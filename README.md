@@ -1,5 +1,6 @@
 OnStep
 ======
+www.stellarjourney.com
 
 Arduino based goto system for stepper motor driven german equatorial telescope mounts
 
@@ -19,7 +20,3 @@ Parking functionality includes the ability to set the park position (anywhere yo
 Home commands including the ability to move the telescope to the home position and stop tracking or reset the controller when at the home position for initialization.
 PEC commands include the ability to record, play-back, read, and write PEC data.
 The Android App allows for initialization, parking, alignment, and PEC programming. Several catalogs of objects are included for Goto's: Messier, NGC/IC, Herschel 400, and a named bright star catalog.
-
-* Stellarium is supported directly through the LX200 protocol, other ASCOM compatible planetarium programs are confirmed to work also. Stellarium's the first confirmed LX200 protocol compatible software package. Others might be compatible as well, but hardware modification (or alternate serial comms provision) might be necessary to prevent an "inadvertent reset on connect" problem that many Arduino's have. Also, the Bluetooth (hand-controller App) option might be necessary to allow you to get unparked/aligned and going while connected with Stellarium. In a future revision I'll probably add an automatic unpark on power up option to get around this limitation.
-
-A detailed command description and the software/firmware downloads are on the Telescope Driver/On-Step Firmware page.
