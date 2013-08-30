@@ -1,4 +1,4 @@
 OnStep
 ======
 
-Arduino goto system for stepper motors driving german equatorial telescope mounts
+Arduino goto system for stepper motor driven german equatorial telescope mounts
