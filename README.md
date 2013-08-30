@@ -10,13 +10,3 @@ Since I aquired an Losmandy G11 mount without any goto provision I decided to cr
 OnStep is a computerized goto system for stepper motor equipped GEM mounts. It was designed, from the beginning, as a more or less general purpose system and provisions were made in the firmware to allow for use on other-than-G11 GEM mounts. It uses a Meade Autostar/LX200 like computer command set with a few extensions to suit hand-controllerless operation.
 
 The OnStep works through either an ASCOM driver* or a Android (4.0 or later) Phone/Tablet (with Bluetooth), functionality supported includes:
-
-My setup slews at about 0.67°/Second (conservative setting). Faster slews are possible with larger stepper motors and/or higher voltages.
-Initialization of date/time/location, and align with one, two, or three stars.
-Meridian flips happen automatically as needed, the software doesn't allow you to pick the meridian side during slews, but it does provide a command to inform you as to what side of the mount the telescope is on.
-Align is currently tested and working with one-star only. Two and three star align corrects for polar misalignment (untested code). Further on, work has started with more advanced corrections for mount geometry and tube flexture - this is the last area of development before version 1.0 is released.
-The guide commands are for pulse-guiding, centering objects, etc.
-Parking functionality includes the ability to set the park position (anywhere you like), park, and to unpark.
-Home commands including the ability to move the telescope to the home position and stop tracking or reset the controller when at the home position for initialization.
-PEC commands include the ability to record, play-back, read, and write PEC data.
-The Android App allows for initialization, parking, alignment, and PEC programming. Several catalogs of objects are included for Goto's: Messier, NGC/IC, Herschel 400, and a named bright star catalog.
