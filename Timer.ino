@@ -44,7 +44,7 @@ ISR(TIMER1_COMPA_vect)
 
     // telescope normally starts on the EAST side of the pier looking at the WEST sky
     if (posDec<targetDec) dirDec=1; else dirDec=0;                                   // Direction control
-    if (DecDir==dirDec) SET(DecDirPORT, DecDirBit); else CLR(DecDirPORT, DecDirBit); // Set direction, decDir default HIGH (=1, for my wiring)
+    if (DecDir==dirDec) CLR(DecDirPORT, DecDirBit); else SET(DecDirPORT, DecDirBit); // Set direction, decDir default HIGH (=1, for my wiring)
     skipDec=0;
 
     if (posDec!=targetDec) {                         // move the Dec stepper to the target
