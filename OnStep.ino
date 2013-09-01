@@ -51,6 +51,7 @@
  * 06-09-2013          0.99a8            Corrected bug, when a meridian flip will be required, Declination of the goto needs a correction applied 
  *                                       (for ID index/offset) before the goTo function is called.  
  *                                       Cleanup of direction changing code in ISR, faster and smaller code.
+ * 09-01-2013          0.99a9            Declination movement was in the wrong direction for my setup, reversed CLR(); else SET(); in Timer.ino 
  *
  *
  * Author: Howard Dutton
