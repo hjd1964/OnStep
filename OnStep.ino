@@ -52,6 +52,7 @@
  *                                       (for ID index/offset) before the goTo function is called.  
  *                                       Cleanup of direction changing code in ISR, faster and smaller code.
  * 09-01-2013          0.99a9            Declination movement was in the wrong direction for my setup, reversed CLR(); else SET(); in Timer.ino 
+ * 09-21-2013          0.99a10           Fixes to initialization code, EEPROM reads should have been writes.
  *
  *
  * Author: Howard Dutton
@@ -102,8 +103,8 @@
 #include "errno.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "06 09 13"
-#define FirmwareNumber "0.99a8"
+#define FirmwareDate   "09 21 13"
+#define FirmwareNumber "0.99a10"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -117,8 +118,8 @@
 
 // these define which MCU you have onboard and are used to assign port addresses for direct I/O
 // additionally, setting MEGA2560_ON enables the second command/reply channel on Serial-1.  Select only one of the two
-#define MEGA328_ON
-#define MEGA2560_OFF
+#define MEGA328_OFF
+#define MEGA2560_ON
 
 // supply power on pins 5 and 11 to Pololu or other stepper drivers without on-board 5V voltage regulators
 #define POWER_SUPPLY_PINS_OFF
@@ -127,10 +128,10 @@
 #define DEC_RATIO_OFF
 
 // enables alignment on two or three stars
-#define ALIGN_TWO_AND_THREE_STAR_OFF
+#define ALIGN_TWO_AND_THREE_STAR_ON
 
 // enables Horizon coordinate goto functions
-#define ALT_AZM_GOTO_OFF
+#define ALT_AZM_GOTO_ON
 
 // enables code to clean-up PEC readings after record (use PECprep or a spreadsheet to fix readings otherwise)
 // this cleans up any tracking rate variations that would be introduced by recording more guiding corrections to either the east or west
@@ -138,7 +139,7 @@
 
 // these turn on and off checksum error correction on the serial ports
 #define CHKSUM0_OFF      // default _OFF: required for OnStep ASCOM driver
-#define CHKSUM1_OFF      // default _ON:  required for OnStep Android Handcontroller
+#define CHKSUM1_ON      // default _ON:  required for OnStep Android Handcontroller
 
 // this initializes a host of settings in EEPROM, OnStep won't work correctly if it isn't run once and then turned off
 // on a ATMega328 you can get away with setting defaults from the arduino serial console... just make sure you get them all
@@ -571,12 +572,12 @@ void setup() {
 
   // init (clear) the backlash amounts
   EEPROM_writeInt(EE_backlashDec,0);
-  EEPROM_readInt(EE_backlashHA,0);
+  EEPROM_writeInt(EE_backlashHA,0);
 
   // init the PEC status, clear the index and buffer
   PECrecord_index=0;
-  EEPROM.read(EE_PECstatus,IgnorePEC);
-  EEPROM.read(EE_PECrecorded,false);
+  EEPROM.write(EE_PECstatus,IgnorePEC);
+  EEPROM.write(EE_PECrecorded,false);
   for (int l=0; l<PECBufferSize; l++) EEPROM.write(EE_PECindex+l,128);
   EEPROM_writeQuad(EE_PECrecord_index,(byte*)&PECrecord_index); 
   
@@ -999,4 +1000,3 @@ void loop() {
     */
   }
 }
-
