@@ -19,7 +19,7 @@ boolean syncEqu(double RA, double Dec) {
   // allows one to quickly set where OnStep thinks the 'scope is to anywhere in the western sky
   cli();
   pierSide=PierSideEast;
-  decDir1=HIGH; decDir2=LOW;
+  decDir1=DecDir1Setting; decDir2=DecDir2Setting;
   targetHA =round(HA*15.0*(double)stepsPerDegreeHA);
   posHA    =targetHA;
   targetDec=round(Dec*(double)stepsPerDegreeDec);
@@ -182,7 +182,7 @@ byte goTo(long HASteps, long DecSteps) {
     // we're in the polar home position, so pick a side (of the pier)
     if (targetHA<0) {
       pierSide=PierSideWest;
-      DecDir  = DecDir2Setting;
+      DecDir  = DecDirWInit;
 
       // west side of pier - we're in the eastern sky and the HA's are negative
       // default, in the polar-home position is +90 deg. HA
@@ -196,7 +196,7 @@ byte goTo(long HASteps, long DecSteps) {
       #endif
     } else { 
       pierSide=PierSideEast;
-      DecDir = DecDir1Setting;
+      DecDir = DecDirEInit;
 
       // east side of pier - we're in the western sky and the HA's are positive
       // this is the default in the polar-home position
