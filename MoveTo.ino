@@ -105,8 +105,8 @@ void moveTo() {
       if (pierSide==PierSideFlipEW3) { 
         pierSide=PierSideWest;
         cli();
-        // reverse the Declination
-        DecDir  = DecDir2Setting;
+        // reverse the Declination movement
+        DecDir  = DecDirWInit;
         // if we were on the east side of the pier the HA's were in the western sky, and were positive
         // now we're in the eastern sky and the HA's are negative
         posHA=posHA-180L*StepsPerDegreeHA;
@@ -115,7 +115,7 @@ void moveTo() {
         pierSide=PierSideEast;
         cli();
         // normal Declination
-        DecDir  = DecDir1Setting;      
+        DecDir  = DecDirEInit;      
         // if we were on the west side of the pier the HA's were in the eastern sky, and were negative
         // now we're in the western sky and the HA's are positive
         posHA=posHA+180L*StepsPerDegreeHA;
