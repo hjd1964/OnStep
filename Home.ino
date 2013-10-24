@@ -29,8 +29,8 @@ boolean setHome() {
   // default values for state variables
   pierSide            = PierSideNone;
   dirDec              = 1;
-  DecDir              = DecDir1Setting;
-  HADir               = HADir1Setting;
+  DecDir              = DecDirEInit;
+  HADir               = HADirEInit;
   dirHA               = 1;
   newTargetRA         = 0;        
   newTargetDec        = 0;
