@@ -53,6 +53,7 @@
  *                                       Cleanup of direction changing code in ISR, faster and smaller code.
  * 09-01-2013          0.99a9            Declination movement was in the wrong direction for my setup, reversed CLR(); else SET(); in Timer.ino 
  * 09-21-2013          0.99a10           Fixes to initialization code, EEPROM reads should have been writes.
+ * 10-14-2013          0.99a11           Fixed HA/RA and Dec ability to reverse direction in initialization.
  *
  *
  * Author: Howard Dutton
@@ -103,8 +104,8 @@
 #include "errno.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "09 21 13"
-#define FirmwareNumber "0.99a10"
+#define FirmwareDate   "10 14 13"
+#define FirmwareNumber "0.99a11"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -138,7 +139,7 @@
 #define PEC_CLEANUP_OFF
 
 // these turn on and off checksum error correction on the serial ports
-#define CHKSUM0_OFF      // default _OFF: required for OnStep ASCOM driver
+#define CHKSUM0_OFF     // default _OFF: required for OnStep ASCOM driver
 #define CHKSUM1_ON      // default _ON:  required for OnStep Android Handcontroller
 
 // this initializes a host of settings in EEPROM, OnStep won't work correctly if it isn't run once and then turned off
@@ -173,10 +174,8 @@
 
 #define PECBufferSize    824         // PEC, buffer size, 824 is default and the maximum on a ATMega328. The ATMega2560 max should be no more than 1336
 
-#define DecDir1Setting   HIGH        // exchange the HIGH/LOW values to reverse direction of the stepper on Dec axis
-#define DecDir2Setting   LOW
-#define HADir1Setting    LOW         // exchange the HIGH/LOW values to reverse direction of the stepper on RA axis
-#define HADir2Setting    HIGH
+#define REVERSE_HA_OFF               // Reverse the direction of movement for the HA/RA axis
+#define REVERSE_DEC_OFF              // Reverse the direction of movement for the Dec axis
 
 long minutesPastMeridian = 60;       // for goto's, how far past the meridian to allow before we do a flip - one hour of RA is the default = 60
 
@@ -326,8 +325,12 @@ int    maxAlt;                      // the maximum altitude, in degrees, for goT
 #define HAStepPORT PORTB   //
 #endif
 
-volatile byte DecDir     = DecDir1Setting;      
-volatile byte HADir      = HADir1Setting;
+#define DecDirEInit      HIGH
+#define DecDirWInit      LOW
+#define HADirEInit       LOW
+#define HADirWInit       HIGH
+volatile byte DecDir     = DecDirEInit;      
+volatile byte HADir      = HADirEInit;
 
 // Status ------------------------------------------------------------------------------------------------------------------
 boolean highPrecision    = true;
@@ -1000,3 +1003,4 @@ void loop() {
     */
   }
 }
+
