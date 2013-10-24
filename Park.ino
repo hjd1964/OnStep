@@ -163,11 +163,7 @@ boolean unpark() {
   
         // see what side of the pier we're on
         pierSide=EEPROM.read(EE_pierSide);
-        if (pierSide==PierSideWest) {
-          DecDir = DecDir2Setting;      // reversed      
-        } else {
-          DecDir = DecDir1Setting;      // normal
-        }
+        if (pierSide==PierSideWest) DecDir = DecDirWInit; else DecDir = DecDirEInit;
         
         // update our status, we're not parked anymore
         parkStatus=NotParked;
