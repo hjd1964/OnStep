@@ -112,8 +112,8 @@ void processCommands() {
             // Now for where we think we are
             cli(); long t=targetHA; long t1=targetDec; sei();
             
-            f2=(t/(double)stepsPerDegreeHA)/15.0;
-            f3=t1/(double)stepsPerDegreeDec;
+            f2=(t/(double)StepsPerDegreeHA)/15.0;
+            f3=t1/(double)StepsPerDegreeDec;
             // corrected to actual HA/Dec (for offset HA/Dec and Alt)
             CEquToEqu(latitude,f2,f3,&f2,&f3);
             // f2/f3 are the Alt/Azm of where we think we are

@@ -19,7 +19,7 @@ boolean syncEqu(double RA, double Dec) {
   // allows one to quickly set where OnStep thinks the 'scope is to anywhere in the western sky
   cli();
   pierSide=PierSideEast;
-  decDir1=DecDirEInit; decDir2=DecDirWInit;
+  decDir1=DecDir1Setting; decDir2=DecDir2Setting;
   targetHA =round(HA*15.0*(double)stepsPerDegreeHA);
   posHA    =targetHA;
   targetDec=round(Dec*(double)stepsPerDegreeDec);
