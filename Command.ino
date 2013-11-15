@@ -929,9 +929,10 @@ void setGuideRate(int g) {
 
   // this sets how fast the drives CAN move
 
-  // use the actual sidereal rate to start
-  // ex. (1000*2*15)/15=2000
-  moveSkipCountHA =(SiderealRate*2*15)/moveRates[g];
+  // use siderealRate as an basis, it really runs at 2 times the speed the (of the sky, half the counts)
+  // so mult. by 2 gets us back to the actual (in the sky) sidereal rate, and mult. by another 15 gets us to a count for arc-seconds/second
+  // and finally, subtract just a little bit to make sure the timer moves the stepper just a hair faster than the target position it chases
+  moveSkipCountHA =((SiderealRate*2*15)/moveRates[g])-1;
 
   #ifdef DEC_RATIO_ON
   moveSkipCountDec=round(moveSkipCountHA*SkipCountRateRatio);
@@ -956,7 +957,7 @@ void setGuideRate(int g) {
   //              1000/(stepsPerDegreeHA*moveRates[g]/amountMoveHA/3600)
   //              1000/(    11520       *    60      /      8     /3600) = 41mS per step (a little round off error)
   //
-  msMoveHA =1000/(((StepsPerDegreeHA*moveRates[g])/amountMoveHA)/3600);
+  msMoveHA =1000/(((StepsPerDegreeHA *moveRates[g])/amountMoveHA )/3600);
   msMoveDec=1000/(((StepsPerDegreeDec*moveRates[g])/amountMoveDec)/3600);
 }
 

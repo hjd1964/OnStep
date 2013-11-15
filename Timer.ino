@@ -20,7 +20,9 @@ ISR(TIMER1_COMPA_vect)
   
   // move the stepper motors, max about 4uS
   skipHA++;                                          // Rate control RA
-  if (skipHA>=skipCountHA) {                         
+  if ((skipHA>=skipCountHA) || 
+      (inBacklashHA && (skipHA>=skipCountBacklashHA))) {                        
+
     if (posHA<(targetHA+PEC_HA)) dirHA=1; else dirHA=0;                        // Direction control
 #ifdef ReverseHA
     if (HADir==dirHA) CLR(HADirPORT, HADirBit); else SET(HADirPORT, HADirBit); // Set direction, HADir default LOW (=0, for my wiring)
@@ -33,9 +35,9 @@ ISR(TIMER1_COMPA_vect)
 
       // telescope moves WEST with the sky, blHA is the amount of EAST backlash
       if (dirHA==1) {
-       if (blHA<backlashHA) { blHA++; if (skipCountHA>skipCountBacklashHA) skipHA=skipCountHA-skipCountBacklashHA; } else { posHA++; }
+       if (blHA<backlashHA) { blHA++; inBacklashHA=true; } else { inBacklashHA=false; posHA++; }
       } else {
-        if (blHA>0)         { blHA--; if (skipCountHA>skipCountBacklashHA) skipHA=skipCountHA-skipCountBacklashHA; } else { posHA--; }
+        if (blHA>0)         { blHA--; inBacklashHA=true; } else { inBacklashHA=false; posHA--; }
       }
 
       SET(HAStepPORT, HAStepBit);
@@ -44,7 +46,8 @@ ISR(TIMER1_COMPA_vect)
   }
   
   skipDec++;                                         // Rate control Dec
-  if (skipDec>=skipCountDec) {                        
+  if ((skipDec>=skipCountDec) || 
+      (inBacklashDec && (skipDec>=skipCountBacklashDec))) {                        
 
     // telescope normally starts on the EAST side of the pier looking at the WEST sky
     if (posDec<targetDec) dirDec=1; else dirDec=0;                                   // Direction control
@@ -59,9 +62,9 @@ ISR(TIMER1_COMPA_vect)
 
       // telescope moving NORTH in the sky, blDec is the amount of SOUTH backlash
       if (dirDec==1) {
-        if (blDec<backlashDec) { blDec++; if (skipCountDec>skipCountBacklashDec) skipDec=skipCountDec-skipCountBacklashDec; } else { posDec++; }
+        if (blDec<backlashDec) { blDec++; inBacklashDec=true; } else { inBacklashDec=false; posDec++; }
       } else {
-        if (blDec>0)           { blDec--; if (skipCountDec>skipCountBacklashDec) skipDec=skipCountDec-skipCountBacklashDec; } else { posDec--; }
+        if (blDec>0)           { blDec--; inBacklashDec=true; } else { inBacklashDec=false; posDec--; }
       }
 
       SET(DecStepPORT, DecStepBit);

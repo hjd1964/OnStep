@@ -54,6 +54,9 @@
  * 09-01-2013          0.99a9            Declination movement was in the wrong direction for my setup, reversed CLR(); else SET(); in Timer.ino 
  * 09-21-2013          0.99a10           Fixes to initialization code, EEPROM reads should have been writes.
  * 10-14-2013          0.99a11           Fixed HA/RA and Dec ability to reverse direction in initialization.
+ * 11-14-2013          0.99b1            Fixed "creep" in HA/RA and Dec during guiding and backlash compensation.  Also fixed tracking oscillation in HA/RA at
+ *                                       certain guide rates (sidereal tracking and guiding interacting with backlash compensation).  Improved method of applying
+ *                                       stepper motor high-speed takeup during backlash compensation.  Added option to easily adjust backlash takeup rate.
  *
  *
  * Author: Howard Dutton
@@ -104,8 +107,8 @@
 #include "errno.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "10 14 13"
-#define FirmwareNumber "0.99a11"
+#define FirmwareDate   "11 14 13"
+#define FirmwareNumber "0.99b1"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -155,12 +158,14 @@
                                      // too low and the stepper motor will be more apt to stall as inductance robs it of power while the required acceleration
                                      // between speed changes becomes greater and greater
 
+#define BacklashTakeupRate    20     // this is the backlash takeup rate (in multipules of the sidereal rate), too fast and your motors will stall
+
                                      // for my G11 both RA and Dec axis have the same gear train and this
 #define StepsPerDegreeHA  11520L     // is calculated as :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
 #define StepsPerDegreeDec 11520L     // is calculated as :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
                                      // G11                      48            * 16          * 15         *  360/360              = 11520
                                      // the steps per second sidereal rate = 48 = (11520/3600)*15
-                                    
+                                   
                                      // another mount I did testing on was an Orion EQ2 (just in RA)...
                                      // EQ2                      200           * 16          * 8          *  90/360               = 6480
                                      // the steps per second sidereal rate = 27 = (6480/3600)*15
@@ -233,9 +238,11 @@ volatile int  skipCountRate = 1;     // this is the rate of change for the stepp
 volatile int  skipHA        = 0;     // higher numbers slow down the acceleration and de-acceleration
 volatile int  skipCountHA;
 volatile int  skipCountBacklashHA;
+volatile boolean inBacklashHA=false;
 volatile int  skipDec       = 0;
 volatile int  skipCountDec;
 volatile int  skipCountBacklashDec;
+volatile boolean inBacklashDec=false;
 #define SkipCountRateRatio    ((double)stepsPerDegreeHA/(double)stepsPerDegreeDec)
 
 volatile long posHA      = 90L*StepsPerDegreeHA;   // hour angle position in steps
@@ -599,20 +606,19 @@ void setup() {
   // this sets the maximum speed that the motors can step while sidereal tracking, one half the siderealInterval for twice the speed
   // this is so guiding corrections can be played back at up to 2X the sidereal rate in RA, 1X in Dec
   // 
-  // was: floor((siderealInterval*100/2)/(stepsPerDegreeHA/(3600/15)))-1;
   // this is the number of ISR ticks per step, used for putting a cap on the maximum speed the ISR will allow the steppers to move 
-  SiderealRate   =(siderealInterval*100/2)/StepsPerSecond; //2
+  SiderealRate   =(siderealInterval*100/2)/StepsPerSecond;
   skipCountHA     =SiderealRate;
   
   #ifdef DEC_RATIO_ON
   skipCountDec    =(SiderealRate*2)*SkipCountRateRatio;
   #else
-  skipCountDec    =(SiderealRate*2);   // was *2
+  skipCountDec    =(SiderealRate*2);
   #endif
   
-  // backlash takeup speeds
-  skipCountBacklashHA =skipCountHA/10;  // skipCountHA covers 30 arc-sec/second, 10x=300 arc-sec/sec
-  skipCountBacklashDec=skipCountDec/20; // skipCountDec covers 15 arc-sec/second, 20x=300 arc-sec/sec
+  // backlash takeup rates
+  skipCountBacklashHA =skipCountHA /(BacklashTakeupRate/2);
+  skipCountBacklashDec=skipCountDec/(BacklashTakeupRate);
 
   // disable timer0 overflow interrupt, it causes timer1 to miss too many interrupts
  // TIMSK0 &= ~_BV(TOIE0); 
@@ -716,7 +722,7 @@ void loop() {
     if ((tempMilli-msTimer1)>=msMoveHA) {
       msTimer1=tempMilli;
 
-      if (moveDirHA) {
+      if ((moveDirHA) && (!inBacklashHA)) {
         // as above, and keep track of how much we've moved for PEC recording
         if (moveDirHA=='e') sign=-1; else sign=1; moveHA=sign*amountMoveHA;
         // for RA, only apply the corrections now if fast guiding
@@ -728,7 +734,7 @@ void loop() {
     if ((tempMilli-msTimer2)>=msMoveDec) {
       msTimer2=tempMilli;
     
-      if (moveDirDec) {
+      if ((moveDirDec) && (!inBacklashDec)) {
         // nudge the targetDec (where we're supposed to be) by amountMoveDec
         if (moveDirDec=='s') sign=-1; else sign=1; cli(); targetDec=targetDec+sign*amountMoveDec; sei();
       }
@@ -894,7 +900,9 @@ void loop() {
     ResultA1=ResultA2;
     ResultA2=floor((double)((StepsPerSecond)/100.0)*(double)(siderealTimer%100));
 
-    if (((trackingState==TrackingMoveTo) && (lastTrackingState==TrackingSidereal)) || (trackingState==TrackingSidereal)) {
+    if ((((trackingState==TrackingMoveTo) && (lastTrackingState==TrackingSidereal)) || (trackingState==TrackingSidereal)) &&
+        !(moveDirHA && (currentGuideRate>1))) // only active with a guide rate that makes sense
+      {
       if (ResultA1!=ResultA2) {
           // PEC_Timer starts at zero again every second, PEC_SKIP will control the rate and will trigger a +/- step every PEC_SKIP steps while tracking 
           PEC_Timer++;
