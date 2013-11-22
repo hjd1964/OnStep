@@ -57,6 +57,7 @@
  * 11-14-2013          0.99b1            Fixed "creep" in HA/RA and Dec during guiding and backlash compensation.  Also fixed tracking oscillation in HA/RA at
  *                                       certain guide rates (sidereal tracking and guiding interacting with backlash compensation).  Improved method of applying
  *                                       stepper motor high-speed takeup during backlash compensation.  Added option to easily adjust backlash takeup rate.
+ * 11-22-2013          0.99b2            Minor debug mode fixes.
  *
  *
  * Author: Howard Dutton
@@ -107,8 +108,8 @@
 #include "errno.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "11 14 13"
-#define FirmwareNumber "0.99b1"
+#define FirmwareDate   "11 22 13"
+#define FirmwareNumber "0.99b2"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 

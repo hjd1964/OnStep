@@ -219,15 +219,15 @@ byte goTo(long HASteps, long DecSteps) {
 
 #ifdef DEBUG_ON
   Serial1.print("Current position = ");
-  Serial1.print((posHA/stepsPerDegreeHA)/15.0);
+  Serial1.print((posHA/StepsPerDegreeHA)/15.0);
   Serial1.print("(HA) ");
-  Serial1.print(posDec/stepsPerDegreeDec);
+  Serial1.print(posDec/StepsPerDegreeDec);
   Serial1.println("(Dec)");
   
   Serial1.print("Target  position =");
-  Serial1.print((targetHA/stepsPerDegreeHA)/15.0);
+  Serial1.print((targetHA/StepsPerDegreeHA)/15.0);
   Serial1.print("(HA) ");
-  Serial1.print(targetDec/stepsPerDegreeDec);
+  Serial1.print(targetDec/StepsPerDegreeDec);
   Serial1.println("(Dec)");
 #endif
 

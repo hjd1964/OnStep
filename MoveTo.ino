@@ -136,8 +136,10 @@ void moveTo() {
 #ifdef DEBUG_ON
       Serial1.println("Stopping MoveTo");
       Serial1.print("Position, HA=");
-      Serial1.println(posHA/stepsPerDegreeHA);
-      Serial1.println(decDir); 
+      Serial1.println(posHA/StepsPerDegreeHA);
+      Serial1.print(" (dirDec=");
+      Serial1.print(dirDec);
+      Serial1.println(")");
 #endif
       // restore normal sidereal tracking 2x in RA, 1x in Dec
       trackingState=lastTrackingState;
