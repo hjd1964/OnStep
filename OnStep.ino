@@ -57,7 +57,8 @@
  * 11-14-2013          0.99b1            Fixed "creep" in HA/RA and Dec during guiding and backlash compensation.  Also fixed tracking oscillation in HA/RA at
  *                                       certain guide rates (sidereal tracking and guiding interacting with backlash compensation).  Improved method of applying
  *                                       stepper motor high-speed takeup during backlash compensation.  Added option to easily adjust backlash takeup rate.
- * 11-22-2013          0.99b2            Minor debug mode fixes.
+ * 11-22-2013          0.99b2            Minor DEBUG mode fixes.
+ * 11-22-2013          0.99b3            Minor DEC_RATIO fixes.
  *
  *
  * Author: Howard Dutton
@@ -109,7 +110,7 @@
 
 // firmware info, these are returned by the ":GV?#" commands
 #define FirmwareDate   "11 22 13"
-#define FirmwareNumber "0.99b2"
+#define FirmwareNumber "0.99b3"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -129,7 +130,7 @@
 // supply power on pins 5 and 11 to Pololu or other stepper drivers without on-board 5V voltage regulators
 #define POWER_SUPPLY_PINS_OFF
 
-// enables goTo speed equalization for differing right ascension and declination stepsPerDegreeHA/Dec
+// enables goTo speed equalization for differing right ascension and declination StepsPerDegreeHA/Dec
 #define DEC_RATIO_OFF
 
 // enables alignment on two or three stars
@@ -153,7 +154,7 @@
                         // see the command reference on my site (stellarjourney.com)
 
 // ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
-#define InterruptRate        32      // maximum step rate, default=32us, you'll probably not need to touch this
+#define InterruptRate         32     // maximum step rate, default=32uS, fastest=16uS?
 
 #define MaxRate               4      // this is the step rate multiplier for maximum slew,  default=4*InterruptRate=128uS - lower numbers speed things up
                                      // too low and the stepper motor will be more apt to stall as inductance robs it of power while the required acceleration
@@ -178,7 +179,7 @@
 
 #define StepsPerWormRotation 11520L  // PEC, number of steps for a complete worm rotation (RA)
 
-#define PECBufferSize    824         // PEC, buffer size, 824 is default and the maximum on a ATMega328. The ATMega2560 max should be no more than 1336
+#define PECBufferSize         824    // PEC, buffer size, 824 is default and the maximum on a ATMega328. The ATMega2560 max should be no more than 1336
 
 #define REVERSE_HA_OFF               // Reverse the direction of movement for the HA/RA axis
 #define REVERSE_DEC_OFF              // Reverse the direction of movement for the Dec axis
@@ -232,7 +233,7 @@ volatile unsigned int siderealInterval  = 10027/InterruptRate;   // default = ar
 double latitude  = 0.0;
 double longitude = 0.0;
 
-long SiderealRate;                   // this is the step rate divisor for sidereal time, default=651 counts=( 1/(stepsPerDegreeHA/(3600/15)) )*(1000000/InterruptRate)
+long SiderealRate;                   // this is the step rate divisor for sidereal time, default=651 counts=( 1/(StepsPerDegreeHA/(3600/15)) )*(1000000/InterruptRate)
 
 #define StepsForRateChange    1000.0 // used in calculating the number of steps during acceleration and de-acceleration
 volatile int  skipCountRate = 1;     // this is the rate of change for the steppers speed
@@ -244,7 +245,7 @@ volatile int  skipDec       = 0;
 volatile int  skipCountDec;
 volatile int  skipCountBacklashDec;
 volatile boolean inBacklashDec=false;
-#define SkipCountRateRatio    ((double)stepsPerDegreeHA/(double)stepsPerDegreeDec)
+#define SkipCountRateRatio    ((double)StepsPerDegreeHA/(double)StepsPerDegreeDec)
 
 volatile long posHA      = 90L*StepsPerDegreeHA;   // hour angle position in steps
 volatile long startHA    = 90L*StepsPerDegreeHA;   // hour angle of goto start position in steps

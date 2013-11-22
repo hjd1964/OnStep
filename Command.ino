@@ -929,7 +929,7 @@ void setGuideRate(int g) {
 
   // this sets how fast the drives CAN move
 
-  // use siderealRate as an basis, it really runs at 2 times the speed (of the sky, half the counts)
+  // use siderealRate as an basis, it really runs at 2 times the speed the (of the sky, half the counts)
   // so mult. by 2 gets us back to the actual (in the sky) sidereal rate, and mult. by another 15 gets us to a count for arc-seconds/second
   // and finally, subtract just a little bit to make sure the timer moves the stepper just a hair faster than the target position it chases
   moveSkipCountHA =((SiderealRate*2*15)/moveRates[g])-1;
