@@ -692,7 +692,6 @@ void setup() {
 
   // set the default guide rate, 1x sidereal
   setGuideRate(1);
-  timeOutIndexDetect=millis();
 
   // prep timers
   cli(); 
