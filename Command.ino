@@ -6,17 +6,16 @@ boolean serial_one_ready = false;
 
 // process commands
 void processCommands() {
-    if ((Serial.available() > 0) && (!serial_zero_ready)) { serial_zero_ready = buildCommand(Serial.read()); }
-    #ifdef MEGA2560_ON
-    if ((Serial1.available() > 0) && (!serial_one_ready)) { serial_one_ready = buildCommand_serial_one(Serial1.read()); }
-    #endif
 
+    if ((Serial_available() > 0) && (!serial_zero_ready)) { serial_zero_ready = buildCommand(Serial_read()); }
+    if ((Serial1_available() > 0) && (!serial_one_ready)) { serial_one_ready = buildCommand_serial_one(Serial1_read()); }
+    
+    if (Serial_transmit()) return;
+    if (Serial1_transmit()) return;
     
     byte process_command = 0;
     if (serial_zero_ready)     { strcpy(command,command_serial_zero); strcpy(parameter,parameter_serial_zero); serial_zero_ready=false; clearCommand_serial_zero(); process_command=1; } 
-    #ifdef MEGA2560_ON
     else if (serial_one_ready) { strcpy(command,command_serial_one);  strcpy(parameter,parameter_serial_one);  serial_one_ready=false;  clearCommand_serial_one();  process_command=2; }
-    #endif
     else return;
 
     if (process_command) {
@@ -241,7 +240,7 @@ void processCommands() {
       if (command[1]=='o')  { sprintf(reply,"%02d*",maxAlt); quietReply=true; } else
 //  :GR#   Get Telescope RA
 //         Returns: HH:MM.T# or HH:MM:SS# (based on precision setting)
-      if (command[1]=='R')  { getEqu(&f,&f1,false); if (!doubleToHms(reply,&f)) commandError=true; else quietReply=true; } else 
+      if (command[1]=='R')  { getEqu(&f,&f1,false); if (!doubleToHms(reply,&f)) commandError=true; else quietReply=true;  } else 
 //  :Gr#   Get current/target object RA
 //         Returns: HH:MM.T# or HH:MM:SS (based on precision setting)
       if (command[1]=='r')  { if (!doubleToHms(reply,&newTargetRA)) commandError=true; else quietReply=true; } else 
@@ -286,7 +285,6 @@ void processCommands() {
         
         quietReply=true; 
         } else 
-#ifdef MEGA2560_ON
 //  :GXnn#   Get OnStep value
 //         Returns: value
       if (command[1]=='X')  { 
@@ -302,7 +300,6 @@ void processCommands() {
         } else commandError=true;
       getEqu(&f,&f1,false);  
     } else 
-#endif
 //  :GZ#   Get telescope azimuth
 //         Returns: DDD*MM# or DDD*MM'SS# (based on precision setting)
       if (command[1]=='Z')  { getHor(&f,&f1); if (!doubleToDms(reply,&f1,true,false)) commandError=true; else quietReply=true; } else commandError=true;
@@ -518,7 +515,14 @@ void processCommands() {
 //         Returns: "1" At the current baud rate and then changes to the new rate for further communication
       if (command[1]=='B') {
         i=(int)(parameter[0]-'0');
-        if (((i>0) && (i<10)) && (process_command==1)) { Serial.print("1\n"); Serial.end(); Serial.begin(baudRate[i]); quietReply=true; } else commandError=true;
+        if ((i>0) && (i<10)) {
+          if (process_command==1) { 
+            Serial_print("1#"); while (Serial_transmit()); delay(20); Serial_Init(baudRate[i]);
+          } else {
+            Serial1_print("1#"); while (Serial1_transmit()); delay(20); Serial1_Init(baudRate[i]); 
+          }
+          quietReply=true; 
+        } else commandError=true;
       } else 
 //  :SCMM/DD/YY#
 //          Change Date to MM/DD/YY
@@ -558,7 +562,7 @@ void processCommands() {
 //          Set the lowest elevation to which the telescope will goTo
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='h')  { if ((parameter[0]!=0) && (strlen(parameter)<4)) { i=atoi(parameter); if ( (!errno) && ((i>=-30) && (i<=30))) { minAlt=i; EEPROM.write(EE_minAlt,minAlt-128); } else commandError=true; } else commandError=true; } else
+      if (command[1]=='h')  { if ((parameter[0]!=0) && (strlen(parameter)<4)) { i=atoi(parameter); if ( (!errno) && ((i>=-30) && (i<=30))) { minAlt=i; EEPROM.write(EE_minAlt,minAlt+128); } else commandError=true; } else commandError=true; } else
 //  :SLHH:MM:SS#
 //          Set the local Time
 //          Return: 0 on failure
@@ -628,12 +632,12 @@ void processCommands() {
       commandError=true;
       } else 
 //   T - Tracking Commands
-//  :T+#   Track faster by 1 part in 300(ish)
-//  :T-#   Track slower by 1 part in 300(ish) this is the speed the sidereal timer runs at
+//  :T+#   Track faster by 0.0001 second/second (100uS)
+//  :T-#   Track slower by 0.0001 second/second (100uS)
 //         Returns: Nothing
      if (command[0]=='T') {
-       if (command[1]=='+') masterSiderealInterval--;
-       if (command[1]=='-') masterSiderealInterval++;
+       if (command[1]=='+') masterSiderealInterval-=16*100;
+       if (command[1]=='-') masterSiderealInterval+=16*100;
        EEPROM_writeInt(EE_siderealInterval,masterSiderealInterval);
        quietReply=true;
      } else
@@ -643,9 +647,7 @@ void processCommands() {
 //         Low -  RA/Dec/etc. displays and accepts HH:MM.M sDD*MM
 //         High - RA/Dec/etc. displays and accepts HH:MM:SS sDD*MM:SS
 //         Returns Nothing
-#ifdef MEGA2560_ON
      if ((command[0]=='U') && (command[1]==0)) { highPrecision=!highPrecision; quietReply=true; } else
-#endif
 //   V - PEC Readout
 //  :VRNNNN#
 //         Read out RA PEC Table Entry
@@ -694,7 +696,6 @@ void processCommands() {
 //         Write RA PEC index start
      if ((command[0]=='W') && (command[1]=='I')) {
        commandError=true;
-#ifdef MEGA2560_ON
        // the correct way...
        long int l=atol(parameter);
        // see if it converted and is in range
@@ -702,15 +703,6 @@ void processCommands() {
          PECrecord_index=l;
          commandError=false;
        }
-#else
-       // good enough for my purposes, smaller code limits index offset to maximum of 32767 (mine is 11520) other mounts
-       i=atoi(parameter);
-       // see if it converted and is in range
-       if ( (!errno) && ((i>=0) && (i<PECBufferSize*StepsPerSecond))) {
-         PECrecord_index=i;
-         commandError=false;
-       }
-#endif
     } else
 //  :WR+#
 //         Move PEC Table ahead by one second
@@ -752,7 +744,6 @@ void processCommands() {
          quietReply=true;
        }
      } else
-#ifdef MEGA2560_ON
 
 //   W - Site Select/Site get
 //  :Wn#
@@ -771,7 +762,6 @@ void processCommands() {
         } else
           commandError=true;
       } else 
-#endif
         commandError=true;
       
       if (!quietReply) {
@@ -784,34 +774,26 @@ void processCommands() {
       if (process_command==1) {
 #ifdef CHKSUM0_ON
         // calculate the checksum
+        char HEXS[3]="";
         byte cks=0; for (int cksCount0=0; cksCount0<strlen(reply); cksCount0++) {  cks+=reply[cksCount0]; }
+        sprintf(HEXS,"%02X",cks);
+        strcat(reply,HEXS);
 #endif
-
-        Serial.print(reply);
-#ifdef CHKSUM0_ON
-        Serial.print(cks,HEX);
-#endif
-        Serial.print("#");
+        strcat(reply,"#");
+        Serial_print(reply);
       } 
 
-#ifdef MEGA2560_ON
       if (process_command==2) {
 #ifdef CHKSUM1_ON
         // calculate the checksum
+        char HEXS[3]="";
         byte cks=0; for (int cksCount0=0; cksCount0<strlen(reply); cksCount0++) {  cks+=reply[cksCount0]; }
+        sprintf(HEXS,"%02X",cks);
+        strcat(reply,HEXS);
 #endif
-//        Serial.print(reply);
-        Serial1.print(reply);
-#ifdef CHKSUM1_ON
-//        Serial.print(cks,HEX);
-//        Serial.print("#");
-        Serial1.print(cks,HEX);
-        Serial1.print("#");
-#endif
-//        Serial.print("\r\n");
-        Serial1.print("\r\n");
+        strcat(reply,"#\r\n");
+        Serial1_print(reply);
       }
-#endif
       }
       quietReply=false;
    }
@@ -819,13 +801,10 @@ void processCommands() {
 
 // Build up a command
 boolean buildCommand(char c) {
-
-#ifdef MEGA2560_ON
   // (chr)6 is a special status command for the LX200 protocol
   if ((c==(char)6) && (bufferPtr_serial_zero==0)) {
-    Serial.print('G#');
+    Serial_print("G#");
   }
-#endif
 
   // ignore spaces/lf/cr, dropping spaces is another tweek to allow compatibility with LX200 protocol
   if ((c!=(char)32) && (c!=(char)10) && (c!=(char)13)) {
@@ -844,7 +823,7 @@ boolean buildCommand(char c) {
     // checksum the data, for example ":11111126".  I don't include the command frame in the checksum.  The error response is a checksumed null string "00#\r\n" which means re-transmit.
     byte len=strlen(command_serial_zero);
     byte cks=0; for (int cksCount0=1; cksCount0<len-2; cksCount0++) {  cks+=command_serial_zero[cksCount0]; }
-    char chkSum[3]; sprintf(chkSum,"%02X",cks); if (!((chkSum[0]==command_serial_zero[len-2]) && (chkSum[1]==command_serial_zero[len-1]))) { clearCommand_serial_zero();  Serial.print("00#\r\n"); return false; }
+    char chkSum[3]; sprintf(chkSum,"%02X",cks); if (!((chkSum[0]==command_serial_zero[len-2]) && (chkSum[1]==command_serial_zero[len-1]))) { clearCommand_serial_zero();  Serial_print("00#\r\n"); return false; }
     --len; command_serial_zero[--len]=0;
 #endif
 
@@ -855,9 +834,6 @@ boolean buildCommand(char c) {
 
     // the command is either one or two chars in length
     command_serial_zero[3]=0;  memmove(command_serial_zero,(char *)&command_serial_zero[1],3);
-
-//    Serial.println(command);
-//    Serial.println(parameter);
 
     return true;
   } else {
@@ -872,7 +848,6 @@ boolean clearCommand_serial_zero() {
   return true;
 }
 
-#ifdef MEGA2560_ON
 // Build up a command
 boolean buildCommand_serial_one(char c) {
   // ignore lf/cr
@@ -892,7 +867,7 @@ boolean buildCommand_serial_one(char c) {
     // checksum the data, as above.  
     byte len=strlen(command_serial_one);
     byte cks=0; for (int cksCount0=1; cksCount0<len-2; cksCount0++) { cks=cks+command_serial_one[cksCount0]; }
-    char chkSum[3]; sprintf(chkSum,"%02X",cks); if (!((chkSum[0]==command_serial_one[len-2]) && (chkSum[1]==command_serial_one[len-1]))) { clearCommand_serial_one(); Serial1.print("00#\r\n"); Serial.println(" failed"); return false; }
+    char chkSum[3]; sprintf(chkSum,"%02X",cks); if (!((chkSum[0]==command_serial_one[len-2]) && (chkSum[1]==command_serial_one[len-1]))) { clearCommand_serial_one(); Serial1_print("00#\r\n"); return false; }
     --len; command_serial_one[--len]=0;
 #endif
 
@@ -919,7 +894,6 @@ boolean clearCommand_serial_one() {
   command_serial_one[bufferPtr_serial_one]=(char)0;
   return true;
 }
-#endif
 
 // calculates the tracking speed for move commands
 void setGuideRate(int g) {
@@ -960,7 +934,3 @@ void setGuideRate(int g) {
   msMoveHA =1000/(((StepsPerDegreeHA *moveRates[g])/amountMoveHA )/3600);
   msMoveDec=1000/(((StepsPerDegreeDec*moveRates[g])/amountMoveDec)/3600);
 }
-
-
-
-
