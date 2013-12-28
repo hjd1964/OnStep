@@ -50,6 +50,3 @@ void EEPROM_readString(int i, char l[]) {
     *l=EEPROM.read(i+l1); l++;
   }
 }
-
-
-
