@@ -332,7 +332,3 @@ double degreeRange(double d) {
   while (d<  0.0)  d+=360.0;
   return d;
 }
-
-
-
-
