@@ -98,11 +98,6 @@ byte goToEqu(double RA, double Dec) {
   // Check to see if this goto is valid
   EquToHor(latitude,HA,Dec,&Alt,&Azm);
 
-#ifdef DEBUG_ON
-  Serial1.print("Alt="); Serial1.println(Alt);
-  Serial1.print(", Azm="); Serial1.println(Azm);
-#endif
-
   if (Alt<minAlt) return 1; // below horizon
   if (Alt>maxAlt) return 6; // outside limits
 
@@ -120,12 +115,10 @@ byte goToEqu(double RA, double Dec) {
 
   // check to see if we're doing a meridian flip, if so pre-correct the destination.  ID will get updated during the goTo()
   // same EXACT math as goTo() uses so we're sure to detect the flip every time
-  #ifdef MEGA2560_ON
   if (((pierSide==PierSideEast) && (HA1<-(minutesPastMeridian*StepsPerDegreeHA/4L))) ||
       ((pierSide==PierSideWest) && (HA1> (minutesPastMeridian*StepsPerDegreeHA/4L)))) {
     Dec=Dec+ID+ID;
   }
-  #endif
 
   if (Dec>+90.0) Dec=+90.0;
   if (Dec<-90.0) Dec=-90.0;
@@ -163,47 +156,32 @@ byte goTo(long HASteps, long DecSteps) {
     if (targetHA<-(minutesPastMeridian*StepsPerDegreeHA/4L)) {
       pierSide=PierSideFlipEW1; 
       ID=-ID;  // correct the index if we're crossing the meridian
-      #ifdef DEBUG_ON
-      Serial1.println("Meridian flip EW");
-      #endif
     }
   } else
   if (pierSide==PierSideWest) {
     if (targetHA> (minutesPastMeridian*StepsPerDegreeHA/4L)) {
       pierSide=PierSideFlipWE1; 
       ID=-ID;  // correct the index if we're crossing the meridian
-      #ifdef DEBUG_ON
-      Serial1.println("Meridian flip WE");
-      #endif
     }
   } else { 
     // pierSide=PierSideNone
     // ID flips back and forth +/-, but that doesn't matter, if we're homed the ID is 0
     // we're in the polar home position, so pick a side (of the pier)
     if (targetHA<0) {
+      // west side of pier - we're in the eastern sky and the HA's are negative
+      // default, in the polar-home position is +90 deg. HA
       pierSide=PierSideWest;
       DecDir  = DecDirWInit;
 
-      // west side of pier - we're in the eastern sky and the HA's are negative
-      // default, in the polar-home position is +90 deg. HA
       cli();
       posHA=posHA-180L*StepsPerDegreeHA;
       startHA=posHA;
       sei();
-      
-      #ifdef DEBUG_ON
-      Serial1.println("West side of pier");
-      #endif
     } else { 
-      pierSide=PierSideEast;
-      DecDir = DecDirEInit;
-
       // east side of pier - we're in the western sky and the HA's are positive
       // this is the default in the polar-home position
-
-      #ifdef DEBUG_ON 
-      Serial1.println("East side of pier");
-      #endif
+      pierSide=PierSideEast;
+      DecDir = DecDirEInit;
     }
   }
 
@@ -217,26 +195,8 @@ byte goTo(long HASteps, long DecSteps) {
   startDec    =posDec;
   sei();
 
-#ifdef DEBUG_ON
-  Serial1.print("Current position = ");
-  Serial1.print((posHA/StepsPerDegreeHA)/15.0);
-  Serial1.print("(HA) ");
-  Serial1.print(posDec/StepsPerDegreeDec);
-  Serial1.println("(Dec)");
-  
-  Serial1.print("Target  position =");
-  Serial1.print((targetHA/StepsPerDegreeHA)/15.0);
-  Serial1.print("(HA) ");
-  Serial1.print(targetDec/StepsPerDegreeDec);
-  Serial1.println("(Dec)");
-#endif
-
   lastTrackingState=trackingState;
   trackingState    =TrackingMoveTo;
 
   return 0;
 }
-
-
-
-
