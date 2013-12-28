@@ -59,6 +59,12 @@
  *                                       stepper motor high-speed takeup during backlash compensation.  Added option to easily adjust backlash takeup rate.
  * 11-22-2013          0.99b2            Minor DEBUG mode fixes.
  * 11-22-2013          0.99b3            Minor DEC_RATIO fixes.
+ * 11-23-2013          0.99b4            MinAlt was being written to EEPROM incorrectly on set. MasterSiderealInterval should have been initialized only once.
+ * 12-15-2013          0.99x1            Now uses Timer3 and Timer4 to control HA/Dec step rates.  Variables that hold/control slew rates expanded from int to long.
+ *                                       Recalculation of various slew rates and sidereal clock rate.  I still would like to write my own Serial port code since
+ *                                       commands being sent/recieved by the Arduino library code disturbs the stepping pulses.
+ * 12-23-2013          0.99x2            Removed support for atmega328 and obsolete "debug mode" code.  Various sidereal timing fixes.  Serial communication code no-longer
+ *                                       uses Arduino libraries for smaller size and higher performance.
  *
  *
  * Author: Howard Dutton
@@ -74,7 +80,7 @@
  * a series of #define statements tailor the configuration to your hardware/mount.
  * they are clearly commented below.
  *
- * the Arduino Mega/UNO/etc. uses USB for power and communication with the host computer
+ * the Arduino Mega2560 uses USB for power and communication with the host computer
  *
  * the RA  BED plugs into pins Gnd,13,12, and 11 of the Arduino
  * the Dec BED plugs into pins 7, 6, 5, and 4 (7 is Gnd and the wiring is identical.)
@@ -109,8 +115,8 @@
 #include "errno.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "11 22 13"
-#define FirmwareNumber "0.99b3"
+#define FirmwareDate   "12 23 13"
+#define FirmwareNumber "0.99x2"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -121,11 +127,6 @@
 #define DEBUG_OFF
 // for getting control of the 'scope when things go horribly wrong
 #define RESCUE_MODE_OFF
-
-// these define which MCU you have onboard and are used to assign port addresses for direct I/O
-// additionally, setting MEGA2560_ON enables the second command/reply channel on Serial-1.  Select only one of the two
-#define MEGA328_OFF
-#define MEGA2560_ON
 
 // supply power on pins 5 and 11 to Pololu or other stepper drivers without on-board 5V voltage regulators
 #define POWER_SUPPLY_PINS_OFF
@@ -148,19 +149,15 @@
 #define CHKSUM1_ON      // default _ON:  required for OnStep Android Handcontroller
 
 // this initializes a host of settings in EEPROM, OnStep won't work correctly if it isn't run once and then turned off
-// on a ATMega328 you can get away with setting defaults from the arduino serial console... just make sure you get them all
 #define INIT_OFF        // default _OFF: set to _ON the first time you upload the onstep firmware to initialize EEPROM (then turn it off again)
                         // even with this you still need to set your latitude, longitude, timezone, local time, and date (as a minimum)
                         // see the command reference on my site (stellarjourney.com)
 
 // ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
-#define InterruptRate         32     // maximum step rate, default=32uS, fastest=16uS?
+#define MaxRate              (30)*16 // this is the minimum number of (16MHz) clock ticks between micro-steps (default is 30 micro-seconds): 
+                                     // this is where you find out how fast your motors can run
 
-#define MaxRate               4      // this is the step rate multiplier for maximum slew,  default=4*InterruptRate=128uS - lower numbers speed things up
-                                     // too low and the stepper motor will be more apt to stall as inductance robs it of power while the required acceleration
-                                     // between speed changes becomes greater and greater
-
-#define BacklashTakeupRate    20     // this is the backlash takeup rate (in multipules of the sidereal rate), too fast and your motors will stall
+#define BacklashTakeupRate    60     // this is the backlash takeup rate (in multipules of the sidereal rate), too fast and your motors will stall
 
                                      // for my G11 both RA and Dec axis have the same gear train and this
 #define StepsPerDegreeHA  11520L     // is calculated as :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
@@ -179,7 +176,7 @@
 
 #define StepsPerWormRotation 11520L  // PEC, number of steps for a complete worm rotation (RA)
 
-#define PECBufferSize         824    // PEC, buffer size, 824 is default and the maximum on a ATMega328. The ATMega2560 max should be no more than 1336
+#define PECBufferSize         824    // PEC, buffer size, max should be no more than 1336
 
 #define REVERSE_HA_OFF               // Reverse the direction of movement for the HA/RA axis
 #define REVERSE_DEC_OFF              // Reverse the direction of movement for the Dec axis
@@ -216,9 +213,9 @@ unsigned long lst_mS_start = 0;      // mS at the start of lst
 long lst_start = 0;                  // the start of lst
 long PECsiderealTimer = 0;           // time since worm wheel zero index for PEC
 
-volatile          int siderealCount     = 0;                     //
-volatile unsigned int siderealInterval  = 10027/InterruptRate;   // default = around 313 ticks per sidereal 1/100 second, this is now stored in 
-         unsigned int masterSiderealInterval = siderealInterval; //
+volatile long siderealInterval  =  15956313;
+         long masterSiderealInterval = siderealInterval;
+                                     // default = around 159564 ticks per sidereal hundredth second, this is now stored in
                                      // EEPROM which is updated/adjusted with the ":T+#" and ":T-#" commands
                                      // stars moving left means too fast, right means too slow (for my 'scope optics/camera)
                                      // a higher number here means a longer count which slows down the sidereal clock...
@@ -235,15 +232,13 @@ double longitude = 0.0;
 
 long SiderealRate;                   // this is the step rate divisor for sidereal time, default=651 counts=( 1/(StepsPerDegreeHA/(3600/15)) )*(1000000/InterruptRate)
 
-#define StepsForRateChange    1000.0 // used in calculating the number of steps during acceleration and de-acceleration
-volatile int  skipCountRate = 1;     // this is the rate of change for the steppers speed
-volatile int  skipHA        = 0;     // higher numbers slow down the acceleration and de-acceleration
-volatile int  skipCountHA;
-volatile int  skipCountBacklashHA;
+#define StepsForRateChange    192000.0 // used in calculating the number of steps during acceleration and de-acceleration
+volatile long skipCountRate = 1;       // this is the rate of change for the steppers speed, higher numbers slow down the acceleration and de-acceleration
+volatile long skipCountHA;
+volatile long skipCountBacklashHA;
 volatile boolean inBacklashHA=false;
-volatile int  skipDec       = 0;
-volatile int  skipCountDec;
-volatile int  skipCountBacklashDec;
+volatile long skipCountDec;
+volatile long skipCountBacklashDec;
 volatile boolean inBacklashDec=false;
 #define SkipCountRateRatio    ((double)StepsPerDegreeHA/(double)StepsPerDegreeDec)
 
@@ -291,27 +286,6 @@ int    maxAlt;                      // the maximum altitude, in degrees, for goT
                                      // Pin GND (GND)
 
 // defines for direct port control
-#ifdef MEGA328_ON
-#define LEDposBit  0
-#define LEDposPORT PORTB
-#define LEDnegBit  1
-#define LEDnegPORT PORTB
-
-#define DecDirBit  4
-#define DecDirPORT PORTD
-
-#define DecStepBit 6
-#define DecStepPORT PORTD
-#define DecGNDBit  7
-#define DecGNDPORT PORTD
-
-#define HADirBit   3
-#define HADirPORT  PORTB
-#define HAStepBit  5
-#define HAStepPORT PORTB
-#endif
-
-#ifdef MEGA2560_ON
 #define LEDposBit  5       // Pin 8
 #define LEDposPORT PORTH   //
 #define LEDnegBit  6       // Pin 9
@@ -332,7 +306,6 @@ int    maxAlt;                      // the maximum altitude, in degrees, for goT
 #define HA5vPORT   PORTB   //
 #define HAStepBit  7       // Pin 13
 #define HAStepPORT PORTB   //
-#endif
 
 #define DecDirEInit      HIGH
 #define DecDirWInit      LOW
@@ -382,30 +355,43 @@ boolean atHome           = false;
 boolean homeMount        = false;
 
 // Command processing -------------------------------------------------------------------------------------------------------
+#define F_CPU 16000000UL
+#define BAUD 9600
+
 boolean commandError     = false;
 boolean quietReply       = false;
 
-char reply[23];
+char reply[25];
 
 char command[3];
-char parameter[23];
+char parameter[25];
 byte bufferPtr= 0;
 
-char command_serial_zero[23];
-char parameter_serial_zero[23];
+char command_serial_zero[25];
+char parameter_serial_zero[25];
 byte bufferPtr_serial_zero= 0;
 
+char Serial_recv_buffer[256] = "";
+volatile byte Serial_recv_tail = 0;
+volatile byte Serial_recv_head = 0;
+char Serial_xmit_buffer[25] = "";
+byte Serial_xmit_index = 0;
+
+char Serial1_recv_buffer[256] = "";
+volatile byte Serial1_recv_tail = 0;
+volatile byte Serial1_recv_head = 0;
+char Serial1_xmit_buffer[25] = "";
+byte Serial1_xmit_index = 0;
+
 // for bluetooth/serial 1
-#ifdef MEGA2560_ON
-char command_serial_one[23];
-char parameter_serial_one[23];
+char command_serial_one[25];
+char parameter_serial_one[25];
 byte bufferPtr_serial_one= 0;
-#endif
 
 // Misc ---------------------------------------------------------------------------------------------------------------------
 #define Rad 57.29577951
 
-int baudRate[10] = {0, 56700,38400,28800,19200,14400,9600,4800,2400,1200};
+int baudRate[10] = {0,56700,38400,28800,19200,14400,9600,4800,2400,1200};
 
 char   s[20];
 double f,f1,f2,f3;
@@ -537,6 +523,14 @@ volatile int     blDec        = 0;
 byte PEC_buffer[PECBufferSize];
 
 void setup() {
+  // timer compare interrupt enable
+  TCCR3B = 0; TCCR3A = 0;
+  TIMSK3 = (1 << OCIE3A);
+  OCR3A=32767;
+
+  TCCR4B = 0; TCCR4A = 0;
+  TIMSK4 = (1 << OCIE4A);
+
   // the following could be done with register writes to save flash memory
   pinMode(HAStepPin, OUTPUT);        // initialize the stepper control pins RA
   pinMode(HADirPin, OUTPUT); 
@@ -558,7 +552,6 @@ void setup() {
 #endif  
 
   // EEPROM init code here to help get up and running quickly
-  // on a ATMega328 like an UNO just issue the set commands from the serial console
   #ifdef INIT_ON
   // init the site information, lat/long/tz/name
   EEPROM.write(EE_currentSite,0);
@@ -598,18 +591,20 @@ void setup() {
   EEPROM.write(EE_parkStatus,NotParked);
 
   // init the sidereal tracking rate, use this once - then issue the T+ and T- commands to fine tune
-  // 10mS resolution timer, ticks per sidereal 1/100 second 
+  // 1/16uS resolution timer, ticks per sidereal second
+  EEPROM_writeQuad(EE_siderealInterval,(byte*)&masterSiderealInterval);
   #endif
-  masterSiderealInterval = round(10027.3/InterruptRate); EEPROM_writeInt(EE_siderealInterval,masterSiderealInterval);
   
   // this sets the sidereal timer, controls the tracking speed so that the mount moves precisely with the stars
-  masterSiderealInterval=EEPROM_readInt(EE_siderealInterval);
+  EEPROM_readQuad(EE_siderealInterval,(byte*)&masterSiderealInterval);
 
   // this sets the maximum speed that the motors can step while sidereal tracking, one half the siderealInterval for twice the speed
   // this is so guiding corrections can be played back at up to 2X the sidereal rate in RA, 1X in Dec
   // 
   // this is the number of ISR ticks per step, used for putting a cap on the maximum speed the ISR will allow the steppers to move 
-  SiderealRate   =(siderealInterval*100/2)/StepsPerSecond;
+
+  // 16MHZ clocks for 48 steps per second + enough speed for guiding
+  SiderealRate    =(siderealInterval/StepsPerSecond)/2;
   skipCountHA     =SiderealRate;
   
   #ifdef DEC_RATIO_ON
@@ -623,28 +618,16 @@ void setup() {
   skipCountBacklashDec=skipCountDec/(BacklashTakeupRate);
 
   // disable timer0 overflow interrupt, it causes timer1 to miss too many interrupts
- // TIMSK0 &= ~_BV(TOIE0); 
+  // this method was abandoned, but I leave it here since it might have future application
+  // to help lessen the processing load during very high speed GoTo's
+ // TIMSK0 &= ~_BV(TOIE0);
 
   // initialize timer1
-  cli();
-  TCCR1A = 0;     // zero TCCR1A
-  TCCR1B = 0;     // and TCCR1B
- 
-  // set compare match register to desired timer count:
-  // 32uS:  32/1000000 = 1/16000000*X  ->  32/1 = 1/16*X  ->  32/(1/16) = X  ->  32*16 = X
-  OCR1A = InterruptRate*16;
-  // CTC mode
-  TCCR1B |= (1 << WGM12);
-  // set CS10 bit for full speed
-  TCCR1B |= (1 << CS10);
-  // timer compare interrupt enable
-  TIMSK1 |= (1 << OCIE1A);
-  sei();
+  Timer1SetRate(siderealInterval/100);
 
-  Serial.begin(9600);
-  #ifdef MEGA2560_ON
-  Serial1.begin(9600);
-  #endif
+  // get ready for serial communications
+  Serial1_Init(9600);
+  Serial_Init(9600);
   
   // get the site information, if a GPS were attached we would use that here instead
   currentSite=EEPROM.read(EE_currentSite);
@@ -704,7 +687,11 @@ void setup() {
   sei();
 }
  
+long isrSkipCountHA;
+long isrSkipCountDec;
+
 void loop() {
+  
   processCommands();
   
   // GUIDING -------------------------------------------------------------------------------------------
@@ -723,7 +710,7 @@ void loop() {
     if ((tempMilli-msTimer1)>=msMoveHA) {
       msTimer1=tempMilli;
 
-      if ((moveDirHA) && (!inBacklashHA)) {
+      if ((moveDirHA) && (!inBacklashHA)) { 
         // as above, and keep track of how much we've moved for PEC recording
         if (moveDirHA=='e') sign=-1; else sign=1; moveHA=sign*amountMoveHA;
         // for RA, only apply the corrections now if fast guiding
@@ -735,7 +722,7 @@ void loop() {
     if ((tempMilli-msTimer2)>=msMoveDec) {
       msTimer2=tempMilli;
     
-      if ((moveDirDec) && (!inBacklashDec)) {
+      if ((moveDirDec) && (!inBacklashDec)) { 
         // nudge the targetDec (where we're supposed to be) by amountMoveDec
         if (moveDirDec=='s') sign=-1; else sign=1; cli(); targetDec=targetDec+sign*amountMoveDec; sei();
       }
@@ -885,15 +872,16 @@ void loop() {
   // moves the targetHA to match the earth's rotation/revolution, can handle up to 100 steps/sidereal second
   // siderealTimer, falls in once every 1/100 sidereal second (1 tick, about 10mS) if the main loop is so busy that this timer
   // is >1 tick you have a problem and the sidereal tracking may be affected.  Again, the slowest commands seem to take 6-7mS and it's
-  // just fast enough to keep up - provided the ISR isn't robbing too many cycles... default 32uS ISR + test code shows that it misses none
+  // just fast enough to keep up - fortunately the new design only seriously robs MPU cycles during fast GoTo operations when this 
+  // code isn't running
   cli(); long tempLst=lst; sei();
   long t=tempLst-siderealTimer;
   if (t>=1) {
     siderealTimer=tempLst;
 
     // tracking rate check code, detects missed ticks
-    //if (t>1) oops=true; else oops=false;
-    
+//    if (t>1) oops=true; else oops=false;
+
     // handles moving to an new target RA and Dec
     if (trackingState==TrackingMoveTo) moveTo();
 
@@ -938,17 +926,17 @@ void loop() {
     double t2=(double)(tempMilli-UT1mS_start)/1000.0;
     UT1=UT1_start+t2/3600.0;   // This just needs to be accurate to the nearest second, it's about 10x better
     ut1Timer=tempMilli;
-
+    
     // naturally, were really working with a single.  we should have, just barely, enough significant digits to get us through a day
     unsigned long lst_now=lst_start+round( (double)((tempMilli-lst_mS_start)/10.0) * 1.00273790935);
 
     // the "master" clock is millis(), due to it's low rate and fast execution time it doesn't miss interrupts due to serial communications, etc.
-    // the sidereal time is calculated from that and compared to the high-resolution timer,
-    // the tick rate (of the high resolution timer) is adjusted to keep the two in sync. 
+    // the sidereal time is calculated and compared to the high-resolution timer, the high resolution timer is adjusted to keep the two in sync.
+    // the value 160 represents 10uS at a 16MHz clock rate (0.001%)
     cli();
-    if (lst>lst_now) siderealInterval=masterSiderealInterval+3; // running too fast, slow it down
-    if (lst==lst_now) siderealInterval=masterSiderealInterval;
-    if (lst<lst_now) siderealInterval=masterSiderealInterval-3; // running too slow, speed it up
+    if ((lst>lst_now) && (siderealInterval!=masterSiderealInterval+160)) { siderealInterval=masterSiderealInterval+160; Timer1SetRate(siderealInterval/100); } // running too fast, slow it down
+    if ((lst==lst_now)&& (siderealInterval!=masterSiderealInterval))     { siderealInterval=masterSiderealInterval;     Timer1SetRate(siderealInterval/100); }
+    if ((lst<lst_now) && (siderealInterval!=masterSiderealInterval-160)) { siderealInterval=masterSiderealInterval-160; Timer1SetRate(siderealInterval/100); } // running too slow, speed it up
     sei();
 
     // update the local sidereal time floating point representation
@@ -957,59 +945,48 @@ void loop() {
     // reset the sidereal clock once a day, to keep the significant digits from being consumed, debated about including this, but
     // I'm shooting for keeping OnStep reliable for about 50 days of continuous uptime (until millis() rolls over)
     if ((lst_now-lst_start)>24*3600*100) update_lst();
+
+
 /*
     // tracking rate check code, detects missed ticks
-    if (oops) Serial1.println("oops"); else Serial1.println('.');
+    if (oops) Serial1_print("!"); else Serial1_print(".");
+*/
 
+/*
     // this is useful checking the timing of milli
     static unsigned int sc=0;
+    char temp[80];
     sc++; sc=sc%60;
-    Serial1.print("milli=");
-    Serial1.print(sc);
-    Serial1.print(" ,lst=");
-    Serial1.println(lst/100);
+    sprintf(temp,"milli=%i, lst=%i\r\n",sc,lst/100);
+    Serial1_print(temp);
 */
 
 /*
     // this is useful for seeing the guiding commands work
     static unsigned long lastPosHA,lastPosDec;
-    Serial1.print("h=");
-    cli(); Serial.print((long)(posHA-lastPosHA)); lastPosHA=posHA; sei();
-    Serial1.print(", d=");
-    cli(); Serial.print(posDec-lastPosDec); lastPosDec=posDec;  sei();
-
-    Serial1.print(", msch=");
-    Serial1.print(moveSkipCountHA);
-    Serial1.print(", ms_h=");
-    Serial1.print(msMoveHA);
-    Serial1.println("");
+    char temp[80];
+    cli(); 
+    sprintf(temp,"~h=%l, ~d=%l, msch=%i, ms_h=%i\r\n",posHA-lastPosHA,posDec-lastPosDec,moveSkipCountHA,msMoveHA);
+    sei();
+    lastPosHA=posHA;
+    lastPosDec=posDec;
+    Serial1_print(temp);
  */
 
 /*
     // this is useful for seeing what PEC and sidereal tracking is doing
     static unsigned long last_posHA=0;
-    Serial.print("wrsp=");
-    Serial.print(wormRotationStepPos);
-    Serial.print(", PECindex=");
-    Serial.print(PECindex);
-    Serial.print(", PEC_HA=");
-    Serial.print(PEC_buffer[PECindex]-128);
-    Serial.print(", posHA=");
-    Serial.println(posHA-last_posHA);
+    char temp[80];
+    sprintf(temp,"wrsp=%l, PECindex=%l, PEC_HA=%i, ~posHA=%l\r\n",wormRotationStepPos,PECindex,PEC_buffer[PECindex]-128,posHA-last_posHA);
+    Serial1_print(temp);
     last_posHA=posHA;
 */
 
 /*
     // this is useful for seeing the Backlash compensation work
-    Serial1.print("blHA=");
-    Serial1.print(blHA);
-    Serial1.print(", blDec=");
-    Serial1.print(blDec);
-    Serial1.print(", backlashDec=");
-    Serial1.println(backlashDec);
-    Serial1.print(", backlashHA=");
-    Serial1.println(backlashHA);
-    */
+    char temp[80];
+    sprintf(temp,"blHA=%l, blDec=%l, backlashHA=%l, backlashDec=%l\r\n",blHA,blDec,backlashHA,backlashDec);
+    Serial1_print(temp);
+ */
   }
 }
-
