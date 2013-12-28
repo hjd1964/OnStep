@@ -25,14 +25,6 @@ void moveTo() {
     sei();
     
     pierSide++;
-
-#ifdef DEBUG_ON
-    Serial1.print("Meridian flip, moving to ");
-    Serial1.print(targetHA);
-    Serial1.print("HA (from");
-    Serial1.print(posHA);
-    Serial1.println("HA)");
-#endif
   }
   cli();
   long distStartHA=abs(posHA-startHA);           // distance from start HA
@@ -55,7 +47,7 @@ void moveTo() {
   sei();
 
   // First, for Right Ascension
-  skipCountRate=(skipCountHA/10); if (skipCountRate<1) skipCountRate=1; // lower limit always allows change
+  skipCountRate=(skipCountHA/10L); if (skipCountRate<1) skipCountRate=1; // lower limit always allows change
 
   double temp;
   if (distStartHA>distDestHA) {
@@ -66,12 +58,12 @@ void moveTo() {
 //    if ((temp<100) && (temp>=10))  temp=9;            // exclude a range of speeds
   }
   if (temp<MaxRate)        temp=MaxRate;              // fastest rate
-  if (temp>SiderealRate/2) temp=SiderealRate/2;       // slowest rate (4x sidereal), remember SiderealRate is actually twice the sidereal rate
+  if (temp>SiderealRate/2L) temp=SiderealRate/2L;       // slowest rate (4x sidereal), remember SiderealRate is actually twice the sidereal rate
 
-  cli();  skipCountHA=temp;  sei();
+  cli();  skipCountHA=round(temp);  sei();
 
   // Now, for Declination
-  skipCountRate=(skipCountDec/10); if (skipCountRate<1) skipCountRate=1; // lower limit always allows change
+  skipCountRate=(skipCountDec/10L); if (skipCountRate<1) skipCountRate=1; // lower limit always allows change
   
   if (distStartDec>distDestDec) {
       temp=(StepsForRateChange/sqrt(distDestDec));    // 50000/40000=1.02  50000/10=5000 slow down the slew
@@ -81,18 +73,15 @@ void moveTo() {
 //      if ((temp<100) && (temp>=10))  temp=9;          // exclude a range of speeds
     }
   if (temp<MaxRate)        temp=MaxRate;              // fastest rate
-  if (temp>SiderealRate/2) temp=SiderealRate/2;       // slowest rate (4x sidereal)
+  if (temp>SiderealRate/2L) temp=SiderealRate/2L;       // slowest rate (4x sidereal)
 
-  cli(); skipCountDec=temp; sei();
+  cli(); skipCountDec=round(temp); sei();
 
   if ((distDestHA<=2) && (distDestDec<=2)) { 
     if ((pierSide==PierSideFlipEW2) || (pierSide==PierSideFlipWE2)) {
       pierSide++;
       // move to the home position first when flipping sides of the mount
       cli(); startDec=posDec; targetDec=90L*StepsPerDegreeDec; sei();
-#ifdef DEBUG_ON
-      Serial1.println("Meridian flip, moving to home position");
-#endif
     } else
     if ((pierSide==PierSideFlipEW3) || (pierSide==PierSideFlipWE3)) {
       
@@ -129,18 +118,7 @@ void moveTo() {
       startDec =posDec;
       targetDec=origTargetDec;
       sei();
-#ifdef DEBUG_ON
-      Serial1.println("Meridian flip done, moving to target");
-#endif
     } else {
-#ifdef DEBUG_ON
-      Serial1.println("Stopping MoveTo");
-      Serial1.print("Position, HA=");
-      Serial1.println(posHA/StepsPerDegreeHA);
-      Serial1.print(" (dirDec=");
-      Serial1.print(dirDec);
-      Serial1.println(")");
-#endif
       // restore normal sidereal tracking 2x in RA, 1x in Dec
       trackingState=lastTrackingState;
       cli(); 
@@ -177,6 +155,3 @@ void moveTo() {
     }
   }
 }
-
-
-
