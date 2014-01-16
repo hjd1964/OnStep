@@ -159,15 +159,20 @@
 #define MaxRate             (96)*16  // this is the minimum number of (16MHz) clocks between micro-steps (minimum is around 16, 
                                      // default is 64, higher is ok) this is where you adjust how fast your motors run during GoTos
                                      
-#define StepsForRateChange  192000.0 // number of steps during acceleration and de-acceleration, higher values=longer acceleration/de-acceleration
+#define StepsForRateChange  192000.0 // number of steps during acceleration and de-acceleration: higher values=longer acceleration/de-acceleration
+                                     // for the most part this doesn't need to be changed, but adjust when needed
 
-#define BacklashTakeupRate    60     // this is the backlash takeup rate (in multipules of the sidereal rate), too fast and your motors will stall
+#define BacklashTakeupRate    50     // backlash takeup rate (in multipules of the sidereal rate): too fast and your motors will stall,
+                                     // too slow and the mount will be sluggish while it moves through the backlash
+                                     // for the most part this doesn't need to be changed, but adjust when needed
 
                                      // for my EM10b both RA and Dec axis have the same gear train and this
 #define StepsPerDegreeHA    7680L    // is calculated as :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
                                      // Takahashi EM10b  :  24            * 32          * 25              *  144/360              = 7680
+                                     // Losmandy G11     :  48            * 16          * 15              *  360/360              = 11520
 #define StepsPerDegreeDec   7680L    // is calculated as :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
                                      // Takahashi EM10b  :  24            * 32          * 25              *  144/360              = 7680
+                                     // Losmandy G11     :  48            * 16          * 15              *  360/360              = 11520
                                      // the EM10b has two spur gears that drive the RA/Dec worms, they are 60 tooth and 48 tooth gears
                                      // for an 1.25x reduction in addition to the 20:1 gear heads on the steppers for a 25:1 final ratio
                                      // before the worm/wheels 144:1
@@ -179,6 +184,7 @@
                                      // the EM10b has a worm-wheel with 144 teeth (7680*360)/144 = 19200
 
 #define PECBufferSize        824     // PEC, buffer size, max should be no more than 1336, your required buffer size = StepsPerWormRotation/StepsPerSecond
+                                     // for the most part this doesn't need to be changed, but adjust when needed
                                      // the EM10b needs a minimum of 600 (seconds)
 
 #define REVERSE_HA_OFF               // Reverse the direction of movement for the HA/RA axis
