@@ -146,7 +146,7 @@ byte goTo(long HASteps, long DecSteps) {
   atHome=false;
 
   cli();
-  skipCountHA=SiderealRate*2;
+  timerRateHA=SiderealRate*2;
   startHA    =posHA;
   targetHA   =HASteps;
   sei();
@@ -188,9 +188,9 @@ byte goTo(long HASteps, long DecSteps) {
   cli(); 
   targetDec   =DecSteps;  
   #ifdef DEC_RATIO_ON
-  skipCountDec=SiderealRate*2*SkipCountRateRatio;
+  timerRateDec=SiderealRate*2*timerRateRatio;
   #else
-  skipCountDec=SiderealRate*2;
+  timerRateDec=SiderealRate*2;
   #endif
   startDec    =posDec;
   sei();
@@ -200,3 +200,6 @@ byte goTo(long HASteps, long DecSteps) {
 
   return 0;
 }
+
+
+
