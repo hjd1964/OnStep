@@ -12,11 +12,11 @@ void moveTo() {
     origTargetDec=targetDec;
  
     // first phase, move to 90 HA
-    skipCountHA =SiderealRate*2;
+    timerRateHA =SiderealRate*2;
     #ifdef DEC_RATIO_ON
-    skipCountDec=SiderealRate*SkipCountRateRatio;
+    timerRateDec=SiderealRate*timerRateRatio;
     #else
-    skipCountDec=SiderealRate;
+    timerRateDec=SiderealRate;
     #endif
 
     // just move HA, not the declination yet
@@ -47,7 +47,7 @@ void moveTo() {
   sei();
 
   // First, for Right Ascension
-  skipCountRate=(skipCountHA/10L); if (skipCountRate<1) skipCountRate=1; // lower limit always allows change
+  long timerRate=(timerRateHA/10L); if (timerRate<1) timerRate=1; // lower limit always allows change
 
   double temp;
   if (distStartHA>distDestHA) {
@@ -60,10 +60,10 @@ void moveTo() {
   if (temp<MaxRate)        temp=MaxRate;              // fastest rate
   if (temp>SiderealRate/2L) temp=SiderealRate/2L;       // slowest rate (4x sidereal), remember SiderealRate is actually twice the sidereal rate
 
-  cli();  skipCountHA=round(temp);  sei();
+  cli();  timerRateHA=round(temp);  sei();
 
   // Now, for Declination
-  skipCountRate=(skipCountDec/10L); if (skipCountRate<1) skipCountRate=1; // lower limit always allows change
+  timerRate=(timerRateDec/10L); if (timerRate<1) timerRate=1; // lower limit always allows change
   
   if (distStartDec>distDestDec) {
       temp=(StepsForRateChange/sqrt(distDestDec));    // 50000/40000=1.02  50000/10=5000 slow down the slew
@@ -75,7 +75,7 @@ void moveTo() {
   if (temp<MaxRate)        temp=MaxRate;              // fastest rate
   if (temp>SiderealRate/2L) temp=SiderealRate/2L;       // slowest rate (4x sidereal)
 
-  cli(); skipCountDec=round(temp); sei();
+  cli(); timerRateDec=round(temp); sei();
 
   if ((distDestHA<=2) && (distDestDec<=2)) { 
     if ((pierSide==PierSideFlipEW2) || (pierSide==PierSideFlipWE2)) {
@@ -122,11 +122,11 @@ void moveTo() {
       // restore normal sidereal tracking 2x in RA, 1x in Dec
       trackingState=lastTrackingState;
       cli(); 
-      skipCountHA  =SiderealRate;
+      timerRateHA  =SiderealRate;
       #ifdef DEC_RATIO_ON
-      skipCountDec =SiderealRate*2*SkipCountRateRatio;
+      timerRateDec =SiderealRate*2*timerRateRatio;
       #else
-      skipCountDec =SiderealRate*2;
+      timerRateDec =SiderealRate*2;
       #endif
       sei();
       
@@ -155,3 +155,5 @@ void moveTo() {
     }
   }
 }
+
+
