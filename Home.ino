@@ -53,11 +53,11 @@ boolean setHome() {
   // reset tracking and rates
   trackingState       = TrackingNone;
   lastTrackingState   = TrackingNone;
-  skipCountHA         = SiderealRate;
+  timerRateHA         = SiderealRate;
   #ifdef DEC_RATIO_ON
-  skipCountDec        =SiderealRate*SkipCountRateRatio;
+  timerRateDec        =SiderealRate*timerRateRatio;
   #else
-  skipCountDec        =SiderealRate;
+  timerRateDec        =SiderealRate;
   #endif
 
   // not parked, but don't wipe the park position if it's saved - we can still use it
@@ -84,3 +84,6 @@ boolean setHome() {
 
   return true;
 }
+
+
+
