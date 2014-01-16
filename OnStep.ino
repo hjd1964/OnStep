@@ -162,23 +162,19 @@
 #define BacklashTakeupRate   60     // this is the backlash takeup rate (in multipules of the sidereal rate), too fast and your motors will stall
 
                                      // for my G11 both RA and Dec axis have the same gear train and this
-#define StepsPerDegreeHA  7680L     // is calculated as :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
-#define StepsPerDegreeDec 7680L     // is calcu96lated as :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
-                                     // G11                      48            * 16          * 15         *  360/360              = 11520
-                                     // the steps per second sidereal rate = 48 = (11520/3600)*15
+#define StepsPerDegreeHA  7680L      // is calculated as :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
+#define StepsPerDegreeDec 7680L      // is calculated as :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
+                                     // Takahashi EM10b          24            * 32          * 20 (*GR1A=60/48)    *  144/360              = 7680
+                                     
                                    
-                                     // another mount I did testing on was an Orion EQ2 (just in RA)...
-                                     // EQ2                      200           * 16          * 8          *  90/360               = 6480
-                                     // the steps per second sidereal rate = 27 = (6480/3600)*15
-                                     // the steps per worm rotation would be 25600 (which moves the 'scope 4 degrees in RA)
-                                     // which would require 960 seconds of PEC readings storage (OnStep can only handle 824 by default, see below) 
-
-#define StepsPerSecond        32     // number of steps in a second = 11520/240 = ie. 11520 steps in 240 (sidereal) seconds - OnStep can handle
+#define StepsPerSecond        32     // the steps per second sidereal rate = 32 = (7680/3600)*15 - OnStep can handle
                                      // between 12 and 100 steps/second when sidereal tracking (StepsPerWormRotation must be evenly divisible by StepsPerSecond)
 
-#define StepsPerWormRotation 15360L  // PEC, number of steps for a complete worm rotation (RA)
+#define StepsPerWormRotation 19200L  // PEC, number of steps for a complete worm rotation (RA), (StepsPerDegreeHA*360)/gear_reduction2 
+                                     // the EM10b has a worm-wheel with 144 teeth (7680*360)/144 = 19200
 
-#define PECBufferSize         824    // PEC, buffer size, max should be no more than 1336
+#define PECBufferSize         824    // PEC, buffer size, max should be no more than 1336, your required buffer size = StepsPerWormRotation/StepsPerSecond
+                                     // the EM10b needs a minimum of 600 (seconds)
 
 #define REVERSE_HA_OFF               // Reverse the direction of movement for the HA/RA axis
 #define REVERSE_DEC_OFF              // Reverse the direction of movement for the Dec axis
