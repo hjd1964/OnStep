@@ -65,6 +65,8 @@
  *                                       commands being sent/recieved by the Arduino library code disturbs the stepping pulses.
  * 12-23-2013          0.99x2            Removed support for atmega328 and obsolete "debug mode" code.  Various sidereal timing fixes.  Serial communication code no-longer
  *                                       uses Arduino libraries for smaller size and higher performance.
+ * 12-29-2013          0.99x3            Renamed variables to better reflect their use.
+ * 01-16-2014          0.99x4            Changes to setPark, faster backlash takeup and compatibility with 32 uStep stepper motor drivers
  *
  *
  * Author: Howard Dutton
@@ -115,8 +117,8 @@
 #include "errno.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "12 23 13"
-#define FirmwareNumber "0.99x2"
+#define FirmwareDate   "01 16 14"
+#define FirmwareNumber "0.99x4"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -154,14 +156,14 @@
                         // see the command reference on my site (stellarjourney.com)
 
 // ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
-#define MaxRate              (30)*16 // this is the minimum number of (16MHz) clock ticks between micro-steps (default is 30 micro-seconds): 
-                                     // this is where you find out how fast your motors can run
+#define MaxRate              (96)*16 // this is the minimum number of (16MHz) clock ticks between micro-steps (default is 30 micro-seconds): this is where you find out how fast your motors can run
+#define StepsForRateChange  192000.0 // number of steps during acceleration and de-acceleration, higher values=longer acceleration/de-acceleration
 
-#define BacklashTakeupRate    60     // this is the backlash takeup rate (in multipules of the sidereal rate), too fast and your motors will stall
+#define BacklashTakeupRate   60     // this is the backlash takeup rate (in multipules of the sidereal rate), too fast and your motors will stall
 
                                      // for my G11 both RA and Dec axis have the same gear train and this
-#define StepsPerDegreeHA  11520L     // is calculated as :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
-#define StepsPerDegreeDec 11520L     // is calculated as :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
+#define StepsPerDegreeHA  7680L     // is calculated as :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
+#define StepsPerDegreeDec 7680L     // is calcu96lated as :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
                                      // G11                      48            * 16          * 15         *  360/360              = 11520
                                      // the steps per second sidereal rate = 48 = (11520/3600)*15
                                    
@@ -171,10 +173,10 @@
                                      // the steps per worm rotation would be 25600 (which moves the 'scope 4 degrees in RA)
                                      // which would require 960 seconds of PEC readings storage (OnStep can only handle 824 by default, see below) 
 
-#define StepsPerSecond        48     // number of steps in a second = 11520/240 = ie. 11520 steps in 240 (sidereal) seconds - OnStep can handle up
-                                     // to 100 steps/second when sidereal tracking (StepsPerWormRotation must be evenly divisible by StepsPerSecond)
+#define StepsPerSecond        32     // number of steps in a second = 11520/240 = ie. 11520 steps in 240 (sidereal) seconds - OnStep can handle
+                                     // between 12 and 100 steps/second when sidereal tracking (StepsPerWormRotation must be evenly divisible by StepsPerSecond)
 
-#define StepsPerWormRotation 11520L  // PEC, number of steps for a complete worm rotation (RA)
+#define StepsPerWormRotation 15360L  // PEC, number of steps for a complete worm rotation (RA)
 
 #define PECBufferSize         824    // PEC, buffer size, max should be no more than 1336
 
@@ -213,9 +215,9 @@ unsigned long lst_mS_start = 0;      // mS at the start of lst
 long lst_start = 0;                  // the start of lst
 long PECsiderealTimer = 0;           // time since worm wheel zero index for PEC
 
-volatile long siderealInterval  =  15956313;
-         long masterSiderealInterval = siderealInterval;
-                                     // default = around 159564 ticks per sidereal hundredth second, this is now stored in
+long siderealInterval  =  15956313;
+long masterSiderealInterval = siderealInterval;
+                                     // default = 15956313 ticks per sidereal hundredth second, this is stored in
                                      // EEPROM which is updated/adjusted with the ":T+#" and ":T-#" commands
                                      // stars moving left means too fast, right means too slow (for my 'scope optics/camera)
                                      // a higher number here means a longer count which slows down the sidereal clock...
@@ -226,40 +228,38 @@ volatile long siderealInterval  =  15956313;
                                      // someday I'd like to add a GPS module and grab the pps (pulse per second) signal as a high-accuracy
                                      // time reference to correct drift in my sidereal clock due to physical effects and software limitations
 
+long SiderealRate;                   // based on the siderealInterval, this is the time between steps for sidereal tracking
+
+volatile long timerRateHA;
+volatile long timerRateBacklashHA;
+volatile boolean inBacklashHA=false;
+volatile long timerRateDec;
+volatile long timerRateBacklashDec;
+volatile boolean inBacklashDec=false;
+#define timerRateRatio    ((double)StepsPerDegreeHA/(double)StepsPerDegreeDec)
+
 // Location ----------------------------------------------------------------------------------------------------------------
 double latitude  = 0.0;
 double longitude = 0.0;
 
-long SiderealRate;                   // this is the step rate divisor for sidereal time, default=651 counts=( 1/(StepsPerDegreeHA/(3600/15)) )*(1000000/InterruptRate)
-
-#define StepsForRateChange    192000.0 // used in calculating the number of steps during acceleration and de-acceleration
-volatile long skipCountRate = 1;       // this is the rate of change for the steppers speed, higher numbers slow down the acceleration and de-acceleration
-volatile long skipCountHA;
-volatile long skipCountBacklashHA;
-volatile boolean inBacklashHA=false;
-volatile long skipCountDec;
-volatile long skipCountBacklashDec;
-volatile boolean inBacklashDec=false;
-#define SkipCountRateRatio    ((double)StepsPerDegreeHA/(double)StepsPerDegreeDec)
-
 volatile long posHA      = 90L*StepsPerDegreeHA;   // hour angle position in steps
 volatile long startHA    = 90L*StepsPerDegreeHA;   // hour angle of goto start position in steps
 volatile long targetHA   = 90L*StepsPerDegreeHA;   // hour angle of goto end   position in steps
-volatile byte dirHA      = 1;        // stepping direction + or -
-volatile long PEC_HA     = 0;        // for PEC, adds or subtracts steps
-double newTargetRA       = 0.0;      // holds the RA for goTos
+volatile byte dirHA      = 1;                      // stepping direction + or -
+volatile long PEC_HA     = 0;                      // for PEC, adds or subtracts steps
+double newTargetRA       = 0.0;                    // holds the RA for goTos
 long origTargetHA        = 0;
 
-volatile long posDec     = 90*StepsPerDegreeDec;  // declination position in steps
-volatile long startDec   = 90*StepsPerDegreeDec;  // declination of goto start position in steps
-volatile long targetDec  = 90*StepsPerDegreeDec;  // declination of goto end   position in steps
-volatile byte dirDec     = 1;        // stepping direction + or -
-double newTargetDec      = 0.0;      // holds the Dec for goTos
+volatile long posDec     = 90L*StepsPerDegreeDec; // declination position in steps
+volatile long startDec   = 90L*StepsPerDegreeDec; // declination of goto start position in steps
+volatile long targetDec  = 90L*StepsPerDegreeDec; // declination of goto end   position in steps
+volatile byte dirDec     = 1;                     // stepping direction + or -
+double newTargetDec      = 0.0;                   // holds the Dec for goTos
 long origTargetDec       = 0;
 
 double newTargetAlt=0.0, newTargetAzm=0.0;        // holds the altitude and azmiuth for slews
-int    minAlt;                      // the minimum altitude, in degrees, for goTo's (so we don't try to point too low)
-int    maxAlt;                      // the maximum altitude, in degrees, for goTo's (to keep the telescope tube away from the mount/tripod)
+int    minAlt;                                    // the minimum altitude, in degrees, for goTo's (so we don't try to point too low)
+int    maxAlt;                                    // the maximum altitude, in degrees, for goTo's (to keep the telescope tube away from the mount/tripod)
 
 // Stepper/position/rate ----------------------------------------------------------------------------------------------------
 
@@ -270,20 +270,20 @@ int    maxAlt;                      // the maximum altitude, in degrees, for goT
 // for now, the #defines below are used to program the port modes using the standard Arduino library
 
 // The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
-//                                            Atmel   328  | 2560
-#define LEDposPin  8                 // Pin 8 (LED)   PB0    PH5
-#define LEDnegPin  9                 // Pin 9 (GND)   PB1    PH6
+//                                  Atmel   328  | 2560
+#define LEDposPin  8       // Pin 8 (LED)   PB0    PH5
+#define LEDnegPin  9       // Pin 9 (GND)   PB1    PH6
 
 // The HA(RA) and Dec jumpers (going to the big easy drivers) are simply four wire jumper cables, each has identical wiring - simple modular construction
-#define DecDirPin  4                 // Pin 4 (Dir)   PD4    PG5
-#define Dec5vPin   5                 // Pin 5 (5V?)   PD5    PE3
-#define DecStepPin 6                 // Pin 6 (Step)  PD6    PH3
-#define DecGNDPin  7                 // Pin 7 (GND)   PD7    PH4
+#define DecDirPin  4       // Pin 4 (Dir)   PD4    PG5
+#define Dec5vPin   5       // Pin 5 (5V?)   PD5    PE3
+#define DecStepPin 6       // Pin 6 (Step)  PD6    PH3
+#define DecGNDPin  7       // Pin 7 (GND)   PD7    PH4
 
-#define HADirPin   11                // Pin 11 (Dir)  PB3    PB5
-#define HA5vPin    12                // Pin 12 (5V?)  PB4    PB6
-#define HAStepPin  13                // Pin 13 (Step) PB5    PB7
-                                     // Pin GND (GND)
+#define HADirPin   11      // Pin 11 (Dir)  PB3    PB5
+#define HA5vPin    12      // Pin 12 (5V?)  PB4    PB6
+#define HAStepPin  13      // Pin 13 (Step) PB5    PB7
+                           // Pin GND (GND)
 
 // defines for direct port control
 #define LEDposBit  5       // Pin 8
@@ -311,7 +311,7 @@ int    maxAlt;                      // the maximum altitude, in degrees, for goT
 #define DecDirWInit      LOW
 #define HADirEInit       LOW
 #define HADirWInit       HIGH
-volatile byte DecDir     = DecDirEInit;      
+volatile byte DecDir     = DecDirEInit;
 volatile byte HADir      = HADirEInit;
 
 // Status ------------------------------------------------------------------------------------------------------------------
@@ -417,10 +417,10 @@ int     moveDurationDec  = 0;
 // Slew control
 int     moveRates[9]={7,15,30,60,120,240,360,600,900}; 
 //                      1x 2x 4x 8x  16x 24x 40x 60x
-int     moveSkipCountHA  = 0;
-int     moveSkipCountDec;
-int     lastSkipCountHA;
-int     lastSkipCountDec;
+int     moveTimerRateHA  = 0;
+int     moveTimerRateDec;
+int     lastTimerRateHA;
+int     lastTimerRateDec;
 //
 unsigned long msMoveHA   = 0;
 int     amountMoveHA     = 0;
@@ -523,13 +523,14 @@ volatile int     blDec        = 0;
 byte PEC_buffer[PECBufferSize];
 
 void setup() {
-  // timer compare interrupt enable
+  // init. the timers that handle RA and Dec
   TCCR3B = 0; TCCR3A = 0;
   TIMSK3 = (1 << OCIE3A);
   OCR3A=32767;
 
   TCCR4B = 0; TCCR4A = 0;
   TIMSK4 = (1 << OCIE4A);
+  OCR4A=32767;
 
   // the following could be done with register writes to save flash memory
   pinMode(HAStepPin, OUTPUT);        // initialize the stepper control pins RA
@@ -594,6 +595,7 @@ void setup() {
   // 1/16uS resolution timer, ticks per sidereal second
   EEPROM_writeQuad(EE_siderealInterval,(byte*)&masterSiderealInterval);
   #endif
+  EEPROM_writeQuad(EE_siderealInterval,(byte*)&masterSiderealInterval);
   
   // this sets the sidereal timer, controls the tracking speed so that the mount moves precisely with the stars
   EEPROM_readQuad(EE_siderealInterval,(byte*)&masterSiderealInterval);
@@ -605,17 +607,17 @@ void setup() {
 
   // 16MHZ clocks for 48 steps per second + enough speed for guiding
   SiderealRate    =(siderealInterval/StepsPerSecond)/2;
-  skipCountHA     =SiderealRate;
+  timerRateHA     =SiderealRate;
   
   #ifdef DEC_RATIO_ON
-  skipCountDec    =(SiderealRate*2)*SkipCountRateRatio;
+  timerRateDec    =(SiderealRate*2)*timerRateRatio;
   #else
-  skipCountDec    =(SiderealRate*2);
+  timerRateDec    =(SiderealRate*2);
   #endif
   
   // backlash takeup rates
-  skipCountBacklashHA =skipCountHA /(BacklashTakeupRate/2);
-  skipCountBacklashDec=skipCountDec/(BacklashTakeupRate);
+  timerRateBacklashHA =timerRateHA /(BacklashTakeupRate/2);
+  timerRateBacklashDec=timerRateDec/(BacklashTakeupRate);
 
   // disable timer0 overflow interrupt, it causes timer1 to miss too many interrupts
   // this method was abandoned, but I leave it here since it might have future application
@@ -686,9 +688,6 @@ void setup() {
   siderealTimer = lst;
   sei();
 }
- 
-long isrSkipCountHA;
-long isrSkipCountDec;
 
 void loop() {
   
@@ -713,11 +712,11 @@ void loop() {
       if ((moveDirHA) && (!inBacklashHA)) { 
         // as above, and keep track of how much we've moved for PEC recording
         if (moveDirHA=='e') sign=-1; else sign=1; moveHA=sign*amountMoveHA;
-        // for RA, only apply the corrections now if fast guiding
+        // for RA, only apply the corrections now if fast guiding; otherwise they get combined with PEC & sidereal-tracking and are applied later
         if (currentGuideRate>1) { cli(); targetHA+=moveHA;  sei(); } else { accGuideHA+=moveHA; }
       }
       // for pulse guiding, count down the mS and stop when timed out
-      if (moveDurationHA>0)  { moveDurationHA-=msMoveHA; if (moveDurationHA<=0) { cli(); skipCountHA=lastSkipCountHA; moveDirHA=0; sei(); } }
+      if (moveDurationHA>0)  { moveDurationHA-=msMoveHA; if (moveDurationHA<=0) { cli(); timerRateHA=lastTimerRateHA; moveDirHA=0; sei(); } }
     }
     if ((tempMilli-msTimer2)>=msMoveDec) {
       msTimer2=tempMilli;
@@ -727,7 +726,7 @@ void loop() {
         if (moveDirDec=='s') sign=-1; else sign=1; cli(); targetDec=targetDec+sign*amountMoveDec; sei();
       }
       // for pulse guiding, count down the mS and stop when timed out
-      if (moveDurationDec>0) { moveDurationDec-=msMoveDec; if (moveDurationDec<=0) { cli(); skipCountDec=lastSkipCountDec; moveDirDec=0; sei(); } }
+      if (moveDurationDec>0) { moveDurationDec-=msMoveDec; if (moveDurationDec<=0) { cli(); timerRateDec=lastTimerRateDec; moveDirDec=0; sei(); } }
     }
   }
   
@@ -966,7 +965,7 @@ void loop() {
     static unsigned long lastPosHA,lastPosDec;
     char temp[80];
     cli(); 
-    sprintf(temp,"~h=%l, ~d=%l, msch=%i, ms_h=%i\r\n",posHA-lastPosHA,posDec-lastPosDec,moveSkipCountHA,msMoveHA);
+    sprintf(temp,"~h=%l, ~d=%l, msch=%i, ms_h=%i\r\n",posHA-lastPosHA,posDec-lastPosDec,moveTimerRateHA,msMoveHA);
     sei();
     lastPosHA=posHA;
     lastPosDec=posDec;
