@@ -353,18 +353,18 @@ void processCommands() {
         i=atoi((char *)&parameter[1]); 
         if ( (!errno) && ((i>=0) && (i<=16399)) && (parkStatus==NotParked)) { 
           if ((parameter[0]=='e') || (parameter[0]=='w')) { 
-            if (moveDirHA) { cli(); skipCountHA=lastSkipCountHA; sei(); }
-            moveDirHA=parameter[0];  moveDurationHA=i;  cli(); lastSkipCountHA=skipCountHA; skipCountHA=moveSkipCountHA; sei();
+            if (moveDirHA) { cli(); timerRateHA=lastTimerRateHA; sei(); }
+            moveDirHA=parameter[0];  moveDurationHA=i;  cli(); lastTimerRateHA=timerRateHA; timerRateHA=moveTimerRateHA; sei();
           } else
             if ((parameter[0]=='n') || (parameter[0]=='s')) { 
-              if (moveDirDec) { cli(); skipCountDec=lastSkipCountDec; sei(); }
+              if (moveDirDec) { cli(); timerRateDec=lastTimerRateDec; sei(); }
               moveDirDec=parameter[0]; 
               moveDurationDec=i; cli(); 
-              lastSkipCountDec=skipCountDec; 
+              lastTimerRateDec=timerRateDec; 
  #ifdef DEC_RATIO_ON
-             skipCountDec=moveSkipCountDec*SkipCountRateRatio;
+             timerRateDec=moveTimerRateDec*timerRateRatio;
  #else
-             skipCountDec=moveSkipCountDec;
+             timerRateDec=moveTimerRateDec;
  #endif
               sei();
             } else commandError=true;
@@ -375,9 +375,9 @@ void processCommands() {
       if ((command[1]=='e') || (command[1]=='w')) { 
         if (parkStatus==NotParked) {
           cli(); 
-          if (moveDirHA) skipCountHA=lastSkipCountHA;
+          if (moveDirHA) timerRateHA=lastTimerRateHA;
           moveDirHA=command[1];  
-          lastSkipCountHA=skipCountHA; skipCountHA=moveSkipCountHA; 
+          lastTimerRateHA=timerRateHA; timerRateHA=moveTimerRateHA; 
           sei();
         }
         quietReply=true;
@@ -387,13 +387,13 @@ void processCommands() {
       if ((command[1]=='n') || (command[1]=='s')) { 
         if (parkStatus==NotParked) {
           cli();
-          if (moveDirDec) skipCountDec=lastSkipCountDec;
+          if (moveDirDec) timerRateDec=lastTimerRateDec;
           moveDirDec=command[1];
-          lastSkipCountDec=skipCountDec; 
+          lastTimerRateDec=timerRateDec; 
  #ifdef DEC_RATIO_ON
-          skipCountDec=moveSkipCountDec*SkipCountRateRatio; 
+          timerRateDec=moveTimerRateDec*timerRateRatio; 
  #else
-          skipCountDec=moveSkipCountDec; 
+          timerRateDec=moveTimerRateDec; 
  #endif
           sei();
         }
@@ -457,8 +457,8 @@ void processCommands() {
         if (command[1]==0) { 
           if (parkStatus==NotParked) {
             cli();
-            if (moveDirDec) skipCountDec=lastSkipCountDec; 
-            if (moveDirHA)  skipCountHA =lastSkipCountHA; 
+            if (moveDirDec) timerRateDec=lastTimerRateDec; 
+            if (moveDirHA)  timerRateHA =lastTimerRateHA; 
             sei();
             moveDirDec=0;
             moveDirHA =0;
@@ -469,7 +469,7 @@ void processCommands() {
 //         Returns: Nothing
         if ((command[1]=='e') || (command[1]=='w')) { 
           if (parkStatus==NotParked) {
-            moveDirHA=0; cli(); skipCountHA=lastSkipCountHA; sei();
+            moveDirHA=0; cli(); timerRateHA=lastTimerRateHA; sei();
           }
           quietReply=true; 
         } else
@@ -477,7 +477,7 @@ void processCommands() {
 //         Returns: Nothing
         if ((command[1]=='n') || (command[1]=='s')) {
           if (parkStatus==NotParked) {
-            moveDirDec=0; cli(); skipCountDec=lastSkipCountDec; sei(); 
+            moveDirDec=0; cli(); timerRateDec=lastTimerRateDec; sei(); 
             quietReply=true; 
           }
         } else commandError=true;
@@ -903,19 +903,20 @@ void setGuideRate(int g) {
 
   // this sets how fast the drives CAN move
 
-  // use siderealRate as an basis, it really runs at 2 times the speed the (of the sky, half the counts)
+  // use siderealRate as an basis, it really runs at 2 times the speed (of the sky, half the counts)
   // so mult. by 2 gets us back to the actual (in the sky) sidereal rate, and mult. by another 15 gets us to a count for arc-seconds/second
+  // 
   // and finally, subtract just a little bit to make sure the timer moves the stepper just a hair faster than the target position it chases
-  moveSkipCountHA =((SiderealRate*2*15)/moveRates[g])-1;
+  moveTimerRateHA =((SiderealRate*2*15)/moveRates[g])-1;
 
   #ifdef DEC_RATIO_ON
-  moveSkipCountDec=round(moveSkipCountHA*SkipCountRateRatio);
+  moveTimerRateDec=round(moveTimerRateHA*timerRateRatio);
   #else
-  moveSkipCountDec=moveSkipCountHA;
+  moveTimerRateDec=moveTimerRateHA;
   #endif
   
   // at low speeds, fall back to guide rates based on the 2 x sidereal rate so we can step fast enough to add in the extra guide/PEC steps
-  if (g<=3) moveSkipCountHA /=2;
+  if (g<=2) moveTimerRateHA /=2;
   
   // moveRates[9]={7,15,30,60,120,240,360,600,900}; 
   if (g<=2) { amountMoveHA=1;  } else
@@ -934,3 +935,6 @@ void setGuideRate(int g) {
   msMoveHA =1000/(((StepsPerDegreeHA *moveRates[g])/amountMoveHA )/3600);
   msMoveDec=1000/(((StepsPerDegreeDec*moveRates[g])/amountMoveDec)/3600);
 }
+
+
+
