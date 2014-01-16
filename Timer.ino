@@ -5,18 +5,19 @@ void Timer1SetRate(long rate) {
   TIMSK1 = 0;
 
   // set compare match register to desired timer count:
-  rate--;
-  if (rate<65536) { TCCR1B |= (1 << CS10); OCR1A = rate; } else {
+//  rate--;
+  if (rate<65536) { TCCR1B |= (1 << CS10); } else {
   rate=rate/8;
-  if (rate<65536) { TCCR1B |= (1 << CS11); OCR1A = rate; } else {
+  if (rate<65536) { TCCR1B |= (1 << CS11); } else {
   rate=rate/8;
-  if (rate<65536) { TCCR1B |= (1 << CS10); TCCR1B |= (1 << CS11); OCR1A = rate; } else {
+  if (rate<65536) { TCCR1B |= (1 << CS10); TCCR1B |= (1 << CS11); } else {
   rate=rate/4;  
-  if (rate<65536) { TCCR1B |= (1 << CS12); OCR1A = rate; } else {
+  if (rate<65536) { TCCR1B |= (1 << CS12); } else {
   rate=rate/4;
-  if (rate<65536) { TCCR1B |= (1 << CS10); TCCR1B |= (1 << CS12); OCR1A = rate;
+  if (rate<65536) { TCCR1B |= (1 << CS10); TCCR1B |= (1 << CS12); 
   }}}}}
-
+  
+  OCR1A = rate-1;
   // CTC mode
   TCCR1B |= (1 << WGM12);
   // timer compare interrupt enable
@@ -26,7 +27,7 @@ void Timer1SetRate(long rate) {
 volatile long nextHArate;
 void Timer3SetRate(long rate) {
   // set compare match register to desired timer count:
-  rate--;
+//  rate--;
   if (rate<65536) { TCCR3B = (1 << WGM12) | (1 << CS10); } else {
   rate=rate/8;
   if (rate<65536) {  TCCR3B = (1 << WGM12) | (1 << CS11);  } else {
@@ -37,13 +38,13 @@ void Timer3SetRate(long rate) {
   rate=rate/4;
   if (rate<65536) { TCCR3B = (1 << WGM12) | (1 << CS10) | (1 << CS12);  
   }}}}}
-  nextHArate=rate;
+  nextHArate=rate-1;
 }
 // set timer to rate (in microseconds*16)
 volatile long nextDErate;
 void Timer4SetRate(long rate) {
   // set compare match register to desired timer count:
-  rate--;
+//  rate--;
   if (rate<65536) { TCCR4B = (1 << WGM12) | (1 << CS10); } else {
   rate=rate/8;
   if (rate<65536) { TCCR4B = (1 << WGM12) | (1 << CS11); } else {
@@ -54,40 +55,41 @@ void Timer4SetRate(long rate) {
   rate=rate/4;
   if (rate<65536) {  TCCR4B = (1 << WGM12) | (1 << CS10) | (1 << CS12);
   }}}}}
-  nextDErate=rate;
+  nextDErate=rate-1;
 }
 
 //--------------------------------------------------------------------------------------------------
 // Timer1 handles just the sidereal time, about 1mS rate
-
+volatile long isrTimerRateHA;
+volatile long isrTimerRateDec;
 ISR(TIMER1_COMPA_vect)
 {
   lst++;
 
   if (trackingState==TrackingSidereal) {
-    long thisSkipCount=skipCountHA;
+    long thisTimerRate=timerRateHA;
     // override rate during backlash compensation
-    if (inBacklashHA) thisSkipCount=skipCountBacklashHA;
-    if (thisSkipCount!=isrSkipCountHA) {
-      Timer3SetRate(thisSkipCount);
-      isrSkipCountHA=thisSkipCount;
+    if (inBacklashHA) thisTimerRate=timerRateBacklashHA;
+    if (thisTimerRate!=isrTimerRateHA) {
+      Timer3SetRate(thisTimerRate);
+      isrTimerRateHA=thisTimerRate;
     }
 
-    thisSkipCount=skipCountDec;
+    thisTimerRate=timerRateDec;
     // override rate during backlash compensation
-    if (inBacklashDec) thisSkipCount=skipCountBacklashDec;
-    if (thisSkipCount!=isrSkipCountDec) {
-      Timer4SetRate(thisSkipCount);
-      isrSkipCountDec=thisSkipCount;
+    if (inBacklashDec) thisTimerRate=timerRateBacklashDec;
+    if (thisTimerRate!=isrTimerRateDec) {
+      Timer4SetRate(thisTimerRate);
+      isrTimerRateDec=thisTimerRate;
     }
   } else {
-    if (skipCountHA!=isrSkipCountHA) {
-      Timer3SetRate(skipCountHA);
-      isrSkipCountHA=skipCountHA;
+    if (timerRateHA!=isrTimerRateHA) {
+      Timer3SetRate(timerRateHA);
+      isrTimerRateHA=timerRateHA;
     } else
-    if (skipCountDec!=isrSkipCountDec) {
-      Timer4SetRate(skipCountDec);
-      isrSkipCountDec=skipCountDec;
+    if (timerRateDec!=isrTimerRateDec) {
+      Timer4SetRate(timerRateDec);
+      isrTimerRateDec=timerRateDec;
     }
   }
 
