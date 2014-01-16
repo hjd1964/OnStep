@@ -595,8 +595,7 @@ void setup() {
   // 1/16uS resolution timer, ticks per sidereal second
   EEPROM_writeQuad(EE_siderealInterval,(byte*)&masterSiderealInterval);
   #endif
-  EEPROM_writeQuad(EE_siderealInterval,(byte*)&masterSiderealInterval);
-  
+
   // this sets the sidereal timer, controls the tracking speed so that the mount moves precisely with the stars
   EEPROM_readQuad(EE_siderealInterval,(byte*)&masterSiderealInterval);
 
