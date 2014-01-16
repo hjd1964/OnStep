@@ -156,8 +156,8 @@
                         // see the command reference on my site (stellarjourney.com)
 
 // ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
-#define MaxRate             (96)*16  // this is the minimum number of (16MHz) clocks between micro-steps (minimum is around 16, default is 64, higher is ok)
-                                     // this is where you adjust how fast your motors run during GoTos
+#define MaxRate             (96)*16  // this is the minimum number of (16MHz) clocks between micro-steps (minimum is around 16, 
+                                     // default is 64, higher is ok) this is where you adjust how fast your motors run during GoTos
 
 #define StepsForRateChange  192000.0 // number of steps during acceleration and de-acceleration, higher values=longer acceleration/de-acceleration
 
