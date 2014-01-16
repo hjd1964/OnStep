@@ -159,7 +159,7 @@
 #define MaxRate              (96)*16 // this is the minimum number of (16MHz) clock ticks between micro-steps (default is 30 micro-seconds): this is where you find out how fast your motors can run
 #define StepsForRateChange  192000.0 // number of steps during acceleration and de-acceleration, higher values=longer acceleration/de-acceleration
 
-#define BacklashTakeupRate   60     // this is the backlash takeup rate (in multipules of the sidereal rate), too fast and your motors will stall
+#define BacklashTakeupRate   60      // this is the backlash takeup rate (in multipules of the sidereal rate), too fast and your motors will stall
 
                                      // for my G11 both RA and Dec axis have the same gear train and this
 #define StepsPerDegreeHA  7680L      // is calculated as :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
