@@ -158,30 +158,33 @@
 // ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
 #define MaxRate             (96)*16  // this is the minimum number of (16MHz) clocks between micro-steps (minimum is around 16, 
                                      // default is 64, higher is ok) this is where you adjust how fast your motors run during GoTos
-
+                                     
 #define StepsForRateChange  192000.0 // number of steps during acceleration and de-acceleration, higher values=longer acceleration/de-acceleration
 
-#define BacklashTakeupRate   60      // this is the backlash takeup rate (in multipules of the sidereal rate), too fast and your motors will stall
+#define BacklashTakeupRate    60     // this is the backlash takeup rate (in multipules of the sidereal rate), too fast and your motors will stall
 
-                                     // for my G11 both RA and Dec axis have the same gear train and this
-#define StepsPerDegreeHA  7680L      // is calculated as :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
-#define StepsPerDegreeDec 7680L      // is calculated as :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
-                                     // Takahashi EM10b          24            * 32          * 20 (*GR1A=60/48)    *  144/360              = 7680
+                                     // for my EM10b both RA and Dec axis have the same gear train and this
+#define StepsPerDegreeHA    7680L    // is calculated as :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
+                                     // Takahashi EM10b  :  24            * 32          * 25              *  144/360              = 7680
+#define StepsPerDegreeDec   7680L    // is calculated as :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
+                                     // Takahashi EM10b  :  24            * 32          * 25              *  144/360              = 7680
+                                     // the EM10b has two spur gears that drive the RA/Dec worms, they are 60 tooth and 48 tooth gears
+                                     // for an 1.25x reduction in addition to the 20:1 gear heads on the steppers for a 25:1 final ratio
+                                     // before the worm/wheels 144:1
                                      
-                                   
-#define StepsPerSecond        32     // the steps per second sidereal rate = 32 = (7680/3600)*15 - OnStep can handle
-                                     // between 12 and 100 steps/second when sidereal tracking (StepsPerWormRotation must be evenly divisible by StepsPerSecond)
+#define StepsPerSecond        32     // the steps per second sidereal rate = 32 = (7680/3600)*15 - OnStep can handle between 12 and 100 steps/second
+                                     // when sidereal tracking (StepsPerWormRotation must be evenly divisible by StepsPerSecond)
 
-#define StepsPerWormRotation 19200L  // PEC, number of steps for a complete worm rotation (RA), (StepsPerDegreeHA*360)/gear_reduction2 
+#define StepsPerWormRotation 19200L  // PEC, number of steps for a complete worm rotation (in RA), (StepsPerDegreeHA*360)/gear_reduction2 
                                      // the EM10b has a worm-wheel with 144 teeth (7680*360)/144 = 19200
 
-#define PECBufferSize         824    // PEC, buffer size, max should be no more than 1336, your required buffer size = StepsPerWormRotation/StepsPerSecond
+#define PECBufferSize        824     // PEC, buffer size, max should be no more than 1336, your required buffer size = StepsPerWormRotation/StepsPerSecond
                                      // the EM10b needs a minimum of 600 (seconds)
 
 #define REVERSE_HA_OFF               // Reverse the direction of movement for the HA/RA axis
 #define REVERSE_DEC_OFF              // Reverse the direction of movement for the Dec axis
 
-long minutesPastMeridian = 60;       // for goto's, how far past the meridian to allow before we do a flip - one hour of RA is the default = 60
+long minutesPastMeridian =   60;     // for goto's, how far past the meridian to allow before we do a flip - one hour of RA is the default = 60
 
 // THAT'S IT FOR USER CONFIGURATION!
 // -------------------------------------------------------------------------------------------------------------------------
