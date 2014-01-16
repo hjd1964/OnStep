@@ -114,4 +114,3 @@ char Serial1_read()
   if (c!=0) Serial1_recv_head++; // buffer is 256 bytes so this byte variable wraps automatically
   return c;
 }
-
