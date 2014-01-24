@@ -67,6 +67,8 @@
  *                                       uses Arduino libraries for smaller size and higher performance.
  * 12-29-2013          0.99x3            Renamed variables to better reflect their use.
  * 01-16-2014          0.99x4            Changes to setPark, faster backlash takeup and compatibility with 32 uStep stepper motor drivers
+ * 01-24-2014          0.99x5            Fixed references for reversing HA/Dec directions, added white-space striping to routines in Astro.ino, 
+ *                                       serial1 no-longer ends replys with /r/n in Command.ino 
  *
  *
  * Author: Howard Dutton
@@ -117,8 +119,8 @@
 #include "errno.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "01 16 14"
-#define FirmwareNumber "0.99x4"
+#define FirmwareDate   "01 24 14"
+#define FirmwareNumber "0.99x5"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
