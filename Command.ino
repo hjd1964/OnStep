@@ -791,7 +791,7 @@ void processCommands() {
         sprintf(HEXS,"%02X",cks);
         strcat(reply,HEXS);
 #endif
-        strcat(reply,"#\r\n");
+        strcat(reply,"#");
         Serial1_print(reply);
       }
       }
