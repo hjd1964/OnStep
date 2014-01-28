@@ -69,6 +69,7 @@
  * 01-16-2014          0.99x4            Changes to setPark, faster backlash takeup and compatibility with 32 uStep stepper motor drivers
  * 01-24-2014          0.99x5            Fixed references for reversing HA/Dec directions, added white-space striping to routines in Astro.ino, 
  *                                       serial1 no-longer ends replys with /r/n in Command.ino 
+ * 01-28-2014          0.99x6            Fixed bug in serial1 transmit function
  *
  *
  * Author: Howard Dutton
@@ -119,8 +120,8 @@
 #include "errno.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "01 24 14"
-#define FirmwareNumber "0.99x5"
+#define FirmwareDate   "01 28 14"
+#define FirmwareNumber "0.99x6"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
