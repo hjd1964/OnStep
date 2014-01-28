@@ -94,7 +94,7 @@ void Serial1_print(char data[])
 // Main loop calls this to send characters on their way without interrupts
 boolean Serial1_transmit()
 {
-  if (Serial1_xmit_buffer[Serial_xmit_index]==(char)0) return false;
+  if (Serial1_xmit_buffer[Serial1_xmit_index]==(char)0) return false;
   if ( ( UCSR1A & (1<<UDRE1)) ) { UDR1 = Serial1_xmit_buffer[Serial1_xmit_index]; Serial1_xmit_index++; }
   return true;
 }
