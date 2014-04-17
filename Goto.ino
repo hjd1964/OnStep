@@ -25,6 +25,7 @@ boolean syncEqu(double RA, double Dec) {
   targetDec=round(Dec*(double)stepsPerDegreeDec);
   posDec=targetDec;
   sei();
+  return true;
 #else
   // compute index offsets IH/ID, if they're within reason 
   // actual PosHA/PosDec are the coords of where this really is
@@ -40,7 +41,7 @@ boolean syncEqu(double RA, double Dec) {
   ID=Dec-((double)targetDec/(double)StepsPerDegreeDec);
   sei();
 
-  if ((abs(ID)>30.0) || (abs(IH)>2.0)) { IH=0; ID=0; return false; };
+  if ((abs(ID)>30.0) || (abs(IH)>2.0)) { IH=0; ID=0; return false; } else return true;
 #endif
 }
 
