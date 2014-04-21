@@ -32,7 +32,7 @@ boolean setPark() {
 
     // let it settle into a fixed position, 20 times the sidereal rate at 12 steps per second minimum... 
     // 128/240=0.53S, worst case
-    delay(1000);
+    delay(2000);
 
     // reality check, we should be at the park position
     if ((targetHA!=posHA) || (targetDec!=posDec)) { trackingState=lastTrackingState; return false;  }
