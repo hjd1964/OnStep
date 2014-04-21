@@ -71,6 +71,7 @@
  *                                       serial1 no-longer ends replys with /r/n in Command.ino 
  * 01-28-2014          0.99x6            Fixed bug in serial1 transmit function
  * 04-17-2014          0.99x7            Fixed successful syncEqu() undefined return
+ * 04-21-2014          0.99x8            Set-park delay adjusted to allow for larger backlash values
  *
  *
  * Author: Howard Dutton
@@ -121,8 +122,8 @@
 #include "errno.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "04 17 14"
-#define FirmwareNumber "0.99x7"
+#define FirmwareDate   "04 21 14"
+#define FirmwareNumber "0.99x8"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
