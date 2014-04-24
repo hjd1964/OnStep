@@ -671,7 +671,7 @@ void processCommands() {
 //         Returns: DDDDDD#
      if ((command[0]=='V') && (command[1]=='W')) {
        if (parameter[0]==0) {
-         sprintf(reply,"%06i",StepsPerWormRotation);
+         sprintf(reply,"%06u",StepsPerWormRotation);
          quietReply=true;
        } else commandError=true;
      } else
