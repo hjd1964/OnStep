@@ -133,7 +133,8 @@ byte park() {
         sei();
         
         // now, slew to this target HA,Dec
-        goTo(tempHA,tempDec);
+        byte gotoPierSide=EEPROM.read(EE_pierSide);
+        goToEx(tempHA,tempDec,gotoPierSide);
 
         return 0;
       } else return 1; // no park position saved
