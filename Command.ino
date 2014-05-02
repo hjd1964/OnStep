@@ -24,6 +24,24 @@ void processCommands() {
 // Handles empty and one char replies
       reply[0]=0; reply[1]=0;
 
+//   @ - Parameter read/write
+        if (command[0]=='@') {
+//  :@W??SSSSS#  Write value, address ??
+//         Returns:
+//         1: If value accepted
+//         0: Failure 
+/*          if (command[1]=='W') {
+            if ((parameter[0]=='D') && (parameter[1]=='O')) {
+              _DO=atoi((char*)parameter[2]);
+            } else
+            if (parameter[0]=='P') && (parameter[l]=='D')) {
+              _PD=atoi((char*)parameter[2]);
+            } else commandError=true;
+          } else
+          if (command[1]=='R') {
+          }  else commandError=true;
+*/        } else
+
 //   A - Alignment Commands
       if (command[0]=='A') {
 //  :An#  Start Telescope Manual Alignment Sequence
@@ -72,7 +90,6 @@ void processCommands() {
             // set the IH offset
             // set the ID offset
             if (!syncEqu(newTargetRA,newTargetDec)) { commandError=true; }
-            
           } else 
 #ifdef ALIGN_TWO_AND_THREE_STAR_ON
           if ((alignMode==AlignTwoStar2) || (alignMode==AlignThreeStar2)) {
@@ -807,7 +824,7 @@ boolean buildCommand(char c) {
   }
 
   // ignore spaces/lf/cr, dropping spaces is another tweek to allow compatibility with LX200 protocol
-  if ((c!=(char)32) && (c!=(char)10) && (c!=(char)13)) {
+  if ((c!=(char)32) && (c!=(char)10) && (c!=(char)13) && (c!=(char)6)) {
     command_serial_zero[bufferPtr_serial_zero]=c;
     bufferPtr_serial_zero++;
     command_serial_zero[bufferPtr_serial_zero]=(char)0;
@@ -823,7 +840,7 @@ boolean buildCommand(char c) {
     // checksum the data, for example ":11111126".  I don't include the command frame in the checksum.  The error response is a checksumed null string "00#\r\n" which means re-transmit.
     byte len=strlen(command_serial_zero);
     byte cks=0; for (int cksCount0=1; cksCount0<len-2; cksCount0++) {  cks+=command_serial_zero[cksCount0]; }
-    char chkSum[3]; sprintf(chkSum,"%02X",cks); if (!((chkSum[0]==command_serial_zero[len-2]) && (chkSum[1]==command_serial_zero[len-1]))) { clearCommand_serial_zero();  Serial_print("00#\r\n"); return false; }
+    char chkSum[3]; sprintf(chkSum,"%02X",cks); if (!((chkSum[0]==command_serial_zero[len-2]) && (chkSum[1]==command_serial_zero[len-1]))) { clearCommand_serial_zero();  Serial_print("00#"); return false; }
     --len; command_serial_zero[--len]=0;
 #endif
 
@@ -850,8 +867,13 @@ boolean clearCommand_serial_zero() {
 
 // Build up a command
 boolean buildCommand_serial_one(char c) {
-  // ignore lf/cr
-  if ((c!=(char)10) && (c!=(char)13)) {
+  // (chr)6 is a special status command for the LX200 protocol
+  if ((c==(char)6) && (bufferPtr_serial_zero==0)) {
+    Serial1_print("G#");
+  }
+
+  // ignore spaces/lf/cr, dropping spaces is another tweek to allow compatibility with LX200 protocol
+  if ((c!=(char)32) && (c!=(char)10) && (c!=(char)13) && (c!=(char)6)) {
     command_serial_one[bufferPtr_serial_one]=c;
     bufferPtr_serial_one++;
     command_serial_one[bufferPtr_serial_one]=(char)0;
@@ -867,7 +889,7 @@ boolean buildCommand_serial_one(char c) {
     // checksum the data, as above.  
     byte len=strlen(command_serial_one);
     byte cks=0; for (int cksCount0=1; cksCount0<len-2; cksCount0++) { cks=cks+command_serial_one[cksCount0]; }
-    char chkSum[3]; sprintf(chkSum,"%02X",cks); if (!((chkSum[0]==command_serial_one[len-2]) && (chkSum[1]==command_serial_one[len-1]))) { clearCommand_serial_one(); Serial1_print("00#\r\n"); return false; }
+    char chkSum[3]; sprintf(chkSum,"%02X",cks); if (!((chkSum[0]==command_serial_one[len-2]) && (chkSum[1]==command_serial_one[len-1]))) { clearCommand_serial_one(); Serial1_print("00#"); return false; }
     --len; command_serial_one[--len]=0;
 #endif
 
@@ -879,6 +901,7 @@ boolean buildCommand_serial_one(char c) {
     // the command is either one or two chars in length
     command_serial_one[3]=0;  memmove(command_serial_one,(char *)&command_serial_one[1],3);
 
+// For debugging:
 //    Serial.println(command);
 //    Serial.println(parameter);
 
@@ -935,6 +958,3 @@ void setGuideRate(int g) {
   msMoveHA =1000/(((StepsPerDegreeHA *moveRates[g])/amountMoveHA )/3600);
   msMoveDec=1000/(((StepsPerDegreeDec*moveRates[g])/amountMoveDec)/3600);
 }
-
-
-
