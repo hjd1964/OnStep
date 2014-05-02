@@ -139,6 +139,28 @@ byte goToHor(double *Alt, double *Azm) {
   return goToEqu(RA,Dec);
 }
 
+// moves the mount to a new Hour Angle and Declination (HA,Dec) and on the specified pier side, if possible
+// if not possible, the mount does a normal goto
+byte goToEx(long HASteps, long DecSteps, byte gotoPierSide) {
+  // this only applies if we're not on the correct side
+  if (pierSide!=gotoPierSide) {
+    // if it's possible to do a meridian flip, force it
+    if (pierSide==PierSideEast) {
+      if (HASteps< (minutesPastMeridian*StepsPerDegreeHA/4L)) {
+        pierSide=PierSideFlipEW1;
+        ID=-ID;  // correct the index if we're crossing the meridian
+      }
+    } else
+    if (pierSide==PierSideWest) {
+      if (HASteps>-(minutesPastMeridian*StepsPerDegreeHA/4L)) {
+        pierSide=PierSideFlipWE1; 
+        ID=-ID;  // correct the index if we're crossing the meridian
+      }
+    }
+  }
+  goTo(HASteps,DecSteps);
+}
+
 // moves the mount to a new Hour Angle and Declination (HA,Dec) - both are in steps, all other HA's and Dec's are in Hours and Degrees
 byte goTo(long HASteps, long DecSteps) {
   // make sure we're not already moving somewhere
