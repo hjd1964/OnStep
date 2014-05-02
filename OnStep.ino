@@ -73,7 +73,8 @@
  * 04-17-2014          0.99x7            Fixed successful syncEqu() undefined return
  * 04-21-2014          0.99x8            Set-park delay adjusted to allow for larger backlash values
  * 04-24-2014          0.99x9            Fixed minor bug in :VW# command (PEC stepsPerWormRotation)
- * 05-02-2014          0.99x10           Fixed bug when parking near the meridian
+ * 05-02-2014          0.99x10           Fixed bug when parking near the meridian and
+ *                                       cleaned up serial protocol for better compatability
  *
  *
  * Author: Howard Dutton
@@ -124,8 +125,8 @@
 #include "errno.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "04 24 14"
-#define FirmwareNumber "0.99x9"
+#define FirmwareDate   "05 02 14"
+#define FirmwareNumber "0.99x10"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
