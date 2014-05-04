@@ -75,6 +75,8 @@
  * 04-24-2014          0.99x9            Fixed minor bug in :VW# command (PEC stepsPerWormRotation)
  * 05-02-2014          0.99x10           Fixed bug when parking near the meridian and
  *                                       cleaned up serial protocol for better compatability
+ * 05-04-2014          0.99x11           LX200 Protocol fix, commands returning 1/0 success/failure (or numeric status, for example :MS#) now omit the '#' framing character
+ *                                       this requires updated ASCOM drivers and Hand controller App but brings better compatibility with LX200 protocol software
  *
  *
  * Author: Howard Dutton
@@ -125,8 +127,8 @@
 #include "errno.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "05 02 14"
-#define FirmwareNumber "0.99x10"
+#define FirmwareDate   "05 04 14"
+#define FirmwareNumber "0.99x11"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
