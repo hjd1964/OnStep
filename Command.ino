@@ -6,6 +6,7 @@ boolean serial_one_ready = false;
 
 // process commands
 void processCommands() {
+    boolean supress_frame = false;
 
     if ((Serial_available() > 0) && (!serial_zero_ready)) { serial_zero_ready = buildCommand(Serial_read()); }
     if ((Serial1_available() > 0) && (!serial_one_ready)) { serial_one_ready = buildCommand_serial_one(Serial1_read()); }
@@ -352,27 +353,28 @@ void processCommands() {
 #ifdef ALT_AZM_GOTO_ON
 //  :MA#   Goto the target Alt and Az
 //         Returns:
-//         0#=Goto is Possible
-//         1#=Object below horizon
-//         2#=No object selected
-//         4#=Position unreachable
-//         6#=Outside limits
+//         0=Goto is Possible
+//         1=Object below horizon
+//         2=No object selected
+//         4=Position unreachable
+//         6=Outside limits
       if (command[1]=='A') { 
-        quietReply=true; 
         i=goToHor(&newTargetAlt, &newTargetAzm);
-        reply[0]=i+'0'; reply[1]=0;
+        reply[0]=i+'0'; reply[1]=0; 
+        quietReply=true; 
+        supress_frame=true;
       } else 
 #endif
 //  :Mgdnnnn# Pulse guide command
-//          Return: 0 on failure
-//                  1 on success
+//          Returns: Nothing
       if (command[1]=='g') {
         i=atoi((char *)&parameter[1]); 
         if ( (!errno) && ((i>=0) && (i<=16399)) && (parkStatus==NotParked)) { 
           if ((parameter[0]=='e') || (parameter[0]=='w')) { 
             if (moveDirHA) { cli(); timerRateHA=lastTimerRateHA; sei(); }
             moveDirHA=parameter[0];  moveDurationHA=i;  cli(); lastTimerRateHA=timerRateHA; timerRateHA=moveTimerRateHA; sei();
-          } else
+            quietReply=true;
+         } else
             if ((parameter[0]=='n') || (parameter[0]=='s')) { 
               if (moveDirDec) { cli(); timerRateDec=lastTimerRateDec; sei(); }
               moveDirDec=parameter[0]; 
@@ -384,6 +386,7 @@ void processCommands() {
              timerRateDec=moveTimerRateDec;
  #endif
               sei();
+              quietReply=true;
             } else commandError=true;
         } else commandError=true;
       } else
@@ -419,15 +422,17 @@ void processCommands() {
 
 //  :MS#   Goto the Target Object
 //         Returns:
-//         0#=Goto is Possible
-//         1#=Object below horizon    Outside limits, below the Horizon limit
-//         2#=No object selected      Failure to resolve coordinates
-//         4#=Position unreachable    Not unparked
-//         5#=Busy                    Goto already active
-//         6#=Outside limits          Outside limits, above the Zenith limit
+//         0=Goto is Possible
+//         1=Object below horizon    Outside limits, below the Horizon limit
+//         2=No object selected      Failure to resolve coordinates
+//         4=Position unreachable    Not unparked
+//         5=Busy                    Goto already active
+//         6=Outside limits          Outside limits, above the Zenith limit
       if (command[1]=='S')  {
-        quietReply=true; i=goToEqu(newTargetRA,newTargetDec);
+        i=goToEqu(newTargetRA,newTargetDec);
         reply[0]=i+'0'; reply[1]=0;
+        quietReply=true;
+        supress_frame=true; 
       } else commandError=true;
       
       } else
@@ -534,9 +539,9 @@ void processCommands() {
         i=(int)(parameter[0]-'0');
         if ((i>0) && (i<10)) {
           if (process_command==1) { 
-            Serial_print("1#"); while (Serial_transmit()); delay(20); Serial_Init(baudRate[i]);
+            Serial_print("1"); while (Serial_transmit()); delay(20); Serial_Init(baudRate[i]);
           } else {
-            Serial1_print("1#"); while (Serial1_transmit()); delay(20); Serial1_Init(baudRate[i]); 
+            Serial1_print("1"); while (Serial1_transmit()); delay(20); Serial1_Init(baudRate[i]); 
           }
           quietReply=true; 
         } else commandError=true;
@@ -783,7 +788,8 @@ void processCommands() {
       
       if (!quietReply) {
         if (commandError) reply[0]='0'; else reply[0]='1';
-        reply[1]=0; 
+        reply[1]=0;
+        supress_frame=true;
       }
       
       if (strlen(reply)>0) {
@@ -796,7 +802,7 @@ void processCommands() {
         sprintf(HEXS,"%02X",cks);
         strcat(reply,HEXS);
 #endif
-        strcat(reply,"#");
+        if (!supress_frame) strcat(reply,"#");
         Serial_print(reply);
       } 
 
@@ -808,7 +814,7 @@ void processCommands() {
         sprintf(HEXS,"%02X",cks);
         strcat(reply,HEXS);
 #endif
-        strcat(reply,"#");
+        if (!supress_frame) strcat(reply,"#");
         Serial1_print(reply);
       }
       }
@@ -832,7 +838,6 @@ boolean buildCommand(char c) {
   }
   
   if (c=='#') {
-
     // validate the command frame, normal command
     if ((bufferPtr_serial_zero>1) && (command_serial_zero[0]==':') && (command_serial_zero[bufferPtr_serial_zero-1]=='#')) { command_serial_zero[bufferPtr_serial_zero-1]=0; } else { clearCommand_serial_zero(); return false; }
 
