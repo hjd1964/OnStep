@@ -77,6 +77,7 @@
  *                                       cleaned up serial protocol for better compatability
  * 05-04-2014          0.99x11           LX200 Protocol fix, commands returning 1/0 success/failure (or numeric status, for example :MS#) now omit the '#' framing character
  *                                       this requires updated ASCOM drivers and Hand controller App but brings better compatibility with LX200 protocol software
+ * 05-05-2014          0.99x12           Added fast PEC readout command ":VrNNNN#"
  *
  *
  * Author: Howard Dutton
@@ -127,8 +128,8 @@
 #include "errno.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "05 04 14"
-#define FirmwareNumber "0.99x11"
+#define FirmwareDate   "05 05 14"
+#define FirmwareNumber "0.99x12"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
