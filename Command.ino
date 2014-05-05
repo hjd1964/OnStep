@@ -688,6 +688,27 @@ void processCommands() {
        } else commandError=true;
        quietReply=true;
      } else
+//  :VrNNNN#
+//         Read out RA PEC ten byte frame in hex format starting at worm segment NNNN
+//         Returns: x0x1x2x3x4x5x6x7x8x9#
+//         Rate Adjustment factor for worm segments. PecRate = Steps +/- for each 1 second segment, hex one byte integer (PecRate=b-128)
+//         leave a delay of about 10ms between calls
+     if ((command[0]=='V') && (command[1]=='r')) {
+       i=atoi(parameter);
+       if ( (!errno) && ((i>=0) && (i<PECBufferSize))) {
+         int j=0;
+         byte b;
+         char x[3]="  ";
+         for (j=0; j<10; j++) {
+           if (i+j<PECBufferSize) b=PEC_buffer[i+j]; else b=128;
+           
+           sprintf(x,"%02X",b);
+           strcat(reply,x);
+         }
+         strcat(reply,"#");
+       } else commandError=true;
+       quietReply=true;
+     } else
 //   V - PEC Readout StepsPerWormRotation
 //  :VW#
 //         Returns: DDDDDD#
