@@ -2,7 +2,7 @@
  * Title       On-Step
  * by          Howard Dutton
  *
- * Copyright (C) 2013 Howard Dutton
+ * Copyright (C) 2013, 2014 Howard Dutton
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,15 +69,17 @@
  * 01-16-2014          0.99x4            Changes to setPark, faster backlash takeup and compatibility with 32 uStep stepper motor drivers
  * 01-24-2014          0.99x5            Fixed references for reversing HA/Dec directions, added white-space striping to routines in Astro.ino, 
  *                                       serial1 no-longer ends replys with /r/n in Command.ino 
- * 01-28-2014          0.99x6            Fixed bug in serial1 transmit function
+ * 01-28-2014          0.99x6            Fixed bug in serial1 transmit function *
  * 04-17-2014          0.99x7            Fixed successful syncEqu() undefined return
  * 04-21-2014          0.99x8            Set-park delay adjusted to allow for larger backlash values
  * 04-24-2014          0.99x9            Fixed minor bug in :VW# command (PEC stepsPerWormRotation)
- * 05-02-2014          0.99x10           Fixed bug when parking near the meridian and
- *                                       cleaned up serial protocol for better compatability
+ * 05-02-2014          0.99x10           Fixed bug when parking near the meridian and cleaned up serial protocol for better compatability
  * 05-04-2014          0.99x11           LX200 Protocol fix, commands returning 1/0 success/failure (or numeric status, for example :MS#) now omit the '#' framing character
  *                                       this requires updated ASCOM drivers and Hand controller App but brings better compatibility with LX200 protocol software
  * 05-05-2014          0.99x12           Added fast PEC readout command ":VrNNNN#"
+ * 05-22-2014          0.99x13           Added guiding to status command ":GU#"
+ * 05-29-2014          0.99x14           Added feature. First-time uploads of OnStep will burn defaults into EEPROM automatically now
+ *                                       *** this will overwrite your parking info and goto limits (once) when upgrading to this version unless you set INIT_KEY to true below ***
  *
  *
  * Author: Howard Dutton
@@ -128,8 +130,8 @@
 #include "errno.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "05 05 14"
-#define FirmwareNumber "0.99x12"
+#define FirmwareDate   "05 29 14"
+#define FirmwareNumber "0.99x14"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -161,10 +163,9 @@
 #define CHKSUM0_OFF     // default _OFF: required for OnStep ASCOM driver
 #define CHKSUM1_ON      // default _ON:  required for OnStep Android Handcontroller
 
-// this initializes a host of settings in EEPROM, OnStep won't work correctly if it isn't run once and then turned off
-#define INIT_OFF        // default _OFF: set to _ON the first time you upload the onstep firmware to initialize EEPROM (then turn it off again)
-                        // even with this you still need to set your latitude, longitude, timezone, local time, and date (as a minimum)
-                        // see the command reference on my site (stellarjourney.com)
+// forces initialialization of a host of settings in EEPROM. OnStep does this automatically, most likely, you will want to leave this alone
+#define INIT_KEY false    // set to true to keep automatic initilization from happening.  This is a one-time operation... upload to the Arduino, then set to false and upload again
+#define initKey 915307547 // unique identifier for the current initialization format, do not change
 
 // ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
 #define MaxRate             (96)*16  // this is the minimum number of (16MHz) clocks between micro-steps (minimum is around 16, 
@@ -570,49 +571,56 @@ void setup() {
   SET(Dec5vPORT, Dec5vBit);
 #endif  
 
-  // EEPROM init code here to help get up and running quickly
-  #ifdef INIT_ON
-  // init the site information, lat/long/tz/name
-  EEPROM.write(EE_currentSite,0);
-  latitude=0; longitude=0;
-  for (int l=0; l<4; l++) {
-    EEPROM_writeQuad(EE_sites+(l)*25+0,(byte*)&latitude);
-    EEPROM_writeQuad(EE_sites+(l)*25+4,(byte*)&longitude);
-    EEPROM.write(EE_sites+(l)*25+8,128);
-    EEPROM.write(EE_sites+(l)*25+9,0);
-  }
-
-  // init the date and time January 1, 2013. 0 hours LMT
-  JD=2456293.5;
-  LMT=0.0;
-  EEPROM_writeQuad(EE_JD,(byte*)&JD);
-  EEPROM_writeQuad(EE_LMT,(byte*)&LMT);
-
-  // init the min and max altitude
-  minAlt=-10;
-  maxAlt=85;
-  EEPROM.write(EE_minAlt,minAlt+128);
-  EEPROM.write(EE_maxAlt,maxAlt);
-
-  // init (clear) the backlash amounts
-  EEPROM_writeInt(EE_backlashDec,0);
-  EEPROM_writeInt(EE_backlashHA,0);
-
-  // init the PEC status, clear the index and buffer
-  PECrecord_index=0;
-  EEPROM.write(EE_PECstatus,IgnorePEC);
-  EEPROM.write(EE_PECrecorded,false);
-  for (int l=0; l<PECBufferSize; l++) EEPROM.write(EE_PECindex+l,128);
-  EEPROM_writeQuad(EE_PECrecord_index,(byte*)&PECrecord_index); 
+  // EEPROM automatic initialization
+  long int autoInitKey = initKey;
+  long int thisAutoInitKey;
+  if (INIT_KEY) EEPROM_writeQuad(EE_autoInitKey,(byte*)&autoInitKey);
+  EEPROM_readQuad(EE_autoInitKey,(byte*)&thisAutoInitKey);
+  if (autoInitKey!=thisAutoInitKey) {
+    // init the site information, lat/long/tz/name
+    EEPROM.write(EE_currentSite,0);
+    latitude=0; longitude=0;
+    for (int l=0; l<4; l++) {
+      EEPROM_writeQuad(EE_sites+(l)*25+0,(byte*)&latitude);
+      EEPROM_writeQuad(EE_sites+(l)*25+4,(byte*)&longitude);
+      EEPROM.write(EE_sites+(l)*25+8,128);
+      EEPROM.write(EE_sites+(l)*25+9,0);
+    }
   
-  // init the Park status
-  EEPROM.write(EE_parkSaved,false);
-  EEPROM.write(EE_parkStatus,NotParked);
-
-  // init the sidereal tracking rate, use this once - then issue the T+ and T- commands to fine tune
-  // 1/16uS resolution timer, ticks per sidereal second
-  EEPROM_writeQuad(EE_siderealInterval,(byte*)&masterSiderealInterval);
-  #endif
+    // init the date and time January 1, 2013. 0 hours LMT
+    JD=2456293.5;
+    LMT=0.0;
+    EEPROM_writeQuad(EE_JD,(byte*)&JD);
+    EEPROM_writeQuad(EE_LMT,(byte*)&LMT);
+  
+    // init the min and max altitude
+    minAlt=-10;
+    maxAlt=85;
+    EEPROM.write(EE_minAlt,minAlt+128);
+    EEPROM.write(EE_maxAlt,maxAlt);
+  
+    // init (clear) the backlash amounts
+    EEPROM_writeInt(EE_backlashDec,0);
+    EEPROM_writeInt(EE_backlashHA,0);
+  
+    // init the PEC status, clear the index and buffer
+    PECrecord_index=0;
+    EEPROM.write(EE_PECstatus,IgnorePEC);
+    EEPROM.write(EE_PECrecorded,false);
+    for (int l=0; l<PECBufferSize; l++) EEPROM.write(EE_PECindex+l,128);
+    EEPROM_writeQuad(EE_PECrecord_index,(byte*)&PECrecord_index); 
+    
+    // init the Park status
+    EEPROM.write(EE_parkSaved,false);
+    EEPROM.write(EE_parkStatus,NotParked);
+  
+    // init the sidereal tracking rate, use this once - then issue the T+ and T- commands to fine tune
+    // 1/16uS resolution timer, ticks per sidereal second
+    EEPROM_writeQuad(EE_siderealInterval,(byte*)&masterSiderealInterval);
+    
+    // finally, stop the init from happening again
+    EEPROM_writeQuad(EE_autoInitKey,(byte*)&autoInitKey);
+  }
 
   // this sets the sidereal timer, controls the tracking speed so that the mount moves precisely with the stars
   EEPROM_readQuad(EE_siderealInterval,(byte*)&masterSiderealInterval);
