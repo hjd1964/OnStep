@@ -282,6 +282,7 @@ void processCommands() {
         char *parkStatusCh = "pIPF";           reply[i++]=parkStatusCh[parkStatus]; // not [p]arked, parking [I]n-progress, [P]arked, Park [F]ailed
         if (PECrecorded)                       reply[i++]='R';
         if (atHome)                            reply[i++]='H'; 
+        if ((moveDirHA!=0) || (moveDirDec!=0)) reply[i++]='G';
         reply[i++]=0;
         quietReply=true;
       } else 
