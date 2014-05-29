@@ -9,4 +9,4 @@ Since I aquired an Losmandy G11 mount without any goto provision I decided to cr
 
 OnStep is a computerized goto system for stepper motor equipped GEM mounts. It was designed, from the beginning, as a more or less general purpose system and provisions were made in the firmware to allow for use on other-than-G11 GEM mounts. It uses a Meade Autostar/LX200 like computer command set with a few extensions to suit hand-controllerless operation.
 
-The OnStep works through either an ASCOM driver* or a Android (4.0 or later) Phone/Tablet (with Bluetooth).
+The OnStep works through either an ASCOM driver* or a Android (2.3.3 or later) Phone/Tablet (with Bluetooth).
