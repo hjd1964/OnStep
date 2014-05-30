@@ -507,6 +507,8 @@ volatile int     blDec        = 0;
 
 #define EE_siderealInterval 88
 
+#define EE_autoInitKey 96
+
 // site index: 100-199
 // 100..103 latitude  1  ((index 1-1)*25+100)
 // 104..107 longitude 1
