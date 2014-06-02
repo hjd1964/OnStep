@@ -79,7 +79,9 @@
  * 05-05-2014          0.99x12           Added fast PEC readout command ":VrNNNN#"
  * 05-22-2014          0.99x13           Added guiding to status command ":GU#"
  * 05-29-2014          0.99x14           Added feature. First-time uploads of OnStep will burn defaults into EEPROM automatically now
- *                                       *** this will overwrite your parking info and goto limits (once) when upgrading to this version unless you set INIT_KEY to true below ***
+ *                                       *** this will overwrite your parking info, goto limits, etc. (once) when upgrading to this version unless you set INIT_KEY to true  ***
+ *                                       *** if upgrading from a prior experimental branch version, set INIT_KEY to true and uploaded then back to false and upload again    ***
+ *                                       *** those uploading for the first time or upgrading from the main branch should just leave INIT_KEY alone (false)                   ***
  *
  *
  * Author: Howard Dutton
@@ -161,7 +163,7 @@
 
 // these turn on and off checksum error correction on the serial ports
 #define CHKSUM0_OFF     // default _OFF: required for OnStep ASCOM driver
-#define CHKSUM1_ON      // default _ON:  required for OnStep Android Handcontroller
+#define CHKSUM1_OFF     // default _OFF: required for OnStep Controller2 Android App (and others)
 
 // forces initialialization of a host of settings in EEPROM. OnStep does this automatically, most likely, you will want to leave this alone
 #define INIT_KEY false    // set to true to keep automatic initilization from happening.  This is a one-time operation... upload to the Arduino, then set to false and upload again
