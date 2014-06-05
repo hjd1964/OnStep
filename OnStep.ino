@@ -82,6 +82,7 @@
  *                                       *** this will overwrite your parking info, goto limits, etc. (once) when upgrading to this version unless you set INIT_KEY to true  ***
  *                                       *** if upgrading from a prior experimental branch version, set INIT_KEY to true and uploaded then back to false and upload again    ***
  *                                       *** those uploading for the first time or upgrading from the main branch should just leave INIT_KEY alone (false)                   ***
+ * 06-05-2014          0.99x15           Fixed RESCUE_MODE code, thanks to N_DD for pointing this out.
  *
  *
  * Author: Howard Dutton
@@ -132,8 +133,8 @@
 #include "errno.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "05 29 14"
-#define FirmwareNumber "0.99x14"
+#define FirmwareDate   "06 05 14"
+#define FirmwareNumber "0.99x15"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
