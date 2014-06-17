@@ -146,7 +146,7 @@ void Serial1_Init(unsigned int baud) {
 }
 
 void Serial1_print(const char data[]) {
-  Serial.print(data);
+  Serial1.print(data);
 }
 
 boolean Serial1_transmit() {
@@ -154,11 +154,11 @@ boolean Serial1_transmit() {
 }
 
 boolean Serial1_available() {
-  return Serial.available();
+  return Serial1.available();
 }
 
 char Serial1_read() {
-  return Serial.read();
+  return Serial1.read();
 }
 
 #endif
