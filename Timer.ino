@@ -1,6 +1,17 @@
+#if defined(__arm__) && defined(TEENSYDUINO)
+IntervalTimer itimer1;
+IntervalTimer itimer3;
+IntervalTimer itimer4;
+#define ISR(f) void f (void)
+void TIMER1_COMPA_vect(void);
+void TIMER3_COMPA_vect(void);
+void TIMER4_COMPA_vect(void);
+#endif
+
 //--------------------------------------------------------------------------------------------------
 // set timer1 to rate (in microseconds*16)
 void Timer1SetRate(long rate) {
+#if defined(__AVR__)
   TCCR1B = 0; TCCR1A = 0;  
   TIMSK1 = 0;
 
@@ -21,10 +32,14 @@ void Timer1SetRate(long rate) {
   TCCR1B |= (1 << WGM12);
   // timer compare interrupt enable
   TIMSK1 |= (1 << OCIE1A);
+#elif defined(__arm__) && defined(TEENSYDUINO)
+  itimer1.begin(TIMER1_COMPA_vect, (float)rate * 0.0625);
+#endif
 }
 // set timer3 to rate (in microseconds*16)
 volatile long nextHArate;
 void Timer3SetRate(long rate) {
+#if defined(__AVR__)
   // set compare match register to desired timer count:
   if (rate<65536) { TCCR3B = (1 << WGM12) | (1 << CS10); } else {
   rate=rate/8;
@@ -36,11 +51,15 @@ void Timer3SetRate(long rate) {
   rate=rate/4;
   if (rate<65536) { TCCR3B = (1 << WGM12) | (1 << CS10) | (1 << CS12);  
   }}}}}
+#elif defined(__arm__) && defined(TEENSYDUINO)
+  itimer3.begin(TIMER3_COMPA_vect, (float)rate * 0.0625);
+#endif
   nextHArate=rate-1;
 }
 // set timer4 to rate (in microseconds*16)
 volatile long nextDErate;
 void Timer4SetRate(long rate) {
+#if defined(__AVR__)
   // set compare match register to desired timer count:
   if (rate<65536) { TCCR4B = (1 << WGM12) | (1 << CS10); } else {
   rate=rate/8;
@@ -52,6 +71,9 @@ void Timer4SetRate(long rate) {
   rate=rate/4;
   if (rate<65536) {  TCCR4B = (1 << WGM12) | (1 << CS10) | (1 << CS12);
   }}}}}
+#elif defined(__arm__) && defined(TEENSYDUINO)
+  itimer4.begin(TIMER4_COMPA_vect, (float)rate * 0.0625);
+#endif
   nextDErate=rate-1;
 }
 
@@ -116,7 +138,9 @@ ISR(TIMER3_COMPA_vect)
 
     SET(HAStepPORT, HAStepBit);
   }
+#if defined(__AVR__)
   OCR3A = nextHArate;
+#endif
 }
 
 ISR(TIMER4_COMPA_vect)
@@ -145,7 +169,9 @@ ISR(TIMER4_COMPA_vect)
     SET(DecStepPORT, DecStepBit);
   }
 
+#if defined(__AVR__)
   OCR4A = nextDErate;
+#endif
 }
 
 // UART Receive Complete Interrupt Handler for Serial0

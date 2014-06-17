@@ -377,7 +377,7 @@ boolean atHome           = false;
 boolean homeMount        = false;
 
 // Command processing -------------------------------------------------------------------------------------------------------
-#define F_CPU 16000000UL
+//#define F_CPU 16000000UL  // this is automatically defined by Arduino
 #define BAUD 9600
 
 boolean commandError     = false;
@@ -548,6 +548,7 @@ byte PEC_buffer[PECBufferSize];
 
 void setup() {
   // init. the timers that handle RA and Dec
+#if defined(__AVR__)
   TCCR3B = 0; TCCR3A = 0;
   TIMSK3 = (1 << OCIE3A);
   OCR3A=32767;
@@ -555,6 +556,7 @@ void setup() {
   TCCR4B = 0; TCCR4A = 0;
   TIMSK4 = (1 << OCIE4A);
   OCR4A=32767;
+#endif
 
   // the following could be done with register writes to save flash memory
   pinMode(HAStepPin, OUTPUT);        // initialize the stepper control pins RA
