@@ -30,7 +30,7 @@ void Serial_Init(unsigned int baud) {
 }
 
 // Loads up a string to send
-void Serial_print(char data[])
+void Serial_print(const char data[])
 {
   strcpy(Serial_xmit_buffer,data);
   Serial_xmit_index=0;
@@ -87,7 +87,7 @@ void Serial1_Init(unsigned int baud) {
 }
 
 // Loads up a string to sen
-void Serial1_print(char data[])
+void Serial1_print(const char data[])
 {
   strcpy(Serial1_xmit_buffer,data);
   Serial1_xmit_index=0;
@@ -125,7 +125,7 @@ void Serial_Init(unsigned int baud) {
   Serial.begin(baud);
 }
 
-void Serial_print(char data[]) {
+void Serial_print(const char data[]) {
   Serial.print(data);
 }
 
@@ -145,7 +145,7 @@ void Serial1_Init(unsigned int baud) {
   Serial1.begin(baud);
 }
 
-void Serial1_print(char data[]) {
+void Serial1_print(const char data[]) {
   Serial.print(data);
 }
 

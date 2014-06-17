@@ -247,7 +247,7 @@ double julian(int Year, int Month, int Day) {
 }
 
 // converts Julian day number to Gregorian date (Y,M,D)
-double greg(double JulianDay, int *Year, int *Month, int *Day) {
+void greg(double JulianDay, int *Year, int *Month, int *Day) {
   double A,B,C,D,D1,E,F,G,I;
 
   JulianDay=JulianDay+0.5;

@@ -141,7 +141,7 @@ byte goToHor(double *Alt, double *Azm) {
 
 // moves the mount to a new Hour Angle and Declination (HA,Dec) and on the specified pier side, if possible
 // if not possible, the mount does a normal goto
-byte goToEx(long HASteps, long DecSteps, byte gotoPierSide) {
+void goToEx(long HASteps, long DecSteps, byte gotoPierSide) {
   // this only applies if we're not on the correct side
   if (pierSide!=gotoPierSide) {
     // if it's possible to do a meridian flip, force it
