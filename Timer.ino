@@ -174,6 +174,7 @@ ISR(TIMER4_COMPA_vect)
 #endif
 }
 
+#if defined(__AVR__)
 // UART Receive Complete Interrupt Handler for Serial0
 ISR(USART0_RX_vect)  {
   Serial_recv_buffer[Serial_recv_tail]=UDR0; 
@@ -185,3 +186,4 @@ ISR(USART1_RX_vect)  {
   Serial1_recv_buffer[Serial1_recv_tail]=UDR1; 
   Serial1_recv_tail++; // buffer is 256 bytes so this byte variable wraps automatically
 }
+#endif

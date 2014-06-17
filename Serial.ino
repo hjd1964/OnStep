@@ -2,6 +2,8 @@
 // Communication routines for Serial0 and Serial1
 // these are more compact and faster than the Arduino provided one's
 
+#if defined(__AVR__)
+
 void Serial_Init(unsigned int baud) {
   unsigned int ubrr=F_CPU/16/baud-1;
 
@@ -114,3 +116,49 @@ char Serial1_read()
   if (c!=0) Serial1_recv_head++; // buffer is 256 bytes so this byte variable wraps automatically
   return c;
 }
+
+
+#else  // on non-AVR platforms, try to use the built-in serial stuff...
+
+
+void Serial_Init(unsigned int baud) {
+  Serial.begin(baud);
+}
+
+void Serial_print(char data[]) {
+  Serial.print(data);
+}
+
+boolean Serial_transmit() {
+  return false;
+}
+
+boolean Serial_available() {
+  return Serial.available();
+}
+
+char Serial_read() {
+  return Serial.read();
+}
+
+void Serial1_Init(unsigned int baud) {
+  Serial1.begin(baud);
+}
+
+void Serial1_print(char data[]) {
+  Serial.print(data);
+}
+
+boolean Serial1_transmit() {
+  return false;
+}
+
+boolean Serial1_available() {
+  return Serial.available();
+}
+
+char Serial1_read() {
+  return Serial.read();
+}
+
+#endif
