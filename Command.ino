@@ -279,7 +279,7 @@ void processCommands() {
       if (command[1]=='U')  { 
         i=0;
         if (trackingState!=TrackingMoveTo)     reply[i++]='N';
-        char *parkStatusCh = "pIPF";           reply[i++]=parkStatusCh[parkStatus]; // not [p]arked, parking [I]n-progress, [P]arked, Park [F]ailed
+        const char *parkStatusCh = "pIPF";     reply[i++]=parkStatusCh[parkStatus]; // not [p]arked, parking [I]n-progress, [P]arked, Park [F]ailed
         if (PECrecorded)                       reply[i++]='R';
         if (atHome)                            reply[i++]='H'; 
         if ((moveDirHA!=0) || (moveDirDec!=0)) reply[i++]='G';
@@ -469,7 +469,7 @@ void processCommands() {
             EEPROM_writeQuad(EE_PECrecord_index,(byte*)&PECrecord_index); 
           } else
           // Status is one of "IpPrR" (I)gnore, get ready to (p)lay, (P)laying, get ready to (r)ecord, (R)ecording
-          if (parameter[1]=='?') { char *PECstatusCh = PECStatusString; reply[0]=PECstatusCh[PECstatus]; reply[1]=0; } else { quietReply=false; commandError=true; }
+          if (parameter[1]=='?') { const char *PECstatusCh = PECStatusString; reply[0]=PECstatusCh[PECstatus]; reply[1]=0; } else { quietReply=false; commandError=true; }
         } else commandError=true;
       } else
 

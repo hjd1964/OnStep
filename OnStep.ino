@@ -308,6 +308,8 @@ int    maxAlt;                                    // the maximum altitude, in de
                            // Pin GND (GND)
 
 // defines for direct port control
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+
 #define LEDposBit  5       // Pin 8
 #define LEDposPORT PORTH   //
 #define LEDnegBit  6       // Pin 9
@@ -328,6 +330,32 @@ int    maxAlt;                                    // the maximum altitude, in de
 #define HA5vPORT   PORTB   //
 #define HAStepBit  7       // Pin 13
 #define HAStepPORT PORTB   //
+
+#else
+
+#define LEDposBit  0       // Pin 8
+#define LEDposPORT PORTB   //
+#define LEDnegBit  1       // Pin 9
+#define LEDnegPORT PORTB   //
+
+#define DecDirBit  4       // Pin 4
+#define DecDirPORT PORTD   //
+#define Dec5vBit   5       // Pin 5
+#define Dec5vPORT  PORTD   //
+#define DecStepBit 6       // Pin 6
+#define DecStepPORT PORTD  //
+#define DecGNDBit  7       // Pin 7
+#define DecGNDPORT PORTD   //
+
+#define HADirBit   3       // Pin 11
+#define HADirPORT  PORTB   //
+#define HA5vBit    4       // Pin 12
+#define HA5vPORT   PORTB   //
+#define HAStepBit  5       // Pin 13
+#define HAStepPORT PORTB   //
+
+#endif
+
 
 #define DecDirEInit      HIGH
 #define DecDirWInit      LOW
@@ -377,7 +405,7 @@ boolean atHome           = false;
 boolean homeMount        = false;
 
 // Command processing -------------------------------------------------------------------------------------------------------
-#define F_CPU 16000000UL
+//#define F_CPU 16000000UL  // this is automatically defined by Arduino
 #define BAUD 9600
 
 boolean commandError     = false;
@@ -548,6 +576,7 @@ byte PEC_buffer[PECBufferSize];
 
 void setup() {
   // init. the timers that handle RA and Dec
+#if defined(__AVR__)
   TCCR3B = 0; TCCR3A = 0;
   TIMSK3 = (1 << OCIE3A);
   OCR3A=32767;
@@ -555,6 +584,7 @@ void setup() {
   TCCR4B = 0; TCCR4A = 0;
   TIMSK4 = (1 << OCIE4A);
   OCR4A=32767;
+#endif
 
   // the following could be done with register writes to save flash memory
   pinMode(HAStepPin, OUTPUT);        // initialize the stepper control pins RA
