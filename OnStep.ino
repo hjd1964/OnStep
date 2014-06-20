@@ -1007,12 +1007,11 @@ void loop() {
 */
 
 /*
-    // this is useful checking the timing of milli
-    static unsigned int sc=0;
+    // this is useful checking the timing of the sidereal clock
     char temp[80];
-    sc++; sc=sc%60;
-    sprintf(temp,"milli=%i, lst=%i\r\n",sc,lst/100);
+    sprintf(temp,"lst_offset: %d\r\n",lst-lst_now);
     Serial1_print(temp);
+    Serial1_transmit();
 */
 
 /*
