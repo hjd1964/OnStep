@@ -267,9 +267,15 @@ void processCommands() {
 //         The Sidereal Time as an ASCII Sexidecimal value in 24 hour format
       if (command[1]=='S')  { i=highPrecision; highPrecision=true; if (!doubleToHms(reply,&LST)) commandError=true; else quietReply=true; highPrecision=i; } else 
 //  :GT#   Get tracking rate
-//         Returns: TT#
-//         Returns "60#" if the telescope is tracking at the sidereal rate, "0#" otherwise
-      if (command[1]=='T')  { if (trackingState==TrackingSidereal) { reply[0]='6'; reply[1]='0'; reply[2]=0; } else { reply[0]='0'; reply[1]=0; } quietReply=true; } else 
+//         Returns: dd.ddddd# (OnStep returns more decimal places than LX200 standard)
+//         Returns the tracking rate if siderealTracking, 0.0 otherwise
+      if (command[1]=='T')  {
+        if (trackingState==TrackingSidereal) f=(60.0/(siderealInterval/HzCf))*60.0; else f=0.0;
+        char temp[10];
+        dtostrf(f,0,5,temp);
+        strcpy(reply,temp);
+        quietReply=true; 
+      } else 
 //  :Gt#   Get Current Site Latitude
 //         Returns: sDD*MM#
 //         The latitude of the current site. Positive for North latitudes
@@ -634,15 +640,19 @@ void processCommands() {
 //          Return: 0 on failure
 //                  1 on success
       if (command[1]=='t')  { i=highPrecision; highPrecision=false; if (!dmsToDouble(&latitude,parameter,true)) commandError=true; else EEPROM_writeQuad(100+(currentSite)*25+0,(byte*)&latitude); highPrecision=i; } else 
-//  :STtt#
-//          Sets the current tracking rate to tt hertz, two values are valid "60" and "0".
+//  :STdd.ddddd#
 //          Return: 0 on failure
 //                  1 on success
       if (command[1]=='T')  { 
         if ((trackingState==TrackingSidereal) || (trackingState==TrackingNone)) {
-          if ((parameter[2]==0) && (parameter[0]=='6') && (parameter[1]=='0')) trackingState = TrackingSidereal; else
-            if ((parameter[1]==0) && (parameter[0]=='0')) trackingState = TrackingNone; else
-              commandError=true;
+          f=atof(parameter);
+          if ( (!errno) && ((f>=30.0) && (f<90.0) || (f==0.0))) {
+            if (f==0.0) { 
+              trackingState = TrackingNone; 
+            } else {
+              siderealInterval=HzCf*((60.0/f)*60.0);
+            }
+          } else commandError=true;
         } else commandError=true;
       } else
 //  :SzDDD*MM#
@@ -655,15 +665,29 @@ void processCommands() {
       commandError=true;
       } else 
 //   T - Tracking Commands
-//  :T+#   Track faster by 0.0001 second/second (100uS)
-//  :T-#   Track slower by 0.0001 second/second (100uS)
+//  :T+#   Track faster by 0.1 Hertz (I use a fifth of the LX200 standard)
+//  :T-#   Track slower by 0.1 Hertz
+//  :TS#   Track rage solar
+//  :TL#   Track rate lunar
+//  :TQ#   Track rate default
+//  :Te#   Tracking enable  (OnStep only, replies 0/1)
+//  :Td#   Tracking disable (OnStep only, replies 0/1)
 //         Returns: Nothing
      if (command[0]=='T') {
-       if (command[1]=='+') siderealInterval-=16*100;
-       if (command[1]=='-') siderealInterval+=16*100;
-       EEPROM_writeQuad(EE_siderealInterval,(byte*)&siderealInterval);
-       Timer1SetRate(siderealInterval/100);
-       quietReply=true;
+       if (command[1]=='+') siderealInterval-=HzCf*0.02; else
+       if (command[1]=='-') siderealInterval+=HzCf*0.02; else
+       if (command[1]=='S') siderealInterval =HzCf*60.0; else                         // solar tracking rate
+       if (command[1]=='L') siderealInterval =HzCf*((60.0/57.9)*60.0); else           // lunar tracking rate
+       if (command[1]=='Q') siderealInterval =HzCf*((60.0/60.16427479)*60.0); else    // default tracking rate
+       if ((command[1]=='e') && (trackingState==TrackingNone)) trackingState=TrackingSidereal; else
+       if ((command[1]=='d') && (trackingState==TrackingSidereal)) trackingState=TrackingNone; else
+         commandError=true;
+
+       if ((!commandError) && (command[1]!='e') && (command[1]!='d')) {
+         EEPROM_writeQuad(EE_siderealInterval,(byte*)&siderealInterval);
+         Timer1SetRate(siderealInterval/100);
+         quietReply=true;
+       }
      } else
      
 //   U - Precision Toggle
