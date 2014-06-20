@@ -659,9 +659,10 @@ void processCommands() {
 //  :T-#   Track slower by 0.0001 second/second (100uS)
 //         Returns: Nothing
      if (command[0]=='T') {
-       if (command[1]=='+') masterSiderealInterval-=16*100;
-       if (command[1]=='-') masterSiderealInterval+=16*100;
-       EEPROM_writeQuad(EE_siderealInterval,(byte*)&masterSiderealInterval);
+       if (command[1]=='+') SiderealInterval-=16*100;
+       if (command[1]=='-') SiderealInterval+=16*100;
+       EEPROM_writeQuad(EE_siderealInterval,(byte*)&SiderealInterval);
+       Timer1SetRate(siderealInterval/100);
        quietReply=true;
      } else
      
