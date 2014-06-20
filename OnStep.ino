@@ -83,6 +83,7 @@
  *                                       *** if upgrading from a prior experimental branch version, set INIT_KEY to true and uploaded then back to false and upload again    ***
  *                                       *** those uploading for the first time or upgrading from the main branch should just leave INIT_KEY alone (false)                   ***
  * 06-05-2014          0.99x15           Fixed RESCUE_MODE code, thanks to N_DD for pointing this out.
+ * 06-20-2014          0.99b16           Merged Paul Stoffregen's Teensy3.1 support code
  *
  *
  * Author: Howard Dutton
