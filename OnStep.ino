@@ -87,7 +87,8 @@
  * 06-20-2014          0.99b17           Removed redundant legacy clock sync code, fixed T+/T- commands writing long SiderealInterval as an int into EEPROM
  *                                       reworked interrupt initialization code, added Paul's suggested interrupt prioritization code
  *                                       added 2uS delay to Timer3/4 ISR's to keep stepper drivers, etc. in spec. also switched to fixed prescaler in Timer3/4 on AVR
- *                                       fixed abortSlew bug in MoveTo.  changed pins for RA stepper on Teensy.  added support for LX200 like commands to get/set tracking rate
+ *                                       fixed abortSlew bug in MoveTo.  changed pins for RA stepper on Teensy.  added support for LX200 like commands to get/set 
+ *                                       tracking rate (this very slightly breaks OnStep's ASCOM driver and requires driver v1.16 to work properly.)
  *
  *
  * Author: Howard Dutton
