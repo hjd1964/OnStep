@@ -84,6 +84,7 @@
  *                                       *** those uploading for the first time or upgrading from the main branch should just leave INIT_KEY alone (false)                   ***
  * 06-05-2014          0.99x15           Fixed RESCUE_MODE code, thanks to N_DD for pointing this out.
  * 06-20-2014          0.99b16           Merged Paul Stoffregen's Teensy3.1 support code
+ * 06-20-2014          0.99b17           Removed redundant legacy clock sync code, fixed T+/T- commands writing long SiderealInterval as an int into EEPROM
  *
  *
  * Author: Howard Dutton
@@ -990,22 +991,12 @@ void loop() {
     // naturally, were really working with a single.  we should have, just barely, enough significant digits to get us through a day
     unsigned long lst_now=lst_start+round( (double)((tempMilli-lst_mS_start)/10.0) * 1.00273790935);
 
-    // the "master" clock is millis(), due to it's low rate and fast execution time it doesn't miss interrupts due to serial communications, etc.
-    // the sidereal time is calculated and compared to the high-resolution timer, the high resolution timer is adjusted to keep the two in sync.
-    // the value 160 represents 10uS at a 16MHz clock rate (0.001%)
-    cli();
-    if ((lst>lst_now) && (siderealInterval!=masterSiderealInterval+160)) { siderealInterval=masterSiderealInterval+160; Timer1SetRate(siderealInterval/100); } // running too fast, slow it down
-    if ((lst==lst_now)&& (siderealInterval!=masterSiderealInterval))     { siderealInterval=masterSiderealInterval;     Timer1SetRate(siderealInterval/100); }
-    if ((lst<lst_now) && (siderealInterval!=masterSiderealInterval-160)) { siderealInterval=masterSiderealInterval-160; Timer1SetRate(siderealInterval/100); } // running too slow, speed it up
-    sei();
-
     // update the local sidereal time floating point representation
     update_LST();
     
     // reset the sidereal clock once a day, to keep the significant digits from being consumed, debated about including this, but
     // I'm shooting for keeping OnStep reliable for about 50 days of continuous uptime (until millis() rolls over)
     if ((lst_now-lst_start)>24*3600*100) update_lst();
-
 
 /*
     // tracking rate check code, detects missed ticks
