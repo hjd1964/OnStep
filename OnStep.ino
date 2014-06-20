@@ -86,6 +86,8 @@
  * 06-20-2014          0.99b16           Merged Paul Stoffregen's Teensy3.1 support code
  * 06-20-2014          0.99b17           Removed redundant legacy clock sync code, fixed T+/T- commands writing long SiderealInterval as an int into EEPROM
  *                                       reworked interrupt initialization code, added Paul's suggested interrupt prioritization code
+ *                                       added 2uS delay to Timer3/4 ISR's to keep stepper drivers, etc. in spec. also switched to fixed prescaler in Timer3/4 on AVR
+ *                                       fixed abortSlew bug in MoveTo
  *
  *
  * Author: Howard Dutton
@@ -136,8 +138,8 @@
 #include "errno.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "06 05 14"
-#define FirmwareNumber "0.99x15"
+#define FirmwareDate   "06 20 14"
+#define FirmwareNumber "0.99b17"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
