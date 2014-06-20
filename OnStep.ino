@@ -644,14 +644,14 @@ void setup() {
   
     // init the sidereal tracking rate, use this once - then issue the T+ and T- commands to fine tune
     // 1/16uS resolution timer, ticks per sidereal second
-    EEPROM_writeQuad(EE_siderealInterval,(byte*)&SiderealInterval);
+    EEPROM_writeQuad(EE_siderealInterval,(byte*)&siderealInterval);
     
     // finally, stop the init from happening again
     EEPROM_writeQuad(EE_autoInitKey,(byte*)&autoInitKey);
   }
 
   // this sets the sidereal timer, controls the tracking speed so that the mount moves precisely with the stars
-  EEPROM_readQuad(EE_siderealInterval,(byte*)&SiderealInterval);
+  EEPROM_readQuad(EE_siderealInterval,(byte*)&siderealInterval);
 
   // this sets the maximum speed that the motors can step while sidereal tracking, one half the siderealInterval for twice the speed
   // this is so guiding corrections can be played back at up to 2X the sidereal rate in RA, 1X in Dec
