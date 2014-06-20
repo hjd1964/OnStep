@@ -9,12 +9,12 @@ void TIMER4_COMPA_vect(void);
 #endif
 
 //--------------------------------------------------------------------------------------------------
-// set timer1 to rate (in microseconds*16)
+// set timer1 to rate (in microseconds)
 void Timer1SetRate(long rate) {
 #if defined(__AVR__)
   TCCR1B = 0; TCCR1A = 0;  
   TIMSK1 = 0;
-
+  
   // set compare match register to desired timer count:
   if (rate<65536) { TCCR1B |= (1 << CS10); } else {
   rate=rate/8;
@@ -36,41 +36,21 @@ void Timer1SetRate(long rate) {
   itimer1.begin(TIMER1_COMPA_vect, (float)rate * 0.0625);
 #endif
 }
-// set timer3 to rate (in microseconds*16)
-volatile long nextHArate;
+// set timer3 to rate (in microseconds*16) valid for rates up to 1/32 second
+volatile unsigned long nextHArate;
 void Timer3SetRate(long rate) {
 #if defined(__AVR__)
-  // set compare match register to desired timer count:
-  if (rate<65536) { TCCR3B = (1 << WGM12) | (1 << CS10); } else {
-  rate=rate/8;
-  if (rate<65536) {  TCCR3B = (1 << WGM12) | (1 << CS11);  } else {
-  rate=rate/8;
-  if (rate<65536) {  TCCR3B = (1 << WGM12) | (1 << CS10) | (1 << CS11);   } else {
-  rate=rate/4;  
-  if (rate<65536) { TCCR3B = (1 << WGM12) | (1 << CS12);   } else {
-  rate=rate/4;
-  if (rate<65536) { TCCR3B = (1 << WGM12) | (1 << CS10) | (1 << CS12);  
-  }}}}}
+  rate=rate/64;
 #elif defined(__arm__) && defined(TEENSYDUINO)
   itimer3.begin(TIMER3_COMPA_vect, (float)rate * 0.0625);
 #endif
   nextHArate=rate-1;
 }
-// set timer4 to rate (in microseconds*16)
-volatile long nextDErate;
+// set timer4 to rate (in microseconds*16) valid for rates up to 1/32 second
+volatile unsigned long nextDErate;
 void Timer4SetRate(long rate) {
 #if defined(__AVR__)
-  // set compare match register to desired timer count:
-  if (rate<65536) { TCCR4B = (1 << WGM12) | (1 << CS10); } else {
-  rate=rate/8;
-  if (rate<65536) { TCCR4B = (1 << WGM12) | (1 << CS11); } else {
-  rate=rate/8;
-  if (rate<65536) { TCCR4B = (1 << WGM12) | (1 << CS10) | (1 << CS11); } else {
-  rate=rate/4;  
-  if (rate<65536) { TCCR4B = (1 << WGM12) | (1 << CS12); } else {
-  rate=rate/4;
-  if (rate<65536) {  TCCR4B = (1 << WGM12) | (1 << CS10) | (1 << CS12);
-  }}}}}
+  rate=rate/64;
 #elif defined(__arm__) && defined(TEENSYDUINO)
   itimer4.begin(TIMER4_COMPA_vect, (float)rate * 0.0625);
 #endif
@@ -127,6 +107,11 @@ ISR(TIMER3_COMPA_vect)
   if (HADir==dirHA) SET(HADirPORT, HADirBit); else CLR(HADirPORT, HADirBit); // Set direction, HADir default LOW (=0, for my wiring)
 #endif
 
+#ifdef defined(__arm__) && defined(TEENSYDUINO)
+  // waste some time on faster MPU's to keep the stepper driver's in-spec
+  delayMicroseconds(2);
+#endif
+
   if (posHA!=(targetHA+PEC_HA)) {                                            // Move the RA stepper to the target
 
     // telescope moves WEST with the sky, blHA is the amount of EAST backlash
@@ -155,6 +140,11 @@ ISR(TIMER4_COMPA_vect)
   if (DecDir==dirDec) SET(DecDirPORT, DecDirBit); else CLR(DecDirPORT, DecDirBit); // Set direction, decDir default HIGH (=1, for my wiring)
 #else
   if (DecDir==dirDec) CLR(DecDirPORT, DecDirBit); else SET(DecDirPORT, DecDirBit); // Set direction, decDir default HIGH (=1, for my wiring)
+#endif
+
+#ifdef defined(__arm__) && defined(TEENSYDUINO)
+  // waste some time on faster MPU's to keep the stepper driver's in-spec
+  delayMicroseconds(2);
 #endif
 
   if (posDec!=targetDec) {                                                         // move the Dec stepper to the target
