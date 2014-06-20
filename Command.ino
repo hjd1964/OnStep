@@ -661,7 +661,7 @@ void processCommands() {
      if (command[0]=='T') {
        if (command[1]=='+') masterSiderealInterval-=16*100;
        if (command[1]=='-') masterSiderealInterval+=16*100;
-       EEPROM_writeInt(EE_siderealInterval,masterSiderealInterval);
+       EEPROM_writeQuad(EE_siderealInterval,(byte*)&masterSiderealInterval);
        quietReply=true;
      } else
      
