@@ -87,7 +87,7 @@
  * 06-20-2014          0.99b17           Removed redundant legacy clock sync code, fixed T+/T- commands writing long SiderealInterval as an int into EEPROM
  *                                       reworked interrupt initialization code, added Paul's suggested interrupt prioritization code
  *                                       added 2uS delay to Timer3/4 ISR's to keep stepper drivers, etc. in spec. also switched to fixed prescaler in Timer3/4 on AVR
- *                                       fixed abortSlew bug in MoveTo.  changed pins for RA stepper on Teensy
+ *                                       fixed abortSlew bug in MoveTo.  changed pins for RA stepper on Teensy.  added support for LX200 like commands to get/set tracking rate
  *
  *
  * Author: Howard Dutton
@@ -243,13 +243,15 @@ long lst_start = 0;                  // the start of lst
 long PECsiderealTimer = 0;           // time since worm wheel zero index for PEC
 
 long siderealInterval  =  15956313;
-                                     // default = 15956313 ticks per sidereal hundredth second, this is stored in
-                                     // EEPROM which is updated/adjusted with the ":T+#" and ":T-#" commands
+long masterSiderealInterval = siderealInterval;
+                                     // default = 15956313 ticks per sidereal hundredth second, where a tick is 1/16 uS
+                                     // this is stored in EEPROM which is updated/adjusted with the ":T+#" and ":T-#" commands
                                      // stars moving left means too fast, right means too slow (for my 'scope optics/camera)
                                      // a higher number here means a longer count which slows down the sidereal clock...
                                      // movement is based on the sidereal clock, but SiderealRate must be low enough that
                                      // the stepping keeps pace with the targetHA for accurate tracking
-                                     
+double HzCf = 16000000.0/60.0;
+
                                      // keeps sidereal time, might need to be adjusted due to variations in Arduino crystal accuracy, etc.
                                      // someday I'd like to add a GPS module and grab the pps (pulse per second) signal as a high-accuracy
                                      // time reference to correct drift in my sidereal clock due to physical effects and software limitations
