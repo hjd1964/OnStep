@@ -36,7 +36,7 @@ void Timer1SetRate(long rate) {
   itimer1.begin(TIMER1_COMPA_vect, (float)rate * 0.0625);
 #endif
 }
-// set timer3 to rate (in microseconds*16) valid for rates down to 1/32 second
+// set timer3 to rate (in microseconds*16) valid for rates down to 1/4 second
 volatile unsigned long nextHArate;
 void Timer3SetRate(long rate) {
 #if defined(__AVR__)
@@ -46,7 +46,7 @@ void Timer3SetRate(long rate) {
 #endif
   nextHArate=rate-1;
 }
-// set timer4 to rate (in microseconds*16) valid for rates down to 1/32 second
+// set timer4 to rate (in microseconds*16) valid for rates down to 1/4 second
 volatile unsigned long nextDErate;
 void Timer4SetRate(long rate) {
 #if defined(__AVR__)
