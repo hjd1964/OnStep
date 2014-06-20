@@ -36,10 +36,16 @@ void moveTo() {
   distDestHA =abs(posHA-targetHA);               // distance from dest HA
   distDestDec =abs(posDec-targetDec);            // distance from dest Dec
 
-  // quickly slow the motors and stop in 1/2 degree
+  // quickly slow the motors and stop in 1 degree
   if (abortSlew) {
-    if ((distDestHA>StepsPerDegreeHA/2L) && (posHA>targetHA))     targetHA =posHA-StepsPerDegreeHA/2L;   else targetHA =posHA+StepsPerDegreeHA/2L;
-    if ((distDestDec>StepsPerDegreeDec/2L) && (posDec>targetDec)) targetDec=posDec-StepsPerDegreeDec/2L; else targetDec=posHA+StepsPerDegreeDec/2L;
+    // aborts the meridian flip
+    if ((pierSide==PierSideFlipWE1) || (pierSide==PierSideFlipWE2) || (pierSide==PierSideFlipWE3)) pierSide=PierSideWest;
+    if ((pierSide==PierSideFlipEW1) || (pierSide==PierSideFlipEW2) || (pierSide==PierSideFlipEW3)) pierSide=PierSideEast;
+
+    // set the destination near where we are now    
+    if (distDestHA>StepsPerDegreeHA)   { if (posHA>targetHA)   targetHA =posHA-StepsPerDegreeHA;   else targetHA =posHA +StepsPerDegreeHA;  }
+    if (distDestDec>StepsPerDegreeDec) { if (posDec>targetDec) targetDec=posDec-StepsPerDegreeDec; else targetDec=posDec+StepsPerDegreeDec; }
+
     abortSlew=false;
     goto Again;
   }
