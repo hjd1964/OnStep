@@ -87,7 +87,7 @@
  * 06-20-2014          0.99b17           Removed redundant legacy clock sync code, fixed T+/T- commands writing long SiderealInterval as an int into EEPROM
  *                                       reworked interrupt initialization code, added Paul's suggested interrupt prioritization code
  *                                       added 2uS delay to Timer3/4 ISR's to keep stepper drivers, etc. in spec. also switched to fixed prescaler in Timer3/4 on AVR
- *                                       fixed abortSlew bug in MoveTo
+ *                                       fixed abortSlew bug in MoveTo.  changed pins for RA stepper on Teensy
  *
  *
  * Author: Howard Dutton
@@ -351,11 +351,11 @@ int    maxAlt;                                    // the maximum altitude, in de
 #define DecGNDBit  7       // Pin 7
 #define DecGNDPORT PORTD   //
 
-#define HADirBit   3       // Pin 11
+#define HADirBit   2       // Pin 10
 #define HADirPORT  PORTB   //
-#define HA5vBit    4       // Pin 12
+#define HA5vBit    3       // Pin 11
 #define HA5vPORT   PORTB   //
-#define HAStepBit  5       // Pin 13
+#define HAStepBit  4       // Pin 12
 #define HAStepPORT PORTB   //
 
 #endif
