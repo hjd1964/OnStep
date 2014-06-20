@@ -85,6 +85,7 @@
  * 06-05-2014          0.99x15           Fixed RESCUE_MODE code, thanks to N_DD for pointing this out.
  * 06-20-2014          0.99b16           Merged Paul Stoffregen's Teensy3.1 support code
  * 06-20-2014          0.99b17           Removed redundant legacy clock sync code, fixed T+/T- commands writing long SiderealInterval as an int into EEPROM
+ *                                       reworked interrupt initialization code, added Paul's suggested interrupt prioritization code
  *
  *
  * Author: Howard Dutton
@@ -240,7 +241,6 @@ long lst_start = 0;                  // the start of lst
 long PECsiderealTimer = 0;           // time since worm wheel zero index for PEC
 
 long siderealInterval  =  15956313;
-long masterSiderealInterval = siderealInterval;
                                      // default = 15956313 ticks per sidereal hundredth second, this is stored in
                                      // EEPROM which is updated/adjusted with the ":T+#" and ":T-#" commands
                                      // stars moving left means too fast, right means too slow (for my 'scope optics/camera)
@@ -407,7 +407,6 @@ boolean atHome           = false;
 boolean homeMount        = false;
 
 // Command processing -------------------------------------------------------------------------------------------------------
-//#define F_CPU 16000000UL  // this is automatically defined by Arduino
 #define BAUD 9600
 
 boolean commandError     = false;
@@ -577,16 +576,6 @@ volatile int     blDec        = 0;
 byte PEC_buffer[PECBufferSize];
 
 void setup() {
-  // init. the timers that handle RA and Dec
-#if defined(__AVR__)
-  TCCR3B = 0; TCCR3A = 0;
-  TIMSK3 = (1 << OCIE3A);
-  OCR3A=32767;
-
-  TCCR4B = 0; TCCR4A = 0;
-  TIMSK4 = (1 << OCIE4A);
-  OCR4A=32767;
-#endif
 
   // the following could be done with register writes to save flash memory
   pinMode(HAStepPin, OUTPUT);        // initialize the stepper control pins RA
@@ -653,14 +642,14 @@ void setup() {
   
     // init the sidereal tracking rate, use this once - then issue the T+ and T- commands to fine tune
     // 1/16uS resolution timer, ticks per sidereal second
-    EEPROM_writeQuad(EE_siderealInterval,(byte*)&masterSiderealInterval);
+    EEPROM_writeQuad(EE_siderealInterval,(byte*)&SiderealInterval);
     
     // finally, stop the init from happening again
     EEPROM_writeQuad(EE_autoInitKey,(byte*)&autoInitKey);
   }
 
   // this sets the sidereal timer, controls the tracking speed so that the mount moves precisely with the stars
-  EEPROM_readQuad(EE_siderealInterval,(byte*)&masterSiderealInterval);
+  EEPROM_readQuad(EE_siderealInterval,(byte*)&SiderealInterval);
 
   // this sets the maximum speed that the motors can step while sidereal tracking, one half the siderealInterval for twice the speed
   // this is so guiding corrections can be played back at up to 2X the sidereal rate in RA, 1X in Dec
@@ -681,13 +670,25 @@ void setup() {
   timerRateBacklashHA =timerRateHA /(BacklashTakeupRate/2);
   timerRateBacklashDec=timerRateDec/(BacklashTakeupRate);
 
-  // disable timer0 overflow interrupt, it causes timer1 to miss too many interrupts
-  // this method was abandoned, but I leave it here since it might have future application
-  // to help lessen the processing load during very high speed GoTo's
- // TIMSK0 &= ~_BV(TOIE0);
-
-  // initialize timer1
+  // initialize the timers that handle the sidereal clock, RA, and Dec
   Timer1SetRate(siderealInterval/100);
+#if defined(__AVR__)
+  TCCR3B = (1 << WGM12) | (1 << CS10) | (1 << CS11);  // 0 to 0.032 seconds (4 steps per second minimum, granularity of timer is 4uS)
+  TCCR3A = 0;
+  TIMSK3 = (1 << OCIE3A);
+
+  TCCR4B = (1 << WGM12) | (1 << CS10) | (1 << CS11);  // 0 to 0.032 seconds (4 steps per second minimum, granularity of timer is 4uS)
+  TCCR4A = 0;
+  TIMSK4 = (1 << OCIE4A);
+#elif defined(__arm__) && defined(TEENSYDUINO)
+  // set the system timer for millis() to the second highest priority
+  SCB_SHPR3 = (32 << 24) | (SCB_SHPR3 & 0x00FFFFFF);
+  // set the 1/100 second sidereal clock timer to run at the second highest priority
+  NVIC_SET_PRIORITY(IRQ_PIT_CH0, 32);
+  // set the motor timers to run at the highest priority
+  NVIC_SET_PRIORITY(IRQ_PIT_CH1, 0);
+  NVIC_SET_PRIORITY(IRQ_PIT_CH2, 0);
+#endif
 
   // get ready for serial communications
   Serial1_Init(9600);
