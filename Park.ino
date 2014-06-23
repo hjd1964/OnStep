@@ -13,8 +13,8 @@ boolean setPark() {
     
     // SiderealRate (which is really twice the sidereal rate and another 10X = 20X speed), ignore rate ratios - we're working in steps
     cli();
-    int LasttimerRateHA =timerRateHA;
-    int LasttimerRateDec=timerRateDec;
+    long LasttimerRateHA =timerRateHA;
+    long LasttimerRateDec=timerRateDec;
     timerRateHA =SiderealRate/10;
     timerRateDec=SiderealRate/10;
     sei();
@@ -74,8 +74,8 @@ boolean parkClearBacklash() {
 
   // SiderealRate (which is really twice the sidereal rate and another 5X = 10X speed), ignore rate ratios for the moment - we're working in steps
   cli();
-  int LasttimerRateHA =timerRateHA;
-  int LasttimerRateDec=timerRateDec;
+  long LasttimerRateHA =timerRateHA;
+  long LasttimerRateDec=timerRateDec;
   timerRateHA =SiderealRate/5;
   timerRateDec=SiderealRate/5;
   sei();
