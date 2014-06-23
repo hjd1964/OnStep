@@ -646,11 +646,13 @@ void processCommands() {
       if (command[1]=='T')  { 
         if ((trackingState==TrackingSidereal) || (trackingState==TrackingNone)) {
           f=atof(parameter);
-          if ( (!errno) && ((f>=30.0) && (f<90.0) || (f==0.0))) {
-            if (f==0.0) { 
+          if ( (!errno) && ((f>=30.0) && (f<90.0) || (abs(f)<0.1))) {
+            if (abs(f)<0.1) { 
               trackingState = TrackingNone; 
             } else {
               siderealInterval=HzCf*((60.0/f)*60.0);
+              EEPROM_writeQuad(EE_siderealInterval,(byte*)&siderealInterval);
+              Timer1SetRate(siderealInterval/100);
             }
           } else commandError=true;
         } else commandError=true;
@@ -679,8 +681,8 @@ void processCommands() {
        if (command[1]=='S') siderealInterval =HzCf*60.0; else                         // solar tracking rate
        if (command[1]=='L') siderealInterval =HzCf*((60.0/57.9)*60.0); else           // lunar tracking rate
        if (command[1]=='Q') siderealInterval =HzCf*((60.0/60.16427479)*60.0); else    // default tracking rate
-       if ((command[1]=='e') && (trackingState==TrackingNone)) trackingState=TrackingSidereal; else
-       if ((command[1]=='d') && (trackingState==TrackingSidereal)) trackingState=TrackingNone; else
+       if ((command[1]=='e') && ((trackingState==TrackingSidereal) || (trackingState==TrackingNone))) trackingState=TrackingSidereal; else
+       if ((command[1]=='d') && ((trackingState==TrackingSidereal) || (trackingState==TrackingNone))) trackingState=TrackingNone; else
          commandError=true;
 
        if ((!commandError) && (command[1]!='e') && (command[1]!='d')) {
