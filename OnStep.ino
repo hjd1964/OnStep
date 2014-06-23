@@ -89,6 +89,7 @@
  *                                       added 2uS delay to Timer3/4 ISR's to keep stepper drivers, etc. in spec. also switched to fixed prescaler in Timer3/4 on AVR
  *                                       fixed abortSlew bug in MoveTo.  changed pins for RA stepper on Teensy.  added support for LX200 like commands to get/set 
  *                                       tracking rate (this very slightly breaks OnStep's ASCOM driver and requires driver v1.16 to work properly.)
+ * 06-23-2014          0.99b18           Refinement of tracking commands in Command.ino, fixed Park/Unpark bug in Park.ino
  *
  *
  * Author: Howard Dutton
@@ -139,8 +140,8 @@
 #include "errno.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "06 20 14"
-#define FirmwareNumber "0.99b17"
+#define FirmwareDate   "06 23 14"
+#define FirmwareNumber "0.99b18"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
