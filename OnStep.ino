@@ -89,7 +89,7 @@
  *                                       added 2uS delay to Timer3/4 ISR's to keep stepper drivers, etc. in spec. also switched to fixed prescaler in Timer3/4 on AVR
  *                                       fixed abortSlew bug in MoveTo.  changed pins for RA stepper on Teensy.  added support for LX200 like commands to get/set 
  *                                       tracking rate (this very slightly breaks OnStep's ASCOM driver and requires driver v1.16 to work properly.)
- * 06-23-2014          0.99b18           Refinement of tracking commands in Command.ino, fixed Park/Unpark bug in Park.ino
+ * 06-23-2014          0.99b18           Refinement of tracking commands in Command.ino, fixed Park/Unpark bug (int temporary storage should be long) in Park.ino and OnStep.ino
  *
  *
  * Author: Howard Dutton
@@ -474,10 +474,10 @@ int     moveDurationDec  = 0;
 // Slew control
 int     moveRates[9]={7,15,30,60,120,240,360,600,900}; 
 //                      1x 2x 4x 8x  16x 24x 40x 60x
-int     moveTimerRateHA  = 0;
-int     moveTimerRateDec;
-int     lastTimerRateHA;
-int     lastTimerRateDec;
+long    moveTimerRateHA  = 0;
+long    moveTimerRateDec;
+long    lastTimerRateHA;
+long    lastTimerRateDec;
 //
 unsigned long msMoveHA   = 0;
 int     amountMoveHA     = 0;
