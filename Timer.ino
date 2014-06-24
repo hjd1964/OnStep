@@ -38,6 +38,7 @@ volatile uint32_t nextHArate;
 void Timer3SetRate(long rate) {
 #if defined(__AVR__)
   rate=rate/64;
+  nextHArate=rate-1;
 #elif defined(__arm__) && defined(TEENSYDUINO)
   nextHArate=(F_BUS / 1000000) * (rate*0.0625) - 1;
   cli();
@@ -46,13 +47,13 @@ void Timer3SetRate(long rate) {
   PIT_LDVAL1=nextHArate;
   sei();
 #endif
-  nextHArate=rate-1;
 }
 // set timer4 to rate (in microseconds*16) valid for rates down to 1/4 second
 volatile uint32_t nextDErate;
 void Timer4SetRate(long rate) {
 #if defined(__AVR__)
   rate=rate/64;
+  nextDErate=rate-1;
 #elif defined(__arm__) && defined(TEENSYDUINO)
   nextDErate=(F_BUS / 1000000) * (rate*0.0625) - 1;
   cli();
@@ -61,7 +62,6 @@ void Timer4SetRate(long rate) {
   PIT_LDVAL2=nextDErate;
   sei();
 #endif
-  nextDErate=rate-1;
 }
 
 //--------------------------------------------------------------------------------------------------
