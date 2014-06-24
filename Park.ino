@@ -15,8 +15,8 @@ boolean setPark() {
     cli();
     long LasttimerRateHA =timerRateHA;
     long LasttimerRateDec=timerRateDec;
-    timerRateHA =SiderealRate/10;
-    timerRateDec=SiderealRate/10;
+    timerRateHA =SiderealRate/10L;
+    timerRateDec=SiderealRate/10L;
     sei();
     
     // find a park position and store it, the main loop isn't running while we're here
@@ -76,8 +76,8 @@ boolean parkClearBacklash() {
   cli();
   long LasttimerRateHA =timerRateHA;
   long LasttimerRateDec=timerRateDec;
-  timerRateHA =SiderealRate/5;
-  timerRateDec=SiderealRate/5;
+  timerRateHA =SiderealRate/5L;
+  timerRateDec=SiderealRate/5L;
   sei();
 
   // figure out how long we'll have to wait at 10x speed for the backlash to clear (+10%)
