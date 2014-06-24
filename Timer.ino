@@ -42,8 +42,6 @@ void Timer3SetRate(long rate) {
 #elif defined(__arm__) && defined(TEENSYDUINO)
   nextHArate=(F_BUS / 1000000) * (rate*0.0625) - 1;
   cli();
-  //  if a faster rate (smaller value) is coming... and we're already past the that rate (minus a few ticks): move it back a bit so the interrupt fires now. 
-  if ((PIT_LDVAL1>nextHArate) && (PIT_CVAL1>nextHArate-2)) PIT_CVAL1=nextHArate-4;
   PIT_LDVAL1=nextHArate;
   sei();
 #endif
@@ -57,8 +55,6 @@ void Timer4SetRate(long rate) {
 #elif defined(__arm__) && defined(TEENSYDUINO)
   nextDErate=(F_BUS / 1000000) * (rate*0.0625) - 1;
   cli();
-  //  if a faster rate (smaller value) is coming... and we're already past the that rate (minus a few ticks): move it back a bit so the interrupt fires now. 
-  if ((PIT_LDVAL2>nextDErate) && (PIT_CVAL2>nextDErate-2)) PIT_CVAL2=nextDErate-4;
   PIT_LDVAL2=nextDErate;
   sei();
 #endif
