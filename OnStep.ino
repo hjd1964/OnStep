@@ -699,7 +699,7 @@ void setup() {
   // set the system timer for millis() to the second highest priority
   SCB_SHPR3 = (32 << 24) | (SCB_SHPR3 & 0x00FFFFFF);
 
-  itimer3.begin(TIMER3_COMPA_vect, (float)128 * 0.0625); // rate doesn't matter, just to initalize
+  itimer3.begin(TIMER3_COMPA_vect, (float)128 * 0.0625);
   itimer4.begin(TIMER4_COMPA_vect, (float)128 * 0.0625);
 
   // set the 1/100 second sidereal clock timer to run at the second highest priority
