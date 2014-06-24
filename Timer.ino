@@ -1,11 +1,7 @@
 #if defined(__arm__) && defined(TEENSYDUINO)
-IntervalTimer itimer1;
-IntervalTimer itimer3;
-IntervalTimer itimer4;
 #define ISR(f) void f (void)
+IntervalTimer itimer1;
 void TIMER1_COMPA_vect(void);
-void TIMER3_COMPA_vect(void);
-void TIMER4_COMPA_vect(void);
 #endif
 
 //--------------------------------------------------------------------------------------------------
@@ -36,23 +32,34 @@ void Timer1SetRate(long rate) {
   itimer1.begin(TIMER1_COMPA_vect, (float)rate * 0.0625);
 #endif
 }
+
 // set timer3 to rate (in microseconds*16) valid for rates down to 1/4 second
-volatile unsigned long nextHArate;
+volatile uint32_t nextHArate;
 void Timer3SetRate(long rate) {
 #if defined(__AVR__)
   rate=rate/64;
 #elif defined(__arm__) && defined(TEENSYDUINO)
-  itimer3.begin(TIMER3_COMPA_vect, (float)rate * 0.0625);
+  nextHArate=(F_BUS / 1000000) * (rate*0.0625) - 1;
+  cli();
+  //  if a faster rate (smaller value) is coming... and we're already past the that rate (minus a few ticks): move it back a bit so the interrupt fires now. 
+  if ((PIT_LDVAL1>nextHArate) && (PIT_CVAL1>nextHArate-2)) PIT_CVAL1=nextHArate-4;
+  PIT_LDVAL1=nextHArate;
+  sei();
 #endif
   nextHArate=rate-1;
 }
 // set timer4 to rate (in microseconds*16) valid for rates down to 1/4 second
-volatile unsigned long nextDErate;
+volatile uint32_t nextDErate;
 void Timer4SetRate(long rate) {
 #if defined(__AVR__)
   rate=rate/64;
 #elif defined(__arm__) && defined(TEENSYDUINO)
-  itimer4.begin(TIMER4_COMPA_vect, (float)rate * 0.0625);
+  nextDErate=(F_BUS / 1000000) * (rate*0.0625) - 1;
+  cli();
+  //  if a faster rate (smaller value) is coming... and we're already past the that rate (minus a few ticks): move it back a bit so the interrupt fires now. 
+  if ((PIT_LDVAL2>nextDErate) && (PIT_CVAL2>nextDErate-2)) PIT_CVAL2=nextDErate-4;
+  PIT_LDVAL2=nextDErate;
+  sei();
 #endif
   nextDErate=rate-1;
 }
@@ -91,7 +98,6 @@ ISR(TIMER1_COMPA_vect)
       isrTimerRateDec=timerRateDec;
     }
   }
-
 }
 
 ISR(TIMER3_COMPA_vect)
