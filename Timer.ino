@@ -88,7 +88,7 @@ ISR(TIMER1_COMPA_vect)
     if (timerRateHA!=isrTimerRateHA) {
       Timer3SetRate(timerRateHA);
       isrTimerRateHA=timerRateHA;
-    } else
+    }
     if (timerRateDec!=isrTimerRateDec) {
       Timer4SetRate(timerRateDec);
       isrTimerRateDec=timerRateDec;
