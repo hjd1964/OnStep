@@ -53,35 +53,31 @@ void moveTo() {
   sei();
 
   // First, for Right Ascension
-  long timerRate=(timerRateHA/10L); if (timerRate<1) timerRate=1; // lower limit always allows change
-
   double temp;
   if (distStartHA>distDestHA) {
     temp=(StepsForRateChange/sqrt(distDestHA));       // 50000/40000=1.02  50000/10=5000 slow down the slew
-//    if ((temp<100) && (temp>=10))  temp=101;          // exclude a range of speeds
+//    if ((temp<100) && (temp>=10))  temp=101;        // exclude a range of speeds
   } else {
     temp=(StepsForRateChange/sqrt(distStartHA));      // speed up the slew
-//    if ((temp<100) && (temp>=10))  temp=9;            // exclude a range of speeds
+//    if ((temp<100) && (temp>=10))  temp=9;          // exclude a range of speeds
   }
   if (temp<MaxRate)        temp=MaxRate;              // fastest rate
-  if (temp>SiderealRate/2L) temp=SiderealRate/2L;       // slowest rate (4x sidereal), remember SiderealRate is actually twice the sidereal rate
+  if (temp>SiderealRate/2L) temp=SiderealRate/2L;     // slowest rate (4x sidereal), remember SiderealRate is actually twice the sidereal rate
 
-  cli();  timerRateHA=round(temp);  sei();
+  cli();  timerRateHA=temp;  sei();
 
   // Now, for Declination
-  timerRate=(timerRateDec/10L); if (timerRate<1) timerRate=1; // lower limit always allows change
-  
   if (distStartDec>distDestDec) {
       temp=(StepsForRateChange/sqrt(distDestDec));    // 50000/40000=1.02  50000/10=5000 slow down the slew
-//      if ((temp<100) && (temp>=10))  temp=101;        // exclude a range of speeds
+//      if ((temp<100) && (temp>=10))  temp=101;      // exclude a range of speeds
     } else {
       temp=(StepsForRateChange/sqrt(distStartDec));   // speed up the slew
-//      if ((temp<100) && (temp>=10))  temp=9;          // exclude a range of speeds
+//      if ((temp<100) && (temp>=10))  temp=9;        // exclude a range of speeds
     }
   if (temp<MaxRate)        temp=MaxRate;              // fastest rate
-  if (temp>SiderealRate/2L) temp=SiderealRate/2L;       // slowest rate (4x sidereal)
+  if (temp>SiderealRate/2L) temp=SiderealRate/2L;     // slowest rate (4x sidereal)
 
-  cli(); timerRateDec=round(temp); sei();
+  cli(); timerRateDec=temp; sei();
 
   if ((distDestHA<=2) && (distDestDec<=2)) { 
     if ((pierSide==PierSideFlipEW2) || (pierSide==PierSideFlipWE2)) {
