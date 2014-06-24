@@ -269,11 +269,13 @@ volatile long timerRateBacklashDec;
 volatile boolean inBacklashDec=false;
 #define timerRateRatio    ((double)StepsPerDegreeHA/(double)StepsPerDegreeDec)
 
+#if defined(__arm__) && defined(TEENSYDUINO)
 IntervalTimer itimer3;
 void TIMER3_COMPA_vect(void);
 
 IntervalTimer itimer4;
 void TIMER4_COMPA_vect(void);
+#endif
 
 // Location ----------------------------------------------------------------------------------------------------------------
 double latitude  = 0.0;
@@ -346,7 +348,7 @@ int    maxAlt;                                    // the maximum altitude, in de
 #define HAStepBit  7       // Pin 13
 #define HAStepPORT PORTB   //
 
-#else
+#elif defined(__arm__) && defined(TEENSYDUINO)
 
 #define LEDposBit  0       // Pin 8
 #define LEDposPORT PORTB   //
