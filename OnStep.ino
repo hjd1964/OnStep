@@ -90,6 +90,7 @@
  *                                       fixed abortSlew bug in MoveTo.  changed pins for RA stepper on Teensy.  added support for LX200 like commands to get/set 
  *                                       tracking rate (this very slightly breaks OnStep's ASCOM driver and requires driver v1.16 to work properly.)
  * 06-23-2014          0.99b18           Refinement of tracking commands in Command.ino, fixed Park/Unpark bug (int temporary storage should be long) in Park.ino and OnStep.ino
+ * 06-23-2014          0.99b19           Fixes to Timer.ino and OnStep.ino to reduce jitter on Teensy3.1
  *
  *
  * Author: Howard Dutton
@@ -141,7 +142,7 @@
 
 // firmware info, these are returned by the ":GV?#" commands
 #define FirmwareDate   "06 23 14"
-#define FirmwareNumber "0.99b18"
+#define FirmwareNumber "0.99b19"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -267,6 +268,12 @@ volatile long timerRateDec;
 volatile long timerRateBacklashDec;
 volatile boolean inBacklashDec=false;
 #define timerRateRatio    ((double)StepsPerDegreeHA/(double)StepsPerDegreeDec)
+
+IntervalTimer itimer3;
+void TIMER3_COMPA_vect(void);
+
+IntervalTimer itimer4;
+void TIMER4_COMPA_vect(void);
 
 // Location ----------------------------------------------------------------------------------------------------------------
 double latitude  = 0.0;
@@ -689,6 +696,10 @@ void setup() {
 #elif defined(__arm__) && defined(TEENSYDUINO)
   // set the system timer for millis() to the second highest priority
   SCB_SHPR3 = (32 << 24) | (SCB_SHPR3 & 0x00FFFFFF);
+
+  itimer3.begin(TIMER3_COMPA_vect, (float)128 * 0.0625); // rate doesn't matter, just to initalize
+  itimer4.begin(TIMER4_COMPA_vect, (float)128 * 0.0625);
+
   // set the 1/100 second sidereal clock timer to run at the second highest priority
   NVIC_SET_PRIORITY(IRQ_PIT_CH0, 32);
   // set the motor timers to run at the highest priority
