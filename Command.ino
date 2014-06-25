@@ -174,8 +174,9 @@ void processCommands() {
       
 //   C - Sync Control
 //  :CS#   Synchonize the telescope with the current right ascension and declination coordinates
+//  :CM#   Synchonize the telescope with the current database object (as above)
 //         Returns: Nothing
-      if ((command[0]=='C') && (command[1]=='S'))  {
+      if ((command[0]=='C') && ((command[1]=='S') || command[1]=='M'))  {
         if (trackingState!=TrackingMoveTo) {
           syncEqu(newTargetRA,newTargetDec);
           quietReply=true;
