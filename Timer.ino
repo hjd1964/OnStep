@@ -72,7 +72,7 @@ ISR(TIMER1_COMPA_vect)
 {
   lst++;
 
-  if (trackingState==TrackingSidereal) {
+  if ((trackingState==TrackingSidereal) || (trackingState==TrackingMoveTo)) {
     long thisTimerRate=timerRateHA;
     // override rate during backlash compensation
     if (inBacklashHA) thisTimerRate=timerRateBacklashHA;
