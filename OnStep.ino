@@ -319,13 +319,13 @@ int    maxAlt;                                    // the maximum altitude, in de
 #define DecStepPin 6       // Pin 6 (Step)  PD6    PH3
 #define DecGNDPin  7       // Pin 7 (GND)   PD7    PH4
 
+// defines for direct port control
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+
 #define HADirPin   11      // Pin 11 (Dir)  PB3    PB5
 #define HA5vPin    12      // Pin 12 (5V?)  PB4    PB6
 #define HAStepPin  13      // Pin 13 (Step) PB5    PB7
                            // Pin GND (GND)
-
-// defines for direct port control
-#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 
 #define LEDposBit  5       // Pin 8
 #define LEDposPORT PORTH   //
@@ -349,6 +349,11 @@ int    maxAlt;                                    // the maximum altitude, in de
 #define HAStepPORT PORTB   //
 
 #elif defined(__arm__) && defined(TEENSYDUINO)
+
+#define HADirPin   10      // Pin 10 (Dir)
+#define HA5vPin    11      // Pin 11 (5V?)
+#define HAStepPin  12      // Pin 12 (Step)
+                           // Pin GND (GND)
 
 #define LEDposBit  0       // Pin 8
 #define LEDposPORT PORTB   //
