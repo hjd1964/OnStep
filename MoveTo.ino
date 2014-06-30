@@ -61,7 +61,7 @@ void moveTo() {
     temp=(StepsForRateChange/sqrt(distStartHA));      // speed up the slew
 //    if ((temp<100) && (temp>=10))  temp=9;          // exclude a range of speeds
   }
-  if (temp<MaxRate)        temp=MaxRate;              // fastest rate
+  if (temp<MaxRate*16)      temp=MaxRate*16;          // fastest rate
   if (temp>SiderealRate/2L) temp=SiderealRate/2L;     // slowest rate (4x sidereal), remember SiderealRate is actually twice the sidereal rate
 
   cli();  timerRateHA=temp;  sei();
@@ -74,7 +74,7 @@ void moveTo() {
       temp=(StepsForRateChange/sqrt(distStartDec));   // speed up the slew
 //      if ((temp<100) && (temp>=10))  temp=9;        // exclude a range of speeds
     }
-  if (temp<MaxRate)        temp=MaxRate;              // fastest rate
+  if (temp<MaxRate*16)      temp=MaxRate*16;          // fastest rate
   if (temp>SiderealRate/2L) temp=SiderealRate/2L;     // slowest rate (4x sidereal)
 
   cli(); timerRateDec=temp; sei();
