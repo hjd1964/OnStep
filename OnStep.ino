@@ -693,11 +693,17 @@ void setup() {
   // initialize the timers that handle the sidereal clock, RA, and Dec
   Timer1SetRate(siderealInterval/100);
 #if defined(__AVR__)
-  TCCR3B = (1 << WGM12) | (1 << CS10) | (1 << CS11);  // 0 to 0.032 seconds (4 steps per second minimum, granularity of timer is 4uS)
+  if (StepsPerSecond<31)
+    TCCR3B = (1 << WGM12) | (1 << CS10) | (1 << CS11);  // ~0 to 0.25 seconds   (4 steps per second minimum, granularity of timer is 4uS)   /64 pre-scaler
+  else
+    TCCR3B = (1 << WGM12) | (1 << CS11);                // ~0 to 0.032 seconds (31 steps per second minimum, granularity of timer is 0.5uS) /8  pre-scaler
   TCCR3A = 0;
   TIMSK3 = (1 << OCIE3A);
 
-  TCCR4B = (1 << WGM12) | (1 << CS10) | (1 << CS11);  // 0 to 0.032 seconds (4 steps per second minimum, granularity of timer is 4uS)
+  if (StepsPerSecond<31)
+    TCCR4B = (1 << WGM12) | (1 << CS10) | (1 << CS11);  // ~0 to 0.25 seconds   (4 steps per second minimum, granularity of timer is 4uS)   /64 pre-scaler
+  else
+    TCCR4B = (1 << WGM12) | (1 << CS11);                // ~0 to 0.032 seconds (31 steps per second minimum, granularity of timer is 0.5uS) /8  pre-scaler
   TCCR4A = 0;
   TIMSK4 = (1 << OCIE4A);
 #elif defined(__arm__) && defined(TEENSYDUINO)
