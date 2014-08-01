@@ -74,7 +74,11 @@ void moveTo() {
       temp=(StepsForRateChange/sqrt(distStartDec));   // speed up the slew
 //      if ((temp<100) && (temp>=10))  temp=9;        // exclude a range of speeds
     }
-  if (temp<MaxRate*16)      temp=MaxRate*16;          // fastest rate
+  #ifdef DEC_RATIO_ON
+  if (temp<MaxRate*16*timerRateRatio) temp=MaxRate*16*timerRateRatio; // fastest rate
+  #else
+  if (temp<MaxRate*16)                temp=MaxRate*16;
+  #endif
   if (temp>SiderealRate/2L) temp=SiderealRate/2L;     // slowest rate (4x sidereal)
 
   cli(); timerRateDec=temp; sei();
