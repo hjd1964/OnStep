@@ -704,7 +704,7 @@ void processCommands() {
 //         Rate Adjustment factor for worm segment NNNN. PecRate = Steps +/- for this 1 second segment
 //         If NNNN is omitted, returns the currently playing segment
       if ((command[0]=='V') && (command[1]=='R')) {
-       boolean conv_result=false;
+       boolean conv_result=true;
        if (parameter[0]==0) i=PECindex; else conv_result=atoi2(parameter,&i);
        if ( (conv_result) && ((i>=0) && (i<PECBufferSize))) {
          if (parameter[0]==0) { 
