@@ -7,6 +7,7 @@ boolean serial_one_ready = false;
 // process commands
 void processCommands() {
     boolean supress_frame = false;
+    char *conv_end;
 
     if ((Serial_available() > 0) && (!serial_zero_ready)) { serial_zero_ready = buildCommand(Serial_read()); }
     if ((Serial1_available() > 0) && (!serial_one_ready)) { serial_one_ready = buildCommand_serial_one(Serial1_read()); }
@@ -158,8 +159,7 @@ void processCommands() {
 //                  1 on success
       if ((command[0]=='$') && (command[1]=='B')) {
         if ((strlen(parameter)>1) && (strlen(parameter)<5)) {
-          i=atoi((char*)&parameter[1]);
-          if ( (!errno) && ((i>=0) && (i<=999))) { 
+          if ( (atoi2((char*)&parameter[1]),&i) && ((i>=0) && (i<=999))) { 
             if (parameter[0]=='D') {
               backlashDec=(i*StepsPerDegreeDec)/3600;
               EEPROM_writeInt(EE_backlashDec,backlashDec);
@@ -376,8 +376,7 @@ void processCommands() {
 //  :Mgdnnnn# Pulse guide command
 //          Returns: Nothing
       if (command[1]=='g') {
-        i=atoi((char *)&parameter[1]); 
-        if ( (!errno) && ((i>=0) && (i<=16399)) && (parkStatus==NotParked)) { 
+        if ( (atoi2((char *)&parameter[1],&i)) && ((i>=0) && (i<=16399)) && (parkStatus==NotParked)) { 
           if ((parameter[0]=='e') || (parameter[0]=='w')) { 
             if (moveDirHA) { cli(); timerRateHA=lastTimerRateHA; sei(); }
             moveDirHA=parameter[0];  moveDurationHA=i;  cli(); lastTimerRateHA=timerRateHA; timerRateHA=moveTimerRateHA; sei();
@@ -575,9 +574,8 @@ void processCommands() {
 //                  1 on success
       if (command[1]=='G')  { 
         if ((parameter[0]!=0) && (strlen(parameter)<4)) { 
-          i=atoi(parameter); 
-          if ( (!errno) && ((i>=-24) && (i<=24))) { 
-            timeZone=i; 
+          if ( (atoi2(parameter,&i)) && ((i>=-24) && (i<=24))) { 
+            timeZone=i;
             b=timeZone+128; 
             EEPROM.write(EE_sites+(currentSite)*25+8,b);
             UT1=LMT+timeZone; 
@@ -592,7 +590,7 @@ void processCommands() {
 //          Set the lowest elevation to which the telescope will goTo
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='h')  { if ((parameter[0]!=0) && (strlen(parameter)<4)) { i=atoi(parameter); if ( (!errno) && ((i>=-30) && (i<=30))) { minAlt=i; EEPROM.write(EE_minAlt,minAlt+128); } else commandError=true; } else commandError=true; } else
+      if (command[1]=='h')  { if ((parameter[0]!=0) && (strlen(parameter)<4)) { if ( (atoi2(parameter,&i)) && ((i>=-30) && (i<=30))) { minAlt=i; EEPROM.write(EE_minAlt,minAlt+128); } else commandError=true; } else commandError=true; } else
 //  :SLHH:MM:SS#
 //          Set the local Time
 //          Return: 0 on failure
@@ -624,7 +622,7 @@ void processCommands() {
 //          Set the overhead elevation limit to DD#
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='o')  { if ((parameter[0]!=0) && (strlen(parameter)<3)) { i=atoi(parameter); if ( (!errno) && ((i>=60) && (i<=90))) { maxAlt=i; EEPROM.write(EE_maxAlt,maxAlt); } else commandError=true; } else commandError=true; } else
+      if (command[1]=='o')  { if ((parameter[0]!=0) && (strlen(parameter)<3)) { if ( (atoi2(parameter,&i)) && ((i>=60) && (i<=90))) { maxAlt=i; EEPROM.write(EE_maxAlt,maxAlt); } else commandError=true; } else commandError=true; } else
 //  :SrHH:MM.T#
 //  :SrHH:MM:SS#
 //          Set target object RA to HH:MM.T or HH:MM:SS (based on precision setting)
@@ -646,8 +644,8 @@ void processCommands() {
 //                  1 on success
       if (command[1]=='T')  { 
         if ((trackingState==TrackingSidereal) || (trackingState==TrackingNone)) {
-          f=atof(parameter);
-          if ( (!errno) && ((f>=30.0) && (f<90.0) || (abs(f)<0.1))) {
+          f=strtod(parameter,&conv_end);
+          if ( (&parameter[0]!=conv_end) && ((f>=30.0) && (f<90.0) || (abs(f)<0.1))) {
             if (abs(f)<0.1) { 
               trackingState = TrackingNone; 
             } else {
@@ -706,8 +704,9 @@ void processCommands() {
 //         Rate Adjustment factor for worm segment NNNN. PecRate = Steps +/- for this 1 second segment
 //         If NNNN is omitted, returns the currently playing segment
       if ((command[0]=='V') && (command[1]=='R')) {
-       if (parameter[0]==0) i=PECindex; else i=atoi(parameter);
-       if ( (!errno) && ((i>=0) && (i<PECBufferSize))) {
+       boolean conv_result=false;
+       if (parameter[0]==0) i=PECindex; else conv_result=atoi2(parameter,&i);
+       if ( (conv_result) && ((i>=0) && (i<PECBufferSize))) {
          if (parameter[0]==0) { 
            i=(i-1)%(StepsPerWormRotation/StepsPerSecond); 
            i1=PEC_buffer[i]-128; sprintf(reply,"%+04i,%03i",i1,i); 
@@ -723,8 +722,7 @@ void processCommands() {
 //         Rate Adjustment factor for worm segments. PecRate = Steps +/- for each 1 second segment, hex one byte integer (PecRate=b-128)
 //         leave a delay of about 10ms between calls
      if ((command[0]=='V') && (command[1]=='r')) {
-       i=atoi(parameter);
-       if ( (!errno) && ((i>=0) && (i<PECBufferSize))) {
+       if ( (atoi2(parameter,&i)) && ((i>=0) && (i<PECBufferSize))) {
          int j=0;
          byte b;
          char x[3]="  ";
@@ -769,9 +767,9 @@ void processCommands() {
      if ((command[0]=='W') && (command[1]=='I')) {
        commandError=true;
        // the correct way...
-       long int l=atol(parameter);
+       long l=strtol(parameter,&conv_end,10);
        // see if it converted and is in range
-       if ( (!errno) && ((l>=0) && (l<StepsPerWormRotation))) {
+       if ( (&parameter[0]!=conv_end) && ((l>=0) && (l<StepsPerWormRotation))) {
          PECrecord_index=l;
          commandError=false;
        }
@@ -801,13 +799,11 @@ void processCommands() {
          }
        } else {
          // it should be an int
-         i=atoi(parameter);
          // see if it converted and is in range
-         if ( (!errno) && ((i>=0) && (i<PECBufferSize))) {
+         if ( (atoi2(parameter,&i)) && ((i>=0) && (i<PECBufferSize))) {
            // should be another int here
-           i2=atoi((char*)&parameter[5]);
            // see if it converted and is in range
-           if ( (!errno) && ((i2>=-128) && (i2<=127))) {
+           if ( (atoi2((char*)&parameter[5],&i2)) && ((i2>=-128) && (i2<=127))) {
              PEC_buffer[i]=i2+128;
              PECrecorded =true;
              commandError=false;
