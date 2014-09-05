@@ -91,7 +91,9 @@
  *                                       tracking rate (this very slightly breaks OnStep's ASCOM driver and requires driver v1.16 to work properly.)
  * 06-23-2014          0.99b18           Refinement of tracking commands in Command.ino, fixed Park/Unpark bug (int temporary storage should be long) in Park.ino and OnStep.ino
  * 06-23-2014          0.99b19           Fixes to Timer.ino and OnStep.ino to reduce jitter on Teensy3.1
- * 08-01-2014          0.99b20           Numeric conversion fixes, DEC_RATIO_ON now MaxRate for Dec is adjusted to yield same deg/sec as HA
+ * 07-22-2014          1.0a1             Changed logic of tracking rate command :TQ#, now only stores the custom sidereal rate (and any changes +/-) in EEPROM
+ * 08-04-2014          1.0a2             Switched to running the motor timers at the sidereal rate. Support added for goto/operation under the celestial pole.
+ *                                       Safety check code, should keep mount from tracking past the meridian limit, below horizon limit, or above the overhead limit.
  *
  *
  * Author: Howard Dutton
@@ -142,36 +144,41 @@
 #include "errno.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "06 23 14"
-#define FirmwareNumber "0.99b19"
+#define FirmwareDate   "08 04 14"
+#define FirmwareNumber "1.0a2"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
 // -------------------------------------------------------------------------------------------------------------------------
 // ADJUST THE FOLLOWING TO CONFIGURE YOUR ARDUINO --------------------------------------------------------------------------
 
-// turns debugging on, used during testing
+// turns debugging on, used during testing, default=OFF
 #define DEBUG_OFF
-// for getting control of the 'scope when things go horribly wrong
+// for getting control of the 'scope when things go horribly wrong, default=OFF
 #define RESCUE_MODE_OFF
 
-// supply power on pins 5 and 11 to Pololu or other stepper drivers without on-board 5V voltage regulators
+// light status LED(s), default=ON
+#define STATUS_LED_PINS_ON
+// default=OFF
+#define STATUS_LED2_PINS_OFF
+
+// supply power on pins 5 and 11 to Pololu or other stepper drivers without on-board 5V voltage regulators, default=OFF
 #define POWER_SUPPLY_PINS_OFF
 
-// enables goTo speed equalization for differing right ascension and declination StepsPerDegreeHA/Dec
+// enables goTo speed equalization for differing right ascension and declination StepsPerDegreeHA/Dec, default=OFF (limited testing done)
 #define DEC_RATIO_OFF
 
-// enables alignment on two or three stars
+// enables alignment on two or three stars, default=OFF (not tested)
 #define ALIGN_TWO_AND_THREE_STAR_ON
 
-// enables Horizon coordinate goto functions
+// enables Horizon coordinate goto functions, default=ON
 #define ALT_AZM_GOTO_ON
 
 // enables code to clean-up PEC readings after record (use PECprep or a spreadsheet to fix readings otherwise)
-// this cleans up any tracking rate variations that would be introduced by recording more guiding corrections to either the east or west
-#define PEC_CLEANUP_OFF
+// this cleans up any tracking rate variations that would be introduced by recording more guiding corrections to either the east or west, default=ON
+#define PEC_CLEANUP_ON
 
-// these turn on and off checksum error correction on the serial ports
+// these turn on and off checksum error correction on the serial ports, default=OFF
 #define CHKSUM0_OFF     // default _OFF: required for OnStep ASCOM driver
 #define CHKSUM1_OFF     // default _OFF: required for OnStep Controller2 Android App (and others)
 
@@ -180,43 +187,48 @@
 #define initKey 915307547 // unique identifier for the current initialization format, do not change
 
 // ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
-#define MaxRate               96     // this is the minimum number of micro-seconds between micro-steps. minimum is around 16 
-                                     // default is 64, higher is ok. this is where you adjust how fast your motors run during GoTos
+#define MaxRate                96    // this is the minimum number of micro-seconds between micro-steps
+                                     // minimum is around 16, default is 96, higher is ok
                                      
-#define StepsForRateChange  192000.0 // number of steps during acceleration and de-acceleration: higher values=longer acceleration/de-acceleration
+#define StepsForRateChange  128000.0 // number of steps during acceleration and de-acceleration: higher values=longer acceleration/de-acceleration
                                      // for the most part this doesn't need to be changed, but adjust when needed
 
-#define BacklashTakeupRate    50     // backlash takeup rate (in multipules of the sidereal rate): too fast and your motors will stall,
+#define BacklashTakeupRate    25     // backlash takeup rate (in multipules of the sidereal rate): too fast and your motors will stall,
                                      // too slow and the mount will be sluggish while it moves through the backlash
                                      // for the most part this doesn't need to be changed, but adjust when needed
 
                                      // for my EM10b both RA and Dec axis have the same gear train and this
-#define StepsPerDegreeHA    7680L    // is calculated as :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
-                                     // Takahashi EM10b  :  24            * 32          * 25              *  144/360              = 7680
+#define StepsPerDegreeHA   19200L    // is calculated as :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
+                                     // Takahashi EM10b  :  48            * 16          * 50 * (40/32)    *  144/360              = 19200
                                      // Losmandy G11     :  48            * 16          * 15              *  360/360              = 11520
-#define StepsPerDegreeDec   7680L    // is calculated as :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
-                                     // Takahashi EM10b  :  24            * 32          * 25              *  144/360              = 7680
+#define StepsPerDegreeDec  19200L    // is calculated as :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
+                                     // Takahashi EM10b  :  48            * 16          * 50 * (40/32)    *  144/360              = 19200
                                      // Losmandy G11     :  48            * 16          * 15              *  360/360              = 11520
                                      // the EM10b has two spur gears that drive the RA/Dec worms, they are 60 tooth and 48 tooth gears
                                      // for an 1.25x reduction in addition to the 20:1 gear heads on the steppers for a 25:1 final ratio
                                      // before the worm/wheels 144:1
                                      
-#define StepsPerSecond        32     // the steps per second sidereal rate = 32 = (7680/3600)*15 - OnStep can handle between 12 and 100 steps/second
+#define StepsPerSecond         80    // the steps per second sidereal rate = 48 = (11520/3600)*15 - OnStep can handle between 12 and 100 steps/second
                                      // when sidereal tracking (StepsPerWormRotation must be evenly divisible by StepsPerSecond)
 
-#define StepsPerWormRotation 19200L  // PEC, number of steps for a complete worm rotation (in RA), (StepsPerDegreeHA*360)/gear_reduction2 
-                                     // the EM10b has a worm-wheel with 144 teeth (7680*360)/144 = 19200
+#define StepsPerWormRotation  48000L // PEC, number of steps for a complete worm rotation (in RA), (StepsPerDegreeHA*360)/gear_reduction2 
+                                     // the EM10b has a worm-wheel with 144 teeth (19200*360)/144 = 48000
+                                     // According to this the EM10b needs 600 (seconds) of PEC buffer.  Since the transfer gears have a rather large effect on the periodic error
+                                     // I have two options 1. use 4x the 48000 = 192000 (2400 seconds.)  This is 4 complete rotations of the worm and 5 complete rotations of the transfer gear.
+                                     //                       I expect the results would be very good, but since PECPrep is limited to 1000S I don't bother.
+                                     //                    2. use 480 (seconds) of PEC buffer.  This is easier to program and keeps the PE at low levels (<3 arc-sec.)
 
-#define PECBufferSize        824     // PEC, buffer size, max should be no more than 1336, your required buffer size = StepsPerWormRotation/StepsPerSecond
-                                     // for the most part this doesn't need to be changed, but adjust when needed
-                                     // the EM10b needs a minimum of 600 (seconds)
+#define PECBufferSize        2400    // PEC, buffer size, max should be no more than 3384, your required buffer size >= StepsPerWormRotation/StepsPerSecond
+                                     // for the most part this doesn't need to be changed, but adjust when needed.  824 seconds is the default
 
-#define REVERSE_HA_OFF               // Reverse the direction of movement for the HA/RA axis
-#define REVERSE_DEC_OFF              // Reverse the direction of movement for the Dec axis
+#define REVERSE_HA_ON                // Reverse the direction of movement for the HA/RA axis, adjust as needed or reverse your wiring so things move in the right direction
+#define REVERSE_DEC_ON               // Reverse the direction of movement for the Dec axis
 
-long minutesPastMeridian =   60;     // for goto's, how far past the meridian to allow before we do a flip - one hour of RA is the default = 60
+long minutesPastMeridianE =   60;     // for goto's, how far past the meridian to allow before we do a flip (if on the East side of the pier) - one hour of RA is the default = 60
+long minutesPastMeridianW =   60;     // as above, if on the West side of the pier
 
 // THAT'S IT FOR USER CONFIGURATION!
+
 // -------------------------------------------------------------------------------------------------------------------------
 
 
@@ -246,7 +258,10 @@ unsigned long lst_mS_start = 0;      // mS at the start of lst
 long lst_start = 0;                  // the start of lst
 long PECsiderealTimer = 0;           // time since worm wheel zero index for PEC
 
-long siderealInterval  =  15956313;
+
+boolean customRateActive=true;       // automatically modify the siderealInterval to compensate for atmospheric refraction
+
+long siderealInterval   =15956313;
 long masterSiderealInterval = siderealInterval;
                                      // default = 15956313 ticks per sidereal hundredth second, where a tick is 1/16 uS
                                      // this is stored in EEPROM which is updated/adjusted with the ":T+#" and ":T-#" commands
@@ -262,9 +277,13 @@ double HzCf = 16000000.0/60.0;
 
 long SiderealRate;                   // based on the siderealInterval, this is the time between steps for sidereal tracking
 
+volatile double rd = 1.002;
+volatile double pecTimerRateHA = 0;
+volatile double moveTimerRateHA = 0;
 volatile long timerRateHA;
 volatile long timerRateBacklashHA;
 volatile boolean inBacklashHA=false;
+volatile double moveTimerRateDec = 0;
 volatile long timerRateDec;
 volatile long timerRateBacklashDec;
 volatile boolean inBacklashDec=false;
@@ -298,6 +317,7 @@ double newTargetDec      = 0.0;                   // holds the Dec for goTos
 long origTargetDec       = 0;
 
 double newTargetAlt=0.0, newTargetAzm=0.0;        // holds the altitude and azmiuth for slews
+double currentAlt = 45;                           // the current altitude
 int    minAlt;                                    // the minimum altitude, in degrees, for goTo's (so we don't try to point too low)
 int    maxAlt;                                    // the maximum altitude, in degrees, for goTo's (to keep the telescope tube away from the mount/tripod)
 
@@ -313,6 +333,7 @@ int    maxAlt;                                    // the maximum altitude, in de
 //                                  Atmel   328  | 2560
 #define LEDposPin  8       // Pin 8 (LED)   PB0    PH5
 #define LEDnegPin  9       // Pin 9 (GND)   PB1    PH6
+#define LEDneg2Pin 10      // Pin 10 (GND)  PB2?   PH7?
 
 // The HA(RA) and Dec jumpers (going to the big easy drivers) are simply four wire jumper cables, each has identical wiring - simple modular construction
 #define DecDirPin  4       // Pin 4 (Dir)   PD4    PG5
@@ -332,6 +353,8 @@ int    maxAlt;                                    // the maximum altitude, in de
 #define LEDposPORT PORTH   //
 #define LEDnegBit  6       // Pin 9
 #define LEDnegPORT PORTH   //
+#define LEDneg2Bit  7      // Pin 10
+#define LEDneg2PORT PORTH  //
 
 #define DecDirBit  5       // Pin 4
 #define DecDirPORT PORTG   //
@@ -378,7 +401,6 @@ int    maxAlt;                                    // the maximum altitude, in de
 #define HAStepPORT PORTB   //
 
 #endif
-
 
 #define DecDirEInit      HIGH
 #define DecDirWInit      LOW
@@ -489,19 +511,16 @@ int     moveDurationDec  = 0;
 // Slew control
 int     moveRates[9]={7,15,30,60,120,240,360,600,900}; 
 //                      1x 2x 4x 8x  16x 24x 40x 60x
-long    moveTimerRateHA  = 0;
-long    moveTimerRateDec;
-long    lastTimerRateHA;
-long    lastTimerRateDec;
+double  moveTimerRate    = 0;
 //
-unsigned long msMoveHA   = 0;
-int     amountMoveHA     = 0;
-int     moveHA           = 0;
-int     accGuideHA       = 0;
-int     accMoveHA        = 0;
-unsigned long msMoveDec  = 0;
-int     amountMoveDec    = 0;
-int     moveDec          = 0;
+long    msMoveHA         = 0;
+long    amountMoveHA     = 0;
+long    moveHA           = 0;
+long    accGuideHA       = 0;
+long    accMoveHA        = 0;
+long    msMoveDec        = 0;
+long    amountMoveDec    = 0;
+long    moveDec          = 0;
 
 // PEC control
 #define PECStatusString  "IpPrR"
@@ -606,13 +625,21 @@ void setup() {
   pinMode(DecStepPin, OUTPUT); 
   pinMode(DecDirPin, OUTPUT); 
   
-  pinMode(LEDnegPin, OUTPUT);        // light status LED
-  pinMode(LEDposPin, OUTPUT);     
+#ifdef STATUS_LED_PINS_ON            // light status LED (provides both +5 and GND)
+  pinMode(LEDnegPin, OUTPUT);
+  pinMode(LEDposPin, OUTPUT);
   CLR(LEDnegPORT, LEDnegBit);
   SET(LEDposPORT, LEDposBit);
+#endif
+
+#ifdef STATUS_LED2_PINS_ON           // light second status LED (provides just GND)
+  pinMode(LEDneg2Pin, OUTPUT);       
+  CLR(LEDneg2PORT, LEDneg2Bit);
+  analogWrite(LEDneg2Pin,250);
+#endif  
 
 #ifdef POWER_SUPPLY_PINS_ON  
-  pinMode(HA5vPin, OUTPUT);         // provide 5V power to stepper drivers if requested
+  pinMode(HA5vPin, OUTPUT);          // provide 5V power to stepper drivers if requested
   SET(HA5vPORT, HA5vBit);
   pinMode(Dec5vPin, OUTPUT);
   SET(Dec5vPORT, Dec5vBit);
@@ -677,14 +704,14 @@ void setup() {
   // 
   // this is the number of ISR ticks per step, used for putting a cap on the maximum speed the ISR will allow the steppers to move 
 
-  // 16MHZ clocks for 48 steps per second + enough speed for guiding
-  SiderealRate    =(siderealInterval/StepsPerSecond)/2;
+  // 16MHZ clocks for steps per second + enough speed for guiding
+  SiderealRate    =siderealInterval/StepsPerSecond;
   timerRateHA     =SiderealRate;
   
   #ifdef DEC_RATIO_ON
-  timerRateDec    =(SiderealRate*2)*timerRateRatio;
+  timerRateDec    =SiderealRate*timerRateRatio;
   #else
-  timerRateDec    =(SiderealRate*2);
+  timerRateDec    =SiderealRate;
   #endif
   
   // backlash takeup rates
@@ -726,8 +753,7 @@ void setup() {
   Serial_Init(9600);
   
   // get the site information, if a GPS were attached we would use that here instead
-  currentSite=EEPROM.read(EE_currentSite);
-  if (currentSite>3) currentSite=0; // site index is valid?
+  currentSite=EEPROM.read(EE_currentSite);  if (currentSite>3) currentSite=0; // site index is valid?
   EEPROM_readQuad(EE_sites+(currentSite)*25+0,(byte*)&latitude);
   EEPROM_readQuad(EE_sites+(currentSite)*25+4,(byte*)&longitude);
   timeZone=EEPROM.read(EE_sites+(currentSite)*25+8)-128;
@@ -810,7 +836,7 @@ void loop() {
         if (currentGuideRate>1) { cli(); targetHA+=moveHA;  sei(); } else { accGuideHA+=moveHA; }
       }
       // for pulse guiding, count down the mS and stop when timed out
-      if (moveDurationHA>0)  { moveDurationHA-=msMoveHA; if (moveDurationHA<=0) { cli(); timerRateHA=lastTimerRateHA; moveDirHA=0; sei(); } }
+      if (moveDurationHA>0)  { moveDurationHA-=msMoveHA; if (moveDurationHA<=0) { cli(); moveTimerRateHA=0; sei(); moveDirHA=0;  } }
     }
     if ((tempMilli-msTimer2)>=msMoveDec) {
       msTimer2=tempMilli;
@@ -820,14 +846,14 @@ void loop() {
         if (moveDirDec=='s') sign=-1; else sign=1; cli(); targetDec=targetDec+sign*amountMoveDec; sei();
       }
       // for pulse guiding, count down the mS and stop when timed out
-      if (moveDurationDec>0) { moveDurationDec-=msMoveDec; if (moveDurationDec<=0) { cli(); timerRateDec=lastTimerRateDec; moveDirDec=0; sei(); } }
+      if (moveDurationDec>0) { moveDurationDec-=msMoveDec; if (moveDurationDec<=0) { cli(); moveTimerRateDec=0; sei(); moveDirDec=0; } }
     }
   }
   
   // PEC ---------------------------------------------------------------------------------------------
     
   // PEC is only active when we're tracking at the sidereal rate with a guide rate that makes sense
-  if ((trackingState==TrackingSidereal) && !(moveDirHA && (currentGuideRate>1))) {
+  if ((trackingState==TrackingSidereal) && !((moveDirHA || moveDirDec) && (currentGuideRate>1))) {
 
     // keep track of our current step position, and when the step position on the worm wraps during playback
     lastWormRotationStepPos = wormRotationStepPos;
@@ -922,11 +948,16 @@ void loop() {
       // if we're ignoring PEC, zero the offset and keep it that way
       cli(); PEC_HA=0; sei(); 
       PEC_SKIP = 0;
+      // no change to tracking rate
+      pecTimerRateHA=0;
     }
 
     // falls in whenever the PECindex changes, which is once a sidereal second
     if (PECindex!=lastPECindex) {
       lastPECindex=PECindex;
+
+      // assume no change to tracking rate
+      pecTimerRateHA=0;
   
       if (PECstatus==RecordPEC) {
         // save the correction 1:2 weighted average
@@ -945,6 +976,8 @@ void loop() {
         // PEC_SKIP is the number of ticks between the added (or skipped) steps
         PEC_SKIP_HA=PEC_buffer[PECindex2]-128;
         if (PEC_SKIP_HA>StepsPerSecond) PEC_SKIP_HA=StepsPerSecond; if (PEC_SKIP_HA<-StepsPerSecond) PEC_SKIP_HA=-StepsPerSecond;
+
+        pecTimerRateHA=PEC_SKIP_HA/StepsPerSecond;
         if (PEC_SKIP_HA==0) PEC_SKIP=(StepsPerWormRotation/StepsPerSecond)+1; 
         else
           PEC_SKIP=StepsPerSecond/abs(PEC_SKIP_HA);
@@ -1029,7 +1062,17 @@ void loop() {
     // reset the sidereal clock once a day, to keep the significant digits from being consumed, debated about including this, but
     // I'm shooting for keeping OnStep reliable for about 50 days of continuous uptime (until millis() rolls over)
     if ((lst_now-lst_start)>24*3600*100) update_lst();
+    
+    // light weight altitude calculation, finishes updating once every ten seconds
+    do_alt_calc();
 
+    // safety checks, keeps mount from tracking past the meridian limit, below horizon limit, or above the overhead limit
+    if (pierSide==PierSideWest) { cli(); if (posHA> (minutesPastMeridianW*StepsPerDegreeHA/4L)) trackingState=TrackingNone; sei(); }
+    if (currentAlt<minAlt) trackingState=TrackingNone;
+    if (currentAlt>maxAlt) trackingState=TrackingNone;
+    
+    // finally, adjust the tracking rate on-the-fly to compensate for refraction
+   // CEquToTracRateCor();
 /*
     // tracking rate check code, detects missed ticks
     if (oops) Serial1_print("!"); else Serial1_print(".");
