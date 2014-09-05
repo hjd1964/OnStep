@@ -184,7 +184,7 @@
 
 // forces initialialization of a host of settings in EEPROM. OnStep does this automatically, most likely, you will want to leave this alone
 #define INIT_KEY false    // set to true to keep automatic initilization from happening.  This is a one-time operation... upload to the Arduino, then set to false and upload again
-#define initKey 915307547 // unique identifier for the current initialization format, do not change
+#define initKey 915307547 // unique identifier for the current initialization format, do not change unless you want to force an initialization.
 
 // ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
 #define MaxRate                96    // this is the minimum number of micro-seconds between micro-steps
