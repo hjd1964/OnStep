@@ -165,10 +165,12 @@ boolean atoi2(char *a, int *i) {
 }
 
 // takes the actual equatorial coordinates and applies the offset correction
-// this takes approx. 5mS, which should be ok for not delaying things too much in the main loop
 boolean EquToCEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1) { 
   double Alt;
   double Azm;
+
+  if (Dec>+90.0) Dec=+90.0;
+  if (Dec<-90.0) Dec=-90.0;
 
   if (abs(Dec)<89.98333333) {
     // breaks-down near the pole (limited to >1' from pole),
@@ -182,6 +184,12 @@ boolean EquToCEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1) 
     return false;
   }
 
+  // set, under the pole
+  if ((abs(*HA1)>9.0) && (*Dec1>(90.0-Lat*Rad))) {
+    *HA1 =*HA1-12; while (*HA1<-12.0) *HA1=*HA1+24.0;
+    *Dec1=(90.0-*Dec1)+90.0;
+  }
+
   // finally, apply index offsets... range limits are disabled here, we're working with offset coords
   *HA1=*HA1-IH;
   *Dec1=*Dec1-ID;
@@ -189,7 +197,6 @@ boolean EquToCEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1) 
 }
 
 // takes the offset corrected coordinates and returns the actual equatorial coordinates 
-// this takes approx. 5mS, which should be ok for not delaying things too much in the main loop
 boolean CEquToEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1) { 
   double Alt;
   double Azm;
@@ -197,6 +204,14 @@ boolean CEquToEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1) 
   // remove the index offsets
   HA=HA+IH;
   Dec=Dec+ID;
+
+  // un-do, under the pole
+  if (Dec>90.0) {
+    Dec=(90.0-Dec)+90.0;
+    HA =HA-12;
+  }
+  while (HA>+12.0) HA=HA-24.0;
+  while (HA<-12.0) HA=HA+24.0;
   if (Dec>+90.0) Dec=+90.0;
   if (Dec<-90.0) Dec=-90.0;
 
@@ -219,6 +234,11 @@ boolean CEquToEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1) 
 void EquToHor(double Lat, double HA, double Dec, double *Alt, double *Azm) {
   double SinAlt;  
   double CosAzm;  
+
+  while (HA>+12.0) HA=HA-24.0;
+  while (HA<-12.0) HA=HA+24.0;
+  if (Dec>+90.0) Dec=+90.0;
+  if (Dec<-90.0) Dec=-90.0;
 
   HA =(HA*15.0)/Rad;
   Dec=Dec/Rad;
@@ -248,6 +268,87 @@ void HorToEqu(double Lat, double Alt, double Azm, double *HA, double *Dec) {
   if (sin(Azm) > 0) { *HA = 360 - *HA; }
   *Dec = *Dec*Rad;
   *HA  = *HA/15.0;
+
+  while (*HA>+12.0) *HA=*HA-24.0;
+  while (*HA<-12.0) *HA=*HA+24.0;
+  if (*Dec>+90.0) *Dec=+90.0;
+  if (*Dec<-90.0) *Dec=-90.0;
+}
+
+// returns the amount of refraction (in arcminutes) at given altitude (degrees), pressure (millibars), and temperature (celsius)
+double Refrac(double Alt, double Pressure=1010.0, double Temperature=15.0) {
+  double TPC=(Pressure/1010.0) * (283.0/(273.0+Temperature));
+  return ( ( 1.02/tan( (Alt+(10.3/(Alt+5.11)))/Rad ) ) ) * TPC;
+}
+
+long lastSiderealInterval;
+void CEquToTracRateCor() {
+  if (customRateActive) {
+
+    double Alt1=currentAlt+0.5;
+    double Alt2=currentAlt-0.5;
+      
+    double Alt1_ = Alt1 - ( Refrac(Alt1) / 60.0 );
+    double Alt2_ = Alt2 - ( Refrac(Alt2) / 60.0 );
+  
+    double newSiderealInterval=siderealInterval * ((double)(( Alt1 - Alt2 ) / ( Alt1_ - Alt2_ )));
+    
+    // program the new rate as needed
+    if (lastSiderealInterval!=newSiderealInterval) {
+      Timer1SetRate(newSiderealInterval/100);
+      lastSiderealInterval=newSiderealInterval;
+    }
+  }
+}
+
+// light weight altitude calculation, finishes updating once every ten seconds
+int ac_step = 0;
+double ac_HA,ac_Dec;
+double ac_sinlat,ac_coslat;
+double ac_sindec,ac_cosdec,ac_cosha;
+double ac_sinalt;
+
+boolean do_alt_calc() {
+  ac_step++;
+
+  // load variables
+  if (ac_step==1) {
+    getApproxEqu(&ac_HA,&ac_Dec,false);
+  } else
+  // convert units
+  if (ac_step==2) {
+    ac_HA =(ac_HA*15.0)/Rad;
+    ac_Dec=ac_Dec/Rad;
+  } else
+  // prep latitude
+  if (ac_step==3) {
+    ac_sinlat=sin(latitude/Rad);
+  } else
+  // prep latitude
+  if (ac_step==4) {
+    ac_coslat=cos(latitude/Rad);
+  } else
+  // prep Dec
+  if (ac_step==5) {
+    ac_sindec=sin(ac_Dec);
+  } else
+  // prep Dec
+  if (ac_step==6) {
+    ac_cosdec=cos(ac_Dec);
+  } else
+  // prep HA
+  if (ac_step==7) {
+    ac_cosha=cos(ac_HA);
+  } else
+  // calc Alt, phase 1
+  if (ac_step==8) {
+    ac_sinalt = (ac_sindec * ac_sinlat) + (ac_cosdec * ac_coslat * ac_cosha); 
+  } else
+  // calc Alt, phase 2
+  if (ac_step==9) {
+    currentAlt=asin(ac_sinalt);
+    ac_step=0;
+  }
 }
 
 // converts Gregorian date (Y,M,D) to Julian day number
