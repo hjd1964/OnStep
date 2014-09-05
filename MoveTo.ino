@@ -12,7 +12,7 @@ void moveTo() {
     origTargetDec=targetDec;
  
     // first phase, move to 90 HA
-    timerRateHA =SiderealRate*2;
+    timerRateHA =SiderealRate;
     #ifdef DEC_RATIO_ON
     timerRateDec=SiderealRate*timerRateRatio;
     #else
@@ -21,8 +21,11 @@ void moveTo() {
 
     // just move HA, not the declination yet
     if (pierSide==PierSideFlipWE1) targetHA=-90L*StepsPerDegreeHA; else targetHA=90L*StepsPerDegreeHA; 
-    targetDec=posDec;
+
     sei();
+
+    // if we're under the pole, slew both axis back at once
+    if (abs((double)posDec/(double)StepsPerDegreeDec)>90.0) { cli(); startDec=posDec; targetDec=90L*StepsPerDegreeDec; sei(); } else { cli(); targetDec=posDec; sei(); }
     
     pierSide++;
   }
@@ -61,8 +64,8 @@ void moveTo() {
     temp=(StepsForRateChange/sqrt(distStartHA));      // speed up the slew
 //    if ((temp<100) && (temp>=10))  temp=9;          // exclude a range of speeds
   }
-  if (temp<MaxRate*16)      temp=MaxRate*16;          // fastest rate
-  if (temp>SiderealRate/2L) temp=SiderealRate/2L;     // slowest rate (4x sidereal), remember SiderealRate is actually twice the sidereal rate
+  if (temp<MaxRate*16)     temp=MaxRate*16;           // fastest rate
+  if (temp>SiderealRate)   temp=SiderealRate;         // slowest rate (1x sidereal)
 
   cli();  timerRateHA=temp;  sei();
 
@@ -79,14 +82,14 @@ void moveTo() {
   #else
   if (temp<MaxRate*16)                temp=MaxRate*16;
   #endif
-  if (temp>SiderealRate/2L) temp=SiderealRate/2L;     // slowest rate (4x sidereal)
+  if (temp>SiderealRate)              temp=SiderealRate; // slowest rate (1x sidereal)
 
   cli(); timerRateDec=temp; sei();
 
   if ((distDestHA<=2) && (distDestDec<=2)) { 
     if ((pierSide==PierSideFlipEW2) || (pierSide==PierSideFlipWE2)) {
       pierSide++;
-      // move to the home position first when flipping sides of the mount
+      // make sure we're at the home position when flipping sides of the mount
       cli(); startDec=posDec; targetDec=90L*StepsPerDegreeDec; sei();
     } else
     if ((pierSide==PierSideFlipEW3) || (pierSide==PierSideFlipWE3)) {
@@ -125,14 +128,14 @@ void moveTo() {
       targetDec=origTargetDec;
       sei();
     } else {
-      // restore normal sidereal tracking 2x in RA, 1x in Dec
+      // restore normal sidereal tracking
       trackingState=lastTrackingState;
       cli(); 
       timerRateHA  =SiderealRate;
       #ifdef DEC_RATIO_ON
-      timerRateDec =SiderealRate*2*timerRateRatio;
+      timerRateDec =SiderealRate*timerRateRatio;
       #else
-      timerRateDec =SiderealRate*2;
+      timerRateDec =SiderealRate;
       #endif
       sei();
       
@@ -161,5 +164,4 @@ void moveTo() {
     }
   }
 }
-
 
