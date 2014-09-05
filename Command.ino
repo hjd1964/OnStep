@@ -159,7 +159,7 @@ void processCommands() {
 //                  1 on success
       if ((command[0]=='$') && (command[1]=='B')) {
         if ((strlen(parameter)>1) && (strlen(parameter)<5)) {
-          if ( (atoi2((char*)&parameter[1],&i) && ((i>=0) && (i<=999))) ) { 
+          if ( (atoi2((char*)&parameter[1],&i)) && ((i>=0) && (i<=999))) { 
             if (parameter[0]=='D') {
               backlashDec=(i*StepsPerDegreeDec)/3600;
               EEPROM_writeInt(EE_backlashDec,backlashDec);
@@ -377,22 +377,20 @@ void processCommands() {
 //          Returns: Nothing
       if (command[1]=='g') {
         if ( (atoi2((char *)&parameter[1],&i)) && ((i>=0) && (i<=16399)) && (parkStatus==NotParked)) { 
-          if ((parameter[0]=='e') || (parameter[0]=='w')) { 
-            if (moveDirHA) { cli(); timerRateHA=lastTimerRateHA; sei(); }
-            moveDirHA=parameter[0];  moveDurationHA=i;  cli(); lastTimerRateHA=timerRateHA; timerRateHA=moveTimerRateHA; sei();
+          if ((parameter[0]=='e') || (parameter[0]=='w')) {
+            if (moveDirHA) { cli(); moveTimerRateHA=0; sei(); }
+            moveDirHA=parameter[0];  
+            moveDurationHA=i;
+            cli(); 
+            if (moveDirHA=='e') moveTimerRateHA=-moveTimerRate; else moveTimerRateHA=moveTimerRate; 
+            sei();
             quietReply=true;
          } else
             if ((parameter[0]=='n') || (parameter[0]=='s')) { 
-              if (moveDirDec) { cli(); timerRateDec=lastTimerRateDec; sei(); }
+              if (moveDirDec) { cli(); moveTimerRateDec=0; sei(); }
               moveDirDec=parameter[0]; 
-              moveDurationDec=i; cli(); 
-              lastTimerRateDec=timerRateDec; 
- #ifdef DEC_RATIO_ON
-             timerRateDec=moveTimerRateDec*timerRateRatio;
- #else
-             timerRateDec=moveTimerRateDec;
- #endif
-              sei();
+              moveDurationDec=i; 
+              cli(); moveTimerRateDec=moveTimerRate; sei();
               quietReply=true;
             } else commandError=true;
         } else commandError=true;
@@ -401,10 +399,10 @@ void processCommands() {
 //         Returns: Nothing
       if ((command[1]=='e') || (command[1]=='w')) { 
         if (parkStatus==NotParked) {
+          if (moveDirHA) { cli(); moveTimerRateHA=0; sei(); }
+          moveDirHA=command[1];
           cli(); 
-          if (moveDirHA) timerRateHA=lastTimerRateHA;
-          moveDirHA=command[1];  
-          lastTimerRateHA=timerRateHA; timerRateHA=moveTimerRateHA; 
+          if (moveDirHA=='e') moveTimerRateHA=-moveTimerRate; else moveTimerRateHA=moveTimerRate; 
           sei();
         }
         quietReply=true;
@@ -413,16 +411,9 @@ void processCommands() {
 //         Returns: Nothing
       if ((command[1]=='n') || (command[1]=='s')) { 
         if (parkStatus==NotParked) {
-          cli();
-          if (moveDirDec) timerRateDec=lastTimerRateDec;
+          if (moveDirDec) { cli(); moveTimerRateDec=0; sei(); }
           moveDirDec=command[1];
-          lastTimerRateDec=timerRateDec; 
- #ifdef DEC_RATIO_ON
-          timerRateDec=moveTimerRateDec*timerRateRatio; 
- #else
-          timerRateDec=moveTimerRateDec; 
- #endif
-          sei();
+          cli(); moveTimerRateDec=moveTimerRate; sei();
         }
         quietReply=true;
       } else
@@ -485,12 +476,8 @@ void processCommands() {
       if (command[0]=='Q') {
         if (command[1]==0) { 
           if (parkStatus==NotParked) {
-            cli();
-            if (moveDirDec) timerRateDec=lastTimerRateDec; 
-            if (moveDirHA)  timerRateHA =lastTimerRateHA; 
-            sei();
-            moveDirDec=0;
-            moveDirHA =0;
+            if (moveDirHA!=0) { cli(); moveTimerRateHA=0; sei(); moveDirHA=0; }
+            if (moveDirDec!=0) { cli(); moveTimerRateDec=0; sei(); moveDirDec=0; }
           }
           quietReply=true; 
         } else
@@ -498,7 +485,7 @@ void processCommands() {
 //         Returns: Nothing
         if ((command[1]=='e') || (command[1]=='w')) { 
           if (parkStatus==NotParked) {
-            moveDirHA=0; cli(); timerRateHA=lastTimerRateHA; sei();
+            if (moveDirHA!=0) { cli(); moveTimerRateHA=0; sei(); moveDirHA=0; }
           }
           quietReply=true; 
         } else
@@ -506,9 +493,9 @@ void processCommands() {
 //         Returns: Nothing
         if ((command[1]=='n') || (command[1]=='s')) {
           if (parkStatus==NotParked) {
-            moveDirDec=0; cli(); timerRateDec=lastTimerRateDec; sei(); 
-            quietReply=true; 
+            if (moveDirDec!=0) { cli(); moveTimerRateDec=0; sei(); moveDirDec=0; }
           }
+          quietReply=true; 
         } else commandError=true;
       } else
 
@@ -590,7 +577,9 @@ void processCommands() {
 //          Set the lowest elevation to which the telescope will goTo
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='h')  { if ((parameter[0]!=0) && (strlen(parameter)<4)) { if ( (atoi2(parameter,&i)) && ((i>=-30) && (i<=30))) { minAlt=i; EEPROM.write(EE_minAlt,minAlt+128); } else commandError=true; } else commandError=true; } else
+      if (command[1]=='h')  { if ((parameter[0]!=0) && (strlen(parameter)<4)) {
+        if ( (atoi2(parameter,&i)) && ((i>=-30) && (i<=30))) { minAlt=i; EEPROM.write(EE_minAlt,minAlt+128); } else commandError=true; 
+      } else commandError=true; } else
 //  :SLHH:MM:SS#
 //          Set the local Time
 //          Return: 0 on failure
@@ -622,7 +611,9 @@ void processCommands() {
 //          Set the overhead elevation limit to DD#
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='o')  { if ((parameter[0]!=0) && (strlen(parameter)<3)) { if ( (atoi2(parameter,&i)) && ((i>=60) && (i<=90))) { maxAlt=i; EEPROM.write(EE_maxAlt,maxAlt); } else commandError=true; } else commandError=true; } else
+      if (command[1]=='o')  { if ((parameter[0]!=0) && (strlen(parameter)<3)) { 
+        if ( (atoi2(parameter,&i)) && ((i>=60) && (i<=90))) { maxAlt=i; EEPROM.write(EE_maxAlt,maxAlt); } else commandError=true; 
+      } else commandError=true; } else
 //  :SrHH:MM.T#
 //  :SrHH:MM:SS#
 //          Set target object RA to HH:MM.T or HH:MM:SS (based on precision setting)
@@ -638,7 +629,13 @@ void processCommands() {
 //          Sets the current site latitude to sDD*MM#
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='t')  { i=highPrecision; highPrecision=false; if (!dmsToDouble(&latitude,parameter,true)) commandError=true; else EEPROM_writeQuad(100+(currentSite)*25+0,(byte*)&latitude); highPrecision=i; } else 
+      if (command[1]=='t')  { 
+        i=highPrecision; highPrecision=false; 
+        if (!dmsToDouble(&latitude,parameter,true)) { commandError=true; } else { 
+          EEPROM_writeQuad(100+(currentSite)*25+0,(byte*)&latitude); 
+        }
+        highPrecision=i;
+      } else 
 //  :STdd.ddddd#
 //          Return: 0 on failure
 //                  1 on success
@@ -670,25 +667,29 @@ void processCommands() {
 //  :T-#   Track slower by 0.1 Hertz
 //  :TS#   Track rage solar
 //  :TL#   Track rate lunar
-//  :TQ#   Track rate default
+//  :TQ#   Track rate custom (stored in EEPROM)
+//  :TR#   Track rate reset custom (to calculated sidereal rate)
+//  :TK#   Track rate king
 //  :Te#   Tracking enable  (OnStep only, replies 0/1)
 //  :Td#   Tracking disable (OnStep only, replies 0/1)
 //         Returns: Nothing
      if (command[0]=='T') {
-       if (command[1]=='+') siderealInterval-=HzCf*0.02; else
-       if (command[1]=='-') siderealInterval+=HzCf*0.02; else
-       if (command[1]=='S') siderealInterval =HzCf*60.0; else                         // solar tracking rate
-       if (command[1]=='L') siderealInterval =HzCf*((60.0/57.9)*60.0); else           // lunar tracking rate
-       if (command[1]=='Q') siderealInterval =HzCf*((60.0/60.16427479)*60.0); else    // default tracking rate
+       if (command[1]=='+') { siderealInterval-=HzCf*(0.02); quietReply=true; } else
+       if (command[1]=='-') { siderealInterval+=HzCf*(0.02); quietReply=true; } else
+       if (command[1]=='S') { siderealInterval =HzCf*(60.0); customRateActive=false; quietReply=true; } else                       // solar tracking rate
+       if (command[1]=='L') { siderealInterval =HzCf*((60.0/57.9)*60.0); customRateActive=false; quietReply=true; } else           // lunar tracking rate
+       if (command[1]=='Q') { EEPROM_readQuad(EE_siderealInterval,(byte*)&siderealInterval); customRateActive=true; quietReply=true; } else  // custom tracking rate
+       if (command[1]=='R') { siderealInterval =HzCf*((60.0/60.16427479)*60.0); customRateActive=false; quietReply=true; } else    // default tracking rate
+       if (command[1]=='K') { siderealInterval =HzCf*((60.0/60.136)*60.0); customRateActive=false; quietReply=true; } else         // king tracking rate
        if ((command[1]=='e') && ((trackingState==TrackingSidereal) || (trackingState==TrackingNone))) trackingState=TrackingSidereal; else
        if ((command[1]=='d') && ((trackingState==TrackingSidereal) || (trackingState==TrackingNone))) trackingState=TrackingNone; else
          commandError=true;
 
-       if ((!commandError) && (command[1]!='e') && (command[1]!='d')) {
-         EEPROM_writeQuad(EE_siderealInterval,(byte*)&siderealInterval);
-         Timer1SetRate(siderealInterval/100);
-         quietReply=true;
-       }
+       // Only burn the new rate if changing the custom tracking rate 
+       if ((customRateActive) && (!commandError) && ((command[1]=='+') || (command[1]=='-'))) EEPROM_writeQuad(EE_siderealInterval,(byte*)&siderealInterval);
+
+       Timer1SetRate(siderealInterval/100);
+       SiderealRate=siderealInterval/StepsPerSecond;
      } else
      
 //   U - Precision Toggle
@@ -703,10 +704,10 @@ void processCommands() {
 //         Returns: sDDD#
 //         Rate Adjustment factor for worm segment NNNN. PecRate = Steps +/- for this 1 second segment
 //         If NNNN is omitted, returns the currently playing segment
-      if ((command[0]=='V') && (command[1]=='R')) {
+     if ((command[0]=='V') && (command[1]=='R')) {
        boolean conv_result=true;
-       if (parameter[0]==0) i=PECindex; else conv_result=atoi2(parameter,&i);
-       if ( (conv_result) && ((i>=0) && (i<PECBufferSize))) {
+       if (parameter[0]==0) { i=PECindex; } else conv_result=atoi2(parameter,&i);
+       if ((conv_result) && ((i>=0) && (i<PECBufferSize))) {
          if (parameter[0]==0) { 
            i=(i-1)%(StepsPerWormRotation/StepsPerSecond); 
            i1=PEC_buffer[i]-128; sprintf(reply,"%+04i,%03i",i1,i); 
@@ -732,7 +733,7 @@ void processCommands() {
            sprintf(x,"%02X",b);
            strcat(reply,x);
          }
-         strcat(reply,"#");
+//         strcat(reply,"#");
        } else commandError=true;
        quietReply=true;
      } else
@@ -741,7 +742,7 @@ void processCommands() {
 //         Returns: DDDDDD#
      if ((command[0]=='V') && (command[1]=='W')) {
        if (parameter[0]==0) {
-         sprintf(reply,"%06u",StepsPerWormRotation);
+         sprintf(reply,"%06ld",StepsPerWormRotation);
          quietReply=true;
        } else commandError=true;
      } else
@@ -758,7 +759,7 @@ void processCommands() {
 //         Read RA PEC record index start
 //         Returns: DDDDDD#
      if ((command[0]=='V') && (command[1]=='I')) {
-         sprintf(reply,"%06i",PECrecord_index);
+         sprintf(reply,"%06ld",PECrecord_index);
          quietReply=true;
      } else
 
@@ -766,7 +767,6 @@ void processCommands() {
 //         Write RA PEC index start
      if ((command[0]=='W') && (command[1]=='I')) {
        commandError=true;
-       // the correct way...
        long l=strtol(parameter,&conv_end,10);
        // see if it converted and is in range
        if ( (&parameter[0]!=conv_end) && ((l>=0) && (l<StepsPerWormRotation))) {
@@ -861,6 +861,7 @@ void processCommands() {
         strcat(reply,HEXS);
 #endif
         if (!supress_frame) strcat(reply,"#");
+//        strcat(reply,"\r");
         Serial1_print(reply);
       }
       }
@@ -921,6 +922,7 @@ boolean buildCommand_serial_one(char c) {
   // (chr)6 is a special status command for the LX200 protocol
   if ((c==(char)6) && (bufferPtr_serial_zero==0)) {
     Serial1_print("G#");
+//    Serial1_print("\r");
   }
 
   // ignore spaces/lf/cr, dropping spaces is another tweek to allow compatibility with LX200 protocol
@@ -975,37 +977,19 @@ void setGuideRate(int g) {
   
   // moveRates[9]={7,15,30,60,120,240,360,600,900}; 
 
-  // this sets how fast the drives CAN move
-
-  // use siderealRate as an basis, it really runs at 2 times the speed (of the sky, half the counts)
-  // so mult. by 2 gets us back to the actual (in the sky) sidereal rate, and mult. by another 15 gets us to a count for arc-seconds/second
-  // 
-  // and finally, subtract just a little bit to make sure the timer moves the stepper just a hair faster than the target position it chases
-  moveTimerRateHA =((SiderealRate*2*15)/moveRates[g])-1;
-
-  #ifdef DEC_RATIO_ON
-  moveTimerRateDec=round(moveTimerRateHA*timerRateRatio);
-  #else
-  moveTimerRateDec=moveTimerRateHA;
-  #endif
+  // this sets the guide rate
+  moveTimerRate=(double)moveRates[g]/15.0;
   
-  // at low speeds, fall back to guide rates based on the 2 x sidereal rate so we can step fast enough to add in the extra guide/PEC steps
-  if (g<=2) moveTimerRateHA /=2;
-  
+  cli();
   // moveRates[9]={7,15,30,60,120,240,360,600,900}; 
-  if (g<=2) { amountMoveHA=1;  } else
-  if (g<=5) { amountMoveHA=8;  } else
-  if (g<=7) { amountMoveHA=24; } else
-            { amountMoveHA=36; }
+  if (g<=1) { amountMoveHA=1; } else // 7,   15
+  if (g<=3) { amountMoveHA=4; } else // 30,  60
+  if (g<=5) { amountMoveHA=8; } else // 120, 240
+  if (g<=7) { amountMoveHA=16; } else // 360, 600
+            { amountMoveHA=24; }     // 900
+  sei();
   amountMoveDec=amountMoveHA;
-  
-  // time between steps for a given rate, for example:
-  // worst case is 10mS (at my stepsPerDegree, this will vary a bit depending on gear ratios on other mounts, but should do as-is for most cases)
-  // g=0:45mS;  g=1:21mS;  g=2:10mS;  g=3:42mS;  g=4:21mS;  g=5:10mS;  g=6:21mS;  g=7:13mS;  g=8:13mS
-  //
-  //              1000/(stepsPerDegreeHA*moveRates[g]/amountMoveHA/3600)
-  //              1000/(    11520       *    60      /      8     /3600) = 41mS per step (a little round off error)
-  //
-  msMoveHA =1000/(((StepsPerDegreeHA *moveRates[g])/amountMoveHA )/3600);
-  msMoveDec=1000/(((StepsPerDegreeDec*moveRates[g])/amountMoveDec)/3600);
+
+  msMoveHA =((3600000.0/(double)StepsPerDegreeHA) /((double)moveRates[g]))*amountMoveHA;
+  msMoveDec=((3600000.0/(double)StepsPerDegreeDec)/((double)moveRates[g]))*amountMoveDec;
 }
