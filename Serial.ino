@@ -117,9 +117,7 @@ char Serial1_read()
   return c;
 }
 
-
 #else  // on non-AVR platforms, try to use the built-in serial stuff...
-
 
 void Serial_Init(unsigned int baud) {
   Serial.begin(baud);
