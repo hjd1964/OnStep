@@ -53,12 +53,6 @@ void getHADec(double *HA, double *Dec) {
   // get the declination
   *Dec=((double)posDec/(double)StepsPerDegreeDec); 
   sei();
-  // adjust HA to +/- 12 hours
-  while (*HA>+12.0) *HA=*HA-24.0;
-  while (*HA<-12.0) *HA=*HA+24.0;
-  // limit declination to +/-90 degrees
-  if (*Dec>+90.0) *Dec=+90.0;
-  if (*Dec<-90.0) *Dec=-90.0;
 }
 
 // gets the telescopes current RA and Dec, set returnHA to true for Horizon Angle instead of RA
@@ -68,8 +62,34 @@ boolean getEqu(double *RA, double *Dec, boolean returnHA) {
   // get the uncorrected HA and Dec
   getHADec(&HA,Dec);
   
-  // correct for polar offset, refraction, coordinate systems, etc. as required
+  // correct for over slew, polar offset, refraction, coordinate systems, etc. as required
   CEquToEqu(latitude,HA,*Dec,&HA,Dec);
+  
+  // return either the RA or the HA depending on returnHA
+  if (!returnHA) *RA=timeRange(LST-HA); else *RA=HA;
+  return true;
+}
+
+// gets the telescopes current RA and Dec, set returnHA to true for Horizon Angle instead of RA
+boolean getApproxEqu(double *RA, double *Dec, boolean returnHA) {
+  double HA;
+  
+  // get the uncorrected HA and Dec
+  getHADec(&HA,Dec);
+  
+  // remove the index offsets
+  HA=HA+IH;
+  *Dec=*Dec+ID;
+  
+  // un-do, under the pole
+  if (*Dec>90.0) {
+    *Dec=(90.0-*Dec)+90.0;
+    HA =HA-12;
+  }
+  while (HA>+12.0) HA=HA-24.0;
+  while (HA<-12.0) HA=HA+24.0;
+  if (*Dec>+90.0) *Dec=+90.0;
+  if (*Dec<-90.0) *Dec=-90.0;
   
   // return either the RA or the HA depending on returnHA
   if (!returnHA) *RA=timeRange(LST-HA); else *RA=HA;
@@ -95,6 +115,8 @@ byte goToEqu(double RA, double Dec) {
   
   // Convert RA into hour angle
   double HA=LST-RA;
+  while (HA>+12.0) HA=HA-24.0;
+  while (HA<-12.0) HA=HA+24.0;
 
   // Check to see if this goto is valid
   EquToHor(latitude,HA,Dec,&Alt,&Azm);
@@ -105,24 +127,20 @@ byte goToEqu(double RA, double Dec) {
   // correct for polar offset, refraction, coordinate systems, etc. as required
   if (!EquToCEqu(latitude,HA,Dec,&HA,&Dec)) return 2;
 
-  // important to make sure the HA/Dec are in range at this point
-  while (HA>+12.0) HA=HA-24.0;
-  while (HA<-12.0) HA=HA+24.0;
-
   // outside limits, too far under the NCP
-  if (abs(HA)>9.0) return 6;
+  //if (abs(HA)>9.0) return 6;
 
   long HA1=HA*15.0*(double)StepsPerDegreeHA;
 
   // check to see if we're doing a meridian flip, if so pre-correct the destination.  ID will get updated during the goTo()
   // same EXACT math as goTo() uses so we're sure to detect the flip every time
-  if (((pierSide==PierSideEast) && (HA1<-(minutesPastMeridian*StepsPerDegreeHA/4L))) ||
-      ((pierSide==PierSideWest) && (HA1> (minutesPastMeridian*StepsPerDegreeHA/4L)))) {
+  if (((pierSide==PierSideEast) && (HA1<-(minutesPastMeridianE*StepsPerDegreeHA/4L))) ||
+      ((pierSide==PierSideWest) && (HA1> (minutesPastMeridianW*StepsPerDegreeHA/4L)))) {
     Dec=Dec+ID+ID;
   }
 
-  if (Dec>+90.0) Dec=+90.0;
-  if (Dec<-90.0) Dec=-90.0;
+//  if (Dec>+90.0) Dec=+90.0;
+//  if (Dec<-90.0) Dec=-90.0;
   
   // goto function takes HA and Dec in steps
   return goTo(HA1,Dec*(double)StepsPerDegreeDec);
@@ -146,13 +164,13 @@ void goToEx(long HASteps, long DecSteps, byte gotoPierSide) {
   if (pierSide!=gotoPierSide) {
     // if it's possible to do a meridian flip, force it
     if (pierSide==PierSideEast) {
-      if (HASteps< (minutesPastMeridian*StepsPerDegreeHA/4L)) {
+      if (HASteps< (minutesPastMeridianE*StepsPerDegreeHA/4L)) {
         pierSide=PierSideFlipEW1;
         ID=-ID;  // correct the index if we're crossing the meridian
       }
     } else
     if (pierSide==PierSideWest) {
-      if (HASteps>-(minutesPastMeridian*StepsPerDegreeHA/4L)) {
+      if (HASteps>-(minutesPastMeridianW*StepsPerDegreeHA/4L)) {
         pierSide=PierSideFlipWE1; 
         ID=-ID;  // correct the index if we're crossing the meridian
       }
@@ -169,20 +187,20 @@ byte goTo(long HASteps, long DecSteps) {
   atHome=false;
 
   cli();
-  timerRateHA=SiderealRate*2;
+  timerRateHA=SiderealRate;
   startHA    =posHA;
   targetHA   =HASteps;
   sei();
 
   // handle Meridian flip
   if (pierSide==PierSideEast) {
-    if (targetHA<-(minutesPastMeridian*StepsPerDegreeHA/4L)) {
+    if (targetHA<-(minutesPastMeridianE*StepsPerDegreeHA/4L)) {
       pierSide=PierSideFlipEW1; 
       ID=-ID;  // correct the index if we're crossing the meridian
     }
   } else
   if (pierSide==PierSideWest) {
-    if (targetHA> (minutesPastMeridian*StepsPerDegreeHA/4L)) {
+    if (targetHA> (minutesPastMeridianW*StepsPerDegreeHA/4L)) {
       pierSide=PierSideFlipWE1; 
       ID=-ID;  // correct the index if we're crossing the meridian
     }
@@ -211,9 +229,9 @@ byte goTo(long HASteps, long DecSteps) {
   cli(); 
   targetDec   =DecSteps;  
   #ifdef DEC_RATIO_ON
-  timerRateDec=SiderealRate*2*timerRateRatio;
+  timerRateDec=SiderealRate*timerRateRatio;
   #else
-  timerRateDec=SiderealRate*2;
+  timerRateDec=SiderealRate;
   #endif
   startDec    =posDec;
   sei();
@@ -223,6 +241,3 @@ byte goTo(long HASteps, long DecSteps) {
 
   return 0;
 }
-
-
-
