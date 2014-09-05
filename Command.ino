@@ -159,7 +159,7 @@ void processCommands() {
 //                  1 on success
       if ((command[0]=='$') && (command[1]=='B')) {
         if ((strlen(parameter)>1) && (strlen(parameter)<5)) {
-          if ( (atoi2((char*)&parameter[1]),&i) && ((i>=0) && (i<=999))) { 
+          if ( (atoi2((char*)&parameter[1],&i) && ((i>=0) && (i<=999))) { 
             if (parameter[0]=='D') {
               backlashDec=(i*StepsPerDegreeDec)/3600;
               EEPROM_writeInt(EE_backlashDec,backlashDec);
