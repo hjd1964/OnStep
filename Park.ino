@@ -11,12 +11,12 @@ boolean setPark() {
     // turn off PEC for a moment
     cli(); long l = PEC_HA; PEC_HA=0; sei();
     
-    // SiderealRate (which is really twice the sidereal rate and another 10X = 20X speed), ignore rate ratios - we're working in steps
+    // SiderealRate (x20 speed), ignore rate ratios - we're working in steps
     cli();
     long LasttimerRateHA =timerRateHA;
     long LasttimerRateDec=timerRateDec;
-    timerRateHA =SiderealRate/10L;
-    timerRateDec=SiderealRate/10L;
+    timerRateHA =SiderealRate/20L;
+    timerRateDec=SiderealRate/20L;
     sei();
     
     // find a park position and store it, the main loop isn't running while we're here
@@ -72,12 +72,12 @@ boolean setPark() {
 // takes up backlash and returns to the current position
 boolean parkClearBacklash() {
 
-  // SiderealRate (which is really twice the sidereal rate and another 5X = 10X speed), ignore rate ratios for the moment - we're working in steps
+  // SiderealRate (x10 speed), ignore rate ratios for the moment - we're working in steps
   cli();
   long LasttimerRateHA =timerRateHA;
   long LasttimerRateDec=timerRateDec;
-  timerRateHA =SiderealRate/5L;
-  timerRateDec=SiderealRate/5L;
+  timerRateHA =SiderealRate/10L;
+  timerRateDec=SiderealRate/10L;
   sei();
 
   // figure out how long we'll have to wait at 10x speed for the backlash to clear (+10%)
@@ -180,6 +180,5 @@ boolean unpark() {
   };
   return false;
 }
-
 
 
