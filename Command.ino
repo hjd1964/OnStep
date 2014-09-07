@@ -242,7 +242,9 @@ void processCommands() {
 //         A # terminated string with the name of the requested site.
       if ((command[1]=='M') || (command[1]=='N') || (command[1]=='O') || (command[1]=='P'))  { 
         i=(byte)command[1]-(byte)'L';
-        EEPROM_readString(EE_sites+i*25+9,reply); quietReply=true; 
+        EEPROM_readString(EE_sites+i*25+9,reply); 
+        if (reply[0]==0) { strcat(reply,"None"); }
+        quietReply=true; 
       } else
 //  :Gm#   Gets the meridian pier-side
 //         Returns: E#, W#, N# (none/parked), ?# (Meridian flip in progress) 
