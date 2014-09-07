@@ -94,6 +94,7 @@
  * 07-22-2014          1.0a1             Changed logic of tracking rate command :TQ#, now only stores the custom sidereal rate (and any changes +/-) in EEPROM
  * 08-04-2014          1.0a2             Switched to running the motor timers at the sidereal rate. Support added for goto/operation under the celestial pole.
  *                                       Safety check code, should keep mount from tracking past the meridian limit, below horizon limit, or above the overhead limit.
+ * 09-07-2014          1.0a3             Fix for empty site name return command framing problem
  *
  *
  * Author: Howard Dutton
@@ -144,8 +145,8 @@
 #include "errno.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "08 04 14"
-#define FirmwareNumber "1.0a2"
+#define FirmwareDate   "09 07 14"
+#define FirmwareNumber "1.0a3"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
