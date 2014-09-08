@@ -144,19 +144,18 @@ void processCommands() {
           commandError=true; 
         } else commandError=true; 
       } else
-//   $B - Backlash Compensation
-//  :$BDdd# Set Altitude/Dec Antibacklash
+//   $ - Set parameter
+//  :$BDddd# Set Dec Antibacklash
 //          Return: 0 on failure
 //                  1 on success
-//  :$BRdd# Set Azimuth/RA Antibacklash
-//          Return: Nothing
-//         Set the Backlash values.  Units are arc-seconds
-//         For HA  when slewing east takes this many additional steps
-//         For Dec when slewing takes this many additional steps
-//         for this reason, calls to the GetEqu command need to have a correction applied to remove
-//         this effect.
+//  :$BRddd# Set RA Antibacklash
 //          Return: 0 on failure
 //                  1 on success
+//          Set the Backlash values.  Units are arc-seconds
+//          For HA  when slewing east takes this many additional steps
+//          For Dec when slewing takes this many additional steps
+//          for this reason, calls to the GetEqu command need to have a correction applied to remove
+//          this effect.
       if ((command[0]=='$') && (command[1]=='B')) {
         if ((strlen(parameter)>1) && (strlen(parameter)<5)) {
           if ( (atoi2((char*)&parameter[1],&i)) && ((i>=0) && (i<=999))) { 
@@ -171,7 +170,24 @@ void processCommands() {
           } else commandError=true;
         } else commandError=true;
       } else
-      
+//   % Return parameter
+//  :%BD# Get Dec Antibacklash
+//          Return: ddd#
+//  :%BR# Get RA Antibacklash
+//          Return: ddd#
+//          Get the Backlash values.  Units are arc-seconds
+      if ((command[0]=='%') && (command[1]=='B')) {
+        if (parameter[0]=='D') {
+            i=((backlashDec*3600)/StepsPerDegreeDec);
+            sprintf(reply,"%03d",i);
+            quietReply=true; 
+        } else
+        if (parameter[0]=='R') {
+            i=((backlashHA*3600)/StepsPerDegreeHA);
+            sprintf(reply,"%03d",i);
+            quietReply=true; 
+        } else commandError=true;
+      } else
 //   C - Sync Control
 //  :CS#   Synchonize the telescope with the current right ascension and declination coordinates
 //  :CM#   Synchonize the telescope with the current database object (as above)
