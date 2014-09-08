@@ -26,24 +26,6 @@ void processCommands() {
 // Handles empty and one char replies
       reply[0]=0; reply[1]=0;
 
-//   @ - Parameter read/write
-        if (command[0]=='@') {
-//  :@W??SSSSS#  Write value, address ??
-//         Returns:
-//         1: If value accepted
-//         0: Failure 
-/*          if (command[1]=='W') {
-            if ((parameter[0]=='D') && (parameter[1]=='O')) {
-              _DO=atoi((char*)parameter[2]);
-            } else
-            if (parameter[0]=='P') && (parameter[l]=='D')) {
-              _PD=atoi((char*)parameter[2]);
-            } else commandError=true;
-          } else
-          if (command[1]=='R') {
-          }  else commandError=true;
-*/        } else
-
 //   A - Alignment Commands
       if (command[0]=='A') {
 //  :An#  Start Telescope Manual Alignment Sequence
@@ -152,10 +134,6 @@ void processCommands() {
 //          Return: 0 on failure
 //                  1 on success
 //          Set the Backlash values.  Units are arc-seconds
-//          For HA  when slewing east takes this many additional steps
-//          For Dec when slewing takes this many additional steps
-//          for this reason, calls to the GetEqu command need to have a correction applied to remove
-//          this effect.
       if ((command[0]=='$') && (command[1]=='B')) {
         if ((strlen(parameter)>1) && (strlen(parameter)<5)) {
           if ( (atoi2((char*)&parameter[1],&i)) && ((i>=0) && (i<=999))) { 
