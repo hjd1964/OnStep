@@ -467,13 +467,14 @@ void processCommands() {
       } else
 
 //   Q - Movement Commands
-//  :Q#    Halt all slews
+//  :Q#    Halt all slews, stops goto
 //         Returns: Nothing
       if (command[0]=='Q') {
         if (command[1]==0) { 
           if (parkStatus==NotParked) {
             if (moveDirHA!=0) { cli(); moveTimerRateHA=0; sei(); moveDirHA=0; }
             if (moveDirDec!=0) { cli(); moveTimerRateDec=0; sei(); moveDirDec=0; }
+            if (trackingState==TrackingMoveTo) { abortSlew=true; }
           }
           quietReply=true; 
         } else
