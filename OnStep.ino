@@ -80,7 +80,7 @@
  * 05-22-2014          0.99x13           Added guiding to status command ":GU#"
  * 05-29-2014          0.99x14           Added feature. First-time uploads of OnStep will burn defaults into EEPROM automatically now
  *                                       *** this will overwrite your parking info, goto limits, etc. (once) when upgrading to this version unless you set INIT_KEY to true  ***
- *                                       *** if upgrading from a prior experimental branch version, set INIT_KEY to true and uploaded then back to false and upload again    ***
+ *                                       *** if upgrading from a prior version, set INIT_KEY to true and uploaded then back to false and upload again                        ***
  *                                       *** those uploading for the first time or upgrading from the main branch should just leave INIT_KEY alone (false)                   ***
  * 06-05-2014          0.99x15           Fixed RESCUE_MODE code, thanks to N_DD for pointing this out.
  * 06-20-2014          0.99b16           Merged Paul Stoffregen's Teensy3.1 support code
@@ -92,9 +92,16 @@
  * 06-23-2014          0.99b18           Refinement of tracking commands in Command.ino, fixed Park/Unpark bug (int temporary storage should be long) in Park.ino and OnStep.ino
  * 06-23-2014          0.99b19           Fixes to Timer.ino and OnStep.ino to reduce jitter on Teensy3.1
  * 07-22-2014          1.0a1             Changed logic of tracking rate command :TQ#, now only stores the custom sidereal rate (and any changes +/-) in EEPROM
- * 08-04-2014          1.0a2             Switched to running the motor timers at the sidereal rate. Support added for goto/operation under the celestial pole.
- *                                       Safety check code, should keep mount from tracking past the meridian limit, below horizon limit, or above the overhead limit.
- * 09-07-2014          1.0a3             Fix for empty site name return command framing problem
+ * 08-04-2014          1.0a2             Switched to running the motor timers at the sidereal rate. Support added for goto/operation under the celestial pole
+ *                                       Safety check code, should keep mount from tracking past the meridian limit, below horizon limit, or above the overhead limit
+ * 09-07-2014          1.0a3             Getting blank site names causes problems so "None" is now returned for empty site names. Added commands to return backlash values.
+ * 09-08-2014          1.0a4             Code to allow operation in the southern hemisphere (declination of the "celestial pole" changes between NCP +90 and SCP -90 based on latitude.)
+ *                                       RA motor direction is also reversed verses north latitude setting.  Added code to stop Gotos with :Q# command.
+ * 09-29-2014          1.0a5             When ready to start/resume playing PEC, the playback rate is now raised so the motors quickly arrive at the new position in the playback sequence.
+ *                                       This is needed due to the changes made in 1.0a2  Goto minimum rate is now 4x sidereal, makes more sense to stay a little fast as we approach the target.
+ *                                       Cleaned up code, renamed some variables, fixed backlash/tracking rate problem, and added some comments in Timer.ino  
+ *                                       Fixed goto meridian flip logic problem and generally cleaned up the goto initiation code.
+ *                                       Fixed altitude calculation used for limits, horizon and overhead limits now stop tracking.
  *
  *
  * Author: Howard Dutton
@@ -145,8 +152,8 @@
 #include "errno.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "09 07 14"
-#define FirmwareNumber "1.0a3"
+#define FirmwareDate   "09 29 14"
+#define FirmwareNumber "1.0a5"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -185,11 +192,11 @@
 
 // forces initialialization of a host of settings in EEPROM. OnStep does this automatically, most likely, you will want to leave this alone
 #define INIT_KEY false    // set to true to keep automatic initilization from happening.  This is a one-time operation... upload to the Arduino, then set to false and upload again
-#define initKey 915307547 // unique identifier for the current initialization format, do not change unless you want to force an initialization.
+#define initKey 915307547 // unique identifier for the current initialization format, do not change
 
 // ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
 #define MaxRate                96    // this is the minimum number of micro-seconds between micro-steps
-                                     // minimum is around 16, default is 96, higher is ok
+                                     // minimum is around 16 (Teensy3.1) or 32 (Mega2560), default is 96, higher is ok
                                      
 #define StepsForRateChange  128000.0 // number of steps during acceleration and de-acceleration: higher values=longer acceleration/de-acceleration
                                      // for the most part this doesn't need to be changed, but adjust when needed
@@ -212,18 +219,19 @@
 #define StepsPerSecond         80    // the steps per second sidereal rate = 48 = (11520/3600)*15 - OnStep can handle between 12 and 100 steps/second
                                      // when sidereal tracking (StepsPerWormRotation must be evenly divisible by StepsPerSecond)
 
-#define StepsPerWormRotation  48000L // PEC, number of steps for a complete worm rotation (in RA), (StepsPerDegreeHA*360)/gear_reduction2 
+#define StepsPerWormRotation  38400L // PEC, number of steps for a complete worm rotation (in RA), (StepsPerDegreeHA*360)/gear_reduction2 
                                      // the EM10b has a worm-wheel with 144 teeth (19200*360)/144 = 48000
                                      // According to this the EM10b needs 600 (seconds) of PEC buffer.  Since the transfer gears have a rather large effect on the periodic error
                                      // I have two options 1. use 4x the 48000 = 192000 (2400 seconds.)  This is 4 complete rotations of the worm and 5 complete rotations of the transfer gear.
                                      //                       I expect the results would be very good, but since PECPrep is limited to 1000S I don't bother.
                                      //                    2. use 480 (seconds) of PEC buffer.  This is easier to program and keeps the PE at low levels (<3 arc-sec.)
+                                     //                       so pretending we have 180 teeth (19200*360)/180 = 38400
 
 #define PECBufferSize        2400    // PEC, buffer size, max should be no more than 3384, your required buffer size >= StepsPerWormRotation/StepsPerSecond
                                      // for the most part this doesn't need to be changed, but adjust when needed.  824 seconds is the default
 
 #define REVERSE_HA_ON                // Reverse the direction of movement for the HA/RA axis, adjust as needed or reverse your wiring so things move in the right direction
-#define REVERSE_DEC_ON               // Reverse the direction of movement for the Dec axis
+#define REVERSE_DEC_ON               // Reverse the direction of movement for the Dec axis (both reversed for my EM10b, both normal for G11) 
 
 long minutesPastMeridianE =   60;     // for goto's, how far past the meridian to allow before we do a flip (if on the East side of the pier) - one hour of RA is the default = 60
 long minutesPastMeridianW =   60;     // as above, if on the West side of the pier
@@ -300,6 +308,7 @@ void TIMER4_COMPA_vect(void);
 
 // Location ----------------------------------------------------------------------------------------------------------------
 double latitude  = 0.0;
+long celestialPoleDec = 90L;
 double longitude = 0.0;
 
 volatile long posHA      = 90L*StepsPerDegreeHA;   // hour angle position in steps
@@ -403,12 +412,12 @@ int    maxAlt;                                    // the maximum altitude, in de
 
 #endif
 
-#define DecDirEInit      HIGH
-#define DecDirWInit      LOW
-#define HADirEInit       LOW
-#define HADirWInit       HIGH
+#define DecDirEInit      1
+#define DecDirWInit      0
+#define HADirNCPInit     0
+#define HADirSCPInit     1
 volatile byte DecDir     = DecDirEInit;
-volatile byte HADir      = HADirEInit;
+volatile byte HADir      = HADirNCPInit;
 
 // Status ------------------------------------------------------------------------------------------------------------------
 boolean highPrecision    = true;
@@ -433,6 +442,7 @@ byte alignMode           = AlignNone;
 #define PierSideNone     0
 #define PierSideEast     1
 #define PierSideWest     2
+#define PierSideBest     3
 #define PierSideFlipWE1  10
 #define PierSideFlipWE2  11
 #define PierSideFlipWE3  12
@@ -537,6 +547,7 @@ boolean PECfirstRecord   = false;
 boolean PECstatus        = IgnorePEC;
 boolean PECrecorded      = false;
 long    PECrecord_index  = 0;
+double  PECstartDelta    = 0;
 long    lastWormRotationStepPos = -1;
 long    wormRotationStepPos = 0;
 long    PECindex         = 0;
@@ -700,12 +711,7 @@ void setup() {
   // this sets the sidereal timer, controls the tracking speed so that the mount moves precisely with the stars
   EEPROM_readQuad(EE_siderealInterval,(byte*)&siderealInterval);
 
-  // this sets the maximum speed that the motors can step while sidereal tracking, one half the siderealInterval for twice the speed
-  // this is so guiding corrections can be played back at up to 2X the sidereal rate in RA, 1X in Dec
-  // 
-  // this is the number of ISR ticks per step, used for putting a cap on the maximum speed the ISR will allow the steppers to move 
-
-  // 16MHZ clocks for steps per second + enough speed for guiding
+  // 16MHZ clocks for steps per second of sidereal tracking
   SiderealRate    =siderealInterval/StepsPerSecond;
   timerRateHA     =SiderealRate;
   
@@ -716,8 +722,8 @@ void setup() {
   #endif
   
   // backlash takeup rates
-  timerRateBacklashHA =timerRateHA /(BacklashTakeupRate/2);
-  timerRateBacklashDec=timerRateDec/(BacklashTakeupRate);
+  timerRateBacklashHA =timerRateHA /BacklashTakeupRate;
+  timerRateBacklashDec=timerRateDec/BacklashTakeupRate;
 
   // initialize the timers that handle the sidereal clock, RA, and Dec
   Timer1SetRate(siderealInterval/100);
@@ -756,6 +762,8 @@ void setup() {
   // get the site information, if a GPS were attached we would use that here instead
   currentSite=EEPROM.read(EE_currentSite);  if (currentSite>3) currentSite=0; // site index is valid?
   EEPROM_readQuad(EE_sites+(currentSite)*25+0,(byte*)&latitude);
+  if (latitude<0) celestialPoleDec=-90L; else celestialPoleDec=90L;
+  if (celestialPoleDec>0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
   EEPROM_readQuad(EE_sites+(currentSite)*25+4,(byte*)&longitude);
   timeZone=EEPROM.read(EE_sites+(currentSite)*25+8)-128;
   EEPROM_readString(EE_sites+(currentSite)*25+9,siteName);
@@ -876,7 +884,9 @@ void loop() {
           // sum corrections to this point
           long m=0; for (int l=0; l<PECindex; l++) { m+=PEC_buffer[l]-128; }
           // move to the corrected location, this might take a few seconds and can be abrupt (after goto's or when unparking)
-          cli(); PEC_HA = m; sei();
+          cli(); PEC_HA = m; sei(); 
+          PECstartDelta=abs(m)/StepsPerSecond; // in units of seconds, ahead or behind, all that matters is how long the rate has to be increased for
+
           // playback starts now
           cli(); PECsiderealTimer = lst; sei();
         }
@@ -891,7 +901,7 @@ void loop() {
       }
 
       // at the start of a worm cycle if wormRotationStepPos rolled over...
-      // this only works because targetHA can't move backward while tracking at +/- 1x sidereal
+      // this only works because targetHA can't move backward while tracking and guiding at +/- 1x sidereal
       // it also works while guiding and playing PEC because the PEC corrections don't get counted in the targetHA location
       if (lastWormRotationStepPos>wormRotationStepPos) {
 
@@ -979,6 +989,10 @@ void loop() {
         if (PEC_SKIP_HA>StepsPerSecond) PEC_SKIP_HA=StepsPerSecond; if (PEC_SKIP_HA<-StepsPerSecond) PEC_SKIP_HA=-StepsPerSecond;
 
         pecTimerRateHA=PEC_SKIP_HA/StepsPerSecond;
+        // And run the PEC rate at another +/-5x to cover any corrections that should have been applied up to this point in the worm cycle
+        // when just (re)starting PEC not worried about how smooth the play back is here, this will be over in a moment just run fast to get there 
+        if (PECstartDelta>0) { PECstartDelta-=30; pecTimerRateHA+=5; }
+        
         if (PEC_SKIP_HA==0) PEC_SKIP=(StepsPerWormRotation/StepsPerSecond)+1; 
         else
           PEC_SKIP=StepsPerSecond/abs(PEC_SKIP_HA);
@@ -1065,14 +1079,32 @@ void loop() {
     if ((lst_now-lst_start)>24*3600*100) update_lst();
     
     // light weight altitude calculation, finishes updating once every ten seconds
-    do_alt_calc();
+    if (trackingState!=TrackingNone) do_alt_calc();
 
     // safety checks, keeps mount from tracking past the meridian limit, below horizon limit, or above the overhead limit
-    if (pierSide==PierSideWest) { cli(); if (posHA> (minutesPastMeridianW*StepsPerDegreeHA/4L)) trackingState=TrackingNone; sei(); }
-    if (currentAlt<minAlt) trackingState=TrackingNone;
-    if (currentAlt>maxAlt) trackingState=TrackingNone;
+    if (pierSide==PierSideWest) { cli(); if (posHA> (minutesPastMeridianW*StepsPerDegreeHA/4L)) trackingState=TrackingNone; sei();  }
+    if ((currentAlt<minAlt) || (currentAlt>maxAlt)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
     
-    // finally, adjust the tracking rate on-the-fly to compensate for refraction
+/*
+    char temp[160];
+    cli();
+    sprintf(temp,"alt=%ld, maxAlt=%ld \r\n",(long)currentAlt,(long)maxAlt);
+    sei();
+    Serial_print(temp);
+    Serial_transmit();
+*/
+    
+    // this is useful for seeing how tracking behaves
+/*
+    char temp[160];
+    cli();
+    sprintf(temp,"blHA=%d, backlashHA=%d, deltaHA=%ld \r\n",blHA,blDec,targetHA-(posHA+PEC_HA));
+    sei();
+    Serial1_print(temp);
+    Serial1_transmit();
+*/
+
+   // finally, adjust the tracking rate on-the-fly to compensate for refraction
    // CEquToTracRateCor();
 /*
     // tracking rate check code, detects missed ticks
