@@ -120,30 +120,31 @@ byte goToEqu(double RA, double Dec) {
 
   // Check to see if this goto is valid
   EquToHor(latitude,HA,Dec,&Alt,&Azm);
-
   if (Alt<minAlt) return 1; // below horizon
   if (Alt>maxAlt) return 6; // outside limits
 
-  // correct for polar offset, refraction, coordinate systems, etc. as required
+  // correct for polar offset, refraction, coordinate systems, operation past pole, etc. as required
   if (!EquToCEqu(latitude,HA,Dec,&HA,&Dec)) return 2;
-
-  // outside limits, too far under the NCP
-  //if (abs(HA)>9.0) return 6;
 
   long HA1=HA*15.0*(double)StepsPerDegreeHA;
 
   // check to see if we're doing a meridian flip, if so pre-correct the destination.  ID will get updated during the goTo()
   // same EXACT math as goTo() uses so we're sure to detect the flip every time
-  if (((pierSide==PierSideEast) && (HA1<-(minutesPastMeridianE*StepsPerDegreeHA/4L))) ||
-      ((pierSide==PierSideWest) && (HA1> (minutesPastMeridianW*StepsPerDegreeHA/4L)))) {
-    Dec=Dec+ID+ID;
-  }
+//  if (((pierSide==PierSideEast) && (HA1<-(minutesPastMeridianE*StepsPerDegreeHA/4L))) ||
+//      ((pierSide==PierSideWest) && (HA1> (minutesPastMeridianW*StepsPerDegreeHA/4L)))) {
+//    Dec=Dec+ID+ID;
+//  }
 
-//  if (Dec>+90.0) Dec=+90.0;
-//  if (Dec<-90.0) Dec=-90.0;
-  
   // goto function takes HA and Dec in steps
-  return goTo(HA1,Dec*(double)StepsPerDegreeDec);
+  // when in align mode, force pier side
+  if ((alignMode==AlignOneStar1) || (alignMode==AlignTwoStar1) || (alignMode==AlignThreeStar1)) {
+    return goTo(HA1,Dec*(double)StepsPerDegreeDec,PierSideWest);
+  } else
+  if ((alignMode==AlignTwoStar2) || (alignMode==AlignThreeStar2) || (alignMode==AlignThreeStar3)) {
+    return goTo(HA1,Dec*(double)StepsPerDegreeDec,PierSideEast);
+  } else {
+    return goTo(HA1,Dec*(double)StepsPerDegreeDec,PierSideBest);
+  }
 }
 
 // moves the mount to a new Altitude and Azmiuth (Alt,Azm) in degrees
@@ -157,30 +158,11 @@ byte goToHor(double *Alt, double *Azm) {
   return goToEqu(RA,Dec);
 }
 
-// moves the mount to a new Hour Angle and Declination (HA,Dec) and on the specified pier side, if possible
-// if not possible, the mount does a normal goto
-void goToEx(long HASteps, long DecSteps, byte gotoPierSide) {
-  // this only applies if we're not on the correct side
-  if (pierSide!=gotoPierSide) {
-    // if it's possible to do a meridian flip, force it
-    if (pierSide==PierSideEast) {
-      if (HASteps< (minutesPastMeridianE*StepsPerDegreeHA/4L)) {
-        pierSide=PierSideFlipEW1;
-        ID=-ID;  // correct the index if we're crossing the meridian
-      }
-    } else
-    if (pierSide==PierSideWest) {
-      if (HASteps>-(minutesPastMeridianW*StepsPerDegreeHA/4L)) {
-        pierSide=PierSideFlipWE1; 
-        ID=-ID;  // correct the index if we're crossing the meridian
-      }
-    }
-  }
-  goTo(HASteps,DecSteps);
-}
-
 // moves the mount to a new Hour Angle and Declination (HA,Dec) - both are in steps, all other HA's and Dec's are in Hours and Degrees
-byte goTo(long HASteps, long DecSteps) {
+byte goTo(long HASteps, long DecSteps, byte gotoPierSide) {
+  // HA goes from +90...0..-90
+  //                W   .   E
+
   // make sure we're not already moving somewhere
   if ((trackingState==TrackingMoveTo) || moveDirHA || moveDirDec) return 4;
   
@@ -192,20 +174,34 @@ byte goTo(long HASteps, long DecSteps) {
   targetHA   =HASteps;
   sei();
 
-  // handle Meridian flip
+  // where the allowable hour angles are
+  long eastOfPierMaxHA= 9*15*StepsPerDegreeHA;
+  long eastOfPierMinHA=-(minutesPastMeridianE*StepsPerDegreeHA/4L);
+  long westOfPierMaxHA= (minutesPastMeridianW*StepsPerDegreeHA/4L);
+  long westOfPierMinHA=-9*15*StepsPerDegreeHA;
+
+  // override the defaults and force a flip if near the meridian and possible
+  if ((gotoPierSide!=PierSideBest) && (pierSide!=gotoPierSide)) {
+    eastOfPierMinHA= (minutesPastMeridianW*StepsPerDegreeHA/4L);
+    westOfPierMaxHA=-(minutesPastMeridianE*StepsPerDegreeHA/4L);
+  }
+  
+  // if only do a meridian flip, if we have to
   if (pierSide==PierSideEast) {
-    if (targetHA<-(minutesPastMeridianE*StepsPerDegreeHA/4L)) {
+    if ((targetHA>eastOfPierMaxHA) || (targetHA<eastOfPierMinHA)) {
       pierSide=PierSideFlipEW1; 
+      DecSteps=DecSteps+ID*2.0*(double)StepsPerDegreeDec;
       ID=-ID;  // correct the index if we're crossing the meridian
     }
   } else
   if (pierSide==PierSideWest) {
-    if (targetHA> (minutesPastMeridianW*StepsPerDegreeHA/4L)) {
+    if ((targetHA>westOfPierMaxHA) || (targetHA<westOfPierMinHA)) {
       pierSide=PierSideFlipWE1; 
+      DecSteps=DecSteps+ID*2.0*(double)StepsPerDegreeDec;
       ID=-ID;  // correct the index if we're crossing the meridian
     }
-  } else { 
-    // pierSide=PierSideNone
+  } else
+  if (pierSide==PierSideNone) {
     // ID flips back and forth +/-, but that doesn't matter, if we're homed the ID is 0
     // we're in the polar home position, so pick a side (of the pier)
     if (targetHA<0) {
@@ -213,7 +209,7 @@ byte goTo(long HASteps, long DecSteps) {
       // default, in the polar-home position is +90 deg. HA
       pierSide=PierSideWest;
       DecDir  = DecDirWInit;
-
+    
       cli();
       posHA=posHA-180L*StepsPerDegreeHA;
       startHA=posHA;
