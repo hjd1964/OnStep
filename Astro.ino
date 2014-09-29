@@ -185,9 +185,13 @@ boolean EquToCEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1) 
   }
 
   // set, under the pole
-  if ((abs(*HA1)>9.0) && (*Dec1>(90.0-Lat*Rad))) {
+  if ((Lat>=0) && ((abs(*HA1)>9.0) && (*Dec1>(90.0-Lat*Rad)))) {
     *HA1 =*HA1-12; while (*HA1<-12.0) *HA1=*HA1+24.0;
     *Dec1=(90.0-*Dec1)+90.0;
+  }
+  if ((Lat<0) && ((abs(*HA1)>9.0) && (*Dec1<(-90.0-Lat*Rad)))) {
+    *HA1 =*HA1-12; while (*HA1<-12.0) *HA1=*HA1+24.0;
+    *Dec1=(-90.0-*Dec1)-90.0;
   }
 
   // finally, apply index offsets... range limits are disabled here, we're working with offset coords
@@ -206,10 +210,9 @@ boolean CEquToEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1) 
   Dec=Dec+ID;
 
   // un-do, under the pole
-  if (Dec>90.0) {
-    Dec=(90.0-Dec)+90.0;
-    HA =HA-12;
-  }
+  if ((Lat>=0) && (Dec>90.0)) { Dec=(90.0-Dec)+90; HA =HA-12; }
+  if ((Lat<0) && (Dec<-90.0)) { Dec=(-90.0-Dec)-90.0; HA =HA-12; }
+
   while (HA>+12.0) HA=HA-24.0;
   while (HA<-12.0) HA=HA+24.0;
   if (Dec>+90.0) Dec=+90.0;
@@ -313,7 +316,7 @@ boolean do_alt_calc() {
 
   // load variables
   if (ac_step==1) {
-    getApproxEqu(&ac_HA,&ac_Dec,false);
+    getApproxEqu(&ac_HA,&ac_Dec,true);
   } else
   // convert units
   if (ac_step==2) {
@@ -346,7 +349,7 @@ boolean do_alt_calc() {
   } else
   // calc Alt, phase 2
   if (ac_step==9) {
-    currentAlt=asin(ac_sinalt);
+    currentAlt=asin(ac_sinalt)*Rad;
     ac_step=0;
   }
 }
