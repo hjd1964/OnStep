@@ -19,8 +19,9 @@ void processCommands() {
     if (serial_zero_ready)     { strcpy(command,command_serial_zero); strcpy(parameter,parameter_serial_zero); serial_zero_ready=false; clearCommand_serial_zero(); process_command=1; } 
     else if (serial_one_ready) { strcpy(command,command_serial_one);  strcpy(parameter,parameter_serial_one);  serial_one_ready=false;  clearCommand_serial_one();  process_command=2; }
     else return;
-
+    
     if (process_command) {
+
 // Command is two chars followed by an optional parameter...
       commandError=false;
 // Handles empty and one char replies
@@ -126,14 +127,15 @@ void processCommands() {
           commandError=true; 
         } else commandError=true; 
       } else
+      
 //   $ - Set parameter
-//  :$BDddd# Set Dec Antibacklash
+//  :$BDdd# Set Dec Antibacklash
 //          Return: 0 on failure
 //                  1 on success
-//  :$BRddd# Set RA Antibacklash
+//  :$BRdd# Set RA Antibacklash
 //          Return: 0 on failure
 //                  1 on success
-//          Set the Backlash values.  Units are arc-seconds
+//         Set the Backlash values.  Units are arc-seconds
       if ((command[0]=='$') && (command[1]=='B')) {
         if ((strlen(parameter)>1) && (strlen(parameter)<5)) {
           if ( (atoi2((char*)&parameter[1],&i)) && ((i>=0) && (i<=999))) { 
@@ -148,7 +150,8 @@ void processCommands() {
           } else commandError=true;
         } else commandError=true;
       } else
-//   % Return parameter
+      
+//   % - Return parameter
 //  :%BD# Get Dec Antibacklash
 //          Return: ddd#
 //  :%BR# Get RA Antibacklash
@@ -166,6 +169,7 @@ void processCommands() {
             quietReply=true; 
         } else commandError=true;
       } else
+      
 //   C - Sync Control
 //  :CS#   Synchonize the telescope with the current right ascension and declination coordinates
 //  :CM#   Synchonize the telescope with the current database object (as above)
@@ -470,7 +474,7 @@ void processCommands() {
 //  :Q#    Halt all slews, stops goto
 //         Returns: Nothing
       if (command[0]=='Q') {
-        if (command[1]==0) { 
+        if (command[1]==0) {
           if (parkStatus==NotParked) {
             if (moveDirHA!=0) { cli(); moveTimerRateHA=0; sei(); moveDirHA=0; }
             if (moveDirDec!=0) { cli(); moveTimerRateDec=0; sei(); moveDirDec=0; }
@@ -628,8 +632,10 @@ void processCommands() {
 //                  1 on success
       if (command[1]=='t')  { 
         i=highPrecision; highPrecision=false; 
-        if (!dmsToDouble(&latitude,parameter,true)) { commandError=true; } else { 
-          EEPROM_writeQuad(100+(currentSite)*25+0,(byte*)&latitude); 
+        if (!dmsToDouble(&latitude,parameter,true)) { commandError=true; } else {
+          EEPROM_writeQuad(100+(currentSite)*25+0,(byte*)&latitude);
+          if (latitude<0) celestialPoleDec=-90L; else celestialPoleDec=90L;
+          if (celestialPoleDec>0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
         }
         highPrecision=i;
       } else 
@@ -818,6 +824,8 @@ void processCommands() {
         if ((command[1]>='0') && (command[1]<='3')) {
           currentSite=command[1]-'0'; EEPROM.write(EE_currentSite,currentSite); quietReply=true;
           EEPROM_readQuad(EE_sites+(currentSite*25+0),(byte*)&latitude);
+          if (latitude<0) celestialPoleDec=-90L; else celestialPoleDec=90L;
+          if (celestialPoleDec>0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
           EEPROM_readQuad(EE_sites+(currentSite*25+4),(byte*)&longitude);
           b=EEPROM.read(EE_sites+(currentSite*25+8)); timeZone=b-128;
         } else 
