@@ -11,7 +11,7 @@ void moveTo() {
     origTargetHA =targetHA; 
     origTargetDec=targetDec;
  
-    // first phase, move to 90 HA
+    // first phase, move to 60 HA (4 hours)
     timerRateHA =SiderealRate;
     #ifdef DEC_RATIO_ON
     timerRateDec=SiderealRate*timerRateRatio;
@@ -20,12 +20,20 @@ void moveTo() {
     #endif
 
     // just move HA, not the declination yet
-    if (pierSide==PierSideFlipWE1) targetHA=-90L*StepsPerDegreeHA; else targetHA=90L*StepsPerDegreeHA; 
-
-    sei();
+    if (pierSide==PierSideFlipWE1) targetHA=-60L*StepsPerDegreeHA; else targetHA=60L*StepsPerDegreeHA; 
 
     // if we're under the pole, slew both axis back at once
-    if (abs((double)posDec/(double)StepsPerDegreeDec)>90.0) { cli(); startDec=posDec; targetDec=90L*StepsPerDegreeDec; sei(); } else { cli(); targetDec=posDec; sei(); }
+    if (abs((double)posDec/(double)StepsPerDegreeDec)>90.0) { 
+      startDec=posDec; targetDec=celestialPoleDec*StepsPerDegreeDec;
+    } else { 
+      targetDec=posDec;
+      if (abs(latitude)<45.0) {
+        // override if we're at a low latitude and in the opposite sky, then goto 0 deg. declination
+        if ((celestialPoleDec>0) && (posDec<0)) targetDec=0;
+        if ((celestialPoleDec<0) && (posDec>0)) targetDec=0;
+      }
+    sei();
+   }
     
     pierSide++;
   }
@@ -65,7 +73,7 @@ void moveTo() {
 //    if ((temp<100) && (temp>=10))  temp=9;          // exclude a range of speeds
   }
   if (temp<MaxRate*16)     temp=MaxRate*16;           // fastest rate
-  if (temp>SiderealRate)   temp=SiderealRate;         // slowest rate (1x sidereal)
+  if (temp>SiderealRate/4) temp=SiderealRate/4;       // slowest rate (4x sidereal)
 
   cli();  timerRateHA=temp;  sei();
 
@@ -82,25 +90,25 @@ void moveTo() {
   #else
   if (temp<MaxRate*16)                temp=MaxRate*16;
   #endif
-  if (temp>SiderealRate)              temp=SiderealRate; // slowest rate (1x sidereal)
+  if (temp>SiderealRate/4)            temp=SiderealRate/4; // slowest rate (4x sidereal)
 
   cli(); timerRateDec=temp; sei();
 
   if ((distDestHA<=2) && (distDestDec<=2)) { 
     if ((pierSide==PierSideFlipEW2) || (pierSide==PierSideFlipWE2)) {
-      pierSide++;
       // make sure we're at the home position when flipping sides of the mount
-      cli(); startDec=posDec; targetDec=90L*StepsPerDegreeDec; sei();
+      cli();
+      if (pierSide==PierSideFlipWE2) targetHA=-90L*StepsPerDegreeHA; else targetHA=90L*StepsPerDegreeHA; 
+      startDec=posDec; targetDec=celestialPoleDec*StepsPerDegreeDec; 
+      sei();
+      pierSide++;
     } else
     if ((pierSide==PierSideFlipEW3) || (pierSide==PierSideFlipWE3)) {
       
-      cli();
       // the blDec gets "reversed" when we Meridian flip, since the NORTH/SOUTH movements are reversed
-    // 80  =   120     - 40
-      blDec=backlashDec-blDec;
-      sei();
+      cli(); blDec=backlashDec-blDec; sei();
 
-      if (pierSide==PierSideFlipEW3) { 
+      if (pierSide==PierSideFlipEW3) {
         pierSide=PierSideWest;
         cli();
         // reverse the Declination movement
