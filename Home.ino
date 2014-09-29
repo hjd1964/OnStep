@@ -10,7 +10,7 @@ boolean goHome() {
     startHA =posHA;
     startDec=posDec;
     if (pierSide==PierSideWest) targetHA=-90L*StepsPerDegreeHA; else targetHA=90L*StepsPerDegreeHA;
-    targetDec=90L*StepsPerDegreeDec;
+    targetDec=celestialPoleDec*StepsPerDegreeDec;
     sei();
     
     pierSide         = PierSideNone;
@@ -30,7 +30,7 @@ boolean setHome() {
   pierSide            = PierSideNone;
   dirDec              = 1;
   DecDir              = DecDirEInit;
-  HADir               = HADirEInit;
+  if (celestialPoleDec>0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
   dirHA               = 1;
   newTargetRA         = 0;        
   newTargetDec        = 0;
@@ -72,7 +72,7 @@ boolean setHome() {
 
   // the polar home position
   startHA             = 90L*StepsPerDegreeHA;
-  startDec            = 90L*StepsPerDegreeDec;
+  startDec            = celestialPoleDec*StepsPerDegreeDec;
 
   cli();
   targetHA            = startHA;
@@ -84,3 +84,5 @@ boolean setHome() {
 
   return true;
 }
+
+
