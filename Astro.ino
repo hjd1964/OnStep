@@ -164,32 +164,32 @@ boolean atoi2(char *a, int *i) {
   return true;
 }
 
-// takes the actual equatorial coordinates and applies the offset correction
+// takes the actual equatorial coordinates and apply corrections
 boolean EquToCEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1) { 
-  double Alt;
-  double Azm;
-
   if (Dec>+90.0) Dec=+90.0;
   if (Dec<-90.0) Dec=-90.0;
 
+  // correct for polar misalignment
+  // breaks-down near the pole (limited to >1' from pole)
   if (abs(Dec)<89.98333333) {
-    // breaks-down near the pole (limited to >1' from pole),
-    // when time allows, I'll look into fixing this - but for now I'll just do a crude work-around
-    EquToHor(Lat,HA,Dec,&Alt,&Azm);
-    HorToEqu(Lat+altCor,Alt,Azm+azmCor,HA1,Dec1);
+    double h =HA/(Rad/15.0);
+    double d =Dec/Rad;
+    double h1=-azmCor*cos(h)*tan(d) + altCor*sin(h)*tan(d);
+    double d1=+azmCor*sin(h)        + altCor*cos(h);
+    *HA1 =HA +(h1/15.0);
+    *Dec1=Dec+d1;
   } else {
-    // just ignore the pointing model if right on the pole
+    // just ignore the the correction if right on the pole
     *HA1 =HA;
     *Dec1=Dec;
-    return false;
   }
 
   // set, under the pole
-  if ((Lat>=0) && ((abs(*HA1)>9.0) && (*Dec1>(90.0-Lat*Rad)))) {
+  if ((Lat>=0) && ((abs(*HA1)>(double)underPoleLimit) && (*Dec1>(90.0-Lat)))) {
     *HA1 =*HA1-12; while (*HA1<-12.0) *HA1=*HA1+24.0;
     *Dec1=(90.0-*Dec1)+90.0;
   }
-  if ((Lat<0) && ((abs(*HA1)>9.0) && (*Dec1<(-90.0-Lat*Rad)))) {
+  if ((Lat<0) && ((abs(*HA1)>(double)underPoleLimit) && (*Dec1<(-90.0-Lat)))) {
     *HA1 =*HA1-12; while (*HA1<-12.0) *HA1=*HA1+24.0;
     *Dec1=(-90.0-*Dec1)-90.0;
   }
@@ -197,76 +197,73 @@ boolean EquToCEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1) 
   // finally, apply index offsets... range limits are disabled here, we're working with offset coords
   *HA1=*HA1-IH;
   *Dec1=*Dec1-ID;
+
+  while (*HA1>+12.0) *HA1-=24.0;
+  while (*HA1<-12.0) *HA1+=24.0;
   return true;
 }
 
-// takes the offset corrected coordinates and returns the actual equatorial coordinates 
+// takes the corrected coordinates and returns the actual equatorial coordinates 
 boolean CEquToEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1) { 
-  double Alt;
-  double Azm;
-
   // remove the index offsets
   HA=HA+IH;
   Dec=Dec+ID;
 
   // un-do, under the pole
-  if ((Lat>=0) && (Dec>90.0)) { Dec=(90.0-Dec)+90; HA =HA-12; }
-  if ((Lat<0) && (Dec<-90.0)) { Dec=(-90.0-Dec)-90.0; HA =HA-12; }
+  if (Dec>90.0) { Dec=(90.0-Dec)+90; HA =HA-12; }
+  if (Dec<-90.0) { Dec=(-90.0-Dec)-90.0; HA =HA-12; }
 
-  while (HA>+12.0) HA=HA-24.0;
-  while (HA<-12.0) HA=HA+24.0;
-  if (Dec>+90.0) Dec=+90.0;
-  if (Dec<-90.0) Dec=-90.0;
-
+  // correct for polar misalignment
+  // breaks-down near the pole (limited to >1' from pole)
   if (abs(Dec)<89.98333333) {
-    // breaks-down near the pole (limited to >1' from pole),
-    // when time allows, I'll look into fixing this - but for now I'll just do a crude work-around
-    EquToHor(Lat,HA,Dec,&Alt,&Azm);
-    HorToEqu(Lat-altCor,Alt,Azm-azmCor,HA1,Dec1);
-    return true;
+    double h =HA/(Rad/15.0);
+    double d =Dec/Rad;
+    double h1=-azmCor*cos(h)*tan(d) + altCor*sin(h)*tan(d);
+    double d1=+azmCor*sin(h)        + altCor*cos(h);
+    *HA1 =HA -(h1/15.0);
+    *Dec1=Dec-d1;
   } else {
-    // just ignore the pointing model if right on the pole
+    // just ignore the the correction if right on the pole
     *HA1=HA;
     *Dec1=Dec;
-    return false;
   }
+
+  while (*HA1>+12.0) *HA1-=24.0;
+  while (*HA1<-12.0) *HA1+=24.0;
+  if (*Dec1>+90.0) *Dec1=+90.0;
+  if (*Dec1<-90.0) *Dec1=-90.0;
+  return true;
 }
 
 // convert equatorial coordinates to horizon
-// this takes approx. 1-2mS
+// this takes approx. 1.4mS
 void EquToHor(double Lat, double HA, double Dec, double *Alt, double *Azm) {
-  double SinAlt;  
-  double CosAzm;  
-
-  while (HA>+12.0) HA=HA-24.0;
-  while (HA<-12.0) HA=HA+24.0;
-  if (Dec>+90.0) Dec=+90.0;
-  if (Dec<-90.0) Dec=-90.0;
+//  while (HA>+12.0) HA=HA-24.0;
+//  while (HA<-12.0) HA=HA+24.0;
+//  if (Dec>+90.0) Dec=+90.0;
+//  if (Dec<-90.0) Dec=-90.0;
 
   HA =(HA*15.0)/Rad;
   Dec=Dec/Rad;
   Lat=Lat/Rad;
   
-  SinAlt = (sin(Dec) * sin(Lat)) + (cos(Dec) * cos(Lat) * cos(HA));  
+  double SinAlt = (sin(Dec) * sin(Lat)) + (cos(Dec) * cos(Lat) * cos(HA));  
   *Alt   = asin(SinAlt);
-  CosAzm = ((sin(Dec) - (sin(Lat) * sin(*Alt))) / (cos(Lat) * cos(*Alt)));  
+  double CosAzm = ((sin(Dec) - (sin(Lat) * SinAlt)) / (cos(Lat) * cos(*Alt)));  
   *Azm   = acos(CosAzm)*Rad;
   if (sin(HA) > 0) { *Azm = 360.0 - *Azm; }
   *Alt = *Alt*Rad;
 }
       
 // convert horizon coordinates to equatorial
-// this takes approx. 1-2mS
+// this takes approx. 1.4mS
 void HorToEqu(double Lat, double Alt, double Azm, double *HA, double *Dec) { 
-  double SinDec;  
-  double CosHA;
-      
   Alt  = Alt/Rad;
   Azm  = Azm/Rad;
   Lat  = Lat/Rad;
-  SinDec = (sin(Alt) * sin(Lat)) + (cos(Alt) * cos(Lat) * cos(Azm));  
+  double SinDec = (sin(Alt) * sin(Lat)) + (cos(Alt) * cos(Lat) * cos(Azm));  
   *Dec = asin(SinDec); 
-  CosHA = ((sin(Alt) - (sin(Lat) * sin(*Dec))) / (cos(Lat) * cos(*Dec)));  
+  double CosHA = ((sin(Alt) - (sin(Lat) * SinDec)) / (cos(Lat) * cos(*Dec)));  
   *HA = acos(CosHA)*Rad;
   if (sin(Azm) > 0) { *HA = 360 - *HA; }
   *Dec = *Dec*Rad;
@@ -274,8 +271,8 @@ void HorToEqu(double Lat, double Alt, double Azm, double *HA, double *Dec) {
 
   while (*HA>+12.0) *HA=*HA-24.0;
   while (*HA<-12.0) *HA=*HA+24.0;
-  if (*Dec>+90.0) *Dec=+90.0;
-  if (*Dec<-90.0) *Dec=-90.0;
+  //if (*Dec>+90.0) *Dec=+90.0;
+  //if (*Dec<-90.0) *Dec=-90.0;
 }
 
 // returns the amount of refraction (in arcminutes) at given altitude (degrees), pressure (millibars), and temperature (celsius)
@@ -305,53 +302,46 @@ void CEquToTracRateCor() {
 }
 
 // light weight altitude calculation, finishes updating once every ten seconds
-int ac_step = 0;
+byte ac_step = 0;
 double ac_HA,ac_Dec;
-double ac_sinlat,ac_coslat;
 double ac_sindec,ac_cosdec,ac_cosha;
 double ac_sinalt;
 
 boolean do_alt_calc() {
+  boolean done=false;
   ac_step++;
-
   // load variables
-  if (ac_step==1) {
+  if (ac_step==2) {
     getApproxEqu(&ac_HA,&ac_Dec,true);
   } else
   // convert units
-  if (ac_step==2) {
-    ac_HA =(ac_HA*15.0)/Rad;
-    ac_Dec=ac_Dec/Rad;
-  } else
-  // prep latitude
-  if (ac_step==3) {
-    ac_sinlat=sin(latitude/Rad);
-  } else
-  // prep latitude
   if (ac_step==4) {
-    ac_coslat=cos(latitude/Rad);
-  } else
-  // prep Dec
-  if (ac_step==5) {
-    ac_sindec=sin(ac_Dec);
+    ac_HA =ac_HA/(Rad/15.0);
+    ac_Dec=ac_Dec/Rad;
   } else
   // prep Dec
   if (ac_step==6) {
+    ac_sindec=sin(ac_Dec);
+  } else
+  // prep Dec
+  if (ac_step==8) {
     ac_cosdec=cos(ac_Dec);
   } else
   // prep HA
-  if (ac_step==7) {
+  if (ac_step==10) {
     ac_cosha=cos(ac_HA);
   } else
   // calc Alt, phase 1
-  if (ac_step==8) {
-    ac_sinalt = (ac_sindec * ac_sinlat) + (ac_cosdec * ac_coslat * ac_cosha); 
+  if (ac_step==12) {
+    ac_sinalt = (ac_sindec * sinLat) + (ac_cosdec * cosLat * ac_cosha); 
   } else
   // calc Alt, phase 2
-  if (ac_step==9) {
+  if (ac_step==14) {
     currentAlt=asin(ac_sinalt)*Rad;
     ac_step=0;
+    done=true;
   }
+  return done;
 }
 
 // converts Gregorian date (Y,M,D) to Julian day number
