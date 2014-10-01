@@ -75,21 +75,6 @@ void processCommands() {
             // set the IH offset
             // set the ID offset
             if (!syncEqu(newTargetRA,newTargetDec)) { commandError=true; }
-
-            char s[100]="";
-            Serial1_send("ALIGN STEP#1\n"); 
-            Serial1_send("IH=");
-            if (IH<0) { 
-            Serial1_send("-"); IH=-IH; doubleToHms(s,&IH); IH=-IH; 
-            } else doubleToHms(s,&IH);
-            Serial1_send(s);
-            Serial1_send("\n");
-
-            doubleToDms(s,&ID,true,true);
-            Serial1_send("ID=");
-            Serial1_send(s);
-            Serial1_send("\n\n");
-
           } else 
 #ifdef ALIGN_TWO_AND_THREE_STAR_ON
           if ((alignMode==AlignTwoStar2) || (alignMode==AlignThreeStar2)) {
@@ -108,51 +93,7 @@ void processCommands() {
               double ID2=ID;
               IH    =(IH1+IH)/2.0;                     // Refine offset in HA, I believe the difference of these two values would be a decent approximation of the RA axis vs. Dec axis non-perpendicularity
               altCor=(ID2+ID1)/2.0;                    // Negative when pointed below the pole
-              // 10
               ID    =(ID2-ID1)/2.0;                    // Average offset in Dec
-              // 2.11
-            
-              // all in minutes:
-              // IH=0, ID=8.25
-              //
-              // IH=  1.05
-              // ID= 10.3
-              //
-              // ID1=-8.25
-              // ID2=12.48
-              // altCor=-02.01
-
-              // test code:
-              // NCP to polaris is about 0.7 degrees
-              char s[100]="";
-              Serial1_send("ALIGN STEP#2\n");   
-              Serial1_send("IH=");
-              if (IH<0) { 
-              Serial1_send("-"); IH=-IH; doubleToHms(s,&IH); IH=-IH; 
-              } else doubleToHms(s,&IH);
-              Serial1_send(s);
-              Serial1_send("\n");
-
-              doubleToDms(s,&ID,true,true);
-              Serial1_send("ID=");
-              Serial1_send(s);
-              Serial1_send("\n");
-
-              doubleToDms(s,&ID1,true,true);
-              Serial1_send("ID1=");
-              Serial1_send(s);
-              Serial1_send("\n");
-
-              doubleToDms(s,&ID2,true,true);
-              Serial1_send("ID2=");
-              Serial1_send(s);
-              Serial1_send("\n");
-
-              doubleToDms(s,&altCor,true,true);
-              Serial1_send("altCor=");
-              Serial1_send(s);
-              Serial1_send("\n\n");
-
             } else commandError=true;
           } else 
           if (alignMode==AlignThreeStar3) {
