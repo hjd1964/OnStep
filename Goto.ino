@@ -8,19 +8,16 @@ boolean syncEqu(double RA, double Dec) {
   while (HA>+12.0) HA-=24.0;
   while (HA<-12.0) HA+=24.0;
 
-  // correct for polar offset only by clearing the equatorial offsets
+  // correct for polar misalignment only by clearing the index offsets
   IH=0; ID=0;
   EquToCEqu(latitude,HA,Dec,&HA,&Dec);
-
-  while (HA>+12.0) HA-=24.0;
-  while (HA<-12.0) HA+=24.0;
   
 #ifdef RESCUE_MODE_ON
   // allows one to quickly set where OnStep thinks the 'scope is to anywhere in the western sky
   cli();
   pierSide=PierSideEast;
   DecDir = DecDirEInit;
-  targetHA =round(HA*15.0*(double)StepsPerDegreeHA);
+  targetHA =round(HA*(double)(StepsPerDegreeHA*15L));
   posHA    =targetHA;
   targetDec=round(Dec*(double)StepsPerDegreeDec);
   posDec=targetDec;
@@ -32,14 +29,12 @@ boolean syncEqu(double RA, double Dec) {
   // IH/ID are the amount to add to the actual RA/Dec to arrive at the correct position
   // double's are really single's on the ATMega's, and we're a digit or two shy of what's required to
   // hold the steps (for my 11520 steps per degree) but it's still getting down to the arc-sec level
-  // in the western sky hour angles run from   0 to 12
-  // in the eastern sky hour angles run from -12 to 0
-  // -12 - (-11) = -12 + 11 = -1
-  double HA1=((double)targetHA/(double)StepsPerDegreeHA)/15.0;
-  cli();
+  // HA goes from +12...0..-12
+  //                W   .   E
+  // IH and ID values get subtracted to arrive at the correct location
+  double HA1=(double)targetHA/(double)(StepsPerDegreeHA*15L);
   IH=HA-HA1;
-  ID=Dec-((double)targetDec/(double)StepsPerDegreeDec);
-  sei();
+  ID=Dec-(double)targetDec/(double)StepsPerDegreeDec;
 
   if ((abs(ID)>30.0) || (abs(IH)>2.0)) { IH=0; ID=0; return false; } else return true;
 #endif
@@ -47,12 +42,14 @@ boolean syncEqu(double RA, double Dec) {
 
 // this returns the current, uncorrected HA and Dec
 void getHADec(double *HA, double *Dec) {
-  cli(); 
-  // get the hour angle
-  *HA=((double)posHA/(double)StepsPerDegreeHA)/15.0;
-  // get the declination
-  *Dec=((double)posDec/(double)StepsPerDegreeDec); 
+  cli();
+  long h=posHA;
+  long d=posDec;
   sei();
+  // get the hour angle
+  *HA=(double)h/(double)(StepsPerDegreeHA*15L);
+  // get the declination
+  *Dec=(double)d/(double)StepsPerDegreeDec; 
 }
 
 // gets the telescopes current RA and Dec, set returnHA to true for Horizon Angle instead of RA
@@ -62,7 +59,7 @@ boolean getEqu(double *RA, double *Dec, boolean returnHA) {
   // get the uncorrected HA and Dec
   getHADec(&HA,Dec);
   
-  // correct for over slew, polar offset, refraction, coordinate systems, etc. as required
+  // correct for under the pole, polar misalignment, and index offsets
   CEquToEqu(latitude,HA,*Dec,&HA,Dec);
   
   // return either the RA or the HA depending on returnHA
@@ -82,10 +79,9 @@ boolean getApproxEqu(double *RA, double *Dec, boolean returnHA) {
   *Dec=*Dec+ID;
   
   // un-do, under the pole
-  if (*Dec>90.0) {
-    *Dec=(90.0-*Dec)+90.0;
-    HA =HA-12;
-  }
+  if (*Dec>90.0) { *Dec=(90.0-*Dec)+90; HA =HA-12; }
+  if (*Dec<-90.0) { *Dec=(-90.0-*Dec)-90.0; HA =HA-12; }
+
   while (HA>+12.0) HA=HA-24.0;
   while (HA<-12.0) HA=HA+24.0;
   if (*Dec>+90.0) *Dec=+90.0;
@@ -126,7 +122,7 @@ byte goToEqu(double RA, double Dec) {
   // correct for polar offset, refraction, coordinate systems, operation past pole, etc. as required
   if (!EquToCEqu(latitude,HA,Dec,&HA,&Dec)) return 2;
 
-  long HA1=HA*15.0*(double)StepsPerDegreeHA;
+  long HA1=HA*(double)(StepsPerDegreeHA*15L);
 
   // check to see if we're doing a meridian flip, if so pre-correct the destination.  ID will get updated during the goTo()
   // same EXACT math as goTo() uses so we're sure to detect the flip every time
@@ -169,16 +165,16 @@ byte goTo(long HASteps, long DecSteps, byte gotoPierSide) {
   atHome=false;
 
   cli();
-  timerRateHA=SiderealRate;
   startHA    =posHA;
   targetHA   =HASteps;
+  timerRateHA=SiderealRate;
   sei();
 
   // where the allowable hour angles are
-  long eastOfPierMaxHA= 9*15*StepsPerDegreeHA;
+  long eastOfPierMaxHA= underPoleLimit*15*StepsPerDegreeHA;
   long eastOfPierMinHA=-(minutesPastMeridianE*StepsPerDegreeHA/4L);
   long westOfPierMaxHA= (minutesPastMeridianW*StepsPerDegreeHA/4L);
-  long westOfPierMinHA=-9*15*StepsPerDegreeHA;
+  long westOfPierMinHA=-underPoleLimit*15*StepsPerDegreeHA;
 
   // override the defaults and force a flip if near the meridian and possible
   if ((gotoPierSide!=PierSideBest) && (pierSide!=gotoPierSide)) {
@@ -189,16 +185,14 @@ byte goTo(long HASteps, long DecSteps, byte gotoPierSide) {
   // if only do a meridian flip, if we have to
   if (pierSide==PierSideEast) {
     if ((targetHA>eastOfPierMaxHA) || (targetHA<eastOfPierMinHA)) {
-      pierSide=PierSideFlipEW1; 
+      pierSide=PierSideFlipEW1;
       DecSteps=DecSteps+ID*2.0*(double)StepsPerDegreeDec;
-      ID=-ID;  // correct the index if we're crossing the meridian
     }
   } else
   if (pierSide==PierSideWest) {
     if ((targetHA>westOfPierMaxHA) || (targetHA<westOfPierMinHA)) {
       pierSide=PierSideFlipWE1; 
       DecSteps=DecSteps+ID*2.0*(double)StepsPerDegreeDec;
-      ID=-ID;  // correct the index if we're crossing the meridian
     }
   } else
   if (pierSide==PierSideNone) {
@@ -223,13 +217,13 @@ byte goTo(long HASteps, long DecSteps, byte gotoPierSide) {
   }
 
   cli(); 
+  startDec    =posDec;
   targetDec   =DecSteps;  
   #ifdef DEC_RATIO_ON
   timerRateDec=SiderealRate*timerRateRatio;
   #else
   timerRateDec=SiderealRate;
   #endif
-  startDec    =posDec;
   sei();
 
   lastTrackingState=trackingState;
