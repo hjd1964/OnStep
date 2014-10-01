@@ -107,6 +107,8 @@ void moveTo() {
       
       // the blDec gets "reversed" when we Meridian flip, since the NORTH/SOUTH movements are reversed
       cli(); blDec=backlashDec-blDec; sei();
+      // also the Index is reversed since we just flipped 180 degrees
+      ID=-ID;
 
       if (pierSide==PierSideFlipEW3) {
         pierSide=PierSideWest;
