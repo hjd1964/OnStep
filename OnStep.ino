@@ -102,6 +102,8 @@
  *                                       Cleaned up code, renamed some variables, fixed backlash/tracking rate problem, and added some comments in Timer.ino  
  *                                       Fixed goto meridian flip logic problem and generally cleaned up the goto initiation code.
  *                                       Fixed altitude calculation used for limits, horizon and overhead limits now stop tracking.
+ * 10-01-2014          1.0a6             Numerous performance related tweeks.  Fixed gotos that involve a meridian flip, they now arrive closer to their destination.
+ *                                       underPoleLimit can now be set to values other than the default of 9 hours. Added safety code to stop the mount when tracking past this limit
  *
  *
  * Author: Howard Dutton
@@ -152,8 +154,8 @@
 #include "errno.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "09 29 14"
-#define FirmwareNumber "1.0a5"
+#define FirmwareDate   "10 01 14"
+#define FirmwareNumber "1.0a6"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -168,7 +170,7 @@
 // light status LED(s), default=ON
 #define STATUS_LED_PINS_ON
 // default=OFF
-#define STATUS_LED2_PINS_OFF
+#define STATUS_LED2_PINS_ON
 
 // supply power on pins 5 and 11 to Pololu or other stepper drivers without on-board 5V voltage regulators, default=OFF
 #define POWER_SUPPLY_PINS_OFF
@@ -195,28 +197,29 @@
 #define initKey 915307547 // unique identifier for the current initialization format, do not change
 
 // ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
-#define MaxRate                96    // this is the minimum number of micro-seconds between micro-steps
-                                     // minimum is around 16 (Teensy3.1) or 32 (Mega2560), default is 96, higher is ok
+#define MaxRate                   96 // this is the minimum number of micro-seconds between micro-steps
+                                     // minimum is around 16 (Teensy3.1) or 24 (Mega2560), default is 96, higher is ok
+                                     // too low and OnStep communicates slowly and/or freezes as the motor timers use up all the MCU time
                                      
 #define StepsForRateChange  128000.0 // number of steps during acceleration and de-acceleration: higher values=longer acceleration/de-acceleration
                                      // for the most part this doesn't need to be changed, but adjust when needed
 
-#define BacklashTakeupRate    25     // backlash takeup rate (in multipules of the sidereal rate): too fast and your motors will stall,
+#define BacklashTakeupRate        25 // backlash takeup rate (in multipules of the sidereal rate): too fast and your motors will stall,
                                      // too slow and the mount will be sluggish while it moves through the backlash
                                      // for the most part this doesn't need to be changed, but adjust when needed
 
                                      // for my EM10b both RA and Dec axis have the same gear train and this
-#define StepsPerDegreeHA   19200L    // is calculated as :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
+#define StepsPerDegreeHA      19200L // is calculated as :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
                                      // Takahashi EM10b  :  48            * 16          * 50 * (40/32)    *  144/360              = 19200
                                      // Losmandy G11     :  48            * 16          * 15              *  360/360              = 11520
-#define StepsPerDegreeDec  19200L    // is calculated as :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
+#define StepsPerDegreeDec     19200L // is calculated as :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
                                      // Takahashi EM10b  :  48            * 16          * 50 * (40/32)    *  144/360              = 19200
                                      // Losmandy G11     :  48            * 16          * 15              *  360/360              = 11520
                                      // the EM10b has two spur gears that drive the RA/Dec worms, they are 60 tooth and 48 tooth gears
                                      // for an 1.25x reduction in addition to the 20:1 gear heads on the steppers for a 25:1 final ratio
                                      // before the worm/wheels 144:1
                                      
-#define StepsPerSecond         80    // the steps per second sidereal rate = 48 = (11520/3600)*15 - OnStep can handle between 12 and 100 steps/second
+#define StepsPerSecond            80 // the steps per second sidereal rate = 48 = (11520/3600)*15 - OnStep can handle between 12 and 100 steps/second
                                      // when sidereal tracking (StepsPerWormRotation must be evenly divisible by StepsPerSecond)
 
 #define StepsPerWormRotation  38400L // PEC, number of steps for a complete worm rotation (in RA), (StepsPerDegreeHA*360)/gear_reduction2 
@@ -227,14 +230,16 @@
                                      //                    2. use 480 (seconds) of PEC buffer.  This is easier to program and keeps the PE at low levels (<3 arc-sec.)
                                      //                       so pretending we have 180 teeth (19200*360)/180 = 38400
 
-#define PECBufferSize        2400    // PEC, buffer size, max should be no more than 3384, your required buffer size >= StepsPerWormRotation/StepsPerSecond
+#define PECBufferSize           2400 // PEC, buffer size, max should be no more than 3384, your required buffer size >= StepsPerWormRotation/StepsPerSecond
                                      // for the most part this doesn't need to be changed, but adjust when needed.  824 seconds is the default
 
-#define REVERSE_HA_ON                // Reverse the direction of movement for the HA/RA axis, adjust as needed or reverse your wiring so things move in the right direction
-#define REVERSE_DEC_ON               // Reverse the direction of movement for the Dec axis (both reversed for my EM10b, both normal for G11) 
+#define REVERSE_HA_ON                // reverse the direction of movement for the HA/RA axis, adjust as needed or reverse your wiring so things move in the right direction
+#define REVERSE_DEC_ON               // reverse the direction of movement for the Dec axis (both reversed for my EM10b, both normal for G11) 
 
-long minutesPastMeridianE =   60;     // for goto's, how far past the meridian to allow before we do a flip (if on the East side of the pier) - one hour of RA is the default = 60
-long minutesPastMeridianW =   60;     // as above, if on the West side of the pier
+#define minutesPastMeridianE      60 // for goto's, how far past the meridian to allow before we do a flip (if on the East side of the pier) - one hour of RA is the default = 60
+#define minutesPastMeridianW      60 // as above, if on the West side of the pier.  If left alone, the mount will stop tracking when it hits the this limit
+#define underPoleLimit             9 // maximum allowed hour angle (+/-) under the celestial pole. OnStep will flip the mount and move the Dec. past 90 degrees (+/-) once past this limit
+                                     // to arrive at the location.  If left alone, the mount will stop tracking when it hits this limit.  Valid range is 7 to 11 hours
 
 // THAT'S IT FOR USER CONFIGURATION!
 
@@ -308,12 +313,15 @@ void TIMER4_COMPA_vect(void);
 
 // Location ----------------------------------------------------------------------------------------------------------------
 double latitude  = 0.0;
+double cosLat = 1.0;
+double sinLat = 0.0;
 long celestialPoleDec = 90L;
 double longitude = 0.0;
 
 volatile long posHA      = 90L*StepsPerDegreeHA;   // hour angle position in steps
 volatile long startHA    = 90L*StepsPerDegreeHA;   // hour angle of goto start position in steps
 volatile long targetHA   = 90L*StepsPerDegreeHA;   // hour angle of goto end   position in steps
+volatile long targetHA1  = 90L*StepsPerDegreeHA;   // hour angle of goto end   position in steps
 volatile byte dirHA      = 1;                      // stepping direction + or -
 volatile long PEC_HA     = 0;                      // for PEC, adds or subtracts steps
 double newTargetRA       = 0.0;                    // holds the RA for goTos
@@ -393,6 +401,8 @@ int    maxAlt;                                    // the maximum altitude, in de
 #define LEDposPORT PORTB   //
 #define LEDnegBit  1       // Pin 9
 #define LEDnegPORT PORTB   //
+#define LEDneg2Bit  3      // Pin 3
+#define LEDneg2PORT PORTD  //
 
 #define DecDirBit  4       // Pin 4
 #define DecDirPORT PORTD   //
@@ -508,8 +518,8 @@ byte currentSite = 0;
 char siteName[16];
 
 // align command
-double altCor            = 0;       // for geometric coordinate correction/align
-double azmCor            = 0;
+double altCor            = 0;       // for geometric coordinate correction/align, - is below the pole, + above
+double azmCor            = 0;       // - is right of the pole, + is left
 double IH                = 0;       // offset corrections/align
 double ID                = 0;
 
@@ -763,6 +773,8 @@ void setup() {
   currentSite=EEPROM.read(EE_currentSite);  if (currentSite>3) currentSite=0; // site index is valid?
   EEPROM_readQuad(EE_sites+(currentSite)*25+0,(byte*)&latitude);
   if (latitude<0) celestialPoleDec=-90L; else celestialPoleDec=90L;
+  cosLat=cos(latitude/Rad);
+  sinLat=sin(latitude/Rad);
   if (celestialPoleDec>0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
   EEPROM_readQuad(EE_sites+(currentSite)*25+4,(byte*)&longitude);
   timeZone=EEPROM.read(EE_sites+(currentSite)*25+8)-128;
@@ -1023,16 +1035,16 @@ void loop() {
     // tracking rate check code, detects missed ticks
 //    if (t>1) oops=true; else oops=false;
 
-    // handles moving to an new target RA and Dec
-    if (trackingState==TrackingMoveTo) moveTo();
+    // handles moving to an new target RA and Dec, runs every 1/10 second
+    if ((trackingState==TrackingMoveTo) && (siderealTimer%10==0)) moveTo(); else
+    {
 
-    // see if we need to take a step
     ResultA1=ResultA2;
-    ResultA2=floor((double)((StepsPerSecond)/100.0)*(double)(siderealTimer%100));
+    ResultA2=floor((double)(StepsPerSecond/100.0)*(double)(siderealTimer%100));
 
-    if ((((trackingState==TrackingMoveTo) && (lastTrackingState==TrackingSidereal)) || (trackingState==TrackingSidereal)) &&
-        !(moveDirHA && (currentGuideRate>1))) // only active with a guide rate that makes sense
-      {
+    if ((trackingState==TrackingSidereal) && !(moveDirHA && (currentGuideRate>1))) { // only active while sidereal tracking with a guide rate that makes sense
+
+      // see if we need to take a step
       if (ResultA1!=ResultA2) {
           // PEC_Timer starts at zero again every second, PEC_SKIP will control the rate and will trigger a +/- step every PEC_SKIP steps while tracking 
           PEC_Timer++;
@@ -1054,8 +1066,9 @@ void loop() {
           }
   
           // apply the Tracking, Guiding, and PEC
-          cli(); targetHA=targetHA+1+ig; PEC_HA+=ip; sei();
+          cli(); targetHA=targetHA+1+ig; PEC_HA+=ip; targetHA1=targetHA+PEC_HA; sei();
       }
+    }
     }
   }
 
@@ -1068,22 +1081,21 @@ void loop() {
     UT1=UT1_start+t2/3600.0;   // This just needs to be accurate to the nearest second, it's about 10x better
     ut1Timer=tempMilli;
     
-    // naturally, were really working with a single.  we should have, just barely, enough significant digits to get us through a day
-    unsigned long lst_now=lst_start+round( (double)((tempMilli-lst_mS_start)/10.0) * 1.00273790935);
-
     // update the local sidereal time floating point representation
     update_LST();
     
-    // reset the sidereal clock once a day, to keep the significant digits from being consumed, debated about including this, but
-    // I'm shooting for keeping OnStep reliable for about 50 days of continuous uptime (until millis() rolls over)
-    if ((lst_now-lst_start)>24*3600*100) update_lst();
-    
-    // light weight altitude calculation, finishes updating once every ten seconds
-    if (trackingState!=TrackingNone) do_alt_calc();
+    // safety checks, keeps mount from tracking past the meridian limit, past the underPoleLimit, below horizon limit, or above the overhead limit
+    if (pierSide==PierSideWest) { cli(); if (posHA>(minutesPastMeridianW*StepsPerDegreeHA/4L)) if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  sei(); }
+    if (pierSide==PierSideEast) { cli(); if (posHA>(underPoleLimit*StepsPerDegreeHA*15L)) if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  sei(); }
+    if (do_alt_calc()) {  // low overhead altitude calculation, finishes updating once every 14 seconds
+      if ((currentAlt<minAlt) || (currentAlt>maxAlt)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
 
-    // safety checks, keeps mount from tracking past the meridian limit, below horizon limit, or above the overhead limit
-    if (pierSide==PierSideWest) { cli(); if (posHA> (minutesPastMeridianW*StepsPerDegreeHA/4L)) trackingState=TrackingNone; sei();  }
-    if ((currentAlt<minAlt) || (currentAlt>maxAlt)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
+      // reset the sidereal clock once a day, to keep the significant digits from being consumed
+      // I'm shooting for keeping OnStep reliable for about 50 days of continuous uptime (until millis() rolls over)
+      // naturally, were really working with a single.  we should have, just barely, enough significant digits to get us through a day
+      unsigned long lst_now=lst_start+round( (double)((tempMilli-lst_mS_start)/10.0) * 1.00273790935);
+      if ((lst_now-lst_start)>24*3600*100) update_lst();
+    }
     
 /*
     char temp[160];
@@ -1146,5 +1158,7 @@ void loop() {
     sprintf(temp,"blHA=%l, blDec=%l, backlashHA=%l, backlashDec=%l\r\n",blHA,blDec,backlashHA,backlashDec);
     Serial1_print(temp);
  */
+  } else {
+    processCommands();
   }
 }
