@@ -11,7 +11,7 @@ void processCommands() {
 
     if ((Serial_available() > 0) && (!serial_zero_ready)) { serial_zero_ready = buildCommand(Serial_read()); }
     if ((Serial1_available() > 0) && (!serial_one_ready)) { serial_one_ready = buildCommand_serial_one(Serial1_read()); }
-    
+
     if (Serial_transmit()) return;
     if (Serial1_transmit()) return;
     
@@ -75,40 +75,95 @@ void processCommands() {
             // set the IH offset
             // set the ID offset
             if (!syncEqu(newTargetRA,newTargetDec)) { commandError=true; }
+
+            char s[100]="";
+            Serial1_send("ALIGN STEP#1\n"); 
+            Serial1_send("IH=");
+            if (IH<0) { 
+            Serial1_send("-"); IH=-IH; doubleToHms(s,&IH); IH=-IH; 
+            } else doubleToHms(s,&IH);
+            Serial1_send(s);
+            Serial1_send("\n");
+
+            doubleToDms(s,&ID,true,true);
+            Serial1_send("ID=");
+            Serial1_send(s);
+            Serial1_send("\n\n");
+
           } else 
 #ifdef ALIGN_TWO_AND_THREE_STAR_ON
           if ((alignMode==AlignTwoStar2) || (alignMode==AlignThreeStar2)) {
             alignMode++;
+
             // Move to star near Zenith(E)  (PAlt~Dec ,PAzm~None)
-            // refine the IH offset
-            // get the ID2 offset           ID1 =ID
-            // set the ID offset            ID  =(ID1-ID2)/2
-            // set the PAlt offset          PAlt=ID-ID1
-     
-            // calculate the Alt1 and Azm1 for the target object
-            // calculate the Alt2 and Azm2 for the current position
-            // AltCorr=Alt1-Alt2 is the polar offset in Alt  (up is +)
-            // EQU->HOR->Add this to Latitude->HOR->EQU conversion
-            
-            float ID1 = ID;
-            float IH1 = IH;
-            
+            // example:
+            // E: dec=50 & target=51, so ID=-1
+            // W: dec=50 & target=48, so ID=+2
+            // altCor=-(-1+2)/2=-0.5
+            // ID    =((-0.5+2)-(-0.5+-1))/2=+1.5
+            double ID1 = -ID;  // negative because we flipped the meridian
+            double IH1 = IH;
+
             if (syncEqu(newTargetRA,newTargetDec)) {
-              float ID2=ID;
-              IH  =(IH1+IH)/2.0;
-              ID  =(ID1-ID2)/2.0;   // West of pier add to actual Dec to get corrected Dec (subtract when East)
-              altCor=-(ID-ID1);     // Negative when pointed below the pole, add to Latitude to go from actual HA/Dec to corrected HA/Dec
+              double ID2=ID;
+              IH    =(IH1+IH)/2.0;                     // Refine offset in HA, I believe the difference of these two values would be a decent approximation of the RA axis vs. Dec axis non-perpendicularity
+              altCor=(ID2+ID1)/2.0;                    // Negative when pointed below the pole
+              // 10
+              ID    =(ID2-ID1)/2.0;                    // Average offset in Dec
+              // 2.11
+            
+              // all in minutes:
+              // IH=0, ID=8.25
+              //
+              // IH=  1.05
+              // ID= 10.3
+              //
+              // ID1=-8.25
+              // ID2=12.48
+              // altCor=-02.01
+
+              // test code:
+              // NCP to polaris is about 0.7 degrees
+              char s[100]="";
+              Serial1_send("ALIGN STEP#2\n");   
+              Serial1_send("IH=");
+              if (IH<0) { 
+              Serial1_send("-"); IH=-IH; doubleToHms(s,&IH); IH=-IH; 
+              } else doubleToHms(s,&IH);
+              Serial1_send(s);
+              Serial1_send("\n");
+
+              doubleToDms(s,&ID,true,true);
+              Serial1_send("ID=");
+              Serial1_send(s);
+              Serial1_send("\n");
+
+              doubleToDms(s,&ID1,true,true);
+              Serial1_send("ID1=");
+              Serial1_send(s);
+              Serial1_send("\n");
+
+              doubleToDms(s,&ID2,true,true);
+              Serial1_send("ID2=");
+              Serial1_send(s);
+              Serial1_send("\n");
+
+              doubleToDms(s,&altCor,true,true);
+              Serial1_send("altCor=");
+              Serial1_send(s);
+              Serial1_send("\n\n");
+
             } else commandError=true;
           } else 
           if (alignMode==AlignThreeStar3) {
             alignMode++;
             
-            // Get hour angle of the actual RA
+            // Get hour angle of the intended RA
             f=LST-newTargetRA;
             while (f>+12.0) f=f-24.0;
             while (f<-12.0) f=f+24.0;
     
-            // f/f1 are the actual Alt/Azm
+            // f/f1 are the intended Alt/Azm
             EquToHor(latitude,f,newTargetDec,&f,&f1);
             // Now for where we think we are
             cli(); long t=targetHA; long t1=targetDec; sei();
@@ -635,6 +690,8 @@ void processCommands() {
         if (!dmsToDouble(&latitude,parameter,true)) { commandError=true; } else {
           EEPROM_writeQuad(100+(currentSite)*25+0,(byte*)&latitude);
           if (latitude<0) celestialPoleDec=-90L; else celestialPoleDec=90L;
+          cosLat=cos(latitude/Rad);
+          sinLat=sin(latitude/Rad);
           if (celestialPoleDec>0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
         }
         highPrecision=i;
@@ -825,6 +882,8 @@ void processCommands() {
           currentSite=command[1]-'0'; EEPROM.write(EE_currentSite,currentSite); quietReply=true;
           EEPROM_readQuad(EE_sites+(currentSite*25+0),(byte*)&latitude);
           if (latitude<0) celestialPoleDec=-90L; else celestialPoleDec=90L;
+          cosLat=cos(latitude/Rad);
+          sinLat=sin(latitude/Rad);
           if (celestialPoleDec>0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
           EEPROM_readQuad(EE_sites+(currentSite*25+4),(byte*)&longitude);
           b=EEPROM.read(EE_sites+(currentSite*25+8)); timeZone=b-128;
