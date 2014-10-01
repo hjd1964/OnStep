@@ -79,35 +79,37 @@ volatile boolean wasInBacklashDec=false;
 ISR(TIMER1_COMPA_vect)
 {
   lst++;
-
+  
+  // keeps the target where it's supposed to be while doing gotos
+  if ((lst%100==0) && ((trackingState==TrackingMoveTo) && (lastTrackingState==TrackingSidereal))) { targetHA+=StepsPerSecond; origTargetHA+=StepsPerSecond;}
+  targetHA1=targetHA+PEC_HA;
+  
   if (trackingState==TrackingSidereal) {
     // automatic rate calculation HA
-    double timerRateHA1=((double)moveTimerRateHA*1.1)/SiderealRate;
-    double timerRateHA2=((double)pecTimerRateHA*1.1) /SiderealRate;
-    double timerRateHA3=1.02                         /SiderealRate; if (moveDirHA && (currentGuideRate>1)) timerRateHA3=0;
-    double calculatedTimerRateHA=abs(timerRateHA1+timerRateHA2+timerRateHA3);
-    // if we're stopped, just run the timer fast since we're not moving anyway
-    if (calculatedTimerRateHA>0) calculatedTimerRateHA=1.0/calculatedTimerRateHA; else calculatedTimerRateHA=SiderealRate*10.0; 
-    // remember our "running" rate and only update the actual rate when it changes
+    long calculatedTimerRateHA;
+    double timerRateHA1=1.02; if (moveDirHA && (currentGuideRate>1)) timerRateHA1=0;
+    double timerRateHA2=abs(moveTimerRateHA*1.1+pecTimerRateHA*1.1+timerRateHA1);
+    if (timerRateHA2>0) calculatedTimerRateHA=SiderealRate/timerRateHA2; else calculatedTimerRateHA=SiderealRate*10;
     if (runTimerRateHA!=calculatedTimerRateHA) { timerRateHA=calculatedTimerRateHA; runTimerRateHA=calculatedTimerRateHA; }
     // dynamic rate adjust
     if (abs(posHA-(targetHA+PEC_HA))>1) {
-      timerRateHA=timerRateHA/rd; if (timerRateHA<SiderealRate/60) timerRateHA=SiderealRate/60;     // 60X sidereal speed as fast as we allow 
+      timerRateHA=timerRateHA/rd; if (timerRateHA<SiderealRate/60) timerRateHA=SiderealRate/60; // 60X sidereal speed as fast as we allow 
     } else {
-      timerRateHA=timerRateHA*rd; if (timerRateHA>SiderealRate*10.0) timerRateHA=SiderealRate*10.0; // 0.1X sidereal speed as slow as we allow
+      timerRateHA=timerRateHA*rd; if (timerRateHA>SiderealRate*10) timerRateHA=SiderealRate*10; // 0.1X sidereal speed as slow as we allow
     }
 
     // automatic rate calculation Dec
-    double calculatedTimerRateDec=((double)moveTimerRateDec*1.1)/SiderealRate;
+    long calculatedTimerRateDec;
+    double timerRateDec1=moveTimerRateDec*1.1;
     // if we're stopped, just run the timer fast since we're not moving anyway
-    if (calculatedTimerRateDec>0) calculatedTimerRateDec=1.00/calculatedTimerRateDec; else calculatedTimerRateDec=SiderealRate*10.0;
+    if (timerRateDec1>0) calculatedTimerRateDec=SiderealRate/timerRateDec1; else calculatedTimerRateDec=SiderealRate*10;
     // remember our "running" rate and only update the actual rate when it changes
     if (runTimerRateDec!=calculatedTimerRateDec) { timerRateDec=calculatedTimerRateDec; runTimerRateDec=calculatedTimerRateDec; }
     // dynamic rate adjust
     if (abs(posDec-targetDec)>1) { 
       timerRateDec=timerRateDec/rd; if (timerRateDec<SiderealRate/60) timerRateDec=SiderealRate/60; 
     } else { 
-      timerRateDec=timerRateDec*rd; if (timerRateDec>SiderealRate*10.0) timerRateDec=SiderealRate*10.0; 
+      timerRateDec=timerRateDec*rd; if (timerRateDec>SiderealRate*10) timerRateDec=SiderealRate*10; 
     }
   }
 
@@ -153,8 +155,8 @@ ISR(TIMER3_COMPA_vect)
   // drivers step on the rising edge, need >=1.9uS to settle (for DRV8825 or A4988) so this is early in the routine
   CLR(HAStepPORT,  HAStepBit);
   // Guessing about 4+4+1+ 4+4+1+ 1+ 2+1+2+ 13=37 clocks between here and the step signal which is 2.3uS
-  if (posHA!=(targetHA+PEC_HA)) { // Move the RA stepper to the target
-    if (posHA<(targetHA+PEC_HA)) dirHA=1; else dirHA=0; // Direction control
+  if (posHA!=targetHA1) { // Move the RA stepper to the target
+    if (posHA<targetHA1) dirHA=1; else dirHA=0; // Direction control
     #ifdef REVERSE_HA_ON
       if (HADir==dirHA) CLR(HADirPORT, HADirBit); else SET(HADirPORT, HADirBit); // Set direction, HADir default LOW (=0, for my wiring.)  Needs >=0.65uS before/after rising step signal (DRV8825 or A4988).
     #else                                                                        // Guessing about 1+2+1+4+4+1=13 clocks between here and the step signal which is 0.81uS
@@ -174,8 +176,8 @@ ISR(TIMER3_COMPA_vect)
   // Step signal doesn't happen until the next ISR call, so loads of time settling
   if (HAclr) {
     CLR(HAStepPORT,  HAStepBit);
-    if (posHA!=(targetHA+PEC_HA)) { // Move the RA stepper to the target
-      if (posHA<(targetHA+PEC_HA)) dirHA=1; else dirHA=0; // Direction control
+    if (posHA!=targetHA1) { // Move the RA stepper to the target
+      if (posHA<targetHA1) dirHA=1; else dirHA=0; // Direction control
       #ifdef REVERSE_HA_ON
         if (HADir==dirHA) CLR(HADirPORT, HADirBit); else SET(HADirPORT, HADirBit); // Set direction, HADir default LOW (=0, for my wiring.)  Needs >=0.65uS before/after rising step signal (DRV8825 or A4988).
       #else
