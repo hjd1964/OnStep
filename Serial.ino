@@ -86,6 +86,12 @@ void Serial1_Init(unsigned int baud) {
            (0 << UMSEL10);
 }
 
+void Serial1_send(const char data[])
+{
+  Serial1_print(data);
+  do {} while (Serial1_transmit());
+}
+
 // Loads up a string to sen
 void Serial1_print(const char data[])
 {
@@ -123,6 +129,12 @@ void Serial_Init(unsigned int baud) {
   Serial.begin(baud);
 }
 
+void Serial_send(const char data[])
+{
+  Serial_print(data);
+  do {} while (Serial_transmit());
+}
+
 void Serial_print(const char data[]) {
   Serial.print(data);
 }
@@ -141,6 +153,12 @@ char Serial_read() {
 
 void Serial1_Init(unsigned int baud) {
   Serial1.begin(baud);
+}
+
+void Serial1_send(const char data[])
+{
+  Serial1_print(data);
+  do {} while (Serial1_transmit());
 }
 
 void Serial1_print(const char data[]) {
