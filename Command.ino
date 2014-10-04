@@ -75,25 +75,25 @@ void processCommands() {
             // set the IH offset
             // set the ID offset
             if (!syncEqu(newTargetRA,newTargetDec)) { commandError=true; }
+            
           } else 
 #ifdef ALIGN_TWO_AND_THREE_STAR_ON
           if ((alignMode==AlignTwoStar2) || (alignMode==AlignThreeStar2)) {
             alignMode++;
 
             // Move to star near Zenith(E)  (PAlt~Dec ,PAzm~None)
-            // example:
-            // E: dec=50 & target=51, so ID=-1
-            // W: dec=50 & target=48, so ID=+2
-            // altCor=-(-1+2)/2=-0.5
-            // ID    =((-0.5+2)-(-0.5+-1))/2=+1.5
             double ID1 = -ID;  // negative because we flipped the meridian
             double IH1 = IH;
 
             if (syncEqu(newTargetRA,newTargetDec)) {
               double ID2=ID;
-              IH    =(IH1+IH)/2.0;                     // Refine offset in HA, I believe the difference of these two values would be a decent approximation of the RA axis vs. Dec axis non-perpendicularity
+              double IH2=ID;
+              IH    =(IH2+IH1)/2.0;                    // Refine offset in HA
+              doCor =(IH2-IH1)/2.0;                    // the difference of these two values should be a decent approximation of the Dec axis to RA axis perp. error (aka cone error)
+              doCor =0.0;                              // disabled for now
               altCor=(ID2+ID1)/2.0;                    // Negative when pointed below the pole
               ID    =(ID2-ID1)/2.0;                    // Average offset in Dec
+
             } else commandError=true;
           } else 
           if (alignMode==AlignThreeStar3) {
