@@ -40,7 +40,7 @@ boolean syncEqu(double RA, double Dec) {
 #endif
 }
 
-// this returns the current, uncorrected HA and Dec
+// this returns the telescopes HA and Dec
 void getHADec(double *HA, double *Dec) {
   cli();
   long h=posHA;
