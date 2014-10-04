@@ -104,6 +104,7 @@
  *                                       Fixed altitude calculation used for limits, horizon and overhead limits now stop tracking.
  * 10-01-2014          1.0a6             Numerous performance related tweeks.  Fixed gotos that involve a meridian flip, they now arrive closer to their destination.
  *                                       underPoleLimit can now be set to values other than the default of 9 hours. Added safety code to stop the mount when tracking past this limit
+ * 10-04-2014          1.0a7             Fixes to recently added code to keep 'scope from exceeding safety limits during meridian flips.  Added experimental align model code for cone error.
  *
  *
  * Author: Howard Dutton
@@ -154,8 +155,8 @@
 #include "errno.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "10 01 14"
-#define FirmwareNumber "1.0a6"
+#define FirmwareDate   "10 04 14"
+#define FirmwareNumber "1.0a7"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -173,7 +174,7 @@
 #define STATUS_LED2_PINS_ON
 
 // supply power on pins 5 and 11 to Pololu or other stepper drivers without on-board 5V voltage regulators, default=OFF
-#define POWER_SUPPLY_PINS_OFF
+#define POWER_SUPPLY_PINS_ON
 
 // enables goTo speed equalization for differing right ascension and declination StepsPerDegreeHA/Dec, default=OFF (limited testing done)
 #define DEC_RATIO_OFF
@@ -197,14 +198,14 @@
 #define initKey 915307547 // unique identifier for the current initialization format, do not change
 
 // ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
-#define MaxRate                   96 // this is the minimum number of micro-seconds between micro-steps
+#define MaxRate                   24 // this is the minimum number of micro-seconds between micro-steps
                                      // minimum is around 16 (Teensy3.1) or 24 (Mega2560), default is 96, higher is ok
                                      // too low and OnStep communicates slowly and/or freezes as the motor timers use up all the MCU time
                                      
-#define StepsForRateChange  128000.0 // number of steps during acceleration and de-acceleration: higher values=longer acceleration/de-acceleration
+#define StepsForRateChange  100000.0 // number of steps during acceleration and de-acceleration: higher values=longer acceleration/de-acceleration
                                      // for the most part this doesn't need to be changed, but adjust when needed
 
-#define BacklashTakeupRate        25 // backlash takeup rate (in multipules of the sidereal rate): too fast and your motors will stall,
+#define BacklashTakeupRate        10 // backlash takeup rate (in multipules of the sidereal rate): too fast and your motors will stall,
                                      // too slow and the mount will be sluggish while it moves through the backlash
                                      // for the most part this doesn't need to be changed, but adjust when needed
 
@@ -520,6 +521,7 @@ char siteName[16];
 // align command
 double altCor            = 0;       // for geometric coordinate correction/align, - is below the pole, + above
 double azmCor            = 0;       // - is right of the pole, + is left
+double doCor             = 0;       // declination orthogonal correction
 double IH                = 0;       // offset corrections/align
 double ID                = 0;
 
@@ -1038,37 +1040,36 @@ void loop() {
     // handles moving to an new target RA and Dec, runs every 1/10 second
     if ((trackingState==TrackingMoveTo) && (siderealTimer%10==0)) moveTo(); else
     {
-
-    ResultA1=ResultA2;
-    ResultA2=floor((double)(StepsPerSecond/100.0)*(double)(siderealTimer%100));
-
-    if ((trackingState==TrackingSidereal) && !(moveDirHA && (currentGuideRate>1))) { // only active while sidereal tracking with a guide rate that makes sense
-
-      // see if we need to take a step
-      if (ResultA1!=ResultA2) {
-          // PEC_Timer starts at zero again every second, PEC_SKIP will control the rate and will trigger a +/- step every PEC_SKIP steps while tracking 
-          PEC_Timer++;
+      ResultA1=ResultA2;
+      ResultA2=floor((double)(StepsPerSecond/100.0)*(double)(siderealTimer%100));
   
-          // lookup Guiding
-          long ig=0; 
-          if (accGuideHA<0) { ig=-1; accGuideHA++; } else if (accGuideHA>0) { ig=1; accGuideHA--; }
+      if ((trackingState==TrackingSidereal) && !(moveDirHA && (currentGuideRate>1))) { // only active while sidereal tracking with a guide rate that makes sense
   
-          // lookup PEC
-          long ip=0;
-          if (PEC_SKIP==0) {
-            // disable playback
-          } else {
-            // get ready to apply the correction
-            if (PEC_Timer%PEC_SKIP==0) {
-              if (PEC_SKIP_HA>0) { ip=1; PEC_SKIP_HA--; } else
-                if (PEC_SKIP_HA<0) { ip=-1; PEC_SKIP_HA++; }
+        // see if we need to take a step
+        if (ResultA1!=ResultA2) {
+            // PEC_Timer starts at zero again every second, PEC_SKIP will control the rate and will trigger a +/- step every PEC_SKIP steps while tracking 
+            PEC_Timer++;
+    
+            // lookup Guiding
+            long ig=0; 
+            if (accGuideHA<0) { ig=-1; accGuideHA++; } else if (accGuideHA>0) { ig=1; accGuideHA--; }
+    
+            // lookup PEC
+            long ip=0;
+            if (PEC_SKIP==0) {
+              // disable playback
+            } else {
+              // get ready to apply the correction
+              if (PEC_Timer%PEC_SKIP==0) {
+                if (PEC_SKIP_HA>0) { ip=1; PEC_SKIP_HA--; } else
+                  if (PEC_SKIP_HA<0) { ip=-1; PEC_SKIP_HA++; }
+              }
             }
-          }
-  
-          // apply the Tracking, Guiding, and PEC
-          cli(); targetHA=targetHA+1+ig; PEC_HA+=ip; targetHA1=targetHA+PEC_HA; sei();
+    
+            // apply the Tracking, Guiding, and PEC
+            cli(); targetHA=targetHA+1+ig; PEC_HA+=ip; targetHA1=targetHA+PEC_HA; sei();
+        }
       }
-    }
     }
   }
 
@@ -1092,7 +1093,7 @@ void loop() {
 
       // reset the sidereal clock once a day, to keep the significant digits from being consumed
       // I'm shooting for keeping OnStep reliable for about 50 days of continuous uptime (until millis() rolls over)
-      // naturally, were really working with a single.  we should have, just barely, enough significant digits to get us through a day
+      // really working with a single and should have, just barely, enough significant digits to get us through a day
       unsigned long lst_now=lst_start+round( (double)((tempMilli-lst_mS_start)/10.0) * 1.00273790935);
       if ((lst_now-lst_start)>24*3600*100) update_lst();
     }
