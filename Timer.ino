@@ -81,7 +81,7 @@ ISR(TIMER1_COMPA_vect)
   lst++;
   
   // keeps the target where it's supposed to be while doing gotos
-  if ((lst%100==0) && ((trackingState==TrackingMoveTo) && (lastTrackingState==TrackingSidereal))) { targetHA+=StepsPerSecond; origTargetHA+=StepsPerSecond;}
+  if ((lst%100==0) && ((trackingState==TrackingMoveTo) && (lastTrackingState==TrackingSidereal))) { targetHA+=StepsPerSecond; origTargetHA+=StepsPerSecond; }
   targetHA1=targetHA+PEC_HA;
   
   if (trackingState==TrackingSidereal) {
