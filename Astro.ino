@@ -169,15 +169,30 @@ boolean EquToCEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1) 
   if (Dec>+90.0) Dec=+90.0;
   if (Dec<-90.0) Dec=-90.0;
 
-  // correct for polar misalignment
   // breaks-down near the pole (limited to >1' from pole)
   if (abs(Dec)<89.98333333) {
     double h =HA/(Rad/15.0);
     double d =Dec/Rad;
-    double h1=-azmCor*cos(h)*tan(d) + altCor*sin(h)*tan(d);
-    double d1=+azmCor*sin(h)        + altCor*cos(h);
-    *HA1 =HA +(h1/15.0);
-    *Dec1=Dec+d1;
+    double dSin=sin(d);
+    double dCos=cos(d);
+
+    // ------------------------------------------------------------
+    // misalignment due to tube/optics not being perp. to Dec axis
+    // negative numbers are further (S) from the NCP, swing to the
+    // equator and the effect on declination is 0. At the SCP it
+    // becomes a (N) offset.  Unchanged with meridian flips.
+    // expressed as a correction to the Polar axis misalignment
+    double p=1.0; if (pierSide==PierSideWest) p=-1.0;
+    double DOd = doCor*dSin;
+    // as the above offset becomes zero near the equator, the affect
+    // works on HA instead.  meridian flips effect this in HA
+    double DOh = doCor*dCos*p;
+
+    // polar misalignment
+    double h1=-azmCor*cos(h)*(dSin/dCos) + altCor*sin(h)*(dSin/dCos);
+    double d1=+azmCor*sin(h)             + altCor*cos(h);
+    *HA1 =HA +((h1/15.0)+DOh);
+    *Dec1=Dec+(d1+DOd);
   } else {
     // just ignore the the correction if right on the pole
     *HA1 =HA;
@@ -213,15 +228,31 @@ boolean CEquToEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1) 
   if (Dec>90.0) { Dec=(90.0-Dec)+90; HA =HA-12; }
   if (Dec<-90.0) { Dec=(-90.0-Dec)-90.0; HA =HA-12; }
 
-  // correct for polar misalignment
   // breaks-down near the pole (limited to >1' from pole)
   if (abs(Dec)<89.98333333) {
     double h =HA/(Rad/15.0);
     double d =Dec/Rad;
-    double h1=-azmCor*cos(h)*tan(d) + altCor*sin(h)*tan(d);
-    double d1=+azmCor*sin(h)        + altCor*cos(h);
-    *HA1 =HA -(h1/15.0);
-    *Dec1=Dec-d1;
+    double dSin=sin(d);
+    double dCos=cos(d);
+
+    // ------------------------------------------------------------
+    // misalignment due to tube/optics not being perp. to Dec axis
+    // negative numbers are further (S) from the NCP, swing to the
+    // equator and the effect on declination is 0. At the SCP it
+    // becomes a (N) offset.  Unchanged with meridian flips.
+    // expressed as a correction to the Polar axis misalignment
+    double p=1.0; if (pierSide==PierSideWest) p=-1.0;
+    double DOd = doCor*dSin;
+    // as the above offset becomes zero near the equator, the affect
+    // works on HA instead.  meridian flips effect this in HA
+    double DOh = doCor*dCos*p;
+
+    // ------------------------------------------------------------
+    // polar misalignment
+    double h1=-azmCor*cos(h)*(dSin/dCos) + altCor*sin(h)*(dSin/dCos);
+    double d1=+azmCor*sin(h)             + altCor*cos(h);
+    *HA1 =HA -((h1/15.0)+DOh);
+    *Dec1=Dec-(d1+DOd);
   } else {
     // just ignore the the correction if right on the pole
     *HA1=HA;
@@ -301,7 +332,7 @@ void CEquToTracRateCor() {
   }
 }
 
-// light weight altitude calculation, finishes updating once every ten seconds
+// light weight altitude calculation, 14 seconds to complete
 byte ac_step = 0;
 double ac_HA,ac_Dec;
 double ac_sindec,ac_cosdec,ac_cosha;
