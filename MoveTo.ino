@@ -19,21 +19,33 @@ void moveTo() {
     timerRateDec=SiderealRate;
     #endif
 
-    // just move HA, not the declination yet
-    if (pierSide==PierSideFlipWE1) targetHA=-60L*StepsPerDegreeHA; else targetHA=60L*StepsPerDegreeHA; 
+    // default
+    if (pierSide==PierSideFlipWE1) targetHA=-60L*StepsPerDegreeHA; else targetHA=60L*StepsPerDegreeHA;
+    targetDec=celestialPoleDec*StepsPerDegreeDec;
 
-    // if we're under the pole, slew both axis back at once
-    if (abs((double)posDec/(double)StepsPerDegreeDec)>90.0) { 
-      startDec=posDec; targetDec=celestialPoleDec*StepsPerDegreeDec;
-    } else { 
-      targetDec=posDec;
-      if (abs(latitude)<45.0) {
-        // override if we're at a low latitude and in the opposite sky, then goto 0 deg. declination
-        if ((celestialPoleDec>0) && (posDec<0)) targetDec=0;
-        if ((celestialPoleDec<0) && (posDec>0)) targetDec=0;
+    if (celestialPoleDec>0) {
+      // if Dec is in the general area of the pole, slew both axis back at once
+      if (((double)posDec/(double)StepsPerDegreeDec)>90-latitude) {
+        if (pierSide==PierSideFlipWE1) targetHA=-90L*StepsPerDegreeHA; else targetHA=90L*StepsPerDegreeHA; 
+      } else { 
+        // override if we're at a low latitude and in the opposite sky, leave the HA alone
+        if ((abs(latitude)<45.0) && (posDec<0)) {
+          if (pierSide==PierSideFlipWE1) targetHA=-45L*StepsPerDegreeHA; else targetHA=45L*StepsPerDegreeHA; 
+        }
       }
+    } else {
+      // if Dec is in the general area of the pole, slew both axis back at once
+      if (((double)posDec/(double)StepsPerDegreeDec)<-90-latitude) {
+        if (pierSide==PierSideFlipWE1) targetHA=-90L*StepsPerDegreeHA; else targetHA=90L*StepsPerDegreeHA; 
+      } else { 
+        // override if we're at a low latitude and in the opposite sky, leave the HA alone
+        if ((abs(latitude)<45.0) && (posDec>0)) {
+          if (pierSide==PierSideFlipWE1) targetHA=-45L*StepsPerDegreeHA; else targetHA=45L*StepsPerDegreeHA; 
+        }
+      }
+    }
+
     sei();
-   }
     
     pierSide++;
   }
