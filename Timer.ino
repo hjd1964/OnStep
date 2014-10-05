@@ -130,10 +130,10 @@ ISR(TIMER1_COMPA_vect)
   if (trackingState==TrackingSidereal) {
     // travel through the backlash is done, but we weren't following the target while it was happening!
     // so now get us back to near where we need to be
-    if ((!inBacklashHA) && (wasInBacklashHA)) {
+    if ((!inBacklashHA) && (wasInBacklashHA) && (!moveDirHA)) {
       if (abs(posHA-(targetHA+PEC_HA))>2) thisTimerRateHA=SiderealRate/4; else wasInBacklashHA=false;
     }
-    if ((!inBacklashDec) && (wasInBacklashDec)) {
+    if ((!inBacklashDec) && (wasInBacklashDec) && (!moveDirDec)) {
       if (abs(posDec-targetDec)>2) thisTimerRateDec=SiderealRate/4; else wasInBacklashDec=false;
     }
   }
