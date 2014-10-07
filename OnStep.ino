@@ -105,7 +105,8 @@
  * 10-01-2014          1.0a6             Numerous performance related tweeks.  Fixed gotos that involve a meridian flip, they now arrive closer to their destination.
  *                                       underPoleLimit can now be set to values other than the default of 9 hours. Added safety code to stop the mount when tracking past this limit
  * 10-04-2014          1.0a7             Fixes to recently added code to keep 'scope from exceeding safety limits during meridian flips.  Added experimental align model code for cone error.
- * 10-06-2014          1.0a8             First successful test of two star align, compensates for Polar altitude misalignment.  32uS rate is again the fastest stable rate I've observed on a Mega2560.
+ * 10-06-2014          1.0a8             First successful test of two star align, compensates for Polar altitude misalignment.  Simple change keeps GetEqu (lots of floating point trig) from needing 
+ *                                       to be run twice when :GR# and :GD# are run and/or more than once a second during goto's.
  *
  *
  * Author: Howard Dutton
@@ -175,7 +176,7 @@
 #define STATUS_LED2_PINS_OFF
 
 // supply power on pins 5 and 11 to Pololu or other stepper drivers without on-board 5V voltage regulators, default=OFF
-#define POWER_SUPPLY_PINS_ON
+#define POWER_SUPPLY_PINS_OFF
 
 // enables goTo speed equalization for differing right ascension and declination StepsPerDegreeHA/Dec, default=OFF (limited testing done)
 #define DEC_RATIO_OFF
@@ -200,7 +201,7 @@
 
 // ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
 #define MaxRate                   96 // this is the minimum number of micro-seconds between micro-steps
-                                     // minimum is around 16 (Teensy3.1) or 32 (Mega2560), default is 96, higher is ok
+                                     // minimum is around 16 (Teensy3.1) or 24 (Mega2560), default is 96, higher is ok
                                      // too low and OnStep communicates slowly and/or freezes as the motor timers use up all the MCU time
                                      
 #define StepsForRateChange  100000.0 // number of steps during acceleration and de-acceleration: higher values=longer acceleration/de-acceleration
