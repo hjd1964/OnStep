@@ -29,6 +29,36 @@ void processCommands() {
 
 //   A - Alignment Commands
       if (command[0]=='A') {
+//  :AH#  Get HA index correction value
+//         Returns: HH:MM:SS
+        if (command[1]=='H') {
+              i=highPrecision; highPrecision=true; doubleToHms(reply,&IH); quietReply=true; highPrecision=i;
+        } else
+//  :AD#  Get Dec index correction value
+//         Returns: sDD*MM:SS
+        if (command[1]=='D') {
+              i=highPrecision; highPrecision=true; doubleToDms(reply,&ID,false,true); quietReply=true; highPrecision=i;
+        } else
+//  :AA#  Get Polar Altitude correction value
+//         Returns: sDD*MM:SS
+        if (command[1]=='A') {
+              i=highPrecision; highPrecision=true; doubleToDms(reply,&altCor,false,true); quietReply=true; highPrecision=i;
+        } else
+//  :AZ#  Get Polar Azimuth correction value
+//         Returns: sDD*MM:SS
+        if (command[1]=='Z') {
+              i=highPrecision; highPrecision=true; doubleToDms(reply,&azmCor,false,true); quietReply=true; highPrecision=i;
+        } else
+//  :AO#  Get declination orthogonality correction value
+//         Returns: sDD*MM:SS
+        if (command[1]=='O') {
+              i=highPrecision; highPrecision=true; doubleToDms(reply,&doCor,false,true); quietReply=true; highPrecision=i;
+        } else
+//  :AP#  Get declination/polar axis orthogonality correction value
+//         Returns: sDD*MM:SS
+        if (command[1]=='P') {
+              i=highPrecision; highPrecision=true; doubleToDms(reply,&pdCor,false,true); quietReply=true; highPrecision=i;
+        } else
 //  :An#  Start Telescope Manual Alignment Sequence
 //         This is to initiate a one or two-star alignment:
 //         1) Before calling this function, the telescope should be in the polar-home position
@@ -45,24 +75,24 @@ void processCommands() {
 //         Returns:
 //         1: When ready for your goto commands
 //         0: If mount is busy
-      if ((command[1]=='1') || (command[1]=='2') || (command[1]=='3')) {
-        // set current time and date before calling this routine
-
-        // telescope should be set in the polar home (CWD) for a starting point
-        // this command sets IH, ID, azmCor=0; altCor=0;
-        setHome();
-
-        // newTargetRA =timeRange(LST);
-        // newTargetDec=90.0;  
-
-        // start tracking
-        trackingState=TrackingSidereal;
-
-        // start align... AlignOneStar1=01, AlignTwoStar1=11, AlignThreeStar1=21
-        alignMode=AlignOneStar1+(command[1]-'1')*10;
-
-        commandError=false;
-      } else
+        if ((command[1]=='1') || (command[1]=='2') || (command[1]=='3')) {
+          // set current time and date before calling this routine
+  
+          // telescope should be set in the polar home (CWD) for a starting point
+          // this command sets IH, ID, azmCor=0; altCor=0;
+          setHome();
+  
+          // newTargetRA =timeRange(LST);
+          // newTargetDec=90.0;  
+  
+          // start tracking
+          trackingState=TrackingSidereal;
+  
+          // start align... AlignOneStar1=01, AlignTwoStar1=11, AlignThreeStar1=21
+          alignMode=AlignOneStar1+(command[1]-'1')*10;
+  
+          commandError=false;
+        } else
 //  :A+#  Manual Alignment, set target location
 //         Returns:
 //         1: If correction is accepted
@@ -75,7 +105,6 @@ void processCommands() {
             // set the IH offset
             // set the ID offset
             if (!syncEqu(newTargetRA,newTargetDec)) { commandError=true; }
-            
           } else 
 #ifdef ALIGN_TWO_AND_THREE_STAR_ON
           if ((alignMode==AlignTwoStar2) || (alignMode==AlignThreeStar2)) {
@@ -87,13 +116,12 @@ void processCommands() {
 
             if (syncEqu(newTargetRA,newTargetDec)) {
               double ID2=ID;
-              double IH2=ID;
-              IH    =(IH2+IH1)/2.0;                    // Refine offset in HA
-              doCor =(IH2-IH1)/2.0;                    // the difference of these two values should be a decent approximation of the Dec axis to RA axis perp. error (aka cone error)
-              doCor =0.0;                              // disabled for now
-              altCor=(ID2+ID1)/2.0;                    // Negative when pointed below the pole
-              ID    =(ID2-ID1)/2.0;                    // Average offset in Dec
-
+              double IH2=IH;
+              IH    = (IH2+IH1)/2.0;                    // Refine offset in HA
+              doCor = (IH2-IH1)/2.0;                    // the difference of these two values should be a decent approximation of the Dec axis to RA axis perp. error (aka cone error)
+              doCor = 0.0;                              // disabled for now
+              altCor=-(ID2+ID1)/2.0;                    // Negative when pointed below the pole
+              ID    = (ID2-ID1)/2.0;                    //
             } else commandError=true;
           } else 
           if (alignMode==AlignThreeStar3) {
@@ -117,7 +145,6 @@ void processCommands() {
             EquToHor(latitude,f2,f3,&f2,&f3);
             // Polar offset in azimuth, degrees ie. at 180, measures 185, azmCor=+5
             azmCor=(f3-f1); 
-  
           } else
 #endif
           commandError=true; 
