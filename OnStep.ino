@@ -105,6 +105,7 @@
  * 10-01-2014          1.0a6             Numerous performance related tweeks.  Fixed gotos that involve a meridian flip, they now arrive closer to their destination.
  *                                       underPoleLimit can now be set to values other than the default of 9 hours. Added safety code to stop the mount when tracking past this limit
  * 10-04-2014          1.0a7             Fixes to recently added code to keep 'scope from exceeding safety limits during meridian flips.  Added experimental align model code for cone error.
+ * 10-06-2014          1.0a8             First successful test of two star align, compensates for Polar altitude misalignment.
  *
  *
  * Author: Howard Dutton
@@ -155,8 +156,8 @@
 #include "errno.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "10 04 14"
-#define FirmwareNumber "1.0a7"
+#define FirmwareDate   "10 06 14"
+#define FirmwareNumber "1.0a8"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -171,7 +172,7 @@
 // light status LED(s), default=ON
 #define STATUS_LED_PINS_ON
 // default=OFF
-#define STATUS_LED2_PINS_ON
+#define STATUS_LED2_PINS_OFF
 
 // supply power on pins 5 and 11 to Pololu or other stepper drivers without on-board 5V voltage regulators, default=OFF
 #define POWER_SUPPLY_PINS_ON
@@ -198,7 +199,7 @@
 #define initKey 915307547 // unique identifier for the current initialization format, do not change
 
 // ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
-#define MaxRate                   24 // this is the minimum number of micro-seconds between micro-steps
+#define MaxRate                   96 // this is the minimum number of micro-seconds between micro-steps
                                      // minimum is around 16 (Teensy3.1) or 24 (Mega2560), default is 96, higher is ok
                                      // too low and OnStep communicates slowly and/or freezes as the motor timers use up all the MCU time
                                      
@@ -522,6 +523,7 @@ char siteName[16];
 double altCor            = 0;       // for geometric coordinate correction/align, - is below the pole, + above
 double azmCor            = 0;       // - is right of the pole, + is left
 double doCor             = 0;       // declination orthogonal correction
+double pdCor             = 0;       // declination/polar orthogonal correction
 double IH                = 0;       // offset corrections/align
 double ID                = 0;
 
