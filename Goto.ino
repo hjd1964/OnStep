@@ -53,17 +53,34 @@ void getHADec(double *HA, double *Dec) {
 }
 
 // gets the telescopes current RA and Dec, set returnHA to true for Horizon Angle instead of RA
-boolean getEqu(double *RA, double *Dec, boolean returnHA) {
-  double HA;
+long lastGetEqu=0;
+double lastGetEquLST=0;
+double lastGetEquHA=0;
+double lastGetEquDec=0;
+boolean getEqu(double *RA, double *Dec, boolean returnHA, boolean fast) {
+  unsigned long Tmin=50;
+  if (trackingState==TrackingMoveTo) Tmin=1000;
+
+  // return last values if recent results apply
+  if ((fast) && (millis()-lastGetEqu<Tmin)) {
+    *Dec=lastGetEquDec;
+    // return either the RA or the HA depending on returnHA
+    if (!returnHA) *RA=timeRange(lastGetEquLST-lastGetEquHA); else *RA=lastGetEquHA;
+    return true;
+  }
   
   // get the uncorrected HA and Dec
-  getHADec(&HA,Dec);
+  getHADec(&lastGetEquHA,Dec);
   
   // correct for under the pole, polar misalignment, and index offsets
-  CEquToEqu(latitude,HA,*Dec,&HA,Dec);
-  
+  CEquToEqu(latitude,lastGetEquHA,*Dec,&lastGetEquHA,Dec);
+
+  lastGetEquLST=LST;
+  lastGetEquDec=*Dec;
+  lastGetEqu=millis();
+
   // return either the RA or the HA depending on returnHA
-  if (!returnHA) *RA=timeRange(LST-HA); else *RA=HA;
+  if (!returnHA) *RA=timeRange(LST-lastGetEquHA); else *RA=lastGetEquHA;
   return true;
 }
 
@@ -95,7 +112,7 @@ boolean getApproxEqu(double *RA, double *Dec, boolean returnHA) {
 // gets the telescopes current Alt and Azm
 boolean getHor(double *Alt, double *Azm) {
 double HA,Dec;
-  getEqu(&HA,&Dec,true);
+  getEqu(&HA,&Dec,true,true);
   EquToHor(latitude,HA,Dec,Alt,Azm);
   return true;
 }
