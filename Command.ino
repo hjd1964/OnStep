@@ -29,35 +29,10 @@ void processCommands() {
 
 //   A - Alignment Commands
       if (command[0]=='A') {
-//  :AH#  Get HA index correction value
-//         Returns: HH:MM:SS
-        if (command[1]=='H') {
-              i=highPrecision; highPrecision=true; doubleToHms(reply,&IH); quietReply=true; highPrecision=i;
-        } else
-//  :AD#  Get Dec index correction value
-//         Returns: sDD*MM:SS
-        if (command[1]=='D') {
-              i=highPrecision; highPrecision=true; doubleToDms(reply,&ID,false,true); quietReply=true; highPrecision=i;
-        } else
-//  :AA#  Get Polar Altitude correction value
-//         Returns: sDD*MM:SS
-        if (command[1]=='A') {
-              i=highPrecision; highPrecision=true; doubleToDms(reply,&altCor,false,true); quietReply=true; highPrecision=i;
-        } else
-//  :AZ#  Get Polar Azimuth correction value
-//         Returns: sDD*MM:SS
-        if (command[1]=='Z') {
-              i=highPrecision; highPrecision=true; doubleToDms(reply,&azmCor,false,true); quietReply=true; highPrecision=i;
-        } else
-//  :AO#  Get declination orthogonality correction value
-//         Returns: sDD*MM:SS
-        if (command[1]=='O') {
-              i=highPrecision; highPrecision=true; doubleToDms(reply,&doCor,false,true); quietReply=true; highPrecision=i;
-        } else
-//  :AP#  Get declination/polar axis orthogonality correction value
-//         Returns: sDD*MM:SS
-        if (command[1]=='P') {
-              i=highPrecision; highPrecision=true; doubleToDms(reply,&pdCor,false,true); quietReply=true; highPrecision=i;
+//  :AW#  Align Write to EEPROM
+//         Returns: 1 on success
+        if (command[1]=='W') {
+              saveAlignModel();
         } else
 //  :An#  Start Telescope Manual Alignment Sequence
 //         This is to initiate a one or two-star alignment:
@@ -97,54 +72,93 @@ void processCommands() {
 //         Returns:
 //         1: If correction is accepted
 //         0: Failure, Manual align mode not set or distance too far 
+/*
+Alignment Logic:
+Near the celestial equator (Dec=0, HA=0)...
+the azmCor term is 0 in Dec
+the altCor term is 1 in Dec
+the doCor  term is 1 in HA
+the pdCor  term is 0 in HA
+
+Near HA=6 and Dec=45...
+the azmCor term is 1 in Dec
+the altCor term is 0 in Dec
+the doCor  term is 0 in HA
+the pdCor  term is 1 in HA
+*/
         if (command[1]=='+') { 
+
+          // First star:
+          // Near the celestial equator (Dec=0, HA=0), telescope West of the pier
           if ((alignMode==AlignOneStar1) || (alignMode==AlignTwoStar1) || (alignMode==AlignThreeStar1)) {
             alignMode++;
-            // Move to star near (Zenith(W) or, for one-star near where you're working) 
-            //                   (PAlt~Dec ,PAzm~None)
             // set the IH offset
             // set the ID offset
             if (!syncEqu(newTargetRA,newTargetDec)) { commandError=true; }
+            avgDec=newTargetDec;
+            avgHA =haRange(LST-newTargetRA);
           } else 
 #ifdef ALIGN_TWO_AND_THREE_STAR_ON
+          // Second star:
+          // Near the celestial equator (Dec=0, HA=0), telescope East of the pier
           if ((alignMode==AlignTwoStar2) || (alignMode==AlignThreeStar2)) {
             alignMode++;
-
-            // Move to star near Zenith(E)  (PAlt~Dec ,PAzm~None)
-            double ID1 = -ID;  // negative because we flipped the meridian
+            double ID1 = -ID;  // last offset Dec is negative because we flipped the meridian
             double IH1 = IH;
 
+            avgDec=(avgDec+newTargetDec)/2.0;
+            avgHA =(-avgHA+haRange(LST-newTargetRA))/2.0; // last HA is negative because we were on the other side of the meridian
             if (syncEqu(newTargetRA,newTargetDec)) {
               double ID2=ID;
               double IH2=IH;
-              IH    = (IH2+IH1)/2.0;                    // Refine offset in HA
-              doCor = (IH2-IH1)/2.0;                    // the difference of these two values should be a decent approximation of the Dec axis to RA axis perp. error (aka cone error)
-              doCor = 0.0;                              // disabled for now
+
+              IH    = (IH2+IH1)/2.0;                    // average offset in HA
+              ID    = (ID2-ID1)/2.0;                    // new offset in Dec
+              double IH3=IH;
+              double ID3=ID;
+            
               altCor=-(ID2+ID1)/2.0;                    // Negative when pointed below the pole
-              ID    = (ID2-ID1)/2.0;                    //
+              altCor= altCor/cos((avgHA*15.0)/Rad);     // correct for measurements being away from the Meridian
+
+              // allow the altCor to be applied
+              if (syncEqu(newTargetRA,newTargetDec)) {
+                ID2=ID;
+                IH2=IH;
+
+                doCor =-((IH2-IH1)/2.0)*15.0;            // the difference of these two values should be a decent approximation of the optical axis to Dec axis error (aka cone error)
+                doCor = doCor*cos(avgDec/Rad);           // correct for measurement being away from the Celestial Equator
+
+                IH=IH3;
+                ID=ID3;
+              } else commandError=true;
             } else commandError=true;
           } else 
+          // Third star:
+          // Near (Dec=45, HA=6), telescope East of the pier
           if (alignMode==AlignThreeStar3) {
             alignMode++;
             
-            // Get hour angle of the intended RA
-            f=LST-newTargetRA;
-            while (f>+12.0) f=f-24.0;
-            while (f<-12.0) f=f+24.0;
-    
-            // f/f1 are the intended Alt/Azm
-            EquToHor(latitude,f,newTargetDec,&f,&f1);
-            // Now for where we think we are
-            cli(); long t=targetHA; long t1=targetDec; sei();
-            
-            f2=(t/(double)StepsPerDegreeHA)/15.0;
-            f3=t1/(double)StepsPerDegreeDec;
-            // corrected to actual HA/Dec (for offset HA/Dec and Alt)
-            CEquToEqu(latitude,f2,f3,&f2,&f3);
-            // f2/f3 are the Alt/Azm of where we think we are
-            EquToHor(latitude,f2,f3,&f2,&f3);
-            // Polar offset in azimuth, degrees ie. at 180, measures 185, azmCor=+5
-            azmCor=(f3-f1); 
+            double ID1 = ID;
+            double IH1 = IH;
+            if (syncEqu(newTargetRA,newTargetDec)) {
+              double ID2=ID;
+              double IH2=IH;
+
+              azmCor = -(ID2-ID1);                      // offset in declination is largely due to polar align Azm error
+              azmCor = azmCor/sin((haRange(LST-newTargetRA)*15.0)/Rad);  // correct for HA of measurement location
+
+              // allow the azmCor to be applied
+              if (syncEqu(newTargetRA,newTargetDec)) {
+                ID2=ID;
+                IH2=IH;
+
+                pdCor =  (IH2-IH1)*15.0;                // the Dec axis to RA axis perp. error should be the only major source of error left effecting the HA
+                pdCor = pdCor/tan(newTargetDec/Rad);    // correct for Dec of measurement location
+
+                ID=ID1;
+                IH=IH1;
+              } else commandError=true;
+            } else commandError=true;
           } else
 #endif
           commandError=true; 
@@ -333,22 +347,24 @@ void processCommands() {
         } else commandError=true;
         
         quietReply=true; 
-        } else 
+      } else 
 //  :GXnn#   Get OnStep value
 //         Returns: value
       if (command[1]=='X')  { 
         if (parameter[2]==(char)0) {
-          if (parameter[0]=='0') {
-            if (parameter[1]=='0') { // ID, Dec offset
-              if (!doubleToDms(reply,&ID,false,true)) commandError=true; else quietReply=true;
-            } else commandError=true;
-            if (parameter[1]=='1') { // IH, HA offset
-              if (!doubleToHms(reply,&IH)) commandError=true; else quietReply=true;
-            } else commandError=true;
+          if (parameter[0]=='0') { // 00: Align Model
+            switch (parameter[1]) {
+              case '0': i=highPrecision; highPrecision=true; doubleToHms(reply,&IH); quietReply=true; highPrecision=i; break;                   // IH
+              case '1': i=highPrecision; highPrecision=true; doubleToDms(reply,&ID,false,true); quietReply=true; highPrecision=i; break;        // ID
+              case '2': i=highPrecision; highPrecision=true; doubleToDms(reply,&altCor,false,true); quietReply=true; highPrecision=i; break;    // altCor aka PE
+              case '3': i=highPrecision; highPrecision=true; doubleToDms(reply,&azmCor,false,true); quietReply=true; highPrecision=i; break;    // azmCor aka PZ
+              case '4': i=highPrecision; highPrecision=true; doubleToDms(reply,&doCor,false,true); quietReply=true; highPrecision=i; break;     // DO
+              case '5': i=highPrecision; highPrecision=true; doubleToDms(reply,&pdCor,false,true); quietReply=true; highPrecision=i; break;     // PD
+            }
           } else commandError=true;
         } else commandError=true;
-      getEqu(&f,&f1,false,true);  
-    } else 
+        getEqu(&f,&f1,false,true);  
+      } else 
 //  :GZ#   Get telescope azimuth
 //         Returns: DDD*MM# or DDD*MM'SS# (based on precision setting)
       if (command[1]=='Z')  { getHor(&f,&f1); if (!doubleToDms(reply,&f1,true,false)) commandError=true; else quietReply=true; } else commandError=true;
@@ -364,8 +380,7 @@ void processCommands() {
 //         Returns: Nothing
       if (command[1]=='C')  { goHome(); quietReply=true; } else 
 //  :hP#   Goto the Park Position
-//          Return: 0 on failure
-//                  1 on success
+//         Returns: Nothing
       if (command[1]=='P')  { if (park()) commandError=true; } else 
 //  :hQ#   Set the park position
 //          Return: 0 on failure
@@ -681,6 +696,24 @@ void processCommands() {
           } else commandError=true;
         } else commandError=true;
       } else
+//  :SXnn,VVVVVV...#   Set OnStep value
+//          Return: 0 on failure
+//                  1 on success
+      if (command[1]=='X')  { 
+        if (parameter[2]==(char)0) {
+          if (parameter[0]=='0') { // 00: Align Model
+            switch (parameter[1]) {
+              case '0': i=highPrecision; highPrecision=true; commandError=!hmsToDouble(&IH,&parameter[3]);          highPrecision=i; break;    // IH
+              case '1': i=highPrecision; highPrecision=true; commandError=!dmsToDouble(&ID,&parameter[3],true);     highPrecision=i; break;    // ID
+              case '2': i=highPrecision; highPrecision=true; commandError=!dmsToDouble(&altCor,&parameter[3],true); highPrecision=i; break;    // altCor aka PE
+              case '3': i=highPrecision; highPrecision=true; commandError=!dmsToDouble(&azmCor,&parameter[3],true); highPrecision=i; break;    // azmCor aka PZ
+              case '4': i=highPrecision; highPrecision=true; commandError=!dmsToDouble(&doCor,&parameter[3],true);  highPrecision=i; break;    // DO
+              case '5': i=highPrecision; highPrecision=true; commandError=!dmsToDouble(&pdCor,&parameter[3],true);  highPrecision=i; break;    // PD
+            }
+          } else commandError=true;
+        } else commandError=true;
+        getEqu(&f,&f1,false,true);  
+      } else 
 //  :SzDDD*MM#
 //          Sets the target Object Azimuth
 //          Return: 0 on failure
