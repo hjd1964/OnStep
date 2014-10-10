@@ -43,11 +43,8 @@ boolean setPark() {
     EEPROM_writeQuad(EE_posHA ,(byte*)&posHA);
     EEPROM_writeQuad(EE_posDec,(byte*)&posDec);
 
-    // and store our corrections
-    EEPROM_writeQuad(EE_altCor,(byte*)&altCor);
-    EEPROM_writeQuad(EE_azmCor,(byte*)&azmCor);
-    EEPROM_writeQuad(EE_IH,(byte*)&IH);
-    EEPROM_writeQuad(EE_ID,(byte*)&ID);
+    // and the align
+    saveAlignModel();
 
     // and remember what side of the pier we're on
     EEPROM.write(EE_pierSide,pierSide);
@@ -67,6 +64,17 @@ boolean setPark() {
     return true;
   }
   return false;
+}
+
+boolean saveAlignModel() {
+  // and store our corrections
+  EEPROM_writeQuad(EE_doCor,(byte*)&doCor);
+  EEPROM_writeQuad(EE_pdCor,(byte*)&pdCor);
+  EEPROM_writeQuad(EE_altCor,(byte*)&altCor);
+  EEPROM_writeQuad(EE_azmCor,(byte*)&azmCor);
+  EEPROM_writeQuad(EE_IH,(byte*)&IH);
+  EEPROM_writeQuad(EE_ID,(byte*)&ID);
+  return true;
 }
 
 // takes up backlash and returns to the current position
@@ -158,11 +166,15 @@ boolean unpark() {
         sei();
   
         // get corrections
+        EEPROM_readQuad(EE_doCor,(byte*)&doCor);
+        EEPROM_readQuad(EE_pdCor,(byte*)&pdCor);
         EEPROM_readQuad(EE_altCor,(byte*)&altCor);
         EEPROM_readQuad(EE_azmCor,(byte*)&azmCor);
         EEPROM_readQuad(EE_IH,(byte*)&IH);
         EEPROM_readQuad(EE_ID,(byte*)&ID);
-  
+
+        azmCor=-azmCor;
+        
         // see what side of the pier we're on
         pierSide=EEPROM.read(EE_pierSide);
         if (pierSide==PierSideWest) DecDir = DecDirWInit; else DecDir = DecDirEInit;
