@@ -107,6 +107,9 @@
  * 10-04-2014          1.0a7             Fixes to recently added code to keep 'scope from exceeding safety limits during meridian flips.  Added experimental align model code for cone error.
  * 10-06-2014          1.0a8             First successful test of two star align, compensates for Polar altitude misalignment.  Simple change keeps GetEqu (lots of floating point trig) from needing 
  *                                       to be run twice when :GR# and :GD# are run and/or more than once a second during goto's.
+ * 10-10-2014          1.0b1             Added :AW# command to write align model to EEPROM without having to do a Set Park.  Added doCor and pdCor alignment coefficients to values saved in EEPROM.
+ *                                       Reworked/added the PD and DO alignment model calculations. Refined code that determines coefficient values during the alignment process.  
+ *                                       Added commands to read/write alignment coefficients. 
  *
  *
  * Author: Howard Dutton
@@ -157,8 +160,8 @@
 #include "errno.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "10 06 14"
-#define FirmwareNumber "1.0a8"
+#define FirmwareDate   "10 10 14"
+#define FirmwareNumber "1.0b1"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -201,7 +204,7 @@
 
 // ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
 #define MaxRate                   96 // this is the minimum number of micro-seconds between micro-steps
-                                     // minimum is around 16 (Teensy3.1) or 24 (Mega2560), default is 96, higher is ok
+                                     // minimum (fastest goto) is around 16 (Teensy3.1) or 32 (Mega2560), default is 96, higher is ok
                                      // too low and OnStep communicates slowly and/or freezes as the motor timers use up all the MCU time
                                      
 #define StepsForRateChange  100000.0 // number of steps during acceleration and de-acceleration: higher values=longer acceleration/de-acceleration
@@ -335,6 +338,8 @@ volatile long startDec   = 90L*StepsPerDegreeDec; // declination of goto start p
 volatile long targetDec  = 90L*StepsPerDegreeDec; // declination of goto end   position in steps
 volatile byte dirDec     = 1;                     // stepping direction + or -
 double newTargetDec      = 0.0;                   // holds the Dec for goTos
+double avgDec            = 0.0;                   // for align
+double avgHA             = 0.0;                   // for align
 long origTargetDec       = 0;
 
 double newTargetAlt=0.0, newTargetAzm=0.0;        // holds the altitude and azmiuth for slews
@@ -482,28 +487,28 @@ boolean quietReply       = false;
 char reply[25];
 
 char command[3];
-char parameter[25];
+char parameter[50];
 byte bufferPtr= 0;
 
-char command_serial_zero[25];
-char parameter_serial_zero[25];
+char command_serial_zero[50];
+char parameter_serial_zero[50];
 byte bufferPtr_serial_zero= 0;
 
 char Serial_recv_buffer[256] = "";
 volatile byte Serial_recv_tail = 0;
 volatile byte Serial_recv_head = 0;
-char Serial_xmit_buffer[25] = "";
+char Serial_xmit_buffer[50] = "";
 byte Serial_xmit_index = 0;
 
 char Serial1_recv_buffer[256] = "";
 volatile byte Serial1_recv_tail = 0;
 volatile byte Serial1_recv_head = 0;
-char Serial1_xmit_buffer[25] = "";
+char Serial1_xmit_buffer[50] = "";
 byte Serial1_xmit_index = 0;
 
 // for bluetooth/serial 1
-char command_serial_one[25];
-char parameter_serial_one[25];
+char command_serial_one[50];
+char parameter_serial_one[50];
 byte bufferPtr_serial_one= 0;
 
 // Misc ---------------------------------------------------------------------------------------------------------------------
@@ -592,6 +597,8 @@ volatile int     blDec        = 0;
 #define EE_minAlt      40
 #define EE_maxAlt      41
 
+#define EE_doCor       42
+#define EE_pdCor       46
 #define EE_altCor      50
 #define EE_azmCor      54
 #define EE_IH          58
@@ -644,7 +651,6 @@ byte PEC_buffer[PECBufferSize];
 
 void setup() {
 
-  // the following could be done with register writes to save flash memory
   pinMode(HAStepPin, OUTPUT);        // initialize the stepper control pins RA
   pinMode(HADirPin, OUTPUT); 
   pinMode(DecGNDPin, OUTPUT);        // initialize the stepper control pins Dec
