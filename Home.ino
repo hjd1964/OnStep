@@ -43,6 +43,8 @@ boolean setHome() {
   alignMode           = AlignNone;
   altCor              = 0; 
   azmCor              = 0;
+  doCor               = 0;
+  pdCor               = 0;
   IH                  = 0;
   ID                  = 0;
   
