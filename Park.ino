@@ -173,8 +173,6 @@ boolean unpark() {
         EEPROM_readQuad(EE_IH,(byte*)&IH);
         EEPROM_readQuad(EE_ID,(byte*)&ID);
 
-        azmCor=-azmCor;
-        
         // see what side of the pier we're on
         pierSide=EEPROM.read(EE_pierSide);
         if (pierSide==PierSideWest) DecDir = DecDirWInit; else DecDir = DecDirEInit;
