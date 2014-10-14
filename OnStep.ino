@@ -108,8 +108,9 @@
  * 10-06-2014          1.0a8             First successful test of two star align, compensates for Polar altitude misalignment.  Simple change keeps GetEqu (lots of floating point trig) from needing 
  *                                       to be run twice when :GR# and :GD# are run and/or more than once a second during goto's.
  * 10-10-2014          1.0b1             Added :AW# command to write align model to EEPROM without having to do a Set Park.  Added doCor and pdCor alignment coefficients to values saved in EEPROM.
- *                                       Reworked/added the PD and DO alignment model calculations. Refined code that determines coefficient values during the alignment process.  
- *                                       Added commands to read/write alignment coefficients. 
+ *                                       Reworked/added the PD and DO alignment model calculations. Refined code that determines coefficient values during the alignment process
+ * 10-14-2014          1.0b2             More pointing model refinement.  Added code to correct destination coordinates when doing meridian flips.  
+ *                                       Changed code that reads model coefficients, added code to write them.
  *
  *
  * Author: Howard Dutton
@@ -160,8 +161,8 @@
 #include "errno.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "10 10 14"
-#define FirmwareNumber "1.0b1"
+#define FirmwareDate   "10 14 14"
+#define FirmwareNumber "1.0b2"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -487,11 +488,11 @@ boolean quietReply       = false;
 char reply[25];
 
 char command[3];
-char parameter[50];
+char parameter[25];
 byte bufferPtr= 0;
 
-char command_serial_zero[50];
-char parameter_serial_zero[50];
+char command_serial_zero[25];
+char parameter_serial_zero[25];
 byte bufferPtr_serial_zero= 0;
 
 char Serial_recv_buffer[256] = "";
@@ -507,8 +508,8 @@ char Serial1_xmit_buffer[50] = "";
 byte Serial1_xmit_index = 0;
 
 // for bluetooth/serial 1
-char command_serial_one[50];
-char parameter_serial_one[50];
+char command_serial_one[25];
+char parameter_serial_one[25];
 byte bufferPtr_serial_one= 0;
 
 // Misc ---------------------------------------------------------------------------------------------------------------------
