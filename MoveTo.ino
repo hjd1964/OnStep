@@ -150,7 +150,7 @@ void moveTo() {
       targetDec=origTargetDec;
       sei();
     } else {
-      // restore normal sidereal tracking
+      // restore last tracking state
       trackingState=lastTrackingState;
       cli(); 
       timerRateHA  =SiderealRate;
@@ -171,9 +171,7 @@ void moveTo() {
             // success, we're parked
             parkStatus=Parked; EEPROM.write(EE_parkStatus,parkStatus);
             
-            // and store our pointing model too, just in-case something was updated
-            EEPROM_writeQuad(EE_altCor,(byte*)&altCor);
-            EEPROM_writeQuad(EE_azmCor,(byte*)&azmCor);
+            // just store the indexes of our pointing model
             EEPROM_writeQuad(EE_IH,(byte*)&IH);
             EEPROM_writeQuad(EE_ID,(byte*)&ID);
  
