@@ -31,8 +31,9 @@ boolean setPark() {
     sei();
 
     // let it settle into a fixed position, 20 times the sidereal rate at 12 steps per second minimum... 
-    // 128/240=0.53S, worst case
-    delay(2000);
+    // 128/240=0.53S, worst case.  Also, for some additional safety margin add a few seconds to cover
+    // travel through the PEC offset
+    delay(4000);
 
     // reality check, we should be at the park position
     if ((targetHA!=posHA) || (targetDec!=posDec)) { trackingState=lastTrackingState; return false;  }
@@ -142,7 +143,7 @@ byte park() {
         
         // now, slew to this target HA,Dec
         byte gotoPierSide=EEPROM.read(EE_pierSide);
-        goTo(tempHA,tempDec,gotoPierSide);
+        goTo(tempHA,tempDec,tempHA,tempDec,gotoPierSide);
 
         return 0;
       } else return 1; // no park position saved
