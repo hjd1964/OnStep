@@ -354,12 +354,12 @@ the pdCor  term is 1 in HA
         if (parameter[2]==(char)0) {
           if (parameter[0]=='0') { // 00: Align Model
             switch (parameter[1]) {
-              case '0': i=highPrecision; highPrecision=true; doubleToHms(reply,&IH); quietReply=true; highPrecision=i; break;                   // IH
-              case '1': i=highPrecision; highPrecision=true; doubleToDms(reply,&ID,false,true); quietReply=true; highPrecision=i; break;        // ID
-              case '2': i=highPrecision; highPrecision=true; doubleToDms(reply,&altCor,false,true); quietReply=true; highPrecision=i; break;    // altCor aka PE
-              case '3': i=highPrecision; highPrecision=true; doubleToDms(reply,&azmCor,false,true); quietReply=true; highPrecision=i; break;    // azmCor aka PZ
-              case '4': i=highPrecision; highPrecision=true; doubleToDms(reply,&doCor,false,true); quietReply=true; highPrecision=i; break;     // DO
-              case '5': i=highPrecision; highPrecision=true; doubleToDms(reply,&pdCor,false,true); quietReply=true; highPrecision=i; break;     // PD
+              case '0': sprintf(reply,"%ld",(long)(IH*15.0*3600.0)); quietReply=true; break;  // IH
+              case '1': sprintf(reply,"%ld",(long)(ID*3600.0)); quietReply=true; break;       // ID
+              case '2': sprintf(reply,"%ld",(long)(altCor*3600.0)); quietReply=true; break;   // altCor
+              case '3': sprintf(reply,"%ld",(long)(azmCor*3600.0)); quietReply=true; break;   // azmCor
+              case '4': sprintf(reply,"%ld",(long)(doCor*3600.0)); quietReply=true; break;    // doCor
+              case '5': sprintf(reply,"%ld",(long)(pdCor*3600.0)); quietReply=true; break;    // pdCor
             }
           } else commandError=true;
         } else commandError=true;
@@ -703,12 +703,12 @@ the pdCor  term is 1 in HA
         if (parameter[2]==(char)0) {
           if (parameter[0]=='0') { // 00: Align Model
             switch (parameter[1]) {
-              case '0': i=highPrecision; highPrecision=true; commandError=!hmsToDouble(&IH,&parameter[3]);          highPrecision=i; break;    // IH
-              case '1': i=highPrecision; highPrecision=true; commandError=!dmsToDouble(&ID,&parameter[3],true);     highPrecision=i; break;    // ID
-              case '2': i=highPrecision; highPrecision=true; commandError=!dmsToDouble(&altCor,&parameter[3],true); highPrecision=i; break;    // altCor aka PE
-              case '3': i=highPrecision; highPrecision=true; commandError=!dmsToDouble(&azmCor,&parameter[3],true); highPrecision=i; break;    // azmCor aka PZ
-              case '4': i=highPrecision; highPrecision=true; commandError=!dmsToDouble(&doCor,&parameter[3],true);  highPrecision=i; break;    // DO
-              case '5': i=highPrecision; highPrecision=true; commandError=!dmsToDouble(&pdCor,&parameter[3],true);  highPrecision=i; break;    // PD
+              case '0': IH=(double)strtol(&parameter[3],NULL,10)/3600.0/15.0; break;  // IH
+              case '1': ID=(double)strtol(&parameter[3],NULL,10)/3600.0; break;       // ID
+              case '2': altCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;   // altCor
+              case '3': azmCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;   // azmCor
+              case '4': doCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;    // doCor
+              case '5': pdCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;    // pdCor
             }
           } else commandError=true;
         } else commandError=true;
