@@ -129,7 +129,7 @@ byte park() {
         // turn off the PEC while we park
         PECstatus=IgnorePEC;
         cli(); PEC_HA=0; sei(); 
-        PEC_SKIP = 0;
+        PEC_Skip = 0;
   
         // record our status
         parkStatus=Parking;
@@ -160,6 +160,11 @@ boolean unpark() {
   if (trackingState!=TrackingMoveTo) {
     if (parkStatus==Parked) {
       if (parkSaved) {
+        // enable the stepper drivers
+        digitalWrite(HA_EN,LOW);
+        digitalWrite(DE_EN,LOW);
+        delay(10);
+        
         // get our position
         cli();
         EEPROM_readQuad(EE_posHA,(byte*)&posHA);   targetHA=posHA;
