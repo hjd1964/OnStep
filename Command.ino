@@ -56,6 +56,11 @@ void processCommands() {
           // telescope should be set in the polar home (CWD) for a starting point
           // this command sets IH, ID, azmCor=0; altCor=0;
           setHome();
+          
+          // enable the stepper drivers
+          digitalWrite(HA_EN,LOW);
+          digitalWrite(DE_EN,LOW);
+          delay(10);
   
           // newTargetRA =timeRange(LST);
           // newTargetDec=90.0;  
@@ -326,7 +331,7 @@ the pdCor  term is 1 in HA
         const char *parkStatusCh = "pIPF";     reply[i++]=parkStatusCh[parkStatus]; // not [p]arked, parking [I]n-progress, [P]arked, Park [F]ailed
         if (PECrecorded)                       reply[i++]='R';
         if (atHome)                            reply[i++]='H'; 
-        if ((moveDirHA!=0) || (moveDirDec!=0)) reply[i++]='G';
+        if ((guideDirHA!=0) || (guideDirDec!=0)) reply[i++]='G';
         reply[i++]=0;
         quietReply=true;
       } else 
@@ -416,19 +421,17 @@ the pdCor  term is 1 in HA
       if (command[1]=='g') {
         if ( (atoi2((char *)&parameter[1],&i)) && ((i>=0) && (i<=16399)) && (parkStatus==NotParked)) { 
           if ((parameter[0]=='e') || (parameter[0]=='w')) {
-            if (moveDirHA) { cli(); moveTimerRateHA=0; sei(); }
-            moveDirHA=parameter[0];  
-            moveDurationHA=i;
+            guideDirHA=parameter[0];  
+            guideDurationHA=i;
             cli(); 
-            if (moveDirHA=='e') moveTimerRateHA=-moveTimerRate; else moveTimerRateHA=moveTimerRate; 
+            if (guideDirHA=='e') guideTimerRateHA=-guideTimerRate; else guideTimerRateHA=guideTimerRate; 
             sei();
             quietReply=true;
          } else
             if ((parameter[0]=='n') || (parameter[0]=='s')) { 
-              if (moveDirDec) { cli(); moveTimerRateDec=0; sei(); }
-              moveDirDec=parameter[0]; 
-              moveDurationDec=i; 
-              cli(); moveTimerRateDec=moveTimerRate; sei();
+              guideDirDec=parameter[0]; 
+              guideDurationDec=i; 
+              cli(); guideTimerRateDec=guideTimerRate; sei();
               quietReply=true;
             } else commandError=true;
         } else commandError=true;
@@ -437,10 +440,9 @@ the pdCor  term is 1 in HA
 //         Returns: Nothing
       if ((command[1]=='e') || (command[1]=='w')) { 
         if (parkStatus==NotParked) {
-          if (moveDirHA) { cli(); moveTimerRateHA=0; sei(); }
-          moveDirHA=command[1];
+          guideDirHA=command[1];
           cli(); 
-          if (moveDirHA=='e') moveTimerRateHA=-moveTimerRate; else moveTimerRateHA=moveTimerRate; 
+          if (guideDirHA=='e') guideTimerRateHA=-guideTimerRate; else guideTimerRateHA=guideTimerRate; 
           sei();
         }
         quietReply=true;
@@ -449,9 +451,8 @@ the pdCor  term is 1 in HA
 //         Returns: Nothing
       if ((command[1]=='n') || (command[1]=='s')) { 
         if (parkStatus==NotParked) {
-          if (moveDirDec) { cli(); moveTimerRateDec=0; sei(); }
-          moveDirDec=command[1];
-          cli(); moveTimerRateDec=moveTimerRate; sei();
+          guideDirDec=command[1];
+          cli(); guideTimerRateDec=guideTimerRate; sei();
         }
         quietReply=true;
       } else
@@ -495,13 +496,14 @@ the pdCor  term is 1 in HA
           if (parameter[1]=='Z') { 
             for (i=0; i<PECBufferSize; i++) PEC_buffer[i]=128;
               PECfirstRecord=true;
-              PECrecord_index=0;
+              PECindex_record=0;
           } else
           if (parameter[1]=='!') {
             for (i=0; i<PECBufferSize; i++) EEPROM.write(EE_PECindex+i,PEC_buffer[i]);
             EEPROM.write(EE_PECrecorded,PECrecorded);
             EEPROM.write(EE_PECstatus,PECstatus);
-            EEPROM_writeQuad(EE_PECrecord_index,(byte*)&PECrecord_index); 
+            EEPROM_writeQuad(EE_PECrecord_index,(byte*)&PECindex_record); 
+            EEPROM_writeQuad(EE_PECsense_index,(byte*)&PECindex_sense);
           } else
           // Status is one of "IpPrR" (I)gnore, get ready to (p)lay, (P)laying, get ready to (r)ecord, (R)ecording
           if (parameter[1]=='?') { const char *PECstatusCh = PECStatusString; reply[0]=PECstatusCh[PECstatus]; reply[1]=0; } else { quietReply=false; commandError=true; }
@@ -514,8 +516,8 @@ the pdCor  term is 1 in HA
       if (command[0]=='Q') {
         if (command[1]==0) {
           if (parkStatus==NotParked) {
-            if (moveDirHA!=0) { cli(); moveTimerRateHA=0; sei(); moveDirHA=0; }
-            if (moveDirDec!=0) { cli(); moveTimerRateDec=0; sei(); moveDirDec=0; }
+            if (guideDirHA!=0) { lstGuideStopHA=lst+amountGuideHA*(1.0/StepsPerSecond)*150; guideDirHA=0; }
+            if (guideDirDec!=0) { lstGuideStopDec=lst+amountGuideDec*(1.0/((StepsPerDegreeDec/3600.0)*15.0))*100; guideDirDec=0; }
             if (trackingState==TrackingMoveTo) { abortSlew=true; }
           }
           quietReply=true; 
@@ -524,7 +526,7 @@ the pdCor  term is 1 in HA
 //         Returns: Nothing
         if ((command[1]=='e') || (command[1]=='w')) { 
           if (parkStatus==NotParked) {
-            if (moveDirHA!=0) { cli(); moveTimerRateHA=0; sei(); moveDirHA=0; }
+            if (guideDirHA!=0) { lstGuideStopHA=lst+amountGuideHA*(1.0/StepsPerSecond)*150; guideDirHA=0; }
           }
           quietReply=true; 
         } else
@@ -532,7 +534,7 @@ the pdCor  term is 1 in HA
 //         Returns: Nothing
         if ((command[1]=='n') || (command[1]=='s')) {
           if (parkStatus==NotParked) {
-            if (moveDirDec!=0) { cli(); moveTimerRateDec=0; sei(); moveDirDec=0; }
+            if (guideDirDec!=0) { lstGuideStopDec=lst+amountGuideDec*(1.0/((StepsPerDegreeDec/3600.0)*15.0))*150; guideDirDec=0; }
           }
           quietReply=true; 
         } else commandError=true;
@@ -724,15 +726,17 @@ the pdCor  term is 1 in HA
       commandError=true;
       } else 
 //   T - Tracking Commands
-//  :T+#   Track faster by 0.1 Hertz (I use a fifth of the LX200 standard)
-//  :T-#   Track slower by 0.1 Hertz
+//  :T+#   Track faster by 0.1 Hertz (I use a fifth of the LX200 standard, stored in EEPROM)
+//  :T-#   Track slower by 0.1 Hertz (stored in EEPROM)
 //  :TS#   Track rage solar
 //  :TL#   Track rate lunar
 //  :TQ#   Track rate custom (stored in EEPROM)
-//  :TR#   Track rate reset custom (to calculated sidereal rate)
-//  :TK#   Track rate king
+//  :TR#   Track rate reset custom (to calculated sidereal rate, stored in EEPROM)
+//  :TK#   Track rate king (turns refraction tracking on/off)
 //  :Te#   Tracking enable  (OnStep only, replies 0/1)
 //  :Td#   Tracking disable (OnStep only, replies 0/1)
+//  :Tr#   Tracking refraction enable  (OnStep only, replies 0/1)
+//  :Tn#   Tracking refraction disable (OnStep only, replies 0/1)
 //         Returns: Nothing
      if (command[0]=='T') {
        if (command[1]=='+') { siderealInterval-=HzCf*(0.02); quietReply=true; } else
@@ -740,10 +744,12 @@ the pdCor  term is 1 in HA
        if (command[1]=='S') { siderealInterval =HzCf*(60.0); customRateActive=false; quietReply=true; } else                       // solar tracking rate
        if (command[1]=='L') { siderealInterval =HzCf*((60.0/57.9)*60.0); customRateActive=false; quietReply=true; } else           // lunar tracking rate
        if (command[1]=='Q') { EEPROM_readQuad(EE_siderealInterval,(byte*)&siderealInterval); customRateActive=true; quietReply=true; } else  // custom tracking rate
-       if (command[1]=='R') { siderealInterval =HzCf*((60.0/60.16427479)*60.0); customRateActive=false; quietReply=true; } else    // default tracking rate
+       if (command[1]=='R') { siderealInterval =HzCf*((60.0/60.16427479)*60.0); EEPROM_writeQuad(EE_siderealInterval,(byte*)&siderealInterval); customRateActive=true; quietReply=true; } else // default tracking rate
        if (command[1]=='K') { siderealInterval =HzCf*((60.0/60.136)*60.0); customRateActive=false; quietReply=true; } else         // king tracking rate
        if ((command[1]=='e') && ((trackingState==TrackingSidereal) || (trackingState==TrackingNone))) trackingState=TrackingSidereal; else
        if ((command[1]=='d') && ((trackingState==TrackingSidereal) || (trackingState==TrackingNone))) trackingState=TrackingNone; else
+       if ((command[1]=='r') && (!refraction)) refraction=true; else
+       if ((command[1]=='n') && (refraction)) refraction=false; else
          commandError=true;
 
        // Only burn the new rate if changing the custom tracking rate 
@@ -770,7 +776,7 @@ the pdCor  term is 1 in HA
        if (parameter[0]==0) { i=PECindex; } else conv_result=atoi2(parameter,&i);
        if ((conv_result) && ((i>=0) && (i<PECBufferSize))) {
          if (parameter[0]==0) { 
-           i=(i-1)%(StepsPerWormRotation/StepsPerSecond); 
+           i=(i-1)%SecondsPerWormRotation; 
            i1=PEC_buffer[i]-128; sprintf(reply,"%+04i,%03i",i1,i); 
          } else { 
            i1=PEC_buffer[i]-128; sprintf(reply,"%+04i",i1);
@@ -809,29 +815,39 @@ the pdCor  term is 1 in HA
      } else
 //   V - PEC Readout StepsPerSecond
 //  :VS#
-//         Returns: DDD#
+//         Returns: DDD.DDDDDD#
      if ((command[0]=='V') && (command[1]=='S')) {
        if (parameter[0]==0) {
-         sprintf(reply,"%03i",StepsPerSecond);
+         char temp[12];
+         dtostrf(StepsPerSecond,0,6,temp);
+         strcpy(reply,temp);
+//         sprintf(reply,"%03i",StepsPerSecond);
          quietReply=true;
        } else commandError=true;
      } else
+//  :VH#
+//         Read RA PEC hall sensor index start (seconds)
+//         Returns: DDDDD#
+     if ((command[0]=='V') && (command[1]=='H')) {
+         sprintf(reply,"%05ld",PECindex_sense);
+         quietReply=true;
+     } else
 //  :VI#
-//         Read RA PEC record index start
+//         Read RA PEC record index start (steps)
 //         Returns: DDDDDD#
      if ((command[0]=='V') && (command[1]=='I')) {
-         sprintf(reply,"%06ld",PECrecord_index);
+         sprintf(reply,"%06ld",PECindex_record);
          quietReply=true;
      } else
 
 //  :WIDDDDDD#
-//         Write RA PEC index start
+//         Write RA PEC index start (steps)
      if ((command[0]=='W') && (command[1]=='I')) {
        commandError=true;
        long l=strtol(parameter,&conv_end,10);
        // see if it converted and is in range
        if ( (&parameter[0]!=conv_end) && ((l>=0) && (l<StepsPerWormRotation))) {
-         PECrecord_index=l;
+         PECindex_record=l;
          commandError=false;
        }
     } else
@@ -847,15 +863,15 @@ the pdCor  term is 1 in HA
        commandError=true;
        if (parameter[1]==0) {
          if (parameter[0]=='+') {
-           i=PEC_buffer[StepsPerWormRotation/StepsPerSecond-1];
-           memmove((byte *)&PEC_buffer[1],(byte *)&PEC_buffer[0],StepsPerWormRotation/StepsPerSecond-1);
+           i=PEC_buffer[SecondsPerWormRotation-1];
+           memmove((byte *)&PEC_buffer[1],(byte *)&PEC_buffer[0],SecondsPerWormRotation-1);
            PEC_buffer[0]=i;
            commandError=false;
          } else
          if (parameter[0]=='-') {
            i=PEC_buffer[0];
-           memmove((byte *)&PEC_buffer[0],(byte *)&PEC_buffer[1],StepsPerWormRotation/StepsPerSecond-1);
-           PEC_buffer[StepsPerWormRotation/StepsPerSecond-1]=i;
+           memmove((byte *)&PEC_buffer[0],(byte *)&PEC_buffer[1],SecondsPerWormRotation-1);
+           PEC_buffer[SecondsPerWormRotation-1]=i;
            commandError=false;
          }
        } else {
@@ -1040,21 +1056,21 @@ boolean clearCommand_serial_one() {
 void setGuideRate(int g) {
   currentGuideRate=g;
   
-  // moveRates[9]={7,15,30,60,120,240,360,600,900}; 
-
   // this sets the guide rate
-  moveTimerRate=(double)moveRates[g]/15.0;
+  //             0.5X,1X,2X,4X,8X ,16X,24X,40X 60X
+  // guideRates[9]={7,15,30,60,120,240,360,600,900}; 
+  guideTimerRate=guideRates[g]/15.0;
   
   cli();
-  // moveRates[9]={7,15,30,60,120,240,360,600,900}; 
-  if (g<=1) { amountMoveHA=1; } else // 7,   15
-  if (g<=3) { amountMoveHA=4; } else // 30,  60
-  if (g<=5) { amountMoveHA=8; } else // 120, 240
-  if (g<=7) { amountMoveHA=16; } else // 360, 600
-            { amountMoveHA=24; }     // 900
+  if (g<=1) { amountGuideHA=1; } else  // 7.5, 15
+  if (g<=3) { amountGuideHA=4; } else  // 30,  60
+  if (g<=5) { amountGuideHA=16; } else // 120, 240
+  if (g<=7) { amountGuideHA=40; } else // 360, 600
+            { amountGuideHA=60; }      // 900
   sei();
-  amountMoveDec=amountMoveHA;
 
-  msMoveHA =((3600000.0/(double)StepsPerDegreeHA) /((double)moveRates[g]))*amountMoveHA;
-  msMoveDec=((3600000.0/(double)StepsPerDegreeDec)/((double)moveRates[g]))*amountMoveDec;
+  stepRateParameterGenerator((StepsPerSecond*guideTimerRate)/amountGuideHA,&gr_st,&gr_sk,&gr_st1,&gr_sk1);
+  double StepsPerSecondDec=(StepsPerDegreeDec/3600.0)*15.0;
+  amountGuideDec=(long)(amountGuideHA*(StepsPerSecondDec/StepsPerSecond)-0.000005)+1;
+  stepRateParameterGenerator((StepsPerSecondDec*guideTimerRate)/amountGuideDec,&gd_st,&gd_sk,&gd_st1,&gd_sk1);
 }
