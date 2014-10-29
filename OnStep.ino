@@ -1185,9 +1185,6 @@ void loop() {
   // UT1 CLOCK -----------------------------------------------------------------------------------------
   // timer... falls in once a second, keeps the universal time clock ticking
   // this clock doesn't rollover (at 24 hours) since that would cause date confusion
-//  unsigned long tempMilli=millis(); 
-//  if (tempMilli-ut1Timer>999) {
-//    ut1Timer=tempMilli;
   unsigned long m=millis();
   if (m%1000==0) {
     double t2=(double)(m-UT1mS_start)/1000.0;
