@@ -262,6 +262,12 @@
 #define minutesPastMeridianW      60 // as above, if on the West side of the pier.  If left alone, the mount will stop tracking when it hits the this limit
 #define underPoleLimit             9 // maximum allowed hour angle (+/-) under the celestial pole. OnStep will flip the mount and move the Dec. past 90 degrees (+/-) once past this limit
                                      // to arrive at the location.  If left alone, the mount will stop tracking when it hits this limit.  Valid range is 7 to 11 hours
+#define minDec                   -91 // minimum allowed declination, default = -91 (off)
+#define maxDec                   +91 // maximum allowed declination, default =  91 (off)
+                                     // For example, a value of +80 would stop gotos/tracking near the north celestial pole.
+                                     // For a Northern Hemisphere user, this would stop tracking when the mount is in the polar home position but
+                                     // that can be easily worked around by doing an alignment once and saving a park position (assuming a 
+                                     // fork/yolk mount with meridian flips turned off by setting the minutesPastMeridian values to cover the whole sky)
 
 // this group is for advanced configuration and is not well tested yet, leave it alone or just use the HA_MODE and DEC_MODE values if you didn't hard wire the micro-stepping mode
 // DRV8825: 5=32x, 4=16x, 3=8x, 2=4x, 1=2x, 0=1x
@@ -1196,6 +1202,7 @@ void loop() {
     // safety checks, keeps mount from tracking past the meridian limit, past the underPoleLimit, below horizon limit, or above the overhead limit
     if (pierSide==PierSideWest) { cli(); if (posHA>(minutesPastMeridianW*StepsPerDegreeHA/4L)) if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  sei(); }
     if (pierSide==PierSideEast) { cli(); if (posHA>(underPoleLimit*StepsPerDegreeHA*15L)) if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  sei(); }
+    if ((getApproxDec()<minDec) || (getApproxDec()>maxDec)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
     #ifdef LIMIT_PIN_ON  
     if (digitalRead(LimitPin)==LOW) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
     #endif
