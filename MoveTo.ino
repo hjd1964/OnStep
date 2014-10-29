@@ -13,16 +13,16 @@ void moveTo() {
  
     // first phase, move to 60 HA (4 hours)
     timerRateHA =SiderealRate;
-    #ifdef DEC_RATIO_ON
-    timerRateDec=SiderealRate*timerRateRatio;
-    #else
     timerRateDec=SiderealRate;
-    #endif
+    sei();
 
     // default
+    cli(); 
     if (pierSide==PierSideFlipWE1) targetHA=-60L*StepsPerDegreeHA; else targetHA=60L*StepsPerDegreeHA;
     targetDec=celestialPoleDec*StepsPerDegreeDec;
+    sei();
 
+    cli();
     if (celestialPoleDec>0) {
       // if Dec is in the general area of the pole, slew both axis back at once
       if (((double)posDec/(double)StepsPerDegreeDec)>90-latitude) {
@@ -44,11 +44,11 @@ void moveTo() {
         }
       }
     }
-
     sei();
-    
+
     pierSide++;
   }
+
   cli();
   long distStartHA=abs(posHA-startHA);           // distance from start HA
   long distStartDec=abs(posDec-startDec);        // distance from start Dec
@@ -72,7 +72,6 @@ void moveTo() {
     abortSlew=false;
     goto Again;
   }
-  
   sei();
 
   // First, for Right Ascension
@@ -97,11 +96,7 @@ void moveTo() {
       temp=(StepsForRateChange/sqrt(distStartDec));   // speed up the slew
 //      if ((temp<100) && (temp>=10))  temp=9;        // exclude a range of speeds
     }
-  #ifdef DEC_RATIO_ON
-  if (temp<MaxRate*16*timerRateRatio) temp=MaxRate*16*timerRateRatio; // fastest rate
-  #else
   if (temp<MaxRate*16)                temp=MaxRate*16;
-  #endif
   if (temp>SiderealRate/4)            temp=SiderealRate/4; // slowest rate (4x sidereal)
 
   cli(); timerRateDec=temp; sei();
@@ -110,7 +105,7 @@ void moveTo() {
     if ((pierSide==PierSideFlipEW2) || (pierSide==PierSideFlipWE2)) {
       // make sure we're at the home position when flipping sides of the mount
       cli();
-      if (pierSide==PierSideFlipWE2) targetHA=-90L*StepsPerDegreeHA; else targetHA=90L*StepsPerDegreeHA; 
+      startHA=posHA; if (pierSide==PierSideFlipWE2) targetHA=-90L*StepsPerDegreeHA; else targetHA=90L*StepsPerDegreeHA; 
       startDec=posDec; targetDec=celestialPoleDec*StepsPerDegreeDec; 
       sei();
       pierSide++;
@@ -154,11 +149,7 @@ void moveTo() {
       trackingState=lastTrackingState;
       cli(); 
       timerRateHA  =SiderealRate;
-      #ifdef DEC_RATIO_ON
-      timerRateDec =SiderealRate*timerRateRatio;
-      #else
       timerRateDec =SiderealRate;
-      #endif
       sei();
       
       // other special gotos: for parking the mount and homeing the mount
@@ -174,13 +165,20 @@ void moveTo() {
             // just store the indexes of our pointing model
             EEPROM_writeQuad(EE_IH,(byte*)&IH);
             EEPROM_writeQuad(EE_ID,(byte*)&ID);
- 
-          } else parkStatus=ParkFailed;
+            
+            // disable the stepper drivers
+            digitalWrite(HA_EN,HIGH);
+            digitalWrite(DE_EN,HIGH);
 
+          } else parkStatus=ParkFailed;
       } else parkStatus=ParkFailed;
 
       } else
-        if (homeMount) { setHome(); homeMount=false; atHome=true; }
+        if (homeMount) { 
+          setHome(); 
+          homeMount=false; 
+          atHome=true;
+        }
     }
   }
 }
