@@ -1,9 +1,7 @@
 // -----------------------------------------------------------------------------------
 // functions related to Homing the mount
 
-// moves telescope to the home position, then stops tracking... I could do a motor sleep here
-// if the sleep pin of the BED's were wired up.  I guess the BED's will remember their micro-step position from sleep?
-// anyway, the scope will still know where it's pointed and a call to ":MS#" etc. will start it up
+// moves telescope to the home position, then stops tracking
 boolean goHome() {
   if (trackingState!=TrackingMoveTo) {
     cli();
@@ -41,7 +39,7 @@ boolean setHome() {
   
   // reset pointing model
   alignMode           = AlignNone;
-  altCor              = 0; 
+  altCor              = 0;
   azmCor              = 0;
   doCor               = 0;
   pdCor               = 0;
