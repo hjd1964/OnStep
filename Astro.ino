@@ -336,9 +336,13 @@ void CEquToTracRateCor() {
 
 // light weight altitude calculation, 16 seconds to complete
 byte ac_step = 0;
-double ac_HA,ac_Dec;
+double ac_HA=0,ac_Dec=0;
 double ac_sindec,ac_cosdec,ac_cosha;
 double ac_sinalt;
+
+double getApproxDec() {
+  return ac_Dec;
+}
 
 boolean do_alt_calc() {
   boolean done=false;
