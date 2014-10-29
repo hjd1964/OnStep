@@ -3,7 +3,7 @@
 
 // syncs the telescope/mount to the sky
 boolean syncEqu(double RA, double Dec) {
-  // hour angle
+  // hour angleTrackingMoveTo
   double HA=LST-RA;
   while (HA>+12.0) HA-=24.0;
   while (HA<-12.0) HA+=24.0;
@@ -58,7 +58,7 @@ double lastGetEquLST=0;
 double lastGetEquHA=0;
 double lastGetEquDec=0;
 boolean getEqu(double *RA, double *Dec, boolean returnHA, boolean fast) {
-  unsigned long Tmin=50;
+  unsigned long Tmin=100;
   if (trackingState==TrackingMoveTo) Tmin=1000;
 
   // return last values if recent results apply
@@ -170,8 +170,8 @@ byte goTo(long thisTargetHA, long thisTargetDec, long altTargetHA, long altTarge
   //                W   .   E
 
   // Check to see if this goto is valid
-  if (trackingState==TrackingMoveTo) { abortSlew=true; return 5; } // fail, prior slew cancelled
-  if (moveDirHA || moveDirDec) return 7;                           // fail, unspecified error
+  if (trackingState==TrackingMoveTo) { abortSlew=true; return 5; }    // fail, prior goto cancelled
+  if (guideDirHA || guideDirDec) return 7;                           // fail, unspecified error
   
   atHome=false;
 
@@ -227,11 +227,7 @@ byte goTo(long thisTargetHA, long thisTargetDec, long altTargetHA, long altTarge
   targetDec=thisTargetDec;
 
   timerRateHA=SiderealRate;
-  #ifdef DEC_RATIO_ON
-  timerRateDec=SiderealRate*timerRateRatio;
-  #else
   timerRateDec=SiderealRate;
-  #endif
   sei();
 
   lastTrackingState=trackingState;
