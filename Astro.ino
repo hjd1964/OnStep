@@ -226,8 +226,8 @@ boolean CEquToEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1) 
   Dec=Dec+ID;
 
   // un-do, under the pole
-  if (Dec>90.0) { Dec=(90.0-Dec)+90; HA =HA-12; }
-  if (Dec<-90.0) { Dec=(-90.0-Dec)-90.0; HA =HA-12; }
+  if (Dec>90.0) { Dec=(90.0-Dec)+90; HA=HA-12; }
+  if (Dec<-90.0) { Dec=(-90.0-Dec)-90.0; HA=HA-12; }
 
   // breaks-down near the pole (limited to >1' from pole)
   if (abs(Dec)<89.98333333) {
@@ -314,17 +314,17 @@ double Refrac(double Alt, double Pressure=1010.0, double Temperature=15.0) {
   return ( ( 1.02/tan( (Alt+(10.3/(Alt+5.11)))/Rad ) ) ) * TPC;
 }
 
-long lastSiderealInterval;
+// adjusts tracking rate to compensate for atmospheric refraction in this area of the sky
+long lastSiderealInterval=0;
 void CEquToTracRateCor() {
   if (customRateActive) {
-
     double Alt1=currentAlt+0.5;
     double Alt2=currentAlt-0.5;
       
     double Alt1_ = Alt1 - ( Refrac(Alt1) / 60.0 );
     double Alt2_ = Alt2 - ( Refrac(Alt2) / 60.0 );
   
-    double newSiderealInterval=siderealInterval * ((double)(( Alt1 - Alt2 ) / ( Alt1_ - Alt2_ )));
+    double newSiderealInterval=siderealInterval / ((double)(( Alt1 - Alt2 ) / ( Alt1_ - Alt2_ )));
     
     // program the new rate as needed
     if (lastSiderealInterval!=newSiderealInterval) {
@@ -334,7 +334,7 @@ void CEquToTracRateCor() {
   }
 }
 
-// light weight altitude calculation, 14 seconds to complete
+// light weight altitude calculation, 16 seconds to complete
 byte ac_step = 0;
 double ac_HA,ac_Dec;
 double ac_sindec,ac_cosdec,ac_cosha;
@@ -372,6 +372,9 @@ boolean do_alt_calc() {
   if (ac_step==14) {
     currentAlt=asin(ac_sinalt)*Rad;
     ac_step=0;
+  }
+  // finish
+  if (ac_step==16) {
     done=true;
   }
   return done;
@@ -479,4 +482,32 @@ double degreeRange(double d) {
   while (d>=360.0) d-=360.0;
   while (d<  0.0)  d+=360.0;
   return d;
+}
+
+// calculate step/skip counts to achieve a given tracking rate
+void stepRateParameterGenerator(double steps, unsigned int *st, unsigned int *sk, unsigned int *st1, unsigned int *sk1) {
+  double d=100.0/steps;
+  // calculate how many steps
+  *st=(unsigned int)d;
+  double f0=100.0/(double)*st;
+  double d1=fabs(steps-f0);
+  d=(100.0/(float)*st)/d1;
+  if (d<65535.0) {
+    // how many skips instead (of steps)
+    *sk=(unsigned int)d;
+    double f1=f0/(double)*sk;
+    double d2=fabs(steps-(f0-f1));
+    d=(100.0/((double)*st*(double)*sk))/d2;
+    if (d<65535.0) {
+      // how many steps instead (of skips (of steps))
+      *st1=(unsigned int)d;
+      double f2=f1/(double)*st1;
+      double d3=fabs(steps-(f0-f1+f2));
+      d=(100.0/((double)*st*(double)*sk*(double)*st1))/d3;
+      if (d<65535.0) {
+        // how many skips instead (of steps (of skips (of steps)))
+        *sk1=(unsigned int)round(d);
+      } else { *sk1=0; }
+    } else { *st1=0; }
+  } else { *sk=0; }
 }
