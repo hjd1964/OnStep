@@ -1086,7 +1086,7 @@ void loop() {
       }
 
       // Increment the PEC index once a second and make it go back to zero when the worm finishes a rotation
-      cli(); if ((lst-PECindexTimer)%100==0) PECindex=(PECindex+1)%SecondsPerWormRotation; sei();
+      cli(); long t=lst; sei(); if (t-PECindexTimer>99) { PECindexTimer=t; PECindex=(PECindex+1)%SecondsPerWormRotation; }
       PECindex1=(PECindex-PECindex_sense); if (PECindex1<0) PECindex1+=SecondsPerWormRotation;
 
     #ifdef PEC_PIN_ON
