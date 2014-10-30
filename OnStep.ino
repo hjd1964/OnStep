@@ -287,7 +287,7 @@
 unsigned long siderealTimer = 0;
 unsigned long siderealTimer2;
 unsigned long tenthSecondTimer;
-//unsigned long ut1Timer;
+unsigned long ut1Timer;
 unsigned long msTimer1 = 0;
 unsigned long msTimer2 = 0;
 unsigned long now = 0;
@@ -1192,8 +1192,9 @@ void loop() {
   // UT1 CLOCK -----------------------------------------------------------------------------------------
   // timer... falls in once a second, keeps the universal time clock ticking
   // this clock doesn't rollover (at 24 hours) since that would cause date confusion
-  unsigned long m=millis();
-  if (m%1000==0) {
+  unsigned long m=millis(); 
+  if (m-ut1Timer>999) {
+    ut1Timer=m;
     double t2=(double)(m-UT1mS_start)/1000.0;
     UT1=UT1_start+t2/3600.0;   // This just needs to be accurate to the nearest second, it's about 10x better
     
