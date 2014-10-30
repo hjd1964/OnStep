@@ -773,7 +773,7 @@ the pdCor  term is 1 in HA
 //         If NNNN is omitted, returns the currently playing segment
      if ((command[0]=='V') && (command[1]=='R')) {
        boolean conv_result=true;
-       if (parameter[0]==0) { i=PECindex; } else conv_result=atoi2(parameter,&i);
+       if (parameter[0]==0) { i=PECindex1; } else conv_result=atoi2(parameter,&i);
        if ((conv_result) && ((i>=0) && (i<PECBufferSize))) {
          if (parameter[0]==0) { 
            i=(i-1)%SecondsPerWormRotation; 
