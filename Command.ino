@@ -517,7 +517,7 @@ the pdCor  term is 1 in HA
         if (command[1]==0) {
           if (parkStatus==NotParked) {
             if (guideDirHA!=0) { lstGuideStopHA=lst+amountGuideHA*(1.0/StepsPerSecond)*150; guideDirHA=0; }
-            if (guideDirDec!=0) { lstGuideStopDec=lst+amountGuideDec*(1.0/((StepsPerDegreeDec/3600.0)*15.0))*100; guideDirDec=0; }
+            if (guideDirDec!=0) { lstGuideStopDec=lst+amountGuideDec*(1.0/((StepsPerDegreeDec/3600.0)*15.0))*150; guideDirDec=0; }
             if (trackingState==TrackingMoveTo) { abortSlew=true; }
           }
           quietReply=true; 
@@ -732,11 +732,11 @@ the pdCor  term is 1 in HA
 //  :TL#   Track rate lunar
 //  :TQ#   Track rate custom (stored in EEPROM)
 //  :TR#   Track rate reset custom (to calculated sidereal rate, stored in EEPROM)
-//  :TK#   Track rate king (turns refraction tracking on/off)
+//  :TK#   Track rate king
 //  :Te#   Tracking enable  (OnStep only, replies 0/1)
 //  :Td#   Tracking disable (OnStep only, replies 0/1)
-//  :Tr#   Tracking refraction enable  (OnStep only, replies 0/1)
-//  :Tn#   Tracking refraction disable (OnStep only, replies 0/1)
+//  :Tr#   Track refraction enable  (OnStep only, replies 0/1)
+//  :Tn#   Track refraction disable (OnStep only, replies 0/1)
 //         Returns: Nothing
      if (command[0]=='T') {
        if (command[1]=='+') { siderealInterval-=HzCf*(0.02); quietReply=true; } else
