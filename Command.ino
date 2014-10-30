@@ -517,7 +517,7 @@ the pdCor  term is 1 in HA
         if (command[1]==0) {
           if (parkStatus==NotParked) {
             if (guideDirHA!=0) { lstGuideStopHA=lst+amountGuideHA*(1.0/StepsPerSecond)*150; guideDirHA=0; }
-            if (guideDirDec!=0) { lstGuideStopDec=lst+amountGuideDec*(1.0/((StepsPerDegreeDec/3600.0)*15.0))*150; guideDirDec=0; }
+            if (guideDirDec!=0) { lstGuideStopDec=lst+amountGuideDec*(1.0/StepsPerSecondDec)*150; guideDirDec=0; }
             if (trackingState==TrackingMoveTo) { abortSlew=true; }
           }
           quietReply=true; 
@@ -1070,7 +1070,6 @@ void setGuideRate(int g) {
   sei();
 
   stepRateParameterGenerator((StepsPerSecond*guideTimerRate)/amountGuideHA,&gr_st,&gr_sk,&gr_st1,&gr_sk1);
-  double StepsPerSecondDec=(StepsPerDegreeDec/3600.0)*15.0;
   amountGuideDec=(long)(amountGuideHA*(StepsPerSecondDec/StepsPerSecond)-0.000005)+1;
   stepRateParameterGenerator((StepsPerSecondDec*guideTimerRate)/amountGuideDec,&gd_st,&gd_sk,&gd_st1,&gd_sk1);
 }
