@@ -346,6 +346,7 @@ volatile long    timerRateBacklashDec = 0;
 volatile boolean inBacklashDec=false;
 #define timerRateRatio          ((double)StepsPerDegreeHA/(double)StepsPerDegreeDec)
 #define SecondsPerWormRotation  ((long)(StepsPerWormRotation/StepsPerSecond))
+#define StepsPerSecondDec       ((double)(StepsPerDegreeDec/3600.0)*15.0)
 
 #if defined(__arm__) && defined(TEENSYDUINO)
 IntervalTimer itimer3;
