@@ -14,7 +14,8 @@ void Timer1SetRate(long rate) {
 #if defined(__AVR__)
   TCCR1B = 0; TCCR1A = 0;  
   TIMSK1 = 0;
-  
+  rate=rate/PPSrateRatio;
+
   // set compare match register to desired timer count:
   if (rate<65536) { TCCR1B |= (1 << CS10); } else {
   rate=rate/8;
@@ -40,6 +41,7 @@ void Timer1SetRate(long rate) {
 // set timer3 to rate (in microseconds*16)
 volatile uint32_t nextHArate;
 void Timer3SetRate(long rate) {
+  rate=rate/PPSrateRatio;
 #if defined(__AVR__)
   // valid for rates down to 0.25 second
   if (StepsPerSecond<31) rate=rate/64; else rate=rate/8;
@@ -55,6 +57,7 @@ void Timer3SetRate(long rate) {
 // set timer4 to rate (in microseconds*16)
 volatile uint32_t nextDErate;
 void Timer4SetRate(long rate) {
+  rate=rate/PPSrateRatio;
 #if defined(__AVR__)
   // valid for rates down to 0.25 second
   if (StepsPerSecond<31) rate=rate/64; else rate=rate/8;
@@ -78,21 +81,25 @@ volatile boolean wasInBacklashHA=false;
 volatile boolean wasInBacklashDec=false;
 volatile boolean gotoRateHA=false;
 volatile boolean gotoRateDec=false;
+volatile byte cnt = 0;
 ISR(TIMER1_COMPA_vect)
 {
+  // run 1/3 of the time
+  cnt++; if (cnt%3!=0) return; cnt=0;
+  
   lst++;
   
   // keeps the target where it's supposed to be while doing gotos
   // this depends on the lst%0 being a value other than 0, technically it's undefined
   if (((lst%st==0) && ((lst%sk!=0) || ((lst%st1==0) && (lst%sk1!=0) ))) && ((trackingState==TrackingMoveTo) && (lastTrackingState==TrackingSidereal))) { targetHA++; origTargetHA++; }
   targetHA1=targetHA+PEC_HA;
-
+  
   if (trackingState==TrackingSidereal) {
     
     // automatic rate calculation HA
     long calculatedTimerRateHA;
     double timerRateHA1=1.0; if (guideDirHA && (currentGuideRate>1)) timerRateHA1=0.0;
-    double timerRateHA2=fabs(guideTimerRateHA+pecTimerRateHA+timerRateHA1);
+    double timerRateHA2=fabs(guideTimerRateHA+pecTimerRateHA+timerRateHA1)*1.0;
     if (timerRateHA2>0.5) calculatedTimerRateHA=SiderealRate/timerRateHA2; else calculatedTimerRateHA=SiderealRate/0.5;
     if (runTimerRateHA!=calculatedTimerRateHA) { timerRateHA=calculatedTimerRateHA; runTimerRateHA=calculatedTimerRateHA; }
 
@@ -106,7 +113,7 @@ ISR(TIMER1_COMPA_vect)
  
     // automatic rate calculation Dec
     long calculatedTimerRateDec;
-    double timerRateDec1=guideTimerRateDec;
+    double timerRateDec1=guideTimerRateDec*1.0;
     // if we're stopped, just run the timer fast since we're not moving anyway
     if (timerRateDec1>0.5) calculatedTimerRateDec=SiderealRate/timerRateDec1; else calculatedTimerRateDec=SiderealRate/0.5;
     // remember our "running" rate and only update the actual rate when it changes
@@ -339,6 +346,18 @@ ISR(TIMER4_COMPA_vect)
 #endif
 }
 
+#ifdef PPS_SENSE_ON
+// PPS interrupt
+void ClockSync() {
+  unsigned long t=micros();
+  unsigned long oneS=(t-PPSlastMicroS);
+  if ((oneS>1000000-1000) && (oneS<1000000+1000)) {
+    PPSavgMicroS=(PPSavgMicroS*19+oneS)/20;
+  }
+  PPSlastMicroS=t;
+}
+#endif
+
 #if defined(__AVR__)
 // UART Receive Complete Interrupt Handler for Serial0
 ISR(USART0_RX_vect)  {
@@ -352,3 +371,4 @@ ISR(USART1_RX_vect)  {
   Serial1_recv_tail++; // buffer is 256 bytes so this byte variable wraps automatically
 }
 #endif
+
