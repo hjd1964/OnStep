@@ -114,9 +114,10 @@
  * 10-17-2014          1.0b3             Added code to disable the stepper drivers until Align is started and while Parked:  Mega2650 uses Pin 25 for RA and 29 for Dec. (Teensy3.1 Pin 16 Dec and 20 RA)
  *                                       Added code to set stepper driver ustep mode:  Mega2560 uses Pins 22,23,24 for M0,M1,M2 (RA) and Pins 26,27,28 for Dec (Teensy3.1 13,14,15 for Dec and 17,18,19 for RA)
  *                                       Added code to support limit switch on pin 3
- * 10-29-2014          1.0b4             Updated step generation code for sidereal tracking and guiding, allows better performance and non-integral StepsPerSecond rates.
- *                                       Finished code to enable dynamic tracking rate compensation for refraction.  Added code to allow use of PEC index sense feature.
- *                                       New commands :Te# :Td# turn refraction tracking on/off, :VH# reads PEC HALL sensor position in seconds.
+ * 10-29-2014          1.0b4             Updated step generation code for sidereal tracking and guiding, allows better performance and non-integral StepsPerSecond rates
+ *                                       Finished code to enable dynamic tracking rate compensation for refraction.  Added code to allow use of PEC index sense feature
+ *                                       New commands :Te# :Td# turn refraction tracking on/off, :VH# reads PEC HALL sensor position in seconds
+ * 10-31-2014          1.0b5             Added code for GPS PPS sync. and Timer1 now runs at clock /3 instead of /8 for higher accuracy
  *
  *
  * Author: Howard Dutton
@@ -167,8 +168,8 @@
 #include "errno.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "10 29 14"
-#define FirmwareNumber "1.0b4"
+#define FirmwareDate   "10 31 14"
+#define FirmwareNumber "1.0b5"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -180,15 +181,17 @@
 // for getting control of the 'scope when things go horribly wrong, default=OFF
 #define RESCUE_MODE_OFF
 
-// PEC sense rising edge on pin 2 (adjusts PEC index position), default=OFF (not tested)
-#define PEC_PIN_OFF
-// limit sense switch close (to ground) on pin 3 (stops gotos and/or tracking), default=OFF (not tested)
-#define LIMIT_PIN_OFF
+// PPS sense rising edge on pin 21 for optional precision clock source (GPS, for example), default=OFF
+#define PPS_SENSE_OFF
+// PEC sense rising edge on pin 2 for optional PEC index, default=OFF (not tested)
+#define PEC_SENSE_OFF
+// switch close (to ground) on pin 3 for optional limit sense (stops gotos and/or tracking), default=OFF (not tested)
+#define LIMIT_SENSE_OFF
 // light status LED by sink to ground (pin 9) and source +5V (pin 8), default=ON
 #define STATUS_LED_PINS_ON
-// lights status LED by sink to ground (pin 10), default=OFF
+// lights 2nd status LED by sink to ground (pin 10), default=OFF
 #define STATUS_LED2_PINS_OFF
-// supply power on pins 5 and 11 to Pololu or other stepper drivers without on-board 5V voltage regulators, default=OFF
+// optional +5V on pins 5 and 11 to Pololu or other stepper drivers without on-board 5V voltage regulators, default=OFF
 #define POWER_SUPPLY_PINS_OFF
 
 // enables goTo speed equalization for differing right ascension and declination StepsPerDegreeHA/Dec, default=OFF (limited testing done)
@@ -204,7 +207,7 @@
 // this cleans up any tracking rate variations that would be introduced by recording more guiding corrections to either the east or west, default=ON
 #define PEC_CLEANUP_ON
 
-// adjusts tracking rate to compensate for atmospheric refraction, default=OFF (not tested)
+// optionally adjust tracking rate to compensate for atmospheric refraction, default=OFF (not tested)
 // can be turned on/off with the :Te# and :Td# commands regardless of this setting
 #define TRACK_REFRACTION_RATE_DEFAULT_OFF
 
@@ -291,6 +294,9 @@ unsigned long ut1Timer;
 unsigned long msTimer1 = 0;
 unsigned long msTimer2 = 0;
 unsigned long now = 0;
+volatile long PPSlastMicroS = 1000000;
+volatile long PPSavgMicroS = 1000000;
+volatile double PPSrateRatio = 1.0;
 
 double UT1       = 0.0;              // the current universal time
 double UT1_start = 0.0;              // the start of UT1
@@ -402,7 +408,7 @@ int    maxAlt;                                    // the maximum altitude, in de
 
 // The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
 // reserved and not yet implemented
-#define PPS        18      // Pin 18 (PPS time source, GPS for example)
+#define PPS        20      // Pin 21 (PPS time source, GPS for example)
 
 // The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
 //                                  Atmel   328  | 2560
@@ -760,12 +766,12 @@ void setup() {
 #endif
 
 // PEC index sense
-#ifdef PEC_PIN_ON  
+#ifdef PEC_SENSE_ON  
   pinMode(PecPin, INPUT);
 #endif
 
 // limit switch sense
-#ifdef LIMIT_PIN_ON  
+#ifdef LIMIT_SENSE_ON  
   pinMode(LimitPin, INPUT);
   digitalWrite(LimitPin, HIGH); // pull pin high
 #endif
@@ -784,6 +790,14 @@ void setup() {
   pinMode(DE_M0, OUTPUT); digitalWrite(DE_M0,(DE_MODE & 1));
   pinMode(DE_M1, OUTPUT); digitalWrite(DE_M1,(DE_MODE>>1 & 1));
   pinMode(DE_M2, OUTPUT); digitalWrite(DE_M2,(DE_MODE>>2 & 1));
+#endif
+
+#ifdef PPS_SENSE_ON
+#if defined(__AVR__)
+  attachInterrupt(2,ClockSync,RISING);
+#elif defined(__arm__) && defined(TEENSYDUINO)
+  attachInterrupt(21,ClockSync,RISING);
+#endif
 #endif
 
   // EEPROM automatic initialization
@@ -857,7 +871,7 @@ void setup() {
   timerRateBacklashDec=timerRateDec/BacklashTakeupRate;
 
   // initialize the timers that handle the sidereal clock, RA, and Dec
-  Timer1SetRate(siderealInterval/100);
+  Timer1SetRate(siderealInterval/300);
 #if defined(__AVR__)
   if (StepsPerSecond<31)
     TCCR3B = (1 << WGM12) | (1 << CS10) | (1 << CS11);  // ~0 to 0.25 seconds   (4 steps per second minimum, granularity of timer is 4uS)   /64 pre-scaler
@@ -1078,9 +1092,9 @@ void loop() {
         // zero the accululators, the index timer, also the index
         accPecGuideHA = 0;
         accPecPlayHA = 0;
-        accPecPlayHA = 0; cli(); PECindexTimer = lst-1; sei();  // keeps PECindex from advancing immediately
+        cli(); PECindexTimer = lst-1; sei();  // keeps PECindex from advancing immediately
         PECindex = 0; lastPECindex = -1;                        // starts record/playback now
-      #ifdef PEC_PIN_ON
+      #ifdef PEC_SENSE_ON
         if (next_PECindex_sense>=0) { PECindex=next_PECindex_sense; next_PECindex_sense=-1; }
       #endif
       }
@@ -1089,7 +1103,7 @@ void loop() {
       cli(); long t=lst; sei(); if (t-PECindexTimer>99) { PECindexTimer=t; PECindex=(PECindex+1)%SecondsPerWormRotation; }
       PECindex1=(PECindex-PECindex_sense); if (PECindex1<0) PECindex1+=SecondsPerWormRotation;
 
-    #ifdef PEC_PIN_ON
+    #ifdef PEC_SENSE_ON
       // if the HALL sensor (etc.) has just arrived at the index and it's been more than 60 seconds since
       // it was there before, set this as the next start of PEC playback/recording
       cli();
@@ -1201,14 +1215,22 @@ void loop() {
     // update the local sidereal time floating point representation
     update_LST();
     
-    // safety checks, keeps mount from tracking past the meridian limit, past the underPoleLimit, below horizon limit, or above the overhead limit
+    #ifdef PPS_SENSE_ON
+    // update clock
+    cli();
+    PPSrateRatio=((double)1000000/(double)(PPSavgMicroS));
+    Timer1SetRate(siderealInterval/300);
+    sei();
+    #endif
+
+    // safety checks, keeps mount from tracking past the meridian limit, past the underPoleLimit, below horizon limit, above the overhead limit, or past the Dec limits
     if (pierSide==PierSideWest) { cli(); if (posHA>(minutesPastMeridianW*StepsPerDegreeHA/4L)) if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  sei(); }
     if (pierSide==PierSideEast) { cli(); if (posHA>(underPoleLimit*StepsPerDegreeHA*15L)) if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  sei(); }
     if ((getApproxDec()<minDec) || (getApproxDec()>maxDec)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
-    #ifdef LIMIT_PIN_ON  
+    #ifdef LIMIT_SENSE_ON  
     if (digitalRead(LimitPin)==LOW) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
     #endif
-    if (do_alt_calc()) {  // low overhead altitude calculation, finishes updating once every 14 seconds
+    if (do_alt_calc()) {  // low overhead altitude calculation, finishes updating once every 16 seconds
       if ((currentAlt<minAlt) || (currentAlt>maxAlt)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
 
       // reset the sidereal clock once a day, to keep the significant digits from being consumed
