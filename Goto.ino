@@ -219,6 +219,9 @@ byte goTo(long thisTargetHA, long thisTargetDec, long altTargetHA, long altTarge
     }
   }
 
+  lastTrackingState=trackingState;
+  trackingState=TrackingMoveTo;
+
   cli();
   startHA =posHA;
   startDec=posDec;
@@ -228,10 +231,10 @@ byte goTo(long thisTargetHA, long thisTargetDec, long altTargetHA, long altTarge
 
   timerRateHA=SiderealRate;
   timerRateDec=SiderealRate;
+  PEC_HA=0; 
   sei();
 
-  lastTrackingState=trackingState;
-  trackingState=TrackingMoveTo;
+  PEC_Skip = 0;
 
   return 0;
 }
