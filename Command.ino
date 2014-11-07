@@ -3,6 +3,13 @@
 
 boolean serial_zero_ready = false;
 boolean serial_one_ready = false;
+// for align
+double avgDec = 0.0;
+double avgHA  = 0.0;
+// scratch-pad variables
+double f,f1,f2,f3; 
+int    i,i1,i2;
+byte   b;
 
 // process commands
 void processCommands() {
@@ -327,11 +334,12 @@ the pdCor  term is 1 in HA
 //         Returns: SS#
       if (command[1]=='U')  { 
         i=0;
-        if (trackingState!=TrackingMoveTo)     reply[i++]='N';
-        const char *parkStatusCh = "pIPF";     reply[i++]=parkStatusCh[parkStatus]; // not [p]arked, parking [I]n-progress, [P]arked, Park [F]ailed
-        if (PECrecorded)                       reply[i++]='R';
-        if (atHome)                            reply[i++]='H'; 
-        if ((guideDirHA!=0) || (guideDirDec!=0)) reply[i++]='G';
+        if (trackingState!=TrackingMoveTo)       reply[i++]='N';
+        const char *parkStatusCh = "pIPF";       reply[i++]=parkStatusCh[parkStatus]; // not [p]arked, parking [I]n-progress, [P]arked, Park [F]ailed
+        if (PECrecorded)                         reply[i++]='R';
+        if (atHome)                              reply[i++]='H'; 
+        if (PPSsynced)                           reply[i++]='S';
+        if ((guideDirHA) || (guideDirDec))       reply[i++]='G';
         reply[i++]=0;
         quietReply=true;
       } else 
@@ -421,16 +429,16 @@ the pdCor  term is 1 in HA
       if (command[1]=='g') {
         if ( (atoi2((char *)&parameter[1],&i)) && ((i>=0) && (i<=16399)) && (parkStatus==NotParked)) { 
           if ((parameter[0]=='e') || (parameter[0]=='w')) {
-            guideDirHA=parameter[0];  
-            guideDurationHA=i;
-            cli(); 
-            if (guideDirHA=='e') guideTimerRateHA=-guideTimerRate; else guideTimerRateHA=guideTimerRate; 
-            sei();
+            guideDirHA=parameter[0];
+            guideDurationLastHA=micros();
+            guideDurationHA=(long)i*1000L;
+            cli(); if (guideDirHA=='e') guideTimerRateHA=-guideTimerRate; else guideTimerRateHA=guideTimerRate; sei();
             quietReply=true;
          } else
             if ((parameter[0]=='n') || (parameter[0]=='s')) { 
               guideDirDec=parameter[0]; 
-              guideDurationDec=i; 
+              guideDurationLastDec=micros();
+              guideDurationDec=(long)i*1000L; 
               cli(); guideTimerRateDec=guideTimerRate; sei();
               quietReply=true;
             } else commandError=true;
@@ -441,9 +449,8 @@ the pdCor  term is 1 in HA
       if ((command[1]=='e') || (command[1]=='w')) { 
         if (parkStatus==NotParked) {
           guideDirHA=command[1];
-          cli(); 
-          if (guideDirHA=='e') guideTimerRateHA=-guideTimerRate; else guideTimerRateHA=guideTimerRate; 
-          sei();
+          guideDurationHA=-1;
+          cli(); if (guideDirHA=='e') guideTimerRateHA=-guideTimerRate; else guideTimerRateHA=guideTimerRate; sei();
         }
         quietReply=true;
       } else
@@ -452,6 +459,7 @@ the pdCor  term is 1 in HA
       if ((command[1]=='n') || (command[1]=='s')) { 
         if (parkStatus==NotParked) {
           guideDirDec=command[1];
+          guideDurationDec=-1;
           cli(); guideTimerRateDec=guideTimerRate; sei();
         }
         quietReply=true;
@@ -516,8 +524,8 @@ the pdCor  term is 1 in HA
       if (command[0]=='Q') {
         if (command[1]==0) {
           if (parkStatus==NotParked) {
-            if (guideDirHA!=0) { lstGuideStopHA=lst+amountGuideHA*(1.0/StepsPerSecond)*150; guideDirHA=0; }
-            if (guideDirDec!=0) { lstGuideStopDec=lst+amountGuideDec*(1.0/StepsPerSecondDec)*150; guideDirDec=0; }
+            if (guideDirHA) { lstGuideStopHA=lst+amountGuideHA*(1.0/StepsPerSecond)*150; guideDirHA=0; }
+            if (guideDirDec) { lstGuideStopDec=lst+amountGuideDec*(1.0/StepsPerSecondDec)*150; guideDirDec=0; }
             if (trackingState==TrackingMoveTo) { abortSlew=true; }
           }
           quietReply=true; 
@@ -526,7 +534,7 @@ the pdCor  term is 1 in HA
 //         Returns: Nothing
         if ((command[1]=='e') || (command[1]=='w')) { 
           if (parkStatus==NotParked) {
-            if (guideDirHA!=0) { lstGuideStopHA=lst+amountGuideHA*(1.0/StepsPerSecond)*150; guideDirHA=0; }
+            if (guideDirHA) { lstGuideStopHA=lst+amountGuideHA*(1.0/StepsPerSecond)*150.0; guideDirHA=0; }
           }
           quietReply=true; 
         } else
@@ -534,7 +542,7 @@ the pdCor  term is 1 in HA
 //         Returns: Nothing
         if ((command[1]=='n') || (command[1]=='s')) {
           if (parkStatus==NotParked) {
-            if (guideDirDec!=0) { lstGuideStopDec=lst+amountGuideDec*(1.0/((StepsPerDegreeDec/3600.0)*15.0))*150; guideDirDec=0; }
+            if (guideDirDec) { lstGuideStopDec=lst+amountGuideDec*(1.0/StepsPerSecondDec)*150.0; guideDirDec=0; }
           }
           quietReply=true; 
         } else commandError=true;
@@ -751,12 +759,11 @@ the pdCor  term is 1 in HA
        if ((command[1]=='r') && (!refraction)) refraction=true; else
        if ((command[1]=='n') && (refraction)) refraction=false; else
          commandError=true;
-
        // Only burn the new rate if changing the custom tracking rate 
        if ((customRateActive) && (!commandError) && ((command[1]=='+') || (command[1]=='-'))) EEPROM_writeQuad(EE_siderealInterval,(byte*)&siderealInterval);
 
        Timer1SetRate(siderealInterval/300);
-       SiderealRate=siderealInterval/StepsPerSecond;
+       cli(); SiderealRate=siderealInterval/StepsPerSecond; sei();
      } else
      
 //   U - Precision Toggle
@@ -1057,9 +1064,9 @@ void setGuideRate(int g) {
   currentGuideRate=g;
   
   // this sets the guide rate
-  //             0.5X,1X,2X,4X,8X ,16X,24X,40X 60X
-  // guideRates[9]={7,15,30,60,120,240,360,600,900}; 
-  guideTimerRate=guideRates[g]/15.0;
+  //               0.5X,1X,2X,4X,8X ,16X,24X,40X 60X
+  // guideRates[9]={7.5,15,30,60,120,240,360,600,900}; 
+  guideTimerRate=(double)guideRates[g]/15.0;
   
   cli();
   if (g<=1) { amountGuideHA=1; } else  // 7.5, 15
@@ -1069,7 +1076,7 @@ void setGuideRate(int g) {
             { amountGuideHA=60; }      // 900
   sei();
 
-  stepRateParameterGenerator((StepsPerSecond*guideTimerRate)/amountGuideHA,&gr_st,&gr_sk,&gr_st1,&gr_sk1);
+  stepRateParameterGenerator((StepsPerSecond*guideTimerRate)/(double)amountGuideHA,&gr_st,&gr_sk,&gr_st1,&gr_sk1);
   amountGuideDec=(long)(amountGuideHA*(StepsPerSecondDec/StepsPerSecond)-0.000005)+1;
-  stepRateParameterGenerator((StepsPerSecondDec*guideTimerRate)/amountGuideDec,&gd_st,&gd_sk,&gd_st1,&gd_sk1);
-}
+  stepRateParameterGenerator((StepsPerSecondDec*guideTimerRate)/(double)amountGuideDec,&gd_st,&gd_sk,&gd_st1,&gd_sk1);
+  }
