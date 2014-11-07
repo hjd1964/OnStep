@@ -1,11 +1,13 @@
 // -----------------------------------------------------------------------------------
 // functions to move the mount to the a new position
 
+
 // moves the mount
 void moveTo() {
   // HA goes from +90...0..-90
   //                W   .   E
   if ((pierSide==PierSideFlipEW1) || (pierSide==PierSideFlipWE1)) {
+    
     // save destination
     cli(); 
     origTargetHA =targetHA; 
@@ -25,17 +27,17 @@ void moveTo() {
     cli();
     if (celestialPoleDec>0) {
       // if Dec is in the general area of the pole, slew both axis back at once
-      if (((double)posDec/(double)StepsPerDegreeDec)>90-latitude) {
-        if (pierSide==PierSideFlipWE1) targetHA=-90L*StepsPerDegreeHA; else targetHA=90L*StepsPerDegreeHA; 
+      if ((posDec/(double)StepsPerDegreeDec)>90-latitude) {
+        if (pierSide==PierSideFlipWE1) targetHA=-90L*StepsPerDegreeHA; else targetHA=90L*StepsPerDegreeHA;
       } else { 
         // override if we're at a low latitude and in the opposite sky, leave the HA alone
         if ((abs(latitude)<45.0) && (posDec<0)) {
-          if (pierSide==PierSideFlipWE1) targetHA=-45L*StepsPerDegreeHA; else targetHA=45L*StepsPerDegreeHA; 
+          if (pierSide==PierSideFlipWE1) targetHA=-45L*StepsPerDegreeHA; else targetHA=45L*StepsPerDegreeHA;
         }
       }
     } else {
       // if Dec is in the general area of the pole, slew both axis back at once
-      if (((double)posDec/(double)StepsPerDegreeDec)<-90-latitude) {
+      if ((posDec/(double)StepsPerDegreeDec)<-90-latitude) {
         if (pierSide==PierSideFlipWE1) targetHA=-90L*StepsPerDegreeHA; else targetHA=90L*StepsPerDegreeHA; 
       } else { 
         // override if we're at a low latitude and in the opposite sky, leave the HA alone
@@ -49,15 +51,22 @@ void moveTo() {
     pierSide++;
   }
 
+  long distStartHA,distStartDec,distDestHA,distDestDec;
+
   cli();
-  long distStartHA=abs(posHA-startHA);           // distance from start HA
-  long distStartDec=abs(posDec-startDec);        // distance from start Dec
-  long distDestHA;
-  long distDestDec;
+  distStartHA=abs(posHA-startHA);           // distance from start HA
+  distStartDec=abs(posDec-startDec);        // distance from start Dec
+  sei();
+  if (distStartHA<1)  distStartHA=1;
+  if (distStartDec<1) distStartDec=1;
   
   Again:
-  distDestHA =abs(posHA-targetHA);               // distance from dest HA
-  distDestDec =abs(posDec-targetDec);            // distance from dest Dec
+  cli();
+  distDestHA=abs(posHA-targetHA);           // distance from dest HA
+  distDestDec=abs(posDec-targetDec);        // distance from dest Dec
+  sei();
+  if (distDestHA<1)  distDestHA=1;
+  if (distDestDec<1) distDestDec=1;
 
   // quickly slow the motors and stop in 1 degree
   if (abortSlew) {
@@ -65,40 +74,39 @@ void moveTo() {
     if ((pierSide==PierSideFlipWE1) || (pierSide==PierSideFlipWE2) || (pierSide==PierSideFlipWE3)) pierSide=PierSideWest;
     if ((pierSide==PierSideFlipEW1) || (pierSide==PierSideFlipEW2) || (pierSide==PierSideFlipEW3)) pierSide=PierSideEast;
 
-    // set the destination near where we are now    
+    // set the destination near where we are now
+    cli();
     if (distDestHA>StepsPerDegreeHA)   { if (posHA>targetHA)   targetHA =posHA-StepsPerDegreeHA;   else targetHA =posHA +StepsPerDegreeHA;  }
     if (distDestDec>StepsPerDegreeDec) { if (posDec>targetDec) targetDec=posDec-StepsPerDegreeDec; else targetDec=posDec+StepsPerDegreeDec; }
-
+    sei();
+    
     abortSlew=false;
     goto Again;
   }
-  sei();
 
   // First, for Right Ascension
-  double temp;
+  unsigned long temp;
   if (distStartHA>distDestHA) {
-    temp=(StepsForRateChange/sqrt(distDestHA));       // 50000/40000=1.02  50000/10=5000 slow down the slew
-//    if ((temp<100) && (temp>=10))  temp=101;        // exclude a range of speeds
+    temp=(StepsForRateChange/sqrt(distDestHA));       // slow down (temp gets bigger)
+//  if ((temp<100) && (temp>=10))  temp=101;          // exclude a range of speeds
   } else {
-    temp=(StepsForRateChange/sqrt(distStartHA));      // speed up the slew
-//    if ((temp<100) && (temp>=10))  temp=9;          // exclude a range of speeds
+    temp=(StepsForRateChange/sqrt(distStartHA));      // speed up (temp gets smaller)
+//  if ((temp<100) && (temp>=10))  temp=9;            // exclude a range of speeds
   }
   if (temp<MaxRate*16)     temp=MaxRate*16;           // fastest rate
   if (temp>SiderealRate/4) temp=SiderealRate/4;       // slowest rate (4x sidereal)
-
-  cli();  timerRateHA=temp;  sei();
+  cli(); timerRateHA=temp; sei();
 
   // Now, for Declination
   if (distStartDec>distDestDec) {
-      temp=(StepsForRateChange/sqrt(distDestDec));    // 50000/40000=1.02  50000/10=5000 slow down the slew
-//      if ((temp<100) && (temp>=10))  temp=101;      // exclude a range of speeds
+      temp=(StepsForRateChange/sqrt(distDestDec));    // slow down
+//    if ((temp<100) && (temp>=10))  temp=101;        // exclude a range of speeds
     } else {
-      temp=(StepsForRateChange/sqrt(distStartDec));   // speed up the slew
-//      if ((temp<100) && (temp>=10))  temp=9;        // exclude a range of speeds
+      temp=(StepsForRateChange/sqrt(distStartDec));   // speed up
+//    if ((temp<100) && (temp>=10))  temp=9;          // exclude a range of speeds
     }
-  if (temp<MaxRate*16)                temp=MaxRate*16;
-  if (temp>SiderealRate/4)            temp=SiderealRate/4; // slowest rate (4x sidereal)
-
+  if (temp<MaxRate*16)     temp=MaxRate*16;           // fastest rate
+  if (temp>SiderealRate/4) temp=SiderealRate/4;       // slowest rate (4x sidereal)
   cli(); timerRateDec=temp; sei();
 
   if ((distDestHA<=2) && (distDestDec<=2)) { 
@@ -147,6 +155,7 @@ void moveTo() {
     } else {
       // restore last tracking state
       trackingState=lastTrackingState;
+
       cli(); 
       timerRateHA  =SiderealRate;
       timerRateDec =SiderealRate;
