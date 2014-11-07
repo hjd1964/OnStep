@@ -133,7 +133,7 @@
  *
  * Review the comments below when setting this up for use with for your equipment.
  * a series of #define statements tailor the configuration to your hardware/mount.
- * they are clearly commented below.
+ * they are clearly commented in the Config.h file.
  *
  * the Arduino Mega2560 uses USB for power and communication with the host computer
  *
@@ -168,6 +168,7 @@
 #include "EEPROM.h"
 #include "math.h"
 #include "errno.h"
+// Use Config.h to configure OnStep to your requirements 
 #include "Config.h"
 
 // firmware info, these are returned by the ":GV?#" commands
