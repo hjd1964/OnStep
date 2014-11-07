@@ -18,9 +18,9 @@
 // light status LED by sink to ground (pin 9) and source +5V (pin 8), default=ON
 #define STATUS_LED_PINS_ON
 // lights 2nd status LED by sink to ground (pin 10), default=OFF
-#define STATUS_LED2_PINS_ON
+#define STATUS_LED2_PINS_OFF
 // optional +5V on pins 5 and 11 to Pololu or other stepper drivers without on-board 5V voltage regulators, default=OFF
-#define POWER_SUPPLY_PINS_ON
+#define POWER_SUPPLY_PINS_OFF
 
 // enables goTo speed equalization for differing right ascension and declination StepsPerDegreeHA/Dec, default=OFF (limited testing done)
 #define DEC_RATIO_OFF
@@ -44,11 +44,11 @@
 #define CHKSUM1_OFF     // default _OFF: required for OnStep Controller2 Android App (and others)
 
 // ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
-#define MaxRate                   12 // this is the minimum number of micro-seconds between micro-steps
+#define MaxRate                   96 // this is the minimum number of micro-seconds between micro-steps
                                      // minimum (fastest goto) is around 16 (Teensy3.1) or 32 (Mega2560), default is 96, higher is ok
                                      // too low and OnStep communicates slowly and/or freezes as the motor timers use up all the MCU time
                                      
-#define StepsForRateChange  150000.0 // number of steps during acceleration and de-acceleration: higher values=longer acceleration/de-acceleration
+#define StepsForRateChange  200000.0 // number of steps during acceleration and de-acceleration: higher values=longer acceleration/de-acceleration
                                      // for the most part this doesn't need to be changed, but adjust when needed
 
 #define BacklashTakeupRate        25 // backlash takeup rate (in multipules of the sidereal rate): too fast and your motors will stall,
@@ -82,8 +82,8 @@
 #define PECBufferSize           2400 // PEC, buffer size, max should be no more than 3384, your required buffer size >= StepsPerWormRotation/StepsPerSecond
                                      // for the most part this doesn't need to be changed, but adjust when needed.  824 seconds is the default
 
-#define REVERSE_HA_ON                // reverse the direction of movement for the HA/RA axis, adjust as needed or reverse your wiring so things move in the right direction
-#define REVERSE_DEC_ON               // reverse the direction of movement for the Dec axis (both reversed for my EM10b, both normal for G11)
+#define REVERSE_HA_OFF               // reverse the direction of movement for the HA/RA axis, adjust as needed or reverse your wiring so things move in the right direction
+#define REVERSE_DEC_OFF              // reverse the direction of movement for the Dec axis (both reversed for my EM10b, both normal for G11)
 
 #define minutesPastMeridianE      60 // for goto's, how far past the meridian to allow before we do a flip (if on the East side of the pier) - one hour of RA is the default = 60
 #define minutesPastMeridianW      60 // as above, if on the West side of the pier.  If left alone, the mount will stop tracking when it hits the this limit
@@ -98,12 +98,12 @@
 
 // this group is for advanced configuration and is not well tested yet, leave it alone or just use the HA_MODE and DEC_MODE values if you didn't hard wire the micro-stepping mode
 // DRV8825: 5=32x, 4=16x, 3=8x, 2=4x, 1=2x, 0=1x
-#define HA_MODE 5                    // programs the HA uStep mode M0/M1/M2, optional and default _OFF. Other values 0 to 7 (0xb000 to 111): for example "#define HA_MODE 4"
-#define HA_MODE_GOTO 2               // programs the HA uStep mode M0/M1/M2, used during gotos, optional and default _OFF. Other values 0 to 7 (0xb000 to 111): for example "#define HA_MODE 4"
-#define HA_STEP_GOTO 8               // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
-#define DE_MODE 5                    // programs the Dec uStep mode M0/M1/M2, optional and default _OFF. Other values 0 to 7 (0xb000 to 111)
-#define DE_MODE_GOTO 2               // programs the Dec uStep mode M0/M1/M2, used during gotos, optional and default _OFF. Other values 0 to 7 (0xb000 to 111)
-#define DE_STEP_GOTO 8               // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
+#define HA_MODE_OFF                  // programs the HA uStep mode M0/M1/M2, optional and default _OFF. Other values 0 to 7 (0xb000 to 111): for example "#define HA_MODE 4"
+#define HA_MODE_GOTO_OFF             // programs the HA uStep mode M0/M1/M2, used during gotos, optional and default _OFF. Other values 0 to 7 (0xb000 to 111): for example "#define HA_MODE 4"
+#define HA_STEP_GOTO 1               // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
+#define DE_MODE_OFF                  // programs the Dec uStep mode M0/M1/M2, optional and default _OFF. Other values 0 to 7 (0xb000 to 111)
+#define DE_MODE_GOTO_OFF             // programs the Dec uStep mode M0/M1/M2, used during gotos, optional and default _OFF. Other values 0 to 7 (0xb000 to 111)
+#define DE_STEP_GOTO 1               // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
 
 // THAT'S IT FOR USER CONFIGURATION!
 
