@@ -298,8 +298,10 @@ int    maxAlt;                                    // the maximum altitude, in de
 #define LimitPin   3
 
 // The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
-// reserved and not yet implemented
-#define PPS        20      // Pin 21 (PPS time source, GPS for example)
+// The Arduino attachInterrupt function works in two modes, on the '2560 it takes an Interrupt# on the Teensy and others it takes a Pin#
+// so we specify both here
+#define PpsPin     21      // Pin 21 (PPS time source, GPS for example, alternate Pin20)
+#define PpsInt     2       // Interrupt 2 (alternate Int3)
 
 // The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
 //                                  Atmel   328  | 2560
@@ -680,9 +682,9 @@ void setup() {
 
 #ifdef PPS_SENSE_ON
 #if defined(__AVR__)
-  attachInterrupt(3,ClockSync,RISING);
+  attachInterrupt(PpsInt,ClockSync,RISING);
 #elif defined(__arm__) && defined(TEENSYDUINO)
-  attachInterrupt(21,ClockSync,RISING);
+  attachInterrupt(PpsPin,ClockSync,RISING);
 #endif
 #endif
 
