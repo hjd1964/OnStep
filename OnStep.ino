@@ -118,6 +118,8 @@
  *                                       Finished code to enable dynamic tracking rate compensation for refraction.  Added code to allow use of PEC index sense feature
  *                                       New commands :Te# :Td# turn refraction tracking on/off, :VH# reads PEC HALL sensor position in seconds
  * 10-31-2014          1.0b5             Added code for GPS PPS sync. and Timer1 now runs at clock /3 instead of /8 for higher accuracy
+ * 11-06-2014          1.0b6             Changes to Timer.ino improve performance, lower timing jitter.  Improvements/fixes to guiding function.  Added PPS lock status to command :GU#.  
+ *                                       Moved configuration to a header file, cleaned up source code a bit.
  *
  *
  * Author: Howard Dutton
@@ -166,157 +168,36 @@
 #include "EEPROM.h"
 #include "math.h"
 #include "errno.h"
+#include "Config.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "10 31 14"
-#define FirmwareNumber "1.0b5"
+#define FirmwareDate   "11 06 14"
+#define FirmwareNumber "1.0b6"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
-
-// -------------------------------------------------------------------------------------------------------------------------
-// ADJUST THE FOLLOWING TO CONFIGURE YOUR CONTROLLER FEATURES --------------------------------------------------------------
-
-// turns debugging on, used during testing, default=OFF
-#define DEBUG_OFF
-// for getting control of the 'scope when things go horribly wrong, default=OFF
-#define RESCUE_MODE_OFF
-
-// PPS sense rising edge on pin 21 for optional precision clock source (GPS, for example), default=OFF
-#define PPS_SENSE_OFF
-// PEC sense rising edge on pin 2 for optional PEC index, default=OFF (not tested)
-#define PEC_SENSE_OFF
-// switch close (to ground) on pin 3 for optional limit sense (stops gotos and/or tracking), default=OFF (not tested)
-#define LIMIT_SENSE_OFF
-// light status LED by sink to ground (pin 9) and source +5V (pin 8), default=ON
-#define STATUS_LED_PINS_ON
-// lights 2nd status LED by sink to ground (pin 10), default=OFF
-#define STATUS_LED2_PINS_OFF
-// optional +5V on pins 5 and 11 to Pololu or other stepper drivers without on-board 5V voltage regulators, default=OFF
-#define POWER_SUPPLY_PINS_OFF
-
-// enables goTo speed equalization for differing right ascension and declination StepsPerDegreeHA/Dec, default=OFF (limited testing done)
-#define DEC_RATIO_OFF
-
-// enables alignment on two or three stars, default=ON
-#define ALIGN_TWO_AND_THREE_STAR_ON
-
-// enables Horizon coordinate goto functions, default=ON
-#define ALT_AZM_GOTO_ON
-
-// enables code to clean-up PEC readings after record (use PECprep or a spreadsheet to fix readings otherwise)
-// this cleans up any tracking rate variations that would be introduced by recording more guiding corrections to either the east or west, default=ON
-#define PEC_CLEANUP_ON
-
-// optionally adjust tracking rate to compensate for atmospheric refraction, default=OFF (not tested)
-// can be turned on/off with the :Te# and :Td# commands regardless of this setting
-#define TRACK_REFRACTION_RATE_DEFAULT_OFF
-
-// these turn on and off checksum error correction on the serial ports, default=OFF
-#define CHKSUM0_OFF     // default _OFF: required for OnStep ASCOM driver
-#define CHKSUM1_OFF     // default _OFF: required for OnStep Controller2 Android App (and others)
 
 // forces initialialization of a host of settings in EEPROM. OnStep does this automatically, most likely, you will want to leave this alone
 #define INIT_KEY false    // set to true to keep automatic initilization from happening.  This is a one-time operation... upload to the Arduino, then set to false and upload again
 #define initKey 915307548 // unique identifier for the current initialization format, do not change
 
-// ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
-#define MaxRate                   96 // this is the minimum number of micro-seconds between micro-steps
-                                     // minimum (fastest goto) is around 16 (Teensy3.1) or 32 (Mega2560), default is 96, higher is ok
-                                     // too low and OnStep communicates slowly and/or freezes as the motor timers use up all the MCU time
-                                     
-#define StepsForRateChange  200000.0 // number of steps during acceleration and de-acceleration: higher values=longer acceleration/de-acceleration
-                                     // for the most part this doesn't need to be changed, but adjust when needed
-
-#define BacklashTakeupRate        20 // backlash takeup rate (in multipules of the sidereal rate): too fast and your motors will stall,
-                                     // too slow and the mount will be sluggish while it moves through the backlash
-                                     // for the most part this doesn't need to be changed, but adjust when needed
-                                     // this should be 60 or lower
-
-                                     // for my mounts both RA and Dec axis have the same gear train
-#define StepsPerDegreeHA      19200L // calculated as    :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
-                                     // Takahashi EM10b  :  48            * 16          * 50 * (40/32)    *  144/360              = 19200
-                                     // Losmandy G11     :  48            * 16          * 15              *  360/360              = 11520
-#define StepsPerDegreeDec     19200L // calculated as    :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
-                                     // Takahashi EM10b  :  48            * 16          * 50 * (40/32)    *  144/360              = 19200
-                                     // Losmandy G11     :  48            * 16          * 15              *  360/360              = 11520
-                                     // the EM10b has two spur gears that drive the RA/Dec worms, they are 60 tooth and 48 tooth gears
-                                     // for an 1.25x reduction in addition to the 20:1 gear heads on the steppers for a 25:1 final ratio
-                                     // before the worm/wheels 144:1
-                                     
-#define StepsPerSecond          80.0 // the steps per second sidereal rate = (19200/3600)*15 = 80 - OnStep can handle between 12 and 100 steps/second
-                                     // StepsPerSecond doesn't need to be an integer
-                                     // StepsPerWormRotation (for PEC) needs to be evenly divisible by StepsPerSecond
-
-#define StepsPerWormRotation  38400L // PEC, number of steps for a complete worm rotation (in RA), (StepsPerDegreeHA*360)/gear_reduction2 
-                                     // the EM10b has a worm-wheel with 144 teeth (19200*360)/144 = 48000
-                                     // According to this the EM10b needs 600 (seconds) of PEC buffer.  Since the transfer gears have a rather large effect on the periodic error
-                                     // I have two options 1. use 4x the 48000 = 192000 (2400 seconds.)  This is 4 complete rotations of the worm and 5 complete rotations of the transfer gear.
-                                     //                       I expect the results would be very good, but since PECPrep is limited to 1000S I don't bother.
-                                     //                    2. use 480 (seconds) of PEC buffer.  This is easier to program and keeps the PE at low levels
-                                     //                       so pretending we have 180 teeth (19200*360)/180 = 38400
-
-#define PECBufferSize           2400 // PEC, buffer size, max should be no more than 3384, your required buffer size >= StepsPerWormRotation/StepsPerSecond
-                                     // for the most part this doesn't need to be changed, but adjust when needed.  824 seconds is the default
-
-#define REVERSE_HA_ON                // reverse the direction of movement for the HA/RA axis, adjust as needed or reverse your wiring so things move in the right direction
-#define REVERSE_DEC_ON               // reverse the direction of movement for the Dec axis (both reversed for my EM10b, both normal for G11)
-
-#define minutesPastMeridianE      60 // for goto's, how far past the meridian to allow before we do a flip (if on the East side of the pier) - one hour of RA is the default = 60
-#define minutesPastMeridianW      60 // as above, if on the West side of the pier.  If left alone, the mount will stop tracking when it hits the this limit
-#define underPoleLimit             9 // maximum allowed hour angle (+/-) under the celestial pole. OnStep will flip the mount and move the Dec. past 90 degrees (+/-) once past this limit
-                                     // to arrive at the location.  If left alone, the mount will stop tracking when it hits this limit.  Valid range is 7 to 11 hours
-#define minDec                   -91 // minimum allowed declination, default = -91 (off)
-#define maxDec                   +91 // maximum allowed declination, default =  91 (off)
-                                     // For example, a value of +80 would stop gotos/tracking near the north celestial pole.
-                                     // For a Northern Hemisphere user, this would stop tracking when the mount is in the polar home position but
-                                     // that can be easily worked around by doing an alignment once and saving a park position (assuming a 
-                                     // fork/yolk mount with meridian flips turned off by setting the minutesPastMeridian values to cover the whole sky)
-
-// this group is for advanced configuration and is not well tested yet, leave it alone or just use the HA_MODE and DEC_MODE values if you didn't hard wire the micro-stepping mode
-// DRV8825: 5=32x, 4=16x, 3=8x, 2=4x, 1=2x, 0=1x
-#define HA_MODE_OFF                  // programs the HA uStep mode M0/M1/M2, optional and default _OFF. Other values 0 to 7 (0xb000 to 111): for example "#define HA_MODE 4"
-#define HA_MODE_GOTO_OFF             // programs the HA uStep mode M0/M1/M2, used during gotos, optional and default _OFF. Other values 0 to 7 (0xb000 to 111): for example "#define HA_MODE 4"
-#define HA_STEP_GOTO 1               // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
-#define DE_MODE_OFF                  // programs the Dec uStep mode M0/M1/M2, optional and default _OFF. Other values 0 to 7 (0xb000 to 111)
-#define DE_MODE_GOTO_OFF             // programs the Dec uStep mode M0/M1/M2, used during gotos, optional and default _OFF. Other values 0 to 7 (0xb000 to 111)
-#define DE_STEP_GOTO 1               // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
-
-// THAT'S IT FOR USER CONFIGURATION!
-
-// -------------------------------------------------------------------------------------------------------------------------
-
-
 // Time keeping ------------------------------------------------------------------------------------------------------------
-unsigned long siderealTimer = 0;
-unsigned long siderealTimer2;
-unsigned long tenthSecondTimer;
-unsigned long ut1Timer;
-unsigned long msTimer1 = 0;
-unsigned long msTimer2 = 0;
-unsigned long now = 0;
-volatile long PPSlastMicroS = 1000000;
-volatile long PPSavgMicroS = 1000000;
-volatile double PPSrateRatio = 1.0;
+long siderealTimer    = 0;            // counter to issue steps during tracking
+long PecSiderealTimer = 0;            // time since worm wheel zero index for PEC
+long guideSiderealTimer=0;            // counter to issue steps during guiding
+unsigned long clockTimer;             // wall time base, one second counter
 
 double UT1       = 0.0;              // the current universal time
 double UT1_start = 0.0;              // the start of UT1
 unsigned long UT1mS_start = 0;       // mS at the start of UT1
 double JD  = 0.0;                    // and date, used for computing LST
-double LMT = 0.0;                    // internally, the date and time is kept in JD/LMT
-                                     // LMT is updated to keep current time
+double LMT = 0.0;                    // internally, the date and time is kept in JD/LMT and LMT is updated to keep current time
 int timeZone = 0;                    //
-double LST = 0.0;                    // this is the local (apparent) sidereal time in 24 hour format (0 to <24) must be updated when accessed
 
+double LST = 0.0;                    // this is the local (apparent) sidereal time in 24 hour format (0 to <24) must be updated when accessed
+long lst_start = 0;                  // the start of lst
+unsigned long lst_mS_start = 0;      // mS at the start of lst
 volatile long lst = 0;               // this is the local (apparent) sidereal time in 1/100 seconds (23h 56m 4.1s per day = 86400 clock seconds/
                                      // 86164.09 sidereal seconds = 1.00273 clock seconds per sidereal second)
-unsigned long lst_mS_start = 0;      // mS at the start of lst
-long lst_start = 0;                  // the start of lst
-long PECindexTimer = 0;              // time since worm wheel zero index for PEC
-long PECtime_lastSense=0;            // time since last PEC index was sensed
-unsigned long PECindex_sense=0;      // position of active PEC index sensed
-unsigned long next_PECindex_sense=-1;// position of next PEC index sensed
-
-boolean customRateActive=true;       // automatically modify the siderealInterval to compensate for atmospheric refraction
 
 long siderealInterval       = 15956313;
 long masterSiderealInterval = siderealInterval;
@@ -331,9 +212,19 @@ double HzCf = 16000000.0/60.0;
                                      // someday I'd like to add a GPS module and grab the pps (pulse per second) signal as a high-accuracy
                                      // time reference to correct drift in my sidereal clock due to physical effects and software limitations
 
-long SiderealRate;                   // based on the siderealInterval, this is the time between steps for sidereal tracking
+volatile long SiderealRate;          // based on the siderealInterval, this is the time between steps for sidereal tracking
+
+boolean customRateActive=true;       // automatically modify the siderealInterval to compensate for atmospheric refraction
+
+// PPS (GPS)
+volatile long PPSlastMicroS = 1000000;
+volatile long PPSavgMicroS = 1000000;
+volatile double PPSrateRatio = 1.0;
+volatile boolean PPSsynced = false;
+
+// Tracking and rate control
 #ifdef TRACK_REFRACTION_RATE_DEFAULT_ON
-boolean refraction = true;          // track at the refraction rate for the area of the sky
+boolean refraction = true;           // track at the refraction rate for the area of the sky
 #else
 boolean refraction = false;
 #endif
@@ -341,15 +232,16 @@ unsigned int gr_st=0,gr_sk=0,gr_st1=0,gr_sk1=0;  // used for guiding step genera
 unsigned int gd_st=0,gd_sk=0,gd_st1=0,gd_sk1=0;  // used for guiding step generation, Dec
 volatile unsigned int st=0,sk=0,st1=0,sk1=0;     // used for sidereal tracking step generation
 
-volatile double  pecTimerRateHA = 0;
-volatile double  guideTimerRateHA = 0;
 volatile long    timerRateHA = 0;
 volatile long    timerRateBacklashHA = 0;
 volatile boolean inBacklashHA=false;
-volatile double  guideTimerRateDec = 0;
 volatile long    timerRateDec = 0;
 volatile long    timerRateBacklashDec = 0;
 volatile boolean inBacklashDec=false;
+
+volatile double  pecTimerRateHA = 0;
+volatile double  guideTimerRateHA = 0;
+volatile double  guideTimerRateDec = 0;
 #define timerRateRatio          ((double)StepsPerDegreeHA/(double)StepsPerDegreeDec)
 #define SecondsPerWormRotation  ((long)(StepsPerWormRotation/StepsPerSecond))
 #define StepsPerSecondDec       ((double)(StepsPerDegreeDec/3600.0)*15.0)
@@ -383,8 +275,6 @@ volatile long startDec   = 90L*StepsPerDegreeDec; // declination of goto start p
 volatile long targetDec  = 90L*StepsPerDegreeDec; // declination of goto end   position in steps
 volatile byte dirDec     = 1;                     // stepping direction + or -
 double newTargetDec      = 0.0;                   // holds the Dec for goTos
-double avgDec            = 0.0;                   // for align
-double avgHA             = 0.0;                   // for align
 long origTargetDec       = 0;
 
 double newTargetAlt=0.0, newTargetAzm=0.0;        // holds the altitude and azmiuth for slews
@@ -509,9 +399,9 @@ int    maxAlt;                                    // the maximum altitude, in de
 
 #define DecDirEInit      1
 #define DecDirWInit      0
+volatile byte DecDir     = DecDirEInit;
 #define HADirNCPInit     0
 #define HADirSCPInit     1
-volatile byte DecDir     = DecDirEInit;
 volatile byte HADir      = HADirNCPInit;
 
 // Status ------------------------------------------------------------------------------------------------------------------
@@ -520,9 +410,8 @@ boolean highPrecision    = true;
 #define TrackingNone     0
 #define TrackingSidereal 1
 #define TrackingMoveTo   2
-byte trackingState       = TrackingNone;
-byte lastTrackingState   = TrackingNone;
-byte currentGuideRate    = 1;
+volatile byte trackingState     = TrackingNone;
+volatile byte lastTrackingState = TrackingNone;
 boolean abortSlew        = false;
 
 #define AlignNone        0
@@ -593,11 +482,6 @@ byte bufferPtr_serial_one= 0;
 
 int baudRate[10] = {0,56700,38400,28800,19200,14400,9600,4800,2400,1200};
 
-char   s[20];
-double f,f1,f2,f3;
-int    i,i1,i2;
-byte   b;
-
 // current site index and name
 byte currentSite = 0; 
 char siteName[16];
@@ -611,27 +495,26 @@ double IH                = 0;       // offset corrections/align
 double ID                = 0;
 
 // guide command
-byte    guideDirHA        = 0;
-int     guideDurationHA   = 0;
-byte    guideDirDec       = 0;
-int     guideDurationDec  = 0;
+volatile byte currentGuideRate     = 1;
+volatile byte guideDirHA           = 0;
+long          guideDurationHA      = -1;
+unsigned long guideDurationLastHA  = 0;
+byte          guideDirDec          = 0;
+long          guideDurationDec     = -1;
+unsigned long guideDurationLastDec = 0;
 
-// Slew control
+// rate control
 double  guideRates[9]={7.5,15,30,60,120,240,360,600,900}; 
-//                      1x 2x 4x 8x  16x 24x 40x 60x
+//                    1x 2x 4x 8x  16x 24x 40x 60x
 double  guideTimerRate    = 0;
-//
-long    msGuideHA         = 0;
 long    amountGuideHA     = 0;
 long    guideHA           = 0;
 long    accGuideHA        = 0;
-long    msGuideDec        = 0;
 long    amountGuideDec    = 0;
 long    guideDec          = 0;
 //
-unsigned long guideSiderealTimer=0;
-unsigned long lstGuideStopHA=0;
-unsigned long lstGuideStopDec=0;
+long lstGuideStopHA=0;
+long lstGuideStopDec=0;
 
 // PEC control
 #define PECStatusString  "IpPrR"
@@ -640,10 +523,10 @@ unsigned long lstGuideStopDec=0;
 #define PlayPEC          2
 #define ReadyRecordPEC   3
 #define RecordPEC        4
-unsigned long PEC_Timer  = 0;        // for PEC, keeps time for applying steps
-long PEC_Skip            = 0;        // for PEC, number of sidereal hundredths of a second between applying steps
-long accPecPlayHA        = 0;        // for PEC, buffers steps to be played back
-long accPecGuideHA       = 0;        // for PEC, buffers steps to be recorded
+unsigned int PEC_Timer   = 0;        // for PEC, keeps time for applying steps
+long    PEC_Skip         = 0;        // for PEC, number of sidereal hundredths of a second between applying steps
+long    accPecPlayHA     = 0;        // for PEC, buffers steps to be played back
+long    accPecGuideHA    = 0;        // for PEC, buffers steps to be recorded
 boolean PECfirstRecord   = false;
 boolean PECstatus        = IgnorePEC;
 boolean PECrecorded      = false;
@@ -654,13 +537,15 @@ long    wormRotationStepPos = 0;
 long    PECindex         = 0;
 long    PECindex1        = 0;
 long    lastPECindex     = -1;
-unsigned long timeOutIndexDetect = 0;
+long    PECtime_lastSense   =0;      // time since last PEC index was sensed
+unsigned long PECindex_sense=0;      // position of active PEC index sensed
+unsigned long next_PECindex_sense=-1;// position of next PEC index sensed
 
 // backlash control
-volatile int     backlashHA   = 0;
-volatile int     backlashDec  = 0;
-volatile int     blHA         = 0;
-volatile int     blDec        = 0;
+volatile int backlashHA   = 0;
+volatile int backlashDec  = 0;
+volatile int blHA         = 0;
+volatile int blDec        = 0;
 
 // EEPROM Info --------------------------------------------------------------------------------------------------------------
 // 0-1023 bytes
@@ -794,7 +679,7 @@ void setup() {
 
 #ifdef PPS_SENSE_ON
 #if defined(__AVR__)
-  attachInterrupt(2,ClockSync,RISING);
+  attachInterrupt(3,ClockSync,RISING);
 #elif defined(__arm__) && defined(TEENSYDUINO)
   attachInterrupt(21,ClockSync,RISING);
 #endif
@@ -859,7 +744,7 @@ void setup() {
   EEPROM_readQuad(EE_siderealInterval,(byte*)&siderealInterval);
 
   // 16MHZ clocks for steps per second of sidereal tracking
-  SiderealRate    =siderealInterval/StepsPerSecond;
+  cli(); SiderealRate=siderealInterval/StepsPerSecond; sei();
   timerRateHA     =SiderealRate;
   timerRateDec    =SiderealRate;
 
@@ -937,7 +822,7 @@ void setup() {
   PECstatus  =EEPROM.read(EE_PECstatus); 
   PECrecorded=EEPROM.read(EE_PECrecorded);
   if (!PECrecorded) PECstatus=IgnorePEC;
-  for (i=0; i<PECBufferSize; i++) PEC_buffer[i]=EEPROM.read(EE_PECindex+i);
+  for (int i=0; i<PECBufferSize; i++) PEC_buffer[i]=EEPROM.read(EE_PECindex+i);
   EEPROM_readQuad(EE_PECrecord_index,(byte*)&PECindex_record); 
   EEPROM_readQuad(EE_PECsense_index,(byte*)&PECindex_sense);
   
@@ -954,53 +839,68 @@ void setup() {
   #endif
 
   // set the default guide rate, 1x sidereal
-  setGuideRate(1);
-
+  setGuideRate(1);  delay(110);
+  
   // prep timers
   cli(); 
-  msTimer1=millis(); 
-  //ut1Timer=millis();
-  timeOutIndexDetect=millis();
-  PECindexTimer = lst;
+  guideSiderealTimer = lst;
+  PecSiderealTimer = lst;
   siderealTimer = lst;
+  clockTimer=millis(); 
   sei();
 }
 
 void loop() {
-  processCommands();
-  
   // GUIDING -------------------------------------------------------------------------------------------
   // 1/100 second sidereal timer, controls issue of steps at the selected RA and/or Dec rate(s) 
   guideHA=0;
-
-  cli(); long guideLst=lst; sei();
-  if (guideLst-guideSiderealTimer>=1) {
-    guideSiderealTimer=guideLst;
-    if (trackingState==TrackingSidereal) { // only active while sidereal tracking with a guide rate that makes sense
+  if (trackingState==TrackingSidereal) { 
+    cli(); long guideLst=lst; sei();
+    if (guideLst!=guideSiderealTimer) {
+      guideSiderealTimer=guideLst;  
       int sign=0;
-      if (((guideLst%gr_st==0) && ((guideLst%gr_sk!=0) || ((guideLst%gr_st1==0) && (guideLst%gr_sk1!=0) )))) {
-        if ((guideDirHA) && (!inBacklashHA)) { 
+      if (guideDirHA) {
+        if (((guideLst%gr_st==0) && ((guideLst%gr_sk!=0) || ((guideLst%gr_st1==0) && (guideLst%gr_sk1!=0) )))) {
           // as above, and keep track of how much we've moved for PEC recording
           if (guideDirHA=='e') sign=-1; else sign=1; guideHA=sign*amountGuideHA;
           // for RA, only apply the corrections now if fast guiding; otherwise they get combined with PEC & sidereal-tracking and are applied later
-          if (currentGuideRate>1) { cli(); targetHA+=guideHA;  sei(); } else { accGuideHA+=guideHA; }
+          if (currentGuideRate>1) { cli(); targetHA+=(long)guideHA; sei(); } else { accGuideHA+=guideHA; }
+        }
+        if (!inBacklashHA){
+          // for pulse guiding, count down the mS and stop when timed out
+          if (guideDurationHA>0)  {
+            guideDurationHA-=(long)(micros()-guideDurationLastHA);
+            guideDurationLastHA=micros();
+            if (guideDurationHA<=0) { lstGuideStopHA=lst+amountGuideHA*(1.0/StepsPerSecond)*150.0; guideDirHA=0; } 
+          }
+        } else {
+          // reset the counter if in backlash
+          guideDurationLastHA=micros();
         }
       }
-      // for pulse guiding, count down the mS and stop when timed out
-      if ((guideDurationHA>0) && (!inBacklashHA))  { guideDurationHA-=msGuideHA; if (guideDurationHA<=0) { lstGuideStopHA=lst+amountGuideHA; guideDirHA=0;  } }
       
-      if (((guideLst%gd_st==0) && ((guideLst%gd_sk!=0) || ((guideLst%gd_st1==0) && (guideLst%gd_sk1!=0) )))) {
-        if ((guideDirDec) && (!inBacklashDec)) { 
+      if (guideDirDec) {
+        if (((guideLst%gd_st==0) && ((guideLst%gd_sk!=0) || ((guideLst%gd_st1==0) && (guideLst%gd_sk1!=0) )))) {
           // nudge the targetDec (where we're supposed to be) by amountMoveDec
-          if (guideDirDec=='s') sign=-1; else sign=1; cli(); targetDec=targetDec+sign*amountGuideDec; sei();
+          if (guideDirDec=='s') sign=-1; else sign=1; cli(); targetDec=targetDec+(long)sign*(long)amountGuideDec; sei();
+        }
+        if (!inBacklashDec) {
+          // for pulse guiding, count down the mS and stop when timed out
+          if (guideDurationDec>0)  {
+            guideDurationDec-=(long)(micros()-guideDurationLastDec);
+            guideDurationLastDec=micros();
+            if (guideDurationDec<=0) { lstGuideStopDec=lst+amountGuideDec*(1.0/StepsPerSecondDec)*150.0; guideDirDec=0;  } 
+          }
+        } else {
+          // reset the counter if in backlash
+          guideDurationLastDec=micros();
         }
       }
-      // for pulse guiding, count down the mS and stop when timed out
-      if ((guideDurationDec>0) && (!inBacklashDec)) { guideDurationDec-=msGuideDec; if (guideDurationDec<=0) { lstGuideStopDec=lst+amountGuideDec; guideDirDec=0; } }
+
     }
     // allow the elevated rate to persist for a moment to allow the bulk added steps to play out after stopping
-    if ((!guideDirHA) && (guideTimerRateHA!=0) && (lst>=lstGuideStopHA)) { cli(); guideTimerRateHA=0; sei(); }
-    if ((!guideDirDec) && (guideTimerRateDec!=0) && (lst>=lstGuideStopDec)) { cli(); guideTimerRateDec=0; sei(); }
+    if ((!guideDirHA) && (fabs(guideTimerRateHA)>0.001) && (lst>=lstGuideStopHA)) { cli(); guideTimerRateHA=0.0; sei(); }
+    if ((!guideDirDec) && (fabs(guideTimerRateDec)>0.001) && (lst>=lstGuideStopDec)) { cli(); guideTimerRateDec=0.0; sei(); }
   }
 
   // PEC ---------------------------------------------------------------------------------------------
@@ -1033,7 +933,7 @@ void loop() {
           PECstartDelta=abs(m)/StepsPerSecond; // in units of seconds, ahead or behind, all that matters is how long the rate has to be increased for
 
           // playback starts now
-          cli(); PECindexTimer = lst; sei();
+          cli(); PecSiderealTimer = lst; sei();
         }
       }
 
@@ -1092,15 +992,15 @@ void loop() {
         // zero the accululators, the index timer, also the index
         accPecGuideHA = 0;
         accPecPlayHA = 0;
-        cli(); PECindexTimer = lst-1; sei();  // keeps PECindex from advancing immediately
-        PECindex = 0; lastPECindex = -1;                        // starts record/playback now
+        cli(); PecSiderealTimer = lst-1; sei();  // keeps PECindex from advancing immediately
+        PECindex = 0; lastPECindex = -1;         // starts record/playback now
       #ifdef PEC_SENSE_ON
         if (next_PECindex_sense>=0) { PECindex=next_PECindex_sense; next_PECindex_sense=-1; }
       #endif
       }
 
       // Increment the PEC index once a second and make it go back to zero when the worm finishes a rotation
-      cli(); long t=lst; sei(); if (t-PECindexTimer>99) { PECindexTimer=t; PECindex=(PECindex+1)%SecondsPerWormRotation; }
+      cli(); long t=lst; sei(); if (t-PecSiderealTimer>99) { PecSiderealTimer=t; PECindex=(PECindex+1)%SecondsPerWormRotation; }
       PECindex1=(PECindex-PECindex_sense); if (PECindex1<0) PECindex1+=SecondsPerWormRotation;
 
     #ifdef PEC_SENSE_ON
@@ -1129,7 +1029,7 @@ void loop() {
 
       // assume no change to tracking rate
       pecTimerRateHA=0;
-  
+
       if (PECstatus==RecordPEC) {
         // save the correction 1:2 weighted average
         int l=accPecGuideHA;
@@ -1149,6 +1049,7 @@ void loop() {
         if (accPecPlayHA>StepsPerSecond) accPecPlayHA=StepsPerSecond; if (accPecPlayHA<-StepsPerSecond) accPecPlayHA=-StepsPerSecond;
 
         pecTimerRateHA=accPecPlayHA/StepsPerSecond;
+
         // And run the PEC rate at another +/-5x to cover any corrections that should have been applied up to this point in the worm cycle
         // when just (re)starting PEC not worried about how smooth the play back is here, this will be over in a moment just run fast to get there 
         if (PECstartDelta>0) { PECstartDelta-=30; pecTimerRateHA+=5; }
@@ -1166,52 +1067,51 @@ void loop() {
     // get ready to re-index when tracking comes back
     if (PECstatus==PlayPEC)  { PECstatus=ReadyPlayPEC; PEC_Skip=0; cli(); PEC_HA=0; sei(); } 
   }
-  
-  // SIDEREAL TRACKING ---------------------------------------------------------------------------------
-  // moves the targetHA to match the earth's rotation/revolution, can handle up to 100 steps/sidereal second
-  // siderealTimer, falls in once every 1/100 sidereal second (1 tick, about 10mS) if the main loop is so busy that this timer
-  // is >1 tick you have a problem and the sidereal tracking may be affected.  Again, the slowest commands seem to take 6-7mS and it's
-  // just fast enough to keep up - fortunately the new design only seriously robs MPU cycles during fast GoTo operations when this 
-  // code isn't running
 
-  // keeps the target where it's supposed to be while doing gotos
-  // this depends on the lst%0 being a value other than 0, technically it's undefined
+  // SIDEREAL TRACKING ---------------------------------------------------------------------------------
   cli(); long tempLst=lst; sei();
-  if (tempLst-siderealTimer>=1) {
+  if (tempLst!=siderealTimer) {
     siderealTimer=tempLst;
-    if ((trackingState==TrackingMoveTo) && (tempLst%10==0)) {
-      moveTo();
-    } else {
-      if ((trackingState==TrackingSidereal) && !(guideDirHA && (currentGuideRate>1))) { // only active while sidereal tracking with a guide rate that makes sense
-        if (((tempLst%st==0) && ((tempLst%sk!=0) || ((tempLst%st1==0) && (tempLst%sk1!=0) )))) {
-            // PEC_Timer starts at zero again every second, PEC_Skip will control the rate and will trigger a +/- step every PEC_Skip steps while tracking 
-            PEC_Timer++;
     
-            // lookup Guiding
-            long ig=0; if (accGuideHA<0) { ig=-1; accGuideHA++; } else if (accGuideHA>0) { ig=1; accGuideHA--; }
-    
-            // lookup PEC
-            long ip=0;
-            if (!PEC_Skip==0) {
-              if (PEC_Timer%PEC_Skip==0) {
-                if (accPecPlayHA<0) { ip=-1; accPecPlayHA++; } else if (accPecPlayHA>0) { ip=1; accPecPlayHA--; } } }
-    
-            // apply the Tracking, Guiding, and PEC
-            cli(); targetHA=targetHA+1+ig; PEC_HA+=ip; targetHA1=targetHA+PEC_HA; sei();
-        }
+    if ((trackingState==TrackingSidereal) && !(guideDirHA && (currentGuideRate>1))) { // only active while sidereal tracking with a guide rate that makes sense
+      if (((tempLst%st==0) && ((tempLst%sk!=0) || ((tempLst%st1==0) && (tempLst%sk1!=0) )))) {
+          // PEC_Timer starts at zero again every second, PEC_Skip will control the rate and will trigger a +/- step every PEC_Skip steps while tracking 
+          PEC_Timer++;
+  
+          // lookup Guiding
+          long ig=0; if (accGuideHA<0) { ig=-1; accGuideHA++; } else if (accGuideHA>0) { ig=1; accGuideHA--; }
+  
+          // lookup PEC
+          long ip=0;
+          if (!PEC_Skip==0) {
+            if (PEC_Timer%PEC_Skip==0) {
+              if (accPecPlayHA<0) { ip=-1; accPecPlayHA++; } else if (accPecPlayHA>0) { ip=1; accPecPlayHA--; } } }
+  
+          // apply the Tracking, Guiding, and PEC
+          cli(); targetHA=targetHA+1+ig; PEC_HA+=ip; targetHA1=targetHA+PEC_HA; sei();
       }
     }
+
+    if (trackingState==TrackingMoveTo) {
+      // keeps the target where it's supposed to be while doing gotos
+      if ((lastTrackingState==TrackingSidereal) && ((tempLst%st==0) && ((tempLst%sk!=0) || ((tempLst%st1==0) && (tempLst%sk1!=0) )))) { cli(); targetHA++; sei(); origTargetHA++; }
+    }
   }
-  
-  // UT1 CLOCK -----------------------------------------------------------------------------------------
-  // timer... falls in once a second, keeps the universal time clock ticking
-  // this clock doesn't rollover (at 24 hours) since that would cause date confusion
+
+  if (trackingState==TrackingMoveTo) moveTo();
+
+  // Housekeeping --------------------------------------------------------------------------------------
+  // timer... falls in once a second, keeps the universal time clock ticking,
+  // handles PPS GPS signal processing, watches safety limits, adjusts tracking rate for refraction
   unsigned long m=millis(); 
-  if (m-ut1Timer>999) {
-    ut1Timer=m;
+  if (m-clockTimer>999) {
+    clockTimer=m;
+    
+    // update the UT1 CLOCK
+    // this clock doesn't rollover (at 24 hours) since that would cause date confusion
     double t2=(double)(m-UT1mS_start)/1000.0;
     UT1=UT1_start+t2/3600.0;   // This just needs to be accurate to the nearest second, it's about 10x better
-    
+
     // update the local sidereal time floating point representation
     update_LST();
     
@@ -1220,6 +1120,7 @@ void loop() {
     cli();
     PPSrateRatio=((double)1000000/(double)(PPSavgMicroS));
     Timer1SetRate(siderealInterval/300);
+    if (micros()-PPSlastMicroS>2000000) PPSsynced=false;
     sei();
     #endif
 
@@ -1242,7 +1143,10 @@ void loop() {
      // finally, adjust the tracking rate on-the-fly to compensate for refraction
      if (refraction) CEquToTracRateCor();
     }
+    
   } else {
+  // Command processing --------------------------------------------------------------------------------
+  // acts on commands recieved across Serial0 and Serial1 interfaces
     processCommands();
   }
 }
