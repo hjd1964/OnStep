@@ -41,33 +41,25 @@ void Timer1SetRate(long rate) {
 // set timer3 to rate (in microseconds*16)
 volatile uint32_t nextHArate;
 void Timer3SetRate(long rate) {
-  rate=rate/PPSrateRatio;
 #if defined(__AVR__)
   // valid for rates down to 0.25 second
   if (StepsPerSecond<31) rate=rate/64; else rate=rate/8;
-  if (rate>65536) rate=65536;
-  nextHArate=rate-1;
+  cli(); nextHArate=rate-1; sei();
 #elif defined(__arm__) && defined(TEENSYDUINO)
   nextHArate=(F_BUS / 1000000) * (rate*0.0625) * 0.5 - 1;
-  cli();
-  PIT_LDVAL1=nextHArate;
-  sei();
+  cli(); PIT_LDVAL1=nextHArate; sei();
 #endif
 }
 // set timer4 to rate (in microseconds*16)
 volatile uint32_t nextDErate;
 void Timer4SetRate(long rate) {
-  rate=rate/PPSrateRatio;
 #if defined(__AVR__)
   // valid for rates down to 0.25 second
   if (StepsPerSecond<31) rate=rate/64; else rate=rate/8;
-  if (rate>65536) rate=65536;
-  nextDErate=rate-1;
+  cli(); nextDErate=rate-1; sei();
 #elif defined(__arm__) && defined(TEENSYDUINO)
   nextDErate=(F_BUS / 1000000) * (rate*0.0625) * 0.5 - 1;
-  cli();
-  PIT_LDVAL2=nextDErate;
-  sei();
+  cli(); PIT_LDVAL2=nextDErate; sei();
 #endif
 }
 
@@ -82,74 +74,60 @@ volatile boolean wasInBacklashDec=false;
 volatile boolean gotoRateHA=false;
 volatile boolean gotoRateDec=false;
 volatile byte cnt = 0;
-ISR(TIMER1_COMPA_vect)
+ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
 {
-  // run 1/3 of the time
-  cnt++; if (cnt%3!=0) return; cnt=0;
-  
+  // run 1/3 of the time at 3x the rate
+  cnt++; if (cnt%3!=0) return;  
   lst++;
   
-  // keeps the target where it's supposed to be while doing gotos
-  // this depends on the lst%0 being a value other than 0, technically it's undefined
-  if (((lst%st==0) && ((lst%sk!=0) || ((lst%st1==0) && (lst%sk1!=0) ))) && ((trackingState==TrackingMoveTo) && (lastTrackingState==TrackingSidereal))) { targetHA++; origTargetHA++; }
-  targetHA1=targetHA+PEC_HA;
-  
+  cli(); targetHA1=targetHA+PEC_HA; sei();
+   
   if (trackingState==TrackingSidereal) {
     
     // automatic rate calculation HA
     long calculatedTimerRateHA;
     double timerRateHA1=1.0; if (guideDirHA && (currentGuideRate>1)) timerRateHA1=0.0;
-    double timerRateHA2=fabs(guideTimerRateHA+pecTimerRateHA+timerRateHA1)*1.0;
-    if (timerRateHA2>0.5) calculatedTimerRateHA=SiderealRate/timerRateHA2; else calculatedTimerRateHA=SiderealRate/0.5;
+    double timerRateHA2=fabs(guideTimerRateHA+pecTimerRateHA+timerRateHA1);
+    if (timerRateHA2>0.5) calculatedTimerRateHA=(double)SiderealRate/timerRateHA2; else calculatedTimerRateHA=(double)SiderealRate/0.5;
     if (runTimerRateHA!=calculatedTimerRateHA) { timerRateHA=calculatedTimerRateHA; runTimerRateHA=calculatedTimerRateHA; }
 
     // dynamic rate adjust
-    double x=fabs((targetHA+PEC_HA)-posHA); x=x*x;
+    double x=fabs(targetHA1-posHA); x=x*x;
     if (x>0) {
-      if (x>100.0) x=100.0; x=50000.00-x; x=x/50000.0;
-      timerRateHA=calculatedTimerRateHA*x; // up to 0.2% faster (or as little as 0.002%)
+      if (x>160.0) x=160.0; x=50000.00-x; x=x/50000.0;
+      timerRateHA=calculatedTimerRateHA*x; // up to 0.32% faster (or as little as 0.002%)
       runTimerRateHA=timerRateHA;
     }
- 
+    
     // automatic rate calculation Dec
     long calculatedTimerRateDec;
-    double timerRateDec1=guideTimerRateDec*1.0;
+    double timerRateDec1=guideTimerRateDec;
     // if we're stopped, just run the timer fast since we're not moving anyway
-    if (timerRateDec1>0.5) calculatedTimerRateDec=SiderealRate/timerRateDec1; else calculatedTimerRateDec=SiderealRate/0.5;
+    if (timerRateDec1>0.5) calculatedTimerRateDec=(double)SiderealRate/timerRateDec1; else calculatedTimerRateDec=(double)SiderealRate/0.5;
     // remember our "running" rate and only update the actual rate when it changes
     if (runTimerRateDec!=calculatedTimerRateDec) { timerRateDec=calculatedTimerRateDec; runTimerRateDec=calculatedTimerRateDec; }
-
+ 
     // dynamic rate adjust
-    x=fabs(targetDec-posDec);
+    x=fabs(targetDec-posDec); x=x*x;
     if (x>0) {
-      if (x>100.0) x=100.0; x=50000.00-x; x=x/50000.0;
-      timerRateDec=calculatedTimerRateDec*x; // up to 0.2% faster (or as little as 0.002%)
+      if (x>160.0) x=160.0; x=50000.00-x; x=x/50000.0;
+      timerRateDec=calculatedTimerRateDec*x; // up to 0.32% faster (or as little as 0.002%)
+      runTimerRateDec=timerRateDec;
     }
-  } 
+  }
   
-  // trigger Goto step mode at 2x the fastest guide rate
-  #if defined(DE_MODE) && defined(DE_MODE_GOTO)
-  gotoRateDec=(timerRateDec<SiderealRate/80);
-  #endif
-  #if defined(HA_MODE) && defined(HA_MODE_GOTO)
-  gotoRateHA=(timerRateHA<SiderealRate/80);
-  #endif
-
   long thisTimerRateHA=timerRateHA;
   #ifdef DEC_RATIO_ON
   long thisTimerRateDec=timerRateDec*timerRateRatio;
   #else
   long thisTimerRateDec=timerRateDec;
   #endif
-
-  // backlash compensation timing
-  if ((trackingState==TrackingSidereal) || (trackingState==TrackingMoveTo)) {
+  
+  if (trackingState==TrackingSidereal) {
     // override rate during backlash compensation
     if (inBacklashHA) { thisTimerRateHA=timerRateBacklashHA; wasInBacklashHA=true; } 
     // override rate during backlash compensation
     if (inBacklashDec) { thisTimerRateDec=timerRateBacklashDec; wasInBacklashDec=true; }
-  }
-  if (trackingState==TrackingSidereal) {
     // travel through the backlash is done, but we weren't following the target while it was happening!
     // so now get us back to near where we need to be
     if ((!inBacklashHA) && (wasInBacklashHA) && (!guideDirHA)) {
@@ -159,16 +137,31 @@ ISR(TIMER1_COMPA_vect)
       if (abs(posDec-targetDec)>2) thisTimerRateDec=SiderealRate/4; else wasInBacklashDec=false;
     }
   }
+  if (trackingState==TrackingMoveTo) {
+    // override rate during backlash compensation
+    if (inBacklashHA) { thisTimerRateHA=timerRateBacklashHA; wasInBacklashHA=true; } 
+    // override rate during backlash compensation
+    if (inBacklashDec) { thisTimerRateDec=timerRateBacklashDec; wasInBacklashDec=true; }
+      
+    // trigger Goto step mode when faster than the fastest guide rate
+    #if defined(DE_MODE) && defined(DE_MODE_GOTO)
+    gotoRateDec=(thisTimerRateDec<SiderealRate/80);
+    #endif
+    #if defined(HA_MODE) && defined(HA_MODE_GOTO)
+    gotoRateHA=(thisTimerRateHA<SiderealRate/80);
+    #endif
+  }
   
   // set the rates
   if (thisTimerRateHA!=isrTimerRateHA) {
-    Timer3SetRate(thisTimerRateHA);
+    Timer3SetRate(thisTimerRateHA/PPSrateRatio);
     isrTimerRateHA=thisTimerRateHA;
   }
   if (thisTimerRateDec!=isrTimerRateDec) {
-    Timer4SetRate(thisTimerRateDec);
+    Timer4SetRate(thisTimerRateDec/PPSrateRatio);
     isrTimerRateDec=thisTimerRateDec;
   }
+ 
 }
 
 #if defined(HA_MODE) && defined(HA_MODE_GOTO)
@@ -181,6 +174,12 @@ volatile boolean gotoModeHA=false;
 ISR(TIMER3_COMPA_vect)
 {
 #if defined(__AVR__)
+  #if defined(HA_MODE) && defined(HA_MODE_GOTO)
+  OCR3A = nextHArate*stepHA;
+  #else
+  OCR3A = nextHArate;
+  #endif
+
   // drivers step on the rising edge, need >=1.9uS to settle (for DRV8825 or A4988) so this is early in the routine
   CLR(HAStepPORT,  HAStepBit);
 
@@ -226,11 +225,7 @@ ISR(TIMER3_COMPA_vect)
     }
     SET(HAStepPORT, HAStepBit);
   }
-  #if defined(HA_MODE) && defined(HA_MODE_GOTO)
-  OCR3A = nextHArate*stepHA;
-  #else
-  OCR3A = nextHArate;
-  #endif
+
 #elif defined(__arm__) && defined(TEENSYDUINO)
   // On the much faster Teensy run at twice the rate and pull the step pin low every other call
   // Step signal doesn't happen until the next ISR call, so loads of time settling
@@ -261,6 +256,7 @@ ISR(TIMER3_COMPA_vect)
 
 #if defined(DE_MODE) && defined(DE_MODE_GOTO)
 volatile long stepDec=1;
+volatile boolean gotoModeDec=false;
 #else
 #define stepDec 1
 #endif
@@ -268,8 +264,15 @@ volatile long stepDec=1;
 ISR(TIMER4_COMPA_vect)
 {
 #if defined(__AVR__)
+
   // drivers step on the rising edge
   CLR(DecStepPORT,  DecStepBit);
+
+  #if defined(DE_MODE) && defined(DE_MODE_GOTO)
+  OCR4A = nextDErate*stepDec;
+  #else
+  OCR4A = nextDErate;
+  #endif
 
 #if defined(DE_MODE) && defined(DE_MODE_GOTO)
   // switch micro-step mode
@@ -313,11 +316,7 @@ ISR(TIMER4_COMPA_vect)
     }
     SET(DecStepPORT, DecStepBit);
   }
-  #if defined(DE_MODE) && defined(DE_MODE_GOTO)
-  OCR4A = nextDErate*stepDec;
-  #else
-  OCR4A = nextDErate;
-  #endif
+
 #elif defined(__arm__) && defined(TEENSYDUINO)
   // on the much faster Teensy run this ISR at twice the normal rate and pull the step pin low every other call
   if (DEclr) {
@@ -353,6 +352,7 @@ void ClockSync() {
   unsigned long oneS=(t-PPSlastMicroS);
   if ((oneS>1000000-1000) && (oneS<1000000+1000)) {
     PPSavgMicroS=(PPSavgMicroS*19+oneS)/20;
+    PPSsynced=true;
   }
   PPSlastMicroS=t;
 }
