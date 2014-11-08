@@ -118,8 +118,11 @@
  *                                       Finished code to enable dynamic tracking rate compensation for refraction.  Added code to allow use of PEC index sense feature
  *                                       New commands :Te# :Td# turn refraction tracking on/off, :VH# reads PEC HALL sensor position in seconds
  * 10-31-2014          1.0b5             Added code for GPS PPS sync. and Timer1 now runs at clock /3 instead of /8 for higher accuracy
- * 11-06-2014          1.0b6             Changes to Timer.ino improve performance, lower timing jitter.  Improvements/fixes to guiding function.  Added PPS lock status to command :GU#.  
+ * 11-06-2014          1.0b6             Changes to Timer.ino improve performance, lower timing jitter.  Improvements/fixes to guiding function.  Added PPS lock status to command :GU#.
  *                                       Moved configuration to a header file, cleaned up source code a bit.
+ * 11-08-2014          1.0b7             ParkClearBacklash now uses the BacklashTakeupRate, doubled takeup time to fix bug.  Guide function now only "moves" once backlash takeup is finished.
+ *                                       Now switching SiderealClock down to a slightly less accurate /8 rate during gotos to save MPU cycles.  Adjusted PEC to fall out of play mode when
+ *                                       guiding at >1x sidereal.  Cleaned up source code a bit more.
  *
  *
  * Author: Howard Dutton
@@ -172,8 +175,8 @@
 #include "Config.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "11 06 14"
-#define FirmwareNumber "1.0b6"
+#define FirmwareDate   "11 08 14"
+#define FirmwareNumber "1.0b7"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -182,10 +185,10 @@
 #define initKey 915307548 // unique identifier for the current initialization format, do not change
 
 // Time keeping ------------------------------------------------------------------------------------------------------------
-long siderealTimer    = 0;            // counter to issue steps during tracking
-long PecSiderealTimer = 0;            // time since worm wheel zero index for PEC
-long guideSiderealTimer=0;            // counter to issue steps during guiding
-unsigned long clockTimer;             // wall time base, one second counter
+long siderealTimer    = 0;           // counter to issue steps during tracking
+long PecSiderealTimer = 0;           // time since worm wheel zero index for PEC
+long guideSiderealTimer=0;           // counter to issue steps during guiding
+unsigned long clockTimer;            // wall time base, one second counter
 
 double UT1       = 0.0;              // the current universal time
 double UT1_start = 0.0;              // the start of UT1
@@ -214,6 +217,7 @@ double HzCf = 16000000.0/60.0;
                                      // time reference to correct drift in my sidereal clock due to physical effects and software limitations
 
 volatile long SiderealRate;          // based on the siderealInterval, this is the time between steps for sidereal tracking
+volatile long TakeupRate;            // this is the makeup rate for synchronizing the target and actual positions
 
 boolean customRateActive=true;       // automatically modify the siderealInterval to compensate for atmospheric refraction
 
@@ -265,7 +269,6 @@ double longitude = 0.0;
 volatile long posHA      = 90L*StepsPerDegreeHA;   // hour angle position in steps
 volatile long startHA    = 90L*StepsPerDegreeHA;   // hour angle of goto start position in steps
 volatile long targetHA   = 90L*StepsPerDegreeHA;   // hour angle of goto end   position in steps
-volatile long targetHA1  = 90L*StepsPerDegreeHA;   // hour angle of goto end   position in steps
 volatile byte dirHA      = 1;                      // stepping direction + or -
 volatile long PEC_HA     = 0;                      // for PEC, adds or subtracts steps
 double newTargetRA       = 0.0;                    // holds the RA for goTos
@@ -492,7 +495,7 @@ char siteName[16];
 // align command
 double altCor            = 0;       // for geometric coordinate correction/align, - is below the pole, + above
 double azmCor            = 0;       // - is right of the pole, + is left
-double doCor             = 0;       // declination orthogonal correction
+double doCor             = 0;       // declination/optics orthogonal correction
 double pdCor             = 0;       // declination/polar orthogonal correction
 double IH                = 0;       // offset corrections/align
 double ID                = 0;
@@ -747,7 +750,7 @@ void setup() {
   EEPROM_readQuad(EE_siderealInterval,(byte*)&siderealInterval);
 
   // 16MHZ clocks for steps per second of sidereal tracking
-  cli(); SiderealRate=siderealInterval/StepsPerSecond; sei();
+  cli(); SiderealRate=siderealInterval/StepsPerSecond; TakeupRate=SiderealRate/4; sei();
   timerRateHA     =SiderealRate;
   timerRateDec    =SiderealRate;
 
@@ -759,7 +762,7 @@ void setup() {
   timerRateBacklashDec=timerRateDec/BacklashTakeupRate;
 
   // initialize the timers that handle the sidereal clock, RA, and Dec
-  Timer1SetRate(siderealInterval/300);
+  SetSiderealClockRate(siderealInterval);
 #if defined(__AVR__)
   if (StepsPerSecond<31)
     TCCR3B = (1 << WGM12) | (1 << CS10) | (1 << CS11);  // ~0 to 0.25 seconds   (4 steps per second minimum, granularity of timer is 4uS)   /64 pre-scaler
@@ -854,229 +857,26 @@ void setup() {
 }
 
 void loop() {
+
   // GUIDING -------------------------------------------------------------------------------------------
-  // 1/100 second sidereal timer, controls issue of steps at the selected RA and/or Dec rate(s) 
-  guideHA=0;
   if (trackingState==TrackingSidereal) { 
-    cli(); long guideLst=lst; sei();
-    if (guideLst!=guideSiderealTimer) {
-      guideSiderealTimer=guideLst;  
-      int sign=0;
-      if (guideDirHA) {
-        if (((guideLst%gr_st==0) && ((guideLst%gr_sk!=0) || ((guideLst%gr_st1==0) && (guideLst%gr_sk1!=0) )))) {
-          // as above, and keep track of how much we've moved for PEC recording
-          if (guideDirHA=='e') sign=-1; else sign=1; guideHA=sign*amountGuideHA;
-          // for RA, only apply the corrections now if fast guiding; otherwise they get combined with PEC & sidereal-tracking and are applied later
-          if (currentGuideRate>1) { cli(); targetHA+=(long)guideHA; sei(); } else { accGuideHA+=guideHA; }
-        }
-        if (!inBacklashHA){
-          // for pulse guiding, count down the mS and stop when timed out
-          if (guideDurationHA>0)  {
-            guideDurationHA-=(long)(micros()-guideDurationLastHA);
-            guideDurationLastHA=micros();
-            if (guideDurationHA<=0) { lstGuideStopHA=lst+amountGuideHA*(1.0/StepsPerSecond)*150.0; guideDirHA=0; } 
-          }
-        } else {
-          // reset the counter if in backlash
-          guideDurationLastHA=micros();
-        }
-      }
-      
-      if (guideDirDec) {
-        if (((guideLst%gd_st==0) && ((guideLst%gd_sk!=0) || ((guideLst%gd_st1==0) && (guideLst%gd_sk1!=0) )))) {
-          // nudge the targetDec (where we're supposed to be) by amountMoveDec
-          if (guideDirDec=='s') sign=-1; else sign=1; cli(); targetDec=targetDec+(long)sign*(long)amountGuideDec; sei();
-        }
-        if (!inBacklashDec) {
-          // for pulse guiding, count down the mS and stop when timed out
-          if (guideDurationDec>0)  {
-            guideDurationDec-=(long)(micros()-guideDurationLastDec);
-            guideDurationLastDec=micros();
-            if (guideDurationDec<=0) { lstGuideStopDec=lst+amountGuideDec*(1.0/StepsPerSecondDec)*150.0; guideDirDec=0;  } 
-          }
-        } else {
-          // reset the counter if in backlash
-          guideDurationLastDec=micros();
-        }
-      }
-
-    }
-    // allow the elevated rate to persist for a moment to allow the bulk added steps to play out after stopping
-    if ((!guideDirHA) && (fabs(guideTimerRateHA)>0.001) && (lst>=lstGuideStopHA)) { cli(); guideTimerRateHA=0.0; sei(); }
-    if ((!guideDirDec) && (fabs(guideTimerRateDec)>0.001) && (lst>=lstGuideStopDec)) { cli(); guideTimerRateDec=0.0; sei(); }
+    guideHA=0;
+    Guide();
   }
-
-  // PEC ---------------------------------------------------------------------------------------------
-  // PEC is only active when we're tracking at the sidereal rate with a guide rate that makes sense
-  if ((trackingState==TrackingSidereal) && !((guideDirHA || guideDirDec) && (currentGuideRate>1))) {
-
-    // keep track of our current step position, and when the step position on the worm wraps during playback
-    lastWormRotationStepPos = wormRotationStepPos;
-    cli(); long posPEC=targetHA; sei();
-    
-    // where we're at (HA), must always be positive, so add 360 degrees (in steps)
-    posPEC=posPEC+StepsPerDegreeHA*360;
-    wormRotationStepPos =(posPEC-PECindex_record) % StepsPerWormRotation;
-    
-    // handle playing back and recording PEC
-    if (PECstatus!=IgnorePEC) {
-      // start playing PEC
-      if (PECstatus==ReadyPlayPEC) {
-        // approximate, might be off by nearly a second, this makes sure that the index is at the start of a second before resuming play
-        if ((long)fmod(wormRotationStepPos,StepsPerSecond)==0) {
-          PECstatus=PlayPEC;
-          PECindex=wormRotationStepPos/StepsPerSecond; 
-          // sum corrections to this point
-          long m=0; for (int l=0; l<PECindex; l++) {
-            long l1=l-PECindex_sense; if (l1<0) l1+=SecondsPerWormRotation;
-            m+=PEC_buffer[l1]-128; 
-          }
-          // move to the corrected location, this might take a few seconds and can be abrupt (after goto's or when unparking)
-          cli(); PEC_HA = m; sei(); 
-          PECstartDelta=abs(m)/StepsPerSecond; // in units of seconds, ahead or behind, all that matters is how long the rate has to be increased for
-
-          // playback starts now
-          cli(); PecSiderealTimer = lst; sei();
-        }
-      }
-
-      // get ready to start recording
-      if (PECstatus==ReadyRecordPEC) {
-        // zero index counter
-        PECindex_record = posPEC % StepsPerWormRotation;
-        wormRotationStepPos = (posPEC-PECindex_record) % StepsPerWormRotation;
-        lastWormRotationStepPos=1; // force recording to start now
-      }
-
-      // at the start of a worm cycle (if wormRotationStepPos rolled over)
-      // this only works because targetHA can't move backward while tracking and guiding at +/- 1x sidereal
-      // it also works while <=1X guiding and playing PEC because the PEC corrections don't get counted in the targetHA location
-      if (lastWormRotationStepPos>wormRotationStepPos) {
-
-        // start recording PEC
-        if (PECstatus==ReadyRecordPEC) {
-          PECstatus=RecordPEC;
-          PECrecorded=false;    
-        } else
-        // and once the PEC data is all stored, indicate that it's valid and start using it
-        if (PECstatus==RecordPEC) {
-          PECstatus=PlayPEC;
-          PECrecorded=true;
-          PECfirstRecord=false;
-#ifdef PEC_CLEANUP_ON
-          // the number of steps added should equal the number of steps subtracted (from the cycle)
-          // first, determine how far we've moved ahead or backward in steps
-          long sum_pec=0; for (int scc=0; scc<SecondsPerWormRotation; scc++) { sum_pec+=(int)PEC_buffer[scc]-128; }
-
-          // this is the correction coefficient for a given location in the sequence
-          double Ccf = (double)sum_pec/(double)SecondsPerWormRotation;
-
-          // now, apply the correction to the sequence to make the PEC adjustments null out
-          // this process was simulated in a spreadsheet and the roundoff error might leave us at +/- a step which is tacked on at the beginning
-          long lp2=0; sum_pec=0; 
-          for (int scc=0; scc<SecondsPerWormRotation; scc++) {
-            // the correction, "now"
-            long lp1=lround(-scc*Ccf);
-            
-            // if the correction increases or decreases then add or subtract that many steps
-            PEC_buffer[scc]=(int)PEC_buffer[scc]+(lp1-lp2);
-
-            // sum the values for a final adjustment, if necessary
-            sum_pec+=(int)PEC_buffer[scc]-128;     
-            lp2=lp1;
-          }
-          PEC_buffer[0]-=sum_pec;
-
-          // a reality check, make sure the buffer data looks good, if not forget it
-          if ((sum_pec>2) || (sum_pec<-2)) { PECrecorded=false; PECstatus=IgnorePEC; }
-#endif
-        }
-        
-        // zero the accululators, the index timer, also the index
-        accPecGuideHA = 0;
-        accPecPlayHA = 0;
-        cli(); PecSiderealTimer = lst-1; sei();  // keeps PECindex from advancing immediately
-        PECindex = 0; lastPECindex = -1;         // starts record/playback now
-      #ifdef PEC_SENSE_ON
-        if (next_PECindex_sense>=0) { PECindex=next_PECindex_sense; next_PECindex_sense=-1; }
-      #endif
-      }
-
-      // Increment the PEC index once a second and make it go back to zero when the worm finishes a rotation
-      cli(); long t=lst; sei(); if (t-PecSiderealTimer>99) { PecSiderealTimer=t; PECindex=(PECindex+1)%SecondsPerWormRotation; }
-      PECindex1=(PECindex-PECindex_sense); if (PECindex1<0) PECindex1+=SecondsPerWormRotation;
-
-    #ifdef PEC_SENSE_ON
-      // if the HALL sensor (etc.) has just arrived at the index and it's been more than 60 seconds since
-      // it was there before, set this as the next start of PEC playback/recording
-      cli();
-      if ((digitalRead(PecPin)==HIGH) && (lst-PECtime_lastSense>6000)) {
-        PECtime_lastSense=lst;
-        next_PECindex_sense=PECindex;
-      }
-      sei();
-    #endif
-
-      accPecGuideHA+=guideHA;
-    } else {
-      // if we're ignoring PEC, zero the offset and keep it that way
-      cli(); PEC_HA=0; sei(); 
-      PEC_Skip = 0;
-      // no change to tracking rate
-      pecTimerRateHA=0;
-    }
-
-    // falls in whenever the PECindex changes, which is once a sidereal second
-    if (PECindex1!=lastPECindex) {
-      lastPECindex=PECindex1;
-
-      // assume no change to tracking rate
-      pecTimerRateHA=0;
-
-      if (PECstatus==RecordPEC) {
-        // save the correction 1:2 weighted average
-        int l=accPecGuideHA;
-        if (l<-StepsPerSecond) l=-StepsPerSecond; if (l>StepsPerSecond) l=StepsPerSecond;   // +/-1 sidereal rate range for corrections
-        if (!PECfirstRecord) l=(l+((int)PEC_buffer[PECindex1]-128)*2)/3; 
-        PEC_buffer[PECindex1]=l+128;  // save the correction
-        accPecGuideHA=0;              // and clear the accumulator
-      }
-      
-      if (PECstatus==PlayPEC) {
-        // PECindex2 adjusts one second before the value was recorded, an estimate of the latency between image acquisition and response
-        // if sending values directly to OnStep from PECprep, etc. be sure to account for this
-        int PECindex2=PECindex1-1; if (PECindex2<0) PECindex2+=SecondsPerWormRotation;
-        // accPecPlayHA play back speed can be +/-1 of sidereal
-        // PEC_Skip is the number of ticks between the added (or skipped) steps
-        accPecPlayHA=PEC_buffer[PECindex2]-128;
-        if (accPecPlayHA>StepsPerSecond) accPecPlayHA=StepsPerSecond; if (accPecPlayHA<-StepsPerSecond) accPecPlayHA=-StepsPerSecond;
-
-        pecTimerRateHA=accPecPlayHA/StepsPerSecond;
-
-        // And run the PEC rate at another +/-5x to cover any corrections that should have been applied up to this point in the worm cycle
-        // when just (re)starting PEC not worried about how smooth the play back is here, this will be over in a moment just run fast to get there 
-        if (PECstartDelta>0) { PECstartDelta-=30; pecTimerRateHA+=5; }
-        
-        if (accPecPlayHA==0) 
-          PEC_Skip=SecondsPerWormRotation+1;
-        else
-          PEC_Skip=(long)StepsPerSecond/abs(accPecPlayHA);
-        PEC_Timer=0;
-      }
-    }
-  } else {
-    // give up recording if we stop tracking at the sidereal rate
-    if (PECstatus==RecordPEC)  { PECstatus=IgnorePEC; PEC_Skip=0; } // don't zero the PEC offset, we don't want things moving and it really doesn't matter 
-    // get ready to re-index when tracking comes back
-    if (PECstatus==PlayPEC)  { PECstatus=ReadyPlayPEC; PEC_Skip=0; cli(); PEC_HA=0; sei(); } 
-  }
+  
+  // PERIODIC ERROR CORRECTION -------------------------------------------------------------------------
+  if ((trackingState==TrackingSidereal) && (!((guideDirHA || guideDirDec) && (currentGuideRate>1)))) { 
+    // only active while sidereal tracking with a guide rate that makes sense
+    Pec();
+  } else disablePec();
 
   // SIDEREAL TRACKING ---------------------------------------------------------------------------------
   cli(); long tempLst=lst; sei();
   if (tempLst!=siderealTimer) {
     siderealTimer=tempLst;
     
-    if ((trackingState==TrackingSidereal) && !(guideDirHA && (currentGuideRate>1))) { // only active while sidereal tracking with a guide rate that makes sense
+    // only active while sidereal tracking with a guide rate that makes sense
+    if ((trackingState==TrackingSidereal) && !(guideDirHA && (currentGuideRate>1))) {
       if (((tempLst%st==0) && ((tempLst%sk!=0) || ((tempLst%st1==0) && (tempLst%sk1!=0) )))) {
           // PEC_Timer starts at zero again every second, PEC_Skip will control the rate and will trigger a +/- step every PEC_Skip steps while tracking 
           PEC_Timer++;
@@ -1091,19 +891,18 @@ void loop() {
               if (accPecPlayHA<0) { ip=-1; accPecPlayHA++; } else if (accPecPlayHA>0) { ip=1; accPecPlayHA--; } } }
   
           // apply the Tracking, Guiding, and PEC
-          cli(); targetHA=targetHA+1+ig; PEC_HA+=ip; targetHA1=targetHA+PEC_HA; sei();
+          cli(); targetHA=targetHA+1+ig; PEC_HA+=ip; sei();
       }
     }
 
     if (trackingState==TrackingMoveTo) {
       // keeps the target where it's supposed to be while doing gotos
       if ((lastTrackingState==TrackingSidereal) && ((tempLst%st==0) && ((tempLst%sk!=0) || ((tempLst%st1==0) && (tempLst%sk1!=0) )))) { cli(); targetHA++; sei(); origTargetHA++; }
+      moveTo();
     }
   }
-
-  if (trackingState==TrackingMoveTo) moveTo();
-
-  // Housekeeping --------------------------------------------------------------------------------------
+  
+  // HOUSEKEEPING --------------------------------------------------------------------------------------
   // timer... falls in once a second, keeps the universal time clock ticking,
   // handles PPS GPS signal processing, watches safety limits, adjusts tracking rate for refraction
   unsigned long m=millis(); 
@@ -1122,7 +921,7 @@ void loop() {
     // update clock
     cli();
     PPSrateRatio=((double)1000000/(double)(PPSavgMicroS));
-    Timer1SetRate(siderealInterval/300);
+    SetSiderealClockRate(siderealInterval);
     if (micros()-PPSlastMicroS>2000000) PPSsynced=false;
     sei();
     #endif
@@ -1148,8 +947,9 @@ void loop() {
     }
     
   } else {
-  // Command processing --------------------------------------------------------------------------------
+  // COMMAND PROCESSING --------------------------------------------------------------------------------
   // acts on commands recieved across Serial0 and Serial1 interfaces
     processCommands();
   }
 }
+
