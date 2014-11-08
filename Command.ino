@@ -701,7 +701,7 @@ the pdCor  term is 1 in HA
             } else {
               siderealInterval=HzCf*((60.0/f)*60.0);
               EEPROM_writeQuad(EE_siderealInterval,(byte*)&siderealInterval);
-              Timer1SetRate(siderealInterval/300);
+              SetSiderealClockRate(siderealInterval);
             }
           } else commandError=true;
         } else commandError=true;
@@ -762,7 +762,7 @@ the pdCor  term is 1 in HA
        // Only burn the new rate if changing the custom tracking rate 
        if ((customRateActive) && (!commandError) && ((command[1]=='+') || (command[1]=='-'))) EEPROM_writeQuad(EE_siderealInterval,(byte*)&siderealInterval);
 
-       Timer1SetRate(siderealInterval/300);
+       SetSiderealClockRate(siderealInterval);
        cli(); SiderealRate=siderealInterval/StepsPerSecond; sei();
      } else
      
