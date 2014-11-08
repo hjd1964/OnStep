@@ -1,0 +1,168 @@
+// PEC ---------------------------------------------------------------------------------------------
+// functions to handle periodic error correction
+
+void Pec() {
+  // PEC is only active when we're tracking at the sidereal rate with a guide rate that makes sense
+
+  // keep track of our current step position, and when the step position on the worm wraps during playback
+  lastWormRotationStepPos = wormRotationStepPos;
+  cli(); long posPEC=targetHA; sei();
+  
+  // where we're at (HA), must always be positive, so add 360 degrees (in steps)
+  posPEC=posPEC+StepsPerDegreeHA*360;
+  wormRotationStepPos =(posPEC-PECindex_record) % StepsPerWormRotation;
+  
+  // handle playing back and recording PEC
+  if (PECstatus!=IgnorePEC) {
+    // start playing PEC
+    if (PECstatus==ReadyPlayPEC) {
+      // approximate, might be off by nearly a second, this makes sure that the index is at the start of a second before resuming play
+      if ((long)fmod(wormRotationStepPos,StepsPerSecond)==0) {
+        PECstatus=PlayPEC;
+        PECindex=wormRotationStepPos/StepsPerSecond; 
+        // sum corrections to this point
+        long m=0; for (int l=0; l<PECindex; l++) {
+          long l1=l-PECindex_sense; if (l1<0) l1+=SecondsPerWormRotation;
+          m+=PEC_buffer[l1]-128; 
+        }
+        // move to the corrected location, this might take a few seconds and can be abrupt (after goto's or when unparking)
+        cli(); PEC_HA = m; sei(); 
+        PECstartDelta=abs(m)/StepsPerSecond; // in units of seconds, ahead or behind, all that matters is how long the rate has to be increased for
+
+        // playback starts now
+        cli(); PecSiderealTimer = lst; sei();
+      }
+    }
+
+    // get ready to start recording
+    if (PECstatus==ReadyRecordPEC) {
+      // zero index counter
+      PECindex_record = posPEC % StepsPerWormRotation;
+      wormRotationStepPos = (posPEC-PECindex_record) % StepsPerWormRotation;
+      lastWormRotationStepPos=1; // force recording to start now
+    }
+
+    // at the start of a worm cycle (if wormRotationStepPos rolled over)
+    // this only works because targetHA can't move backward while tracking and guiding at +/- 1x sidereal
+    // it also works while <=1X guiding and playing PEC because the PEC corrections don't get counted in the targetHA location
+    if (lastWormRotationStepPos>wormRotationStepPos) {
+
+      // start recording PEC
+      if (PECstatus==ReadyRecordPEC) {
+        PECstatus=RecordPEC;
+        PECrecorded=false;    
+      } else
+      // and once the PEC data is all stored, indicate that it's valid and start using it
+      if (PECstatus==RecordPEC) {
+        PECstatus=PlayPEC;
+        PECrecorded=true;
+        PECfirstRecord=false;
+#ifdef PEC_CLEANUP_ON
+        // the number of steps added should equal the number of steps subtracted (from the cycle)
+        // first, determine how far we've moved ahead or backward in steps
+        long sum_pec=0; for (int scc=0; scc<SecondsPerWormRotation; scc++) { sum_pec+=(int)PEC_buffer[scc]-128; }
+
+        // this is the correction coefficient for a given location in the sequence
+        double Ccf = (double)sum_pec/(double)SecondsPerWormRotation;
+
+        // now, apply the correction to the sequence to make the PEC adjustments null out
+        // this process was simulated in a spreadsheet and the roundoff error might leave us at +/- a step which is tacked on at the beginning
+        long lp2=0; sum_pec=0; 
+        for (int scc=0; scc<SecondsPerWormRotation; scc++) {
+          // the correction, "now"
+          long lp1=lround(-scc*Ccf);
+          
+          // if the correction increases or decreases then add or subtract that many steps
+          PEC_buffer[scc]=(int)PEC_buffer[scc]+(lp1-lp2);
+
+          // sum the values for a final adjustment, if necessary
+          sum_pec+=(int)PEC_buffer[scc]-128;     
+          lp2=lp1;
+        }
+        PEC_buffer[0]-=sum_pec;
+
+        // a reality check, make sure the buffer data looks good, if not forget it
+        if ((sum_pec>2) || (sum_pec<-2)) { PECrecorded=false; PECstatus=IgnorePEC; }
+#endif
+      }
+      
+      // zero the accululators, the index timer, also the index
+      accPecGuideHA = 0;
+      accPecPlayHA = 0;
+      cli(); PecSiderealTimer = lst-1; sei();  // keeps PECindex from advancing immediately
+      PECindex = 0; lastPECindex = -1;         // starts record/playback now
+    #ifdef PEC_SENSE_ON
+      if (next_PECindex_sense>=0) { PECindex=next_PECindex_sense; next_PECindex_sense=-1; }
+    #endif
+    }
+
+    // Increment the PEC index once a second and make it go back to zero when the worm finishes a rotation
+    cli(); long t=lst; sei(); if (t-PecSiderealTimer>99) { PecSiderealTimer=t; PECindex=(PECindex+1)%SecondsPerWormRotation; }
+    PECindex1=(PECindex-PECindex_sense); if (PECindex1<0) PECindex1+=SecondsPerWormRotation;
+
+  #ifdef PEC_SENSE_ON
+    // if the HALL sensor (etc.) has just arrived at the index and it's been more than 60 seconds since
+    // it was there before, set this as the next start of PEC playback/recording
+    cli();
+    if ((digitalRead(PecPin)==HIGH) && (lst-PECtime_lastSense>6000)) {
+      PECtime_lastSense=lst;
+      next_PECindex_sense=PECindex;
+    }
+    sei();
+  #endif
+
+    accPecGuideHA+=guideHA;
+  } else {
+    // if we're ignoring PEC, zero the offset and keep it that way
+    cli(); PEC_HA=0; sei(); 
+    PEC_Skip = 0;
+    // no change to tracking rate
+    pecTimerRateHA=0;
+  }
+
+  // falls in whenever the PECindex changes, which is once a sidereal second
+  if (PECindex1!=lastPECindex) {
+    lastPECindex=PECindex1;
+
+    // assume no change to tracking rate
+    pecTimerRateHA=0;
+
+    if (PECstatus==RecordPEC) {
+      // save the correction 1:2 weighted average
+      int l=accPecGuideHA;
+      if (l<-StepsPerSecond) l=-StepsPerSecond; if (l>StepsPerSecond) l=StepsPerSecond;   // +/-1 sidereal rate range for corrections
+      if (!PECfirstRecord) l=(l+((int)PEC_buffer[PECindex1]-128)*2)/3; 
+      PEC_buffer[PECindex1]=l+128;  // save the correction
+      accPecGuideHA=0;              // and clear the accumulator
+    }
+    
+    if (PECstatus==PlayPEC) {
+      // PECindex2 adjusts one second before the value was recorded, an estimate of the latency between image acquisition and response
+      // if sending values directly to OnStep from PECprep, etc. be sure to account for this
+      int PECindex2=PECindex1-1; if (PECindex2<0) PECindex2+=SecondsPerWormRotation;
+      // accPecPlayHA play back speed can be +/-1 of sidereal
+      // PEC_Skip is the number of ticks between the added (or skipped) steps
+      accPecPlayHA=PEC_buffer[PECindex2]-128;
+      if (accPecPlayHA>StepsPerSecond) accPecPlayHA=StepsPerSecond; if (accPecPlayHA<-StepsPerSecond) accPecPlayHA=-StepsPerSecond;
+
+      pecTimerRateHA=accPecPlayHA/StepsPerSecond;
+
+      // And run the PEC rate at another +/-5x to cover any corrections that should have been applied up to this point in the worm cycle
+      // when just (re)starting PEC not worried about how smooth the play back is here, this will be over in a moment just run fast to get there 
+      if (PECstartDelta>0) { PECstartDelta-=30; pecTimerRateHA+=5; }
+      
+      if (accPecPlayHA==0) 
+        PEC_Skip=SecondsPerWormRotation+1;
+      else
+        PEC_Skip=(long)StepsPerSecond/abs(accPecPlayHA);
+      PEC_Timer=0;
+    }
+  }
+}
+ 
+void disablePec() {
+  // give up recording if we stop tracking at the sidereal rate
+  if (PECstatus==RecordPEC)  { PECstatus=IgnorePEC; PEC_Skip=0; } // don't zero the PEC offset, we don't want things moving and it really doesn't matter 
+  // get ready to re-index when tracking comes back
+  if (PECstatus==PlayPEC)  { PECstatus=ReadyPlayPEC; PEC_Skip=0; cli(); PEC_HA=0; sei(); } 
+}
