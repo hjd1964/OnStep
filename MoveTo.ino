@@ -1,7 +1,6 @@
 // -----------------------------------------------------------------------------------
 // functions to move the mount to the a new position
 
-
 // moves the mount
 void moveTo() {
   // HA goes from +90...0..-90
@@ -87,26 +86,26 @@ void moveTo() {
   // First, for Right Ascension
   unsigned long temp;
   if (distStartHA>distDestHA) {
-    temp=(StepsForRateChange/sqrt(distDestHA));       // slow down (temp gets bigger)
+    temp=(StepsForRateChange/isqrt32(distDestHA));    // slow down (temp gets bigger)
 //  if ((temp<100) && (temp>=10))  temp=101;          // exclude a range of speeds
   } else {
-    temp=(StepsForRateChange/sqrt(distStartHA));      // speed up (temp gets smaller)
+    temp=(StepsForRateChange/isqrt32(distStartHA));   // speed up (temp gets smaller)
 //  if ((temp<100) && (temp>=10))  temp=9;            // exclude a range of speeds
   }
-  if (temp<MaxRate*16)     temp=MaxRate*16;           // fastest rate
-  if (temp>SiderealRate/4) temp=SiderealRate/4;       // slowest rate (4x sidereal)
+  if (temp<MaxRate*16) temp=MaxRate*16;               // fastest rate
+  if (temp>TakeupRate) temp=TakeupRate;               // slowest rate (4x sidereal)
   cli(); timerRateHA=temp; sei();
 
   // Now, for Declination
   if (distStartDec>distDestDec) {
-      temp=(StepsForRateChange/sqrt(distDestDec));    // slow down
+      temp=(StepsForRateChange/isqrt32(distDestDec)); // slow down
 //    if ((temp<100) && (temp>=10))  temp=101;        // exclude a range of speeds
     } else {
-      temp=(StepsForRateChange/sqrt(distStartDec));   // speed up
+      temp=(StepsForRateChange/isqrt32(distStartDec));// speed up
 //    if ((temp<100) && (temp>=10))  temp=9;          // exclude a range of speeds
     }
-  if (temp<MaxRate*16)     temp=MaxRate*16;           // fastest rate
-  if (temp>SiderealRate/4) temp=SiderealRate/4;       // slowest rate (4x sidereal)
+  if (temp<MaxRate*16) temp=MaxRate*16;               // fastest rate
+  if (temp>TakeupRate) temp=TakeupRate;               // slowest rate (4x sidereal)
   cli(); timerRateDec=temp; sei();
 
   if ((distDestHA<=2) && (distDestDec<=2)) { 
@@ -155,22 +154,25 @@ void moveTo() {
     } else {
       // restore last tracking state
       trackingState=lastTrackingState;
+      SetSiderealClockRate(siderealInterval);
 
-      cli(); 
+      cli();
       timerRateHA  =SiderealRate;
       timerRateDec =SiderealRate;
       sei();
       
       // other special gotos: for parking the mount and homeing the mount
       if (parkStatus==Parking) {
+
         // give the drives a moment to settle in
         delay(3000);
+
         if ((posHA==targetHA) && (posDec==targetDec)) {
           
           if (parkClearBacklash()) {
             // success, we're parked
             parkStatus=Parked; EEPROM.write(EE_parkStatus,parkStatus);
-            
+
             // just store the indexes of our pointing model
             EEPROM_writeQuad(EE_IH,(byte*)&IH);
             EEPROM_writeQuad(EE_ID,(byte*)&ID);
@@ -178,6 +180,7 @@ void moveTo() {
             // disable the stepper drivers
             digitalWrite(HA_EN,HIGH);
             digitalWrite(DE_EN,HIGH);
+
 
           } else parkStatus=ParkFailed;
       } else parkStatus=ParkFailed;
@@ -192,3 +195,19 @@ void moveTo() {
   }
 }
 
+// fast integer square root routine, Integer Square Roots by Jack W. Crenshaw
+uint32_t isqrt32 (uint32_t n) {
+    register uint32_t root=0, remainder, place= 0x40000000;
+    remainder = n;
+
+    while (place > remainder) place = place >> 2;
+    while (place) {
+        if (remainder >= root + place) {
+            remainder = remainder - root - place;
+            root = root + (place << 1);
+        }
+        root = root >> 1;
+        place = place >> 2;
+    }
+    return root;
+}
