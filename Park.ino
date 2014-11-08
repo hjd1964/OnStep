@@ -11,7 +11,7 @@ boolean setPark() {
     // turn off PEC for a moment
     cli(); long l = PEC_HA; PEC_HA=0; sei();
     
-    // SiderealRate (x20 speed), ignore rate ratios - we're working in steps
+    // SiderealRate (x20 speed)
     cli();
     long LasttimerRateHA =timerRateHA;
     long LasttimerRateDec=timerRateDec;
@@ -26,7 +26,7 @@ boolean setPark() {
     // per Allegro data-sheet for A4983, 1/2 step takes 8 steps to cycle home, 1/4 = 16,
     // ... 1/8 = 32 and 1/16 = 64 (*2 to handle up to 32 uStep drivers)
     cli();
-    targetHA =(posHA / 128L) * 128L;
+    targetHA=(posHA / 128L) * 128L;
     targetDec=(posDec / 128L) * 128L;
     sei();
 
@@ -81,16 +81,17 @@ boolean saveAlignModel() {
 // takes up backlash and returns to the current position
 boolean parkClearBacklash() {
 
-  // SiderealRate (x10 speed), ignore rate ratios for the moment - we're working in steps
+  // SiderealRate (x10 speed)
   cli();
   long LasttimerRateHA =timerRateHA;
   long LasttimerRateDec=timerRateDec;
-  timerRateHA =SiderealRate/10L;
-  timerRateDec=SiderealRate/10L;
+  timerRateHA =timerRateBacklashHA;
+  timerRateDec=timerRateBacklashDec;
   sei();
 
   // figure out how long we'll have to wait at 10x speed for the backlash to clear (+10%)
-  long t; if (backlashHA>backlashDec) t=(((long)backlashHA*110L)/(long)StepsPerSecond); else t=(((long)backlashDec*110L)/(long)StepsPerSecond); 
+  long t; if (backlashHA>backlashDec) t=((long)backlashHA*1100)/(long)StepsPerSecond; else t=((long)backlashDec*1100)/(long)StepsPerSecond;
+  t=t/BacklashTakeupRate;
 
   // start by moving fully into the backlash
   cli();
@@ -104,7 +105,7 @@ boolean parkClearBacklash() {
   targetHA =targetHA  - backlashHA;
   targetDec=targetDec - backlashDec;
   sei();
-  delay(t);
+  delay(t*2); // if sitting on the opposite side of the backlash, it might take twice as long to clear it
   
   // move at the previous speed
   cli();
@@ -164,7 +165,7 @@ boolean unpark() {
         digitalWrite(HA_EN,LOW);
         digitalWrite(DE_EN,LOW);
         delay(10);
-        
+
         // get our position
         cli();
         EEPROM_readQuad(EE_posHA,(byte*)&posHA);   targetHA=posHA;
@@ -186,7 +187,7 @@ boolean unpark() {
         // update our status, we're not parked anymore
         parkStatus=NotParked;
         EEPROM.write(EE_parkStatus,parkStatus);
-  
+          
         // start tracking the sky
         trackingState=TrackingSidereal;
         
@@ -196,3 +197,5 @@ boolean unpark() {
   };
   return false;
 }
+
+
