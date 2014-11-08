@@ -121,7 +121,7 @@
  * 11-06-2014          1.0b6             Changes to Timer.ino improve performance, lower timing jitter.  Improvements/fixes to guiding function.  Added PPS lock status to command :GU#.
  *                                       Moved configuration to a header file, cleaned up source code a bit.
  * 11-08-2014          1.0b7             ParkClearBacklash now uses the BacklashTakeupRate, doubled takeup time to fix bug.  Guide function now only "moves" once backlash takeup is finished.
- *                                       Now switching SiderealClock down to a slightly less accurate /8 rate during gotos to save MPU cycles.  Adjusted PEC to fall out of play mode when
+ *                                       Now switching SiderealClock down to a slightly less accurate /8 rate during gotos to save MPU cycles.  Adjusted PEC to temporarily fall out of play mode when
  *                                       guiding at >1x sidereal.  Cleaned up source code a bit more.
  *
  *
