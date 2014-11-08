@@ -221,6 +221,7 @@ byte goTo(long thisTargetHA, long thisTargetDec, long altTargetHA, long altTarge
 
   lastTrackingState=trackingState;
   trackingState=TrackingMoveTo;
+  SetSiderealClockRate(siderealInterval);
 
   cli();
   startHA =posHA;
@@ -233,7 +234,6 @@ byte goTo(long thisTargetHA, long thisTargetDec, long altTargetHA, long altTarge
   timerRateDec=SiderealRate;
   PEC_HA=0; 
   sei();
-
   PEC_Skip = 0;
 
   return 0;
