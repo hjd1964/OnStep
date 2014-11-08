@@ -38,6 +38,10 @@ void Timer1SetRate(long rate) {
 #endif
 }
 
+void SetSiderealClockRate(long Interval) {
+  if (trackingState==TrackingMoveTo) Timer1SetRate(Interval/100);  else  Timer1SetRate(Interval/300);
+}
+
 // set timer3 to rate (in microseconds*16)
 volatile uint32_t nextHArate;
 void Timer3SetRate(long rate) {
@@ -76,12 +80,10 @@ volatile boolean gotoRateDec=false;
 volatile byte cnt = 0;
 ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
 {
-  // run 1/3 of the time at 3x the rate
-  cnt++; if (cnt%3!=0) return;  
+  // run 1/3 of the time at 3x the rate, unless a goto is happening
+  if (trackingState!=TrackingMoveTo) { cnt++; if (cnt%3!=0) return; }
   lst++;
-  
-  cli(); targetHA1=targetHA+PEC_HA; sei();
-   
+
   if (trackingState==TrackingSidereal) {
     
     // automatic rate calculation HA
@@ -92,7 +94,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     if (runTimerRateHA!=calculatedTimerRateHA) { timerRateHA=calculatedTimerRateHA; runTimerRateHA=calculatedTimerRateHA; }
 
     // dynamic rate adjust
-    double x=fabs(targetHA1-posHA); x=x*x;
+    double x=fabs(targetHA-posHA); x=x*x;
     if (x>0) {
       if (x>160.0) x=160.0; x=50000.00-x; x=x/50000.0;
       timerRateHA=calculatedTimerRateHA*x; // up to 0.32% faster (or as little as 0.002%)
@@ -123,25 +125,22 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
   long thisTimerRateDec=timerRateDec;
   #endif
   
+  // override rate during backlash compensation
+  if (inBacklashHA) { thisTimerRateHA=timerRateBacklashHA; wasInBacklashHA=true; } 
+  // override rate during backlash compensation
+  if (inBacklashDec) { thisTimerRateDec=timerRateBacklashDec; wasInBacklashDec=true; }
+
   if (trackingState==TrackingSidereal) {
-    // override rate during backlash compensation
-    if (inBacklashHA) { thisTimerRateHA=timerRateBacklashHA; wasInBacklashHA=true; } 
-    // override rate during backlash compensation
-    if (inBacklashDec) { thisTimerRateDec=timerRateBacklashDec; wasInBacklashDec=true; }
     // travel through the backlash is done, but we weren't following the target while it was happening!
     // so now get us back to near where we need to be
     if ((!inBacklashHA) && (wasInBacklashHA) && (!guideDirHA)) {
-      if (abs(posHA-(targetHA+PEC_HA))>2) thisTimerRateHA=SiderealRate/4; else wasInBacklashHA=false;
+      if (abs(posHA-targetHA)>2) thisTimerRateHA=TakeupRate; else wasInBacklashHA=false;
     }
     if ((!inBacklashDec) && (wasInBacklashDec) && (!guideDirDec)) {
-      if (abs(posDec-targetDec)>2) thisTimerRateDec=SiderealRate/4; else wasInBacklashDec=false;
+      if (abs(posDec-targetDec)>2) thisTimerRateDec=TakeupRate; else wasInBacklashDec=false;
     }
   }
   if (trackingState==TrackingMoveTo) {
-    // override rate during backlash compensation
-    if (inBacklashHA) { thisTimerRateHA=timerRateBacklashHA; wasInBacklashHA=true; } 
-    // override rate during backlash compensation
-    if (inBacklashDec) { thisTimerRateDec=timerRateBacklashDec; wasInBacklashDec=true; }
       
     // trigger Goto step mode when faster than the fastest guide rate
     #if defined(DE_MODE) && defined(DE_MODE_GOTO)
@@ -161,7 +160,6 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     Timer4SetRate(thisTimerRateDec/PPSrateRatio);
     isrTimerRateDec=thisTimerRateDec;
   }
- 
 }
 
 #if defined(HA_MODE) && defined(HA_MODE_GOTO)
@@ -210,8 +208,8 @@ ISR(TIMER3_COMPA_vect)
 #endif
 
   // Guessing about 4+4+1+ 4+4+1+ 1+ 2+1+2+ 13=37 clocks between here and the step signal which is 2.3uS
-  if (posHA!=targetHA1) { // Move the RA stepper to the target
-    if (posHA<targetHA1) dirHA=1; else dirHA=0; // Direction control
+  if (posHA!=targetHA+PEC_HA) { // Move the RA stepper to the target
+    if (posHA<targetHA+PEC_HA) dirHA=1; else dirHA=0; // Direction control
     #ifdef REVERSE_HA_ON
       if (HADir==dirHA) CLR(HADirPORT, HADirBit); else SET(HADirPORT, HADirBit); // Set direction, HADir default LOW (=0, for my wiring.)  Needs >=0.65uS before/after rising step signal (DRV8825 or A4988).
     #else                                                                        // Guessing about 1+2+1+4+4+1=13 clocks between here and the step signal which is 0.81uS
@@ -219,9 +217,9 @@ ISR(TIMER3_COMPA_vect)
     #endif
     // telescope moves WEST with the sky, blHA is the amount of EAST backlash
     if (dirHA==1) {
-     if (blHA<backlashHA) { blHA++; inBacklashHA=true; } else { inBacklashHA=false; posHA+=stepHA; }
+      if (blHA<backlashHA) { blHA++; inBacklashHA=true; } else { inBacklashHA=false; posHA+=stepHA; }
     } else {
-      if (blHA>0)         { blHA--; inBacklashHA=true; } else { inBacklashHA=false; posHA-=stepHA; }
+      if (blHA>0)          { blHA--; inBacklashHA=true; } else { inBacklashHA=false; posHA-=stepHA; }
     }
     SET(HAStepPORT, HAStepBit);
   }
@@ -231,8 +229,8 @@ ISR(TIMER3_COMPA_vect)
   // Step signal doesn't happen until the next ISR call, so loads of time settling
   if (HAclr) {
     CLR(HAStepPORT,  HAStepBit);
-    if (posHA!=targetHA1) { // Move the RA stepper to the target
-      if (posHA<targetHA1) dirHA=1; else dirHA=0; // Direction control
+    if (posHA!=targetHA+PEC_HA) { // Move the RA stepper to the target
+      if (posHA<targetHA+PEC_HA) dirHA=1; else dirHA=0; // Direction control
       #ifdef REVERSE_HA_ON
         if (HADir==dirHA) CLR(HADirPORT, HADirBit); else SET(HADirPORT, HADirBit); // Set direction, HADir default LOW (=0, for my wiring.)  Needs >=0.65uS before/after rising step signal (DRV8825 or A4988).
       #else
