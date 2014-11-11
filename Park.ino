@@ -81,7 +81,7 @@ boolean saveAlignModel() {
 // takes up backlash and returns to the current position
 boolean parkClearBacklash() {
 
-  // SiderealRate (x10 speed)
+  // backlash takeup rate
   cli();
   long LasttimerRateHA =timerRateHA;
   long LasttimerRateDec=timerRateDec;
@@ -89,8 +89,8 @@ boolean parkClearBacklash() {
   timerRateDec=timerRateBacklashDec;
   sei();
 
-  // figure out how long we'll have to wait at 10x speed for the backlash to clear (+10%)
-  long t; if (backlashHA>backlashDec) t=((long)backlashHA*1100)/(long)StepsPerSecond; else t=((long)backlashDec*1100)/(long)StepsPerSecond;
+  // figure out how long we'll have to wait for the backlash to clear (+50%)
+  long t; if (backlashHA>backlashDec) t=((long)backlashHA*1500)/(long)StepsPerSecond; else t=((long)backlashDec*1500)/(long)StepsPerSecond;
   t=t/BacklashTakeupRate;
 
   // start by moving fully into the backlash
