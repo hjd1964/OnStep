@@ -45,8 +45,9 @@
 
 // ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
 #define MaxRate                   96 // this is the minimum number of micro-seconds between micro-steps
-                                     // minimum (fastest goto) is around 16 (Teensy3.1) or 32 (Mega2560), default is 96, higher is ok
+                                     // minimum* (fastest goto) is around 16 (Teensy3.1) or 32 (Mega2560), default is 96, higher is ok
                                      // too low and OnStep communicates slowly and/or freezes as the motor timers use up all the MCU time
+                                     // * = minimum can be lower, when both HA & DE_MODE_GOTO are used by HA/DE_STEP_GOTO times.
                                      
 #define StepsForRateChange  200000.0 // number of steps during acceleration and de-acceleration: higher values=longer acceleration/de-acceleration
                                      // for the most part this doesn't need to be changed, but adjust when needed
@@ -59,12 +60,12 @@
                                      // for my mounts both RA and Dec axis have the same gear train
 #define StepsPerDegreeHA      19200L // calculated as    :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
                                      // Takahashi EM10b  :  48            * 16          * 50 * (40/32)    *  144/360              = 19200
-                                     // Losmandy G11     :  48            * 16          * 15              *  360/360              = 11520
+                                     // Losmandy G11     :  400           * 32          * 1               *  360/360              = 12800
 #define StepsPerDegreeDec     19200L // calculated as    :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
                                      // Takahashi EM10b  :  48            * 16          * 50 * (40/32)    *  144/360              = 19200
-                                     // Losmandy G11     :  48            * 16          * 15              *  360/360              = 11520
+                                     // Losmandy G11     :  400           * 32          * 1               *  360/360              = 12800
                                      // the EM10b has two spur gears that drive the RA/Dec worms, they are 60 tooth and 48 tooth gears
-                                     // for an 1.25x reduction in addition to the 20:1 gear heads on the steppers for a 25:1 final ratio
+                                     // for an 1.25x reduction in addition to the 50:1 gear heads on the steppers for a 62.5:1 final ratio
                                      // before the worm/wheels 144:1
                                      
 #define StepsPerSecond          80.0 // the steps per second sidereal rate = (19200/3600)*15 = 80 - OnStep can handle between 12 and 100 steps/second
@@ -99,7 +100,7 @@
 // this group is for advanced configuration and is not well tested yet, leave it alone or just use the HA_MODE and DEC_MODE values if you didn't hard wire the micro-stepping mode
 // DRV8825: 5=32x, 4=16x, 3=8x, 2=4x, 1=2x, 0=1x
 #define HA_MODE_OFF                  // programs the HA uStep mode M0/M1/M2, optional and default _OFF. Other values 0 to 7 (0xb000 to 111): for example "#define HA_MODE 4"
-#define HA_MODE_GOTO_OFF             // programs the HA uStep mode M0/M1/M2, used during gotos, optional and default _OFF. Other values 0 to 7 (0xb000 to 111): for example "#define HA_MODE 4"
+#define HA_MODE_GOTO_OFF             // programs the HA uStep mode M0/M1/M2, used during gotos, optional and default _OFF. Other values 0 to 7 (0xb000 to 111): for example "#define HA_MODE_GOTO 4"
 #define HA_STEP_GOTO 1               // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
 #define DE_MODE_OFF                  // programs the Dec uStep mode M0/M1/M2, optional and default _OFF. Other values 0 to 7 (0xb000 to 111)
 #define DE_MODE_GOTO_OFF             // programs the Dec uStep mode M0/M1/M2, used during gotos, optional and default _OFF. Other values 0 to 7 (0xb000 to 111)
