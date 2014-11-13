@@ -21,6 +21,8 @@
 #define STATUS_LED2_PINS_OFF
 // optional +5V on pins 5 and 11 to Pololu or other stepper drivers without on-board 5V voltage regulators, default=OFF
 #define POWER_SUPPLY_PINS_OFF
+// optional stepper driver Enable support is always on (no setting,) just wire Enable to Pins 25 (HA) and 29 (Dec) and OnStep will pull these 
+// pins High to disable stepper drivers on startup and when Parked. An Align or UnPark will enable the drivers.
 
 // enables goTo speed equalization for differing right ascension and declination StepsPerDegreeHA/Dec, default=OFF (limited testing done)
 #define DEC_RATIO_OFF
@@ -98,6 +100,7 @@
                                      // fork/yolk mount with meridian flips turned off by setting the minutesPastMeridian values to cover the whole sky)
 
 // this group is for advanced configuration and is not well tested yet, leave it alone or just use the HA_MODE and DEC_MODE values if you didn't hard wire the micro-stepping mode
+// M0, M1, and M2 are on Pins 22,23, and 24 for RA.  M0, M1, M2 are on Pins 26,27,28 for Dec.
 // DRV8825: 5=32x, 4=16x, 3=8x, 2=4x, 1=2x, 0=1x
 #define HA_MODE_OFF                  // programs the HA uStep mode M0/M1/M2, optional and default _OFF. Other values 0 to 7 (0xb000 to 111): for example "#define HA_MODE 4"
 #define HA_MODE_GOTO_OFF             // programs the HA uStep mode M0/M1/M2, used during gotos, optional and default _OFF. Other values 0 to 7 (0xb000 to 111): for example "#define HA_MODE_GOTO 4"
