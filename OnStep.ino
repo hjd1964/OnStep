@@ -543,9 +543,9 @@ long    wormRotationStepPos = 0;
 long    PECindex         = 0;
 long    PECindex1        = 0;
 long    lastPECindex     = -1;
-long    PECtime_lastSense   =0;      // time since last PEC index was sensed
-unsigned long PECindex_sense=0;      // position of active PEC index sensed
-unsigned long next_PECindex_sense=-1;// position of next PEC index sensed
+long    PECtime_lastSense= 0;        // time since last PEC index was sensed
+long    PECindex_sense   = 0;        // position of active PEC index sensed
+long    next_PECindex_sense=-1;      // position of next PEC index sensed
 
 // backlash control
 volatile int backlashHA   = 0;
