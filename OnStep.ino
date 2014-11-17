@@ -330,12 +330,14 @@ int    maxAlt;                                    // the maximum altitude, in de
 #define HA_M0      22      // Pin 22 (Microstep Mode 0)
 #define HA_M1      23      // Pin 23 (Microstep Mode 1)
 #define HA_M2      24      // Pin 24 (Microstep Mode 2)
-#define HA_EN      25      // Pin 25 (Enabled when HIGH)
+#define HA_EN      25      // Pin 25 (Enabled when LOW)
+#define HA_FAULT   26      // Pin 26 (Fault if LOW)
 
-#define DE_M0      26      // Pin 26 (Microstep Mode 0)
-#define DE_M1      27      // Pin 27 (Microstep Mode 1)
-#define DE_M2      28      // Pin 28 (Microstep Mode 2)
-#define DE_EN      29      // Pin 29 (Enabled when HIGH)
+#define DE_M0      27      // Pin 27 (Microstep Mode 0)
+#define DE_M1      28      // Pin 28 (Microstep Mode 1)
+#define DE_M2      29      // Pin 29 (Microstep Mode 2)
+#define DE_EN      30      // Pin 30 (Enabled when LOW)
+#define DE_FAULT   31      // Pin 31 (Fault if LOW)
 
 #define LEDposBit  5       // Pin 8
 #define LEDposPORT PORTH   //
@@ -371,12 +373,14 @@ int    maxAlt;                                    // the maximum altitude, in de
 #define HA_M0      13      // Pin 13 (Microstep Mode 0)
 #define HA_M1      14      // Pin 14 (Microstep Mode 1)
 #define HA_M2      15      // Pin 15 (Microstep Mode 2)
-#define HA_EN      16      // Pin 16 (Enabled when HIGH)
+#define HA_EN      16      // Pin 16 (Enabled when LOW)
+#define HA_FAULT   17      // Pin 17 (Fault if LOW)
 
-#define DE_M0      17      // Pin 17 (Microstep Mode 0)
-#define DE_M1      18      // Pin 18 (Microstep Mode 1)
-#define DE_M2      19      // Pin 19 (Microstep Mode 2)
-#define DE_EN      20      // Pin 20 (Enabled when HIGH)
+#define DE_M0      17      // Pin 18 (Microstep Mode 0)
+#define DE_M1      18      // Pin 19 (Microstep Mode 1)
+#define DE_M2      19      // Pin 20 (Microstep Mode 2)
+#define DE_EN      20      // Pin 21 (Enabled when LOW)
+#define DE_FAULT   21      // Pin 21 (Fault if LOW)
 
 #define LEDposBit  0       // Pin 8
 #define LEDposPORT PORTB   //
