@@ -178,10 +178,10 @@ the pdCor  term is 1 in HA
       } else
       
 //   $ - Set parameter
-//  :$BDdd# Set Dec Antibacklash
+//  :$BDddd# Set Dec Antibacklash
 //          Return: 0 on failure
 //                  1 on success
-//  :$BRdd# Set RA Antibacklash
+//  :$BRddd# Set RA Antibacklash
 //          Return: 0 on failure
 //                  1 on success
 //         Set the Backlash values.  Units are arc-seconds
@@ -189,11 +189,11 @@ the pdCor  term is 1 in HA
         if ((strlen(parameter)>1) && (strlen(parameter)<5)) {
           if ( (atoi2((char*)&parameter[1],&i)) && ((i>=0) && (i<=999))) { 
             if (parameter[0]=='D') {
-              backlashDec=(i*StepsPerDegreeDec)/3600;
+              backlashDec=(int)(((long)i*StepsPerDegreeDec)/3600L);
               EEPROM_writeInt(EE_backlashDec,backlashDec);
             } else
             if (parameter[0]=='R') {
-              backlashHA =(i*StepsPerDegreeHA)/3600;
+              backlashHA =(int)(((long)i*StepsPerDegreeHA)/3600L);
               EEPROM_writeInt(EE_backlashHA,backlashHA);
             } else commandError=true;
           } else commandError=true;
@@ -208,14 +208,16 @@ the pdCor  term is 1 in HA
 //          Get the Backlash values.  Units are arc-seconds
       if ((command[0]=='%') && (command[1]=='B')) {
         if (parameter[0]=='D') {
-            i=((backlashDec*3600)/StepsPerDegreeDec);
+            i=(int)(((long)backlashDec*3600L)/StepsPerDegreeDec);
+            if (i<0) i=0; if (i>999) i=999;
             sprintf(reply,"%03d",i);
-            quietReply=true; 
+            quietReply=true;
         } else
         if (parameter[0]=='R') {
-            i=((backlashHA*3600)/StepsPerDegreeHA);
+            i=(int)(((long)backlashHA*3600L)/StepsPerDegreeHA);
+            if (i<0) i=0; if (i>999) i=999;
             sprintf(reply,"%03d",i);
-            quietReply=true; 
+            quietReply=true;
         } else commandError=true;
       } else
       
