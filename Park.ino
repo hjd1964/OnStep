@@ -91,7 +91,7 @@ boolean parkClearBacklash() {
 
   // figure out how long we'll have to wait for the backlash to clear (+50%)
   long t; if (backlashHA>backlashDec) t=((long)backlashHA*1500)/(long)StepsPerSecond; else t=((long)backlashDec*1500)/(long)StepsPerSecond;
-  t=t/BacklashTakeupRate;
+  t=t/BacklashTakeupRate+250;
 
   // start by moving fully into the backlash
   cli();
