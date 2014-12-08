@@ -21,7 +21,7 @@
 #define STATUS_LED2_PINS_OFF
 // optional +5V on pins 5 and 11 to Pololu or other stepper drivers without on-board 5V voltage regulators, default=OFF
 #define POWER_SUPPLY_PINS_OFF
-// optional stepper driver Enable support is always on (no setting,) just wire Enable to Pins 25 (HA) and 30 (Dec) and OnStep will pull these pins High
+// optional stepper driver Enable support is always on (no setting,) just wire Enable to Pins 26 (HA) and 31 (Dec) and OnStep will pull these pins High
 // to disable stepper drivers on startup and when Parked. An Align or UnPark will enable the drivers.  (Pin assignments for the Mega2560, see OnStep.ino for the Teensy3.1)
 
 // enables goTo speed equalization for differing right ascension and declination StepsPerDegreeHA/Dec, default=OFF (limited testing done)
