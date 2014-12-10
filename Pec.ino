@@ -92,7 +92,7 @@ void Pec() {
       cli(); PecSiderealTimer = lst-1; sei();  // keeps PECindex from advancing immediately
       PECindex = 0; lastPECindex = -1;         // starts record/playback now
     #ifdef PEC_SENSE_ON
-      if (next_PECindex_sense>=0) { PECindex=next_PECindex_sense; next_PECindex_sense=-1; }
+      if (next_PECindex_sense>=0) { PECindex_sense=next_PECindex_sense; next_PECindex_sense=-1; }
     #endif
     }
 
@@ -104,7 +104,7 @@ void Pec() {
     // if the HALL sensor (etc.) has just arrived at the index and it's been more than 60 seconds since
     // it was there before, set this as the next start of PEC playback/recording
     cli();
-    if ((digitalRead(PecPin)==HIGH) && (lst-PECtime_lastSense>6000)) {
+    if ((digitalRead(PecPin)==HIGH) && (lst-PECtime_lastSense>600)) {
       PECtime_lastSense=lst;
       next_PECindex_sense=PECindex;
     }
