@@ -1064,7 +1064,8 @@ void setGuideRate(int g) {
   guideTimerRate=(double)guideRates[g]/15.0;
   
   cli();
-  if (g<=2) { amountGuideHA=1; } else  // 3.75, 7.5, 15
+  if (g<=GuideRate1x)
+            { amountGuideHA=1; } else  // 3.75, 7.5, 15
   if (g<=4) { amountGuideHA=4; } else  // 30,  60
   if (g<=6) { amountGuideHA=16; } else // 120, 240
   if (g<=8) { amountGuideHA=40; } else // 360, 600
