@@ -4,10 +4,10 @@
 /*
  * The Arduino Mega2560 and Teensy3.1 use USB for power and communication with the host computer
  *
- * the RA stepper driver plugs into Pins Gnd,13,12, and 11 (Teensy3.1 uses Gnd,12,11,10.)
- * the Dec driver plugs into pins 7, 6, 5, and 4 (7 is Gnd and the wiring is identical.)
- * RA : Gnd,13,12,11 = Gnd,Step,N/C,Direction (Teensy3.1 N/C,12,N/C,10)
- * Dec:   7, 6, 5, 4 = Gnd,Step,N/C,Direction (Teensy3.1   7, 6,N/C, 4)
+ * the RA stepper driver plugs into Pins Gnd,13,12, and 11 (Gnd,Step,N/C,Dir... Teensy3.1 uses Gnd,12,11,10.)
+ * the Dec driver plugs into pins 7, 6, 5, and 4 (OnStep pulls 7 LOW to simulate Gnd, and the wiring is identical.)
+ * RA : Gnd,13,12,11 = Gnd,Step,N/C,Direction (Teensy3.1 Gnd,12,N/C,10)
+ * Dec:   7, 6, 5, 4 = Gnd,Step,N/C,Direction (Teensy3.1 Gnd, 6,N/C, 4)
  *
  * The easiest option is to use two SparkFun Big Easy Drivers (BED) to control the 
  * bipolar stepper motors; with proper heat-sinks they can handle up to 2A per phase at 35V.
