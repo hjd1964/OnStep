@@ -1,6 +1,37 @@
 // -----------------------------------------------------------------------------------
 // Configuration
 
+/*
+ * The Arduino Mega2560 and Teensy3.1 use USB for power and communication with the host computer
+ *
+ * the RA stepper driver plugs into Pins Gnd,13,12, and 11 (Teensy3.1 omits Gnd and uses Pins 12,11,10.)
+ * the Dec driver plugs into pins 7, 6, 5, and 4 (7 is Gnd and the wiring is identical.)
+ * RA : Gnd,13,12,11 = Gnd,Step,N/C,Direction (Teensy3.1 N/C,12,N/C,10)
+ * Dec:   7, 6, 5, 4 = Gnd,Step,N/C,Direction (Teensy3.1   7, 6,N/C, 4)
+ *
+ * The easiest option is to use two SparkFun Big Easy Drivers (BED) to control the 
+ * bipolar stepper motors; with proper heat-sinks they can handle up to 2A per phase at 35V.
+ * Each BED can be setup by soldering a 4-position male .1" header into the input side.  
+ * I modified the header by removing the 2nd to last pin, and bending the last pin so
+ * the header fits into the Gnd,Step,Dir holes of the BED. A four wire ribbon cable from
+ * Sparkfun, etc. can then be used to plug them into the Arduino.  The outputs go to the
+ * two coils of each stepper motor.  If you don't know which wires are which, the 'net is
+ * full of advise on determining what you have, google it and get out your multimeter.
+ * Refer to my site (Equipment->OnStep) and/or read up on the 'net to get an idea of how
+ * to set the potientiometer on the BEDs to match your stepper motors; too much current
+ * will BURN OUT YOUR STEPPER MOTORS.
+ *
+ * Optionally, the status LED plugs into pins 9,8. I use an 2.2k resistor in series with the LED.
+ * LED: 9,8 = Gnd,+5V
+ *
+ * Optionally, a bluetooth adapter (HC05 or RN42 for example) plugs into pins Tx1/Rx1 and pins +5V/Gnd. 
+ * I use two 2-wire cables for 0.1" headers.  Remember Rx goes to Tx and Tx goes to Rx. And be
+ * sure to get a BT module designed for 5 volt operation and signaling otherwise you'll have to design
+ * and implement the level conversion hardware yourself.
+ * BT: Tx,Rx/+5V,Gnd = Rx1,Tx1/+5V,Gnd
+ * 
+*/
+
 // -------------------------------------------------------------------------------------------------------------------------
 // ADJUST THE FOLLOWING TO CONFIGURE YOUR CONTROLLER FEATURES --------------------------------------------------------------
 
@@ -9,22 +40,23 @@
 // for getting control of the 'scope when things go horribly wrong, default=OFF
 #define RESCUE_MODE_OFF
 
-// PPS sense rising edge on pin 21 for optional precision clock source (GPS, for example), default=OFF
+// PPS sense rising edge on pin 21 for optional precision clock source (GPS, for example), default=OFF (Teensy3.1 Pin 23)
 #define PPS_SENSE_OFF
-// PEC sense rising edge on pin 2 for optional PEC index, default=OFF (not tested)
+// PEC sense rising edge on pin 2 for optional PEC index, default=OFF
 #define PEC_SENSE_OFF
 // switch close (to ground) on pin 3 for optional limit sense (stops gotos and/or tracking), default=OFF (not tested)
 #define LIMIT_SENSE_OFF
 // light status LED by sink to ground (pin 9) and source +5V (pin 8), default=ON
 #define STATUS_LED_PINS_ON
-// lights 2nd status LED by sink to ground (pin 10), default=OFF
+// lights 2nd status LED by sink to ground (pin 10), default=OFF (must be OFF for Teensy3.1)
 #define STATUS_LED2_PINS_OFF
-// optional +5V on pins 5 and 11 to Pololu or other stepper drivers without on-board 5V voltage regulators, default=OFF
+// optional +5V on pins 5 and 12 to Pololu or other stepper drivers without on-board 5V voltage regulators, default=OFF (Teensy3.1 Pins 5,11)
 #define POWER_SUPPLY_PINS_OFF
-// optional stepper driver Enable support is always on (no setting,) just wire Enable to Pins 26 (HA) and 31 (Dec) and OnStep will pull these pins High
-// to disable stepper drivers on startup and when Parked. An Align or UnPark will enable the drivers.  (Pin assignments for the Mega2560, see OnStep.ino for the Teensy3.1)
+// optional stepper driver Enable support is always on (no setting,) just wire Enable to Pins 25 (HA) and 30 (Dec) and OnStep will pull these pins High (Teensy3.1 Pins 16,21)
+// to disable stepper drivers on startup and when Parked. An Align or UnPark will enable the drivers.
 
-// enables goTo speed equalization for differing right ascension and declination StepsPerDegreeHA/Dec, default=OFF (limited testing done)
+// enables goTo speed equalization for differing right ascension and declination StepsPerDegreeHA/Dec, default=OFF
+// must be _ON when StepsPerDegreeHA isn't equal to StepsPerDegreeDec (limited testing done)
 #define DEC_RATIO_OFF
 
 // enables alignment on two or three stars, default=ON
@@ -100,7 +132,7 @@
                                      // fork/yolk mount with meridian flips turned off by setting the minutesPastMeridian values to cover the whole sky)
 
 // this group is for advanced configuration and is not well tested yet, leave it alone or just use the HA_MODE and DEC_MODE values if you didn't hard wire the micro-stepping mode
-// M0, M1, and M2 are on Pins 22,23, and 24 for RA.  M0, M1, M2 are on Pins 27,28,29 for Dec.  (For the Mega2560, see OnStep.ino for the Teensy3.1)
+// M0, M1, and M2 are on Pins 22,23, and 24 for RA (Teensy3.1 Pins 13,14,15.)  M0, M1, M2 are on Pins 27,28,29 for Dec (Teensy3.1 Pins 18,19,20.)
 // DRV8825: 5=32x, 4=16x, 3=8x, 2=4x, 1=2x, 0=1x
 #define HA_MODE_OFF                  // programs the HA uStep mode M0/M1/M2, optional and default _OFF. Other values 0 to 7 (0xb000 to 111): for example "#define HA_MODE 4"
 #define HA_MODE_GOTO_OFF             // programs the HA uStep mode M0/M1/M2, used during gotos, optional and default _OFF. Other values 0 to 7 (0xb000 to 111): for example "#define HA_MODE_GOTO 4"
