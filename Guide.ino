@@ -12,7 +12,7 @@ void Guide() {
         // as above, and keep track of how much we've moved for PEC recording
         if (guideDirHA=='e') sign=-1; else sign=1; guideHA=sign*amountGuideHA;
         // for RA, only apply the corrections now if fast guiding; otherwise they get combined with PEC & sidereal-tracking and are applied later
-        if (currentGuideRate>1) { if (!inBacklashHA) { cli(); targetHA+=(long)guideHA; sei(); } } else { accGuideHA+=guideHA; }
+        if (currentGuideRate>2) { if (!inBacklashHA) { cli(); targetHA+=(long)guideHA; sei(); } } else { accGuideHA+=guideHA; }
       }
       if (!inBacklashHA) {
         // for pulse guiding, count down the mS and stop when timed out
