@@ -556,14 +556,14 @@ the pdCor  term is 1 in HA
 //  :RC#   Set Slew rate to Centering rate (2nd slowest)
 //  :RM#   Set Slew rate to Find Rate (2nd Fastest)
 //  :RS#   Set Slew rate to max (fastest)
-//  :Rn#   Set Slew rate to n, where n=1..9
+//  :Rn#   Set Slew rate to n, where n=0..9
 //         Returns: Nothing
-      if ((command[1]=='G') || (command[1]=='C') || (command[1]=='M') || (command[1]=='S') || ((command[1]>='1') && (command[1]<='9'))) {
+      if ((command[1]=='G') || (command[1]=='C') || (command[1]=='M') || (command[1]=='S') || ((command[1]>='0') && (command[1]<='9'))) {
         if (command[1]=='G') i=1; else
         if (command[1]=='C') i=3; else
         if (command[1]=='M') i=4; else
-        if (command[1]=='S') i=6; else i=command[1]-'1';
-        setGuideRate(i); // 0..8
+        if (command[1]=='S') i=6; else i=command[1]-'0';
+        setGuideRate(i); // 0..9
         quietReply=true; 
       } else commandError=true;
      } else
@@ -951,7 +951,6 @@ the pdCor  term is 1 in HA
         strcat(reply,HEXS);
 #endif
         if (!supress_frame) strcat(reply,"#");
-//        strcat(reply,"\r");
         Serial1_print(reply);
       }
       }
@@ -1012,7 +1011,6 @@ boolean buildCommand_serial_one(char c) {
   // (chr)6 is a special status command for the LX200 protocol
   if ((c==(char)6) && (bufferPtr_serial_zero==0)) {
     Serial1_print("G#");
-//    Serial1_print("\r");
   }
 
   // ignore spaces/lf/cr, dropping spaces is another tweek to allow compatibility with LX200 protocol
@@ -1024,7 +1022,6 @@ boolean buildCommand_serial_one(char c) {
   }
 
   if (c=='#') {
-    //Serial.println(command_serial_one);
     // validate the command frame, normal command
     if ((bufferPtr_serial_one>1) && (command_serial_one[0]==':') && (command_serial_one[bufferPtr_serial_one-1]=='#')) { command_serial_one[bufferPtr_serial_one-1]=0; } else { clearCommand_serial_one(); return false; }
     
@@ -1044,10 +1041,6 @@ boolean buildCommand_serial_one(char c) {
     // the command is either one or two chars in length
     command_serial_one[3]=0;  memmove(command_serial_one,(char *)&command_serial_one[1],3);
 
-// For debugging:
-//    Serial.println(command);
-//    Serial.println(parameter);
-
     return true;
   } else {
     return false;
@@ -1066,8 +1059,8 @@ void setGuideRate(int g) {
   currentGuideRate=g;
   
   // this sets the guide rate
-  //               0.5X,1X,2X,4X,8X ,16X,24X,40X 60X
-  // guideRates[9]={7.5,15,30,60,120,240,360,600,900}; 
+  //                0.25X,0.5X,1X,2X,4X,8X ,16X,24X,40X 60X
+  // guideRates[10]={3.75,7.5 ,15,30,60,120,240,360,600,900}; 
   guideTimerRate=(double)guideRates[g]/15.0;
   
   cli();
