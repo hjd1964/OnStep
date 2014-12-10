@@ -4,7 +4,7 @@
 /*
  * The Arduino Mega2560 and Teensy3.1 use USB for power and communication with the host computer
  *
- * the RA stepper driver plugs into Pins Gnd,13,12, and 11 (Teensy3.1 omits Gnd and uses Pins 12,11,10.)
+ * the RA stepper driver plugs into Pins Gnd,13,12, and 11 (Teensy3.1 uses Gnd,12,11,10.)
  * the Dec driver plugs into pins 7, 6, 5, and 4 (7 is Gnd and the wiring is identical.)
  * RA : Gnd,13,12,11 = Gnd,Step,N/C,Direction (Teensy3.1 N/C,12,N/C,10)
  * Dec:   7, 6, 5, 4 = Gnd,Step,N/C,Direction (Teensy3.1   7, 6,N/C, 4)
