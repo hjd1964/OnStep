@@ -42,9 +42,9 @@
 
 // PPS sense rising edge on pin 21 for optional precision clock source (GPS, for example), default=OFF (Teensy3.1 Pin 23)
 #define PPS_SENSE_OFF
-// PEC sense rising edge on pin 2 for optional PEC index, default=OFF
+// PEC sense rising edge on pin 2 for optional PEC index, default=OFF (not tested)
 #define PEC_SENSE_OFF
-// switch close (to ground) on pin 3 for optional limit sense (stops gotos and/or tracking), default=OFF (not tested)
+// switch close (to ground) on pin 3 for optional limit sense (stops gotos and/or tracking), default=OFF
 #define LIMIT_SENSE_OFF
 // light status LED by sink to ground (pin 9) and source +5V (pin 8), default=ON
 #define STATUS_LED_PINS_ON
