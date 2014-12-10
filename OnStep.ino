@@ -475,7 +475,10 @@ double IH                = 0;       // offset corrections/align
 double ID                = 0;
 
 // guide command
-volatile byte currentGuideRate     = 2;
+#define GuideRate1x        2
+double  guideRates[10]={3.75,7.5,15,30,60,120,240,360,600,900}; 
+//                      .25X .5x 1x 2x 4x 8x  16x 24x 40x 60x
+volatile byte currentGuideRate     = GuideRate1x;
 volatile byte guideDirHA           = 0;
 long          guideDurationHA      = -1;
 unsigned long guideDurationLastHA  = 0;
@@ -483,9 +486,6 @@ byte          guideDirDec          = 0;
 long          guideDurationDec     = -1;
 unsigned long guideDurationLastDec = 0;
 
-// rate control
-double  guideRates[10]={3.75,7.5,15,30,60,120,240,360,600,900}; 
-//                      .25X .5x 1x 2x 4x 8x  16x 24x 40x 60x
 double  guideTimerRate    = 0;
 long    amountGuideHA     = 0;
 long    guideHA           = 0;
@@ -818,7 +818,7 @@ void setup() {
   #endif
 
   // set the default guide rate, 1x sidereal
-  setGuideRate(2);  delay(110);
+  setGuideRate(2); delay(110);
   
   // prep timers
   cli(); 
@@ -839,7 +839,7 @@ void loop() {
   }
   
   // PERIODIC ERROR CORRECTION -------------------------------------------------------------------------
-  if ((trackingState==TrackingSidereal) && (!((guideDirHA || guideDirDec) && (currentGuideRate>2)))) { 
+  if ((trackingState==TrackingSidereal) && (!((guideDirHA || guideDirDec) && (currentGuideRate>GuideRate1x)))) { 
     // only active while sidereal tracking with a guide rate that makes sense
     Pec();
   } else disablePec();
@@ -850,7 +850,7 @@ void loop() {
     siderealTimer=tempLst;
     
     // only active while sidereal tracking with a guide rate that makes sense
-    if ((trackingState==TrackingSidereal) && !(guideDirHA && (currentGuideRate>2))) {
+    if ((trackingState==TrackingSidereal) && !(guideDirHA && (currentGuideRate>GuideRate1x))) {
       if (((tempLst%st==0) && ((tempLst%sk!=0) || ((tempLst%st1==0) && (tempLst%sk1!=0) )))) {
           // PEC_Timer starts at zero again every second, PEC_Skip will control the rate and will trigger a +/- step every PEC_Skip steps while tracking 
           PEC_Timer++;
