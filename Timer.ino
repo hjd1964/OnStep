@@ -38,8 +38,15 @@ void Timer1SetRate(long rate) {
 #endif
 }
 
+// set the master sidereal clock rate, also forces rate update for RA/Dec timer rates so that PPS adjustments take hold immediately
+volatile long isrTimerRateHA=0;
+volatile long isrTimerRateDec=0;
+volatile long runTimerRateHA=0;
+volatile long runTimerRateDec=0;
 void SetSiderealClockRate(long Interval) {
   if (trackingState==TrackingMoveTo) Timer1SetRate(Interval/100);  else  Timer1SetRate(Interval/300);
+  isrTimerRateHA=0;
+  isrTimerRateDec=0;
 }
 
 // set timer3 to rate (in microseconds*16)
@@ -69,16 +76,17 @@ void Timer4SetRate(long rate) {
 
 //--------------------------------------------------------------------------------------------------
 // Timer1 handles sidereal time and programming the drive rates
-volatile long isrTimerRateHA;
-volatile long isrTimerRateDec;
-volatile long runTimerRateHA=0;
-volatile long runTimerRateDec=0;
 volatile boolean wasInBacklashHA=false;
 volatile boolean wasInBacklashDec=false;
 volatile boolean gotoRateHA=false;
 volatile boolean gotoRateDec=false;
 volatile byte cnt = 0;
+
+#if defined(__arm__) && defined(TEENSYDUINO)
+ISR(TIMER1_COMPA_vect)
+#else
 ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
+#endif
 {
   // run 1/3 of the time at 3x the rate, unless a goto is happening
   if (trackingState!=TrackingMoveTo) { cnt++; if (cnt%3!=0) return; }
@@ -140,8 +148,8 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
       if (abs(posDec-targetDec)>2) thisTimerRateDec=TakeupRate; else wasInBacklashDec=false;
     }
   }
+
   if (trackingState==TrackingMoveTo) {
-      
     // trigger Goto step mode when faster than the fastest guide rate
     #if defined(DE_MODE) && defined(DE_MODE_GOTO)
     gotoRateDec=(thisTimerRateDec<SiderealRate/80);
@@ -171,17 +179,19 @@ volatile boolean gotoModeHA=false;
 
 ISR(TIMER3_COMPA_vect)
 {
-#if defined(__AVR__)
-  #if defined(HA_MODE) && defined(HA_MODE_GOTO)
-  OCR3A = nextHArate*stepHA;
-  #else
-  OCR3A = nextHArate;
-  #endif
-
   // drivers step on the rising edge, need >=1.9uS to settle (for DRV8825 or A4988) so this is early in the routine
   CLR(HAStepPORT,  HAStepBit);
 
+#if defined(__arm__) && defined(TEENSYDUINO)
+  // on the much faster Teensy run this ISR at twice the normal rate and pull the step pin low every other call
+  if (HAclr) {
+    TakeStepHA=false;
+#endif
+
 #if defined(HA_MODE) && defined(HA_MODE_GOTO)
+#if defined(__AVR__)
+  OCR3A = nextHArate*stepHA;
+#endif
   // switch micro-step mode
   if ((!gotoModeHA && gotoRateHA) || (gotoModeHA && !gotoRateHA)) {
     // only when at the home position
@@ -205,6 +215,10 @@ ISR(TIMER3_COMPA_vect)
       }
     }
   }
+#else
+#if defined(__AVR__)
+  OCR3A = nextHArate;
+#endif
 #endif
 
   // Guessing about 4+4+1+ 4+4+1+ 1+ 2+1+2+ 13=37 clocks between here and the step signal which is 2.3uS
@@ -221,33 +235,14 @@ ISR(TIMER3_COMPA_vect)
     } else {
       if (blHA>0)          { blHA--; inBacklashHA=true; } else { inBacklashHA=false; posHA-=stepHA; }
     }
-    SET(HAStepPORT, HAStepBit);
-  }
 
-#elif defined(__arm__) && defined(TEENSYDUINO)
-  // On the much faster Teensy run at twice the rate and pull the step pin low every other call
-  // Step signal doesn't happen until the next ISR call, so loads of time settling
-  if (HAclr) {
-    CLR(HAStepPORT,  HAStepBit);
-    if (posHA!=targetHA+PEC_HA) { // Move the RA stepper to the target
-      if (posHA<targetHA+PEC_HA) dirHA=1; else dirHA=0; // Direction control
-      #ifdef REVERSE_HA_ON
-        if (HADir==dirHA) CLR(HADirPORT, HADirBit); else SET(HADirPORT, HADirBit); // Set direction, HADir default LOW (=0, for my wiring.)  Needs >=0.65uS before/after rising step signal (DRV8825 or A4988).
-      #else
-        if (HADir==dirHA) SET(HADirPORT, HADirBit); else CLR(HADirPORT, HADirBit);
-      #endif
-      // telescope moves WEST with the sky, blHA is the amount of EAST backlash
-      if (dirHA==1) {
-        if (blHA<backlashHA) { blHA++; inBacklashHA=true; } else { inBacklashHA=false; posHA++; }
-      } else {
-        if (blHA>0)          { blHA--; inBacklashHA=true; } else { inBacklashHA=false; posHA--; }
-      }
+#if defined(__arm__) && defined(TEENSYDUINO)
       TakeStepHA=true;
-    } else TakeStepHA=false;
+    }
     HAclr=false;
-  } else {
-    if (TakeStepHA) SET(HAStepPORT, HAStepBit);
-    HAclr=true;
+  } else { if (TakeStepHA) SET(HAStepPORT, HAStepBit); HAclr=true; }
+#else
+    SET(HAStepPORT, HAStepBit);
   }
 #endif
 }
@@ -261,18 +256,19 @@ volatile boolean gotoModeDec=false;
 
 ISR(TIMER4_COMPA_vect)
 {
-#if defined(__AVR__)
-
   // drivers step on the rising edge
   CLR(DecStepPORT,  DecStepBit);
 
-  #if defined(DE_MODE) && defined(DE_MODE_GOTO)
-  OCR4A = nextDErate*stepDec;
-  #else
-  OCR4A = nextDErate;
-  #endif
+#if defined(__arm__) && defined(TEENSYDUINO)
+  // on the much faster Teensy run this ISR at twice the normal rate and pull the step pin low every other call
+  if (DEclr) {
+    TakeStepDec=false;
+#endif
 
 #if defined(DE_MODE) && defined(DE_MODE_GOTO)
+#if defined(__AVR__)
+  OCR4A = nextDErate*stepDec;
+#endif
   // switch micro-step mode
   if ((!gotoModeDec && gotoRateDec) || (gotoModeDec && !gotoRateDec)) {
     // only when at home position
@@ -296,6 +292,10 @@ ISR(TIMER4_COMPA_vect)
       }
     }
   }
+#else
+#if defined(__AVR__)
+  OCR4A = nextDErate;
+#endif
 #endif
   
   if (posDec!=targetDec) { // move the Dec stepper to the target
@@ -312,33 +312,14 @@ ISR(TIMER4_COMPA_vect)
     } else {
       if (blDec>0)           { blDec--; inBacklashDec=true; } else { inBacklashDec=false; posDec-=stepDec; }
     }
-    SET(DecStepPORT, DecStepBit);
-  }
 
-#elif defined(__arm__) && defined(TEENSYDUINO)
-  // on the much faster Teensy run this ISR at twice the normal rate and pull the step pin low every other call
-  if (DEclr) {
-    CLR(DecStepPORT,  DecStepBit);
-    if (posDec!=targetDec) { // move the Dec stepper to the target
-      // telescope normally starts on the EAST side of the pier looking at the WEST sky
-      if (posDec<targetDec) dirDec=1; else dirDec=0;                                     // Direction control
-      #ifdef REVERSE_DEC_ON
-        if (DecDir==dirDec) SET(DecDirPORT, DecDirBit); else CLR(DecDirPORT, DecDirBit); // Set direction, decDir default HIGH (=1, for my wiring)
-      #else
-        if (DecDir==dirDec) CLR(DecDirPORT, DecDirBit); else SET(DecDirPORT, DecDirBit);
-      #endif
-      // telescope moving toward celestial pole in the sky, blDec is the amount of opposite backlash
-      if (dirDec==1) {
-        if (blDec<backlashDec) { blDec++; inBacklashDec=true; } else { inBacklashDec=false; posDec++; }
-      } else {
-        if (blDec>0)           { blDec--; inBacklashDec=true; } else { inBacklashDec=false; posDec--; }
-      }
+#if defined(__arm__) && defined(TEENSYDUINO)
       TakeStepDec=true;
-    } else TakeStepDec=false;
-    DEclr=false;
-  } else {
-    if (TakeStepDec) SET(DecStepPORT, DecStepBit);
-    DEclr=true;
+    }
+    DEclr=false; 
+  } else { if (TakeStepDec) SET(DecStepPORT, DecStepBit); DEclr=true; }
+#else
+    SET(DecStepPORT, DecStepBit);
   }
 #endif
 }
