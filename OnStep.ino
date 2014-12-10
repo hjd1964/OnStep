@@ -121,8 +121,9 @@
  * 11-06-2014          1.0b6             Changes to Timer.ino improve performance, lower timing jitter.  Improvements/fixes to guiding function.  Added PPS lock status to command :GU#.
  *                                       Moved configuration to a header file, cleaned up source code a bit.
  * 11-08-2014          1.0b7             ParkClearBacklash now uses the BacklashTakeupRate, doubled takeup time to fix bug.  Guide function now only "moves" once backlash takeup is finished.
- *                                       Now switching SiderealClock down to a slightly less accurate /8 rate during gotos to save MPU cycles.  Adjusted PEC to temporarily fall out of play mode when
- *                                       guiding at >1x sidereal.  Cleaned up source code a bit more.
+ *                                       Switching SiderealClock down to a slightly less accurate /8 rate during gotos to save MPU cycles.  Adjusted PEC to temporarily fall out of play mode when
+ *                                       guiding at >1x sidereal.  Cleaned up source code a bit more.  Fixed stepper driver mode/enable/fault pin assignments.
+ * 12-09-2014          1.0b8             Added guide rate 0 at 0.25x the sidereal rate.  Rearranged Timer.ino so the Teensy3.1 should work with the micro-step mode switching feature.
  *
  *
  * Author: Howard Dutton
@@ -175,8 +176,8 @@
 #include "Config.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "11 08 14"
-#define FirmwareNumber "1.0b7"
+#define FirmwareDate   "12 09 14"
+#define FirmwareNumber "1.0b8"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -247,7 +248,7 @@ volatile boolean inBacklashDec=false;
 volatile double  pecTimerRateHA = 0;
 volatile double  guideTimerRateHA = 0;
 volatile double  guideTimerRateDec = 0;
-#define timerRateRatio          ((double)StepsPerDegreeHA/(double)StepsPerDegreeDec)
+volatile double  timerRateRatio = ((double)StepsPerDegreeHA/(double)StepsPerDegreeDec);
 #define SecondsPerWormRotation  ((long)(StepsPerWormRotation/StepsPerSecond))
 #define StepsPerSecondDec       ((double)(StepsPerDegreeDec/3600.0)*15.0)
 
@@ -514,8 +515,8 @@ long          guideDurationDec     = -1;
 unsigned long guideDurationLastDec = 0;
 
 // rate control
-double  guideRates[9]={7.5,15,30,60,120,240,360,600,900}; 
-//                    1x 2x 4x 8x  16x 24x 40x 60x
+double  guideRates[10]={3.75,7.5,15,30,60,120,240,360,600,900}; 
+//                      .25X .5x 1x 2x 4x 8x  16x 24x 40x 60x
 double  guideTimerRate    = 0;
 long    amountGuideHA     = 0;
 long    guideHA           = 0;
@@ -547,9 +548,9 @@ long    wormRotationStepPos = 0;
 long    PECindex         = 0;
 long    PECindex1        = 0;
 long    lastPECindex     = -1;
-long    PECtime_lastSense= 0;        // time since last PEC index was sensed
-long    PECindex_sense   = 0;        // position of active PEC index sensed
-long    next_PECindex_sense=-1;      // position of next PEC index sensed
+long    PECtime_lastSense= 0;      // time since last PEC index was sensed
+long    PECindex_sense   = 0;      // position of active PEC index sensed
+long    next_PECindex_sense=-1;    // position of next PEC index sensed
 
 // backlash control
 volatile int backlashHA   = 0;
@@ -667,8 +668,7 @@ void setup() {
 
 // limit switch sense
 #ifdef LIMIT_SENSE_ON  
-  pinMode(LimitPin, INPUT);
-  digitalWrite(LimitPin, HIGH); // pull pin high
+  pinMode(LimitPin, INPUT_PULLUP);
 #endif
 
 // disable the stepper drivers for now, if the enable lines are connected
@@ -681,7 +681,7 @@ void setup() {
   pinMode(HA_M1, OUTPUT); digitalWrite(HA_M1,(HA_MODE>>1 & 1));
   pinMode(HA_M2, OUTPUT); digitalWrite(HA_M2,(HA_MODE>>2 & 1));
 #endif
-#ifdef DEC_MODE
+#ifdef DE_MODE
   pinMode(DE_M0, OUTPUT); digitalWrite(DE_M0,(DE_MODE & 1));
   pinMode(DE_M1, OUTPUT); digitalWrite(DE_M1,(DE_MODE>>1 & 1));
   pinMode(DE_M2, OUTPUT); digitalWrite(DE_M2,(DE_MODE>>2 & 1));
@@ -849,13 +849,14 @@ void setup() {
   #endif
 
   // set the default guide rate, 1x sidereal
-  setGuideRate(1);  delay(110);
+  setGuideRate(2);  delay(110);
   
   // prep timers
   cli(); 
   guideSiderealTimer = lst;
   PecSiderealTimer = lst;
   siderealTimer = lst;
+  PECtime_lastSense = lst;
   clockTimer=millis(); 
   sei();
 }
