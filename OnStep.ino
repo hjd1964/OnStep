@@ -475,7 +475,7 @@ double IH                = 0;       // offset corrections/align
 double ID                = 0;
 
 // guide command
-volatile byte currentGuideRate     = 1;
+volatile byte currentGuideRate     = 2;
 volatile byte guideDirHA           = 0;
 long          guideDurationHA      = -1;
 unsigned long guideDurationLastHA  = 0;
@@ -839,7 +839,7 @@ void loop() {
   }
   
   // PERIODIC ERROR CORRECTION -------------------------------------------------------------------------
-  if ((trackingState==TrackingSidereal) && (!((guideDirHA || guideDirDec) && (currentGuideRate>1)))) { 
+  if ((trackingState==TrackingSidereal) && (!((guideDirHA || guideDirDec) && (currentGuideRate>2)))) { 
     // only active while sidereal tracking with a guide rate that makes sense
     Pec();
   } else disablePec();
@@ -850,7 +850,7 @@ void loop() {
     siderealTimer=tempLst;
     
     // only active while sidereal tracking with a guide rate that makes sense
-    if ((trackingState==TrackingSidereal) && !(guideDirHA && (currentGuideRate>1))) {
+    if ((trackingState==TrackingSidereal) && !(guideDirHA && (currentGuideRate>2))) {
       if (((tempLst%st==0) && ((tempLst%sk!=0) || ((tempLst%st1==0) && (tempLst%sk1!=0) )))) {
           // PEC_Timer starts at zero again every second, PEC_Skip will control the rate and will trigger a +/- step every PEC_Skip steps while tracking 
           PEC_Timer++;
