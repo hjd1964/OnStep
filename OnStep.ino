@@ -133,40 +133,8 @@
  * Description
  *
  * Arduino Stepper motor controller for Losmandy G11 mounts (and others)
- * with basic LX200 derived command set.
+ * with LX200 derived command set.
  *
- * Review the comments below when setting this up for use with for your equipment.
- * a series of #define statements tailor the configuration to your hardware/mount.
- * they are clearly commented in the Config.h file.
- *
- * the Arduino Mega2560 uses USB for power and communication with the host computer
- *
- * the RA  BED plugs into pins Gnd,13,12, and 11 of the Arduino
- * the Dec BED plugs into pins 7, 6, 5, and 4 (7 is Gnd and the wiring is identical.)
- * RA : Gnd,13,12,11 = Gnd,Step,N/C,Direction
- * Dec: 7,6,5,4      = Gnd,Step,N/C,Direction
- *
- * I used two SparkFun Big Easy Drivers (BED) to control the bipolar stepper motors; 
- * with proper heat-sinks they can handle up to 2A per phase at 35V.
- * Each BED is setup by soldering a 4-position male .1" header into the input side.  
- * I modified the header by removing the 2nd to last pin, and bending the last pin so
- * the header fits into the Gnd,Step,Dir holes of the BED. A four wire ribbon cable from
- * Sparkfun, etc. can then be used to plug them into the Arduino.  The outputs go to the
- * two coils of each stepper motor.  If you don't know which wires are which, the 'net is
- * full of advise on determining what you have, google it and get out your multimeter.
- * Refer to my site (Equipment->OnStep) and/or read up on the 'net to get an idea of how
- * to set the potientiometer on the BEDs to match your stepper motors; too much current
- * will BURN OUT YOUR STEPPER MOTORS.
- *
- * Optionally, the status LED plugs into pins 9,8. I use an 2.2k resistor in series with the LED.
- * LED: 9,8 = Gnd,+5V
- *
- * Optionally, the HC05 bluetooth adapter plugs into pins Tx1/Rx1 and pins +5V/Gnd. I use
- * two 2-wire cables for 0.1" headers.  Remember Rx goes to Tx and Tx goes to Rx. And be
- * sure to get a HC05 (or other) module designed for 5 volt operation otherwise you will
- * have to do the level conversion hardware yourself.
- * HC05: Tx,Rx/+5V,Gnd = Rx1,Tx1/+5V,Gnd
- * 
  */
  
 #include "EEPROM.h"
@@ -301,12 +269,6 @@ int    maxAlt;                                    // the maximum altitude, in de
 // The limit switch sense is a 5V logic input which uses the internal pull up, shorted to ground it stops gotos/tracking
 #define LimitPin   3
 
-// The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
-// The Arduino attachInterrupt function works in two modes, on the '2560 it takes an Interrupt# on the Teensy and others it takes a Pin#
-// so we specify both here
-#define PpsPin     21      // Pin 21 (PPS time source, GPS for example, alternate Pin20)
-#define PpsInt     2       // Interrupt 2 (alternate Int3)
-
 // The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
 //                                  Atmel   328  | 2560
 #define LEDposPin  8       // Pin 8 (LED)   PB0    PH5
@@ -321,6 +283,10 @@ int    maxAlt;                                    // the maximum altitude, in de
 
 // defines for direct port control
 #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+
+// The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
+// The Arduino attachInterrupt function works in two modes, on the '2560 it takes an Interrupt# on the Teensy and others it takes a Pin#
+#define PpsInt     2       // Interrupt 2 on Pin 21 (alternate Int3 on Pin20)
 
 #define HADirPin   11      // Pin 11 (Dir)  PB3    PB5
 #define HA5vPin    12      // Pin 12 (5V?)  PB4    PB6
@@ -364,6 +330,9 @@ int    maxAlt;                                    // the maximum altitude, in de
 #define HAStepPORT PORTB   //
 
 #elif defined(__arm__) && defined(TEENSYDUINO)
+
+// The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
+#define PpsPin     23      // Pin 23 (PPS time source, GPS for example)
 
 #define HADirPin   10      // Pin 10 (Dir)
 #define HA5vPin    11      // Pin 11 (5V?)
