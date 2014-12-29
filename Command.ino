@@ -367,7 +367,7 @@ the pdCor  term is 1 in HA
 //         Returns: value
       if (command[1]=='X')  { 
         if (parameter[2]==(char)0) {
-          if (parameter[0]=='0') { // 00: Align Model
+          if (parameter[0]=='0') { // 0n: Align Model
             switch (parameter[1]) {
               case '0': sprintf(reply,"%ld",(long)(IH*15.0*3600.0)); quietReply=true; break;  // IH
               case '1': sprintf(reply,"%ld",(long)(ID*3600.0)); quietReply=true; break;       // ID
@@ -375,6 +375,11 @@ the pdCor  term is 1 in HA
               case '3': sprintf(reply,"%ld",(long)(azmCor*3600.0)); quietReply=true; break;   // azmCor
               case '4': sprintf(reply,"%ld",(long)(doCor*3600.0)); quietReply=true; break;    // doCor
               case '5': sprintf(reply,"%ld",(long)(pdCor*3600.0)); quietReply=true; break;    // pdCor
+            }
+          } else
+          if (parameter[0]=='9') { // 9n: Misc.
+            switch (parameter[1]) {
+              case '0': char temp[12]; dtostrf(guideRates[currentGuideRate]/15.0,2,2,temp); sprintf(reply,"%s",temp); quietReply=true; break;  // guide rate
             }
           } else commandError=true;
         } else commandError=true;
@@ -559,11 +564,11 @@ the pdCor  term is 1 in HA
 //  :Rn#   Set Slew rate to n, where n=0..9
 //         Returns: Nothing
       if ((command[1]=='G') || (command[1]=='C') || (command[1]=='M') || (command[1]=='S') || ((command[1]>='0') && (command[1]<='9'))) {
-        if (command[1]=='G') i=1; else
-        if (command[1]=='C') i=3; else
-        if (command[1]=='M') i=4; else
-        if (command[1]=='S') i=6; else i=command[1]-'0';
-        setGuideRate(i); // 0..9
+        if (command[1]=='G') i=2; else
+        if (command[1]=='C') i=4; else
+        if (command[1]=='M') i=5; else
+        if (command[1]=='S') i=7; else i=command[1]-'0';
+        setGuideRate(i);
         quietReply=true; 
       } else commandError=true;
      } else
