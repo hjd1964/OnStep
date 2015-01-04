@@ -22,7 +22,7 @@ void Pec() {
         PECindex=wormRotationStepPos/StepsPerSecond; 
         // sum corrections to this point
         long m=0; for (int l=0; l<PECindex; l++) {
-          long l1=l-PECindex_sense; if (l1<0) l1+=SecondsPerWormRotation;
+          long l1=l-PECindex_sense; if (l1<0) l1+=SecondsPerWormRotation; if (l1>SecondsPerWormRotation-1) l1-=SecondsPerWormRotation;
           m+=PEC_buffer[l1]-128; 
         }
         // move to the corrected location, this might take a few seconds and can be abrupt (after goto's or when unparking)
@@ -34,19 +34,10 @@ void Pec() {
       }
     }
 
-    // get ready to start recording
-    if (PECstatus==ReadyRecordPEC) {
-      // zero index counter
-      PECindex_record = posPEC % StepsPerWormRotation;
-      wormRotationStepPos = (posPEC-PECindex_record) % StepsPerWormRotation;
-      lastWormRotationStepPos=1; // force recording to start now
-    }
-
     // at the start of a worm cycle (if wormRotationStepPos rolled over)
     // this only works because targetHA can't move backward while tracking and guiding at +/- 1x sidereal
     // it also works while <=1X guiding and playing PEC because the PEC corrections don't get counted in the targetHA location
     if (lastWormRotationStepPos>wormRotationStepPos) {
-
       // start recording PEC
       if (PECstatus==ReadyRecordPEC) {
         PECstatus=RecordPEC;
@@ -91,20 +82,30 @@ void Pec() {
       accPecPlayHA = 0;
       cli(); PecSiderealTimer = lst-1; sei();  // keeps PECindex from advancing immediately
       PECindex = 0; lastPECindex = -1;         // starts record/playback now
-    #ifdef PEC_SENSE_ON
+    #if defined(PEC_SENSE_ON) || defined(PEC_SENSE)
       if (next_PECindex_sense>=0) { PECindex_sense=next_PECindex_sense; next_PECindex_sense=-1; }
     #endif
     }
 
     // Increment the PEC index once a second and make it go back to zero when the worm finishes a rotation
     cli(); long t=lst; sei(); if (t-PecSiderealTimer>99) { PecSiderealTimer=t; PECindex=(PECindex+1)%SecondsPerWormRotation; }
-    PECindex1=(PECindex-PECindex_sense); if (PECindex1<0) PECindex1+=SecondsPerWormRotation;
+    PECindex1=(PECindex-PECindex_sense); if (PECindex1<0) PECindex1+=SecondsPerWormRotation; if (PECindex1>SecondsPerWormRotation-1) PECindex1-=SecondsPerWormRotation;
 
   #ifdef PEC_SENSE_ON
     // if the HALL sensor (etc.) has just arrived at the index and it's been more than 60 seconds since
     // it was there before, set this as the next start of PEC playback/recording
     cli();
     if ((digitalRead(PecPin)==HIGH) && (lst-PECtime_lastSense>600)) {
+      PECtime_lastSense=lst;
+      next_PECindex_sense=PECindex;
+    }
+    sei();
+  #endif
+
+  #ifdef PEC_SENSE
+    // as above except for Analog sense
+    cli();
+    if ((PECav>PEC_SENSE) && (lst-PECtime_lastSense>600)) {
       PECtime_lastSense=lst;
       next_PECindex_sense=PECindex;
     }
