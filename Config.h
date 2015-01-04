@@ -42,6 +42,11 @@
 
 // PPS sense rising edge on pin 21 for optional precision clock source (GPS, for example), default=OFF (Teensy3.1 Pin 23)
 #define PPS_SENSE_OFF
+// PEC sense, rising edge on pin 2 (ex. PEC_SENSE_ON) or threshold value on Analog 1; for optional PEC index, default=OFF
+// analog values range from 0 to 1023 which indicate voltages from 0-5VDC on the A1 pin, for example "PEC_SENSE 600" would detect an index when the voltage exceeds 2.92V
+// with either index detection method, once triggered 60s must expire before another detection can happen.  This gives time for the index magnet to pass by the detector before another cycle begins.
+// Note: Analog PEC index sense is not supported on the Teensy3.1
+#define PEC_SENSE_OFF
 // PEC sense rising edge on pin 2 for optional PEC index, default=OFF (not tested)
 #define PEC_SENSE_OFF
 // switch close (to ground) on pin 3 for optional limit sense (stops gotos and/or tracking), default=OFF
@@ -55,7 +60,7 @@
 // optional stepper driver Enable support is always on (no setting,) just wire Enable to Pins 25 (HA) and 30 (Dec) and OnStep will pull these pins High (Teensy3.1 Pins 16,21)
 // to disable stepper drivers on startup and when Parked. An Align or UnPark will enable the drivers.
 
-// enables goTo speed equalization for differing right ascension and declination StepsPerDegreeHA/Dec, default=OFF
+// enables Goto speed equalization for differing right ascension and declination StepsPerDegreeHA/Dec, default=OFF
 // must be _ON when StepsPerDegreeHA isn't equal to StepsPerDegreeDec (limited testing done)
 #define DEC_RATIO_OFF
 
@@ -69,9 +74,12 @@
 // this cleans up any tracking rate variations that would be introduced by recording more guiding corrections to either the east or west, default=ON
 #define PEC_CLEANUP_ON
 
-// optionally adjust tracking rate to compensate for atmospheric refraction, default=OFF (not tested)
+// optionally adjust tracking rate to compensate for atmospheric refraction, default=OFF (limited testing done)
 // can be turned on/off with the :Te# and :Td# commands regardless of this setting
 #define TRACK_REFRACTION_RATE_DEFAULT_OFF
+
+// use seperate pulse-guide rate so centering and guiding don't disturb eachother, default=OFF
+#define SEPERATE_PULSE_GUIDE_RATE_ON
 
 // these turn on and off checksum error correction on the serial ports, default=OFF
 #define CHKSUM0_OFF     // default _OFF: required for OnStep ASCOM driver
@@ -131,7 +139,7 @@
                                      // that can be easily worked around by doing an alignment once and saving a park position (assuming a 
                                      // fork/yolk mount with meridian flips turned off by setting the minutesPastMeridian values to cover the whole sky)
 
-// this group is for advanced configuration and is not well tested yet, leave it alone or just use the HA_MODE and DEC_MODE values if you didn't hard wire the micro-stepping mode
+// Micro-step driver mode control
 // M0, M1, and M2 are on Pins 22,23, and 24 for RA (Teensy3.1 Pins 13,14,15.)  M0, M1, M2 are on Pins 27,28,29 for Dec (Teensy3.1 Pins 18,19,20.)
 // DRV8825: 5=32x, 4=16x, 3=8x, 2=4x, 1=2x, 0=1x
 #define HA_MODE_OFF                  // programs the HA uStep mode M0/M1/M2, optional and default _OFF. Other values 0 to 7 (0xb000 to 111): for example "#define HA_MODE 4"
