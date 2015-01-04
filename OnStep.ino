@@ -2,7 +2,7 @@
  * Title       On-Step
  * by          Howard Dutton
  *
- * Copyright (C) 2013, 2014 Howard Dutton
+ * Copyright (C) 2013 to 2015 Howard Dutton
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -124,6 +124,9 @@
  *                                       Switching SiderealClock down to a slightly less accurate /8 rate during gotos to save MPU cycles.  Adjusted PEC to temporarily fall out of play mode when
  *                                       guiding at >1x sidereal.  Cleaned up source code a bit more.  Fixed stepper driver mode/enable/fault pin assignments.
  * 12-09-2014          1.0b8             Added guide rate 0 at 0.25x the sidereal rate.  Rearranged Timer.ino so the Teensy3.1 should work with the micro-step mode switching feature.
+ * 01-03-2015          1.0b9             Added PEC analog sensor index support.  Fixes to PEC, record now waits for beginning of buffer to start and PEC buffer overflow protection added. 
+ *                                       PEC now stays active if position in buffer is lost when index support is turned on since it can recover from this.
+ *                                       Added command to get the current pulseguide rate.  Added (optional) seperate pulse guide rate with memory.  Minor fix to smooth out guide after travel through backlash.
  *
  *
  * Author: Howard Dutton
@@ -144,8 +147,8 @@
 #include "Config.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "12 09 14"
-#define FirmwareNumber "1.0b8"
+#define FirmwareDate   "12 09 15"
+#define FirmwareNumber "1.0b9"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -476,9 +479,14 @@ double ID                = 0;
 
 // guide command
 #define GuideRate1x        2
+#define GuideRate16x       6
+#define GuideRateNone      255
 double  guideRates[10]={3.75,7.5,15,30,60,120,240,360,600,900}; 
 //                      .25X .5x 1x 2x 4x 8x  16x 24x 40x 60x
-volatile byte currentGuideRate     = GuideRate1x;
+byte currentGuideRate        = GuideRate16x;
+byte currentPulseGuideRate   = GuideRate1x;
+volatile byte activeGuideRate= GuideRateNone;
+
 volatile byte guideDirHA           = 0;
 long          guideDurationHA      = -1;
 unsigned long guideDurationLastHA  = 0;
@@ -516,6 +524,7 @@ long    lastWormRotationStepPos = -1;
 long    wormRotationStepPos = 0;
 long    PECindex         = 0;
 long    PECindex1        = 0;
+int     PECav            = 0;
 long    lastPECindex     = -1;
 long    PECtime_lastSense= 0;      // time since last PEC index was sensed
 long    PECindex_sense   = 0;      // position of active PEC index sensed
@@ -540,6 +549,8 @@ volatile int blDec        = 0;
 #define EE_currentSite 11
 #define EE_LMT         14
 #define EE_JD          18
+
+#define EE_pulseGuideRate 22
 
 #define EE_minAlt      40
 #define EE_maxAlt      41
@@ -631,7 +642,7 @@ void setup() {
 #endif
 
 // PEC index sense
-#ifdef PEC_SENSE_ON  
+#ifdef PEC_SENSE_ON
   pinMode(PecPin, INPUT);
 #endif
 
@@ -708,6 +719,9 @@ void setup() {
     EEPROM.write(EE_parkSaved,false);
     EEPROM.write(EE_parkStatus,NotParked);
   
+    // init the pulse-guide rate
+    EEPROM.write(EE_pulseGuideRate,GuideRate1x);
+
     // init the sidereal tracking rate, use this once - then issue the T+ and T- commands to fine tune
     // 1/16uS resolution timer, ticks per sidereal second
     EEPROM_writeQuad(EE_siderealInterval,(byte*)&siderealInterval);
@@ -804,11 +818,17 @@ void setup() {
   for (int i=0; i<PECBufferSize; i++) PEC_buffer[i]=EEPROM.read(EE_PECindex+i);
   EEPROM_readQuad(EE_PECrecord_index,(byte*)&PECindex_record); 
   EEPROM_readQuad(EE_PECsense_index,(byte*)&PECindex_sense);
+  #ifdef PEC_SENSE_OFF
+  PECindex_sense=0;
+  #endif
   
   // get the Park status
   parkSaved=EEPROM.read(EE_parkSaved);
   parkStatus=EEPROM.read(EE_parkStatus);
 
+  // get the pulse-guide rate
+  currentPulseGuideRate=EEPROM.read(EE_pulseGuideRate); if (currentPulseGuideRate>GuideRate1x) currentPulseGuideRate=GuideRate1x;
+  
   // makes onstep think that you parked the 'scope
   // combined with a hack in the goto syncEqu() function and you can quickly recover from
   // a reset without loosing much accuracy in the sky.  PEC is toast though.
@@ -817,8 +837,10 @@ void setup() {
   parkStatus=Parked;
   #endif
 
-  // set the default guide rate, 1x sidereal
-  setGuideRate(2); delay(110);
+  // set the default guide rate, 16x sidereal
+  setGuideRate(GuideRate16x);
+  enableGuideRate(GuideRate16x);
+  delay(110);
   
   // prep timers
   cli(); 
@@ -839,7 +861,7 @@ void loop() {
   }
   
   // PERIODIC ERROR CORRECTION -------------------------------------------------------------------------
-  if ((trackingState==TrackingSidereal) && (!((guideDirHA || guideDirDec) && (currentGuideRate>GuideRate1x)))) { 
+  if ((trackingState==TrackingSidereal) && (!((guideDirHA || guideDirDec) && (activeGuideRate>GuideRate1x)))) { 
     // only active while sidereal tracking with a guide rate that makes sense
     Pec();
   } else disablePec();
@@ -850,7 +872,7 @@ void loop() {
     siderealTimer=tempLst;
     
     // only active while sidereal tracking with a guide rate that makes sense
-    if ((trackingState==TrackingSidereal) && !(guideDirHA && (currentGuideRate>GuideRate1x))) {
+    if ((trackingState==TrackingSidereal) && !(guideDirHA && (activeGuideRate>GuideRate1x))) {
       if (((tempLst%st==0) && ((tempLst%sk!=0) || ((tempLst%st1==0) && (tempLst%sk1!=0) )))) {
           // PEC_Timer starts at zero again every second, PEC_Skip will control the rate and will trigger a +/- step every PEC_Skip steps while tracking 
           PEC_Timer++;
@@ -879,7 +901,7 @@ void loop() {
   // HOUSEKEEPING --------------------------------------------------------------------------------------
   // timer... falls in once a second, keeps the universal time clock ticking,
   // handles PPS GPS signal processing, watches safety limits, adjusts tracking rate for refraction
-  unsigned long m=millis(); 
+  unsigned long m=millis();
   if (m-clockTimer>999) {
     clockTimer=m;
     
@@ -891,6 +913,11 @@ void loop() {
     // update the local sidereal time floating point representation
     update_LST();
     
+    #ifdef PEC_SENSE
+    // see if we're on the PEC index
+    PECav = analogRead(1);
+    #endif
+
     #ifdef PPS_SENSE_ON
     // update clock
     cli();
