@@ -8,13 +8,14 @@ void Guide() {
     guideSiderealTimer=guideLst;  
     int sign=0;
     if (guideDirHA) {
+      if (!inBacklashHA) {
       if (((guideLst%gr_st==0) && ((guideLst%gr_sk!=0) || ((guideLst%gr_st1==0) && (guideLst%gr_sk1!=0) )))) {
         // as above, and keep track of how much we've moved for PEC recording
         if (guideDirHA=='e') sign=-1; else sign=1; guideHA=sign*amountGuideHA;
         // for RA, only apply the corrections now if fast guiding; otherwise they get combined with PEC & sidereal-tracking and are applied later
-        if (currentGuideRate>GuideRate1x) { if (!inBacklashHA) { cli(); targetHA+=(long)guideHA; sei(); } } else { accGuideHA+=guideHA; }
+        if (activeGuideRate>GuideRate1x) { if (!inBacklashHA) { cli(); targetHA+=(long)guideHA; sei(); } } else { accGuideHA+=guideHA; }
       }
-      if (!inBacklashHA) {
+
         // for pulse guiding, count down the mS and stop when timed out
         if (guideDurationHA>0)  {
           guideDurationHA-=(long)(micros()-guideDurationLastHA);
@@ -22,17 +23,17 @@ void Guide() {
           if (guideDurationHA<=0) { lstGuideStopHA=lst+amountGuideHA*(1.0/StepsPerSecond)*150.0; guideDirHA=0; } 
         }
       } else {
-        // reset the counter if in backlash
+        // don't count time if in backlash
         guideDurationLastHA=micros();
       }
     }
     
     if (guideDirDec) {
+      if (!inBacklashDec) {
       if (((guideLst%gd_st==0) && ((guideLst%gd_sk!=0) || ((guideLst%gd_st1==0) && (guideLst%gd_sk1!=0) )))) {
         // nudge the targetDec (where we're supposed to be) by amountMoveDec
         if (guideDirDec=='s') sign=-1; else sign=1; cli(); targetDec=targetDec+(long)sign*(long)amountGuideDec; sei();
       }
-      if (!inBacklashDec) {
         // for pulse guiding, count down the mS and stop when timed out
         if (guideDurationDec>0)  {
           guideDurationDec-=(long)(micros()-guideDurationLastDec);
@@ -40,7 +41,7 @@ void Guide() {
           if (guideDurationDec<=0) { lstGuideStopDec=lst+amountGuideDec*(1.0/StepsPerSecondDec)*150.0; guideDirDec=0;  } 
         }
       } else {
-        // reset the counter if in backlash
+        // don't count time if in backlash
         guideDurationLastDec=micros();
       }
     }
