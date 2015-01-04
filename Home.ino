@@ -64,15 +64,26 @@ boolean setHome() {
   parkStatus          = NotParked;
   EEPROM.write(EE_parkStatus,parkStatus);
   
-  // reset PEC  
-  PECstatus           = IgnorePEC;
-  PECrecorded         = false;
-  EEPROM.write(EE_PECstatus,PECstatus);
-  EEPROM.write(EE_PECrecorded,PECrecorded);
+  // reset PEC, unless we have an index to recover from this
+  #ifdef PEC_SENSE_OFF
+    PECstatus           = IgnorePEC;
+    PECrecorded         = false;
+    EEPROM.write(EE_PECstatus,PECstatus);
+    EEPROM.write(EE_PECrecorded,PECrecorded);
+  #else
+    PECstatus           = IgnorePEC;
+    PECstatus  =EEPROM.read(EE_PECstatus);
+  #endif
 
   // the polar home position
   startHA             = 90L*StepsPerDegreeHA;
   startDec            = celestialPoleDec*StepsPerDegreeDec;
+
+  // clear pulse-guiding state
+  guideDurationHA     = 0;
+  guideDurationLastHA = 0;
+  guideDurationDec    = 0;
+  guideDurationLastDec= 0;
 
   cli();
   targetHA            = startHA;
