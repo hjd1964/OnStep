@@ -379,7 +379,8 @@ the pdCor  term is 1 in HA
           } else
           if (parameter[0]=='9') { // 9n: Misc.
             switch (parameter[1]) {
-              case '0': char temp[12]; dtostrf(guideRates[currentGuideRate]/15.0,2,2,temp); sprintf(reply,"%s",temp); quietReply=true; break;  // guide rate
+              case '0': dtostrf(guideRates[currentPulseGuideRate]/15.0,2,2,reply); quietReply=true; break;  // pulse-guide rate
+              case '1': sprintf(reply,"%i",PECav); quietReply=true; break;                                  // pec analog value
             }
           } else commandError=true;
         } else commandError=true;
@@ -436,6 +437,11 @@ the pdCor  term is 1 in HA
       if (command[1]=='g') {
         if ( (atoi2((char *)&parameter[1],&i)) && ((i>=0) && (i<=16399)) && (parkStatus==NotParked)) { 
           if ((parameter[0]=='e') || (parameter[0]=='w')) {
+#ifdef SEPERATE_PULSE_GUIDE_RATE_ON
+            enableGuideRate(currentPulseGuideRate);
+#else
+            enableGuideRate(currentGuideRate);
+#endif
             guideDirHA=parameter[0];
             guideDurationLastHA=micros();
             guideDurationHA=(long)i*1000L;
@@ -443,6 +449,11 @@ the pdCor  term is 1 in HA
             quietReply=true;
          } else
             if ((parameter[0]=='n') || (parameter[0]=='s')) { 
+#ifdef SEPERATE_PULSE_GUIDE_RATE_ON
+            enableGuideRate(currentPulseGuideRate);
+#else
+            enableGuideRate(currentGuideRate);
+#endif
               guideDirDec=parameter[0]; 
               guideDurationLastDec=micros();
               guideDurationDec=(long)i*1000L; 
@@ -455,6 +466,7 @@ the pdCor  term is 1 in HA
 //         Returns: Nothing
       if ((command[1]=='e') || (command[1]=='w')) { 
         if (parkStatus==NotParked) {
+          enableGuideRate(currentGuideRate);
           guideDirHA=command[1];
           guideDurationHA=-1;
           cli(); if (guideDirHA=='e') guideTimerRateHA=-guideTimerRate; else guideTimerRateHA=guideTimerRate; sei();
@@ -465,6 +477,7 @@ the pdCor  term is 1 in HA
 //         Returns: Nothing
       if ((command[1]=='n') || (command[1]=='s')) { 
         if (parkStatus==NotParked) {
+          enableGuideRate(currentGuideRate);
           guideDirDec=command[1];
           guideDurationDec=-1;
           cli(); guideTimerRateDec=guideTimerRate; sei();
@@ -510,11 +523,17 @@ the pdCor  term is 1 in HA
           if ((parameter[1]=='/') && (trackingState==TrackingSidereal)) { PECstatus=ReadyRecordPEC; } else
           if (parameter[1]=='Z') { 
             for (i=0; i<PECBufferSize; i++) PEC_buffer[i]=128;
-              PECfirstRecord=true;
-              PECindex_record=0;
+              PECfirstRecord = true;
+              PECindex_record= 0;
+              PECstatus      = IgnorePEC;
+              PECrecorded    = false;
+              EEPROM.write(EE_PECstatus,PECstatus);
+              EEPROM.write(EE_PECrecorded,PECrecorded);
           } else
           if (parameter[1]=='!') {
             for (i=0; i<PECBufferSize; i++) EEPROM.write(EE_PECindex+i,PEC_buffer[i]);
+            PECrecorded=true;
+            PECstatus=IgnorePEC;
             EEPROM.write(EE_PECrecorded,PECrecorded);
             EEPROM.write(EE_PECstatus,PECstatus);
             EEPROM_writeQuad(EE_PECrecord_index,(byte*)&PECindex_record); 
@@ -1062,15 +1081,24 @@ boolean clearCommand_serial_one() {
 // calculates the tracking speed for move commands
 void setGuideRate(int g) {
   currentGuideRate=g;
+  if ((g<=GuideRate1x) && (currentPulseGuideRate!=g)) { currentPulseGuideRate=g; EEPROM.write(EE_pulseGuideRate,g); }
+}
+
+void enableGuideRate(int g) {
+  // don't do these lengthy calculations unless we have to
+  if (activeGuideRate==g) return;
   
-  // this sets the guide rate
+  activeGuideRate=g;
+  
+  // this enables the guide rate
   //                0.25X,0.5X,1X,2X,4X,8X ,16X,24X,40X 60X
   // guideRates[10]={3.75,7.5 ,15,30,60,120,240,360,600,900}; 
   guideTimerRate=(double)guideRates[g]/15.0;
   
   cli();
-  if (g<=GuideRate1x)
-            { amountGuideHA=1; } else  // 3.75, 7.5, 15
+  if (g<=GuideRate1x) { 
+    amountGuideHA=1; // 3.75, 7.5, 15 
+  } else  
   if (g<=4) { amountGuideHA=4; } else  // 30,  60
   if (g<=6) { amountGuideHA=16; } else // 120, 240
   if (g<=8) { amountGuideHA=40; } else // 360, 600
@@ -1080,4 +1108,4 @@ void setGuideRate(int g) {
   stepRateParameterGenerator((StepsPerSecond*guideTimerRate)/(double)amountGuideHA,&gr_st,&gr_sk,&gr_st1,&gr_sk1);
   amountGuideDec=(long)(amountGuideHA*(StepsPerSecondDec/StepsPerSecond)-0.000005)+1;
   stepRateParameterGenerator((StepsPerSecondDec*guideTimerRate)/(double)amountGuideDec,&gd_st,&gd_sk,&gd_st1,&gd_sk1);
-  }
+}
