@@ -96,7 +96,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     
     // automatic rate calculation HA
     long calculatedTimerRateHA;
-    double timerRateHA1=1.0; if (guideDirHA && (currentGuideRate>GuideRate1x)) timerRateHA1=0.0;
+    double timerRateHA1=1.0; if (guideDirHA && (activeGuideRate>GuideRate1x)) timerRateHA1=0.0;
     double timerRateHA2=fabs(guideTimerRateHA+pecTimerRateHA+timerRateHA1);
     if (timerRateHA2>0.5) calculatedTimerRateHA=(double)SiderealRate/timerRateHA2; else calculatedTimerRateHA=(double)SiderealRate/0.5;
     if (runTimerRateHA!=calculatedTimerRateHA) { timerRateHA=calculatedTimerRateHA; runTimerRateHA=calculatedTimerRateHA; }
