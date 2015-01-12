@@ -147,7 +147,7 @@
 #include "Config.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "12 09 15"
+#define FirmwareDate   "01 03 15"
 #define FirmwareNumber "1.0b9"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
