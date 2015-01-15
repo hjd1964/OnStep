@@ -671,6 +671,7 @@ void setup() {
 #if defined(__AVR__)
   attachInterrupt(PpsInt,ClockSync,RISING);
 #elif defined(__arm__) && defined(TEENSYDUINO)
+  pinMode(PpsPin, INPUT); // without this, interrupt seems not to work on teensy
   attachInterrupt(PpsPin,ClockSync,RISING);
 #endif
 #endif
