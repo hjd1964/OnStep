@@ -276,7 +276,7 @@ int    maxAlt;                                    // the maximum altitude, in de
 //                                  Atmel   328  | 2560
 #define LEDposPin  8       // Pin 8 (LED)   PB0    PH5
 #define LEDnegPin  9       // Pin 9 (GND)   PB1    PH6
-#define LEDneg2Pin 10      // Pin 10 (GND)  PB2?   PH7?
+#define LEDneg2Pin 10      // Pin 10 (GND)  P??    PB4
 
 // The HA(RA) and Dec jumpers (going to the big easy drivers) are simply four wire jumper cables, each has identical wiring - simple modular construction
 #define DecDirPin  4       // Pin 4 (Dir)   PD4    PG5
@@ -313,8 +313,8 @@ int    maxAlt;                                    // the maximum altitude, in de
 #define LEDposPORT PORTH   //
 #define LEDnegBit  6       // Pin 9
 #define LEDnegPORT PORTH   //
-#define LEDneg2Bit  7      // Pin 10
-#define LEDneg2PORT PORTH  //
+#define LEDneg2Bit  4      // Pin 10
+#define LEDneg2PORT PORTB  //
 
 #define DecDirBit  5       // Pin 4
 #define DecDirPORT PORTG   //
