@@ -99,10 +99,10 @@
 
                                      // for my mounts both RA and Dec axis have the same gear train
 #define StepsPerDegreeHA      19200L // calculated as    :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
-                                     // Takahashi EM10b  :  48            * 16          * 50 * (40/32)    *  144/360              = 19200
+                                     // Takahashi EM10b  :  48            * 16          * 50 * (45/36)    *  144/360              = 19200
                                      // Losmandy G11     :  400           * 32          * 1               *  360/360              = 12800
 #define StepsPerDegreeDec     19200L // calculated as    :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
-                                     // Takahashi EM10b  :  48            * 16          * 50 * (40/32)    *  144/360              = 19200
+                                     // Takahashi EM10b  :  48            * 16          * 50 * (45/36)    *  144/360              = 19200
                                      // Losmandy G11     :  400           * 32          * 1               *  360/360              = 12800
                                      // the EM10b has two spur gears that drive the RA/Dec worms, they are 60 tooth and 48 tooth gears
                                      // for an 1.25x reduction in addition to the 50:1 gear heads on the steppers for a 62.5:1 final ratio
