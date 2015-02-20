@@ -514,4 +514,18 @@ void stepRateParameterGenerator(double steps, unsigned int *st, unsigned int *sk
       } else { *sk1=0; }
     } else { *st1=0; }
   } else { *sk=0; }
+  
+  // fix any overflow in last digit
+  if (*sk1!=0) {
+    if (*st1+1==*sk1) { *sk1=0; *st1+=1; return; }
+  } else {
+    if (st1!=0) {
+      if (*sk+1==*st1) { *st1=0; *sk+=1; return; }
+    } else {
+      if (*sk!=0) {
+        if (*st+1==*sk) { *sk=0; *st+=1; return; }
+      }
+    }
+  }
+
 }
