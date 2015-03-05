@@ -89,7 +89,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
 #endif
 {
   // run 1/3 of the time at 3x the rate, unless a goto is happening
-  if (trackingState!=TrackingMoveTo) { cnt++; if (cnt%3!=0) return; cnt=0; }
+  if (trackingState!=TrackingMoveTo) { cnt++; } // if (cnt%3!=0) return; cnt=0; }
   lst++;
 
   if (trackingState==TrackingSidereal) {
