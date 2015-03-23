@@ -40,6 +40,10 @@
 // for getting control of the 'scope when things go horribly wrong, default=OFF
 #define RESCUE_MODE_OFF
 
+// Mount type, default is _GEM (German Equatorial) other options are _FORK, _FORK_ALT.  _FORK switches off Meridian Flips after (1, 2 or 3 star) alignment is done.  _FORK_ALT disables Meridian Flips (1 star align.)
+// _ALTAZM will be for Alt/Azm mounted 'scopes, but isn't implemented yet.
+#define MOUNT_TYPE_GEM
+
 // PPS sense rising edge on pin 21 for optional precision clock source (GPS, for example), default=OFF (Teensy3.1 Pin 23)
 #define PPS_SENSE_OFF
 // PEC sense, rising edge on pin 2 (ex. PEC_SENSE_ON) or threshold value on Analog 1; for optional PEC index, default=OFF
@@ -50,8 +54,11 @@
 // switch close (to ground) on pin 3 for optional limit sense (stops gotos and/or tracking), default=OFF
 #define LIMIT_SENSE_OFF
 // light status LED by sink to ground (pin 9) and source +5V (pin 8), default=ON
+// _ON and OnStep keeps this illuminated to indicate that the controller is active.  When sidereal tracking this LED will rapidly flash with RA step pulses
 #define STATUS_LED_PINS_ON
-// lights 2nd status LED by sink to ground (pin 10), default=OFF (must be OFF for Teensy3.1)
+// lights 2nd status LED by sink to ground (pin 10), default=OFF, must be off for Teensy3.1 (pin 7)
+// _ON sets this to blink at 1 sec intervals when PPS is synced
+//  n sets this to dimly light a polar finder reticle, for example I use STATUS_LED2_PINS 250
 #define STATUS_LED2_PINS_OFF
 // optional +5V on pins 5 and 12 to Pololu or other stepper drivers without on-board 5V voltage regulators, default=OFF (Teensy3.1 Pins 5,11)
 #define POWER_SUPPLY_PINS_OFF
@@ -61,9 +68,6 @@
 // enables Goto speed equalization for differing right ascension and declination StepsPerDegreeHA/Dec, default=OFF
 // must be _ON when StepsPerDegreeHA isn't equal to StepsPerDegreeDec (limited testing done)
 #define DEC_RATIO_OFF
-
-// enables alignment on two or three stars, default=ON
-#define ALIGN_TWO_AND_THREE_STAR_ON
 
 // enables Horizon coordinate goto functions, default=ON
 #define ALT_AZM_GOTO_ON
@@ -84,6 +88,7 @@
 #define CHKSUM1_OFF     // default _OFF: required for OnStep Controller2 Android App (and others)
 
 // ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
+#define RememberMaxRate_OFF          // set to ON and OnStep will remember rates set in the ASCOM driver or Android App (when supported), default=OFF 
 #define MaxRate                   96 // this is the minimum number of micro-seconds between micro-steps
                                      // minimum* (fastest goto) is around 16 (Teensy3.1) or 32 (Mega2560), default is 96, higher is ok
                                      // too low and OnStep communicates slowly and/or freezes as the motor timers use up all the MCU time
