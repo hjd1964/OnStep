@@ -8,11 +8,29 @@ volatile boolean DEclr = true;
 volatile boolean TakeStepDec = false;
 #endif
 
+#if defined(HA_MODE) && defined(HA_MODE_GOTO)
+volatile long stepHA=1;
+volatile long stepHA_next=1;
+volatile long modeHA_next=HA_MODE;
+volatile boolean gotoModeHA=false;
+#else
+#define stepHA 1
+#endif
+
+#if defined(DE_MODE) && defined(DE_MODE_GOTO)
+volatile long stepDec=1;
+volatile long stepDec_next=1;
+volatile long modeDec_next=DE_MODE;
+volatile boolean gotoModeDec=false;
+#else
+#define stepDec 1
+#endif
+
 //--------------------------------------------------------------------------------------------------
 // set timer1 to rate (in microseconds*16)
 void Timer1SetRate(long rate) {
 #if defined(__AVR__)
-  TCCR1B = 0; TCCR1A = 0;  
+  TCCR1B = 0; TCCR1A = 0;
   TIMSK1 = 0;
   rate=rate/PPSrateRatio;
 
@@ -44,7 +62,7 @@ volatile long isrTimerRateDec=0;
 volatile long runTimerRateHA=0;
 volatile long runTimerRateDec=0;
 void SetSiderealClockRate(long Interval) {
-  if (trackingState==TrackingMoveTo) Timer1SetRate(Interval/100);  else  Timer1SetRate(Interval/300);
+  if (trackingState==TrackingMoveTo) Timer1SetRate(Interval/100); else Timer1SetRate(Interval/300);
   isrTimerRateHA=0;
   isrTimerRateDec=0;
 }
@@ -53,24 +71,50 @@ void SetSiderealClockRate(long Interval) {
 volatile uint32_t nextHArate;
 void Timer3SetRate(long rate) {
 #if defined(__AVR__)
-  // valid for rates down to 0.25 second
-  if (StepsPerSecond<31) rate=rate/64; else rate=rate/8;
-  cli(); nextHArate=rate-1; sei();
+  // valid for rates down to 0.25 second, and cap the rate
+  if (StepsPerSecond<31) rate=rate/64L; else rate=rate/8L;
+  if (rate>65536L) rate=65536L;
+  cli(); nextHArate=rate-1L; sei();
 #elif defined(__arm__) && defined(TEENSYDUINO)
   nextHArate=(F_BUS / 1000000) * (rate*0.0625) * 0.5 - 1;
-  cli(); PIT_LDVAL1=nextHArate; sei();
+  cli();
+#if defined(HA_MODE) && defined(HA_MODE_GOTO)
+  // reprogram the timer for a higher/lower rate and switch micro-stepping rate
+  // we must enter here fast enough to catch the moment when the motor step location happens to be right and the last step (of the correct size) was taken
+  if ((stepHA!=stepHA_next) && (HAclr) && ((posHA+blHA)%128==0)) {
+    stepHA=stepHA_next;
+    digitalWrite(HA_M0,(modeHA_next & 1));
+    digitalWrite(HA_M1,(modeHA_next>>1 & 1));
+    digitalWrite(HA_M2,(modeHA_next>>2 & 1));
+  }
+#endif
+  PIT_LDVAL1=nextHArate*stepHA;
+  sei();
 #endif
 }
 // set timer4 to rate (in microseconds*16)
 volatile uint32_t nextDErate;
 void Timer4SetRate(long rate) {
 #if defined(__AVR__)
-  // valid for rates down to 0.25 second
-  if (StepsPerSecond<31) rate=rate/64; else rate=rate/8;
-  cli(); nextDErate=rate-1; sei();
+  // valid for rates down to 0.25 second, and cap the rate
+  if (StepsPerSecond<31) rate=rate/64L; else rate=rate/8L;
+  if (rate>65536L) rate=65536L;
+  cli(); nextDErate=rate-1L; sei();
 #elif defined(__arm__) && defined(TEENSYDUINO)
   nextDErate=(F_BUS / 1000000) * (rate*0.0625) * 0.5 - 1;
-  cli(); PIT_LDVAL2=nextDErate; sei();
+  cli();
+#if defined(DE_MODE) && defined(DE_MODE_GOTO)
+  // reprogram the timer for a higher/lower rate and switch micro-stepping rate
+  // we must enter here fast enough to catch the moment when the motor step location happens to be right and the last step (of the correct size) was taken
+  if ((stepDec!=stepDec_next) && (DEclr) && ((posDec+blDec)%128==0)) {
+    stepDec=stepDec_next;
+    digitalWrite(DE_M0,(modeDec_next & 1));
+    digitalWrite(DE_M1,(modeDec_next>>1 & 1));
+    digitalWrite(DE_M2,(modeDec_next>>2 & 1));
+  }
+#endif
+  PIT_LDVAL2=nextDErate*stepDec; 
+  sei();
 #endif
 }
 
@@ -89,46 +133,48 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
 #endif
 {
   // run 1/3 of the time at 3x the rate, unless a goto is happening
-  if (trackingState!=TrackingMoveTo) { cnt++; } // if (cnt%3!=0) return; cnt=0; }
+  if (trackingState!=TrackingMoveTo) { cnt++; if (cnt%3!=0) return; cnt=0; }
   lst++;
 
   if (trackingState==TrackingSidereal) {
-    
     // automatic rate calculation HA
     long calculatedTimerRateHA;
     double timerRateHA1=1.0; if (guideDirHA && (activeGuideRate>GuideRate1x)) timerRateHA1=0.0;
     double timerRateHA2=fabs(guideTimerRateHA+pecTimerRateHA+timerRateHA1);
-    if (timerRateHA2>0.5) calculatedTimerRateHA=(double)SiderealRate/timerRateHA2; else calculatedTimerRateHA=(double)SiderealRate/0.5;
+    // round up to run the motor timers just a tiny bit slow, then adjust below if we start to fall behind during sidereal tracking
+    if (timerRateHA2>0.5) calculatedTimerRateHA=ceil((double)SiderealRate/timerRateHA2); else calculatedTimerRateHA=ceil((double)SiderealRate*2.0);
     if (runTimerRateHA!=calculatedTimerRateHA) { timerRateHA=calculatedTimerRateHA; runTimerRateHA=calculatedTimerRateHA; }
 
     // dynamic rate adjust
-    double x=fabs(targetHA-posHA); x=x*x;
-    if (x>0) {
-      if (x>160.0) x=160.0; x=50000.00-x; x=x/50000.0;
-      timerRateHA=calculatedTimerRateHA*x; // up to 0.32% faster (or as little as 0.002%)
+    // in pre-scaler /64 mode the motor timers might be slow (relative to the sidereal timer) by as much as 0.000004 seconds/second (16000000/64)
+    // so a 0.01% (0.0001x) increase is always enough to correct for this, it happens very slowly - about a single step worth of movement over an hours time
+    double x=fabs((targetHA+PEC_HA)-posHA);
+    if (x>1.0) {
+      x=x-1.0; if (x>10.0) x=10.0; x=10000.00-x; x=x/10000.0;
+      timerRateHA=calculatedTimerRateHA*x; // up to 0.01% faster (or as little as 0.001%)
       runTimerRateHA=timerRateHA;
     }
-    
+
     // automatic rate calculation Dec
     long calculatedTimerRateDec;
     double timerRateDec1=guideTimerRateDec;
     // if we're stopped, just run the timer fast since we're not moving anyway
-    if (timerRateDec1>0.5) calculatedTimerRateDec=(double)SiderealRate/timerRateDec1; else calculatedTimerRateDec=(double)SiderealRate/0.5;
+    if (timerRateDec1>0.5) calculatedTimerRateDec=ceil((double)SiderealRate/timerRateDec1); else calculatedTimerRateDec=ceil((double)SiderealRate*2.0);
     // remember our "running" rate and only update the actual rate when it changes
     if (runTimerRateDec!=calculatedTimerRateDec) { timerRateDec=calculatedTimerRateDec; runTimerRateDec=calculatedTimerRateDec; }
- 
+    
     // dynamic rate adjust
-    x=fabs(targetDec-posDec); x=x*x;
-    if (x>0) {
-      if (x>160.0) x=160.0; x=50000.00-x; x=x/50000.0;
-      timerRateDec=calculatedTimerRateDec*x; // up to 0.32% faster (or as little as 0.002%)
+    x=fabs(targetDec-posDec);
+    if (x>1.0) {
+      x=x-1.0; if (x>10.0) x=10.0; x=10000.00-x; x=x/10000.0;
+      timerRateDec=calculatedTimerRateDec*x; // up to 0.01% faster (or as little as 0.001%)
       runTimerRateDec=timerRateDec;
     }
   }
   
   long thisTimerRateHA=timerRateHA;
   #ifdef DEC_RATIO_ON
-  long thisTimerRateDec=timerRateDec*timerRateRatio;
+  long thisTimerRateDec=(timerRateDec*timerRateRatio);
   #else
   long thisTimerRateDec=timerRateDec;
   #endif
@@ -142,7 +188,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     // travel through the backlash is done, but we weren't following the target while it was happening!
     // so now get us back to near where we need to be
     if ((!inBacklashHA) && (wasInBacklashHA) && (!guideDirHA)) {
-      if (abs(posHA-targetHA)>2) thisTimerRateHA=TakeupRate; else wasInBacklashHA=false;
+      if (abs(posHA-(targetHA+PEC_HA))>2) thisTimerRateHA=TakeupRate; else wasInBacklashHA=false;
     }
     if ((!inBacklashDec) && (wasInBacklashDec) && (!guideDirDec)) {
       if (abs(posDec-targetDec)>2) thisTimerRateDec=TakeupRate; else wasInBacklashDec=false;
@@ -152,7 +198,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
   if (trackingState==TrackingMoveTo) {
     // trigger Goto step mode when faster than the fastest guide rate
     #if defined(DE_MODE) && defined(DE_MODE_GOTO)
-    gotoRateDec=(thisTimerRateDec<SiderealRate/80);
+    gotoRateDec=(thisTimerRateDec<SiderealRate/80);  // 80 times the sidereal rate 
     #endif
     #if defined(HA_MODE) && defined(HA_MODE_GOTO)
     gotoRateHA=(thisTimerRateHA<SiderealRate/80);
@@ -170,13 +216,6 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
   }
 }
 
-#if defined(HA_MODE) && defined(HA_MODE_GOTO)
-volatile long stepHA=1;
-volatile boolean gotoModeHA=false;
-#else
-#define stepHA 1
-#endif
-
 ISR(TIMER3_COMPA_vect)
 {
   // drivers step on the rising edge, need >=1.9uS to settle (for DRV8825 or A4988) so this is early in the routine
@@ -190,28 +229,22 @@ ISR(TIMER3_COMPA_vect)
 
 #if defined(HA_MODE) && defined(HA_MODE_GOTO)
 #if defined(__AVR__)
-  OCR3A = nextHArate*stepHA;
+  stepHA=stepHA_next;
+  OCR3A =nextHArate*stepHA;
 #endif
   // switch micro-step mode
-  if ((!gotoModeHA && gotoRateHA) || (gotoModeHA && !gotoRateHA)) {
+  if (gotoModeHA!=gotoRateHA) {
     // only when at the home position
     if ((posHA+blHA)%128==0) {
       // make sure travel through backlash compensation is finished
       if ((blHA==backlashHA) || (blHA==0)) {
         // switch mode
-        if (gotoModeHA) {
-          digitalWrite(HA_M0,(HA_MODE & 1));
-          digitalWrite(HA_M1,(HA_MODE>>1 & 1));
-          digitalWrite(HA_M2,(HA_MODE>>2 & 1));
-          stepHA=1;
-          gotoModeHA=false;
-        } else {
-          digitalWrite(HA_M0,(HA_MODE_GOTO & 1));
-          digitalWrite(HA_M1,(HA_MODE_GOTO>>1 & 1));
-          digitalWrite(HA_M2,(HA_MODE_GOTO>>2 & 1));
-          stepHA=HA_STEP_GOTO;
-          gotoModeHA=true;
-        }
+        if (gotoModeHA) { stepHA_next=1; modeHA_next=HA_MODE; gotoModeHA=false; } else { stepHA_next=HA_STEP_GOTO; modeHA_next=HA_MODE_GOTO; gotoModeHA=true; }
+#if defined(__AVR__)
+        digitalWrite(HA_M0,(modeHA_next & 1));
+        digitalWrite(HA_M1,(modeHA_next>>1 & 1));
+        digitalWrite(HA_M2,(modeHA_next>>2 & 1));
+#endif
       }
     }
   }
@@ -247,13 +280,6 @@ ISR(TIMER3_COMPA_vect)
 #endif
 }
 
-#if defined(DE_MODE) && defined(DE_MODE_GOTO)
-volatile long stepDec=1;
-volatile boolean gotoModeDec=false;
-#else
-#define stepDec 1
-#endif
-
 ISR(TIMER4_COMPA_vect)
 {
   // drivers step on the rising edge
@@ -267,28 +293,22 @@ ISR(TIMER4_COMPA_vect)
 
 #if defined(DE_MODE) && defined(DE_MODE_GOTO)
 #if defined(__AVR__)
-  OCR4A = nextDErate*stepDec;
+  stepDec=stepDec_next;
+  OCR4A  =nextDErate*stepDec;
 #endif
   // switch micro-step mode
-  if ((!gotoModeDec && gotoRateDec) || (gotoModeDec && !gotoRateDec)) {
+  if (gotoModeDec!=gotoRateDec) {
     // only when at home position
     if ((posDec+blDec)%128==0) {
       // make sure travel through backlash compensation is finished
       if ((blDec==backlashDec) || (blDec==0)) {
         // switch mode
-        if (gotoModeDec) {
-          digitalWrite(DE_M0,(DE_MODE & 1));
-          digitalWrite(DE_M1,(DE_MODE>>1 & 1));
-          digitalWrite(DE_M2,(DE_MODE>>2 & 1));
-          stepDec=1;
-          gotoModeDec=false;
-        } else {
-          digitalWrite(DE_M0,(DE_MODE_GOTO & 1));
-          digitalWrite(DE_M1,(DE_MODE_GOTO>>1 & 1));
-          digitalWrite(DE_M2,(DE_MODE_GOTO>>2 & 1));
-          stepDec=DE_STEP_GOTO;
-          gotoModeDec=true;
-        }
+        if (gotoModeDec) { stepDec_next=1; modeDec_next=DE_MODE; gotoModeDec=false; } else { stepDec_next=DE_STEP_GOTO; modeDec_next=DE_MODE_GOTO; gotoModeDec=true; }
+#if defined(__AVR__)
+        digitalWrite(DE_M0,(modeDec_next & 1));
+        digitalWrite(DE_M1,(modeDec_next>>1 & 1));
+        digitalWrite(DE_M2,(modeDec_next>>2 & 1));
+#endif
       }
     }
   }
