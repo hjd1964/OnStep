@@ -127,6 +127,10 @@
  * 01-03-2015          1.0b9             Added PEC analog sensor index support.  Fixes to PEC, record now waits for beginning of buffer to start and PEC buffer overflow protection added. 
  *                                       PEC now stays active if position in buffer is lost when index support is turned on since it can recover from this.
  *                                       Added command to get the current pulseguide rate.  Added (optional) seperate pulse guide rate with memory.  Minor fix to smooth out guide after travel through backlash.
+ * 01-13-2015          1.0b10            MaxRate can now be set by updated ASCOM driver, OnStep can optionally remember this setting when it changes.
+ * 02-06-2015          1.0b11            Corrected sidereal rate bug, improvements to guiding responsiveness, status LEDS now provide more feedback.
+ * 03-08-2015          1.0b12            Abandoned step rate generation logic method in favor of fixed point math for rate calculations.  Hopefully fixed Teensy3.1 micro-step mode switch during goto problems. 
+ *                                       Initial support for fork mounts: polar home position HA=0, mode w/meridian flips completely disabled, mode with meridian flips enabled until align is complete.
  *
  *
  * Author: Howard Dutton
@@ -147,14 +151,16 @@
 #include "Config.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "01 03 15"
-#define FirmwareNumber "1.0b9"
+#define FirmwareDate   "03 08 15"
+#define FirmwareNumber "1.0b12"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
 // forces initialialization of a host of settings in EEPROM. OnStep does this automatically, most likely, you will want to leave this alone
 #define INIT_KEY false    // set to true to keep automatic initilization from happening.  This is a one-time operation... upload to the Arduino, then set to false and upload again
 #define initKey 915307548 // unique identifier for the current initialization format, do not change
+
+#define fixed uint64_t
 
 // Time keeping ------------------------------------------------------------------------------------------------------------
 long siderealTimer    = 0;           // counter to issue steps during tracking
@@ -205,10 +211,8 @@ boolean refraction = true;           // track at the refraction rate for the are
 #else
 boolean refraction = false;
 #endif
-unsigned int gr_st=0,gr_sk=0,gr_st1=0,gr_sk1=0;  // used for guiding step generation, RA
-unsigned int gd_st=0,gd_sk=0,gd_st1=0,gd_sk1=0;  // used for guiding step generation, Dec
-volatile unsigned int st=0,sk=0,st1=0,sk1=0;     // used for sidereal tracking step generation
 
+unsigned long    maxRate = MaxRate*16;
 volatile long    timerRateHA = 0;
 volatile long    timerRateBacklashHA = 0;
 volatile boolean inBacklashHA=false;
@@ -235,19 +239,34 @@ void TIMER4_COMPA_vect(void);
 double latitude  = 0.0;
 double cosLat = 1.0;
 double sinLat = 0.0;
-long celestialPoleDec = 90L;
 double longitude = 0.0;
+
+// fix underPoleLimit for fork mounts
+#if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT)
+#undef underPoleLimit
+#define underPoleLimit 12
+#endif
+
+#ifdef MOUNT_TYPE_GEM
+long celestialPoleHA  = 90L;
+#endif
+#if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT) || defined(MOUNT_TYPE_ALTAZM)
+long celestialPoleHA  = 0L;
+#endif
+long celestialPoleDec = 90L;
 
 volatile long posHA      = 90L*StepsPerDegreeHA;   // hour angle position in steps
 volatile long startHA    = 90L*StepsPerDegreeHA;   // hour angle of goto start position in steps
+volatile fixed fTargetHA = 90L*StepsPerDegreeHA;   // hour angle of goto end   position in steps
 volatile long targetHA   = 90L*StepsPerDegreeHA;   // hour angle of goto end   position in steps
 volatile byte dirHA      = 1;                      // stepping direction + or -
 volatile long PEC_HA     = 0;                      // for PEC, adds or subtracts steps
 double newTargetRA       = 0.0;                    // holds the RA for goTos
-long origTargetHA        = 0;
+fixed origTargetHA       = 0;
 
 volatile long posDec     = 90L*StepsPerDegreeDec; // declination position in steps
 volatile long startDec   = 90L*StepsPerDegreeDec; // declination of goto start position in steps
+volatile fixed fTargetDec= 90L*StepsPerDegreeDec; // declination of goto end   position in steps
 volatile long targetDec  = 90L*StepsPerDegreeDec; // declination of goto end   position in steps
 volatile byte dirDec     = 1;                     // stepping direction + or -
 double newTargetDec      = 0.0;                   // holds the Dec for goTos
@@ -262,6 +281,7 @@ int    maxAlt;                                    // the maximum altitude, in de
 
 #define CLR(x,y) (x&=(~(1<<y)))
 #define SET(x,y) (x|=(1<<y))
+#define TGL(x,y) (x^=(1<<y))
 
 // I set the pin usage to facilitate easy connection of jumper cables
 // for now, the #defines below are used to program the port modes using the standard Arduino library
@@ -397,6 +417,11 @@ volatile byte trackingState     = TrackingNone;
 volatile byte lastTrackingState = TrackingNone;
 boolean abortSlew        = false;
 
+#define MeridianFlipNever  0
+#define MeridianFlipAlign  1
+#define MeridianFlipAlways 2
+byte meridianFlip = MeridianFlipAlways;
+
 #define AlignNone        0
 #define AlignOneStar1    1
 #define AlignTwoStar1    11
@@ -477,6 +502,10 @@ double pdCor             = 0;       // declination/polar orthogonal correction
 double IH                = 0;       // offset corrections/align
 double ID                = 0;
 
+// tracking and PEC, fractional steps
+fixed fstep = 0;
+fixed pstep = 0;
+
 // guide command
 #define GuideRate1x        2
 #define GuideRate16x       6
@@ -494,11 +523,13 @@ byte          guideDirDec          = 0;
 long          guideDurationDec     = -1;
 unsigned long guideDurationLastDec = 0;
 
+long lastTargetHA=0;
+long debugv1 = 0;
+
 double  guideTimerRate    = 0;
-long    amountGuideHA     = 0;
+fixed   amountGuideHA     = 0;
 long    guideHA           = 0;
-long    accGuideHA        = 0;
-long    amountGuideDec    = 0;
+fixed   amountGuideDec    = 0;
 long    guideDec          = 0;
 //
 long lstGuideStopHA=0;
@@ -511,9 +542,6 @@ long lstGuideStopDec=0;
 #define PlayPEC          2
 #define ReadyRecordPEC   3
 #define RecordPEC        4
-unsigned int PEC_Timer   = 0;        // for PEC, keeps time for applying steps
-long    PEC_Skip         = 0;        // for PEC, number of sidereal hundredths of a second between applying steps
-long    accPecPlayHA     = 0;        // for PEC, buffers steps to be played back
 long    accPecGuideHA    = 0;        // for PEC, buffers steps to be recorded
 boolean PECfirstRecord   = false;
 boolean PECstatus        = IgnorePEC;
@@ -536,6 +564,10 @@ volatile int backlashDec  = 0;
 volatile int blHA         = 0;
 volatile int blDec        = 0;
 
+// status state
+boolean LED_ON = false;
+boolean LED2_ON = false;
+
 // EEPROM Info --------------------------------------------------------------------------------------------------------------
 // 0-1023 bytes
 // general purpose storage 0..99
@@ -550,7 +582,8 @@ volatile int blDec        = 0;
 #define EE_LMT         14
 #define EE_JD          18
 
-#define EE_pulseGuideRate 22
+#define EE_pulseGuideRate 22  // 1 byte
+#define EE_maxRate     23     // 2 bytes
 
 #define EE_minAlt      40
 #define EE_maxAlt      41
@@ -609,7 +642,8 @@ volatile int blDec        = 0;
 byte PEC_buffer[PECBufferSize];
 
 void setup() {
-
+  fstep=doubleToFixed(StepsPerSecond/100.0);
+  
 // initialize the stepper control pins RA and Dec
   pinMode(HAStepPin, OUTPUT);
   pinMode(HADirPin, OUTPUT); 
@@ -621,17 +655,32 @@ void setup() {
 // light status LED (provides both +5 and GND)
 #ifdef STATUS_LED_PINS_ON
   pinMode(LEDnegPin, OUTPUT);
-  pinMode(LEDposPin, OUTPUT);
   CLR(LEDnegPORT, LEDnegBit);
+  pinMode(LEDposPin, OUTPUT);
   SET(LEDposPORT, LEDposBit);
+  LED_ON=true;
+#endif
+// light status LED (provides both +5 and pwm'd GND for polar reticule)
+#ifdef STATUS_LED_PINS
+  pinMode(LEDnegPin, OUTPUT);
+  CLR(LEDnegPORT, LEDnegBit);
+  pinMode(LEDposPin, OUTPUT);
+  SET(LEDposPORT, LEDposBit);
+  analogWrite(LEDnegPin,STATUS_LED_PINS);
+  LED_ON=true;
 #endif
 
 // light second status LED (provides just GND)
 #ifdef STATUS_LED2_PINS_ON
-  pinMode(LEDneg2Pin, OUTPUT);       
+  pinMode(LEDneg2Pin, OUTPUT);
+  CLR(LEDneg2PORT, LEDneg2Bit); LED2_ON=false;
+#endif
+// light second status LED (provides pwm'd GND for polar reticule)
+#ifdef STATUS_LED2_PINS
+  pinMode(LEDneg2Pin, OUTPUT);
   CLR(LEDneg2PORT, LEDneg2Bit);
-  analogWrite(LEDneg2Pin,250);
-#endif  
+  analogWrite(LEDneg2Pin,STATUS_LED2_PINS);
+#endif
 
 // provide 5V power to stepper drivers if requested
 #ifdef POWER_SUPPLY_PINS_ON  
@@ -671,7 +720,6 @@ void setup() {
 #if defined(__AVR__)
   attachInterrupt(PpsInt,ClockSync,RISING);
 #elif defined(__arm__) && defined(TEENSYDUINO)
-  pinMode(PpsPin, INPUT); // without this, interrupt seems not to work on teensy
   attachInterrupt(PpsPin,ClockSync,RISING);
 #endif
 #endif
@@ -722,6 +770,10 @@ void setup() {
   
     // init the pulse-guide rate
     EEPROM.write(EE_pulseGuideRate,GuideRate1x);
+    
+    // init the default maxRate
+    if (maxRate<2L*16L) maxRate=2L*16L; if (maxRate>10000L*16L) maxRate=10000L*16L;
+    EEPROM_writeInt(EE_maxRate,(int)(maxRate/16L));
 
     // init the sidereal tracking rate, use this once - then issue the T+ and T- commands to fine tune
     // 1/16uS resolution timer, ticks per sidereal second
@@ -741,9 +793,6 @@ void setup() {
   cli(); SiderealRate=siderealInterval/StepsPerSecond; TakeupRate=SiderealRate/4; sei();
   timerRateHA     =SiderealRate;
   timerRateDec    =SiderealRate;
-
-  // figure out how to issue steps at the StepsPerSecond rate
-  unsigned int _st,_sk,_st1,_sk1; stepRateParameterGenerator(StepsPerSecond,&_st,&_sk,&_st1,&_sk1); st=_st; sk=_sk; st1=_st1; sk1=_sk1;
 
   // backlash takeup rates
   timerRateBacklashHA =timerRateHA /BacklashTakeupRate;
@@ -829,6 +878,15 @@ void setup() {
 
   // get the pulse-guide rate
   currentPulseGuideRate=EEPROM.read(EE_pulseGuideRate); if (currentPulseGuideRate>GuideRate1x) currentPulseGuideRate=GuideRate1x;
+
+  // get the Goto rate
+  maxRate=EEPROM_readInt(EE_maxRate)*16L;
+  if (maxRate<2L*16L) maxRate=2L*16L; if (maxRate>10000*16) maxRate=10000L*16L;
+  #ifdef RememberMaxRate_ON
+  if (maxRate<2L*16L) maxRate=MaxRate*16L; if (maxRate>10000L*16L) maxRate=MaxRate*16L;
+  #else
+  if (maxRate!=MaxRate*16L) { maxRate=MaxRate*16L; EEPROM_writeInt(EE_maxRate,(int)(maxRate/16L)); }
+  #endif
   
   // makes onstep think that you parked the 'scope
   // combined with a hack in the goto syncEqu() function and you can quickly recover from
@@ -874,27 +932,20 @@ void loop() {
     
     // only active while sidereal tracking with a guide rate that makes sense
     if ((trackingState==TrackingSidereal) && !(guideDirHA && (activeGuideRate>GuideRate1x))) {
-      if (((tempLst%st==0) && ((tempLst%sk!=0) || ((tempLst%st1==0) && (tempLst%sk1!=0) )))) {
-          // PEC_Timer starts at zero again every second, PEC_Skip will control the rate and will trigger a +/- step every PEC_Skip steps while tracking 
-          PEC_Timer++;
-  
-          // lookup Guiding
-          long ig=0; if (accGuideHA<0) { ig=-1; accGuideHA++; } else if (accGuideHA>0) { ig=1; accGuideHA--; }
-  
-          // lookup PEC
-          long ip=0;
-          if (!PEC_Skip==0) {
-            if (PEC_Timer%PEC_Skip==0) {
-              if (accPecPlayHA<0) { ip=-1; accPecPlayHA++; } else if (accPecPlayHA>0) { ip=1; accPecPlayHA--; } } }
-  
-          // apply the Tracking, Guiding, and PEC
-          cli(); targetHA=targetHA+1+ig; PEC_HA+=ip; sei();
-      }
+      // apply the Tracking, Guiding, and PEC
+      fTargetHA+=fstep;
+      if (pecTimerRateHA!=0) fTargetHA+=pstep;
+      cli(); targetHA=fixedToLong(fTargetHA); sei();
+
+      #ifdef STATUS_LED_PINS_ON
+      if (LED_ON) { SET(LEDnegPORT,LEDnegBit); } else { CLR(LEDnegPORT,LEDnegBit); }
+      LED_ON!=LED_ON; // indicate tracking
+      #endif
     }
 
     if (trackingState==TrackingMoveTo) {
       // keeps the target where it's supposed to be while doing gotos
-      if ((lastTrackingState==TrackingSidereal) && ((tempLst%st==0) && ((tempLst%sk!=0) || ((tempLst%st1==0) && (tempLst%sk1!=0) )))) { cli(); targetHA++; sei(); origTargetHA++; }
+      if (lastTrackingState==TrackingSidereal) { origTargetHA+=fstep; fTargetHA+=fstep; cli(); targetHA=fixedToLong(fTargetHA); sei();  }
       moveTo();
     }
   }
@@ -906,6 +957,10 @@ void loop() {
   if (m-clockTimer>999) {
     clockTimer=m;
     
+    // for testing, average steps per second
+    debugv1=(debugv1*4+(targetHA*1000-lastTargetHA))/5;
+    lastTargetHA=targetHA*1000;
+    
     // update the UT1 CLOCK
     // this clock doesn't rollover (at 24 hours) since that would cause date confusion
     double t2=(double)(m-UT1mS_start)/1000.0;
@@ -916,22 +971,44 @@ void loop() {
     
     #ifdef PEC_SENSE
     // see if we're on the PEC index
-    PECav = analogRead(1);
+    if (trackingState==TrackingSidereal) PECav = analogRead(1);
     #endif
 
     #ifdef PPS_SENSE_ON
     // update clock
-    cli();
-    PPSrateRatio=((double)1000000/(double)(PPSavgMicroS));
-    SetSiderealClockRate(siderealInterval);
-    if (micros()-PPSlastMicroS>2000000) PPSsynced=false;
-    sei();
+    if (trackingState==TrackingSidereal) {
+      cli();
+      PPSrateRatio=((double)1000000/(double)(PPSavgMicroS));
+      SetSiderealClockRate(siderealInterval);
+      if (micros()-PPSlastMicroS>2000000) PPSsynced=false;
+      sei();
+      #ifdef STATUS_LED2_PINS_ON
+      if (PPSsynced) { if (LED2_ON) { SET(LEDneg2PORT, LEDneg2Bit); LED2_ON=false; } else { CLR(LEDneg2PORT, LEDneg2Bit); LED2_ON=true; } } else { SET(LEDneg2PORT, LEDneg2Bit); LED2_ON=false; } // indicate PPS
+      #endif
+    }
+    #endif
+
+    #ifdef STATUS_LED_PINS_ON
+    if (trackingState!=TrackingSidereal) {
+      if (!LED_ON) { CLR(LEDnegPORT, LEDnegBit); LED_ON=true; } // indicate PWR on
+    }
+    #endif
+    #ifdef STATUS_LED2_PINS_ON
+    if (trackingState==TrackingNone) if (LED2_ON) { SET(LEDneg2PORT, LEDneg2Bit); LED2_ON=false; } // indicate STOP
+    if (trackingState==TrackingMoveTo) if (LED2_ON) { CLR(LEDneg2PORT, LEDneg2Bit); LED2_ON=true; }  // indicate GOTO
     #endif
 
     // safety checks, keeps mount from tracking past the meridian limit, past the underPoleLimit, below horizon limit, above the overhead limit, or past the Dec limits
-    if (pierSide==PierSideWest) { cli(); if (posHA>(minutesPastMeridianW*StepsPerDegreeHA/4L)) if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  sei(); }
-    if (pierSide==PierSideEast) { cli(); if (posHA>(underPoleLimit*StepsPerDegreeHA*15L)) if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  sei(); }
+    if (meridianFlip!=MeridianFlipNever) {
+      if (pierSide==PierSideWest) { cli(); if (posHA>(minutesPastMeridianW*StepsPerDegreeHA/4L)) if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  sei(); }
+      if (pierSide==PierSideEast) { cli(); if (posHA>(underPoleLimit*StepsPerDegreeHA*15L)) if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  sei(); }
+    } else {
+      // when Fork mounted, ignore pierSide and just stop the mount if it passes the underPoleLimit
+      cli(); if (posHA>(underPoleLimit*StepsPerDegreeHA*15L)) if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  sei();
+    }
+    
     if ((getApproxDec()<minDec) || (getApproxDec()>maxDec)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
+    
     #ifdef LIMIT_SENSE_ON  
     if (digitalRead(LimitPin)==LOW) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
     #endif
