@@ -59,7 +59,12 @@ void processCommands() {
 //         0: If mount is busy
         if ((command[1]=='1') || (command[1]=='2') || (command[1]=='3')) {
           // set current time and date before calling this routine
-  
+
+          // :A2 and :A3 arent supported with Fork mounts in alternate mode
+          #if defined(MOUNT_TYPE_FORK_ALT) || (MOUNT_TYPE_ALTAZM)
+          if (command[1]=='1') {
+          #endif
+
           // telescope should be set in the polar home (CWD) for a starting point
           // this command sets IH, ID, azmCor=0; altCor=0;
           setHome();
@@ -79,6 +84,11 @@ void processCommands() {
           alignMode=AlignOneStar1+(command[1]-'1')*10;
   
           commandError=false;
+          
+          #if defined(MOUNT_TYPE_FORK_ALT) || (MOUNT_TYPE_ALTAZM)
+          } else commandError=true;
+          #endif
+
         } else
 //  :A+#  Manual Alignment, set target location
 //         Returns:
@@ -101,8 +111,9 @@ the pdCor  term is 1 in HA
         if (command[1]=='+') { 
 
           // First star:
-          // Near the celestial equator (Dec=0, HA=0), telescope West of the pier
+          // Near the celestial equator (Dec=0, HA=0), telescope West of the pier if multi-star align
           if ((alignMode==AlignOneStar1) || (alignMode==AlignTwoStar1) || (alignMode==AlignThreeStar1)) {
+            if ((alignMode==AlignOneStar1) && (meridianFlip==MeridianFlipAlign)) meridianFlip=MeridianFlipNever;
             alignMode++;
             // set the IH offset
             // set the ID offset
@@ -110,10 +121,10 @@ the pdCor  term is 1 in HA
             avgDec=newTargetDec;
             avgHA =haRange(LST-newTargetRA);
           } else 
-#ifdef ALIGN_TWO_AND_THREE_STAR_ON
           // Second star:
           // Near the celestial equator (Dec=0, HA=0), telescope East of the pier
           if ((alignMode==AlignTwoStar2) || (alignMode==AlignThreeStar2)) {
+            if ((alignMode==AlignTwoStar2) && (meridianFlip==MeridianFlipAlign)) meridianFlip=MeridianFlipNever;
             alignMode++;
             double ID1 = -ID;  // last offset Dec is negative because we flipped the meridian
             double IH1 = IH;
@@ -148,6 +159,7 @@ the pdCor  term is 1 in HA
           // Third star:
           // Near (Dec=45, HA=6), telescope East of the pier
           if (alignMode==AlignThreeStar3) {
+            meridianFlip=MeridianFlipNever;
             alignMode++;
             
             double ID1 = ID;
@@ -163,17 +175,18 @@ the pdCor  term is 1 in HA
               if (syncEqu(newTargetRA,newTargetDec)) {
                 ID2=ID;
                 IH2=IH;
-
+                // only apply Dec axis flexture term on GEMs
+                #ifdef MOUNT_TYPE_GEM
                 pdCor =  (IH2-IH1)*15.0;                // the Dec axis to RA axis perp. error should be the only major source of error left effecting the HA
                 pdCor = pdCor/tan(newTargetDec/Rad);    // correct for Dec of measurement location
-
+                #else
+                pdCor = 0.0;
+                #endif
                 ID=ID1;
                 IH=IH1;
               } else commandError=true;
             } else commandError=true;
-          } else
-#endif
-          commandError=true; 
+          } else commandError=true; 
         } else commandError=true; 
       } else
       
@@ -381,6 +394,15 @@ the pdCor  term is 1 in HA
             switch (parameter[1]) {
               case '0': dtostrf(guideRates[currentPulseGuideRate]/15.0,2,2,reply); quietReply=true; break;  // pulse-guide rate
               case '1': sprintf(reply,"%i",PECav); quietReply=true; break;                                  // pec analog value
+              case '2': sprintf(reply,"%ld",(long)(maxRate/16L)); quietReply=true; break;                   // MaxRate
+              case '3': sprintf(reply,"%ld",(long)(MaxRate)); quietReply=true; break;                       // MaxRate (default)
+            }
+          } else
+          if (parameter[0]=='F') { // Fn: Debug
+            long temp;
+            switch (parameter[1]) {
+              case '0': cli(); temp=(long)(posHA-(targetHA+PEC_HA)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;    // Debug0, true vs. target RA position          
+              case '1': sprintf(reply,"%ld",(long)(debugv1*1.00273790935)); quietReply=true; break;                               // Debug1, RA tracking rate
             }
           } else commandError=true;
         } else commandError=true;
@@ -550,8 +572,8 @@ the pdCor  term is 1 in HA
       if (command[0]=='Q') {
         if (command[1]==0) {
           if (parkStatus==NotParked) {
-            if (guideDirHA) { lstGuideStopHA=lst+amountGuideHA*(1.0/StepsPerSecond)*150; guideDirHA=0; }
-            if (guideDirDec) { lstGuideStopDec=lst+amountGuideDec*(1.0/StepsPerSecondDec)*150; guideDirDec=0; }
+            if (guideDirHA)  { lstGuideStopHA =lst+3; guideDirHA=0; }
+            if (guideDirDec) { lstGuideStopDec=lst+3; guideDirDec=0; }
             if (trackingState==TrackingMoveTo) { abortSlew=true; }
           }
           quietReply=true; 
@@ -560,7 +582,7 @@ the pdCor  term is 1 in HA
 //         Returns: Nothing
         if ((command[1]=='e') || (command[1]=='w')) { 
           if (parkStatus==NotParked) {
-            if (guideDirHA) { lstGuideStopHA=lst+amountGuideHA*(1.0/StepsPerSecond)*150.0; guideDirHA=0; }
+            if (guideDirHA) { lstGuideStopHA=lst+3; guideDirHA=0; }
           }
           quietReply=true; 
         } else
@@ -568,7 +590,7 @@ the pdCor  term is 1 in HA
 //         Returns: Nothing
         if ((command[1]=='n') || (command[1]=='s')) {
           if (parkStatus==NotParked) {
-            if (guideDirDec) { lstGuideStopDec=lst+amountGuideDec*(1.0/StepsPerSecondDec)*150.0; guideDirDec=0; }
+            if (guideDirDec) { lstGuideStopDec==lst+1; guideDirDec=0; }
           }
           quietReply=true; 
         } else commandError=true;
@@ -736,17 +758,20 @@ the pdCor  term is 1 in HA
 //          Return: 0 on failure
 //                  1 on success
       if (command[1]=='X')  { 
-        if (parameter[2]==(char)0) {
-          if (parameter[0]=='0') { // 00: Align Model
-            switch (parameter[1]) {
-              case '0': IH=(double)strtol(&parameter[3],NULL,10)/3600.0/15.0; break;  // IH
-              case '1': ID=(double)strtol(&parameter[3],NULL,10)/3600.0; break;       // ID
-              case '2': altCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;   // altCor
-              case '3': azmCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;   // azmCor
-              case '4': doCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;    // doCor
-              case '5': pdCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;    // pdCor
-            }
-          } else commandError=true;
+        if (parameter[0]=='0') { // 0n: Align Model
+          switch (parameter[1]) {
+            case '0': IH=(double)strtol(&parameter[3],NULL,10)/3600.0/15.0; break;  // IH
+            case '1': ID=(double)strtol(&parameter[3],NULL,10)/3600.0; break;       // ID
+            case '2': altCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;   // altCor
+            case '3': azmCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;   // azmCor
+            case '4': doCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;    // doCor
+            case '5': pdCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;    // pdCor
+          }
+        } else
+        if (parameter[0]=='9') { // 9n: Misc.
+          switch (parameter[1]) {
+            case '2': maxRate=strtol(&parameter[3],NULL,10)*16L; if (maxRate<2L*16L) maxRate=2L*16L; if (maxRate>10000L*16L) maxRate=10000L*16L; EEPROM_writeInt(EE_maxRate,(int)(maxRate/16L)); break; // maxRate
+          }
         } else commandError=true;
         getEqu(&f,&f1,false,true);  
       } else 
@@ -986,7 +1011,12 @@ the pdCor  term is 1 in HA
 boolean buildCommand(char c) {
   // (chr)6 is a special status command for the LX200 protocol
   if ((c==(char)6) && (bufferPtr_serial_zero==0)) {
-    Serial_print("G#");
+//    Serial_print("G#");
+    #ifdef MOUNT_TYPE_ALTAZM
+    Serial_print("A");
+    #else
+    Serial_print("P");
+    #endif
   }
 
   // ignore spaces/lf/cr, dropping spaces is another tweek to allow compatibility with LX200 protocol
@@ -1034,7 +1064,12 @@ boolean clearCommand_serial_zero() {
 boolean buildCommand_serial_one(char c) {
   // (chr)6 is a special status command for the LX200 protocol
   if ((c==(char)6) && (bufferPtr_serial_zero==0)) {
-    Serial1_print("G#");
+//    Serial1_print("G#");
+    #ifdef MOUNT_TYPE_ALTAZM
+    Serial_print("A");
+    #else
+    Serial_print("P");
+    #endif
   }
 
   // ignore spaces/lf/cr, dropping spaces is another tweek to allow compatibility with LX200 protocol
@@ -1094,18 +1129,9 @@ void enableGuideRate(int g) {
   //                0.25X,0.5X,1X,2X,4X,8X ,16X,24X,40X 60X
   // guideRates[10]={3.75,7.5 ,15,30,60,120,240,360,600,900}; 
   guideTimerRate=(double)guideRates[g]/15.0;
-  
-  cli();
-  if (g<=GuideRate1x) { 
-    amountGuideHA=1; // 3.75, 7.5, 15 
-  } else  
-  if (g<=4) { amountGuideHA=4; } else  // 30,  60
-  if (g<=6) { amountGuideHA=16; } else // 120, 240
-  if (g<=8) { amountGuideHA=40; } else // 360, 600
-            { amountGuideHA=60; }      // 900
-  sei();
 
-  stepRateParameterGenerator((StepsPerSecond*guideTimerRate)/(double)amountGuideHA,&gr_st,&gr_sk,&gr_st1,&gr_sk1);
-  amountGuideDec=(long)(amountGuideHA*(StepsPerSecondDec/StepsPerSecond)-0.000005)+1;
-  stepRateParameterGenerator((StepsPerSecondDec*guideTimerRate)/(double)amountGuideDec,&gd_st,&gd_sk,&gd_st1,&gd_sk1);
+  cli();
+  amountGuideHA =doubleToFixed((guideTimerRate*StepsPerSecond)/100.0);
+  amountGuideDec=doubleToFixed((guideTimerRate*StepsPerSecondDec)/100.0);
+  sei();
 }
