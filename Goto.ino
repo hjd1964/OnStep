@@ -17,9 +17,9 @@ boolean syncEqu(double RA, double Dec) {
   cli();
   pierSide=PierSideEast;
   DecDir = DecDirEInit;
-  targetHA =round(HA*(double)(StepsPerDegreeHA*15L));
+  targetHA =round(HA*(double)(StepsPerDegreeHA*15L)); ftargetHA=longToFixed(targetHA);
   posHA    =targetHA;
-  targetDec=round(Dec*(double)StepsPerDegreeDec);
+  targetDec=round(Dec*(double)StepsPerDegreeDec); ftargetDec=longToFixed(targetDec);
   posDec=targetDec;
   sei();
   return true;
@@ -96,10 +96,10 @@ boolean getApproxEqu(double *RA, double *Dec, boolean returnHA) {
   *Dec=*Dec+ID;
   
   // un-do, under the pole
-  if (*Dec>90.0) { *Dec=(90.0-*Dec)+90; HA =HA-12; }
-  if (*Dec<-90.0) { *Dec=(-90.0-*Dec)-90.0; HA =HA-12; }
+  if (*Dec>90.0) { *Dec=(90.0-*Dec)+90; HA=HA-12; }
+  if (*Dec<-90.0) { *Dec=(-90.0-*Dec)-90.0; HA=HA-12; }
 
-  while (HA>+12.0) HA=HA-24.0;
+  while (HA>=12.0) HA=HA-24.0;
   while (HA<-12.0) HA=HA+24.0;
   if (*Dec>+90.0) *Dec=+90.0;
   if (*Dec<-90.0) *Dec=-90.0;
@@ -123,7 +123,7 @@ byte goToEqu(double RA, double Dec) {
 
   // Convert RA into hour angle, get altitude
   double HA=LST-RA;
-  while (HA>+12.0) HA=HA-24.0;
+  while (HA>=12.0) HA=HA-24.0;
   while (HA<-12.0) HA=HA+24.0;
   EquToHor(latitude,HA,Dec,&Alt,&Azm);
 
@@ -175,50 +175,60 @@ byte goTo(long thisTargetHA, long thisTargetDec, long altTargetHA, long altTarge
   
   atHome=false;
 
-  // where the allowable hour angles are
-  long eastOfPierMaxHA= underPoleLimit*15*StepsPerDegreeHA;
-  long eastOfPierMinHA=-(minutesPastMeridianE*StepsPerDegreeHA/4L);
-  long westOfPierMaxHA= (minutesPastMeridianW*StepsPerDegreeHA/4L);
-  long westOfPierMinHA=-underPoleLimit*15*StepsPerDegreeHA;
-
-  // override the defaults and force a flip if near the meridian and possible (for parking and align)
-  if ((gotoPierSide!=PierSideBest) && (pierSide!=gotoPierSide)) {
-    eastOfPierMinHA= (minutesPastMeridianW*StepsPerDegreeHA/4L);
-    westOfPierMaxHA=-(minutesPastMeridianE*StepsPerDegreeHA/4L);
+  if (meridianFlip!=MeridianFlipNever) {
+    // where the allowable hour angles are
+    long eastOfPierMaxHA= underPoleLimit*15*StepsPerDegreeHA;
+    long eastOfPierMinHA=-(minutesPastMeridianE*StepsPerDegreeHA/4L);
+    long westOfPierMaxHA= (minutesPastMeridianW*StepsPerDegreeHA/4L);
+    long westOfPierMinHA=-underPoleLimit*15*StepsPerDegreeHA;
+  
+    // override the defaults and force a flip if near the meridian and possible (for parking and align)
+    if ((gotoPierSide!=PierSideBest) && (pierSide!=gotoPierSide)) {
+      eastOfPierMinHA= (minutesPastMeridianW*StepsPerDegreeHA/4L);
+      westOfPierMaxHA=-(minutesPastMeridianE*StepsPerDegreeHA/4L);
+    }
+    
+    // if doing a meridian flip, use the opposite pier side coordinates
+    if (pierSide==PierSideEast) {
+      if ((thisTargetHA>eastOfPierMaxHA) || (thisTargetHA<eastOfPierMinHA)) {
+        pierSide=PierSideFlipEW1;
+        thisTargetHA =altTargetHA;
+        thisTargetDec=altTargetDec;
+      }
+    } else
+    if (pierSide==PierSideWest) {
+      if ((thisTargetHA>westOfPierMaxHA) || (thisTargetHA<westOfPierMinHA)) {
+        pierSide=PierSideFlipWE1; 
+        thisTargetHA =altTargetHA;
+        thisTargetDec=altTargetDec;
+      }
+    } else
+    if (pierSide==PierSideNone) {
+      // ID flips back and forth +/-, but that doesn't matter, if we're homed the ID is 0
+      // we're in the polar home position, so pick a side (of the pier)
+      if (thisTargetHA<0) {
+        // west side of pier - we're in the eastern sky and the HA's are negative
+        pierSide=PierSideWest;
+        DecDir  =DecDirWInit;
+        // default, in the polar-home position is +90 deg. HA, we want -90HA
+//        cli(); posHA=posHA-180L*StepsPerDegreeHA; sei();
+        cli(); posHA=-posHA; sei();
+      } else { 
+        // east side of pier - we're in the western sky and the HA's are positive
+        // this is the default in the polar-home position
+        pierSide=PierSideEast;
+        DecDir = DecDirEInit;
+      }
+    }
+  } else {
+    if (pierSide==PierSideNone) {
+        // always on the "east" side of pier - we're in the western sky and the HA's are positive
+        // this is the default in the polar-home position
+        pierSide=PierSideEast;
+        DecDir = DecDirEInit;
+    }
   }
   
-  // if doing a meridian flip, use the opposite pier side coordinates
-  if (pierSide==PierSideEast) {
-    if ((thisTargetHA>eastOfPierMaxHA) || (thisTargetHA<eastOfPierMinHA)) {
-      pierSide=PierSideFlipEW1;
-      thisTargetHA =altTargetHA;
-      thisTargetDec=altTargetDec;
-    }
-  } else
-  if (pierSide==PierSideWest) {
-    if ((thisTargetHA>westOfPierMaxHA) || (thisTargetHA<westOfPierMinHA)) {
-      pierSide=PierSideFlipWE1; 
-      thisTargetHA =altTargetHA;
-      thisTargetDec=altTargetDec;
-    }
-  } else
-  if (pierSide==PierSideNone) {
-    // ID flips back and forth +/-, but that doesn't matter, if we're homed the ID is 0
-    // we're in the polar home position, so pick a side (of the pier)
-    if (thisTargetHA<0) {
-      // west side of pier - we're in the eastern sky and the HA's are negative
-      pierSide=PierSideWest;
-      DecDir  =DecDirWInit;
-      // default, in the polar-home position is +90 deg. HA, we want -90HA
-      cli(); posHA=posHA-180L*StepsPerDegreeHA; sei();
-    } else { 
-      // east side of pier - we're in the western sky and the HA's are positive
-      // this is the default in the polar-home position
-      pierSide=PierSideEast;
-      DecDir = DecDirEInit;
-    }
-  }
-
   lastTrackingState=trackingState;
   trackingState=TrackingMoveTo;
   SetSiderealClockRate(siderealInterval);
@@ -227,14 +237,14 @@ byte goTo(long thisTargetHA, long thisTargetDec, long altTargetHA, long altTarge
   startHA =posHA;
   startDec=posDec;
 
-  targetHA =thisTargetHA;
-  targetDec=thisTargetDec;
+  targetHA =thisTargetHA; fTargetHA=longToFixed(targetHA);
+  targetDec=thisTargetDec; fTargetDec=longToFixed(targetDec);
 
   timerRateHA=SiderealRate;
   timerRateDec=SiderealRate;
-  PEC_HA=0; 
   sei();
-  PEC_Skip = 0;
-
+  
+  disablePec();
+  
   return 0;
 }
