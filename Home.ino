@@ -7,11 +7,13 @@ boolean goHome() {
     cli();
     startHA =posHA;
     startDec=posDec;
-    if (pierSide==PierSideWest) targetHA=-90L*StepsPerDegreeHA; else targetHA=90L*StepsPerDegreeHA;
+    if (pierSide==PierSideWest) targetHA=-celestialPoleHA*StepsPerDegreeHA; else targetHA=celestialPoleHA*StepsPerDegreeHA;
+    fTargetHA=longToFixed(targetHA);
     targetDec=celestialPoleDec*StepsPerDegreeDec;
+    fTargetDec=longToFixed(targetDec);
     sei();
     
-    pierSide         = PierSideNone;
+//    pierSide         = PierSideNone;
     lastTrackingState= TrackingNone;
     
     trackingState    = TrackingMoveTo;
@@ -46,6 +48,17 @@ boolean setHome() {
   IH                  = 0;
   ID                  = 0;
   
+  // reset Meridian Flip control
+  #ifdef MOUNT_TYPE_GEM
+  meridianFlip = MeridianFlipAlways;
+  #endif
+  #ifdef MOUNT_TYPE_FORK
+  meridianFlip = MeridianFlipAlign;
+  #endif
+  #ifdef MOUNT_TYPE_FORK_ALT
+  meridianFlip = MeridianFlipNever;
+  #endif
+  
   // where we are
   homeMount           = false;
   atHome              = true;
@@ -76,7 +89,7 @@ boolean setHome() {
   #endif
 
   // the polar home position
-  startHA             = 90L*StepsPerDegreeHA;
+  startHA             = celestialPoleHA*StepsPerDegreeHA;
   startDec            = celestialPoleDec*StepsPerDegreeDec;
 
   // clear pulse-guiding state
@@ -87,9 +100,11 @@ boolean setHome() {
 
   cli();
   targetHA            = startHA;
+  fTargetHA=longToFixed(targetHA);
   posHA               = startHA;
   PEC_HA              = 0;
   targetDec           = startDec;
+  fTargetDec=longToFixed(targetDec);
   posDec              = startDec;
   sei();
 
