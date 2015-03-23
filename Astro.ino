@@ -488,44 +488,25 @@ double degreeRange(double d) {
   return d;
 }
 
-// calculate step/skip counts to achieve a given tracking rate
-void stepRateParameterGenerator(double steps, unsigned int *st, unsigned int *sk, unsigned int *st1, unsigned int *sk1) {
-  double d=100.0/steps;
-  // calculate how many steps
-  *st=(unsigned int)d;
-  double f0=100.0/(double)*st;
-  double d1=fabs(steps-f0);
-  d=(100.0/(float)*st)/d1;
-  if (d<65535.0) {
-    // how many skips instead (of steps)
-    *sk=(unsigned int)d;
-    double f1=f0/(double)*sk;
-    double d2=fabs(steps-(f0-f1));
-    d=(100.0/((double)*st*(double)*sk))/d2;
-    if (d<65535.0) {
-      // how many steps instead (of skips (of steps))
-      *st1=(unsigned int)d;
-      double f2=f1/(double)*st1;
-      double d3=fabs(steps-(f0-f1+f2));
-      d=(100.0/((double)*st*(double)*sk*(double)*st1))/d3;
-      if (d<65535.0) {
-        // how many skips instead (of steps (of skips (of steps)))
-        *sk1=(unsigned int)round(d);
-      } else { *sk1=0; }
-    } else { *st1=0; }
-  } else { *sk=0; }
-  
-  // fix any overflow in last digit
-  if (*sk1!=0) {
-    if (*st1+1==*sk1) { *sk1=0; *st1+=1; return; }
-  } else {
-    if (st1!=0) {
-      if (*sk+1==*st1) { *st1=0; *sk+=1; return; }
-    } else {
-      if (*sk!=0) {
-        if (*st+1==*sk) { *sk=0; *st+=1; return; }
-      }
-    }
-  }
+// full long int range
+long fixedToLong(fixed a) {
+  return a>>32;
+}
 
+// full long int range
+fixed longToFixed(long a) {
+  return ((fixed)a)<<32;
+}
+
+// floating point range of +/-255.999999x
+fixed doubleToFixed(double d) {
+// shifted into a long, with a capacity of 31 bits + sign
+  long l = (d*8388608.0);      // shift 23 bits and
+  return ((fixed)l)<<9;        // and 9 more, for 32 bits total
+}
+
+// floating point range of +/-255.999999x
+double fixedToDouble(fixed a) {
+  long l = a>>9;                // shift 9 bits
+  return ((double)l/8388608.0); // and 23 more, for 32 bits total
 }
