@@ -6,21 +6,19 @@ void Guide() {
   cli(); long guideLst=lst; sei();
   if (guideLst!=guideSiderealTimer) {
     guideSiderealTimer=guideLst;  
-    int sign=0;
     if (guideDirHA) {
       if (!inBacklashHA) {
-      if (((guideLst%gr_st==0) && ((guideLst%gr_sk!=0) || ((guideLst%gr_st1==0) && (guideLst%gr_sk1!=0) )))) {
-        // as above, and keep track of how much we've moved for PEC recording
-        if (guideDirHA=='e') sign=-1; else sign=1; guideHA=sign*amountGuideHA;
-        // for RA, only apply the corrections now if fast guiding; otherwise they get combined with PEC & sidereal-tracking and are applied later
-        if (activeGuideRate>GuideRate1x) { if (!inBacklashHA) { cli(); targetHA+=(long)guideHA; sei(); } } else { accGuideHA+=guideHA; }
-      }
+        long v=fixedToLong(fTargetHA);
+        if (guideDirHA=='e') fTargetHA-=amountGuideHA; else fTargetHA+=amountGuideHA;
+        // guideHA keeps track of how many steps we've moved for PEC recording
+        guideHA=fixedToLong(fTargetHA)-v;
+        cli(); targetHA=fixedToLong(fTargetHA); sei();
 
         // for pulse guiding, count down the mS and stop when timed out
         if (guideDurationHA>0)  {
           guideDurationHA-=(long)(micros()-guideDurationLastHA);
           guideDurationLastHA=micros();
-          if (guideDurationHA<=0) { lstGuideStopHA=lst+amountGuideHA*(1.0/StepsPerSecond)*150.0; guideDirHA=0; } 
+          if (guideDurationHA<=0) { lstGuideStopHA=lst+3; guideDirHA=0; } 
         }
       } else {
         // don't count time if in backlash
@@ -30,15 +28,14 @@ void Guide() {
     
     if (guideDirDec) {
       if (!inBacklashDec) {
-      if (((guideLst%gd_st==0) && ((guideLst%gd_sk!=0) || ((guideLst%gd_st1==0) && (guideLst%gd_sk1!=0) )))) {
         // nudge the targetDec (where we're supposed to be) by amountMoveDec
-        if (guideDirDec=='s') sign=-1; else sign=1; cli(); targetDec=targetDec+(long)sign*(long)amountGuideDec; sei();
-      }
+        if (guideDirDec=='s') fTargetDec-=amountGuideDec; else fTargetDec+=amountGuideDec; 
+        cli(); targetDec=fixedToLong(fTargetDec); sei();
         // for pulse guiding, count down the mS and stop when timed out
         if (guideDurationDec>0)  {
           guideDurationDec-=(long)(micros()-guideDurationLastDec);
           guideDurationLastDec=micros();
-          if (guideDurationDec<=0) { lstGuideStopDec=lst+amountGuideDec*(1.0/StepsPerSecondDec)*150.0; guideDirDec=0;  } 
+          if (guideDurationDec<=0) { lstGuideStopDec=lst+3; guideDirDec=0;  } 
         }
       } else {
         // don't count time if in backlash
@@ -48,6 +45,8 @@ void Guide() {
 
   }
   // allow the elevated rate to persist for a moment to allow the bulk added steps to play out after stopping
+  // if the guide rate is negative and slow it's always faster to go back to the sidereal rate
+  if ((currentGuideRate<=GuideRate1x) && (guideTimerRateHA<0.001)) { cli(); guideTimerRateHA=0.0; sei(); }
   if ((!guideDirHA) && (fabs(guideTimerRateHA)>0.001) && (lst>=lstGuideStopHA)) { cli(); guideTimerRateHA=0.0; sei(); }
   if ((!guideDirDec) && (fabs(guideTimerRateDec)>0.001) && (lst>=lstGuideStopDec)) { cli(); guideTimerRateDec=0.0; sei(); }
 }
