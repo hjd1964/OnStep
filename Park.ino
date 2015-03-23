@@ -29,6 +29,8 @@ boolean setPark() {
     targetHA=(posHA / 128L) * 128L;
     targetDec=(posDec / 128L) * 128L;
     sei();
+    fTargetHA=longToFixed(targetHA);
+    fTargetDec=longToFixed(targetDec);
 
     // let it settle into a fixed position, 20 times the sidereal rate at 12 steps per second minimum... 
     // 128/240=0.53S, worst case.  Also, for some additional safety margin add a few seconds to cover
@@ -106,6 +108,7 @@ boolean parkClearBacklash() {
   targetDec=targetDec - backlashDec;
   sei();
   delay(t*2); // if sitting on the opposite side of the backlash, it might take twice as long to clear it
+  // we arrive back at the exact same position so fTargetHA/Dec don't need to be touched
   
   // move at the previous speed
   cli();
@@ -128,9 +131,8 @@ byte park() {
         trackingState=TrackingNone; lastTrackingState=TrackingNone;
 
         // turn off the PEC while we park
+        disablePec();
         PECstatus=IgnorePEC;
-        cli(); PEC_HA=0; sei(); 
-        PEC_Skip = 0;
   
         // record our status
         parkStatus=Parking;
@@ -171,6 +173,8 @@ boolean unpark() {
         EEPROM_readQuad(EE_posHA,(byte*)&posHA);   targetHA=posHA;
         EEPROM_readQuad(EE_posDec,(byte*)&posDec); targetDec=posDec;
         sei();
+        fTargetHA=longToFixed(targetHA);
+        fTargetDec=longToFixed(targetDec);
   
         // get corrections
         EEPROM_readQuad(EE_doCor,(byte*)&doCor);
@@ -183,6 +187,13 @@ boolean unpark() {
         // see what side of the pier we're on
         pierSide=EEPROM.read(EE_pierSide);
         if (pierSide==PierSideWest) DecDir = DecDirWInit; else DecDir = DecDirEInit;
+
+        // set Meridian Flip behaviour to match mount type
+        #ifdef MOUNT_TYPE_GEM
+        meridianFlip=MeridianFlipAlways;
+        #else
+        meridianFlip=MeridianFlipNever;
+        #endif
         
         // update our status, we're not parked anymore
         parkStatus=NotParked;
