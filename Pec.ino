@@ -79,7 +79,6 @@ void Pec() {
       
       // zero the accululators, the index timer, also the index
       accPecGuideHA = 0;
-      accPecPlayHA = 0;
       cli(); PecSiderealTimer = lst-1; sei();  // keeps PECindex from advancing immediately
       PECindex = 0; lastPECindex = -1;         // starts record/playback now
     #if defined(PEC_SENSE_ON) || defined(PEC_SENSE)
@@ -116,8 +115,6 @@ void Pec() {
   } else {
     // if we're ignoring PEC, zero the offset and keep it that way
     cli(); PEC_HA=0; sei(); 
-    PEC_Skip = 0;
-    // no change to tracking rate
     pecTimerRateHA=0;
   }
 
@@ -143,27 +140,27 @@ void Pec() {
       int PECindex2=PECindex1-1; if (PECindex2<0) PECindex2+=SecondsPerWormRotation;
       // accPecPlayHA play back speed can be +/-1 of sidereal
       // PEC_Skip is the number of ticks between the added (or skipped) steps
-      accPecPlayHA=PEC_buffer[PECindex2]-128;
-      if (accPecPlayHA>StepsPerSecond) accPecPlayHA=StepsPerSecond; if (accPecPlayHA<-StepsPerSecond) accPecPlayHA=-StepsPerSecond;
+      int l=PEC_buffer[PECindex2]-128;
+      if (l>StepsPerSecond) l=StepsPerSecond; if (l<-StepsPerSecond) l=-StepsPerSecond;
 
-      pecTimerRateHA=accPecPlayHA/StepsPerSecond;
-
-      // And run the PEC rate at another +/-5x to cover any corrections that should have been applied up to this point in the worm cycle
-      // when just (re)starting PEC not worried about how smooth the play back is here, this will be over in a moment just run fast to get there 
-      if (PECstartDelta>0) { PECstartDelta-=30; pecTimerRateHA+=5; }
-      
-      if (accPecPlayHA==0) 
-        PEC_Skip=SecondsPerWormRotation+1;
-      else
-        PEC_Skip=(long)StepsPerSecond/abs(accPecPlayHA);
-      PEC_Timer=0;
+      if (PECstartDelta>0) { 
+        // when (re)starting PEC not worried about how smooth the play back is, this will be over in a moment just run fast to get there in position
+        // run the PEC rate at another +/-5x to cover any corrections that should have been applied up to this point in the worm cycle
+        PECstartDelta-=30; 
+        pecTimerRateHA+=5; 
+        pstep=doubleToFixed(0.0); 
+      } else {
+        // otherwise set the rates to playback the correct number of steps per second
+        pecTimerRateHA=(l/StepsPerSecond);
+        pstep=doubleToFixed(l/100.0);
+      }
     }
   }
 }
  
 void disablePec() {
   // give up recording if we stop tracking at the sidereal rate
-  if (PECstatus==RecordPEC)  { PECstatus=IgnorePEC; PEC_Skip=0; } // don't zero the PEC offset, we don't want things moving and it really doesn't matter 
+  if (PECstatus==RecordPEC)  { PECstatus=IgnorePEC; pecTimerRateHA=0; } // don't zero the PEC offset, we don't want things moving and it really doesn't matter 
   // get ready to re-index when tracking comes back
-  if (PECstatus==PlayPEC)  { PECstatus=ReadyPlayPEC; PEC_Skip=0; cli(); PEC_HA=0; sei(); } 
+  if (PECstatus==PlayPEC)  { PECstatus=ReadyPlayPEC; pecTimerRateHA=0; cli(); PEC_HA=0; sei(); } 
 }
