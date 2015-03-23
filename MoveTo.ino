@@ -5,11 +5,12 @@
 void moveTo() {
   // HA goes from +90...0..-90
   //                W   .   E
+  // meridian flip, first phase.  only happens for GEM mounts
   if ((pierSide==PierSideFlipEW1) || (pierSide==PierSideFlipWE1)) {
     
     // save destination
     cli(); 
-    origTargetHA =targetHA; 
+    origTargetHA =longToFixed(targetHA);
     origTargetDec=targetDec;
  
     // first phase, move to 60 HA (4 hours)
@@ -27,8 +28,8 @@ void moveTo() {
     if (celestialPoleDec>0) {
       // if Dec is in the general area of the pole, slew both axis back at once
       if ((posDec/(double)StepsPerDegreeDec)>90-latitude) {
-        if (pierSide==PierSideFlipWE1) targetHA=-90L*StepsPerDegreeHA; else targetHA=90L*StepsPerDegreeHA;
-      } else { 
+        if (pierSide==PierSideFlipWE1) targetHA=-celestialPoleHA*StepsPerDegreeHA; else targetHA=celestialPoleHA*StepsPerDegreeHA;
+      } else {
         // override if we're at a low latitude and in the opposite sky, leave the HA alone
         if ((abs(latitude)<45.0) && (posDec<0)) {
           if (pierSide==PierSideFlipWE1) targetHA=-45L*StepsPerDegreeHA; else targetHA=45L*StepsPerDegreeHA;
@@ -37,7 +38,7 @@ void moveTo() {
     } else {
       // if Dec is in the general area of the pole, slew both axis back at once
       if ((posDec/(double)StepsPerDegreeDec)<-90-latitude) {
-        if (pierSide==PierSideFlipWE1) targetHA=-90L*StepsPerDegreeHA; else targetHA=90L*StepsPerDegreeHA; 
+        if (pierSide==PierSideFlipWE1) targetHA=-celestialPoleHA*StepsPerDegreeHA; else targetHA=celestialPoleHA*StepsPerDegreeHA; 
       } else { 
         // override if we're at a low latitude and in the opposite sky, leave the HA alone
         if ((abs(latitude)<45.0) && (posDec>0)) {
@@ -46,6 +47,9 @@ void moveTo() {
       }
     }
     sei();
+
+    fTargetHA =longToFixed(targetHA);
+    fTargetDec=longToFixed(targetDec);
 
     pierSide++;
   }
@@ -69,14 +73,15 @@ void moveTo() {
 
   // quickly slow the motors and stop in 1 degree
   if (abortSlew) {
-    // aborts the meridian flip
+    // aborts any meridian flip
     if ((pierSide==PierSideFlipWE1) || (pierSide==PierSideFlipWE2) || (pierSide==PierSideFlipWE3)) pierSide=PierSideWest;
     if ((pierSide==PierSideFlipEW1) || (pierSide==PierSideFlipEW2) || (pierSide==PierSideFlipEW3)) pierSide=PierSideEast;
 
     // set the destination near where we are now
+    // todo: the new targetHA/Dec should be checked against the old targetHA/Dec, if the old targetHA/Dec is closer than use it
     cli();
-    if (distDestHA>StepsPerDegreeHA)   { if (posHA>targetHA)   targetHA =posHA-StepsPerDegreeHA;   else targetHA =posHA +StepsPerDegreeHA;  }
-    if (distDestDec>StepsPerDegreeDec) { if (posDec>targetDec) targetDec=posDec-StepsPerDegreeDec; else targetDec=posDec+StepsPerDegreeDec; }
+    if (distDestHA>StepsPerDegreeHA)   { if (posHA>targetHA)   targetHA =posHA-StepsPerDegreeHA;   else targetHA =posHA +StepsPerDegreeHA; fTargetHA=longToFixed(targetHA); }
+    if (distDestDec>StepsPerDegreeDec) { if (posDec>targetDec) targetDec=posDec-StepsPerDegreeDec; else targetDec=posDec+StepsPerDegreeDec; fTargetDec=longToFixed(targetDec); }
     sei();
     
     abortSlew=false;
@@ -92,7 +97,7 @@ void moveTo() {
     temp=(StepsForRateChange/isqrt32(distStartHA));   // speed up (temp gets smaller)
 //  if ((temp<100) && (temp>=10))  temp=9;            // exclude a range of speeds
   }
-  if (temp<MaxRate*16) temp=MaxRate*16;               // fastest rate
+  if (temp<maxRate) temp=maxRate;                     // fastest rate
   if (temp>TakeupRate) temp=TakeupRate;               // slowest rate (4x sidereal)
   cli(); timerRateHA=temp; sei();
 
@@ -104,7 +109,7 @@ void moveTo() {
       temp=(StepsForRateChange/isqrt32(distStartDec));// speed up
 //    if ((temp<100) && (temp>=10))  temp=9;          // exclude a range of speeds
     }
-  if (temp<MaxRate*16) temp=MaxRate*16;               // fastest rate
+  if (temp<maxRate) temp=maxRate;                     // fastest rate
   if (temp>TakeupRate) temp=TakeupRate;               // slowest rate (4x sidereal)
   cli(); timerRateDec=temp; sei();
 
@@ -112,9 +117,11 @@ void moveTo() {
     if ((pierSide==PierSideFlipEW2) || (pierSide==PierSideFlipWE2)) {
       // make sure we're at the home position when flipping sides of the mount
       cli();
-      startHA=posHA; if (pierSide==PierSideFlipWE2) targetHA=-90L*StepsPerDegreeHA; else targetHA=90L*StepsPerDegreeHA; 
+      startHA=posHA; if (pierSide==PierSideFlipWE2) targetHA=-celestialPoleHA*StepsPerDegreeHA; else targetHA=celestialPoleHA*StepsPerDegreeHA; 
       startDec=posDec; targetDec=celestialPoleDec*StepsPerDegreeDec; 
       sei();
+      fTargetHA=longToFixed(targetHA);
+      fTargetDec=longToFixed(targetDec);
       pierSide++;
     } else
     if ((pierSide==PierSideFlipEW3) || (pierSide==PierSideFlipWE3)) {
@@ -147,10 +154,12 @@ void moveTo() {
       // now complete the slew
       cli();
       startHA  =posHA;
-      targetHA =origTargetHA;
+      targetHA =fixedToLong(origTargetHA);
       startDec =posDec;
       targetDec=origTargetDec;
       sei();
+      fTargetHA=origTargetHA;
+      fTargetDec=longToFixed(targetDec);
     } else {
       // restore last tracking state
       trackingState=lastTrackingState;
