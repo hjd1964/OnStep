@@ -131,6 +131,7 @@
  * 02-06-2015          1.0b11            Corrected sidereal rate bug, improvements to guiding responsiveness, status LEDS now provide more feedback.
  * 03-08-2015          1.0b12            Abandoned step rate generation logic method in favor of fixed point math for rate calculations.  Hopefully fixed Teensy3.1 micro-step mode switch during goto problems. 
  *                                       Initial support for fork mounts: polar home position HA=0, mode w/meridian flips completely disabled, mode with meridian flips enabled until align is complete.
+ * 03-26-2015          1.0b13            Minor fix so OnStep remembers the MaxRate set by the ASCOM driver (when this is enabled in config.h) 
  *
  *
  * Author: Howard Dutton
@@ -151,8 +152,8 @@
 #include "Config.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "03 08 15"
-#define FirmwareNumber "1.0b12"
+#define FirmwareDate   "03 26 15"
+#define FirmwareNumber "1.0b13"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -881,10 +882,9 @@ void setup() {
 
   // get the Goto rate
   maxRate=EEPROM_readInt(EE_maxRate)*16L;
+  // constrain values to the limits
   if (maxRate<2L*16L) maxRate=2L*16L; if (maxRate>10000*16) maxRate=10000L*16L;
-  #ifdef RememberMaxRate_ON
-  if (maxRate<2L*16L) maxRate=MaxRate*16L; if (maxRate>10000L*16L) maxRate=MaxRate*16L;
-  #else
+  #ifdef RememberMaxRate_OFF
   if (maxRate!=MaxRate*16L) { maxRate=MaxRate*16L; EEPROM_writeInt(EE_maxRate,(int)(maxRate/16L)); }
   #endif
   
@@ -958,7 +958,7 @@ void loop() {
     clockTimer=m;
     
     // for testing, average steps per second
-    debugv1=(debugv1*4+(targetHA*1000-lastTargetHA))/5;
+    debugv1=(debugv1*19+(targetHA*1000-lastTargetHA))/20;
     lastTargetHA=targetHA*1000;
     
     // update the UT1 CLOCK
