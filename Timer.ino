@@ -229,7 +229,6 @@ ISR(TIMER3_COMPA_vect)
 
 #if defined(HA_MODE) && defined(HA_MODE_GOTO)
 #if defined(__AVR__)
-  stepHA=stepHA_next;
   OCR3A =nextHArate*stepHA;
 #endif
   // switch micro-step mode
@@ -244,6 +243,7 @@ ISR(TIMER3_COMPA_vect)
         digitalWrite(HA_M0,(modeHA_next & 1));
         digitalWrite(HA_M1,(modeHA_next>>1 & 1));
         digitalWrite(HA_M2,(modeHA_next>>2 & 1));
+        stepHA=stepHA_next;
 #endif
       }
     }
@@ -293,7 +293,6 @@ ISR(TIMER4_COMPA_vect)
 
 #if defined(DE_MODE) && defined(DE_MODE_GOTO)
 #if defined(__AVR__)
-  stepDec=stepDec_next;
   OCR4A  =nextDErate*stepDec;
 #endif
   // switch micro-step mode
@@ -308,6 +307,7 @@ ISR(TIMER4_COMPA_vect)
         digitalWrite(DE_M0,(modeDec_next & 1));
         digitalWrite(DE_M1,(modeDec_next>>1 & 1));
         digitalWrite(DE_M2,(modeDec_next>>2 & 1));
+        stepDec=stepDec_next;
 #endif
       }
     }
