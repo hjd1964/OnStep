@@ -132,6 +132,7 @@
  * 03-08-2015          1.0b12            Abandoned step rate generation logic method in favor of fixed point math for rate calculations.  Hopefully fixed Teensy3.1 micro-step mode switch during goto problems. 
  *                                       Initial support for fork mounts: polar home position HA=0, mode w/meridian flips completely disabled, mode with meridian flips enabled until align is complete.
  * 03-26-2015          1.0b13            Minor fix so OnStep remembers the MaxRate set by the ASCOM driver (when this is enabled in config.h) 
+ * 03-30-2015          1.0b14            Fixes for goto micro-step mode switch on Mega2560 and PEC soft index detect. PEC Clear command now clears hard index too.
  *
  *
  * Author: Howard Dutton
@@ -152,8 +153,8 @@
 #include "Config.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "03 26 15"
-#define FirmwareNumber "1.0b13"
+#define FirmwareDate   "03 30 15"
+#define FirmwareNumber "1.0b14"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
