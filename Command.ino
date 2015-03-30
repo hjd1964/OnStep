@@ -545,12 +545,15 @@ the pdCor  term is 1 in HA
           if ((parameter[1]=='/') && (trackingState==TrackingSidereal)) { PECstatus=ReadyRecordPEC; } else
           if (parameter[1]=='Z') { 
             for (i=0; i<PECBufferSize; i++) PEC_buffer[i]=128;
-              PECfirstRecord = true;
-              PECindex_record= 0;
-              PECstatus      = IgnorePEC;
-              PECrecorded    = false;
-              EEPROM.write(EE_PECstatus,PECstatus);
-              EEPROM.write(EE_PECrecorded,PECrecorded);
+            PECfirstRecord = true;
+            PECstatus      = IgnorePEC;
+            PECrecorded    = false;
+            EEPROM.write(EE_PECstatus,PECstatus);
+            EEPROM.write(EE_PECrecorded,PECrecorded);
+            PECindex_record= 0;
+            PECindex_sense = 0;
+            EEPROM_writeQuad(EE_PECrecord_index,(byte*)&PECindex_record); 
+            EEPROM_writeQuad(EE_PECsense_index,(byte*)&PECindex_sense);
           } else
           if (parameter[1]=='!') {
             for (i=0; i<PECBufferSize; i++) EEPROM.write(EE_PECindex+i,PEC_buffer[i]);
