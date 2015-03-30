@@ -37,7 +37,7 @@ void Pec() {
     // at the start of a worm cycle (if wormRotationStepPos rolled over)
     // this only works because targetHA can't move backward while tracking and guiding at +/- 1x sidereal
     // it also works while <=1X guiding and playing PEC because the PEC corrections don't get counted in the targetHA location
-    if (lastWormRotationStepPos>wormRotationStepPos) {
+    if (lastWormRotationStepPos>wormRotationStepPos+StepsPerSecond) {
       // start recording PEC
       if (PECstatus==ReadyRecordPEC) {
         PECstatus=RecordPEC;
