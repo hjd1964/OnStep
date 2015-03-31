@@ -939,8 +939,7 @@ void loop() {
       cli(); targetHA=fixedToLong(fTargetHA); sei();
 
       #ifdef STATUS_LED_PINS_ON
-      if (LED_ON) { SET(LEDnegPORT,LEDnegBit); } else { CLR(LEDnegPORT,LEDnegBit); }
-      LED_ON!=LED_ON; // indicate tracking
+      if (siderealTimer%20L==0L) { if (LED_ON) { SET(LEDnegPORT,LEDnegBit); LED_ON=false; } else { CLR(LEDnegPORT,LEDnegBit); LED_ON=true; } }
       #endif
     }
 
@@ -990,13 +989,11 @@ void loop() {
     #endif
 
     #ifdef STATUS_LED_PINS_ON
-    if (trackingState!=TrackingSidereal) {
-      if (!LED_ON) { CLR(LEDnegPORT, LEDnegBit); LED_ON=true; } // indicate PWR on
-    }
+    if (trackingState!=TrackingSidereal) if (!LED_ON) { CLR(LEDnegPORT, LEDnegBit); LED_ON=true; } // indicate PWR on 
     #endif
     #ifdef STATUS_LED2_PINS_ON
     if (trackingState==TrackingNone) if (LED2_ON) { SET(LEDneg2PORT, LEDneg2Bit); LED2_ON=false; } // indicate STOP
-    if (trackingState==TrackingMoveTo) if (LED2_ON) { CLR(LEDneg2PORT, LEDneg2Bit); LED2_ON=true; }  // indicate GOTO
+    if (trackingState==TrackingMoveTo) if (!LED2_ON) { CLR(LEDneg2PORT, LEDneg2Bit); LED2_ON=true; }  // indicate GOTO
     #endif
 
     // safety checks, keeps mount from tracking past the meridian limit, past the underPoleLimit, below horizon limit, above the overhead limit, or past the Dec limits
