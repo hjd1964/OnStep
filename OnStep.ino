@@ -133,6 +133,7 @@
  *                                       Initial support for fork mounts: polar home position HA=0, mode w/meridian flips completely disabled, mode with meridian flips enabled until align is complete.
  * 03-26-2015          1.0b13            Minor fix so OnStep remembers the MaxRate set by the ASCOM driver (when this is enabled in config.h) 
  * 03-30-2015          1.0b14            Fixes for goto micro-step mode switch on Mega2560 and PEC soft index detect. PEC Clear command now clears hard index too.
+ * 04-13-2015          1.0b15            Fixes startup initialization of polar home position for southern hemisphere users
  *
  *
  * Author: Howard Dutton
@@ -153,8 +154,8 @@
 #include "Config.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "03 30 15"
-#define FirmwareNumber "1.0b14"
+#define FirmwareDate   "04 13 15"
+#define FirmwareNumber "1.0b15"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -844,6 +845,18 @@ void setup() {
   EEPROM_readQuad(EE_sites+(currentSite)*25+4,(byte*)&longitude);
   timeZone=EEPROM.read(EE_sites+(currentSite)*25+8)-128;
   EEPROM_readString(EE_sites+(currentSite)*25+9,siteName);
+  
+  // update starting coordinates to reflect NCP or SCP polar home position
+  startHA = celestialPoleHA*StepsPerDegreeHA;
+  startDec = celestialPoleDec*StepsPerDegreeDec;
+  cli();
+  targetHA            = startHA;
+  fTargetHA=longToFixed(targetHA);
+  posHA               = startHA;
+  targetDec           = startDec;
+  fTargetDec=longToFixed(targetDec);
+  posDec              = startDec;
+  sei();
   
   // get date and time from EEPROM, start keeping time
   EEPROM_readQuad(EE_JD,(byte*)&JD);
