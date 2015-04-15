@@ -5,7 +5,7 @@
  * Copyright (C) 2013 to 2015 Howard Dutton
  *
  * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GtarNU General Public License as published by
+ * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
@@ -857,10 +857,6 @@ void setup() {
   fTargetDec=longToFixed(targetDec);
   posDec              = startDec;
   sei();
-  
-  EEPROM_readQuad(EE_sites+(currentSite)*25+4,(byte*)&longitude);
-  timeZone=EEPROM.read(EE_sites+(currentSite)*25+8)-128;
-  EEPROM_readString(EE_sites+(currentSite)*25+9,siteName);
   
   // get date and time from EEPROM, start keeping time
   EEPROM_readQuad(EE_JD,(byte*)&JD);
