@@ -131,6 +131,8 @@ byte goToEqu(double RA, double Dec) {
   if (parkStatus!=NotParked) return 4; // fail, not unparked 
   if (Alt<minAlt) return 1;            // fail, below horizon
   if (Alt>maxAlt) return 6;            // fail, outside limits
+  if (Dec>maxDec) return 6;            // fail, outside limits
+  if (Dec<minDec) return 6;            // fail, outside limits
 
   // correct for polar offset, refraction, coordinate systems, operation past pole, etc. as required
   double ha,dec;
