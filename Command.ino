@@ -61,7 +61,7 @@ void processCommands() {
           // set current time and date before calling this routine
 
           // :A2 and :A3 arent supported with Fork mounts in alternate mode
-          #if defined(MOUNT_TYPE_FORK_ALT) || (MOUNT_TYPE_ALTAZM)
+          #if defined(MOUNT_TYPE_FORK_ALT) || defined(MOUNT_TYPE_ALTAZM)
           if (command[1]=='1') {
           #endif
 
@@ -85,7 +85,7 @@ void processCommands() {
   
           commandError=false;
           
-          #if defined(MOUNT_TYPE_FORK_ALT) || (MOUNT_TYPE_ALTAZM)
+          #if defined(MOUNT_TYPE_FORK_ALT) || defined(MOUNT_TYPE_ALTAZM)
           } else commandError=true;
           #endif
 
@@ -159,7 +159,9 @@ the pdCor  term is 1 in HA
           // Third star:
           // Near (Dec=45, HA=6), telescope East of the pier
           if (alignMode==AlignThreeStar3) {
+            #ifndef MOUNT_TYPE_GEM
             meridianFlip=MeridianFlipNever;
+            #endif
             alignMode++;
             
             double ID1 = ID;
