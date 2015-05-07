@@ -2,7 +2,7 @@
  * Title       On-Step
  * by          Howard Dutton
  *
- * Copyright (C) 2013 to 2015 Howard Dutton
+ * Copyright (C) 2012 to 2015 Howard Dutton
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -134,6 +134,10 @@
  * 03-26-2015          1.0b13            Minor fix so OnStep remembers the MaxRate set by the ASCOM driver (when this is enabled in config.h) 
  * 03-30-2015          1.0b14            Fixes for goto micro-step mode switch on Mega2560 and PEC soft index detect. PEC Clear command now clears hard index too.
  * 04-13-2015          1.0b15            Fixes startup initialization of polar home position for southern hemisphere users
+ * 04-28-2015          1.0b16            Added support for user defined object libraries.  There are up to 15 seperate libraries of which 14 are set aside for user object lists.  The total number of objects that
+ *                                       can be stored depends on EEPROM size and PEC table size.  With the default 824 byte PEC table, the Mega2560 can store 192 objects and the Teensy3.1 can store 64.  
+ *                                       Commands are :Lon# select catalog n, :LB# move back, :LN# move next, :LCn# move to catalog record n, :LI# get object info, :LW write object info, :LL# clear catalog, #L!# clear library.
+ *                                       Fixed bug, 3-star align was disabling meridian flips for GEM mounts.
  *
  *
  * Author: Howard Dutton
@@ -152,10 +156,11 @@
 #include "errno.h"
 // Use Config.h to configure OnStep to your requirements 
 #include "Config.h"
+#include "Library.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "04 13 15"
-#define FirmwareNumber "1.0b15"
+#define FirmwareDate   "04 28 15"
+#define FirmwareNumber "1.0b16"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -225,7 +230,9 @@ volatile boolean inBacklashDec=false;
 
 volatile double  pecTimerRateHA = 0;
 volatile double  guideTimerRateHA = 0;
+volatile double  guideTimerRateHA1 = 0;
 volatile double  guideTimerRateDec = 0;
+volatile double  guideTimerRateDec1 = 0;
 volatile double  timerRateRatio = ((double)StepsPerDegreeHA/(double)StepsPerDegreeDec);
 #define SecondsPerWormRotation  ((long)(StepsPerWormRotation/StepsPerSecond))
 #define StepsPerSecondDec       ((double)(StepsPerDegreeDec/3600.0)*15.0)
@@ -461,7 +468,7 @@ boolean homeMount        = false;
 boolean commandError     = false;
 boolean quietReply       = false;
 
-char reply[25];
+char reply[50];
 
 char command[3];
 char parameter[25];
@@ -498,6 +505,12 @@ byte currentSite = 0;
 char siteName[16];
 
 // align command
+boolean modelOn = true;
+double altCor1           = 0;       // for geometric coordinate correction/align, - is below the pole, + above
+double azmCor1           = 0;       // - is right of the pole, + is left
+double doCor1            = 0;       // declination/optics orthogonal correction
+double pdCor1            = 0;       // declination/polar orthogonal correction
+
 double altCor            = 0;       // for geometric coordinate correction/align, - is below the pole, + above
 double azmCor            = 0;       // - is right of the pole, + is left
 double doCor             = 0;       // declination/optics orthogonal correction
@@ -514,7 +527,7 @@ fixed pstep = 0;
 #define GuideRate16x       6
 #define GuideRateNone      255
 double  guideRates[10]={3.75,7.5,15,30,60,120,240,360,600,900}; 
-//                      .25X .5x 1x 2x 4x 8x  16x 24x 40x 60x
+//                      .25X .5x 1x 2x 4x  8x 16x 24x 40x 60x
 byte currentGuideRate        = GuideRate16x;
 byte currentPulseGuideRate   = GuideRate1x;
 volatile byte activeGuideRate= GuideRateNone;
@@ -570,6 +583,9 @@ volatile int blDec        = 0;
 // status state
 boolean LED_ON = false;
 boolean LED2_ON = false;
+
+Library Lib;
+char* objectStr[] = {"UNK", "OC", "GC", "PN", "DN", "SG", "EG", "IG", "KNT", "SNR", "GAL", "CN", "STR", "PLA", "CMT", "AST"};
 
 // EEPROM Info --------------------------------------------------------------------------------------------------------------
 // 0-1023 bytes
