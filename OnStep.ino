@@ -230,9 +230,7 @@ volatile boolean inBacklashDec=false;
 
 volatile double  pecTimerRateHA = 0;
 volatile double  guideTimerRateHA = 0;
-volatile double  guideTimerRateHA1 = 0;
 volatile double  guideTimerRateDec = 0;
-volatile double  guideTimerRateDec1 = 0;
 volatile double  timerRateRatio = ((double)StepsPerDegreeHA/(double)StepsPerDegreeDec);
 #define SecondsPerWormRotation  ((long)(StepsPerWormRotation/StepsPerSecond))
 #define StepsPerSecondDec       ((double)(StepsPerDegreeDec/3600.0)*15.0)
@@ -505,12 +503,6 @@ byte currentSite = 0;
 char siteName[16];
 
 // align command
-boolean modelOn = true;
-double altCor1           = 0;       // for geometric coordinate correction/align, - is below the pole, + above
-double azmCor1           = 0;       // - is right of the pole, + is left
-double doCor1            = 0;       // declination/optics orthogonal correction
-double pdCor1            = 0;       // declination/polar orthogonal correction
-
 double altCor            = 0;       // for geometric coordinate correction/align, - is below the pole, + above
 double azmCor            = 0;       // - is right of the pole, + is left
 double doCor             = 0;       // declination/optics orthogonal correction
