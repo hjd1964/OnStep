@@ -184,6 +184,7 @@ the pdCor  term is 1 in HA
                 #else
                 pdCor = 0.0;
                 #endif
+
                 ID=ID1;
                 IH=IH1;
               } else commandError=true;
@@ -398,13 +399,18 @@ the pdCor  term is 1 in HA
               case '1': sprintf(reply,"%i",PECav); quietReply=true; break;                                  // pec analog value
               case '2': sprintf(reply,"%ld",(long)(maxRate/16L)); quietReply=true; break;                   // MaxRate
               case '3': sprintf(reply,"%ld",(long)(MaxRate)); quietReply=true; break;                       // MaxRate (default)
+#if defined(__AVR__)
+              case '9': sprintf(reply,"%ld",(long)(freeRam())); quietReply=true; break;                     // Available RAM
+#endif
             }
           } else
           if (parameter[0]=='F') { // Fn: Debug
             long temp;
             switch (parameter[1]) {
-              case '0': cli(); temp=(long)(posHA-(targetHA+PEC_HA)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;    // Debug0, true vs. target RA position          
-              case '1': sprintf(reply,"%ld",(long)(debugv1*1.00273790935)); quietReply=true; break;                               // Debug1, RA tracking rate
+              case '0': cli(); temp=(long)round(guideTimerRateDec); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;     // Debug0, true vs. target RA position          
+              case '1': cli(); temp=(long)round(guideTimerRateDec1); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;    // Debug0, true vs. target RA position          
+              //case '0': cli(); temp=(long)(posHA-(targetHA+PEC_HA)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;  // Debug0, true vs. target RA position          
+//              case '1': sprintf(reply,"%ld",(long)(debugv1/1.00273790935)); quietReply=true; break;                             // Debug1, RA tracking rate
             }
           } else commandError=true;
         } else commandError=true;
@@ -437,6 +443,128 @@ the pdCor  term is 1 in HA
       if (command[1]=='R')  { if (!unpark()) commandError=true; }
       else commandError=true; 
 
+      } else
+      
+//   L - Object Library Commands
+      if (command[0]=='L') {
+
+// :LB#    Find previous object and set it as the current target object.
+//          Returns: Nothing
+      if (command[1]=='B') { 
+          Lib.prevRec(); quietReply=true;
+      } else 
+
+// :LCNNNN#
+//         Set current target object to deep sky catalog object number NNNN
+//          Returns : Nothing
+      if (command[1]=='C') {
+        if ( (atoi2((char *)&parameter[0],&i)) && ((i>=0) && (i<=32767))) {
+          Lib.gotoRec(i); quietReply=true;
+        } else commandError=true;
+      } else 
+
+// :LI#    Get Object Information
+//          Returns: <string>#
+//          Returns a string containing the current target object’s name and object type.
+      if (command[1]=='I') {
+        Lib.readVars(reply,&i,&newTargetRA,&newTargetDec);
+
+        char* objType=objectStr[i];
+        strcat(reply,",");
+        strcat(reply,objType);
+        quietReply=true;
+          
+      } else 
+
+// :LR#    Get Object Information including RA and Dec, with advance to next Record
+//          Returns: <string>#
+//          Returns a string containing the current target object’s name, type, RA, and Dec.
+      if (command[1]=='R') {
+        Lib.readVars(reply,&i,&newTargetRA,&newTargetDec);
+
+        char* objType=objectStr[i];
+        char ws[20];
+
+        strcat(reply,",");
+        strcat(reply,objType);
+        if (strcmp(reply,",UNK")!=0) {
+          doubleToHms(ws,&newTargetRA); strcat(reply,","); strcat(reply,ws);
+          doubleToDms(ws,&newTargetDec,false,true); strcat(reply,","); strcat(reply,ws);
+        }
+        
+        Lib.nextRec();
+
+        quietReply=true;
+          
+      } else 
+
+// :LWss#  Write Object Information including current target RA,Dec to next available empty record
+//         If at the end of the object list (:LI# command returns an empty string "#") a new item is automatically added
+//         ss is a string of up to seven chars followed by a comma and a type designation for ex. ":LWM31 AND,GAL#"
+//          Return: 0 on failure (memory full, for example)
+//                  1 on success
+      if (command[1]=='W') {
+        
+        char name[8];
+        char objType[4];
+
+        // extract object name
+        int l=0;
+        do {
+          name[l]=0;
+          if (parameter[l]==',') break;
+          name[l]=parameter[l]; name[l+1]=0;
+          l++;
+        } while (l<8);
+
+        // extract object type
+        i=0; if (parameter[l]==',') {
+          l++; int m=0;
+          do {
+            objType[m+1]=0;
+            objType[m]=parameter[l];
+            l++; m++;
+          } while (parameter[l]!=0);
+          // encode
+          //   0      1      2      3      4      5      6      7      8      9     10     11     12     13     14     15    
+          // "UNK",  "OC",  "GC",  "PN",  "DN",  "SG",  "EG",  "IG", "KNT", "SNR", "GAL",  "CN", "STR", "PLA", "CMT", "AST"
+          for (l=0; l<=15; l++) { if (strcmp(objType,objectStr[l])==0) i=l; }
+        }
+        
+        if (Lib.firstFreeRec()) Lib.writeVars(name,i,newTargetRA,newTargetDec); else commandError=true;
+      } else 
+
+// :LN#    Find next deep sky target object subject to the current constraints.
+//          Returns: Nothing
+      if (command[1]=='N') { 
+          Lib.nextRec();
+          quietReply=true;
+      } else 
+
+// :LL#    Clear current catalog
+//          Returns: Nothing
+      if (command[1]=='L') { 
+          Lib.clearLib();
+          quietReply=true;
+      } else 
+
+// :L!#    Clear library (all catalogs)
+//          Returns: Nothing
+      if (command[1]=='!') { 
+          Lib.clearAll();
+          quietReply=true;
+      } else 
+
+// :Lonn#  Select Library catalog where nn specifies user catalog number
+//         in OnStep catalog# range from 0-14. Catalogs 0-6 are user defined, the remainder are reserved.
+//          Return: 0 on failure
+//                  1 on success
+      if (command[1]=='o') {
+        if ( (atoi2((char *)&parameter[0],&i)) && ((i>=0) && (i<=14))) {
+          Lib.setCatalog(i);
+        } else commandError=true;
+      } else commandError=true;
+        
       } else
 
 //   M - Telescope Movement Commands
@@ -526,6 +654,30 @@ the pdCor  term is 1 in HA
       
       } else
 
+      if ((command[0]=='P') && (command[1]=='1')) {
+        modelOn=true;
+        
+        // IH, ID. altCor, azmCor, doCor, pdCor
+        altCor=altCor1;
+        azmCor=azmCor1;
+        doCor=doCor1;
+        pdCor=pdCor1;
+      } else
+
+      if ((command[0]=='P') && (command[1]=='0')) {
+        modelOn=false;
+        
+        altCor1=altCor;
+        azmCor1=azmCor;
+        doCor1=doCor;
+        pdCor1=pdCor;
+
+        altCor=0;
+        azmCor=0;
+        doCor=0;
+        pdCor=0;
+      } else
+
 //   $Q - PEC Control
 //  :$QZ+  Enable RA PEC compensation 
 //         Returns: nothing
@@ -595,7 +747,7 @@ the pdCor  term is 1 in HA
 //         Returns: Nothing
         if ((command[1]=='n') || (command[1]=='s')) {
           if (parkStatus==NotParked) {
-            if (guideDirDec) { lstGuideStopDec==lst+1; guideDirDec=0; }
+            if (guideDirDec) { lstGuideStopDec=lst+3; guideDirDec=0; }
           }
           quietReply=true; 
         } else commandError=true;
@@ -603,10 +755,10 @@ the pdCor  term is 1 in HA
 
 //   R - Slew Rate Commands
       if (command[0]=='R') {
-//  :RG#   Set Slew rate to Guiding Rate (slowest)
-//  :RC#   Set Slew rate to Centering rate (2nd slowest)
-//  :RM#   Set Slew rate to Find Rate (2nd Fastest)
-//  :RS#   Set Slew rate to max (fastest)
+//  :RG#   Set Slew rate to Guiding Rate (slowest) 1X
+//  :RC#   Set Slew rate to Centering rate (2nd slowest) 4X
+//  :RM#   Set Slew rate to Find Rate (2nd Fastest) 8X
+//  :RS#   Set Slew rate to max (fastest) 24X
 //  :Rn#   Set Slew rate to n, where n=0..9
 //         Returns: Nothing
       if ((command[1]=='G') || (command[1]=='C') || (command[1]=='M') || (command[1]=='S') || ((command[1]>='0') && (command[1]<='9'))) {
@@ -1140,3 +1292,11 @@ void enableGuideRate(int g) {
   amountGuideDec=doubleToFixed((guideTimerRate*StepsPerSecondDec)/100.0);
   sei();
 }
+
+#if defined(__AVR__)
+int freeRam () {
+  extern int __heap_start, *__brkval;
+  int v;
+  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
+}
+#endif
