@@ -138,8 +138,19 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
 
   if (trackingState==TrackingSidereal) {
     // automatic rate calculation HA
+    double inc; 
     long calculatedTimerRateHA;
-    double timerRateHA1=1.0; if (guideDirHA && (activeGuideRate>GuideRate1x)) timerRateHA1=0.0;
+    double timerRateHA1=1.0; 
+    
+    // guide rate acceleration/deceleration and control
+/*    double z=(abs(guideTimerRateHA1-guideTimerRateHA));
+    if (z>1.0) inc=round(z/60.0)+1.0; else inc=0.25;
+    if (guideTimerRateHA1<guideTimerRateHA) { guideTimerRateHA1+=inc; }
+    if (guideTimerRateHA1>guideTimerRateHA) { guideTimerRateHA1-=inc*0.9; }
+    // respond to low speed guiding start/stop immediately
+    if ((guideTimerRateHA==0.0) && (guideTimerRateHA1<2.0)) { guideTimerRateHA1=0; }
+    if (guideDirHA) { if (guideTimerRateHA>1.0) timerRateHA1=0.0; else guideTimerRateHA1=guideTimerRateHA; }
+*/
     double timerRateHA2=fabs(guideTimerRateHA+pecTimerRateHA+timerRateHA1);
     // round up to run the motor timers just a tiny bit slow, then adjust below if we start to fall behind during sidereal tracking
     if (timerRateHA2>0.5) calculatedTimerRateHA=ceil((double)SiderealRate/timerRateHA2); else calculatedTimerRateHA=ceil((double)SiderealRate*2.0);
@@ -157,7 +168,20 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
 
     // automatic rate calculation Dec
     long calculatedTimerRateDec;
+
+    // guide rate acceleration/deceleration
+ /*   if (!inBacklashDec) {
+      z=(abs(guideTimerRateDec1-guideTimerRateDec));
+      if (z>1.0) inc=round(z/60.0)+1.0; else inc=0.25;
+      if (guideTimerRateDec1<guideTimerRateDec) { guideTimerRateDec1+=inc; }
+      if (guideTimerRateDec1>guideTimerRateDec) { guideTimerRateDec1-=inc*0.9; }
+      // respond to low speed guiding start/stop immediately
+      if ((guideTimerRateDec==0.0) && (guideTimerRateDec1<2.0)) { guideTimerRateDec1=0; }
+      if (guideDirDec && (guideTimerRateDec<2.0)) guideTimerRateDec1=guideTimerRateDec;
+    }
+ */   
     double timerRateDec1=guideTimerRateDec;
+
     // if we're stopped, just run the timer fast since we're not moving anyway
     if (timerRateDec1>0.5) calculatedTimerRateDec=ceil((double)SiderealRate/timerRateDec1); else calculatedTimerRateDec=ceil((double)SiderealRate*2.0);
     // remember our "running" rate and only update the actual rate when it changes
@@ -198,10 +222,10 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
   if (trackingState==TrackingMoveTo) {
     // trigger Goto step mode when faster than the fastest guide rate
     #if defined(DE_MODE) && defined(DE_MODE_GOTO)
-    gotoRateDec=(thisTimerRateDec<SiderealRate/80);  // 80 times the sidereal rate 
+    gotoRateDec=(thisTimerRateDec<SiderealRate/160);  // 160 times the sidereal rate 
     #endif
     #if defined(HA_MODE) && defined(HA_MODE_GOTO)
-    gotoRateHA=(thisTimerRateHA<SiderealRate/80);
+    gotoRateHA=(thisTimerRateHA<SiderealRate/160);
     #endif
   }
   
