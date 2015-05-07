@@ -407,10 +407,8 @@ the pdCor  term is 1 in HA
           if (parameter[0]=='F') { // Fn: Debug
             long temp;
             switch (parameter[1]) {
-              case '0': cli(); temp=(long)round(guideTimerRateDec); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;     // Debug0, true vs. target RA position          
-              case '1': cli(); temp=(long)round(guideTimerRateDec1); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;    // Debug0, true vs. target RA position          
-              //case '0': cli(); temp=(long)(posHA-(targetHA+PEC_HA)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;  // Debug0, true vs. target RA position          
-//              case '1': sprintf(reply,"%ld",(long)(debugv1/1.00273790935)); quietReply=true; break;                             // Debug1, RA tracking rate
+              case '0': cli(); temp=(long)(posHA-(targetHA+PEC_HA)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;  // Debug0, true vs. target RA position          
+              case '1': sprintf(reply,"%ld",(long)(debugv1/1.00273790935)); quietReply=true; break;                             // Debug1, RA tracking rate
             }
           } else commandError=true;
         } else commandError=true;
