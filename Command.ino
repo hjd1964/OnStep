@@ -653,31 +653,6 @@ the pdCor  term is 1 in HA
       } else commandError=true;
       
       } else
-
-      if ((command[0]=='P') && (command[1]=='1')) {
-        modelOn=true;
-        
-        // IH, ID. altCor, azmCor, doCor, pdCor
-        altCor=altCor1;
-        azmCor=azmCor1;
-        doCor=doCor1;
-        pdCor=pdCor1;
-      } else
-
-      if ((command[0]=='P') && (command[1]=='0')) {
-        modelOn=false;
-        
-        altCor1=altCor;
-        azmCor1=azmCor;
-        doCor1=doCor;
-        pdCor1=pdCor;
-
-        altCor=0;
-        azmCor=0;
-        doCor=0;
-        pdCor=0;
-      } else
-
 //   $Q - PEC Control
 //  :$QZ+  Enable RA PEC compensation 
 //         Returns: nothing
