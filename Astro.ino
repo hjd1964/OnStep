@@ -501,7 +501,7 @@ fixed longToFixed(long a) {
 // floating point range of +/-255.999999x
 fixed doubleToFixed(double d) {
 // shifted into a long, with a capacity of 31 bits + sign
-  long l = (d*8388608.0);      // shift 23 bits
+  long l = (d*8388608.0);      // shift 23 bits and
   return ((fixed)l)<<9;        // and 9 more, for 32 bits total
 }
 
