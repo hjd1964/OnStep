@@ -222,10 +222,10 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
   if (trackingState==TrackingMoveTo) {
     // trigger Goto step mode when faster than the fastest guide rate
     #if defined(DE_MODE) && defined(DE_MODE_GOTO)
-    gotoRateDec=(thisTimerRateDec<SiderealRate/160);  // 160 times the sidereal rate 
+    gotoRateDec=(thisTimerRateDec<SiderealRate/80);  // 80 times the sidereal rate 
     #endif
     #if defined(HA_MODE) && defined(HA_MODE_GOTO)
-    gotoRateHA=(thisTimerRateHA<SiderealRate/160);
+    gotoRateHA=(thisTimerRateHA<SiderealRate/80);
     #endif
   }
   
