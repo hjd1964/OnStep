@@ -771,7 +771,7 @@ the pdCor  term is 1 in HA
 //          Change Date to MM/DD/YY
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='C')  { if (!dateToDouble(&JD,parameter)) commandError=true; else { EEPROM_writeQuad(EE_JD,(byte*)&JD); LST=(JD,UT1); update_lst(); } } else 
+      if (command[1]=='C')  { if (!dateToDouble(&JD,parameter)) commandError=true; else { float f=JD; EEPROM_writeQuad(EE_JD,(byte*)&f); LST=(JD,UT1); update_lst(); } } else 
 //  :SdsDD*MM#
 //          Set target object declination to sDD*MM or sDD*MM:SS depending on the current precision setting
 //          Return: 0 on failure
@@ -781,7 +781,7 @@ the pdCor  term is 1 in HA
 //          Set current sites longitude to sDDD*MM an ASCII position string, East longitudes are expressed as negative
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='g')  { i=highPrecision; highPrecision=false; if (!dmsToDouble(&longitude,(char *)&parameter[1],false)) commandError=true; else { if (parameter[0]=='-') longitude=-longitude; EEPROM_writeQuad(EE_sites+(currentSite)*25+4,(byte*)&longitude); } LST=jd2last(JD,UT1); update_lst(); highPrecision=i; } else 
+      if (command[1]=='g')  { i=highPrecision; highPrecision=false; if (!dmsToDouble(&longitude,(char *)&parameter[1],false)) commandError=true; else { if (parameter[0]=='-') longitude=-longitude; float f=longitude; EEPROM_writeQuad(EE_sites+(currentSite)*25+4,(byte*)&f); } LST=jd2last(JD,UT1); update_lst(); highPrecision=i; } else 
 //  :SGsHH#
 //          Set the number of hours added to local time to yield UTC
 //          Return: 0 on failure
@@ -814,7 +814,7 @@ the pdCor  term is 1 in HA
       if (command[1]=='L')  {  
         i=highPrecision; highPrecision=true; 
         if (!hmsToDouble(&LMT,parameter)) commandError=true; else {
-          EEPROM_writeQuad(EE_LMT,(byte*)&LMT); 
+          float f=LMT; EEPROM_writeQuad(EE_LMT,(byte*)&f); 
           UT1=LMT+timeZone; 
           UT1_start  =UT1;
           UT1mS_start=millis(); 
@@ -859,7 +859,7 @@ the pdCor  term is 1 in HA
       if (command[1]=='t')  { 
         i=highPrecision; highPrecision=false; 
         if (!dmsToDouble(&latitude,parameter,true)) { commandError=true; } else {
-          EEPROM_writeQuad(100+(currentSite)*25+0,(byte*)&latitude);
+          float f=latitude; EEPROM_writeQuad(100+(currentSite)*25+0,(byte*)&f);
           if (latitude<0) celestialPoleDec=-90L; else celestialPoleDec=90L;
           cosLat=cos(latitude/Rad);
           sinLat=sin(latitude/Rad);
