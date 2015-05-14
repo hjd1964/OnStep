@@ -771,7 +771,7 @@ the pdCor  term is 1 in HA
 //          Change Date to MM/DD/YY
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='C')  { if (!dateToDouble(&JD,parameter)) commandError=true; else { float f=JD; EEPROM_writeQuad(EE_JD,(byte*)&f); LST=(JD,UT1); update_lst(); } } else 
+      if (command[1]=='C')  { if (!dateToDouble(&JD,parameter)) commandError=true; else { float f=JD; EEPROM_writeQuad(EE_JD,(byte*)&f); LST=jd2last(JD,UT1); update_lst(); } } else 
 //  :SdsDD*MM#
 //          Set target object declination to sDD*MM or sDD*MM:SS depending on the current precision setting
 //          Return: 0 on failure
