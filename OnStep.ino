@@ -138,6 +138,7 @@
  *                                       can be stored depends on EEPROM size and PEC table size.  With the default 824 byte PEC table, the Mega2560 can store 192 objects and the Teensy3.1 can store 64.  
  *                                       Commands are :Lon# select catalog n, :LB# move back, :LN# move next, :LCn# move to catalog record n, :LI# get object info, :LW write object info, :LL# clear catalog, #L!# clear library.
  *                                       Fixed bug, 3-star align was disabling meridian flips for GEM mounts.
+ * 05-14-2015          1.0b17            Fixed bug, Latitude/Longitude/UT/LMT are now correctly stored in EEPROM on Teensy3.1
  *
  *
  * Author: Howard Dutton
@@ -159,8 +160,8 @@
 #include "Library.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "04 28 15"
-#define FirmwareNumber "1.0b16"
+#define FirmwareDate   "05 14 15"
+#define FirmwareNumber "1.0b17"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -745,8 +746,8 @@ void setup() {
     EEPROM.write(EE_currentSite,0);
     latitude=0; longitude=0;
     for (int l=0; l<4; l++) {
-      EEPROM_writeQuad(EE_sites+(l)*25+0,(byte*)&latitude);
-      EEPROM_writeQuad(EE_sites+(l)*25+4,(byte*)&longitude);
+      float f=latitude; EEPROM_writeQuad(EE_sites+(l)*25+0,(byte*)&f);
+      f=longitude; EEPROM_writeQuad(EE_sites+(l)*25+4,(byte*)&f);
       EEPROM.write(EE_sites+(l)*25+8,128);
       EEPROM.write(EE_sites+(l)*25+9,0);
     }
@@ -754,8 +755,8 @@ void setup() {
     // init the date and time January 1, 2013. 0 hours LMT
     JD=2456293.5;
     LMT=0.0;
-    EEPROM_writeQuad(EE_JD,(byte*)&JD);
-    EEPROM_writeQuad(EE_LMT,(byte*)&LMT);
+    float f=JD; EEPROM_writeQuad(EE_JD,(byte*)&f);
+    f=LMT; EEPROM_writeQuad(EE_LMT,(byte*)&f);
   
     // init the min and max altitude
     minAlt=-10;
@@ -845,12 +846,12 @@ void setup() {
   
   // get the site information, if a GPS were attached we would use that here instead
   currentSite=EEPROM.read(EE_currentSite);  if (currentSite>3) currentSite=0; // site index is valid?
-  EEPROM_readQuad(EE_sites+(currentSite)*25+0,(byte*)&latitude);
+  float f; EEPROM_readQuad(EE_sites+(currentSite)*25+0,(byte*)&f); latitude=f;
   if (latitude<0) celestialPoleDec=-90L; else celestialPoleDec=90L;
   cosLat=cos(latitude/Rad);
   sinLat=sin(latitude/Rad);
   if (celestialPoleDec>0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
-  EEPROM_readQuad(EE_sites+(currentSite)*25+4,(byte*)&longitude);
+  EEPROM_readQuad(EE_sites+(currentSite)*25+4,(byte*)&f); longitude=f;
   timeZone=EEPROM.read(EE_sites+(currentSite)*25+8)-128;
   EEPROM_readString(EE_sites+(currentSite)*25+9,siteName);
 
@@ -867,8 +868,8 @@ void setup() {
   sei();
   
   // get date and time from EEPROM, start keeping time
-  EEPROM_readQuad(EE_JD,(byte*)&JD);
-  EEPROM_readQuad(EE_LMT,(byte*)&LMT);
+  EEPROM_readQuad(EE_JD,(byte*)&f); JD=f;
+  EEPROM_readQuad(EE_LMT,(byte*)&f); LMT=f;
   UT1=LMT+timeZone;
   UT1_start  =UT1;
   UT1mS_start=millis(); 
@@ -979,8 +980,8 @@ void loop() {
     clockTimer=m;
     
     // for testing, average steps per second
-    debugv1=(debugv1*19+(targetHA*1000-lastTargetHA))/20;
-    lastTargetHA=targetHA*1000;
+    // debugv1=(debugv1*19+(targetHA*1000-lastTargetHA))/20;
+    // lastTargetHA=targetHA*1000;
     
     // update the UT1 CLOCK
     // this clock doesn't rollover (at 24 hours) since that would cause date confusion
