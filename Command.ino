@@ -244,6 +244,7 @@ the pdCor  term is 1 in HA
       if ((command[0]=='C') && ((command[1]=='S') || command[1]=='M'))  {
         if (trackingState!=TrackingMoveTo) {
           syncEqu(newTargetRA,newTargetDec);
+          if (command[1]=='M') strcpy(reply,"N/A");
           quietReply=true;
         }
       } else 
