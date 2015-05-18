@@ -1008,11 +1008,12 @@ void loop() {
 
   // ST4 INTERFACE -------------------------------------------------------------------------------------
   #if defined(ST4_ON) || defined(ST4_PULLUP)
-  if (digitalRead(ST4RAw)==LOW) ST4RA_state='w'; else if (digitalRead(ST4RAe)==LOW) ST4RA_state='e'; else ST4RA_state=0;
-  if (digitalRead(ST4DEn)==LOW) ST4DE_state='n'; else if (digitalRead(ST4DEs)==LOW) ST4DE_state='s'; else ST4DE_state=0;
-  // RA changed?
-  if (ST4RA_last=ST4RA_state) {
-    if (parkStatus==NotParked) {
+  if (parkStatus==NotParked) {
+    if (digitalRead(ST4RAw)==LOW) ST4RA_state='w'; else if (digitalRead(ST4RAe)==LOW) ST4RA_state='e'; else ST4RA_state=0;
+    if (digitalRead(ST4DEn)==LOW) ST4DE_state='n'; else if (digitalRead(ST4DEs)==LOW) ST4DE_state='s'; else ST4DE_state=0;
+    // RA changed?
+    if (ST4RA_last!=ST4RA_state) {
+      ST4RA_last=ST4RA_state;
       if (ST4RA_state) { 
         enableGuideRate(currentGuideRate);
         guideDirHA=ST4RA_state;
@@ -1022,10 +1023,9 @@ void loop() {
         if (guideDirHA) { lstGuideStopHA=lst+3; guideDirHA=0; }
       }
     }
-  }
-  // Dec changed?
-  if (ST4DE_last=ST4DE_state) {
-    if (parkStatus==NotParked) {
+    // Dec changed?
+    if (ST4DE_last!=ST4DE_state) {
+      ST4DE_last=ST4DE_state;
       if (ST4DE_state) { 
         enableGuideRate(currentGuideRate);
         guideDirDec=ST4DE_state;
