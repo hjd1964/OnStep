@@ -499,12 +499,12 @@ the pdCor  term is 1 in HA
 
 // :LWss#  Write Object Information including current target RA,Dec to next available empty record
 //         If at the end of the object list (:LI# command returns an empty string "#") a new item is automatically added
-//         ss is a string of up to seven chars followed by a comma and a type designation for ex. ":LWM31 AND,GAL#"
+//         ss is a string of up to eleven chars followed by a comma and a type designation for ex. ":LWM31 AND,GAL#"
 //          Return: 0 on failure (memory full, for example)
 //                  1 on success
       if (command[1]=='W') {
         
-        char name[8];
+        char name[12];
         char objType[4];
 
         // extract object name
@@ -514,7 +514,7 @@ the pdCor  term is 1 in HA
           if (parameter[l]==',') break;
           name[l]=parameter[l]; name[l+1]=0;
           l++;
-        } while (l<8);
+        } while (l<12);
 
         // extract object type
         i=0; if (parameter[l]==',') {
