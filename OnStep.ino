@@ -138,7 +138,9 @@
  *                                       can be stored depends on EEPROM size and PEC table size.  With the default 824 byte PEC table, the Mega2560 can store 192 objects and the Teensy3.1 can store 64.  
  *                                       Commands are :Lon# select catalog n, :LB# move back, :LN# move next, :LCn# move to catalog record n, :LI# get object info, :LW write object info, :LL# clear catalog, #L!# clear library.
  *                                       Fixed bug, 3-star align was disabling meridian flips for GEM mounts.
- * 05-14-2015          1.0b17            Fixed bug, Latitude/Longitude/UT/LMT are now correctly stored in EEPROM on Teensy3.1
+ * 05-14-2015          1.0b17            Fixed bug, Latitude/Longitude/UT/LMT are now correctly stored in EEPROM on Teensy3.1.  
+ *                                       Improved user defined object library record format: object names can now be 11 chars max (was 7.)
+ * 05-18-2015          1.0b18            Added experimental support of ST4 interface.  
  *
  *
  * Author: Howard Dutton
@@ -160,8 +162,8 @@
 #include "Library.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "05 14 15"
-#define FirmwareNumber "1.0b17"
+#define FirmwareDate   "05 18 15"
+#define FirmwareNumber "1.0b18"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -361,6 +363,12 @@ int    maxAlt;                                    // the maximum altitude, in de
 #define HAStepBit  7       // Pin 13
 #define HAStepPORT PORTB   //
 
+// ST4 interface
+#define ST4RAw     47      // Pin 47 ST4 RA- West
+#define ST4DEs     49      // Pin 49 ST4 DE- South
+#define ST4DEn     51      // Pin 51 ST4 DE+ North
+#define ST4RAe     53      // Pin 53 ST4 RA+ East
+
 #elif defined(__arm__) && defined(TEENSYDUINO)
 
 // The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
@@ -406,6 +414,12 @@ int    maxAlt;                                    // the maximum altitude, in de
 #define HA5vPORT   PORTB   //
 #define HAStepBit  4       // Pin 12
 #define HAStepPORT PORTB   //
+
+// ST4 interface
+#define ST4RAw     24      // Pin 24 ST4 RA- West
+#define ST4DEs     25      // Pin 25 ST4 DE- South
+#define ST4DEn     26      // Pin 26 ST4 DE+ North
+#define ST4RAe     27      // Pin 27 ST4 RA+ East
 
 #endif
 
@@ -577,6 +591,12 @@ volatile int blDec        = 0;
 boolean LED_ON = false;
 boolean LED2_ON = false;
 
+// ST4 interface
+char ST4RA_state = 0;
+char ST4RA_last = 0;
+char ST4DE_state = 0;
+char ST4DE_last = 0;
+
 Library Lib;
 char* objectStr[] = {"UNK", "OC", "GC", "PN", "DN", "SG", "EG", "IG", "KNT", "SNR", "GAL", "CN", "STR", "PLA", "CMT", "AST"};
 
@@ -710,6 +730,20 @@ void setup() {
 // limit switch sense
 #ifdef LIMIT_SENSE_ON  
   pinMode(LimitPin, INPUT_PULLUP);
+#endif
+
+// ST4 interface
+#ifdef ST4_ON
+  pinMode(ST4RAw, INPUT);
+  pinMode(ST4RAe, INPUT);
+  pinMode(ST4DEn, INPUT);
+  pinMode(ST4DEs, INPUT);
+#endif
+#ifdef ST4_PULLUP
+  pinMode(ST4RAw, INPUT_PULLUP);
+  pinMode(ST4RAe, INPUT_PULLUP);
+  pinMode(ST4DEn, INPUT_PULLUP);
+  pinMode(ST4DEs, INPUT_PULLUP);
 #endif
 
 // disable the stepper drivers for now, if the enable lines are connected
@@ -971,6 +1005,38 @@ void loop() {
       moveTo();
     }
   }
+
+  // ST4 INTERFACE -------------------------------------------------------------------------------------
+  #if defined(ST4_ON) || defined(ST4_PULLUP)
+  if (digitalRead(ST4RAw)==LOW) ST4RA_state='w'; else if (digitalRead(ST4RAe)==LOW) ST4RA_state='e'; else ST4RA_state=0;
+  if (digitalRead(ST4DEn)==LOW) ST4DE_state='n'; else if (digitalRead(ST4DEs)==LOW) ST4DE_state='s'; else ST4DE_state=0;
+  // RA changed?
+  if (ST4RA_last=ST4RA_state) {
+    if (parkStatus==NotParked) {
+      if (ST4RA_state) { 
+        enableGuideRate(currentGuideRate);
+        guideDirHA=ST4RA_state;
+        guideDurationHA=-1;
+        cli(); if (guideDirHA=='e') guideTimerRateHA=-guideTimerRate; else guideTimerRateHA=guideTimerRate; sei();
+      } else {
+        if (guideDirHA) { lstGuideStopHA=lst+3; guideDirHA=0; }
+      }
+    }
+  }
+  // Dec changed?
+  if (ST4DE_last=ST4DE_state) {
+    if (parkStatus==NotParked) {
+      if (ST4DE_state) { 
+        enableGuideRate(currentGuideRate);
+        guideDirDec=ST4DE_state;
+        guideDurationDec=-1;
+        cli(); guideTimerRateDec=guideTimerRate; sei();
+      } else {
+        if (guideDirDec) { lstGuideStopDec=lst+3; guideDirDec=0; }
+      }
+    }
+  }
+  #endif
   
   // HOUSEKEEPING --------------------------------------------------------------------------------------
   // timer... falls in once a second, keeps the universal time clock ticking,
