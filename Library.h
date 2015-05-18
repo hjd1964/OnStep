@@ -5,10 +5,10 @@
 
 const int rec_size = 16;
 typedef struct libRecBase_t{
-  char name[7];  // 7
+  char name[11]; // 11
   byte code;     // 1 (low 4 bits are object class, high are catalog #)
-  float RA;      // 4
-  float Dec;     // 4
+  uint16_t RA;   // 2
+  uint16_t Dec;  // 2
 };
 
 typedef union libRec_t{
