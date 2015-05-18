@@ -33,10 +33,18 @@ boolean Library::setCatalog(int num)
 void Library::writeVars(char* name, int code, double RA, double Dec)
 {
   libRec_t work;
-  for (int l=0; l<7; l++) work.libRec.name[l] = name[l];
+  for (int l=0; l<11; l++) work.libRec.name[l] = name[l];
   work.libRec.code = (code | (catalog<<4));
-  work.libRec.RA   = RA;
-  work.libRec.Dec  = Dec;
+
+  // convert into ulong, RA=0..360
+  RA=RA*15.0; RA=degreeRange(RA)/360.0;
+  // convert into ulong, Dec=0..180
+  if (Dec>90.0) Dec=90.0; if (Dec<-90.0) Dec=-90.0; Dec=Dec+90.0; Dec=Dec/180.0;
+  uint16_t r=round(RA*65536.0);
+  uint16_t d=round(Dec*65536.0);
+  
+  work.libRec.RA   = r;
+  work.libRec.Dec  = d;
 
   writeRec(recPos,work);
 }
@@ -51,11 +59,17 @@ void Library::readVars(char* name, int* code, double* RA, double* Dec)
   // empty? or not found
   if ((cat==15) || (cat!=catalog)) { name[0]=0; *code=0; *RA=0.0; *Dec=0.0; return; }
 
-  for (int l=0; l<7; l++) name[l]=work.libRec.name[l]; name[7]=0;
+  for (int l=0; l<11; l++) name[l]=work.libRec.name[l]; name[11]=0;
   
   *code = work.libRec.code & 15;
-  *RA = work.libRec.RA;
-  *Dec = work.libRec.Dec;
+  uint16_t r = work.libRec.RA;
+  uint16_t d = work.libRec.Dec;
+  
+  // convert from ulong
+  *RA=(double)r;
+  *RA=((*RA/65536.0)*360.0)/15.0;
+  *Dec=(double)d;
+  *Dec=((*Dec/65536.0)*180.0)-90.0;
 }
 
 libRec_t Library::readRec(int address)
@@ -76,7 +90,7 @@ void Library::clearRec(int address)
 {
   int l=address*rec_size+byteMin;
   int code=15<<4;
-  EEPROM.write(l+7,(byte)code); // catalog code 15 = deleted
+  EEPROM.write(l+11,(byte)code); // catalog code 15 = deleted
 }
 
 boolean Library::firstRec()
