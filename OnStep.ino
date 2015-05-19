@@ -972,6 +972,47 @@ void loop() {
 
   // GUIDING -------------------------------------------------------------------------------------------
   if (trackingState==TrackingSidereal) { 
+
+    // ST4 INTERFACE -------------------------------------------------------------------------------------
+    #if defined(ST4_ON) || defined(ST4_PULLUP)
+    if (parkStatus==NotParked) {
+      if (digitalRead(ST4RAw)==LOW) ST4RA_state='w'; else if (digitalRead(ST4RAe)==LOW) ST4RA_state='e'; else ST4RA_state=0;
+      if (digitalRead(ST4DEn)==LOW) ST4DE_state='n'; else if (digitalRead(ST4DEs)==LOW) ST4DE_state='s'; else ST4DE_state=0;
+      // RA changed?
+      if (ST4RA_last!=ST4RA_state) {
+        ST4RA_last=ST4RA_state;
+        if (ST4RA_state) { 
+          #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
+          enableGuideRate(currentPulseGuideRate);
+          #else
+          enableGuideRate(currentGuideRate);
+          #endif
+          guideDirHA=ST4RA_state;
+          guideDurationHA=-1;
+          cli(); if (guideDirHA=='e') guideTimerRateHA=-guideTimerRate; else guideTimerRateHA=guideTimerRate; sei();
+        } else {
+          if (guideDirHA) { lstGuideStopHA=lst+3; guideDirHA=0; }
+        }
+      }
+      // Dec changed?
+      if (ST4DE_last!=ST4DE_state) {
+        ST4DE_last=ST4DE_state;
+        if (ST4DE_state) { 
+          #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
+          enableGuideRate(currentPulseGuideRate);
+          #else
+          enableGuideRate(currentGuideRate);
+          #endif
+          guideDirDec=ST4DE_state;
+          guideDurationDec=-1;
+          cli(); guideTimerRateDec=guideTimerRate; sei();
+        } else {
+          if (guideDirDec) { lstGuideStopDec=lst+3; guideDirDec=0; }
+        }
+      }
+    }
+    #endif
+
     guideHA=0;
     Guide();
   }
@@ -1005,46 +1046,6 @@ void loop() {
       moveTo();
     }
   }
-
-  // ST4 INTERFACE -------------------------------------------------------------------------------------
-  #if defined(ST4_ON) || defined(ST4_PULLUP)
-  if (parkStatus==NotParked) {
-    if (digitalRead(ST4RAw)==LOW) ST4RA_state='w'; else if (digitalRead(ST4RAe)==LOW) ST4RA_state='e'; else ST4RA_state=0;
-    if (digitalRead(ST4DEn)==LOW) ST4DE_state='n'; else if (digitalRead(ST4DEs)==LOW) ST4DE_state='s'; else ST4DE_state=0;
-    // RA changed?
-    if (ST4RA_last!=ST4RA_state) {
-      ST4RA_last=ST4RA_state;
-      if (ST4RA_state) { 
-#ifdef SEPERATE_PULSE_GUIDE_RATE_ON
-        enableGuideRate(currentPulseGuideRate);
-#else
-        enableGuideRate(currentGuideRate);
-#endif
-        guideDirHA=ST4RA_state;
-        guideDurationHA=-1;
-        cli(); if (guideDirHA=='e') guideTimerRateHA=-guideTimerRate; else guideTimerRateHA=guideTimerRate; sei();
-      } else {
-        if (guideDirHA) { lstGuideStopHA=lst+3; guideDirHA=0; }
-      }
-    }
-    // Dec changed?
-    if (ST4DE_last!=ST4DE_state) {
-      ST4DE_last=ST4DE_state;
-      if (ST4DE_state) { 
-#ifdef SEPERATE_PULSE_GUIDE_RATE_ON
-        enableGuideRate(currentPulseGuideRate);
-#else
-        enableGuideRate(currentGuideRate);
-#endif
-        guideDirDec=ST4DE_state;
-        guideDurationDec=-1;
-        cli(); guideTimerRateDec=guideTimerRate; sei();
-      } else {
-        if (guideDirDec) { lstGuideStopDec=lst+3; guideDirDec=0; }
-      }
-    }
-  }
-  #endif
   
   // HOUSEKEEPING --------------------------------------------------------------------------------------
   // timer... falls in once a second, keeps the universal time clock ticking,
@@ -1085,28 +1086,30 @@ void loop() {
     #endif
 
     #ifdef STATUS_LED_PINS_ON
-    if (trackingState!=TrackingSidereal) if (!LED_ON) { CLR(LEDnegPORT, LEDnegBit); LED_ON=true; } // indicate PWR on 
+    if (trackingState!=TrackingSidereal) if (!LED_ON) { CLR(LEDnegPORT, LEDnegBit); LED_ON=true; }    // indicate PWR on 
     #endif
     #ifdef STATUS_LED2_PINS_ON
-    if (trackingState==TrackingNone) if (LED2_ON) { SET(LEDneg2PORT, LEDneg2Bit); LED2_ON=false; } // indicate STOP
+    if (trackingState==TrackingNone) if (LED2_ON) { SET(LEDneg2PORT, LEDneg2Bit); LED2_ON=false; }    // indicate STOP
     if (trackingState==TrackingMoveTo) if (!LED2_ON) { CLR(LEDneg2PORT, LEDneg2Bit); LED2_ON=true; }  // indicate GOTO
     #endif
 
     // safety checks, keeps mount from tracking past the meridian limit, past the underPoleLimit, below horizon limit, above the overhead limit, or past the Dec limits
     if (meridianFlip!=MeridianFlipNever) {
       if (pierSide==PierSideWest) { cli(); if (posHA>(minutesPastMeridianW*StepsPerDegreeHA/4L)) if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  sei(); }
-      if (pierSide==PierSideEast) { cli(); if (posHA>(underPoleLimit*StepsPerDegreeHA*15L)) if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  sei(); }
+      if (pierSide==PierSideEast) { cli(); if (posHA>(underPoleLimit*StepsPerDegreeHA*15L))      if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  sei(); }
     } else {
       // when Fork mounted, ignore pierSide and just stop the mount if it passes the underPoleLimit
       cli(); if (posHA>(underPoleLimit*StepsPerDegreeHA*15L)) if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  sei();
     }
-    
     if ((getApproxDec()<minDec) || (getApproxDec()>maxDec)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
-    
+
+    // support for limit switch(es)
     #ifdef LIMIT_SENSE_ON  
     if (digitalRead(LimitPin)==LOW) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
     #endif
-    if (do_alt_calc()) {  // low overhead altitude calculation, finishes updating once every 16 seconds
+
+    // low overhead altitude calculation, finishes updating once every 16 seconds
+    if (do_alt_calc()) {
       if ((currentAlt<minAlt) || (currentAlt>maxAlt)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
 
       // reset the sidereal clock once a day, to keep the significant digits from being consumed
