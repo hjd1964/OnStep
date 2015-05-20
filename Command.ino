@@ -307,7 +307,7 @@ the pdCor  term is 1 in HA
 //         Returns: <string>#
 //         A # terminated string with the name of the requested site.
       if ((command[1]=='M') || (command[1]=='N') || (command[1]=='O') || (command[1]=='P'))  { 
-        i=(int)command[1]-(int)'M';
+        i=command[1]-'M';
         EEPROM_readString(EE_sites+i*25+9,reply);
         if (reply[0]==0) { strcat(reply,"None"); }
         quietReply=true;
@@ -832,7 +832,7 @@ the pdCor  term is 1 in HA
 //          Return: 0 on failure
 //                  1 on success
       if ((command[1]=='M') || (command[1]=='N') || (command[1]=='O') || (command[1]=='P')) {
-        i=(int)command[1]-(int)'M';
+        i=command[1]-'M';
         if (strlen(parameter)>15) commandError=true; else EEPROM_writeString(EE_sites+i*25+9,parameter);
       } else
 //  :SoDD#
