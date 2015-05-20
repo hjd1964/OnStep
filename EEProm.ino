@@ -37,16 +37,14 @@ void EEPROM_readQuad(int i,byte *v) {
 
 // write String into EEPROM at position i (16 bytes)
 void EEPROM_writeString(int i,char l[]) {
-  int l1;
-  for (l1==0; l1<16; l1++) {
+  for (int l1=0; l1<16; l1++) {
     EEPROM.write(i+l1,*l); l++;
   }
 }
 
 // read String from EEPROM at position i (16 bytes)
 void EEPROM_readString(int i, char l[]) {
-  int l1;
-  for (l1==0; l1<16; l1++) {
+  for (int l1=0; l1<16; l1++) {
     *l=EEPROM.read(i+l1); l++;
   }
 }
