@@ -239,8 +239,9 @@ the pdCor  term is 1 in HA
       
 //   C - Sync Control
 //  :CS#   Synchonize the telescope with the current right ascension and declination coordinates
-//  :CM#   Synchonize the telescope with the current database object (as above)
 //         Returns: Nothing
+//  :CM#   Synchonize the telescope with the current database object (as above)
+//         Returns: "N/A#"
       if ((command[0]=='C') && ((command[1]=='S') || command[1]=='M'))  {
         if (trackingState!=TrackingMoveTo) {
           syncEqu(newTargetRA,newTargetDec);
