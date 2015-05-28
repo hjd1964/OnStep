@@ -129,6 +129,7 @@ void Pec() {
       // save the correction 1:2 weighted average
       int l=accPecGuideHA;
       if (l<-StepsPerSecond) l=-StepsPerSecond; if (l>StepsPerSecond) l=StepsPerSecond;   // +/-1 sidereal rate range for corrections
+      if (l<-127) l=-127; if (l>127) l=127;                                               // prevent overflow if StepsPerSecond>127
       if (!PECfirstRecord) l=(l+((int)PEC_buffer[PECindex1]-128)*2)/3; 
       PEC_buffer[PECindex1]=l+128;  // save the correction
       accPecGuideHA=0;              // and clear the accumulator
