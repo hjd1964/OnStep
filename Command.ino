@@ -262,6 +262,9 @@ the pdCor  term is 1 in HA
 //         Returns: sDD*MM# or sDD*MM'SS# (based on precision setting)
 //         The current scope altitude
       if (command[1]=='A')  { getHor(&f,&f1); if (!doubleToDms(reply,&f,false,true)) commandError=true; else quietReply=true; } else
+//  :Ga#   Get Local Time in 12 hour format
+//         Returns: HH:MM:SS#
+      if (command[1]=='a')  { i=highPrecision; highPrecision=true; LMT=timeRange(UT1-timeZone); if (LMT>12.0) LMT-=12.0; if (!doubleToHms(reply,&LMT)) commandError=true; else quietReply=true; highPrecision=i; } else 
 //  :GC#   Get the current date
 //         Returns: MM/DD/YY#
 //         The current local calendar date
