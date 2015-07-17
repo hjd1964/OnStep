@@ -32,9 +32,9 @@ boolean syncEqu(double RA, double Dec) {
   // HA goes from +12...0..-12
   //                W   .   E
   // IH and ID values get subtracted to arrive at the correct location
-  double HA1=(double)targetHA/(double)(StepsPerDegreeHA*15L);
+  double HA1=(double)((long int)targetHA.part.m)/(double)(StepsPerDegreeHA*15L);
   IH=HA-HA1;
-  ID=Dec-(double)targetDec/(double)StepsPerDegreeDec;
+  ID=Dec-(double)((long int)targetDec.part.m)/(double)StepsPerDegreeDec;
 
   if ((abs(ID)>30.0) || (abs(IH)>2.0)) { IH=0; ID=0; return false; } else return true;
 #endif
@@ -119,7 +119,7 @@ double HA,Dec;
 
 // moves the mount to a new Right Ascension and Declination (RA,Dec) in degrees
 byte goToEqu(double RA, double Dec) {
-  double Alt,Azm,f;
+  double Alt,Azm;
 
   // Convert RA into hour angle, get altitude
   double HA=LST-RA;
@@ -173,7 +173,7 @@ byte goTo(long thisTargetHA, long thisTargetDec, long altTargetHA, long altTarge
 
   // Check to see if this goto is valid
   if (trackingState==TrackingMoveTo) { abortSlew=true; return 5; }    // fail, prior goto cancelled
-  if (guideDirHA || guideDirDec) return 7;                           // fail, unspecified error
+  if (guideDirHA || guideDirDec) return 7;                            // fail, unspecified error
   
   atHome=false;
 
@@ -239,8 +239,8 @@ byte goTo(long thisTargetHA, long thisTargetDec, long altTargetHA, long altTarge
   startHA =posHA;
   startDec=posDec;
 
-  targetHA =thisTargetHA; fTargetHA=longToFixed(targetHA);
-  targetDec=thisTargetDec; fTargetDec=longToFixed(targetDec);
+  targetHA.part.m=thisTargetHA; targetHA.part.f=0;
+  targetDec.part.m=thisTargetDec; targetDec.part.f=0;
 
   timerRateHA=SiderealRate;
   timerRateDec=SiderealRate;
