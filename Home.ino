@@ -7,10 +7,8 @@ boolean goHome() {
     cli();
     startHA =posHA;
     startDec=posDec;
-    if (pierSide==PierSideWest) targetHA=-celestialPoleHA*StepsPerDegreeHA; else targetHA=celestialPoleHA*StepsPerDegreeHA;
-    fTargetHA=longToFixed(targetHA);
-    targetDec=celestialPoleDec*StepsPerDegreeDec;
-    fTargetDec=longToFixed(targetDec);
+    if (pierSide==PierSideWest) targetHA.part.m=-celestialPoleHA*StepsPerDegreeHA; else targetHA.part.m=celestialPoleHA*StepsPerDegreeHA; targetHA.part.f=0;
+    targetDec.part.m=celestialPoleDec*StepsPerDegreeDec; targetDec.part.f=0;
     sei();
     
 //    pierSide         = PierSideNone;
@@ -36,7 +34,7 @@ boolean setHome() {
   newTargetDec        = 0;
   newTargetAlt        = 0;
   newTargetAzm        = 0;
-  origTargetHA        = 0;
+  origTargetHA.fixed  = 0;
   origTargetDec       = 0;
   
   // reset pointing model
@@ -99,13 +97,11 @@ boolean setHome() {
   guideDurationLastDec= 0;
 
   cli();
-  targetHA            = startHA;
-  fTargetHA=longToFixed(targetHA);
-  posHA               = startHA;
-  PEC_HA              = 0;
-  targetDec           = startDec;
-  fTargetDec=longToFixed(targetDec);
-  posDec              = startDec;
+  targetHA.part.m = startHA; targetHA.part.f = 0;
+  posHA   = startHA;
+  PEC_HA  = 0;
+  targetDec.part.m = startDec; targetDec.part.f = 0;
+  posDec  = startDec;
   sei();
 
   return true;
