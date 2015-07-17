@@ -10,46 +10,48 @@ void moveTo() {
     
     // save destination
     cli(); 
-    origTargetHA =longToFixed(targetHA);
-    origTargetDec=targetDec;
+    origTargetHA.fixed = targetHA.fixed;
+    origTargetDec = (long int)targetDec.part.m;
  
-    // first phase, move to 60 HA (4 hours)
     timerRateHA =SiderealRate;
     timerRateDec=SiderealRate;
     sei();
 
-    // default
-    cli(); 
-    if (pierSide==PierSideFlipWE1) targetHA=-60L*StepsPerDegreeHA; else targetHA=60L*StepsPerDegreeHA;
-    targetDec=celestialPoleDec*StepsPerDegreeDec;
+    // first phase, decide if we should move to 60 deg. HA (4 hours) to get away from the horizon limits or just go straight to the home position
+    cli();
+    if (pierSide==PierSideFlipWE1) { 
+      if ((currentAlt<10.0) && (startHA>-90L*StepsPerDegreeHA)) targetHA.part.m=-60L*StepsPerDegreeHA; else targetHA.part.m=-celestialPoleHA*StepsPerDegreeHA; 
+    } else {
+      if ((currentAlt<10.0) && (startHA<90L*StepsPerDegreeHA)) targetHA.part.m=60L*StepsPerDegreeHA; else targetHA.part.m=celestialPoleHA*StepsPerDegreeHA; 
+    } 
+    targetHA.part.f=0;
+    targetDec.part.m=celestialPoleDec*StepsPerDegreeDec;
     sei();
 
     cli();
     if (celestialPoleDec>0) {
       // if Dec is in the general area of the pole, slew both axis back at once
-      if ((posDec/(double)StepsPerDegreeDec)>90-latitude) {
-        if (pierSide==PierSideFlipWE1) targetHA=-celestialPoleHA*StepsPerDegreeHA; else targetHA=celestialPoleHA*StepsPerDegreeHA;
+      if (((double)posDec/(double)StepsPerDegreeDec)>90.0-latitude) {
+        if (pierSide==PierSideFlipWE1) targetHA.part.m=-celestialPoleHA*StepsPerDegreeHA; else targetHA.part.m=celestialPoleHA*StepsPerDegreeHA; targetHA.part.f=0;
       } else {
-        // override if we're at a low latitude and in the opposite sky, leave the HA alone
-        if ((abs(latitude)<45.0) && (posDec<0)) {
-          if (pierSide==PierSideFlipWE1) targetHA=-45L*StepsPerDegreeHA; else targetHA=45L*StepsPerDegreeHA;
+        // override if we're at a low latitude and in the opposite sky, |HA|=6 is very low on the horizon in this orientation and we need to delay arriving there during a meridian flip
+        // in the extreme case, where the user is very near the (Earths!) equator an Horizon limit of -10 or -15 may be necessary for proper operation.
+        if ((currentAlt<20.0) && (abs(latitude)<45.0) && (posDec<0)) {
+          if (pierSide==PierSideFlipWE1) targetHA.part.m=-45L*StepsPerDegreeHA; else targetHA.part.m=45L*StepsPerDegreeHA; targetHA.part.f=0;
         }
       }
     } else {
       // if Dec is in the general area of the pole, slew both axis back at once
-      if ((posDec/(double)StepsPerDegreeDec)<-90-latitude) {
-        if (pierSide==PierSideFlipWE1) targetHA=-celestialPoleHA*StepsPerDegreeHA; else targetHA=celestialPoleHA*StepsPerDegreeHA; 
+      if (((double)posDec/(double)StepsPerDegreeDec)<-90.0-latitude) {
+        if (pierSide==PierSideFlipWE1) targetHA.part.m=-celestialPoleHA*StepsPerDegreeHA; else targetHA.part.m=celestialPoleHA*StepsPerDegreeHA; targetHA.part.f=0;
       } else { 
-        // override if we're at a low latitude and in the opposite sky, leave the HA alone
-        if ((abs(latitude)<45.0) && (posDec>0)) {
-          if (pierSide==PierSideFlipWE1) targetHA=-45L*StepsPerDegreeHA; else targetHA=45L*StepsPerDegreeHA; 
+        // override if we're at a low latitude and in the opposite sky, |HA|=6 is very low on the horizon in this orientation and we need to delay arriving there during a meridian flip
+        if ((currentAlt<20.0) && (abs(latitude)<45.0) && (posDec>0)) {
+          if (pierSide==PierSideFlipWE1) targetHA.part.m=-45L*StepsPerDegreeHA; else targetHA.part.m=45L*StepsPerDegreeHA; targetHA.part.f=0;
         }
       }
     }
     sei();
-
-    fTargetHA =longToFixed(targetHA);
-    fTargetDec=longToFixed(targetDec);
 
     pierSide++;
   }
@@ -57,16 +59,16 @@ void moveTo() {
   long distStartHA,distStartDec,distDestHA,distDestDec;
 
   cli();
-  distStartHA=abs(posHA-startHA);           // distance from start HA
-  distStartDec=abs(posDec-startDec);        // distance from start Dec
+  distStartHA=abs(posHA-startHA);    // distance from start HA
+  distStartDec=abs(posDec-startDec); // distance from start Dec
   sei();
   if (distStartHA<1)  distStartHA=1;
   if (distStartDec<1) distStartDec=1;
   
   Again:
   cli();
-  distDestHA=abs(posHA-targetHA);           // distance from dest HA
-  distDestDec=abs(posDec-targetDec);        // distance from dest Dec
+  distDestHA=abs(posHA-(long int)targetHA.part.m);    // distance from dest HA
+  distDestDec=abs(posDec-(long int)targetDec.part.m); // distance from dest Dec
   sei();
   if (distDestHA<1)  distDestHA=1;
   if (distDestDec<1) distDestDec=1;
@@ -80,8 +82,8 @@ void moveTo() {
     // set the destination near where we are now
     // todo: the new targetHA/Dec should be checked against the old targetHA/Dec, if the old targetHA/Dec is closer than use it
     cli();
-    if (distDestHA>StepsPerDegreeHA)   { if (posHA>targetHA)   targetHA =posHA-StepsPerDegreeHA;   else targetHA =posHA +StepsPerDegreeHA; fTargetHA=longToFixed(targetHA); }
-    if (distDestDec>StepsPerDegreeDec) { if (posDec>targetDec) targetDec=posDec-StepsPerDegreeDec; else targetDec=posDec+StepsPerDegreeDec; fTargetDec=longToFixed(targetDec); }
+    if (distDestHA>StepsPerDegreeHA)   { if (posHA>(long int)targetHA.part.m)   targetHA.part.m =posHA-StepsPerDegreeHA;   else targetHA.part.m =posHA +StepsPerDegreeHA; targetHA.part.f=0; }
+    if (distDestDec>StepsPerDegreeDec) { if (posDec>(long int)targetDec.part.m) targetDec.part.m=posDec-StepsPerDegreeDec; else targetDec.part.m=posDec+StepsPerDegreeDec; targetDec.part.f=0; }
     sei();
     
     abortSlew=false;
@@ -89,7 +91,7 @@ void moveTo() {
   }
 
   // First, for Right Ascension
-  unsigned long temp;
+  long temp;
   if (distStartHA>distDestHA) {
     temp=(StepsForRateChange/isqrt32(distDestHA));    // slow down (temp gets bigger)
 //  if ((temp<100) && (temp>=10))  temp=101;          // exclude a range of speeds
@@ -117,11 +119,9 @@ void moveTo() {
     if ((pierSide==PierSideFlipEW2) || (pierSide==PierSideFlipWE2)) {
       // make sure we're at the home position when flipping sides of the mount
       cli();
-      startHA=posHA; if (pierSide==PierSideFlipWE2) targetHA=-celestialPoleHA*StepsPerDegreeHA; else targetHA=celestialPoleHA*StepsPerDegreeHA; 
-      startDec=posDec; targetDec=celestialPoleDec*StepsPerDegreeDec; 
+      startHA=posHA; if (pierSide==PierSideFlipWE2) targetHA.part.m=-celestialPoleHA*StepsPerDegreeHA; else targetHA.part.m=celestialPoleHA*StepsPerDegreeHA; targetHA.part.f=0;
+      startDec=posDec; targetDec.part.m=celestialPoleDec*StepsPerDegreeDec; targetDec.part.f=0;
       sei();
-      fTargetHA=longToFixed(targetHA);
-      fTargetDec=longToFixed(targetDec);
       pierSide++;
     } else
     if ((pierSide==PierSideFlipEW3) || (pierSide==PierSideFlipWE3)) {
@@ -154,12 +154,10 @@ void moveTo() {
       // now complete the slew
       cli();
       startHA  =posHA;
-      targetHA =fixedToLong(origTargetHA);
+      targetHA.fixed=origTargetHA.fixed;
       startDec =posDec;
-      targetDec=origTargetDec;
+      targetDec.part.m=origTargetDec; targetDec.part.f=0;
       sei();
-      fTargetHA=origTargetHA;
-      fTargetDec=longToFixed(targetDec);
     } else {
       // restore last tracking state
       trackingState=lastTrackingState;
@@ -176,7 +174,7 @@ void moveTo() {
         // give the drives a moment to settle in
         delay(3000);
 
-        if ((posHA==targetHA) && (posDec==targetDec)) {
+        if ((posHA==(long int)targetHA.part.m) && (posDec==(long int)targetDec.part.m)) {
           
           if (parkClearBacklash()) {
             // success, we're parked
@@ -187,9 +185,8 @@ void moveTo() {
             EEPROM_writeQuad(EE_ID,(byte*)&ID);
             
             // disable the stepper drivers
-            digitalWrite(HA_EN,HIGH);
-            digitalWrite(DE_EN,HIGH);
-
+            digitalWrite(HA_EN,HA_Disabled);
+            digitalWrite(DE_EN,DE_Disabled);
 
           } else parkStatus=ParkFailed;
       } else parkStatus=ParkFailed;
