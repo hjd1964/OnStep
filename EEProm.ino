@@ -2,21 +2,19 @@
 // EEPROM related functions 
 
 // write int numbers into EEPROM at position i (2 bytes)
-void EEPROM_writeInt(int i,int l) {
-  byte *lPtr;
-  lPtr = (byte*)&l;
-  EEPROM.write(i+0,*lPtr); lPtr++;
-  EEPROM.write(i+1,*lPtr);
+void EEPROM_writeInt(int i,int j) {
+  uint8_t *k = (uint8_t*)&j;
+  EEPROM.write(i+0,*k); k++;
+  EEPROM.write(i+1,*k);
 }
 
 // read int numbers from EEPROM at position i (2 bytes)
 int EEPROM_readInt(int i) {
-  int l;
-  byte *lPtr;
-  lPtr = (byte*)&l;
-  *lPtr=EEPROM.read(i+0); lPtr++;
-  *lPtr=EEPROM.read(i+1);
-  return l;
+  uint16_t j;
+  uint8_t *k = (uint8_t*)&j;
+  *k=EEPROM.read(i+0); k++;
+  *k=EEPROM.read(i+1);
+  return j;
 }
 
 // write 4 byte variable into EEPROM at position i (4 bytes)
