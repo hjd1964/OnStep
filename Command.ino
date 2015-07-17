@@ -70,8 +70,8 @@ void processCommands() {
           setHome();
           
           // enable the stepper drivers
-          digitalWrite(HA_EN,LOW);
-          digitalWrite(DE_EN,LOW);
+          digitalWrite(HA_EN,HA_Enabled);
+          digitalWrite(DE_EN,DE_Enabled);
           delay(10);
   
           // newTargetRA =timeRange(LST);
@@ -253,7 +253,7 @@ the pdCor  term is 1 in HA
       
 //   D - Distance Bars
 //  :D#    returns an "\0x7f#" if the mount is moving, otherwise returns "#".
-      if ((command[0]=='D') && (command[1]==0))  { if (trackingState==TrackingMoveTo) { reply[0]='\0x7f'; reply[1]=0; } else { reply[0]=0; } quietReply=true; } else 
+      if ((command[0]=='D') && (command[1]==0))  { if (trackingState==TrackingMoveTo) { reply[0]=(char)127; reply[1]=0; } else { reply[0]=0; } quietReply=true; } else 
  
 //   G - Get Telescope Information
       if (command[0]=='G') {
@@ -312,9 +312,9 @@ the pdCor  term is 1 in HA
 //         A # terminated string with the name of the requested site.
       if ((command[1]=='M') || (command[1]=='N') || (command[1]=='O') || (command[1]=='P'))  { 
         i=command[1]-'M';
-        EEPROM_readString(EE_sites+i*25+9,reply);
+        EEPROM_readString(EE_sites+i*25+9,reply); 
         if (reply[0]==0) { strcat(reply,"None"); }
-        quietReply=true;
+        quietReply=true; 
       } else
 //  :Gm#   Gets the meridian pier-side
 //         Returns: E#, W#, N# (none/parked), ?# (Meridian flip in progress) 
@@ -412,8 +412,8 @@ the pdCor  term is 1 in HA
           if (parameter[0]=='F') { // Fn: Debug
             long temp;
             switch (parameter[1]) {
-              case '0': cli(); temp=(long)(posHA-(targetHA+PEC_HA)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;  // Debug0, true vs. target RA position          
-              case '1': sprintf(reply,"%ld",(long)(debugv1/1.00273790935)); quietReply=true; break;                             // Debug1, RA tracking rate
+              case '0': cli(); temp=(long)(posHA-((long int)targetHA.part.m+PEC_HA)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;  // Debug0, true vs. target RA position          
+              case '1': sprintf(reply,"%ld",(long)(debugv1/1.00273790935)); quietReply=true; break;                                              // Debug1, RA tracking rate
             }
           } else commandError=true;
         } else commandError=true;
@@ -472,7 +472,7 @@ the pdCor  term is 1 in HA
       if (command[1]=='I') {
         Lib.readVars(reply,&i,&newTargetRA,&newTargetDec);
 
-        char* objType=objectStr[i];
+        char const * objType=objectStr[i];
         strcat(reply,",");
         strcat(reply,objType);
         quietReply=true;
@@ -485,7 +485,7 @@ the pdCor  term is 1 in HA
       if (command[1]=='R') {
         Lib.readVars(reply,&i,&newTargetRA,&newTargetDec);
 
-        char* objType=objectStr[i];
+        char const * objType=objectStr[i];
         char ws[20];
 
         strcat(reply,",");
@@ -878,7 +878,7 @@ the pdCor  term is 1 in HA
       if (command[1]=='T')  { 
         if ((trackingState==TrackingSidereal) || (trackingState==TrackingNone)) {
           f=strtod(parameter,&conv_end);
-          if ( (&parameter[0]!=conv_end) && ((f>=30.0) && (f<90.0) || (abs(f)<0.1))) {
+          if ( (&parameter[0]!=conv_end) && (((f>=30.0) && (f<90.0)) || (abs(f)<0.1))) {
             if (abs(f)<0.1) { 
               trackingState = TrackingNone; 
             } else {
@@ -905,7 +905,12 @@ the pdCor  term is 1 in HA
         } else
         if (parameter[0]=='9') { // 9n: Misc.
           switch (parameter[1]) {
-            case '2': maxRate=strtol(&parameter[3],NULL,10)*16L; if (maxRate<2L*16L) maxRate=2L*16L; if (maxRate>10000L*16L) maxRate=10000L*16L; EEPROM_writeInt(EE_maxRate,(int)(maxRate/16L)); break; // maxRate
+            case '2': 
+              maxRate=strtol(&parameter[3],NULL,10)*16L;
+              if (maxRate<(MaxRate/2L)*16L) maxRate=(MaxRate/2L)*16L;
+              if (maxRate>(MaxRate*2L)*16L) maxRate=(MaxRate*2L)*16L;
+              EEPROM_writeInt(EE_maxRate,(int)(maxRate/16L));
+            break; // maxRate
           }
         } else commandError=true;
         getEqu(&f,&f1,false,true);  
@@ -1266,8 +1271,8 @@ void enableGuideRate(int g) {
   guideTimerRate=(double)guideRates[g]/15.0;
 
   cli();
-  amountGuideHA =doubleToFixed((guideTimerRate*StepsPerSecond)/100.0);
-  amountGuideDec=doubleToFixed((guideTimerRate*StepsPerSecondDec)/100.0);
+  amountGuideHA.fixed =doubleToFixed((guideTimerRate*StepsPerSecond)/100.0);
+  amountGuideDec.fixed=doubleToFixed((guideTimerRate*StepsPerSecondDec)/100.0);
   sei();
 }
 
