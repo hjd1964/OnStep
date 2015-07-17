@@ -43,7 +43,6 @@ boolean hmsToDouble(double *f, char *hms) {
 }
 
 boolean doubleToHms(char *reply, double *f) {
-  char h[3],m[5],str[20];
   int  h1;
   double m1,f1,s1;
 
@@ -78,7 +77,6 @@ boolean dmsToDouble(double *f, char *dms, boolean sign_present) {
   int checkLen,checkLen1;
   double sign = 1.0;
   boolean secondsOff = false;
-  char *conv_end;
 
   while (*dms==' ') dms++; // strip prefix white-space
 
@@ -97,14 +95,14 @@ boolean dmsToDouble(double *f, char *dms, boolean sign_present) {
 
   // determine if the sign was used and accept it if so
   if (sign_present) {
-    if (*dms=='-') sign=-1.0; else if (*dms=='+') sign=1.0; else return false; *dms++;
-    d[0]=*dms++; d[1]=*dms++; d[2]=0; if (!atoi2(d,&d1)) return false;
+    if (*dms=='-') sign=-1.0; else if (*dms=='+') sign=1.0; else return false; 
+    *dms++; d[0]=*dms++; d[1]=*dms++; d[2]=0; if (!atoi2(d,&d1)) return false;
   } else {
     d[0]=*dms++; d[1]=*dms++; d[2]=*dms++; d[3]=0; if (!atoi2(d,&d1)) return false;
   }
 
   // make sure the seperator is an allowed character
-  if ((*dms!=':') && (*dms!='*') && (*dms!=char(223))) return false; else *dms++; 
+  if ((*dms!=':') && (*dms!='*') && (*dms!=char(223))) return false; else *dms++;
 
   m[0]=*dms++; m[1]=*dms++; m[2]=0; if (!atoi2(m,&m1)) return false;
 
@@ -122,7 +120,7 @@ boolean dmsToDouble(double *f, char *dms, boolean sign_present) {
 }
 
 boolean doubleToDms(char *reply, double *f, boolean fullRange, boolean signPresent) {
-  char d[4],m[5],sign[]="+";
+  char sign[]="+";
   int  o=0,d1,s1=0;
   double m1,f1;
   f1=*f;
@@ -334,7 +332,7 @@ void CEquToTracRateCor() {
   }
 }
 
-// light weight altitude calculation, 16 seconds to complete
+// light weight altitude calculation, 16 calls to complete
 byte ac_step = 0;
 double ac_HA=0,ac_Dec=0;
 double ac_sindec,ac_cosdec,ac_cosha;
@@ -488,25 +486,17 @@ double degreeRange(double d) {
   return d;
 }
 
-// full long int range
-long fixedToLong(fixed a) {
-  return a>>32;
-}
-
-// full long int range
-fixed longToFixed(long a) {
-  return ((fixed)a)<<32;
+// floating point range of +/-255.999999x
+uint64_t doubleToFixed(double d) {
+  fixed_t x;
+  x.fixed = (long)(d*8388608.0);  // shift 23 bits
+  x.fixed = x.fixed<<9;
+  return x.fixed;
 }
 
 // floating point range of +/-255.999999x
-fixed doubleToFixed(double d) {
-// shifted into a long, with a capacity of 31 bits + sign
-  long l = (d*8388608.0);      // shift 23 bits and
-  return ((fixed)l)<<9;        // and 9 more, for 32 bits total
-}
-
-// floating point range of +/-255.999999x
-double fixedToDouble(fixed a) {
-  long l = a>>9;                // shift 9 bits
+double fixedToDouble(fixed_t a) {
+  long l = a.fixed>>9;          // shift 9 bits
   return ((double)l/8388608.0); // and 23 more, for 32 bits total
 }
+
