@@ -141,6 +141,10 @@
  * 05-14-2015          1.0b17            Fixed bug, Latitude/Longitude/UT/LMT are now correctly stored in EEPROM on Teensy3.1.  
  *                                       Improved user defined object library record format: object names can now be 11 chars max (was 7.)
  * 05-18-2015          1.0b18            Added experimental support of ST4 interface.  
+ * 06-05-2015          1.0b19            Fixed point math improvements: smaller more elegant code, should be faster too.  Added support for disabling stepper drivers with a high or low signal.
+ * 07-14-2015          1.0b20            Minor code corrections to fix warnings during Teensy3.1 compile.  Re-arranged altitude limits calculation so it completes once a second.
+ * 07-17-2015          1.0b21            Added code that makes more intelligent decisions about when to use an RA "waypoint" back to the polar home position during meridian flips to avoid exceeding 
+ *                                       horizon limits (makes most meridian flips faster.) Compatibility fixes to EEPROM_writeInt and EEPROM_readInt for Teensy3.1 target.
  *
  *
  * Author: Howard Dutton
@@ -160,18 +164,17 @@
 // Use Config.h to configure OnStep to your requirements 
 #include "Config.h"
 #include "Library.h"
+#include "FPoint.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "05 18 15"
-#define FirmwareNumber "1.0b18"
+#define FirmwareDate   "07 14 15"
+#define FirmwareNumber "1.0b20"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
 // forces initialialization of a host of settings in EEPROM. OnStep does this automatically, most likely, you will want to leave this alone
 #define INIT_KEY false    // set to true to keep automatic initilization from happening.  This is a one-time operation... upload to the Arduino, then set to false and upload again
 #define initKey 915307548 // unique identifier for the current initialization format, do not change
-
-#define fixed uint64_t
 
 // Time keeping ------------------------------------------------------------------------------------------------------------
 long siderealTimer    = 0;           // counter to issue steps during tracking
@@ -192,27 +195,22 @@ unsigned long lst_mS_start = 0;      // mS at the start of lst
 volatile long lst = 0;               // this is the local (apparent) sidereal time in 1/100 seconds (23h 56m 4.1s per day = 86400 clock seconds/
                                      // 86164.09 sidereal seconds = 1.00273 clock seconds per sidereal second)
 
-long siderealInterval       = 15956313;
+long siderealInterval       = 15956313L;
 long masterSiderealInterval = siderealInterval;
                                      // default = 15956313 ticks per sidereal hundredth second, where a tick is 1/16 uS
                                      // this is stored in EEPROM which is updated/adjusted with the ":T+#" and ":T-#" commands
-                                     // stars moving left means too fast, right means too slow (for my 'scope optics/camera)
-                                     // a higher number here means a longer count which slows down the sidereal clock...
-                                     // movement is based on the sidereal clock, but SiderealRate must be low enough that
-                                     // the stepping keeps pace with the targetHA for accurate tracking
-double HzCf = 16000000.0/60.0;
-                                     // keeps sidereal time, might need to be adjusted due to variations in Arduino crystal accuracy, etc.
-                                     // someday I'd like to add a GPS module and grab the pps (pulse per second) signal as a high-accuracy
-                                     // time reference to correct drift in my sidereal clock due to physical effects and software limitations
+                                     // a higher number here means a longer count which slows down the sidereal clock
+
+double HzCf = 16000000.0/60.0;       // conversion factor to go to/from Hz for tracking rate commands
 
 volatile long SiderealRate;          // based on the siderealInterval, this is the time between steps for sidereal tracking
-volatile long TakeupRate;            // this is the makeup rate for synchronizing the target and actual positions
+volatile long TakeupRate;            // this is the takeup rate for synchronizing the target and actual positions when needed
 
 boolean customRateActive=true;       // automatically modify the siderealInterval to compensate for atmospheric refraction
 
 // PPS (GPS)
-volatile long PPSlastMicroS = 1000000;
-volatile long PPSavgMicroS = 1000000;
+volatile unsigned long PPSlastMicroS = 1000000;
+volatile unsigned long PPSavgMicroS = 1000000;
 volatile double PPSrateRatio = 1.0;
 volatile boolean PPSsynced = false;
 
@@ -223,7 +221,7 @@ boolean refraction = true;           // track at the refraction rate for the are
 boolean refraction = false;
 #endif
 
-unsigned long    maxRate = MaxRate*16;
+long    maxRate = MaxRate*16L;
 volatile long    timerRateHA = 0;
 volatile long    timerRateBacklashHA = 0;
 volatile boolean inBacklashHA=false;
@@ -268,17 +266,15 @@ long celestialPoleDec = 90L;
 
 volatile long posHA      = 90L*StepsPerDegreeHA;   // hour angle position in steps
 volatile long startHA    = 90L*StepsPerDegreeHA;   // hour angle of goto start position in steps
-volatile fixed fTargetHA = 90L*StepsPerDegreeHA;   // hour angle of goto end   position in steps
-volatile long targetHA   = 90L*StepsPerDegreeHA;   // hour angle of goto end   position in steps
+volatile fixed_t targetHA;                         // hour angle of goto end   position in steps
 volatile byte dirHA      = 1;                      // stepping direction + or -
 volatile long PEC_HA     = 0;                      // for PEC, adds or subtracts steps
 double newTargetRA       = 0.0;                    // holds the RA for goTos
-fixed origTargetHA       = 0;
+fixed_t origTargetHA;
 
 volatile long posDec     = 90L*StepsPerDegreeDec; // declination position in steps
 volatile long startDec   = 90L*StepsPerDegreeDec; // declination of goto start position in steps
-volatile fixed fTargetDec= 90L*StepsPerDegreeDec; // declination of goto end   position in steps
-volatile long targetDec  = 90L*StepsPerDegreeDec; // declination of goto end   position in steps
+volatile fixed_t targetDec;                       // declination of goto end   position in steps
 volatile byte dirDec     = 1;                     // stepping direction + or -
 double newTargetDec      = 0.0;                   // holds the Dec for goTos
 long origTargetDec       = 0;
@@ -423,6 +419,23 @@ int    maxAlt;                                    // the maximum altitude, in de
 
 #endif
 
+#if defined(HA_DISABLED_HIGH)
+#define HA_Disabled HIGH
+#define HA_Enabled LOW
+#endif
+#if defined(HA_DISABLED_LOW)
+#define HA_Disabled LOW
+#define HA_Enabled HIGH
+#endif
+#if defined(DE_DISABLED_HIGH)
+#define DE_Disabled HIGH
+#define DE_Enabled LOW
+#endif
+#if defined(DE_DISABLED_LOW)
+#define DE_Disabled LOW
+#define DE_Enabled HIGH
+#endif
+
 #define DecDirEInit      1
 #define DecDirWInit      0
 volatile byte DecDir     = DecDirEInit;
@@ -526,8 +539,8 @@ double IH                = 0;       // offset corrections/align
 double ID                = 0;
 
 // tracking and PEC, fractional steps
-fixed fstep = 0;
-fixed pstep = 0;
+fixed_t fstep;
+fixed_t pstep;
 
 // guide command
 #define GuideRate1x        2
@@ -550,9 +563,9 @@ long lastTargetHA=0;
 long debugv1 = 0;
 
 double  guideTimerRate    = 0;
-fixed   amountGuideHA     = 0;
+fixed_t amountGuideHA;
 long    guideHA           = 0;
-fixed   amountGuideDec    = 0;
+fixed_t amountGuideDec;
 long    guideDec          = 0;
 //
 long lstGuideStopHA=0;
@@ -597,9 +610,6 @@ char ST4RA_last = 0;
 char ST4DE_state = 0;
 char ST4DE_last = 0;
 
-Library Lib;
-char* objectStr[] = {"UNK", "OC", "GC", "PN", "DN", "SG", "EG", "IG", "KNT", "SNR", "GAL", "CN", "STR", "PLA", "CMT", "AST"};
-
 // EEPROM Info --------------------------------------------------------------------------------------------------------------
 // 0-1023 bytes
 // general purpose storage 0..99
@@ -614,8 +624,8 @@ char* objectStr[] = {"UNK", "OC", "GC", "PN", "DN", "SG", "EG", "IG", "KNT", "SN
 #define EE_LMT         14
 #define EE_JD          18
 
-#define EE_pulseGuideRate 22  // 1 byte
-#define EE_maxRate     23     // 2 bytes
+#define EE_pulseGuideRate 22
+#define EE_maxRate     23
 
 #define EE_minAlt      40
 #define EE_maxAlt      41
@@ -674,7 +684,18 @@ char* objectStr[] = {"UNK", "OC", "GC", "PN", "DN", "SG", "EG", "IG", "KNT", "SN
 byte PEC_buffer[PECBufferSize];
 
 void setup() {
-  fstep=doubleToFixed(StepsPerSecond/100.0);
+// initialize some fixed-point values
+  amountGuideHA.fixed=0;
+  amountGuideDec.fixed=0;
+  fstep.fixed=0;
+  pstep.fixed=0;
+  origTargetHA.fixed = 0;
+  targetHA.part.m = 90L*StepsPerDegreeHA;
+  targetHA.part.f = 0;
+  targetDec.part.m = 90L*StepsPerDegreeDec;
+  targetDec.part.f = 0;
+
+  fstep.fixed=doubleToFixed(StepsPerSecond/100.0);
   
 // initialize the stepper control pins RA and Dec
   pinMode(HAStepPin, OUTPUT);
@@ -747,8 +768,8 @@ void setup() {
 #endif
 
 // disable the stepper drivers for now, if the enable lines are connected
-  pinMode(HA_EN,OUTPUT); digitalWrite(HA_EN,HIGH);
-  pinMode(DE_EN,OUTPUT); digitalWrite(DE_EN,HIGH);
+  pinMode(HA_EN,OUTPUT); digitalWrite(HA_EN,HA_Disabled);
+  pinMode(DE_EN,OUTPUT); digitalWrite(DE_EN,DE_Disabled);
 
 // if the stepper driver mode select pins are wired in, program any requested micro-step mode
 #ifdef HA_MODE
@@ -893,12 +914,12 @@ void setup() {
   startHA = celestialPoleHA*StepsPerDegreeHA;
   startDec = celestialPoleDec*StepsPerDegreeDec;
   cli();
-  targetHA            = startHA;
-  fTargetHA=longToFixed(targetHA);
-  posHA               = startHA;
-  targetDec           = startDec;
-  fTargetDec=longToFixed(targetDec);
-  posDec              = startDec;
+  targetHA.part.m  = startHA; 
+  targetHA.part.f  = 0;
+  posHA            = startHA;
+  targetDec.part.m = startDec; 
+  targetDec.part.f = 0;
+  posDec           = startDec;
   sei();
   
   // get date and time from EEPROM, start keeping time
@@ -937,11 +958,11 @@ void setup() {
   // get the pulse-guide rate
   currentPulseGuideRate=EEPROM.read(EE_pulseGuideRate); if (currentPulseGuideRate>GuideRate1x) currentPulseGuideRate=GuideRate1x;
 
-  // get the Goto rate
-  maxRate=EEPROM_readInt(EE_maxRate)*16L;
-  // constrain values to the limits
-  if (maxRate<2L*16L) maxRate=2L*16L; if (maxRate>10000*16) maxRate=10000L*16L;
-  #ifdef RememberMaxRate_OFF
+  // get the Goto rate and constrain values to the limits (1/2 to 2X the MaxRate,) maxRate is in 16MHz clocks but stored in micro-seconds
+  maxRate=EEPROM_readInt(EE_maxRate)*16;
+  if (maxRate<(MaxRate/2L)*16L) maxRate=(MaxRate/2L)*16L;
+  if (maxRate>(MaxRate*2L)*16L) maxRate=(MaxRate*2L)*16L;
+  #ifndef RememberMaxRate_ON
   if (maxRate!=MaxRate*16L) { maxRate=MaxRate*16L; EEPROM_writeInt(EE_maxRate,(int)(maxRate/16L)); }
   #endif
   
@@ -966,6 +987,7 @@ void setup() {
   PECtime_lastSense = lst;
   clockTimer=millis(); 
   sei();
+
 }
 
 void loop() {
@@ -1031,9 +1053,10 @@ void loop() {
     // only active while sidereal tracking with a guide rate that makes sense
     if ((trackingState==TrackingSidereal) && !(guideDirHA && (activeGuideRate>GuideRate1x))) {
       // apply the Tracking, Guiding, and PEC
-      fTargetHA+=fstep;
-      if (pecTimerRateHA!=0) fTargetHA+=pstep;
-      cli(); targetHA=fixedToLong(fTargetHA); sei();
+      cli();
+      targetHA.fixed+=fstep.fixed;
+      if (pecTimerRateHA!=0) targetHA.fixed+=pstep.fixed;
+      sei();
 
       #ifdef STATUS_LED_PINS_ON
       if (siderealTimer%20L==0L) { if (LED_ON) { SET(LEDnegPORT,LEDnegBit); LED_ON=false; } else { CLR(LEDnegPORT,LEDnegBit); LED_ON=true; } }
@@ -1042,16 +1065,19 @@ void loop() {
 
     if (trackingState==TrackingMoveTo) {
       // keeps the target where it's supposed to be while doing gotos
-      if (lastTrackingState==TrackingSidereal) { origTargetHA+=fstep; fTargetHA+=fstep; cli(); targetHA=fixedToLong(fTargetHA); sei();  }
+      if (lastTrackingState==TrackingSidereal) { origTargetHA.fixed+=fstep.fixed; cli(); targetHA.fixed+=fstep.fixed; sei();  }
       moveTo();
     }
   }
-  
+
+  // figure out the current Alititude
+  if (lst%5==0) do_alt_calc(); // call 20x a second to spread out the overhead
+
   // HOUSEKEEPING --------------------------------------------------------------------------------------
   // timer... falls in once a second, keeps the universal time clock ticking,
   // handles PPS GPS signal processing, watches safety limits, adjusts tracking rate for refraction
   unsigned long m=millis();
-  if (m-clockTimer>999) {
+  if ((long)(m-(clockTimer+999UL))>0) {
     clockTimer=m;
     
     // for testing, average steps per second
@@ -1077,7 +1103,7 @@ void loop() {
       cli();
       PPSrateRatio=((double)1000000/(double)(PPSavgMicroS));
       SetSiderealClockRate(siderealInterval);
-      if (micros()-PPSlastMicroS>2000000) PPSsynced=false;
+      if ((long)(micros()-(PPSlastMicroS+2000000UL))>0) PPSsynced=false; // if more than two seconds has ellapsed without a pulse we've lost sync
       sei();
       #ifdef STATUS_LED2_PINS_ON
       if (PPSsynced) { if (LED2_ON) { SET(LEDneg2PORT, LEDneg2Bit); LED2_ON=false; } else { CLR(LEDneg2PORT, LEDneg2Bit); LED2_ON=true; } } else { SET(LEDneg2PORT, LEDneg2Bit); LED2_ON=false; } // indicate PPS
@@ -1095,11 +1121,11 @@ void loop() {
 
     // safety checks, keeps mount from tracking past the meridian limit, past the underPoleLimit, below horizon limit, above the overhead limit, or past the Dec limits
     if (meridianFlip!=MeridianFlipNever) {
-      if (pierSide==PierSideWest) { cli(); if (posHA>(minutesPastMeridianW*StepsPerDegreeHA/4L)) if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  sei(); }
-      if (pierSide==PierSideEast) { cli(); if (posHA>(underPoleLimit*StepsPerDegreeHA*15L))      if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  sei(); }
+      if (pierSide==PierSideWest) { cli(); if (posHA>(minutesPastMeridianW*StepsPerDegreeHA/4L)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  sei(); }}
+      if (pierSide==PierSideEast) { cli(); if (posHA>(underPoleLimit*StepsPerDegreeHA*15L))      { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  sei(); }}
     } else {
       // when Fork mounted, ignore pierSide and just stop the mount if it passes the underPoleLimit
-      cli(); if (posHA>(underPoleLimit*StepsPerDegreeHA*15L)) if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  sei();
+      cli(); if (posHA>(underPoleLimit*StepsPerDegreeHA*15L)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  sei(); }
     }
     if ((getApproxDec()<minDec) || (getApproxDec()>maxDec)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
 
@@ -1108,20 +1134,18 @@ void loop() {
     if (digitalRead(LimitPin)==LOW) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
     #endif
 
-    // low overhead altitude calculation, finishes updating once every 16 seconds
-    if (do_alt_calc()) {
-      if ((currentAlt<minAlt) || (currentAlt>maxAlt)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
+    // check altitude every second
+    if ((currentAlt<minAlt) || (currentAlt>maxAlt)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
 
-      // reset the sidereal clock once a day, to keep the significant digits from being consumed
-      // I'm shooting for keeping OnStep reliable for about 50 days of continuous uptime (until millis() rolls over)
-      // really working with a single and should have, just barely, enough significant digits to get us through a day
-      unsigned long lst_now=lst_start+round( (double)((m-lst_mS_start)/10.0) * 1.00273790935);
-      if ((lst_now-lst_start)>24*3600*100) update_lst();
+    // reset the sidereal clock once a day, to keep the significant digits from being consumed
+    // I'm shooting for keeping OnStep reliable for about 50 days of continuous uptime (until millis() rolls over)
+    // really working with a single and should have, just barely, enough significant digits to get us through a day
+    unsigned long lst_now=lst_start+round( (double)((m-lst_mS_start)/10.0) * 1.00273790935);
+    if ((lst_now-lst_start)>24*3600*100) update_lst();
 
-     // finally, adjust the tracking rate on-the-fly to compensate for refraction
-     if (refraction) CEquToTracRateCor();
-    }
-    
+    // finally, adjust the tracking rate on-the-fly to compensate for refraction
+    if (refraction) CEquToTracRateCor();
+
   } else {
   // COMMAND PROCESSING --------------------------------------------------------------------------------
   // acts on commands recieved across Serial0 and Serial1 interfaces
