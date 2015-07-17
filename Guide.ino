@@ -8,11 +8,12 @@ void Guide() {
     guideSiderealTimer=guideLst;  
     if (guideDirHA) {
       if (!inBacklashHA) {
-        long v=fixedToLong(fTargetHA);
-        if (guideDirHA=='e') fTargetHA-=amountGuideHA; else fTargetHA+=amountGuideHA;
+        cli();
+        long v=(long int)targetHA.part.m;
+        if (guideDirHA=='e') targetHA.fixed-=amountGuideHA.fixed; else targetHA.fixed+=amountGuideHA.fixed;
         // guideHA keeps track of how many steps we've moved for PEC recording
-        guideHA=fixedToLong(fTargetHA)-v;
-        cli(); targetHA=fixedToLong(fTargetHA); sei();
+        guideHA=(long int)targetHA.part.m-v;
+        sei();
 
         // for pulse guiding, count down the mS and stop when timed out
         if (guideDurationHA>0)  {
@@ -28,9 +29,10 @@ void Guide() {
     
     if (guideDirDec) {
       if (!inBacklashDec) {
+        cli();
         // nudge the targetDec (where we're supposed to be) by amountMoveDec
-        if (guideDirDec=='s') fTargetDec-=amountGuideDec; else fTargetDec+=amountGuideDec; 
-        cli(); targetDec=fixedToLong(fTargetDec); sei();
+        if (guideDirDec=='s') targetDec.fixed-=amountGuideDec.fixed; else targetDec.fixed+=amountGuideDec.fixed; 
+        sei();
         // for pulse guiding, count down the mS and stop when timed out
         if (guideDurationDec>0)  {
           guideDurationDec-=(long)(micros()-guideDurationLastDec);
