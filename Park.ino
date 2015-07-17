@@ -6,7 +6,6 @@ boolean setPark() {
   if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
     lastTrackingState=trackingState;
     trackingState=TrackingNone;
-    int lastPECstatus=PECstatus;
 
     // turn off PEC for a moment
     cli(); long l = PEC_HA; PEC_HA=0; sei();
@@ -26,11 +25,9 @@ boolean setPark() {
     // per Allegro data-sheet for A4983, 1/2 step takes 8 steps to cycle home, 1/4 = 16,
     // ... 1/8 = 32 and 1/16 = 64 (*2 to handle up to 32 uStep drivers)
     cli();
-    targetHA=(posHA / 128L) * 128L;
-    targetDec=(posDec / 128L) * 128L;
+    targetHA.part.m=(posHA / 128L) * 128L; targetHA.part.f=0;
+    targetDec.part.m=(posDec / 128L) * 128L; targetDec.part.f=0;
     sei();
-    fTargetHA=longToFixed(targetHA);
-    fTargetDec=longToFixed(targetDec);
 
     // let it settle into a fixed position, 20 times the sidereal rate at 12 steps per second minimum... 
     // 128/240=0.53S, worst case.  Also, for some additional safety margin add a few seconds to cover
@@ -38,7 +35,7 @@ boolean setPark() {
     delay(4000);
 
     // reality check, we should be at the park position
-    if ((targetHA!=posHA) || (targetDec!=posDec)) { trackingState=lastTrackingState; return false;  }
+    if (((long int)targetHA.part.m!=posHA) || ((long int)targetDec.part.m!=posDec)) { trackingState=lastTrackingState; return false;  }
     // reality check, we shouldn't have any backlash remaining
     if ((!parkClearBacklash())) { trackingState=lastTrackingState; return false; } 
 
@@ -97,15 +94,15 @@ boolean parkClearBacklash() {
 
   // start by moving fully into the backlash
   cli();
-  targetHA =targetHA  + backlashHA;
-  targetDec=targetDec + backlashDec;
+  targetHA.part.m += backlashHA;
+  targetDec.part.m += backlashDec;
   sei();
   delay(t);
 
   // then reverse direction and take it all up
   cli();
-  targetHA =targetHA  - backlashHA;
-  targetDec=targetDec - backlashDec;
+  targetHA.part.m  -= backlashHA;
+  targetDec.part.m -= backlashDec;
   sei();
   delay(t*2); // if sitting on the opposite side of the backlash, it might take twice as long to clear it
   // we arrive back at the exact same position so fTargetHA/Dec don't need to be touched
@@ -164,17 +161,15 @@ boolean unpark() {
     if (parkStatus==Parked) {
       if (parkSaved) {
         // enable the stepper drivers
-        digitalWrite(HA_EN,LOW);
-        digitalWrite(DE_EN,LOW);
+        digitalWrite(HA_EN,HA_Enabled);
+        digitalWrite(DE_EN,DE_Enabled);
         delay(10);
 
         // get our position
         cli();
-        EEPROM_readQuad(EE_posHA,(byte*)&posHA);   targetHA=posHA;
-        EEPROM_readQuad(EE_posDec,(byte*)&posDec); targetDec=posDec;
+        EEPROM_readQuad(EE_posHA,(byte*)&posHA);   targetHA.part.m=posHA; targetHA.part.f=0;
+        EEPROM_readQuad(EE_posDec,(byte*)&posDec); targetDec.part.m=posDec; targetDec.part.f=0;
         sei();
-        fTargetHA=longToFixed(targetHA);
-        fTargetDec=longToFixed(targetDec);
   
         // get corrections
         EEPROM_readQuad(EE_doCor,(byte*)&doCor);
