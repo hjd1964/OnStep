@@ -1,3 +1,6 @@
+// -----------------------------------------------------------------------------------
+// Timers and interrupt handling
+
 #if defined(__arm__) && defined(TEENSYDUINO)
 #define ISR(f) void f (void)
 IntervalTimer itimer1;
@@ -138,7 +141,6 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
 
   if (trackingState==TrackingSidereal) {
     // automatic rate calculation HA
-    double inc; 
     long calculatedTimerRateHA;
     double timerRateHA1=1.0; 
     
@@ -159,7 +161,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     // dynamic rate adjust
     // in pre-scaler /64 mode the motor timers might be slow (relative to the sidereal timer) by as much as 0.000004 seconds/second (16000000/64)
     // so a 0.01% (0.0001x) increase is always enough to correct for this, it happens very slowly - about a single step worth of movement over an hours time
-    double x=fabs((targetHA+PEC_HA)-posHA);
+    double x=fabs(((long int)targetHA.part.m+PEC_HA)-posHA);
     if (x>1.0) {
       x=x-1.0; if (x>10.0) x=10.0; x=10000.00-x; x=x/10000.0;
       timerRateHA=calculatedTimerRateHA*x; // up to 0.01% faster (or as little as 0.001%)
@@ -188,7 +190,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     if (runTimerRateDec!=calculatedTimerRateDec) { timerRateDec=calculatedTimerRateDec; runTimerRateDec=calculatedTimerRateDec; }
     
     // dynamic rate adjust
-    x=fabs(targetDec-posDec);
+    x=fabs((long int)targetDec.part.m-posDec);
     if (x>1.0) {
       x=x-1.0; if (x>10.0) x=10.0; x=10000.00-x; x=x/10000.0;
       timerRateDec=calculatedTimerRateDec*x; // up to 0.01% faster (or as little as 0.001%)
@@ -212,10 +214,10 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     // travel through the backlash is done, but we weren't following the target while it was happening!
     // so now get us back to near where we need to be
     if ((!inBacklashHA) && (wasInBacklashHA) && (!guideDirHA)) {
-      if (abs(posHA-(targetHA+PEC_HA))>2) thisTimerRateHA=TakeupRate; else wasInBacklashHA=false;
+      if (abs(posHA-((long int)targetHA.part.m+PEC_HA))>2) thisTimerRateHA=TakeupRate; else wasInBacklashHA=false;
     }
     if ((!inBacklashDec) && (wasInBacklashDec) && (!guideDirDec)) {
-      if (abs(posDec-targetDec)>2) thisTimerRateDec=TakeupRate; else wasInBacklashDec=false;
+      if (abs(posDec-(long int)targetDec.part.m)>2) thisTimerRateDec=TakeupRate; else wasInBacklashDec=false;
     }
   }
 
@@ -279,8 +281,8 @@ ISR(TIMER3_COMPA_vect)
 #endif
 
   // Guessing about 4+4+1+ 4+4+1+ 1+ 2+1+2+ 13=37 clocks between here and the step signal which is 2.3uS
-  if (posHA!=targetHA+PEC_HA) { // Move the RA stepper to the target
-    if (posHA<targetHA+PEC_HA) dirHA=1; else dirHA=0; // Direction control
+  if (posHA!=(long int)targetHA.part.m+PEC_HA) { // Move the RA stepper to the target
+    if (posHA<(long int)targetHA.part.m+PEC_HA) dirHA=1; else dirHA=0; // Direction control
     #ifdef REVERSE_HA_ON
       if (HADir==dirHA) CLR(HADirPORT, HADirBit); else SET(HADirPORT, HADirBit); // Set direction, HADir default LOW (=0, for my wiring.)  Needs >=0.65uS before/after rising step signal (DRV8825 or A4988).
     #else                                                                        // Guessing about 1+2+1+4+4+1=13 clocks between here and the step signal which is 0.81uS
@@ -342,9 +344,9 @@ ISR(TIMER4_COMPA_vect)
 #endif
 #endif
   
-  if (posDec!=targetDec) { // move the Dec stepper to the target
+  if (posDec!=(long int)targetDec.part.m) { // move the Dec stepper to the target
     // telescope normally starts on the EAST side of the pier looking at the WEST sky
-    if (posDec<targetDec) dirDec=1; else dirDec=0;                                     // Direction control
+    if (posDec<(long int)targetDec.part.m) dirDec=1; else dirDec=0;                                     // Direction control
     #ifdef REVERSE_DEC_ON
       if (DecDir==dirDec) SET(DecDirPORT, DecDirBit); else CLR(DecDirPORT, DecDirBit); // Set direction, decDir default HIGH (=1, for my wiring)
     #else
