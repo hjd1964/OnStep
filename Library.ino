@@ -5,7 +5,7 @@ Library::Library()
 
   byteMin=(PECBufferSize-824)+1024;    // default=1024
   
-  #if defined(__arm__) && defined(TEENSYDUINO)
+  #if defined(TEENSYDUINO) && !defined(E2END)
   #define E2END 2047
   #endif
   byteMax=E2END;                       // default=4095 (or 2047 on Teensy3.1)
@@ -97,8 +97,6 @@ boolean Library::firstRec()
 {
   libRec_t work;
 
-  int c=0;
-
   // see if first record is for the currentLib
   recPos=0;
   work=readRec(recPos);
@@ -115,7 +113,6 @@ boolean Library::firstFreeRec()
   libRec_t work;
 
   int cat;
-  int c=0;
   recPos=-1;
   
   do
@@ -138,7 +135,6 @@ boolean Library::prevRec()
   libRec_t work;
 
   int cat;
-  int c=0;
   
   do
   {
@@ -159,8 +155,7 @@ boolean Library::nextRec()
   libRec_t work;
 
   int cat;
-  int c=0;
-  
+ 
   do
   {
     recPos++; if (recPos>=recMax) break;
@@ -180,7 +175,7 @@ boolean Library::gotoRec(int num)
   libRec_t work;
 
   int cat;
-  int l,r;
+  int l,r=0;
   int c=0;
   
   for (l=0;l<recMax;l++) {
