@@ -6,7 +6,7 @@ void Pec() {
 
   // keep track of our current step position, and when the step position on the worm wraps during playback
   lastWormRotationStepPos = wormRotationStepPos;
-  cli(); long posPEC=targetHA; sei();
+  cli(); long posPEC=(long int)targetHA.part.m; sei();
   
   // where we're at (HA), must always be positive, so add 360 degrees (in steps)
   posPEC=posPEC+StepsPerDegreeHA*360;
@@ -147,13 +147,13 @@ void Pec() {
       if (PECstartDelta>0) { 
         // when (re)starting PEC not worried about how smooth the play back is, this will be over in a moment just run fast to get there in position
         // run the PEC rate at another +/-5x to cover any corrections that should have been applied up to this point in the worm cycle
-        PECstartDelta-=30; 
+        PECstartDelta-=30;
         pecTimerRateHA+=5; 
-        pstep=doubleToFixed(0.0); 
+        pstep.fixed=doubleToFixed(0.0); 
       } else {
         // otherwise set the rates to playback the correct number of steps per second
         pecTimerRateHA=(l/StepsPerSecond);
-        pstep=doubleToFixed(l/100.0);
+        pstep.fixed=doubleToFixed(l/100.0);
       }
     }
   }
