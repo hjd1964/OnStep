@@ -84,7 +84,7 @@ void Timer3SetRate(long rate) {
 #if defined(HA_MODE) && defined(HA_MODE_GOTO)
   // reprogram the timer for a higher/lower rate and switch micro-stepping rate
   // we must enter here fast enough to catch the moment when the motor step location happens to be right and the last step (of the correct size) was taken
-  if ((stepHA!=stepHA_next) && (HAclr) && ((posHA+blHA)%128==0)) {
+  if ((stepHA!=stepHA_next) && (HAclr) && ((posHA+blHA)%1024==0)) {
     stepHA=stepHA_next;
     digitalWrite(HA_M0,(modeHA_next & 1));
     digitalWrite(HA_M1,(modeHA_next>>1 & 1));
@@ -109,7 +109,7 @@ void Timer4SetRate(long rate) {
 #if defined(DE_MODE) && defined(DE_MODE_GOTO)
   // reprogram the timer for a higher/lower rate and switch micro-stepping rate
   // we must enter here fast enough to catch the moment when the motor step location happens to be right and the last step (of the correct size) was taken
-  if ((stepDec!=stepDec_next) && (DEclr) && ((posDec+blDec)%128==0)) {
+  if ((stepDec!=stepDec_next) && (DEclr) && ((posDec+blDec)%1024==0)) {
     stepDec=stepDec_next;
     digitalWrite(DE_M0,(modeDec_next & 1));
     digitalWrite(DE_M1,(modeDec_next>>1 & 1));
@@ -260,7 +260,7 @@ ISR(TIMER3_COMPA_vect)
   // switch micro-step mode
   if (gotoModeHA!=gotoRateHA) {
     // only when at the home position
-    if ((posHA+blHA)%128==0) {
+    if ((posHA+blHA)%1024==0) {
       // make sure travel through backlash compensation is finished
       if ((blHA==backlashHA) || (blHA==0)) {
         // switch mode
@@ -324,7 +324,7 @@ ISR(TIMER4_COMPA_vect)
   // switch micro-step mode
   if (gotoModeDec!=gotoRateDec) {
     // only when at home position
-    if ((posDec+blDec)%128==0) {
+    if ((posDec+blDec)%1024==0) {
       // make sure travel through backlash compensation is finished
       if ((blDec==backlashDec) || (blDec==0)) {
         // switch mode
