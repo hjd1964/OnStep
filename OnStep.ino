@@ -144,7 +144,7 @@
  * 06-05-2015          1.0b19            Fixed point math improvements: smaller more elegant code, should be faster too.  Added support for disabling stepper drivers with a high or low signal.
  * 07-14-2015          1.0b20            Minor code corrections to fix warnings during Teensy3.1 compile.  Re-arranged altitude limits calculation so it completes once a second.
  * 07-17-2015          1.0b21            Added code that makes more intelligent decisions about when to use an RA "waypoint" back to the polar home position during meridian flips to avoid exceeding 
- *                                       horizon limits (makes most meridian flips faster.) Compatibility fixes to EEPROM_writeInt and EEPROM_readInt for Teensy3.1 target.
+ *                                       horizon limits (makes most meridian flips faster.) Compatibility fixes to EEPROM_writeInt and EEPROM_readInt for Teensy3.1 target.  Support for up to 256X micro-stepping.
  *
  *
  * Author: Howard Dutton
