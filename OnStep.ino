@@ -167,8 +167,8 @@
 #include "FPoint.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "07 14 15"
-#define FirmwareNumber "1.0b20"
+#define FirmwareDate   "07 17 15"
+#define FirmwareNumber "1.0b21"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
