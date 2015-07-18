@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------------
-// functions related to Parking the mount 
+// functions related to Parking the mount
 
 // sets the park postion as the current position
 boolean setPark() {
@@ -7,41 +7,14 @@ boolean setPark() {
     lastTrackingState=trackingState;
     trackingState=TrackingNone;
 
-    // turn off PEC for a moment
-    cli(); long l = PEC_HA; PEC_HA=0; sei();
-    
-    // SiderealRate (x20 speed)
-    cli();
-    long LasttimerRateHA =timerRateHA;
-    long LasttimerRateDec=timerRateDec;
-    timerRateHA =SiderealRate/20L;
-    timerRateDec=SiderealRate/20L;
-    sei();
-    
-    // find a park position and store it, the main loop isn't running while we're here
-    // so sidereal tracking isn't an issue right now
-
-    // ok, now figure out where to move the HA and Dec to arrive at stepper home positions
-    // per Allegro data-sheet for A4983, 1/2 step takes 8 steps to cycle home, 1/4 = 16,
-    // ... 1/8 = 32 and 1/16 = 64 (*2 to handle up to 32 uStep drivers)
-    cli();
-    targetHA.part.m=(posHA / 128L) * 128L; targetHA.part.f=0;
-    targetDec.part.m=(posDec / 128L) * 128L; targetDec.part.f=0;
-    sei();
-
-    // let it settle into a fixed position, 20 times the sidereal rate at 12 steps per second minimum... 
-    // 128/240=0.53S, worst case.  Also, for some additional safety margin add a few seconds to cover
-    // travel through the PEC offset
-    delay(4000);
-
-    // reality check, we should be at the park position
-    if (((long int)targetHA.part.m!=posHA) || ((long int)targetDec.part.m!=posDec)) { trackingState=lastTrackingState; return false;  }
-    // reality check, we shouldn't have any backlash remaining
-    if ((!parkClearBacklash())) { trackingState=lastTrackingState; return false; } 
+    // don't worry about moving around: during parking pec is turned off and backlash is cleared (0) so that targetHA/Dec=posHA/Dec
+    // this should handle getting us back to the home position for micro-step modes up to 256X
+    long int h=((long int)targetHA.part.m/1024L)*1024L;
+    long int d=((long int)targetDec.part.m/1024L)*1024L;
 
     // store our position
-    EEPROM_writeQuad(EE_posHA ,(byte*)&posHA);
-    EEPROM_writeQuad(EE_posDec,(byte*)&posDec);
+    EEPROM_writeQuad(EE_posHA ,(byte*)&h);
+    EEPROM_writeQuad(EE_posDec,(byte*)&d);
 
     // and the align
     saveAlignModel();
@@ -51,16 +24,7 @@ boolean setPark() {
     parkSaved=true;
     EEPROM.write(EE_parkSaved,parkSaved);
 
-    // move at the previous speed
-    cli();
-    timerRateHA =LasttimerRateHA;
-    timerRateDec=LasttimerRateDec;
-    sei();
-
     trackingState=lastTrackingState;
-
-    // turn PEC back on
-    cli(); PEC_HA=l; sei();
     return true;
   }
   return false;
