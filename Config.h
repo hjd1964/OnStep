@@ -66,8 +66,6 @@
 #define STATUS_LED2_PINS_OFF
 // optional +5V on pins 5 and 12 to Pololu or other stepper drivers without on-board 5V voltage regulators, default=OFF (Teensy3.1 Pins 5,11)
 #define POWER_SUPPLY_PINS_OFF
-// optional stepper driver Enable support is always on (no setting,) just wire Enable to Pins 25 (HA) and 30 (Dec) and OnStep will pull these pins High (Teensy3.1 Pins 16,21)
-// to disable stepper drivers on startup and when Parked. An Align or UnPark will enable the drivers.
 // optional stepper driver Enable support is always on, just wire Enable to Pins 25 (HA) and 30 (Dec) and OnStep will pull these HIGH (Teensy3.1 Pins 16,21)
 // by default to disable stepper drivers on startup and when Parked. An Align or UnPark will enable the drivers.  Adjust below if you need these pulled LOW to disable the drivers.
 #define HA_DISABLED_HIGH
