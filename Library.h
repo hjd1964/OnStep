@@ -36,11 +36,13 @@ class Library
     void readVars(char* name, int* code, double* RA, double* Dec);
 
     boolean firstRec();
+    boolean nameRec();
     boolean firstFreeRec();
     boolean prevRec();
     boolean nextRec();
     boolean gotoRec(int num);
 
+    void clearCurrentRec(); // clears this record
     void clearLib(); // clears this library
     void clearAll(); // clears all libraries
 
@@ -65,3 +67,4 @@ Library Lib;
 char const * objectStr[] = {"UNK", "OC", "GC", "PN", "DN", "SG", "EG", "IG", "KNT", "SNR", "GAL", "CN", "STR", "PLA", "CMT", "AST"};
 
 #endif
+

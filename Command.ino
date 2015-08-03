@@ -544,6 +544,20 @@ the pdCor  term is 1 in HA
           quietReply=true;
       } else 
 
+// :L$#    Move to catalog name record
+//          Returns: 1
+      if (command[1]=='$') { 
+          Lib.nameRec();
+          quietReply=false;
+      } else 
+
+// :LD#    Clear current record
+//          Returns: Nothing
+      if (command[1]=='D') { 
+          Lib.clearCurrentRec();
+          quietReply=true;
+      } else 
+
 // :LL#    Clear current catalog
 //          Returns: Nothing
       if (command[1]=='L') { 
@@ -1283,3 +1297,4 @@ int freeRam () {
   return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
 }
 #endif
+
