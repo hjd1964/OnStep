@@ -1063,15 +1063,15 @@ void loop() {
       #endif
     }
 
+    // keeps the target where it's supposed to be while doing gotos
     if (trackingState==TrackingMoveTo) {
-      // keeps the target where it's supposed to be while doing gotos
       if (lastTrackingState==TrackingSidereal) { origTargetHA.fixed+=fstep.fixed; cli(); targetHA.fixed+=fstep.fixed; sei();  }
       moveTo();
     }
-  }
 
-  // figure out the current Alititude
-  if (lst%5==0) do_alt_calc(); // call 20x a second to spread out the overhead
+    // figure out the current Alititude
+    if (lst%5==0) do_alt_calc(); // call 20x a second to spread out the overhead
+  }
 
   // HOUSEKEEPING --------------------------------------------------------------------------------------
   // timer... falls in once a second, keeps the universal time clock ticking,
