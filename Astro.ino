@@ -373,10 +373,10 @@ boolean do_alt_calc() {
   // calc Alt, phase 2
   if (ac_step==14) {
     currentAlt=asin(ac_sinalt)*Rad;
-    ac_step=0;
-  }
+  } else
   // finish
   if (ac_step==16) {
+    ac_step=0;
     done=true;
   }
   return done;
