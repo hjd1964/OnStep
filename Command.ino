@@ -939,8 +939,8 @@ the pdCor  term is 1 in HA
       commandError=true;
       } else 
 //   T - Tracking Commands
-//  :T+#   Track faster by 0.1 Hertz (I use a fifth of the LX200 standard, stored in EEPROM)
-//  :T-#   Track slower by 0.1 Hertz (stored in EEPROM)
+//  :T+#   Track faster by 0.02 Hertz (I use a fifth of the LX200 standard, stored in EEPROM)
+//  :T-#   Track slower by 0.02 Hertz (stored in EEPROM)
 //  :TS#   Track rage solar
 //  :TL#   Track rate lunar
 //  :TQ#   Track rate custom (stored in EEPROM)
