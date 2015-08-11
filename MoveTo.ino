@@ -111,7 +111,11 @@ void moveTo() {
       temp=(StepsForRateChange/isqrt32(distStartDec));// speed up
 //    if ((temp<100) && (temp>=10))  temp=9;          // exclude a range of speeds
     }
+#ifdef MaxRateDecRatio
+  if (temp<maxRate*MaxRateDecRatio) temp=maxRate*MaxRateDecRatio; // fastest rate
+#else
   if (temp<maxRate) temp=maxRate;                     // fastest rate
+#endif
   if (temp>TakeupRate) temp=TakeupRate;               // slowest rate (4x sidereal)
   cli(); timerRateDec=temp; sei();
 
