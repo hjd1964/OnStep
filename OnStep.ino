@@ -145,7 +145,7 @@
  * 07-14-2015          1.0b20            Minor code corrections to fix warnings during Teensy3.1 compile.  Re-arranged altitude limits calculation so it completes once a second.
  * 07-17-2015          1.0b21            Added code that makes more intelligent decisions about when to use an RA "waypoint" back to the polar home position during meridian flips to avoid exceeding 
  *                                       horizon limits (makes most meridian flips faster.) Compatibility fixes to EEPROM_writeInt and EEPROM_readInt for Teensy3.1 target.  Support for up to 256X micro-stepping.
- *
+ *t
  *
  * Author: Howard Dutton
  * http://www.stellarjourney.com
@@ -233,6 +233,8 @@ volatile double  pecTimerRateHA = 0;
 volatile double  guideTimerRateHA = 0;
 volatile double  guideTimerRateDec = 0;
 volatile double  timerRateRatio = ((double)StepsPerDegreeHA/(double)StepsPerDegreeDec);
+volatile boolean useTimerRateRatio = (StepsPerDegreeHA!=StepsPerDegreeDec);
+
 #define SecondsPerWormRotation  ((long)(StepsPerWormRotation/StepsPerSecond))
 #define StepsPerSecondDec       ((double)(StepsPerDegreeDec/3600.0)*15.0)
 
