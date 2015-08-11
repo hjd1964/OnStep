@@ -199,11 +199,12 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
   }
   
   long thisTimerRateHA=timerRateHA;
-  #ifdef DEC_RATIO_ON
-  long thisTimerRateDec=(timerRateDec*timerRateRatio);
-  #else
-  long thisTimerRateDec=timerRateDec;
-  #endif
+  long thisTimerRateDec;
+  if (useTimerRateRatio) {
+    thisTimerRateDec=(timerRateDec*timerRateRatio);
+  } else {
+    thisTimerRateDec=timerRateDec;
+  }
   
   // override rate during backlash compensation
   if (inBacklashHA) { thisTimerRateHA=timerRateBacklashHA; wasInBacklashHA=true; } 
