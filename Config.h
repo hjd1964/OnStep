@@ -71,10 +71,6 @@
 #define HA_DISABLED_HIGH
 #define DE_DISABLED_HIGH
 
-// enables Goto speed equalization for differing right ascension and declination StepsPerDegreeHA/Dec, default=OFF
-// must be _ON when StepsPerDegreeHA isn't equal to StepsPerDegreeDec (limited testing done)
-#define DEC_RATIO_OFF
-
 // enables Horizon coordinate goto functions, default=ON
 #define ALT_AZM_GOTO_ON
 
