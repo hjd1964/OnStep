@@ -702,13 +702,13 @@ the pdCor  term is 1 in HA
             EEPROM_writeQuad(EE_PECsense_index,(byte*)&PECindex_sense);
           } else
           if (parameter[1]=='!') {
-            for (i=0; i<PECBufferSize; i++) EEPROM.write(EE_PECindex+i,PEC_buffer[i]);
             PECrecorded=true;
             PECstatus=IgnorePEC;
             EEPROM.write(EE_PECrecorded,PECrecorded);
             EEPROM.write(EE_PECstatus,PECstatus);
             EEPROM_writeQuad(EE_PECrecord_index,(byte*)&PECindex_record); 
             EEPROM_writeQuad(EE_PECsense_index,(byte*)&PECindex_sense);
+            PECautoRecord=PECBufferSize;
           } else
           // Status is one of "IpPrR" (I)gnore, get ready to (p)lay, (P)laying, get ready to (r)ecord, (R)ecording
           if (parameter[1]=='?') { const char *PECstatusCh = PECStatusString; reply[0]=PECstatusCh[PECstatus]; reply[1]=0; } else { quietReply=false; commandError=true; }
