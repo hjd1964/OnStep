@@ -94,7 +94,7 @@ void Pec() {
     // if the HALL sensor (etc.) has just arrived at the index and it's been more than 60 seconds since
     // it was there before, set this as the next start of PEC playback/recording
     cli();
-    if ((digitalRead(PecPin)==HIGH) && (lst-PECtime_lastSense>600)) {
+    if ((digitalRead(PecPin)==HIGH) && (lst-PECtime_lastSense>6000)) {
       PECtime_lastSense=lst;
       next_PECindex_sense=PECindex;
     }
@@ -104,7 +104,7 @@ void Pec() {
   #ifdef PEC_SENSE
     // as above except for Analog sense
     cli();
-    if ((PECav>PEC_SENSE) && (lst-PECtime_lastSense>600)) {
+    if ((PECav>PEC_SENSE) && (lst-PECtime_lastSense>6000)) {
       PECtime_lastSense=lst;
       next_PECindex_sense=PECindex;
     }
