@@ -595,6 +595,7 @@ long    lastPECindex     = -1;
 long    PECtime_lastSense= 0;      // time since last PEC index was sensed
 long    PECindex_sense   = 0;      // position of active PEC index sensed
 long    next_PECindex_sense=-1;    // position of next PEC index sensed
+int     PECautoRecord    = 0;      // for writing to PEC table to EEPROM
 
 // backlash control
 volatile int backlashHA   = 0;
@@ -1046,6 +1047,10 @@ void loop() {
     // only active while sidereal tracking with a guide rate that makes sense
     Pec();
   } else disablePec();
+  if (PECautoRecord>0) {
+    PECautoRecord--;
+    EEPROM.update(EE_PECindex+PECautoRecord,PEC_buffer[PECautoRecord]);
+  }
 
   // SIDEREAL TRACKING ---------------------------------------------------------------------------------
   cli(); long tempLst=lst; sei();
