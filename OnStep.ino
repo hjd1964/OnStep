@@ -582,7 +582,7 @@ long lstGuideStopDec=0;
 #define RecordPEC        4
 long    accPecGuideHA    = 0;        // for PEC, buffers steps to be recorded
 boolean PECfirstRecord   = false;
-boolean PECstatus        = IgnorePEC;
+int     PECstatus        = IgnorePEC;
 boolean PECrecorded      = false;
 long    PECindex_record  = 0;
 double  PECstartDelta    = 0;
