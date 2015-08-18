@@ -145,7 +145,8 @@
  * 07-14-2015          1.0b20            Minor code corrections to fix warnings during Teensy3.1 compile.  Re-arranged altitude limits calculation so it completes once a second.
  * 07-17-2015          1.0b21            Added code that makes more intelligent decisions about when to use an RA "waypoint" back to the polar home position during meridian flips to avoid exceeding 
  *                                       horizon limits (makes most meridian flips faster.) Compatibility fixes to EEPROM_writeInt and EEPROM_readInt for Teensy3.1 target.  Support for up to 256X micro-stepping.
- *t
+ *                                       Improvements to library catalogs... added ability to store and recall catalog name records, added ability to delete individual records.
+ *
  *
  * Author: Howard Dutton
  * http://www.stellarjourney.com
@@ -233,8 +234,6 @@ volatile double  pecTimerRateHA = 0;
 volatile double  guideTimerRateHA = 0;
 volatile double  guideTimerRateDec = 0;
 volatile double  timerRateRatio = ((double)StepsPerDegreeHA/(double)StepsPerDegreeDec);
-volatile boolean useTimerRateRatio = (StepsPerDegreeHA!=StepsPerDegreeDec);
-
 #define SecondsPerWormRotation  ((long)(StepsPerWormRotation/StepsPerSecond))
 #define StepsPerSecondDec       ((double)(StepsPerDegreeDec/3600.0)*15.0)
 
@@ -596,6 +595,7 @@ long    PECtime_lastSense= 0;      // time since last PEC index was sensed
 long    PECindex_sense   = 0;      // position of active PEC index sensed
 long    next_PECindex_sense=-1;    // position of next PEC index sensed
 int     PECautoRecord    = 0;      // for writing to PEC table to EEPROM
+boolean PECindexDetected = false;  // indicates PEC index was found
 
 // backlash control
 volatile int backlashHA   = 0;
@@ -1041,13 +1041,14 @@ void loop() {
     guideHA=0;
     Guide();
   }
-  
+
   // PERIODIC ERROR CORRECTION -------------------------------------------------------------------------
   if ((trackingState==TrackingSidereal) && (!((guideDirHA || guideDirDec) && (activeGuideRate>GuideRate1x)))) { 
     // only active while sidereal tracking with a guide rate that makes sense
     Pec();
   } else disablePec();
   if (PECautoRecord>0) {
+    // write PEC table to EEPROM, should do about 100 bytes/second
     PECautoRecord--;
     EEPROM.update(EE_PECindex+PECautoRecord,PEC_buffer[PECautoRecord]);
   }
