@@ -1,6 +1,12 @@
 // PEC ---------------------------------------------------------------------------------------------
 // functions to handle periodic error correction
 
+int LastPecPinState=!PEC_SENSE_STATE;
+#if defined(PEC_SENSE_ON) || defined(PEC_SENSE)
+boolean initPecIndex=true;
+#else
+boolean initPecIndex=false;
+#endif
 void Pec() {
   // PEC is only active when we're tracking at the sidereal rate with a guide rate that makes sense
 
@@ -9,7 +15,7 @@ void Pec() {
   cli(); long posPEC=(long int)targetHA.part.m; sei();
   
   // where we're at (HA), must always be positive, so add 360 degrees (in steps)
-  posPEC=posPEC+StepsPerDegreeHA*360;
+  posPEC=posPEC+StepsPerDegreeHA*360L;
   wormRotationStepPos =(posPEC-PECindex_record) % StepsPerWormRotation;
   
   // handle playing back and recording PEC
@@ -41,7 +47,7 @@ void Pec() {
       // start recording PEC
       if (PECstatus==ReadyRecordPEC) {
         PECstatus=RecordPEC;
-        PECrecorded=false;    
+        PECrecorded=false;
       } else
       // and once the PEC data is all stored, indicate that it's valid and start using it
       if (PECstatus==RecordPEC) {
@@ -91,22 +97,28 @@ void Pec() {
     PECindex1=(PECindex-PECindex_sense); if (PECindex1<0) PECindex1+=SecondsPerWormRotation; if (PECindex1>SecondsPerWormRotation-1) PECindex1-=SecondsPerWormRotation;
 
   #ifdef PEC_SENSE_ON
-    // if the HALL sensor (etc.) has just arrived at the index and it's been more than 60 seconds since
+    // if the HALL sensor (etc.) has just arrived at the index and it's been more than 10 seconds since
     // it was there before, set this as the next start of PEC playback/recording
+    int PecPinState=digitalRead(PecPin);
     cli();
-    if ((digitalRead(PecPin)==HIGH) && (lst-PECtime_lastSense>6000)) {
+    if (((LastPecPinState!=PEC_SENSE_STATE)) && (PecPinState==PEC_SENSE_STATE) && (lst-PECtime_lastSense>6000)) {
+      PECindexDetected=true;
       PECtime_lastSense=lst;
       next_PECindex_sense=PECindex;
+      if (initPecIndex) { PECindex_record=posPEC; next_PECindex_sense=0; initPecIndex=false; }
     }
     sei();
+    LastPecPinState=PecPinState;
   #endif
 
   #ifdef PEC_SENSE
     // as above except for Analog sense
     cli();
     if ((PECav>PEC_SENSE) && (lst-PECtime_lastSense>6000)) {
+      PECindexDetected=true;
       PECtime_lastSense=lst;
       next_PECindex_sense=PECindex;
+      if (initPecIndex) { PECindex_record=posPEC; next_PECindex_sense=0; initPecIndex=false; }
     }
     sei();
   #endif
@@ -134,26 +146,28 @@ void Pec() {
       PEC_buffer[PECindex1]=l+128;  // save the correction
       accPecGuideHA=0;              // and clear the accumulator
     }
-    
-    if (PECstatus==PlayPEC) {
-      // PECindex2 adjusts one second before the value was recorded, an estimate of the latency between image acquisition and response
-      // if sending values directly to OnStep from PECprep, etc. be sure to account for this
-      int PECindex2=PECindex1-1; if (PECindex2<0) PECindex2+=SecondsPerWormRotation;
-      // accPecPlayHA play back speed can be +/-1 of sidereal
-      // PEC_Skip is the number of ticks between the added (or skipped) steps
-      int l=PEC_buffer[PECindex2]-128;
-      if (l>StepsPerSecond) l=StepsPerSecond; if (l<-StepsPerSecond) l=-StepsPerSecond;
 
-      if (PECstartDelta>0) { 
-        // when (re)starting PEC not worried about how smooth the play back is, this will be over in a moment just run fast to get there in position
-        // run the PEC rate at another +/-5x to cover any corrections that should have been applied up to this point in the worm cycle
-        PECstartDelta-=30;
-        pecTimerRateHA+=5; 
-        pstep.fixed=doubleToFixed(0.0); 
-      } else {
-        // otherwise set the rates to playback the correct number of steps per second
-        pecTimerRateHA=(l/StepsPerSecond);
-        pstep.fixed=doubleToFixed(l/100.0);
+    if (!initPecIndex) { // wait for the index, if we have one
+      if (PECstatus==PlayPEC) {
+        // PECindex2 adjusts one second before the value was recorded, an estimate of the latency between image acquisition and response
+        // if sending values directly to OnStep from PECprep, etc. be sure to account for this
+        int PECindex2=PECindex1-1; if (PECindex2<0) PECindex2+=SecondsPerWormRotation;
+        // accPecPlayHA play back speed can be +/-1 of sidereal
+        // PEC_Skip is the number of ticks between the added (or skipped) steps
+        int l=PEC_buffer[PECindex2]-128;
+        if (l>StepsPerSecond) l=StepsPerSecond; if (l<-StepsPerSecond) l=-StepsPerSecond;
+  
+        if (PECstartDelta>0) { 
+          // when (re)starting PEC not worried about how smooth the play back is, this will be over in a moment just run fast to get there in position
+          // run the PEC rate at another +/-5x to cover any corrections that should have been applied up to this point in the worm cycle
+          PECstartDelta-=30;
+          pecTimerRateHA+=5; 
+          pstep.fixed=doubleToFixed(0.0); 
+        } else {
+          // otherwise set the rates to playback the correct number of steps per second
+          pecTimerRateHA=(l/StepsPerSecond);
+          pstep.fixed=doubleToFixed(l/100.0);
+        }
       }
     }
   }
