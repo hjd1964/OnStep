@@ -694,8 +694,8 @@ the pdCor  term is 1 in HA
             PECfirstRecord = true;
             PECstatus      = IgnorePEC;
             PECrecorded    = false;
-            EEPROM.write(EE_PECstatus,PECstatus);
-            EEPROM.write(EE_PECrecorded,PECrecorded);
+            EEPROM.update(EE_PECstatus,PECstatus);
+            EEPROM.update(EE_PECrecorded,PECrecorded);
             PECindex_record= 0;
             PECindex_sense = 0;
             EEPROM_writeQuad(EE_PECrecord_index,(byte*)&PECindex_record); 
@@ -704,14 +704,15 @@ the pdCor  term is 1 in HA
           if (parameter[1]=='!') {
             PECrecorded=true;
             PECstatus=IgnorePEC;
-            EEPROM.write(EE_PECrecorded,PECrecorded);
-            EEPROM.write(EE_PECstatus,PECstatus);
-            EEPROM_writeQuad(EE_PECrecord_index,(byte*)&PECindex_record); 
+            EEPROM.update(EE_PECrecorded,PECrecorded);
+            EEPROM.update(EE_PECstatus,PECstatus);
+           // EEPROM_writeQuad(EE_PECrecord_index,(byte*)&PECindex_record); 
             EEPROM_writeQuad(EE_PECsense_index,(byte*)&PECindex_sense);
+            // trigger recording of PEC buffer
             PECautoRecord=PECBufferSize;
           } else
-          // Status is one of "IpPrR" (I)gnore, get ready to (p)lay, (P)laying, get ready to (r)ecord, (R)ecording
-          if (parameter[1]=='?') { const char *PECstatusCh = PECStatusString; reply[0]=PECstatusCh[PECstatus]; reply[1]=0; } else { quietReply=false; commandError=true; }
+          // Status is one of "IpPrR" (I)gnore, get ready to (p)lay, (P)laying, get ready to (r)ecord, (R)ecording.  Or an optional (.) to indicate an index detect.
+          if (parameter[1]=='?') { const char *PECstatusCh = PECStatusString; reply[0]=PECstatusCh[PECstatus]; reply[1]=0; reply[2]=0; if (PECindexDetected) { reply[1]='.'; PECindexDetected=false; } } else { quietReply=false; commandError=true; }
         } else commandError=true;
       } else
 
@@ -810,7 +811,7 @@ the pdCor  term is 1 in HA
           if ( (atoi2(parameter,&i)) && ((i>=-24) && (i<=24))) { 
             timeZone=i;
             b=timeZone+128; 
-            EEPROM.write(EE_sites+(currentSite)*25+8,b);
+            EEPROM.update(EE_sites+(currentSite)*25+8,b);
             UT1=LMT+timeZone; 
             UT1_start  =UT1;
             UT1mS_start=millis(); 
@@ -824,7 +825,7 @@ the pdCor  term is 1 in HA
 //          Return: 0 on failure
 //                  1 on success
       if (command[1]=='h')  { if ((parameter[0]!=0) && (strlen(parameter)<4)) {
-        if ( (atoi2(parameter,&i)) && ((i>=-30) && (i<=30))) { minAlt=i; EEPROM.write(EE_minAlt,minAlt+128); } else commandError=true; 
+        if ( (atoi2(parameter,&i)) && ((i>=-30) && (i<=30))) { minAlt=i; EEPROM.update(EE_minAlt,minAlt+128); } else commandError=true; 
       } else commandError=true; } else
 //  :SLHH:MM:SS#
 //          Set the local Time
@@ -858,7 +859,7 @@ the pdCor  term is 1 in HA
 //          Return: 0 on failure
 //                  1 on success
       if (command[1]=='o')  { if ((parameter[0]!=0) && (strlen(parameter)<3)) { 
-        if ( (atoi2(parameter,&i)) && ((i>=60) && (i<=90))) { maxAlt=i; EEPROM.write(EE_maxAlt,maxAlt); } else commandError=true; 
+        if ( (atoi2(parameter,&i)) && ((i>=60) && (i<=90))) { maxAlt=i; EEPROM.update(EE_maxAlt,maxAlt); } else commandError=true; 
       } else commandError=true; } else
 //  :SrHH:MM.T#
 //  :SrHH:MM:SS#
@@ -939,8 +940,8 @@ the pdCor  term is 1 in HA
       commandError=true;
       } else 
 //   T - Tracking Commands
-//  :T+#   Track faster by 0.02 Hertz (I use a fifth of the LX200 standard, stored in EEPROM)
-//  :T-#   Track slower by 0.02 Hertz (stored in EEPROM)
+//  :T+#   Track faster by 0.1 Hertz (I use a fifth of the LX200 standard, stored in EEPROM)
+//  :T-#   Track slower by 0.1 Hertz (stored in EEPROM)
 //  :TS#   Track rage solar
 //  :TL#   Track rate lunar
 //  :TQ#   Track rate custom (stored in EEPROM)
@@ -1108,7 +1109,7 @@ the pdCor  term is 1 in HA
 //         Returns: Nothing or current site ?#
       if (command[0]=='W') {
         if ((command[1]>='0') && (command[1]<='3')) {
-          currentSite=command[1]-'0'; EEPROM.write(EE_currentSite,currentSite); quietReply=true;
+          currentSite=command[1]-'0'; EEPROM.update(EE_currentSite,currentSite); quietReply=true;
           EEPROM_readQuad(EE_sites+(currentSite*25+0),(byte*)&latitude);
           if (latitude<0) celestialPoleDec=-90L; else celestialPoleDec=90L;
           cosLat=cos(latitude/Rad);
@@ -1270,7 +1271,7 @@ boolean clearCommand_serial_one() {
 // calculates the tracking speed for move commands
 void setGuideRate(int g) {
   currentGuideRate=g;
-  if ((g<=GuideRate1x) && (currentPulseGuideRate!=g)) { currentPulseGuideRate=g; EEPROM.write(EE_pulseGuideRate,g); }
+  if ((g<=GuideRate1x) && (currentPulseGuideRate!=g)) { currentPulseGuideRate=g; EEPROM.update(EE_pulseGuideRate,g); }
 }
 
 void enableGuideRate(int g) {
@@ -1297,4 +1298,3 @@ int freeRam () {
   return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
 }
 #endif
-
