@@ -146,6 +146,7 @@
  * 07-17-2015          1.0b21            Added code that makes more intelligent decisions about when to use an RA "waypoint" back to the polar home position during meridian flips to avoid exceeding 
  *                                       horizon limits (makes most meridian flips faster.) Compatibility fixes to EEPROM_writeInt and EEPROM_readInt for Teensy3.1 target.  Support for up to 256X micro-stepping.
  *                                       Improvements to library catalogs... added ability to store and recall catalog name records, added ability to delete individual records.
+ * 08-18-2015          1.0b22            PEC improvements, automatic handling of differing axis reductions
  *
  *
  * Author: Howard Dutton
@@ -168,8 +169,8 @@
 #include "FPoint.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "07 17 15"
-#define FirmwareNumber "1.0b21"
+#define FirmwareDate   "08 18 15"
+#define FirmwareNumber "1.0b22"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
