@@ -97,7 +97,7 @@ void Pec() {
     PECindex1=(PECindex-PECindex_sense); if (PECindex1<0) PECindex1+=SecondsPerWormRotation; if (PECindex1>SecondsPerWormRotation-1) PECindex1-=SecondsPerWormRotation;
 
   #ifdef PEC_SENSE_ON
-    // if the HALL sensor (etc.) has just arrived at the index and it's been more than 10 seconds since
+    // if the HALL sensor (etc.) has just arrived at the index and it's been more than 60 seconds since
     // it was there before, set this as the next start of PEC playback/recording
     int PecPinState=digitalRead(PecPin);
     cli();
