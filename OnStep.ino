@@ -989,7 +989,7 @@ void setup() {
   guideSiderealTimer = lst;
   PecSiderealTimer = lst;
   siderealTimer = lst;
-  PECtime_lastSense = lst;
+  PECtime_lastSense = lst-6000;
   clockTimer=millis(); 
   sei();
 
