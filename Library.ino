@@ -266,4 +266,3 @@ void Library::clearAll()
 {
   for (int l=0;l<recMax;l++) clearRec(l);
 }
-
