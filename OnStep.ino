@@ -234,6 +234,7 @@ volatile double  pecTimerRateHA = 0;
 volatile double  guideTimerRateHA = 0;
 volatile double  guideTimerRateDec = 0;
 volatile double  timerRateRatio = ((double)StepsPerDegreeHA/(double)StepsPerDegreeDec);
+volatile boolean useTimerRateRatio = (StepsPerDegreeHA!=StepsPerDegreeDec);
 #define SecondsPerWormRotation  ((long)(StepsPerWormRotation/StepsPerSecond))
 #define StepsPerSecondDec       ((double)(StepsPerDegreeDec/3600.0)*15.0)
 
