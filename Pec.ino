@@ -1,7 +1,7 @@
 // PEC ---------------------------------------------------------------------------------------------
 // functions to handle periodic error correction
 
-int LastPecPinState=!PEC_SENSE_STATE;
+int LastPecPinState=PEC_SENSE_STATE;
 #if defined(PEC_SENSE_ON) || defined(PEC_SENSE)
 boolean initPecIndex=true;
 #else
