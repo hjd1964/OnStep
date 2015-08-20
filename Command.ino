@@ -1110,12 +1110,13 @@ the pdCor  term is 1 in HA
       if (command[0]=='W') {
         if ((command[1]>='0') && (command[1]<='3')) {
           currentSite=command[1]-'0'; EEPROM.update(EE_currentSite,currentSite); quietReply=true;
-          EEPROM_readQuad(EE_sites+(currentSite*25+0),(byte*)&latitude);
+          float f;
+          EEPROM_readQuad(EE_sites+(currentSite*25+0),(byte*)&f); latitude=f;
           if (latitude<0) celestialPoleDec=-90L; else celestialPoleDec=90L;
           cosLat=cos(latitude/Rad);
           sinLat=sin(latitude/Rad);
           if (celestialPoleDec>0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
-          EEPROM_readQuad(EE_sites+(currentSite*25+4),(byte*)&longitude);
+          EEPROM_readQuad(EE_sites+(currentSite*25+4),(byte*)&f); longitude=f;
           b=EEPROM.read(EE_sites+(currentSite*25+8)); timeZone=b-128;
         } else 
         if (command[1]=='?') {
