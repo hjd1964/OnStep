@@ -146,7 +146,7 @@
  * 07-17-2015          1.0b21            Added code that makes more intelligent decisions about when to use an RA "waypoint" back to the polar home position during meridian flips to avoid exceeding 
  *                                       horizon limits (makes most meridian flips faster.) Compatibility fixes to EEPROM_writeInt and EEPROM_readInt for Teensy3.1 target.  Support for up to 256X micro-stepping.
  *                                       Improvements to library catalogs... added ability to store and recall catalog name records, added ability to delete individual records.
- * 08-18-2015          1.0b22            PEC improvements, automatic handling of differing axis reductions
+ * 08-18-2015          1.0b22            PEC improvements, automatic handling of differing axis reductions.  HA limits and meridian flip now account for IH index error.
  *
  *
  * Author: Howard Dutton
@@ -539,6 +539,7 @@ double azmCor            = 0;       // - is right of the pole, + is left
 double doCor             = 0;       // declination/optics orthogonal correction
 double pdCor             = 0;       // declination/polar orthogonal correction
 double IH                = 0;       // offset corrections/align
+long   IHS               = 0;
 double ID                = 0;
 
 // tracking and PEC, fractional steps
@@ -989,7 +990,7 @@ void setup() {
   guideSiderealTimer = lst;
   PecSiderealTimer = lst;
   siderealTimer = lst;
-  PECtime_lastSense = lst-6000;
+  PECtime_lastSense = lst;
   clockTimer=millis(); 
   sei();
 
@@ -1131,8 +1132,8 @@ void loop() {
 
     // safety checks, keeps mount from tracking past the meridian limit, past the underPoleLimit, below horizon limit, above the overhead limit, or past the Dec limits
     if (meridianFlip!=MeridianFlipNever) {
-      if (pierSide==PierSideWest) { cli(); if (posHA>(minutesPastMeridianW*StepsPerDegreeHA/4L)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  sei(); }}
-      if (pierSide==PierSideEast) { cli(); if (posHA>(underPoleLimit*StepsPerDegreeHA*15L))      { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  sei(); }}
+      if (pierSide==PierSideWest) { cli(); if (posHA+IHS>(minutesPastMeridianW*StepsPerDegreeHA/4L)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  sei(); }}
+      if (pierSide==PierSideEast) { cli(); if (posHA+IHS>(underPoleLimit*StepsPerDegreeHA*15L))      { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  sei(); }}
     } else {
       // when Fork mounted, ignore pierSide and just stop the mount if it passes the underPoleLimit
       cli(); if (posHA>(underPoleLimit*StepsPerDegreeHA*15L)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  sei(); }
