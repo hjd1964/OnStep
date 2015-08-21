@@ -141,6 +141,7 @@ boolean unpark() {
         EEPROM_readQuad(EE_altCor,(byte*)&altCor);
         EEPROM_readQuad(EE_azmCor,(byte*)&azmCor);
         EEPROM_readQuad(EE_IH,(byte*)&IH);
+        IHS=IH*15.0*StepsPerDegreeHA;
         EEPROM_readQuad(EE_ID,(byte*)&ID);
 
         // see what side of the pier we're on
