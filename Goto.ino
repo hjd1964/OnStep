@@ -180,6 +180,7 @@ byte goTo(long thisTargetHA, long thisTargetDec, long altTargetHA, long altTarge
   if (meridianFlip!=MeridianFlipNever) {
     // where the allowable hour angles are
     long eastOfPierMaxHA= underPoleLimit*15*StepsPerDegreeHA;
+    //                           +30/4=+7.5'
     long eastOfPierMinHA=-(minutesPastMeridianE*StepsPerDegreeHA/4L);
     long westOfPierMaxHA= (minutesPastMeridianW*StepsPerDegreeHA/4L);
     long westOfPierMinHA=-underPoleLimit*15*StepsPerDegreeHA;
@@ -189,19 +190,22 @@ byte goTo(long thisTargetHA, long thisTargetDec, long altTargetHA, long altTarge
       eastOfPierMinHA= (minutesPastMeridianW*StepsPerDegreeHA/4L);
       westOfPierMaxHA=-(minutesPastMeridianE*StepsPerDegreeHA/4L);
     }
-    
+    // IH=37593 seconds, 626'
     // if doing a meridian flip, use the opposite pier side coordinates
     if (pierSide==PierSideEast) {
-      if ((thisTargetHA>eastOfPierMaxHA) || (thisTargetHA<eastOfPierMinHA)) {
+      //                                               X-626   < +7.5
+      if ((thisTargetHA+IHS>eastOfPierMaxHA) || (thisTargetHA+IHS<eastOfPierMinHA)) {
         pierSide=PierSideFlipEW1;
         thisTargetHA =altTargetHA;
+        if (thisTargetHA+IHS>westOfPierMaxHA) return 6; // fail, outside limits
         thisTargetDec=altTargetDec;
       }
     } else
     if (pierSide==PierSideWest) {
-      if ((thisTargetHA>westOfPierMaxHA) || (thisTargetHA<westOfPierMinHA)) {
+      if ((thisTargetHA+IHS>westOfPierMaxHA) || (thisTargetHA+IHS<westOfPierMinHA)) {
         pierSide=PierSideFlipWE1; 
         thisTargetHA =altTargetHA;
+        if (thisTargetHA+IHS<eastOfPierMinHA) return 6; // fail, outside limits
         thisTargetDec=altTargetDec;
       }
     } else
