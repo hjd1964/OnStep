@@ -118,6 +118,7 @@ the pdCor  term is 1 in HA
             // set the IH offset
             // set the ID offset
             if (!syncEqu(newTargetRA,newTargetDec)) { commandError=true; }
+            IHS=IH*15.0*StepsPerDegreeHA;
             avgDec=newTargetDec;
             avgHA =haRange(LST-newTargetRA);
           } else 
@@ -136,6 +137,7 @@ the pdCor  term is 1 in HA
               double IH2=IH;
 
               IH    = (IH2+IH1)/2.0;                    // average offset in HA
+              IHS=IH*15.0*StepsPerDegreeHA;
               ID    = (ID2-ID1)/2.0;                    // new offset in Dec
               double IH3=IH;
               double ID3=ID;
@@ -152,6 +154,7 @@ the pdCor  term is 1 in HA
                 doCor = doCor*cos(avgDec/Rad);           // correct for measurement being away from the Celestial Equator
 
                 IH=IH3;
+                IHS=IH*15.0*StepsPerDegreeHA;
                 ID=ID3;
               } else commandError=true;
             } else commandError=true;
@@ -1110,7 +1113,7 @@ the pdCor  term is 1 in HA
       if (command[0]=='W') {
         if ((command[1]>='0') && (command[1]<='3')) {
           currentSite=command[1]-'0'; EEPROM.update(EE_currentSite,currentSite); quietReply=true;
-          float f;
+          float f; 
           EEPROM_readQuad(EE_sites+(currentSite*25+0),(byte*)&f); latitude=f;
           if (latitude<0) celestialPoleDec=-90L; else celestialPoleDec=90L;
           cosLat=cos(latitude/Rad);
