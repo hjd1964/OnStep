@@ -1286,8 +1286,6 @@ void enableGuideRate(int g) {
   activeGuideRate=g;
   
   // this enables the guide rate
-  //                0.25X,0.5X,1X,2X,4X,8X ,16X,24X,40X 60X
-  // guideRates[10]={3.75,7.5 ,15,30,60,120,240,360,600,900}; 
   guideTimerRate=(double)guideRates[g]/15.0;
 
   cli();
