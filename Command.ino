@@ -415,9 +415,10 @@ the pdCor  term is 1 in HA
           if (parameter[0]=='F') { // Fn: Debug
             long temp;
             switch (parameter[1]) {
-              case '0': cli(); temp=(long)(posHA-((long int)targetHA.part.m+PEC_HA)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;  // Debug0, true vs. target RA position          
-              case '1': sprintf(reply,"%ld",(long)(debugv1/1.00273790935)); quietReply=true; break;                                              // Debug1, RA tracking rate
-//              case '1': sprintf(reply,"%ld",(long)(guideRates[9])); quietReply=true; break;                                              // Debug1, RA tracking rate
+//              case '0': cli(); temp=(long)(posHA-((long)targetHA.part.m+PEC_HA)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;  // Debug0, true vs. target RA position          
+              case '0': cli(); temp=(long)(posDec-((long)targetDec.part.m)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;  // Debug0, true vs. target RA position          
+//              case '1': sprintf(reply,"%ld",(long)(debugv1/1.00273790935)); quietReply=true; break;                                              // Debug1, RA tracking rate
+              case '1': cli(); sprintf(reply,"%ld",(long)(posDec)); sei(); quietReply=true; break;                                              // Debug1, RA tracking rate
             }
           } else commandError=true;
         } else commandError=true;
@@ -639,10 +640,15 @@ the pdCor  term is 1 in HA
 //         Returns: Nothing
       if ((command[1]=='e') || (command[1]=='w')) { 
         if (parkStatus==NotParked) {
-          enableGuideRate(currentGuideRate);
-          guideDirHA=command[1];
-          guideDurationHA=-1;
-          cli(); if (guideDirHA=='e') guideTimerRateHA=-guideTimerRate; else guideTimerRateHA=guideTimerRate; sei();
+          // block user from changing direction at high rates, just stop the guide instead
+          if ((guideDirHA!=0) && (command[1]!=guideDirHA) && (fabs(guideTimerRateHA)>2)) { 
+            guideDirHA='b';
+          } else {
+            enableGuideRate(currentGuideRate);
+            guideDirHA=command[1];
+            guideDurationHA=-1;
+            cli(); if (guideDirHA=='e') guideTimerRateHA=-guideTimerRate; else guideTimerRateHA=guideTimerRate; sei();
+          }
         }
         quietReply=true;
       } else
@@ -650,10 +656,15 @@ the pdCor  term is 1 in HA
 //         Returns: Nothing
       if ((command[1]=='n') || (command[1]=='s')) { 
         if (parkStatus==NotParked) {
-          enableGuideRate(currentGuideRate);
-          guideDirDec=command[1];
-          guideDurationDec=-1;
-          cli(); guideTimerRateDec=guideTimerRate; sei();
+          // block user from changing direction at high rates, just stop the guide instead
+          if ((guideDirDec!=0) && (command[1]!=guideDirDec) && (fabs(guideTimerRateDec)>2)) { 
+            guideDirDec='b';
+          } else {
+            enableGuideRate(currentGuideRate);
+            guideDirDec=command[1];
+            guideDurationDec=-1;
+            cli(); guideTimerRateDec=guideTimerRate; sei();
+          }
         }
         quietReply=true;
       } else
@@ -726,8 +737,8 @@ the pdCor  term is 1 in HA
       if (command[0]=='Q') {
         if (command[1]==0) {
           if (parkStatus==NotParked) {
-            if (guideDirHA)  { guideDirHA='b'; } // break
-            if (guideDirDec) { guideDirDec='b'; } // break
+            if (guideDirHA)  guideDirHA='b'; // break
+            if (guideDirDec) guideDirDec='b'; // break
             if (trackingState==TrackingMoveTo) { abortSlew=true; }
           }
           quietReply=true; 
@@ -736,7 +747,7 @@ the pdCor  term is 1 in HA
 //         Returns: Nothing
         if ((command[1]=='e') || (command[1]=='w')) { 
           if (parkStatus==NotParked) {
-            if (guideDirHA) { guideDirHA='b'; } // break
+            if (guideDirHA) guideDirHA='b'; // break
           }
           quietReply=true; 
         } else
@@ -744,7 +755,7 @@ the pdCor  term is 1 in HA
 //         Returns: Nothing
         if ((command[1]=='n') || (command[1]=='s')) {
           if (parkStatus==NotParked) {
-            if (guideDirDec) { guideDirDec='b'; } // break
+            if (guideDirDec) guideDirDec='b'; // break
           }
           quietReply=true; 
         } else commandError=true;
