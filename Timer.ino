@@ -190,9 +190,9 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
       } else {
         // use acceleration
         double z=x;
-        if (z>StepsPerDegreeDec/4) z=StepsPerDegreeDec/4;
-        z=(z/StepsPerDegreeDec)*60; // z=distance in arc-min but <=15
-        guideTimerRateDec1=z*40;
+        if (z>StepsPerDegreeDec/2) z=StepsPerDegreeDec/2;
+        z=(z/StepsPerDegreeDec)*60; // z=distance in arc-min but <=30
+        guideTimerRateDec1=z*((slewRate/15.0)/30.0);  // 30*x = slewRate, which is as fast as a guide can go
         if (guideTimerRateDec1>fabs(guideTimerRateDec)) guideTimerRateDec1=fabs(guideTimerRateDec);
       }
       // stop guiding
