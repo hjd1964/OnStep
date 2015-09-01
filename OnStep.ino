@@ -147,6 +147,7 @@
  *                                       horizon limits (makes most meridian flips faster.) Compatibility fixes to EEPROM_writeInt and EEPROM_readInt for Teensy3.1 target.  Support for up to 256X micro-stepping.
  *                                       Improvements to library catalogs... added ability to store and recall catalog name records, added ability to delete individual records.
  * 08-18-2015          1.0b22            PEC improvements, automatic handling of differing axis reductions.  HA limits and meridian flip now account for IH index error.
+ * 09-01-2015          1.0b23            Implemented acceleration for guide commands.  Adjusted rates so that R8(RS) are 1/2x MaxRate and R9 is 1x MaxRate.
  *
  *
  * Author: Howard Dutton
@@ -169,8 +170,8 @@
 #include "FPoint.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "08 18 15"
-#define FirmwareNumber "1.0b22"
+#define FirmwareDate   "09 01 15"
+#define FirmwareNumber "1.0b23"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -550,8 +551,12 @@ fixed_t pstep;
 #define GuideRate1x        2
 #define GuideRate16x       6
 #define GuideRateNone      255
-double  guideRates[10]={3.75,7.5,15,30,60,120,240,360,600,900}; 
-//                      .25X .5x 1x 2x 4x  8x 16x 24x 40x 60x
+
+#define slewRate (1.0/((StepsPerDegreeHA*(MaxRate/1000000.0)))*3600.0)
+#define halfSlewRate (slewRate/2.0)
+double  guideRates[10]={3.75,7.5,15,30,60,120,360,720,halfSlewRate,slewRate};
+//                      .25X .5x 1x 2x 4x  8x 24x 48x ?            ?
+
 byte currentGuideRate        = GuideRate16x;
 byte currentPulseGuideRate   = GuideRate1x;
 volatile byte activeGuideRate= GuideRateNone;
@@ -1058,11 +1063,11 @@ void loop() {
 
   // SIDEREAL TRACKING ---------------------------------------------------------------------------------
   cli(); long tempLst=lst; sei();
-  if (tempLst!=siderealTimer) {
+  if ((tempLst!=siderealTimer) && (!(guideDirHA && (activeGuideRate>GuideRate1x)))) {
     siderealTimer=tempLst;
     
     // only active while sidereal tracking with a guide rate that makes sense
-    if ((trackingState==TrackingSidereal) && !(guideDirHA && (activeGuideRate>GuideRate1x))) {
+    if ((trackingState==TrackingSidereal) ) {
       // apply the Tracking, Guiding, and PEC
       cli();
       targetHA.fixed+=fstep.fixed;
