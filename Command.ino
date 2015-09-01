@@ -417,6 +417,7 @@ the pdCor  term is 1 in HA
             switch (parameter[1]) {
               case '0': cli(); temp=(long)(posHA-((long int)targetHA.part.m+PEC_HA)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;  // Debug0, true vs. target RA position          
               case '1': sprintf(reply,"%ld",(long)(debugv1/1.00273790935)); quietReply=true; break;                                              // Debug1, RA tracking rate
+//              case '1': sprintf(reply,"%ld",(long)(guideRates[9])); quietReply=true; break;                                              // Debug1, RA tracking rate
             }
           } else commandError=true;
         } else commandError=true;
@@ -725,8 +726,8 @@ the pdCor  term is 1 in HA
       if (command[0]=='Q') {
         if (command[1]==0) {
           if (parkStatus==NotParked) {
-            if (guideDirHA)  { lstGuideStopHA =lst+3; guideDirHA=0; }
-            if (guideDirDec) { lstGuideStopDec=lst+3; guideDirDec=0; }
+            if (guideDirHA)  { guideDirHA='b'; } // break
+            if (guideDirDec) { guideDirDec='b'; } // break
             if (trackingState==TrackingMoveTo) { abortSlew=true; }
           }
           quietReply=true; 
@@ -735,7 +736,7 @@ the pdCor  term is 1 in HA
 //         Returns: Nothing
         if ((command[1]=='e') || (command[1]=='w')) { 
           if (parkStatus==NotParked) {
-            if (guideDirHA) { lstGuideStopHA=lst+3; guideDirHA=0; }
+            if (guideDirHA) { guideDirHA='b'; } // break
           }
           quietReply=true; 
         } else
@@ -743,7 +744,7 @@ the pdCor  term is 1 in HA
 //         Returns: Nothing
         if ((command[1]=='n') || (command[1]=='s')) {
           if (parkStatus==NotParked) {
-            if (guideDirDec) { lstGuideStopDec=lst+3; guideDirDec=0; }
+            if (guideDirDec) { guideDirDec='b'; } // break
           }
           quietReply=true; 
         } else commandError=true;
@@ -752,16 +753,16 @@ the pdCor  term is 1 in HA
 //   R - Slew Rate Commands
       if (command[0]=='R') {
 //  :RG#   Set Slew rate to Guiding Rate (slowest) 1X
-//  :RC#   Set Slew rate to Centering rate (2nd slowest) 4X
-//  :RM#   Set Slew rate to Find Rate (2nd Fastest) 8X
-//  :RS#   Set Slew rate to max (fastest) 24X
+//  :RC#   Set Slew rate to Centering rate (2nd slowest) 8X
+//  :RM#   Set Slew rate to Find Rate (2nd Fastest) 24X
+//  :RS#   Set Slew rate to max (fastest) ?X (1/2 of MaxRate)
 //  :Rn#   Set Slew rate to n, where n=0..9
 //         Returns: Nothing
       if ((command[1]=='G') || (command[1]=='C') || (command[1]=='M') || (command[1]=='S') || ((command[1]>='0') && (command[1]<='9'))) {
         if (command[1]=='G') i=2; else
-        if (command[1]=='C') i=4; else
-        if (command[1]=='M') i=5; else
-        if (command[1]=='S') i=7; else i=command[1]-'0';
+        if (command[1]=='C') i=5; else
+        if (command[1]=='M') i=6; else
+        if (command[1]=='S') i=8; else i=command[1]-'0';
         setGuideRate(i);
         quietReply=true; 
       } else commandError=true;
