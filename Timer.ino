@@ -129,6 +129,9 @@ volatile boolean gotoRateHA=false;
 volatile boolean gotoRateDec=false;
 volatile byte cnt = 0;
 
+volatile double guideTimerRateHA1=0;
+volatile double guideTimerRateDec1=0;
+
 #if defined(__arm__) && defined(TEENSYDUINO)
 ISR(TIMER1_COMPA_vect)
 #else
@@ -142,18 +145,26 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
   if (trackingState==TrackingSidereal) {
     // automatic rate calculation HA
     long calculatedTimerRateHA;
-    double timerRateHA1=1.0; 
     
     // guide rate acceleration/deceleration and control
-/*    double z=(abs(guideTimerRateHA1-guideTimerRateHA));
-    if (z>1.0) inc=round(z/60.0)+1.0; else inc=0.25;
-    if (guideTimerRateHA1<guideTimerRateHA) { guideTimerRateHA1+=inc; }
-    if (guideTimerRateHA1>guideTimerRateHA) { guideTimerRateHA1-=inc*0.9; }
-    // respond to low speed guiding start/stop immediately
-    if ((guideTimerRateHA==0.0) && (guideTimerRateHA1<2.0)) { guideTimerRateHA1=0; }
-    if (guideDirHA) { if (guideTimerRateHA>1.0) timerRateHA1=0.0; else guideTimerRateHA1=guideTimerRateHA; }
-*/
-    double timerRateHA2=fabs(guideTimerRateHA+pecTimerRateHA+timerRateHA1);
+    double x=fabs(((long int)targetHA.part.m+PEC_HA)-posHA);
+    if ((!inBacklashHA) && (guideDirHA)) {
+      if ((fabs(guideTimerRateHA)<10.0) && (fabs(guideTimerRateHA1)<10.0)) { 
+        // slow speed guiding, no acceleration
+        guideTimerRateHA1=guideTimerRateHA; 
+      } else {
+        // use acceleration
+        double z=x;
+        if (z>StepsPerDegreeHA/2) z=StepsPerDegreeHA/2;
+        z=(z/StepsPerDegreeHA)*60; // z=distance in arc-min but <=30
+        guideTimerRateHA1=z*((slewRate/15.0)/30.0);  // 30*x = slewRate, which is as fast as a guide can go
+        if (guideTimerRateHA1>fabs(guideTimerRateHA)) guideTimerRateHA1=fabs(guideTimerRateHA);
+      }
+      if ((guideDirHA=='b') && (x<2)) { guideDirHA=0; guideTimerRateHA=0; guideTimerRateHA1=0;}
+    }
+
+    double timerRateHA1=1.0; if (guideDirHA && (activeGuideRate>GuideRate1x)) timerRateHA1=0.0;
+    double timerRateHA2=fabs(guideTimerRateHA1+pecTimerRateHA+timerRateHA1);
     // round up to run the motor timers just a tiny bit slow, then adjust below if we start to fall behind during sidereal tracking
     if (timerRateHA2>0.5) calculatedTimerRateHA=ceil((double)SiderealRate/timerRateHA2); else calculatedTimerRateHA=ceil((double)SiderealRate*2.0);
     if (runTimerRateHA!=calculatedTimerRateHA) { timerRateHA=calculatedTimerRateHA; runTimerRateHA=calculatedTimerRateHA; }
@@ -161,7 +172,6 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     // dynamic rate adjust
     // in pre-scaler /64 mode the motor timers might be slow (relative to the sidereal timer) by as much as 0.000004 seconds/second (16000000/64)
     // so a 0.01% (0.0001x) increase is always enough to correct for this, it happens very slowly - about a single step worth of movement over an hours time
-    double x=fabs(((long int)targetHA.part.m+PEC_HA)-posHA);
     if (x>1.0) {
       x=x-1.0; if (x>10.0) x=10.0; x=10000.00-x; x=x/10000.0;
       timerRateHA=calculatedTimerRateHA*x; // up to 0.01% faster (or as little as 0.001%)
@@ -172,25 +182,30 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     long calculatedTimerRateDec;
 
     // guide rate acceleration/deceleration
- /*   if (!inBacklashDec) {
-      z=(abs(guideTimerRateDec1-guideTimerRateDec));
-      if (z>1.0) inc=round(z/60.0)+1.0; else inc=0.25;
-      if (guideTimerRateDec1<guideTimerRateDec) { guideTimerRateDec1+=inc; }
-      if (guideTimerRateDec1>guideTimerRateDec) { guideTimerRateDec1-=inc*0.9; }
-      // respond to low speed guiding start/stop immediately
-      if ((guideTimerRateDec==0.0) && (guideTimerRateDec1<2.0)) { guideTimerRateDec1=0; }
-      if (guideDirDec && (guideTimerRateDec<2.0)) guideTimerRateDec1=guideTimerRateDec;
+    x=fabs((long int)targetDec.part.m-posDec);
+    if (!inBacklashDec && guideDirDec) {
+      if ((fabs(guideTimerRateDec)<10.0) && (fabs(guideTimerRateDec1)<10.0)) { 
+        // slow speed guiding, no acceleration
+        guideTimerRateDec1=guideTimerRateDec; 
+      } else {
+        // use acceleration
+        double z=x;
+        if (z>StepsPerDegreeDec/4) z=StepsPerDegreeDec/4;
+        z=(z/StepsPerDegreeDec)*60; // z=distance in arc-min but <=15
+        guideTimerRateDec1=z*40;
+        if (guideTimerRateDec1>fabs(guideTimerRateDec)) guideTimerRateDec1=fabs(guideTimerRateDec);
+      }
+      // stop guiding
+      if ((guideDirDec=='b') && (x<2)) { guideDirDec=0; guideTimerRateDec=0; guideTimerRateDec1=0; }
     }
- */   
-    double timerRateDec1=guideTimerRateDec;
-
+   
+    double timerRateDec1=guideTimerRateDec1;
     // if we're stopped, just run the timer fast since we're not moving anyway
     if (timerRateDec1>0.5) calculatedTimerRateDec=ceil((double)SiderealRate/timerRateDec1); else calculatedTimerRateDec=ceil((double)SiderealRate*2.0);
     // remember our "running" rate and only update the actual rate when it changes
     if (runTimerRateDec!=calculatedTimerRateDec) { timerRateDec=calculatedTimerRateDec; runTimerRateDec=calculatedTimerRateDec; }
     
     // dynamic rate adjust
-    x=fabs((long int)targetDec.part.m-posDec);
     if (x>1.0) {
       x=x-1.0; if (x>10.0) x=10.0; x=10000.00-x; x=x/10000.0;
       timerRateDec=calculatedTimerRateDec*x; // up to 0.01% faster (or as little as 0.001%)
