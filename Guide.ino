@@ -9,17 +9,17 @@ void Guide() {
     if (guideDirHA) {
       if (!inBacklashHA) {
         cli();
-        long v=(long int)targetHA.part.m;
-        if (guideDirHA=='e') targetHA.fixed-=amountGuideHA.fixed; else targetHA.fixed+=amountGuideHA.fixed;
+        long v=(long)targetHA.part.m;
+        if (guideDirHA=='e') targetHA.fixed-=amountGuideHA.fixed; else if (guideDirHA=='w') targetHA.fixed+=amountGuideHA.fixed;
         // guideHA keeps track of how many steps we've moved for PEC recording
-        guideHA=(long int)targetHA.part.m-v;
+        guideHA=(long)targetHA.part.m-v;
         sei();
 
         // for pulse guiding, count down the mS and stop when timed out
         if (guideDurationHA>0)  {
           guideDurationHA-=(long)(micros()-guideDurationLastHA);
           guideDurationLastHA=micros();
-          if (guideDurationHA<=0) { lstGuideStopHA=lst+3; guideDirHA=0; } 
+          if (guideDurationHA<=0) { guideDirHA='b'; } // break
         }
       } else {
         // don't count time if in backlash
@@ -31,13 +31,13 @@ void Guide() {
       if (!inBacklashDec) {
         cli();
         // nudge the targetDec (where we're supposed to be) by amountMoveDec
-        if (guideDirDec=='s') targetDec.fixed-=amountGuideDec.fixed; else targetDec.fixed+=amountGuideDec.fixed; 
+        if (guideDirDec=='s') targetDec.fixed-=amountGuideDec.fixed; else if (guideDirDec=='n') targetDec.fixed+=amountGuideDec.fixed; 
         sei();
         // for pulse guiding, count down the mS and stop when timed out
         if (guideDurationDec>0)  {
           guideDurationDec-=(long)(micros()-guideDurationLastDec);
           guideDurationLastDec=micros();
-          if (guideDurationDec<=0) { lstGuideStopDec=lst+3; guideDirDec=0;  } 
+          if (guideDurationDec<=0) { guideDirDec='b'; }  // break 
         }
       } else {
         // don't count time if in backlash
@@ -48,7 +48,5 @@ void Guide() {
   }
   // allow the elevated rate to persist for a moment to allow the bulk added steps to play out after stopping
   // if the guide rate is negative and slow it's always faster to go back to the sidereal rate
-  if ((currentGuideRate<=GuideRate1x) && (guideTimerRateHA<0.001)) { cli(); guideTimerRateHA=0.0; sei(); }
-  if ((!guideDirHA) && (fabs(guideTimerRateHA)>0.001) && (lst>=lstGuideStopHA)) { cli(); guideTimerRateHA=0.0; sei(); }
-  if ((!guideDirDec) && (fabs(guideTimerRateDec)>0.001) && (lst>=lstGuideStopDec)) { cli(); guideTimerRateDec=0.0; sei(); }
+  if ((currentGuideRate<=GuideRate1x) && (fabs(guideTimerRateHA)<0.001)) { cli(); guideTimerRateHA=0.0; sei(); }
 }
