@@ -576,9 +576,6 @@ fixed_t amountGuideHA;
 long    guideHA           = 0;
 fixed_t amountGuideDec;
 long    guideDec          = 0;
-//
-long lstGuideStopHA=0;
-long lstGuideStopDec=0;
 
 // PEC control
 #define PECStatusString  "IpPrR"
@@ -1024,7 +1021,7 @@ void loop() {
           guideDurationHA=-1;
           cli(); if (guideDirHA=='e') guideTimerRateHA=-guideTimerRate; else guideTimerRateHA=guideTimerRate; sei();
         } else {
-          if (guideDirHA) { lstGuideStopHA=lst+3; guideDirHA=0; }
+          if (guideDirHA) { guideDirHA='b'; }
         }
       }
       // Dec changed?
@@ -1040,7 +1037,7 @@ void loop() {
           guideDurationDec=-1;
           cli(); guideTimerRateDec=guideTimerRate; sei();
         } else {
-          if (guideDirDec) { lstGuideStopDec=lst+3; guideDirDec=0; }
+          if (guideDirDec) { guideDirDec='b'; }
         }
       }
     }
