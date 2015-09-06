@@ -147,20 +147,18 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     long calculatedTimerRateHA;
     
     // guide rate acceleration/deceleration and control
-    double x=fabs(((long int)targetHA.part.m+PEC_HA)-posHA);
+    cli();  double x=((long int)targetHA.part.m+PEC_HA)-posHA; sei();
     if ((!inBacklashHA) && (guideDirHA)) {
       if ((fabs(guideTimerRateHA)<10.0) && (fabs(guideTimerRateHA1)<10.0)) { 
         // slow speed guiding, no acceleration
         guideTimerRateHA1=guideTimerRateHA; 
       } else {
         // use acceleration
-        double z=x;
-        if (z>StepsPerDegreeHA/2) z=StepsPerDegreeHA/2;
-        z=(z/StepsPerDegreeHA)*60; // z=distance in arc-min but <=30
-        guideTimerRateHA1=z*((slewRate/15.0)/30.0);  // 30*x = slewRate, which is as fast as a guide can go
+        double z=(StepsForRateChange/isqrt32(fabs(x)));
+        guideTimerRateHA1=(1.0/((StepsPerDegreeHA*(z/1000000.0)))*3600.0);
         if (guideTimerRateHA1>fabs(guideTimerRateHA)) guideTimerRateHA1=fabs(guideTimerRateHA);
       }
-      if ((guideDirHA=='b') && (x<2)) { guideDirHA=0; guideTimerRateHA=0; guideTimerRateHA1=0;}
+      if ((guideDirHA=='b') && (fabs(x)<2)) { guideDirHA=0; guideTimerRateHA=0; guideTimerRateHA1=0;}
     }
 
     double timerRateHA1=1.0; if (guideDirHA && (activeGuideRate>GuideRate1x)) timerRateHA1=0.0;
@@ -172,27 +170,25 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     // dynamic rate adjust
     // in pre-scaler /64 mode the motor timers might be slow (relative to the sidereal timer) by as much as 0.000004 seconds/second (16000000/64)
     // so a 0.01% (0.0001x) increase is always enough to correct for this, it happens very slowly - about a single step worth of movement over an hours time
-    if (x>1.0) {
-      x=x-1.0; if (x>10.0) x=10.0; x=10000.00-x; x=x/10000.0;
-      timerRateHA=calculatedTimerRateHA*x; // up to 0.01% faster (or as little as 0.001%)
-      runTimerRateHA=timerRateHA;
-    }
+    if (x>10.0) x=10.0; 
+    if (x<-10.0) x=-10.0; 
+    x=10000.00-x; x=x/10000.0;
+    timerRateHA=calculatedTimerRateHA*x; // up to 0.01% faster or slower (or as little as 0.001%)
+    runTimerRateHA=timerRateHA;
 
     // automatic rate calculation Dec
     long calculatedTimerRateDec;
 
     // guide rate acceleration/deceleration
-    x=fabs((long int)targetDec.part.m-posDec);
+    cli(); x=fabs((long int)targetDec.part.m-posDec); sei();
     if (!inBacklashDec && guideDirDec) {
       if ((fabs(guideTimerRateDec)<10.0) && (fabs(guideTimerRateDec1)<10.0)) { 
         // slow speed guiding, no acceleration
         guideTimerRateDec1=guideTimerRateDec; 
       } else {
         // use acceleration
-        double z=x;
-        if (z>StepsPerDegreeDec/2) z=StepsPerDegreeDec/2;
-        z=(z/StepsPerDegreeDec)*60; // z=distance in arc-min but <=30
-        guideTimerRateDec1=z*((slewRate/15.0)/30.0);  // 30*x = slewRate, which is as fast as a guide can go
+        double z=(StepsForRateChange/isqrt32(x));
+        guideTimerRateDec1=(1.0/((StepsPerDegreeDec*(z/1000000.0)))*3600.0);
         if (guideTimerRateDec1>fabs(guideTimerRateDec)) guideTimerRateDec1=fabs(guideTimerRateDec);
       }
       // stop guiding
@@ -225,25 +221,26 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
   if (inBacklashHA) { thisTimerRateHA=timerRateBacklashHA; wasInBacklashHA=true; } 
   // override rate during backlash compensation
   if (inBacklashDec) { thisTimerRateDec=timerRateBacklashDec; wasInBacklashDec=true; }
-
-  if (trackingState==TrackingSidereal) {
+  if ((trackingState==TrackingSidereal)) {
     // travel through the backlash is done, but we weren't following the target while it was happening!
     // so now get us back to near where we need to be
     if ((!inBacklashHA) && (wasInBacklashHA) && (!guideDirHA)) {
-      if (abs(posHA-((long int)targetHA.part.m+PEC_HA))>2) thisTimerRateHA=TakeupRate; else wasInBacklashHA=false;
+      cli(); if (abs(posHA-((long int)targetHA.part.m+PEC_HA))>2) thisTimerRateHA=TakeupRate; else wasInBacklashHA=false; sei();
     }
     if ((!inBacklashDec) && (wasInBacklashDec) && (!guideDirDec)) {
-      if (abs(posDec-(long int)targetDec.part.m)>2) thisTimerRateDec=TakeupRate; else wasInBacklashDec=false;
+      cli(); if (abs(posDec-(long int)targetDec.part.m)>2) thisTimerRateDec=TakeupRate; else wasInBacklashDec=false; sei();
     }
   }
 
   if (trackingState==TrackingMoveTo) {
-    // trigger Goto step mode when faster than the fastest guide rate
+    // trigger Goto step mode, rapid acceleration (low StepsForRateChange) can leave too little time
+    // until the home position arrives to actually switch to tracking micro-step mode. the larger step size  
+    // then causes backlash compensation to activate which in-turn keeps goto micro-step mode from turning off
     #if defined(DE_MODE) && defined(DE_MODE_GOTO)
-    gotoRateDec=(thisTimerRateDec<SiderealRate/80);  // 80 times the sidereal rate 
+    gotoRateDec=(thisTimerRateDec<SiderealRate/120); // activate at 120x sidereal rate
     #endif
     #if defined(HA_MODE) && defined(HA_MODE_GOTO)
-    gotoRateHA=(thisTimerRateHA<SiderealRate/80);
+    gotoRateHA=(thisTimerRateHA<SiderealRate/120);
     #endif
   }
   
@@ -277,17 +274,14 @@ ISR(TIMER3_COMPA_vect)
   if (gotoModeHA!=gotoRateHA) {
     // only when at the home position
     if ((posHA+blHA)%1024==0) {
-      // make sure travel through backlash compensation is finished
-      if ((blHA==backlashHA) || (blHA==0)) {
-        // switch mode
-        if (gotoModeHA) { stepHA_next=1; modeHA_next=HA_MODE; gotoModeHA=false; } else { stepHA_next=HA_STEP_GOTO; modeHA_next=HA_MODE_GOTO; gotoModeHA=true; }
+      // switch mode
+      if (gotoModeHA) { stepHA_next=1; modeHA_next=HA_MODE; gotoModeHA=false; } else { stepHA_next=HA_STEP_GOTO; modeHA_next=HA_MODE_GOTO; gotoModeHA=true; }
 #if defined(__AVR__)
-        digitalWrite(HA_M0,(modeHA_next & 1));
-        digitalWrite(HA_M1,(modeHA_next>>1 & 1));
-        digitalWrite(HA_M2,(modeHA_next>>2 & 1));
-        stepHA=stepHA_next;
+      digitalWrite(HA_M0,(modeHA_next & 1));
+      digitalWrite(HA_M1,(modeHA_next>>1 & 1));
+      digitalWrite(HA_M2,(modeHA_next>>2 & 1));
+      stepHA=stepHA_next;
 #endif
-      }
     }
   }
 #else
@@ -306,9 +300,9 @@ ISR(TIMER3_COMPA_vect)
     #endif
     // telescope moves WEST with the sky, blHA is the amount of EAST backlash
     if (dirHA==1) {
-      if (blHA<backlashHA) { blHA++; inBacklashHA=true; } else { inBacklashHA=false; posHA+=stepHA; }
+      if (blHA<backlashHA) { blHA+=stepHA; inBacklashHA=true; } else { inBacklashHA=false; posHA+=stepHA; }
     } else {
-      if (blHA>0)          { blHA--; inBacklashHA=true; } else { inBacklashHA=false; posHA-=stepHA; }
+      if (blHA>0)          { blHA-=stepHA; inBacklashHA=true; } else { inBacklashHA=false; posHA-=stepHA; }
     }
 
 #if defined(__arm__) && defined(TEENSYDUINO)
@@ -341,17 +335,14 @@ ISR(TIMER4_COMPA_vect)
   if (gotoModeDec!=gotoRateDec) {
     // only when at home position
     if ((posDec+blDec)%1024==0) {
-      // make sure travel through backlash compensation is finished
-      if ((blDec==backlashDec) || (blDec==0)) {
-        // switch mode
-        if (gotoModeDec) { stepDec_next=1; modeDec_next=DE_MODE; gotoModeDec=false; } else { stepDec_next=DE_STEP_GOTO; modeDec_next=DE_MODE_GOTO; gotoModeDec=true; }
+      // switch mode
+      if (gotoModeDec) { stepDec_next=1; modeDec_next=DE_MODE; gotoModeDec=false; } else { stepDec_next=DE_STEP_GOTO; modeDec_next=DE_MODE_GOTO; gotoModeDec=true; }
 #if defined(__AVR__)
-        digitalWrite(DE_M0,(modeDec_next & 1));
-        digitalWrite(DE_M1,(modeDec_next>>1 & 1));
-        digitalWrite(DE_M2,(modeDec_next>>2 & 1));
-        stepDec=stepDec_next;
+      digitalWrite(DE_M0,(modeDec_next & 1));
+      digitalWrite(DE_M1,(modeDec_next>>1 & 1));
+      digitalWrite(DE_M2,(modeDec_next>>2 & 1));
+      stepDec=stepDec_next;
 #endif
-      }
     }
   }
 #else
@@ -370,9 +361,9 @@ ISR(TIMER4_COMPA_vect)
     #endif
     // telescope moving toward celestial pole in the sky, blDec is the amount of opposite backlash
     if (dirDec==1) {
-      if (blDec<backlashDec) { blDec++; inBacklashDec=true; } else { inBacklashDec=false; posDec+=stepDec; }
+      if (blDec<backlashDec) { blDec+=stepDec; inBacklashDec=true; } else { inBacklashDec=false; posDec+=stepDec; }
     } else {
-      if (blDec>0)           { blDec--; inBacklashDec=true; } else { inBacklashDec=false; posDec-=stepDec; }
+      if (blDec>0)           { blDec-=stepDec; inBacklashDec=true; } else { inBacklashDec=false; posDec-=stepDec; }
     }
 
 #if defined(__arm__) && defined(TEENSYDUINO)
