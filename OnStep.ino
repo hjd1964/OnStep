@@ -1006,8 +1006,8 @@ void loop() {
     // ST4 INTERFACE -------------------------------------------------------------------------------------
     #if defined(ST4_ON) || defined(ST4_PULLUP)
     if (parkStatus==NotParked) {
-      if (digitalRead(ST4RAw)==LOW) ST4RA_state='w'; else if (digitalRead(ST4RAe)==LOW) ST4RA_state='e'; else ST4RA_state=0;
-      if (digitalRead(ST4DEn)==LOW) ST4DE_state='n'; else if (digitalRead(ST4DEs)==LOW) ST4DE_state='s'; else ST4DE_state=0;
+      ST4RA_state=0; if (digitalRead(ST4RAw)==LOW) { if (digitalRead(ST4RAe)!=LOW) ST4RA_state='w'; } else if (digitalRead(ST4RAe)==LOW) ST4RA_state='e';
+      ST4DE_state=0; if (digitalRead(ST4DEn)==LOW) { if (digitalRead(ST4DEs)!=LOW) ST4DE_state='n'; } else if (digitalRead(ST4DEs)==LOW) ST4DE_state='s';
       // RA changed?
       if (ST4RA_last!=ST4RA_state) {
         ST4RA_last=ST4RA_state;
