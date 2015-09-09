@@ -24,7 +24,7 @@ Library::~Library()
 
 boolean Library::setCatalog(int num)
 {
-  if (num<0) return false;   if (num>13) return false;
+  if ((num<0) || (num>14)) return false;
 
   catalog=num;
   return firstRec();
