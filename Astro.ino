@@ -334,12 +334,12 @@ void CEquToTracRateCor() {
 
 // light weight altitude calculation, 16 calls to complete
 byte ac_step = 0;
-double ac_HA=0,ac_Dec=0;
+double ac_HA=0,ac_De=0, ac_Dec=0;
 double ac_sindec,ac_cosdec,ac_cosha;
 double ac_sinalt;
 
 double getApproxDec() {
-  return ac_Dec;
+  return ac_De;
 }
 
 boolean do_alt_calc() {
@@ -347,7 +347,8 @@ boolean do_alt_calc() {
   ac_step++;
   // load variables
   if (ac_step==2) {
-    getApproxEqu(&ac_HA,&ac_Dec,true);
+    getApproxEqu(&ac_HA,&ac_De,true);
+    ac_Dec=ac_De;
   } else
   // convert units
   if (ac_step==4) {
