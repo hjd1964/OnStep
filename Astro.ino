@@ -162,8 +162,8 @@ boolean atoi2(char *a, int *i) {
   return true;
 }
 
-// takes the actual equatorial coordinates and apply corrections
-boolean EquToCEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1) { 
+// takes the topocentric refracted coordinates and applies corrections to arrive at instrument equatorial coordinates 
+boolean EquToCEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1) {
   if (Dec>+90.0) Dec=+90.0;
   if (Dec<-90.0) Dec=-90.0;
 
@@ -198,12 +198,15 @@ boolean EquToCEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1) 
     *Dec1=Dec;
   }
 
-  // set, under the pole
-  if ((Lat>=0) && ((abs(*HA1)>(double)underPoleLimit) && (*Dec1>(90.0-Lat)))) {
+  while (*HA1>+12.0) *HA1-=24.0;
+  while (*HA1<-12.0) *HA1+=24.0;
+  
+  // switch to under the pole coordinates
+  if ((Lat>=0) && ((abs(*HA1)>(double)underPoleLimit))) {
     *HA1 =*HA1-12; while (*HA1<-12.0) *HA1=*HA1+24.0;
     *Dec1=(90.0-*Dec1)+90.0;
   }
-  if ((Lat<0) && ((abs(*HA1)>(double)underPoleLimit) && (*Dec1<(-90.0-Lat)))) {
+  if ((Lat<0) && ((abs(*HA1)>(double)underPoleLimit) )) {
     *HA1 =*HA1-12; while (*HA1<-12.0) *HA1=*HA1+24.0;
     *Dec1=(-90.0-*Dec1)-90.0;
   }
@@ -217,7 +220,7 @@ boolean EquToCEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1) 
   return true;
 }
 
-// takes the corrected coordinates and returns the actual equatorial coordinates 
+// takes the instrument equatorial coordinates and applies corrections to arrive at topocentric refracted coordinates
 boolean CEquToEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1) { 
   // remove the index offsets
   HA=HA+IH;
