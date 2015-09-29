@@ -96,13 +96,13 @@ boolean dmsToDouble(double *f, char *dms, boolean sign_present) {
   // determine if the sign was used and accept it if so
   if (sign_present) {
     if (*dms=='-') sign=-1.0; else if (*dms=='+') sign=1.0; else return false; 
-    *dms++; d[0]=*dms++; d[1]=*dms++; d[2]=0; if (!atoi2(d,&d1)) return false;
+    dms++; d[0]=*dms++; d[1]=*dms++; d[2]=0; if (!atoi2(d,&d1)) return false;
   } else {
     d[0]=*dms++; d[1]=*dms++; d[2]=*dms++; d[3]=0; if (!atoi2(d,&d1)) return false;
   }
 
   // make sure the seperator is an allowed character
-  if ((*dms!=':') && (*dms!='*') && (*dms!=char(223))) return false; else *dms++;
+  if ((*dms!=':') && (*dms!='*') && (*dms!=char(223))) return false; else dms++;
 
   m[0]=*dms++; m[1]=*dms++; m[2]=0; if (!atoi2(m,&m1)) return false;
 
