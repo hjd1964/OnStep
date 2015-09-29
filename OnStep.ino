@@ -1134,11 +1134,11 @@ void loop() {
 
     // safety checks, keeps mount from tracking past the meridian limit, past the underPoleLimit, below horizon limit, above the overhead limit, or past the Dec limits
     if (meridianFlip!=MeridianFlipNever) {
-      if (pierSide==PierSideWest) { cli(); if (posHA+IHS>(minutesPastMeridianW*StepsPerDegreeHA/4L)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  sei(); }}
-      if (pierSide==PierSideEast) { cli(); if (posHA+IHS>(underPoleLimit*StepsPerDegreeHA*15L))      { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  sei(); }}
+      if (pierSide==PierSideWest) { cli(); if (posHA+IHS>(minutesPastMeridianW*StepsPerDegreeHA/4L)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  } sei(); }
+      if (pierSide==PierSideEast) { cli(); if (posHA+IHS>(underPoleLimit*StepsPerDegreeHA*15L))      { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  } sei(); }
     } else {
       // when Fork mounted, ignore pierSide and just stop the mount if it passes the underPoleLimit
-      cli(); if (posHA>(underPoleLimit*StepsPerDegreeHA*15L)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  sei(); }
+      cli(); if (posHA>(underPoleLimit*StepsPerDegreeHA*15L)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
     }
     if ((getApproxDec()<minDec) || (getApproxDec()>maxDec)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
 
