@@ -116,7 +116,7 @@ boolean Library::nameRec()
 {
   libRec_t work;
 
-  int cat,typ;
+  int cat;
   recPos=-1;
   
   do
@@ -125,7 +125,6 @@ boolean Library::nameRec()
     work=readRec(recPos);
 
     cat=(int)work.libRec.code>>4;
-    typ=(int)work.libRec.code&15;
 
     if ((work.libRec.name[0]=='$') && (cat==catalog)) break;
   } while (recPos<recMax);
