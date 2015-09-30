@@ -304,27 +304,28 @@ int    maxAlt;                                    // the maximum altitude, in de
 #define LimitPin   3
 
 // The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
-//                                  Atmel   328  | 2560
-#define LEDposPin  8       // Pin 8 (LED)   PB0    PH5
-#define LEDnegPin  9       // Pin 9 (GND)   PB1    PH6
-#define LEDneg2Pin 10      // Pin 10 (GND)  P??    PB4
+//                                  Atmel   2560
+#define LEDposPin  8       // Pin 8 (LED)   PH5
+#define LEDnegPin  9       // Pin 9 (GND)   PH6
 
 // The HA(RA) and Dec jumpers (going to the big easy drivers) are simply four wire jumper cables, each has identical wiring - simple modular construction
-#define DecDirPin  4       // Pin 4 (Dir)   PD4    PG5
-#define Dec5vPin   5       // Pin 5 (5V?)   PD5    PE3
-#define DecStepPin 6       // Pin 6 (Step)  PD6    PH3
-#define DecGNDPin  7       // Pin 7 (GND)   PD7    PH4
+#define DecDirPin  4       // Pin 4 (Dir)   PG5
+#define Dec5vPin   5       // Pin 5 (5V?)   PE3
+#define DecStepPin 6       // Pin 6 (Step)  PH3
+#define DecGNDPin  7       // Pin 7 (GND)   PH4
 
 // defines for direct port control
 #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+
+#define LEDneg2Pin 10      // Pin 10 (GND)  PB4
 
 // The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
 // The Arduino attachInterrupt function works in two modes, on the '2560 it takes an Interrupt# on the Teensy and others it takes a Pin#
 #define PpsInt     2       // Interrupt 2 on Pin 21 (alternate Int3 on Pin20)
 
-#define HADirPin   11      // Pin 11 (Dir)  PB3    PB5
-#define HA5vPin    12      // Pin 12 (5V?)  PB4    PB6
-#define HAStepPin  13      // Pin 13 (Step) PB5    PB7
+#define HADirPin   11      // Pin 11 (Dir)  PB5
+#define HA5vPin    12      // Pin 12 (5V?)  PB6
+#define HAStepPin  13      // Pin 13 (Step) PB7
                            // Pin GND (GND)
                          
 // Pins to enable/disable the stepper drivers and set microstep mode, optional and normally just hard-wired (DRV8825)/ignored (BED-A4988)
@@ -371,6 +372,8 @@ int    maxAlt;                                    // the maximum altitude, in de
 
 #elif defined(__arm__) && defined(TEENSYDUINO)
 
+#define LEDneg2Pin 7       // Pin 7 (GND)
+
 // The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
 #define PpsPin     23      // Pin 23 (PPS time source, GPS for example)
 
@@ -396,7 +399,7 @@ int    maxAlt;                                    // the maximum altitude, in de
 #define LEDposPORT PORTB   //
 #define LEDnegBit  1       // Pin 9
 #define LEDnegPORT PORTB   //
-#define LEDneg2Bit  3      // Pin 3
+#define LEDneg2Bit 7       // Pin 7
 #define LEDneg2PORT PORTD  //
 
 #define DecDirBit  4       // Pin 4
@@ -555,7 +558,7 @@ fixed_t pstep;
 #define slewRate (1.0/((StepsPerDegreeHA*(MaxRate/1000000.0)))*3600.0)
 #define halfSlewRate (slewRate/2.0)
 double  guideRates[10]={3.75,7.5,15,30,60,120,360,720,halfSlewRate,slewRate};
-//                      .25X .5x 1x 2x 4x  8x 24x 48x ?            ?
+//                      .25X .5x 1x 2x 4x  8x 24x 48x half-MaxRate MaxRate
 
 byte currentGuideRate        = GuideRate16x;
 byte currentPulseGuideRate   = GuideRate1x;
