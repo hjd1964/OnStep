@@ -57,7 +57,7 @@ boolean doubleToHms(char *reply, double *f) {
     s1=s1*60;
   } else {
     s1=s1*10;
-    s[9]=':'; s[12]='1';
+    s[9]='.'; s[12]='1';
   }
   sprintf(reply,s,h1,(int)m1,(int)s1);
 
