@@ -301,13 +301,6 @@ the pdCor  term is 1 in HA
 //         Returns: sDD*#
 //         The minimum elevation of an object above the horizon required for a mount goto
       if (command[1]=='h')  { sprintf(reply,"%+02d*",minAlt); quietReply=true; } else
-//  :GH#   Get Telescope HA
-//         Returns: sHH:MM.T# or sHH:MM:SS# (based on precision setting)
-      if (command[1]=='H')  { 
-        getEqu(&f,&f1,true,true);
-        if (f<0) { f=-f; strcpy(reply,"-"); } else { strcpy(reply,"+"); }
-        char temp[10]; if (!doubleToHms(temp,&f)) commandError=true; else { strcat(reply,temp); quietReply=true; } 
-      } else 
 //  :GL#   Get Local Time in 24 hour format
 //         Returns: HH:MM:SS#
       if (command[1]=='L')  { i=highPrecision; highPrecision=true; LMT=timeRange(UT1-timeZone); if (!doubleToHms(reply,&LMT)) commandError=true; else quietReply=true; highPrecision=i; } else 
