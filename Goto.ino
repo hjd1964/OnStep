@@ -128,11 +128,13 @@ byte goToEqu(double RA, double Dec) {
   EquToHor(latitude,HA,Dec,&Alt,&Azm);
 
   // Check to see if this goto is valid
-  if (parkStatus!=NotParked) return 4; // fail, not unparked 
-  if (Alt<minAlt) return 1;            // fail, below horizon
-  if (Alt>maxAlt) return 6;            // fail, outside limits
-  if (Dec>maxDec) return 6;            // fail, outside limits
-  if (Dec<minDec) return 6;            // fail, outside limits
+  if ((parkStatus!=NotParked) && (parkStatus!=Parking)) return 4;   // fail, Parked
+  if (Alt<minAlt)                                       return 1;   // fail, below horizon
+  if (Alt>maxAlt)                                       return 6;   // fail, outside limits
+  if (Dec>maxDec)                                       return 6;   // fail, outside limits
+  if (Dec<minDec)                                       return 6;   // fail, outside limits
+  if (trackingState==TrackingMoveTo) { abortSlew=true;  return 5; } // fail, prior goto cancelled
+  if (guideDirHA || guideDirDec)                        return 7;   // fail, unspecified error
 
   // correct for polar offset, refraction, coordinate systems, operation past pole, etc. as required
   double ha,dec;
@@ -171,10 +173,6 @@ byte goTo(long thisTargetHA, long thisTargetDec, long altTargetHA, long altTarge
   // HA goes from +90...0..-90
   //                W   .   E
 
-  // Check to see if this goto is valid
-  if (trackingState==TrackingMoveTo) { abortSlew=true; return 5; }    // fail, prior goto cancelled
-  if (guideDirHA || guideDirDec) return 7;                            // fail, unspecified error
-  
   atHome=false;
 
   if (meridianFlip!=MeridianFlipNever) {
