@@ -733,7 +733,7 @@ the pdCor  term is 1 in HA
 //         Returns: Nothing
       if (command[0]=='Q') {
         if (command[1]==0) {
-          if (parkStatus==NotParked) {
+          if ((parkStatus==NotParked) || (parkStatus==Parking)) {
             if (guideDirHA)  guideDirHA='b'; // break
             if (guideDirDec) guideDirDec='b'; // break
             if (trackingState==TrackingMoveTo) { abortSlew=true; }
