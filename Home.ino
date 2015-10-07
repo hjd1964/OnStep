@@ -12,10 +12,11 @@ boolean goHome() {
     sei();
     
 //    pierSide         = PierSideNone;
-    lastTrackingState= TrackingNone;
+    abortTrackingState= trackingState;
+    lastTrackingState = TrackingNone;
     
-    trackingState    = TrackingMoveTo;
-    homeMount        = true;
+    trackingState     = TrackingMoveTo;
+    homeMount         = true;
   
     return true;
   } else return false;
@@ -44,6 +45,7 @@ boolean setHome() {
   doCor               = 0;
   pdCor               = 0;
   IH                  = 0;
+  IHS                 = 0;
   ID                  = 0;
   
   // reset Meridian Flip control
