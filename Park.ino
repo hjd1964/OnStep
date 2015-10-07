@@ -88,8 +88,10 @@ byte park() {
     parkSaved=EEPROM.read(EE_parkSaved);
     if (parkStatus==NotParked) {
       if (parkSaved) {
-        // stop tracking, we're shutting down
-        trackingState=TrackingNone; lastTrackingState=TrackingNone;
+        // stop tracking
+        abortTrackingState=trackingState;
+        lastTrackingState=TrackingNone;
+        trackingState=TrackingNone; 
 
         // turn off the PEC while we park
         disablePec();
