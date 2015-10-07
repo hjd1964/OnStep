@@ -85,6 +85,16 @@ void moveTo() {
     if (distDestHA>StepsPerDegreeHA)   { if (posHA>(long int)targetHA.part.m)   targetHA.part.m =posHA-StepsPerDegreeHA;   else targetHA.part.m =posHA +StepsPerDegreeHA; targetHA.part.f=0; }
     if (distDestDec>StepsPerDegreeDec) { if (posDec>(long int)targetDec.part.m) targetDec.part.m=posDec-StepsPerDegreeDec; else targetDec.part.m=posDec+StepsPerDegreeDec; targetDec.part.f=0; }
     sei();
+
+    if (parkStatus==Parking) {
+      trackingState=abortTrackingState;
+      parkStatus=NotParked;
+      EEPROM.write(EE_parkStatus,parkStatus);
+    } else
+    if (homeMount) {
+      trackingState=abortTrackingState;
+      homeMount=false;
+    }
     
     abortSlew=false;
     goto Again;
@@ -197,7 +207,7 @@ void moveTo() {
 
       } else
         if (homeMount) { 
-          setHome(); 
+          setHome();
           homeMount=false; 
           atHome=true;
         }
