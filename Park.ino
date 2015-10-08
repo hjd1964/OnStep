@@ -54,21 +54,26 @@ boolean parkClearBacklash() {
 
   // figure out how long we'll have to wait for the backlash to clear (+50%)
   long t; if (backlashHA>backlashDec) t=((long)backlashHA*1500)/(long)StepsPerSecond; else t=((long)backlashDec*1500)/(long)StepsPerSecond;
-  t=t/BacklashTakeupRate+250;
+  t=(t/BacklashTakeupRate+250)/12;
 
   // start by moving fully into the backlash
   cli();
   targetHA.part.m += backlashHA;
   targetDec.part.m += backlashDec;
   sei();
-  delay(t);
+
+  // wait until done or timed out
+  for (int i=0; i<12; i++) if ((blHA!=backlashHA) || (blDec!=backlashDec)) delay(t);
 
   // then reverse direction and take it all up
   cli();
   targetHA.part.m  -= backlashHA;
   targetDec.part.m -= backlashDec;
   sei();
-  delay(t*2); // if sitting on the opposite side of the backlash, it might take twice as long to clear it
+
+  // wait until done or timed out. if sitting on the opposite side of the backlash, it might take twice as long to clear it
+  for (int i=0; i<24; i++) if ((blHA!=0) || (blDec!=0)) delay(t);
+
   // we arrive back at the exact same position so fTargetHA/Dec don't need to be touched
   
   // move at the previous speed
