@@ -186,10 +186,9 @@ void moveTo() {
       if (parkStatus==Parking) {
 
         // give the drives a moment to settle in
-        delay(3000);
+        for (int i=0; i<12; i++) if ((posHA!=(long int)targetHA.part.m) || (posDec!=(long int)targetDec.part.m)) delay(250);
 
         if ((posHA==(long int)targetHA.part.m) && (posDec==(long int)targetDec.part.m)) {
-          
           if (parkClearBacklash()) {
             // success, we're parked
             parkStatus=Parked; EEPROM.write(EE_parkStatus,parkStatus);
