@@ -87,12 +87,12 @@ void moveTo() {
     sei();
 
     if (parkStatus==Parking) {
-      trackingState=abortTrackingState;
+      lastTrackingState=abortTrackingState;
       parkStatus=NotParked;
       EEPROM.write(EE_parkStatus,parkStatus);
     } else
     if (homeMount) {
-      trackingState=abortTrackingState;
+      lastTrackingState=abortTrackingState;
       homeMount=false;
     }
     
