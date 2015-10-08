@@ -3,23 +3,25 @@
 
 // moves telescope to the home position, then stops tracking
 boolean goHome() {
-  if (trackingState!=TrackingMoveTo) {
-    cli();
-    startHA =posHA;
-    startDec=posDec;
-    if (pierSide==PierSideWest) targetHA.part.m=-celestialPoleHA*StepsPerDegreeHA; else targetHA.part.m=celestialPoleHA*StepsPerDegreeHA; targetHA.part.f=0;
-    targetDec.part.m=celestialPoleDec*StepsPerDegreeDec; targetDec.part.f=0;
-    sei();
+  if ((parkStatus!=NotParked) && (parkStatus!=Parking)) return false;  // fail, moving to home not allowed if Parked
+  if (trackingState==TrackingMoveTo)                    return false;  // fail, moving to home not allowed during a move
+  if (guideDirHA || guideDirDec)                        return false;  // fail, moving to home not allowed while guiding
+
+  cli();
+  startHA =posHA;
+  startDec=posDec;
+  if (pierSide==PierSideWest) targetHA.part.m=-celestialPoleHA*StepsPerDegreeHA; else targetHA.part.m=celestialPoleHA*StepsPerDegreeHA; targetHA.part.f=0;
+  targetDec.part.m=celestialPoleDec*StepsPerDegreeDec; targetDec.part.f=0;
+  sei();
     
-//    pierSide         = PierSideNone;
-    abortTrackingState= trackingState;
-    lastTrackingState = TrackingNone;
+//  pierSide         = PierSideNone;
+  abortTrackingState= trackingState;
+  lastTrackingState = TrackingNone;
     
-    trackingState     = TrackingMoveTo;
-    homeMount         = true;
+  trackingState     = TrackingMoveTo;
+  homeMount         = true;
   
-    return true;
-  } else return false;
+  return true;
 }
 
 // sets telescope home position; user manually moves to Hour Angle 90 and Declination 90 (CWD position),
