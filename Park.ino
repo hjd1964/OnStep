@@ -63,7 +63,7 @@ boolean parkClearBacklash() {
   sei();
 
   // wait until done or timed out
-  for (int i=0; i<12; i++) if ((blHA!=backlashHA) || (blDec!=backlashDec)) delay(t);
+  for (int i=0; i<12; i++) if ((blHA!=backlashHA) || (posHA!=(long int)targetHA.part.m) || (blDec!=backlashDec) || (posDec!=(long int)targetDec.part.m)) delay(t);
 
   // then reverse direction and take it all up
   cli();
@@ -71,8 +71,8 @@ boolean parkClearBacklash() {
   targetDec.part.m -= backlashDec;
   sei();
 
-  // wait until done or timed out. if sitting on the opposite side of the backlash, it might take twice as long to clear it
-  for (int i=0; i<24; i++) if ((blHA!=0) || (blDec!=0)) delay(t);
+  // wait until done or timed out, plus a safety margin
+  for (int i=0; i<24; i++) if ((blHA!=0) || (posHA!=(long int)targetHA.part.m) || (blDec!=0) || (posDec!=(long int)targetDec.part.m)) delay(t);
 
   // we arrive back at the exact same position so fTargetHA/Dec don't need to be touched
   
