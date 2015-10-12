@@ -212,8 +212,8 @@ volatile long TakeupRate;            // this is the takeup rate for synchronizin
 boolean customRateActive=true;       // automatically modify the siderealInterval to compensate for atmospheric refraction
 
 // PPS (GPS)
-volatile unsigned long PPSlastMicroS = 1000000;
-volatile unsigned long PPSavgMicroS = 1000000;
+volatile unsigned long PPSlastMicroS = 1000000UL;
+volatile unsigned long PPSavgMicroS = 1000000UL;
 volatile double PPSrateRatio = 1.0;
 volatile boolean PPSsynced = false;
 
@@ -1118,7 +1118,7 @@ void loop() {
     // update clock
     if (trackingState==TrackingSidereal) {
       cli();
-      PPSrateRatio=((double)1000000/(double)(PPSavgMicroS));
+      PPSrateRatio=((double)1000000.0/(double)(PPSavgMicroS));
       SetSiderealClockRate(siderealInterval);
       if ((long)(micros()-(PPSlastMicroS+2000000UL))>0) PPSsynced=false; // if more than two seconds has ellapsed without a pulse we've lost sync
       sei();
@@ -1158,7 +1158,7 @@ void loop() {
     // I'm shooting for keeping OnStep reliable for about 50 days of continuous uptime (until millis() rolls over)
     // really working with a single and should have, just barely, enough significant digits to get us through a day
     unsigned long lst_now=lst_start+round( (double)((m-lst_mS_start)/10.0) * 1.00273790935);
-    if ((lst_now-lst_start)>24*3600*100) update_lst();
+    if ((lst_now-lst_start)>24L*3600L*100L) update_lst();
 
     // finally, adjust the tracking rate on-the-fly to compensate for refraction
     if (refraction) CEquToTracRateCor();
