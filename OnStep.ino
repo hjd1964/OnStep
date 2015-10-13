@@ -1098,8 +1098,8 @@ void loop() {
     clockTimer=m;
     
     // for testing, average steps per second
-    // debugv1=(debugv1*19+(targetHA*1000-lastTargetHA))/20;
-    // lastTargetHA=targetHA*1000;
+    //debugv1=(debugv1*39+(targetHA.part.m*1000-lastTargetHA))/40;
+    //lastTargetHA=targetHA.part.m*1000;
     
     // update the UT1 CLOCK
     // this clock doesn't rollover (at 24 hours) since that would cause date confusion
@@ -1119,13 +1119,16 @@ void loop() {
     if (trackingState==TrackingSidereal) {
       cli();
       PPSrateRatio=((double)1000000.0/(double)(PPSavgMicroS));
-      SetSiderealClockRate(siderealInterval);
       if ((long)(micros()-(PPSlastMicroS+2000000UL))>0) PPSsynced=false; // if more than two seconds has ellapsed without a pulse we've lost sync
       sei();
       #ifdef STATUS_LED2_PINS_ON
       if (PPSsynced) { if (LED2_ON) { SET(LEDneg2PORT, LEDneg2Bit); LED2_ON=false; } else { CLR(LEDneg2PORT, LEDneg2Bit); LED2_ON=true; } } else { SET(LEDneg2PORT, LEDneg2Bit); LED2_ON=false; } // indicate PPS
       #endif
     }
+    // adjust the tracking rate on-the-fly to compensate for refraction
+    if (refraction) CEquToTracRateCor(); else { SetSiderealClockRate(siderealInterval); cli(); SiderealRate=siderealInterval/StepsPerSecond; sei(); }
+    #else
+    if (refraction) CEquToTracRateCor();
     #endif
 
     #ifdef STATUS_LED_PINS_ON
@@ -1159,9 +1162,6 @@ void loop() {
     // really working with a single and should have, just barely, enough significant digits to get us through a day
     unsigned long lst_now=lst_start+round( (double)((m-lst_mS_start)/10.0) * 1.00273790935);
     if ((lst_now-lst_start)>24L*3600L*100L) update_lst();
-
-    // finally, adjust the tracking rate on-the-fly to compensate for refraction
-    if (refraction) CEquToTracRateCor();
 
   } else {
   // COMMAND PROCESSING --------------------------------------------------------------------------------
