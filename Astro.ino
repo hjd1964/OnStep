@@ -226,7 +226,7 @@ boolean CEquToEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1) 
   HA=HA+IH;
   Dec=Dec+ID;
 
-  // un-do, under the pole
+  // switch from under the pole coordinates
   if (Dec>90.0) { Dec=(90.0-Dec)+90; HA=HA-12; }
   if (Dec<-90.0) { Dec=(-90.0-Dec)-90.0; HA=HA-12; }
 
@@ -329,7 +329,8 @@ void CEquToTracRateCor() {
     
     // program the new rate as needed
     if (lastSiderealInterval!=newSiderealInterval) {
-      Timer1SetRate(newSiderealInterval/100);
+      SetSiderealClockRate(newSiderealInterval);
+      cli(); SiderealRate=newSiderealInterval/StepsPerSecond; sei();
       lastSiderealInterval=newSiderealInterval;
     }
   }
@@ -337,7 +338,7 @@ void CEquToTracRateCor() {
 
 // light weight altitude calculation, 16 calls to complete
 byte ac_step = 0;
-double ac_HA=0,ac_De=0, ac_Dec=0;
+double ac_HA=0,ac_De=0,ac_Dec=0;
 double ac_sindec,ac_cosdec,ac_cosha;
 double ac_sinalt;
 
