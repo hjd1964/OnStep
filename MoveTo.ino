@@ -7,7 +7,7 @@ void moveTo() {
   //                W   .   E
   // meridian flip, first phase.  only happens for GEM mounts
   if ((pierSide==PierSideFlipEW1) || (pierSide==PierSideFlipWE1)) {
-    
+
     // save destination
     cli(); 
     origTargetHA.fixed = targetHA.fixed;
