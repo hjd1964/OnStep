@@ -240,7 +240,7 @@ volatile boolean inBacklashDec=false;
 #ifdef MOUNT_TYPE_ALTAZM
 #define default_tracking_rate 0
 #else
-#define defualt_tracking_rate 1
+#define default_tracking_rate 1
 #endif
 volatile double  trackingTimerRateHA = default_tracking_rate;
 volatile double  pecTimerRateHA = 0.0;
