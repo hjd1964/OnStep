@@ -53,7 +53,8 @@
 // PEC sense, rising edge (default with PEC_SENSE_STATE HIGH, use LOW for falling edge) on pin 2 (ex. PEC_SENSE_ON) or threshold value on Analog 1; for optional PEC index, default=OFF
 // analog values range from 0 to 1023 which indicate voltages from 0-5VDC on the A1 pin, for example "PEC_SENSE 600" would detect an index when the voltage exceeds 2.92V
 // with either index detection method, once triggered 60s must expire before another detection can happen.  This gives time for the index magnet to pass by the detector before another cycle begins.
-// Note: Analog PEC index sense is not supported on the Teensy3.1  Ignored on Alt/Azm mounts.
+// Note: Analog PEC index sense is not supported on the Teensy3.1
+// Ignored on Alt/Azm mounts.
 #define PEC_SENSE_ON
 #define PEC_SENSE_STATE HIGH
 // switch close (to ground) on pin 3 for optional limit sense (stops gotos and/or tracking), default=OFF
