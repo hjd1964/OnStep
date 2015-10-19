@@ -41,7 +41,7 @@
 #define RESCUE_MODE_OFF
 
 // Mount type, default is _GEM (German Equatorial) other options are _FORK, _FORK_ALT.  _FORK switches off Meridian Flips after (1, 2 or 3 star) alignment is done.  _FORK_ALT disables Meridian Flips (1 star align.)
-// _ALTAZM will be for Alt/Azm mounted 'scopes, but isn't implemented yet.
+// _ALTAZM is for Alt/Azm mounted 'scopes (1 star align only.)
 #define MOUNT_TYPE_GEM
 
 // Experimental ST4 interface on pins 47, 49, 51, 53.  Pin 47 is RA- (West), Pin 49 is Dec- (South), Pin 51 is Dec+ (North), Pin 53 is RA+ (East.)  Teensy3.1 pins 24, 25, 26, 27.
@@ -53,7 +53,7 @@
 // PEC sense, rising edge (default with PEC_SENSE_STATE HIGH, use LOW for falling edge) on pin 2 (ex. PEC_SENSE_ON) or threshold value on Analog 1; for optional PEC index, default=OFF
 // analog values range from 0 to 1023 which indicate voltages from 0-5VDC on the A1 pin, for example "PEC_SENSE 600" would detect an index when the voltage exceeds 2.92V
 // with either index detection method, once triggered 60s must expire before another detection can happen.  This gives time for the index magnet to pass by the detector before another cycle begins.
-// Note: Analog PEC index sense is not supported on the Teensy3.1
+// Note: Analog PEC index sense is not supported on the Teensy3.1  Ignored on Alt/Azm mounts.
 #define PEC_SENSE_ON
 #define PEC_SENSE_STATE HIGH
 // switch close (to ground) on pin 3 for optional limit sense (stops gotos and/or tracking), default=OFF
@@ -65,6 +65,9 @@
 // _ON sets this to blink at 1 sec intervals when PPS is synced
 //  n sets this to dimly light a polar finder reticle, for example I use STATUS_LED2_PINS 250
 #define STATUS_LED2_PINS_OFF
+// lights reticule LED by sink to ground (pin 44), default=OFF.  Defaults to pin 9 on the Teensy3.1 (overrides STATUS_LED_PINS_ON if used)
+// RETICULE_LED_PINS n, where n=0 to 255 activates this feature and sets default brightness
+#define RETICULE_LED_PINS_OFF
 // optional +5V on pins 5 and 12 to Pololu or other stepper drivers without on-board 5V voltage regulators, default=OFF (Teensy3.1 Pins 5,11)
 #define POWER_SUPPLY_PINS_OFF
 // optional stepper driver Enable support is always on, just wire Enable to Pins 25 (HA) and 30 (Dec) and OnStep will pull these HIGH (Teensy3.1 Pins 16,21)
@@ -77,6 +80,7 @@
 
 // enables code to clean-up PEC readings after record (use PECprep or a spreadsheet to fix readings otherwise)
 // this cleans up any tracking rate variations that would be introduced by recording more guiding corrections to either the east or west, default=ON
+// Ignored on Alt/Azm mounts.
 #define PEC_CLEANUP_ON
 
 // optionally adjust tracking rate to compensate for atmospheric refraction, default=OFF (limited testing done)
@@ -118,28 +122,22 @@
                                      
 #define StepsPerSecond          80.0 // the steps per second sidereal rate = (19200/3600)*15 = 80 - OnStep can handle between 12 and 100 steps/second
                                      // StepsPerSecond doesn't need to be an integer
-                                     // StepsPerWormRotation (for PEC) needs to be evenly divisible by StepsPerSecond
+                                     // StepsPerWormRotation (for PEC) needs to be evenly divisible by StepsPerSecond.  Ignored on Alt/Azm mounts.
 
-#define StepsPerWormRotation  38400L // PEC, number of steps for a complete worm rotation (in RA), (StepsPerDegreeHA*360)/gear_reduction2 
-                                     // the EM10b has a worm-wheel with 144 teeth (19200*360)/144 = 48000
-                                     // According to this the EM10b needs 600 (seconds) of PEC buffer.  Since the transfer gears have a rather large effect on the periodic error
-                                     // I have two options 1. use 4x the 48000 = 192000 (2400 seconds.)  This is 4 complete rotations of the worm and 5 complete rotations of the transfer gear.
-                                     //                       I expect the results would be very good, but since PECPrep is limited to 1000S I don't bother.
-                                     //                    2. use 480 (seconds) of PEC buffer.  This is easier to program and keeps the PE at low levels
-                                     //                       so pretending we have 180 teeth (19200*360)/180 = 38400
+#define StepsPerWormRotation  38400L // PEC, number of steps for a complete worm rotation (in RA), (StepsPerDegreeHA*360)/gear_reduction2.  Ignored on Alt/Azm mounts.
 
-#define PECBufferSize           2400 // PEC, buffer size, max should be no more than 3384, your required buffer size >= StepsPerWormRotation/StepsPerSecond
+#define PECBufferSize           2400 // PEC, buffer size, max should be no more than 3384, your required buffer size >= StepsPerWormRotation/StepsPerSecond.  Ignored on Alt/Azm mounts.
                                      // for the most part this doesn't need to be changed, but adjust when needed.  824 seconds is the default
 
 #define REVERSE_HA_OFF               // reverse the direction of movement for the HA/RA axis, adjust as needed or reverse your wiring so things move in the right direction
 #define REVERSE_DEC_OFF              // reverse the direction of movement for the Dec axis (both reversed for my EM10b, both normal for G11)
 
-#define minutesPastMeridianE      60 // for goto's, how far past the meridian to allow before we do a flip (if on the East side of the pier) - one hour of RA is the default = 60
-#define minutesPastMeridianW      60 // as above, if on the West side of the pier.  If left alone, the mount will stop tracking when it hits the this limit
-#define underPoleLimit             9 // maximum allowed hour angle (+/-) under the celestial pole. OnStep will flip the mount and move the Dec. past 90 degrees (+/-) once past this limit
+#define minutesPastMeridianE      60 // for goto's, how far past the meridian to allow before we do a flip (if on the East side of the pier) - one hour of RA is the default = 60.  Ignored on Alt/Azm mounts.
+#define minutesPastMeridianW      60 // as above, if on the West side of the pier.  If left alone, the mount will stop tracking when it hits the this limit.  Ignored on Alt/Azm mounts.
+#define underPoleLimit             9 // maximum allowed hour angle (+/-) under the celestial pole. OnStep will flip the mount and move the Dec. past 90 degrees (+/-) once past this limit.  Ignored on Alt/Azm mounts.
                                      // to arrive at the location.  If left alone, the mount will stop tracking when it hits this limit.  Valid range is 7 to 11 hours
-#define minDec                   -91 // minimum allowed declination, default = -91 (off)
-#define maxDec                   +91 // maximum allowed declination, default =  91 (off)
+#define minDec                   -91 // minimum allowed declination, default = -91 (off)  Ignored on Alt/Azm mounts.
+#define maxDec                   +91 // maximum allowed declination, default =  91 (off)  Ignored on Alt/Azm mounts.
                                      // For example, a value of +80 would stop gotos/tracking near the north celestial pole.
                                      // For a Northern Hemisphere user, this would stop tracking when the mount is in the polar home position but
                                      // that can be easily worked around by doing an alignment once and saving a park position (assuming a 
