@@ -376,10 +376,18 @@ int    maxAlt;                                    // the maximum altitude, in de
 #define HAStepPORT PORTB   //
 
 // ST4 interface
+#ifdef ST4_ALTERNATE_PINS
+#define ST4RAw     47      // Pin 47 ST4 RA- West
+#define ST4DEs     43      // Pin 43 ST4 DE- South
+#define ST4DEn     45      // Pin 45 ST4 DE+ North
+#define ST4RAe     49      // Pin 49 ST4 RA+ East
+#endif
+#ifdef ST4_DEFAULT_PINS
 #define ST4RAw     47      // Pin 47 ST4 RA- West
 #define ST4DEs     49      // Pin 49 ST4 DE- South
 #define ST4DEn     51      // Pin 51 ST4 DE+ North
 #define ST4RAe     53      // Pin 53 ST4 RA+ East
+#endif
 
 #elif defined(__arm__) && defined(TEENSYDUINO)
 
