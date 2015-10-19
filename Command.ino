@@ -245,7 +245,7 @@ the pdCor  term is 1 in HA
 //         Returns: Nothing
 //  :B-#   Decrease Reticule Brightness
 //         Returns: Nothing
-      if ((command[0]=='B') && ((command[1]=='+') || command[1]=='-'))  {
+      if ((command[0]=='B') && ((command[1]=='+') || (command[1]=='-')))  {
 #ifdef RETICULE_LED_PINS
         if (command[1]=='-') reticuleBrightness+=8;  if (reticuleBrightness>255) reticuleBrightness=255;
         if (command[1]=='+') reticuleBrightness-=8;  if (reticuleBrightness<0)   reticuleBrightness=0;
@@ -709,7 +709,6 @@ the pdCor  term is 1 in HA
       } else commandError=true;
       
       } else
-#ifndef MOUNT_TYPE_ALTAZM
 //   $Q - PEC Control
 //  :$QZ+  Enable RA PEC compensation 
 //         Returns: nothing
@@ -726,6 +725,7 @@ the pdCor  term is 1 in HA
       if ((command[0]=='$') && (command[1]=='Q')) {
         if ((parameter[2]==0) && (parameter[0]=='Z')) {
           quietReply=true; 
+#ifndef MOUNT_TYPE_ALTAZM
           if ((parameter[1]=='+') && (trackingState==TrackingSidereal)) { if (PECrecorded) PECstatus=ReadyPlayPEC; } else
           if ((parameter[1]=='-') && (trackingState==TrackingSidereal)) { PECstatus=IgnorePEC; } else
           if ((parameter[1]=='/') && (trackingState==TrackingSidereal)) { PECstatus=ReadyRecordPEC; } else
@@ -751,11 +751,11 @@ the pdCor  term is 1 in HA
             // trigger recording of PEC buffer
             PECautoRecord=PECBufferSize;
           } else
+#endif
           // Status is one of "IpPrR" (I)gnore, get ready to (p)lay, (P)laying, get ready to (r)ecord, (R)ecording.  Or an optional (.) to indicate an index detect.
           if (parameter[1]=='?') { const char *PECstatusCh = PECStatusString; reply[0]=PECstatusCh[PECstatus]; reply[1]=0; reply[2]=0; if (PECindexDetected) { reply[1]='.'; PECindexDetected=false; } } else { quietReply=false; commandError=true; }
         } else commandError=true;
       } else
-#endif
 
 //   Q - Movement Commands
 //  :Q#    Halt all slews, stops goto
@@ -1025,6 +1025,8 @@ the pdCor  term is 1 in HA
 //         High - RA/Dec/etc. displays and accepts HH:MM:SS sDD*MM:SS
 //         Returns Nothing
      if ((command[0]=='U') && (command[1]==0)) { highPrecision=!highPrecision; quietReply=true; } else
+
+#ifndef MOUNT_TYPE_ALTAZM
 //   V - PEC Readout
 //  :VRNNNN#
 //         Read out RA PEC Table Entry
@@ -1149,6 +1151,7 @@ the pdCor  term is 1 in HA
          quietReply=true;
        }
      } else
+#endif
 
 //   W - Site Select/Site get
 //  :Wn#
