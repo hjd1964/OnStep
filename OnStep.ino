@@ -148,6 +148,7 @@
  *                                       Improvements to library catalogs... added ability to store and recall catalog name records, added ability to delete individual records.
  * 08-18-2015          1.0b22            PEC improvements, automatic handling of differing axis reductions.  HA limits and meridian flip now account for IH index error.
  * 09-01-2015          1.0b23            Implemented acceleration for guide commands.  Adjusted rates so that R8(RS) are 1/2x MaxRate and R9 is 1x MaxRate.
+ * 10-18-2015          1.0b24            Alt/Azm mount support.  Improved refraction rate tracking.
  *
  *
  * Author: Howard Dutton
@@ -170,8 +171,8 @@
 #include "FPoint.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "09 01 15"
-#define FirmwareNumber "1.0b23"
+#define FirmwareDate   "10 18 15"
+#define FirmwareNumber "1.0b24"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -204,12 +205,10 @@ long masterSiderealInterval = siderealInterval;
                                      // this is stored in EEPROM which is updated/adjusted with the ":T+#" and ":T-#" commands
                                      // a higher number here means a longer count which slows down the sidereal clock
 
-double HzCf = 16000000.0/60.0;       // conversion factor to go to/from Hz for tracking rate commands
+double HzCf = 16000000.0/60.0;       // conversion factor to go to/from Hz for sidereal interval
 
 volatile long SiderealRate;          // based on the siderealInterval, this is the time between steps for sidereal tracking
 volatile long TakeupRate;            // this is the takeup rate for synchronizing the target and actual positions when needed
-
-boolean customRateActive=true;       // automatically modify the siderealInterval to compensate for atmospheric refraction
 
 // PPS (GPS)
 volatile unsigned long PPSlastMicroS = 1000000UL;
@@ -218,8 +217,14 @@ volatile double PPSrateRatio = 1.0;
 volatile boolean PPSsynced = false;
 
 // Tracking and rate control
+#ifdef MOUNT_TYPE_ALTAZM
+#define refraction_enable false      // refraction isn't allowed in Alt/Azm mode
+#else
+#define refraction_enable true       // refraction allowed
+#endif
+
 #ifdef TRACK_REFRACTION_RATE_DEFAULT_ON
-boolean refraction = true;           // track at the refraction rate for the area of the sky
+boolean refraction = refraction_enable;
 #else
 boolean refraction = false;
 #endif
@@ -232,9 +237,15 @@ volatile long    timerRateDec = 0;
 volatile long    timerRateBacklashDec = 0;
 volatile boolean inBacklashDec=false;
 
-volatile double  pecTimerRateHA = 0;
-volatile double  guideTimerRateHA = 0;
-volatile double  guideTimerRateDec = 0;
+#ifdef MOUNT_TYPE_ALTAZM
+#define default_tracking_rate 0
+#else
+#define defualt_tracking_rate 1
+#endif
+volatile double  trackingTimerRateHA = default_tracking_rate;
+volatile double  pecTimerRateHA = 0.0;
+volatile double  guideTimerRateHA = 0.0;
+volatile double  guideTimerRateDec = 0.0;
 volatile double  timerRateRatio = ((double)StepsPerDegreeHA/(double)StepsPerDegreeDec);
 volatile boolean useTimerRateRatio = (StepsPerDegreeHA!=StepsPerDegreeDec);
 #define SecondsPerWormRotation  ((long)(StepsPerWormRotation/StepsPerSecond))
@@ -464,7 +475,18 @@ boolean abortSlew        = false;
 #define MeridianFlipNever  0
 #define MeridianFlipAlign  1
 #define MeridianFlipAlways 2
+#ifdef MOUNT_TYPE_GEM
 byte meridianFlip = MeridianFlipAlways;
+#endif
+#ifdef MOUNT_TYPE_FORK
+byte meridianFlip = MeridianFlipNever;
+#endif
+#ifdef MOUNT_TYPE_FORK_ALT
+byte meridianFlip = MeridianFlipAlign;
+#endif
+#ifdef MOUNT_TYPE_ALTAZM
+byte meridianFlip = MeridianFlipNever;
+#endif
 
 #define AlignNone        0
 #define AlignOneStar1    1
@@ -548,7 +570,8 @@ long   IHS               = 0;
 double ID                = 0;
 
 // tracking and PEC, fractional steps
-fixed_t fstep;
+fixed_t fstepHA;
+fixed_t fstepDec;
 fixed_t pstep;
 
 // guide command
@@ -580,6 +603,17 @@ fixed_t amountGuideHA;
 long    guideHA           = 0;
 fixed_t amountGuideDec;
 long    guideDec          = 0;
+
+// Reticule control
+#ifdef RETICULE_LED_PINS
+int reticuleBrightness=RETICULE_LED_PINS;
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+#define reticulePin 44
+#endif
+#if defined(__arm__) && defined(TEENSYDUINO)
+#define reticulePin 9
+#endif
+#endif
 
 // PEC control
 #define PECStatusString  "IpPrR"
@@ -699,7 +733,8 @@ void setup() {
 // initialize some fixed-point values
   amountGuideHA.fixed=0;
   amountGuideDec.fixed=0;
-  fstep.fixed=0;
+  fstepHA.fixed=0;
+  fstepDec.fixed=0;
   pstep.fixed=0;
   origTargetHA.fixed = 0;
   targetHA.part.m = 90L*StepsPerDegreeHA;
@@ -707,7 +742,7 @@ void setup() {
   targetDec.part.m = 90L*StepsPerDegreeDec;
   targetDec.part.f = 0;
 
-  fstep.fixed=doubleToFixed(StepsPerSecond/100.0);
+  fstepHA.fixed=doubleToFixed(StepsPerSecond/100.0);
   
 // initialize the stepper control pins RA and Dec
   pinMode(HAStepPin, OUTPUT);
@@ -733,6 +768,21 @@ void setup() {
   SET(LEDposPORT, LEDposBit);
   analogWrite(LEDnegPin,STATUS_LED_PINS);
   LED_ON=true;
+#endif
+
+// light reticule LED
+#ifdef RETICULE_LED_PINS
+// make sure the status LED isn't defined
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+  #ifdef STATUS_LED_PINS_ON
+    #undef STATUS_LED_PINS_ON
+  #endif
+  #ifdef STATUS_LED_PINS
+    #undef STATUS_LED_PINS
+  #endif
+#endif
+  pinMode(reticulePin, OUTPUT);
+  analogWrite(reticulePin,reticuleBrightness);
 #endif
 
 // light second status LED (provides just GND)
@@ -914,7 +964,12 @@ void setup() {
   // get the site information, if a GPS were attached we would use that here instead
   currentSite=EEPROM.read(EE_currentSite);  if (currentSite>3) currentSite=0; // site index is valid?
   float f; EEPROM_readQuad(EE_sites+(currentSite)*25+0,(byte*)&f); latitude=f;
+
+#ifdef MOUNT_TYPE_ALTAZM
+  celestialPoleDec=latitude;
+#else
   if (latitude<0) celestialPoleDec=-90L; else celestialPoleDec=90L;
+#endif
   cosLat=cos(latitude/Rad);
   sinLat=sin(latitude/Rad);
   if (celestialPoleDec>0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
@@ -1051,6 +1106,7 @@ void loop() {
     Guide();
   }
 
+#ifndef MOUNT_TYPE_ALTAZM
   // PERIODIC ERROR CORRECTION -------------------------------------------------------------------------
   if ((trackingState==TrackingSidereal) && (!((guideDirHA || guideDirDec) && (activeGuideRate>GuideRate1x)))) { 
     // only active while sidereal tracking with a guide rate that makes sense
@@ -1061,17 +1117,19 @@ void loop() {
     PECautoRecord--;
     EEPROM.update(EE_PECindex+PECautoRecord,PEC_buffer[PECautoRecord]);
   }
+#endif
 
   // SIDEREAL TRACKING ---------------------------------------------------------------------------------
   cli(); long tempLst=lst; sei();
-  if ((tempLst!=siderealTimer) && (!(guideDirHA && (activeGuideRate>GuideRate1x)))) {
+  if (tempLst!=siderealTimer) {
     siderealTimer=tempLst;
     
     // only active while sidereal tracking with a guide rate that makes sense
-    if ((trackingState==TrackingSidereal) ) {
+    if ((trackingState==TrackingSidereal) && (!(guideDirHA && (activeGuideRate>GuideRate1x)))) {
       // apply the Tracking, Guiding, and PEC
       cli();
-      targetHA.fixed+=fstep.fixed;
+      targetHA.fixed+=fstepHA.fixed;
+      targetDec.fixed+=fstepDec.fixed;
       if (pecTimerRateHA!=0) targetHA.fixed+=pstep.fixed;
       sei();
 
@@ -1082,13 +1140,28 @@ void loop() {
 
     // keeps the target where it's supposed to be while doing gotos
     if (trackingState==TrackingMoveTo) {
-      if (lastTrackingState==TrackingSidereal) { origTargetHA.fixed+=fstep.fixed; cli(); targetHA.fixed+=fstep.fixed; sei();  }
+      if (lastTrackingState==TrackingSidereal) { 
+        origTargetHA.fixed+=fstepHA.fixed;
+        // origTargetDec isn't used in Alt/Azm mode
+        cli();
+        targetHA.fixed+=fstepHA.fixed;
+        targetDec.fixed+=fstepDec.fixed;
+        sei();  
+      }
       moveTo();
     }
 
     // figure out the current Alititude
-    if (lst%5==0) do_alt_calc(); // call 20x a second to spread out the overhead
-  }
+    if (lst%3==0) do_fastalt_calc();
+
+#ifdef MOUNT_TYPE_ALTAZM
+    // figure out the current Alt/Azm tracking rates
+    if (lst%3!=0) do_altAzmRate_calc();
+#else
+    // figure out the current refraction compensated tracking rate
+    if (refraction && (lst%3!=0)) do_refractionRate_calc();
+#endif
+}
 
   // HOUSEKEEPING --------------------------------------------------------------------------------------
   // timer... falls in once a second, keeps the universal time clock ticking,
@@ -1096,10 +1169,12 @@ void loop() {
   unsigned long m=millis();
   if ((long)(m-(clockTimer+999UL))>0) {
     clockTimer=m;
-    
+
     // for testing, average steps per second
-    //debugv1=(debugv1*39+(targetHA.part.m*1000-lastTargetHA))/40;
-    //lastTargetHA=targetHA.part.m*1000;
+    if (debugv1>100000) debugv1=100000; if (debugv1<0) debugv1=0;
+    
+    debugv1=(debugv1*19+(targetHA.part.m*1000-lastTargetHA))/20;
+    lastTargetHA=targetHA.part.m*1000;
     
     // update the UT1 CLOCK
     // this clock doesn't rollover (at 24 hours) since that would cause date confusion
@@ -1114,6 +1189,14 @@ void loop() {
     if (trackingState==TrackingSidereal) PECav = analogRead(1);
     #endif
 
+#ifdef MOUNT_TYPE_ALTAZM
+    // adjust tracking rate for Alt/Azm mounts
+    SetDeltaTrackingRate();
+#else
+    // adjust tracking rate for refraction
+    if (refraction) SetDeltaTrackingRate();
+#endif
+
     #ifdef PPS_SENSE_ON
     // update clock
     if (trackingState==TrackingSidereal) {
@@ -1125,10 +1208,8 @@ void loop() {
       if (PPSsynced) { if (LED2_ON) { SET(LEDneg2PORT, LEDneg2Bit); LED2_ON=false; } else { CLR(LEDneg2PORT, LEDneg2Bit); LED2_ON=true; } } else { SET(LEDneg2PORT, LEDneg2Bit); LED2_ON=false; } // indicate PPS
       #endif
     }
-    // adjust the tracking rate on-the-fly to compensate for refraction
-    if (refraction) CEquToTracRateCor(); else { SetSiderealClockRate(siderealInterval); cli(); SiderealRate=siderealInterval/StepsPerSecond; sei(); }
-    #else
-    if (refraction) CEquToTracRateCor();
+    SetSiderealClockRate(siderealInterval); 
+    cli(); SiderealRate=siderealInterval/StepsPerSecond; sei();
     #endif
 
     #ifdef STATUS_LED_PINS_ON
@@ -1144,10 +1225,14 @@ void loop() {
       if (pierSide==PierSideWest) { cli(); if (posHA+IHS>(minutesPastMeridianW*StepsPerDegreeHA/4L)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  } sei(); }
       if (pierSide==PierSideEast) { cli(); if (posHA+IHS>(underPoleLimit*StepsPerDegreeHA*15L))      { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  } sei(); }
     } else {
+#ifndef MOUNT_TYPE_ALTAZM
       // when Fork mounted, ignore pierSide and just stop the mount if it passes the underPoleLimit
       cli(); if (posHA>(underPoleLimit*StepsPerDegreeHA*15L)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
+#endif      
     }
+#ifndef MOUNT_TYPE_ALTAZM
     if ((getApproxDec()<minDec) || (getApproxDec()>maxDec)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
+#endif      
 
     // support for limit switch(es)
     #ifdef LIMIT_SENSE_ON  
