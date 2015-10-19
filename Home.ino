@@ -8,13 +8,12 @@ boolean goHome() {
   if (guideDirHA || guideDirDec)                        return false;  // fail, moving to home not allowed while guiding
 
   cli();
-  startHA =posHA;
-  startDec=posDec;
   if (pierSide==PierSideWest) targetHA.part.m=-celestialPoleHA*StepsPerDegreeHA; else targetHA.part.m=celestialPoleHA*StepsPerDegreeHA; targetHA.part.f=0;
   targetDec.part.m=celestialPoleDec*StepsPerDegreeDec; targetDec.part.f=0;
+  startHA =posHA;
+  startDec=posDec;
   sei();
     
-//  pierSide         = PierSideNone;
   abortTrackingState= trackingState;
   lastTrackingState = TrackingNone;
     
@@ -50,7 +49,7 @@ boolean setHome() {
   IHS                 = 0;
   ID                  = 0;
   
-  // reset Meridian Flip control
+  // reset meridian flip control
   #ifdef MOUNT_TYPE_GEM
   meridianFlip = MeridianFlipAlways;
   #endif
@@ -60,7 +59,10 @@ boolean setHome() {
   #ifdef MOUNT_TYPE_FORK_ALT
   meridianFlip = MeridianFlipNever;
   #endif
-  
+  #ifdef MOUNT_TYPE_ALTAZM
+  meridianFlip = MeridianFlipNever;
+  #endif
+
   // where we are
   homeMount           = false;
   atHome              = true;
@@ -91,8 +93,8 @@ boolean setHome() {
   #endif
 
   // the polar home position
-  startHA             = celestialPoleHA*StepsPerDegreeHA;
-  startDec            = celestialPoleDec*StepsPerDegreeDec;
+  startHA  = celestialPoleHA*StepsPerDegreeHA;
+  startDec = celestialPoleDec*StepsPerDegreeDec;
 
   // clear pulse-guiding state
   guideDurationHA     = 0;
