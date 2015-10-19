@@ -10,7 +10,19 @@ boolean syncEqu(double RA, double Dec) {
 
   // correct for polar misalignment only by clearing the index offsets
   IH=0; ID=0;
+
+#ifdef MOUNT_TYPE_ALTAZM
+  double Alt,Azm;
+  EquToHor(latitude,HA,Dec,&Dec,&HA); // convert from HA/Dec to Alt/Azm
+  if (HA>180.0) HA-=360.0;
+  HA/=15.0;
+  // corrected horizon to instrument horizon
+  HA=HA-IH;
+  Dec=Dec-ID;
+#else
   EquToCEqu(latitude,HA,Dec,&HA,&Dec);
+#endif
+
   
 #ifdef RESCUE_MODE_ON
   // allows one to quickly set where OnStep thinks the 'scope is to anywhere in the western sky
@@ -40,16 +52,27 @@ boolean syncEqu(double RA, double Dec) {
 #endif
 }
 
-// this returns the telescopes HA and Dec
+// this returns the telescopes HA and Dec (index corrected for Alt/Azm)
 void getHADec(double *HA, double *Dec) {
   cli();
   long h=posHA;
   long d=posDec;
   sei();
-  // get the hour angle
+  // get the hour angle (or Azm)
   *HA=(double)h/(double)(StepsPerDegreeHA*15L);
-  // get the declination
+  // get the declination (or Alt)
   *Dec=(double)d/(double)StepsPerDegreeDec; 
+
+#ifdef MOUNT_TYPE_ALTAZM
+  // instrument to corrected horizon
+  *HA=*HA+IH;
+  *Dec=*Dec+ID;
+
+  // hours to degrees (Azm)
+  *HA=*HA*15L;
+  
+  HorToEqu(latitude,*Dec,*HA,HA,Dec); // convert from Alt/Azm to HA/Dec
+#endif
 }
 
 // gets the telescopes current RA and Dec, set returnHA to true for Horizon Angle instead of RA
@@ -69,11 +92,13 @@ boolean getEqu(double *RA, double *Dec, boolean returnHA, boolean fast) {
     return true;
   }
   
-  // get the uncorrected HA and Dec
+  // get the HA and Dec (already index corrected on AltAzm)
   getHADec(&lastGetEquHA,Dec);
   
+#ifndef MOUNT_TYPE_ALTAZM
   // correct for under the pole, polar misalignment, and index offsets
   CEquToEqu(latitude,lastGetEquHA,*Dec,&lastGetEquHA,Dec);
+#endif
 
   lastGetEquLST=LST;
   lastGetEquDec=*Dec;
@@ -88,12 +113,14 @@ boolean getEqu(double *RA, double *Dec, boolean returnHA, boolean fast) {
 boolean getApproxEqu(double *RA, double *Dec, boolean returnHA) {
   double HA;
   
-  // get the uncorrected HA and Dec
+  // get the HA and Dec (already index corrected on AltAzm)
   getHADec(&HA,Dec);
   
-  // remove the index offsets
+#ifndef MOUNT_TYPE_ALTAZM
+  // instrument to corrected equatorial
   HA=HA+IH;
   *Dec=*Dec+ID;
+#endif
   
   // un-do, under the pole
   if (*Dec>90.0) { *Dec=(90.0-*Dec)+90; HA=HA-12; }
@@ -136,6 +163,17 @@ byte goToEqu(double RA, double Dec) {
   if (trackingState==TrackingMoveTo) { abortSlew=true;  return 5; } // fail, prior goto cancelled
   if (guideDirHA || guideDirDec)                        return 7;   // fail, unspecified error
 
+#ifdef MOUNT_TYPE_ALTAZM
+  EquToHor(latitude,HA,Dec,&Dec,&HA);
+  if (HA>180.0) HA-=360.0;
+  // corrected to instrument horizon
+  HA=HA-IH*15L;
+  Dec=Dec-ID;
+  long HA1=HA*(double)StepsPerDegreeHA;
+  long DEC1=Dec*(double)StepsPerDegreeDec;
+  long HA2=HA1;
+  long DEC2=DEC1;
+#else
   // correct for polar offset, refraction, coordinate systems, operation past pole, etc. as required
   double ha,dec;
   if (!EquToCEqu(latitude,HA,Dec,&ha,&dec)) return 2; // fail, coordinates invalid
@@ -148,6 +186,7 @@ byte goToEqu(double RA, double Dec) {
   long HA2=ha*(double)(StepsPerDegreeHA*15L);
   long DEC2=dec*(double)StepsPerDegreeDec;
   pierSide=p;
+#endif
 
   // goto function takes HA and Dec in steps
   // when in align mode, force pier side
@@ -227,7 +266,7 @@ byte goTo(long thisTargetHA, long thisTargetDec, long altTargetHA, long altTarge
   } else {
     if (pierSide==PierSideNone) {
         // always on the "east" side of pier - we're in the western sky and the HA's are positive
-        // this is the default in the polar-home position
+        // this is the default in the polar-home position and also for MOUNT_TYPE_FORK and MOUNT_TYPE_ALTAZM.  MOUNT_TYPE_FORK_ALT ends up pierSideEast, but flips are allowed until aligned.
         pierSide=PierSideEast;
         DecDir = DecDirEInit;
     }
@@ -235,7 +274,6 @@ byte goTo(long thisTargetHA, long thisTargetDec, long altTargetHA, long altTarge
   
   lastTrackingState=trackingState;
   trackingState=TrackingMoveTo;
-  SetSiderealClockRate(siderealInterval);
 
   cli();
   startHA =posHA;
