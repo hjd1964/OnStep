@@ -240,6 +240,20 @@ the pdCor  term is 1 in HA
         } else commandError=true;
       } else
       
+//   B - Reticule/Accessory Control
+//  :B+#   Increase reticule Brightness
+//         Returns: Nothing
+//  :B-#   Decrease Reticule Brightness
+//         Returns: Nothing
+      if ((command[0]=='B') && ((command[1]=='+') || command[1]=='-'))  {
+#ifdef RETICULE_LED_PINS
+        if (command[1]=='-') reticuleBrightness+=8;  if (reticuleBrightness>255) reticuleBrightness=255;
+        if (command[1]=='+') reticuleBrightness-=8;  if (reticuleBrightness<0)   reticuleBrightness=0;
+        analogWrite(reticulePin,reticuleBrightness);
+        quietReply=true;
+#endif
+      } else 
+
 //   C - Sync Control
 //  :CS#   Synchonize the telescope with the current right ascension and declination coordinates
 //         Returns: Nothing
@@ -343,11 +357,18 @@ the pdCor  term is 1 in HA
 //         Returns: dd.ddddd# (OnStep returns more decimal places than LX200 standard)
 //         Returns the tracking rate if siderealTracking, 0.0 otherwise
       if (command[1]=='T')  {
-        if (trackingState==TrackingSidereal) f=(60.0/(siderealInterval/HzCf))*60.0; else f=0.0;
+        if (trackingState==TrackingSidereal) {
+#ifdef MOUNT_TYPE_ALTAZM
+          f=1.00273790935*60.0; 
+#else
+          f=(trackingTimerRateHA*1.00273790935)*60.0; 
+#endif
+        }
+        else f=0.0;
         char temp[10];
         dtostrf(f,0,5,temp);
         strcpy(reply,temp);
-        quietReply=true; 
+        quietReply=true;
       } else 
 //  :Gt#   Get Current Site Latitude
 //         Returns: sDD*MM#
@@ -412,10 +433,16 @@ the pdCor  term is 1 in HA
           if (parameter[0]=='F') { // Fn: Debug
             long temp;
             switch (parameter[1]) {
-//              case '0': cli(); temp=(long)(posHA-((long)targetHA.part.m+PEC_HA)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;  // Debug0, true vs. target RA position          
-              case '0': cli(); temp=(long)(posDec-((long)targetDec.part.m)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;  // Debug0, true vs. target RA position          
-//              case '1': sprintf(reply,"%ld",(long)(debugv1/1.00273790935)); quietReply=true; break;                                              // Debug1, RA tracking rate
-              case '1': cli(); sprintf(reply,"%ld",(long)(posDec)); sei(); quietReply=true; break;                                              // Debug1, RA tracking rate
+              case '0': cli(); temp=(long)(posHA-((long)targetHA.part.m+PEC_HA)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;  // Debug0, true vs. target RA position
+              case '1': cli(); temp=(long)(posDec-((long)targetDec.part.m)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;       // Debug1, true vs. target Dec position
+              case '2': sprintf(reply,"%ld",(long)((debugv1/53333.3333333333)*15000)); quietReply=true; break;                               // Debug2, RA tracking rate
+              case '3': sprintf(reply,"%ld",(long)(az_deltaH*1000.0*1.00273790935)); quietReply=true; break;                                 // Debug3, RA refraction tracking rate
+              case '4': sprintf(reply,"%ld",(long)(az_deltaD*1000.0*1.00273790935)); quietReply=true; break;                                 // Debug4, Dec refraction tracking rate
+              case '5': sprintf(reply,"%ld",(long)(ZenithTrackingRate()*1000.0*1.00273790935)); quietReply=true; break;                      // Debug5, Alt RA refraction tracking rate
+              case '6': cli(); temp=(long)(targetHA.part.m);  sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                      // Debug6, HA target position
+              case '7': cli(); temp=(long)(targetDec.part.m); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                      // Debug7, Dec target position
+              case '8': cli(); temp=(long)(posHA);     sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                             // Debug8, HA motor position
+              case '9': cli(); temp=(long)(posDec);    sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                             // Debug9, Dec motor position
             }
           } else commandError=true;
         } else commandError=true;
@@ -434,7 +461,7 @@ the pdCor  term is 1 in HA
       if (command[1]=='F')  { setHome(); quietReply=true; } else 
 //  :hC#   Moves telescope to the home position
 //         Returns: Nothing
-      if (command[1]=='C')  { goHome(); quietReply=true; } else 
+      if (command[1]=='C')  {  goHome(); quietReply=true; } else 
 //  :hP#   Goto the Park Position
 //         Returns: Nothing
       if (command[1]=='P')  { if (park()) commandError=true; } else 
@@ -682,6 +709,7 @@ the pdCor  term is 1 in HA
       } else commandError=true;
       
       } else
+#ifndef MOUNT_TYPE_ALTAZM
 //   $Q - PEC Control
 //  :$QZ+  Enable RA PEC compensation 
 //         Returns: nothing
@@ -727,6 +755,7 @@ the pdCor  term is 1 in HA
           if (parameter[1]=='?') { const char *PECstatusCh = PECStatusString; reply[0]=PECstatusCh[PECstatus]; reply[1]=0; reply[2]=0; if (PECindexDetected) { reply[1]='.'; PECindexDetected=false; } } else { quietReply=false; commandError=true; }
         } else commandError=true;
       } else
+#endif
 
 //   Q - Movement Commands
 //  :Q#    Halt all slews, stops goto
@@ -892,7 +921,11 @@ the pdCor  term is 1 in HA
         i=highPrecision; highPrecision=false; 
         if (!dmsToDouble(&latitude,parameter,true)) { commandError=true; } else {
           float f=latitude; EEPROM_writeQuad(100+(currentSite)*25+0,(byte*)&f);
+#ifdef MOUNT_TYPE_ALTAZM
+          celestialPoleDec=latitude;
+#else
           if (latitude<0) celestialPoleDec=-90L; else celestialPoleDec=90L;
+#endif
           cosLat=cos(latitude/Rad);
           sinLat=sin(latitude/Rad);
           if (celestialPoleDec>0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
@@ -909,9 +942,7 @@ the pdCor  term is 1 in HA
             if (abs(f)<0.1) { 
               trackingState = TrackingNone; 
             } else {
-              siderealInterval=HzCf*((60.0/f)*60.0);
-              EEPROM_writeQuad(EE_siderealInterval,(byte*)&siderealInterval);
-              SetSiderealClockRate(siderealInterval);
+              trackingTimerRateHA=(f/60.0)/1.00273790935;
             }
           } else commandError=true;
         } else commandError=true;
@@ -952,36 +983,40 @@ the pdCor  term is 1 in HA
       commandError=true;
       } else 
 //   T - Tracking Commands
-//  :T+#   Track faster by 0.1 Hertz (I use a fifth of the LX200 standard, stored in EEPROM)
-//  :T-#   Track slower by 0.1 Hertz (stored in EEPROM)
-//  :TS#   Track rage solar
+//  :T+#   Master sidereal clock faster by 0.1 Hertz (I use a fifth of the LX200 standard, stored in EEPROM)
+//  :T-#   Master sidereal clock slower by 0.1 Hertz (stored in EEPROM)
+//  :TS#   Track rate solar
 //  :TL#   Track rate lunar
-//  :TQ#   Track rate custom (stored in EEPROM)
-//  :TR#   Track rate reset custom (to calculated sidereal rate, stored in EEPROM)
+//  :TQ#   Track rate sidereal
+//  :TR#   Master sidereal clock reset (to calculated sidereal rate, stored in EEPROM)
 //  :TK#   Track rate king
 //  :Te#   Tracking enable  (OnStep only, replies 0/1)
 //  :Td#   Tracking disable (OnStep only, replies 0/1)
 //  :Tr#   Track refraction enable  (OnStep only, replies 0/1)
 //  :Tn#   Track refraction disable (OnStep only, replies 0/1)
 //         Returns: Nothing
+
      if (command[0]=='T') {
        if (command[1]=='+') { siderealInterval-=HzCf*(0.02); quietReply=true; } else
        if (command[1]=='-') { siderealInterval+=HzCf*(0.02); quietReply=true; } else
-       if (command[1]=='S') { siderealInterval =HzCf*(60.0); customRateActive=false; quietReply=true; } else                       // solar tracking rate
-       if (command[1]=='L') { siderealInterval =HzCf*((60.0/57.9)*60.0); customRateActive=false; quietReply=true; } else           // lunar tracking rate
-       if (command[1]=='Q') { EEPROM_readQuad(EE_siderealInterval,(byte*)&siderealInterval); customRateActive=true; quietReply=true; } else  // custom tracking rate
-       if (command[1]=='R') { siderealInterval =HzCf*((60.0/60.16427479)*60.0); EEPROM_writeQuad(EE_siderealInterval,(byte*)&siderealInterval); customRateActive=true; quietReply=true; } else // default tracking rate
-       if (command[1]=='K') { siderealInterval =HzCf*((60.0/60.136)*60.0); customRateActive=false; quietReply=true; } else         // king tracking rate
+       if (command[1]=='S') { SetTrackingRate(0.99726956632); quietReply=true; } else                        // solar tracking rate 60Hz
+       if (command[1]=='L') { SetTrackingRate(0.96236513150); quietReply=true; } else                        // lunar tracking rate 57.9Hz
+       if (command[1]=='Q') { SetTrackingRate(default_tracking_rate); quietReply=true; } else                // sidereal tracking rate
+       if (command[1]=='R') { siderealInterval=15956313L; quietReply=true; } else                            // reset master sidereal clock interval
+       if (command[1]=='K') { SetTrackingRate(0.99953004401); quietReply=true; } else                        // king tracking rate 60.136Hz
        if ((command[1]=='e') && ((trackingState==TrackingSidereal) || (trackingState==TrackingNone))) trackingState=TrackingSidereal; else
        if ((command[1]=='d') && ((trackingState==TrackingSidereal) || (trackingState==TrackingNone))) trackingState=TrackingNone; else
-       if ((command[1]=='r') && (!refraction)) refraction=true; else
-       if ((command[1]=='n') && (refraction)) refraction=false; else
+       if (command[1]=='r') { refraction=refraction_enable;  SetTrackingRate(default_tracking_rate); } else  // turn refraction tracking on, defaults to base sidereal tracking rate
+       if (command[1]=='n') { refraction=false; SetTrackingRate(default_tracking_rate); } else               // turn refraction off, sidereal tracking rate resumes
          commandError=true;
-       // Only burn the new rate if changing the custom tracking rate 
-       if ((customRateActive) && (!commandError) && ((command[1]=='+') || (command[1]=='-'))) EEPROM_writeQuad(EE_siderealInterval,(byte*)&siderealInterval);
 
-       SetSiderealClockRate(siderealInterval);
-       cli(); SiderealRate=siderealInterval/StepsPerSecond; sei();
+       // Only burn the new rate if changing the sidereal interval
+       if ((!commandError) && ((command[1]=='+') || (command[1]=='-') || (command[1]=='R'))) {
+         EEPROM_writeQuad(EE_siderealInterval,(byte*)&siderealInterval);
+         SetSiderealClockRate(siderealInterval);
+         cli(); SiderealRate=siderealInterval/StepsPerSecond; sei();
+       }
+
      } else
      
 //   U - Precision Toggle
@@ -1124,7 +1159,11 @@ the pdCor  term is 1 in HA
           currentSite=command[1]-'0'; EEPROM.update(EE_currentSite,currentSite); quietReply=true;
           float f; 
           EEPROM_readQuad(EE_sites+(currentSite*25+0),(byte*)&f); latitude=f;
+#ifdef MOUNT_TYPE_ALTAZM
+          celestialPoleDec=latitude;
+#else
           if (latitude<0) celestialPoleDec=-90L; else celestialPoleDec=90L;
+#endif
           cosLat=cos(latitude/Rad);
           sinLat=sin(latitude/Rad);
           if (celestialPoleDec>0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
@@ -1179,7 +1218,6 @@ the pdCor  term is 1 in HA
 boolean buildCommand(char c) {
   // (chr)6 is a special status command for the LX200 protocol
   if ((c==(char)6) && (bufferPtr_serial_zero==0)) {
-//    Serial_print("G#");
     #ifdef MOUNT_TYPE_ALTAZM
     Serial_print("A");
     #else
@@ -1232,7 +1270,6 @@ boolean clearCommand_serial_zero() {
 boolean buildCommand_serial_one(char c) {
   // (chr)6 is a special status command for the LX200 protocol
   if ((c==(char)6) && (bufferPtr_serial_zero==0)) {
-//    Serial1_print("G#");
     #ifdef MOUNT_TYPE_ALTAZM
     Serial_print("A");
     #else
