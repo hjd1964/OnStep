@@ -922,7 +922,7 @@ the pdCor  term is 1 in HA
         if (!dmsToDouble(&latitude,parameter,true)) { commandError=true; } else {
           float f=latitude; EEPROM_writeQuad(100+(currentSite)*25+0,(byte*)&f);
 #ifdef MOUNT_TYPE_ALTAZM
-          celestialPoleDec=latitude;
+          celestialPoleDec=fabs(latitude);
 #else
           if (latitude<0) celestialPoleDec=-90L; else celestialPoleDec=90L;
 #endif
