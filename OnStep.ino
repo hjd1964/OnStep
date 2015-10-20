@@ -975,6 +975,7 @@ void setup() {
 
 #ifdef MOUNT_TYPE_ALTAZM
   celestialPoleDec=fabs(latitude);
+  if (latitude<0) celestialPoleHA=180L; else celestialPoleHA=0L;
 #else
   if (latitude<0) celestialPoleDec=-90L; else celestialPoleDec=90L;
 #endif
