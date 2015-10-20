@@ -26,6 +26,8 @@ boolean goHome() {
 // sets telescope home position; user manually moves to Hour Angle 90 and Declination 90 (CWD position),
 // then the first gotoEqu will set the pier side and turn on tracking
 boolean setHome() {
+  if (trackingState==TrackingMoveTo) return false;  // fail, forcing home not allowed during a move
+
   // default values for state variables
   pierSide            = PierSideNone;
   dirDec              = 1;
