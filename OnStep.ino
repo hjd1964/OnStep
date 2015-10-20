@@ -974,7 +974,7 @@ void setup() {
   float f; EEPROM_readQuad(EE_sites+(currentSite)*25+0,(byte*)&f); latitude=f;
 
 #ifdef MOUNT_TYPE_ALTAZM
-  celestialPoleDec=latitude;
+  celestialPoleDec=fabs(latitude);
 #else
   if (latitude<0) celestialPoleDec=-90L; else celestialPoleDec=90L;
 #endif
