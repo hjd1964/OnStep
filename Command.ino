@@ -250,8 +250,8 @@ the pdCor  term is 1 in HA
         if (command[1]=='-') reticuleBrightness+=8;  if (reticuleBrightness>255) reticuleBrightness=255;
         if (command[1]=='+') reticuleBrightness-=8;  if (reticuleBrightness<0)   reticuleBrightness=0;
         analogWrite(reticulePin,reticuleBrightness);
-        quietReply=true;
 #endif
+        quietReply=true;
       } else 
 
 //   C - Sync Control
