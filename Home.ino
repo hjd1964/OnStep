@@ -99,8 +99,10 @@ boolean setHome() {
   startDec = celestialPoleDec*StepsPerDegreeDec;
 
   // clear pulse-guiding state
+  guideDirHA          = 0;
   guideDurationHA     = 0;
   guideDurationLastHA = 0;
+  guideDirDec         = 0;
   guideDurationDec    = 0;
   guideDurationLastDec= 0;
 
