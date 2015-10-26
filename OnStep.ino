@@ -1069,7 +1069,7 @@ void setup() {
 void loop() {
 
   // GUIDING -------------------------------------------------------------------------------------------
-  if (trackingState==TrackingSidereal) { 
+  if (trackingState!=TrackingMoveTo) { 
 
     // ST4 INTERFACE -------------------------------------------------------------------------------------
     #if defined(ST4_ON) || defined(ST4_PULLUP)
@@ -1236,8 +1236,11 @@ void loop() {
     } else {
 #ifndef MOUNT_TYPE_ALTAZM
       // when Fork mounted, ignore pierSide and just stop the mount if it passes the underPoleLimit
-      cli(); if (posHA>(underPoleLimit*StepsPerDegreeHA*15L)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
-#endif      
+      cli(); if (posHA+IHS>(underPoleLimit*StepsPerDegreeHA*15L)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
+#else
+      // when Alt/Azm mounted, just stop the mount if it passes +180 degrees Azm
+      cli(); if (posHA+IHS>(180L*StepsPerDegreeHA*15L)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
+#endif
     }
 #ifndef MOUNT_TYPE_ALTAZM
     if ((getApproxDec()<minDec) || (getApproxDec()>maxDec)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
