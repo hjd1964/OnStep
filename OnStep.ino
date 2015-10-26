@@ -781,7 +781,7 @@ void setup() {
 // light reticule LED
 #ifdef RETICULE_LED_PINS
 // make sure the status LED isn't defined
-#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+#if defined(__arm__) && defined(TEENSYDUINO)
   #ifdef STATUS_LED_PINS_ON
     #undef STATUS_LED_PINS_ON
   #endif
