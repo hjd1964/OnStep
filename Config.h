@@ -46,10 +46,12 @@
 
 // ST4 interface on pins 47, 49, 51, 53.  Pin 47 is RA- (West), Pin 49 is Dec- (South), Pin 51 is Dec+ (North), Pin 53 is RA+ (East.)  Teensy3.1 pins 24, 25, 26, 27.
 // ST4_ON enables the interface.  ST4_PULLUP enables the interface and any internal pullup resistors.
-// ST4_ALTERNATE_PINS moves the interface (Mega2560 only) to pins 43, 45, 47, 49.  Pin 43 is Dec- (South), Pin 45 is Dec+ (North), Pin 47 is RA- (West), Pin 49 is RA+ (East.)
 // It is up to you to create an interface that meets the electrical specifications of any connected device, use at your own risk.
+// ST4_HAND_CONTROL_ON allows guide rates >1x while SEPERATE_PULSE_GUIDE_RATE_ON is enabled
+// ST4_ALTERNATE_PINS moves the interface (Mega2560 only) to pins 43, 45, 47, 49.  Pin 43 is Dec- (South), Pin 45 is Dec+ (North), Pin 47 is RA- (West), Pin 49 is RA+ (East.)
 #define ST4_OFF
-#define ST4_DEFAULT_PINS
+#define ST4_HAND_CONTROL_OFF
+#define ST4_ALTERNATE_PINS_OFF
 // PPS sense rising edge on pin 21 for optional precision clock source (GPS, for example), default=OFF (Teensy3.1 Pin 23)
 #define PPS_SENSE_OFF
 // PEC sense, rising edge (default with PEC_SENSE_STATE HIGH, use LOW for falling edge) on pin 2 (ex. PEC_SENSE_ON) or threshold value on Analog 1; for optional PEC index, default=OFF
