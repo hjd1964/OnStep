@@ -1081,9 +1081,13 @@ void loop() {
         ST4RA_last=ST4RA_state;
         if (ST4RA_state) { 
           #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
-          enableGuideRate(currentPulseGuideRate);
+            #ifdef ST4_HAND_CONTROL_ON
+              enableGuideRate(currentGuideRate);
+            #else
+              enableGuideRate(currentPulseGuideRate);
+            #endif
           #else
-          enableGuideRate(currentGuideRate);
+            enableGuideRate(currentGuideRate);
           #endif
           guideDirHA=ST4RA_state;
           guideDurationHA=-1;
@@ -1097,9 +1101,13 @@ void loop() {
         ST4DE_last=ST4DE_state;
         if (ST4DE_state) { 
           #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
-          enableGuideRate(currentPulseGuideRate);
+            #ifdef ST4_HAND_CONTROL_ON
+              enableGuideRate(currentGuideRate);
+            #else
+              enableGuideRate(currentPulseGuideRate);
+            #endif
           #else
-          enableGuideRate(currentGuideRate);
+            enableGuideRate(currentGuideRate);
           #endif
           guideDirDec=ST4DE_state;
           guideDurationDec=-1;
