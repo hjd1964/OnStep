@@ -19,6 +19,8 @@ boolean goHome() {
   lastTrackingState = TrackingNone;
     
   trackingState     = TrackingMoveTo;
+  SetSiderealClockRate(siderealInterval);
+    
   homeMount         = true;
   
   return true;
