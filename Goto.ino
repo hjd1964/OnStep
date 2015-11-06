@@ -274,6 +274,7 @@ byte goTo(long thisTargetHA, long thisTargetDec, long altTargetHA, long altTarge
   
   lastTrackingState=trackingState;
   trackingState=TrackingMoveTo;
+  SetSiderealClockRate(siderealInterval);
 
   cli();
   startHA =posHA;
