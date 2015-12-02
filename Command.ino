@@ -306,7 +306,11 @@ the pdCor  term is 1 in HA
 //  :GG#   Get UTC offset time
 //         Returns: sHH#
 //         The number of decimal hours to add to local time to convert it to UTC
-      if (command[1]=='G')  { sprintf(reply,"%+03d",timeZone); quietReply=true; } else 
+      if (command[1]=='G')  {
+        timeZoneToHM(reply,timeZone);
+//        sprintf(reply,"%+03d",(int)timeZone); 
+        quietReply=true; 
+      } else 
 //  :Gg#   Get Current Site Longitude
 //         Returns: sDDD*MM#
 //         The current site Longitude. East Longitudes are negative
@@ -844,20 +848,31 @@ the pdCor  term is 1 in HA
 //                  1 on success
       if (command[1]=='g')  { i=highPrecision; highPrecision=false; if (!dmsToDouble(&longitude,(char *)&parameter[1],false)) commandError=true; else { if (parameter[0]=='-') longitude=-longitude; float f=longitude; EEPROM_writeQuad(EE_sites+(currentSite)*25+4,(byte*)&f); } LST=jd2last(JD,UT1); update_lst(); highPrecision=i; } else 
 //  :SGsHH#
+//  :SGsHH:MM# (where MM is 30 or 45)
 //          Set the number of hours added to local time to yield UTC
 //          Return: 0 on failure
 //                  1 on success
       if (command[1]=='G')  { 
-        if ((parameter[0]!=0) && (strlen(parameter)<4)) { 
-          if ( (atoi2(parameter,&i)) && ((i>=-24) && (i<=24))) { 
-            timeZone=i;
-            b=timeZone+128; 
+        boolean result = false;
+        if (strlen(parameter)<7) {
+          double f=0.0;
+          char *temp=strchr(parameter,':'); long p=(long)(temp - parameter);  if (p<0) p=strlen(parameter); if (p>strlen(parameter)) p=strlen(parameter);
+          if (strlen(parameter)>3) {
+            char *temp1="xxx";
+            for (int i=0; i<3; i++) { temp1[i]=parameter[i+p]; }
+            if ((temp1[0]=':') && (temp[1]='4') && temp[2]=='5') { parameter[p]=0; f=0.75; } else
+            if ((temp1[0]=':') && (temp[1]='3') && temp[2]=='0') { parameter[p]=0; f=0.5; } else { parameter[0]='9'; parameter[1]='9'; parameter[2]=0; } // force error if not :30 of :45
+          }
+          
+          if ( (atoi2(parameter,&i)) && ((i>=-24) && (i<=24))) {
+            if (i<0) timeZone=i-f; else timeZone=i+f;
+            b=encodeTimeZone(timeZone)+128;
             EEPROM.update(EE_sites+(currentSite)*25+8,b);
-            UT1=LMT+timeZone; 
+            UT1=LMT+timeZone;
             UT1_start  =UT1;
-            UT1mS_start=millis(); 
-            LST=jd2last(JD,UT1); 
-            update_lst(); 
+            UT1mS_start=millis();
+            LST=jd2last(JD,UT1);
+            update_lst();
           } else commandError=true; 
         } else commandError=true; 
       } else
