@@ -149,6 +149,7 @@
  * 08-18-2015          1.0b22            PEC improvements, automatic handling of differing axis reductions.  HA limits and meridian flip now account for IH index error.
  * 09-01-2015          1.0b23            Implemented acceleration for guide commands.  Adjusted rates so that R8(RS) are 1/2x MaxRate and R9 is 1x MaxRate.
  * 10-18-2015          1.0b24            Alt/Azm mount support.  Improved refraction rate tracking.
+ * 12-01-2015          1.0b25            Fixes to Alt/Azm mount support.
  *
  *
  * Author: Howard Dutton
@@ -171,8 +172,8 @@
 #include "FPoint.h"
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "10 18 15"
-#define FirmwareNumber "1.0b24"
+#define FirmwareDate   "12 01 15"
+#define FirmwareNumber "1.0b25"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -214,6 +215,7 @@ volatile long TakeupRate;            // this is the takeup rate for synchronizin
 volatile unsigned long PPSlastMicroS = 1000000UL;
 volatile unsigned long PPSavgMicroS = 1000000UL;
 volatile double PPSrateRatio = 1.0;
+volatile double LastPPSrateRatio = 1.0;
 volatile boolean PPSsynced = false;
 
 // Tracking and rate control
@@ -243,6 +245,7 @@ volatile boolean inBacklashDec=false;
 #define default_tracking_rate 1
 #endif
 volatile double  trackingTimerRateHA = default_tracking_rate;
+volatile double  trackingTimerRateDec = default_tracking_rate;
 volatile double  pecTimerRateHA = 0.0;
 volatile double  guideTimerRateHA = 0.0;
 volatile double  guideTimerRateDec = 0.0;
@@ -277,7 +280,7 @@ long celestialPoleHA  = 90L;
 #if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT) || defined(MOUNT_TYPE_ALTAZM)
 long celestialPoleHA  = 0L;
 #endif
-long celestialPoleDec = 90L;
+double celestialPoleDec = 90.0;
 
 volatile long posHA      = 90L*StepsPerDegreeHA;   // hour angle position in steps
 volatile long startHA    = 90L*StepsPerDegreeHA;   // hour angle of goto start position in steps
@@ -927,8 +930,8 @@ void setup() {
 
   // 16MHZ clocks for steps per second of sidereal tracking
   cli(); SiderealRate=siderealInterval/StepsPerSecond; TakeupRate=SiderealRate/4; sei();
-  timerRateHA     =SiderealRate;
-  timerRateDec    =SiderealRate;
+  timerRateHA =SiderealRate;
+  timerRateDec=SiderealRate;
 
   // backlash takeup rates
   timerRateBacklashHA =timerRateHA /BacklashTakeupRate;
@@ -976,19 +979,19 @@ void setup() {
   celestialPoleDec=fabs(latitude);
   if (latitude<0) celestialPoleHA=180L; else celestialPoleHA=0L;
 #else
-  if (latitude<0) celestialPoleDec=-90L; else celestialPoleDec=90L;
+  if (latitude<0) celestialPoleDec=-90.0; else celestialPoleDec=90.0;
 #endif
   cosLat=cos(latitude/Rad);
   sinLat=sin(latitude/Rad);
-  if (celestialPoleDec>0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
+  if (latitude>0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
   EEPROM_readQuad(EE_sites+(currentSite)*25+4,(byte*)&f); longitude=f;
-  timeZone=EEPROM.read(EE_sites+(currentSite)*25+8)-128; // allowable values range from +/-24 hours
+  timeZone=EEPROM.read(EE_sites+(currentSite)*25+8)-128;
   timeZone=decodeTimeZone(timeZone);
   EEPROM_readString(EE_sites+(currentSite)*25+9,siteName);
 
   // update starting coordinates to reflect NCP or SCP polar home position
   startHA = celestialPoleHA*StepsPerDegreeHA;
-  startDec = celestialPoleDec*StepsPerDegreeDec;
+  startDec = celestialPoleDec*(double)StepsPerDegreeDec;
   cli();
   targetHA.part.m  = startHA; 
   targetHA.part.f  = 0;
@@ -1205,14 +1208,10 @@ void loop() {
     // see if we're on the PEC index
     if (trackingState==TrackingSidereal) PECav = analogRead(1);
     #endif
-
-#ifdef MOUNT_TYPE_ALTAZM
+    
     // adjust tracking rate for Alt/Azm mounts
-    SetDeltaTrackingRate();
-#else
     // adjust tracking rate for refraction
-    if (refraction) SetDeltaTrackingRate();
-#endif
+    SetDeltaTrackingRate();
 
     #ifdef PPS_SENSE_ON
     // update clock
@@ -1224,9 +1223,8 @@ void loop() {
       #ifdef STATUS_LED2_PINS_ON
       if (PPSsynced) { if (LED2_ON) { SET(LEDneg2PORT, LEDneg2Bit); LED2_ON=false; } else { CLR(LEDneg2PORT, LEDneg2Bit); LED2_ON=true; } } else { SET(LEDneg2PORT, LEDneg2Bit); LED2_ON=false; } // indicate PPS
       #endif
+      if (LastPPSrateRatio!=PPSrateRatio) { SetSiderealClockRate(siderealInterval); LastPPSrateRatio=PPSrateRatio; }
     }
-    SetSiderealClockRate(siderealInterval); 
-    cli(); SiderealRate=siderealInterval/StepsPerSecond; sei();
     #endif
 
     #ifdef STATUS_LED_PINS_ON
