@@ -445,13 +445,14 @@ double az_deltaH=15.0,az_deltaD=0;
 
 void SetDeltaTrackingRate() {
   trackingTimerRateHA = (az_deltaH/15.0);
-  fstepHA.fixed=doubleToFixed( (((double)StepsPerDegreeHA/240.0)*(trackingTimerRateHA))/100.0 );
-  fstepDec.fixed=doubleToFixed( (((double)StepsPerDegreeDec/240.0)*(az_deltaD/15.0))/100.0 );
+  trackingTimerRateDec= (az_deltaD/15.0);
+  fstepHA.fixed=doubleToFixed( (((double)StepsPerDegreeHA/240.0)*trackingTimerRateHA)/100.0 );
+  fstepDec.fixed=doubleToFixed( (((double)StepsPerDegreeDec/240.0)*trackingTimerRateDec)/100.0 );
 }
 
 void SetTrackingRate(double r) {
   trackingTimerRateHA=r;
-  fstepHA.fixed=doubleToFixed( (((double)StepsPerDegreeHA/240.0)*(trackingTimerRateHA))/100.0 );
+  fstepHA.fixed=doubleToFixed( (((double)StepsPerDegreeHA/240.0)*trackingTimerRateHA)/100.0 );
   fstepDec.fixed=doubleToFixed(0.0);
 }
 
@@ -591,7 +592,8 @@ boolean do_altAzmRate_calc() {
   boolean done=false;
 
   // turn off if not tracking at sidereal rate
-  if ((trackingState!=TrackingSidereal) && (trackingState!=TrackingMoveTo)) { az_deltaH=0.0; az_deltaD=0.0; return true; }
+  // ToDo: this whole routine uses "uncorrected" coordinates, no index offsets are applied
+  if (((trackingState!=TrackingSidereal) && (trackingState!=TrackingMoveTo))) { az_deltaH=0.0; az_deltaD=0.0; return true; }
 
   az_step++;
   // load Alt/Azm
@@ -712,11 +714,12 @@ boolean do_altAzmRate_calc() {
     if (az_step==120) {
       // set rates
       // handle coordinate wrap
-      if ((az_Azm1<-90.0) && (az_Azm2>90.0)) az_Azm1+=360;
+      if ((az_Azm1<-90.0) && (az_Azm2> 90.0)) az_Azm1+=360.0;
+      if ((az_Azm1> 90.0) && (az_Azm2<-90.0)) az_Azm2+=360.0;
       az_deltaH=(az_Azm1-az_Azm2)*2.0;
       az_deltaD=(az_Alt1-az_Alt2)*2.0;
       // override for special case of near a celestial pole
-      if (90.0-fabs(az_Dec*Rad)<(1.0/3600.0)) { az_deltaH=0.0; az_deltaD=0.0; }
+      if (90.0-fabs(az_Dec*Rad)<=0.5) { az_deltaH=0.0; az_deltaD=0.0; }
     }
   } else
 
