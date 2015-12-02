@@ -191,7 +191,7 @@ double UT1_start = 0.0;              // the start of UT1
 unsigned long UT1mS_start = 0;       // mS at the start of UT1
 double JD  = 0.0;                    // and date, used for computing LST
 double LMT = 0.0;                    // internally, the date and time is kept in JD/LMT and LMT is updated to keep current time
-int timeZone = 0;                    //
+double timeZone = 0.0;               //
 
 double LST = 0.0;                    // this is the local (apparent) sidereal time in 24 hour format (0 to <24) must be updated when accessed
 long lst_start = 0;                  // the start of lst
@@ -982,7 +982,8 @@ void setup() {
   sinLat=sin(latitude/Rad);
   if (celestialPoleDec>0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
   EEPROM_readQuad(EE_sites+(currentSite)*25+4,(byte*)&f); longitude=f;
-  timeZone=EEPROM.read(EE_sites+(currentSite)*25+8)-128;
+  timeZone=EEPROM.read(EE_sites+(currentSite)*25+8)-128; // allowable values range from +/-24 hours
+  timeZone=decodeTimeZone(timeZone);
   EEPROM_readString(EE_sites+(currentSite)*25+9,siteName);
 
   // update starting coordinates to reflect NCP or SCP polar home position
