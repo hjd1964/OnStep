@@ -152,6 +152,51 @@ boolean doubleToDms(char *reply, double *f, boolean fullRange, boolean signPrese
   return true;
 }
 
+double frac(double v) {
+  return v - ((long)v);
+}
+
+double decodeTimeZone(double tz) {
+  // -100 codes for :30
+  if (tz<-24.0) {
+    tz=tz+100.0;
+    if (tz<0) tz=tz-0.5; else tz=tz+0.5;
+  }
+  // +100 codes for :45
+  if (tz>24.0) {
+    tz=tz-100.0;
+    if (tz<0) tz=tz-0.75; else tz=tz+0.75;
+  }
+  return tz;
+}
+
+double encodeTimeZone(double tz) {
+  double f=fabs(frac(tz));
+  // -100 codes for :30
+  if (fabs(f-0.5)<0.00000001) {
+    tz=(long)tz-100.0;
+  }
+  // +100 codes for :45
+  if (fabs(f-0.75)<0.00000001) {
+    tz=(long)tz+100.0;
+  }
+  tz=(long)tz;
+  return tz;
+}
+
+void timeZoneToHM(char *reply, double tz) {
+  double f=fabs(frac(tz));
+  sprintf(reply,"%+03d",(int)tz);
+  // append for :30
+  if (fabs(f-0.5)<0.00000001) {
+    strcat(reply,":30");
+  }
+  // append for :45
+  if (fabs(f-0.75)<0.00000001) {
+    strcat(reply,":45");
+  }
+}
+
 // integer numeric conversion with error checking
 boolean atoi2(char *a, int *i) {
   char *conv_end;
