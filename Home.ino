@@ -9,16 +9,14 @@ boolean goHome() {
 
   cli();
   if (pierSide==PierSideWest) targetHA.part.m=-celestialPoleHA*StepsPerDegreeHA; else targetHA.part.m=celestialPoleHA*StepsPerDegreeHA; targetHA.part.f=0;
-  targetDec.part.m=celestialPoleDec*StepsPerDegreeDec; targetDec.part.f=0;
+  targetDec.part.m=celestialPoleDec*(double)StepsPerDegreeDec; targetDec.part.f=0;
   startHA =posHA;
   startDec=posDec;
+    
+  abortTrackingState=trackingState;
+  lastTrackingState=TrackingNone;
+  trackingState=TrackingMoveTo; SetSiderealClockRate(siderealInterval);
   sei();
-    
-  abortTrackingState= trackingState;
-  lastTrackingState = TrackingNone;
-    
-  trackingState     = TrackingMoveTo;
-  SetSiderealClockRate(siderealInterval);
   
   homeMount         = true;
   
@@ -34,7 +32,7 @@ boolean setHome() {
   pierSide            = PierSideNone;
   dirDec              = 1;
   DecDir              = DecDirEInit;
-  if (celestialPoleDec>0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
+  if (latitude>0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
   dirHA               = 1;
   newTargetRA         = 0;        
   newTargetDec        = 0;
@@ -98,7 +96,7 @@ boolean setHome() {
 
   // the polar home position
   startHA  = celestialPoleHA*StepsPerDegreeHA;
-  startDec = celestialPoleDec*StepsPerDegreeDec;
+  startDec = celestialPoleDec*(double)StepsPerDegreeDec;
 
   // clear pulse-guiding state
   guideDirHA          = 0;
