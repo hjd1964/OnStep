@@ -165,6 +165,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     double timerRateHA2=fabs(guideTimerRateHA1+pecTimerRateHA+timerRateHA1);
     // round up to run the motor timers just a tiny bit slow, then adjust below if we start to fall behind during sidereal tracking
     if (timerRateHA2>0.5) calculatedTimerRateHA=ceil((double)SiderealRate/timerRateHA2); else calculatedTimerRateHA=ceil((double)SiderealRate*2.0);
+    // remember our "running" rate and only update the actual rate when it changes
     if (runTimerRateHA!=calculatedTimerRateHA) { timerRateHA=calculatedTimerRateHA; runTimerRateHA=calculatedTimerRateHA; }
 
     // dynamic rate adjust
@@ -195,12 +196,13 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
       if ((guideDirDec=='b') && (x<2)) { guideDirDec=0; guideTimerRateDec=0; guideTimerRateDec1=0; }
     }
    
-    double timerRateDec1=guideTimerRateDec1;
-    // if we're stopped, just run the timer fast since we're not moving anyway
-    if (timerRateDec1>0.5) calculatedTimerRateDec=ceil((double)SiderealRate/timerRateDec1); else calculatedTimerRateDec=ceil((double)SiderealRate*2.0);
+    double timerRateDec1=trackingTimerRateDec; if (guideDirDec && (activeGuideRate>GuideRate1x)) timerRateDec1=0.0;
+    double timerRateDec2=fabs(guideTimerRateDec1+timerRateDec1);
+    // round up to run the motor timers just a tiny bit slow, then adjust below if we start to fall behind during sidereal tracking
+    if (timerRateDec2>0.5) calculatedTimerRateDec=ceil((double)SiderealRate/timerRateDec2); else calculatedTimerRateDec=ceil((double)SiderealRate*2.0);
     // remember our "running" rate and only update the actual rate when it changes
     if (runTimerRateDec!=calculatedTimerRateDec) { timerRateDec=calculatedTimerRateDec; runTimerRateDec=calculatedTimerRateDec; }
-    
+
     // dynamic rate adjust
     if (x>1.0) {
       x=x-1.0; if (x>10.0) x=10.0; x=10000.00-x; x=x/10000.0;
