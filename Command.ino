@@ -306,9 +306,8 @@ the pdCor  term is 1 in HA
 //  :GG#   Get UTC offset time
 //         Returns: sHH#
 //         The number of decimal hours to add to local time to convert it to UTC
-      if (command[1]=='G')  {
+      if (command[1]=='G')  { 
         timeZoneToHM(reply,timeZone);
-//        sprintf(reply,"%+03d",(int)timeZone); 
         quietReply=true; 
       } else 
 //  :Gg#   Get Current Site Longitude
@@ -439,6 +438,8 @@ the pdCor  term is 1 in HA
             switch (parameter[1]) {
               case '0': cli(); temp=(long)(posHA-((long)targetHA.part.m+PEC_HA)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;  // Debug0, true vs. target RA position
               case '1': cli(); temp=(long)(posDec-((long)targetDec.part.m)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;       // Debug1, true vs. target Dec position
+//              case '0': cli(); temp=(long)(((az_Azm1-az_Azm2)*2.0/15.0)*1000); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;  // Debug0, true vs. target RA position
+//              case '1': cli(); temp=(long)(az_Azm1); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;       // Debug1, true vs. target Dec position
               case '2': sprintf(reply,"%ld",(long)((debugv1/53333.3333333333)*15000)); quietReply=true; break;                               // Debug2, RA tracking rate
               case '3': sprintf(reply,"%ld",(long)(az_deltaH*1000.0*1.00273790935)); quietReply=true; break;                                 // Debug3, RA refraction tracking rate
               case '4': sprintf(reply,"%ld",(long)(az_deltaD*1000.0*1.00273790935)); quietReply=true; break;                                 // Debug4, Dec refraction tracking rate
@@ -940,11 +941,11 @@ the pdCor  term is 1 in HA
           celestialPoleDec=fabs(latitude);
           if (latitude<0) celestialPoleHA=180L; else celestialPoleHA=0L;
 #else
-          if (latitude<0) celestialPoleDec=-90L; else celestialPoleDec=90L;
+          if (latitude<0) celestialPoleDec=-90.0; else celestialPoleDec=90.0;
 #endif
           cosLat=cos(latitude/Rad);
           sinLat=sin(latitude/Rad);
-          if (celestialPoleDec>0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
+          if (latitude>0.0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
         }
         highPrecision=i;
       } else 
@@ -1179,13 +1180,13 @@ the pdCor  term is 1 in HA
           float f; 
           EEPROM_readQuad(EE_sites+(currentSite*25+0),(byte*)&f); latitude=f;
 #ifdef MOUNT_TYPE_ALTAZM
-          celestialPoleDec=latitude;
+          celestialPoleDec=fabs(latitude);
 #else
-          if (latitude<0) celestialPoleDec=-90L; else celestialPoleDec=90L;
+          if (latitude<0.0) celestialPoleDec=-90.0; else celestialPoleDec=90.0;
 #endif
           cosLat=cos(latitude/Rad);
           sinLat=sin(latitude/Rad);
-          if (celestialPoleDec>0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
+          if (latitude>0.0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
           EEPROM_readQuad(EE_sites+(currentSite*25+4),(byte*)&f); longitude=f;
           b=EEPROM.read(EE_sites+(currentSite*25+8)); timeZone=b-128;
         } else 
