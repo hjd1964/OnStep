@@ -174,9 +174,7 @@ void moveTo() {
       sei();
     } else {
       // restore last tracking state
-      trackingState=lastTrackingState;
-      SetSiderealClockRate(siderealInterval);
-
+      trackingState=lastTrackingState; SetSiderealClockRate(siderealInterval);
       cli();
       timerRateHA  =SiderealRate;
       timerRateDec =SiderealRate;
