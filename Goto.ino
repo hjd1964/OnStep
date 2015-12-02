@@ -61,7 +61,7 @@ void getHADec(double *HA, double *Dec) {
   // get the hour angle (or Azm)
   *HA=(double)h/(double)(StepsPerDegreeHA*15L);
   // get the declination (or Alt)
-  *Dec=(double)d/(double)StepsPerDegreeDec; 
+  *Dec=(double)d/(double)StepsPerDegreeDec;
 
 #ifdef MOUNT_TYPE_ALTAZM
   // instrument to corrected horizon
@@ -166,8 +166,9 @@ byte goToEqu(double RA, double Dec) {
 #ifdef MOUNT_TYPE_ALTAZM
   EquToHor(latitude,HA,Dec,&Dec,&HA);
   if (HA>180.0) HA-=360.0;
+  if (HA<-180.0) HA+=360.0;
   // corrected to instrument horizon
-  HA=HA-IH*15L;
+  HA=HA-IH*15.0;
   Dec=Dec-ID;
   long HA1=HA*(double)StepsPerDegreeHA;
   long DEC1=Dec*(double)StepsPerDegreeDec;
@@ -253,7 +254,7 @@ byte goTo(long thisTargetHA, long thisTargetDec, long altTargetHA, long altTarge
         // west side of pier - we're in the eastern sky and the HA's are negative
         pierSide=PierSideWest;
         DecDir  =DecDirWInit;
-        // default, in the polar-home position is +90 deg. HA, we want -90HA
+        // default, if the polar-home position is +90 deg. HA, we want -90HA
 //        cli(); posHA=posHA-180L*StepsPerDegreeHA; sei();
         cli(); posHA=-posHA; sei();
       } else { 
@@ -272,11 +273,15 @@ byte goTo(long thisTargetHA, long thisTargetDec, long altTargetHA, long altTarge
     }
   }
   
+  // final validation
+ if (((thisTargetHA>StepsPerDegreeHA*180) || (thisTargetHA<-StepsPerDegreeHA*180)) ||
+     ((thisTargetDec>StepsPerDegreeDec*180) || (thisTargetDec<-StepsPerDegreeDec*180))) return 7; // fail, unspecified error
+
   lastTrackingState=trackingState;
-  trackingState=TrackingMoveTo;
-  SetSiderealClockRate(siderealInterval);
 
   cli();
+  trackingState=TrackingMoveTo; SetSiderealClockRate(siderealInterval);
+
   startHA =posHA;
   startDec=posDec;
 
