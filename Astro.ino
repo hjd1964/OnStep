@@ -441,7 +441,7 @@ double az_Dec1=0,az_HA1=0,az_Dec2=-91,az_HA2=0;
 double az_Alt,az_Azm;
 double az_sindec,az_cosdec,az_cosha;
 double az_sinalt,az_cosalt,az_cosazm;
-double az_deltaH=15.0,az_deltaD=0;
+double az_deltaH=15.0,az_deltaD=0.0;
 
 void SetDeltaTrackingRate() {
   trackingTimerRateHA = (az_deltaH/15.0);
@@ -451,9 +451,8 @@ void SetDeltaTrackingRate() {
 }
 
 void SetTrackingRate(double r) {
-  trackingTimerRateHA=r;
-  fstepHA.fixed=doubleToFixed( (((double)StepsPerDegreeHA/240.0)*trackingTimerRateHA)/100.0 );
-  fstepDec.fixed=doubleToFixed(0.0);
+  az_deltaH=r*15.0;
+  az_deltaD=0.0;
 }
 
 boolean do_refractionRate_calc() {
@@ -659,11 +658,11 @@ boolean do_altAzmRate_calc() {
     az_Dec=az_Dec1;
     az_HA =az_HA1/15.0;
     if (az_step==10) {
-      az_HA =(az_HA-(30.0/60.0))/(Rad/15.0);
+      az_HA =(az_HA-(1.875/60.0))/(Rad/15.0);
       az_Dec=az_Dec/Rad;
     }
     if (az_step==110) {
-      az_HA =(az_HA+(30.0/60.0))/(Rad/15.0);
+      az_HA =(az_HA+(1.875/60.0))/(Rad/15.0);
       az_Dec=az_Dec/Rad;
     }
   } else
@@ -716,8 +715,8 @@ boolean do_altAzmRate_calc() {
       // handle coordinate wrap
       if ((az_Azm1<-90.0) && (az_Azm2> 90.0)) az_Azm1+=360.0;
       if ((az_Azm1> 90.0) && (az_Azm2<-90.0)) az_Azm2+=360.0;
-      az_deltaH=(az_Azm1-az_Azm2)*2.0;
-      az_deltaD=(az_Alt1-az_Alt2)*2.0;
+      az_deltaH=(az_Azm1-az_Azm2)*32.0;  // use *2 for +/- 30 minutes of RA
+      az_deltaD=(az_Alt1-az_Alt2)*32.0;  // use *2 for +/- 30 minutes of RA
       // override for special case of near a celestial pole
       if (90.0-fabs(az_Dec*Rad)<=0.5) { az_deltaH=0.0; az_deltaD=0.0; }
     }
