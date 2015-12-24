@@ -70,7 +70,7 @@
 // _ON sets this to blink at 1 sec intervals when PPS is synced
 //  n sets this to dimly light a polar finder reticle, for example I use STATUS_LED2_PINS 250
 #define STATUS_LED2_PINS_OFF
-// lights reticule LED by sink to ground (pin 44), default=OFF.  Defaults to pin 9 on the Teensy3.1 (overrides STATUS_LED_PINS_ON if used)
+// lights reticule LED by sink to ground (pin 44), default=OFF.  Defaults to pin 9 on the Teensy3.1 (STATUS_LED_PINS must be _ON)
 // RETICULE_LED_PINS n, where n=0 to 255 activates this feature and sets default brightness
 #define RETICULE_LED_PINS_OFF
 // optional +5V on pins 5 and 12 to Pololu or other stepper drivers without on-board 5V voltage regulators, default=OFF (Teensy3.1 Pins 5,11)
