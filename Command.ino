@@ -247,8 +247,13 @@ the pdCor  term is 1 in HA
 //         Returns: Nothing
       if ((command[0]=='B') && ((command[1]=='+') || (command[1]=='-')))  {
 #ifdef RETICULE_LED_PINS
-        if (command[1]=='-') reticuleBrightness+=8;  if (reticuleBrightness>255) reticuleBrightness=255;
-        if (command[1]=='+') reticuleBrightness-=8;  if (reticuleBrightness<0)   reticuleBrightness=0;
+        int scale;
+        if (reticuleBrightness>255-8) scale=1; else
+        if (reticuleBrightness>255-32) scale=4; else
+        if (reticuleBrightness>255-64) scale=12; else
+        if (reticuleBrightness>255-128) scale=32; else scale=64;
+        if (command[1]=='-') reticuleBrightness+=scale;  if (reticuleBrightness>255) reticuleBrightness=255;
+        if (command[1]=='+') reticuleBrightness-=scale;  if (reticuleBrightness<0)   reticuleBrightness=0;
         analogWrite(reticulePin,reticuleBrightness);
 #endif
         quietReply=true;
@@ -854,12 +859,11 @@ the pdCor  term is 1 in HA
 //          Return: 0 on failure
 //                  1 on success
       if (command[1]=='G')  { 
-        boolean result = false;
         if (strlen(parameter)<7) {
           double f=0.0;
-          char *temp=strchr(parameter,':'); long p=(long)(temp - parameter);  if (p<0) p=strlen(parameter); if (p>strlen(parameter)) p=strlen(parameter);
+          char *temp=strchr(parameter,':'); long p=(long)(temp - parameter); if (p<0L) p=strlen(parameter); if ((unsigned long)p>strlen(parameter)) p=strlen(parameter);
           if (strlen(parameter)>3) {
-            char *temp1="xxx";
+            char *temp1 = new char[4]; strcpy( temp1, "xxx" );
             for (int i=0; i<3; i++) { temp1[i]=parameter[i+p]; }
             if ((temp1[0]=':') && (temp[1]='4') && temp[2]=='5') { parameter[p]=0; f=0.75; } else
             if ((temp1[0]=':') && (temp[1]='3') && temp[2]=='0') { parameter[p]=0; f=0.5; } else { parameter[0]='9'; parameter[1]='9'; parameter[2]=0; } // force error if not :30 of :45
