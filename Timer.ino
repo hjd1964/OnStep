@@ -71,7 +71,7 @@ void SetSiderealClockRate(long Interval) {
 }
 
 // set timer3 to rate (in microseconds*16)
-volatile uint32_t nextHArate;
+volatile uint32_t nextHArate = 100000UL;
 void Timer3SetRate(long rate) {
 #if defined(__AVR__)
   // valid for rates down to 0.25 second, and cap the rate
@@ -79,24 +79,11 @@ void Timer3SetRate(long rate) {
   if (rate>65536L) rate=65536L;
   cli(); nextHArate=rate-1L; sei();
 #elif defined(__arm__) && defined(TEENSYDUINO)
-  nextHArate=(F_BUS / 1000000) * (rate*0.0625) * 0.5 - 1;
-  cli();
-#if defined(HA_MODE) && defined(HA_MODE_GOTO)
-  // reprogram the timer for a higher/lower rate and switch micro-stepping rate
-  // we must enter here fast enough to catch the moment when the motor step location happens to be right and the last step (of the correct size) was taken
-  if ((stepHA!=stepHA_next) && (HAclr) && ((posHA+blHA)%1024==0)) {
-    stepHA=stepHA_next;
-    digitalWrite(HA_M0,(modeHA_next & 1));
-    digitalWrite(HA_M1,(modeHA_next>>1 & 1));
-    digitalWrite(HA_M2,(modeHA_next>>2 & 1));
-  }
-#endif
-  PIT_LDVAL1=nextHArate*stepHA;
-  sei();
+  cli(); nextHArate=(F_BUS / 1000000) * (rate*0.0625) * 0.5 - 1; sei();
 #endif
 }
 // set timer4 to rate (in microseconds*16)
-volatile uint32_t nextDErate;
+volatile uint32_t nextDErate = 100000UL;
 void Timer4SetRate(long rate) {
 #if defined(__AVR__)
   // valid for rates down to 0.25 second, and cap the rate
@@ -104,20 +91,7 @@ void Timer4SetRate(long rate) {
   if (rate>65536L) rate=65536L;
   cli(); nextDErate=rate-1L; sei();
 #elif defined(__arm__) && defined(TEENSYDUINO)
-  nextDErate=(F_BUS / 1000000) * (rate*0.0625) * 0.5 - 1;
-  cli();
-#if defined(DE_MODE) && defined(DE_MODE_GOTO)
-  // reprogram the timer for a higher/lower rate and switch micro-stepping rate
-  // we must enter here fast enough to catch the moment when the motor step location happens to be right and the last step (of the correct size) was taken
-  if ((stepDec!=stepDec_next) && (DEclr) && ((posDec+blDec)%1024==0)) {
-    stepDec=stepDec_next;
-    digitalWrite(DE_M0,(modeDec_next & 1));
-    digitalWrite(DE_M1,(modeDec_next>>1 & 1));
-    digitalWrite(DE_M2,(modeDec_next>>2 & 1));
-  }
-#endif
-  PIT_LDVAL2=nextDErate*stepDec; 
-  sei();
+  cli(); nextDErate=(F_BUS / 1000000) * (rate*0.0625) * 0.5 - 1; sei();
 #endif
 }
 
@@ -164,15 +138,15 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     double timerRateHA1=trackingTimerRateHA; if (guideDirHA && (activeGuideRate>GuideRate1x)) timerRateHA1=0.0;
     double timerRateHA2=fabs(guideTimerRateHA1+pecTimerRateHA+timerRateHA1);
     // round up to run the motor timers just a tiny bit slow, then adjust below if we start to fall behind during sidereal tracking
-    if (timerRateHA2>0.5) calculatedTimerRateHA=ceil((double)SiderealRate/timerRateHA2); else calculatedTimerRateHA=ceil((double)SiderealRate*2.0);
+    if (timerRateHA2>0.5) calculatedTimerRateHA=ceil((double)SiderealRate/timerRateHA2)+5; else calculatedTimerRateHA=ceil((double)SiderealRate*2.0);
     // remember our "running" rate and only update the actual rate when it changes
     if (runTimerRateHA!=calculatedTimerRateHA) { timerRateHA=calculatedTimerRateHA; runTimerRateHA=calculatedTimerRateHA; }
 
     // dynamic rate adjust
     // in pre-scaler /64 mode the motor timers might be slow (relative to the sidereal timer) by as much as 0.000004 seconds/second (16000000/64)
     // so a 0.01% (0.0001x) increase is always enough to correct for this, it happens very slowly - about a single step worth of movement over an hours time
-    if (x>10.0) x=10.0; 
-    if (x<-10.0) x=-10.0; 
+    if (x>10.0) x=10.0;
+    if (x<-10.0) x=-10.0;
     x=10000.00-x; x=x/10000.0;
     timerRateHA=calculatedTimerRateHA*x; // up to 0.01% faster or slower (or as little as 0.001%)
     runTimerRateHA=timerRateHA;
@@ -199,7 +173,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     double timerRateDec1=trackingTimerRateDec; if (guideDirDec && (activeGuideRate>GuideRate1x)) timerRateDec1=0.0;
     double timerRateDec2=fabs(guideTimerRateDec1+timerRateDec1);
     // round up to run the motor timers just a tiny bit slow, then adjust below if we start to fall behind during sidereal tracking
-    if (timerRateDec2>0.5) calculatedTimerRateDec=ceil((double)SiderealRate/timerRateDec2); else calculatedTimerRateDec=ceil((double)SiderealRate*2.0);
+    if (timerRateDec2>0.5) calculatedTimerRateDec=ceil((double)SiderealRate/timerRateDec2)+5; else calculatedTimerRateDec=ceil((double)SiderealRate*2.0);
     // remember our "running" rate and only update the actual rate when it changes
     if (runTimerRateDec!=calculatedTimerRateDec) { timerRateDec=calculatedTimerRateDec; runTimerRateDec=calculatedTimerRateDec; }
 
@@ -270,7 +244,9 @@ ISR(TIMER3_COMPA_vect)
 
 #if defined(HA_MODE) && defined(HA_MODE_GOTO)
 #if defined(__AVR__)
-  OCR3A =nextHArate*stepHA;
+  OCR3A=nextHArate*stepHA;
+#elif defined(__arm__) && defined(TEENSYDUINO)
+  PIT_LDVAL1=nextHArate*stepHA;
 #endif
   // switch micro-step mode
   if (gotoModeHA!=gotoRateHA) {
@@ -278,17 +254,17 @@ ISR(TIMER3_COMPA_vect)
     if ((posHA+blHA)%1024==0) {
       // switch mode
       if (gotoModeHA) { stepHA_next=1; modeHA_next=HA_MODE; gotoModeHA=false; } else { stepHA_next=HA_STEP_GOTO; modeHA_next=HA_MODE_GOTO; gotoModeHA=true; }
-#if defined(__AVR__)
       digitalWrite(HA_M0,(modeHA_next & 1));
       digitalWrite(HA_M1,(modeHA_next>>1 & 1));
       digitalWrite(HA_M2,(modeHA_next>>2 & 1));
       stepHA=stepHA_next;
-#endif
     }
   }
 #else
 #if defined(__AVR__)
-  OCR3A = nextHArate;
+  OCR3A=nextHArate;
+#elif defined(__arm__) && defined(TEENSYDUINO)
+  PIT_LDVAL1=nextHArate;
 #endif
 #endif
 
@@ -331,7 +307,9 @@ ISR(TIMER4_COMPA_vect)
 
 #if defined(DE_MODE) && defined(DE_MODE_GOTO)
 #if defined(__AVR__)
-  OCR4A  =nextDErate*stepDec;
+  OCR4A=nextDErate*stepDec;
+#elif defined(__arm__) && defined(TEENSYDUINO)
+  PIT_LDVAL2=nextDErate*stepDec;
 #endif
   // switch micro-step mode
   if (gotoModeDec!=gotoRateDec) {
@@ -339,17 +317,17 @@ ISR(TIMER4_COMPA_vect)
     if ((posDec+blDec)%1024==0) {
       // switch mode
       if (gotoModeDec) { stepDec_next=1; modeDec_next=DE_MODE; gotoModeDec=false; } else { stepDec_next=DE_STEP_GOTO; modeDec_next=DE_MODE_GOTO; gotoModeDec=true; }
-#if defined(__AVR__)
       digitalWrite(DE_M0,(modeDec_next & 1));
       digitalWrite(DE_M1,(modeDec_next>>1 & 1));
       digitalWrite(DE_M2,(modeDec_next>>2 & 1));
       stepDec=stepDec_next;
-#endif
     }
   }
 #else
 #if defined(__AVR__)
-  OCR4A = nextDErate;
+  OCR4A=nextDErate;
+#elif defined(__arm__) && defined(TEENSYDUINO)
+  PIT_LDVAL2=nextDErate;
 #endif
 #endif
   
