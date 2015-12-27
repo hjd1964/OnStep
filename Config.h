@@ -37,8 +37,8 @@
 
 // turns debugging on, used during testing, default=OFF
 #define DEBUG_OFF
-// for getting control of the 'scope when things go horribly wrong, default=OFF
-#define RESCUE_MODE_OFF
+// allows syncing anywhere, doesn't preserve PEC (unless using an index), default=OFF
+#define SYNC_ANYWHERE_OFF
 
 // Mount type, default is _GEM (German Equatorial) other options are _FORK, _FORK_ALT.  _FORK switches off Meridian Flips after (1, 2 or 3 star) alignment is done.  _FORK_ALT disables Meridian Flips (1 star align.)
 // _ALTAZM is for Alt/Azm mounted 'scopes (1 star align only.)
