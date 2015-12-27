@@ -23,19 +23,39 @@ boolean syncEqu(double RA, double Dec) {
   EquToCEqu(latitude,HA,Dec,&HA,&Dec);
 #endif
 
+#ifdef SYNC_ANYWHERE_ON
+  if ((pierSide==PierSideNone) || ((pierSide==PierSideWest) && (HA>0)) || ((pierSide==PierSideEast) && (HA<0))) {
+    trackingState=TrackingSidereal;
+    atHome=false;
+    if (meridianFlip!=MeridianFlipNever) {
+      // ID flips back and forth +/-, but that doesn't matter, if we're homed the ID is 0
+      // we're in the polar home position, so pick a side (of the pier)
+      if (HA<0) {
+        // west side of pier - we're in the eastern sky and the HA's are negative
+        pierSide=PierSideWest;
+        DecDir  =DecDirWInit;
+      } else { 
+        // east side of pier - we're in the western sky and the HA's are positive
+        // this is the default in the polar-home position
+        pierSide=PierSideEast;
+        DecDir = DecDirEInit;
+      }
+    } else {
+      // always on the "east" side of pier - we're in the western sky and the HA's are positive
+      // this is the default in the polar-home position and also for MOUNT_TYPE_FORK and MOUNT_TYPE_ALTAZM.  MOUNT_TYPE_FORK_ALT ends up pierSideEast, but flips are allowed until aligned.
+      pierSide=PierSideEast;
+      DecDir = DecDirEInit;
+    }
+    cli();
+    posHA=HA*(double)(StepsPerDegreeHA*15L);
+    targetHA.part.m=posHA; targetHA.part.f=0;
+    posDec=Dec*(double)StepsPerDegreeDec;
+    targetDec.part.m=posDec; targetDec.part.f=0;
+    sei();
+    return true;
+  }
+#endif
   
-#ifdef RESCUE_MODE_ON
-  // allows one to quickly set where OnStep thinks the 'scope is to anywhere in the western sky
-  cli();
-  pierSide=PierSideEast;
-  DecDir = DecDirEInit;
-  targetHA =round(HA*(double)(StepsPerDegreeHA*15L)); ftargetHA=longToFixed(targetHA);
-  posHA    =targetHA;
-  targetDec=round(Dec*(double)StepsPerDegreeDec); ftargetDec=longToFixed(targetDec);
-  posDec=targetDec;
-  sei();
-  return true;
-#else
   // compute index offsets IH/ID, if they're within reason 
   // actual PosHA/PosDec are the coords of where this really is
   // IH/ID are the amount to add to the actual RA/Dec to arrive at the correct position
@@ -48,8 +68,10 @@ boolean syncEqu(double RA, double Dec) {
   IH=HA-HA1;
   ID=Dec-(double)((long int)targetDec.part.m)/(double)StepsPerDegreeDec;
 
-  if ((abs(ID)>30.0) || (abs(IH)>2.0)) { IH=0; ID=0; return false; } else return true;
+#ifndef SYNC_ANYWHERE_ON
+  if ((abs(ID)>30.0) || (abs(IH)>2.0)) { IH=0; ID=0; return false; }
 #endif
+  return true;
 }
 
 // this returns the telescopes HA and Dec (index corrected for Alt/Azm)
@@ -255,7 +277,6 @@ byte goTo(long thisTargetHA, long thisTargetDec, long altTargetHA, long altTarge
         pierSide=PierSideWest;
         DecDir  =DecDirWInit;
         // default, if the polar-home position is +90 deg. HA, we want -90HA
-//        cli(); posHA=posHA-180L*StepsPerDegreeHA; sei();
         cli(); posHA=-posHA; sei();
       } else { 
         // east side of pier - we're in the western sky and the HA's are positive
