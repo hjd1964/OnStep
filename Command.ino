@@ -1293,7 +1293,7 @@ boolean clearCommand_serial_zero() {
 // Build up a command
 boolean buildCommand_serial_one(char c) {
   // (chr)6 is a special status command for the LX200 protocol
-  if ((c==(char)6) && (bufferPtr_serial_zero==0)) {
+  if ((c==(char)6) && (bufferPtr_serial_one==0)) {
     #ifdef MOUNT_TYPE_ALTAZM
     Serial_print("A");
     #else
