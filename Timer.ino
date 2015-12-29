@@ -149,7 +149,9 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     // guide rate acceleration/deceleration and control
     cli();  double x=((long int)targetHA.part.m+PEC_HA)-posHA; sei();
     if ((!inBacklashHA) && (guideDirHA)) {
-      if ((fabs(guideTimerRateHA)<10.0) && (fabs(guideTimerRateHA1)<10.0)) { 
+      if ((fabs(guideTimerRateHA)<10.0) && (fabs(guideTimerRateHA1)<10.0)) {
+        // break mode
+        if (guideDirDec=='b') guideTimerRateHA=1.0;
         // slow speed guiding, no acceleration
         guideTimerRateHA1=guideTimerRateHA; 
       } else {
@@ -158,10 +160,11 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
         guideTimerRateHA1=(1.0/((StepsPerDegreeHA*(z/1000000.0)))*3600.0);
         if (guideTimerRateHA1>fabs(guideTimerRateHA)) guideTimerRateHA1=fabs(guideTimerRateHA);
       }
+      // stop guiding
       if ((guideDirHA=='b') && (fabs(x)<2)) { guideDirHA=0; guideTimerRateHA=0; guideTimerRateHA1=0;}
     }
 
-    double timerRateHA1=1.0; if (guideDirHA && (activeGuideRate>GuideRate1x)) timerRateHA1=0.0;
+    double timerRateHA1=1.0; if ((guideDirHA || guideDirDec) && (activeGuideRate>GuideRate1x)) timerRateHA1=0.0;
     double timerRateHA2=fabs(guideTimerRateHA1+pecTimerRateHA+timerRateHA1);
     // round up to run the motor timers just a tiny bit slow, then adjust below if we start to fall behind during sidereal tracking
     if (timerRateHA2>0.5) calculatedTimerRateHA=ceil((double)SiderealRate/timerRateHA2); else calculatedTimerRateHA=ceil((double)SiderealRate*2.0);
@@ -182,7 +185,9 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     // guide rate acceleration/deceleration
     cli(); x=fabs((long int)targetDec.part.m-posDec); sei();
     if (!inBacklashDec && guideDirDec) {
-      if ((fabs(guideTimerRateDec)<10.0) && (fabs(guideTimerRateDec1)<10.0)) { 
+      if ((fabs(guideTimerRateDec)<10.0) && (fabs(guideTimerRateDec1)<10.0)) {
+        // break mode
+        if (guideDirDec=='b') guideTimerRateDec=1.0;
         // slow speed guiding, no acceleration
         guideTimerRateDec1=guideTimerRateDec; 
       } else {
