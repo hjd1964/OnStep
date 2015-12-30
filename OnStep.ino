@@ -1145,7 +1145,7 @@ void loop() {
     siderealTimer=tempLst;
     
     // only active while sidereal tracking with a guide rate that makes sense
-    if ((trackingState==TrackingSidereal) && (!(guideDirHA && (activeGuideRate>GuideRate1x)))) {
+    if ((trackingState==TrackingSidereal) && (!((guideDirHA || guideDirDec) && (activeGuideRate>GuideRate1x)))) {
       // apply the Tracking, Guiding, and PEC
       cli();
       targetHA.fixed+=fstepHA.fixed;
