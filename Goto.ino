@@ -46,16 +46,16 @@ boolean syncEqu(double RA, double Dec) {
       pierSide=PierSideEast;
       DecDir = DecDirEInit;
     }
-    cli();
-    posHA=HA*(double)(StepsPerDegreeHA*15L);
-    targetHA.part.m=posHA; targetHA.part.f=0;
-    posDec=Dec*(double)StepsPerDegreeDec;
-    targetDec.part.m=posDec; targetDec.part.f=0;
-    sei();
-    return true;
   }
-#endif
-  
+
+  cli();
+  posHA=HA*(double)(StepsPerDegreeHA*15L);
+  targetHA.part.m=posHA; targetHA.part.f=0;
+  posDec=Dec*(double)StepsPerDegreeDec;
+  targetDec.part.m=posDec; targetDec.part.f=0;
+  sei();
+  return true;
+#else
   // compute index offsets IH/ID, if they're within reason 
   // actual PosHA/PosDec are the coords of where this really is
   // IH/ID are the amount to add to the actual RA/Dec to arrive at the correct position
@@ -68,10 +68,9 @@ boolean syncEqu(double RA, double Dec) {
   IH=HA-HA1;
   ID=Dec-(double)((long int)targetDec.part.m)/(double)StepsPerDegreeDec;
 
-#ifndef SYNC_ANYWHERE_ON
   if ((abs(ID)>30.0) || (abs(IH)>2.0)) { IH=0; ID=0; return false; }
-#endif
   return true;
+#endif  
 }
 
 // this returns the telescopes HA and Dec (index corrected for Alt/Azm)
