@@ -163,13 +163,40 @@
  *
  */
  
-#include "EEPROM.h"
 #include "math.h"
 #include "errno.h"
 // Use Config.h to configure OnStep to your requirements 
 #include "Config.h"
 #include "Library.h"
 #include "FPoint.h"
+
+// There is a bug in Arduino/Energia which ignores #ifdef preprocessor directives when generating a list of files to link and hence it links all libraries from #include files (even the ones which should be ignored).
+// Until this is fixed YOU MUST MANUALLY COMMENT OUT all the #include lines below which are not for your device!!!
+#if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+#include "Energia.h"
+#include <driverlib/timer.h>
+#include <driverlib/sysctl.h>
+#include <driverlib/interrupt.h>
+#include "inc/hw_ints.h"
+
+// Energia only has EEPROM.read and EEPROM.write, it does not include EEPROM.update. My patch has been accepted but it will take a while until the next version is released. Until then you can use the included EEPROM_LP.ino and EEPROM_LP.h.
+#include "EEPROM_LP.h"
+
+#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+// Again, It is not honoring the #ifdef directives. Until the bug is fixed you need to uncomment this line manually for TM4C1294.
+#include "Ethernet.h"
+#endif
+
+#else // standard Arduino environment
+//#include "EEPROM.h"
+#endif
+
+#if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
+#define F_BUS SysCtlClockGet() // no pre-scaling of timers on Tiva Launchpads
+#elif defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+// There is a bug with SysCtlClockGet and TM4C1294 MCUs. At the moment we just hardcode the value and set the cpu frequency manually at the start of setup()
+#define F_BUS 120000000 
+#endif
 
 // firmware info, these are returned by the ":GV?#" commands
 #define FirmwareDate   "12 01 15"
@@ -254,12 +281,55 @@ volatile boolean useTimerRateRatio = (StepsPerDegreeHA!=StepsPerDegreeDec);
 #define SecondsPerWormRotation  ((long)(StepsPerWormRotation/StepsPerSecond))
 #define StepsPerSecondDec       ((double)(StepsPerDegreeDec/3600.0)*15.0)
 
+#if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+#define cli() noInterrupts()
+#define sei() interrupts()
+#endif
+
 #if defined(__arm__) && defined(TEENSYDUINO)
 IntervalTimer itimer3;
 void TIMER3_COMPA_vect(void);
 
 IntervalTimer itimer4;
 void TIMER4_COMPA_vect(void);
+
+#elif defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+// Energia does not have IntervalTimer so we have to initialise timers manually
+
+void TIMER1_COMPA_vect(void); // it gets initialised here and not in timer.ino
+
+//Timer itimer3;
+void TIMER3_COMPA_vect(void);
+
+//Timer itimer4;
+void TIMER4_COMPA_vect(void);
+#endif
+
+#if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
+#define Sysctl_Periph_Timer1 SYSCTL_PERIPH_TIMER1
+#define Timer1_base TIMER1_BASE
+#define Int_timer1 INT_TIMER1A
+
+#define Sysctl_Periph_Timer3 SYSCTL_PERIPH_TIMER2
+#define Timer3_base TIMER2_BASE
+#define Int_timer3 INT_TIMER2A
+
+#define Sysctl_Periph_Timer4 SYSCTL_PERIPH_TIMER3
+#define Timer4_base TIMER3_BASE
+#define Int_timer4 INT_TIMER3A
+
+#elif defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+#define Sysctl_Periph_Timer1 SYSCTL_PERIPH_TIMER1
+#define Timer1_base TIMER1_BASE
+#define Int_timer1 INT_TIMER1A
+
+#define Sysctl_Periph_Timer3 SYSCTL_PERIPH_TIMER2
+#define Timer3_base TIMER2_BASE
+#define Int_timer3 INT_TIMER2A
+
+#define Sysctl_Periph_Timer4 SYSCTL_PERIPH_TIMER3
+#define Timer4_base TIMER3_BASE
+#define Int_timer4 INT_TIMER3A
 #endif
 
 // Location ----------------------------------------------------------------------------------------------------------------
@@ -304,13 +374,21 @@ int    maxAlt;                                    // the maximum altitude, in de
 
 // Stepper/position/rate ----------------------------------------------------------------------------------------------------
 
+#if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+#define CLR(x,y) (GPIOPinWrite(x,y,0))
+#define SET(x,y) (GPIOPinWrite(x,y,y))
+#define TGL(x,y) (GPIOPinRead(x,y)==0?GPIOPinWrite(x,y,y):GPIOPinWrite(x,y,0)) // untested, not used in current version
+#else
 #define CLR(x,y) (x&=(~(1<<y)))
 #define SET(x,y) (x|=(1<<y))
 #define TGL(x,y) (x^=(1<<y))
+#endif
 
 // I set the pin usage to facilitate easy connection of jumper cables
 // for now, the #defines below are used to program the port modes using the standard Arduino library
 
+// defines for direct port control
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 // The PEC index sense is a 5V logic input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
 #define PecPin     2
 
@@ -327,9 +405,6 @@ int    maxAlt;                                    // the maximum altitude, in de
 #define Dec5vPin   5       // Pin 5 (5V?)   PE3
 #define DecStepPin 6       // Pin 6 (Step)  PH3
 #define DecGNDPin  7       // Pin 7 (GND)   PH4
-
-// defines for direct port control
-#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 
 #define LEDneg2Pin 10      // Pin 10 (GND)  PB4
 
@@ -392,6 +467,22 @@ int    maxAlt;                                    // the maximum altitude, in de
 #endif
 
 #elif defined(__arm__) && defined(TEENSYDUINO)
+// The PEC index sense is a 5V logic input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
+#define PecPin     2
+
+// The limit switch sense is a 5V logic input which uses the internal pull up, shorted to ground it stops gotos/tracking
+#define LimitPin   3
+
+// The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
+//                                  Atmel   2560
+#define LEDposPin  8       // Pin 8 (LED)   PH5
+#define LEDnegPin  9       // Pin 9 (GND)   PH6
+
+// The HA(RA) and Dec jumpers (going to the big easy drivers) are simply four wire jumper cables, each has identical wiring - simple modular construction
+#define DecDirPin  4       // Pin 4 (Dir)   PG5
+#define Dec5vPin   5       // Pin 5 (5V?)   PE3
+#define DecStepPin 6       // Pin 6 (Step)  PH3
+#define DecGNDPin  7       // Pin 7 (GND)   PH4
 
 #define LEDneg2Pin 7       // Pin 7 (GND)
 
@@ -445,7 +536,157 @@ int    maxAlt;                                    // the maximum altitude, in de
 #define ST4DEn     26      // Pin 26 ST4 DE+ North
 #define ST4RAe     27      // Pin 27 ST4 RA+ East
 
+#elif defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
+// Note that TM4C123 has resistors R9 anr R10 between pins 14 (B6) and 23 (D0) and between pins 15 (B7) and 24 (D1)
+// Make sure you look at the list of the pins and options to avoid clashes or desolder the two bridges
+// These pins are used for DE_M2 (14) and DE_M3 (15) and for DecDirPin (23) and Dec5VPin (24)
+// If you have defined DE_MODE_OFF in Config.h you should be safe to leave things as they are.
+
+// Also note that we are using UART1 and UART 5 which use pins 3-6
+
+// The PEC index sense is a 5V logic input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
+#define PecPin     11      // Pin A2
+
+// The limit switch sense is a 5V logic input which uses the internal pull up, shorted to ground it stops gotos/tracking
+#define LimitPin   12      // Pin A3
+
+// The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
+#define LEDposPin  2       // Pin B5 (LED)
+#define LEDnegPin  33      // Pin D6 (GND)
+
+
+// The HA(RA) and Dec jumpers (going to the big easy drivers) are simply four wire jumper cables, each has identical wiring - simple modular construction
+#define DecDirPin  23       // Pin D0 (Dir)
+#define Dec5vPin   24       // Pin D1 (5V?)
+#define DecStepPin 25       // Pin D2 (Step)
+#define DecGNDPin  26       // Pin D3 (GND)
+
+#define LEDneg2Pin 26       // Pin D3 (GND)
+
+// The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
+#define PpsPin     19      // Pin B2 (PPS time source, GPS for example)
+
+#define HADirPin   27      // Pin E1 (Dir)
+#define HA5vPin    28      // Pin E2 (5V?)
+#define HAStepPin  29      // Pin E3 (Step)
+// Pin GND (GND)
+// Pins to enable/disable the stepper drivers and set microstep mode, optional and normally just hard-wired (DRV8825)/ignored (BED-A4988)
+#define HA_M0      34      // Pin C7 (Microstep Mode 0)
+#define HA_M1      35      // Pin C6 (Microstep Mode 1)
+#define HA_M2      36      // Pin C5 (Microstep Mode 2)
+#define HA_EN      37      // Pin C4 (Enabled when LOW)
+#define HA_FAULT   38      // Pin B3 (Fault if LOW)
+
+#define DE_M0      13      // Pin A4 (Microstep Mode 0)
+#define DE_M1      14      // Pin B6 (Microstep Mode 1) IF USED MAKE SURE YOU DESOLDER A BRIDGE or change pins around, otherwise pin 14 is connected to pin 23
+#define DE_M2      15      // Pin B7 (Microstep Mode 2) IF USED MAKE SURE YOU DESOLDER A BRIDGE or change pins around, otherwise pin 15 is connected to pin 24
+#define DE_EN      18      // Pin E0 (Enabled when LOW)
+#define DE_FAULT   17      // Pin F0 (Fault if LOW) NOTE, this is connected to pushbutton switch 2
+
+#define LEDposBit  GPIO_PIN_5       // Pin 2
+#define LEDposPORT GPIO_PORTB_BASE   //
+#define LEDnegBit  GPIO_PIN_6       // Pin 33
+#define LEDnegPORT GPIO_PORTD_BASE   //
+#define LEDneg2Bit GPIO_PIN_3       // Pin 26
+#define LEDneg2PORT GPIO_PORTD_BASE  //
+
+#define DecDirBit  GPIO_PIN_0       // Pin 23=D0=B6 = pin 14
+#define DecDirPORT GPIO_PORTD_BASE   //
+#define Dec5vBit   GPIO_PIN_1       // Pin 24=D1=B7 = pin 15
+#define Dec5vPORT  GPIO_PORTD_BASE   //
+#define DecStepBit GPIO_PIN_2       // Pin 25
+#define DecStepPORT GPIO_PORTD_BASE  //
+#define DecGNDBit  GPIO_PIN_3       // Pin 26
+#define DecGNDPORT GPIO_PORTD_BASE   //
+
+#define HADirBit   GPIO_PIN_1       // Pin 27
+#define HADirPORT  GPIO_PORTE_BASE   //
+#define HA5vBit    GPIO_PIN_2       // Pin 28
+#define HA5vPORT   GPIO_PORTE_BASE   //
+#define HAStepBit  GPIO_PIN_3       // Pin 29
+#define HAStepPORT GPIO_PORTE_BASE   //
+
+// ST4 interface
+#define ST4RAw     7      // Pin B4 ST4 RA- West
+#define ST4DEs     8      // Pin A5 ST4 DE- South
+#define ST4DEn     9      // Pin A6 ST4 DE+ North
+#define ST4RAe     10     // Pin A7 ST4 RA+ East
+
+#elif defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+// No need to desolder anything on this launchpad as pins we are using are not bridged
+
+// Note that we are using UART7 and UART 5 which use pins 3-5 and pin 8 (C4,C5,C6,C7)
+
+// The PEC index sense is a 5V logic input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
+#define PecPin     11      // Pin P2
+
+// The limit switch sense is a 5V logic input which uses the internal pull up, shorted to ground it stops gotos/tracking
+#define LimitPin   12      // Pin N3
+
+// The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
+#define LEDposPin  2       // Pin E4 (LED)
+#define LEDnegPin  33      // Pin L1 (GND)
+
+
+// The HA(RA) and Dec jumpers (going to the big easy drivers) are simply four wire jumper cables, each has identical wiring - simple modular construction
+#define DecDirPin  23       // Pin E0 (Dir)
+#define Dec5vPin   24       // Pin E1 (5V?)
+#define DecStepPin 25       // Pin E2 (Step)
+#define DecGNDPin  26       // Pin E3 (GND)
+
+#define LEDneg2Pin 26       // Pin E3 (GND)
+
+// The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
+#define PpsPin     19      // Pin M3 (PPS time source, GPS for example)
+
+#define HADirPin   27      // Pin D7 (Dir)
+#define HA5vPin    28      // Pin A6 (5V?)
+#define HAStepPin  29      // Pin M4 (Step)
+// Pin GND (GND)
+// Pins to enable/disable the stepper drivers and set microstep mode, optional and normally just hard-wired (DRV8825)/ignored (BED-A4988)
+#define HA_M0      34      // Pin L0 (Microstep Mode 0)
+#define HA_M1      35      // Pin L5 (Microstep Mode 1)
+#define HA_M2      36      // Pin L4 (Microstep Mode 2)
+#define HA_EN      37      // Pin G0 (Enabled when LOW)
+#define HA_FAULT   38      // Pin F3 (Fault if LOW)
+
+#define DE_M0      13      // Pin N2 (Microstep Mode 0)
+#define DE_M1      14      // Pin D0 (Microstep Mode 1)
+#define DE_M2      15      // Pin D1 (Microstep Mode 2)
+#define DE_EN      18      // Pin H2 (Enabled when LOW)
+#define DE_FAULT   17      // Pin H3 (Fault if LOW) NOTE, this is connected to pushbutton switch 2
+
+#define LEDposBit  GPIO_PIN_4       // Pin 2
+#define LEDposPORT GPIO_PORTE_BASE   //
+#define LEDnegBit  GPIO_PIN_1       // Pin 33
+#define LEDnegPORT GPIO_PORTL_BASE   //
+#define LEDneg2Bit GPIO_PIN_3       // Pin 26
+#define LEDneg2PORT GPIO_PORTE_BASE  //
+
+#define DecDirBit  GPIO_PIN_0       // Pin 23
+#define DecDirPORT GPIO_PORTE_BASE   //
+#define Dec5vBit   GPIO_PIN_1       // Pin 24
+#define Dec5vPORT  GPIO_PORTE_BASE   //
+#define DecStepBit GPIO_PIN_2       // Pin 25
+#define DecStepPORT GPIO_PORTE_BASE  //
+#define DecGNDBit  GPIO_PIN_3       // Pin 26
+#define DecGNDPORT GPIO_PORTE_BASE   //
+
+#define HADirBit   GPIO_PIN_7       // Pin 27
+#define HADirPORT  GPIO_PORTD_BASE   //
+#define HA5vBit    GPIO_PIN_6       // Pin 28
+#define HA5vPORT   GPIO_PORTA_BASE   //
+#define HAStepBit  GPIO_PIN_4       // Pin 29
+#define HAStepPORT GPIO_PORTM_BASE   //
+
+// ST4 interface
+#define ST4RAw     7      // Pin D3 ST4 RA- West
+#define ST4DEs     6      // Pin C7 ST4 DE- South
+#define ST4DEn     9      // Pin B2 ST4 DE+ North
+#define ST4RAe     10     // Pin B3 ST4 RA+ East
+
 #endif
+
 
 #if defined(HA_DISABLED_HIGH)
 #define HA_Disabled HIGH
@@ -561,6 +802,11 @@ char command_serial_one[25];
 char parameter_serial_one[25];
 byte bufferPtr_serial_one= 0;
 
+// for ethernet
+char command_ethernet[25];
+char parameter_ethernet[25];
+byte bufferPtr_ethernet= 0;
+
 // Misc ---------------------------------------------------------------------------------------------------------------------
 #define Rad 57.29577951
 
@@ -622,6 +868,12 @@ int reticuleBrightness=RETICULE_LED_PINS;
 #endif
 #if defined(__arm__) && defined(TEENSYDUINO)
 #define reticulePin 9
+#endif
+#if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
+#define reticulePin 33
+#endif
+#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+#define reticulePin 33
 #endif
 #endif
 
@@ -740,6 +992,11 @@ char ST4DE_last = 0;
 byte PEC_buffer[PECBufferSize];
 
 void setup() {
+#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+  // due to a bug we set the frequency manually here
+  uint32_t g_ui32SysClock = SysCtlClockFreqSet((SYSCTL_XTAL_25MHZ | SYSCTL_OSC_MAIN | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), F_BUS);
+#endif
+
 // initialize some fixed-point values
   amountGuideHA.fixed=0;
   amountGuideDec.fixed=0;
@@ -860,6 +1117,8 @@ void setup() {
   attachInterrupt(PpsInt,ClockSync,RISING);
 #elif defined(__arm__) && defined(TEENSYDUINO)
   attachInterrupt(PpsPin,ClockSync,RISING);
+#elif defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+  attachInterrupt(PpsPin,ClockSync,RISING);
 #endif
 #endif
 
@@ -937,8 +1196,69 @@ void setup() {
   timerRateBacklashHA =timerRateHA /BacklashTakeupRate;
   timerRateBacklashDec=timerRateDec/BacklashTakeupRate;
 
+#if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+  // need to initialise timers before using SetSiderealClockRate
+  // all timers are 32 bits
+  // timer 1A is used instead of itimer1
+  // timer 2A is used instead of itimer3
+  // timer 3A is used instead of itimer4
+
+  // Enable Timer 1 Clock
+  SysCtlPeripheralEnable(Sysctl_Periph_Timer1);
+
+  // Configure Timer Operation as Periodic
+  TimerConfigure(Timer1_base, TIMER_CFG_PERIODIC);
+
+  // register interrupt without editing the startup Energia file
+  //IntRegister( INT_TIMER1A, TIMER1_COMPA_vect );
+  TimerIntRegister(Timer1_base, TIMER_A, TIMER1_COMPA_vect );
+
+  // Enable Timer 1A interrupt
+  IntEnable(Int_timer1);
+
+  // Timer 1A generate interrupt when Timeout occurs
+  TimerIntEnable(Timer1_base, TIMER_TIMA_TIMEOUT);
+
+  // Configure Timer Frequency - initialize the timers that handle the sidereal clock, RA, and Dec
+  SetSiderealClockRate(siderealInterval);
+
+  // Start Timer 1A
+  TimerEnable(Timer1_base, TIMER_A);
+
+
+
+  // we also initialise timer 2A and 3A here as they may get used uninitialised from
+  // the interrupt for timer 1 if it gets triggered in the meantime
+  // we will not start them yet though
+
+  // Enable Timer 2 and 3 Clocks
+  SysCtlPeripheralEnable(Sysctl_Periph_Timer3);
+  SysCtlPeripheralEnable(Sysctl_Periph_Timer4);
+
+  // Configure Timer Operation as Periodic
+  TimerConfigure(Timer3_base, TIMER_CFG_PERIODIC);
+  TimerConfigure(Timer4_base, TIMER_CFG_PERIODIC);
+
+  // register interrupts without editing the startup Energia file
+  //IntRegister( INT_TIMER2A, TIMER3_COMPA_vect );
+  //IntRegister( INT_TIMER3A, TIMER4_COMPA_vect );
+  TimerIntRegister(Timer3_base, TIMER_A, TIMER3_COMPA_vect );
+  TimerIntRegister(Timer4_base, TIMER_A, TIMER4_COMPA_vect );
+
+  // Enable Timer 2A and 3A interrupts
+  IntEnable(Int_timer3);
+  IntEnable(Int_timer4);
+
+  // Timer 2A and 3A generate interrupt when Timeout occurs
+  TimerIntEnable(Timer3_base, TIMER_TIMA_TIMEOUT);
+  TimerIntEnable(Timer4_base, TIMER_TIMA_TIMEOUT);
+
+  //IntMasterEnable(); // not sure if needed, it works without
+#else
   // initialize the timers that handle the sidereal clock, RA, and Dec
   SetSiderealClockRate(siderealInterval);
+#endif
+
 #if defined(__AVR__)
   if (StepsPerSecond<31)
     TCCR3B = (1 << WGM12) | (1 << CS10) | (1 << CS11);  // ~0 to 0.25 seconds   (4 steps per second minimum, granularity of timer is 4uS)   /64 pre-scaler
@@ -965,11 +1285,26 @@ void setup() {
   // set the motor timers to run at the highest priority
   NVIC_SET_PRIORITY(IRQ_PIT_CH1, 0);
   NVIC_SET_PRIORITY(IRQ_PIT_CH2, 0);
+
+#elif defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+  TimerLoadSet(Timer3_base, TIMER_A, (int) (F_BUS / 1000000 * 128 * 0.0625));
+  TimerLoadSet(Timer4_base, TIMER_A, (int) (F_BUS / 1000000 * 128 * 0.0625));
+
+  // Start Timer 2A and 3A
+  TimerEnable(Timer3_base, TIMER_A);
+  TimerEnable(Timer4_base, TIMER_A);
+
+  IntPrioritySet(Int_timer1, 1);
+  IntPrioritySet(Int_timer3, 0);
+  IntPrioritySet(Int_timer4, 0);
 #endif
 
   // get ready for serial communications
   Serial1_Init(9600);
-  Serial_Init(9600);
+  Serial_Init(9600); // for Tiva TM4C the serial is redirected to serial5 in serial.ino file
+
+  // get ready for Ethernet communications
+  Ethernet_Init();
   
   // get the site information, if a GPS were attached we would use that here instead
   currentSite=EEPROM.read(EE_currentSite);  if (currentSite>3) currentSite=0; // site index is valid?
