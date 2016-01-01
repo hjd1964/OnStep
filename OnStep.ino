@@ -1303,8 +1303,10 @@ void setup() {
   Serial1_Init(9600);
   Serial_Init(9600); // for Tiva TM4C the serial is redirected to serial5 in serial.ino file
 
+#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
   // get ready for Ethernet communications
   Ethernet_Init();
+#endif
   
   // get the site information, if a GPS were attached we would use that here instead
   currentSite=EEPROM.read(EE_currentSite);  if (currentSite>3) currentSite=0; // site index is valid?
