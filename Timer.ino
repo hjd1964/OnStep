@@ -164,7 +164,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
       if ((guideDirHA=='b') && (fabs(x)<2)) { guideDirHA=0; guideTimerRateHA=0; guideTimerRateHA1=0;}
     }
 
-    double timerRateHA1=1.0; if ((guideDirHA || guideDirDec) && (activeGuideRate>GuideRate1x)) timerRateHA1=0.0;
+    double timerRateHA1=1.0; if ((guideDirHA) && (activeGuideRate>GuideRate1x)) timerRateHA1=0.0;
     double timerRateHA2=fabs(guideTimerRateHA1+pecTimerRateHA+timerRateHA1);
     // round up to run the motor timers just a tiny bit slow, then adjust below if we start to fall behind during sidereal tracking
     if (timerRateHA2>0.5) calculatedTimerRateHA=ceil((double)SiderealRate/timerRateHA2); else calculatedTimerRateHA=ceil((double)SiderealRate*2.0);
