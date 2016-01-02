@@ -151,7 +151,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     if ((!inBacklashHA) && (guideDirHA)) {
       if ((fabs(guideTimerRateHA)<10.0) && (fabs(guideTimerRateHA1)<10.0)) {
         // break mode
-        if (guideDirDec=='b') guideTimerRateHA=1.0;
+        if (guideDirHA=='b') guideTimerRateHA=1.0;
         // slow speed guiding, no acceleration
         guideTimerRateHA1=guideTimerRateHA; 
       } else {
