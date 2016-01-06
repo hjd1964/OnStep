@@ -3,7 +3,7 @@
 
 boolean serial_zero_ready = false;
 boolean serial_one_ready = false;
-#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
 boolean ethernet_ready = false;
 #endif
 // for align
@@ -25,20 +25,20 @@ void processCommands() {
 
     if ((Serial_available() > 0) && (!serial_zero_ready)) { serial_zero_ready = buildCommand(Serial_read()); }
     if ((Serial1_available() > 0) && (!serial_one_ready)) { serial_one_ready = buildCommand_serial_one(Serial1_read()); }
-#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
     if ((Ethernet_available() > 0) && (!ethernet_ready)) { ethernet_ready = buildCommand_ethernet(Ethernet_read()); }
 #endif
 
     if (Serial_transmit()) return;
     if (Serial1_transmit()) return;
-#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
     if (Ethernet_transmit()) return;
 #endif
     
     process_command = COMMAND_NONE;
     if (serial_zero_ready)     { strcpy(command,command_serial_zero); strcpy(parameter,parameter_serial_zero); serial_zero_ready=false; clearCommand_serial_zero(); process_command=COMMAND_SERIAL; }
     else if (serial_one_ready) { strcpy(command,command_serial_one);  strcpy(parameter,parameter_serial_one);  serial_one_ready=false;  clearCommand_serial_one();  process_command=COMMAND_SERIAL1; }
-#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
     else if (ethernet_ready) {strcpy(command,command_ethernet);  strcpy(parameter,parameter_ethernet);  ethernet_ready=false;  clearCommand_ethernet();  process_command=COMMAND_ETHERNET; }
 #endif
     else return;
@@ -849,7 +849,7 @@ the pdCor  term is 1 in HA
           if (process_command==COMMAND_SERIAL) {
             Serial_print("1"); while (Serial_transmit()); delay(20); Serial_Init(baudRate[i]);
           } else if (process_command==COMMAND_ETHERNET) {
-#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
              Ethernet_print("1"); while (Ethernet_transmit()); delay(20);
 #endif
           } else  {
@@ -1254,7 +1254,7 @@ the pdCor  term is 1 in HA
         Serial1_print(reply);
       }
 
-#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
       if (process_command==COMMAND_ETHERNET) {
 #ifdef CHKSUM0_ON
         // calculate the checksum
@@ -1376,7 +1376,7 @@ boolean clearCommand_serial_one() {
   return true;
 }
 
-#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
 // Build up a command
 boolean buildCommand_ethernet(char c) {
   // return if -1 is received (no data)
