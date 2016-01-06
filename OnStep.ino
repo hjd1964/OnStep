@@ -42,7 +42,7 @@
 #include "TM4C.h"
 // There is a bug in Arduino/Energia which ignores #ifdef preprocessor directives when generating a list of files
 // Until this is fixed YOU MUST MANUALLY UN-COMMENT the #include line below if using the Launchpad Connected device
-#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
 //#include "Ethernet.h"
 #endif
 
