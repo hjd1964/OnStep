@@ -849,9 +849,10 @@ the pdCor  term is 1 in HA
           if (process_command==COMMAND_SERIAL) {
             Serial_print("1"); while (Serial_transmit()); delay(20); Serial_Init(baudRate[i]);
           } else if (process_command==COMMAND_ETHERNET) {
-            Ethernet_print("1"); while (Ethernet_transmit()); delay(20);
-          }
-          else  {
+#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+             Ethernet_print("1"); while (Ethernet_transmit()); delay(20);
+#endif
+          } else  {
             Serial1_print("1"); while (Serial1_transmit()); delay(20); Serial1_Init(baudRate[i]); 
           }
           quietReply=true; 
@@ -878,7 +879,6 @@ the pdCor  term is 1 in HA
 //          Return: 0 on failure
 //                  1 on success
       if (command[1]=='G')  { 
-        boolean result = false;
         if (strlen(parameter)<7) {
           double f=0.0;
           char *temp=strchr(parameter,':'); long p=(long)(temp - parameter); if (p<0L) p=strlen(parameter); if ((unsigned long)p>strlen(parameter)) p=strlen(parameter);
@@ -1254,6 +1254,7 @@ the pdCor  term is 1 in HA
         Serial1_print(reply);
       }
 
+#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
       if (process_command==COMMAND_ETHERNET) {
 #ifdef CHKSUM0_ON
         // calculate the checksum
@@ -1264,7 +1265,8 @@ the pdCor  term is 1 in HA
 #endif
         if (!supress_frame) strcat(reply,"#");
         Ethernet_print(reply);
-      } 
+      }
+#endif       
       }
       quietReply=false;
    }
