@@ -2,7 +2,7 @@
  * Title       On-Step
  * by          Howard Dutton
  *
- * Copyright (C) 2012 to 2015 Howard Dutton
+ * Copyright (C) 2012 to 2016 Howard Dutton
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,137 +19,7 @@
  *
  * 
  *
- * Revision History
- *
- * Date                Version           Comment
- * 08-12-2012          0.1               Basic function, implemented ISR, moves steppers around
- * 09-15-2012          0.5               First working version, no PEC or align
- * 11-12-2012          0.90              PEC and one star align implemented
- * 11-30-2012          0.92              Working and tested except for PEC and 2/3 star align
- * 02-09-2013          0.94              PEC appears to be working, still need to test 2/3 star align
- * 02-21-2013          0.96              Support for Mega-2560/two channel serial control, ISR overhaul and fixed timing related problems
- * 02-25-2013          0.98              Optional outgoing checksum for both serial channels
- * 02-27-2013          0.99a1            Support for differing RA/Dec gear ratios, Timer0 disabled and millis() replaced
- * 03-31-2013          0.99a2            Optional checksum for both serial channels is now bidirectional, delay() replaced
- *                                       Corrected a logic bug in the PEC routine.  MinAlt was limited to 0-90 range, -30 to 30 deg range is
- *                                       now used, storage format adjusted. TimeZone storage format was adjusted slightly, issue an :SG??# before use
- *                                       Park delays adjusted for quicker operation
- *                                       PEC improvements, new command to clear PEC buffer, PEC recording averages 2:1 favoring the buffer,
- *                                       PEC playback is now adjusted to be one second prior to the recorded value in the sequence
- *                                       Added new PEC readout mode for live visualization
- * 04-04-2013          0.99a3            Sidereal tracking for various StepsPerSecond is now automatic and no longer requires programming for setup
- * 04-09-2013          0.99a4            PEC correction for working in the eastern sky.  Re-enabled Timer0, tracking rates are now
- *                                       based on Timer0 with the hundreth/second sidereal clock synced to it.  Fixed minor bug in Sync command,
- *                                       now works correctly in the eastern sky
- * 05-03-2013          0.99a5            Minor command-set changes for better LX200 protocol compatibility
- * 05-10-2013          0.99a6            Command processing code clean-up from above command-set changes, support for "ACK - Alignment Query" command on Mega-2560 only
- * 06-05-2013          0.99a7            Added commands :WR+# and :WR-#, to shift the (in static memory) PEC table ahead or back a second.
- *                                       Corrected bug, ID index/offset value needs to be reversed with Meridian flip.
- *                                       Corrected bug, mount won't park properly with backlash values set.  Incorrectly calculated delay (int overflow).
- *                                       Added command :GXnn# to return various internal values from OnStep.  ID and IH are the only ones defined so far.
- *                                       Added ability to supply 5V power to the logic side of stepper drivers that lack onboard regulators.
- * 06-09-2013          0.99a8            Corrected bug, when a meridian flip will be required, Declination of the goto needs a correction applied 
- *                                       (for ID index/offset) before the goTo function is called.  
- *                                       Cleanup of direction changing code in ISR, faster and smaller code.
- * 09-01-2013          0.99a9            Declination movement was in the wrong direction for my setup, reversed CLR(); else SET(); in Timer.ino 
- * 09-21-2013          0.99a10           Fixes to initialization code, EEPROM reads should have been writes.
- * 10-14-2013          0.99a11           Fixed HA/RA and Dec ability to reverse direction in initialization.
- * 11-14-2013          0.99b1            Fixed "creep" in HA/RA and Dec during guiding and backlash compensation.  Also fixed tracking oscillation in HA/RA at
- *                                       certain guide rates (sidereal tracking and guiding interacting with backlash compensation).  Improved method of applying
- *                                       stepper motor high-speed takeup during backlash compensation.  Added option to easily adjust backlash takeup rate.
- * 11-22-2013          0.99b2            Minor DEBUG mode fixes.
- * 11-22-2013          0.99b3            Minor DEC_RATIO fixes.
- * 11-23-2013          0.99b4            MinAlt was being written to EEPROM incorrectly on set. MasterSiderealInterval should have been initialized only once.
- * 12-15-2013          0.99x1            Now uses Timer3 and Timer4 to control HA/Dec step rates.  Variables that hold/control slew rates expanded from int to long.
- *                                       Recalculation of various slew rates and sidereal clock rate.  I still would like to write my own Serial port code since
- *                                       commands being sent/recieved by the Arduino library code disturbs the stepping pulses.
- * 12-23-2013          0.99x2            Removed support for atmega328 and obsolete "debug mode" code.  Various sidereal timing fixes.  Serial communication code no-longer
- *                                       uses Arduino libraries for smaller size and higher performance.
- * 12-29-2013          0.99x3            Renamed variables to better reflect their use.
- * 01-16-2014          0.99x4            Changes to setPark, faster backlash takeup and compatibility with 32 uStep stepper motor drivers
- * 01-24-2014          0.99x5            Fixed references for reversing HA/Dec directions, added white-space striping to routines in Astro.ino, 
- *                                       serial1 no-longer ends replys with /r/n in Command.ino 
- * 01-28-2014          0.99x6            Fixed bug in serial1 transmit function *
- * 04-17-2014          0.99x7            Fixed successful syncEqu() undefined return
- * 04-21-2014          0.99x8            Set-park delay adjusted to allow for larger backlash values
- * 04-24-2014          0.99x9            Fixed minor bug in :VW# command (PEC stepsPerWormRotation)
- * 05-02-2014          0.99x10           Fixed bug when parking near the meridian and cleaned up serial protocol for better compatability
- * 05-04-2014          0.99x11           LX200 Protocol fix, commands returning 1/0 success/failure (or numeric status, for example :MS#) now omit the '#' framing character
- *                                       this requires updated ASCOM drivers and Hand controller App but brings better compatibility with LX200 protocol software
- * 05-05-2014          0.99x12           Added fast PEC readout command ":VrNNNN#"
- * 05-22-2014          0.99x13           Added guiding to status command ":GU#"
- * 05-29-2014          0.99x14           Added feature. First-time uploads of OnStep will burn defaults into EEPROM automatically now
- *                                       *** this will overwrite your parking info, goto limits, etc. (once) when upgrading to this version unless you set INIT_KEY to true  ***
- *                                       *** if upgrading from a prior version, set INIT_KEY to true and uploaded then back to false and upload again                        ***
- *                                       *** those uploading for the first time or upgrading from the main branch should just leave INIT_KEY alone (false)                   ***
- * 06-05-2014          0.99x15           Fixed RESCUE_MODE code, thanks to N_DD for pointing this out.
- * 06-20-2014          0.99b16           Merged Paul Stoffregen's Teensy3.1 support code
- * 06-20-2014          0.99b17           Removed redundant legacy clock sync code, fixed T+/T- commands writing long SiderealInterval as an int into EEPROM
- *                                       reworked interrupt initialization code, added Paul's suggested interrupt prioritization code
- *                                       added 2uS delay to Timer3/4 ISR's to keep stepper drivers, etc. in spec. also switched to fixed prescaler in Timer3/4 on AVR
- *                                       fixed abortSlew bug in MoveTo.  changed pins for RA stepper on Teensy.  added support for LX200 like commands to get/set 
- *                                       tracking rate (this very slightly breaks OnStep's ASCOM driver and requires driver v1.16 to work properly.)
- * 06-23-2014          0.99b18           Refinement of tracking commands in Command.ino, fixed Park/Unpark bug (int temporary storage should be long) in Park.ino and OnStep.ino
- * 06-23-2014          0.99b19           Fixes to Timer.ino and OnStep.ino to reduce jitter on Teensy3.1
- * 07-22-2014          1.0a1             Changed logic of tracking rate command :TQ#, now only stores the custom sidereal rate (and any changes +/-) in EEPROM
- * 08-04-2014          1.0a2             Switched to running the motor timers at the sidereal rate. Support added for goto/operation under the celestial pole
- *                                       Safety check code, should keep mount from tracking past the meridian limit, below horizon limit, or above the overhead limit
- * 09-07-2014          1.0a3             Getting blank site names causes problems so "None" is now returned for empty site names. Added commands to return backlash values.
- * 09-08-2014          1.0a4             Code to allow operation in the southern hemisphere (declination of the "celestial pole" changes between NCP +90 and SCP -90 based on latitude.)
- *                                       RA motor direction is also reversed verses north latitude setting.  Added code to stop Gotos with :Q# command.
- * 09-29-2014          1.0a5             When ready to start/resume playing PEC, the playback rate is now raised so the motors quickly arrive at the new position in the playback sequence.
- *                                       This is needed due to the changes made in 1.0a2  Goto minimum rate is now 4x sidereal, makes more sense to stay a little fast as we approach the target.
- *                                       Cleaned up code, renamed some variables, fixed backlash/tracking rate problem, and added some comments in Timer.ino  
- *                                       Fixed goto meridian flip logic problem and generally cleaned up the goto initiation code.
- *                                       Fixed altitude calculation used for limits, horizon and overhead limits now stop tracking.
- * 10-01-2014          1.0a6             Numerous performance related tweeks.  Fixed gotos that involve a meridian flip, they now arrive closer to their destination.
- *                                       underPoleLimit can now be set to values other than the default of 9 hours. Added safety code to stop the mount when tracking past this limit
- * 10-04-2014          1.0a7             Fixes to recently added code to keep 'scope from exceeding safety limits during meridian flips.  Added experimental align model code for cone error.
- * 10-06-2014          1.0a8             First successful test of two star align, compensates for Polar altitude misalignment.  Simple change keeps GetEqu (lots of floating point trig) from needing 
- *                                       to be run twice when :GR# and :GD# are run and/or more than once a second during goto's.
- * 10-10-2014          1.0b1             Added :AW# command to write align model to EEPROM without having to do a Set Park.  Added doCor and pdCor alignment coefficients to values saved in EEPROM.
- *                                       Reworked/added the PD and DO alignment model calculations. Refined code that determines coefficient values during the alignment process
- * 10-14-2014          1.0b2             More pointing model refinement.  Added code to correct destination coordinates when doing meridian flips.  
- *                                       Changed code that reads model coefficients (:GX#), added code to write (:SX#) them.
- * 10-17-2014          1.0b3             Added code to disable the stepper drivers until Align is started and while Parked:  Mega2650 uses Pin 25 for RA and 29 for Dec. (Teensy3.1 Pin 16 Dec and 20 RA)
- *                                       Added code to set stepper driver ustep mode:  Mega2560 uses Pins 22,23,24 for M0,M1,M2 (RA) and Pins 26,27,28 for Dec (Teensy3.1 13,14,15 for Dec and 17,18,19 for RA)
- *                                       Added code to support limit switch on pin 3
- * 10-29-2014          1.0b4             Updated step generation code for sidereal tracking and guiding, allows better performance and non-integral StepsPerSecond rates
- *                                       Finished code to enable dynamic tracking rate compensation for refraction.  Added code to allow use of PEC index sense feature
- *                                       New commands :Te# :Td# turn refraction tracking on/off, :VH# reads PEC HALL sensor position in seconds
- * 10-31-2014          1.0b5             Added code for GPS PPS sync. and Timer1 now runs at clock /3 instead of /8 for higher accuracy
- * 11-06-2014          1.0b6             Changes to Timer.ino improve performance, lower timing jitter.  Improvements/fixes to guiding function.  Added PPS lock status to command :GU#.
- *                                       Moved configuration to a header file, cleaned up source code a bit.
- * 11-08-2014          1.0b7             ParkClearBacklash now uses the BacklashTakeupRate, doubled takeup time to fix bug.  Guide function now only "moves" once backlash takeup is finished.
- *                                       Switching SiderealClock down to a slightly less accurate /8 rate during gotos to save MPU cycles.  Adjusted PEC to temporarily fall out of play mode when
- *                                       guiding at >1x sidereal.  Cleaned up source code a bit more.  Fixed stepper driver mode/enable/fault pin assignments.
- * 12-09-2014          1.0b8             Added guide rate 0 at 0.25x the sidereal rate.  Rearranged Timer.ino so the Teensy3.1 should work with the micro-step mode switching feature.
- * 01-03-2015          1.0b9             Added PEC analog sensor index support.  Fixes to PEC, record now waits for beginning of buffer to start and PEC buffer overflow protection added. 
- *                                       PEC now stays active if position in buffer is lost when index support is turned on since it can recover from this.
- *                                       Added command to get the current pulseguide rate.  Added (optional) seperate pulse guide rate with memory.  Minor fix to smooth out guide after travel through backlash.
- * 01-13-2015          1.0b10            MaxRate can now be set by updated ASCOM driver, OnStep can optionally remember this setting when it changes.
- * 02-06-2015          1.0b11            Corrected sidereal rate bug, improvements to guiding responsiveness, status LEDS now provide more feedback.
- * 03-08-2015          1.0b12            Abandoned step rate generation logic method in favor of fixed point math for rate calculations.  Hopefully fixed Teensy3.1 micro-step mode switch during goto problems. 
- *                                       Initial support for fork mounts: polar home position HA=0, mode w/meridian flips completely disabled, mode with meridian flips enabled until align is complete.
- * 03-26-2015          1.0b13            Minor fix so OnStep remembers the MaxRate set by the ASCOM driver (when this is enabled in config.h) 
- * 03-30-2015          1.0b14            Fixes for goto micro-step mode switch on Mega2560 and PEC soft index detect. PEC Clear command now clears hard index too.
- * 04-13-2015          1.0b15            Fixes startup initialization of polar home position for southern hemisphere users
- * 04-28-2015          1.0b16            Added support for user defined object libraries.  There are up to 15 seperate libraries of which 14 are set aside for user object lists.  The total number of objects that
- *                                       can be stored depends on EEPROM size and PEC table size.  With the default 824 byte PEC table, the Mega2560 can store 192 objects and the Teensy3.1 can store 64.  
- *                                       Commands are :Lon# select catalog n, :LB# move back, :LN# move next, :LCn# move to catalog record n, :LI# get object info, :LW write object info, :LL# clear catalog, #L!# clear library.
- *                                       Fixed bug, 3-star align was disabling meridian flips for GEM mounts.
- * 05-14-2015          1.0b17            Fixed bug, Latitude/Longitude/UT/LMT are now correctly stored in EEPROM on Teensy3.1.  
- *                                       Improved user defined object library record format: object names can now be 11 chars max (was 7.)
- * 05-18-2015          1.0b18            Added experimental support of ST4 interface.  
- * 06-05-2015          1.0b19            Fixed point math improvements: smaller more elegant code, should be faster too.  Added support for disabling stepper drivers with a high or low signal.
- * 07-14-2015          1.0b20            Minor code corrections to fix warnings during Teensy3.1 compile.  Re-arranged altitude limits calculation so it completes once a second.
- * 07-17-2015          1.0b21            Added code that makes more intelligent decisions about when to use an RA "waypoint" back to the polar home position during meridian flips to avoid exceeding 
- *                                       horizon limits (makes most meridian flips faster.) Compatibility fixes to EEPROM_writeInt and EEPROM_readInt for Teensy3.1 target.  Support for up to 256X micro-stepping.
- *                                       Improvements to library catalogs... added ability to store and recall catalog name records, added ability to delete individual records.
- * 08-18-2015          1.0b22            PEC improvements, automatic handling of differing axis reductions.  HA limits and meridian flip now account for IH index error.
- * 09-01-2015          1.0b23            Implemented acceleration for guide commands.  Adjusted rates so that R8(RS) are 1/2x MaxRate and R9 is 1x MaxRate.
- * 10-18-2015          1.0b24            Alt/Azm mount support.  Improved refraction rate tracking.
- * 12-01-2015          1.0b25            Fixes to Alt/Azm mount support.
+ * Revision History, see GitHub
  *
  *
  * Author: Howard Dutton
@@ -169,26 +39,11 @@
 #include "Config.h"
 #include "Library.h"
 #include "FPoint.h"
-
-// There is a bug in Arduino/Energia which ignores #ifdef preprocessor directives when generating a list of files to link and hence it links all libraries from #include files (even the ones which should be ignored).
-// Until this is fixed YOU MUST MANUALLY COMMENT OUT all the #include lines below which are not for your device!!!
-#if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
-#include "Energia.h"
-#include <driverlib/timer.h>
-#include <driverlib/sysctl.h>
-#include <driverlib/interrupt.h>
-#include "inc/hw_ints.h"
-
-// Energia only has EEPROM.read and EEPROM.write, it does not include EEPROM.update. My patch has been accepted but it will take a while until the next version is released. Until then you can use the included EEPROM_LP.ino and EEPROM_LP.h.
-#include "EEPROM_LP.h"
-
+#include "TM4C.h"
+// There is a bug in Arduino/Energia which ignores #ifdef preprocessor directives when generating a list of files
+// Until this is fixed YOU MUST MANUALLY UN-COMMENT the #include line below if using the Launchpad Connected device
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
-// Again, It is not honoring the #ifdef directives. Until the bug is fixed you need to uncomment this line manually for TM4C1294.
-#include "Ethernet.h"
-#endif
-
-#else // standard Arduino environment
-//#include "EEPROM.h"
+//#include "Ethernet.h"
 #endif
 
 #if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
@@ -199,8 +54,8 @@
 #endif
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "12 01 15"
-#define FirmwareNumber "1.0b25"
+#define FirmwareDate   "01 04 16"
+#define FirmwareNumber "1.0b26"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -1609,4 +1464,3 @@ void loop() {
     processCommands();
   }
 }
-
