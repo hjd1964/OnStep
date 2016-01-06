@@ -158,6 +158,10 @@
 #define DE_MODE_GOTO_OFF             // programs the Dec uStep mode M0/M1/M2, used during gotos, optional and default _OFF. Other values 0 to 7 (0xb000 to 111)
 #define DE_STEP_GOTO 1               // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
 
+#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+#define ETHERNET_USE_DHCP_OFF        // if DHCP is used to obtain the IP address
+#endif
+
 // THAT'S IT FOR USER CONFIGURATION!
 
 // -------------------------------------------------------------------------------------------------------------------------

@@ -1,14 +1,19 @@
 // -----------------------------------------------------------------------------------
 // Timers and interrupt handling
 
-#if defined(__arm__) && defined(TEENSYDUINO)
+#if (defined(__arm__) && defined(TEENSYDUINO)) || (defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__))
 #define ISR(f) void f (void)
-IntervalTimer itimer1;
 void TIMER1_COMPA_vect(void);
 volatile boolean HAclr = true;
 volatile boolean TakeStepHA = false;
 volatile boolean DEclr = true;
 volatile boolean TakeStepDec = false;
+
+#if defined(__arm__) && defined(TEENSYDUINO)
+IntervalTimer itimer1;
+#endif
+// Energia does not have IntervalTimer so the timers were already initialised in OnStep.ino
+
 #endif
 
 #if defined(HA_MODE) && defined(HA_MODE_GOTO)
@@ -56,6 +61,8 @@ void Timer1SetRate(long rate) {
   TIMSK1 |= (1 << OCIE1A);
 #elif defined(__arm__) && defined(TEENSYDUINO)
   itimer1.begin(TIMER1_COMPA_vect, (float)rate * 0.0625);
+#elif defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+  TimerLoadSet(Timer1_base, TIMER_A, (int) (F_BUS / 1000000 * rate * 0.0625));
 #endif
 }
 
@@ -78,7 +85,7 @@ void Timer3SetRate(long rate) {
   if (StepsPerSecond<31) rate=rate/64L; else rate=rate/8L;
   if (rate>65536L) rate=65536L;
   cli(); nextHArate=rate-1L; sei();
-#elif defined(__arm__) && defined(TEENSYDUINO)
+#elif (defined(__arm__) && defined(TEENSYDUINO)) || (defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__))
   cli(); nextHArate=(F_BUS / 1000000) * (rate*0.0625) * 0.5 - 1; sei();
 #endif
 }
@@ -90,7 +97,7 @@ void Timer4SetRate(long rate) {
   if (StepsPerSecond<31) rate=rate/64L; else rate=rate/8L;
   if (rate>65536L) rate=65536L;
   cli(); nextDErate=rate-1L; sei();
-#elif defined(__arm__) && defined(TEENSYDUINO)
+#elif (defined(__arm__) && defined(TEENSYDUINO)) || (defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__))
   cli(); nextDErate=(F_BUS / 1000000) * (rate*0.0625) * 0.5 - 1; sei();
 #endif
 }
@@ -106,12 +113,16 @@ volatile byte cnt = 0;
 volatile double guideTimerRateHA1=0;
 volatile double guideTimerRateDec1=0;
 
-#if defined(__arm__) && defined(TEENSYDUINO)
+#if (defined(__arm__) && defined(TEENSYDUINO)) || (defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__))
 ISR(TIMER1_COMPA_vect)
 #else
 ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
 #endif
 {
+#if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+  TimerIntClear( Timer1_base, TIMER_TIMA_TIMEOUT );
+#endif
+
   // run 1/3 of the time at 3x the rate, unless a goto is happening
   if (trackingState!=TrackingMoveTo) { cnt++; if (cnt%3!=0) return; cnt=0; }
   lst++;
@@ -238,11 +249,16 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
 
 ISR(TIMER3_COMPA_vect)
 {
+#if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+  TimerIntClear( Timer3_base, TIMER_TIMA_TIMEOUT );
+#endif
+
   // drivers step on the rising edge, need >=1.9uS to settle (for DRV8825 or A4988) so this is early in the routine
   CLR(HAStepPORT,  HAStepBit);
 
-#if defined(__arm__) && defined(TEENSYDUINO)
+#if (defined(__arm__) && defined(TEENSYDUINO)) || (defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__))
   // on the much faster Teensy run this ISR at twice the normal rate and pull the step pin low every other call
+  // I assume that Tiva TM4C is the same???
   if (HAclr) {
     TakeStepHA=false;
 #endif
@@ -252,6 +268,8 @@ ISR(TIMER3_COMPA_vect)
   OCR3A=nextHArate*stepHA;
 #elif defined(__arm__) && defined(TEENSYDUINO)
   PIT_LDVAL1=nextHArate*stepHA;
+#elif defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+  TimerLoadSet(Timer3_base, TIMER_A, nextHArate*stepHA);
 #endif
   // switch micro-step mode
   if (gotoModeHA!=gotoRateHA) {
@@ -270,6 +288,8 @@ ISR(TIMER3_COMPA_vect)
   OCR3A=nextHArate;
 #elif defined(__arm__) && defined(TEENSYDUINO)
   PIT_LDVAL1=nextHArate;
+#elif defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+  TimerLoadSet(Timer3_base, TIMER_A, nextHArate*stepHA);
 #endif
 #endif
 
@@ -288,7 +308,7 @@ ISR(TIMER3_COMPA_vect)
       if (blHA>0)          { blHA-=stepHA; inBacklashHA=true; } else { inBacklashHA=false; posHA-=stepHA; }
     }
 
-#if defined(__arm__) && defined(TEENSYDUINO)
+#if (defined(__arm__) && defined(TEENSYDUINO)) || (defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__))
       TakeStepHA=true;
     }
     HAclr=false;
@@ -301,11 +321,16 @@ ISR(TIMER3_COMPA_vect)
 
 ISR(TIMER4_COMPA_vect)
 {
+#if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+  TimerIntClear( Timer4_base, TIMER_TIMA_TIMEOUT );
+#endif
+
   // drivers step on the rising edge
   CLR(DecStepPORT,  DecStepBit);
 
-#if defined(__arm__) && defined(TEENSYDUINO)
+#if (defined(__arm__) && defined(TEENSYDUINO)) || (defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__))
   // on the much faster Teensy run this ISR at twice the normal rate and pull the step pin low every other call
+  // I assume that Tiva TM4C is the same???
   if (DEclr) {
     TakeStepDec=false;
 #endif
@@ -315,6 +340,8 @@ ISR(TIMER4_COMPA_vect)
   OCR4A=nextDErate*stepDec;
 #elif defined(__arm__) && defined(TEENSYDUINO)
   PIT_LDVAL2=nextDErate*stepDec;
+#elif defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+  TimerLoadSet(Timer4_base, TIMER_A, nextDErate*stepDec);
 #endif
   // switch micro-step mode
   if (gotoModeDec!=gotoRateDec) {
@@ -333,6 +360,8 @@ ISR(TIMER4_COMPA_vect)
   OCR4A=nextDErate;
 #elif defined(__arm__) && defined(TEENSYDUINO)
   PIT_LDVAL2=nextDErate;
+#elif defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+  TimerLoadSet(Timer4_base, TIMER_A, nextDErate);
 #endif
 #endif
   
@@ -351,7 +380,7 @@ ISR(TIMER4_COMPA_vect)
       if (blDec>0)           { blDec-=stepDec; inBacklashDec=true; } else { inBacklashDec=false; posDec-=stepDec; }
     }
 
-#if defined(__arm__) && defined(TEENSYDUINO)
+#if (defined(__arm__) && defined(TEENSYDUINO)) || (defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__))
       TakeStepDec=true;
     }
     DEclr=false; 
