@@ -36,6 +36,7 @@
 // ADJUST THE FOLLOWING TO CONFIGURE YOUR CONTROLLER FEATURES --------------------------------------------------------------
 
 // turns ethernet on for W5100 adapters, default=OFF (if _ON you must also uncomment the #include "Ethernet.h" line near the beginning of OnStep.ino for now)
+//  configure the interface in Ethernet.ino
 #define W5100_OFF
 // turns debugging on, used during testing, default=OFF
 #define DEBUG_OFF
