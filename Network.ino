@@ -1,4 +1,4 @@
-#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
 
 // provice the same functions as for serial
 
@@ -64,4 +64,3 @@ void Ethernet_print(const char data[]) {
    return client.read();
  }
 #endif
-
