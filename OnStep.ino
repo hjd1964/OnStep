@@ -1158,7 +1158,7 @@ void setup() {
   Serial1_Init(9600);
   Serial_Init(9600); // for Tiva TM4C the serial is redirected to serial5 in serial.ino file
 
-#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
   // get ready for Ethernet communications
   Ethernet_Init();
 #endif
