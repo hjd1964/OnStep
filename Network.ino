@@ -25,7 +25,7 @@ boolean alreadyConnected = false; // whether or not the client was connected pre
 
 void Ethernet_Init() {
   // initialize the ethernet device
-#if defined(ETHERNET_USE_DHCP)
+#if defined(ETHERNET_USE_DHCP_ON)
   Ethernet.begin(mac);
 #else
   Ethernet.begin(mac, ip, myDns, gateway, subnet);
@@ -89,12 +89,12 @@ char get_vals[10] = "";
 const char index_page[] = "GET /index.htm"; bool index_page_found; byte index_page_count;
 const char settings_page[] = "GET /settings.htm"; bool settings_page_found; byte settings_page_count;
 const char control_page[] = "GET /control.htm"; bool control_page_found; byte control_page_count;
-const char main_css_page[] = "GET /main.css"; bool main_css_page_found; byte main_css_page_count;
+const char config_page[] = "GET /config.htm"; bool config_page_found; byte config_page_count;
 void reset_page_requests() {
   index_page_found=false; index_page_count=0;
   settings_page_found=false; settings_page_count=0;
   control_page_found=false; control_page_count=0;
-  main_css_page_found=false; main_css_page_count=0;
+  config_page_found=false; config_page_count=0;
   get_check=false; get_val=false; get_name=false;
 }
 
@@ -118,10 +118,10 @@ void Ethernet_www() {
         if ((get_check) && (c=='?')) { get_name=true; get_idx=0; } get_check=false;
         
         // watch for page requests and flag them
-        if (!index_page_found)    { if (c==   index_page[index_page_count])    index_page_count++;    else index_page_count=0;    if (index_page_count==14)    { index_page_found=true; get_check=true; } }
+        if (!index_page_found)    { if (c==index_page[index_page_count])       index_page_count++;    else index_page_count=0;    if (index_page_count==14)    { index_page_found=true; get_check=true; } }
         if (!settings_page_found) { if (c==settings_page[settings_page_count]) settings_page_count++; else settings_page_count=0; if (settings_page_count==17) { settings_page_found=true; get_check=true; } }
-        if (!control_page_found)  { if (c== control_page[control_page_count])  control_page_count++;  else control_page_count=0;  if (control_page_count==16)  { control_page_found=true; get_check=true; } }
-        if (!main_css_page_found) { if (c==main_css_page[main_css_page_count]) main_css_page_count++; else main_css_page_count=0; if (main_css_page_count==13) { main_css_page_found=true; get_check=true; } }
+        if (!control_page_found)  { if (c==control_page[control_page_count])   control_page_count++;  else control_page_count=0;  if (control_page_count==16)  { control_page_found=true; get_check=true; } }
+        if (!config_page_found)   { if (c==config_page[config_page_count])     config_page_count++;   else config_page_count=0;   if (config_page_count==15)   { config_page_found=true; get_check=true; } }
         
         // if you've gotten to the end of the line (received a newline character) and the line is blank, the http request has ended, so you can send a reply
         if ((c == '\n') && currentLineIsBlank) { 
@@ -142,7 +142,7 @@ void Ethernet_www() {
         if (index_page_found) index_html_page(); else
         if (settings_page_found) settings_html_page(); else
         if (control_page_found) control_html_page(); else
-        if (main_css_page_found) main_css_html_page(); else
+        if (config_page_found) config_html_page(); else
         index_html_page();
       }
 
@@ -332,14 +332,27 @@ void Ethernet_get() {
 // since it stops and waits should the local outgoing buffer become full
 const char html_header1[] PROGMEM = "HTTP/1.1 200 OK\r\n";
 const char html_header2[] PROGMEM = "Content-Type: text/html\r\n";
-const char html_header2a[] PROGMEM = "Content-Type: text/css\r\n";
 const char html_header3[] PROGMEM = "Connection: close\r\n";
 const char html_header4[] PROGMEM = "Refresh: 5\r\n\r\n";
 const char html_header4a[] PROGMEM = "\r\n";
 const char html_header5[] PROGMEM = "<!DOCTYPE HTML>\r\n<html>\r\n";
-const char html_header6[] PROGMEM = "<head><link rel=\"stylesheet\" type=\"text/css\"";
-const char html_header7[] PROGMEM = " href=\"/main.css\" media=\"screen\" /></head>\r\n";
+const char html_header6[] PROGMEM = "<head>\r\n";
+const char html_header7[] PROGMEM = "</head>\r\n";
 const char html_header8[] PROGMEM = "<body bgcolor=\"#26262A\">\r\n";
+
+const char html_main_css1[] PROGMEM = "<STYLE>\r\n";
+const char html_main_css2[] PROGMEM = ".a { background-color: #111111; }\r\n";
+const char html_main_css3[] PROGMEM = ".t { padding: 15px; border: 15px solid #551111;\r\n";
+const char html_main_css4[] PROGMEM = " margin: 25px; color: #999999; background-color: #111111; }\r\n";
+const char html_main_css5[] PROGMEM = ".b { padding: 30px; border: 2px solid #551111;\r\n";
+const char html_main_css6[] PROGMEM = " margin: 30px; color: #999999; background-color: #111111; }\r\n";
+const char html_main_css7[] PROGMEM = "h1 { text-align: right; }\r\n";
+const char html_main_css8[] PROGMEM = "input { width:4em }\r\n";
+const char html_main_css9[] PROGMEM = "</STYLE>\r\n";
+
+const char html_links1[] PROGMEM = "<a href=\"/index.htm\">Status</a>&nbsp;&nbsp;&nbsp;";
+const char html_links2[] PROGMEM = "<a href=\"/settings.htm\">Settings</a>&nbsp;&nbsp;&nbsp;";
+const char html_links3[] PROGMEM = "<a href=\"/control.htm\">Control</a>&nbsp;&nbsp;&nbsp;<a href=\"/config.htm\">Configuration</a><br />";
 
 // The index.htm page --------------------------------------------------------------------------------------
 #ifdef MOUNT_TYPE_ALTAZM
@@ -380,6 +393,17 @@ void index_html_page() {
   if (html_page_step==++stp) strcpy_P(temp, html_header4);
   if (html_page_step==++stp) strcpy_P(temp, html_header5);
   if (html_page_step==++stp) strcpy_P(temp, html_header6);
+
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css1);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css2);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css3);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css4);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css5);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css6);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css7);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css8);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css9);
+  
   if (html_page_step==++stp) strcpy_P(temp, html_header7);
   if (html_page_step==++stp) strcpy_P(temp, html_header8);
 
@@ -387,9 +411,9 @@ void index_html_page() {
   if (html_page_step==++stp) strcpy_P(temp, html_index1);
   if (html_page_step==++stp) strcpy_P(temp, html_index2);
   if (html_page_step==++stp) strcpy_P(temp, html_index2a);
-  if (html_page_step==++stp) strcpy(temp,"<a href=\"/index.htm\">Status</a>&nbsp;&nbsp;&nbsp;");
-  if (html_page_step==++stp) strcpy(temp,"<a href=\"/settings.htm\">Settings</a>&nbsp;&nbsp;&nbsp;");
-  if (html_page_step==++stp) strcpy(temp,"<a href=\"/control.htm\">Control</a><br />");
+  if (html_page_step==++stp) strcpy_P(temp, html_links1);
+  if (html_page_step==++stp) strcpy_P(temp, html_links2);
+  if (html_page_step==++stp) strcpy_P(temp, html_links3);
   if (html_page_step==++stp) {
     i=highPrecision; 
     highPrecision=false; 
@@ -573,15 +597,26 @@ void settings_html_page() {
   if (html_page_step==++stp) strcpy_P(temp, html_header4a);
   if (html_page_step==++stp) strcpy_P(temp, html_header5);
   if (html_page_step==++stp) strcpy_P(temp, html_header6);
+
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css1);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css2);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css3);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css4);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css5);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css6);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css7);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css8);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css9);
+  
   if (html_page_step==++stp) strcpy_P(temp, html_header7);
   if (html_page_step==++stp) strcpy_P(temp, html_header8);
 
   // and the remainder of the page
   if (html_page_step==++stp) strcpy_P(temp, html_settings1);
   if (html_page_step==++stp) strcpy_P(temp, html_settings2);
-  if (html_page_step==++stp) strcpy(temp,"<a href=\"/index.htm\">Status</a>&nbsp;&nbsp;&nbsp;");
-  if (html_page_step==++stp) strcpy(temp,"<a href=\"/settings.htm\">Settings</a>&nbsp;&nbsp;&nbsp;");
-  if (html_page_step==++stp) strcpy(temp,"<a href=\"/control.htm\">Control</a><br />");
+  if (html_page_step==++stp) strcpy_P(temp, html_links1);
+  if (html_page_step==++stp) strcpy_P(temp, html_links2);
+  if (html_page_step==++stp) strcpy_P(temp, html_links3);
   if (html_page_step==++stp) strcpy_P(temp, html_settings3);
   if (html_page_step==++stp) strcpy_P(temp, html_settings4);
   if (html_page_step==++stp) strcpy_P(temp, html_settings5);
@@ -673,14 +708,15 @@ const char html_control4d[] PROGMEM =
 "document.getElementById(\"ts\").value = d.getSeconds();"
 "}\r\n"
 "</script>\r\n";
-const char html_control4e[] PROGMEM =
+const char html_controlAlign1[] PROGMEM =
 "Align: "
 "<form method=\"get\" action=\"/control.htm\">"
-"<button name=\"al\" value=\"1\" type=\"submit\">1 Star</button>"
-"<button name=\"al\" value=\"2\" type=\"submit\">2 Star</button>";
-const char html_control5[] PROGMEM = 
-"<button name=\"al\" value=\"3\" type=\"submit\">3 Star</button><br /><br />"
-"<button name=\"al\" value=\"n\" type=\"submit\">Accept</button>"
+"<button name=\"al\" value=\"1\" type=\"submit\">1 Star</button>";
+const char html_controlAlign23[] PROGMEM = 
+"<button name=\"al\" value=\"2\" type=\"submit\">2 Star</button>"
+"<button name=\"al\" value=\"3\" type=\"submit\">3 Star</button>";
+const char html_controlAlign4[] PROGMEM = 
+"<br /><br /><button name=\"al\" value=\"n\" type=\"submit\">Accept</button>"
 "</form><br />\r\n";
 const char html_control6[] PROGMEM = 
 "Home/Park: "
@@ -705,7 +741,7 @@ const char html_control10[] PROGMEM =
 "<button name=\"tk\" value=\"s\" type=\"submit\">Sidereal</button>"
 "<button name=\"tk\" value=\"l\" type=\"submit\">Lunar</button>"
 "<button name=\"tk\" value=\"h\" type=\"submit\">Solar</button>"
-"</form><br />\r\n";
+"</form>\r\n";
 
 void control_html_page() {
   char temp[256] = "";
@@ -720,22 +756,36 @@ void control_html_page() {
   if (html_page_step==++stp) strcpy_P(temp, html_header4a);
   if (html_page_step==++stp) strcpy_P(temp, html_header5);
   if (html_page_step==++stp) strcpy_P(temp, html_header6);
+
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css1);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css2);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css3);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css4);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css5);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css6);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css7);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css8);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css9);
+  
   if (html_page_step==++stp) strcpy_P(temp, html_header7);
   if (html_page_step==++stp) strcpy_P(temp, html_header8);
 
   // and the remainder of the page
   if (html_page_step==++stp) strcpy_P(temp, html_control1);
   if (html_page_step==++stp) strcpy_P(temp, html_control2);
-  if (html_page_step==++stp) strcpy(temp,"<a href=\"/index.htm\">Status</a>&nbsp;&nbsp;&nbsp;");
-  if (html_page_step==++stp) strcpy(temp,"<a href=\"/settings.htm\">Settings</a>&nbsp;&nbsp;&nbsp;");
-  if (html_page_step==++stp) strcpy(temp,"<a href=\"/control.htm\">Control</a><br />");
+  if (html_page_step==++stp) strcpy_P(temp, html_links1);
+  if (html_page_step==++stp) strcpy_P(temp, html_links2);
+  if (html_page_step==++stp) strcpy_P(temp, html_links3);
   if (html_page_step==++stp) strcpy_P(temp, html_control3);
   if (html_page_step==++stp) strcpy_P(temp, html_control4a);
   if (html_page_step==++stp) strcpy_P(temp, html_control4b);
   if (html_page_step==++stp) strcpy_P(temp, html_control4c);
   if (html_page_step==++stp) strcpy_P(temp, html_control4d);
-  if (html_page_step==++stp) strcpy_P(temp, html_control4e);
-  if (html_page_step==++stp) strcpy_P(temp, html_control5);
+  if (html_page_step==++stp) strcpy_P(temp, html_controlAlign1);
+#if defined(MOUNT_TYPE_GEM) || defined(MOUNT_TYPE_FORK_ALT)
+  if (html_page_step==++stp) strcpy_P(temp, html_controlAlign23);
+#endif
+  if (html_page_step==++stp) strcpy_P(temp, html_controlAlign4);
   if (html_page_step==++stp) strcpy_P(temp, html_control6);
   if (html_page_step==++stp) strcpy_P(temp, html_control7);
   if (html_page_step==++stp) strcpy_P(temp, html_control8);
@@ -751,32 +801,60 @@ void control_html_page() {
   if (!r) html_page_step--; // repeat this step if www_write failed
 }
 
-// The main.css page ----------------------------------------------------------------------------------
+// The config.htm page --------------------------------------------------------------------------------------
+const char html_config1[] PROGMEM = "<div class=\"t\"><table width=\"100%\"><tr><td><b>" FirmwareName " " FirmwareNumber;
+const char html_config2[] PROGMEM = "</b></td><td align=\"right\"><b><font size=\"5\">";
+const char html_config3[] PROGMEM = "CONFIGURATION</font></b></td></tr></table><br />";
+const char html_config4[] PROGMEM = "</div><div class=\"b\">";
+#if defined(MOUNT_TYPE_GEM)
+const char html_configMount[] PROGMEM = "Mount type: GEM<br /><br />";
+#elif defined(MOUNT_TYPE_FORK)
+const char html_configMount[] PROGMEM = "Mount type: Fork or similar<br /><br />";
+#elif defined(MOUNT_TYPE_FORKALT)
+const char html_configMount[] PROGMEM = "Mount type: Fork or similar (Alternate)<br /><br />";
+#elif defined(MOUNT_TYPE_ALTAZM)
+const char html_configMount[] PROGMEM = "Mount type: AltAz<br /><br />";
+#endif
+#if defined(ST4_OFF)
+const char html_configST4[] PROGMEM = "ST4 interface is OFF<br /><br />";
+#elif defined(ST4_ON)
+const char html_configST4[] PROGMEM = "ST4 interface is ON (no internal pullup resistors)<br /><br />";
+#elif defined(ST4_PULLUP)
+const char html_configST4[] PROGMEM = "ST4 interface is ON (with internal pullup resistors)<br /><br />";
+#endif
+#if defined(PPS_SENSE_OFF)
+const char html_configPPS[] PROGMEM = "PPS sense is OFF<br />";
+#elif defined(PPS_SENSE_ON)
+const char html_configPPS[] PROGMEM = "PPS sense is ON<br />";
+#endif
+#if defined(PEC_SENSE_OFF)
+const char html_configPEC[] PROGMEM = "PEC sense is OFF<br />";
+#elif defined(PEC_SENSE_ON)
+const char html_configPEC[] PROGMEM = "PEC sense is ON<br />";
+#endif
+#if defined(LIMIT_SENSE_OFF)
+const char html_configLimit[] PROGMEM = "LIMIT sense is OFF<br /><br />";
+#elif defined(LIMIT_SENSE_ON)
+const char html_configLimit[] PROGMEM = "LIMIT sense is ON<br /><br />";
+#endif
 
-const char html_main_css1[] PROGMEM = ".a { background-color: #111111; }\r\n";
-const char html_main_css2[] PROGMEM = ".t { padding: 15px; border: 15px solid #551111;";
-const char html_main_css3[] PROGMEM = " margin: 25px; color: #999999; background-color: #111111; }\r\n";
-const char html_main_css4[] PROGMEM = ".b { padding: 30px; border: 2px solid #551111;";
-const char html_main_css5[] PROGMEM = " margin: 30px; color: #999999; background-color: #111111; }\r\n";
-const char html_main_css6[] PROGMEM = "h1 { text-align: right; }\r\n";
-const char html_main_css7[] PROGMEM = "input { width:4em }\r\n";
-void main_css_html_page() {
-  char temp[80] = "";
+void config_html_page() {
+  char temp[256] = "";
+  char temp1[80] = "";
+  char temp2[20] = "";
+  char temp3[20] = "";
   bool r=true;
   int stp=0;
   html_page_step++;
-
+    
   // send a standard http response header
-  if (html_page_step==++stp) strcpy_P(temp, html_header1);
-  if (html_page_step==++stp) strcpy_P(temp, html_header2a);
+  if (html_page_step==++stp) strcpy_P(temp, html_header1); 
+  if (html_page_step==++stp) strcpy_P(temp, html_header2);
   if (html_page_step==++stp) strcpy_P(temp, html_header3);
-  if (html_page_step==++stp) strcpy_P(temp, html_header4a);
+  if (html_page_step==++stp) strcpy_P(temp, html_header4);
   if (html_page_step==++stp) strcpy_P(temp, html_header5);
   if (html_page_step==++stp) strcpy_P(temp, html_header6);
-  if (html_page_step==++stp) strcpy_P(temp, html_header7);
-  if (html_page_step==++stp) strcpy_P(temp, html_header8);
 
-  // send the css page
   if (html_page_step==++stp) strcpy_P(temp, html_main_css1);
   if (html_page_step==++stp) strcpy_P(temp, html_main_css2);
   if (html_page_step==++stp) strcpy_P(temp, html_main_css3);
@@ -784,14 +862,33 @@ void main_css_html_page() {
   if (html_page_step==++stp) strcpy_P(temp, html_main_css5);
   if (html_page_step==++stp) strcpy_P(temp, html_main_css6);
   if (html_page_step==++stp) strcpy_P(temp, html_main_css7);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css8);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css9);
+  
+  if (html_page_step==++stp) strcpy_P(temp, html_header7);
+  if (html_page_step==++stp) strcpy_P(temp, html_header8);
+
+  // and the remainder of the page
+  if (html_page_step==++stp) strcpy_P(temp, html_config1);
+  if (html_page_step==++stp) strcpy_P(temp, html_config2);
+  if (html_page_step==++stp) strcpy_P(temp, html_config3);
+  if (html_page_step==++stp) strcpy_P(temp, html_links1);
+  if (html_page_step==++stp) strcpy_P(temp, html_links2);
+  if (html_page_step==++stp) strcpy_P(temp, html_links3);
+  if (html_page_step==++stp) strcpy_P(temp, html_config4);
+  if (html_page_step==++stp) strcpy_P(temp, html_configMount);
+  if (html_page_step==++stp) strcpy_P(temp, html_configST4);
+  if (html_page_step==++stp) strcpy_P(temp, html_configPPS);
+  if (html_page_step==++stp) strcpy_P(temp, html_configPEC);
+  if (html_page_step==++stp) strcpy_P(temp, html_configLimit);
+  if (html_page_step==++stp) strcpy(temp,"</div></body></html>");
 
   // stop sending this page
   if (html_page_step==++stp) { html_page_step=0; responseStarted=false; return; }
 
   // send the data
   r=www_write(temp);
-  // repeat this step if www_write failed
-  if (!r) html_page_step--;
+  if (!r) html_page_step--; // repeat this step if www_write failed
 }
 
 // quickly copies string to www server transmit buffer
@@ -835,6 +932,5 @@ boolean www_send() {
 
   return true;
 }
-
 
 #endif
