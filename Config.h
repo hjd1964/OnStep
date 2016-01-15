@@ -38,6 +38,10 @@
 // turns ethernet on for W5100 adapters, default=OFF (if _ON you must also uncomment the #include "Ethernet.h" line near the beginning of OnStep.ino for now)
 //  configure the interface in Ethernet.ino
 #define W5100_OFF
+// default IP,Gateway,subnet are in the Network.ino file
+// if ethernet is available DHCP is used to obtain the IP address (default addresses are overridden), default=OFF
+#define ETHERNET_USE_DHCP_OFF
+
 // turns debugging on, used during testing, default=OFF
 #define DEBUG_OFF
 // allows syncing anywhere, doesn't preserve PEC (unless using an index), default=OFF
@@ -142,8 +146,8 @@
 
 #define minutesPastMeridianE      60 // for goto's, how far past the meridian to allow before we do a flip (if on the East side of the pier) - one hour of RA is the default = 60.  Ignored on Alt/Azm mounts.
 #define minutesPastMeridianW      60 // as above, if on the West side of the pier.  If left alone, the mount will stop tracking when it hits the this limit.  Ignored on Alt/Azm mounts.
-#define underPoleLimit             9 // maximum allowed hour angle (+/-) under the celestial pole. OnStep will flip the mount and move the Dec. past 90 degrees (+/-) once past this limit.  Ignored on Alt/Azm mounts.
-                                     // to arrive at the location.  If left alone, the mount will stop tracking when it hits this limit.  Valid range is 7 to 11 hours
+#define underPoleLimit             9 // maximum allowed hour angle (+/-) under the celestial pole. OnStep will flip the mount and move the Dec. past 90 degrees (+/-) once past this limit to arrive at the location.
+                                     // Ignored on Alt/Azm mounts.  If left alone, the mount will stop tracking when it hits this limit.  Valid range is 7 to 11 hours
 #define minDec                   -91 // minimum allowed declination, default = -91 (off)  Ignored on Alt/Azm mounts.
 #define maxDec                   +91 // maximum allowed declination, default =  91 (off)  Ignored on Alt/Azm mounts.
                                      // For example, a value of +80 would stop gotos/tracking near the north celestial pole.
@@ -160,10 +164,6 @@
 #define DE_MODE_OFF                  // programs the Dec uStep mode M0/M1/M2, optional and default _OFF. Other values 0 to 7 (0xb000 to 111)
 #define DE_MODE_GOTO_OFF             // programs the Dec uStep mode M0/M1/M2, used during gotos, optional and default _OFF. Other values 0 to 7 (0xb000 to 111)
 #define DE_STEP_GOTO 1               // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
-
-#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
-#define ETHERNET_USE_DHCP_OFF        // if DHCP is used to obtain the IP address
-#endif
 
 // THAT'S IT FOR USER CONFIGURATION!
 
