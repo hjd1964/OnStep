@@ -49,6 +49,14 @@ boolean Serial_transmit()
   return true;
 }
 
+// For debugging, sends one char at a time to Serial0 interface
+boolean Serial_char(char c)
+{
+  while ( !( UCSR0A & (1<<UDRE0)) ) {  }
+  UDR0 = c;
+  return true;
+}
+
 boolean Serial_available()
 {
   return !(Serial_recv_buffer[Serial_recv_head]==char(0));
