@@ -32,7 +32,7 @@
  * with LX200 derived command set.
  *
  */
- 
+
 #include "math.h"
 #include "errno.h"
 // Use Config.h to configure OnStep to your requirements 
@@ -54,8 +54,8 @@
 #endif
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "01 04 16"
-#define FirmwareNumber "1.0b26"
+#define FirmwareDate   "01 14 16"
+#define FirmwareNumber "1.0b27"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -661,6 +661,9 @@ byte bufferPtr_serial_one= 0;
 char command_ethernet[25];
 char parameter_ethernet[25];
 byte bufferPtr_ethernet= 0;
+int  www_xmit_buffer_send_pos=0;
+int  www_xmit_buffer_pos=0;
+char www_xmit_buffer[1024] = "";
 
 // Misc ---------------------------------------------------------------------------------------------------------------------
 #define Rad 57.29577951
