@@ -74,6 +74,7 @@
 // _ON and OnStep keeps this illuminated to indicate that the controller is active.  When sidereal tracking this LED will rapidly flash with RA step pulses
 #define STATUS_LED_PINS_ON
 // lights 2nd status LED by sink to ground (pin 10), default=OFF, must be off for Teensy3.1 (pin 7)
+// must be off if W5100_ON is used on a Mega2560 since the SS (slave select) pin for the ethernet adapter is pin 10
 // _ON sets this to blink at 1 sec intervals when PPS is synced
 //  n sets this to dimly light a polar finder reticle, for example I use STATUS_LED2_PINS 250
 #define STATUS_LED2_PINS_OFF
