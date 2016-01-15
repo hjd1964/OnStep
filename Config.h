@@ -36,7 +36,9 @@
 // ADJUST THE FOLLOWING TO CONFIGURE YOUR CONTROLLER FEATURES --------------------------------------------------------------
 
 // turns ethernet on for W5100 adapters, default=OFF (if _ON you must also uncomment the #include "Ethernet.h" line near the beginning of OnStep.ino for now)
-//  configure the interface in Ethernet.ino
+// configure the interface in Ethernet.ino
+// see forum below for good technical info. about using an Arduino Ethernet Shield:
+// https://forum.pjrc.com/threads/25050-Teensy-3-0-3-1-W5100-ethernet-shield
 #define W5100_OFF
 // default IP,Gateway,subnet are in the Network.ino file
 // if ethernet is available DHCP is used to obtain the IP address (default addresses are overridden), default=OFF
