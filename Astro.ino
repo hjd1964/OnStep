@@ -850,3 +850,124 @@ double fixedToDouble(fixed_t a) {
   return ((double)l/8388608.0); // and 23 more, for 32 bits total
 }
 
+bool startAlign(char c) {
+  // :A2 and :A3 arent supported with Fork mounts in alternate mode
+  #if defined(MOUNT_TYPE_FORK_ALT) || defined(MOUNT_TYPE_ALTAZM)
+  if (c=='1') {
+  #endif
+
+  // telescope should be set in the polar home (CWD) for a starting point
+  // this command sets IH, ID, azmCor=0; altCor=0;
+  setHome();
+  
+  // enable the stepper drivers
+  digitalWrite(HA_EN,HA_Enabled);
+  digitalWrite(DE_EN,DE_Enabled);
+  delay(10);
+
+  // newTargetRA =timeRange(LST);
+  // newTargetDec=90.0;  
+
+  // start tracking
+  trackingState=TrackingSidereal;
+
+  // start align... AlignOneStar1=01, AlignTwoStar1=11, AlignThreeStar1=21
+  alignMode=AlignOneStar1+(c-'1')*10;
+
+  return false;
+
+  #if defined(MOUNT_TYPE_FORK_ALT) || defined(MOUNT_TYPE_ALTAZM)
+  } else return true;
+  #endif
+}
+
+// for align
+double avgDec = 0.0;
+double avgHA  = 0.0;
+bool nextAlign() {
+  // First star:
+  // Near the celestial equator (Dec=0, HA=0), telescope West of the pier if multi-star align
+  if ((alignMode==AlignOneStar1) || (alignMode==AlignTwoStar1) || (alignMode==AlignThreeStar1)) {
+    if ((alignMode==AlignOneStar1) && (meridianFlip==MeridianFlipAlign)) meridianFlip=MeridianFlipNever;
+    alignMode++;
+    // set the IH offset
+    // set the ID offset
+    if (!syncEqu(newTargetRA,newTargetDec)) { return true; }
+    IHS=IH*15.0*StepsPerDegreeHA;
+    avgDec=newTargetDec;
+    avgHA =haRange(LST-newTargetRA);
+  } else 
+  // Second star:
+  // Near the celestial equator (Dec=0, HA=0), telescope East of the pier
+  if ((alignMode==AlignTwoStar2) || (alignMode==AlignThreeStar2)) {
+    if ((alignMode==AlignTwoStar2) && (meridianFlip==MeridianFlipAlign)) meridianFlip=MeridianFlipNever;
+    alignMode++;
+    double ID1 = -ID;  // last offset Dec is negative because we flipped the meridian
+    double IH1 = IH;
+
+    avgDec=(avgDec+newTargetDec)/2.0;
+    avgHA =(-avgHA+haRange(LST-newTargetRA))/2.0; // last HA is negative because we were on the other side of the meridian
+    if (syncEqu(newTargetRA,newTargetDec)) {
+      double ID2=ID;
+      double IH2=IH;
+
+      IH    = (IH2+IH1)/2.0;                    // average offset in HA
+      IHS=IH*15.0*StepsPerDegreeHA;
+      ID    = (ID2-ID1)/2.0;                    // new offset in Dec
+      double IH3=IH;
+      double ID3=ID;
+    
+      altCor=-(ID2+ID1)/2.0;                    // Negative when pointed below the pole
+      altCor= altCor/cos((avgHA*15.0)/Rad);     // correct for measurements being away from the Meridian
+
+      // allow the altCor to be applied
+      if (syncEqu(newTargetRA,newTargetDec)) {
+        ID2=ID;
+        IH2=IH;
+
+        doCor =-((IH2-IH1)/2.0)*15.0;            // the difference of these two values should be a decent approximation of the optical axis to Dec axis error (aka cone error)
+        doCor = doCor*cos(avgDec/Rad);           // correct for measurement being away from the Celestial Equator
+
+        IH=IH3;
+        IHS=IH*15.0*StepsPerDegreeHA;
+        ID=ID3;
+      } else return true;
+    } else return true;
+  } else 
+  // Third star:
+  // Near (Dec=45, HA=6), telescope East of the pier
+  if (alignMode==AlignThreeStar3) {
+    #ifndef MOUNT_TYPE_GEM
+    meridianFlip=MeridianFlipNever;
+    #endif
+    alignMode++;
+    
+    double ID1 = ID;
+    double IH1 = IH;
+    if (syncEqu(newTargetRA,newTargetDec)) {
+      double ID2=ID;
+      double IH2=IH;
+
+      azmCor = -(ID2-ID1);                      // offset in declination is largely due to polar align Azm error
+      azmCor = azmCor/sin((haRange(LST-newTargetRA)*15.0)/Rad);  // correct for HA of measurement location
+
+      // allow the azmCor to be applied
+      if (syncEqu(newTargetRA,newTargetDec)) {
+        ID2=ID;
+        IH2=IH;
+        // only apply Dec axis flexture term on GEMs
+        #ifdef MOUNT_TYPE_GEM
+        pdCor =  (IH2-IH1)*15.0;                // the Dec axis to RA axis perp. error should be the only major source of error left effecting the HA
+        pdCor = pdCor/tan(newTargetDec/Rad);    // correct for Dec of measurement location
+        #else
+        pdCor = 0.0;
+        #endif
+
+        ID=ID1;
+        IH=IH1;
+      } else return true;
+    } else return true;
+  } else return true;
+
+  return false;
+}
