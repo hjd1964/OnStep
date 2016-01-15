@@ -6,9 +6,6 @@ boolean serial_one_ready = false;
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
 boolean ethernet_ready = false;
 #endif
-// for align
-double avgDec = 0.0;
-double avgHA  = 0.0;
 // scratch-pad variables
 double f,f1,f2,f3; 
 int    i,i1,i2;
@@ -39,9 +36,14 @@ void processCommands() {
     if (serial_zero_ready)     { strcpy(command,command_serial_zero); strcpy(parameter,parameter_serial_zero); serial_zero_ready=false; clearCommand_serial_zero(); process_command=COMMAND_SERIAL; }
     else if (serial_one_ready) { strcpy(command,command_serial_one);  strcpy(parameter,parameter_serial_one);  serial_one_ready=false;  clearCommand_serial_one();  process_command=COMMAND_SERIAL1; }
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
-    else if (ethernet_ready) {strcpy(command,command_ethernet);  strcpy(parameter,parameter_ethernet);  ethernet_ready=false;  clearCommand_ethernet();  process_command=COMMAND_ETHERNET; }
+    else if (ethernet_ready)   { strcpy(command,command_ethernet);    strcpy(parameter,parameter_ethernet);    ethernet_ready=false;    clearCommand_ethernet();    process_command=COMMAND_ETHERNET; }
 #endif
-    else return;
+    else {
+#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
+      Ethernet_www();
+#endif
+      return;
+    }
 
     if (process_command) {
 
@@ -76,34 +78,7 @@ void processCommands() {
         if ((command[1]=='1') || (command[1]=='2') || (command[1]=='3')) {
           // set current time and date before calling this routine
 
-          // :A2 and :A3 arent supported with Fork mounts in alternate mode
-          #if defined(MOUNT_TYPE_FORK_ALT) || defined(MOUNT_TYPE_ALTAZM)
-          if (command[1]=='1') {
-          #endif
-
-          // telescope should be set in the polar home (CWD) for a starting point
-          // this command sets IH, ID, azmCor=0; altCor=0;
-          setHome();
-          
-          // enable the stepper drivers
-          digitalWrite(HA_EN,HA_Enabled);
-          digitalWrite(DE_EN,DE_Enabled);
-          delay(10);
-  
-          // newTargetRA =timeRange(LST);
-          // newTargetDec=90.0;  
-  
-          // start tracking
-          trackingState=TrackingSidereal;
-  
-          // start align... AlignOneStar1=01, AlignTwoStar1=11, AlignThreeStar1=21
-          alignMode=AlignOneStar1+(command[1]-'1')*10;
-  
-          commandError=false;
-          
-          #if defined(MOUNT_TYPE_FORK_ALT) || defined(MOUNT_TYPE_ALTAZM)
-          } else commandError=true;
-          #endif
+          commandError=startAlign(command[1]);
 
         } else
 //  :A+#  Manual Alignment, set target location
