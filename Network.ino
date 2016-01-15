@@ -833,9 +833,9 @@ const char html_configPEC[] PROGMEM = "PEC sense is OFF<br />";
 const char html_configPEC[] PROGMEM = "PEC sense is ON<br />";
 #endif
 #if defined(LIMIT_SENSE_OFF)
-const char html_configLimit[] PROGMEM = "LIMIT sense is OFF<br /><br />";
+const char html_configLimit[] PROGMEM = "LIMIT sense is OFF<br />";
 #elif defined(LIMIT_SENSE_ON)
-const char html_configLimit[] PROGMEM = "LIMIT sense is ON<br /><br />";
+const char html_configLimit[] PROGMEM = "LIMIT sense is ON<br />";
 #endif
 
 void config_html_page() {
@@ -851,7 +851,7 @@ void config_html_page() {
   if (html_page_step==++stp) strcpy_P(temp, html_header1); 
   if (html_page_step==++stp) strcpy_P(temp, html_header2);
   if (html_page_step==++stp) strcpy_P(temp, html_header3);
-  if (html_page_step==++stp) strcpy_P(temp, html_header4);
+  if (html_page_step==++stp) strcpy_P(temp, html_header4a);
   if (html_page_step==++stp) strcpy_P(temp, html_header5);
   if (html_page_step==++stp) strcpy_P(temp, html_header6);
 
