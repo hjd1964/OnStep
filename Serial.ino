@@ -138,35 +138,6 @@ char Serial1_read()
 
 #else  // on non-AVR platforms, try to use the built-in serial stuff...
 
-#if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
-// use serial5 as serial (serial0) is connected to the debugger/programming chip
-// if you really want to use serial you will need to do some soldering
-void Serial_Init(unsigned int baud) {
-  Serial5.begin(baud);
-}
-
-void Serial_send(const char data[]) {
-  Serial5.print(data);
-  do {} while (Serial_transmit());
-}
-
-void Serial_print(const char data[]) {
-  Serial5.print(data);
-}
-
-boolean Serial_transmit() {
-  return false;
-}
-
-boolean Serial_available() {
-  return Serial5.available();
-}
-
-char Serial_read() {
-  return Serial5.read();
-}
-
-#else
 void Serial_Init(unsigned int baud) {
   Serial.begin(baud);
 }
@@ -191,7 +162,6 @@ boolean Serial_available() {
 char Serial_read() {
   return Serial.read();
 }
-#endif
 
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
 // use serial7 as serial1 (serial1) as serial1 is not readily available on the board
