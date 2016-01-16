@@ -33,6 +33,7 @@ void Ethernet_Init() {
 
   cmd_server.begin();
   web_server.begin();
+  www_client = web_server.available(); // initialise www_client
 }
 
 void Ethernet_send(const char data[]) {
@@ -574,11 +575,11 @@ const char html_settings14[] PROGMEM =
 "\r\n";
 const char html_settings15[] PROGMEM = 
 "<form method=\"get\" action=\"/settings.htm\">"
-" <input value=\"%s\" type=\"number\" name=\"u1\" min=\"-13\" max=\"13\">&nbsp;hrs&nbsp;";
+" <input value=\"%s\" type=\"number\" name=\"u1\" min=\"-12\" max=\"14\">&nbsp;hrs&nbsp;";
 const char html_settings16[] PROGMEM = 
 " <select name=\"u2\"><option value=\"0\" %s>00</option><option value=\"30\" %s>30</option><option value=\"45\" %s>45</option></select>&nbsp;min.&nbsp;"
 "<button type=\"submit\">Upload</button>"
-" (UTC Offset, in hours +/- 13)"
+" (UTC Offset, in hours -12 to +14)"
 "</form>"
 "\r\n";
 
