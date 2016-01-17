@@ -1,5 +1,9 @@
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
 
+int  www_xmit_buffer_send_pos=0;
+int  www_xmit_buffer_pos=0;
+char www_xmit_buffer[1024] = "";
+
 // provide the same functions as for serial
 
 // Enter a MAC address and IP address for your controller below. MAC address will be on the sticker on the Tiva Connected Launchpad.
@@ -43,7 +47,7 @@ void Ethernet_send(const char data[]) {
   cmd_client.flush();
    
   cmd_client.print(data);
-  do {} while (Serial_transmit());
+//  do {} while (Serial_transmit());
 }
 
 void Ethernet_print(const char data[]) {
@@ -83,8 +87,8 @@ bool get_check=false;
 bool get_name=false;
 bool get_val=false;
 int get_idx=0;
-char get_names[10] = "";
-char get_vals[10] = "";
+char get_names[11] = "";
+char get_vals[11] = "";
 
 // variables to support web-page request detection
 const char index_page[] = "GET /index.htm"; bool index_page_found; byte index_page_count;
@@ -167,6 +171,49 @@ void Ethernet_www() {
   }
 }
 
+// quickly copies string to www server transmit buffer
+// returns true if successful
+// returns false if buffer is too full to accept the data (and copies no data into buffer)
+boolean www_write(const char data[]) {
+  int l=strlen(data);
+  if (www_xmit_buffer_pos+l>1022) return false;
+  strcpy((char *)&www_xmit_buffer[www_xmit_buffer_pos],data);
+  www_xmit_buffer_pos+=l;
+  return true;
+}
+
+// quickly writes up to 5 chars at a time from buffer to ethernet adapter
+// returns true if data is still waiting for transmit
+// returns false if data buffer is empty
+boolean www_send() {
+  char buf[11] = "";
+  char c;
+  
+  // copy some data
+  boolean buffer_empty=false;
+  for (int l=0; l<5; l++) {
+    c=www_xmit_buffer[www_xmit_buffer_send_pos];
+    buf[l+1]=0;
+    buf[l]=c;
+    if ((c==0) || (www_xmit_buffer_send_pos>1022)) { buffer_empty=true; break; }
+    www_xmit_buffer_send_pos++;
+  }
+
+  // send network data
+  www_client.print(buf);
+
+  // hit end of www_xmit_buffer? reset and start over
+  if (buffer_empty) {
+    www_xmit_buffer_pos=0;
+    www_xmit_buffer_send_pos=0;
+    www_xmit_buffer[0]=0;
+    return false;
+  }
+
+  return true;
+}
+
+// The index.htm page --------------------------------------------------------------------------------------
 // process GET requests 
 // currently only the name and value are handled, the page sending the name isn't considered
 // this lowers the processing overhead and is sufficient for our purposes here
@@ -175,7 +222,7 @@ int get_temp_day,get_temp_month,get_temp_year;
 int get_temp_hour,get_temp_minute,get_temp_second;
 void Ethernet_get() {
   if (get_names[2]!=0) return; // only two char names for now
-  
+
   // from the Settings.htm page -------------------------------------------------------------------
   // Slew Speed
   if ((get_names[0]=='s') && (get_names[1]=='s')) {
@@ -329,6 +376,7 @@ void Ethernet_get() {
   }
 }
 
+// --------------------------------------------------------------------------------------------------------------
 // Web-site pages, the design of each xxxxx_html_page() function is now capable of sending a web-page of any size
 // since it stops and waits should the local outgoing buffer become full
 const char html_header1[] PROGMEM = "HTTP/1.1 200 OK\r\n";
@@ -374,9 +422,10 @@ const char html_index4[] PROGMEM = "&nbsp;%s&nbsp;UT";
 const char html_index4a[] PROGMEM = "&nbsp;(%s&nbsp; Local Apparent Sidereal Time)<br /><br />";
 const char html_index5[] PROGMEM = "Current Position: " Axis1 "=%s, " Axis2 "=%s<br />";
 const char html_index6[] PROGMEM = "Target Position: " Axis1 "=%s, " Axis2 "=%s<br /><br />";
-const char html_index7[] PROGMEM = "Tracking: %s %s<br />";
-const char html_index8[] PROGMEM = "Parking: %s<br />";
-const char html_index9[] PROGMEM = "PEC: %s<br />";
+const char html_index7[] PROGMEM = "Current MaxRate: %ld (Default MaxRate: %ld)<br /><br />";
+const char html_index8[] PROGMEM = "Tracking: %s %s<br />";
+const char html_index9[] PROGMEM = "Parking: %s<br />";
+const char html_index10[] PROGMEM = "PEC: %s<br />";
 
 void index_html_page() {
   char temp[256] = "";
@@ -460,7 +509,7 @@ void index_html_page() {
     strcpy_P(temp1, html_index5); sprintf(temp,temp1,temp2,temp3); 
   }
   if (html_page_step==++stp) {
-    i=highPrecision; highPrecision=true; 
+    i=highPrecision; highPrecision=true;
     cli();
     double ha=((double)((long int)targetHA.part.m)/StepsPerDegreeHA)/15.0; 
     doubleToHms(temp2,&ha);
@@ -471,7 +520,10 @@ void index_html_page() {
     
     strcpy_P(temp1, html_index6); sprintf(temp,temp1,temp2,temp3); 
   }
-  if (html_page_step==++stp) { 
+  if (html_page_step==++stp) {
+    strcpy_P(temp1, html_index7); sprintf(temp,temp1,maxRate/16L,(long int)MaxRate);
+  }
+  if (html_page_step==++stp) {
     if (trackingState==TrackingNone)     strcpy(temp2,"Off");
     if (trackingState==TrackingSidereal) strcpy(temp2,"On");
     if (trackingState==TrackingMoveTo)   strcpy(temp2,"Slewing");
@@ -481,15 +533,15 @@ void index_html_page() {
     if ((!PPSsynced) && (atHome)) strcpy(temp3,"(at home)");
     if ((!PPSsynced) && (!atHome)) strcpy(temp3,"");
     
-    strcpy_P(temp1, html_index7); sprintf(temp,temp1,temp2,temp3);
+    strcpy_P(temp1, html_index8); sprintf(temp,temp1,temp2,temp3);
   }
-  if (html_page_step==++stp) { 
+  if (html_page_step==++stp) {
     if (parkStatus==NotParked)  strcpy(temp2,"Not Parked");
     if (parkStatus==Parked)     strcpy(temp2,"Parked");
     if (parkStatus==Parking)    strcpy(temp2,"Parking");
     if (parkStatus==ParkFailed) strcpy(temp2,"Park Failed");
     
-    strcpy_P(temp1, html_index8); sprintf(temp,temp1,temp2);
+    strcpy_P(temp1, html_index9); sprintf(temp,temp1,temp2);
   }
   if (html_page_step==++stp) { 
     if (PECstatus==IgnorePEC)      strcpy(temp2,"Ignore");
@@ -498,7 +550,7 @@ void index_html_page() {
     if (PECstatus==ReadyRecordPEC) strcpy(temp2,"Waiting to Record");
     if (PECstatus==ReadyPlayPEC)   strcpy(temp2,"Waiting to Play");
     
-    strcpy_P(temp1, html_index9); sprintf(temp,temp1,temp2);
+    strcpy_P(temp1, html_index10); sprintf(temp,temp1,temp2);
   }
   if (html_page_step==++stp) strcpy(temp,"</div></body></html>");
 
@@ -890,48 +942,6 @@ void config_html_page() {
   // send the data
   r=www_write(temp);
   if (!r) html_page_step--; // repeat this step if www_write failed
-}
-
-// quickly copies string to www server transmit buffer
-// returns true if successful
-// returns false if buffer is too full to accept the data (and copies no data into buffer)
-boolean www_write(const char data[]) {
-  int l=strlen(data);
-  if (www_xmit_buffer_pos+l>1023) return false;
-  strcpy((char *)&www_xmit_buffer[www_xmit_buffer_pos],data);
-  www_xmit_buffer_pos+=l;
-  return true;
-}
-
-// quickly writes up to 5 chars at a time from buffer to ethernet adapter
-// returns true if data is still waiting for transmit
-// returns false if data buffer is empty
-boolean www_send() {
-  char buf[11] = "";
-  char c;
-  
-  // copy some data
-  boolean buffer_empty=false;
-  for (int l=0; l<5; l++) {
-    c=www_xmit_buffer[www_xmit_buffer_send_pos];
-    buf[l+1]=0;
-    buf[l]=c;
-    if ((c==0) || (www_xmit_buffer_send_pos>1023)) { buffer_empty=true; break; }
-    www_xmit_buffer_send_pos++;
-  }
-
-  // send network data
-  www_client.print(buf);
-
-  // hit end of www_xmit_buffer? reset and start over
-  if (buffer_empty) {
-    www_xmit_buffer_pos=0;
-    www_xmit_buffer_send_pos=0;
-    www_xmit_buffer[0]=0;
-    return false;
-  }
-
-  return true;
 }
 
 #endif
