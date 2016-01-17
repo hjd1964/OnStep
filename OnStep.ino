@@ -661,9 +661,6 @@ byte bufferPtr_serial_one= 0;
 char command_ethernet[25];
 char parameter_ethernet[25];
 byte bufferPtr_ethernet= 0;
-int  www_xmit_buffer_send_pos=0;
-int  www_xmit_buffer_pos=0;
-char www_xmit_buffer[1024] = "";
 
 // Misc ---------------------------------------------------------------------------------------------------------------------
 #define Rad 57.29577951
