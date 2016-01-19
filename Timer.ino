@@ -141,7 +141,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
         guideTimerRateHA1=guideTimerRateHA; 
       } else {
         // use acceleration
-        double z=(StepsForRateChange/isqrt32(fabs(x)));
+        double z=(StepsForRateChangeHA/isqrt32(fabs(x)));
         guideTimerRateHA1=(1.0/((StepsPerDegreeHA*(z/1000000.0)))*3600.0);
         if (guideTimerRateHA1>fabs(guideTimerRateHA)) guideTimerRateHA1=fabs(guideTimerRateHA);
       }
@@ -178,7 +178,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
         guideTimerRateDec1=guideTimerRateDec; 
       } else {
         // use acceleration
-        double z=(StepsForRateChange/isqrt32(x));
+        double z=(StepsForRateChangeDec/isqrt32(x));
         guideTimerRateDec1=(1.0/((StepsPerDegreeDec*(z/1000000.0)))*3600.0);
         if (guideTimerRateDec1>fabs(guideTimerRateDec)) guideTimerRateDec1=fabs(guideTimerRateDec);
       }
