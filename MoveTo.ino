@@ -103,10 +103,10 @@ void moveTo() {
   // First, for Right Ascension
   long temp;
   if (distStartHA>distDestHA) {
-    temp=(StepsForRateChange/isqrt32(distDestHA));    // slow down (temp gets bigger)
+    temp=(StepsForRateChangeHA/isqrt32(distDestHA));    // slow down (temp gets bigger)
 //  if ((temp<100) && (temp>=10))  temp=101;          // exclude a range of speeds
   } else {
-    temp=(StepsForRateChange/isqrt32(distStartHA));   // speed up (temp gets smaller)
+    temp=(StepsForRateChangeHA/isqrt32(distStartHA));   // speed up (temp gets smaller)
 //  if ((temp<100) && (temp>=10))  temp=9;            // exclude a range of speeds
   }
   if (temp<maxRate) temp=maxRate;                     // fastest rate
@@ -115,10 +115,10 @@ void moveTo() {
 
   // Now, for Declination
   if (distStartDec>distDestDec) {
-      temp=(StepsForRateChange/isqrt32(distDestDec)); // slow down
+      temp=(StepsForRateChangeDec/isqrt32(distDestDec)); // slow down
 //    if ((temp<100) && (temp>=10))  temp=101;        // exclude a range of speeds
     } else {
-      temp=(StepsForRateChange/isqrt32(distStartDec));// speed up
+      temp=(StepsForRateChangeDec/isqrt32(distStartDec)); // speed up
 //    if ((temp<100) && (temp>=10))  temp=9;          // exclude a range of speeds
     }
 #ifdef MaxRateDecRatio
