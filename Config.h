@@ -116,7 +116,7 @@
                                      // too low and OnStep communicates slowly and/or freezes as the motor timers use up all the MCU time
                                      // * = minimum can be lower, when both HA & DE_MODE_GOTO are used by HA/DE_STEP_GOTO times.
                                      
-#define StepsForRateChange  200000.0 // number of steps during acceleration and de-acceleration: higher values=longer acceleration/de-acceleration
+#define DegreesForAcceleration    15 // number of degrees for full acceleration or deceleration: higher values=longer acceleration/deceleration
                                      // for the most part this doesn't need to be changed, but adjust when needed
 
 #define BacklashTakeupRate        25 // backlash takeup rate (in multipules of the sidereal rate): too fast and your motors will stall,
