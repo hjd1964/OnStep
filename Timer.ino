@@ -18,7 +18,6 @@ IntervalTimer itimer1;
 
 #if defined(HA_MODE) && defined(HA_MODE_GOTO)
 volatile long stepHA=1;
-volatile long stepHA_next=1;
 volatile long modeHA_next=HA_MODE;
 volatile boolean gotoModeHA=false;
 #else
@@ -27,7 +26,6 @@ volatile boolean gotoModeHA=false;
 
 #if defined(DE_MODE) && defined(DE_MODE_GOTO)
 volatile long stepDec=1;
-volatile long stepDec_next=1;
 volatile long modeDec_next=DE_MODE;
 volatile boolean gotoModeDec=false;
 #else
@@ -226,13 +224,13 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
 
   if (trackingState==TrackingMoveTo) {
     // trigger Goto step mode, rapid acceleration (low StepsForRateChange) can leave too little time
-    // until the home position arrives to actually switch to tracking micro-step mode. the larger step size  
+    // until the home position arrives to actually switch to tracking micro-step mode. the larger step size
     // then causes backlash compensation to activate which in-turn keeps goto micro-step mode from turning off
     #if defined(DE_MODE) && defined(DE_MODE_GOTO)
-    gotoRateDec=(thisTimerRateDec<SiderealRate/120); // activate at 120x sidereal rate
+    gotoRateDec=(thisTimerRateDec<128*16L); // activate <128us rate
     #endif
     #if defined(HA_MODE) && defined(HA_MODE_GOTO)
-    gotoRateHA=(thisTimerRateHA<SiderealRate/120);
+    gotoRateHA=(thisTimerRateHA<128*16L);   // activate <128us rate
     #endif
   }
   
@@ -257,8 +255,7 @@ ISR(TIMER3_COMPA_vect)
   CLR(HAStepPORT,  HAStepBit);
 
 #if (defined(__arm__) && defined(TEENSYDUINO)) || (defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__))
-  // on the much faster Teensy run this ISR at twice the normal rate and pull the step pin low every other call
-  // I assume that Tiva TM4C is the same???
+  // on the much faster Teensy and Tiva TM4C run this ISR at twice the normal rate and pull the step pin low every other call
   if (HAclr) {
     TakeStepHA=false;
 #endif
@@ -274,13 +271,12 @@ ISR(TIMER3_COMPA_vect)
   // switch micro-step mode
   if (gotoModeHA!=gotoRateHA) {
     // only when at the home position
-    if ((posHA+blHA)%1024==0) {
+    if ((posHA+blHA)%256==0) { // was 1024 in support of 256x drivers... if they work like the DRV8825, A4988 this should still be ok
       // switch mode
-      if (gotoModeHA) { stepHA_next=1; modeHA_next=HA_MODE; gotoModeHA=false; } else { stepHA_next=HA_STEP_GOTO; modeHA_next=HA_MODE_GOTO; gotoModeHA=true; }
+      if (gotoModeHA) { stepHA=1; modeHA_next=HA_MODE; gotoModeHA=false; } else { stepHA=HA_STEP_GOTO; modeHA_next=HA_MODE_GOTO; gotoModeHA=true; }
       digitalWrite(HA_M0,(modeHA_next & 1));
       digitalWrite(HA_M1,(modeHA_next>>1 & 1));
       digitalWrite(HA_M2,(modeHA_next>>2 & 1));
-      stepHA=stepHA_next;
     }
   }
 #else
@@ -289,7 +285,7 @@ ISR(TIMER3_COMPA_vect)
 #elif defined(__arm__) && defined(TEENSYDUINO)
   PIT_LDVAL1=nextHArate;
 #elif defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
-  TimerLoadSet(Timer3_base, TIMER_A, nextHArate*stepHA);
+  TimerLoadSet(Timer3_base, TIMER_A, nextHArate);
 #endif
 #endif
 
@@ -329,8 +325,7 @@ ISR(TIMER4_COMPA_vect)
   CLR(DecStepPORT,  DecStepBit);
 
 #if (defined(__arm__) && defined(TEENSYDUINO)) || (defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__))
-  // on the much faster Teensy run this ISR at twice the normal rate and pull the step pin low every other call
-  // I assume that Tiva TM4C is the same???
+  // on the much faster Teensy and Tiva TM4C run this ISR at twice the normal rate and pull the step pin low every other call
   if (DEclr) {
     TakeStepDec=false;
 #endif
@@ -346,13 +341,12 @@ ISR(TIMER4_COMPA_vect)
   // switch micro-step mode
   if (gotoModeDec!=gotoRateDec) {
     // only when at home position
-    if ((posDec+blDec)%1024==0) {
+    if ((posDec+blDec)%256==0) { // was 1024 in support of 256x drivers... if they work like the DRV8825, A4988 this should still be ok
       // switch mode
-      if (gotoModeDec) { stepDec_next=1; modeDec_next=DE_MODE; gotoModeDec=false; } else { stepDec_next=DE_STEP_GOTO; modeDec_next=DE_MODE_GOTO; gotoModeDec=true; }
+      if (gotoModeDec) { stepDec=1; modeDec_next=DE_MODE; gotoModeDec=false; } else { stepDec=DE_STEP_GOTO; modeDec_next=DE_MODE_GOTO; gotoModeDec=true; }
       digitalWrite(DE_M0,(modeDec_next & 1));
       digitalWrite(DE_M1,(modeDec_next>>1 & 1));
       digitalWrite(DE_M2,(modeDec_next>>2 & 1));
-      stepDec=stepDec_next;
     }
   }
 #else
