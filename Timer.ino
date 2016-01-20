@@ -261,13 +261,6 @@ ISR(TIMER3_COMPA_vect)
 #endif
 
 #if defined(HA_MODE) && defined(HA_MODE_GOTO)
-#if defined(__AVR__)
-  OCR3A=nextHArate*stepHA;
-#elif defined(__arm__) && defined(TEENSYDUINO)
-  PIT_LDVAL1=nextHArate*stepHA;
-#elif defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
-  TimerLoadSet(Timer3_base, TIMER_A, nextHArate*stepHA);
-#endif
   // switch micro-step mode
   if (gotoModeHA!=gotoRateHA) {
     // only when at the home position
@@ -279,14 +272,10 @@ ISR(TIMER3_COMPA_vect)
       digitalWrite(HA_M2,(modeHA_next>>2 & 1));
     }
   }
-#else
-#if defined(__AVR__)
-  OCR3A=nextHArate;
-#elif defined(__arm__) && defined(TEENSYDUINO)
-  PIT_LDVAL1=nextHArate;
-#elif defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
-  TimerLoadSet(Timer3_base, TIMER_A, nextHArate);
 #endif
+
+#if defined(__AVR__)
+  OCR3A=nextHArate*stepHA;
 #endif
 
   // Guessing about 4+4+1+ 4+4+1+ 1+ 2+1+2+ 13=37 clocks between here and the step signal which is 2.3uS
@@ -308,7 +297,15 @@ ISR(TIMER3_COMPA_vect)
       TakeStepHA=true;
     }
     HAclr=false;
-  } else { if (TakeStepHA) SET(HAStepPORT, HAStepBit); HAclr=true; }
+  } else { 
+    if (TakeStepHA) SET(HAStepPORT, HAStepBit); HAclr=true;
+
+#if defined(__arm__) && defined(TEENSYDUINO)
+    PIT_LDVAL1=nextHArate*stepHA;
+#elif defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+    TimerLoadSet(Timer3_base, TIMER_A, nextHArate*stepHA);
+#endif
+  }
 #else
     SET(HAStepPORT, HAStepBit);
   }
@@ -331,13 +328,6 @@ ISR(TIMER4_COMPA_vect)
 #endif
 
 #if defined(DE_MODE) && defined(DE_MODE_GOTO)
-#if defined(__AVR__)
-  OCR4A=nextDErate*stepDec;
-#elif defined(__arm__) && defined(TEENSYDUINO)
-  PIT_LDVAL2=nextDErate*stepDec;
-#elif defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
-  TimerLoadSet(Timer4_base, TIMER_A, nextDErate*stepDec);
-#endif
   // switch micro-step mode
   if (gotoModeDec!=gotoRateDec) {
     // only when at home position
@@ -349,19 +339,15 @@ ISR(TIMER4_COMPA_vect)
       digitalWrite(DE_M2,(modeDec_next>>2 & 1));
     }
   }
-#else
-#if defined(__AVR__)
-  OCR4A=nextDErate;
-#elif defined(__arm__) && defined(TEENSYDUINO)
-  PIT_LDVAL2=nextDErate;
-#elif defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
-  TimerLoadSet(Timer4_base, TIMER_A, nextDErate);
 #endif
+
+#if defined(__AVR__)
+  OCR4A=nextDErate*stepDec;
 #endif
   
   if (posDec!=(long int)targetDec.part.m) { // move the Dec stepper to the target
     // telescope normally starts on the EAST side of the pier looking at the WEST sky
-    if (posDec<(long int)targetDec.part.m) dirDec=1; else dirDec=0;                                     // Direction control
+    if (posDec<(long int)targetDec.part.m) dirDec=1; else dirDec=0; // Direction control
     #ifdef REVERSE_DEC_ON
       if (DecDir==dirDec) SET(DecDirPORT, DecDirBit); else CLR(DecDirPORT, DecDirBit); // Set direction, decDir default HIGH (=1, for my wiring)
     #else
@@ -378,7 +364,15 @@ ISR(TIMER4_COMPA_vect)
       TakeStepDec=true;
     }
     DEclr=false; 
-  } else { if (TakeStepDec) SET(DecStepPORT, DecStepBit); DEclr=true; }
+  } else { 
+    if (TakeStepDec) SET(DecStepPORT, DecStepBit); DEclr=true;
+
+#if defined(__arm__) && defined(TEENSYDUINO)
+    PIT_LDVAL2=nextDErate*stepDec;
+#elif defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+    TimerLoadSet(Timer4_base, TIMER_A, nextDErate*stepDec);
+#endif
+  }
 #else
     SET(DecStepPORT, DecStepBit);
   }
