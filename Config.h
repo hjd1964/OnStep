@@ -116,8 +116,8 @@
                                      // too low and OnStep communicates slowly and/or freezes as the motor timers use up all the MCU time
                                      // * = minimum can be lower, when both HA & DE_MODE_GOTO are used by HA/DE_STEP_GOTO times.
                                      
-#define DegreesForAcceleration    15 // number of degrees for full acceleration or deceleration: higher values=longer acceleration/deceleration
-                                     // for the most part this doesn't need to be changed, but adjust when needed
+#define DegreesForAcceleration   5.0 // approximate number of degrees for full acceleration or deceleration: higher values=longer acceleration/deceleration
+                                     // Default=5.0, too low (about <1 or 2) can cause gotos to never end if micro-step mode switching is enabled.
 
 #define BacklashTakeupRate        25 // backlash takeup rate (in multipules of the sidereal rate): too fast and your motors will stall,
                                      // too slow and the mount will be sluggish while it moves through the backlash
