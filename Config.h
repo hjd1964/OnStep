@@ -68,7 +68,7 @@
 // with either index detection method, once triggered 60s must expire before another detection can happen.  This gives time for the index magnet to pass by the detector before another cycle begins.
 // Note: Analog PEC index sense is not supported on the Teensy3.1
 // Ignored on Alt/Azm mounts.
-#define PEC_SENSE_ON
+#define PEC_SENSE_OFF
 #define PEC_SENSE_STATE HIGH
 // switch close (to ground) on pin 3 for optional limit sense (stops gotos and/or tracking), default=OFF
 #define LIMIT_SENSE_OFF
