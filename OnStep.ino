@@ -135,8 +135,8 @@ volatile double  timerRateRatio = ((double)StepsPerDegreeHA/(double)StepsPerDegr
 volatile boolean useTimerRateRatio = (StepsPerDegreeHA!=StepsPerDegreeDec);
 #define SecondsPerWormRotation  ((long)(StepsPerWormRotation/StepsPerSecond))
 #define StepsPerSecondDec       ((double)(StepsPerDegreeDec/3600.0)*15.0)
-volatile double StepsForRateChangeHA = DegreesForAcceleration*(double)StepsPerDegreeHA;
-volatile double StepsForRateChangeDec = DegreesForAcceleration*(double)StepsPerDegreeDec;
+volatile double StepsForRateChangeHA = DegreesForAcceleration*(double)StepsPerDegreeHA*4.0;
+volatile double StepsForRateChangeDec = DegreesForAcceleration*(double)StepsPerDegreeDec*4.0;
 
 #if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
 #define cli() noInterrupts()
