@@ -20,9 +20,13 @@ void moveTo() {
     // first phase, decide if we should move to 60 deg. HA (4 hours) to get away from the horizon limits or just go straight to the home position
     cli();
     if (pierSide==PierSideFlipWE1) { 
-      if ((currentAlt<10.0) && (startHA>-90L*StepsPerDegreeHA)) targetHA.part.m=-60L*StepsPerDegreeHA; else targetHA.part.m=-celestialPoleHA*StepsPerDegreeHA; 
+      if (celestialPoleHA==0) targetHA.part.m=0*StepsPerDegreeHA; else {
+        if ((currentAlt<10.0) && (startHA>-90L*StepsPerDegreeHA)) targetHA.part.m=-60L*StepsPerDegreeHA; else targetHA.part.m=-celestialPoleHA*StepsPerDegreeHA;
+      }
     } else {
-      if ((currentAlt<10.0) && (startHA<90L*StepsPerDegreeHA)) targetHA.part.m=60L*StepsPerDegreeHA; else targetHA.part.m=celestialPoleHA*StepsPerDegreeHA; 
+      if (celestialPoleHA==0) targetHA.part.m=0*StepsPerDegreeHA; else {
+        if ((currentAlt<10.0) && (startHA<90L*StepsPerDegreeHA)) targetHA.part.m=60L*StepsPerDegreeHA; else targetHA.part.m=celestialPoleHA*StepsPerDegreeHA; 
+      }
     } 
     targetHA.part.f=0;
     targetDec.part.m=celestialPoleDec*StepsPerDegreeDec;
@@ -132,10 +136,20 @@ void moveTo() {
   if ((distDestHA<=2) && (distDestDec<=2)) { 
     if ((pierSide==PierSideFlipEW2) || (pierSide==PierSideFlipWE2)) {
       // make sure we're at the home position when flipping sides of the mount
-      cli();
-      startHA=posHA; if (pierSide==PierSideFlipWE2) targetHA.part.m=-celestialPoleHA*StepsPerDegreeHA; else targetHA.part.m=celestialPoleHA*StepsPerDegreeHA; targetHA.part.f=0;
-      startDec=posDec; targetDec.part.m=celestialPoleDec*StepsPerDegreeDec; targetDec.part.f=0;
-      sei();
+      if (celestialPoleHA==0) {
+        cli();
+        startHA=posHA;
+        if (pierSide==PierSideFlipWE2) targetHA.part.m=-180*StepsPerDegreeHA; else targetHA.part.m=180*StepsPerDegreeHA; targetHA.part.f=0;
+        startDec=posDec; targetDec.part.m=celestialPoleDec*StepsPerDegreeDec; targetDec.part.f=0;
+        sei();
+      } else {
+        cli();
+        startHA=posHA;
+        if (pierSide==PierSideFlipWE2) targetHA.part.m=-celestialPoleHA*StepsPerDegreeHA; else targetHA.part.m=celestialPoleHA*StepsPerDegreeHA; targetHA.part.f=0;
+        startDec=posDec; targetDec.part.m=celestialPoleDec*StepsPerDegreeDec; targetDec.part.f=0;
+        sei();
+      }
+      
       pierSide++;
     } else
     if ((pierSide==PierSideFlipEW3) || (pierSide==PierSideFlipWE3)) {
