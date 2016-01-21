@@ -47,7 +47,6 @@ void Ethernet_send(const char data[]) {
   cmd_client.flush();
    
   cmd_client.print(data);
-//  do {} while (Serial_transmit());
 }
 
 void Ethernet_print(const char data[]) {
@@ -94,11 +93,13 @@ char get_vals[11] = "";
 const char index_page[] = "GET /index.htm"; bool index_page_found; byte index_page_count;
 const char settings_page[] = "GET /settings.htm"; bool settings_page_found; byte settings_page_count;
 const char control_page[] = "GET /control.htm"; bool control_page_found; byte control_page_count;
+const char pec_page[] = "GET /pec.htm"; bool pec_page_found; byte pec_page_count;
 const char config_page[] = "GET /config.htm"; bool config_page_found; byte config_page_count;
 void reset_page_requests() {
   index_page_found=false; index_page_count=0;
   settings_page_found=false; settings_page_count=0;
   control_page_found=false; control_page_count=0;
+  pec_page_found=false; pec_page_count=0;
   config_page_found=false; config_page_count=0;
   get_check=false; get_val=false; get_name=false;
 }
@@ -126,6 +127,7 @@ void Ethernet_www() {
         if (!index_page_found)    { if (c==index_page[index_page_count])       index_page_count++;    else index_page_count=0;    if (index_page_count==14)    { index_page_found=true; get_check=true; } }
         if (!settings_page_found) { if (c==settings_page[settings_page_count]) settings_page_count++; else settings_page_count=0; if (settings_page_count==17) { settings_page_found=true; get_check=true; } }
         if (!control_page_found)  { if (c==control_page[control_page_count])   control_page_count++;  else control_page_count=0;  if (control_page_count==16)  { control_page_found=true; get_check=true; } }
+        if (!pec_page_found)      { if (c==pec_page[pec_page_count])           pec_page_count++;      else pec_page_count=0;      if (pec_page_count==12)      { pec_page_found=true; get_check=true; } }
         if (!config_page_found)   { if (c==config_page[config_page_count])     config_page_count++;   else config_page_count=0;   if (config_page_count==15)   { config_page_found=true; get_check=true; } }
         
         // if you've gotten to the end of the line (received a newline character) and the line is blank, the http request has ended, so you can send a reply
@@ -147,6 +149,7 @@ void Ethernet_www() {
         if (index_page_found) index_html_page(); else
         if (settings_page_found) settings_html_page(); else
         if (control_page_found) control_html_page(); else
+        if (pec_page_found) pec_html_page(); else
         if (config_page_found) config_html_page(); else
         index_html_page();
       }
@@ -374,6 +377,33 @@ void Ethernet_get() {
     if ((get_vals[0]=='l') && (get_vals[1]==0)) SetTrackingRate(0.96236513150); // lunar
     if ((get_vals[0]=='h') && (get_vals[1]==0)) SetTrackingRate(0.99726956632); // solar
   }
+  // PEC control
+  if ((get_names[0]=='p') && (get_names[1]=='e')) {
+    if ((get_vals[0]=='p') && (get_vals[1]=='l') && (get_vals[2]==0)) { if (PECrecorded) PECstatus=ReadyPlayPEC; } // play
+    if ((get_vals[0]=='s') && (get_vals[1]=='t') && (get_vals[2]==0)) { PECstatus=IgnorePEC; }; // stop
+    if ((get_vals[0]=='r') && (get_vals[1]=='e') && (get_vals[2]==0)) { PECstatus=ReadyRecordPEC; }; // record
+    if ((get_vals[0]=='c') && (get_vals[1]=='l') && (get_vals[2]==0)) { // clear
+      for (i=0; i<PECBufferSize; i++) PEC_buffer[i]=128;
+      PECfirstRecord = true;
+      PECstatus      = IgnorePEC;
+      PECrecorded    = false;
+      EEPROM.update(EE_PECstatus,PECstatus);
+      EEPROM.update(EE_PECrecorded,PECrecorded);
+      PECindex_record= 0;
+      PECindex_sense = 0;
+      EEPROM_writeQuad(EE_PECrecord_index,(byte*)&PECindex_record); 
+      EEPROM_writeQuad(EE_PECsense_index,(byte*)&PECindex_sense);
+    };
+    if ((get_vals[0]=='w') && (get_vals[1]=='r') && (get_vals[2]==0)) { // write to eeprom
+      PECrecorded=true;
+      PECstatus=IgnorePEC;
+      EEPROM.update(EE_PECrecorded,PECrecorded);
+      EEPROM.update(EE_PECstatus,PECstatus);
+      EEPROM_writeQuad(EE_PECsense_index,(byte*)&PECindex_sense);
+      // trigger recording of PEC buffer
+      PECautoRecord=PECBufferSize;
+    }
+  }
 }
 
 // --------------------------------------------------------------------------------------------------------------
@@ -399,9 +429,9 @@ const char html_main_css7[] PROGMEM = "h1 { text-align: right; }\r\n";
 const char html_main_css8[] PROGMEM = "input { width:4em }\r\n";
 const char html_main_css9[] PROGMEM = "</STYLE>\r\n";
 
-const char html_links1[] PROGMEM = "<a href=\"/index.htm\">Status</a>&nbsp;&nbsp;&nbsp;";
-const char html_links2[] PROGMEM = "<a href=\"/settings.htm\">Settings</a>&nbsp;&nbsp;&nbsp;";
-const char html_links3[] PROGMEM = "<a href=\"/control.htm\">Control</a>&nbsp;&nbsp;&nbsp;<a href=\"/config.htm\">Configuration</a><br />";
+const char html_links1[] PROGMEM = "<a href=\"/index.htm\">Status</a>&nbsp;&nbsp;&nbsp;<a href=\"/settings.htm\">";
+const char html_links2[] PROGMEM = "Settings</a>&nbsp;&nbsp;&nbsp;<a href=\"/control.htm\">Control</a>&nbsp;&nbsp;&nbsp;";
+const char html_links3[] PROGMEM = "<a href=\"/pec.htm\">PEC</a>&nbsp;&nbsp;&nbsp;<a href=\"/config.htm\">Configuration</a><br />";
 
 // The index.htm page --------------------------------------------------------------------------------------
 #ifdef MOUNT_TYPE_ALTAZM
@@ -639,7 +669,6 @@ void settings_html_page() {
   char temp[256] = "";
   char temp1[256] = "";
   char temp2[20] = "";
-  bool r=true;
   int stp=0;
   html_page_step++;
 
@@ -728,8 +757,7 @@ void settings_html_page() {
   if (html_page_step==++stp) { html_page_step=0; responseStarted=false; return; }
 
   // send the data
-  r=www_write(temp);
-  if (!r) html_page_step--; // repeat this step if www_write failed
+  if (!www_write(temp)) html_page_step--; // repeat this step if www_write failed
 }
 
 // The control.htm page ----------------------------------------------------------------------------------
@@ -798,7 +826,6 @@ const char html_control10[] PROGMEM =
 
 void control_html_page() {
   char temp[256] = "";
-  bool r=true;
   int stp=0;
   html_page_step++;
 
@@ -850,8 +877,89 @@ void control_html_page() {
   if (html_page_step==++stp) { html_page_step=0; responseStarted=false; return; }
 
   // send the data
-  r=www_write(temp);
-  if (!r) html_page_step--; // repeat this step if www_write failed
+  if (!www_write(temp)) html_page_step--; // repeat this step if www_write failed
+}
+
+// The pec.htm page ----------------------------------------------------------------------------------
+const char html_pec1[] PROGMEM = "<div class=\"t\"><table width=\"100%\"><tr><td><b>" FirmwareName " " FirmwareNumber ;
+const char html_pec2[] PROGMEM = "</b></td><td align=\"right\"><b><font size=\"5\">PEC</font></b></td></tr></table><br />";
+const char html_pec3[] PROGMEM = "</div><div class=\"b\">\r\n";
+const char html_pec4[] PROGMEM = "PEC: <br /><br />";
+const char html_pec5[] PROGMEM = "STATUS = %s<br /><br />";
+const char html_pecControls1[] PROGMEM =
+"<form method=\"get\" action=\"/pec.htm\">"
+"<button name=\"pe\" value=\"pl\" type=\"submit\">Play</button>";
+const char html_pecControls2[] PROGMEM = 
+"<button name=\"pe\" value=\"st\" type=\"submit\">Stop</button><br /><br />"
+"<button name=\"pe\" value=\"cl\" type=\"submit\">Clear</button>";
+const char html_pecControls3[] PROGMEM = 
+"<button name=\"pe\" value=\"re\" type=\"submit\">Record</button><br /><br />"
+"<button name=\"pe\" value=\"wr\" type=\"submit\">Write to EEPROM</button></form>"
+"</form><br />\r\n";
+
+void pec_html_page() {
+  char temp[256] = "";
+  char temp1[80] = "";
+  char temp2[80] = "";
+  int stp=0;
+  html_page_step++;
+
+  // send a standard http response header
+  if (html_page_step==++stp) strcpy_P(temp, html_header1);
+  if (html_page_step==++stp) strcpy_P(temp, html_header2);
+  if (html_page_step==++stp) strcpy_P(temp, html_header3);
+  if (html_page_step==++stp) strcpy_P(temp, html_header4);
+  if (html_page_step==++stp) strcpy_P(temp, html_header5);
+  if (html_page_step==++stp) strcpy_P(temp, html_header6);
+
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css1);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css2);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css3);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css4);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css5);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css6);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css7);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css8);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css9);
+  
+  if (html_page_step==++stp) strcpy_P(temp, html_header7);
+  if (html_page_step==++stp) strcpy_P(temp, html_header8);
+
+  // and the remainder of the page
+  if (html_page_step==++stp) strcpy_P(temp, html_pec1);
+  if (html_page_step==++stp) strcpy_P(temp, html_pec2);
+  if (html_page_step==++stp) strcpy_P(temp, html_links1);
+  if (html_page_step==++stp) strcpy_P(temp, html_links2);
+  if (html_page_step==++stp) strcpy_P(temp, html_links3);
+  if (html_page_step==++stp) strcpy_P(temp, html_pec3);
+  if (html_page_step==++stp) strcpy_P(temp, html_pec4);
+  if (html_page_step==++stp) {
+#ifndef MOUNT_TYPE_ALTAZM
+    const char *PECstatusCh = PECStatusString;
+    if (PECstatusCh[PECstatus]=='I') { strcpy(temp2,"Idle"); } else
+    if (PECstatusCh[PECstatus]=='p') { strcpy(temp2,"Play waiting Idx"); } else
+    if (PECstatusCh[PECstatus]=='P') { strcpy(temp2,"Playing"); } else
+    if (PECstatusCh[PECstatus]=='r') { strcpy(temp2,"Record waiting Idx"); } else
+    if (PECstatusCh[PECstatus]=='R') { strcpy(temp2,"Recording"); } else
+      strcpy(temp2,"Unknown");
+#endif
+    strcpy_P(temp1, html_pec5); sprintf(temp,temp1,temp2);
+  }
+
+#ifdef MOUNT_TYPE_ALTAZM
+  if (html_page_step==++stp) strcpy_P(temp, "PEC CONTROLS DISABLED");
+#else
+  if (html_page_step==++stp) strcpy_P(temp, html_pecControls1);
+  if (html_page_step==++stp) strcpy_P(temp, html_pecControls2);
+  if (html_page_step==++stp) strcpy_P(temp, html_pecControls3);
+#endif
+  if (html_page_step==++stp) strcpy(temp,"</div></body></html>");
+
+  // stop sending this page
+  if (html_page_step==++stp) { html_page_step=0; responseStarted=false; return; }
+
+  // send the data
+  if (!www_write(temp)) html_page_step--; // repeat this step if www_write failed
 }
 
 // The config.htm page --------------------------------------------------------------------------------------
@@ -896,7 +1004,6 @@ void config_html_page() {
   char temp1[80] = "";
   char temp2[20] = "";
   char temp3[20] = "";
-  bool r=true;
   int stp=0;
   html_page_step++;
     
@@ -940,8 +1047,7 @@ void config_html_page() {
   if (html_page_step==++stp) { html_page_step=0; responseStarted=false; return; }
 
   // send the data
-  r=www_write(temp);
-  if (!r) html_page_step--; // repeat this step if www_write failed
+  if (!www_write(temp)) html_page_step--; // repeat this step if www_write failed
 }
 
 #endif
