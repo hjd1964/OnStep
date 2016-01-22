@@ -135,8 +135,8 @@ volatile double  timerRateRatio = ((double)StepsPerDegreeHA/(double)StepsPerDegr
 volatile boolean useTimerRateRatio = (StepsPerDegreeHA!=StepsPerDegreeDec);
 #define SecondsPerWormRotation  ((long)(StepsPerWormRotation/StepsPerSecond))
 #define StepsPerSecondDec       ((double)(StepsPerDegreeDec/3600.0)*15.0)
-volatile double StepsForRateChangeHA = DegreesForAcceleration*(double)StepsPerDegreeHA*4.0;
-volatile double StepsForRateChangeDec = DegreesForAcceleration*(double)StepsPerDegreeDec*4.0;
+volatile double StepsForRateChangeHA = (double)DegreesForAcceleration*(double)StepsPerDegreeHA*4.0;
+volatile double StepsForRateChangeDec = (double)DegreesForAcceleration*(double)StepsPerDegreeDec*4.0;
 
 #if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
 #define cli() noInterrupts()
@@ -623,7 +623,7 @@ byte pierSide            = PierSideNone;
 #define ParkFailed       3
 byte    parkStatus       = NotParked;
 boolean parkSaved        = false;
-boolean atHome           = false;
+boolean atHome           = true;
 boolean homeMount        = false;
 
 // Command processing -------------------------------------------------------------------------------------------------------
@@ -1045,7 +1045,7 @@ void setup() {
   EEPROM_readQuad(EE_siderealInterval,(byte*)&siderealInterval);
 
   // 16MHZ clocks for steps per second of sidereal tracking
-  cli(); SiderealRate=siderealInterval/StepsPerSecond; TakeupRate=SiderealRate/4; sei();
+  cli(); SiderealRate=siderealInterval/StepsPerSecond; TakeupRate=SiderealRate/4L; sei();
   timerRateHA =SiderealRate;
   timerRateDec=SiderealRate;
 
@@ -1453,6 +1453,9 @@ void loop() {
 
     // check altitude every second
     if ((currentAlt<minAlt) || (currentAlt>maxAlt)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
+
+    // basic check to see if we're at home
+    if (trackingState!=TrackingNone) atHome=false;
 
     // reset the sidereal clock once a day, to keep the significant digits from being consumed
     // I'm shooting for keeping OnStep reliable for about 50 days of continuous uptime (until millis() rolls over)
