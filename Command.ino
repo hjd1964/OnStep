@@ -199,11 +199,11 @@ the pdCor  term is 1 in HA
         if ((strlen(parameter)>1) && (strlen(parameter)<5)) {
           if ( (atoi2((char*)&parameter[1],&i)) && ((i>=0) && (i<=999))) { 
             if (parameter[0]=='D') {
-              backlashDec=(int)(((long)i*StepsPerDegreeDec)/3600L);
+              backlashDec=(int)round(((double)i*(double)StepsPerDegreeDec)/3600.0);
               EEPROM_writeInt(EE_backlashDec,backlashDec);
             } else
             if (parameter[0]=='R') {
-              backlashHA =(int)(((long)i*StepsPerDegreeHA)/3600L);
+              backlashHA =(int)round(((double)i*(double)StepsPerDegreeHA)/3600.0);
               EEPROM_writeInt(EE_backlashHA,backlashHA);
             } else commandError=true;
           } else commandError=true;
@@ -212,21 +212,21 @@ the pdCor  term is 1 in HA
       
 //   % - Return parameter
 //  :%BD# Get Dec Antibacklash
-//          Return: ddd#
+//          Return: d#
 //  :%BR# Get RA Antibacklash
-//          Return: ddd#
+//          Return: d#
 //          Get the Backlash values.  Units are arc-seconds
       if ((command[0]=='%') && (command[1]=='B')) {
         if (parameter[0]=='D') {
-            i=(int)(((long)backlashDec*3600L)/StepsPerDegreeDec);
+            i=(int)round(((double)backlashDec*3600.0)/(double)StepsPerDegreeDec);
             if (i<0) i=0; if (i>999) i=999;
-            sprintf(reply,"%03d",i);
+            sprintf(reply,"%d",i);
             quietReply=true;
         } else
         if (parameter[0]=='R') {
-            i=(int)(((long)backlashHA*3600L)/StepsPerDegreeHA);
+            i=(int)round(((double)backlashHA*3600.0)/(double)StepsPerDegreeHA);
             if (i<0) i=0; if (i>999) i=999;
-            sprintf(reply,"%03d",i);
+            sprintf(reply,"%d",i);
             quietReply=true;
         } else commandError=true;
       } else
@@ -747,7 +747,7 @@ the pdCor  term is 1 in HA
             PECstatus=IgnorePEC;
             EEPROM.update(EE_PECrecorded,PECrecorded);
             EEPROM.update(EE_PECstatus,PECstatus);
-           // EEPROM_writeQuad(EE_PECrecord_index,(byte*)&PECindex_record); 
+            EEPROM_writeQuad(EE_PECrecord_index,(byte*)&PECindex_record); 
             EEPROM_writeQuad(EE_PECsense_index,(byte*)&PECindex_sense);
             // trigger recording of PEC buffer
             PECautoRecord=PECBufferSize;
