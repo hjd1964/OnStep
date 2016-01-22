@@ -455,7 +455,6 @@ const char html_index6[] PROGMEM = "Target Position: " Axis1 "=%s, " Axis2 "=%s<
 const char html_index7[] PROGMEM = "Current MaxRate: %ld (Default MaxRate: %ld)<br /><br />";
 const char html_index8[] PROGMEM = "Tracking: %s %s<br />";
 const char html_index9[] PROGMEM = "Parking: %s<br />";
-const char html_index10[] PROGMEM = "PEC: %s<br />";
 
 void index_html_page() {
   char temp[256] = "";
@@ -572,15 +571,6 @@ void index_html_page() {
     if (parkStatus==ParkFailed) strcpy(temp2,"Park Failed");
     
     strcpy_P(temp1, html_index9); sprintf(temp,temp1,temp2);
-  }
-  if (html_page_step==++stp) { 
-    if (PECstatus==IgnorePEC)      strcpy(temp2,"Ignore");
-    if (PECstatus==PlayPEC)        strcpy(temp2,"Playing");
-    if (PECstatus==RecordPEC)      strcpy(temp2,"Recording");
-    if (PECstatus==ReadyRecordPEC) strcpy(temp2,"Waiting to Record");
-    if (PECstatus==ReadyPlayPEC)   strcpy(temp2,"Waiting to Play");
-    
-    strcpy_P(temp1, html_index10); sprintf(temp,temp1,temp2);
   }
   if (html_page_step==++stp) strcpy(temp,"</div></body></html>");
 
@@ -891,10 +881,10 @@ const char html_pecControls1[] PROGMEM =
 "<button name=\"pe\" value=\"pl\" type=\"submit\">Play</button>";
 const char html_pecControls2[] PROGMEM = 
 "<button name=\"pe\" value=\"st\" type=\"submit\">Stop</button><br /><br />"
-"<button name=\"pe\" value=\"cl\" type=\"submit\">Clear</button>";
+"<button name=\"pe\" value=\"cl\" type=\"submit\">Clear</button><button name=\"pe\" value=\"re\" type=\"submit\">";
 const char html_pecControls3[] PROGMEM = 
-"<button name=\"pe\" value=\"re\" type=\"submit\">Record</button><br /><br />"
-"<button name=\"pe\" value=\"wr\" type=\"submit\">Write to EEPROM</button></form>"
+"Record</button> Clear erases the memory buffer not EEPROM.  During recording corrections are averaged 3:1 favoring the buffer unless the buffer was cleared in which case the full correction is used.<br /><br />"
+"<button name=\"pe\" value=\"wr\" type=\"submit\">Write to EEPROM</button> Writing PEC data to EEPROM pauses everything in OnStep for about 2 to 4 seconds.</form>"
 "</form><br />\r\n";
 
 void pec_html_page() {
@@ -937,17 +927,17 @@ void pec_html_page() {
 #ifndef MOUNT_TYPE_ALTAZM
     const char *PECstatusCh = PECStatusString;
     if (PECstatusCh[PECstatus]=='I') { strcpy(temp2,"Idle"); } else
-    if (PECstatusCh[PECstatus]=='p') { strcpy(temp2,"Play waiting Idx"); } else
+    if (PECstatusCh[PECstatus]=='p') { strcpy(temp2,"Play waiting to start"); } else
     if (PECstatusCh[PECstatus]=='P') { strcpy(temp2,"Playing"); } else
-    if (PECstatusCh[PECstatus]=='r') { strcpy(temp2,"Record waiting Idx"); } else
+    if (PECstatusCh[PECstatus]=='r') { strcpy(temp2,"Record waiting for the index to arrive"); } else
     if (PECstatusCh[PECstatus]=='R') { strcpy(temp2,"Recording"); } else
-      strcpy(temp2,"Unknown");
 #endif
+      strcpy(temp2,"Unknown");
     strcpy_P(temp1, html_pec5); sprintf(temp,temp1,temp2);
   }
 
 #ifdef MOUNT_TYPE_ALTAZM
-  if (html_page_step==++stp) strcpy_P(temp, "PEC CONTROLS DISABLED");
+  if (html_page_step==++stp) strcpy(temp, "PEC CONTROLS DISABLED");
 #else
   if (html_page_step==++stp) strcpy_P(temp, html_pecControls1);
   if (html_page_step==++stp) strcpy_P(temp, html_pecControls2);
