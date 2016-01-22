@@ -250,11 +250,11 @@ void Ethernet_get() {
   if (get_names[0]=='b') {
     if ( (atoi2(get_vals,&i)) && ((i>=0) && (i<=999))) { 
       if (get_names[1]=='2') {
-        backlashDec=(int)(((long)i*StepsPerDegreeDec)/3600L);
+        backlashDec=(int)round(((double)i*(double)StepsPerDegreeDec)/3600.0);
         EEPROM_writeInt(EE_backlashDec,backlashDec);
       } else
       if (get_names[1]=='1') {
-        backlashHA =(int)(((long)i*StepsPerDegreeHA)/3600L);
+        backlashHA =(int)round(((double)i*(double)StepsPerDegreeHA)/3600.0);
         EEPROM_writeInt(EE_backlashHA,backlashHA);
       }
     }
@@ -420,18 +420,18 @@ const char html_header7[] PROGMEM = "</head>\r\n";
 const char html_header8[] PROGMEM = "<body bgcolor=\"#26262A\">\r\n";
 
 const char html_main_css1[] PROGMEM = "<STYLE>\r\n";
-const char html_main_css2[] PROGMEM = ".a { background-color: #111111; }\r\n";
-const char html_main_css3[] PROGMEM = ".t { padding: 15px; border: 15px solid #551111;\r\n";
-const char html_main_css4[] PROGMEM = " margin: 25px; color: #999999; background-color: #111111; }\r\n";
-const char html_main_css5[] PROGMEM = ".b { padding: 30px; border: 2px solid #551111;\r\n";
-const char html_main_css6[] PROGMEM = " margin: 30px; color: #999999; background-color: #111111; }\r\n";
-const char html_main_css7[] PROGMEM = "h1 { text-align: right; }\r\n";
-const char html_main_css8[] PROGMEM = "input { width:4em }\r\n";
-const char html_main_css9[] PROGMEM = "</STYLE>\r\n";
+const char html_main_css2[] PROGMEM = ".a { background-color: #111111; }\r\n .t { padding: 15px; border: 15px solid #551111;\r\n";
+const char html_main_css3[] PROGMEM = " margin: 25px; color: #999999; background-color: #111111; }\r\n input { width:4em; font-weight: bold; background-color: #A01010; padding: 2px 2px; }\r\n";
+const char html_main_css4[] PROGMEM = ".b { padding: 30px; border: 2px solid #551111; margin: 30px; color: #999999; background-color: #111111; }\r\n";
+const char html_main_css5[] PROGMEM = "select { width:4em; font-weight: bold; background-color: #A01010; padding: 2px 2px; }\r\n .c { color: #A01010; font-weight: bold; }\r\n";
+const char html_main_css6[] PROGMEM = "h1 { text-align: right; }\r\n a:hover, a:active { background-color: red; }\r\n";
+const char html_main_css7[] PROGMEM = "a:link, a:visited { background-color: #332222; color: #a07070; border:1px solid red; padding: 5px 10px;";
+const char html_main_css8[] PROGMEM = " margin: none; text-align: center; text-decoration: none; display: inline-block; }\r\n";
+const char html_main_css9[] PROGMEM = "button { background-color: #A01010; font-weight: bold; border-radius: 5px; font-size: 12px; margin: 2px; padding: 4px 8px; }\r\n</STYLE>\r\n";
 
-const char html_links1[] PROGMEM = "<a href=\"/index.htm\">Status</a>&nbsp;&nbsp;&nbsp;<a href=\"/settings.htm\">";
-const char html_links2[] PROGMEM = "Settings</a>&nbsp;&nbsp;&nbsp;<a href=\"/control.htm\">Control</a>&nbsp;&nbsp;&nbsp;";
-const char html_links3[] PROGMEM = "<a href=\"/pec.htm\">PEC</a>&nbsp;&nbsp;&nbsp;<a href=\"/config.htm\">Configuration</a><br />";
+const char html_links1[] PROGMEM = "<a href=\"/index.htm\">Status</a><a href=\"/settings.htm\">";
+const char html_links2[] PROGMEM = "Settings</a><a href=\"/control.htm\">Control</a>";
+const char html_links3[] PROGMEM = "<a href=\"/pec.htm\">PEC</a><a href=\"/config.htm\">Configuration</a><br />";
 
 // The index.htm page --------------------------------------------------------------------------------------
 #ifdef MOUNT_TYPE_ALTAZM
@@ -446,19 +446,19 @@ const char html_links3[] PROGMEM = "<a href=\"/pec.htm\">PEC</a>&nbsp;&nbsp;&nbs
 const char html_index1[] PROGMEM = "<div class=\"t\"><table width=\"100%\"><tr><td><b>" FirmwareName " " FirmwareNumber;
 const char html_index2[] PROGMEM = "</b></td><td align=\"right\"><b><font size=\"5\">";
 const char html_index2a[] PROGMEM = "STATUS</font></b></td></tr></table><br />";
-const char html_index2b[] PROGMEM = "</div><div class=\"b\">Longitude = %s, Latitude = %s<br />";
-const char html_index3[] PROGMEM = "%02d/%02d/%02d";
+const char html_index2b[] PROGMEM = "</div><div class=\"b\">Longitude = <font class=\"c\">%s</font>, Latitude = <font class=\"c\">%s</font><br />";
+const char html_index3[] PROGMEM = "<font class=\"c\">%02d/%02d/%02d</font>";
 const char html_index4[] PROGMEM = "&nbsp;%s&nbsp;UT";
-const char html_index4a[] PROGMEM = "&nbsp;(%s&nbsp; Local Apparent Sidereal Time)<br /><br />";
-const char html_index5[] PROGMEM = "Current Position: " Axis1 "=%s, " Axis2 "=%s<br />";
-const char html_index6[] PROGMEM = "Target Position: " Axis1 "=%s, " Axis2 "=%s<br /><br />";
-const char html_index7[] PROGMEM = "Current MaxRate: %ld (Default MaxRate: %ld)<br /><br />";
-const char html_index8[] PROGMEM = "Tracking: %s %s<br />";
-const char html_index9[] PROGMEM = "Parking: %s<br />";
+const char html_index4a[] PROGMEM = "&nbsp;(<font class=\"c\">%s</font>&nbsp; Local Apparent Sidereal Time)<br /><br />";
+const char html_index5[] PROGMEM = "Current Position: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
+const char html_index6[] PROGMEM = "Target Position: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br /><br />";
+const char html_index7[] PROGMEM = "Current MaxRate: <font class=\"c\">%ld</font> (Default MaxRate: <font class=\"c\">%ld</font>)<br /><br />";
+const char html_index8[] PROGMEM = "Tracking: <font class=\"c\">%s %s</font><br />";
+const char html_index9[] PROGMEM = "Parking: <font class=\"c\">%s</font><br />";
 
 void index_html_page() {
   char temp[256] = "";
-  char temp1[80] = "";
+  char temp1[256] = "";
   char temp2[20] = "";
   char temp3[20] = "";
   bool r=true;
@@ -692,8 +692,8 @@ void settings_html_page() {
   if (html_page_step==++stp) strcpy_P(temp, html_settings3);
   if (html_page_step==++stp) strcpy_P(temp, html_settings4);
   if (html_page_step==++stp) strcpy_P(temp, html_settings5);
-  if (html_page_step==++stp) { strcpy_P(temp1, html_settings7); i=(int)(((long)backlashHA*3600L)/StepsPerDegreeHA); if (i<0) i=0; if (i>999) i=999; sprintf(temp,temp1,i); }
-  if (html_page_step==++stp) { strcpy_P(temp1, html_settings8); i=(int)(((long)backlashDec*3600L)/StepsPerDegreeDec); if (i<0) i=0; if (i>999) i=999; sprintf(temp,temp1,i); }
+  if (html_page_step==++stp) { strcpy_P(temp1, html_settings7); i=(int)round(((double)backlashHA*3600.0)/(double)StepsPerDegreeHA); if (i<0) i=0; if (i>999) i=999; sprintf(temp,temp1,i); }
+  if (html_page_step==++stp) { strcpy_P(temp1, html_settings8); i=(int)round(((double)backlashDec*3600.0)/(double)StepsPerDegreeDec); if (i<0) i=0; if (i>999) i=999; sprintf(temp,temp1,i); }
   if (html_page_step==++stp) { strcpy_P(temp1, html_settings9); sprintf(temp,temp1,minAlt); }
   if (html_page_step==++stp) { strcpy_P(temp1, html_settings10); sprintf(temp,temp1,maxAlt); }
   if (html_page_step==++stp) {
@@ -787,16 +787,16 @@ const char html_controlAlign23[] PROGMEM =
 "<button name=\"al\" value=\"2\" type=\"submit\">2 Star</button>"
 "<button name=\"al\" value=\"3\" type=\"submit\">3 Star</button>";
 const char html_controlAlign4[] PROGMEM = 
-"<br /><br /><button name=\"al\" value=\"n\" type=\"submit\">Accept</button>"
+"<br /><button name=\"al\" value=\"n\" type=\"submit\">Accept</button>"
 "</form><br />\r\n";
 const char html_control6[] PROGMEM = 
 "Home/Park: "
 "<form method=\"get\" action=\"/control.htm\">"
 "<button name=\"hm\" value=\"r\" type=\"submit\">Home (Reset)</button>&nbsp;&nbsp;&nbsp;"
-"<button name=\"hm\" value=\"f\" type=\"submit\">Find Home</button><br /><br />";
+"<button name=\"hm\" value=\"f\" type=\"submit\">Find Home</button><br />";
 const char html_control7[] PROGMEM = 
 "<button name=\"pk\" value=\"p\" type=\"submit\">Park</button>&nbsp;&nbsp;&nbsp;"
-"<button name=\"pk\" value=\"u\" type=\"submit\">Un-Park</button><br /><br />"
+"<button name=\"pk\" value=\"u\" type=\"submit\">Un-Park</button><br />"
 "<button name=\"pk\" value=\"s\" type=\"submit\">Set-Park</button>"
 "</form><br />\r\n";
 const char html_control8[] PROGMEM = 
@@ -807,7 +807,7 @@ const char html_control8[] PROGMEM =
 const char html_control9[] PROGMEM = 
 "<button name=\"tk\" value=\"f\" type=\"submit\">+ (0.1Hz faster)</button>"
 "<button name=\"tk\" value=\"-\" type=\"submit\">- (0.1Hz slower)</button>"
-"<button name=\"tk\" value=\"r\" type=\"submit\">Reset (default)</button><br /><br />";
+"<button name=\"tk\" value=\"r\" type=\"submit\">Reset (default)</button><br />";
 const char html_control10[] PROGMEM = 
 "<button name=\"tk\" value=\"s\" type=\"submit\">Sidereal</button>"
 "<button name=\"tk\" value=\"l\" type=\"submit\">Lunar</button>"
@@ -875,7 +875,7 @@ const char html_pec1[] PROGMEM = "<div class=\"t\"><table width=\"100%\"><tr><td
 const char html_pec2[] PROGMEM = "</b></td><td align=\"right\"><b><font size=\"5\">PEC</font></b></td></tr></table><br />";
 const char html_pec3[] PROGMEM = "</div><div class=\"b\">\r\n";
 const char html_pec4[] PROGMEM = "PEC: <br /><br />";
-const char html_pec5[] PROGMEM = "STATUS = %s<br /><br />";
+const char html_pec5[] PROGMEM = "STATUS = <font class=\"c\">%s</font><br /><br />";
 const char html_pecControls1[] PROGMEM =
 "<form method=\"get\" action=\"/pec.htm\">"
 "<button name=\"pe\" value=\"pl\" type=\"submit\">Play</button>";
@@ -883,8 +883,8 @@ const char html_pecControls2[] PROGMEM =
 "<button name=\"pe\" value=\"st\" type=\"submit\">Stop</button><br /><br />"
 "<button name=\"pe\" value=\"cl\" type=\"submit\">Clear</button><button name=\"pe\" value=\"re\" type=\"submit\">";
 const char html_pecControls3[] PROGMEM = 
-"Record</button> Clear erases the memory buffer not EEPROM.  During recording corrections are averaged 3:1 favoring the buffer unless the buffer was cleared in which case the full correction is used.<br /><br />"
-"<button name=\"pe\" value=\"wr\" type=\"submit\">Write to EEPROM</button> Writing PEC data to EEPROM pauses everything in OnStep for about 2 to 4 seconds.</form>"
+"Record</button><br />Clear erases the memory buffer not EEPROM.  During recording corrections are averaged 3:1 favoring the buffer unless the buffer was cleared in which case the full correction is used.<br /><br />"
+"<button name=\"pe\" value=\"wr\" type=\"submit\">Write to EEPROM</button><br />Writing PEC data to EEPROM pauses everything in OnStep for about 2 to 4 seconds.</form>"
 "</form><br />\r\n";
 
 void pec_html_page() {
@@ -958,35 +958,35 @@ const char html_config2[] PROGMEM = "</b></td><td align=\"right\"><b><font size=
 const char html_config3[] PROGMEM = "CONFIGURATION</font></b></td></tr></table><br />";
 const char html_config4[] PROGMEM = "</div><div class=\"b\">";
 #if defined(MOUNT_TYPE_GEM)
-const char html_configMount[] PROGMEM = "Mount type: GEM<br /><br />";
+const char html_configMount[] PROGMEM = "Mount type: <font class=\"c\">GEM</font><br /><br />";
 #elif defined(MOUNT_TYPE_FORK)
-const char html_configMount[] PROGMEM = "Mount type: Fork or similar<br /><br />";
+const char html_configMount[] PROGMEM = "Mount type: <font class=\"c\">Fork or similar</font><br /><br />";
 #elif defined(MOUNT_TYPE_FORKALT)
-const char html_configMount[] PROGMEM = "Mount type: Fork or similar (Alternate)<br /><br />";
+const char html_configMount[] PROGMEM = "Mount type: <font class=\"c\">Fork or similar (Alternate)</font><br /><br />";
 #elif defined(MOUNT_TYPE_ALTAZM)
-const char html_configMount[] PROGMEM = "Mount type: AltAz<br /><br />";
+const char html_configMount[] PROGMEM = "Mount type: <font class=\"c\">AltAz</font><br /><br />";
 #endif
 #if defined(ST4_OFF)
-const char html_configST4[] PROGMEM = "ST4 interface is OFF<br /><br />";
+const char html_configST4[] PROGMEM = "ST4 interface is <font class=\"c\">OFF</font><br /><br />";
 #elif defined(ST4_ON)
-const char html_configST4[] PROGMEM = "ST4 interface is ON (no internal pullup resistors)<br /><br />";
+const char html_configST4[] PROGMEM = "ST4 interface is <font class=\"c\">ON (no internal pullup resistors)</font><br /><br />";
 #elif defined(ST4_PULLUP)
-const char html_configST4[] PROGMEM = "ST4 interface is ON (with internal pullup resistors)<br /><br />";
+const char html_configST4[] PROGMEM = "ST4 interface is <font class=\"c\">ON (with internal pullup resistors)</font><br /><br />";
 #endif
 #if defined(PPS_SENSE_OFF)
-const char html_configPPS[] PROGMEM = "PPS sense is OFF<br />";
+const char html_configPPS[] PROGMEM = "PPS sense is <font class=\"c\">OFF</font><br />";
 #elif defined(PPS_SENSE_ON)
-const char html_configPPS[] PROGMEM = "PPS sense is ON<br />";
+const char html_configPPS[] PROGMEM = "PPS sense is <font class=\"c\">ON</font><br />";
 #endif
 #if defined(PEC_SENSE_OFF)
-const char html_configPEC[] PROGMEM = "PEC sense is OFF<br />";
+const char html_configPEC[] PROGMEM = "PEC sense is <font class=\"c\">OFF</font><br />";
 #elif defined(PEC_SENSE_ON)
-const char html_configPEC[] PROGMEM = "PEC sense is ON<br />";
+const char html_configPEC[] PROGMEM = "PEC sense is <font class=\"c\">ON</font><br />";
 #endif
 #if defined(LIMIT_SENSE_OFF)
-const char html_configLimit[] PROGMEM = "LIMIT sense is OFF<br />";
+const char html_configLimit[] PROGMEM = "LIMIT sense is <font class=\"c\">OFF</font><br />";
 #elif defined(LIMIT_SENSE_ON)
-const char html_configLimit[] PROGMEM = "LIMIT sense is ON<br />";
+const char html_configLimit[] PROGMEM = "LIMIT sense is <font class=\"c\">ON</font><br />";
 #endif
 
 void config_html_page() {
