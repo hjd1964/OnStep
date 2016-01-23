@@ -1187,7 +1187,8 @@ the pdCor  term is 1 in HA
           sinLat=sin(latitude/Rad);
           if (latitude>0.0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
           EEPROM_readQuad(EE_sites+(currentSite*25+4),(byte*)&f); longitude=f;
-          b=EEPROM.read(EE_sites+(currentSite*25+8)); timeZone=b-128;
+          timeZone=EEPROM.read(EE_sites+(currentSite)*25+8)-128;
+          timeZone=decodeTimeZone(timeZone);
         } else 
         if (command[1]=='?') {
           quietReply=true;
