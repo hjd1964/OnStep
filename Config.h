@@ -58,6 +58,7 @@
 // It is up to you to create an interface that meets the electrical specifications of any connected device, use at your own risk.
 // ST4_HAND_CONTROL_ON allows guide rates >1x while SEPERATE_PULSE_GUIDE_RATE_ON is enabled
 // ST4_ALTERNATE_PINS_ON moves the interface (Mega2560 only) to pins 43, 45, 47, 49.  Pin 43 is Dec- (South), Pin 45 is Dec+ (North), Pin 47 is RA- (West), Pin 49 is RA+ (East.)
+// ST4_ALTERNATE_PINS_ON is required for Steve's ST4 board
 #define ST4_OFF
 #define ST4_HAND_CONTROL_OFF
 #define ST4_ALTERNATE_PINS_OFF
