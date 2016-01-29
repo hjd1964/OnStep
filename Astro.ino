@@ -898,7 +898,6 @@ bool nextAlign() {
     // set the IH offset
     // set the ID offset
     if (!syncEqu(newTargetRA,newtargetDec)) { return true; }
-    IHS=(long)(IH*15.0*(double)StepsPerDegreeAxis1);
     avgDec=newtargetDec;
     avgHA =haRange(LST-newTargetRA);
   } else 
@@ -907,19 +906,20 @@ bool nextAlign() {
   if ((alignMode==AlignTwoStar2) || (alignMode==AlignThreeStar2)) {
     if ((alignMode==AlignTwoStar2) && (meridianFlip==MeridianFlipAlign)) meridianFlip=MeridianFlipNever;
     alignMode++;
-    double ID1 = ID;  // last offset Dec is negative because we flipped the meridian
     double IH1 = IH;
+    double ID1 = ID;
 
     avgDec=(avgDec+newtargetDec)/2.0;
     avgHA =(-avgHA+haRange(LST-newTargetRA))/2.0; // last HA is negative because we were on the other side of the meridian
     if (syncEqu(newTargetRA,newtargetDec)) {
-      double ID2=ID;
       double IH2=IH;
+      double ID2=ID;
 
-      IH    = (IH2+IH1)/2.0;                    // average offset in HA
-      IHS=(long)(IH*15.0*(double)StepsPerDegreeAxis1);
-      ID    = (ID2-ID1)/2.0;                    // new offset in Dec
-      IDS=(long)(ID*(double)StepsPerDegreeAxis2);
+      IH  = (IH2+IH1)/2.0;                      // average offset in HA
+      IHS = (long)(IH*(double)StepsPerDegreeAxis1);
+      ID  = (ID2-ID1)/2.0;                      // new offset in Dec
+      IDS = (long)(ID*(double)StepsPerDegreeAxis2);
+
       double IH3=IH;
       double ID3=ID;
     
@@ -934,10 +934,10 @@ bool nextAlign() {
         doCor =-((IH2-IH1)/2.0)*15.0;            // the difference of these two values should be a decent approximation of the optical axis to Dec axis error (aka cone error)
         doCor = doCor*cos(avgDec/Rad);           // correct for measurement being away from the Celestial Equator
 
-        IH=IH3;
-        IHS=(long)(IH*15.0*(double)StepsPerDegreeAxis1);
-        ID=ID3;
-        IDS=(long)(ID*(double)StepsPerDegreeAxis2);
+        IH  = IH3;
+        IHS = (long)(IH*(double)StepsPerDegreeAxis1);
+        ID  = ID3;
+        IDS = (long)(ID*(double)StepsPerDegreeAxis2);
       } else return true;
     } else return true;
   } else 
@@ -949,11 +949,11 @@ bool nextAlign() {
     #endif
     alignMode++;
     
-    double ID1 = ID;
     double IH1 = IH;
+    double ID1 = ID;
     if (syncEqu(newTargetRA,newtargetDec)) {
-      double ID2=ID;
       double IH2=IH;
+      double ID2=ID;
 
       azmCor = -(ID2-ID1);                      // offset in declination is largely due to polar align Azm error
       azmCor = azmCor/sin((haRange(LST-newTargetRA)*15.0)/Rad);  // correct for HA of measurement location
