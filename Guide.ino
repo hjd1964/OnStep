@@ -6,20 +6,20 @@ void Guide() {
   cli(); long guideLst=lst; sei();
   if (guideLst!=guideSiderealTimer) {
     guideSiderealTimer=guideLst;  
-    if (guideDirHA) {
-      if (!inBacklashHA) {
+    if (guideDirAxis1) {
+      if (!inbacklashAxis1) {
         cli();
-        long v=(long)targetHA.part.m;
-        if (guideDirHA=='e') targetHA.fixed-=amountGuideHA.fixed; else if (guideDirHA=='w') targetHA.fixed+=amountGuideHA.fixed;
+        long v=(long)targetAxis1.part.m;
+        if (guideDirAxis1=='e') targetAxis1.fixed-=amountGuideHA.fixed; else if (guideDirAxis1=='w') targetAxis1.fixed+=amountGuideHA.fixed;
         // guideHA keeps track of how many steps we've moved for PEC recording
-        guideHA=(long)targetHA.part.m-v;
+        guideHA=(long)targetAxis1.part.m-v;
         sei();
 
         // for pulse guiding, count down the mS and stop when timed out
         if (guideDurationHA>0)  {
           guideDurationHA-=(long)(micros()-guideDurationLastHA);
           guideDurationLastHA=micros();
-          if (guideDurationHA<=0) { guideDirHA='b'; } // break
+          if (guideDurationHA<=0) { guideDirAxis1='b'; } // break
         }
       } else {
         // don't count time if in backlash
@@ -27,17 +27,17 @@ void Guide() {
       }
     }
     
-    if (guideDirDec) {
-      if (!inBacklashDec) {
+    if (guideDirAxis2) {
+      if (!inbacklashAxis2) {
         cli();
-        // nudge the targetDec (where we're supposed to be) by amountMoveDec
-        if (guideDirDec=='s') targetDec.fixed-=amountGuideDec.fixed; else if (guideDirDec=='n') targetDec.fixed+=amountGuideDec.fixed; 
+        // nudge the targetAxis2 (where we're supposed to be) by amountMoveDec
+        if (guideDirAxis2=='s') targetAxis2.fixed-=amountGuideDec.fixed; else if (guideDirAxis2=='n') targetAxis2.fixed+=amountGuideDec.fixed; 
         sei();
         // for pulse guiding, count down the mS and stop when timed out
         if (guideDurationDec>0)  {
           guideDurationDec-=(long)(micros()-guideDurationLastDec);
           guideDurationLastDec=micros();
-          if (guideDurationDec<=0) { guideDirDec='b'; }  // break 
+          if (guideDurationDec<=0) { guideDirAxis2='b'; }  // break 
         }
       } else {
         // don't count time if in backlash
@@ -48,5 +48,5 @@ void Guide() {
   }
   // allow the elevated rate to persist for a moment to allow the bulk added steps to play out after stopping
   // if the guide rate is negative and slow it's always faster to go back to the sidereal rate
-  if ((currentGuideRate<=GuideRate1x) && (fabs(guideTimerRateHA)<0.001)) { cli(); guideTimerRateHA=0.0; sei(); }
+  if ((currentGuideRate<=GuideRate1x) && (fabs(guidetimerRateAxis1)<0.001)) { cli(); guidetimerRateAxis1=0.0; sei(); }
 }
