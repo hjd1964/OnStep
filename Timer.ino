@@ -91,7 +91,7 @@ volatile uint32_t nextAxis2Rate = 100000UL;
 void Timer4SetRate(long rate) {
 #if defined(__AVR__)
   // valid for rates down to 0.25 second, and cap the rate
-  if (StepsPerSecondAxis1<31) rate=rate/64L; else rate=rate/8L;
+  if (StepsPerSecondAxis2<31) rate=rate/64L; else rate=rate/8L;
   if (rate>65536L) rate=65536L;
   cli(); nextAxis2Rate=rate-1L; sei();
 #elif (defined(__arm__) && defined(TEENSYDUINO)) || (defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__))
@@ -126,7 +126,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
 
   if (trackingState!=TrackingMoveTo) {
     // automatic rate calculation HA
-    long calculatedtimerRateAxis1;
+    long calculatedTimerRateAxis1;
     
     // guide rate acceleration/deceleration and control
     cli();  double x=((long)targetAxis1.part.m+PEC_HA)-posAxis1; sei();
@@ -146,12 +146,12 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
       if ((guideDirAxis1=='b') && (fabs(x)<2)) { guideDirAxis1=0; guidetimerRateAxis1=0; guideTimerRateAxis1A=0; }
     }
 
-    double timerRateAxis11=trackingtimerRateAxis1; if (((guideDirAxis1) || (guideDirAxis2)) && (activeGuideRate>GuideRate1x)) timerRateAxis11=0.0;
-    double timerRateAxis12=fabs(guideTimerRateAxis1A+pecTimerRateAxis1+timerRateAxis11);
+    double timerRateAxis1A=trackingtimerRateAxis1; if (((guideDirAxis1) || (guideDirAxis2)) && (activeGuideRate>GuideRate1x)) timerRateAxis1A=0.0;
+    double timerRateAxis1B=fabs(guideTimerRateAxis1A+pecTimerRateAxis1+timerRateAxis1A);
     // round up to run the motor timers just a tiny bit slow, then adjust below if we start to fall behind during sidereal tracking
-    if (timerRateAxis12>0.5) calculatedtimerRateAxis1=ceil((double)SiderealRate/timerRateAxis12)+5; else calculatedtimerRateAxis1=ceil((double)SiderealRate*2.0);
+    if (timerRateAxis1B>0.5) calculatedTimerRateAxis1=ceil((double)SiderealRate/timerRateAxis1B)+5; else calculatedTimerRateAxis1=ceil((double)SiderealRate*2.0);
     // remember our "running" rate and only update the actual rate when it changes
-    if (runtimerRateAxis1!=calculatedtimerRateAxis1) { timerRateAxis1=calculatedtimerRateAxis1; runtimerRateAxis1=calculatedtimerRateAxis1; }
+    if (runtimerRateAxis1!=calculatedTimerRateAxis1) { timerRateAxis1=calculatedTimerRateAxis1; runtimerRateAxis1=calculatedTimerRateAxis1; }
 
     // dynamic rate adjust
     // in pre-scaler /64 mode the motor timers might be slow (relative to the sidereal timer) by as much as 0.000004 seconds/second (16000000/64)
@@ -159,11 +159,11 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     if (x>10.0) x=10.0;
     if (x<-10.0) x=-10.0;
     x=10000.00-x; x=x/10000.0;
-    timerRateAxis1=calculatedtimerRateAxis1*x; // up to 0.01% faster or slower (or as little as 0.001%)
+    timerRateAxis1=calculatedTimerRateAxis1*x; // up to 0.01% faster or slower (or as little as 0.001%)
     runtimerRateAxis1=timerRateAxis1;
 
     // automatic rate calculation Dec
-    long calculatedTimerRateDec;
+    long calculatedTimerRateAxis2;
 
     // guide rate acceleration/deceleration
     cli(); x=fabs((long)targetAxis2.part.m-posAxis2); sei();
@@ -183,17 +183,17 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
       if ((guideDirAxis2=='b') && (x<2)) { guideDirAxis2=0; guideTimerRateAxis2=0; guideTimerRateAxis2A=0; }
     }
        
-    double timerRateAxis21=trackingTimerRateAxis2; if (guideDirAxis2 && (activeGuideRate>GuideRate1x)) timerRateAxis21=0.0;
-    double timerRateAxis22=fabs(guideTimerRateAxis2A+timerRateAxis21);
+    double timerRateAxis2A=trackingTimerRateAxis2; if (guideDirAxis2 && (activeGuideRate>GuideRate1x)) timerRateAxis2A=0.0;
+    double timerRateAxis2B=fabs(guideTimerRateAxis2A+timerRateAxis2A);
     // round up to run the motor timers just a tiny bit slow, then adjust below if we start to fall behind during sidereal tracking
-    if (timerRateAxis22>0.5) calculatedTimerRateDec=ceil((double)SiderealRate/timerRateAxis22)+5; else calculatedTimerRateDec=ceil((double)SiderealRate*2.0);
+    if (timerRateAxis2B>0.5) calculatedTimerRateAxis2=ceil((double)SiderealRate/timerRateAxis2B)+5; else calculatedTimerRateAxis2=ceil((double)SiderealRate*2.0);
     // remember our "running" rate and only update the actual rate when it changes
-    if (runTimerRateAxis2!=calculatedTimerRateDec) { timerRateAxis2=calculatedTimerRateDec; runTimerRateAxis2=calculatedTimerRateDec; }
+    if (runTimerRateAxis2!=calculatedTimerRateAxis2) { timerRateAxis2=calculatedTimerRateAxis2; runTimerRateAxis2=calculatedTimerRateAxis2; }
 
     // dynamic rate adjust
     if (x>1.0) {
       x=x-1.0; if (x>10.0) x=10.0; x=10000.00-x; x=x/10000.0;
-      timerRateAxis2=calculatedTimerRateDec*x; // up to 0.01% faster (or as little as 0.001%)
+      timerRateAxis2=calculatedTimerRateAxis2*x; // up to 0.01% faster (or as little as 0.001%)
       runTimerRateAxis2=timerRateAxis2;
     }
   }
