@@ -4,32 +4,31 @@
 #if (defined(__arm__) && defined(TEENSYDUINO)) || (defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__))
 #define ISR(f) void f (void)
 void TIMER1_COMPA_vect(void);
-volatile boolean HAclr = true;
-volatile boolean TakeStepHA = false;
-volatile boolean DEclr = true;
-volatile boolean TakeStepDec = false;
+volatile boolean clearAxis1 = true;
+volatile boolean takeStepAxis1 = false;
+volatile boolean clearAxis2 = true;
+volatile boolean takeStepAxis2 = false;
 
 #if defined(__arm__) && defined(TEENSYDUINO)
 IntervalTimer itimer1;
 #endif
 // Energia does not have IntervalTimer so the timers were already initialised in OnStep.ino
-
 #endif
 
-#if defined(HA_MODE) && defined(HA_MODE_GOTO)
-volatile long stepHA=1;
-volatile long modeHA_next=HA_MODE;
-volatile boolean gotoModeHA=false;
+#if defined(AXIS1_MODE) && defined(AXIS1_MODE_GOTO)
+volatile long stepAxis1=1;
+volatile long modeAxis1_next=AXIS1_MODE;
+volatile boolean gotoModeAxis1=false;
 #else
-#define stepHA 1
+#define stepAxis1 1
 #endif
 
-#if defined(DE_MODE) && defined(DE_MODE_GOTO)
-volatile long stepDec=1;
-volatile long modeDec_next=DE_MODE;
-volatile boolean gotoModeDec=false;
+#if defined(AXIS2_MODE) && defined(AXIS2_MODE_GOTO)
+volatile long stepAxis2=1;
+volatile long modeAxis2_next=AXIS2_MODE;
+volatile boolean gotoModeAxis2=false;
 #else
-#define stepDec 1
+#define stepAxis2 1
 #endif
 
 //--------------------------------------------------------------------------------------------------
@@ -65,51 +64,51 @@ void Timer1SetRate(long rate) {
 }
 
 // set the master sidereal clock rate, also forces rate update for RA/Dec timer rates so that PPS adjustments take hold immediately
-volatile long isrTimerRateHA=0;
-volatile long isrTimerRateDec=0;
-volatile long runTimerRateHA=0;
-volatile long runTimerRateDec=0;
+volatile long isrTimerRateAxis1=0;
+volatile long isrTimerRateAxis2=0;
+volatile long runtimerRateAxis1=0;
+volatile long runTimerRateAxis2=0;
 void SetSiderealClockRate(long Interval) {
   if (trackingState==TrackingMoveTo) Timer1SetRate(Interval/100); else Timer1SetRate(Interval/300);
-  isrTimerRateHA=0;
-  isrTimerRateDec=0;
+  isrTimerRateAxis1=0;
+  isrTimerRateAxis2=0;
 }
 
 // set timer3 to rate (in microseconds*16)
-volatile uint32_t nextHArate = 100000UL;
+volatile uint32_t nextAxis1Rate = 100000UL;
 void Timer3SetRate(long rate) {
 #if defined(__AVR__)
   // valid for rates down to 0.25 second, and cap the rate
-  if (StepsPerSecond<31) rate=rate/64L; else rate=rate/8L;
+  if (StepsPerSecondAxis1<31) rate=rate/64L; else rate=rate/8L;
   if (rate>65536L) rate=65536L;
-  cli(); nextHArate=rate-1L; sei();
+  cli(); nextAxis1Rate=rate-1L; sei();
 #elif (defined(__arm__) && defined(TEENSYDUINO)) || (defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__))
-  cli(); nextHArate=(F_BUS / 1000000) * (rate*0.0625) * 0.5 - 1; sei();
+  cli(); nextAxis1Rate=(F_BUS / 1000000) * (rate*0.0625) * 0.5 - 1; sei();
 #endif
 }
 // set timer4 to rate (in microseconds*16)
-volatile uint32_t nextDErate = 100000UL;
+volatile uint32_t nextAxis2Rate = 100000UL;
 void Timer4SetRate(long rate) {
 #if defined(__AVR__)
   // valid for rates down to 0.25 second, and cap the rate
-  if (StepsPerSecond<31) rate=rate/64L; else rate=rate/8L;
+  if (StepsPerSecondAxis1<31) rate=rate/64L; else rate=rate/8L;
   if (rate>65536L) rate=65536L;
-  cli(); nextDErate=rate-1L; sei();
+  cli(); nextAxis2Rate=rate-1L; sei();
 #elif (defined(__arm__) && defined(TEENSYDUINO)) || (defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__))
-  cli(); nextDErate=(F_BUS / 1000000) * (rate*0.0625) * 0.5 - 1; sei();
+  cli(); nextAxis2Rate=(F_BUS / 1000000) * (rate*0.0625) * 0.5 - 1; sei();
 #endif
 }
 
 //--------------------------------------------------------------------------------------------------
 // Timer1 handles sidereal time and programming the drive rates
-volatile boolean wasInBacklashHA=false;
-volatile boolean wasInBacklashDec=false;
-volatile boolean gotoRateHA=false;
-volatile boolean gotoRateDec=false;
+volatile boolean wasInbacklashAxis1=false;
+volatile boolean wasInbacklashAxis2=false;
+volatile boolean gotoRateAxis1=false;
+volatile boolean gotoRateAxis2=false;
 volatile byte cnt = 0;
 
-volatile double guideTimerRateHA1=0;
-volatile double guideTimerRateDec1=0;
+volatile double guideTimerRateAxis1A=0;
+volatile double guideTimerRateAxis2A=0;
 
 #if (defined(__arm__) && defined(TEENSYDUINO)) || (defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__))
 ISR(TIMER1_COMPA_vect)
@@ -127,32 +126,32 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
 
   if (trackingState!=TrackingMoveTo) {
     // automatic rate calculation HA
-    long calculatedTimerRateHA;
+    long calculatedtimerRateAxis1;
     
     // guide rate acceleration/deceleration and control
-    cli();  double x=((long int)targetHA.part.m+PEC_HA)-posHA; sei();
-    if ((!inBacklashHA) && (guideDirHA)) {
-      if ((fabs(guideTimerRateHA)<10.0) && (fabs(guideTimerRateHA1)<10.0)) { 
+    cli();  double x=((long)targetAxis1.part.m+PEC_HA)-posAxis1; sei();
+    if ((!inbacklashAxis1) && (guideDirAxis1)) {
+      if ((fabs(guidetimerRateAxis1)<10.0) && (fabs(guideTimerRateAxis1A)<10.0)) { 
         // break mode
-        if (guideDirHA=='b') { guideTimerRateHA=1.0; }
+        if (guideDirAxis1=='b') { guidetimerRateAxis1=1.0; }
         // slow speed guiding, no acceleration
-        guideTimerRateHA1=guideTimerRateHA; 
+        guideTimerRateAxis1A=guidetimerRateAxis1; 
       } else {
         // use acceleration
-        double z=(StepsForRateChangeHA/isqrt32(fabs(x)));
-        guideTimerRateHA1=(1.0/((StepsPerDegreeHA*(z/1000000.0)))*3600.0);
-        if (guideTimerRateHA1>fabs(guideTimerRateHA)) guideTimerRateHA1=fabs(guideTimerRateHA);
+        double z=(StepsForRateChangeAxis1/isqrt32(fabs(x)));
+        guideTimerRateAxis1A=(1.0/((StepsPerDegreeAxis1*(z/1000000.0)))*3600.0);
+        if (guideTimerRateAxis1A>fabs(guidetimerRateAxis1)) guideTimerRateAxis1A=fabs(guidetimerRateAxis1);
       }
       // stop guiding
-      if ((guideDirHA=='b') && (fabs(x)<2)) { guideDirHA=0; guideTimerRateHA=0; guideTimerRateHA1=0; }
+      if ((guideDirAxis1=='b') && (fabs(x)<2)) { guideDirAxis1=0; guidetimerRateAxis1=0; guideTimerRateAxis1A=0; }
     }
 
-    double timerRateHA1=trackingTimerRateHA; if (((guideDirHA) || (guideDirDec)) && (activeGuideRate>GuideRate1x)) timerRateHA1=0.0;
-    double timerRateHA2=fabs(guideTimerRateHA1+pecTimerRateHA+timerRateHA1);
+    double timerRateAxis11=trackingtimerRateAxis1; if (((guideDirAxis1) || (guideDirAxis2)) && (activeGuideRate>GuideRate1x)) timerRateAxis11=0.0;
+    double timerRateAxis12=fabs(guideTimerRateAxis1A+pecTimerRateAxis1+timerRateAxis11);
     // round up to run the motor timers just a tiny bit slow, then adjust below if we start to fall behind during sidereal tracking
-    if (timerRateHA2>0.5) calculatedTimerRateHA=ceil((double)SiderealRate/timerRateHA2)+5; else calculatedTimerRateHA=ceil((double)SiderealRate*2.0);
+    if (timerRateAxis12>0.5) calculatedtimerRateAxis1=ceil((double)SiderealRate/timerRateAxis12)+5; else calculatedtimerRateAxis1=ceil((double)SiderealRate*2.0);
     // remember our "running" rate and only update the actual rate when it changes
-    if (runTimerRateHA!=calculatedTimerRateHA) { timerRateHA=calculatedTimerRateHA; runTimerRateHA=calculatedTimerRateHA; }
+    if (runtimerRateAxis1!=calculatedtimerRateAxis1) { timerRateAxis1=calculatedtimerRateAxis1; runtimerRateAxis1=calculatedtimerRateAxis1; }
 
     // dynamic rate adjust
     // in pre-scaler /64 mode the motor timers might be slow (relative to the sidereal timer) by as much as 0.000004 seconds/second (16000000/64)
@@ -160,65 +159,65 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     if (x>10.0) x=10.0;
     if (x<-10.0) x=-10.0;
     x=10000.00-x; x=x/10000.0;
-    timerRateHA=calculatedTimerRateHA*x; // up to 0.01% faster or slower (or as little as 0.001%)
-    runTimerRateHA=timerRateHA;
+    timerRateAxis1=calculatedtimerRateAxis1*x; // up to 0.01% faster or slower (or as little as 0.001%)
+    runtimerRateAxis1=timerRateAxis1;
 
     // automatic rate calculation Dec
     long calculatedTimerRateDec;
 
     // guide rate acceleration/deceleration
-    cli(); x=fabs((long int)targetDec.part.m-posDec); sei();
-    if (!inBacklashDec && guideDirDec) {
-      if ((fabs(guideTimerRateDec)<10.0) && (fabs(guideTimerRateDec1)<10.0)) { 
+    cli(); x=fabs((long)targetAxis2.part.m-posAxis2); sei();
+    if (!inbacklashAxis2 && guideDirAxis2) {
+      if ((fabs(guideTimerRateAxis2)<10.0) && (fabs(guideTimerRateAxis2A)<10.0)) { 
         // break mode
-        if (guideDirDec=='b') guideTimerRateDec=1.0;
+        if (guideDirAxis2=='b') guideTimerRateAxis2=1.0;
         // slow speed guiding, no acceleration
-        guideTimerRateDec1=guideTimerRateDec; 
+        guideTimerRateAxis2A=guideTimerRateAxis2; 
       } else {
         // use acceleration
-        double z=(StepsForRateChangeDec/isqrt32(x));
-        guideTimerRateDec1=(1.0/((StepsPerDegreeDec*(z/1000000.0)))*3600.0);
-        if (guideTimerRateDec1>fabs(guideTimerRateDec)) guideTimerRateDec1=fabs(guideTimerRateDec);
+        double z=(StepsForRateChangeAxis2/isqrt32(x));
+        guideTimerRateAxis2A=(1.0/((StepsPerDegreeAxis2*(z/1000000.0)))*3600.0);
+        if (guideTimerRateAxis2A>fabs(guideTimerRateAxis2)) guideTimerRateAxis2A=fabs(guideTimerRateAxis2);
       }
       // stop guiding
-      if ((guideDirDec=='b') && (x<2)) { guideDirDec=0; guideTimerRateDec=0; guideTimerRateDec1=0; }
+      if ((guideDirAxis2=='b') && (x<2)) { guideDirAxis2=0; guideTimerRateAxis2=0; guideTimerRateAxis2A=0; }
     }
        
-    double timerRateDec1=trackingTimerRateDec; if (guideDirDec && (activeGuideRate>GuideRate1x)) timerRateDec1=0.0;
-    double timerRateDec2=fabs(guideTimerRateDec1+timerRateDec1);
+    double timerRateAxis21=trackingTimerRateAxis2; if (guideDirAxis2 && (activeGuideRate>GuideRate1x)) timerRateAxis21=0.0;
+    double timerRateAxis22=fabs(guideTimerRateAxis2A+timerRateAxis21);
     // round up to run the motor timers just a tiny bit slow, then adjust below if we start to fall behind during sidereal tracking
-    if (timerRateDec2>0.5) calculatedTimerRateDec=ceil((double)SiderealRate/timerRateDec2)+5; else calculatedTimerRateDec=ceil((double)SiderealRate*2.0);
+    if (timerRateAxis22>0.5) calculatedTimerRateDec=ceil((double)SiderealRate/timerRateAxis22)+5; else calculatedTimerRateDec=ceil((double)SiderealRate*2.0);
     // remember our "running" rate and only update the actual rate when it changes
-    if (runTimerRateDec!=calculatedTimerRateDec) { timerRateDec=calculatedTimerRateDec; runTimerRateDec=calculatedTimerRateDec; }
+    if (runTimerRateAxis2!=calculatedTimerRateDec) { timerRateAxis2=calculatedTimerRateDec; runTimerRateAxis2=calculatedTimerRateDec; }
 
     // dynamic rate adjust
     if (x>1.0) {
       x=x-1.0; if (x>10.0) x=10.0; x=10000.00-x; x=x/10000.0;
-      timerRateDec=calculatedTimerRateDec*x; // up to 0.01% faster (or as little as 0.001%)
-      runTimerRateDec=timerRateDec;
+      timerRateAxis2=calculatedTimerRateDec*x; // up to 0.01% faster (or as little as 0.001%)
+      runTimerRateAxis2=timerRateAxis2;
     }
   }
   
-  long thisTimerRateHA=timerRateHA;
-  long thisTimerRateDec;
+  long thisTimerRateAxis1=timerRateAxis1;
+  long thisTimerRateAxis2;
   if (useTimerRateRatio) {
-    thisTimerRateDec=(timerRateDec*timerRateRatio);
+    thisTimerRateAxis2=(timerRateAxis2*timerRateRatio);
   } else {
-    thisTimerRateDec=timerRateDec;
+    thisTimerRateAxis2=timerRateAxis2;
   }
   
   // override rate during backlash compensation
-  if (inBacklashHA) { thisTimerRateHA=timerRateBacklashHA; wasInBacklashHA=true; } 
+  if (inbacklashAxis1) { thisTimerRateAxis1=timerRateBacklashAxis1; wasInbacklashAxis1=true; } 
   // override rate during backlash compensation
-  if (inBacklashDec) { thisTimerRateDec=timerRateBacklashDec; wasInBacklashDec=true; }
+  if (inbacklashAxis2) { thisTimerRateAxis2=timerRateBacklashAxis2; wasInbacklashAxis2=true; }
   if ((trackingState==TrackingSidereal)) {
     // travel through the backlash is done, but we weren't following the target while it was happening!
     // so now get us back to near where we need to be
-    if ((!inBacklashHA) && (wasInBacklashHA) && (!guideDirHA)) {
-      cli(); if (abs(posHA-((long int)targetHA.part.m+PEC_HA))>2) thisTimerRateHA=TakeupRate; else wasInBacklashHA=false; sei();
+    if ((!inbacklashAxis1) && (wasInbacklashAxis1) && (!guideDirAxis1)) {
+      cli(); if (abs(posAxis1-((long)targetAxis1.part.m+PEC_HA))>2) thisTimerRateAxis1=TakeupRate; else wasInbacklashAxis1=false; sei();
     }
-    if ((!inBacklashDec) && (wasInBacklashDec) && (!guideDirDec)) {
-      cli(); if (abs(posDec-(long int)targetDec.part.m)>2) thisTimerRateDec=TakeupRate; else wasInBacklashDec=false; sei();
+    if ((!inbacklashAxis2) && (wasInbacklashAxis2) && (!guideDirAxis2)) {
+      cli(); if (abs(posAxis2-(long)targetAxis2.part.m)>2) thisTimerRateAxis2=TakeupRate; else wasInbacklashAxis2=false; sei();
     }
   }
 
@@ -226,22 +225,22 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     // trigger Goto step mode, rapid acceleration (low StepsForRateChange) can leave too little time
     // until the home position arrives to actually switch to tracking micro-step mode. the larger step size
     // then causes backlash compensation to activate which in-turn keeps goto micro-step mode from turning off
-    #if defined(DE_MODE) && defined(DE_MODE_GOTO)
-    gotoRateDec=(thisTimerRateDec<128*16L); // activate <128us rate
+    #if defined(AXIS2_MODE) && defined(AXIS2_MODE_GOTO)
+    gotoRateAxis2=(thisTimerRateAxis2<128*16L);   // activate <128us rate
     #endif
-    #if defined(HA_MODE) && defined(HA_MODE_GOTO)
-    gotoRateHA=(thisTimerRateHA<128*16L);   // activate <128us rate
+    #if defined(AXIS1_MODE) && defined(AXIS1_MODE_GOTO)
+    gotoRateAxis1=(thisTimerRateAxis1<128*16L);   // activate <128us rate
     #endif
   }
   
   // set the rates
-  if (thisTimerRateHA!=isrTimerRateHA) {
-    Timer3SetRate(thisTimerRateHA/PPSrateRatio);
-    isrTimerRateHA=thisTimerRateHA;
+  if (thisTimerRateAxis1!=isrTimerRateAxis1) {
+    Timer3SetRate(thisTimerRateAxis1/PPSrateRatio);
+    isrTimerRateAxis1=thisTimerRateAxis1;
   }
-  if (thisTimerRateDec!=isrTimerRateDec) {
-    Timer4SetRate(thisTimerRateDec/PPSrateRatio);
-    isrTimerRateDec=thisTimerRateDec;
+  if (thisTimerRateAxis2!=isrTimerRateAxis2) {
+    Timer4SetRate(thisTimerRateAxis2/PPSrateRatio);
+    isrTimerRateAxis2=thisTimerRateAxis2;
   }
 }
 
@@ -252,62 +251,62 @@ ISR(TIMER3_COMPA_vect)
 #endif
 
   // drivers step on the rising edge, need >=1.9uS to settle (for DRV8825 or A4988) so this is early in the routine
-  CLR(HAStepPORT,  HAStepBit);
+  CLR(Axis1StepPORT,  Axis1StepBit);
 
 #if (defined(__arm__) && defined(TEENSYDUINO)) || (defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__))
   // on the much faster Teensy and Tiva TM4C run this ISR at twice the normal rate and pull the step pin low every other call
-  if (HAclr) {
-    TakeStepHA=false;
+  if (clearAxis1) {
+    takeStepAxis1=false;
 #endif
 
-#if defined(HA_MODE) && defined(HA_MODE_GOTO)
+#if defined(AXIS1_MODE) && defined(AXIS1_MODE_GOTO)
   // switch micro-step mode
-  if (gotoModeHA!=gotoRateHA) {
+  if (gotoModeAxis1!=gotoRateAxis1) {
     // only when at the home position
-    if ((posHA+blHA)%256==0) { // was 1024 in support of 256x drivers... if they work like the DRV8825, A4988 this should still be ok
+    if ((posAxis1+blAxis1)%256==0) { // was 1024 in support of 256x drivers... if they work like the DRV8825, A4988 this should still be ok
       // switch mode
-      if (gotoModeHA) { stepHA=1; modeHA_next=HA_MODE; gotoModeHA=false; } else { stepHA=HA_STEP_GOTO; modeHA_next=HA_MODE_GOTO; gotoModeHA=true; }
-      digitalWrite(HA_M0,(modeHA_next & 1));
-      digitalWrite(HA_M1,(modeHA_next>>1 & 1));
-      digitalWrite(HA_M2,(modeHA_next>>2 & 1));
+      if (gotoModeAxis1) { stepAxis1=1; modeAxis1_next=AXIS1_MODE; gotoModeAxis1=false; } else { stepAxis1=AXIS1_STEP_GOTO; modeAxis1_next=AXIS1_MODE_GOTO; gotoModeAxis1=true; }
+      digitalWrite(Axis1_M0,(modeAxis1_next & 1));
+      digitalWrite(Axis1_M1,(modeAxis1_next>>1 & 1));
+      digitalWrite(Axis1_M2,(modeAxis1_next>>2 & 1));
     }
   }
 #endif
 
 #if defined(__AVR__)
-  OCR3A=nextHArate*stepHA;
+  OCR3A=nextAxis1Rate*stepAxis1;
 #endif
 
   // Guessing about 4+4+1+ 4+4+1+ 1+ 2+1+2+ 13=37 clocks between here and the step signal which is 2.3uS
-  if (posHA!=(long int)targetHA.part.m+PEC_HA) { // Move the RA stepper to the target
-    if (posHA<(long int)targetHA.part.m+PEC_HA) dirHA=1; else dirHA=0; // Direction control
-    #ifdef REVERSE_HA_ON
-      if (HADir==dirHA) CLR(HADirPORT, HADirBit); else SET(HADirPORT, HADirBit); // Set direction, HADir default LOW (=0, for my wiring.)  Needs >=0.65uS before/after rising step signal (DRV8825 or A4988).
-    #else                                                                        // Guessing about 1+2+1+4+4+1=13 clocks between here and the step signal which is 0.81uS
-      if (HADir==dirHA) SET(HADirPORT, HADirBit); else CLR(HADirPORT, HADirBit);
+  if (posAxis1!=(long)targetAxis1.part.m+PEC_HA) { // Move the RA stepper to the target
+    if (posAxis1<(long)targetAxis1.part.m+PEC_HA) dirAxis1=1; else dirAxis1=0; // Direction control
+    #ifdef REVERSE_AXIS1_ON
+      if (HADir==dirAxis1) CLR(Axis1DirPORT, Axis1DirBit); else SET(Axis1DirPORT, Axis1DirBit); // Set direction, HADir default LOW (=0, for my wiring.)  Needs >=0.65uS before/after rising step signal (DRV8825 or A4988).
+    #else                                                                                       // Guessing about 1+2+1+4+4+1=13 clocks between here and the step signal which is 0.81uS
+      if (HADir==dirAxis1) SET(Axis1DirPORT, Axis1DirBit); else CLR(Axis1DirPORT, Axis1DirBit);
     #endif
-    // telescope moves WEST with the sky, blHA is the amount of EAST backlash
-    if (dirHA==1) {
-      if (blHA<backlashHA) { blHA+=stepHA; inBacklashHA=true; } else { inBacklashHA=false; posHA+=stepHA; }
+    // telescope moves WEST with the sky, blAxis1 is the amount of EAST backlash
+    if (dirAxis1==1) {
+      if (blAxis1<backlashAxis1) { blAxis1+=stepAxis1; inbacklashAxis1=true; } else { inbacklashAxis1=false; posAxis1+=stepAxis1; }
     } else {
-      if (blHA>0)          { blHA-=stepHA; inBacklashHA=true; } else { inBacklashHA=false; posHA-=stepHA; }
+      if (blAxis1>0)             { blAxis1-=stepAxis1; inbacklashAxis1=true; } else { inbacklashAxis1=false; posAxis1-=stepAxis1; }
     }
 
 #if (defined(__arm__) && defined(TEENSYDUINO)) || (defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__))
-      TakeStepHA=true;
+      takeStepAxis1=true;
     }
-    HAclr=false;
+    clearAxis1=false;
   } else { 
-    if (TakeStepHA) SET(HAStepPORT, HAStepBit); HAclr=true;
+    if (takeStepAxis1) SET(Axis1StepPORT, Axis1StepBit); clearAxis1=true;
 
 #if defined(__arm__) && defined(TEENSYDUINO)
-    PIT_LDVAL1=nextHArate*stepHA;
+    PIT_LDVAL1=nextAxis1Rate*stepAxis1;
 #elif defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
-    TimerLoadSet(Timer3_base, TIMER_A, nextHArate*stepHA);
+    TimerLoadSet(Timer3_base, TIMER_A, nextAxis1Rate*stepAxis1);
 #endif
   }
 #else
-    SET(HAStepPORT, HAStepBit);
+    SET(Axis1StepPORT, Axis1StepBit);
   }
 #endif
 }
@@ -319,62 +318,62 @@ ISR(TIMER4_COMPA_vect)
 #endif
 
   // drivers step on the rising edge
-  CLR(DecStepPORT,  DecStepBit);
+  CLR(Axis2StepPORT,  Axis2StepBit);
 
 #if (defined(__arm__) && defined(TEENSYDUINO)) || (defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__))
   // on the much faster Teensy and Tiva TM4C run this ISR at twice the normal rate and pull the step pin low every other call
-  if (DEclr) {
-    TakeStepDec=false;
+  if (clearAxis2) {
+    takeStepAxis2=false;
 #endif
 
-#if defined(DE_MODE) && defined(DE_MODE_GOTO)
+#if defined(AXIS2_MODE) && defined(AXIS2_MODE_GOTO)
   // switch micro-step mode
-  if (gotoModeDec!=gotoRateDec) {
+  if (gotoModeAxis2!=gotoRateAxis2) {
     // only when at home position
-    if ((posDec+blDec)%256==0) { // was 1024 in support of 256x drivers... if they work like the DRV8825, A4988 this should still be ok
+    if ((posAxis2+blAxis2)%256==0) { // was 1024 in support of 256x drivers... if they work like the DRV8825, A4988 this should still be ok
       // switch mode
-      if (gotoModeDec) { stepDec=1; modeDec_next=DE_MODE; gotoModeDec=false; } else { stepDec=DE_STEP_GOTO; modeDec_next=DE_MODE_GOTO; gotoModeDec=true; }
-      digitalWrite(DE_M0,(modeDec_next & 1));
-      digitalWrite(DE_M1,(modeDec_next>>1 & 1));
-      digitalWrite(DE_M2,(modeDec_next>>2 & 1));
+      if (gotoModeAxis2) { stepAxis2=1; modeAxis2_next=AXIS2_MODE; gotoModeAxis2=false; } else { stepAxis2=AXIS2_STEP_GOTO; modeAxis2_next=AXIS2_MODE_GOTO; gotoModeAxis2=true; }
+      digitalWrite(Axis2_M0,(modeAxis2_next & 1));
+      digitalWrite(Axis2_M1,(modeAxis2_next>>1 & 1));
+      digitalWrite(Axis2_M2,(modeAxis2_next>>2 & 1));
     }
   }
 #endif
 
 #if defined(__AVR__)
-  OCR4A=nextDErate*stepDec;
+  OCR4A=nextAxis2Rate*stepAxis2;
 #endif
   
-  if (posDec!=(long int)targetDec.part.m) { // move the Dec stepper to the target
+  if (posAxis2!=(long)targetAxis2.part.m) { // move the Dec stepper to the target
     // telescope normally starts on the EAST side of the pier looking at the WEST sky
-    if (posDec<(long int)targetDec.part.m) dirDec=1; else dirDec=0; // Direction control
-    #ifdef REVERSE_DEC_ON
-      if (DecDir==dirDec) SET(DecDirPORT, DecDirBit); else CLR(DecDirPORT, DecDirBit); // Set direction, decDir default HIGH (=1, for my wiring)
+    if (posAxis2<(long)targetAxis2.part.m) dirAxis2=1; else dirAxis2=0; // Direction control
+    #ifdef REVERSE_AXIS2_ON
+      if (DecDir==dirAxis2) SET(Axis2DirPORT, Axis2DirBit); else CLR(Axis2DirPORT, Axis2DirBit); // Set direction, decDir default HIGH (=1, for my wiring)
     #else
-      if (DecDir==dirDec) CLR(DecDirPORT, DecDirBit); else SET(DecDirPORT, DecDirBit);
+      if (DecDir==dirAxis2) CLR(Axis2DirPORT, Axis2DirBit); else SET(Axis2DirPORT, Axis2DirBit);
     #endif
-    // telescope moving toward celestial pole in the sky, blDec is the amount of opposite backlash
-    if (dirDec==1) {
-      if (blDec<backlashDec) { blDec+=stepDec; inBacklashDec=true; } else { inBacklashDec=false; posDec+=stepDec; }
+    // telescope moving toward celestial pole in the sky, blAxis2 is the amount of opposite backlash
+    if (dirAxis2==1) {
+      if (blAxis2<backlashAxis2) { blAxis2+=stepAxis2; inbacklashAxis2=true; } else { inbacklashAxis2=false; posAxis2+=stepAxis2; }
     } else {
-      if (blDec>0)           { blDec-=stepDec; inBacklashDec=true; } else { inBacklashDec=false; posDec-=stepDec; }
+      if (blAxis2>0)             { blAxis2-=stepAxis2; inbacklashAxis2=true; } else { inbacklashAxis2=false; posAxis2-=stepAxis2; }
     }
 
 #if (defined(__arm__) && defined(TEENSYDUINO)) || (defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__))
-      TakeStepDec=true;
+      takeStepAxis2=true;
     }
-    DEclr=false; 
+    clearAxis2=false; 
   } else { 
-    if (TakeStepDec) SET(DecStepPORT, DecStepBit); DEclr=true;
+    if (takeStepAxis2) SET(Axis2StepPORT, Axis2StepBit); clearAxis2=true;
 
 #if defined(__arm__) && defined(TEENSYDUINO)
-    PIT_LDVAL2=nextDErate*stepDec;
+    PIT_LDVAL2=nextAxis2Rate*stepAxis2;
 #elif defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
-    TimerLoadSet(Timer4_base, TIMER_A, nextDErate*stepDec);
+    TimerLoadSet(Timer4_base, TIMER_A, nextAxis2Rate*stepAxis2);
 #endif
   }
 #else
-    SET(DecStepPORT, DecStepBit);
+    SET(Axis2StepPORT, Axis2StepBit);
   }
 #endif
 }
