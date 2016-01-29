@@ -194,7 +194,7 @@ boolean www_send() {
   
   // copy some data
   boolean buffer_empty=false;
-  for (int l=0; l<5; l++) {
+  for (int l=0; l<10; l++) {
     c=www_xmit_buffer[www_xmit_buffer_send_pos];
     buf[l+1]=0;
     buf[l]=c;
@@ -250,12 +250,12 @@ void Ethernet_get() {
   if (get_names[0]=='b') {
     if ( (atoi2(get_vals,&i)) && ((i>=0) && (i<=999))) { 
       if (get_names[1]=='2') {
-        backlashDec=(int)round(((double)i*(double)StepsPerDegreeDec)/3600.0);
-        EEPROM_writeInt(EE_backlashDec,backlashDec);
+        backlashAxis2=(int)round(((double)i*(double)StepsPerDegreeAxis2)/3600.0);
+        EEPROM_writeInt(EE_backlashAxis2,backlashAxis2);
       } else
       if (get_names[1]=='1') {
-        backlashHA =(int)round(((double)i*(double)StepsPerDegreeHA)/3600.0);
-        EEPROM_writeInt(EE_backlashHA,backlashHA);
+        backlashAxis1 =(int)round(((double)i*(double)StepsPerDegreeAxis1)/3600.0);
+        EEPROM_writeInt(EE_backlashAxis1,backlashAxis1);
       }
     }
   }
@@ -371,7 +371,7 @@ void Ethernet_get() {
        if (get_vals[0]=='r') siderealInterval=15956313L;
        EEPROM_writeQuad(EE_siderealInterval,(byte*)&siderealInterval);
        SetSiderealClockRate(siderealInterval);
-       cli(); SiderealRate=siderealInterval/StepsPerSecond; sei();
+       cli(); SiderealRate=siderealInterval/StepsPerSecondAxis1; sei();
     }
     if ((get_vals[0]=='s') && (get_vals[1]==0)) SetTrackingRate(default_tracking_rate); // sidereal
     if ((get_vals[0]=='l') && (get_vals[1]==0)) SetTrackingRate(0.96236513150); // lunar
@@ -424,7 +424,7 @@ const char html_main_css2[] PROGMEM = ".a { background-color: #111111; }\r\n .t 
 const char html_main_css3[] PROGMEM = " margin: 25px; color: #999999; background-color: #111111; }\r\n input { width:4em; font-weight: bold; background-color: #A01010; padding: 2px 2px; }\r\n";
 const char html_main_css4[] PROGMEM = ".b { padding: 30px; border: 2px solid #551111; margin: 30px; color: #999999; background-color: #111111; }\r\n";
 const char html_main_css5[] PROGMEM = "select { width:4em; font-weight: bold; background-color: #A01010; padding: 2px 2px; }\r\n .c { color: #A01010; font-weight: bold; }\r\n";
-const char html_main_css6[] PROGMEM = "h1 { text-align: right; }\r\n a:hover, a:active { background-color: red; }\r\n";
+const char html_main_css6[] PROGMEM = "h1 { text-align: right; }\r\n a:hover, a:active { background-color: red; }\r\n .g { color: #10A010; font-weight: bold; }";
 const char html_main_css7[] PROGMEM = "a:link, a:visited { background-color: #332222; color: #a07070; border:1px solid red; padding: 5px 10px;";
 const char html_main_css8[] PROGMEM = " margin: none; text-align: center; text-decoration: none; display: inline-block; }\r\n";
 const char html_main_css9[] PROGMEM = "button { background-color: #A01010; font-weight: bold; border-radius: 5px; font-size: 12px; margin: 2px; padding: 4px 8px; }\r\n</STYLE>\r\n";
@@ -437,7 +437,7 @@ const char html_links3[] PROGMEM = "<a href=\"/pec.htm\">PEC</a><a href=\"/confi
 #ifdef MOUNT_TYPE_ALTAZM
   #define Axis1 "Az"
   #define Axis1a "Az"
-  #define Axis2 "Azm"
+  #define Axis2 "Alt"
 #else
   #define Axis1 "HA"
   #define Axis1a "RA"
@@ -448,19 +448,22 @@ const char html_index2[] PROGMEM = "</b></td><td align=\"right\"><b><font size=\
 const char html_index2a[] PROGMEM = "STATUS</font></b></td></tr></table><br />";
 const char html_index2b[] PROGMEM = "</div><div class=\"b\">Longitude = <font class=\"c\">%s</font>, Latitude = <font class=\"c\">%s</font><br />";
 const char html_index3[] PROGMEM = "<font class=\"c\">%02d/%02d/%02d</font>";
-const char html_index4[] PROGMEM = "&nbsp;%s&nbsp;UT";
+const char html_index4[] PROGMEM = "&nbsp;<font class=\"c\">%s</font>&nbsp;UT";
 const char html_index4a[] PROGMEM = "&nbsp;(<font class=\"c\">%s</font>&nbsp; Local Apparent Sidereal Time)<br /><br />";
-const char html_index5[] PROGMEM = "Current Position: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
-const char html_index6[] PROGMEM = "Target Position: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br /><br />";
+const char html_indexFault[] PROGMEM =  "Stepper driver " Axis1 " axis %s, " Axis2 " axis %s<br /><br />";
+const char html_indexPosition[] PROGMEM = "Current Position: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
+const char html_indexTarget[] PROGMEM = "Target Position: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
+const char html_indexIndex[] PROGMEM = "IHS=<font class=\"c\">%ld</font>, IDS=<font class=\"c\">%ld</font><br />";
+const char html_indexPier[] PROGMEM = "Pier Side=<font class=\"c\">%s</font> (meridian flips <font class=\"c\">%s</font>)<br /><br />";
 const char html_index7[] PROGMEM = "Current MaxRate: <font class=\"c\">%ld</font> (Default MaxRate: <font class=\"c\">%ld</font>)<br /><br />";
 const char html_index8[] PROGMEM = "Tracking: <font class=\"c\">%s %s</font><br />";
-const char html_index9[] PROGMEM = "Parking: <font class=\"c\">%s</font><br />";
+const char html_index9[] PROGMEM = "Parking: <font class=\"c\">%s</font><br /><br />Workload: <font class=\"c\">%ld%%</font><br />";
 
 void index_html_page() {
-  char temp[256] = "";
-  char temp1[256] = "";
-  char temp2[20] = "";
-  char temp3[20] = "";
+  char temp[320] = "";
+  char temp1[320] = "";
+  char temp2[80] = "";
+  char temp3[80] = "";
   bool r=true;
   int stp=0;
   html_page_step++;
@@ -525,32 +528,66 @@ void index_html_page() {
     
     strcpy_P(temp1, html_index4a); sprintf(temp,temp1,temp2);
   }
-  if (html_page_step==++stp) {
+if (html_page_step==++stp) {
+    strcpy_P(temp1, html_indexFault);
+    sprintf(temp, temp1, faultAxis1 ? "<font class=\"c\">FAULT</font>" : "<font class=\"g\">Ok</font>", faultAxis2 ? "<font class=\"c\">FAULT</font>" : "<font class=\"g\">Ok</font>");
+  }
+if (html_page_step==++stp) {
     i=highPrecision; highPrecision=true; 
     cli();
-    double ha=((double)posHA/StepsPerDegreeHA)/15.0; 
-    doubleToHms(temp2,&ha);
-    double dec=(double)posDec/StepsPerDegreeDec; 
+    long h=posAxis1+IHS;
+    long d=posAxis2+IDS;
     sei();
+#ifdef MOUNT_TYPE_ALTAZM
+    double ha=(double)h/(double)StepsPerDegreeAxis1; 
+    doubleToDms(temp2,&ha,true,true);
+#else
+    double ha=(double)h/(double)(StepsPerDegreeAxis1*15L); 
+    doubleToHms(temp2,&ha);
+#endif
+    double dec=(double)d/(double)StepsPerDegreeAxis2; 
     doubleToDms(temp3,&dec,false,true);
     highPrecision=i;
     
-    strcpy_P(temp1, html_index5); sprintf(temp,temp1,temp2,temp3); 
+    strcpy_P(temp1, html_indexPosition); sprintf(temp,temp1,temp2,temp3); 
   }
   if (html_page_step==++stp) {
     i=highPrecision; highPrecision=true;
     cli();
-    double ha=((double)((long int)targetHA.part.m)/StepsPerDegreeHA)/15.0; 
-    doubleToHms(temp2,&ha);
-    double dec=((double)(long int)targetDec.part.m)/StepsPerDegreeDec; 
+    long h=(long)targetAxis1.part.m+IHS;
+    long d=(long)targetAxis2.part.m+IDS;
     sei();
+#ifdef MOUNT_TYPE_ALTAZM
+    double ha=(double)h/(double)(StepsPerDegreeAxis1);
+    doubleToDms(temp2,&ha,true,true);
+#else
+    double ha=(double)h/(double)(StepsPerDegreeAxis1*15L);
+    doubleToHms(temp2,&ha);
+#endif
+    double dec=(double)d/(double)StepsPerDegreeAxis2; 
     doubleToDms(temp3,&dec,false,true);
     highPrecision=i;
     
-    strcpy_P(temp1, html_index6); sprintf(temp,temp1,temp2,temp3); 
+    strcpy_P(temp1, html_indexTarget); sprintf(temp,temp1,temp2,temp3); 
   }
   if (html_page_step==++stp) {
-    strcpy_P(temp1, html_index7); sprintf(temp,temp1,maxRate/16L,(long int)MaxRate);
+    strcpy_P(temp1, html_indexIndex); sprintf(temp,temp1,IHS,IDS); 
+  }
+  if (html_page_step==++stp) {
+    if ((pierSide==PierSideFlipWE1) ||
+        (pierSide==PierSideFlipWE2) ||
+        (pierSide==PierSideFlipWE3)) strcpy(temp2,"Meridian Flip, West to East"); else
+    if ((pierSide==PierSideFlipEW1) ||
+        (pierSide==PierSideFlipEW2) ||
+        (pierSide==PierSideFlipEW3)) strcpy(temp2,"Meridian Flip, East to West"); else
+    if (pierSide==PierSideWest) strcpy(temp2,"West"); else
+    if (pierSide==PierSideEast) strcpy(temp2,"East"); else
+    if (pierSide==PierSideNone) strcpy(temp2,"None"); else strcpy(temp2,"Unknown");
+    if (meridianFlip==MeridianFlipNever) strcpy(temp3,"Disabled"); else strcpy(temp3,"Enabled");
+    strcpy_P(temp1, html_indexPier); sprintf(temp,temp1,temp2,temp3); 
+  }
+  if (html_page_step==++stp) {
+    strcpy_P(temp1, html_index7); sprintf(temp,temp1,maxRate/16L,(long)MaxRate);
   }
   if (html_page_step==++stp) {
     if (trackingState==TrackingNone)     strcpy(temp2,"Off");
@@ -569,8 +606,9 @@ void index_html_page() {
     if (parkStatus==Parked)     strcpy(temp2,"Parked");
     if (parkStatus==Parking)    strcpy(temp2,"Parking");
     if (parkStatus==ParkFailed) strcpy(temp2,"Park Failed");
-    
-    strcpy_P(temp1, html_index9); sprintf(temp,temp1,temp2);
+
+    strcpy_P(temp1, html_index9); sprintf(temp,temp1,temp2,(worst_loop_time*100L)/9970L);
+    worst_loop_time=0;
   }
   if (html_page_step==++stp) strcpy(temp,"</div></body></html>");
 
@@ -656,9 +694,9 @@ const char html_settings16[] PROGMEM =
 "\r\n";
 
 void settings_html_page() {
-  char temp[256] = "";
-  char temp1[256] = "";
-  char temp2[20] = "";
+  char temp[320] = "";
+  char temp1[320] = "";
+  char temp2[80] = "";
   int stp=0;
   html_page_step++;
 
@@ -692,8 +730,8 @@ void settings_html_page() {
   if (html_page_step==++stp) strcpy_P(temp, html_settings3);
   if (html_page_step==++stp) strcpy_P(temp, html_settings4);
   if (html_page_step==++stp) strcpy_P(temp, html_settings5);
-  if (html_page_step==++stp) { strcpy_P(temp1, html_settings7); i=(int)round(((double)backlashHA*3600.0)/(double)StepsPerDegreeHA); if (i<0) i=0; if (i>999) i=999; sprintf(temp,temp1,i); }
-  if (html_page_step==++stp) { strcpy_P(temp1, html_settings8); i=(int)round(((double)backlashDec*3600.0)/(double)StepsPerDegreeDec); if (i<0) i=0; if (i>999) i=999; sprintf(temp,temp1,i); }
+  if (html_page_step==++stp) { strcpy_P(temp1, html_settings7); i=(int)round(((double)backlashAxis1*3600.0)/(double)StepsPerDegreeAxis1); if (i<0) i=0; if (i>999) i=999; sprintf(temp,temp1,i); }
+  if (html_page_step==++stp) { strcpy_P(temp1, html_settings8); i=(int)round(((double)backlashAxis2*3600.0)/(double)StepsPerDegreeAxis2); if (i<0) i=0; if (i>999) i=999; sprintf(temp,temp1,i); }
   if (html_page_step==++stp) { strcpy_P(temp1, html_settings9); sprintf(temp,temp1,minAlt); }
   if (html_page_step==++stp) { strcpy_P(temp1, html_settings10); sprintf(temp,temp1,maxAlt); }
   if (html_page_step==++stp) {
@@ -815,7 +853,7 @@ const char html_control10[] PROGMEM =
 "</form>\r\n";
 
 void control_html_page() {
-  char temp[256] = "";
+  char temp[320] = "";
   int stp=0;
   html_page_step++;
 
@@ -888,8 +926,8 @@ const char html_pecControls3[] PROGMEM =
 "</form><br />\r\n";
 
 void pec_html_page() {
-  char temp[256] = "";
-  char temp1[80] = "";
+  char temp[320] = "";
+  char temp1[320] = "";
   char temp2[80] = "";
   int stp=0;
   html_page_step++;
@@ -957,6 +995,16 @@ const char html_config1[] PROGMEM = "<div class=\"t\"><table width=\"100%\"><tr>
 const char html_config2[] PROGMEM = "</b></td><td align=\"right\"><b><font size=\"5\">";
 const char html_config3[] PROGMEM = "CONFIGURATION</font></b></td></tr></table><br />";
 const char html_config4[] PROGMEM = "</div><div class=\"b\">";
+#ifdef DEBUG_ON
+const char html_debug[] PROGMEM = "Debug Mode: <font class=\"c\">ON</font><br /><br />";
+#else
+const char html_debug[] PROGMEM = "Debug Mode: <font class=\"c\">OFF</font><br /><br />";
+#endif
+#ifdef SYNC_ANYWHERE_ON
+const char html_sync[] PROGMEM = "Sync Anywhere: <font class=\"c\">ON</font><br /><br />";
+#else
+const char html_sync[] PROGMEM = "Sync Anywhere: <font class=\"c\">OFF</font><br /><br />";
+#endif
 #if defined(MOUNT_TYPE_GEM)
 const char html_configMount[] PROGMEM = "Mount type: <font class=\"c\">GEM</font><br /><br />";
 #elif defined(MOUNT_TYPE_FORK)
@@ -965,35 +1013,122 @@ const char html_configMount[] PROGMEM = "Mount type: <font class=\"c\">Fork or s
 const char html_configMount[] PROGMEM = "Mount type: <font class=\"c\">Fork or similar (Alternate)</font><br /><br />";
 #elif defined(MOUNT_TYPE_ALTAZM)
 const char html_configMount[] PROGMEM = "Mount type: <font class=\"c\">AltAz</font><br /><br />";
+#else
+const char html_configMount[] PROGMEM = "Mount type: <font class=\"c\">Unknown</font><br /><br />";
 #endif
 #if defined(ST4_OFF)
-const char html_configST4[] PROGMEM = "ST4 interface is <font class=\"c\">OFF</font><br /><br />";
+const char html_configST4[] PROGMEM = "ST4 interface <font class=\"c\">OFF</font> (";
 #elif defined(ST4_ON)
-const char html_configST4[] PROGMEM = "ST4 interface is <font class=\"c\">ON (no internal pullup resistors)</font><br /><br />";
+const char html_configST4[] PROGMEM = "ST4 interface <font class=\"c\">ON</font> (<font class=\"c\">no internal pullup resistors</font>, ";
 #elif defined(ST4_PULLUP)
-const char html_configST4[] PROGMEM = "ST4 interface is <font class=\"c\">ON (with internal pullup resistors)</font><br /><br />";
+const char html_configST4[] PROGMEM = "ST4 interface <font class=\"c\">ON</font> (<font class=\"c\">with internal pullup resistors</font>, ";
+#else
+const char html_configST4[] PROGMEM = "ST4 interface <font class=\"c\">OFF</font> (";
 #endif
-#if defined(PPS_SENSE_OFF)
-const char html_configPPS[] PROGMEM = "PPS sense is <font class=\"c\">OFF</font><br />";
-#elif defined(PPS_SENSE_ON)
-const char html_configPPS[] PROGMEM = "PPS sense is <font class=\"c\">ON</font><br />";
+#ifdef ST4_ALTERNATE_PINS_ON
+const char html_pinsST4[] PROGMEM = "at <font class=\"c\">Alternate Pins</font>)<br /><br />";
+#else
+const char html_pinsST4[] PROGMEM = "at <font class=\"c\">Default Pins</font>)<br /><br />";
 #endif
-#if defined(PEC_SENSE_OFF)
-const char html_configPEC[] PROGMEM = "PEC sense is <font class=\"c\">OFF</font><br />";
-#elif defined(PEC_SENSE_ON)
-const char html_configPEC[] PROGMEM = "PEC sense is <font class=\"c\">ON</font><br />";
+#ifdef PPS_SENSE_ON
+const char html_configPPS[] PROGMEM = "PPS sense is <font class=\"c\">ON</font>, ";
+#else
+const char html_configPPS[] PROGMEM = "PPS sense is <font class=\"c\">OFF</font>, ";
 #endif
-#if defined(LIMIT_SENSE_OFF)
-const char html_configLimit[] PROGMEM = "LIMIT sense is <font class=\"c\">OFF</font><br />";
-#elif defined(LIMIT_SENSE_ON)
-const char html_configLimit[] PROGMEM = "LIMIT sense is <font class=\"c\">ON</font><br />";
+#ifdef PEC_SENSE_ON
+const char html_configPEC[] PROGMEM = "PEC sense is <font class=\"c\">ON</font>, ";
+#else
+const char html_configPEC[] PROGMEM = "PEC sense is <font class=\"c\">OFF</font>, ";
 #endif
+#ifdef LIMIT_SENSE_ON
+const char html_configLimit[] PROGMEM = "LIMIT sense is <font class=\"c\">ON</font><br /><br />";
+#else
+const char html_configLimit[] PROGMEM = "LIMIT sense is <font class=\"c\">OFF</font><br /><br />";
+#endif
+#ifdef STATUS_LED_PINS_ON
+const char html_configLed1[] PROGMEM = "Status LED 1 <font class=\"c\">ON</font>, ";
+#else
+const char html_configLed1[] PROGMEM = "Status LED 1 <font class=\"c\">OFF</font>, ";
+#endif
+#if defined(STATUS_LED2_PINS_ON)
+const char html_configLed2[] PROGMEM = "Status LED 2 <font class=\"c\">ON</font>, ";
+#elif defined(STATUS_LED2_PINS)
+const char html_configLed2[] PROGMEM = "Status LED 2 <font class=\"c\">Reticule Mode, ";
+#else
+const char html_configLed2[] PROGMEM = "Status LED 2 <font class=\"c\">OFF</font>, ";
+#endif
+#ifdef RETICULE_LED_PINS
+const char html_configLed3[] PROGMEM = "Reticule LED <font class=\"c\">ON</font><br /><br />";
+#else
+const char html_configLed3[] PROGMEM = "Reticule LED <font class=\"c\">OFF</font><br /><br />";
+#endif
+#ifdef POWER_SUPPLY_PINS_ON
+const char html_configPwr[] PROGMEM = "Optional Logic Level Power to Stepper drivers <font class=\"c\">ON</font><br />";
+#else
+const char html_configPwr[] PROGMEM = "Optional Logic Level Power to Stepper drivers <font class=\"c\">OFF</font><br />";
+#endif
+#if defined(AXIS1_DISABLED_HIGH)
+const char html_configA1En[] PROGMEM = "Stepper driver Enable line support Axis1 (RA/Az) disabled <font class=\"c\">HIGH";
+#elif defined(AXIS1_DISABLED_LOW)
+const char html_configA1En[] PROGMEM = "Stepper driver Enable line support Axis1 (RA/Az) disabled <font class=\"c\">LOW";
+#else
+const char html_configA1En[] PROGMEM = "Stepper driver Enable line support Axis1 (RA/Az) disabled <font class=\"c\">Unknown";
+#endif
+#if defined(AXIS2_DISABLED_HIGH)
+const char html_configA2En[] PROGMEM = "</font>, Axis2 (Dec/Alt) disabled <font class=\"c\">HIGH</font><br />";
+#elif defined(AXIS2_DISABLED_LOW)
+const char html_configA2En[] PROGMEM = "</font>, Axis2 (Dec/Alt) disabled <font class=\"c\">LOW</font><br />";
+#else
+const char html_configA2En[] PROGMEM = "</font>, Axis2 (Dec/Alt) disabled <font class=\"c\">Unknown</font><br />";
+#endif
+#if defined(AXIS1_FAULT_LOW)
+const char html_configA1Flt[] PROGMEM = "Stepper driver Fault on Axis1 (RA/Az) when <font class=\"c\">LOW</font>, ";
+#elif defined(AXIS1_FAULT_HIGH)
+const char html_configA1Flt[] PROGMEM = "Stepper driver Fault on Axis1 (RA/Az) when <font class=\"c\">HIGH</font>, ";
+#elif defined(AXIS1_FAULT_OFF)
+const char html_configA1Flt[] PROGMEM = "Stepper driver Fault on Axis1 (RA/Az) <font class=\"c\">OFF</font>, ";
+#endif
+#if defined(AXIS2_FAULT_LOW)
+const char html_configA2Flt[] PROGMEM = "Axis2 (Dec/Alt) when <font class=\"c\">LOW</font><br /><br />";
+#elif defined(AXIS2_FAULT_HIGH)
+const char html_configA2Flt[] PROGMEM = "Axis2 (Dec/Alt) when <font class=\"c\">HIGH</font><br /><br />";
+#elif defined(AXIS2_FAULT_OFF)
+const char html_configA2Flt[] PROGMEM = "Axis2 (Dec/Alt) <font class=\"c\">OFF</font><br /><br />";
+#endif
+#ifdef TRACK_REFRACTION_RATE_DEFAULT_ON
+const char html_configTrack[] PROGMEM = "Tracking compensation for refraction effect, defaults to <font class=\"c\">ON</font><br /><br />";
+#else
+const char html_configTrack[] PROGMEM = "Tracking compensation for refraction effect, defaults to <font class=\"c\">OFF</font><br /><br />";
+#endif
+#ifdef SEPERATE_PULSE_GUIDE_RATE_ON
+const char html_configGuide[] PROGMEM = "Separate pulse guide rate <font class=\"c\">ON</font><br /><br />";
+#else
+const char html_configGuide[] PROGMEM = "Separate pulse guide rate <font class=\"c\">OFF</font><br /><br />";
+#endif
+#ifdef RememberMaxRate_ON
+const char html_configRemMax[] PROGMEM = "Remember MaxRate setting changes <font class=\"c\">ON</font><br /><br />";
+#else
+const char html_configRemMax[] PROGMEM = "Remember MaxRate setting changes <font class=\"c\">OFF</font><br /><br />";
+#endif
+const char html_configMaxRate[] PROGMEM = "MaxRate <font class=\"c\">%d</font>uS<br /><br />";
+const char html_configDegAcc[] PROGMEM = "Degrees for acceleration/deceleration <font class=\"c\">%s</font><br />";
+const char html_configBacklash[] PROGMEM = "Backlash takeup rate <font class=\"c\">%d</font> x Sidereal<br /><br />";
+const char html_configStepsDegHA[] PROGMEM = "Steps per degree for Axis1 (RA/Az) <font class=\"c\">%d</font><br />";
+const char html_configStepsDegDec[] PROGMEM = "Steps per degree for Axis2 (Dec/Alt) <font class=\"c\">%d</font><br />";
+const char html_configStepsPerSec[] PROGMEM = "Steps per second for tracking <font class=\"c\">%s</font><br /><br />";
+const char html_configStepsPerWR[] PROGMEM = "Steps per worm rotation for PEC <font class=\"c\">%d</font>, ";
+const char html_configPecBufSize[] PROGMEM = "PEC buffer size <font class=\"c\">%d</font> seconds<br /><br />";
+const char html_configMPME[] PROGMEM = "Minutes past meridian East <font class=\"c\">%d</font> minutes<br />";
+const char html_configMPMW[] PROGMEM = "Minutes past meridian West <font class=\"c\">%d</font> minutes<br />";
+const char html_configUPL[] PROGMEM = "Under pole limit <font class=\"c\">%d</font> hours<br />";
+const char html_configMinDec[] PROGMEM = "Minimum Declination <font class=\"c\">%d</font> degrees<br />";
+const char html_configMaxDec[] PROGMEM = "Maximum Declination <font class=\"c\">%d</font> degrees<br /><br />";
 
 void config_html_page() {
-  char temp[256] = "";
-  char temp1[80] = "";
-  char temp2[20] = "";
-  char temp3[20] = "";
+  char temp[320] = "";
+  char temp1[320] = "";
+  char temp2[80] = "";
+  char temp3[80] = "";
   int stp=0;
   html_page_step++;
     
@@ -1026,11 +1161,42 @@ void config_html_page() {
   if (html_page_step==++stp) strcpy_P(temp, html_links2);
   if (html_page_step==++stp) strcpy_P(temp, html_links3);
   if (html_page_step==++stp) strcpy_P(temp, html_config4);
+
+  if (html_page_step==++stp) strcpy_P(temp, html_debug);
+  if (html_page_step==++stp) strcpy_P(temp, html_sync);
   if (html_page_step==++stp) strcpy_P(temp, html_configMount);
   if (html_page_step==++stp) strcpy_P(temp, html_configST4);
+  if (html_page_step==++stp) strcpy_P(temp, html_pinsST4);
   if (html_page_step==++stp) strcpy_P(temp, html_configPPS);
   if (html_page_step==++stp) strcpy_P(temp, html_configPEC);
   if (html_page_step==++stp) strcpy_P(temp, html_configLimit);
+  if (html_page_step==++stp) strcpy_P(temp, html_configLed1);
+  if (html_page_step==++stp) strcpy_P(temp, html_configLed2);
+  if (html_page_step==++stp) strcpy_P(temp, html_configLed3);
+  if (html_page_step==++stp) strcpy_P(temp, html_configPwr);
+  if (html_page_step==++stp) strcpy_P(temp, html_configA1En);
+  if (html_page_step==++stp) strcpy_P(temp, html_configA2En);
+  if (html_page_step==++stp) strcpy_P(temp, html_configA1Flt);
+  if (html_page_step==++stp) strcpy_P(temp, html_configA2Flt);
+  if (html_page_step==++stp) strcpy_P(temp, html_configTrack);
+  if (html_page_step==++stp) strcpy_P(temp, html_configGuide);
+  if (html_page_step==++stp) strcpy_P(temp, html_configRemMax);
+  if (html_page_step==++stp) { strcpy_P(temp1, html_configMaxRate); sprintf(temp,temp1,MaxRate); }
+  if (html_page_step==++stp) { strcpy_P(temp1, html_configDegAcc); dtostrf(DegreesForAcceleration,2,1,temp2); sprintf(temp,temp1,temp2); }
+  if (html_page_step==++stp) { strcpy_P(temp1, html_configBacklash); sprintf(temp,temp1,(long)round(BacklashTakeupRate)); }
+  if (html_page_step==++stp) { strcpy_P(temp1, html_configStepsDegHA); sprintf(temp,temp1,(long)round(StepsPerDegreeAxis1)); }
+  if (html_page_step==++stp) { strcpy_P(temp1, html_configStepsDegDec); sprintf(temp,temp1,(long)round(StepsPerDegreeAxis2)); }
+  if (html_page_step==++stp) { strcpy_P(temp1, html_configStepsPerSec); dtostrf(StepsPerSecondAxis1,3,6,temp2); sprintf(temp,temp1,temp2); }
+  if (html_page_step==++stp) { strcpy_P(temp1, html_configStepsPerWR); sprintf(temp,temp1,(long)round(StepsPerAxis1WormRotation)); }
+  if (html_page_step==++stp) { strcpy_P(temp1, html_configPecBufSize); sprintf(temp,temp1,(long)round(PECBufferSize)); }
+  if (html_page_step==++stp) { strcpy_P(temp1, html_configMPME); sprintf(temp,temp1,(long)round(MinutesPastMeridianE)); }
+  if (html_page_step==++stp) { strcpy_P(temp1, html_configMPMW); sprintf(temp,temp1,(long)round(MinutesPastMeridianW)); }
+  if (html_page_step==++stp) { strcpy_P(temp1, html_configUPL); sprintf(temp,temp1,(long)round(UnderPoleLimit)); }
+ 
+  if (html_page_step==++stp) { strcpy_P(temp1, html_configMinDec); sprintf(temp,temp1,(long)round(MinDec)); }
+  if (html_page_step==++stp) { strcpy_P(temp1, html_configMaxDec); sprintf(temp,temp1,(long)round(MaxDec)); }
+
+
   if (html_page_step==++stp) strcpy(temp,"</div></body></html>");
 
   // stop sending this page
