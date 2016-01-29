@@ -87,7 +87,7 @@
 // other settings are LOW and HIGH
 #define AXIS1_FAULT_OFF
 #define AXIS2_FAULT_OFF
-// optional stepper driver Enable support is always on, just wire Enable to Pins 25 (HA) and 30 (Dec) and OnStep will pull these HIGH (Teensy3.1 Pins 16,21)
+// optional stepper driver Enable support is always on, just wire Enable to Pins 25 (Axis1) and 30 (Axis2) and OnStep will pull these HIGH (Teensy3.1 Pins 16,21)
 // by default to disable stepper drivers on startup and when Parked. An Align or UnPark will enable the drivers.  Adjust below if you need these pulled LOW to disable the drivers.
 #define AXIS1_DISABLED_HIGH
 #define AXIS2_DISABLED_HIGH
