@@ -54,8 +54,8 @@
 #endif
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "01 14 16"
-#define FirmwareNumber "1.0b27"
+#define FirmwareDate   "01 29 16"
+#define FirmwareNumber "1.0b29"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -93,6 +93,11 @@ double HzCf = 16000000.0/60.0;       // conversion factor to go to/from Hz for s
 volatile long SiderealRate;          // based on the siderealInterval, this is the time between steps for sidereal tracking
 volatile long TakeupRate;            // this is the takeup rate for synchronizing the target and actual positions when needed
 
+long last_loop_micros=0;             // workload monitoring
+long this_loop_time=0;
+long loop_time=0;
+long worst_loop_time=0;
+
 // PPS (GPS)
 volatile unsigned long PPSlastMicroS = 1000000UL;
 volatile unsigned long PPSavgMicroS = 1000000UL;
@@ -114,29 +119,32 @@ boolean refraction = false;
 #endif
 
 long    maxRate = MaxRate*16L;
-volatile long    timerRateHA = 0;
-volatile long    timerRateBacklashHA = 0;
-volatile boolean inBacklashHA=false;
-volatile long    timerRateDec = 0;
-volatile long    timerRateBacklashDec = 0;
-volatile boolean inBacklashDec=false;
+volatile long    timerRateAxis1 = 0;
+volatile long    timerRateBacklashAxis1 = 0;
+volatile boolean inbacklashAxis1 = false;
+boolean faultAxis1 = false;
+volatile long    timerRateAxis2 = 0;
+volatile long    timerRateBacklashAxis2 = 0;
+volatile boolean inbacklashAxis2 = false;
+boolean faultAxis2 = false;
 
 #ifdef MOUNT_TYPE_ALTAZM
 #define default_tracking_rate 0
 #else
 #define default_tracking_rate 1
 #endif
-volatile double  trackingTimerRateHA = default_tracking_rate;
-volatile double  trackingTimerRateDec = default_tracking_rate;
-volatile double  pecTimerRateHA = 0.0;
-volatile double  guideTimerRateHA = 0.0;
-volatile double  guideTimerRateDec = 0.0;
-volatile double  timerRateRatio = ((double)StepsPerDegreeHA/(double)StepsPerDegreeDec);
-volatile boolean useTimerRateRatio = (StepsPerDegreeHA!=StepsPerDegreeDec);
-#define SecondsPerWormRotation  ((long)(StepsPerWormRotation/StepsPerSecond))
-#define StepsPerSecondDec       ((double)(StepsPerDegreeDec/3600.0)*15.0)
-volatile double StepsForRateChangeHA = (double)DegreesForAcceleration*(double)StepsPerDegreeHA*4.0;
-volatile double StepsForRateChangeDec = (double)DegreesForAcceleration*(double)StepsPerDegreeDec*4.0;
+volatile double  trackingtimerRateAxis1 = default_tracking_rate;
+volatile double  trackingTimerRateAxis2 = default_tracking_rate;
+volatile double  pecTimerRateAxis1   = 0.0;
+volatile double  guidetimerRateAxis1 = 0.0;
+volatile double  guideTimerRateAxis2   = 0.0;
+volatile double  timerRateRatio =       ((double)StepsPerDegreeAxis1/(double)StepsPerDegreeAxis2);
+volatile boolean useTimerRateRatio =    (StepsPerDegreeAxis1!=StepsPerDegreeAxis2);
+#define StepsPerSecondAxis1             ((double)StepsPerDegreeAxis1/240.0)
+#define StepsPerSecondAxis2             ((double)StepsPerDegreeAxis2/240.0)
+#define SecondsPerAxis1WormRotation     ((long)(StepsPerAxis1WormRotation/StepsPerSecondAxis1))
+volatile double StepsForRateChangeAxis1 = (double)DegreesForAcceleration*(double)StepsPerDegreeAxis1*4.0;
+volatile double StepsForRateChangeAxis2 = (double)DegreesForAcceleration*(double)StepsPerDegreeAxis2*4.0;
 
 #if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
 #define cli() noInterrupts()
@@ -195,10 +203,10 @@ double cosLat = 1.0;
 double sinLat = 0.0;
 double longitude = 0.0;
 
-// fix underPoleLimit for fork mounts
+// fix UnderPoleLimit for fork mounts
 #if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT)
-#undef underPoleLimit
-#define underPoleLimit 12
+#undef UnderPoleLimit
+#define UnderPoleLimit 12
 #endif
 
 #ifdef MOUNT_TYPE_GEM
@@ -209,25 +217,25 @@ long celestialPoleHA  = 0L;
 #endif
 double celestialPoleDec = 90.0;
 
-volatile long posHA      = 90L*StepsPerDegreeHA;   // hour angle position in steps
-volatile long startHA    = 90L*StepsPerDegreeHA;   // hour angle of goto start position in steps
-volatile fixed_t targetHA;                         // hour angle of goto end   position in steps
-volatile byte dirHA      = 1;                      // stepping direction + or -
+volatile long posAxis1   = 90L*StepsPerDegreeAxis1;// hour angle position in steps
+volatile long startAxis1 = 90L*StepsPerDegreeAxis1;// hour angle of goto start position in steps
+volatile fixed_t targetAxis1;                      // hour angle of goto end   position in steps
+volatile byte dirAxis1   = 1;                      // stepping direction + or -
 volatile long PEC_HA     = 0;                      // for PEC, adds or subtracts steps
 double newTargetRA       = 0.0;                    // holds the RA for goTos
-fixed_t origTargetHA;
+fixed_t origTargetAxis1;
 
-volatile long posDec     = 90L*StepsPerDegreeDec; // declination position in steps
-volatile long startDec   = 90L*StepsPerDegreeDec; // declination of goto start position in steps
-volatile fixed_t targetDec;                       // declination of goto end   position in steps
-volatile byte dirDec     = 1;                     // stepping direction + or -
-double newTargetDec      = 0.0;                   // holds the Dec for goTos
-long origTargetDec       = 0;
+volatile long posAxis2   = 90L*StepsPerDegreeAxis2;// declination position in steps
+volatile long startAxis2 = 90L*StepsPerDegreeAxis2;// declination of goto start position in steps
+volatile fixed_t targetAxis2;                      // declination of goto end   position in steps
+volatile byte dirAxis2   = 1;                      // stepping direction + or -
+double newtargetDec      = 0.0;                    // holds the Dec for goTos
+long origTargetAxis2     = 0;
 
-double newTargetAlt=0.0, newTargetAzm=0.0;        // holds the altitude and azmiuth for slews
-double currentAlt = 45;                           // the current altitude
-int    minAlt;                                    // the minimum altitude, in degrees, for goTo's (so we don't try to point too low)
-int    maxAlt;                                    // the maximum altitude, in degrees, for goTo's (to keep the telescope tube away from the mount/tripod)
+double newTargetAlt=0.0, newTargetAzm=0.0;         // holds the altitude and azmiuth for slews
+double currentAlt = 45;                            // the current altitude
+int    minAlt;                                     // the minimum altitude, in degrees, for goTo's (so we don't try to point too low)
+int    maxAlt;                                     // the maximum altitude, in degrees, for goTo's (to keep the telescope tube away from the mount/tripod)
 
 // Stepper/position/rate ----------------------------------------------------------------------------------------------------
 
@@ -247,227 +255,227 @@ int    maxAlt;                                    // the maximum altitude, in de
 // defines for direct port control
 #if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
 // The PEC index sense is a 5V logic input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
-#define PecPin     2
+#define PecPin         2
 
 // The limit switch sense is a 5V logic input which uses the internal pull up, shorted to ground it stops gotos/tracking
-#define LimitPin   3
+#define LimitPin       3
 
 // The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
 //                                  Atmel   2560
-#define LEDposPin  8       // Pin 8 (LED)   PH5
-#define LEDnegPin  9       // Pin 9 (GND)   PH6
+#define LEDposPin      8    // Pin 8 (LED)   PH5
+#define LEDnegPin      9    // Pin 9 (GND)   PH6
 
 // The HA(RA) and Dec jumpers (going to the big easy drivers) are simply four wire jumper cables, each has identical wiring - simple modular construction
-#define DecDirPin  4       // Pin 4 (Dir)   PG5
-#define Dec5vPin   5       // Pin 5 (5V?)   PE3
-#define DecStepPin 6       // Pin 6 (Step)  PH3
-#define DecGNDPin  7       // Pin 7 (GND)   PH4
+#define Axis2DirPin    4    // Pin 4 (Dir)   PG5
+#define Axis25vPin     5    // Pin 5 (5V?)   PE3
+#define Axis2StepPin   6    // Pin 6 (Step)  PH3
+#define Axis2GndPin    7    // Pin 7 (GND)   PH4
 
-#define LEDneg2Pin 10      // Pin 10 (GND)  PB4
+#define LEDneg2Pin    10    // Pin 10 (GND)  PB4
 
 // The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
 // The Arduino attachInterrupt function works in two modes, on the '2560 it takes an Interrupt# on the Teensy and others it takes a Pin#
-#define PpsInt     2       // Interrupt 2 on Pin 21 (alternate Int3 on Pin20)
+#define PpsInt         2    // Interrupt 2 on Pin 21 (alternate Int3 on Pin20)
 
-#define HADirPin   11      // Pin 11 (Dir)  PB5
-#define HA5vPin    12      // Pin 12 (5V?)  PB6
-#define HAStepPin  13      // Pin 13 (Step) PB7
-                           // Pin GND (GND)
+#define Axis1DirPin   11    // Pin 11 (Dir)  PB5
+#define Axis15vPin    12    // Pin 12 (5V?)  PB6
+#define Axis1StepPin  13    // Pin 13 (Step) PB7
+                            // Pin GND (GND)
                          
 // Pins to enable/disable the stepper drivers and set microstep mode, optional and normally just hard-wired (DRV8825)/ignored (BED-A4988)
-#define HA_M0      22      // Pin 22 (Microstep Mode 0)
-#define HA_M1      23      // Pin 23 (Microstep Mode 1)
-#define HA_M2      24      // Pin 24 (Microstep Mode 2)
-#define HA_EN      25      // Pin 25 (Enabled when LOW)
-#define HA_FAULT   26      // Pin 26 (Fault if LOW)
+#define Axis1_M0      22    // Pin 22 (Microstep Mode 0)
+#define Axis1_M1      23    // Pin 23 (Microstep Mode 1)
+#define Axis1_M2      24    // Pin 24 (Microstep Mode 2)
+#define Axis1_EN      25    // Pin 25 (Enabled when LOW)
+#define Axis1_FAULT   26    // Pin 26 (Fault if LOW)
 
-#define DE_M0      27      // Pin 27 (Microstep Mode 0)
-#define DE_M1      28      // Pin 28 (Microstep Mode 1)
-#define DE_M2      29      // Pin 29 (Microstep Mode 2)
-#define DE_EN      30      // Pin 30 (Enabled when LOW)
-#define DE_FAULT   31      // Pin 31 (Fault if LOW)
+#define Axis2_M0      27    // Pin 27 (Microstep Mode 0)
+#define Axis2_M1      28    // Pin 28 (Microstep Mode 1)
+#define Axis2_M2      29    // Pin 29 (Microstep Mode 2)
+#define Axis2_EN      30    // Pin 30 (Enabled when LOW)
+#define Axis2_FAULT   31    // Pin 31 (Fault if LOW)
 
-#define LEDposBit  5       // Pin 8
-#define LEDposPORT PORTH   //
-#define LEDnegBit  6       // Pin 9
-#define LEDnegPORT PORTH   //
-#define LEDneg2Bit  4      // Pin 10
-#define LEDneg2PORT PORTB  //
+#define LEDposBit      5    // Pin 8
+#define LEDposPORT PORTH    //
+#define LEDnegBit      6    // Pin 9
+#define LEDnegPORT PORTH    //
+#define LEDneg2Bit     4    // Pin 10
+#define LEDneg2PORT PORTB   //
 
-#define DecDirBit  5       // Pin 4
-#define DecDirPORT PORTG   //
-#define Dec5vBit   3       // Pin 5
-#define Dec5vPORT  PORTE   //
-#define DecStepBit 3       // Pin 6
-#define DecStepPORT PORTH  //
-#define DecGNDBit  4       // Pin 7
-#define DecGNDPORT PORTH   //
+#define Axis2DirBit    5    // Pin 4
+#define Axis2DirPORT PORTG  //
+#define Axis25vBit     3    // Pin 5
+#define Axis25vPORT  PORTE  //
+#define Axis2StepBit   3    // Pin 6
+#define Axis2StepPORT PORTH //
+#define Axis2GNDBit    4    // Pin 7
+#define Axis2GNDPORT PORTH  //
 
-#define HADirBit   5       // Pin 11
-#define HADirPORT  PORTB   //
-#define HA5vBit    6       // Pin 12
-#define HA5vPORT   PORTB   //
-#define HAStepBit  7       // Pin 13
-#define HAStepPORT PORTB   //
+#define Axis1DirBit    5    // Pin 11
+#define Axis1DirPORT  PORTB //
+#define Axis15vBit     6    // Pin 12
+#define Axis15vPORT   PORTB //
+#define Axis1StepBit   7    // Pin 13
+#define Axis1StepPORT PORTB //
 
 // ST4 interface
 #ifdef ST4_ALTERNATE_PINS_ON
-#define ST4RAw     47      // Pin 47 ST4 RA- West
-#define ST4DEs     43      // Pin 43 ST4 DE- South
-#define ST4DEn     45      // Pin 45 ST4 DE+ North
-#define ST4RAe     49      // Pin 49 ST4 RA+ East
+#define ST4RAw        47    // Pin 47 ST4 RA- West
+#define ST4DEs        43    // Pin 43 ST4 DE- South
+#define ST4DEn        45    // Pin 45 ST4 DE+ North
+#define ST4RAe        49    // Pin 49 ST4 RA+ East
 #else
-#define ST4RAw     47      // Pin 47 ST4 RA- West
-#define ST4DEs     49      // Pin 49 ST4 DE- South
-#define ST4DEn     51      // Pin 51 ST4 DE+ North
-#define ST4RAe     53      // Pin 53 ST4 RA+ East
+#define ST4RAw        47    // Pin 47 ST4 RA- West
+#define ST4DEs        49    // Pin 49 ST4 DE- South
+#define ST4DEn        51    // Pin 51 ST4 DE+ North
+#define ST4RAe        53    // Pin 53 ST4 RA+ East
 #endif
 
 #elif defined(__arm__) && defined(TEENSYDUINO)
 // The PEC index sense is a 5V logic input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
-#define PecPin     2
+#define PecPin         2
 
 // The limit switch sense is a 5V logic input which uses the internal pull up, shorted to ground it stops gotos/tracking
-#define LimitPin   3
+#define LimitPin       3
 
 // The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
 //                                  Atmel   2560
-#define LEDposPin  8       // Pin 8 (LED)   PH5
-#define LEDnegPin  9       // Pin 9 (GND)   PH6
+#define LEDposPin      8    // Pin 8 (LED)   PH5
+#define LEDnegPin      9    // Pin 9 (GND)   PH6
 
 // The HA(RA) and Dec jumpers (going to the big easy drivers) are simply four wire jumper cables, each has identical wiring - simple modular construction
-#define DecDirPin  4       // Pin 4 (Dir)   PG5
-#define Dec5vPin   5       // Pin 5 (5V?)   PE3
-#define DecStepPin 6       // Pin 6 (Step)  PH3
-#define DecGNDPin  7       // Pin 7 (GND)   PH4
+#define Axis2DirPin    4    // Pin 4 (Dir)   PG5
+#define Axis25vPin     5    // Pin 5 (5V?)   PE3
+#define Axis2StepPin   6    // Pin 6 (Step)  PH3
+#define Axis2GndPin    7    // Pin 7 (GND)   PH4
 
-#define LEDneg2Pin 7       // Pin 7 (GND)
+#define LEDneg2Pin     7    // Pin 7 (GND)
 
 // The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
-#define PpsPin     23      // Pin 23 (PPS time source, GPS for example)
+#define PpsPin        23    // Pin 23 (PPS time source, GPS for example)
 
-#define HADirPin   10      // Pin 10 (Dir)
-#define HA5vPin    11      // Pin 11 (5V?)
-#define HAStepPin  12      // Pin 12 (Step)
-                           // Pin GND (GND)
+#define Axis1DirPin   10    // Pin 10 (Dir)
+#define Axis15vPin    11    // Pin 11 (5V?)
+#define Axis1StepPin  12    // Pin 12 (Step)
+                            // Pin GND (GND)
 
 // Pins to enable/disable the stepper drivers and set microstep mode, optional and normally just hard-wired (DRV8825)/ignored (BED-A4988)
-#define HA_M0      13      // Pin 13 (Microstep Mode 0)
-#define HA_M1      14      // Pin 14 (Microstep Mode 1)
-#define HA_M2      15      // Pin 15 (Microstep Mode 2)
-#define HA_EN      16      // Pin 16 (Enabled when LOW)
-#define HA_FAULT   17      // Pin 17 (Fault if LOW)
+#define Axis1_M0      13    // Pin 13 (Microstep Mode 0)
+#define Axis1_M1      14    // Pin 14 (Microstep Mode 1)
+#define Axis1_M2      15    // Pin 15 (Microstep Mode 2)
+#define Axis1_EN      16    // Pin 16 (Enabled when LOW)
+#define Axis1_FAULT   17    // Pin 17 (Fault if LOW)
 
-#define DE_M0      18      // Pin 18 (Microstep Mode 0)
-#define DE_M1      19      // Pin 19 (Microstep Mode 1)
-#define DE_M2      20      // Pin 20 (Microstep Mode 2)
-#define DE_EN      21      // Pin 21 (Enabled when LOW)
-#define DE_FAULT   22      // Pin 22 (Fault if LOW)
+#define Axis2_M0      18    // Pin 18 (Microstep Mode 0)
+#define Axis2_M1      19    // Pin 19 (Microstep Mode 1)
+#define Axis2_M2      20    // Pin 20 (Microstep Mode 2)
+#define Axis2_EN      21    // Pin 21 (Enabled when LOW)
+#define Axis2_FAULT   22    // Pin 22 (Fault if LOW)
 
-#define LEDposBit  0       // Pin 8
-#define LEDposPORT PORTB   //
-#define LEDnegBit  1       // Pin 9
-#define LEDnegPORT PORTB   //
-#define LEDneg2Bit 7       // Pin 7
-#define LEDneg2PORT PORTD  //
+#define LEDposBit      0    // Pin 8
+#define LEDposPORT PORTB    //
+#define LEDnegBit      1    // Pin 9
+#define LEDnegPORT PORTB    //
+#define LEDneg2Bit     7    // Pin 7
+#define LEDneg2PORT PORTD   //
 
-#define DecDirBit  4       // Pin 4
-#define DecDirPORT PORTD   //
-#define Dec5vBit   5       // Pin 5
-#define Dec5vPORT  PORTD   //
-#define DecStepBit 6       // Pin 6
-#define DecStepPORT PORTD  //
-#define DecGNDBit  7       // Pin 7
-#define DecGNDPORT PORTD   //
+#define Axis2DirBit    4    // Pin 4
+#define Axis2DirPORT PORTD  //
+#define Axis25vBit     5    // Pin 5
+#define Axis25vPORT  PORTD  //
+#define Axis2StepBit   6    // Pin 6
+#define Axis2StepPORT PORTD //
+#define Axis2GNDBit    7    // Pin 7
+#define Axis2GNDPORT PORTD  //
 
-#define HADirBit   2       // Pin 10
-#define HADirPORT  PORTB   //
-#define HA5vBit    3       // Pin 11
-#define HA5vPORT   PORTB   //
-#define HAStepBit  4       // Pin 12
-#define HAStepPORT PORTB   //
+#define Axis1DirBit     2   // Pin 10
+#define Axis1DirPORT  PORTB //
+#define Axis15vBit      3   // Pin 11
+#define Axis15vPORT   PORTB //
+#define Axis1StepBit    4   // Pin 12
+#define Axis1StepPORT PORTB //
 
 // ST4 interface
-#define ST4RAw     24      // Pin 24 ST4 RA- West
-#define ST4DEs     25      // Pin 25 ST4 DE- South
-#define ST4DEn     26      // Pin 26 ST4 DE+ North
-#define ST4RAe     27      // Pin 27 ST4 RA+ East
+#define ST4RAw        24    // Pin 24 ST4 RA- West
+#define ST4DEs        25    // Pin 25 ST4 DE- South
+#define ST4DEn        26    // Pin 26 ST4 DE+ North
+#define ST4RAe        27    // Pin 27 ST4 RA+ East
 
 #elif defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
 // Note that TM4C123 has resistors R9 anr R10 between pins 14 (B6) and 23 (D0) and between pins 15 (B7) and 24 (D1)
 // Make sure you look at the list of the pins and options to avoid clashes or desolder the two bridges
-// These pins are used for DE_M2 (14) and DE_M3 (15) and for DecDirPin (23) and Dec5VPin (24)
-// If you have defined DE_MODE_OFF in Config.h you should be safe to leave things as they are.
+// These pins are used for Axis2_M2 (14) and DE_M3 (15) and for Axis2DirPin (23) and Axis25vPin (24)
+// If you have defined AXIS2_MODE_OFF in Config.h you should be safe to leave things as they are.
 
 // Also note that we are using UART1 and UART 5 which use pins 3-6
 
 // The PEC index sense is a 5V logic input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
-#define PecPin     11      // Pin A2
+#define PecPin        11    // Pin A2
 
 // The limit switch sense is a 5V logic input which uses the internal pull up, shorted to ground it stops gotos/tracking
-#define LimitPin   12      // Pin A3
+#define LimitPin      12    // Pin A3
 
 // The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
-#define LEDposPin  2       // Pin B5 (LED)
-#define LEDnegPin  33      // Pin D6 (GND)
+#define LEDposPin      2    // Pin B5 (LED)
+#define LEDnegPin     33    // Pin D6 (GND)
 
 
 // The HA(RA) and Dec jumpers (going to the big easy drivers) are simply four wire jumper cables, each has identical wiring - simple modular construction
-#define DecDirPin  23       // Pin D0 (Dir)
-#define Dec5vPin   24       // Pin D1 (5V?)
-#define DecStepPin 25       // Pin D2 (Step)
-#define DecGNDPin  26       // Pin D3 (GND)
+#define Axis2DirPin   23    // Pin D0 (Dir)
+#define Axis25vPin    24    // Pin D1 (5V?)
+#define Axis2StepPin  25    // Pin D2 (Step)
+#define Axis2GndPin   26    // Pin D3 (GND)
 
-#define LEDneg2Pin 26       // Pin D3 (GND)
+#define LEDneg2Pin    26    // Pin D3 (GND)
 
 // The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
-#define PpsPin     19      // Pin B2 (PPS time source, GPS for example)
+#define PpsPin        19    // Pin B2 (PPS time source, GPS for example)
 
-#define HADirPin   27      // Pin E1 (Dir)
-#define HA5vPin    28      // Pin E2 (5V?)
-#define HAStepPin  29      // Pin E3 (Step)
+#define Axis1DirPin   27    // Pin E1 (Dir)
+#define Axis15vPin    28    // Pin E2 (5V?)
+#define Axis1StepPin  29    // Pin E3 (Step)
 // Pin GND (GND)
 // Pins to enable/disable the stepper drivers and set microstep mode, optional and normally just hard-wired (DRV8825)/ignored (BED-A4988)
-#define HA_M0      34      // Pin C7 (Microstep Mode 0)
-#define HA_M1      35      // Pin C6 (Microstep Mode 1)
-#define HA_M2      36      // Pin C5 (Microstep Mode 2)
-#define HA_EN      37      // Pin C4 (Enabled when LOW)
-#define HA_FAULT   38      // Pin B3 (Fault if LOW)
+#define Axis1_M0      34    // Pin C7 (Microstep Mode 0)
+#define Axis1_M1      35    // Pin C6 (Microstep Mode 1)
+#define Axis1_M2      36    // Pin C5 (Microstep Mode 2)
+#define Axis1_EN      37    // Pin C4 (Enabled when LOW)
+#define Axis1_FAULT   38    // Pin B3 (Fault if LOW)
 
-#define DE_M0      13      // Pin A4 (Microstep Mode 0)
-#define DE_M1      14      // Pin B6 (Microstep Mode 1) IF USED MAKE SURE YOU DESOLDER A BRIDGE or change pins around, otherwise pin 14 is connected to pin 23
-#define DE_M2      15      // Pin B7 (Microstep Mode 2) IF USED MAKE SURE YOU DESOLDER A BRIDGE or change pins around, otherwise pin 15 is connected to pin 24
-#define DE_EN      18      // Pin E0 (Enabled when LOW)
-#define DE_FAULT   17      // Pin F0 (Fault if LOW) NOTE, this is connected to pushbutton switch 2
+#define Axis2_M0      13    // Pin A4 (Microstep Mode 0)
+#define Axis2_M1      14    // Pin B6 (Microstep Mode 1) IF USED MAKE SURE YOU DESOLDER A BRIDGE or change pins around, otherwise pin 14 is connected to pin 23
+#define Axis2_M2      15    // Pin B7 (Microstep Mode 2) IF USED MAKE SURE YOU DESOLDER A BRIDGE or change pins around, otherwise pin 15 is connected to pin 24
+#define Axis2_EN      18    // Pin E0 (Enabled when LOW)
+#define Axis2_FAULT   17    // Pin F0 (Fault if LOW) NOTE, this is connected to pushbutton switch 2
 
-#define LEDposBit  GPIO_PIN_5       // Pin 2
-#define LEDposPORT GPIO_PORTB_BASE   //
-#define LEDnegBit  GPIO_PIN_6       // Pin 33
-#define LEDnegPORT GPIO_PORTD_BASE   //
-#define LEDneg2Bit GPIO_PIN_3       // Pin 26
-#define LEDneg2PORT GPIO_PORTD_BASE  //
+#define LEDposBit  GPIO_PIN_5          // Pin 2
+#define LEDposPORT GPIO_PORTB_BASE     //
+#define LEDnegBit  GPIO_PIN_6          // Pin 33
+#define LEDnegPORT GPIO_PORTD_BASE     //
+#define LEDneg2Bit GPIO_PIN_3          // Pin 26
+#define LEDneg2PORT GPIO_PORTD_BASE    //
 
-#define DecDirBit  GPIO_PIN_0       // Pin 23=D0=B6 = pin 14
-#define DecDirPORT GPIO_PORTD_BASE   //
-#define Dec5vBit   GPIO_PIN_1       // Pin 24=D1=B7 = pin 15
-#define Dec5vPORT  GPIO_PORTD_BASE   //
-#define DecStepBit GPIO_PIN_2       // Pin 25
-#define DecStepPORT GPIO_PORTD_BASE  //
-#define DecGNDBit  GPIO_PIN_3       // Pin 26
-#define DecGNDPORT GPIO_PORTD_BASE   //
+#define Axis2DirBit  GPIO_PIN_0        // Pin 23=D0=B6 = pin 14
+#define Axis2DirPORT GPIO_PORTD_BASE   //
+#define Axis25vBit   GPIO_PIN_1        // Pin 24=D1=B7 = pin 15
+#define Axis25vPORT  GPIO_PORTD_BASE   //
+#define Axis2StepBit GPIO_PIN_2        // Pin 25
+#define Axis2StepPORT GPIO_PORTD_BASE  //
+#define Axis2GNDBit  GPIO_PIN_3        // Pin 26
+#define Axis2GNDPORT GPIO_PORTD_BASE   //
 
-#define HADirBit   GPIO_PIN_1       // Pin 27
-#define HADirPORT  GPIO_PORTE_BASE   //
-#define HA5vBit    GPIO_PIN_2       // Pin 28
-#define HA5vPORT   GPIO_PORTE_BASE   //
-#define HAStepBit  GPIO_PIN_3       // Pin 29
-#define HAStepPORT GPIO_PORTE_BASE   //
+#define Axis1DirBit   GPIO_PIN_1       // Pin 27
+#define Axis1DirPORT  GPIO_PORTE_BASE  //
+#define Axis15vBit    GPIO_PIN_2       // Pin 28
+#define Axis15vPORT   GPIO_PORTE_BASE  //
+#define Axis1StepBit  GPIO_PIN_3       // Pin 29
+#define Axis1StepPORT GPIO_PORTE_BASE  //
 
 // ST4 interface
-#define ST4RAw     7      // Pin B4 ST4 RA- West
-#define ST4DEs     8      // Pin A5 ST4 DE- South
-#define ST4DEn     9      // Pin A6 ST4 DE+ North
-#define ST4RAe     10     // Pin A7 ST4 RA+ East
+#define ST4RAw         7    // Pin B4 ST4 RA- West
+#define ST4DEs         8    // Pin A5 ST4 DE- South
+#define ST4DEn         9    // Pin A6 ST4 DE+ North
+#define ST4RAe        10    // Pin A7 ST4 RA+ East
 
 #elif defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
 // No need to desolder anything on this launchpad as pins we are using are not bridged
@@ -475,91 +483,91 @@ int    maxAlt;                                    // the maximum altitude, in de
 // Note that we are using UART7 and UART 5 which use pins 3-5 and pin 8 (C4,C5,C6,C7)
 
 // The PEC index sense is a 5V logic input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
-#define PecPin     11      // Pin P2
+#define PecPin        11    // Pin P2
 
 // The limit switch sense is a 5V logic input which uses the internal pull up, shorted to ground it stops gotos/tracking
-#define LimitPin   12      // Pin N3
+#define LimitPin      12    // Pin N3
 
 // The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
-#define LEDposPin  2       // Pin E4 (LED)
-#define LEDnegPin  33      // Pin L1 (GND)
+#define LEDposPin      2    // Pin E4 (LED)
+#define LEDnegPin     33    // Pin L1 (GND)
 
 
 // The HA(RA) and Dec jumpers (going to the big easy drivers) are simply four wire jumper cables, each has identical wiring - simple modular construction
-#define DecDirPin  23       // Pin E0 (Dir)
-#define Dec5vPin   24       // Pin E1 (5V?)
-#define DecStepPin 25       // Pin E2 (Step)
-#define DecGNDPin  26       // Pin E3 (GND)
+#define Axis2DirPin   23    // Pin E0 (Dir)
+#define Axis25vPin    24    // Pin E1 (5V?)
+#define Axis2StepPin  25    // Pin E2 (Step)
+#define Axis2GndPin   26    // Pin E3 (GND)
 
-#define LEDneg2Pin 26       // Pin E3 (GND)
+#define LEDneg2Pin    26    // Pin E3 (GND)
 
 // The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
-#define PpsPin     19      // Pin M3 (PPS time source, GPS for example)
+#define PpsPin        19    // Pin M3 (PPS time source, GPS for example)
 
-#define HADirPin   27      // Pin D7 (Dir)
-#define HA5vPin    28      // Pin A6 (5V?)
-#define HAStepPin  29      // Pin M4 (Step)
+#define Axis1DirPin   27    // Pin D7 (Dir)
+#define Axis15vPin    28    // Pin A6 (5V?)
+#define Axis1StepPin  29    // Pin M4 (Step)
 // Pin GND (GND)
 // Pins to enable/disable the stepper drivers and set microstep mode, optional and normally just hard-wired (DRV8825)/ignored (BED-A4988)
-#define HA_M0      34      // Pin L0 (Microstep Mode 0)
-#define HA_M1      35      // Pin L5 (Microstep Mode 1)
-#define HA_M2      36      // Pin L4 (Microstep Mode 2)
-#define HA_EN      37      // Pin G0 (Enabled when LOW)
-#define HA_FAULT   38      // Pin F3 (Fault if LOW)
+#define Axis1_M0      34    // Pin L0 (Microstep Mode 0)
+#define Axis1_M1      35    // Pin L5 (Microstep Mode 1)
+#define Axis1_M2      36    // Pin L4 (Microstep Mode 2)
+#define Axis1_EN      37    // Pin G0 (Enabled when LOW)
+#define Axis1_FAULT   38    // Pin F3 (Fault if LOW)
 
-#define DE_M0      13      // Pin N2 (Microstep Mode 0)
-#define DE_M1      14      // Pin D0 (Microstep Mode 1)
-#define DE_M2      15      // Pin D1 (Microstep Mode 2)
-#define DE_EN      18      // Pin H2 (Enabled when LOW)
-#define DE_FAULT   17      // Pin H3 (Fault if LOW) NOTE, this is connected to pushbutton switch 2
+#define Axis2_M0      13    // Pin N2 (Microstep Mode 0)
+#define Axis2_M1      14    // Pin D0 (Microstep Mode 1)
+#define Axis2_M2      15    // Pin D1 (Microstep Mode 2)
+#define Axis2_EN      18    // Pin H2 (Enabled when LOW)
+#define Axis2_FAULT   17    // Pin H3 (Fault if LOW) NOTE, this is connected to pushbutton switch 2
 
-#define LEDposBit  GPIO_PIN_4       // Pin 2
-#define LEDposPORT GPIO_PORTE_BASE   //
-#define LEDnegBit  GPIO_PIN_1       // Pin 33
-#define LEDnegPORT GPIO_PORTL_BASE   //
-#define LEDneg2Bit GPIO_PIN_3       // Pin 26
-#define LEDneg2PORT GPIO_PORTE_BASE  //
+#define LEDposBit  GPIO_PIN_4          // Pin 2
+#define LEDposPORT GPIO_PORTE_BASE     //
+#define LEDnegBit  GPIO_PIN_1          // Pin 33
+#define LEDnegPORT GPIO_PORTL_BASE     //
+#define LEDneg2Bit GPIO_PIN_3          // Pin 26
+#define LEDneg2PORT GPIO_PORTE_BASE    //
 
-#define DecDirBit  GPIO_PIN_0       // Pin 23
-#define DecDirPORT GPIO_PORTE_BASE   //
-#define Dec5vBit   GPIO_PIN_1       // Pin 24
-#define Dec5vPORT  GPIO_PORTE_BASE   //
-#define DecStepBit GPIO_PIN_2       // Pin 25
-#define DecStepPORT GPIO_PORTE_BASE  //
-#define DecGNDBit  GPIO_PIN_3       // Pin 26
-#define DecGNDPORT GPIO_PORTE_BASE   //
+#define Axis2DirBit  GPIO_PIN_0        // Pin 23
+#define Axis2DirPORT GPIO_PORTE_BASE   //
+#define Axis25vBit   GPIO_PIN_1        // Pin 24
+#define Axis25vPORT  GPIO_PORTE_BASE   //
+#define Axis2StepBit GPIO_PIN_2        // Pin 25
+#define Axis2StepPORT GPIO_PORTE_BASE  //
+#define Axis2GNDBit  GPIO_PIN_3        // Pin 26
+#define Axis2GNDPORT GPIO_PORTE_BASE   //
 
-#define HADirBit   GPIO_PIN_7       // Pin 27
-#define HADirPORT  GPIO_PORTD_BASE   //
-#define HA5vBit    GPIO_PIN_6       // Pin 28
-#define HA5vPORT   GPIO_PORTA_BASE   //
-#define HAStepBit  GPIO_PIN_4       // Pin 29
-#define HAStepPORT GPIO_PORTM_BASE   //
+#define Axis1DirBit   GPIO_PIN_7       // Pin 27
+#define Axis1DirPORT  GPIO_PORTD_BASE  //
+#define Axis15vBit    GPIO_PIN_6       // Pin 28
+#define Axis15vPORT   GPIO_PORTA_BASE  //
+#define Axis1StepBit  GPIO_PIN_4       // Pin 29
+#define Axis1StepPORT GPIO_PORTM_BASE  //
 
 // ST4 interface
-#define ST4RAw     7      // Pin D3 ST4 RA- West
-#define ST4DEs     6      // Pin C7 ST4 DE- South
-#define ST4DEn     9      // Pin B2 ST4 DE+ North
-#define ST4RAe     10     // Pin B3 ST4 RA+ East
+#define ST4RAw         7    // Pin D3 ST4 RA- West
+#define ST4DEs         6    // Pin C7 ST4 DE- South
+#define ST4DEn         9    // Pin B2 ST4 DE+ North
+#define ST4RAe        10    // Pin B3 ST4 RA+ East
 
 #endif
 
 
-#if defined(HA_DISABLED_HIGH)
-#define HA_Disabled HIGH
-#define HA_Enabled LOW
+#if defined(AXIS1_DISABLED_HIGH)
+#define Axis1_Disabled HIGH
+#define Axis1_Enabled LOW
 #endif
-#if defined(HA_DISABLED_LOW)
-#define HA_Disabled LOW
-#define HA_Enabled HIGH
+#if defined(AXIS1_DISABLED_LOW)
+#define Axis1_Disabled LOW
+#define Axis1_Enabled HIGH
 #endif
-#if defined(DE_DISABLED_HIGH)
-#define DE_Disabled HIGH
-#define DE_Enabled LOW
+#if defined(AXIS2_DISABLED_HIGH)
+#define Axis2_Disabled HIGH
+#define Axis2_Enabled LOW
 #endif
-#if defined(DE_DISABLED_LOW)
-#define DE_Disabled LOW
-#define DE_Enabled HIGH
+#if defined(AXIS2_DISABLED_LOW)
+#define Axis2_Disabled LOW
+#define Axis2_Enabled HIGH
 #endif
 
 #define DecDirEInit      1
@@ -681,10 +689,11 @@ double pdCor             = 0;       // declination/polar orthogonal correction
 double IH                = 0;       // offset corrections/align
 long   IHS               = 0;
 double ID                = 0;
+long   IDS               = 0;
 
 // tracking and PEC, fractional steps
-fixed_t fstepHA;
-fixed_t fstepDec;
+fixed_t fstepAxis1;
+fixed_t fstepAxis2;
 fixed_t pstep;
 
 // guide command
@@ -692,7 +701,7 @@ fixed_t pstep;
 #define GuideRate16x       6
 #define GuideRateNone      255
 
-#define slewRate (1.0/((StepsPerDegreeHA*(MaxRate/1000000.0)))*3600.0)
+#define slewRate (1.0/((StepsPerDegreeAxis1*(MaxRate/1000000.0)))*3600.0)
 #define halfSlewRate (slewRate/2.0)
 double  guideRates[10]={3.75,7.5,15,30,60,120,360,720,halfSlewRate,slewRate};
 //                      .25X .5x 1x 2x 4x  8x 24x 48x half-MaxRate MaxRate
@@ -701,14 +710,14 @@ byte currentGuideRate        = GuideRate16x;
 byte currentPulseGuideRate   = GuideRate1x;
 volatile byte activeGuideRate= GuideRateNone;
 
-volatile byte guideDirHA           = 0;
+volatile byte guideDirAxis1        = 0;
 long          guideDurationHA      = -1;
 unsigned long guideDurationLastHA  = 0;
-byte          guideDirDec          = 0;
+byte          guideDirAxis2        = 0;
 long          guideDurationDec     = -1;
 unsigned long guideDurationLastDec = 0;
 
-long lastTargetHA=0;
+long lasttargetAxis1=0;
 long debugv1 = 0;
 
 double  guideTimerRate    = 0;
@@ -741,7 +750,7 @@ int reticuleBrightness=RETICULE_LED_PINS;
 #define PlayPEC          2
 #define ReadyRecordPEC   3
 #define RecordPEC        4
-long    accPecGuideHA    = 0;        // for PEC, buffers steps to be recorded
+long    accPecGuideHA    = 0;      // for PEC, buffers steps to be recorded
 boolean PECfirstRecord   = false;
 int     PECstatus        = IgnorePEC;
 boolean PECrecorded      = false;
@@ -760,10 +769,10 @@ int     PECautoRecord    = 0;      // for writing to PEC table to EEPROM
 boolean PECindexDetected = false;  // indicates PEC index was found
 
 // backlash control
-volatile int backlashHA   = 0;
-volatile int backlashDec  = 0;
-volatile int blHA         = 0;
-volatile int blDec        = 0;
+volatile int backlashAxis1  = 0;
+volatile int backlashAxis2  = 0;
+volatile int blAxis1        = 0;
+volatile int blAxis2        = 0;
 
 // status state
 boolean LED_ON = false;
@@ -779,8 +788,8 @@ char ST4DE_last = 0;
 // 0-1023 bytes
 // general purpose storage 0..99
 
-#define EE_posHA       0
-#define EE_posDec      4
+#define EE_posAxis1    0
+#define EE_posAxis2    4
 #define EE_pierSide    8
 #define EE_parkStatus  9
 #define EE_parkSaved   10
@@ -807,8 +816,8 @@ char ST4DE_last = 0;
 #define EE_PECrecord_index 72
 #define EE_PECsense_index 76
 
-#define EE_backlashHA  80
-#define EE_backlashDec 84
+#define EE_backlashAxis1 80
+#define EE_backlashAxis2 84
 
 #define EE_siderealInterval 88
 
@@ -857,24 +866,24 @@ void setup() {
 // initialize some fixed-point values
   amountGuideHA.fixed=0;
   amountGuideDec.fixed=0;
-  fstepHA.fixed=0;
-  fstepDec.fixed=0;
+  fstepAxis1.fixed=0;
+  fstepAxis2.fixed=0;
   pstep.fixed=0;
-  origTargetHA.fixed = 0;
-  targetHA.part.m = 90L*StepsPerDegreeHA;
-  targetHA.part.f = 0;
-  targetDec.part.m = 90L*StepsPerDegreeDec;
-  targetDec.part.f = 0;
+  origTargetAxis1.fixed = 0;
+  targetAxis1.part.m = 90L*StepsPerDegreeAxis1;
+  targetAxis1.part.f = 0;
+  targetAxis2.part.m = 90L*StepsPerDegreeAxis2;
+  targetAxis2.part.f = 0;
 
-  fstepHA.fixed=doubleToFixed(StepsPerSecond/100.0);
+  fstepAxis1.fixed=doubleToFixed(StepsPerSecondAxis1/100.0);
   
 // initialize the stepper control pins RA and Dec
-  pinMode(HAStepPin, OUTPUT);
-  pinMode(HADirPin, OUTPUT); 
-  pinMode(DecGNDPin, OUTPUT);
-  CLR(DecGNDPORT, DecGNDBit);
-  pinMode(DecStepPin, OUTPUT); 
-  pinMode(DecDirPin, OUTPUT); 
+  pinMode(Axis1StepPin, OUTPUT);
+  pinMode(Axis1DirPin, OUTPUT); 
+  pinMode(Axis2GndPin, OUTPUT);
+  CLR(Axis2GNDPORT, Axis2GNDBit);
+  pinMode(Axis2StepPin, OUTPUT); 
+  pinMode(Axis2DirPin, OUTPUT); 
 
 // light status LED (provides both +5 and GND)
 #ifdef STATUS_LED_PINS_ON
@@ -923,10 +932,10 @@ void setup() {
 
 // provide 5V power to stepper drivers if requested
 #ifdef POWER_SUPPLY_PINS_ON  
-  pinMode(HA5vPin, OUTPUT);
-  SET(HA5vPORT, HA5vBit);
-  pinMode(Dec5vPin, OUTPUT);
-  SET(Dec5vPORT, Dec5vBit);
+  pinMode(Axis15vPin, OUTPUT);
+  SET(Axis15vPORT, Axis15vBit);
+  pinMode(Axis25vPin, OUTPUT);
+  SET(Axis25vPORT, Axis25vBit);
 #endif
 
 // PEC index sense
@@ -953,20 +962,24 @@ void setup() {
   pinMode(ST4DEs, INPUT_PULLUP);
 #endif
 
+// inputs for stepper drivers fault signal
+  pinMode(Axis1_FAULT,INPUT);
+  pinMode(Axis2_FAULT,INPUT);
+
 // disable the stepper drivers for now, if the enable lines are connected
-  pinMode(HA_EN,OUTPUT); digitalWrite(HA_EN,HA_Disabled);
-  pinMode(DE_EN,OUTPUT); digitalWrite(DE_EN,DE_Disabled);
+  pinMode(Axis1_EN,OUTPUT); digitalWrite(Axis1_EN,Axis1_Disabled);
+  pinMode(Axis2_EN,OUTPUT); digitalWrite(Axis2_EN,Axis2_Disabled);
 
 // if the stepper driver mode select pins are wired in, program any requested micro-step mode
-#ifdef HA_MODE
-  pinMode(HA_M0, OUTPUT); digitalWrite(HA_M0,(HA_MODE & 1));
-  pinMode(HA_M1, OUTPUT); digitalWrite(HA_M1,(HA_MODE>>1 & 1));
-  pinMode(HA_M2, OUTPUT); digitalWrite(HA_M2,(HA_MODE>>2 & 1));
+#ifdef AXIS1_MODE
+  pinMode(Axis1_M0, OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE & 1));
+  pinMode(Axis1_M1, OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE>>1 & 1));
+  pinMode(Axis1_M2, OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE>>2 & 1));
 #endif
-#ifdef DE_MODE
-  pinMode(DE_M0, OUTPUT); digitalWrite(DE_M0,(DE_MODE & 1));
-  pinMode(DE_M1, OUTPUT); digitalWrite(DE_M1,(DE_MODE>>1 & 1));
-  pinMode(DE_M2, OUTPUT); digitalWrite(DE_M2,(DE_MODE>>2 & 1));
+#ifdef AXIS2_MODE
+  pinMode(Axis2_M0, OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE & 1));
+  pinMode(Axis2_M1, OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE>>1 & 1));
+  pinMode(Axis2_M2, OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE>>2 & 1));
 #endif
 
 #ifdef PPS_SENSE_ON
@@ -980,8 +993,8 @@ void setup() {
 #endif
 
   // EEPROM automatic initialization
-  long int autoInitKey = initKey;
-  long int thisAutoInitKey;
+  long autoInitKey = initKey;
+  long thisAutoInitKey;
   if (INIT_KEY) EEPROM_writeQuad(EE_autoInitKey,(byte*)&autoInitKey);
   EEPROM_readQuad(EE_autoInitKey,(byte*)&thisAutoInitKey);
   if (autoInitKey!=thisAutoInitKey) {
@@ -1008,8 +1021,8 @@ void setup() {
     EEPROM.write(EE_maxAlt,maxAlt);
   
     // init (clear) the backlash amounts
-    EEPROM_writeInt(EE_backlashDec,0);
-    EEPROM_writeInt(EE_backlashHA,0);
+    EEPROM_writeInt(EE_backlashAxis2,0);
+    EEPROM_writeInt(EE_backlashAxis1,0);
   
     // init the PEC status, clear the index and buffer
     PECindex_record=0;
@@ -1045,13 +1058,13 @@ void setup() {
   EEPROM_readQuad(EE_siderealInterval,(byte*)&siderealInterval);
 
   // 16MHZ clocks for steps per second of sidereal tracking
-  cli(); SiderealRate=siderealInterval/StepsPerSecond; TakeupRate=SiderealRate/4L; sei();
-  timerRateHA =SiderealRate;
-  timerRateDec=SiderealRate;
+  cli(); SiderealRate=siderealInterval/StepsPerSecondAxis1; TakeupRate=SiderealRate/4L; sei();
+  timerRateAxis1 =SiderealRate;
+  timerRateAxis2=SiderealRate;
 
   // backlash takeup rates
-  timerRateBacklashHA =timerRateHA /BacklashTakeupRate;
-  timerRateBacklashDec=timerRateDec/BacklashTakeupRate;
+  timerRateBacklashAxis1 =timerRateAxis1 /BacklashTakeupRate;
+  timerRateBacklashAxis2=timerRateAxis2/BacklashTakeupRate;
 
 #if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
   // need to initialise timers before using SetSiderealClockRate
@@ -1117,14 +1130,14 @@ void setup() {
 #endif
 
 #if defined(__AVR__)
-  if (StepsPerSecond<31)
+  if (StepsPerSecondAxis1<31)
     TCCR3B = (1 << WGM12) | (1 << CS10) | (1 << CS11);  // ~0 to 0.25 seconds   (4 steps per second minimum, granularity of timer is 4uS)   /64 pre-scaler
   else
     TCCR3B = (1 << WGM12) | (1 << CS11);                // ~0 to 0.032 seconds (31 steps per second minimum, granularity of timer is 0.5uS) /8  pre-scaler
   TCCR3A = 0;
   TIMSK3 = (1 << OCIE3A);
 
-  if (StepsPerSecond<31)
+  if (StepsPerSecondAxis1<31)
     TCCR4B = (1 << WGM12) | (1 << CS10) | (1 << CS11);  // ~0 to 0.25 seconds   (4 steps per second minimum, granularity of timer is 4uS)   /64 pre-scaler
   else
     TCCR4B = (1 << WGM12) | (1 << CS11);                // ~0 to 0.032 seconds (31 steps per second minimum, granularity of timer is 0.5uS) /8  pre-scaler
@@ -1184,15 +1197,15 @@ void setup() {
   EEPROM_readString(EE_sites+(currentSite)*25+9,siteName);
 
   // update starting coordinates to reflect NCP or SCP polar home position
-  startHA = celestialPoleHA*StepsPerDegreeHA;
-  startDec = celestialPoleDec*(double)StepsPerDegreeDec;
+  startAxis1 = celestialPoleHA*StepsPerDegreeAxis1;
+  startAxis2 = celestialPoleDec*(double)StepsPerDegreeAxis2;
   cli();
-  targetHA.part.m  = startHA; 
-  targetHA.part.f  = 0;
-  posHA            = startHA;
-  targetDec.part.m = startDec; 
-  targetDec.part.f = 0;
-  posDec           = startDec;
+  targetAxis1.part.m  = startAxis1; 
+  targetAxis1.part.f  = 0;
+  posAxis1            = startAxis1;
+  targetAxis2.part.m = startAxis2; 
+  targetAxis2.part.f = 0;
+  posAxis2           = startAxis2;
   sei();
   
   // get date and time from EEPROM, start keeping time
@@ -1210,8 +1223,8 @@ void setup() {
   maxAlt=EEPROM.read(EE_maxAlt);
 
   // get the backlash amounts
-  backlashDec=EEPROM_readInt(EE_backlashDec);
-  backlashHA=EEPROM_readInt(EE_backlashHA);
+  backlashAxis2=EEPROM_readInt(EE_backlashAxis2);
+  backlashAxis1=EEPROM_readInt(EE_backlashAxis1);
   
   // get the PEC status
   PECstatus  =EEPROM.read(EE_PECstatus); 
@@ -1258,9 +1271,9 @@ void setup() {
   PecSiderealTimer = lst;
   siderealTimer = lst;
   PECtime_lastSense = lst;
-  clockTimer=millis(); 
   sei();
-
+  clockTimer=millis(); 
+  last_loop_micros=micros();
 }
 
 void loop() {
@@ -1286,11 +1299,11 @@ void loop() {
           #else
             enableGuideRate(currentGuideRate);
           #endif
-          guideDirHA=ST4RA_state;
+          guideDirAxis1=ST4RA_state;
           guideDurationHA=-1;
-          cli(); if (guideDirHA=='e') guideTimerRateHA=-guideTimerRate; else guideTimerRateHA=guideTimerRate; sei();
+          cli(); if (guideDirAxis1=='e') guidetimerRateAxis1=-guideTimerRate; else guidetimerRateAxis1=guideTimerRate; sei();
         } else {
-          if (guideDirHA) { guideDirHA='b'; }
+          if (guideDirAxis1) { guideDirAxis1='b'; }
         }
       }
       // Dec changed?
@@ -1306,11 +1319,11 @@ void loop() {
           #else
             enableGuideRate(currentGuideRate);
           #endif
-          guideDirDec=ST4DE_state;
+          guideDirAxis2=ST4DE_state;
           guideDurationDec=-1;
-          cli(); guideTimerRateDec=guideTimerRate; sei();
+          cli(); guideTimerRateAxis2=guideTimerRate; sei();
         } else {
-          if (guideDirDec) { guideDirDec='b'; }
+          if (guideDirAxis2) { guideDirAxis2='b'; }
         }
       }
     }
@@ -1322,7 +1335,7 @@ void loop() {
 
 #ifndef MOUNT_TYPE_ALTAZM
   // PERIODIC ERROR CORRECTION -------------------------------------------------------------------------
-  if ((trackingState==TrackingSidereal) && (!((guideDirHA || guideDirDec) && (activeGuideRate>GuideRate1x)))) { 
+  if ((trackingState==TrackingSidereal) && (!((guideDirAxis1 || guideDirAxis2) && (activeGuideRate>GuideRate1x)))) { 
     // only active while sidereal tracking with a guide rate that makes sense
     Pec();
   } else disablePec();
@@ -1339,12 +1352,12 @@ void loop() {
     siderealTimer=tempLst;
     
     // only active while sidereal tracking with a guide rate that makes sense
-    if ((trackingState==TrackingSidereal) && (!((guideDirHA || guideDirDec) && (activeGuideRate>GuideRate1x)))) {
+    if ((trackingState==TrackingSidereal) && (!((guideDirAxis1 || guideDirAxis2) && (activeGuideRate>GuideRate1x)))) {
       // apply the Tracking, Guiding, and PEC
       cli();
-      targetHA.fixed+=fstepHA.fixed;
-      targetDec.fixed+=fstepDec.fixed;
-      if (pecTimerRateHA!=0) targetHA.fixed+=pstep.fixed;
+      targetAxis1.fixed+=fstepAxis1.fixed;
+      targetAxis2.fixed+=fstepAxis2.fixed;
+      if (pecTimerRateAxis1!=0) targetAxis1.fixed+=pstep.fixed;
       sei();
 
       #ifdef STATUS_LED_PINS_ON
@@ -1355,11 +1368,11 @@ void loop() {
     // keeps the target where it's supposed to be while doing gotos
     if (trackingState==TrackingMoveTo) {
       if (lastTrackingState==TrackingSidereal) { 
-        origTargetHA.fixed+=fstepHA.fixed;
-        // origTargetDec isn't used in Alt/Azm mode
+        origTargetAxis1.fixed+=fstepAxis1.fixed;
+        // origTargetAxisn isn't used in Alt/Azm mode since meridian flips never happen
         cli();
-        targetHA.fixed+=fstepHA.fixed;
-        targetDec.fixed+=fstepDec.fixed;
+        targetAxis1.fixed+=fstepAxis1.fixed;
+        targetAxis2.fixed+=fstepAxis2.fixed;
         sei();  
       }
       moveTo();
@@ -1375,7 +1388,13 @@ void loop() {
     // figure out the current refraction compensated tracking rate
     if (refraction && (lst%3!=0)) do_refractionRate_calc();
 #endif
-}
+  }
+
+  // WORKLOAD MONITORING -------------------------------------------------------------------------------
+  long this_loop_micros=micros(); 
+  loop_time=this_loop_micros-last_loop_micros;
+  if (loop_time>worst_loop_time) worst_loop_time=loop_time;
+  last_loop_micros=this_loop_micros;
 
   // HOUSEKEEPING --------------------------------------------------------------------------------------
   // timer... falls in once a second, keeps the universal time clock ticking,
@@ -1387,8 +1406,8 @@ void loop() {
     // for testing, average steps per second
     if (debugv1>100000) debugv1=100000; if (debugv1<0) debugv1=0;
     
-    debugv1=(debugv1*19+(targetHA.part.m*1000-lastTargetHA))/20;
-    lastTargetHA=targetHA.part.m*1000;
+    debugv1=(debugv1*19+(targetAxis1.part.m*1000-lasttargetAxis1))/20;
+    lasttargetAxis1=targetAxis1.part.m*1000;
     
     // update the UT1 CLOCK
     // this clock doesn't rollover (at 24 hours) since that would cause date confusion
@@ -1429,21 +1448,21 @@ void loop() {
     if (trackingState==TrackingMoveTo) if (!LED2_ON) { CLR(LEDneg2PORT, LEDneg2Bit); LED2_ON=true; }  // indicate GOTO
     #endif
 
-    // safety checks, keeps mount from tracking past the meridian limit, past the underPoleLimit, below horizon limit, above the overhead limit, or past the Dec limits
+    // safety checks, keeps mount from tracking past the meridian limit, past the UnderPoleLimit, below horizon limit, above the overhead limit, or past the Dec limits
     if (meridianFlip!=MeridianFlipNever) {
-      if (pierSide==PierSideWest) { cli(); if (posHA+IHS>(minutesPastMeridianW*StepsPerDegreeHA/4L)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  } sei(); }
-      if (pierSide==PierSideEast) { cli(); if (posHA+IHS>(underPoleLimit*StepsPerDegreeHA*15L))      { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  } sei(); }
+      if (pierSide==PierSideWest) { cli(); if (posAxis1+IHS>(MinutesPastMeridianW*StepsPerDegreeAxis1/4L)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  } sei(); }
+      if (pierSide==PierSideEast) { cli(); if (posAxis1+IHS>(UnderPoleLimit*StepsPerDegreeAxis1*15L))      { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  } sei(); }
     } else {
 #ifndef MOUNT_TYPE_ALTAZM
-      // when Fork mounted, ignore pierSide and just stop the mount if it passes the underPoleLimit
-      cli(); if (posHA+IHS>(underPoleLimit*StepsPerDegreeHA*15L)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
+      // when Fork mounted, ignore pierSide and just stop the mount if it passes the UnderPoleLimit
+      cli(); if (posAxis1+IHS>(UnderPoleLimit*StepsPerDegreeAxis1*15L)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
 #else
       // when Alt/Azm mounted, just stop the mount if it passes +180 degrees Azm
-      cli(); if (posHA+IHS>(180L*StepsPerDegreeHA*15L)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
+      cli(); if (posAxis1+IHS>(180L*StepsPerDegreeAxis1*15L)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
 #endif
     }
 #ifndef MOUNT_TYPE_ALTAZM
-    if ((getApproxDec()<minDec) || (getApproxDec()>maxDec)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
+    if ((getApproxDec()<MinDec) || (getApproxDec()>MaxDec)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
 #endif      
 
     // support for limit switch(es)
@@ -1453,6 +1472,21 @@ void loop() {
 
     // check altitude every second
     if ((currentAlt<minAlt) || (currentAlt>maxAlt)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
+
+    // check for fault signal, stop any slew or guide and turn tracking off
+#ifdef AXIS1_FAULT_LOW
+    faultAxis1=(digitalRead(Axis1_FAULT)==LOW);
+#endif
+#ifdef AXIS1_FAULT_HIGH
+    faultAxis1=(digitalRead(Axis1_FAULT)==HIGH);
+#endif
+#ifdef AXIS2_FAULT_LOW
+    faultAxis2=(digitalRead(Axis2_FAULT)==LOW);
+#endif
+#ifdef AXIS2_FAULT_HIGH
+    faultAxis2=(digitalRead(Axis2_FAULT)==HIGH);
+#endif
+    if (faultAxis1 || faultAxis2) { if (trackingState==TrackingMoveTo) abortSlew=true; else { trackingState=TrackingNone; if (guideDirAxis1) guideDirAxis1='b'; if (guideDirAxis2) guideDirAxis2='b'; } }
 
     // basic check to see if we're at home
     if (trackingState!=TrackingNone) atHome=false;
