@@ -7,14 +7,21 @@ boolean setPark() {
     lastTrackingState=trackingState;
     trackingState=TrackingNone;
 
-    // don't worry about moving around: during parking pec is turned off and backlash is cleared (0) so that targetHA/Dec=posHA/Dec
+    // don't worry about moving around: during parking pec is turned off and backlash is cleared (0) so that targetAxis1/Dec=posAxis1/Dec
     // this should handle getting us back to the home position for micro-step modes up to 256X
-    long int h=((long int)targetHA.part.m/1024L)*1024L;
-    long int d=((long int)targetDec.part.m/1024L)*1024L;
+
+   // if sync anywhere is enabled use the corrected location
+  #ifdef SYNC_ANYWHERE_ON
+    long h=(((long)targetAxis1.part.m+IHS)/1024L)*1024L;
+    long d=(((long)targetAxis2.part.m+IDS)/1024L)*1024L;
+  #else
+    long h=((long)targetAxis1.part.m/1024L)*1024L;
+    long d=((long)targetAxis2.part.m/1024L)*1024L;
+  #endif
 
     // store our position
-    EEPROM_writeQuad(EE_posHA ,(byte*)&h);
-    EEPROM_writeQuad(EE_posDec,(byte*)&d);
+    EEPROM_writeQuad(EE_posAxis1 ,(byte*)&h);
+    EEPROM_writeQuad(EE_posAxis2,(byte*)&d);
 
     // and the align
     saveAlignModel();
@@ -46,44 +53,44 @@ boolean parkClearBacklash() {
 
   // backlash takeup rate
   cli();
-  long LasttimerRateHA =timerRateHA;
-  long LasttimerRateDec=timerRateDec;
-  timerRateHA =timerRateBacklashHA;
-  timerRateDec=timerRateBacklashDec;
+  long LasttimerRateAxis1 =timerRateAxis1;
+  long LasttimerRateAxis2=timerRateAxis2;
+  timerRateAxis1 =timerRateBacklashAxis1;
+  timerRateAxis2=timerRateBacklashAxis2;
   sei();
 
   // figure out how long we'll have to wait for the backlash to clear (+50%)
-  long t; if (backlashHA>backlashDec) t=((long)backlashHA*1500)/(long)StepsPerSecond; else t=((long)backlashDec*1500)/(long)StepsPerSecond;
+  long t; if (backlashAxis1>backlashAxis2) t=((long)backlashAxis1*1500)/(long)StepsPerSecondAxis1; else t=((long)backlashAxis2*1500)/(long)StepsPerSecondAxis1;
   t=(t/BacklashTakeupRate+250)/12;
 
   // start by moving fully into the backlash
   cli();
-  targetHA.part.m += backlashHA;
-  targetDec.part.m += backlashDec;
+  targetAxis1.part.m += backlashAxis1;
+  targetAxis2.part.m += backlashAxis2;
   sei();
 
   // wait until done or timed out
-  for (int i=0; i<12; i++) if ((blHA!=backlashHA) || (posHA!=(long int)targetHA.part.m) || (blDec!=backlashDec) || (posDec!=(long int)targetDec.part.m)) delay(t);
+  for (int i=0; i<12; i++) if ((blAxis1!=backlashAxis1) || (posAxis1!=(long)targetAxis1.part.m) || (blAxis2!=backlashAxis2) || (posAxis2!=(long)targetAxis2.part.m)) delay(t);
 
   // then reverse direction and take it all up
   cli();
-  targetHA.part.m  -= backlashHA;
-  targetDec.part.m -= backlashDec;
+  targetAxis1.part.m  -= backlashAxis1;
+  targetAxis2.part.m -= backlashAxis2;
   sei();
 
   // wait until done or timed out, plus a safety margin
-  for (int i=0; i<24; i++) if ((blHA!=0) || (posHA!=(long int)targetHA.part.m) || (blDec!=0) || (posDec!=(long int)targetDec.part.m)) delay(t);
+  for (int i=0; i<24; i++) if ((blAxis1!=0) || (posAxis1!=(long)targetAxis1.part.m) || (blAxis2!=0) || (posAxis2!=(long)targetAxis2.part.m)) delay(t);
 
-  // we arrive back at the exact same position so fTargetHA/Dec don't need to be touched
+  // we arrive back at the exact same position so ftargetAxis1/Dec don't need to be touched
   
   // move at the previous speed
   cli();
-  timerRateHA =LasttimerRateHA;
-  timerRateDec=LasttimerRateDec;
+  timerRateAxis1 =LasttimerRateAxis1;
+  timerRateAxis2=LasttimerRateAxis2;
   sei();
   
   // return true on success
-  if ((blHA!=0) || (blDec!=0)) return false; else return true;
+  if ((blAxis1!=0) || (blAxis2!=0)) return false; else return true;
 }
 
 // moves the telescope to the park position, stops tracking
@@ -107,14 +114,23 @@ byte park() {
         EEPROM.write(EE_parkStatus,parkStatus);
         
         // get the position we're supposed to park at
-        cli();
-        long tempHA;  EEPROM_readQuad(EE_posHA,(byte*)&tempHA);
-        long tempDec; EEPROM_readQuad(EE_posDec,(byte*)&tempDec);
-        sei();
+        long h; EEPROM_readQuad(EE_posAxis1,(byte*)&h);
+        long d; EEPROM_readQuad(EE_posAxis2,(byte*)&d);
         
         // now, slew to this target HA,Dec
         byte gotoPierSide=EEPROM.read(EE_pierSide);
-        goTo(tempHA,tempDec,tempHA,tempDec,gotoPierSide);
+
+        // if sync anywhere is enabled we have a corrected location, convert to instrument
+        // and make sure we land on full-step, and store this new location so we remember PEC
+  #ifdef SYNC_ANYWHERE_ON
+        h=((h-IHS)/1024L)*1024L;
+        d=((d-IDS)/1024L)*1024L;
+        // also save the alignment index values in this mode since they can change widely
+        EEPROM_writeQuad(EE_IH,(byte*)&IH);
+        EEPROM_writeQuad(EE_ID,(byte*)&ID);
+  #endif
+
+        goTo(h,d,h,d,gotoPierSide);
 
         return 0;
       } else return 1; // no park position saved
@@ -132,25 +148,33 @@ boolean unpark() {
     if (parkStatus==Parked) {
       if (parkSaved) {
         // enable the stepper drivers
-        digitalWrite(HA_EN,HA_Enabled);
-        digitalWrite(DE_EN,DE_Enabled);
+        digitalWrite(Axis1_EN,Axis1_Enabled);
+        digitalWrite(Axis2_EN,Axis2_Enabled);
         delay(10);
 
-        // get our position
-        cli();
-        EEPROM_readQuad(EE_posHA,(byte*)&posHA);   targetHA.part.m=posHA; targetHA.part.f=0;
-        EEPROM_readQuad(EE_posDec,(byte*)&posDec); targetDec.part.m=posDec; targetDec.part.f=0;
-        sei();
-  
         // get corrections
         EEPROM_readQuad(EE_doCor,(byte*)&doCor);
         EEPROM_readQuad(EE_pdCor,(byte*)&pdCor);
         EEPROM_readQuad(EE_altCor,(byte*)&altCor);
         EEPROM_readQuad(EE_azmCor,(byte*)&azmCor);
         EEPROM_readQuad(EE_IH,(byte*)&IH);
-        IHS=IH*15.0*StepsPerDegreeHA;
+        IHS=IH*15.0*StepsPerDegreeAxis1;
         EEPROM_readQuad(EE_ID,(byte*)&ID);
+        IDS=ID*StepsPerDegreeAxis2;
 
+        // get our position
+        cli();
+        EEPROM_readQuad(EE_posAxis1,(byte*)&posAxis1);   targetAxis1.part.m=posAxis1; targetAxis1.part.f=0;
+        EEPROM_readQuad(EE_posAxis2,(byte*)&posAxis2); targetAxis2.part.m=posAxis2; targetAxis2.part.f=0;
+
+  // if sync anywhere is enabled we have a corrected location, convert to instrument
+  // just like we did when we parked
+  #ifdef SYNC_ANYWHERE_ON
+        posAxis1=((posAxis1-IHS)/1024L)*1024L;
+        posAxis2=((posAxis2-IDS)/1024L)*1024L;
+  #endif
+        sei();
+  
         // see what side of the pier we're on
         pierSide=EEPROM.read(EE_pierSide);
         if (pierSide==PierSideWest) DecDir = DecDirWInit; else DecDir = DecDirEInit;
@@ -175,5 +199,4 @@ boolean unpark() {
   };
   return false;
 }
-
 
