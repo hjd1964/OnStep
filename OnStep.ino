@@ -1137,7 +1137,7 @@ void setup() {
   TCCR3A = 0;
   TIMSK3 = (1 << OCIE3A);
 
-  if (StepsPerSecondAxis1<31)
+  if (StepsPerSecondAxis2<31)
     TCCR4B = (1 << WGM12) | (1 << CS10) | (1 << CS11);  // ~0 to 0.25 seconds   (4 steps per second minimum, granularity of timer is 4uS)   /64 pre-scaler
   else
     TCCR4B = (1 << WGM12) | (1 << CS11);                // ~0 to 0.032 seconds (31 steps per second minimum, granularity of timer is 0.5uS) /8  pre-scaler
