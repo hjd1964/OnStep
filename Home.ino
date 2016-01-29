@@ -5,13 +5,18 @@
 boolean goHome() {
   if ((parkStatus!=NotParked) && (parkStatus!=Parking)) return false;  // fail, moving to home not allowed if Parked
   if (trackingState==TrackingMoveTo)                    return false;  // fail, moving to home not allowed during a move
-  if (guideDirHA || guideDirDec)                        return false;  // fail, moving to home not allowed while guiding
+  if (guideDirAxis1 || guideDirAxis2)                   return false;  // fail, moving to home not allowed while guiding
 
   cli();
-  if (pierSide==PierSideWest) targetHA.part.m=-celestialPoleHA*StepsPerDegreeHA; else targetHA.part.m=celestialPoleHA*StepsPerDegreeHA; targetHA.part.f=0;
-  targetDec.part.m=celestialPoleDec*(double)StepsPerDegreeDec; targetDec.part.f=0;
-  startHA =posHA;
-  startDec=posDec;
+  #ifdef SYNC_ANYWHERE_ON
+  if (pierSide==PierSideWest) targetAxis1.part.m=-celestialPoleHA*StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=celestialPoleHA*StepsPerDegreeAxis1-IHS; targetAxis1.part.f=0;
+  targetAxis2.part.m=celestialPoleDec*(double)StepsPerDegreeAxis2-IDS; targetAxis2.part.f=0;
+  #else
+  if (pierSide==PierSideWest) targetAxis1.part.m=-celestialPoleHA*StepsPerDegreeAxis1; else targetAxis1.part.m=celestialPoleHA*StepsPerDegreeAxis1; targetAxis1.part.f=0;
+  targetAxis2.part.m=celestialPoleDec*(double)StepsPerDegreeAxis2; targetAxis2.part.f=0;
+  #endif
+  startAxis1=posAxis1;
+  startAxis2=posAxis2;
     
   abortTrackingState=trackingState;
   lastTrackingState=TrackingNone;
@@ -30,16 +35,16 @@ boolean setHome() {
 
   // default values for state variables
   pierSide            = PierSideNone;
-  dirDec              = 1;
+  dirAxis2            = 1;
   DecDir              = DecDirEInit;
   if (latitude>0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
-  dirHA               = 1;
+  dirAxis1            = 1;
   newTargetRA         = 0;        
-  newTargetDec        = 0;
+  newtargetDec        = 0;
   newTargetAlt        = 0;
   newTargetAzm        = 0;
-  origTargetHA.fixed  = 0;
-  origTargetDec       = 0;
+  origTargetAxis1.fixed = 0;
+  origTargetAxis2       = 0;
   
   // reset pointing model
   alignMode           = AlignNone;
@@ -50,6 +55,7 @@ boolean setHome() {
   IH                  = 0;
   IHS                 = 0;
   ID                  = 0;
+  IDS                 = 0;
   
   // reset meridian flip control
   #ifdef MOUNT_TYPE_GEM
@@ -72,8 +78,8 @@ boolean setHome() {
   // reset tracking and rates
   trackingState       = TrackingNone;
   lastTrackingState   = TrackingNone;
-  timerRateHA         = SiderealRate;
-  timerRateDec        = SiderealRate;
+  timerRateAxis1         = SiderealRate;
+  timerRateAxis2        = SiderealRate;
 
   // not parked, but don't wipe the park position if it's saved - we can still use it
   parkStatus          = NotParked;
@@ -91,23 +97,23 @@ boolean setHome() {
   #endif
 
   // the polar home position
-  startHA  = celestialPoleHA*StepsPerDegreeHA;
-  startDec = celestialPoleDec*(double)StepsPerDegreeDec;
+  startAxis1  = celestialPoleHA*StepsPerDegreeAxis1;
+  startAxis2 = celestialPoleDec*(double)StepsPerDegreeAxis2;
 
   // clear pulse-guiding state
-  guideDirHA          = 0;
+  guideDirAxis1       = 0;
   guideDurationHA     = 0;
   guideDurationLastHA = 0;
-  guideDirDec         = 0;
+  guideDirAxis2       = 0;
   guideDurationDec    = 0;
   guideDurationLastDec= 0;
 
   cli();
-  targetHA.part.m = startHA; targetHA.part.f = 0;
-  posHA   = startHA;
+  targetAxis1.part.m = startAxis1; targetAxis1.part.f = 0;
+  posAxis1           = startAxis1;
   PEC_HA  = 0;
-  targetDec.part.m = startDec; targetDec.part.f = 0;
-  posDec  = startDec;
+  targetAxis2.part.m = startAxis2; targetAxis2.part.f = 0;
+  posAxis2           = startAxis2;
   sei();
 
   return true;
