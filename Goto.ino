@@ -52,9 +52,9 @@ boolean syncEqu(double RA, double Dec) {
   //                 W   .   E
   // IH and ID values get subtracted to arrive at the correct location
   IH=Axis1-(double)((long)targetAxis1.part.m)/(double)StepsPerDegreeAxis1;
-  IHS=IH*StepsPerDegreeAxis1;
+  IHS=(long)(IH*(double)StepsPerDegreeAxis1);
   ID=Axis2-(double)((long)targetAxis2.part.m)/(double)StepsPerDegreeAxis2;
-  IDS=ID*StepsPerDegreeAxis2;
+  IDS=(long)(ID*(double)StepsPerDegreeAxis2);
 
 #ifndef SYNC_ANYWHERE_ON
   if ((abs(ID)>30.0) || (abs(IH)>30.0)) { IH=0; ID=0; return false; }
