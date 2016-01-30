@@ -815,8 +815,8 @@ double timeRange(double time) {
 }
 
 double haRange(double time) {
-  while (time>=12.0) time-=24.0;
-  while (time<-12.0) time+=24.0;
+  while (time>=180.0) time-=360.0;
+  while (time<-180.0) time+=360.0;
   return time;
 }
 
@@ -854,9 +854,6 @@ bool startAlign(char c) {
   digitalWrite(Axis1_EN,Axis1_Enabled);
   digitalWrite(Axis2_EN,Axis2_Enabled);
   delay(10);
-
-  // newTargetRA =timeRange(LST);
-  // newtargetDec=90.0;  
 
   // start tracking
   trackingState=TrackingSidereal;
@@ -899,7 +896,7 @@ bool nextAlign() {
     // set the ID offset
     if (!syncEqu(newTargetRA,newtargetDec)) { return true; }
     avgDec=newtargetDec;
-    avgHA =haRange(LST-newTargetRA);
+    avgHA =haRange(LST*15.0-newTargetRA);
   } else 
   // Second star:
   // Near the celestial equator (Dec=0, HA=0), telescope East of the pier
@@ -910,7 +907,7 @@ bool nextAlign() {
     double ID1 = ID;
 
     avgDec=(avgDec+newtargetDec)/2.0;
-    avgHA =(-avgHA+haRange(LST-newTargetRA))/2.0; // last HA is negative because we were on the other side of the meridian
+    avgHA =(-avgHA+haRange(LST*15.0-newTargetRA))/2.0; // last HA is negative because we were on the other side of the meridian
     if (syncEqu(newTargetRA,newtargetDec)) {
       double IH2=IH;
       double ID2=ID;
@@ -924,14 +921,14 @@ bool nextAlign() {
       double ID3=ID;
     
       altCor=-(ID2+ID1)/2.0;                    // Negative when pointed below the pole
-      altCor= altCor/cos((avgHA*15.0)/Rad);     // correct for measurements being away from the Meridian
+      altCor= altCor/cos(avgHA/Rad);            // correct for measurements being away from the Meridian
 
       // allow the altCor to be applied
       if (syncEqu(newTargetRA,newtargetDec)) {
         ID2=ID;
         IH2=IH;
 
-        doCor =-((IH2-IH1)/2.0)*15.0;            // the difference of these two values should be a decent approximation of the optical axis to Dec axis error (aka cone error)
+        doCor =-(IH2-IH1)/2.0;                   // the difference of these two values should be a decent approximation of the optical axis to Dec axis error (aka cone error)
         doCor = doCor*cos(avgDec/Rad);           // correct for measurement being away from the Celestial Equator
 
         IH  = IH3;
@@ -955,8 +952,8 @@ bool nextAlign() {
       double IH2=IH;
       double ID2=ID;
 
-      azmCor = -(ID2-ID1);                      // offset in declination is largely due to polar align Azm error
-      azmCor = azmCor/sin((haRange(LST-newTargetRA)*15.0)/Rad);  // correct for HA of measurement location
+      azmCor = -(ID2-ID1);                                      // offset in declination is largely due to polar align Azm error
+      azmCor = azmCor/sin(haRange(LST*15.0-newTargetRA)/Rad);   // correct for HA of measurement location
 
       // allow the azmCor to be applied
       if (syncEqu(newTargetRA,newtargetDec)) {
@@ -964,7 +961,7 @@ bool nextAlign() {
         IH2=IH;
         // only apply Dec axis flexture term on GEMs
         #ifdef MOUNT_TYPE_GEM
-        pdCor =  (IH2-IH1)*15.0;                // the Dec axis to RA axis perp. error should be the only major source of error left effecting the HA
+        pdCor = (IH2-IH1);                      // the Dec axis to RA axis perp. error should be the only major source of error left effecting the HA
         pdCor = pdCor/tan(newtargetDec/Rad);    // correct for Dec of measurement location
         #else
         pdCor = 0.0;
