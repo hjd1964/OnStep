@@ -218,6 +218,7 @@ long celestialPoleHA  = 0L;
 double celestialPoleDec = 90.0;
 
 volatile long posAxis1   = 90L*StepsPerDegreeAxis1;// hour angle position in steps
+long trueAxis1           = 90L*StepsPerDegreeAxis1;
 volatile long startAxis1 = 90L*StepsPerDegreeAxis1;// hour angle of goto start position in steps
 volatile fixed_t targetAxis1;                      // hour angle of goto end   position in steps
 volatile byte dirAxis1   = 1;                      // stepping direction + or -
@@ -226,10 +227,11 @@ double newTargetRA       = 0.0;                    // holds the RA for goTos
 fixed_t origTargetAxis1;
 
 volatile long posAxis2   = 90L*StepsPerDegreeAxis2;// declination position in steps
+long trueAxis2           = 90L*StepsPerDegreeAxis1;
 volatile long startAxis2 = 90L*StepsPerDegreeAxis2;// declination of goto start position in steps
 volatile fixed_t targetAxis2;                      // declination of goto end   position in steps
 volatile byte dirAxis2   = 1;                      // stepping direction + or -
-double newtargetDec      = 0.0;                    // holds the Dec for goTos
+double newTargetDec      = 0.0;                    // holds the Dec for goTos
 long origTargetAxis2     = 0;
 
 double newTargetAlt=0.0, newTargetAzm=0.0;         // holds the altitude and azmiuth for slews
@@ -578,6 +580,9 @@ volatile byte DecDir     = DecDirEInit;
 volatile byte HADir      = HADirNCPInit;
 
 // Status ------------------------------------------------------------------------------------------------------------------
+enum Errors {ERR_NONE, ERR_MOTOR_FAULT, ERR_ALT, ERR_LIMIT_SENSE, ERR_DEC, ERR_AZM, ERR_UNDER_POLE, ERR_MERIDIAN};
+Errors lastError = ERR_NONE;
+
 boolean highPrecision    = true;
 
 #define TrackingNone     0
@@ -800,6 +805,9 @@ char ST4DE_last = 0;
 
 #define EE_pulseGuideRate 22
 #define EE_maxRate     23
+
+#define EE_trueAxis1   30
+#define EE_trueAxis2   34
 
 #define EE_minAlt      40
 #define EE_maxAlt      41
@@ -1059,11 +1067,11 @@ void setup() {
 
   // 16MHZ clocks for steps per second of sidereal tracking
   cli(); SiderealRate=siderealInterval/StepsPerSecondAxis1; TakeupRate=SiderealRate/4L; sei();
-  timerRateAxis1 =SiderealRate;
+  timerRateAxis1=SiderealRate;
   timerRateAxis2=SiderealRate;
 
   // backlash takeup rates
-  timerRateBacklashAxis1 =timerRateAxis1 /BacklashTakeupRate;
+  timerRateBacklashAxis1=timerRateAxis1/BacklashTakeupRate;
   timerRateBacklashAxis2=timerRateAxis2/BacklashTakeupRate;
 
 #if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
@@ -1137,7 +1145,7 @@ void setup() {
   TCCR3A = 0;
   TIMSK3 = (1 << OCIE3A);
 
-  if (StepsPerSecondAxis2<31)
+  if (StepsPerSecondAxis1<31)
     TCCR4B = (1 << WGM12) | (1 << CS10) | (1 << CS11);  // ~0 to 0.25 seconds   (4 steps per second minimum, granularity of timer is 4uS)   /64 pre-scaler
   else
     TCCR4B = (1 << WGM12) | (1 << CS11);                // ~0 to 0.032 seconds (31 steps per second minimum, granularity of timer is 0.5uS) /8  pre-scaler
@@ -1200,12 +1208,14 @@ void setup() {
   startAxis1 = celestialPoleHA*StepsPerDegreeAxis1;
   startAxis2 = celestialPoleDec*(double)StepsPerDegreeAxis2;
   cli();
-  targetAxis1.part.m  = startAxis1; 
-  targetAxis1.part.f  = 0;
-  posAxis1            = startAxis1;
-  targetAxis2.part.m = startAxis2; 
+  targetAxis1.part.m = startAxis1;
+  targetAxis1.part.f = 0;
+  posAxis1           = startAxis1;
+  trueAxis1          = startAxis1;
+  targetAxis2.part.m = startAxis2;
   targetAxis2.part.f = 0;
   posAxis2           = startAxis2;
+  trueAxis2          = startAxis2;
   sei();
   
   // get date and time from EEPROM, start keeping time
@@ -1367,13 +1377,16 @@ void loop() {
 
     // keeps the target where it's supposed to be while doing gotos
     if (trackingState==TrackingMoveTo) {
-      if (lastTrackingState==TrackingSidereal) { 
-        origTargetAxis1.fixed+=fstepAxis1.fixed;
+      if (lastTrackingState==TrackingSidereal) {
         // origTargetAxisn isn't used in Alt/Azm mode since meridian flips never happen
-        cli();
-        targetAxis1.fixed+=fstepAxis1.fixed;
-        targetAxis2.fixed+=fstepAxis2.fixed;
-        sei();  
+        origTargetAxis1.fixed+=fstepAxis1.fixed;
+        // don't advance the target during meridian flips
+        if ((pierSide==PierSideEast) || (pierSide==PierSideWest)) {
+          cli();
+          targetAxis1.fixed+=fstepAxis1.fixed;
+          targetAxis2.fixed+=fstepAxis2.fixed;
+          sei();  
+        }
       }
       moveTo();
     }
@@ -1450,28 +1463,28 @@ void loop() {
 
     // safety checks, keeps mount from tracking past the meridian limit, past the UnderPoleLimit, below horizon limit, above the overhead limit, or past the Dec limits
     if (meridianFlip!=MeridianFlipNever) {
-      if (pierSide==PierSideWest) { cli(); if (posAxis1+IHS>(MinutesPastMeridianW*StepsPerDegreeAxis1/4L)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  } sei(); }
-      if (pierSide==PierSideEast) { cli(); if (posAxis1+IHS>(UnderPoleLimit*StepsPerDegreeAxis1*15L))      { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  } sei(); }
+      if (pierSide==PierSideWest) { cli(); if (posAxis1+IHS>(MinutesPastMeridianW*StepsPerDegreeAxis1/4L)) { lastError=ERR_MERIDIAN; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  } sei(); }
+      if (pierSide==PierSideEast) { cli(); if (posAxis1+IHS>(UnderPoleLimit*15L*StepsPerDegreeAxis1))      { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  } sei(); }
     } else {
 #ifndef MOUNT_TYPE_ALTAZM
       // when Fork mounted, ignore pierSide and just stop the mount if it passes the UnderPoleLimit
-      cli(); if (posAxis1+IHS>(UnderPoleLimit*StepsPerDegreeAxis1*15L)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
+      cli(); if (posAxis1+IHS>(UnderPoleLimit*15L*StepsPerDegreeAxis1)) { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
 #else
       // when Alt/Azm mounted, just stop the mount if it passes +180 degrees Azm
-      cli(); if (posAxis1+IHS>(180L*StepsPerDegreeAxis1*15L)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
+      cli(); if (posAxis1+IHS>(180L*StepsPerDegreeAxis1)) { lastError=ERR_AZM; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
 #endif
     }
 #ifndef MOUNT_TYPE_ALTAZM
-    if ((getApproxDec()<MinDec) || (getApproxDec()>MaxDec)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
+    if ((getApproxDec()<MinDec) || (getApproxDec()>MaxDec)) { lastError=ERR_DEC; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
 #endif      
 
     // support for limit switch(es)
     #ifdef LIMIT_SENSE_ON  
-    if (digitalRead(LimitPin)==LOW) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
+    if (digitalRead(LimitPin)==LOW) { lastError=ERR_LIMIT_SENSE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
     #endif
 
     // check altitude every second
-    if ((currentAlt<minAlt) || (currentAlt>maxAlt)) { if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
+    if ((currentAlt<minAlt) || (currentAlt>maxAlt)) { lastError=ERR_ALT; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
 
     // check for fault signal, stop any slew or guide and turn tracking off
 #ifdef AXIS1_FAULT_LOW
@@ -1486,9 +1499,9 @@ void loop() {
 #ifdef AXIS2_FAULT_HIGH
     faultAxis2=(digitalRead(Axis2_FAULT)==HIGH);
 #endif
-    if (faultAxis1 || faultAxis2) { if (trackingState==TrackingMoveTo) abortSlew=true; else { trackingState=TrackingNone; if (guideDirAxis1) guideDirAxis1='b'; if (guideDirAxis2) guideDirAxis2='b'; } }
+    if (faultAxis1 || faultAxis2) { lastError=ERR_MOTOR_FAULT; if (trackingState==TrackingMoveTo) abortSlew=true; else { trackingState=TrackingNone; if (guideDirAxis1) guideDirAxis1='b'; if (guideDirAxis2) guideDirAxis2='b'; } }
 
-    // basic check to see if we're at home
+    // basic check to see if we're not at home
     if (trackingState!=TrackingNone) atHome=false;
 
     // reset the sidereal clock once a day, to keep the significant digits from being consumed
