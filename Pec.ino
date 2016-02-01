@@ -12,6 +12,14 @@ boolean initPecIndex=true;
 boolean initPecIndex=false;
 #endif
 void Pec() {
+  long    accPecGuideHA       = 0;      // for PEC, buffers steps to be recorded
+  double  PECstartDelta       = 0;
+  long    lastWormRotationStepPos=-1;
+  long    wormRotationStepPos    = 0;
+  long    PECindex            = 0;
+  long    lastPECindex        = -1;
+  long    next_PECindex_sense = -1;    // position of next PEC index sensed
+
   // PEC is only active when we're tracking at the sidereal rate with a guide rate that makes sense
 
   // keep track of our current step position, and when the step position on the worm wraps during playback
