@@ -89,12 +89,12 @@ void getHADec(double *HA, double *Dec) {
 }
 
 // gets the telescopes current RA and Dec, set returnHA to true for Horizon Angle instead of RA
-long lastGetEqu=0;
+unsigned long lastGetEqu=0;
 double lastGetEquLST=0;
 double lastGetEquHA=0;
 double lastGetEquDec=0;
 boolean getEqu(double *RA, double *Dec, boolean returnHA, boolean fast) {
-  long Tmin=250L; if (trackingState==TrackingMoveTo) Tmin=500L;
+  unsigned long Tmin=250L; if (trackingState==TrackingMoveTo) Tmin=500L;
   
   // return last values if recent results apply
   if ((fast) && (millis()-lastGetEqu<Tmin)) {
@@ -283,7 +283,8 @@ byte goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1, long 
         DecDir  =DecDirWInit;
         // default, if the polar-home position is +90 deg. HA, we want -90HA
         cli(); posAxis1=-posAxis1; sei();
-      } else { 
+        trueAxis1=-trueAxis1;
+      } else {
         // east side of pier - we're in the western sky and the HA's are positive
         // this is the default in the polar-home position
         pierSide=PierSideEast;
