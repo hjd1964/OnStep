@@ -44,7 +44,7 @@ void Ethernet_send(const char data[]) {
   if (!cmd_client)
    return;
    
-  cmd_client.flush();
+//  cmd_client.flush();
    
   cmd_client.print(data);
 }
@@ -144,14 +144,17 @@ void Ethernet_www() {
           }
         }
       }
+
       // any data ready to send gets processed here
       if (responseStarted) {
-        if (index_page_found) index_html_page(); else
-        if (settings_page_found) settings_html_page(); else
-        if (control_page_found) control_html_page(); else
-        if (pec_page_found) pec_html_page(); else
-        if (config_page_found) config_html_page(); else
-        index_html_page();
+        if (www_xmit_buffer_pos==0) {
+          if (index_page_found) index_html_page(); else
+          if (settings_page_found) settings_html_page(); else
+          if (control_page_found) control_html_page(); else
+          if (pec_page_found) pec_html_page(); else
+          if (config_page_found) config_html_page(); else
+          index_html_page();
+        }
       }
 
       if (www_xmit_buffer_pos>0) {
@@ -164,6 +167,7 @@ void Ethernet_www() {
       }
 
     }
+  
     // if data was sent give the web browser time to receive it then stop the client
     // if a transaction is taking more than five seconds, stop the client
     if ((clientNeedsToClose && (millis()-responseFinish_ms>100)) || (millis()-transactionStart_ms>5000)) {
@@ -171,6 +175,7 @@ void Ethernet_www() {
       www_client.stop();
     }
     Ethernet.maintain();
+
   }
 }
 
@@ -185,7 +190,7 @@ boolean www_write(const char data[]) {
   return true;
 }
 
-// quickly writes up to 5 chars at a time from buffer to ethernet adapter
+// quickly writes up to 7 chars at a time from buffer to ethernet adapter
 // returns true if data is still waiting for transmit
 // returns false if data buffer is empty
 boolean www_send() {
@@ -194,16 +199,19 @@ boolean www_send() {
   
   // copy some data
   boolean buffer_empty=false;
-  for (int l=0; l<10; l++) {
+  int count=0;
+  for (int l=0; l<9; l++) {
     c=www_xmit_buffer[www_xmit_buffer_send_pos];
     buf[l+1]=0;
-    buf[l]=c;
+    buf[l]=c; 
     if ((c==0) || (www_xmit_buffer_send_pos>1022)) { buffer_empty=true; break; }
-    www_xmit_buffer_send_pos++;
+    www_xmit_buffer_send_pos++; count++;
   }
 
+  www_client.write(buf,count);
   // send network data
-  www_client.print(buf);
+//  www_client.write(buf,);
+ // www.client.
 
   // hit end of www_xmit_buffer? reset and start over
   if (buffer_empty) {
@@ -457,7 +465,10 @@ const char html_indexIndex[] PROGMEM = "IHS=<font class=\"c\">%ld</font>, IDS=<f
 const char html_indexPier[] PROGMEM = "Pier Side=<font class=\"c\">%s</font> (meridian flips <font class=\"c\">%s</font>)<br /><br />";
 const char html_index7[] PROGMEM = "Current MaxRate: <font class=\"c\">%ld</font> (Default MaxRate: <font class=\"c\">%ld</font>)<br /><br />";
 const char html_index8[] PROGMEM = "Tracking: <font class=\"c\">%s %s</font><br />";
-const char html_index9[] PROGMEM = "Parking: <font class=\"c\">%s</font><br /><br />Workload: <font class=\"c\">%ld%%</font><br />";
+const char html_index9[] PROGMEM = "Parking: <font class=\"c\">%s</font><br />";
+const char html_index10[] PROGMEM = "Last Error: <font class=\"c\">%s</font><br /><br />";
+const char html_index11[] PROGMEM = "Workload: <font class=\"c\">%ld%%</font><br />";
+
 
 void index_html_page() {
   char temp[320] = "";
@@ -496,7 +507,8 @@ void index_html_page() {
   if (html_page_step==++stp) strcpy_P(temp, html_links1);
   if (html_page_step==++stp) strcpy_P(temp, html_links2);
   if (html_page_step==++stp) strcpy_P(temp, html_links3);
-  if (html_page_step==++stp) {
+  
+if (html_page_step==++stp) {
     i=highPrecision; 
     highPrecision=false; 
     doubleToDms(temp2,&longitude,true,true);
@@ -551,7 +563,7 @@ if (html_page_step==++stp) {
     
     strcpy_P(temp1, html_indexPosition); sprintf(temp,temp1,temp2,temp3); 
   }
-  if (html_page_step==++stp) {
+   if (html_page_step==++stp) {
     i=highPrecision; highPrecision=true;
     cli();
     long h=(long)targetAxis1.part.m+IHS;
@@ -610,7 +622,23 @@ if (html_page_step==++stp) {
     strcpy_P(temp1, html_index9); sprintf(temp,temp1,temp2,(worst_loop_time*100L)/9970L);
     worst_loop_time=0;
   }
+  if (html_page_step==++stp) {
+    if (lastError==ERR_NONE) strcpy(temp2,"None"); else
+    if (lastError==ERR_MOTOR_FAULT) strcpy(temp2,"Motor Fault"); else
+    if (lastError==ERR_ALT) strcpy(temp2,"Altitude Min/Max"); else
+    if (lastError==ERR_LIMIT_SENSE) strcpy(temp2,"Limit Sense"); else
+    if (lastError==ERR_DEC) strcpy(temp2,"Dec Limit Exceeded"); else
+    if (lastError==ERR_AZM) strcpy(temp2,"Azm Limit Exceeded"); else
+    if (lastError==ERR_UNDER_POLE) strcpy(temp2,"Under Pole Limit Exceeded"); else
+    if (lastError==ERR_MERIDIAN) strcpy(temp2,"Meridian Limit (W) Exceeded");
+    strcpy_P(temp1, html_index10); sprintf(temp,temp1,temp2);
+  }
+  if (html_page_step==++stp) {
+    strcpy_P(temp1, html_index11); sprintf(temp,temp1,(worst_loop_time*100L)/9970L);
+    worst_loop_time=0;
+  }
   if (html_page_step==++stp) strcpy(temp,"</div></body></html>");
+
 
   // stop sending this page
   if (html_page_step==++stp) { html_page_step=0; responseStarted=false; return; }
