@@ -13,7 +13,7 @@ void moveTo() {
     origTargetAxis1.fixed = targetAxis1.fixed;
     origTargetAxis2 = (long)targetAxis2.part.m;
  
-    timerRateAxis1 =SiderealRate;
+    timerRateAxis1=SiderealRate;
     timerRateAxis2=SiderealRate;
     sei();
 
@@ -60,22 +60,22 @@ void moveTo() {
     pierSide++;
   }
 
-  long diststartAxis1,distStartDec,distDestHA,distDestDec;
+  long distStartAxis1,distStartAxis2,distDestAxis1,distDestAxis2;
 
   cli();
-  diststartAxis1=abs(posAxis1-startAxis1);    // distance from start HA
-  distStartDec=abs(posAxis2-startAxis2); // distance from start Dec
+  distStartAxis1=abs(posAxis1-startAxis1);  // distance from start HA
+  distStartAxis2=abs(posAxis2-startAxis2);  // distance from start Dec
   sei();
-  if (diststartAxis1<1)  diststartAxis1=1;
-  if (distStartDec<1) distStartDec=1;
+  if (distStartAxis1<1) distStartAxis1=1;
+  if (distStartAxis2<1) distStartAxis2=1;
   
   Again:
   cli();
-  distDestHA=abs(posAxis1-(long)targetAxis1.part.m);  // distance from dest HA
-  distDestDec=abs(posAxis2-(long)targetAxis2.part.m); // distance from dest Dec
+  distDestAxis1=abs(posAxis1-(long)targetAxis1.part.m);  // distance from dest HA
+  distDestAxis2=abs(posAxis2-(long)targetAxis2.part.m);  // distance from dest Dec
   sei();
-  if (distDestHA<1)  distDestHA=1;
-  if (distDestDec<1) distDestDec=1;
+  if (distDestAxis1<1) distDestAxis1=1;
+  if (distDestAxis2<1) distDestAxis2=1;
 
   // quickly slow the motors and stop in 1 degree
   if (abortSlew) {
@@ -86,8 +86,8 @@ void moveTo() {
     // set the destination near where we are now
     // todo: the new targetAxis1/Dec should be checked against the old targetAxis1/Dec, if the old targetAxis1/Dec is closer than use it
     cli();
-    if (distDestHA>StepsPerDegreeAxis1)   { if (posAxis1>(long)targetAxis1.part.m)   targetAxis1.part.m =posAxis1-StepsPerDegreeAxis1;   else targetAxis1.part.m =posAxis1 +StepsPerDegreeAxis1; targetAxis1.part.f=0; }
-    if (distDestDec>StepsPerDegreeAxis2) { if (posAxis2>(long)targetAxis2.part.m) targetAxis2.part.m=posAxis2-StepsPerDegreeAxis2; else targetAxis2.part.m=posAxis2+StepsPerDegreeAxis2; targetAxis2.part.f=0; }
+    if (distDestAxis1>StepsPerDegreeAxis1) { if (posAxis1>(long)targetAxis1.part.m) targetAxis1.part.m=posAxis1-StepsPerDegreeAxis1; else targetAxis1.part.m=posAxis1+StepsPerDegreeAxis1; targetAxis1.part.f=0; }
+    if (distDestAxis2>StepsPerDegreeAxis2) { if (posAxis2>(long)targetAxis2.part.m) targetAxis2.part.m=posAxis2-StepsPerDegreeAxis2; else targetAxis2.part.m=posAxis2+StepsPerDegreeAxis2; targetAxis2.part.f=0; }
     sei();
 
     if (parkStatus==Parking) {
@@ -106,49 +106,48 @@ void moveTo() {
 
   // First, for Right Ascension
   long temp;
-  if (diststartAxis1>distDestHA) {
-    temp=(StepsForRateChangeAxis1/isqrt32(distDestHA));    // slow down (temp gets bigger)
-//  if ((temp<100) && (temp>=10))  temp=101;          // exclude a range of speeds
+  if (distStartAxis1>distDestAxis1) {
+    temp=(StepsForRateChangeAxis1/isqrt32(distDestAxis1));   // slow down (temp gets bigger)
+//  if ((temp<100) && (temp>=10))  temp=101;                 // exclude a range of speeds
   } else {
-    temp=(StepsForRateChangeAxis1/isqrt32(diststartAxis1));   // speed up (temp gets smaller)
-//  if ((temp<100) && (temp>=10))  temp=9;            // exclude a range of speeds
+    temp=(StepsForRateChangeAxis1/isqrt32(distStartAxis1));  // speed up (temp gets smaller)
+//  if ((temp<100) && (temp>=10))  temp=9;                   // exclude a range of speeds
   }
-  if (temp<maxRate) temp=maxRate;                     // fastest rate
-  if (temp>TakeupRate) temp=TakeupRate;               // slowest rate (4x sidereal)
+  if (temp<maxRate) temp=maxRate;                            // fastest rate
+  if (temp>TakeupRate) temp=TakeupRate;                      // slowest rate (4x sidereal)
   cli(); timerRateAxis1=temp; sei();
 
   // Now, for Declination
-  if (distStartDec>distDestDec) {
-      temp=(StepsForRateChangeAxis2/isqrt32(distDestDec)); // slow down
-//    if ((temp<100) && (temp>=10))  temp=101;        // exclude a range of speeds
-    } else {
-      temp=(StepsForRateChangeAxis2/isqrt32(distStartDec)); // speed up
-//    if ((temp<100) && (temp>=10))  temp=9;          // exclude a range of speeds
-    }
+  if (distStartAxis2>distDestAxis2) {
+    temp=(StepsForRateChangeAxis2/isqrt32(distDestAxis2));   // slow down
+//  if ((temp<100) && (temp>=10))  temp=101;                 // exclude a range of speeds
+  } else {
+    temp=(StepsForRateChangeAxis2/isqrt32(distStartAxis2));  // speed up
+//  if ((temp<100) && (temp>=10))  temp=9;                   // exclude a range of speeds
+  }
 #ifdef MaxRateDecRatio
   if (temp<maxRate*MaxRateDecRatio) temp=maxRate*MaxRateDecRatio; // fastest rate
 #else
-  if (temp<maxRate) temp=maxRate;                     // fastest rate
+  if (temp<maxRate) temp=maxRate;                            // fastest rate
 #endif
-  if (temp>TakeupRate) temp=TakeupRate;               // slowest rate (4x sidereal)
+  if (temp>TakeupRate) temp=TakeupRate;                      // slowest rate (4x sidereal)
   cli(); timerRateAxis2=temp; sei();
 
-  if ((distDestHA<=2) && (distDestDec<=2)) { 
+  if ((distDestAxis1<=2) && (distDestAxis2<=2)) { 
     if ((pierSide==PierSideFlipEW2) || (pierSide==PierSideFlipWE2)) {
-      // make sure we're at the home position when flipping sides of the mount
+      // make sure we're at the home position just before flipping sides of the mount
+      startAxis1=posAxis1;
+      startAxis2=posAxis2;
+      cli();
       if (celestialPoleHA==0) {
-        cli();
-        startAxis1=posAxis1;
-        if (pierSide==PierSideFlipWE2) targetAxis1.part.m=-180L*StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=180L*StepsPerDegreeAxis1-IHS; targetAxis1.part.f=0;
-        startAxis2=posAxis2; targetAxis2.part.m=celestialPoleDec*StepsPerDegreeAxis2-IDS; targetAxis2.part.f=0;
-        sei();
+        // for fork mounts
+        if (pierSide==PierSideFlipEW2) targetAxis1.part.m=180L*StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=-180L*StepsPerDegreeAxis1-IHS; targetAxis1.part.f=0;
       } else {
-        cli();
-        startAxis1=posAxis1;
-        if (pierSide==PierSideFlipWE2) targetAxis1.part.m=-celestialPoleHA*StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=celestialPoleHA*StepsPerDegreeAxis1-IHS; targetAxis1.part.f=0;
-        startAxis2=posAxis2; targetAxis2.part.m=celestialPoleDec*StepsPerDegreeAxis2-IDS; targetAxis2.part.f=0;
-        sei();
+        // for eq mounts
+        if (pierSide==PierSideFlipEW2) targetAxis1.part.m=celestialPoleHA*StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=-celestialPoleHA*StepsPerDegreeAxis1-IHS; targetAxis1.part.f=0;
       }
+      targetAxis2.part.m=celestialPoleDec*StepsPerDegreeAxis2-IDS; targetAxis2.part.f=0;
+      sei();
       
       pierSide++;
     } else
@@ -156,8 +155,6 @@ void moveTo() {
       
       // the blAxis2 gets "reversed" when we Meridian flip, since the NORTH/SOUTH movements are reversed
       cli(); blAxis2=backlashAxis2-blAxis2; sei();
-      // also the Index is reversed since we just flipped 180 degrees
-   //   ID=-ID; IDS=-IDS;
 
       if (pierSide==PierSideFlipEW3) {
         pierSide=PierSideWest;
@@ -166,7 +163,8 @@ void moveTo() {
         DecDir  = DecDirWInit;
         // if we were on the east side of the pier the HA's were in the western sky, and were positive
         // now we're in the eastern sky and the HA's are negative
-        posAxis1=posAxis1-180L*StepsPerDegreeAxis1;
+        posAxis1-=180L*StepsPerDegreeAxis1;
+        trueAxis1-=180L*StepsPerDegreeAxis1;
         sei();
       } else {
         pierSide=PierSideEast;
@@ -175,23 +173,24 @@ void moveTo() {
         DecDir  = DecDirEInit;      
         // if we were on the west side of the pier the HA's were in the eastern sky, and were negative
         // now we're in the western sky and the HA's are positive
-        posAxis1=posAxis1+180L*StepsPerDegreeAxis1;
+        posAxis1+=180L*StepsPerDegreeAxis1;
+        trueAxis1+=180L*StepsPerDegreeAxis1;
         sei();
       }
     
       // now complete the slew
       cli();
-      startAxis1  =posAxis1;
+      startAxis1=posAxis1;
       targetAxis1.fixed=origTargetAxis1.fixed;
-      startAxis2 =posAxis2;
+      startAxis2=posAxis2;
       targetAxis2.part.m=origTargetAxis2; targetAxis2.part.f=0;
       sei();
     } else {
       // restore last tracking state
       trackingState=lastTrackingState; SetSiderealClockRate(siderealInterval);
       cli();
-      timerRateAxis1  =SiderealRate;
-      timerRateAxis2 =SiderealRate;
+      timerRateAxis1=SiderealRate;
+      timerRateAxis2=SiderealRate;
       sei();
       
       // other special gotos: for parking the mount and homeing the mount
@@ -221,6 +220,10 @@ void moveTo() {
           setHome();
           homeMount=false; 
           atHome=true;
+          
+          // disable the stepper drivers
+          digitalWrite(Axis1_EN,Axis1_Disabled);
+          digitalWrite(Axis2_EN,Axis2_Disabled);        
         }
     }
   }
