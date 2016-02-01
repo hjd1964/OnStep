@@ -4,7 +4,7 @@
 // syncs the telescope/mount to the sky
 boolean syncEqu(double RA, double Dec) {
   // hour angleTrackingMoveTo
-  double HA=LST*15.0-RA;
+  double HA=LST()*15.0-RA;
   while (HA>+180.0) HA-=360.0;
   while (HA<-180.0) HA+=360.0;
 
@@ -51,9 +51,9 @@ boolean syncEqu(double RA, double Dec) {
   // HA goes from +180...0..-180
   //                 W   .   E
   // IH and ID values get subtracted to arrive at the correct location
-  IH=Axis1-(double)((long)targetAxis1.part.m)/(double)StepsPerDegreeAxis1;
+  IH=Axis1-((double)(long)targetAxis1.part.m)/(double)StepsPerDegreeAxis1;
   IHS=(long)(IH*(double)StepsPerDegreeAxis1);
-  ID=Axis2-(double)((long)targetAxis2.part.m)/(double)StepsPerDegreeAxis2;
+  ID=Axis2-((double)(long)targetAxis2.part.m)/(double)StepsPerDegreeAxis2;
   IDS=(long)(ID*(double)StepsPerDegreeAxis2);
 
 #ifndef SYNC_ANYWHERE_ON
@@ -116,13 +116,13 @@ boolean getEqu(double *RA, double *Dec, boolean returnHA, boolean fast) {
   CEquToEqu(latitude,lastGetEquHA,*Dec,&lastGetEquHA,Dec);
 #endif
 
-  lastGetEquLST=LST;
+  lastGetEquLST=LST();
   lastGetEquDec=*Dec;
   lastGetEqu=millis();
 
   // return either the RA or the HA depending on returnHA
   if (!returnHA) {
-    *RA=LST*15.0-lastGetEquHA;
+    *RA=LST()*15.0-lastGetEquHA;
     while (*RA>=360.0) *RA=*RA-360.0;
     while (*RA<0.0) *RA=*RA+360.0;
   } else *RA=lastGetEquHA;
@@ -154,7 +154,7 @@ boolean getApproxEqu(double *RA, double *Dec, boolean returnHA) {
   
   // return either the RA or the HA depending on returnHA
   if (!returnHA) {
-    *RA=LST*15.0-HA;
+    *RA=LST()*15.0-HA;
     while (*RA>=360.0) *RA=*RA-360.0;
     while (*RA<0.0) *RA=*RA+360.0;
   } else *RA=HA;
@@ -174,7 +174,7 @@ byte goToEqu(double RA, double Dec) {
   double a,z;
 
   // Convert RA into hour angle, get altitude
-  double HA=LST*15.0-RA;
+  double HA=LST()*15.0-RA;
   while (HA>=180.0) HA-=360.0;
   while (HA<-180.0) HA+=360.0;
   EquToHor(latitude,HA,Dec,&a,&z);
@@ -229,7 +229,7 @@ byte goToHor(double *Alt, double *Azm) {
   
   HorToEqu(latitude,*Alt,*Azm,&HA,&Dec);
   
-  double RA=LST*15.0-HA;
+  double RA=LST()*15.0-HA;
   while (RA>=360.0) RA=RA-360.0;
   while (RA<0.0) RA=RA+360.0;
   
