@@ -7,21 +7,27 @@ boolean setPark() {
     lastTrackingState=trackingState;
     trackingState=TrackingNone;
 
-    // don't worry about moving around: during parking pec is turned off and backlash is cleared (0) so that targetAxis1/Dec=posAxis1/Dec
+    // don't worry about moving around: during parking pec is turned off and backlash is cleared (0) so that targetAxis1/targetAxis2=posAxis1/posAxis2
     // this should handle getting us back to the home position for micro-step modes up to 256X
 
-   // if sync anywhere is enabled use the corrected location
+    // if sync anywhere is enabled use the corrected location
   #ifdef SYNC_ANYWHERE_ON
-    long h=(((long)targetAxis1.part.m+IHS)/1024L)*1024L;
-    long d=(((long)targetAxis2.part.m+IDS)/1024L)*1024L;
+    long ax1md=((((long)targetAxis1.part.m+IHS)-trueAxis1)%1024L-((long)targetAxis1.part.m+IHS)%1024L);
+    long ax2md=((((long)targetAxis2.part.m+IDS)-trueAxis2)%1024L-((long)targetAxis2.part.m+IDS)%1024L);
+    long h=(((long)targetAxis1.part.m+IHS)/1024L)*1024L+ax1md;
+    long d=(((long)targetAxis2.part.m+IDS)/1024L)*1024L+ax2md;
   #else
-    long h=((long)targetAxis1.part.m/1024L)*1024L;
-    long d=((long)targetAxis2.part.m/1024L)*1024L;
+    long ax1md=(((long)targetAxis1.part.m-trueAxis1)%1024L-(long)targetAxis1.part.m%1024L);
+    long ax2md=(((long)targetAxis2.part.m-trueAxis2)%1024L-(long)targetAxis2.part.m%1024L);
+    long h=(((long)targetAxis1.part.m)/1024L)*1024L+ax1md;
+    long d=(((long)targetAxis2.part.m)/1024L)*1024L+ax2md;
   #endif
 
     // store our position
-    EEPROM_writeQuad(EE_posAxis1 ,(byte*)&h);
+    EEPROM_writeQuad(EE_posAxis1,(byte*)&h);
     EEPROM_writeQuad(EE_posAxis2,(byte*)&d);
+    EEPROM_writeQuad(EE_trueAxis1,(byte*)&trueAxis1);
+    EEPROM_writeQuad(EE_trueAxis2,(byte*)&trueAxis2);
 
     // and the align
     saveAlignModel();
@@ -74,7 +80,7 @@ boolean parkClearBacklash() {
 
   // then reverse direction and take it all up
   cli();
-  targetAxis1.part.m  -= backlashAxis1;
+  targetAxis1.part.m -= backlashAxis1;
   targetAxis2.part.m -= backlashAxis2;
   sei();
 
@@ -85,7 +91,7 @@ boolean parkClearBacklash() {
   
   // move at the previous speed
   cli();
-  timerRateAxis1 =LasttimerRateAxis1;
+  timerRateAxis1=LasttimerRateAxis1;
   timerRateAxis2=LasttimerRateAxis2;
   sei();
   
@@ -158,14 +164,16 @@ boolean unpark() {
         EEPROM_readQuad(EE_altCor,(byte*)&altCor);
         EEPROM_readQuad(EE_azmCor,(byte*)&azmCor);
         EEPROM_readQuad(EE_IH,(byte*)&IH);
-        IHS=IH*15.0*StepsPerDegreeAxis1;
+        IHS=(long)(IH*(double)StepsPerDegreeAxis1);
         EEPROM_readQuad(EE_ID,(byte*)&ID);
-        IDS=ID*StepsPerDegreeAxis2;
+        IDS=(long)(ID*(double)StepsPerDegreeAxis2);
 
         // get our position
         cli();
         EEPROM_readQuad(EE_posAxis1,(byte*)&posAxis1);   targetAxis1.part.m=posAxis1; targetAxis1.part.f=0;
-        EEPROM_readQuad(EE_posAxis2,(byte*)&posAxis2); targetAxis2.part.m=posAxis2; targetAxis2.part.f=0;
+        EEPROM_readQuad(EE_posAxis2,(byte*)&posAxis2);   targetAxis2.part.m=posAxis2; targetAxis2.part.f=0;
+        EEPROM_readQuad(EE_trueAxis1,(byte*)&trueAxis1);
+        EEPROM_readQuad(EE_trueAxis2,(byte*)&trueAxis2);
 
   // if sync anywhere is enabled we have a corrected location, convert to instrument
   // just like we did when we parked
