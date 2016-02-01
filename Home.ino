@@ -40,7 +40,7 @@ boolean setHome() {
   if (latitude>0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
   dirAxis1            = 1;
   newTargetRA         = 0;        
-  newtargetDec        = 0;
+  newTargetDec        = 0;
   newTargetAlt        = 0;
   newTargetAzm        = 0;
   origTargetAxis1.fixed = 0;
@@ -97,7 +97,7 @@ boolean setHome() {
   #endif
 
   // the polar home position
-  startAxis1  = celestialPoleHA*StepsPerDegreeAxis1;
+  startAxis1 = celestialPoleHA*StepsPerDegreeAxis1;
   startAxis2 = celestialPoleDec*(double)StepsPerDegreeAxis2;
 
   // clear pulse-guiding state
@@ -111,9 +111,11 @@ boolean setHome() {
   cli();
   targetAxis1.part.m = startAxis1; targetAxis1.part.f = 0;
   posAxis1           = startAxis1;
+  trueAxis1          = startAxis1;
   PEC_HA  = 0;
   targetAxis2.part.m = startAxis2; targetAxis2.part.f = 0;
   posAxis2           = startAxis2;
+  trueAxis2          = startAxis2;
   sei();
 
   return true;
