@@ -786,24 +786,20 @@ double jd2last(double JulianDay, double ut1) {
 }
 
 // passes Local Apparent Sidereal Time to stepper timer
-// uses LST, updates lst
-void update_lst() {
-  long lst1=(LST/24.0)*8640000.0;
-  siderealTimer=lst1;
+void update_lst(double t) {
+  long lst1=(t/24.0)*8640000.0;
 
-  // set the local sidereal time, mark where we start at
+  // set the local sidereal time
   cli(); 
   lst=lst1;
-  lst_start=lst;
   sei();
-  lst_mS_start=millis();
 }
 
 // convert the lst (in 1/100 second units) into floating point hours
-// uses lst, updates LST
-void update_LST() {
+double LST() {
   cli(); long tempLst=lst; sei();
-  LST=timeRange((tempLst/8640000.0)*360.0/15.0); 
+  while (tempLst>8640000) tempLst-=8640000;
+  return (tempLst/8640000.0)*360.0/15.0;
 }
 
 double timeRange(double time) {
@@ -894,7 +890,7 @@ bool nextAlign() {
     // set the ID offset
     if (!syncEqu(newTargetRA,newTargetDec)) { return true; }
     avgDec=newTargetDec;
-    avgHA =haRange(LST*15.0-newTargetRA);
+    avgHA =haRange(LST()*15.0-newTargetRA);
   } else 
   // Second star:
   // Near the celestial equator (Dec=0, HA=0), telescope East of the pier
@@ -905,7 +901,7 @@ bool nextAlign() {
     double ID1 = ID;
 
     avgDec=(avgDec+newTargetDec)/2.0;
-    avgHA =(-avgHA+haRange(LST*15.0-newTargetRA))/2.0; // last HA is negative because we were on the other side of the meridian
+    avgHA =(-avgHA+haRange(LST()*15.0-newTargetRA))/2.0; // last HA is negative because we were on the other side of the meridian
     if (syncEqu(newTargetRA,newTargetDec)) {
       double IH2=IH;
       double ID2=ID;
@@ -951,7 +947,7 @@ bool nextAlign() {
       double ID2=ID;
 
       azmCor = -(ID2-ID1);                                      // offset in declination is largely due to polar align Azm error
-      azmCor = azmCor/sin(haRange(LST*15.0-newTargetRA)/Rad);   // correct for HA of measurement location
+      azmCor = azmCor/sin(haRange(LST()*15.0-newTargetRA)/Rad);   // correct for HA of measurement location
 
       // allow the azmCor to be applied
       if (syncEqu(newTargetRA,newTargetDec)) {
