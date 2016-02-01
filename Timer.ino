@@ -91,7 +91,7 @@ volatile uint32_t nextAxis2Rate = 100000UL;
 void Timer4SetRate(long rate) {
 #if defined(__AVR__)
   // valid for rates down to 0.25 second, and cap the rate
-  if (StepsPerSecondAxis2<31) rate=rate/64L; else rate=rate/8L;
+  if (StepsPerSecondAxis1<31) rate=rate/64L; else rate=rate/8L;
   if (rate>65536L) rate=65536L;
   cli(); nextAxis2Rate=rate-1L; sei();
 #elif (defined(__arm__) && defined(TEENSYDUINO)) || (defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__))
