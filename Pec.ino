@@ -16,10 +16,10 @@ void Pec() {
 
   // keep track of our current step position, and when the step position on the worm wraps during playback
   lastWormRotationStepPos = wormRotationStepPos;
-  cli(); long posPEC=(long)targetAxis1.part.m; sei();
+  cli(); long posPEC=(long)targetAxis1.part.m-trueAxis1; sei();
   
   // where we're at (HA), must always be positive, so add 360 degrees (in steps)
-  posPEC=posPEC+StepsPerDegreeAxis1*360L;
+  posPEC=posPEC+StepsPerDegreeAxis1*720L;
   wormRotationStepPos =(posPEC-PECindex_record) % StepsPerAxis1WormRotation;
   
   // handle playing back and recording PEC
