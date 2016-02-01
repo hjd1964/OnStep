@@ -76,9 +76,6 @@ double JD  = 0.0;                    // and date, used for computing LST
 double LMT = 0.0;                    // internally, the date and time is kept in JD/LMT and LMT is updated to keep current time
 double timeZone = 0.0;               //
 
-double LST = 0.0;                    // this is the local (apparent) sidereal time in 24 hour format (0 to <24) must be updated when accessed
-long lst_start = 0;                  // the start of lst
-unsigned long lst_mS_start = 0;      // mS at the start of lst
 volatile long lst = 0;               // this is the local (apparent) sidereal time in 1/100 seconds (23h 56m 4.1s per day = 86400 clock seconds/
                                      // 86164.09 sidereal seconds = 1.00273 clock seconds per sidereal second)
 
@@ -755,23 +752,16 @@ int reticuleBrightness=RETICULE_LED_PINS;
 #define PlayPEC          2
 #define ReadyRecordPEC   3
 #define RecordPEC        4
-long    accPecGuideHA    = 0;      // for PEC, buffers steps to be recorded
-boolean PECfirstRecord   = false;
-int     PECstatus        = IgnorePEC;
-boolean PECrecorded      = false;
-long    PECindex_record  = 0;
-double  PECstartDelta    = 0;
-long    lastWormRotationStepPos = -1;
-long    wormRotationStepPos = 0;
-long    PECindex         = 0;
-long    PECindex1        = 0;
-int     PECav            = 0;
-long    lastPECindex     = -1;
-long    PECtime_lastSense= 0;      // time since last PEC index was sensed
-long    PECindex_sense   = 0;      // position of active PEC index sensed
-long    next_PECindex_sense=-1;    // position of next PEC index sensed
-int     PECautoRecord    = 0;      // for writing to PEC table to EEPROM
-boolean PECindexDetected = false;  // indicates PEC index was found
+volatile byte    PECstatus        = IgnorePEC;
+volatile long    PECindex_record  = 0;
+volatile long    PECindex_sense   = 0;      // position of active PEC index sensed
+volatile boolean PECrecorded      = false;
+volatile long    PECtime_lastSense= 0;      // time since last PEC index was sensed
+volatile int     PECautoRecord    = 0;      // for writing to PEC table to EEPROM
+volatile int     PECav            = 0;
+volatile boolean PECfirstRecord   = false;
+volatile boolean PECindexDetected = false;  // indicates PEC index was found
+volatile long    PECindex1        = 0;
 
 // backlash control
 volatile int backlashAxis1  = 0;
@@ -1225,8 +1215,7 @@ void setup() {
   UT1_start  =UT1;
   UT1mS_start=millis(); 
 
-  LST=jd2last(JD,UT1);
-  update_lst();
+  update_lst(jd2last(JD,UT1));
   
   // get the min. and max altitude
   minAlt=EEPROM.read(EE_minAlt)-128;
@@ -1391,7 +1380,7 @@ void loop() {
       moveTo();
     }
 
-    // figure out the current Alititude
+    // figure out the current Altitude
     if (lst%3==0) do_fastalt_calc();
 
 #ifdef MOUNT_TYPE_ALTAZM
@@ -1426,9 +1415,6 @@ void loop() {
     // this clock doesn't rollover (at 24 hours) since that would cause date confusion
     double t2=(double)(m-UT1mS_start)/1000.0;
     UT1=UT1_start+t2/3600.0;   // This just needs to be accurate to the nearest second, it's about 10x better
-
-    // update the local sidereal time floating point representation
-    update_LST();
     
     #ifdef PEC_SENSE
     // see if we're on the PEC index
@@ -1503,12 +1489,6 @@ void loop() {
 
     // basic check to see if we're not at home
     if (trackingState!=TrackingNone) atHome=false;
-
-    // reset the sidereal clock once a day, to keep the significant digits from being consumed
-    // I'm shooting for keeping OnStep reliable for about 50 days of continuous uptime (until millis() rolls over)
-    // really working with a single and should have, just barely, enough significant digits to get us through a day
-    unsigned long lst_now=lst_start+round( (double)((m-lst_mS_start)/10.0) * 1.00273790935);
-    if ((lst_now-lst_start)>24L*3600L*100L) update_lst();
 
   } else {
   // COMMAND PROCESSING --------------------------------------------------------------------------------
