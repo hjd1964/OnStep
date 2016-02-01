@@ -148,7 +148,6 @@ boolean doubleToDms(char *reply, double *f, boolean fullRange, boolean signPrese
     s[9+o]=0;
     sprintf(reply,s,d1,(int)m1);
   }
-//  Serial.print(str);
   return true;
 }
 
@@ -719,7 +718,6 @@ boolean do_altAzmRate_calc() {
   }
   return done;
 }
-
 #endif
 
 // converts Gregorian date (Y,M,D) to Julian day number
@@ -894,8 +892,8 @@ bool nextAlign() {
     alignMode++;
     // set the IH offset
     // set the ID offset
-    if (!syncEqu(newTargetRA,newtargetDec)) { return true; }
-    avgDec=newtargetDec;
+    if (!syncEqu(newTargetRA,newTargetDec)) { return true; }
+    avgDec=newTargetDec;
     avgHA =haRange(LST*15.0-newTargetRA);
   } else 
   // Second star:
@@ -906,9 +904,9 @@ bool nextAlign() {
     double IH1 = IH;
     double ID1 = ID;
 
-    avgDec=(avgDec+newtargetDec)/2.0;
+    avgDec=(avgDec+newTargetDec)/2.0;
     avgHA =(-avgHA+haRange(LST*15.0-newTargetRA))/2.0; // last HA is negative because we were on the other side of the meridian
-    if (syncEqu(newTargetRA,newtargetDec)) {
+    if (syncEqu(newTargetRA,newTargetDec)) {
       double IH2=IH;
       double ID2=ID;
 
@@ -924,12 +922,12 @@ bool nextAlign() {
       altCor= altCor/cos(avgHA/Rad);            // correct for measurements being away from the Meridian
 
       // allow the altCor to be applied
-      if (syncEqu(newTargetRA,newtargetDec)) {
+      if (syncEqu(newTargetRA,newTargetDec)) {
         ID2=ID;
         IH2=IH;
 
-        doCor =-(IH2-IH1)/2.0;                   // the difference of these two values should be a decent approximation of the optical axis to Dec axis error (aka cone error)
-        doCor = doCor*cos(avgDec/Rad);           // correct for measurement being away from the Celestial Equator
+        doCor =-(IH2-IH1)/2.0;                  // the difference of these two values should be a decent approximation of the optical axis to Dec axis error (aka cone error)
+        doCor = doCor*cos(avgDec/Rad);          // correct for measurement being away from the Celestial Equator
 
         IH  = IH3;
         IHS = (long)(IH*(double)StepsPerDegreeAxis1);
@@ -948,7 +946,7 @@ bool nextAlign() {
     
     double IH1 = IH;
     double ID1 = ID;
-    if (syncEqu(newTargetRA,newtargetDec)) {
+    if (syncEqu(newTargetRA,newTargetDec)) {
       double IH2=IH;
       double ID2=ID;
 
@@ -956,13 +954,13 @@ bool nextAlign() {
       azmCor = azmCor/sin(haRange(LST*15.0-newTargetRA)/Rad);   // correct for HA of measurement location
 
       // allow the azmCor to be applied
-      if (syncEqu(newTargetRA,newtargetDec)) {
+      if (syncEqu(newTargetRA,newTargetDec)) {
         ID2=ID;
         IH2=IH;
         // only apply Dec axis flexture term on GEMs
         #ifdef MOUNT_TYPE_GEM
         pdCor = (IH2-IH1);                      // the Dec axis to RA axis perp. error should be the only major source of error left effecting the HA
-        pdCor = pdCor/tan(newtargetDec/Rad);    // correct for Dec of measurement location
+        pdCor = pdCor/tan(newTargetDec/Rad);    // correct for Dec of measurement location
         #else
         pdCor = 0.0;
         #endif
