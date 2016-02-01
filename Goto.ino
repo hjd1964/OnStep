@@ -190,8 +190,8 @@ byte goToEqu(double RA, double Dec) {
 
 #ifdef MOUNT_TYPE_ALTAZM
   EquToHor(latitude,HA,Dec,&a,&z);
-  if (Azm>180.0) Azm-=360.0;
-  if (Azm<-180.0) Azm+=360.0;
+  if (z>180.0) z-=360.0;
+  if (z<-180.0) z+=360.0;
   // corrected to instrument horizon
   z-=IH;
   a-=ID;
