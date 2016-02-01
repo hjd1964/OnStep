@@ -272,7 +272,7 @@ void Ethernet_get() {
     if ( (atoi2(get_vals,&i)) && ((i>=-180) && (i<=180))) { get_temp_float=i; }
   }
   if ((get_names[0]=='g') && (get_names[1]=='2')) {
-    if ( (atoi2(get_vals,&i)) && ((i>=0) && (i<=60))) { if (get_temp_float<0.0) i=-i; longitude=get_temp_float+((double)i)/60.0; float f=longitude; EEPROM_writeQuad(EE_sites+(currentSite)*25+4,(byte*)&f); LST=jd2last(JD,UT1); update_lst(); }
+    if ( (atoi2(get_vals,&i)) && ((i>=0) && (i<=60))) { if (get_temp_float<0.0) i=-i; longitude=get_temp_float+((double)i)/60.0; float f=longitude; EEPROM_writeQuad(EE_sites+(currentSite)*25+4,(byte*)&f); update_lst(jd2last(JD,UT1)); }
   }
   if ((get_names[0]=='t') && (get_names[1]=='1')) {
     if ( (atoi2(get_vals,&i)) && ((i>=-180) && (i<=180))) { get_temp_float=i; }
@@ -305,8 +305,7 @@ void Ethernet_get() {
       UT1=LMT+timeZone;
       UT1_start  =UT1;
       UT1mS_start=millis();
-      LST=jd2last(JD,UT1);
-      update_lst();
+      update_lst(jd2last(JD,UT1));
     }
   }
   // from the Control.htm page -------------------------------------------------------------------
@@ -324,8 +323,7 @@ void Ethernet_get() {
       sprintf(temp,"%02d/%02d/%02d",get_temp_month,get_temp_day,get_temp_year);
       if (dateToDouble(&JD,temp)) { 
         float f=JD; EEPROM_writeQuad(EE_JD,(byte*)&f); 
-        LST=jd2last(JD,UT1); 
-        update_lst();
+        update_lst(jd2last(JD,UT1));
       }
     }
   }
@@ -346,8 +344,7 @@ void Ethernet_get() {
         UT1=LMT+timeZone; 
         UT1_start  =UT1;
         UT1mS_start=millis(); 
-        LST=jd2last(JD,UT1); 
-        update_lst(); 
+        update_lst(jd2last(JD,UT1)); 
       }
       highPrecision=i;
     }
@@ -534,8 +531,9 @@ if (html_page_step==++stp) {
     strcpy_P(temp1, html_index4); sprintf(temp,temp1,temp2);
   }
   if (html_page_step==++stp) { 
-    i=highPrecision; highPrecision=true; 
-    doubleToHms(temp2,&LST);
+    i=highPrecision; highPrecision=true;
+    f=LST();
+    doubleToHms(temp2,&f);
     highPrecision=i;
     
     strcpy_P(temp1, html_index4a); sprintf(temp,temp1,temp2);
