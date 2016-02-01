@@ -44,7 +44,7 @@ void processCommands() {
 #endif
     else {
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
-      Ethernet_www();
+  Ethernet_www();
 #endif
       return;
     }
@@ -162,7 +162,7 @@ void processCommands() {
 //         Returns: "N/A#"
       if ((command[0]=='C') && ((command[1]=='S') || command[1]=='M'))  {
         if (trackingState!=TrackingMoveTo) {
-          syncEqu(newTargetRA,newtargetDec);
+          syncEqu(newTargetRA,newTargetDec);
           if (command[1]=='M') strcpy(reply,"N/A");
           quietReply=true;
         }
@@ -203,7 +203,7 @@ void processCommands() {
       if (command[1]=='D')  { getEqu(&f,&f1,true,true); if (!doubleToDms(reply,&f1,false,true)) commandError=true; else quietReply=true; } else 
 //  :Gd#   Get Currently Selected Target Declination
 //         Returns: sDD*MM# or sDD*MM'SS# (based on precision setting)
-      if (command[1]=='d')  { if (!doubleToDms(reply,&newtargetDec,false,true)) commandError=true; else quietReply=true; } else 
+      if (command[1]=='d')  { if (!doubleToDms(reply,&newTargetDec,false,true)) commandError=true; else quietReply=true; } else 
 //  :GG#   Get UTC offset time
 //         Returns: sHH#
 //         The number of decimal hours to add to local time to convert it to UTC
@@ -256,7 +256,7 @@ void processCommands() {
 //  :GS#   Get the Sidereal Time
 //         Returns: HH:MM:SS#
 //         The Sidereal Time as an ASCII Sexidecimal value in 24 hour format
-      if (command[1]=='S')  { i=highPrecision; highPrecision=true; if (!doubleToHms(reply,&LST)) commandError=true; else quietReply=true; highPrecision=i; } else 
+      if (command[1]=='S')  { i=highPrecision; highPrecision=true; f=LST(); if (!doubleToHms(reply,&f)) commandError=true; else quietReply=true; highPrecision=i; } else 
 //  :GT#   Get tracking rate
 //         Returns: dd.ddddd# (OnStep returns more decimal places than LX200 standard)
 //         Returns the tracking rate if siderealTracking, 0.0 otherwise
@@ -350,6 +350,8 @@ void processCommands() {
               case '7': cli(); temp=(long)(targetAxis2.part.m); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                         // Debug7, Dec target position
               case '8': cli(); temp=(long)(posAxis1);     sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                               // Debug8, HA motor position
               case '9': cli(); temp=(long)(posAxis2);    sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                                // Debug9, Dec motor position
+              case 'A': sprintf(reply,"%ld%%",(worst_loop_time*100L)/9970L); worst_loop_time=0; quietReply=true; break;                           // DebugA, Workload
+              
             }
           } else commandError=true;
         } else commandError=true;
@@ -406,7 +408,7 @@ void processCommands() {
 //          Returns: <string>#
 //          Returns a string containing the current target object’s name and object type.
       if (command[1]=='I') {
-        Lib.readVars(reply,&i,&newTargetRA,&newtargetDec);
+        Lib.readVars(reply,&i,&newTargetRA,&newTargetDec);
 
         char const * objType=objectStr[i];
         strcat(reply,",");
@@ -419,7 +421,7 @@ void processCommands() {
 //          Returns: <string>#
 //          Returns a string containing the current target object’s name, type, RA, and Dec.
       if (command[1]=='R') {
-        Lib.readVars(reply,&i,&newTargetRA,&newtargetDec);
+        Lib.readVars(reply,&i,&newTargetRA,&newTargetDec);
 
         char const * objType=objectStr[i];
         char ws[20];
@@ -428,7 +430,7 @@ void processCommands() {
         strcat(reply,objType);
         if (strcmp(reply,",UNK")!=0) {
           f=newTargetRA; f/=15.0; doubleToHms(ws,&f); strcat(reply,","); strcat(reply,ws);
-          doubleToDms(ws,&newtargetDec,false,true); strcat(reply,","); strcat(reply,ws);
+          doubleToDms(ws,&newTargetDec,false,true); strcat(reply,","); strcat(reply,ws);
         }
         
         Lib.nextRec();
@@ -470,7 +472,7 @@ void processCommands() {
           for (l=0; l<=15; l++) { if (strcmp(objType,objectStr[l])==0) i=l; }
         }
         
-        if (Lib.firstFreeRec()) Lib.writeVars(name,i,newTargetRA,newtargetDec); else commandError=true;
+        if (Lib.firstFreeRec()) Lib.writeVars(name,i,newTargetRA,newTargetDec); else commandError=true;
       } else 
 
 // :LN#    Find next deep sky target object subject to the current constraints.
@@ -607,7 +609,7 @@ void processCommands() {
 //         5=Busy                    Goto already active
 //         6=Outside limits          Outside limits, above the Zenith limit
       if (command[1]=='S')  {
-        i=goToEqu(newTargetRA,newtargetDec);
+        i=goToEqu(newTargetRA,newTargetDec);
         reply[0]=i+'0'; reply[1]=0;
         quietReply=true;
         supress_frame=true; 
@@ -739,17 +741,17 @@ void processCommands() {
 //          Change Date to MM/DD/YY
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='C')  { if (!dateToDouble(&JD,parameter)) commandError=true; else { float f=JD; EEPROM_writeQuad(EE_JD,(byte*)&f); LST=jd2last(JD,UT1); update_lst(); } } else 
+      if (command[1]=='C')  { if (!dateToDouble(&JD,parameter)) commandError=true; else { float f=JD; EEPROM_writeQuad(EE_JD,(byte*)&f); update_lst(jd2last(JD,UT1)); } } else 
 //  :SdsDD*MM#
 //          Set target object declination to sDD*MM or sDD*MM:SS depending on the current precision setting
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='d')  { if (!dmsToDouble(&newtargetDec,parameter,true)) commandError=true; } else 
+      if (command[1]=='d')  { if (!dmsToDouble(&newTargetDec,parameter,true)) commandError=true; } else 
 //  :SgsDDD*MM#
 //          Set current sites longitude to sDDD*MM an ASCII position string, East longitudes are expressed as negative
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='g')  { i=highPrecision; highPrecision=false; if (!dmsToDouble(&longitude,(char *)&parameter[1],false)) commandError=true; else { if (parameter[0]=='-') longitude=-longitude; float f=longitude; EEPROM_writeQuad(EE_sites+(currentSite)*25+4,(byte*)&f); } LST=jd2last(JD,UT1); update_lst(); highPrecision=i; } else 
+      if (command[1]=='g')  { i=highPrecision; highPrecision=false; if (!dmsToDouble(&longitude,(char *)&parameter[1],false)) commandError=true; else { if (parameter[0]=='-') longitude=-longitude; float f=longitude; EEPROM_writeQuad(EE_sites+(currentSite)*25+4,(byte*)&f); } update_lst(jd2last(JD,UT1)); highPrecision=i; } else 
 //  :SGsHH#
 //  :SGsHH:MM# (where MM is 30 or 45)
 //          Set the number of hours added to local time to yield UTC
@@ -773,8 +775,7 @@ void processCommands() {
             UT1=LMT+timeZone;
             UT1_start  =UT1;
             UT1mS_start=millis();
-            LST=jd2last(JD,UT1);
-            update_lst();
+            update_lst(jd2last(JD,UT1));
           } else commandError=true; 
         } else commandError=true; 
       } else
@@ -796,8 +797,7 @@ void processCommands() {
           UT1=LMT+timeZone; 
           UT1_start  =UT1;
           UT1mS_start=millis(); 
-          LST=jd2last(JD,UT1); 
-          update_lst(); 
+          update_lst(jd2last(JD,UT1));
         }
         highPrecision=i;
       } else 
@@ -829,7 +829,7 @@ void processCommands() {
 //          Sets the local (apparent) sideral time to HH:MM:SS
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='S')  { i=highPrecision; highPrecision=true; if (!hmsToDouble(&LST,parameter)) commandError=true; else update_lst(); highPrecision=i; } else 
+      if (command[1]=='S')  { i=highPrecision; highPrecision=true; if (!hmsToDouble(&f,parameter)) commandError=true; else update_lst(f); highPrecision=i; } else 
 //  :StsDD*MM#
 //          Sets the current site latitude to sDD*MM#
 //          Return: 0 on failure
