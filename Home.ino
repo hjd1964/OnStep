@@ -23,7 +23,7 @@ boolean goHome() {
   trackingState=TrackingMoveTo; SetSiderealClockRate(siderealInterval);
   sei();
   
-  homeMount         = true;
+  homeMount=true;
   
   return true;
 }
@@ -78,8 +78,8 @@ boolean setHome() {
   // reset tracking and rates
   trackingState       = TrackingNone;
   lastTrackingState   = TrackingNone;
-  timerRateAxis1         = SiderealRate;
-  timerRateAxis2        = SiderealRate;
+  timerRateAxis1      = SiderealRate;
+  timerRateAxis2      = SiderealRate;
 
   // not parked, but don't wipe the park position if it's saved - we can still use it
   parkStatus          = NotParked;
@@ -87,13 +87,13 @@ boolean setHome() {
   
   // reset PEC, unless we have an index to recover from this
   #ifdef PEC_SENSE_OFF
-    PECstatus           = IgnorePEC;
-    PECrecorded         = false;
-    EEPROM.write(EE_PECstatus,PECstatus);
-    EEPROM.write(EE_PECrecorded,PECrecorded);
+    pecStatus         = IgnorePEC;
+    pecRecorded       = false;
+    EEPROM.write(EE_pecStatus,pecStatus);
+    EEPROM.write(EE_pecRecorded,pecRecorded);
   #else
-    PECstatus           = IgnorePEC;
-    PECstatus  =EEPROM.read(EE_PECstatus);
+    pecStatus         = IgnorePEC;
+    pecStatus = EEPROM.read(EE_pecStatus);
   #endif
 
   // the polar home position
@@ -112,10 +112,11 @@ boolean setHome() {
   targetAxis1.part.m = startAxis1; targetAxis1.part.f = 0;
   posAxis1           = startAxis1;
   trueAxis1          = startAxis1;
-  PEC_HA  = 0;
   targetAxis2.part.m = startAxis2; targetAxis2.part.f = 0;
   posAxis2           = startAxis2;
   trueAxis2          = startAxis2;
+  blAxis1            = 0;
+  blAxis2            = 0;
   sei();
 
   return true;
