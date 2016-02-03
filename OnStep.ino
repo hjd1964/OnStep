@@ -1237,7 +1237,7 @@ void setup() {
   for (int i=0; i<PECBufferSize; i++) pecBuffer[i]=EEPROM.read(EE_indexWorm+i);
   wormSensePos=EEPROM_readLong(EE_wormSensePos);
   #ifdef PEC_SENSE_OFF
-  indexWorm_sense=0;
+  wormSensePos=0;
   #endif
   
   // get the Park status
