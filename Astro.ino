@@ -433,17 +433,31 @@ double az_sinalt,az_cosalt,az_cosazm;
 double az_deltaAxis1=15.0,az_deltaAxis2=0.0;
 
 // az_deltaH/D are in arc-seconds/second
-// trackingtimerRateAxis1/2 are x the sidereal rate
+// trackingTimerRateAxis1/2 are x the sidereal rate
 void SetDeltaTrackingRate() {
-  trackingtimerRateAxis1 = az_deltaAxis1/15.0;
+  trackingTimerRateAxis1 = az_deltaAxis1/15.0;
   trackingTimerRateAxis2 = az_deltaAxis2/15.0;
-  fstepAxis1.fixed=doubleToFixed( (((double)StepsPerDegreeAxis1/240.0)*trackingtimerRateAxis1)/100.0 );
+  fstepAxis1.fixed=doubleToFixed( (((double)StepsPerDegreeAxis1/240.0)*trackingTimerRateAxis1)/100.0 );
   fstepAxis2.fixed=doubleToFixed( (((double)StepsPerDegreeAxis2/240.0)*trackingTimerRateAxis2)/100.0 );
 }
 
+double _az_deltaAxis1=1.0;
 void SetTrackingRate(double r) {
   az_deltaAxis1=r*15.0;
+  _az_deltaAxis1=az_deltaAxis1;
   az_deltaAxis2=0.0;
+}
+
+void TempTrackingRateRA(double r) {
+  az_deltaAxis1=r*15.0;
+}
+
+void RestoreTrackingRateRA() {
+  az_deltaAxis1=_az_deltaAxis1;
+}
+
+double CurrentTrackingRateRA() {
+  return _az_deltaAxis1;
 }
 
 boolean do_refractionRate_calc() {
