@@ -205,8 +205,8 @@ void moveTo() {
             parkStatus=Parked; EEPROM.write(EE_parkStatus,parkStatus);
 
             // just store the indexes of our pointing model
-            EEPROM_writeQuad(EE_IH,(byte*)&IH);
-            EEPROM_writeQuad(EE_ID,(byte*)&ID);
+            EEPROM_writeFloat(EE_IH,IH);
+            EEPROM_writeFloat(EE_ID,ID);
             
             // disable the stepper drivers
             digitalWrite(Axis1_EN,Axis1_Disabled);
@@ -217,13 +217,14 @@ void moveTo() {
 
       } else
         if (homeMount) { 
+          parkClearBacklash();
           setHome();
           homeMount=false; 
           atHome=true;
           
           // disable the stepper drivers
           digitalWrite(Axis1_EN,Axis1_Disabled);
-          digitalWrite(Axis2_EN,Axis2_Disabled);        
+          digitalWrite(Axis2_EN,Axis2_Disabled);
         }
     }
   }
