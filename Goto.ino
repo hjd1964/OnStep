@@ -282,8 +282,13 @@ byte goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1, long 
         pierSide=PierSideWest;
         DecDir  =DecDirWInit;
         // default, if the polar-home position is +90 deg. HA, we want -90HA
-        cli(); posAxis1=-posAxis1; sei();
-        trueAxis1=-trueAxis1;
+        cli();
+        posAxis1-=180L*StepsPerDegreeAxis1;
+        sei();
+        trueAxis1-=180L*StepsPerDegreeAxis1;
+
+//        posAxis1=-posAxis1;
+//        trueAxis1=-trueAxis1;
       } else {
         // east side of pier - we're in the western sky and the HA's are positive
         // this is the default in the polar-home position
@@ -320,7 +325,7 @@ byte goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1, long 
   timerRateAxis2=SiderealRate;
   sei();
   
-  disablePec();
+  DisablePec();
   
   return 0;
 }
