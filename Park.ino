@@ -14,20 +14,20 @@ boolean setPark() {
   #ifdef SYNC_ANYWHERE_ON
     long ax1md=((((long)targetAxis1.part.m+IHS)-trueAxis1)%1024L-((long)targetAxis1.part.m+IHS)%1024L);
     long ax2md=((((long)targetAxis2.part.m+IDS)-trueAxis2)%1024L-((long)targetAxis2.part.m+IDS)%1024L);
-    long h=(((long)targetAxis1.part.m+IHS)/1024L)*1024L+ax1md;
-    long d=(((long)targetAxis2.part.m+IDS)/1024L)*1024L+ax2md;
+    long h=(((long)targetAxis1.part.m+IHS)/1024L)*1024L-ax1md;
+    long d=(((long)targetAxis2.part.m+IDS)/1024L)*1024L-ax2md;
   #else
     long ax1md=(((long)targetAxis1.part.m-trueAxis1)%1024L-(long)targetAxis1.part.m%1024L);
     long ax2md=(((long)targetAxis2.part.m-trueAxis2)%1024L-(long)targetAxis2.part.m%1024L);
-    long h=(((long)targetAxis1.part.m)/1024L)*1024L+ax1md;
-    long d=(((long)targetAxis2.part.m)/1024L)*1024L+ax2md;
+    long h=(((long)targetAxis1.part.m)/1024L)*1024L-ax1md;
+    long d=(((long)targetAxis2.part.m)/1024L)*1024L-ax2md;
   #endif
 
     // store our position
-    EEPROM_writeQuad(EE_posAxis1,(byte*)&h);
-    EEPROM_writeQuad(EE_posAxis2,(byte*)&d);
-    EEPROM_writeQuad(EE_trueAxis1,(byte*)&trueAxis1);
-    EEPROM_writeQuad(EE_trueAxis2,(byte*)&trueAxis2);
+    EEPROM_writeLong(EE_posAxis1,h);
+    EEPROM_writeLong(EE_posAxis2,d);
+    EEPROM_writeLong(EE_trueAxis1,trueAxis1);
+    EEPROM_writeLong(EE_trueAxis2,trueAxis2);
 
     // and the align
     saveAlignModel();
@@ -45,12 +45,12 @@ boolean setPark() {
 
 boolean saveAlignModel() {
   // and store our corrections
-  EEPROM_writeQuad(EE_doCor,(byte*)&doCor);
-  EEPROM_writeQuad(EE_pdCor,(byte*)&pdCor);
-  EEPROM_writeQuad(EE_altCor,(byte*)&altCor);
-  EEPROM_writeQuad(EE_azmCor,(byte*)&azmCor);
-  EEPROM_writeQuad(EE_IH,(byte*)&IH);
-  EEPROM_writeQuad(EE_ID,(byte*)&ID);
+  EEPROM_writeFloat(EE_doCor,doCor);
+  EEPROM_writeFloat(EE_pdCor,pdCor);
+  EEPROM_writeFloat(EE_altCor,altCor);
+  EEPROM_writeFloat(EE_azmCor,azmCor);
+  EEPROM_writeFloat(EE_IH,IH);
+  EEPROM_writeFloat(EE_ID,ID);
   return true;
 }
 
@@ -59,7 +59,7 @@ boolean parkClearBacklash() {
 
   // backlash takeup rate
   cli();
-  long LasttimerRateAxis1 =timerRateAxis1;
+  long LasttimerRateAxis1=timerRateAxis1;
   long LasttimerRateAxis2=timerRateAxis2;
   timerRateAxis1 =timerRateBacklashAxis1;
   timerRateAxis2=timerRateBacklashAxis2;
@@ -112,16 +112,19 @@ byte park() {
         trackingState=TrackingNone; 
 
         // turn off the PEC while we park
-        disablePec();
-        PECstatus=IgnorePEC;
+        DisablePec();
+        pecStatus=IgnorePEC;
   
         // record our status
         parkStatus=Parking;
         EEPROM.write(EE_parkStatus,parkStatus);
         
+        // save the worm sense position
+        EEPROM_writeLong(EE_wormSensePos,wormSensePos);
+        
         // get the position we're supposed to park at
-        long h; EEPROM_readQuad(EE_posAxis1,(byte*)&h);
-        long d; EEPROM_readQuad(EE_posAxis2,(byte*)&d);
+        long h=EEPROM_readLong(EE_posAxis1);
+        long d=EEPROM_readLong(EE_posAxis2);
         
         // now, slew to this target HA,Dec
         byte gotoPierSide=EEPROM.read(EE_pierSide);
@@ -129,11 +132,15 @@ byte park() {
         // if sync anywhere is enabled we have a corrected location, convert to instrument
         // and make sure we land on full-step, and store this new location so we remember PEC
   #ifdef SYNC_ANYWHERE_ON
-        h=((h-IHS)/1024L)*1024L;
-        d=((d-IDS)/1024L)*1024L;
+        long ihs=(IHS/1024L)*1024L;
+        long ids=(IDS/1024L)*1024L;
+        h=h-ihs;
+        d=d-ids;
+        float ih=ihs/StepsPerDegreeAxis1;
+        float id=ids/StepsPerDegreeAxis2;
         // also save the alignment index values in this mode since they can change widely
-        EEPROM_writeQuad(EE_IH,(byte*)&IH);
-        EEPROM_writeQuad(EE_ID,(byte*)&ID);
+        EEPROM_writeFloat(EE_IH,ih);
+        EEPROM_writeFloat(EE_ID,id);
   #endif
 
         goTo(h,d,h,d,gotoPierSide);
@@ -159,21 +166,21 @@ boolean unpark() {
         delay(10);
 
         // get corrections
-        EEPROM_readQuad(EE_doCor,(byte*)&doCor);
-        EEPROM_readQuad(EE_pdCor,(byte*)&pdCor);
-        EEPROM_readQuad(EE_altCor,(byte*)&altCor);
-        EEPROM_readQuad(EE_azmCor,(byte*)&azmCor);
-        EEPROM_readQuad(EE_IH,(byte*)&IH);
+        doCor=EEPROM_readFloat(EE_doCor);
+        pdCor=EEPROM_readFloat(EE_pdCor);
+        altCor=EEPROM_readFloat(EE_altCor);
+        azmCor=EEPROM_readFloat(EE_azmCor);
+        IH=EEPROM_readFloat(EE_IH);
         IHS=(long)(IH*(double)StepsPerDegreeAxis1);
-        EEPROM_readQuad(EE_ID,(byte*)&ID);
+        ID=EEPROM_readFloat(EE_ID);
         IDS=(long)(ID*(double)StepsPerDegreeAxis2);
 
         // get our position
         cli();
-        EEPROM_readQuad(EE_posAxis1,(byte*)&posAxis1);   targetAxis1.part.m=posAxis1; targetAxis1.part.f=0;
-        EEPROM_readQuad(EE_posAxis2,(byte*)&posAxis2);   targetAxis2.part.m=posAxis2; targetAxis2.part.f=0;
-        EEPROM_readQuad(EE_trueAxis1,(byte*)&trueAxis1);
-        EEPROM_readQuad(EE_trueAxis2,(byte*)&trueAxis2);
+        posAxis1=EEPROM_readLong(EE_posAxis1);  targetAxis1.part.m=posAxis1; targetAxis1.part.f=0;
+        posAxis2=EEPROM_readLong(EE_posAxis2);  targetAxis2.part.m=posAxis2; targetAxis2.part.f=0;
+        trueAxis1=EEPROM_readLong(EE_trueAxis1);
+        trueAxis2=EEPROM_readLong(EE_trueAxis2);
 
   // if sync anywhere is enabled we have a corrected location, convert to instrument
   // just like we did when we parked
@@ -182,7 +189,7 @@ boolean unpark() {
         posAxis2=((posAxis2-IDS)/1024L)*1024L;
   #endif
         sei();
-  
+
         // see what side of the pier we're on
         pierSide=EEPROM.read(EE_pierSide);
         if (pierSide==PierSideWest) DecDir = DecDirWInit; else DecDir = DecDirEInit;
