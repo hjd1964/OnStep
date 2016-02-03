@@ -129,7 +129,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     long calculatedTimerRateAxis1;
     
     // guide rate acceleration/deceleration and control
-    cli();  double x=((long)targetAxis1.part.m+PEC_HA)-posAxis1; sei();
+    cli();  double x=((long)targetAxis1.part.m)-posAxis1; sei();
     if ((!inbacklashAxis1) && (guideDirAxis1)) {
       if ((fabs(guidetimerRateAxis1)<10.0) && (fabs(guideTimerRateAxis1A)<10.0)) { 
         // break mode
@@ -146,7 +146,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
       if ((guideDirAxis1=='b') && (fabs(x)<2)) { guideDirAxis1=0; guidetimerRateAxis1=0; guideTimerRateAxis1A=0; }
     }
 
-    double timerRateAxis1A=trackingtimerRateAxis1; if (((guideDirAxis1) || (guideDirAxis2)) && (activeGuideRate>GuideRate1x)) timerRateAxis1A=0.0;
+    double timerRateAxis1A=trackingTimerRateAxis1; if (((guideDirAxis1) || (guideDirAxis2)) && (activeGuideRate>GuideRate1x)) timerRateAxis1A=0.0;
     double timerRateAxis1B=fabs(guideTimerRateAxis1A+pecTimerRateAxis1+timerRateAxis1A);
     // round up to run the motor timers just a tiny bit slow, then adjust below if we start to fall behind during sidereal tracking
     if (timerRateAxis1B>0.5) calculatedTimerRateAxis1=ceil((double)SiderealRate/timerRateAxis1B)+5; else calculatedTimerRateAxis1=ceil((double)SiderealRate*2.0);
@@ -214,7 +214,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     // travel through the backlash is done, but we weren't following the target while it was happening!
     // so now get us back to near where we need to be
     if ((!inbacklashAxis1) && (wasInbacklashAxis1) && (!guideDirAxis1)) {
-      cli(); if (abs(posAxis1-((long)targetAxis1.part.m+PEC_HA))>2) thisTimerRateAxis1=TakeupRate; else wasInbacklashAxis1=false; sei();
+      cli(); if (abs(posAxis1-((long)targetAxis1.part.m))>2) thisTimerRateAxis1=TakeupRate; else wasInbacklashAxis1=false; sei();
     }
     if ((!inbacklashAxis2) && (wasInbacklashAxis2) && (!guideDirAxis2)) {
       cli(); if (abs(posAxis2-(long)targetAxis2.part.m)>2) thisTimerRateAxis2=TakeupRate; else wasInbacklashAxis2=false; sei();
@@ -263,7 +263,7 @@ ISR(TIMER3_COMPA_vect)
   // switch micro-step mode
   if (gotoModeAxis1!=gotoRateAxis1) {
     // only when at the home position
-    if ((posAxis1+blAxis1)%256==0) { // was 1024 in support of 256x drivers... if they work like the DRV8825, A4988 this should still be ok
+    if (((posAxis1+blAxis1)-trueAxis1)%256==0) { // was 1024 in support of 256x drivers... if they work like the DRV8825, A4988 this should still be ok
       // switch mode
       if (gotoModeAxis1) { stepAxis1=1; modeAxis1_next=AXIS1_MODE; gotoModeAxis1=false; } else { stepAxis1=AXIS1_STEP_GOTO; modeAxis1_next=AXIS1_MODE_GOTO; gotoModeAxis1=true; }
       digitalWrite(Axis1_M0,(modeAxis1_next & 1));
@@ -278,8 +278,8 @@ ISR(TIMER3_COMPA_vect)
 #endif
 
   // Guessing about 4+4+1+ 4+4+1+ 1+ 2+1+2+ 13=37 clocks between here and the step signal which is 2.3uS
-  if (posAxis1!=(long)targetAxis1.part.m+PEC_HA) { // Move the RA stepper to the target
-    if (posAxis1<(long)targetAxis1.part.m+PEC_HA) dirAxis1=1; else dirAxis1=0; // Direction control
+  if (posAxis1!=(long)targetAxis1.part.m) { // Move the RA stepper to the target
+    if (posAxis1<(long)targetAxis1.part.m) dirAxis1=1; else dirAxis1=0; // Direction control
     #ifdef REVERSE_AXIS1_ON
       if (HADir==dirAxis1) CLR(Axis1DirPORT, Axis1DirBit); else SET(Axis1DirPORT, Axis1DirBit); // Set direction, HADir default LOW (=0, for my wiring.)  Needs >=0.65uS before/after rising step signal (DRV8825 or A4988).
     #else                                                                                       // Guessing about 1+2+1+4+4+1=13 clocks between here and the step signal which is 0.81uS
@@ -330,7 +330,7 @@ ISR(TIMER4_COMPA_vect)
   // switch micro-step mode
   if (gotoModeAxis2!=gotoRateAxis2) {
     // only when at home position
-    if ((posAxis2+blAxis2)%256==0) { // was 1024 in support of 256x drivers... if they work like the DRV8825, A4988 this should still be ok
+    if (((posAxis2+blAxis2)-trueAxis2)%256==0) { // was 1024 in support of 256x drivers... if they work like the DRV8825, A4988 this should still be ok
       // switch mode
       if (gotoModeAxis2) { stepAxis2=1; modeAxis2_next=AXIS2_MODE; gotoModeAxis2=false; } else { stepAxis2=AXIS2_STEP_GOTO; modeAxis2_next=AXIS2_MODE_GOTO; gotoModeAxis2=true; }
       digitalWrite(Axis2_M0,(modeAxis2_next & 1));
