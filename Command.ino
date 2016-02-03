@@ -265,7 +265,7 @@ void processCommands() {
 #ifdef MOUNT_TYPE_ALTAZM
           f=1.00273790935*60.0; 
 #else
-          f=(trackingtimerRateAxis1*1.00273790935)*60.0; 
+          f=(trackingTimerRateAxis1*1.00273790935)*60.0; 
 #endif
         }
         else f=0.0;
@@ -284,7 +284,7 @@ void processCommands() {
         i=0;
         if (trackingState!=TrackingMoveTo)       reply[i++]='N';
         const char *parkStatusCh = "pIPF";       reply[i++]=parkStatusCh[parkStatus]; // not [p]arked, parking [I]n-progress, [P]arked, Park [F]ailed
-        if (PECrecorded)                         reply[i++]='R';
+        if (pecRecorded)                         reply[i++]='R';
         if (atHome)                              reply[i++]='H'; 
         if (PPSsynced)                           reply[i++]='S';
         if ((guideDirAxis1) || (guideDirAxis2))  reply[i++]='G';
@@ -327,7 +327,7 @@ void processCommands() {
           if (parameter[0]=='9') { // 9n: Misc.
             switch (parameter[1]) {
               case '0': dtostrf(guideRates[currentPulseGuideRate]/15.0,2,2,reply); quietReply=true; break;  // pulse-guide rate
-              case '1': sprintf(reply,"%i",PECav); quietReply=true; break;                                  // pec analog value
+              case '1': sprintf(reply,"%i",pecAnalogValue); quietReply=true; break;                                  // pec analog value
               case '2': sprintf(reply,"%ld",(long)(maxRate/16L)); quietReply=true; break;                   // MaxRate
               case '3': sprintf(reply,"%ld",(long)(MaxRate)); quietReply=true; break;                       // MaxRate (default)
 #if defined(__AVR__)
@@ -338,7 +338,7 @@ void processCommands() {
           if (parameter[0]=='F') { // Fn: Debug
             long temp;
             switch (parameter[1]) {
-              case '0': cli(); temp=(long)(posAxis1-((long)targetAxis1.part.m+PEC_HA)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break; // Debug0, true vs. target RA position
+              case '0': cli(); temp=(long)(posAxis1-((long)targetAxis1.part.m)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;        // Debug0, true vs. target RA position
               case '1': cli(); temp=(long)(posAxis2-((long)targetAxis2.part.m)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;        // Debug1, true vs. target Dec position
 //              case '0': cli(); temp=(long)(((az_Azm1-az_Azm2)*2.0)*1000); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;               // Debug0, true vs. target RA position
 //              case '1': cli(); temp=(long)(az_Azm1); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                                    // Debug1, true vs. target Dec position
@@ -633,34 +633,29 @@ void processCommands() {
         if ((parameter[2]==0) && (parameter[0]=='Z')) {
           quietReply=true; 
 #ifndef MOUNT_TYPE_ALTAZM
-          if ((parameter[1]=='+') && (trackingState==TrackingSidereal)) { if (PECrecorded) PECstatus=ReadyPlayPEC; } else
-          if ((parameter[1]=='-') && (trackingState==TrackingSidereal)) { PECstatus=IgnorePEC; } else
-          if ((parameter[1]=='/') && (trackingState==TrackingSidereal)) { PECstatus=ReadyRecordPEC; } else
+          if ((parameter[1]=='+') && (trackingState==TrackingSidereal)) { if (pecRecorded) pecStatus=ReadyPlayPEC; } else
+          if ((parameter[1]=='-') && (trackingState==TrackingSidereal)) { pecStatus=IgnorePEC; } else
+          if ((parameter[1]=='/') && (trackingState==TrackingSidereal)) { pecStatus=ReadyRecordPEC; } else
           if (parameter[1]=='Z') { 
-            for (i=0; i<PECBufferSize; i++) PEC_buffer[i]=128;
-            PECfirstRecord = true;
-            PECstatus      = IgnorePEC;
-            PECrecorded    = false;
-            EEPROM.update(EE_PECstatus,PECstatus);
-            EEPROM.update(EE_PECrecorded,PECrecorded);
-            PECindex_record= 0;
-            PECindex_sense = 0;
-            EEPROM_writeQuad(EE_PECrecord_index,(byte*)&PECindex_record); 
-            EEPROM_writeQuad(EE_PECsense_index,(byte*)&PECindex_sense);
+            for (i=0; i<PECBufferSize; i++) pecBuffer[i]=128;
+            pecFirstRecord = true;
+            pecStatus      = IgnorePEC;
+            pecRecorded    = false;
+            EEPROM.update(EE_pecStatus,pecStatus);
+            EEPROM.update(EE_pecRecorded,pecRecorded);
           } else
           if (parameter[1]=='!') {
-            PECrecorded=true;
-            PECstatus=IgnorePEC;
-            EEPROM.update(EE_PECrecorded,PECrecorded);
-            EEPROM.update(EE_PECstatus,PECstatus);
-            EEPROM_writeQuad(EE_PECrecord_index,(byte*)&PECindex_record); 
-            EEPROM_writeQuad(EE_PECsense_index,(byte*)&PECindex_sense);
+            pecRecorded=true;
+            pecStatus=IgnorePEC;
+            EEPROM.update(EE_pecRecorded,pecRecorded);
+            EEPROM.update(EE_pecStatus,pecStatus);
+            EEPROM_writeLong(EE_wormSensePos,wormSensePos);
             // trigger recording of PEC buffer
-            PECautoRecord=PECBufferSize;
+            pecAutoRecord=PECBufferSize;
           } else
 #endif
           // Status is one of "IpPrR" (I)gnore, get ready to (p)lay, (P)laying, get ready to (r)ecord, (R)ecording.  Or an optional (.) to indicate an index detect.
-          if (parameter[1]=='?') { const char *PECstatusCh = PECStatusString; reply[0]=PECstatusCh[PECstatus]; reply[1]=0; reply[2]=0; if (PECindexDetected) { reply[1]='.'; PECindexDetected=false; } } else { quietReply=false; commandError=true; }
+          if (parameter[1]=='?') { const char *pecStatusCh = PECStatusString; reply[0]=pecStatusCh[pecStatus]; reply[1]=0; reply[2]=0; if (wormSenseDetected) { reply[1]='.'; wormSenseDetected=false; } } else { quietReply=false; commandError=true; }
         } else commandError=true;
       } else
 
@@ -741,7 +736,7 @@ void processCommands() {
 //          Change Date to MM/DD/YY
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='C')  { if (!dateToDouble(&JD,parameter)) commandError=true; else { float f=JD; EEPROM_writeQuad(EE_JD,(byte*)&f); update_lst(jd2last(JD,UT1)); } } else 
+      if (command[1]=='C')  { if (!dateToDouble(&JD,parameter)) commandError=true; else { EEPROM_writeFloat(EE_JD,JD); update_lst(jd2last(JD,UT1)); } } else 
 //  :SdsDD*MM#
 //          Set target object declination to sDD*MM or sDD*MM:SS depending on the current precision setting
 //          Return: 0 on failure
@@ -751,7 +746,7 @@ void processCommands() {
 //          Set current sites longitude to sDDD*MM an ASCII position string, East longitudes are expressed as negative
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='g')  { i=highPrecision; highPrecision=false; if (!dmsToDouble(&longitude,(char *)&parameter[1],false)) commandError=true; else { if (parameter[0]=='-') longitude=-longitude; float f=longitude; EEPROM_writeQuad(EE_sites+(currentSite)*25+4,(byte*)&f); } update_lst(jd2last(JD,UT1)); highPrecision=i; } else 
+      if (command[1]=='g')  { i=highPrecision; highPrecision=false; if (!dmsToDouble(&longitude,(char *)&parameter[1],false)) commandError=true; else { if (parameter[0]=='-') longitude=-longitude; EEPROM_writeFloat(EE_sites+(currentSite)*25+4,longitude); } update_lst(jd2last(JD,UT1)); highPrecision=i; } else 
 //  :SGsHH#
 //  :SGsHH:MM# (where MM is 30 or 45)
 //          Set the number of hours added to local time to yield UTC
@@ -793,9 +788,9 @@ void processCommands() {
       if (command[1]=='L')  {  
         i=highPrecision; highPrecision=true; 
         if (!hmsToDouble(&LMT,parameter)) commandError=true; else {
-          float f=LMT; EEPROM_writeQuad(EE_LMT,(byte*)&f); 
+          EEPROM_writeFloat(EE_LMT,LMT); 
           UT1=LMT+timeZone; 
-          UT1_start  =UT1;
+          UT1_start=UT1;
           UT1mS_start=millis(); 
           update_lst(jd2last(JD,UT1));
         }
@@ -837,7 +832,7 @@ void processCommands() {
       if (command[1]=='t')  { 
         i=highPrecision; highPrecision=false; 
         if (!dmsToDouble(&latitude,parameter,true)) { commandError=true; } else {
-          float f=latitude; EEPROM_writeQuad(100+(currentSite)*25+0,(byte*)&f);
+          EEPROM_writeFloat(100+(currentSite)*25+0,latitude);
 #ifdef MOUNT_TYPE_ALTAZM
           celestialPoleDec=fabs(latitude);
           if (latitude<0) celestialPoleHA=180L; else celestialPoleHA=0L;
@@ -860,7 +855,7 @@ void processCommands() {
             if (abs(f)<0.1) { 
               trackingState = TrackingNone; 
             } else {
-              trackingtimerRateAxis1=(f/60.0)/1.00273790935;
+              trackingTimerRateAxis1=(f/60.0)/1.00273790935;
             }
           } else commandError=true;
         } else commandError=true;
@@ -928,7 +923,7 @@ void processCommands() {
 
        // Only burn the new rate if changing the sidereal interval
        if ((!commandError) && ((command[1]=='+') || (command[1]=='-') || (command[1]=='R'))) {
-         EEPROM_writeQuad(EE_siderealInterval,(byte*)&siderealInterval);
+         EEPROM_writeLong(EE_siderealInterval,siderealInterval);
          SetSiderealClockRate(siderealInterval);
          cli(); SiderealRate=siderealInterval/StepsPerSecondAxis1; sei();
        }
@@ -951,13 +946,13 @@ void processCommands() {
 //         If NNNN is omitted, returns the currently playing segment
      if ((command[0]=='V') && (command[1]=='R')) {
        boolean conv_result=true;
-       if (parameter[0]==0) { i=PECindex1; } else conv_result=atoi2(parameter,&i);
+       if (parameter[0]==0) { i=pecIndex1; } else conv_result=atoi2(parameter,&i);
        if ((conv_result) && ((i>=0) && (i<PECBufferSize))) {
-         if (parameter[0]==0) { 
-           i=(i-1)%SecondsPerAxis1WormRotation; 
-           i1=PEC_buffer[i]-128; sprintf(reply,"%+04i,%03i",i1,i); 
-         } else { 
-           i1=PEC_buffer[i]-128; sprintf(reply,"%+04i",i1);
+         if (parameter[0]==0) {
+           i=(i-1)%SecondsPerWormRotationAxis1;
+           i1=pecBuffer[i]-128; sprintf(reply,"%+04i,%03i",i1,i);
+         } else {
+           i1=pecBuffer[i]-128; sprintf(reply,"%+04i",i1);
          }
        } else commandError=true;
        quietReply=true;
@@ -973,7 +968,7 @@ void processCommands() {
          byte b;
          char x[3]="  ";
          for (j=0; j<10; j++) {
-           if (i+j<PECBufferSize) b=PEC_buffer[i+j]; else b=128;
+           if (i+j<PECBufferSize) b=pecBuffer[i+j]; else b=128;
            
            sprintf(x,"%02X",b);
            strcat(reply,x);
@@ -982,12 +977,12 @@ void processCommands() {
        } else commandError=true;
        quietReply=true;
      } else
-//   V - PEC Readout StepsPerAxis1WormRotation
+//   V - PEC Readout StepsPerWormRotationAxis1
 //  :VW#
 //         Returns: DDDDDD#
      if ((command[0]=='V') && (command[1]=='W')) {
        if (parameter[0]==0) {
-         sprintf(reply,"%06ld",StepsPerAxis1WormRotation);
+         sprintf(reply,"%06ld",StepsPerWormRotationAxis1);
          quietReply=true;
        } else commandError=true;
      } else
@@ -1004,18 +999,21 @@ void processCommands() {
        } else commandError=true;
      } else
 //  :VH#
-//         Read RA PEC hall sensor index start (seconds)
+//         Read RA PEC sense index (seconds)
 //         Returns: DDDDD#
      if ((command[0]=='V') && (command[1]=='H')) {
-         sprintf(reply,"%05ld",PECindex_sense);
-         quietReply=true;
+       long s=(long)((double)wormSensePos/(double)StepsPerSecondAxis1);
+       while (s>SecondsPerWormRotationAxis1) s-=SecondsPerWormRotationAxis1;
+       while (s<0) s-=SecondsPerWormRotationAxis1;
+       sprintf(reply,"%05ld",s); // indexWorm_sense
+       quietReply=true;
      } else
 //  :VI#
 //         Read RA PEC record index start (steps)
 //         Returns: DDDDDD#
      if ((command[0]=='V') && (command[1]=='I')) {
-         sprintf(reply,"%06ld",PECindex_record);
-         quietReply=true;
+       sprintf(reply,"%06ld",0);  // indexWorm_record
+       quietReply=true;
      } else
 
 //  :WIDDDDDD#
@@ -1024,8 +1022,8 @@ void processCommands() {
        commandError=true;
        long l=strtol(parameter,&conv_end,10);
        // see if it converted and is in range
-       if ( (&parameter[0]!=conv_end) && ((l>=0) && (l<StepsPerAxis1WormRotation))) {
-         PECindex_record=l;
+       if ( (&parameter[0]!=conv_end) && ((l>=0) && (l<StepsPerWormRotationAxis1))) {
+// ignored
          commandError=false;
        }
     } else
@@ -1041,15 +1039,15 @@ void processCommands() {
        commandError=true;
        if (parameter[1]==0) {
          if (parameter[0]=='+') {
-           i=PEC_buffer[SecondsPerAxis1WormRotation-1];
-           memmove((byte *)&PEC_buffer[1],(byte *)&PEC_buffer[0],SecondsPerAxis1WormRotation-1);
-           PEC_buffer[0]=i;
+           i=pecBuffer[SecondsPerWormRotationAxis1-1];
+           memmove((byte *)&pecBuffer[1],(byte *)&pecBuffer[0],SecondsPerWormRotationAxis1-1);
+           pecBuffer[0]=i;
            commandError=false;
          } else
          if (parameter[0]=='-') {
-           i=PEC_buffer[0];
-           memmove((byte *)&PEC_buffer[0],(byte *)&PEC_buffer[1],SecondsPerAxis1WormRotation-1);
-           PEC_buffer[SecondsPerAxis1WormRotation-1]=i;
+           i=pecBuffer[0];
+           memmove((byte *)&pecBuffer[0],(byte *)&pecBuffer[1],SecondsPerWormRotationAxis1-1);
+           pecBuffer[SecondsPerWormRotationAxis1-1]=i;
            commandError=false;
          }
        } else {
@@ -1059,8 +1057,8 @@ void processCommands() {
            // should be another int here
            // see if it converted and is in range
            if ( (atoi2((char*)&parameter[5],&i2)) && ((i2>=-128) && (i2<=127))) {
-             PEC_buffer[i]=i2+128;
-             PECrecorded =true;
+             pecBuffer[i]=i2+128;
+             pecRecorded =true;
              commandError=false;
            }
          }
@@ -1077,7 +1075,7 @@ void processCommands() {
         if ((command[1]>='0') && (command[1]<='3')) {
           currentSite=command[1]-'0'; EEPROM.update(EE_currentSite,currentSite); quietReply=true;
           float f; 
-          EEPROM_readQuad(EE_sites+(currentSite*25+0),(byte*)&f); latitude=f;
+          latitude=EEPROM_readFloat(EE_sites+(currentSite*25+0));
 #ifdef MOUNT_TYPE_ALTAZM
           celestialPoleDec=fabs(latitude);
 #else
@@ -1086,7 +1084,7 @@ void processCommands() {
           cosLat=cos(latitude/Rad);
           sinLat=sin(latitude/Rad);
           if (latitude>0.0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
-          EEPROM_readQuad(EE_sites+(currentSite*25+4),(byte*)&f); longitude=f;
+          longitude=EEPROM_readFloat(EE_sites+(currentSite*25+4));
           timeZone=EEPROM.read(EE_sites+(currentSite)*25+8)-128;
           timeZone=decodeTimeZone(timeZone);
         } else 
