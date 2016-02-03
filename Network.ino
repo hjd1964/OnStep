@@ -272,7 +272,7 @@ void Ethernet_get() {
     if ( (atoi2(get_vals,&i)) && ((i>=-180) && (i<=180))) { get_temp_float=i; }
   }
   if ((get_names[0]=='g') && (get_names[1]=='2')) {
-    if ( (atoi2(get_vals,&i)) && ((i>=0) && (i<=60))) { if (get_temp_float<0.0) i=-i; longitude=get_temp_float+((double)i)/60.0; float f=longitude; EEPROM_writeQuad(EE_sites+(currentSite)*25+4,(byte*)&f); update_lst(jd2last(JD,UT1)); }
+    if ( (atoi2(get_vals,&i)) && ((i>=0) && (i<=60))) { if (get_temp_float<0.0) i=-i; longitude=get_temp_float+((double)i)/60.0; EEPROM_writeFloat(EE_sites+(currentSite)*25+4,longitude); update_lst(jd2last(JD,UT1)); }
   }
   if ((get_names[0]=='t') && (get_names[1]=='1')) {
     if ( (atoi2(get_vals,&i)) && ((i>=-180) && (i<=180))) { get_temp_float=i; }
@@ -280,8 +280,8 @@ void Ethernet_get() {
   if ((get_names[0]=='t') && (get_names[1]=='2')) {
     if ( (atoi2(get_vals,&i)) && ((i>=0) && (i<=60))) {
       if (get_temp_float<0.0) i=-i;
-      latitude=get_temp_float+((double)i)/60.0; float f=latitude;
-      EEPROM_writeQuad(100+(currentSite)*25+0,(byte*)&f);
+      latitude=get_temp_float+((double)i)/60.0;
+      EEPROM_writeFloat(100+(currentSite)*25+0,latitude);
 #ifdef MOUNT_TYPE_ALTAZM
       celestialPoleDec=fabs(latitude);
       if (latitude<0) celestialPoleHA=180L; else celestialPoleHA=0L;
@@ -321,8 +321,8 @@ void Ethernet_get() {
       get_temp_year=i-2000;
       char temp[10];
       sprintf(temp,"%02d/%02d/%02d",get_temp_month,get_temp_day,get_temp_year);
-      if (dateToDouble(&JD,temp)) { 
-        float f=JD; EEPROM_writeQuad(EE_JD,(byte*)&f); 
+      if (dateToDouble(&JD,temp)) {
+        EEPROM_writeFloat(EE_JD,JD); 
         update_lst(jd2last(JD,UT1));
       }
     }
@@ -340,7 +340,7 @@ void Ethernet_get() {
       sprintf(temp,"%02d:%02d:%02d",get_temp_hour,get_temp_minute,get_temp_second);
       i=highPrecision; highPrecision=true; 
       if (hmsToDouble(&LMT,temp)) {
-        float f=LMT; EEPROM_writeQuad(EE_LMT,(byte*)&f); 
+        EEPROM_writeFloat(EE_LMT,LMT); 
         UT1=LMT+timeZone; 
         UT1_start  =UT1;
         UT1mS_start=millis(); 
@@ -374,7 +374,7 @@ void Ethernet_get() {
        if (get_vals[0]=='f') siderealInterval+=HzCf*(0.1);
        if (get_vals[0]=='-') siderealInterval-=HzCf*(0.1);
        if (get_vals[0]=='r') siderealInterval=15956313L;
-       EEPROM_writeQuad(EE_siderealInterval,(byte*)&siderealInterval);
+       EEPROM_writeLong(EE_siderealInterval,siderealInterval);
        SetSiderealClockRate(siderealInterval);
        cli(); SiderealRate=siderealInterval/StepsPerSecondAxis1; sei();
     }
@@ -384,29 +384,27 @@ void Ethernet_get() {
   }
   // PEC control
   if ((get_names[0]=='p') && (get_names[1]=='e')) {
-    if ((get_vals[0]=='p') && (get_vals[1]=='l') && (get_vals[2]==0)) { if (PECrecorded) PECstatus=ReadyPlayPEC; } // play
-    if ((get_vals[0]=='s') && (get_vals[1]=='t') && (get_vals[2]==0)) { PECstatus=IgnorePEC; }; // stop
-    if ((get_vals[0]=='r') && (get_vals[1]=='e') && (get_vals[2]==0)) { PECstatus=ReadyRecordPEC; }; // record
+    if ((get_vals[0]=='p') && (get_vals[1]=='l') && (get_vals[2]==0)) { if (pecRecorded) pecStatus=ReadyPlayPEC; } // play
+    if ((get_vals[0]=='s') && (get_vals[1]=='t') && (get_vals[2]==0)) { pecStatus=IgnorePEC; }; // stop
+    if ((get_vals[0]=='r') && (get_vals[1]=='e') && (get_vals[2]==0)) { pecStatus=ReadyRecordPEC; }; // record
     if ((get_vals[0]=='c') && (get_vals[1]=='l') && (get_vals[2]==0)) { // clear
-      for (i=0; i<PECBufferSize; i++) PEC_buffer[i]=128;
-      PECfirstRecord = true;
-      PECstatus      = IgnorePEC;
-      PECrecorded    = false;
-      EEPROM.update(EE_PECstatus,PECstatus);
-      EEPROM.update(EE_PECrecorded,PECrecorded);
-      PECindex_record= 0;
-      PECindex_sense = 0;
-      EEPROM_writeQuad(EE_PECrecord_index,(byte*)&PECindex_record); 
-      EEPROM_writeQuad(EE_PECsense_index,(byte*)&PECindex_sense);
+      for (i=0; i<PECBufferSize; i++) pecBuffer[i]=128;
+      pecFirstRecord = true;
+      pecStatus      = IgnorePEC;
+      pecRecorded    = false;
+      EEPROM.update(EE_pecStatus,pecStatus);
+      EEPROM.update(EE_pecRecorded,pecRecorded);
+      wormSensePos=0;
+      EEPROM_writeLong(EE_wormSensePos,wormSensePos);
     };
     if ((get_vals[0]=='w') && (get_vals[1]=='r') && (get_vals[2]==0)) { // write to eeprom
-      PECrecorded=true;
-      PECstatus=IgnorePEC;
-      EEPROM.update(EE_PECrecorded,PECrecorded);
-      EEPROM.update(EE_PECstatus,PECstatus);
-      EEPROM_writeQuad(EE_PECsense_index,(byte*)&PECindex_sense);
+      pecRecorded=true;
+      pecStatus=IgnorePEC;
+      EEPROM.update(EE_pecRecorded,pecRecorded);
+      EEPROM.update(EE_pecStatus,pecStatus);
+      EEPROM_writeLong(EE_wormSensePos,wormSensePos);
       // trigger recording of PEC buffer
-      PECautoRecord=PECBufferSize;
+      pecAutoRecord=PECBufferSize;
     }
   }
 }
@@ -456,16 +454,16 @@ const char html_index3[] PROGMEM = "<font class=\"c\">%02d/%02d/%02d</font>";
 const char html_index4[] PROGMEM = "&nbsp;<font class=\"c\">%s</font>&nbsp;UT";
 const char html_index4a[] PROGMEM = "&nbsp;(<font class=\"c\">%s</font>&nbsp; Local Apparent Sidereal Time)<br /><br />";
 const char html_indexFault[] PROGMEM =  "Stepper driver " Axis1 " axis %s, " Axis2 " axis %s<br /><br />";
+const char html_indexTrue[] PROGMEM = "Stepper Position: " Axis1 "=<font class=\"c\">%ld</font>, " Axis2 "=<font class=\"c\">%ld</font><br />";
+const char html_indexIndex[] PROGMEM = "IHS=<font class=\"c\">%ld</font>, IDS=<font class=\"c\">%ld</font><br />";
 const char html_indexPosition[] PROGMEM = "Current Position: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
 const char html_indexTarget[] PROGMEM = "Target Position: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
-const char html_indexIndex[] PROGMEM = "IHS=<font class=\"c\">%ld</font>, IDS=<font class=\"c\">%ld</font><br />";
 const char html_indexPier[] PROGMEM = "Pier Side=<font class=\"c\">%s</font> (meridian flips <font class=\"c\">%s</font>)<br /><br />";
 const char html_index7[] PROGMEM = "Current MaxRate: <font class=\"c\">%ld</font> (Default MaxRate: <font class=\"c\">%ld</font>)<br /><br />";
 const char html_index8[] PROGMEM = "Tracking: <font class=\"c\">%s %s</font><br />";
 const char html_index9[] PROGMEM = "Parking: <font class=\"c\">%s</font><br />";
 const char html_index10[] PROGMEM = "Last Error: <font class=\"c\">%s</font><br /><br />";
 const char html_index11[] PROGMEM = "Workload: <font class=\"c\">%ld%%</font><br />";
-
 
 void index_html_page() {
   char temp[320] = "";
@@ -538,11 +536,22 @@ if (html_page_step==++stp) {
     
     strcpy_P(temp1, html_index4a); sprintf(temp,temp1,temp2);
   }
-if (html_page_step==++stp) {
+  if (html_page_step==++stp) {
     strcpy_P(temp1, html_indexFault);
     sprintf(temp, temp1, faultAxis1 ? "<font class=\"c\">FAULT</font>" : "<font class=\"g\">Ok</font>", faultAxis2 ? "<font class=\"c\">FAULT</font>" : "<font class=\"g\">Ok</font>");
   }
-if (html_page_step==++stp) {
+  if (html_page_step==++stp) {
+    cli();
+    long a1=(posAxis1+blAxis1)-trueAxis1;
+    long a2=(posAxis2+blAxis2)-trueAxis2;
+    sei();
+    
+    strcpy_P(temp1, html_indexTrue); sprintf(temp,temp1,a1,a2); 
+  }
+  if (html_page_step==++stp) {
+    strcpy_P(temp1, html_indexIndex); sprintf(temp,temp1,IHS,IDS); 
+  }
+  if (html_page_step==++stp) {
     i=highPrecision; highPrecision=true; 
     cli();
     long h=posAxis1+IHS;
@@ -561,7 +570,7 @@ if (html_page_step==++stp) {
     
     strcpy_P(temp1, html_indexPosition); sprintf(temp,temp1,temp2,temp3); 
   }
-   if (html_page_step==++stp) {
+  if (html_page_step==++stp) {
     i=highPrecision; highPrecision=true;
     cli();
     long h=(long)targetAxis1.part.m+IHS;
@@ -579,9 +588,6 @@ if (html_page_step==++stp) {
     highPrecision=i;
     
     strcpy_P(temp1, html_indexTarget); sprintf(temp,temp1,temp2,temp3); 
-  }
-  if (html_page_step==++stp) {
-    strcpy_P(temp1, html_indexIndex); sprintf(temp,temp1,IHS,IDS); 
   }
   if (html_page_step==++stp) {
     if ((pierSide==PierSideFlipWE1) ||
@@ -989,12 +995,12 @@ void pec_html_page() {
   if (html_page_step==++stp) strcpy_P(temp, html_pec4);
   if (html_page_step==++stp) {
 #ifndef MOUNT_TYPE_ALTAZM
-    const char *PECstatusCh = PECStatusString;
-    if (PECstatusCh[PECstatus]=='I') { strcpy(temp2,"Idle"); } else
-    if (PECstatusCh[PECstatus]=='p') { strcpy(temp2,"Play waiting to start"); } else
-    if (PECstatusCh[PECstatus]=='P') { strcpy(temp2,"Playing"); } else
-    if (PECstatusCh[PECstatus]=='r') { strcpy(temp2,"Record waiting for the index to arrive"); } else
-    if (PECstatusCh[PECstatus]=='R') { strcpy(temp2,"Recording"); } else
+    const char *pecStatusCh = PECStatusString;
+    if (pecStatusCh[pecStatus]=='I') { strcpy(temp2,"Idle"); } else
+    if (pecStatusCh[pecStatus]=='p') { strcpy(temp2,"Play waiting to start"); } else
+    if (pecStatusCh[pecStatus]=='P') { strcpy(temp2,"Playing"); } else
+    if (pecStatusCh[pecStatus]=='r') { strcpy(temp2,"Record waiting for the index to arrive"); } else
+    if (pecStatusCh[pecStatus]=='R') { strcpy(temp2,"Recording"); } else
 #endif
       strcpy(temp2,"Unknown");
     strcpy_P(temp1, html_pec5); sprintf(temp,temp1,temp2);
@@ -1213,7 +1219,7 @@ void config_html_page() {
   if (html_page_step==++stp) { strcpy_P(temp1, html_configStepsDegHA); sprintf(temp,temp1,(long)round(StepsPerDegreeAxis1)); }
   if (html_page_step==++stp) { strcpy_P(temp1, html_configStepsDegDec); sprintf(temp,temp1,(long)round(StepsPerDegreeAxis2)); }
   if (html_page_step==++stp) { strcpy_P(temp1, html_configStepsPerSec); dtostrf(StepsPerSecondAxis1,3,6,temp2); sprintf(temp,temp1,temp2); }
-  if (html_page_step==++stp) { strcpy_P(temp1, html_configStepsPerWR); sprintf(temp,temp1,(long)round(StepsPerAxis1WormRotation)); }
+  if (html_page_step==++stp) { strcpy_P(temp1, html_configStepsPerWR); sprintf(temp,temp1,(long)round(StepsPerWormRotationAxis1)); }
   if (html_page_step==++stp) { strcpy_P(temp1, html_configPecBufSize); sprintf(temp,temp1,(long)round(PECBufferSize)); }
   if (html_page_step==++stp) { strcpy_P(temp1, html_configMPME); sprintf(temp,temp1,(long)round(MinutesPastMeridianE)); }
   if (html_page_step==++stp) { strcpy_P(temp1, html_configMPMW); sprintf(temp,temp1,(long)round(MinutesPastMeridianW)); }
