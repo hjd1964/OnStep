@@ -130,7 +130,7 @@ boolean faultAxis2 = false;
 #else
 #define default_tracking_rate 1
 #endif
-volatile double  trackingtimerRateAxis1 = default_tracking_rate;
+volatile double  trackingTimerRateAxis1 = default_tracking_rate;
 volatile double  trackingTimerRateAxis2 = default_tracking_rate;
 volatile double  pecTimerRateAxis1   = 0.0;
 volatile double  guidetimerRateAxis1 = 0.0;
@@ -139,7 +139,7 @@ volatile double  timerRateRatio =       ((double)StepsPerDegreeAxis1/(double)Ste
 volatile boolean useTimerRateRatio =    (StepsPerDegreeAxis1!=StepsPerDegreeAxis2);
 #define StepsPerSecondAxis1             ((double)StepsPerDegreeAxis1/240.0)
 #define StepsPerSecondAxis2             ((double)StepsPerDegreeAxis2/240.0)
-#define SecondsPerAxis1WormRotation     ((long)(StepsPerAxis1WormRotation/StepsPerSecondAxis1))
+#define SecondsPerWormRotationAxis1     ((long)(StepsPerWormRotationAxis1/StepsPerSecondAxis1))
 volatile double StepsForRateChangeAxis1 = (double)DegreesForAcceleration*(double)StepsPerDegreeAxis1*4.0;
 volatile double StepsForRateChangeAxis2 = (double)DegreesForAcceleration*(double)StepsPerDegreeAxis2*4.0;
 
@@ -215,16 +215,15 @@ long celestialPoleHA  = 0L;
 double celestialPoleDec = 90.0;
 
 volatile long posAxis1   = 90L*StepsPerDegreeAxis1;// hour angle position in steps
-long trueAxis1           = 90L*StepsPerDegreeAxis1;
+long trueAxis1           = 90L*StepsPerDegreeAxis1;// correction to above for motor shaft position steps
 volatile long startAxis1 = 90L*StepsPerDegreeAxis1;// hour angle of goto start position in steps
 volatile fixed_t targetAxis1;                      // hour angle of goto end   position in steps
 volatile byte dirAxis1   = 1;                      // stepping direction + or -
-volatile long PEC_HA     = 0;                      // for PEC, adds or subtracts steps
 double newTargetRA       = 0.0;                    // holds the RA for goTos
 fixed_t origTargetAxis1;
 
 volatile long posAxis2   = 90L*StepsPerDegreeAxis2;// declination position in steps
-long trueAxis2           = 90L*StepsPerDegreeAxis1;
+long trueAxis2           = 90L*StepsPerDegreeAxis1;// correction to above for motor shaft position steps
 volatile long startAxis2 = 90L*StepsPerDegreeAxis2;// declination of goto start position in steps
 volatile fixed_t targetAxis2;                      // declination of goto end   position in steps
 volatile byte dirAxis2   = 1;                      // stepping direction + or -
@@ -724,9 +723,9 @@ long debugv1 = 0;
 
 double  guideTimerRate    = 0;
 fixed_t amountGuideHA;
-long    guideHA           = 0;
+fixed_t guideHA;
 fixed_t amountGuideDec;
-long    guideDec          = 0;
+fixed_t guideDec;
 
 // Reticule control
 #ifdef RETICULE_LED_PINS
@@ -752,16 +751,22 @@ int reticuleBrightness=RETICULE_LED_PINS;
 #define PlayPEC          2
 #define ReadyRecordPEC   3
 #define RecordPEC        4
-volatile byte    PECstatus        = IgnorePEC;
-volatile long    PECindex_record  = 0;
-volatile long    PECindex_sense   = 0;      // position of active PEC index sensed
-volatile boolean PECrecorded      = false;
-volatile long    PECtime_lastSense= 0;      // time since last PEC index was sensed
-volatile int     PECautoRecord    = 0;      // for writing to PEC table to EEPROM
-volatile int     PECav            = 0;
-volatile boolean PECfirstRecord   = false;
-volatile boolean PECindexDetected = false;  // indicates PEC index was found
-volatile long    PECindex1        = 0;
+byte    pecStatus         = IgnorePEC;
+boolean pecRecorded       = false;
+int     pecAutoRecord     = 0;      // for writing to PEC table to EEPROM
+boolean pecFirstRecord    = false;
+long    lastPecIndex      = -1;
+long    pecIndex          = 0;
+long    pecIndex1         = 0;
+int     pecAnalogValue    = 0;
+long    wormSenseLst      = 0;      // time since last PEC index was sensed
+long    wormSensePos      = 0;      // in steps
+boolean wormSenseDetected = false;  // indicates PEC index was found
+int     LastPecPinState   = PEC_SENSE_STATE;
+
+boolean pecBufferStart    = false;
+
+fixed_t accPecGuideHA;              // for PEC, buffers steps to be recorded
 
 // backlash control
 volatile int backlashAxis1  = 0;
@@ -809,10 +814,9 @@ char ST4DE_last = 0;
 #define EE_IH          58
 #define EE_ID          62
 
-#define EE_PECstatus   70
-#define EE_PECrecorded 71
-#define EE_PECrecord_index 72
-#define EE_PECsense_index 76
+#define EE_pecStatus   70
+#define EE_pecRecorded 71
+#define EE_wormSensePos 76
 
 #define EE_backlashAxis1 80
 #define EE_backlashAxis2 84
@@ -847,13 +851,13 @@ char ST4DE_last = 0;
 // PEC index: 200...1023
 // PECBufferSize byte sized integers -128..+127, units are steps
 
-#define EE_PECindex 200
+#define EE_indexWorm 200
 
 // it takes 3.3ms to record a value to EEPROM, this can effect tracking performance since interrupts are disabled during the operation.
 // so we store PEC data in RAM while recording.  When done, sidereal tracking is turned off and the data is written to EEPROM.
 // writing the data can take up to 3 seconds.
 
-byte PEC_buffer[PECBufferSize];
+byte pecBuffer[PECBufferSize];
 
 void setup() {
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
@@ -864,6 +868,9 @@ void setup() {
 // initialize some fixed-point values
   amountGuideHA.fixed=0;
   amountGuideDec.fixed=0;
+  guideHA.fixed=0;
+  guideDec.fixed=0;
+  accPecGuideHA.fixed=0;
   fstepAxis1.fixed=0;
   fstepAxis2.fixed=0;
   pstep.fixed=0;
@@ -993,15 +1000,15 @@ void setup() {
   // EEPROM automatic initialization
   long autoInitKey = initKey;
   long thisAutoInitKey;
-  if (INIT_KEY) EEPROM_writeQuad(EE_autoInitKey,(byte*)&autoInitKey);
-  EEPROM_readQuad(EE_autoInitKey,(byte*)&thisAutoInitKey);
+  if (INIT_KEY) EEPROM_writeLong(EE_autoInitKey,autoInitKey);
+  thisAutoInitKey=EEPROM_readLong(EE_autoInitKey);
   if (autoInitKey!=thisAutoInitKey) {
     // init the site information, lat/long/tz/name
     EEPROM.write(EE_currentSite,0);
     latitude=0; longitude=0;
     for (int l=0; l<4; l++) {
-      float f=latitude; EEPROM_writeQuad(EE_sites+(l)*25+0,(byte*)&f);
-      f=longitude; EEPROM_writeQuad(EE_sites+(l)*25+4,(byte*)&f);
+      EEPROM_writeFloat(EE_sites+(l)*25+0,latitude);
+      EEPROM_writeFloat(EE_sites+(l)*25+4,longitude);
       EEPROM.write(EE_sites+(l)*25+8,128);
       EEPROM.write(EE_sites+(l)*25+9,0);
     }
@@ -1009,8 +1016,8 @@ void setup() {
     // init the date and time January 1, 2013. 0 hours LMT
     JD=2456293.5;
     LMT=0.0;
-    float f=JD; EEPROM_writeQuad(EE_JD,(byte*)&f);
-    f=LMT; EEPROM_writeQuad(EE_LMT,(byte*)&f);
+    EEPROM_writeFloat(EE_JD,JD);
+    EEPROM_writeFloat(EE_LMT,LMT);
   
     // init the min and max altitude
     minAlt=-10;
@@ -1023,12 +1030,11 @@ void setup() {
     EEPROM_writeInt(EE_backlashAxis1,0);
   
     // init the PEC status, clear the index and buffer
-    PECindex_record=0;
-    EEPROM.write(EE_PECstatus,IgnorePEC);
-    EEPROM.write(EE_PECrecorded,false);
-    for (int l=0; l<PECBufferSize; l++) EEPROM.write(EE_PECindex+l,128);
-    EEPROM_writeQuad(EE_PECrecord_index,(byte*)&PECindex_record); 
-    EEPROM_writeQuad(EE_PECsense_index,(byte*)&PECindex_sense);
+    EEPROM.write(EE_pecStatus,IgnorePEC);
+    EEPROM.write(EE_pecRecorded,false);
+    for (int l=0; l<PECBufferSize; l++) EEPROM.write(EE_indexWorm+l,128);
+    wormSensePos=0;
+    EEPROM_writeLong(EE_wormSensePos,wormSensePos);
     
     // init the Park status
     EEPROM.write(EE_parkSaved,false);
@@ -1043,22 +1049,23 @@ void setup() {
 
     // init the sidereal tracking rate, use this once - then issue the T+ and T- commands to fine tune
     // 1/16uS resolution timer, ticks per sidereal second
-    EEPROM_writeQuad(EE_siderealInterval,(byte*)&siderealInterval);
+    EEPROM_writeLong(EE_siderealInterval,siderealInterval);
     
     // finally, stop the init from happening again
-    EEPROM_writeQuad(EE_autoInitKey,(byte*)&autoInitKey);
+    EEPROM_writeLong(EE_autoInitKey,autoInitKey);
     
     // clear the pointing model
     saveAlignModel();
   }
 
   // this sets the sidereal timer, controls the tracking speed so that the mount moves precisely with the stars
-  EEPROM_readQuad(EE_siderealInterval,(byte*)&siderealInterval);
+  siderealInterval=EEPROM_readLong(EE_siderealInterval);
 
   // 16MHZ clocks for steps per second of sidereal tracking
   cli(); SiderealRate=siderealInterval/StepsPerSecondAxis1; TakeupRate=SiderealRate/4L; sei();
   timerRateAxis1=SiderealRate;
   timerRateAxis2=SiderealRate;
+  SetTrackingRate(default_tracking_rate);
 
   // backlash takeup rates
   timerRateBacklashAxis1=timerRateAxis1/BacklashTakeupRate;
@@ -1092,8 +1099,6 @@ void setup() {
 
   // Start Timer 1A
   TimerEnable(Timer1_base, TIMER_A);
-
-
 
   // we also initialise timer 2A and 3A here as they may get used uninitialised from
   // the interrupt for timer 1 if it gets triggered in the meantime
@@ -1178,7 +1183,7 @@ void setup() {
   
   // get the site information, if a GPS were attached we would use that here instead
   currentSite=EEPROM.read(EE_currentSite);  if (currentSite>3) currentSite=0; // site index is valid?
-  float f; EEPROM_readQuad(EE_sites+(currentSite)*25+0,(byte*)&f); latitude=f;
+  latitude=EEPROM_readFloat(EE_sites+(currentSite)*25+0);
 
 #ifdef MOUNT_TYPE_ALTAZM
   celestialPoleDec=fabs(latitude);
@@ -1189,7 +1194,7 @@ void setup() {
   cosLat=cos(latitude/Rad);
   sinLat=sin(latitude/Rad);
   if (latitude>0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
-  EEPROM_readQuad(EE_sites+(currentSite)*25+4,(byte*)&f); longitude=f;
+  longitude=EEPROM_readFloat(EE_sites+(currentSite)*25+4);
   timeZone=EEPROM.read(EE_sites+(currentSite)*25+8)-128;
   timeZone=decodeTimeZone(timeZone);
   EEPROM_readString(EE_sites+(currentSite)*25+9,siteName);
@@ -1209,10 +1214,10 @@ void setup() {
   sei();
   
   // get date and time from EEPROM, start keeping time
-  EEPROM_readQuad(EE_JD,(byte*)&f); JD=f;
-  EEPROM_readQuad(EE_LMT,(byte*)&f); LMT=f;
+  JD=EEPROM_readFloat(EE_JD);
+  LMT=EEPROM_readFloat(EE_LMT);
   UT1=LMT+timeZone;
-  UT1_start  =UT1;
+  UT1_start=UT1;
   UT1mS_start=millis(); 
 
   update_lst(jd2last(JD,UT1));
@@ -1226,14 +1231,13 @@ void setup() {
   backlashAxis1=EEPROM_readInt(EE_backlashAxis1);
   
   // get the PEC status
-  PECstatus  =EEPROM.read(EE_PECstatus); 
-  PECrecorded=EEPROM.read(EE_PECrecorded);
-  if (!PECrecorded) PECstatus=IgnorePEC;
-  for (int i=0; i<PECBufferSize; i++) PEC_buffer[i]=EEPROM.read(EE_PECindex+i);
-  EEPROM_readQuad(EE_PECrecord_index,(byte*)&PECindex_record); 
-  EEPROM_readQuad(EE_PECsense_index,(byte*)&PECindex_sense);
+  pecStatus  =EEPROM.read(EE_pecStatus); 
+  pecRecorded=EEPROM.read(EE_pecRecorded);
+  if (!pecRecorded) pecStatus=IgnorePEC;
+  for (int i=0; i<PECBufferSize; i++) pecBuffer[i]=EEPROM.read(EE_indexWorm+i);
+  wormSensePos=EEPROM_readLong(EE_wormSensePos);
   #ifdef PEC_SENSE_OFF
-  PECindex_sense=0;
+  indexWorm_sense=0;
   #endif
   
   // get the Park status
@@ -1269,7 +1273,7 @@ void setup() {
   guideSiderealTimer = lst;
   PecSiderealTimer = lst;
   siderealTimer = lst;
-  PECtime_lastSense = lst;
+  wormSenseLst = lst;
   sei();
   clockTimer=millis(); 
   last_loop_micros=micros();
@@ -1328,7 +1332,7 @@ void loop() {
     }
     #endif
 
-    guideHA=0;
+    guideHA.fixed=0;
     Guide();
   }
 
@@ -1337,11 +1341,11 @@ void loop() {
   if ((trackingState==TrackingSidereal) && (!((guideDirAxis1 || guideDirAxis2) && (activeGuideRate>GuideRate1x)))) { 
     // only active while sidereal tracking with a guide rate that makes sense
     Pec();
-  } else disablePec();
-  if (PECautoRecord>0) {
+  } else DisablePec();
+  if (pecAutoRecord>0) {
     // write PEC table to EEPROM, should do about 100 bytes/second
-    PECautoRecord--;
-    EEPROM.update(EE_PECindex+PECautoRecord,PEC_buffer[PECautoRecord]);
+    pecAutoRecord--;
+    EEPROM.update(EE_indexWorm+pecAutoRecord,pecBuffer[pecAutoRecord]);
   }
 #endif
 
@@ -1418,7 +1422,7 @@ void loop() {
     
     #ifdef PEC_SENSE
     // see if we're on the PEC index
-    if (trackingState==TrackingSidereal) PECav = analogRead(1);
+    if (trackingState==TrackingSidereal) pecAnalogValue = analogRead(1);
     #endif
     
     // adjust tracking rate for Alt/Azm mounts
