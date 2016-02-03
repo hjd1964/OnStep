@@ -8,11 +8,10 @@ void Guide() {
     guideSiderealTimer=guideLst;  
     if (guideDirAxis1) {
       if (!inbacklashAxis1) {
-        cli();
-        long v=(long)targetAxis1.part.m;
-        if (guideDirAxis1=='e') targetAxis1.fixed-=amountGuideHA.fixed; else if (guideDirAxis1=='w') targetAxis1.fixed+=amountGuideHA.fixed;
         // guideHA keeps track of how many steps we've moved for PEC recording
-        guideHA=(long)targetAxis1.part.m-v;
+        if (guideDirAxis1=='e') guideHA.fixed=-amountGuideHA.fixed; else if (guideDirAxis1=='w') guideHA.fixed=amountGuideHA.fixed;
+        cli();
+        targetAxis1.fixed+=guideHA.fixed;
         sei();
 
         // for pulse guiding, count down the mS and stop when timed out
