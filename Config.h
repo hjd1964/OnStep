@@ -123,7 +123,7 @@
                                      // in addition to the 18:1 gear heads on the steppers for a 22.5:1 final ratio before the worm/wheels at 144:1
                                      
                                      // PEC, number of steps for a complete worm rotation (in RA), (StepsPerDegreeAxis1*360)/gear_reduction2.  Ignored on Alt/Azm mounts.
-#define StepsPerAxis1WormRotation  36000L
+#define StepsPerWormRotationAxis1  36000L
                                      // Tak EM10         : (14400*360)/144 = 36000
 
 #define PECBufferSize           824  // PEC, buffer size, max should be no more than 3384, your required buffer size >= StepsPerAxis1WormRotation/(StepsPerDegeeAxis1/240)
