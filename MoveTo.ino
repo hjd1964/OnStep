@@ -114,7 +114,7 @@ void moveTo() {
 //  if ((temp<100) && (temp>=10))  temp=9;                   // exclude a range of speeds
   }
   if (temp<maxRate) temp=maxRate;                            // fastest rate
-  if (temp>TakeupRate) temp=TakeupRate;                      // slowest rate (4x sidereal)
+  if (temp>TakeupRate) temp=TakeupRate;                      // slowest rate
   cli(); timerRateAxis1=temp; sei();
 
   // Now, for Declination
@@ -130,10 +130,26 @@ void moveTo() {
 #else
   if (temp<maxRate) temp=maxRate;                            // fastest rate
 #endif
-  if (temp>TakeupRate) temp=TakeupRate;                      // slowest rate (4x sidereal)
+  if (temp>TakeupRate) temp=TakeupRate;                      // slowest rate
   cli(); timerRateAxis2=temp; sei();
 
+#ifdef MOUNT_TYPE_ALTAZM
+  // In AltAz mode & at the end of slew & near the Zenith, disable tracking for a moment if we're getting close to the target
+  if ((distDestAxis1<=StepsPerDegreeAxis1*2) && (distDestAxis2<=StepsPerDegreeAxis2*2)) {
+    if (targetAxis2.part.m>80L*StepsPerDegreeAxis2-IHS) {
+      if (lastTrackingState==TrackingSidereal) {
+        lastTrackingState=TrackingSiderealDisabled;
+      }
+    }
+  } else
+#endif
+
   if ((distDestAxis1<=2) && (distDestAxis2<=2)) { 
+#ifdef MOUNT_TYPE_ALTAZM
+    // Near the Zenith disable tracking in AltAz mode for a moment if we're getting close to the target
+    if (lastTrackingState==TrackingSiderealDisabled) lastTrackingState=TrackingSidereal;
+#endif
+    
     if ((pierSide==PierSideFlipEW2) || (pierSide==PierSideFlipWE2)) {
       // make sure we're at the home position just before flipping sides of the mount
       startAxis1=posAxis1;
