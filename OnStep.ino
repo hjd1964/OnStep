@@ -1465,7 +1465,7 @@ void loop() {
       cli(); if (posAxis1+IHS>(UnderPoleLimit*15L*StepsPerDegreeAxis1)) { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
 #else
       // when Alt/Azm mounted, just stop the mount if it passes +180 degrees Azm
-      cli(); if (posAxis1+IHS>(180L*StepsPerDegreeAxis1)) { lastError=ERR_AZM; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
+      cli(); if (posAxis1+IHS>(MaxAzm*StepsPerDegreeAxis1)) { lastError=ERR_AZM; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
 #endif
     }
 #ifndef MOUNT_TYPE_ALTAZM
