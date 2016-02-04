@@ -141,7 +141,7 @@ void moveTo() {
         lastTrackingState=TrackingSiderealDisabled;
       }
     }
-  } else
+  }
 #endif
 
   if ((distDestAxis1<=2) && (distDestAxis2<=2)) { 
