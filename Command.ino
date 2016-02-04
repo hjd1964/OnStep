@@ -961,6 +961,7 @@ void processCommands() {
            i1=pecBuffer[i]-128; sprintf(reply,"%+04i",i1);
          }
        } else commandError=true;
+       quietReply=true;
      } else
 //  :VrNNNN#
 //         Read out RA PEC ten byte frame in hex format starting at worm segment NNNN
