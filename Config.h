@@ -142,6 +142,7 @@
                                      // For a Northern Hemisphere user, this would stop tracking when the mount is in the polar home position but
                                      // that can be easily worked around by doing an alignment once and saving a park position (assuming a 
                                      // fork/yolk mount with meridian flips turned off by setting the minutesPastMeridian values to cover the whole sky)
+#define MaxAzm                   180 // Alt/Az mounts only. +/- maximum allowed Azimuth, default =  180.  Allowed range is 180 to 360
 
 // Micro-step driver mode control
 // M0, M1, and M2 are on Pins 22,23, and 24 for RA (Teensy3.1 Pins 13,14,15.)  M0, M1, M2 are on Pins 27,28,29 for Dec (Teensy3.1 Pins 18,19,20.)
