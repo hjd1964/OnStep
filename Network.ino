@@ -249,7 +249,13 @@ void Ethernet_get() {
   }
   // Overhead and Horizon Limits
   if ((get_names[0]=='o') && (get_names[1]=='l')) {
-    if ( (atoi2(get_vals,&i)) && ((i>=60) && (i<=90))) { maxAlt=i; EEPROM.update(EE_maxAlt,maxAlt); }
+    if ( (atoi2(get_vals,&i)) && ((i>=60) && (i<=90))) { 
+      maxAlt=i; 
+#ifdef MOUNT_TYPE_ALTAZM
+      if (maxAlt>87) maxAlt=87;
+#endif
+      EEPROM.update(EE_maxAlt,maxAlt);
+    }
   }
   if ((get_names[0]=='h') && (get_names[1]=='l')) {
     if ( (atoi2(get_vals,&i)) && ((i>=-30) && (i<=30))) { minAlt=i; EEPROM.update(EE_minAlt,minAlt+128); }
@@ -545,7 +551,6 @@ if (html_page_step==++stp) {
     long a1=(posAxis1+blAxis1)-trueAxis1;
     long a2=(posAxis2+blAxis2)-trueAxis2;
     sei();
-    
     strcpy_P(temp1, html_indexTrue); sprintf(temp,temp1,a1,a2); 
   }
   if (html_page_step==++stp) {
