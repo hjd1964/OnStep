@@ -581,9 +581,10 @@ Errors lastError = ERR_NONE;
 
 boolean highPrecision    = true;
 
-#define TrackingNone     0
-#define TrackingSidereal 1
-#define TrackingMoveTo   2
+#define TrackingNone             0
+#define TrackingSidereal         1
+#define TrackingMoveTo           2
+#define TrackingSiderealDisabled 3
 volatile byte trackingState     = TrackingNone;
 byte abortTrackingState = TrackingNone;
 volatile byte lastTrackingState = TrackingNone;
@@ -1225,6 +1226,9 @@ void setup() {
   // get the min. and max altitude
   minAlt=EEPROM.read(EE_minAlt)-128;
   maxAlt=EEPROM.read(EE_maxAlt);
+  #ifdef MOUNT_TYPE_ALTAZM
+  if (maxAlt>87) maxAlt=87;
+  #endif
 
   // get the backlash amounts
   backlashAxis2=EEPROM_readInt(EE_backlashAxis2);
