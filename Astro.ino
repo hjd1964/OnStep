@@ -1,4 +1,4 @@
-// -----------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------------------------------------------
 // Astronomy related functions
 
 // convert string in format MM/DD/YY to julian date
@@ -206,6 +206,9 @@ boolean atoi2(char *a, int *i) {
   return true;
 }
 
+// -----------------------------------------------------------------------------------------------------------------------------
+// Coordinate conversion
+
 // takes the topocentric refracted coordinates and applies corrections to arrive at instrument equatorial coordinates 
 boolean EquToCEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1) {
   if (Dec>90.0) Dec=90.0;
@@ -351,6 +354,46 @@ double cot(double n) {
   return 1.0/tan(n);
 }
 
+// -----------------------------------------------------------------------------------------------------------------------------
+// Refraction rate tracking
+
+int az_step = 0;
+double az_Axis1=0,az_Axis2=0;
+double az_Dec=0,az_HA=0;
+double az_Dec1=0,az_HA1=0,az_Dec2=-91,az_HA2=0;
+double az_Alt,az_Azm;
+double az_sindec,az_cosdec,az_cosha;
+double az_sinalt,az_cosalt,az_cosazm;
+double az_deltaAxis1=15.0,az_deltaAxis2=0.0;
+
+// az_deltaH/D are in arc-seconds/second
+// trackingTimerRateAxis1/2 are x the sidereal rate
+void SetDeltaTrackingRate() {
+  trackingTimerRateAxis1 = az_deltaAxis1/15.0;
+  trackingTimerRateAxis2 = az_deltaAxis2/15.0;
+  fstepAxis1.fixed=doubleToFixed( (((double)StepsPerDegreeAxis1/240.0)*trackingTimerRateAxis1)/100.0 );
+  fstepAxis2.fixed=doubleToFixed( (((double)StepsPerDegreeAxis2/240.0)*trackingTimerRateAxis2)/100.0 );
+}
+
+double _az_deltaAxis1=1.0;
+void SetTrackingRate(double r) {
+  az_deltaAxis1=r*15.0;
+  _az_deltaAxis1=az_deltaAxis1;
+  az_deltaAxis2=0.0;
+}
+
+void TempTrackingRateRA(double r) {
+  az_deltaAxis1=r*15.0;
+}
+
+void RestoreTrackingRateRA() {
+  az_deltaAxis1=_az_deltaAxis1;
+}
+
+double CurrentTrackingRateRA() {
+  return _az_deltaAxis1;
+}
+
 // returns the amount of refraction (in arcminutes) at given altitude (degrees), pressure (millibars), and temperature (celsius)
 double Refrac(double Alt, double Pressure=1010.0, double Temperature=15.0) {
   double TPC=(Pressure/1010.0) * (283.0/(273.0+Temperature));
@@ -423,43 +466,6 @@ boolean do_fastalt_calc() {
 }
 
 // low overhead refraction rate calculation, 200 calls to complete
-int az_step = 0;
-double az_Axis1=0,az_Axis2=0;
-double az_Dec=0,az_HA=0;
-double az_Dec1=0,az_HA1=0,az_Dec2=-91,az_HA2=0;
-double az_Alt,az_Azm;
-double az_sindec,az_cosdec,az_cosha;
-double az_sinalt,az_cosalt,az_cosazm;
-double az_deltaAxis1=15.0,az_deltaAxis2=0.0;
-
-// az_deltaH/D are in arc-seconds/second
-// trackingTimerRateAxis1/2 are x the sidereal rate
-void SetDeltaTrackingRate() {
-  trackingTimerRateAxis1 = az_deltaAxis1/15.0;
-  trackingTimerRateAxis2 = az_deltaAxis2/15.0;
-  fstepAxis1.fixed=doubleToFixed( (((double)StepsPerDegreeAxis1/240.0)*trackingTimerRateAxis1)/100.0 );
-  fstepAxis2.fixed=doubleToFixed( (((double)StepsPerDegreeAxis2/240.0)*trackingTimerRateAxis2)/100.0 );
-}
-
-double _az_deltaAxis1=1.0;
-void SetTrackingRate(double r) {
-  az_deltaAxis1=r*15.0;
-  _az_deltaAxis1=az_deltaAxis1;
-  az_deltaAxis2=0.0;
-}
-
-void TempTrackingRateRA(double r) {
-  az_deltaAxis1=r*15.0;
-}
-
-void RestoreTrackingRateRA() {
-  az_deltaAxis1=_az_deltaAxis1;
-}
-
-double CurrentTrackingRateRA() {
-  return _az_deltaAxis1;
-}
-
 boolean do_refractionRate_calc() {
   boolean done=false;
 
@@ -589,7 +595,12 @@ boolean do_refractionRate_calc() {
   return done;
 }
 
+// -----------------------------------------------------------------------------------------------------------------------------
+// AltAz tracking
+
 #ifdef MOUNT_TYPE_ALTAZM
+
+#define AltAzTrackingRange 20  // distance in arc-min ahead of and behind the current Equ position, used for rate calculation
 double az_Alt1,az_Alt2,az_Azm1,az_Azm2;
 
 boolean do_altAzmRate_calc() {
@@ -661,11 +672,11 @@ boolean do_altAzmRate_calc() {
     az_Dec=az_Dec1;
     az_HA =az_HA1;
     if (az_step==10) {
-      az_HA =(az_HA-(1.875/60.0)*15.0)/Rad;
+      az_HA =(az_HA-(AltAzTrackingRange/60.0))/Rad;  // =(az_HA-(28.125/60.0))/Rad;
       az_Dec=az_Dec/Rad;
     }
     if (az_step==110) {
-      az_HA =(az_HA+(1.875/60.0)*15.0)/Rad;
+      az_HA =(az_HA+(AltAzTrackingRange/60.0))/Rad;
       az_Dec=az_Dec/Rad;
     }
   } else
@@ -718,8 +729,10 @@ boolean do_altAzmRate_calc() {
       // handle coordinate wrap
       if ((az_Azm1<-90.0) && (az_Azm2> 90.0)) az_Azm1+=360.0;
       if ((az_Azm1> 90.0) && (az_Azm2<-90.0)) az_Azm2+=360.0;
-      az_deltaAxis1=(az_Azm1-az_Azm2)*32.0;  // use *2 for +/- 30 minutes of RA
-      az_deltaAxis2=(az_Alt1-az_Alt2)*32.0;  // use *2 for +/- 30 minutes of RA
+      
+      az_deltaAxis1=(az_Azm1-az_Azm2)*(15.0/(AltAzTrackingRange/60.0));  // *1 = +/- 15 deg... use *2 for +/- 7.5 deg... * 32 = .468 deg = 28.125'
+      az_deltaAxis2=(az_Alt1-az_Alt2)*(15.0/(AltAzTrackingRange/60.0));  // 
+      
       // override for special case of near a celestial pole
       if (90.0-fabs(az_Dec*Rad)<=0.5) { az_deltaAxis1=0.0; az_deltaAxis2=0.0; }
     }
@@ -733,6 +746,9 @@ boolean do_altAzmRate_calc() {
   return done;
 }
 #endif
+
+// -----------------------------------------------------------------------------------------------------------------------------
+// Date Time conversion
 
 // converts Gregorian date (Y,M,D) to Julian day number
 double julian(int Year, int Month, int Day) {
@@ -816,6 +832,9 @@ double LST() {
   return (tempLst/8640000.0)*360.0/15.0;
 }
 
+// -----------------------------------------------------------------------------------------------------------------------------
+// Misc. numeric conversion
+
 double timeRange(double time) {
   while (time>=24.0) time-=24.0;
   while (time<  0.0) time+=24.0;
@@ -847,6 +866,9 @@ double fixedToDouble(fixed_t a) {
   long l = a.fixed>>9;          // shift 9 bits
   return ((double)l/8388608.0); // and 23 more, for 32 bits total
 }
+
+// -----------------------------------------------------------------------------------------------------------------------------
+// Align
 
 bool startAlign(char c) {
   // :A2 and :A3 arent supported with Fork mounts in alternate mode
