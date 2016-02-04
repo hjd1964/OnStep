@@ -812,7 +812,13 @@ void processCommands() {
 //          Return: 0 on failure
 //                  1 on success
       if (command[1]=='o')  { if ((parameter[0]!=0) && (strlen(parameter)<3)) { 
-        if ( (atoi2(parameter,&i)) && ((i>=60) && (i<=90))) { maxAlt=i; EEPROM.update(EE_maxAlt,maxAlt); } else commandError=true; 
+        if ( (atoi2(parameter,&i)) && ((i>=60) && (i<=90))) { 
+          maxAlt=i;
+#ifdef MOUNT_TYPE_ALTAZM
+          if (maxAlt>87) maxAlt=87;
+#endif
+          EEPROM.update(EE_maxAlt,maxAlt); 
+        } else commandError=true; 
       } else commandError=true; } else
 //  :SrHH:MM.T#
 //  :SrHH:MM:SS#
@@ -955,7 +961,6 @@ void processCommands() {
            i1=pecBuffer[i]-128; sprintf(reply,"%+04i",i1);
          }
        } else commandError=true;
-       quietReply=true;
      } else
 //  :VrNNNN#
 //         Read out RA PEC ten byte frame in hex format starting at worm segment NNNN
