@@ -190,8 +190,36 @@ byte goToEqu(double RA, double Dec) {
 
 #ifdef MOUNT_TYPE_ALTAZM
   EquToHor(latitude,HA,Dec,&a,&z);
+  
   if (z>180.0) z-=360.0;
   if (z<-180.0) z+=360.0;
+
+  cli(); long a1=posAxis1+IHS; sei();
+
+#ifdef MOUNT_TYPE_ALTAZM
+  if ((MaxAzm>180) && (MaxAzm<=360)) {
+    // adjust coordinate range to allow going past 180 deg.
+    // position a1 is 0..180
+    if (a1>=0) {
+      // and goto z is in -0..-180
+      if (z<0) {
+        // the alternate z1 is in 180..360
+        long z1=z+360;
+        if ((z1<MaxAzm) && (dist(a1,z)>dist(a1,z1))) z=z1;
+      }
+    }
+    // position a1 -0..-180
+    if (a1<0) { 
+      // and goto z is in 0..180
+      if (z>0) {
+        // the alternate z1 is in -360..-180
+        long z1=z-360;
+        if ((z1>-MaxAzm) && (dist(a1,z)>dist(a1,z1))) z=z1;
+      }
+    }
+  }
+#endif
+  
   // corrected to instrument horizon
   z-=IH;
   a-=ID;
@@ -304,9 +332,14 @@ byte goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1, long 
   }
   
   // final validation
- if (((thisTargetAxis1+IHS>StepsPerDegreeAxis1*180L) || (thisTargetAxis1+IHS<-StepsPerDegreeAxis1*180L)) ||
+#ifdef MOUNT_TYPE_ALTAZM
+  // allow +/- 360 in Az
+  if (((thisTargetAxis1+IHS>StepsPerDegreeAxis1*MaxAzm) || (thisTargetAxis1+IHS<-StepsPerDegreeAxis1*MaxAzm)) ||
      ((thisTargetAxis2+IDS>StepsPerDegreeAxis2*180L) || (thisTargetAxis2+IDS<-StepsPerDegreeAxis2*180L))) return 7; // fail, unspecified error
-
+#else
+  if (((thisTargetAxis1+IHS>StepsPerDegreeAxis1*180L) || (thisTargetAxis1+IHS<-StepsPerDegreeAxis1*180L)) ||
+     ((thisTargetAxis2+IDS>StepsPerDegreeAxis2*180L) || (thisTargetAxis2+IDS<-StepsPerDegreeAxis2*180L))) return 7; // fail, unspecified error
+#endif
   lastTrackingState=trackingState;
 
   cli();
