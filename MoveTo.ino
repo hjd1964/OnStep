@@ -136,7 +136,7 @@ void moveTo() {
 #ifdef MOUNT_TYPE_ALTAZM
   // In AltAz mode & at the end of slew & near the Zenith, disable tracking for a moment if we're getting close to the target
   if ((distDestAxis1<=StepsPerDegreeAxis1*2) && (distDestAxis2<=StepsPerDegreeAxis2*2)) {
-    if (targetAxis2.part.m>80L*StepsPerDegreeAxis2-IHS) {
+    if ((long)targetAxis2.part.m>80L*StepsPerDegreeAxis2-IHS) {
       if (lastTrackingState==TrackingSidereal) {
         lastTrackingState=TrackingSiderealDisabled;
       }
