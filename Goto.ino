@@ -13,7 +13,7 @@ boolean syncEqu(double RA, double Dec) {
 
   double Axis1,Axis2;
 #ifdef MOUNT_TYPE_ALTAZM
-  EquToHor(latitude,HA,Dec,&Axis2,&Axis1); // convert from HA/Dec to Alt/Azm
+  EquToHor(HA,Dec,&Axis2,&Axis1); // convert from HA/Dec to Alt/Azm
   if (Axis1>180.0) Axis1-=360.0;
 #else
   EquToCEqu(latitude,HA,Dec,&Axis1,&Axis2);
@@ -65,67 +65,47 @@ boolean syncEqu(double RA, double Dec) {
 // this returns the telescopes HA and Dec (index corrected for Alt/Azm)
 void getHADec(double *HA, double *Dec) {
   cli();
-  long axis1=posAxis1;
-  long axis2=posAxis2;
+  double Axis1=posAxis1;
+  double Axis2=posAxis2;
   sei();
   
 #ifdef MOUNT_TYPE_ALTAZM
   // get the hour angle (or Azm)
-  double z=(double)axis1/(double)StepsPerDegreeAxis1;
+  double z=Axis1/(double)StepsPerDegreeAxis1;
   // get the declination (or Alt)
-  double a=(double)axis2/(double)StepsPerDegreeAxis2;
+  double a=Axis2/(double)StepsPerDegreeAxis2;
 
   // instrument to corrected horizon
   z+=IH;
   a+=ID;
 
-  HorToEqu(latitude,a,z,HA,Dec); // convert from Alt/Azm to HA/Dec
+  HorToEqu(a,z,HA,Dec); // convert from Alt/Azm to HA/Dec
 #else
   // get the hour angle (or Azm)
-  *HA=(double)axis1/(double)StepsPerDegreeAxis1;
+  *HA=Axis1/(double)StepsPerDegreeAxis1;
   // get the declination (or Alt)
-  *Dec=(double)axis2/(double)StepsPerDegreeAxis2;
+  *Dec=Axis2/(double)StepsPerDegreeAxis2;
 #endif
 }
 
 // gets the telescopes current RA and Dec, set returnHA to true for Horizon Angle instead of RA
-unsigned long lastGetEqu=0;
-double lastGetEquLST=0;
-double lastGetEquHA=0;
-double lastGetEquDec=0;
-boolean getEqu(double *RA, double *Dec, boolean returnHA, boolean fast) {
-  unsigned long Tmin=250L; if (trackingState==TrackingMoveTo) Tmin=500L;
-  
-  // return last values if recent results apply
-  if ((fast) && (millis()-lastGetEqu<Tmin)) {
-    *Dec=lastGetEquDec;
-    // return either the RA or the HA depending on returnHA
-    if (!returnHA) {
-      *RA=lastGetEquLST*15.0-lastGetEquHA;
-      while (*RA>=360.0) *RA=*RA-360.0;
-      while (*RA<0.0) *RA=*RA+360.0;
-    } else *RA=lastGetEquHA;
-    return true;
-  }
+boolean getEqu(double *RA, double *Dec, boolean returnHA) {
+  double HA;
   
   // get the HA and Dec (already index corrected on AltAzm)
-  getHADec(&lastGetEquHA,Dec);
+  getHADec(&HA,Dec);
   
 #ifndef MOUNT_TYPE_ALTAZM
   // correct for under the pole, polar misalignment, and index offsets
-  CEquToEqu(latitude,lastGetEquHA,*Dec,&lastGetEquHA,Dec);
+  CEquToEqu(latitude,HA,*Dec,&HA,Dec);
 #endif
-
-  lastGetEquLST=LST();
-  lastGetEquDec=*Dec;
-  lastGetEqu=millis();
 
   // return either the RA or the HA depending on returnHA
   if (!returnHA) {
-    *RA=LST()*15.0-lastGetEquHA;
-    while (*RA>=360.0) *RA=*RA-360.0;
-    while (*RA<0.0) *RA=*RA+360.0;
-  } else *RA=lastGetEquHA;
+    *RA=(LST()*15.0-HA);
+    while (*RA>=360.0) *RA-=360.0;
+    while (*RA<0.0) *RA+=360.0;
+  } else *RA=HA;
   
   return true;
 }
@@ -164,8 +144,8 @@ boolean getApproxEqu(double *RA, double *Dec, boolean returnHA) {
 // gets the telescopes current Alt and Azm
 boolean getHor(double *Alt, double *Azm) {
   double h,d;
-  getEqu(&h,&d,true,true);
-  EquToHor(latitude,h,d,Alt,Azm);
+  getEqu(&h,&d,true);
+  EquToHor(h,d,Alt,Azm);
   return true;
 }
 
@@ -177,7 +157,7 @@ byte goToEqu(double RA, double Dec) {
   double HA=LST()*15.0-RA;
   while (HA>=180.0) HA-=360.0;
   while (HA<-180.0) HA+=360.0;
-  EquToHor(latitude,HA,Dec,&a,&z);
+  EquToHor(HA,Dec,&a,&z);
 
   // Check to see if this goto is valid
   if ((parkStatus!=NotParked) && (parkStatus!=Parking)) return 4;   // fail, Parked
@@ -189,7 +169,7 @@ byte goToEqu(double RA, double Dec) {
   if (guideDirAxis1 || guideDirAxis2)                   return 7;   // fail, unspecified error
 
 #ifdef MOUNT_TYPE_ALTAZM
-  EquToHor(latitude,HA,Dec,&a,&z);
+  EquToHor(HA,Dec,&a,&z);
   
   if (z>180.0) z-=360.0;
   if (z<-180.0) z+=360.0;
@@ -255,7 +235,7 @@ byte goToEqu(double RA, double Dec) {
 byte goToHor(double *Alt, double *Azm) {
   double HA,Dec;
   
-  HorToEqu(latitude,*Alt,*Azm,&HA,&Dec);
+  HorToEqu(*Alt,*Azm,&HA,&Dec);
   
   double RA=LST()*15.0-HA;
   while (RA>=360.0) RA=RA-360.0;
