@@ -464,6 +464,8 @@ const char html_indexTrue[] PROGMEM = "Stepper Position: " Axis1 "=<font class=\
 const char html_indexIndex[] PROGMEM = "IHS=<font class=\"c\">%ld</font>, IDS=<font class=\"c\">%ld</font><br />";
 const char html_indexPosition[] PROGMEM = "Current Position: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
 const char html_indexTarget[] PROGMEM = "Target Position: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
+const char html_indexAz1[] PROGMEM = "Az1: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
+const char html_indexAz2[] PROGMEM = "Az2: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
 const char html_indexPier[] PROGMEM = "Pier Side=<font class=\"c\">%s</font> (meridian flips <font class=\"c\">%s</font>)<br /><br />";
 const char html_index7[] PROGMEM = "Current MaxRate: <font class=\"c\">%ld</font> (Default MaxRate: <font class=\"c\">%ld</font>)<br /><br />";
 const char html_index8[] PROGMEM = "Tracking: <font class=\"c\">%s %s</font><br />";
@@ -546,6 +548,7 @@ if (html_page_step==++stp) {
     strcpy_P(temp1, html_indexFault);
     sprintf(temp, temp1, faultAxis1 ? "<font class=\"c\">FAULT</font>" : "<font class=\"g\">Ok</font>", faultAxis2 ? "<font class=\"c\">FAULT</font>" : "<font class=\"g\">Ok</font>");
   }
+#ifdef DEBUG_ON
   if (html_page_step==++stp) {
     cli();
     long a1=(posAxis1+blAxis1)-trueAxis1;
@@ -556,6 +559,7 @@ if (html_page_step==++stp) {
   if (html_page_step==++stp) {
     strcpy_P(temp1, html_indexIndex); sprintf(temp,temp1,IHS,IDS); 
   }
+#endif
   if (html_page_step==++stp) {
     i=highPrecision; highPrecision=true; 
     cli();
@@ -575,6 +579,24 @@ if (html_page_step==++stp) {
     
     strcpy_P(temp1, html_indexPosition); sprintf(temp,temp1,temp2,temp3); 
   }
+#ifdef DEBUG_ON
+#ifdef MOUNT_TYPE_ALTAZM
+  if (html_page_step==++stp) {
+    i=highPrecision; highPrecision=true; 
+    doubleToDms(temp2,&az_Azm1,true,true);
+    doubleToDms(temp3,&az_Alt1,false,true);
+    highPrecision=i;
+    strcpy_P(temp1, html_indexAz1); sprintf(temp,temp1,temp2,temp3); 
+  }
+  if (html_page_step==++stp) {
+    i=highPrecision; highPrecision=true; 
+    doubleToDms(temp2,&az_Azm2,true,true);
+    doubleToDms(temp3,&az_Alt2,false,true);
+    highPrecision=i;
+    strcpy_P(temp1, html_indexAz2); sprintf(temp,temp1,temp2,temp3); 
+  }
+#endif
+#endif
   if (html_page_step==++stp) {
     i=highPrecision; highPrecision=true;
     cli();
