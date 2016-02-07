@@ -200,7 +200,7 @@ void processCommands() {
       } else 
 //  :GD#   Get Telescope Declination
 //         Returns: sDD*MM# or sDD*MM'SS# (based on precision setting)
-      if (command[1]=='D')  { getEqu(&f,&f1,true,true); if (!doubleToDms(reply,&f1,false,true)) commandError=true; else quietReply=true; } else 
+      if (command[1]=='D')  { getEqu(&f,&f1,true); if (!doubleToDms(reply,&f1,false,true)) commandError=true; else quietReply=true; } else 
 //  :Gd#   Get Currently Selected Target Declination
 //         Returns: sDD*MM# or sDD*MM'SS# (based on precision setting)
       if (command[1]=='d')  { if (!doubleToDms(reply,&newTargetDec,false,true)) commandError=true; else quietReply=true; } else 
@@ -249,7 +249,7 @@ void processCommands() {
       if (command[1]=='o')  { sprintf(reply,"%02d*",maxAlt); quietReply=true; } else
 //  :GR#   Get Telescope RA
 //         Returns: HH:MM.T# or HH:MM:SS# (based on precision setting)
-      if (command[1]=='R')  { getEqu(&f,&f1,false,true); f/=15.0; if (!doubleToHms(reply,&f)) commandError=true; else quietReply=true;  } else 
+      if (command[1]=='R')  { getEqu(&f,&f1,false); f/=15.0; if (!doubleToHms(reply,&f)) commandError=true; else quietReply=true;  } else 
 //  :Gr#   Get current/target object RA
 //         Returns: HH:MM.T# or HH:MM:SS (based on precision setting)
       if (command[1]=='r')  { f=newTargetRA; f/=15.0; if (!doubleToHms(reply,&f)) commandError=true; else quietReply=true; } else 
@@ -355,7 +355,7 @@ void processCommands() {
             }
           } else commandError=true;
         } else commandError=true;
-        getEqu(&f,&f1,false,true);  
+        getEqu(&f,&f1,false);  
       } else 
 //  :GZ#   Get telescope azimuth
 //         Returns: DDD*MM# or DDD*MM'SS# (based on precision setting)
@@ -890,7 +890,7 @@ void processCommands() {
             break; // maxRate
           }
         } else commandError=true;
-        getEqu(&f,&f1,false,true);  
+        getEqu(&f,&f1,false);  
       } else 
 //  :SzDDD*MM#
 //          Sets the target Object Azimuth
