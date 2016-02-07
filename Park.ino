@@ -59,9 +59,9 @@ boolean parkClearBacklash() {
 
   // backlash takeup rate
   cli();
-  long LasttimerRateAxis1=timerRateAxis1;
-  long LasttimerRateAxis2=timerRateAxis2;
-  timerRateAxis1 =timerRateBacklashAxis1;
+  long LastTimerRateAxis1=timerRateAxis1;
+  long LastTimerRateAxis2=timerRateAxis2;
+  timerRateAxis1=timerRateBacklashAxis1;
   timerRateAxis2=timerRateBacklashAxis2;
   sei();
 
@@ -91,8 +91,8 @@ boolean parkClearBacklash() {
   
   // move at the previous speed
   cli();
-  timerRateAxis1=LasttimerRateAxis1;
-  timerRateAxis2=LasttimerRateAxis2;
+  timerRateAxis1=LastTimerRateAxis1;
+  timerRateAxis2=LastTimerRateAxis2;
   sei();
   
   // return true on success
