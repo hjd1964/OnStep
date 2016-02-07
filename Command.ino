@@ -1018,7 +1018,7 @@ void processCommands() {
 //         Read RA PEC record index start (steps)
 //         Returns: DDDDDD#
      if ((command[0]=='V') && (command[1]=='I')) {
-       sprintf(reply,"%06ld",0);  // indexWorm_record
+       sprintf(reply,"%06ld",0L);  // indexWorm_record
        quietReply=true;
      } else
 
@@ -1080,7 +1080,6 @@ void processCommands() {
       if (command[0]=='W') {
         if ((command[1]>='0') && (command[1]<='3')) {
           currentSite=command[1]-'0'; EEPROM.update(EE_currentSite,currentSite); quietReply=true;
-          float f; 
           latitude=EEPROM_readFloat(EE_sites+(currentSite*25+0));
 #ifdef MOUNT_TYPE_ALTAZM
           celestialPoleDec=fabs(latitude);
