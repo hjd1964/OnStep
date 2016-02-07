@@ -716,8 +716,7 @@ double degreeRange(double d) {
 }
 
 long dist(long a, long b) {
-  if (a>b) return a-b;
-  if (b>=a) return b-a;
+  if (a>b) return a-b; else return b-a;
 }
 
 // floating point range of +/-255.999999x
