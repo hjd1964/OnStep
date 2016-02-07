@@ -320,34 +320,34 @@ boolean CEquToEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1) 
 
 // convert equatorial coordinates to horizon
 // this takes approx. 1.4mS on a 16MHz Mega2560
-void EquToHor(double Lat, double HA, double Dec, double *Alt, double *Azm) {
+void EquToHor(double HA, double Dec, double *Alt, double *Azm) {
+  while (HA<0.0)    HA=HA+360.0;
+  while (HA>=360.0) HA=HA-360.0;
   HA =HA/Rad;
   Dec=Dec/Rad;
-  Lat=Lat/Rad;
-  
-  double SinAlt = (sin(Dec) * sin(Lat)) + (cos(Dec) * cos(Lat) * cos(HA));  
+  double SinAlt = (sin(Dec) * sinLat) + (cos(Dec) * cosLat * cos(HA));  
   *Alt   = asin(SinAlt);
-  double CosAzm = ((sin(Dec) - (sin(Lat) * SinAlt)) / (cos(Lat) * cos(*Alt)));  
-  *Azm   = acos(CosAzm)*Rad;
-  if (sin(HA) > 0) { *Azm = 360.0 - *Azm; }
+  double t1=sin(HA);
+  double t2=cos(HA)*sinLat-tan(Dec)*cosLat;
+  *Azm=atan2(t1,t2)*Rad;
+  *Azm=*Azm+180.0;
   *Alt = *Alt*Rad;
 }
       
 // convert horizon coordinates to equatorial
 // this takes approx. 1.4mS
-void HorToEqu(double Lat, double Alt, double Azm, double *HA, double *Dec) { 
+void HorToEqu(double Alt, double Azm, double *HA, double *Dec) { 
+  while (Azm<0)      Azm=Azm+360.0;
+  while (Azm>=360.0) Azm=Azm-360.0;
   Alt  = Alt/Rad;
   Azm  = Azm/Rad;
-  Lat  = Lat/Rad;
-  double SinDec = (sin(Alt) * sin(Lat)) + (cos(Alt) * cos(Lat) * cos(Azm));  
+  double SinDec = (sin(Alt) * sinLat) + (cos(Alt) * cosLat * cos(Azm));  
   *Dec = asin(SinDec); 
-  double CosHA = ((sin(Alt) - (sin(Lat) * SinDec)) / (cos(Lat) * cos(*Dec)));  
-  *HA = acos(CosHA)*Rad;
-  if (sin(Azm) > 0) { *HA = 360 - *HA; }
+  double t1=sin(Azm);
+  double t2=cos(Azm)*sinLat-tan(Alt)*cosLat;
+  *HA=atan2(t1,t2)*Rad;
+  *HA=*HA+180.0;
   *Dec = *Dec*Rad;
-
-  while (*HA>+180.0) *HA=*HA-360.0;
-  while (*HA<-180.0) *HA=*HA+360.0;
 }
 
 double cot(double n) {
@@ -361,9 +361,7 @@ int az_step = 0;
 double az_Axis1=0,az_Axis2=0;
 double az_Dec=0,az_HA=0;
 double az_Dec1=0,az_HA1=0,az_Dec2=-91,az_HA2=0;
-double az_Alt,az_Azm;
-double az_sindec,az_cosdec,az_cosha;
-double az_sinalt,az_cosalt,az_cosazm;
+double az_Alt,az_Azm,_az_Alt;
 double az_deltaAxis1=15.0,az_deltaAxis2=0.0;
 
 // az_deltaH/D are in arc-seconds/second
@@ -375,23 +373,9 @@ void SetDeltaTrackingRate() {
   fstepAxis2.fixed=doubleToFixed( (((double)StepsPerDegreeAxis2/240.0)*trackingTimerRateAxis2)/100.0 );
 }
 
-double _az_deltaAxis1=1.0;
 void SetTrackingRate(double r) {
   az_deltaAxis1=r*15.0;
-  _az_deltaAxis1=az_deltaAxis1;
   az_deltaAxis2=0.0;
-}
-
-void TempTrackingRateRA(double r) {
-  az_deltaAxis1=r*15.0;
-}
-
-void RestoreTrackingRateRA() {
-  az_deltaAxis1=_az_deltaAxis1;
-}
-
-double CurrentTrackingRateRA() {
-  return _az_deltaAxis1;
 }
 
 // returns the amount of refraction (in arcminutes) at given altitude (degrees), pressure (millibars), and temperature (celsius)
@@ -477,7 +461,8 @@ boolean do_refractionRate_calc() {
   if (az_step==1) {
     getApproxEqu(&az_Axis1,&az_Axis2,true);
   } else
-  // convert units
+
+  // convert units, get ahead of and behind current position
   if ((az_step==2) || (az_step==102)) {
     az_Dec=az_Axis2;
     az_HA =az_Axis1;
@@ -490,79 +475,20 @@ boolean do_refractionRate_calc() {
       az_Dec=az_Dec/Rad;
     }
   } else
-  // prep Dec
-  if ((az_step==3) || (az_step==103)) {
-    az_sindec=sin(az_Dec);
-  } else
-  // prep Dec
-  if ((az_step==4) || (az_step==104)) {
-    az_cosdec=cos(az_Dec);
-  } else
-  // prep HA
-  if ((az_step==5) || (az_step==105)) {
-    az_cosha=cos(az_HA);
-  } else
-  // calc Alt, phase 1
-  if ((az_step==6) || (az_step==106)) {
-    az_sinalt = (az_sindec * sinLat) + (az_cosdec * cosLat * az_cosha); 
-  } else
-  // calc Alt, phase 2
-  if ((az_step==7) || (az_step==107)) {
-    az_Alt=asin(az_sinalt)*Rad;
-  } else
-  // prep Alt
-  if ((az_step==8) || (az_step==108)) {
-    az_cosalt=cos(az_Alt/Rad);
-  } else
-  // calc Azm, phase 1
-  if ((az_step==9) || (az_step==109)) {
-    az_cosazm = ((az_sindec - (sinLat * az_sinalt)) / (cosLat * az_cosalt));  
-  } else
-  // calc Azm, phase 2
-  if ((az_step==10) || (az_step==110)) {
-    az_Azm    = acos(az_cosazm)*Rad;
-  } else
-  // calc Azm, phase 3
-  if ((az_step==11) || (az_step==111)) {
-    if (sin(az_HA) > 0) { az_Azm = 360.0 - az_Azm; }
-  } else
   
+  // get the Horizon coords
+  if ((az_step==5) || (az_step==105)) {
+    EquToHor(az_HA,az_Dec,&az_Alt,&az_Azm);
+  } else
+
   // apply refraction
-  if ((az_step==12) || (az_step==112)) {
+  if ((az_step==10) || (az_step==110)) {
     az_Alt+=Refrac(az_Alt)/60.0;
   } else
 
-  // calc, Prep Alt
-  if ((az_step==13) || (az_step==113)) {
-    az_sinalt=sin(az_Alt/Rad);
-  } else
-  // calc, Prep Alt
-  if ((az_step==14) || (az_step==114)) {
-    az_cosalt=cos(az_Alt/Rad);
-  } else
-  // calc, Dec phase 1
+  // convert back to the Equtorial coords
   if ((az_step==15) || (az_step==115)) {
-    az_sindec = (az_sinalt * sinLat) + (az_cosalt * cosLat * az_cosazm);  
-  } else
-  // calc, Dec phase 2
-  if ((az_step==16) || (az_step==116)) {
-    az_Dec1 = asin(az_sindec)*Rad;
-  } else
-  // calc, HA phase 1
-  if ((az_step==17) || (az_step==117)) {
-    az_cosdec=cos(az_Dec1/Rad);  
-  } else
-  // calc, HA phase 2
-  if ((az_step==18) || (az_step==118)) {
-    az_cosha = ((az_sinalt - (sinLat * az_sindec)) / (cosLat * az_cosdec));  
-  } else
-  // calc, HA phase 3
-  if ((az_step==19) || (az_step==119)) {
-    az_HA1 = acos(az_cosha)*Rad;
-  } else
-  // calc, HA phase 4
-  if ((az_step==20) || (az_step==120)) {
-    if (sin(az_Azm/Rad) > 0) { az_HA1 = 360.0 - az_HA1; }
+    HorToEqu(az_Alt,az_Azm,&az_HA1,&az_Dec1);
     if (az_HA1>180.0) az_HA1-=360.0; // HA range +/-180
   } else
 
@@ -600,141 +526,77 @@ boolean do_refractionRate_calc() {
 
 #ifdef MOUNT_TYPE_ALTAZM
 
-#define AltAzTrackingRange 20  // distance in arc-min ahead of and behind the current Equ position, used for rate calculation
+#define AltAzTrackingRange 10  // distance in arc-min (20) ahead of and behind the current Equ position, used for rate calculation
 double az_Alt1,az_Alt2,az_Azm1,az_Azm2;
 
 boolean do_altAzmRate_calc() {
   boolean done=false;
 
   // turn off if not tracking at sidereal rate
-  // ToDo: this whole routine uses "uncorrected" coordinates, no index offsets are applied
   if (((trackingState!=TrackingSidereal) && (trackingState!=TrackingMoveTo))) { az_deltaAxis1=0.0; az_deltaAxis2=0.0; return true; }
 
   az_step++;
-  // load Alt/Azm
+  // convert units, get ahead of and behind current position
   if (az_step==1) {
-    long a,z;
     if (trackingState==TrackingMoveTo) {
-      z=targetAxis1.part.m;
-      a=targetAxis2.part.m;
+      cli();
+      az_Axis1=targetAxis1.part.m+IHS;
+      az_Axis2=targetAxis2.part.m+IDS;
+      sei();
     } else {
       cli();
-      z=posAxis1;
-      a=posAxis2;
+      az_Axis1=posAxis1+IHS;
+      az_Axis2=posAxis2+IDS;
       sei();
     }
     // get the Azm
-    az_Azm=(double)z/(double)StepsPerDegreeAxis1;
+    az_Azm=(double)az_Axis1/(double)StepsPerDegreeAxis1;
     // get the Alt
-    az_Alt=(double)a/(double)StepsPerDegreeAxis2; 
-
-    // returns Alt/Azm
-    az_cosazm = cos(az_Azm/Rad);
+    az_Alt=(double)az_Axis2/(double)StepsPerDegreeAxis2; 
   } else
 
-  // convert it into an RA/Dec
-  // calc, Prep Alt
-  if ((az_step==2) || (az_step==102)) {
-    az_sinalt=sin(az_Alt/Rad);
-  } else
-  // calc, Prep Alt
-  if ((az_step==3) || (az_step==103)) {
-    az_cosalt=cos(az_Alt/Rad);
-  } else
-  // calc, Dec phase 1
-  if ((az_step==4) || (az_step==104)) {
-    az_sindec = (az_sinalt * sinLat) + (az_cosalt * cosLat * az_cosazm);
-  } else
-  // calc, Dec phase 2
-  if ((az_step==5) || (az_step==105)) {
-    az_Dec1 = asin(az_sindec)*Rad;
-  } else
-  // calc, HA phase 1
-  if ((az_step==6) || (az_step==106)) {
-    az_cosdec=cos(az_Dec1/Rad);  
-  } else
-  // calc, HA phase 2
-  if ((az_step==7) || (az_step==107)) {
-    az_cosha = ((az_sinalt - (sinLat * az_sindec)) / (cosLat * az_cosdec));  
-  } else
-  // calc, HA phase 3
-  if ((az_step==8) || (az_step==108)) {
-    az_HA1 = acos(az_cosha)*Rad;
-  } else
-  // calc, HA phase 4
-  if ((az_step==9) || (az_step==109)) {
-    if (sin(az_Azm/Rad) > 0) { az_HA1 = 360.0 - az_HA1; }
-    if (az_HA1>180.0) az_HA1-=360.0;
+  // convert to Equatorial coords
+  if ((az_step==5)) {
+    HorToEqu(az_Alt,az_Azm,&az_HA1,&az_Dec1);
   } else
 
-  // offset and convert units
+  // look ahead of and behind the current position
   if ((az_step==10) || (az_step==110)) {
+    if (az_step==10 ) az_HA =(az_HA1-(AltAzTrackingRange/60.0));
+    if (az_step==110) az_HA =(az_HA1+(AltAzTrackingRange/60.0));
     az_Dec=az_Dec1;
-    az_HA =az_HA1;
-    if (az_step==10) {
-      az_HA =(az_HA-(AltAzTrackingRange/60.0))/Rad;  // =(az_HA-(28.125/60.0))/Rad;
-      az_Dec=az_Dec/Rad;
-    }
-    if (az_step==110) {
-      az_HA =(az_HA+(AltAzTrackingRange/60.0))/Rad;
-      az_Dec=az_Dec/Rad;
-    }
   } else
 
-  // prep Dec
-  if ((az_step==11) || (az_step==111)) {
-    az_sindec=sin(az_Dec);
-  } else
-  // prep Dec
-  if ((az_step==12) || (az_step==112)) {
-    az_cosdec=cos(az_Dec);
-  } else
-  // prep HA
-  if ((az_step==13) || (az_step==113)) {
-    az_cosha=cos(az_HA);
-  } else
-  // calc Alt, phase 1
-  if ((az_step==14) || (az_step==114)) {
-    az_sinalt = (az_sindec * sinLat) + (az_cosdec * cosLat * az_cosha); 
-  } else
-  // calc Alt, phase 2
+  // each back to the Horizon coords
   if ((az_step==15) || (az_step==115)) {
-    az_Alt=asin(az_sinalt)*Rad;
-  } else
-  // prep Alt
-  if ((az_step==16) || (az_step==116)) {
-    az_cosalt=cos(az_Alt/Rad);
-  } else
-  // calc Azm, phase 1
-  if ((az_step==17) || (az_step==117)) {
-    az_cosazm = ((az_sindec - (sinLat * az_sinalt)) / (cosLat * az_cosalt));  
-  } else
-  // calc Azm, phase 2
-  if ((az_step==18) || (az_step==118)) {
-    az_Azm    = acos(az_cosazm)*Rad;
-  } else
-  // calc Azm, phase 3
-  if ((az_step==19) || (az_step==119)) {
-    if (sin(az_HA) > 0) { az_Azm = 360.0 - az_Azm; }
-    if (az_Azm>180.0) az_Azm-=360.0; // Azm range +/-180
-    if (az_step==19) { az_Alt2=az_Alt; az_Azm2=az_Azm; }
-    if (az_step==119) { az_Alt1=az_Alt; az_Azm1=az_Azm; }
+    EquToHor(az_HA,az_Dec,&az_Alt,&az_Azm);
+    if (az_Azm>180.0)  az_Azm-=360.0;
+    if (az_Azm<-180.0) az_Azm+=360.0;
+
+    if (az_step==15)  { 
+      az_Alt2=az_Alt;
+      az_Azm2=az_Azm;
+    }
+    if (az_step==115) { 
+      az_Alt1=az_Alt;
+      az_Azm1=az_Azm;
+    }
   } else
   
   // calculate tracking rate deltas'
   if ((az_step==20) || (az_step==120)) {
     // we have both -0.5hr and +0.5hr values 
     if (az_step==120) {
-      // set rates
       // handle coordinate wrap
-      if ((az_Azm1<-90.0) && (az_Azm2> 90.0)) az_Azm1+=360.0;
-      if ((az_Azm1> 90.0) && (az_Azm2<-90.0)) az_Azm2+=360.0;
+      if ((az_Azm1<-90.0) && (az_Azm2>90.0)) az_Azm1+=360.0;
+      if ((az_Azm2<-90.0) && (az_Azm1>90.0)) az_Azm2+=360.0;
       
-      az_deltaAxis1=(az_Azm1-az_Azm2)*(15.0/(AltAzTrackingRange/60.0));  // *1 = +/- 15 deg... use *2 for +/- 7.5 deg... * 32 = .468 deg = 28.125'
-      az_deltaAxis2=(az_Alt1-az_Alt2)*(15.0/(AltAzTrackingRange/60.0));  // 
+      // set rates
+      az_deltaAxis1=(az_Azm1-az_Azm2)*(15.0/(AltAzTrackingRange/60.0))/2.0;
+      az_deltaAxis2=(az_Alt1-az_Alt2)*(15.0/(AltAzTrackingRange/60.0))/2.0; 
       
       // override for special case of near a celestial pole
-      if (90.0-fabs(az_Dec*Rad)<=0.5) { az_deltaAxis1=0.0; az_deltaAxis2=0.0; }
+      if (90.0-fabs(az_Dec)<=0.5) { az_deltaAxis1=0.0; az_deltaAxis2=0.0; }
     }
   } else
 
@@ -829,7 +691,7 @@ void update_lst(double t) {
 double LST() {
   cli(); long tempLst=lst; sei();
   while (tempLst>8640000) tempLst-=8640000;
-  return (tempLst/8640000.0)*360.0/15.0;
+  return (tempLst/8640000.0)*24.0;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------
@@ -851,6 +713,11 @@ double degreeRange(double d) {
   while (d>=360.0) d-=360.0;
   while (d<  0.0)  d+=360.0;
   return d;
+}
+
+long dist(long a, long b) {
+  if (a>b) return a-b;
+  if (b>=a) return b-a;
 }
 
 // floating point range of +/-255.999999x
