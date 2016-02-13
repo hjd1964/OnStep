@@ -208,7 +208,11 @@ void moveTo() {
       timerRateAxis1=SiderealRate;
       timerRateAxis2=SiderealRate;
       sei();
-      
+
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+      DecayModeTracking();
+#endif
+            
       // other special gotos: for parking the mount and homeing the mount
       if (parkStatus==Parking) {
 
@@ -261,4 +265,43 @@ uint32_t isqrt32 (uint32_t n) {
         place = place >> 2;
     }
     return root;
+}
+
+// if stepper drive can switch decay mode, set it here
+void DecayModeTracking() {
+#ifdef DRV8825_DECAY_MODE_MIXED
+  pinMode(Axis1_Mode,INPUT);
+  pinMode(Axis2_Mode,INPUT);
+#endif
+#ifdef DRV8825_DECAY_MODE_SLOW
+  pinMode(Axis1_Mode,OUTPUT);
+  digitalWrite(Axis1_Mode,LOW);
+  pinMode(Axis2_Mode,OUTPUT);
+  digitalWrite(Axis1_Mode,LOW);
+#endif
+#ifdef DRV8825_DECAY_MODE_FAST
+  pinMode(Axis1_Mode,OUTPUT);
+  digitalWrite(Axis1_Mode,HIGH);
+  pinMode(Axis2_Mode,OUTPUT);
+  digitalWrite(Axis2_Mode,HIGH);
+#endif
+}
+
+void DecayModeGoto() {
+#ifdef DRV8825_DECAY_MODE_GOTO_MIXED
+  pinMode(Axis1_Mode,INPUT);
+  pinMode(Axis2_Mode,INPUT);
+#endif
+#ifdef DRV8825_DECAY_MODE_GOTO_SLOW
+  pinMode(Axis1_Mode,OUTPUT);
+  digitalWrite(Axis1_Mode,LOW);
+  pinMode(Axis2_Mode,OUTPUT);
+  digitalWrite(Axis1_Mode,LOW);
+#endif
+#ifdef DRV8825_DECAY_MODE_GOTO_FAST
+  pinMode(Axis1_Mode,OUTPUT);
+  digitalWrite(Axis1_Mode,HIGH);
+  pinMode(Axis2_Mode,OUTPUT);
+  digitalWrite(Axis2_Mode,HIGH);
+#endif
 }
