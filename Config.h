@@ -154,6 +154,12 @@
 #define AXIS2_MODE_GOTO_OFF          // programs the Dec/Alt uStep mode M0/M1/M2, used during gotos, optional and default _OFF. Other values 0 to 7 (0xb000 to 111)
 #define AXIS2_STEP_GOTO 1            // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
 
+// Stepper driver decay mode control
+// Axis1 decay mode on Pin 32 and Axis2 decay mode on Pin 33
+// options are _FAST, _SLOW, _MIXED, default is _OFF
+#define DRV8825_DECAY_MODE_OFF       // decay mode used during tracking (for DRV8825)
+#define DRV8825_DECAY_MODE_GOTO_OFF  // decay mode used during slews (for DRV8825)
+
 // THAT'S IT FOR USER CONFIGURATION!
 
 // -------------------------------------------------------------------------------------------------------------------------
