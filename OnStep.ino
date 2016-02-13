@@ -293,6 +293,9 @@ int    maxAlt;                                     // the maximum altitude, in d
 #define Axis2_EN      30    // Pin 30 (Enabled when LOW)
 #define Axis2_FAULT   31    // Pin 31 (Fault if LOW)
 
+#define Axis1_Mode    32    // Pin 32 (Mode switch for Axis1)
+#define Axis2_Mode    33    // Pin 33 (Mode switch for Axis2)
+
 #define LEDposBit      5    // Pin 8
 #define LEDposPORT PORTH    //
 #define LEDnegBit      6    // Pin 9
@@ -386,11 +389,11 @@ int    maxAlt;                                     // the maximum altitude, in d
 #define Axis2GNDBit    7    // Pin 7
 #define Axis2GNDPORT PORTD  //
 
-#define Axis1DirBit     2   // Pin 10
+#define Axis1DirBit    2    // Pin 10
 #define Axis1DirPORT  PORTB //
-#define Axis15vBit      3   // Pin 11
+#define Axis15vBit     3    // Pin 11
 #define Axis15vPORT   PORTB //
-#define Axis1StepBit    4   // Pin 12
+#define Axis1StepBit   4    // Pin 12
 #define Axis1StepPORT PORTB //
 
 // ST4 interface
@@ -988,6 +991,11 @@ void setup() {
   pinMode(Axis2_M2, OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE>>2 & 1));
 #endif
 
+// if the stepper driver decay control is wired in request the decay mode
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+  DecayModeTracking();
+#endif
+
 #ifdef PPS_SENSE_ON
 #if defined(__AVR__)
   attachInterrupt(PpsInt,ClockSync,RISING);
@@ -1426,7 +1434,12 @@ void loop() {
     
     #ifdef PEC_SENSE
     // see if we're on the PEC index
-    if (trackingState==TrackingSidereal) pecAnalogValue = analogRead(1);
+    if (trackingState==TrackingSidereal) 
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+    pecAnalogValue = analogRead(1);
+#elif defined(__arm__) && defined(TEENSYDUINO)
+    pecAnalogValue = analogRead(14);
+#endif
     #endif
     
     // adjust tracking rate for Alt/Azm mounts
