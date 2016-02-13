@@ -335,8 +335,12 @@ byte goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1, long 
   timerRateAxis1=SiderealRate;
   timerRateAxis2=SiderealRate;
   sei();
-  
+
   DisablePec();
+
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+  DecayModeGoto();
+#endif
   
   return 0;
 }
