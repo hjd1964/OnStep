@@ -46,20 +46,22 @@ boolean doubleToHms(char *reply, double *f) {
   int  h1;
   double m1,f1,s1;
 
-  f1=*f+0.00001; // keep from rounding down in seconds
+  f1=abs(*f)+0.00001; // keep from rounding down in seconds
 
   h1=floor(f1);
   m1=(f1-h1)*60;
   s1=(m1-floor(m1));
 
-  char s[]="%02d:%02d:%02d";
+  char s[]="%s%02d:%02d:%02d";
   if (highPrecision) {
     s1=s1*60;
   } else {
     s1=s1*10;
     s[9]='.'; s[12]='1';
   }
-  sprintf(reply,s,h1,(int)m1,(int)s1);
+  char sign[]="";
+  if (((s1!=0) || (m1!=0) || (h1!=0)) && (*f<0.0)) strcpy(sign,"-");
+  sprintf(reply,s,sign,h1,(int)m1,(int)s1);
 
   return true;
 }
