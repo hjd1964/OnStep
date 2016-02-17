@@ -9,11 +9,11 @@ boolean goHome() {
 
   cli();
   #ifdef SYNC_ANYWHERE_ON
-  if (pierSide==PierSideWest) targetAxis1.part.m=-celestialPoleHA*StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=celestialPoleHA*StepsPerDegreeAxis1-IHS; targetAxis1.part.f=0;
-  targetAxis2.part.m=celestialPoleDec*(double)StepsPerDegreeAxis2-IDS; targetAxis2.part.f=0;
+  if (pierSide==PierSideWest) targetAxis1.part.m=-celestialPoleHA*(long)StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=celestialPoleHA*(long)StepsPerDegreeAxis1-IHS; targetAxis1.part.f=0;
+  targetAxis2.part.m=(long)(celestialPoleDec*(double)StepsPerDegreeAxis2)-IDS; targetAxis2.part.f=0;
   #else
-  if (pierSide==PierSideWest) targetAxis1.part.m=-celestialPoleHA*StepsPerDegreeAxis1; else targetAxis1.part.m=celestialPoleHA*StepsPerDegreeAxis1; targetAxis1.part.f=0;
-  targetAxis2.part.m=celestialPoleDec*(double)StepsPerDegreeAxis2; targetAxis2.part.f=0;
+  if (pierSide==PierSideWest) targetAxis1.part.m=-celestialPoleHA*(long)StepsPerDegreeAxis1; else targetAxis1.part.m=celestialPoleHA*(long)StepsPerDegreeAxis1; targetAxis1.part.f=0;
+  targetAxis2.part.m=(long)(celestialPoleDec*(double)StepsPerDegreeAxis2); targetAxis2.part.f=0;
   #endif
   startAxis1=posAxis1;
   startAxis2=posAxis2;
@@ -96,7 +96,7 @@ boolean setHome() {
   if (!pecRecorded) pecStatus=IgnorePEC;
 
   // the polar home position
-  startAxis1 = celestialPoleHA*StepsPerDegreeAxis1;
+  startAxis1 = celestialPoleHA*(long)StepsPerDegreeAxis1;
   startAxis2 = celestialPoleDec*(double)StepsPerDegreeAxis2;
 
   // clear pulse-guiding state
