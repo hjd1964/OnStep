@@ -207,7 +207,11 @@ boolean unpark() {
           
         // start tracking the sky
         trackingState=TrackingSidereal;
-        
+
+        // get PEC status
+        pecStatus  =EEPROM.read(EE_pecStatus);
+        pecRecorded=EEPROM.read(EE_pecRecorded); if (!pecRecorded) pecStatus=IgnorePEC;
+
         return true;
       };
     };
