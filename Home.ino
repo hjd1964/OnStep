@@ -86,15 +86,14 @@ boolean setHome() {
   EEPROM.write(EE_parkStatus,parkStatus);
   
   // reset PEC, unless we have an index to recover from this
+  pecRecorded=EEPROM.read(EE_pecRecorded);
   #ifdef PEC_SENSE_OFF
-    pecStatus         = IgnorePEC;
-    pecRecorded       = false;
+    pecStatus=IgnorePEC;
     EEPROM.write(EE_pecStatus,pecStatus);
-    EEPROM.write(EE_pecRecorded,pecRecorded);
   #else
-    pecStatus         = IgnorePEC;
-    pecStatus = EEPROM.read(EE_pecStatus);
+    pecStatus=EEPROM.read(EE_pecStatus);
   #endif
+  if (!pecRecorded) pecStatus=IgnorePEC;
 
   // the polar home position
   startAxis1 = celestialPoleHA*StepsPerDegreeAxis1;
