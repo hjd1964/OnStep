@@ -1243,13 +1243,13 @@ void setup() {
   backlashAxis1=EEPROM_readInt(EE_backlashAxis1);
   
   // get the PEC status
-  pecStatus  =EEPROM.read(EE_pecStatus); 
-  pecRecorded=EEPROM.read(EE_pecRecorded);
-  if (!pecRecorded) pecStatus=IgnorePEC;
+  pecStatus  =EEPROM.read(EE_pecStatus);
+  pecRecorded=EEPROM.read(EE_pecRecorded); if (!pecRecorded) pecStatus=IgnorePEC;
   for (int i=0; i<PECBufferSize; i++) pecBuffer[i]=EEPROM.read(EE_indexWorm+i);
   wormSensePos=EEPROM_readLong(EE_wormSensePos);
   #ifdef PEC_SENSE_OFF
   wormSensePos=0;
+  pecStatus=IgnorePEC;
   #endif
   
   // get the Park status
@@ -1354,18 +1354,23 @@ void loop() {
     // only active while sidereal tracking with a guide rate that makes sense
     Pec();
   } else DisablePec();
-  if (pecAutoRecord>0) {
-    // write PEC table to EEPROM, should do about 100 bytes/second
-    pecAutoRecord--;
-    EEPROM.update(EE_indexWorm+pecAutoRecord,pecBuffer[pecAutoRecord]);
-  }
 #endif
 
-  // SIDEREAL TRACKING ---------------------------------------------------------------------------------
+  // 0.01 SECOND TIMED ---------------------------------------------------------------------------------
   cli(); long tempLst=lst; sei();
   if (tempLst!=siderealTimer) {
     siderealTimer=tempLst;
-    
+
+#ifndef MOUNT_TYPE_ALTAZM
+    // WRITE PERIODIC ERROR CORRECTION TO EEPROM -------------------------------------------------------
+    if (pecAutoRecord>0) {
+      // write PEC table to EEPROM, should do several hundred bytes/second
+      pecAutoRecord--;
+      EEPROM.update(EE_indexWorm+pecAutoRecord,pecBuffer[pecAutoRecord]);
+    }
+#endif
+
+    // SIDEREAL TRACKING -------------------------------------------------------------------------------
     // only active while sidereal tracking with a guide rate that makes sense
     if ((trackingState==TrackingSidereal) && (!((guideDirAxis1 || guideDirAxis2) && (activeGuideRate>GuideRate1x)))) {
       // apply the Tracking, Guiding, and PEC
@@ -1380,6 +1385,7 @@ void loop() {
       #endif
     }
 
+    // SIDEREAL TRACKING DURING GOTOS ------------------------------------------------------------------
     // keeps the target where it's supposed to be while doing gotos
     if (trackingState==TrackingMoveTo) {
       if (lastTrackingState==TrackingSidereal) {
