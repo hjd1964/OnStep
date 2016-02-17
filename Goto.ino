@@ -255,15 +255,15 @@ byte goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1, long 
 
   if (meridianFlip!=MeridianFlipNever) {
     // where the allowable hour angles are
-    long eastOfPierMaxHA= UnderPoleLimit*15L*StepsPerDegreeAxis1;
+    long eastOfPierMaxHA= UnderPoleLimit*15L*(long)StepsPerDegreeAxis1;
     long eastOfPierMinHA=-(MinutesPastMeridianE*StepsPerDegreeAxis1/4L);
     long westOfPierMaxHA= (MinutesPastMeridianW*StepsPerDegreeAxis1/4L);
-    long westOfPierMinHA=-UnderPoleLimit*15L*StepsPerDegreeAxis1;
+    long westOfPierMinHA=-UnderPoleLimit*15L*(long)StepsPerDegreeAxis1;
   
     // override the defaults and force a flip if near the meridian and possible (for parking and align)
     if ((gotoPierSide!=PierSideBest) && (pierSide!=gotoPierSide)) {
-      eastOfPierMinHA= (MinutesPastMeridianW*StepsPerDegreeAxis1/4L);
-      westOfPierMaxHA=-(MinutesPastMeridianE*StepsPerDegreeAxis1/4L);
+      eastOfPierMinHA= (MinutesPastMeridianW*(long)StepsPerDegreeAxis1/4L);
+      westOfPierMaxHA=-(MinutesPastMeridianE*(long)StepsPerDegreeAxis1/4L);
     }
     // if doing a meridian flip, use the opposite pier side coordinates
     if (pierSide==PierSideEast) {
@@ -292,8 +292,8 @@ byte goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1, long 
         // default, if the polar-home position is +90 deg. HA, we want -90HA
         // for a fork mount the polar-home position is 0 deg. HA, so leave it alone
 #if !defined(MOUNT_TYPE_FORK) && !defined(MOUNT_TYPE_FORK_ALT)
-        cli(); posAxis1-=180L*StepsPerDegreeAxis1; sei();
-        trueAxis1-=180L*StepsPerDegreeAxis1;
+        cli(); posAxis1-=(long)(180.0*(double)StepsPerDegreeAxis1); sei();
+        trueAxis1-=(long)(180.0*(double)StepsPerDegreeAxis1);
 #endif
       } else {
         // east side of pier - we're in the western sky and the HA's are positive
@@ -314,11 +314,11 @@ byte goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1, long 
   // final validation
 #ifdef MOUNT_TYPE_ALTAZM
   // allow +/- 360 in Az
-  if (((thisTargetAxis1+IHS>StepsPerDegreeAxis1*MaxAzm) || (thisTargetAxis1+IHS<-StepsPerDegreeAxis1*MaxAzm)) ||
-     ((thisTargetAxis2+IDS>StepsPerDegreeAxis2*180L) || (thisTargetAxis2+IDS<-StepsPerDegreeAxis2*180L))) return 7; // fail, unspecified error
+  if (((thisTargetAxis1+IHS>(long)StepsPerDegreeAxis1*MaxAzm) || (thisTargetAxis1+IHS<-(long)StepsPerDegreeAxis1*MaxAzm)) ||
+     ((thisTargetAxis2+IDS>(long)StepsPerDegreeAxis2*180L) || (thisTargetAxis2+IDS<-(long)StepsPerDegreeAxis2*180L))) return 7; // fail, unspecified error
 #else
-  if (((thisTargetAxis1+IHS>StepsPerDegreeAxis1*180L) || (thisTargetAxis1+IHS<-StepsPerDegreeAxis1*180L)) ||
-     ((thisTargetAxis2+IDS>StepsPerDegreeAxis2*180L) || (thisTargetAxis2+IDS<-StepsPerDegreeAxis2*180L))) return 7; // fail, unspecified error
+  if (((thisTargetAxis1+IHS>(long)StepsPerDegreeAxis1*180L) || (thisTargetAxis1+IHS<-(long)StepsPerDegreeAxis1*180L)) ||
+     ((thisTargetAxis2+IDS>(long)StepsPerDegreeAxis2*180L) || (thisTargetAxis2+IDS<-(long)StepsPerDegreeAxis2*180L))) return 7; // fail, unspecified error
 #endif
   lastTrackingState=trackingState;
 
