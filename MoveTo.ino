@@ -20,38 +20,38 @@ void moveTo() {
     // first phase, decide if we should move to 60 deg. HA (4 hours) to get away from the horizon limits or just go straight to the home position
     cli();
     if (pierSide==PierSideFlipWE1) { 
-      if (celestialPoleHA==0) targetAxis1.part.m=0*StepsPerDegreeAxis1-IHS; else {
-        if ((currentAlt<10.0) && (startAxis1>-90L*StepsPerDegreeAxis1-IHS)) targetAxis1.part.m=-60L*StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=-celestialPoleHA*StepsPerDegreeAxis1-IHS;
+      if (celestialPoleHA==0) targetAxis1.part.m=0*(long)StepsPerDegreeAxis1-IHS; else {
+        if ((currentAlt<10.0) && (startAxis1>-90L*(long)StepsPerDegreeAxis1-IHS)) targetAxis1.part.m=-60L*(long)StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=-celestialPoleHA*(long)StepsPerDegreeAxis1-IHS;
       }
     } else {
-      if (celestialPoleHA==0) targetAxis1.part.m=0*StepsPerDegreeAxis1; else {
-        if ((currentAlt<10.0) && (startAxis1<90L*StepsPerDegreeAxis1-IHS)) targetAxis1.part.m=60L*StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=celestialPoleHA*StepsPerDegreeAxis1-IHS; 
+      if (celestialPoleHA==0) targetAxis1.part.m=0*(long)StepsPerDegreeAxis1; else {
+        if ((currentAlt<10.0) && (startAxis1<90L*(long)StepsPerDegreeAxis1-IHS)) targetAxis1.part.m=60L*(long)StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=celestialPoleHA*(long)StepsPerDegreeAxis1-IHS; 
       }
     } 
     targetAxis1.part.f=0;
-    targetAxis2.part.m=((long)(celestialPoleDec*StepsPerDegreeAxis2))-IDS; targetAxis2.part.f=0;
+    targetAxis2.part.m=((long)(celestialPoleDec*(double)StepsPerDegreeAxis2))-IDS; targetAxis2.part.f=0;
     sei();
 
     cli();
     if (celestialPoleDec>0) {
       // if Dec is in the general area of the pole, slew both axis back at once
-      if (posAxis2>((long)((90.0-latitude)*StepsPerDegreeAxis2))-IDS) {
-        if (pierSide==PierSideFlipWE1) targetAxis1.part.m=-celestialPoleHA*StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=celestialPoleHA*StepsPerDegreeAxis1-IHS; targetAxis1.part.f=0;
+      if (posAxis2>((long)((90.0-latitude)*(double)StepsPerDegreeAxis2))-IDS) {
+        if (pierSide==PierSideFlipWE1) targetAxis1.part.m=-celestialPoleHA*(long)StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=celestialPoleHA*(long)StepsPerDegreeAxis1-IHS; targetAxis1.part.f=0;
       } else {
         // override if we're at a low latitude and in the opposite sky, |HA|=6 is very low on the horizon in this orientation and we need to delay arriving there during a meridian flip
         // in the extreme case, where the user is very near the (Earths!) equator an Horizon limit of -10 or -15 may be necessary for proper operation.
         if ((currentAlt<20.0) && (abs(latitude)<45.0) && (posAxis2<0-IDS)) {
-          if (pierSide==PierSideFlipWE1) targetAxis1.part.m=-45L*StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=45L*StepsPerDegreeAxis1-IHS; targetAxis1.part.f=0;
+          if (pierSide==PierSideFlipWE1) targetAxis1.part.m=-45L*(long)StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=45L*(long)StepsPerDegreeAxis1-IHS; targetAxis1.part.f=0;
         }
       }
     } else {
       // if Dec is in the general area of the pole, slew both axis back at once
-      if (posAxis2<((long)((-90.0-latitude)*StepsPerDegreeAxis2))-IDS) {
-        if (pierSide==PierSideFlipWE1) targetAxis1.part.m=-celestialPoleHA*StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=celestialPoleHA*StepsPerDegreeAxis1-IHS; targetAxis1.part.f=0;
+      if (posAxis2<((long)((-90.0-latitude)*(double)StepsPerDegreeAxis2))-IDS) {
+        if (pierSide==PierSideFlipWE1) targetAxis1.part.m=-celestialPoleHA*(long)StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=celestialPoleHA*(long)StepsPerDegreeAxis1-IHS; targetAxis1.part.f=0;
       } else { 
         // override if we're at a low latitude and in the opposite sky, |HA|=6 is very low on the horizon in this orientation and we need to delay arriving there during a meridian flip
         if ((currentAlt<20.0) && (abs(latitude)<45.0) && (posAxis2>0-IDS)) {
-          if (pierSide==PierSideFlipWE1) targetAxis1.part.m=-45L*StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=45L*StepsPerDegreeAxis1-IHS; targetAxis1.part.f=0;
+          if (pierSide==PierSideFlipWE1) targetAxis1.part.m=-45L*(long)StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=45L*(long)StepsPerDegreeAxis1-IHS; targetAxis1.part.f=0;
         }
       }
     }
@@ -84,10 +84,9 @@ void moveTo() {
     if ((pierSide==PierSideFlipEW1) || (pierSide==PierSideFlipEW2) || (pierSide==PierSideFlipEW3)) pierSide=PierSideEast;
 
     // set the destination near where we are now
-    // todo: the new targetAxis1/Dec should be checked against the old targetAxis1/Dec, if the old targetAxis1/Dec is closer than use it
     cli();
-    if (distDestAxis1>StepsPerDegreeAxis1) { if (posAxis1>(long)targetAxis1.part.m) targetAxis1.part.m=posAxis1-StepsPerDegreeAxis1; else targetAxis1.part.m=posAxis1+StepsPerDegreeAxis1; targetAxis1.part.f=0; }
-    if (distDestAxis2>StepsPerDegreeAxis2) { if (posAxis2>(long)targetAxis2.part.m) targetAxis2.part.m=posAxis2-StepsPerDegreeAxis2; else targetAxis2.part.m=posAxis2+StepsPerDegreeAxis2; targetAxis2.part.f=0; }
+    if (distDestAxis1>(long)StepsPerDegreeAxis1) { if (posAxis1>(long)targetAxis1.part.m) targetAxis1.part.m=posAxis1-(long)StepsPerDegreeAxis1; else targetAxis1.part.m=posAxis1+(long)StepsPerDegreeAxis1; targetAxis1.part.f=0; }
+    if (distDestAxis2>(long)StepsPerDegreeAxis2) { if (posAxis2>(long)targetAxis2.part.m) targetAxis2.part.m=posAxis2-(long)StepsPerDegreeAxis2; else targetAxis2.part.m=posAxis2+(long)StepsPerDegreeAxis2; targetAxis2.part.f=0; }
     sei();
 
     if (parkStatus==Parking) {
@@ -135,8 +134,8 @@ void moveTo() {
 
 #ifdef MOUNT_TYPE_ALTAZM
   // In AltAz mode & at the end of slew & near the Zenith, disable tracking for a moment if we're getting close to the target
-  if ((distDestAxis1<=StepsPerDegreeAxis1*2) && (distDestAxis2<=StepsPerDegreeAxis2*2)) {
-    if ((long)targetAxis2.part.m>80L*StepsPerDegreeAxis2-IHS) {
+  if ((distDestAxis1<=(long)StepsPerDegreeAxis1*2L) && (distDestAxis2<=(long)StepsPerDegreeAxis2*2L)) {
+    if ((long)targetAxis2.part.m>80L*(long)StepsPerDegreeAxis2-IHS) {
       if (lastTrackingState==TrackingSidereal) {
         lastTrackingState=TrackingSiderealDisabled;
       }
@@ -157,12 +156,12 @@ void moveTo() {
       cli();
       if (celestialPoleHA==0) {
         // for fork mounts
-        if (pierSide==PierSideFlipEW2) targetAxis1.part.m=180L*StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=-180L*StepsPerDegreeAxis1-IHS; targetAxis1.part.f=0;
+        if (pierSide==PierSideFlipEW2) targetAxis1.part.m=180L*(long)StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=-180L*(long)StepsPerDegreeAxis1-IHS; targetAxis1.part.f=0;
       } else {
         // for eq mounts
-        if (pierSide==PierSideFlipEW2) targetAxis1.part.m=celestialPoleHA*StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=-celestialPoleHA*StepsPerDegreeAxis1-IHS; targetAxis1.part.f=0;
+        if (pierSide==PierSideFlipEW2) targetAxis1.part.m=celestialPoleHA*(long)StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=-celestialPoleHA*(long)StepsPerDegreeAxis1-IHS; targetAxis1.part.f=0;
       }
-      targetAxis2.part.m=celestialPoleDec*StepsPerDegreeAxis2-IDS; targetAxis2.part.f=0;
+      targetAxis2.part.m=(long)(celestialPoleDec*(double)StepsPerDegreeAxis2)-IDS; targetAxis2.part.f=0;
       sei();
       
       pierSide++;
@@ -179,8 +178,8 @@ void moveTo() {
         DecDir  = DecDirWInit;
         // if we were on the east side of the pier the HA's were in the western sky, and were positive
         // now we're in the eastern sky and the HA's are negative
-        posAxis1-=180L*StepsPerDegreeAxis1;
-        trueAxis1-=180L*StepsPerDegreeAxis1;
+        posAxis1-=(long)(180.0*(double)StepsPerDegreeAxis1);
+        trueAxis1-=(long)(180.0*(double)StepsPerDegreeAxis1);
         sei();
       } else {
         pierSide=PierSideEast;
@@ -189,8 +188,8 @@ void moveTo() {
         DecDir  = DecDirEInit;      
         // if we were on the west side of the pier the HA's were in the eastern sky, and were negative
         // now we're in the western sky and the HA's are positive
-        posAxis1+=180L*StepsPerDegreeAxis1;
-        trueAxis1+=180L*StepsPerDegreeAxis1;
+        posAxis1+=(long)(180.0*(double)StepsPerDegreeAxis1);
+        trueAxis1+=(long)(180.0*(double)StepsPerDegreeAxis1);
         sei();
       }
     
