@@ -139,7 +139,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
       } else {
         // use acceleration
         double z=(StepsForRateChangeAxis1/isqrt32(fabs(x)));
-        guideTimerRateAxis1A=(1.0/((StepsPerDegreeAxis1*(z/1000000.0)))*3600.0);
+        guideTimerRateAxis1A=(1.0/(((double)StepsPerDegreeAxis1*(z/1000000.0)))*3600.0);
         if (guideTimerRateAxis1A>fabs(guidetimerRateAxis1)) guideTimerRateAxis1A=fabs(guidetimerRateAxis1);
       }
       // stop guiding
@@ -176,7 +176,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
       } else {
         // use acceleration
         double z=(StepsForRateChangeAxis2/isqrt32(x));
-        guideTimerRateAxis2A=(1.0/((StepsPerDegreeAxis2*(z/1000000.0)))*3600.0);
+        guideTimerRateAxis2A=(1.0/(((double)StepsPerDegreeAxis2*(z/1000000.0)))*3600.0);
         if (guideTimerRateAxis2A>fabs(guideTimerRateAxis2)) guideTimerRateAxis2A=fabs(guideTimerRateAxis2);
       }
       // stop guiding
