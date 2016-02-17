@@ -46,7 +46,7 @@ void processCommands() {
 #endif
     else {
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
-  Ethernet_www();
+      Ethernet_www();
 #endif
       return;
     }
@@ -647,9 +647,9 @@ void processCommands() {
         if ((parameter[2]==0) && (parameter[0]=='Z')) {
           quietReply=true; 
 #ifndef MOUNT_TYPE_ALTAZM
-          if ((parameter[1]=='+') && (trackingState==TrackingSidereal)) { if (pecRecorded) pecStatus=ReadyPlayPEC; } else
-          if ((parameter[1]=='-') && (trackingState==TrackingSidereal)) { pecStatus=IgnorePEC; } else
-          if ((parameter[1]=='/') && (trackingState==TrackingSidereal)) { pecStatus=ReadyRecordPEC; } else
+          if (parameter[1]=='+') { if (pecRecorded) pecStatus=ReadyPlayPEC; EEPROM.update(EE_pecStatus,pecStatus); } else
+          if (parameter[1]=='-') { pecStatus=IgnorePEC; EEPROM.update(EE_pecStatus,pecStatus); } else
+          if ((parameter[1]=='/') && (trackingState==TrackingSidereal)) { pecStatus=ReadyRecordPEC; EEPROM.update(EE_pecStatus,IgnorePEC); } else
           if (parameter[1]=='Z') { 
             for (i=0; i<PECBufferSize; i++) pecBuffer[i]=128;
             pecFirstRecord = true;
@@ -660,9 +660,7 @@ void processCommands() {
           } else
           if (parameter[1]=='!') {
             pecRecorded=true;
-            pecStatus=IgnorePEC;
             EEPROM.update(EE_pecRecorded,pecRecorded);
-            EEPROM.update(EE_pecStatus,pecStatus);
             EEPROM_writeLong(EE_wormSensePos,wormSensePos);
             // trigger recording of PEC buffer
             pecAutoRecord=PECBufferSize;
