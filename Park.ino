@@ -136,8 +136,8 @@ byte park() {
         long ids=(IDS/1024L)*1024L;
         h=h-ihs;
         d=d-ids;
-        float ih=ihs/StepsPerDegreeAxis1;
-        float id=ids/StepsPerDegreeAxis2;
+        float ih=ihs/(long)StepsPerDegreeAxis1;
+        float id=ids/(long)StepsPerDegreeAxis2;
         // also save the alignment index values in this mode since they can change widely
         EEPROM_writeFloat(EE_IH,ih);
         EEPROM_writeFloat(EE_ID,id);
