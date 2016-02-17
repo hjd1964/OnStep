@@ -1000,7 +1000,7 @@ void processCommands() {
 //         Returns: DDDDDD#
      if ((command[0]=='V') && (command[1]=='W')) {
        if (parameter[0]==0) {
-         sprintf(reply,"%06ld",StepsPerWormRotationAxis1);
+         sprintf(reply,"%06ld",(long)StepsPerWormRotationAxis1);
          quietReply=true;
        } else commandError=true;
      } else
@@ -1040,7 +1040,7 @@ void processCommands() {
        commandError=true;
        long l=strtol(parameter,&conv_end,10);
        // see if it converted and is in range
-       if ( (&parameter[0]!=conv_end) && ((l>=0) && (l<StepsPerWormRotationAxis1))) {
+       if ( (&parameter[0]!=conv_end) && ((l>=0) && (l<(long)StepsPerWormRotationAxis1))) {
 // ignored
          commandError=false;
        }
