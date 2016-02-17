@@ -20,8 +20,8 @@ void Pec() {
 
   // keep track of our current step position, and when the step position on the worm wraps during playback
   cli(); long pecPos=(long)targetAxis1.part.m-trueAxis1; sei();
-  while (pecPos>=StepsPerWormRotationAxis1) pecPos-=StepsPerWormRotationAxis1;
-  while (pecPos<0) pecPos+=StepsPerWormRotationAxis1;
+  while (pecPos>=(long)StepsPerWormRotationAxis1) pecPos-=(long)StepsPerWormRotationAxis1;
+  while (pecPos<0) pecPos+=(long)StepsPerWormRotationAxis1;
 
   #ifdef PEC_SENSE_ON
     // if the HALL sensor (etc.) has just arrived at the index and it's been more than 60 seconds since
@@ -49,14 +49,18 @@ void Pec() {
     sei();
   #endif
 
+  #ifdef PEC_SENSE_OFF
+  wormSensed=true;
+  #endif
+
   // worm step position corrected for any index found
   lastWormRotationPos = wormRotationPos;
   wormRotationPos =(pecPos-wormSensePos);
-  while (wormRotationPos>=StepsPerWormRotationAxis1) wormRotationPos-=StepsPerWormRotationAxis1;
-  while (wormRotationPos<0) wormRotationPos+=StepsPerWormRotationAxis1;
+  while (wormRotationPos>=(long)StepsPerWormRotationAxis1) wormRotationPos-=(long)StepsPerWormRotationAxis1;
+  while (wormRotationPos<0) wormRotationPos+=(long)StepsPerWormRotationAxis1;
   if ((wormRotationPos-lastWormRotationPos)<0) pecBufferStart=true; else pecBufferStart=false;
   lastWormRotationPos=wormRotationPos;
-  
+
   // handle playing back and recording PEC
   if ((pecStatus!=IgnorePEC) && (wormSensed)) {
     // start playing PEC
