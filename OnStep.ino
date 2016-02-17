@@ -54,8 +54,8 @@
 #endif
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "01 29 16"
-#define FirmwareNumber "1.0b29"
+#define FirmwareDate   "02 17 16"
+#define FirmwareNumber "1.0b30"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -214,20 +214,20 @@ long celestialPoleHA  = 0L;
 #endif
 double celestialPoleDec = 90.0;
 
-volatile long posAxis1   = 90L*StepsPerDegreeAxis1;// hour angle position in steps
-long trueAxis1           = 90L*StepsPerDegreeAxis1;// correction to above for motor shaft position steps
-volatile long startAxis1 = 90L*StepsPerDegreeAxis1;// hour angle of goto start position in steps
-volatile fixed_t targetAxis1;                      // hour angle of goto end   position in steps
-volatile byte dirAxis1   = 1;                      // stepping direction + or -
-double newTargetRA       = 0.0;                    // holds the RA for goTos
+volatile long posAxis1   = 90L*(long)StepsPerDegreeAxis1;// hour angle position in steps
+long trueAxis1           = 90L*(long)StepsPerDegreeAxis1;// correction to above for motor shaft position steps
+volatile long startAxis1 = 90L*(long)StepsPerDegreeAxis1;// hour angle of goto start position in steps
+volatile fixed_t targetAxis1;                            // hour angle of goto end   position in steps
+volatile byte dirAxis1   = 1;                            // stepping direction + or -
+double newTargetRA       = 0.0;                          // holds the RA for goTos
 fixed_t origTargetAxis1;
 
-volatile long posAxis2   = 90L*StepsPerDegreeAxis2;// declination position in steps
-long trueAxis2           = 90L*StepsPerDegreeAxis1;// correction to above for motor shaft position steps
-volatile long startAxis2 = 90L*StepsPerDegreeAxis2;// declination of goto start position in steps
-volatile fixed_t targetAxis2;                      // declination of goto end   position in steps
-volatile byte dirAxis2   = 1;                      // stepping direction + or -
-double newTargetDec      = 0.0;                    // holds the Dec for goTos
+volatile long posAxis2   = 90L*(long)StepsPerDegreeAxis2;// declination position in steps
+long trueAxis2           = 90L*(long)StepsPerDegreeAxis2;// correction to above for motor shaft position steps
+volatile long startAxis2 = 90L*(long)StepsPerDegreeAxis2;// declination of goto start position in steps
+volatile fixed_t targetAxis2;                            // declination of goto end   position in steps
+volatile byte dirAxis2   = 1;                            // stepping direction + or -
+double newTargetDec      = 0.0;                          // holds the Dec for goTos
 long origTargetAxis2     = 0;
 
 double newTargetAlt=0.0, newTargetAzm=0.0;         // holds the altitude and azmiuth for slews
@@ -706,7 +706,7 @@ fixed_t pstep;
 #define GuideRate16x       6
 #define GuideRateNone      255
 
-#define slewRate (1.0/((StepsPerDegreeAxis1*(MaxRate/1000000.0)))*3600.0)
+#define slewRate (1.0/(((double)StepsPerDegreeAxis1*(MaxRate/1000000.0)))*3600.0)
 #define halfSlewRate (slewRate/2.0)
 double  guideRates[10]={3.75,7.5,15,30,60,120,360,720,halfSlewRate,slewRate};
 //                      .25X .5x 1x 2x 4x  8x 24x 48x half-MaxRate MaxRate
@@ -879,9 +879,9 @@ void setup() {
   fstepAxis2.fixed=0;
   pstep.fixed=0;
   origTargetAxis1.fixed = 0;
-  targetAxis1.part.m = 90L*StepsPerDegreeAxis1;
+  targetAxis1.part.m = 90L*(long)StepsPerDegreeAxis1;
   targetAxis1.part.f = 0;
-  targetAxis2.part.m = 90L*StepsPerDegreeAxis2;
+  targetAxis2.part.m = 90L*(long)StepsPerDegreeAxis2;
   targetAxis2.part.f = 0;
 
   fstepAxis1.fixed=doubleToFixed(StepsPerSecondAxis1/100.0);
@@ -1209,7 +1209,7 @@ void setup() {
   EEPROM_readString(EE_sites+(currentSite)*25+9,siteName);
 
   // update starting coordinates to reflect NCP or SCP polar home position
-  startAxis1 = celestialPoleHA*StepsPerDegreeAxis1;
+  startAxis1 = celestialPoleHA*(long)StepsPerDegreeAxis1;
   startAxis2 = celestialPoleDec*(double)StepsPerDegreeAxis2;
   cli();
   targetAxis1.part.m = startAxis1;
@@ -1476,15 +1476,15 @@ void loop() {
 
     // safety checks, keeps mount from tracking past the meridian limit, past the UnderPoleLimit, below horizon limit, above the overhead limit, or past the Dec limits
     if (meridianFlip!=MeridianFlipNever) {
-      if (pierSide==PierSideWest) { cli(); if (posAxis1+IHS>(MinutesPastMeridianW*StepsPerDegreeAxis1/4L)) { lastError=ERR_MERIDIAN; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  } sei(); }
-      if (pierSide==PierSideEast) { cli(); if (posAxis1+IHS>(UnderPoleLimit*15L*StepsPerDegreeAxis1))      { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  } sei(); }
+      if (pierSide==PierSideWest) { cli(); if (posAxis1+IHS>(MinutesPastMeridianW*(long)StepsPerDegreeAxis1/4L)) { lastError=ERR_MERIDIAN; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  } sei(); }
+      if (pierSide==PierSideEast) { cli(); if (posAxis1+IHS>(UnderPoleLimit*15L*(long)StepsPerDegreeAxis1))      { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  } sei(); }
     } else {
 #ifndef MOUNT_TYPE_ALTAZM
       // when Fork mounted, ignore pierSide and just stop the mount if it passes the UnderPoleLimit
-      cli(); if (posAxis1+IHS>(UnderPoleLimit*15L*StepsPerDegreeAxis1)) { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
+      cli(); if (posAxis1+IHS>(UnderPoleLimit*15L*(long)StepsPerDegreeAxis1)) { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
 #else
-      // when Alt/Azm mounted, just stop the mount if it passes +180 degrees Azm
-      cli(); if (posAxis1+IHS>(MaxAzm*StepsPerDegreeAxis1)) { lastError=ERR_AZM; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
+      // when Alt/Azm mounted, just stop the mount if it passes MaxAzm
+      cli(); if (posAxis1+IHS>(MaxAzm*(long)StepsPerDegreeAxis1)) { lastError=ERR_AZM; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
 #endif
     }
 #ifndef MOUNT_TYPE_ALTAZM
