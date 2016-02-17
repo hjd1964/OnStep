@@ -581,7 +581,7 @@ if (html_page_step==++stp) {
     double ha=(double)h/(double)StepsPerDegreeAxis1; 
     doubleToDms(temp2,&ha,true,true);
 #else
-    double ha=(double)h/(double)(StepsPerDegreeAxis1*15L); 
+    double ha=(double)h/((double)StepsPerDegreeAxis1*15.0); 
     doubleToHms(temp2,&ha);
 #endif
     double dec=(double)d/(double)StepsPerDegreeAxis2; 
@@ -618,7 +618,7 @@ if (html_page_step==++stp) {
     double ha=(double)h/(double)(StepsPerDegreeAxis1);
     doubleToDms(temp2,&ha,true,true);
 #else
-    double ha=(double)h/(double)(StepsPerDegreeAxis1*15L);
+    double ha=(double)h/((double)StepsPerDegreeAxis1*15.0);
     doubleToHms(temp2,&ha);
 #endif
     double dec=(double)d/(double)StepsPerDegreeAxis2; 
