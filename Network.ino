@@ -390,9 +390,9 @@ void Ethernet_get() {
   }
   // PEC control
   if ((get_names[0]=='p') && (get_names[1]=='e')) {
-    if ((get_vals[0]=='p') && (get_vals[1]=='l') && (get_vals[2]==0)) { if (pecRecorded) pecStatus=ReadyPlayPEC; } // play
-    if ((get_vals[0]=='s') && (get_vals[1]=='t') && (get_vals[2]==0)) { pecStatus=IgnorePEC; }; // stop
-    if ((get_vals[0]=='r') && (get_vals[1]=='e') && (get_vals[2]==0)) { pecStatus=ReadyRecordPEC; }; // record
+    if ((get_vals[0]=='p') && (get_vals[1]=='l') && (get_vals[2]==0)) { if (pecRecorded) pecStatus=ReadyPlayPEC; EEPROM.update(EE_pecStatus,pecStatus); } // play
+    if ((get_vals[0]=='s') && (get_vals[1]=='t') && (get_vals[2]==0)) { pecStatus=IgnorePEC; EEPROM.update(EE_pecStatus,pecStatus); }; // stop
+    if ((get_vals[0]=='r') && (get_vals[1]=='e') && (get_vals[2]==0)) { pecStatus=ReadyRecordPEC; EEPROM.update(EE_pecStatus,IgnorePEC); }; // record
     if ((get_vals[0]=='c') && (get_vals[1]=='l') && (get_vals[2]==0)) { // clear
       for (i=0; i<PECBufferSize; i++) pecBuffer[i]=128;
       pecFirstRecord = true;
@@ -405,9 +405,7 @@ void Ethernet_get() {
     };
     if ((get_vals[0]=='w') && (get_vals[1]=='r') && (get_vals[2]==0)) { // write to eeprom
       pecRecorded=true;
-      pecStatus=IgnorePEC;
       EEPROM.update(EE_pecRecorded,pecRecorded);
-      EEPROM.update(EE_pecStatus,pecStatus);
       EEPROM_writeLong(EE_wormSensePos,wormSensePos);
       // trigger recording of PEC buffer
       pecAutoRecord=PECBufferSize;
@@ -425,6 +423,7 @@ const char html_header4[] PROGMEM = "Refresh: 5\r\n\r\n";
 const char html_header4a[] PROGMEM = "\r\n";
 const char html_header5[] PROGMEM = "<!DOCTYPE HTML>\r\n<html>\r\n";
 const char html_header6[] PROGMEM = "<head>\r\n";
+const char html_headerPec[] PROGMEM = "<meta http-equiv=\"refresh\" content=\"5; URL=/pec.htm\">\r\n";
 const char html_header7[] PROGMEM = "</head>\r\n";
 const char html_header8[] PROGMEM = "<body bgcolor=\"#26262A\">\r\n";
 
@@ -460,8 +459,11 @@ const char html_index3[] PROGMEM = "<font class=\"c\">%02d/%02d/%02d</font>";
 const char html_index4[] PROGMEM = "&nbsp;<font class=\"c\">%s</font>&nbsp;UT";
 const char html_index4a[] PROGMEM = "&nbsp;(<font class=\"c\">%s</font>&nbsp; Local Apparent Sidereal Time)<br /><br />";
 const char html_indexFault[] PROGMEM =  "Stepper driver " Axis1 " axis %s, " Axis2 " axis %s<br /><br />";
-const char html_indexTrue[] PROGMEM = "Stepper Position: " Axis1 "=<font class=\"c\">%ld</font>, " Axis2 "=<font class=\"c\">%ld</font><br />";
-const char html_indexIndex[] PROGMEM = "IHS=<font class=\"c\">%ld</font>, IDS=<font class=\"c\">%ld</font><br />";
+const char html_indexTrue[] PROGMEM = "Absolute Position: " Axis1 "=<font class=\"c\">%ld</font> steps, " Axis2 "=<font class=\"c\">%ld</font> steps<br />";
+const char html_indexIndex[] PROGMEM = "IHS=<font class=\"c\">%ld</font> steps, IDS=<font class=\"c\">%ld</font> steps<br />";
+const char html_indexCorIdx[] PROGMEM = "IH=<font class=\"c\">%ld</font>\", ID=<font class=\"c\">%ld</font>\"<br />";
+const char html_indexCorPole[] PROGMEM = "altCor=<font class=\"c\">%ld</font>\", azmCor=<font class=\"c\">%ld</font>\"<br />";
+const char html_indexCorOrtho[] PROGMEM = "doCor=<font class=\"c\">%ld</font>\", pdCor=<font class=\"c\">%ld</font>\"<br /><br />";
 const char html_indexPosition[] PROGMEM = "Current Position: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
 const char html_indexTarget[] PROGMEM = "Target Position: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
 const char html_indexAz1[] PROGMEM = "Az1: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
@@ -558,6 +560,15 @@ if (html_page_step==++stp) {
   }
   if (html_page_step==++stp) {
     strcpy_P(temp1, html_indexIndex); sprintf(temp,temp1,IHS,IDS); 
+  }
+  if (html_page_step==++stp) {
+    strcpy_P(temp1, html_indexCorIdx); sprintf(temp,temp1,(long)(IH*3600.0),(long)(ID*3600.0)); 
+  }
+  if (html_page_step==++stp) {
+    strcpy_P(temp1, html_indexCorPole); sprintf(temp,temp1,(long)(altCor*3600.0),(long)(azmCor*3600.0)); 
+  }
+  if (html_page_step==++stp) {
+    strcpy_P(temp1, html_indexCorOrtho); sprintf(temp,temp1,(long)(doCor*3600.0),(long)(pdCor*3600.0)); 
   }
 #endif
   if (html_page_step==++stp) {
@@ -968,26 +979,30 @@ void control_html_page() {
 }
 
 // The pec.htm page ----------------------------------------------------------------------------------
-const char html_pec1[] PROGMEM = "<div class=\"t\"><table width=\"100%\"><tr><td><b>" FirmwareName " " FirmwareNumber ;
+const char html_pec1[] PROGMEM = 
+"<div class=\"t\"><table width=\"100%\"><tr><td><b>" FirmwareName " " FirmwareNumber ;
 const char html_pec2[] PROGMEM = "</b></td><td align=\"right\"><b><font size=\"5\">PEC</font></b></td></tr></table><br />";
 const char html_pec3[] PROGMEM = "</div><div class=\"b\">\r\n";
 const char html_pec4[] PROGMEM = "PEC: <br /><br />";
-const char html_pec5[] PROGMEM = "STATUS = <font class=\"c\">%s</font><br /><br />";
+const char html_pec5[] PROGMEM = "STATUS = <font class=\"c\">%s%s</font><br /><br />";
 const char html_pecControls1[] PROGMEM =
 "<form method=\"get\" action=\"/pec.htm\">"
 "<button name=\"pe\" value=\"pl\" type=\"submit\">Play</button>";
 const char html_pecControls2[] PROGMEM = 
 "<button name=\"pe\" value=\"st\" type=\"submit\">Stop</button><br /><br />"
-"<button name=\"pe\" value=\"cl\" type=\"submit\">Clear</button><button name=\"pe\" value=\"re\" type=\"submit\">";
+"<button name=\"pe\" value=\"cl\" type=\"submit\">Clear</button><button name=\"pe\" value=\"re\" type=\"submit\">Record</button><br />";
 const char html_pecControls3[] PROGMEM = 
-"Record</button><br />Clear erases the memory buffer not EEPROM.  During recording corrections are averaged 3:1 favoring the buffer unless the buffer was cleared in which case the full correction is used.<br /><br />"
-"<button name=\"pe\" value=\"wr\" type=\"submit\">Write to EEPROM</button><br />Writing PEC data to EEPROM pauses everything in OnStep for about 2 to 4 seconds.</form>"
+"Clear erases the memory buffer not EEPROM.  During recording corrections are averaged 3:1 favoring the buffer unless the buffer was cleared in which case the full correction is used.<br />";
+const char html_pecControls4[] PROGMEM = 
+"<br /><button name=\"pe\" value=\"wr\" type=\"submit\">Write to EEPROM</button><br />Writes PEC data to EEPROM so it's remembered if OnStep is restarted.  Writing the data can take a few seconds.";
+const char html_pecControls5[] PROGMEM = 
 "</form><br />\r\n";
 
 void pec_html_page() {
   char temp[320] = "";
   char temp1[320] = "";
   char temp2[80] = "";
+  char temp3[80] = "";
   int stp=0;
   html_page_step++;
 
@@ -995,9 +1010,10 @@ void pec_html_page() {
   if (html_page_step==++stp) strcpy_P(temp, html_header1);
   if (html_page_step==++stp) strcpy_P(temp, html_header2);
   if (html_page_step==++stp) strcpy_P(temp, html_header3);
-  if (html_page_step==++stp) strcpy_P(temp, html_header4);
+  if (html_page_step==++stp) strcpy_P(temp, html_header4a);
   if (html_page_step==++stp) strcpy_P(temp, html_header5);
   if (html_page_step==++stp) strcpy_P(temp, html_header6);
+  if (html_page_step==++stp) strcpy_P(temp, html_headerPec); // page refresh
 
   if (html_page_step==++stp) strcpy_P(temp, html_main_css1);
   if (html_page_step==++stp) strcpy_P(temp, html_main_css2);
@@ -1022,6 +1038,7 @@ void pec_html_page() {
   if (html_page_step==++stp) strcpy_P(temp, html_pec4);
   if (html_page_step==++stp) {
 #ifndef MOUNT_TYPE_ALTAZM
+    if (pecAutoRecord>0) { sprintf(temp3," (writing to EEPROM, %d bytes left)",pecAutoRecord); } else { strcpy(temp3,""); }
     const char *pecStatusCh = PECStatusString;
     if (pecStatusCh[pecStatus]=='I') { strcpy(temp2,"Idle"); } else
     if (pecStatusCh[pecStatus]=='p') { strcpy(temp2,"Play waiting to start"); } else
@@ -1030,7 +1047,7 @@ void pec_html_page() {
     if (pecStatusCh[pecStatus]=='R') { strcpy(temp2,"Recording"); } else
 #endif
       strcpy(temp2,"Unknown");
-    strcpy_P(temp1, html_pec5); sprintf(temp,temp1,temp2);
+    strcpy_P(temp1, html_pec5); sprintf(temp,temp1,temp2,temp3);
   }
 
 #ifdef MOUNT_TYPE_ALTAZM
@@ -1039,6 +1056,8 @@ void pec_html_page() {
   if (html_page_step==++stp) strcpy_P(temp, html_pecControls1);
   if (html_page_step==++stp) strcpy_P(temp, html_pecControls2);
   if (html_page_step==++stp) strcpy_P(temp, html_pecControls3);
+  if (html_page_step==++stp) { if (pecAutoRecord==0) strcpy_P(temp, html_pecControls4); }
+  if (html_page_step==++stp) strcpy_P(temp, html_pecControls5);
 #endif
   if (html_page_step==++stp) strcpy(temp,"</div></body></html>");
 
