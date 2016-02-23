@@ -41,7 +41,7 @@ void Library::writeVars(char* name, int code, double RA, double Dec)
   work.libRec.code = (code | (catalog<<4));
 
   // convert into ulong, RA=0..360
-  RA=RA*15.0; RA=degreeRange(RA)/360.0;
+  RA=degreeRange(RA)/360.0;
   // convert into ulong, Dec=0..180
   if (Dec>90.0) Dec=90.0; if (Dec<-90.0) Dec=-90.0; Dec=Dec+90.0; Dec=Dec/180.0;
   uint16_t r=round(RA*65536.0);
@@ -71,7 +71,7 @@ void Library::readVars(char* name, int* code, double* RA, double* Dec)
   
   // convert from ulong
   *RA=(double)r;
-  *RA=((*RA/65536.0)*360.0)/15.0;
+  *RA=(*RA/65536.0)*360.0;
   *Dec=(double)d;
   *Dec=((*Dec/65536.0)*180.0)-90.0;
 }
