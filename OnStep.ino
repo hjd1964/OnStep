@@ -951,6 +951,9 @@ void setup() {
 #ifdef PEC_SENSE_ON
   pinMode(PecPin, INPUT);
 #endif
+#ifdef PEC_SENSE_PULLUP
+  pinMode(PecPin, INPUT_PULLUP);
+#endif
 
 // limit switch sense
 #ifdef LIMIT_SENSE_ON  
@@ -1523,3 +1526,4 @@ void loop() {
     processCommands();
   }
 }
+

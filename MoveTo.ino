@@ -304,3 +304,4 @@ void DecayModeGoto() {
   digitalWrite(Axis2_Mode,HIGH);
 #endif
 }
+

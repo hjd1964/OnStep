@@ -5,7 +5,7 @@
 // this cleans up any tracking rate variations that would be introduced by recording more guiding corrections to either the east or west, default=ON
 #define PEC_CLEANUP_ON
 
-#if defined(PEC_SENSE_ON) || defined (PEC_SENSE)
+#if defined(PEC_SENSE_ON) || defined(PEC_SENSE_PULLUP) || defined(PEC_SENSE)
   boolean wormSensed=false;
 #else
   boolean wormSensed=true;
@@ -23,7 +23,7 @@ void Pec() {
   while (pecPos>=(long)StepsPerWormRotationAxis1) pecPos-=(long)StepsPerWormRotationAxis1;
   while (pecPos<0) pecPos+=(long)StepsPerWormRotationAxis1;
 
-  #ifdef PEC_SENSE_ON
+  #if defined(PEC_SENSE_ON) || defined(PEC_SENSE_PULLUP)
     // if the HALL sensor (etc.) has just arrived at the index and it's been more than 60 seconds since
     // it was there before, set this as the next start of PEC playback/recording
     int PecPinState=digitalRead(PecPin);
@@ -202,3 +202,4 @@ void CleanupPec() {
   // a reality check, make sure the buffer data looks good, if not forget it
   if ((sum_pec>2) || (sum_pec<-2)) { pecRecorded=false; pecStatus=IgnorePEC; }
 }
+

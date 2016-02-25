@@ -70,3 +70,4 @@ long EEPROM_readLong(int i) {
   EEPROM_readQuad(i,(byte*)&l);
   return l;
 }
+
