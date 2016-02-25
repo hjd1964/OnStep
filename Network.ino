@@ -111,7 +111,7 @@ void Ethernet_www() {
   // active client?
   if (www_client) {
     if (www_client.connected()) {
-      if (www_client.available()) {
+      if (www_client.available() && (!responseStarted)) {
         char c = www_client.read();
 
         //Serial_char(c);
@@ -1115,6 +1115,8 @@ const char html_configPPS[] PROGMEM = "PPS sense is <font class=\"c\">OFF</font>
 #endif
 #ifdef PEC_SENSE_ON
 const char html_configPEC[] PROGMEM = "PEC sense is <font class=\"c\">ON</font>, ";
+#elif PEC_SENSE_PULLUP
+const char html_configPEC[] PROGMEM = "PEC sense is <font class=\"c\">ON W/PULLUP</font>, ";
 #else
 const char html_configPEC[] PROGMEM = "PEC sense is <font class=\"c\">OFF</font>, ";
 #endif
@@ -1285,3 +1287,4 @@ void config_html_page() {
 }
 
 #endif
+
