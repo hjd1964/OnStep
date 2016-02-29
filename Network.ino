@@ -463,7 +463,8 @@ const char html_indexTrue[] PROGMEM = "Absolute Position: " Axis1 "=<font class=
 const char html_indexIndex[] PROGMEM = "IHS=<font class=\"c\">%ld</font> steps, IDS=<font class=\"c\">%ld</font> steps<br />";
 const char html_indexCorIdx[] PROGMEM = "IH=<font class=\"c\">%ld</font>\", ID=<font class=\"c\">%ld</font>\"<br />";
 const char html_indexCorPole[] PROGMEM = "altCor=<font class=\"c\">%ld</font>\", azmCor=<font class=\"c\">%ld</font>\"<br />";
-const char html_indexCorOrtho[] PROGMEM = "doCor=<font class=\"c\">%ld</font>\", pdCor=<font class=\"c\">%ld</font>\"<br /><br />";
+const char html_indexCorOrtho[] PROGMEM = "doCor=<font class=\"c\">%ld</font>\", pdCor=<font class=\"c\">%ld</font>\"<br />";
+const char html_indexRateDeltas[] PROGMEM = "deltaAxis1 =<font class=\"c\">%s</font>, deltaAxis2=<font class=\"c\">%s</font><br /><br />";
 const char html_indexPosition[] PROGMEM = "Current Position: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
 const char html_indexTarget[] PROGMEM = "Target Position: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
 const char html_indexAz1[] PROGMEM = "Az1: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
@@ -569,6 +570,13 @@ if (html_page_step==++stp) {
   }
   if (html_page_step==++stp) {
     strcpy_P(temp1, html_indexCorOrtho); sprintf(temp,temp1,(long)(doCor*3600.0),(long)(pdCor*3600.0)); 
+  }
+  if (html_page_step==++stp) {
+    i=highPrecision; highPrecision=true;
+    dtostrf(az_deltaAxis1*1.002738,1,3,temp2);
+    dtostrf(az_deltaAxis2*1.002738,1,3,temp3);
+    highPrecision=i;
+    strcpy_P(temp1, html_indexRateDeltas); sprintf(temp,temp1,temp2,temp3); 
   }
 #endif
   if (html_page_step==++stp) {

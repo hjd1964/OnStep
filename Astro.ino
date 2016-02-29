@@ -451,6 +451,9 @@ boolean do_fastalt_calc() {
 }
 
 // low overhead refraction rate calculation, 200 calls to complete
+
+#define RefractionRateRange 10  // distance in arc-min (20) ahead of and behind the current Equ position, used for rate calculation
+
 boolean do_refractionRate_calc() {
   boolean done=false;
 
@@ -467,14 +470,8 @@ boolean do_refractionRate_calc() {
   if ((az_step==2) || (az_step==102)) {
     az_Dec=az_Axis2;
     az_HA =az_Axis1;
-    if (az_step==2) {
-      az_HA =(az_HA-(30.0/60.0))/Rad;
-      az_Dec=az_Dec/Rad;
-    }
-    if (az_step==102) {
-      az_HA =(az_HA+(30.0/60.0))/Rad;
-      az_Dec=az_Dec/Rad;
-    }
+    if (az_step==2)   az_HA =az_HA-(RefractionRateRange/60.0);
+    if (az_step==102) az_HA =az_HA+(RefractionRateRange/60.0);
   } else
   
   // get the Horizon coords
@@ -502,10 +499,13 @@ boolean do_refractionRate_calc() {
       // set rates
       // handle coordinate wrap
       if ((az_HA1<-90.0) && (az_HA2>90.0)) az_HA1+=360.0;
-      az_deltaAxis1=(az_HA1-az_HA2);
-      az_deltaAxis2=(az_Dec1-az_Dec2);
+
+      // set rates
+      az_deltaAxis1=(az_HA1-az_HA2)  *(15.0/(RefractionRateRange/60.0))/2.0;
+      az_deltaAxis2=(az_Dec1-az_Dec2)*(15.0/(RefractionRateRange/60.0))/2.0;
+      
       // override for special case of near a celestial pole
-      if (90.0-fabs(az_Dec*Rad)<(1.0/3600.0)) { az_deltaAxis1=15.0; az_deltaAxis2=0.0; }
+      if (90.0-fabs(az_Dec)<(1.0/3600.0)) { az_deltaAxis1=15.0; az_deltaAxis2=0.0; }
       // override for special case of near the zenith
       if (currentAlt>(90.0-7.5)) {
         az_deltaAxis1=ZenithTrackingRate();

@@ -303,6 +303,7 @@ void processCommands() {
         if (PPSsynced)                           reply[i++]='S';
         if ((guideDirAxis1) || (guideDirAxis2))  reply[i++]='G';
         if (faultAxis1 || faultAxis2)            reply[i++]='f';
+        if (refraction)                          reply[i++]='r'; else reply[i++]='s';
         reply[i++]=0;
         quietReply=true;
       } else 
