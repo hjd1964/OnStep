@@ -388,6 +388,11 @@ void Ethernet_get() {
     if ((get_vals[0]=='l') && (get_vals[1]==0)) SetTrackingRate(0.96236513150); // lunar
     if ((get_vals[0]=='h') && (get_vals[1]==0)) SetTrackingRate(0.99726956632); // solar
   }
+  // Refraction Rate Tracking control
+  if ((get_names[0]=='r') && (get_names[1]=='r')) {
+    if ((get_vals[0]=='o') && (get_vals[1]=='n') && (get_vals[2]==0)) { refraction=refraction_enable;  SetTrackingRate(default_tracking_rate); }
+    if ((get_vals[0]=='o') && (get_vals[1]=='f') && (get_vals[2]=='f') && (get_vals[3]==0)) { refraction=false; SetTrackingRate(default_tracking_rate); }
+  }
   // PEC control
   if ((get_names[0]=='p') && (get_names[1]=='e')) {
     if ((get_vals[0]=='p') && (get_vals[1]=='l') && (get_vals[2]==0)) { if (pecRecorded) pecStatus=ReadyPlayPEC; EEPROM.update(EE_pecStatus,pecStatus); } // play
@@ -464,7 +469,7 @@ const char html_indexIndex[] PROGMEM = "IHS=<font class=\"c\">%ld</font> steps, 
 const char html_indexCorIdx[] PROGMEM = "IH=<font class=\"c\">%ld</font>\", ID=<font class=\"c\">%ld</font>\"<br />";
 const char html_indexCorPole[] PROGMEM = "altCor=<font class=\"c\">%ld</font>\", azmCor=<font class=\"c\">%ld</font>\"<br />";
 const char html_indexCorOrtho[] PROGMEM = "doCor=<font class=\"c\">%ld</font>\", pdCor=<font class=\"c\">%ld</font>\"<br />";
-const char html_indexRateDeltas[] PROGMEM = "deltaAxis1 =<font class=\"c\">%s</font>, deltaAxis2=<font class=\"c\">%s</font><br /><br />";
+const char html_indexRateDeltas[] PROGMEM = "deltaAxis1 =<font class=\"c\">%s</font>\"/s, deltaAxis2=<font class=\"c\">%s</font>\"/s<br /><br />";
 const char html_indexPosition[] PROGMEM = "Current Position: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
 const char html_indexTarget[] PROGMEM = "Target Position: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
 const char html_indexAz1[] PROGMEM = "Az1: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
@@ -656,11 +661,11 @@ if (html_page_step==++stp) {
     if (trackingState==TrackingSidereal) strcpy(temp2,"On");
     if (trackingState==TrackingMoveTo)   strcpy(temp2,"Slewing");
 
-    if ((PPSsynced) && (atHome)) strcpy(temp3,"(at home, PPS sync)");
-    if ((PPSsynced) && (!atHome)) strcpy(temp3,"(PPS sync)");
-    if ((!PPSsynced) && (atHome)) strcpy(temp3,"(at home)");
-    if ((!PPSsynced) && (!atHome)) strcpy(temp3,"");
-    
+    strcpy(temp3,"(");
+    if (PPSsynced) strcat(temp3,"PPS Sync, ");
+    if (refraction) strcat(temp3,"Refr. Compensated, ");
+    if (temp3[strlen(temp3)-2]==',') { temp3[strlen(temp3)-2]=')'; temp3[strlen(temp3)-1]=0; } else strcpy(temp3,"");
+ 
     strcpy_P(temp1, html_index8); sprintf(temp,temp1,temp2,temp3);
   }
   if (html_page_step==++stp) {
@@ -668,6 +673,7 @@ if (html_page_step==++stp) {
     if (parkStatus==Parked)     strcpy(temp2,"Parked");
     if (parkStatus==Parking)    strcpy(temp2,"Parking");
     if (parkStatus==ParkFailed) strcpy(temp2,"Park Failed");
+    if (atHome) strcat(temp2," (At Home)");
 
     strcpy_P(temp1, html_index9); sprintf(temp,temp1,temp2,(worst_loop_time*100L)/9970L);
     worst_loop_time=0;
@@ -927,7 +933,13 @@ const char html_control9[] PROGMEM =
 const char html_control10[] PROGMEM = 
 "<button name=\"tk\" value=\"s\" type=\"submit\">Sidereal</button>"
 "<button name=\"tk\" value=\"l\" type=\"submit\">Lunar</button>"
-"<button name=\"tk\" value=\"h\" type=\"submit\">Solar</button>"
+"<button name=\"tk\" value=\"h\" type=\"submit\">Solar</button>";
+const char html_control11[] PROGMEM = 
+#if !defined(MOUNT_TYPE_ALTAZM)
+"</br></br>Refraction Compensated Tracking Rate: </br>"
+"<button name=\"rr\" value=\"on\" type=\"submit\">On</button>"
+"<button name=\"rr\" value=\"off\" type=\"submit\">Off</button>"
+#endif
 "</form>\r\n";
 
 void control_html_page() {
@@ -977,6 +989,7 @@ void control_html_page() {
   if (html_page_step==++stp) strcpy_P(temp, html_control8);
   if (html_page_step==++stp) strcpy_P(temp, html_control9);
   if (html_page_step==++stp) strcpy_P(temp, html_control10);
+  if (html_page_step==++stp) strcpy_P(temp, html_control11);
   if (html_page_step==++stp) strcpy(temp,"</div></body></html>");
 
   // stop sending this page
@@ -1002,9 +1015,9 @@ const char html_pecControls2[] PROGMEM =
 const char html_pecControls3[] PROGMEM = 
 "Clear erases the memory buffer not EEPROM.  During recording corrections are averaged 3:1 favoring the buffer unless the buffer was cleared in which case the full correction is used.<br />";
 const char html_pecControls4[] PROGMEM = 
-"<br /><button name=\"pe\" value=\"wr\" type=\"submit\">Write to EEPROM</button><br />Writes PEC data to EEPROM so it's remembered if OnStep is restarted.  Writing the data can take a few seconds.";
+"<br /><button name=\"pe\" value=\"wr\" type=\"submit\">Write to EEPROM</button><br />Writes PEC data to EEPROM so it's remembered if OnStep is restarted.  Writing the data can take a few seconds.<br /><br />";
 const char html_pecControls5[] PROGMEM = 
-"</form><br />\r\n";
+"</form>\r\n";
 
 void pec_html_page() {
   char temp[320] = "";
