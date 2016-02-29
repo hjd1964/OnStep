@@ -43,10 +43,9 @@ boolean hmsToDouble(double *f, char *hms) {
 }
 
 boolean doubleToHms(char *reply, double *f) {
-  int  h1;
-  double m1,f1,s1;
+  double h1,m1,f1,s1;
 
-  f1=abs(*f)+0.00001; // keep from rounding down in seconds
+  f1=fabs(*f)+0.00001; // keep from rounding down in seconds
 
   h1=floor(f1);
   m1=(f1-h1)*60;
@@ -61,7 +60,7 @@ boolean doubleToHms(char *reply, double *f) {
   }
   char sign[]="";
   if (((s1!=0) || (m1!=0) || (h1!=0)) && (*f<0.0)) strcpy(sign,"-");
-  sprintf(reply,s,sign,h1,(int)m1,(int)s1);
+  sprintf(reply,s,sign,(int)h1,(int)m1,(int)s1);
 
   return true;
 }
