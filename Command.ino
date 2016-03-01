@@ -929,11 +929,11 @@ void processCommands() {
      if (command[0]=='T') {
        if (command[1]=='+') { siderealInterval-=HzCf*(0.02); quietReply=true; } else
        if (command[1]=='-') { siderealInterval+=HzCf*(0.02); quietReply=true; } else
-       if (command[1]=='S') { SetTrackingRate(0.99726956632); quietReply=true; } else                        // solar tracking rate 60Hz
-       if (command[1]=='L') { SetTrackingRate(0.96236513150); quietReply=true; } else                        // lunar tracking rate 57.9Hz
+       if (command[1]=='S') { SetTrackingRate(0.99726956632); refraction=false; quietReply=true; } else      // solar tracking rate 60Hz
+       if (command[1]=='L') { SetTrackingRate(0.96236513150); refraction=false; quietReply=true; } else      // lunar tracking rate 57.9Hz
        if (command[1]=='Q') { SetTrackingRate(default_tracking_rate); quietReply=true; } else                // sidereal tracking rate
        if (command[1]=='R') { siderealInterval=15956313L; quietReply=true; } else                            // reset master sidereal clock interval
-       if (command[1]=='K') { SetTrackingRate(0.99953004401); quietReply=true; } else                        // king tracking rate 60.136Hz
+       if (command[1]=='K') { SetTrackingRate(0.99953004401); refraction=false; quietReply=true; } else      // king tracking rate 60.136Hz
        if ((command[1]=='e') && ((trackingState==TrackingSidereal) || (trackingState==TrackingNone))) trackingState=TrackingSidereal; else
        if ((command[1]=='d') && ((trackingState==TrackingSidereal) || (trackingState==TrackingNone))) trackingState=TrackingNone; else
        if (command[1]=='r') { refraction=refraction_enable;  SetTrackingRate(default_tracking_rate); } else  // turn refraction tracking on, defaults to base sidereal tracking rate
