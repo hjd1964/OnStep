@@ -211,7 +211,7 @@ boolean atoi2(char *a, int *i) {
 // Coordinate conversion
 
 // takes the topocentric refracted coordinates and applies corrections to arrive at instrument equatorial coordinates 
-boolean EquToCEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1) {
+boolean EquToIEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1) {
   if (Dec>90.0) Dec=90.0;
   if (Dec<-90.0) Dec=-90.0;
 
@@ -268,7 +268,7 @@ boolean EquToCEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1) 
 }
 
 // takes the instrument equatorial coordinates and applies corrections to arrive at topocentric refracted coordinates
-boolean CEquToEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1) { 
+boolean IEquToEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1) { 
   // remove the index offsets
   HA+=IH; Dec+=ID;
 
@@ -463,39 +463,47 @@ boolean do_refractionRate_calc() {
   az_step++;
   // load HA/Dec
   if (az_step==1) {
-    getApproxEqu(&az_Axis1,&az_Axis2,true);
+    if (onTrack)
+      getEqu(&az_Axis1,&az_Axis2,true);
+    else
+      getApproxEqu(&az_Axis1,&az_Axis2,true);
   } else
 
-  // convert units, get ahead of and behind current position
-  if ((az_step==2) || (az_step==102)) {
+  // convert units,  get ahead of and behind current position
+  if ((az_step==5) || (az_step==105)) {
     az_Dec=az_Axis2;
     az_HA =az_Axis1;
-    if (az_step==2)   az_HA =az_HA-(RefractionRateRange/60.0);
-    if (az_step==102) az_HA =az_HA+(RefractionRateRange/60.0);
+    if (az_step==5)   az_HA =az_HA-(RefractionRateRange/60.0);
+    if (az_step==105) az_HA =az_HA+(RefractionRateRange/60.0);
   } else
   
   // get the Horizon coords
-  if ((az_step==5) || (az_step==105)) {
+  if ((az_step==10) || (az_step==110)) {
+    if (onTrack) EquToIEqu(latitude,az_HA,az_Dec,&az_HA,&az_Dec);
+  }
+
+  // get the Horizon coords
+  if ((az_step==15) || (az_step==115)) {
     EquToHor(az_HA,az_Dec,&az_Alt,&az_Azm);
   } else
 
   // apply refraction
-  if ((az_step==10) || (az_step==110)) {
+  if ((az_step==20) || (az_step==120)) {
     az_Alt+=Refrac(az_Alt)/60.0;
   } else
 
   // convert back to the Equtorial coords
-  if ((az_step==15) || (az_step==115)) {
+  if ((az_step==25) || (az_step==125)) {
     HorToEqu(az_Alt,az_Azm,&az_HA1,&az_Dec1);
     if (az_HA1>180.0) az_HA1-=360.0; // HA range +/-180
   } else
 
   // calculate refraction rate deltas'
-  if ((az_step==21) || (az_step==121)) {
+  if ((az_step==30) || (az_step==130)) {
     // store first calc
-    if (az_step==21) { az_HA2=az_HA1; az_Dec2=az_Dec1; }
+    if (az_step==30) { az_HA2=az_HA1; az_Dec2=az_Dec1; }
     // we have both -0.5hr and +0.5hr values 
-    if (az_step==121) {
+    if (az_step==130) {
       // set rates
       // handle coordinate wrap
       if ((az_HA1<-90.0) && (az_HA2>90.0)) az_HA1+=360.0;
