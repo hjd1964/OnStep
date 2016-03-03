@@ -29,15 +29,12 @@ void processCommands() {
     if ((Serial_available() > 0) && (!serial_zero_ready)) { serial_zero_ready = buildCommand(Serial_read()); }
     if ((Serial1_available() > 0) && (!serial_one_ready)) { serial_one_ready = buildCommand_serial_one(Serial1_read()); }
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
-    if ((Ethernet_available() > 0) && (!ethernet_ready)) { ethernet_ready = buildCommand_ethernet(Ethernet_read()); }
+    if ((!Ethernet_www_busy()) && (Ethernet_available() > 0) && (!ethernet_ready)) { ethernet_ready = buildCommand_ethernet(Ethernet_read()); }
+    if (Serial_transmit() || Serial1_transmit() || Ethernet_transmit()) return;
+#else
+    if (Serial_transmit() || Serial1_transmit()) return;
 #endif
 
-    if (Serial_transmit()) return;
-    if (Serial1_transmit()) return;
-#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
-    if (Ethernet_transmit()) return;
-#endif
-    
     process_command = COMMAND_NONE;
     if (serial_zero_ready)     { strcpy(command,command_serial_zero); strcpy(parameter,parameter_serial_zero); serial_zero_ready=false; clearCommand_serial_zero(); process_command=COMMAND_SERIAL; }
     else if (serial_one_ready) { strcpy(command,command_serial_one);  strcpy(parameter,parameter_serial_one);  serial_one_ready=false;  clearCommand_serial_one();  process_command=COMMAND_SERIAL1; }
@@ -46,7 +43,7 @@ void processCommands() {
 #endif
     else {
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
-      Ethernet_www();
+      if (!Ethernet_cmd_busy()) Ethernet_www();
 #endif
       return;
     }
@@ -936,8 +933,9 @@ void processCommands() {
        if (command[1]=='K') { SetTrackingRate(0.99953004401); refraction=false; quietReply=true; } else      // king tracking rate 60.136Hz
        if ((command[1]=='e') && ((trackingState==TrackingSidereal) || (trackingState==TrackingNone))) trackingState=TrackingSidereal; else
        if ((command[1]=='d') && ((trackingState==TrackingSidereal) || (trackingState==TrackingNone))) trackingState=TrackingNone; else
-       if (command[1]=='r') { refraction=refraction_enable;  SetTrackingRate(default_tracking_rate); } else  // turn refraction tracking on, defaults to base sidereal tracking rate
-       if (command[1]=='n') { refraction=false; SetTrackingRate(default_tracking_rate); } else               // turn refraction off, sidereal tracking rate resumes
+       if (command[1]=='o') { refraction=refraction_enable; onTrack=true;  SetTrackingRate(default_tracking_rate); } else  // turn full compensation on, defaults to base sidereal tracking rate
+       if (command[1]=='r') { refraction=refraction_enable; onTrack=false; SetTrackingRate(default_tracking_rate); } else  // turn refraction compensation on, defaults to base sidereal tracking rate
+       if (command[1]=='n') { refraction=false; onTrack=false; SetTrackingRate(default_tracking_rate); } else              // turn refraction off, sidereal tracking rate resumes
          commandError=true;
 
        // Only burn the new rate if changing the sidereal interval

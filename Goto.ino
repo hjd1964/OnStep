@@ -16,7 +16,7 @@ boolean syncEqu(double RA, double Dec) {
   EquToHor(HA,Dec,&Axis2,&Axis1); // convert from HA/Dec to Alt/Azm
   if (Axis1>180.0) Axis1-=360.0;
 #else
-  EquToCEqu(latitude,HA,Dec,&Axis1,&Axis2);
+  EquToIEqu(latitude,HA,Dec,&Axis1,&Axis2);
 #endif
 
 #ifdef SYNC_ANYWHERE_ON
@@ -97,7 +97,7 @@ boolean getEqu(double *RA, double *Dec, boolean returnHA) {
   
 #ifndef MOUNT_TYPE_ALTAZM
   // correct for under the pole, polar misalignment, and index offsets
-  CEquToEqu(latitude,HA,*Dec,&HA,Dec);
+  IEquToEqu(latitude,HA,*Dec,&HA,Dec);
 #endif
 
   // return either the RA or the HA depending on returnHA
@@ -210,13 +210,13 @@ byte goToEqu(double RA, double Dec) {
 #else
   // correct for polar offset, refraction, coordinate systems, operation past pole, etc. as required
   double h,d;
-  if (!EquToCEqu(latitude,HA,Dec,&h,&d)) return 2; // fail, coordinates invalid
+  if (!EquToIEqu(latitude,HA,Dec,&h,&d)) return 2; // fail, coordinates invalid
   long Axis1=h*(double)StepsPerDegreeAxis1;
   long Axis2=d*(double)StepsPerDegreeAxis2;
 
   // as above... for the opposite pier side just incase we need to do a meridian flip
   byte p=pierSide; if (pierSide==PierSideEast) pierSide=PierSideWest; else if (pierSide==PierSideWest) pierSide=PierSideEast;
-  if (!EquToCEqu(latitude,HA,Dec,&h,&d)) return 2; // fail, coordinates invalid
+  if (!EquToIEqu(latitude,HA,Dec,&h,&d)) return 2; // fail, coordinates invalid
 
   long Axis1Alt=h*(double)StepsPerDegreeAxis1;
   long Axis2Alt=d*(double)StepsPerDegreeAxis2;

@@ -41,9 +41,11 @@
 #include "FPoint.h"
 #include "TM4C.h"
 // There is a bug in Arduino/Energia which ignores #ifdef preprocessor directives when generating a list of files
-// Until this is fixed YOU MUST MANUALLY UN-COMMENT the #include line below if using the Launchpad Connected device
+// Until this is fixed YOU MUST MANUALLY UN-COMMENT the #include line below if using the Launchpad Connected device. 
+// Notice OnStep uses the EthernetPlus library:
+// this is available at: https://github.com/hjd1964/EthernetPlus and should be installed in your "~\Documents\Arduino\libraries" folder
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
-//#include "Ethernet.h"
+//#include "EthernetPlus.h"
 #endif
 
 #if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
@@ -114,6 +116,7 @@ boolean refraction = refraction_enable;
 #else
 boolean refraction = false;
 #endif
+boolean onTrack=false;
 
 long    maxRate = MaxRate*16L;
 volatile long    timerRateAxis1 = 0;

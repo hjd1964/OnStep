@@ -1,8 +1,9 @@
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
 
+#define www_xmit_buffer_size 1024
 int  www_xmit_buffer_send_pos=0;
 int  www_xmit_buffer_pos=0;
-char www_xmit_buffer[1024] = "";
+char www_xmit_buffer[www_xmit_buffer_size] = "";
 
 // provide the same functions as for serial
 
@@ -17,7 +18,6 @@ IPAddress myDns(192,168,1, 1);
 IPAddress gateway(192, 168, 1, 1);
 IPAddress subnet(255, 255, 255, 0);
 
-
 // Network server port for command channel
 EthernetServer cmd_server(9999);
 EthernetClient cmd_client;
@@ -25,7 +25,6 @@ EthernetClient cmd_client;
 EthernetServer web_server(80);
 EthernetClient www_client;
 boolean alreadyConnected = false; // whether or not the client was connected previously
-
 
 void Ethernet_Init() {
   // initialize the ethernet device
@@ -36,41 +35,42 @@ void Ethernet_Init() {
 #endif
 
   cmd_server.begin();
+  cmd_client = cmd_server.available(); // initialise cmd_client
   web_server.begin();
   www_client = web_server.available(); // initialise www_client
 }
 
+bool Ethernet_www_busy() {
+  return www_client;
+}
+
+bool Ethernet_cmd_busy() {
+  return cmd_client;
+}
+
 void Ethernet_send(const char data[]) {
-  if (!cmd_client)
-   return;
-   
-//  cmd_client.flush();
-   
-  cmd_client.print(data);
+  if (!cmd_client) return;
+  cmd_client.flush();
+  cmd_client.write(data,strlen(data));
 }
 
 void Ethernet_print(const char data[]) {
-  if (!cmd_client)
-   return;
-   
-   cmd_server.print(data);
- }
+  Ethernet_send(data);
+}
  
- boolean Ethernet_transmit() {
-   return false;
- }
+boolean Ethernet_transmit() {
+  return false;
+}
  
- boolean Ethernet_available() {
-   cmd_client = cmd_server.available();
-   return cmd_client;
- }
+boolean Ethernet_available() {
+  cmd_client = cmd_server.available();
+  return cmd_client;
+}
  
- char Ethernet_read() {
-   if (!cmd_client)
-   return -1;
-   
-   return cmd_client.read();
- }
+char Ethernet_read() {
+  if (!cmd_client) return -1;
+  return cmd_client.read();
+}
 
 // -----------------------------------------------------------------------------------------
 // web server
@@ -78,6 +78,7 @@ void Ethernet_print(const char data[]) {
 boolean currentLineIsBlank;
 boolean responseStarted = false;
 boolean clientNeedsToClose = false;
+boolean clientIsClosing = false;
 unsigned long responseFinish_ms;
 unsigned long transactionStart_ms;
 int html_page_step=0;
@@ -106,7 +107,7 @@ void reset_page_requests() {
 
 void Ethernet_www() {
   // if a client doesn't already exist try to find a new one
-  if (!www_client) { www_client = web_server.available(); currentLineIsBlank = true; responseStarted=false; clientNeedsToClose=false; reset_page_requests(); transactionStart_ms=millis(); }
+  if (!www_client) { www_client = web_server.available(); currentLineIsBlank = true; responseStarted=false; clientNeedsToClose=false; clientIsClosing=false; reset_page_requests(); transactionStart_ms=millis(); }
 
   // active client?
   if (www_client) {
@@ -158,23 +159,25 @@ void Ethernet_www() {
       }
 
       if (www_xmit_buffer_pos>0) {
-        if (!www_send()) {
-          clientNeedsToClose=true;
-          responseFinish_ms=millis();
-        } else {
-          clientNeedsToClose=false;
-        }
+        if (!www_send()) { clientNeedsToClose=true; responseFinish_ms=millis(); } else { clientNeedsToClose=false; }
       }
 
     }
   
     // if data was sent give the web browser time to receive it then stop the client
     // if a transaction is taking more than five seconds, stop the client
-    if ((clientNeedsToClose && (millis()-responseFinish_ms>100)) || (millis()-transactionStart_ms>5000)) {
-      clientNeedsToClose=false;
-      www_client.stop();
+    if (((clientNeedsToClose && (millis()-responseFinish_ms>100)) || (millis()-transactionStart_ms>5000)) ||
+        ((clientNeedsToClose && clientIsClosing))) {
+      if (!clientIsClosing) {
+        www_client.stopRequest(); 
+        clientIsClosing=true;
+      } else {
+        if (www_client.stopMonitor()) { clientNeedsToClose=false; clientIsClosing=false; }
+      }
     }
+    #ifdef ETHERNET_USE_DHCP_ON
     Ethernet.maintain();
+    #endif
 
   }
 }
@@ -184,7 +187,7 @@ void Ethernet_www() {
 // returns false if buffer is too full to accept the data (and copies no data into buffer)
 boolean www_write(const char data[]) {
   int l=strlen(data);
-  if (www_xmit_buffer_pos+l>1022) return false;
+  if (www_xmit_buffer_pos+l>www_xmit_buffer_size-2) return false;
   strcpy((char *)&www_xmit_buffer[www_xmit_buffer_pos],data);
   www_xmit_buffer_pos+=l;
   return true;
@@ -194,24 +197,20 @@ boolean www_write(const char data[]) {
 // returns true if data is still waiting for transmit
 // returns false if data buffer is empty
 boolean www_send() {
-  char buf[11] = "";
+  char buf[50] = "";
   char c;
   
   // copy some data
   boolean buffer_empty=false;
   int count=0;
-  for (int l=0; l<9; l++) {
+  for (int l=0; l<48; l++) {
     c=www_xmit_buffer[www_xmit_buffer_send_pos];
     buf[l+1]=0;
     buf[l]=c; 
-    if ((c==0) || (www_xmit_buffer_send_pos>1022)) { buffer_empty=true; break; }
+    if ((c==0) || (www_xmit_buffer_send_pos>www_xmit_buffer_size-2)) { buffer_empty=true; break; }
     www_xmit_buffer_send_pos++; count++;
   }
-
   www_client.write(buf,count);
-  // send network data
-//  www_client.write(buf,);
- // www.client.
 
   // hit end of www_xmit_buffer? reset and start over
   if (buffer_empty) {
@@ -390,8 +389,9 @@ void Ethernet_get() {
   }
   // Refraction Rate Tracking control
   if ((get_names[0]=='r') && (get_names[1]=='r')) {
-    if ((get_vals[0]=='o') && (get_vals[1]=='n') && (get_vals[2]==0)) { refraction=refraction_enable;  SetTrackingRate(default_tracking_rate); }
-    if ((get_vals[0]=='o') && (get_vals[1]=='f') && (get_vals[2]=='f') && (get_vals[3]==0)) { refraction=false; SetTrackingRate(default_tracking_rate); }
+    if ((get_vals[0]=='o') && (get_vals[1]=='t') && (get_vals[2]=='k') && (get_vals[3]==0)) { refraction=refraction_enable; onTrack=true; SetTrackingRate(default_tracking_rate); }
+    if ((get_vals[0]=='o') && (get_vals[1]=='n') && (get_vals[2]==0)) { refraction=refraction_enable; onTrack=false; SetTrackingRate(default_tracking_rate); }
+    if ((get_vals[0]=='o') && (get_vals[1]=='f') && (get_vals[2]=='f') && (get_vals[3]==0)) { refraction=false; onTrack=false; SetTrackingRate(default_tracking_rate); }
   }
   // PEC control
   if ((get_names[0]=='p') && (get_names[1]=='e')) {
@@ -663,7 +663,8 @@ if (html_page_step==++stp) {
 
     strcpy(temp3,"(");
     if (PPSsynced) strcat(temp3,"PPS Sync, ");
-    if (refraction) strcat(temp3,"Refr. Compensated, ");
+    if (refraction && !onTrack) strcat(temp3,"Refr. Compensation, ");
+    if (refraction && onTrack) strcat(temp3,"Full Compensation, ");
     if (temp3[strlen(temp3)-2]==',') { temp3[strlen(temp3)-2]=')'; temp3[strlen(temp3)-1]=0; } else strcpy(temp3,"");
  
     strcpy_P(temp1, html_index8); sprintf(temp,temp1,temp2,temp3);
@@ -936,8 +937,9 @@ const char html_control10[] PROGMEM =
 "<button name=\"tk\" value=\"h\" type=\"submit\">Solar</button>";
 const char html_control11[] PROGMEM = 
 #if !defined(MOUNT_TYPE_ALTAZM)
-"</br></br>Refraction Compensated Tracking Rate: </br>"
-"<button name=\"rr\" value=\"on\" type=\"submit\">On</button>"
+"</br></br>Compensated Tracking Rate (Pointing Model/Refraction): </br>"
+"<button name=\"rr\" value=\"otk\" type=\"submit\">Full</button>"
+"<button name=\"rr\" value=\"on\" type=\"submit\">Refraction Only</button>"
 "<button name=\"rr\" value=\"off\" type=\"submit\">Off</button>"
 #endif
 "</form>\r\n";
