@@ -654,6 +654,7 @@ char command[3];
 char parameter[25];
 byte bufferPtr= 0;
 
+// for bluetooth/serial 0
 char command_serial_zero[25];
 char parameter_serial_zero[25];
 byte bufferPtr_serial_zero= 0;
@@ -664,16 +665,16 @@ volatile byte Serial_recv_head = 0;
 char Serial_xmit_buffer[50] = "";
 byte Serial_xmit_index = 0;
 
+// for bluetooth/serial 1
+char command_serial_one[25];
+char parameter_serial_one[25];
+byte bufferPtr_serial_one= 0;
+
 char Serial1_recv_buffer[256] = "";
 volatile byte Serial1_recv_tail = 0;
 volatile byte Serial1_recv_head = 0;
 char Serial1_xmit_buffer[50] = "";
 byte Serial1_xmit_index = 0;
-
-// for bluetooth/serial 1
-char command_serial_one[25];
-char parameter_serial_one[25];
-byte bufferPtr_serial_one= 0;
 
 // for ethernet
 char command_ethernet[25];

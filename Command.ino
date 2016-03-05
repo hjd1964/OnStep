@@ -26,10 +26,10 @@ void processCommands() {
     boolean supress_frame = false;
     char *conv_end;
 
-    if ((Serial_available() > 0) && (!serial_zero_ready)) { serial_zero_ready = buildCommand(Serial_read()); }
+    if ((Serial_available() > 0) && (!serial_zero_ready)) { serial_zero_ready = buildCommand_serial_zero(Serial_read()); }
     if ((Serial1_available() > 0) && (!serial_one_ready)) { serial_one_ready = buildCommand_serial_one(Serial1_read()); }
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
-    if ((!Ethernet_www_busy()) && (Ethernet_available() > 0) && (!ethernet_ready)) { ethernet_ready = buildCommand_ethernet(Ethernet_read()); }
+    if ((Ethernet_available() > 0) && (!ethernet_ready)) { ethernet_ready = buildCommand_ethernet(Ethernet_read()); }
     if (Serial_transmit() || Serial1_transmit() || Ethernet_transmit()) return;
 #else
     if (Serial_transmit() || Serial1_transmit()) return;
@@ -919,6 +919,7 @@ void processCommands() {
 //  :TK#   Track rate king
 //  :Te#   Tracking enable  (OnStep only, replies 0/1)
 //  :Td#   Tracking disable (OnStep only, replies 0/1)
+//  :To#   OnTrack enable   (OnStep only, replies 0/1)
 //  :Tr#   Track refraction enable  (OnStep only, replies 0/1)
 //  :Tn#   Track refraction disable (OnStep only, replies 0/1)
 //         Returns: Nothing
@@ -1164,7 +1165,7 @@ void processCommands() {
 }
 
 // Build up a command
-boolean buildCommand(char c) {
+boolean buildCommand_serial_zero(char c) {
   // (chr)6 is a special status command for the LX200 protocol
   if ((c==(char)6) && (bufferPtr_serial_zero==0)) {
     #ifdef MOUNT_TYPE_ALTAZM
@@ -1271,8 +1272,7 @@ boolean clearCommand_serial_one() {
 // Build up a command
 boolean buildCommand_ethernet(char c) {
   // return if -1 is received (no data)
-  if (c == 0xFF)
-    return false;
+  if (c == 0xFF) return false;
 
   // (chr)6 is a special status command for the LX200 protocol
   if ((c==(char)6) && (bufferPtr_ethernet==0)) {

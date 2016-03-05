@@ -24,7 +24,9 @@ EthernetClient cmd_client;
 // Network server port for web channel
 EthernetServer web_server(80);
 EthernetClient www_client;
-boolean alreadyConnected = false; // whether or not the client was connected previously
+
+bool cmdIsClosing = false;        // handle non-blocking stop()
+long cmdTransactionLast_ms = 0;   // timed stop()
 
 void Ethernet_Init() {
   // initialize the ethernet device
@@ -38,6 +40,8 @@ void Ethernet_Init() {
   cmd_client = cmd_server.available(); // initialise cmd_client
   web_server.begin();
   www_client = web_server.available(); // initialise www_client
+
+  cmdTransactionLast_ms=millis();
 }
 
 bool Ethernet_www_busy() {
@@ -45,6 +49,7 @@ bool Ethernet_www_busy() {
 }
 
 bool Ethernet_cmd_busy() {
+  if (cmdIsClosing) return true;
   return cmd_client;
 }
 
@@ -52,6 +57,7 @@ void Ethernet_send(const char data[]) {
   if (!cmd_client) return;
   cmd_client.flush();
   cmd_client.write(data,strlen(data));
+  cmdTransactionLast_ms=millis();
 }
 
 void Ethernet_print(const char data[]) {
@@ -64,11 +70,20 @@ boolean Ethernet_transmit() {
  
 boolean Ethernet_available() {
   cmd_client = cmd_server.available();
-  return cmd_client;
+  if (cmd_client) {
+    if (cmd_client.connected()) {
+      return cmd_client.available();
+    }
+
+    if (millis()-cmdTransactionLast_ms>2000) { cmd_client.stopRequest(); cmdIsClosing=true; }
+    if (cmdIsClosing) {
+      if (cmd_client.stopMonitor()) { cmdIsClosing=false; }
+    }
+  }
+  return false;
 }
  
 char Ethernet_read() {
-  if (!cmd_client) return -1;
   return cmd_client.read();
 }
 
