@@ -15,3 +15,10 @@
 *.exe
 *.out
 *.app
+
+Config.h
+Config.takem10b.60sps.h
+Config.takem10b.h
+Config.steve.h
+Config_Z12.h
+Config.g11.h
