@@ -20,19 +20,20 @@ void Pec() {
 
   // keep track of our current step position, and when the step position on the worm wraps during playback
   cli(); long pecPos=(long)targetAxis1.part.m-trueAxis1; long t=lst; sei();
+  
   while (pecPos>=(long)StepsPerWormRotationAxis1) pecPos-=(long)StepsPerWormRotationAxis1;
   while (pecPos<0) pecPos+=(long)StepsPerWormRotationAxis1;
 
   #if defined(PEC_SENSE_ON) || defined(PEC_SENSE_PULLUP) || defined(PEC_SENSE)
+    long dist; if (wormSensePos>pecPos) dist=wormSensePos-pecPos; else dist=pecPos-wormSensePos;
   #ifdef PEC_SENSE
     // as above except for Analog sense
-    if ((t-wormSenseLst>6000) && (pecAnalogValue>PEC_SENSE)) {
+    if ((dist>StepsPerSecondAxis1*60) && (pecAnalogValue>PEC_SENSE)) {
   #else
     // if the HALL sensor (etc.) has just arrived at the index and it's been more than 60 seconds since
     // it was there before, set this as the next start of PEC playback/recording
-    if ((t-wormSenseLst>6000) && (digitalRead(PecPin)==PEC_SENSE_STATE)) {
+    if ((dist>StepsPerSecondAxis1*60) && (digitalRead(PecPin)==PEC_SENSE_STATE)) {
   #endif
-      wormSenseLst=t;
       wormSensePos=pecPos;
       wormSenseDetected=true;
       wormSensed=true;

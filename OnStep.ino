@@ -767,7 +767,6 @@ long    lastPecIndex      = -1;
 long    pecIndex          = 0;
 long    pecIndex1         = 0;
 int     pecAnalogValue    = 0;
-long    wormSenseLst      = 0;      // time since last PEC index was sensed
 long    wormSensePos      = 0;      // in steps
 boolean wormSenseDetected = false;  // indicates PEC index was found
 int     LastPecPinState   = PEC_SENSE_STATE;
@@ -1292,7 +1291,6 @@ void setup() {
   guideSiderealTimer = lst;
   PecSiderealTimer = lst;
   siderealTimer = lst;
-  wormSenseLst = lst;
   sei();
   clockTimer=millis(); 
   last_loop_micros=micros();
