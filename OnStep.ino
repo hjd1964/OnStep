@@ -133,18 +133,18 @@ boolean faultAxis2 = false;
 #else
 #define default_tracking_rate 1
 #endif
-volatile double  trackingTimerRateAxis1 = default_tracking_rate;
-volatile double  trackingTimerRateAxis2 = default_tracking_rate;
-volatile double  pecTimerRateAxis1   = 0.0;
-volatile double  guidetimerRateAxis1 = 0.0;
+volatile double  trackingTimerRateAxis1= default_tracking_rate;
+volatile double  trackingTimerRateAxis2= default_tracking_rate;
+volatile double  pecTimerRateAxis1     = 0.0;
+volatile double  guidetimerRateAxis1   = 0.0;
 volatile double  guideTimerRateAxis2   = 0.0;
-volatile double  timerRateRatio =       ((double)StepsPerDegreeAxis1/(double)StepsPerDegreeAxis2);
-volatile boolean useTimerRateRatio =    (StepsPerDegreeAxis1!=StepsPerDegreeAxis2);
-#define StepsPerSecondAxis1             ((double)StepsPerDegreeAxis1/240.0)
-#define StepsPerSecondAxis2             ((double)StepsPerDegreeAxis2/240.0)
-#define SecondsPerWormRotationAxis1     ((long)(StepsPerWormRotationAxis1/StepsPerSecondAxis1))
-volatile double StepsForRateChangeAxis1 = (double)DegreesForAcceleration*(double)StepsPerDegreeAxis1*4.0;
-volatile double StepsForRateChangeAxis2 = (double)DegreesForAcceleration*(double)StepsPerDegreeAxis2*4.0;
+volatile double  timerRateRatio        = ((double)StepsPerDegreeAxis1/(double)StepsPerDegreeAxis2);
+volatile boolean useTimerRateRatio     = (StepsPerDegreeAxis1!=StepsPerDegreeAxis2);
+#define StepsPerSecondAxis1              ((double)StepsPerDegreeAxis1/240.0)
+#define StepsPerSecondAxis2              ((double)StepsPerDegreeAxis2/240.0)
+#define SecondsPerWormRotationAxis1      ((long)(StepsPerWormRotationAxis1/StepsPerSecondAxis1))
+volatile double StepsForRateChangeAxis1= (double)DegreesForAcceleration*(double)StepsPerDegreeAxis1*4.0;
+volatile double StepsForRateChangeAxis2= (double)DegreesForAcceleration*(double)StepsPerDegreeAxis2*4.0;
 
 #if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
 #define cli() noInterrupts()
