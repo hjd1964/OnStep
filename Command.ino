@@ -665,7 +665,7 @@ void processCommands() {
           } else
 #endif
           // Status is one of "IpPrR" (I)gnore, get ready to (p)lay, (P)laying, get ready to (r)ecord, (R)ecording.  Or an optional (.) to indicate an index detect.
-          if (parameter[1]=='?') { const char *pecStatusCh = PECStatusString; reply[0]=pecStatusCh[pecStatus]; reply[1]=0; reply[2]=0; if (wormSenseDetected) { reply[1]='.'; wormSenseDetected=false; } } else { quietReply=false; commandError=true; }
+          if (parameter[1]=='?') { const char *pecStatusCh = PECStatusString; reply[0]=pecStatusCh[pecStatus]; reply[1]=0; reply[2]=0; if (wormSensedAgain) { reply[1]='.'; wormSensedAgain=false; } } else { quietReply=false; commandError=true; }
         } else commandError=true;
       } else
 

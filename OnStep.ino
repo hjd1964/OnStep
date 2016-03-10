@@ -768,7 +768,7 @@ long    pecIndex          = 0;
 long    pecIndex1         = 0;
 int     pecAnalogValue    = 0;
 long    wormSensePos      = 0;      // in steps
-boolean wormSenseDetected = false;  // indicates PEC index was found
+boolean wormSensedAgain   = false;  // indicates PEC index was found
 int     LastPecPinState   = PEC_SENSE_STATE;
 
 boolean pecBufferStart    = false;

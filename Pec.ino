@@ -5,10 +5,10 @@
 // this cleans up any tracking rate variations that would be introduced by recording more guiding corrections to either the east or west, default=ON
 #define PEC_CLEANUP_ON
 
-#if defined(PEC_SENSE_ON) || defined(PEC_SENSE_PULLUP) || defined(PEC_SENSE)
-  boolean wormSensed=false;
+#ifdef PEC_SENSE_OFF
+  boolean wormSensedFirst=true;
 #else
-  boolean wormSensed=true;
+  boolean wormSensedFirst=false;
 #endif
 
 long pecRecordStopTime  = 0;
@@ -32,18 +32,18 @@ void Pec() {
     if ((dist>StepsPerSecondAxis1*60.0) && (pecAnalogValue>PEC_SENSE)) {
   #endif
       wormSensePos=pecPos;
-      wormSenseDetected=true;
-      wormSensed=true;
+      wormSensedAgain=true;
+      wormSensedFirst=true;
       pecBufferStart=true;
     } else pecBufferStart=false;
   #endif
   
   #ifdef PEC_SENSE_OFF
-  wormSensed=true;
+  wormSensedFirst=true;
   #endif
 
   if (pecStatus==IgnorePEC) { pecTimerRateAxis1=0; return; }
-  if (!wormSensed) return;
+  if (!wormSensedFirst) return;
 
   // worm step position corrected for any index found
   lastWormRotationPos=wormRotationPos;
