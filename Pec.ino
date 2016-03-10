@@ -21,25 +21,22 @@ void Pec() {
   // keep track of our current step position, and when the step position on the worm wraps during playback
   cli(); long pecPos=(long)targetAxis1.part.m-trueAxis1; sei();
   
-  #if defined(PEC_SENSE_ON) || defined(PEC_SENSE_PULLUP) || defined(PEC_SENSE)
-    long dist; if (wormSensePos>pecPos) dist=wormSensePos-pecPos; else dist=pecPos-wormSensePos;
-  #if defined(PEC_SENSE_ON) || defined(PEC_SENSE_PULLUP)
-    // if the HALL sensor (etc.) has just arrived at the index and it's been more than 60 seconds since
-    // it was there before, set this as the next start of PEC playback/recording
-    if ((dist>StepsPerSecondAxis1*60.0) && (digitalRead(PecPin)==PEC_SENSE_STATE)) {
+  #ifdef PEC_SENSE_OFF
+    wormSensedFirst=true;
   #else
-    // as above except for Analog sense
+    long dist; if (wormSensePos>pecPos) dist=wormSensePos-pecPos; else dist=pecPos-wormSensePos;
+    #ifdef PEC_SENSE
+    // for analog sense, with 60 second delay before redetect
     if ((dist>StepsPerSecondAxis1*60.0) && (pecAnalogValue>PEC_SENSE)) {
-  #endif
+    #else
+    // for digital sense, with 60 second delay before redetect
+    if ((dist>StepsPerSecondAxis1*60.0) && (digitalRead(PecPin)==PEC_SENSE_STATE)) {
+    #endif
       wormSensePos=pecPos;
       wormSensedAgain=true;
       wormSensedFirst=true;
       pecBufferStart=true;
     } else pecBufferStart=false;
-  #endif
-  
-  #ifdef PEC_SENSE_OFF
-  wormSensedFirst=true;
   #endif
 
   if (pecStatus==IgnorePEC) { pecTimerRateAxis1=0; return; }
