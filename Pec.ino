@@ -19,20 +19,17 @@ void Pec() {
   // PEC is only active when we're tracking at the sidereal rate with a guide rate that makes sense
 
   // keep track of our current step position, and when the step position on the worm wraps during playback
-  cli(); long pecPos=(long)targetAxis1.part.m-trueAxis1; long t=lst; sei();
+  cli(); long pecPos=(long)targetAxis1.part.m-trueAxis1; sei();
   
-  while (pecPos>=(long)StepsPerWormRotationAxis1) pecPos-=(long)StepsPerWormRotationAxis1;
-  while (pecPos<0) pecPos+=(long)StepsPerWormRotationAxis1;
-
   #if defined(PEC_SENSE_ON) || defined(PEC_SENSE_PULLUP) || defined(PEC_SENSE)
     long dist; if (wormSensePos>pecPos) dist=wormSensePos-pecPos; else dist=pecPos-wormSensePos;
-  #ifdef PEC_SENSE
-    // as above except for Analog sense
-    if ((dist>StepsPerSecondAxis1*60) && (pecAnalogValue>PEC_SENSE)) {
-  #else
+  #if defined(PEC_SENSE_ON) || defined(PEC_SENSE_PULLUP)
     // if the HALL sensor (etc.) has just arrived at the index and it's been more than 60 seconds since
     // it was there before, set this as the next start of PEC playback/recording
-    if ((dist>StepsPerSecondAxis1*60) && (digitalRead(PecPin)==PEC_SENSE_STATE)) {
+    if ((dist>StepsPerSecondAxis1*60.0) && (digitalRead(PecPin)==PEC_SENSE_STATE)) {
+  #else
+    // as above except for Analog sense
+    if ((dist>StepsPerSecondAxis1*60.0) && (pecAnalogValue>PEC_SENSE)) {
   #endif
       wormSensePos=pecPos;
       wormSenseDetected=true;
@@ -40,10 +37,13 @@ void Pec() {
       pecBufferStart=true;
     } else pecBufferStart=false;
   #endif
-
+  
   #ifdef PEC_SENSE_OFF
   wormSensed=true;
   #endif
+
+  if (pecStatus==IgnorePEC) { pecTimerRateAxis1=0; return; }
+  if (!wormSensed) return;
 
   // worm step position corrected for any index found
   lastWormRotationPos=wormRotationPos;
@@ -51,62 +51,57 @@ void Pec() {
   while (wormRotationPos>=(long)StepsPerWormRotationAxis1) wormRotationPos-=(long)StepsPerWormRotationAxis1;
   while (wormRotationPos<0) wormRotationPos+=(long)StepsPerWormRotationAxis1;
   // "soft" PEC index sense
-  #if !defined(PEC_SENSE_ON) && !defined(PEC_SENSE_PULLUP) && !defined(PEC_SENSE)
+  #ifdef PEC_SENSE_OFF
   if ((wormRotationPos-lastWormRotationPos)<0) pecBufferStart=true; else pecBufferStart=false;
   #endif
-
+    
   // handle playing back and recording PEC
-  if ((pecStatus!=IgnorePEC) && (wormSensed)) {
-    cli(); t=lst; sei(); 
+  cli(); long t=lst; sei();
 
-    // start playing PEC
-    if (pecStatus==ReadyPlayPEC) {
-      // makes sure the index is at the start of a second before resuming play
-      if ((long)fmod(wormRotationPos,StepsPerSecondAxis1)==0) {
-        pecStatus=PlayPEC;
-        pecIndex=wormRotationPos/StepsPerSecondAxis1;
-
-        // playback starts now
-        PecSiderealTimer=t;
-      }
-    } else
-    // start recording PEC
-    if (pecStatus==ReadyRecordPEC) {
-      if ((long)fmod(wormRotationPos,StepsPerSecondAxis1)==0) {
-        pecStatus=RecordPEC;
-        pecIndex=wormRotationPos/StepsPerSecondAxis1;
-        pecRecorded=false;
-
-        // recording starts now
-        PecSiderealTimer=t;
-        pecRecordStopTime=PecSiderealTimer+(long)SecondsPerWormRotationAxis1*100L;
-        accPecGuideHA.fixed=0;
-      }
-    } else
-    // and once the PEC data is all stored, indicate that it's valid and start using it
-    if ((pecStatus==RecordPEC) && (t-pecRecordStopTime>0)) {
+  // start playing PEC
+  if (pecStatus==ReadyPlayPEC) {
+    // makes sure the index is at the start of a second before resuming play
+    if ((long)fmod(wormRotationPos,StepsPerSecondAxis1)==0) {
       pecStatus=PlayPEC;
-      pecRecorded=true;
-      pecFirstRecord=false;
+      pecIndex=wormRotationPos/StepsPerSecondAxis1;
+
+      // playback starts now
+      PecSiderealTimer=t;
+    }
+  } else
+  // start recording PEC
+  if (pecStatus==ReadyRecordPEC) {
+    if ((long)fmod(wormRotationPos,StepsPerSecondAxis1)==0) {
+      pecStatus=RecordPEC;
+      pecIndex=wormRotationPos/StepsPerSecondAxis1;
+      pecRecorded=false;
+
+      // recording starts now
+      PecSiderealTimer=t;
+      pecRecordStopTime=PecSiderealTimer+(long)SecondsPerWormRotationAxis1*100L;
+      accPecGuideHA.fixed=0;
+    }
+  } else
+  // and once the PEC data is all stored, indicate that it's valid and start using it
+  if ((pecStatus==RecordPEC) && (t-pecRecordStopTime>0)) {
+    pecStatus=PlayPEC;
+    pecRecorded=true;
+    pecFirstRecord=false;
 #ifdef PEC_CLEANUP_ON
-      CleanupPec();
+    CleanupPec();
 #endif
-    }
-
-    // reset the buffer index to match the worm index
-    if (pecBufferStart && (pecStatus!=RecordPEC)) { pecIndex=0; PecSiderealTimer=t; }
-    // Increment the PEC index once a second and make it go back to zero when the worm finishes a rotation
-    if (t-PecSiderealTimer>99) {
-      PecSiderealTimer=t; pecIndex=(pecIndex+1)%SecondsPerWormRotationAxis1;
-    }
-    pecIndex1=pecIndex; if (pecIndex1<0) pecIndex1+=SecondsPerWormRotationAxis1; if (pecIndex1>=SecondsPerWormRotationAxis1) pecIndex1-=SecondsPerWormRotationAxis1;
-
-    accPecGuideHA.fixed+=guideHA.fixed;
-  } else {
-    // if we're ignoring PEC, zero the offset and keep it that way
-    pecTimerRateAxis1=0;
   }
 
+  // reset the buffer index to match the worm index
+  if (pecBufferStart && (pecStatus!=RecordPEC)) { pecIndex=0; PecSiderealTimer=t; }
+  // Increment the PEC index once a second and make it go back to zero when the worm finishes a rotation
+  if (t-PecSiderealTimer>99) {
+    PecSiderealTimer=t; pecIndex=(pecIndex+1)%SecondsPerWormRotationAxis1;
+  }
+  pecIndex1=pecIndex; if (pecIndex1<0) pecIndex1+=SecondsPerWormRotationAxis1; if (pecIndex1>=SecondsPerWormRotationAxis1) pecIndex1-=SecondsPerWormRotationAxis1;
+
+  accPecGuideHA.fixed+=guideHA.fixed;
+  
   // falls in whenever the pecIndex changes, which is once a sidereal second
   if (pecIndex1!=lastPecIndex) {
     lastPecIndex=pecIndex1;
