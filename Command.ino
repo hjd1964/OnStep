@@ -1022,7 +1022,7 @@ void processCommands() {
      if ((command[0]=='V') && (command[1]=='H')) {
        long s=(long)((double)wormSensePos/(double)StepsPerSecondAxis1);
        while (s>SecondsPerWormRotationAxis1) s-=SecondsPerWormRotationAxis1;
-       while (s<0) s-=SecondsPerWormRotationAxis1;
+       while (s<0) s+=SecondsPerWormRotationAxis1;
        sprintf(reply,"%05ld",s); // indexWorm_sense
        quietReply=true;
      } else
