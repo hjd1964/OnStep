@@ -14,6 +14,6 @@
 
 #else
 
-#include "EEPROM.h"
+#include "../../libraries/EEPROM/EEPROM.h"
 
 #endif
