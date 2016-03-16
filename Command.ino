@@ -62,6 +62,28 @@ void processCommands() {
         if (command[1]=='W') {
               saveAlignModel();
         } else
+//  :A?#  Align status
+//         Returns: mno#
+//         where m is the maximum number of alignment stars
+//               n is the current alignment star (0 otherwise)
+//               o is the last required alignment star when an alignment is in progress (0 otherwise)
+        if (command[1]=='?') {
+#if defined(MOUNT_TYPE_ALTAZM)
+              reply[0]='1';
+#elif defined(MOUNT_TYPE_FORK_ALT)
+              reply[0]='1';
+#else
+              reply[0]='3';
+#endif
+              if (alignMode==AlignOneStar1)   { reply[1]='1'; reply[2]='1'; } else
+              if (alignMode==AlignTwoStar1)   { reply[1]='1'; reply[2]='2'; } else
+              if (alignMode==AlignThreeStar1) { reply[1]='1'; reply[2]='3'; } else
+              if (alignMode==AlignTwoStar2)   { reply[1]='2'; reply[2]='2'; } else
+              if (alignMode==AlignThreeStar2) { reply[1]='2'; reply[2]='3'; } else
+              if (alignMode==AlignThreeStar3) { reply[1]='3'; reply[2]='3'; } else { reply[1]='0'; reply[2]='0'; }
+              reply[3]=0;
+              quietReply=true;
+        } else
 //  :An#  Start Telescope Manual Alignment Sequence
 //         This is to initiate a one or two-star alignment:
 //         1) Before calling this function, the telescope should be in the polar-home position
