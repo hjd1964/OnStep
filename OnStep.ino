@@ -56,8 +56,8 @@
 #endif
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "02 17 16"
-#define FirmwareNumber "1.0b30"
+#define FirmwareDate   "03 10 16"
+#define FirmwareNumber "1.0b31"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -582,7 +582,7 @@ volatile byte DecDir     = DecDirEInit;
 volatile byte HADir      = HADirNCPInit;
 
 // Status ------------------------------------------------------------------------------------------------------------------
-enum Errors {ERR_NONE, ERR_MOTOR_FAULT, ERR_ALT, ERR_LIMIT_SENSE, ERR_DEC, ERR_AZM, ERR_UNDER_POLE, ERR_MERIDIAN};
+enum Errors {ERR_NONE, ERR_MOTOR_FAULT, ERR_ALT, ERR_LIMIT_SENSE, ERR_DEC, ERR_AZM, ERR_UNDER_POLE, ERR_MERIDIAN, ERR_SYNC};
 Errors lastError = ERR_NONE;
 
 boolean highPrecision    = true;

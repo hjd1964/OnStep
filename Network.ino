@@ -702,7 +702,8 @@ if (html_page_step==++stp) {
     if (lastError==ERR_DEC) strcpy(temp2,"Dec Limit Exceeded"); else
     if (lastError==ERR_AZM) strcpy(temp2,"Azm Limit Exceeded"); else
     if (lastError==ERR_UNDER_POLE) strcpy(temp2,"Under Pole Limit Exceeded"); else
-    if (lastError==ERR_MERIDIAN) strcpy(temp2,"Meridian Limit (W) Exceeded");
+    if (lastError==ERR_MERIDIAN) strcpy(temp2,"Meridian Limit (W) Exceeded"); else
+    if (lastError==ERR_SYNC) strcpy(temp2,"Sync. ignored >30&deg;");
     strcpy_P(temp1, html_index10); sprintf(temp,temp1,temp2);
   }
   if (html_page_step==++stp) {

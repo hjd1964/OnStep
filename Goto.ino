@@ -19,7 +19,7 @@ boolean syncEqu(double RA, double Dec) {
   EquToIEqu(latitude,HA,Dec,&Axis1,&Axis2);
 #endif
 
-#ifdef SYNC_ANYWHERE_ON
+#if defined(SYNC_ANYWHERE_ON) && !defined(MOUNT_TYPE_ALTAZM)
   if ((pierSide==PierSideNone) || ((pierSide==PierSideWest) && (Axis1>0)) || ((pierSide==PierSideEast) && (Axis1<0))) {
     trackingState=TrackingSidereal;
     atHome=false;
@@ -43,6 +43,7 @@ boolean syncEqu(double RA, double Dec) {
     }
   }
 #endif
+
   // compute index offsets IH/ID, if they're within reason 
   // actual posAxis1/posAxis2 are the coords of where this really is
   // IH/ID are the amount to add to the actual RA/Dec to arrive at the correct position
@@ -52,12 +53,16 @@ boolean syncEqu(double RA, double Dec) {
   //                 W   .   E
   // IH and ID values get subtracted to arrive at the correct location
   IH=Axis1-((double)(long)targetAxis1.part.m)/(double)StepsPerDegreeAxis1;
+#ifdef MOUNT_TYPE_ALTAZM
+  if (abs(IH-360.0)<abs(IH)) IH-=360.0;
+  if (abs(IH+360.0)<abs(IH)) IH+=360.0;
+#endif
   IHS=(long)(IH*(double)StepsPerDegreeAxis1);
   ID=Axis2-((double)(long)targetAxis2.part.m)/(double)StepsPerDegreeAxis2;
   IDS=(long)(ID*(double)StepsPerDegreeAxis2);
 
 #ifndef SYNC_ANYWHERE_ON
-  if ((abs(ID)>30.0) || (abs(IH)>30.0)) { IH=0; ID=0; return false; }
+  if ((abs(ID)>30.0) || (abs(IH)>30.0)) { IH=0; ID=0; lastError=ERR_SYNC; return false; }
 #endif
   return true;
 }
