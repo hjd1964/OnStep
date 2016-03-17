@@ -57,11 +57,10 @@ boolean Serial_available()
 char Serial_read()
 {
   char c;
-//  cli();
+  cli();
   Serial_recv_buffer[Serial_recv_tail]=(char)0; // always mark the tail
   c=Serial_recv_buffer[Serial_recv_head];
-//  sei();
-//  char c1[4]="?"; c1[0]=c; c1[1]=0; Serial_print(c1);
+  sei();
   if (c!=0) Serial_recv_head++; // buffer is 256 bytes so this byte variable wraps automatically
   return c;
 }
