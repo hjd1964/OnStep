@@ -182,7 +182,7 @@ void processCommands() {
 //  :CM#   Synchonize the telescope with the current database object (as above)
 //         Returns: "N/A#"
       if ((command[0]=='C') && ((command[1]=='S') || command[1]=='M'))  {
-        if (trackingState!=TrackingMoveTo) {
+        if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
           syncEqu(newTargetRA,newTargetDec);
           if (command[1]=='M') strcpy(reply,"N/A");
           quietReply=true;
@@ -575,7 +575,7 @@ void processCommands() {
 //  :Mgdnnnn# Pulse guide command
 //          Returns: Nothing
       if (command[1]=='g') {
-        if ( (atoi2((char *)&parameter[1],&i)) && ((i>=0) && (i<=16399)) && (parkStatus==NotParked)) { 
+        if ( (atoi2((char *)&parameter[1],&i)) && ((i>=0) && (i<=16399)) && (parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) { 
           if ((parameter[0]=='e') || (parameter[0]=='w')) {
 #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
             enableGuideRate(currentPulseGuideRate);
@@ -605,9 +605,9 @@ void processCommands() {
 //  :Me# & :Mw#      Move Telescope East or West at current slew rate
 //         Returns: Nothing
       if ((command[1]=='e') || (command[1]=='w')) { 
-        if (parkStatus==NotParked) {
+        if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
           // block user from changing direction at high rates, just stop the guide instead
-          if ((guideDirAxis1!=0) && (command[1]!=guideDirAxis1) && (fabs(guidetimerRateAxis1)>2)) { 
+          if ((guideDirAxis1) && (command[1]!=guideDirAxis1) && (fabs(guidetimerRateAxis1)>2)) { 
             guideDirAxis1='b';
           } else {
             enableGuideRate(currentGuideRate);
@@ -621,9 +621,9 @@ void processCommands() {
 //  :Mn# & :Ms#      Move Telescope North or South at current slew rate
 //         Returns: Nothing
       if ((command[1]=='n') || (command[1]=='s')) { 
-        if (parkStatus==NotParked) {
+        if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
           // block user from changing direction at high rates, just stop the guide instead
-          if ((guideDirAxis2!=0) && (command[1]!=guideDirAxis2) && (fabs(guideTimerRateAxis2)>2)) { 
+          if ((guideDirAxis2) && (command[1]!=guideDirAxis2) && (fabs(guideTimerRateAxis2)>2)) { 
             guideDirAxis2='b';
           } else {
             enableGuideRate(currentGuideRate);
@@ -698,7 +698,7 @@ void processCommands() {
       if (command[0]=='Q') {
         if (command[1]==0) {
           if ((parkStatus==NotParked) || (parkStatus==Parking)) {
-            if (guideDirAxis1)  guideDirAxis1='b'; // break
+            if (guideDirAxis1) guideDirAxis1='b'; // break
             if (guideDirAxis2) guideDirAxis2='b'; // break
             if (trackingState==TrackingMoveTo) { abortSlew=true; }
           }
@@ -707,7 +707,7 @@ void processCommands() {
 //  :Qe# & Qw#   Halt east/westward Slews
 //         Returns: Nothing
         if ((command[1]=='e') || (command[1]=='w')) { 
-          if (parkStatus==NotParked) {
+          if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
             if (guideDirAxis1) guideDirAxis1='b'; // break
           }
           quietReply=true; 
@@ -715,7 +715,7 @@ void processCommands() {
 //  :Qn# & Qs#   Halt north/southward Slews
 //         Returns: Nothing
         if ((command[1]=='n') || (command[1]=='s')) {
-          if (parkStatus==NotParked) {
+          if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
             if (guideDirAxis2) guideDirAxis2='b'; // break
           }
           quietReply=true; 

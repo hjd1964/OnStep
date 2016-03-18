@@ -423,12 +423,12 @@ void Ethernet_get() {
     }
   }
   if ((get_names[0]=='d') && (get_names[1]=='r')) {
-    if (get_vals[2]==0) {
-      if (get_vals[1]=='1') { // start guide
-        if ((get_vals[0]=='n') || (get_vals[0]=='s')) { 
-          if (parkStatus==NotParked) {
+    if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
+      if (get_vals[2]==0) {
+        if (get_vals[1]=='1') { // start guide
+          if ((get_vals[0]=='n') || (get_vals[0]=='s')) { 
             // block user from changing direction at high rates, just stop the guide instead
-            if ((guideDirAxis2!=0) && (get_vals[0]!=guideDirAxis2) && (fabs(guideTimerRateAxis2)>2)) { 
+            if ((guideDirAxis2) && (get_vals[0]!=guideDirAxis2) && (fabs(guideTimerRateAxis2)>2)) { 
               guideDirAxis2='b';
             } else {
               enableGuideRate(currentGuideRate);
@@ -436,13 +436,11 @@ void Ethernet_get() {
               guideDurationDec=-1;
               cli(); guideTimerRateAxis2=guideTimerRate; sei();
             }
-          }
-          quietReply=true;
-        } else
-        if ((get_vals[0]=='e') || (get_vals[0]=='w')) { 
-          if (parkStatus==NotParked) {
+            quietReply=true;
+          } else
+          if ((get_vals[0]=='e') || (get_vals[0]=='w')) { 
             // block user from changing direction at high rates, just stop the guide instead
-            if ((guideDirAxis1!=0) && (get_vals[0]!=guideDirAxis1) && (fabs(guidetimerRateAxis1)>2)) { 
+            if ((guideDirAxis1) && (get_vals[0]!=guideDirAxis1) && (fabs(guidetimerRateAxis1)>2)) { 
               guideDirAxis1='b';
             } else {
               enableGuideRate(currentGuideRate);
@@ -451,22 +449,16 @@ void Ethernet_get() {
               cli(); if (guideDirAxis1=='e') guidetimerRateAxis1=-guideTimerRate; else guidetimerRateAxis1=guideTimerRate; sei();
             }
           }
-        }
-      } else 
-      if (get_vals[1]=='0') { // stop guide
-        if ((get_vals[0]=='n') || (get_vals[0]=='s')) { 
-          if (parkStatus==NotParked) {
+        } else 
+        if (get_vals[1]=='0') { // stop guide
+          if ((get_vals[0]=='n') || (get_vals[0]=='s')) { 
             if (guideDirAxis2) guideDirAxis2='b'; // break
-          }
-        } else
-        if ((get_vals[0]=='e') || (get_vals[0]=='w')) { 
-          if (parkStatus==NotParked) {
+          } else
+          if ((get_vals[0]=='e') || (get_vals[0]=='w')) { 
             if (guideDirAxis1) guideDirAxis1='b'; // break
           }
-        }
-      } else 
-      if ((get_vals[1]=='y') && (get_vals[0]=='s')) { // sync
-        if (trackingState!=TrackingMoveTo) {
+        } else 
+        if ((get_vals[1]=='y') && (get_vals[0]=='s')) { // sync
           syncEqu(newTargetRA,newTargetDec);
         }
       }
