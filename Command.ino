@@ -1014,7 +1014,6 @@ void processCommands() {
            sprintf(x,"%02X",b);
            strcat(reply,x);
          }
-//         strcat(reply,"#");
        } else commandError=true;
        quietReply=true;
      } else

@@ -109,14 +109,19 @@ char get_vals[11] = "";
 const char index_page[] = "GET /index.htm"; bool index_page_found; byte index_page_count;
 const char settings_page[] = "GET /settings.htm"; bool settings_page_found; byte settings_page_count;
 const char control_page[] = "GET /control.htm"; bool control_page_found; byte control_page_count;
+const char guide_page[] = "GET /guide.htm"; bool guide_page_found; byte guide_page_count;
 const char pec_page[] = "GET /pec.htm"; bool pec_page_found; byte pec_page_count;
 const char config_page[] = "GET /config.htm"; bool config_page_found; byte config_page_count;
+const char guide_ajax[] = "GET /guide.txt"; bool guide_ajax_found; byte guide_ajax_count;
+
 void reset_page_requests() {
   index_page_found=false; index_page_count=0;
   settings_page_found=false; settings_page_count=0;
   control_page_found=false; control_page_count=0;
+  guide_page_found=false; guide_page_count=0;
   pec_page_found=false; pec_page_count=0;
   config_page_found=false; config_page_count=0;
+  guide_ajax_found=false; guide_ajax_count=0;
   get_check=false; get_val=false; get_name=false;
 }
 
@@ -143,8 +148,10 @@ void Ethernet_www() {
         if (!index_page_found)    { if (c==index_page[index_page_count])       index_page_count++;    else index_page_count=0;    if (index_page_count==14)    { index_page_found=true; get_check=true; } }
         if (!settings_page_found) { if (c==settings_page[settings_page_count]) settings_page_count++; else settings_page_count=0; if (settings_page_count==17) { settings_page_found=true; get_check=true; } }
         if (!control_page_found)  { if (c==control_page[control_page_count])   control_page_count++;  else control_page_count=0;  if (control_page_count==16)  { control_page_found=true; get_check=true; } }
+        if (!guide_page_found)    { if (c==guide_page[guide_page_count])       guide_page_count++;    else guide_page_count=0;    if (guide_page_count==14)    { guide_page_found=true; get_check=true; } }
         if (!pec_page_found)      { if (c==pec_page[pec_page_count])           pec_page_count++;      else pec_page_count=0;      if (pec_page_count==12)      { pec_page_found=true; get_check=true; } }
         if (!config_page_found)   { if (c==config_page[config_page_count])     config_page_count++;   else config_page_count=0;   if (config_page_count==15)   { config_page_found=true; get_check=true; } }
+        if (!guide_ajax_found)    { if (c==guide_ajax[guide_ajax_count])       guide_ajax_count++;    else guide_ajax_count=0;    if (guide_ajax_count==14)    { guide_ajax_found=true; get_check=true; } }
         
         // if you've gotten to the end of the line (received a newline character) and the line is blank, the http request has ended, so you can send a reply
         if ((c == '\n') && currentLineIsBlank) { 
@@ -167,8 +174,10 @@ void Ethernet_www() {
           if (index_page_found) index_html_page(); else
           if (settings_page_found) settings_html_page(); else
           if (control_page_found) control_html_page(); else
+          if (guide_page_found) guide_html_page(); else
           if (pec_page_found) pec_html_page(); else
           if (config_page_found) config_html_page(); else
+          if (guide_ajax_found) guide_ajax_page(); else
           index_html_page();
         }
       }
@@ -238,8 +247,7 @@ boolean www_send() {
   return true;
 }
 
-// The index.htm page --------------------------------------------------------------------------------------
-// process GET requests 
+// process GET requests ------------------------------------------------------------------------------------
 // currently only the name and value are handled, the page sending the name isn't considered
 // this lowers the processing overhead and is sufficient for our purposes here
 double get_temp_float;
@@ -408,6 +416,63 @@ void Ethernet_get() {
     if ((get_vals[0]=='o') && (get_vals[1]=='n') && (get_vals[2]==0)) { refraction=refraction_enable; onTrack=false; SetTrackingRate(default_tracking_rate); }
     if ((get_vals[0]=='o') && (get_vals[1]=='f') && (get_vals[2]=='f') && (get_vals[3]==0)) { refraction=false; onTrack=false; SetTrackingRate(default_tracking_rate); }
   }
+  // GUIDE control
+  if ((get_names[0]=='g') && (get_names[1]=='u')) {
+    if (get_vals[1]==0) {
+      if ((get_vals[0]>='0') && (get_vals[0]<='9')) setGuideRate(get_vals[0]-'0');
+    }
+  }
+  if ((get_names[0]=='d') && (get_names[1]=='r')) {
+    if (get_vals[2]==0) {
+      if (get_vals[1]=='1') { // start guide
+        if ((get_vals[0]=='n') || (get_vals[0]=='s')) { 
+          if (parkStatus==NotParked) {
+            // block user from changing direction at high rates, just stop the guide instead
+            if ((guideDirAxis2!=0) && (get_vals[0]!=guideDirAxis2) && (fabs(guideTimerRateAxis2)>2)) { 
+              guideDirAxis2='b';
+            } else {
+              enableGuideRate(currentGuideRate);
+              guideDirAxis2=get_vals[0];
+              guideDurationDec=-1;
+              cli(); guideTimerRateAxis2=guideTimerRate; sei();
+            }
+          }
+          quietReply=true;
+        } else
+        if ((get_vals[0]=='e') || (get_vals[0]=='w')) { 
+          if (parkStatus==NotParked) {
+            // block user from changing direction at high rates, just stop the guide instead
+            if ((guideDirAxis1!=0) && (get_vals[0]!=guideDirAxis1) && (fabs(guidetimerRateAxis1)>2)) { 
+              guideDirAxis1='b';
+            } else {
+              enableGuideRate(currentGuideRate);
+              guideDirAxis1=get_vals[0];
+              guideDurationHA=-1;
+              cli(); if (guideDirAxis1=='e') guidetimerRateAxis1=-guideTimerRate; else guidetimerRateAxis1=guideTimerRate; sei();
+            }
+          }
+        }
+      } else 
+      if (get_vals[1]=='0') { // stop guide
+        if ((get_vals[0]=='n') || (get_vals[0]=='s')) { 
+          if (parkStatus==NotParked) {
+            if (guideDirAxis2) guideDirAxis2='b'; // break
+          }
+        } else
+        if ((get_vals[0]=='e') || (get_vals[0]=='w')) { 
+          if (parkStatus==NotParked) {
+            if (guideDirAxis1) guideDirAxis1='b'; // break
+          }
+        }
+      } else 
+      if ((get_vals[1]=='y') && (get_vals[0]=='s')) { // sync
+        if (trackingState!=TrackingMoveTo) {
+          syncEqu(newTargetRA,newTargetDec);
+        }
+      }
+    }
+  }
+
   // PEC control
   if ((get_names[0]=='p') && (get_names[1]=='e')) {
     if ((get_vals[0]=='p') && (get_vals[1]=='l') && (get_vals[2]==0)) { if (pecRecorded) pecStatus=ReadyPlayPEC; EEPROM.update(EE_pecStatus,pecStatus); } // play
@@ -457,8 +522,8 @@ const char html_main_css7[] PROGMEM = "a:link, a:visited { background-color: #33
 const char html_main_css8[] PROGMEM = " margin: none; text-align: center; text-decoration: none; display: inline-block; }\r\n";
 const char html_main_css9[] PROGMEM = "button { background-color: #A01010; font-weight: bold; border-radius: 5px; font-size: 12px; margin: 2px; padding: 4px 8px; }\r\n</STYLE>\r\n";
 
-const char html_links1[] PROGMEM = "<a href=\"/index.htm\">Status</a><a href=\"/settings.htm\">";
-const char html_links2[] PROGMEM = "Settings</a><a href=\"/control.htm\">Control</a>";
+const char html_links1[] PROGMEM = "<a href=\"/index.htm\">Status</a><a href=\"/settings.htm\">Settings";
+const char html_links2[] PROGMEM = "</a><a href=\"/control.htm\">Control</a><a href=\"/guide.htm\">Guide</a>";
 const char html_links3[] PROGMEM = "<a href=\"/pec.htm\">PEC</a><a href=\"/config.htm\">Configuration</a><br />";
 
 // The index.htm page --------------------------------------------------------------------------------------
@@ -1009,6 +1074,110 @@ void control_html_page() {
   if (html_page_step==++stp) strcpy_P(temp, html_control10);
   if (html_page_step==++stp) strcpy_P(temp, html_control11);
   if (html_page_step==++stp) strcpy(temp,"</div></body></html>");
+
+  // stop sending this page
+  if (html_page_step==++stp) { html_page_step=0; responseStarted=false; return; }
+
+  // send the data
+  if (!www_write(temp)) html_page_step--; // repeat this step if www_write failed
+}
+
+// The guide.htm page --------------------------------------------------------------------------------
+const char html_guide1[] PROGMEM = 
+"<div class=\"t\"><table width=\"100%\"><tr><td><b>" FirmwareName " " FirmwareNumber ;
+const char html_guide2[] PROGMEM = "</b></td><td align=\"right\"><b><font size=\"5\">GUIDE</font></b></td></tr></table><br />";
+const char html_guide3[] PROGMEM = "</div><div class=\"b\">\r\n";
+const char html_guide4[] PROGMEM = 
+"<script>function guide(dir,start) { var xhttp = new XMLHttpRequest(); "
+"xhttp.open('GET', 'guide.txt?dr='+dir+start+'&x='+new Date().getTime(), true);"
+"xhttp.send(); }</script>"
+"Guide Rate:<br />";
+const char html_guideControls1[] PROGMEM =
+"<form method=\"get\" action=\"/guide.htm\">"
+"<button name=\"gu\" value=\"1\" type=\"submit\">0.5x</button>";
+const char html_guideControls2[] PROGMEM = 
+"<button name=\"gu\" value=\"2\" type=\"submit\">1x</button>"
+"<button name=\"gu\" value=\"4\" type=\"submit\">Mid</button>";
+const char html_guideControls3[] PROGMEM = 
+"<button name=\"gu\" value=\"6\" type=\"submit\">Fast</button>"
+"<button name=\"gu\" value=\"8\" type=\"submit\">VFast</button></form><br />Guide:<br />";
+const char html_guideControls4[] PROGMEM =
+"<div style=\"float: left; border: 2px solid #551111; background-color: #181818; text-align: center; padding: 15px; margin: 5px;\">"
+"<button type=\"button\" style=\"width: 60px; height: 50px;\" onmousedown=\"guide('n','1')\" onmouseup=\"guide('n','0')\">North</button><br />";
+const char html_guideControls5[] PROGMEM = 
+"<button type=\"button\" style=\"width: 60px; height: 50px;\" onmousedown=\"guide('e','1')\" onmouseup=\"guide('e','0')\">East</button>";
+const char html_guideControls6[] PROGMEM = 
+"<button type=\"button\" style=\"width: 60px; height: 50px;\" onclick=\"guide('s','y')\">Sync</button>"
+"<button type=\"button\" style=\"width: 60px; height: 50px;\" onmousedown=\"guide('w','1')\" onmouseup=\"guide('w','0')\">West</button><br />";
+const char html_guideControls7[] PROGMEM = 
+"<button type=\"button\" style=\"width: 60px; height: 50px;\" onmousedown=\"guide('s','1')\" onmouseup=\"guide('s','0')\">South</button>"
+"</div><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />\r\n";
+
+void guide_html_page() {
+  char temp[320] = "";
+
+  int stp=0;
+  html_page_step++;
+
+  // send a standard http response header
+  if (html_page_step==++stp) strcpy_P(temp, html_header1);
+  if (html_page_step==++stp) strcpy_P(temp, html_header2);
+  if (html_page_step==++stp) strcpy_P(temp, html_header3);
+  if (html_page_step==++stp) strcpy_P(temp, html_header4a);
+  if (html_page_step==++stp) strcpy_P(temp, html_header5);
+  if (html_page_step==++stp) strcpy_P(temp, html_header6);
+
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css1);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css2);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css3);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css4);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css5);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css6);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css7);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css8);
+  if (html_page_step==++stp) strcpy_P(temp, html_main_css9);
+  
+  if (html_page_step==++stp) strcpy_P(temp, html_header7);
+  if (html_page_step==++stp) strcpy_P(temp, html_header8);
+
+  // and the remainder of the page
+  if (html_page_step==++stp) strcpy_P(temp, html_guide1);
+  if (html_page_step==++stp) strcpy_P(temp, html_guide2);
+  if (html_page_step==++stp) strcpy_P(temp, html_links1);
+  if (html_page_step==++stp) strcpy_P(temp, html_links2);
+  if (html_page_step==++stp) strcpy_P(temp, html_links3);
+  if (html_page_step==++stp) strcpy_P(temp, html_guide3);
+  if (html_page_step==++stp) strcpy_P(temp, html_guide4);
+
+  if (html_page_step==++stp) strcpy_P(temp, html_guideControls1);
+  if (html_page_step==++stp) strcpy_P(temp, html_guideControls2);
+  if (html_page_step==++stp) strcpy_P(temp, html_guideControls3);
+  if (html_page_step==++stp) strcpy_P(temp, html_guideControls4);
+  if (html_page_step==++stp) strcpy_P(temp, html_guideControls5);
+  if (html_page_step==++stp) strcpy_P(temp, html_guideControls6);
+  if (html_page_step==++stp) strcpy_P(temp, html_guideControls7);
+  if (html_page_step==++stp) strcpy(temp,"</div></body></html>");
+
+  // stop sending this page
+  if (html_page_step==++stp) { html_page_step=0; responseStarted=false; return; }
+
+  // send the data
+  if (!www_write(temp)) html_page_step--; // repeat this step if www_write failed
+}
+
+int val=0;
+
+// The guide.txt ajax response --------------------------------------------------------------------------
+void guide_ajax_page() {
+  char temp[320] = "";
+
+  int stp=0;
+  html_page_step++;
+
+  // send a standard http response header
+  if (html_page_step==++stp) strcpy_P(temp, html_header1);
+  if (html_page_step==++stp) strcpy_P(temp, html_header3);
+  if (html_page_step==++stp) strcpy_P(temp, html_header4a);
 
   // stop sending this page
   if (html_page_step==++stp) { html_page_step=0; responseStarted=false; return; }
