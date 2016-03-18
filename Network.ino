@@ -550,8 +550,8 @@ const char html_indexCorIdx[] PROGMEM = "IH=<font class=\"c\">%ld</font>\", ID=<
 const char html_indexCorPole[] PROGMEM = "altCor=<font class=\"c\">%ld</font>\", azmCor=<font class=\"c\">%ld</font>\"<br />";
 const char html_indexCorOrtho[] PROGMEM = "doCor=<font class=\"c\">%ld</font>\", pdCor=<font class=\"c\">%ld</font>\"<br />";
 const char html_indexRateDeltas[] PROGMEM = "deltaAxis1 =<font class=\"c\">%s</font>\"/s, deltaAxis2=<font class=\"c\">%s</font>\"/s<br /><br />";
-const char html_indexPosition[] PROGMEM = "Current Position: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
-const char html_indexTarget[] PROGMEM = "Target Position: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
+const char html_indexPosition[] PROGMEM = "Instrument Coordinates: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
+const char html_indexTarget[] PROGMEM   = "Target Coordinates: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
 const char html_indexAz1[] PROGMEM = "Az1: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
 const char html_indexAz2[] PROGMEM = "Az2: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
 const char html_indexPier[] PROGMEM = "Pier Side=<font class=\"c\">%s</font> (meridian flips <font class=\"c\">%s</font>)<br /><br />";
@@ -674,8 +674,11 @@ if (html_page_step==++stp) {
     double ha=(double)h/(double)StepsPerDegreeAxis1; 
     doubleToDms(temp2,&ha,true,true);
 #else
-    double ha=(double)h/((double)StepsPerDegreeAxis1*15.0); 
+    double ha=(double)h/((double)StepsPerDegreeAxis1*15.0);
     doubleToHms(temp2,&ha);
+    double ra=timeRange(LST()-ha);
+    doubleToHms(temp3,&ra);
+    sprintf(temp2,"%s</font> (RA=<font class=\"c\">%s</font>)",temp2,temp3);
 #endif
     double dec=(double)d/(double)StepsPerDegreeAxis2; 
     doubleToDms(temp3,&dec,false,true);
