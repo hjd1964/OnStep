@@ -13,12 +13,10 @@
  * Dec/Alt:   7, 6, 5, 4 = Gnd,Step,N/C,Direction (Teensy3.1 Gnd, 6,N/C, 4)
  *
  * Optionally, a bluetooth adapter (HC05 or RN42 for example) plugs into pins Tx1/Rx1 and pins +5V/Gnd. 
- * I use two 2-wire cables for 0.1" headers.  Remember Rx goes to Tx and Tx goes to Rx. And be
- * sure to get a BT module designed for 5 volt operation and signaling otherwise you'll have to design
+ * I use two 2-wire cables for 0.1" headers.  Remember Rx goes to Tx and Tx goes to Rx. If using a Mega2560
+ * be sure to get a BT module designed for 5 volt operation and signaling otherwise you'll have to design
  * and implement the level conversion hardware yourself.
  * BT: Tx,Rx/+5V,Gnd = Rx1,Tx1/+5V,Gnd
- *
- * 
 */
 
 // -------------------------------------------------------------------------------------------------------------------------
