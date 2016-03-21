@@ -2,31 +2,22 @@
 // Configuration
 
 /*
+ * For more information on setting OnStep up see http://www.stellarjourney.com/index.php?r=site/equipment_onstep and 
+ * join the OnStep yahoo group at https://groups.yahoo.com/neo/groups/onsteptelescope/info
+ * 
  * The Arduino Mega2560 and Teensy3.1/3.2 use USB for power and communication with the host computer
- * The some Launchpad TM4C devices are also supported (see OnStep.ino for pin definitions)
+ * some Launchpad TM4C devices are also supported (thanks to Luka,) see OnStep.ino for pin definitions
  *
- * the RA/Az stepper driver plugs into Pins Gnd,13,12, and 11 (Gnd,Step,N/C,Dir... Teensy3.1 uses Gnd,12,11,10.)
- * the Dec/Alt driver plugs into pins 7, 6, 5, and 4 (OnStep pulls 7 LOW to simulate Gnd, and the wiring is identical.)
+ * The RA/Az (Axis1) and Dec/Alt (Axis2) stepper driver plugs in as follows:
  * RA/Az :  Gnd,13,12,11 = Gnd,Step,N/C,Direction (Teensy3.1 Gnd,12,N/C,10)
  * Dec/Alt:   7, 6, 5, 4 = Gnd,Step,N/C,Direction (Teensy3.1 Gnd, 6,N/C, 4)
- *
- * The easiest option is to use two SparkFun Big Easy Drivers (BED) to control the 
- * bipolar stepper motors; with proper heat-sinks they can handle up to 2A per phase at 35V.
- * Each BED can be setup by soldering a 4-position male .1" header into the input side.  
- * I modified the header by removing the 2nd to last pin, and bending the last pin so
- * the header fits into the Gnd,Step,Dir holes of the BED. A four wire ribbon cable from
- * Sparkfun, etc. can then be used to plug them into the Arduino.  The outputs go to the
- * two coils of each stepper motor.  If you don't know which wires are which, the 'net is
- * full of advise on determining what you have, google it and get out your multimeter.
- * Refer to my site (Equipment->OnStep) and/or read up on the 'net to get an idea of how
- * to set the potientiometer on the BEDs to match your stepper motors; too much current
- * will BURN OUT YOUR STEPPER MOTORS.
  *
  * Optionally, a bluetooth adapter (HC05 or RN42 for example) plugs into pins Tx1/Rx1 and pins +5V/Gnd. 
  * I use two 2-wire cables for 0.1" headers.  Remember Rx goes to Tx and Tx goes to Rx. And be
  * sure to get a BT module designed for 5 volt operation and signaling otherwise you'll have to design
  * and implement the level conversion hardware yourself.
  * BT: Tx,Rx/+5V,Gnd = Rx1,Tx1/+5V,Gnd
+ *
  * 
 */
 
