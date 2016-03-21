@@ -268,17 +268,17 @@ uint32_t isqrt32 (uint32_t n) {
 
 // if stepper drive can switch decay mode, set it here
 void DecayModeTracking() {
-#ifdef DRV8825_DECAY_MODE_MIXED
+#ifdef DECAY_MODE_OPEN
   pinMode(Axis1_Mode,INPUT);
   pinMode(Axis2_Mode,INPUT);
 #endif
-#ifdef DRV8825_DECAY_MODE_SLOW
+#ifdef DECAY_MODE_LOW
   pinMode(Axis1_Mode,OUTPUT);
   digitalWrite(Axis1_Mode,LOW);
   pinMode(Axis2_Mode,OUTPUT);
   digitalWrite(Axis1_Mode,LOW);
 #endif
-#ifdef DRV8825_DECAY_MODE_FAST
+#ifdef DECAY_MODE_HIGH
   pinMode(Axis1_Mode,OUTPUT);
   digitalWrite(Axis1_Mode,HIGH);
   pinMode(Axis2_Mode,OUTPUT);
@@ -287,17 +287,17 @@ void DecayModeTracking() {
 }
 
 void DecayModeGoto() {
-#ifdef DRV8825_DECAY_MODE_GOTO_MIXED
+#ifdef DECAY_MODE_GOTO_OPEN
   pinMode(Axis1_Mode,INPUT);
   pinMode(Axis2_Mode,INPUT);
 #endif
-#ifdef DRV8825_DECAY_MODE_GOTO_SLOW
+#ifdef DECAY_MODE_GOTO_LOW
   pinMode(Axis1_Mode,OUTPUT);
   digitalWrite(Axis1_Mode,LOW);
   pinMode(Axis2_Mode,OUTPUT);
   digitalWrite(Axis1_Mode,LOW);
 #endif
-#ifdef DRV8825_DECAY_MODE_GOTO_FAST
+#ifdef DECAY_MODE_GOTO_HIGH
   pinMode(Axis1_Mode,OUTPUT);
   digitalWrite(Axis1_Mode,HIGH);
   pinMode(Axis2_Mode,OUTPUT);

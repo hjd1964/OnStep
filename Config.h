@@ -146,7 +146,7 @@
                                      // fork/yolk mount with meridian flips turned off by setting the minutesPastMeridian values to cover the whole sky)
 #define MaxAzm                   180 // Alt/Az mounts only. +/- maximum allowed Azimuth, default =  180.  Allowed range is 180 to 360
 
-// Micro-step driver mode control
+// Stepper driver micro-step mode control (the _MODE_GOTO settings engage during slews at <128us/step)
 // M0, M1, and M2 are on Pins 22,23, and 24 for RA (Teensy3.1 Pins 13,14,15.)  M0, M1, M2 are on Pins 27,28,29 for Dec (Teensy3.1 Pins 18,19,20.)
 // DRV8825: 5=32x, 4=16x, 3=8x, 2=4x, 1=2x, 0=1x
 #define AXIS1_MODE_OFF               // programs the RA/Az uStep mode M0/M1/M2, optional and default _OFF. Other values 0 to 7 (0xb000 to 111): for example "#define AXIS1_MODE 4"
@@ -156,11 +156,11 @@
 #define AXIS2_MODE_GOTO_OFF          // programs the Dec/Alt uStep mode M0/M1/M2, used during gotos, optional and default _OFF. Other values 0 to 7 (0xb000 to 111)
 #define AXIS2_STEP_GOTO 1            // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
 
-// Stepper driver decay mode control
-// Axis1 decay mode on Pin 32 and Axis2 decay mode on Pin 33
-// options are _FAST, _SLOW, _MIXED, default is _OFF
-#define DRV8825_DECAY_MODE_OFF       // decay mode used during tracking (for DRV8825)
-#define DRV8825_DECAY_MODE_GOTO_OFF  // decay mode used during slews (for DRV8825)
+// Stepper driver decay mode control (for both Axis, the _MODE_GOTO settings engage during gotos)
+// Axis1 decay mode is on Pin 32 and Axis2 decay mode is on Pin 33.  Options are _HIGH, _LOW, _OPEN, default is _OFF
+// DRV8825 can be configured for the following decay modes: Fast (_HIGH,) Slow (_LOW,) and Mixed Mode (_OPEN)
+#define DECAY_MODE_OFF               // decay mode used during tracking
+#define DECAY_MODE_GOTO_OFF          // decay mode used during slews
 
 // THAT'S IT FOR USER CONFIGURATION!
 
