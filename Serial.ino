@@ -49,6 +49,14 @@ boolean Serial_transmit()
   return true;
 }
 
+// For debugging, sends one char at a time to Serial0 interface
+boolean Serial_char(char c)
+{
+  while ( !( UCSR0A & (1<<UDRE0)) ) {  }
+  UDR0 = c;
+  return true;
+}
+
 boolean Serial_available()
 {
   return !(Serial_recv_buffer[Serial_recv_head]==char(0));
@@ -154,6 +162,35 @@ char Serial_read() {
   return Serial.read();
 }
 
+#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+// use serial7 as serial1 (serial1) as serial1 is not readily available on the board
+// if you really want to use serial1 you will need to do some soldering
+void Serial1_Init(unsigned int baud) {
+  Serial7.begin(baud);
+}
+
+void Serial1_send(const char data[])
+{
+  Serial1_print(data);
+  do {} while (Serial1_transmit());
+}
+
+void Serial1_print(const char data[]) {
+  Serial7.print(data);
+}
+
+boolean Serial1_transmit() {
+  return false;
+}
+
+boolean Serial1_available() {
+  return Serial7.available();
+}
+
+char Serial1_read() {
+  return Serial7.read();
+}
+#else
 void Serial1_Init(unsigned int baud) {
   Serial1.begin(baud);
 }
@@ -179,5 +216,6 @@ boolean Serial1_available() {
 char Serial1_read() {
   return Serial1.read();
 }
+#endif
 
 #endif
