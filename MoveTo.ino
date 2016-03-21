@@ -266,8 +266,11 @@ uint32_t isqrt32 (uint32_t n) {
     return root;
 }
 
+bool DecayModeTrack=false;
 // if stepper drive can switch decay mode, set it here
 void DecayModeTracking() {
+  if (DecayModeTrack) return;
+  DecayModeTrack=true;
 #ifdef DECAY_MODE_OPEN
   pinMode(Axis1_Mode,INPUT);
   pinMode(Axis2_Mode,INPUT);
@@ -287,6 +290,8 @@ void DecayModeTracking() {
 }
 
 void DecayModeGoto() {
+  if (!DecayModeTrack) return;
+  DecayModeTrack=false;
 #ifdef DECAY_MODE_GOTO_OPEN
   pinMode(Axis1_Mode,INPUT);
   pinMode(Axis2_Mode,INPUT);

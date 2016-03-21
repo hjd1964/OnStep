@@ -138,12 +138,13 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
         guideTimerRateAxis1A=guidetimerRateAxis1; 
       } else {
         // use acceleration
+        DecayModeGoto();
         double z=(StepsForRateChangeAxis1/isqrt32(fabs(x)));
         guideTimerRateAxis1A=(1.0/(((double)StepsPerDegreeAxis1*(z/1000000.0)))*3600.0);
         if (guideTimerRateAxis1A>fabs(guidetimerRateAxis1)) guideTimerRateAxis1A=fabs(guidetimerRateAxis1);
       }
       // stop guiding
-      if ((guideDirAxis1=='b') && (fabs(x)<2)) { guideDirAxis1=0; guidetimerRateAxis1=0; guideTimerRateAxis1A=0; }
+      if ((guideDirAxis1=='b') && (fabs(x)<2)) { guideDirAxis1=0; guidetimerRateAxis1=0; guideTimerRateAxis1A=0; DecayModeTracking(); }
     }
 
     double timerRateAxis1A=trackingTimerRateAxis1; if (((guideDirAxis1) || (guideDirAxis2)) && (activeGuideRate>GuideRate1x)) timerRateAxis1A=0.0;
@@ -175,12 +176,13 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
         guideTimerRateAxis2A=guideTimerRateAxis2; 
       } else {
         // use acceleration
+        DecayModeGoto();
         double z=(StepsForRateChangeAxis2/isqrt32(x));
         guideTimerRateAxis2A=(1.0/(((double)StepsPerDegreeAxis2*(z/1000000.0)))*3600.0);
         if (guideTimerRateAxis2A>fabs(guideTimerRateAxis2)) guideTimerRateAxis2A=fabs(guideTimerRateAxis2);
       }
       // stop guiding
-      if ((guideDirAxis2=='b') && (x<2)) { guideDirAxis2=0; guideTimerRateAxis2=0; guideTimerRateAxis2A=0; }
+      if ((guideDirAxis2=='b') && (x<2)) { guideDirAxis2=0; guideTimerRateAxis2=0; guideTimerRateAxis2A=0; DecayModeTracking(); }
     }
        
     double timerRateAxis2A=trackingTimerRateAxis2; if (guideDirAxis2 && (activeGuideRate>GuideRate1x)) timerRateAxis2A=0.0;
