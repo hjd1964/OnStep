@@ -159,8 +159,8 @@
 // Stepper driver decay mode control (for both Axis, the _MODE_GOTO settings engage during slews)
 // Axis1 decay mode is on Pin 32 and Axis2 decay mode is on Pin 33.  Options are _HIGH, _LOW, _OPEN, default is _OFF
 // DRV8825 can be configured for the following decay modes: Fast (_HIGH,) Slow (_LOW,) and Mixed Mode (_OPEN)
-#define DECAY_MODE_OFF               // decay mode used during tracking
-#define DECAY_MODE_GOTO_OFF          // decay mode used during slews
+#define DECAY_MODE_OFF               // decay mode used during tracking, optional and default _OFF
+#define DECAY_MODE_GOTO_OFF          // decay mode used during slews, optional and default _OFF
 
 // THAT'S IT FOR USER CONFIGURATION!
 
