@@ -1,32 +1,53 @@
 // -----------------------------------------------------------------------------------
 // Command processing
 
+// these turn on and off checksum error correction on the serial ports, default=OFF
+#define CHKSUM0_OFF     // default _OFF: as required for OnStep ASCOM driver
+#define CHKSUM1_OFF     // default _OFF: as required for OnStep Controller2 Android App (and others)
+
 boolean serial_zero_ready = false;
 boolean serial_one_ready = false;
-// for align
-double avgDec = 0.0;
-double avgHA  = 0.0;
+#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
+boolean ethernet_ready = false;
+#endif
 // scratch-pad variables
 double f,f1,f2,f3; 
 int    i,i1,i2;
 byte   b;
+unsigned long _coord_t=0;
+double _dec,_ra;
+
+enum Command {COMMAND_NONE, COMMAND_SERIAL, COMMAND_SERIAL1, COMMAND_ETHERNET};
 
 // process commands
 void processCommands() {
+    Command process_command = COMMAND_NONE;
+
     boolean supress_frame = false;
     char *conv_end;
 
-    if ((Serial_available() > 0) && (!serial_zero_ready)) { serial_zero_ready = buildCommand(Serial_read()); }
+    if ((Serial_available() > 0) && (!serial_zero_ready)) { serial_zero_ready = buildCommand_serial_zero(Serial_read()); }
     if ((Serial1_available() > 0) && (!serial_one_ready)) { serial_one_ready = buildCommand_serial_one(Serial1_read()); }
+#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
+    if ((Ethernet_available() > 0) && (!ethernet_ready)) { ethernet_ready = buildCommand_ethernet(Ethernet_read()); }
+    if (Serial_transmit() || Serial1_transmit() || Ethernet_transmit()) return;
+#else
+    if (Serial_transmit() || Serial1_transmit()) return;
+#endif
 
-    if (Serial_transmit()) return;
-    if (Serial1_transmit()) return;
-    
-    byte process_command = 0;
-    if (serial_zero_ready)     { strcpy(command,command_serial_zero); strcpy(parameter,parameter_serial_zero); serial_zero_ready=false; clearCommand_serial_zero(); process_command=1; } 
-    else if (serial_one_ready) { strcpy(command,command_serial_one);  strcpy(parameter,parameter_serial_one);  serial_one_ready=false;  clearCommand_serial_one();  process_command=2; }
-    else return;
-    
+    process_command = COMMAND_NONE;
+    if (serial_zero_ready)     { strcpy(command,command_serial_zero); strcpy(parameter,parameter_serial_zero); serial_zero_ready=false; clearCommand_serial_zero(); process_command=COMMAND_SERIAL; }
+    else if (serial_one_ready) { strcpy(command,command_serial_one);  strcpy(parameter,parameter_serial_one);  serial_one_ready=false;  clearCommand_serial_one();  process_command=COMMAND_SERIAL1; }
+#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
+    else if (ethernet_ready)   { strcpy(command,command_ethernet);    strcpy(parameter,parameter_ethernet);    ethernet_ready=false;    clearCommand_ethernet();    process_command=COMMAND_ETHERNET; }
+#endif
+    else {
+#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
+      if (!Ethernet_cmd_busy()) Ethernet_www();
+#endif
+      return;
+    }
+
     if (process_command) {
 
 // Command is two chars followed by an optional parameter...
@@ -40,6 +61,28 @@ void processCommands() {
 //         Returns: 1 on success
         if (command[1]=='W') {
               saveAlignModel();
+        } else
+//  :A?#  Align status
+//         Returns: mno#
+//         where m is the maximum number of alignment stars
+//               n is the current alignment star (0 otherwise)
+//               o is the last required alignment star when an alignment is in progress (0 otherwise)
+        if (command[1]=='?') {
+#if defined(MOUNT_TYPE_ALTAZM)
+              reply[0]='1';
+#elif defined(MOUNT_TYPE_FORK_ALT)
+              reply[0]='1';
+#else
+              reply[0]='3';
+#endif
+              if (alignMode==AlignOneStar1)   { reply[1]='1'; reply[2]='1'; } else
+              if (alignMode==AlignTwoStar1)   { reply[1]='1'; reply[2]='2'; } else
+              if (alignMode==AlignThreeStar1) { reply[1]='1'; reply[2]='3'; } else
+              if (alignMode==AlignTwoStar2)   { reply[1]='2'; reply[2]='2'; } else
+              if (alignMode==AlignThreeStar2) { reply[1]='2'; reply[2]='3'; } else
+              if (alignMode==AlignThreeStar3) { reply[1]='3'; reply[2]='3'; } else { reply[1]='0'; reply[2]='0'; }
+              reply[3]=0;
+              quietReply=true;
         } else
 //  :An#  Start Telescope Manual Alignment Sequence
 //         This is to initiate a one or two-star alignment:
@@ -59,140 +102,14 @@ void processCommands() {
 //         0: If mount is busy
         if ((command[1]=='1') || (command[1]=='2') || (command[1]=='3')) {
           // set current time and date before calling this routine
-
-          // :A2 and :A3 arent supported with Fork mounts in alternate mode
-          #if defined(MOUNT_TYPE_FORK_ALT) || defined(MOUNT_TYPE_ALTAZM)
-          if (command[1]=='1') {
-          #endif
-
-          // telescope should be set in the polar home (CWD) for a starting point
-          // this command sets IH, ID, azmCor=0; altCor=0;
-          setHome();
-          
-          // enable the stepper drivers
-          digitalWrite(HA_EN,HA_Enabled);
-          digitalWrite(DE_EN,DE_Enabled);
-          delay(10);
-  
-          // newTargetRA =timeRange(LST);
-          // newTargetDec=90.0;  
-  
-          // start tracking
-          trackingState=TrackingSidereal;
-  
-          // start align... AlignOneStar1=01, AlignTwoStar1=11, AlignThreeStar1=21
-          alignMode=AlignOneStar1+(command[1]-'1')*10;
-  
-          commandError=false;
-          
-          #if defined(MOUNT_TYPE_FORK_ALT) || defined(MOUNT_TYPE_ALTAZM)
-          } else commandError=true;
-          #endif
-
+          commandError=startAlign(command[1]);
         } else
 //  :A+#  Manual Alignment, set target location
 //         Returns:
 //         1: If correction is accepted
 //         0: Failure, Manual align mode not set or distance too far 
-/*
-Alignment Logic:
-Near the celestial equator (Dec=0, HA=0)...
-the azmCor term is 0 in Dec
-the altCor term is 1 in Dec
-the doCor  term is 1 in HA
-the pdCor  term is 0 in HA
-
-Near HA=6 and Dec=45...
-the azmCor term is 1 in Dec
-the altCor term is 0 in Dec
-the doCor  term is 0 in HA
-the pdCor  term is 1 in HA
-*/
         if (command[1]=='+') { 
-
-          // First star:
-          // Near the celestial equator (Dec=0, HA=0), telescope West of the pier if multi-star align
-          if ((alignMode==AlignOneStar1) || (alignMode==AlignTwoStar1) || (alignMode==AlignThreeStar1)) {
-            if ((alignMode==AlignOneStar1) && (meridianFlip==MeridianFlipAlign)) meridianFlip=MeridianFlipNever;
-            alignMode++;
-            // set the IH offset
-            // set the ID offset
-            if (!syncEqu(newTargetRA,newTargetDec)) { commandError=true; }
-            IHS=IH*15.0*StepsPerDegreeHA;
-            avgDec=newTargetDec;
-            avgHA =haRange(LST-newTargetRA);
-          } else 
-          // Second star:
-          // Near the celestial equator (Dec=0, HA=0), telescope East of the pier
-          if ((alignMode==AlignTwoStar2) || (alignMode==AlignThreeStar2)) {
-            if ((alignMode==AlignTwoStar2) && (meridianFlip==MeridianFlipAlign)) meridianFlip=MeridianFlipNever;
-            alignMode++;
-            double ID1 = -ID;  // last offset Dec is negative because we flipped the meridian
-            double IH1 = IH;
-
-            avgDec=(avgDec+newTargetDec)/2.0;
-            avgHA =(-avgHA+haRange(LST-newTargetRA))/2.0; // last HA is negative because we were on the other side of the meridian
-            if (syncEqu(newTargetRA,newTargetDec)) {
-              double ID2=ID;
-              double IH2=IH;
-
-              IH    = (IH2+IH1)/2.0;                    // average offset in HA
-              IHS=IH*15.0*StepsPerDegreeHA;
-              ID    = (ID2-ID1)/2.0;                    // new offset in Dec
-              double IH3=IH;
-              double ID3=ID;
-            
-              altCor=-(ID2+ID1)/2.0;                    // Negative when pointed below the pole
-              altCor= altCor/cos((avgHA*15.0)/Rad);     // correct for measurements being away from the Meridian
-
-              // allow the altCor to be applied
-              if (syncEqu(newTargetRA,newTargetDec)) {
-                ID2=ID;
-                IH2=IH;
-
-                doCor =-((IH2-IH1)/2.0)*15.0;            // the difference of these two values should be a decent approximation of the optical axis to Dec axis error (aka cone error)
-                doCor = doCor*cos(avgDec/Rad);           // correct for measurement being away from the Celestial Equator
-
-                IH=IH3;
-                IHS=IH*15.0*StepsPerDegreeHA;
-                ID=ID3;
-              } else commandError=true;
-            } else commandError=true;
-          } else 
-          // Third star:
-          // Near (Dec=45, HA=6), telescope East of the pier
-          if (alignMode==AlignThreeStar3) {
-            #ifndef MOUNT_TYPE_GEM
-            meridianFlip=MeridianFlipNever;
-            #endif
-            alignMode++;
-            
-            double ID1 = ID;
-            double IH1 = IH;
-            if (syncEqu(newTargetRA,newTargetDec)) {
-              double ID2=ID;
-              double IH2=IH;
-
-              azmCor = -(ID2-ID1);                      // offset in declination is largely due to polar align Azm error
-              azmCor = azmCor/sin((haRange(LST-newTargetRA)*15.0)/Rad);  // correct for HA of measurement location
-
-              // allow the azmCor to be applied
-              if (syncEqu(newTargetRA,newTargetDec)) {
-                ID2=ID;
-                IH2=IH;
-                // only apply Dec axis flexture term on GEMs
-                #ifdef MOUNT_TYPE_GEM
-                pdCor =  (IH2-IH1)*15.0;                // the Dec axis to RA axis perp. error should be the only major source of error left effecting the HA
-                pdCor = pdCor/tan(newTargetDec/Rad);    // correct for Dec of measurement location
-                #else
-                pdCor = 0.0;
-                #endif
-
-                ID=ID1;
-                IH=IH1;
-              } else commandError=true;
-            } else commandError=true;
-          } else commandError=true; 
+          commandError=nextAlign();
         } else commandError=true; 
       } else
       
@@ -208,12 +125,12 @@ the pdCor  term is 1 in HA
         if ((strlen(parameter)>1) && (strlen(parameter)<5)) {
           if ( (atoi2((char*)&parameter[1],&i)) && ((i>=0) && (i<=999))) { 
             if (parameter[0]=='D') {
-              backlashDec=(int)(((long)i*StepsPerDegreeDec)/3600L);
-              EEPROM_writeInt(EE_backlashDec,backlashDec);
+              backlashAxis2=(int)round(((double)i*(double)StepsPerDegreeAxis2)/3600.0);
+              EEPROM_writeInt(EE_backlashAxis2,backlashAxis2);
             } else
             if (parameter[0]=='R') {
-              backlashHA =(int)(((long)i*StepsPerDegreeHA)/3600L);
-              EEPROM_writeInt(EE_backlashHA,backlashHA);
+              backlashAxis1 =(int)round(((double)i*(double)StepsPerDegreeAxis1)/3600.0);
+              EEPROM_writeInt(EE_backlashAxis1,backlashAxis1);
             } else commandError=true;
           } else commandError=true;
         } else commandError=true;
@@ -221,32 +138,51 @@ the pdCor  term is 1 in HA
       
 //   % - Return parameter
 //  :%BD# Get Dec Antibacklash
-//          Return: ddd#
+//          Return: d#
 //  :%BR# Get RA Antibacklash
-//          Return: ddd#
+//          Return: d#
 //          Get the Backlash values.  Units are arc-seconds
       if ((command[0]=='%') && (command[1]=='B')) {
         if (parameter[0]=='D') {
-            i=(int)(((long)backlashDec*3600L)/StepsPerDegreeDec);
+            i=(int)round(((double)backlashAxis2*3600.0)/(double)StepsPerDegreeAxis2);
             if (i<0) i=0; if (i>999) i=999;
-            sprintf(reply,"%03d",i);
+            sprintf(reply,"%d",i);
             quietReply=true;
         } else
         if (parameter[0]=='R') {
-            i=(int)(((long)backlashHA*3600L)/StepsPerDegreeHA);
+            i=(int)round(((double)backlashAxis1*3600.0)/(double)StepsPerDegreeAxis1);
             if (i<0) i=0; if (i>999) i=999;
-            sprintf(reply,"%03d",i);
+            sprintf(reply,"%d",i);
             quietReply=true;
         } else commandError=true;
       } else
       
+//   B - Reticule/Accessory Control
+//  :B+#   Increase reticule Brightness
+//         Returns: Nothing
+//  :B-#   Decrease Reticule Brightness
+//         Returns: Nothing
+      if ((command[0]=='B') && ((command[1]=='+') || (command[1]=='-')))  {
+#ifdef RETICULE_LED_PINS
+        int scale;
+        if (reticuleBrightness>255-8) scale=1; else
+        if (reticuleBrightness>255-32) scale=4; else
+        if (reticuleBrightness>255-64) scale=12; else
+        if (reticuleBrightness>255-128) scale=32; else scale=64;
+        if (command[1]=='-') reticuleBrightness+=scale;  if (reticuleBrightness>255) reticuleBrightness=255;
+        if (command[1]=='+') reticuleBrightness-=scale;  if (reticuleBrightness<0)   reticuleBrightness=0;
+        analogWrite(reticulePin,reticuleBrightness);
+#endif
+        quietReply=true;
+      } else 
+
 //   C - Sync Control
 //  :CS#   Synchonize the telescope with the current right ascension and declination coordinates
 //         Returns: Nothing
 //  :CM#   Synchonize the telescope with the current database object (as above)
 //         Returns: "N/A#"
       if ((command[0]=='C') && ((command[1]=='S') || command[1]=='M'))  {
-        if (trackingState!=TrackingMoveTo) {
+        if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
           syncEqu(newTargetRA,newTargetDec);
           if (command[1]=='M') strcpy(reply,"N/A");
           quietReply=true;
@@ -285,14 +221,23 @@ the pdCor  term is 1 in HA
       } else 
 //  :GD#   Get Telescope Declination
 //         Returns: sDD*MM# or sDD*MM'SS# (based on precision setting)
-      if (command[1]=='D')  { getEqu(&f,&f1,true,true); if (!doubleToDms(reply,&f1,false,true)) commandError=true; else quietReply=true; } else 
+      if (command[1]=='D')  { 
+        if (millis()-_coord_t<100) { f=_ra; f1=_dec; } else {
+          getEqu(&f,&f1,false); f/=15.0;
+          _ra=f; _dec=f1; _coord_t=millis(); 
+        }
+        if (!doubleToDms(reply,&f1,false,true)) commandError=true; else quietReply=true; 
+      } else 
 //  :Gd#   Get Currently Selected Target Declination
 //         Returns: sDD*MM# or sDD*MM'SS# (based on precision setting)
       if (command[1]=='d')  { if (!doubleToDms(reply,&newTargetDec,false,true)) commandError=true; else quietReply=true; } else 
 //  :GG#   Get UTC offset time
 //         Returns: sHH#
 //         The number of decimal hours to add to local time to convert it to UTC
-      if (command[1]=='G')  { sprintf(reply,"%+03d",timeZone); quietReply=true; } else 
+      if (command[1]=='G')  { 
+        timeZoneToHM(reply,timeZone);
+        quietReply=true; 
+      } else 
 //  :Gg#   Get Current Site Longitude
 //         Returns: sDDD*MM#
 //         The current site Longitude. East Longitudes are negative
@@ -331,23 +276,36 @@ the pdCor  term is 1 in HA
       if (command[1]=='o')  { sprintf(reply,"%02d*",maxAlt); quietReply=true; } else
 //  :GR#   Get Telescope RA
 //         Returns: HH:MM.T# or HH:MM:SS# (based on precision setting)
-      if (command[1]=='R')  { getEqu(&f,&f1,false,true); if (!doubleToHms(reply,&f)) commandError=true; else quietReply=true;  } else 
+      if (command[1]=='R')  { 
+        if (millis()-_coord_t<100) { f=_ra; f1=_dec; } else {
+          getEqu(&f,&f1,false); f/=15.0;
+          _ra=f; _dec=f1; _coord_t=millis(); 
+        }
+        if (!doubleToHms(reply,&f)) commandError=true; else quietReply=true;  
+      } else 
 //  :Gr#   Get current/target object RA
 //         Returns: HH:MM.T# or HH:MM:SS (based on precision setting)
-      if (command[1]=='r')  { if (!doubleToHms(reply,&newTargetRA)) commandError=true; else quietReply=true; } else 
+      if (command[1]=='r')  { f=newTargetRA; f/=15.0; if (!doubleToHms(reply,&f)) commandError=true; else quietReply=true; } else 
 //  :GS#   Get the Sidereal Time
 //         Returns: HH:MM:SS#
 //         The Sidereal Time as an ASCII Sexidecimal value in 24 hour format
-      if (command[1]=='S')  { i=highPrecision; highPrecision=true; if (!doubleToHms(reply,&LST)) commandError=true; else quietReply=true; highPrecision=i; } else 
+      if (command[1]=='S')  { i=highPrecision; highPrecision=true; f=LST(); if (!doubleToHms(reply,&f)) commandError=true; else quietReply=true; highPrecision=i; } else 
 //  :GT#   Get tracking rate
 //         Returns: dd.ddddd# (OnStep returns more decimal places than LX200 standard)
 //         Returns the tracking rate if siderealTracking, 0.0 otherwise
       if (command[1]=='T')  {
-        if (trackingState==TrackingSidereal) f=(60.0/(siderealInterval/HzCf))*60.0; else f=0.0;
+        if (trackingState==TrackingSidereal) {
+#ifdef MOUNT_TYPE_ALTAZM
+          f=1.00273790935*60.0; 
+#else
+          f=(trackingTimerRateAxis1*1.00273790935)*60.0; 
+#endif
+        }
+        else f=0.0;
         char temp[10];
         dtostrf(f,0,5,temp);
         strcpy(reply,temp);
-        quietReply=true; 
+        quietReply=true;
       } else 
 //  :Gt#   Get Current Site Latitude
 //         Returns: sDD*MM#
@@ -359,10 +317,13 @@ the pdCor  term is 1 in HA
         i=0;
         if (trackingState!=TrackingMoveTo)       reply[i++]='N';
         const char *parkStatusCh = "pIPF";       reply[i++]=parkStatusCh[parkStatus]; // not [p]arked, parking [I]n-progress, [P]arked, Park [F]ailed
-        if (PECrecorded)                         reply[i++]='R';
+        if (pecRecorded)                         reply[i++]='R';
         if (atHome)                              reply[i++]='H'; 
         if (PPSsynced)                           reply[i++]='S';
-        if ((guideDirHA) || (guideDirDec))       reply[i++]='G';
+        if ((guideDirAxis1) || (guideDirAxis2))  reply[i++]='G';
+        if (faultAxis1 || faultAxis2)            reply[i++]='f';
+        if (refraction)                          reply[i++]='r'; else reply[i++]='s';
+        reply[i++]='0'+lastError;
         reply[i++]=0;
         quietReply=true;
       } else 
@@ -390,7 +351,7 @@ the pdCor  term is 1 in HA
         if (parameter[2]==(char)0) {
           if (parameter[0]=='0') { // 0n: Align Model
             switch (parameter[1]) {
-              case '0': sprintf(reply,"%ld",(long)(IH*15.0*3600.0)); quietReply=true; break;  // IH
+              case '0': sprintf(reply,"%ld",(long)(IH*3600.0)); quietReply=true; break;       // IH
               case '1': sprintf(reply,"%ld",(long)(ID*3600.0)); quietReply=true; break;       // ID
               case '2': sprintf(reply,"%ld",(long)(altCor*3600.0)); quietReply=true; break;   // altCor
               case '3': sprintf(reply,"%ld",(long)(azmCor*3600.0)); quietReply=true; break;   // azmCor
@@ -401,7 +362,7 @@ the pdCor  term is 1 in HA
           if (parameter[0]=='9') { // 9n: Misc.
             switch (parameter[1]) {
               case '0': dtostrf(guideRates[currentPulseGuideRate]/15.0,2,2,reply); quietReply=true; break;  // pulse-guide rate
-              case '1': sprintf(reply,"%i",PECav); quietReply=true; break;                                  // pec analog value
+              case '1': sprintf(reply,"%i",pecAnalogValue); quietReply=true; break;                                  // pec analog value
               case '2': sprintf(reply,"%ld",(long)(maxRate/16L)); quietReply=true; break;                   // MaxRate
               case '3': sprintf(reply,"%ld",(long)(MaxRate)); quietReply=true; break;                       // MaxRate (default)
 #if defined(__AVR__)
@@ -412,14 +373,24 @@ the pdCor  term is 1 in HA
           if (parameter[0]=='F') { // Fn: Debug
             long temp;
             switch (parameter[1]) {
-//              case '0': cli(); temp=(long)(posHA-((long)targetHA.part.m+PEC_HA)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;  // Debug0, true vs. target RA position          
-              case '0': cli(); temp=(long)(posDec-((long)targetDec.part.m)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;  // Debug0, true vs. target RA position          
-//              case '1': sprintf(reply,"%ld",(long)(debugv1/1.00273790935)); quietReply=true; break;                                              // Debug1, RA tracking rate
-              case '1': cli(); sprintf(reply,"%ld",(long)(posDec)); sei(); quietReply=true; break;                                              // Debug1, RA tracking rate
+              case '0': cli(); temp=(long)(posAxis1-((long)targetAxis1.part.m)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;        // Debug0, true vs. target RA position
+              case '1': cli(); temp=(long)(posAxis2-((long)targetAxis2.part.m)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;        // Debug1, true vs. target Dec position
+//              case '0': cli(); temp=(long)(((az_Azm1-az_Azm2)*2.0)*1000); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;               // Debug0, true vs. target RA position
+//              case '1': cli(); temp=(long)(az_Azm1); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                                    // Debug1, true vs. target Dec position
+              case '2': sprintf(reply,"%ld",(long)((debugv1/53333.3333333333)*15000)); quietReply=true; break;                                    // Debug2, RA tracking rate
+              case '3': sprintf(reply,"%ld",(long)(az_deltaAxis1*1000.0*1.00273790935)); quietReply=true; break;                                  // Debug3, RA refraction tracking rate
+              case '4': sprintf(reply,"%ld",(long)(az_deltaAxis2*1000.0*1.00273790935)); quietReply=true; break;                                  // Debug4, Dec refraction tracking rate
+              case '5': sprintf(reply,"%ld",(long)(ZenithTrackingRate()*1000.0*1.00273790935)); quietReply=true; break;                           // Debug5, Alt RA refraction tracking rate
+              case '6': cli(); temp=(long)(targetAxis1.part.m);  sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                        // Debug6, HA target position
+              case '7': cli(); temp=(long)(targetAxis2.part.m); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                         // Debug7, Dec target position
+              case '8': cli(); temp=(long)(posAxis1);     sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                               // Debug8, HA motor position
+              case '9': cli(); temp=(long)(posAxis2);    sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                                // Debug9, Dec motor position
+              case 'A': sprintf(reply,"%ld%%",(worst_loop_time*100L)/9970L); worst_loop_time=0; quietReply=true; break;                           // DebugA, Workload
+              
             }
           } else commandError=true;
         } else commandError=true;
-        getEqu(&f,&f1,false,true);  
+        getEqu(&f,&f1,false);  
       } else 
 //  :GZ#   Get telescope azimuth
 //         Returns: DDD*MM# or DDD*MM'SS# (based on precision setting)
@@ -434,7 +405,7 @@ the pdCor  term is 1 in HA
       if (command[1]=='F')  { setHome(); quietReply=true; } else 
 //  :hC#   Moves telescope to the home position
 //         Returns: Nothing
-      if (command[1]=='C')  { goHome(); quietReply=true; } else 
+      if (command[1]=='C')  {  goHome(); quietReply=true; } else 
 //  :hP#   Goto the Park Position
 //         Returns: Nothing
       if (command[1]=='P')  { if (park()) commandError=true; } else 
@@ -493,7 +464,7 @@ the pdCor  term is 1 in HA
         strcat(reply,",");
         strcat(reply,objType);
         if (strcmp(reply,",UNK")!=0) {
-          doubleToHms(ws,&newTargetRA); strcat(reply,","); strcat(reply,ws);
+          f=newTargetRA; f/=15.0; doubleToHms(ws,&f); strcat(reply,","); strcat(reply,ws);
           doubleToDms(ws,&newTargetDec,false,true); strcat(reply,","); strcat(reply,ws);
         }
         
@@ -588,7 +559,6 @@ the pdCor  term is 1 in HA
 
 //   M - Telescope Movement Commands
       if (command[0]=='M') {
-#ifdef ALT_AZM_GOTO_ON
 //  :MA#   Goto the target Alt and Az
 //         Returns:
 //         0=Goto is Possible
@@ -602,21 +572,20 @@ the pdCor  term is 1 in HA
         quietReply=true; 
         supress_frame=true;
       } else 
-#endif
 //  :Mgdnnnn# Pulse guide command
 //          Returns: Nothing
       if (command[1]=='g') {
-        if ( (atoi2((char *)&parameter[1],&i)) && ((i>=0) && (i<=16399)) && (parkStatus==NotParked)) { 
+        if ( (atoi2((char *)&parameter[1],&i)) && ((i>=0) && (i<=16399)) && (parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) { 
           if ((parameter[0]=='e') || (parameter[0]=='w')) {
 #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
             enableGuideRate(currentPulseGuideRate);
 #else
             enableGuideRate(currentGuideRate);
 #endif
-            guideDirHA=parameter[0];
+            guideDirAxis1=parameter[0];
             guideDurationLastHA=micros();
             guideDurationHA=(long)i*1000L;
-            cli(); if (guideDirHA=='e') guideTimerRateHA=-guideTimerRate; else guideTimerRateHA=guideTimerRate; sei();
+            cli(); if (guideDirAxis1=='e') guidetimerRateAxis1=-guideTimerRate; else guidetimerRateAxis1=guideTimerRate; sei();
             quietReply=true;
          } else
             if ((parameter[0]=='n') || (parameter[0]=='s')) { 
@@ -625,10 +594,10 @@ the pdCor  term is 1 in HA
 #else
             enableGuideRate(currentGuideRate);
 #endif
-              guideDirDec=parameter[0]; 
+              guideDirAxis2=parameter[0]; 
               guideDurationLastDec=micros();
               guideDurationDec=(long)i*1000L; 
-              cli(); guideTimerRateDec=guideTimerRate; sei();
+              cli(); guideTimerRateAxis2=guideTimerRate; sei();
               quietReply=true;
             } else commandError=true;
         } else commandError=true;
@@ -636,15 +605,15 @@ the pdCor  term is 1 in HA
 //  :Me# & :Mw#      Move Telescope East or West at current slew rate
 //         Returns: Nothing
       if ((command[1]=='e') || (command[1]=='w')) { 
-        if (parkStatus==NotParked) {
+        if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
           // block user from changing direction at high rates, just stop the guide instead
-          if ((guideDirHA!=0) && (command[1]!=guideDirHA) && (fabs(guideTimerRateHA)>2)) { 
-            guideDirHA='b';
+          if ((guideDirAxis1) && (command[1]!=guideDirAxis1) && (fabs(guidetimerRateAxis1)>2)) { 
+            guideDirAxis1='b';
           } else {
             enableGuideRate(currentGuideRate);
-            guideDirHA=command[1];
+            guideDirAxis1=command[1];
             guideDurationHA=-1;
-            cli(); if (guideDirHA=='e') guideTimerRateHA=-guideTimerRate; else guideTimerRateHA=guideTimerRate; sei();
+            cli(); if (guideDirAxis1=='e') guidetimerRateAxis1=-guideTimerRate; else guidetimerRateAxis1=guideTimerRate; sei();
           }
         }
         quietReply=true;
@@ -652,15 +621,15 @@ the pdCor  term is 1 in HA
 //  :Mn# & :Ms#      Move Telescope North or South at current slew rate
 //         Returns: Nothing
       if ((command[1]=='n') || (command[1]=='s')) { 
-        if (parkStatus==NotParked) {
+        if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
           // block user from changing direction at high rates, just stop the guide instead
-          if ((guideDirDec!=0) && (command[1]!=guideDirDec) && (fabs(guideTimerRateDec)>2)) { 
-            guideDirDec='b';
+          if ((guideDirAxis2) && (command[1]!=guideDirAxis2) && (fabs(guideTimerRateAxis2)>2)) { 
+            guideDirAxis2='b';
           } else {
             enableGuideRate(currentGuideRate);
-            guideDirDec=command[1];
+            guideDirAxis2=command[1];
             guideDurationDec=-1;
-            cli(); guideTimerRateDec=guideTimerRate; sei();
+            cli(); guideTimerRateAxis2=guideTimerRate; sei();
           }
         }
         quietReply=true;
@@ -698,33 +667,28 @@ the pdCor  term is 1 in HA
       if ((command[0]=='$') && (command[1]=='Q')) {
         if ((parameter[2]==0) && (parameter[0]=='Z')) {
           quietReply=true; 
-          if ((parameter[1]=='+') && (trackingState==TrackingSidereal)) { if (PECrecorded) PECstatus=ReadyPlayPEC; } else
-          if ((parameter[1]=='-') && (trackingState==TrackingSidereal)) { PECstatus=IgnorePEC; } else
-          if ((parameter[1]=='/') && (trackingState==TrackingSidereal)) { PECstatus=ReadyRecordPEC; } else
+#ifndef MOUNT_TYPE_ALTAZM
+          if (parameter[1]=='+') { if (pecRecorded) pecStatus=ReadyPlayPEC; EEPROM.update(EE_pecStatus,pecStatus); } else
+          if (parameter[1]=='-') { pecStatus=IgnorePEC; EEPROM.update(EE_pecStatus,pecStatus); } else
+          if ((parameter[1]=='/') && (trackingState==TrackingSidereal)) { pecStatus=ReadyRecordPEC; EEPROM.update(EE_pecStatus,IgnorePEC); } else
           if (parameter[1]=='Z') { 
-            for (i=0; i<PECBufferSize; i++) PEC_buffer[i]=128;
-            PECfirstRecord = true;
-            PECstatus      = IgnorePEC;
-            PECrecorded    = false;
-            EEPROM.update(EE_PECstatus,PECstatus);
-            EEPROM.update(EE_PECrecorded,PECrecorded);
-            PECindex_record= 0;
-            PECindex_sense = 0;
-            EEPROM_writeQuad(EE_PECrecord_index,(byte*)&PECindex_record); 
-            EEPROM_writeQuad(EE_PECsense_index,(byte*)&PECindex_sense);
+            for (i=0; i<PECBufferSize; i++) pecBuffer[i]=128;
+            pecFirstRecord = true;
+            pecStatus      = IgnorePEC;
+            pecRecorded    = false;
+            EEPROM.update(EE_pecStatus,pecStatus);
+            EEPROM.update(EE_pecRecorded,pecRecorded);
           } else
           if (parameter[1]=='!') {
-            PECrecorded=true;
-            PECstatus=IgnorePEC;
-            EEPROM.update(EE_PECrecorded,PECrecorded);
-            EEPROM.update(EE_PECstatus,PECstatus);
-           // EEPROM_writeQuad(EE_PECrecord_index,(byte*)&PECindex_record); 
-            EEPROM_writeQuad(EE_PECsense_index,(byte*)&PECindex_sense);
+            pecRecorded=true;
+            EEPROM.update(EE_pecRecorded,pecRecorded);
+            EEPROM_writeLong(EE_wormSensePos,wormSensePos);
             // trigger recording of PEC buffer
-            PECautoRecord=PECBufferSize;
+            pecAutoRecord=PECBufferSize;
           } else
+#endif
           // Status is one of "IpPrR" (I)gnore, get ready to (p)lay, (P)laying, get ready to (r)ecord, (R)ecording.  Or an optional (.) to indicate an index detect.
-          if (parameter[1]=='?') { const char *PECstatusCh = PECStatusString; reply[0]=PECstatusCh[PECstatus]; reply[1]=0; reply[2]=0; if (PECindexDetected) { reply[1]='.'; PECindexDetected=false; } } else { quietReply=false; commandError=true; }
+          if (parameter[1]=='?') { const char *pecStatusCh = PECStatusString; reply[0]=pecStatusCh[pecStatus]; reply[1]=0; reply[2]=0; if (wormSensedAgain) { reply[1]='.'; wormSensedAgain=false; } } else { quietReply=false; commandError=true; }
         } else commandError=true;
       } else
 
@@ -734,8 +698,8 @@ the pdCor  term is 1 in HA
       if (command[0]=='Q') {
         if (command[1]==0) {
           if ((parkStatus==NotParked) || (parkStatus==Parking)) {
-            if (guideDirHA)  guideDirHA='b'; // break
-            if (guideDirDec) guideDirDec='b'; // break
+            if (guideDirAxis1) guideDirAxis1='b'; // break
+            if (guideDirAxis2) guideDirAxis2='b'; // break
             if (trackingState==TrackingMoveTo) { abortSlew=true; }
           }
           quietReply=true; 
@@ -743,16 +707,16 @@ the pdCor  term is 1 in HA
 //  :Qe# & Qw#   Halt east/westward Slews
 //         Returns: Nothing
         if ((command[1]=='e') || (command[1]=='w')) { 
-          if (parkStatus==NotParked) {
-            if (guideDirHA) guideDirHA='b'; // break
+          if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
+            if (guideDirAxis1) guideDirAxis1='b'; // break
           }
           quietReply=true; 
         } else
 //  :Qn# & Qs#   Halt north/southward Slews
 //         Returns: Nothing
         if ((command[1]=='n') || (command[1]=='s')) {
-          if (parkStatus==NotParked) {
-            if (guideDirDec) guideDirDec='b'; // break
+          if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
+            if (guideDirAxis2) guideDirAxis2='b'; // break
           }
           quietReply=true; 
         } else commandError=true;
@@ -778,22 +742,24 @@ the pdCor  term is 1 in HA
 
 //   S - Telescope Set Commands
       if (command[0]=='S') {
-#ifdef ALT_AZM_GOTO_ON
 //  :SasDD*MM#
 //         Set target object altitude to sDD*MM# or sDD*MM'SS# (based on precision setting)
 //         Returns:
 //         0 if Object is within slew range, 1 otherwise
       if (command[1]=='a')  { if (!dmsToDouble(&newTargetAlt,parameter,true)) commandError=true; } else 
-#endif
 //  :SBn#  Set Baud Rate n for Serial-0, where n is an ASCII digit (1..9) with the following interpertation
 //         1=56.7K, 2=38.4K, 3=28.8K, 4=19.2K, 5=14.4K, 6=9600, 7=4800, 8=2400, 9=1200
 //         Returns: "1" At the current baud rate and then changes to the new rate for further communication
       if (command[1]=='B') {
         i=(int)(parameter[0]-'0');
         if ((i>0) && (i<10)) {
-          if (process_command==1) { 
+          if (process_command==COMMAND_SERIAL) {
             Serial_print("1"); while (Serial_transmit()); delay(20); Serial_Init(baudRate[i]);
-          } else {
+          } else if (process_command==COMMAND_ETHERNET) {
+#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
+             Ethernet_print("1"); while (Ethernet_transmit()); delay(20);
+#endif
+          } else  {
             Serial1_print("1"); while (Serial1_transmit()); delay(20); Serial1_Init(baudRate[i]); 
           }
           quietReply=true; 
@@ -803,7 +769,7 @@ the pdCor  term is 1 in HA
 //          Change Date to MM/DD/YY
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='C')  { if (!dateToDouble(&JD,parameter)) commandError=true; else { float f=JD; EEPROM_writeQuad(EE_JD,(byte*)&f); LST=jd2last(JD,UT1); update_lst(); } } else 
+      if (command[1]=='C')  { if (!dateToDouble(&JD,parameter)) commandError=true; else { EEPROM_writeFloat(EE_JD,JD); update_lst(jd2last(JD,UT1)); } } else 
 //  :SdsDD*MM#
 //          Set target object declination to sDD*MM or sDD*MM:SS depending on the current precision setting
 //          Return: 0 on failure
@@ -813,22 +779,31 @@ the pdCor  term is 1 in HA
 //          Set current sites longitude to sDDD*MM an ASCII position string, East longitudes are expressed as negative
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='g')  { i=highPrecision; highPrecision=false; if (!dmsToDouble(&longitude,(char *)&parameter[1],false)) commandError=true; else { if (parameter[0]=='-') longitude=-longitude; float f=longitude; EEPROM_writeQuad(EE_sites+(currentSite)*25+4,(byte*)&f); } LST=jd2last(JD,UT1); update_lst(); highPrecision=i; } else 
+      if (command[1]=='g')  { i=highPrecision; highPrecision=false; if (!dmsToDouble(&longitude,(char *)&parameter[1],false)) commandError=true; else { if (parameter[0]=='-') longitude=-longitude; EEPROM_writeFloat(EE_sites+(currentSite)*25+4,longitude); } update_lst(jd2last(JD,UT1)); highPrecision=i; } else 
 //  :SGsHH#
+//  :SGsHH:MM# (where MM is 30 or 45)
 //          Set the number of hours added to local time to yield UTC
 //          Return: 0 on failure
 //                  1 on success
       if (command[1]=='G')  { 
-        if ((parameter[0]!=0) && (strlen(parameter)<4)) { 
-          if ( (atoi2(parameter,&i)) && ((i>=-24) && (i<=24))) { 
-            timeZone=i;
-            b=timeZone+128; 
+        if (strlen(parameter)<7) {
+          double f=0.0;
+          char *temp=strchr(parameter,':'); long p=(long)(temp - parameter); if (p<0L) p=strlen(parameter); if ((unsigned long)p>strlen(parameter)) p=strlen(parameter);
+          if (strlen(parameter)>3) {
+            char *temp1 = new char[4]; strcpy( temp1, "xxx" );
+            for (int i=0; i<3; i++) { temp1[i]=parameter[i+p]; }
+            if ((temp1[0]=':') && (temp[1]='4') && temp[2]=='5') { parameter[p]=0; f=0.75; } else
+            if ((temp1[0]=':') && (temp[1]='3') && temp[2]=='0') { parameter[p]=0; f=0.5; } else { parameter[0]='9'; parameter[1]='9'; parameter[2]=0; } // force error if not :30 of :45
+          }
+          
+          if ( (atoi2(parameter,&i)) && ((i>=-24) && (i<=24))) {
+            if (i<0) timeZone=i-f; else timeZone=i+f;
+            b=encodeTimeZone(timeZone)+128;
             EEPROM.update(EE_sites+(currentSite)*25+8,b);
-            UT1=LMT+timeZone; 
+            UT1=LMT+timeZone;
             UT1_start  =UT1;
-            UT1mS_start=millis(); 
-            LST=jd2last(JD,UT1); 
-            update_lst(); 
+            UT1mS_start=millis();
+            update_lst(jd2last(JD,UT1));
           } else commandError=true; 
         } else commandError=true; 
       } else
@@ -846,12 +821,11 @@ the pdCor  term is 1 in HA
       if (command[1]=='L')  {  
         i=highPrecision; highPrecision=true; 
         if (!hmsToDouble(&LMT,parameter)) commandError=true; else {
-          float f=LMT; EEPROM_writeQuad(EE_LMT,(byte*)&f); 
+          EEPROM_writeFloat(EE_LMT,LMT); 
           UT1=LMT+timeZone; 
-          UT1_start  =UT1;
+          UT1_start=UT1;
           UT1mS_start=millis(); 
-          LST=jd2last(JD,UT1); 
-          update_lst(); 
+          update_lst(jd2last(JD,UT1));
         }
         highPrecision=i;
       } else 
@@ -871,19 +845,25 @@ the pdCor  term is 1 in HA
 //          Return: 0 on failure
 //                  1 on success
       if (command[1]=='o')  { if ((parameter[0]!=0) && (strlen(parameter)<3)) { 
-        if ( (atoi2(parameter,&i)) && ((i>=60) && (i<=90))) { maxAlt=i; EEPROM.update(EE_maxAlt,maxAlt); } else commandError=true; 
+        if ( (atoi2(parameter,&i)) && ((i>=60) && (i<=90))) { 
+          maxAlt=i;
+#ifdef MOUNT_TYPE_ALTAZM
+          if (maxAlt>87) maxAlt=87;
+#endif
+          EEPROM.update(EE_maxAlt,maxAlt); 
+        } else commandError=true; 
       } else commandError=true; } else
 //  :SrHH:MM.T#
 //  :SrHH:MM:SS#
 //          Set target object RA to HH:MM.T or HH:MM:SS (based on precision setting)
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='r')  { if (!hmsToDouble(&newTargetRA,parameter)) commandError=true; } else 
+      if (command[1]=='r')  { if (!hmsToDouble(&newTargetRA,parameter)) commandError=true; newTargetRA*=15.0; } else 
 //  :SSHH:MM:SS#
 //          Sets the local (apparent) sideral time to HH:MM:SS
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='S')  { i=highPrecision; highPrecision=true; if (!hmsToDouble(&LST,parameter)) commandError=true; else update_lst(); highPrecision=i; } else 
+      if (command[1]=='S')  { i=highPrecision; highPrecision=true; if (!hmsToDouble(&f,parameter)) commandError=true; else update_lst(f); highPrecision=i; } else 
 //  :StsDD*MM#
 //          Sets the current site latitude to sDD*MM#
 //          Return: 0 on failure
@@ -891,11 +871,16 @@ the pdCor  term is 1 in HA
       if (command[1]=='t')  { 
         i=highPrecision; highPrecision=false; 
         if (!dmsToDouble(&latitude,parameter,true)) { commandError=true; } else {
-          float f=latitude; EEPROM_writeQuad(100+(currentSite)*25+0,(byte*)&f);
-          if (latitude<0) celestialPoleDec=-90L; else celestialPoleDec=90L;
+          EEPROM_writeFloat(100+(currentSite)*25+0,latitude);
+#ifdef MOUNT_TYPE_ALTAZM
+          celestialPoleDec=fabs(latitude);
+          if (latitude<0) celestialPoleHA=180L; else celestialPoleHA=0L;
+#else
+          if (latitude<0) celestialPoleDec=-90.0; else celestialPoleDec=90.0;
+#endif
           cosLat=cos(latitude/Rad);
           sinLat=sin(latitude/Rad);
-          if (celestialPoleDec>0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
+          if (latitude>0.0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
         }
         highPrecision=i;
       } else 
@@ -909,9 +894,7 @@ the pdCor  term is 1 in HA
             if (abs(f)<0.1) { 
               trackingState = TrackingNone; 
             } else {
-              siderealInterval=HzCf*((60.0/f)*60.0);
-              EEPROM_writeQuad(EE_siderealInterval,(byte*)&siderealInterval);
-              SetSiderealClockRate(siderealInterval);
+              trackingTimerRateAxis1=(f/60.0)/1.00273790935;
             }
           } else commandError=true;
         } else commandError=true;
@@ -922,7 +905,7 @@ the pdCor  term is 1 in HA
       if (command[1]=='X')  { 
         if (parameter[0]=='0') { // 0n: Align Model
           switch (parameter[1]) {
-            case '0': IH=(double)strtol(&parameter[3],NULL,10)/3600.0/15.0; break;  // IH
+            case '0': IH=(double)strtol(&parameter[3],NULL,10)/3600.0; break;       // IH
             case '1': ID=(double)strtol(&parameter[3],NULL,10)/3600.0; break;       // ID
             case '2': altCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;   // altCor
             case '3': azmCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;   // azmCor
@@ -940,48 +923,52 @@ the pdCor  term is 1 in HA
             break; // maxRate
           }
         } else commandError=true;
-        getEqu(&f,&f1,false,true);  
+        getEqu(&f,&f1,false);  
       } else 
 //  :SzDDD*MM#
 //          Sets the target Object Azimuth
 //          Return: 0 on failure
 //                  1 on success
-#ifdef ALT_AZM_GOTO_ON
       if (command[1]=='z')  { if (!dmsToDouble(&newTargetAzm,parameter,false)) commandError=true; } else
-#endif
       commandError=true;
       } else 
 //   T - Tracking Commands
-//  :T+#   Track faster by 0.1 Hertz (I use a fifth of the LX200 standard, stored in EEPROM)
-//  :T-#   Track slower by 0.1 Hertz (stored in EEPROM)
-//  :TS#   Track rage solar
+//  :T+#   Master sidereal clock faster by 0.1 Hertz (I use a fifth of the LX200 standard, stored in EEPROM)
+//  :T-#   Master sidereal clock slower by 0.1 Hertz (stored in EEPROM)
+//  :TS#   Track rate solar
 //  :TL#   Track rate lunar
-//  :TQ#   Track rate custom (stored in EEPROM)
-//  :TR#   Track rate reset custom (to calculated sidereal rate, stored in EEPROM)
+//  :TQ#   Track rate sidereal
+//  :TR#   Master sidereal clock reset (to calculated sidereal rate, stored in EEPROM)
 //  :TK#   Track rate king
 //  :Te#   Tracking enable  (OnStep only, replies 0/1)
 //  :Td#   Tracking disable (OnStep only, replies 0/1)
+//  :To#   OnTrack enable   (OnStep only, replies 0/1)
 //  :Tr#   Track refraction enable  (OnStep only, replies 0/1)
 //  :Tn#   Track refraction disable (OnStep only, replies 0/1)
 //         Returns: Nothing
+
      if (command[0]=='T') {
        if (command[1]=='+') { siderealInterval-=HzCf*(0.02); quietReply=true; } else
        if (command[1]=='-') { siderealInterval+=HzCf*(0.02); quietReply=true; } else
-       if (command[1]=='S') { siderealInterval =HzCf*(60.0); customRateActive=false; quietReply=true; } else                       // solar tracking rate
-       if (command[1]=='L') { siderealInterval =HzCf*((60.0/57.9)*60.0); customRateActive=false; quietReply=true; } else           // lunar tracking rate
-       if (command[1]=='Q') { EEPROM_readQuad(EE_siderealInterval,(byte*)&siderealInterval); customRateActive=true; quietReply=true; } else  // custom tracking rate
-       if (command[1]=='R') { siderealInterval =HzCf*((60.0/60.16427479)*60.0); EEPROM_writeQuad(EE_siderealInterval,(byte*)&siderealInterval); customRateActive=true; quietReply=true; } else // default tracking rate
-       if (command[1]=='K') { siderealInterval =HzCf*((60.0/60.136)*60.0); customRateActive=false; quietReply=true; } else         // king tracking rate
+       if (command[1]=='S') { SetTrackingRate(0.99726956632); refraction=false; quietReply=true; } else      // solar tracking rate 60Hz
+       if (command[1]=='L') { SetTrackingRate(0.96236513150); refraction=false; quietReply=true; } else      // lunar tracking rate 57.9Hz
+       if (command[1]=='Q') { SetTrackingRate(default_tracking_rate); quietReply=true; } else                // sidereal tracking rate
+       if (command[1]=='R') { siderealInterval=15956313L; quietReply=true; } else                            // reset master sidereal clock interval
+       if (command[1]=='K') { SetTrackingRate(0.99953004401); refraction=false; quietReply=true; } else      // king tracking rate 60.136Hz
        if ((command[1]=='e') && ((trackingState==TrackingSidereal) || (trackingState==TrackingNone))) trackingState=TrackingSidereal; else
        if ((command[1]=='d') && ((trackingState==TrackingSidereal) || (trackingState==TrackingNone))) trackingState=TrackingNone; else
-       if ((command[1]=='r') && (!refraction)) refraction=true; else
-       if ((command[1]=='n') && (refraction)) refraction=false; else
+       if (command[1]=='o') { refraction=refraction_enable; onTrack=true;  SetTrackingRate(default_tracking_rate); } else  // turn full compensation on, defaults to base sidereal tracking rate
+       if (command[1]=='r') { refraction=refraction_enable; onTrack=false; SetTrackingRate(default_tracking_rate); } else  // turn refraction compensation on, defaults to base sidereal tracking rate
+       if (command[1]=='n') { refraction=false; onTrack=false; SetTrackingRate(default_tracking_rate); } else              // turn refraction off, sidereal tracking rate resumes
          commandError=true;
-       // Only burn the new rate if changing the custom tracking rate 
-       if ((customRateActive) && (!commandError) && ((command[1]=='+') || (command[1]=='-'))) EEPROM_writeQuad(EE_siderealInterval,(byte*)&siderealInterval);
 
-       SetSiderealClockRate(siderealInterval);
-       cli(); SiderealRate=siderealInterval/StepsPerSecond; sei();
+       // Only burn the new rate if changing the sidereal interval
+       if ((!commandError) && ((command[1]=='+') || (command[1]=='-') || (command[1]=='R'))) {
+         EEPROM_writeLong(EE_siderealInterval,siderealInterval);
+         SetSiderealClockRate(siderealInterval);
+         cli(); SiderealRate=siderealInterval/StepsPerSecondAxis1; sei();
+       }
+
      } else
      
 //   U - Precision Toggle
@@ -990,6 +977,8 @@ the pdCor  term is 1 in HA
 //         High - RA/Dec/etc. displays and accepts HH:MM:SS sDD*MM:SS
 //         Returns Nothing
      if ((command[0]=='U') && (command[1]==0)) { highPrecision=!highPrecision; quietReply=true; } else
+
+#ifndef MOUNT_TYPE_ALTAZM
 //   V - PEC Readout
 //  :VRNNNN#
 //         Read out RA PEC Table Entry
@@ -998,13 +987,13 @@ the pdCor  term is 1 in HA
 //         If NNNN is omitted, returns the currently playing segment
      if ((command[0]=='V') && (command[1]=='R')) {
        boolean conv_result=true;
-       if (parameter[0]==0) { i=PECindex1; } else conv_result=atoi2(parameter,&i);
+       if (parameter[0]==0) { i=pecIndex1; } else conv_result=atoi2(parameter,&i);
        if ((conv_result) && ((i>=0) && (i<PECBufferSize))) {
-         if (parameter[0]==0) { 
-           i=(i-1)%SecondsPerWormRotation; 
-           i1=PEC_buffer[i]-128; sprintf(reply,"%+04i,%03i",i1,i); 
-         } else { 
-           i1=PEC_buffer[i]-128; sprintf(reply,"%+04i",i1);
+         if (parameter[0]==0) {
+           i=(i-1)%SecondsPerWormRotationAxis1;
+           i1=pecBuffer[i]-128; sprintf(reply,"%+04i,%03i",i1,i);
+         } else {
+           i1=pecBuffer[i]-128; sprintf(reply,"%+04i",i1);
          }
        } else commandError=true;
        quietReply=true;
@@ -1020,49 +1009,51 @@ the pdCor  term is 1 in HA
          byte b;
          char x[3]="  ";
          for (j=0; j<10; j++) {
-           if (i+j<PECBufferSize) b=PEC_buffer[i+j]; else b=128;
+           if (i+j<PECBufferSize) b=pecBuffer[i+j]; else b=128;
            
            sprintf(x,"%02X",b);
            strcat(reply,x);
          }
-//         strcat(reply,"#");
        } else commandError=true;
        quietReply=true;
      } else
-//   V - PEC Readout StepsPerWormRotation
+//   V - PEC Readout StepsPerWormRotationAxis1
 //  :VW#
 //         Returns: DDDDDD#
      if ((command[0]=='V') && (command[1]=='W')) {
        if (parameter[0]==0) {
-         sprintf(reply,"%06ld",StepsPerWormRotation);
+         sprintf(reply,"%06ld",(long)StepsPerWormRotationAxis1);
          quietReply=true;
        } else commandError=true;
      } else
-//   V - PEC Readout StepsPerSecond
+//   V - PEC Readout StepsPerSecondAxis1
 //  :VS#
 //         Returns: DDD.DDDDDD#
      if ((command[0]=='V') && (command[1]=='S')) {
        if (parameter[0]==0) {
          char temp[12];
-         dtostrf(StepsPerSecond,0,6,temp);
+         dtostrf(StepsPerSecondAxis1,0,6,temp);
          strcpy(reply,temp);
-//         sprintf(reply,"%03i",StepsPerSecond);
+//         sprintf(reply,"%03i",StepsPerSecondAxis1);
          quietReply=true;
        } else commandError=true;
      } else
 //  :VH#
-//         Read RA PEC hall sensor index start (seconds)
+//         Read RA PEC sense index (seconds)
 //         Returns: DDDDD#
      if ((command[0]=='V') && (command[1]=='H')) {
-         sprintf(reply,"%05ld",PECindex_sense);
-         quietReply=true;
+       long s=(long)((double)wormSensePos/(double)StepsPerSecondAxis1);
+       while (s>SecondsPerWormRotationAxis1) s-=SecondsPerWormRotationAxis1;
+       while (s<0) s+=SecondsPerWormRotationAxis1;
+       sprintf(reply,"%05ld",s); // indexWorm_sense
+       quietReply=true;
      } else
 //  :VI#
 //         Read RA PEC record index start (steps)
 //         Returns: DDDDDD#
      if ((command[0]=='V') && (command[1]=='I')) {
-         sprintf(reply,"%06ld",PECindex_record);
-         quietReply=true;
+       sprintf(reply,"%06ld",0L);  // indexWorm_record
+       quietReply=true;
      } else
 
 //  :WIDDDDDD#
@@ -1071,8 +1062,8 @@ the pdCor  term is 1 in HA
        commandError=true;
        long l=strtol(parameter,&conv_end,10);
        // see if it converted and is in range
-       if ( (&parameter[0]!=conv_end) && ((l>=0) && (l<StepsPerWormRotation))) {
-         PECindex_record=l;
+       if ( (&parameter[0]!=conv_end) && ((l>=0) && (l<(long)StepsPerWormRotationAxis1))) {
+// ignored
          commandError=false;
        }
     } else
@@ -1088,15 +1079,16 @@ the pdCor  term is 1 in HA
        commandError=true;
        if (parameter[1]==0) {
          if (parameter[0]=='+') {
-           i=PEC_buffer[SecondsPerWormRotation-1];
-           memmove((byte *)&PEC_buffer[1],(byte *)&PEC_buffer[0],SecondsPerWormRotation-1);
-           PEC_buffer[0]=i;
+           i=pecBuffer[SecondsPerWormRotationAxis1-1];
+           memmove((byte *)&pecBuffer[1],(byte *)&pecBuffer[0],SecondsPerWormRotationAxis1-1);
+           pecBuffer[0]=i;
            commandError=false;
          } else
          if (parameter[0]=='-') {
-           i=PEC_buffer[0];
-           memmove((byte *)&PEC_buffer[0],(byte *)&PEC_buffer[1],SecondsPerWormRotation-1);
-           PEC_buffer[SecondsPerWormRotation-1]=i;
+           i=pecBuffer[0];
+           memmove((byte *)&pecBuffer[0],(byte *)&pecBuffer[1],SecondsPerWormRotationAxis1-1);
+           pecBuffer[SecondsPerWormRotationAxis1-1]=i;
+           pecRecorded=true;
            commandError=false;
          }
        } else {
@@ -1106,14 +1098,15 @@ the pdCor  term is 1 in HA
            // should be another int here
            // see if it converted and is in range
            if ( (atoi2((char*)&parameter[5],&i2)) && ((i2>=-128) && (i2<=127))) {
-             PEC_buffer[i]=i2+128;
-             PECrecorded =true;
+             pecBuffer[i]=i2+128;
+             pecRecorded =true;
              commandError=false;
            }
          }
          quietReply=true;
        }
      } else
+#endif
 
 //   W - Site Select/Site get
 //  :Wn#
@@ -1122,14 +1115,18 @@ the pdCor  term is 1 in HA
       if (command[0]=='W') {
         if ((command[1]>='0') && (command[1]<='3')) {
           currentSite=command[1]-'0'; EEPROM.update(EE_currentSite,currentSite); quietReply=true;
-          float f; 
-          EEPROM_readQuad(EE_sites+(currentSite*25+0),(byte*)&f); latitude=f;
-          if (latitude<0) celestialPoleDec=-90L; else celestialPoleDec=90L;
+          latitude=EEPROM_readFloat(EE_sites+(currentSite*25+0));
+#ifdef MOUNT_TYPE_ALTAZM
+          celestialPoleDec=fabs(latitude);
+#else
+          if (latitude<0.0) celestialPoleDec=-90.0; else celestialPoleDec=90.0;
+#endif
           cosLat=cos(latitude/Rad);
           sinLat=sin(latitude/Rad);
-          if (celestialPoleDec>0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
-          EEPROM_readQuad(EE_sites+(currentSite*25+4),(byte*)&f); longitude=f;
-          b=EEPROM.read(EE_sites+(currentSite*25+8)); timeZone=b-128;
+          if (latitude>0.0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
+          longitude=EEPROM_readFloat(EE_sites+(currentSite*25+4));
+          timeZone=EEPROM.read(EE_sites+(currentSite)*25+8)-128;
+          timeZone=decodeTimeZone(timeZone);
         } else 
         if (command[1]=='?') {
           quietReply=true;
@@ -1147,7 +1144,7 @@ the pdCor  term is 1 in HA
       
       if (strlen(reply)>0) {
 
-      if (process_command==1) {
+      if (process_command==COMMAND_SERIAL) {
 #ifdef CHKSUM0_ON
         // calculate the checksum
         char HEXS[3]="";
@@ -1159,7 +1156,7 @@ the pdCor  term is 1 in HA
         Serial_print(reply);
       } 
 
-      if (process_command==2) {
+      if (process_command==COMMAND_SERIAL1) {
 #ifdef CHKSUM1_ON
         // calculate the checksum
         char HEXS[3]="";
@@ -1170,16 +1167,29 @@ the pdCor  term is 1 in HA
         if (!supress_frame) strcat(reply,"#");
         Serial1_print(reply);
       }
+
+#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
+      if (process_command==COMMAND_ETHERNET) {
+#ifdef CHKSUM0_ON
+        // calculate the checksum
+        char HEXS[3]="";
+        byte cks=0; for (int cksCount0=0; cksCount0<strlen(reply); cksCount0++) {  cks+=reply[cksCount0]; }
+        sprintf(HEXS,"%02X",cks);
+        strcat(reply,HEXS);
+#endif
+        if (!supress_frame) strcat(reply,"#");
+        Ethernet_print(reply);
+      }
+#endif       
       }
       quietReply=false;
    }
 }
 
 // Build up a command
-boolean buildCommand(char c) {
+boolean buildCommand_serial_zero(char c) {
   // (chr)6 is a special status command for the LX200 protocol
   if ((c==(char)6) && (bufferPtr_serial_zero==0)) {
-//    Serial_print("G#");
     #ifdef MOUNT_TYPE_ALTAZM
     Serial_print("A");
     #else
@@ -1232,7 +1242,6 @@ boolean clearCommand_serial_zero() {
 boolean buildCommand_serial_one(char c) {
   // (chr)6 is a special status command for the LX200 protocol
   if ((c==(char)6) && (bufferPtr_serial_one==0)) {
-//    Serial1_print("G#");
     #ifdef MOUNT_TYPE_ALTAZM
     Serial_print("A");
     #else
@@ -1281,6 +1290,64 @@ boolean clearCommand_serial_one() {
   return true;
 }
 
+#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
+// Build up a command
+boolean buildCommand_ethernet(char c) {
+  // return if -1 is received (no data)
+  if (c == 0xFF) return false;
+
+  // (chr)6 is a special status command for the LX200 protocol
+  if ((c==(char)6) && (bufferPtr_ethernet==0)) {
+//    Ethernet_print("G#");
+    #ifdef MOUNT_TYPE_ALTAZM
+    Ethernet_print("A");
+    #else
+    Ethernet_print("P");
+    #endif
+  }
+
+  // ignore spaces/lf/cr, dropping spaces is another tweek to allow compatibility with LX200 protocol
+  if ((c!=(char)32) && (c!=(char)10) && (c!=(char)13) && (c!=(char)6)) {
+    command_ethernet[bufferPtr_ethernet]=c;
+    bufferPtr_ethernet++;
+    command_ethernet[bufferPtr_ethernet]=(char)0;
+    if (bufferPtr_ethernet>22) { bufferPtr_ethernet=22; }  // limit maximum command length to avoid overflow, c2+p16+cc2+eol2+eos1=23 bytes max ranging from 0..22
+  }
+
+  if (c=='#') {
+    // validate the command frame, normal command
+    if ((bufferPtr_ethernet>1) && (command_ethernet[0]==':') && (command_ethernet[bufferPtr_ethernet-1]=='#')) { command_ethernet[bufferPtr_ethernet-1]=0; } else { clearCommand_ethernet(); return false; }
+
+#ifdef CHKSUM1_ON
+    // checksum the data, as above.
+    byte len=strlen(command_ethernet);
+    byte cks=0; for (int cksCount0=1; cksCount0<len-2; cksCount0++) { cks=cks+command_ethernet[cksCount0]; }
+    char chkSum[3]; sprintf(chkSum,"%02X",cks); if (!((chkSum[0]==command_ethernet[len-2]) && (chkSum[1]==command_ethernet[len-1]))) { clearCommand_ethernet(); Ethernet_print("00#"); return false; }
+    --len; command_ethernet[--len]=0;
+#endif
+
+    // break up the command into a two char command and the remaining parameter
+
+    // the parameter can be up to 16 chars in length
+    memmove(parameter_ethernet,(char *)&command_ethernet[3],17);
+
+    // the command is either one or two chars in length
+    command_ethernet[3]=0;  memmove(command_ethernet,(char *)&command_ethernet[1],3);
+
+    return true;
+  } else {
+    return false;
+  }
+}
+
+// clear commands
+boolean clearCommand_ethernet() {
+  bufferPtr_ethernet=0;
+  command_ethernet[bufferPtr_ethernet]=(char)0;
+  return true;
+}
+#endif
+
 // calculates the tracking speed for move commands
 void setGuideRate(int g) {
   currentGuideRate=g;
@@ -1297,8 +1364,8 @@ void enableGuideRate(int g) {
   guideTimerRate=(double)guideRates[g]/15.0;
 
   cli();
-  amountGuideHA.fixed =doubleToFixed((guideTimerRate*StepsPerSecond)/100.0);
-  amountGuideDec.fixed=doubleToFixed((guideTimerRate*StepsPerSecondDec)/100.0);
+  amountGuideHA.fixed =doubleToFixed((guideTimerRate*StepsPerSecondAxis1)/100.0);
+  amountGuideDec.fixed=doubleToFixed((guideTimerRate*StepsPerSecondAxis2)/100.0);
   sei();
 }
 
