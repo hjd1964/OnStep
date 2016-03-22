@@ -857,7 +857,7 @@ bool nextAlign() {
       double IH2=IH;
       double ID2=ID;
 
-      azmCor = -(ID2-ID1);                                      // offset in declination is largely due to polar align Azm error
+      azmCor = -(ID2-ID1);                                        // offset in declination is largely due to polar align Azm error
       azmCor = azmCor/sin(haRange(LST()*15.0-newTargetRA)/Rad);   // correct for HA of measurement location
 
       // allow the azmCor to be applied
