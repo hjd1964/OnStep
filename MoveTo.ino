@@ -272,20 +272,29 @@ void DecayModeTracking() {
   if (DecayModeTrack) return;
   DecayModeTrack=true;
 #ifdef DECAY_MODE_OPEN
+  cli();
   pinMode(Axis1_Mode,INPUT);
   pinMode(Axis2_Mode,INPUT);
+  sleep(3);
+  sei();
 #endif
 #ifdef DECAY_MODE_LOW
+  cli();
   pinMode(Axis1_Mode,OUTPUT);
   digitalWrite(Axis1_Mode,LOW);
   pinMode(Axis2_Mode,OUTPUT);
   digitalWrite(Axis1_Mode,LOW);
+  sleep(3);
+  sei();
 #endif
 #ifdef DECAY_MODE_HIGH
+  cli();
   pinMode(Axis1_Mode,OUTPUT);
   digitalWrite(Axis1_Mode,HIGH);
   pinMode(Axis2_Mode,OUTPUT);
   digitalWrite(Axis2_Mode,HIGH);
+  sleep(3);
+  sei();
 #endif
 }
 
@@ -293,20 +302,29 @@ void DecayModeGoto() {
   if (!DecayModeTrack) return;
   DecayModeTrack=false;
 #ifdef DECAY_MODE_GOTO_OPEN
+  cli();
   pinMode(Axis1_Mode,INPUT);
   pinMode(Axis2_Mode,INPUT);
+  sleep(3);
+  sei();
 #endif
 #ifdef DECAY_MODE_GOTO_LOW
+  cli();
   pinMode(Axis1_Mode,OUTPUT);
   digitalWrite(Axis1_Mode,LOW);
   pinMode(Axis2_Mode,OUTPUT);
   digitalWrite(Axis1_Mode,LOW);
+  sleep(3);
+  sei();
 #endif
 #ifdef DECAY_MODE_GOTO_HIGH
+  cli();
   pinMode(Axis1_Mode,OUTPUT);
   digitalWrite(Axis1_Mode,HIGH);
   pinMode(Axis2_Mode,OUTPUT);
   digitalWrite(Axis2_Mode,HIGH);
+  sleep(3);
+  sei();
 #endif
 }
 
