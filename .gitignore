@@ -15,3 +15,9 @@
 *.exe
 *.out
 *.app
+Config.g11.h
+Config.steve.h
+Config.takem10b.60sps.h
+Config_Z12.h
+PecPlus.ino
+Config.takem10b.h
