@@ -572,8 +572,8 @@ const char html_index11[] PROGMEM = "Workload: <font class=\"c\">%ld%%</font><br
 void index_html_page() {
   char temp[320] = "";
   char temp1[320] = "";
-  char temp2[80] = "";
-  char temp3[80] = "";
+  char temp2[120] = "";
+  char temp3[120] = "";
   bool r=true;
   int stp=0;
   html_page_step++;
