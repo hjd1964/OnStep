@@ -75,9 +75,18 @@ boolean Ethernet_available() {
       return cmd_client.available();
     }
 
-    if (millis()-cmdTransactionLast_ms>2000) { cmd_client.stopRequest(); cmdIsClosing=true; }
+    if (millis()-cmdTransactionLast_ms>2000) { 
+#ifdef W5100_ON
+      cmd_client.stopRequest(); 
+#endif
+      cmdIsClosing=true; 
+    }
     if (cmdIsClosing) {
+#ifdef W5100_ON
       if (cmd_client.stopMonitor()) { cmdIsClosing=false; }
+#else
+      cmd_client.stop(); cmdIsClosing=false;
+#endif
     }
   }
   return false;
@@ -193,10 +202,16 @@ void Ethernet_www() {
     if (((clientNeedsToClose && (millis()-responseFinish_ms>100)) || (millis()-transactionStart_ms>5000)) ||
         ((clientNeedsToClose && clientIsClosing))) {
       if (!clientIsClosing) {
-        www_client.stopRequest(); 
+#ifdef W5100_ON
+        www_client.stopRequest();
+#endif
         clientIsClosing=true;
       } else {
+#ifdef W5100_ON
         if (www_client.stopMonitor()) { clientNeedsToClose=false; clientIsClosing=false; }
+#else
+        www_client.stop(); clientNeedsToClose=false; clientIsClosing=false;
+#endif
       }
     }
     #ifdef ETHERNET_USE_DHCP_ON
