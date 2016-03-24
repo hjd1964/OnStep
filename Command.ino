@@ -635,6 +635,25 @@ void processCommands() {
         quietReply=true;
       } else
 
+//  :MP#   Goto the Current Position for Polar Align
+//         Returns:
+//         0=Goto is Possible
+//         1=Object below horizon    Outside limits, below the Horizon limit
+//         2=No object selected      Failure to resolve coordinates
+//         4=Position unreachable    Not unparked
+//         5=Busy                    Goto already active
+//         6=Outside limits          Outside limits, above the Zenith limit
+      if (command[1]=='P')  {
+        double r,d;
+        getEqu(&r,&d,false);
+        altCor=0.0;
+        azmCor=0.0;
+        i=goToEqu(r,d);
+        reply[0]=i+'0'; reply[1]=0;
+        quietReply=true;
+        supress_frame=true;
+      } else commandError=true;
+
 //  :MS#   Goto the Target Object
 //         Returns:
 //         0=Goto is Possible
