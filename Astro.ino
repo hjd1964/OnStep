@@ -706,19 +706,19 @@ double LST() {
 // -----------------------------------------------------------------------------------------------------------------------------
 // Misc. numeric conversion
 
-double timeRange(double time) {
-  while (time>=24.0) time-=24.0;
-  while (time<  0.0) time+=24.0;
-  return time;
+double timeRange(double t) {
+  while (t>=24.0) t-=24.0;
+  while (t<  0.0) t+=24.0;
+  return t;
 }
 
-double haRange(double time) {
-  while (time>=180.0) time-=360.0;
-  while (time<-180.0) time+=360.0;
-  return time;
+double haRange(double d) {
+  while (d>=180.0) d-=360.0;
+  while (d<-180.0) d+=360.0;
+  return d;
 }
 
-double degreeRange(double d) {
+double degRange(double d) {
   while (d>=360.0) d-=360.0;
   while (d<  0.0)  d+=360.0;
   return d;
@@ -808,8 +808,8 @@ bool nextAlign() {
   if ((alignMode==AlignTwoStar2) || (alignMode==AlignThreeStar2)) {
     if ((alignMode==AlignTwoStar2) && (meridianFlip==MeridianFlipAlign)) meridianFlip=MeridianFlipNever;
     alignMode++;
-    double IH1 = IH;
-    double ID1 = ID;
+    double IH1=IH;
+    double ID1=ID;
 
     avgDec=(avgDec+newTargetDec)/2.0;
     avgHA =(-avgHA+haRange(LST()*15.0-newTargetRA))/2.0; // last HA is negative because we were on the other side of the meridian
@@ -851,8 +851,8 @@ bool nextAlign() {
     #endif
     alignMode++;
     
-    double IH1 = IH;
-    double ID1 = ID;
+    double IH1=IH;
+    double ID1=ID;
     if (syncEqu(newTargetRA,newTargetDec)) {
       double IH2=IH;
       double ID2=ID;
@@ -862,18 +862,20 @@ bool nextAlign() {
 
       // allow the azmCor to be applied
       if (syncEqu(newTargetRA,newTargetDec)) {
-        ID2=ID;
         IH2=IH;
+        ID2=ID;
         // only apply Dec axis flexture term on GEMs
         #ifdef MOUNT_TYPE_GEM
-        pdCor = (IH2-IH1);                      // the Dec axis to RA axis perp. error should be the only major source of error left effecting the HA
+        pdCor = (IH2-IH1);                      // the Dec axis to RA axis perp. error should be the only major source of error left affecting the HA
         pdCor = pdCor/tan(newTargetDec/Rad);    // correct for Dec of measurement location
         #else
         pdCor = 0.0;
         #endif
 
-        ID=ID1;
         IH=IH1;
+        IHS = (long)(IH*(double)StepsPerDegreeAxis1);
+        ID=ID1;
+        IDS = (long)(ID*(double)StepsPerDegreeAxis2);
       } else return true;
     } else return true;
   } else return true;
