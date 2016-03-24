@@ -4,9 +4,7 @@
 // syncs the telescope/mount to the sky
 boolean syncEqu(double RA, double Dec) {
   // hour angleTrackingMoveTo
-  double HA=LST()*15.0-RA;
-  while (HA>+180.0) HA-=360.0;
-  while (HA<-180.0) HA+=360.0;
+  double HA=haRange(LST()*15.0-RA);
 
   // correct for polar misalignment only by clearing the index offsets
   IH=0; ID=0; IHS=0; IDS=0;
@@ -132,16 +130,13 @@ boolean getApproxEqu(double *RA, double *Dec, boolean returnHA) {
   if (*Dec>90.0) { *Dec=(90.0-*Dec)+90; HA=HA-180.0; }
   if (*Dec<-90.0) { *Dec=(-90.0-*Dec)-90.0; HA=HA-180.0; }
 
-  while (HA>180.0) HA=HA-360.0;
-  while (HA<-180.0) HA=HA+360.0;
+  HA=haRange(HA);
   if (*Dec>90.0) *Dec=+90.0;
   if (*Dec<-90.0) *Dec=-90.0;
   
   // return either the RA or the HA depending on returnHA
   if (!returnHA) {
-    *RA=LST()*15.0-HA;
-    while (*RA>=360.0) *RA=*RA-360.0;
-    while (*RA<0.0) *RA=*RA+360.0;
+    *RA=degRange(LST()*15.0-HA);
   } else *RA=HA;
   return true;
 }
@@ -159,9 +154,7 @@ byte goToEqu(double RA, double Dec) {
   double a,z;
 
   // Convert RA into hour angle, get altitude
-  double HA=LST()*15.0-RA;
-  while (HA>=180.0) HA-=360.0;
-  while (HA<-180.0) HA+=360.0;
+  double HA=haRange(LST()*15.0-RA);
   EquToHor(HA,Dec,&a,&z);
 
   // Check to see if this goto is valid
@@ -175,9 +168,7 @@ byte goToEqu(double RA, double Dec) {
 
 #ifdef MOUNT_TYPE_ALTAZM
   EquToHor(HA,Dec,&a,&z);
-  
-  if (z>180.0) z-=360.0;
-  if (z<-180.0) z+=360.0;
+  z=haRange(z);  
 
   cli(); long a1=posAxis1+IHS; sei();
 
@@ -241,10 +232,7 @@ byte goToHor(double *Alt, double *Azm) {
   double HA,Dec;
   
   HorToEqu(*Alt,*Azm,&HA,&Dec);
-  
-  double RA=LST()*15.0-HA;
-  while (RA>=360.0) RA=RA-360.0;
-  while (RA<0.0) RA=RA+360.0;
+  double RA=degRange(LST()*15.0-HA);
   
   return goToEqu(RA,Dec);
 }

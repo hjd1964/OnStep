@@ -539,7 +539,7 @@ const char html_indexTrue[] PROGMEM = "Absolute Position: " Axis1 "=<font class=
 const char html_indexIndex[] PROGMEM = "IHS=<font class=\"c\">%ld</font> steps, IDS=<font class=\"c\">%ld</font> steps<br />";
 const char html_indexCorIdx[] PROGMEM = "IH=<font class=\"c\">%ld</font>\", ID=<font class=\"c\">%ld</font>\"<br />";
 const char html_indexCorPole[] PROGMEM = "altCor=<font class=\"c\">%ld</font>\", azmCor=<font class=\"c\">%ld</font>\"<br />";
-const char html_indexCorPolar[] PROGMEM = "Polar Alignment Correction: Altitude=<font class=\"c\">%ld</font>\", Azimuth=<font class=\"c\">%ld</font>\"<br /><br />";
+const char html_indexCorPolar[] PROGMEM = "Polar Alignment Correction: Alt=<font class=\"c\">%ld</font>\", Azm=<font class=\"c\">%ld</font>\"<br /><br />";
 const char html_indexCorOrtho[] PROGMEM = "doCor=<font class=\"c\">%ld</font>\", pdCor=<font class=\"c\">%ld</font>\"<br />";
 const char html_indexRateDeltas[] PROGMEM = "deltaAxis1 =<font class=\"c\">%s</font>\"/s, deltaAxis2=<font class=\"c\">%s</font>\"/s<br /><br />";
 const char html_indexPosition[] PROGMEM = "Instrument Coordinates: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
