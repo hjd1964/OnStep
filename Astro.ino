@@ -809,7 +809,7 @@ bool nextAlign() {
     if ((alignMode==AlignTwoStar2) && (meridianFlip==MeridianFlipAlign)) meridianFlip=MeridianFlipNever;
     alignMode++;
     double IH1=IH;
-    double ID1=ID;
+    double ID1=-ID;
 
     avgDec=(avgDec+newTargetDec)/2.0;
     avgHA =(-avgHA+haRange(LST()*15.0-newTargetRA))/2.0; // last HA is negative because we were on the other side of the meridian
