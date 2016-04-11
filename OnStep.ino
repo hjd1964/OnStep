@@ -41,11 +41,14 @@
 #include "FPoint.h"
 #include "TM4C.h"
 // There is a bug in Arduino/Energia which ignores #ifdef preprocessor directives when generating a list of files
-// Until this is fixed YOU MUST MANUALLY UN-COMMENT the #include line below if using the Launchpad Connected device. 
-// Notice OnStep uses the EthernetPlus library:
+// Until this is fixed YOU MUST MANUALLY UN-COMMENT the #include line below if using the Launchpad Connected device.
+// Notice OnStep uses the EthernetPlus.h library for the W5100:
 // this is available at: https://github.com/hjd1964/EthernetPlus and should be installed in your "~\Documents\Arduino\libraries" folder
-#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
+#if defined(W5100_ON)
 //#include "EthernetPlus.h"
+#endif
+#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+//#include "Ethernet.h"
 #endif
 
 #if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
@@ -57,7 +60,7 @@
 
 // firmware info, these are returned by the ":GV?#" commands
 #define FirmwareDate   "03 18 16"
-#define FirmwareNumber "1.0b32"
+#define FirmwareNumber "1.0a32"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -1528,3 +1531,4 @@ void loop() {
     processCommands();
   }
 }
+

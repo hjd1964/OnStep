@@ -75,9 +75,18 @@ boolean Ethernet_available() {
       return cmd_client.available();
     }
 
-    if (millis()-cmdTransactionLast_ms>2000) { cmd_client.stopRequest(); cmdIsClosing=true; }
+    if (millis()-cmdTransactionLast_ms>2000) { 
+#ifdef W5100_ON
+      cmd_client.stopRequest(); 
+#endif
+      cmdIsClosing=true; 
+    }
     if (cmdIsClosing) {
+#ifdef W5100_ON
       if (cmd_client.stopMonitor()) { cmdIsClosing=false; }
+#else
+      cmd_client.stop(); cmdIsClosing=false;
+#endif
     }
   }
   return false;
@@ -193,10 +202,16 @@ void Ethernet_www() {
     if (((clientNeedsToClose && (millis()-responseFinish_ms>100)) || (millis()-transactionStart_ms>5000)) ||
         ((clientNeedsToClose && clientIsClosing))) {
       if (!clientIsClosing) {
-        www_client.stopRequest(); 
+#ifdef W5100_ON
+        www_client.stopRequest();
+#endif
         clientIsClosing=true;
       } else {
+#ifdef W5100_ON
         if (www_client.stopMonitor()) { clientNeedsToClose=false; clientIsClosing=false; }
+#else
+        www_client.stop(); clientNeedsToClose=false; clientIsClosing=false;
+#endif
       }
     }
     #ifdef ETHERNET_USE_DHCP_ON
@@ -509,7 +524,7 @@ const char html_main_css2[] PROGMEM = ".a { background-color: #111111; }\r\n .t 
 const char html_main_css3[] PROGMEM = " margin: 25px; color: #999999; background-color: #111111; }\r\n input { width:4em; font-weight: bold; background-color: #A01010; padding: 2px 2px; }\r\n";
 const char html_main_css4[] PROGMEM = ".b { padding: 30px; border: 2px solid #551111; margin: 30px; color: #999999; background-color: #111111; }\r\n";
 const char html_main_css5[] PROGMEM = "select { width:4em; font-weight: bold; background-color: #A01010; padding: 2px 2px; }\r\n .c { color: #A01010; font-weight: bold; }\r\n";
-const char html_main_css6[] PROGMEM = "h1 { text-align: right; }\r\n a:hover, a:active { background-color: red; }\r\n .g { color: #10A010; font-weight: bold; }";
+const char html_main_css6[] PROGMEM = "h1 { text-align: right; }\r\n a:hover, a:active { background-color: red; }\r\n .g { color: #105010; font-weight: bold; }";
 const char html_main_css7[] PROGMEM = "a:link, a:visited { background-color: #332222; color: #a07070; border:1px solid red; padding: 5px 10px;";
 const char html_main_css8[] PROGMEM = " margin: none; text-align: center; text-decoration: none; display: inline-block; }\r\n";
 const char html_main_css9[] PROGMEM = "button { background-color: #A01010; font-weight: bold; border-radius: 5px; font-size: 12px; margin: 2px; padding: 4px 8px; }\r\n</STYLE>\r\n";
@@ -535,11 +550,11 @@ const char html_index2b[] PROGMEM = "</div><div class=\"b\">Longitude = <font cl
 const char html_index3[] PROGMEM = "<font class=\"c\">%02d/%02d/%02d</font>";
 const char html_index4[] PROGMEM = "&nbsp;<font class=\"c\">%s</font>&nbsp;UT";
 const char html_index4a[] PROGMEM = "&nbsp;(<font class=\"c\">%s</font>&nbsp; Local Apparent Sidereal Time)<br /><br />";
-const char html_indexFault[] PROGMEM =  "Stepper driver " Axis1 " axis %s, " Axis2 " axis %s<br /><br />";
 const char html_indexTrue[] PROGMEM = "Absolute Position: " Axis1 "=<font class=\"c\">%ld</font> steps, " Axis2 "=<font class=\"c\">%ld</font> steps<br />";
 const char html_indexIndex[] PROGMEM = "IHS=<font class=\"c\">%ld</font> steps, IDS=<font class=\"c\">%ld</font> steps<br />";
 const char html_indexCorIdx[] PROGMEM = "IH=<font class=\"c\">%ld</font>\", ID=<font class=\"c\">%ld</font>\"<br />";
 const char html_indexCorPole[] PROGMEM = "altCor=<font class=\"c\">%ld</font>\", azmCor=<font class=\"c\">%ld</font>\"<br />";
+const char html_indexCorPolar[] PROGMEM = "Polar Alignment Correction: Alt=<font class=\"c\">%ld</font>\", Azm=<font class=\"c\">%ld</font>\"<br /><br />";
 const char html_indexCorOrtho[] PROGMEM = "doCor=<font class=\"c\">%ld</font>\", pdCor=<font class=\"c\">%ld</font>\"<br />";
 const char html_indexRateDeltas[] PROGMEM = "deltaAxis1 =<font class=\"c\">%s</font>\"/s, deltaAxis2=<font class=\"c\">%s</font>\"/s<br /><br />";
 const char html_indexPosition[] PROGMEM = "Instrument Coordinates: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
@@ -547,17 +562,18 @@ const char html_indexTarget[] PROGMEM   = "Target Coordinates: " Axis1 "=<font c
 const char html_indexAz1[] PROGMEM = "Az1: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
 const char html_indexAz2[] PROGMEM = "Az2: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
 const char html_indexPier[] PROGMEM = "Pier Side=<font class=\"c\">%s</font> (meridian flips <font class=\"c\">%s</font>)<br /><br />";
-const char html_index7[] PROGMEM = "Current MaxRate: <font class=\"c\">%ld</font> (Default MaxRate: <font class=\"c\">%ld</font>)<br /><br />";
 const char html_index8[] PROGMEM = "Tracking: <font class=\"c\">%s %s</font><br />";
-const char html_index9[] PROGMEM = "Parking: <font class=\"c\">%s</font><br />";
-const char html_index10[] PROGMEM = "Last Error: <font class=\"c\">%s</font><br /><br />";
+const char html_index9[] PROGMEM = "Parking: <font class=\"c\">%s</font><br /><br />";
+const char html_index10[] PROGMEM = "Last Error: <font class=\"c\">%s</font><br />";
+const char html_indexFault[] PROGMEM =  "Stepper Driver: " Axis1 " axis %s, " Axis2 " axis %s<br /><br />";
+const char html_indexMaxRate[] PROGMEM = "Current MaxRate: <font class=\"c\">%ld</font> (Default MaxRate: <font class=\"c\">%ld</font>)<br /><br />";
 const char html_index11[] PROGMEM = "Workload: <font class=\"c\">%ld%%</font><br />";
 
 void index_html_page() {
   char temp[320] = "";
   char temp1[320] = "";
-  char temp2[80] = "";
-  char temp3[80] = "";
+  char temp2[120] = "";
+  char temp3[120] = "";
   bool r=true;
   int stp=0;
   html_page_step++;
@@ -624,10 +640,6 @@ if (html_page_step==++stp) {
     
     strcpy_P(temp1, html_index4a); sprintf(temp,temp1,temp2);
   }
-  if (html_page_step==++stp) {
-    strcpy_P(temp1, html_indexFault);
-    sprintf(temp, temp1, faultAxis1 ? "<font class=\"c\">FAULT</font>" : "<font class=\"g\">Ok</font>", faultAxis2 ? "<font class=\"c\">FAULT</font>" : "<font class=\"g\">Ok</font>");
-  }
 #ifdef DEBUG_ON
   if (html_page_step==++stp) {
     cli();
@@ -655,6 +667,12 @@ if (html_page_step==++stp) {
     highPrecision=i;
     strcpy_P(temp1, html_indexRateDeltas); sprintf(temp,temp1,temp2,temp3); 
   }
+#else
+#if defined(MOUNT_TYPE_GEM) || defined(MOUNT_TYPE_FORK)
+  if (html_page_step==++stp) {
+    strcpy_P(temp1, html_indexCorPolar); sprintf(temp,temp1,(long)(altCor*3600.0),(long)(azmCor*3600.0)); 
+  }
+#endif
 #endif
   if (html_page_step==++stp) {
     i=highPrecision; highPrecision=true; 
@@ -729,9 +747,6 @@ if (html_page_step==++stp) {
     strcpy_P(temp1, html_indexPier); sprintf(temp,temp1,temp2,temp3); 
   }
   if (html_page_step==++stp) {
-    strcpy_P(temp1, html_index7); sprintf(temp,temp1,maxRate/16L,(long)MaxRate);
-  }
-  if (html_page_step==++stp) {
     if (trackingState==TrackingNone)     strcpy(temp2,"Off");
     if (trackingState==TrackingSidereal) strcpy(temp2,"On");
     if (trackingState==TrackingMoveTo)   strcpy(temp2,"Slewing");
@@ -755,7 +770,7 @@ if (html_page_step==++stp) {
     worst_loop_time=0;
   }
   if (html_page_step==++stp) {
-    if (lastError==ERR_NONE) strcpy(temp2,"None"); else
+    if (lastError==ERR_NONE) strcpy(temp2,"</font><font class=\"g\">None"); else
     if (lastError==ERR_MOTOR_FAULT) strcpy(temp2,"Motor Fault"); else
     if (lastError==ERR_ALT) strcpy(temp2,"Altitude Min/Max"); else
     if (lastError==ERR_LIMIT_SENSE) strcpy(temp2,"Limit Sense"); else
@@ -765,6 +780,13 @@ if (html_page_step==++stp) {
     if (lastError==ERR_MERIDIAN) strcpy(temp2,"Meridian Limit (W) Exceeded"); else
     if (lastError==ERR_SYNC) strcpy(temp2,"Sync. ignored >30&deg;");
     strcpy_P(temp1, html_index10); sprintf(temp,temp1,temp2);
+  }
+  if (html_page_step==++stp) {
+    strcpy_P(temp1, html_indexFault);
+    sprintf(temp, temp1, faultAxis1 ? "<font class=\"c\">FAULT</font>" : "<font class=\"g\">Ok</font>", faultAxis2 ? "<font class=\"c\">FAULT</font>" : "<font class=\"g\">Ok</font>");
+  }
+  if (html_page_step==++stp) {
+    strcpy_P(temp1, html_indexMaxRate); sprintf(temp,temp1,maxRate/16L,(long)MaxRate);
   }
   if (html_page_step==++stp) {
     strcpy_P(temp1, html_index11); sprintf(temp,temp1,(worst_loop_time*100L)/9970L);
@@ -1490,3 +1512,4 @@ void config_html_page() {
 }
 
 #endif
+

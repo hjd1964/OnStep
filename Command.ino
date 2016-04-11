@@ -60,7 +60,7 @@ void processCommands() {
 //  :AW#  Align Write to EEPROM
 //         Returns: 1 on success
         if (command[1]=='W') {
-              saveAlignModel();
+          saveAlignModel();
         } else
 //  :A?#  Align status
 //         Returns: mno#
@@ -69,20 +69,20 @@ void processCommands() {
 //               o is the last required alignment star when an alignment is in progress (0 otherwise)
         if (command[1]=='?') {
 #if defined(MOUNT_TYPE_ALTAZM)
-              reply[0]='1';
+          reply[0]='1';
 #elif defined(MOUNT_TYPE_FORK_ALT)
-              reply[0]='1';
+          reply[0]='1';
 #else
-              reply[0]='3';
+          reply[0]='3';
 #endif
-              if (alignMode==AlignOneStar1)   { reply[1]='1'; reply[2]='1'; } else
-              if (alignMode==AlignTwoStar1)   { reply[1]='1'; reply[2]='2'; } else
-              if (alignMode==AlignThreeStar1) { reply[1]='1'; reply[2]='3'; } else
-              if (alignMode==AlignTwoStar2)   { reply[1]='2'; reply[2]='2'; } else
-              if (alignMode==AlignThreeStar2) { reply[1]='2'; reply[2]='3'; } else
-              if (alignMode==AlignThreeStar3) { reply[1]='3'; reply[2]='3'; } else { reply[1]='0'; reply[2]='0'; }
-              reply[3]=0;
-              quietReply=true;
+          if (alignMode==AlignOneStar1)   { reply[1]='1'; reply[2]='1'; } else
+          if (alignMode==AlignTwoStar1)   { reply[1]='1'; reply[2]='2'; } else
+          if (alignMode==AlignThreeStar1) { reply[1]='1'; reply[2]='3'; } else
+          if (alignMode==AlignTwoStar2)   { reply[1]='2'; reply[2]='2'; } else
+          if (alignMode==AlignThreeStar2) { reply[1]='2'; reply[2]='3'; } else
+          if (alignMode==AlignThreeStar3) { reply[1]='3'; reply[2]='3'; } else { reply[1]='0'; reply[2]='0'; }
+          reply[3]=0;
+          quietReply=true;
         } else
 //  :An#  Start Telescope Manual Alignment Sequence
 //         This is to initiate a one or two-star alignment:
@@ -633,6 +633,25 @@ void processCommands() {
           }
         }
         quietReply=true;
+      } else
+
+//  :MP#   Goto the Current Position for Polar Align
+//         Returns:
+//         0=Goto is Possible
+//         1=Object below horizon    Outside limits, below the Horizon limit
+//         2=No object selected      Failure to resolve coordinates
+//         4=Position unreachable    Not unparked
+//         5=Busy                    Goto already active
+//         6=Outside limits          Outside limits, above the Zenith limit
+      if (command[1]=='P')  {
+        double r,d;
+        getEqu(&r,&d,false);
+        altCor=0.0;
+        azmCor=0.0;
+        i=goToEqu(r,d);
+        reply[0]=i+'0'; reply[1]=0;
+        quietReply=true;
+        supress_frame=true;
       } else
 
 //  :MS#   Goto the Target Object
@@ -1376,3 +1395,4 @@ int freeRam () {
   return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
 }
 #endif
+

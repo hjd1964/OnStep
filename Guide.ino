@@ -5,7 +5,7 @@ void Guide() {
   // 1/100 second sidereal timer, controls issue of steps at the selected RA and/or Dec rate(s) 
   cli(); long guideLst=lst; sei();
   if (guideLst!=guideSiderealTimer) {
-    guideSiderealTimer=guideLst;  
+    guideSiderealTimer=guideLst;
     if (guideDirAxis1) {
       if (!inbacklashAxis1) {
         // guideHA keeps track of how many steps we've moved for PEC recording

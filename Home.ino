@@ -74,6 +74,7 @@ boolean setHome() {
   // where we are
   homeMount           = false;
   atHome              = true;
+  lastError           = ERR_NONE;
 
   // reset tracking and rates
   trackingState       = TrackingNone;
@@ -120,4 +121,5 @@ boolean setHome() {
 
   return true;
 }
+
 
