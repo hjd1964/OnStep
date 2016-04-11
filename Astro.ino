@@ -724,7 +724,7 @@ double degRange(double d) {
   return d;
 }
 
-long dist(long a, long b) {
+double dist(double a, double b) {
   if (a>b) return a-b; else return b-a;
 }
 

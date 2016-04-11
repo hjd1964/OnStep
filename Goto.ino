@@ -170,7 +170,7 @@ byte goToEqu(double RA, double Dec) {
   EquToHor(HA,Dec,&a,&z);
   z=haRange(z);  
 
-  cli(); long a1=posAxis1+IHS; sei();
+  cli(); double a1=(posAxis1+IHS)/StepsPerDegreeAxis1; sei();
 
 #ifdef MOUNT_TYPE_ALTAZM
   if ((MaxAzm>180) && (MaxAzm<=360)) {
