@@ -180,7 +180,7 @@ byte goToEqu(double RA, double Dec) {
       // and goto z is in -0..-180
       if (z<0) {
         // the alternate z1 is in 180..360
-        long z1=z+360;
+        double z1=z+360.0;
         if ((z1<MaxAzm) && (dist(a1,z)>dist(a1,z1))) z=z1;
       }
     }
@@ -189,7 +189,7 @@ byte goToEqu(double RA, double Dec) {
       // and goto z is in 0..180
       if (z>0) {
         // the alternate z1 is in -360..-180
-        long z1=z-360;
+        double z1=z-360.0;
         if ((z1>-MaxAzm) && (dist(a1,z)>dist(a1,z1))) z=z1;
       }
     }

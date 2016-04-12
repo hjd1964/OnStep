@@ -681,7 +681,7 @@ if (html_page_step==++stp) {
     long d=posAxis2+IDS;
     sei();
 #ifdef MOUNT_TYPE_ALTAZM
-    double ha=(double)h/(double)StepsPerDegreeAxis1; 
+    double ha=(double)h/(double)StepsPerDegreeAxis1;
     doubleToDms(temp2,&ha,true,true);
 #else
     double ha=(double)h/((double)StepsPerDegreeAxis1*15.0);
@@ -1433,7 +1433,6 @@ void config_html_page() {
   char temp[320] = "";
   char temp1[320] = "";
   char temp2[80] = "";
-  char temp3[80] = "";
   int stp=0;
   html_page_step++;
     
@@ -1500,7 +1499,6 @@ void config_html_page() {
  
   if (html_page_step==++stp) { strcpy_P(temp1, html_configMinDec); sprintf(temp,temp1,(long)round(MinDec)); }
   if (html_page_step==++stp) { strcpy_P(temp1, html_configMaxDec); sprintf(temp,temp1,(long)round(MaxDec)); }
-
 
   if (html_page_step==++stp) strcpy(temp,"</div></body></html>");
 
