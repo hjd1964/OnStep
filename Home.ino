@@ -25,7 +25,11 @@ boolean goHome() {
   
   homeMount=true;
   
-  return true;
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+  DecayModeGoto();
+#endif
+  
+    return true;
 }
 
 // sets telescope home position; user manually moves to Hour Angle 90 and Declination 90 (CWD position),
