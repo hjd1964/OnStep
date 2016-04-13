@@ -22,8 +22,12 @@ boolean goHome() {
   lastTrackingState=TrackingNone;
   trackingState=TrackingMoveTo; SetSiderealClockRate(siderealInterval);
   sei();
-  
+
   homeMount=true;
+  
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+  DecayModeGoto();
+#endif
   
   return true;
 }
