@@ -17,10 +17,12 @@ boolean syncEqu(double RA, double Dec) {
   EquToIEqu(latitude,HA,Dec,&Axis1,&Axis2);
 #endif
 
-#if defined(SYNC_ANYWHERE_ON) && !defined(MOUNT_TYPE_ALTAZM)
+#if defined(SYNC_ANYWHERE_ON)
   if ((pierSide==PierSideNone) || ((pierSide==PierSideWest) && (Axis1>0)) || ((pierSide==PierSideEast) && (Axis1<0))) {
-    trackingState=TrackingSidereal;
-    atHome=false;
+    if (pierSide==PierSideNone) {
+      trackingState=TrackingSidereal;
+      atHome=false;
+    }
     if (meridianFlip!=MeridianFlipNever) {
       // we're in the polar home position, so pick a side (of the pier)
       if (Axis1<0) {
