@@ -877,7 +877,7 @@ void processCommands() {
 //          Set target object RA to HH:MM.T or HH:MM:SS (based on precision setting)
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='r')  { if (!hmsToDouble(&newTargetRA,parameter)) commandError=true; newTargetRA*=15.0; } else 
+      if (command[1]=='r')  { if (!hmsToDouble(&newTargetRA,parameter)) commandError=true; else newTargetRA*=15.0; } else 
 //  :SSHH:MM:SS#
 //          Sets the local (apparent) sideral time to HH:MM:SS
 //          Return: 0 on failure
