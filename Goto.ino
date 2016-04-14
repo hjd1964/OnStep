@@ -62,7 +62,7 @@ boolean syncEqu(double RA, double Dec) {
   IDS=(long)(ID*(double)StepsPerDegreeAxis2);
 
 #ifndef SYNC_ANYWHERE_ON
-  if ((abs(ID)>30.0) || (abs(IH)>30.0)) { IH=0; ID=0; lastError=ERR_SYNC; return false; }
+  if ((abs(ID)>30.0) || (abs(IH)>30.0)) { IH=0; ID=0; IHS=0; IDS=0; lastError=ERR_SYNC; return false; }
 #endif
   return true;
 }
