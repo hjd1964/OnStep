@@ -112,6 +112,13 @@ boolean setHome() {
   guideDurationDec    = 0;
   guideDurationLastDec= 0;
 
+  // initialize/disable the stepper drivers
+#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+  DecayModeTracking();
+#endif
+  digitalWrite(Axis1_EN,Axis1_Disabled);
+  digitalWrite(Axis2_EN,Axis2_Disabled);
+
   cli();
   targetAxis1.part.m = startAxis1; targetAxis1.part.f = 0;
   posAxis1           = startAxis1;
