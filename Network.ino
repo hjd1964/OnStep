@@ -449,19 +449,19 @@ void Ethernet_get() {
               enableGuideRate(currentGuideRate);
               guideDirAxis2=get_vals[0];
               guideDurationDec=-1;
-              cli(); guideTimerRateAxis2=guideTimerRate; sei();
+              cli(); guideTimerRateAxis2=guideTimerBaseRate; sei();
             }
             quietReply=true;
           } else
           if ((get_vals[0]=='e') || (get_vals[0]=='w')) { 
             // block user from changing direction at high rates, just stop the guide instead
-            if ((guideDirAxis1) && (get_vals[0]!=guideDirAxis1) && (fabs(guidetimerRateAxis1)>2)) { 
+            if ((guideDirAxis1) && (get_vals[0]!=guideDirAxis1) && (fabs(guideTimerRateAxis1)>2)) { 
               guideDirAxis1='b';
             } else {
               enableGuideRate(currentGuideRate);
               guideDirAxis1=get_vals[0];
               guideDurationHA=-1;
-              cli(); if (guideDirAxis1=='e') guidetimerRateAxis1=-guideTimerRate; else guidetimerRateAxis1=guideTimerRate; sei();
+              cli(); if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRate; else guideTimerRateAxis1=guideTimerBaseRate; sei();
             }
           }
         } else 

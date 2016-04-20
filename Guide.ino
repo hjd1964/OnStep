@@ -45,7 +45,7 @@ void Guide() {
     }
 
   }
-  // allow the elevated rate to persist for a moment to allow the bulk added steps to play out after stopping
+
   // if the guide rate is negative and slow it's always faster to go back to the sidereal rate
-  if ((currentGuideRate<=GuideRate1x) && (fabs(guidetimerRateAxis1)<0.001)) { cli(); guidetimerRateAxis1=0.0; sei(); }
+//  if ((currentGuideRate<=GuideRate1x) && (fabs(guideTimerRateAxis1)<0.001)) { cli(); guideTimerRateAxis1=0.0; sei(); }
 }

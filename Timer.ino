@@ -131,23 +131,26 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     // guide rate acceleration/deceleration and control
     cli();  double x=((long)targetAxis1.part.m)-posAxis1; sei();
     if ((!inbacklashAxis1) && (guideDirAxis1)) {
-      if ((fabs(guidetimerRateAxis1)<10.0) && (fabs(guideTimerRateAxis1A)<10.0)) { 
+      if ((fabs(guideTimerRateAxis1)<10.0) && (fabs(guideTimerRateAxis1A)<10.0)) { 
         // break mode
-        if (guideDirAxis1=='b') { guidetimerRateAxis1=1.0; }
+        if (guideDirAxis1=='b') { 
+          guideTimerRateAxis1=trackingTimerRateAxis1; 
+          if (guideTimerRateAxis1>=0) guideTimerRateAxis1=1.0; else guideTimerRateAxis1=-1.0;
+        }
         // slow speed guiding, no acceleration
-        guideTimerRateAxis1A=guidetimerRateAxis1; 
+        guideTimerRateAxis1A=guideTimerRateAxis1; 
       } else {
         // use acceleration
         DecayModeGoto();
         double z=(StepsForRateChangeAxis1/isqrt32(fabs(x)));
         guideTimerRateAxis1A=(1.0/(((double)StepsPerDegreeAxis1*(z/1000000.0)))*3600.0);
-        if (guideTimerRateAxis1A>fabs(guidetimerRateAxis1)) guideTimerRateAxis1A=fabs(guidetimerRateAxis1);
+        if (guideTimerRateAxis1A>fabs(guideTimerRateAxis1)) guideTimerRateAxis1A=fabs(guideTimerRateAxis1);
       }
       // stop guiding
-      if ((guideDirAxis1=='b') && (fabs(x)<2)) { guideDirAxis1=0; guidetimerRateAxis1=0; guideTimerRateAxis1A=0; DecayModeTracking(); }
+      if ((guideDirAxis1=='b') && (fabs(x)<2)) { guideDirAxis1=0; guideTimerRateAxis1=0; guideTimerRateAxis1A=0; DecayModeTracking(); }
     }
 
-    double timerRateAxis1A=trackingTimerRateAxis1; if (((guideDirAxis1) || (guideDirAxis2)) && (activeGuideRate>GuideRate1x)) timerRateAxis1A=0.0;
+    double timerRateAxis1A=trackingTimerRateAxis1; if (guideDirAxis1 && (activeGuideRate>GuideRate1x)) timerRateAxis1A=0.0;
     double timerRateAxis1B=fabs(guideTimerRateAxis1A+pecTimerRateAxis1+timerRateAxis1A);
     // round up to run the motor timers just a tiny bit slow, then adjust below if we start to fall behind during sidereal tracking
     if (timerRateAxis1B>0.5) calculatedTimerRateAxis1=ceil((double)SiderealRate/timerRateAxis1B)+5; else calculatedTimerRateAxis1=ceil((double)SiderealRate*2.0);
@@ -171,7 +174,10 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     if (!inbacklashAxis2 && guideDirAxis2) {
       if ((fabs(guideTimerRateAxis2)<10.0) && (fabs(guideTimerRateAxis2A)<10.0)) { 
         // break mode
-        if (guideDirAxis2=='b') guideTimerRateAxis2=1.0;
+        if (guideDirAxis2=='b') {
+          guideTimerRateAxis2=trackingTimerRateAxis2;
+          if (guideTimerRateAxis2>=0) guideTimerRateAxis2=1.0; else guideTimerRateAxis2=-1.0;
+        }
         // slow speed guiding, no acceleration
         guideTimerRateAxis2A=guideTimerRateAxis2; 
       } else {

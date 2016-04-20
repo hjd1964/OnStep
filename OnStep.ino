@@ -139,7 +139,7 @@ boolean faultAxis2 = false;
 volatile double  trackingTimerRateAxis1= default_tracking_rate;
 volatile double  trackingTimerRateAxis2= default_tracking_rate;
 volatile double  pecTimerRateAxis1     = 0.0;
-volatile double  guidetimerRateAxis1   = 0.0;
+volatile double  guideTimerRateAxis1   = 0.0;
 volatile double  guideTimerRateAxis2   = 0.0;
 volatile double  timerRateRatio        = ((double)StepsPerDegreeAxis1/(double)StepsPerDegreeAxis2);
 volatile boolean useTimerRateRatio     = (StepsPerDegreeAxis1!=StepsPerDegreeAxis2);
@@ -732,7 +732,7 @@ unsigned long guideDurationLastDec = 0;
 long lasttargetAxis1=0;
 long debugv1 = 0;
 
-double  guideTimerRate    = 0;
+double  guideTimerBaseRate = 0;
 fixed_t amountGuideHA;
 fixed_t guideHA;
 fixed_t amountGuideDec;
@@ -1324,7 +1324,7 @@ void loop() {
           #endif
           guideDirAxis1=ST4RA_state;
           guideDurationHA=-1;
-          cli(); if (guideDirAxis1=='e') guidetimerRateAxis1=-guideTimerRate; else guidetimerRateAxis1=guideTimerRate; sei();
+          cli(); if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRate; else guideTimerRateAxis1=guideTimerBaseRate; sei();
         } else {
           if (guideDirAxis1) { guideDirAxis1='b'; }
         }
@@ -1344,7 +1344,7 @@ void loop() {
           #endif
           guideDirAxis2=ST4DE_state;
           guideDurationDec=-1;
-          cli(); guideTimerRateAxis2=guideTimerRate; sei();
+          cli(); guideTimerRateAxis2=guideTimerBaseRate; sei();
         } else {
           if (guideDirAxis2) { guideDirAxis2='b'; }
         }
@@ -1404,7 +1404,7 @@ void loop() {
           cli();
           targetAxis1.fixed+=fstepAxis1.fixed;
           targetAxis2.fixed+=fstepAxis2.fixed;
-          sei();  
+          sei();
         }
       }
       moveTo();

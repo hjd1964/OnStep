@@ -585,7 +585,7 @@ void processCommands() {
             guideDirAxis1=parameter[0];
             guideDurationLastHA=micros();
             guideDurationHA=(long)i*1000L;
-            cli(); if (guideDirAxis1=='e') guidetimerRateAxis1=-guideTimerRate; else guidetimerRateAxis1=guideTimerRate; sei();
+            cli(); if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRate; else guideTimerRateAxis1=guideTimerBaseRate; sei();
             quietReply=true;
          } else
             if ((parameter[0]=='n') || (parameter[0]=='s')) { 
@@ -597,7 +597,7 @@ void processCommands() {
               guideDirAxis2=parameter[0]; 
               guideDurationLastDec=micros();
               guideDurationDec=(long)i*1000L; 
-              cli(); guideTimerRateAxis2=guideTimerRate; sei();
+              cli(); if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRate; else guideTimerRateAxis2=guideTimerBaseRate; sei();
               quietReply=true;
             } else commandError=true;
         } else commandError=true;
@@ -607,13 +607,13 @@ void processCommands() {
       if ((command[1]=='e') || (command[1]=='w')) { 
         if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
           // block user from changing direction at high rates, just stop the guide instead
-          if ((guideDirAxis1) && (command[1]!=guideDirAxis1) && (fabs(guidetimerRateAxis1)>2)) { 
+          if ((guideDirAxis1) && (command[1]!=guideDirAxis1) && (fabs(guideTimerRateAxis1)>2)) { 
             guideDirAxis1='b';
           } else {
             enableGuideRate(currentGuideRate);
             guideDirAxis1=command[1];
             guideDurationHA=-1;
-            cli(); if (guideDirAxis1=='e') guidetimerRateAxis1=-guideTimerRate; else guidetimerRateAxis1=guideTimerRate; sei();
+            cli(); if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRate; else guideTimerRateAxis1=guideTimerBaseRate; sei();
           }
         }
         quietReply=true;
@@ -629,7 +629,7 @@ void processCommands() {
             enableGuideRate(currentGuideRate);
             guideDirAxis2=command[1];
             guideDurationDec=-1;
-            cli(); guideTimerRateAxis2=guideTimerRate; sei();
+            cli(); if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRate; else guideTimerRateAxis2=guideTimerBaseRate; sei();
           }
         }
         quietReply=true;
@@ -1378,13 +1378,13 @@ void enableGuideRate(int g) {
   if (activeGuideRate==g) return;
   
   activeGuideRate=g;
-  
+
   // this enables the guide rate
-  guideTimerRate=(double)guideRates[g]/15.0;
+  guideTimerBaseRate=(double)(guideRates[g]/15.0);
 
   cli();
-  amountGuideHA.fixed =doubleToFixed((guideTimerRate*StepsPerSecondAxis1)/100.0);
-  amountGuideDec.fixed=doubleToFixed((guideTimerRate*StepsPerSecondAxis2)/100.0);
+  amountGuideHA.fixed =doubleToFixed((guideTimerBaseRate*StepsPerSecondAxis1)/100.0);
+  amountGuideDec.fixed=doubleToFixed((guideTimerBaseRate*StepsPerSecondAxis2)/100.0);
   sei();
 }
 
