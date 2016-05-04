@@ -1020,7 +1020,7 @@ void setup() {
 #endif
 
 #ifdef PPS_SENSE_ON
-#if defined(__AVR__)
+#if defined(__AVR_ATmega2560__)
   attachInterrupt(PpsInt,ClockSync,RISING);
 #elif defined(__arm__) && defined(TEENSYDUINO)
   attachInterrupt(PpsPin,ClockSync,RISING);
@@ -1164,7 +1164,7 @@ void setup() {
   SetSiderealClockRate(siderealInterval);
 #endif
 
-#if defined(__AVR__)
+#if defined(__AVR_ATmega2560__)
   if (StepsPerSecondAxis1<31)
     TCCR3B = (1 << WGM12) | (1 << CS10) | (1 << CS11);  // ~0 to 0.25 seconds   (4 steps per second minimum, granularity of timer is 4uS)   /64 pre-scaler
   else
