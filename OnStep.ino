@@ -1003,12 +1003,12 @@ void setup() {
   pinMode(Axis2_EN,OUTPUT); digitalWrite(Axis2_EN,Axis2_Disabled);
 
 // if the stepper driver mode select pins are wired in, program any requested micro-step mode
-#ifdef AXIS1_MODE && !defined(MODE_SWITCH_BEFORE_SLEW_ON)
+#if defined(AXIS1_MODE) && !defined(MODE_SWITCH_BEFORE_SLEW_ON)
   pinMode(Axis1_M0, OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE & 1));
   pinMode(Axis1_M1, OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE>>1 & 1));
   pinMode(Axis1_M2, OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE>>2 & 1));
 #endif
-#ifdef AXIS2_MODE && !defined(MODE_SWITCH_BEFORE_SLEW_ON)
+#if defined(AXIS2_MODE) && !defined(MODE_SWITCH_BEFORE_SLEW_ON)
   pinMode(Axis2_M0, OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE & 1));
   pinMode(Axis2_M1, OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE>>1 & 1));
   pinMode(Axis2_M2, OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE>>2 & 1));
