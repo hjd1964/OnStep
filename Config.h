@@ -98,7 +98,9 @@
                                      // * = minimum can be lower, when both AXIS1/AXIS2_MODE_GOTO are used by AXIS1/AXIS2_STEP_GOTO times
                                      
 #define DegreesForAcceleration   5.0 // approximate number of degrees for full acceleration or deceleration: higher values=longer acceleration/deceleration
-                                     // Default=5.0, too low (about <1 or 2) can cause gotos to never end if micro-step mode switching is enabled.
+                                     // Default=5.0, too low (about <1) can cause gotos to never end if micro-step mode switching is enabled.
+#define DegreesForRapidStop      1.0 // approximate number of degrees required to stop when requested or if limit is exceeded during a slew: higher values=longer deceleration
+                                     // Default=1.0, too low (about <1) can cause gotos to never end if micro-step mode switching is enabled.
 
 #define BacklashTakeupRate        25 // backlash takeup rate (in multipules of the sidereal rate): too fast and your motors will stall,
                                      // too slow and the mount will be sluggish while it moves through the backlash
