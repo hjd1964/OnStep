@@ -270,25 +270,21 @@ bool DecayModeTrack=false;
 void DecayModeTracking() {
   if (DecayModeTrack) return;
   DecayModeTrack=true;
-#if defined(DECAY_MODE_OPEN)
   cli();
+#if defined(DECAY_MODE_OPEN)
   pinMode(Axis1_Mode,INPUT);
   pinMode(Axis2_Mode,INPUT);
 #elif defined(DECAY_MODE_LOW)
-  cli();
   pinMode(Axis1_Mode,OUTPUT);
   digitalWrite(Axis1_Mode,LOW);
   pinMode(Axis2_Mode,OUTPUT);
   digitalWrite(Axis1_Mode,LOW);
 #elif defined(DECAY_MODE_HIGH)
-  cli();
   pinMode(Axis1_Mode,OUTPUT);
   digitalWrite(Axis1_Mode,HIGH);
   pinMode(Axis2_Mode,OUTPUT);
   digitalWrite(Axis2_Mode,HIGH);
 #elif defined(MODE_SWITCH_BEFORE_SLEW_ON)
-  cli();
-  
   if ((AXIS1_MODE & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE    & 1)); } else { pinMode(Axis1_M0,INPUT); }
   if ((AXIS1_MODE & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE>>1 & 1)); } else { pinMode(Axis1_M1,INPUT); }
   if ((AXIS1_MODE & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE>>2 & 1)); } else { pinMode(Axis1_M2,INPUT); }
@@ -299,8 +295,6 @@ void DecayModeTracking() {
 
   stepAxis1=1;
   stepAxis2=1;
-#else
-  cli();
 #endif
   #ifdef MODE_SWITCH_SLEEP_ON 
   delay(3);
@@ -311,25 +305,21 @@ void DecayModeTracking() {
 void DecayModeGoto() {
   if (!DecayModeTrack) return;
   DecayModeTrack=false;
-#if defined(DECAY_MODE_GOTO_OPEN)
   cli();
+#if defined(DECAY_MODE_GOTO_OPEN)
   pinMode(Axis1_Mode,INPUT);
   pinMode(Axis2_Mode,INPUT);
 #elif defined(DECAY_MODE_GOTO_LOW)
-  cli();
   pinMode(Axis1_Mode,OUTPUT);
   digitalWrite(Axis1_Mode,LOW);
   pinMode(Axis2_Mode,OUTPUT);
   digitalWrite(Axis1_Mode,LOW);
 #elif defined(DECAY_MODE_GOTO_HIGH)
-  cli();
   pinMode(Axis1_Mode,OUTPUT);
   digitalWrite(Axis1_Mode,HIGH);
   pinMode(Axis2_Mode,OUTPUT);
   digitalWrite(Axis2_Mode,HIGH);
 #elif defined(MODE_SWITCH_BEFORE_SLEW_ON)
-  //special case of decay control with the mode pins
-  cli();
   if ((AXIS1_MODE_GOTO & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE_GOTO    & 1)); } else { pinMode(Axis1_M0,INPUT); }
   if ((AXIS1_MODE_GOTO & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE_GOTO>>1 & 1)); } else { pinMode(Axis1_M1,INPUT); }
   if ((AXIS1_MODE_GOTO & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE_GOTO>>2 & 1)); } else { pinMode(Axis1_M2,INPUT); }
@@ -340,8 +330,6 @@ void DecayModeGoto() {
 
   stepAxis1=AXIS1_STEP_GOTO;
   stepAxis2=AXIS2_STEP_GOTO;
-#else
-  cli();
 #endif
   #ifdef MODE_SWITCH_SLEEP_ON
   delay(3);
