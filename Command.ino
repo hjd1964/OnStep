@@ -171,7 +171,7 @@ void processCommands() {
         if (reticuleBrightness>255-128) scale=32; else scale=64;
         if (command[1]=='-') reticuleBrightness+=scale;  if (reticuleBrightness>255) reticuleBrightness=255;
         if (command[1]=='+') reticuleBrightness-=scale;  if (reticuleBrightness<0)   reticuleBrightness=0;
-        analogWrite(reticulePin,reticuleBrightness);
+        analogWrite(ReticulePin,reticuleBrightness);
 #endif
         quietReply=true;
       } else 
@@ -365,9 +365,6 @@ void processCommands() {
               case '1': sprintf(reply,"%i",pecAnalogValue); quietReply=true; break;                                  // pec analog value
               case '2': sprintf(reply,"%ld",(long)(maxRate/16L)); quietReply=true; break;                   // MaxRate
               case '3': sprintf(reply,"%ld",(long)(MaxRate)); quietReply=true; break;                       // MaxRate (default)
-#if defined(__AVR__)
-              case '9': sprintf(reply,"%ld",(long)(freeRam())); quietReply=true; break;                     // Available RAM
-#endif
             }
           } else
           if (parameter[0]=='F') { // Fn: Debug
@@ -1387,12 +1384,4 @@ void enableGuideRate(int g) {
   amountGuideDec.fixed=doubleToFixed((guideTimerBaseRate*StepsPerSecondAxis2)/100.0);
   sei();
 }
-
-#if defined(__AVR__)
-int freeRam () {
-  extern int __heap_start, *__brkval;
-  int v;
-  return (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
-}
-#endif
 

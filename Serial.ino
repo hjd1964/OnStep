@@ -2,7 +2,7 @@
 // Communication routines for Serial0 and Serial1
 // these are more compact and faster than the Arduino provided one's
 
-#if defined(__AVR__)
+#if defined(__AVR_ATmega2560__)
 
 void Serial_Init(unsigned int baud) {
   unsigned int ubrr=F_CPU/16/baud-1;

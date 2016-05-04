@@ -85,8 +85,8 @@ void moveTo() {
 
     // set the destination near where we are now
     cli();
-    if (distDestAxis1>(long)StepsPerDegreeAxis1) { if (posAxis1>(long)targetAxis1.part.m) targetAxis1.part.m=posAxis1-(long)StepsPerDegreeAxis1; else targetAxis1.part.m=posAxis1+(long)StepsPerDegreeAxis1; targetAxis1.part.f=0; }
-    if (distDestAxis2>(long)StepsPerDegreeAxis2) { if (posAxis2>(long)targetAxis2.part.m) targetAxis2.part.m=posAxis2-(long)StepsPerDegreeAxis2; else targetAxis2.part.m=posAxis2+(long)StepsPerDegreeAxis2; targetAxis2.part.f=0; }
+    if (distDestAxis1>(long)(StepsPerDegreeAxis1*DegreesForRapidStop)) { if (posAxis1>(long)targetAxis1.part.m) targetAxis1.part.m=posAxis1-(long)(StepsPerDegreeAxis1*DegreesForRapidStop); else targetAxis1.part.m=posAxis1+(long)(StepsPerDegreeAxis1*DegreesForRapidStop); targetAxis1.part.f=0; }
+    if (distDestAxis2>(long)(StepsPerDegreeAxis2*DegreesForRapidStop)) { if (posAxis2>(long)targetAxis2.part.m) targetAxis2.part.m=posAxis2-(long)(StepsPerDegreeAxis2*DegreesForRapidStop); else targetAxis2.part.m=posAxis2+(long)(StepsPerDegreeAxis2*DegreesForRapidStop); targetAxis2.part.f=0; }
     sei();
 
     if (parkStatus==Parking) {
@@ -208,9 +208,7 @@ void moveTo() {
       timerRateAxis2=SiderealRate;
       sei();
 
-#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
       DecayModeTracking();
-#endif
             
       // other special gotos: for parking the mount and homeing the mount
       if (parkStatus==Parking) {
@@ -267,58 +265,87 @@ uint32_t isqrt32 (uint32_t n) {
 }
 
 bool DecayModeTrack=false;
+
 // if stepper drive can switch decay mode, set it here
 void DecayModeTracking() {
   if (DecayModeTrack) return;
   DecayModeTrack=true;
-#ifdef DECAY_MODE_OPEN
+#if defined(DECAY_MODE_OPEN)
   cli();
   pinMode(Axis1_Mode,INPUT);
   pinMode(Axis2_Mode,INPUT);
-  sei();
-#endif
-#ifdef DECAY_MODE_LOW
+#elif defined(DECAY_MODE_LOW)
   cli();
   pinMode(Axis1_Mode,OUTPUT);
   digitalWrite(Axis1_Mode,LOW);
   pinMode(Axis2_Mode,OUTPUT);
   digitalWrite(Axis1_Mode,LOW);
-  sei();
-#endif
-#ifdef DECAY_MODE_HIGH
+#elif defined(DECAY_MODE_HIGH)
   cli();
   pinMode(Axis1_Mode,OUTPUT);
   digitalWrite(Axis1_Mode,HIGH);
   pinMode(Axis2_Mode,OUTPUT);
   digitalWrite(Axis2_Mode,HIGH);
-  sei();
+#elif defined(MODE_SWITCH_BEFORE_SLEW_ON)
+  cli();
+  
+  if ((AXIS1_MODE & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE    & 1)); } else { pinMode(Axis1_M0,INPUT); }
+  if ((AXIS1_MODE & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE>>1 & 1)); } else { pinMode(Axis1_M1,INPUT); }
+  if ((AXIS1_MODE & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE>>2 & 1)); } else { pinMode(Axis1_M2,INPUT); }
+
+  if ((AXIS2_MODE & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE    & 1)); } else { pinMode(Axis2_M0,INPUT); }
+  if ((AXIS2_MODE & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE>>1 & 1)); } else { pinMode(Axis2_M1,INPUT); }
+  if ((AXIS2_MODE & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE>>2 & 1)); } else { pinMode(Axis2_M2,INPUT); }
+
+  stepAxis1=1;
+  stepAxis2=1;
+#else
+  cli();
 #endif
+  #ifdef MODE_SWITCH_SLEEP_ON 
+  sleep(3);
+  #endif
+  sei();
 }
 
 void DecayModeGoto() {
   if (!DecayModeTrack) return;
   DecayModeTrack=false;
-#ifdef DECAY_MODE_GOTO_OPEN
+#if defined(DECAY_MODE_GOTO_OPEN)
   cli();
   pinMode(Axis1_Mode,INPUT);
   pinMode(Axis2_Mode,INPUT);
-  sei();
-#endif
-#ifdef DECAY_MODE_GOTO_LOW
+#elif defined(DECAY_MODE_GOTO_LOW)
   cli();
   pinMode(Axis1_Mode,OUTPUT);
   digitalWrite(Axis1_Mode,LOW);
   pinMode(Axis2_Mode,OUTPUT);
   digitalWrite(Axis1_Mode,LOW);
-  sei();
-#endif
-#ifdef DECAY_MODE_GOTO_HIGH
+#elif defined(DECAY_MODE_GOTO_HIGH)
   cli();
   pinMode(Axis1_Mode,OUTPUT);
   digitalWrite(Axis1_Mode,HIGH);
   pinMode(Axis2_Mode,OUTPUT);
   digitalWrite(Axis2_Mode,HIGH);
-  sei();
+#elif defined(MODE_SWITCH_BEFORE_SLEW_ON)
+  //special case of decay control with the mode pins
+  cli();
+  if ((AXIS1_MODE_GOTO & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE_GOTO    & 1)); } else { pinMode(Axis1_M0,INPUT); }
+  if ((AXIS1_MODE_GOTO & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE_GOTO>>1 & 1)); } else { pinMode(Axis1_M1,INPUT); }
+  if ((AXIS1_MODE_GOTO & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE_GOTO>>2 & 1)); } else { pinMode(Axis1_M2,INPUT); }
+
+  if ((AXIS2_MODE_GOTO & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE_GOTO    & 1)); } else { pinMode(Axis2_M0,INPUT); }
+  if ((AXIS2_MODE_GOTO & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE_GOTO>>1 & 1)); } else { pinMode(Axis2_M1,INPUT); }
+  if ((AXIS2_MODE_GOTO & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE_GOTO>>2 & 1)); } else { pinMode(Axis2_M2,INPUT); }
+
+  stepAxis1=AXIS1_STEP_GOTO;
+  stepAxis2=AXIS2_STEP_GOTO;
+#else
+  cli();
 #endif
+  #ifdef MODE_SWITCH_SLEEP_ON
+  sleep(3);
+  #endif
+  sei();
 }
 

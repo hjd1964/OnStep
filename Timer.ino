@@ -16,25 +16,19 @@ IntervalTimer itimer1;
 #endif
 
 #if defined(AXIS1_MODE) && defined(AXIS1_MODE_GOTO)
-volatile long stepAxis1=1;
 volatile long modeAxis1_next=AXIS1_MODE;
 volatile boolean gotoModeAxis1=false;
-#else
-#define stepAxis1 1
 #endif
 
 #if defined(AXIS2_MODE) && defined(AXIS2_MODE_GOTO)
-volatile long stepAxis2=1;
 volatile long modeAxis2_next=AXIS2_MODE;
 volatile boolean gotoModeAxis2=false;
-#else
-#define stepAxis2 1
 #endif
 
 //--------------------------------------------------------------------------------------------------
 // set timer1 to rate (in microseconds*16)
 void Timer1SetRate(long rate) {
-#if defined(__AVR__)
+#if defined(__AVR_ATmega2560__)
   TCCR1B = 0; TCCR1A = 0;
   TIMSK1 = 0;
   rate=rate/PPSrateRatio;
@@ -77,7 +71,7 @@ void SetSiderealClockRate(long Interval) {
 // set timer3 to rate (in microseconds*16)
 volatile uint32_t nextAxis1Rate = 100000UL;
 void Timer3SetRate(long rate) {
-#if defined(__AVR__)
+#if defined(__AVR_ATmega2560__)
   // valid for rates down to 0.25 second, and cap the rate
   if (StepsPerSecondAxis1<31) rate=rate/64L; else rate=rate/8L;
   if (rate>65536L) rate=65536L;
@@ -89,7 +83,7 @@ void Timer3SetRate(long rate) {
 // set timer4 to rate (in microseconds*16)
 volatile uint32_t nextAxis2Rate = 100000UL;
 void Timer4SetRate(long rate) {
-#if defined(__AVR__)
+#if defined(__AVR_ATmega2560__)
   // valid for rates down to 0.25 second, and cap the rate
   if (StepsPerSecondAxis1<31) rate=rate/64L; else rate=rate/8L;
   if (rate>65536L) rate=65536L;
@@ -259,7 +253,11 @@ ISR(TIMER3_COMPA_vect)
 #endif
 
   // drivers step on the rising edge, need >=1.9uS to settle (for DRV8825 or A4988) so this is early in the routine
-  CLR(Axis1StepPORT,  Axis1StepBit);
+#if defined(__arm__) && defined(TEENSYDUINO)
+  digitalWriteFast(Axis1StepPin,LOW);
+#else
+  CLR(Axis1StepPORT,Axis1StepBit);
+#endif
 
 #if (defined(__arm__) && defined(TEENSYDUINO)) || (defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__))
   // on the much faster Teensy and Tiva TM4C run this ISR at twice the normal rate and pull the step pin low every other call
@@ -267,7 +265,7 @@ ISR(TIMER3_COMPA_vect)
     takeStepAxis1=false;
 #endif
 
-#if defined(AXIS1_MODE) && defined(AXIS1_MODE_GOTO)
+#if defined(AXIS1_MODE) && defined(AXIS1_MODE_GOTO) && !defined(MODE_SWITCH_BEFORE_SLEW_ON)
   // switch micro-step mode
   if (gotoModeAxis1!=gotoRateAxis1) {
     // only when at the home position
@@ -281,18 +279,30 @@ ISR(TIMER3_COMPA_vect)
   }
 #endif
 
-#if defined(__AVR__)
+#if defined(__AVR_ATmega2560__)
   OCR3A=nextAxis1Rate*stepAxis1;
 #endif
 
   // Guessing about 4+4+1+ 4+4+1+ 1+ 2+1+2+ 13=37 clocks between here and the step signal which is 2.3uS
   if (posAxis1!=(long)targetAxis1.part.m) { // Move the RA stepper to the target
     if (posAxis1<(long)targetAxis1.part.m) dirAxis1=1; else dirAxis1=0; // Direction control
+
+    // Guessing about 1+2+1+4+4+1=13 clocks between here and the step signal which is 0.81uS
+    // Set direction.  Needs >=0.65uS before/after rising step signal (DRV8825 or A4988).
+#if defined(__arm__) && defined(TEENSYDUINO)
     #ifdef REVERSE_AXIS1_ON
-      if (HADir==dirAxis1) CLR(Axis1DirPORT, Axis1DirBit); else SET(Axis1DirPORT, Axis1DirBit); // Set direction, HADir default LOW (=0, for my wiring.)  Needs >=0.65uS before/after rising step signal (DRV8825 or A4988).
-    #else                                                                                       // Guessing about 1+2+1+4+4+1=13 clocks between here and the step signal which is 0.81uS
+      if (HADir==dirAxis1) digitalWriteFast(Axis1DirPin, LOW); else digitalWriteFast(Axis1DirPin, HIGH);
+    #else                                                                                                 
+      if (HADir==dirAxis1) digitalWriteFast(Axis1DirPin, HIGH); else digitalWriteFast(Axis1DirPin, LOW);
+    #endif
+#else
+    #ifdef REVERSE_AXIS1_ON
+      if (HADir==dirAxis1) CLR(Axis1DirPORT, Axis1DirBit); else SET(Axis1DirPORT, Axis1DirBit);
+    #else
       if (HADir==dirAxis1) SET(Axis1DirPORT, Axis1DirBit); else CLR(Axis1DirPORT, Axis1DirBit);
     #endif
+#endif
+  
     // telescope moves WEST with the sky, blAxis1 is the amount of EAST backlash
     if (dirAxis1==1) {
       if (blAxis1<backlashAxis1) { blAxis1+=stepAxis1; inbacklashAxis1=true; } else { inbacklashAxis1=false; posAxis1+=stepAxis1; }
@@ -305,7 +315,14 @@ ISR(TIMER3_COMPA_vect)
     }
     clearAxis1=false;
   } else { 
-    if (takeStepAxis1) SET(Axis1StepPORT, Axis1StepBit); clearAxis1=true;
+    if (takeStepAxis1) {
+#if defined(__arm__) && defined(TEENSYDUINO)
+      digitalWriteFast(Axis1StepPin,HIGH);
+#else
+      SET(Axis1StepPORT, Axis1StepBit); 
+#endif
+    }
+    clearAxis1=true;
 
 #if defined(__arm__) && defined(TEENSYDUINO)
     PIT_LDVAL1=nextAxis1Rate*stepAxis1;
@@ -325,8 +342,12 @@ ISR(TIMER4_COMPA_vect)
   TimerIntClear( Timer4_base, TIMER_TIMA_TIMEOUT );
 #endif
 
+#if defined(__arm__) && defined(TEENSYDUINO)
+  digitalWriteFast(Axis2StepPin,LOW);
+#else
   // drivers step on the rising edge
-  CLR(Axis2StepPORT,  Axis2StepBit);
+  CLR(Axis2StepPORT,Axis2StepBit);
+#endif
 
 #if (defined(__arm__) && defined(TEENSYDUINO)) || (defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__))
   // on the much faster Teensy and Tiva TM4C run this ISR at twice the normal rate and pull the step pin low every other call
@@ -334,7 +355,7 @@ ISR(TIMER4_COMPA_vect)
     takeStepAxis2=false;
 #endif
 
-#if defined(AXIS2_MODE) && defined(AXIS2_MODE_GOTO)
+#if defined(AXIS2_MODE) && defined(AXIS2_MODE_GOTO) && !defined(MODE_SWITCH_BEFORE_SLEW_ON)
   // switch micro-step mode
   if (gotoModeAxis2!=gotoRateAxis2) {
     // only when at home position
@@ -348,18 +369,28 @@ ISR(TIMER4_COMPA_vect)
   }
 #endif
 
-#if defined(__AVR__)
+#if defined(__AVR_ATmega2560__)
   OCR4A=nextAxis2Rate*stepAxis2;
 #endif
   
   if (posAxis2!=(long)targetAxis2.part.m) { // move the Dec stepper to the target
     // telescope normally starts on the EAST side of the pier looking at the WEST sky
     if (posAxis2<(long)targetAxis2.part.m) dirAxis2=1; else dirAxis2=0; // Direction control
+    // Set direction.  Needs >=0.65uS before/after rising step signal (DRV8825 or A4988).
+#if defined(__arm__) && defined(TEENSYDUINO)
     #ifdef REVERSE_AXIS2_ON
-      if (DecDir==dirAxis2) SET(Axis2DirPORT, Axis2DirBit); else CLR(Axis2DirPORT, Axis2DirBit); // Set direction, decDir default HIGH (=1, for my wiring)
+      if (HADir==dirAxis2) digitalWriteFast(Axis2DirPin, LOW); else digitalWriteFast(Axis2DirPin, HIGH);
+    #else
+      if (HADir==dirAxis2) digitalWriteFast(Axis2DirPin, HIGH); else digitalWriteFast(Axis2DirPin, LOW);
+    #endif
+#else
+    #ifdef REVERSE_AXIS2_ON
+      if (DecDir==dirAxis2) SET(Axis2DirPORT, Axis2DirBit); else CLR(Axis2DirPORT, Axis2DirBit);
     #else
       if (DecDir==dirAxis2) CLR(Axis2DirPORT, Axis2DirBit); else SET(Axis2DirPORT, Axis2DirBit);
     #endif
+#endif
+   
     // telescope moving toward celestial pole in the sky, blAxis2 is the amount of opposite backlash
     if (dirAxis2==1) {
       if (blAxis2<backlashAxis2) { blAxis2+=stepAxis2; inbacklashAxis2=true; } else { inbacklashAxis2=false; posAxis2+=stepAxis2; }
@@ -372,7 +403,14 @@ ISR(TIMER4_COMPA_vect)
     }
     clearAxis2=false; 
   } else { 
-    if (takeStepAxis2) SET(Axis2StepPORT, Axis2StepBit); clearAxis2=true;
+    if (takeStepAxis2) { 
+#if defined(__arm__) && defined(TEENSYDUINO)
+      digitalWriteFast(Axis2StepPin,HIGH);
+#else
+      SET(Axis2StepPORT, Axis2StepBit);
+#endif
+    }
+    clearAxis2=true; 
 
 #if defined(__arm__) && defined(TEENSYDUINO)
     PIT_LDVAL2=nextAxis2Rate*stepAxis2;
@@ -399,7 +437,7 @@ void ClockSync() {
 }
 #endif
 
-#if defined(__AVR__)
+#if defined(__AVR_ATmega2560__)
 // UART Receive Complete Interrupt Handler for Serial0
 ISR(USART0_RX_vect)  {
   Serial_recv_buffer[Serial_recv_tail]=UDR0; 

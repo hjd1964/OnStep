@@ -56,7 +56,13 @@ bool Ethernet_cmd_busy() {
 void Ethernet_send(const char data[]) {
   if (!cmd_client) return;
   cmd_client.flush();
+
+#ifdef __AVR_ATmega2560__
   cmd_client.write(data,strlen(data));
+#else
+  cmd_client.print(data);
+#endif
+  
   cmdTransactionLast_ms=millis();
 }
 
@@ -249,7 +255,12 @@ boolean www_send() {
     if ((c==0) || (www_xmit_buffer_send_pos>www_xmit_buffer_size-2)) { buffer_empty=true; break; }
     www_xmit_buffer_send_pos++; count++;
   }
+
+#ifdef __AVR_ATmega2560__
   www_client.write(buf,count);
+#else
+  www_client.print(buf);
+#endif
 
   // hit end of www_xmit_buffer? reset and start over
   if (buffer_empty) {

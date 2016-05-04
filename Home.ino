@@ -25,9 +25,7 @@ boolean goHome() {
 
   homeMount=true;
   
-#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
   DecayModeGoto();
-#endif
   
   return true;
 }
@@ -113,9 +111,8 @@ boolean setHome() {
   guideDurationLastDec= 0;
 
   // initialize/disable the stepper drivers
-#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
   DecayModeTracking();
-#endif
+
   digitalWrite(Axis1_EN,Axis1_Disabled);
   digitalWrite(Axis2_EN,Axis2_Disabled);
 
