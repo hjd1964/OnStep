@@ -135,23 +135,50 @@
                                      // fork/yolk mount with meridian flips turned off by setting the minutesPastMeridian values to cover the whole sky)
 #define MaxAzm                   180 // Alt/Az mounts only. +/- maximum allowed Azimuth, default =  180.  Allowed range is 180 to 360
 
-// Stepper driver micro-step mode control (the _MODE_GOTO settings engage during slews at <128us/step)
-// M0, M1, and M2 are on Pins 22,23, and 24 for RA (Teensy3.1 Pins 13,14,15.)  M0, M1, M2 are on Pins 27,28,29 for Dec (Teensy3.1 Pins 18,19,20.)
-// DRV8825: 5=32x, 4=16x, 3=8x, 2=4x, 1=2x, 0=1x
-#define AXIS1_MODE_OFF               // programs the RA/Az uStep mode M0/M1/M2, optional and default _OFF. Other values 0 to 7 (0xb000 to 111): for example "#define AXIS1_MODE 4"
-#define AXIS1_MODE_GOTO_OFF          // programs the RA/Az uStep mode M0/M1/M2, used during gotos, optional and default _OFF. Other values 0 to 7 (0xb000 to 111): for example "#define AXIS1_MODE_GOTO 4"
+// Stepper driver mode control (micro-step and/or decay):
+// M0, M1, and M2 are on Pins 25,27, and 29 for RA (Teensy3.2 Pins 20,19,18.)  M0, M1, M2 are on Pins 34,32,30 for Dec (Teensy3.2 Pins 8,7,6.)
+// values 0 to 7 (0b000 to 111): for example "#define AXIS1_MODE 4" is the same as "#define AXIS1_MODE 0b100" which sets M2 to HIGH, M1 to LOW, and M0 to LOW
+//                 / | \
+//               M2  M1 M0
+// *IF* MODE_SWITCH_BEFORE_SLEW_ON is used... for full tri-state control:
+// values 0b000 000     to 111111): for example "#define AXIS1_MODE 0b100010" sets M2 to OPEN, M1 to HIGH, M0 to LOW (note that 0b100010 = 34 so "#define AXIS1_MODE 34" would have the same effect)
+//        open? on/off                                             open?  on/off
+//                                                              M2 M1 M0  M2 M1 M0
+//
+// Examples:
+// DRV8825, micro-stepping modes: 5=32x, 4=16x, 3=8x, 2=4x, 1=2x, 0=1x
+// SilentStepStick configurations (M0 is CFG1, M1 is CFG2, M2 is CFG3):
+// CFG3 always open here...
+// CFG2,CFG1        Microsteps      Interpolation      Chopper Mode    _MODE/_MODE_GOTO value
+// GND,GND         1 (Fullstep)     N                  spreadCycle     0b100000
+// GND,VCC_IO      2 (Halfstep)     N                      "           0b100001
+// GND,open        2 (Halfstep)     Y, to 256 μsteps       "           0b101000
+// VCC_IO,GND      4 (Quarterstep)  N                      "           0b100010
+// VCC_IO,VCC_IO  16 μsteps         N                      "           0b100011
+// VCC_IO,open     4 (Quarterstep)  Y, to 256 μsteps       "           0b101010
+// open,GND       16 μsteps         Y, to 256 μsteps       "           0b110000
+// open,VCC_IO     4 (Quarterstep)  Y, to 256 μsteps   stealthChop     0b110001
+// open,open      16 μsteps         Y, to 256 μsteps       "           0b111000
+//
+#define AXIS1_MODE_OFF               // programs the RA/Az uStep mode M0/M1/M2, optional and default _OFF.
+#define AXIS1_MODE_GOTO_OFF          // programs the RA/Az uStep mode M0/M1/M2, used during gotos, optional and default _OFF.
 #define AXIS1_STEP_GOTO 1            // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
-#define AXIS2_MODE_OFF               // programs the Dec/Alt uStep mode M0/M1/M2, optional and default _OFF. Other values 0 to 7 (0xb000 to 111)
-#define AXIS2_MODE_GOTO_OFF          // programs the Dec/Alt uStep mode M0/M1/M2, used during gotos, optional and default _OFF. Other values 0 to 7 (0xb000 to 111)
+#define AXIS2_MODE_OFF               // programs the Dec/Alt uStep mode M0/M1/M2, optional and default _OFF.
+#define AXIS2_MODE_GOTO_OFF          // programs the Dec/Alt uStep mode M0/M1/M2, used during gotos, optional and default _OFF.
 #define AXIS2_STEP_GOTO 1            // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
+#define MODE_SWITCH_BEFORE_SLEW_OFF  // _ON for _MODE and _MODE_GOTO settings to start/stop just before/after the slew, otherwise they are active during the slew at <128uS/step)
 
-// Stepper driver decay mode control (for both Axis, the _MODE_GOTO settings engage during slews)
-// Axis1 decay mode is on Pin 32 and Axis2 decay mode is on Pin 33.  Options are _HIGH, _LOW, _OPEN, default is _OFF
-// DRV8825 can be configured for the following decay modes: Fast (_HIGH,) Slow (_LOW,) and Mixed Mode (_OPEN)
-#define DECAY_MODE_OFF               // decay mode used during tracking, optional and default _OFF
-#define DECAY_MODE_GOTO_OFF          // decay mode used during slews, optional and default _OFF
+// Secondary stepper driver decay control (for both Axis, the _DECAY_MODE and _DECAY_MODE_GOTO settings always start/stop just before/after the slew)
+// Axis1 decay mode is on Pin 41 and Axis2 decay mode is on Pin 40.  Options are _HIGH, _LOW, _OPEN, default is _OFF (not supported on Teensy3.2)
+// MODE_SWITCH_BEFORE_SLEW must be _OFF if using this
+#define DECAY_MODE_OFF
+#define DECAY_MODE_GOTO_OFF            
+
+// if the decay/micro-step mode switch happens before/after a slew, inserts a 3ms delay before the motors take a step
+#define MODE_SWITCH_SLEEP_OFF
 
 // THAT'S IT FOR USER CONFIGURATION!
 
 // -------------------------------------------------------------------------------------------------------------------------
+
 

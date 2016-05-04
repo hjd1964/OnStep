@@ -303,7 +303,7 @@ void DecayModeTracking() {
   cli();
 #endif
   #ifdef MODE_SWITCH_SLEEP_ON 
-  sleep(3);
+  delay(3);
   #endif
   sei();
 }
@@ -344,7 +344,7 @@ void DecayModeGoto() {
   cli();
 #endif
   #ifdef MODE_SWITCH_SLEEP_ON
-  sleep(3);
+  delay(3);
   #endif
   sei();
 }

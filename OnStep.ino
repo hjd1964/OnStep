@@ -45,6 +45,7 @@
 // Notice OnStep uses the EthernetPlus.h library for the W5100:
 // this is available at: https://github.com/hjd1964/EthernetPlus and should be installed in your "~\Documents\Arduino\libraries" folder
 #if defined(W5100_ON)
+//#include "SPI.h"
 //#include "EthernetPlus.h"
 #endif
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
@@ -148,6 +149,9 @@ volatile boolean useTimerRateRatio     = (StepsPerDegreeAxis1!=StepsPerDegreeAxi
 #define SecondsPerWormRotationAxis1      ((long)(StepsPerWormRotationAxis1/StepsPerSecondAxis1))
 volatile double StepsForRateChangeAxis1= (double)DegreesForAcceleration*(double)StepsPerDegreeAxis1*4.0;
 volatile double StepsForRateChangeAxis2= (double)DegreesForAcceleration*(double)StepsPerDegreeAxis2*4.0;
+#ifndef DegreesForRapidStop
+#define DegreesForRapidStop 1.0
+#endif
 
 #if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
 #define cli() noInterrupts()
@@ -227,6 +231,11 @@ volatile fixed_t targetAxis1;                            // hour angle of goto e
 volatile byte dirAxis1   = 1;                            // stepping direction + or -
 double newTargetRA       = 0.0;                          // holds the RA for goTos
 fixed_t origTargetAxis1;
+#if defined(AXIS1_MODE) && defined(AXIS1_MODE_GOTO)
+volatile long stepAxis1=1;
+#else
+#define stepAxis1 1
+#endif
 
 volatile long posAxis2   = 90L*(long)StepsPerDegreeAxis2;// declination position in steps
 long trueAxis2           = 90L*(long)StepsPerDegreeAxis2;// correction to above for motor shaft position steps
@@ -235,6 +244,11 @@ volatile fixed_t targetAxis2;                            // declination of goto 
 volatile byte dirAxis2   = 1;                            // stepping direction + or -
 double newTargetDec      = 0.0;                          // holds the Dec for goTos
 long origTargetAxis2     = 0;
+#if defined(AXIS2_MODE) && defined(AXIS2_MODE_GOTO)
+volatile long stepAxis2=1;
+#else
+#define stepAxis2 1
+#endif
 
 double newTargetAlt=0.0, newTargetAzm=0.0;         // holds the altitude and azmiuth for slews
 double currentAlt = 45;                            // the current altitude
@@ -257,7 +271,7 @@ int    maxAlt;                                     // the maximum altitude, in d
 // for now, the #defines below are used to program the port modes using the standard Arduino library
 
 // defines for direct port control
-#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+#if defined(__AVR_ATmega2560__)
 // The PEC index sense is a 5V logic input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
 #define PecPin         2
 
@@ -741,17 +755,17 @@ fixed_t guideDec;
 // Reticule control
 #ifdef RETICULE_LED_PINS
 int reticuleBrightness=RETICULE_LED_PINS;
-#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
-#define reticulePin 44
+#if defined(__AVR_ATmega2560__)
+#define ReticulePin 44
 #endif
 #if defined(__arm__) && defined(TEENSYDUINO)
-#define reticulePin 9
+#define ReticulePin 9
 #endif
 #if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
-#define reticulePin 33
+#define ReticulePin 33
 #endif
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
-#define reticulePin 33
+#define ReticulePin 33
 #endif
 #endif
 
@@ -929,8 +943,8 @@ void setup() {
     #undef STATUS_LED_PINS
   #endif
 #endif
-  pinMode(reticulePin, OUTPUT);
-  analogWrite(reticulePin,reticuleBrightness);
+  pinMode(ReticulePin, OUTPUT);
+  analogWrite(ReticulePin,reticuleBrightness);
 #endif
 
 // light second status LED (provides just GND)
@@ -989,19 +1003,19 @@ void setup() {
   pinMode(Axis2_EN,OUTPUT); digitalWrite(Axis2_EN,Axis2_Disabled);
 
 // if the stepper driver mode select pins are wired in, program any requested micro-step mode
-#ifdef AXIS1_MODE
+#ifdef AXIS1_MODE && !defined(MODE_SWITCH_BEFORE_SLEW_ON)
   pinMode(Axis1_M0, OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE & 1));
   pinMode(Axis1_M1, OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE>>1 & 1));
   pinMode(Axis1_M2, OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE>>2 & 1));
 #endif
-#ifdef AXIS2_MODE
+#ifdef AXIS2_MODE && !defined(MODE_SWITCH_BEFORE_SLEW_ON)
   pinMode(Axis2_M0, OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE & 1));
   pinMode(Axis2_M1, OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE>>1 & 1));
   pinMode(Axis2_M2, OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE>>2 & 1));
 #endif
 
 // if the stepper driver decay control is wired in request the decay mode
-#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+#if defined(__AVR_ATmega2560__)
   DecayModeTracking();
 #endif
 
@@ -1449,7 +1463,7 @@ void loop() {
     #ifdef PEC_SENSE
     // see if we're on the PEC index
     if (trackingState==TrackingSidereal) 
-#if defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+#if defined(__AVR_ATmega2560__)
     pecAnalogValue = analogRead(1);
 #elif defined(__arm__) && defined(TEENSYDUINO)
     pecAnalogValue = analogRead(14);
