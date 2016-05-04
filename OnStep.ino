@@ -1014,10 +1014,8 @@ void setup() {
   pinMode(Axis2_M2, OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE>>2 & 1));
 #endif
 
-// if the stepper driver decay control is wired in request the decay mode
-#if defined(__AVR_ATmega2560__)
+// request the tracking decay mode
   DecayModeTracking();
-#endif
 
 #ifdef PPS_SENSE_ON
 #if defined(__AVR_ATmega2560__)
