@@ -137,8 +137,9 @@
                                      // fork/yolk mount with meridian flips turned off by setting the minutesPastMeridian values to cover the whole sky)
 #define MaxAzm                   180 // Alt/Az mounts only. +/- maximum allowed Azimuth, default =  180.  Allowed range is 180 to 360
 
+
 // Stepper driver mode control (micro-step and/or decay):
-// M0, M1, and M2 are on Pins 25,27, and 29 for RA (Teensy3.2 Pins 20,19,18.)  M0, M1, M2 are on Pins 34,32,30 for Dec (Teensy3.2 Pins 8,7,6.)
+// M0, M1, and M2 are on Pins 22,23, and 24 for RA (Teensy3.1 Pins 13,14,15.)  M0, M1, M2 are on Pins 27,28,29 for Dec (Teensy3.1 Pins 18,19,20.)
 // values 0 to 7 (0b000 to 111): for example "#define AXIS1_MODE 4" is the same as "#define AXIS1_MODE 0b100" which sets M2 to HIGH, M1 to LOW, and M0 to LOW
 //                 / | \
 //               M2  M1 M0
