@@ -107,10 +107,8 @@ void moveTo() {
   long temp;
   if (distStartAxis1>distDestAxis1) {
     temp=(StepsForRateChangeAxis1/isqrt32(distDestAxis1));   // slow down (temp gets bigger)
-//  if ((temp<100) && (temp>=10))  temp=101;                 // exclude a range of speeds
   } else {
     temp=(StepsForRateChangeAxis1/isqrt32(distStartAxis1));  // speed up (temp gets smaller)
-//  if ((temp<100) && (temp>=10))  temp=9;                   // exclude a range of speeds
   }
   if (temp<maxRate) temp=maxRate;                            // fastest rate
   if (temp>TakeupRate) temp=TakeupRate;                      // slowest rate
@@ -119,16 +117,10 @@ void moveTo() {
   // Now, for Declination
   if (distStartAxis2>distDestAxis2) {
     temp=(StepsForRateChangeAxis2/isqrt32(distDestAxis2));   // slow down
-//  if ((temp<100) && (temp>=10))  temp=101;                 // exclude a range of speeds
   } else {
     temp=(StepsForRateChangeAxis2/isqrt32(distStartAxis2));  // speed up
-//  if ((temp<100) && (temp>=10))  temp=9;                   // exclude a range of speeds
   }
-#ifdef MaxRateDecRatio
-  if (temp<maxRate*MaxRateDecRatio) temp=maxRate*MaxRateDecRatio; // fastest rate
-#else
   if (temp<maxRate) temp=maxRate;                            // fastest rate
-#endif
   if (temp>TakeupRate) temp=TakeupRate;                      // slowest rate
   cli(); timerRateAxis2=temp; sei();
 
@@ -340,4 +332,3 @@ void DecayModeGoto() {
   #endif
   sei();
 }
-
