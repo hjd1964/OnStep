@@ -315,14 +315,27 @@ void processCommands() {
 //         Returns: SS#
       if (command[1]=='U')  { 
         i=0;
+        if (trackingState!=TrackingSidereal)     reply[i++]='n';
         if (trackingState!=TrackingMoveTo)       reply[i++]='N';
         const char *parkStatusCh = "pIPF";       reply[i++]=parkStatusCh[parkStatus]; // not [p]arked, parking [I]n-progress, [P]arked, Park [F]ailed
         if (pecRecorded)                         reply[i++]='R';
+        if (pecAutoRecord)                       reply[i++]='W';
         if (atHome)                              reply[i++]='H'; 
         if (PPSsynced)                           reply[i++]='S';
         if ((guideDirAxis1) || (guideDirAxis2))  reply[i++]='G';
         if (faultAxis1 || faultAxis2)            reply[i++]='f';
         if (refraction)                          reply[i++]='r'; else reply[i++]='s';
+        if (onTrack)                             reply[i++]='t';
+        // provide mount type
+        #ifdef MOUNT_TYPE_GEM
+        reply[i++]='E';
+        #endif
+        #if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT)
+        reply[i++]='K';
+        #endif
+        #ifdef MOUNT_TYPE_ALTAZM
+        reply[i++]='A';
+        #endif
         reply[i++]='0'+lastError;
         reply[i++]=0;
         quietReply=true;
@@ -359,13 +372,157 @@ void processCommands() {
               case '5': sprintf(reply,"%ld",(long)(pdCor*3600.0)); quietReply=true; break;    // pdCor
             }
           } else
+          if (parameter[0]=='8') { // 8n: Date/Time
+            switch (parameter[1]) {
+              case '0': i=highPrecision; highPrecision=true; f=UT1; while (f>24.0) f-=24.0; doubleToHms(reply,&f); highPrecision=i; quietReply=true; break;  // UTC time
+              case '1': f1=JD; f=UT1; while (f>24.0) { f-=24.0; f1+=1; } greg(f1,&i2,&i,&i1); i2=(i2/99.99999-floor(i2/99.99999))*100; sprintf(reply,"%d/%d/%d",i,i1,i2); quietReply=true; break; // UTC date
+            }
+          } else
           if (parameter[0]=='9') { // 9n: Misc.
             switch (parameter[1]) {
               case '0': dtostrf(guideRates[currentPulseGuideRate]/15.0,2,2,reply); quietReply=true; break;  // pulse-guide rate
-              case '1': sprintf(reply,"%i",pecAnalogValue); quietReply=true; break;                                  // pec analog value
+              case '1': sprintf(reply,"%i",pecAnalogValue); quietReply=true; break;                         // pec analog value
               case '2': sprintf(reply,"%ld",(long)(maxRate/16L)); quietReply=true; break;                   // MaxRate
               case '3': sprintf(reply,"%ld",(long)(MaxRate)); quietReply=true; break;                       // MaxRate (default)
+              case '4': if (meridianFlip==MeridianFlipNever) { sprintf(reply,"%d N",(int)(pierSide)); } else { sprintf(reply,"%d",(int)(pierSide)); } quietReply=true; break; // pierSide (N if never)
             }
+          } else
+          if (parameter[0]=='E') { // En: Get config
+            if (parameter[1]=='0') { // simple values
+              String c;
+              #ifdef DEBUG_ON
+                c="1";
+              #else
+                c="0";
+              #endif
+              #ifdef SYNC_ANYWHERE_ON
+                c+="1";
+              #else
+                c+="0";
+              #endif
+              #if defined(MOUNT_TYPE_GEM)
+                c+="0";
+              #elif defined(MOUNT_TYPE_FORK)
+                c+="1";
+              #elif defined(MOUNT_TYPE_FORKALT)
+                c+="2";
+              #elif defined(MOUNT_TYPE_ALTAZM)
+                c+="3";
+              #else
+                c+="9";
+              #endif
+              #if defined(ST4_OFF)
+                c+="0";
+              #elif defined(ST4_ON)
+                c+="1";
+              #elif defined(ST4_PULLUP)
+                c+="2";
+              #else
+                c+="0";
+              #endif
+              #if defined(ST4_ALTERNATE_PINS_ON)
+                c+="1";
+              #else
+                c+="0";
+              #endif
+              #if defined(PPS_SENSE_ON)
+                c+="1";
+              #else
+                c+="0";
+              #endif
+              #if defined(PEC_SENSE_ON)
+                c+="1";
+              #elif PEC_SENSE_PULLUP
+                c+="2";
+              #else
+                c+="0";
+              #endif
+              #ifdef LIMIT_SENSE_ON
+                c+="1";
+              #else
+                c+="0";
+              #endif
+              #ifdef STATUS_LED_PINS_ON
+                c+="1";
+              #else
+                c+="0";
+              #endif
+              #if defined(STATUS_LED2_PINS_ON)
+                c+="1";
+              #elif defined(STATUS_LED2_PINS)
+                c+="2";
+              #else
+                c+="0";
+              #endif
+              #ifdef RETICULE_LED_PINS
+                c+="1";
+              #else
+                c+="0";
+              #endif
+              #ifdef POWER_SUPPLY_PINS_ON
+                c+="1";
+              #else
+                c+="0";
+              #endif
+              #if defined(AXIS1_DISABLED_HIGH)
+                c+="1";
+              #elif defined(AXIS1_DISABLED_LOW)
+                c+="0";
+              #else
+                c+="9";
+              #endif
+              #if defined(AXIS2_DISABLED_HIGH)
+                c+="1";
+              #elif defined(AXIS2_DISABLED_LOW)
+                c+="0";
+              #else
+                c+="9";
+              #endif
+              #if defined(AXIS1_FAULT_LOW)
+                c+="0";
+              #elif defined(AXIS1_FAULT_HIGH)
+                c+="1";
+              #elif defined(AXIS1_FAULT_OFF)
+                c+="2";
+              #endif
+              #if defined(AXIS2_FAULT_LOW)
+                c+="0";
+              #elif defined(AXIS2_FAULT_HIGH)
+                c+="1";
+              #elif defined(AXIS2_FAULT_OFF)
+                c+="2";
+              #endif
+              #ifdef TRACK_REFRACTION_RATE_DEFAULT_ON
+                c+="1";
+              #else
+                c+="0";
+              #endif
+              #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
+                c+="1";
+              #else
+                c+="0";
+              #endif
+              #ifdef RememberMaxRate_ON
+                c+="1";
+              #else
+                c+="0";
+              #endif
+              strcpy(reply,(char *)c.c_str());
+              quietReply=true;
+            } else
+            if (parameter[1]=='1') { sprintf(reply,"%ld",(long)MaxRate); quietReply=true; } else
+            if (parameter[1]=='2') { dtostrf(DegreesForAcceleration,2,1,reply); quietReply=true; } else
+            if (parameter[1]=='3') { sprintf(reply,"%ld",(long)round(BacklashTakeupRate)); quietReply=true; } else
+            if (parameter[1]=='4') { sprintf(reply,"%ld",(long)round(StepsPerDegreeAxis1)); quietReply=true; } else
+            if (parameter[1]=='5') { sprintf(reply,"%ld",(long)round(StepsPerDegreeAxis2)); quietReply=true; } else
+            if (parameter[1]=='6') { dtostrf(StepsPerSecondAxis1,3,6,reply); quietReply=true; } else
+            if (parameter[1]=='7') { sprintf(reply,"%ld",(long)round(StepsPerWormRotationAxis1)); quietReply=true; } else
+            if (parameter[1]=='8') { sprintf(reply,"%ld",(long)round(PECBufferSize)); quietReply=true; } else
+            if (parameter[1]=='9') { sprintf(reply,"%ld",(long)round(MinutesPastMeridianE)); quietReply=true; } else
+            if (parameter[1]=='A') { sprintf(reply,"%ld",(long)round(MinutesPastMeridianW)); quietReply=true; } else
+            if (parameter[1]=='B') { sprintf(reply,"%ld",(long)round(UnderPoleLimit)); quietReply=true; } else
+            if (parameter[1]=='C') { sprintf(reply,"%ld",(long)round(MinDec)); quietReply=true; } else
+            if (parameter[1]=='D') { sprintf(reply,"%ld",(long)round(MaxDec)); quietReply=true; } else commandError=true;
           } else
           if (parameter[0]=='F') { // Fn: Debug
             long temp;
@@ -764,11 +921,11 @@ void processCommands() {
 //         0 if Object is within slew range, 1 otherwise
       if (command[1]=='a')  { if (!dmsToDouble(&newTargetAlt,parameter,true)) commandError=true; } else 
 //  :SBn#  Set Baud Rate n for Serial-0, where n is an ASCII digit (1..9) with the following interpertation
-//         1=56.7K, 2=38.4K, 3=28.8K, 4=19.2K, 5=14.4K, 6=9600, 7=4800, 8=2400, 9=1200
+//         0=115.2K, 1=56.7K, 2=38.4K, 3=28.8K, 4=19.2K, 5=14.4K, 6=9600, 7=4800, 8=2400, 9=1200
 //         Returns: "1" At the current baud rate and then changes to the new rate for further communication
       if (command[1]=='B') {
         i=(int)(parameter[0]-'0');
-        if ((i>0) && (i<10)) {
+        if ((i>=0) && (i<10)) {
           if (process_command==COMMAND_SERIAL) {
             Serial_print("1"); while (Serial_transmit()); delay(20); Serial_Init(baudRate[i]);
           } else if (process_command==COMMAND_ETHERNET) {
@@ -804,14 +961,13 @@ void processCommands() {
       if (command[1]=='G')  { 
         if (strlen(parameter)<7) {
           double f=0.0;
-          char *temp=strchr(parameter,':'); long p=(long)(temp - parameter); if (p<0L) p=strlen(parameter); if ((unsigned long)p>strlen(parameter)) p=strlen(parameter);
-          if (strlen(parameter)>3) {
-            char *temp1 = new char[4]; strcpy( temp1, "xxx" );
-            for (int i=0; i<3; i++) { temp1[i]=parameter[i+p]; }
-            if ((temp1[0]=':') && (temp[1]='4') && temp[2]=='5') { parameter[p]=0; f=0.75; } else
-            if ((temp1[0]=':') && (temp[1]='3') && temp[2]=='0') { parameter[p]=0; f=0.5; } else { parameter[0]='9'; parameter[1]='9'; parameter[2]=0; } // force error if not :30 of :45
+          char *temp=strchr(parameter,':');
+          if (temp) {
+            if ((temp[0]==':') && (temp[1]=='4') && temp[2]=='5') { temp[0]=0; f=0.75; } else
+            if ((temp[0]==':') && (temp[1]=='3') && temp[2]=='0') { temp[0]=0; f=0.5; } else 
+            if ((temp[0]==':') && (temp[1]=='0') && temp[2]=='0') { temp[0]=0; f=0.0; } else { i=-999; } // force error if not :00 or :30 or :45
           }
-          
+
           if ( (atoi2(parameter,&i)) && ((i>=-24) && (i<=24))) {
             if (i<0) timeZone=i-f; else timeZone=i+f;
             b=encodeTimeZone(timeZone)+128;
@@ -936,10 +1092,23 @@ void processCommands() {
               if (maxRate<(MaxRate/2L)*16L) maxRate=(MaxRate/2L)*16L;
               if (maxRate>(MaxRate*2L)*16L) maxRate=(MaxRate*2L)*16L;
               EEPROM_writeInt(EE_maxRate,(int)(maxRate/16L));
+              SetAccelerationRates(maxRate); // set the new acceleration rate
+            break; // maxRate
+            case '3':
+              quietReply=true;
+              switch (parameter[3]) {
+                case '5': maxRate=MaxRate*32L; break; // 50%
+                case '4': maxRate=MaxRate*24L; break; // 75%
+                case '3': maxRate=MaxRate*16L; break; // 100%
+                case '2': maxRate=MaxRate*12L; break; // 150%
+                case '1': maxRate=MaxRate*8L;  break; // 200%
+              break;
+              }
+              SetAccelerationRates(maxRate); // set the new acceleration rate
             break; // maxRate
           }
         } else commandError=true;
-        getEqu(&f,&f1,false);  
+        //getEqu(&f,&f1,false);  
       } else 
 //  :SzDDD*MM#
 //          Sets the target Object Azimuth
@@ -1384,4 +1553,3 @@ void enableGuideRate(int g) {
   amountGuideDec.fixed=doubleToFixed((guideTimerBaseRate*StepsPerSecondAxis2)/100.0);
   sei();
 }
-
