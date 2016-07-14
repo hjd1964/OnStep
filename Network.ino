@@ -294,6 +294,7 @@ void Ethernet_get() {
     if (maxRate<(MaxRate/2L)*16L) maxRate=(MaxRate/2L)*16L;
     if (maxRate>(MaxRate*2L)*16L) maxRate=(MaxRate*2L)*16L;
     EEPROM_writeInt(EE_maxRate,(int)(maxRate/16L));
+    SetAccelerationRates(maxRate); // set the new acceleration rate
   }
   // Overhead and Horizon Limits
   if ((get_names[0]=='o') && (get_names[1]=='l')) {
@@ -574,7 +575,7 @@ const char html_indexAz1[] PROGMEM = "Az1: " Axis1 "=<font class=\"c\">%s</font>
 const char html_indexAz2[] PROGMEM = "Az2: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
 const char html_indexPier[] PROGMEM = "Pier Side=<font class=\"c\">%s</font> (meridian flips <font class=\"c\">%s</font>)<br /><br />";
 const char html_index8[] PROGMEM = "Tracking: <font class=\"c\">%s %s</font><br />";
-const char html_index9[] PROGMEM = "Parking: <font class=\"c\">%s</font><br /><br />";
+const char html_index9[] PROGMEM = "Park: <font class=\"c\">%s</font><br /><br />";
 const char html_index10[] PROGMEM = "Last Error: <font class=\"c\">%s</font><br />";
 const char html_indexFault[] PROGMEM =  "Stepper Driver: " Axis1 " axis %s, " Axis2 " axis %s<br /><br />";
 const char html_indexMaxRate[] PROGMEM = "Current MaxRate: <font class=\"c\">%ld</font> (Default MaxRate: <font class=\"c\">%ld</font>)<br /><br />";
@@ -1521,4 +1522,3 @@ void config_html_page() {
 }
 
 #endif
-
