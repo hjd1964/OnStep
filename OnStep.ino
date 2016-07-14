@@ -45,8 +45,8 @@
 // Notice OnStep uses the EthernetPlus.h library for the W5100:
 // this is available at: https://github.com/hjd1964/EthernetPlus and should be installed in your "~\Documents\Arduino\libraries" folder
 #if defined(W5100_ON)
-//#include "SPI.h"
-//#include "EthernetPlus.h"
+#include "SPI.h"
+#include "EthernetPlus.h"
 #endif
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
 //#include "Ethernet.h"
@@ -60,8 +60,8 @@
 #endif
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "05 04 16"
-#define FirmwareNumber "1.0a33"
+#define FirmwareDate   "06 17 16"
+#define FirmwareNumber "1.0a34"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -146,9 +146,13 @@ volatile double  timerRateRatio        = ((double)StepsPerDegreeAxis1/(double)St
 volatile boolean useTimerRateRatio     = (StepsPerDegreeAxis1!=StepsPerDegreeAxis2);
 #define StepsPerSecondAxis1              ((double)StepsPerDegreeAxis1/240.0)
 #define StepsPerSecondAxis2              ((double)StepsPerDegreeAxis2/240.0)
+#define BreakDistAxis1                   (2L)  //(2L+(long)(StepsPerDegreeAxis1/24000L))
+#define BreakDistAxis2                   (2L)  //(2L+(long)(StepsPerDegreeAxis2/24000L))
 #define SecondsPerWormRotationAxis1      ((long)(StepsPerWormRotationAxis1/StepsPerSecondAxis1))
-volatile double StepsForRateChangeAxis1= (double)DegreesForAcceleration*(double)StepsPerDegreeAxis1*4.0;
-volatile double StepsForRateChangeAxis2= (double)DegreesForAcceleration*(double)StepsPerDegreeAxis2*4.0;
+volatile double StepsForRateChangeAxis1= ((double)DegreesForAcceleration/sqrt((double)StepsPerDegreeAxis1))*0.3333333*StepsPerDegreeAxis1*MaxRate;
+volatile double StepsForRateChangeAxis2= ((double)DegreesForAcceleration/sqrt((double)StepsPerDegreeAxis2))*0.3333333*StepsPerDegreeAxis2*MaxRate;
+//volatile double StepsForRateChangeAxis1= (double)DegreesForAcceleration*(double)StepsPerDegreeAxis1*4.0;
+//volatile double StepsForRateChangeAxis2= (double)DegreesForAcceleration*(double)StepsPerDegreeAxis2*4.0;
 #ifndef DegreesForRapidStop
 #define DegreesForRapidStop 1.0
 #endif
@@ -271,9 +275,10 @@ int    maxAlt;                                     // the maximum altitude, in d
 // for now, the #defines below are used to program the port modes using the standard Arduino library
 
 // defines for direct port control
-#if defined(__AVR_ATmega2560__)
+#if defined(__AVR_ATmega2560__) && !defined(ALTERNATE_PINMAP_ON)
 // The PEC index sense is a 5V logic input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
 #define PecPin         2
+#define AnalogPecPin   1
 
 // The limit switch sense is a 5V logic input which uses the internal pull up, shorted to ground it stops gotos/tracking
 #define LimitPin       3
@@ -282,62 +287,47 @@ int    maxAlt;                                     // the maximum altitude, in d
 //                                  Atmel   2560
 #define LEDposPin      8    // Pin 8 (LED)   PH5
 #define LEDnegPin      9    // Pin 9 (GND)   PH6
-
-// The HA(RA) and Dec jumpers (going to the big easy drivers) are simply four wire jumper cables, each has identical wiring - simple modular construction
-#define Axis2DirPin    4    // Pin 4 (Dir)   PG5
-#define Axis25vPin     5    // Pin 5 (5V?)   PE3
-#define Axis2StepPin   6    // Pin 6 (Step)  PH3
-#define Axis2GndPin    7    // Pin 7 (GND)   PH4
-
 #define LEDneg2Pin    10    // Pin 10 (GND)  PB4
+#define ReticulePin   44    // Pin 44 (GND)  
 
 // The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
 // The Arduino attachInterrupt function works in two modes, on the '2560 it takes an Interrupt# on the Teensy and others it takes a Pin#
 #define PpsInt         2    // Interrupt 2 on Pin 21 (alternate Int3 on Pin20)
 
 #define Axis1DirPin   11    // Pin 11 (Dir)  PB5
+#define Axis1DirBit    5    //
+#define Axis1DirPORT  PORTB //
 #define Axis15vPin    12    // Pin 12 (5V?)  PB6
 #define Axis1StepPin  13    // Pin 13 (Step) PB7
+#define Axis1StepBit   7    //
+#define Axis1StepPORT PORTB //
                             // Pin GND (GND)
-                         
+
 // Pins to enable/disable the stepper drivers and set microstep mode, optional and normally just hard-wired (DRV8825)/ignored (BED-A4988)
 #define Axis1_M0      22    // Pin 22 (Microstep Mode 0)
 #define Axis1_M1      23    // Pin 23 (Microstep Mode 1)
 #define Axis1_M2      24    // Pin 24 (Microstep Mode 2)
 #define Axis1_EN      25    // Pin 25 (Enabled when LOW)
 #define Axis1_FAULT   26    // Pin 26 (Fault if LOW)
+#define Axis1_Mode    32    // Pin 32 (Mode switch for Axis1)
 
+// The HA(RA) and Dec jumpers (going to the big easy drivers) are simply four wire jumper cables, each has identical wiring - simple modular construction
+#define Axis2DirPin    4    // Pin 4 (Dir)   PG5
+#define Axis2DirBit    5    //
+#define Axis2DirPORT  PORTG //
+#define Axis25vPin     5    // Pin 5 (5V?)   PE3
+#define Axis2StepPin   6    // Pin 6 (Step)  PH3
+#define Axis2StepBit   3    //
+#define Axis2StepPORT PORTH //
+#define Axis2GndPin    7    // Pin 7 (GND)   PH4
+
+// Pins to enable/disable the stepper drivers and set microstep mode, optional and normally just hard-wired (DRV8825)/ignored (BED-A4988)
 #define Axis2_M0      27    // Pin 27 (Microstep Mode 0)
 #define Axis2_M1      28    // Pin 28 (Microstep Mode 1)
 #define Axis2_M2      29    // Pin 29 (Microstep Mode 2)
 #define Axis2_EN      30    // Pin 30 (Enabled when LOW)
 #define Axis2_FAULT   31    // Pin 31 (Fault if LOW)
-
-#define Axis1_Mode    32    // Pin 32 (Mode switch for Axis1)
 #define Axis2_Mode    33    // Pin 33 (Mode switch for Axis2)
-
-#define LEDposBit      5    // Pin 8
-#define LEDposPORT PORTH    //
-#define LEDnegBit      6    // Pin 9
-#define LEDnegPORT PORTH    //
-#define LEDneg2Bit     4    // Pin 10
-#define LEDneg2PORT PORTB   //
-
-#define Axis2DirBit    5    // Pin 4
-#define Axis2DirPORT PORTG  //
-#define Axis25vBit     3    // Pin 5
-#define Axis25vPORT  PORTE  //
-#define Axis2StepBit   3    // Pin 6
-#define Axis2StepPORT PORTH //
-#define Axis2GNDBit    4    // Pin 7
-#define Axis2GNDPORT PORTH  //
-
-#define Axis1DirBit    5    // Pin 11
-#define Axis1DirPORT  PORTB //
-#define Axis15vBit     6    // Pin 12
-#define Axis15vPORT   PORTB //
-#define Axis1StepBit   7    // Pin 13
-#define Axis1StepPORT PORTB //
 
 // ST4 interface
 #ifdef ST4_ALTERNATE_PINS_ON
@@ -352,27 +342,79 @@ int    maxAlt;                                     // the maximum altitude, in d
 #define ST4RAe        53    // Pin 53 ST4 RA+ East
 #endif
 
-#elif defined(__arm__) && defined(TEENSYDUINO)
+#elif defined(__AVR_ATmega2560__) && defined(ALTERNATE_PINMAP_ON)
 // The PEC index sense is a 5V logic input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
 #define PecPin         2
+#define AnalogPecPin   1
 
 // The limit switch sense is a 5V logic input which uses the internal pull up, shorted to ground it stops gotos/tracking
 #define LimitPin       3
 
 // The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
-//                                  Atmel   2560
-#define LEDposPin      8    // Pin 8 (LED)   PH5
-#define LEDnegPin      9    // Pin 9 (GND)   PH6
-
-// The HA(RA) and Dec jumpers (going to the big easy drivers) are simply four wire jumper cables, each has identical wiring - simple modular construction
-#define Axis2DirPin    4    // Pin 4 (Dir)   PG5
-#define Axis25vPin     5    // Pin 5 (5V?)   PE3
-#define Axis2StepPin   6    // Pin 6 (Step)  PH3
-#define Axis2GndPin    7    // Pin 7 (GND)   PH4
-
+#define LEDposPin      8    // Pin 8 (LED)
+#define LEDnegPin      9    // Pin 9 (GND)
 #define LEDneg2Pin     7    // Pin 7 (GND)
+#define ReticulePin   44    // Pin 44 (GND)  
 
 // The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
+// The Arduino attachInterrupt function works in two modes, on the '2560 it takes an Interrupt# on the Teensy and others it takes a Pin#
+#define PpsInt         2    // Interrupt 2 on Pin 21 (alternate Int3 on Pin20)
+                         
+// Pins to enable/disable the stepper drivers and set microstep mode, optional and normally just hard-wired (DRV8825)/ignored (BED-A4988)
+#define Axis1DirPin   37    // Pin 37 (Dir)  PC0
+#define Axis1DirBit    0    //
+#define Axis1DirPORT  PORTC //
+#define Axis1StepPin  35    // Pin 35 (Step) PC2
+#define Axis1StepBit   2    //
+#define Axis1StepPORT PORTC //
+#define Axis1SlpPin   33    //
+#define Axis1RstPin   31    //
+
+#define Axis1_M0      29    // Pin 29 (Microstep or Decay Mode 0)
+#define Axis1_M1      27    // Pin 27 (Microstep or Decay Mode 1)
+#define Axis1_M2      25    // Pin 25 (Microstep or Decay Mode 2)
+#define Axis1_EN      23    // Pin 23 (Enabled when LOW)
+#define Axis1_FAULT   39    // Pin 39 (Fault if LOW)
+#define Axis1_Mode    41    // Pin 41 (Aux Decay Mode for Axis1)
+
+// The HA(RA) and Dec jumpers (going to the big easy drivers) are simply four wire jumper cables, each has identical wiring - simple modular construction
+#define Axis2DirPin   22    // Pin 22 (Dir)   PA0
+#define Axis2DirBit    0    //
+#define Axis2DirPORT  PORTA //
+#define Axis2StepPin  24    // Pin 24 (Step)  PA2
+#define Axis2StepBit   2    //
+#define Axis2StepPORT PORTA //
+#define Axis2SlpPin   26    //
+#define Axis2RstPin   28    //
+
+#define Axis2_M0      30    // Pin 30 (Microstep or Decay Mode 0)
+#define Axis2_M1      32    // Pin 32 (Microstep or Decay Mode 1)
+#define Axis2_M2      34    // Pin 34 (Microstep or Decay Mode 2)
+#define Axis2_EN      36    // Pin 36 (Enabled when LOW)
+#define Axis2_FAULT   38    // Pin 38 (Fault if LOW)
+#define Axis2_Mode    40    // Pin 40 (Aux Decay Mode for Axis2)
+
+// ST4 interface
+#define ST4RAw        47    // Pin 47 ST4 RA- West
+#define ST4DEs        43    // Pin 43 ST4 DE- South
+#define ST4DEn        45    // Pin 45 ST4 DE+ North
+#define ST4RAe        49    // Pin 49 ST4 RA+ East
+
+#elif defined(__arm__) && defined(TEENSYDUINO) && !defined(ALTERNATE_PINMAP_ON)
+// The PEC index sense is a logic level input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
+#define PecPin         2
+#define AnalogPecPin  14
+
+// The limit switch sense is a 5V logic input which uses the internal pull up, shorted to ground it stops gotos/tracking
+#define LimitPin       3
+
+// The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
+#define LEDposPin      8    // Pin 8 (LED)
+#define LEDnegPin      9    // Pin 9 (GND)
+#define LEDneg2Pin     7    // Pin 7 (GND)
+#define ReticulePin    9    // Pin 9 (GND)
+
+// The PPS pin is a logic level input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
 #define PpsPin        23    // Pin 23 (PPS time source, GPS for example)
 
 #define Axis1DirPin   10    // Pin 10 (Dir)
@@ -387,34 +429,17 @@ int    maxAlt;                                     // the maximum altitude, in d
 #define Axis1_EN      16    // Pin 16 (Enabled when LOW)
 #define Axis1_FAULT   17    // Pin 17 (Fault if LOW)
 
+// The HA(RA) and Dec jumpers (going to the big easy drivers) are simply four wire jumper cables, each has identical wiring - simple modular construction
+#define Axis2DirPin    4    // Pin 4 (Dir)
+#define Axis25vPin     5    // Pin 5 (5V?)
+#define Axis2StepPin   6    // Pin 6 (Step)
+#define Axis2GndPin    7    // Pin 7 (GND)
+
 #define Axis2_M0      18    // Pin 18 (Microstep Mode 0)
 #define Axis2_M1      19    // Pin 19 (Microstep Mode 1)
 #define Axis2_M2      20    // Pin 20 (Microstep Mode 2)
 #define Axis2_EN      21    // Pin 21 (Enabled when LOW)
 #define Axis2_FAULT   22    // Pin 22 (Fault if LOW)
-
-#define LEDposBit      0    // Pin 8
-#define LEDposPORT PORTB    //
-#define LEDnegBit      1    // Pin 9
-#define LEDnegPORT PORTB    //
-#define LEDneg2Bit     7    // Pin 7
-#define LEDneg2PORT PORTD   //
-
-#define Axis2DirBit    4    // Pin 4
-#define Axis2DirPORT PORTD  //
-#define Axis25vBit     5    // Pin 5
-#define Axis25vPORT  PORTD  //
-#define Axis2StepBit   6    // Pin 6
-#define Axis2StepPORT PORTD //
-#define Axis2GNDBit    7    // Pin 7
-#define Axis2GNDPORT PORTD  //
-
-#define Axis1DirBit    2    // Pin 10
-#define Axis1DirPORT  PORTB //
-#define Axis15vBit     3    // Pin 11
-#define Axis15vPORT   PORTB //
-#define Axis1StepBit   4    // Pin 12
-#define Axis1StepPORT PORTB //
 
 // ST4 interface
 #define ST4RAw        24    // Pin 24 ST4 RA- West
@@ -422,7 +447,58 @@ int    maxAlt;                                     // the maximum altitude, in d
 #define ST4DEn        26    // Pin 26 ST4 DE+ North
 #define ST4RAe        27    // Pin 27 ST4 RA+ East
 
-#elif defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
+#elif defined(__arm__) && defined(TEENSYDUINO) && defined(ALTERNATE_PINMAP_ON)
+// Note that TM4C123 has resistors R9 anr R10 between pins 14 (B6) and 23 (D0) and between pins 15 (B7) and 24 (D1)
+// Make sure you look at the list of the pins and options to avoid clashes or desolder the two bridges
+// These pins are used for Axis2_M2 (14) and DE_M3 (15) and for Axis2DirPin (23) and Axis25vPin (24)
+// If you have defined AXIS2_MODE_OFF in Config.h you should be safe to leave things as they are.
+
+// The PEC index sense is a logic level input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
+#define PecPin        23
+#define AnalogPecPin  23    // Pin 23 (PEC Sense, analog or digital)
+
+// The limit switch sense is a logic level input which uses the internal pull up, shorted to ground it stops gotos/tracking
+#define LimitPin       4
+
+// The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
+#define LEDnegPin     19    // Pin 19 (GND)
+#define LEDneg2Pin    22    // Pin 22 (GND)
+#define ReticulePin   22    // Pin 22 (GND)
+
+// The PPS pin is a logic level input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
+#define PpsPin         5    // Pin 5 (PPS time source, GPS for example)
+
+#define Axis1DirPin   21    // Pin 21 (Dir)
+#define Axis1StepPin  20    // Pin 20 (Step)
+#define Axis1SlpPin   19    // Pin 19 (Sleep)
+#define Axis1RstPin   18    // Pin 18 (Reset)
+
+// Pins to enable/disable the stepper drivers and set microstep mode, optional and normally just hard-wired (DRV8825)/ignored (BED-A4988)
+#define Axis1_M0      15    // Pin 15 (Microstep Mode 0)
+#define Axis1_M1      16    // Pin 16 (Microstep Mode 1)
+#define Axis1_M2      17    // Pin 17 (Microstep Mode 2)
+#define Axis1_EN      14    // Pin 14 (Enabled when LOW)
+#define Axis1_FAULT   18    // Pin 18 (Fault if LOW)
+
+// The HA(RA) and Dec jumpers (going to the big easy drivers) are simply four wire jumper cables, each has identical wiring - simple modular construction
+#define Axis2DirPin    2    // Pin  2 (Dir)
+#define Axis2StepPin   3    // Pin  3 (Step)
+#define Axis2SlpPin    4    // Pin  4 (Sleep)
+#define Axis2RstPin    5    // Pin  5 (Reset)
+
+#define Axis2_M0       8    // Pin  8 (Microstep Mode 0)
+#define Axis2_M1       7    // Pin  7 (Microstep Mode 1)
+#define Axis2_M2       6    // Pin  6 (Microstep Mode 2)
+#define Axis2_EN       9    // Pin  9 (Enabled when LOW)
+#define Axis2_FAULT    5    // Pin  5 (Fault if LOW)
+
+// ST4 interface
+#define ST4RAw        24    // Pin 24 ST4 RA- West
+#define ST4DEs        25    // Pin 25 ST4 DE- South
+#define ST4DEn        26    // Pin 26 ST4 DE+ North
+#define ST4RAe        27    // Pin 27 ST4 RA+ East
+
+#elif (defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)) && !defined(ALTERNATE_PINMAP_ON)
 // Note that TM4C123 has resistors R9 anr R10 between pins 14 (B6) and 23 (D0) and between pins 15 (B7) and 24 (D1)
 // Make sure you look at the list of the pins and options to avoid clashes or desolder the two bridges
 // These pins are used for Axis2_M2 (14) and DE_M3 (15) and for Axis2DirPin (23) and Axis25vPin (24)
@@ -431,72 +507,114 @@ int    maxAlt;                                     // the maximum altitude, in d
 // Also note that we are using UART1 and UART 5 which use pins 3-6
 
 // The PEC index sense is a 5V logic input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
-#define PecPin        11    // Pin A2
+#define PecPin        11               // Pin A2
 
 // The limit switch sense is a 5V logic input which uses the internal pull up, shorted to ground it stops gotos/tracking
-#define LimitPin      12    // Pin A3
+#define LimitPin      12               // Pin A3
 
 // The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
-#define LEDposPin      2    // Pin B5 (LED)
-#define LEDnegPin     33    // Pin D6 (GND)
-
-
-// The HA(RA) and Dec jumpers (going to the big easy drivers) are simply four wire jumper cables, each has identical wiring - simple modular construction
-#define Axis2DirPin   23    // Pin D0 (Dir)
-#define Axis25vPin    24    // Pin D1 (5V?)
-#define Axis2StepPin  25    // Pin D2 (Step)
-#define Axis2GndPin   26    // Pin D3 (GND)
-
-#define LEDneg2Pin    26    // Pin D3 (GND)
+#define LEDposPin      2               // Pin B5 (LED)
+#define LEDnegPin     33               // Pin D6 (GND)
+#define LEDneg2Pin    26               // Pin D3 (GND)
+#define ReticulePin   33
 
 // The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
-#define PpsPin        19    // Pin B2 (PPS time source, GPS for example)
+#define PpsPin        19               // Pin B2 (PPS time source, GPS for example)
 
-#define Axis1DirPin   27    // Pin E1 (Dir)
-#define Axis15vPin    28    // Pin E2 (5V?)
-#define Axis1StepPin  29    // Pin E3 (Step)
-// Pin GND (GND)
-// Pins to enable/disable the stepper drivers and set microstep mode, optional and normally just hard-wired (DRV8825)/ignored (BED-A4988)
-#define Axis1_M0      34    // Pin C7 (Microstep Mode 0)
-#define Axis1_M1      35    // Pin C6 (Microstep Mode 1)
-#define Axis1_M2      36    // Pin C5 (Microstep Mode 2)
-#define Axis1_EN      37    // Pin C4 (Enabled when LOW)
-#define Axis1_FAULT   38    // Pin B3 (Fault if LOW)
-
-#define Axis2_M0      13    // Pin A4 (Microstep Mode 0)
-#define Axis2_M1      14    // Pin B6 (Microstep Mode 1) IF USED MAKE SURE YOU DESOLDER A BRIDGE or change pins around, otherwise pin 14 is connected to pin 23
-#define Axis2_M2      15    // Pin B7 (Microstep Mode 2) IF USED MAKE SURE YOU DESOLDER A BRIDGE or change pins around, otherwise pin 15 is connected to pin 24
-#define Axis2_EN      18    // Pin E0 (Enabled when LOW)
-#define Axis2_FAULT   17    // Pin F0 (Fault if LOW) NOTE, this is connected to pushbutton switch 2
-
-#define LEDposBit  GPIO_PIN_5          // Pin 2
-#define LEDposPORT GPIO_PORTB_BASE     //
-#define LEDnegBit  GPIO_PIN_6          // Pin 33
-#define LEDnegPORT GPIO_PORTD_BASE     //
-#define LEDneg2Bit GPIO_PIN_3          // Pin 26
-#define LEDneg2PORT GPIO_PORTD_BASE    //
-
-#define Axis2DirBit  GPIO_PIN_0        // Pin 23=D0=B6 = pin 14
-#define Axis2DirPORT GPIO_PORTD_BASE   //
-#define Axis25vBit   GPIO_PIN_1        // Pin 24=D1=B7 = pin 15
-#define Axis25vPORT  GPIO_PORTD_BASE   //
-#define Axis2StepBit GPIO_PIN_2        // Pin 25
-#define Axis2StepPORT GPIO_PORTD_BASE  //
-#define Axis2GNDBit  GPIO_PIN_3        // Pin 26
-#define Axis2GNDPORT GPIO_PORTD_BASE   //
-
+#define Axis1DirPin   27               // Pin E1 (Dir)
 #define Axis1DirBit   GPIO_PIN_1       // Pin 27
 #define Axis1DirPORT  GPIO_PORTE_BASE  //
-#define Axis15vBit    GPIO_PIN_2       // Pin 28
-#define Axis15vPORT   GPIO_PORTE_BASE  //
+#define Axis15vPin    28               // Pin E2 (5V?)
+#define Axis1StepPin  29               // Pin E3 (Step)
 #define Axis1StepBit  GPIO_PIN_3       // Pin 29
 #define Axis1StepPORT GPIO_PORTE_BASE  //
+// Pin GND (GND)
+
+// Pins to enable/disable the stepper drivers and set microstep mode, optional and normally just hard-wired (DRV8825)/ignored (BED-A4988)
+#define Axis1_M0      34               // Pin C7 (Microstep Mode 0)
+#define Axis1_M1      35               // Pin C6 (Microstep Mode 1)
+#define Axis1_M2      36               // Pin C5 (Microstep Mode 2)
+#define Axis1_EN      37               // Pin C4 (Enabled when LOW)
+#define Axis1_FAULT   38               // Pin B3 (Fault if LOW)
+
+// The HA(RA) and Dec jumpers (going to the big easy drivers) are simply four wire jumper cables, each has identical wiring - simple modular construction
+#define Axis2DirPin   23               // Pin D0 (Dir)
+#define Axis2DirBit   GPIO_PIN_0       // Pin 23=D0=B6 = pin 14
+#define Axis2DirPORT  GPIO_PORTD_BASE  //
+#define Axis25vPin    24               // Pin D1 (5V?)
+#define Axis2StepPin  25               // Pin D2 (Step)
+#define Axis2StepBit  GPIO_PIN_2       // Pin 25
+#define Axis2StepPORT GPIO_PORTD_BASE  //
+#define Axis2GndPin   26               // Pin D3 (GND)
+
+#define Axis2_M0      13               // Pin A4 (Microstep Mode 0)
+#define Axis2_M1      14               // Pin B6 (Microstep Mode 1) IF USED MAKE SURE YOU DESOLDER A BRIDGE or change pins around, otherwise pin 14 is connected to pin 23
+#define Axis2_M2      15               // Pin B7 (Microstep Mode 2) IF USED MAKE SURE YOU DESOLDER A BRIDGE or change pins around, otherwise pin 15 is connected to pin 24
+#define Axis2_EN      18               // Pin E0 (Enabled when LOW)
+#define Axis2_FAULT   17               // Pin F0 (Fault if LOW) NOTE, this is connected to pushbutton switch 2
 
 // ST4 interface
-#define ST4RAw         7    // Pin B4 ST4 RA- West
-#define ST4DEs         8    // Pin A5 ST4 DE- South
-#define ST4DEn         9    // Pin A6 ST4 DE+ North
-#define ST4RAe        10    // Pin A7 ST4 RA+ East
+#define ST4RAw         7               // Pin B4 ST4 RA- West
+#define ST4DEs         8               // Pin A5 ST4 DE- South
+#define ST4DEn         9               // Pin A6 ST4 DE+ North
+#define ST4RAe        10               // Pin A7 ST4 RA+ East
+
+#elif (defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)) && defined(ALTERNATE_PINMAP_ON)
+// Note that TM4C123 has resistors R9 and R10 between pins 14 (B6) and 23 (D0) and between pins 15 (B7) and 24 (D1)
+// These two resistors must be desoldered/removed to use this pinmap
+
+// Also note that we are using UART1 and UART 5 which use pins 3-6
+
+// The PEC index sense is a 5V logic input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
+#define PecPin        11               // Pin A2
+
+// The limit switch sense is a 5V logic input which uses the internal pull up, shorted to ground it stops gotos/tracking
+#define LimitPin      12               // Pin A3
+
+// The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
+#define LEDnegPin     13               // Pin A4 (GND)
+#define LEDneg2Pin    19               // Pin B2 (GND)
+
+// The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
+#define PpsPin         2               // Pin B5 (PPS time source, GPS for example)
+
+#define Axis1DirPin   31               // Pin F4 (Dir)
+#define Axis1DirBit   GPIO_PIN_4       // Pin 31
+#define Axis1DirPORT  GPIO_PORTF_BASE  //
+#define Axis1StepPin  32               // Pin D7 (Step)
+#define Axis1StepBit  GPIO_PIN_7       // Pin 32
+#define Axis1StepPORT GPIO_PORTD_BASE  //
+#define Axis1SlpPin   33               // Pin D6 (Sleep)
+#define Axis1RstPin   34               // Pin C7 (Reset)
+
+// Pins to enable/disable the stepper drivers and set microstep mode, optional and normally just hard-wired (DRV8825)/ignored (BED-A4988)
+#define Axis1_M2      35               // Pin C6 (Microstep Mode 0)
+#define Axis1_M1      36               // Pin C5 (Microstep Mode 1)
+#define Axis1_M0      37               // Pin C4 (Microstep Mode 2)
+#define Axis1_EN      38               // Pin B3 (Enabled when LOW)
+#define Axis1_FAULT   34               // Pin C7 (Fault if LOW)
+
+// The HA(RA) and Dec jumpers (going to the big easy drivers) are simply four wire jumper cables, each has identical wiring - simple modular construction
+#define Axis2DirPin   23               // Pin D0 (Dir)
+#define Axis2DirBit   GPIO_PIN_0       // Pin 23=D0=B6 = pin 14
+#define Axis2DirPORT  GPIO_PORTD_BASE  //
+#define Axis2StepPin  24               // Pin D1 (Step)
+#define Axis2StepBit  GPIO_PIN_1       // Pin 25
+#define Axis2StepPORT GPIO_PORTD_BASE  //
+#define Axis2SlpPin   25               // Pin D2 (Sleep)
+#define Axis2RstPin   26               // Pin D3 (Reset)
+
+#define Axis2_M2      27               // Pin E1 (Microstep Mode 0)
+#define Axis2_M1      28               // Pin E2 (Microstep Mode 1) IF USED MAKE SURE YOU DESOLDER A BRIDGE or change pins around, otherwise pin 14 is connected to pin 23
+#define Axis2_M0      29               // Pin E3 (Microstep Mode 2) IF USED MAKE SURE YOU DESOLDER A BRIDGE or change pins around, otherwise pin 15 is connected to pin 24
+#define Axis2_EN      30               // Pin F1 (Enabled when LOW)
+#define Axis2_FAULT   26               // Pin D3 (Fault if LOW) NOTE, this is connected to pushbutton switch 2
+
+// ST4 interface
+#define ST4RAw        18               // Pin E0 ST4 RA- West
+#define ST4DEs         8               // Pin A5 ST4 DE- South
+#define ST4DEn         9               // Pin A6 ST4 DE+ North
+#define ST4RAe        17               // Pin F0 ST4 RA+ East
 
 #elif defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
 // No need to desolder anything on this launchpad as pins we are using are not bridged
@@ -504,72 +622,57 @@ int    maxAlt;                                     // the maximum altitude, in d
 // Note that we are using UART7 and UART 5 which use pins 3-5 and pin 8 (C4,C5,C6,C7)
 
 // The PEC index sense is a 5V logic input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
-#define PecPin        11    // Pin P2
+#define PecPin        11               // Pin P2
 
 // The limit switch sense is a 5V logic input which uses the internal pull up, shorted to ground it stops gotos/tracking
-#define LimitPin      12    // Pin N3
+#define LimitPin      12               // Pin N3
 
 // The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
-#define LEDposPin      2    // Pin E4 (LED)
-#define LEDnegPin     33    // Pin L1 (GND)
-
-
-// The HA(RA) and Dec jumpers (going to the big easy drivers) are simply four wire jumper cables, each has identical wiring - simple modular construction
-#define Axis2DirPin   23    // Pin E0 (Dir)
-#define Axis25vPin    24    // Pin E1 (5V?)
-#define Axis2StepPin  25    // Pin E2 (Step)
-#define Axis2GndPin   26    // Pin E3 (GND)
-
-#define LEDneg2Pin    26    // Pin E3 (GND)
+#define LEDposPin      2               // Pin E4 (LED)
+#define LEDnegPin     33               // Pin L1 (GND)
+#define LEDneg2Pin    26               // Pin E3 (GND)
+#define ReticulePin   33
 
 // The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
-#define PpsPin        19    // Pin M3 (PPS time source, GPS for example)
+#define PpsPin        19               // Pin M3 (PPS time source, GPS for example)
 
-#define Axis1DirPin   27    // Pin D7 (Dir)
-#define Axis15vPin    28    // Pin A6 (5V?)
-#define Axis1StepPin  29    // Pin M4 (Step)
-// Pin GND (GND)
-// Pins to enable/disable the stepper drivers and set microstep mode, optional and normally just hard-wired (DRV8825)/ignored (BED-A4988)
-#define Axis1_M0      34    // Pin L0 (Microstep Mode 0)
-#define Axis1_M1      35    // Pin L5 (Microstep Mode 1)
-#define Axis1_M2      36    // Pin L4 (Microstep Mode 2)
-#define Axis1_EN      37    // Pin G0 (Enabled when LOW)
-#define Axis1_FAULT   38    // Pin F3 (Fault if LOW)
-
-#define Axis2_M0      13    // Pin N2 (Microstep Mode 0)
-#define Axis2_M1      14    // Pin D0 (Microstep Mode 1)
-#define Axis2_M2      15    // Pin D1 (Microstep Mode 2)
-#define Axis2_EN      18    // Pin H2 (Enabled when LOW)
-#define Axis2_FAULT   17    // Pin H3 (Fault if LOW) NOTE, this is connected to pushbutton switch 2
-
-#define LEDposBit  GPIO_PIN_4          // Pin 2
-#define LEDposPORT GPIO_PORTE_BASE     //
-#define LEDnegBit  GPIO_PIN_1          // Pin 33
-#define LEDnegPORT GPIO_PORTL_BASE     //
-#define LEDneg2Bit GPIO_PIN_3          // Pin 26
-#define LEDneg2PORT GPIO_PORTE_BASE    //
-
-#define Axis2DirBit  GPIO_PIN_0        // Pin 23
-#define Axis2DirPORT GPIO_PORTE_BASE   //
-#define Axis25vBit   GPIO_PIN_1        // Pin 24
-#define Axis25vPORT  GPIO_PORTE_BASE   //
-#define Axis2StepBit GPIO_PIN_2        // Pin 25
-#define Axis2StepPORT GPIO_PORTE_BASE  //
-#define Axis2GNDBit  GPIO_PIN_3        // Pin 26
-#define Axis2GNDPORT GPIO_PORTE_BASE   //
-
+#define Axis1DirPin   27               // Pin D7 (Dir)
 #define Axis1DirBit   GPIO_PIN_7       // Pin 27
 #define Axis1DirPORT  GPIO_PORTD_BASE  //
-#define Axis15vBit    GPIO_PIN_6       // Pin 28
-#define Axis15vPORT   GPIO_PORTA_BASE  //
+#define Axis15vPin    28               // Pin A6 (5V?)
+#define Axis1StepPin  29               // Pin M4 (Step)
 #define Axis1StepBit  GPIO_PIN_4       // Pin 29
 #define Axis1StepPORT GPIO_PORTM_BASE  //
+// Pin GND (GND)
+
+// Pins to enable/disable the stepper drivers and set microstep mode, optional and normally just hard-wired (DRV8825)/ignored (BED-A4988)
+#define Axis1_M0      34               // Pin L0 (Microstep Mode 0)
+#define Axis1_M1      35               // Pin L5 (Microstep Mode 1)
+#define Axis1_M2      36               // Pin L4 (Microstep Mode 2)
+#define Axis1_EN      37               // Pin G0 (Enabled when LOW)
+#define Axis1_FAULT   38               // Pin F3 (Fault if LOW)
+
+// The HA(RA) and Dec jumpers (going to the big easy drivers) are simply four wire jumper cables, each has identical wiring - simple modular construction
+#define Axis2DirPin   23               // Pin E0 (Dir)
+#define Axis2DirBit   GPIO_PIN_0       // Pin 23
+#define Axis2DirPORT  GPIO_PORTE_BASE  //
+#define Axis25vPin    24               // Pin E1 (5V?)
+#define Axis2StepPin  25               // Pin E2 (Step)
+#define Axis2StepBit  GPIO_PIN_2       // Pin 25
+#define Axis2StepPORT GPIO_PORTE_BASE  //
+#define Axis2GndPin   26               // Pin E3 (GND)
+
+#define Axis2_M0      13               // Pin N2 (Microstep Mode 0)
+#define Axis2_M1      14               // Pin D0 (Microstep Mode 1)
+#define Axis2_M2      15               // Pin D1 (Microstep Mode 2)
+#define Axis2_EN      18               // Pin H2 (Enabled when LOW)
+#define Axis2_FAULT   17               // Pin H3 (Fault if LOW) NOTE, this is connected to pushbutton switch 2
 
 // ST4 interface
-#define ST4RAw         7    // Pin D3 ST4 RA- West
-#define ST4DEs         6    // Pin C7 ST4 DE- South
-#define ST4DEn         9    // Pin B2 ST4 DE+ North
-#define ST4RAe        10    // Pin B3 ST4 RA+ East
+#define ST4RAw         7               // Pin D3 ST4 RA- West
+#define ST4DEs         6               // Pin C7 ST4 DE- South
+#define ST4DEn         9               // Pin B2 ST4 DE+ North
+#define ST4RAe        10               // Pin B3 ST4 RA+ East
 
 #endif
 
@@ -701,7 +804,7 @@ byte bufferPtr_ethernet= 0;
 // Misc ---------------------------------------------------------------------------------------------------------------------
 #define Rad 57.29577951
 
-unsigned int baudRate[10] = {0,56700,38400,28800,19200,14400,9600,4800,2400,1200};
+unsigned long baudRate[10] = {115200,56700,38400,28800,19200,14400,9600,4800,2400,1200};
 
 // current site index and name
 byte currentSite = 0; 
@@ -755,18 +858,6 @@ fixed_t guideDec;
 // Reticule control
 #ifdef RETICULE_LED_PINS
 int reticuleBrightness=RETICULE_LED_PINS;
-#if defined(__AVR_ATmega2560__)
-#define ReticulePin 44
-#endif
-#if defined(__arm__) && defined(TEENSYDUINO)
-#define ReticulePin 9
-#endif
-#if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
-#define ReticulePin 33
-#endif
-#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
-#define ReticulePin 33
-#endif
 #endif
 
 // PEC control
@@ -905,37 +996,86 @@ void setup() {
   targetAxis2.part.f = 0;
 
   fstepAxis1.fixed=doubleToFixed(StepsPerSecondAxis1/100.0);
+
+// if alternate features are used on the Teensy3.2 or Launchpad remove the default
+#if defined(__arm__) && defined(TEENSYDUINO) 
+  #if (defined(AXIS1_FAULT_LOW) || defined(AXIS1_FAULT_HIGH))
+    #undef Axis1RstPin
+  #endif
+  #if (defined(STATUS_LED_PINS_ON) || defined(STATUS_LED_PINS))
+    #undef Axis1SlpPin
+  #endif
+  #if (defined(AXIS2_FAULT_LOW) || defined(AXIS2_FAULT_HIGH) || defined(PPS_SENSE_ON))
+    #undef Axis2RstPin
+  #endif
+  #if defined(LIMIT_SENSE_ON)
+    #undef Axis2SlpPin
+  #endif
+#endif
+#if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) 
+  #if defined(AXIS1_FAULT_LOW) || defined(AXIS1_FAULT_HIGH)
+    #undef Axis1RstPin
+  #endif
+  #if (defined(AXIS2_FAULT_LOW) || defined(AXIS2_FAULT_HIGH))
+    #undef Axis2RstPin
+  #endif
+#endif
   
 // initialize the stepper control pins RA and Dec
-  pinMode(Axis1StepPin, OUTPUT);
-  pinMode(Axis1DirPin, OUTPUT); 
-  pinMode(Axis2GndPin, OUTPUT);
-  CLR(Axis2GNDPORT, Axis2GNDBit);
-  pinMode(Axis2StepPin, OUTPUT); 
-  pinMode(Axis2DirPin, OUTPUT); 
+  pinMode(Axis1StepPin,OUTPUT);
+  pinMode(Axis1DirPin,OUTPUT); 
+#ifdef Axis1RstPin
+  pinMode(Axis1RstPin,OUTPUT);
+  digitalWrite(Axis1RstPin,HIGH);
+#endif
+#ifdef Axis1SlpPin
+  pinMode(Axis1SlpPin,OUTPUT);
+  digitalWrite(Axis1SlpPin,HIGH);
+#endif
 
-// light status LED (provides both +5 and GND)
+#ifdef Axis2GndPin
+  pinMode(Axis2GndPin,OUTPUT);
+  digitalWrite(Axis2GndPin,LOW);
+#endif
+  pinMode(Axis2StepPin,OUTPUT); 
+  pinMode(Axis2DirPin,OUTPUT); 
+#ifdef Axis2RstPin
+  pinMode(Axis2RstPin,OUTPUT);
+  digitalWrite(Axis2RstPin,HIGH);
+#endif
+#ifdef Axis2SlpPin
+  pinMode(Axis2SlpPin,OUTPUT);
+  digitalWrite(Axis2SlpPin,HIGH);
+#endif
+
+// light status LED (provides GND)
 #ifdef STATUS_LED_PINS_ON
-  pinMode(LEDnegPin, OUTPUT);
-  CLR(LEDnegPORT, LEDnegBit);
-  pinMode(LEDposPin, OUTPUT);
-  SET(LEDposPORT, LEDposBit);
+  pinMode(LEDnegPin,OUTPUT);
+  digitalWrite(LEDnegPin,LOW);
+// sometimes +5v is provided on a pin
+#ifdef LEDposPin
+  pinMode(LEDposPin,OUTPUT);
+  digitalWrite(LEDposPin,HIGH);
+#endif
   LED_ON=true;
 #endif
-// light status LED (provides both +5 and pwm'd GND for polar reticule)
+
+// light status LED (provides pwm'd GND for polar reticule)
 #ifdef STATUS_LED_PINS
-  pinMode(LEDnegPin, OUTPUT);
-  CLR(LEDnegPORT, LEDnegBit);
-  pinMode(LEDposPin, OUTPUT);
-  SET(LEDposPORT, LEDposBit);
+  pinMode(LEDnegPin,OUTPUT);
+  digitalWrite(LEDnegPin,LOW);
+// sometimes +5v is provided on a pin
+#ifdef LEDposPin
+  pinMode(LEDposPin,OUTPUT);
+  digitalWrite(LEDposPin,HIGH);
+#endif
   analogWrite(LEDnegPin,STATUS_LED_PINS);
   LED_ON=true;
 #endif
 
 // light reticule LED
 #ifdef RETICULE_LED_PINS
-// make sure the status LED isn't defined
-#if defined(__arm__) && defined(TEENSYDUINO)
+#if defined(__arm__) && defined(TEENSYDUINO) && !defined(ALTERNATE_PINMAP_ON)
   #ifdef STATUS_LED_PINS_ON
     #undef STATUS_LED_PINS_ON
   #endif
@@ -943,55 +1083,56 @@ void setup() {
     #undef STATUS_LED_PINS
   #endif
 #endif
-  pinMode(ReticulePin, OUTPUT);
+  pinMode(ReticulePin,OUTPUT);
   analogWrite(ReticulePin,reticuleBrightness);
 #endif
 
 // light second status LED (provides just GND)
 #ifdef STATUS_LED2_PINS_ON
-  pinMode(LEDneg2Pin, OUTPUT);
-  CLR(LEDneg2PORT, LEDneg2Bit); LED2_ON=false;
+  pinMode(LEDneg2Pin,OUTPUT);
+  digitalWrite(LEDneg2Pin,LOW);
+  LED2_ON=false;
 #endif
 // light second status LED (provides pwm'd GND for polar reticule)
 #ifdef STATUS_LED2_PINS
-  pinMode(LEDneg2Pin, OUTPUT);
-  CLR(LEDneg2PORT, LEDneg2Bit);
+  pinMode(LEDneg2Pin,OUTPUT);
+  digitalWrite(LEDneg2Pin,LOW);
   analogWrite(LEDneg2Pin,STATUS_LED2_PINS);
 #endif
 
 // provide 5V power to stepper drivers if requested
 #ifdef POWER_SUPPLY_PINS_ON  
-  pinMode(Axis15vPin, OUTPUT);
-  SET(Axis15vPORT, Axis15vBit);
-  pinMode(Axis25vPin, OUTPUT);
-  SET(Axis25vPORT, Axis25vBit);
+  pinMode(Axis15vPin,OUTPUT);
+  digitalWrite(Axis15vPin,HIGH);
+  pinMode(Axis25vPin,OUTPUT);
+  digitalWrite(Axis25vPin,HIGH);
 #endif
 
 // PEC index sense
 #ifdef PEC_SENSE_ON
-  pinMode(PecPin, INPUT);
+  pinMode(PecPin,INPUT);
 #endif
 #ifdef PEC_SENSE_PULLUP
-  pinMode(PecPin, INPUT_PULLUP);
+  pinMode(PecPin,INPUT_PULLUP);
 #endif
 
 // limit switch sense
 #ifdef LIMIT_SENSE_ON  
-  pinMode(LimitPin, INPUT_PULLUP);
+  pinMode(LimitPin,INPUT_PULLUP);
 #endif
 
 // ST4 interface
 #ifdef ST4_ON
-  pinMode(ST4RAw, INPUT);
-  pinMode(ST4RAe, INPUT);
-  pinMode(ST4DEn, INPUT);
-  pinMode(ST4DEs, INPUT);
+  pinMode(ST4RAw,INPUT);
+  pinMode(ST4RAe,INPUT);
+  pinMode(ST4DEn,INPUT);
+  pinMode(ST4DEs,INPUT);
 #endif
 #ifdef ST4_PULLUP
-  pinMode(ST4RAw, INPUT_PULLUP);
-  pinMode(ST4RAe, INPUT_PULLUP);
-  pinMode(ST4DEn, INPUT_PULLUP);
-  pinMode(ST4DEs, INPUT_PULLUP);
+  pinMode(ST4RAw,INPUT_PULLUP);
+  pinMode(ST4RAe,INPUT_PULLUP);
+  pinMode(ST4DEn,INPUT_PULLUP);
+  pinMode(ST4DEs,INPUT_PULLUP);
 #endif
 
 // inputs for stepper drivers fault signal
@@ -1003,15 +1144,17 @@ void setup() {
   pinMode(Axis2_EN,OUTPUT); digitalWrite(Axis2_EN,Axis2_Disabled);
 
 // if the stepper driver mode select pins are wired in, program any requested micro-step mode
-#if defined(AXIS1_MODE) && !defined(MODE_SWITCH_BEFORE_SLEW_ON)
-  pinMode(Axis1_M0, OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE & 1));
-  pinMode(Axis1_M1, OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE>>1 & 1));
-  pinMode(Axis1_M2, OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE>>2 & 1));
+#ifdef AXIS1_MODE
+ delay(5000);
+  if ((AXIS1_MODE & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE    & 1)); } else { pinMode(Axis1_M0,INPUT); }
+  if ((AXIS1_MODE & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE>>1 & 1)); } else { pinMode(Axis1_M1,INPUT); }
+  if ((AXIS1_MODE & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE>>2 & 1)); } else { pinMode(Axis1_M2,INPUT); }
 #endif
-#if defined(AXIS2_MODE) && !defined(MODE_SWITCH_BEFORE_SLEW_ON)
-  pinMode(Axis2_M0, OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE & 1));
-  pinMode(Axis2_M1, OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE>>1 & 1));
-  pinMode(Axis2_M2, OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE>>2 & 1));
+
+#ifdef AXIS2_MODE
+  if ((AXIS2_MODE & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE    & 1)); } else { pinMode(Axis2_M0,INPUT); }
+  if ((AXIS2_MODE & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE>>1 & 1)); } else { pinMode(Axis2_M1,INPUT); }
+  if ((AXIS2_MODE & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE>>2 & 1)); } else { pinMode(Axis2_M2,INPUT); }
 #endif
 
 // request the tracking decay mode
@@ -1287,7 +1430,8 @@ void setup() {
   #ifndef RememberMaxRate_ON
   if (maxRate!=MaxRate*16L) { maxRate=MaxRate*16L; EEPROM_writeInt(EE_maxRate,(int)(maxRate/16L)); }
   #endif
-  
+  SetAccelerationRates(maxRate); // set the new acceleration rate
+
   // makes onstep think that you parked the 'scope
   // combined with a hack in the goto syncEqu() function and you can quickly recover from
   // a reset without loosing much accuracy in the sky.  PEC is toast though.
@@ -1401,7 +1545,7 @@ void loop() {
       sei();
 
       #ifdef STATUS_LED_PINS_ON
-      if (siderealTimer%20L==0L) { if (LED_ON) { SET(LEDnegPORT,LEDnegBit); LED_ON=false; } else { CLR(LEDnegPORT,LEDnegBit); LED_ON=true; } }
+      if (siderealTimer%20L==0L) { if (LED_ON) { digitalWrite(LEDnegPin,HIGH); LED_ON=false; } else { digitalWrite(LEDnegPin,LOW); LED_ON=true; } }
       #endif
     }
 
@@ -1461,11 +1605,7 @@ void loop() {
     #ifdef PEC_SENSE
     // see if we're on the PEC index
     if (trackingState==TrackingSidereal) 
-#if defined(__AVR_ATmega2560__)
-    pecAnalogValue = analogRead(1);
-#elif defined(__arm__) && defined(TEENSYDUINO)
-    pecAnalogValue = analogRead(14);
-#endif
+    pecAnalogValue = analogRead(AnalogPecPin);
     #endif
     
     // adjust tracking rate for Alt/Azm mounts
@@ -1480,18 +1620,18 @@ void loop() {
       if ((long)(micros()-(PPSlastMicroS+2000000UL))>0) PPSsynced=false; // if more than two seconds has ellapsed without a pulse we've lost sync
       sei();
       #ifdef STATUS_LED2_PINS_ON
-      if (PPSsynced) { if (LED2_ON) { SET(LEDneg2PORT, LEDneg2Bit); LED2_ON=false; } else { CLR(LEDneg2PORT, LEDneg2Bit); LED2_ON=true; } } else { SET(LEDneg2PORT, LEDneg2Bit); LED2_ON=false; } // indicate PPS
+      if (PPSsynced) { if (LED2_ON) { digitalWrite(LEDneg2Pin,HIGH); LED2_ON=false; } else { digitalWrite(LEDneg2Pin,LOW); LED2_ON=true; } } else { digitalWrite(LEDneg2Pin,HIGH); LED2_ON=false; } // indicate PPS
       #endif
       if (LastPPSrateRatio!=PPSrateRatio) { SetSiderealClockRate(siderealInterval); LastPPSrateRatio=PPSrateRatio; }
     }
     #endif
 
     #ifdef STATUS_LED_PINS_ON
-    if (trackingState!=TrackingSidereal) if (!LED_ON) { CLR(LEDnegPORT, LEDnegBit); LED_ON=true; }    // indicate PWR on 
+    if (trackingState!=TrackingSidereal) if (!LED_ON) { digitalWrite(LEDnegPin,LOW); LED_ON=true; }   // indicate PWR on 
     #endif
     #ifdef STATUS_LED2_PINS_ON
-    if (trackingState==TrackingNone) if (LED2_ON) { SET(LEDneg2PORT, LEDneg2Bit); LED2_ON=false; }    // indicate STOP
-    if (trackingState==TrackingMoveTo) if (!LED2_ON) { CLR(LEDneg2PORT, LEDneg2Bit); LED2_ON=true; }  // indicate GOTO
+    if (trackingState==TrackingNone) if (LED2_ON) { digitalWrite(LEDneg2Pin,HIGH); LED2_ON=false; }   // indicate STOP
+    if (trackingState==TrackingMoveTo) if (!LED2_ON) { digitalWrite(LEDneg2Pin,LOW); LED2_ON=true; }  // indicate GOTO
     #endif
 
     // safety checks, keeps mount from tracking past the meridian limit, past the UnderPoleLimit, below horizon limit, above the overhead limit, or past the Dec limits
@@ -1543,4 +1683,3 @@ void loop() {
     processCommands();
   }
 }
-
