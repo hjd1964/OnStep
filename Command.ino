@@ -374,8 +374,8 @@ void processCommands() {
           } else
           if (parameter[0]=='8') { // 8n: Date/Time
             switch (parameter[1]) {
-              case '0': i=highPrecision; highPrecision=true; f=UT1; while (f>24.0) f-=24.0; doubleToHms(reply,&f); highPrecision=i; quietReply=true; break;  // UTC time
-              case '1': f1=JD; f=UT1; while (f>24.0) { f-=24.0; f1+=1; } greg(f1,&i2,&i,&i1); i2=(i2/99.99999-floor(i2/99.99999))*100; sprintf(reply,"%d/%d/%d",i,i1,i2); quietReply=true; break; // UTC date
+              case '0': i=highPrecision; highPrecision=true; f=UT1; while (f>=24.0) f-=24.0; while (f<0.0) f+=24.0; doubleToHms(reply,&f); highPrecision=i; quietReply=true; break;  // UTC time
+              case '1': f1=JD; f=UT1; while (f>=24.0) { f-=24.0; f1+=1; } while (f<0.0) { f+=24.0; f1-=1; } greg(f1,&i2,&i,&i1); i2=(i2/99.99999-floor(i2/99.99999))*100; sprintf(reply,"%d/%d/%d",i,i1,i2); quietReply=true; break; // UTC date
             }
           } else
           if (parameter[0]=='9') { // 9n: Misc.
