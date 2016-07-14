@@ -141,7 +141,10 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
         if (guideTimerRateAxis1A>fabs(guideTimerRateAxis1)) guideTimerRateAxis1A=fabs(guideTimerRateAxis1);
       }
       // stop guiding
-      if ((guideDirAxis1=='b') && (fabs(x)<2)) { guideDirAxis1=0; guideTimerRateAxis1=0; guideTimerRateAxis1A=0; DecayModeTracking(); }
+      if (guideDirAxis1=='b') {
+        if (fabs(x)<BreakDistAxis1) { guideDirAxis1=0; guideTimerRateAxis1=0; guideTimerRateAxis1A=0; DecayModeTracking(); } else
+          if (fabs(x)<20) guideTimerRateAxis1A=2;
+      }
     }
 
     double timerRateAxis1A=trackingTimerRateAxis1; if (guideDirAxis1 && (activeGuideRate>GuideRate1x)) timerRateAxis1A=0.0;
@@ -182,7 +185,10 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
         if (guideTimerRateAxis2A>fabs(guideTimerRateAxis2)) guideTimerRateAxis2A=fabs(guideTimerRateAxis2);
       }
       // stop guiding
-      if ((guideDirAxis2=='b') && (x<2)) { guideDirAxis2=0; guideTimerRateAxis2=0; guideTimerRateAxis2A=0; DecayModeTracking(); }
+      if (guideDirAxis2=='b') {
+        if (x<BreakDistAxis2) { guideDirAxis2=0; guideTimerRateAxis2=0; guideTimerRateAxis2A=0; DecayModeTracking(); } else
+          if (fabs(x)<20) guideTimerRateAxis2A=2;
+      }
     }
        
     double timerRateAxis2A=trackingTimerRateAxis2; if (guideDirAxis2 && (activeGuideRate>GuideRate1x)) timerRateAxis2A=0.0;
@@ -450,5 +456,4 @@ ISR(USART1_RX_vect)  {
   Serial1_recv_tail++; // buffer is 256 bytes so this byte variable wraps automatically
 }
 #endif
-
 
