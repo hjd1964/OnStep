@@ -4,7 +4,7 @@
 
 #if defined(__AVR_ATmega2560__)
 
-void Serial_Init(unsigned int baud) {
+void Serial_Init(unsigned long baud) {
   unsigned int ubrr=F_CPU/16/baud-1;
 
   Serial_xmit_index=0;
@@ -73,7 +73,7 @@ char Serial_read()
   return c;
 }
 
-void Serial1_Init(unsigned int baud) {
+void Serial1_Init(unsigned long baud) {
   unsigned int ubrr=F_CPU/16/baud-1;
 
   Serial1_xmit_index=0;
@@ -137,7 +137,7 @@ char Serial1_read()
 
 #else  // on non-AVR platforms, try to use the built-in serial stuff...
 
-void Serial_Init(unsigned int baud) {
+void Serial_Init(unsigned long baud) {
   Serial.begin(baud);
 }
 
@@ -165,7 +165,7 @@ char Serial_read() {
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
 // use serial7 as serial1 (serial1) as serial1 is not readily available on the board
 // if you really want to use serial1 you will need to do some soldering
-void Serial1_Init(unsigned int baud) {
+void Serial1_Init(unsigned long baud) {
   Serial7.begin(baud);
 }
 
@@ -191,7 +191,7 @@ char Serial1_read() {
   return Serial7.read();
 }
 #else
-void Serial1_Init(unsigned int baud) {
+void Serial1_Init(unsigned long baud) {
   Serial1.begin(baud);
 }
 
@@ -219,3 +219,112 @@ char Serial1_read() {
 #endif
 
 #endif
+
+// -----------------------------------------------------------------------------------
+// Simple soft SPI routines
+int _ss = 11;
+int _sck = 10;
+int _miso = 9;
+int _mosi = 8;
+
+byte sendValue = 74;   // Value we are going to send
+byte returnValue = 0;  // Where we will store the value sent by the slave
+
+void spiStart(int ss, int sck, int miso, int mosi)
+{
+  _ss=ss;
+  pinMode(ss, OUTPUT);
+  digitalWrite(ss, HIGH);
+  _sck=sck;
+  pinMode(_sck,OUTPUT);
+  _mosi=mosi;
+  pinMode(_miso,INPUT);
+  _miso=miso;
+  pinMode(_mosi,OUTPUT);
+}
+
+uint8_t spiTransfer(uint8_t data_out)
+{
+  digitalWrite(_ss, LOW);
+  uint8_t data_in = 0;
+  
+  for(int i=7; i>=0; i--)
+  {
+    digitalWrite(_mosi,bitRead(data_out,i)); // Set MOSI
+    delayMicroseconds(1);
+    digitalWrite(_sck,HIGH);
+    bitWrite(data_in,i,digitalRead(_miso)); // Get MISO
+    delayMicroseconds(1);
+    digitalWrite(_sck,LOW);
+  }
+  
+  digitalWrite(_ss, HIGH);
+  return data_in;
+}
+
+uint32_t spiTransfer32(uint32_t data_out)
+{
+  digitalWrite(_ss, LOW);
+  uint32_t data_in = 0;
+  
+  for(int i=31; i>=0; i--)
+  {
+    digitalWrite(_mosi,bitRead(data_out,i)); // Set MOSI
+    delayMicroseconds(1);
+    digitalWrite(_sck,HIGH);
+    bitWrite(data_in,i,digitalRead(_miso)); // Get MISO
+    delayMicroseconds(1);
+    digitalWrite(_sck,LOW);
+  }
+  
+  digitalWrite(_ss, HIGH);
+  return data_in;
+}
+
+//TMC2130 registers
+#define WRITE          0x80 //write flag
+#define REG_GCONF      0x00
+#define REG_GSTAT      0x01
+#define REG_IHOLD_IRUN 0x10
+#define REG_CHOPCONF   0x6C
+#define REG_COOLCONF   0x6D
+#define REG_DCCTRL     0x6E
+#define REG_DRVSTATUS  0x6F
+
+uint8_t TMC2130_write(byte Address, uint32_t data_out)
+{
+  Address=Address|0x80;
+  uint8_t status_byte=spiTransfer(Address);
+  spiTransfer32(data_out);
+  return status_byte;
+}
+
+uint8_t TMC2130_read(byte Address, uint32_t* data_out)
+{
+  Address=Address&!0x80;
+  uint8_t status_byte=spiTransfer(Address);
+  *data_out=spiTransfer32(*data_out);
+  return status_byte;
+}
+
+// TMC2130 microstep modes:
+// interpolation: intpol
+// stealth chop: stealth_chop
+// micro_step_mode: 0 = 256x, 1= 128x, 2=64x, 3=32x, 4=16x, 5=8x, 6=4x, 7=2x, 8=1x
+void TMC2130_setStepMode(bool intpol, bool stealth_chop, byte micro_step_mode) {
+  unsigned long data_out=0;
+
+  // voltage on AIN is current reference
+  if (stealth_chop) data_out=0x00000003UL; else data_out=0x00000001UL;
+  TMC2130_write(REG_GCONF,data_out);
+
+  TMC2130_write(REG_IHOLD_IRUN,0x00001010UL); // IHOLD=0x10, IRUN=0x10 (16,16) 
+  
+  // native 256 microsteps, MRES=0, TBL=1=24, TOFF=8
+  data_out=0x00008008UL;
+  // set the interpolation bit
+  if (intpol) bitWrite(data_out,28,1); else bitWrite(data_out,28,0);
+  // set the micro-step mode bits
+  data_out|=micro_step_mode<<24;
+  TMC2130_write(REG_CHOPCONF,&data_out);
+}
