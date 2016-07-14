@@ -355,6 +355,15 @@ double cot(double n) {
   return 1.0/tan(n);
 }
 
+// ----------------------------------------------------------------------------------------------------------------------------
+// Acceleration rate calculation
+
+void SetAccelerationRates(double maxRate) {
+  // set the new acceleration rate
+  StepsForRateChangeAxis1= ((double)DegreesForAcceleration/sqrt((double)StepsPerDegreeAxis1))*0.3333333*StepsPerDegreeAxis1*maxRate;
+  StepsForRateChangeAxis2= ((double)DegreesForAcceleration/sqrt((double)StepsPerDegreeAxis2))*0.3333333*StepsPerDegreeAxis2*maxRate;
+}
+
 // -----------------------------------------------------------------------------------------------------------------------------
 // Refraction rate tracking
 
@@ -882,4 +891,3 @@ bool nextAlign() {
 
   return false;
 }
-
