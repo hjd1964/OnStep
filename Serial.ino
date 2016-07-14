@@ -312,7 +312,7 @@ uint8_t TMC2130_read(byte Address, uint32_t* data_out)
 // stealth chop: stealth_chop
 // micro_step_mode: 0 = 256x, 1= 128x, 2=64x, 3=32x, 4=16x, 5=8x, 6=4x, 7=2x, 8=1x
 void TMC2130_setStepMode(bool intpol, bool stealth_chop, byte micro_step_mode) {
-  unsigned long data_out=0;
+  uint32_t data_out=0;
 
   // voltage on AIN is current reference
   if (stealth_chop) data_out=0x00000003UL; else data_out=0x00000001UL;
@@ -326,5 +326,5 @@ void TMC2130_setStepMode(bool intpol, bool stealth_chop, byte micro_step_mode) {
   if (intpol) bitWrite(data_out,28,1); else bitWrite(data_out,28,0);
   // set the micro-step mode bits
   data_out|=micro_step_mode<<24;
-  TMC2130_write(REG_CHOPCONF,&data_out);
+  TMC2130_write(REG_CHOPCONF,data_out);
 }
