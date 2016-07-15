@@ -256,7 +256,7 @@ double newTargetAlt=0.0, newTargetAzm=0.0;         // holds the altitude and azm
 double currentAlt = 45;                            // the current altitude
 int    minAlt;                                     // the minimum altitude, in degrees, for goTo's (so we don't try to point too low)
 int    maxAlt;                                     // the maximum altitude, in degrees, for goTo's (to keep the telescope tube away from the mount/tripod)
-bool   autoContinue = true;                        // automatically do a meridian flip and continue when we hit the MinutesPastMeridianW
+bool   autoContinue = false;                       // automatically do a meridian flip and continue when we hit the MinutesPastMeridianW
 
 // Stepper/position/rate ----------------------------------------------------------------------------------------------------
 
