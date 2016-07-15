@@ -325,3 +325,4 @@ void TMC2130_setStepMode(bool intpol, bool stealth_chop, byte micro_step_mode) {
   data_out|=micro_step_mode<<24;
   TMC2130_write(REG_CHOPCONF,data_out);
 }
+
