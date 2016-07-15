@@ -146,13 +146,11 @@ volatile double  timerRateRatio        = ((double)StepsPerDegreeAxis1/(double)St
 volatile boolean useTimerRateRatio     = (StepsPerDegreeAxis1!=StepsPerDegreeAxis2);
 #define StepsPerSecondAxis1              ((double)StepsPerDegreeAxis1/240.0)
 #define StepsPerSecondAxis2              ((double)StepsPerDegreeAxis2/240.0)
-#define BreakDistAxis1                   (2L)  //(2L+(long)(StepsPerDegreeAxis1/24000L))
-#define BreakDistAxis2                   (2L)  //(2L+(long)(StepsPerDegreeAxis2/24000L))
+#define BreakDistAxis1                   (2L)
+#define BreakDistAxis2                   (2L)
 #define SecondsPerWormRotationAxis1      ((long)(StepsPerWormRotationAxis1/StepsPerSecondAxis1))
 volatile double StepsForRateChangeAxis1= ((double)DegreesForAcceleration/sqrt((double)StepsPerDegreeAxis1))*0.3333333*StepsPerDegreeAxis1*MaxRate;
 volatile double StepsForRateChangeAxis2= ((double)DegreesForAcceleration/sqrt((double)StepsPerDegreeAxis2))*0.3333333*StepsPerDegreeAxis2*MaxRate;
-//volatile double StepsForRateChangeAxis1= (double)DegreesForAcceleration*(double)StepsPerDegreeAxis1*4.0;
-//volatile double StepsForRateChangeAxis2= (double)DegreesForAcceleration*(double)StepsPerDegreeAxis2*4.0;
 #ifndef DegreesForRapidStop
 #define DegreesForRapidStop 1.0
 #endif
@@ -258,6 +256,7 @@ double newTargetAlt=0.0, newTargetAzm=0.0;         // holds the altitude and azm
 double currentAlt = 45;                            // the current altitude
 int    minAlt;                                     // the minimum altitude, in degrees, for goTo's (so we don't try to point too low)
 int    maxAlt;                                     // the maximum altitude, in degrees, for goTo's (to keep the telescope tube away from the mount/tripod)
+bool   autoContinue = true;                        // automatically do a meridian flip and continue when we hit the MinutesPastMeridianW
 
 // Stepper/position/rate ----------------------------------------------------------------------------------------------------
 
@@ -457,46 +456,48 @@ int    maxAlt;                                     // the maximum altitude, in d
 #define PecPin        23
 #define AnalogPecPin  23    // Pin 23 (PEC Sense, analog or digital)
 
-// The limit switch sense is a logic level input which uses the internal pull up, shorted to ground it stops gotos/tracking
-#define LimitPin       4
 
 // The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
-#define LEDnegPin     19    // Pin 19 (GND)
-#define LEDneg2Pin    22    // Pin 22 (GND)
-#define ReticulePin   22    // Pin 22 (GND)
-
-// The PPS pin is a logic level input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
-#define PpsPin         5    // Pin 5 (PPS time source, GPS for example)
+#define LEDnegPin     19    // Pin 19 (Drain)
+#define LEDneg2Pin    22    // Pin 22 (Drain)
+#define ReticulePin   22    // Pin 22 (Drain)
 
 #define Axis1DirPin   21    // Pin 21 (Dir)
 #define Axis1StepPin  20    // Pin 20 (Step)
 #define Axis1SlpPin   19    // Pin 19 (Sleep)
 #define Axis1RstPin   18    // Pin 18 (Reset)
-
-// Pins to enable/disable the stepper drivers and set microstep mode, optional and normally just hard-wired (DRV8825)/ignored (BED-A4988)
-#define Axis1_M0      15    // Pin 15 (Microstep Mode 0)
-#define Axis1_M1      16    // Pin 16 (Microstep Mode 1)
+#define Axis1_Aux     18    // Pin 14 (Aux - used for SPI)
+#define Axis1_FAULT   18    // Pin 18 (Fault)
 #define Axis1_M2      17    // Pin 17 (Microstep Mode 2)
+#define Axis1_M1      16    // Pin 16 (Microstep Mode 1)
+#define Axis1_M0      15    // Pin 15 (Microstep Mode 0)
 #define Axis1_EN      14    // Pin 14 (Enabled when LOW)
-#define Axis1_FAULT   18    // Pin 18 (Fault if LOW)
 
-// The HA(RA) and Dec jumpers (going to the big easy drivers) are simply four wire jumper cables, each has identical wiring - simple modular construction
 #define Axis2DirPin    2    // Pin  2 (Dir)
 #define Axis2StepPin   3    // Pin  3 (Step)
 #define Axis2SlpPin    4    // Pin  4 (Sleep)
+#define LimitPin       4    // Pin  4 (The limit switch sense is a logic level input which uses the internal pull up, shorted to ground it stops gotos/tracking)
+#define PpsPin         5    // Pin  5 (PPS time source, GPS for example)
 #define Axis2RstPin    5    // Pin  5 (Reset)
-
-#define Axis2_M0       8    // Pin  8 (Microstep Mode 0)
-#define Axis2_M1       7    // Pin  7 (Microstep Mode 1)
+#define Axis2_Aux      5    // Pin  5 (Aux - used for SPI)
+#define Axis2_FAULT    5    // Pin  5 (Fault)
 #define Axis2_M2       6    // Pin  6 (Microstep Mode 2)
+#define Axis2_M1       7    // Pin  7 (Microstep Mode 1)
+#define Axis2_M0       8    // Pin  8 (Microstep Mode 0)
 #define Axis2_EN       9    // Pin  9 (Enabled when LOW)
-#define Axis2_FAULT    5    // Pin  5 (Fault if LOW)
 
 // ST4 interface
+#ifdef ST4_ALTERNATE_PINS_ON
+#define ST4RAw        10    // Pin 10 ST4 RA- West
+#define ST4DEs        11    // Pin 11 ST4 DE- South
+#define ST4DEn        12    // Pin 12 ST4 DE+ North
+#define ST4RAe        13    // Pin 13 ST4 RA+ East
+#else
 #define ST4RAw        24    // Pin 24 ST4 RA- West
 #define ST4DEs        25    // Pin 25 ST4 DE- South
 #define ST4DEn        26    // Pin 26 ST4 DE+ North
 #define ST4RAe        27    // Pin 27 ST4 RA+ East
+#endif
 
 #elif (defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)) && !defined(ALTERNATE_PINMAP_ON)
 // Note that TM4C123 has resistors R9 anr R10 between pins 14 (B6) and 23 (D0) and between pins 15 (B7) and 24 (D1)
@@ -916,6 +917,8 @@ char ST4DE_last = 0;
 #define EE_pulseGuideRate 22
 #define EE_maxRate     23
 
+#define EE_autoContinue 25
+
 #define EE_trueAxis1   30
 #define EE_trueAxis2   34
 
@@ -999,13 +1002,13 @@ void setup() {
 
 // if alternate features are used on the Teensy3.2 or Launchpad remove the default
 #if defined(__arm__) && defined(TEENSYDUINO) 
-  #if (defined(AXIS1_FAULT_LOW) || defined(AXIS1_FAULT_HIGH))
+  #if (defined(AXIS1_FAULT_LOW) || defined(AXIS1_FAULT_HIGH) || defined(MODE_SWITCH_BEFORE_SLEW_SPI))
     #undef Axis1RstPin
   #endif
   #if (defined(STATUS_LED_PINS_ON) || defined(STATUS_LED_PINS))
     #undef Axis1SlpPin
   #endif
-  #if (defined(AXIS2_FAULT_LOW) || defined(AXIS2_FAULT_HIGH) || defined(PPS_SENSE_ON))
+  #if (defined(AXIS2_FAULT_LOW) || defined(AXIS2_FAULT_HIGH) || defined(PPS_SENSE_ON) || defined(MODE_SWITCH_BEFORE_SLEW_SPI))
     #undef Axis2RstPin
   #endif
   #if defined(LIMIT_SENSE_ON)
@@ -1220,6 +1223,9 @@ void setup() {
     if (maxRate<2L*16L) maxRate=2L*16L; if (maxRate>10000L*16L) maxRate=10000L*16L;
     EEPROM_writeInt(EE_maxRate,(int)(maxRate/16L));
 
+    // init autoContinue
+    EEPROM.write(EE_autoContinue,autoContinue);
+
     // init the sidereal tracking rate, use this once - then issue the T+ and T- commands to fine tune
     // 1/16uS resolution timer, ticks per sidereal second
     EEPROM_writeLong(EE_siderealInterval,siderealInterval);
@@ -1398,9 +1404,9 @@ void setup() {
   // get the min. and max altitude
   minAlt=EEPROM.read(EE_minAlt)-128;
   maxAlt=EEPROM.read(EE_maxAlt);
-  #ifdef MOUNT_TYPE_ALTAZM
+#ifdef MOUNT_TYPE_ALTAZM
   if (maxAlt>87) maxAlt=87;
-  #endif
+#endif
 
   // get the backlash amounts
   backlashAxis2=EEPROM_readInt(EE_backlashAxis2);
@@ -1432,13 +1438,16 @@ void setup() {
   #endif
   SetAccelerationRates(maxRate); // set the new acceleration rate
 
+  // get autoContinue
+  autoContinue=EEPROM.read(EE_autoContinue); if (!autoContinue) autoContinue==true;
+
   // makes onstep think that you parked the 'scope
   // combined with a hack in the goto syncEqu() function and you can quickly recover from
   // a reset without loosing much accuracy in the sky.  PEC is toast though.
-  #ifdef RESCUE_MODE_ON
+#ifdef RESCUE_MODE_ON
   parkSaved=true;    
   parkStatus=Parked;
-  #endif
+#endif
 
   // set the default guide rate, 16x sidereal
   setGuideRate(GuideRate16x);
@@ -1461,7 +1470,7 @@ void loop() {
   if (trackingState!=TrackingMoveTo) { 
 
     // ST4 INTERFACE -------------------------------------------------------------------------------------
-    #if defined(ST4_ON) || defined(ST4_PULLUP)
+#if defined(ST4_ON) || defined(ST4_PULLUP)
     if (parkStatus==NotParked) {
       ST4RA_state=0; if (digitalRead(ST4RAw)==LOW) { if (digitalRead(ST4RAe)!=LOW) ST4RA_state='w'; } else if (digitalRead(ST4RAe)==LOW) ST4RA_state='e';
       ST4DE_state=0; if (digitalRead(ST4DEn)==LOW) { if (digitalRead(ST4DEs)!=LOW) ST4DE_state='n'; } else if (digitalRead(ST4DEs)==LOW) ST4DE_state='s';
@@ -1469,15 +1478,15 @@ void loop() {
       if (ST4RA_last!=ST4RA_state) {
         ST4RA_last=ST4RA_state;
         if (ST4RA_state) { 
-          #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
-            #ifdef ST4_HAND_CONTROL_ON
-              enableGuideRate(currentGuideRate);
-            #else
-              enableGuideRate(currentPulseGuideRate);
-            #endif
-          #else
-            enableGuideRate(currentGuideRate);
-          #endif
+  #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
+    #ifdef ST4_HAND_CONTROL_ON
+          enableGuideRate(currentGuideRate);
+      #else
+          enableGuideRate(currentPulseGuideRate);
+      #endif
+    #else
+          enableGuideRate(currentGuideRate);
+    #endif
           guideDirAxis1=ST4RA_state;
           guideDurationHA=-1;
           cli(); if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRate; else guideTimerRateAxis1=guideTimerBaseRate; sei();
@@ -1489,15 +1498,15 @@ void loop() {
       if (ST4DE_last!=ST4DE_state) {
         ST4DE_last=ST4DE_state;
         if (ST4DE_state) { 
-          #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
-            #ifdef ST4_HAND_CONTROL_ON
-              enableGuideRate(currentGuideRate);
-            #else
-              enableGuideRate(currentPulseGuideRate);
-            #endif
-          #else
-            enableGuideRate(currentGuideRate);
-          #endif
+  #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
+    #ifdef ST4_HAND_CONTROL_ON
+          enableGuideRate(currentGuideRate);
+    #else
+          enableGuideRate(currentPulseGuideRate);
+    #endif
+  #else
+          enableGuideRate(currentGuideRate);
+  #endif
           guideDirAxis2=ST4DE_state;
           guideDurationDec=-1;
           cli(); guideTimerRateAxis2=guideTimerBaseRate; sei();
@@ -1506,7 +1515,7 @@ void loop() {
         }
       }
     }
-    #endif
+#endif
 
     guideHA.fixed=0;
     Guide();
@@ -1544,9 +1553,9 @@ void loop() {
       if (pecTimerRateAxis1!=0) targetAxis1.fixed+=pstep.fixed;
       sei();
 
-      #ifdef STATUS_LED_PINS_ON
+#ifdef STATUS_LED_PINS_ON
       if (siderealTimer%20L==0L) { if (LED_ON) { digitalWrite(LEDnegPin,HIGH); LED_ON=false; } else { digitalWrite(LEDnegPin,LOW); LED_ON=true; } }
-      #endif
+#endif
     }
 
     // SIDEREAL TRACKING DURING GOTOS ------------------------------------------------------------------
@@ -1602,42 +1611,57 @@ void loop() {
     double t2=(double)(m-UT1mS_start)/1000.0;
     UT1=UT1_start+t2/3600.0;   // This just needs to be accurate to the nearest second, it's about 10x better
     
-    #ifdef PEC_SENSE
+#ifdef PEC_SENSE
     // see if we're on the PEC index
     if (trackingState==TrackingSidereal) 
     pecAnalogValue = analogRead(AnalogPecPin);
-    #endif
+#endif
     
     // adjust tracking rate for Alt/Azm mounts
     // adjust tracking rate for refraction
     SetDeltaTrackingRate();
 
-    #ifdef PPS_SENSE_ON
+#ifdef PPS_SENSE_ON
     // update clock
     if (trackingState==TrackingSidereal) {
       cli();
       PPSrateRatio=((double)1000000.0/(double)(PPSavgMicroS));
       if ((long)(micros()-(PPSlastMicroS+2000000UL))>0) PPSsynced=false; // if more than two seconds has ellapsed without a pulse we've lost sync
       sei();
-      #ifdef STATUS_LED2_PINS_ON
+  #ifdef STATUS_LED2_PINS_ON
       if (PPSsynced) { if (LED2_ON) { digitalWrite(LEDneg2Pin,HIGH); LED2_ON=false; } else { digitalWrite(LEDneg2Pin,LOW); LED2_ON=true; } } else { digitalWrite(LEDneg2Pin,HIGH); LED2_ON=false; } // indicate PPS
-      #endif
+  #endif
       if (LastPPSrateRatio!=PPSrateRatio) { SetSiderealClockRate(siderealInterval); LastPPSrateRatio=PPSrateRatio; }
     }
-    #endif
+#endif
 
-    #ifdef STATUS_LED_PINS_ON
+#ifdef STATUS_LED_PINS_ON
     if (trackingState!=TrackingSidereal) if (!LED_ON) { digitalWrite(LEDnegPin,LOW); LED_ON=true; }   // indicate PWR on 
-    #endif
-    #ifdef STATUS_LED2_PINS_ON
+#endif
+#ifdef STATUS_LED2_PINS_ON
     if (trackingState==TrackingNone) if (LED2_ON) { digitalWrite(LEDneg2Pin,HIGH); LED2_ON=false; }   // indicate STOP
     if (trackingState==TrackingMoveTo) if (!LED2_ON) { digitalWrite(LEDneg2Pin,LOW); LED2_ON=true; }  // indicate GOTO
-    #endif
+#endif
 
     // safety checks, keeps mount from tracking past the meridian limit, past the UnderPoleLimit, below horizon limit, above the overhead limit, or past the Dec limits
     if (meridianFlip!=MeridianFlipNever) {
-      if (pierSide==PierSideWest) { cli(); if (posAxis1+IHS>(MinutesPastMeridianW*(long)StepsPerDegreeAxis1/4L)) { lastError=ERR_MERIDIAN; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  } sei(); }
-      if (pierSide==PierSideEast) { cli(); if (posAxis1+IHS>(UnderPoleLimit*15L*(long)StepsPerDegreeAxis1))      { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  } sei(); }
+      if (pierSide==PierSideWest) { 
+        cli(); 
+        if (posAxis1+IHS>(MinutesPastMeridianW*(long)StepsPerDegreeAxis1/4L)) {
+          sei();
+          // do an automatic meridian flip and continue
+          if (autoContinue && (posAxis1+IHS>(-MinutesPastMeridianE*(long)StepsPerDegreeAxis1/4L))) {
+            double newRA,newDec;
+            getEqu(&newRA,&newDec,false); // returns 0 on success
+            if (goToEqu(newRA,newDec)) {
+              lastError=ERR_MERIDIAN; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;
+            }
+          } else {
+            lastError=ERR_MERIDIAN; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;
+          }
+        } else sei();
+      }
+      if (pierSide==PierSideEast) { cli(); if (posAxis1+IHS>(UnderPoleLimit*15L*(long)StepsPerDegreeAxis1)) { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  } sei(); }
     } else {
 #ifndef MOUNT_TYPE_ALTAZM
       // when Fork mounted, ignore pierSide and just stop the mount if it passes the UnderPoleLimit
@@ -1652,9 +1676,9 @@ void loop() {
 #endif      
 
     // support for limit switch(es)
-    #ifdef LIMIT_SENSE_ON  
+#ifdef LIMIT_SENSE_ON  
     if (digitalRead(LimitPin)==LOW) { lastError=ERR_LIMIT_SENSE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
-    #endif
+#endif
 
     // check altitude every second
     if ((currentAlt<minAlt) || (currentAlt>maxAlt)) { lastError=ERR_ALT; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
