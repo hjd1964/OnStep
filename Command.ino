@@ -385,6 +385,7 @@ void processCommands() {
               case '2': sprintf(reply,"%ld",(long)(maxRate/16L)); quietReply=true; break;                   // MaxRate
               case '3': sprintf(reply,"%ld",(long)(MaxRate)); quietReply=true; break;                       // MaxRate (default)
               case '4': if (meridianFlip==MeridianFlipNever) { sprintf(reply,"%d N",(int)(pierSide)); } else { sprintf(reply,"%d",(int)(pierSide)); } quietReply=true; break; // pierSide (N if never)
+              case '5': sprintf(reply,"%i",(int)autoContinue); quietReply=true; break;                      // autoContinue
             }
           } else
           if (parameter[0]=='E') { // En: Get config
@@ -1106,6 +1107,9 @@ void processCommands() {
               }
               SetAccelerationRates(maxRate); // set the new acceleration rate
             break; // maxRate
+            case '5':
+              if (parameter[4]=='0') { i=parameter[3]-'0'; if ((i==0) || (i==1)) { autoContinue=i;  EEPROM.write(EE_autoContinue,autoContinue); } }
+            break; // autoContinue
           }
         } else commandError=true;
         //getEqu(&f,&f1,false);  
