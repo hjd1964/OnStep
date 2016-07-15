@@ -222,13 +222,10 @@ char Serial1_read() {
 
 // -----------------------------------------------------------------------------------
 // Simple soft SPI routines
-int _ss = 11;
-int _sck = 10;
-int _miso = 9;
-int _mosi = 8;
-
-byte sendValue = 74;   // Value we are going to send
-byte returnValue = 0;  // Where we will store the value sent by the slave
+int _ss = 0;
+int _sck = 0;
+int _miso = 0;
+int _mosi = 0;
 
 void spiStart(int ss, int sck, int miso, int mosi)
 {
@@ -281,7 +278,7 @@ uint32_t spiTransfer32(uint32_t data_out)
   return data_in;
 }
 
-//TMC2130 registers
+// TMC2130 registers
 #define WRITE          0x80 //write flag
 #define REG_GCONF      0x00
 #define REG_GSTAT      0x01
