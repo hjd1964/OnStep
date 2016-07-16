@@ -218,8 +218,8 @@ void moveTo() {
             EEPROM_writeFloat(EE_ID,ID);
             
             // disable the stepper drivers
-            digitalWrite(Axis1_EN,Axis1_Disabled);
-            digitalWrite(Axis2_EN,Axis2_Disabled);
+            digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
+            digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
 
           } else parkStatus=ParkFailed;
       } else parkStatus=ParkFailed;
@@ -232,8 +232,8 @@ void moveTo() {
           atHome=true;
           
           // disable the stepper drivers
-          digitalWrite(Axis1_EN,Axis1_Disabled);
-          digitalWrite(Axis2_EN,Axis2_Disabled);
+          digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
+          digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
         }
     }
   }
