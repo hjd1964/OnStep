@@ -849,6 +849,8 @@ unsigned long guideDurationLastDec = 0;
 
 long lasttargetAxis1=0;
 long debugv1 = 0;
+boolean axis1Enabled = false;
+boolean axis2Enabled = false;
 
 double  guideTimerBaseRate = 0;
 fixed_t amountGuideHA;
@@ -1143,8 +1145,8 @@ void setup() {
   pinMode(Axis2_FAULT,INPUT);
 
 // disable the stepper drivers for now, if the enable lines are connected
-  pinMode(Axis1_EN,OUTPUT); digitalWrite(Axis1_EN,Axis1_Disabled);
-  pinMode(Axis2_EN,OUTPUT); digitalWrite(Axis2_EN,Axis2_Disabled);
+  pinMode(Axis1_EN,OUTPUT); digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
+  pinMode(Axis2_EN,OUTPUT); digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
 
 // if the stepper driver mode select pins are wired in, program any requested micro-step mode
 #ifdef AXIS1_MODE
