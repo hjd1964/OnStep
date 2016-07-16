@@ -724,10 +724,10 @@ boolean abortSlew        = false;
 byte meridianFlip = MeridianFlipAlways;
 #endif
 #ifdef MOUNT_TYPE_FORK
-byte meridianFlip = MeridianFlipNever;
+byte meridianFlip = MeridianFlipAlign;
 #endif
 #ifdef MOUNT_TYPE_FORK_ALT
-byte meridianFlip = MeridianFlipAlign;
+byte meridianFlip = MeridianFlipNever;
 #endif
 #ifdef MOUNT_TYPE_ALTAZM
 byte meridianFlip = MeridianFlipNever;
