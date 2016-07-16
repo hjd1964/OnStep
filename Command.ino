@@ -330,8 +330,11 @@ void processCommands() {
         #ifdef MOUNT_TYPE_GEM
         reply[i++]='E';
         #endif
-        #if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT)
+        #if defined(MOUNT_TYPE_FORK)
         reply[i++]='K';
+        #endif
+        #if defined(MOUNT_TYPE_FORK_ALT)
+        reply[i++]='k';
         #endif
         #ifdef MOUNT_TYPE_ALTAZM
         reply[i++]='A';
@@ -405,7 +408,7 @@ void processCommands() {
                 c+="0";
               #elif defined(MOUNT_TYPE_FORK)
                 c+="1";
-              #elif defined(MOUNT_TYPE_FORKALT)
+              #elif defined(MOUNT_TYPE_FORK_ALT)
                 c+="2";
               #elif defined(MOUNT_TYPE_ALTAZM)
                 c+="3";
@@ -1108,7 +1111,7 @@ void processCommands() {
               SetAccelerationRates(maxRate); // set the new acceleration rate
             break; // maxRate
             case '5':
-              if (parameter[4]=='0') { i=parameter[3]-'0'; if ((i==0) || (i==1)) { autoContinue=i;  EEPROM.write(EE_autoContinue,autoContinue); } }
+              if ((parameter[4]=='0') || (parameter[4]=='1')) { i=parameter[3]-'0'; if ((i==0) || (i==1)) { autoContinue=i;  EEPROM.write(EE_autoContinue,autoContinue); } }
             break; // autoContinue
           }
         } else commandError=true;
