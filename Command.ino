@@ -1111,7 +1111,7 @@ void processCommands() {
               SetAccelerationRates(maxRate); // set the new acceleration rate
             break; // maxRate
             case '5':
-              if ((parameter[4]=='0') || (parameter[4]=='1')) { i=parameter[3]-'0'; if ((i==0) || (i==1)) { autoContinue=i;  EEPROM.write(EE_autoContinue,autoContinue); } }
+              if ((parameter[3]=='0') || (parameter[3]=='1')) { i=parameter[3]-'0'; if ((i==0) || (i==1)) { autoContinue=i;  EEPROM.write(EE_autoContinue,autoContinue); } }
             break; // autoContinue
           }
         } else commandError=true;
