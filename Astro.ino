@@ -765,8 +765,8 @@ bool startAlign(char c) {
   setHome();
   
   // enable the stepper drivers
-  digitalWrite(Axis1_EN,Axis1_Enabled);
-  digitalWrite(Axis2_EN,Axis2_Enabled);
+  digitalWrite(Axis1_EN,Axis1_Enabled); axis1Enabled=true;
+  digitalWrite(Axis2_EN,Axis2_Enabled); axis2Enabled=true;
   delay(10);
 
   // start tracking
