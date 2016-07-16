@@ -25,6 +25,11 @@ volatile long modeAxis2_next=AXIS2_MODE;
 volatile boolean gotoModeAxis2=false;
 #endif
 
+#ifdef AUTO_POWER_DOWN_AXIS2_ON
+volatile long Axis2PowerOffTimer = 0;
+bool axis2Powered = false;
+#endif
+
 //--------------------------------------------------------------------------------------------------
 // set timer1 to rate (in microseconds*16)
 void Timer1SetRate(long rate) {
@@ -190,7 +195,31 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
           if (fabs(x)<20) guideTimerRateAxis2A=2;
       }
     }
-       
+
+#if defined(AUTO_POWER_DOWN_AXIS2_ON) && !defined(MOUNT_TYPE_ALTAZM)
+    // ------------------------------------------------------------------------------------------------------------------------------------
+    // Power down the Dec motor
+    
+  if (axis2Enabled) {
+    // timer count down
+    if (Axis2PowerOffTimer>0) Axis2PowerOffTimer--; 
+
+    // if the guide rate <= 1x and we're guiding on either axis set the timer to 10 minutes
+    if ((fabs(guideTimerRateAxis2)<=1.000001) && (guideDirAxis2 || guideDirAxis1)) Axis2PowerOffTimer=10*60*100;
+
+    // if Axis2 isn't stationary set the timer to a minimum of 10 seconds
+    cli(); if (posAxis2!=(long)targetAxis2.part.m) if (Axis2PowerOffTimer<10*100) Axis2PowerOffTimer=10*100; sei();
+
+    // enable/disable Axis2
+    if (Axis2PowerOffTimer!=0) {
+      if (axis2Powered) { digitalWrite(Axis2_EN,Axis2_Disabled); axis2Powered=false; }
+    } else  {
+      if (!axis2Powered) { cli(); digitalWrite(Axis2_EN,Axis2_Enabled); axis2Powered=true; delayMicroseconds(10); sei(); }
+    }
+  } else { Axis2PowerOffTimer=0; axis2Powered=false; }
+    // ------------------------------------------------------------------------------------------------------------------------------------
+#endif
+
     double timerRateAxis2A=trackingTimerRateAxis2; if (guideDirAxis2 && (activeGuideRate>GuideRate1x)) timerRateAxis2A=0.0;
     double timerRateAxis2B=fabs(guideTimerRateAxis2A+timerRateAxis2A);
     // round up to run the motor timers just a tiny bit slow, then adjust below if we start to fall behind during sidereal tracking
