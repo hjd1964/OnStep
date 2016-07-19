@@ -208,10 +208,10 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     if ((fabs(guideTimerRateAxis2)<=1.000001) && (guideDirAxis2 || guideDirAxis1)) Axis2PowerOffTimer=10*60*100;
 
     // if Axis2 isn't stationary set the timer to a minimum of 10 seconds
-    cli(); if (posAxis2!=(long)targetAxis2.part.m) if (Axis2PowerOffTimer<10*100) Axis2PowerOffTimer=10*100; sei();
+    cli(); if ((posAxis2!=(long)targetAxis2.part.m) && (Axis2PowerOffTimer<10*100)) Axis2PowerOffTimer=10*100; sei();
 
     // enable/disable Axis2
-    if (Axis2PowerOffTimer!=0) {
+    if (Axis2PowerOffTimer==0) {
       if (axis2Powered) { digitalWrite(Axis2_EN,Axis2_Disabled); axis2Powered=false; }
     } else  {
       if (!axis2Powered) { cli(); digitalWrite(Axis2_EN,Axis2_Enabled); axis2Powered=true; delayMicroseconds(10); sei(); }
