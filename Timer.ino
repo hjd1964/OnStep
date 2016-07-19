@@ -27,7 +27,7 @@ volatile boolean gotoModeAxis2=false;
 
 #ifdef AUTO_POWER_DOWN_AXIS2_ON
 volatile long Axis2PowerOffTimer = 0;
-bool axis2Powered = false;
+volatile bool axis2Powered = false;
 #endif
 
 //--------------------------------------------------------------------------------------------------
