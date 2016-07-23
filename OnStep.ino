@@ -42,11 +42,13 @@
 #include "TM4C.h"
 // There is a bug in Arduino/Energia which ignores #ifdef preprocessor directives when generating a list of files
 // Until this is fixed YOU MUST MANUALLY UN-COMMENT the #include line below if using the Launchpad Connected device.
-// Notice OnStep uses the EthernetPlus.h library for the W5100:
-// this is available at: https://github.com/hjd1964/EthernetPlus and should be installed in your "~\Documents\Arduino\libraries" folder
 #if defined(W5100_ON)
 #include "SPI.h"
-#include "EthernetPlus.h"
+// OnStep uses the EthernetPlus.h library for the W5100 on the Mega2560 and Launchpad TM4C:
+// this is available at: https://github.com/hjd1964/EthernetPlus and should be installed in your "~\Documents\Arduino\libraries" folder
+//#include "EthernetPlus.h"
+// OnStep uses the Ethernet.h library for the W5100 on the Teensy3.2:
+//#include "Ethernet.h"
 #endif
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
 //#include "Ethernet.h"
@@ -464,8 +466,7 @@ bool   autoContinue = false;                       // automatically do a meridia
 
 #define Axis1DirPin   21    // Pin 21 (Dir)
 #define Axis1StepPin  20    // Pin 20 (Step)
-#define Axis1SlpPin   19    // Pin 19 (Sleep)
-#define Axis1RstPin   18    // Pin 18 (Reset)
+#define RstPin        19    // Pin 19 (Reset)
 #define Axis1_Aux     18    // Pin 14 (Aux - used for SPI)
 #define Axis1_FAULT   18    // Pin 18 (Fault)
 #define Axis1_M2      17    // Pin 17 (Microstep Mode 2)
@@ -475,7 +476,6 @@ bool   autoContinue = false;                       // automatically do a meridia
 
 #define Axis2DirPin    2    // Pin  2 (Dir)
 #define Axis2StepPin   3    // Pin  3 (Step)
-#define Axis2SlpPin    4    // Pin  4 (Sleep)
 #define LimitPin       4    // Pin  4 (The limit switch sense is a logic level input which uses the internal pull up, shorted to ground it stops gotos/tracking)
 #define PpsPin         5    // Pin  5 (PPS time source, GPS for example)
 #define Axis2RstPin    5    // Pin  5 (Reset)
@@ -1002,55 +1002,28 @@ void setup() {
 
   fstepAxis1.fixed=doubleToFixed(StepsPerSecondAxis1/100.0);
 
-// if alternate features are used on the Teensy3.2 or Launchpad remove the default
-#if defined(__arm__) && defined(TEENSYDUINO) 
-  #if (defined(AXIS1_FAULT_LOW) || defined(AXIS1_FAULT_HIGH) || defined(MODE_SWITCH_BEFORE_SLEW_SPI))
-    #undef Axis1RstPin
-  #endif
-  #if (defined(STATUS_LED_PINS_ON) || defined(STATUS_LED_PINS))
-    #undef Axis1SlpPin
-  #endif
-  #if (defined(AXIS2_FAULT_LOW) || defined(AXIS2_FAULT_HIGH) || defined(PPS_SENSE_ON) || defined(MODE_SWITCH_BEFORE_SLEW_SPI))
-    #undef Axis2RstPin
-  #endif
-  #if defined(LIMIT_SENSE_ON)
-    #undef Axis2SlpPin
-  #endif
-#endif
-#if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) 
-  #if defined(AXIS1_FAULT_LOW) || defined(AXIS1_FAULT_HIGH)
-    #undef Axis1RstPin
-  #endif
-  #if (defined(AXIS2_FAULT_LOW) || defined(AXIS2_FAULT_HIGH))
-    #undef Axis2RstPin
-  #endif
-#endif
-  
-// initialize the stepper control pins RA and Dec
+// initialize the stepper control pins Axis1 and Axis2
   pinMode(Axis1StepPin,OUTPUT);
   pinMode(Axis1DirPin,OUTPUT); 
-#ifdef Axis1RstPin
-  pinMode(Axis1RstPin,OUTPUT);
-  digitalWrite(Axis1RstPin,HIGH);
-#endif
-#ifdef Axis1SlpPin
-  pinMode(Axis1SlpPin,OUTPUT);
-  digitalWrite(Axis1SlpPin,HIGH);
-#endif
-
 #ifdef Axis2GndPin
   pinMode(Axis2GndPin,OUTPUT);
   digitalWrite(Axis2GndPin,LOW);
 #endif
   pinMode(Axis2StepPin,OUTPUT); 
   pinMode(Axis2DirPin,OUTPUT); 
-#ifdef Axis2RstPin
-  pinMode(Axis2RstPin,OUTPUT);
-  digitalWrite(Axis2RstPin,HIGH);
+
+// override any status LED and set the reset pin HIGH
+#if defined(W5100_ON) && defined(__arm__) && defined(TEENSYDUINO)
+#ifdef STATUS_LED_PINS_ON
+#undef STATUS_LED_PINS_ON
 #endif
-#ifdef Axis2SlpPin
-  pinMode(Axis2SlpPin,OUTPUT);
-  digitalWrite(Axis2SlpPin,HIGH);
+#ifdef STATUS_LED_PINS
+#undef STATUS_LED_PINS
+#endif
+  pinMode(RstPin,OUTPUT);
+  digitalWrite(RstPin,LOW);
+  delay(500);
+  digitalWrite(RstPin,HIGH);
 #endif
 
 // light status LED (provides GND)
@@ -1141,8 +1114,12 @@ void setup() {
 #endif
 
 // inputs for stepper drivers fault signal
+#ifndef AXIS1_FAULT_OFF
   pinMode(Axis1_FAULT,INPUT);
+#endif
+#ifndef AXIS2_FAULT_OFF
   pinMode(Axis2_FAULT,INPUT);
+#endif
 
 // disable the stepper drivers for now, if the enable lines are connected
   pinMode(Axis1_EN,OUTPUT); digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
