@@ -48,8 +48,10 @@ bool Ethernet_www_busy() {
   return www_client;
 }
 
+boolean cmd_no_client = true;
 bool Ethernet_cmd_busy() {
   if (cmdIsClosing) return true;
+  if (cmd_no_client) { return false; }
   return cmd_client;
 }
 
@@ -74,7 +76,6 @@ boolean Ethernet_transmit() {
   return false;
 }
 
-boolean cmd_no_client = true;
 boolean Ethernet_available() {
   if (cmd_no_client) {
     cmd_client = cmd_server.available();
@@ -88,7 +89,14 @@ boolean Ethernet_available() {
       return cmd_client.available();
     }
 
-    if (millis()-cmdTransactionLast_ms>50) { 
+// immediately time out on the Teensy3.2
+#if (defined(__arm__) && defined(TEENSYDUINO))
+#define CTO 15
+#else
+#define CTO 1000
+#endif
+
+  if (millis()-cmdTransactionLast_ms>CTO) { 
 #if defined(W5100_ON) && !(defined(__arm__) && defined(TEENSYDUINO)) 
       cmd_client.stopRequest(); 
 #endif
