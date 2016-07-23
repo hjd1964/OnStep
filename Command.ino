@@ -4,7 +4,6 @@
 // these turn on and off checksum error correction on the serial ports, default=OFF
 #define CHKSUM0_OFF     // default _OFF: as required for OnStep ASCOM driver
 #define CHKSUM1_OFF     // default _OFF: as required for OnStep Controller2 Android App (and others)
-
 boolean serial_zero_ready = false;
 boolean serial_one_ready = false;
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
@@ -43,7 +42,11 @@ void processCommands() {
 #endif
     else {
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
-      if (!Ethernet_cmd_busy()) Ethernet_www();
+#if (defined(__arm__) && defined(TEENSYDUINO))
+  Ethernet_www();
+#else
+  if (!Ethernet_cmd_busy()) Ethernet_www();
+#endif
 #endif
       return;
     }
