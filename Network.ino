@@ -73,25 +73,33 @@ void Ethernet_print(const char data[]) {
 boolean Ethernet_transmit() {
   return false;
 }
- 
+
+boolean cmd_no_client = true;
 boolean Ethernet_available() {
-  cmd_client = cmd_server.available();
+  if (cmd_no_client) {
+    cmd_client = cmd_server.available();
+    cmd_no_client = !cmd_client;
+    if (cmd_no_client) return false;
+  }
+
+//  cmd_client = cmd_server.available();
   if (cmd_client) {
     if (cmd_client.connected()) {
       return cmd_client.available();
     }
 
-    if (millis()-cmdTransactionLast_ms>2000) { 
-#ifdef W5100_ON
+    if (millis()-cmdTransactionLast_ms>50) { 
+#if defined(W5100_ON) && !(defined(__arm__) && defined(TEENSYDUINO)) 
       cmd_client.stopRequest(); 
 #endif
       cmdIsClosing=true; 
     }
     if (cmdIsClosing) {
-#ifdef W5100_ON
+#if defined(W5100_ON) && !(defined(__arm__) && defined(TEENSYDUINO)) 
       if (cmd_client.stopMonitor()) { cmdIsClosing=false; }
 #else
       cmd_client.stop(); cmdIsClosing=false;
+      cmd_no_client=true;
 #endif
     }
   }
@@ -140,9 +148,18 @@ void reset_page_requests() {
   get_check=false; get_val=false; get_name=false;
 }
 
+bool www_no_client=true;
 void Ethernet_www() {
   // if a client doesn't already exist try to find a new one
-  if (!www_client) { www_client = web_server.available(); currentLineIsBlank = true; responseStarted=false; clientNeedsToClose=false; clientIsClosing=false; reset_page_requests(); transactionStart_ms=millis(); }
+
+  if (www_no_client) {
+    www_client = web_server.available();
+    www_no_client = !www_client;
+    if (www_no_client) return;
+    currentLineIsBlank = true; responseStarted=false; clientNeedsToClose=false; clientIsClosing=false; reset_page_requests(); transactionStart_ms=millis();
+  }
+
+  //if (!www_client) { currentLineIsBlank = true; responseStarted=false; clientNeedsToClose=false; clientIsClosing=false; reset_page_requests(); transactionStart_ms=millis(); }
 
   // active client?
   if (www_client) {
@@ -208,15 +225,21 @@ void Ethernet_www() {
     if (((clientNeedsToClose && (millis()-responseFinish_ms>100)) || (millis()-transactionStart_ms>5000)) ||
         ((clientNeedsToClose && clientIsClosing))) {
       if (!clientIsClosing) {
-#ifdef W5100_ON
+#if defined(W5100_ON) && !(defined(__arm__) && defined(TEENSYDUINO)) 
         www_client.stopRequest();
 #endif
         clientIsClosing=true;
       } else {
-#ifdef W5100_ON
+#if defined(W5100_ON) && !(defined(__arm__) && defined(TEENSYDUINO)) 
         if (www_client.stopMonitor()) { clientNeedsToClose=false; clientIsClosing=false; }
 #else
         www_client.stop(); clientNeedsToClose=false; clientIsClosing=false;
+#if (defined(__arm__) && defined(TEENSYDUINO))
+        //www_client = web_server.available();
+        //www_client.stop();
+        www_no_client=true;
+#endif
+ //       Serial.println("client disconnected");
 #endif
       }
     }
@@ -443,6 +466,13 @@ void Ethernet_get() {
     if ((get_vals[0]=='o') && (get_vals[1]=='n') && (get_vals[2]==0)) { refraction=refraction_enable; onTrack=false; SetTrackingRate(default_tracking_rate); }
     if ((get_vals[0]=='o') && (get_vals[1]=='f') && (get_vals[2]=='f') && (get_vals[3]==0)) { refraction=false; onTrack=false; SetTrackingRate(default_tracking_rate); }
   }
+  // Auto-continue
+  if ((get_names[0]=='a') && (get_names[1]=='c')) {
+    if ((get_vals[0]=='o') && (get_vals[1]=='n') && (get_vals[2]==0)) { autoContinue=true; EEPROM.write(EE_autoContinue,autoContinue); }
+    if ((get_vals[0]=='o') && (get_vals[1]=='f') && (get_vals[2]=='f') && (get_vals[3]==0)) { autoContinue=false; EEPROM.write(EE_autoContinue,autoContinue); }
+  }
+    
+  // from the Guide.htm page -------------------------------------------------------------------
   // GUIDE control
   if ((get_names[0]=='g') && (get_names[1]=='u')) {
     if (get_vals[1]==0) {
@@ -1045,13 +1075,18 @@ const char html_control10[] PROGMEM =
 "<button name=\"tk\" value=\"s\" type=\"submit\">Sidereal</button>"
 "<button name=\"tk\" value=\"l\" type=\"submit\">Lunar</button>"
 "<button name=\"tk\" value=\"h\" type=\"submit\">Solar</button>";
-const char html_control11[] PROGMEM = 
 #if !defined(MOUNT_TYPE_ALTAZM)
+const char html_control11[] PROGMEM = 
 "</br></br>Compensated Tracking Rate (Pointing Model/Refraction): </br>"
 "<button name=\"rr\" value=\"otk\" type=\"submit\">Full</button>"
 "<button name=\"rr\" value=\"on\" type=\"submit\">Refraction Only</button>"
-"<button name=\"rr\" value=\"off\" type=\"submit\">Off</button>"
+"<button name=\"rr\" value=\"off\" type=\"submit\">Off</button>";
+const char html_control12[] = 
+"</br></br>Auto-flip (automatic Meridian flip): </br>"
+"<button name=\"ac\" value=\"on\" type=\"submit\">On</button>"
+"<button name=\"ac\" value=\"off\" type=\"submit\">Off</button>";
 #endif
+const char html_control13[] = 
 "</form>\r\n";
 
 void control_html_page() {
@@ -1101,7 +1136,11 @@ void control_html_page() {
   if (html_page_step==++stp) strcpy_P(temp, html_control8);
   if (html_page_step==++stp) strcpy_P(temp, html_control9);
   if (html_page_step==++stp) strcpy_P(temp, html_control10);
+#if !defined(MOUNT_TYPE_ALTAZM)
   if (html_page_step==++stp) strcpy_P(temp, html_control11);
+  if (html_page_step==++stp) strcpy_P(temp, html_control12);
+#endif  
+  if (html_page_step==++stp) strcpy_P(temp, html_control13);
   if (html_page_step==++stp) strcpy(temp,"</div></body></html>");
 
   // stop sending this page
