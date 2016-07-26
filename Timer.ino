@@ -414,9 +414,9 @@ ISR(TIMER4_COMPA_vect)
     // Set direction.  Needs >=0.65uS before/after rising step signal (DRV8825 or A4988).
 #if defined(__arm__) && defined(TEENSYDUINO)
     #ifdef REVERSE_AXIS2_ON
-      if (HADir==dirAxis2) digitalWriteFast(Axis2DirPin, LOW); else digitalWriteFast(Axis2DirPin, HIGH);
+      if (DecDir==dirAxis2) digitalWriteFast(Axis2DirPin, LOW); else digitalWriteFast(Axis2DirPin, HIGH);
     #else
-      if (HADir==dirAxis2) digitalWriteFast(Axis2DirPin, HIGH); else digitalWriteFast(Axis2DirPin, LOW);
+      if (DecDir==dirAxis2) digitalWriteFast(Axis2DirPin, HIGH); else digitalWriteFast(Axis2DirPin, LOW);
     #endif
 #else
     #ifdef REVERSE_AXIS2_ON
