@@ -222,6 +222,13 @@ void processCommands() {
         sprintf(reply,"%02d/%02d/%02d",i,i1,i2); 
         quietReply=true; 
       } else 
+//  :Gc#   Get the current time format
+//         Returns: 24#
+//         The current local time format
+      if (command[1]=='c') {
+        strcpy(reply,"24");
+        quietReply=true; 
+       } else
 //  :GD#   Get Telescope Declination
 //         Returns: sDD*MM# or sDD*MM'SS# (based on precision setting)
       if (command[1]=='D')  { 
@@ -439,7 +446,7 @@ void processCommands() {
               #endif
               #if defined(PEC_SENSE_ON)
                 c+="1";
-              #elif PEC_SENSE_PULLUP
+              #elif defined(PEC_SENSE_PULLUP)
                 c+="2";
               #else
                 c+="0";
