@@ -243,11 +243,8 @@ void Ethernet_www() {
 #else
         www_client.stop(); clientNeedsToClose=false; clientIsClosing=false;
 #if (defined(__arm__) && defined(TEENSYDUINO))
-        //www_client = web_server.available();
-        //www_client.stop();
         www_no_client=true;
 #endif
- //       Serial.println("client disconnected");
 #endif
       }
     }
@@ -1569,3 +1566,4 @@ void config_html_page() {
 }
 
 #endif
+
