@@ -368,8 +368,6 @@ bool   autoContinue = false;                       // automatically do a meridia
 #define Axis1StepPin  35    // Pin 35 (Step) PC2
 #define Axis1StepBit   2    //
 #define Axis1StepPORT PORTC //
-#define Axis1SlpPin   33    //
-#define Axis1RstPin   31    //
 
 #define Axis1_M0      29    // Pin 29 (Microstep or Decay Mode 0)
 #define Axis1_M1      27    // Pin 27 (Microstep or Decay Mode 1)
@@ -385,8 +383,6 @@ bool   autoContinue = false;                       // automatically do a meridia
 #define Axis2StepPin  24    // Pin 24 (Step)  PA2
 #define Axis2StepBit   2    //
 #define Axis2StepPORT PORTA //
-#define Axis2SlpPin   26    //
-#define Axis2RstPin   28    //
 
 #define Axis2_M0      30    // Pin 30 (Microstep or Decay Mode 0)
 #define Axis2_M1      32    // Pin 32 (Microstep or Decay Mode 1)
@@ -467,7 +463,7 @@ bool   autoContinue = false;                       // automatically do a meridia
 #define Axis1DirPin   21    // Pin 21 (Dir)
 #define Axis1StepPin  20    // Pin 20 (Step)
 #define RstPin        19    // Pin 19 (Reset)
-#define Axis1_Aux     18    // Pin 14 (Aux - used for SPI)
+#define Axis1_Aux     18    // Pin 18 (Aux - used for SPI or ESP8266 GPIO0)
 #define Axis1_FAULT   18    // Pin 18 (Fault)
 #define Axis1_M2      17    // Pin 17 (Microstep Mode 2)
 #define Axis1_M1      16    // Pin 16 (Microstep Mode 1)
@@ -478,8 +474,7 @@ bool   autoContinue = false;                       // automatically do a meridia
 #define Axis2StepPin   3    // Pin  3 (Step)
 #define LimitPin       4    // Pin  4 (The limit switch sense is a logic level input which uses the internal pull up, shorted to ground it stops gotos/tracking)
 #define PpsPin         5    // Pin  5 (PPS time source, GPS for example)
-#define Axis2RstPin    5    // Pin  5 (Reset)
-#define Axis2_Aux      5    // Pin  5 (Aux - used for SPI)
+#define Axis2_Aux      5    // Pin  5 (Aux - used for SPI or ESP8266 RST)
 #define Axis2_FAULT    5    // Pin  5 (Fault)
 #define Axis2_M2       6    // Pin  6 (Microstep Mode 2)
 #define Axis2_M1       7    // Pin  7 (Microstep Mode 1)
@@ -575,6 +570,7 @@ bool   autoContinue = false;                       // automatically do a meridia
 // The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
 #define LEDnegPin     13               // Pin A4 (GND)
 #define LEDneg2Pin    19               // Pin B2 (GND)
+#define ReticulePin   13
 
 // The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
 #define PpsPin         2               // Pin B5 (PPS time source, GPS for example)
@@ -585,8 +581,7 @@ bool   autoContinue = false;                       // automatically do a meridia
 #define Axis1StepPin  32               // Pin D7 (Step)
 #define Axis1StepBit  GPIO_PIN_7       // Pin 32
 #define Axis1StepPORT GPIO_PORTD_BASE  //
-#define Axis1SlpPin   33               // Pin D6 (Sleep)
-#define Axis1RstPin   34               // Pin C7 (Reset)
+#define Axis1_Aux     10               // ESP8266 GPIO0
 
 // Pins to enable/disable the stepper drivers and set microstep mode, optional and normally just hard-wired (DRV8825)/ignored (BED-A4988)
 #define Axis1_M2      35               // Pin C6 (Microstep Mode 0)
@@ -602,8 +597,7 @@ bool   autoContinue = false;                       // automatically do a meridia
 #define Axis2StepPin  24               // Pin D1 (Step)
 #define Axis2StepBit  GPIO_PIN_1       // Pin 25
 #define Axis2StepPORT GPIO_PORTD_BASE  //
-#define Axis2SlpPin   25               // Pin D2 (Sleep)
-#define Axis2RstPin   26               // Pin D3 (Reset)
+#define Axis2_Aux     9                // ESP8266 Reset
 
 #define Axis2_M2      27               // Pin E1 (Microstep Mode 0)
 #define Axis2_M1      28               // Pin E2 (Microstep Mode 1) IF USED MAKE SURE YOU DESOLDER A BRIDGE or change pins around, otherwise pin 14 is connected to pin 23
@@ -614,7 +608,7 @@ bool   autoContinue = false;                       // automatically do a meridia
 // ST4 interface
 #define ST4RAw        18               // Pin E0 ST4 RA- West
 #define ST4DEs         8               // Pin A5 ST4 DE- South
-#define ST4DEn         9               // Pin A6 ST4 DE+ North
+#define ST4DEn        25               // (was 9) Pin A6 ST4 DE+ North
 #define ST4RAe        17               // Pin F0 ST4 RA+ East
 
 #elif defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
@@ -843,7 +837,7 @@ volatile byte activeGuideRate= GuideRateNone;
 volatile byte guideDirAxis1        = 0;
 long          guideDurationHA      = -1;
 unsigned long guideDurationLastHA  = 0;
-byte          guideDirAxis2        = 0;
+volatile byte guideDirAxis2        = 0;
 long          guideDurationDec     = -1;
 unsigned long guideDurationLastDec = 0;
 
@@ -983,6 +977,14 @@ void setup() {
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
   // due to a bug we set the frequency manually here
   uint32_t g_ui32SysClock = SysCtlClockFreqSet((SYSCTL_XTAL_25MHZ | SYSCTL_OSC_MAIN | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), F_BUS);
+#endif
+
+#ifdef ESP8266_CONTROL_ON
+  pinMode(Axis1_Aux,OUTPUT);               // ESP8266 GPIO0
+  digitalWrite(Axis1_Aux,HIGH); delay(20); // Run mode
+  pinMode(Axis2_Aux,OUTPUT);               // ESP8266 RST
+  digitalWrite(Axis2_Aux,LOW);  delay(20); // Reset, if LOW
+  digitalWrite(Axis2_Aux,HIGH);            // Reset, inactive HIGH
 #endif
 
 // initialize some fixed-point values
@@ -1451,12 +1453,19 @@ void loop() {
     // ST4 INTERFACE -------------------------------------------------------------------------------------
 #if defined(ST4_ON) || defined(ST4_PULLUP)
     if (parkStatus==NotParked) {
-      ST4RA_state=0; if (digitalRead(ST4RAw)==LOW) { if (digitalRead(ST4RAe)!=LOW) ST4RA_state='w'; } else if (digitalRead(ST4RAe)==LOW) ST4RA_state='e';
-      ST4DE_state=0; if (digitalRead(ST4DEn)==LOW) { if (digitalRead(ST4DEs)!=LOW) ST4DE_state='n'; } else if (digitalRead(ST4DEs)==LOW) ST4DE_state='s';
+      byte w1=digitalRead(ST4RAw); byte e1=digitalRead(ST4RAe); byte n1=digitalRead(ST4DEn); byte s1=digitalRead(ST4DEs);
+      delayMicroseconds(50);
+      byte w2=digitalRead(ST4RAw); byte e2=digitalRead(ST4RAe); byte n2=digitalRead(ST4DEn); byte s2=digitalRead(ST4DEs);
+      // if signals aren't stable ignore them
+      if ((w1==w2) && (e1==e2) && (n1==n2) && (s1==s2)) {
+        ST4RA_state=0; if (w1==LOW) { if (e1!=LOW) ST4RA_state='w'; } else if (e1==LOW) ST4RA_state='e';
+        ST4DE_state=0; if (n1==LOW) { if (s1!=LOW) ST4DE_state='n'; } else if (s1==LOW) ST4DE_state='s';
+      }
+
       // RA changed?
       if (ST4RA_last!=ST4RA_state) {
         ST4RA_last=ST4RA_state;
-        if (ST4RA_state) { 
+        if (ST4RA_state) {
   #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
     #ifdef ST4_HAND_CONTROL_ON
           enableGuideRate(currentGuideRate);
@@ -1564,6 +1573,29 @@ void loop() {
     // figure out the current refraction compensated tracking rate
     if (refraction && (lst%3!=0)) do_refractionRate_calc();
 #endif
+
+    // SAFETY CHECKS --------------------------------------------------------------------------------------
+    // support for limit switch(es)
+#ifdef LIMIT_SENSE_ON
+    byte ls1=digitalRead(LimitPin); delayMicroseconds(50); byte ls2=digitalRead(LimitPin);
+    if ((ls1==LOW) && (ls2==LOW)) { lastError=ERR_LIMIT_SENSE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
+#endif
+    // check for fault signal, stop any slew or guide and turn tracking off
+#ifdef AXIS1_FAULT_LOW
+    faultAxis1=(digitalRead(Axis1_FAULT)==LOW);
+#endif
+#ifdef AXIS1_FAULT_HIGH
+    faultAxis1=(digitalRead(Axis1_FAULT)==HIGH);
+#endif
+#ifdef AXIS2_FAULT_LOW
+    faultAxis2=(digitalRead(Axis2_FAULT)==LOW);
+#endif
+#ifdef AXIS2_FAULT_HIGH
+    faultAxis2=(digitalRead(Axis2_FAULT)==HIGH);
+#endif
+    if (faultAxis1 || faultAxis2) { lastError=ERR_MOTOR_FAULT; if (trackingState==TrackingMoveTo) abortSlew=true; else { trackingState=TrackingNone; if (guideDirAxis1) guideDirAxis1='b'; if (guideDirAxis2) guideDirAxis2='b'; } }
+    // check altitude overhead limit and horizon limit
+    if ((currentAlt<minAlt) || (currentAlt>maxAlt)) { lastError=ERR_ALT; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
   }
 
   // WORKLOAD MONITORING -------------------------------------------------------------------------------
@@ -1571,6 +1603,7 @@ void loop() {
   loop_time=this_loop_micros-last_loop_micros;
   if (loop_time>worst_loop_time) worst_loop_time=loop_time;
   last_loop_micros=this_loop_micros;
+
 
   // HOUSEKEEPING --------------------------------------------------------------------------------------
   // timer... falls in once a second, keeps the universal time clock ticking,
@@ -1650,32 +1683,10 @@ void loop() {
       cli(); if (posAxis1+IHS>(MaxAzm*(long)StepsPerDegreeAxis1)) { lastError=ERR_AZM; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
 #endif
     }
+    // check for exceeding MinDec or MaxDec
 #ifndef MOUNT_TYPE_ALTAZM
     if ((getApproxDec()<MinDec) || (getApproxDec()>MaxDec)) { lastError=ERR_DEC; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
 #endif      
-
-    // support for limit switch(es)
-#ifdef LIMIT_SENSE_ON  
-    if (digitalRead(LimitPin)==LOW) { lastError=ERR_LIMIT_SENSE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
-#endif
-
-    // check altitude every second
-    if ((currentAlt<minAlt) || (currentAlt>maxAlt)) { lastError=ERR_ALT; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
-
-    // check for fault signal, stop any slew or guide and turn tracking off
-#ifdef AXIS1_FAULT_LOW
-    faultAxis1=(digitalRead(Axis1_FAULT)==LOW);
-#endif
-#ifdef AXIS1_FAULT_HIGH
-    faultAxis1=(digitalRead(Axis1_FAULT)==HIGH);
-#endif
-#ifdef AXIS2_FAULT_LOW
-    faultAxis2=(digitalRead(Axis2_FAULT)==LOW);
-#endif
-#ifdef AXIS2_FAULT_HIGH
-    faultAxis2=(digitalRead(Axis2_FAULT)==HIGH);
-#endif
-    if (faultAxis1 || faultAxis2) { lastError=ERR_MOTOR_FAULT; if (trackingState==TrackingMoveTo) abortSlew=true; else { trackingState=TrackingNone; if (guideDirAxis1) guideDirAxis1='b'; if (guideDirAxis2) guideDirAxis2='b'; } }
 
     // basic check to see if we're not at home
     if (trackingState!=TrackingNone) atHome=false;
@@ -1686,3 +1697,4 @@ void loop() {
     processCommands();
   }
 }
+
