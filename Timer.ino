@@ -144,11 +144,11 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
         double z=(StepsForRateChangeAxis1/isqrt32(fabs(x)));
         guideTimerRateAxis1A=(1.0/(((double)StepsPerDegreeAxis1*(z/1000000.0)))*3600.0);
         if (guideTimerRateAxis1A>fabs(guideTimerRateAxis1)) guideTimerRateAxis1A=fabs(guideTimerRateAxis1);
+        if (guideTimerRateAxis1A<10) guideTimerRateAxis1A=10;
       }
       // stop guiding
       if (guideDirAxis1=='b') {
-        if (fabs(x)<BreakDistAxis1) { guideDirAxis1=0; guideTimerRateAxis1=0; guideTimerRateAxis1A=0; DecayModeTracking(); } else
-          if (fabs(x)<20) guideTimerRateAxis1A=2;
+        if (fabs(x)<BreakDistAxis1) { guideDirAxis1=0; guideTimerRateAxis1=0; guideTimerRateAxis1A=0; DecayModeTracking(); }
       }
     }
 
@@ -188,14 +188,14 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
         double z=(StepsForRateChangeAxis2/isqrt32(x));
         guideTimerRateAxis2A=(1.0/(((double)StepsPerDegreeAxis2*(z/1000000.0)))*3600.0);
         if (guideTimerRateAxis2A>fabs(guideTimerRateAxis2)) guideTimerRateAxis2A=fabs(guideTimerRateAxis2);
+        if (guideTimerRateAxis2A<10) guideTimerRateAxis2A=10;
       }
       // stop guiding
       if (guideDirAxis2=='b') {
-        if (x<BreakDistAxis2) { guideDirAxis2=0; guideTimerRateAxis2=0; guideTimerRateAxis2A=0; DecayModeTracking(); } else
-          if (fabs(x)<20) guideTimerRateAxis2A=2;
+        if (x<BreakDistAxis2) { guideDirAxis2=0; guideTimerRateAxis2=0; guideTimerRateAxis2A=0; DecayModeTracking(); }
       }
     }
-    
+
     double timerRateAxis2A=trackingTimerRateAxis2; if (guideDirAxis2 && (activeGuideRate>GuideRate1x)) timerRateAxis2A=0.0;
     double timerRateAxis2B=fabs(guideTimerRateAxis2A+timerRateAxis2A);
     // round up to run the motor timers just a tiny bit slow, then adjust below if we start to fall behind during sidereal tracking
@@ -485,4 +485,5 @@ ISR(USART1_RX_vect)  {
   Serial1_recv_tail++; // buffer is 256 bytes so this byte variable wraps automatically
 }
 #endif
+
 
