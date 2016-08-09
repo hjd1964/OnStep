@@ -516,6 +516,7 @@ boolean do_refractionRate_calc() {
       // set rates
       // handle coordinate wrap
       if ((az_HA1<-90.0) && (az_HA2>90.0)) az_HA1+=360.0;
+      if ((az_HA2<-90.0) && (az_HA1>90.0)) az_HA2+=360.0;
 
       // set rates
       az_deltaAxis1=(az_HA1-az_HA2)  *(15.0/(RefractionRateRange/60.0))/2.0;
@@ -891,3 +892,4 @@ bool nextAlign() {
 
   return false;
 }
+
