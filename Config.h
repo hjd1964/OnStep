@@ -33,8 +33,8 @@
 
 // turns debugging on, used during testing, default=OFF
 #define DEBUG_OFF
-// allows syncing anywhere, default=OFF
-#define SYNC_ANYWHERE_OFF
+// allows syncing anywhere, default=ON
+#define SYNC_ANYWHERE_ON
 
 // Mount type, default is _GEM (German Equatorial) other options are _FORK, _FORK_ALT.  _FORK switches off Meridian Flips after (1, 2 or 3 star) alignment is done.  _FORK_ALT disables Meridian Flips (1 star align.)
 // _ALTAZM is for Alt/Azm mounted 'scopes (1 star align only.)
@@ -137,8 +137,7 @@
                                      // fork/yolk mount with meridian flips turned off by setting the minutesPastMeridian values to cover the whole sky)
 #define MaxAzm                   180 // Alt/Az mounts only. +/- maximum allowed Azimuth, default =  180.  Allowed range is 180 to 360
 
-
-// Stepper driver mode control (micro-step and/or decay):
+/* Stepper driver mode control (micro-step and/or decay):
 // M0, M1, and M2 are on Pins 22,23, and 24 for RA (Teensy3.1 Pins 13,14,15.)  M0, M1, M2 are on Pins 27,28,29 for Dec (Teensy3.1 Pins 18,19,20.)
 // values 0 to 7 (0b000 to 111): for example "#define AXIS1_MODE 4" is the same as "#define AXIS1_MODE 0b100" which sets M2 to HIGH, M1 to LOW, and M0 to LOW
 //                 / | \
@@ -162,7 +161,7 @@
 // open,GND       16 μsteps         Y, to 256 μsteps       "           0b110000
 // open,VCC_IO     4 (Quarterstep)  Y, to 256 μsteps   stealthChop     0b110001
 // open,open      16 μsteps         Y, to 256 μsteps       "           0b111000
-//
+*/
 #define AXIS1_MODE_OFF               // programs the RA/Az uStep mode M0/M1/M2, optional and default _OFF.
 #define AXIS1_MODE_GOTO_OFF          // programs the RA/Az uStep mode M0/M1/M2, used during gotos, optional and default _OFF.
 #define AXIS1_STEP_GOTO 1            // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
