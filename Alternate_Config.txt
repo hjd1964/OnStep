@@ -12,7 +12,7 @@
  * RA/Az :  37,35 = Dir,Step (Teensy3.2 21,20)
  * Dec/Alt: 22,24 = Dir,Step (Teensy3.2  2, 3)
  *
- * Optionally, a bluetooth adapter (HC05 or RN42 for example) plugs into pins Tx1/Rx1 and pins +5V/Gnd.
+ * Optionally, a bluetooth or WiFi adapter (HC05, RN42, or ESP8266 for example) plugs into pins Tx1/Rx1 and pins +5V/Gnd.
  * I use two 2-wire cables for 0.1" headers.  Remember Rx goes to Tx and Tx goes to Rx. If using a Mega2560
  * be sure to get a BT module designed for 5 volt operation and signaling otherwise you'll have to design
  * and implement the level conversion hardware yourself.
