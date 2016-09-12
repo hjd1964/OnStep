@@ -962,11 +962,23 @@ void processCommands() {
 //          Return: 0 on failure
 //                  1 on success
       if (command[1]=='d')  { if (!dmsToDouble(&newTargetDec,parameter,true)) commandError=true; } else 
-//  :SgsDDD*MM#
-//          Set current sites longitude to sDDD*MM an ASCII position string, East longitudes are expressed as negative
+//  :SgsDDD*MM# or :SgDDD*MM#
+//          Set current sites longitude to sDDD*MM an ASCII position string, East longitudes can be as negative or >180 degrees
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='g')  { i=highPrecision; highPrecision=false; if (!dmsToDouble(&longitude,(char *)&parameter[1],false)) commandError=true; else { if (parameter[0]=='-') longitude=-longitude; EEPROM_writeFloat(EE_sites+(currentSite)*25+4,longitude); } update_lst(jd2last(JD,UT1)); highPrecision=i; } else 
+      if (command[1]=='g')  {
+        i=highPrecision;
+        highPrecision=false;
+        if ((parameter[0] == '-') || (parameter[0] == '+')) i1=1; else i1=0;
+        if (!dmsToDouble(&longitude,(char *)&parameter[i1],false))
+          commandError=true;
+        else {
+          if (parameter[0]=='-') longitude=-longitude;
+          EEPROM_writeFloat(EE_sites+(currentSite)*25+4,longitude);
+        }
+        update_lst(jd2last(JD,UT1));
+        highPrecision=i;
+        } else
 //  :SGsHH#
 //  :SGsHH:MM# (where MM is 30 or 45)
 //          Set the number of hours added to local time to yield UTC
