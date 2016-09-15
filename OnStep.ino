@@ -473,7 +473,7 @@ bool   autoContinue = false;                       // automatically do a meridia
 #define Axis2DirPin    2    // Pin  2 (Dir)
 #define Axis2StepPin   3    // Pin  3 (Step)
 #define LimitPin       4    // Pin  4 (The limit switch sense is a logic level input which uses the internal pull up, shorted to ground it stops gotos/tracking)
-#define PpsPin         5    // Pin  5 (PPS time source, GPS for example)
+#define PpsPin         28   // Pin  28 (PPS time source, GPS for example)
 #define Axis2_Aux      5    // Pin  5 (Aux - used for SPI or ESP8266 RST)
 #define Axis2_FAULT    5    // Pin  5 (Fault)
 #define Axis2_M2       6    // Pin  6 (Microstep Mode 2)
@@ -1117,10 +1117,28 @@ void setup() {
 
 // inputs for stepper drivers fault signal
 #ifndef AXIS1_FAULT_OFF
-  pinMode(Axis1_FAULT,INPUT);
+  #if defined(__arm__) && defined(TEENSYDUINO) && defined(ALTERNATE_PINMAP_ON)
+    #ifdef AXIS1_FAULT_LOW
+      pinMode(Axis1_FAULT,INPUT_PULLUP);
+    #endif
+    #ifdef AXIS1_FAULT_HIGH
+      pinMode(Axis1_FAULT,INPUT_PULLDOWN);
+    #endif
+  #else
+    pinMode(Axis1_FAULT,INPUT);
+  #endif
 #endif
 #ifndef AXIS2_FAULT_OFF
-  pinMode(Axis2_FAULT,INPUT);
+  #if defined(__arm__) && defined(TEENSYDUINO) && defined(ALTERNATE_PINMAP_ON)
+    #ifdef AXIS2_FAULT_LOW
+      pinMode(Axis2_FAULT,INPUT_PULLUP);
+    #endif
+    #ifdef AXIS1_FAULT_HIGH
+      pinMode(Axis2_FAULT,INPUT_PULLDOWN);
+    #endif
+  #else
+    pinMode(Axis2_FAULT,INPUT);
+  #endif
 #endif
 
 // disable the stepper drivers for now, if the enable lines are connected
