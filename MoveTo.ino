@@ -265,13 +265,8 @@ void DecayModeTracking() {
   DecayModeTrack=true;
   cli();
 #if defined(DECAY_MODE_OPEN)
-  #if defined(__arm__) && defined(TEENSYDUINO)
-    pinMode(Axis1_Mode,OUTPUT_OPENDRAIN); digitalWrite(Axis1_Mode,HIGH);
-    pinMode(Axis2_Mode,OUTPUT_OPENDRAIN); digitalWrite(Axis2_Mode,HIGH);
-  #else
-    pinMode(Axis1_Mode,INPUT);
-    pinMode(Axis2_Mode,INPUT);
-  #endif
+  pinModeOpen(Axis1_Mode);
+  pinModeOpen(Axis2_Mode);
 #elif defined(DECAY_MODE_LOW)
   pinMode(Axis1_Mode,OUTPUT); digitalWrite(Axis1_Mode,LOW);
   pinMode(Axis2_Mode,OUTPUT); digitalWrite(Axis1_Mode,LOW);
@@ -279,28 +274,15 @@ void DecayModeTracking() {
   pinMode(Axis1_Mode,OUTPUT); digitalWrite(Axis1_Mode,HIGH);
   pinMode(Axis2_Mode,OUTPUT); digitalWrite(Axis2_Mode,HIGH);
 #elif defined(MODE_SWITCH_BEFORE_SLEW_ON)
-  #if defined(__arm__) && defined(TEENSYDUINO)
-    #ifdef AXIS1_MODE
-      if ((AXIS1_MODE & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE    & 1)); } else { pinMode(Axis1_M0,OUTPUT_OPENDRAIN); digitalWrite(Axis1_M0,HIGH); }
-      if ((AXIS1_MODE & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE>>1 & 1)); } else { pinMode(Axis1_M1,OUTPUT_OPENDRAIN); digitalWrite(Axis1_M1,HIGH); }
-      if ((AXIS1_MODE & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE>>2 & 1)); } else { pinMode(Axis1_M2,OUTPUT_OPENDRAIN); digitalWrite(Axis1_M2,HIGH); }
-    #endif
-    #ifdef AXIS2_MODE
-      if ((AXIS2_MODE & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE    & 1)); } else { pinMode(Axis2_M0,OUTPUT_OPENDRAIN); digitalWrite(Axis2_M0,HIGH); }
-      if ((AXIS2_MODE & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE>>1 & 1)); } else { pinMode(Axis2_M1,OUTPUT_OPENDRAIN); digitalWrite(Axis2_M1,HIGH); }
-      if ((AXIS2_MODE & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE>>2 & 1)); } else { pinMode(Axis2_M2,OUTPUT_OPENDRAIN); digitalWrite(Axis2_M2,HIGH); }
-    #endif
-  #else
-    #ifdef AXIS1_MODE
-      if ((AXIS1_MODE & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE    & 1)); } else { pinMode(Axis1_M0,INPUT); }
-      if ((AXIS1_MODE & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE>>1 & 1)); } else { pinMode(Axis1_M1,INPUT); }
-      if ((AXIS1_MODE & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE>>2 & 1)); } else { pinMode(Axis1_M2,INPUT); }
-    #endif
-    #ifdef AXIS2_MODE
-      if ((AXIS2_MODE & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE    & 1)); } else { pinMode(Axis2_M0,INPUT); }
-      if ((AXIS2_MODE & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE>>1 & 1)); } else { pinMode(Axis2_M1,INPUT); }
-      if ((AXIS2_MODE & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE>>2 & 1)); } else { pinMode(Axis2_M2,INPUT); }
-    #endif
+  #ifdef AXIS1_MODE
+    if ((AXIS1_MODE & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE    & 1)); } else { pinModeOpen(Axis1_M0); }
+    if ((AXIS1_MODE & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE>>1 & 1)); } else { pinModeOpen(Axis1_M1); }
+    if ((AXIS1_MODE & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE>>2 & 1)); } else { pinModeOpen(Axis1_M2); }
+  #endif
+  #ifdef AXIS2_MODE
+    if ((AXIS2_MODE & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE    & 1)); } else { pinModeOpen(Axis2_M0); }
+    if ((AXIS2_MODE & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE>>1 & 1)); } else { pinModeOpen(Axis2_M1); }
+    if ((AXIS2_MODE & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE>>2 & 1)); } else { pinModeOpen(Axis2_M2); }
   #endif
   stepAxis1=1;
   stepAxis2=1;
@@ -325,13 +307,8 @@ void DecayModeGoto() {
   DecayModeTrack=false;
   cli();
 #if defined(DECAY_MODE_GOTO_OPEN)
-  #if defined(__arm__) && defined(TEENSYDUINO)
-    pinMode(Axis1_Mode,OUTPUT_OPENDRAIN); digitalWrite(Axis1_Mode,HIGH);
-    pinMode(Axis2_Mode,OUTPUT_OPENDRAIN); digitalWrite(Axis2_Mode,HIGH);
-  #else
-    pinMode(Axis1_Mode,INPUT);
-    pinMode(Axis2_Mode,INPUT);
-  #endif
+  pinModeOpen(Axis1_Mode);
+  pinModeOpen(Axis2_Mode);
 #elif defined(DECAY_MODE_GOTO_LOW)
   pinMode(Axis1_Mode,OUTPUT); digitalWrite(Axis1_Mode,LOW);
   pinMode(Axis2_Mode,OUTPUT); digitalWrite(Axis1_Mode,LOW);
@@ -339,28 +316,15 @@ void DecayModeGoto() {
   pinMode(Axis1_Mode,OUTPUT); digitalWrite(Axis1_Mode,HIGH);
   pinMode(Axis2_Mode,OUTPUT); digitalWrite(Axis2_Mode,HIGH);
 #elif defined(MODE_SWITCH_BEFORE_SLEW_ON)
-  #if defined(__arm__) && defined(TEENSYDUINO)
-    #ifdef AXIS1_MODE_GOTO
-      if ((AXIS1_MODE_GOTO & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE_GOTO    & 1)); } else { pinMode(Axis1_M0,OUTPUT_OPENDRAIN); digitalWrite(Axis1_M0,HIGH); }
-      if ((AXIS1_MODE_GOTO & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE_GOTO>>1 & 1)); } else { pinMode(Axis1_M1,OUTPUT_OPENDRAIN); digitalWrite(Axis1_M1,HIGH); }
-      if ((AXIS1_MODE_GOTO & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE_GOTO>>2 & 1)); } else { pinMode(Axis1_M2,OUTPUT_OPENDRAIN); digitalWrite(Axis1_M2,HIGH); }
-    #endif
-    #ifdef AXIS2_MODE_GOTO
-      if ((AXIS2_MODE_GOTO & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE_GOTO    & 1)); } else { pinMode(Axis2_M0,OUTPUT_OPENDRAIN); digitalWrite(Axis2_M0,HIGH); }
-      if ((AXIS2_MODE_GOTO & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE_GOTO>>1 & 1)); } else { pinMode(Axis2_M1,OUTPUT_OPENDRAIN); digitalWrite(Axis2_M1,HIGH); }
-      if ((AXIS2_MODE_GOTO & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE_GOTO>>2 & 1)); } else { pinMode(Axis2_M2,OUTPUT_OPENDRAIN); digitalWrite(Axis2_M2,HIGH); }
-    #endif
-  #else
-    #ifdef AXIS1_MODE_GOTO
-      if ((AXIS1_MODE_GOTO & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE_GOTO    & 1)); } else { pinMode(Axis1_M0,INPUT); }
-      if ((AXIS1_MODE_GOTO & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE_GOTO>>1 & 1)); } else { pinMode(Axis1_M1,INPUT); }
-      if ((AXIS1_MODE_GOTO & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE_GOTO>>2 & 1)); } else { pinMode(Axis1_M2,INPUT); }
-    #endif
-    #ifdef AXIS2_MODE_GOTO
-      if ((AXIS2_MODE_GOTO & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE_GOTO    & 1)); } else { pinMode(Axis2_M0,INPUT); }
-      if ((AXIS2_MODE_GOTO & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE_GOTO>>1 & 1)); } else { pinMode(Axis2_M1,INPUT); }
-      if ((AXIS2_MODE_GOTO & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE_GOTO>>2 & 1)); } else { pinMode(Axis2_M2,INPUT); }
-    #endif
+  #ifdef AXIS1_MODE_GOTO
+    if ((AXIS1_MODE_GOTO & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE_GOTO    & 1)); } else { pinModeOpen(Axis1_M0); }
+    if ((AXIS1_MODE_GOTO & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE_GOTO>>1 & 1)); } else { pinModeOpen(Axis1_M1); }
+    if ((AXIS1_MODE_GOTO & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE_GOTO>>2 & 1)); } else { pinModeOpen(Axis1_M2); }
+  #endif
+  #ifdef AXIS2_MODE_GOTO
+    if ((AXIS2_MODE_GOTO & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE_GOTO    & 1)); } else { pinModeOpen(Axis2_M0); }
+    if ((AXIS2_MODE_GOTO & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE_GOTO>>1 & 1)); } else { pinModeOpen(Axis2_M1); }
+    if ((AXIS2_MODE_GOTO & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE_GOTO>>2 & 1)); } else { pinModeOpen(Axis2_M2); }
   #endif
   stepAxis1=AXIS1_STEP_GOTO;
   stepAxis2=AXIS2_STEP_GOTO;
@@ -378,3 +342,12 @@ void DecayModeGoto() {
   #endif
   sei();
 }
+
+void pinModeOpen(int pin) {
+  #if defined(__arm__) && defined(TEENSYDUINO)
+    pinMode(pin,OUTPUT_OPENDRAIN); digitalWrite(pin,HIGH);
+  #else
+    pinMode(pin,INPUT);
+  #endif
+}
+ 
