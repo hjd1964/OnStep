@@ -142,6 +142,9 @@
 // to disable stepper drivers on startup and when Parked or Homed.  An Align or UnPark will enable the drivers.  Adjust below if you need these pulled LOW to disable the drivers.
 #define AXIS1_DISABLED_HIGH
 #define AXIS2_DISABLED_HIGH
+// For equatorial mounts, _ON powers down the Declination axis when it's not being used to help lower power use.  During low rate guiding (<=1x) the axis stays enabled
+// for 10 minutes after any guide on either axis.  Otherwise, the Dec axis is disabled (powered off) 10 seconds after movement stops.
+#define AUTO_POWER_DOWN_AXIS2_OFF
 
 /* Stepper driver Mode control
 // M0, M1, and M2 are on Pins 25,27, and 29 for RA (Teensy3.2 Pins 15,16,17.)  M0, M1, M2 are on Pins 34,32,30 for Dec (Teensy3.2 Pins 8,7,6.)
