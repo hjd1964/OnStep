@@ -221,7 +221,7 @@ char Serial1_read() {
 #endif
 
 // -----------------------------------------------------------------------------------
-// Simple soft SPI routines
+// Simple soft SPI routines (CPOL=1, CPHA=1)
 int _ss = 0;
 int _sck = 0;
 int _miso = 0;
@@ -229,60 +229,59 @@ int _mosi = 0;
 
 void spiStart(int ss, int sck, int miso, int mosi)
 {
-  _ss=ss;
-  pinMode(ss,OUTPUT);
-  digitalWrite(ss,HIGH);
-  _sck=sck;
-  pinMode(_sck,OUTPUT);
-  _miso=miso;
-  pinMode(_miso,INPUT);
-  _mosi=mosi;
-  pinMode(_mosi,OUTPUT);
+  _ss=ss; pinMode(ss,OUTPUT); digitalWrite(ss,HIGH);
+  delayMicroseconds(1);
+
+  _sck=sck; pinMode(_sck,OUTPUT); digitalWrite(_sck,HIGH);
+
+  _miso=miso; pinMode(_miso,INPUT);
+  _mosi=mosi; pinMode(_mosi,OUTPUT);
+
+  digitalWrite(ss,LOW);
+  delayMicroseconds(1);
+}
+
+void spiEnd() {
+  delayMicroseconds(1);
+  digitalWrite(_ss, HIGH);
 }
 
 uint8_t spiTransfer(uint8_t data_out)
 {
-  digitalWrite(_ss, LOW);
-  delayMicroseconds(1);
   uint8_t data_in = 0;
   
   for(int i=7; i>=0; i--)
   {
-    digitalWrite(_mosi,bitRead(data_out,i)); // Set MOSI
+    digitalWrite(_sck,LOW);
+    digitalWrite(_mosi,bitRead(data_out,i));
     delayMicroseconds(1);
     digitalWrite(_sck,HIGH);
-    bitWrite(data_in,i,digitalRead(_miso));  // Get MISO
+    bitWrite(data_in,i,digitalRead(_miso));
     delayMicroseconds(1);
-    digitalWrite(_sck,LOW);
   }
   
-  delayMicroseconds(1);
-  digitalWrite(_ss, HIGH);
   return data_in;
 }
 
 uint32_t spiTransfer32(uint32_t data_out)
 {
-  digitalWrite(_ss, LOW);
-  delayMicroseconds(1);
   uint32_t data_in = 0;
   
   for(int i=31; i>=0; i--)
   {
-    digitalWrite(_mosi,bitRead(data_out,i)); // Set MOSI
+    digitalWrite(_sck,LOW);
+    digitalWrite(_mosi,bitRead(data_out,i));
     delayMicroseconds(1);
     digitalWrite(_sck,HIGH);
-    bitWrite(data_in,i,digitalRead(_miso)); // Get MISO
+    bitWrite(data_in,i,digitalRead(_miso));
     delayMicroseconds(1);
-    digitalWrite(_sck,LOW);
   }
-  
-  delayMicroseconds(1);
-  digitalWrite(_ss, HIGH);
+
   return data_in;
 }
 
-// TMC2130 registers
+// -----------------------------------------------------------------------------------
+// TMC2130 control
 #define WRITE          0x80 //write flag
 #define REG_GCONF      0x00
 #define REG_GSTAT      0x01
@@ -329,4 +328,6 @@ void TMC2130_setStepMode(bool intpol, bool stealth_chop, byte micro_step_mode) {
   data_out|=micro_step_mode<<24;
   TMC2130_write(REG_CHOPCONF,data_out);
 }
+
+
 

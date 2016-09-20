@@ -290,10 +290,12 @@ void DecayModeTracking() {
   // this is for TMC2130
   //       SS      ,SCK      ,MISO     ,MOSI
   spiStart(Axis1_CS,Axis1_SCK,Axis1_SDO,Axis1_SDI);
-  //                  intPol,spreadCycle,uSteps
-  TMC2130_setStepMode(true,false,AXIS1_MODE);
+  TMC2130_setStepMode(true,false,AXIS1_MODE);  // intPol,spreadCycle,uSteps
+  spiEnd();
+
   spiStart(Axis2_CS,Axis2_SCK,Axis2_SDO,Axis2_SDI);
   TMC2130_setStepMode(true,false,AXIS2_MODE);
+  spiEnd();
 #endif
   #ifdef MODE_SWITCH_SLEEP_ON 
   delay(3);
@@ -332,10 +334,12 @@ void DecayModeGoto() {
   // this is for TMC2130
   //       SS      ,SCK      ,MISO     ,MOSI
   spiStart(Axis1_CS,Axis1_SCK,Axis1_SDO,Axis1_SDI);
-  //                  intPol,spreadCycle,uSteps
-  TMC2130_setStepMode(true,false,AXIS1_MODE_GOTO);
+  TMC2130_setStepMode(true,false,AXIS1_MODE_GOTO);  // intPol,spreadCycle,uSteps
+  spiEnd();
+
   spiStart(Axis2_CS,Axis2_SCK,Axis2_SDO,Axis2_SDI);
   TMC2130_setStepMode(true,false,AXIS2_MODE_GOTO);
+  spiEnd();
 #endif
   #ifdef MODE_SWITCH_SLEEP_ON
   delay(3);
