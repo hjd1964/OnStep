@@ -261,43 +261,56 @@ bool DecayModeTrack=false;
 // if stepper drive can switch decay mode, set it here
 void DecayModeTracking() {
   if (DecayModeTrack) return;
+
   DecayModeTrack=true;
   cli();
 #if defined(DECAY_MODE_OPEN)
-  pinMode(Axis1_Mode,INPUT);
-  pinMode(Axis2_Mode,INPUT);
+  #if defined(__arm__) && defined(TEENSYDUINO)
+    pinMode(Axis1_Mode,OUTPUT_OPENDRAIN); digitalWrite(Axis1_Mode,HIGH);
+    pinMode(Axis2_Mode,OUTPUT_OPENDRAIN); digitalWrite(Axis2_Mode,HIGH);
+  #else
+    pinMode(Axis1_Mode,INPUT);
+    pinMode(Axis2_Mode,INPUT);
+  #endif
 #elif defined(DECAY_MODE_LOW)
-  pinMode(Axis1_Mode,OUTPUT);
-  digitalWrite(Axis1_Mode,LOW);
-  pinMode(Axis2_Mode,OUTPUT);
-  digitalWrite(Axis1_Mode,LOW);
+  pinMode(Axis1_Mode,OUTPUT); digitalWrite(Axis1_Mode,LOW);
+  pinMode(Axis2_Mode,OUTPUT); digitalWrite(Axis1_Mode,LOW);
 #elif defined(DECAY_MODE_HIGH)
-  pinMode(Axis1_Mode,OUTPUT);
-  digitalWrite(Axis1_Mode,HIGH);
-  pinMode(Axis2_Mode,OUTPUT);
-  digitalWrite(Axis2_Mode,HIGH);
+  pinMode(Axis1_Mode,OUTPUT); digitalWrite(Axis1_Mode,HIGH);
+  pinMode(Axis2_Mode,OUTPUT); digitalWrite(Axis2_Mode,HIGH);
 #elif defined(MODE_SWITCH_BEFORE_SLEW_ON)
-  #ifdef AXIS1_MODE
-  if ((AXIS1_MODE & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE    & 1)); } else { pinMode(Axis1_M0,INPUT); }
-  if ((AXIS1_MODE & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE>>1 & 1)); } else { pinMode(Axis1_M1,INPUT); }
-  if ((AXIS1_MODE & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE>>2 & 1)); } else { pinMode(Axis1_M2,INPUT); }
+  #if defined(__arm__) && defined(TEENSYDUINO)
+    #ifdef AXIS1_MODE
+      if ((AXIS1_MODE & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE    & 1)); } else { pinMode(Axis1_M0,OUTPUT_OPENDRAIN); digitalWrite(Axis1_M0,HIGH); }
+      if ((AXIS1_MODE & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE>>1 & 1)); } else { pinMode(Axis1_M1,OUTPUT_OPENDRAIN); digitalWrite(Axis1_M1,HIGH); }
+      if ((AXIS1_MODE & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE>>2 & 1)); } else { pinMode(Axis1_M2,OUTPUT_OPENDRAIN); digitalWrite(Axis1_M2,HIGH); }
+    #endif
+    #ifdef AXIS2_MODE
+      if ((AXIS2_MODE & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE    & 1)); } else { pinMode(Axis2_M0,OUTPUT_OPENDRAIN); digitalWrite(Axis2_M0,HIGH); }
+      if ((AXIS2_MODE & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE>>1 & 1)); } else { pinMode(Axis2_M1,OUTPUT_OPENDRAIN); digitalWrite(Axis2_M1,HIGH); }
+      if ((AXIS2_MODE & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE>>2 & 1)); } else { pinMode(Axis2_M2,OUTPUT_OPENDRAIN); digitalWrite(Axis2_M2,HIGH); }
+    #endif
+  #else
+    #ifdef AXIS1_MODE
+      if ((AXIS1_MODE & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE    & 1)); } else { pinMode(Axis1_M0,INPUT); }
+      if ((AXIS1_MODE & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE>>1 & 1)); } else { pinMode(Axis1_M1,INPUT); }
+      if ((AXIS1_MODE & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE>>2 & 1)); } else { pinMode(Axis1_M2,INPUT); }
+    #endif
+    #ifdef AXIS2_MODE
+      if ((AXIS2_MODE & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE    & 1)); } else { pinMode(Axis2_M0,INPUT); }
+      if ((AXIS2_MODE & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE>>1 & 1)); } else { pinMode(Axis2_M1,INPUT); }
+      if ((AXIS2_MODE & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE>>2 & 1)); } else { pinMode(Axis2_M2,INPUT); }
+    #endif
   #endif
-
-  #ifdef AXIS2_MODE
-  if ((AXIS2_MODE & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE    & 1)); } else { pinMode(Axis2_M0,INPUT); }
-  if ((AXIS2_MODE & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE>>1 & 1)); } else { pinMode(Axis2_M1,INPUT); }
-  if ((AXIS2_MODE & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE>>2 & 1)); } else { pinMode(Axis2_M2,INPUT); }
-  #endif
-
   stepAxis1=1;
   stepAxis2=1;
 #elif defined(MODE_SWITCH_BEFORE_SLEW_SPI)
   // this is for TMC2130
-  //       SS      ,SCK     ,MISO     ,MOSI
-  spiStart(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0)
+  //       SS      ,SCK      ,MISO     ,MOSI
+  spiStart(Axis1_CS,Axis1_SCK,Axis1_SDO,Axis1_SDI);
   //                  intPol,spreadCycle,uSteps
   TMC2130_setStepMode(true,false,AXIS1_MODE);
-  spiStart(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0)
+  spiStart(Axis2_CS,Axis2_SCK,Axis2_SDO,Axis2_SDI);
   TMC2130_setStepMode(true,false,AXIS2_MODE);
 #endif
   #ifdef MODE_SWITCH_SLEEP_ON 
@@ -308,39 +321,56 @@ void DecayModeTracking() {
 
 void DecayModeGoto() {
   if (!DecayModeTrack) return;
+
   DecayModeTrack=false;
   cli();
 #if defined(DECAY_MODE_GOTO_OPEN)
-  pinMode(Axis1_Mode,INPUT);
-  pinMode(Axis2_Mode,INPUT);
+  #if defined(__arm__) && defined(TEENSYDUINO)
+    pinMode(Axis1_Mode,OUTPUT_OPENDRAIN); digitalWrite(Axis1_Mode,HIGH);
+    pinMode(Axis2_Mode,OUTPUT_OPENDRAIN); digitalWrite(Axis2_Mode,HIGH);
+  #else
+    pinMode(Axis1_Mode,INPUT);
+    pinMode(Axis2_Mode,INPUT);
+  #endif
 #elif defined(DECAY_MODE_GOTO_LOW)
-  pinMode(Axis1_Mode,OUTPUT);
-  digitalWrite(Axis1_Mode,LOW);
-  pinMode(Axis2_Mode,OUTPUT);
-  digitalWrite(Axis1_Mode,LOW);
+  pinMode(Axis1_Mode,OUTPUT); digitalWrite(Axis1_Mode,LOW);
+  pinMode(Axis2_Mode,OUTPUT); digitalWrite(Axis1_Mode,LOW);
 #elif defined(DECAY_MODE_GOTO_HIGH)
-  pinMode(Axis1_Mode,OUTPUT);
-  digitalWrite(Axis1_Mode,HIGH);
-  pinMode(Axis2_Mode,OUTPUT);
-  digitalWrite(Axis2_Mode,HIGH);
+  pinMode(Axis1_Mode,OUTPUT); digitalWrite(Axis1_Mode,HIGH);
+  pinMode(Axis2_Mode,OUTPUT); digitalWrite(Axis2_Mode,HIGH);
 #elif defined(MODE_SWITCH_BEFORE_SLEW_ON)
-  if ((AXIS1_MODE_GOTO & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE_GOTO    & 1)); } else { pinMode(Axis1_M0,INPUT); }
-  if ((AXIS1_MODE_GOTO & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE_GOTO>>1 & 1)); } else { pinMode(Axis1_M1,INPUT); }
-  if ((AXIS1_MODE_GOTO & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE_GOTO>>2 & 1)); } else { pinMode(Axis1_M2,INPUT); }
-
-  if ((AXIS2_MODE_GOTO & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE_GOTO    & 1)); } else { pinMode(Axis2_M0,INPUT); }
-  if ((AXIS2_MODE_GOTO & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE_GOTO>>1 & 1)); } else { pinMode(Axis2_M1,INPUT); }
-  if ((AXIS2_MODE_GOTO & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE_GOTO>>2 & 1)); } else { pinMode(Axis2_M2,INPUT); }
-
+  #if defined(__arm__) && defined(TEENSYDUINO)
+    #ifdef AXIS1_MODE_GOTO
+      if ((AXIS1_MODE_GOTO & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE_GOTO    & 1)); } else { pinMode(Axis1_M0,OUTPUT_OPENDRAIN); digitalWrite(Axis1_M0,HIGH); }
+      if ((AXIS1_MODE_GOTO & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE_GOTO>>1 & 1)); } else { pinMode(Axis1_M1,OUTPUT_OPENDRAIN); digitalWrite(Axis1_M1,HIGH); }
+      if ((AXIS1_MODE_GOTO & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE_GOTO>>2 & 1)); } else { pinMode(Axis1_M2,OUTPUT_OPENDRAIN); digitalWrite(Axis1_M2,HIGH); }
+    #endif
+    #ifdef AXIS2_MODE_GOTO
+      if ((AXIS2_MODE_GOTO & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE_GOTO    & 1)); } else { pinMode(Axis2_M0,OUTPUT_OPENDRAIN); digitalWrite(Axis2_M0,HIGH); }
+      if ((AXIS2_MODE_GOTO & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE_GOTO>>1 & 1)); } else { pinMode(Axis2_M1,OUTPUT_OPENDRAIN); digitalWrite(Axis2_M1,HIGH); }
+      if ((AXIS2_MODE_GOTO & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE_GOTO>>2 & 1)); } else { pinMode(Axis2_M2,OUTPUT_OPENDRAIN); digitalWrite(Axis2_M2,HIGH); }
+    #endif
+  #else
+    #ifdef AXIS1_MODE_GOTO
+      if ((AXIS1_MODE_GOTO & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE_GOTO    & 1)); } else { pinMode(Axis1_M0,INPUT); }
+      if ((AXIS1_MODE_GOTO & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE_GOTO>>1 & 1)); } else { pinMode(Axis1_M1,INPUT); }
+      if ((AXIS1_MODE_GOTO & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE_GOTO>>2 & 1)); } else { pinMode(Axis1_M2,INPUT); }
+    #endif
+    #ifdef AXIS2_MODE_GOTO
+      if ((AXIS2_MODE_GOTO & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE_GOTO    & 1)); } else { pinMode(Axis2_M0,INPUT); }
+      if ((AXIS2_MODE_GOTO & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE_GOTO>>1 & 1)); } else { pinMode(Axis2_M1,INPUT); }
+      if ((AXIS2_MODE_GOTO & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE_GOTO>>2 & 1)); } else { pinMode(Axis2_M2,INPUT); }
+    #endif
+  #endif
   stepAxis1=AXIS1_STEP_GOTO;
   stepAxis2=AXIS2_STEP_GOTO;
 #elif defined(MODE_SWITCH_BEFORE_SLEW_SPI)
   // this is for TMC2130
-  //       SS      ,SCK     ,MISO     ,MOSI
-  spiStart(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0)
+  //       SS      ,SCK      ,MISO     ,MOSI
+  spiStart(Axis1_CS,Axis1_SCK,Axis1_SDO,Axis1_SDI);
   //                  intPol,spreadCycle,uSteps
   TMC2130_setStepMode(true,false,AXIS1_MODE_GOTO);
-  spiStart(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0)
+  spiStart(Axis2_CS,Axis2_SCK,Axis2_SDO,Axis2_SDI);
   TMC2130_setStepMode(true,false,AXIS2_MODE_GOTO);
 #endif
   #ifdef MODE_SWITCH_SLEEP_ON

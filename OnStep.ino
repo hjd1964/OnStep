@@ -463,23 +463,31 @@ bool   autoContinue = false;                       // automatically do a meridia
 #define Axis1DirPin   21    // Pin 21 (Dir)
 #define Axis1StepPin  20    // Pin 20 (Step)
 #define RstPin        19    // Pin 19 (Reset)
-#define Axis1_Aux     18    // Pin 18 (Aux - used for SPI or ESP8266 GPIO0)
 #define Axis1_FAULT   18    // Pin 18 (Fault)
+#define Axis1_Aux     18    // Pin 18 (Aux or ESP8266 GPIO0)
 #define Axis1_M2      17    // Pin 17 (Microstep Mode 2)
 #define Axis1_M1      16    // Pin 16 (Microstep Mode 1)
 #define Axis1_M0      15    // Pin 15 (Microstep Mode 0)
 #define Axis1_EN      14    // Pin 14 (Enabled when LOW)
+#define Axis1_SDO     18    // Pin 18 (SPI Slave SDO)
+#define Axis1_CS      17    // Pin 17 (SPI Slave CS)
+#define Axis1_SCK     16    // Pin 16 (SPI Slave SCK)
+#define Axis1_SDI     15    // Pin 15 (SPI Slave SDI)
 
 #define Axis2DirPin    2    // Pin  2 (Dir)
 #define Axis2StepPin   3    // Pin  3 (Step)
 #define LimitPin       4    // Pin  4 (The limit switch sense is a logic level input which uses the internal pull up, shorted to ground it stops gotos/tracking)
 #define PpsPin         28   // Pin  28 (PPS time source, GPS for example)
-#define Axis2_Aux      5    // Pin  5 (Aux - used for SPI or ESP8266 RST)
 #define Axis2_FAULT    5    // Pin  5 (Fault)
+#define Axis2_Aux      5    // Pin  5 (Aux - used for SPI or ESP8266 RST)
 #define Axis2_M2       6    // Pin  6 (Microstep Mode 2)
 #define Axis2_M1       7    // Pin  7 (Microstep Mode 1)
 #define Axis2_M0       8    // Pin  8 (Microstep Mode 0)
 #define Axis2_EN       9    // Pin  9 (Enabled when LOW)
+#define Axis2_SDO      5    // Pin  5 (SPI Slave SDO)
+#define Axis2_CS       6    // Pin  6 (SPI Slave CS)
+#define Axis2_SCK      7    // Pin  7 (SPI Slave SCK)
+#define Axis2_SDI      8    // Pin  8 (SPI Slave SDI)
 
 // ST4 interface
 #ifdef ST4_ALTERNATE_PINS_ON
@@ -1144,23 +1152,26 @@ void setup() {
 // disable the stepper drivers for now, if the enable lines are connected
   pinMode(Axis1_EN,OUTPUT); digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
   pinMode(Axis2_EN,OUTPUT); digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
+  delay(100);
 
 // if the stepper driver mode select pins are wired in, program any requested micro-step mode
-#ifdef AXIS1_MODE
- delay(5000);
-  if ((AXIS1_MODE & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE    & 1)); } else { pinMode(Axis1_M0,INPUT); }
-  if ((AXIS1_MODE & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE>>1 & 1)); } else { pinMode(Axis1_M1,INPUT); }
-  if ((AXIS1_MODE & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE>>2 & 1)); } else { pinMode(Axis1_M2,INPUT); }
-#endif
-
-#ifdef AXIS2_MODE
-  if ((AXIS2_MODE & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE    & 1)); } else { pinMode(Axis2_M0,INPUT); }
-  if ((AXIS2_MODE & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE>>1 & 1)); } else { pinMode(Axis2_M1,INPUT); }
-  if ((AXIS2_MODE & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE>>2 & 1)); } else { pinMode(Axis2_M2,INPUT); }
-#endif
-
-// request the tracking decay mode
+#ifdef MODE_SWITCH_BEFORE_SLEW_OFF
+  // automatic mode switching during slews, initialize micro-step mode
+  #ifdef AXIS1_MODE
+    if ((AXIS1_MODE & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE    & 1)); } else { pinMode(Axis1_M0,INPUT); }
+    if ((AXIS1_MODE & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE>>1 & 1)); } else { pinMode(Axis1_M1,INPUT); }
+    if ((AXIS1_MODE & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE>>2 & 1)); } else { pinMode(Axis1_M2,INPUT); }
+  #endif
+  
+  #ifdef AXIS2_MODE
+    if ((AXIS2_MODE & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE    & 1)); } else { pinMode(Axis2_M0,INPUT); }
+    if ((AXIS2_MODE & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE>>1 & 1)); } else { pinMode(Axis2_M1,INPUT); }
+    if ((AXIS2_MODE & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE>>2 & 1)); } else { pinMode(Axis2_M2,INPUT); }
+  #endif
+#else
+  // automatic mode switching before/after slews, initialize micro-step mode
   DecayModeTracking();
+#endif
 
 #ifdef PPS_SENSE_ON
 #if defined(__AVR_ATmega2560__)

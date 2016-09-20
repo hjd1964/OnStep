@@ -230,19 +230,20 @@ int _mosi = 0;
 void spiStart(int ss, int sck, int miso, int mosi)
 {
   _ss=ss;
-  pinMode(ss, OUTPUT);
-  digitalWrite(ss, HIGH);
+  pinMode(ss,OUTPUT);
+  digitalWrite(ss,HIGH);
   _sck=sck;
   pinMode(_sck,OUTPUT);
-  _mosi=mosi;
-  pinMode(_miso,INPUT);
   _miso=miso;
+  pinMode(_miso,INPUT);
+  _mosi=mosi;
   pinMode(_mosi,OUTPUT);
 }
 
 uint8_t spiTransfer(uint8_t data_out)
 {
   digitalWrite(_ss, LOW);
+  delayMicroseconds(1);
   uint8_t data_in = 0;
   
   for(int i=7; i>=0; i--)
@@ -250,11 +251,12 @@ uint8_t spiTransfer(uint8_t data_out)
     digitalWrite(_mosi,bitRead(data_out,i)); // Set MOSI
     delayMicroseconds(1);
     digitalWrite(_sck,HIGH);
-    bitWrite(data_in,i,digitalRead(_miso)); // Get MISO
+    bitWrite(data_in,i,digitalRead(_miso));  // Get MISO
     delayMicroseconds(1);
     digitalWrite(_sck,LOW);
   }
   
+  delayMicroseconds(1);
   digitalWrite(_ss, HIGH);
   return data_in;
 }
@@ -262,6 +264,7 @@ uint8_t spiTransfer(uint8_t data_out)
 uint32_t spiTransfer32(uint32_t data_out)
 {
   digitalWrite(_ss, LOW);
+  delayMicroseconds(1);
   uint32_t data_in = 0;
   
   for(int i=31; i>=0; i--)
@@ -274,6 +277,7 @@ uint32_t spiTransfer32(uint32_t data_out)
     digitalWrite(_sck,LOW);
   }
   
+  delayMicroseconds(1);
   digitalWrite(_ss, HIGH);
   return data_in;
 }
