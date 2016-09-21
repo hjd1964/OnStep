@@ -188,7 +188,7 @@
 #define MODE_SWITCH_SLEEP_OFF
 
 // Stepper driver Fault detection, just wire the driver Fault signal to Pins 39 (Axis1) and 38 (Axis2), default=OFF.  Teensy3.2 Pins 18 (Aux1) and 5 (Aux2,) choose only one feature to use on Aux1/2.
-// other settings are LOW and HIGH (Teensy3.2 applies internal pullup if _LOW and pulldown if _HIGH)
+// other settings are LOW, HIGH, SPI (Teensy3.2 applies internal pullup if _LOW and pulldown if _HIGH.)  The SPI interface (on M0/M1/M2/Aux) can be used to detect errors on the TMC2130.
 #define AXIS1_FAULT_OFF
 #define AXIS2_FAULT_OFF
 
