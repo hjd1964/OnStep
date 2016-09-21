@@ -161,9 +161,11 @@
 // or keep CFG3 and CFG1 open (not connected) and CFG2 can be pulled high for 4x micro-stepping (256x intpol) in spreadCycle mode
 //
 // SilentStepStick TMC2130 SPI configurations:
-// use MODE_SWITCH_BEFORE_SLEW_SPI
-// spreadCycle and 256x interpolation are always on
+// use MODE_SWITCH_BEFORE_SLEW_SPI.  Normal operation is in spreadCycle and with 256x interpolation on:
 // AXISn_MODE and AXISn_MODE_GOTO can be set to 0-8 where 0=256x, 1=128x, 2=64x, 3=32x, 4=16x, 5=8x, 6=4x, 7=2x, 8=1x
+// You can also turn stealthChop on (bit 5) and/or disable 256x interpolation (bit 4):
+// For example, 64x microstepping in stealthChop mode with 256x interpolation would be 0b100010 = 2+32 = 34.
+// Or, 128x microstepping in spreadCycle with 256x interpolation off would be 0b010001 = 1+16 = 17.
 */
 
 #define AXIS1_MODE_OFF               // programs the RA/Az uStep mode M0/M1/M2, optional and default _OFF.

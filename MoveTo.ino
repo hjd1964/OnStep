@@ -287,16 +287,16 @@ void DecayModeTracking() {
   stepAxis1=1;
   stepAxis2=1;
 #elif defined(MODE_SWITCH_BEFORE_SLEW_SPI)
-  bool nintpol=(AXIS1_MODE&0b001000!=0);
-  bool stealth=(AXIS1_MODE&0b010000!=0);
+  bool nintpol=(AXIS1_MODE&0b010000!=0);
+  bool stealth=(AXIS1_MODE&0b100000!=0);
   //       SS      ,SCK     ,MISO     ,MOSI
   spiStart(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0);
-  TMC2130_setup(!nintpol,stealth,AXIS1_MODE&0b000111);  // default 256x interpolation ON, stealthChop OFF (spreadCycle), micro-steps
+  TMC2130_setup(!nintpol,stealth,AXIS1_MODE&0b001111);  // default 256x interpolation ON, stealthChop OFF (spreadCycle), micro-steps
   spiEnd();
-  nintpol=(AXIS2_MODE&0b001000!=0);
-  stealth=(AXIS2_MODE&0b010000!=0);
+  nintpol=(AXIS2_MODE&0b010000!=0);
+  stealth=(AXIS2_MODE&0b100000!=0);
   spiStart(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
-  TMC2130_setup(!nintpol,stealth,AXIS2_MODE&0b000111);
+  TMC2130_setup(!nintpol,stealth,AXIS2_MODE&0b001111);
   spiEnd();
 #endif
   #ifdef MODE_SWITCH_SLEEP_ON 
@@ -333,16 +333,16 @@ void DecayModeGoto() {
   stepAxis1=AXIS1_STEP_GOTO;
   stepAxis2=AXIS2_STEP_GOTO;
 #elif defined(MODE_SWITCH_BEFORE_SLEW_SPI)
-  bool nintpol=(AXIS1_MODE&0b001000!=0);
-  bool stealth=(AXIS1_MODE&0b010000!=0);
+  bool nintpol=(AXIS1_MODE&0b010000!=0);
+  bool stealth=(AXIS1_MODE&0b100000!=0);
   //       CS      ,SCK     ,MISO     ,MOSI
   spiStart(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0);
-  TMC2130_setup(!nintpol,stealth,AXIS1_MODE_GOTO&0b000111);  // default 256x interpolation ON, stealthChop OFF (spreadCycle), micro-steps
+  TMC2130_setup(!nintpol,stealth,AXIS1_MODE_GOTO&0b001111);  // default 256x interpolation ON, stealthChop OFF (spreadCycle), micro-steps
   spiEnd();
-  nintpol=(AXIS2_MODE&0b001000!=0);
-  stealth=(AXIS2_MODE&0b010000!=0);
+  nintpol=(AXIS2_MODE&0b010000!=0);
+  stealth=(AXIS2_MODE&0b100000!=0);
   spiStart(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
-  TMC2130_setup(!nintpol,stealth,AXIS2_MODE_GOTO&0b000111);
+  TMC2130_setup(!nintpol,stealth,AXIS2_MODE_GOTO&0b001111);
   spiEnd();
 #endif
   #ifdef MODE_SWITCH_SLEEP_ON
