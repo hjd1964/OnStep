@@ -62,8 +62,8 @@
 #endif
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "06 17 16"
-#define FirmwareNumber "1.0a34"
+#define FirmwareDate   "09 21 16"
+#define FirmwareNumber "1.0a35"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
