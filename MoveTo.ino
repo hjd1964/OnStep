@@ -288,12 +288,12 @@ void DecayModeTracking() {
   stepAxis2=1;
 #elif defined(MODE_SWITCH_BEFORE_SLEW_SPI)
   // this is for TMC2130
-  //       SS      ,SCK      ,MISO     ,MOSI
-  spiStart(Axis1_CS,Axis1_SCK,Axis1_SDO,Axis1_SDI);
+  //       SS      ,SCK     ,MISO     ,MOSI
+  spiStart(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0);
   TMC2130_setStepMode(true,false,AXIS1_MODE);  // intPol,spreadCycle,uSteps
   spiEnd();
 
-  spiStart(Axis2_CS,Axis2_SCK,Axis2_SDO,Axis2_SDI);
+  spiStart(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
   TMC2130_setStepMode(true,false,AXIS2_MODE);
   spiEnd();
 #endif
@@ -332,12 +332,12 @@ void DecayModeGoto() {
   stepAxis2=AXIS2_STEP_GOTO;
 #elif defined(MODE_SWITCH_BEFORE_SLEW_SPI)
   // this is for TMC2130
-  //       SS      ,SCK      ,MISO     ,MOSI
-  spiStart(Axis1_CS,Axis1_SCK,Axis1_SDO,Axis1_SDI);
+  //       CS      ,SCK     ,MISO     ,MOSI
+  spiStart(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0);
   TMC2130_setStepMode(true,false,AXIS1_MODE_GOTO);  // intPol,spreadCycle,uSteps
   spiEnd();
 
-  spiStart(Axis2_CS,Axis2_SCK,Axis2_SDO,Axis2_SDI);
+  spiStart(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
   TMC2130_setStepMode(true,false,AXIS2_MODE_GOTO);
   spiEnd();
 #endif
