@@ -28,19 +28,21 @@ uint8_t TMC2130_read(byte Address, uint32_t* data_out)
 // TMC2130 setup:
 // 256x interpolation:  intpol
 // stealth chop on/off: stealth_chop
-// microstepping mode:  micro_step_mode (0 = 256x, 1= 128x, 2=64x, 3=32x, 4=16x, 5=8x, 6=4x, 7=2x, 8=1x)
-void TMC2130_setup(bool intpol, bool stealth_chop, byte micro_step_mode) {
+// microstepping mode:  micro_step_mode (0=256x, 1=128x, 2=64x, 3=32x, 4=16x, 5=8x, 6=4x, 7=2x, 8=1x)
+// power level       :  low_power (true for low power: 50%, 100% otherwise)
+void TMC2130_setup(bool intpol, bool stealth_chop, byte micro_step_mode, bool low_power) {
   uint32_t data_out=0;
 
   // voltage on AIN is current reference
-  if (stealth_chop) data_out=0x00000005UL; else data_out=0x00000001UL;
+  data_out=0x00000001UL;
+  // set stealthChop bit
+  if (stealth_chop) data_out|=0x00000004UL; 
   TMC2130_write(REG_GCONF,data_out);
-
   spiPause();
-  
-  // IHOLD=0x1F, IRUN=0x1F (31,31)
-  TMC2130_write(REG_IHOLD_IRUN,0x000003FFUL);
-  
+
+  // IHOLDDELAY=0x00, IRUN=0x1F, IHOLD=0x1F (  0,   31,   31   ) or 50% (0,16,16)
+  //                                         0b0000 11111 11111
+  if (!low_power) TMC2130_write(REG_IHOLD_IRUN,0x000003FFUL); else TMC2130_write(REG_IHOLD_IRUN,0x00000210UL);
   spiPause();
 
   // native 256 microsteps, MRES=0, TBL=1=24, TOFF=8
@@ -50,7 +52,6 @@ void TMC2130_setup(bool intpol, bool stealth_chop, byte micro_step_mode) {
   // set the micro-step mode bits
   data_out|=micro_step_mode<<24;
   TMC2130_write(REG_CHOPCONF,data_out);
-
 }
 
 bool TMC2130_error() {

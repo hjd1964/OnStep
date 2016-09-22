@@ -36,6 +36,10 @@
 #include "math.h"
 #include "errno.h"
 // Use Config.h to configure OnStep to your requirements 
+// help stepper driver configuration
+#define TMC_LOWPWR      64
+#define TMC_STEALTHCHOP 32
+#define TMC_NINTPOL     16
 #include "Config.h"
 #include "Library.h"
 #include "FPoint.h"
