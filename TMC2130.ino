@@ -33,7 +33,7 @@ void TMC2130_setup(bool intpol, bool stealth_chop, byte micro_step_mode) {
   uint32_t data_out=0;
 
   // voltage on AIN is current reference
-  if (stealth_chop) data_out=0x00000003UL; else data_out=0x00000001UL;
+  if (stealth_chop) data_out=0x00000005UL; else data_out=0x00000001UL;
   TMC2130_write(REG_GCONF,data_out);
 
   TMC2130_write(REG_IHOLD_IRUN,0x00001010UL); // IHOLD=0x10, IRUN=0x10 (16,16) 
@@ -41,7 +41,7 @@ void TMC2130_setup(bool intpol, bool stealth_chop, byte micro_step_mode) {
   // native 256 microsteps, MRES=0, TBL=1=24, TOFF=8
   data_out=0x00008008UL;
   // set the interpolation bit
-  if (intpol) bitWrite(data_out,28,1); else bitWrite(data_out,28,0);
+  if (intpol) data_out|=1<<28;
   // set the micro-step mode bits
   data_out|=micro_step_mode<<24;
   TMC2130_write(REG_CHOPCONF,data_out);
