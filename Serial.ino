@@ -244,10 +244,10 @@ void spiEnd() {
 }
 
 void spiPause() {
-  delayMicroseconds(1);
   digitalWrite(_cs, HIGH);
   delayMicroseconds(1);
   digitalWrite(_cs, LOW);
+  delayMicroseconds(1);
 }
 
 uint8_t spiTransfer(uint8_t data_out)
