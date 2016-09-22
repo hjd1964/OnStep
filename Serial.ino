@@ -222,25 +222,32 @@ char Serial1_read() {
 
 // -----------------------------------------------------------------------------------
 // Simple soft SPI routines (CPOL=1, CPHA=1)
-int _ss = 0;
+int _cs = 0;
 int _sck = 0;
 int _miso = 0;
 int _mosi = 0;
 
-void spiStart(int ss, int sck, int miso, int mosi)
+void spiStart(int cs, int sck, int miso, int mosi)
 {
-  _ss=ss; pinMode(ss,OUTPUT); digitalWrite(ss,HIGH);
+  _cs=cs; pinMode(cs,OUTPUT); digitalWrite(cs,HIGH);
   delayMicroseconds(1);
   _sck=sck; pinMode(_sck,OUTPUT); digitalWrite(_sck,HIGH);
   _miso=miso; pinMode(_miso,INPUT);
   _mosi=mosi; pinMode(_mosi,OUTPUT);
-  digitalWrite(ss,LOW);
+  digitalWrite(cs,LOW);
   delayMicroseconds(1);
 }
 
 void spiEnd() {
   delayMicroseconds(1);
-  digitalWrite(_ss, HIGH);
+  digitalWrite(_cs, HIGH);
+}
+
+void spiPause() {
+  delayMicroseconds(1);
+  digitalWrite(_cs, HIGH);
+  delayMicroseconds(1);
+  digitalWrite(_cs, LOW);
 }
 
 uint8_t spiTransfer(uint8_t data_out)
