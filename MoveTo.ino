@@ -294,7 +294,7 @@ void DecayModeTracking() {
   spiEnd();
   nintpol=((AXIS2_MODE & 0b0010000)!=0);
   stealth=((AXIS2_MODE & 0b0100000)!=0);
-  lowpwr =((AXIS1_MODE & 0b1000000)!=0);
+  lowpwr =((AXIS2_MODE & 0b1000000)!=0);
   spiStart(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
   TMC2130_setup(!nintpol,stealth,AXIS2_MODE&0b001111,lowpwr);
   spiEnd();
@@ -333,16 +333,16 @@ void DecayModeGoto() {
     if ((AXIS2_MODE_GOTO & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE_GOTO>>2 & 1)); } else { pinModeOpen(Axis2_M2); }
   #endif
 #elif defined(MODE_SWITCH_BEFORE_SLEW_SPI)
-  bool nintpol=((AXIS1_MODE & 0b0010000)!=0);
-  bool stealth=((AXIS1_MODE & 0b0100000)!=0);
-  bool lowpwr =((AXIS1_MODE & 0b1000000)!=0);
+  bool nintpol=((AXIS1_MODE_GOTO & 0b0010000)!=0);
+  bool stealth=((AXIS1_MODE_GOTO & 0b0100000)!=0);
+  bool lowpwr =((AXIS1_MODE_GOTO & 0b1000000)!=0);
   //       CS      ,SCK     ,MISO     ,MOSI
   spiStart(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0);
   TMC2130_setup(!nintpol,stealth,AXIS1_MODE_GOTO&0b001111,lowpwr);  // default 256x interpolation ON, stealthChop OFF (spreadCycle), micro-steps
   spiEnd();
-  nintpol=((AXIS2_MODE & 0b0010000)!=0);
-  stealth=((AXIS2_MODE & 0b0100000)!=0);
-  lowpwr =((AXIS1_MODE & 0b1000000)!=0);
+  nintpol=((AXIS2_MODE_GOTO & 0b0010000)!=0);
+  stealth=((AXIS2_MODE_GOTO & 0b0100000)!=0);
+  lowpwr =((AXIS2_MODE_GOTO & 0b1000000)!=0);
   spiStart(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
   TMC2130_setup(!nintpol,stealth,AXIS2_MODE_GOTO&0b001111,lowpwr);
   spiEnd();
