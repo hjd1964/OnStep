@@ -31,12 +31,17 @@ uint8_t TMC2130_read(byte Address, uint32_t* data_out)
 // microstepping mode:  micro_step_mode (0 = 256x, 1= 128x, 2=64x, 3=32x, 4=16x, 5=8x, 6=4x, 7=2x, 8=1x)
 void TMC2130_setup(bool intpol, bool stealth_chop, byte micro_step_mode) {
   uint32_t data_out=0;
+  
+  // clear the gconf
+  data_out=0x00000000UL;
+  TMC2130_write(REG_GCONF,data_out);
+
+  // IHOLD=0x1F, IRUN=0x1F (31,31)
+  TMC2130_write(REG_IHOLD_IRUN,0x000003FFUL);
 
   // voltage on AIN is current reference
   if (stealth_chop) data_out=0x00000005UL; else data_out=0x00000001UL;
   TMC2130_write(REG_GCONF,data_out);
-
-  TMC2130_write(REG_IHOLD_IRUN,0x00001010UL); // IHOLD=0x10, IRUN=0x10 (16,16) 
   
   // native 256 microsteps, MRES=0, TBL=1=24, TOFF=8
   data_out=0x00008008UL;

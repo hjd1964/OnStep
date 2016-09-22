@@ -284,8 +284,6 @@ void DecayModeTracking() {
     if ((AXIS2_MODE & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE>>1 & 1)); } else { pinModeOpen(Axis2_M1); }
     if ((AXIS2_MODE & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE>>2 & 1)); } else { pinModeOpen(Axis2_M2); }
   #endif
-  stepAxis1=1;
-  stepAxis2=1;
 #elif defined(MODE_SWITCH_BEFORE_SLEW_SPI)
   bool nintpol=((AXIS1_MODE & 0b010000)!=0);
   bool stealth=((AXIS1_MODE & 0b100000)!=0);
@@ -299,6 +297,8 @@ void DecayModeTracking() {
   TMC2130_setup(!nintpol,stealth,AXIS2_MODE&0b001111);
   spiEnd();
 #endif
+  stepAxis1=1;
+  stepAxis2=1;
   #ifdef MODE_SWITCH_SLEEP_ON 
   delay(3);
   #endif
@@ -330,8 +330,6 @@ void DecayModeGoto() {
     if ((AXIS2_MODE_GOTO & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE_GOTO>>1 & 1)); } else { pinModeOpen(Axis2_M1); }
     if ((AXIS2_MODE_GOTO & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE_GOTO>>2 & 1)); } else { pinModeOpen(Axis2_M2); }
   #endif
-  stepAxis1=AXIS1_STEP_GOTO;
-  stepAxis2=AXIS2_STEP_GOTO;
 #elif defined(MODE_SWITCH_BEFORE_SLEW_SPI)
   bool nintpol=(AXIS1_MODE&0b010000!=0);
   bool stealth=(AXIS1_MODE&0b100000!=0);
@@ -345,6 +343,8 @@ void DecayModeGoto() {
   TMC2130_setup(!nintpol,stealth,AXIS2_MODE_GOTO&0b001111);
   spiEnd();
 #endif
+  stepAxis1=AXIS1_STEP_GOTO;
+  stepAxis2=AXIS2_STEP_GOTO;
   #ifdef MODE_SWITCH_SLEEP_ON
   delay(3);
   #endif
