@@ -1148,11 +1148,10 @@ void setup() {
     pinMode(Axis2_FAULT,INPUT);
   #endif
 #endif
-
-// disable the stepper drivers for now, if the enable lines are connected
+  
+  // disable the stepper drivers for now, if the enable lines are connected
   pinMode(Axis1_EN,OUTPUT); digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
   pinMode(Axis2_EN,OUTPUT); digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
-  delay(100);
 
 // if the stepper driver mode select pins are wired in, program any requested micro-step mode
 #ifdef MODE_SWITCH_BEFORE_SLEW_OFF
