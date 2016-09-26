@@ -59,7 +59,7 @@ void TMC2130_setup(bool intpol, bool stealth_chop, byte micro_step_mode, bool lo
   // TPOWERDOWN, default=127, range 0 to 255 (Delay after standstill for motor current power down, about 0 to 4 seconds)
   //            TPOWERDOWN
   data_out    =(127<<0);
-  TMC2130_write(REG_TPOWERDOWN,data_out); else TMC2130_write(REG_IHOLD_IRUN,data_out_low);
+  TMC2130_write(REG_TPOWERDOWN,data_out);
   spiPause();
 
   // native 256 microsteps, MRES=0, TBL=1=24, TOFF=8
