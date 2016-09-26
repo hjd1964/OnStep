@@ -75,7 +75,7 @@
 // light status LED by sink to ground (pin 9) and source +5V (pin 8), default=ON.  (Teensy3.2 Pin 19, no V+ pin)
 // _ON and OnStep keeps this illuminated to indicate that the controller is active.  When sidereal tracking this LED will rapidly flash
 #define STATUS_LED_PINS_ON
-// lights 2nd status LED by sink to ground (pin 7), default=OFF. (Teensy3.2 Pin 22, don't use with RETICULE_LED_PINS_ON)
+// lights 2nd status LED by sink to ground (pin 7), default=OFF. (Teensy3.2 Pin 22)
 // _ON sets this to blink at 1 sec intervals when PPS is synced
 #define STATUS_LED2_PINS_OFF
 // lights reticule LED by sink to ground (pin 44), default=OFF.  (Teensy3.2 Pin 22, don't use with STATUS_LED2_PINS_ON)
@@ -106,17 +106,17 @@
                                      // for the most part this doesn't need to be changed, but adjust when needed.  Default=25
 
                                      // Axis1 is for RA/Az
-#define StepsPerDegreeAxis1  14400.0 // calculated as    :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
-                                     // Takahashi EM10b  :  200           * 8           * 18 * (1.25)     *  144/360              = 14400
+#define StepsPerDegreeAxis1  12800.0 // calculated as    :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
+                                     // G11              :  400           * 32          * 1               *  360/360              = 12800
                                      // Axis2 is for Dec/Alt
-#define StepsPerDegreeAxis2  14400.0 // calculated as    :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
-                                     // Takahashi EM10b  :  200           * 8           * 18 * (1.25)     *  144/360              = 14400
+#define StepsPerDegreeAxis2  12800.0 // calculated as    :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
+                                     // G11              :  400           * 32          * 1               *  360/360              = 12800
                                      // the EM10b has two spur gears that drive the RA/Dec worms, they give an additional 1.25:1 reduction
                                      // in addition to the 18:1 gear heads on the steppers for a 22.5:1 final ratio before the worm/wheels at 144:1
                                      
                                      // PEC, number of steps for a complete worm rotation (in RA), (StepsPerDegreeAxis1*360)/gear_reduction2.  Ignored on Alt/Azm mounts.
-#define StepsPerWormRotationAxis1 36000
-                                     // Tak EM10         : (14400*360)/144 = 36000
+#define StepsPerWormRotationAxis1 12800L
+                                     // G11              : (12800*360)/360 = 12800
 
 #define PECBufferSize           824  // PEC, buffer size, max should be no more than 3384, your required buffer size >= StepsPerAxis1WormRotation/(StepsPerDegeeAxis1/240)
                                      // for the most part this doesn't need to be changed, but adjust when needed.  824 seconds is the default.  Ignored on Alt/Azm mounts.
@@ -138,7 +138,7 @@
 
 // ADDITIONAL STEPPER DRIVER CONTROL: --------------------------------------------------------------------------------------
 
-// Stepper driver Enable support is always on, just wire Enable to Pins 23 (Axis1) and 36 (Axis2) and OnStep will pull these HIGH (Teensy3.2 Pins 16,21)
+// Stepper driver Enable support is always on, just wire Enable to Pins 23 (Axis1) and 36 (Axis2) and OnStep will pull these HIGH (Teensy3.2 Pins 9,14)
 // to disable stepper drivers on startup and when Parked or Homed.  An Align or UnPark will enable the drivers.  Adjust below if you need these pulled LOW to disable the drivers.
 #define AXIS1_DISABLED_HIGH
 #define AXIS2_DISABLED_HIGH
@@ -149,16 +149,16 @@
 /* Stepper driver Mode control
 // M0, M1, and M2 are on Pins 25,27, and 29 for RA (Teensy3.2 Pins 15,16,17.)  M0, M1, M2 are on Pins 34,32,30 for Dec (Teensy3.2 Pins 8,7,6.)
 // values 0 to 7 (0b000 to 111): for example "#define AXIS1_MODE 4" is the same as "#define AXIS1_MODE 0b100" which sets M2 to HIGH, M1 to LOW, and M0 to LOW
-//                  on/off                                                                              / | \
+//                                                                                                      / | \
 //                                                                                                    M2  M1 M0
 // DRV8825 or A4988 or RAPS128:
 // use MODE_SWITCH_BEFORE_SLEW_OFF
 // micro-stepping modes: 5=32x, 4=16x, 3=8x, 2=4x, 1=2x, 0=1x (RAPS128 also supports 6=64x, 7=128x)
 //
 // SilentStepStick TMC2100/2130 configurations (M0 is CFG1, M1 is CFG2, M2 is CFG3):
-// use MODE_SWITCH_BEFORE_SLEW_ON (though it isn't used)
-// I recommend keeping CFG3 and CFG2 open (not connected) CFG1 can then be pulled low for 16x micro-stepping (256x intpol) in spreadCycle mode
-// or keep CFG3 and CFG1 open (not connected) and CFG2 can be pulled high for 4x micro-stepping (256x intpol) in spreadCycle mode
+// use MODE_SWITCH_BEFORE_SLEW_ON
+// I recommend keeping CFG3 and CFG2 open (not connected) CFG1 can then be pulled low for 16x micro-stepping (256x intpol) in spreadCycle mode (0b110000 = 48 = OPEN/OPEN/OUTPUT, ignore/ignore/LOW)
+// or keep CFG3 and CFG1 open (not connected) and CFG2 can be pulled high for 4x micro-stepping (256x intpol) in spreadCycle mode (0b101010 = 42 = OPEN/OUTPUT/OPEN, ignore/HIGH/ignore)
 //
 // SilentStepStick TMC2130 SPI configurations:
 // use MODE_SWITCH_BEFORE_SLEW_SPI.  Default operation in spreadCycle and with 256x interpolation on:
@@ -168,22 +168,21 @@
 // Another option allows setting 50% power while tracking (TMC_LOWPWR.)  As above, with this option on too:
 // AXIS1_MODE (3|TMC_STEALTHCHOP|TMC_LOWPWR)
 */
-
 #define AXIS1_MODE_OFF               // programs the RA/Az uStep mode M0/M1/M2, optional and default _OFF.
 #define AXIS1_MODE_GOTO_OFF          // programs the RA/Az uStep mode M0/M1/M2, used during gotos, optional and default _OFF.
 #define AXIS1_STEP_GOTO 1            // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
 #define AXIS2_MODE_OFF               // programs the Dec/Alt uStep mode M0/M1/M2, optional and default _OFF.
 #define AXIS2_MODE_GOTO_OFF          // programs the Dec/Alt uStep mode M0/M1/M2, used during gotos, optional and default _OFF.
 #define AXIS2_STEP_GOTO 1            // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
-#define MODE_SWITCH_BEFORE_SLEW_OFF  // _ON for _MODE and _MODE_GOTO settings to start/stop just before/after the slew, otherwise they are active during the slew at <128uS/step speeds)
-                                     // _SPI as above but uses SPI to do the switching on (TMC2130.)  Uses Teensy3.2 Pins 18 (Aux1) and 5 (Aux2,) choose only one feature on Aux1/2.
+#define MODE_SWITCH_BEFORE_SLEW_OFF  // _ON (or _SPI) for _MODE and _MODE_GOTO settings to start/stop just before/after the slew, otherwise they are active during the slew at <128uS/step speeds)
+                                     // _SPI as above but uses SPI (on M0/M1/M2/Aux) to do the switching (TMC2130.)  Uses Teensy3.2 Pins 18 (Aux1) and 5 (Aux2,) choose only one feature on Aux1/2.
 
 // Secondary stepper driver decay control (for both Axis, the _DECAY_MODE and _DECAY_MODE_GOTO settings always start/stop just before/after the slew)
 // typically used for the DRV8825 or A9488 where decay control is seperate from the micro-step mode control.  The driver modules usually need to be modified to accomplish this.
 // Axis1 decay mode is on Pin 41 and Axis2 decay mode is on Pin 40.  Options are _HIGH, _LOW, _OPEN, default is _OFF (not supported on Teensy3.2)
 // MODE_SWITCH_BEFORE_SLEW must be _OFF if using this.
 #define DECAY_MODE_OFF
-#define DECAY_MODE_GOTO_OFF            
+#define DECAY_MODE_GOTO_OFF
 
 // if the decay/micro-step mode switch happens before/after a slew, inserts a 3ms delay before the motors take a step
 #define MODE_SWITCH_SLEEP_OFF
