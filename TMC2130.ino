@@ -48,8 +48,8 @@ void TMC2130_setup(bool intpol, bool stealth_chop, byte micro_step_mode, bool lo
   // IHOLDDELAY=0x00, IRUN=0x1F, IHOLD=0x1F (  0,   31,   31   ) or 50% (0,16,16)
   //                                         0b0000 11111 11111
   // IHOLDDELAY, default=0,  range 0 to 15 (Delay per current reduction step in x 2^18 clocks)
-  // IRUN,       default=0,  range 0 to 31 (Run current 0=1/32... 31=32/32)
-  // IHOLD,      default=15, range 0 to 31 (Standstill current 0=1/32... 31=32/32)
+  // IRUN,       default=31, range 0 to 31 (Run current 0=1/32... 31=32/32)
+  // IHOLD,      default=16, range 0 to 31 (Standstill current 0=1/32... 31=32/32)
   //            IHOLD + IRUN  + IHOLDDELAY
   data_out_low=(16<<0)+(12<<8)+(0<<16);
   data_out    =(31<<0)+(16<<8)+(0<<16);
