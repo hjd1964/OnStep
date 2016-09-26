@@ -302,11 +302,14 @@ void DecayModeTracking() {
   // allow stealth chop current regulation to ramp up to the initial motor current before moving
   if ((((AXIS1_MODE & 0b0100000)!=0) || ((AXIS2_MODE & 0b0100000)!=0)) & (atHome)) delay(100);
 #endif
+
+#if defined(AXIS1_MODE) && defined(AXIS1_MODE_GOTO)
   stepAxis1=1;
   stepAxis2=1;
-  #ifdef MODE_SWITCH_SLEEP_ON 
+#endif
+#ifdef MODE_SWITCH_SLEEP_ON 
   delay(3);
-  #endif
+#endif
   sei();
 }
 
@@ -350,11 +353,14 @@ void DecayModeGoto() {
   TMC2130_setup(!nintpol,stealth,AXIS2_MODE_GOTO&0b001111,lowpwr);
   spiEnd();
 #endif
+
+#if defined(AXIS1_MODE) && defined(AXIS1_MODE_GOTO)
   stepAxis1=AXIS1_STEP_GOTO;
   stepAxis2=AXIS2_STEP_GOTO;
-  #ifdef MODE_SWITCH_SLEEP_ON
+#endif
+#ifdef MODE_SWITCH_SLEEP_ON
   delay(3);
-  #endif
+#endif
   sei();
 }
 
