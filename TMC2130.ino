@@ -4,6 +4,7 @@
 #define REG_GCONF      0x00
 #define REG_GSTAT      0x01
 #define REG_IHOLD_IRUN 0x10
+#define REG_TPOWERDOWN 0x11
 #define REG_CHOPCONF   0x6C
 #define REG_COOLCONF   0x6D
 #define REG_DCCTRL     0x6E
@@ -33,6 +34,7 @@ uint8_t TMC2130_read(byte Address, uint32_t* data_out)
 // power level       :  low_power (true for low power: 50%, 100% otherwise)
 void TMC2130_setup(bool intpol, bool stealth_chop, byte micro_step_mode, bool low_power) {
   uint32_t data_out=0;
+  uint32_t data_out_low=0;
 
   // voltage on AIN is current reference
   data_out=0x00000001UL;
@@ -41,13 +43,33 @@ void TMC2130_setup(bool intpol, bool stealth_chop, byte micro_step_mode, bool lo
   TMC2130_write(REG_GCONF,data_out);
   spiPause();
 
+  // *** My notes are limited, see TMC2130 spec. sheet for more info. ***
+
   // IHOLDDELAY=0x00, IRUN=0x1F, IHOLD=0x1F (  0,   31,   31   ) or 50% (0,16,16)
   //                                         0b0000 11111 11111
-  if (!low_power) TMC2130_write(REG_IHOLD_IRUN,0x000003FFUL); else TMC2130_write(REG_IHOLD_IRUN,0x00000210UL);
+  // IHOLDDELAY, default=0,  range 0 to 15 (Delay per current reduction step in x 2^18 clocks)
+  // IRUN,       default=31, range 0 to 31 (Run current 0=1/32... 31=32/32)
+  // IHOLD,      default=16, range 0 to 31 (Standstill current 0=1/32... 31=32/32)
+  //            IHOLD + IRUN  + IHOLDDELAY
+  data_out_low=(16<<0)+(12<<8)+(0<<16);
+  data_out    =(31<<0)+(16<<8)+(0<<16);
+  if (!low_power) TMC2130_write(REG_IHOLD_IRUN,data_out); else TMC2130_write(REG_IHOLD_IRUN,data_out_low);
+  spiPause();
+
+  // TPOWERDOWN, default=127, range 0 to 255 (Delay after standstill for motor current power down, about 0 to 4 seconds)
+  //            TPOWERDOWN
+  data_out    =(127<<0);
+  TMC2130_write(REG_TPOWERDOWN,data_out);
   spiPause();
 
   // native 256 microsteps, MRES=0, TBL=1=24, TOFF=8
-  data_out=0x00008008UL;
+  // data_out=0x00008008UL;
+  // TOFF,  default=4, range 2 to 15
+  // HSTRT, default=0, range 0 to 7  (Hysteresis start 1, 2, ..., 8)
+  // HEND,  default=0, range 0 to 15 (Hysteresis -3, -2, -1, 0, 1 ..., 12)
+  // TBL,   default=1, range 0 to 3  (for 6, 24, 36 or 54 clocks)
+  //        TOFF + HSTRT + HEND + TBL
+  data_out=(4<<0)+(0<<4) +(0<<7)+(1<<15);
   // set the interpolation bit
   if (intpol) data_out|=1<<28;
   // set the micro-step mode bits
