@@ -81,7 +81,7 @@ bool TMC2130_error() {
   uint32_t data_out=0;
 
   // get global status register, look for driver error bit
-  data_out=0;
-  if (TMC2130_read(REG_GSTAT,&data_out)&2!=0) return true; else return false;
+  uint8_t result=TMC2130_read(REG_GSTAT,&data_out);
+  if ((result&2)!=0) return true; else return false;
 }
 
