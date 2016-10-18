@@ -40,6 +40,7 @@
 #define TMC_LOWPWR      64
 #define TMC_STEALTHCHOP 32
 #define TMC_NINTPOL     16
+#include "Align.h"
 #include "Config.h"
 #include "Library.h"
 #include "FPoint.h"
@@ -66,8 +67,8 @@
 #endif
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "09 21 16"
-#define FirmwareNumber "1.0a35"
+#define FirmwareDate   "10 18 16"
+#define FirmwareNumber "1.0a36"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -225,12 +226,14 @@ double longitude = 0.0;
 #endif
 
 #ifdef MOUNT_TYPE_GEM
-long celestialPoleHA  = 90L;
+long celestialPoleAxis1  = 90L;
 #endif
 #if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT) || defined(MOUNT_TYPE_ALTAZM)
-long celestialPoleHA  = 0L;
+long celestialPoleAxis1  = 0L;
 #endif
-double celestialPoleDec = 90.0;
+double celestialPoleAxis2 = 90.0;
+// either 0 or (fabs(latitude))
+#define AltAzmDecStartPos (fabs(latitude))
 
 volatile long posAxis1   = 90L*(long)StepsPerDegreeAxis1;// hour angle position in steps
 long trueAxis1           = 90L*(long)StepsPerDegreeAxis1;// correction to above for motor shaft position steps
@@ -735,14 +738,8 @@ byte meridianFlip = MeridianFlipNever;
 byte meridianFlip = MeridianFlipNever;
 #endif
 
-#define AlignNone        0
-#define AlignOneStar1    1
-#define AlignTwoStar1    11
-#define AlignTwoStar2    12
-#define AlignThreeStar1  21
-#define AlignThreeStar2  22
-#define AlignThreeStar3  23
-byte alignMode           = AlignNone;
+byte alignNumStars       = 0;
+byte alignThisStar       = 0;
 
 #define PierSideNone     0
 #define PierSideEast     1
@@ -807,6 +804,19 @@ byte bufferPtr_ethernet= 0;
 // Misc ---------------------------------------------------------------------------------------------------------------------
 #define Rad 57.29577951
 
+// align
+#if defined(MOUNT_TYPE_GEM)
+#define MAX_NUM_ALIGN_STARS '3'
+#elif defined(MOUNT_TYPE_FORK)
+#define MAX_NUM_ALIGN_STARS '3'
+#elif defined(MOUNT_TYPE_FORK_ALT)
+#define MAX_NUM_ALIGN_STARS '1'
+#elif defined(MOUNT_TYPE_ALTAZM)
+#define MAX_NUM_ALIGN_STARS '3'
+#else
+#endif
+
+// serial speed
 unsigned long baudRate[10] = {115200,56700,38400,28800,19200,14400,9600,4800,2400,1200};
 
 // current site index and name
@@ -1374,10 +1384,10 @@ void setup() {
   latitude=EEPROM_readFloat(EE_sites+(currentSite)*25+0);
 
 #ifdef MOUNT_TYPE_ALTAZM
-  celestialPoleDec=fabs(latitude);
-  if (latitude<0) celestialPoleHA=180L; else celestialPoleHA=0L;
+  celestialPoleAxis2=AltAzmDecStartPos;
+  if (latitude<0) celestialPoleAxis1=180L; else celestialPoleAxis1=0L;
 #else
-  if (latitude<0) celestialPoleDec=-90.0; else celestialPoleDec=90.0;
+  if (latitude<0) celestialPoleAxis2=-90.0; else celestialPoleAxis2=90.0;
 #endif
   cosLat=cos(latitude/Rad);
   sinLat=sin(latitude/Rad);
@@ -1388,8 +1398,8 @@ void setup() {
   EEPROM_readString(EE_sites+(currentSite)*25+9,siteName);
 
   // update starting coordinates to reflect NCP or SCP polar home position
-  startAxis1 = celestialPoleHA*(long)StepsPerDegreeAxis1;
-  startAxis2 = celestialPoleDec*(double)StepsPerDegreeAxis2;
+  startAxis1 = celestialPoleAxis1*(long)StepsPerDegreeAxis1;
+  startAxis2 = celestialPoleAxis2*(double)StepsPerDegreeAxis2;
   cli();
   targetAxis1.part.m = startAxis1;
   targetAxis1.part.f = 0;

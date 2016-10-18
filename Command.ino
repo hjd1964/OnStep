@@ -71,19 +71,9 @@ void processCommands() {
 //               n is the current alignment star (0 otherwise)
 //               o is the last required alignment star when an alignment is in progress (0 otherwise)
         if (command[1]=='?') {
-#if defined(MOUNT_TYPE_ALTAZM)
-          reply[0]='1';
-#elif defined(MOUNT_TYPE_FORK_ALT)
-          reply[0]='1';
-#else
-          reply[0]='3';
-#endif
-          if (alignMode==AlignOneStar1)   { reply[1]='1'; reply[2]='1'; } else
-          if (alignMode==AlignTwoStar1)   { reply[1]='1'; reply[2]='2'; } else
-          if (alignMode==AlignThreeStar1) { reply[1]='1'; reply[2]='3'; } else
-          if (alignMode==AlignTwoStar2)   { reply[1]='2'; reply[2]='2'; } else
-          if (alignMode==AlignThreeStar2) { reply[1]='2'; reply[2]='3'; } else
-          if (alignMode==AlignThreeStar3) { reply[1]='3'; reply[2]='3'; } else { reply[1]='0'; reply[2]='0'; }
+          reply[0]=MAX_NUM_ALIGN_STARS;
+          reply[1]='0'+alignThisStar;
+          reply[2]='0'+alignNumStars;
           reply[3]=0;
           quietReply=true;
         } else
@@ -103,9 +93,10 @@ void processCommands() {
 //         Returns:
 //         1: When ready for your goto commands
 //         0: If mount is busy
-        if ((command[1]=='1') || (command[1]=='2') || (command[1]=='3')) {
+        if ((command[1]>='1') && (command[1]<='9')) {
           // set current time and date before calling this routine
-          commandError=startAlign(command[1]);
+          commandError=startAlign(command[1]-'0');
+          if (commandError) alignNumStars=0;
         } else
 //  :A+#  Manual Alignment, set target location
 //         Returns:
@@ -113,6 +104,7 @@ void processCommands() {
 //         0: Failure, Manual align mode not set or distance too far 
         if (command[1]=='+') { 
           commandError=nextAlign();
+          if (commandError) alignNumStars=0;
         } else commandError=true; 
       } else
       
@@ -340,10 +332,10 @@ void processCommands() {
         #ifdef MOUNT_TYPE_GEM
         reply[i++]='E';
         #endif
-        #if defined(MOUNT_TYPE_FORK)
+        #ifdef MOUNT_TYPE_FORK
         reply[i++]='K';
         #endif
-        #if defined(MOUNT_TYPE_FORK_ALT)
+        #ifdef MOUNT_TYPE_FORK_ALT
         reply[i++]='k';
         #endif
         #ifdef MOUNT_TYPE_ALTAZM
@@ -1071,10 +1063,10 @@ void processCommands() {
         if (!dmsToDouble(&latitude,parameter,true)) { commandError=true; } else {
           EEPROM_writeFloat(100+(currentSite)*25+0,latitude);
 #ifdef MOUNT_TYPE_ALTAZM
-          celestialPoleDec=fabs(latitude);
-          if (latitude<0) celestialPoleHA=180L; else celestialPoleHA=0L;
+          celestialPoleAxis2=AltAzmDecStartPos;
+          if (latitude<0) celestialPoleAxis1=180L; else celestialPoleAxis1=0L;
 #else
-          if (latitude<0) celestialPoleDec=-90.0; else celestialPoleDec=90.0;
+          if (latitude<0) celestialPoleAxis2=-90.0; else celestialPoleAxis2=90.0;
 #endif
           cosLat=cos(latitude/Rad);
           sinLat=sin(latitude/Rad);
@@ -1331,9 +1323,9 @@ void processCommands() {
           currentSite=command[1]-'0'; EEPROM.update(EE_currentSite,currentSite); quietReply=true;
           latitude=EEPROM_readFloat(EE_sites+(currentSite*25+0));
 #ifdef MOUNT_TYPE_ALTAZM
-          celestialPoleDec=fabs(latitude);
+          celestialPoleAxis2=AltAzmDecStartPos;
 #else
-          if (latitude<0.0) celestialPoleDec=-90.0; else celestialPoleDec=90.0;
+          if (latitude<0.0) celestialPoleAxis2=-90.0; else celestialPoleAxis2=90.0;
 #endif
           cosLat=cos(latitude/Rad);
           sinLat=sin(latitude/Rad);

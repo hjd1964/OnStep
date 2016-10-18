@@ -738,6 +738,11 @@ double dist(double a, double b) {
   if (a>b) return a-b; else return b-a;
 }
 
+
+double angDist(double h, double d, double h1, double d1) {
+  return acos(sin(d/Rad)*sin(d1/Rad)+cos(d/Rad)*cos(d1/Rad)*cos((h1-h)/Rad))*Rad;
+}
+
 // floating point range of +/-255.999999x
 uint64_t doubleToFixed(double d) {
   fixed_t x;
@@ -755,10 +760,10 @@ double fixedToDouble(fixed_t a) {
 // -----------------------------------------------------------------------------------------------------------------------------
 // Align
 
-bool startAlign(char c) {
-  // :A2 and :A3 arent supported with Fork mounts in alternate mode
-  #if defined(MOUNT_TYPE_FORK_ALT) || defined(MOUNT_TYPE_ALTAZM)
-  if (c=='1') {
+bool startAlign(int n) {
+  // Two star and three star align not supported with Fork mounts in alternate mode
+  #ifdef MOUNT_TYPE_FORK_ALT
+  if (n==1) {
   #endif
 
   // telescope should be set in the polar home (CWD) for a starting point
@@ -773,12 +778,13 @@ bool startAlign(char c) {
   // start tracking
   trackingState=TrackingSidereal;
 
-  // start align... AlignOneStar1=01, AlignTwoStar1=11, AlignThreeStar1=21
-  alignMode=AlignOneStar1+(c-'1')*10;
+  // start align...
+  alignNumStars=n;
+  alignThisStar=1;
 
   return false;
 
-  #if defined(MOUNT_TYPE_FORK_ALT) || defined(MOUNT_TYPE_ALTAZM)
+  #if defined(MOUNT_TYPE_FORK_ALT)
   } else return true;
   #endif
 }
@@ -802,22 +808,41 @@ the pdCor  term is 1 in HA
 double avgDec = 0.0;
 double avgHA  = 0.0;
 bool nextAlign() {
+  // after last star turn meridian flips off when align is done
+  if ((alignNumStars==alignThisStar) && (meridianFlip==MeridianFlipAlign)) meridianFlip=MeridianFlipNever;
+
+// AltAz Taki method
+#ifdef MOUNT_TYPE_ALTAZM
+    if ((alignNumStars>1) && (alignThisStar<=alignNumStars)) {
+      cli();
+      // get the Azm/Alt
+      double F=(double)(posAxis1+IHS)/(double)StepsPerDegreeAxis1;
+      double H=(double)(posAxis2+IDS)/(double)StepsPerDegreeAxis2;
+      sei();
+      // B=RA, D=Dec, H=Elevation, F=Azimuth (all in degrees)
+      Align.addStar(alignThisStar,alignNumStars,haRange(LST()*15.0-newTargetRA),newTargetDec,H,F);
+      alignThisStar++;
+      return false;
+    }
+#endif
+
   // First star:
   // Near the celestial equator (Dec=0, HA=0), telescope West of the pier if multi-star align
-  if ((alignMode==AlignOneStar1) || (alignMode==AlignTwoStar1) || (alignMode==AlignThreeStar1)) {
-    if ((alignMode==AlignOneStar1) && (meridianFlip==MeridianFlipAlign)) meridianFlip=MeridianFlipNever;
-    alignMode++;
+  if (alignThisStar==1) {
+    alignThisStar++;
+
     // set the IH offset
     // set the ID offset
     if (!syncEqu(newTargetRA,newTargetDec)) { return true; }
+
     avgDec=newTargetDec;
     avgHA =haRange(LST()*15.0-newTargetRA);
   } else 
   // Second star:
   // Near the celestial equator (Dec=0, HA=0), telescope East of the pier
-  if ((alignMode==AlignTwoStar2) || (alignMode==AlignThreeStar2)) {
-    if ((alignMode==AlignTwoStar2) && (meridianFlip==MeridianFlipAlign)) meridianFlip=MeridianFlipNever;
-    alignMode++;
+  if (alignThisStar==2) {
+    alignThisStar++;
+
     double IH1=IH;
     double ID1=-ID;
 
@@ -855,11 +880,8 @@ bool nextAlign() {
   } else 
   // Third star:
   // Near (Dec=45, HA=6), telescope East of the pier
-  if (alignMode==AlignThreeStar3) {
-    #ifndef MOUNT_TYPE_GEM
-    meridianFlip=MeridianFlipNever;
-    #endif
-    alignMode++;
+  if (alignThisStar==3) {
+    alignThisStar++;
     
     double IH1=IH;
     double ID1=ID;
@@ -892,4 +914,5 @@ bool nextAlign() {
 
   return false;
 }
+
 

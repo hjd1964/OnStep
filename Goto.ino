@@ -11,7 +11,12 @@ boolean syncEqu(double RA, double Dec) {
 
   double Axis1,Axis2;
 #ifdef MOUNT_TYPE_ALTAZM
-  EquToHor(HA,Dec,&Axis2,&Axis1); // convert from HA/Dec to Alt/Azm
+  if (Align.isReady()) {
+    // B=RA, D=Dec, H=Elevation, F=Azimuth (all in degrees)
+    Align.EquToInstr(HA,Dec,&Axis2,&Axis1);
+  } else {
+    EquToHor(HA,Dec,&Axis2,&Axis1);
+  }
   if (Axis1>180.0) Axis1-=360.0;
 #else
   EquToIEqu(latitude,HA,Dec,&Axis1,&Axis2);
@@ -96,13 +101,25 @@ void getHADec(double *HA, double *Dec) {
 // gets the telescopes current RA and Dec, set returnHA to true for Horizon Angle instead of RA
 boolean getEqu(double *RA, double *Dec, boolean returnHA) {
   double HA;
-  
-  // get the HA and Dec (already index corrected on AltAzm)
-  getHADec(&HA,Dec);
-  
+ 
 #ifndef MOUNT_TYPE_ALTAZM
+  // get the HA and Dec
+  getHADec(&HA,Dec);
   // correct for under the pole, polar misalignment, and index offsets
   IEquToEqu(latitude,HA,*Dec,&HA,Dec);
+#else
+  if (Align.isReady()) {
+    cli();
+    // get the Azm/Alt
+    double F=(double)(posAxis1+IHS)/(double)StepsPerDegreeAxis1;
+    double H=(double)(posAxis2+IDS)/(double)StepsPerDegreeAxis2;
+    sei();
+    // H=Elevation, F=Azimuth, B=RA, D=Dec (all in degrees)
+    Align.InstrToEqu(H,F,&HA,Dec);
+  } else {
+    // get the HA and Dec (already index corrected on AltAzm)
+    getHADec(&HA,Dec);
+  }
 #endif
 
   // return either the RA or the HA depending on returnHA
@@ -169,7 +186,12 @@ byte goToEqu(double RA, double Dec) {
   if (guideDirAxis1 || guideDirAxis2)                   return 7;   // fail, unspecified error
 
 #ifdef MOUNT_TYPE_ALTAZM
-  EquToHor(HA,Dec,&a,&z);
+  if (Align.isReady()) {
+    // B=RA, D=Dec, H=Elevation, F=Azimuth (all in degrees)
+    Align.EquToInstr(HA,Dec,&a,&z);
+  } else {
+    EquToHor(HA,Dec,&a,&z);
+  }
   z=haRange(z);  
 
   cli(); double a1=(posAxis1+IHS)/StepsPerDegreeAxis1; sei();
@@ -224,8 +246,13 @@ byte goToEqu(double RA, double Dec) {
   // goto function takes HA and Dec in steps
   // when in align mode, force pier side
   byte thisPierSide=PierSideBest;
-  if ((alignMode==AlignOneStar1) || (alignMode==AlignTwoStar1) || (alignMode==AlignThreeStar1)) thisPierSide=PierSideWest;
-  if ((alignMode==AlignTwoStar2) || (alignMode==AlignThreeStar2) || (alignMode==AlignThreeStar3)) thisPierSide=PierSideEast;
+  // only for 2+ star aligns
+  if (alignNumStars>1) {
+    // and only for the first three stars
+    if (alignThisStar<4) {
+      if (alignThisStar==1) thisPierSide=PierSideWest; else thisPierSide=PierSideEast;
+    }
+  }
   return goTo(Axis1,Axis2,Axis1Alt,Axis2Alt,thisPierSide);
 }
 
