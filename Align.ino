@@ -36,9 +36,9 @@ void TAlign::addStar(int I, int N, double B, double D, double H, double F) {
   AlignStars[I-1].Alt=H; AlignStars[I-1].Az=F;
 
   // FOR >2 STARS LOG THEM AND USE TO CALCULATE Z1/Z2/Z3 TERMS
-  if (I>2) {
-    if (I==N) {
-      t_ready=true;
+  if (I==N) {
+    t_ready=true;
+    if (I>2) {
       // handles searching for Z3 up to +/- 10 degrees
       bestZ3(N,-10.0,10.0,2.0);       // 10x
       bestZ3(N,Z3-2.0,Z3+2.0,0.5);    // 8x
