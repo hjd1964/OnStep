@@ -1714,12 +1714,13 @@ void loop() {
         cli(); 
         if (posAxis1+IHS>(MinutesPastMeridianW*(long)StepsPerDegreeAxis1/4L)) {
           sei();
-          // do an automatic meridian flip and continue
-          if (autoContinue && (posAxis1+IHS>(-MinutesPastMeridianE*(long)StepsPerDegreeAxis1/4L))) {
+          // do an automatic meridian flip and continue if just tracking
+          if (autoContinue && (posAxis1+IHS>(-MinutesPastMeridianE*(long)StepsPerDegreeAxis1/4L)) && (trackingState!=TrackingMoveTo)) {
             double newRA,newDec;
             getEqu(&newRA,&newDec,false); // returns 0 on success
             if (goToEqu(newRA,newDec)) {
-              lastError=ERR_MERIDIAN; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;
+              lastError=ERR_MERIDIAN; 
+              trackingState=TrackingNone;
             }
           } else {
             lastError=ERR_MERIDIAN; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;
