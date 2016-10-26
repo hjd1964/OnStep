@@ -51,14 +51,14 @@ void TMC2130_setup(bool intpol, bool stealth_chop, byte micro_step_mode, bool lo
   // IRUN,       default=31, range 0 to 31 (Run current 0=1/32... 31=32/32)
   // IHOLD,      default=16, range 0 to 31 (Standstill current 0=1/32... 31=32/32)
   //            IHOLD + IRUN  + IHOLDDELAY
-  data_out_low=(16<<0)+(12<<8)+(0<<16);
-  data_out    =(31<<0)+(16<<8)+(0<<16);
+  data_out_low=(16UL<<0)+(12UL<<8)+(0UL<<16);
+  data_out    =(31UL<<0)+(16UL<<8)+(0UL<<16);
   if (!low_power) TMC2130_write(REG_IHOLD_IRUN,data_out); else TMC2130_write(REG_IHOLD_IRUN,data_out_low);
   spiPause();
 
   // TPOWERDOWN, default=127, range 0 to 255 (Delay after standstill for motor current power down, about 0 to 4 seconds)
   //            TPOWERDOWN
-  data_out    =(127<<0);
+  data_out    =(127UL<<0);
   TMC2130_write(REG_TPOWERDOWN,data_out);
   spiPause();
 
@@ -69,11 +69,11 @@ void TMC2130_setup(bool intpol, bool stealth_chop, byte micro_step_mode, bool lo
   // HEND,  default=0, range 0 to 15 (Hysteresis -3, -2, -1, 0, 1 ..., 12)
   // TBL,   default=1, range 0 to 3  (for 6, 24, 36 or 54 clocks)
   //        TOFF + HSTRT + HEND + TBL
-  data_out=(4<<0)+(0<<4) +(0<<7)+(1<<15);
+  data_out=(4UL<<0)+(0UL<<4) +(0UL<<7)+(1UL<<15);
   // set the interpolation bit
-  if (intpol) data_out|=1<<28;
+  if (intpol) data_out|=1UL<<28;
   // set the micro-step mode bits
-  data_out|=micro_step_mode<<24;
+  data_out|=((uint32_t)micro_step_mode)<<24;
   TMC2130_write(REG_CHOPCONF,data_out);
 }
 
