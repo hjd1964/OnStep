@@ -152,38 +152,6 @@ boolean doubleToDms(char *reply, double *f, boolean fullRange, boolean signPrese
   return true;
 }
 
-double frac(double v) {
-  return v - ((long)v);
-}
-
-double decodeTimeZone(double tz) {
-  // -100 codes for :30
-  if (tz<-24.0) {
-    tz=tz+100.0;
-    if (tz<0) tz=tz-0.5; else tz=tz+0.5;
-  }
-  // +100 codes for :45
-  if (tz>24.0) {
-    tz=tz-100.0;
-    if (tz<0) tz=tz-0.75; else tz=tz+0.75;
-  }
-  return tz;
-}
-
-double encodeTimeZone(double tz) {
-  double f=fabs(frac(tz));
-  // -100 codes for :30
-  if (fabs(f-0.5)<0.00000001) {
-    tz=(long)tz-100.0;
-  }
-  // +100 codes for :45
-  if (fabs(f-0.75)<0.00000001) {
-    tz=(long)tz+100.0;
-  }
-  tz=(long)tz;
-  return tz;
-}
-
 void timeZoneToHM(char *reply, double tz) {
   double f=fabs(frac(tz));
   sprintf(reply,"%+03d",(int)tz);
@@ -196,437 +164,6 @@ void timeZoneToHM(char *reply, double tz) {
     strcat(reply,":45");
   }
 }
-
-// integer numeric conversion with error checking
-boolean atoi2(char *a, int *i) {
-  char *conv_end;
-  long l=strtol(a,&conv_end,10);
-  
-  if ((l<-32767) || (l>32768) || (&a[0]==conv_end)) return false;
-  *i=l;
-  return true;
-}
-
-// -----------------------------------------------------------------------------------------------------------------------------
-// Coordinate conversion
-
-// takes the topocentric refracted coordinates and applies corrections to arrive at instrument equatorial coordinates 
-boolean EquToIEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1) {
-  if (Dec>90.0) Dec=90.0;
-  if (Dec<-90.0) Dec=-90.0;
-
-  // breaks-down near the pole (limited to >1' from pole)
-  if (abs(Dec)<89.98333333) {
-    double h =HA/Rad;
-    double d =Dec/Rad;
-    double dSin=sin(d);
-    double dCos=cos(d);
-    double p=1.0; if (pierSide==PierSideWest) p=-1.0;
-
-    // ------------------------------------------------------------
-    // misalignment due to tube/optics not being perp. to Dec axis
-    // negative numbers are further (S) from the NCP, swing to the
-    // equator and the effect on declination is 0. At the SCP it
-    // becomes a (N) offset.  Unchanged with meridian flips.
-    // expressed as a correction to the Polar axis misalignment
-    double DOh = doCor*(1.0/dCos)*p;
-
-    // ------------------------------------------------------------
-    // misalignment due to Dec axis being perp. to RA axis
-    double PDh =-pdCor*(dSin/dCos)*p;
-
-    // polar misalignment
-    double h1=-azmCor*cos(h)*(dSin/dCos) + altCor*sin(h)*(dSin/dCos);
-    double d1=+azmCor*sin(h)             + altCor*cos(h);
-    *HA1 =HA +(h1+PDh+DOh);
-    *Dec1=Dec+ d1;
-  } else {
-    // just ignore the the correction if right on the pole
-    *HA1 =HA;
-    *Dec1=Dec;
-  }
-
-  while (*HA1>180.0) *HA1-=360.0;
-  while (*HA1<-180.0) *HA1+=360.0;
-  
-#ifndef MOUNT_TYPE_ALTAZM
-  // switch to under the pole coordinates
-  if ((Lat>=0) && ((abs(*HA1)>(double)UnderPoleLimit*15.0))) {
-    *HA1 =*HA1-180.0; while (*HA1<-180.0) *HA1=*HA1+360.0;
-    *Dec1=(90.0-*Dec1)+90.0;
-  }
-  if ((Lat<0) && ((abs(*HA1)>(double)UnderPoleLimit*15.0) )) {
-    *HA1 =*HA1-180.0; while (*HA1<-180.0) *HA1=*HA1+360.0;
-    *Dec1=(-90.0-*Dec1)-90.0;
-  }
-#endif
-
-  // finally, apply the index offsets
-  *HA1-=IH; *Dec1-=ID;
-
-  return true;
-}
-
-// takes the instrument equatorial coordinates and applies corrections to arrive at topocentric refracted coordinates
-boolean IEquToEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1) { 
-  // remove the index offsets
-  HA+=IH; Dec+=ID;
-
-#ifndef MOUNT_TYPE_ALTAZM
-  // switch from under the pole coordinates
-  if (Dec>90.0) { Dec=(90.0-Dec)+90; HA=HA-180.0; }
-  if (Dec<-90.0) { Dec=(-90.0-Dec)-90.0; HA=HA-180.0; }
-#endif
-  while (HA>180.0) HA-=360.0;
-  while (HA<-180.0) HA+=360.0;
-
-  // breaks-down near the pole (limited to >1' from pole)
-  if (abs(Dec)<89.98333333) {
-    double h =HA/Rad;
-    double d =Dec/Rad;
-    double dSin=sin(d);
-    double dCos=cos(d);
-    double p=1.0; if (pierSide==PierSideWest) p=-1.0;
-
-    // ------------------------------------------------------------
-    // misalignment due to tube/optics not being perp. to Dec axis
-    // negative numbers are further (S) from the NCP, swing to the
-    // equator and the effect on declination is 0. At the SCP it
-    // becomes a (N) offset.  Unchanged with meridian flips.
-    // expressed as a correction to the Polar axis misalignment
-    double DOh = doCor*(1.0/dCos)*p;
-
-    // as the above offset becomes zero near the equator, the affect
-    // works on HA instead.  meridian flips effect this in HA
-    double PDh =-pdCor*(dSin/dCos)*p;
-
-    // ------------------------------------------------------------
-    // polar misalignment
-    double h1=-azmCor*cos(h)*(dSin/dCos) + altCor*sin(h)*(dSin/dCos);
-    double d1=+azmCor*sin(h)             + altCor*cos(h);
-    *HA1 =HA -(h1+PDh+DOh);
-    *Dec1=Dec- d1;
-  } else {
-    // just ignore the the correction if right on the pole
-    *HA1=HA;
-    *Dec1=Dec;
-  }
-
-  while (*HA1>180.0) *HA1-=360.0;
-  while (*HA1<-180.0) *HA1+=360.0;
-  if (*Dec1>90.0) *Dec1=90.0;
-  if (*Dec1<-90.0) *Dec1=-90.0;
-  return true;
-}
-
-// convert equatorial coordinates to horizon
-// this takes approx. 1.4mS on a 16MHz Mega2560
-void EquToHor(double HA, double Dec, double *Alt, double *Azm) {
-  while (HA<0.0)    HA=HA+360.0;
-  while (HA>=360.0) HA=HA-360.0;
-  HA =HA/Rad;
-  Dec=Dec/Rad;
-  double SinAlt = (sin(Dec) * sinLat) + (cos(Dec) * cosLat * cos(HA));  
-  *Alt   = asin(SinAlt);
-  double t1=sin(HA);
-  double t2=cos(HA)*sinLat-tan(Dec)*cosLat;
-  *Azm=atan2(t1,t2)*Rad;
-  *Azm=*Azm+180.0;
-  *Alt = *Alt*Rad;
-}
-      
-// convert horizon coordinates to equatorial
-// this takes approx. 1.4mS
-void HorToEqu(double Alt, double Azm, double *HA, double *Dec) { 
-  while (Azm<0)      Azm=Azm+360.0;
-  while (Azm>=360.0) Azm=Azm-360.0;
-  Alt  = Alt/Rad;
-  Azm  = Azm/Rad;
-  double SinDec = (sin(Alt) * sinLat) + (cos(Alt) * cosLat * cos(Azm));  
-  *Dec = asin(SinDec); 
-  double t1=sin(Azm);
-  double t2=cos(Azm)*sinLat-tan(Alt)*cosLat;
-  *HA=atan2(t1,t2)*Rad;
-  *HA=*HA+180.0;
-  *Dec = *Dec*Rad;
-}
-
-double cot(double n) {
-  return 1.0/tan(n);
-}
-
-// ----------------------------------------------------------------------------------------------------------------------------
-// Acceleration rate calculation
-
-void SetAccelerationRates(double maxRate) {
-  // set the new acceleration rate
-  StepsForRateChangeAxis1= ((double)DegreesForAcceleration/sqrt((double)StepsPerDegreeAxis1))*0.3333333*StepsPerDegreeAxis1*maxRate;
-  StepsForRateChangeAxis2= ((double)DegreesForAcceleration/sqrt((double)StepsPerDegreeAxis2))*0.3333333*StepsPerDegreeAxis2*maxRate;
-}
-
-// -----------------------------------------------------------------------------------------------------------------------------
-// Refraction rate tracking
-
-int az_step = 0;
-double az_Axis1=0,az_Axis2=0;
-double az_Dec=0,az_HA=0;
-double az_Dec1=0,az_HA1=0,az_Dec2=-91,az_HA2=0;
-double az_Alt,az_Azm,_az_Alt;
-double az_deltaAxis1=15.0,az_deltaAxis2=0.0;
-
-// az_deltaH/D are in arc-seconds/second
-// trackingTimerRateAxis1/2 are x the sidereal rate
-void SetDeltaTrackingRate() {
-  trackingTimerRateAxis1 = az_deltaAxis1/15.0;
-  trackingTimerRateAxis2 = az_deltaAxis2/15.0;
-  fstepAxis1.fixed=doubleToFixed( (((double)StepsPerDegreeAxis1/240.0)*trackingTimerRateAxis1)/100.0 );
-  fstepAxis2.fixed=doubleToFixed( (((double)StepsPerDegreeAxis2/240.0)*trackingTimerRateAxis2)/100.0 );
-}
-
-void SetTrackingRate(double r) {
-  az_deltaAxis1=r*15.0;
-  az_deltaAxis2=0.0;
-}
-
-// returns the amount of refraction (in arcminutes) at given altitude (degrees), pressure (millibars), and temperature (celsius)
-double Refrac(double Alt, double Pressure=1010.0, double Temperature=15.0) {
-  double TPC=(Pressure/1010.0) * (283.0/(273.0+Temperature));
-  double r=( ( 1.02*cot( (Alt+(10.3/(Alt+5.11)))/Rad ) ) ) * TPC;  if (r<0.0) r=0.0;
-  return r;
-}
-
-// Alternate tracking rate calculation method
-double ZenithTrackingRate() {
-  double Alt1=currentAlt+0.5; if (Alt1<0.0) Alt1=0.0;
-  double Alt2=currentAlt-0.5; if (Alt2<0.0) Alt2=0.0;
-  if (currentAlt>89.8) return 15.0;
-  if (currentAlt>89.5) return 14.998;
-
-  double Alt1_ = Alt1 - ( Refrac(Alt1) / 60.0 );
-  double Alt2_ = Alt2 - ( Refrac(Alt2) / 60.0 );
-  
-  return 15.0 * ((double)(( Alt1 - Alt2 ) / ( Alt1_ - Alt2_ )));
-}
-
-// low overhead altitude calculation, 16 calls to complete
-byte ac_step = 0;
-double ac_HA=0,ac_De=0,ac_Dec=0;
-double ac_sindec,ac_cosdec,ac_cosha;
-double ac_sinalt;
-
-double getApproxDec() {
-  return ac_De;
-}
-
-boolean do_fastalt_calc() {
-  boolean done=false;
-  ac_step++;
-  // load HA/Dec
-  if (ac_step==1) {
-    getApproxEqu(&ac_HA,&ac_De,true);
-    ac_Dec=ac_De;
-  } else
-  // convert units
-  if (ac_step==2) {
-    ac_HA =ac_HA/Rad;
-    ac_Dec=ac_Dec/Rad;
-  } else
-  // prep Dec
-  if (ac_step==3) {
-    ac_sindec=sin(ac_Dec);
-  } else
-  // prep Dec
-  if (ac_step==4) {
-    ac_cosdec=cos(ac_Dec);
-  } else
-  // prep HA
-  if (ac_step==5) {
-    ac_cosha=cos(ac_HA);
-  } else
-  // calc Alt, phase 1
-  if (ac_step==6) {
-    ac_sinalt = (ac_sindec * sinLat) + (ac_cosdec * cosLat * ac_cosha); 
-  } else
-  // calc Alt, phase 2
-  if (ac_step==7) {
-    currentAlt=asin(ac_sinalt)*Rad;
-  } else
-  // finish
-  if (ac_step==8) {
-    ac_step=0;
-    done=true;
-  }
-  return done;
-}
-
-// low overhead refraction rate calculation, 200 calls to complete
-
-#define RefractionRateRange 10  // distance in arc-min (20) ahead of and behind the current Equ position, used for rate calculation
-
-boolean do_refractionRate_calc() {
-  boolean done=false;
-
-  // turn off if not tracking at sidereal rate  
-  if (trackingState!=TrackingSidereal) { az_deltaAxis1=15.0; az_deltaAxis2=0.0; return true; }
-  
-  az_step++;
-  // load HA/Dec
-  if (az_step==1) {
-    if (onTrack)
-      getEqu(&az_Axis1,&az_Axis2,true);
-    else
-      getApproxEqu(&az_Axis1,&az_Axis2,true);
-  } else
-
-  // convert units,  get ahead of and behind current position
-  if ((az_step==5) || (az_step==105)) {
-    az_Dec=az_Axis2;
-    az_HA =az_Axis1;
-    if (az_step==5)   az_HA =az_HA-(RefractionRateRange/60.0);
-    if (az_step==105) az_HA =az_HA+(RefractionRateRange/60.0);
-  } else
-  
-  // get the Horizon coords
-  if ((az_step==10) || (az_step==110)) {
-    if (onTrack) EquToIEqu(latitude,az_HA,az_Dec,&az_HA,&az_Dec);
-  }
-
-  // get the Horizon coords
-  if ((az_step==15) || (az_step==115)) {
-    EquToHor(az_HA,az_Dec,&az_Alt,&az_Azm);
-  } else
-
-  // apply refraction
-  if ((az_step==20) || (az_step==120)) {
-    az_Alt+=Refrac(az_Alt)/60.0;
-  } else
-
-  // convert back to the Equtorial coords
-  if ((az_step==25) || (az_step==125)) {
-    HorToEqu(az_Alt,az_Azm,&az_HA1,&az_Dec1);
-    if (az_HA1>180.0) az_HA1-=360.0; // HA range +/-180
-  } else
-
-  // calculate refraction rate deltas'
-  if ((az_step==30) || (az_step==130)) {
-    // store first calc
-    if (az_step==30) { az_HA2=az_HA1; az_Dec2=az_Dec1; }
-    // we have both -0.5hr and +0.5hr values 
-    if (az_step==130) {
-      // set rates
-      // handle coordinate wrap
-      if ((az_HA1<-90.0) && (az_HA2>90.0)) az_HA1+=360.0;
-      if ((az_HA2<-90.0) && (az_HA1>90.0)) az_HA2+=360.0;
-
-      // set rates
-      az_deltaAxis1=(az_HA1-az_HA2)  *(15.0/(RefractionRateRange/60.0))/2.0;
-      az_deltaAxis2=(az_Dec1-az_Dec2)*(15.0/(RefractionRateRange/60.0))/2.0;
-      
-      // override for special case of near a celestial pole
-      if (90.0-fabs(az_Dec)<(1.0/3600.0)) { az_deltaAxis1=15.0; az_deltaAxis2=0.0; }
-      // override for special case of near the zenith
-      if (currentAlt>(90.0-7.5)) {
-        az_deltaAxis1=ZenithTrackingRate();
-        az_deltaAxis2=0.0;
-      }
-    }
-  } else
-
-  // finish once every 200 calls
-  if (az_step==200) {
-    az_step=0;
-    done=true;
-  }
-  return done;
-}
-
-// -----------------------------------------------------------------------------------------------------------------------------
-// AltAz tracking
-
-#ifdef MOUNT_TYPE_ALTAZM
-
-#define AltAzTrackingRange 10  // distance in arc-min (20) ahead of and behind the current Equ position, used for rate calculation
-double az_Alt1,az_Alt2,az_Azm1,az_Azm2;
-
-boolean do_altAzmRate_calc() {
-  boolean done=false;
-
-  // turn off if not tracking at sidereal rate
-  if (((trackingState!=TrackingSidereal) && (trackingState!=TrackingMoveTo))) { az_deltaAxis1=0.0; az_deltaAxis2=0.0; return true; }
-
-  az_step++;
-  // convert units, get ahead of and behind current position
-  if (az_step==1) {
-    if (trackingState==TrackingMoveTo) {
-      cli();
-      az_Axis1=targetAxis1.part.m+IHS;
-      az_Axis2=targetAxis2.part.m+IDS;
-      sei();
-    } else {
-      cli();
-      az_Axis1=posAxis1+IHS;
-      az_Axis2=posAxis2+IDS;
-      sei();
-    }
-    // get the Azm
-    az_Azm=(double)az_Axis1/(double)StepsPerDegreeAxis1;
-    // get the Alt
-    az_Alt=(double)az_Axis2/(double)StepsPerDegreeAxis2; 
-  } else
-
-  // convert to Equatorial coords
-  if ((az_step==5)) {
-    HorToEqu(az_Alt,az_Azm,&az_HA1,&az_Dec1);
-  } else
-
-  // look ahead of and behind the current position
-  if ((az_step==10) || (az_step==110)) {
-    if (az_step==10 ) az_HA =(az_HA1-(AltAzTrackingRange/60.0));
-    if (az_step==110) az_HA =(az_HA1+(AltAzTrackingRange/60.0));
-    az_Dec=az_Dec1;
-  } else
-
-  // each back to the Horizon coords
-  if ((az_step==15) || (az_step==115)) {
-    EquToHor(az_HA,az_Dec,&az_Alt,&az_Azm);
-    if (az_Azm>180.0)  az_Azm-=360.0;
-    if (az_Azm<-180.0) az_Azm+=360.0;
-
-    if (az_step==15)  { 
-      az_Alt2=az_Alt;
-      az_Azm2=az_Azm;
-    }
-    if (az_step==115) { 
-      az_Alt1=az_Alt;
-      az_Azm1=az_Azm;
-    }
-  } else
-  
-  // calculate tracking rate deltas'
-  if ((az_step==20) || (az_step==120)) {
-    // we have both -0.5hr and +0.5hr values 
-    if (az_step==120) {
-      // handle coordinate wrap
-      if ((az_Azm1<-90.0) && (az_Azm2>90.0)) az_Azm1+=360.0;
-      if ((az_Azm2<-90.0) && (az_Azm1>90.0)) az_Azm2+=360.0;
-      
-      // set rates
-      az_deltaAxis1=(az_Azm1-az_Azm2)*(15.0/(AltAzTrackingRange/60.0))/2.0;
-      az_deltaAxis2=(az_Alt1-az_Alt2)*(15.0/(AltAzTrackingRange/60.0))/2.0; 
-      
-      // override for special case of near a celestial pole
-      if (90.0-fabs(az_Dec)<=0.5) { az_deltaAxis1=0.0; az_deltaAxis2=0.0; }
-    }
-  } else
-
-  // finish once every 200 calls
-  if (az_step==200) {
-    az_step=0;
-    done=true;
-  }
-  return done;
-}
-#endif
 
 // -----------------------------------------------------------------------------------------------------------------------------
 // Date Time conversion
@@ -713,6 +250,352 @@ double LST() {
   return (tempLst/8640000.0)*24.0;
 }
 
+
+double decodeTimeZone(double tz) {
+  // -100 codes for :30
+  if (tz<-24.0) {
+    tz=tz+100.0;
+    if (tz<0) tz=tz-0.5; else tz=tz+0.5;
+  }
+  // +100 codes for :45
+  if (tz>24.0) {
+    tz=tz-100.0;
+    if (tz<0) tz=tz-0.75; else tz=tz+0.75;
+  }
+  return tz;
+}
+
+double encodeTimeZone(double tz) {
+  double f=fabs(frac(tz));
+  // -100 codes for :30
+  if (fabs(f-0.5)<0.00000001) {
+    tz=(long)tz-100.0;
+  }
+  // +100 codes for :45
+  if (fabs(f-0.75)<0.00000001) {
+    tz=(long)tz+100.0;
+  }
+  tz=(long)tz;
+  return tz;
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------
+// Coordinate conversion
+
+// convert equatorial coordinates to horizon
+// this takes approx. 1.4mS on a 16MHz Mega2560
+void EquToHor(double HA, double Dec, double *Alt, double *Azm) {
+  while (HA<0.0)    HA=HA+360.0;
+  while (HA>=360.0) HA=HA-360.0;
+  HA =HA/Rad;
+  Dec=Dec/Rad;
+  double SinAlt = (sin(Dec) * sinLat) + (cos(Dec) * cosLat * cos(HA));  
+  *Alt   = asin(SinAlt);
+  double t1=sin(HA);
+  double t2=cos(HA)*sinLat-tan(Dec)*cosLat;
+  *Azm=atan2(t1,t2)*Rad;
+  *Azm=*Azm+180.0;
+  *Alt = *Alt*Rad;
+}
+      
+// convert horizon coordinates to equatorial
+// this takes approx. 1.4mS
+void HorToEqu(double Alt, double Azm, double *HA, double *Dec) { 
+  while (Azm<0)      Azm=Azm+360.0;
+  while (Azm>=360.0) Azm=Azm-360.0;
+  Alt  = Alt/Rad;
+  Azm  = Azm/Rad;
+  double SinDec = (sin(Alt) * sinLat) + (cos(Alt) * cosLat * cos(Azm));  
+  *Dec = asin(SinDec); 
+  double t1=sin(Azm);
+  double t2=cos(Azm)*sinLat-tan(Alt)*cosLat;
+  *HA=atan2(t1,t2)*Rad;
+  *HA=*HA+180.0;
+  *Dec = *Dec*Rad;
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------
+// Refraction rate tracking
+
+int az_step = 0;
+double az_Axis1=0,az_Axis2=0;
+double az_Dec=0,az_HA=0;
+double az_Dec1=0,az_HA1=0,az_Dec2=-91,az_HA2=0;
+double az_Alt,az_Azm,_az_Alt;
+double az_deltaAxis1=15.0,az_deltaAxis2=0.0;
+double az_deltaRateScale=1.0;
+
+// az_deltaH/D are in arc-seconds/second
+// trackingTimerRateAxis1/2 are x the sidereal rate
+void SetDeltaTrackingRate() {
+  trackingTimerRateAxis1 = az_deltaAxis1/15.0;
+  trackingTimerRateAxis2 = az_deltaAxis2/15.0;
+  fstepAxis1.fixed=doubleToFixed( (((double)StepsPerDegreeAxis1/240.0)*trackingTimerRateAxis1)/100.0 );
+  fstepAxis2.fixed=doubleToFixed( (((double)StepsPerDegreeAxis2/240.0)*trackingTimerRateAxis2)/100.0 );
+}
+
+void SetTrackingRate(double r) {
+  az_deltaRateScale=r;
+#ifndef MOUNT_TYPE_ALTAZM
+  az_deltaAxis1=r*15.0;
+  az_deltaAxis2=0.0;
+#endif
+}
+
+double GetTrackingRate() {
+  return az_deltaRateScale;
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------
+// Low overhead altitude calculation, 16 calls to complete
+
+byte ac_step = 0;
+double ac_HA=0,ac_De=0,ac_Dec=0;
+double ac_sindec,ac_cosdec,ac_cosha;
+double ac_sinalt;
+
+double getApproxDec() {
+  return ac_De;
+}
+
+boolean do_fastalt_calc() {
+  boolean done=false;
+  ac_step++;
+  // load HA/Dec
+  if (ac_step==1) {
+    getApproxEqu(&ac_HA,&ac_De,true);
+    ac_Dec=ac_De;
+  } else
+  // convert units
+  if (ac_step==2) {
+    ac_HA =ac_HA/Rad;
+    ac_Dec=ac_Dec/Rad;
+  } else
+  // prep Dec
+  if (ac_step==3) {
+    ac_sindec=sin(ac_Dec);
+  } else
+  // prep Dec
+  if (ac_step==4) {
+    ac_cosdec=cos(ac_Dec);
+  } else
+  // prep HA
+  if (ac_step==5) {
+    ac_cosha=cos(ac_HA);
+  } else
+  // calc Alt, phase 1
+  if (ac_step==6) {
+    ac_sinalt = (ac_sindec * sinLat) + (ac_cosdec * cosLat * ac_cosha); 
+  } else
+  // calc Alt, phase 2
+  if (ac_step==7) {
+    currentAlt=asin(ac_sinalt)*Rad;
+  } else
+  // finish
+  if (ac_step==8) {
+    ac_step=0;
+    done=true;
+  }
+  return done;
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------
+// Refraction adjusted tracking
+
+// returns the amount of refraction (in arcminutes) at given altitude (degrees), pressure (millibars), and temperature (celsius)
+double Refrac(double Alt, double Pressure=1010.0, double Temperature=15.0) {
+  double TPC=(Pressure/1010.0) * (283.0/(273.0+Temperature));
+  double r=( ( 1.02*cot( (Alt+(10.3/(Alt+5.11)))/Rad ) ) ) * TPC;  if (r<0.0) r=0.0;
+  return r;
+}
+
+// Alternate tracking rate calculation method
+double ZenithTrackingRate() {
+  double Alt1=currentAlt+0.5; if (Alt1<0.0) Alt1=0.0;
+  double Alt2=currentAlt-0.5; if (Alt2<0.0) Alt2=0.0;
+  if (currentAlt>89.8) return 15.0;
+  if (currentAlt>89.5) return 14.998;
+
+  double Alt1_ = Alt1 - ( Refrac(Alt1) / 60.0 );
+  double Alt2_ = Alt2 - ( Refrac(Alt2) / 60.0 );
+  
+  return 15.0 * ((double)(( Alt1 - Alt2 ) / ( Alt1_ - Alt2_ )));
+}
+
+// distance in arc-min ahead of and behind the current Equ position, used for rate calculation
+#if defined(__AVR_ATmega2560__)
+#define RefractionRateRange 30
+#else
+#define RefractionRateRange 10
+#endif
+
+boolean do_refractionRate_calc() {
+  boolean done=false;
+
+  // turn off if not tracking at sidereal rate  
+  if (trackingState!=TrackingSidereal) { az_deltaAxis1=15.0; az_deltaAxis2=0.0; return true; }
+  
+  az_step++;
+  // load HA/Dec
+  if (az_step==1) {
+    if (onTrack)
+      getEqu(&az_Axis1,&az_Axis2,true);
+    else
+      getApproxEqu(&az_Axis1,&az_Axis2,true);
+  } else
+
+  // convert units,  get ahead of and behind current position
+  if ((az_step==5) || (az_step==105)) {
+    az_Dec=az_Axis2;
+    az_HA =az_Axis1;
+    if (az_step==5)   az_HA =az_HA-(RefractionRateRange/60.0);
+    if (az_step==105) az_HA =az_HA+(RefractionRateRange/60.0);
+  } else
+  
+  // get the Horizon coords
+  if ((az_step==10) || (az_step==110)) {
+    if (onTrack) GeoAlign.EquToInstr(latitude,az_HA,az_Dec,&az_HA,&az_Dec);
+  }
+
+  // get the Horizon coords
+  if ((az_step==15) || (az_step==115)) {
+    EquToHor(az_HA,az_Dec,&az_Alt,&az_Azm);
+  } else
+
+  // apply refraction
+  if ((az_step==20) || (az_step==120)) {
+    az_Alt+=Refrac(az_Alt)/60.0;
+  } else
+
+  // convert back to the Equtorial coords
+  if ((az_step==25) || (az_step==125)) {
+    HorToEqu(az_Alt,az_Azm,&az_HA1,&az_Dec1);
+    if (az_HA1>180.0) az_HA1-=360.0; // HA range +/-180
+  } else
+
+  // calculate refraction rate deltas'
+  if ((az_step==30) || (az_step==130)) {
+    // store first calc
+    if (az_step==30) { az_HA2=az_HA1; az_Dec2=az_Dec1; }
+    // we have both -0.5hr and +0.5hr values 
+    if (az_step==130) {
+      // set rates
+      // handle coordinate wrap
+      if ((az_HA1<-90.0) && (az_HA2>90.0)) az_HA1+=360.0;
+      if ((az_HA2<-90.0) && (az_HA1>90.0)) az_HA2+=360.0;
+
+      // set rates
+      double dax1=(az_HA1-az_HA2)  *(15.0/(RefractionRateRange/60.0))/2.0;
+      az_deltaAxis1=(az_deltaAxis1*9.0+dax1)/10.0;
+      double dax2=(az_Dec1-az_Dec2)*(15.0/(RefractionRateRange/60.0))/2.0;
+      az_deltaAxis2=(az_deltaAxis2*9.0+dax2)/10.0;
+      
+      // override for special case of near a celestial pole
+      if (90.0-fabs(az_Dec)<(1.0/3600.0)) { az_deltaAxis1=15.0; az_deltaAxis2=0.0; }
+      // override for special case of near the zenith
+      if (currentAlt>(90.0-7.5)) {
+        az_deltaAxis1=ZenithTrackingRate();
+        az_deltaAxis2=0.0;
+      }
+    }
+  } else
+
+  // finish once every 200 calls
+  if (az_step==200) {
+    az_step=0;
+    done=true;
+  }
+  return done;
+}
+
+// -----------------------------------------------------------------------------------------------------------------------------
+// AltAz tracking
+
+#ifdef MOUNT_TYPE_ALTAZM
+
+#define AltAzTrackingRange 10  // distance in arc-min (20) ahead of and behind the current Equ position, used for rate calculation
+double az_Alt1,az_Alt2,az_Azm1,az_Azm2;
+
+boolean do_altAzmRate_calc() {
+  boolean done=false;
+
+  // turn off if not tracking at sidereal rate
+  if (((trackingState!=TrackingSidereal) && (trackingState!=TrackingMoveTo))) { az_deltaAxis1=0.0; az_deltaAxis2=0.0; return true; }
+
+  az_step++;
+  // convert units, get ahead of and behind current position
+  if (az_step==1) {
+    if (trackingState==TrackingMoveTo) {
+      cli();
+      az_Axis1=targetAxis1.part.m+indexAxis1Steps;
+      az_Axis2=targetAxis2.part.m+indexAxis2Steps;
+      sei();
+    } else {
+      cli();
+      az_Axis1=posAxis1+indexAxis1Steps;
+      az_Axis2=posAxis2+indexAxis2Steps;
+      sei();
+    }
+    // get the Azm
+    az_Azm=(double)az_Axis1/(double)StepsPerDegreeAxis1;
+    // get the Alt
+    az_Alt=(double)az_Axis2/(double)StepsPerDegreeAxis2; 
+  } else
+
+  // convert to Equatorial coords
+  if ((az_step==5)) {
+    HorToEqu(az_Alt,az_Azm,&az_HA1,&az_Dec1);
+  } else
+
+  // look ahead of and behind the current position
+  if ((az_step==10) || (az_step==110)) {
+    if (az_step==10 ) az_HA =(az_HA1-(AltAzTrackingRange/60.0));
+    if (az_step==110) az_HA =(az_HA1+(AltAzTrackingRange/60.0));
+    az_Dec=az_Dec1;
+  } else
+
+  // each back to the Horizon coords
+  if ((az_step==15) || (az_step==115)) {
+    EquToHor(az_HA,az_Dec,&az_Alt,&az_Azm);
+    if (az_Azm>180.0)  az_Azm-=360.0;
+    if (az_Azm<-180.0) az_Azm+=360.0;
+
+    if (az_step==15)  { 
+      az_Alt2=az_Alt;
+      az_Azm2=az_Azm;
+    }
+    if (az_step==115) { 
+      az_Alt1=az_Alt;
+      az_Azm1=az_Azm;
+    }
+  } else
+  
+  // calculate tracking rate deltas'
+  if ((az_step==20) || (az_step==120)) {
+    // we have both -0.5hr and +0.5hr values 
+    if (az_step==120) {
+      // handle coordinate wrap
+      if ((az_Azm1<-90.0) && (az_Azm2>90.0)) az_Azm1+=360.0;
+      if ((az_Azm2<-90.0) && (az_Azm1>90.0)) az_Azm2+=360.0;
+      
+      // set rates
+      az_deltaAxis1=((az_Azm1-az_Azm2)*(15.0/(AltAzTrackingRange/60.0))/2.0)*az_deltaRateScale;
+      az_deltaAxis2=((az_Alt1-az_Alt2)*(15.0/(AltAzTrackingRange/60.0))/2.0)*az_deltaRateScale; 
+      
+      // override for special case of near a celestial pole
+      if (90.0-fabs(az_Dec)<=0.5) { az_deltaAxis1=0.0; az_deltaAxis2=0.0; }
+    }
+  } else
+
+  // finish once every 200 calls
+  if (az_step==200) {
+    az_step=0;
+    done=true;
+  }
+  return done;
+}
+#endif
+
 // -----------------------------------------------------------------------------------------------------------------------------
 // Misc. numeric conversion
 
@@ -738,7 +621,6 @@ double dist(double a, double b) {
   if (a>b) return a-b; else return b-a;
 }
 
-
 double angDist(double h, double d, double h1, double d1) {
   return acos(sin(d/Rad)*sin(d1/Rad)+cos(d/Rad)*cos(d1/Rad)*cos((h1-h)/Rad))*Rad;
 }
@@ -757,162 +639,29 @@ double fixedToDouble(fixed_t a) {
   return ((double)l/8388608.0); // and 23 more, for 32 bits total
 }
 
-// -----------------------------------------------------------------------------------------------------------------------------
-// Align
-
-bool startAlign(int n) {
-  // Two star and three star align not supported with Fork mounts in alternate mode
-  #ifdef MOUNT_TYPE_FORK_ALT
-  if (n==1) {
-  #endif
-
-  // telescope should be set in the polar home (CWD) for a starting point
-  // this command sets IH, ID, azmCor=0; altCor=0;
-  setHome();
+// integer numeric conversion with error checking
+boolean atoi2(char *a, int *i) {
+  char *conv_end;
+  long l=strtol(a,&conv_end,10);
   
-  // enable the stepper drivers
-  digitalWrite(Axis1_EN,Axis1_Enabled); axis1Enabled=true;
-  digitalWrite(Axis2_EN,Axis2_Enabled); axis2Enabled=true;
-  delay(10);
-
-  // start tracking
-  trackingState=TrackingSidereal;
-
-  // start align...
-  alignNumStars=n;
-  alignThisStar=1;
-
-  return false;
-
-  #if defined(MOUNT_TYPE_FORK_ALT)
-  } else return true;
-  #endif
+  if ((l<-32767) || (l>32768) || (&a[0]==conv_end)) return false;
+  *i=l;
+  return true;
 }
 
-/*
-Alignment Logic:
-Near the celestial equator (Dec=0, HA=0)...
-the azmCor term is 0 in Dec
-the altCor term is 1 in Dec
-the doCor  term is 1 in HA
-the pdCor  term is 0 in HA
+double frac(double v) {
+  return v - ((long)v);
+}
 
-Near HA=6 and Dec=45...
-the azmCor term is 1 in Dec
-the altCor term is 0 in Dec
-the doCor  term is 0 in HA
-the pdCor  term is 1 in HA
-*/
+double cot(double n) {
+  return 1.0/tan(n);
+}
 
-// for align
-double avgDec = 0.0;
-double avgHA  = 0.0;
-bool nextAlign() {
-  // after last star turn meridian flips off when align is done
-  if ((alignNumStars==alignThisStar) && (meridianFlip==MeridianFlipAlign)) meridianFlip=MeridianFlipNever;
-
-// AltAz Taki method
-#ifdef MOUNT_TYPE_ALTAZM
-    if ((alignNumStars>1) && (alignThisStar<=alignNumStars)) {
-      cli();
-      // get the Azm/Alt
-      double F=(double)(posAxis1+IHS)/(double)StepsPerDegreeAxis1;
-      double H=(double)(posAxis2+IDS)/(double)StepsPerDegreeAxis2;
-      sei();
-      // B=RA, D=Dec, H=Elevation, F=Azimuth (all in degrees)
-      Align.addStar(alignThisStar,alignNumStars,haRange(LST()*15.0-newTargetRA),newTargetDec,H,F);
-      alignThisStar++;
-      return false;
-    }
-#endif
-
-  // First star:
-  // Near the celestial equator (Dec=0, HA=0), telescope West of the pier if multi-star align
-  if (alignThisStar==1) {
-    alignThisStar++;
-
-    // set the IH offset
-    // set the ID offset
-    if (!syncEqu(newTargetRA,newTargetDec)) { return true; }
-
-    avgDec=newTargetDec;
-    avgHA =haRange(LST()*15.0-newTargetRA);
-  } else 
-  // Second star:
-  // Near the celestial equator (Dec=0, HA=0), telescope East of the pier
-  if (alignThisStar==2) {
-    alignThisStar++;
-
-    double IH1=IH;
-    double ID1=-ID;
-
-    avgDec=(avgDec+newTargetDec)/2.0;
-    avgHA =(-avgHA+haRange(LST()*15.0-newTargetRA))/2.0; // last HA is negative because we were on the other side of the meridian
-    if (syncEqu(newTargetRA,newTargetDec)) {
-      double IH2=IH;
-      double ID2=ID;
-
-      IH  = (IH2+IH1)/2.0;                      // average offset in HA
-      IHS = (long)(IH*(double)StepsPerDegreeAxis1);
-      ID  = (ID2-ID1)/2.0;                      // new offset in Dec
-      IDS = (long)(ID*(double)StepsPerDegreeAxis2);
-
-      double IH3=IH;
-      double ID3=ID;
-    
-      altCor=-(ID2+ID1)/2.0;                    // Negative when pointed below the pole
-      altCor= altCor/cos(avgHA/Rad);            // correct for measurements being away from the Meridian
-
-      // allow the altCor to be applied
-      if (syncEqu(newTargetRA,newTargetDec)) {
-        IH2=IH;
-        ID2=ID;
-
-        doCor =-(IH2-IH1)/2.0;                  // the difference of these two values should be a decent approximation of the optical axis to Dec axis error (aka cone error)
-        doCor = doCor*cos(avgDec/Rad);          // correct for measurement being away from the Celestial Equator
-
-        IH  = IH3;
-        IHS = (long)(IH*(double)StepsPerDegreeAxis1);
-        ID  = ID3;
-        IDS = (long)(ID*(double)StepsPerDegreeAxis2);
-      } else return true;
-    } else return true;
-  } else 
-  // Third star:
-  // Near (Dec=45, HA=6), telescope East of the pier
-  if (alignThisStar==3) {
-    alignThisStar++;
-    
-    double IH1=IH;
-    double ID1=ID;
-    if (syncEqu(newTargetRA,newTargetDec)) {
-      double IH2=IH;
-      double ID2=ID;
-
-      azmCor = -(ID2-ID1);                                        // offset in declination is largely due to polar align Azm error
-      azmCor = azmCor/sin(haRange(LST()*15.0-newTargetRA)/Rad);   // correct for HA of measurement location
-
-      // allow the azmCor to be applied
-      if (syncEqu(newTargetRA,newTargetDec)) {
-        IH2=IH;
-        ID2=ID;
-        // only apply Dec axis flexture term on GEMs
-        #ifdef MOUNT_TYPE_GEM
-        pdCor = (IH2-IH1);                      // the Dec axis to RA axis perp. error should be the only major source of error left affecting the HA
-        pdCor = pdCor/tan(newTargetDec/Rad);    // correct for Dec of measurement location
-        #else
-        pdCor = 0.0;
-        #endif
-
-        IH=IH1;
-        IHS = (long)(IH*(double)StepsPerDegreeAxis1);
-        ID=ID1;
-        IDS = (long)(ID*(double)StepsPerDegreeAxis2);
-      } else return true;
-    } else return true;
-  } else return true;
-
-  return false;
+// Acceleration rate calculation
+void SetAccelerationRates(double maxRate) {
+  // set the new acceleration rate
+  StepsForRateChangeAxis1= ((double)DegreesForAcceleration/sqrt((double)StepsPerDegreeAxis1))*0.3333333*StepsPerDegreeAxis1*maxRate;
+  StepsForRateChangeAxis2= ((double)DegreesForAcceleration/sqrt((double)StepsPerDegreeAxis2))*0.3333333*StepsPerDegreeAxis2*maxRate;
 }
 
 

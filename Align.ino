@@ -265,3 +265,265 @@ void TAlign::bestZ3(int N, double nrange, double range, double incr) {
 }
 
 
+// -----------------------------------------------------------------------------------
+// GEOMETRIC ALIGN FOR EQUATORIAL MOUNTS
+//
+
+TGeoAlign::TGeoAlign()
+{
+  init();
+}
+
+TGeoAlign::~TGeoAlign()
+{
+}
+
+// Initialize
+void TGeoAlign::init() {
+  avgDec=0.0;
+  avgHA =0.0;
+  
+  altCor=0;  // for geometric coordinate correction/align, - is below the pole, + above (Z3)
+  azmCor=0;  // - is right of the pole, + is left
+  doCor =0;  // declination/optics orthogonal correction (Z2)
+  pdCor =0;  // declination/polar orthogonal correction  (Z1)
+
+  geo_ready=false;
+}
+
+// remember the alignment between sessions
+void TGeoAlign::readCoe() {
+  doCor=EEPROM_readFloat(EE_doCor);
+  pdCor=EEPROM_readFloat(EE_pdCor);
+  altCor=EEPROM_readFloat(EE_altCor);
+  azmCor=EEPROM_readFloat(EE_azmCor);
+}
+
+void TGeoAlign::writeCoe() {
+  EEPROM_writeFloat(EE_doCor,doCor);
+  EEPROM_writeFloat(EE_pdCor,pdCor);
+  EEPROM_writeFloat(EE_altCor,altCor);
+  EEPROM_writeFloat(EE_azmCor,azmCor);
+}
+
+// Status
+bool TGeoAlign::isReady() {
+  return geo_ready;
+}
+
+/*
+Alignment Logic:
+Near the celestial equator (Dec=0, HA=0)...
+the azmCor term is 0 in Dec
+the altCor term is 1 in Dec
+the doCor  term is 1 in HA
+the pdCor  term is 0 in HA
+
+Near HA=6 and Dec=45...
+the azmCor term is 1 in Dec
+the altCor term is 0 in Dec
+the doCor  term is 0 in HA
+the pdCor  term is 1 in HA
+*/
+
+// I=1 for 1st star, I=2 for 2nd star, both must be initialized before use
+// N=total number of stars for this align
+// RA, Dec (all in degrees)
+bool TGeoAlign::addStar(int I, int N, double RA, double Dec) {
+
+  AlignStars[I-1].HA =haRange(LST()*15.0-RA);
+  AlignStars[I-1].Dec=Dec;
+  AlignStars[I-1].HA1=((double)(long)targetAxis1.part.m)/(double)StepsPerDegreeAxis1;
+  AlignStars[I-1].Dec=((double)(long)targetAxis2.part.m)/(double)StepsPerDegreeAxis2;
+
+  // two or more stars and finished
+  if ((I>=2) && (I==N)) geo_ready=true;
+
+  // First star:
+  // Near the celestial equator (Dec=0, HA=0), telescope West of the pier if multi-star align
+  if (I==1) {
+    // set the indexAxis1 offset
+    // set the indexAxis2 offset
+    if (!syncEqu(RA,Dec)) { return false; }
+
+    avgDec=Dec;
+    avgHA =haRange(LST()*15.0-RA);
+  } else 
+  // Second star:
+  // Near the celestial equator (Dec=0, HA=0), telescope East of the pier
+  if (I==2) {
+    double IH1=indexAxis1;
+    double ID1=-indexAxis2;
+
+    avgDec=(avgDec+Dec)/2.0;
+    avgHA =(-avgHA+haRange(LST()*15.0-RA))/2.0; // last HA is negative because we were on the other side of the meridian
+    if (syncEqu(RA,Dec)) {
+      double IH2=indexAxis1;
+      double ID2=indexAxis2;
+
+      indexAxis1  = (IH2+IH1)/2.0;                      // average offset in HA
+      indexAxis1Steps = (long)(indexAxis1*(double)StepsPerDegreeAxis1);
+      indexAxis2  = (ID2-ID1)/2.0;                      // new offset in Dec
+      indexAxis2Steps = (long)(indexAxis2*(double)StepsPerDegreeAxis2);
+
+      double IH3=indexAxis1;
+      double ID3=indexAxis2;
+    
+      altCor=-(ID2+ID1)/2.0;                    // Negative when pointed below the pole
+      altCor= altCor/cos(avgHA/Rad);            // correct for measurements being away from the Meridian
+
+      // allow the altCor to be applied
+      if (syncEqu(RA,Dec)) {
+        IH2=indexAxis1;
+        ID2=indexAxis2;
+
+        doCor =-(IH2-IH1)/2.0;                  // the difference of these two values should be a decent approximation of the optical axis to Dec axis error (aka cone error)
+        doCor = doCor*cos(avgDec/Rad);          // correct for measurement being away from the Celestial Equator
+
+        indexAxis1      = IH3;
+        indexAxis1Steps = (long)(indexAxis1*(double)StepsPerDegreeAxis1);
+        indexAxis2      = ID3;
+        indexAxis2Steps = (long)(indexAxis2*(double)StepsPerDegreeAxis2);
+      } else return false;
+    } else return false;
+  } else 
+  // Third star:
+  // Near (Dec=45, HA=6), telescope East of the pier
+  if (I==3) {
+    double IH1=indexAxis1;
+    double ID1=indexAxis2;
+    if (syncEqu(RA,Dec)) {
+      double IH2=indexAxis1;
+      double ID2=indexAxis2;
+
+      azmCor = -(ID2-ID1);                                        // offset in declination is largely due to polar align Azm error
+      azmCor = azmCor/sin(haRange(LST()*15.0-newTargetRA)/Rad);   // correct for HA of measurement location
+
+      // allow the azmCor to be applied
+      if (syncEqu(RA,Dec)) {
+        IH2=indexAxis1;
+        ID2=indexAxis2;
+        // only apply Dec axis flexture term on GEMs
+        #ifdef MOUNT_TYPE_GEM
+        pdCor = (IH2-IH1);                      // the Dec axis to RA axis perp. error should be the only major source of error left affecting the HA
+        pdCor = pdCor/tan(newTargetDec/Rad);    // correct for Dec of measurement location
+        #else
+        pdCor = 0.0;
+        #endif
+
+        indexAxis1=IH1;
+        indexAxis1Steps = (long)(indexAxis1*(double)StepsPerDegreeAxis1);
+        indexAxis2=ID1;
+        indexAxis2Steps = (long)(indexAxis2*(double)StepsPerDegreeAxis2);
+      } else return false;
+    } else return false;
+  } else return false;
+  return true;
+}
+
+// takes the topocentric refracted coordinates and applies corrections to arrive at instrument equatorial coordinates 
+void TGeoAlign::EquToInstr(double Lat, double HA, double Dec, double *HA1, double *Dec1) {
+  if (Dec>90.0) Dec=90.0;
+  if (Dec<-90.0) Dec=-90.0;
+
+  // breaks-down near the pole (limited to >1' from pole)
+  if (abs(Dec)<89.98333333) {
+    double h =HA/Rad;
+    double d =Dec/Rad;
+    double dSin=sin(d);
+    double dCos=cos(d);
+    double p=1.0; if (pierSide==PierSideWest) p=-1.0;
+
+    // ------------------------------------------------------------
+    // misalignment due to tube/optics not being perp. to Dec axis
+    // negative numbers are further (S) from the NCP, swing to the
+    // equator and the effect on declination is 0. At the SCP it
+    // becomes a (N) offset.  Unchanged with meridian flips.
+    // expressed as a correction to the Polar axis misalignment
+    double DOh = doCor*(1.0/dCos)*p;
+
+    // ------------------------------------------------------------
+    // misalignment due to Dec axis being perp. to RA axis
+    double PDh =-pdCor*(dSin/dCos)*p;
+
+    // polar misalignment
+    double h1=-azmCor*cos(h)*(dSin/dCos) + altCor*sin(h)*(dSin/dCos);
+    double d1=+azmCor*sin(h)             + altCor*cos(h);
+    *HA1 =HA +(h1+PDh+DOh);
+    *Dec1=Dec+ d1;
+  } else {
+    // just ignore the the correction if right on the pole
+    *HA1 =HA;
+    *Dec1=Dec;
+  }
+
+  while (*HA1>180.0) *HA1-=360.0;
+  while (*HA1<-180.0) *HA1+=360.0;
+  
+#ifndef MOUNT_TYPE_ALTAZM
+  // switch to under the pole coordinates
+  if ((Lat>=0) && ((abs(*HA1)>(double)UnderPoleLimit*15.0))) {
+    *HA1 =*HA1-180.0; while (*HA1<-180.0) *HA1=*HA1+360.0;
+    *Dec1=(90.0-*Dec1)+90.0;
+  }
+  if ((Lat<0) && ((abs(*HA1)>(double)UnderPoleLimit*15.0) )) {
+    *HA1 =*HA1-180.0; while (*HA1<-180.0) *HA1=*HA1+360.0;
+    *Dec1=(-90.0-*Dec1)-90.0;
+  }
+#endif
+
+  // finally, apply the index offsets
+  *HA1-=indexAxis1; *Dec1-=indexAxis2;
+}
+
+// takes the instrument equatorial coordinates and applies corrections to arrive at topocentric refracted coordinates
+void TGeoAlign::InstrToEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1) { 
+  // remove the index offsets
+  HA+=indexAxis1; Dec+=indexAxis2;
+
+#ifndef MOUNT_TYPE_ALTAZM
+  // switch from under the pole coordinates
+  if (Dec>90.0) { Dec=(90.0-Dec)+90; HA=HA-180.0; }
+  if (Dec<-90.0) { Dec=(-90.0-Dec)-90.0; HA=HA-180.0; }
+#endif
+  while (HA>180.0) HA-=360.0;
+  while (HA<-180.0) HA+=360.0;
+
+  // breaks-down near the pole (limited to >1' from pole)
+  if (abs(Dec)<89.98333333) {
+    double h =HA/Rad;
+    double d =Dec/Rad;
+    double dSin=sin(d);
+    double dCos=cos(d);
+    double p=1.0; if (pierSide==PierSideWest) p=-1.0;
+
+    // ------------------------------------------------------------
+    // misalignment due to tube/optics not being perp. to Dec axis
+    // negative numbers are further (S) from the NCP, swing to the
+    // equator and the effect on declination is 0. At the SCP it
+    // becomes a (N) offset.  Unchanged with meridian flips.
+    // expressed as a correction to the Polar axis misalignment
+    double DOh = doCor*(1.0/dCos)*p;
+
+    // as the above offset becomes zero near the equator, the affect
+    // works on HA instead.  meridian flips effect this in HA
+    double PDh =-pdCor*(dSin/dCos)*p;
+
+    // ------------------------------------------------------------
+    // polar misalignment
+    double h1=-azmCor*cos(h)*(dSin/dCos) + altCor*sin(h)*(dSin/dCos);
+    double d1=+azmCor*sin(h)             + altCor*cos(h);
+    *HA1 =HA -(h1+PDh+DOh);
+    *Dec1=Dec- d1;
+  } else {
+    // just ignore the the correction if right on the pole
+    *HA1=HA;
+    *Dec1=Dec;
+  }
+
+  while (*HA1>180.0) *HA1-=360.0;
+  while (*HA1<-180.0) *HA1+=360.0;
+  if (*Dec1>90.0) *Dec1=90.0;
+  if (*Dec1<-90.0) *Dec1=-90.0;
+}
+

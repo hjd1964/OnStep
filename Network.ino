@@ -604,8 +604,8 @@ const char html_index3[] PROGMEM = "<font class=\"c\">%02d/%02d/%02d</font>";
 const char html_index4[] PROGMEM = "&nbsp;<font class=\"c\">%s</font>&nbsp;UT";
 const char html_index4a[] PROGMEM = "&nbsp;(<font class=\"c\">%s</font>&nbsp; Local Apparent Sidereal Time)<br /><br />";
 const char html_indexTrue[] PROGMEM = "Absolute Position: " Axis1 "=<font class=\"c\">%ld</font> steps, " Axis2 "=<font class=\"c\">%ld</font> steps<br />";
-const char html_indexIndex[] PROGMEM = "IHS=<font class=\"c\">%ld</font> steps, IDS=<font class=\"c\">%ld</font> steps<br />";
-const char html_indexCorIdx[] PROGMEM = "IH=<font class=\"c\">%ld</font>\", ID=<font class=\"c\">%ld</font>\"<br />";
+const char html_indexIndex[] PROGMEM = "indexAxis1Steps=<font class=\"c\">%ld</font> steps, indexAxis2Steps=<font class=\"c\">%ld</font> steps<br />";
+const char html_indexCorIdx[] PROGMEM = "indexAxis1=<font class=\"c\">%ld</font>\", indexAxis2=<font class=\"c\">%ld</font>\"<br />";
 const char html_indexCorPole[] PROGMEM = "altCor=<font class=\"c\">%ld</font>\", azmCor=<font class=\"c\">%ld</font>\"<br />";
 const char html_indexCorPolar[] PROGMEM = "Polar Alignment Correction: Alt=<font class=\"c\">%ld</font>\", Azm=<font class=\"c\">%ld</font>\"<br /><br />";
 const char html_indexCorOrtho[] PROGMEM = "doCor=<font class=\"c\">%ld</font>\", pdCor=<font class=\"c\">%ld</font>\"<br />";
@@ -702,10 +702,10 @@ if (html_page_step==++stp) {
     strcpy_P(temp1, html_indexTrue); sprintf(temp,temp1,a1,a2); 
   }
   if (html_page_step==++stp) {
-    strcpy_P(temp1, html_indexIndex); sprintf(temp,temp1,IHS,IDS); 
+    strcpy_P(temp1, html_indexIndex); sprintf(temp,temp1,indexAxis1Steps,indexAxis2Steps); 
   }
   if (html_page_step==++stp) {
-    strcpy_P(temp1, html_indexCorIdx); sprintf(temp,temp1,(long)(IH*3600.0),(long)(ID*3600.0)); 
+    strcpy_P(temp1, html_indexCorIdx); sprintf(temp,temp1,(long)(indexAxis1*3600.0),(long)(indexAxis2*3600.0)); 
   }
   if (html_page_step==++stp) {
     strcpy_P(temp1, html_indexCorPole); sprintf(temp,temp1,(long)(altCor*3600.0),(long)(azmCor*3600.0)); 
@@ -730,8 +730,8 @@ if (html_page_step==++stp) {
   if (html_page_step==++stp) {
     i=highPrecision; highPrecision=true; 
     cli();
-    long h=posAxis1+IHS;
-    long d=posAxis2+IDS;
+    long h=posAxis1+indexAxis1Steps;
+    long d=posAxis2+indexAxis2Steps;
     sei();
 #ifdef MOUNT_TYPE_ALTAZM
     double ha=(double)h/(double)StepsPerDegreeAxis1;
@@ -770,8 +770,8 @@ if (html_page_step==++stp) {
   if (html_page_step==++stp) {
     i=highPrecision; highPrecision=true;
     cli();
-    long h=(long)targetAxis1.part.m+IHS;
-    long d=(long)targetAxis2.part.m+IDS;
+    long h=(long)targetAxis1.part.m+indexAxis1Steps;
+    long d=(long)targetAxis2.part.m+indexAxis2Steps;
     sei();
 #ifdef MOUNT_TYPE_ALTAZM
     double ha=(double)h/(double)(StepsPerDegreeAxis1);

@@ -9,8 +9,8 @@ boolean goHome() {
 
   cli();
   #ifdef SYNC_ANYWHERE_ON
-  if (pierSide==PierSideWest) targetAxis1.part.m=-celestialPoleAxis1*(long)StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=celestialPoleAxis1*(long)StepsPerDegreeAxis1-IHS; targetAxis1.part.f=0;
-  targetAxis2.part.m=(long)(celestialPoleAxis2*(double)StepsPerDegreeAxis2)-IDS; targetAxis2.part.f=0;
+  if (pierSide==PierSideWest) targetAxis1.part.m=-celestialPoleAxis1*(long)StepsPerDegreeAxis1-indexAxis1Steps; else targetAxis1.part.m=celestialPoleAxis1*(long)StepsPerDegreeAxis1-indexAxis1Steps; targetAxis1.part.f=0;
+  targetAxis2.part.m=(long)(celestialPoleAxis2*(double)StepsPerDegreeAxis2)-indexAxis2Steps; targetAxis2.part.f=0;
   #else
   if (pierSide==PierSideWest) targetAxis1.part.m=-celestialPoleAxis1*(long)StepsPerDegreeAxis1; else targetAxis1.part.m=celestialPoleAxis1*(long)StepsPerDegreeAxis1; targetAxis1.part.f=0;
   targetAxis2.part.m=(long)(celestialPoleAxis2*(double)StepsPerDegreeAxis2); targetAxis2.part.f=0;
@@ -51,17 +51,14 @@ boolean setHome() {
   // reset pointing model
   alignNumStars       = 0;
   alignThisStar       = 0;
-  altCor              = 0;
-  azmCor              = 0;
-  doCor               = 0;
-  pdCor               = 0;
-  IH                  = 0;
-  IHS                 = 0;
-  ID                  = 0;
-  IDS                 = 0;
+  indexAxis1          = 0;
+  indexAxis1Steps     = 0;
+  indexAxis2          = 0;
+  indexAxis2Steps     = 0;
   #ifdef MOUNT_TYPE_ALTAZM
   Align.init();
   #endif
+  GeoAlign.init();
   
   // reset meridian flip control
   #ifdef MOUNT_TYPE_GEM

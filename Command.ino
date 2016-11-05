@@ -95,16 +95,61 @@ void processCommands() {
 //         0: If mount is busy
         if ((command[1]>='1') && (command[1]<='9')) {
           // set current time and date before calling this routine
-          commandError=startAlign(command[1]-'0');
-          if (commandError) alignNumStars=0;
+
+          // Two star and three star align not supported with Fork mounts in alternate mode
+#ifdef MOUNT_TYPE_FORK_ALT
+          if (n==1) {
+#endif
+        
+          // telescope should be set in the polar home (CWD) for a starting point
+          // this command sets indexAxis1, indexAxis2, azmCor=0; altCor=0;
+          setHome();
+          
+          // enable the stepper drivers
+          digitalWrite(Axis1_EN,Axis1_Enabled); axis1Enabled=true;
+          digitalWrite(Axis2_EN,Axis2_Enabled); axis2Enabled=true;
+          delay(10);
+        
+          // start tracking
+          trackingState=TrackingSidereal;
+        
+          // start align...
+          alignNumStars=command[1]-'0';
+          alignThisStar=1;
+       
+#if defined(MOUNT_TYPE_FORK_ALT)
+          } else commandError=true;
+#endif
+
+          if (commandError) { alignNumStars=0; alignThisStar=1; }
         } else
 //  :A+#  Manual Alignment, set target location
 //         Returns:
 //         1: If correction is accepted
 //         0: Failure, Manual align mode not set or distance too far 
-        if (command[1]=='+') { 
-          commandError=nextAlign();
-          if (commandError) alignNumStars=0;
+        if (command[1]=='+') {
+            // after last star turn meridian flips off when align is done
+            if ((alignNumStars==alignThisStar) && (meridianFlip==MeridianFlipAlign)) meridianFlip=MeridianFlipNever;
+          
+#ifdef MOUNT_TYPE_ALTAZM
+            // AltAz Taki method
+            if ((alignNumStars>1) && (alignThisStar<=alignNumStars)) {
+              cli();
+              // get the Azm/Alt
+              double F=(double)(posAxis1+indexAxis1Steps)/(double)StepsPerDegreeAxis1;
+              double H=(double)(posAxis2+indexAxis2Steps)/(double)StepsPerDegreeAxis2;
+              sei();
+              // B=RA, D=Dec, H=Elevation (instr), F=Azimuth (instr), all in degrees
+              Align.addStar(alignThisStar,alignNumStars,haRange(LST()*15.0-newTargetRA),newTargetDec,H,F);
+              alignThisStar++;
+            } else
+#endif
+            if (alignThisStar<=alignNumStars) {
+              // RA, Dec (in degrees)
+              if (GeoAlign.addStar(alignThisStar,alignNumStars,newTargetRA,newTargetDec)) alignThisStar++;
+            } else commandError=true;
+
+          if (commandError) { alignNumStars=0; alignThisStar=1; }
         } else commandError=true; 
       } else
       
@@ -298,7 +343,7 @@ void processCommands() {
       if (command[1]=='T')  {
         if (trackingState==TrackingSidereal) {
 #ifdef MOUNT_TYPE_ALTAZM
-          f=1.00273790935*60.0; 
+          f=GetTrackingRate()*1.00273790935*60.0; 
 #else
           f=(trackingTimerRateAxis1*1.00273790935)*60.0; 
 #endif
@@ -369,12 +414,12 @@ void processCommands() {
         if (parameter[2]==(char)0) {
           if (parameter[0]=='0') { // 0n: Align Model
             switch (parameter[1]) {
-              case '0': sprintf(reply,"%ld",(long)(IH*3600.0)); quietReply=true; break;       // IH
-              case '1': sprintf(reply,"%ld",(long)(ID*3600.0)); quietReply=true; break;       // ID
-              case '2': sprintf(reply,"%ld",(long)(altCor*3600.0)); quietReply=true; break;   // altCor
-              case '3': sprintf(reply,"%ld",(long)(azmCor*3600.0)); quietReply=true; break;   // azmCor
-              case '4': sprintf(reply,"%ld",(long)(doCor*3600.0)); quietReply=true; break;    // doCor
-              case '5': sprintf(reply,"%ld",(long)(pdCor*3600.0)); quietReply=true; break;    // pdCor
+              case '0': sprintf(reply,"%ld",(long)(indexAxis1*3600.0)); quietReply=true; break;                // indexAxis1
+              case '1': sprintf(reply,"%ld",(long)(indexAxis2*3600.0)); quietReply=true; break;                // indexAxis2
+              case '2': sprintf(reply,"%ld",(long)(GeoAlign.altCor*3600.0)); quietReply=true; break;   // altCor
+              case '3': sprintf(reply,"%ld",(long)(GeoAlign.azmCor*3600.0)); quietReply=true; break;   // azmCor
+              case '4': sprintf(reply,"%ld",(long)(GeoAlign.doCor*3600.0)); quietReply=true; break;    // doCor
+              case '5': sprintf(reply,"%ld",(long)(GeoAlign.pdCor*3600.0)); quietReply=true; break;    // pdCor
             }
           } else
           if (parameter[0]=='8') { // 8n: Date/Time
@@ -806,8 +851,8 @@ void processCommands() {
       if (command[1]=='P')  {
         double r,d;
         getEqu(&r,&d,false);
-        altCor=0.0;
-        azmCor=0.0;
+        GeoAlign.altCor=0.0;
+        GeoAlign.azmCor=0.0;
         i=goToEqu(r,d);
         reply[0]=i+'0'; reply[1]=0;
         quietReply=true;
@@ -1095,12 +1140,12 @@ void processCommands() {
       if (command[1]=='X')  { 
         if (parameter[0]=='0') { // 0n: Align Model
           switch (parameter[1]) {
-            case '0': IH=(double)strtol(&parameter[3],NULL,10)/3600.0; break;       // IH
-            case '1': ID=(double)strtol(&parameter[3],NULL,10)/3600.0; break;       // ID
-            case '2': altCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;   // altCor
-            case '3': azmCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;   // azmCor
-            case '4': doCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;    // doCor
-            case '5': pdCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;    // pdCor
+            case '0': indexAxis1=(double)strtol(&parameter[3],NULL,10)/3600.0; break;       // indexAxis1
+            case '1': indexAxis2=(double)strtol(&parameter[3],NULL,10)/3600.0; break;       // indexAxis2
+            case '2': GeoAlign.altCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;   // altCor
+            case '3': GeoAlign.azmCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;   // azmCor
+            case '4': GeoAlign.doCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;    // doCor
+            case '5': GeoAlign.pdCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;    // pdCor
           }
         } else
         if (parameter[0]=='9') { // 9n: Misc.

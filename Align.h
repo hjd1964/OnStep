@@ -3,6 +3,9 @@
 //
 // CONVERSION TO C++/Arduino BY Howard Dutton, 10/12/2016
 
+byte alignNumStars = 0;
+byte alignThisStar = 1;
+
 typedef struct {
   double HA;
   double Dec;
@@ -41,8 +44,46 @@ class TAlign
     void t_sub2(double F, double H);
 
     void bestZ3(int I, double nrange, double range, double incr);
-    void bestZ12(int I);
 };
 
 TAlign Align;
+
+// -----------------------------------------------------------------------------------
+// GEOMETRIC ALIGN FOR EQUATORIAL MOUNTS
+//
+
+typedef struct {
+  double HA;
+  double Dec;
+  double HA1;
+  double Dec1;
+} align_coord2_t;
+
+class TGeoAlign
+{
+  public:
+    double altCor;
+    double azmCor;
+    double doCor;
+    double pdCor;
+
+    TGeoAlign();
+    ~TGeoAlign();
+    void init();
+    void readCoe();
+    void writeCoe();
+    bool isReady();
+    bool addStar(int I, int N, double RA, double Dec);
+    void EquToInstr(double Lat, double HA, double Dec, double *HA1, double *Dec1);
+    void InstrToEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1);
+
+  private:
+    boolean geo_ready;
+    double avgDec;
+    double avgHA;
+
+    align_coord2_t AlignStars[4];
+};
+
+TGeoAlign GeoAlign;
 

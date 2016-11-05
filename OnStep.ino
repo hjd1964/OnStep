@@ -139,11 +139,7 @@ volatile long    timerRateBacklashAxis2 = 0;
 volatile boolean inbacklashAxis2 = false;
 boolean faultAxis2 = false;
 
-#ifdef MOUNT_TYPE_ALTAZM
-#define default_tracking_rate 0
-#else
 #define default_tracking_rate 1
-#endif
 volatile double  trackingTimerRateAxis1= default_tracking_rate;
 volatile double  trackingTimerRateAxis2= default_tracking_rate;
 volatile double  pecTimerRateAxis1     = 0.0;
@@ -461,7 +457,6 @@ bool   autoContinue = false;                       // automatically do a meridia
 #define PecPin        23
 #define AnalogPecPin  23    // Pin 23 (PEC Sense, analog or digital)
 
-
 // The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
 #define LEDnegPin     19    // Pin 19 (Drain)
 #define LEDneg2Pin    22    // Pin 22 (Drain)
@@ -738,9 +733,6 @@ byte meridianFlip = MeridianFlipNever;
 byte meridianFlip = MeridianFlipNever;
 #endif
 
-byte alignNumStars       = 0;
-byte alignThisStar       = 0;
-
 #define PierSideNone     0
 #define PierSideEast     1
 #define PierSideWest     2
@@ -823,15 +815,11 @@ unsigned long baudRate[10] = {115200,56700,38400,28800,19200,14400,9600,4800,240
 byte currentSite = 0; 
 char siteName[16];
 
-// align command
-double altCor            = 0;       // for geometric coordinate correction/align, - is below the pole, + above
-double azmCor            = 0;       // - is right of the pole, + is left
-double doCor             = 0;       // declination/optics orthogonal correction
-double pdCor             = 0;       // declination/polar orthogonal correction
-double IH                = 0;       // offset corrections/align
-long   IHS               = 0;
-double ID                = 0;
-long   IDS               = 0;
+// offset corrections simple align
+double indexAxis1       = 0;
+long   indexAxis1Steps  = 0;
+double indexAxis2       = 0;
+long   indexAxis2Steps  = 0;
 
 // tracking and PEC, fractional steps
 fixed_t fstepAxis1;
@@ -943,8 +931,8 @@ char ST4DE_last = 0;
 #define EE_pdCor       46
 #define EE_altCor      50
 #define EE_azmCor      54
-#define EE_IH          58
-#define EE_ID          62
+#define EE_indexAxis1  58
+#define EE_indexAxis2  62
 
 #define EE_pecStatus   70
 #define EE_pecRecorded 71
@@ -1019,8 +1007,13 @@ void setup() {
   targetAxis1.part.f = 0;
   targetAxis2.part.m = 90L*(long)StepsPerDegreeAxis2;
   targetAxis2.part.f = 0;
-
   fstepAxis1.fixed=doubleToFixed(StepsPerSecondAxis1/100.0);
+
+// initialize alignment
+  #ifdef MOUNT_TYPE_ALTAZM
+  Align.init();
+  #endif
+  GeoAlign.init();
 
 // initialize the stepper control pins Axis1 and Axis2
   pinMode(Axis1StepPin,OUTPUT);
@@ -1712,10 +1705,10 @@ void loop() {
     if (meridianFlip!=MeridianFlipNever) {
       if (pierSide==PierSideWest) { 
         cli(); 
-        if (posAxis1+IHS>(MinutesPastMeridianW*(long)StepsPerDegreeAxis1/4L)) {
+        if (posAxis1+indexAxis1Steps>(MinutesPastMeridianW*(long)StepsPerDegreeAxis1/4L)) {
           sei();
           // do an automatic meridian flip and continue if just tracking
-          if (autoContinue && (posAxis1+IHS>(-MinutesPastMeridianE*(long)StepsPerDegreeAxis1/4L)) && (trackingState!=TrackingMoveTo)) {
+          if (autoContinue && (posAxis1+indexAxis1Steps>(-MinutesPastMeridianE*(long)StepsPerDegreeAxis1/4L)) && (trackingState!=TrackingMoveTo)) {
             double newRA,newDec;
             getEqu(&newRA,&newDec,false); // returns 0 on success
             if (goToEqu(newRA,newDec)) {
@@ -1727,14 +1720,14 @@ void loop() {
           }
         } else sei();
       }
-      if (pierSide==PierSideEast) { cli(); if (posAxis1+IHS>(UnderPoleLimit*15L*(long)StepsPerDegreeAxis1)) { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  } sei(); }
+      if (pierSide==PierSideEast) { cli(); if (posAxis1+indexAxis1Steps>(UnderPoleLimit*15L*(long)StepsPerDegreeAxis1)) { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  } sei(); }
     } else {
 #ifndef MOUNT_TYPE_ALTAZM
       // when Fork mounted, ignore pierSide and just stop the mount if it passes the UnderPoleLimit
-      cli(); if (posAxis1+IHS>(UnderPoleLimit*15L*(long)StepsPerDegreeAxis1)) { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
+      cli(); if (posAxis1+indexAxis1Steps>(UnderPoleLimit*15L*(long)StepsPerDegreeAxis1)) { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
 #else
       // when Alt/Azm mounted, just stop the mount if it passes MaxAzm
-      cli(); if (posAxis1+IHS>(MaxAzm*(long)StepsPerDegreeAxis1)) { lastError=ERR_AZM; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
+      cli(); if (posAxis1+indexAxis1Steps>(MaxAzm*(long)StepsPerDegreeAxis1)) { lastError=ERR_AZM; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
 #endif
     }
     // check for exceeding MinDec or MaxDec
