@@ -1474,6 +1474,21 @@ void setup() {
   sei();
   clockTimer=millis(); 
   last_loop_micros=micros();
+
+  // autostart tracking
+#if defined(AUTOSTART_TRACKING_ON) && (defined(MOUNT_TYPE_GEM) || defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORKALT))
+  // telescope should be set in the polar home (CWD) for a starting point
+  // this command sets indexAxis1, indexAxis2, azmCor=0; altCor=0;
+  setHome();
+  
+  // enable the stepper drivers
+  digitalWrite(Axis1_EN,Axis1_Enabled); axis1Enabled=true;
+  digitalWrite(Axis2_EN,Axis2_Enabled); axis2Enabled=true;
+  delay(10);
+
+  // start tracking
+  trackingState=TrackingSidereal;
+#endif
 }
 
 void loop() {
