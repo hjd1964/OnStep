@@ -17,7 +17,8 @@ boolean syncEqu(double RA, double Dec) {
   } else {
     EquToHor(HA,Dec,&Axis2,&Axis1);
   }
-  if (Axis1>180.0) Axis1-=360.0;
+  while (Axis1>180.0) Axis1-=360.0;
+  while (Axis1<-180.0) Axis1+=360.0;
 #else
   GeoAlign.EquToInstr(latitude,HA,Dec,&Axis1,&Axis2);
 #endif
@@ -58,10 +59,6 @@ boolean syncEqu(double RA, double Dec) {
   //                 W   .   E
   // indexAxis1 and indexAxis2 values get subtracted to arrive at the correct location
   indexAxis1=Axis1-((double)(long)targetAxis1.part.m)/(double)StepsPerDegreeAxis1;
-#ifdef MOUNT_TYPE_ALTAZM
-  if (abs(indexAxis1-360.0)<abs(indexAxis1)) indexAxis1-=360.0;
-  if (abs(indexAxis1+360.0)<abs(indexAxis1)) indexAxis1+=360.0;
-#endif
   indexAxis1Steps=(long)(indexAxis1*(double)StepsPerDegreeAxis1);
   indexAxis2=Axis2-((double)(long)targetAxis2.part.m)/(double)StepsPerDegreeAxis2;
   indexAxis2Steps=(long)(indexAxis2*(double)StepsPerDegreeAxis2);
