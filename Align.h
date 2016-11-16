@@ -4,7 +4,7 @@
 // CONVERSION TO C++/Arduino BY Howard Dutton, 10/12/2016
 
 byte alignNumStars = 0;
-byte alignThisStar = 1;
+byte alignThisStar = 0;
 
 typedef struct {
   double HA;
