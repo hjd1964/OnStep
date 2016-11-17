@@ -146,10 +146,10 @@ void processCommands() {
 #endif
             if (alignThisStar<=alignNumStars) {
               // RA, Dec (in degrees)
-              if (GeoAlign.addStar(alignThisStar,alignNumStars,newTargetRA,newTargetDec)) alignThisStar++;
+              if (GeoAlign.addStar(alignThisStar,alignNumStars,newTargetRA,newTargetDec)) alignThisStar++; else commandError=true;
             } else commandError=true;
 
-          if (commandError) { alignNumStars=0; alignThisStar=1; }
+          if (commandError) { alignNumStars=0; alignThisStar=0; }
         } else commandError=true; 
       } else
       
