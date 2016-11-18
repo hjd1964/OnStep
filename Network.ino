@@ -366,10 +366,10 @@ void Ethernet_get() {
       latitude=get_temp_float+((double)i)/60.0;
       EEPROM_writeFloat(100+(currentSite)*25+0,latitude);
 #ifdef MOUNT_TYPE_ALTAZM
-      celestialPoleDec=fabs(latitude);
-      if (latitude<0) celestialPoleHA=180L; else celestialPoleHA=0L;
+      celestialPoleAxis2=AltAzmDecStartPos;
+      if (latitude<0) celestialPoleAxis1=180L; else celestialPoleAxis1=0L;
 #else
-      if (latitude<0) celestialPoleDec=-90.0; else celestialPoleDec=90.0;
+      if (latitude<0) celestialPoleAxis2=-90.0; else celestialPoleAxis2=90.0;
 #endif
       cosLat=cos(latitude/Rad);
       sinLat=sin(latitude/Rad);
@@ -434,9 +434,15 @@ void Ethernet_get() {
   }
   // Align
   if ((get_names[0]=='a') && (get_names[1]=='l')) {
-    if ((get_vals[0]=='1') && (get_vals[1]==0)) startAlign(get_vals[0]);
-    if ((get_vals[0]=='2') && (get_vals[1]==0)) startAlign(get_vals[0]);
-    if ((get_vals[0]=='3') && (get_vals[1]==0)) startAlign(get_vals[0]);
+    if ((get_vals[0]=='1') && (get_vals[1]==0)) startAlign(1);
+    if ((get_vals[0]=='2') && (get_vals[1]==0)) startAlign(2);
+    if ((get_vals[0]=='3') && (get_vals[1]==0)) startAlign(3);
+    if ((get_vals[0]=='4') && (get_vals[1]==0)) startAlign(4);
+    if ((get_vals[0]=='5') && (get_vals[1]==0)) startAlign(5);
+    if ((get_vals[0]=='6') && (get_vals[1]==0)) startAlign(6);
+    if ((get_vals[0]=='7') && (get_vals[1]==0)) startAlign(7);
+    if ((get_vals[0]=='8') && (get_vals[1]==0)) startAlign(8);
+    if ((get_vals[0]=='9') && (get_vals[1]==0)) startAlign(9);
     if ((get_vals[0]=='n') && (get_vals[1]==0)) nextAlign();
   }
   // Home/Park
@@ -598,8 +604,8 @@ const char html_index3[] PROGMEM = "<font class=\"c\">%02d/%02d/%02d</font>";
 const char html_index4[] PROGMEM = "&nbsp;<font class=\"c\">%s</font>&nbsp;UT";
 const char html_index4a[] PROGMEM = "&nbsp;(<font class=\"c\">%s</font>&nbsp; Local Apparent Sidereal Time)<br /><br />";
 const char html_indexTrue[] PROGMEM = "Absolute Position: " Axis1 "=<font class=\"c\">%ld</font> steps, " Axis2 "=<font class=\"c\">%ld</font> steps<br />";
-const char html_indexIndex[] PROGMEM = "IHS=<font class=\"c\">%ld</font> steps, IDS=<font class=\"c\">%ld</font> steps<br />";
-const char html_indexCorIdx[] PROGMEM = "IH=<font class=\"c\">%ld</font>\", ID=<font class=\"c\">%ld</font>\"<br />";
+const char html_indexIndex[] PROGMEM = "indexAxis1Steps=<font class=\"c\">%ld</font> steps, indexAxis2Steps=<font class=\"c\">%ld</font> steps<br />";
+const char html_indexCorIdx[] PROGMEM = "indexAxis1=<font class=\"c\">%ld</font>\", indexAxis2=<font class=\"c\">%ld</font>\"<br />";
 const char html_indexCorPole[] PROGMEM = "altCor=<font class=\"c\">%ld</font>\", azmCor=<font class=\"c\">%ld</font>\"<br />";
 const char html_indexCorPolar[] PROGMEM = "Polar Alignment Correction: Alt=<font class=\"c\">%ld</font>\", Azm=<font class=\"c\">%ld</font>\"<br /><br />";
 const char html_indexCorOrtho[] PROGMEM = "doCor=<font class=\"c\">%ld</font>\", pdCor=<font class=\"c\">%ld</font>\"<br />";
@@ -696,10 +702,10 @@ if (html_page_step==++stp) {
     strcpy_P(temp1, html_indexTrue); sprintf(temp,temp1,a1,a2); 
   }
   if (html_page_step==++stp) {
-    strcpy_P(temp1, html_indexIndex); sprintf(temp,temp1,IHS,IDS); 
+    strcpy_P(temp1, html_indexIndex); sprintf(temp,temp1,indexAxis1Steps,indexAxis2Steps); 
   }
   if (html_page_step==++stp) {
-    strcpy_P(temp1, html_indexCorIdx); sprintf(temp,temp1,(long)(IH*3600.0),(long)(ID*3600.0)); 
+    strcpy_P(temp1, html_indexCorIdx); sprintf(temp,temp1,(long)(indexAxis1*3600.0),(long)(indexAxis2*3600.0)); 
   }
   if (html_page_step==++stp) {
     strcpy_P(temp1, html_indexCorPole); sprintf(temp,temp1,(long)(altCor*3600.0),(long)(azmCor*3600.0)); 
@@ -724,8 +730,8 @@ if (html_page_step==++stp) {
   if (html_page_step==++stp) {
     i=highPrecision; highPrecision=true; 
     cli();
-    long h=posAxis1+IHS;
-    long d=posAxis2+IDS;
+    long h=posAxis1+indexAxis1Steps;
+    long d=posAxis2+indexAxis2Steps;
     sei();
 #ifdef MOUNT_TYPE_ALTAZM
     double ha=(double)h/(double)StepsPerDegreeAxis1;
@@ -764,8 +770,8 @@ if (html_page_step==++stp) {
   if (html_page_step==++stp) {
     i=highPrecision; highPrecision=true;
     cli();
-    long h=(long)targetAxis1.part.m+IHS;
-    long d=(long)targetAxis2.part.m+IDS;
+    long h=(long)targetAxis1.part.m+indexAxis1Steps;
+    long d=(long)targetAxis2.part.m+indexAxis2Steps;
     sei();
 #ifdef MOUNT_TYPE_ALTAZM
     double ha=(double)h/(double)(StepsPerDegreeAxis1);
@@ -1051,11 +1057,16 @@ const char html_controlAlign1[] PROGMEM =
 "Align: "
 "<form method=\"get\" action=\"/control.htm\">"
 "<button name=\"al\" value=\"1\" type=\"submit\">1 Star</button>";
-const char html_controlAlign23[] PROGMEM = 
-"<button name=\"al\" value=\"2\" type=\"submit\">2 Star</button>"
-"<button name=\"al\" value=\"3\" type=\"submit\">3 Star</button>";
-const char html_controlAlign4[] PROGMEM = 
-"<br /><button name=\"al\" value=\"n\" type=\"submit\">Accept</button>"
+const char html_controlAlign2[] PROGMEM = "<button name=\"al\" value=\"2\" type=\"submit\">2 Star</button>";
+const char html_controlAlign3[] PROGMEM = "<button name=\"al\" value=\"3\" type=\"submit\">3 Star</button>";
+const char html_controlAlign3[] PROGMEM = "<button name=\"al\" value=\"3\" type=\"submit\">3 Star</button>";
+const char html_controlAlign4[] PROGMEM = "<button name=\"al\" value=\"4\" type=\"submit\">4 Star</button>";
+const char html_controlAlign5[] PROGMEM = "<button name=\"al\" value=\"5\" type=\"submit\">5 Star</button>";
+const char html_controlAlign6[] PROGMEM = "<button name=\"al\" value=\"6\" type=\"submit\">6 Star</button>";
+const char html_controlAlign7[] PROGMEM = "<button name=\"al\" value=\"7\" type=\"submit\">7 Star</button>";
+const char html_controlAlign8[] PROGMEM = "<button name=\"al\" value=\"8\" type=\"submit\">8 Star</button>";
+const char html_controlAlign9[] PROGMEM = "<button name=\"al\" value=\"9\" type=\"submit\">9 Star</button>";
+const char html_controlAlignX[] PROGMEM = "<br /><button name=\"al\" value=\"n\" type=\"submit\">Accept</button>"
 "</form><br />\r\n";
 const char html_control6[] PROGMEM = 
 "Home/Park: "
@@ -1132,10 +1143,16 @@ void control_html_page() {
   if (html_page_step==++stp) strcpy_P(temp, html_control4c);
   if (html_page_step==++stp) strcpy_P(temp, html_control4d);
   if (html_page_step==++stp) strcpy_P(temp, html_controlAlign1);
-#if defined(MOUNT_TYPE_GEM) || defined(MOUNT_TYPE_FORK_ALT)
-  if (html_page_step==++stp) strcpy_P(temp, html_controlAlign23);
-#endif
-  if (html_page_step==++stp) strcpy_P(temp, html_controlAlign4);
+  if (MAX_NUM_ALIGN_STARS>=2) if (html_page_step==++stp) strcpy_P(temp, html_controlAlign2);
+  if (MAX_NUM_ALIGN_STARS>=3) if (html_page_step==++stp) strcpy_P(temp, html_controlAlign3);
+  if (MAX_NUM_ALIGN_STARS>=3) if (html_page_step==++stp) strcpy_P(temp, html_controlAlign3);
+  if (MAX_NUM_ALIGN_STARS>=4) if (html_page_step==++stp) strcpy_P(temp, html_controlAlign4);
+  if (MAX_NUM_ALIGN_STARS>=5) if (html_page_step==++stp) strcpy_P(temp, html_controlAlign5);
+  if (MAX_NUM_ALIGN_STARS>=6) if (html_page_step==++stp) strcpy_P(temp, html_controlAlign6);
+  if (MAX_NUM_ALIGN_STARS>=7) if (html_page_step==++stp) strcpy_P(temp, html_controlAlign7);
+  if (MAX_NUM_ALIGN_STARS>=8) if (html_page_step==++stp) strcpy_P(temp, html_controlAlign8);
+  if (MAX_NUM_ALIGN_STARS>=9) if (html_page_step==++stp) strcpy_P(temp, html_controlAlign9);
+  if (html_page_step==++stp) strcpy_P(temp, html_controlAlignX);
   if (html_page_step==++stp) strcpy_P(temp, html_control6);
   if (html_page_step==++stp) strcpy_P(temp, html_control7);
   if (html_page_step==++stp) strcpy_P(temp, html_control8);

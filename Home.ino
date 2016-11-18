@@ -9,11 +9,11 @@ boolean goHome() {
 
   cli();
   #ifdef SYNC_ANYWHERE_ON
-  if (pierSide==PierSideWest) targetAxis1.part.m=-celestialPoleHA*(long)StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=celestialPoleHA*(long)StepsPerDegreeAxis1-IHS; targetAxis1.part.f=0;
-  targetAxis2.part.m=(long)(celestialPoleDec*(double)StepsPerDegreeAxis2)-IDS; targetAxis2.part.f=0;
+  if (pierSide==PierSideWest) targetAxis1.part.m=-celestialPoleAxis1*(long)StepsPerDegreeAxis1-indexAxis1Steps; else targetAxis1.part.m=celestialPoleAxis1*(long)StepsPerDegreeAxis1-indexAxis1Steps; targetAxis1.part.f=0;
+  targetAxis2.part.m=(long)(celestialPoleAxis2*(double)StepsPerDegreeAxis2)-indexAxis2Steps; targetAxis2.part.f=0;
   #else
-  if (pierSide==PierSideWest) targetAxis1.part.m=-celestialPoleHA*(long)StepsPerDegreeAxis1; else targetAxis1.part.m=celestialPoleHA*(long)StepsPerDegreeAxis1; targetAxis1.part.f=0;
-  targetAxis2.part.m=(long)(celestialPoleDec*(double)StepsPerDegreeAxis2); targetAxis2.part.f=0;
+  if (pierSide==PierSideWest) targetAxis1.part.m=-celestialPoleAxis1*(long)StepsPerDegreeAxis1; else targetAxis1.part.m=celestialPoleAxis1*(long)StepsPerDegreeAxis1; targetAxis1.part.f=0;
+  targetAxis2.part.m=(long)(celestialPoleAxis2*(double)StepsPerDegreeAxis2); targetAxis2.part.f=0;
   #endif
   startAxis1=posAxis1;
   startAxis2=posAxis2;
@@ -49,15 +49,16 @@ boolean setHome() {
   origTargetAxis2       = 0;
   
   // reset pointing model
-  alignMode           = AlignNone;
-  altCor              = 0;
-  azmCor              = 0;
-  doCor               = 0;
-  pdCor               = 0;
-  IH                  = 0;
-  IHS                 = 0;
-  ID                  = 0;
-  IDS                 = 0;
+  alignNumStars       = 0;
+  alignThisStar       = 0;
+  indexAxis1          = 0;
+  indexAxis1Steps     = 0;
+  indexAxis2          = 0;
+  indexAxis2Steps     = 0;
+  #ifdef MOUNT_TYPE_ALTAZM
+  Align.init();
+  #endif
+  GeoAlign.init();
   
   // reset meridian flip control
   #ifdef MOUNT_TYPE_GEM
@@ -99,8 +100,8 @@ boolean setHome() {
   if (!pecRecorded) pecStatus=IgnorePEC;
 
   // the polar home position
-  startAxis1 = celestialPoleHA*(long)StepsPerDegreeAxis1;
-  startAxis2 = celestialPoleDec*(double)StepsPerDegreeAxis2;
+  startAxis1 = celestialPoleAxis1*(long)StepsPerDegreeAxis1;
+  startAxis2 = celestialPoleAxis2*(double)StepsPerDegreeAxis2;
 
   // clear pulse-guiding state
   guideDirAxis1       = 0;

@@ -12,10 +12,10 @@ boolean setPark() {
 
     // if sync anywhere is enabled use the corrected location
   #ifdef SYNC_ANYWHERE_ON
-    long ax1md=((((long)targetAxis1.part.m+IHS)-trueAxis1)%1024L-((long)targetAxis1.part.m+IHS)%1024L);
-    long ax2md=((((long)targetAxis2.part.m+IDS)-trueAxis2)%1024L-((long)targetAxis2.part.m+IDS)%1024L);
-    long h=(((long)targetAxis1.part.m+IHS)/1024L)*1024L-ax1md;
-    long d=(((long)targetAxis2.part.m+IDS)/1024L)*1024L-ax2md;
+    long ax1md=((((long)targetAxis1.part.m+indexAxis1Steps)-trueAxis1)%1024L-((long)targetAxis1.part.m+indexAxis1Steps)%1024L);
+    long ax2md=((((long)targetAxis2.part.m+indexAxis2Steps)-trueAxis2)%1024L-((long)targetAxis2.part.m+indexAxis2Steps)%1024L);
+    long h=(((long)targetAxis1.part.m+indexAxis1Steps)/1024L)*1024L-ax1md;
+    long d=(((long)targetAxis2.part.m+indexAxis2Steps)/1024L)*1024L-ax2md;
   #else
     long ax1md=(((long)targetAxis1.part.m-trueAxis1)%1024L-(long)targetAxis1.part.m%1024L);
     long ax2md=(((long)targetAxis2.part.m-trueAxis2)%1024L-(long)targetAxis2.part.m%1024L);
@@ -45,12 +45,9 @@ boolean setPark() {
 
 boolean saveAlignModel() {
   // and store our corrections
-  EEPROM_writeFloat(EE_doCor,doCor);
-  EEPROM_writeFloat(EE_pdCor,pdCor);
-  EEPROM_writeFloat(EE_altCor,altCor);
-  EEPROM_writeFloat(EE_azmCor,azmCor);
-  EEPROM_writeFloat(EE_IH,IH);
-  EEPROM_writeFloat(EE_ID,ID);
+  GeoAlign.writeCoe();
+  EEPROM_writeFloat(EE_indexAxis1,indexAxis1);
+  EEPROM_writeFloat(EE_indexAxis2,indexAxis2);
   return true;
 }
 
@@ -132,15 +129,15 @@ byte park() {
         // if sync anywhere is enabled we have a corrected location, convert to instrument
         // and make sure we land on full-step, and store this new location so we remember PEC
   #ifdef SYNC_ANYWHERE_ON
-        long ihs=(IHS/1024L)*1024L;
-        long ids=(IDS/1024L)*1024L;
+        long ihs=(indexAxis1Steps/1024L)*1024L;
+        long ids=(indexAxis2Steps/1024L)*1024L;
         h=h-ihs;
         d=d-ids;
         float ih=ihs/(long)StepsPerDegreeAxis1;
         float id=ids/(long)StepsPerDegreeAxis2;
         // also save the alignment index values in this mode since they can change widely
-        EEPROM_writeFloat(EE_IH,ih);
-        EEPROM_writeFloat(EE_ID,id);
+        EEPROM_writeFloat(EE_indexAxis1,ih);
+        EEPROM_writeFloat(EE_indexAxis2,id);
   #endif
 
         goTo(h,d,h,d,gotoPierSide);
@@ -166,14 +163,11 @@ boolean unpark() {
         delay(10);
 
         // get corrections
-        doCor=EEPROM_readFloat(EE_doCor);
-        pdCor=EEPROM_readFloat(EE_pdCor);
-        altCor=EEPROM_readFloat(EE_altCor);
-        azmCor=EEPROM_readFloat(EE_azmCor);
-        IH=EEPROM_readFloat(EE_IH);
-        IHS=(long)(IH*(double)StepsPerDegreeAxis1);
-        ID=EEPROM_readFloat(EE_ID);
-        IDS=(long)(ID*(double)StepsPerDegreeAxis2);
+        GeoAlign.readCoe();
+        indexAxis1=EEPROM_readFloat(EE_indexAxis1);
+        indexAxis1Steps=(long)(indexAxis1*(double)StepsPerDegreeAxis1);
+        indexAxis2=EEPROM_readFloat(EE_indexAxis2);
+        indexAxis2Steps=(long)(indexAxis2*(double)StepsPerDegreeAxis2);
 
         // get our position
         cli();
@@ -185,8 +179,8 @@ boolean unpark() {
   // if sync anywhere is enabled we have a corrected location, convert to instrument
   // just like we did when we parked
   #ifdef SYNC_ANYWHERE_ON
-        posAxis1=((posAxis1-IHS)/1024L)*1024L;
-        posAxis2=((posAxis2-IDS)/1024L)*1024L;
+        posAxis1=((posAxis1-indexAxis1Steps)/1024L)*1024L;
+        posAxis2=((posAxis2-indexAxis2Steps)/1024L)*1024L;
   #endif
         sei();
 
