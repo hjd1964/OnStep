@@ -1543,7 +1543,7 @@ void loop() {
   #endif
           guideDirAxis2=ST4DE_state;
           guideDurationDec=-1;
-          cli(); guideTimerRateAxis2=guideTimerBaseRate; sei();
+          cli(); if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRate; else guideTimerRateAxis2=guideTimerBaseRate; sei();
         } else {
           if (guideDirAxis2) { guideDirAxis2='b'; }
         }
