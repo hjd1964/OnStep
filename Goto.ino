@@ -254,9 +254,11 @@ byte goToEqu(double RA, double Dec) {
 
   // goto function takes HA and Dec in steps
   // when in align mode, force pier side
-  byte thisPierSide;
-  if (preferredPierSide==PPS_WEST) thisPierSide=PierSideWest;
-  if (preferredPierSide==PPS_EAST) thisPierSide=PierSideEast; else thisPierSide=PierSideBest;
+  byte thisPierSide = PierSideBest;
+  if (meridianFlip!=MeridianFlipNever) {
+    if (preferredPierSide==PPS_WEST) thisPierSide=PierSideWest;
+    if (preferredPierSide==PPS_EAST) thisPierSide=PierSideEast;
+  }
 
   // only for 2+ star aligns
   if (alignNumStars>1) {
