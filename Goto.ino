@@ -24,29 +24,41 @@ boolean syncEqu(double RA, double Dec) {
 #endif
 
 #if defined(SYNC_ANYWHERE_ON)
-  if ((pierSide==PierSideNone) || ((pierSide==PierSideWest) && (Axis1>0)) || ((pierSide==PierSideEast) && (Axis1<0))) {
-    if (pierSide==PierSideNone) {
-      trackingState=TrackingSidereal;
-      atHome=false;
-    }
-    if (meridianFlip!=MeridianFlipNever) {
-      // we're in the polar home position, so pick a side (of the pier)
+  // just turn on tracking
+  if (pierSide==PierSideNone) {
+    trackingState=TrackingSidereal;
+    atHome=false;
+    // should enable motors here!  Why not?
+  }
+
+  if (meridianFlip!=MeridianFlipNever) {
+    // we're in the polar home position, so pick a side (of the pier)
+    if (preferredPierSide==PPS_WEST) {
+      // west side of pier - we're in the eastern sky and the HA's are negative
+      pierSide=PierSideWest;
+      DecDir  =DecDirWInit;
+    } else
+    if (preferredPierSide==PPS_EAST) {
+      // east side of pier - we're in the western sky and the HA's are positive
+      pierSide=PierSideEast;
+      DecDir = DecDirEInit;
+    } else {
+      // best side of pier
       if (Axis1<0) {
         // west side of pier - we're in the eastern sky and the HA's are negative
         pierSide=PierSideWest;
         DecDir  =DecDirWInit;
       } else { 
         // east side of pier - we're in the western sky and the HA's are positive
-        // this is the default in the polar-home position
         pierSide=PierSideEast;
         DecDir = DecDirEInit;
       }
-    } else {
-      // always on the "east" side of pier - we're in the western sky and the HA's are positive
-      // this is the default in the polar-home position and also for MOUNT_TYPE_FORK and MOUNT_TYPE_ALTAZM.  MOUNT_TYPE_FORK_ALT ends up pierSideEast, but flips are allowed until aligned.
-      pierSide=PierSideEast;
-      DecDir = DecDirEInit;
     }
+  } else {
+    // always on the "east" side of pier - we're in the western sky and the HA's are positive
+    // this is the default in the polar-home position and also for MOUNT_TYPE_FORK and MOUNT_TYPE_ALTAZM.  MOUNT_TYPE_FORK_ALT ends up pierSideEast, but flips are allowed until aligned.
+    pierSide=PierSideEast;
+    DecDir = DecDirEInit;
   }
 #endif
 
@@ -242,7 +254,10 @@ byte goToEqu(double RA, double Dec) {
 
   // goto function takes HA and Dec in steps
   // when in align mode, force pier side
-  byte thisPierSide=PierSideBest;
+  byte thisPierSide;
+  if (preferredPierSide==PPS_WEST) thisPierSide=PierSideWest;
+  if (preferredPierSide==PPS_EAST) thisPierSide=PierSideEast; else thisPierSide=PierSideBest;
+
   // only for 2+ star aligns
   if (alignNumStars>1) {
     // and only for the first three stars

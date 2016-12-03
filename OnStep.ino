@@ -745,6 +745,9 @@ byte meridianFlip = MeridianFlipNever;
 #define PierSideFlipEW3  22
 byte pierSide            = PierSideNone;
 
+enum PreferredPierSide {PPS_BEST,PPS_EAST,PPS_WEST};
+PreferredPierSide preferredPierSide = PPS_BEST;
+
 #define NotParked        0
 #define Parking          1
 #define Parked           2
