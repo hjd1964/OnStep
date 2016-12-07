@@ -56,9 +56,9 @@ boolean doubleToHms(char *reply, double *f) {
     s1=s1*60;
   } else {
     s1=s1*10;
-    s[9]='.'; s[12]='1';
+    s[11]='.'; s[14]='1';
   }
-  char sign[]="";
+  char sign[2]="";
   if (((s1!=0) || (m1!=0) || (h1!=0)) && (*f<0.0)) strcpy(sign,"-");
   sprintf(reply,s,sign,(int)h1,(int)m1,(int)s1);
 
