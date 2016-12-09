@@ -745,6 +745,9 @@ byte meridianFlip = MeridianFlipNever;
 #define PierSideFlipEW3  22
 byte pierSide            = PierSideNone;
 
+enum PreferredPierSide {PPS_BEST,PPS_EAST,PPS_WEST};
+PreferredPierSide preferredPierSide = PPS_BEST;
+
 #define NotParked        0
 #define Parking          1
 #define Parked           2
@@ -1543,7 +1546,7 @@ void loop() {
   #endif
           guideDirAxis2=ST4DE_state;
           guideDurationDec=-1;
-          cli(); guideTimerRateAxis2=guideTimerBaseRate; sei();
+          cli(); if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRate; else guideTimerRateAxis2=guideTimerBaseRate; sei();
         } else {
           if (guideDirAxis2) { guideDirAxis2='b'; }
         }
@@ -1719,11 +1722,11 @@ void loop() {
     // safety checks, keeps mount from tracking past the meridian limit, past the UnderPoleLimit, below horizon limit, above the overhead limit, or past the Dec limits
     if (meridianFlip!=MeridianFlipNever) {
       if (pierSide==PierSideWest) { 
-        cli(); 
-        if (posAxis1+indexAxis1Steps>(MinutesPastMeridianW*(long)StepsPerDegreeAxis1/4L)) {
-          sei();
+        cli(); long p1=posAxis1+indexAxis1Steps; sei();
+        if (p1>(MinutesPastMeridianW*(long)StepsPerDegreeAxis1/4L)) {
           // do an automatic meridian flip and continue if just tracking
-          if (autoContinue && (posAxis1+indexAxis1Steps>(-MinutesPastMeridianE*(long)StepsPerDegreeAxis1/4L)) && (trackingState!=TrackingMoveTo)) {
+          // checks: enabled && not too far past the meridian (doesn't make sense) && not in inaccessible area between east and west limits && finally that a slew isn't happening
+          if (autoContinue && (p1<(MinutesPastMeridianW*(long)StepsPerDegreeAxis1/4L+(1.0/60.0)*(long)StepsPerDegreeAxis1)) && (p1>(-MinutesPastMeridianE*(long)StepsPerDegreeAxis1/4L)) && (trackingState!=TrackingMoveTo)) {
             double newRA,newDec;
             getEqu(&newRA,&newDec,false); // returns 0 on success
             if (goToEqu(newRA,newDec)) {
@@ -1733,7 +1736,7 @@ void loop() {
           } else {
             lastError=ERR_MERIDIAN; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;
           }
-        } else sei();
+        }
       }
       if (pierSide==PierSideEast) { cli(); if (posAxis1+indexAxis1Steps>(UnderPoleLimit*15L*(long)StepsPerDegreeAxis1)) { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  } sei(); }
     } else {

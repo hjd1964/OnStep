@@ -414,8 +414,8 @@ void processCommands() {
         if (parameter[2]==(char)0) {
           if (parameter[0]=='0') { // 0n: Align Model
             switch (parameter[1]) {
-              case '0': sprintf(reply,"%ld",(long)(indexAxis1*3600.0)); quietReply=true; break;                // indexAxis1
-              case '1': sprintf(reply,"%ld",(long)(indexAxis2*3600.0)); quietReply=true; break;                // indexAxis2
+              case '0': sprintf(reply,"%ld",(long)(indexAxis1*3600.0)); quietReply=true; break;        // indexAxis1
+              case '1': sprintf(reply,"%ld",(long)(indexAxis2*3600.0)); quietReply=true; break;        // indexAxis2
               case '2': sprintf(reply,"%ld",(long)(GeoAlign.altCor*3600.0)); quietReply=true; break;   // altCor
               case '3': sprintf(reply,"%ld",(long)(GeoAlign.azmCor*3600.0)); quietReply=true; break;   // azmCor
               case '4': sprintf(reply,"%ld",(long)(GeoAlign.doCor*3600.0)); quietReply=true; break;    // doCor
@@ -436,6 +436,10 @@ void processCommands() {
               case '3': sprintf(reply,"%ld",(long)(MaxRate)); quietReply=true; break;                       // MaxRate (default)
               case '4': if (meridianFlip==MeridianFlipNever) { sprintf(reply,"%d N",(int)(pierSide)); } else { sprintf(reply,"%d",(int)(pierSide)); } quietReply=true; break; // pierSide (N if never)
               case '5': sprintf(reply,"%i",(int)autoContinue); quietReply=true; break;                      // autoContinue
+              case '6': 
+                if (preferredPierSide==PPS_EAST) strcpy(reply,"E"); else
+                if (preferredPierSide==PPS_WEST) strcpy(reply,"W"); else strcpy(reply,"B");
+                quietReply=true; break;                 // preferred pier side
             }
           } else
           if (parameter[0]=='E') { // En: Get config
@@ -795,9 +799,9 @@ void processCommands() {
          } else
             if ((parameter[0]=='n') || (parameter[0]=='s')) { 
 #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
-            enableGuideRate(currentPulseGuideRate);
+              enableGuideRate(currentPulseGuideRate);
 #else
-            enableGuideRate(currentGuideRate);
+              enableGuideRate(currentGuideRate);
 #endif
               guideDirAxis2=parameter[0]; 
               guideDurationLastDec=micros();
@@ -988,7 +992,7 @@ void processCommands() {
           }
           quietReply=true; 
         } else commandError=true;
-      } else 
+      } else
 //  :SCMM/DD/YY#
 //          Change Date to MM/DD/YY
 //          Return: 0 on failure
@@ -1150,14 +1154,14 @@ void processCommands() {
         } else
         if (parameter[0]=='9') { // 9n: Misc.
           switch (parameter[1]) {
-            case '2': 
+            case '2': // set new acceleration rate
               maxRate=strtol(&parameter[3],NULL,10)*16L;
               if (maxRate<(MaxRate/2L)*16L) maxRate=(MaxRate/2L)*16L;
               if (maxRate>(MaxRate*2L)*16L) maxRate=(MaxRate*2L)*16L;
               EEPROM_writeInt(EE_maxRate,(int)(maxRate/16L));
-              SetAccelerationRates(maxRate); // set the new acceleration rate
-            break; // maxRate
-            case '3':
+              SetAccelerationRates(maxRate);
+            break;
+            case '3': // acceleration rate preset
               quietReply=true;
               switch (parameter[3]) {
                 case '5': maxRate=MaxRate*32L; break; // 50%
@@ -1167,11 +1171,19 @@ void processCommands() {
                 case '1': maxRate=MaxRate*8L;  break; // 200%
               break;
               }
-              SetAccelerationRates(maxRate); // set the new acceleration rate
-            break; // maxRate
-            case '5':
-              if ((parameter[3]=='0') || (parameter[3]=='1')) { i=parameter[3]-'0'; if ((i==0) || (i==1)) { autoContinue=i;  EEPROM.write(EE_autoContinue,autoContinue); } }
-            break; // autoContinue
+              SetAccelerationRates(maxRate);
+            break;
+            case '5': // autoContinue
+              if ((parameter[3]=='0') || (parameter[3]=='1')) { i=parameter[3]-'0'; if ((i==0) || (i==1)) { autoContinue=i;  EEPROM.write(EE_autoContinue,autoContinue); } } 
+            break; 
+            case '6': // preferred pier side 
+              switch (parameter[3]) {
+                case 'E': preferredPierSide=PPS_EAST; break;
+                case 'W': preferredPierSide=PPS_WEST; break;
+                case 'B': preferredPierSide=PPS_BEST; break;
+                default: commandError=true;
+              }
+            break;
           }
         } else commandError=true;
         //getEqu(&f,&f1,false);  

@@ -45,7 +45,7 @@ boolean hmsToDouble(double *f, char *hms) {
 boolean doubleToHms(char *reply, double *f) {
   double h1,m1,f1,s1;
 
-  f1=fabs(*f)+0.00001; // keep from rounding down in seconds
+  f1=fabs(*f)+0.000139; // round to 1/2 arc-sec
 
   h1=floor(f1);
   m1=(f1-h1)*60;
@@ -53,12 +53,12 @@ boolean doubleToHms(char *reply, double *f) {
 
   char s[]="%s%02d:%02d:%02d";
   if (highPrecision) {
-    s1=s1*60;
+    s1=s1*60.0;
   } else {
-    s1=s1*10;
-    s[9]='.'; s[12]='1';
+    s1=s1*10.0;
+    s[11]='.'; s[14]='1';
   }
-  char sign[]="";
+  char sign[2]="";
   if (((s1!=0) || (m1!=0) || (h1!=0)) && (*f<0.0)) strcpy(sign,"-");
   sprintf(reply,s,sign,(int)h1,(int)m1,(int)s1);
 
@@ -129,7 +129,7 @@ boolean doubleToDms(char *reply, double *f, boolean fullRange, boolean signPrese
   // setup formatting, handle adding the sign
   if (f1<0) { f1=-f1; sign[0]='-'; }
 
-  f1=f1+0.00001; // add a little tiny bit to keep from rounding down in seconds
+  f1=f1+0.000139; // round to 1/2 arc-second
   d1=floor(f1);
   m1=(f1-d1)*60.0;
   s1=(m1-floor(m1))*60.0;
