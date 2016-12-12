@@ -191,6 +191,7 @@ byte goToEqu(double RA, double Dec) {
   if (a>maxAlt)                                         return 6;   // fail, outside limits
   if (Dec>MaxDec)                                       return 6;   // fail, outside limits
   if (Dec<MinDec)                                       return 6;   // fail, outside limits
+  if ((abs(HA)>(double)UnderPoleLimit*15.0) )           return 6;   // fail, outside limits
   if (trackingState==TrackingMoveTo) { abortSlew=true;  return 5; } // fail, prior goto cancelled
   if (guideDirAxis1 || guideDirAxis2)                   return 7;   // fail, unspecified error
 
@@ -291,10 +292,10 @@ byte goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1, long 
 
   if (meridianFlip!=MeridianFlipNever) {
     // where the allowable hour angles are
-    long eastOfPierMaxHA= UnderPoleLimit*15L*(long)StepsPerDegreeAxis1;
+    long eastOfPierMaxHA= 12L*15L*(long)StepsPerDegreeAxis1;
     long eastOfPierMinHA=-(MinutesPastMeridianE*StepsPerDegreeAxis1/4L);
     long westOfPierMaxHA= (MinutesPastMeridianW*StepsPerDegreeAxis1/4L);
-    long westOfPierMinHA=-UnderPoleLimit*15L*(long)StepsPerDegreeAxis1;
+    long westOfPierMinHA=-12L*15L*(long)StepsPerDegreeAxis1;
   
     // override the defaults and force a flip if near the meridian and possible (for parking and align)
     if ((gotoPierSide!=PierSideBest) && (pierSide!=gotoPierSide)) {
