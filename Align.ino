@@ -460,18 +460,6 @@ void TGeoAlign::EquToInstr(double Lat, double HA, double Dec, double *HA1, doubl
   while (*HA1>180.0) *HA1-=360.0;
   while (*HA1<-180.0) *HA1+=360.0;
   
-#ifndef MOUNT_TYPE_ALTAZM
-  // switch to under the pole coordinates
-  if ((Lat>=0) && ((abs(*HA1)>(double)UnderPoleLimit*15.0))) {
-    *HA1 =*HA1-180.0; while (*HA1<-180.0) *HA1=*HA1+360.0;
-    *Dec1=(90.0-*Dec1)+90.0;
-  }
-  if ((Lat<0) && ((abs(*HA1)>(double)UnderPoleLimit*15.0) )) {
-    *HA1 =*HA1-180.0; while (*HA1<-180.0) *HA1=*HA1+360.0;
-    *Dec1=(-90.0-*Dec1)-90.0;
-  }
-#endif
-
   // finally, apply the index offsets
   *HA1-=indexAxis1; *Dec1-=indexAxis2;
 }
@@ -481,11 +469,6 @@ void TGeoAlign::InstrToEqu(double Lat, double HA, double Dec, double *HA1, doubl
   // remove the index offsets
   HA+=indexAxis1; Dec+=indexAxis2;
 
-#ifndef MOUNT_TYPE_ALTAZM
-  // switch from under the pole coordinates
-  if (Dec>90.0) { Dec=(90.0-Dec)+90; HA=HA-180.0; }
-  if (Dec<-90.0) { Dec=(-90.0-Dec)-90.0; HA=HA-180.0; }
-#endif
   while (HA>180.0) HA-=360.0;
   while (HA<-180.0) HA+=360.0;
 
