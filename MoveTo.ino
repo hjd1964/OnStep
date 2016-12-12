@@ -1,6 +1,8 @@
 // -----------------------------------------------------------------------------------
 // functions to move the mount to the a new position
 
+long lastPosAxis2=0;
+
 // moves the mount
 void moveTo() {
   // HA goes from +90...0..-90
@@ -71,9 +73,38 @@ void moveTo() {
   
   Again:
   cli();
-  distDestAxis1=abs(posAxis1-(long)targetAxis1.part.m);  // distance from dest HA
-  distDestAxis2=abs(posAxis2-(long)targetAxis2.part.m);  // distance from dest Dec
+  long p1=posAxis1;
+  long p2=posAxis2;
+  distDestAxis1=abs(p1-(long)targetAxis1.part.m);  // distance from dest HA
+  distDestAxis2=abs(p2-(long)targetAxis2.part.m);  // distance from dest Dec
   sei();
+
+  #ifndef MOUNT_TYPE_ALTAZM
+  // slow down motion if we're near the horizon (for mid or high latitudes)
+  long p2a=0;
+  if (((latitude>10) || (latitude<-10)) && (distStartAxis1>((DegreesForAcceleration*StepsPerDegreeAxis1)/16))) {
+    p2a=p2+indexAxis2Steps; if (latitude<0) p2a=-p2a;
+
+    // if Dec is decreasing, slow down Dec
+    if (p2a<lastPosAxis2) {
+      cli();
+      double minAlt2=minAlt+10.0;
+      long a=(currentAlt-minAlt2)*StepsPerDegreeAxis2; if (a<((DegreesForAcceleration*StepsPerDegreeAxis2)/8)) a=((DegreesForAcceleration*StepsPerDegreeAxis2)/8);
+      if (a<distDestAxis2) distDestAxis2=a;
+      sei();
+    } else
+    // if Dec is increasing, slow down HA
+    {
+      cli();
+      double minAlt2=minAlt+10.0;
+      long a=(currentAlt-minAlt2)*StepsPerDegreeAxis1; if (a<((DegreesForAcceleration*StepsPerDegreeAxis1)/8)) a=((DegreesForAcceleration*StepsPerDegreeAxis1)/8);
+      if (a<distDestAxis1) distDestAxis1=a;
+      sei();
+    }
+  }
+  lastPosAxis2=p2a;
+  #endif
+  
   if (distDestAxis1<1) distDestAxis1=1;
   if (distDestAxis2<1) distDestAxis2=1;
 
