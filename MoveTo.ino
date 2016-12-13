@@ -73,20 +73,17 @@ void moveTo() {
   
   Again:
   cli();
-  long p1=posAxis1;
-  long p2=posAxis2;
-  distDestAxis1=abs(p1-(long)targetAxis1.part.m);  // distance from dest HA
-  distDestAxis2=abs(p2-(long)targetAxis2.part.m);  // distance from dest Dec
+  long tempPosAxis2=posAxis2;
+  distDestAxis1=abs(posAxis1-(long)targetAxis1.part.m);  // distance from dest HA
+  distDestAxis2=abs(tempPosAxis2-(long)targetAxis2.part.m);  // distance from dest Dec
   sei();
 
+  // adjust rates near the horizon to help keep from exceeding the minAlt limit
   #ifndef MOUNT_TYPE_ALTAZM
-  // slow down motion if we're near the horizon (for mid or high latitudes)
-  long p2a=0;
+  tempPosAxis2+=indexAxis2Steps; if (latitude<0) tempPosAxis2=-tempPosAxis2;
   if (((latitude>10) || (latitude<-10)) && (distStartAxis1>((DegreesForAcceleration*StepsPerDegreeAxis1)/16))) {
-    p2a=p2+indexAxis2Steps; if (latitude<0) p2a=-p2a;
-
     // if Dec is decreasing, slow down Dec
-    if (p2a<lastPosAxis2) {
+    if (tempPosAxis2<lastPosAxis2) {
       cli();
       double minAlt2=minAlt+10.0;
       long a=(currentAlt-minAlt2)*StepsPerDegreeAxis2; if (a<((DegreesForAcceleration*StepsPerDegreeAxis2)/8)) a=((DegreesForAcceleration*StepsPerDegreeAxis2)/8);
@@ -102,9 +99,9 @@ void moveTo() {
       sei();
     }
   }
-  lastPosAxis2=p2a;
+  lastPosAxis2=tempPosAxis2;
   #endif
-  
+
   if (distDestAxis1<1) distDestAxis1=1;
   if (distDestAxis2<1) distDestAxis2=1;
 
