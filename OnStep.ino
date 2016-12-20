@@ -1160,7 +1160,10 @@ void setup() {
   pinMode(Axis2_EN,OUTPUT); digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
 
 // if the stepper driver mode select pins are wired in, program any requested micro-step mode
-#ifdef MODE_SWITCH_BEFORE_SLEW_OFF
+#ifdef MODE_SWITCH_BEFORE_SLEW_ON
+  // automatic mode switching before/after slews, initialize micro-step mode
+  DecayModeTracking();
+#else
   // automatic mode switching during slews, initialize micro-step mode
   #ifdef AXIS1_MODE
     if ((AXIS1_MODE & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE    & 1)); } else { pinMode(Axis1_M0,INPUT); }
@@ -1173,9 +1176,6 @@ void setup() {
     if ((AXIS2_MODE & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE>>1 & 1)); } else { pinMode(Axis2_M1,INPUT); }
     if ((AXIS2_MODE & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE>>2 & 1)); } else { pinMode(Axis2_M2,INPUT); }
   #endif
-#else
-  // automatic mode switching before/after slews, initialize micro-step mode
-  DecayModeTracking();
 #endif
 
 #ifdef PPS_SENSE_ON
