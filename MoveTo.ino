@@ -26,7 +26,7 @@ void moveTo() {
         if ((currentAlt<10.0) && (startAxis1>-90L*(long)StepsPerDegreeAxis1-indexAxis1Steps)) targetAxis1.part.m=-60L*(long)StepsPerDegreeAxis1-indexAxis1Steps; else targetAxis1.part.m=-celestialPoleAxis1*(long)StepsPerDegreeAxis1-indexAxis1Steps;
       }
     } else {
-      if (celestialPoleAxis1==0) targetAxis1.part.m=0*(long)StepsPerDegreeAxis1; else {
+      if (celestialPoleAxis1==0) targetAxis1.part.m=0*(long)StepsPerDegreeAxis1-indexAxis1Steps; else {
         if ((currentAlt<10.0) && (startAxis1<90L*(long)StepsPerDegreeAxis1-indexAxis1Steps)) targetAxis1.part.m=60L*(long)StepsPerDegreeAxis1-indexAxis1Steps; else targetAxis1.part.m=celestialPoleAxis1*(long)StepsPerDegreeAxis1-indexAxis1Steps; 
       }
     } 
