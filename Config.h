@@ -140,30 +140,22 @@
                                      // fork/yolk mount with meridian flips turned off by setting the minutesPastMeridian values to cover the whole sky)
 #define MaxAzm                   180 // Alt/Az mounts only. +/- maximum allowed Azimuth, default =  180.  Allowed range is 180 to 360
 
-/* Stepper driver mode control (micro-step and/or decay):
+/* Stepper driver Mode control
 // M0, M1, and M2 are on Pins 22,23, and 24 for RA (Teensy3.1 Pins 13,14,15.)  M0, M1, M2 are on Pins 27,28,29 for Dec (Teensy3.1 Pins 18,19,20.)
 // values 0 to 7 (0b000 to 111): for example "#define AXIS1_MODE 4" is the same as "#define AXIS1_MODE 0b100" which sets M2 to HIGH, M1 to LOW, and M0 to LOW
-//                 / | \
-//               M2  M1 M0
-// *IF* MODE_SWITCH_BEFORE_SLEW_ON is used... for full tri-state control:
-// values 0b000 000     to 111111): for example "#define AXIS1_MODE 0b100010" sets M2 to OPEN, M1 to HIGH, M0 to LOW (note that 0b100010 = 34 so "#define AXIS1_MODE 34" would have the same effect)
-//        open? on/off                                             open?  on/off
-//                                                              M2 M1 M0  M2 M1 M0
+//                                                                                                      / | \
+//                                                                                                    M2  M1 M0
+// DRV8825 or A4988 or RAPS128:
+// use MODE_SWITCH_BEFORE_SLEW_OFF
+// micro-stepping modes: 5=32x, 4=16x, 3=8x, 2=4x, 1=2x, 0=1x (RAPS128 also supports 6=64x, 7=128x)
 //
-// Examples:
-// DRV8825, micro-stepping modes: 5=32x, 4=16x, 3=8x, 2=4x, 1=2x, 0=1x
-// SilentStepStick configurations (M0 is CFG1, M1 is CFG2, M2 is CFG3):
-// CFG3 always open here...
-// CFG2,CFG1        Microsteps      Interpolation      Chopper Mode    _MODE/_MODE_GOTO value
-// GND,GND         1 (Fullstep)     N                  spreadCycle     0b100000
-// GND,VCC_IO      2 (Halfstep)     N                      "           0b100001
-// GND,open        2 (Halfstep)     Y, to 256 μsteps       "           0b101000
-// VCC_IO,GND      4 (Quarterstep)  N                      "           0b100010
-// VCC_IO,VCC_IO  16 μsteps         N                      "           0b100011
-// VCC_IO,open     4 (Quarterstep)  Y, to 256 μsteps       "           0b101010
-// open,GND       16 μsteps         Y, to 256 μsteps       "           0b110000
-// open,VCC_IO     4 (Quarterstep)  Y, to 256 μsteps   stealthChop     0b110001
-// open,open      16 μsteps         Y, to 256 μsteps       "           0b111000
+// SilentStepStick TMC2100/2130 configurations (M0 is CFG1, M1 is CFG2, M2 is CFG3):
+// use MODE_SWITCH_BEFORE_SLEW_OFF.  CFG3 should always be OPEN*.  AXISn_MODE_GOTO_OFF is recommended so AXISn_STEP_GOTO would then be 1.
+// Some useful modes (all with 256x interpolation):
+// 16x stealthChop: CFG1 and CFG2 are both OPEN*.
+// 16x spreadCycle: CFG1 can be wired to GND (LOW) or M0 (with AXISn_MODE 0).  CFG2 should be OPEN*.  
+// 4x  spreadCycle: CFG2 should be OPEN*.  CFG2 can be wired to Vcc (HIGH) or M1 (with AXISn_MODE 2).
+// * = For a pin to be considered OPEN it must be electrically disconnected (not wired in.)
 */
 #define AXIS1_MODE_OFF               // programs the RA/Az uStep mode M0/M1/M2, optional and default _OFF.
 #define AXIS1_MODE_GOTO_OFF          // programs the RA/Az uStep mode M0/M1/M2, used during gotos, optional and default _OFF.
@@ -185,5 +177,6 @@
 // THAT'S IT FOR USER CONFIGURATION!
 
 // -------------------------------------------------------------------------------------------------------------------------
+
 
 
