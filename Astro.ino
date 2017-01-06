@@ -241,6 +241,7 @@ void update_lst(double t) {
   cli(); 
   lst=lst1;
   sei();
+  lst_start=lst1;
 }
 
 // convert the lst (in 1/100 second units) into floating point hours
@@ -249,7 +250,6 @@ double LST() {
   while (tempLst>8640000) tempLst-=8640000;
   return (tempLst/8640000.0)*24.0;
 }
-
 
 double decodeTimeZone(double tz) {
   // -100 codes for :30

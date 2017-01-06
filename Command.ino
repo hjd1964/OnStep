@@ -253,7 +253,6 @@ void processCommands() {
         i2=(i2/99.99999-floor(i2/99.99999))*100;
 
         // correct for day moving forward/backward... this works for multipule days of up-time, but eventually
-        // (after several days) the time keeping will loose precision as the larger values start to consume the significant digits
         while (LMT>=24.0) { LMT=LMT-24.0; i1--; } 
         if    (LMT<0.0)   { LMT=LMT+24.0; i1++; }
         sprintf(reply,"%02d/%02d/%02d",i,i1,i2); 
@@ -295,6 +294,8 @@ void processCommands() {
       if (command[1]=='h')  { sprintf(reply,"%+02d*",minAlt); quietReply=true; } else
 //  :GL#   Get Local Time in 24 hour format
 //         Returns: HH:MM:SS#
+//         On devices with single precision fp several days up-time will cause loss of precision as additional mantissa digits are needed to represent hours
+//         Devices with double precision fp are limitated by sidereal clock overflow which takes 249 days
       if (command[1]=='L')  { i=highPrecision; highPrecision=true; LMT=timeRange(UT1-timeZone); if (!doubleToHms(reply,&LMT)) commandError=true; else quietReply=true; highPrecision=i; } else 
 //  :GM#   Get Site 1 Name
 //  :GN#   Get Site 2 Name
@@ -424,7 +425,7 @@ void processCommands() {
           } else
           if (parameter[0]=='8') { // 8n: Date/Time
             switch (parameter[1]) {
-              case '0': i=highPrecision; highPrecision=true; f=UT1; while (f>=24.0) f-=24.0; while (f<0.0) f+=24.0; doubleToHms(reply,&f); highPrecision=i; quietReply=true; break;  // UTC time
+              case '0': i=highPrecision; highPrecision=true; f=timeRange(UT1); doubleToHms(reply,&f); highPrecision=i; quietReply=true; break;  // UTC time
               case '1': f1=JD; f=UT1; while (f>=24.0) { f-=24.0; f1+=1; } while (f<0.0) { f+=24.0; f1-=1; } greg(f1,&i2,&i,&i1); i2=(i2/99.99999-floor(i2/99.99999))*100; sprintf(reply,"%d/%d/%d",i,i1,i2); quietReply=true; break; // UTC date
             }
           } else
@@ -1039,9 +1040,6 @@ void processCommands() {
             if (i<0) timeZone=i-f; else timeZone=i+f;
             b=encodeTimeZone(timeZone)+128;
             EEPROM.update(EE_sites+(currentSite)*25+8,b);
-            UT1=LMT+timeZone;
-            UT1_start  =UT1;
-            UT1mS_start=millis();
             update_lst(jd2last(JD,UT1));
           } else commandError=true; 
         } else commandError=true; 
@@ -1063,7 +1061,6 @@ void processCommands() {
           EEPROM_writeFloat(EE_LMT,LMT); 
           UT1=LMT+timeZone; 
           UT1_start=UT1;
-          UT1mS_start=millis(); 
           update_lst(jd2last(JD,UT1));
         }
         highPrecision=i;

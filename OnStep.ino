@@ -80,17 +80,17 @@
 long siderealTimer    = 0;           // counter to issue steps during tracking
 long PecSiderealTimer = 0;           // time since worm wheel zero index for PEC
 long guideSiderealTimer=0;           // counter to issue steps during guiding
-unsigned long clockTimer;            // wall time base, one second counter
+unsigned long housekeepingTimer;     // counter for timing housekeeping
 
 double UT1       = 0.0;              // the current universal time
 double UT1_start = 0.0;              // the start of UT1
-unsigned long UT1mS_start = 0;       // mS at the start of UT1
 double JD  = 0.0;                    // and date, used for computing LST
-double LMT = 0.0;                    // internally, the date and time is kept in JD/LMT and LMT is updated to keep current time
+double LMT = 0.0;                    //
 double timeZone = 0.0;               //
 
+long   lst_start = 0;                // this marks the start lst when UT1 is set 
 volatile long lst = 0;               // this is the local (apparent) sidereal time in 1/100 seconds (23h 56m 4.1s per day = 86400 clock seconds/
-                                     // 86164.09 sidereal seconds = 1.00273 clock seconds per sidereal second)
+                                     // 86164.09 sidereal seconds = 1.00273 clock seconds per sidereal second.)  Takes 249 days to roll over.
 
 long siderealInterval       = 15956313L;
 long masterSiderealInterval = siderealInterval;
@@ -1412,8 +1412,6 @@ void setup() {
   LMT=EEPROM_readFloat(EE_LMT);
   UT1=LMT+timeZone;
   UT1_start=UT1;
-  UT1mS_start=millis(); 
-
   update_lst(jd2last(JD,UT1));
   
   // get the min. and max altitude
@@ -1474,8 +1472,8 @@ void setup() {
   guideSiderealTimer = lst;
   PecSiderealTimer = lst;
   siderealTimer = lst;
+  housekeepingTimer=lst; 
   sei();
-  clockTimer=millis(); 
   last_loop_micros=micros();
 
   // autostart tracking
@@ -1499,8 +1497,8 @@ void loop() {
   // GUIDING -------------------------------------------------------------------------------------------
   if (trackingState!=TrackingMoveTo) { 
 
-    // ST4 INTERFACE -------------------------------------------------------------------------------------
 #if defined(ST4_ON) || defined(ST4_PULLUP)
+    // ST4 INTERFACE
     if (parkStatus==NotParked) {
       byte w1=digitalRead(ST4RAw); byte e1=digitalRead(ST4RAe); byte n1=digitalRead(ST4DEn); byte s1=digitalRead(ST4DEs);
       delayMicroseconds(50);
@@ -1566,13 +1564,13 @@ void loop() {
   } else DisablePec();
 #endif
 
-  // 0.01 SECOND TIMED ---------------------------------------------------------------------------------
+  // 1/100 SECOND TIMED --------------------------------------------------------------------------------
   cli(); long tempLst=lst; sei();
   if (tempLst!=siderealTimer) {
     siderealTimer=tempLst;
 
 #ifndef MOUNT_TYPE_ALTAZM
-    // WRITE PERIODIC ERROR CORRECTION TO EEPROM -------------------------------------------------------
+    // WRITE PERIODIC ERROR CORRECTION TO EEPROM
     if (pecAutoRecord>0) {
       // write PEC table to EEPROM, should do several hundred bytes/second
       pecAutoRecord--;
@@ -1580,7 +1578,7 @@ void loop() {
     }
 #endif
 
-    // SIDEREAL TRACKING -------------------------------------------------------------------------------
+    // SIDEREAL TRACKING
     // only active while sidereal tracking with a guide rate that makes sense
     if ((trackingState==TrackingSidereal) && (!((guideDirAxis1 || guideDirAxis2) && (activeGuideRate>GuideRate1x)))) {
       // apply the Tracking, Guiding, and PEC
@@ -1595,7 +1593,7 @@ void loop() {
 #endif
     }
 
-    // SIDEREAL TRACKING DURING GOTOS ------------------------------------------------------------------
+    // SIDEREAL TRACKING DURING GOTOS
     // keeps the target where it's supposed to be while doing gotos
     if (trackingState==TrackingMoveTo) {
       if (lastTrackingState==TrackingSidereal) {
@@ -1623,7 +1621,7 @@ void loop() {
     if (refraction && (lst%3!=0)) do_refractionRate_calc();
 #endif
 
-    // SAFETY CHECKS --------------------------------------------------------------------------------------
+    // SAFETY CHECKS
     // support for limit switch(es)
 #ifdef LIMIT_SENSE_ON
     byte ls1=digitalRead(LimitPin); delayMicroseconds(50); byte ls2=digitalRead(LimitPin);
@@ -1656,10 +1654,15 @@ void loop() {
     spiEnd();
   }
 #endif
-
     if (faultAxis1 || faultAxis2) { lastError=ERR_MOTOR_FAULT; if (trackingState==TrackingMoveTo) abortSlew=true; else { trackingState=TrackingNone; if (guideDirAxis1) guideDirAxis1='b'; if (guideDirAxis2) guideDirAxis2='b'; } }
     // check altitude overhead limit and horizon limit
     if ((currentAlt<minAlt) || (currentAlt>maxAlt)) { lastError=ERR_ALT; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
+
+    // UPDATE THE UT1 CLOCK
+    cli(); long cs=lst; sei();
+    double t2=(double)((cs-lst_start)/100.0)/1.00273790935;
+    // This just needs to be accurate to the nearest second, it's about 10x better
+    UT1=UT1_start+(t2/3600.0);
   }
 
   // WORKLOAD MONITORING -------------------------------------------------------------------------------
@@ -1668,37 +1671,31 @@ void loop() {
   if (loop_time>worst_loop_time) worst_loop_time=loop_time;
   last_loop_micros=this_loop_micros;
 
-
-  // HOUSEKEEPING --------------------------------------------------------------------------------------
-  // timer... falls in once a second, keeps the universal time clock ticking,
-  // handles PPS GPS signal processing, watches safety limits, adjusts tracking rate for refraction
-  unsigned long m=millis();
-  if ((long)(m-(clockTimer+999UL))>0) {
-    clockTimer=m;
+  // 1 SECOND TIMED ------------------------------------------------------------------------------------
+  cli(); long cs=lst; sei();
+  if ((long)(cs-(housekeepingTimer+99L))>0) {
+    housekeepingTimer=cs;
 
     // for testing, average steps per second
-    if (debugv1>100000) debugv1=100000; if (debugv1<0) debugv1=0;
+//    if (debugv1>100000) debugv1=100000; if (debugv1<0) debugv1=0;
+//    debugv1=(debugv1*19+(targetAxis1.part.m*1000-lasttargetAxis1))/20;
+//    lasttargetAxis1=targetAxis1.part.m*1000;
     
-    debugv1=(debugv1*19+(targetAxis1.part.m*1000-lasttargetAxis1))/20;
-    lasttargetAxis1=targetAxis1.part.m*1000;
-    
-    // update the UT1 CLOCK
-    // this clock doesn't rollover (at 24 hours) since that would cause date confusion
-    double t2=(double)(m-UT1mS_start)/1000.0;
-    UT1=UT1_start+t2/3600.0;   // This just needs to be accurate to the nearest second, it's about 10x better
-    
+    // adjust tracking rate for Alt/Azm mounts
+    // adjust tracking rate for refraction
+    SetDeltaTrackingRate();
+
+    // basic check to see if we're not at home
+    if (trackingState!=TrackingNone) atHome=false;
+
 #ifdef PEC_SENSE
     // see if we're on the PEC index
     if (trackingState==TrackingSidereal) 
     pecAnalogValue = analogRead(AnalogPecPin);
 #endif
     
-    // adjust tracking rate for Alt/Azm mounts
-    // adjust tracking rate for refraction
-    SetDeltaTrackingRate();
-
 #ifdef PPS_SENSE_ON
-    // update clock
+    // update clock via PPS
     if (trackingState==TrackingSidereal) {
       cli();
       PPSrateRatio=((double)1000000.0/(double)(PPSavgMicroS));
@@ -1712,11 +1709,13 @@ void loop() {
 #endif
 
 #ifdef STATUS_LED_PINS_ON
-    if (trackingState!=TrackingSidereal) if (!LED_ON) { digitalWrite(LEDnegPin,LOW); LED_ON=true; }   // indicate PWR on 
+    // LED indicate PWR on 
+    if (trackingState!=TrackingSidereal) if (!LED_ON) { digitalWrite(LEDnegPin,LOW); LED_ON=true; }
 #endif
 #ifdef STATUS_LED2_PINS_ON
-    if (trackingState==TrackingNone) if (LED2_ON) { digitalWrite(LEDneg2Pin,HIGH); LED2_ON=false; }   // indicate STOP
-    if (trackingState==TrackingMoveTo) if (!LED2_ON) { digitalWrite(LEDneg2Pin,LOW); LED2_ON=true; }  // indicate GOTO
+    // LED indicate STOP and GOTO
+    if (trackingState==TrackingNone) if (LED2_ON) { digitalWrite(LEDneg2Pin,HIGH); LED2_ON=false; }
+    if (trackingState==TrackingMoveTo) if (!LED2_ON) { digitalWrite(LEDneg2Pin,LOW); LED2_ON=true; }
 #endif
 
     // safety checks, keeps mount from tracking past the meridian limit, past the UnderPoleLimit, below horizon limit, above the overhead limit, or past the Dec limits
@@ -1752,9 +1751,6 @@ void loop() {
 #ifndef MOUNT_TYPE_ALTAZM
     if ((getApproxDec()<MinDec) || (getApproxDec()>MaxDec)) { lastError=ERR_DEC; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
 #endif      
-
-    // basic check to see if we're not at home
-    if (trackingState!=TrackingNone) atHome=false;
 
   } else {
   // COMMAND PROCESSING --------------------------------------------------------------------------------
