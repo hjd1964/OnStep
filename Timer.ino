@@ -235,7 +235,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
   }
 
   if (trackingState==TrackingMoveTo) {
-    // trigger Goto step mode, rapid acceleration (low StepsForRateChange) can leave too little time
+    // trigger Goto step mode, rapid acceleration (low DegreesForAcceleration) can leave too little time
     // until the home position arrives to actually switch to tracking micro-step mode. the larger step size
     // then causes backlash compensation to activate which in-turn keeps goto micro-step mode from turning off
     #if defined(AXIS2_MODE) && defined(AXIS2_MODE_GOTO)
