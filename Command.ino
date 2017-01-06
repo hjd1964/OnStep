@@ -1250,7 +1250,7 @@ void processCommands() {
        if (parameter[0]==0) { i=pecIndex1; } else conv_result=atoi2(parameter,&i);
        if ((conv_result) && ((i>=0) && (i<PECBufferSize))) {
          if (parameter[0]==0) {
-           i=(i-1)%SecondsPerWormRotationAxis1;
+           i-=1; if (i<0) i+=SecondsPerWormRotationAxis1; if (i>=SecondsPerWormRotationAxis1) i-=SecondsPerWormRotationAxis1;
            i1=pecBuffer[i]-128; sprintf(reply,"%+04i,%03i",i1,i);
          } else {
            i1=pecBuffer[i]-128; sprintf(reply,"%+04i",i1);
