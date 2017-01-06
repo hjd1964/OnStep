@@ -126,8 +126,8 @@
 
 #define MinutesPastMeridianE      60 // for goto's, how far past the meridian to allow before we do a flip (if on the East side of the pier) - one hour of RA is the default = 60.  Sometimes used for Fork mounts in Align mode.  Ignored on Alt/Azm mounts.
 #define MinutesPastMeridianW      60 // as above, if on the West side of the pier.  If left alone, the mount will stop tracking when it hits the this limit.  Sometimes used for Fork mounts in Align mode.  Ignored on Alt/Azm mounts.
-#define UnderPoleLimit             9 // maximum allowed hour angle (+/-) under the celestial pole. OnStep will flip the mount and move the Dec. >90 degrees (+/-) once past this limit.  Sometimes used for Fork mounts in Align mode.  Ignored on Alt/Azm mounts.
-                                     // If left alone, the mount will stop tracking when it hits this limit.  Valid range is 7 to 11 hours.
+#define UnderPoleLimit            12 // maximum allowed hour angle (+/-) under the celestial pole.  Default=12.  Ignored on Alt/Azm mounts.
+                                     // If left alone, the mount will stop tracking when it hits this limit.  Valid range is 10 to 12 hours.
 #define MinDec                   -91 // minimum allowed declination, default = -91 (off)  Ignored on Alt/Azm mounts.
 #define MaxDec                   +91 // maximum allowed declination, default =  91 (off)  Ignored on Alt/Azm mounts.
                                      // For example, a value of +80 would stop gotos/tracking near the north celestial pole.
@@ -156,9 +156,12 @@
 // micro-stepping modes: 5=32x, 4=16x, 3=8x, 2=4x, 1=2x, 0=1x (RAPS128 also supports 6=64x, 7=128x)
 //
 // SilentStepStick TMC2100/2130 configurations (M0 is CFG1, M1 is CFG2, M2 is CFG3):
-// use MODE_SWITCH_BEFORE_SLEW_ON
-// I recommend keeping CFG3 and CFG2 open (not connected) CFG1 can then be pulled low for 16x micro-stepping (256x intpol) in spreadCycle mode (0b110000 = 48 = OPEN/OPEN/OUTPUT, ignore/ignore/LOW)
-// or keep CFG3 and CFG1 open (not connected) and CFG2 can be pulled high for 4x micro-stepping (256x intpol) in spreadCycle mode (0b101010 = 42 = OPEN/OUTPUT/OPEN, ignore/HIGH/ignore)
+// use MODE_SWITCH_BEFORE_SLEW_OFF.  CFG3 should always be OPEN*.  AXISn_MODE_GOTO_OFF is recommended so AXISn_STEP_GOTO would then be 1.
+// Some useful modes (all with 256x interpolation):
+// 16x stealthChop: CFG1 and CFG2 are both OPEN*.
+// 16x spreadCycle: CFG1 can be wired to GND (LOW) or M0 (with AXISn_MODE 0).  CFG2 should be OPEN*.  
+// 4x  spreadCycle: CFG2 should be OPEN*.  CFG2 can be wired to Vcc (HIGH) or M1 (with AXISn_MODE 2).
+// * = For a pin to be considered OPEN it must be electrically disconnected (not wired in.)
 //
 // SilentStepStick TMC2130 SPI configurations:
 // use MODE_SWITCH_BEFORE_SLEW_SPI.  Default operation in spreadCycle and with 256x interpolation on:
