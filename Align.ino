@@ -227,7 +227,7 @@ void TAlign::t_sub2(double F, double H) {
 
 //
 // BESTZ3
-// range is range the search distance +/- in degrees
+// nrange to range is the search area in degrees
 // incr is the increment distance across that range in +/- degrees
 void TAlign::bestZ3(int N, double nrange, double range, double incr) {
   double HA1,Dec1;
@@ -235,7 +235,7 @@ void TAlign::bestZ3(int N, double nrange, double range, double incr) {
   double BestZ3=180.0;
   double BestDist=180.0;
 
-  // +/- 10 degrees range for our search
+  // search
   for (Z3=nrange; Z3<=range; Z3+=incr) {
     // for each star
     for (int J=0; J<N; J++) {
@@ -326,8 +326,8 @@ the doCor  term is 0 in HA
 the pdCor  term is 1 in HA
 */
 
-// I=1 for 1st star, I=2 for 2nd star, both must be initialized before use
-// N=total number of stars for this align
+// I=1 for 1st star, I=2 for 2nd star, I=3 for 3rd star
+// N=total number of stars for this align (1 to 3)
 // RA, Dec (all in degrees)
 bool TGeoAlign::addStar(int I, int N, double RA, double Dec) {
 
