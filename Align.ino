@@ -45,8 +45,8 @@ void TAlign::addStar(int I, int N, double B, double D, double H, double F) {
       bestZ3(N,Z3-0.5,Z3+0.5,0.062);  // 16x
 //    bestZ12(N);
     }
-    return;
   }
+  if (I>2) return;
 
   // HAVE STAR, PREPARE
   X[1][I]=cos(D/Rad)*cos(B/Rad);
