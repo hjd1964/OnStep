@@ -287,12 +287,16 @@ void TGeoAlign::init() {
   azmCor=0;  // - is right of the pole, + is left
   doCor =0;  // declination/optics orthogonal correction (Z2)
   pdCor =0;  // declination/polar orthogonal correction  (Z1)
+  dfCor =0;  // fork or declination axis flex
+  tfCor =0;  // tube flex
 
   geo_ready=false;
 }
 
 // remember the alignment between sessions
 void TGeoAlign::readCoe() {
+  dfCor=EEPROM_readFloat(EE_dfCor);  // dfCor is ffCor for fork mounts
+  tfCor=EEPROM_readFloat(EE_tfCor);
   doCor=EEPROM_readFloat(EE_doCor);
   pdCor=EEPROM_readFloat(EE_pdCor);
   altCor=EEPROM_readFloat(EE_altCor);
@@ -300,6 +304,8 @@ void TGeoAlign::readCoe() {
 }
 
 void TGeoAlign::writeCoe() {
+  EEPROM_writeFloat(EE_dfCor,dfCor);  // dfCor is ffCor for fork mounts
+  EEPROM_writeFloat(EE_tfCor,tfCor);
   EEPROM_writeFloat(EE_doCor,doCor);
   EEPROM_writeFloat(EE_pdCor,pdCor);
   EEPROM_writeFloat(EE_altCor,altCor);
@@ -430,8 +436,10 @@ void TGeoAlign::EquToInstr(double Lat, double HA, double Dec, double *HA1, doubl
   if (abs(Dec)<89.98333333) {
     double h =HA/Rad;
     double d =Dec/Rad;
-    double dSin=sin(d);
-    double dCos=cos(d);
+    double sinDec=sin(d);
+    double cosDec=cos(d);
+    double sinHA =sin(h);
+    double cosHA =cos(h);
     double p=1.0; if (pierSide==PierSideWest) p=-1.0;
 
     // ------------------------------------------------------------
@@ -440,17 +448,29 @@ void TGeoAlign::EquToInstr(double Lat, double HA, double Dec, double *HA1, doubl
     // equator and the effect on declination is 0. At the SCP it
     // becomes a (N) offset.  Unchanged with meridian flips.
     // expressed as a correction to the Polar axis misalignment
-    double DOh = doCor*(1.0/dCos)*p;
+    double DOh=doCor*(1.0/cosDec)*p;
 
     // ------------------------------------------------------------
     // misalignment due to Dec axis being perp. to RA axis
-    double PDh =-pdCor*(dSin/dCos)*p;
+    double PDh=-pdCor*(sinDec/cosDec)*p;
+
+#if defined (MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT)
+    // Fork flex
+    double DFd=dfCor*cosHA;
+#else
+    // Axis flex
+    double DFd=-dfCor*(cosLat*cosHA+sinLat*(sinDec/cosDec));
+#endif
+
+    // Tube flex
+    double TFh=tfCor*(cosLat*sinHA*(1.0/cosDec));
+    double TFd=tfCor*(cosLat*cosHA-sinLat*cosDec);
 
     // polar misalignment
-    double h1=-azmCor*cos(h)*(dSin/dCos) + altCor*sin(h)*(dSin/dCos);
-    double d1=+azmCor*sin(h)             + altCor*cos(h);
-    *HA1 =HA +(h1+PDh+DOh);
-    *Dec1=Dec+ d1;
+    double h1=-azmCor*cosHA*(sinDec/cosDec) + altCor*sinHA*(sinDec/cosDec);
+    double d1=+azmCor*sinHA                 + altCor*cosHA;
+    *HA1 =HA +(h1+PDh+DOh+TFh);
+    *Dec1=Dec+(d1+DFd+TFd);
   } else {
     // just ignore the the correction if right on the pole
     *HA1 =HA;
@@ -460,7 +480,19 @@ void TGeoAlign::EquToInstr(double Lat, double HA, double Dec, double *HA1, doubl
   while (*HA1>180.0) *HA1-=360.0;
   while (*HA1<-180.0) *HA1+=360.0;
   
-  // finally, apply the index offsets
+#ifndef MOUNT_TYPE_ALTAZM
+  // switch to under the pole coordinates
+  if ((Lat>=0) && ((abs(*HA1)>(double)UnderPoleLimit*15.0))) {
+    *HA1 =*HA1-180.0; while (*HA1<-180.0) *HA1=*HA1+360.0;
+    *Dec1=(90.0-*Dec1)+90.0;
+  }
+  if ((Lat<0) && ((abs(*HA1)>(double)UnderPoleLimit*15.0) )) {
+    *HA1 =*HA1-180.0; while (*HA1<-180.0) *HA1=*HA1+360.0;
+    *Dec1=(-90.0-*Dec1)-90.0;
+  }
+#endif
+
+// finally, apply the index offsets
   *HA1-=indexAxis1; *Dec1-=indexAxis2;
 }
 
@@ -469,6 +501,12 @@ void TGeoAlign::InstrToEqu(double Lat, double HA, double Dec, double *HA1, doubl
   // remove the index offsets
   HA+=indexAxis1; Dec+=indexAxis2;
 
+#ifndef MOUNT_TYPE_ALTAZM
+  // switch from under the pole coordinates
+  if (Dec>90.0) { Dec=(90.0-Dec)+90; HA=HA-180.0; }
+  if (Dec<-90.0) { Dec=(-90.0-Dec)-90.0; HA=HA-180.0; }
+#endif
+
   while (HA>180.0) HA-=360.0;
   while (HA<-180.0) HA+=360.0;
 
@@ -476,8 +514,10 @@ void TGeoAlign::InstrToEqu(double Lat, double HA, double Dec, double *HA1, doubl
   if (abs(Dec)<89.98333333) {
     double h =HA/Rad;
     double d =Dec/Rad;
-    double dSin=sin(d);
-    double dCos=cos(d);
+    double sinDec=sin(d);
+    double cosDec=cos(d);
+    double sinHA =sin(h);
+    double cosHA =cos(h);
     double p=1.0; if (pierSide==PierSideWest) p=-1.0;
 
     // ------------------------------------------------------------
@@ -486,18 +526,31 @@ void TGeoAlign::InstrToEqu(double Lat, double HA, double Dec, double *HA1, doubl
     // equator and the effect on declination is 0. At the SCP it
     // becomes a (N) offset.  Unchanged with meridian flips.
     // expressed as a correction to the Polar axis misalignment
-    double DOh = doCor*(1.0/dCos)*p;
+    double DOh=doCor*(1.0/cosDec)*p;
 
     // as the above offset becomes zero near the equator, the affect
-    // works on HA instead.  meridian flips effect this in HA
-    double PDh =-pdCor*(dSin/dCos)*p;
+    // works on HA instead.  meridian flips affect this in HA
+    double PDh=-pdCor*(sinDec/cosDec)*p;
 
+#if defined (MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT)
+    // Fork flex
+    double DFd=dfCor*cosHA;
+#else
+    // Axis flex
+    double DFd=-dfCor*(cosLat*cosHA+sinLat*(sinDec/cosDec));
+#endif
+
+    // Tube flex
+    double TFh=tfCor*(cosLat*sinHA*(1.0/cosDec));
+    double TFd=tfCor*(cosLat*cosHA-sinLat*cosDec);
+   
     // ------------------------------------------------------------
     // polar misalignment
-    double h1=-azmCor*cos(h)*(dSin/dCos) + altCor*sin(h)*(dSin/dCos);
-    double d1=+azmCor*sin(h)             + altCor*cos(h);
-    *HA1 =HA -(h1+PDh+DOh);
-    *Dec1=Dec- d1;
+    double h1=-azmCor*cosHA*(sinDec/cosDec) + altCor*sinHA*(sinDec/cosDec);
+    double d1=+azmCor*sinHA                 + altCor*cosHA;
+
+    *HA1 =HA -(h1+PDh+DOh+TFh);
+    *Dec1=Dec-(d1+DFd+TFd);
   } else {
     // just ignore the the correction if right on the pole
     *HA1=HA;

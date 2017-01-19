@@ -909,42 +909,44 @@ char ST4DE_last = 0;
 // 0-1023 bytes
 // general purpose storage 0..99
 
-#define EE_posAxis1    0
-#define EE_posAxis2    4
-#define EE_pierSide    8
-#define EE_parkStatus  9
-#define EE_parkSaved   10
+#define EE_posAxis1    0      // 4
+#define EE_posAxis2    4      // 4
+#define EE_pierSide    8      // 1
+#define EE_parkStatus  9      // 1
+#define EE_parkSaved   10     // 1
 
-#define EE_currentSite 11
-#define EE_LMT         14
-#define EE_JD          18
+#define EE_currentSite 11     // 1 +2
+#define EE_LMT         14     // 4
+#define EE_JD          18     // 4
 
-#define EE_pulseGuideRate 22
-#define EE_maxRate     23
+#define EE_pulseGuideRate 22  // 1
+#define EE_maxRate     23     // 2
 
-#define EE_autoContinue 25
+#define EE_autoContinue 25    // 1
 
-#define EE_trueAxis1   30
-#define EE_trueAxis2   34
+#define EE_dfCor       26     // 4
 
-#define EE_minAlt      40
-#define EE_maxAlt      41
+#define EE_trueAxis1   30     // 4
+#define EE_trueAxis2   34     // 4 +3
 
-#define EE_doCor       42
-#define EE_pdCor       46
-#define EE_altCor      50
-#define EE_azmCor      54
-#define EE_indexAxis1  58
-#define EE_indexAxis2  62
+#define EE_minAlt      40     // 1
+#define EE_maxAlt      41     // 1
 
-#define EE_pecStatus   70
-#define EE_pecRecorded 71
-#define EE_wormSensePos 76
+#define EE_doCor       42     // 4
+#define EE_pdCor       46     // 4
+#define EE_altCor      50     // 4
+#define EE_azmCor      54     // 4
+#define EE_indexAxis1  58     // 4
+#define EE_indexAxis2  62     // 4
+#define EE_tfCor       66     // 4
 
-#define EE_backlashAxis1 80
-#define EE_backlashAxis2 84
+#define EE_pecStatus   70     // 1
+#define EE_pecRecorded 71     // 1 +4
+#define EE_wormSensePos 76    // 4
 
-#define EE_siderealInterval 88
+#define EE_backlashAxis1 80   // 4
+#define EE_backlashAxis2 84   // 4
+#define EE_siderealInterval 88  // 4 +4
 
 #define EE_autoInitKey 96
 

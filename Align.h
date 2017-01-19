@@ -66,6 +66,8 @@ class TGeoAlign
     double azmCor;
     double doCor;
     double pdCor;
+    double dfCor;
+    double tfCor;
 
     TGeoAlign();
     ~TGeoAlign();

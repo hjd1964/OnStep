@@ -421,6 +421,14 @@ void processCommands() {
               case '3': sprintf(reply,"%ld",(long)(GeoAlign.azmCor*3600.0)); quietReply=true; break;   // azmCor
               case '4': sprintf(reply,"%ld",(long)(GeoAlign.doCor*3600.0)); quietReply=true; break;    // doCor
               case '5': sprintf(reply,"%ld",(long)(GeoAlign.pdCor*3600.0)); quietReply=true; break;    // pdCor
+#if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT)
+              case '6': sprintf(reply,"%ld",(long)(GeoAlign.dfCor*3600.0)); quietReply=true; break;    // ffCor
+              case '7': sprintf(reply,"%ld",(long)(0)); quietReply=true; break;                        // dfCor
+#else
+              case '6': sprintf(reply,"%ld",(long)(0)); quietReply=true; break;                        // ffCor
+              case '7': sprintf(reply,"%ld",(long)(GeoAlign.dfCor*3600.0)); quietReply=true; break;    // dfCor
+#endif
+              case '8': sprintf(reply,"%ld",(long)(GeoAlign.tfCor*3600.0)); quietReply=true; break;    // tfCor
             }
           } else
           if (parameter[0]=='8') { // 8n: Date/Time
@@ -1141,12 +1149,20 @@ void processCommands() {
       if (command[1]=='X')  { 
         if (parameter[0]=='0') { // 0n: Align Model
           switch (parameter[1]) {
-            case '0': indexAxis1=(double)strtol(&parameter[3],NULL,10)/3600.0; break;       // indexAxis1
-            case '1': indexAxis2=(double)strtol(&parameter[3],NULL,10)/3600.0; break;       // indexAxis2
+            case '0': indexAxis1=(double)strtol(&parameter[3],NULL,10)/3600.0; break;        // indexAxis1
+            case '1': indexAxis2=(double)strtol(&parameter[3],NULL,10)/3600.0; break;        // indexAxis2
             case '2': GeoAlign.altCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;   // altCor
             case '3': GeoAlign.azmCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;   // azmCor
             case '4': GeoAlign.doCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;    // doCor
             case '5': GeoAlign.pdCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;    // pdCor
+#if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT)
+            case '6': GeoAlign.dfCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;    // ffCor
+            case '7': break;                                                                 // dfCor
+#else
+            case '6': break;                                                                 // ffCor
+            case '7': GeoAlign.dfCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;    // dfCor
+#endif
+            case '8': GeoAlign.tfCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;    // tfCor
           }
         } else
         if (parameter[0]=='9') { // 9n: Misc.
