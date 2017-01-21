@@ -2,6 +2,12 @@
 // Communication routines for Serial0 and Serial1
 // these are more compact and faster than the Arduino provided one's
 
+void lookf(const char comment[], double f)
+{
+  char temp[10];
+  Serial1_send(comment); dtostrf(f,4,6,temp); Serial1_send(temp); Serial1_send("\r\n");
+}
+
 #if defined(__AVR_ATmega2560__)
 
 void Serial_Init(unsigned long baud) {

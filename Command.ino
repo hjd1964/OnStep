@@ -935,8 +935,10 @@ void processCommands() {
       if (command[0]=='Q') {
         if (command[1]==0) {
           if ((parkStatus==NotParked) || (parkStatus==Parking)) {
+            cli();
             if (guideDirAxis1) guideDirAxis1='b'; // break
             if (guideDirAxis2) guideDirAxis2='b'; // break
+            sei();
             if (trackingState==TrackingMoveTo) { abortSlew=true; }
           }
           quietReply=true; 
@@ -945,7 +947,9 @@ void processCommands() {
 //         Returns: Nothing
         if ((command[1]=='e') || (command[1]=='w')) { 
           if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
+            cli();
             if (guideDirAxis1) guideDirAxis1='b'; // break
+            sei();
           }
           quietReply=true; 
         } else
@@ -953,7 +957,9 @@ void processCommands() {
 //         Returns: Nothing
         if ((command[1]=='n') || (command[1]=='s')) {
           if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
+            cli();
             if (guideDirAxis2) guideDirAxis2='b'; // break
+            sei();
           }
           quietReply=true; 
         } else commandError=true;

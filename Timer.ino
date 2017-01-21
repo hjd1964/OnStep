@@ -148,7 +148,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
       }
       // stop guiding
       if (guideDirAxis1=='b') {
-        if (fabs(x)<BreakDistAxis1) { guideDirAxis1=0; guideTimerRateAxis1=0; guideTimerRateAxis1A=0; DecayModeTracking(); }
+        if (fabs(x)<=BreakDistAxis1) { guideDirAxis1=0; guideTimerRateAxis1=0; guideTimerRateAxis1A=0; DecayModeTracking(); }
       }
     }
 
@@ -192,7 +192,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
       }
       // stop guiding
       if (guideDirAxis2=='b') {
-        if (x<BreakDistAxis2) { guideDirAxis2=0; guideTimerRateAxis2=0; guideTimerRateAxis2A=0; DecayModeTracking(); }
+        if (x<=BreakDistAxis2) { guideDirAxis2=0; guideTimerRateAxis2=0; guideTimerRateAxis2A=0; DecayModeTracking(); }
       }
     }
 
@@ -239,10 +239,10 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     // until the home position arrives to actually switch to tracking micro-step mode. the larger step size
     // then causes backlash compensation to activate which in-turn keeps goto micro-step mode from turning off
     #if defined(AXIS2_MODE) && defined(AXIS2_MODE_GOTO)
-    gotoRateAxis2=(thisTimerRateAxis2<128*16L);   // activate <128us rate
+    gotoRateAxis2=(thisTimerRateAxis2<50*16L);   // activate <50us rate
     #endif
     #if defined(AXIS1_MODE) && defined(AXIS1_MODE_GOTO)
-    gotoRateAxis1=(thisTimerRateAxis1<128*16L);   // activate <128us rate
+    gotoRateAxis1=(thisTimerRateAxis1<50*16L);   // activate <50us rate
     #endif
   }
   
@@ -304,7 +304,7 @@ ISR(TIMER3_COMPA_vect)
   // switch micro-step mode
   if (gotoModeAxis1!=gotoRateAxis1) {
     // only when at the home position
-    if (((posAxis1+blAxis1)-trueAxis1)%256==0) { // was 1024 in support of 256x drivers... if they work like the DRV8825, A4988 this should still be ok
+    if (((posAxis1+blAxis1)-trueAxis1)%128==0) { // was 1024 in support of 256x drivers... should be good for up to 128x now
       // switch mode
       if (gotoModeAxis1) { stepAxis1=1; modeAxis1_next=AXIS1_MODE; gotoModeAxis1=false; } else { stepAxis1=AXIS1_STEP_GOTO; modeAxis1_next=AXIS1_MODE_GOTO; gotoModeAxis1=true; }
       digitalWrite(Axis1_M0,(modeAxis1_next & 1));
@@ -394,7 +394,7 @@ ISR(TIMER4_COMPA_vect)
   // switch micro-step mode
   if (gotoModeAxis2!=gotoRateAxis2) {
     // only when at home position
-    if (((posAxis2+blAxis2)-trueAxis2)%256==0) { // was 1024 in support of 256x drivers... if they work like the DRV8825, A4988 this should still be ok
+    if (((posAxis2+blAxis2)-trueAxis2)%128==0) { // was 1024 in support of 256x drivers... should be good for up to 128x now
       // switch mode
       if (gotoModeAxis2) { stepAxis2=1; modeAxis2_next=AXIS2_MODE; gotoModeAxis2=false; } else { stepAxis2=AXIS2_STEP_GOTO; modeAxis2_next=AXIS2_MODE_GOTO; gotoModeAxis2=true; }
       digitalWrite(Axis2_M0,(modeAxis2_next & 1));
