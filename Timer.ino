@@ -304,7 +304,7 @@ ISR(TIMER3_COMPA_vect)
   // switch micro-step mode
   if (gotoModeAxis1!=gotoRateAxis1) {
     // only when at the home position
-    if (((posAxis1+blAxis1)-trueAxis1)%128==0) { // was 1024 in support of 256x drivers... should be good for up to 128x now
+    if (((posAxis1+blAxis1)-trueAxis1)%128==0) { // good for up to 128x micro-stepping
       // switch mode
       if (gotoModeAxis1) { stepAxis1=1; modeAxis1_next=AXIS1_MODE; gotoModeAxis1=false; } else { stepAxis1=AXIS1_STEP_GOTO; modeAxis1_next=AXIS1_MODE_GOTO; gotoModeAxis1=true; }
       digitalWrite(Axis1_M0,(modeAxis1_next & 1));
@@ -394,7 +394,7 @@ ISR(TIMER4_COMPA_vect)
   // switch micro-step mode
   if (gotoModeAxis2!=gotoRateAxis2) {
     // only when at home position
-    if (((posAxis2+blAxis2)-trueAxis2)%128==0) { // was 1024 in support of 256x drivers... should be good for up to 128x now
+    if (((posAxis2+blAxis2)-trueAxis2)%128==0) { // good for up to 128x micro-stepping
       // switch mode
       if (gotoModeAxis2) { stepAxis2=1; modeAxis2_next=AXIS2_MODE; gotoModeAxis2=false; } else { stepAxis2=AXIS2_STEP_GOTO; modeAxis2_next=AXIS2_MODE_GOTO; gotoModeAxis2=true; }
       digitalWrite(Axis2_M0,(modeAxis2_next & 1));
