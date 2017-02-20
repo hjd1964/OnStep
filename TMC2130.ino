@@ -41,7 +41,7 @@ void TMC2130_setup(bool intpol, bool stealth_chop, byte micro_step_mode, bool lo
   // voltage on AIN is current reference
   data_out=0x00000001UL;
   // set stealthChop bit
-  if (stealth_chop) data_out|=0x00000004UL; 
+  if (stealth_chop) data_out|=0x00000004UL;
   TMC2130_write(REG_GCONF,data_out);
   spiPause();
 
