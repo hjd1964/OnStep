@@ -111,8 +111,10 @@ boolean setHome() {
   guideDurationDec    = 0;
   guideDurationLastDec= 0;
 
+  // initialize/disable the stepper drivers
   digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
   digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
+  DecayModeTracking();
 
   cli();
   targetAxis1.part.m = startAxis1; targetAxis1.part.f = 0;
@@ -125,9 +127,6 @@ boolean setHome() {
   blAxis2            = 0;
   sei();
   
-  // initialize/disable the stepper drivers
-  DecayModeTracking();
-
   return true;
 }
 

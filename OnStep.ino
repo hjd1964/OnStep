@@ -1,8 +1,8 @@
 /*
- * Title       On-Step
+ * Title       OnStep
  * by          Howard Dutton
  *
- * Copyright (C) 2012 to 2016 Howard Dutton
+ * Copyright (C) 2012 to 2017 Howard Dutton
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,8 +67,8 @@
 #endif
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "10 18 16"
-#define FirmwareNumber "1.0a36"
+#define FirmwareDate   "01 20 17"
+#define FirmwareNumber "1.0a"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
@@ -677,7 +677,6 @@ bool   autoContinue = false;                       // automatically do a meridia
 
 #endif
 
-
 #if defined(AXIS1_DISABLED_HIGH)
 #define Axis1_Disabled HIGH
 #define Axis1_Enabled LOW
@@ -1157,15 +1156,13 @@ void setup() {
   #endif
 #endif
   
-  // disable the stepper drivers for now, if the enable lines are connected
+  // initialize/disable the stepper drivers
   pinMode(Axis1_EN,OUTPUT); digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
   pinMode(Axis2_EN,OUTPUT); digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
+  DecayModeTracking();
 
 // if the stepper driver mode select pins are wired in, program any requested micro-step mode
-#ifdef MODE_SWITCH_BEFORE_SLEW_ON
-  // automatic mode switching before/after slews, initialize micro-step mode
-  DecayModeTracking();
-#else
+#ifdef MODE_SWITCH_BEFORE_SLEW_OFF
   // automatic mode switching during slews, initialize micro-step mode
   #ifdef AXIS1_MODE
     if ((AXIS1_MODE & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE    & 1)); } else { pinMode(Axis1_M0,INPUT); }
