@@ -367,9 +367,9 @@ bool TGeoAlign::addStar(int I, int N, double RA, double Dec) {
       double IH2=indexAxis1;
       double ID2=indexAxis2;
 
-      indexAxis1  = (IH2+IH1)/2.0;                      // average offset in HA
+      indexAxis1  = (IH2+IH1)/2.0;              // average offset in HA
       indexAxis1Steps = (long)(indexAxis1*(double)StepsPerDegreeAxis1);
-      indexAxis2  = (ID2-ID1)/2.0;                      // new offset in Dec
+      indexAxis2  = (ID2-ID1)/2.0;              // new offset in Dec
       indexAxis2Steps = (long)(indexAxis2*(double)StepsPerDegreeAxis2);
 
       double IH3=indexAxis1;
