@@ -387,7 +387,6 @@ void Ethernet_get() {
       EEPROM.update(EE_sites+(currentSite)*25+8,b);
       UT1=LMT+timeZone;
       UT1_start  =UT1;
-      UT1mS_start=millis();
       update_lst(jd2last(JD,UT1));
     }
   }
@@ -426,7 +425,6 @@ void Ethernet_get() {
         EEPROM_writeFloat(EE_LMT,LMT); 
         UT1=LMT+timeZone; 
         UT1_start  =UT1;
-        UT1mS_start=millis(); 
         update_lst(jd2last(JD,UT1)); 
       }
       highPrecision=i;
@@ -434,16 +432,54 @@ void Ethernet_get() {
   }
   // Align
   if ((get_names[0]=='a') && (get_names[1]=='l')) {
-    if ((get_vals[0]=='1') && (get_vals[1]==0)) startAlign(1);
-    if ((get_vals[0]=='2') && (get_vals[1]==0)) startAlign(2);
-    if ((get_vals[0]=='3') && (get_vals[1]==0)) startAlign(3);
-    if ((get_vals[0]=='4') && (get_vals[1]==0)) startAlign(4);
-    if ((get_vals[0]=='5') && (get_vals[1]==0)) startAlign(5);
-    if ((get_vals[0]=='6') && (get_vals[1]==0)) startAlign(6);
-    if ((get_vals[0]=='7') && (get_vals[1]==0)) startAlign(7);
-    if ((get_vals[0]=='8') && (get_vals[1]==0)) startAlign(8);
-    if ((get_vals[0]=='9') && (get_vals[1]==0)) startAlign(9);
-    if ((get_vals[0]=='n') && (get_vals[1]==0)) nextAlign();
+    if ((get_vals[0]!='n') && (get_vals[1]==0)) {
+      // Two star and three star align not supported with Fork mounts in alternate mode
+#ifdef MOUNT_TYPE_FORK_ALT
+      if (get_vals[0]=='1') {
+#endif
+    
+      // telescope should be set in the polar home (CWD) for a starting point
+      // this command sets indexAxis1, indexAxis2, azmCor=0; altCor=0;
+      setHome();
+      
+      // enable the stepper drivers
+      digitalWrite(Axis1_EN,Axis1_Enabled); axis1Enabled=true;
+      digitalWrite(Axis2_EN,Axis2_Enabled); axis2Enabled=true;
+      delay(10);
+    
+      // start tracking
+      trackingState=TrackingSidereal;
+    
+      // start align...
+      alignNumStars=get_vals[0]-'0';
+      alignThisStar=1;
+   
+#if defined(MOUNT_TYPE_FORK_ALT)
+      } else { alignNumStars=0; alignThisStar=1; }
+#endif
+    }
+    if ((get_vals[0]=='n') && (get_vals[1]==0)) {
+      // after last star turn meridian flips off when align is done
+      if ((alignNumStars==alignThisStar) && (meridianFlip==MeridianFlipAlign)) meridianFlip=MeridianFlipNever;
+    
+#ifdef MOUNT_TYPE_ALTAZM
+      // AltAz Taki method
+      if ((alignNumStars>1) && (alignThisStar<=alignNumStars)) {
+        cli();
+        // get the Azm/Alt
+        double F=(double)(posAxis1+indexAxis1Steps)/(double)StepsPerDegreeAxis1;
+        double H=(double)(posAxis2+indexAxis2Steps)/(double)StepsPerDegreeAxis2;
+        sei();
+        // B=RA, D=Dec, H=Elevation (instr), F=Azimuth (instr), all in degrees
+        Align.addStar(alignThisStar,alignNumStars,haRange(LST()*15.0-newTargetRA),newTargetDec,H,F);
+        alignThisStar++;
+      } else
+#endif
+      if (alignThisStar<=alignNumStars) {
+        // RA, Dec (in degrees)
+        if (GeoAlign.addStar(alignThisStar,alignNumStars,newTargetRA,newTargetDec)) alignThisStar++; else { alignNumStars=0; alignThisStar=0; }
+      } else { alignNumStars=0; alignThisStar=0; }
+    }
   }
   // Home/Park
   if ((get_names[0]=='h') && (get_names[1]=='m')) {
@@ -723,7 +759,7 @@ if (html_page_step==++stp) {
 #else
 #if defined(MOUNT_TYPE_GEM) || defined(MOUNT_TYPE_FORK)
   if (html_page_step==++stp) {
-    strcpy_P(temp1, html_indexCorPolar); sprintf(temp,temp1,(long)(altCor*3600.0),(long)(azmCor*3600.0)); 
+    strcpy_P(temp1, html_indexCorPolar); sprintf(temp,temp1,(long)(GeoAlign.altCor*3600.0),(long)(GeoAlign.azmCor*3600.0)); 
   }
 #endif
 #endif
@@ -1058,7 +1094,6 @@ const char html_controlAlign1[] PROGMEM =
 "<form method=\"get\" action=\"/control.htm\">"
 "<button name=\"al\" value=\"1\" type=\"submit\">1 Star</button>";
 const char html_controlAlign2[] PROGMEM = "<button name=\"al\" value=\"2\" type=\"submit\">2 Star</button>";
-const char html_controlAlign3[] PROGMEM = "<button name=\"al\" value=\"3\" type=\"submit\">3 Star</button>";
 const char html_controlAlign3[] PROGMEM = "<button name=\"al\" value=\"3\" type=\"submit\">3 Star</button>";
 const char html_controlAlign4[] PROGMEM = "<button name=\"al\" value=\"4\" type=\"submit\">4 Star</button>";
 const char html_controlAlign5[] PROGMEM = "<button name=\"al\" value=\"5\" type=\"submit\">5 Star</button>";
