@@ -4,8 +4,7 @@
 
 void lookf(const char comment[], double f)
 {
-  char temp[10];
-  Serial1_send(comment); dtostrf(f,4,6,temp); Serial1_send(temp); Serial1_send("\r\n");
+  char temp[20]; Serial1_send(comment); dtostrf(f,4,6,temp); Serial1_send(temp); Serial1_send("\r\n");
 }
 
 #if defined(__AVR_ATmega2560__)

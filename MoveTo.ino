@@ -139,7 +139,7 @@ void moveTo() {
     temp=(StepsForRateChangeAxis1/isqrt32(distStartAxis1));  // speed up (temp gets smaller)
   }
   if (temp<maxRate) temp=maxRate;                            // fastest rate
-  if (temp>TakeupRate) temp=TakeupRate;                      // slowest rate
+  if (temp>TakeupRate) temp=1.1;                      // slowest rate
   cli(); timerRateAxis1=temp; sei();
 
   // Now, for Declination
@@ -149,7 +149,7 @@ void moveTo() {
     temp=(StepsForRateChangeAxis2/isqrt32(distStartAxis2));  // speed up
   }
   if (temp<maxRate) temp=maxRate;                            // fastest rate
-  if (temp>TakeupRate) temp=TakeupRate;                      // slowest rate
+  if (temp>TakeupRate) temp=1.1;                      // slowest rate
   cli(); timerRateAxis2=temp; sei();
 
 #ifdef MOUNT_TYPE_ALTAZM

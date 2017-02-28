@@ -337,10 +337,12 @@ the pdCor  term is 1 in HA
 // RA, Dec (all in degrees)
 bool TGeoAlign::addStar(int I, int N, double RA, double Dec) {
 
+  cli();
   AlignStars[I-1].HA =haRange(LST()*15.0-RA);
   AlignStars[I-1].Dec=Dec;
   AlignStars[I-1].HA1=((double)(long)targetAxis1.part.m)/(double)StepsPerDegreeAxis1;
   AlignStars[I-1].Dec=((double)(long)targetAxis2.part.m)/(double)StepsPerDegreeAxis2;
+  sei();
 
   // two or more stars and finished
   if ((I>=2) && (I==N)) geo_ready=true;

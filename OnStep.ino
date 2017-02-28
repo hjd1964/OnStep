@@ -51,7 +51,7 @@
 #include "SPI.h"
 // OnStep uses the EthernetPlus.h library for the W5100 on the Mega2560 and Launchpad TM4C:
 // this is available at: https://github.com/hjd1964/EthernetPlus and should be installed in your "~\Documents\Arduino\libraries" folder
-//#include "EthernetPlus.h"
+#include "EthernetPlus.h"
 // OnStep uses the Ethernet.h library for the W5100 on the Teensy3.2:
 //#include "Ethernet.h"
 #endif
@@ -67,7 +67,7 @@
 #endif
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "02 27 17"
+#define FirmwareDate   "01 20 17"
 #define FirmwareNumber "1.0a"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
@@ -145,6 +145,10 @@ volatile double  trackingTimerRateAxis2= default_tracking_rate;
 volatile double  pecTimerRateAxis1     = 0.0;
 volatile double  guideTimerRateAxis1   = 0.0;
 volatile double  guideTimerRateAxis2   = 0.0;
+volatile uint32_t guideStartTimeAxis1 = 0;
+volatile uint32_t guideStartTimeAxis2 = 0;
+volatile uint32_t guideBreakTimeAxis1 = 0;
+volatile uint32_t guideBreakTimeAxis2 = 0;
 volatile double  timerRateRatio        = ((double)StepsPerDegreeAxis1/(double)StepsPerDegreeAxis2);
 volatile boolean useTimerRateRatio     = (StepsPerDegreeAxis1!=StepsPerDegreeAxis2);
 #define StepsPerSecondAxis1              ((double)StepsPerDegreeAxis1/240.0)
@@ -834,6 +838,7 @@ fixed_t pstep;
 #define GuideRateNone      255
 
 #define slewRate (1.0/(((double)StepsPerDegreeAxis1*(MaxRate/1000000.0)))*3600.0)
+#define slewRateX (slewRate/15.0)
 #define halfSlewRate (slewRate/2.0)
 double  guideRates[10]={3.75,7.5,15,30,60,120,360,720,halfSlewRate,slewRate};
 //                      .25X .5x 1x 2x 4x  8x 24x 48x half-MaxRate MaxRate
@@ -1326,17 +1331,11 @@ void setup() {
 #endif
 
 #if defined(__AVR_ATmega2560__)
-  if (StepsPerSecondAxis1<31)
-    TCCR3B = (1 << WGM12) | (1 << CS10) | (1 << CS11);  // ~0 to 0.25 seconds   (4 steps per second minimum, granularity of timer is 4uS)   /64 pre-scaler
-  else
-    TCCR3B = (1 << WGM12) | (1 << CS11);                // ~0 to 0.032 seconds (31 steps per second minimum, granularity of timer is 0.5uS) /8  pre-scaler
+  TCCR3B = (1 << WGM12) | (1 << CS11); // ~0 to 0.032 seconds (31 steps per second minimum, granularity of timer is 0.5uS) /8  pre-scaler
   TCCR3A = 0;
   TIMSK3 = (1 << OCIE3A);
 
-  if (StepsPerSecondAxis1<31)
-    TCCR4B = (1 << WGM12) | (1 << CS10) | (1 << CS11);  // ~0 to 0.25 seconds   (4 steps per second minimum, granularity of timer is 4uS)   /64 pre-scaler
-  else
-    TCCR4B = (1 << WGM12) | (1 << CS11);                // ~0 to 0.032 seconds (31 steps per second minimum, granularity of timer is 0.5uS) /8  pre-scaler
+  TCCR4B = (1 << WGM12) | (1 << CS11); // ~0 to 0.032 seconds (31 steps per second minimum, granularity of timer is 0.5uS) /8  pre-scaler
   TCCR4A = 0;
   TIMSK4 = (1 << OCIE4A);
 #elif defined(__arm__) && defined(TEENSYDUINO)
@@ -1579,14 +1578,7 @@ void loop() {
 
     // SIDEREAL TRACKING
     // only active while sidereal tracking with a guide rate that makes sense
-    if ((trackingState==TrackingSidereal) && (!((guideDirAxis1 || guideDirAxis2) && (activeGuideRate>GuideRate1x)))) {
-      // apply the Tracking, Guiding, and PEC
-      cli();
-      targetAxis1.fixed+=fstepAxis1.fixed;
-      targetAxis2.fixed+=fstepAxis2.fixed;
-      if (pecTimerRateAxis1!=0) targetAxis1.fixed+=pstep.fixed;
-      sei();
-
+    if (trackingState==TrackingSidereal) {
 #ifdef STATUS_LED_PINS_ON
       if (siderealTimer%20L==0L) { if (LED_ON) { digitalWrite(LEDnegPin,HIGH); LED_ON=false; } else { digitalWrite(LEDnegPin,LOW); LED_ON=true; } }
 #endif
@@ -1675,6 +1667,8 @@ void loop() {
   if ((long)(cs-(housekeepingTimer+99L))>0) {
     housekeepingTimer=cs;
 
+ //   lookf("rtr1=",(double)(timerDirAxis1*stepAxis1));
+    
     // for testing, average steps per second
 //    if (debugv1>100000) debugv1=100000; if (debugv1<0) debugv1=0;
 //    debugv1=(debugv1*19+(targetAxis1.part.m*1000-lasttargetAxis1))/20;

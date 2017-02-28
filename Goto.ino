@@ -70,10 +70,12 @@ boolean syncEqu(double RA, double Dec) {
   // HA goes from +180...0..-180
   //                 W   .   E
   // indexAxis1 and indexAxis2 values get subtracted to arrive at the correct location
+  cli();
   indexAxis1=Axis1-((double)(long)targetAxis1.part.m)/(double)StepsPerDegreeAxis1;
   indexAxis1Steps=(long)(indexAxis1*(double)StepsPerDegreeAxis1);
   indexAxis2=Axis2-((double)(long)targetAxis2.part.m)/(double)StepsPerDegreeAxis2;
   indexAxis2Steps=(long)(indexAxis2*(double)StepsPerDegreeAxis2);
+  sei();
 
 #ifndef SYNC_ANYWHERE_ON
   if ((abs(indexAxis2)>30.0) || (abs(indexAxis1)>30.0)) { indexAxis1=0; indexAxis2=0; indexAxis1Steps=0; indexAxis2Steps=0; lastError=ERR_SYNC; return false; }

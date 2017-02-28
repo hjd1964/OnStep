@@ -37,10 +37,10 @@ boolean setHome() {
 
   // default values for state variables
   pierSide            = PierSideNone;
+  dirAxis1            = 1;
   dirAxis2            = 1;
   DecDir              = DecDirEInit;
   if (latitude>0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
-  dirAxis1            = 1;
   newTargetRA         = 0;        
   newTargetDec        = 0;
   newTargetAlt        = 0;

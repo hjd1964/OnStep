@@ -803,21 +803,27 @@ void processCommands() {
             guideDirAxis1=parameter[0];
             guideDurationLastHA=micros();
             guideDurationHA=(long)i*1000L;
-            cli(); if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRate; else guideTimerRateAxis1=guideTimerBaseRate; sei();
+            cli();
+            guideStartTimeAxis1=millis();
+            if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRate; else guideTimerRateAxis1=guideTimerBaseRate; 
+            sei();
             quietReply=true;
-         } else
-            if ((parameter[0]=='n') || (parameter[0]=='s')) { 
+          } else
+          if ((parameter[0]=='n') || (parameter[0]=='s')) { 
 #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
-              enableGuideRate(currentPulseGuideRate);
+            enableGuideRate(currentPulseGuideRate);
 #else
-              enableGuideRate(currentGuideRate);
+            enableGuideRate(currentGuideRate);
 #endif
-              guideDirAxis2=parameter[0]; 
-              guideDurationLastDec=micros();
-              guideDurationDec=(long)i*1000L; 
-              cli(); if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRate; else guideTimerRateAxis2=guideTimerBaseRate; sei();
-              quietReply=true;
-            } else commandError=true;
+            guideDirAxis2=parameter[0]; 
+            guideDurationLastDec=micros();
+            guideDurationDec=(long)i*1000L; 
+            cli();
+            guideStartTimeAxis2=millis();
+            if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRate; else guideTimerRateAxis2=guideTimerBaseRate; 
+            sei();
+            quietReply=true;
+          } else commandError=true;
         } else commandError=true;
       } else
 //  :Me# & :Mw#      Move Telescope East or West at current slew rate
@@ -831,7 +837,10 @@ void processCommands() {
             enableGuideRate(currentGuideRate);
             guideDirAxis1=command[1];
             guideDurationHA=-1;
-            cli(); if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRate; else guideTimerRateAxis1=guideTimerBaseRate; sei();
+            cli();
+            guideStartTimeAxis1=millis();
+            if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRate; else guideTimerRateAxis1=guideTimerBaseRate; 
+            sei();
           }
         }
         quietReply=true;
@@ -847,7 +856,10 @@ void processCommands() {
             enableGuideRate(currentGuideRate);
             guideDirAxis2=command[1];
             guideDurationDec=-1;
-            cli(); if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRate; else guideTimerRateAxis2=guideTimerBaseRate; sei();
+            cli();
+            guideStartTimeAxis2=millis();
+            if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRate; else guideTimerRateAxis2=guideTimerBaseRate; 
+            sei();
           }
         }
         quietReply=true;
@@ -938,6 +950,8 @@ void processCommands() {
             cli();
             if (guideDirAxis1) guideDirAxis1='b'; // break
             if (guideDirAxis2) guideDirAxis2='b'; // break
+            guideBreakTimeAxis1=millis();
+            guideBreakTimeAxis2=millis();
             sei();
             if (trackingState==TrackingMoveTo) { abortSlew=true; }
           }
@@ -949,6 +963,7 @@ void processCommands() {
           if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
             cli();
             if (guideDirAxis1) guideDirAxis1='b'; // break
+            guideBreakTimeAxis1=millis();
             sei();
           }
           quietReply=true; 
@@ -959,6 +974,7 @@ void processCommands() {
           if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
             cli();
             if (guideDirAxis2) guideDirAxis2='b'; // break
+            guideBreakTimeAxis2=millis();
             sei();
           }
           quietReply=true; 
@@ -1144,7 +1160,7 @@ void processCommands() {
             if (abs(f)<0.1) { 
               trackingState = TrackingNone; 
             } else {
-              trackingTimerRateAxis1=(f/60.0)/1.00273790935;
+              SetTrackingRate((f/60.0)/1.00273790935);
             }
           } else commandError=true;
         } else commandError=true;

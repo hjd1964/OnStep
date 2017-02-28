@@ -31,70 +31,83 @@ volatile bool axis2Powered = false;
 #endif
 
 //--------------------------------------------------------------------------------------------------
-// set timer1 to rate (in microseconds*16)
-void Timer1SetRate(long rate) {
+// set timer1 to interval (in microseconds*16)
+void Timer1SetInterval(long interval) {
 #if defined(__AVR_ATmega2560__)
   TCCR1B = 0; TCCR1A = 0;
   TIMSK1 = 0;
-  rate=rate/PPSrateRatio;
+  interval=interval/PPSrateRatio;
 
   // set compare match register to desired timer count:
-  if (rate<65536) { TCCR1B |= (1 << CS10); } else {
-  rate=rate/8;
-  if (rate<65536) { TCCR1B |= (1 << CS11); } else {
-  rate=rate/8;
-  if (rate<65536) { TCCR1B |= (1 << CS10); TCCR1B |= (1 << CS11); } else {
-  rate=rate/4;  
-  if (rate<65536) { TCCR1B |= (1 << CS12); } else {
-  rate=rate/4;
-  if (rate<65536) { TCCR1B |= (1 << CS10); TCCR1B |= (1 << CS12); 
+  if (interval<65536) { TCCR1B |= (1 << CS10); } else {
+  interval=interval/8;
+  if (interval<65536) { TCCR1B |= (1 << CS11); } else {
+  interval=interval/8;
+  if (interval<65536) { TCCR1B |= (1 << CS10); TCCR1B |= (1 << CS11); } else {
+  interval=interval/4;  
+  if (interval<65536) { TCCR1B |= (1 << CS12); } else {
+  interval=interval/4;
+  if (interval<65536) { TCCR1B |= (1 << CS10); TCCR1B |= (1 << CS12); 
   }}}}}
   
-  OCR1A = rate-1;
+  OCR1A = interval-1;
   // CTC mode
   TCCR1B |= (1 << WGM12);
   // timer compare interrupt enable
   TIMSK1 |= (1 << OCIE1A);
 #elif defined(__arm__) && defined(TEENSYDUINO)
-  itimer1.begin(TIMER1_COMPA_vect, (float)rate * 0.0625);
+  itimer1.begin(TIMER1_COMPA_vect, (float)interval * 0.0625);
 #elif defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
-  TimerLoadSet(Timer1_base, TIMER_A, (int) (F_BUS / 1000000 * rate * 0.0625));
+  TimerLoadSet(Timer1_base, TIMER_A, (int)(F_BUS/1000000 * interval * 0.0625));
 #endif
 }
 
 // set the master sidereal clock rate, also forces rate update for RA/Dec timer rates so that PPS adjustments take hold immediately
 volatile long isrTimerRateAxis1=0;
 volatile long isrTimerRateAxis2=0;
-volatile long runtimerRateAxis1=0;
+volatile long runTimerRateAxis1=0;
 volatile long runTimerRateAxis2=0;
 void SetSiderealClockRate(long Interval) {
-  if (trackingState==TrackingMoveTo) Timer1SetRate(Interval/100); else Timer1SetRate(Interval/300);
+  if (trackingState==TrackingMoveTo) Timer1SetInterval(Interval/100); else Timer1SetInterval(Interval/300);
   isrTimerRateAxis1=0;
   isrTimerRateAxis2=0;
 }
 
-// set timer3 to rate (in microseconds*16)
+// set timer3 to interval (in microseconds*16), maximum time is about 134 seconds
 volatile uint32_t nextAxis1Rate = 100000UL;
-void Timer3SetRate(long rate) {
+volatile uint16_t t3cnt = 0;
+volatile uint16_t t3rep = 1;
+volatile long timerDirAxis1 = 0;
+volatile long thisTimerRateAxis1 = 10000UL;
+void Timer3SetInterval(long interval) {
 #if defined(__AVR_ATmega2560__)
-  // valid for rates down to 0.25 second, and cap the rate
-  if (StepsPerSecondAxis1<31) rate=rate/64L; else rate=rate/8L;
-  if (rate>65536L) rate=65536L;
-  cli(); nextAxis1Rate=rate-1L; sei();
+  interval=interval/8L;
+  // 0.0327 * 4096 = 134.21s
+  long i=interval; uint16_t t=1; while (interval>65536L) { t*=2; interval=i/t; if (t==4096) { interval=65535L; break; } }
+  cli(); nextAxis1Rate=interval-1L; t3rep=t; sei();
 #elif (defined(__arm__) && defined(TEENSYDUINO)) || (defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__))
-  cli(); nextAxis1Rate=(F_BUS / 1000000) * (rate*0.0625) * 0.5 - 1; sei();
+  // 4.194 * 32 = 134.21s
+  long i=interval; uint16_t t=1; while (interval>65536L*1024L) { t++; interval=i/t; if (t==32) { interval=65535L*1024L; break; } }
+  cli(); nextAxis1Rate=(F_BUS/1000000) * (interval*0.0625) * 0.5 - 1; t3rep=t; sei();
 #endif
 }
-// set timer4 to rate (in microseconds*16)
+
+// set timer4 to interval (in microseconds*16), maximum time is about 134 seconds
 volatile uint32_t nextAxis2Rate = 100000UL;
-void Timer4SetRate(long rate) {
+volatile uint16_t t4cnt = 0;
+volatile uint16_t t4rep = 1;
+volatile long timerDirAxis2 = 0;
+volatile long thisTimerRateAxis2 = 10000UL;
+void Timer4SetInterval(long interval) {
 #if defined(__AVR_ATmega2560__)
-  // valid for rates down to 0.25 second, and cap the rate
-  if (StepsPerSecondAxis1<31) rate=rate/64L; else rate=rate/8L;
-  if (rate>65536L) rate=65536L;
-  cli(); nextAxis2Rate=rate-1L; sei();
+  interval=interval/8L;
+  // 0.0327 * 4096 = 134.21s
+  long i=interval; uint16_t t=1; while (interval>65536L) { t*=2; interval=i/t; if (t==4096) { interval=65535L; break; } }
+  cli(); nextAxis2Rate=interval-1L; t4rep=t; sei();
 #elif (defined(__arm__) && defined(TEENSYDUINO)) || (defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__))
-  cli(); nextAxis2Rate=(F_BUS / 1000000) * (rate*0.0625) * 0.5 - 1; sei();
+  // 4.194 * 32 = 134.21s
+  long i=interval; uint16_t t=1; while (interval>65536L*1024L) { t++; interval=i/t; if (t==32) { interval=65535L*1024L; break; } }
+  cli(); nextAxis2Rate=(F_BUS/1000000) * (interval*0.0625) * 0.5 - 1; t4rep=t; sei();
 #endif
 }
 
@@ -108,6 +121,8 @@ volatile byte cnt = 0;
 
 volatile double guideTimerRateAxis1A=0;
 volatile double guideTimerRateAxis2A=0;
+volatile double guideTimerRateAtBreakAxis1=0;
+volatile double guideTimerRateAtBreakAxis2=0;
 
 #if (defined(__arm__) && defined(TEENSYDUINO)) || (defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__))
 ISR(TIMER1_COMPA_vect)
@@ -128,124 +143,96 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     long calculatedTimerRateAxis1;
     
     // guide rate acceleration/deceleration and control
-    cli();  double x=((long)targetAxis1.part.m)-posAxis1; sei();
-    if ((!inbacklashAxis1) && (guideDirAxis1)) {
+    if ((guideDirAxis1)) {
       if ((fabs(guideTimerRateAxis1)<10.0) && (fabs(guideTimerRateAxis1A)<10.0)) { 
-        // break mode
-        if (guideDirAxis1=='b') { 
-          guideTimerRateAxis1=trackingTimerRateAxis1; 
-          if (guideTimerRateAxis1>=0) guideTimerRateAxis1=1.0; else guideTimerRateAxis1=-1.0;
-        }
         // slow speed guiding, no acceleration
         guideTimerRateAxis1A=guideTimerRateAxis1; 
+        // break
+        if (guideDirAxis1=='b') { guideTimerRateAtBreakAxis1=0; guideDirAxis1=0; guideTimerRateAxis1=0; guideTimerRateAxis1A=0; }
       } else {
         // use acceleration
         DecayModeGoto();
-        double z=(StepsForRateChangeAxis1/isqrt32(fabs(x)));
-        guideTimerRateAxis1A=(1.0/(((double)StepsPerDegreeAxis1*(z/1000000.0)))*3600.0);
+        long t=(millis()-guideStartTimeAxis1);
+        guideTimerRateAxis1A=sqrt(t/(((480.0*DegreesForAcceleration)/slewRateX)*1000.0))*fabs(slewRateX);
         if (guideTimerRateAxis1A>fabs(guideTimerRateAxis1)) guideTimerRateAxis1A=fabs(guideTimerRateAxis1);
-        if (guideTimerRateAxis1A<10) guideTimerRateAxis1A=10;
+        if (guideTimerRateAxis1<0) guideTimerRateAxis1A=-guideTimerRateAxis1A;
       }
       // stop guiding
       if (guideDirAxis1=='b') {
-        if (fabs(x)<=BreakDistAxis1) { guideDirAxis1=0; guideTimerRateAxis1=0; guideTimerRateAxis1A=0; DecayModeTracking(); }
+        if (guideTimerRateAtBreakAxis1==0) guideTimerRateAtBreakAxis1=fabs(guideTimerRateAxis1A);
+        long t=(((480.0*DegreesForAcceleration)/slewRateX)*1000.0)*sq(guideTimerRateAtBreakAxis1/fabs(slewRateX))-(millis()-guideBreakTimeAxis1); if (t<0) t=0;
+        guideTimerRateAxis1A=sqrt(t/(((480.0*DegreesForAcceleration)/slewRateX)*1000.0))*fabs(slewRateX);
+        if (guideTimerRateAxis1<0) guideTimerRateAxis1A=-guideTimerRateAxis1A;
+        if (guideTimerRateAxis1A==0) { guideTimerRateAtBreakAxis1=0; guideDirAxis1=0; guideTimerRateAxis1=0; guideTimerRateAxis1A=0; DecayModeTracking(); }
       }
-    }
+    } else { guideTimerRateAxis1A=0; }
 
-    double timerRateAxis1A=trackingTimerRateAxis1; if (guideDirAxis1 && (activeGuideRate>GuideRate1x)) timerRateAxis1A=0.0;
-    double timerRateAxis1B=fabs(guideTimerRateAxis1A+pecTimerRateAxis1+timerRateAxis1A);
+    double timerRateAxis1A=trackingTimerRateAxis1;
+    double timerRateAxis1B=guideTimerRateAxis1A+pecTimerRateAxis1+timerRateAxis1A;
+    if (timerRateAxis1B<0) { timerRateAxis1B=fabs(timerRateAxis1B); cli(); timerDirAxis1=-1; sei(); } else { cli(); timerDirAxis1=1; sei(); }
+    if (timerRateAxis1B<0.00001) { timerDirAxis1=0; timerRateAxis1B=0.5; }
     // round up to run the motor timers just a tiny bit slow, then adjust below if we start to fall behind during sidereal tracking
-    if (timerRateAxis1B>0.5) calculatedTimerRateAxis1=ceil((double)SiderealRate/timerRateAxis1B)+5; else calculatedTimerRateAxis1=ceil((double)SiderealRate*2.0);
+    calculatedTimerRateAxis1=round((double)SiderealRate/timerRateAxis1B);
     // remember our "running" rate and only update the actual rate when it changes
-    if (runtimerRateAxis1!=calculatedTimerRateAxis1) { timerRateAxis1=calculatedTimerRateAxis1; runtimerRateAxis1=calculatedTimerRateAxis1; }
-
-    // dynamic rate adjust
-    // in pre-scaler /64 mode the motor timers might be slow (relative to the sidereal timer) by as much as 0.000004 seconds/second (16000000/64)
-    // so a 0.01% (0.0001x) increase is always enough to correct for this, it happens very slowly - about a single step worth of movement over an hours time
-    if (x>10.0) x=10.0;
-    if (x<-10.0) x=-10.0;
-    x=10000.00-x; x=x/10000.0;
-    timerRateAxis1=calculatedTimerRateAxis1*x; // up to 0.01% faster or slower (or as little as 0.001%)
-    runtimerRateAxis1=timerRateAxis1;
+    if (runTimerRateAxis1!=calculatedTimerRateAxis1) { timerRateAxis1=calculatedTimerRateAxis1; runTimerRateAxis1=calculatedTimerRateAxis1; }
 
     // automatic rate calculation Dec
     long calculatedTimerRateAxis2;
 
     // guide rate acceleration/deceleration
-    cli(); x=fabs((long)targetAxis2.part.m-posAxis2); sei();
-    if (!inbacklashAxis2 && guideDirAxis2) {
+    if (guideDirAxis2) {
       if ((fabs(guideTimerRateAxis2)<10.0) && (fabs(guideTimerRateAxis2A)<10.0)) { 
-        // break mode
-        if (guideDirAxis2=='b') {
-          guideTimerRateAxis2=trackingTimerRateAxis2;
-          if (guideTimerRateAxis2>=0) guideTimerRateAxis2=1.0; else guideTimerRateAxis2=-1.0;
-        }
         // slow speed guiding, no acceleration
         guideTimerRateAxis2A=guideTimerRateAxis2; 
+        // break mode
+        if (guideDirAxis2=='b') { guideTimerRateAtBreakAxis2=0; guideDirAxis2=0; guideTimerRateAxis2=0; guideTimerRateAxis2A=0; }
       } else {
         // use acceleration
         DecayModeGoto();
-        double z=(StepsForRateChangeAxis2/isqrt32(x));
-        guideTimerRateAxis2A=(1.0/(((double)StepsPerDegreeAxis2*(z/1000000.0)))*3600.0);
+        long t=(millis()-guideStartTimeAxis2);
+        guideTimerRateAxis2A=sqrt(t/(((480.0*DegreesForAcceleration)/slewRateX)*1000.0))*fabs(slewRateX);
         if (guideTimerRateAxis2A>fabs(guideTimerRateAxis2)) guideTimerRateAxis2A=fabs(guideTimerRateAxis2);
-        if (guideTimerRateAxis2A<10) guideTimerRateAxis2A=10;
+        if (guideTimerRateAxis2<0) guideTimerRateAxis2A=-guideTimerRateAxis2A;
       }
       // stop guiding
       if (guideDirAxis2=='b') {
-        if (x<=BreakDistAxis2) { guideDirAxis2=0; guideTimerRateAxis2=0; guideTimerRateAxis2A=0; DecayModeTracking(); }
+        if (guideTimerRateAtBreakAxis2==0) guideTimerRateAtBreakAxis2=fabs(guideTimerRateAxis2);
+        long t=(((480.0*DegreesForAcceleration)/slewRateX)*1000.0)*sq(guideTimerRateAtBreakAxis2/fabs(slewRateX))-(millis()-guideBreakTimeAxis2); if (t<0) t=0;
+        guideTimerRateAxis2A=sqrt(t/(((480.0*DegreesForAcceleration)/slewRateX)*1000.0))*fabs(slewRateX);
+        if (guideTimerRateAxis2<0) guideTimerRateAxis2A=-guideTimerRateAxis2A;
+        if (guideTimerRateAxis2A==0) { guideTimerRateAtBreakAxis2=0; guideDirAxis2=0; guideTimerRateAxis2=0; guideTimerRateAxis2A=0; DecayModeTracking(); }
       }
-    }
+    } else guideTimerRateAxis2A=0;
 
-    double timerRateAxis2A=trackingTimerRateAxis2; if (guideDirAxis2 && (activeGuideRate>GuideRate1x)) timerRateAxis2A=0.0;
-    double timerRateAxis2B=fabs(guideTimerRateAxis2A+timerRateAxis2A);
-    // round up to run the motor timers just a tiny bit slow, then adjust below if we start to fall behind during sidereal tracking
-    if (timerRateAxis2B>0.5) calculatedTimerRateAxis2=ceil((double)SiderealRate/timerRateAxis2B)+5; else calculatedTimerRateAxis2=ceil((double)SiderealRate*2.0);
+    double timerRateAxis2A=trackingTimerRateAxis2;
+    double timerRateAxis2B=guideTimerRateAxis2A+timerRateAxis2A;
+    if (timerRateAxis2B<0) { timerRateAxis2B=fabs(timerRateAxis2B); cli(); timerDirAxis2=-1; sei(); } else { cli(); timerDirAxis2=1; sei(); }
+    if (timerRateAxis2B<0.0001) { timerDirAxis2=0; timerRateAxis2B=0.5; }
+    calculatedTimerRateAxis2=round((double)SiderealRate/timerRateAxis2B);
     // remember our "running" rate and only update the actual rate when it changes
     if (runTimerRateAxis2!=calculatedTimerRateAxis2) { timerRateAxis2=calculatedTimerRateAxis2; runTimerRateAxis2=calculatedTimerRateAxis2; }
-
-    // dynamic rate adjust
-    if (x>1.0) {
-      x=x-1.0; if (x>10.0) x=10.0; x=10000.00-x; x=x/10000.0;
-      timerRateAxis2=calculatedTimerRateAxis2*x; // up to 0.01% faster (or as little as 0.001%)
-      runTimerRateAxis2=timerRateAxis2;
-    }
   }
   
-  long thisTimerRateAxis1=timerRateAxis1;
-  long thisTimerRateAxis2;
-  if (useTimerRateRatio) {
-    thisTimerRateAxis2=(timerRateAxis2*timerRateRatio);
-  } else {
-    thisTimerRateAxis2=timerRateAxis2;
-  }
+  thisTimerRateAxis1=timerRateAxis1;
+  thisTimerRateAxis2; if (useTimerRateRatio) { thisTimerRateAxis2=(timerRateAxis2*timerRateRatio); } else { thisTimerRateAxis2=timerRateAxis2; }
   
   // override rate during backlash compensation
-  if (inbacklashAxis1) { thisTimerRateAxis1=timerRateBacklashAxis1; wasInbacklashAxis1=true; } 
+  if (inbacklashAxis1) { thisTimerRateAxis1=timerRateBacklashAxis1; wasInbacklashAxis1=true; }
   // override rate during backlash compensation
   if (inbacklashAxis2) { thisTimerRateAxis2=timerRateBacklashAxis2; wasInbacklashAxis2=true; }
-  if ((trackingState==TrackingSidereal)) {
-    // travel through the backlash is done, but we weren't following the target while it was happening!
-    // so now get us back to near where we need to be
-    if ((!inbacklashAxis1) && (wasInbacklashAxis1) && (!guideDirAxis1)) {
-      cli(); if (abs(posAxis1-((long)targetAxis1.part.m))>2) thisTimerRateAxis1=TakeupRate; else wasInbacklashAxis1=false; sei();
-    }
-    if ((!inbacklashAxis2) && (wasInbacklashAxis2) && (!guideDirAxis2)) {
-      cli(); if (abs(posAxis2-(long)targetAxis2.part.m)>2) thisTimerRateAxis2=TakeupRate; else wasInbacklashAxis2=false; sei();
-    }
-  }
 
   if (trackingState==TrackingMoveTo) {
     // trigger Goto step mode, rapid acceleration (low DegreesForAcceleration) can leave too little time
     // until the home position arrives to actually switch to tracking micro-step mode. the larger step size
     // then causes backlash compensation to activate which in-turn keeps goto micro-step mode from turning off
     #if defined(AXIS2_MODE) && defined(AXIS2_MODE_GOTO)
-    gotoRateAxis2=(thisTimerRateAxis2<50*16L);   // activate <50us rate
+    gotoRateAxis2=(thisTimerRateAxis2<512*16L);   // activate <512us rate
     #endif
     #if defined(AXIS1_MODE) && defined(AXIS1_MODE_GOTO)
-    gotoRateAxis1=(thisTimerRateAxis1<50*16L);   // activate <50us rate
+    gotoRateAxis1=(thisTimerRateAxis1<512*16L);   // activate <512us rate
     #endif
   }
-  
+
 #if defined(AUTO_POWER_DOWN_AXIS2_ON) && !defined(MOUNT_TYPE_ALTAZM)
     // ------------------------------------------------------------------------------------------------------------------------------------
     // Power down the Dec motor
@@ -272,11 +259,11 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
 
   // set the rates
   if (thisTimerRateAxis1!=isrTimerRateAxis1) {
-    Timer3SetRate(thisTimerRateAxis1/PPSrateRatio);
+    Timer3SetInterval(thisTimerRateAxis1/PPSrateRatio);
     isrTimerRateAxis1=thisTimerRateAxis1;
   }
   if (thisTimerRateAxis2!=isrTimerRateAxis2) {
-    Timer4SetRate(thisTimerRateAxis2/PPSrateRatio);
+    Timer4SetInterval(thisTimerRateAxis2/PPSrateRatio);
     isrTimerRateAxis2=thisTimerRateAxis2;
   }
 }
@@ -286,6 +273,8 @@ ISR(TIMER3_COMPA_vect)
 #if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
   TimerIntClear( Timer3_base, TIMER_TIMA_TIMEOUT );
 #endif
+
+  t3cnt++; if (t3cnt%t3rep!=0) return;
 
   // drivers step on the rising edge, need >=1.9uS to settle (for DRV8825 or A4988) so this is early in the routine
 #if defined(__arm__) && defined(TEENSYDUINO)
@@ -318,8 +307,10 @@ ISR(TIMER3_COMPA_vect)
   OCR3A=nextAxis1Rate*stepAxis1;
 #endif
 
+  if ((trackingState==TrackingSidereal) && (!inbacklashAxis1)) targetAxis1.part.m+=timerDirAxis1*stepAxis1;
+
   // Guessing about 4+4+1+ 4+4+1+ 1+ 2+1+2+ 13=37 clocks between here and the step signal which is 2.3uS
-  if (posAxis1!=(long)targetAxis1.part.m) { // Move the RA stepper to the target
+  if ((posAxis1!=(long)targetAxis1.part.m) || (inbacklashAxis1)) { // Move the RA stepper to the target
     if (posAxis1<(long)targetAxis1.part.m) dirAxis1=1; else dirAxis1=0; // Direction control
 
     // Guessing about 1+2+1+4+4+1=13 clocks between here and the step signal which is 0.81uS
@@ -377,6 +368,8 @@ ISR(TIMER4_COMPA_vect)
   TimerIntClear( Timer4_base, TIMER_TIMA_TIMEOUT );
 #endif
 
+  t4cnt++; if (t4cnt%t4rep!=0) return;
+
 #if defined(__arm__) && defined(TEENSYDUINO)
   digitalWriteFast(Axis2StepPin,LOW);
 #else
@@ -407,8 +400,10 @@ ISR(TIMER4_COMPA_vect)
 #if defined(__AVR_ATmega2560__)
   OCR4A=nextAxis2Rate*stepAxis2;
 #endif
-  
-  if (posAxis2!=(long)targetAxis2.part.m) { // move the Dec stepper to the target
+
+  if ((trackingState==TrackingSidereal) && (!inbacklashAxis2)) targetAxis2.part.m+=timerDirAxis2*stepAxis2;
+
+  if ((posAxis2!=(long)targetAxis2.part.m) || (inbacklashAxis2)) { // move the Dec stepper to the target
     // telescope normally starts on the EAST side of the pier looking at the WEST sky
     if (posAxis2<(long)targetAxis2.part.m) dirAxis2=1; else dirAxis2=0; // Direction control
     // Set direction.  Needs >=0.65uS before/after rising step signal (DRV8825 or A4988).

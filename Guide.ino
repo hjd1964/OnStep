@@ -10,9 +10,6 @@ void Guide() {
       if (!inbacklashAxis1) {
         // guideHA keeps track of how many steps we've moved for PEC recording
         if (guideDirAxis1=='e') guideHA.fixed=-amountGuideHA.fixed; else if (guideDirAxis1=='w') guideHA.fixed=amountGuideHA.fixed;
-        cli();
-        targetAxis1.fixed+=guideHA.fixed;
-        sei();
 
         // for pulse guiding, count down the mS and stop when timed out
         if (guideDurationHA>0)  {
@@ -28,10 +25,6 @@ void Guide() {
     
     if (guideDirAxis2) {
       if (!inbacklashAxis2) {
-        cli();
-        // nudge the targetAxis2 (where we're supposed to be) by amountMoveDec
-        if (guideDirAxis2=='s') targetAxis2.fixed-=amountGuideDec.fixed; else if (guideDirAxis2=='n') targetAxis2.fixed+=amountGuideDec.fixed; 
-        sei();
         // for pulse guiding, count down the mS and stop when timed out
         if (guideDurationDec>0)  {
           guideDurationDec-=(long)(micros()-guideDurationLastDec);
@@ -43,9 +36,5 @@ void Guide() {
         guideDurationLastDec=micros();
       }
     }
-
   }
-
-  // if the guide rate is negative and slow it's always faster to go back to the sidereal rate
-//  if ((currentGuideRate<=GuideRate1x) && (fabs(guideTimerRateAxis1)<0.001)) { cli(); guideTimerRateAxis1=0.0; sei(); }
 }
