@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------------
-// Configuration (G11)
+// Configuration
 
 /*
  * For more information on setting OnStep up see http://www.stellarjourney.com/index.php?r=site/equipment_onstep and 
@@ -22,8 +22,8 @@
 // -------------------------------------------------------------------------------------------------------------------------
 // ADJUST THE FOLLOWING TO CONFIGURE YOUR CONTROLLER FEATURES --------------------------------------------------------------
 
-// turns ethernet on for W5100 adapters, default=OFF (if _ON you must also uncomment the #include "Ethernet.h" line near the beginning of OnStep.ino for now)
-// configure the interface in Ethernet.ino
+// turns ethernet on for W5100 adapters, default=OFF (if _ON you must also uncomment the #include "EthernetPlus.h" line near the beginning of OnStep.ino for now)
+// configure the interface IP address and subnet mask in Ethernet.ino
 // see forum below for good technical info. about using an Arduino Ethernet Shield:
 // https://forum.pjrc.com/threads/25050-Teensy-3-0-3-1-W5100-ethernet-shield
 #define W5100_OFF
@@ -33,7 +33,7 @@
 
 // turns debugging on, used during testing, default=OFF
 #define DEBUG_OFF
-// allows syncing anywhere, default=OFF
+// allows syncing anywhere, default=ON
 #define SYNC_ANYWHERE_ON
 
 // Mount type, default is _GEM (German Equatorial) other options are _FORK, _FORK_ALT.  _FORK switches off Meridian Flips after (1, 2 or 3 star) alignment is done.  _FORK_ALT disables Meridian Flips (1 star align.)
@@ -50,27 +50,33 @@
 #define ST4_HAND_CONTROL_OFF
 #define ST4_ALTERNATE_PINS_OFF
 // PPS sense rising edge on pin 21 for optional precision clock source (GPS, for example), default=OFF (Teensy3.1 Pin 23)
-#define PPS_SENSE_ON
+#define PPS_SENSE_OFF
 // PEC sense on pin 2 or threshold value on Analog 1 (Analog 14 on Teensy3.1) use _ON or _PULLUP to enable the input and use the built-in pullup resistor, default=OFF
 // Analog values range from 0 to 1023 which indicate voltages from 0-5VDC (or 0-3.3VDC) on the analog pin, for example "PEC_SENSE 600" would detect an index when the voltage exceeds 2.92V (or 1.93V)
 // with either index detection method, once triggered 60s must expire before another detection can happen.  This gives time for the index magnet to pass by the detector before another cycle begins.
 // Ignored on Alt/Azm mounts.
-#define PEC_SENSE_ON
+#define PEC_SENSE_OFF
 // PEC sense, rising edge (default with PEC_SENSE_STATE HIGH, use LOW for falling edge) on pin 2 (ex. PEC_SENSE_ON) ; for optional PEC index
-#define PEC_SENSE_STATE LOW
+#define PEC_SENSE_STATE HIGH
 // switch close (to ground) on pin 3 for optional limit sense (stops gotos and/or tracking), default=OFF
 #define LIMIT_SENSE_OFF
 // light status LED by sink to ground (pin 9) and source +5V (pin 8), default=ON
 // _ON and OnStep keeps this illuminated to indicate that the controller is active.  When sidereal tracking this LED will rapidly flash
-#define STATUS_LED_PINS_ON
+//2016-10-2   Leo
+#define STATUS_LED_PINS_OFF
+//#define STATUS_LED_PINS_ON
+
 // lights 2nd status LED by sink to ground (pin 10), default=OFF, must be off for Teensy3.1 (pin 7)
 // _ON sets this to blink at 1 sec intervals when PPS is synced
 // n sets this to dimly light a polar finder reticle, for example I use STATUS_LED2_PINS 250
 // The W5100 Ethernet adapter uses pin 10 for CS, so if W5100_ON is used this must be _OFF
-#define STATUS_LED2_PINS_ON
-// lights reticule LED by sink to ground (pin 44), default=OFF.  Defaults to pin 9 on the Teensy3.1 (overrides STATUS_LED_PINS_ON if used)
+//2016-10-2   Leo
+#define STATUS_LED2_PINS_OFF
+//#define STATUS_LED2_PINS_ON
+
+// lights reticule LED by sink to ground (pin 44), default=OFF.  Defaults to pin 9 on the Teensy3.1 (STATUS_LED_PINS must be _ON)
 // RETICULE_LED_PINS n, where n=0 to 255 activates this feature and sets default brightness
-#define RETICULE_LED_PINS_OFF
+#define RETICULE_LED_PINS_OFF   //128     //RETICULE_LED_PINS_OFF             //2016-10-2   Leo
 // optional +5V on pins 5 and 12 to Pololu or other stepper drivers without on-board 5V voltage regulators, default=OFF (Teensy3.1 Pins 5,11)
 #define POWER_SUPPLY_PINS_OFF
 
@@ -82,6 +88,11 @@
 // by default to disable stepper drivers on startup and when Parked. An Align or UnPark will enable the drivers.  Adjust below if you need these pulled LOW to disable the drivers.
 #define AXIS1_DISABLED_HIGH
 #define AXIS2_DISABLED_HIGH
+// For equatorial mounts, _ON powers down the Declination axis when it's not being used to help lower power use.  During low rate guiding (<=1x) the axis stays enabled
+// for 10 minutes after any guide on either axis.  Otherwise, the Dec axis is disabled (powered off) 10 seconds after movement stops.
+//2016-10-2   Leo
+#define AUTO_POWER_DOWN_AXIS2_OFF
+//#define AUTO_POWER_DOWN_AXIS2_ON
 
 // optionally adjust tracking rate to compensate for atmospheric refraction, default=OFF (limited testing done)
 // can be turned on/off with the :Te# and :Td# commands regardless of this setting
@@ -91,60 +102,49 @@
 #define SEPERATE_PULSE_GUIDE_RATE_ON
 
 // ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
-#define RememberMaxRate_ON           // set to ON and OnStep will remember rates set in the ASCOM driver or Android App, default=OFF 
-#define MaxRate                   40 // this is the minimum number of micro-seconds between micro-steps
+#define RememberMaxRate_OFF          // set to ON and OnStep will remember rates set in the ASCOM driver or Android App, default=OFF 
+#define MaxRate                   44  //96 // this is the minimum number of micro-seconds between micro-steps
                                      // minimum* (fastest goto) is around 16 (Teensy3.1) or 32 (Mega2560), default=96 higher is ok
                                      // too low and OnStep communicates slowly and/or freezes as the motor timers use up all the MCU time
                                      // * = minimum can be lower, when both AXIS1/AXIS2_MODE_GOTO are used by AXIS1/AXIS2_STEP_GOTO times
                                      
-#define DegreesForAcceleration   3.0 // approximate number of degrees for full acceleration or deceleration: higher values=longer acceleration/deceleration
-                                     // Default=5.0, too low (about <1 or 2) can cause gotos to never end if micro-step mode switching is enabled.
-//#define StepsForRateChange  150000.0 // number of steps during acceleration and de-acceleration: higher values=longer acceleration/de-acceleration
-//                                     // for the most part this doesn't need to be changed, but adjust when needed
+#define DegreesForAcceleration   5.0 // approximate number of degrees for full acceleration or deceleration: higher values=longer acceleration/deceleration
+                                     // Default=5.0, too low (about <1) can cause gotos to never end if micro-step mode switching is enabled.
+#define DegreesForRapidStop      1.0 // approximate number of degrees required to stop when requested or if limit is exceeded during a slew: higher values=longer deceleration
+                                     // Default=1.0, too low (about <1) can cause gotos to never end if micro-step mode switching is enabled.
 
 #define BacklashTakeupRate        25 // backlash takeup rate (in multipules of the sidereal rate): too fast and your motors will stall,
                                      // too slow and the mount will be sluggish while it moves through the backlash
                                      // for the most part this doesn't need to be changed, but adjust when needed.  Default=25
 
                                      // Axis1 is for RA/Az
-#define StepsPerDegreeAxis1  12800.0 // calculated as    :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
-                                     // Test             :  200           * 16          * 15              *  180/360              = 24000
-                                     // Takahashi EM10b  :  48            * 16          * 50 * (40/32)    *  144/360              = 19200
-                                     // Takahashi EM10b 2:  200           * 8           * 18 * (40/32)    *  144/360              = 14400
-                                     // Losmandy G11     :  400           * 32          * 1               *  360/360              = 12800
-                                     // Test             :  400           * 16          * 1               *  360/360              = 6400
-                                     // Test             :  200           * 16          * 1               *  360/360              = 3200
+#define StepsPerDegreeAxis1     9600 //14400.0 // calculated as    :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
+                                     // calculated as    :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
+                                     // Losmandy GM8     :  48            * 16          * 25              *  180/360              =  9600
+                                     // Takahashi EM10b  :  200           * 8           * 18 * (1.25)     *  144/360              = 14400
                                      // Axis2 is for Dec/Alt
-#define StepsPerDegreeAxis2  12800.0 // calculated as    :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
-                                     // Test             :  200           * 16          * 15              *  180/360              = 24000
-                                     // Takahashi EM10b  :  48            * 16          * 50 * (40/32)    *  144/360              = 19200
-                                     // Takahashi EM10b 2:  200           * 8           * 18 * (40/32)    *  144/360              = 14400
-                                     // Losmandy G11     :  400           * 32          * 1               *  360/360              = 12800
-                                     // Test             :  400           * 16          * 1               *  360/360              = 6400
-                                     // Test             :  200           * 16          * 1               *  360/360              = 3200
-                                     // the EM10b has two spur gears that drive the RA/Dec worms, they are 60 tooth and 48 tooth gears
-                                     // for an 1.25x reduction in addition to the 20:1 gear heads on the steppers for a 25:1 final ratio
-                                     // before the worm/wheels 144:1
+#define StepsPerDegreeAxis2     9600 //14400.0 // calculated as    :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
+                                     // calculated as    :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
+                                     // Losmandy GM8     :  48            * 16          * 25              *  180/360              =  9600
+                                     // Takahashi EM10b  :  200           * 8           * 18 * (1.25)     *  144/360              = 14400
+                                     // the EM10b has two spur gears that drive the RA/Dec worms, they give an additional 1.25:1 reduction
+                                     // in addition to the 18:1 gear heads on the steppers for a 22.5:1 final ratio before the worm/wheels at 144:1
                                      
                                      // PEC, number of steps for a complete worm rotation (in RA), (StepsPerDegreeAxis1*360)/gear_reduction2.  Ignored on Alt/Azm mounts.
-#define StepsPerWormRotationAxis1 12800.0
-                                     // Test             : (24000*360)/180 = 48000
-                                     // Tak EM10         : (19200*360)/144 = 48000
-                                     // Tak EM10 2       : (14400*360)/144 = 36000
-                                     // Losmandy G11     : (12800*360)/360 = 12800
-                                     // Test             : (6400*360)/360 = 6400
-                                     // Test             : (3200*360)/360 = 3200
+#define StepsPerWormRotationAxis1 19200 //36000
+                                     // GM8  25:1  (9600*360)/180 = 19200
+                                     // Tak EM10         : (14400*360)/144 = 36000
 
-#define PECBufferSize           824  // PEC, buffer size, max should be no more than 3384, your required buffer size >= StepsPerWormRotationAxis1/(StepsPerDegeeAxis1/240)
+#define PECBufferSize           824  // PEC, buffer size, max should be no more than 3384, your required buffer size >= StepsPerAxis1WormRotation/(StepsPerDegeeAxis1/240)
                                      // for the most part this doesn't need to be changed, but adjust when needed.  824 seconds is the default.  Ignored on Alt/Azm mounts.
 
 #define REVERSE_AXIS1_OFF            // reverse the direction of movement for the HA/RA axis, adjust as needed or reverse your wiring so things move in the right direction
 #define REVERSE_AXIS2_OFF            // reverse the direction of movement for the Dec axis (both reversed for my EM10b, both normal for G11)
 
-#define MinutesPastMeridianE     -30 // for goto's, how far past the meridian to allow before we do a flip (if on the East side of the pier) - one hour of RA is the default = 60.  Sometimes used for Fork mounts in Align mode.  Ignored on Alt/Azm mounts.
+#define MinutesPastMeridianE      60 // for goto's, how far past the meridian to allow before we do a flip (if on the East side of the pier) - one hour of RA is the default = 60.  Sometimes used for Fork mounts in Align mode.  Ignored on Alt/Azm mounts.
 #define MinutesPastMeridianW      60 // as above, if on the West side of the pier.  If left alone, the mount will stop tracking when it hits the this limit.  Sometimes used for Fork mounts in Align mode.  Ignored on Alt/Azm mounts.
-#define UnderPoleLimit            11 // maximum allowed hour angle (+/-) under the celestial pole. Default=12.  Ignored on Alt/Azm mounts.
-                                     // If left alone, the mount will stop tracking when it hits this limit.  Valid range is 10 to 12 hours.
+#define UnderPoleLimit             9 // maximum allowed hour angle (+/-) under the celestial pole. OnStep will flip the mount and move the Dec. >90 degrees (+/-) once past this limit.  Sometimes used for Fork mounts in Align mode.  Ignored on Alt/Azm mounts.
+                                     // If left alone, the mount will stop tracking when it hits this limit.  Valid range is 7 to 11 hours.
 #define MinDec                   -91 // minimum allowed declination, default = -91 (off)  Ignored on Alt/Azm mounts.
 #define MaxDec                   +91 // maximum allowed declination, default =  91 (off)  Ignored on Alt/Azm mounts.
                                      // For example, a value of +80 would stop gotos/tracking near the north celestial pole.
@@ -153,22 +153,60 @@
                                      // fork/yolk mount with meridian flips turned off by setting the minutesPastMeridian values to cover the whole sky)
 #define MaxAzm                   180 // Alt/Az mounts only. +/- maximum allowed Azimuth, default =  180.  Allowed range is 180 to 360
 
-// Stepper driver micro-step mode control (the _MODE_GOTO settings engage during slews at <128us/step)
+/* Stepper driver mode control (micro-step and/or decay):
 // M0, M1, and M2 are on Pins 22,23, and 24 for RA (Teensy3.1 Pins 13,14,15.)  M0, M1, M2 are on Pins 27,28,29 for Dec (Teensy3.1 Pins 18,19,20.)
-// DRV8825: 5=32x, 4=16x, 3=8x, 2=4x, 1=2x, 0=1x
-#define AXIS1_MODE 5                 // programs the RA/Az uStep mode M0/M1/M2, optional and default _OFF. Other values 0 to 7 (0xb000 to 111): for example "#define AXIS1_MODE 4"
-#define AXIS1_MODE_GOTO 3            // programs the RA/Az uStep mode M0/M1/M2, used during gotos, optional and default _OFF. Other values 0 to 7 (0xb000 to 111): for example "#define AXIS1_MODE_GOTO 4"
-#define AXIS1_STEP_GOTO 4            // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
-#define AXIS2_MODE 5                 // programs the Dec/Alt uStep mode M0/M1/M2, optional and default _OFF. Other values 0 to 7 (0xb000 to 111)
-#define AXIS2_MODE_GOTO 3            // programs the Dec/Alt uStep mode M0/M1/M2, used during gotos, optional and default _OFF. Other values 0 to 7 (0xb000 to 111)
-#define AXIS2_STEP_GOTO 4            // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
+// values 0 to 7 (0b000 to 111): for example "#define AXIS1_MODE 4" is the same as "#define AXIS1_MODE 0b100" which sets M2 to HIGH, M1 to LOW, and M0 to LOW
+//                 / | \
+//               M2  M1 M0
+// *IF* MODE_SWITCH_BEFORE_SLEW_ON is used... for full tri-state control:
+// values 0b000 000     to 111111): for example "#define AXIS1_MODE 0b100010" sets M2 to OPEN, M1 to HIGH, M0 to LOW (note that 0b100010 = 34 so "#define AXIS1_MODE 34" would have the same effect)
+//        open? on/off                                             open?  on/off
+//                                                              M2 M1 M0  M2 M1 M0
+//
+// Examples:
+// DRV8825, micro-stepping modes: 5=32x, 4=16x, 3=8x, 2=4x, 1=2x, 0=1x
+// SilentStepStick configurations (M0 is CFG1, M1 is CFG2, M2 is CFG3):
+// CFG3 always open here...
+// CFG2,CFG1        Microsteps      Interpolation      Chopper Mode    _MODE/_MODE_GOTO value
+// GND,GND         1 (Fullstep)     N                  spreadCycle     0b100000
+// GND,VCC_IO      2 (Halfstep)     N                      "           0b100001
+// GND,open        2 (Halfstep)     Y, to 256 μsteps       "           0b101000
+// VCC_IO,GND      4 (Quarterstep)  N                      "           0b100010
+// VCC_IO,VCC_IO  16 μsteps         N                      "           0b100011
+// VCC_IO,open     4 (Quarterstep)  Y, to 256 μsteps       "           0b101010
+// open,GND       16 μsteps         Y, to 256 μsteps       "           0b110000
+// open,VCC_IO     4 (Quarterstep)  Y, to 256 μsteps   stealthChop     0b110001
+// open,open      16 μsteps         Y, to 256 μsteps       "           0b111000
+*/
+//2016-10-2   Leo
+//#define AXIS1_MODE_OFF               // programs the RA/Az uStep mode M0/M1/M2, optional and default _OFF.
+//#define AXIS1_MODE_GOTO_OFF          // programs the RA/Az uStep mode M0/M1/M2, used during gotos, optional and default _OFF.
+//#define AXIS1_STEP_GOTO 1            // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
+#define AXIS1_MODE            4      // programs the RA/Az uStep mode M0/M1/M2, optional and default _OFF.
+#define AXIS1_MODE_GOTO       1      // programs the RA/Az uStep mode M0/M1/M2, used during gotos, optional and default _OFF.
+#define AXIS1_STEP_GOTO       8      // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
 
-// Stepper driver decay mode control (for both Axis, the _MODE_GOTO settings engage during slews)
-// Axis1 decay mode is on Pin 32 and Axis2 decay mode is on Pin 33.  Options are _HIGH, _LOW, _OPEN, default is _OFF
-// DRV8825 can be configured for the following decay modes: Fast (_HIGH,) Slow (_LOW,) and Mixed Mode (_OPEN)
-#define DECAY_MODE_OFF               // decay mode used during tracking
-#define DECAY_MODE_GOTO_OFF          // decay mode used during slews
+//2016-10-2   Leo
+//#define AXIS2_MODE_OFF               // programs the Dec/Alt uStep mode M0/M1/M2, optional and default _OFF.
+//#define AXIS2_MODE_GOTO_OFF          // programs the Dec/Alt uStep mode M0/M1/M2, used during gotos, optional and default _OFF.
+//#define AXIS2_STEP_GOTO 1            // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
+#define AXIS2_MODE            4      // programs the Dec/Alt uStep mode M0/M1/M2, optional and default _OFF.
+#define AXIS2_MODE_GOTO       1      // programs the Dec/Alt uStep mode M0/M1/M2, used during gotos, optional and default _OFF.
+#define AXIS2_STEP_GOTO       8      // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
+
+#define MODE_SWITCH_BEFORE_SLEW_OFF  // _ON for _MODE and _MODE_GOTO settings to start/stop just before/after the slew, otherwise they are active during the slew at <128uS/step)
+
+// Secondary stepper driver decay control (for both Axis, the _DECAY_MODE and _DECAY_MODE_GOTO settings always start/stop just before/after the slew)
+// Axis1 decay mode is on Pin 41 and Axis2 decay mode is on Pin 40.  Options are _HIGH, _LOW, _OPEN, default is _OFF (not supported on Teensy3.2)
+// MODE_SWITCH_BEFORE_SLEW must be _OFF if using this
+#define DECAY_MODE_OFF
+#define DECAY_MODE_GOTO_OFF            
+
+// if the decay/micro-step mode switch happens before/after a slew, inserts a 3ms delay before the motors take a step
+#define MODE_SWITCH_SLEEP_OFF
 
 // THAT'S IT FOR USER CONFIGURATION!
 
 // -------------------------------------------------------------------------------------------------------------------------
+
+

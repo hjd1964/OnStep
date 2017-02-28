@@ -48,15 +48,23 @@ bool Ethernet_www_busy() {
   return www_client;
 }
 
+boolean cmd_no_client = true;
 bool Ethernet_cmd_busy() {
   if (cmdIsClosing) return true;
+  if (cmd_no_client) { return false; }
   return cmd_client;
 }
 
 void Ethernet_send(const char data[]) {
   if (!cmd_client) return;
   cmd_client.flush();
+
+#ifdef __AVR_ATmega2560__
   cmd_client.write(data,strlen(data));
+#else
+  cmd_client.print(data);
+#endif
+  
   cmdTransactionLast_ms=millis();
 }
 
@@ -67,25 +75,39 @@ void Ethernet_print(const char data[]) {
 boolean Ethernet_transmit() {
   return false;
 }
- 
+
 boolean Ethernet_available() {
-  cmd_client = cmd_server.available();
+  if (cmd_no_client) {
+    cmd_client = cmd_server.available();
+    cmd_no_client = !cmd_client;
+    if (cmd_no_client) return false;
+  }
+
+//  cmd_client = cmd_server.available();
   if (cmd_client) {
     if (cmd_client.connected()) {
       return cmd_client.available();
     }
 
-    if (millis()-cmdTransactionLast_ms>2000) { 
-#ifdef W5100_ON
+// immediately time out on the Teensy3.2
+#if (defined(__arm__) && defined(TEENSYDUINO))
+#define CTO 15
+#else
+#define CTO 1000
+#endif
+
+  if (millis()-cmdTransactionLast_ms>CTO) { 
+#if defined(W5100_ON) && !(defined(__arm__) && defined(TEENSYDUINO)) 
       cmd_client.stopRequest(); 
 #endif
       cmdIsClosing=true; 
     }
     if (cmdIsClosing) {
-#ifdef W5100_ON
+#if defined(W5100_ON) && !(defined(__arm__) && defined(TEENSYDUINO)) 
       if (cmd_client.stopMonitor()) { cmdIsClosing=false; }
 #else
       cmd_client.stop(); cmdIsClosing=false;
+      cmd_no_client=true;
 #endif
     }
   }
@@ -134,9 +156,18 @@ void reset_page_requests() {
   get_check=false; get_val=false; get_name=false;
 }
 
+bool www_no_client=true;
 void Ethernet_www() {
   // if a client doesn't already exist try to find a new one
-  if (!www_client) { www_client = web_server.available(); currentLineIsBlank = true; responseStarted=false; clientNeedsToClose=false; clientIsClosing=false; reset_page_requests(); transactionStart_ms=millis(); }
+
+  if (www_no_client) {
+    www_client = web_server.available();
+    www_no_client = !www_client;
+    if (www_no_client) return;
+    currentLineIsBlank = true; responseStarted=false; clientNeedsToClose=false; clientIsClosing=false; reset_page_requests(); transactionStart_ms=millis();
+  }
+
+  //if (!www_client) { currentLineIsBlank = true; responseStarted=false; clientNeedsToClose=false; clientIsClosing=false; reset_page_requests(); transactionStart_ms=millis(); }
 
   // active client?
   if (www_client) {
@@ -202,15 +233,18 @@ void Ethernet_www() {
     if (((clientNeedsToClose && (millis()-responseFinish_ms>100)) || (millis()-transactionStart_ms>5000)) ||
         ((clientNeedsToClose && clientIsClosing))) {
       if (!clientIsClosing) {
-#ifdef W5100_ON
+#if defined(W5100_ON) && !(defined(__arm__) && defined(TEENSYDUINO)) 
         www_client.stopRequest();
 #endif
         clientIsClosing=true;
       } else {
-#ifdef W5100_ON
+#if defined(W5100_ON) && !(defined(__arm__) && defined(TEENSYDUINO)) 
         if (www_client.stopMonitor()) { clientNeedsToClose=false; clientIsClosing=false; }
 #else
         www_client.stop(); clientNeedsToClose=false; clientIsClosing=false;
+#if (defined(__arm__) && defined(TEENSYDUINO))
+        www_no_client=true;
+#endif
 #endif
       }
     }
@@ -249,7 +283,12 @@ boolean www_send() {
     if ((c==0) || (www_xmit_buffer_send_pos>www_xmit_buffer_size-2)) { buffer_empty=true; break; }
     www_xmit_buffer_send_pos++; count++;
   }
+
+#ifdef __AVR_ATmega2560__
   www_client.write(buf,count);
+#else
+  www_client.print(buf);
+#endif
 
   // hit end of www_xmit_buffer? reset and start over
   if (buffer_empty) {
@@ -283,6 +322,7 @@ void Ethernet_get() {
     if (maxRate<(MaxRate/2L)*16L) maxRate=(MaxRate/2L)*16L;
     if (maxRate>(MaxRate*2L)*16L) maxRate=(MaxRate*2L)*16L;
     EEPROM_writeInt(EE_maxRate,(int)(maxRate/16L));
+    SetAccelerationRates(maxRate); // set the new acceleration rate
   }
   // Overhead and Horizon Limits
   if ((get_names[0]=='o') && (get_names[1]=='l')) {
@@ -326,10 +366,10 @@ void Ethernet_get() {
       latitude=get_temp_float+((double)i)/60.0;
       EEPROM_writeFloat(100+(currentSite)*25+0,latitude);
 #ifdef MOUNT_TYPE_ALTAZM
-      celestialPoleDec=fabs(latitude);
-      if (latitude<0) celestialPoleHA=180L; else celestialPoleHA=0L;
+      celestialPoleAxis2=AltAzmDecStartPos;
+      if (latitude<0) celestialPoleAxis1=180L; else celestialPoleAxis1=0L;
 #else
-      if (latitude<0) celestialPoleDec=-90.0; else celestialPoleDec=90.0;
+      if (latitude<0) celestialPoleAxis2=-90.0; else celestialPoleAxis2=90.0;
 #endif
       cosLat=cos(latitude/Rad);
       sinLat=sin(latitude/Rad);
@@ -347,7 +387,6 @@ void Ethernet_get() {
       EEPROM.update(EE_sites+(currentSite)*25+8,b);
       UT1=LMT+timeZone;
       UT1_start  =UT1;
-      UT1mS_start=millis();
       update_lst(jd2last(JD,UT1));
     }
   }
@@ -386,7 +425,6 @@ void Ethernet_get() {
         EEPROM_writeFloat(EE_LMT,LMT); 
         UT1=LMT+timeZone; 
         UT1_start  =UT1;
-        UT1mS_start=millis(); 
         update_lst(jd2last(JD,UT1)); 
       }
       highPrecision=i;
@@ -394,10 +432,54 @@ void Ethernet_get() {
   }
   // Align
   if ((get_names[0]=='a') && (get_names[1]=='l')) {
-    if ((get_vals[0]=='1') && (get_vals[1]==0)) startAlign(get_vals[0]);
-    if ((get_vals[0]=='2') && (get_vals[1]==0)) startAlign(get_vals[0]);
-    if ((get_vals[0]=='3') && (get_vals[1]==0)) startAlign(get_vals[0]);
-    if ((get_vals[0]=='n') && (get_vals[1]==0)) nextAlign();
+    if ((get_vals[0]!='n') && (get_vals[1]==0)) {
+      // Two star and three star align not supported with Fork mounts in alternate mode
+#ifdef MOUNT_TYPE_FORK_ALT
+      if (get_vals[0]=='1') {
+#endif
+    
+      // telescope should be set in the polar home (CWD) for a starting point
+      // this command sets indexAxis1, indexAxis2, azmCor=0; altCor=0;
+      setHome();
+      
+      // enable the stepper drivers
+      digitalWrite(Axis1_EN,Axis1_Enabled); axis1Enabled=true;
+      digitalWrite(Axis2_EN,Axis2_Enabled); axis2Enabled=true;
+      delay(10);
+    
+      // start tracking
+      trackingState=TrackingSidereal;
+    
+      // start align...
+      alignNumStars=get_vals[0]-'0';
+      alignThisStar=1;
+   
+#if defined(MOUNT_TYPE_FORK_ALT)
+      } else { alignNumStars=0; alignThisStar=1; }
+#endif
+    }
+    if ((get_vals[0]=='n') && (get_vals[1]==0)) {
+      // after last star turn meridian flips off when align is done
+      if ((alignNumStars==alignThisStar) && (meridianFlip==MeridianFlipAlign)) meridianFlip=MeridianFlipNever;
+    
+#ifdef MOUNT_TYPE_ALTAZM
+      // AltAz Taki method
+      if ((alignNumStars>1) && (alignThisStar<=alignNumStars)) {
+        cli();
+        // get the Azm/Alt
+        double F=(double)(posAxis1+indexAxis1Steps)/(double)StepsPerDegreeAxis1;
+        double H=(double)(posAxis2+indexAxis2Steps)/(double)StepsPerDegreeAxis2;
+        sei();
+        // B=RA, D=Dec, H=Elevation (instr), F=Azimuth (instr), all in degrees
+        Align.addStar(alignThisStar,alignNumStars,haRange(LST()*15.0-newTargetRA),newTargetDec,H,F);
+        alignThisStar++;
+      } else
+#endif
+      if (alignThisStar<=alignNumStars) {
+        // RA, Dec (in degrees)
+        if (GeoAlign.addStar(alignThisStar,alignNumStars,newTargetRA,newTargetDec)) alignThisStar++; else { alignNumStars=0; alignThisStar=0; }
+      } else { alignNumStars=0; alignThisStar=0; }
+    }
   }
   // Home/Park
   if ((get_names[0]=='h') && (get_names[1]=='m')) {
@@ -431,6 +513,13 @@ void Ethernet_get() {
     if ((get_vals[0]=='o') && (get_vals[1]=='n') && (get_vals[2]==0)) { refraction=refraction_enable; onTrack=false; SetTrackingRate(default_tracking_rate); }
     if ((get_vals[0]=='o') && (get_vals[1]=='f') && (get_vals[2]=='f') && (get_vals[3]==0)) { refraction=false; onTrack=false; SetTrackingRate(default_tracking_rate); }
   }
+  // Auto-continue
+  if ((get_names[0]=='a') && (get_names[1]=='c')) {
+    if ((get_vals[0]=='o') && (get_vals[1]=='n') && (get_vals[2]==0)) { autoContinue=true; EEPROM.write(EE_autoContinue,autoContinue); }
+    if ((get_vals[0]=='o') && (get_vals[1]=='f') && (get_vals[2]=='f') && (get_vals[3]==0)) { autoContinue=false; EEPROM.write(EE_autoContinue,autoContinue); }
+  }
+    
+  // from the Guide.htm page -------------------------------------------------------------------
   // GUIDE control
   if ((get_names[0]=='g') && (get_names[1]=='u')) {
     if (get_vals[1]==0) {
@@ -449,19 +538,19 @@ void Ethernet_get() {
               enableGuideRate(currentGuideRate);
               guideDirAxis2=get_vals[0];
               guideDurationDec=-1;
-              cli(); guideTimerRateAxis2=guideTimerRate; sei();
+              cli(); guideTimerRateAxis2=guideTimerBaseRate; sei();
             }
             quietReply=true;
           } else
           if ((get_vals[0]=='e') || (get_vals[0]=='w')) { 
             // block user from changing direction at high rates, just stop the guide instead
-            if ((guideDirAxis1) && (get_vals[0]!=guideDirAxis1) && (fabs(guidetimerRateAxis1)>2)) { 
+            if ((guideDirAxis1) && (get_vals[0]!=guideDirAxis1) && (fabs(guideTimerRateAxis1)>2)) { 
               guideDirAxis1='b';
             } else {
               enableGuideRate(currentGuideRate);
               guideDirAxis1=get_vals[0];
               guideDurationHA=-1;
-              cli(); if (guideDirAxis1=='e') guidetimerRateAxis1=-guideTimerRate; else guidetimerRateAxis1=guideTimerRate; sei();
+              cli(); if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRate; else guideTimerRateAxis1=guideTimerBaseRate; sei();
             }
           }
         } else 
@@ -551,19 +640,19 @@ const char html_index3[] PROGMEM = "<font class=\"c\">%02d/%02d/%02d</font>";
 const char html_index4[] PROGMEM = "&nbsp;<font class=\"c\">%s</font>&nbsp;UT";
 const char html_index4a[] PROGMEM = "&nbsp;(<font class=\"c\">%s</font>&nbsp; Local Apparent Sidereal Time)<br /><br />";
 const char html_indexTrue[] PROGMEM = "Absolute Position: " Axis1 "=<font class=\"c\">%ld</font> steps, " Axis2 "=<font class=\"c\">%ld</font> steps<br />";
-const char html_indexIndex[] PROGMEM = "IHS=<font class=\"c\">%ld</font> steps, IDS=<font class=\"c\">%ld</font> steps<br />";
-const char html_indexCorIdx[] PROGMEM = "IH=<font class=\"c\">%ld</font>\", ID=<font class=\"c\">%ld</font>\"<br />";
+const char html_indexIndex[] PROGMEM = "indexAxis1Steps=<font class=\"c\">%ld</font> steps, indexAxis2Steps=<font class=\"c\">%ld</font> steps<br />";
+const char html_indexCorIdx[] PROGMEM = "indexAxis1=<font class=\"c\">%ld</font>\", indexAxis2=<font class=\"c\">%ld</font>\"<br />";
 const char html_indexCorPole[] PROGMEM = "altCor=<font class=\"c\">%ld</font>\", azmCor=<font class=\"c\">%ld</font>\"<br />";
 const char html_indexCorPolar[] PROGMEM = "Polar Alignment Correction: Alt=<font class=\"c\">%ld</font>\", Azm=<font class=\"c\">%ld</font>\"<br /><br />";
 const char html_indexCorOrtho[] PROGMEM = "doCor=<font class=\"c\">%ld</font>\", pdCor=<font class=\"c\">%ld</font>\"<br />";
-const char html_indexRateDeltas[] PROGMEM = "deltaAxis1 =<font class=\"c\">%s</font>\"/s, deltaAxis2=<font class=\"c\">%s</font>\"/s<br /><br />";
+const char html_indexRateDeltas[] PROGMEM = "&Delta; Axis1=<font class=\"c\">%s</font>\"/s, &Delta; Axis2=<font class=\"c\">%s</font>\"/s<br /><br />";
 const char html_indexPosition[] PROGMEM = "Instrument Coordinates: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
 const char html_indexTarget[] PROGMEM   = "Target Coordinates: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
 const char html_indexAz1[] PROGMEM = "Az1: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
 const char html_indexAz2[] PROGMEM = "Az2: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
 const char html_indexPier[] PROGMEM = "Pier Side=<font class=\"c\">%s</font> (meridian flips <font class=\"c\">%s</font>)<br /><br />";
 const char html_index8[] PROGMEM = "Tracking: <font class=\"c\">%s %s</font><br />";
-const char html_index9[] PROGMEM = "Parking: <font class=\"c\">%s</font><br /><br />";
+const char html_index9[] PROGMEM = "Park: <font class=\"c\">%s</font><br /><br />";
 const char html_index10[] PROGMEM = "Last Error: <font class=\"c\">%s</font><br />";
 const char html_indexFault[] PROGMEM =  "Stepper Driver: " Axis1 " axis %s, " Axis2 " axis %s<br /><br />";
 const char html_indexMaxRate[] PROGMEM = "Current MaxRate: <font class=\"c\">%ld</font> (Default MaxRate: <font class=\"c\">%ld</font>)<br /><br />";
@@ -649,10 +738,10 @@ if (html_page_step==++stp) {
     strcpy_P(temp1, html_indexTrue); sprintf(temp,temp1,a1,a2); 
   }
   if (html_page_step==++stp) {
-    strcpy_P(temp1, html_indexIndex); sprintf(temp,temp1,IHS,IDS); 
+    strcpy_P(temp1, html_indexIndex); sprintf(temp,temp1,indexAxis1Steps,indexAxis2Steps); 
   }
   if (html_page_step==++stp) {
-    strcpy_P(temp1, html_indexCorIdx); sprintf(temp,temp1,(long)(IH*3600.0),(long)(ID*3600.0)); 
+    strcpy_P(temp1, html_indexCorIdx); sprintf(temp,temp1,(long)(indexAxis1*3600.0),(long)(indexAxis2*3600.0)); 
   }
   if (html_page_step==++stp) {
     strcpy_P(temp1, html_indexCorPole); sprintf(temp,temp1,(long)(altCor*3600.0),(long)(azmCor*3600.0)); 
@@ -670,18 +759,18 @@ if (html_page_step==++stp) {
 #else
 #if defined(MOUNT_TYPE_GEM) || defined(MOUNT_TYPE_FORK)
   if (html_page_step==++stp) {
-    strcpy_P(temp1, html_indexCorPolar); sprintf(temp,temp1,(long)(altCor*3600.0),(long)(azmCor*3600.0)); 
+    strcpy_P(temp1, html_indexCorPolar); sprintf(temp,temp1,(long)(GeoAlign.altCor*3600.0),(long)(GeoAlign.azmCor*3600.0)); 
   }
 #endif
 #endif
   if (html_page_step==++stp) {
     i=highPrecision; highPrecision=true; 
     cli();
-    long h=posAxis1+IHS;
-    long d=posAxis2+IDS;
+    long h=posAxis1+indexAxis1Steps;
+    long d=posAxis2+indexAxis2Steps;
     sei();
 #ifdef MOUNT_TYPE_ALTAZM
-    double ha=(double)h/(double)StepsPerDegreeAxis1; 
+    double ha=(double)h/(double)StepsPerDegreeAxis1;
     doubleToDms(temp2,&ha,true,true);
 #else
     double ha=(double)h/((double)StepsPerDegreeAxis1*15.0);
@@ -717,8 +806,8 @@ if (html_page_step==++stp) {
   if (html_page_step==++stp) {
     i=highPrecision; highPrecision=true;
     cli();
-    long h=(long)targetAxis1.part.m+IHS;
-    long d=(long)targetAxis2.part.m+IDS;
+    long h=(long)targetAxis1.part.m+indexAxis1Steps;
+    long d=(long)targetAxis2.part.m+indexAxis2Steps;
     sei();
 #ifdef MOUNT_TYPE_ALTAZM
     double ha=(double)h/(double)(StepsPerDegreeAxis1);
@@ -1004,11 +1093,15 @@ const char html_controlAlign1[] PROGMEM =
 "Align: "
 "<form method=\"get\" action=\"/control.htm\">"
 "<button name=\"al\" value=\"1\" type=\"submit\">1 Star</button>";
-const char html_controlAlign23[] PROGMEM = 
-"<button name=\"al\" value=\"2\" type=\"submit\">2 Star</button>"
-"<button name=\"al\" value=\"3\" type=\"submit\">3 Star</button>";
-const char html_controlAlign4[] PROGMEM = 
-"<br /><button name=\"al\" value=\"n\" type=\"submit\">Accept</button>"
+const char html_controlAlign2[] PROGMEM = "<button name=\"al\" value=\"2\" type=\"submit\">2 Star</button>";
+const char html_controlAlign3[] PROGMEM = "<button name=\"al\" value=\"3\" type=\"submit\">3 Star</button>";
+const char html_controlAlign4[] PROGMEM = "<button name=\"al\" value=\"4\" type=\"submit\">4 Star</button>";
+const char html_controlAlign5[] PROGMEM = "<button name=\"al\" value=\"5\" type=\"submit\">5 Star</button>";
+const char html_controlAlign6[] PROGMEM = "<button name=\"al\" value=\"6\" type=\"submit\">6 Star</button>";
+const char html_controlAlign7[] PROGMEM = "<button name=\"al\" value=\"7\" type=\"submit\">7 Star</button>";
+const char html_controlAlign8[] PROGMEM = "<button name=\"al\" value=\"8\" type=\"submit\">8 Star</button>";
+const char html_controlAlign9[] PROGMEM = "<button name=\"al\" value=\"9\" type=\"submit\">9 Star</button>";
+const char html_controlAlignX[] PROGMEM = "<br /><button name=\"al\" value=\"n\" type=\"submit\">Accept</button>"
 "</form><br />\r\n";
 const char html_control6[] PROGMEM = 
 "Home/Park: "
@@ -1033,13 +1126,18 @@ const char html_control10[] PROGMEM =
 "<button name=\"tk\" value=\"s\" type=\"submit\">Sidereal</button>"
 "<button name=\"tk\" value=\"l\" type=\"submit\">Lunar</button>"
 "<button name=\"tk\" value=\"h\" type=\"submit\">Solar</button>";
-const char html_control11[] PROGMEM = 
 #if !defined(MOUNT_TYPE_ALTAZM)
+const char html_control11[] PROGMEM = 
 "</br></br>Compensated Tracking Rate (Pointing Model/Refraction): </br>"
 "<button name=\"rr\" value=\"otk\" type=\"submit\">Full</button>"
 "<button name=\"rr\" value=\"on\" type=\"submit\">Refraction Only</button>"
-"<button name=\"rr\" value=\"off\" type=\"submit\">Off</button>"
+"<button name=\"rr\" value=\"off\" type=\"submit\">Off</button>";
+const char html_control12[] = 
+"</br></br>Auto-flip (automatic Meridian flip): </br>"
+"<button name=\"ac\" value=\"on\" type=\"submit\">On</button>"
+"<button name=\"ac\" value=\"off\" type=\"submit\">Off</button>";
 #endif
+const char html_control13[] = 
 "</form>\r\n";
 
 void control_html_page() {
@@ -1080,16 +1178,26 @@ void control_html_page() {
   if (html_page_step==++stp) strcpy_P(temp, html_control4c);
   if (html_page_step==++stp) strcpy_P(temp, html_control4d);
   if (html_page_step==++stp) strcpy_P(temp, html_controlAlign1);
-#if defined(MOUNT_TYPE_GEM) || defined(MOUNT_TYPE_FORK_ALT)
-  if (html_page_step==++stp) strcpy_P(temp, html_controlAlign23);
-#endif
-  if (html_page_step==++stp) strcpy_P(temp, html_controlAlign4);
+  if (MAX_NUM_ALIGN_STARS>=2) if (html_page_step==++stp) strcpy_P(temp, html_controlAlign2);
+  if (MAX_NUM_ALIGN_STARS>=3) if (html_page_step==++stp) strcpy_P(temp, html_controlAlign3);
+  if (MAX_NUM_ALIGN_STARS>=3) if (html_page_step==++stp) strcpy_P(temp, html_controlAlign3);
+  if (MAX_NUM_ALIGN_STARS>=4) if (html_page_step==++stp) strcpy_P(temp, html_controlAlign4);
+  if (MAX_NUM_ALIGN_STARS>=5) if (html_page_step==++stp) strcpy_P(temp, html_controlAlign5);
+  if (MAX_NUM_ALIGN_STARS>=6) if (html_page_step==++stp) strcpy_P(temp, html_controlAlign6);
+  if (MAX_NUM_ALIGN_STARS>=7) if (html_page_step==++stp) strcpy_P(temp, html_controlAlign7);
+  if (MAX_NUM_ALIGN_STARS>=8) if (html_page_step==++stp) strcpy_P(temp, html_controlAlign8);
+  if (MAX_NUM_ALIGN_STARS>=9) if (html_page_step==++stp) strcpy_P(temp, html_controlAlign9);
+  if (html_page_step==++stp) strcpy_P(temp, html_controlAlignX);
   if (html_page_step==++stp) strcpy_P(temp, html_control6);
   if (html_page_step==++stp) strcpy_P(temp, html_control7);
   if (html_page_step==++stp) strcpy_P(temp, html_control8);
   if (html_page_step==++stp) strcpy_P(temp, html_control9);
   if (html_page_step==++stp) strcpy_P(temp, html_control10);
+#if !defined(MOUNT_TYPE_ALTAZM)
   if (html_page_step==++stp) strcpy_P(temp, html_control11);
+  if (html_page_step==++stp) strcpy_P(temp, html_control12);
+#endif  
+  if (html_page_step==++stp) strcpy_P(temp, html_control13);
   if (html_page_step==++stp) strcpy(temp,"</div></body></html>");
 
   // stop sending this page
@@ -1433,7 +1541,6 @@ void config_html_page() {
   char temp[320] = "";
   char temp1[320] = "";
   char temp2[80] = "";
-  char temp3[80] = "";
   int stp=0;
   html_page_step++;
     
@@ -1500,7 +1607,6 @@ void config_html_page() {
  
   if (html_page_step==++stp) { strcpy_P(temp1, html_configMinDec); sprintf(temp,temp1,(long)round(MinDec)); }
   if (html_page_step==++stp) { strcpy_P(temp1, html_configMaxDec); sprintf(temp,temp1,(long)round(MaxDec)); }
-
 
   if (html_page_step==++stp) strcpy(temp,"</div></body></html>");
 

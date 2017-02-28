@@ -2,9 +2,15 @@
 // Communication routines for Serial0 and Serial1
 // these are more compact and faster than the Arduino provided one's
 
-#if defined(__AVR__)
+void lookf(const char comment[], double f)
+{
+  char temp[10];
+  Serial1_send(comment); dtostrf(f,4,6,temp); Serial1_send(temp); Serial1_send("\r\n");
+}
 
-void Serial_Init(unsigned int baud) {
+#if defined(__AVR_ATmega2560__)
+
+void Serial_Init(unsigned long baud) {
   unsigned int ubrr=F_CPU/16/baud-1;
 
   Serial_xmit_index=0;
@@ -73,7 +79,7 @@ char Serial_read()
   return c;
 }
 
-void Serial1_Init(unsigned int baud) {
+void Serial1_Init(unsigned long baud) {
   unsigned int ubrr=F_CPU/16/baud-1;
 
   Serial1_xmit_index=0;
@@ -137,7 +143,7 @@ char Serial1_read()
 
 #else  // on non-AVR platforms, try to use the built-in serial stuff...
 
-void Serial_Init(unsigned int baud) {
+void Serial_Init(unsigned long baud) {
   Serial.begin(baud);
 }
 
@@ -165,7 +171,7 @@ char Serial_read() {
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
 // use serial7 as serial1 (serial1) as serial1 is not readily available on the board
 // if you really want to use serial1 you will need to do some soldering
-void Serial1_Init(unsigned int baud) {
+void Serial1_Init(unsigned long baud) {
   Serial7.begin(baud);
 }
 
@@ -191,7 +197,7 @@ char Serial1_read() {
   return Serial7.read();
 }
 #else
-void Serial1_Init(unsigned int baud) {
+void Serial1_Init(unsigned long baud) {
   Serial1.begin(baud);
 }
 
@@ -219,3 +225,69 @@ char Serial1_read() {
 #endif
 
 #endif
+
+// -----------------------------------------------------------------------------------
+// Simple soft SPI routines (CPOL=1, CPHA=1)
+int _cs = 0;
+int _sck = 0;
+int _miso = 0;
+int _mosi = 0;
+
+void spiStart(int cs, int sck, int miso, int mosi)
+{
+  _cs=cs; pinMode(cs,OUTPUT); digitalWrite(cs,HIGH);
+  delayMicroseconds(1);
+  _sck=sck; pinMode(_sck,OUTPUT); digitalWrite(_sck,HIGH);
+  _miso=miso; pinMode(_miso,INPUT);
+  _mosi=mosi; pinMode(_mosi,OUTPUT);
+  digitalWrite(cs,LOW);
+  delayMicroseconds(1);
+}
+
+void spiEnd() {
+  delayMicroseconds(1);
+  digitalWrite(_cs, HIGH);
+}
+
+void spiPause() {
+  digitalWrite(_cs, HIGH);
+  delayMicroseconds(1);
+  digitalWrite(_cs, LOW);
+  delayMicroseconds(1);
+}
+
+uint8_t spiTransfer(uint8_t data_out)
+{
+  uint8_t data_in = 0;
+  
+  for(int i=7; i>=0; i--)
+  {
+    digitalWrite(_sck,LOW);
+    digitalWrite(_mosi,bitRead(data_out,i));
+    delayMicroseconds(1);
+    digitalWrite(_sck,HIGH);
+    bitWrite(data_in,i,digitalRead(_miso));
+    delayMicroseconds(1);
+  }
+  
+  return data_in;
+}
+
+uint32_t spiTransfer32(uint32_t data_out)
+{
+  uint32_t data_in = 0;
+  
+  for(int i=31; i>=0; i--)
+  {
+    digitalWrite(_sck,LOW);
+    digitalWrite(_mosi,bitRead(data_out,i));
+    delayMicroseconds(1);
+    digitalWrite(_sck,HIGH);
+    bitWrite(data_in,i,digitalRead(_miso));
+    delayMicroseconds(1);
+  }
+
+  return data_in;
+}
+
+
