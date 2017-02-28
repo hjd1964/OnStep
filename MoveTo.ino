@@ -303,16 +303,19 @@ void DecayModeTracking() {
   pinMode(Axis2_Mode,OUTPUT); digitalWrite(Axis2_Mode,HIGH);
 #elif defined(MODE_SWITCH_BEFORE_SLEW_ON)
   #ifdef AXIS1_MODE
+    stepAxis1=1;
     if ((AXIS1_MODE & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE    & 1)); } else { pinModeOpen(Axis1_M0); }
     if ((AXIS1_MODE & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE>>1 & 1)); } else { pinModeOpen(Axis1_M1); }
     if ((AXIS1_MODE & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE>>2 & 1)); } else { pinModeOpen(Axis1_M2); }
   #endif
   #ifdef AXIS2_MODE
+    stepAxis2=1;
     if ((AXIS2_MODE & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE    & 1)); } else { pinModeOpen(Axis2_M0); }
     if ((AXIS2_MODE & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE>>1 & 1)); } else { pinModeOpen(Axis2_M1); }
     if ((AXIS2_MODE & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE>>2 & 1)); } else { pinModeOpen(Axis2_M2); }
   #endif
 #elif defined(MODE_SWITCH_BEFORE_SLEW_SPI)
+  stepAxis1=1;
   bool nintpol=((AXIS1_MODE & 0b0010000)!=0);
   bool stealth=((AXIS1_MODE & 0b0100000)!=0);
   bool lowpwr =((AXIS1_MODE & 0b1000000)!=0);
@@ -320,6 +323,7 @@ void DecayModeTracking() {
   spiStart(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0);
   TMC2130_setup(!nintpol,stealth,AXIS1_MODE&0b001111,lowpwr);  // default 256x interpolation ON, stealthChop OFF (spreadCycle), micro-steps
   spiEnd();
+  stepAxis2=1;
   nintpol=((AXIS2_MODE & 0b0010000)!=0);
   stealth=((AXIS2_MODE & 0b0100000)!=0);
   lowpwr =((AXIS2_MODE & 0b1000000)!=0);
@@ -331,10 +335,6 @@ void DecayModeTracking() {
   if ((((AXIS1_MODE & 0b0100000)!=0) || ((AXIS2_MODE & 0b0100000)!=0)) & (atHome)) delay(100);
 #endif
 
-#if defined(AXIS1_MODE) && defined(AXIS1_MODE_GOTO)
-  stepAxis1=1;
-  stepAxis2=1;
-#endif
 #ifdef MODE_SWITCH_SLEEP_ON 
   delay(3);
 #endif
@@ -357,16 +357,19 @@ void DecayModeGoto() {
   pinMode(Axis2_Mode,OUTPUT); digitalWrite(Axis2_Mode,HIGH);
 #elif defined(MODE_SWITCH_BEFORE_SLEW_ON)
   #ifdef AXIS1_MODE_GOTO
+    stepAxis1=AXIS1_STEP_GOTO;
     if ((AXIS1_MODE_GOTO & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE_GOTO    & 1)); } else { pinModeOpen(Axis1_M0); }
     if ((AXIS1_MODE_GOTO & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE_GOTO>>1 & 1)); } else { pinModeOpen(Axis1_M1); }
     if ((AXIS1_MODE_GOTO & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE_GOTO>>2 & 1)); } else { pinModeOpen(Axis1_M2); }
   #endif
   #ifdef AXIS2_MODE_GOTO
+    stepAxis2=AXIS2_STEP_GOTO;
     if ((AXIS2_MODE_GOTO & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE_GOTO    & 1)); } else { pinModeOpen(Axis2_M0); }
     if ((AXIS2_MODE_GOTO & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE_GOTO>>1 & 1)); } else { pinModeOpen(Axis2_M1); }
     if ((AXIS2_MODE_GOTO & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE_GOTO>>2 & 1)); } else { pinModeOpen(Axis2_M2); }
   #endif
 #elif defined(MODE_SWITCH_BEFORE_SLEW_SPI)
+  stepAxis1=AXIS1_STEP_GOTO;
   bool nintpol=((AXIS1_MODE_GOTO & 0b0010000)!=0);
   bool stealth=((AXIS1_MODE_GOTO & 0b0100000)!=0);
   bool lowpwr =((AXIS1_MODE_GOTO & 0b1000000)!=0);
@@ -374,6 +377,7 @@ void DecayModeGoto() {
   spiStart(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0);
   TMC2130_setup(!nintpol,stealth,AXIS1_MODE_GOTO&0b001111,lowpwr);  // default 256x interpolation ON, stealthChop OFF (spreadCycle), micro-steps
   spiEnd();
+  stepAxis2=AXIS2_STEP_GOTO;
   nintpol=((AXIS2_MODE_GOTO & 0b0010000)!=0);
   stealth=((AXIS2_MODE_GOTO & 0b0100000)!=0);
   lowpwr =((AXIS2_MODE_GOTO & 0b1000000)!=0);
@@ -382,10 +386,6 @@ void DecayModeGoto() {
   spiEnd();
 #endif
 
-#if defined(AXIS1_MODE) && defined(AXIS1_MODE_GOTO)
-  stepAxis1=AXIS1_STEP_GOTO;
-  stepAxis2=AXIS2_STEP_GOTO;
-#endif
 #ifdef MODE_SWITCH_SLEEP_ON
   delay(3);
 #endif

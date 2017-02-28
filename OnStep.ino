@@ -1162,7 +1162,7 @@ void setup() {
   DecayModeTracking();
 
 // if the stepper driver mode select pins are wired in, program any requested micro-step mode
-#ifdef MODE_SWITCH_BEFORE_SLEW_OFF
+#if !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
   // automatic mode switching during slews, initialize micro-step mode
   #ifdef AXIS1_MODE
     if ((AXIS1_MODE & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE    & 1)); } else { pinMode(Axis1_M0,INPUT); }
