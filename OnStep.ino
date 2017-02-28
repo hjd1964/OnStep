@@ -38,6 +38,7 @@
 #define TMC_LOWPWR      64
 #define TMC_STEALTHCHOP 32
 #define TMC_NINTPOL     16
+#include "Serial.h"
 #include "math.h"
 #include "errno.h"
 #include "Align.h"
@@ -163,6 +164,10 @@ volatile double StepsForRateChangeAxis2= ((double)DegreesForAcceleration/sqrt((d
 #ifndef DegreesForRapidStop
 #define DegreesForRapidStop 1.0
 #endif
+
+pserial PSerial;
+pserial1 PSerial1;
+bbspi BBSpi;
 
 #if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
 #define cli() noInterrupts()
@@ -1331,8 +1336,8 @@ void setup() {
 #endif
 
   // get ready for serial communications
-  Serial1_Init(9600);
-  Serial_Init(9600); // for Tiva TM4C the serial is redirected to serial5 in serial.ino file
+  PSerial.begin(9600); // for Tiva TM4C the serial is redirected to serial5 in serial.ino file
+  PSerial1.begin(9600);
 
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
   // get ready for Ethernet communications

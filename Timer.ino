@@ -467,14 +467,14 @@ void ClockSync() {
 #if defined(__AVR_ATmega2560__)
 // UART Receive Complete Interrupt Handler for Serial0
 ISR(USART0_RX_vect)  {
-  Serial_recv_buffer[Serial_recv_tail]=UDR0; 
-  Serial_recv_tail++; // buffer is 256 bytes so this byte variable wraps automatically
+  PSerial._recv_buffer[PSerial._recv_tail]=UDR0; 
+  PSerial._recv_tail++; // buffer is 256 bytes so this byte variable wraps automatically
 }
 
 // UART Receive Complete Interrupt Handler for Serial1
 ISR(USART1_RX_vect)  {
-  Serial1_recv_buffer[Serial1_recv_tail]=UDR1; 
-  Serial1_recv_tail++; // buffer is 256 bytes so this byte variable wraps automatically
+  PSerial1._recv_buffer[PSerial1._recv_tail]=UDR1; 
+  PSerial1._recv_tail++; // buffer is 256 bytes so this byte variable wraps automatically
 }
 #endif
 

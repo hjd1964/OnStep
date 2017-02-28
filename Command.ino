@@ -26,16 +26,16 @@ void processCommands() {
     boolean supress_frame = false;
     char *conv_end;
 
-    if ((Serial_available()>0) && (!cmd.ready())) cmd.add(Serial_read());
-    if ((Serial1_available()>0) && (!cmd1.ready())) cmd1.add(Serial1_read());
+    if ((PSerial.available()>0) && (!cmd.ready())) cmd.add(PSerial.read());
+    if ((PSerial1.available()>0) && (!cmd1.ready())) cmd1.add(PSerial1.read());
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
     if ((Ethernet_available()>0) && (!cmde.ready())) cmde.add(Ethernet_read());
 #endif
 
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
-    if (Serial_transmit() || Serial1_transmit() || Ethernet_transmit()) return;
+    if (PSerial.transmit() || PSerial1.transmit() || Ethernet_transmit()) return;
 #else
-    if (Serial_transmit() || Serial1_transmit()) return;
+    if (PSerial.transmit() || PSerial1.transmit()) return;
 #endif
 
     process_command = COMMAND_NONE;
@@ -1029,13 +1029,13 @@ void processCommands() {
         i=(int)(parameter[0]-'0');
         if ((i>=0) && (i<10)) {
           if (process_command==COMMAND_SERIAL) {
-            Serial_print("1"); while (Serial_transmit()); delay(20); Serial_Init(baudRate[i]);
+            PSerial.print("1"); while (PSerial.transmit()); delay(20); PSerial.begin(baudRate[i]);
           } else if (process_command==COMMAND_ETHERNET) {
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
              Ethernet_print("1"); while (Ethernet_transmit()); delay(20);
 #endif
           } else  {
-            Serial1_print("1"); while (Serial1_transmit()); delay(20); Serial1_Init(baudRate[i]); 
+            PSerial1.print("1"); while (PSerial1.transmit()); delay(20); PSerial1.begin(baudRate[i]); 
           }
           quietReply=true; 
         } else commandError=true;
@@ -1460,13 +1460,13 @@ void processCommands() {
         if (process_command==COMMAND_SERIAL) {
           if (cmd.checksum) checksum(reply);
           if (!supress_frame) strcat(reply,"#");
-          Serial_print(reply);
+          PSerial.print(reply);
         } 
   
         if (process_command==COMMAND_SERIAL1) {
           if (cmd1.checksum) checksum(reply);
           if (!supress_frame) strcat(reply,"#");
-          Serial1_print(reply);
+          PSerial1.print(reply);
         }
   
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
@@ -1505,7 +1505,7 @@ void enableGuideRate(int g) {
 // calculate the checksum and add to string
 void checksum(char s[]) {
   char HEXS[3]="";
-  byte cks=0; for (int cksCount0=0; cksCount0<strlen(s); cksCount0++) {  cks+=s[cksCount0]; }
+  byte cks=0; for (unsigned int cksCount0=0; cksCount0<strlen(s); cksCount0++) {  cks+=s[cksCount0]; }
   sprintf(HEXS,"%02X",cks);
   strcat(s,HEXS);
 }
