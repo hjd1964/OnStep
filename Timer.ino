@@ -238,10 +238,10 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     // trigger Goto step mode, rapid acceleration (low DegreesForAcceleration) can leave too little time
     // until the home position arrives to actually switch to tracking micro-step mode. the larger step size
     // then causes backlash compensation to activate which in-turn keeps goto micro-step mode from turning off
-    #if defined(AXIS2_MODE) && defined(AXIS2_MODE_GOTO)
+    #if defined(AXIS2_MODE) && defined(AXIS2_MODE_GOTO) && !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
     gotoRateAxis2=(thisTimerRateAxis2<50*16L);   // activate <50us rate
     #endif
-    #if defined(AXIS1_MODE) && defined(AXIS1_MODE_GOTO)
+    #if defined(AXIS1_MODE) && defined(AXIS1_MODE_GOTO) && !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
     gotoRateAxis1=(thisTimerRateAxis1<50*16L);   // activate <50us rate
     #endif
   }
