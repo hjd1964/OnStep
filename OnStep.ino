@@ -165,10 +165,6 @@ volatile double StepsForRateChangeAxis2= ((double)DegreesForAcceleration/sqrt((d
 #define DegreesForRapidStop 1.0
 #endif
 
-pserial PSerial;
-pserial1 PSerial1;
-bbspi BBSpi;
-
 #if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
 #define cli() noInterrupts()
 #define sei() interrupts()
@@ -769,6 +765,9 @@ boolean homeMount        = false;
 
 // Command processing -------------------------------------------------------------------------------------------------------
 #define BAUD 9600
+pserial PSerial;
+pserial1 PSerial1;
+bbspi BBSpi;
 
 // Misc ---------------------------------------------------------------------------------------------------------------------
 #define Rad 57.29577951
