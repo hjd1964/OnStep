@@ -171,7 +171,6 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     double timerRateAxis1B=guideTimerRateAxis1A+pecTimerRateAxis1+timerRateAxis1A;
     if (timerRateAxis1B<0) { timerRateAxis1B=fabs(timerRateAxis1B); cli(); timerDirAxis1=-1; sei(); } else { cli(); timerDirAxis1=1; sei(); }
     if (timerRateAxis1B<0.00001) { timerDirAxis1=0; timerRateAxis1B=0.5; }
-    // round up to run the motor timers just a tiny bit slow, then adjust below if we start to fall behind during sidereal tracking
     calculatedTimerRateAxis1=round((double)SiderealRate/timerRateAxis1B);
     // remember our "running" rate and only update the actual rate when it changes
     if (runTimerRateAxis1!=calculatedTimerRateAxis1) { timerRateAxis1=calculatedTimerRateAxis1; runTimerRateAxis1=calculatedTimerRateAxis1; }
@@ -221,17 +220,15 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
   // override rate during backlash compensation
   if (inbacklashAxis2) { thisTimerRateAxis2=timerRateBacklashAxis2; wasInbacklashAxis2=true; }
 
-  if (trackingState==TrackingMoveTo) {
-    // trigger Goto step mode, rapid acceleration (low DegreesForAcceleration) can leave too little time
-    // until the home position arrives to actually switch to tracking micro-step mode. the larger step size
-    // then causes backlash compensation to activate which in-turn keeps goto micro-step mode from turning off
-    #if defined(AXIS2_MODE) && defined(AXIS2_MODE_GOTO)
-    gotoRateAxis2=(thisTimerRateAxis2<512*16L);   // activate <512us rate
-    #endif
-    #if defined(AXIS1_MODE) && defined(AXIS1_MODE_GOTO)
-    gotoRateAxis1=(thisTimerRateAxis1<512*16L);   // activate <512us rate
-    #endif
-  }
+  // trigger Goto step mode, rapid acceleration (low DegreesForAcceleration) can leave too little time
+  // until the home position arrives to actually switch to tracking micro-step mode. the larger step size
+  // then causes backlash compensation to activate which in-turn keeps goto micro-step mode from turning off
+  #if defined(AXIS1_MODE) && defined(AXIS1_MODE_GOTO) && !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
+  gotoRateAxis1=(thisTimerRateAxis1<512*16L);   // activate <512us rate
+  #endif
+  #if defined(AXIS2_MODE) && defined(AXIS2_MODE_GOTO) && !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
+  gotoRateAxis2=(thisTimerRateAxis2<512*16L);   // activate <512us rate
+  #endif
 
 #if defined(AUTO_POWER_DOWN_AXIS2_ON) && !defined(MOUNT_TYPE_ALTAZM)
     // ------------------------------------------------------------------------------------------------------------------------------------
