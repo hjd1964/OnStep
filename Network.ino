@@ -1,4 +1,4 @@
-#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
+#ifdef ETHERNET_ON
 
 #define www_xmit_buffer_size 1024
 int  www_xmit_buffer_send_pos=0;

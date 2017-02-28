@@ -51,6 +51,7 @@
 // There is a bug in Arduino/Energia which ignores #ifdef preprocessor directives when generating a list of files
 // Until this is fixed YOU MUST MANUALLY UN-COMMENT the #include line below if using the Launchpad Connected device.
 #if defined(W5100_ON)
+#define ETHERNET_ON
 #include "SPI.h"
 // OnStep uses the EthernetPlus.h library for the W5100 on the Mega2560 and Launchpad TM4C:
 // this is available at: https://github.com/hjd1964/EthernetPlus and should be installed in your "~\Documents\Arduino\libraries" folder
@@ -59,6 +60,7 @@
 //#include "Ethernet.h"
 #endif
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+#define ETHERNET_ON
 //#include "Ethernet.h"
 #endif
 
@@ -765,6 +767,8 @@ boolean homeMount        = false;
 
 // Command processing -------------------------------------------------------------------------------------------------------
 #define BAUD 9600
+// serial speed
+unsigned long baudRate[10] = {115200,56700,38400,28800,19200,14400,9600,4800,2400,1200};
 pserial PSerial;
 pserial1 PSerial1;
 bbspi BBSpi;
@@ -783,9 +787,6 @@ bbspi BBSpi;
 #define MAX_NUM_ALIGN_STARS '3'
 #else
 #endif
-
-// serial speed
-unsigned long baudRate[10] = {115200,56700,38400,28800,19200,14400,9600,4800,2400,1200};
 
 // current site index and name
 byte currentSite = 0; 
@@ -1338,7 +1339,7 @@ void setup() {
   PSerial.begin(9600); // for Tiva TM4C the serial is redirected to serial5 in serial.ino file
   PSerial1.begin(9600);
 
-#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
+#ifdef ENTERNET_ON
   // get ready for Ethernet communications
   Ethernet_Init();
 #endif
