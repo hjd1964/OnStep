@@ -33,25 +33,27 @@
  *
  */
 
-#include "math.h"
-#include "errno.h"
 // Use Config.h to configure OnStep to your requirements 
 // help stepper driver configuration
 #define TMC_LOWPWR      64
 #define TMC_STEALTHCHOP 32
 #define TMC_NINTPOL     16
+#include "math.h"
+#include "errno.h"
 #include "Align.h"
 #include "Config.h"
+#include "Command.h"
 #include "Library.h"
 #include "FPoint.h"
 #include "TM4C.h"
+
 // There is a bug in Arduino/Energia which ignores #ifdef preprocessor directives when generating a list of files
 // Until this is fixed YOU MUST MANUALLY UN-COMMENT the #include line below if using the Launchpad Connected device.
 #if defined(W5100_ON)
 #include "SPI.h"
 // OnStep uses the EthernetPlus.h library for the W5100 on the Mega2560 and Launchpad TM4C:
 // this is available at: https://github.com/hjd1964/EthernetPlus and should be installed in your "~\Documents\Arduino\libraries" folder
-#include "EthernetPlus.h"
+//#include "EthernetPlus.h"
 // OnStep uses the Ethernet.h library for the W5100 on the Teensy3.2:
 //#include "Ethernet.h"
 #endif
@@ -762,42 +764,6 @@ boolean homeMount        = false;
 
 // Command processing -------------------------------------------------------------------------------------------------------
 #define BAUD 9600
-
-boolean commandError     = false;
-boolean quietReply       = false;
-
-char reply[50];
-
-char command[3];
-char parameter[25];
-byte bufferPtr= 0;
-
-// for bluetooth/serial 0
-char command_serial_zero[25];
-char parameter_serial_zero[25];
-byte bufferPtr_serial_zero= 0;
-
-char Serial_recv_buffer[256] = "";
-volatile byte Serial_recv_tail = 0;
-volatile byte Serial_recv_head = 0;
-char Serial_xmit_buffer[50] = "";
-byte Serial_xmit_index = 0;
-
-// for bluetooth/serial 1
-char command_serial_one[25];
-char parameter_serial_one[25];
-byte bufferPtr_serial_one= 0;
-
-char Serial1_recv_buffer[256] = "";
-volatile byte Serial1_recv_tail = 0;
-volatile byte Serial1_recv_head = 0;
-char Serial1_xmit_buffer[50] = "";
-byte Serial1_xmit_index = 0;
-
-// for ethernet
-char command_ethernet[25];
-char parameter_ethernet[25];
-byte bufferPtr_ethernet= 0;
 
 // Misc ---------------------------------------------------------------------------------------------------------------------
 #define Rad 57.29577951

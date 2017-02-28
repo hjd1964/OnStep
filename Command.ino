@@ -1,14 +1,6 @@
 // -----------------------------------------------------------------------------------
 // Command processing
 
-// these turn on and off checksum error correction on the serial ports, default=OFF
-#define CHKSUM0_OFF     // default _OFF: as required for OnStep ASCOM driver
-#define CHKSUM1_OFF     // default _OFF: as required for OnStep Controller2 Android App (and others)
-boolean serial_zero_ready = false;
-boolean serial_one_ready = false;
-#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
-boolean ethernet_ready = false;
-#endif
 // scratch-pad variables
 double f,f1,f2,f3; 
 int    i,i1,i2;
@@ -16,7 +8,16 @@ byte   b;
 unsigned long _coord_t=0;
 double _dec,_ra;
 
-enum Command {COMMAND_NONE, COMMAND_SERIAL, COMMAND_SERIAL1, COMMAND_ETHERNET};
+// help with commands
+enum Command {COMMAND_NONE, COMMAND_SERIAL, COMMAND_SERIAL1, COMMAND_ETHERNET, COMMAND_SPI};
+char reply[50];
+char command[3];
+char parameter[25];
+boolean commandError = false;
+boolean quietReply   = false;
+cb cmd;  // serial
+cb cmd1; // serial1
+cb cmde; // ethernet
 
 // process commands
 void processCommands() {
@@ -25,21 +26,25 @@ void processCommands() {
     boolean supress_frame = false;
     char *conv_end;
 
-    if ((Serial_available() > 0) && (!serial_zero_ready)) { serial_zero_ready = buildCommand_serial_zero(Serial_read()); }
-    if ((Serial1_available() > 0) && (!serial_one_ready)) { serial_one_ready = buildCommand_serial_one(Serial1_read()); }
+    if ((Serial_available()>0) && (!cmd.ready())) cmd.add(Serial_read());
+    if ((Serial1_available()>0) && (!cmd1.ready())) cmd1.add(Serial1_read());
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
-    if ((Ethernet_available() > 0) && (!ethernet_ready)) { ethernet_ready = buildCommand_ethernet(Ethernet_read()); }
+    if ((Ethernet_available()>0) && (!cmde.ready())) cmde.add(Ethernet_read());
+#endif
+
+#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
     if (Serial_transmit() || Serial1_transmit() || Ethernet_transmit()) return;
 #else
     if (Serial_transmit() || Serial1_transmit()) return;
 #endif
 
     process_command = COMMAND_NONE;
-    if (serial_zero_ready)     { strcpy(command,command_serial_zero); strcpy(parameter,parameter_serial_zero); serial_zero_ready=false; clearCommand_serial_zero(); process_command=COMMAND_SERIAL; }
-    else if (serial_one_ready) { strcpy(command,command_serial_one);  strcpy(parameter,parameter_serial_one);  serial_one_ready=false;  clearCommand_serial_one();  process_command=COMMAND_SERIAL1; }
+    if (cmd.ready()) { strcpy(command,cmd.getCmd()); strcpy(parameter,cmd.getParameter()); cmd.flush(); process_command=COMMAND_SERIAL; }
+    else if (cmd1.ready()) { strcpy(command,cmd1.getCmd()); strcpy(parameter,cmd1.getParameter()); cmd1.flush(); process_command=COMMAND_SERIAL1; }
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
-    else if (ethernet_ready)   { strcpy(command,command_ethernet);    strcpy(parameter,parameter_ethernet);    ethernet_ready=false;    clearCommand_ethernet();    process_command=COMMAND_ETHERNET; }
+    else if (cmde.ready()) { strcpy(command,cmde.getCmd()); strcpy(parameter,cmde.getParameter()); cmde.flush(); process_command=COMMAND_ETHERNET; }
 #endif
+    
     else {
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
 #if (defined(__arm__) && defined(TEENSYDUINO))
@@ -57,6 +62,17 @@ void processCommands() {
       commandError=false;
 // Handles empty and one char replies
       reply[0]=0; reply[1]=0;
+
+//   (char)6 - Special
+      if (command[0]==(char)6) {
+        if (command[1]=='0') {
+          reply[0]=command[1]; reply[1]=command[1]; reply[2]=0; // last cmd checksum failed, 00#
+        } else {
+          reply[0]=command[1]; reply[1]=0; // Equatorial or Horizon mode, A or P
+          supress_frame=true;
+        }
+        quietReply=true;
+      } else
 
 //   A - Alignment Commands
       if (command[0]=='A') {
@@ -1441,210 +1457,29 @@ void processCommands() {
       }
       
       if (strlen(reply)>0) {
-
-      if (process_command==COMMAND_SERIAL) {
-#ifdef CHKSUM0_ON
-        // calculate the checksum
-        char HEXS[3]="";
-        byte cks=0; for (int cksCount0=0; cksCount0<strlen(reply); cksCount0++) {  cks+=reply[cksCount0]; }
-        sprintf(HEXS,"%02X",cks);
-        strcat(reply,HEXS);
-#endif
-        if (!supress_frame) strcat(reply,"#");
-        Serial_print(reply);
-      } 
-
-      if (process_command==COMMAND_SERIAL1) {
-#ifdef CHKSUM1_ON
-        // calculate the checksum
-        char HEXS[3]="";
-        byte cks=0; for (int cksCount0=0; cksCount0<strlen(reply); cksCount0++) {  cks+=reply[cksCount0]; }
-        sprintf(HEXS,"%02X",cks);
-        strcat(reply,HEXS);
-#endif
-        if (!supress_frame) strcat(reply,"#");
-        Serial1_print(reply);
-      }
-
+        if (process_command==COMMAND_SERIAL) {
+          if (cmd.checksum) checksum(reply);
+          if (!supress_frame) strcat(reply,"#");
+          Serial_print(reply);
+        } 
+  
+        if (process_command==COMMAND_SERIAL1) {
+          if (cmd1.checksum) checksum(reply);
+          if (!supress_frame) strcat(reply,"#");
+          Serial1_print(reply);
+        }
+  
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
-      if (process_command==COMMAND_ETHERNET) {
-#ifdef CHKSUM0_ON
-        // calculate the checksum
-        char HEXS[3]="";
-        byte cks=0; for (int cksCount0=0; cksCount0<strlen(reply); cksCount0++) {  cks+=reply[cksCount0]; }
-        sprintf(HEXS,"%02X",cks);
-        strcat(reply,HEXS);
-#endif
-        if (!supress_frame) strcat(reply,"#");
-        Ethernet_print(reply);
-      }
+        if (process_command==COMMAND_ETHERNET) {
+          if (cmde.checksum) checksum(reply);
+          if (!supress_frame) strcat(reply,"#");
+          Ethernet_print(reply);
+        }
 #endif       
       }
       quietReply=false;
    }
 }
-
-// Build up a command
-boolean buildCommand_serial_zero(char c) {
-  // (chr)6 is a special status command for the LX200 protocol
-  if ((c==(char)6) && (bufferPtr_serial_zero==0)) {
-    #ifdef MOUNT_TYPE_ALTAZM
-    Serial_print("A");
-    #else
-    Serial_print("P");
-    #endif
-  }
-
-  // ignore spaces/lf/cr, dropping spaces is another tweek to allow compatibility with LX200 protocol
-  if ((c!=(char)32) && (c!=(char)10) && (c!=(char)13) && (c!=(char)6)) {
-    command_serial_zero[bufferPtr_serial_zero]=c;
-    bufferPtr_serial_zero++;
-    command_serial_zero[bufferPtr_serial_zero]=(char)0;
-    if (bufferPtr_serial_zero>22) { bufferPtr_serial_zero=22; }  // limit maximum command length to avoid overflow, c2+p16+cc2+eol2+eos1=23 bytes max ranging from 0..22
-  }
-  
-  if (c=='#') {
-    // validate the command frame, normal command
-    if ((bufferPtr_serial_zero>1) && (command_serial_zero[0]==':') && (command_serial_zero[bufferPtr_serial_zero-1]=='#')) { command_serial_zero[bufferPtr_serial_zero-1]=0; } else { clearCommand_serial_zero(); return false; }
-
-#ifdef CHKSUM0_ON
-    // checksum the data, for example ":11111126".  I don't include the command frame in the checksum.  The error response is a checksumed null string "00#\r\n" which means re-transmit.
-    byte len=strlen(command_serial_zero);
-    byte cks=0; for (int cksCount0=1; cksCount0<len-2; cksCount0++) {  cks+=command_serial_zero[cksCount0]; }
-    char chkSum[3]; sprintf(chkSum,"%02X",cks); if (!((chkSum[0]==command_serial_zero[len-2]) && (chkSum[1]==command_serial_zero[len-1]))) { clearCommand_serial_zero();  Serial_print("00#"); return false; }
-    --len; command_serial_zero[--len]=0;
-#endif
-
-    // break up the command into a two char command and the remaining parameter
-    
-    // the parameter can be up to 16 chars in length
-    memmove(parameter_serial_zero,(char *)&command_serial_zero[3],17);
-
-    // the command is either one or two chars in length
-    command_serial_zero[3]=0;  memmove(command_serial_zero,(char *)&command_serial_zero[1],3);
-
-    return true;
-  } else {
-    return false;
-  }
-}
-
-// clear commands
-boolean clearCommand_serial_zero() {
-  bufferPtr_serial_zero=0;
-  command_serial_zero[bufferPtr_serial_zero]=(char)0;
-  return true;
-}
-
-// Build up a command
-boolean buildCommand_serial_one(char c) {
-  // (chr)6 is a special status command for the LX200 protocol
-  if ((c==(char)6) && (bufferPtr_serial_one==0)) {
-    #ifdef MOUNT_TYPE_ALTAZM
-    Serial1_print("A");
-    #else
-    Serial1_print("P");
-    #endif
-  }
-
-  // ignore spaces/lf/cr, dropping spaces is another tweek to allow compatibility with LX200 protocol
-  if ((c!=(char)32) && (c!=(char)10) && (c!=(char)13) && (c!=(char)6)) {
-    command_serial_one[bufferPtr_serial_one]=c;
-    bufferPtr_serial_one++;
-    command_serial_one[bufferPtr_serial_one]=(char)0;
-    if (bufferPtr_serial_one>22) { bufferPtr_serial_one=22; }  // limit maximum command length to avoid overflow, c2+p16+cc2+eol2+eos1=23 bytes max ranging from 0..22
-  }
-
-  if (c=='#') {
-    // validate the command frame, normal command
-    if ((bufferPtr_serial_one>1) && (command_serial_one[0]==':') && (command_serial_one[bufferPtr_serial_one-1]=='#')) { command_serial_one[bufferPtr_serial_one-1]=0; } else { clearCommand_serial_one(); return false; }
-    
-#ifdef CHKSUM1_ON
-    // checksum the data, as above.  
-    byte len=strlen(command_serial_one);
-    byte cks=0; for (int cksCount0=1; cksCount0<len-2; cksCount0++) { cks=cks+command_serial_one[cksCount0]; }
-    char chkSum[3]; sprintf(chkSum,"%02X",cks); if (!((chkSum[0]==command_serial_one[len-2]) && (chkSum[1]==command_serial_one[len-1]))) { clearCommand_serial_one(); Serial1_print("00#"); return false; }
-    --len; command_serial_one[--len]=0;
-#endif
-
-    // break up the command into a two char command and the remaining parameter
-    
-    // the parameter can be up to 16 chars in length
-    memmove(parameter_serial_one,(char *)&command_serial_one[3],17);
-
-    // the command is either one or two chars in length
-    command_serial_one[3]=0;  memmove(command_serial_one,(char *)&command_serial_one[1],3);
-
-    return true;
-  } else {
-    return false;
-  }
-}
-
-// clear commands
-boolean clearCommand_serial_one() {
-  bufferPtr_serial_one=0;
-  command_serial_one[bufferPtr_serial_one]=(char)0;
-  return true;
-}
-
-#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
-// Build up a command
-boolean buildCommand_ethernet(char c) {
-  // return if -1 is received (no data)
-  if (c == 0xFF) return false;
-
-  // (chr)6 is a special status command for the LX200 protocol
-  if ((c==(char)6) && (bufferPtr_ethernet==0)) {
-//    Ethernet_print("G#");
-    #ifdef MOUNT_TYPE_ALTAZM
-    Ethernet_print("A");
-    #else
-    Ethernet_print("P");
-    #endif
-  }
-
-  // ignore spaces/lf/cr, dropping spaces is another tweek to allow compatibility with LX200 protocol
-  if ((c!=(char)32) && (c!=(char)10) && (c!=(char)13) && (c!=(char)6)) {
-    command_ethernet[bufferPtr_ethernet]=c;
-    bufferPtr_ethernet++;
-    command_ethernet[bufferPtr_ethernet]=(char)0;
-    if (bufferPtr_ethernet>22) { bufferPtr_ethernet=22; }  // limit maximum command length to avoid overflow, c2+p16+cc2+eol2+eos1=23 bytes max ranging from 0..22
-  }
-
-  if (c=='#') {
-    // validate the command frame, normal command
-    if ((bufferPtr_ethernet>1) && (command_ethernet[0]==':') && (command_ethernet[bufferPtr_ethernet-1]=='#')) { command_ethernet[bufferPtr_ethernet-1]=0; } else { clearCommand_ethernet(); return false; }
-
-#ifdef CHKSUM1_ON
-    // checksum the data, as above.
-    byte len=strlen(command_ethernet);
-    byte cks=0; for (int cksCount0=1; cksCount0<len-2; cksCount0++) { cks=cks+command_ethernet[cksCount0]; }
-    char chkSum[3]; sprintf(chkSum,"%02X",cks); if (!((chkSum[0]==command_ethernet[len-2]) && (chkSum[1]==command_ethernet[len-1]))) { clearCommand_ethernet(); Ethernet_print("00#"); return false; }
-    --len; command_ethernet[--len]=0;
-#endif
-
-    // break up the command into a two char command and the remaining parameter
-
-    // the parameter can be up to 16 chars in length
-    memmove(parameter_ethernet,(char *)&command_ethernet[3],17);
-
-    // the command is either one or two chars in length
-    command_ethernet[3]=0;  memmove(command_ethernet,(char *)&command_ethernet[1],3);
-
-    return true;
-  } else {
-    return false;
-  }
-}
-
-// clear commands
-boolean clearCommand_ethernet() {
-  bufferPtr_ethernet=0;
-  command_ethernet[bufferPtr_ethernet]=(char)0;
-  return true;
-}
-#endif
 
 // calculates the tracking speed for move commands
 void setGuideRate(int g) {
@@ -1666,3 +1501,12 @@ void enableGuideRate(int g) {
   amountGuideDec.fixed=doubleToFixed((guideTimerBaseRate*StepsPerSecondAxis2)/100.0);
   sei();
 }
+
+// calculate the checksum and add to string
+void checksum(char s[]) {
+  char HEXS[3]="";
+  byte cks=0; for (int cksCount0=0; cksCount0<strlen(s); cksCount0++) {  cks+=s[cksCount0]; }
+  sprintf(HEXS,"%02X",cks);
+  strcat(s,HEXS);
+}
+

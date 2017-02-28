@@ -2,6 +2,18 @@
 // Communication routines for Serial0 and Serial1
 // these are more compact and faster than the Arduino provided one's
 
+char Serial_recv_buffer[256]   = "";
+volatile byte Serial_recv_tail = 0;
+volatile byte Serial_recv_head = 0;
+char Serial_xmit_buffer[50]    = "";
+byte Serial_xmit_index         = 0;
+
+char Serial1_recv_buffer[256]   = "";
+volatile byte Serial1_recv_tail = 0;
+volatile byte Serial1_recv_head = 0;
+char Serial1_xmit_buffer[50] = "";
+byte Serial1_xmit_index = 0;
+
 void lookf(const char comment[], double f)
 {
   char temp[20]; Serial1_send(comment); dtostrf(f,4,6,temp); Serial1_send(temp); Serial1_send("\r\n");
