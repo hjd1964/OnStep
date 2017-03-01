@@ -34,3 +34,11 @@ Config_takem10b_60sps.h
 Config.h
 Alternate_Config.h
 Config_g11_new.h
+zConfig_g11.h
+zConfig_takem10b_60sps.h
+zConfig_z12.h
+zConfig_takem10b.h
+zConfig_orig.h
+zConfig_steve.h
+zConfig_Leo.h
+zConfig_g11_new.h
