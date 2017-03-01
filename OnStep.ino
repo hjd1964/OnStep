@@ -829,7 +829,7 @@ void setup() {
   siderealInterval=EEPROM_readLong(EE_siderealInterval);
 
   // 16MHZ clocks for steps per second of sidereal tracking
-  cli(); SiderealRate=siderealInterval/StepsPerSecondAxis1; TakeupRate=SiderealRate/4L; sei();
+  cli(); SiderealRate=siderealInterval/StepsPerSecondAxis1; TakeupRate=round(SiderealRate/1.1); sei();
   timerRateAxis1=SiderealRate;
   timerRateAxis2=SiderealRate;
   SetTrackingRate(default_tracking_rate);
@@ -1236,8 +1236,11 @@ void loop() {
   if ((long)(cs-(housekeepingTimer+99L))>0) {
     housekeepingTimer=cs;
 
- //   lookf("rtr1=",(double)(timerDirAxis1*stepAxis1));
-    
+    // for testing, loop time
+//    PSerial1.puts("stepAxis1=");
+//    PSerial1.putf((double)loop_time/1000000.0);
+//    PSerial1.puts("\r\n");
+//    
     // for testing, average steps per second
 //    if (debugv1>100000) debugv1=100000; if (debugv1<0) debugv1=0;
 //    debugv1=(debugv1*19+(targetAxis1.part.m*1000-lasttargetAxis1))/20;

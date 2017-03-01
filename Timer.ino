@@ -224,10 +224,10 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
   // until the home position arrives to actually switch to tracking micro-step mode. the larger step size
   // then causes backlash compensation to activate which in-turn keeps goto micro-step mode from turning off
   #if defined(AXIS1_MODE) && defined(AXIS1_MODE_GOTO) && !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
-  gotoRateAxis1=(thisTimerRateAxis1<512*16L);   // activate <512us rate
+  gotoRateAxis1=(thisTimerRateAxis1<128*16L);   // activate <128us rate
   #endif
   #if defined(AXIS2_MODE) && defined(AXIS2_MODE_GOTO) && !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
-  gotoRateAxis2=(thisTimerRateAxis2<512*16L);   // activate <512us rate
+  gotoRateAxis2=(thisTimerRateAxis2<128*16L);   // activate <128us rate
   #endif
 
 #if defined(AUTO_POWER_DOWN_AXIS2_ON) && !defined(MOUNT_TYPE_ALTAZM)
@@ -307,7 +307,7 @@ ISR(TIMER3_COMPA_vect)
   if ((trackingState==TrackingSidereal) && (!inbacklashAxis1)) targetAxis1.part.m+=timerDirAxis1*stepAxis1;
 
   // Guessing about 4+4+1+ 4+4+1+ 1+ 2+1+2+ 13=37 clocks between here and the step signal which is 2.3uS
-  if ((posAxis1!=(long)targetAxis1.part.m) || (inbacklashAxis1)) { // Move the RA stepper to the target
+  if ((posAxis1!=(long)targetAxis1.part.m)) { // Move the RA stepper to the target
     if (posAxis1<(long)targetAxis1.part.m) dirAxis1=1; else dirAxis1=0; // Direction control
 
     // Guessing about 1+2+1+4+4+1=13 clocks between here and the step signal which is 0.81uS
@@ -400,7 +400,7 @@ ISR(TIMER4_COMPA_vect)
 
   if ((trackingState==TrackingSidereal) && (!inbacklashAxis2)) targetAxis2.part.m+=timerDirAxis2*stepAxis2;
 
-  if ((posAxis2!=(long)targetAxis2.part.m) || (inbacklashAxis2)) { // move the Dec stepper to the target
+  if ((posAxis2!=(long)targetAxis2.part.m)) { // move the Dec stepper to the target
     // telescope normally starts on the EAST side of the pier looking at the WEST sky
     if (posAxis2<(long)targetAxis2.part.m) dirAxis2=1; else dirAxis2=0; // Direction control
     // Set direction.  Needs >=0.65uS before/after rising step signal (DRV8825 or A4988).
