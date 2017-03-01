@@ -21,7 +21,7 @@
 
 // ******************* These new pin assignments aren't well tested and mistakes might have been made, a mistake could damage your MCU etc. Use at your own risk. *****************
 //
-// This must be _ON to use the pin assignments given in this Config.h!  The Launchpad TM4C123GH6PM and LM4F120H5QR also have alternate pin assignments in this mode, see OnStep.ino
+// This must be _ON to use the pin assignments given in this Config.h!  The Launchpad TM4C123GH6PM and LM4F120H5QR also have alternate pin assignments in this mode, see Pins.h
 // this allows minimal wiring for Pololu style stepper driver modules and also frees SPI pins to allow use of the Arduino Ethernet Shield on the Teensy3.2 and Launchpad TM4C123GXL
 //
 #define ALTERNATE_PINMAP_ON
