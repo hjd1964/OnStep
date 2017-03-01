@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------------
-// functions related to Parking the mount
+// Functions related to Parking the mount
 
 // sets the park postion as the current position
 boolean setPark() {

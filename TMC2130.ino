@@ -1,5 +1,6 @@
 // -----------------------------------------------------------------------------------
 // TMC2130 control over bit bit-banged SPI
+
 #define WRITE          0x80 //write flag
 #define REG_GCONF      0x00
 #define REG_GSTAT      0x01

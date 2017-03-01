@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------------
-// functions to move the mount to the a new position
+// Functions to move the mount to the a new position
 
 long lastPosAxis2=0;
 

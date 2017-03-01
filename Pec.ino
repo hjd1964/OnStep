@@ -1,5 +1,5 @@
-// PEC ---------------------------------------------------------------------------------------------
-// functions to handle periodic error correction
+// -------------------------------------------------------------------------------------------------
+// Functions to handle periodic error correction
 
 // enables code to clean-up PEC readings after record (use PECprep or a spreadsheet to fix readings otherwise)
 // this cleans up any tracking rate variations that would be introduced by recording more guiding corrections to either the east or west, default=ON

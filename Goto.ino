@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------------------
-// GoTo, commands to move the telescope to an location or to report the current location
+// Goto, commands to move the telescope to an location or to report the current location
 
 // syncs the telescope/mount to the sky
 boolean syncEqu(double RA, double Dec) {
