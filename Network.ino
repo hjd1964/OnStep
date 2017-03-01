@@ -1518,7 +1518,7 @@ const char html_configGuide[] PROGMEM = "Separate pulse guide rate <font class=\
 #else
 const char html_configGuide[] PROGMEM = "Separate pulse guide rate <font class=\"c\">OFF</font><br /><br />";
 #endif
-#ifdef RememberMaxRate_ON
+#if defined(RememberMaxRate_ON) || defined(REMEMBER_MAX_RATE_ON)
 const char html_configRemMax[] PROGMEM = "Remember MaxRate setting changes <font class=\"c\">ON</font><br /><br />";
 #else
 const char html_configRemMax[] PROGMEM = "Remember MaxRate setting changes <font class=\"c\">OFF</font><br /><br />";
