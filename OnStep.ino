@@ -44,6 +44,7 @@
 #include "errno.h"
 #include "Align.h"
 #include "Config.h"
+#define SYNC_ANYWHERE_ON
 #include "Command.h"
 #include "Library.h"
 #include "FPoint.h"

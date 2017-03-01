@@ -1,3 +1,6 @@
+// -----------------------------------------------------------------------------------
+// Ethernet, provide the same functions as for serial
+
 #ifdef ETHERNET_ON
 
 #define www_xmit_buffer_size 1024
@@ -5,23 +8,20 @@ int  www_xmit_buffer_send_pos=0;
 int  www_xmit_buffer_pos=0;
 char www_xmit_buffer[www_xmit_buffer_size] = "";
 
-// provide the same functions as for serial
-
-// Enter a MAC address and IP address for your controller below. MAC address will be on the sticker on the Tiva Connected Launchpad.
-// The IP address will be dependent on your local network.
-// gateway and subnet are optional:
-byte mac[] = {
-  0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED
-};
+// enter a MAC address and IP address for your controller below. MAC address will be on the sticker on the Tiva Connected Launchpad
+byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+// if ethernet is available DHCP is used to obtain the IP address (default addresses are overridden), default=OFF
+#define ETHERNET_USE_DHCP_OFF
+// the IP address will be dependent on your local network. Gateway and subnet are optional:
 IPAddress ip(192, 168, 1, 55);
 IPAddress myDns(192,168,1, 1);
 IPAddress gateway(192, 168, 1, 1);
 IPAddress subnet(255, 255, 255, 0);
 
-// Network server port for command channel
+// network server port for command channel
 EthernetServer cmd_server(9999);
 EthernetClient cmd_client;
-// Network server port for web channel
+// network server port for web channel
 EthernetServer web_server(80);
 EthernetClient www_client;
 
