@@ -1,8 +1,5 @@
 // Pin maps -----------------------------------------------------------------------------------------------------------------
 
-// I set the pin usage to facilitate easy connection of jumper cables
-// for now, the #defines below are used to program the port modes using the standard Arduino library
-
 // defines for direct port control
 #if defined(__AVR_ATmega2560__) && !defined(ALTERNATE_PINMAP_ON)
 // The PEC index sense is a 5V logic input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
