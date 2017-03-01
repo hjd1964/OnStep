@@ -90,6 +90,9 @@
 // use seperate pulse-guide rate so centering and guiding don't disturb each other, default=ON
 #define SEPERATE_PULSE_GUIDE_RATE_ON
 
+// set to ON and OnStep will remember the last auto meridian flip setting (on/off), default=OFF
+#define REMEMBER_AUTO_MERIDIAN_FLIP_OFF
+
 // ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
 #define RememberMaxRate_ON           // set to ON and OnStep will remember rates set in the ASCOM driver or Android App, default=OFF 
 #define MaxRate                   40 // this is the minimum number of micro-seconds between micro-steps
