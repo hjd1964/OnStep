@@ -21,21 +21,25 @@ cb cmde; // ethernet
 
 // process commands
 void processCommands() {
-    Command process_command = COMMAND_NONE;
-
     boolean supress_frame = false;
     char *conv_end;
 
+    // accumulate the command
     if ((PSerial.available()>0) && (!cmd.ready())) cmd.add(PSerial.read());
     if ((PSerial1.available()>0) && (!cmd1.ready())) cmd1.add(PSerial1.read());
 #ifdef ETHERNET_ON
     if ((Ethernet_available()>0) && (!cmde.ready())) cmde.add(Ethernet_read());
-    if (PSerial.transmit() || PSerial1.transmit() || Ethernet_transmit()) return;
-#else
-    if (PSerial.transmit() || PSerial1.transmit()) return;
 #endif
 
-    process_command = COMMAND_NONE;
+    // send any reply
+    if (PSerial.transmit() || PSerial1.transmit() 
+#ifdef ETHERNET_ON
+    || Ethernet_transmit()
+#endif
+    ) return;
+
+    // once a command is ready, process it
+    Command process_command = COMMAND_NONE;
     if (cmd.ready()) { strcpy(command,cmd.getCmd()); strcpy(parameter,cmd.getParameter()); cmd.flush(); process_command=COMMAND_SERIAL; }
     else if (cmd1.ready()) { strcpy(command,cmd1.getCmd()); strcpy(parameter,cmd1.getParameter()); cmd1.flush(); process_command=COMMAND_SERIAL1; }
 #ifdef ETHERNET_ON
