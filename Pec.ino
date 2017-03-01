@@ -147,21 +147,21 @@ void DisablePec() {
 
 void CleanupPec() {
   // low pass filter ----------------------------------------------------------
-  int j,J1,J4,J9,J17;
+  int j,J1,J4,J10,J18;
   for (int scc=0+3; scc<SecondsPerWormRotationAxis1+3; scc++) {
     j=pecBuffer[((scc)%SecondsPerWormRotationAxis1)]-128;
 
     J1=(int)round((float)j*0.01);
     J4=(int)round((float)j*0.04);
-    J9=(int)round((float)j*0.09);
-    J17=(int)round((float)j*0.17);
+    J10=(int)round((float)j*0.10);
+    J18=(int)round((float)j*0.18);
     pecBuffer[((scc-4)%SecondsPerWormRotationAxis1)]=(((int)pecBuffer[((scc-4)%SecondsPerWormRotationAxis1)]-128)+J1)+128;
     pecBuffer[((scc-3)%SecondsPerWormRotationAxis1)]=(((int)pecBuffer[((scc-3)%SecondsPerWormRotationAxis1)]-128)+J4)+128;
-    pecBuffer[((scc-2)%SecondsPerWormRotationAxis1)]=(((int)pecBuffer[((scc-2)%SecondsPerWormRotationAxis1)]-128)+J9)+128;
-    pecBuffer[((scc-1)%SecondsPerWormRotationAxis1)]=(((int)pecBuffer[((scc-1)%SecondsPerWormRotationAxis1)]-128)+J17)+128;
-    pecBuffer[((scc  )%SecondsPerWormRotationAxis1)]=(((int)pecBuffer[((scc  )%SecondsPerWormRotationAxis1)]-128)-(J17+J17+J9+J9+J4+J4+J1+J1))+128;
-    pecBuffer[((scc+1)%SecondsPerWormRotationAxis1)]=(((int)pecBuffer[((scc+1)%SecondsPerWormRotationAxis1)]-128)+J17)+128;
-    pecBuffer[((scc+2)%SecondsPerWormRotationAxis1)]=(((int)pecBuffer[((scc+2)%SecondsPerWormRotationAxis1)]-128)+J9)+128;
+    pecBuffer[((scc-2)%SecondsPerWormRotationAxis1)]=(((int)pecBuffer[((scc-2)%SecondsPerWormRotationAxis1)]-128)+J10)+128;
+    pecBuffer[((scc-1)%SecondsPerWormRotationAxis1)]=(((int)pecBuffer[((scc-1)%SecondsPerWormRotationAxis1)]-128)+J18)+128;
+    pecBuffer[((scc  )%SecondsPerWormRotationAxis1)]=(((int)pecBuffer[((scc  )%SecondsPerWormRotationAxis1)]-128)-(J18+J18+J10+J10+J4+J4+J1+J1))+128;
+    pecBuffer[((scc+1)%SecondsPerWormRotationAxis1)]=(((int)pecBuffer[((scc+1)%SecondsPerWormRotationAxis1)]-128)+J18)+128;
+    pecBuffer[((scc+2)%SecondsPerWormRotationAxis1)]=(((int)pecBuffer[((scc+2)%SecondsPerWormRotationAxis1)]-128)+J10)+128;
     pecBuffer[((scc+3)%SecondsPerWormRotationAxis1)]=(((int)pecBuffer[((scc+3)%SecondsPerWormRotationAxis1)]-128)+J4)+128;
     pecBuffer[((scc+4)%SecondsPerWormRotationAxis1)]=(((int)pecBuffer[((scc+4)%SecondsPerWormRotationAxis1)]-128)+J1)+128;
   }
