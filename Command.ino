@@ -38,27 +38,26 @@ void processCommands() {
 #endif
     ) return;
 
-    // once a command is ready, process it
+    // if a command is ready, process it
     Command process_command = COMMAND_NONE;
     if (cmd.ready()) { strcpy(command,cmd.getCmd()); strcpy(parameter,cmd.getParameter()); cmd.flush(); process_command=COMMAND_SERIAL; }
     else if (cmd1.ready()) { strcpy(command,cmd1.getCmd()); strcpy(parameter,cmd1.getParameter()); cmd1.flush(); process_command=COMMAND_SERIAL1; }
 #ifdef ETHERNET_ON
     else if (cmde.ready()) { strcpy(command,cmde.getCmd()); strcpy(parameter,cmde.getParameter()); cmde.flush(); process_command=COMMAND_ETHERNET; }
 #endif
-    
     else {
+
+    // if a command isn't ready, give the www interface some time
 #ifdef ETHERNET_ON
-#if (defined(__arm__) && defined(TEENSYDUINO))
-  Ethernet_www();
-#else
-  if (!Ethernet_cmd_busy()) Ethernet_www();
+#if !(defined(__arm__) && defined(TEENSYDUINO))
+      if (!Ethernet_cmd_busy())
 #endif
+      Ethernet_www();
 #endif
       return;
     }
 
     if (process_command) {
-
 // Command is two chars followed by an optional parameter...
       commandError=false;
 // Handles empty and one char replies
