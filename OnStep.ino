@@ -115,14 +115,14 @@ long this_loop_time=0;
 long loop_time=0;
 long worst_loop_time=0;
 
-// PPS (GPS)
+// PPS (GPS) ---------------------------------------------------------------------------------------------------------------
 volatile unsigned long PPSlastMicroS = 1000000UL;
 volatile unsigned long PPSavgMicroS = 1000000UL;
 volatile double PPSrateRatio = 1.0;
 volatile double LastPPSrateRatio = 1.0;
 volatile boolean PPSsynced = false;
 
-// Tracking and rate control
+// Tracking and rate control -----------------------------------------------------------------------------------------------
 #ifdef MOUNT_TYPE_ALTAZM
 #define refraction_enable false      // refraction isn't allowed in Alt/Azm mode
 #else
@@ -134,7 +134,7 @@ boolean refraction = refraction_enable;
 #else
 boolean refraction = false;
 #endif
-boolean onTrack=false;
+boolean onTrack = false;
 
 long    maxRate = MaxRate*16L;
 volatile long    timerRateAxis1 = 0;
@@ -368,57 +368,6 @@ pserial PSerial;
 pserial1 PSerial1;
 bbspi BBSpi;
 
-// Misc ---------------------------------------------------------------------------------------------------------------------
-#define Rad 57.29577951
-
-// align
-#if defined(MOUNT_TYPE_GEM)
-#define MAX_NUM_ALIGN_STARS '3'
-#elif defined(MOUNT_TYPE_FORK)
-#define MAX_NUM_ALIGN_STARS '3'
-#elif defined(MOUNT_TYPE_FORK_ALT)
-#define MAX_NUM_ALIGN_STARS '1'
-#elif defined(MOUNT_TYPE_ALTAZM)
-#define MAX_NUM_ALIGN_STARS '3'
-#else
-#endif
-
-// current site index and name
-byte currentSite = 0; 
-char siteName[16];
-
-// offset corrections simple align
-double indexAxis1       = 0;
-long   indexAxis1Steps  = 0;
-double indexAxis2       = 0;
-long   indexAxis2Steps  = 0;
-
-// tracking and PEC, fractional steps
-fixed_t fstepAxis1;
-fixed_t fstepAxis2;
-fixed_t pstep;
-
-// Reticule control
-#ifdef RETICULE_LED_PINS
-int reticuleBrightness=RETICULE_LED_PINS;
-#endif
-
-// backlash control
-volatile int backlashAxis1  = 0;
-volatile int backlashAxis2  = 0;
-volatile int blAxis1        = 0;
-volatile int blAxis2        = 0;
-
-// status state
-boolean LED_ON = false;
-boolean LED2_ON = false;
-
-// ST4 interface
-char ST4RA_state = 0;
-char ST4RA_last = 0;
-char ST4DE_state = 0;
-char ST4DE_last = 0;
-
 // Guide command ------------------------------------------------------------------------------------------------------------
 #define GuideRate1x        2
 #define GuideRate16x       6
@@ -484,6 +433,57 @@ volatile double pecTimerRateAxis1 = 0.0;
 // so we store PEC data in RAM while recording.  When done, sidereal tracking is turned off and the data is written to EEPROM.
 // writing the data can take up to 3 seconds.
 byte pecBuffer[PECBufferSize];
+
+// Misc ---------------------------------------------------------------------------------------------------------------------
+#define Rad 57.29577951
+
+// align
+#if defined(MOUNT_TYPE_GEM)
+#define MAX_NUM_ALIGN_STARS '3'
+#elif defined(MOUNT_TYPE_FORK)
+#define MAX_NUM_ALIGN_STARS '3'
+#elif defined(MOUNT_TYPE_FORK_ALT)
+#define MAX_NUM_ALIGN_STARS '1'
+#elif defined(MOUNT_TYPE_ALTAZM)
+#define MAX_NUM_ALIGN_STARS '3'
+#else
+#endif
+
+// current site index and name
+byte currentSite = 0; 
+char siteName[16];
+
+// offset corrections simple align
+double indexAxis1       = 0;
+long   indexAxis1Steps  = 0;
+double indexAxis2       = 0;
+long   indexAxis2Steps  = 0;
+
+// tracking and PEC, fractional steps
+fixed_t fstepAxis1;
+fixed_t fstepAxis2;
+fixed_t pstep;
+
+// status state
+boolean LED_ON = false;
+boolean LED2_ON = false;
+
+// reticule control
+#ifdef RETICULE_LED_PINS
+int reticuleBrightness=RETICULE_LED_PINS;
+#endif
+
+// backlash control
+volatile int backlashAxis1  = 0;
+volatile int backlashAxis2  = 0;
+volatile int blAxis1        = 0;
+volatile int blAxis2        = 0;
+
+// ST4 interface
+char ST4RA_state = 0;
+char ST4RA_last = 0;
+char ST4DE_state = 0;
+char ST4DE_last = 0;
 
 // EEPROM Info --------------------------------------------------------------------------------------------------------------
 // 0-1023 bytes
