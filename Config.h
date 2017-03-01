@@ -5,8 +5,8 @@
  * For more information on setting OnStep up see http://www.stellarjourney.com/index.php?r=site/equipment_onstep and 
  * join the OnStep yahoo group at https://groups.yahoo.com/neo/groups/onsteptelescope/info
  * 
- * The Arduino Mega2560 and Teensy3.1/3.2 use USB for power and communication with the host computer
- * some Launchpad TM4C devices are also supported (thanks to Luka,) see OnStep.ino for pin definitions
+ * The Arduino Mega2560, Teensy3.1/3.2, and some Launchpad TM4C devices are also supported (thanks to Luka.) 
+ * See the Pins.h file for detailed information on the pin maps
  *
  * The RA/Az (Axis1) and Dec/Alt (Axis2) stepper driver plugs in as follows:
  * RA/Az :  Gnd,13,12,11 = Gnd,Step,N/C,Direction (Teensy3.1 Gnd,12,N/C,10)
