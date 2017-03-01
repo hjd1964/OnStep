@@ -1013,13 +1013,15 @@ void setup() {
   maxRate=EEPROM_readInt(EE_maxRate)*16;
   if (maxRate<(MaxRate/2L)*16L) maxRate=(MaxRate/2L)*16L;
   if (maxRate>(MaxRate*2L)*16L) maxRate=(MaxRate*2L)*16L;
-  #ifndef RememberMaxRate_ON
+  #if !defined(RememberMaxRate_ON) && !defined(REMEMBER_MAX_RATE_ON)
   if (maxRate!=MaxRate*16L) { maxRate=MaxRate*16L; EEPROM_writeInt(EE_maxRate,(int)(maxRate/16L)); }
   #endif
   SetAccelerationRates(maxRate); // set the new acceleration rate
 
   // get autoContinue
-  autoContinue=EEPROM.read(EE_autoContinue); if (!autoContinue) autoContinue=true;
+  #ifdef REMEMBER_AUTO_MERIDIAN_FLIP_ON
+  autoContinue=EEPROM.read(EE_autoContinue);
+  #endif
 
   // makes onstep think that you parked the 'scope
   // combined with a hack in the goto syncEqu() function and you can quickly recover from

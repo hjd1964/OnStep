@@ -579,7 +579,7 @@ void processCommands() {
               #else
                 c+="0";
               #endif
-              #ifdef RememberMaxRate_ON
+              #if defined(RememberMaxRate_ON) || defined(REMEMBER_MAX_RATE_ON)
                 c+="1";
               #else
                 c+="0";

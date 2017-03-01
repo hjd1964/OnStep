@@ -93,8 +93,11 @@
 // use seperate pulse-guide rate so centering and guiding don't disturb each other, default=ON
 #define SEPERATE_PULSE_GUIDE_RATE_ON
 
+// set to ON and OnStep will remember the last auto meridian flip setting (on/off), default=OFF
+#define REMEMBER_AUTO_MERIDIAN_FLIP_OFF
+
 // ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
-#define RememberMaxRate_OFF          // set to ON and OnStep will remember rates set in the ASCOM driver or Android App, default=OFF 
+#define REMEMBER_MAX_RATE_OFF        // set to ON and OnStep will remember rates set in the ASCOM driver or Android App, default=OFF 
 #define MaxRate                   96 // this is the minimum number of micro-seconds between micro-steps
                                      // minimum* (fastest goto) is around 16 (Teensy3.1) or 32 (Mega2560), default=96 higher is ok
                                      // too low and OnStep communicates slowly and/or freezes as the motor timers use up all the MCU time
