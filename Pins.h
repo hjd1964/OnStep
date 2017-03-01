@@ -123,7 +123,7 @@
 #define ST4DEn        45    // Pin 45 ST4 DE+ North
 #define ST4RAe        49    // Pin 49 ST4 RA+ East
 
-#elif defined(__arm__) && defined(TEENSYDUINO) && !defined(ALTERNATE_PINMAP_ON)
+#elif defined(__ARM_Teensy3__) && !defined(ALTERNATE_PINMAP_ON)
 // The PEC index sense is a logic level input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
 #define PecPin         2
 #define AnalogPecPin  14
@@ -170,7 +170,7 @@
 #define ST4DEn        26    // Pin 26 ST4 DE+ North
 #define ST4RAe        27    // Pin 27 ST4 RA+ East
 
-#elif defined(__arm__) && defined(TEENSYDUINO) && defined(ALTERNATE_PINMAP_ON)
+#elif defined(__ARM_Teensy3__) && defined(ALTERNATE_PINMAP_ON)
 // Note that TM4C123 has resistors R9 anr R10 between pins 14 (B6) and 23 (D0) and between pins 15 (B7) and 24 (D1)
 // Make sure you look at the list of the pins and options to avoid clashes or desolder the two bridges
 // These pins are used for Axis2_M2 (14) and DE_M3 (15) and for Axis2DirPin (23) and Axis25vPin (24)

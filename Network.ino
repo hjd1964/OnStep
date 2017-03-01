@@ -90,20 +90,20 @@ boolean Ethernet_available() {
     }
 
 // immediately time out on the Teensy3.2
-#if (defined(__arm__) && defined(TEENSYDUINO))
+#if (defined(__ARM_Teensy3__))
 #define CTO 15
 #else
 #define CTO 1000
 #endif
 
   if (millis()-cmdTransactionLast_ms>CTO) { 
-#if defined(W5100_ON) && !(defined(__arm__) && defined(TEENSYDUINO)) 
+#if defined(W5100_ON) && !(defined(__ARM_Teensy3__)) 
       cmd_client.stopRequest(); 
 #endif
       cmdIsClosing=true; 
     }
     if (cmdIsClosing) {
-#if defined(W5100_ON) && !(defined(__arm__) && defined(TEENSYDUINO)) 
+#if defined(W5100_ON) && !(defined(__ARM_Teensy3__)) 
       if (cmd_client.stopMonitor()) { cmdIsClosing=false; }
 #else
       cmd_client.stop(); cmdIsClosing=false;
@@ -233,16 +233,16 @@ void Ethernet_www() {
     if (((clientNeedsToClose && (millis()-responseFinish_ms>100)) || (millis()-transactionStart_ms>5000)) ||
         ((clientNeedsToClose && clientIsClosing))) {
       if (!clientIsClosing) {
-#if defined(W5100_ON) && !(defined(__arm__) && defined(TEENSYDUINO)) 
+#if defined(W5100_ON) && !(defined(__ARM_Teensy3__)) 
         www_client.stopRequest();
 #endif
         clientIsClosing=true;
       } else {
-#if defined(W5100_ON) && !(defined(__arm__) && defined(TEENSYDUINO)) 
+#if defined(W5100_ON) && !(defined(__ARM_Teensy3__)) 
         if (www_client.stopMonitor()) { clientNeedsToClose=false; clientIsClosing=false; }
 #else
         www_client.stop(); clientNeedsToClose=false; clientIsClosing=false;
-#if (defined(__arm__) && defined(TEENSYDUINO))
+#if (defined(__ARM_Teensy3__))
         www_no_client=true;
 #endif
 #endif

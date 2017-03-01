@@ -38,17 +38,20 @@
 #define TMC_LOWPWR      64
 #define TMC_STEALTHCHOP 32
 #define TMC_NINTPOL     16
-#include "Pins.h"
-#include "Serial.h"
-#include "math.h"
-#include "errno.h"
-#include "Align.h"
-#include "Config.h"
 #define SYNC_ANYWHERE_ON
-#include "Command.h"
-#include "Library.h"
-#include "FPoint.h"
+#if defined(__arm__) && defined(TEENSYDUINO)
+#define __ARM_Teensy3__
+#endif
 #include "TM4C.h"
+#include "Config.h"
+#include "Pins.h"
+#include "errno.h"
+#include "math.h"
+#include "FPoint.h"
+#include "Serial.h"
+#include "Library.h"
+#include "Align.h"
+#include "Command.h"
 
 // There is a bug in Arduino/Energia which ignores #ifdef preprocessor directives when generating a list of files
 // Until this is fixed YOU MUST MANUALLY UN-COMMENT the #include line below if using the Launchpad Connected device.
@@ -66,18 +69,18 @@
 //#include "Ethernet.h"
 #endif
 
+// firmware info, these are returned by the ":GV?#" commands
+#define FirmwareDate   "02 28 17"
+#define FirmwareNumber "1.0a"
+#define FirmwareName   "On-Step"
+#define FirmwareTime   "12:00:00"
+
 #if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
 #define F_BUS SysCtlClockGet() // no pre-scaling of timers on Tiva Launchpads
 #elif defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
 // There is a bug with SysCtlClockGet and TM4C1294 MCUs. At the moment we just hardcode the value and set the cpu frequency manually at the start of setup()
 #define F_BUS 120000000 
 #endif
-
-// firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "02 28 17"
-#define FirmwareNumber "1.0a"
-#define FirmwareName   "On-Step"
-#define FirmwareTime   "12:00:00"
 
 // forces initialialization of a host of settings in EEPROM. OnStep does this automatically, most likely, you will want to leave this alone
 #define INIT_KEY false    // set to true to keep automatic initilization from happening.  This is a one-time operation... upload to the Arduino, then set to false and upload again
@@ -163,19 +166,19 @@ volatile double StepsForRateChangeAxis2= ((double)DegreesForAcceleration/sqrt((d
 #endif
 
 // Interrupts and timers ---------------------------------------------------------------------------------------------------
-#if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+#if defined(__ARM_TI_TM4C__)
 #define cli() noInterrupts()
 #define sei() interrupts()
 #endif
 
-#if defined(__arm__) && defined(TEENSYDUINO)
+#if defined(__ARM_Teensy3__)
 IntervalTimer itimer3;
 void TIMER3_COMPA_vect(void);
 
 IntervalTimer itimer4;
 void TIMER4_COMPA_vect(void);
 
-#elif defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+#elif defined(__ARM_TI_TM4C__)
 // Energia does not have IntervalTimer so we have to initialise timers manually
 
 void TIMER1_COMPA_vect(void); // it gets initialised here and not in timer.ino
@@ -270,7 +273,7 @@ int    maxAlt;                                     // the maximum altitude, in d
 bool   autoContinue = false;                       // automatically do a meridian flip and continue when we hit the MinutesPastMeridianW
 
 // Fast port writting help -------------------------------------------------------------------------------------------------
-#if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+#if defined(__ARM_TI_TM4C__)
 #define CLR(x,y) (GPIOPinWrite(x,y,0))
 #define SET(x,y) (GPIOPinWrite(x,y,y))
 #define TGL(x,y) (GPIOPinRead(x,y)==0?GPIOPinWrite(x,y,y):GPIOPinWrite(x,y,0)) // untested, not used in current version
@@ -605,7 +608,7 @@ void setup() {
   pinMode(Axis2DirPin,OUTPUT); 
 
 // override any status LED and set the reset pin HIGH
-#if defined(W5100_ON) && defined(__arm__) && defined(TEENSYDUINO)
+#if defined(W5100_ON) && defined(__ARM_Teensy3__)
 #ifdef STATUS_LED_PINS_ON
 #undef STATUS_LED_PINS_ON
 #endif
@@ -645,7 +648,7 @@ void setup() {
 
 // light reticule LED
 #ifdef RETICULE_LED_PINS
-#if defined(__arm__) && defined(TEENSYDUINO) && !defined(ALTERNATE_PINMAP_ON)
+#if defined(__ARM_Teensy3__) && !defined(ALTERNATE_PINMAP_ON)
   #ifdef STATUS_LED_PINS_ON
     #undef STATUS_LED_PINS_ON
   #endif
@@ -707,7 +710,7 @@ void setup() {
 
 // inputs for stepper drivers fault signal
 #ifndef AXIS1_FAULT_OFF
-  #if defined(__arm__) && defined(TEENSYDUINO) && defined(ALTERNATE_PINMAP_ON)
+  #if defined(__ARM_Teensy3__) && defined(ALTERNATE_PINMAP_ON)
     #ifdef AXIS1_FAULT_LOW
       pinMode(Axis1_FAULT,INPUT_PULLUP);
     #endif
@@ -719,7 +722,7 @@ void setup() {
   #endif
 #endif
 #ifndef AXIS2_FAULT_OFF
-  #if defined(__arm__) && defined(TEENSYDUINO) && defined(ALTERNATE_PINMAP_ON)
+  #if defined(__ARM_Teensy3__) && defined(ALTERNATE_PINMAP_ON)
     #ifdef AXIS2_FAULT_LOW
       pinMode(Axis2_FAULT,INPUT_PULLUP);
     #endif
@@ -755,9 +758,9 @@ void setup() {
 #ifdef PPS_SENSE_ON
 #if defined(__AVR_ATmega2560__)
   attachInterrupt(PpsInt,ClockSync,RISING);
-#elif defined(__arm__) && defined(TEENSYDUINO)
+#elif defined(__ARM_Teensy3__)
   attachInterrupt(PpsPin,ClockSync,RISING);
-#elif defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+#elif defined(__ARM_TI_TM4C__)
   attachInterrupt(PpsPin,ClockSync,RISING);
 #endif
 #endif
@@ -839,7 +842,7 @@ void setup() {
   timerRateBacklashAxis1=timerRateAxis1/BacklashTakeupRate;
   timerRateBacklashAxis2=timerRateAxis2/BacklashTakeupRate;
 
-#if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+#if defined(__ARM_TI_TM4C__)
   // need to initialise timers before using SetSiderealClockRate
   // all timers are 32 bits
   // timer 1A is used instead of itimer1
@@ -908,7 +911,7 @@ void setup() {
   TCCR4B = (1 << WGM12) | (1 << CS11); // ~0 to 0.032 seconds (31 steps per second minimum, granularity of timer is 0.5uS) /8  pre-scaler
   TCCR4A = 0;
   TIMSK4 = (1 << OCIE4A);
-#elif defined(__arm__) && defined(TEENSYDUINO)
+#elif defined(__ARM_Teensy3__)
   // set the system timer for millis() to the second highest priority
   SCB_SHPR3 = (32 << 24) | (SCB_SHPR3 & 0x00FFFFFF);
 
@@ -921,7 +924,7 @@ void setup() {
   NVIC_SET_PRIORITY(IRQ_PIT_CH1, 0);
   NVIC_SET_PRIORITY(IRQ_PIT_CH2, 0);
 
-#elif defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+#elif defined(__ARM_TI_TM4C__)
   TimerLoadSet(Timer3_base, TIMER_A, (int) (F_BUS / 1000000 * 128 * 0.0625));
   TimerLoadSet(Timer4_base, TIMER_A, (int) (F_BUS / 1000000 * 128 * 0.0625));
 

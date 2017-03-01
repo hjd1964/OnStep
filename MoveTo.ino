@@ -393,7 +393,7 @@ void DecayModeGoto() {
 }
 
 void pinModeOpen(int pin) {
-  #if defined(__arm__) && defined(TEENSYDUINO)
+  #if defined(__ARM_Teensy3__)
     pinMode(pin,OUTPUT_OPENDRAIN); digitalWrite(pin,HIGH);
   #else
     pinMode(pin,INPUT);

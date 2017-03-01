@@ -49,7 +49,7 @@ void processCommands() {
 
     // if a command isn't ready, give the www interface some time
 #ifdef ETHERNET_ON
-#if !(defined(__arm__) && defined(TEENSYDUINO))
+#if !(defined(__ARM_Teensy3__))
       if (!Ethernet_cmd_busy())
 #endif
       Ethernet_www();
