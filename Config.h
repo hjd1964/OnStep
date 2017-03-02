@@ -25,6 +25,9 @@
 // Turns debugging on, used during testing, default=OFF
 #define DEBUG_OFF
 
+// Enables goto assist mount modeling (for Eq mounts), default=OFF
+#define ALIGN_GOTOASSIST_OFF
+
 // Turns ethernet on for W5100 adapters, default=OFF (if _ON you must also uncomment the #include "EthernetPlus.h" line near the beginning of OnStep.ino for now)
 // configure the interface IP address, gateway, and subnet mask in Ethernet.ino (DHCP is off by default)
 // good technical info. about using an Arduino Ethernet Shield: https://forum.pjrc.com/threads/25050-Teensy-3-0-3-1-W5100-ethernet-shield
@@ -83,7 +86,7 @@
 // ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
 #define REMEMBER_MAX_RATE_OFF        // set to ON and OnStep will remember rates set in the ASCOM driver or Android App, default=OFF 
 #define MaxRate                   96 // this is the minimum number of micro-seconds between micro-steps
-                                     // minimum* (fastest goto) is around 16 (Teensy3.1) or 32 (Mega2560), default=96 higher is ok
+                                     // minimum* (fastest goto) is around 16 (Teensy3.1) or 64 (Mega2560), default=96 higher is ok
                                      // too low and OnStep communicates slowly and/or freezes as the motor timers use up all the MCU time
                                      // * = minimum can be lower, when both AXIS1/AXIS2_MODE_GOTO are used by AXIS1/AXIS2_STEP_GOTO times
                                      
