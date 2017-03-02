@@ -515,8 +515,8 @@ void Ethernet_get() {
   }
   // Auto-continue
   if ((get_names[0]=='a') && (get_names[1]=='c')) {
-    if ((get_vals[0]=='o') && (get_vals[1]=='n') && (get_vals[2]==0)) { autoContinue=true; EEPROM.write(EE_autoContinue,autoContinue); }
-    if ((get_vals[0]=='o') && (get_vals[1]=='f') && (get_vals[2]=='f') && (get_vals[3]==0)) { autoContinue=false; EEPROM.write(EE_autoContinue,autoContinue); }
+    if ((get_vals[0]=='o') && (get_vals[1]=='n') && (get_vals[2]==0)) { autoMeridianFlip=true; EEPROM.write(EE_autoMeridianFlip,autoMeridianFlip); }
+    if ((get_vals[0]=='o') && (get_vals[1]=='f') && (get_vals[2]=='f') && (get_vals[3]==0)) { autoMeridianFlip=false; EEPROM.write(EE_autoMeridianFlip,autoMeridianFlip); }
   }
     
   // from the Guide.htm page -------------------------------------------------------------------

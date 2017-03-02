@@ -270,7 +270,7 @@ double newTargetAlt=0.0, newTargetAzm=0.0;         // holds the altitude and azm
 double currentAlt = 45;                            // the current altitude
 int    minAlt;                                     // the minimum altitude, in degrees, for goTo's (so we don't try to point too low)
 int    maxAlt;                                     // the maximum altitude, in degrees, for goTo's (to keep the telescope tube away from the mount/tripod)
-bool   autoContinue = false;                       // automatically do a meridian flip and continue when we hit the MinutesPastMeridianW
+bool   autoMeridianFlip = false;                   // automatically do a meridian flip and continue when we hit the MinutesPastMeridianW
 
 // Fast port writting help -------------------------------------------------------------------------------------------------
 #if defined(__ARM_TI_TM4C__)
@@ -505,7 +505,7 @@ char ST4DE_last = 0;
 #define EE_pulseGuideRate 22  // 1
 #define EE_maxRate     23     // 2
 
-#define EE_autoContinue 25    // 1
+#define EE_autoMeridianFlip 25 // 1
 
 #define EE_dfCor       26     // 4
 
@@ -815,8 +815,8 @@ void setup() {
     if (maxRate<2L*16L) maxRate=2L*16L; if (maxRate>10000L*16L) maxRate=10000L*16L;
     EEPROM_writeInt(EE_maxRate,(int)(maxRate/16L));
 
-    // init autoContinue
-    EEPROM.write(EE_autoContinue,autoContinue);
+    // init autoMeridianFlip
+    EEPROM.write(EE_autoMeridianFlip,autoMeridianFlip);
 
     // init the sidereal tracking rate, use this once - then issue the T+ and T- commands to fine tune
     // 1/16uS resolution timer, ticks per sidereal second
@@ -1022,9 +1022,9 @@ void setup() {
   #endif
   SetAccelerationRates(maxRate); // set the new acceleration rate
 
-  // get autoContinue
+  // get autoMeridianFlip
   #ifdef REMEMBER_AUTO_MERIDIAN_FLIP_ON
-  autoContinue=EEPROM.read(EE_autoContinue);
+  autoMeridianFlip=EEPROM.read(EE_autoMeridianFlip);
   #endif
 
   // makes onstep think that you parked the 'scope
@@ -1289,17 +1289,17 @@ void loop() {
     if (trackingState==TrackingMoveTo) if (!LED2_ON) { digitalWrite(LEDneg2Pin,LOW); LED2_ON=true; }
 #endif
 
-    // safety checks, keeps mount from tracking past the meridian limit, past the UnderPoleLimit, below horizon limit, above the overhead limit, or past the Dec limits
+    // safety checks, keeps mount from tracking past the meridian limit, past the UnderPoleLimit, or past the Dec limits
     if (meridianFlip!=MeridianFlipNever) {
-      if (pierSide==PierSideWest) { 
+      if (pierSide==PierSideWest) {
         cli(); long p1=posAxis1+indexAxis1Steps; sei();
         if (p1>(MinutesPastMeridianW*(long)StepsPerDegreeAxis1/4L)) {
           // do an automatic meridian flip and continue if just tracking
           // checks: enabled && not too far past the meridian (doesn't make sense) && not in inaccessible area between east and west limits && finally that a slew isn't happening
-          if (autoContinue && (p1<(MinutesPastMeridianW*(long)StepsPerDegreeAxis1/4L+(1.0/60.0)*(long)StepsPerDegreeAxis1)) && (p1>(-MinutesPastMeridianE*(long)StepsPerDegreeAxis1/4L)) && (trackingState!=TrackingMoveTo)) {
+          if (autoMeridianFlip && (p1<(MinutesPastMeridianW*(long)StepsPerDegreeAxis1/4L+(1.0/60.0)*(long)StepsPerDegreeAxis1)) && (p1>(-MinutesPastMeridianE*(long)StepsPerDegreeAxis1/4L)) && (trackingState!=TrackingMoveTo)) {
             double newRA,newDec;
-            getEqu(&newRA,&newDec,false); // returns 0 on success
-            if (goToEqu(newRA,newDec)) {
+            getEqu(&newRA,&newDec,false);
+            if (goToEqu(newRA,newDec)) { // returns 0 on success
               lastError=ERR_MERIDIAN; 
               trackingState=TrackingNone;
             }

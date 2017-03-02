@@ -460,7 +460,7 @@ void processCommands() {
               case '2': sprintf(reply,"%ld",(long)(maxRate/16L)); quietReply=true; break;                   // MaxRate
               case '3': sprintf(reply,"%ld",(long)(MaxRate)); quietReply=true; break;                       // MaxRate (default)
               case '4': if (meridianFlip==MeridianFlipNever) { sprintf(reply,"%d N",(int)(pierSide)); } else { sprintf(reply,"%d",(int)(pierSide)); } quietReply=true; break; // pierSide (N if never)
-              case '5': sprintf(reply,"%i",(int)autoContinue); quietReply=true; break;                      // autoContinue
+              case '5': sprintf(reply,"%i",(int)autoMeridianFlip); quietReply=true; break;                      // autoMeridianFlip
               case '6': 
                 if (preferredPierSide==PPS_EAST) strcpy(reply,"E"); else
                 if (preferredPierSide==PPS_WEST) strcpy(reply,"W"); else strcpy(reply,"B");
@@ -1224,8 +1224,8 @@ void processCommands() {
               }
               SetAccelerationRates(maxRate);
             break;
-            case '5': // autoContinue
-              if ((parameter[3]=='0') || (parameter[3]=='1')) { i=parameter[3]-'0'; if ((i==0) || (i==1)) { autoContinue=i;  EEPROM.write(EE_autoContinue,autoContinue); } } 
+            case '5': // autoMeridianFlip
+              if ((parameter[3]=='0') || (parameter[3]=='1')) { i=parameter[3]-'0'; if ((i==0) || (i==1)) { autoMeridianFlip=i;  EEPROM.write(EE_autoMeridianFlip,autoMeridianFlip); } } 
             break; 
             case '6': // preferred pier side 
               switch (parameter[3]) {
