@@ -441,15 +441,26 @@ byte pecBuffer[PECBufferSize];
 #define Rad 57.29577951
 
 // align
-#if defined(MOUNT_TYPE_GEM)
-#define MAX_NUM_ALIGN_STARS '3'
-#elif defined(MOUNT_TYPE_FORK)
-#define MAX_NUM_ALIGN_STARS '3'
-#elif defined(MOUNT_TYPE_FORK_ALT)
-#define MAX_NUM_ALIGN_STARS '1'
-#elif defined(MOUNT_TYPE_ALTAZM)
-#define MAX_NUM_ALIGN_STARS '3'
+#ifndef ALIGN_GOTOASSIST_ON
+  #if defined(MOUNT_TYPE_GEM)
+  #define MAX_NUM_ALIGN_STARS '3'
+  #elif defined(MOUNT_TYPE_FORK)
+  #define MAX_NUM_ALIGN_STARS '3'
+  #elif defined(MOUNT_TYPE_FORK_ALT)
+  #define MAX_NUM_ALIGN_STARS '1'
+  #elif defined(MOUNT_TYPE_ALTAZM)
+  #define MAX_NUM_ALIGN_STARS '3'
+  #endif
 #else
+  #if defined(MOUNT_TYPE_GEM)
+  #define MAX_NUM_ALIGN_STARS '6'
+  #elif defined(MOUNT_TYPE_FORK)
+  #define MAX_NUM_ALIGN_STARS '6'
+  #elif defined(MOUNT_TYPE_FORK_ALT)
+  #define MAX_NUM_ALIGN_STARS '1'
+  #elif defined(MOUNT_TYPE_ALTAZM)
+  #define MAX_NUM_ALIGN_STARS '3'
+  #endif
 #endif
 
 // current site index and name
@@ -465,7 +476,6 @@ long   indexAxis2Steps  = 0;
 // tracking and PEC, fractional steps
 fixed_t fstepAxis1;
 fixed_t fstepAxis2;
-fixed_t pstep;
 
 // status state
 boolean LED_ON = false;
@@ -583,7 +593,6 @@ void setup() {
   accPecGuideHA.fixed=0;
   fstepAxis1.fixed=0;
   fstepAxis2.fixed=0;
-  pstep.fixed=0;
   origTargetAxis1.fixed = 0;
   targetAxis1.part.m = 90L*(long)StepsPerDegreeAxis1;
   targetAxis1.part.f = 0;

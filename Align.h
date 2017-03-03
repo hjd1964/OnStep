@@ -141,7 +141,7 @@ class TGeoAlign
     align_coord2_t actual[9];
     align_coord2_t delta[9];
 
-    void correct(double ha, double dec, int pierSide, double sf, double _deo, double _pd, double _pz, double _pe, double _da, double _ff, double _tf, double *h1, double *d1);
+    void correct(double ha, double dec, double pierSide, double sf, double _deo, double _pd, double _pz, double _pe, double _da, double _ff, double _tf, double *h1, double *d1);
     void do_search(double sf, int p1, int p2, int p3, int p4, int p5, int p6, int p7, int p8, int p9);
     void autoModel(int n);
 };

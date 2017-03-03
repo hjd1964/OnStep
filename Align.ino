@@ -642,22 +642,21 @@ bool TGeoAlign::addStar(int I, int N, double RA, double Dec) {
   // First star:
   // Near the celestial equator (Dec=0, HA=0), telescope West of the pier if multi-star align
   if (I==1) {
-    // set the indexAxis1 offset
-    // set the indexAxis2 offset
+    // set the indexAxis1/2 offset
     if (!syncEqu(RA,Dec)) { return false; }
   }
 
   actual[I-1].ha=haRange(LST()*15.0-RA)/Rad;
   actual[I-1].dec=Dec/Rad;
-  mount[I-1].ha=(((double)(long)targetAxis1.part.m)/(double)StepsPerDegreeAxis1)/Rad;
-  mount[I-1].dec=(((double)(long)targetAxis2.part.m)/(double)StepsPerDegreeAxis2)/Rad;
+  mount[I-1].ha=(((double)(long)(targetAxis1.part.m+indexAxis1Steps))/(double)StepsPerDegreeAxis1)/Rad;
+  mount[I-1].dec=(((double)(long)(targetAxis2.part.m+indexAxis2Steps))/(double)StepsPerDegreeAxis2)/Rad;
   if (pierSide==PierSideWest) { actual[I-1].side=-1; mount[I-1].side=-1; } else
   if (pierSide==PierSideEast) { actual[I-1].side=1; mount[I-1].side=1; } else { actual[I-1].side=0; mount[I-1].side=0; }
 
   // two or more stars and finished
   if ((I>=2) && (I==N)) {
     autoModel(N);
-    if (!syncEqu(RA,Dec)) { return false; }
+ //   if (!syncEqu(RA,Dec)) { return false; }
     geo_ready=true;
   }
 
@@ -666,7 +665,7 @@ bool TGeoAlign::addStar(int I, int N, double RA, double Dec) {
 }
 
 // returns the correction to be added to the requested RA,Dec to yield the actual RA,Dec that we will arrive at
-void TGeoAlign::correct(double ha, double dec, int pierSide, double sf, double _deo, double _pd, double _pz, double _pe, double _da, double _ff, double _tf, double *h1, double *d1) {
+void TGeoAlign::correct(double ha, double dec, double pierSide, double sf, double _deo, double _pd, double _pz, double _pe, double _da, double _ff, double _tf, double *h1, double *d1) {
   double DO1,DOh;
   double PD,PDh;
   double PZ,PA;
@@ -847,6 +846,7 @@ void TGeoAlign::autoModel(int n) {
   Ff=0; Df=1;
 #endif
 
+#if defined(__AVR_ATmega2560__)
   // search, this can handle about 4.5 degrees of polar misalignment, and 1 degree of cone error
   //             DoPdPzPeTfFfDfOdOh
   do_search( 8192,0,0,1,1,0,0,0,0,0);
@@ -856,6 +856,30 @@ void TGeoAlign::autoModel(int n) {
   do_search(  512,1,0,1,1,0,0,0,0,0);
   do_search(  256,1,0,1,1,0,0,0,0,0);
   do_search(  128,1,1,1,1,0,0,0,0,0);
+#endif
+
+#if defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__)
+  // search, this can handle about 9 degrees of polar misalignment, and 2 degrees of cone error, 6' of FF/DF and TF
+  if (num>4) {
+    do_search(16384,0,0,1,1,0, 0, 0,0,0);
+    do_search( 8192,0,0,1,1,0, 0, 0,0,0);
+    do_search( 4096,1,0,1,1,0, 0, 0,0,0);
+    do_search( 2048,1,0,1,1,0, 0, 0,0,0);
+    do_search( 1024,1,0,1,1,0, 0, 0,0,0);
+    do_search(  512,1,0,1,1,1, 0, 0,0,0);
+    do_search(  256,1,0,1,1,1,Ff,Df,0,0);
+    do_search(  128,1,1,1,1,1,Ff,Df,0,0);
+  } else {
+    do_search(16384,0,0,1,1,0,0,0,0,0);
+    do_search( 8192,0,0,1,1,0,0,0,0,0);
+    do_search( 4096,1,0,1,1,0,0,0,0,0);
+    do_search( 2048,1,0,1,1,0,0,0,0,0);
+    do_search( 1024,1,0,1,1,0,0,0,0,0);
+    do_search(  512,1,0,1,1,0,0,0,0,0);
+    do_search(  256,1,0,1,1,0,0,0,0,0);
+    do_search(  128,1,1,1,1,0,0,0,0,0);
+  }
+#endif
 
   // geometric corrections
   altCor=best_pe/3600.0;
@@ -869,7 +893,7 @@ void TGeoAlign::autoModel(int n) {
 #endif
   tfCor=best_tf/3600.0;
 
-  // offset corrections
+  // offset corrections: doesn't matter, a sync will override this
   indexAxis1=best_ohw/3600.0;
   indexAxis1Steps=(long)(indexAxis1*((double)StepsPerDegreeAxis1));
   if (pierSide==PierSideWest) indexAxis2=best_odw/3600.0;
