@@ -45,7 +45,7 @@ void Pec() {
     } else pecBufferStart=false;
   #endif
 
-  if (pecStatus==IgnorePEC) { pecTimerRateAxis1=0; return; }
+  if (pecStatus==IgnorePEC) { pecTimerRateAxis1=0.0; return; }
   if (!wormSensedFirst) return;
 
   // worm step position corrected for any index found
@@ -110,7 +110,7 @@ void Pec() {
     lastPecIndex=pecIndex1;
 
     // assume no change to tracking rate
-    pecTimerRateAxis1=0;
+    pecTimerRateAxis1=0.0;
 
     if (pecStatus==RecordPEC) {
       // save the correction as 1 of 3 weighted average
@@ -132,7 +132,6 @@ void Pec() {
       if (l>StepsPerSecondAxis1) l=StepsPerSecondAxis1; if (l<-StepsPerSecondAxis1) l=-StepsPerSecondAxis1;
       // otherwise set the rates to playback the correct number of steps per second
       pecTimerRateAxis1=(l/StepsPerSecondAxis1);
-      pstep.fixed=doubleToFixed(l/100.0);
     }
 
   }
@@ -140,9 +139,9 @@ void Pec() {
  
 void DisablePec() {
   // give up recording if we stop tracking at the sidereal rate
-  if (pecStatus==RecordPEC)  { pecStatus=IgnorePEC; pecTimerRateAxis1=0; } // don't zero the PEC offset, we don't want things moving and it really doesn't matter 
+  if (pecStatus==RecordPEC)  { pecStatus=IgnorePEC; pecTimerRateAxis1=0.0; } // don't zero the PEC offset, we don't want things moving and it really doesn't matter 
   // get ready to re-index when tracking comes back
-  if (pecStatus==PlayPEC)  { pecStatus=ReadyPlayPEC; pecTimerRateAxis1=0; } 
+  if (pecStatus==PlayPEC)  { pecStatus=ReadyPlayPEC; pecTimerRateAxis1=0.0; } 
 }
 
 void CleanupPec() {
