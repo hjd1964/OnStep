@@ -32,11 +32,7 @@ void processCommands() {
 #endif
 
     // send any reply
-    if (PSerial.transmit() || PSerial1.transmit() 
-#ifdef ETHERNET_ON
-    || Ethernet_transmit()
-#endif
-    ) return;
+    if (PSerial.transmit() || PSerial1.transmit()) return;
 
     // if a command is ready, process it
     Command process_command = COMMAND_NONE;
@@ -1032,7 +1028,7 @@ void processCommands() {
             PSerial.print("1"); while (PSerial.transmit()); delay(20); PSerial.begin(baudRate[i]);
           } else if (process_command==COMMAND_ETHERNET) {
 #ifdef ETHERNET_ON
-             Ethernet_print("1"); while (Ethernet_transmit()); delay(20);
+             Ethernet_print("1");
 #endif
           } else  {
             PSerial1.print("1"); while (PSerial1.transmit()); delay(20); PSerial1.begin(baudRate[i]); 
