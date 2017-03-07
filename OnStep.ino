@@ -950,7 +950,7 @@ void setup() {
   PSerial.begin(9600); // for Tiva TM4C the serial is redirected to serial5 in serial.ino file
   PSerial1.begin(9600);
 
-#ifdef ENTERNET_ON
+#ifdef ETHERNET_ON
   // get ready for Ethernet communications
   Ethernet_Init();
 #endif
