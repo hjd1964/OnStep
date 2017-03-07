@@ -51,7 +51,7 @@ bool Ethernet_www_busy() {
 boolean cmd_no_client = true;
 bool Ethernet_cmd_busy() {
   if (cmdIsClosing) return true;
-  if (cmd_no_client) { return false; }
+  if (cmd_no_client) return false;
   return cmd_client;
 }
 
@@ -238,13 +238,15 @@ void Ethernet_www() {
 #endif
         clientIsClosing=true;
       } else {
-#if defined(W5100_ON) && !(defined(__ARM_Teensy3__)) 
-        if (www_client.stopMonitor()) { clientNeedsToClose=false; clientIsClosing=false; }
+#if defined(W5100_ON) && !(defined(__ARM_Teensy3__))
+        if (www_client.stopMonitor()) { 
+          clientNeedsToClose=false; 
+          clientIsClosing=false; 
+          www_no_client=true;
+        }
 #else
         www_client.stop(); clientNeedsToClose=false; clientIsClosing=false;
-#if (defined(__ARM_Teensy3__))
         www_no_client=true;
-#endif
 #endif
       }
     }
