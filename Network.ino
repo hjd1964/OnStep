@@ -1134,12 +1134,12 @@ const char html_control11[] PROGMEM =
 "<button name=\"rr\" value=\"otk\" type=\"submit\">Full</button>"
 "<button name=\"rr\" value=\"on\" type=\"submit\">Refraction Only</button>"
 "<button name=\"rr\" value=\"off\" type=\"submit\">Off</button>";
-const char html_control12[] = 
+const char html_control12[] PROGMEM = 
 "</br></br>Auto-flip (automatic Meridian flip): </br>"
 "<button name=\"ac\" value=\"on\" type=\"submit\">On</button>"
 "<button name=\"ac\" value=\"off\" type=\"submit\">Off</button>";
 #endif
-const char html_control13[] = 
+const char html_control13[] PROGMEM = 
 "</form>\r\n";
 
 void control_html_page() {
@@ -1180,15 +1180,14 @@ void control_html_page() {
   if (html_page_step==++stp) strcpy_P(temp, html_control4c);
   if (html_page_step==++stp) strcpy_P(temp, html_control4d);
   if (html_page_step==++stp) strcpy_P(temp, html_controlAlign1);
-  if (MAX_NUM_ALIGN_STARS>=2) if (html_page_step==++stp) strcpy_P(temp, html_controlAlign2);
-  if (MAX_NUM_ALIGN_STARS>=3) if (html_page_step==++stp) strcpy_P(temp, html_controlAlign3);
-  if (MAX_NUM_ALIGN_STARS>=3) if (html_page_step==++stp) strcpy_P(temp, html_controlAlign3);
-  if (MAX_NUM_ALIGN_STARS>=4) if (html_page_step==++stp) strcpy_P(temp, html_controlAlign4);
-  if (MAX_NUM_ALIGN_STARS>=5) if (html_page_step==++stp) strcpy_P(temp, html_controlAlign5);
-  if (MAX_NUM_ALIGN_STARS>=6) if (html_page_step==++stp) strcpy_P(temp, html_controlAlign6);
-  if (MAX_NUM_ALIGN_STARS>=7) if (html_page_step==++stp) strcpy_P(temp, html_controlAlign7);
-  if (MAX_NUM_ALIGN_STARS>=8) if (html_page_step==++stp) strcpy_P(temp, html_controlAlign8);
-  if (MAX_NUM_ALIGN_STARS>=9) if (html_page_step==++stp) strcpy_P(temp, html_controlAlign9);
+  if (MAX_NUM_ALIGN_STARS>='2') if (html_page_step==++stp) strcpy_P(temp, html_controlAlign2);
+  if (MAX_NUM_ALIGN_STARS>='3') if (html_page_step==++stp) strcpy_P(temp, html_controlAlign3);
+  if (MAX_NUM_ALIGN_STARS>='4') if (html_page_step==++stp) strcpy_P(temp, html_controlAlign4);
+  if (MAX_NUM_ALIGN_STARS>='5') if (html_page_step==++stp) strcpy_P(temp, html_controlAlign5);
+  if (MAX_NUM_ALIGN_STARS>='6') if (html_page_step==++stp) strcpy_P(temp, html_controlAlign6);
+  if (MAX_NUM_ALIGN_STARS>='7') if (html_page_step==++stp) strcpy_P(temp, html_controlAlign7);
+  if (MAX_NUM_ALIGN_STARS>='8') if (html_page_step==++stp) strcpy_P(temp, html_controlAlign8);
+  if (MAX_NUM_ALIGN_STARS>='9') if (html_page_step==++stp) strcpy_P(temp, html_controlAlign9);
   if (html_page_step==++stp) strcpy_P(temp, html_controlAlignX);
   if (html_page_step==++stp) strcpy_P(temp, html_control6);
   if (html_page_step==++stp) strcpy_P(temp, html_control7);
