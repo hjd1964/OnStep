@@ -29,10 +29,8 @@ void processCommands() {
     if ((Serial1_available() > 0) && (!serial_one_ready)) { serial_one_ready = buildCommand_serial_one(Serial1_read()); }
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
     if ((Ethernet_available() > 0) && (!ethernet_ready)) { ethernet_ready = buildCommand_ethernet(Ethernet_read()); }
-    if (Serial_transmit() || Serial1_transmit() || Ethernet_transmit()) return;
-#else
-    if (Serial_transmit() || Serial1_transmit()) return;
 #endif
+    if (Serial_transmit() || Serial1_transmit()) return;
 
     process_command = COMMAND_NONE;
     if (serial_zero_ready)     { strcpy(command,command_serial_zero); strcpy(parameter,parameter_serial_zero); serial_zero_ready=false; clearCommand_serial_zero(); process_command=COMMAND_SERIAL; }
@@ -1000,7 +998,7 @@ void processCommands() {
             Serial_print("1"); while (Serial_transmit()); delay(20); Serial_Init(baudRate[i]);
           } else if (process_command==COMMAND_ETHERNET) {
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
-             Ethernet_print("1"); while (Ethernet_transmit()); delay(20);
+             Ethernet_print("1");
 #endif
           } else  {
             Serial1_print("1"); while (Serial1_transmit()); delay(20); Serial1_Init(baudRate[i]); 

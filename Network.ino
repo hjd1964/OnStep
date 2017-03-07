@@ -1,5 +1,12 @@
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
 
+// immediately time out on the Teensy3.2
+#if (defined(__arm__) && defined(TEENSYDUINO))
+#define CTO 15
+#else
+#define CTO 1000
+#endif
+
 #define www_xmit_buffer_size 1024
 int  www_xmit_buffer_send_pos=0;
 int  www_xmit_buffer_pos=0;
@@ -48,15 +55,14 @@ bool Ethernet_www_busy() {
   return www_client;
 }
 
-boolean cmd_no_client = true;
 bool Ethernet_cmd_busy() {
   if (cmdIsClosing) return true;
-  if (cmd_no_client) return false;
-  return cmd_client;
+  if (!cmd_client.connected()) return false;
+  return cmd_client.available()>0;
 }
 
 void Ethernet_send(const char data[]) {
-  if (!cmd_client) return;
+  if (!cmd_client.connected()) return;
   cmd_client.flush();
 
 #ifdef __AVR_ATmega2560__
@@ -71,46 +77,34 @@ void Ethernet_send(const char data[]) {
 void Ethernet_print(const char data[]) {
   Ethernet_send(data);
 }
- 
-boolean Ethernet_transmit() {
-  return false;
-}
 
 boolean Ethernet_available() {
-  if (cmd_no_client) {
-    cmd_client = cmd_server.available();
-    cmd_no_client = !cmd_client;
-    if (cmd_no_client) return false;
-  }
-
-//  cmd_client = cmd_server.available();
-  if (cmd_client) {
+  long avail=0;
+  if (!cmdIsClosing) {
+    if (cmd_server.available()) cmd_client = cmd_server.available();
+    
     if (cmd_client.connected()) {
-      return cmd_client.available();
-    }
+      avail=cmd_client.available();
 
-// immediately time out on the Teensy3.2
-#if (defined(__arm__) && defined(TEENSYDUINO))
-#define CTO 15
-#else
-#define CTO 1000
-#endif
-
-  if (millis()-cmdTransactionLast_ms>CTO) { 
-#if defined(W5100_ON) && !(defined(__arm__) && defined(TEENSYDUINO)) 
-      cmd_client.stopRequest(); 
-#endif
-      cmdIsClosing=true; 
+      if (avail>0) cmdTransactionLast_ms=millis();
+  
+      if (millis()-cmdTransactionLast_ms>CTO) {
+    #if defined(W5100_ON) && !(defined(__arm__) && defined(TEENSYDUINO)) 
+        cmd_client.stopRequest();
+    #endif
+        cmdIsClosing=true;
+      }
+      
+      return (avail>0);
     }
-    if (cmdIsClosing) {
-#if defined(W5100_ON) && !(defined(__arm__) && defined(TEENSYDUINO)) 
-      if (cmd_client.stopMonitor()) { cmdIsClosing=false; }
+  } else {
+#if defined(W5100_ON) && !(defined(__arm__) && defined(TEENSYDUINO))
+    if (cmd_client.stopMonitor()) cmdIsClosing=false;
 #else
-      cmd_client.stop(); cmdIsClosing=false;
-      cmd_no_client=true;
+    cmd_client.stop(); cmdIsClosing=false;
 #endif
-    }
   }
+  
   return false;
 }
  
