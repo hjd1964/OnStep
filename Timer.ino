@@ -79,16 +79,17 @@ volatile uint16_t t3cnt = 0;
 volatile uint16_t t3rep = 1;
 volatile long timerDirAxis1 = 0;
 volatile long thisTimerRateAxis1 = 10000UL;
+volatile boolean fastAxis1 = false;
 void Timer3SetInterval(long interval) {
 #if defined(__AVR_ATmega2560__)
   interval=interval/8L;
   // 0.0327 * 4096 = 134.21s
   long i=interval; uint16_t t=1; while (interval>65536L) { t*=2; interval=i/t; if (t==4096) { interval=65535L; break; } }
-  cli(); nextAxis1Rate=interval-1L; t3rep=t; sei();
+  cli(); nextAxis1Rate=interval-1L; t3rep=t; fastAxis1=(t3rep==1); sei();
 #elif (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__))
   // 4.194 * 32 = 134.21s
   long i=interval; uint16_t t=1; while (interval>65536L*1024L) { t++; interval=i/t; if (t==32) { interval=65535L*1024L; break; } }
-  cli(); nextAxis1Rate=(F_BUS/1000000) * (interval*0.0625) * 0.5 - 1; t3rep=t; sei();
+  cli(); nextAxis1Rate=(F_BUS/1000000) * (interval*0.0625) * 0.5 - 1; t3rep=t; fastAxis1=(t3rep==1); sei();
 #endif
 }
 
@@ -98,16 +99,17 @@ volatile uint16_t t4cnt = 0;
 volatile uint16_t t4rep = 1;
 volatile long timerDirAxis2 = 0;
 volatile long thisTimerRateAxis2 = 10000UL;
+volatile boolean fastAxis2 = false;
 void Timer4SetInterval(long interval) {
 #if defined(__AVR_ATmega2560__)
   interval=interval/8L;
   // 0.0327 * 4096 = 134.21s
   long i=interval; uint16_t t=1; while (interval>65536L) { t*=2; interval=i/t; if (t==4096) { interval=65535L; break; } }
-  cli(); nextAxis2Rate=interval-1L; t4rep=t; sei();
+  cli(); nextAxis2Rate=interval-1L; t4rep=t; fastAxis2=(t4rep==1); sei();
 #elif (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__))
   // 4.194 * 32 = 134.21s
   long i=interval; uint16_t t=1; while (interval>65536L*1024L) { t++; interval=i/t; if (t==32) { interval=65535L*1024L; break; } }
-  cli(); nextAxis2Rate=(F_BUS/1000000) * (interval*0.0625) * 0.5 - 1; t4rep=t; sei();
+  cli(); nextAxis2Rate=(F_BUS/1000000) * (interval*0.0625) * 0.5 - 1; t4rep=t; fastAxis2=(t4rep==1); sei();
 #endif
 }
 
@@ -271,7 +273,7 @@ ISR(TIMER3_COMPA_vect)
   TimerIntClear( Timer3_base, TIMER_TIMA_TIMEOUT );
 #endif
 
-  t3cnt++; if (t3cnt%t3rep!=0) return;
+  if (!fastAxis1) { t3cnt++; if (t3cnt%t3rep!=0) return; }
 
   // drivers step on the rising edge, need >=1.9uS to settle (for DRV8825 or A4988) so this is early in the routine
 #if defined(__ARM_Teensy3__)
@@ -365,7 +367,7 @@ ISR(TIMER4_COMPA_vect)
   TimerIntClear( Timer4_base, TIMER_TIMA_TIMEOUT );
 #endif
 
-  t4cnt++; if (t4cnt%t4rep!=0) return;
+  if (!fastAxis2) { t4cnt++; if (t4cnt%t4rep!=0) return; }
 
 #if defined(__ARM_Teensy3__)
   digitalWriteFast(Axis2StepPin,LOW);
