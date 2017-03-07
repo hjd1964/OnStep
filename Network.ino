@@ -29,7 +29,7 @@ IPAddress subnet(255, 255, 255, 0);
 EthernetServer cmd_server(9999);
 EthernetClient cmd_client;
 // network server port for web channel
-EthernetServer web_server(80);
+EthernetServer www_server(80);
 EthernetClient www_client;
 
 bool cmdIsClosing = false;        // handle non-blocking stop()
@@ -45,8 +45,8 @@ void Ethernet_Init() {
 
   cmd_server.begin();
   cmd_client = cmd_server.available(); // initialise cmd_client
-  web_server.begin();
-  www_client = web_server.available(); // initialise www_client
+  www_server.begin();
+  www_client = www_server.available(); // initialise www_client
 
   cmdTransactionLast_ms=millis();
 }
@@ -155,7 +155,7 @@ void Ethernet_www() {
   // if a client doesn't already exist try to find a new one
 
   if (www_no_client) {
-    www_client = web_server.available();
+    www_client = www_server.available();
     www_no_client = !www_client;
     if (www_no_client) return;
     currentLineIsBlank = true; responseStarted=false; clientNeedsToClose=false; clientIsClosing=false; reset_page_requests(); transactionStart_ms=millis();
