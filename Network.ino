@@ -153,15 +153,12 @@ void reset_page_requests() {
 bool www_no_client=true;
 void Ethernet_www() {
   // if a client doesn't already exist try to find a new one
-
   if (www_no_client) {
     www_client = www_server.available();
     www_no_client = !www_client;
     if (www_no_client) return;
     currentLineIsBlank = true; responseStarted=false; clientNeedsToClose=false; clientIsClosing=false; reset_page_requests(); transactionStart_ms=millis();
   }
-
-  //if (!www_client) { currentLineIsBlank = true; responseStarted=false; clientNeedsToClose=false; clientIsClosing=false; reset_page_requests(); transactionStart_ms=millis(); }
 
   // active client?
   if (www_client) {
@@ -219,7 +216,6 @@ void Ethernet_www() {
       if (www_xmit_buffer_pos>0) {
         if (!www_send()) { clientNeedsToClose=true; responseFinish_ms=millis(); } else { clientNeedsToClose=false; }
       }
-
     }
   
     // if data was sent give the web browser time to receive it then stop the client
