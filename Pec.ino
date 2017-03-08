@@ -119,7 +119,7 @@ void Pec() {
       if (l<-127) l=-127; if (l>127) l=127;                                                                   // prevent overflow if StepsPerSecondAxis1>127
       if (!pecFirstRecord) l=(l+((int)pecBuffer[pecIndex1]-128)*2)/3; 
       pecBuffer[pecIndex1]=l+128;  // save the correction
-      accPecGuideHA.fixed=0;       // and clear the accumulator
+      accPecGuideHA.part.m-=l;     // remove from the accumulator
     }
 
     if (pecStatus==PlayPEC) {
