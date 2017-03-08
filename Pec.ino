@@ -114,7 +114,7 @@ void Pec() {
 
     if (pecStatus==RecordPEC) {
       // save the correction as 1 of 3 weighted average
-      int l=accPecGuideHA.part.m;
+      int l=round(fixedToDouble(accPecGuideHA));
       if (l<-StepsPerSecondAxis1) l=-StepsPerSecondAxis1; if (l>StepsPerSecondAxis1) l=StepsPerSecondAxis1;   // +/-1 sidereal rate range for corrections
       if (l<-127) l=-127; if (l>127) l=127;                                                                   // prevent overflow if StepsPerSecondAxis1>127
       if (!pecFirstRecord) l=(l+((int)pecBuffer[pecIndex1]-128)*2)/3; 
@@ -126,14 +126,11 @@ void Pec() {
       // pecIndex2 adjusts one second before the value was recorded, an estimate of the latency between image acquisition and response
       // if sending values directly to OnStep from PECprep, etc. be sure to account for this
       int pecIndex2=pecIndex1-1; if (pecIndex2<0) pecIndex2+=SecondsPerWormRotationAxis1;
-      // accPecPlayHA play back speed can be +/-1 of sidereal
-      // PEC_Skip is the number of ticks between the added (or skipped) steps
+      // number of steps ahead or behind for this 1 second slot, up to +/-127
       int l=pecBuffer[pecIndex2]-128;
       if (l>StepsPerSecondAxis1) l=StepsPerSecondAxis1; if (l<-StepsPerSecondAxis1) l=-StepsPerSecondAxis1;
-      // otherwise set the rates to playback the correct number of steps per second
-      pecTimerRateAxis1=(l/StepsPerSecondAxis1);
+      pecTimerRateAxis1=((double)l/StepsPerSecondAxis1);
     }
-
   }
 }
  
@@ -146,21 +143,21 @@ void DisablePec() {
 
 void CleanupPec() {
   // low pass filter ----------------------------------------------------------
-  int j,J1,J4,J10,J18;
+  int j,J1,J4,J9,J17;
   for (int scc=0+3; scc<SecondsPerWormRotationAxis1+3; scc++) {
     j=pecBuffer[((scc)%SecondsPerWormRotationAxis1)]-128;
 
     J1=(int)round((float)j*0.01);
     J4=(int)round((float)j*0.04);
-    J10=(int)round((float)j*0.10);
-    J18=(int)round((float)j*0.18);
+    J9=(int)round((float)j*0.09);
+    J17=(int)round((float)j*0.17);
     pecBuffer[((scc-4)%SecondsPerWormRotationAxis1)]=(((int)pecBuffer[((scc-4)%SecondsPerWormRotationAxis1)]-128)+J1)+128;
     pecBuffer[((scc-3)%SecondsPerWormRotationAxis1)]=(((int)pecBuffer[((scc-3)%SecondsPerWormRotationAxis1)]-128)+J4)+128;
-    pecBuffer[((scc-2)%SecondsPerWormRotationAxis1)]=(((int)pecBuffer[((scc-2)%SecondsPerWormRotationAxis1)]-128)+J10)+128;
-    pecBuffer[((scc-1)%SecondsPerWormRotationAxis1)]=(((int)pecBuffer[((scc-1)%SecondsPerWormRotationAxis1)]-128)+J18)+128;
-    pecBuffer[((scc  )%SecondsPerWormRotationAxis1)]=(((int)pecBuffer[((scc  )%SecondsPerWormRotationAxis1)]-128)-(J18+J18+J10+J10+J4+J4+J1+J1))+128;
-    pecBuffer[((scc+1)%SecondsPerWormRotationAxis1)]=(((int)pecBuffer[((scc+1)%SecondsPerWormRotationAxis1)]-128)+J18)+128;
-    pecBuffer[((scc+2)%SecondsPerWormRotationAxis1)]=(((int)pecBuffer[((scc+2)%SecondsPerWormRotationAxis1)]-128)+J10)+128;
+    pecBuffer[((scc-2)%SecondsPerWormRotationAxis1)]=(((int)pecBuffer[((scc-2)%SecondsPerWormRotationAxis1)]-128)+J9)+128;
+    pecBuffer[((scc-1)%SecondsPerWormRotationAxis1)]=(((int)pecBuffer[((scc-1)%SecondsPerWormRotationAxis1)]-128)+J17)+128;
+    pecBuffer[((scc  )%SecondsPerWormRotationAxis1)]=(((int)pecBuffer[((scc  )%SecondsPerWormRotationAxis1)]-128)-(J17+J17+J9+J9+J4+J4+J1+J1))+128;
+    pecBuffer[((scc+1)%SecondsPerWormRotationAxis1)]=(((int)pecBuffer[((scc+1)%SecondsPerWormRotationAxis1)]-128)+J17)+128;
+    pecBuffer[((scc+2)%SecondsPerWormRotationAxis1)]=(((int)pecBuffer[((scc+2)%SecondsPerWormRotationAxis1)]-128)+J9)+128;
     pecBuffer[((scc+3)%SecondsPerWormRotationAxis1)]=(((int)pecBuffer[((scc+3)%SecondsPerWormRotationAxis1)]-128)+J4)+128;
     pecBuffer[((scc+4)%SecondsPerWormRotationAxis1)]=(((int)pecBuffer[((scc+4)%SecondsPerWormRotationAxis1)]-128)+J1)+128;
   }
