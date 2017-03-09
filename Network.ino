@@ -600,19 +600,19 @@ const char html_headerPec[] PROGMEM = "<meta http-equiv=\"refresh\" content=\"5;
 const char html_header7[] PROGMEM = "</head>\r\n";
 const char html_header8[] PROGMEM = "<body bgcolor=\"#26262A\">\r\n";
 
-const char html_main_css1[] PROGMEM = "<STYLE>\r\n";
-const char html_main_css2[] PROGMEM = ".a { background-color: #111111; }\r\n .t { padding: 15px; border: 15px solid #551111;\r\n";
-const char html_main_css3[] PROGMEM = " margin: 25px; color: #999999; background-color: #111111; }\r\n input { width:4em; font-weight: bold; background-color: #A01010; padding: 2px 2px; }\r\n";
-const char html_main_css4[] PROGMEM = ".b { padding: 30px; border: 2px solid #551111; margin: 30px; color: #999999; background-color: #111111; }\r\n";
-const char html_main_css5[] PROGMEM = "select { width:4em; font-weight: bold; background-color: #A01010; padding: 2px 2px; }\r\n .c { color: #A01010; font-weight: bold; }\r\n";
-const char html_main_css6[] PROGMEM = "h1 { text-align: right; }\r\n a:hover, a:active { background-color: red; }\r\n .g { color: #105010; font-weight: bold; }";
+const char html_main_css1[] PROGMEM = "<STYLE>";
+const char html_main_css2[] PROGMEM = ".a { background-color: #111111; } .t { padding: 10px 10px 20px 10px; border: 5px solid #551111;";
+const char html_main_css3[] PROGMEM = " margin: 25px 25px 0px 25px; color: #999999; background-color: #111111; } input { width:4em; font-weight: bold; background-color: #A01010; padding: 2px 2px; }";
+const char html_main_css4[] PROGMEM = ".b { padding: 10px; border-left: 5px solid #551111; border-right: 5px solid #551111; border-bottom: 5px solid #551111; margin: 0px 25px 25px 25px; color: #999999;";
+const char html_main_css5[] PROGMEM = "background-color: #111111; } select { width:4em; font-weight: bold; background-color: #A01010; padding: 2px 2px; } .c { color: #A01010; font-weight: bold; }";
+const char html_main_css6[] PROGMEM = "h1 { text-align: right; } a:hover, a:active { background-color: red; } .g { color: #105010; font-weight: bold; }";
 const char html_main_css7[] PROGMEM = "a:link, a:visited { background-color: #332222; color: #a07070; border:1px solid red; padding: 5px 10px;";
-const char html_main_css8[] PROGMEM = " margin: none; text-align: center; text-decoration: none; display: inline-block; }\r\n";
-const char html_main_css9[] PROGMEM = "button { background-color: #A01010; font-weight: bold; border-radius: 5px; font-size: 12px; margin: 2px; padding: 4px 8px; }\r\n</STYLE>\r\n";
+const char html_main_css8[] PROGMEM = " margin: none; text-align: center; text-decoration: none; display: inline-block; }";
+const char html_main_css9[] PROGMEM = "button { background-color: #A01010; font-weight: bold; border-radius: 5px; font-size: 12px; margin: 2px; padding: 4px 8px; }</STYLE>";
 
 const char html_links1[] PROGMEM = "<a href=\"/index.htm\">Status</a><a href=\"/settings.htm\">Settings";
 const char html_links2[] PROGMEM = "</a><a href=\"/control.htm\">Control</a><a href=\"/guide.htm\">Guide</a>";
-const char html_links3[] PROGMEM = "<a href=\"/pec.htm\">PEC</a><a href=\"/config.htm\">Configuration</a><br />";
+const char html_links3[] PROGMEM = "<a href=\"/pec.htm\">PEC</a><a href=\"/config.htm\">Configuration</a>";
 
 // The index.htm page --------------------------------------------------------------------------------------
 #ifdef MOUNT_TYPE_ALTAZM
@@ -624,9 +624,9 @@ const char html_links3[] PROGMEM = "<a href=\"/pec.htm\">PEC</a><a href=\"/confi
   #define Axis1a "RA"
   #define Axis2 "Dec"
 #endif
-const char html_index1[] PROGMEM = "<div class=\"t\"><table width=\"100%\"><tr><td><b>" FirmwareName " " FirmwareNumber;
-const char html_index2[] PROGMEM = "</b></td><td align=\"right\"><b><font size=\"5\">";
-const char html_index2a[] PROGMEM = "STATUS</font></b></td></tr></table><br />";
+const char html_index1[] PROGMEM = "<div class=\"t\"><table width=\"100%\"><tr><td><b><font size=\"5\">OnStep STATUS</font>";
+const char html_index2[] PROGMEM = "</b></td><td align=\"right\"><b>";
+const char html_index2a[] PROGMEM = FirmwareNumber " " FirmwareDate "</b></td></tr></table>";
 const char html_index2b[] PROGMEM = "</div><div class=\"b\">Longitude = <font class=\"c\">%s</font>, Latitude = <font class=\"c\">%s</font><br />";
 const char html_index3[] PROGMEM = "<font class=\"c\">%02d/%02d/%02d</font>";
 const char html_index4[] PROGMEM = "&nbsp;<font class=\"c\">%s</font>&nbsp;UT";
@@ -885,8 +885,8 @@ if (html_page_step==++stp) {
 }
 
 // The settings.htm page ----------------------------------------------------------------------------------
-const char html_settings1[] PROGMEM = "<div class=\"t\"><table width=\"100%\"><tr><td><b>" FirmwareName " " FirmwareNumber ;
-const char html_settings2[] PROGMEM = "</b></td><td align=\"right\"><b><font size=\"5\">SETTINGS</font></b></td></tr></table><br />";
+const char html_settings1[] PROGMEM = "<div class=\"t\"><table width=\"100%\"><tr><td><b><font size=\"5\">OnStep SETTINGS</font>";
+const char html_settings2[] PROGMEM = "</b></td><td align=\"right\"><b>" FirmwareNumber " " FirmwareDate "</b></td></tr></table>";
 const char html_settings3[] PROGMEM = "</div><div class=\"b\">\r\n";
 const char html_settings4[] PROGMEM = 
 "Maximum Slew Speed: "
@@ -1053,8 +1053,8 @@ void settings_html_page() {
 }
 
 // The control.htm page ----------------------------------------------------------------------------------
-const char html_control1[] PROGMEM = "<div class=\"t\"><table width=\"100%\"><tr><td><b>" FirmwareName " " FirmwareNumber ;
-const char html_control2[] PROGMEM = "</b></td><td align=\"right\"><b><font size=\"5\">CONTROL</font></b></td></tr></table><br />";
+const char html_control1[] PROGMEM = "<div class=\"t\"><table width=\"100%\"><tr><td><b><font size=\"5\">OnStep CONTROL</font>" ;
+const char html_control2[] PROGMEM = "</b></td><td align=\"right\"><b>" FirmwareNumber " " FirmwareDate "</b></td></tr></table>";
 const char html_control3[] PROGMEM = "</div><div class=\"b\">\r\n";
 const char html_control4a[] PROGMEM = 
 "Date/Time: "
@@ -1200,8 +1200,8 @@ void control_html_page() {
 
 // The guide.htm page --------------------------------------------------------------------------------
 const char html_guide1[] PROGMEM = 
-"<div class=\"t\"><table width=\"100%\"><tr><td><b>" FirmwareName " " FirmwareNumber ;
-const char html_guide2[] PROGMEM = "</b></td><td align=\"right\"><b><font size=\"5\">GUIDE</font></b></td></tr></table><br />";
+"<div class=\"t\"><table width=\"100%\"><tr><td><b><font size=\"5\">OnStep GUIDE</font>";
+const char html_guide2[] PROGMEM = "</b></td><td align=\"right\"><b>" FirmwareNumber " " FirmwareDate "</b></td></tr></table>";
 const char html_guide3[] PROGMEM = "</div><div class=\"b\">\r\n";
 const char html_guide4[] PROGMEM = 
 "<script>function guide(dir,start) { var xhttp = new XMLHttpRequest(); "
@@ -1304,8 +1304,8 @@ void guide_ajax_page() {
 
 // The pec.htm page ----------------------------------------------------------------------------------
 const char html_pec1[] PROGMEM = 
-"<div class=\"t\"><table width=\"100%\"><tr><td><b>" FirmwareName " " FirmwareNumber ;
-const char html_pec2[] PROGMEM = "</b></td><td align=\"right\"><b><font size=\"5\">PEC</font></b></td></tr></table><br />";
+"<div class=\"t\"><table width=\"100%\"><tr><td><b><font size=\"5\">OnStep PEC</font>";
+const char html_pec2[] PROGMEM = "</b></td><td align=\"right\"><b>" FirmwareNumber " " FirmwareDate "</b></td></tr></table>";
 const char html_pec3[] PROGMEM = "</div><div class=\"b\">\r\n";
 const char html_pec4[] PROGMEM = "PEC: <br /><br />";
 const char html_pec5[] PROGMEM = "STATUS = <font class=\"c\">%s%s</font><br /><br />";
@@ -1393,9 +1393,9 @@ void pec_html_page() {
 }
 
 // The config.htm page --------------------------------------------------------------------------------------
-const char html_config1[] PROGMEM = "<div class=\"t\"><table width=\"100%\"><tr><td><b>" FirmwareName " " FirmwareNumber;
-const char html_config2[] PROGMEM = "</b></td><td align=\"right\"><b><font size=\"5\">";
-const char html_config3[] PROGMEM = "CONFIGURATION</font></b></td></tr></table><br />";
+const char html_config1[] PROGMEM = "<div class=\"t\"><table width=\"100%\"><tr><td><b><font size=\"5\">OnStep CONFIGURATION</font>";
+const char html_config2[] PROGMEM = "</b></td><td align=\"right\"><b>" FirmwareNumber " " FirmwareDate;
+const char html_config3[] PROGMEM = "</b></td></tr></table>";
 const char html_config4[] PROGMEM = "</div><div class=\"b\">";
 #ifdef DEBUG_ON
 const char html_debug[] PROGMEM = "Debug Mode: <font class=\"c\">ON</font><br /><br />";
