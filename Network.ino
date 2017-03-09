@@ -610,9 +610,29 @@ const char html_main_css7[] PROGMEM = "a:link, a:visited { background-color: #33
 const char html_main_css8[] PROGMEM = " margin: none; text-align: center; text-decoration: none; display: inline-block; }";
 const char html_main_css9[] PROGMEM = "button { background-color: #A01010; font-weight: bold; border-radius: 5px; font-size: 12px; margin: 2px; padding: 4px 8px; }</STYLE>";
 
-const char html_links1[] PROGMEM = "<a href=\"/index.htm\">Status</a><a href=\"/settings.htm\">Settings";
-const char html_links2[] PROGMEM = "</a><a href=\"/control.htm\">Control</a><a href=\"/guide.htm\">Guide</a>";
-const char html_links3[] PROGMEM = "<a href=\"/pec.htm\">PEC</a><a href=\"/config.htm\">Configuration</a>";
+const char html_links1in[] PROGMEM = "<a href=\"/index.htm\" style=\"background-color: #552222;\">Status</a><a href=\"/settings.htm\">Settings";
+const char html_links2in[] PROGMEM = "</a><a href=\"/control.htm\">Control</a><a href=\"/guide.htm\">Guide</a>";
+const char html_links3in[] PROGMEM = "<a href=\"/pec.htm\">PEC</a><a href=\"/config.htm\">Configuration</a>";
+
+const char html_links1se[] PROGMEM = "<a href=\"/index.htm\">Status</a><a href=\"/settings.htm\" style=\"background-color: #552222;\">Settings";
+const char html_links2se[] PROGMEM = "</a><a href=\"/control.htm\">Control</a><a href=\"/guide.htm\">Guide</a>";
+const char html_links3se[] PROGMEM = "<a href=\"/pec.htm\">PEC</a><a href=\"/config.htm\">Configuration</a>";
+
+const char html_links1ct[] PROGMEM = "<a href=\"/index.htm\">Status</a><a href=\"/settings.htm\">Settings";
+const char html_links2ct[] PROGMEM = "</a><a href=\"/control.htm\" style=\"background-color: #552222;\">Control</a><a href=\"/guide.htm\">Guide</a>";
+const char html_links3ct[] PROGMEM = "<a href=\"/pec.htm\">PEC</a><a href=\"/config.htm\">Configuration</a>";
+
+const char html_links1gu[] PROGMEM = "<a href=\"/index.htm\">Status</a><a href=\"/settings.htm\">Settings";
+const char html_links2gu[] PROGMEM = "</a><a href=\"/control.htm\">Control</a><a href=\"/guide.htm\" style=\"background-color: #552222;\">Guide</a>";
+const char html_links3gu[] PROGMEM = "<a href=\"/pec.htm\">PEC</a><a href=\"/config.htm\">Configuration</a>";
+
+const char html_links1pe[] PROGMEM = "<a href=\"/index.htm\">Status</a><a href=\"/settings.htm\">Settings";
+const char html_links2pe[] PROGMEM = "</a><a href=\"/control.htm\">Control</a><a href=\"/guide.htm\">Guide</a>";
+const char html_links3pe[] PROGMEM = "<a href=\"/pec.htm\" style=\"background-color: #552222;\">PEC</a><a href=\"/config.htm\">Configuration</a>";
+
+const char html_links1co[] PROGMEM = "<a href=\"/index.htm\">Status</a><a href=\"/settings.htm\">Settings";
+const char html_links2co[] PROGMEM = "</a><a href=\"/control.htm\">Control</a><a href=\"/guide.htm\">Guide</a>";
+const char html_links3co[] PROGMEM = "<a href=\"/pec.htm\">PEC</a><a href=\"/config.htm\" style=\"background-color: #552222;\">Configuration</a>";
 
 // The index.htm page --------------------------------------------------------------------------------------
 #ifdef MOUNT_TYPE_ALTAZM
@@ -624,7 +644,7 @@ const char html_links3[] PROGMEM = "<a href=\"/pec.htm\">PEC</a><a href=\"/confi
   #define Axis1a "RA"
   #define Axis2 "Dec"
 #endif
-const char html_index1[] PROGMEM = "<div class=\"t\"><table width=\"100%\"><tr><td><b><font size=\"5\">OnStep STATUS</font>";
+const char html_index1[] PROGMEM = "<div class=\"t\"><table width=\"100%\"><tr><td><b><font size=\"5\">OnStep</font>";
 const char html_index2[] PROGMEM = "</b></td><td align=\"right\"><b>";
 const char html_index2a[] PROGMEM = FirmwareNumber " " FirmwareDate "</b></td></tr></table>";
 const char html_index2b[] PROGMEM = "</div><div class=\"b\">Longitude = <font class=\"c\">%s</font>, Latitude = <font class=\"c\">%s</font><br />";
@@ -684,9 +704,9 @@ void index_html_page() {
   if (html_page_step==++stp) strcpy_P(temp, html_index1);
   if (html_page_step==++stp) strcpy_P(temp, html_index2);
   if (html_page_step==++stp) strcpy_P(temp, html_index2a);
-  if (html_page_step==++stp) strcpy_P(temp, html_links1);
-  if (html_page_step==++stp) strcpy_P(temp, html_links2);
-  if (html_page_step==++stp) strcpy_P(temp, html_links3);
+  if (html_page_step==++stp) strcpy_P(temp, html_links1in);
+  if (html_page_step==++stp) strcpy_P(temp, html_links2in);
+  if (html_page_step==++stp) strcpy_P(temp, html_links3in);
   
 if (html_page_step==++stp) {
     i=highPrecision; 
@@ -885,7 +905,7 @@ if (html_page_step==++stp) {
 }
 
 // The settings.htm page ----------------------------------------------------------------------------------
-const char html_settings1[] PROGMEM = "<div class=\"t\"><table width=\"100%\"><tr><td><b><font size=\"5\">OnStep SETTINGS</font>";
+const char html_settings1[] PROGMEM = "<div class=\"t\"><table width=\"100%\"><tr><td><b><font size=\"5\">OnStep</font>";
 const char html_settings2[] PROGMEM = "</b></td><td align=\"right\"><b>" FirmwareNumber " " FirmwareDate "</b></td></tr></table>";
 const char html_settings3[] PROGMEM = "</div><div class=\"b\">\r\n";
 const char html_settings4[] PROGMEM = 
@@ -988,9 +1008,9 @@ void settings_html_page() {
   // and the remainder of the page
   if (html_page_step==++stp) strcpy_P(temp, html_settings1);
   if (html_page_step==++stp) strcpy_P(temp, html_settings2);
-  if (html_page_step==++stp) strcpy_P(temp, html_links1);
-  if (html_page_step==++stp) strcpy_P(temp, html_links2);
-  if (html_page_step==++stp) strcpy_P(temp, html_links3);
+  if (html_page_step==++stp) strcpy_P(temp, html_links1se);
+  if (html_page_step==++stp) strcpy_P(temp, html_links2se);
+  if (html_page_step==++stp) strcpy_P(temp, html_links3se);
   if (html_page_step==++stp) strcpy_P(temp, html_settings3);
   if (html_page_step==++stp) strcpy_P(temp, html_settings4);
   if (html_page_step==++stp) strcpy_P(temp, html_settings5);
@@ -1053,7 +1073,7 @@ void settings_html_page() {
 }
 
 // The control.htm page ----------------------------------------------------------------------------------
-const char html_control1[] PROGMEM = "<div class=\"t\"><table width=\"100%\"><tr><td><b><font size=\"5\">OnStep CONTROL</font>" ;
+const char html_control1[] PROGMEM = "<div class=\"t\"><table width=\"100%\"><tr><td><b><font size=\"5\">OnStep</font>" ;
 const char html_control2[] PROGMEM = "</b></td><td align=\"right\"><b>" FirmwareNumber " " FirmwareDate "</b></td></tr></table>";
 const char html_control3[] PROGMEM = "</div><div class=\"b\">\r\n";
 const char html_control4a[] PROGMEM = 
@@ -1161,9 +1181,9 @@ void control_html_page() {
   // and the remainder of the page
   if (html_page_step==++stp) strcpy_P(temp, html_control1);
   if (html_page_step==++stp) strcpy_P(temp, html_control2);
-  if (html_page_step==++stp) strcpy_P(temp, html_links1);
-  if (html_page_step==++stp) strcpy_P(temp, html_links2);
-  if (html_page_step==++stp) strcpy_P(temp, html_links3);
+  if (html_page_step==++stp) strcpy_P(temp, html_links1ct);
+  if (html_page_step==++stp) strcpy_P(temp, html_links2ct);
+  if (html_page_step==++stp) strcpy_P(temp, html_links3ct);
   if (html_page_step==++stp) strcpy_P(temp, html_control3);
   if (html_page_step==++stp) strcpy_P(temp, html_control4a);
   if (html_page_step==++stp) strcpy_P(temp, html_control4b);
@@ -1200,7 +1220,7 @@ void control_html_page() {
 
 // The guide.htm page --------------------------------------------------------------------------------
 const char html_guide1[] PROGMEM = 
-"<div class=\"t\"><table width=\"100%\"><tr><td><b><font size=\"5\">OnStep GUIDE</font>";
+"<div class=\"t\"><table width=\"100%\"><tr><td><b><font size=\"5\">OnStep</font>";
 const char html_guide2[] PROGMEM = "</b></td><td align=\"right\"><b>" FirmwareNumber " " FirmwareDate "</b></td></tr></table>";
 const char html_guide3[] PROGMEM = "</div><div class=\"b\">\r\n";
 const char html_guide4[] PROGMEM = 
@@ -1259,9 +1279,9 @@ void guide_html_page() {
   // and the remainder of the page
   if (html_page_step==++stp) strcpy_P(temp, html_guide1);
   if (html_page_step==++stp) strcpy_P(temp, html_guide2);
-  if (html_page_step==++stp) strcpy_P(temp, html_links1);
-  if (html_page_step==++stp) strcpy_P(temp, html_links2);
-  if (html_page_step==++stp) strcpy_P(temp, html_links3);
+  if (html_page_step==++stp) strcpy_P(temp, html_links1gu);
+  if (html_page_step==++stp) strcpy_P(temp, html_links2gu);
+  if (html_page_step==++stp) strcpy_P(temp, html_links3gu);
   if (html_page_step==++stp) strcpy_P(temp, html_guide3);
   if (html_page_step==++stp) strcpy_P(temp, html_guide4);
 
@@ -1304,7 +1324,7 @@ void guide_ajax_page() {
 
 // The pec.htm page ----------------------------------------------------------------------------------
 const char html_pec1[] PROGMEM = 
-"<div class=\"t\"><table width=\"100%\"><tr><td><b><font size=\"5\">OnStep PEC</font>";
+"<div class=\"t\"><table width=\"100%\"><tr><td><b><font size=\"5\">OnStep</font>";
 const char html_pec2[] PROGMEM = "</b></td><td align=\"right\"><b>" FirmwareNumber " " FirmwareDate "</b></td></tr></table>";
 const char html_pec3[] PROGMEM = "</div><div class=\"b\">\r\n";
 const char html_pec4[] PROGMEM = "PEC: <br /><br />";
@@ -1355,9 +1375,9 @@ void pec_html_page() {
   // and the remainder of the page
   if (html_page_step==++stp) strcpy_P(temp, html_pec1);
   if (html_page_step==++stp) strcpy_P(temp, html_pec2);
-  if (html_page_step==++stp) strcpy_P(temp, html_links1);
-  if (html_page_step==++stp) strcpy_P(temp, html_links2);
-  if (html_page_step==++stp) strcpy_P(temp, html_links3);
+  if (html_page_step==++stp) strcpy_P(temp, html_links1pe);
+  if (html_page_step==++stp) strcpy_P(temp, html_links2pe);
+  if (html_page_step==++stp) strcpy_P(temp, html_links3pe);
   if (html_page_step==++stp) strcpy_P(temp, html_pec3);
   if (html_page_step==++stp) strcpy_P(temp, html_pec4);
   if (html_page_step==++stp) {
@@ -1393,7 +1413,7 @@ void pec_html_page() {
 }
 
 // The config.htm page --------------------------------------------------------------------------------------
-const char html_config1[] PROGMEM = "<div class=\"t\"><table width=\"100%\"><tr><td><b><font size=\"5\">OnStep CONFIGURATION</font>";
+const char html_config1[] PROGMEM = "<div class=\"t\"><table width=\"100%\"><tr><td><b><font size=\"5\">OnStep</font>";
 const char html_config2[] PROGMEM = "</b></td><td align=\"right\"><b>" FirmwareNumber " " FirmwareDate;
 const char html_config3[] PROGMEM = "</b></td></tr></table>";
 const char html_config4[] PROGMEM = "</div><div class=\"b\">";
@@ -1560,9 +1580,9 @@ void config_html_page() {
   if (html_page_step==++stp) strcpy_P(temp, html_config1);
   if (html_page_step==++stp) strcpy_P(temp, html_config2);
   if (html_page_step==++stp) strcpy_P(temp, html_config3);
-  if (html_page_step==++stp) strcpy_P(temp, html_links1);
-  if (html_page_step==++stp) strcpy_P(temp, html_links2);
-  if (html_page_step==++stp) strcpy_P(temp, html_links3);
+  if (html_page_step==++stp) strcpy_P(temp, html_links1co);
+  if (html_page_step==++stp) strcpy_P(temp, html_links2co);
+  if (html_page_step==++stp) strcpy_P(temp, html_links3co);
   if (html_page_step==++stp) strcpy_P(temp, html_config4);
 
   if (html_page_step==++stp) strcpy_P(temp, html_debug);
