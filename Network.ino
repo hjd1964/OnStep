@@ -610,29 +610,29 @@ const char html_main_css7[] PROGMEM = "a:link, a:visited { background-color: #33
 const char html_main_css8[] PROGMEM = " margin: none; text-align: center; text-decoration: none; display: inline-block; }";
 const char html_main_css9[] PROGMEM = "button { background-color: #A01010; font-weight: bold; border-radius: 5px; font-size: 12px; margin: 2px; padding: 4px 8px; }</STYLE>";
 
-const char html_links1in[] PROGMEM = "<a href=\"/index.htm\" style=\"background-color: #552222;\">Status</a><a href=\"/settings.htm\">Settings";
-const char html_links2in[] PROGMEM = "</a><a href=\"/control.htm\">Control</a><a href=\"/guide.htm\">Guide</a>";
-const char html_links3in[] PROGMEM = "<a href=\"/pec.htm\">PEC</a><a href=\"/config.htm\">Configuration</a>";
+const char html_links1in[] PROGMEM = "<a href=\"/index.htm\" style=\"background-color: #552222;\">Status</a><a href=\"/control.htm\">Control</a>";
+const char html_links2in[] PROGMEM = "<a href=\"/guide.htm\">Guide</a><a href=\"/pec.htm\">PEC</a>";
+const char html_links3in[] PROGMEM = "<a href=\"/settings.htm\">Settings</a><a href=\"/config.htm\">Configuration</a>";
 
-const char html_links1se[] PROGMEM = "<a href=\"/index.htm\">Status</a><a href=\"/settings.htm\" style=\"background-color: #552222;\">Settings";
-const char html_links2se[] PROGMEM = "</a><a href=\"/control.htm\">Control</a><a href=\"/guide.htm\">Guide</a>";
-const char html_links3se[] PROGMEM = "<a href=\"/pec.htm\">PEC</a><a href=\"/config.htm\">Configuration</a>";
+const char html_links1se[] PROGMEM = "<a href=\"/index.htm\">Status</a><a href=\"/control.htm\">Control</a>";
+const char html_links2se[] PROGMEM = "<a href=\"/guide.htm\">Guide</a><a href=\"/pec.htm\">PEC</a>";
+const char html_links3se[] PROGMEM = "<a href=\"/settings.htm\" style=\"background-color: #552222;\">Settings</a><a href=\"/config.htm\">Configuration</a>";
 
-const char html_links1ct[] PROGMEM = "<a href=\"/index.htm\">Status</a><a href=\"/settings.htm\">Settings";
-const char html_links2ct[] PROGMEM = "</a><a href=\"/control.htm\" style=\"background-color: #552222;\">Control</a><a href=\"/guide.htm\">Guide</a>";
-const char html_links3ct[] PROGMEM = "<a href=\"/pec.htm\">PEC</a><a href=\"/config.htm\">Configuration</a>";
+const char html_links1ct[] PROGMEM = "<a href=\"/index.htm\">Status</a><a href=\"/control.htm\" style=\"background-color: #552222;\">Control</a>";
+const char html_links2ct[] PROGMEM = "<a href=\"/guide.htm\">Guide</a><a href=\"/pec.htm\">PEC</a>";
+const char html_links3ct[] PROGMEM = "<a href=\"/settings.htm\">Settings</a><a href=\"/config.htm\">Configuration</a>";
 
-const char html_links1gu[] PROGMEM = "<a href=\"/index.htm\">Status</a><a href=\"/settings.htm\">Settings";
-const char html_links2gu[] PROGMEM = "</a><a href=\"/control.htm\">Control</a><a href=\"/guide.htm\" style=\"background-color: #552222;\">Guide</a>";
-const char html_links3gu[] PROGMEM = "<a href=\"/pec.htm\">PEC</a><a href=\"/config.htm\">Configuration</a>";
+const char html_links1gu[] PROGMEM = "<a href=\"/index.htm\">Status</a><a href=\"/control.htm\">Control</a>";
+const char html_links2gu[] PROGMEM = "<a href=\"/guide.htm\" style=\"background-color: #552222;\">Guide</a><a href=\"/pec.htm\">PEC</a>";
+const char html_links3gu[] PROGMEM = "<a href=\"/settings.htm\">Settings</a><a href=\"/config.htm\">Configuration</a>";
 
-const char html_links1pe[] PROGMEM = "<a href=\"/index.htm\">Status</a><a href=\"/settings.htm\">Settings";
-const char html_links2pe[] PROGMEM = "</a><a href=\"/control.htm\">Control</a><a href=\"/guide.htm\">Guide</a>";
-const char html_links3pe[] PROGMEM = "<a href=\"/pec.htm\" style=\"background-color: #552222;\">PEC</a><a href=\"/config.htm\">Configuration</a>";
+const char html_links1pe[] PROGMEM = "<a href=\"/index.htm\">Status</a><a href=\"/control.htm\">Control</a>";
+const char html_links2pe[] PROGMEM = "<a href=\"/guide.htm\">Guide</a><a href=\"/pec.htm\" style=\"background-color: #552222;\">PEC</a>";
+const char html_links3pe[] PROGMEM = "<a href=\"/settings.htm\">Settings</a><a href=\"/config.htm\">Configuration</a>";
 
-const char html_links1co[] PROGMEM = "<a href=\"/index.htm\">Status</a><a href=\"/settings.htm\">Settings";
-const char html_links2co[] PROGMEM = "</a><a href=\"/control.htm\">Control</a><a href=\"/guide.htm\">Guide</a>";
-const char html_links3co[] PROGMEM = "<a href=\"/pec.htm\">PEC</a><a href=\"/config.htm\" style=\"background-color: #552222;\">Configuration</a>";
+const char html_links1co[] PROGMEM = "<a href=\"/index.htm\">Status</a><a href=\"/control.htm\">Control</a>";
+const char html_links2co[] PROGMEM = "<a href=\"/guide.htm\">Guide</a><a href=\"/pec.htm\">PEC</a>";
+const char html_links3co[] PROGMEM = "<a href=\"/settings.htm\">Settings</a><a href=\"/config.htm\" style=\"background-color: #552222;\">Configuration</a>";
 
 // The index.htm page --------------------------------------------------------------------------------------
 #ifdef MOUNT_TYPE_ALTAZM
