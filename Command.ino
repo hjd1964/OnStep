@@ -404,7 +404,7 @@ void processCommands() {
         quietReply=true;
       } else 
 //  :GVD# Get Telescope Firmware Date
-//         Returns: mm dd yyyy#
+//         Returns: mm dd yy#
 //  :GVN# Get Telescope Firmware Number
 //         Returns: dd.d#
 //  :GVP# Get Telescope Product Name
