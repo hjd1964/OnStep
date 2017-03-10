@@ -975,7 +975,7 @@ const char html_settings7[] PROGMEM =
 "<form method=\"get\" action=\"/settings.htm\">"
 " <input value=\"%d\" type=\"number\" name=\"b1\" min=\"0\" max=\"999\">"
 "<button type=\"submit\">Upload</button>"
-" (" Axis1a ", in arc-seconds 0 to 999)"
+" (" Axis1 ", in arc-seconds 0 to 999)"
 "</form>"
 "\r\n";
 const char html_settings8[] PROGMEM = 
