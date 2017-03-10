@@ -456,11 +456,12 @@ void processCommands() {
               case '2': sprintf(reply,"%ld",(long)(maxRate/16L)); quietReply=true; break;                   // MaxRate
               case '3': sprintf(reply,"%ld",(long)(MaxRate)); quietReply=true; break;                       // MaxRate (default)
               case '4': if (meridianFlip==MeridianFlipNever) { sprintf(reply,"%d N",(int)(pierSide)); } else { sprintf(reply,"%d",(int)(pierSide)); } quietReply=true; break; // pierSide (N if never)
-              case '5': sprintf(reply,"%i",(int)autoMeridianFlip); quietReply=true; break;                      // autoMeridianFlip
-              case '6': 
+              case '5': sprintf(reply,"%i",(int)autoMeridianFlip); quietReply=true; break;                  // autoMeridianFlip
+              case '6':                                                                                     // preffered pier side
                 if (preferredPierSide==PPS_EAST) strcpy(reply,"E"); else
                 if (preferredPierSide==PPS_WEST) strcpy(reply,"W"); else strcpy(reply,"B");
-                quietReply=true; break;                 // preferred pier side
+                quietReply=true; break;
+              case '7': dtostrf(slewSpeed,3,1,reply); quietReply=true; break;                               // slew speed
             }
           } else
           if (parameter[0]=='E') { // En: Get config
@@ -594,8 +595,10 @@ void processCommands() {
             if (parameter[1]=='6') { dtostrf(StepsPerSecondAxis1,3,6,reply); quietReply=true; } else
             if (parameter[1]=='7') { sprintf(reply,"%ld",(long)round(StepsPerWormRotationAxis1)); quietReply=true; } else
             if (parameter[1]=='8') { sprintf(reply,"%ld",(long)round(PECBufferSize)); quietReply=true; } else
-            if (parameter[1]=='9') { sprintf(reply,"%ld",(long)round(MinutesPastMeridianE)); quietReply=true; } else
-            if (parameter[1]=='A') { sprintf(reply,"%ld",(long)round(MinutesPastMeridianW)); quietReply=true; } else
+#ifdef MOUNT_TYPE_GEM
+            if (parameter[1]=='9') { sprintf(reply,"%ld",(long)round(minutesPastMeridianE)); quietReply=true; } else
+            if (parameter[1]=='A') { sprintf(reply,"%ld",(long)round(minutesPastMeridianW)); quietReply=true; } else
+#endif
             if (parameter[1]=='B') { sprintf(reply,"%ld",(long)round(UnderPoleLimit)); quietReply=true; } else
             if (parameter[1]=='C') { sprintf(reply,"%ld",(long)round(MinDec)); quietReply=true; } else
             if (parameter[1]=='D') { sprintf(reply,"%ld",(long)round(MaxDec)); quietReply=true; } else commandError=true;
@@ -1232,9 +1235,18 @@ void processCommands() {
               }
             break;
           }
-        } else commandError=true;
-        //getEqu(&f,&f1,false);  
-      } else 
+        } else
+#ifdef MOUNT_TYPE_GEM
+        if (parameter[0]=='E') { // En: Simple value
+          switch (parameter[1]) {
+            case '9': minutesPastMeridianE=(double)strtol(&parameter[3],NULL,10); EEPROM.write(EE_dpmE,round((minutesPastMeridianE*15.0)/60.0)+128); break;     // minutesPastMeridianE
+            case 'A': minutesPastMeridianW=(double)strtol(&parameter[3],NULL,10); EEPROM.write(EE_dpmW,round((minutesPastMeridianW*15.0)/60.0)+128); break;     // minutesPastMeridianW
+            break;
+          }
+        } else 
+#endif
+          commandError=true;
+      } else
 //  :SzDDD*MM#
 //          Sets the target Object Azimuth
 //          Return: 0 on failure

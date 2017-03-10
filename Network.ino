@@ -329,6 +329,21 @@ void Ethernet_get() {
   if ((get_names[0]=='h') && (get_names[1]=='l')) {
     if ( (atoi2(get_vals,&i)) && ((i>=-30) && (i<=30))) { minAlt=i; EEPROM.update(EE_minAlt,minAlt+128); }
   }
+#ifdef MOUNT_TYPE_GEM
+  // Meridian Limits East and West
+  if ((get_names[0]=='e') && (get_names[1]=='l')) {
+    if ( (atoi2(get_vals,&i)) && ((i>=-45) && (i<=45))) {
+      minutesPastMeridianE=round((i*60.0)/15.0); 
+      EEPROM.write(EE_dpmE,round((minutesPastMeridianE*15.0)/60.0)+128);
+    }
+  }
+  if ((get_names[0]=='w') && (get_names[1]=='l')) {
+    if ( (atoi2(get_vals,&i)) && ((i>=-45) && (i<=45))) {
+      minutesPastMeridianW=round((i*60.0)/15.0); 
+      EEPROM.write(EE_dpmW,round((minutesPastMeridianW*15.0)/60.0)+128);
+    }
+  }
+#endif
   // Backlash Limits
   if (get_names[0]=='b') {
     if ( (atoi2(get_vals,&i)) && ((i>=0) && (i<=999))) { 
@@ -612,27 +627,27 @@ const char html_main_css9[] PROGMEM = "button { background-color: #A01010; font-
 
 const char html_links1in[] PROGMEM = "<a href=\"/index.htm\" style=\"background-color: #552222;\">Status</a><a href=\"/control.htm\">Control</a>";
 const char html_links2in[] PROGMEM = "<a href=\"/guide.htm\">Guide</a><a href=\"/pec.htm\">PEC</a>";
-const char html_links3in[] PROGMEM = "<a href=\"/settings.htm\">Settings</a><a href=\"/config.htm\">Configuration</a>";
+const char html_links3in[] PROGMEM = "<a href=\"/settings.htm\">Settings</a><a href=\"/config.htm\">Config.h</a>";
 
 const char html_links1se[] PROGMEM = "<a href=\"/index.htm\">Status</a><a href=\"/control.htm\">Control</a>";
 const char html_links2se[] PROGMEM = "<a href=\"/guide.htm\">Guide</a><a href=\"/pec.htm\">PEC</a>";
-const char html_links3se[] PROGMEM = "<a href=\"/settings.htm\" style=\"background-color: #552222;\">Settings</a><a href=\"/config.htm\">Configuration</a>";
+const char html_links3se[] PROGMEM = "<a href=\"/settings.htm\" style=\"background-color: #552222;\">Settings</a><a href=\"/config.htm\">Config.h</a>";
 
 const char html_links1ct[] PROGMEM = "<a href=\"/index.htm\">Status</a><a href=\"/control.htm\" style=\"background-color: #552222;\">Control</a>";
 const char html_links2ct[] PROGMEM = "<a href=\"/guide.htm\">Guide</a><a href=\"/pec.htm\">PEC</a>";
-const char html_links3ct[] PROGMEM = "<a href=\"/settings.htm\">Settings</a><a href=\"/config.htm\">Configuration</a>";
+const char html_links3ct[] PROGMEM = "<a href=\"/settings.htm\">Settings</a><a href=\"/config.htm\">Config.h</a>";
 
 const char html_links1gu[] PROGMEM = "<a href=\"/index.htm\">Status</a><a href=\"/control.htm\">Control</a>";
 const char html_links2gu[] PROGMEM = "<a href=\"/guide.htm\" style=\"background-color: #552222;\">Guide</a><a href=\"/pec.htm\">PEC</a>";
-const char html_links3gu[] PROGMEM = "<a href=\"/settings.htm\">Settings</a><a href=\"/config.htm\">Configuration</a>";
+const char html_links3gu[] PROGMEM = "<a href=\"/settings.htm\">Settings</a><a href=\"/config.htm\">Config.h</a>";
 
 const char html_links1pe[] PROGMEM = "<a href=\"/index.htm\">Status</a><a href=\"/control.htm\">Control</a>";
 const char html_links2pe[] PROGMEM = "<a href=\"/guide.htm\">Guide</a><a href=\"/pec.htm\" style=\"background-color: #552222;\">PEC</a>";
-const char html_links3pe[] PROGMEM = "<a href=\"/settings.htm\">Settings</a><a href=\"/config.htm\">Configuration</a>";
+const char html_links3pe[] PROGMEM = "<a href=\"/settings.htm\">Settings</a><a href=\"/config.htm\">Config.h</a>";
 
 const char html_links1co[] PROGMEM = "<a href=\"/index.htm\">Status</a><a href=\"/control.htm\">Control</a>";
 const char html_links2co[] PROGMEM = "<a href=\"/guide.htm\">Guide</a><a href=\"/pec.htm\">PEC</a>";
-const char html_links3co[] PROGMEM = "<a href=\"/settings.htm\">Settings</a><a href=\"/config.htm\" style=\"background-color: #552222;\">Configuration</a>";
+const char html_links3co[] PROGMEM = "<a href=\"/settings.htm\">Settings</a><a href=\"/config.htm\" style=\"background-color: #552222;\">Config.h</a>";
 
 // The index.htm page --------------------------------------------------------------------------------------
 #ifdef MOUNT_TYPE_ALTAZM
@@ -640,8 +655,8 @@ const char html_links3co[] PROGMEM = "<a href=\"/settings.htm\">Settings</a><a h
   #define Axis1a "Az"
   #define Axis2 "Alt"
 #else
-  #define Axis1 "HA"
-  #define Axis1a "RA"
+  #define Axis1 "RA"
+  #define Axis1a "HA"
   #define Axis2 "Dec"
 #endif
 const char html_index1[] PROGMEM = "<div class=\"t\"><table width=\"100%\"><tr><td><b><font size=\"5\">OnStep</font>";
@@ -658,7 +673,7 @@ const char html_indexCorPole[] PROGMEM = "altCor=<font class=\"c\">%ld</font>\",
 const char html_indexCorPolar[] PROGMEM = "Polar Alignment Correction: Alt=<font class=\"c\">%ld</font>\", Azm=<font class=\"c\">%ld</font>\"<br /><br />";
 const char html_indexCorOrtho[] PROGMEM = "doCor=<font class=\"c\">%ld</font>\", pdCor=<font class=\"c\">%ld</font>\"<br />";
 const char html_indexRateDeltas[] PROGMEM = "&Delta; Axis1=<font class=\"c\">%s</font>\"/s, &Delta; Axis2=<font class=\"c\">%s</font>\"/s<br /><br />";
-const char html_indexPosition[] PROGMEM = "Instrument Coordinates: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
+const char html_indexPosition[] PROGMEM = "Current Coordinates: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
 const char html_indexTarget[] PROGMEM   = "Target Coordinates: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
 const char html_indexAz1[] PROGMEM = "Az1: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
 const char html_indexAz2[] PROGMEM = "Az2: " Axis1 "=<font class=\"c\">%s</font>, " Axis2 "=<font class=\"c\">%s</font><br />";
@@ -679,6 +694,7 @@ void index_html_page() {
   char temp1[320] = "";
   char temp2[120] = "";
   char temp3[120] = "";
+  char temp4[120] = "";
   bool r=true;
   int stp=0;
   html_page_step++;
@@ -785,22 +801,26 @@ if (html_page_step==++stp) {
     long h=posAxis1+indexAxis1Steps;
     long d=posAxis2+indexAxis2Steps;
     sei();
-#ifdef MOUNT_TYPE_ALTAZM
-    double ha=(double)h/(double)StepsPerDegreeAxis1;
-    doubleToDms(temp2,&ha,true,true);
-#else
+
+#ifdef DEBUG_ON
     double ha=(double)h/((double)StepsPerDegreeAxis1*15.0);
-    doubleToHms(temp2,&ha);
     double ra=timeRange(LST()-ha);
-    doubleToHms(temp3,&ra);
-    sprintf(temp2,"%s</font> (RA=<font class=\"c\">%s</font>)",temp2,temp3);
-#endif
     double dec=(double)d/(double)StepsPerDegreeAxis2; 
+    doubleToHms(temp2,&ha);
+    doubleToHms(temp3,&ra);
+    sprintf(temp4,"%s</font> (HA=<font class=\"c\">%s</font>)",temp3,temp2);
+#else
+    double ra,dec;
+    getEqu(&ra,&dec,false); ra/=15.0;
+    doubleToHms(temp3,&ra);
+    sprintf(temp4,"%s</font>",temp3);
+#endif
+    
     doubleToDms(temp3,&dec,false,true);
     highPrecision=i;
     
-    strcpy_P(temp1, html_indexPosition); sprintf(temp,temp1,temp2,temp3); 
-  }
+    strcpy_P(temp1, html_indexPosition); sprintf(temp,temp1,temp4,temp3); 
+  } 
 #ifdef DEBUG_ON
 #ifdef MOUNT_TYPE_ALTAZM
   if (html_page_step==++stp) {
@@ -848,7 +868,15 @@ if (html_page_step==++stp) {
     if (pierSide==PierSideWest) strcpy(temp2,"West"); else
     if (pierSide==PierSideEast) strcpy(temp2,"East"); else
     if (pierSide==PierSideNone) strcpy(temp2,"None"); else strcpy(temp2,"Unknown");
-    if (meridianFlip==MeridianFlipNever) strcpy(temp3,"Disabled"); else strcpy(temp3,"Enabled");
+    if (meridianFlip==MeridianFlipNever) 
+      strcpy(temp3,"Disabled"); else {
+      strcpy(temp3,"Enabled");
+      // automatic meridian flips
+#ifndef MOUNT_TYPE_ALTAZM
+      if (autoMeridianFlip) strcat(temp3,"</font>, <font class=\"c\">Automatic"); else strcat(temp3,"</font>, <font class=\"c\">not Automatic"); 
+#endif
+      }
+
     strcpy_P(temp1, html_indexPier); sprintf(temp,temp1,temp2,temp3); 
   }
   if (html_page_step==++stp) {
@@ -856,20 +884,33 @@ if (html_page_step==++stp) {
     if (trackingState==TrackingSidereal) strcpy(temp2,"On");
     if (trackingState==TrackingMoveTo)   strcpy(temp2,"Slewing");
 
-    strcpy(temp3,"(");
+    strcpy(temp3,"</font>(<font class=\"c\">");
     if (PPSsynced) strcat(temp3,"PPS Sync, ");
     if (refraction && !onTrack) strcat(temp3,"Refr. Compensation, ");
     if (refraction && onTrack) strcat(temp3,"Full Compensation, ");
-    if (temp3[strlen(temp3)-2]==',') { temp3[strlen(temp3)-2]=')'; temp3[strlen(temp3)-1]=0; } else strcpy(temp3,"");
- 
+    if (temp3[strlen(temp3)-2]==',') { temp3[strlen(temp3)-2]=0; strcat(temp3,"</font>)<font class=\"c\">"); } else strcpy(temp3,"");
+  
     strcpy_P(temp1, html_index8); sprintf(temp,temp1,temp2,temp3);
+  }
+  if (html_page_step==++stp) {
+    double tr=0;
+    // Tracking rate
+    if (trackingState==TrackingSidereal) {
+#ifdef MOUNT_TYPE_ALTAZM
+      tr=GetTrackingRate()*1.00273790935*60.0; 
+#else
+      tr=(trackingTimerRateAxis1*1.00273790935)*60.0; 
+#endif
+    }
+    dtostrf(tr,0,3,temp1);
+    sprintf(temp,"Tracking Rate: <font class=\"c\">%sHz</font><br />",temp1);
   }
   if (html_page_step==++stp) {
     if (parkStatus==NotParked)  strcpy(temp2,"Not Parked");
     if (parkStatus==Parked)     strcpy(temp2,"Parked");
     if (parkStatus==Parking)    strcpy(temp2,"Parking");
     if (parkStatus==ParkFailed) strcpy(temp2,"Park Failed");
-    if (atHome) strcat(temp2," (At Home)");
+    if (atHome) strcat(temp2," </font>(<font class=\"c\">At Home</font>)<font class=\"c\">");
 
     strcpy_P(temp1, html_index9); sprintf(temp,temp1,temp2,(worst_loop_time*100L)/9970L);
     worst_loop_time=0;
@@ -956,7 +997,23 @@ const char html_settings10[] PROGMEM =
 "<button type=\"submit\">Upload</button>"
 " (Overhead, in degrees 60 to 90)"
 "</form>"
+"\r\n";
+#ifdef MOUNT_TYPE_GEM
+const char html_settings10A[] PROGMEM = 
+"<form method=\"get\" action=\"/settings.htm\">"
+" <input value=\"%d\" type=\"number\" name=\"el\" min=\"-45\" max=\"45\">"
+"<button type=\"submit\">Upload</button>"
+" (Past Meridian when East of the pier, in degrees +/-45)"
+"</form>"
+"\r\n";
+const char html_settings10B[] PROGMEM = 
+"<form method=\"get\" action=\"/settings.htm\">"
+" <input value=\"%d\" type=\"number\" name=\"wl\" min=\"-45\" max=\"45\">"
+"<button type=\"submit\">Upload</button>"
+" (Past Meridian when West of the pier, in degrees +/-45)"
+"</form>"
 "<br />\r\n";
+#endif
 const char html_settings11[] PROGMEM = 
 "Location: <br />"
 "<form method=\"get\" action=\"/settings.htm\">"
@@ -1027,6 +1084,10 @@ void settings_html_page() {
   if (html_page_step==++stp) { strcpy_P(temp1, html_settings8); i=(int)round(((double)backlashAxis2*3600.0)/(double)StepsPerDegreeAxis2); if (i<0) i=0; if (i>999) i=999; sprintf(temp,temp1,i); }
   if (html_page_step==++stp) { strcpy_P(temp1, html_settings9); sprintf(temp,temp1,minAlt); }
   if (html_page_step==++stp) { strcpy_P(temp1, html_settings10); sprintf(temp,temp1,maxAlt); }
+#ifdef MOUNT_TYPE_GEM
+  if (html_page_step==++stp) { strcpy_P(temp1, html_settings10A); sprintf(temp,temp1,round((minutesPastMeridianE*15.0)/60.0)); }
+  if (html_page_step==++stp) { strcpy_P(temp1, html_settings10B); sprintf(temp,temp1,round((minutesPastMeridianW*15.0)/60.0)); }
+#endif
   if (html_page_step==++stp) {
     i=highPrecision; 
     highPrecision=false; 
@@ -1215,7 +1276,9 @@ void control_html_page() {
   if (html_page_step==++stp) strcpy_P(temp, html_control10);
 #if !defined(MOUNT_TYPE_ALTAZM)
   if (html_page_step==++stp) strcpy_P(temp, html_control11);
+#if defined(MOUNT_TYPE_GEM)
   if (html_page_step==++stp) strcpy_P(temp, html_control12);
+#endif
 #endif  
   if (html_page_step==++stp) strcpy_P(temp, html_control13);
   if (html_page_step==++stp) strcpy(temp,"</div></body></html>");
@@ -1551,8 +1614,6 @@ const char html_configStepsDegDec[] PROGMEM = "Steps per degree for Axis2 (Dec/A
 const char html_configStepsPerSec[] PROGMEM = "Steps per second for tracking <font class=\"c\">%s</font><br /><br />";
 const char html_configStepsPerWR[] PROGMEM = "Steps per worm rotation for PEC <font class=\"c\">%d</font>, ";
 const char html_configPecBufSize[] PROGMEM = "PEC buffer size <font class=\"c\">%d</font> seconds<br /><br />";
-const char html_configMPME[] PROGMEM = "Minutes past meridian East <font class=\"c\">%d</font> minutes<br />";
-const char html_configMPMW[] PROGMEM = "Minutes past meridian West <font class=\"c\">%d</font> minutes<br />";
 const char html_configUPL[] PROGMEM = "Under pole limit <font class=\"c\">%d</font> hours<br />";
 const char html_configMinDec[] PROGMEM = "Minimum Declination <font class=\"c\">%d</font> degrees<br />";
 const char html_configMaxDec[] PROGMEM = "Maximum Declination <font class=\"c\">%d</font> degrees<br /><br />";
@@ -1621,8 +1682,6 @@ void config_html_page() {
   if (html_page_step==++stp) { strcpy_P(temp1, html_configStepsPerSec); dtostrf(StepsPerSecondAxis1,3,6,temp2); sprintf(temp,temp1,temp2); }
   if (html_page_step==++stp) { strcpy_P(temp1, html_configStepsPerWR); sprintf(temp,temp1,(long)round(StepsPerWormRotationAxis1)); }
   if (html_page_step==++stp) { strcpy_P(temp1, html_configPecBufSize); sprintf(temp,temp1,(long)round(PECBufferSize)); }
-  if (html_page_step==++stp) { strcpy_P(temp1, html_configMPME); sprintf(temp,temp1,(long)round(MinutesPastMeridianE)); }
-  if (html_page_step==++stp) { strcpy_P(temp1, html_configMPMW); sprintf(temp,temp1,(long)round(MinutesPastMeridianW)); }
   if (html_page_step==++stp) { strcpy_P(temp1, html_configUPL); sprintf(temp,temp1,(long)round(UnderPoleLimit)); }
  
   if (html_page_step==++stp) { strcpy_P(temp1, html_configMinDec); sprintf(temp,temp1,(long)round(MinDec)); }

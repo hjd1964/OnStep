@@ -269,6 +269,10 @@ volatile long stepAxis2=1;
 
 double newTargetAlt=0.0, newTargetAzm=0.0;         // holds the altitude and azmiuth for slews
 double currentAlt = 45;                            // the current altitude
+// for goto's, how far past the meridian to allow before we do a flip (if on the East side of the pier) - one hour of RA is the default = 60.  Sometimes used for Fork mounts in Align mode.  Ignored on Alt/Azm mounts.
+long minutesPastMeridianE = 60L;
+// as above, if on the West side of the pier.  If left alone, the mount will stop tracking when it hits the this limit.  Sometimes used for Fork mounts in Align mode.  Ignored on Alt/Azm mounts.
+long minutesPastMeridianW = 60L;
 int    minAlt;                                     // the minimum altitude, in degrees, for goTo's (so we don't try to point too low)
 int    maxAlt;                                     // the maximum altitude, in degrees, for goTo's (to keep the telescope tube away from the mount/tripod)
 bool   autoMeridianFlip = false;                   // automatically do a meridian flip and continue when we hit the MinutesPastMeridianW
@@ -521,8 +525,10 @@ char ST4DE_last = 0;
 #define EE_dfCor       26     // 4
 
 #define EE_trueAxis1   30     // 4
-#define EE_trueAxis2   34     // 4 +3
+#define EE_trueAxis2   34     // 4
 
+#define EE_dpmE        38     // 1
+#define EE_dpmW        39     // 1
 #define EE_minAlt      40     // 1
 #define EE_maxAlt      41     // 1
 
@@ -797,6 +803,10 @@ void setup() {
     EEPROM_writeFloat(EE_JD,JD);
     EEPROM_writeFloat(EE_LMT,LMT);
   
+    // init the minutes past meridian east/west
+    EEPROM.write(EE_dpmE,round((minutesPastMeridianE*15.0)/60.0)+128);
+    EEPROM.write(EE_dpmW,round((minutesPastMeridianW*15.0)/60.0)+128);
+
     // init the min and max altitude
     minAlt=-10;
     maxAlt=85;
@@ -994,6 +1004,19 @@ void setup() {
   UT1=LMT+timeZone;
   UT1_start=UT1;
   update_lst(jd2last(JD,UT1));
+
+  // get the minutes past meridian east/west
+#ifdef MOUNT_TYPE_GEM
+  minutesPastMeridianE=round(((EEPROM.read(EE_dpmE)-128)*60.0)/15.0); if (abs(minutesPastMeridianE)>180) minutesPastMeridianE=60;
+  minutesPastMeridianW=round(((EEPROM.read(EE_dpmW)-128)*60.0)/15.0); if (abs(minutesPastMeridianW)>180) minutesPastMeridianW=60;
+#endif
+  // override if specified in Config.h
+#ifdef MinutesPastMeridianE
+  minutesPastMeridianE=MinutesPastMeridianE;
+#endif
+#ifdef MinutesPastMeridianW
+  minutesPastMeridianW=MinutesPastMeridianW;
+#endif
   
   // get the min. and max altitude
   minAlt=EEPROM.read(EE_minAlt)-128;
@@ -1033,7 +1056,7 @@ void setup() {
   SetAccelerationRates(maxRate); // set the new acceleration rate
 
   // get autoMeridianFlip
-  #ifdef REMEMBER_AUTO_MERIDIAN_FLIP_ON
+  #if defined(MOUNT_TYPE_GEM) && defined(REMEMBER_AUTO_MERIDIAN_FLIP_ON)
   autoMeridianFlip=EEPROM.read(EE_autoMeridianFlip);
   #endif
 
@@ -1303,10 +1326,10 @@ void loop() {
     if (meridianFlip!=MeridianFlipNever) {
       if (pierSide==PierSideWest) {
         cli(); long p1=posAxis1+indexAxis1Steps; sei();
-        if (p1>(MinutesPastMeridianW*(long)StepsPerDegreeAxis1/4L)) {
+        if (p1>(minutesPastMeridianW*(long)StepsPerDegreeAxis1/4L)) {
           // do an automatic meridian flip and continue if just tracking
           // checks: enabled && not too far past the meridian (doesn't make sense) && not in inaccessible area between east and west limits && finally that a slew isn't happening
-          if (autoMeridianFlip && (p1<(MinutesPastMeridianW*(long)StepsPerDegreeAxis1/4L+(1.0/60.0)*(long)StepsPerDegreeAxis1)) && (p1>(-MinutesPastMeridianE*(long)StepsPerDegreeAxis1/4L)) && (trackingState!=TrackingMoveTo)) {
+          if (autoMeridianFlip && (p1<(minutesPastMeridianW*(long)StepsPerDegreeAxis1/4L+(1.0/60.0)*(long)StepsPerDegreeAxis1)) && (p1>(-minutesPastMeridianE*(long)StepsPerDegreeAxis1/4L)) && (trackingState!=TrackingMoveTo)) {
             double newRA,newDec;
             getEqu(&newRA,&newDec,false);
             if (goToEqu(newRA,newDec)) { // returns 0 on success

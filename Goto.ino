@@ -295,14 +295,14 @@ byte goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1, long 
   if (meridianFlip!=MeridianFlipNever) {
     // where the allowable hour angles are
     long eastOfPierMaxHA= 12L*15L*(long)StepsPerDegreeAxis1;
-    long eastOfPierMinHA=-(MinutesPastMeridianE*StepsPerDegreeAxis1/4L);
-    long westOfPierMaxHA= (MinutesPastMeridianW*StepsPerDegreeAxis1/4L);
+    long eastOfPierMinHA=-(minutesPastMeridianE*StepsPerDegreeAxis1/4L);
+    long westOfPierMaxHA= (minutesPastMeridianW*StepsPerDegreeAxis1/4L);
     long westOfPierMinHA=-12L*15L*(long)StepsPerDegreeAxis1;
   
     // override the defaults and force a flip if near the meridian and possible (for parking and align)
     if ((gotoPierSide!=PierSideBest) && (pierSide!=gotoPierSide)) {
-      eastOfPierMinHA= (MinutesPastMeridianW*(long)StepsPerDegreeAxis1/4L);
-      westOfPierMaxHA=-(MinutesPastMeridianE*(long)StepsPerDegreeAxis1/4L);
+      eastOfPierMinHA= (minutesPastMeridianW*(long)StepsPerDegreeAxis1/4L);
+      westOfPierMaxHA=-(minutesPastMeridianE*(long)StepsPerDegreeAxis1/4L);
     }
     // if doing a meridian flip, use the opposite pier side coordinates
     if (pierSide==PierSideEast) {
