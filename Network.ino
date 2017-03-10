@@ -893,7 +893,7 @@ if (html_page_step==++stp) {
     strcpy_P(temp1, html_index8); sprintf(temp,temp1,temp2,temp3);
   }
   if (html_page_step==++stp) {
-    double tr=0;
+    double tr=0.0;
     // Tracking rate
     if (trackingState==TrackingSidereal) {
 #ifdef MOUNT_TYPE_ALTAZM
@@ -902,7 +902,7 @@ if (html_page_step==++stp) {
       tr=(trackingTimerRateAxis1*1.00273790935)*60.0; 
 #endif
     }
-    dtostrf(tr,0,3,temp1);
+    dtostrf(tr,5,3,temp1);
     sprintf(temp,"Tracking Rate: <font class=\"c\">%sHz</font><br />",temp1);
   }
   if (html_page_step==++stp) {
