@@ -540,26 +540,35 @@ void Ethernet_get() {
       if (get_vals[2]==0) {
         if (get_vals[1]=='1') { // start guide
           if ((get_vals[0]=='n') || (get_vals[0]=='s')) { 
-            // block user from changing direction at high rates, just stop the guide instead
-            if ((guideDirAxis2) && (get_vals[0]!=guideDirAxis2) && (fabs(guideTimerRateAxis2)>2)) { 
-              guideDirAxis2='b';
-            } else {
-              enableGuideRate(currentGuideRate);
-              guideDirAxis2=get_vals[0];
-              guideDurationDec=-1;
-              cli(); guideTimerRateAxis2=guideTimerBaseRate; sei();
+            if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
+              // block user from changing direction at high rates, just stop the guide instead
+              if ((guideDirAxis2) && (command[1]!=guideDirAxis2) && (fabs(guideTimerRateAxis2)>2)) { 
+                guideDirAxis2='b';
+              } else {
+                enableGuideRate(currentGuideRate);
+                guideDirAxis2=get_vals[0];
+                guideDurationDec=-1;
+                cli();
+                guideStartTimeAxis2=millis();
+                if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRate; else guideTimerRateAxis2=guideTimerBaseRate; 
+                sei();
+              }
             }
-            quietReply=true;
           } else
           if ((get_vals[0]=='e') || (get_vals[0]=='w')) { 
-            // block user from changing direction at high rates, just stop the guide instead
-            if ((guideDirAxis1) && (get_vals[0]!=guideDirAxis1) && (fabs(guideTimerRateAxis1)>2)) { 
-              guideDirAxis1='b';
-            } else {
-              enableGuideRate(currentGuideRate);
-              guideDirAxis1=get_vals[0];
-              guideDurationHA=-1;
-              cli(); if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRate; else guideTimerRateAxis1=guideTimerBaseRate; sei();
+            if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
+              // block user from changing direction at high rates, just stop the guide instead
+              if ((guideDirAxis1) && (command[1]!=guideDirAxis1) && (fabs(guideTimerRateAxis1)>2)) { 
+                guideDirAxis1='b';
+              } else {
+                enableGuideRate(currentGuideRate);
+                guideDirAxis1=get_vals[0];
+                guideDurationHA=-1;
+                cli();
+                guideStartTimeAxis1=millis();
+                if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRate; else guideTimerRateAxis1=guideTimerBaseRate; 
+                sei();
+              }
             }
           }
         } else 
@@ -1328,7 +1337,7 @@ const char html_guideControls7[] PROGMEM =
 "</div><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />";
 const char html_guideControls8[] PROGMEM = 
 "<form method=\"get\" action=\"/guide.htm\">"
-">&nbsp;<button name=\"gu\" value=\"q\" type=\"submit\">Stop Slew!</button>&nbsp;<<br /><br /></form>\r\n";
+">&nbsp;<button name=\"gu\" value=\"q\" type=\"submit\" style=\"height: 40px;\">Stop Slew/Guide!</button>&nbsp;<<br /><br /></form>\r\n";
 
 void guide_html_page() {
   char temp[320] = "";
