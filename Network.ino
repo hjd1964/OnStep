@@ -667,7 +667,11 @@ const char html_index8[] PROGMEM = "Tracking: <font class=\"c\">%s %s</font><br 
 const char html_index9[] PROGMEM = "Park: <font class=\"c\">%s</font><br /><br />";
 const char html_index10[] PROGMEM = "Last Error: <font class=\"c\">%s</font><br />";
 const char html_indexFault[] PROGMEM =  "Stepper Driver: " Axis1 " axis %s, " Axis2 " axis %s<br /><br />";
+#ifdef DEBUG_ON
 const char html_indexMaxRate[] PROGMEM = "Current MaxRate: <font class=\"c\">%ld</font> (Default MaxRate: <font class=\"c\">%ld</font>)<br /><br />";
+#else
+const char html_indexMaxSpeed[] PROGMEM = "Maximum slew speed: <font class=\"c\">%s</font>&deg;/s<br /><br />";
+#endif
 const char html_index11[] PROGMEM = "Workload: <font class=\"c\">%ld%%</font><br />";
 
 void index_html_page() {
@@ -887,7 +891,12 @@ if (html_page_step==++stp) {
     sprintf(temp, temp1, faultAxis1 ? "<font class=\"c\">FAULT</font>" : "<font class=\"g\">Ok</font>", faultAxis2 ? "<font class=\"c\">FAULT</font>" : "<font class=\"g\">Ok</font>");
   }
   if (html_page_step==++stp) {
+#ifdef DEBUG_ON
     strcpy_P(temp1, html_indexMaxRate); sprintf(temp,temp1,maxRate/16L,(long)MaxRate);
+#else
+    dtostrf(slewSpeed,3,1,temp2);
+    strcpy_P(temp1, html_indexMaxSpeed); sprintf(temp,temp1,temp2);
+#endif
   }
   if (html_page_step==++stp) {
     strcpy_P(temp1, html_index11); sprintf(temp,temp1,(worst_loop_time*100L)/9970L);

@@ -140,6 +140,7 @@ boolean refraction = false;
 boolean onTrack = false;
 
 long    maxRate = MaxRate*16L;
+double  slewSpeed = 0;
 volatile long    timerRateAxis1 = 0;
 volatile long    timerRateBacklashAxis1 = 0;
 volatile boolean inbacklashAxis1 = false;
