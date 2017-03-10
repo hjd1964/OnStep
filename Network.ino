@@ -775,12 +775,14 @@ if (html_page_step==++stp) {
   if (html_page_step==++stp) {
     strcpy_P(temp1, html_indexCorIdx); sprintf(temp,temp1,(long)(indexAxis1*3600.0),(long)(indexAxis2*3600.0)); 
   }
+#ifndef MOUNT_TYPE_ALTAZM
   if (html_page_step==++stp) {
-    strcpy_P(temp1, html_indexCorPole); sprintf(temp,temp1,(long)(altCor*3600.0),(long)(azmCor*3600.0)); 
+    strcpy_P(temp1, html_indexCorPole); sprintf(temp,temp1,(long)(GeoAlign.altCor*3600.0),(long)(GeoAlign.azmCor*3600.0)); 
   }
   if (html_page_step==++stp) {
-    strcpy_P(temp1, html_indexCorOrtho); sprintf(temp,temp1,(long)(doCor*3600.0),(long)(pdCor*3600.0)); 
+    strcpy_P(temp1, html_indexCorOrtho); sprintf(temp,temp1,(long)(GeoAlign.doCor*3600.0),(long)(GeoAlign.pdCor*3600.0)); 
   }
+#endif
   if (html_page_step==++stp) {
     i=highPrecision; highPrecision=true;
     dtostrf(az_deltaAxis1*1.002738,1,3,temp2);
