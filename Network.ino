@@ -1317,6 +1317,7 @@ const char html_guide4[] PROGMEM =
 "Guide Rate:<br />";
 const char html_guideControls1[] PROGMEM =
 "<form method=\"get\" action=\"/guide.htm\">"
+"<button name=\"gu\" value=\"0\" type=\"submit\">0.25x</button>"
 "<button name=\"gu\" value=\"1\" type=\"submit\">0.5x</button>";
 const char html_guideControls2[] PROGMEM = 
 "<button name=\"gu\" value=\"2\" type=\"submit\">1x</button>"
