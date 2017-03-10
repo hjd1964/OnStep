@@ -438,8 +438,31 @@ void Ethernet_get() {
     }
   }
   // Align
-  if ((get_names[0]=='a') && (get_names[1]=='l')) {
-    if ((get_vals[0]!='n') && (get_vals[1]==0)) {
+  if ((get_names[0]=='a') && (get_names[1]=='l') && (get_vals[1]==0)) {
+    if (get_vals[0]=='n') {
+      // after last star turn meridian flips off when align is done
+      if ((alignNumStars==alignThisStar) && (meridianFlip==MeridianFlipAlign)) meridianFlip=MeridianFlipNever;
+    
+#ifdef MOUNT_TYPE_ALTAZM
+      // AltAz Taki method
+      if ((alignNumStars>1) && (alignThisStar<=alignNumStars)) {
+        cli();
+        // get the Azm/Alt
+        double F=(double)(posAxis1+indexAxis1Steps)/(double)StepsPerDegreeAxis1;
+        double H=(double)(posAxis2+indexAxis2Steps)/(double)StepsPerDegreeAxis2;
+        sei();
+        // B=RA, D=Dec, H=Elevation (instr), F=Azimuth (instr), all in degrees
+        Align.addStar(alignThisStar,alignNumStars,haRange(LST()*15.0-newTargetRA),newTargetDec,H,F);
+        alignThisStar++;
+      } else
+#endif
+      if (alignThisStar<=alignNumStars) {
+        // RA, Dec (in degrees)
+        if (GeoAlign.addStar(alignThisStar,alignNumStars,newTargetRA,newTargetDec)) alignThisStar++; else { alignNumStars=0; alignThisStar=0; }
+      } else { alignNumStars=0; alignThisStar=0; }
+    } else
+    if (get_vals[0]=='q') stopMount(); else
+    if ((get_vals[0]>='0') && (get_vals[0]<='9')) {
       // Two star and three star align not supported with Fork mounts in alternate mode
 #ifdef MOUNT_TYPE_FORK_ALT
       if (get_vals[0]=='1') {
@@ -464,28 +487,6 @@ void Ethernet_get() {
 #if defined(MOUNT_TYPE_FORK_ALT)
       } else { alignNumStars=0; alignThisStar=1; }
 #endif
-    }
-    if ((get_vals[0]=='n') && (get_vals[1]==0)) {
-      // after last star turn meridian flips off when align is done
-      if ((alignNumStars==alignThisStar) && (meridianFlip==MeridianFlipAlign)) meridianFlip=MeridianFlipNever;
-    
-#ifdef MOUNT_TYPE_ALTAZM
-      // AltAz Taki method
-      if ((alignNumStars>1) && (alignThisStar<=alignNumStars)) {
-        cli();
-        // get the Azm/Alt
-        double F=(double)(posAxis1+indexAxis1Steps)/(double)StepsPerDegreeAxis1;
-        double H=(double)(posAxis2+indexAxis2Steps)/(double)StepsPerDegreeAxis2;
-        sei();
-        // B=RA, D=Dec, H=Elevation (instr), F=Azimuth (instr), all in degrees
-        Align.addStar(alignThisStar,alignNumStars,haRange(LST()*15.0-newTargetRA),newTargetDec,H,F);
-        alignThisStar++;
-      } else
-#endif
-      if (alignThisStar<=alignNumStars) {
-        // RA, Dec (in degrees)
-        if (GeoAlign.addStar(alignThisStar,alignNumStars,newTargetRA,newTargetDec)) alignThisStar++; else { alignNumStars=0; alignThisStar=0; }
-      } else { alignNumStars=0; alignThisStar=0; }
     }
   }
   // Home/Park
@@ -531,6 +532,7 @@ void Ethernet_get() {
   if ((get_names[0]=='g') && (get_names[1]=='u')) {
     if (get_vals[1]==0) {
       if ((get_vals[0]>='0') && (get_vals[0]<='9')) setGuideRate(get_vals[0]-'0');
+      if (get_vals[0]=='q') stopMount();
     }
   }
   if ((get_names[0]=='d') && (get_names[1]=='r')) {
@@ -1185,7 +1187,8 @@ const char html_controlAlign6[] PROGMEM = "<button name=\"al\" value=\"6\" type=
 const char html_controlAlign7[] PROGMEM = "<button name=\"al\" value=\"7\" type=\"submit\">7 Star</button>";
 const char html_controlAlign8[] PROGMEM = "<button name=\"al\" value=\"8\" type=\"submit\">8 Star</button>";
 const char html_controlAlign9[] PROGMEM = "<button name=\"al\" value=\"9\" type=\"submit\">9 Star</button>";
-const char html_controlAlignX[] PROGMEM = "<br /><button name=\"al\" value=\"n\" type=\"submit\">Accept</button>"
+const char html_controlAlignA[] PROGMEM = "<br /><button name=\"al\" value=\"n\" type=\"submit\">Accept</button>";
+const char html_controlAlignB[] PROGMEM = "&nbsp;&nbsp;>&nbsp;<button name=\"al\" value=\"q\" type=\"submit\">Stop Slew!</button>&nbsp;<"
 "</form><br />\r\n";
 const char html_control6[] PROGMEM = 
 "Home/Park: "
@@ -1270,7 +1273,8 @@ void control_html_page() {
   if (MAX_NUM_ALIGN_STARS>='7') if (html_page_step==++stp) strcpy_P(temp, html_controlAlign7);
   if (MAX_NUM_ALIGN_STARS>='8') if (html_page_step==++stp) strcpy_P(temp, html_controlAlign8);
   if (MAX_NUM_ALIGN_STARS>='9') if (html_page_step==++stp) strcpy_P(temp, html_controlAlign9);
-  if (html_page_step==++stp) strcpy_P(temp, html_controlAlignX);
+  if (html_page_step==++stp) strcpy_P(temp, html_controlAlignA);
+  if (html_page_step==++stp) strcpy_P(temp, html_controlAlignB);
   if (html_page_step==++stp) strcpy_P(temp, html_control6);
   if (html_page_step==++stp) strcpy_P(temp, html_control7);
   if (html_page_step==++stp) strcpy_P(temp, html_control8);
@@ -1321,7 +1325,10 @@ const char html_guideControls6[] PROGMEM =
 "<button type=\"button\" style=\"width: 60px; height: 50px;\" onmousedown=\"guide('w','1')\" onmouseup=\"guide('w','0')\">West</button><br />";
 const char html_guideControls7[] PROGMEM = 
 "<button type=\"button\" style=\"width: 60px; height: 50px;\" onmousedown=\"guide('s','1')\" onmouseup=\"guide('s','0')\">South</button>"
-"</div><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />\r\n";
+"</div><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br /><br />";
+const char html_guideControls8[] PROGMEM = 
+"<form method=\"get\" action=\"/guide.htm\">"
+">&nbsp;<button name=\"gu\" value=\"q\" type=\"submit\">Stop Slew!</button>&nbsp;<<br /><br /></form>\r\n";
 
 void guide_html_page() {
   char temp[320] = "";
@@ -1366,6 +1373,7 @@ void guide_html_page() {
   if (html_page_step==++stp) strcpy_P(temp, html_guideControls5);
   if (html_page_step==++stp) strcpy_P(temp, html_guideControls6);
   if (html_page_step==++stp) strcpy_P(temp, html_guideControls7);
+  if (html_page_step==++stp) strcpy_P(temp, html_guideControls8);
   if (html_page_step==++stp) strcpy(temp,"</div></body></html>");
 
   // stop sending this page
