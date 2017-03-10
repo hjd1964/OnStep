@@ -961,15 +961,7 @@ void processCommands() {
 //         Returns: Nothing
       if (command[0]=='Q') {
         if (command[1]==0) {
-          if ((parkStatus==NotParked) || (parkStatus==Parking)) {
-            cli();
-            if (guideDirAxis1) guideDirAxis1='b'; // break
-            if (guideDirAxis2) guideDirAxis2='b'; // break
-            guideBreakTimeAxis1=millis();
-            guideBreakTimeAxis2=millis();
-            sei();
-            if (trackingState==TrackingMoveTo) { abortSlew=true; }
-          }
+          stopMount();
           quietReply=true; 
         } else
 //  :Qe# & Qw#   Halt east/westward Slews
@@ -1508,6 +1500,18 @@ void enableGuideRate(int g) {
   amountGuideHA.fixed =doubleToFixed((guideTimerBaseRate*StepsPerSecondAxis1)/100.0);
   amountGuideDec.fixed=doubleToFixed((guideTimerBaseRate*StepsPerSecondAxis2)/100.0);
   sei();
+}
+
+void stopMount() {
+  if ((parkStatus==NotParked) || (parkStatus==Parking)) {
+    cli();
+    if (guideDirAxis1) guideDirAxis1='b'; // break
+    if (guideDirAxis2) guideDirAxis2='b'; // break
+    guideBreakTimeAxis1=millis();
+    guideBreakTimeAxis2=millis();
+    sei();
+    if (trackingState==TrackingMoveTo) { abortSlew=true; }
+  }
 }
 
 // calculate the checksum and add to string
