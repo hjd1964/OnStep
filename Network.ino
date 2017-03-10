@@ -854,6 +854,7 @@ if (html_page_step==++stp) {
 #endif
   if (html_page_step==++stp) {
     i=highPrecision; highPrecision=true;
+#ifdef DEBUG_MODE_ON
     cli();
     long h=(long)targetAxis1.part.m+indexAxis1Steps;
     long d=(long)targetAxis2.part.m+indexAxis2Steps;
@@ -867,8 +868,14 @@ if (html_page_step==++stp) {
 #endif
     double dec=(double)d/(double)StepsPerDegreeAxis2; 
     doubleToDms(temp3,&dec,false,true);
+#else
+    double ra=newTargetRA; ra/=15.0;
+    double dec=newTargetDec;
+    doubleToHms(temp2,&ra);
+    doubleToDms(temp3,&dec,false,true);
+#endif
     highPrecision=i;
-    
+   
     strcpy_P(temp1, html_indexTarget); sprintf(temp,temp1,temp2,temp3); 
   }
   if (html_page_step==++stp) {
