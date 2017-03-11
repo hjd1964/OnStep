@@ -8,6 +8,7 @@ class pserial {
     char read();
     void print(const char data[]);
     void putch(char c);
+    void putl(long l);
     void putf(double f);
     void puts(const char data[]);
     boolean transmit();
@@ -29,6 +30,7 @@ class pserial1 {
     void print(const char data[]);
     void putch(char c);
     void putf(double f);
+    void putl(long l);
     void puts(const char data[]);
     boolean transmit();
 #if defined(__AVR_ATmega2560__)

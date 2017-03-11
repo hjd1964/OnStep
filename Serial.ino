@@ -62,6 +62,11 @@ void pserial::putf(double f)
   char temp[20]; dtostrf(f,4,6,temp); puts(temp);
 }
 
+void pserial::putl(long l)
+{
+  char temp[20]; sprintf(temp,"%ld",l); puts(temp);
+}
+
 void pserial::puts(const char data[]) {
   print(data);
   do {} while (transmit());
@@ -133,6 +138,11 @@ void pserial1::putf(double f)
   char temp[20]; dtostrf(f,4,6,temp); puts(temp);
 }
 
+void pserial1::putl(long l)
+{
+  char temp[20]; sprintf(temp,"%ld",l); puts(temp);
+}
+
 void pserial1::puts(const char data[])
 {
   print(data);
@@ -154,6 +164,7 @@ boolean pserial::available() { return Serial.available(); }
 char pserial::read() { return Serial.read(); }
 void pserial::print(const char data[]) { Serial.print(data); }
 void pserial::putch(char c) { Serial.print(c); }
+void pserial::putl(long l) { char temp[20]; sprintf(temp,"%ld",l); puts(temp); }
 void pserial::putf(double f) { char temp[20]; dtostrf(f,4,6,temp); puts(temp); }
 void pserial::puts(const char data[]) { Serial.print(data); do {} while (transmit()); }
 boolean pserial::transmit() { return false; }
@@ -167,6 +178,7 @@ char pserial1::read() { return Serial1.read(); }
 void pserial1::print(const char data[]) { Serial1.print(data); }
 void pserial1::putch(char c) { Serial1.print(c); }
 void pserial1::putf(double f) { char temp[20]; dtostrf(f,4,6,temp); puts(temp); }
+void pserial1::putl(long l) { char temp[20]; sprintf(temp,"%ld",l); puts(temp); }
 void pserial1::puts(const char data[]) { print(data); do {} while (transmit()); }
 boolean pserial1::transmit() { return false; }
 
@@ -180,6 +192,7 @@ char pserial1::read() { return Serial7.read(); }
 void pserial1::print(const char data[]) { Serial7.print(data); }
 void pserial1::putch(char c) { Serial7.print(c); }
 void pserial1::putf(double f) { char temp[20]; dtostrf(f,4,6,temp); puts(temp); }
+void pserial1::putl(long l) { char temp[20]; sprintf(temp,"%ld",l); puts(temp); }
 void pserial1::puts(const char data[]) { print(data); do {} while (transmit()); }
 boolean pserial1::transmit() { return false; }
 
