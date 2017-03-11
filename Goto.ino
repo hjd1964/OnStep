@@ -36,29 +36,29 @@ boolean syncEqu(double RA, double Dec) {
     if (preferredPierSide==PPS_WEST) {
       // west side of pier - we're in the eastern sky and the HA's are negative
       pierSide=PierSideWest;
-      DecDir  =DecDirWInit;
+      defaultDirAxis2  =defaultDirAxis2WInit;
     } else
     if (preferredPierSide==PPS_EAST) {
       // east side of pier - we're in the western sky and the HA's are positive
       pierSide=PierSideEast;
-      DecDir = DecDirEInit;
+      defaultDirAxis2 = defaultDirAxis2EInit;
     } else {
       // best side of pier
       if (Axis1<0) {
         // west side of pier - we're in the eastern sky and the HA's are negative
         pierSide=PierSideWest;
-        DecDir  =DecDirWInit;
+        defaultDirAxis2  =defaultDirAxis2WInit;
       } else { 
         // east side of pier - we're in the western sky and the HA's are positive
         pierSide=PierSideEast;
-        DecDir = DecDirEInit;
+        defaultDirAxis2 = defaultDirAxis2EInit;
       }
     }
   } else {
     // always on the "east" side of pier - we're in the western sky and the HA's are positive
     // this is the default in the polar-home position and also for MOUNT_TYPE_FORK and MOUNT_TYPE_ALTAZM.  MOUNT_TYPE_FORK_ALT ends up pierSideEast, but flips are allowed until aligned.
     pierSide=PierSideEast;
-    DecDir = DecDirEInit;
+    defaultDirAxis2 = defaultDirAxis2EInit;
   }
 #endif
 
@@ -327,7 +327,7 @@ byte goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1, long 
       if (thisTargetAxis1<0) {
         // west side of pier - we're in the eastern sky and the HA's are negative
         pierSide=PierSideWest;
-        DecDir  =DecDirWInit;
+        defaultDirAxis2  =defaultDirAxis2WInit;
         // default, if the polar-home position is +90 deg. HA, we want -90HA
         // for a fork mount the polar-home position is 0 deg. HA, so leave it alone
 #if !defined(MOUNT_TYPE_FORK) && !defined(MOUNT_TYPE_FORK_ALT)
@@ -338,7 +338,7 @@ byte goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1, long 
         // east side of pier - we're in the western sky and the HA's are positive
         // this is the default in the polar-home position
         pierSide=PierSideEast;
-        DecDir = DecDirEInit;
+        defaultDirAxis2 = defaultDirAxis2EInit;
       }
     }
   } else {
@@ -346,7 +346,7 @@ byte goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1, long 
         // always on the "east" side of pier - we're in the western sky and the HA's are positive
         // this is the default in the polar-home position and also for MOUNT_TYPE_FORK and MOUNT_TYPE_ALTAZM.  MOUNT_TYPE_FORK_ALT ends up pierSideEast, but flips are allowed until aligned.
         pierSide=PierSideEast;
-        DecDir = DecDirEInit;
+        defaultDirAxis2 = defaultDirAxis2EInit;
     }
   }
   

@@ -306,12 +306,12 @@ bool   autoMeridianFlip = false;                   // automatically do a meridia
 #define Axis2_Enabled HIGH
 #endif
 
-#define DecDirEInit  1
-#define DecDirWInit  0
-volatile byte DecDir = DecDirEInit;
-#define HADirNCPInit 0
-#define HADirSCPInit 1
-volatile byte HADir  = HADirNCPInit;
+#define defaultDirAxis2EInit  1
+#define defaultDirAxis2WInit  0
+volatile byte defaultDirAxis2 = defaultDirAxis2EInit;
+#define defaultDirAxis1NCPInit 0
+#define defaultDirAxis1SCPInit 1
+volatile byte defaultDirAxis1  = defaultDirAxis1NCPInit;
 
 // Status ------------------------------------------------------------------------------------------------------------------
 enum Errors {ERR_NONE, ERR_MOTOR_FAULT, ERR_ALT, ERR_LIMIT_SENSE, ERR_DEC, ERR_AZM, ERR_UNDER_POLE, ERR_MERIDIAN, ERR_SYNC};
@@ -391,12 +391,12 @@ byte currentGuideRate        = GuideRate16x;
 byte currentPulseGuideRate   = GuideRate1x;
 volatile byte activeGuideRate= GuideRateNone;
 
-volatile byte guideDirAxis1        = 0;
-long          guideDurationHA      = -1;
-unsigned long guideDurationLastHA  = 0;
-volatile byte guideDirAxis2        = 0;
-long          guideDurationDec     = -1;
-unsigned long guideDurationLastDec = 0;
+volatile byte guideDirAxis1           = 0;
+long          guideDurationAxis1      = -1;
+unsigned long guideDurationLastAxis1  = 0;
+volatile byte guideDirAxis2           = 0;
+long          guideDurationAxis2      = -1;
+unsigned long guideDurationLastAxis2  = 0;
 
 volatile double   guideTimerRateAxis1 = 0.0;
 volatile double   guideTimerRateAxis2 = 0.0;
@@ -411,10 +411,10 @@ boolean axis1Enabled = false;
 boolean axis2Enabled = false;
 
 double  guideTimerBaseRate = 0;
-fixed_t amountGuideHA;
-fixed_t guideHA;
-fixed_t amountGuideDec;
-fixed_t guideDec;
+fixed_t amountGuideAxis1;
+fixed_t guideAxis1;
+fixed_t amountGuideAxis2;
+fixed_t guideAxis2;
 
 // PEC control --------------------------------------------------------------------------------------------------------------
 #define PECStatusString  "IpPrR"
@@ -585,18 +585,18 @@ void setup() {
 #endif
 
 #ifdef ESP8266_CONTROL_ON
-  pinMode(Axis1_Aux,OUTPUT);               // ESP8266 GPIO0
-  digitalWrite(Axis1_Aux,HIGH); delay(20); // Run mode
-  pinMode(Axis2_Aux,OUTPUT);               // ESP8266 RST
-  digitalWrite(Axis2_Aux,LOW);  delay(20); // Reset, if LOW
-  digitalWrite(Axis2_Aux,HIGH);            // Reset, inactive HIGH
+  pinMode(Axis1_Aux,OUTPUT);                // ESP8266 GPIO0
+  digitalWrite(Axis1_Aux,HIGH); delay(20);  // Run mode
+  pinMode(Axis2_Aux,OUTPUT);                // ESP8266 RST
+  digitalWrite(Axis2_Aux,LOW);  delay(200); // Reset, if LOW
+  digitalWrite(Axis2_Aux,HIGH);             // Reset, inactive HIGH
 #endif
 
 // initialize some fixed-point values
-  amountGuideHA.fixed=0;
-  amountGuideDec.fixed=0;
-  guideHA.fixed=0;
-  guideDec.fixed=0;
+  amountGuideAxis1.fixed=0;
+  amountGuideAxis2.fixed=0;
+  guideAxis1.fixed=0;
+  guideAxis2.fixed=0;
   accPecGuideHA.fixed=0;
   fstepAxis1.fixed=0;
   fstepAxis2.fixed=0;
@@ -978,7 +978,7 @@ void setup() {
 #endif
   cosLat=cos(latitude/Rad);
   sinLat=sin(latitude/Rad);
-  if (latitude>0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
+  if (latitude>0) defaultDirAxis1 = defaultDirAxis1NCPInit; else defaultDirAxis1 = defaultDirAxis1SCPInit;
   longitude=EEPROM_readFloat(EE_sites+(currentSite)*25+4);
   timeZone=EEPROM.read(EE_sites+(currentSite)*25+8)-128;
   timeZone=decodeTimeZone(timeZone);
@@ -1129,7 +1129,7 @@ void loop() {
           enableGuideRate(currentGuideRate);
     #endif
           guideDirAxis1=ST4RA_state;
-          guideDurationHA=-1;
+          guideDurationAxis1=-1;
           cli(); if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRate; else guideTimerRateAxis1=guideTimerBaseRate; sei();
         } else {
           if (guideDirAxis1) { guideDirAxis1='b'; }
@@ -1149,7 +1149,7 @@ void loop() {
           enableGuideRate(currentGuideRate);
   #endif
           guideDirAxis2=ST4DE_state;
-          guideDurationDec=-1;
+          guideDurationAxis2=-1;
           cli(); if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRate; else guideTimerRateAxis2=guideTimerBaseRate; sei();
         } else {
           if (guideDirAxis2) { guideDirAxis2='b'; }
@@ -1158,7 +1158,7 @@ void loop() {
     }
 #endif
 
-    guideHA.fixed=0;
+    guideAxis1.fixed=0;
     Guide();
   }
 

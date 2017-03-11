@@ -39,8 +39,8 @@ boolean setHome() {
   pierSide            = PierSideNone;
   dirAxis1            = 1;
   dirAxis2            = 1;
-  DecDir              = DecDirEInit;
-  if (latitude>0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
+  defaultDirAxis2     = defaultDirAxis2EInit;
+  if (latitude>0) defaultDirAxis1 = defaultDirAxis1NCPInit; else defaultDirAxis1 = defaultDirAxis1SCPInit;
   newTargetRA         = 0;        
   newTargetDec        = 0;
   newTargetAlt        = 0;
@@ -104,12 +104,12 @@ boolean setHome() {
   startAxis2 = celestialPoleAxis2*(double)StepsPerDegreeAxis2;
 
   // clear pulse-guiding state
-  guideDirAxis1       = 0;
-  guideDurationHA     = 0;
-  guideDurationLastHA = 0;
-  guideDirAxis2       = 0;
-  guideDurationDec    = 0;
-  guideDurationLastDec= 0;
+  guideDirAxis1          = 0;
+  guideDurationAxis1     = 0;
+  guideDurationLastAxis1 = 0;
+  guideDirAxis2          = 0;
+  guideDurationAxis2     = 0;
+  guideDurationLastAxis2 = 0;
 
   // initialize/disable the stepper drivers
   digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;

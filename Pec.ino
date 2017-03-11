@@ -103,7 +103,7 @@ void Pec() {
   }
   pecIndex1=pecIndex; if (pecIndex1<0) pecIndex1+=SecondsPerWormRotationAxis1; if (pecIndex1>=SecondsPerWormRotationAxis1) pecIndex1-=SecondsPerWormRotationAxis1;
 
-  accPecGuideHA.fixed+=guideHA.fixed;
+  accPecGuideHA.fixed+=guideAxis1.fixed;
   
   // falls in whenever the pecIndex changes, which is once a sidereal second
   if (pecIndex1!=lastPecIndex) {

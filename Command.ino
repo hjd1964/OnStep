@@ -816,8 +816,8 @@ void processCommands() {
             enableGuideRate(currentGuideRate);
 #endif
             guideDirAxis1=parameter[0];
-            guideDurationLastHA=micros();
-            guideDurationHA=(long)i*1000L;
+            guideDurationLastAxis1=micros();
+            guideDurationAxis1=(long)i*1000L;
             cli();
             guideStartTimeAxis1=millis();
             if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRate; else guideTimerRateAxis1=guideTimerBaseRate; 
@@ -831,8 +831,8 @@ void processCommands() {
             enableGuideRate(currentGuideRate);
 #endif
             guideDirAxis2=parameter[0]; 
-            guideDurationLastDec=micros();
-            guideDurationDec=(long)i*1000L; 
+            guideDurationLastAxis2=micros();
+            guideDurationAxis2=(long)i*1000L; 
             cli();
             guideStartTimeAxis2=millis();
             if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRate; else guideTimerRateAxis2=guideTimerBaseRate; 
@@ -851,7 +851,7 @@ void processCommands() {
           } else {
             enableGuideRate(currentGuideRate);
             guideDirAxis1=command[1];
-            guideDurationHA=-1;
+            guideDurationAxis1=-1;
             cli();
             guideStartTimeAxis1=millis();
             if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRate; else guideTimerRateAxis1=guideTimerBaseRate; 
@@ -870,7 +870,7 @@ void processCommands() {
           } else {
             enableGuideRate(currentGuideRate);
             guideDirAxis2=command[1];
-            guideDurationDec=-1;
+            guideDurationAxis2=-1;
             cli();
             guideStartTimeAxis2=millis();
             if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRate; else guideTimerRateAxis2=guideTimerBaseRate; 
@@ -1153,7 +1153,7 @@ void processCommands() {
 #endif
           cosLat=cos(latitude/Rad);
           sinLat=sin(latitude/Rad);
-          if (latitude>0.0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
+          if (latitude>0.0) defaultDirAxis1 = defaultDirAxis1NCPInit; else defaultDirAxis1 = defaultDirAxis1SCPInit;
         }
         highPrecision=i;
       } else 
@@ -1437,7 +1437,7 @@ void processCommands() {
 #endif
           cosLat=cos(latitude/Rad);
           sinLat=sin(latitude/Rad);
-          if (latitude>0.0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
+          if (latitude>0.0) defaultDirAxis1 = defaultDirAxis1NCPInit; else defaultDirAxis1 = defaultDirAxis1SCPInit;
           longitude=EEPROM_readFloat(EE_sites+(currentSite*25+4));
           timeZone=EEPROM.read(EE_sites+(currentSite)*25+8)-128;
           timeZone=decodeTimeZone(timeZone);
@@ -1497,8 +1497,8 @@ void enableGuideRate(int g) {
   guideTimerBaseRate=(double)(guideRates[g]/15.0);
 
   cli();
-  amountGuideHA.fixed =doubleToFixed((guideTimerBaseRate*StepsPerSecondAxis1)/100.0);
-  amountGuideDec.fixed=doubleToFixed((guideTimerBaseRate*StepsPerSecondAxis2)/100.0);
+  amountGuideAxis1.fixed =doubleToFixed((guideTimerBaseRate*StepsPerSecondAxis1)/100.0);
+  amountGuideAxis2.fixed=doubleToFixed((guideTimerBaseRate*StepsPerSecondAxis2)/100.0);
   sei();
 }
 

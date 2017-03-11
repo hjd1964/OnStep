@@ -158,14 +158,14 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
         guideTimerRateAxis1A=sqrt(t/(((480.0*DegreesForAcceleration)/slewRateX)*1000.0))*fabs(slewRateX);
         if (guideTimerRateAxis1A>fabs(guideTimerRateAxis1)) guideTimerRateAxis1A=fabs(guideTimerRateAxis1);
         if (guideTimerRateAxis1<0) guideTimerRateAxis1A=-guideTimerRateAxis1A;
-      }
-      // stop guiding
-      if (guideDirAxis1=='b') {
-        if (guideTimerRateAtBreakAxis1==0) guideTimerRateAtBreakAxis1=fabs(guideTimerRateAxis1A);
-        long t=(((480.0*DegreesForAcceleration)/slewRateX)*1000.0)*sq(guideTimerRateAtBreakAxis1/fabs(slewRateX))-(millis()-guideBreakTimeAxis1); if (t<0) t=0;
-        guideTimerRateAxis1A=sqrt(t/(((480.0*DegreesForAcceleration)/slewRateX)*1000.0))*fabs(slewRateX);
-        if (guideTimerRateAxis1<0) guideTimerRateAxis1A=-guideTimerRateAxis1A;
-        if (guideTimerRateAxis1A==0) { guideTimerRateAtBreakAxis1=0; guideDirAxis1=0; guideTimerRateAxis1=0; guideTimerRateAxis1A=0; DecayModeTracking(); }
+        // stop guiding
+        if (guideDirAxis1=='b') {
+          if (guideTimerRateAtBreakAxis1==0) guideTimerRateAtBreakAxis1=fabs(guideTimerRateAxis1A);
+          long t=(((480.0*DegreesForAcceleration)/slewRateX)*1000.0)*sq(guideTimerRateAtBreakAxis1/fabs(slewRateX))-(millis()-guideBreakTimeAxis1); if (t<0) t=0;
+          guideTimerRateAxis1A=sqrt(t/(((480.0*DegreesForAcceleration)/slewRateX)*1000.0))*fabs(slewRateX);
+          if (guideTimerRateAxis1<0) guideTimerRateAxis1A=-guideTimerRateAxis1A;
+          if (abs(guideTimerRateAxis1A)<1.0) { guideTimerRateAtBreakAxis1=0; guideDirAxis1=0; guideTimerRateAxis1=0; guideTimerRateAxis1A=0; if (!guideDirAxis2) DecayModeTracking(); }
+        }
       }
     } else { guideTimerRateAxis1A=0; }
 
@@ -194,14 +194,14 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
         guideTimerRateAxis2A=sqrt(t/(((480.0*DegreesForAcceleration)/slewRateX)*1000.0))*fabs(slewRateX);
         if (guideTimerRateAxis2A>fabs(guideTimerRateAxis2)) guideTimerRateAxis2A=fabs(guideTimerRateAxis2);
         if (guideTimerRateAxis2<0) guideTimerRateAxis2A=-guideTimerRateAxis2A;
-      }
-      // stop guiding
-      if (guideDirAxis2=='b') {
-        if (guideTimerRateAtBreakAxis2==0) guideTimerRateAtBreakAxis2=fabs(guideTimerRateAxis2);
-        long t=(((480.0*DegreesForAcceleration)/slewRateX)*1000.0)*sq(guideTimerRateAtBreakAxis2/fabs(slewRateX))-(millis()-guideBreakTimeAxis2); if (t<0) t=0;
-        guideTimerRateAxis2A=sqrt(t/(((480.0*DegreesForAcceleration)/slewRateX)*1000.0))*fabs(slewRateX);
-        if (guideTimerRateAxis2<0) guideTimerRateAxis2A=-guideTimerRateAxis2A;
-        if (guideTimerRateAxis2A==0) { guideTimerRateAtBreakAxis2=0; guideDirAxis2=0; guideTimerRateAxis2=0; guideTimerRateAxis2A=0; DecayModeTracking(); }
+        // stop guiding
+        if (guideDirAxis2=='b') {
+          if (guideTimerRateAtBreakAxis2==0) guideTimerRateAtBreakAxis2=fabs(guideTimerRateAxis2);
+          long t=(((480.0*DegreesForAcceleration)/slewRateX)*1000.0)*sq(guideTimerRateAtBreakAxis2/fabs(slewRateX))-(millis()-guideBreakTimeAxis2); if (t<0) t=0;
+          guideTimerRateAxis2A=sqrt(t/(((480.0*DegreesForAcceleration)/slewRateX)*1000.0))*fabs(slewRateX);
+          if (guideTimerRateAxis2<0) guideTimerRateAxis2A=-guideTimerRateAxis2A;
+          if (abs(guideTimerRateAxis2A)<1.0) { guideTimerRateAtBreakAxis2=0; guideDirAxis2=0; guideTimerRateAxis2=0; guideTimerRateAxis2A=0; if (!guideDirAxis1) DecayModeTracking(); }
+        }
       }
     } else guideTimerRateAxis2A=0;
 
@@ -306,25 +306,25 @@ ISR(TIMER3_COMPA_vect)
   OCR3A=nextAxis1Rate*stepAxis1;
 #endif
 
-  if ((trackingState==TrackingSidereal) && (!inbacklashAxis1)) targetAxis1.part.m+=timerDirAxis1*stepAxis1;
+  if ((trackingState!=TrackingMoveTo) && (!inbacklashAxis1)) targetAxis1.part.m+=timerDirAxis1*stepAxis1;
 
   // Guessing about 4+4+1+ 4+4+1+ 1+ 2+1+2+ 13=37 clocks between here and the step signal which is 2.3uS
-  if ((posAxis1!=(long)targetAxis1.part.m)) { // Move the RA stepper to the target
+  if (posAxis1!=(long)targetAxis1.part.m) { // Move the RA stepper to the target
     if (posAxis1<(long)targetAxis1.part.m) dirAxis1=1; else dirAxis1=0; // Direction control
 
     // Guessing about 1+2+1+4+4+1=13 clocks between here and the step signal which is 0.81uS
     // Set direction.  Needs >=0.65uS before/after rising step signal (DRV8825 or A4988).
 #if defined(__ARM_Teensy3__)
     #ifdef REVERSE_AXIS1_ON
-      if (HADir==dirAxis1) digitalWriteFast(Axis1DirPin, LOW); else digitalWriteFast(Axis1DirPin, HIGH);
+      if (defaultDirAxis1==dirAxis1) digitalWriteFast(Axis1DirPin, LOW); else digitalWriteFast(Axis1DirPin, HIGH);
     #else                                                                                                 
-      if (HADir==dirAxis1) digitalWriteFast(Axis1DirPin, HIGH); else digitalWriteFast(Axis1DirPin, LOW);
+      if (defaultDirAxis1==dirAxis1) digitalWriteFast(Axis1DirPin, HIGH); else digitalWriteFast(Axis1DirPin, LOW);
     #endif
 #else
     #ifdef REVERSE_AXIS1_ON
-      if (HADir==dirAxis1) CLR(Axis1DirPORT, Axis1DirBit); else SET(Axis1DirPORT, Axis1DirBit);
+      if (defaultDirAxis1==dirAxis1) CLR(Axis1DirPORT, Axis1DirBit); else SET(Axis1DirPORT, Axis1DirBit);
     #else
-      if (HADir==dirAxis1) SET(Axis1DirPORT, Axis1DirBit); else CLR(Axis1DirPORT, Axis1DirBit);
+      if (defaultDirAxis1==dirAxis1) SET(Axis1DirPORT, Axis1DirBit); else CLR(Axis1DirPORT, Axis1DirBit);
     #endif
 #endif
   
@@ -400,23 +400,23 @@ ISR(TIMER4_COMPA_vect)
   OCR4A=nextAxis2Rate*stepAxis2;
 #endif
 
-  if ((trackingState==TrackingSidereal) && (!inbacklashAxis2)) targetAxis2.part.m+=timerDirAxis2*stepAxis2;
+  if ((trackingState!=TrackingMoveTo) && (!inbacklashAxis2)) targetAxis2.part.m+=timerDirAxis2*stepAxis2;
 
-  if ((posAxis2!=(long)targetAxis2.part.m)) { // move the Dec stepper to the target
+  if (posAxis2!=(long)targetAxis2.part.m) { // move the Dec stepper to the target
     // telescope normally starts on the EAST side of the pier looking at the WEST sky
     if (posAxis2<(long)targetAxis2.part.m) dirAxis2=1; else dirAxis2=0; // Direction control
     // Set direction.  Needs >=0.65uS before/after rising step signal (DRV8825 or A4988).
 #if defined(__ARM_Teensy3__)
     #ifdef REVERSE_AXIS2_ON
-      if (DecDir==dirAxis2) digitalWriteFast(Axis2DirPin, LOW); else digitalWriteFast(Axis2DirPin, HIGH);
+      if (defaultDirAxis2==dirAxis2) digitalWriteFast(Axis2DirPin, LOW); else digitalWriteFast(Axis2DirPin, HIGH);
     #else
-      if (DecDir==dirAxis2) digitalWriteFast(Axis2DirPin, HIGH); else digitalWriteFast(Axis2DirPin, LOW);
+      if (defaultDirAxis2==dirAxis2) digitalWriteFast(Axis2DirPin, HIGH); else digitalWriteFast(Axis2DirPin, LOW);
     #endif
 #else
     #ifdef REVERSE_AXIS2_ON
-      if (DecDir==dirAxis2) SET(Axis2DirPORT, Axis2DirBit); else CLR(Axis2DirPORT, Axis2DirBit);
+      if (defaultDirAxis2==dirAxis2) SET(Axis2DirPORT, Axis2DirBit); else CLR(Axis2DirPORT, Axis2DirBit);
     #else
-      if (DecDir==dirAxis2) CLR(Axis2DirPORT, Axis2DirBit); else SET(Axis2DirPORT, Axis2DirBit);
+      if (defaultDirAxis2==dirAxis2) CLR(Axis2DirPORT, Axis2DirBit); else SET(Axis2DirPORT, Axis2DirBit);
     #endif
 #endif
    

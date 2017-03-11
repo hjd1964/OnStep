@@ -186,7 +186,7 @@ boolean unpark() {
 
         // see what side of the pier we're on
         pierSide=EEPROM.read(EE_pierSide);
-        if (pierSide==PierSideWest) DecDir = DecDirWInit; else DecDir = DecDirEInit;
+        if (pierSide==PierSideWest) defaultDirAxis2 = defaultDirAxis2WInit; else defaultDirAxis2 = defaultDirAxis2EInit;
 
         // set Meridian Flip behaviour to match mount type
         #ifdef MOUNT_TYPE_GEM

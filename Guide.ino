@@ -8,32 +8,32 @@ void Guide() {
     guideSiderealTimer=guideLst;  
     if (guideDirAxis1) {
       if (!inbacklashAxis1) {
-        // guideHA keeps track of how many steps we've moved for PEC recording
-        if (guideDirAxis1=='e') guideHA.fixed=-amountGuideHA.fixed; else if (guideDirAxis1=='w') guideHA.fixed=amountGuideHA.fixed;
+        // guideAxis1 keeps track of how many steps we've moved for PEC recording
+        if (guideDirAxis1=='e') guideAxis1.fixed=-amountGuideAxis1.fixed; else if (guideDirAxis1=='w') guideAxis1.fixed=amountGuideAxis1.fixed;
 
         // for pulse guiding, count down the mS and stop when timed out
-        if (guideDurationHA>0)  {
-          guideDurationHA-=(long)(micros()-guideDurationLastHA);
-          guideDurationLastHA=micros();
-          if (guideDurationHA<=0) { guideDirAxis1='b'; } // break
+        if (guideDurationAxis1>0)  {
+          guideDurationAxis1-=(long)(micros()-guideDurationLastAxis1);
+          guideDurationLastAxis1=micros();
+          if (guideDurationAxis1<=0) { guideDirAxis1='b'; } // break
         }
       } else {
         // don't count time if in backlash
-        guideDurationLastHA=micros();
+        guideDurationLastAxis1=micros();
       }
     }
     
     if (guideDirAxis2) {
       if (!inbacklashAxis2) {
         // for pulse guiding, count down the mS and stop when timed out
-        if (guideDurationDec>0)  {
-          guideDurationDec-=(long)(micros()-guideDurationLastDec);
-          guideDurationLastDec=micros();
-          if (guideDurationDec<=0) { guideDirAxis2='b'; }  // break 
+        if (guideDurationAxis2>0)  {
+          guideDurationAxis2-=(long)(micros()-guideDurationLastAxis2);
+          guideDurationLastAxis2=micros();
+          if (guideDurationAxis2<=0) { guideDirAxis2='b'; }  // break 
         }
       } else {
         // don't count time if in backlash
-        guideDurationLastDec=micros();
+        guideDurationLastAxis2=micros();
       }
     }
   }

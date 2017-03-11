@@ -380,7 +380,7 @@ void Ethernet_get() {
 #endif
       cosLat=cos(latitude/Rad);
       sinLat=sin(latitude/Rad);
-      if (latitude>0.0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
+      if (latitude>0.0) defaultDirAxis1 = defaultDirAxis1NCPInit; else defaultDirAxis1 = defaultDirAxis1SCPInit;
     }
   }
   if ((get_names[0]=='u') && (get_names[1]=='1')) {
@@ -547,7 +547,7 @@ void Ethernet_get() {
               } else {
                 enableGuideRate(currentGuideRate);
                 guideDirAxis1=get_vals[0];
-                guideDurationHA=-1;
+                guideDurationAxis1=-1;
                 cli();
                 guideStartTimeAxis1=millis();
                 if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRate; else guideTimerRateAxis1=guideTimerBaseRate; 
@@ -563,7 +563,7 @@ void Ethernet_get() {
               } else {
                 enableGuideRate(currentGuideRate);
                 guideDirAxis2=get_vals[0];
-                guideDurationDec=-1;
+                guideDurationAxis2=-1;
                 cli();
                 guideStartTimeAxis2=millis();
                 if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRate; else guideTimerRateAxis2=guideTimerBaseRate; 
