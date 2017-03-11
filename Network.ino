@@ -540,9 +540,9 @@ void Ethernet_get() {
       if (get_vals[2]==0) {
         if (get_vals[1]=='1') { // start guide
           if ((get_vals[0]=='e') || (get_vals[0]=='w')) { 
-            if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
+            if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo) && (get_vals[0]!=guideDirAxis1)) {
               // block user from changing direction at high rates, just stop the guide instead
-              if ((guideDirAxis1) && (get_vals[0]!=guideDirAxis1) && (fabs(guideTimerRateAxis1)>2)) { 
+              if (guideDirAxis1) && (fabs(guideTimerRateAxis1)>2)) { 
                 if (guideDirAxis1!='b') { guideDirAxis1='b'; guideBreakTimeAxis1=millis(); } // break
               } else {
                 enableGuideRate(currentGuideRate);
@@ -556,9 +556,9 @@ void Ethernet_get() {
             }
           } else
           if ((get_vals[0]=='n') || (get_vals[0]=='s')) { 
-            if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
+            if (((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) && (get_vals[0]!=guideDirAxis2)) {
               // block user from changing direction at high rates, just stop the guide instead
-              if ((guideDirAxis2) && (get_vals[0]!=guideDirAxis2) && (fabs(guideTimerRateAxis2)>2)) { 
+              if ((guideDirAxis2) && (fabs(guideTimerRateAxis2)>2)) { 
                 if (guideDirAxis2!='b') { guideDirAxis2='b'; guideBreakTimeAxis2=millis(); } // break
               } else {
                 enableGuideRate(currentGuideRate);

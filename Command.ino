@@ -844,9 +844,9 @@ void processCommands() {
 //  :Me# & :Mw#      Move Telescope East or West at current slew rate
 //         Returns: Nothing
       if ((command[1]=='e') || (command[1]=='w')) { 
-        if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
+        if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo) && (command[1]!=guideDirAxis1)) {
           // block user from changing direction at high rates, just stop the guide instead
-          if ((guideDirAxis1) && (command[1]!=guideDirAxis1) && (fabs(guideTimerRateAxis1)>2)) { 
+          if (guideDirAxis1) && (fabs(guideTimerRateAxis1)>2)) { 
             if (guideDirAxis1!='b') { guideDirAxis1='b'; guideBreakTimeAxis1=millis(); } // break
           } else {
             enableGuideRate(currentGuideRate);
@@ -863,9 +863,9 @@ void processCommands() {
 //  :Mn# & :Ms#      Move Telescope North or South at current slew rate
 //         Returns: Nothing
       if ((command[1]=='n') || (command[1]=='s')) { 
-        if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
+        if (((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) && (command[1]!=guideDirAxis2)) {
           // block user from changing direction at high rates, just stop the guide instead
-          if ((guideDirAxis2) && (command[1]!=guideDirAxis2) && (fabs(guideTimerRateAxis2)>2)) { 
+          if ((guideDirAxis2) && (fabs(guideTimerRateAxis2)>2)) { 
             if (guideDirAxis2!='b') { guideDirAxis2='b'; guideBreakTimeAxis2=millis(); } // break
           } else {
             enableGuideRate(currentGuideRate);

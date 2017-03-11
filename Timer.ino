@@ -145,7 +145,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     long calculatedTimerRateAxis1;
     
     // guide rate acceleration/deceleration and control
-    if ((guideDirAxis1)) {
+    if (guideDirAxis1) {
       if ((fabs(guideTimerRateAxis1)<10.0) && (fabs(guideTimerRateAxis1A)<10.0)) { 
         // slow speed guiding, no acceleration
         guideTimerRateAxis1A=guideTimerRateAxis1; 
