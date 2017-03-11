@@ -539,22 +539,6 @@ void Ethernet_get() {
     if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
       if (get_vals[2]==0) {
         if (get_vals[1]=='1') { // start guide
-          if ((get_vals[0]=='n') || (get_vals[0]=='s')) { 
-            if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
-              // block user from changing direction at high rates, just stop the guide instead
-              if ((guideDirAxis2) && (get_vals[0]!=guideDirAxis2) && (fabs(guideTimerRateAxis2)>2)) { 
-                guideDirAxis2='b';
-              } else {
-                enableGuideRate(currentGuideRate);
-                guideDirAxis2=get_vals[0];
-                guideDurationDec=-1;
-                cli();
-                guideStartTimeAxis2=millis();
-                if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRate; else guideTimerRateAxis2=guideTimerBaseRate; 
-                sei();
-              }
-            }
-          } else
           if ((get_vals[0]=='e') || (get_vals[0]=='w')) { 
             if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
               // block user from changing direction at high rates, just stop the guide instead
@@ -567,6 +551,22 @@ void Ethernet_get() {
                 cli();
                 guideStartTimeAxis1=millis();
                 if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRate; else guideTimerRateAxis1=guideTimerBaseRate; 
+                sei();
+              }
+            }
+          } else
+          if ((get_vals[0]=='n') || (get_vals[0]=='s')) { 
+            if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
+              // block user from changing direction at high rates, just stop the guide instead
+              if ((guideDirAxis2) && (get_vals[0]!=guideDirAxis2) && (fabs(guideTimerRateAxis2)>2)) { 
+                guideDirAxis2='b';
+              } else {
+                enableGuideRate(currentGuideRate);
+                guideDirAxis2=get_vals[0];
+                guideDurationDec=-1;
+                cli();
+                guideStartTimeAxis2=millis();
+                if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRate; else guideTimerRateAxis2=guideTimerBaseRate; 
                 sei();
               }
             }
