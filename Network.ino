@@ -543,7 +543,7 @@ void Ethernet_get() {
             if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
               // block user from changing direction at high rates, just stop the guide instead
               if ((guideDirAxis1) && (get_vals[0]!=guideDirAxis1) && (fabs(guideTimerRateAxis1)>2)) { 
-                guideDirAxis1='b';
+                if (guideDirAxis1!='b') { guideDirAxis1='b'; guideBreakTimeAxis1=millis(); } // break
               } else {
                 enableGuideRate(currentGuideRate);
                 guideDirAxis1=get_vals[0];
@@ -559,7 +559,7 @@ void Ethernet_get() {
             if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
               // block user from changing direction at high rates, just stop the guide instead
               if ((guideDirAxis2) && (get_vals[0]!=guideDirAxis2) && (fabs(guideTimerRateAxis2)>2)) { 
-                guideDirAxis2='b';
+                if (guideDirAxis2!='b') { guideDirAxis2='b'; guideBreakTimeAxis2=millis(); } // break
               } else {
                 enableGuideRate(currentGuideRate);
                 guideDirAxis2=get_vals[0];
@@ -573,11 +573,15 @@ void Ethernet_get() {
           }
         } else 
         if (get_vals[1]=='0') { // stop guide
-          if ((get_vals[0]=='n') || (get_vals[0]=='s')) { 
-            if (guideDirAxis2) guideDirAxis2='b'; // break
-          } else
           if ((get_vals[0]=='e') || (get_vals[0]=='w')) { 
-            if (guideDirAxis1) guideDirAxis1='b'; // break
+            if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
+              cli(); if ((guideDirAxis1) && (guideDirAxis1!='b')) { guideDirAxis1='b'; guideBreakTimeAxis1=millis(); } sei(); // break
+            }
+          } else
+          if ((get_vals[0]=='n') || (get_vals[0]=='s')) { 
+            if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
+              cli(); if ((guideDirAxis2) && (guideDirAxis2!='b')) { guideDirAxis2='b'; guideBreakTimeAxis2=millis(); } sei(); // break
+            }
           }
         } else 
         if ((get_vals[1]=='y') && (get_vals[0]=='s')) { // sync
@@ -810,12 +814,12 @@ if (html_page_step==++stp) {
 #endif
   if (html_page_step==++stp) {
     i=highPrecision; highPrecision=true; 
+
+#ifdef DEBUG_ON
     cli();
     long h=posAxis1+indexAxis1Steps;
     long d=posAxis2+indexAxis2Steps;
     sei();
-
-#ifdef DEBUG_ON
     double ha=(double)h/((double)StepsPerDegreeAxis1*15.0);
     double ra=timeRange(LST()-ha);
     double dec=(double)d/(double)StepsPerDegreeAxis2; 
@@ -1558,7 +1562,7 @@ const char html_configPPS[] PROGMEM = "PPS sense is <font class=\"c\">OFF</font>
 #endif
 #ifdef PEC_SENSE_ON
 const char html_configPEC[] PROGMEM = "PEC sense is <font class=\"c\">ON</font>, ";
-#elif PEC_SENSE_PULLUP
+#elif defined(PEC_SENSE_PULLUP)
 const char html_configPEC[] PROGMEM = "PEC sense is <font class=\"c\">ON W/PULLUP</font>, ";
 #else
 const char html_configPEC[] PROGMEM = "PEC sense is <font class=\"c\">OFF</font>, ";

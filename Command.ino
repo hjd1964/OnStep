@@ -809,7 +809,7 @@ void processCommands() {
 //          Returns: Nothing
       if (command[1]=='g') {
         if ( (atoi2((char *)&parameter[1],&i)) && ((i>=0) && (i<=16399)) && (parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) { 
-          if ((parameter[0]=='e') || (parameter[0]=='w')) {
+          if (((parameter[0]=='e') || (parameter[0]=='w')) && (guideDirAxis1==0)) {
 #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
             enableGuideRate(currentPulseGuideRate);
 #else
@@ -824,7 +824,7 @@ void processCommands() {
             sei();
             quietReply=true;
           } else
-          if ((parameter[0]=='n') || (parameter[0]=='s')) { 
+          if (((parameter[0]=='n') || (parameter[0]=='s')) && (guideDirAxis2==0)) { 
 #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
             enableGuideRate(currentPulseGuideRate);
 #else
@@ -968,9 +968,7 @@ void processCommands() {
 //         Returns: Nothing
         if ((command[1]=='e') || (command[1]=='w')) { 
           if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
-            cli();
-            if ((guideDirAxis1) && (guideDirAxis1!='b')) { guideDirAxis1='b'; guideBreakTimeAxis1=millis(); } // break
-            sei();
+            cli(); if ((guideDirAxis1) && (guideDirAxis1!='b')) { guideDirAxis1='b'; guideBreakTimeAxis1=millis(); } sei(); // break
           }
           quietReply=true; 
         } else
@@ -978,9 +976,7 @@ void processCommands() {
 //         Returns: Nothing
         if ((command[1]=='n') || (command[1]=='s')) {
           if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
-            cli();
-            if ((guideDirAxis2) && (guideDirAxis2!='b')) { guideDirAxis2='b'; guideBreakTimeAxis2=millis(); } // break
-            sei();
+            cli(); if ((guideDirAxis2) && (guideDirAxis2!='b')) { guideDirAxis2='b'; guideBreakTimeAxis2=millis(); } sei(); // break
           }
           quietReply=true; 
         } else commandError=true;
