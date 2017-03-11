@@ -120,11 +120,11 @@ volatile boolean wasInbacklashAxis2=false;
 volatile boolean gotoRateAxis1=false;
 volatile boolean gotoRateAxis2=false;
 volatile byte cnt = 0;
-
-volatile double guideTimerRateAxis1A=0;
-volatile double guideTimerRateAxis2A=0;
-volatile double guideTimerRateAtBreakAxis1=0;
-volatile double guideTimerRateAtBreakAxis2=0;
+volatile double guideTimerRateAxis1A      = 0.0;
+volatile double guideTimerRateAtBreakAxis1= 0.0;
+volatile double guideTimerRateAxis2A      = 0.0;
+volatile double guideTimerRateAtBreakAxis2= 0.0;
+volatile long timerLastPosAxis2=0;
 
 #if (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__))
 ISR(TIMER1_COMPA_vect)
@@ -244,7 +244,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     if ((fabs(guideTimerBaseRate)<=1.000001) && (guideDirAxis2 || guideDirAxis1)) Axis2PowerOffTimer=10*60*100;
 
     // if Axis2 isn't stationary set the timer to a minimum of 10 seconds
-    cli(); if ((posAxis2!=(long)targetAxis2.part.m) && (Axis2PowerOffTimer<10*100)) Axis2PowerOffTimer=10*100; sei();
+    cli(); if ((posAxis2!=timerLastPosAxis2) && (Axis2PowerOffTimer<10*100)) { timerLastPosAxis2=posAxis2; Axis2PowerOffTimer=10*100; } sei();
 
     // enable/disable Axis2
     if (Axis2PowerOffTimer==0) {
