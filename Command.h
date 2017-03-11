@@ -41,6 +41,7 @@ class cb {
       // the command is either one or two chars in length
       cmd[0]=0;
       memmove(cmd,(char *)&cb[1],2); cmd[2]=0;
+      if ((cmd[1]=='#') && (cmd[2]==0)) cmd[1]=0;
       return cmd;
     }
     char* getParameter() {
