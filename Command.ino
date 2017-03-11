@@ -847,7 +847,7 @@ void processCommands() {
         if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
           // block user from changing direction at high rates, just stop the guide instead
           if ((guideDirAxis1) && (command[1]!=guideDirAxis1) && (fabs(guideTimerRateAxis1)>2)) { 
-            guideDirAxis1='b';
+            if (guideDirAxis1!='b') { guideDirAxis1='b'; guideBreakTimeAxis1=millis(); } // break
           } else {
             enableGuideRate(currentGuideRate);
             guideDirAxis1=command[1];
@@ -866,7 +866,7 @@ void processCommands() {
         if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
           // block user from changing direction at high rates, just stop the guide instead
           if ((guideDirAxis2) && (command[1]!=guideDirAxis2) && (fabs(guideTimerRateAxis2)>2)) { 
-            guideDirAxis2='b';
+            if (guideDirAxis2!='b') { guideDirAxis2='b'; guideBreakTimeAxis2=millis(); } // break
           } else {
             enableGuideRate(currentGuideRate);
             guideDirAxis2=command[1];
@@ -969,8 +969,7 @@ void processCommands() {
         if ((command[1]=='e') || (command[1]=='w')) { 
           if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
             cli();
-            if (guideDirAxis1) guideDirAxis1='b'; // break
-            guideBreakTimeAxis1=millis();
+            if ((guideDirAxis1) && (guideDirAxis1!='b')) { guideDirAxis1='b'; guideBreakTimeAxis1=millis(); } // break
             sei();
           }
           quietReply=true; 
@@ -980,8 +979,7 @@ void processCommands() {
         if ((command[1]=='n') || (command[1]=='s')) {
           if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
             cli();
-            if (guideDirAxis2) guideDirAxis2='b'; // break
-            guideBreakTimeAxis2=millis();
+            if ((guideDirAxis2) && (guideDirAxis2!='b')) { guideDirAxis2='b'; guideBreakTimeAxis2=millis(); } // break
             sei();
           }
           quietReply=true; 
@@ -1505,10 +1503,8 @@ void enableGuideRate(int g) {
 void stopMount() {
   if ((parkStatus==NotParked) || (parkStatus==Parking)) {
     cli();
-    if (guideDirAxis1) guideDirAxis1='b'; // break
-    if (guideDirAxis2) guideDirAxis2='b'; // break
-    guideBreakTimeAxis1=millis();
-    guideBreakTimeAxis2=millis();
+    if ((guideDirAxis1) && (guideDirAxis1!='b')) { guideDirAxis1='b'; guideBreakTimeAxis1=millis(); } // break
+    if ((guideDirAxis2) && (guideDirAxis2!='b')) { guideDirAxis2='b'; guideBreakTimeAxis2=millis(); } // break
     sei();
     if (trackingState==TrackingMoveTo) { abortSlew=true; }
   }
