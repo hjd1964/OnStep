@@ -846,7 +846,7 @@ void processCommands() {
       if ((command[1]=='e') || (command[1]=='w')) { 
         if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo) && (command[1]!=guideDirAxis1)) {
           // block user from changing direction at high rates, just stop the guide instead
-          if (guideDirAxis1) && (fabs(guideTimerRateAxis1)>2)) { 
+          if ((guideDirAxis1) && (fabs(guideTimerRateAxis1)>2)) { 
             if (guideDirAxis1!='b') { guideDirAxis1='b'; guideBreakTimeAxis1=millis(); } // break
           } else {
             enableGuideRate(currentGuideRate);
@@ -1491,7 +1491,7 @@ void enableGuideRate(int g) {
   guideTimerBaseRate=(double)(guideRates[g]/15.0);
 
   cli();
-  amountGuideAxis1.fixed =doubleToFixed((guideTimerBaseRate*StepsPerSecondAxis1)/100.0);
+  amountGuideAxis1.fixed=doubleToFixed((guideTimerBaseRate*StepsPerSecondAxis1)/100.0);
   amountGuideAxis2.fixed=doubleToFixed((guideTimerBaseRate*StepsPerSecondAxis2)/100.0);
   sei();
 }

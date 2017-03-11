@@ -32,33 +32,33 @@ volatile bool axis2Powered = false;
 
 //--------------------------------------------------------------------------------------------------
 // set timer1 to interval (in microseconds*16)
-void Timer1SetInterval(long interval) {
+void Timer1SetInterval(long iv) {
 #if defined(__AVR_ATmega2560__)
   TCCR1B = 0; TCCR1A = 0;
   TIMSK1 = 0;
-  interval=interval/PPSrateRatio;
+  iv=iv/PPSrateRatio;
 
   // set compare match register to desired timer count:
-  if (interval<65536) { TCCR1B |= (1 << CS10); } else {
-  interval=interval/8;
-  if (interval<65536) { TCCR1B |= (1 << CS11); } else {
-  interval=interval/8;
-  if (interval<65536) { TCCR1B |= (1 << CS10); TCCR1B |= (1 << CS11); } else {
-  interval=interval/4;  
-  if (interval<65536) { TCCR1B |= (1 << CS12); } else {
-  interval=interval/4;
-  if (interval<65536) { TCCR1B |= (1 << CS10); TCCR1B |= (1 << CS12); 
+  if (iv<65536) { TCCR1B |= (1 << CS10); } else {
+  iv=iv/8;
+  if (iv<65536) { TCCR1B |= (1 << CS11); } else {
+  iv=iv/8;
+  if (iv<65536) { TCCR1B |= (1 << CS10); TCCR1B |= (1 << CS11); } else {
+  iv=iv/4;  
+  if (iv<65536) { TCCR1B |= (1 << CS12); } else {
+  iv=iv/4;
+  if (iv<65536) { TCCR1B |= (1 << CS10); TCCR1B |= (1 << CS12); 
   }}}}}
   
-  OCR1A = interval-1;
+  OCR1A = iv-1;
   // CTC mode
   TCCR1B |= (1 << WGM12);
   // timer compare interrupt enable
   TIMSK1 |= (1 << OCIE1A);
 #elif defined(__ARM_Teensy3__)
-  itimer1.begin(TIMER1_COMPA_vect, (float)interval * 0.0625);
+  itimer1.begin(TIMER1_COMPA_vect, (float)iv * 0.0625);
 #elif defined(__ARM_TI_TM4C__)
-  TimerLoadSet(Timer1_base, TIMER_A, (int)(F_BUS/1000000 * interval * 0.0625));
+  TimerLoadSet(Timer1_base, TIMER_A, (int)(F_BUS/1000000 * iv * 0.0625));
 #endif
 }
 
@@ -67,8 +67,8 @@ volatile long isrTimerRateAxis1=0;
 volatile long isrTimerRateAxis2=0;
 volatile long runTimerRateAxis1=0;
 volatile long runTimerRateAxis2=0;
-void SetSiderealClockRate(long Interval) {
-  if (trackingState==TrackingMoveTo) Timer1SetInterval(Interval/100); else Timer1SetInterval(Interval/300);
+void SetSiderealClockRate(long iv) {
+  if (trackingState==TrackingMoveTo) Timer1SetInterval(iv/100); else Timer1SetInterval(iv/300);
   isrTimerRateAxis1=0;
   isrTimerRateAxis2=0;
 }
@@ -80,16 +80,16 @@ volatile uint16_t t3rep = 1;
 volatile long timerDirAxis1 = 0;
 volatile long thisTimerRateAxis1 = 10000UL;
 volatile boolean fastAxis1 = false;
-void Timer3SetInterval(long interval) {
+void Timer3SetInterval(long iv) {
 #if defined(__AVR_ATmega2560__)
-  interval=interval/8L;
+  iv=iv/8L;
   // 0.0327 * 4096 = 134.21s
-  long i=interval; uint16_t t=1; while (interval>65536L) { t*=2; interval=i/t; if (t==4096) { interval=65535L; break; } }
-  cli(); nextAxis1Rate=interval-1L; t3rep=t; fastAxis1=(t3rep==1); sei();
+  long i=iv; uint16_t t=1; while (iv>65536L) { t*=2; iv=i/t; if (t==4096) { iv=65535L; break; } }
+  cli(); nextAxis1Rate=iv-1L; t3rep=t; fastAxis1=(t3rep==1); sei();
 #elif (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__))
   // 4.194 * 32 = 134.21s
-  long i=interval; uint16_t t=1; while (interval>65536L*1024L) { t++; interval=i/t; if (t==32) { interval=65535L*1024L; break; } }
-  cli(); nextAxis1Rate=(F_BUS/1000000) * (interval*0.0625) * 0.5 - 1; t3rep=t; fastAxis1=(t3rep==1); sei();
+  long i=iv; uint16_t t=1; while (iv>65536L*1024L) { t++; iv=i/t; if (t==32) { iv=65535L*1024L; break; } }
+  cli(); nextAxis1Rate=(F_BUS/1000000) * (iv*0.0625) * 0.5 - 1; t3rep=t; fastAxis1=(t3rep==1); sei();
 #endif
 }
 
@@ -100,16 +100,16 @@ volatile uint16_t t4rep = 1;
 volatile long timerDirAxis2 = 0;
 volatile long thisTimerRateAxis2 = 10000UL;
 volatile boolean fastAxis2 = false;
-void Timer4SetInterval(long interval) {
+void Timer4SetInterval(long iv) {
 #if defined(__AVR_ATmega2560__)
-  interval=interval/8L;
+  iv=iv/8L;
   // 0.0327 * 4096 = 134.21s
-  long i=interval; uint16_t t=1; while (interval>65536L) { t*=2; interval=i/t; if (t==4096) { interval=65535L; break; } }
-  cli(); nextAxis2Rate=interval-1L; t4rep=t; fastAxis2=(t4rep==1); sei();
+  long i=iv; uint16_t t=1; while (iv>65536L) { t*=2; iv=i/t; if (t==4096) { iv=65535L; break; } }
+  cli(); nextAxis2Rate=iv-1L; t4rep=t; fastAxis2=(t4rep==1); sei();
 #elif (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__))
   // 4.194 * 32 = 134.21s
-  long i=interval; uint16_t t=1; while (interval>65536L*1024L) { t++; interval=i/t; if (t==32) { interval=65535L*1024L; break; } }
-  cli(); nextAxis2Rate=(F_BUS/1000000) * (interval*0.0625) * 0.5 - 1; t4rep=t; fastAxis2=(t4rep==1); sei();
+  long i=iv; uint16_t t=1; while (iv>65536L*1024L) { t++; iv=i/t; if (t==32) { iv=65535L*1024L; break; } }
+  cli(); nextAxis2Rate=(F_BUS/1000000) * (iv*0.0625) * 0.5 - 1; t4rep=t; fastAxis2=(t4rep==1); sei();
 #endif
 }
 
