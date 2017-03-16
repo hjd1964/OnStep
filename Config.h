@@ -28,7 +28,7 @@
 // Enables goto assist mount modeling (for Eq mounts), default=OFF
 #define ALIGN_GOTOASSIST_OFF
 
-// Turns ethernet on for W5100 adapters, default=OFF (if _ON you must also uncomment the #include "EthernetPlus.h" line near the beginning of OnStep.ino for now)
+// Turns ethernet on for W5100 adapters, default=OFF
 // configure the interface IP address, gateway, and subnet mask in Ethernet.ino (DHCP is off by default)
 // good technical info. about using an Arduino Ethernet Shield: https://forum.pjrc.com/threads/25050-Teensy-3-0-3-1-W5100-ethernet-shield
 #define W5100_OFF
