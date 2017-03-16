@@ -6,6 +6,7 @@ boolean goHome() {
   if ((parkStatus!=NotParked) && (parkStatus!=Parking)) return false;  // fail, moving to home not allowed if Parked
   if (trackingState==TrackingMoveTo)                    return false;  // fail, moving to home not allowed during a move
   if (guideDirAxis1 || guideDirAxis2)                   return false;  // fail, moving to home not allowed while guiding
+  if (!axis1Enabled)                                    return false;  // fail, moving to home not allowed if drivers aren't enabled
 
   cli();
   #ifdef SYNC_ANYWHERE_ON

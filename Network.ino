@@ -501,7 +501,7 @@ void Ethernet_get() {
   }
   // Tracking control
   if ((get_names[0]=='t') && (get_names[1]=='k')) {
-    if ((get_vals[0]=='o') && (get_vals[1]=='n') && (get_vals[2]==0)) trackingState=TrackingSidereal;
+    if ((get_vals[0]=='o') && (get_vals[1]=='n') && (axis1Enabled) && (get_vals[2]==0)) trackingState=TrackingSidereal;
     if ((get_vals[0]=='o') && (get_vals[1]=='f') && (get_vals[2]=='f') && (get_vals[3]==0)) trackingState=TrackingNone;
     if (((get_vals[0]=='f') || (get_vals[0]=='-') || (get_vals[0]=='r')) && (get_vals[1]==0)) {
        if (get_vals[0]=='f') siderealInterval+=HzCf*(0.1);
@@ -536,7 +536,7 @@ void Ethernet_get() {
     }
   }
   if ((get_names[0]=='d') && (get_names[1]=='r')) {
-    if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
+    if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo) && (axis1Enabled)) {
       if (get_vals[2]==0) {
         if (get_vals[1]=='1') { // start guide
           if ((get_vals[0]=='e') || (get_vals[0]=='w')) { 
