@@ -791,7 +791,7 @@ void processCommands() {
       } else
 
 //   M - Telescope Movement Commands
-      if (command[0]=='M') {
+      if ((command[0]=='M') && (axis1Enabled)) {
 //  :MA#   Goto the target Alt and Az
 //         Returns:
 //         0=Goto is Possible
@@ -1159,7 +1159,7 @@ void processCommands() {
           f=strtod(parameter,&conv_end);
           if ( (&parameter[0]!=conv_end) && (((f>=30.0) && (f<90.0)) || (abs(f)<0.1))) {
             if (abs(f)<0.1) { 
-              trackingState = TrackingNone; 
+              trackingState = TrackingNone;
             } else {
               SetTrackingRate((f/60.0)/1.00273790935);
             }
@@ -1263,8 +1263,8 @@ void processCommands() {
        if (command[1]=='Q') { SetTrackingRate(default_tracking_rate); quietReply=true; } else                // sidereal tracking rate
        if (command[1]=='R') { siderealInterval=15956313L; quietReply=true; } else                            // reset master sidereal clock interval
        if (command[1]=='K') { SetTrackingRate(0.99953004401); refraction=false; quietReply=true; } else      // king tracking rate 60.136Hz
-       if ((command[1]=='e') && ((trackingState==TrackingSidereal) || (trackingState==TrackingNone)) && (parkStatus==NotParked)) trackingState=TrackingSidereal; else
-       if ((command[1]=='d') && ((trackingState==TrackingSidereal) || (trackingState==TrackingNone))) trackingState=TrackingNone; else
+       if ((command[1]=='e') && (axis1Enabled) && (trackingState==TrackingNone) && (parkStatus==NotParked)) trackingState=TrackingSidereal; else
+       if ((command[1]=='d') && (trackingState==TrackingSidereal)) trackingState=TrackingNone; else
        if (command[1]=='o') { refraction=refraction_enable; onTrack=true;  SetTrackingRate(default_tracking_rate); } else  // turn full compensation on, defaults to base sidereal tracking rate
        if (command[1]=='r') { refraction=refraction_enable; onTrack=false; SetTrackingRate(default_tracking_rate); } else  // turn refraction compensation on, defaults to base sidereal tracking rate
        if (command[1]=='n') { refraction=false; onTrack=false; SetTrackingRate(default_tracking_rate); } else              // turn refraction off, sidereal tracking rate resumes
