@@ -542,7 +542,7 @@ void Ethernet_get() {
           if ((get_vals[0]=='e') || (get_vals[0]=='w')) { 
             if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo) && (get_vals[0]!=guideDirAxis1)) {
               // block user from changing direction at high rates, just stop the guide instead
-              if (guideDirAxis1) && (fabs(guideTimerRateAxis1)>2)) { 
+              if ((guideDirAxis1) && (fabs(guideTimerRateAxis1)>2)) { 
                 if (guideDirAxis1!='b') { guideDirAxis1='b'; guideBreakTimeAxis1=millis(); } // break
               } else {
                 enableGuideRate(currentGuideRate);
