@@ -35,6 +35,12 @@
 
 // Use Config.h to configure OnStep to your requirements 
 
+// firmware info, these are returned by the ":GV?#" commands
+#define FirmwareDate   "03 16 17"
+#define FirmwareNumber "1.0a"
+#define FirmwareName   "On-Step"
+#define FirmwareTime   "12:00:00"
+
 // some defines to help with configuration
 #define TMC_LOWPWR      64
 #define TMC_STEALTHCHOP 32
@@ -73,12 +79,6 @@
 #define ETHERNET_ON
 //#include "Ethernet.h"
 #endif
-
-// firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "03 16 17"
-#define FirmwareNumber "1.0a"
-#define FirmwareName   "On-Step"
-#define FirmwareTime   "12:00:00"
 
 #if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
 #define F_BUS SysCtlClockGet() // no pre-scaling of timers on Tiva Launchpads
