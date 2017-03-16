@@ -604,7 +604,7 @@ void setup() {
   // backlash takeup rates
   TakeupRate=round(SiderealRate/1.1);
   timerRateBacklashAxis1=SiderealRate/BacklashTakeupRate;
-  timerRateBacklashAxis2=SiderealRate/BacklashTakeupRate;
+  timerRateBacklashAxis2=(SiderealRate/BacklashTakeupRate)*timerRateRatio;
 
   // starts the hardware timers that keep sidereal time, move the motors, etc.
   Init_Start_Timers();
