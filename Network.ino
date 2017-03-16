@@ -16,8 +16,8 @@ int  www_xmit_buffer_pos=0;
 char www_xmit_buffer[www_xmit_buffer_size] = "";
 
 // **************************************************************************************************************************************
-// block www and cmd channel from operating at the same time, default _OFF but _ON might help to stabilize Ethernet comms (not sure at this point)
-#define ETHERNET_CONCURRENT_BLOCK_OFF
+// block www and cmd channel from operating at the same time, default _ON but _OFF almost works (not sure at this point)
+#define ETHERNET_CONCURRENT_BLOCK_ON
 // enter a MAC address and IP address for your controller below. MAC address will be on the sticker on the Tiva Connected Launchpad
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 // if ethernet is available DHCP is used to obtain the IP address (default addresses are overridden), default=OFF
