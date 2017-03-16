@@ -24,7 +24,7 @@ byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 #define ETHERNET_USE_DHCP_OFF
 // the IP address will be dependent on your local network. Gateway and subnet are optional:
 IPAddress ip(192, 168, 1, 55);
-IPAddress myDns(192,168,1, 1);
+IPAddress myDns(192,168, 1, 1);
 IPAddress gateway(192, 168, 1, 1);
 IPAddress subnet(255, 255, 255, 0);
 // **************************************************************************************************************************************

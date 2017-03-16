@@ -34,7 +34,8 @@
  */
 
 // Use Config.h to configure OnStep to your requirements 
-// help stepper driver configuration
+
+// some defines to help with configuration
 #define TMC_LOWPWR      64
 #define TMC_STEALTHCHOP 32
 #define TMC_NINTPOL     16
@@ -42,6 +43,7 @@
 #if defined(__arm__) && defined(TEENSYDUINO)
 #define __ARM_Teensy3__
 #endif
+
 #include "TM4C.h"
 #include "Config.h"
 #include "Pins.h"
@@ -53,17 +55,20 @@
 #include "Align.h"
 #include "Command.h"
 
-// There is a bug in Arduino/Energia which ignores #ifdef preprocessor directives when generating a list of files
-// Until this is fixed YOU MUST MANUALLY UN-COMMENT the #include line below if using the Launchpad Connected device.
 #if defined(W5100_ON)
 #define ETHERNET_ON
 #include "SPI.h"
+#if defined(__AVR_ATmega2560__) || defined(__ARM_TI_TM4C__)
 // OnStep uses the EthernetPlus.h library for the W5100 on the Mega2560 and Launchpad TM4C:
 // this is available at: https://github.com/hjd1964/EthernetPlus and should be installed in your "~\Documents\Arduino\libraries" folder
-//#include "EthernetPlus.h"
-// OnStep uses the Ethernet.h library for the W5100 on the Teensy3.2:
-//#include "Ethernet.h"
+#include "EthernetPlus.h"
 #endif
+#if defined(__ARM_Teensy3__)
+// OnStep uses the standard Ethernet.h library for the W5100 on the Teensy3.2:
+#include "Ethernet.h"
+#endif
+#endif
+
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
 #define ETHERNET_ON
 //#include "Ethernet.h"
