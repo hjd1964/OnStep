@@ -6,6 +6,7 @@
 byte alignNumStars = 0;
 byte alignThisStar = 0;
 
+#ifdef MOUNT_TYPE_ALTAZM
 typedef struct {
   double HA;
   double Dec;
@@ -47,6 +48,7 @@ class TAlign
 };
 
 TAlign Align;
+#endif
 
 #ifndef ALIGN_GOTOASSIST_ON
 // -----------------------------------------------------------------------------------

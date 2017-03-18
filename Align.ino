@@ -3,6 +3,7 @@
 //
 // CONVERSION TO C++/Arduino BY Howard Dutton, 10/12/2016
 
+#ifdef MOUNT_TYPE_ALTAZM
 TAlign::TAlign()
 {
   init();
@@ -263,6 +264,7 @@ void TAlign::bestZ3(int N, double nrange, double range, double incr) {
 
   Z3=BestZ3;
 }
+#endif
 
 #ifndef ALIGN_GOTOASSIST_ON
 // -----------------------------------------------------------------------------------
