@@ -36,6 +36,7 @@
 #define Axis1_M2      24    // Pin 24 (Microstep Mode 2)
 #define Axis1_EN      25    // Pin 25 (Enabled when LOW)
 #define Axis1_FAULT   26    // Pin 26 (Fault if LOW)
+#define Axis1_Aux     26    // Pin 26 (Aux - SPI MISO)
 #define Axis1_Mode    32    // Pin 32 (Mode switch for Axis1)
 
 // The HA(RA) and Dec jumpers (going to the big easy drivers) are simply four wire jumper cables, each has identical wiring - simple modular construction
@@ -54,6 +55,7 @@
 #define Axis2_M2      29    // Pin 29 (Microstep Mode 2)
 #define Axis2_EN      30    // Pin 30 (Enabled when LOW)
 #define Axis2_FAULT   31    // Pin 31 (Fault if LOW)
+#define Axis2_Aux     31    // Pin 31 (Aux - SPI MISO)
 #define Axis2_Mode    33    // Pin 33 (Mode switch for Axis2)
 
 // ST4 interface
@@ -100,6 +102,7 @@
 #define Axis1_M2      25    // Pin 25 (Microstep or Decay Mode 2)
 #define Axis1_EN      23    // Pin 23 (Enabled when LOW)
 #define Axis1_FAULT   39    // Pin 39 (Fault if LOW)
+#define Axis1_Aux     39    // Pin 39 (Aux - SPI MISO)
 #define Axis1_Mode    41    // Pin 41 (Aux Decay Mode for Axis1)
 
 // The HA(RA) and Dec jumpers (going to the big easy drivers) are simply four wire jumper cables, each has identical wiring - simple modular construction
@@ -115,6 +118,7 @@
 #define Axis2_M2      34    // Pin 34 (Microstep or Decay Mode 2)
 #define Axis2_EN      36    // Pin 36 (Enabled when LOW)
 #define Axis2_FAULT   38    // Pin 38 (Fault if LOW)
+#define Axis2_Aux     38    // Pin 38 (Aux - SPI MISO)
 #define Axis2_Mode    40    // Pin 40 (Aux Decay Mode for Axis2)
 
 // ST4 interface
@@ -151,6 +155,7 @@
 #define Axis1_M2      15    // Pin 15 (Microstep Mode 2)
 #define Axis1_EN      16    // Pin 16 (Enabled when LOW)
 #define Axis1_FAULT   17    // Pin 17 (Fault if LOW)
+#define Axis1_Aux     17    // Pin 17 (Aux - ESP8266 GPIO0 or SPI MISO)
 
 // The HA(RA) and Dec jumpers (going to the big easy drivers) are simply four wire jumper cables, each has identical wiring - simple modular construction
 #define Axis2DirPin    4    // Pin 4 (Dir)
@@ -163,6 +168,7 @@
 #define Axis2_M2      20    // Pin 20 (Microstep Mode 2)
 #define Axis2_EN      21    // Pin 21 (Enabled when LOW)
 #define Axis2_FAULT   22    // Pin 22 (Fault if LOW)
+#define Axis2_Aux     22    // Pin 22 (Aux - ESP8266 GPIO0 or SPI MISO)
 
 // ST4 interface
 #define ST4RAw        24    // Pin 24 ST4 RA- West
