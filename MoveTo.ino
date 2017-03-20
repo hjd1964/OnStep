@@ -303,13 +303,17 @@ void DecayModeTracking() {
   pinMode(Axis2_Mode,OUTPUT); digitalWrite(Axis2_Mode,HIGH);
 #elif defined(MODE_SWITCH_BEFORE_SLEW_ON)
   #ifdef AXIS1_MODE
+    #ifdef AXIS1_MODE_GOTO 
     stepAxis1=1;
+    #endif
     if ((AXIS1_MODE & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE    & 1)); } else { pinModeOpen(Axis1_M0); }
     if ((AXIS1_MODE & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE>>1 & 1)); } else { pinModeOpen(Axis1_M1); }
     if ((AXIS1_MODE & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE>>2 & 1)); } else { pinModeOpen(Axis1_M2); }
   #endif
   #ifdef AXIS2_MODE
+    #ifdef AXIS2_MODE_GOTO 
     stepAxis2=1;
+    #endif
     if ((AXIS2_MODE & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE    & 1)); } else { pinModeOpen(Axis2_M0); }
     if ((AXIS2_MODE & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE>>1 & 1)); } else { pinModeOpen(Axis2_M1); }
     if ((AXIS2_MODE & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE>>2 & 1)); } else { pinModeOpen(Axis2_M2); }
