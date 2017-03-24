@@ -1210,7 +1210,7 @@ void processCommands() {
               SetAccelerationRates(maxRate);
             break;
             case '5': // autoMeridianFlip
-              if ((parameter[3]=='0') || (parameter[3]=='1')) { i=parameter[3]-'0'; if ((i==0) || (i==1)) { autoMeridianFlip=i;  EEPROM.write(EE_autoMeridianFlip,autoMeridianFlip); } } 
+              if ((parameter[3]=='0') || (parameter[3]=='1')) { i=parameter[3]-'0'; autoMeridianFlip=i; EEPROM.write(EE_autoMeridianFlip,autoMeridianFlip); } 
             break; 
             case '6': // preferred pier side 
               switch (parameter[3]) {
