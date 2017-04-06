@@ -170,10 +170,14 @@ void Init_Pins() {
   #endif
 #endif
   
+  // initialize/enable the stepper drivers
+  pinMode(Axis1_EN,OUTPUT); digitalWrite(Axis1_EN,Axis1_Enabled); axis1Enabled=true;
+  pinMode(Axis2_EN,OUTPUT); digitalWrite(Axis2_EN,Axis2_Enabled); axis2Enabled=true;
+  delay(100);
+  DecayModeTracking();
   // initialize/disable the stepper drivers
   pinMode(Axis1_EN,OUTPUT); digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
   pinMode(Axis2_EN,OUTPUT); digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
-  DecayModeTracking();
 
 // if the stepper driver mode select pins are wired in, program any requested micro-step mode
 #if !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
