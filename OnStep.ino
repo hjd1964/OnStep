@@ -68,16 +68,19 @@
 // OnStep uses the EthernetPlus.h library for the W5100 on the Mega2560 and Launchpad TM4C:
 // this is available at: https://github.com/hjd1964/EthernetPlus and should be installed in your "~\Documents\Arduino\libraries" folder
 #include "EthernetPlus.h"
+#include "CmdServer.h"
 #endif
 #if defined(__ARM_Teensy3__)
 // OnStep uses the standard Ethernet.h library for the W5100 on the Teensy3.2:
 #include "Ethernet.h"
+#include "CmdServer.h"
 #endif
 #endif
 
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
 #define ETHERNET_ON
-//#include "Ethernet.h"
+#include "Ethernet.h"
+#include "CmdServer.h"
 #endif
 
 #if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
@@ -473,6 +476,10 @@ byte pecBuffer[PECBufferSize];
   #endif
 #endif
 
+#ifdef ETHERNET_ON
+CmdServer Cmd;
+#endif
+
 // current site index and name
 byte currentSite = 0; 
 char siteName[16];
@@ -621,8 +628,16 @@ void setup() {
   PSerial.begin(9600); // for Tiva TM4C the serial is redirected to serial5 in serial.ino file
   PSerial1.begin(9600);
 #ifdef ETHERNET_ON
-  // get ready for Ethernet communications
+  // initialize the ethernet device
+#if defined(ETHERNET_USE_DHCP_ON)
+  Ethernet.begin(mac);
+#else
+  Ethernet.begin(mac, ip, myDns, gateway, subnet);
+#endif
+  // get the web-server ready
   Ethernet_Init();
+  // get the cmd-server ready
+  Cmd.init(1000);
 #endif
  
   // prep counters (for keeping time in main loop)
@@ -900,6 +915,10 @@ void loop() {
   } else {
     // COMMAND PROCESSING --------------------------------------------------------------------------------
     processCommands();
+#ifdef ETHERNET_ON
+    Ethernet_www();
+    Cmd.handleClient();
+#endif
   }
 }
 

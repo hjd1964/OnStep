@@ -28,7 +28,7 @@ void processCommands() {
     if ((PSerial.available()>0) && (!cmd.ready())) cmd.add(PSerial.read());
     if ((PSerial1.available()>0) && (!cmd1.ready())) cmd1.add(PSerial1.read());
 #ifdef ETHERNET_ON
-    if ((Ethernet_available()>0) && (!cmde.ready())) cmde.add(Ethernet_read());
+    if ((Cmd.available()>0) && (!cmde.ready())) cmde.add(Cmd.read());
 #endif
 
     // send any reply
@@ -41,17 +41,7 @@ void processCommands() {
 #ifdef ETHERNET_ON
     else if (cmde.ready()) { strcpy(command,cmde.getCmd()); strcpy(parameter,cmde.getParameter()); cmde.flush(); process_command=COMMAND_ETHERNET; }
 #endif
-    else {
-
-    // if a command isn't ready, give the www interface some time
-#ifdef ETHERNET_ON
-#if (!defined(__ARM_Teensy3__) && defined(ETHERNET_CONCURRENT_BLOCK_ON))
-      if (!Ethernet_cmd_busy())
-#endif
-      Ethernet_www();
-#endif
-      return;
-    }
+    else return;
 
     if (process_command) {
 // Command is two chars followed by an optional parameter...
@@ -1017,7 +1007,7 @@ void processCommands() {
             PSerial.print("1"); while (PSerial.transmit()); delay(20); PSerial.begin(baudRate[i]);
           } else if (process_command==COMMAND_ETHERNET) {
 #ifdef ETHERNET_ON
-             Ethernet_print("1");
+             Cmd.print("1");
 #endif
           } else  {
             PSerial1.print("1"); while (PSerial1.transmit()); delay(20); PSerial1.begin(baudRate[i]); 
@@ -1467,7 +1457,7 @@ void processCommands() {
         if (process_command==COMMAND_ETHERNET) {
           if (cmde.checksum) checksum(reply);
           if (!supress_frame) strcat(reply,"#");
-          Ethernet_print(reply);
+          Cmd.print(reply);
         }
 #endif       
       }

@@ -1,119 +1,24 @@
 // -----------------------------------------------------------------------------------
-// Ethernet, provide the same functions as for serial
+// Web server
 
 #ifdef ETHERNET_ON
-
-// immediately time out on the Teensy3.2
-#if (defined(__arm__) && defined(TEENSYDUINO))
-#define CTO 15
-#else
-#define CTO 1000
-#endif
 
 #define www_xmit_buffer_size 1024
 int  www_xmit_buffer_send_pos=0;
 int  www_xmit_buffer_pos=0;
 char www_xmit_buffer[www_xmit_buffer_size] = "";
 
-// **************************************************************************************************************************************
-// block www and cmd channel from operating at the same time, default _ON but _OFF almost works (not sure at this point)
-#define ETHERNET_CONCURRENT_BLOCK_ON
-// enter a MAC address and IP address for your controller below. MAC address will be on the sticker on the Tiva Connected Launchpad
-byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
-// if ethernet is available DHCP is used to obtain the IP address (default addresses are overridden), default=OFF
-#define ETHERNET_USE_DHCP_OFF
-// the IP address will be dependent on your local network. Gateway and subnet are optional:
-IPAddress ip(192, 168, 1, 55);
-IPAddress myDns(192,168, 1, 1);
-IPAddress gateway(192, 168, 1, 1);
-IPAddress subnet(255, 255, 255, 0);
-// **************************************************************************************************************************************
-
-// network server port for command channel
-EthernetServer cmd_server(9999);
-EthernetClient cmd_client;
 // network server port for web channel
 EthernetServer www_server(80);
 EthernetClient www_client;
 
-bool cmdIsClosing = false;        // handle non-blocking stop()
-long cmdTransactionLast_ms = 0;   // timed stop()
-
 void Ethernet_Init() {
-  // initialize the ethernet device
-#if defined(ETHERNET_USE_DHCP_ON)
-  Ethernet.begin(mac);
-#else
-  Ethernet.begin(mac, ip, myDns, gateway, subnet);
-#endif
-
-  cmd_server.begin();
-  cmd_client = cmd_server.available(); // initialise cmd_client
   www_server.begin();
   www_client = www_server.available(); // initialise www_client
-
-  cmdTransactionLast_ms=millis();
 }
 
 bool Ethernet_www_busy() {
   return www_client;
-}
-
-bool Ethernet_cmd_busy() {
-  if (cmdIsClosing) return true;
-  if (!cmd_client.connected()) return false;
-  return cmd_client.available()>0;
-}
-
-void Ethernet_send(const char data[]) {
-  if (!cmd_client.connected()) return;
-  cmd_client.flush();
-
-#ifdef __AVR_ATmega2560__
-  cmd_client.write(data,strlen(data));
-#else
-  cmd_client.print(data);
-#endif
-  
-  cmdTransactionLast_ms=millis();
-}
-
-void Ethernet_print(const char data[]) {
-  Ethernet_send(data);
-}
-
-boolean Ethernet_available() {
-  long avail=0;
-  if (!cmdIsClosing) {
-    if (cmd_server.available()) cmd_client = cmd_server.available();
-    
-    if (cmd_client.connected()) {
-      avail=cmd_client.available();
-
-      if (avail>0) cmdTransactionLast_ms=millis();
-  
-      if (millis()-cmdTransactionLast_ms>CTO) {
-    #if defined(W5100_ON) && !defined(__ARM_Teensy3__) 
-        cmd_client.stopRequest();
-    #endif
-        cmdIsClosing=true;
-      }
-      
-      return (avail>0);
-    }
-  } else {
-#if defined(W5100_ON) && !defined(__ARM_Teensy3__)
-    if (cmd_client.stopMonitor()) cmdIsClosing=false;
-#else
-    cmd_client.stop(); cmdIsClosing=false;
-#endif
-  }
-  
-  return false;
-}
- 
-char Ethernet_read() {
-  return cmd_client.read();
 }
 
 // -----------------------------------------------------------------------------------------
