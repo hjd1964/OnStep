@@ -68,6 +68,8 @@ void pserial::putl(long l)
 }
 
 void pserial::puts(const char data[]) {
+  // temporarily disable, for debugging
+  return;
   print(data);
   do {} while (transmit());
 }
