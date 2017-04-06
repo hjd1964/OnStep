@@ -829,7 +829,7 @@ if (html_page_step==++stp) {
 #endif
     }
     dtostrf(tr,5,3,temp1);
-    sprintf(temp,"Tracking Rate: <font class=\"c\">%sHz</font><br />",temp1);
+    sprintf(temp,"Tracking Rate: <font class=\"c\">%s</font>Hz<br />",temp1);
   }
   if (html_page_step==++stp) {
     if (parkStatus==NotParked)  strcpy(temp2,"Not Parked");
