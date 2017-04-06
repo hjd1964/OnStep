@@ -5,15 +5,13 @@
 
 EthernetServer cmdserver1(9999);
 EthernetServer cmdserver2(9998);
-EthernetServer cmdserver3(9997);
 
 // t is the timeout in ms, 0 for never
 void CmdServer::init(int port, long t) {
-  if ((port>=9997) && (port<=9999)) {
+  if ((port>=9998) && (port<=9999)) {
     thisPort=port;
     if (thisPort==9999) cmdserver1.begin();
     if (thisPort==9998) cmdserver2.begin();
-    if (thisPort==9997) cmdserver3.begin();
     timeout=t;
 #ifdef CMDSERVER_DEBUG_ON
     Serial.print("server is at ");
@@ -28,7 +26,6 @@ void CmdServer::handleClient() {
     // new client connect
     if (thisPort==9999) client=cmdserver1.available();
     if (thisPort==9998) client=cmdserver2.available();
-    if (thisPort==9997) client=cmdserver3.available();
     if (client) {
       lastAccess=millis();
       haveClient = true;
