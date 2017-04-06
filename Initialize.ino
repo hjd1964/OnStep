@@ -208,7 +208,7 @@ void Init_Pins() {
 
 void Init_ReadEEPROM_Values() {
   // get the site information, if a GPS were attached we would use that here instead
-  currentSite=EEPROM.read(EE_currentSite);  if (currentSite>3) currentSite=0; // site index is valid?
+  currentSite=EEPROM.read(EE_currentSite); if (currentSite>3) currentSite=0; // site index is valid?
   latitude=EEPROM_readFloat(EE_sites+(currentSite)*25+0);
 
 #ifdef MOUNT_TYPE_ALTAZM

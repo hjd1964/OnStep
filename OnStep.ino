@@ -478,6 +478,7 @@ byte pecBuffer[PECBufferSize];
 
 #ifdef ETHERNET_ON
 CmdServer Cmd;
+CmdServer Cmd1;
 #endif
 
 // current site index and name
@@ -635,9 +636,10 @@ void setup() {
   Ethernet.begin(mac, ip, myDns, gateway, subnet);
 #endif
   // get the web-server ready
-  Ethernet_Init();
-  // get the cmd-server ready
-  Cmd.init(1000);
+  www_init();
+  // get the cmd-servers ready
+  Cmd.init(9999,2000);
+  Cmd1.init(9998,2000);
 #endif
  
   // prep counters (for keeping time in main loop)
@@ -819,9 +821,9 @@ void loop() {
     spiEnd();
   }
 #endif
-    if (faultAxis1 || faultAxis2) { lastError=ERR_MOTOR_FAULT; if (trackingState==TrackingMoveTo) abortSlew=true; else { trackingState=TrackingNone; if (guideDirAxis1) guideDirAxis1='b'; if (guideDirAxis2) guideDirAxis2='b'; } }
+    if (faultAxis1 || faultAxis2) { lastError=ERR_MOTOR_FAULT; if (trackingState==TrackingMoveTo) abortSlew=true; else { trackingState=TrackingNone; PSerial.puts("ts6"); if (guideDirAxis1) guideDirAxis1='b'; if (guideDirAxis2) guideDirAxis2='b'; } }
     // check altitude overhead limit and horizon limit
-    if ((currentAlt<minAlt) || (currentAlt>maxAlt)) { lastError=ERR_ALT; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
+    if ((currentAlt<minAlt) || (currentAlt>maxAlt)) { lastError=ERR_ALT; if (trackingState==TrackingMoveTo) abortSlew=true; else { trackingState=TrackingNone; PSerial.puts("ts7"); } }
 
     // UPDATE THE UT1 CLOCK
     cli(); long cs=lst; sei();
@@ -889,19 +891,20 @@ void loop() {
             double newRA,newDec;
             getEqu(&newRA,&newDec,false);
             if (goToEqu(newRA,newDec)) { // returns 0 on success
-              lastError=ERR_MERIDIAN; 
+              lastError=ERR_MERIDIAN;
+              PSerial.puts("ts1");
               trackingState=TrackingNone;
             }
           } else {
-            lastError=ERR_MERIDIAN; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;
+            lastError=ERR_MERIDIAN; if (trackingState==TrackingMoveTo) abortSlew=true; else { trackingState=TrackingNone; PSerial.puts("ts2"); }
           }
         }
       }
-      if (pierSide==PierSideEast) { cli(); if (posAxis1+indexAxis1Steps>(UnderPoleLimit*15L*(long)StepsPerDegreeAxis1)) { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;  } sei(); }
+      if (pierSide==PierSideEast) { cli(); if (posAxis1+indexAxis1Steps>(UnderPoleLimit*15L*(long)StepsPerDegreeAxis1)) { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else { trackingState=TrackingNone; PSerial.puts("ts3"); }  } sei(); }
     } else {
 #ifndef MOUNT_TYPE_ALTAZM
       // when Fork mounted, ignore pierSide and just stop the mount if it passes the UnderPoleLimit
-      cli(); if (posAxis1+indexAxis1Steps>(UnderPoleLimit*15L*(long)StepsPerDegreeAxis1)) { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
+      cli(); if (posAxis1+indexAxis1Steps>(UnderPoleLimit*15L*(long)StepsPerDegreeAxis1)) { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else { trackingState=TrackingNone; PSerial.puts("ts4"); } } sei();
 #else
       // when Alt/Azm mounted, just stop the mount if it passes MaxAzm
       cli(); if (posAxis1+indexAxis1Steps>((long)MaxAzm*(long)StepsPerDegreeAxis1)) { lastError=ERR_AZM; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
@@ -909,15 +912,16 @@ void loop() {
     }
     // check for exceeding MinDec or MaxDec
 #ifndef MOUNT_TYPE_ALTAZM
-    if ((getApproxDec()<MinDec) || (getApproxDec()>MaxDec)) { lastError=ERR_DEC; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
+    if ((getApproxDec()<MinDec) || (getApproxDec()>MaxDec)) { lastError=ERR_DEC; if (trackingState==TrackingMoveTo) abortSlew=true; else { trackingState=TrackingNone; PSerial.puts("ts5"); } }
 #endif      
 
   } else {
     // COMMAND PROCESSING --------------------------------------------------------------------------------
     processCommands();
 #ifdef ETHERNET_ON
-    Ethernet_www();
-    Cmd.handleClient();
+    www_handleClient();
+    if (!www_busy()) Cmd.handleClient();
+    if (!www_busy()) Cmd1.handleClient();
 #endif
   }
 }

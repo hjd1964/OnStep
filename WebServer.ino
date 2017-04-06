@@ -9,16 +9,15 @@ int  www_xmit_buffer_pos=0;
 char www_xmit_buffer[www_xmit_buffer_size] = "";
 
 // network server port for web channel
-EthernetServer www_server(80);
-EthernetClient www_client;
+EthernetServer wwwserver(80);
+EthernetClient wwwclient;
 
-void Ethernet_Init() {
-  www_server.begin();
-  www_client = www_server.available(); // initialise www_client
+void www_init() {
+  wwwserver.begin();
 }
 
-bool Ethernet_www_busy() {
-  return www_client;
+bool www_busy() {
+  return wwwclient;
 }
 
 // -----------------------------------------------------------------------------------------
@@ -59,24 +58,21 @@ void reset_page_requests() {
   get_check=false; get_val=false; get_name=false;
 }
 
-bool www_no_client=true;
-void Ethernet_www() {
+bool haveClient=false;
+void www_handleClient() {
   // if a client doesn't already exist try to find a new one
-  if (www_no_client) {
-    www_client = www_server.available();
-    www_no_client = !www_client;
-    if (www_no_client) return;
+  if (!haveClient) {
+    wwwclient = wwwserver.available();
+    if (!wwwclient) return;
+    haveClient=true;
     currentLineIsBlank = true; responseStarted=false; clientNeedsToClose=false; clientIsClosing=false; reset_page_requests(); transactionStart_ms=millis();
   }
 
   // active client?
-  if (www_client) {
-    if (www_client.connected()) {
-      if (www_client.available() && (!responseStarted)) {
-        char c = www_client.read();
-
-        //Serial_char(c);
-
+  if (wwwclient) {
+    if (wwwclient.connected()) {
+      if (wwwclient.available() && (!responseStarted)) {
+        char c = wwwclient.read();
         // record the get request name and value, then process the request
         if ((get_val) && ((c==' ') || (c=='&'))) { get_val=false; get_idx=0; Ethernet_get(); if (c=='&') { c='?'; get_check=true; } }
         if (get_val) { if (get_idx<10) { get_vals[get_idx]=c; get_vals[get_idx+1]=0; get_idx++; } }
@@ -133,26 +129,23 @@ void Ethernet_www() {
         ((clientNeedsToClose && clientIsClosing))) {
       if (!clientIsClosing) {
 #if defined(W5100_ON) && !defined(__ARM_Teensy3__) 
-        www_client.stopRequest();
+        wwwclient.stopRequest();
 #endif
         clientIsClosing=true;
       } else {
 #if defined(W5100_ON) && !defined(__ARM_Teensy3__)
-        if (www_client.stopMonitor()) { 
-          clientNeedsToClose=false; 
-          clientIsClosing=false; 
-          www_no_client=true;
+        if (wwwclient.stopMonitor()) {
+          wwwclient=EthernetClient(); haveClient=false; clientNeedsToClose=false; clientIsClosing=false; 
         }
 #else
-        www_client.stop(); clientNeedsToClose=false; clientIsClosing=false;
-        www_no_client=true;
+        wwwclient.stop();
+        client=EthernetClient(); haveClient=false; clientNeedsToClose=false; clientIsClosing=false;
 #endif
       }
     }
     #ifdef ETHERNET_USE_DHCP_ON
     Ethernet.maintain();
     #endif
-
   }
 }
 
@@ -186,9 +179,9 @@ boolean www_send() {
   }
 
 #ifdef __AVR_ATmega2560__
-  www_client.write(buf,count);
+  wwwclient.write(buf,count);
 #else
-  www_client.print(buf);
+  wwwclient.print(buf);
 #endif
 
   // hit end of www_xmit_buffer? reset and start over

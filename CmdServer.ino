@@ -2,22 +2,33 @@
 // Cmd channel server
 
 #ifdef ETHERNET_ON
-EthernetServer cmdserver(9999);
+
+EthernetServer cmdserver1(9999);
+EthernetServer cmdserver2(9998);
+EthernetServer cmdserver3(9997);
 
 // t is the timeout in ms, 0 for never
-void CmdServer::init(long t) {
-  cmdserver.begin();
-  timeout=t;
+void CmdServer::init(int port, long t) {
+  if ((port>=9997) && (port<=9999)) {
+    thisPort=port;
+    if (thisPort==9999) cmdserver1.begin();
+    if (thisPort==9998) cmdserver2.begin();
+    if (thisPort==9997) cmdserver3.begin();
+    timeout=t;
 #ifdef CMDSERVER_DEBUG_ON
-  Serial.print("server is at ");
-  Serial.println(Ethernet.localIP());
+    Serial.print("server is at ");
+    Serial.println(Ethernet.localIP()); Serial.print(":"); Serial.print(thisPort);
 #endif
+  }
 }
 
 void CmdServer::handleClient() {
+  if (thisPort==0) return;
   if (!haveClient) {
     // new client connect
-    client = cmdserver.available();
+    if (thisPort==9999) client=cmdserver1.available();
+    if (thisPort==9998) client=cmdserver2.available();
+    if (thisPort==9997) client=cmdserver3.available();
     if (client) {
       lastAccess=millis();
       haveClient = true;
@@ -40,18 +51,21 @@ void CmdServer::handleClient() {
 }
 
 int CmdServer::available() {
+  if (thisPort==0) return 0;
   if (!haveClient) return 0;
   if (!client.connected()) return 0;
   return client.available();
 }
 
 char CmdServer::read() {
+  if (thisPort==0) return 0;
   lastAccess=millis();
   return client.read();
 }
 
 void CmdServer::print(char s[]) {
+  if (thisPort==0) return;
   lastAccess=millis();
-  client.print(s);
+  client.write(s);
 }
 #endif

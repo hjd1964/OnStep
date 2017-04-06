@@ -3,8 +3,9 @@
 
 #ifdef ETHERNET_ON
 
-// if above is used, enter a MAC address and IP address for your controller below.
+// if above is used, enter a MAC address and IP address for your controller below:
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+
 // the IP address will be dependent on your local network. Gateway and subnet are optional:
 IPAddress ip(192, 168, 1, 55);
 IPAddress myDns(192,168, 1, 1);
@@ -16,15 +17,17 @@ typedef void (* webFunction) (EthernetClient *client);
 
 class CmdServer {
   public:
-    void init(long t);
+    void init(int port, long t);
     void handleClient();
     int available();
     char read();
     void print(char s[]);
   private:
-    bool haveClient=false;
     EthernetClient client;
+
+    int thisPort=0;
     unsigned long timeout=0;
+    bool haveClient=false;
     unsigned long lastAccess=0;
 };
 #endif
