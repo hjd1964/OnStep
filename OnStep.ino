@@ -713,8 +713,7 @@ void loop() {
           enableGuideRate(currentGuideRate);
     #else
           enableGuideRate(currentPulseGuideRate);
-    #endif
-  #else
+    #endif  #else
           enableGuideRate(currentGuideRate);
   #endif
           guideDirAxis2=ST4DE_state;
@@ -821,9 +820,9 @@ void loop() {
     spiEnd();
   }
 #endif
-    if (faultAxis1 || faultAxis2) { lastError=ERR_MOTOR_FAULT; if (trackingState==TrackingMoveTo) abortSlew=true; else { trackingState=TrackingNone; PSerial.puts("ts6"); if (guideDirAxis1) guideDirAxis1='b'; if (guideDirAxis2) guideDirAxis2='b'; } }
+    if (faultAxis1 || faultAxis2) { lastError=ERR_MOTOR_FAULT; if (trackingState==TrackingMoveTo) abortSlew=true; else { trackingState=TrackingNone; if (guideDirAxis1) guideDirAxis1='b'; if (guideDirAxis2) guideDirAxis2='b'; } }
     // check altitude overhead limit and horizon limit
-    if ((currentAlt<minAlt) || (currentAlt>maxAlt)) { lastError=ERR_ALT; if (trackingState==TrackingMoveTo) abortSlew=true; else { trackingState=TrackingNone; PSerial.puts("ts7"); } }
+    if ((currentAlt<minAlt) || (currentAlt>maxAlt)) { lastError=ERR_ALT; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
 
     // UPDATE THE UT1 CLOCK
     cli(); long cs=lst; sei();
@@ -892,19 +891,18 @@ void loop() {
             getEqu(&newRA,&newDec,false);
             if (goToEqu(newRA,newDec)) { // returns 0 on success
               lastError=ERR_MERIDIAN;
-              PSerial.puts("ts1");
               trackingState=TrackingNone;
             }
           } else {
-            lastError=ERR_MERIDIAN; if (trackingState==TrackingMoveTo) abortSlew=true; else { trackingState=TrackingNone; PSerial.puts("ts2"); }
+            lastError=ERR_MERIDIAN; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
           }
         }
       }
-      if (pierSide==PierSideEast) { cli(); if (posAxis1+indexAxis1Steps>(UnderPoleLimit*15L*(long)StepsPerDegreeAxis1)) { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else { trackingState=TrackingNone; PSerial.puts("ts3"); }  } sei(); }
+      if (pierSide==PierSideEast) { cli(); if (posAxis1+indexAxis1Steps>(UnderPoleLimit*15L*(long)StepsPerDegreeAxis1)) { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei(); }
     } else {
 #ifndef MOUNT_TYPE_ALTAZM
       // when Fork mounted, ignore pierSide and just stop the mount if it passes the UnderPoleLimit
-      cli(); if (posAxis1+indexAxis1Steps>(UnderPoleLimit*15L*(long)StepsPerDegreeAxis1)) { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else { trackingState=TrackingNone; PSerial.puts("ts4"); } } sei();
+      cli(); if (posAxis1+indexAxis1Steps>(UnderPoleLimit*15L*(long)StepsPerDegreeAxis1)) { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
 #else
       // when Alt/Azm mounted, just stop the mount if it passes MaxAzm
       cli(); if (posAxis1+indexAxis1Steps>((long)MaxAzm*(long)StepsPerDegreeAxis1)) { lastError=ERR_AZM; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
@@ -912,8 +910,8 @@ void loop() {
     }
     // check for exceeding MinDec or MaxDec
 #ifndef MOUNT_TYPE_ALTAZM
-    if ((getApproxDec()<MinDec) || (getApproxDec()>MaxDec)) { lastError=ERR_DEC; if (trackingState==TrackingMoveTo) abortSlew=true; else { trackingState=TrackingNone; PSerial.puts("ts5"); } }
-#endif      
+    if ((getApproxDec()<MinDec) || (getApproxDec()>MaxDec)) { lastError=ERR_DEC; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
+#endif
 
   } else {
     // COMMAND PROCESSING --------------------------------------------------------------------------------
