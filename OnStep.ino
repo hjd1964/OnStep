@@ -314,9 +314,9 @@ bool   autoMeridianFlip = false;                   // automatically do a meridia
 #define Axis2_Enabled HIGH
 #endif
 
-#define defaultDirAxis2EInit  1
-#define defaultDirAxis2WInit  0
-volatile byte defaultDirAxis2 = defaultDirAxis2EInit;
+#define defaultDirAxis2EInit   1
+#define defaultDirAxis2WInit   0
+volatile byte defaultDirAxis2  = defaultDirAxis2EInit;
 #define defaultDirAxis1NCPInit 0
 #define defaultDirAxis1SCPInit 1
 volatile byte defaultDirAxis1  = defaultDirAxis1NCPInit;
@@ -331,10 +331,10 @@ boolean highPrecision = true;
 #define TrackingSidereal         1
 #define TrackingMoveTo           2
 #define TrackingSiderealDisabled 3
-volatile byte trackingState     = TrackingNone;
-byte abortTrackingState = TrackingNone;
-volatile byte lastTrackingState = TrackingNone;
-boolean abortSlew        = false;
+volatile byte trackingState      = TrackingNone;
+byte abortTrackingState          = TrackingNone;
+volatile byte lastTrackingState  = TrackingNone;
+boolean abortSlew                = false;
 
 #define MeridianFlipNever  0
 #define MeridianFlipAlign  1

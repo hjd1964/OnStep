@@ -36,29 +36,29 @@ boolean syncEqu(double RA, double Dec) {
     if (preferredPierSide==PPS_WEST) {
       // west side of pier - we're in the eastern sky and the HA's are negative
       pierSide=PierSideWest;
-      defaultDirAxis2  =defaultDirAxis2WInit;
+      defaultDirAxis2=defaultDirAxis2WInit;
     } else
     if (preferredPierSide==PPS_EAST) {
       // east side of pier - we're in the western sky and the HA's are positive
       pierSide=PierSideEast;
-      defaultDirAxis2 = defaultDirAxis2EInit;
+      defaultDirAxis2=defaultDirAxis2EInit;
     } else {
       // best side of pier
       if (Axis1<0) {
         // west side of pier - we're in the eastern sky and the HA's are negative
         pierSide=PierSideWest;
-        defaultDirAxis2  =defaultDirAxis2WInit;
+        defaultDirAxis2=defaultDirAxis2WInit;
       } else { 
         // east side of pier - we're in the western sky and the HA's are positive
         pierSide=PierSideEast;
-        defaultDirAxis2 = defaultDirAxis2EInit;
+        defaultDirAxis2=defaultDirAxis2EInit;
       }
     }
   } else {
     // always on the "east" side of pier - we're in the western sky and the HA's are positive
     // this is the default in the polar-home position and also for MOUNT_TYPE_FORK and MOUNT_TYPE_ALTAZM.  MOUNT_TYPE_FORK_ALT ends up pierSideEast, but flips are allowed until aligned.
     pierSide=PierSideEast;
-    defaultDirAxis2 = defaultDirAxis2EInit;
+    defaultDirAxis2=defaultDirAxis2EInit;
   }
 #endif
 
