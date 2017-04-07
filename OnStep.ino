@@ -894,7 +894,7 @@ void loop() {
               trackingState=TrackingNone;
             }
           } else {
-            lastError=ERR_MERIDIAN; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
+            lastError=ERR_MERIDIAN; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;
           }
         }
       }
