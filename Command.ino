@@ -1154,7 +1154,7 @@ void processCommands() {
           f=strtod(parameter,&conv_end);
           if ( (&parameter[0]!=conv_end) && (((f>=30.0) && (f<90.0)) || (abs(f)<0.1))) {
             if (abs(f)<0.1) { 
-              trackingState = TrackingNone;
+              trackingState=TrackingNone;
             } else {
               SetTrackingRate((f/60.0)/1.00273790935);
             }

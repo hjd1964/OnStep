@@ -2,7 +2,6 @@
 // Cmd channel server
 
 #ifdef ETHERNET_ON
-
 // if above is used, enter a MAC address and IP address for your controller below:
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 

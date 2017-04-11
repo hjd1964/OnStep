@@ -2,7 +2,6 @@
 // Cmd channel server
 
 #ifdef ETHERNET_ON
-
 EthernetServer cmdserver1(9999);
 EthernetServer cmdserver2(9998);
 

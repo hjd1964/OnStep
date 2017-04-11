@@ -713,7 +713,8 @@ void loop() {
           enableGuideRate(currentGuideRate);
     #else
           enableGuideRate(currentPulseGuideRate);
-    #endif  #else
+    #endif
+  #else
           enableGuideRate(currentGuideRate);
   #endif
           guideDirAxis2=ST4DE_state;
