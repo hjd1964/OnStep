@@ -803,9 +803,9 @@ void loop() {
 #endif
 #ifdef AXIS1_FAULT_SPI
   if (lst%2==0) {
-    spiStart(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0);
+    BBSpi.begin(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0);
     faultAxis1=TMC2130_error();
-    spiEnd();
+    BBSpi.end();
   }
 #endif
 #ifdef AXIS2_FAULT_LOW
@@ -816,9 +816,9 @@ void loop() {
 #endif
 #ifdef AXIS2_FAULT_SPI
   if (lst%2==1) {
-    spiStart(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
+    BBSpi.begin(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
     faultAxis2=TMC2130_error();
-    spiEnd();
+    BBSpi.end();
   }
 #endif
     if (faultAxis1 || faultAxis2) { lastError=ERR_MOTOR_FAULT; if (trackingState==TrackingMoveTo) abortSlew=true; else { trackingState=TrackingNone; if (guideDirAxis1) guideDirAxis1='b'; if (guideDirAxis2) guideDirAxis2='b'; } }
