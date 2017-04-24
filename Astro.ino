@@ -323,7 +323,7 @@ double az_Dec=0,az_HA=0;
 double az_Dec1=0,az_HA1=0,az_Dec2=-91,az_HA2=0;
 double az_Alt,az_Azm,_az_Alt;
 double az_deltaAxis1=15.0,az_deltaAxis2=0.0;
-double az_deltaRateScale=1.0;
+double az_currentRate=1.0;
 
 // az_deltaH/D are in arc-seconds/second
 // trackingTimerRateAxis1/2 are x the sidereal rate
@@ -335,7 +335,7 @@ void SetDeltaTrackingRate() {
 }
 
 void SetTrackingRate(double r) {
-  az_deltaRateScale=r;
+  az_currentRate=r;
 #ifndef MOUNT_TYPE_ALTAZM
   az_deltaAxis1=r*15.0;
   az_deltaAxis2=0.0;
@@ -343,7 +343,7 @@ void SetTrackingRate(double r) {
 }
 
 double GetTrackingRate() {
-  return az_deltaRateScale;
+  return az_currentRate;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------
@@ -432,8 +432,8 @@ double ZenithTrackingRate() {
 boolean do_refractionRate_calc() {
   boolean done=false;
 
-  // turn off if not tracking at sidereal rate  
-  if (trackingState!=TrackingSidereal) { az_deltaAxis1=15.0; az_deltaAxis2=0.0; return true; }
+  // turn off if not tracking at sidereal rate
+  if (trackingState!=TrackingSidereal) { az_deltaAxis1=az_currentRate*15.0; az_deltaAxis2=0.0; return true; }
   
   az_step++;
   // load HA/Dec
@@ -491,7 +491,7 @@ boolean do_refractionRate_calc() {
       az_deltaAxis2=(az_deltaAxis2*9.0+dax2)/10.0;
       
       // override for special case of near a celestial pole
-      if (90.0-fabs(az_Dec)<(1.0/3600.0)) { az_deltaAxis1=15.0; az_deltaAxis2=0.0; }
+      if (90.0-fabs(az_Dec)<(1.0/3600.0)) { az_deltaAxis1=az_currentRate*15.0; az_deltaAxis2=0.0; }
       // override for special case of near the zenith
       if (currentAlt>(90.0-7.5)) {
         az_deltaAxis1=ZenithTrackingRate();
@@ -579,8 +579,8 @@ boolean do_altAzmRate_calc() {
       if ((az_Azm2<-90.0) && (az_Azm1>90.0)) az_Azm2+=360.0;
       
       // set rates
-      az_deltaAxis1=((az_Azm1-az_Azm2)*(15.0/(AltAzTrackingRange/60.0))/2.0)*az_deltaRateScale;
-      az_deltaAxis2=((az_Alt1-az_Alt2)*(15.0/(AltAzTrackingRange/60.0))/2.0)*az_deltaRateScale; 
+      az_deltaAxis1=((az_Azm1-az_Azm2)*(15.0/(AltAzTrackingRange/60.0))/2.0)*az_currentRate;
+      az_deltaAxis2=((az_Alt1-az_Alt2)*(15.0/(AltAzTrackingRange/60.0))/2.0)*az_currentRate; 
       
       // override for special case of near a celestial pole
       if (90.0-fabs(az_Dec)<=0.5) { az_deltaAxis1=0.0; az_deltaAxis2=0.0; }

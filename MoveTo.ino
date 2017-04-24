@@ -286,6 +286,17 @@ uint32_t isqrt32 (uint32_t n) {
 
 bool DecayModeTrack=false;
 
+// initialize stepper drivers
+void DecayModeTrackingInit() {
+  DecayModeTrack=false; 
+  digitalWrite(Axis1_EN,Axis1_Enabled); axis1Enabled=true;
+  digitalWrite(Axis2_EN,Axis2_Enabled); axis2Enabled=true;
+  delay(100);
+  DecayModeTracking(); 
+  digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
+  digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
+}
+
 // if stepper drive can switch decay mode, set it here
 void DecayModeTracking() {
   if (DecayModeTrack) return;

@@ -330,7 +330,6 @@ boolean highPrecision = true;
 #define TrackingNone             0
 #define TrackingSidereal         1
 #define TrackingMoveTo           2
-#define TrackingSiderealDisabled 3
 volatile byte trackingState      = TrackingNone;
 byte abortTrackingState          = TrackingNone;
 volatile byte lastTrackingState  = TrackingNone;
@@ -619,11 +618,20 @@ void setup() {
   timerRateBacklashAxis1=SiderealRate/BacklashTakeupRate;
   timerRateBacklashAxis2=(SiderealRate/BacklashTakeupRate)*timerRateRatio;
 
-  // starts the hardware timers that keep sidereal time, move the motors, etc.
-  Init_Start_Timers();
-
   // now read any saved values from EEPROM into varaibles to restore our last state
   Init_ReadEEPROM_Values();
+
+  // prep counters (for keeping time in main loop)
+  cli(); 
+  siderealTimer = lst;
+  guideSiderealTimer = lst;
+  PecSiderealTimer = lst;
+  housekeepingTimer = lst; 
+  sei();
+  last_loop_micros=micros();
+
+  // starts the hardware timers that keep sidereal time, move the motors, etc.
+  Init_Start_Timers();
 
   // get ready for serial communications
   PSerial.begin(9600); // for Tiva TM4C the serial is redirected to serial5 in serial.ino file
@@ -642,15 +650,6 @@ void setup() {
   Cmd1.init(9998,2000);
 #endif
  
-  // prep counters (for keeping time in main loop)
-  cli(); 
-  siderealTimer = lst;
-  guideSiderealTimer = lst;
-  PecSiderealTimer = lst;
-  housekeepingTimer=lst; 
-  sei();
-  last_loop_micros=micros();
-
   // autostart tracking
 #if defined(AUTOSTART_TRACKING_ON) && (defined(MOUNT_TYPE_GEM) || defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORKALT))
   // telescope should be set in the polar home (CWD) for a starting point

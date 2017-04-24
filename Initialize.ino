@@ -2,7 +2,7 @@
 // Functions for initializing pins, variables, and timers on startup
 
 void Init_Startup_Values() {
-// initialize some fixed-point values
+  // initialize some fixed-point values
   amountGuideAxis1.fixed=0;
   amountGuideAxis2.fixed=0;
   guideAxis1.fixed=0;
@@ -15,13 +15,56 @@ void Init_Startup_Values() {
   targetAxis1.part.f = 0;
   targetAxis2.part.m = 90L*(long)StepsPerDegreeAxis2;
   targetAxis2.part.f = 0;
-  fstepAxis1.fixed=doubleToFixed(StepsPerSecondAxis1/100.0);
 
-// initialize alignment
+  // default values for state variables
+  pierSide            = PierSideNone;
+  dirAxis1            = 1;
+  dirAxis2            = 1;
+  defaultDirAxis2     = defaultDirAxis2EInit;
+  if (latitude>0) defaultDirAxis1 = defaultDirAxis1NCPInit; else defaultDirAxis1 = defaultDirAxis1SCPInit;
+  newTargetRA         = 0;        
+  newTargetDec        = 0;
+  newTargetAlt        = 0;
+  newTargetAzm        = 0;
+  origTargetAxis1.fixed = 0;
+  origTargetAxis2       = 0;
+
+  // initialize alignment
+  alignNumStars       = 0;
+  alignThisStar       = 0;
+  indexAxis1          = 0;
+  indexAxis1Steps     = 0;
+  indexAxis2          = 0;
+  indexAxis2Steps     = 0;
   #ifdef MOUNT_TYPE_ALTAZM
   Align.init();
   #endif
   GeoAlign.init();
+
+   // reset meridian flip control
+  #ifdef MOUNT_TYPE_GEM
+  meridianFlip = MeridianFlipAlways;
+  #endif
+  #ifdef MOUNT_TYPE_FORK
+  meridianFlip = MeridianFlipAlign;
+  #endif
+  #ifdef MOUNT_TYPE_FORK_ALT
+  meridianFlip = MeridianFlipNever;
+  #endif
+  #ifdef MOUNT_TYPE_ALTAZM
+  meridianFlip = MeridianFlipNever;
+  #endif
+
+  // where we are
+  homeMount           = false;
+  atHome              = true;
+  lastError           = ERR_NONE;
+
+  // reset tracking and rates
+  trackingState       = TrackingNone;
+  lastTrackingState   = TrackingNone;
+  timerRateAxis1      = SiderealRate;
+  timerRateAxis2      = SiderealRate;
 }
 
 void Init_Pins() {
@@ -170,14 +213,10 @@ void Init_Pins() {
   #endif
 #endif
   
-  // initialize/enable the stepper drivers
-  pinMode(Axis1_EN,OUTPUT); digitalWrite(Axis1_EN,Axis1_Enabled); axis1Enabled=true;
-  pinMode(Axis2_EN,OUTPUT); digitalWrite(Axis2_EN,Axis2_Enabled); axis2Enabled=true;
-  delay(100);
-  DecayModeTracking();
-  // initialize/disable the stepper drivers
-  pinMode(Axis1_EN,OUTPUT); digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
-  pinMode(Axis2_EN,OUTPUT); digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
+  // initialize and disable the stepper drivers
+  pinMode(Axis1_EN,OUTPUT); 
+  pinMode(Axis2_EN,OUTPUT);
+  DecayModeTrackingInit();
 
 // if the stepper driver mode select pins are wired in, program any requested micro-step mode
 #if !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
