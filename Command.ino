@@ -230,7 +230,7 @@ void processCommands() {
       
 //   D - Distance Bars
 //  :D#    returns an "\0x7f#" if the mount is moving, otherwise returns "#".
-      if ((command[0]=='D') && (command[1]==0))  { if (trackingState==TrackingMoveTo) { reply[0]=(char)127; reply[1]=0; } else { reply[0]=0; } quietReply=true; } else 
+      if ((command[0]=='D') && (command[1]==0))  { if (trackingState==TrackingMoveTo) { reply[0]=(char)127; reply[1]=0; } else { reply[0]='#'; reply[1]=0; supress_frame=true; } quietReply=true; } else 
  
 //   G - Get Telescope Information
       if (command[0]=='G') {
