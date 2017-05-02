@@ -28,11 +28,6 @@
 // Enables goto assist mount modeling (for Eq mounts), default=OFF
 #define ALIGN_GOTOASSIST_OFF
 
-// Turns ethernet on for W5100 adapters, default=OFF
-// configure the interface IP address, gateway, and subnet mask in Ethernet.ino (DHCP is off by default)
-// good technical info. about using an Arduino Ethernet Shield: https://forum.pjrc.com/threads/25050-Teensy-3-0-3-1-W5100-ethernet-shield
-#define W5100_OFF
-
 // Mount type, default is _GEM (German Equatorial) other options are _FORK, _FORK_ALT.  _FORK switches off Meridian Flips after (1, 2 or 3 star) alignment is done.  _FORK_ALT disables Meridian Flips (1 star align.)
 // _ALTAZM is for Alt/Azm mounted 'scopes (1 star align only.)
 #define MOUNT_TYPE_GEM
