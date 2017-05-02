@@ -2,6 +2,8 @@ OnStep
 ======
 www.stellarjourney.com
 
+THIS IS THE BETA BRANCH, I RECOMMEND THIS WELL TESTED BRANCH FOR MOST USERS.  NEW FEATURES AND BUG FIXES ONLY WHEN I DEEM THEM NECESSARY AND LOW RISK.
+
 Computerized telescope goto control based on Arduino driven stepper motors.  All common mount types are supported: German Equatorial, Fork (and variations), and AltAzm (Dobsonian, etc.)
 
 Since I aquired an Losmandy G11 mount without any goto provision I decided to create my own solution. I was a bit reluctant to use a Gemini, mainly because of the cost, but also due to the reliablity since the servo motors are somewhat prone to failure. I also like to have complete control over the software/firmware so that no "show stopper" issues will ever be a problem for me.
