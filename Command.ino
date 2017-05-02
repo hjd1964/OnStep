@@ -9,7 +9,7 @@ unsigned long _coord_t=0;
 double _dec,_ra;
 
 // help with commands
-enum Command {COMMAND_NONE, COMMAND_SERIAL, COMMAND_SERIAL1, COMMAND_ETHERNET, COMMAND_ETHERNET1, COMMAND_SPI};
+enum Command {COMMAND_NONE, COMMAND_SERIAL, COMMAND_SERIAL1, COMMAND_SPI};
 char reply[50];
 char command[3];
 char parameter[25];
@@ -17,8 +17,6 @@ boolean commandError = false;
 boolean quietReply   = false;
 cb cmd;  // serial
 cb cmd1; // serial1
-cb cmde;  // ethernet
-cb cmde1; // ethernet1
 
 // process commands
 void processCommands() {
@@ -28,12 +26,6 @@ void processCommands() {
     // accumulate the command
     if ((PSerial.available()>0) && (!cmd.ready())) cmd.add(PSerial.read());
     if ((PSerial1.available()>0) && (!cmd1.ready())) cmd1.add(PSerial1.read());
-#ifdef ETHERNET_ON
-    if (!www_busy()) {
-      if ((Cmd.available()>0) && (!cmde.ready())) cmde.add(Cmd.read());
-      if ((Cmd1.available()>0) && (!cmde1.ready())) cmde1.add(Cmd1.read());
-    }
-#endif
 
     // send any reply
     if (PSerial.transmit() || PSerial1.transmit()) return;
@@ -42,10 +34,6 @@ void processCommands() {
     Command process_command = COMMAND_NONE;
     if (cmd.ready()) { strcpy(command,cmd.getCmd()); strcpy(parameter,cmd.getParameter()); cmd.flush(); process_command=COMMAND_SERIAL; }
     else if (cmd1.ready()) { strcpy(command,cmd1.getCmd()); strcpy(parameter,cmd1.getParameter()); cmd1.flush(); process_command=COMMAND_SERIAL1; }
-#ifdef ETHERNET_ON
-    else if (cmde.ready()) { strcpy(command,cmde.getCmd()); strcpy(parameter,cmde.getParameter()); cmde.flush(); process_command=COMMAND_ETHERNET; }
-    else if (cmde1.ready()) { strcpy(command,cmde1.getCmd()); strcpy(parameter,cmde1.getParameter()); cmde1.flush(); process_command=COMMAND_ETHERNET1; }
-#endif
     else return;
 
     if (process_command) {
@@ -1010,14 +998,12 @@ void processCommands() {
         if ((i>=0) && (i<10)) {
           if (process_command==COMMAND_SERIAL) {
             PSerial.print("1"); while (PSerial.transmit()); delay(20); PSerial.begin(baudRate[i]);
-          } else if (process_command==COMMAND_ETHERNET) {
-#ifdef ETHERNET_ON
-             Cmd.print("1");
-#endif
-          } else  {
+            quietReply=true; 
+          } else
+          if (process_command==COMMAND_SERIAL1) {
             PSerial1.print("1"); while (PSerial1.transmit()); delay(20); PSerial1.begin(baudRate[i]); 
-          }
-          quietReply=true; 
+            quietReply=true; 
+          } else commandError=true;
         } else commandError=true;
       } else
 //  :SCMM/DD/YY#
@@ -1457,19 +1443,6 @@ void processCommands() {
           if (!supress_frame) strcat(reply,"#");
           PSerial1.print(reply);
         }
-  
-#ifdef ETHERNET_ON
-        if (process_command==COMMAND_ETHERNET) {
-          if (cmde.checksum) checksum(reply);
-          if (!supress_frame) strcat(reply,"#");
-          Cmd.print(reply);
-        }
-        if (process_command==COMMAND_ETHERNET1) {
-          if (cmde1.checksum) checksum(reply);
-          if (!supress_frame) strcat(reply,"#");
-          Cmd1.print(reply);
-        }
-#endif       
       }
       quietReply=false;
    }

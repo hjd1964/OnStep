@@ -61,28 +61,6 @@
 #include "Align.h"
 #include "Command.h"
 
-#if defined(W5100_ON)
-#define ETHERNET_ON
-#include "SPI.h"
-#if defined(__AVR_ATmega2560__) || defined(__ARM_TI_TM4C__)
-// OnStep uses the EthernetPlus.h library for the W5100 on the Mega2560 and Launchpad TM4C:
-// this is available at: https://github.com/hjd1964/EthernetPlus and should be installed in your "~\Documents\Arduino\libraries" folder
-#include "EthernetPlus.h"
-#include "CmdServer.h"
-#endif
-#if defined(__ARM_Teensy3__)
-// OnStep uses the standard Ethernet.h library for the W5100 on the Teensy3.2:
-#include "Ethernet.h"
-#include "CmdServer.h"
-#endif
-#endif
-
-#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
-#define ETHERNET_ON
-#include "Ethernet.h"
-#include "CmdServer.h"
-#endif
-
 #if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
 #define F_BUS SysCtlClockGet() // no pre-scaling of timers on Tiva Launchpads
 #elif defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
@@ -475,11 +453,6 @@ byte pecBuffer[PECBufferSize];
   #endif
 #endif
 
-#ifdef ETHERNET_ON
-CmdServer Cmd;
-CmdServer Cmd1;
-#endif
-
 // current site index and name
 byte currentSite = 0; 
 char siteName[16];
@@ -636,19 +609,6 @@ void setup() {
   // get ready for serial communications
   PSerial.begin(9600); // for Tiva TM4C the serial is redirected to serial5 in serial.ino file
   PSerial1.begin(9600);
-#ifdef ETHERNET_ON
-  // initialize the ethernet device
-#if defined(ETHERNET_USE_DHCP_ON)
-  Ethernet.begin(mac);
-#else
-  Ethernet.begin(mac, ip, myDns, gateway, subnet);
-#endif
-  // get the web-server ready
-  www_init();
-  // get the cmd-servers ready
-  Cmd.init(9999,2000);
-  Cmd1.init(9998,2000);
-#endif
  
   // autostart tracking
 #if defined(AUTOSTART_TRACKING_ON) && (defined(MOUNT_TYPE_GEM) || defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORKALT))
@@ -916,11 +876,6 @@ void loop() {
   } else {
     // COMMAND PROCESSING --------------------------------------------------------------------------------
     processCommands();
-#ifdef ETHERNET_ON
-    www_handleClient();
-    if (!www_busy()) Cmd.handleClient();
-    if (!www_busy()) Cmd1.handleClient();
-#endif
   }
 }
 
