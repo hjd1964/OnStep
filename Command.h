@@ -23,6 +23,7 @@ class cb {
       if (c=='#') {
         // validate the command frame, normal command
         if (!(cbp>1) && (cb[0]==':') && (cb[cbp-1]=='#')) { flush(); return false; }
+        if ((cb[0]==':') && (cb[1]=='#') && (cb[2]==0)) { flush(); return false; }
 
         if (checksum) {
           // checksum the data, for example ":11111126".  I don't include the command frame in the checksum.  The error response is a checksumed null string "00#" which means re-transmit.
