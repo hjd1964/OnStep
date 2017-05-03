@@ -583,8 +583,6 @@ void setup() {
   SiderealRate=siderealInterval/StepsPerSecondAxis1;
   timerRateAxis1=SiderealRate;
   timerRateAxis2=SiderealRate;
-  SetTrackingRate(default_tracking_rate);
-  SetDeltaTrackingRate();
 
   // backlash takeup rates
   TakeupRate=round(SiderealRate/1.1);
@@ -593,6 +591,9 @@ void setup() {
 
   // now read any saved values from EEPROM into varaibles to restore our last state
   Init_ReadEEPROM_Values();
+
+  SetTrackingRate(default_tracking_rate);
+  SetDeltaTrackingRate();
 
   // prep counters (for keeping time in main loop)
   cli(); 
