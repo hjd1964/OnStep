@@ -644,9 +644,7 @@ void loop() {
             startGuideAxis1(c1,currentGuideRate,-1);
   #endif
           }
-          if (c1=='b') {
-            cli(); if ((guideDirAxis1) && (guideDirAxis1!='b')) { guideDirAxis1='b'; guideBreakTimeAxis1=millis(); } sei(); // break
-          }
+          if (c1=='b') stopGuideAxis1();
         }
   
         char c2=0;
@@ -663,9 +661,7 @@ void loop() {
             startGuideAxis2(c2,currentGuideRate,-1);
   #endif
           }
-          if (c2=='b') {
-            cli(); if ((guideDirAxis2) && (guideDirAxis2!='b')) { guideDirAxis2='b'; guideBreakTimeAxis2=millis(); } sei(); // break
-          }
+          if (c2=='b') stopGuideAxis2();
         }
       }
     }
