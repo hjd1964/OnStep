@@ -283,6 +283,7 @@ bool   autoMeridianFlip = false;                   // automatically do a meridia
 #define Axis1_Disabled LOW
 #define Axis1_Enabled HIGH
 #endif
+boolean axis1Enabled = false;
 #if defined(AXIS2_DISABLED_HIGH)
 #define Axis2_Disabled HIGH
 #define Axis2_Enabled LOW
@@ -291,6 +292,7 @@ bool   autoMeridianFlip = false;                   // automatically do a meridia
 #define Axis2_Disabled LOW
 #define Axis2_Enabled HIGH
 #endif
+boolean axis2Enabled = false;
 
 #define defaultDirAxis2EInit   1
 #define defaultDirAxis2WInit   0
@@ -385,11 +387,6 @@ volatile uint32_t guideStartTimeAxis1 = 0;
 volatile uint32_t guideStartTimeAxis2 = 0;
 volatile uint32_t guideBreakTimeAxis1 = 0;
 volatile uint32_t guideBreakTimeAxis2 = 0;
-
-long lasttargetAxis1=0;
-long debugv1 = 0;
-boolean axis1Enabled = false;
-boolean axis2Enabled = false;
 
 double  guideTimerBaseRate = 0;
 fixed_t amountGuideAxis1;
