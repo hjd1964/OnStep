@@ -377,9 +377,11 @@ byte currentPulseGuideRate   = GuideRate1x;
 volatile byte activeGuideRate= GuideRateNone;
 
 volatile byte guideDirAxis1           = 0;
+char          ST4DirAxis1             = 'b';
 long          guideDurationAxis1      = -1;
 unsigned long guideDurationLastAxis1  = 0;
 volatile byte guideDirAxis2           = 0;
+char          ST4DirAxis2             = 'b';
 long          guideDurationAxis2      = -1;
 unsigned long guideDurationLastAxis2  = 0;
 
@@ -481,12 +483,6 @@ volatile int backlashAxis1  = 0;
 volatile int backlashAxis2  = 0;
 volatile int blAxis1        = 0;
 volatile int blAxis2        = 0;
-
-// ST4 interface
-char ST4RA_state = 0;
-char ST4RA_last = 0;
-char ST4DE_state = 0;
-char ST4DE_last = 0;
 
 // EEPROM Info --------------------------------------------------------------------------------------------------------------
 // 0-1023 bytes
@@ -638,50 +634,45 @@ void loop() {
       byte w1=digitalRead(ST4RAw); byte e1=digitalRead(ST4RAe); byte n1=digitalRead(ST4DEn); byte s1=digitalRead(ST4DEs);
       delayMicroseconds(50);
       byte w2=digitalRead(ST4RAw); byte e2=digitalRead(ST4RAe); byte n2=digitalRead(ST4DEn); byte s2=digitalRead(ST4DEs);
+
       // if signals aren't stable ignore them
       if ((w1==w2) && (e1==e2) && (n1==n2) && (s1==s2)) {
-        ST4RA_state=0; if (w1==LOW) { if (e1!=LOW) ST4RA_state='w'; } else if (e1==LOW) ST4RA_state='e';
-        ST4DE_state=0; if (n1==LOW) { if (s1!=LOW) ST4DE_state='n'; } else if (s1==LOW) ST4DE_state='s';
-      }
-
-      // RA changed?
-      if (ST4RA_last!=ST4RA_state) {
-        ST4RA_last=ST4RA_state;
-        if (ST4RA_state) {
-  #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
-    #ifdef ST4_HAND_CONTROL_ON
-          enableGuideRate(currentGuideRate);
-      #else
-          enableGuideRate(currentPulseGuideRate);
-      #endif
-    #else
-          enableGuideRate(currentGuideRate);
-    #endif
-          guideDirAxis1=ST4RA_state;
-          guideDurationAxis1=-1;
-          cli(); if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRate; else guideTimerRateAxis1=guideTimerBaseRate; sei();
-        } else {
-          if (guideDirAxis1) { guideDirAxis1='b'; }
-        }
-      }
-      // Dec changed?
-      if (ST4DE_last!=ST4DE_state) {
-        ST4DE_last=ST4DE_state;
-        if (ST4DE_state) { 
-  #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
-    #ifdef ST4_HAND_CONTROL_ON
-          enableGuideRate(currentGuideRate);
-    #else
-          enableGuideRate(currentPulseGuideRate);
-    #endif
+        char c1=0;
+        if ((w1==HIGH) && (e1==HIGH)) c1='b';
+        if ((w1==LOW)  && (e1==HIGH)) c1='w';
+        if ((w1==HIGH) && (e1==LOW))  c1='e';
+        if ((w1==LOW)  && (e1==LOW))  c1='+';
+        if (c1!=ST4DirAxis1) {
+          ST4DirAxis1=c1;
+          if ((c1=='e') || (c1=='w')) {
+  #if defined(SEPERATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
+            startGuideAxis1(c1,currentPulseGuideRate,-1);
   #else
-          enableGuideRate(currentGuideRate);
+            startGuideAxis1(c1,currentGuideRate,-1);
   #endif
-          guideDirAxis2=ST4DE_state;
-          guideDurationAxis2=-1;
-          cli(); if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRate; else guideTimerRateAxis2=guideTimerBaseRate; sei();
-        } else {
-          if (guideDirAxis2) { guideDirAxis2='b'; }
+          }
+          if (c1=='b') {
+            cli(); if ((guideDirAxis1) && (guideDirAxis1!='b')) { guideDirAxis1='b'; guideBreakTimeAxis1=millis(); } sei(); // break
+          }
+        }
+  
+        char c2=0;
+        if ((n1==HIGH) && (s1==HIGH)) c2='b';
+        if ((n1==LOW)  && (s1==HIGH)) c2='n';
+        if ((n1==HIGH) && (s1==LOW))  c2='s';
+        if ((n1==LOW)  && (s1==LOW))  c2='+';
+        if (c2!=ST4DirAxis2) {
+          ST4DirAxis2=c2;
+          if ((c2=='n') || (c2=='s')) {
+  #if defined(SEPERATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
+            startGuideAxis2(c2,currentPulseGuideRate,-1);
+  #else
+            startGuideAxis2(c2,currentGuideRate,-1);
+  #endif
+          }
+          if (c2=='b') {
+            cli(); if ((guideDirAxis2) && (guideDirAxis2!='b')) { guideDirAxis2='b'; guideBreakTimeAxis2=millis(); } sei(); // break
+          }
         }
       }
     }

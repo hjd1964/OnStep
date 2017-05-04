@@ -38,3 +38,54 @@ void Guide() {
     }
   }
 }
+
+bool startGuideAxis1(char c, double guideRate, long guideDuration) {
+  if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo) && (c!=guideDirAxis1)) {
+    // block user from changing direction at high rates, just stop the guide instead
+    if ((guideDirAxis1) && (fabs(guideTimerRateAxis1)>2)) { 
+      if (guideDirAxis1!='b') { guideDirAxis1='b'; guideBreakTimeAxis1=millis(); } // break
+    } else {
+      enableGuideRate(guideRate);
+      guideDirAxis1=c;
+      guideDurationLastAxis1=micros();
+      guideDurationAxis1=guideDuration;
+      cli();
+      guideStartTimeAxis1=millis();
+      if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRate; else guideTimerRateAxis1=guideTimerBaseRate; 
+      sei();
+    }
+  } else return false;
+  return true;
+}
+
+void stopGuideAxis1() {
+  if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
+    cli(); if ((guideDirAxis1) && (guideDirAxis1!='b')) { guideDirAxis1='b'; guideBreakTimeAxis1=millis(); } sei(); // break
+  }
+}
+  
+bool startGuideAxis2(char c, double guideRate, long guideDuration) {
+  if (((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) && (c!=guideDirAxis2)) {
+    // block user from changing direction at high rates, just stop the guide instead
+    if ((guideDirAxis2) && (fabs(guideTimerRateAxis2)>2)) { 
+      if (guideDirAxis2!='b') { guideDirAxis2='b'; guideBreakTimeAxis2=millis(); } // break
+    } else {
+      enableGuideRate(guideRate);
+      guideDirAxis2=c;
+      guideDurationLastAxis2=micros();
+      guideDurationAxis2=guideDuration;
+      cli();
+      guideStartTimeAxis2=millis();
+      if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRate; else guideTimerRateAxis2=guideTimerBaseRate; 
+      sei();
+    }
+  } else return false;
+  return true;
+}
+
+void stopGuideAxis2() {
+  if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
+    cli(); if ((guideDirAxis2) && (guideDirAxis2!='b')) { guideDirAxis2='b'; guideBreakTimeAxis2=millis(); } sei(); // break
+  }
+}
+

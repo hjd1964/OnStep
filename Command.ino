@@ -794,72 +794,32 @@ void processCommands() {
         if ( (atoi2((char *)&parameter[1],&i)) && ((i>=0) && (i<=16399)) && (parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) { 
           if (((parameter[0]=='e') || (parameter[0]=='w')) && (guideDirAxis1==0)) {
 #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
-            enableGuideRate(currentPulseGuideRate);
+            startGuideAxis1(parameter[0],currentPulseGuideRate,i);
 #else
-            enableGuideRate(currentGuideRate);
+            startGuideAxis1(parameter[0],currentGuideRate,i);
 #endif
-            guideDirAxis1=parameter[0];
-            guideDurationLastAxis1=micros();
-            guideDurationAxis1=(long)i*1000L;
-            cli();
-            guideStartTimeAxis1=millis();
-            if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRate; else guideTimerRateAxis1=guideTimerBaseRate; 
-            sei();
             quietReply=true;
           } else
           if (((parameter[0]=='n') || (parameter[0]=='s')) && (guideDirAxis2==0)) { 
 #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
-            enableGuideRate(currentPulseGuideRate);
+            startGuideAxis2(parameter[0],currentPulseGuideRate,i);
 #else
-            enableGuideRate(currentGuideRate);
+            startGuideAxis2(parameter[0],currentGuideRate,i);
 #endif
-            guideDirAxis2=parameter[0]; 
-            guideDurationLastAxis2=micros();
-            guideDurationAxis2=(long)i*1000L; 
-            cli();
-            guideStartTimeAxis2=millis();
-            if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRate; else guideTimerRateAxis2=guideTimerBaseRate; 
-            sei();
             quietReply=true;
           } else commandError=true;
         } else commandError=true;
       } else
 //  :Me# & :Mw#      Move Telescope East or West at current slew rate
 //         Returns: Nothing
-      if ((command[1]=='e') || (command[1]=='w')) { 
-        if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo) && (command[1]!=guideDirAxis1)) {
-          // block user from changing direction at high rates, just stop the guide instead
-          if ((guideDirAxis1) && (fabs(guideTimerRateAxis1)>2)) { 
-            if (guideDirAxis1!='b') { guideDirAxis1='b'; guideBreakTimeAxis1=millis(); } // break
-          } else {
-            enableGuideRate(currentGuideRate);
-            guideDirAxis1=command[1];
-            guideDurationAxis1=-1;
-            cli();
-            guideStartTimeAxis1=millis();
-            if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRate; else guideTimerRateAxis1=guideTimerBaseRate; 
-            sei();
-          }
-        }
+      if ((command[1]=='e') || (command[1]=='w')) {
+        startGuideAxis1(command[1],currentGuideRate,-1);
         quietReply=true;
       } else
 //  :Mn# & :Ms#      Move Telescope North or South at current slew rate
 //         Returns: Nothing
-      if ((command[1]=='n') || (command[1]=='s')) { 
-        if (((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) && (command[1]!=guideDirAxis2)) {
-          // block user from changing direction at high rates, just stop the guide instead
-          if ((guideDirAxis2) && (fabs(guideTimerRateAxis2)>2)) { 
-            if (guideDirAxis2!='b') { guideDirAxis2='b'; guideBreakTimeAxis2=millis(); } // break
-          } else {
-            enableGuideRate(currentGuideRate);
-            guideDirAxis2=command[1];
-            guideDurationAxis2=-1;
-            cli();
-            guideStartTimeAxis2=millis();
-            if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRate; else guideTimerRateAxis2=guideTimerBaseRate; 
-            sei();
-          }
-        }
+      if ((command[1]=='n') || (command[1]=='s')) {
+        startGuideAxis2(command[1],currentGuideRate,-1);
         quietReply=true;
       } else
 
@@ -950,17 +910,13 @@ void processCommands() {
 //  :Qe# & Qw#   Halt east/westward Slews
 //         Returns: Nothing
         if ((command[1]=='e') || (command[1]=='w')) { 
-          if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
-            cli(); if ((guideDirAxis1) && (guideDirAxis1!='b')) { guideDirAxis1='b'; guideBreakTimeAxis1=millis(); } sei(); // break
-          }
+          stopGuideAxis1();
           quietReply=true; 
         } else
 //  :Qn# & Qs#   Halt north/southward Slews
 //         Returns: Nothing
         if ((command[1]=='n') || (command[1]=='s')) {
-          if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
-            cli(); if ((guideDirAxis2) && (guideDirAxis2!='b')) { guideDirAxis2='b'; guideBreakTimeAxis2=millis(); } sei(); // break
-          }
+          stopGuideAxis2();
           quietReply=true; 
         } else commandError=true;
       } else
@@ -1471,10 +1427,8 @@ void enableGuideRate(int g) {
 
 void stopMount() {
   if ((parkStatus==NotParked) || (parkStatus==Parking)) {
-    cli();
-    if ((guideDirAxis1) && (guideDirAxis1!='b')) { guideDirAxis1='b'; guideBreakTimeAxis1=millis(); } // break
-    if ((guideDirAxis2) && (guideDirAxis2!='b')) { guideDirAxis2='b'; guideBreakTimeAxis2=millis(); } // break
-    sei();
+    stopGuideAxis1();
+    stopGuideAxis2();
     if (trackingState==TrackingMoveTo) { abortSlew=true; }
   }
 }
