@@ -379,7 +379,9 @@ byte currentPulseGuideRate   = GuideRate1x;
 volatile byte activeGuideRate= GuideRateNone;
 
 volatile byte guideDirAxis1           = 0;
+char          ST4DirAxis1             = 'b';
 volatile byte guideDirAxis2           = 0;
+char          ST4DirAxis2             = 'b';
 
 volatile double   guideTimerRateAxis1 = 0.0;
 volatile double   guideTimerRateAxis2 = 0.0;

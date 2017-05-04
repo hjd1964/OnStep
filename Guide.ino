@@ -1,10 +1,8 @@
 // ---------------------------------------------------------------------------------------------------
 // Guide, commands to move the mount in any direction at a series of fixed rates
 
-char          ST4DirAxis1             = 'b';
 long          guideDurationAxis1      = -1;
 unsigned long guideDurationLastAxis1  = -1;
-char          ST4DirAxis2             = 'b';
 long          guideDurationAxis2      = -1;
 unsigned long guideDurationLastAxis2  = -1;
 
