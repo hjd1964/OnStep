@@ -22,7 +22,7 @@
 // ******************* These new pin assignments aren't well tested and mistakes might have been made, a mistake could damage your MCU etc. Use at your own risk. *****************
 //
 // This must be _ON to use the pin assignments given in this Config.h!  The Launchpad TM4C123GH6PM and LM4F120H5QR also have alternate pin assignments in this mode, see Pins.h
-// this allows minimal wiring for Pololu style stepper driver modules and also frees SPI pins to allow use of the Arduino Ethernet Shield on the Teensy3.2 and Launchpad TM4C123GXL
+// this allows minimal wiring for Pololu style stepper driver modules and generally makes better use of the limited number of pins on a Teensy3.2
 //
 #define ALTERNATE_PINMAP_ON
 // ******************* These new pin assignments aren't well tested and mistakes might have been made, a mistake could damage your MCU etc. Use at your own risk. *****************
@@ -33,10 +33,8 @@
 // Turns debugging on, used during testing, default=OFF
 #define DEBUG_OFF
 
-// Turns ethernet on for W5100 adapters, default=OFF
-// configure the interface IP address, gateway, and subnet mask in Ethernet.ino (DHCP is off by default)
-// good technical info. about using an Arduino Ethernet Shield: https://forum.pjrc.com/threads/25050-Teensy-3-0-3-1-W5100-ethernet-shield
-#define W5100_OFF
+// Enables goto assist mount modeling (for Eq mounts), default=OFF
+#define ALIGN_GOTOASSIST_OFF
 
 // ESP8266 reset and GPIO0 control, this sets run mode for normal operation.  Uploading programmer firmware to the OpStep MCU can then enable sending new firmware to the ESP8266-01
 // Only supported on the Teensy3.2, Pin 18 (Aux1) for Rst and Pin 5 (Aux2) for GPIO0 control.  Choose only one feature on Aux1/2.
