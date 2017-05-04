@@ -6,6 +6,16 @@ unsigned long guideDurationLastAxis1  = -1;
 long          guideDurationAxis2      = -1;
 unsigned long guideDurationLastAxis2  = -1;
 
+// initialize guiding
+void initGuide() {
+  guideDirAxis1          = 0;
+  guideDurationAxis1     = -1;
+  guideDurationLastAxis1 = -1;
+  guideDirAxis2          = 0;
+  guideDurationAxis2     = -1;
+  guideDurationLastAxis2 = -1;
+}
+
 void Guide() {
   // 1/100 second sidereal timer, controls issue of steps at the selected RA and/or Dec rate(s) 
   cli(); long guideLst=lst; sei();
@@ -44,18 +54,8 @@ void Guide() {
   }
 }
 
-// initialize guiding
-void initGuide() {
-  guideDirAxis1          = 0;
-  guideDurationAxis1     = -1;
-  guideDurationLastAxis1 = -1;
-  guideDirAxis2          = 0;
-  guideDurationAxis2     = -1;
-  guideDurationLastAxis2 = -1;
-}
-  
-// start a guide in RA or Azm, direction must be 'e', 'w', or 'b', guide rate in x the sidereal rate (=1,) guideDuration is in ms (-1 to ignore) 
-bool startGuideAxis1(char direction, double guideRate, long guideDuration) {
+// start a guide in RA or Azm, direction must be 'e', 'w', or 'b', guideRate is the rate selection (0 to 9), guideDuration is in ms (-1 to ignore) 
+bool startGuideAxis1(char direction, int guideRate, long guideDuration) {
   if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo) && (direction!=guideDirAxis1)) {
     // block user from changing direction at high rates, just stop the guide instead
     if ((guideDirAxis1) && (fabs(guideTimerRateAxis1)>2)) { 
@@ -81,8 +81,8 @@ void stopGuideAxis1() {
   }
 }
   
-// start a guide in Dec or Alt, direction must be 'n', 's', or 'b', guide rate in x the sidereal rate (=1,) guideDuration is in ms (-1 to ignore) 
-bool startGuideAxis2(char c, double guideRate, long guideDuration) {
+// start a guide in Dec or Alt, direction must be 'n', 's', or 'b', guideRate is the rate selection (0 to 9), guideDuration is in ms (-1 to ignore) 
+bool startGuideAxis2(char c, int guideRate, long guideDuration) {
   if (((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) && (c!=guideDirAxis2)) {
     // block user from changing direction at high rates, just stop the guide instead
     if ((guideDirAxis2) && (fabs(guideTimerRateAxis2)>2)) { 
