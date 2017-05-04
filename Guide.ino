@@ -47,7 +47,7 @@ void Guide() {
 }
 
 // initialize guiding
-void initGuideRates() {
+void initGuide() {
   guideDirAxis1          = 0;
   guideDurationAxis1     = -1;
   guideDurationLastAxis1 = -1;
