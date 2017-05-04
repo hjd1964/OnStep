@@ -55,13 +55,7 @@ boolean setHome() {
   #endif
   if (!pecRecorded) pecStatus=IgnorePEC;
 
-  // initialize guiding
-  guideDirAxis1          = 0;
-  guideDurationAxis1     = 0;
-  guideDurationLastAxis1 = 0;
-  guideDirAxis2          = 0;
-  guideDurationAxis2     = 0;
-  guideDurationLastAxis2 = 0;
+  initGuideRates();
 
   // the polar home position
   startAxis1 = celestialPoleAxis1*(long)StepsPerDegreeAxis1;

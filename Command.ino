@@ -1404,27 +1404,6 @@ void processCommands() {
    }
 }
 
-// calculates the tracking speed for move commands
-void setGuideRate(int g) {
-  currentGuideRate=g;
-  if ((g<=GuideRate1x) && (currentPulseGuideRate!=g)) { currentPulseGuideRate=g; EEPROM.update(EE_pulseGuideRate,g); }
-}
-
-void enableGuideRate(int g) {
-  // don't do these lengthy calculations unless we have to
-  if (activeGuideRate==g) return;
-  
-  activeGuideRate=g;
-
-  // this enables the guide rate
-  guideTimerBaseRate=(double)(guideRates[g]/15.0);
-
-  cli();
-  amountGuideAxis1.fixed=doubleToFixed((guideTimerBaseRate*StepsPerSecondAxis1)/100.0);
-  amountGuideAxis2.fixed=doubleToFixed((guideTimerBaseRate*StepsPerSecondAxis2)/100.0);
-  sei();
-}
-
 void stopMount() {
   if ((parkStatus==NotParked) || (parkStatus==Parking)) {
     stopGuideAxis1();
