@@ -328,8 +328,10 @@ double az_deltaRateScale=1.0;
 // az_deltaH/D are in arc-seconds/second
 // trackingTimerRateAxis1/2 are x the sidereal rate
 void SetDeltaTrackingRate() {
+  cli();
   trackingTimerRateAxis1 = az_deltaAxis1/15.0;
   trackingTimerRateAxis2 = az_deltaAxis2/15.0;
+  sei();
   fstepAxis1.fixed=doubleToFixed( (((double)StepsPerDegreeAxis1/240.0)*trackingTimerRateAxis1)/100.0 );
   fstepAxis2.fixed=doubleToFixed( (((double)StepsPerDegreeAxis2/240.0)*trackingTimerRateAxis2)/100.0 );
 }
@@ -663,5 +665,4 @@ void SetAccelerationRates(double maxRate) {
   StepsForRateChangeAxis1= ((double)DegreesForAcceleration/sqrt((double)StepsPerDegreeAxis1))*0.3333333*StepsPerDegreeAxis1*maxRate;
   StepsForRateChangeAxis2= ((double)DegreesForAcceleration/sqrt((double)StepsPerDegreeAxis2))*0.3333333*StepsPerDegreeAxis2*maxRate;
 }
-
 
