@@ -1,19 +1,19 @@
 // ---------------------------------------------------------------------------------------------------
 // Guide, commands to move the mount in any direction at a series of fixed rates
 
-long          guideDurationAxis1      = -1;
-unsigned long guideDurationLastAxis1  = -1;
-long          guideDurationAxis2      = -1;
-unsigned long guideDurationLastAxis2  = -1;
+long          guideTimeRemainingAxis1    = -1;
+unsigned long guideTimeThisIntervalAxis1 = -1;
+long          guideTimeRemainingAxis2    = -1;
+unsigned long guideTimeThisIntervalAxis2 = -1;
 
 // initialize guiding
 void initGuide() {
   guideDirAxis1          = 0;
-  guideDurationAxis1     = -1;
-  guideDurationLastAxis1 = -1;
+  guideTimeRemainingAxis1     = -1;
+  guideTimeThisIntervalAxis1 = -1;
   guideDirAxis2          = 0;
-  guideDurationAxis2     = -1;
-  guideDurationLastAxis2 = -1;
+  guideTimeRemainingAxis2     = -1;
+  guideTimeThisIntervalAxis2 = -1;
 }
 
 void Guide() {
@@ -27,28 +27,28 @@ void Guide() {
         if (guideDirAxis1=='e') guideAxis1.fixed=-amountGuideAxis1.fixed; else if (guideDirAxis1=='w') guideAxis1.fixed=amountGuideAxis1.fixed;
 
         // for pulse guiding, count down the mS and stop when timed out
-        if (guideDurationAxis1>0)  {
-          guideDurationAxis1-=(long)(micros()-guideDurationLastAxis1);
-          guideDurationLastAxis1=micros();
-          if (guideDurationAxis1<=0) { guideDirAxis1='b'; } // break
+        if (guideTimeRemainingAxis1>0) {
+          guideTimeRemainingAxis1-=(long)(micros()-guideTimeThisIntervalAxis1);
+          guideTimeThisIntervalAxis1=micros();
+          if (guideTimeRemainingAxis1<=0) { guideDirAxis1='b'; } // break
         }
       } else {
         // don't count time if in backlash
-        guideDurationLastAxis1=micros();
+        guideTimeThisIntervalAxis1=micros();
       }
     }
     
     if (guideDirAxis2) {
       if (!inbacklashAxis2) {
         // for pulse guiding, count down the mS and stop when timed out
-        if (guideDurationAxis2>0)  {
-          guideDurationAxis2-=(long)(micros()-guideDurationLastAxis2);
-          guideDurationLastAxis2=micros();
-          if (guideDurationAxis2<=0) { guideDirAxis2='b'; }  // break 
+        if (guideTimeRemainingAxis2>0) {
+          guideTimeRemainingAxis2-=(long)(micros()-guideTimeThisIntervalAxis2);
+          guideTimeThisIntervalAxis2=micros();
+          if (guideTimeRemainingAxis2<=0) { guideDirAxis2='b'; }  // break 
         }
       } else {
         // don't count time if in backlash
-        guideDurationLastAxis2=micros();
+        guideTimeThisIntervalAxis2=micros();
       }
     }
   }
@@ -63,8 +63,8 @@ bool startGuideAxis1(char direction, int guideRate, long guideDuration) {
     } else {
       enableGuideRate(guideRate);
       guideDirAxis1=direction;
-      guideDurationLastAxis1=micros();
-      guideDurationAxis1=guideDuration;
+      guideTimeThisIntervalAxis1=micros();
+      guideTimeRemainingAxis1=guideDuration;
       cli();
       guideStartTimeAxis1=millis();
       if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRate; else guideTimerRateAxis1=guideTimerBaseRate; 
@@ -90,8 +90,8 @@ bool startGuideAxis2(char c, int guideRate, long guideDuration) {
     } else {
       enableGuideRate(guideRate);
       guideDirAxis2=c;
-      guideDurationLastAxis2=micros();
-      guideDurationAxis2=guideDuration;
+      guideTimeThisIntervalAxis2=micros();
+      guideTimeRemainingAxis2=guideDuration;
       cli();
       guideStartTimeAxis2=millis();
       if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRate; else guideTimerRateAxis2=guideTimerBaseRate; 
