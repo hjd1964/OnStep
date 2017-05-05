@@ -598,7 +598,11 @@ void setup() {
 
   // get ready for serial communications
   PSerial.begin(9600); // for Tiva TM4C the serial is redirected to serial5 in serial.ino file
+#ifdef SERIAL1_BAUD_DEFAULT
+  PSerial1.begin(SERIAL1_BAUD_DEFAULT);
+#else
   PSerial1.begin(9600);
+#endif
  
   // autostart tracking
 #if defined(AUTOSTART_TRACKING_ON) && (defined(MOUNT_TYPE_GEM) || defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORKALT))
