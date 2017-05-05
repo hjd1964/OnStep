@@ -136,10 +136,10 @@ byte park() {
 // returns a parked telescope to operation, you must set date and time before calling this.  it also
 // depends on the latitude, longitude, and timeZone; but those are stored and recalled automatically
 boolean unpark() {
-  parkStatus=EEPROM.read(EE_parkStatus);
-  parkSaved =EEPROM.read(EE_parkSaved);
-  parkStatus=Parked;
-  if (trackingState!=TrackingMoveTo) {
+  if (atHome) {
+    parkStatus=EEPROM.read(EE_parkStatus);
+    parkSaved =EEPROM.read(EE_parkSaved);
+    parkStatus=Parked;
     if (parkStatus==Parked) {
       if (parkSaved) {
         // enable the stepper drivers
@@ -156,8 +156,8 @@ boolean unpark() {
 
         // get our position
         cli();
-        posAxis1=EEPROM_readLong(EE_posAxis1);  targetAxis1.part.m=posAxis1; targetAxis1.part.f=0;
-        posAxis2=EEPROM_readLong(EE_posAxis2);  targetAxis2.part.m=posAxis2; targetAxis2.part.f=0;
+        posAxis1=EEPROM_readLong(EE_posAxis1); targetAxis1.part.m=posAxis1; targetAxis1.part.f=0;
+        posAxis2=EEPROM_readLong(EE_posAxis2); targetAxis2.part.m=posAxis2; targetAxis2.part.f=0;
         trueAxis1=EEPROM_readLong(EE_trueAxis1);
         trueAxis2=EEPROM_readLong(EE_trueAxis2);
 
