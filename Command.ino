@@ -1142,7 +1142,7 @@ void processCommands() {
             if (abs(f)<0.1) { 
               trackingState = TrackingNone; 
             } else {
-              trackingTimerRateAxis1=(f/60.0)/1.00273790935;
+              cli(); trackingTimerRateAxis1=(f/60.0)/1.00273790935; sei();
             }
           } else commandError=true;
         } else commandError=true;
