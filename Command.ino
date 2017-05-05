@@ -440,7 +440,7 @@ void processCommands() {
               case '3': sprintf(reply,"%ld",(long)(MaxRate)); quietReply=true; break;                       // MaxRate (default)
               case '4': if (meridianFlip==MeridianFlipNever) { sprintf(reply,"%d N",(int)(pierSide)); } else { sprintf(reply,"%d",(int)(pierSide)); } quietReply=true; break; // pierSide (N if never)
               case '5': sprintf(reply,"%i",(int)autoMeridianFlip); quietReply=true; break;                  // autoMeridianFlip
-              case '6':                                                                                     // preffered pier side
+              case '6':                                                                                     // preferred pier side
                 if (preferredPierSide==PPS_EAST) strcpy(reply,"E"); else
                 if (preferredPierSide==PPS_WEST) strcpy(reply,"W"); else strcpy(reply,"B");
                 quietReply=true; break;
@@ -470,14 +470,16 @@ void processCommands() {
             switch (parameter[1]) {
               case '0': cli(); temp=(long)(posAxis1-((long)targetAxis1.part.m)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;        // Debug0, true vs. target RA position
               case '1': cli(); temp=(long)(posAxis2-((long)targetAxis2.part.m)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;        // Debug1, true vs. target Dec position
+              case '2': cli(); temp=(long)trackingState; sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                                // Debug2, trackingState
               case '3': sprintf(reply,"%ld",(long)(az_deltaAxis1*1000.0*1.00273790935)); quietReply=true; break;                                  // Debug3, RA refraction tracking rate
               case '4': sprintf(reply,"%ld",(long)(az_deltaAxis2*1000.0*1.00273790935)); quietReply=true; break;                                  // Debug4, Dec refraction tracking rate
               case '5': sprintf(reply,"%ld",(long)(ZenithTrackingRate()*1000.0*1.00273790935)); quietReply=true; break;                           // Debug5, Alt RA refraction tracking rate
-              case '6': cli(); temp=(long)(targetAxis1.part.m);  sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                        // Debug6, HA target position
+              case '6': cli(); temp=(long)(targetAxis1.part.m); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                         // Debug6, HA target position
               case '7': cli(); temp=(long)(targetAxis2.part.m); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                         // Debug7, Dec target position
-              case '8': cli(); temp=(long)(posAxis1);     sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                               // Debug8, HA motor position
-              case '9': cli(); temp=(long)(posAxis2);    sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                                // Debug9, Dec motor position
+              case '8': cli(); temp=(long)(posAxis1); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                                   // Debug8, HA motor position
+              case '9': cli(); temp=(long)(posAxis2); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                                   // Debug9, Dec motor position
               case 'A': sprintf(reply,"%ld%%",(worst_loop_time*100L)/9970L); worst_loop_time=0; quietReply=true; break;                           // DebugA, Workload
+              case 'B': cli(); temp=(long)(trackingTimerRateAxis1*1000.0); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;              // DebugB, trackingTimerRateAxis1
             }
           } else commandError=true;
         } else commandError=true;
