@@ -486,7 +486,7 @@ void Init_Start_Timers() {
 #endif
 
   // wait for the sidereal clock to tick
-  delay(150);
+  delay(15);
 
 #if defined(__AVR_ATmega2560__)
   TCCR3B = (1 << WGM12) | (1 << CS11); // ~0 to 0.032 seconds (31 steps per second minimum, granularity of timer is 0.5uS) /8  pre-scaler
