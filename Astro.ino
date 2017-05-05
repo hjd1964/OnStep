@@ -328,10 +328,12 @@ double az_currentRate=1.0;
 // az_deltaH/D are in arc-seconds/second
 // trackingTimerRateAxis1/2 are x the sidereal rate
 void SetDeltaTrackingRate() {
+  cli();
   if (trackingState==TrackingSidereal) trackingTimerRateAxis1=az_deltaAxis1/15.0; else trackingTimerRateAxis1=0.0;
   if (trackingState==TrackingSidereal) trackingTimerRateAxis2=az_deltaAxis2/15.0; else trackingTimerRateAxis2=0.0;
-  fstepAxis1.fixed=doubleToFixed( (((double)StepsPerDegreeAxis1/240.0)*trackingTimerRateAxis1)/100.0 );
-  fstepAxis2.fixed=doubleToFixed( (((double)StepsPerDegreeAxis2/240.0)*trackingTimerRateAxis2)/100.0 );
+  sei();
+  fstepAxis1.fixed=doubleToFixed( (((double)StepsPerDegreeAxis1/240.0)*(az_deltaAxis1/15.0))/100.0 );
+  fstepAxis2.fixed=doubleToFixed( (((double)StepsPerDegreeAxis2/240.0)*(az_deltaAxis2/15.0))/100.0 );
 }
 
 void SetTrackingRate(double r) {
