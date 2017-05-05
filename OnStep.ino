@@ -584,15 +584,6 @@ void setup() {
   SetTrackingRate(default_tracking_rate);
   SetDeltaTrackingRate();
 
-  // prep counters (for keeping time in main loop)
-  cli(); 
-  siderealTimer = lst;
-  guideSiderealTimer = lst;
-  PecSiderealTimer = lst;
-  housekeepingTimer = lst; 
-  sei();
-  last_loop_micros=micros();
-
   // starts the hardware timers that keep sidereal time, move the motors, etc.
   Init_Start_Timers();
 
@@ -618,6 +609,11 @@ void setup() {
   // start tracking
   trackingState=TrackingSidereal;
 #endif
+
+  // prep counters (for keeping time in main loop)
+  cli(); siderealTimer=lst; guideSiderealTimer=lst; PecSiderealTimer=lst; sei();
+  housekeepingTimer=millis()+1000UL; 
+  last_loop_micros=micros();
 }
 
 void loop() {
@@ -783,10 +779,10 @@ void loop() {
   last_loop_micros=this_loop_micros;
 
   // 1 SECOND TIMED ------------------------------------------------------------------------------------
-  cli(); long cs=lst; sei();
-  if ((long)(cs-(housekeepingTimer+99L))>0) {
-    housekeepingTimer=cs;
-   
+  unsigned long ms=millis();
+  if ((long)(ms-housekeepingTimer)>0) {
+    housekeepingTimer=ms+1000UL;
+
     // adjust tracking rate for Alt/Azm mounts
     // adjust tracking rate for refraction
     SetDeltaTrackingRate();
