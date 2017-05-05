@@ -1467,15 +1467,6 @@ void setup() {
   setGuideRate(GuideRate16x);
   enableGuideRate(GuideRate16x);
   delay(110);
-  
-  // prep timers
-  cli(); 
-  guideSiderealTimer = lst;
-  PecSiderealTimer = lst;
-  siderealTimer = lst;
-  housekeepingTimer=lst; 
-  sei();
-  last_loop_micros=micros();
 
   // autostart tracking
 #if defined(AUTOSTART_TRACKING_ON) && (defined(MOUNT_TYPE_GEM) || defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORKALT))
@@ -1491,6 +1482,11 @@ void setup() {
   // start tracking
   trackingState=TrackingSidereal;
 #endif
+  
+  // prep timers
+  cli(); guideSiderealTimer=lst; PecSiderealTimer=lst; siderealTimer=lst; sei();
+  housekeepingTimer=millis()+1000UL;
+  last_loop_micros=micros();
 }
 
 void loop() {
@@ -1673,9 +1669,9 @@ void loop() {
   last_loop_micros=this_loop_micros;
 
   // 1 SECOND TIMED ------------------------------------------------------------------------------------
-  cli(); long cs=lst; sei();
-  if ((long)(cs-(housekeepingTimer+99L))>0) {
-    housekeepingTimer=cs;
+  unsigned long ms=millis();
+  if ((long)(ms-housekeepingTimer)>0) {
+    housekeepingTimer=ms+1000UL;
 
     // for testing, average steps per second
 //    if (debugv1>100000) debugv1=100000; if (debugv1<0) debugv1=0;
@@ -1759,4 +1755,3 @@ void loop() {
     processCommands();
   }
 }
-
