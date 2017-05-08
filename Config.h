@@ -45,6 +45,8 @@
 #define ST4_HAND_CONTROL_OFF
 #define ST4_ALTERNATE_PINS_OFF
 
+// RTC (Real Time Clock) support, Default=OFF. Other options: RTC_DS3234 for a DS3234 on the default SPI interface pins (and CS on pin 10, optionally wire the SQW output to the PPS pin below.)
+#define RTC_OFF
 // PPS sense rising edge on pin 21 for optional precision clock source (GPS, for example), default=OFF (Teensy3.1 Pin 23)
 #define PPS_SENSE_OFF
 
