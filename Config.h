@@ -67,7 +67,7 @@
 // Light 2nd status LED by sink to ground (pin 10), default=OFF, must be off for Teensy3.1 (pin 7)
 // _ON sets this to blink at 1 sec intervals when PPS is synced
 // n sets this to dimly light a polar finder reticle, for example I use STATUS_LED2_PINS 250
-// The W5100 Ethernet adapter uses pin 10 for CS, so if W5100_ON is used this must be _OFF
+// The default SPI device CS is at pin 10 also, so if the SPI interface is used this must be _OFF
 #define STATUS_LED2_PINS_OFF
 // Light reticule LED by sink to ground (pin 44), default=OFF.  Defaults to pin 9 on the Teensy3.1 (STATUS_LED_PINS must be _ON)
 // RETICULE_LED_PINS n, where n=0 to 255 activates this feature and sets default brightness
