@@ -61,6 +61,11 @@
 #include "Align.h"
 #include "Command.h"
 
+#ifdef RTC_DS3234
+#include <SparkFunDS3234RTC.h>  //https://github.com/sparkfun/SparkFun_DS3234_RTC_Arduino_Library/archive/master.zip
+#define DS3234_CS_PIN 10
+#endif
+
 #if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
 #define F_BUS SysCtlClockGet() // no pre-scaling of timers on Tiva Launchpads
 #elif defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
@@ -796,7 +801,7 @@ void loop() {
     pecAnalogValue = analogRead(AnalogPecPin);
 #endif
     
-#ifdef PPS_SENSE_ON
+#if defined(PPS_SENSE_ON) || defined(PPS_SENSE_PULLUP)
     // update clock via PPS
     if (trackingState==TrackingSidereal) {
       cli();

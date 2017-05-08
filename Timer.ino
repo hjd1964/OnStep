@@ -453,7 +453,7 @@ ISR(TIMER4_COMPA_vect)
 #endif
 }
 
-#ifdef PPS_SENSE_ON
+#if defined(PPS_SENSE_ON) || defined(PPS_SENSE_PULLUP)
 // PPS interrupt
 void ClockSync() {
   unsigned long t=micros();

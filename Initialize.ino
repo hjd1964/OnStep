@@ -235,6 +235,12 @@ void Init_Pins() {
 #endif
 
 #ifdef PPS_SENSE_ON
+  pinMode(PpsPin,INPUT);
+#endif
+#ifdef PPS_SENSE_PULLUP
+  pinMode(PpsPin,INPUT_PULLUP);
+#endif
+#if defined(PPS_SENSE_ON) || defined(PPS_SENSE_PULLUP)
 #if defined(__AVR_ATmega2560__)
   attachInterrupt(PpsInt,ClockSync,RISING);
 #elif defined(__ARM_Teensy3__)
@@ -283,7 +289,16 @@ void Init_ReadEEPROM_Values() {
   LMT=EEPROM_readFloat(EE_LMT);
   UT1=LMT+timeZone;
   UT1_start=UT1;
-  update_lst(jd2last(JD,UT1));
+#ifdef RTC_DS3234
+  rtc.begin(DS3234_CS_PIN);
+  rtc.update();
+  int y1=rtc.year(); if (y1>11) y1=y1+2000; else y1=y1+2100;
+  JD=julian(y1,rtc.month(),rtc.day());
+  UT1=(rtc.hour()+(rtc.minute()/60.0)+(rtc.second()/3600.0))+timeZone;
+  UT1_start=UT1;
+  rtc.writeSQW(SQW_SQUARE_1);
+#endif
+  update_lst(jd2last(JD,UT1,false));
 
   // get the minutes past meridian east/west
 #ifdef MOUNT_TYPE_GEM

@@ -244,13 +244,13 @@ void processCommands() {
 //         The current local calendar date
       if (command[1]=='C') { 
         LMT=UT1-timeZone;
-        greg(JD,&i2,&i,&i1); 
-        i2=(i2/99.99999-floor(i2/99.99999))*100;
-
-        // correct for day moving forward/backward... this works for multipule days of up-time, but eventually
-        while (LMT>=24.0) { LMT=LMT-24.0; i1--; } 
-        if    (LMT<0.0)   { LMT=LMT+24.0; i1++; }
-        sprintf(reply,"%02d/%02d/%02d",i,i1,i2); 
+        // correct for day moving forward/backward... this works for multipule days of up-time
+        double J=JD;
+        int y,m,d;
+        while (LMT>=24.0) { LMT=LMT-24.0; J=J-1.0; } 
+        if    (LMT<0.0)   { LMT=LMT+24.0; J=J+1.0; }
+        greg(J,&y,&m,&d); y-=2000; if (y>=100) y-=100;
+        sprintf(reply,"%02d/%02d/%02d",m,d,y); 
         quietReply=true; 
       } else 
 //  :Gc#   Get the current time format
@@ -843,7 +843,7 @@ void processCommands() {
 //          Change Date to MM/DD/YY
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='C')  { if (!dateToDouble(&JD,parameter)) commandError=true; else { EEPROM_writeFloat(EE_JD,JD); update_lst(jd2last(JD,UT1)); } } else 
+      if (command[1]=='C')  { if (dateToDouble(&JD,parameter)) { EEPROM_writeFloat(EE_JD,JD); update_lst(jd2last(JD,UT1,true)); } else commandError=true; } else 
 //  :SdsDD*MM#
 //          Set target object declination to sDD*MM or sDD*MM:SS depending on the current precision setting
 //          Return: 0 on failure
@@ -863,7 +863,7 @@ void processCommands() {
           if (parameter[0]=='-') longitude=-longitude;
           EEPROM_writeFloat(EE_sites+(currentSite)*25+4,longitude);
         }
-        update_lst(jd2last(JD,UT1));
+        update_lst(jd2last(JD,UT1,false));
         highPrecision=i;
         } else
 //  :SGsHH#
@@ -885,8 +885,8 @@ void processCommands() {
             if (i<0) timeZone=i-f; else timeZone=i+f;
             b=encodeTimeZone(timeZone)+128;
             EEPROM.update(EE_sites+(currentSite)*25+8,b);
-            update_lst(jd2last(JD,UT1));
-          } else commandError=true; 
+            update_lst(jd2last(JD,UT1,true));
+          } else commandError=true;
         } else commandError=true; 
       } else
 //  :Sh+DD#
@@ -904,9 +904,9 @@ void processCommands() {
         i=highPrecision; highPrecision=true; 
         if (!hmsToDouble(&LMT,parameter)) commandError=true; else {
           EEPROM_writeFloat(EE_LMT,LMT); 
-          UT1=LMT+timeZone; 
+          UT1=LMT+timeZone;
           UT1_start=UT1;
-          update_lst(jd2last(JD,UT1));
+          update_lst(jd2last(JD,UT1,true));
         }
         highPrecision=i;
       } else 
@@ -1335,8 +1335,10 @@ String ConfighSettings() {
   #else
     c+="0";
   #endif
-  #if defined(PPS_SENSE_ON)
+  #ifdef PPS_SENSE_ON
     c+="1";
+  #elif defined(PPS_SENSE_PULLUP)
+    c+="2";
   #else
     c+="0";
   #endif
