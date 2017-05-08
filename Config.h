@@ -47,7 +47,7 @@
 
 // RTC (Real Time Clock) support, Default=OFF. Other options: RTC_DS3234 for a DS3234 on the default SPI interface pins (and CS on pin 10, optionally wire the SQW output to the PPS pin below.)
 #define RTC_OFF
-// PPS sense rising edge on pin 21 for optional precision clock source (GPS, for example), default=OFF (Teensy3.1 Pin 23)
+// PPS use _ON or _PULLUP to enable the input and use the built-in pullup resistor.  Sense rising edge on pin 21 for optional precision clock source (GPS, for example), default=OFF (Teensy3.1 Pin 23)
 #define PPS_SENSE_OFF
 
 // PEC sense on pin 2 or threshold value on Analog 1 (Analog 14 on Teensy3.1) use _ON or _PULLUP to enable the input and use the built-in pullup resistor, default=OFF
