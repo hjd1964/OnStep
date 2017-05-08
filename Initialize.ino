@@ -287,17 +287,18 @@ void Init_ReadEEPROM_Values() {
   // get date and time from EEPROM, start keeping time
   JD=EEPROM_readFloat(EE_JD);
   LMT=EEPROM_readFloat(EE_LMT);
+#ifdef RTC_DS3234
+  rtc.begin(DS3234_CS_PIN); rtc.update();
+  if ((rtc.year()>=0) && (rtc.month()<=99) && (rtc.month()>=1) && (rtc.month()<=12) && (rtc.day()>=1) && (rtc.day()<=31) &&
+      (rtc.hour()>=0) && (rtc.hour()<=23) && (rtc.minute()>=0) && (rtc.minute()<=59) && (rtc.second()>=0) && (rtc.second()<=59)) {
+    int y1=rtc.year(); if (y1>11) y1=y1+2000; else y1=y1+2100;
+    JD=julian(y1,rtc.month(),rtc.day());
+    LMT=(rtc.hour()+(rtc.minute()/60.0)+(rtc.second()/3600.0));
+    rtc.writeSQW(SQW_SQUARE_1);
+  }
+#endif
   UT1=LMT+timeZone;
   UT1_start=UT1;
-#ifdef RTC_DS3234
-  rtc.begin(DS3234_CS_PIN);
-  rtc.update();
-  int y1=rtc.year(); if (y1>11) y1=y1+2000; else y1=y1+2100;
-  JD=julian(y1,rtc.month(),rtc.day());
-  UT1=(rtc.hour()+(rtc.minute()/60.0)+(rtc.second()/3600.0))+timeZone;
-  UT1_start=UT1;
-  rtc.writeSQW(SQW_SQUARE_1);
-#endif
   update_lst(jd2last(JD,UT1,false));
 
   // get the minutes past meridian east/west
