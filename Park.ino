@@ -53,9 +53,11 @@ boolean saveAlignModel() {
 
 // takes up backlash and returns to the current position
 boolean parkClearBacklash() {
-  // figure out how long we'll have to wait for the backlash to clear (+50%)
-  long t; if (backlashAxis1>backlashAxis2) t=((long)backlashAxis1*1500)/(long)StepsPerSecondAxis1; else t=((long)backlashAxis2*1500)/(long)StepsPerSecondAxis1;
-  t=(t/BacklashTakeupRate+250)/12;
+  // figure out how long we'll have to wait for the backlash to clear (+25%)
+  long t; if (backlashAxis1>backlashAxis2) t=((long)backlashAxis1*1250)/(long)StepsPerSecondAxis1; else t=((long)backlashAxis2*1250)/(long)StepsPerSecondAxis1;
+  t/=BacklashTakeupRate; // divide by the takeup rate
+  t+=100;                // and add on minimum amount of time should the distance be very short
+  t/=12;                 // divide by 12 since loop is 12 iterations
 
   // start by moving fully into the backlash
   cli();
@@ -72,8 +74,8 @@ boolean parkClearBacklash() {
   targetAxis2.part.m -= backlashAxis2;
   sei();
 
-  // wait until done or timed out, plus a safety margin
-  for (int i=0; i<24; i++) if ((blAxis1!=0) || (posAxis1!=(long)targetAxis1.part.m) || (blAxis2!=0) || (posAxis2!=(long)targetAxis2.part.m)) delay(t);
+  // wait until done or timed out
+  for (int i=0; i<12; i++) if ((blAxis1!=0) || (posAxis1!=(long)targetAxis1.part.m) || (blAxis2!=0) || (posAxis2!=(long)targetAxis2.part.m)) delay(t);
 
   // we arrive back at the exact same position so targetAxis1/targetAxis2 don't need to be touched
   

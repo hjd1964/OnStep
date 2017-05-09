@@ -222,7 +222,6 @@ void moveTo() {
       sei();
     } else {
       // restore last tracking state
-      trackingState=lastTrackingState; SetSiderealClockRate(siderealInterval);
       cli();
       timerRateAxis1=SiderealRate;
       timerRateAxis2=SiderealRate;
@@ -236,25 +235,30 @@ void moveTo() {
         // give the drives a moment to settle in
         for (int i=0; i<12; i++) if ((posAxis1!=(long)targetAxis1.part.m) || (posAxis2!=(long)targetAxis2.part.m)) delay(250);
 
-        if ((posAxis1==(long)targetAxis1.part.m) && (posAxis2==(long)targetAxis2.part.m)) {
-          if (parkClearBacklash()) {
-            // success, we're parked
-            parkStatus=Parked; EEPROM.write(EE_parkStatus,parkStatus);
+        if (((posAxis1==(long)targetAxis1.part.m) && (posAxis2==(long)targetAxis2.part.m)) && (parkClearBacklash())) {
+          // restore trackingState
+          trackingState=lastTrackingState; SetSiderealClockRate(siderealInterval);
 
-            // just store the indexes of our pointing model
-            EEPROM_writeFloat(EE_indexAxis1,indexAxis1);
-            EEPROM_writeFloat(EE_indexAxis2,indexAxis2);
-            
-            // disable the stepper drivers
-            digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
-            digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
+          // success, we're parked
+          parkStatus=Parked; EEPROM.write(EE_parkStatus,parkStatus);
 
-          } else parkStatus=ParkFailed;
-      } else parkStatus=ParkFailed;
+          // just store the indexes of our pointing model
+          EEPROM_writeFloat(EE_indexAxis1,indexAxis1);
+          EEPROM_writeFloat(EE_indexAxis2,indexAxis2);
+          
+          // disable the stepper drivers
+          digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
+          digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
 
+          // home is either the polar home position or the park position
+          atHome=true;
+        } else { parkStatus=ParkFailed; trackingState=lastTrackingState; SetSiderealClockRate(siderealInterval); }
       } else
-        if (homeMount) { 
+        if (homeMount) {
           parkClearBacklash();
+          // restore trackingState
+          trackingState=lastTrackingState; SetSiderealClockRate(siderealInterval);
+
           setHome();
           homeMount=false; 
           atHome=true;
@@ -262,6 +266,9 @@ void moveTo() {
           // disable the stepper drivers
           digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
           digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
+        } else {
+          // restore trackingState
+          trackingState=lastTrackingState; SetSiderealClockRate(siderealInterval);
         }
     }
   }
