@@ -11,10 +11,14 @@ void Init_Startup_Values() {
   fstepAxis1.fixed=0;
   fstepAxis2.fixed=0;
   origTargetAxis1.fixed = 0;
-  targetAxis1.part.m = 90L*(long)StepsPerDegreeAxis1;
-  targetAxis1.part.f = 0;
-  targetAxis2.part.m = 90L*(long)StepsPerDegreeAxis2;
-  targetAxis2.part.f = 0;
+  cli();
+  targetAxis1.part.m = 90L*(long)StepsPerDegreeAxis1; targetAxis1.part.f = 0;
+  posAxis1           = 90L*(long)StepsPerDegreeAxis1;
+  trueAxis1          = 90L*(long)StepsPerDegreeAxis1;
+  targetAxis2.part.m = 90L*(long)StepsPerDegreeAxis2; targetAxis2.part.f = 0;
+  posAxis2           = 90L*(long)StepsPerDegreeAxis2;
+  trueAxis2          = 90L*(long)StepsPerDegreeAxis2;
+  sei();
 
   // default values for state variables
   pierSide            = PierSideNone;
@@ -61,10 +65,12 @@ void Init_Startup_Values() {
   lastError           = ERR_NONE;
 
   // reset tracking and rates
+  cli();
   trackingState       = TrackingNone;
   lastTrackingState   = TrackingNone;
   timerRateAxis1      = SiderealRate;
   timerRateAxis2      = SiderealRate;
+  sei();
 }
 
 void Init_Pins() {
