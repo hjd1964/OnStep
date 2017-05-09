@@ -1021,6 +1021,7 @@ void processCommands() {
                 case '1': maxRate=MaxRate*8L;  break; // 200%
               break;
               }
+              EEPROM_writeInt(EE_maxRate,(int)(maxRate/16L));
               SetAccelerationRates(maxRate);
             break;
             case '5': // autoMeridianFlip
