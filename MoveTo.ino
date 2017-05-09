@@ -228,9 +228,12 @@ void moveTo() {
       sei();
 
       DecayModeTracking();
-            
+
       // other special gotos: for parking the mount and homeing the mount
       if (parkStatus==Parking) {
+         int i=parkClearBacklash();
+         if (i==-1) return; // working
+         if (i==0) { parkStatus=ParkFailed; trackingState=lastTrackingState; SetSiderealClockRate(siderealInterval); } // failed
 
         // give the drives a moment to settle in
         for (int i=0; i<12; i++) if ((posAxis1!=(long)targetAxis1.part.m) || (posAxis2!=(long)targetAxis2.part.m)) delay(250);
@@ -249,13 +252,11 @@ void moveTo() {
           // disable the stepper drivers
           digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
           digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
-
-          // home is either the polar home position or the park position
-          atHome=true;
         } else { parkStatus=ParkFailed; trackingState=lastTrackingState; SetSiderealClockRate(siderealInterval); }
       } else
         if (homeMount) {
-          parkClearBacklash();
+          if (parkClearBacklash()==-1) return;  // working, no error flagging
+
           // restore trackingState
           trackingState=lastTrackingState; SetSiderealClockRate(siderealInterval);
 

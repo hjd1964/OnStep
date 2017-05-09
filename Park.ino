@@ -52,35 +52,53 @@ boolean saveAlignModel() {
 }
 
 // takes up backlash and returns to the current position
-boolean parkClearBacklash() {
-  // figure out how long we'll have to wait for the backlash to clear (+25%)
-  long t; if (backlashAxis1>backlashAxis2) t=((long)backlashAxis1*1250)/(long)StepsPerSecondAxis1; else t=((long)backlashAxis2*1250)/(long)StepsPerSecondAxis1;
-  t/=BacklashTakeupRate; // divide by the takeup rate
-  t+=100;                // and add on minimum amount of time should the distance be very short
-  t/=12;                 // divide by 12 since loop is 12 iterations
+long _bt=0;
+bool doParkClearBacklash(int phase) {
+  if (phase==1) {
+    // start by moving fully into the backlash
+    cli(); targetAxis1.part.m += backlashAxis1; targetAxis2.part.m += backlashAxis2; sei();
 
-  // start by moving fully into the backlash
-  cli();
-  targetAxis1.part.m += backlashAxis1;
-  targetAxis2.part.m += backlashAxis2;
-  sei();
-
+    // figure out how long we'll have to wait for the backlash to clear (+25%)
+    long t; if (backlashAxis1>backlashAxis2) t=((long)backlashAxis1*1250)/(long)StepsPerSecondAxis1; else t=((long)backlashAxis2*1250)/(long)StepsPerSecondAxis1;
+    t/=BacklashTakeupRate; // divide by the takeup rate
+    t+=100;                // and add on minimum amount of time should the distance be very short
+    _bt=t+millis();
+    return true;
+  }
   // wait until done or timed out
-  for (int i=0; i<12; i++) if ((blAxis1!=backlashAxis1) || (posAxis1!=(long)targetAxis1.part.m) || (blAxis2!=backlashAxis2) || (posAxis2!=(long)targetAxis2.part.m)) delay(t);
+  if (phase==2) {
+    return (millis()-_bt>0);
+  }
+  if (phase==3) {
+    // then reverse direction and take it all up
+    cli(); targetAxis1.part.m -= backlashAxis1; targetAxis2.part.m -= backlashAxis2; sei();
 
-  // then reverse direction and take it all up
-  cli();
-  targetAxis1.part.m -= backlashAxis1;
-  targetAxis2.part.m -= backlashAxis2;
-  sei();
-
+    // figure out how long we'll have to wait for the backlash to clear (+25%)
+    long t; if (backlashAxis1>backlashAxis2) t=((long)backlashAxis1*1250)/(long)StepsPerSecondAxis1; else t=((long)backlashAxis2*1250)/(long)StepsPerSecondAxis1;
+    t/=BacklashTakeupRate; // divide by the takeup rate
+    t+=100;                // and add on minimum amount of time should the distance be very short
+    _bt=t+millis();
+    return true;
+  }
   // wait until done or timed out
-  for (int i=0; i<12; i++) if ((blAxis1!=0) || (posAxis1!=(long)targetAxis1.part.m) || (blAxis2!=0) || (posAxis2!=(long)targetAxis2.part.m)) delay(t);
-
+  if (phase==4) {
+    return (millis()-_bt>0);
+  }
   // we arrive back at the exact same position so targetAxis1/targetAxis2 don't need to be touched
-  
-  // return true on success
-  if ((blAxis1!=0) || (blAxis2!=0)) return false; else return true;
+  if (phase==5) {
+    // return true on success
+    if ((blAxis1!=0) || (blAxis2!=0) || (posAxis1!=(long)targetAxis1.part.m) || (posAxis2!=(long)targetAxis2.part.m)) return false; else return true;
+  }
+}
+
+int _phase=1;
+int parkClearBacklash() {
+  if (_phase==1) { if (doParkClearBacklash(1)) _phase++; } else
+  if (_phase==2) { if (doParkClearBacklash(2)) _phase++; } else
+  if (_phase==3) { if (doParkClearBacklash(3)) _phase++; } else
+  if (_phase==4) { if (doParkClearBacklash(4)) _phase++; } else
+  if (_phase==5) { _phase=0; if (doParkClearBacklash(5)) return 1; else return 0; }
+  return -1;
 }
 
 // moves the telescope to the park position, stops tracking
@@ -138,7 +156,7 @@ byte park() {
 // returns a parked telescope to operation, you must set date and time before calling this.  it also
 // depends on the latitude, longitude, and timeZone; but those are stored and recalled automatically
 boolean unpark() {
-  if (atHome) {
+  if ((parkStatus==Parked) || (atHome)) {
     parkStatus=EEPROM.read(EE_parkStatus);
     parkSaved =EEPROM.read(EE_parkSaved);
     parkStatus=Parked;
