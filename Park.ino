@@ -97,7 +97,7 @@ int parkClearBacklash() {
   if (_phase==2) { if (doParkClearBacklash(2)) _phase++; } else
   if (_phase==3) { if (doParkClearBacklash(3)) _phase++; } else
   if (_phase==4) { if (doParkClearBacklash(4)) _phase++; } else
-  if (_phase==5) { _phase=0; if (doParkClearBacklash(5)) return 1; else return 0; }
+  if (_phase==5) { _phase=1; if (doParkClearBacklash(5)) return 1; else return 0; }
   return -1;
 }
 

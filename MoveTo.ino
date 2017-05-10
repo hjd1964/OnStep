@@ -231,14 +231,9 @@ void moveTo() {
 
       // other special gotos: for parking the mount and homeing the mount
       if (parkStatus==Parking) {
-         int i=parkClearBacklash();
-         if (i==-1) return; // working
-         if (i==0) { parkStatus=ParkFailed; trackingState=lastTrackingState; SetSiderealClockRate(siderealInterval); } // failed
-
-        // give the drives a moment to settle in
-        for (int i=0; i<12; i++) if ((posAxis1!=(long)targetAxis1.part.m) || (posAxis2!=(long)targetAxis2.part.m)) delay(250);
-
-        if (((posAxis1==(long)targetAxis1.part.m) && (posAxis2==(long)targetAxis2.part.m)) && (parkClearBacklash())) {
+        int i=parkClearBacklash(); if (i==-1) return; // working
+    
+        if ((posAxis1==(long)targetAxis1.part.m) && (posAxis2==(long)targetAxis2.part.m) && (i==1)) {
           // restore trackingState
           trackingState=lastTrackingState; SetSiderealClockRate(siderealInterval);
 
@@ -253,6 +248,7 @@ void moveTo() {
           digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
           digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
         } else { parkStatus=ParkFailed; trackingState=lastTrackingState; SetSiderealClockRate(siderealInterval); }
+      
       } else
         if (homeMount) {
           if (parkClearBacklash()==-1) return;  // working, no error flagging
