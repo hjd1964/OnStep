@@ -89,6 +89,7 @@ bool doParkClearBacklash(int phase) {
     // return true on success
     if ((blAxis1!=0) || (blAxis2!=0) || (posAxis1!=(long)targetAxis1.part.m) || (posAxis2!=(long)targetAxis2.part.m)) return false; else return true;
   }
+  return false;
 }
 
 int _phase=1;

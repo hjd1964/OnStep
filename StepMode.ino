@@ -1,11 +1,11 @@
 // -----------------------------------------------------------------------------------
 // Stepper driver mode control
 
-bool _decayModeTrack=false;
+bool _stepperModeTrack=false;
 
 // initialize stepper drivers
 void StepperModeTrackingInit() {
-  _decayModeTrack=false; 
+  _stepperModeTrack=false; 
   digitalWrite(Axis1_EN,Axis1_Enabled); axis1Enabled=true;
   digitalWrite(Axis2_EN,Axis2_Enabled); axis2Enabled=true;
   delay(100);
@@ -16,8 +16,8 @@ void StepperModeTrackingInit() {
 
 // if stepper drive can switch decay mode, set it here
 void StepperModeTracking() {
-  if (_decayModeTrack) return;
-  _decayModeTrack=true;
+  if (_stepperModeTrack) return;
+  _stepperModeTrack=true;
   cli();
 #if defined(DECAY_MODE_OPEN)
   pinModeOpen(Axis1_Mode);
@@ -73,8 +73,8 @@ void StepperModeTracking() {
 }
 
 void StepperModeGoto() {
-  if (!_decayModeTrack) return;
-  _decayModeTrack=false;
+  if (!_stepperModeTrack) return;
+  _stepperModeTrack=false;
   cli();
 #if defined(DECAY_MODE_GOTO_OPEN)
   pinModeOpen(Axis1_Mode);
