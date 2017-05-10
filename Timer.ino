@@ -153,7 +153,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
         if (guideDirAxis1=='b') { guideTimerRateAtBreakAxis1=0; guideDirAxis1=0; guideTimerRateAxis1=0; guideTimerRateAxis1A=0; }
       } else {
         // use acceleration
-        DecayModeGoto();
+        StepperModeGoto();
         long t=(millis()-guideStartTimeAxis1);
         guideTimerRateAxis1A=sqrt(t/(((480.0*DegreesForAcceleration)/slewRateX)*1000.0))*fabs(slewRateX);
         if (guideTimerRateAxis1A>fabs(guideTimerRateAxis1)) guideTimerRateAxis1A=fabs(guideTimerRateAxis1);
@@ -164,7 +164,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
           long t=(((480.0*DegreesForAcceleration)/slewRateX)*1000.0)*sq(guideTimerRateAtBreakAxis1/fabs(slewRateX))-(millis()-guideBreakTimeAxis1); if (t<0) t=0;
           guideTimerRateAxis1A=sqrt(t/(((480.0*DegreesForAcceleration)/slewRateX)*1000.0))*fabs(slewRateX);
           if (guideTimerRateAxis1<0) guideTimerRateAxis1A=-guideTimerRateAxis1A;
-          if (abs(guideTimerRateAxis1A)<1.0) { guideTimerRateAtBreakAxis1=0; guideDirAxis1=0; guideTimerRateAxis1=0; guideTimerRateAxis1A=0; if (!guideDirAxis2) DecayModeTracking(); }
+          if (abs(guideTimerRateAxis1A)<1.0) { guideTimerRateAtBreakAxis1=0; guideDirAxis1=0; guideTimerRateAxis1=0; guideTimerRateAxis1A=0; if (!guideDirAxis2) StepperModeTracking(); }
         }
       }
     } else { guideTimerRateAxis1A=0; }
@@ -189,7 +189,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
         if (guideDirAxis2=='b') { guideTimerRateAtBreakAxis2=0; guideDirAxis2=0; guideTimerRateAxis2=0; guideTimerRateAxis2A=0; }
       } else {
         // use acceleration
-        DecayModeGoto();
+        StepperModeGoto();
         long t=(millis()-guideStartTimeAxis2);
         guideTimerRateAxis2A=sqrt(t/(((480.0*DegreesForAcceleration)/slewRateX)*1000.0))*fabs(slewRateX);
         if (guideTimerRateAxis2A>fabs(guideTimerRateAxis2)) guideTimerRateAxis2A=fabs(guideTimerRateAxis2);
@@ -200,7 +200,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
           long t=(((480.0*DegreesForAcceleration)/slewRateX)*1000.0)*sq(guideTimerRateAtBreakAxis2/fabs(slewRateX))-(millis()-guideBreakTimeAxis2); if (t<0) t=0;
           guideTimerRateAxis2A=sqrt(t/(((480.0*DegreesForAcceleration)/slewRateX)*1000.0))*fabs(slewRateX);
           if (guideTimerRateAxis2<0) guideTimerRateAxis2A=-guideTimerRateAxis2A;
-          if (abs(guideTimerRateAxis2A)<1.0) { guideTimerRateAtBreakAxis2=0; guideDirAxis2=0; guideTimerRateAxis2=0; guideTimerRateAxis2A=0; if (!guideDirAxis1) DecayModeTracking(); }
+          if (abs(guideTimerRateAxis2A)<1.0) { guideTimerRateAtBreakAxis2=0; guideDirAxis2=0; guideTimerRateAxis2=0; guideTimerRateAxis2A=0; if (!guideDirAxis1) StepperModeTracking(); }
         }
       }
     } else guideTimerRateAxis2A=0;

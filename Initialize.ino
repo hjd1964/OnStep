@@ -222,7 +222,7 @@ void Init_Pins() {
   // initialize and disable the stepper drivers
   pinMode(Axis1_EN,OUTPUT); 
   pinMode(Axis2_EN,OUTPUT);
-  DecayModeTrackingInit();
+  StepperModeTrackingInit();
 
 // if the stepper driver mode select pins are wired in, program any requested micro-step mode
 #if !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)

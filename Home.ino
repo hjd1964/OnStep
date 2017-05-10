@@ -26,7 +26,7 @@ boolean goHome() {
 
   homeMount=true;
   
-  DecayModeGoto();
+  StepperModeGoto();
   
   return true;
 }
@@ -39,7 +39,7 @@ boolean setHome() {
   Init_Startup_Values();
 
   // initialize and disable the stepper drivers
-  DecayModeTrackingInit();
+  StepperModeTrackingInit();
  
   // not parked, but don't wipe the park position if it's saved - we can still use it
   parkStatus=NotParked;
