@@ -1040,8 +1040,18 @@ void processCommands() {
 #ifdef MOUNT_TYPE_GEM
         if (parameter[0]=='E') { // En: Simple value
           switch (parameter[1]) {
-            case '9': minutesPastMeridianE=(double)strtol(&parameter[3],NULL,10); EEPROM.write(EE_dpmE,round((minutesPastMeridianE*15.0)/60.0)+128); break;     // minutesPastMeridianE
-            case 'A': minutesPastMeridianW=(double)strtol(&parameter[3],NULL,10); EEPROM.write(EE_dpmW,round((minutesPastMeridianW*15.0)/60.0)+128); break;     // minutesPastMeridianW
+            case '9': // minutesPastMeridianE 
+              minutesPastMeridianE=(double)strtol(&parameter[3],NULL,10); 
+              if (minutesPastMeridianE>180) minutesPastMeridianE=180; 
+              if (minutesPastMeridianE<-180) minutesPastMeridianE=-180; 
+              EEPROM.write(EE_dpmE,round((minutesPastMeridianE*15.0)/60.0)+128); 
+              break;
+            case 'A': // minutesPastMeridianW
+              minutesPastMeridianW=(double)strtol(&parameter[3],NULL,10); 
+              if (minutesPastMeridianW>180) minutesPastMeridianW=180; 
+              if (minutesPastMeridianW<-180) minutesPastMeridianW=-180; 
+              EEPROM.write(EE_dpmW,round((minutesPastMeridianW*15.0)/60.0)+128); 
+              break;
             break;
           }
         } else 
