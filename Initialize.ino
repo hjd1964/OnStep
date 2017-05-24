@@ -295,10 +295,10 @@ void Init_ReadEEPROM_Values() {
   LMT=EEPROM_readFloat(EE_LMT);
 #ifdef RTC_DS3234
   rtc.begin(DS3234_CS_PIN); rtc.update();
-  if ((rtc.year()>=0) && (rtc.month()<=99) && (rtc.month()>=1) && (rtc.month()<=12) && (rtc.day()>=1) && (rtc.day()<=31) &&
+  if ((rtc.year()>=0) && (rtc.month()<=99) && (rtc.month()>=1) && (rtc.month()<=12) && (rtc.date()>=1) && (rtc.date()<=31) &&
       (rtc.hour()>=0) && (rtc.hour()<=23) && (rtc.minute()>=0) && (rtc.minute()<=59) && (rtc.second()>=0) && (rtc.second()<=59)) {
     int y1=rtc.year(); if (y1>11) y1=y1+2000; else y1=y1+2100;
-    JD=julian(y1,rtc.month(),rtc.day());
+    JD=julian(y1,rtc.month(),rtc.date());
     LMT=(rtc.hour()+(rtc.minute()/60.0)+(rtc.second()/3600.0));
     rtc.writeSQW(SQW_SQUARE_1);
   }
