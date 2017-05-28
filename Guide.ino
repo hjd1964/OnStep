@@ -64,7 +64,7 @@ bool startGuideAxis1(char direction, int guideRate, long guideDuration) {
       enableGuideRate(guideRate);
       guideDirAxis1=direction;
       guideTimeThisIntervalAxis1=micros();
-      guideTimeRemainingAxis1=guideDuration;
+      guideTimeRemainingAxis1=guideDuration*1000L;
       cli();
       guideStartTimeAxis1=millis();
       if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRate; else guideTimerRateAxis1=guideTimerBaseRate; 
@@ -91,7 +91,7 @@ bool startGuideAxis2(char c, int guideRate, long guideDuration) {
       enableGuideRate(guideRate);
       guideDirAxis2=c;
       guideTimeThisIntervalAxis2=micros();
-      guideTimeRemainingAxis2=guideDuration;
+      guideTimeRemainingAxis2=guideDuration*1000L;
       cli();
       guideStartTimeAxis2=millis();
       if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRate; else guideTimerRateAxis2=guideTimerBaseRate; 
