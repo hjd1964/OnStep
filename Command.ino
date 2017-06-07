@@ -1434,3 +1434,7 @@ String ConfighSettings() {
   return c;
 }
 
+void forceRefreshGetEqu() {
+  _coord_t=millis()-100;
+}
+

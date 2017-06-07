@@ -201,6 +201,7 @@ void moveTo() {
         posAxis1-=(long)(180.0*(double)StepsPerDegreeAxis1);
         trueAxis1-=(long)(180.0*(double)StepsPerDegreeAxis1);
         sei();
+        forceRefreshGetEqu();
       } else {
         pierSide=PierSideEast;
         cli();
@@ -211,6 +212,7 @@ void moveTo() {
         posAxis1+=(long)(180.0*(double)StepsPerDegreeAxis1);
         trueAxis1+=(long)(180.0*(double)StepsPerDegreeAxis1);
         sei();
+        forceRefreshGetEqu();
       }
     
       // now complete the slew
