@@ -464,10 +464,10 @@ ISR(TIMER4_COMPA_vect)
 void ClockSync() {
   unsigned long t=micros();
   unsigned long oneS=(t-PPSlastMicroS);
-  if ((oneS>1000000-1000) && (oneS<1000000+1000)) {
+  if ((oneS>1000000-20000) && (oneS<1000000+20000)) {
     PPSavgMicroS=(PPSavgMicroS*19+oneS)/20;
     PPSsynced=true;
-  }
+  } else PPSsynced=false;
   PPSlastMicroS=t;
 }
 #endif
