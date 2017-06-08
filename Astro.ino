@@ -229,7 +229,8 @@ double jd2last(double JulianDay, double ut1, bool updateRTC) {
   // update RTC
   if (updateRTC) {
 #ifdef RTC_DS3234
-  int y,mo,d,h,m,s,dow;
+  int y,mo,d,h,dow;
+  double m,s;
 
   double lmt=ut1-timeZone;
   // correct for day moving forward/backward... this works for multipule days of up-time
@@ -240,11 +241,11 @@ double jd2last(double JulianDay, double ut1, bool updateRTC) {
 
   double f1=fabs(lmt)+0.000139;
   h=floor(f1);
-  m=(f1-h)*60;
-  s=(m-floor(m));
+  m=(f1-h)*60.0;
+  s=(m-floor(m))*60.0;
   dow=(round(J)%7)+1;
 
-  rtc.setTime(s, m, h, dow, d, mo, y);
+  rtc.setTime(floor(s), floor(m), h, dow, d, mo, y);
 #endif
   }
   // JulianDay is the Local date, jd2gast requires a universal time
