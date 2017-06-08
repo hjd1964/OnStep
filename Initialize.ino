@@ -304,7 +304,6 @@ void Init_ReadEEPROM_Values() {
   }
 #endif
   UT1=LMT+timeZone;
-  UT1_start=UT1;
   update_lst(jd2last(JD,UT1,false));
 
   // get the minutes past meridian east/west

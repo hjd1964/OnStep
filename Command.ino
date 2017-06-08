@@ -905,7 +905,6 @@ void processCommands() {
         if (!hmsToDouble(&LMT,parameter)) commandError=true; else {
           EEPROM_writeFloat(EE_LMT,LMT); 
           UT1=LMT+timeZone;
-          UT1_start=UT1;
           update_lst(jd2last(JD,UT1,true));
         }
         highPrecision=i;

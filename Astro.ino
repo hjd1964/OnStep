@@ -262,6 +262,7 @@ void update_lst(double t) {
   cli(); 
   lst=lst1;
   sei();
+  UT1_start=UT1;
   lst_start=lst1;
 }
 
