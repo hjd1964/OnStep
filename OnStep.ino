@@ -552,10 +552,13 @@ volatile int blAxis2        = 0;
 
 #define EE_sites    100
 
-// PEC index: 200...1023
-// PECBufferSize byte sized integers -128..+127, units are steps
+// PEC table: 200...PECBufferSize+200-1
+// PECBufferSize table of byte sized integers -128..+127, units are steps
 
-#define EE_indexWorm 200
+#define EE_pecTable 200
+
+// Library
+// Catalog storage starts at 200+PECBufferSize and fills EEPROM
 
 void setup() {
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
@@ -694,7 +697,7 @@ void loop() {
     if (pecAutoRecord>0) {
       // write PEC table to EEPROM, should do several hundred bytes/second
       pecAutoRecord--;
-      EEPROM.update(EE_indexWorm+pecAutoRecord,pecBuffer[pecAutoRecord]);
+      EEPROM.update(EE_pecTable+pecAutoRecord,pecBuffer[pecAutoRecord]);
     }
 #endif
 

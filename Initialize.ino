@@ -333,7 +333,7 @@ void Init_ReadEEPROM_Values() {
   // get the PEC status
   pecStatus  =EEPROM.read(EE_pecStatus);
   pecRecorded=EEPROM.read(EE_pecRecorded); if (!pecRecorded) pecStatus=IgnorePEC;
-  for (int i=0; i<PECBufferSize; i++) pecBuffer[i]=EEPROM.read(EE_indexWorm+i);
+  for (int i=0; i<PECBufferSize; i++) pecBuffer[i]=EEPROM.read(EE_pecTable+i);
   wormSensePos=EEPROM_readLong(EE_wormSensePos);
   #ifdef PEC_SENSE_OFF
   wormSensePos=0;
@@ -414,7 +414,7 @@ void Init_EEPROM_Values() {
     // init the PEC status, clear the index and buffer
     EEPROM.write(EE_pecStatus,IgnorePEC);
     EEPROM.write(EE_pecRecorded,false);
-    for (int l=0; l<PECBufferSize; l++) EEPROM.write(EE_indexWorm+l,128);
+    for (int l=0; l<PECBufferSize; l++) EEPROM.write(EE_pecTable+l,128);
     wormSensePos=0;
     EEPROM_writeLong(EE_wormSensePos,wormSensePos);
     
