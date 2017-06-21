@@ -8,11 +8,11 @@ unsigned long guideTimeThisIntervalAxis2 = -1;
 
 // initialize guiding
 void initGuide() {
-  guideDirAxis1          = 0;
-  guideTimeRemainingAxis1     = -1;
+  guideDirAxis1              =  0;
+  guideTimeRemainingAxis1    = -1;
   guideTimeThisIntervalAxis1 = -1;
-  guideDirAxis2          = 0;
-  guideTimeRemainingAxis2     = -1;
+  guideDirAxis2              =  0;
+  guideTimeRemainingAxis2    = -1;
   guideTimeThisIntervalAxis2 = -1;
 }
 

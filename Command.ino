@@ -1065,8 +1065,8 @@ void processCommands() {
       commandError=true;
       } else 
 //   T - Tracking Commands
-//  :T+#   Master sidereal clock faster by 0.1 Hertz (I use a fifth of the LX200 standard, stored in EEPROM)
-//  :T-#   Master sidereal clock slower by 0.1 Hertz (stored in EEPROM)
+//  :T+#   Master sidereal clock faster by 0.02 Hertz (stored in EEPROM)
+//  :T-#   Master sidereal clock slower by 0.02 Hertz (stored in EEPROM)
 //  :TS#   Track rate solar
 //  :TL#   Track rate lunar
 //  :TQ#   Track rate sidereal

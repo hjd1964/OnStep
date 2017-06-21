@@ -9,7 +9,7 @@ void StepperModeTrackingInit() {
   digitalWrite(Axis1_EN,Axis1_Enabled); axis1Enabled=true;
   digitalWrite(Axis2_EN,Axis2_Enabled); axis2Enabled=true;
   delay(100);
-  StepperModeTracking(); 
+  StepperModeTracking();
   digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
   digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
 }
@@ -66,7 +66,7 @@ void StepperModeTracking() {
   if ((((AXIS1_MODE & 0b0100000)!=0) || ((AXIS2_MODE & 0b0100000)!=0)) & (atHome)) delay(100);
 #endif
 
-#ifdef MODE_SWITCH_SLEEP_ON 
+#ifdef MODE_SWITCH_SLEEP_ON
   delay(3);
 #endif
   sei();
