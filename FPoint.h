@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------------
-// fixed point math data type
+// Fixed point math data type
 
 #include "Arduino.h"
 

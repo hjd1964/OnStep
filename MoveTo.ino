@@ -1,5 +1,7 @@
 // -----------------------------------------------------------------------------------
-// functions to move the mount to the a new position
+// Functions to move the mount to the a new position
+
+long lastPosAxis2=0;
 
 // moves the mount
 void moveTo() {
@@ -20,38 +22,38 @@ void moveTo() {
     // first phase, decide if we should move to 60 deg. HA (4 hours) to get away from the horizon limits or just go straight to the home position
     cli();
     if (pierSide==PierSideFlipWE1) { 
-      if (celestialPoleHA==0) targetAxis1.part.m=0*(long)StepsPerDegreeAxis1-IHS; else {
-        if ((currentAlt<10.0) && (startAxis1>-90L*(long)StepsPerDegreeAxis1-IHS)) targetAxis1.part.m=-60L*(long)StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=-celestialPoleHA*(long)StepsPerDegreeAxis1-IHS;
+      if (celestialPoleAxis1==0) targetAxis1.part.m=0*(long)StepsPerDegreeAxis1-indexAxis1Steps; else {
+        if ((currentAlt<10.0) && (startAxis1>-90L*(long)StepsPerDegreeAxis1-indexAxis1Steps)) targetAxis1.part.m=-60L*(long)StepsPerDegreeAxis1-indexAxis1Steps; else targetAxis1.part.m=-celestialPoleAxis1*(long)StepsPerDegreeAxis1-indexAxis1Steps;
       }
     } else {
-      if (celestialPoleHA==0) targetAxis1.part.m=0*(long)StepsPerDegreeAxis1; else {
-        if ((currentAlt<10.0) && (startAxis1<90L*(long)StepsPerDegreeAxis1-IHS)) targetAxis1.part.m=60L*(long)StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=celestialPoleHA*(long)StepsPerDegreeAxis1-IHS; 
+      if (celestialPoleAxis1==0) targetAxis1.part.m=0*(long)StepsPerDegreeAxis1-indexAxis1Steps; else {
+        if ((currentAlt<10.0) && (startAxis1<90L*(long)StepsPerDegreeAxis1-indexAxis1Steps)) targetAxis1.part.m=60L*(long)StepsPerDegreeAxis1-indexAxis1Steps; else targetAxis1.part.m=celestialPoleAxis1*(long)StepsPerDegreeAxis1-indexAxis1Steps; 
       }
     } 
     targetAxis1.part.f=0;
-    targetAxis2.part.m=((long)(celestialPoleDec*(double)StepsPerDegreeAxis2))-IDS; targetAxis2.part.f=0;
+    targetAxis2.part.m=((long)(celestialPoleAxis2*(double)StepsPerDegreeAxis2))-indexAxis2Steps; targetAxis2.part.f=0;
     sei();
 
     cli();
-    if (celestialPoleDec>0) {
+    if (celestialPoleAxis2>0) {
       // if Dec is in the general area of the pole, slew both axis back at once
-      if (posAxis2>((long)((90.0-latitude)*(double)StepsPerDegreeAxis2))-IDS) {
-        if (pierSide==PierSideFlipWE1) targetAxis1.part.m=-celestialPoleHA*(long)StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=celestialPoleHA*(long)StepsPerDegreeAxis1-IHS; targetAxis1.part.f=0;
+      if (posAxis2>((long)((90.0-latitude)*(double)StepsPerDegreeAxis2))-indexAxis2Steps) {
+        if (pierSide==PierSideFlipWE1) targetAxis1.part.m=-celestialPoleAxis1*(long)StepsPerDegreeAxis1-indexAxis1Steps; else targetAxis1.part.m=celestialPoleAxis1*(long)StepsPerDegreeAxis1-indexAxis1Steps; targetAxis1.part.f=0;
       } else {
         // override if we're at a low latitude and in the opposite sky, |HA|=6 is very low on the horizon in this orientation and we need to delay arriving there during a meridian flip
         // in the extreme case, where the user is very near the (Earths!) equator an Horizon limit of -10 or -15 may be necessary for proper operation.
-        if ((currentAlt<20.0) && (abs(latitude)<45.0) && (posAxis2<0-IDS)) {
-          if (pierSide==PierSideFlipWE1) targetAxis1.part.m=-45L*(long)StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=45L*(long)StepsPerDegreeAxis1-IHS; targetAxis1.part.f=0;
+        if ((currentAlt<20.0) && (abs(latitude)<45.0) && (posAxis2<0-indexAxis2Steps)) {
+          if (pierSide==PierSideFlipWE1) targetAxis1.part.m=-45L*(long)StepsPerDegreeAxis1-indexAxis1Steps; else targetAxis1.part.m=45L*(long)StepsPerDegreeAxis1-indexAxis1Steps; targetAxis1.part.f=0;
         }
       }
     } else {
       // if Dec is in the general area of the pole, slew both axis back at once
-      if (posAxis2<((long)((-90.0-latitude)*(double)StepsPerDegreeAxis2))-IDS) {
-        if (pierSide==PierSideFlipWE1) targetAxis1.part.m=-celestialPoleHA*(long)StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=celestialPoleHA*(long)StepsPerDegreeAxis1-IHS; targetAxis1.part.f=0;
+      if (posAxis2<((long)((-90.0-latitude)*(double)StepsPerDegreeAxis2))-indexAxis2Steps) {
+        if (pierSide==PierSideFlipWE1) targetAxis1.part.m=-celestialPoleAxis1*(long)StepsPerDegreeAxis1-indexAxis1Steps; else targetAxis1.part.m=celestialPoleAxis1*(long)StepsPerDegreeAxis1-indexAxis1Steps; targetAxis1.part.f=0;
       } else { 
         // override if we're at a low latitude and in the opposite sky, |HA|=6 is very low on the horizon in this orientation and we need to delay arriving there during a meridian flip
-        if ((currentAlt<20.0) && (abs(latitude)<45.0) && (posAxis2>0-IDS)) {
-          if (pierSide==PierSideFlipWE1) targetAxis1.part.m=-45L*(long)StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=45L*(long)StepsPerDegreeAxis1-IHS; targetAxis1.part.f=0;
+        if ((currentAlt<20.0) && (abs(latitude)<45.0) && (posAxis2>0-indexAxis2Steps)) {
+          if (pierSide==PierSideFlipWE1) targetAxis1.part.m=-45L*(long)StepsPerDegreeAxis1-indexAxis1Steps; else targetAxis1.part.m=45L*(long)StepsPerDegreeAxis1-indexAxis1Steps; targetAxis1.part.f=0;
         }
       }
     }
@@ -71,9 +73,35 @@ void moveTo() {
   
   Again:
   cli();
+  long tempPosAxis2=posAxis2;
   distDestAxis1=abs(posAxis1-(long)targetAxis1.part.m);  // distance from dest HA
-  distDestAxis2=abs(posAxis2-(long)targetAxis2.part.m);  // distance from dest Dec
+  distDestAxis2=abs(tempPosAxis2-(long)targetAxis2.part.m);  // distance from dest Dec
   sei();
+
+  // adjust rates near the horizon to help keep from exceeding the minAlt limit
+  #ifndef MOUNT_TYPE_ALTAZM
+  tempPosAxis2+=indexAxis2Steps; if (latitude<0) tempPosAxis2=-tempPosAxis2;
+  if (((latitude>10) || (latitude<-10)) && (distStartAxis1>((DegreesForAcceleration*StepsPerDegreeAxis1)/16))) {
+    // if Dec is decreasing, slow down Dec
+    if (tempPosAxis2<lastPosAxis2) {
+      cli();
+      double minAlt2=minAlt+10.0;
+      long a=(currentAlt-minAlt2)*StepsPerDegreeAxis2; if (a<((DegreesForAcceleration*StepsPerDegreeAxis2)/8)) a=((DegreesForAcceleration*StepsPerDegreeAxis2)/8);
+      if (a<distDestAxis2) distDestAxis2=a;
+      sei();
+    } else
+    // if Dec is increasing, slow down HA
+    {
+      cli();
+      double minAlt2=minAlt+10.0;
+      long a=(currentAlt-minAlt2)*StepsPerDegreeAxis1; if (a<((DegreesForAcceleration*StepsPerDegreeAxis1)/8)) a=((DegreesForAcceleration*StepsPerDegreeAxis1)/8);
+      if (a<distDestAxis1) distDestAxis1=a;
+      sei();
+    }
+  }
+  lastPosAxis2=tempPosAxis2;
+  #endif
+
   if (distDestAxis1<1) distDestAxis1=1;
   if (distDestAxis2<1) distDestAxis2=1;
 
@@ -127,7 +155,7 @@ void moveTo() {
 #ifdef MOUNT_TYPE_ALTAZM
   // In AltAz mode & at the end of slew & near the Zenith, disable tracking for a moment if we're getting close to the target
   if ((distDestAxis1<=(long)StepsPerDegreeAxis1*2L) && (distDestAxis2<=(long)StepsPerDegreeAxis2*2L)) {
-    if ((long)targetAxis2.part.m>80L*(long)StepsPerDegreeAxis2-IHS) {
+    if ((long)targetAxis2.part.m>80L*(long)StepsPerDegreeAxis2-indexAxis1Steps) {
       if (lastTrackingState==TrackingSidereal) {
         lastTrackingState=TrackingSiderealDisabled;
       }
@@ -146,14 +174,14 @@ void moveTo() {
       startAxis1=posAxis1;
       startAxis2=posAxis2;
       cli();
-      if (celestialPoleHA==0) {
+      if (celestialPoleAxis1==0) {
         // for fork mounts
-        if (pierSide==PierSideFlipEW2) targetAxis1.part.m=180L*(long)StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=-180L*(long)StepsPerDegreeAxis1-IHS; targetAxis1.part.f=0;
+        if (pierSide==PierSideFlipEW2) targetAxis1.part.m=180L*(long)StepsPerDegreeAxis1-indexAxis1Steps; else targetAxis1.part.m=-180L*(long)StepsPerDegreeAxis1-indexAxis1Steps; targetAxis1.part.f=0;
       } else {
         // for eq mounts
-        if (pierSide==PierSideFlipEW2) targetAxis1.part.m=celestialPoleHA*(long)StepsPerDegreeAxis1-IHS; else targetAxis1.part.m=-celestialPoleHA*(long)StepsPerDegreeAxis1-IHS; targetAxis1.part.f=0;
+        if (pierSide==PierSideFlipEW2) targetAxis1.part.m=celestialPoleAxis1*(long)StepsPerDegreeAxis1-indexAxis1Steps; else targetAxis1.part.m=-celestialPoleAxis1*(long)StepsPerDegreeAxis1-indexAxis1Steps; targetAxis1.part.f=0;
       }
-      targetAxis2.part.m=(long)(celestialPoleDec*(double)StepsPerDegreeAxis2)-IDS; targetAxis2.part.f=0;
+      targetAxis2.part.m=(long)(celestialPoleAxis2*(double)StepsPerDegreeAxis2)-indexAxis2Steps; targetAxis2.part.f=0;
       sei();
       
       pierSide++;
@@ -167,22 +195,24 @@ void moveTo() {
         pierSide=PierSideWest;
         cli();
         // reverse the Declination movement
-        DecDir  = DecDirWInit;
+        defaultDirAxis2  = defaultDirAxis2WInit;
         // if we were on the east side of the pier the HA's were in the western sky, and were positive
         // now we're in the eastern sky and the HA's are negative
         posAxis1-=(long)(180.0*(double)StepsPerDegreeAxis1);
         trueAxis1-=(long)(180.0*(double)StepsPerDegreeAxis1);
         sei();
+        forceRefreshGetEqu();
       } else {
         pierSide=PierSideEast;
         cli();
         // normal Declination
-        DecDir  = DecDirEInit;      
+        defaultDirAxis2  = defaultDirAxis2EInit;      
         // if we were on the west side of the pier the HA's were in the eastern sky, and were negative
         // now we're in the western sky and the HA's are positive
         posAxis1+=(long)(180.0*(double)StepsPerDegreeAxis1);
         trueAxis1+=(long)(180.0*(double)StepsPerDegreeAxis1);
         sei();
+        forceRefreshGetEqu();
       }
     
       // now complete the slew
@@ -194,39 +224,40 @@ void moveTo() {
       sei();
     } else {
       // restore last tracking state
-      trackingState=lastTrackingState; SetSiderealClockRate(siderealInterval);
       cli();
       timerRateAxis1=SiderealRate;
       timerRateAxis2=SiderealRate;
       sei();
 
-      DecayModeTracking();
-            
+      StepperModeTracking();
+
       // other special gotos: for parking the mount and homeing the mount
       if (parkStatus==Parking) {
+        int i=parkClearBacklash(); if (i==-1) return; // working
+    
+        if ((posAxis1==(long)targetAxis1.part.m) && (posAxis2==(long)targetAxis2.part.m) && (i==1)) {
+          // restore trackingState
+          trackingState=lastTrackingState; SetSiderealClockRate(siderealInterval);
 
-        // give the drives a moment to settle in
-        for (int i=0; i<12; i++) if ((posAxis1!=(long)targetAxis1.part.m) || (posAxis2!=(long)targetAxis2.part.m)) delay(250);
+          // success, we're parked
+          parkStatus=Parked; EEPROM.write(EE_parkStatus,parkStatus);
 
-        if ((posAxis1==(long)targetAxis1.part.m) && (posAxis2==(long)targetAxis2.part.m)) {
-          if (parkClearBacklash()) {
-            // success, we're parked
-            parkStatus=Parked; EEPROM.write(EE_parkStatus,parkStatus);
-
-            // just store the indexes of our pointing model
-            EEPROM_writeFloat(EE_IH,IH);
-            EEPROM_writeFloat(EE_ID,ID);
-            
-            // disable the stepper drivers
-            digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
-            digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
-
-          } else parkStatus=ParkFailed;
-      } else parkStatus=ParkFailed;
-
+          // just store the indexes of our pointing model
+          EEPROM_writeFloat(EE_indexAxis1,indexAxis1);
+          EEPROM_writeFloat(EE_indexAxis2,indexAxis2);
+          
+          // disable the stepper drivers
+          digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
+          digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
+        } else { parkStatus=ParkFailed; trackingState=lastTrackingState; SetSiderealClockRate(siderealInterval); }
+      
       } else
-        if (homeMount) { 
-          parkClearBacklash();
+        if (homeMount) {
+          if (parkClearBacklash()==-1) return;  // working, no error flagging
+
+          // restore trackingState
+          trackingState=lastTrackingState; SetSiderealClockRate(siderealInterval);
+
           setHome();
           homeMount=false; 
           atHome=true;
@@ -234,6 +265,9 @@ void moveTo() {
           // disable the stepper drivers
           digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
           digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
+        } else {
+          // restore trackingState
+          trackingState=lastTrackingState; SetSiderealClockRate(siderealInterval);
         }
     }
   }
@@ -256,95 +290,3 @@ uint32_t isqrt32 (uint32_t n) {
     return root;
 }
 
-bool DecayModeTrack=false;
-
-// if stepper drive can switch decay mode, set it here
-void DecayModeTracking() {
-  if (DecayModeTrack) return;
-  DecayModeTrack=true;
-  cli();
-#if defined(DECAY_MODE_OPEN)
-  pinMode(Axis1_Mode,INPUT);
-  pinMode(Axis2_Mode,INPUT);
-#elif defined(DECAY_MODE_LOW)
-  pinMode(Axis1_Mode,OUTPUT);
-  digitalWrite(Axis1_Mode,LOW);
-  pinMode(Axis2_Mode,OUTPUT);
-  digitalWrite(Axis1_Mode,LOW);
-#elif defined(DECAY_MODE_HIGH)
-  pinMode(Axis1_Mode,OUTPUT);
-  digitalWrite(Axis1_Mode,HIGH);
-  pinMode(Axis2_Mode,OUTPUT);
-  digitalWrite(Axis2_Mode,HIGH);
-#elif defined(MODE_SWITCH_BEFORE_SLEW_ON)
-  #ifdef AXIS1_MODE
-  if ((AXIS1_MODE & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE    & 1)); } else { pinMode(Axis1_M0,INPUT); }
-  if ((AXIS1_MODE & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE>>1 & 1)); } else { pinMode(Axis1_M1,INPUT); }
-  if ((AXIS1_MODE & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE>>2 & 1)); } else { pinMode(Axis1_M2,INPUT); }
-  #endif
-
-  #ifdef AXIS2_MODE
-  if ((AXIS2_MODE & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE    & 1)); } else { pinMode(Axis2_M0,INPUT); }
-  if ((AXIS2_MODE & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE>>1 & 1)); } else { pinMode(Axis2_M1,INPUT); }
-  if ((AXIS2_MODE & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE>>2 & 1)); } else { pinMode(Axis2_M2,INPUT); }
-  #endif
-
-  stepAxis1=1;
-  stepAxis2=1;
-#elif defined(MODE_SWITCH_BEFORE_SLEW_SPI)
-  // this is for TMC2130
-  //       SS      ,SCK     ,MISO     ,MOSI
-  spiStart(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0)
-  //                  intPol,spreadCycle,uSteps
-  TMC2130_setStepMode(true,false,AXIS1_MODE);
-  spiStart(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0)
-  TMC2130_setStepMode(true,false,AXIS2_MODE);
-#endif
-  #ifdef MODE_SWITCH_SLEEP_ON 
-  delay(3);
-  #endif
-  sei();
-}
-
-void DecayModeGoto() {
-  if (!DecayModeTrack) return;
-  DecayModeTrack=false;
-  cli();
-#if defined(DECAY_MODE_GOTO_OPEN)
-  pinMode(Axis1_Mode,INPUT);
-  pinMode(Axis2_Mode,INPUT);
-#elif defined(DECAY_MODE_GOTO_LOW)
-  pinMode(Axis1_Mode,OUTPUT);
-  digitalWrite(Axis1_Mode,LOW);
-  pinMode(Axis2_Mode,OUTPUT);
-  digitalWrite(Axis1_Mode,LOW);
-#elif defined(DECAY_MODE_GOTO_HIGH)
-  pinMode(Axis1_Mode,OUTPUT);
-  digitalWrite(Axis1_Mode,HIGH);
-  pinMode(Axis2_Mode,OUTPUT);
-  digitalWrite(Axis2_Mode,HIGH);
-#elif defined(MODE_SWITCH_BEFORE_SLEW_ON)
-  if ((AXIS1_MODE_GOTO & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE_GOTO    & 1)); } else { pinMode(Axis1_M0,INPUT); }
-  if ((AXIS1_MODE_GOTO & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE_GOTO>>1 & 1)); } else { pinMode(Axis1_M1,INPUT); }
-  if ((AXIS1_MODE_GOTO & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE_GOTO>>2 & 1)); } else { pinMode(Axis1_M2,INPUT); }
-
-  if ((AXIS2_MODE_GOTO & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE_GOTO    & 1)); } else { pinMode(Axis2_M0,INPUT); }
-  if ((AXIS2_MODE_GOTO & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE_GOTO>>1 & 1)); } else { pinMode(Axis2_M1,INPUT); }
-  if ((AXIS2_MODE_GOTO & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE_GOTO>>2 & 1)); } else { pinMode(Axis2_M2,INPUT); }
-
-  stepAxis1=AXIS1_STEP_GOTO;
-  stepAxis2=AXIS2_STEP_GOTO;
-#elif defined(MODE_SWITCH_BEFORE_SLEW_SPI)
-  // this is for TMC2130
-  //       SS      ,SCK     ,MISO     ,MOSI
-  spiStart(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0)
-  //                  intPol,spreadCycle,uSteps
-  TMC2130_setStepMode(true,false,AXIS1_MODE_GOTO);
-  spiStart(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0)
-  TMC2130_setStepMode(true,false,AXIS2_MODE_GOTO);
-#endif
-  #ifdef MODE_SWITCH_SLEEP_ON
-  delay(3);
-  #endif
-  sei();
-}
