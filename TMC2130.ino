@@ -24,7 +24,7 @@ uint8_t TMC2130_write(byte Address, uint32_t data_out)
 
 uint8_t TMC2130_read(byte Address, uint32_t* data_out)
 {
-  Address=Address&!0x80;
+  Address=Address&~0x80;
   uint8_t status_byte=BBSpi.transfer(Address);
   *data_out=BBSpi.transfer32(*data_out);
   return status_byte;
