@@ -159,7 +159,7 @@ void Init_Pins() {
 #endif
 
 // ready the sound/buzzer pin
-#ifndef SOUND_OFF
+#ifndef BUZZER_OFF
   pinMode(TonePin,OUTPUT);
   digitalWrite(TonePin,LOW);
 #endif

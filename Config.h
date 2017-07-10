@@ -74,8 +74,10 @@
 #define RETICULE_LED_PINS_OFF
 
 // Sound/buzzer on pin 42, default=OFF.  (Teensy3.2 Pin 29)
-// Specify frequency for a piezo speaker (for example "SOUND 2000") or use SOUND_ON for a piezo buzzer.
-#define SOUND_OFF
+// Specify frequency for a piezo speaker (for example "BUZZER 2000") or use BUZZER_ON for a piezo buzzer.
+#define BUZZER_OFF
+// Sound state at startup, default=ON.
+#define DEFAULT_SOUND_ON
 
 // Optionally adjust tracking rate to compensate for atmospheric refraction, default=OFF (limited testing done)
 // can be turned on/off with the :Te# and :Td# commands regardless of this setting

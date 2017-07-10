@@ -696,11 +696,11 @@ void SetAccelerationRates(double maxRate) {
 // Sound/buzzer
 void soundAlert() {
   if (soundEnabled) {
-    #ifdef SOUND_ON
+    #ifdef BUZZER_ON
       digitalWrite(TonePin,HIGH); buzzerDuration=100;
     #endif
-    #ifdef SOUND
-      tone(TonePin,SOUND,1000);
+    #ifdef BUZZER
+      tone(TonePin,BUZZER,1000);
     #endif
   }
 }

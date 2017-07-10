@@ -473,7 +473,11 @@ boolean LED_ON = false;
 boolean LED2_ON = false;
 
 // sound/buzzer
+#ifdef DEFAULT_SOUND_ON
+boolean soundEnabled = true;
+#else
 boolean soundEnabled = false;
+#endif
 int buzzerDuration = 0;
 
 // pause at home on meridian flip
