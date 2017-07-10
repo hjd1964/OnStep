@@ -171,8 +171,10 @@ void moveTo() {
     
     if ((pierSide==PierSideFlipEW2) || (pierSide==PierSideFlipWE2)) {
       // just wait stop here until we get notification to continue
-      if ((pauseHome) && (!waitingHomeContinue)) { waitingHome=true; return; }
-      waitingHome=false; waitingHomeContinue=false;
+      if (pauseHome) {
+        if (!waitingHomeContinue) { waitingHome=true; return; }
+        soundAlert(); waitingHome=false; waitingHomeContinue=false;
+      }
 
       // make sure we're at the home position just before flipping sides of the mount
       startAxis1=posAxis1;
