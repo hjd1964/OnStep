@@ -316,6 +316,7 @@ boolean highPrecision = true;
 #define TrackingNone             0
 #define TrackingSidereal         1
 #define TrackingMoveTo           2
+#define TrackingSiderealDisabled 3
 volatile byte trackingState      = TrackingNone;
 byte abortTrackingState          = TrackingNone;
 volatile byte lastTrackingState  = TrackingNone;
