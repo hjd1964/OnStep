@@ -129,6 +129,7 @@ boolean refraction = refraction_enable;
 boolean refraction = false;
 #endif
 boolean onTrack = false;
+boolean onTrackDec = false;
 
 long    maxRate = MaxRate*16L;
 double  slewSpeed = 0;
@@ -471,6 +472,15 @@ fixed_t fstepAxis2;
 boolean LED_ON = false;
 boolean LED2_ON = false;
 
+// sound/buzzer
+boolean soundEnabled = false;
+int buzzerDuration = 0;
+
+// pause at home on meridian flip
+boolean pauseHome = false;            // allow pause at home?
+boolean waitingHomeContinue = false;  // set to true to stop pause
+boolean waitingHome = false;          // true if waiting at home
+
 // reticule control
 #ifdef RETICULE_LED_PINS
 int reticuleBrightness=RETICULE_LED_PINS;
@@ -525,7 +535,9 @@ volatile int blAxis2        = 0;
 
 #define EE_backlashAxis1 80   // 4
 #define EE_backlashAxis2 84   // 4
-#define EE_siderealInterval 88  // 4 +4
+#define EE_siderealInterval 88  // 4
+#define EE_onTrackDec  92     // 1
+#define EE_pauseHome   93     // 1 +2
 
 #define EE_autoInitKey 96
 
@@ -638,38 +650,43 @@ void loop() {
 
       // if signals aren't stable ignore them
       if ((w1==w2) && (e1==e2) && (n1==n2) && (s1==s2)) {
-        char c1=0;
-        if ((w1==HIGH) && (e1==HIGH)) c1='b';
-        if ((w1==LOW)  && (e1==HIGH)) c1='w';
-        if ((w1==HIGH) && (e1==LOW))  c1='e';
-        if ((w1==LOW)  && (e1==LOW))  c1='+';
-        if (c1!=ST4DirAxis1) {
-          ST4DirAxis1=c1;
-          if ((c1=='e') || (c1=='w')) {
-  #if defined(SEPERATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
-            startGuideAxis1(c1,currentPulseGuideRate,-1);
-  #else
-            startGuideAxis1(c1,currentGuideRate,-1);
-  #endif
+        if (!waitingHome) {
+          char c1=0;
+          if ((w1==HIGH) && (e1==HIGH)) c1='b';
+          if ((w1==LOW)  && (e1==HIGH)) c1='w';
+          if ((w1==HIGH) && (e1==LOW))  c1='e';
+          if ((w1==LOW)  && (e1==LOW))  c1='+';
+          if (c1!=ST4DirAxis1) {
+            ST4DirAxis1=c1;
+            if ((c1=='e') || (c1=='w')) {
+    #if defined(SEPERATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
+              startGuideAxis1(c1,currentPulseGuideRate,-1);
+    #else
+              startGuideAxis1(c1,currentGuideRate,-1);
+    #endif
+            }
+            if (c1=='b') stopGuideAxis1();
           }
-          if (c1=='b') stopGuideAxis1();
-        }
-  
-        char c2=0;
-        if ((n1==HIGH) && (s1==HIGH)) c2='b';
-        if ((n1==LOW)  && (s1==HIGH)) c2='n';
-        if ((n1==HIGH) && (s1==LOW))  c2='s';
-        if ((n1==LOW)  && (s1==LOW))  c2='+';
-        if (c2!=ST4DirAxis2) {
-          ST4DirAxis2=c2;
-          if ((c2=='n') || (c2=='s')) {
-  #if defined(SEPERATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
-            startGuideAxis2(c2,currentPulseGuideRate,-1);
-  #else
-            startGuideAxis2(c2,currentGuideRate,-1);
-  #endif
+    
+          char c2=0;
+          if ((n1==HIGH) && (s1==HIGH)) c2='b';
+          if ((n1==LOW)  && (s1==HIGH)) c2='n';
+          if ((n1==HIGH) && (s1==LOW))  c2='s';
+          if ((n1==LOW)  && (s1==LOW))  c2='+';
+          if (c2!=ST4DirAxis2) {
+            ST4DirAxis2=c2;
+            if ((c2=='n') || (c2=='s')) {
+    #if defined(SEPERATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
+              startGuideAxis2(c2,currentPulseGuideRate,-1);
+    #else
+              startGuideAxis2(c2,currentGuideRate,-1);
+    #endif
+            }
+            if (c2=='b') stopGuideAxis2();
           }
-          if (c2=='b') stopGuideAxis2();
+        } else {
+          // continue if paused at home
+          if ((w1==LOW) || (e1==LOW) || (n1==LOW) || (s1==LOW)) waitingHomeContinue=true;
         }
       }
     }

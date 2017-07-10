@@ -17,6 +17,9 @@
 #define LEDneg2Pin    10    // Pin 10 (GND)  PB4
 #define ReticulePin   44    // Pin 44 (GND)  
 
+// For a piezo buzzer
+#define TonePin       42    // Pin 42 (Tone)
+
 // The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
 // The Arduino attachInterrupt function works in two modes, on the '2560 it takes an Interrupt# on the Teensy and others it takes a Pin#
 #define PpsPin         21   //
@@ -86,6 +89,9 @@
 #define LEDneg2Pin     7    // Pin 7 (GND)
 #define ReticulePin   44    // Pin 44 (GND)  
 
+// For a piezo buzzer
+#define TonePin       42    // Pin 42 (Tone)
+
 // The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
 // The Arduino attachInterrupt function works in two modes, on the '2560 it takes an Interrupt# on the Teensy and others it takes a Pin#
 #define PpsPin         21   //
@@ -143,6 +149,9 @@
 #define LEDneg2Pin     7    // Pin 7 (GND)
 #define ReticulePin    9    // Pin 9 (GND)
 
+// For a piezo buzzer
+#define TonePin       29    // Pin 29 (Tone)
+
 // The PPS pin is a logic level input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
 #define PpsPin        23    // Pin 23 (PPS time source, GPS for example)
 
@@ -193,6 +202,12 @@
 #define LEDneg2Pin    22    // Pin 22 (Drain)
 #define ReticulePin   22    // Pin 22 (Drain)
 
+// For a piezo buzzer
+#define TonePin       29    // Pin 29 (Tone)
+
+// The PPS pin is a 3.3V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
+#define PpsPin        28    // Pin 28 (PPS time source, GPS for example)
+
 #define Axis1DirPin   21    // Pin 21 (Dir)
 #define Axis1StepPin  20    // Pin 20 (Step)
 #define RstPin        19    // Pin 19 (Reset)
@@ -210,7 +225,6 @@
 #define Axis2DirPin    2    // Pin  2 (Dir)
 #define Axis2StepPin   3    // Pin  3 (Step)
 #define LimitPin       4    // Pin  4 (The limit switch sense is a logic level input which uses the internal pull up, shorted to ground it stops gotos/tracking)
-#define PpsPin         28   // Pin  28 (PPS time source, GPS for example)
 #define Axis2_FAULT    5    // Pin  5 (Fault)
 #define Axis2_Aux      5    // Pin  5 (Aux - ESP8266 RST or SPI MISO)
 #define Axis2_M2       6    // Pin  6 (Microstep Mode 2 or SPI CS)
@@ -232,7 +246,7 @@
 #endif
 
 #elif (defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)) && !defined(ALTERNATE_PINMAP_ON)
-// Note that TM4C123 has resistors R9 anr R10 between pins 14 (B6) and 23 (D0) and between pins 15 (B7) and 24 (D1)
+// Note that TM4C123 has resistors R9 and R10 between pins 14 (B6) and 23 (D0) and between pins 15 (B7) and 24 (D1)
 // Make sure you look at the list of the pins and options to avoid clashes or desolder the two bridges
 // These pins are used for Axis2_M2 (14) and DE_M3 (15) and for Axis2DirPin (23) and Axis25vPin (24)
 // If you have defined AXIS2_MODE_OFF in Config.h you should be safe to leave things as they are.
@@ -250,6 +264,9 @@
 #define LEDnegPin     33               // Pin D6 (GND)
 #define LEDneg2Pin    26               // Pin D3 (GND)
 #define ReticulePin   33
+
+// For a piezo buzzer
+#define TonePin       19               // Pin B5
 
 // The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
 #define PpsPin        19               // Pin B2 (PPS time source, GPS for example)
@@ -309,6 +326,9 @@
 #define LEDneg2Pin    19               // Pin B2 (GND)
 #define ReticulePin   13
 
+// For a piezo buzzer
+#define TonePin        2               // Pin B5
+
 // The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
 #define PpsPin         2               // Pin B5 (PPS time source, GPS for example)
 
@@ -328,7 +348,7 @@
 #define Axis1_FAULT   34               // Pin C7 (Fault if LOW)
 
 // The HA(RA) and Dec jumpers (going to the big easy drivers) are simply four wire jumper cables, each has identical wiring - simple modular construction
-#define Axis2DirPin   23               // Pin D0 (Dir)
+#define Axis2DirPin   23               // Pin D0 (Dir) 
 #define Axis2DirBit   GPIO_PIN_0       // Pin 23=D0=B6 = pin 14
 #define Axis2DirPORT  GPIO_PORTD_BASE  //
 #define Axis2StepPin  24               // Pin D1 (Step)
@@ -337,8 +357,8 @@
 #define Axis2_Aux     9                // ESP8266 Reset
 
 #define Axis2_M2      27               // Pin E1 (Microstep Mode 0)
-#define Axis2_M1      28               // Pin E2 (Microstep Mode 1) IF USED MAKE SURE YOU DESOLDER A BRIDGE or change pins around, otherwise pin 14 is connected to pin 23
-#define Axis2_M0      29               // Pin E3 (Microstep Mode 2) IF USED MAKE SURE YOU DESOLDER A BRIDGE or change pins around, otherwise pin 15 is connected to pin 24
+#define Axis2_M1      28               // Pin E2 (Microstep Mode 1)
+#define Axis2_M0      29               // Pin E3 (Microstep Mode 2)
 #define Axis2_EN      30               // Pin F1 (Enabled when LOW)
 #define Axis2_FAULT   26               // Pin D3 (Fault if LOW) NOTE, this is connected to pushbutton switch 2
 
@@ -364,6 +384,9 @@
 #define LEDnegPin     33               // Pin L1 (GND)
 #define LEDneg2Pin    26               // Pin E3 (GND)
 #define ReticulePin   33
+
+// For a piezo buzzer
+#define TonePin       19               // Pin M3
 
 // The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
 #define PpsPin        19               // Pin M3 (PPS time source, GPS for example)

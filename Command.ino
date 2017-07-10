@@ -369,6 +369,7 @@ void processCommands() {
         if (faultAxis1 || faultAxis2)            reply[i++]='f';
         if (refraction)                          reply[i++]='r'; else reply[i++]='s';
         if (onTrack)                             reply[i++]='t';
+        if (waitingHome)                         reply[i++]='w';
         // provide mount type
         #ifdef MOUNT_TYPE_GEM
         reply[i++]='E';
@@ -1034,6 +1035,15 @@ void processCommands() {
                 default: commandError=true;
               }
             break;
+            case '7': // buzzer
+              if ((parameter[3]=='0') || (parameter[3]=='1')) { soundEnabled=parameter[3]-'0'; }
+            break;
+            case '8': // pause at home on meridian flip
+              if ((parameter[3]=='0') || (parameter[3]=='1')) { pauseHome=parameter[3]-'0'; EEPROM.write(EE_pauseHome,pauseHome); }
+            break;
+            case '9': // continue if paused at home
+              if ((parameter[3]=='1')) { if (waitingHome) waitingHomeContinue=true; }
+            break;
           }
         } else
 #ifdef MOUNT_TYPE_GEM
@@ -1065,6 +1075,7 @@ void processCommands() {
       commandError=true;
       } else 
 //   T - Tracking Commands
+//
 //  :T+#   Master sidereal clock faster by 0.02 Hertz (stored in EEPROM)
 //  :T-#   Master sidereal clock slower by 0.02 Hertz (stored in EEPROM)
 //  :TS#   Track rate solar
@@ -1072,12 +1083,17 @@ void processCommands() {
 //  :TQ#   Track rate sidereal
 //  :TR#   Master sidereal clock reset (to calculated sidereal rate, stored in EEPROM)
 //  :TK#   Track rate king
-//  :Te#   Tracking enable  (OnStep only, replies 0/1)
-//  :Td#   Tracking disable (OnStep only, replies 0/1)
-//  :To#   OnTrack enable   (OnStep only, replies 0/1)
-//  :Tr#   Track refraction enable  (OnStep only, replies 0/1)
-//  :Tn#   Track refraction disable (OnStep only, replies 0/1)
 //         Returns: Nothing
+//
+//  :Te#   Tracking enable
+//  :Td#   Tracking disable
+//  :To#   OnTrack enable
+//  :Tr#   Track refraction enable
+//  :Tn#   Track refraction disable
+//  :T1#   Track single axis (disable Dec tracking on Eq mounts)
+//  :T2#   Track dual axis
+//         Return: 0 on failure
+//                 1 on success
 
      if (command[0]=='T') {
        if (command[1]=='+') { siderealInterval-=HzCf*(0.02); quietReply=true; } else
@@ -1092,6 +1108,8 @@ void processCommands() {
        if (command[1]=='o') { refraction=refraction_enable; onTrack=true;  SetTrackingRate(default_tracking_rate); } else  // turn full compensation on, defaults to base sidereal tracking rate
        if (command[1]=='r') { refraction=refraction_enable; onTrack=false; SetTrackingRate(default_tracking_rate); } else  // turn refraction compensation on, defaults to base sidereal tracking rate
        if (command[1]=='n') { refraction=false; onTrack=false; SetTrackingRate(default_tracking_rate); } else              // turn refraction off, sidereal tracking rate resumes
+       if (command[1]=='1') { onTrackDec=false; EEPROM.write(EE_onTrackDec,(byte)onTrackDec); } else                       // turn off dual axis tracking
+       if (command[1]=='2') { onTrackDec=true;  EEPROM.write(EE_onTrackDec,(byte)onTrackDec); } else                       // turn on dual axis tracking
          commandError=true;
 
        // Only burn the new rate if changing the sidereal interval

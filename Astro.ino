@@ -351,6 +351,9 @@ double az_currentRate=1.0;
 // az_deltaH/D are in arc-seconds/second
 // trackingTimerRateAxis1/2 are x the sidereal rate
 void SetDeltaTrackingRate() {
+#ifndef MOUNT_TYPE_ALTAZM
+  if (!onTrackDec) az_deltaAxis2=0.0;
+#endif
   cli();
   if (trackingState==TrackingSidereal) trackingTimerRateAxis1=az_deltaAxis1/15.0; else trackingTimerRateAxis1=0.0;
   if (trackingState==TrackingSidereal) trackingTimerRateAxis2=az_deltaAxis2/15.0; else trackingTimerRateAxis2=0.0;
@@ -688,6 +691,18 @@ void SetAccelerationRates(double maxRate) {
   StepsForRateChangeAxis1= ((double)DegreesForAcceleration/sqrt((double)StepsPerDegreeAxis1))*0.3333333*StepsPerDegreeAxis1*maxRate;
   StepsForRateChangeAxis2= ((double)DegreesForAcceleration/sqrt((double)StepsPerDegreeAxis2))*0.3333333*StepsPerDegreeAxis2*maxRate;
   slewSpeed=(1000000.0/(maxRate/16L))/StepsPerDegreeAxis1;
+}
+
+// Sound/buzzer
+void soundAlert() {
+  if (soundEnabled) {
+    #ifdef SOUND_ON
+      digitalWrite(TonePin,HIGH); buzzerDuration=100;
+    #endif
+    #ifdef SOUND
+      tone(TonePin,SOUND,1000);
+    #endif
+  }
 }
 
 

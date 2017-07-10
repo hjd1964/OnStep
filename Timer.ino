@@ -140,6 +140,9 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
   if (trackingState!=TrackingMoveTo) { cnt++; if (cnt%3!=0) return; cnt=0; }
   lst++;
 
+  // handle buzzer
+  if (buzzerDuration>0) { buzzerDuration--; if (buzzerDuration==0) digitalWrite(TonePin,LOW); }
+
   if (trackingState!=TrackingMoveTo) {
     // automatic rate calculation HA
     long calculatedTimerRateAxis1;

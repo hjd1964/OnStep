@@ -377,7 +377,10 @@ byte goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1, long 
 
   DisablePec();
 
+  // sound goto start
+  soundAlert();
+
   StepperModeGoto();
-  
+
   return 0;
 }

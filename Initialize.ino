@@ -158,6 +158,12 @@ void Init_Pins() {
   analogWrite(LEDneg2Pin,STATUS_LED2_PINS);
 #endif
 
+// ready the sound/buzzer pin
+#ifndef SOUND_OFF
+  pinMode(TonePin,OUTPUT);
+  digitalWrite(TonePin,LOW);
+#endif
+
 // provide 5V power to stepper drivers if requested
 #ifdef POWER_SUPPLY_PINS_ON  
   pinMode(Axis15vPin,OUTPUT);
@@ -335,10 +341,10 @@ void Init_ReadEEPROM_Values() {
   pecRecorded=EEPROM.read(EE_pecRecorded); if (!pecRecorded) pecStatus=IgnorePEC;
   for (int i=0; i<PECBufferSize; i++) pecBuffer[i]=EEPROM.read(EE_pecTable+i);
   wormSensePos=EEPROM_readLong(EE_wormSensePos);
-  #ifdef PEC_SENSE_OFF
+#ifdef PEC_SENSE_OFF
   wormSensePos=0;
   pecStatus=IgnorePEC;
-  #endif
+#endif
   
   // get the Park status
   parkSaved=EEPROM.read(EE_parkSaved);
@@ -351,15 +357,20 @@ void Init_ReadEEPROM_Values() {
   maxRate=EEPROM_readInt(EE_maxRate)*16;
   if (maxRate<(MaxRate/2L)*16L) maxRate=(MaxRate/2L)*16L;
   if (maxRate>(MaxRate*2L)*16L) maxRate=(MaxRate*2L)*16L;
-  #if !defined(RememberMaxRate_ON) && !defined(REMEMBER_MAX_RATE_ON)
+#if !defined(RememberMaxRate_ON) && !defined(REMEMBER_MAX_RATE_ON)
   if (maxRate!=MaxRate*16L) { maxRate=MaxRate*16L; EEPROM_writeInt(EE_maxRate,(int)(maxRate/16L)); }
-  #endif
+#endif
   SetAccelerationRates(maxRate); // set the new acceleration rate
 
   // get autoMeridianFlip
-  #if defined(MOUNT_TYPE_GEM) && defined(REMEMBER_AUTO_MERIDIAN_FLIP_ON)
+#if defined(MOUNT_TYPE_GEM) && defined(REMEMBER_AUTO_MERIDIAN_FLIP_ON)
   autoMeridianFlip=EEPROM.read(EE_autoMeridianFlip);
-  #endif
+#endif
+
+  // meridian flip pause at home
+#ifdef REMEMBER_PAUSE_HOME_ON
+  pauseHome=EEPROM.read(EE_pauseHome);
+#endif
 
   // makes onstep think that you parked the 'scope
   // combined with a hack in the goto syncEqu() function and you can quickly recover from
@@ -441,6 +452,9 @@ void Init_EEPROM_Values() {
     
     // clear the pointing model
     saveAlignModel();
+
+    // disable OnTrack/Refraction dual axis mode
+    EEPROM.write(EE_onTrackDec,0);
   }
 }
 

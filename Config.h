@@ -73,6 +73,10 @@
 // RETICULE_LED_PINS n, where n=0 to 255 activates this feature and sets default brightness
 #define RETICULE_LED_PINS_OFF
 
+// Sound/buzzer on pin 42, default=OFF.  (Teensy3.2 Pin 29)
+// Specify frequency for a piezo speaker (for example "SOUND 2000") or use SOUND_ON for a piezo buzzer.
+#define SOUND_OFF
+
 // Optionally adjust tracking rate to compensate for atmospheric refraction, default=OFF (limited testing done)
 // can be turned on/off with the :Te# and :Td# commands regardless of this setting
 #define TRACK_REFRACTION_RATE_DEFAULT_OFF
@@ -82,6 +86,9 @@
 
 // Set to ON and OnStep will remember the last auto meridian flip setting (on/off), default=OFF
 #define REMEMBER_AUTO_MERIDIAN_FLIP_OFF
+
+// Set to ON and OnStep will remember the last meridian flip pause at home setting (on/off), default=OFF
+#define REMEMBER_PAUSE_HOME_OFF
 
 // ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
 #define REMEMBER_MAX_RATE_OFF        // set to ON and OnStep will remember rates set in the ASCOM driver or Android App, default=OFF 

@@ -170,6 +170,10 @@ void moveTo() {
 #endif
     
     if ((pierSide==PierSideFlipEW2) || (pierSide==PierSideFlipWE2)) {
+      // just wait stop here until we get notification to continue
+      if ((pauseHome) && (!waitingHomeContinue)) { waitingHome=true; return; }
+      waitingHome=false; waitingHomeContinue=false;
+
       // make sure we're at the home position just before flipping sides of the mount
       startAxis1=posAxis1;
       startAxis2=posAxis2;
@@ -183,7 +187,7 @@ void moveTo() {
       }
       targetAxis2.part.m=(long)(celestialPoleAxis2*(double)StepsPerDegreeAxis2)-indexAxis2Steps; targetAxis2.part.f=0;
       sei();
-      
+
       pierSide++;
     } else
     if ((pierSide==PierSideFlipEW3) || (pierSide==PierSideFlipWE3)) {
@@ -223,6 +227,10 @@ void moveTo() {
       targetAxis2.part.m=origTargetAxis2; targetAxis2.part.f=0;
       sei();
     } else {
+
+      // sound goto done
+      soundAlert();
+
       // restore last tracking state
       cli();
       timerRateAxis1=SiderealRate;

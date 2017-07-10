@@ -82,6 +82,10 @@
 // RETICULE_LED_PINS n, where n=0 to 255 activates this feature and sets default brightness
 #define RETICULE_LED_PINS_OFF
 
+// Sound/buzzer on pin 42, default=OFF.  (Teensy3.2 Pin 29)
+// Specify frequency for a piezo speaker (for example "SOUND 2000") or use SOUND_ON for a piezo buzzer.
+#define SOUND_OFF
+
 // Optionally adjust tracking rate to compensate for atmospheric refraction, default=OFF (limited testing done)
 // can be turned on/off with the :Te# and :Td# commands regardless of this setting
 #define TRACK_REFRACTION_RATE_DEFAULT_OFF
@@ -91,6 +95,9 @@
 
 // Set to ON and OnStep will remember the last auto meridian flip setting (on/off), default=OFF
 #define REMEMBER_AUTO_MERIDIAN_FLIP_OFF
+
+// Set to ON and OnStep will remember the last meridian flip pause at home setting (on/off), default=OFF
+#define REMEMBER_PAUSE_HOME_OFF
 
 // ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
 #define REMEMBER_MAX_RATE_OFF        // set to ON and OnStep will remember rates set in the ASCOM driver or Android App, default=OFF 
@@ -180,7 +187,7 @@
 #define AXIS2_MODE_OFF               // programs the Dec/Alt uStep mode M0/M1/M2, optional and default _OFF.
 #define AXIS2_MODE_GOTO_OFF          // programs the Dec/Alt uStep mode M0/M1/M2, used during gotos, optional and default _OFF.
 #define AXIS2_STEP_GOTO 1            // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
-#define MODE_SWITCH_BEFORE_SLEW_OFF  // _ON (or _SPI) for _MODE and _MODE_GOTO settings to start/stop just before/after the slew, otherwise they are active during the slew at <128uS/step speeds)
+#define MODE_SWITCH_BEFORE_SLEW_OFF  // _ON (or _SPI) for _MODE and _MODE_GOTO settings to start/stop just before/after the slew, otherwise they are active during the slew at <128uS/step speeds
                                      // _SPI as above but uses SPI (on M0/M1/M2/Aux) to do the switching (TMC2130.)  Uses Teensy3.2 Pins 18 (Aux1) and 5 (Aux2,) choose only one feature on Aux1/2.
 
 // Secondary stepper driver decay control (for both Axis, the _DECAY_MODE and _DECAY_MODE_GOTO settings always start/stop just before/after the slew)
