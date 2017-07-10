@@ -478,7 +478,7 @@ boolean soundEnabled = true;
 #else
 boolean soundEnabled = false;
 #endif
-int buzzerDuration = 0;
+volatile int buzzerDuration = 0;
 
 // pause at home on meridian flip
 boolean pauseHome = false;            // allow pause at home?
