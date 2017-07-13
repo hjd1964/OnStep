@@ -497,16 +497,21 @@ boolean do_refractionRate_calc() {
 
   // convert back to the Equtorial coords
   if ((az_step==25) || (az_step==125)) {
+    if (onTrack) GeoAlign.InstrToEqu(latitude,az_HA,az_Dec,&az_HA,&az_Dec);
+  }
+
+  // convert back to the Equtorial coords
+  if ((az_step==30) || (az_step==130)) {
     HorToEqu(az_Alt,az_Azm,&az_HA1,&az_Dec1);
     if (az_HA1>180.0) az_HA1-=360.0; // HA range +/-180
   } else
 
   // calculate refraction rate deltas'
-  if ((az_step==30) || (az_step==130)) {
+  if ((az_step==35) || (az_step==135)) {
     // store first calc
-    if (az_step==30) { az_HA2=az_HA1; az_Dec2=az_Dec1; }
+    if (az_step==35) { az_HA2=az_HA1; az_Dec2=az_Dec1; }
     // we have both -0.5hr and +0.5hr values 
-    if (az_step==130) {
+    if (az_step==135) {
       // set rates
       // handle coordinate wrap
       if ((az_HA1<-90.0) && (az_HA2>90.0)) az_HA1+=360.0;
