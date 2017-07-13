@@ -110,6 +110,7 @@ void moveTo() {
     // aborts any meridian flip
     if ((pierSide==PierSideFlipWE1) || (pierSide==PierSideFlipWE2) || (pierSide==PierSideFlipWE3)) pierSide=PierSideWest;
     if ((pierSide==PierSideFlipEW1) || (pierSide==PierSideFlipEW2) || (pierSide==PierSideFlipEW3)) pierSide=PierSideEast;
+    if (pauseHome) { waitingHome=false; waitingHomeContinue=false; }
 
     // set the destination near where we are now
     cli();
