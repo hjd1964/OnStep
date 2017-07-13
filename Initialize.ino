@@ -367,8 +367,8 @@ void Init_ReadEEPROM_Values() {
   autoMeridianFlip=EEPROM.read(EE_autoMeridianFlip);
 #endif
 
-  // meridian flip pause at home
-#ifdef REMEMBER_PAUSE_HOME_ON
+  // get meridian flip pause at home
+#if defined(MOUNT_TYPE_GEM) && defined(REMEMBER_PAUSE_HOME_ON)
   pauseHome=EEPROM.read(EE_pauseHome);
 #endif
 
