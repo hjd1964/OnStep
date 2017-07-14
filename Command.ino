@@ -9,7 +9,7 @@ unsigned long _coord_t=0;
 double _dec,_ra;
 
 // help with commands
-enum Command {COMMAND_NONE, COMMAND_SERIAL, COMMAND_SERIAL1, COMMAND_SPI};
+enum Command {COMMAND_NONE, COMMAND_SERIAL, COMMAND_SERIAL1, COMMAND_SERIAL4, COMMAND_SPI};
 char reply[50];
 char command[3];
 char parameter[25];
@@ -17,6 +17,9 @@ boolean commandError = false;
 boolean quietReply   = false;
 cb cmd;  // serial
 cb cmd1; // serial1
+#ifdef SER4_AVAILABLE
+cb cmd4; // serial4
+#endif
 
 // process commands
 void processCommands() {
@@ -26,6 +29,9 @@ void processCommands() {
     // accumulate the command
     if ((PSerial.available()>0) && (!cmd.ready())) cmd.add(PSerial.read());
     if ((PSerial1.available()>0) && (!cmd1.ready())) cmd1.add(PSerial1.read());
+#ifdef SER4_AVAILABLE
+    if ((Serial4.available()>0) && (!cmd4.ready())) cmd4.add(Serial4.read());
+#endif
 
     // send any reply
     if (PSerial.transmit() || PSerial1.transmit()) return;
@@ -34,6 +40,9 @@ void processCommands() {
     Command process_command = COMMAND_NONE;
     if (cmd.ready()) { strcpy(command,cmd.getCmd()); strcpy(parameter,cmd.getParameter()); cmd.flush(); process_command=COMMAND_SERIAL; }
     else if (cmd1.ready()) { strcpy(command,cmd1.getCmd()); strcpy(parameter,cmd1.getParameter()); cmd1.flush(); process_command=COMMAND_SERIAL1; }
+#ifdef SER4_AVAILABLE
+    else if (cmd4.ready()) { strcpy(command,cmd4.getCmd()); strcpy(parameter,cmd4.getParameter()); cmd4.flush(); process_command=COMMAND_SERIAL4; }
+#endif
     else return;
 
     if (process_command) {
@@ -837,6 +846,12 @@ void processCommands() {
           if (process_command==COMMAND_SERIAL1) {
             PSerial1.print("1"); while (PSerial1.transmit()); delay(20); PSerial1.begin(baudRate[i]); 
             quietReply=true; 
+#ifdef SER4_AVAILABLE
+          } else
+          if (process_command==COMMAND_SERIAL4) {
+            Serial4.print("1"); delay(20); Serial4.begin(baudRate[i]);
+            quietReply=true; 
+#endif
           } else commandError=true;
         } else commandError=true;
       } else
@@ -1304,6 +1319,14 @@ void processCommands() {
           if (!supress_frame) strcat(reply,"#");
           PSerial1.print(reply);
         }
+
+#ifdef SER4_AVAILABLE
+        if (process_command==COMMAND_SERIAL4) {
+          if (cmd4.checksum) checksum(reply);
+          if (!supress_frame) strcat(reply,"#");
+          Serial4.print(reply);
+        }
+#endif
       }
       quietReply=false;
    }

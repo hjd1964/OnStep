@@ -36,7 +36,7 @@
 // Use Config.h to configure OnStep to your requirements 
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "06 08 17"
+#define FirmwareDate   "07 14 17"
 #define FirmwareNumber "1.0a"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
@@ -48,6 +48,9 @@
 #define SYNC_ANYWHERE_ON
 #if defined(__arm__) && defined(TEENSYDUINO)
 #define __ARM_Teensy3__
+#endif
+#if defined(__MK64FX512__) || defined(__MK66FX1M0__)
+#define SER4_AVAILABLE
 #endif
 
 #include "TM4C.h"
@@ -618,6 +621,9 @@ void setup() {
   PSerial1.begin(SERIAL1_BAUD_DEFAULT);
 #else
   PSerial1.begin(9600);
+#endif
+#ifdef SER4_AVAILABLE
+  Serial4.begin(9600);
 #endif
  
   // autostart tracking
