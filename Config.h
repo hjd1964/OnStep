@@ -5,12 +5,12 @@
  * For more information on setting OnStep up see http://www.stellarjourney.com/index.php?r=site/equipment_onstep and 
  * join the OnStep yahoo group at https://groups.yahoo.com/neo/groups/onsteptelescope/info
  * 
- * The Arduino Mega2560, Teensy3.1/3.2, and some Launchpad TM4C devices are also supported (thanks to Luka.) 
+ * The Arduino Mega2560, Teensy3.x(3.1/3.2/3.5/3.6,) and some Launchpad TM4C devices are also supported (thanks to Luka.)
  * See the Pins.h file for detailed information on the pin maps
  *
  * The RA/Az (Axis1) and Dec/Alt (Axis2) stepper driver plugs in as follows:
- * RA/Az :  Gnd,13,12,11 = Gnd,Step,N/C,Direction (Teensy3.1 Gnd,12,N/C,10)
- * Dec/Alt:   7, 6, 5, 4 = Gnd,Step,N/C,Direction (Teensy3.1 Gnd, 6,N/C, 4)
+ * RA/Az :  Gnd,13,12,11 = Gnd,Step,N/C,Direction (Teensy3.x Gnd,12,N/C,10)
+ * Dec/Alt:   7, 6, 5, 4 = Gnd,Step,N/C,Direction (Teensy3.x Gnd, 6,N/C, 4)
  *
  * Optionally, a bluetooth adapter (HC05 or RN42 for example) plugs into pins Tx1/Rx1 and pins +5V/Gnd. 
  * I use two 2-wire cables for 0.1" headers.  Remember Rx goes to Tx and Tx goes to Rx. If using a Mega2560
@@ -73,7 +73,7 @@
 // RETICULE_LED_PINS n, where n=0 to 255 activates this feature and sets default brightness
 #define RETICULE_LED_PINS_OFF
 
-// Sound/buzzer on pin 42, default=OFF.  (Teensy3.2 Pin 29)
+// Sound/buzzer on pin 42, default=OFF.  (Teensy3.x Pin 29)
 // Specify frequency for a piezo speaker (for example "BUZZER 2000") or use BUZZER_ON for a piezo buzzer.
 #define BUZZER_OFF
 // Sound state at startup, default=ON.
@@ -95,7 +95,7 @@
 // ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
 #define REMEMBER_MAX_RATE_OFF        // set to ON and OnStep will remember rates set in the ASCOM driver or Android App, default=OFF 
 #define MaxRate                   96 // this is the minimum number of micro-seconds between micro-steps
-                                     // minimum* (fastest goto) is around 16 (Teensy3.1) or 32 (Mega2560), default=96 higher is ok
+                                     // minimum* (fastest goto) is around 32 (Mega2560,) 12 (Teensy3.2,) 6 (Teensy3.5,) 4 (Teensy3.6,) default=96 higher is ok
                                      // too low and OnStep communicates slowly and/or freezes as the motor timers use up all the MCU time
                                      // * = minimum can be lower, when both AXIS1/AXIS2_MODE_GOTO are used by AXIS1/AXIS2_STEP_GOTO times
                                      
@@ -175,7 +175,7 @@
 #define MODE_SWITCH_BEFORE_SLEW_OFF  // _ON for _MODE and _MODE_GOTO settings to start/stop just before/after the slew, otherwise they are active during the slew at <128uS/step)
 
 // Secondary stepper driver decay control (for both Axis, the _DECAY_MODE and _DECAY_MODE_GOTO settings always start/stop just before/after the slew)
-// Axis1 decay mode is on Pin 41 and Axis2 decay mode is on Pin 40.  Options are _HIGH, _LOW, _OPEN, default is _OFF (not supported on Teensy3.2)
+// Axis1 decay mode is on Pin 41 and Axis2 decay mode is on Pin 40.  Options are _HIGH, _LOW, _OPEN, default is _OFF (not supported on Teensy3.x)
 // MODE_SWITCH_BEFORE_SLEW must be _OFF if using this
 #define DECAY_MODE_OFF
 #define DECAY_MODE_GOTO_OFF            
