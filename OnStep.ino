@@ -739,6 +739,7 @@ void loop() {
     // SIDEREAL TRACKING DURING GOTOS
     // keeps the target where it's supposed to be while doing gotos
     if (trackingState==TrackingMoveTo) {
+      moveTo();
       if (lastTrackingState==TrackingSidereal) {
         // origTargetAxisn isn't used in Alt/Azm mode since meridian flips never happen
         origTargetAxis1.fixed+=fstepAxis1.fixed;
@@ -750,7 +751,6 @@ void loop() {
           sei();
         }
       }
-      moveTo();
     }
 
     // figure out the current Altitude
