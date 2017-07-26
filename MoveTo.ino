@@ -105,7 +105,7 @@ void moveTo() {
   if (distDestAxis1<1) distDestAxis1=1;
   if (distDestAxis2<1) distDestAxis2=1;
 
-  // quickly slow the motors and stop in 1 degree
+  // quickly slow the motors and stop in DegreesForRapidStop
   if (abortSlew) {
     // aborts any meridian flip
     if ((pierSide==PierSideFlipWE1) || (pierSide==PierSideFlipWE2) || (pierSide==PierSideFlipWE3)) pierSide=PierSideWest;
