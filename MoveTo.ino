@@ -248,7 +248,8 @@ void moveTo() {
     
         if ((posAxis1==(long)targetAxis1.part.m) && (posAxis2==(long)targetAxis2.part.m) && (i==1)) {
           // restore trackingState
-          trackingState=lastTrackingState; SetSiderealClockRate(siderealInterval);
+          trackingState=lastTrackingState; lastTrackingState=TrackingNone;
+          SetSiderealClockRate(siderealInterval);
 
           // success, we're parked
           parkStatus=Parked; EEPROM.write(EE_parkStatus,parkStatus);
@@ -267,7 +268,8 @@ void moveTo() {
           if (parkClearBacklash()==-1) return;  // working, no error flagging
 
           // restore trackingState
-          trackingState=lastTrackingState; SetSiderealClockRate(siderealInterval);
+          trackingState=lastTrackingState; lastTrackingState=TrackingNone;
+          SetSiderealClockRate(siderealInterval);
 
           setHome();
           homeMount=false; 
@@ -278,7 +280,8 @@ void moveTo() {
           digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
         } else {
           // restore trackingState
-          trackingState=lastTrackingState; SetSiderealClockRate(siderealInterval);
+          trackingState=lastTrackingState; lastTrackingState=TrackingNone;
+          SetSiderealClockRate(siderealInterval);
         }
     }
   }
