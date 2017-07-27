@@ -3,8 +3,21 @@
 
 // syncs the telescope/mount to the sky
 boolean syncEqu(double RA, double Dec) {
+  double a,z;
+
+  // Convert RA into hour angle, get altitude
   // hour angleTrackingMoveTo
   double HA=haRange(LST()*15.0-RA);
+  EquToHor(HA,Dec,&a,&z);
+
+  if ((parkStatus!=NotParked) && (parkStatus!=Parking)) return false;   // fail, Parked
+  if (a<minAlt)                                         return false;   // fail, below horizon
+  if (a>maxAlt)                                         return false;   // fail, outside limits
+  if (Dec>MaxDec)                                       return false;   // fail, outside limits
+  if (Dec<MinDec)                                       return false;   // fail, outside limits
+  if ((abs(HA)>(double)UnderPoleLimit*15.0) )           return false;   // fail, outside limits
+  if (trackingState==TrackingMoveTo)                    return false;   // fail, goto in progress
+  if (guideDirAxis1 || guideDirAxis2)                   return false;   // fail, unspecified error
 
   // correct for polar misalignment only by clearing the index offsets
   indexAxis1=0; indexAxis2=0; indexAxis1Steps=0; indexAxis2Steps=0;
