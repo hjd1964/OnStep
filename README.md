@@ -2,8 +2,10 @@ OnStep
 ======
 www.stellarjourney.com
 
-THIS IS THE ALPHA BRANCH, THE MOST ADVANCED ONSTEP VERSION BUT ALSO THE LEAST WELL TESTED!
-I RECOMMEND THE BETA BRANCH FOR MOST USERS.
+THIS IS THE BETA BRANCH, I RECOMMEND THIS WELL TESTED BRANCH FOR MOST USERS.
+NEW FEATURES AND BUG FIXES ONLY WHEN I DEEM THEM NECESSARY AND LOW RISK.
+
+
 
 Computerized telescope goto control based on Arduino driven stepper motors.  All common mount types are supported: German Equatorial, Fork (and variations), and AltAzm (Dobsonian, etc.)
 
