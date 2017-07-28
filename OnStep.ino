@@ -36,7 +36,7 @@
 // Use Config.h to configure OnStep to your requirements 
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "07 27 17"
+#define FirmwareDate   "07 28 17"
 #define FirmwareNumber "1.0a"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
