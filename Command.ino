@@ -224,11 +224,14 @@ void processCommands() {
 //  :CS#   Synchonize the telescope with the current right ascension and declination coordinates
 //         Returns: Nothing (Sync's fail silently)
 //  :CM#   Synchonize the telescope with the current database object (as above)
-//         Returns: "N/A#"
+//         Returns: "N/A#" on success, "En#" on failure where n is the error code per the :MS# command
       if ((command[0]=='C') && ((command[1]=='S') || command[1]=='M'))  {
         if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
-          syncEqu(newTargetRA,newTargetDec);
-          if (command[1]=='M') strcpy(reply,"N/A");
+          i=syncEqu(newTargetRA,newTargetDec);
+          if (command[1]=='M') {
+            if (i==0) strcpy(reply,"N/A");
+            if (i>0) { reply[0]='E'; reply[1]='0'+i; reply[2]=0; }
+          }
           quietReply=true;
         }
       } else 

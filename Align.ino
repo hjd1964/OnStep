@@ -354,7 +354,7 @@ bool TGeoAlign::addStar(int I, int N, double RA, double Dec) {
   if (I==1) {
     // set the indexAxis1 offset
     // set the indexAxis2 offset
-    if (!syncEqu(RA,Dec)) { return false; }
+    if (syncEqu(RA,Dec)!=0) { return false; }
 
     avgDec=Dec;
     avgHA =haRange(LST()*15.0-RA);
@@ -367,7 +367,7 @@ bool TGeoAlign::addStar(int I, int N, double RA, double Dec) {
 
     avgDec=(avgDec+Dec)/2.0;
     avgHA =(-avgHA+haRange(LST()*15.0-RA))/2.0; // last HA is negative because we were on the other side of the meridian
-    if (syncEqu(RA,Dec)) {
+    if (syncEqu(RA,Dec)==0) {
       double IH2=indexAxis1;
       double ID2=indexAxis2;
 
@@ -383,7 +383,7 @@ bool TGeoAlign::addStar(int I, int N, double RA, double Dec) {
       altCor= altCor/cos(avgHA/Rad);            // correct for measurements being away from the Meridian
 
       // allow the altCor to be applied
-      if (syncEqu(RA,Dec)) {
+      if (syncEqu(RA,Dec)==0) {
         IH2=indexAxis1;
         ID2=indexAxis2;
 
@@ -402,7 +402,7 @@ bool TGeoAlign::addStar(int I, int N, double RA, double Dec) {
   if (I==3) {
     double IH1=indexAxis1;
     double ID1=indexAxis2;
-    if (syncEqu(RA,Dec)) {
+    if (syncEqu(RA,Dec)==0) {
       double IH2=indexAxis1;
       double ID2=indexAxis2;
 
@@ -410,7 +410,7 @@ bool TGeoAlign::addStar(int I, int N, double RA, double Dec) {
       azmCor = azmCor/sin(haRange(LST()*15.0-newTargetRA)/Rad);   // correct for HA of measurement location
 
       // allow the azmCor to be applied
-      if (syncEqu(RA,Dec)) {
+      if (syncEqu(RA,Dec)==0) {
         IH2=indexAxis1;
         ID2=indexAxis2;
         // only apply Dec axis flexture term on GEMs
@@ -645,7 +645,7 @@ bool TGeoAlign::addStar(int I, int N, double RA, double Dec) {
   // Near the celestial equator (Dec=0, HA=0), telescope West of the pier if multi-star align
   if (I==1) {
     // set the indexAxis1/2 offset
-    if (!syncEqu(RA,Dec)) { return false; }
+    if (syncEqu(RA,Dec)!=0) { return false; }
   }
 
   actual[I-1].ha=haRange(LST()*15.0-RA)/Rad;
@@ -658,7 +658,7 @@ bool TGeoAlign::addStar(int I, int N, double RA, double Dec) {
   // two or more stars and finished
   if ((I>=2) && (I==N)) {
     autoModel(N);
- //   if (!syncEqu(RA,Dec)) { return false; }
+ //   if (syncEqu(RA,Dec)!=0) { return false; }
     geo_ready=true;
   }
 
