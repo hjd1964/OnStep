@@ -1,5 +1,6 @@
 // -----------------------------------------------------------------------------------
 // TMC2130 control over bit bit-banged SPI
+
 #define WRITE          0x80 //write flag
 #define REG_GCONF      0x00
 #define REG_GSTAT      0x01
@@ -16,16 +17,16 @@
 uint8_t TMC2130_write(byte Address, uint32_t data_out)
 {
   Address=Address|0x80;
-  uint8_t status_byte=spiTransfer(Address);
-  spiTransfer32(data_out);
+  uint8_t status_byte=BBSpi.transfer(Address);
+  BBSpi.transfer32(data_out);
   return status_byte;
 }
 
 uint8_t TMC2130_read(byte Address, uint32_t* data_out)
 {
-  Address=Address&!0x80;
-  uint8_t status_byte=spiTransfer(Address);
-  *data_out=spiTransfer32(*data_out);
+  Address=Address&~0x80;
+  uint8_t status_byte=BBSpi.transfer(Address);
+  *data_out=BBSpi.transfer32(*data_out);
   return status_byte;
 }
 
@@ -43,7 +44,7 @@ void TMC2130_setup(bool intpol, bool stealth_chop, byte micro_step_mode, bool lo
   // set stealthChop bit
   if (stealth_chop) data_out|=0x00000004UL;
   TMC2130_write(REG_GCONF,data_out);
-  spiPause();
+  BBSpi.pause();
 
   // *** My notes are limited, see the TMC2130 datasheet for more info. ***
 
@@ -56,13 +57,13 @@ void TMC2130_setup(bool intpol, bool stealth_chop, byte micro_step_mode, bool lo
   data_out_low=(12UL<<0)+(16UL<<8)+(4UL<<16);
   data_out    =(16UL<<0)+(31UL<<8)+(4UL<<16);
   if (!low_power) TMC2130_write(REG_IHOLD_IRUN,data_out); else TMC2130_write(REG_IHOLD_IRUN,data_out_low);
-  spiPause();
+  BBSpi.pause();
 
   // TPOWERDOWN, default=127, range 0 to 255 (Delay after standstill for motor current power down, about 0 to 4 seconds)
   //            TPOWERDOWN
   data_out    =(127UL<<0);
   TMC2130_write(REG_TPOWERDOWN,data_out);
-  spiPause();
+  BBSpi.pause();
 
 /*
   // Uncomment this for PWM configuration

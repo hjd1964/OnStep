@@ -1,10 +1,17 @@
 //--------------------------------------------------------------------------------------------------
-// GoTo, commands to move the telescope to an location or to report the current location
+// Goto, commands to move the telescope to an location or to report the current location
 
 // syncs the telescope/mount to the sky
-boolean syncEqu(double RA, double Dec) {
+int syncEqu(double RA, double Dec) {
+  double a,z;
+
+  // Convert RA into hour angle, get altitude
   // hour angleTrackingMoveTo
   double HA=haRange(LST()*15.0-RA);
+  EquToHor(HA,Dec,&a,&z);
+
+  // validate
+  int f=validateGoto(HA,Dec,a); if (f!=0) return f;
 
   // correct for polar misalignment only by clearing the index offsets
   indexAxis1=0; indexAxis2=0; indexAxis1Steps=0; indexAxis2Steps=0;
@@ -36,29 +43,29 @@ boolean syncEqu(double RA, double Dec) {
     if (preferredPierSide==PPS_WEST) {
       // west side of pier - we're in the eastern sky and the HA's are negative
       pierSide=PierSideWest;
-      DecDir  =DecDirWInit;
+      defaultDirAxis2=defaultDirAxis2WInit;
     } else
     if (preferredPierSide==PPS_EAST) {
       // east side of pier - we're in the western sky and the HA's are positive
       pierSide=PierSideEast;
-      DecDir = DecDirEInit;
+      defaultDirAxis2=defaultDirAxis2EInit;
     } else {
       // best side of pier
       if (Axis1<0) {
         // west side of pier - we're in the eastern sky and the HA's are negative
         pierSide=PierSideWest;
-        DecDir  =DecDirWInit;
+        defaultDirAxis2=defaultDirAxis2WInit;
       } else { 
         // east side of pier - we're in the western sky and the HA's are positive
         pierSide=PierSideEast;
-        DecDir = DecDirEInit;
+        defaultDirAxis2=defaultDirAxis2EInit;
       }
     }
   } else {
     // always on the "east" side of pier - we're in the western sky and the HA's are positive
     // this is the default in the polar-home position and also for MOUNT_TYPE_FORK and MOUNT_TYPE_ALTAZM.  MOUNT_TYPE_FORK_ALT ends up pierSideEast, but flips are allowed until aligned.
     pierSide=PierSideEast;
-    DecDir = DecDirEInit;
+    defaultDirAxis2=defaultDirAxis2EInit;
   }
 #endif
 
@@ -70,15 +77,17 @@ boolean syncEqu(double RA, double Dec) {
   // HA goes from +180...0..-180
   //                 W   .   E
   // indexAxis1 and indexAxis2 values get subtracted to arrive at the correct location
+  cli();
   indexAxis1=Axis1-((double)(long)targetAxis1.part.m)/(double)StepsPerDegreeAxis1;
   indexAxis1Steps=(long)(indexAxis1*(double)StepsPerDegreeAxis1);
   indexAxis2=Axis2-((double)(long)targetAxis2.part.m)/(double)StepsPerDegreeAxis2;
   indexAxis2Steps=(long)(indexAxis2*(double)StepsPerDegreeAxis2);
+  sei();
 
 #ifndef SYNC_ANYWHERE_ON
-  if ((abs(indexAxis2)>30.0) || (abs(indexAxis1)>30.0)) { indexAxis1=0; indexAxis2=0; indexAxis1Steps=0; indexAxis2Steps=0; lastError=ERR_SYNC; return false; }
+  if ((abs(indexAxis2)>30.0) || (abs(indexAxis1)>30.0)) { indexAxis1=0; indexAxis2=0; indexAxis1Steps=0; indexAxis2Steps=0; lastError=ERR_SYNC; return 6; }
 #endif
-  return true;
+  return 0;
 }
 
 // this returns the telescopes HA and Dec (index corrected for Alt/Azm)
@@ -185,15 +194,8 @@ byte goToEqu(double RA, double Dec) {
   double HA=haRange(LST()*15.0-RA);
   EquToHor(HA,Dec,&a,&z);
 
-  // Check to see if this goto is valid
-  if ((parkStatus!=NotParked) && (parkStatus!=Parking)) return 4;   // fail, Parked
-  if (a<minAlt)                                         return 1;   // fail, below horizon
-  if (a>maxAlt)                                         return 6;   // fail, outside limits
-  if (Dec>MaxDec)                                       return 6;   // fail, outside limits
-  if (Dec<MinDec)                                       return 6;   // fail, outside limits
-  if ((abs(HA)>(double)UnderPoleLimit*15.0) )           return 6;   // fail, outside limits
-  if (trackingState==TrackingMoveTo) { abortSlew=true;  return 5; } // fail, prior goto cancelled
-  if (guideDirAxis1 || guideDirAxis2)                   return 7;   // fail, unspecified error
+  // validate
+  int f=validateGoto(HA,Dec,a); if (f==5) abortSlew=true; if (f!=0) return f;
 
 #ifdef MOUNT_TYPE_ALTAZM
   if (Align.isReady()) {
@@ -281,6 +283,20 @@ byte goToHor(double *Alt, double *Azm) {
   return goToEqu(RA,Dec);
 }
 
+// check if goto/sync is valid
+int validateGoto(double HA, double Dec, double Alt) {
+  // Check to see if this goto is valid
+  if ((parkStatus!=NotParked) && (parkStatus!=Parking)) return 4;   // fail, Parked
+  if (Alt<minAlt)                                       return 1;   // fail, below horizon
+  if (Alt>maxAlt)                                       return 6;   // fail, outside limits
+  if (Dec>MaxDec)                                       return 6;   // fail, outside limits
+  if (Dec<MinDec)                                       return 6;   // fail, outside limits
+  if ((abs(HA)>(double)UnderPoleLimit*15.0) )           return 6;   // fail, outside limits
+  if (trackingState==TrackingMoveTo)                    return 5;   // fail, goto in progress
+  if (guideDirAxis1 || guideDirAxis2)                   return 7;   // fail, unspecified error
+  return 0;
+}
+
 // moves the mount to a new Hour Angle and Declination - both are in steps.  Alternate targets are used when a meridian flip occurs
 byte goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1, long altTargetAxis2, byte gotoPierSide) {
   // HA goes from +90...0..-90
@@ -293,14 +309,14 @@ byte goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1, long 
   if (meridianFlip!=MeridianFlipNever) {
     // where the allowable hour angles are
     long eastOfPierMaxHA= 12L*15L*(long)StepsPerDegreeAxis1;
-    long eastOfPierMinHA=-(MinutesPastMeridianE*StepsPerDegreeAxis1/4L);
-    long westOfPierMaxHA= (MinutesPastMeridianW*StepsPerDegreeAxis1/4L);
+    long eastOfPierMinHA=-(minutesPastMeridianE*StepsPerDegreeAxis1/4L);
+    long westOfPierMaxHA= (minutesPastMeridianW*StepsPerDegreeAxis1/4L);
     long westOfPierMinHA=-12L*15L*(long)StepsPerDegreeAxis1;
   
     // override the defaults and force a flip if near the meridian and possible (for parking and align)
     if ((gotoPierSide!=PierSideBest) && (pierSide!=gotoPierSide)) {
-      eastOfPierMinHA= (MinutesPastMeridianW*(long)StepsPerDegreeAxis1/4L);
-      westOfPierMaxHA=-(MinutesPastMeridianE*(long)StepsPerDegreeAxis1/4L);
+      eastOfPierMinHA= (minutesPastMeridianW*(long)StepsPerDegreeAxis1/4L);
+      westOfPierMaxHA=-(minutesPastMeridianE*(long)StepsPerDegreeAxis1/4L);
     }
     // if doing a meridian flip, use the opposite pier side coordinates
     if (pierSide==PierSideEast) {
@@ -325,7 +341,7 @@ byte goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1, long 
       if (thisTargetAxis1<0) {
         // west side of pier - we're in the eastern sky and the HA's are negative
         pierSide=PierSideWest;
-        DecDir  =DecDirWInit;
+        defaultDirAxis2  =defaultDirAxis2WInit;
         // default, if the polar-home position is +90 deg. HA, we want -90HA
         // for a fork mount the polar-home position is 0 deg. HA, so leave it alone
 #if !defined(MOUNT_TYPE_FORK) && !defined(MOUNT_TYPE_FORK_ALT)
@@ -336,7 +352,7 @@ byte goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1, long 
         // east side of pier - we're in the western sky and the HA's are positive
         // this is the default in the polar-home position
         pierSide=PierSideEast;
-        DecDir = DecDirEInit;
+        defaultDirAxis2 = defaultDirAxis2EInit;
       }
     }
   } else {
@@ -344,7 +360,7 @@ byte goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1, long 
         // always on the "east" side of pier - we're in the western sky and the HA's are positive
         // this is the default in the polar-home position and also for MOUNT_TYPE_FORK and MOUNT_TYPE_ALTAZM.  MOUNT_TYPE_FORK_ALT ends up pierSideEast, but flips are allowed until aligned.
         pierSide=PierSideEast;
-        DecDir = DecDirEInit;
+        defaultDirAxis2 = defaultDirAxis2EInit;
     }
   }
   
@@ -375,7 +391,11 @@ byte goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1, long 
 
   DisablePec();
 
-  DecayModeGoto();
-  
+  // sound goto start
+  soundAlert();
+
+  StepperModeGoto();
+
   return 0;
 }
+

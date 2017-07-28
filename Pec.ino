@@ -1,5 +1,5 @@
-// PEC ---------------------------------------------------------------------------------------------
-// functions to handle periodic error correction
+// -------------------------------------------------------------------------------------------------
+// Functions to handle periodic error correction
 
 // enables code to clean-up PEC readings after record (use PECprep or a spreadsheet to fix readings otherwise)
 // this cleans up any tracking rate variations that would be introduced by recording more guiding corrections to either the east or west, default=ON
@@ -45,7 +45,7 @@ void Pec() {
     } else pecBufferStart=false;
   #endif
 
-  if (pecStatus==IgnorePEC) { pecTimerRateAxis1=0; return; }
+  if (pecStatus==IgnorePEC) { pecTimerRateAxis1=0.0; return; }
   if (!wormSensedFirst) return;
 
   // worm step position corrected for any index found
@@ -103,46 +103,42 @@ void Pec() {
   }
   pecIndex1=pecIndex; if (pecIndex1<0) pecIndex1+=SecondsPerWormRotationAxis1; if (pecIndex1>=SecondsPerWormRotationAxis1) pecIndex1-=SecondsPerWormRotationAxis1;
 
-  accPecGuideHA.fixed+=guideHA.fixed;
+  accPecGuideHA.fixed+=guideAxis1.fixed;
   
   // falls in whenever the pecIndex changes, which is once a sidereal second
   if (pecIndex1!=lastPecIndex) {
     lastPecIndex=pecIndex1;
 
     // assume no change to tracking rate
-    pecTimerRateAxis1=0;
+    pecTimerRateAxis1=0.0;
 
     if (pecStatus==RecordPEC) {
       // save the correction as 1 of 3 weighted average
-      int l=accPecGuideHA.part.m;
+      int l=round(fixedToDouble(accPecGuideHA));
       if (l<-StepsPerSecondAxis1) l=-StepsPerSecondAxis1; if (l>StepsPerSecondAxis1) l=StepsPerSecondAxis1;   // +/-1 sidereal rate range for corrections
       if (l<-127) l=-127; if (l>127) l=127;                                                                   // prevent overflow if StepsPerSecondAxis1>127
       if (!pecFirstRecord) l=(l+((int)pecBuffer[pecIndex1]-128)*2)/3; 
       pecBuffer[pecIndex1]=l+128;  // save the correction
-      accPecGuideHA.fixed=0;       // and clear the accumulator
+      accPecGuideHA.part.m-=l;     // remove from the accumulator
     }
 
     if (pecStatus==PlayPEC) {
       // pecIndex2 adjusts one second before the value was recorded, an estimate of the latency between image acquisition and response
       // if sending values directly to OnStep from PECprep, etc. be sure to account for this
       int pecIndex2=pecIndex1-1; if (pecIndex2<0) pecIndex2+=SecondsPerWormRotationAxis1;
-      // accPecPlayHA play back speed can be +/-1 of sidereal
-      // PEC_Skip is the number of ticks between the added (or skipped) steps
+      // number of steps ahead or behind for this 1 second slot, up to +/-127
       int l=pecBuffer[pecIndex2]-128;
       if (l>StepsPerSecondAxis1) l=StepsPerSecondAxis1; if (l<-StepsPerSecondAxis1) l=-StepsPerSecondAxis1;
-      // otherwise set the rates to playback the correct number of steps per second
-      pecTimerRateAxis1=(l/StepsPerSecondAxis1);
-      pstep.fixed=doubleToFixed(l/100.0);
+      pecTimerRateAxis1=((double)l/StepsPerSecondAxis1);
     }
-
   }
 }
  
 void DisablePec() {
   // give up recording if we stop tracking at the sidereal rate
-  if (pecStatus==RecordPEC)  { pecStatus=IgnorePEC; pecTimerRateAxis1=0; } // don't zero the PEC offset, we don't want things moving and it really doesn't matter 
+  if (pecStatus==RecordPEC)  { pecStatus=IgnorePEC; pecTimerRateAxis1=0.0; } // don't zero the PEC offset, we don't want things moving and it really doesn't matter 
   // get ready to re-index when tracking comes back
-  if (pecStatus==PlayPEC)  { pecStatus=ReadyPlayPEC; pecTimerRateAxis1=0; } 
+  if (pecStatus==PlayPEC)  { pecStatus=ReadyPlayPEC; pecTimerRateAxis1=0.0; } 
 }
 
 void CleanupPec() {

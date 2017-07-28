@@ -224,8 +224,30 @@ double jd2gast(double JulianDay, double ut1) {
 }
 
 // convert date/time to Local Apparent Sidereal Time
-// uses longitude
-double jd2last(double JulianDay, double ut1) {
+// optionally updates the RTC, uses longitude
+double jd2last(double JulianDay, double ut1, bool updateRTC) {
+  // update RTC
+  if (updateRTC) {
+#ifdef RTC_DS3234
+  int y,mo,d,h,dow;
+  double m,s;
+
+  double lmt=ut1-timeZone;
+  // correct for day moving forward/backward... this works for multipule days of up-time
+  double J=JulianDay;
+  while (lmt>=24.0) { lmt=lmt-24.0; J=J-1.0; } 
+  if    (lmt<0.0)   { lmt=lmt+24.0; J=J+1.0; }
+  greg(J,&y,&mo,&d); y-=2000; if (y>=100) y-=100;
+
+  double f1=fabs(lmt)+0.000139;
+  h=floor(f1);
+  m=(f1-h)*60.0;
+  s=(m-floor(m))*60.0;
+  dow=(round(J)%7)+1;
+
+  rtc.setTime(floor(s), floor(m), h, dow, d, mo, y);
+#endif
+  }
   // JulianDay is the Local date, jd2gast requires a universal time
   // this is a hack that leaves the date alone and lets the UT1 cover
   // the difference in time to the next (or previous) day
@@ -241,6 +263,7 @@ void update_lst(double t) {
   cli(); 
   lst=lst1;
   sei();
+  UT1_start=UT1;
   lst_start=lst1;
 }
 
@@ -323,21 +346,24 @@ double az_Dec=0,az_HA=0;
 double az_Dec1=0,az_HA1=0,az_Dec2=-91,az_HA2=0;
 double az_Alt,az_Azm,_az_Alt;
 double az_deltaAxis1=15.0,az_deltaAxis2=0.0;
-double az_deltaRateScale=1.0;
+double az_currentRate=1.0;
 
 // az_deltaH/D are in arc-seconds/second
 // trackingTimerRateAxis1/2 are x the sidereal rate
 void SetDeltaTrackingRate() {
+#ifndef MOUNT_TYPE_ALTAZM
+  if (!onTrackDec) az_deltaAxis2=0.0;
+#endif
   cli();
-  trackingTimerRateAxis1 = az_deltaAxis1/15.0;
-  trackingTimerRateAxis2 = az_deltaAxis2/15.0;
+  if (trackingState==TrackingSidereal) trackingTimerRateAxis1=az_deltaAxis1/15.0; else trackingTimerRateAxis1=0.0;
+  if (trackingState==TrackingSidereal) trackingTimerRateAxis2=az_deltaAxis2/15.0; else trackingTimerRateAxis2=0.0;
   sei();
-  fstepAxis1.fixed=doubleToFixed( (((double)StepsPerDegreeAxis1/240.0)*trackingTimerRateAxis1)/100.0 );
-  fstepAxis2.fixed=doubleToFixed( (((double)StepsPerDegreeAxis2/240.0)*trackingTimerRateAxis2)/100.0 );
+  fstepAxis1.fixed=doubleToFixed( (((double)StepsPerDegreeAxis1/240.0)*(az_deltaAxis1/15.0))/100.0 );
+  fstepAxis2.fixed=doubleToFixed( (((double)StepsPerDegreeAxis2/240.0)*(az_deltaAxis2/15.0))/100.0 );
 }
 
 void SetTrackingRate(double r) {
-  az_deltaRateScale=r;
+  az_currentRate=r;
 #ifndef MOUNT_TYPE_ALTAZM
   az_deltaAxis1=r*15.0;
   az_deltaAxis2=0.0;
@@ -345,7 +371,7 @@ void SetTrackingRate(double r) {
 }
 
 double GetTrackingRate() {
-  return az_deltaRateScale;
+  return az_currentRate;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------
@@ -434,8 +460,8 @@ double ZenithTrackingRate() {
 boolean do_refractionRate_calc() {
   boolean done=false;
 
-  // turn off if not tracking at sidereal rate  
-  if (trackingState!=TrackingSidereal) { az_deltaAxis1=15.0; az_deltaAxis2=0.0; return true; }
+  // turn off if not tracking at sidereal rate
+  if (trackingState!=TrackingSidereal) { az_deltaAxis1=az_currentRate*15.0; az_deltaAxis2=0.0; return true; }
   
   az_step++;
   // load HA/Dec
@@ -471,16 +497,21 @@ boolean do_refractionRate_calc() {
 
   // convert back to the Equtorial coords
   if ((az_step==25) || (az_step==125)) {
+    if (onTrack) GeoAlign.InstrToEqu(latitude,az_HA,az_Dec,&az_HA,&az_Dec);
+  }
+
+  // convert back to the Equtorial coords
+  if ((az_step==30) || (az_step==130)) {
     HorToEqu(az_Alt,az_Azm,&az_HA1,&az_Dec1);
     if (az_HA1>180.0) az_HA1-=360.0; // HA range +/-180
   } else
 
   // calculate refraction rate deltas'
-  if ((az_step==30) || (az_step==130)) {
+  if ((az_step==35) || (az_step==135)) {
     // store first calc
-    if (az_step==30) { az_HA2=az_HA1; az_Dec2=az_Dec1; }
+    if (az_step==35) { az_HA2=az_HA1; az_Dec2=az_Dec1; }
     // we have both -0.5hr and +0.5hr values 
-    if (az_step==130) {
+    if (az_step==135) {
       // set rates
       // handle coordinate wrap
       if ((az_HA1<-90.0) && (az_HA2>90.0)) az_HA1+=360.0;
@@ -493,7 +524,7 @@ boolean do_refractionRate_calc() {
       az_deltaAxis2=(az_deltaAxis2*9.0+dax2)/10.0;
       
       // override for special case of near a celestial pole
-      if (90.0-fabs(az_Dec)<(1.0/3600.0)) { az_deltaAxis1=15.0; az_deltaAxis2=0.0; }
+      if (90.0-fabs(az_Dec)<(1.0/3600.0)) { az_deltaAxis1=az_currentRate*15.0; az_deltaAxis2=0.0; }
       // override for special case of near the zenith
       if (currentAlt>(90.0-7.5)) {
         az_deltaAxis1=ZenithTrackingRate();
@@ -581,8 +612,8 @@ boolean do_altAzmRate_calc() {
       if ((az_Azm2<-90.0) && (az_Azm1>90.0)) az_Azm2+=360.0;
       
       // set rates
-      az_deltaAxis1=((az_Azm1-az_Azm2)*(15.0/(AltAzTrackingRange/60.0))/2.0)*az_deltaRateScale;
-      az_deltaAxis2=((az_Alt1-az_Alt2)*(15.0/(AltAzTrackingRange/60.0))/2.0)*az_deltaRateScale; 
+      az_deltaAxis1=((az_Azm1-az_Azm2)*(15.0/(AltAzTrackingRange/60.0))/2.0)*az_currentRate;
+      az_deltaAxis2=((az_Alt1-az_Alt2)*(15.0/(AltAzTrackingRange/60.0))/2.0)*az_currentRate; 
       
       // override for special case of near a celestial pole
       if (90.0-fabs(az_Dec)<=0.5) { az_deltaAxis1=0.0; az_deltaAxis2=0.0; }
@@ -664,5 +695,19 @@ void SetAccelerationRates(double maxRate) {
   // set the new acceleration rate
   StepsForRateChangeAxis1= ((double)DegreesForAcceleration/sqrt((double)StepsPerDegreeAxis1))*0.3333333*StepsPerDegreeAxis1*maxRate;
   StepsForRateChangeAxis2= ((double)DegreesForAcceleration/sqrt((double)StepsPerDegreeAxis2))*0.3333333*StepsPerDegreeAxis2*maxRate;
+  slewSpeed=(1000000.0/(maxRate/16L))/StepsPerDegreeAxis1;
 }
+
+// Sound/buzzer
+void soundAlert() {
+  if (soundEnabled) {
+    #ifdef BUZZER_ON
+      digitalWrite(TonePin,HIGH); buzzerDuration=100;
+    #endif
+    #ifdef BUZZER
+      tone(TonePin,BUZZER,1000);
+    #endif
+  }
+}
+
 

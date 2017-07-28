@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------------
-// functions to move the mount to the a new position
+// Functions to move the mount to the a new position
 
 long lastPosAxis2=0;
 
@@ -105,11 +105,12 @@ void moveTo() {
   if (distDestAxis1<1) distDestAxis1=1;
   if (distDestAxis2<1) distDestAxis2=1;
 
-  // quickly slow the motors and stop in 1 degree
+  // quickly slow the motors and stop in DegreesForRapidStop
   if (abortSlew) {
     // aborts any meridian flip
     if ((pierSide==PierSideFlipWE1) || (pierSide==PierSideFlipWE2) || (pierSide==PierSideFlipWE3)) pierSide=PierSideWest;
     if ((pierSide==PierSideFlipEW1) || (pierSide==PierSideFlipEW2) || (pierSide==PierSideFlipEW3)) pierSide=PierSideEast;
+    if (pauseHome) { waitingHome=false; waitingHomeContinue=false; }
 
     // set the destination near where we are now
     cli();
@@ -170,6 +171,12 @@ void moveTo() {
 #endif
     
     if ((pierSide==PierSideFlipEW2) || (pierSide==PierSideFlipWE2)) {
+      // just wait stop here until we get notification to continue
+      if (pauseHome) {
+        if (!waitingHomeContinue) { waitingHome=true; return; }
+        soundAlert(); waitingHome=false; waitingHomeContinue=false;
+      }
+
       // make sure we're at the home position just before flipping sides of the mount
       startAxis1=posAxis1;
       startAxis2=posAxis2;
@@ -183,7 +190,7 @@ void moveTo() {
       }
       targetAxis2.part.m=(long)(celestialPoleAxis2*(double)StepsPerDegreeAxis2)-indexAxis2Steps; targetAxis2.part.f=0;
       sei();
-      
+
       pierSide++;
     } else
     if ((pierSide==PierSideFlipEW3) || (pierSide==PierSideFlipWE3)) {
@@ -195,22 +202,24 @@ void moveTo() {
         pierSide=PierSideWest;
         cli();
         // reverse the Declination movement
-        DecDir  = DecDirWInit;
+        defaultDirAxis2  = defaultDirAxis2WInit;
         // if we were on the east side of the pier the HA's were in the western sky, and were positive
         // now we're in the eastern sky and the HA's are negative
         posAxis1-=(long)(180.0*(double)StepsPerDegreeAxis1);
         trueAxis1-=(long)(180.0*(double)StepsPerDegreeAxis1);
         sei();
+        forceRefreshGetEqu();
       } else {
         pierSide=PierSideEast;
         cli();
         // normal Declination
-        DecDir  = DecDirEInit;      
+        defaultDirAxis2  = defaultDirAxis2EInit;      
         // if we were on the west side of the pier the HA's were in the eastern sky, and were negative
         // now we're in the western sky and the HA's are positive
         posAxis1+=(long)(180.0*(double)StepsPerDegreeAxis1);
         trueAxis1+=(long)(180.0*(double)StepsPerDegreeAxis1);
         sei();
+        forceRefreshGetEqu();
       }
     
       // now complete the slew
@@ -221,40 +230,47 @@ void moveTo() {
       targetAxis2.part.m=origTargetAxis2; targetAxis2.part.f=0;
       sei();
     } else {
+
+      // sound goto done
+      soundAlert();
+
       // restore last tracking state
-      trackingState=lastTrackingState; SetSiderealClockRate(siderealInterval);
       cli();
       timerRateAxis1=SiderealRate;
       timerRateAxis2=SiderealRate;
       sei();
 
-      DecayModeTracking();
-            
+      StepperModeTracking();
+
       // other special gotos: for parking the mount and homeing the mount
       if (parkStatus==Parking) {
+        int i=parkClearBacklash(); if (i==-1) return; // working
+    
+        if ((posAxis1==(long)targetAxis1.part.m) && (posAxis2==(long)targetAxis2.part.m) && (i==1)) {
+          // restore trackingState
+          trackingState=lastTrackingState; lastTrackingState=TrackingNone;
+          SetSiderealClockRate(siderealInterval);
 
-        // give the drives a moment to settle in
-        for (int i=0; i<12; i++) if ((posAxis1!=(long)targetAxis1.part.m) || (posAxis2!=(long)targetAxis2.part.m)) delay(250);
+          // success, we're parked
+          parkStatus=Parked; EEPROM.write(EE_parkStatus,parkStatus);
 
-        if ((posAxis1==(long)targetAxis1.part.m) && (posAxis2==(long)targetAxis2.part.m)) {
-          if (parkClearBacklash()) {
-            // success, we're parked
-            parkStatus=Parked; EEPROM.write(EE_parkStatus,parkStatus);
-
-            // just store the indexes of our pointing model
-            EEPROM_writeFloat(EE_indexAxis1,indexAxis1);
-            EEPROM_writeFloat(EE_indexAxis2,indexAxis2);
-            
-            // disable the stepper drivers
-            digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
-            digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
-
-          } else parkStatus=ParkFailed;
-      } else parkStatus=ParkFailed;
-
+          // just store the indexes of our pointing model
+          EEPROM_writeFloat(EE_indexAxis1,indexAxis1);
+          EEPROM_writeFloat(EE_indexAxis2,indexAxis2);
+          
+          // disable the stepper drivers
+          digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
+          digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
+        } else { parkStatus=ParkFailed; trackingState=lastTrackingState; SetSiderealClockRate(siderealInterval); }
+      
       } else
-        if (homeMount) { 
-          parkClearBacklash();
+        if (homeMount) {
+          if (parkClearBacklash()==-1) return;  // working, no error flagging
+
+          // restore trackingState
+          trackingState=lastTrackingState; lastTrackingState=TrackingNone;
+          SetSiderealClockRate(siderealInterval);
+
           setHome();
           homeMount=false; 
           atHome=true;
@@ -262,6 +278,10 @@ void moveTo() {
           // disable the stepper drivers
           digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
           digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
+        } else {
+          // restore trackingState
+          trackingState=lastTrackingState; lastTrackingState=TrackingNone;
+          SetSiderealClockRate(siderealInterval);
         }
     }
   }
@@ -284,119 +304,3 @@ uint32_t isqrt32 (uint32_t n) {
     return root;
 }
 
-bool DecayModeTrack=false;
-
-// if stepper drive can switch decay mode, set it here
-void DecayModeTracking() {
-  if (DecayModeTrack) return;
-
-  DecayModeTrack=true;
-  cli();
-#if defined(DECAY_MODE_OPEN)
-  pinModeOpen(Axis1_Mode);
-  pinModeOpen(Axis2_Mode);
-#elif defined(DECAY_MODE_LOW)
-  pinMode(Axis1_Mode,OUTPUT); digitalWrite(Axis1_Mode,LOW);
-  pinMode(Axis2_Mode,OUTPUT); digitalWrite(Axis1_Mode,LOW);
-#elif defined(DECAY_MODE_HIGH)
-  pinMode(Axis1_Mode,OUTPUT); digitalWrite(Axis1_Mode,HIGH);
-  pinMode(Axis2_Mode,OUTPUT); digitalWrite(Axis2_Mode,HIGH);
-#elif defined(MODE_SWITCH_BEFORE_SLEW_ON)
-  #ifdef AXIS1_MODE
-    stepAxis1=1;
-    if ((AXIS1_MODE & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE    & 1)); } else { pinModeOpen(Axis1_M0); }
-    if ((AXIS1_MODE & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE>>1 & 1)); } else { pinModeOpen(Axis1_M1); }
-    if ((AXIS1_MODE & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE>>2 & 1)); } else { pinModeOpen(Axis1_M2); }
-  #endif
-  #ifdef AXIS2_MODE
-    stepAxis2=1;
-    if ((AXIS2_MODE & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE    & 1)); } else { pinModeOpen(Axis2_M0); }
-    if ((AXIS2_MODE & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE>>1 & 1)); } else { pinModeOpen(Axis2_M1); }
-    if ((AXIS2_MODE & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE>>2 & 1)); } else { pinModeOpen(Axis2_M2); }
-  #endif
-#elif defined(MODE_SWITCH_BEFORE_SLEW_SPI)
-  stepAxis1=1;
-  bool nintpol=((AXIS1_MODE & 0b0010000)!=0);
-  bool stealth=((AXIS1_MODE & 0b0100000)!=0);
-  bool lowpwr =((AXIS1_MODE & 0b1000000)!=0);
-  //       SS      ,SCK     ,MISO     ,MOSI
-  spiStart(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0);
-  TMC2130_setup(!nintpol,stealth,AXIS1_MODE&0b001111,lowpwr);  // default 256x interpolation ON, stealthChop OFF (spreadCycle), micro-steps
-  spiEnd();
-  stepAxis2=1;
-  nintpol=((AXIS2_MODE & 0b0010000)!=0);
-  stealth=((AXIS2_MODE & 0b0100000)!=0);
-  lowpwr =((AXIS2_MODE & 0b1000000)!=0);
-  spiStart(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
-  TMC2130_setup(!nintpol,stealth,AXIS2_MODE&0b001111,lowpwr);
-  spiEnd();
-
-  // allow stealth chop current regulation to ramp up to the initial motor current before moving
-  if ((((AXIS1_MODE & 0b0100000)!=0) || ((AXIS2_MODE & 0b0100000)!=0)) & (atHome)) delay(100);
-#endif
-
-#ifdef MODE_SWITCH_SLEEP_ON 
-  delay(3);
-#endif
-  sei();
-}
-
-void DecayModeGoto() {
-  if (!DecayModeTrack) return;
-
-  DecayModeTrack=false;
-  cli();
-#if defined(DECAY_MODE_GOTO_OPEN)
-  pinModeOpen(Axis1_Mode);
-  pinModeOpen(Axis2_Mode);
-#elif defined(DECAY_MODE_GOTO_LOW)
-  pinMode(Axis1_Mode,OUTPUT); digitalWrite(Axis1_Mode,LOW);
-  pinMode(Axis2_Mode,OUTPUT); digitalWrite(Axis1_Mode,LOW);
-#elif defined(DECAY_MODE_GOTO_HIGH)
-  pinMode(Axis1_Mode,OUTPUT); digitalWrite(Axis1_Mode,HIGH);
-  pinMode(Axis2_Mode,OUTPUT); digitalWrite(Axis2_Mode,HIGH);
-#elif defined(MODE_SWITCH_BEFORE_SLEW_ON)
-  #ifdef AXIS1_MODE_GOTO
-    stepAxis1=AXIS1_STEP_GOTO;
-    if ((AXIS1_MODE_GOTO & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE_GOTO    & 1)); } else { pinModeOpen(Axis1_M0); }
-    if ((AXIS1_MODE_GOTO & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE_GOTO>>1 & 1)); } else { pinModeOpen(Axis1_M1); }
-    if ((AXIS1_MODE_GOTO & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE_GOTO>>2 & 1)); } else { pinModeOpen(Axis1_M2); }
-  #endif
-  #ifdef AXIS2_MODE_GOTO
-    stepAxis2=AXIS2_STEP_GOTO;
-    if ((AXIS2_MODE_GOTO & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE_GOTO    & 1)); } else { pinModeOpen(Axis2_M0); }
-    if ((AXIS2_MODE_GOTO & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE_GOTO>>1 & 1)); } else { pinModeOpen(Axis2_M1); }
-    if ((AXIS2_MODE_GOTO & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE_GOTO>>2 & 1)); } else { pinModeOpen(Axis2_M2); }
-  #endif
-#elif defined(MODE_SWITCH_BEFORE_SLEW_SPI)
-  stepAxis1=AXIS1_STEP_GOTO;
-  bool nintpol=((AXIS1_MODE_GOTO & 0b0010000)!=0);
-  bool stealth=((AXIS1_MODE_GOTO & 0b0100000)!=0);
-  bool lowpwr =((AXIS1_MODE_GOTO & 0b1000000)!=0);
-  //       CS      ,SCK     ,MISO     ,MOSI
-  spiStart(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0);
-  TMC2130_setup(!nintpol,stealth,AXIS1_MODE_GOTO&0b001111,lowpwr);  // default 256x interpolation ON, stealthChop OFF (spreadCycle), micro-steps
-  spiEnd();
-  stepAxis2=AXIS2_STEP_GOTO;
-  nintpol=((AXIS2_MODE_GOTO & 0b0010000)!=0);
-  stealth=((AXIS2_MODE_GOTO & 0b0100000)!=0);
-  lowpwr =((AXIS2_MODE_GOTO & 0b1000000)!=0);
-  spiStart(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
-  TMC2130_setup(!nintpol,stealth,AXIS2_MODE_GOTO&0b001111,lowpwr);
-  spiEnd();
-#endif
-
-#ifdef MODE_SWITCH_SLEEP_ON
-  delay(3);
-#endif
-  sei();
-}
-
-void pinModeOpen(int pin) {
-  #if defined(__arm__) && defined(TEENSYDUINO)
-    pinMode(pin,OUTPUT_OPENDRAIN); digitalWrite(pin,HIGH);
-  #else
-    pinMode(pin,INPUT);
-  #endif
-}
- 

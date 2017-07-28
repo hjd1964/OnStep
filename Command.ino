@@ -1,14 +1,6 @@
 // -----------------------------------------------------------------------------------
 // Command processing
 
-// these turn on and off checksum error correction on the serial ports, default=OFF
-#define CHKSUM0_OFF     // default _OFF: as required for OnStep ASCOM driver
-#define CHKSUM1_OFF     // default _OFF: as required for OnStep Controller2 Android App (and others)
-boolean serial_zero_ready = false;
-boolean serial_one_ready = false;
-#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
-boolean ethernet_ready = false;
-#endif
 // scratch-pad variables
 double f,f1,f2,f3; 
 int    i,i1,i2;
@@ -16,45 +8,59 @@ byte   b;
 unsigned long _coord_t=0;
 double _dec,_ra;
 
-enum Command {COMMAND_NONE, COMMAND_SERIAL, COMMAND_SERIAL1, COMMAND_ETHERNET};
+// help with commands
+enum Command {COMMAND_NONE, COMMAND_SERIAL, COMMAND_SERIAL1, COMMAND_SERIAL4, COMMAND_SPI};
+char reply[50];
+char command[3];
+char parameter[25];
+boolean commandError = false;
+boolean quietReply   = false;
+cb cmd;  // serial
+cb cmd1; // serial1
+#ifdef SER4_AVAILABLE
+cb cmd4; // serial4
+#endif
 
 // process commands
 void processCommands() {
-    Command process_command = COMMAND_NONE;
-
     boolean supress_frame = false;
     char *conv_end;
 
-    if ((Serial_available() > 0) && (!serial_zero_ready)) { serial_zero_ready = buildCommand_serial_zero(Serial_read()); }
-    if ((Serial1_available() > 0) && (!serial_one_ready)) { serial_one_ready = buildCommand_serial_one(Serial1_read()); }
-#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
-    if ((Ethernet_available() > 0) && (!ethernet_ready)) { ethernet_ready = buildCommand_ethernet(Ethernet_read()); }
+    // accumulate the command
+    if ((PSerial.available()>0) && (!cmd.ready())) cmd.add(PSerial.read());
+    if ((PSerial1.available()>0) && (!cmd1.ready())) cmd1.add(PSerial1.read());
+#ifdef SER4_AVAILABLE
+    if ((Serial4.available()>0) && (!cmd4.ready())) cmd4.add(Serial4.read());
 #endif
-    if (Serial_transmit() || Serial1_transmit()) return;
 
-    process_command = COMMAND_NONE;
-    if (serial_zero_ready)     { strcpy(command,command_serial_zero); strcpy(parameter,parameter_serial_zero); serial_zero_ready=false; clearCommand_serial_zero(); process_command=COMMAND_SERIAL; }
-    else if (serial_one_ready) { strcpy(command,command_serial_one);  strcpy(parameter,parameter_serial_one);  serial_one_ready=false;  clearCommand_serial_one();  process_command=COMMAND_SERIAL1; }
-#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
-    else if (ethernet_ready)   { strcpy(command,command_ethernet);    strcpy(parameter,parameter_ethernet);    ethernet_ready=false;    clearCommand_ethernet();    process_command=COMMAND_ETHERNET; }
+    // send any reply
+    if (PSerial.transmit() || PSerial1.transmit()) return;
+
+    // if a command is ready, process it
+    Command process_command = COMMAND_NONE;
+    if (cmd.ready()) { strcpy(command,cmd.getCmd()); strcpy(parameter,cmd.getParameter()); cmd.flush(); process_command=COMMAND_SERIAL; }
+    else if (cmd1.ready()) { strcpy(command,cmd1.getCmd()); strcpy(parameter,cmd1.getParameter()); cmd1.flush(); process_command=COMMAND_SERIAL1; }
+#ifdef SER4_AVAILABLE
+    else if (cmd4.ready()) { strcpy(command,cmd4.getCmd()); strcpy(parameter,cmd4.getParameter()); cmd4.flush(); process_command=COMMAND_SERIAL4; }
 #endif
-    else {
-#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
-#if (defined(__arm__) && defined(TEENSYDUINO))
-  Ethernet_www();
-#else
-  if (!Ethernet_cmd_busy()) Ethernet_www();
-#endif
-#endif
-      return;
-    }
+    else return;
 
     if (process_command) {
-
 // Command is two chars followed by an optional parameter...
       commandError=false;
 // Handles empty and one char replies
       reply[0]=0; reply[1]=0;
+
+//   (char)6 - Special
+      if (command[0]==(char)6) {
+        if (command[1]=='0') {
+          reply[0]=command[1]; reply[1]=command[1]; reply[2]=0; // last cmd checksum failed, 00#
+        } else {
+          reply[0]=command[1]; reply[1]=0; // Equatorial or Horizon mode, A or P
+          supress_frame=true;
+        }
+        quietReply=true;
+      } else
 
 //   A - Alignment Commands
       if (command[0]=='A') {
@@ -216,13 +222,16 @@ void processCommands() {
 
 //   C - Sync Control
 //  :CS#   Synchonize the telescope with the current right ascension and declination coordinates
-//         Returns: Nothing
+//         Returns: Nothing (Sync's fail silently)
 //  :CM#   Synchonize the telescope with the current database object (as above)
-//         Returns: "N/A#"
+//         Returns: "N/A#" on success, "En#" on failure where n is the error code per the :MS# command
       if ((command[0]=='C') && ((command[1]=='S') || command[1]=='M'))  {
         if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
-          syncEqu(newTargetRA,newTargetDec);
-          if (command[1]=='M') strcpy(reply,"N/A");
+          i=syncEqu(newTargetRA,newTargetDec);
+          if (command[1]=='M') {
+            if (i==0) strcpy(reply,"N/A");
+            if (i>0) { reply[0]='E'; reply[1]='0'+i; reply[2]=0; }
+          }
           quietReply=true;
         }
       } else 
@@ -247,13 +256,13 @@ void processCommands() {
 //         The current local calendar date
       if (command[1]=='C') { 
         LMT=UT1-timeZone;
-        greg(JD,&i2,&i,&i1); 
-        i2=(i2/99.99999-floor(i2/99.99999))*100;
-
-        // correct for day moving forward/backward... this works for multipule days of up-time, but eventually
-        while (LMT>=24.0) { LMT=LMT-24.0; i1--; } 
-        if    (LMT<0.0)   { LMT=LMT+24.0; i1++; }
-        sprintf(reply,"%02d/%02d/%02d",i,i1,i2); 
+        // correct for day moving forward/backward... this works for multipule days of up-time
+        double J=JD;
+        int y,m,d;
+        while (LMT>=24.0) { LMT=LMT-24.0; J=J-1.0; } 
+        if    (LMT<0.0)   { LMT=LMT+24.0; J=J+1.0; }
+        greg(J,&y,&m,&d); y-=2000; if (y>=100) y-=100;
+        sprintf(reply,"%02d/%02d/%02d",m,d,y); 
         quietReply=true; 
       } else 
 //  :Gc#   Get the current time format
@@ -372,6 +381,7 @@ void processCommands() {
         if (faultAxis1 || faultAxis2)            reply[i++]='f';
         if (refraction)                          reply[i++]='r'; else reply[i++]='s';
         if (onTrack)                             reply[i++]='t';
+        if (waitingHome)                         reply[i++]='w';
         // provide mount type
         #ifdef MOUNT_TYPE_GEM
         reply[i++]='E';
@@ -390,7 +400,7 @@ void processCommands() {
         quietReply=true;
       } else 
 //  :GVD# Get Telescope Firmware Date
-//         Returns: mm dd yyyy#
+//         Returns: mm dd yy#
 //  :GVN# Get Telescope Firmware Number
 //         Returns: dd.d#
 //  :GVP# Get Telescope Product Name
@@ -442,136 +452,16 @@ void processCommands() {
               case '2': sprintf(reply,"%ld",(long)(maxRate/16L)); quietReply=true; break;                   // MaxRate
               case '3': sprintf(reply,"%ld",(long)(MaxRate)); quietReply=true; break;                       // MaxRate (default)
               case '4': if (meridianFlip==MeridianFlipNever) { sprintf(reply,"%d N",(int)(pierSide)); } else { sprintf(reply,"%d",(int)(pierSide)); } quietReply=true; break; // pierSide (N if never)
-              case '5': sprintf(reply,"%i",(int)autoContinue); quietReply=true; break;                      // autoContinue
-              case '6': 
+              case '5': sprintf(reply,"%i",(int)autoMeridianFlip); quietReply=true; break;                  // autoMeridianFlip
+              case '6':                                                                                     // preferred pier side
                 if (preferredPierSide==PPS_EAST) strcpy(reply,"E"); else
                 if (preferredPierSide==PPS_WEST) strcpy(reply,"W"); else strcpy(reply,"B");
-                quietReply=true; break;                 // preferred pier side
+                quietReply=true; break;
+              case '7': dtostrf(slewSpeed,3,1,reply); quietReply=true; break;                               // slew speed
             }
           } else
-          if (parameter[0]=='E') { // En: Get config
-            if (parameter[1]=='0') { // simple values
-              String c;
-              #ifdef DEBUG_ON
-                c="1";
-              #else
-                c="0";
-              #endif
-              #ifdef SYNC_ANYWHERE_ON
-                c+="1";
-              #else
-                c+="0";
-              #endif
-              #if defined(MOUNT_TYPE_GEM)
-                c+="0";
-              #elif defined(MOUNT_TYPE_FORK)
-                c+="1";
-              #elif defined(MOUNT_TYPE_FORK_ALT)
-                c+="2";
-              #elif defined(MOUNT_TYPE_ALTAZM)
-                c+="3";
-              #else
-                c+="9";
-              #endif
-              #if defined(ST4_OFF)
-                c+="0";
-              #elif defined(ST4_ON)
-                c+="1";
-              #elif defined(ST4_PULLUP)
-                c+="2";
-              #else
-                c+="0";
-              #endif
-              #if defined(ST4_ALTERNATE_PINS_ON)
-                c+="1";
-              #else
-                c+="0";
-              #endif
-              #if defined(PPS_SENSE_ON)
-                c+="1";
-              #else
-                c+="0";
-              #endif
-              #if defined(PEC_SENSE_ON)
-                c+="1";
-              #elif defined(PEC_SENSE_PULLUP)
-                c+="2";
-              #else
-                c+="0";
-              #endif
-              #ifdef LIMIT_SENSE_ON
-                c+="1";
-              #else
-                c+="0";
-              #endif
-              #ifdef STATUS_LED_PINS_ON
-                c+="1";
-              #else
-                c+="0";
-              #endif
-              #if defined(STATUS_LED2_PINS_ON)
-                c+="1";
-              #elif defined(STATUS_LED2_PINS)
-                c+="2";
-              #else
-                c+="0";
-              #endif
-              #ifdef RETICULE_LED_PINS
-                c+="1";
-              #else
-                c+="0";
-              #endif
-              #ifdef POWER_SUPPLY_PINS_ON
-                c+="1";
-              #else
-                c+="0";
-              #endif
-              #if defined(AXIS1_DISABLED_HIGH)
-                c+="1";
-              #elif defined(AXIS1_DISABLED_LOW)
-                c+="0";
-              #else
-                c+="9";
-              #endif
-              #if defined(AXIS2_DISABLED_HIGH)
-                c+="1";
-              #elif defined(AXIS2_DISABLED_LOW)
-                c+="0";
-              #else
-                c+="9";
-              #endif
-              #if defined(AXIS1_FAULT_LOW)
-                c+="0";
-              #elif defined(AXIS1_FAULT_HIGH)
-                c+="1";
-              #elif defined(AXIS1_FAULT_OFF)
-                c+="2";
-              #endif
-              #if defined(AXIS2_FAULT_LOW)
-                c+="0";
-              #elif defined(AXIS2_FAULT_HIGH)
-                c+="1";
-              #elif defined(AXIS2_FAULT_OFF)
-                c+="2";
-              #endif
-              #ifdef TRACK_REFRACTION_RATE_DEFAULT_ON
-                c+="1";
-              #else
-                c+="0";
-              #endif
-              #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
-                c+="1";
-              #else
-                c+="0";
-              #endif
-              #if defined(RememberMaxRate_ON) || defined(REMEMBER_MAX_RATE_ON)
-                c+="1";
-              #else
-                c+="0";
-              #endif
-              strcpy(reply,(char *)c.c_str());
-              quietReply=true;
-            } else
+          if (parameter[0]=='E') { // En: Get settings
+            if (parameter[1]=='0') { strcpy(reply,(char *)ConfighSettings().c_str()); quietReply=true; } else
             if (parameter[1]=='1') { sprintf(reply,"%ld",(long)MaxRate); quietReply=true; } else
             if (parameter[1]=='2') { dtostrf(DegreesForAcceleration,2,1,reply); quietReply=true; } else
             if (parameter[1]=='3') { sprintf(reply,"%ld",(long)round(BacklashTakeupRate)); quietReply=true; } else
@@ -580,8 +470,10 @@ void processCommands() {
             if (parameter[1]=='6') { dtostrf(StepsPerSecondAxis1,3,6,reply); quietReply=true; } else
             if (parameter[1]=='7') { sprintf(reply,"%ld",(long)round(StepsPerWormRotationAxis1)); quietReply=true; } else
             if (parameter[1]=='8') { sprintf(reply,"%ld",(long)round(PECBufferSize)); quietReply=true; } else
-            if (parameter[1]=='9') { sprintf(reply,"%ld",(long)round(MinutesPastMeridianE)); quietReply=true; } else
-            if (parameter[1]=='A') { sprintf(reply,"%ld",(long)round(MinutesPastMeridianW)); quietReply=true; } else
+#ifdef MOUNT_TYPE_GEM
+            if (parameter[1]=='9') { sprintf(reply,"%ld",(long)round(minutesPastMeridianE)); quietReply=true; } else
+            if (parameter[1]=='A') { sprintf(reply,"%ld",(long)round(minutesPastMeridianW)); quietReply=true; } else
+#endif
             if (parameter[1]=='B') { sprintf(reply,"%ld",(long)round(UnderPoleLimit)); quietReply=true; } else
             if (parameter[1]=='C') { sprintf(reply,"%ld",(long)round(MinDec)); quietReply=true; } else
             if (parameter[1]=='D') { sprintf(reply,"%ld",(long)round(MaxDec)); quietReply=true; } else commandError=true;
@@ -591,18 +483,16 @@ void processCommands() {
             switch (parameter[1]) {
               case '0': cli(); temp=(long)(posAxis1-((long)targetAxis1.part.m)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;        // Debug0, true vs. target RA position
               case '1': cli(); temp=(long)(posAxis2-((long)targetAxis2.part.m)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;        // Debug1, true vs. target Dec position
-//              case '0': cli(); temp=(long)(((az_Azm1-az_Azm2)*2.0)*1000); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;               // Debug0, true vs. target RA position
-//              case '1': cli(); temp=(long)(az_Azm1); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                                    // Debug1, true vs. target Dec position
-              case '2': sprintf(reply,"%ld",(long)((debugv1/53333.3333333333)*15000)); quietReply=true; break;                                    // Debug2, RA tracking rate
+              case '2': cli(); temp=(long)trackingState; sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                                // Debug2, trackingState
               case '3': sprintf(reply,"%ld",(long)(az_deltaAxis1*1000.0*1.00273790935)); quietReply=true; break;                                  // Debug3, RA refraction tracking rate
               case '4': sprintf(reply,"%ld",(long)(az_deltaAxis2*1000.0*1.00273790935)); quietReply=true; break;                                  // Debug4, Dec refraction tracking rate
               case '5': sprintf(reply,"%ld",(long)(ZenithTrackingRate()*1000.0*1.00273790935)); quietReply=true; break;                           // Debug5, Alt RA refraction tracking rate
-              case '6': cli(); temp=(long)(targetAxis1.part.m);  sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                        // Debug6, HA target position
+              case '6': cli(); temp=(long)(targetAxis1.part.m); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                         // Debug6, HA target position
               case '7': cli(); temp=(long)(targetAxis2.part.m); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                         // Debug7, Dec target position
-              case '8': cli(); temp=(long)(posAxis1);     sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                               // Debug8, HA motor position
-              case '9': cli(); temp=(long)(posAxis2);    sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                                // Debug9, Dec motor position
+              case '8': cli(); temp=(long)(posAxis1); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                                   // Debug8, HA motor position
+              case '9': cli(); temp=(long)(posAxis2); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                                   // Debug9, Dec motor position
               case 'A': sprintf(reply,"%ld%%",(worst_loop_time*100L)/9970L); worst_loop_time=0; quietReply=true; break;                           // DebugA, Workload
-              
+              case 'B': cli(); temp=(long)(trackingTimerRateAxis1*1000.0); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;              // DebugB, trackingTimerRateAxis1
             }
           } else commandError=true;
         } else commandError=true;
@@ -774,7 +664,7 @@ void processCommands() {
       } else
 
 //   M - Telescope Movement Commands
-      if (command[0]=='M') {
+      if ((command[0]=='M') && (axis1Enabled)) {
 //  :MA#   Goto the target Alt and Az
 //         Returns:
 //         0=Goto is Possible
@@ -792,62 +682,34 @@ void processCommands() {
 //          Returns: Nothing
       if (command[1]=='g') {
         if ( (atoi2((char *)&parameter[1],&i)) && ((i>=0) && (i<=16399)) && (parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) { 
-          if ((parameter[0]=='e') || (parameter[0]=='w')) {
+          if (((parameter[0]=='e') || (parameter[0]=='w')) && (guideDirAxis1==0)) {
 #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
-            enableGuideRate(currentPulseGuideRate);
+            startGuideAxis1(parameter[0],currentPulseGuideRate,i);
 #else
-            enableGuideRate(currentGuideRate);
+            startGuideAxis1(parameter[0],currentGuideRate,i);
 #endif
-            guideDirAxis1=parameter[0];
-            guideDurationLastHA=micros();
-            guideDurationHA=(long)i*1000L;
-            cli(); if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRate; else guideTimerRateAxis1=guideTimerBaseRate; sei();
             quietReply=true;
-         } else
-            if ((parameter[0]=='n') || (parameter[0]=='s')) { 
+          } else
+          if (((parameter[0]=='n') || (parameter[0]=='s')) && (guideDirAxis2==0)) { 
 #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
-              enableGuideRate(currentPulseGuideRate);
+            startGuideAxis2(parameter[0],currentPulseGuideRate,i);
 #else
-              enableGuideRate(currentGuideRate);
+            startGuideAxis2(parameter[0],currentGuideRate,i);
 #endif
-              guideDirAxis2=parameter[0]; 
-              guideDurationLastDec=micros();
-              guideDurationDec=(long)i*1000L; 
-              cli(); if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRate; else guideTimerRateAxis2=guideTimerBaseRate; sei();
-              quietReply=true;
-            } else commandError=true;
+            quietReply=true;
+          } else commandError=true;
         } else commandError=true;
       } else
 //  :Me# & :Mw#      Move Telescope East or West at current slew rate
 //         Returns: Nothing
-      if ((command[1]=='e') || (command[1]=='w')) { 
-        if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
-          // block user from changing direction at high rates, just stop the guide instead
-          if ((guideDirAxis1) && (command[1]!=guideDirAxis1) && (fabs(guideTimerRateAxis1)>2)) { 
-            guideDirAxis1='b';
-          } else {
-            enableGuideRate(currentGuideRate);
-            guideDirAxis1=command[1];
-            guideDurationHA=-1;
-            cli(); if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRate; else guideTimerRateAxis1=guideTimerBaseRate; sei();
-          }
-        }
+      if ((command[1]=='e') || (command[1]=='w')) {
+        startGuideAxis1(command[1],currentGuideRate,-1);
         quietReply=true;
       } else
 //  :Mn# & :Ms#      Move Telescope North or South at current slew rate
 //         Returns: Nothing
-      if ((command[1]=='n') || (command[1]=='s')) { 
-        if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
-          // block user from changing direction at high rates, just stop the guide instead
-          if ((guideDirAxis2) && (command[1]!=guideDirAxis2) && (fabs(guideTimerRateAxis2)>2)) { 
-            guideDirAxis2='b';
-          } else {
-            enableGuideRate(currentGuideRate);
-            guideDirAxis2=command[1];
-            guideDurationDec=-1;
-            cli(); if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRate; else guideTimerRateAxis2=guideTimerBaseRate; sei();
-          }
-        }
+      if ((command[1]=='n') || (command[1]=='s')) {
+        startGuideAxis2(command[1],currentGuideRate,-1);
         quietReply=true;
       } else
 
@@ -932,33 +794,19 @@ void processCommands() {
 //         Returns: Nothing
       if (command[0]=='Q') {
         if (command[1]==0) {
-          if ((parkStatus==NotParked) || (parkStatus==Parking)) {
-            cli();
-            if (guideDirAxis1) guideDirAxis1='b'; // break
-            if (guideDirAxis2) guideDirAxis2='b'; // break
-            sei();
-            if (trackingState==TrackingMoveTo) { abortSlew=true; }
-          }
+          stopMount();
           quietReply=true; 
         } else
 //  :Qe# & Qw#   Halt east/westward Slews
 //         Returns: Nothing
         if ((command[1]=='e') || (command[1]=='w')) { 
-          if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
-            cli();
-            if (guideDirAxis1) guideDirAxis1='b'; // break
-            sei();
-          }
+          stopGuideAxis1();
           quietReply=true; 
         } else
 //  :Qn# & Qs#   Halt north/southward Slews
 //         Returns: Nothing
         if ((command[1]=='n') || (command[1]=='s')) {
-          if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
-            cli();
-            if (guideDirAxis2) guideDirAxis2='b'; // break
-            sei();
-          }
+          stopGuideAxis2();
           quietReply=true; 
         } else commandError=true;
       } else
@@ -995,22 +843,26 @@ void processCommands() {
         i=(int)(parameter[0]-'0');
         if ((i>=0) && (i<10)) {
           if (process_command==COMMAND_SERIAL) {
-            Serial_print("1"); while (Serial_transmit()); delay(20); Serial_Init(baudRate[i]);
-          } else if (process_command==COMMAND_ETHERNET) {
-#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
-             Ethernet_print("1");
+            PSerial.print("1"); while (PSerial.transmit()); delay(20); PSerial.begin(baudRate[i]);
+            quietReply=true; 
+          } else
+          if (process_command==COMMAND_SERIAL1) {
+            PSerial1.print("1"); while (PSerial1.transmit()); delay(20); PSerial1.begin(baudRate[i]); 
+            quietReply=true; 
+#ifdef SER4_AVAILABLE
+          } else
+          if (process_command==COMMAND_SERIAL4) {
+            Serial4.print("1"); delay(20); Serial4.begin(baudRate[i]);
+            quietReply=true; 
 #endif
-          } else  {
-            Serial1_print("1"); while (Serial1_transmit()); delay(20); Serial1_Init(baudRate[i]); 
-          }
-          quietReply=true; 
+          } else commandError=true;
         } else commandError=true;
       } else
 //  :SCMM/DD/YY#
 //          Change Date to MM/DD/YY
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='C')  { if (!dateToDouble(&JD,parameter)) commandError=true; else { EEPROM_writeFloat(EE_JD,JD); update_lst(jd2last(JD,UT1)); } } else 
+      if (command[1]=='C')  { if (dateToDouble(&JD,parameter)) { EEPROM_writeFloat(EE_JD,JD); update_lst(jd2last(JD,UT1,true)); } else commandError=true; } else 
 //  :SdsDD*MM#
 //          Set target object declination to sDD*MM or sDD*MM:SS depending on the current precision setting
 //          Return: 0 on failure
@@ -1030,7 +882,7 @@ void processCommands() {
           if (parameter[0]=='-') longitude=-longitude;
           EEPROM_writeFloat(EE_sites+(currentSite)*25+4,longitude);
         }
-        update_lst(jd2last(JD,UT1));
+        update_lst(jd2last(JD,UT1,false));
         highPrecision=i;
         } else
 //  :SGsHH#
@@ -1052,8 +904,8 @@ void processCommands() {
             if (i<0) timeZone=i-f; else timeZone=i+f;
             b=encodeTimeZone(timeZone)+128;
             EEPROM.update(EE_sites+(currentSite)*25+8,b);
-            update_lst(jd2last(JD,UT1));
-          } else commandError=true; 
+            update_lst(jd2last(JD,UT1,true));
+          } else commandError=true;
         } else commandError=true; 
       } else
 //  :Sh+DD#
@@ -1071,9 +923,8 @@ void processCommands() {
         i=highPrecision; highPrecision=true; 
         if (!hmsToDouble(&LMT,parameter)) commandError=true; else {
           EEPROM_writeFloat(EE_LMT,LMT); 
-          UT1=LMT+timeZone; 
-          UT1_start=UT1;
-          update_lst(jd2last(JD,UT1));
+          UT1=LMT+timeZone;
+          update_lst(jd2last(JD,UT1,true));
         }
         highPrecision=i;
       } else 
@@ -1128,7 +979,7 @@ void processCommands() {
 #endif
           cosLat=cos(latitude/Rad);
           sinLat=sin(latitude/Rad);
-          if (latitude>0.0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
+          if (latitude>0.0) defaultDirAxis1 = defaultDirAxis1NCPInit; else defaultDirAxis1 = defaultDirAxis1SCPInit;
         }
         highPrecision=i;
       } else 
@@ -1140,9 +991,9 @@ void processCommands() {
           f=strtod(parameter,&conv_end);
           if ( (&parameter[0]!=conv_end) && (((f>=30.0) && (f<90.0)) || (abs(f)<0.1))) {
             if (abs(f)<0.1) { 
-              trackingState = TrackingNone; 
+              trackingState=TrackingNone;
             } else {
-              cli(); trackingTimerRateAxis1=(f/60.0)/1.00273790935; sei();
+              SetTrackingRate((f/60.0)/1.00273790935);
             }
           } else commandError=true;
         } else commandError=true;
@@ -1188,10 +1039,11 @@ void processCommands() {
                 case '1': maxRate=MaxRate*8L;  break; // 200%
               break;
               }
+              EEPROM_writeInt(EE_maxRate,(int)(maxRate/16L));
               SetAccelerationRates(maxRate);
             break;
-            case '5': // autoContinue
-              if ((parameter[3]=='0') || (parameter[3]=='1')) { i=parameter[3]-'0'; if ((i==0) || (i==1)) { autoContinue=i;  EEPROM.write(EE_autoContinue,autoContinue); } } 
+            case '5': // autoMeridianFlip
+              if ((parameter[3]=='0') || (parameter[3]=='1')) { i=parameter[3]-'0'; autoMeridianFlip=i; EEPROM.write(EE_autoMeridianFlip,autoMeridianFlip); } 
             break; 
             case '6': // preferred pier side 
               switch (parameter[3]) {
@@ -1201,10 +1053,38 @@ void processCommands() {
                 default: commandError=true;
               }
             break;
+            case '7': // buzzer
+              if ((parameter[3]=='0') || (parameter[3]=='1')) { soundEnabled=parameter[3]-'0'; }
+            break;
+            case '8': // pause at home on meridian flip
+              if ((parameter[3]=='0') || (parameter[3]=='1')) { pauseHome=parameter[3]-'0'; EEPROM.write(EE_pauseHome,pauseHome); }
+            break;
+            case '9': // continue if paused at home
+              if ((parameter[3]=='1')) { if (waitingHome) waitingHomeContinue=true; }
+            break;
           }
-        } else commandError=true;
-        //getEqu(&f,&f1,false);  
-      } else 
+        } else
+#ifdef MOUNT_TYPE_GEM
+        if (parameter[0]=='E') { // En: Simple value
+          switch (parameter[1]) {
+            case '9': // minutesPastMeridianE 
+              minutesPastMeridianE=(double)strtol(&parameter[3],NULL,10); 
+              if (minutesPastMeridianE>180) minutesPastMeridianE=180; 
+              if (minutesPastMeridianE<-180) minutesPastMeridianE=-180; 
+              EEPROM.write(EE_dpmE,round((minutesPastMeridianE*15.0)/60.0)+128); 
+              break;
+            case 'A': // minutesPastMeridianW
+              minutesPastMeridianW=(double)strtol(&parameter[3],NULL,10); 
+              if (minutesPastMeridianW>180) minutesPastMeridianW=180; 
+              if (minutesPastMeridianW<-180) minutesPastMeridianW=-180; 
+              EEPROM.write(EE_dpmW,round((minutesPastMeridianW*15.0)/60.0)+128); 
+              break;
+            break;
+          }
+        } else 
+#endif
+          commandError=true;
+      } else
 //  :SzDDD*MM#
 //          Sets the target Object Azimuth
 //          Return: 0 on failure
@@ -1213,19 +1093,25 @@ void processCommands() {
       commandError=true;
       } else 
 //   T - Tracking Commands
-//  :T+#   Master sidereal clock faster by 0.1 Hertz (I use a fifth of the LX200 standard, stored in EEPROM)
-//  :T-#   Master sidereal clock slower by 0.1 Hertz (stored in EEPROM)
+//
+//  :T+#   Master sidereal clock faster by 0.02 Hertz (stored in EEPROM)
+//  :T-#   Master sidereal clock slower by 0.02 Hertz (stored in EEPROM)
 //  :TS#   Track rate solar
 //  :TL#   Track rate lunar
 //  :TQ#   Track rate sidereal
 //  :TR#   Master sidereal clock reset (to calculated sidereal rate, stored in EEPROM)
 //  :TK#   Track rate king
-//  :Te#   Tracking enable  (OnStep only, replies 0/1)
-//  :Td#   Tracking disable (OnStep only, replies 0/1)
-//  :To#   OnTrack enable   (OnStep only, replies 0/1)
-//  :Tr#   Track refraction enable  (OnStep only, replies 0/1)
-//  :Tn#   Track refraction disable (OnStep only, replies 0/1)
 //         Returns: Nothing
+//
+//  :Te#   Tracking enable
+//  :Td#   Tracking disable
+//  :To#   OnTrack enable
+//  :Tr#   Track refraction enable
+//  :Tn#   Track refraction disable
+//  :T1#   Track single axis (disable Dec tracking on Eq mounts)
+//  :T2#   Track dual axis
+//         Return: 0 on failure
+//                 1 on success
 
      if (command[0]=='T') {
        if (command[1]=='+') { siderealInterval-=HzCf*(0.02); quietReply=true; } else
@@ -1235,11 +1121,13 @@ void processCommands() {
        if (command[1]=='Q') { SetTrackingRate(default_tracking_rate); quietReply=true; } else                // sidereal tracking rate
        if (command[1]=='R') { siderealInterval=15956313L; quietReply=true; } else                            // reset master sidereal clock interval
        if (command[1]=='K') { SetTrackingRate(0.99953004401); refraction=false; quietReply=true; } else      // king tracking rate 60.136Hz
-       if ((command[1]=='e') && ((trackingState==TrackingSidereal) || (trackingState==TrackingNone)) && (parkStatus==NotParked)) trackingState=TrackingSidereal; else
-       if ((command[1]=='d') && ((trackingState==TrackingSidereal) || (trackingState==TrackingNone))) trackingState=TrackingNone; else
+       if ((command[1]=='e') && (axis1Enabled) && (trackingState==TrackingNone) && (parkStatus==NotParked)) trackingState=TrackingSidereal; else
+       if ((command[1]=='d') && (trackingState==TrackingSidereal)) trackingState=TrackingNone; else
        if (command[1]=='o') { refraction=refraction_enable; onTrack=true;  SetTrackingRate(default_tracking_rate); } else  // turn full compensation on, defaults to base sidereal tracking rate
        if (command[1]=='r') { refraction=refraction_enable; onTrack=false; SetTrackingRate(default_tracking_rate); } else  // turn refraction compensation on, defaults to base sidereal tracking rate
        if (command[1]=='n') { refraction=false; onTrack=false; SetTrackingRate(default_tracking_rate); } else              // turn refraction off, sidereal tracking rate resumes
+       if (command[1]=='1') { onTrackDec=false; EEPROM.write(EE_onTrackDec,(byte)onTrackDec); } else                       // turn off dual axis tracking
+       if (command[1]=='2') { onTrackDec=true;  EEPROM.write(EE_onTrackDec,(byte)onTrackDec); } else                       // turn on dual axis tracking
          commandError=true;
 
        // Only burn the new rate if changing the sidereal interval
@@ -1403,7 +1291,7 @@ void processCommands() {
 #endif
           cosLat=cos(latitude/Rad);
           sinLat=sin(latitude/Rad);
-          if (latitude>0.0) HADir = HADirNCPInit; else HADir = HADirSCPInit;
+          if (latitude>0.0) defaultDirAxis1 = defaultDirAxis1NCPInit; else defaultDirAxis1 = defaultDirAxis1SCPInit;
           longitude=EEPROM_readFloat(EE_sites+(currentSite*25+4));
           timeZone=EEPROM.read(EE_sites+(currentSite)*25+8)-128;
           timeZone=decodeTimeZone(timeZone);
@@ -1423,228 +1311,173 @@ void processCommands() {
       }
       
       if (strlen(reply)>0) {
+        if (process_command==COMMAND_SERIAL) {
+          if (cmd.checksum) checksum(reply);
+          if (!supress_frame) strcat(reply,"#");
+          PSerial.print(reply);
+        } 
+  
+        if (process_command==COMMAND_SERIAL1) {
+          if (cmd1.checksum) checksum(reply);
+          if (!supress_frame) strcat(reply,"#");
+          PSerial1.print(reply);
+        }
 
-      if (process_command==COMMAND_SERIAL) {
-#ifdef CHKSUM0_ON
-        // calculate the checksum
-        char HEXS[3]="";
-        byte cks=0; for (int cksCount0=0; cksCount0<strlen(reply); cksCount0++) {  cks+=reply[cksCount0]; }
-        sprintf(HEXS,"%02X",cks);
-        strcat(reply,HEXS);
+#ifdef SER4_AVAILABLE
+        if (process_command==COMMAND_SERIAL4) {
+          if (cmd4.checksum) checksum(reply);
+          if (!supress_frame) strcat(reply,"#");
+          Serial4.print(reply);
+        }
 #endif
-        if (!supress_frame) strcat(reply,"#");
-        Serial_print(reply);
-      } 
-
-      if (process_command==COMMAND_SERIAL1) {
-#ifdef CHKSUM1_ON
-        // calculate the checksum
-        char HEXS[3]="";
-        byte cks=0; for (int cksCount0=0; cksCount0<strlen(reply); cksCount0++) {  cks+=reply[cksCount0]; }
-        sprintf(HEXS,"%02X",cks);
-        strcat(reply,HEXS);
-#endif
-        if (!supress_frame) strcat(reply,"#");
-        Serial1_print(reply);
-      }
-
-#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
-      if (process_command==COMMAND_ETHERNET) {
-#ifdef CHKSUM0_ON
-        // calculate the checksum
-        char HEXS[3]="";
-        byte cks=0; for (int cksCount0=0; cksCount0<strlen(reply); cksCount0++) {  cks+=reply[cksCount0]; }
-        sprintf(HEXS,"%02X",cks);
-        strcat(reply,HEXS);
-#endif
-        if (!supress_frame) strcat(reply,"#");
-        Ethernet_print(reply);
-      }
-#endif       
       }
       quietReply=false;
    }
 }
 
-// Build up a command
-boolean buildCommand_serial_zero(char c) {
-  // (chr)6 is a special status command for the LX200 protocol
-  if ((c==(char)6) && (bufferPtr_serial_zero==0)) {
-    #ifdef MOUNT_TYPE_ALTAZM
-    Serial_print("A");
-    #else
-    Serial_print("P");
-    #endif
-  }
-
-  // ignore spaces/lf/cr, dropping spaces is another tweek to allow compatibility with LX200 protocol
-  if ((c!=(char)32) && (c!=(char)10) && (c!=(char)13) && (c!=(char)6)) {
-    command_serial_zero[bufferPtr_serial_zero]=c;
-    bufferPtr_serial_zero++;
-    command_serial_zero[bufferPtr_serial_zero]=(char)0;
-    if (bufferPtr_serial_zero>22) { bufferPtr_serial_zero=22; }  // limit maximum command length to avoid overflow, c2+p16+cc2+eol2+eos1=23 bytes max ranging from 0..22
-  }
-  
-  if (c=='#') {
-    // validate the command frame, normal command
-    if ((bufferPtr_serial_zero>1) && (command_serial_zero[0]==':') && (command_serial_zero[bufferPtr_serial_zero-1]=='#')) { command_serial_zero[bufferPtr_serial_zero-1]=0; } else { clearCommand_serial_zero(); return false; }
-
-#ifdef CHKSUM0_ON
-    // checksum the data, for example ":11111126".  I don't include the command frame in the checksum.  The error response is a checksumed null string "00#\r\n" which means re-transmit.
-    byte len=strlen(command_serial_zero);
-    byte cks=0; for (int cksCount0=1; cksCount0<len-2; cksCount0++) {  cks+=command_serial_zero[cksCount0]; }
-    char chkSum[3]; sprintf(chkSum,"%02X",cks); if (!((chkSum[0]==command_serial_zero[len-2]) && (chkSum[1]==command_serial_zero[len-1]))) { clearCommand_serial_zero();  Serial_print("00#"); return false; }
-    --len; command_serial_zero[--len]=0;
-#endif
-
-    // break up the command into a two char command and the remaining parameter
-    
-    // the parameter can be up to 16 chars in length
-    memmove(parameter_serial_zero,(char *)&command_serial_zero[3],17);
-
-    // the command is either one or two chars in length
-    command_serial_zero[3]=0;  memmove(command_serial_zero,(char *)&command_serial_zero[1],3);
-
-    return true;
-  } else {
-    return false;
+void stopMount() {
+  if ((parkStatus==NotParked) || (parkStatus==Parking)) {
+    stopGuideAxis1();
+    stopGuideAxis2();
+    if (trackingState==TrackingMoveTo) { abortSlew=true; }
   }
 }
 
-// clear commands
-boolean clearCommand_serial_zero() {
-  bufferPtr_serial_zero=0;
-  command_serial_zero[bufferPtr_serial_zero]=(char)0;
-  return true;
+// calculate the checksum and add to string
+void checksum(char s[]) {
+  char HEXS[3]="";
+  byte cks=0; for (unsigned int cksCount0=0; cksCount0<strlen(s); cksCount0++) {  cks+=s[cksCount0]; }
+  sprintf(HEXS,"%02X",cks);
+  strcat(s,HEXS);
 }
 
-// Build up a command
-boolean buildCommand_serial_one(char c) {
-  // (chr)6 is a special status command for the LX200 protocol
-  if ((c==(char)6) && (bufferPtr_serial_one==0)) {
-    #ifdef MOUNT_TYPE_ALTAZM
-    Serial1_print("A");
-    #else
-    Serial1_print("P");
-    #endif
-  }
+// gets configuration (Config.h) related values
+String ConfighSettings() {
+  String c;
+  #ifdef DEBUG_ON
+    c="1";
+  #else
+    c="0";
+  #endif
+  #ifdef SYNC_ANYWHERE_ON
+    c+="1";
+  #else
+    c+="0";
+  #endif
+  #if defined(MOUNT_TYPE_GEM)
+    c+="0";
+  #elif defined(MOUNT_TYPE_FORK)
+    c+="1";
+  #elif defined(MOUNT_TYPE_FORK_ALT)
+    c+="2";
+  #elif defined(MOUNT_TYPE_ALTAZM)
+    c+="3";
+  #else
+    c+="9";
+  #endif
+  #if defined(ST4_OFF)
+    c+="0";
+  #elif defined(ST4_ON)
+    c+="1";
+  #elif defined(ST4_PULLUP)
+    c+="2";
+  #else
+    c+="0";
+  #endif
+  #if defined(ST4_ALTERNATE_PINS_ON)
+    c+="1";
+  #else
+    c+="0";
+  #endif
+  #ifdef PPS_SENSE_ON
+    c+="1";
+  #elif defined(PPS_SENSE_PULLUP)
+    c+="2";
+  #else
+    c+="0";
+  #endif
+  #if defined(PEC_SENSE_ON)
+    c+="1";
+  #elif defined(PEC_SENSE_PULLUP)
+    c+="2";
+  #else
+    c+="0";
+  #endif
+  #ifdef LIMIT_SENSE_ON
+    c+="1";
+  #else
+    c+="0";
+  #endif
+  #ifdef STATUS_LED_PINS_ON
+    c+="1";
+  #else
+    c+="0";
+  #endif
+  #if defined(STATUS_LED2_PINS_ON)
+    c+="1";
+  #elif defined(STATUS_LED2_PINS)
+    c+="2";
+  #else
+    c+="0";
+  #endif
+  #ifdef RETICULE_LED_PINS
+    c+="1";
+  #else
+    c+="0";
+  #endif
+  #ifdef POWER_SUPPLY_PINS_ON
+    c+="1";
+  #else
+    c+="0";
+  #endif
+  #if defined(AXIS1_DISABLED_HIGH)
+    c+="1";
+  #elif defined(AXIS1_DISABLED_LOW)
+    c+="0";
+  #else
+    c+="9";
+  #endif
+  #if defined(AXIS2_DISABLED_HIGH)
+    c+="1";
+  #elif defined(AXIS2_DISABLED_LOW)
+    c+="0";
+  #else
+    c+="9";
+  #endif
+  #if defined(AXIS1_FAULT_LOW)
+    c+="0";
+  #elif defined(AXIS1_FAULT_HIGH)
+    c+="1";
+  #elif defined(AXIS1_FAULT_OFF)
+    c+="2";
+  #endif
+  #if defined(AXIS2_FAULT_LOW)
+    c+="0";
+  #elif defined(AXIS2_FAULT_HIGH)
+    c+="1";
+  #elif defined(AXIS2_FAULT_OFF)
+    c+="2";
+  #endif
+  #ifdef TRACK_REFRACTION_RATE_DEFAULT_ON
+    c+="1";
+  #else
+    c+="0";
+  #endif
+  #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
+    c+="1";
+  #else
+    c+="0";
+  #endif
+  #if defined(RememberMaxRate_ON) || defined(REMEMBER_MAX_RATE_ON)
+    c+="1";
+  #else
+    c+="0";
+  #endif
 
-  // ignore spaces/lf/cr, dropping spaces is another tweek to allow compatibility with LX200 protocol
-  if ((c!=(char)32) && (c!=(char)10) && (c!=(char)13) && (c!=(char)6)) {
-    command_serial_one[bufferPtr_serial_one]=c;
-    bufferPtr_serial_one++;
-    command_serial_one[bufferPtr_serial_one]=(char)0;
-    if (bufferPtr_serial_one>22) { bufferPtr_serial_one=22; }  // limit maximum command length to avoid overflow, c2+p16+cc2+eol2+eos1=23 bytes max ranging from 0..22
-  }
-
-  if (c=='#') {
-    // validate the command frame, normal command
-    if ((bufferPtr_serial_one>1) && (command_serial_one[0]==':') && (command_serial_one[bufferPtr_serial_one-1]=='#')) { command_serial_one[bufferPtr_serial_one-1]=0; } else { clearCommand_serial_one(); return false; }
-    
-#ifdef CHKSUM1_ON
-    // checksum the data, as above.  
-    byte len=strlen(command_serial_one);
-    byte cks=0; for (int cksCount0=1; cksCount0<len-2; cksCount0++) { cks=cks+command_serial_one[cksCount0]; }
-    char chkSum[3]; sprintf(chkSum,"%02X",cks); if (!((chkSum[0]==command_serial_one[len-2]) && (chkSum[1]==command_serial_one[len-1]))) { clearCommand_serial_one(); Serial1_print("00#"); return false; }
-    --len; command_serial_one[--len]=0;
-#endif
-
-    // break up the command into a two char command and the remaining parameter
-    
-    // the parameter can be up to 16 chars in length
-    memmove(parameter_serial_one,(char *)&command_serial_one[3],17);
-
-    // the command is either one or two chars in length
-    command_serial_one[3]=0;  memmove(command_serial_one,(char *)&command_serial_one[1],3);
-
-    return true;
-  } else {
-    return false;
-  }
+  return c;
 }
 
-// clear commands
-boolean clearCommand_serial_one() {
-  bufferPtr_serial_one=0;
-  command_serial_one[bufferPtr_serial_one]=(char)0;
-  return true;
+void forceRefreshGetEqu() {
+  _coord_t=millis()-100;
 }
 
-#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__) || defined(W5100_ON)
-// Build up a command
-boolean buildCommand_ethernet(char c) {
-  // return if -1 is received (no data)
-  if (c == 0xFF) return false;
-
-  // (chr)6 is a special status command for the LX200 protocol
-  if ((c==(char)6) && (bufferPtr_ethernet==0)) {
-//    Ethernet_print("G#");
-    #ifdef MOUNT_TYPE_ALTAZM
-    Ethernet_print("A");
-    #else
-    Ethernet_print("P");
-    #endif
-  }
-
-  // ignore spaces/lf/cr, dropping spaces is another tweek to allow compatibility with LX200 protocol
-  if ((c!=(char)32) && (c!=(char)10) && (c!=(char)13) && (c!=(char)6)) {
-    command_ethernet[bufferPtr_ethernet]=c;
-    bufferPtr_ethernet++;
-    command_ethernet[bufferPtr_ethernet]=(char)0;
-    if (bufferPtr_ethernet>22) { bufferPtr_ethernet=22; }  // limit maximum command length to avoid overflow, c2+p16+cc2+eol2+eos1=23 bytes max ranging from 0..22
-  }
-
-  if (c=='#') {
-    // validate the command frame, normal command
-    if ((bufferPtr_ethernet>1) && (command_ethernet[0]==':') && (command_ethernet[bufferPtr_ethernet-1]=='#')) { command_ethernet[bufferPtr_ethernet-1]=0; } else { clearCommand_ethernet(); return false; }
-
-#ifdef CHKSUM1_ON
-    // checksum the data, as above.
-    byte len=strlen(command_ethernet);
-    byte cks=0; for (int cksCount0=1; cksCount0<len-2; cksCount0++) { cks=cks+command_ethernet[cksCount0]; }
-    char chkSum[3]; sprintf(chkSum,"%02X",cks); if (!((chkSum[0]==command_ethernet[len-2]) && (chkSum[1]==command_ethernet[len-1]))) { clearCommand_ethernet(); Ethernet_print("00#"); return false; }
-    --len; command_ethernet[--len]=0;
-#endif
-
-    // break up the command into a two char command and the remaining parameter
-
-    // the parameter can be up to 16 chars in length
-    memmove(parameter_ethernet,(char *)&command_ethernet[3],17);
-
-    // the command is either one or two chars in length
-    command_ethernet[3]=0;  memmove(command_ethernet,(char *)&command_ethernet[1],3);
-
-    return true;
-  } else {
-    return false;
-  }
-}
-
-// clear commands
-boolean clearCommand_ethernet() {
-  bufferPtr_ethernet=0;
-  command_ethernet[bufferPtr_ethernet]=(char)0;
-  return true;
-}
-#endif
-
-// calculates the tracking speed for move commands
-void setGuideRate(int g) {
-  currentGuideRate=g;
-  if ((g<=GuideRate1x) && (currentPulseGuideRate!=g)) { currentPulseGuideRate=g; EEPROM.update(EE_pulseGuideRate,g); }
-}
-
-void enableGuideRate(int g) {
-  // don't do these lengthy calculations unless we have to
-  if (activeGuideRate==g) return;
-  
-  activeGuideRate=g;
-
-  // this enables the guide rate
-  guideTimerBaseRate=(double)(guideRates[g]/15.0);
-
-  cli();
-  amountGuideHA.fixed =doubleToFixed((guideTimerBaseRate*StepsPerSecondAxis1)/100.0);
-  amountGuideDec.fixed=doubleToFixed((guideTimerBaseRate*StepsPerSecondAxis2)/100.0);
-  sei();
-}

@@ -12,6 +12,8 @@
 // Energia only has EEPROM.read and EEPROM.write, it does not include EEPROM.update. My patch has been accepted but it will take a while until the next version is released. Until then you can use the included EEPROM_LP.ino and EEPROM_LP.h.
 #include "EEPROM_LP.h"
 
+#define __ARM_TI_TM4C__
+
 #else
 
 #include "EEPROM.h"

@@ -6,6 +6,7 @@
 byte alignNumStars = 0;
 byte alignThisStar = 0;
 
+#ifdef MOUNT_TYPE_ALTAZM
 typedef struct {
   double HA;
   double Dec;
@@ -47,7 +48,9 @@ class TAlign
 };
 
 TAlign Align;
+#endif
 
+#ifndef ALIGN_GOTOASSIST_ON
 // -----------------------------------------------------------------------------------
 // GEOMETRIC ALIGN FOR EQUATORIAL MOUNTS
 //
@@ -89,3 +92,61 @@ class TGeoAlign
 
 TGeoAlign GeoAlign;
 
+#else
+// -----------------------------------------------------------------------------------
+// GEOMETRIC ALIGN FOR EQUATORIAL MOUNTS2
+//
+
+typedef struct {
+  double ha;
+  double dec;
+  int side;
+} align_coord2_t;
+
+class TGeoAlign
+{
+  public:
+    double altCor;
+    double azmCor;
+    double doCor;
+    double pdCor;
+    double dfCor;
+    double tfCor;
+
+    TGeoAlign();
+    ~TGeoAlign();
+    void init();
+    void readCoe();
+    void writeCoe();
+    bool isReady();
+    bool addStar(int I, int N, double RA, double Dec);
+    void EquToInstr(double Lat, double HA, double Dec, double *HA1, double *Dec1);
+    void InstrToEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1);
+
+  private:
+    boolean geo_ready;
+    double avgDec;
+    double avgHA;
+
+    long num,l;
+    long Ff,Df;
+    double best_deo, best_pd, best_pz, best_pe, best_ohw, best_odw, best_ohe, best_ode, best_tf, best_df, best_ff;
+    double h1,d1;
+    double avg_ha,avg_dec;
+    double dist,sumd,rms;
+    double best_dist;
+    double ohe,ode,ohw,odw,dh;
+    double sd,sh,sum1;
+    double max_dist;
+
+    align_coord2_t mount[9];
+    align_coord2_t actual[9];
+    align_coord2_t delta[9];
+
+    void correct(double ha, double dec, double pierSide, double sf, double _deo, double _pd, double _pz, double _pe, double _da, double _ff, double _tf, double *h1, double *d1);
+    void do_search(double sf, int p1, int p2, int p3, int p4, int p5, int p6, int p7, int p8, int p9);
+    void autoModel(int n);
+};
+
+TGeoAlign GeoAlign;
+#endif

@@ -1,9 +1,11 @@
+// -----------------------------------------------------------------------------------
+// Object libraries
 
 Library::Library()
 {
   catalog=0;
 
-  byteMin=(PECBufferSize-824)+1024;    // default=1024
+  byteMin=200+PECBufferSize;
   
   #if defined(TEENSYDUINO) && !defined(E2END)
   #define E2END 2047
