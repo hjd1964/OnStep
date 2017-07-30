@@ -13,49 +13,6 @@ int syncEqu(double RA, double Dec) {
   // validate
   int f=validateGoto(HA,Dec,a); if (f!=0) return f;
 
-  // control pier side flip
-  int newPierSide=PierSideNone;
-
-#if defined(SYNC_ANYWHERE_ON)
-  // just turn on tracking
-  if (pierSide==PierSideNone) {
-    atHome=false;
-
-    // enable the stepper drivers
-    digitalWrite(Axis1_EN,Axis1_Enabled); axis1Enabled=true;
-    digitalWrite(Axis2_EN,Axis2_Enabled); axis2Enabled=true;
-    delay(10);
-
-    // start tracking
-    trackingState=TrackingSidereal;
-  }
-
-  if (meridianFlip!=MeridianFlipNever) {
-    // we're in the polar home position, so pick a side (of the pier)
-    
-    // west side of pier - we're in the eastern sky and the HA's are negative
-    // east side of pier - we're in the western sky and the HA's are positive
-    if (preferredPierSide==PPS_WEST) newPierSide=PierSideWest;
-    if (preferredPierSide==PPS_EAST) newPierSide=PierSideEast;
-    if (preferredPierSide==PPS_BEST) { if (HA<0) newPierSide=PierSideWest; else newPierSide=PierSideEast; }
-
-    // check meridian limits
-    if (newPierSide==PierSideWest) {
-      double maxHA= ((double)minutesPastMeridianW/4.0);
-      if (HA>maxHA) return 6; // fail, outside limits
-    } else 
-    if (newPierSide==PierSideEast) {
-      double minHA=-((double)minutesPastMeridianE/4.0);
-      if (HA<minHA) return 6; // fail, outside limits
-    } else return 7; // unspecified error
-
-  } else {
-    // always on the "east" side of pier - we're in the western sky and the HA's are positive
-    // this is the default in the polar-home position and also for MOUNT_TYPE_FORK and MOUNT_TYPE_ALTAZM.  MOUNT_TYPE_FORK_ALT ends up pierSideEast, but flips are allowed until aligned.
-    newPierSide=PierSideEast;
-  }
-#endif
-
   // correct for polar misalignment only by clearing the index offsets
   indexAxis1=0; indexAxis2=0; indexAxis1Steps=0; indexAxis2Steps=0;
 
@@ -73,13 +30,45 @@ int syncEqu(double RA, double Dec) {
   GeoAlign.EquToInstr(latitude,HA,Dec,&Axis1,&Axis2);
 #endif
 
-  // flip pier side if required
-  if (newPierSide!=PierSideNone) {
-    pierSide=newPierSide;
-    if (pierSide==PierSideEast) defaultDirAxis2=defaultDirAxis2EInit;
-    if (pierSide==PierSideWest) defaultDirAxis2=defaultDirAxis2WInit;
+#if defined(SYNC_ANYWHERE_ON)
+  // just turn on tracking
+  if (pierSide==PierSideNone) {
+    trackingState=TrackingSidereal;
+    atHome=false;
+    // should enable motors here!  Why not?
   }
-  
+
+  if (meridianFlip!=MeridianFlipNever) {
+    // we're in the polar home position, so pick a side (of the pier)
+    if (preferredPierSide==PPS_WEST) {
+      // west side of pier - we're in the eastern sky and the HA's are negative
+      pierSide=PierSideWest;
+      defaultDirAxis2=defaultDirAxis2WInit;
+    } else
+    if (preferredPierSide==PPS_EAST) {
+      // east side of pier - we're in the western sky and the HA's are positive
+      pierSide=PierSideEast;
+      defaultDirAxis2=defaultDirAxis2EInit;
+    } else {
+      // best side of pier
+      if (Axis1<0) {
+        // west side of pier - we're in the eastern sky and the HA's are negative
+        pierSide=PierSideWest;
+        defaultDirAxis2=defaultDirAxis2WInit;
+      } else { 
+        // east side of pier - we're in the western sky and the HA's are positive
+        pierSide=PierSideEast;
+        defaultDirAxis2=defaultDirAxis2EInit;
+      }
+    }
+  } else {
+    // always on the "east" side of pier - we're in the western sky and the HA's are positive
+    // this is the default in the polar-home position and also for MOUNT_TYPE_FORK and MOUNT_TYPE_ALTAZM.  MOUNT_TYPE_FORK_ALT ends up pierSideEast, but flips are allowed until aligned.
+    pierSide=PierSideEast;
+    defaultDirAxis2=defaultDirAxis2EInit;
+  }
+#endif
+
   // compute index offsets indexAxis1/indexAxis2, if they're within reason 
   // actual posAxis1/posAxis2 are the coords of where this really is
   // indexAxis1/indexAxis2 are the amount to add to the actual RA/Dec to arrive at the correct position
