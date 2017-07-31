@@ -147,6 +147,8 @@ byte park() {
         int gotoStatus=goTo(h,d,h,d,gotoPierSide);
 
         if (gotoStatus!=0) {
+          // resume tracking state
+          trackingState=abortTrackingState;
           // if not successful revert the park status
           parkStatus=lastParkStatus;
           EEPROM.write(EE_parkStatus,parkStatus);
