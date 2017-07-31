@@ -245,23 +245,25 @@ void moveTo() {
       // other special gotos: for parking the mount and homeing the mount
       if (parkStatus==Parking) {
         int i=parkClearBacklash(); if (i==-1) return; // working
-    
-        if ((posAxis1==(long)targetAxis1.part.m) && (posAxis2==(long)targetAxis2.part.m) && (i==1)) {
-          // restore trackingState
-          trackingState=lastTrackingState; lastTrackingState=TrackingNone;
-          SetSiderealClockRate(siderealInterval);
 
-          // success, we're parked
-          parkStatus=Parked; EEPROM.write(EE_parkStatus,parkStatus);
+        // restore trackingState
+        trackingState=lastTrackingState; lastTrackingState=TrackingNone;
+        SetSiderealClockRate(siderealInterval);
 
-          // just store the indexes of our pointing model
-          EEPROM_writeFloat(EE_indexAxis1,indexAxis1);
-          EEPROM_writeFloat(EE_indexAxis2,indexAxis2);
-          
-          // disable the stepper drivers
-          digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
-          digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
-        } else { parkStatus=ParkFailed; trackingState=lastTrackingState; SetSiderealClockRate(siderealInterval); }
+        // validate location
+        byte parkPierSide=EEPROM.read(EE_pierSide);
+        if ((posAxis1!=(long)targetAxis1.part.m) || (posAxis2!=(long)targetAxis2.part.m) || (pierSide!=parkPierSide) || (i!=1)) { parkStatus=ParkFailed; EEPROM.write(EE_parkStatus,parkStatus); return; }
+
+        // success, we're parked
+        parkStatus=Parked; EEPROM.write(EE_parkStatus,parkStatus);
+
+        // just store the indexes of our pointing model
+        EEPROM_writeFloat(EE_indexAxis1,indexAxis1);
+        EEPROM_writeFloat(EE_indexAxis2,indexAxis2);
+        
+        // disable the stepper drivers
+        digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
+        digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
       
       } else
         if (homeMount) {
