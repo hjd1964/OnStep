@@ -315,8 +315,8 @@ byte goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1, long 
   
     // override the defaults and force a flip if near the meridian and possible (for parking and align)
     if ((gotoPierSide!=PierSideBest) && (pierSide!=gotoPierSide)) {
-      eastOfPierMinHA= (minutesPastMeridianW*(long)StepsPerDegreeAxis1/4L);
-      westOfPierMaxHA=-(minutesPastMeridianE*(long)StepsPerDegreeAxis1/4L);
+      if (pierSide==PierSideEast) eastOfPierMinHA= (minutesPastMeridianW*(long)StepsPerDegreeAxis1/4L);
+      if (pierSide==PierSideWest) westOfPierMaxHA=-(minutesPastMeridianE*(long)StepsPerDegreeAxis1/4L);
     }
     // if doing a meridian flip, use the opposite pier side coordinates
     if (pierSide==PierSideEast) {
@@ -329,7 +329,7 @@ byte goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1, long 
     } else
     if (pierSide==PierSideWest) {
       if ((thisTargetAxis1+indexAxis1Steps>westOfPierMaxHA) || (thisTargetAxis1+indexAxis1Steps<westOfPierMinHA)) {
-        pierSide=PierSideFlipWE1; 
+        pierSide=PierSideFlipWE1;
         thisTargetAxis1 =altTargetAxis1;
         if (thisTargetAxis1+indexAxis1Steps<eastOfPierMinHA) return 6; // fail, outside limits
         thisTargetAxis2=altTargetAxis2;
