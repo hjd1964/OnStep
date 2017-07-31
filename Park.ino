@@ -168,7 +168,11 @@ byte park() {
 // returns a parked telescope to operation, you must set date and time before calling this.  it also
 // depends on the latitude, longitude, and timeZone; but those are stored and recalled automatically
 boolean unpark() {
-  if ((parkStatus==Parked) || (atHome)) {
+#ifdef STRICT_PARKING_ON
+  if (parkStatus==Parked) {
+#else
+  if ((parkStatus==Parked) || ((atHome) && (parkStatus==NotParked))) {
+#endif
     parkStatus=EEPROM.read(EE_parkStatus);
     parkSaved =EEPROM.read(EE_parkSaved);
     parkStatus=Parked;
