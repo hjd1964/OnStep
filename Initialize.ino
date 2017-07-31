@@ -372,14 +372,6 @@ void Init_ReadEEPROM_Values() {
   pauseHome=EEPROM.read(EE_pauseHome);
 #endif
 
-  // makes onstep think that you parked the 'scope
-  // combined with a hack in the goto syncEqu() function and you can quickly recover from
-  // a reset without loosing much accuracy in the sky.  PEC is toast though.
-#ifdef RESCUE_MODE_ON
-  parkSaved=true;    
-  parkStatus=Parked;
-#endif
-
   // set the default guide rate, 16x sidereal
   setGuideRate(GuideRate16x);
   enableGuideRate(GuideRate16x);
