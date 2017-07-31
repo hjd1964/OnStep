@@ -38,8 +38,8 @@
 #define Axis1_M0      22    // Pin 22 (Microstep Mode 0)
 #define Axis1_M1      23    // Pin 23 (Microstep Mode 1)
 #define Axis1_M2      24    // Pin 24 (Microstep Mode 2)
-#define Axis1_EN      25    // Pin 25 (Enabled when LOW)
-#define Axis1_FAULT   26    // Pin 26 (Fault if LOW)
+#define Axis1_EN      25    // Pin 25 (Enable)
+#define Axis1_FAULT   26    // Pin 26 (Fault)
 #define Axis1_Aux     26    // Pin 26 (Aux - SPI MISO)
 #define Axis1_Mode    32    // Pin 32 (Mode switch for Axis1)
 
@@ -57,8 +57,8 @@
 #define Axis2_M0      27    // Pin 27 (Microstep Mode 0)
 #define Axis2_M1      28    // Pin 28 (Microstep Mode 1)
 #define Axis2_M2      29    // Pin 29 (Microstep Mode 2)
-#define Axis2_EN      30    // Pin 30 (Enabled when LOW)
-#define Axis2_FAULT   31    // Pin 31 (Fault if LOW)
+#define Axis2_EN      30    // Pin 30 (Enable)
+#define Axis2_FAULT   31    // Pin 31 (Fault)
 #define Axis2_Aux     31    // Pin 31 (Aux - SPI MISO)
 #define Axis2_Mode    33    // Pin 33 (Mode switch for Axis2)
 
@@ -108,8 +108,8 @@
 #define Axis1_M0      29    // Pin 29 (Microstep or Decay Mode 0)
 #define Axis1_M1      27    // Pin 27 (Microstep or Decay Mode 1)
 #define Axis1_M2      25    // Pin 25 (Microstep or Decay Mode 2)
-#define Axis1_EN      23    // Pin 23 (Enabled when LOW)
-#define Axis1_FAULT   39    // Pin 39 (Fault if LOW)
+#define Axis1_EN      23    // Pin 23 (Enable)
+#define Axis1_FAULT   39    // Pin 39 (Fault)
 #define Axis1_Aux     39    // Pin 39 (Aux - SPI MISO)
 #define Axis1_Mode    41    // Pin 41 (Aux Decay Mode for Axis1)
 
@@ -124,8 +124,8 @@
 #define Axis2_M0      30    // Pin 30 (Microstep or Decay Mode 0)
 #define Axis2_M1      32    // Pin 32 (Microstep or Decay Mode 1)
 #define Axis2_M2      34    // Pin 34 (Microstep or Decay Mode 2)
-#define Axis2_EN      36    // Pin 36 (Enabled when LOW)
-#define Axis2_FAULT   38    // Pin 38 (Fault if LOW)
+#define Axis2_EN      36    // Pin 36 (Enabled)
+#define Axis2_FAULT   38    // Pin 38 (Fault)
 #define Axis2_Aux     38    // Pin 38 (Aux - SPI MISO)
 #define Axis2_Mode    40    // Pin 40 (Aux Decay Mode for Axis2)
 
@@ -164,8 +164,8 @@
 #define Axis1_M0      13    // Pin 13 (Microstep Mode 0)
 #define Axis1_M1      14    // Pin 14 (Microstep Mode 1)
 #define Axis1_M2      15    // Pin 15 (Microstep Mode 2)
-#define Axis1_EN      16    // Pin 16 (Enabled when LOW)
-#define Axis1_FAULT   17    // Pin 17 (Fault if LOW)
+#define Axis1_EN      16    // Pin 16 (Enable)
+#define Axis1_FAULT   17    // Pin 17 (Fault)
 #define Axis1_Aux     17    // Pin 17 (Aux - ESP8266 GPIO0 or SPI MISO)
 
 // The HA(RA) and Dec jumpers (going to the big easy drivers) are simply four wire jumper cables, each has identical wiring - simple modular construction
@@ -177,8 +177,8 @@
 #define Axis2_M0      18    // Pin 18 (Microstep Mode 0)
 #define Axis2_M1      19    // Pin 19 (Microstep Mode 1)
 #define Axis2_M2      20    // Pin 20 (Microstep Mode 2)
-#define Axis2_EN      21    // Pin 21 (Enabled when LOW)
-#define Axis2_FAULT   22    // Pin 22 (Fault if LOW)
+#define Axis2_EN      21    // Pin 21 (Enable)
+#define Axis2_FAULT   22    // Pin 22 (Fault)
 #define Axis2_Aux     22    // Pin 22 (Aux - ESP8266 GPIO0 or SPI MISO)
 
 // ST4 interface
@@ -216,7 +216,7 @@
 #define Axis1_M2      17    // Pin 17 (Microstep Mode 2 or SPI CS)
 #define Axis1_M1      16    // Pin 16 (Microstep Mode 1 or SPI SCK)
 #define Axis1_M0      15    // Pin 15 (Microstep Mode 0 or SPI MOSI)
-#define Axis1_EN      14    // Pin 14 (Enabled when LOW)
+#define Axis1_EN      14    // Pin 14 (Enable)
 #define Axis1_SDO     18    // Pin 18 (SPI Slave SDO)
 #define Axis1_CS      17    // Pin 17 (SPI Slave CS)
 #define Axis1_SCK     16    // Pin 16 (SPI Slave SCK)
@@ -230,7 +230,7 @@
 #define Axis2_M2       6    // Pin  6 (Microstep Mode 2 or SPI CS)
 #define Axis2_M1       7    // Pin  7 (Microstep Mode 1 or SPI SCK)
 #define Axis2_M0       8    // Pin  8 (Microstep Mode 0 or SPI MOSI)
-#define Axis2_EN       9    // Pin  9 (Enabled when LOW)
+#define Axis2_EN       9    // Pin  9 (Enable)
 
 // ST4 interface
 #ifdef ST4_ALTERNATE_PINS_ON
@@ -284,8 +284,8 @@
 #define Axis1_M0      34               // Pin C7 (Microstep Mode 0)
 #define Axis1_M1      35               // Pin C6 (Microstep Mode 1)
 #define Axis1_M2      36               // Pin C5 (Microstep Mode 2)
-#define Axis1_EN      37               // Pin C4 (Enabled when LOW)
-#define Axis1_FAULT   38               // Pin B3 (Fault if LOW)
+#define Axis1_EN      37               // Pin C4 (Enable)
+#define Axis1_FAULT   38               // Pin B3 (Fault)
 
 // The HA(RA) and Dec jumpers (going to the big easy drivers) are simply four wire jumper cables, each has identical wiring - simple modular construction
 #define Axis2DirPin   23               // Pin D0 (Dir)
@@ -300,8 +300,8 @@
 #define Axis2_M0      13               // Pin A4 (Microstep Mode 0)
 #define Axis2_M1      14               // Pin B6 (Microstep Mode 1) IF USED MAKE SURE YOU DESOLDER A BRIDGE or change pins around, otherwise pin 14 is connected to pin 23
 #define Axis2_M2      15               // Pin B7 (Microstep Mode 2) IF USED MAKE SURE YOU DESOLDER A BRIDGE or change pins around, otherwise pin 15 is connected to pin 24
-#define Axis2_EN      18               // Pin E0 (Enabled when LOW)
-#define Axis2_FAULT   17               // Pin F0 (Fault if LOW) NOTE, this is connected to pushbutton switch 2
+#define Axis2_EN      18               // Pin E0 (Enable)
+#define Axis2_FAULT   17               // Pin F0 (Fault) NOTE, this is connected to pushbutton switch 2
 
 // ST4 interface
 #define ST4RAw         7               // Pin B4 ST4 RA- West
@@ -344,8 +344,8 @@
 #define Axis1_M2      35               // Pin C6 (Microstep Mode 0)
 #define Axis1_M1      36               // Pin C5 (Microstep Mode 1)
 #define Axis1_M0      37               // Pin C4 (Microstep Mode 2)
-#define Axis1_EN      38               // Pin B3 (Enabled when LOW)
-#define Axis1_FAULT   34               // Pin C7 (Fault if LOW)
+#define Axis1_EN      38               // Pin B3 (Enable)
+#define Axis1_FAULT   34               // Pin C7 (Fault)
 
 // The HA(RA) and Dec jumpers (going to the big easy drivers) are simply four wire jumper cables, each has identical wiring - simple modular construction
 #define Axis2DirPin   23               // Pin D0 (Dir) 
@@ -359,8 +359,8 @@
 #define Axis2_M2      27               // Pin E1 (Microstep Mode 0)
 #define Axis2_M1      28               // Pin E2 (Microstep Mode 1)
 #define Axis2_M0      29               // Pin E3 (Microstep Mode 2)
-#define Axis2_EN      30               // Pin F1 (Enabled when LOW)
-#define Axis2_FAULT   26               // Pin D3 (Fault if LOW) NOTE, this is connected to pushbutton switch 2
+#define Axis2_EN      30               // Pin F1 (Enable)
+#define Axis2_FAULT   26               // Pin D3 (Fault) NOTE, this is connected to pushbutton switch 2
 
 // ST4 interface
 #define ST4RAw        18               // Pin E0 ST4 RA- West
@@ -420,8 +420,8 @@
 #define Axis2_M0      13               // Pin N2 (Microstep Mode 0)
 #define Axis2_M1      14               // Pin D0 (Microstep Mode 1)
 #define Axis2_M2      15               // Pin D1 (Microstep Mode 2)
-#define Axis2_EN      18               // Pin H2 (Enabled when LOW)
-#define Axis2_FAULT   17               // Pin H3 (Fault if LOW) NOTE, this is connected to pushbutton switch 2
+#define Axis2_EN      18               // Pin H2 (Enable)
+#define Axis2_FAULT   17               // Pin H3 (Fault) NOTE, this is connected to pushbutton switch 2
 
 // ST4 interface
 #define ST4RAw         7               // Pin D3 ST4 RA- West
