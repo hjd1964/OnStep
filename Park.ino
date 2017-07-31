@@ -200,8 +200,8 @@ boolean unpark() {
   // if sync anywhere is enabled we have a corrected location, convert to instrument
   // just like we did when we parked
   #ifdef SYNC_ANYWHERE_ON
-        posAxis1=((posAxis1-indexAxis1Steps)/1024L)*1024L;
-        posAxis2=((posAxis2-indexAxis2Steps)/1024L)*1024L;
+        posAxis1=((posAxis1-indexAxis1Steps)/1024L)*1024L; targetAxis1.part.m=posAxis1;
+        posAxis2=((posAxis2-indexAxis2Steps)/1024L)*1024L; targetAxis2.part.m=posAxis2;
   #endif
         sei();
 
