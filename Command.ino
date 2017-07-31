@@ -513,7 +513,8 @@ void processCommands() {
 //         Returns: Nothing
       if (command[1]=='C')  {  goHome(); quietReply=true; } else 
 //  :hP#   Goto the Park Position
-//         Returns: Nothing
+//          Return: 0 on failure
+//                  1 on success
       if (command[1]=='P')  { if (park()) commandError=true; } else 
 //  :hQ#   Set the park position
 //          Return: 0 on failure
