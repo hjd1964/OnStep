@@ -119,6 +119,7 @@ byte park() {
         pecStatus=IgnorePEC;
   
         // record our status
+        int lastParkStatus=parkStatus;
         parkStatus=Parking;
         EEPROM.write(EE_parkStatus,parkStatus);
         
@@ -141,14 +142,24 @@ byte park() {
         d=d-ids;
         float ih=ihs/(long)StepsPerDegreeAxis1;
         float id=ids/(long)StepsPerDegreeAxis2;
-        // also save the alignment index values in this mode since they can change widely
-        EEPROM_writeFloat(EE_indexAxis1,ih);
-        EEPROM_writeFloat(EE_indexAxis2,id);
   #endif
 
-        goTo(h,d,h,d,gotoPierSide);
+        int gotoStatus=goTo(h,d,h,d,gotoPierSide);
 
-        return 0;
+        if (gotoStatus!=0) {
+          // if not successful revert the park status
+          parkStatus=lastParkStatus;
+          EEPROM.write(EE_parkStatus,parkStatus);
+        } else {
+          // if successful record the changed index values
+  #ifdef SYNC_ANYWHERE_ON
+          // also save the alignment index values in this mode since they can change widely
+          EEPROM_writeFloat(EE_indexAxis1,ih);
+          EEPROM_writeFloat(EE_indexAxis2,id);
+  #endif
+        }
+
+        return gotoStatus;
       } else return 1; // no park position saved
     } else return 2; // not parked
   } else return 3; // already moving
