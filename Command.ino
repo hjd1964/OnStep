@@ -684,7 +684,7 @@ void processCommands() {
       if (command[1]=='g') {
         if ( (atoi2((char *)&parameter[1],&i)) && ((i>=0) && (i<=16399)) && (parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) { 
           if (((parameter[0]=='e') || (parameter[0]=='w')) && (guideDirAxis1==0)) {
-#ifdef SEPERATE_PULSE_GUIDE_RATE_ON
+#ifdef SEPARATE_PULSE_GUIDE_RATE_ON
             startGuideAxis1(parameter[0],currentPulseGuideRate,i);
 #else
             startGuideAxis1(parameter[0],currentGuideRate,i);
@@ -692,7 +692,7 @@ void processCommands() {
             quietReply=true;
           } else
           if (((parameter[0]=='n') || (parameter[0]=='s')) && (guideDirAxis2==0)) { 
-#ifdef SEPERATE_PULSE_GUIDE_RATE_ON
+#ifdef SEPARATE_PULSE_GUIDE_RATE_ON
             startGuideAxis2(parameter[0],currentPulseGuideRate,i);
 #else
             startGuideAxis2(parameter[0],currentGuideRate,i);
@@ -704,13 +704,13 @@ void processCommands() {
 //  :Me# & :Mw#      Move Telescope East or West at current slew rate
 //         Returns: Nothing
       if ((command[1]=='e') || (command[1]=='w')) {
-        startGuideAxis1(command[1],currentGuideRate,-1);
+        startGuideAxis1(command[1],currentGuideRate,GUIDE_TIME_LIMIT*1000);
         quietReply=true;
       } else
 //  :Mn# & :Ms#      Move Telescope North or South at current slew rate
 //         Returns: Nothing
       if ((command[1]=='n') || (command[1]=='s')) {
-        startGuideAxis2(command[1],currentGuideRate,-1);
+        startGuideAxis2(command[1],currentGuideRate,GUIDE_TIME_LIMIT*1000);
         quietReply=true;
       } else
 
@@ -1464,7 +1464,7 @@ String ConfighSettings() {
   #else
     c+="0";
   #endif
-  #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
+  #ifdef SEPARATE_PULSE_GUIDE_RATE_ON
     c+="1";
   #else
     c+="0";
