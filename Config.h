@@ -52,7 +52,7 @@
 #define SEPARATE_PULSE_GUIDE_RATE_ON
 
 // Guide time limit (in seconds,) default=0 (no limit.)  A safety feature, some guides are started with one command and stopped with another.  
-// If the stop command is never recieved the guide will continue forever unless this is enabled.
+// If the stop command is never received the guide will continue forever unless this is enabled.
 #define GUIDE_TIME_LIMIT 0
 
 // RTC (Real Time Clock) support, Default=OFF. Other options: RTC_DS3234 for a DS3234 on the default SPI interface pins (and CS on pin 10, optionally wire the SQW output to the PPS pin below.)
