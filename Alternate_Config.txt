@@ -53,11 +53,18 @@
 // ST4 interface on pins 47, 43, 45, 49.  Pin 47 is RA- (West), Pin 43 is Dec- (South), Pin 45 is Dec+ (North), Pin 49 is RA+ (East.)  (Teensy3.x pins 24, 25, 26, 27)
 // ST4_ON enables the interface.  ST4_PULLUP enables the interface and any internal pullup resistors.  default=OFF
 // It is up to you to create an interface that meets the electrical specifications of any connected device, use at your own risk.
-// ST4_HAND_CONTROL_ON allows guide rates >1x while SEPERATE_PULSE_GUIDE_RATE_ON is enabled
+// ST4_HAND_CONTROL_ON allows guide rates >1x while SEPARATE_PULSE_GUIDE_RATE_ON is enabled
 // ST4_ALTERNATE_PINS_ON moves the interface (Teensy3.x only) to pins 10, 11, 12, 13.  Pin 10 is RA- (West), Pin 11 is Dec- (South), Pin 12 is Dec+ (North), Pin 13 is RA+ (East.)  The default SPI interface is then unavailable.
 #define ST4_OFF
 #define ST4_HAND_CONTROL_ON
 #define ST4_ALTERNATE_PINS_ON
+
+// Separate pulse-guide rate so centering and guiding don't disturb each other, default=ON
+#define SEPARATE_PULSE_GUIDE_RATE_OFF
+
+// Guide time limit (in seconds,) default=0 (no limit.)  A safety feature, some guides are started with one command and stopped with another.  
+// If the stop command is never recieved the guide will continue forever unless this is enabled.
+#define GUIDE_TIME_LIMIT 0
 
 // RTC (Real Time Clock) support, Default=OFF. Other options: RTC_DS3234 for a DS3234 on the default SPI interface pins (and CS on pin 10, optionally wire the SQW output to the PPS pin below.)
 #define RTC_OFF
@@ -94,9 +101,6 @@
 // Optionally adjust tracking rate to compensate for atmospheric refraction, default=OFF
 // can be turned on/off with the :Te# and :Td# commands regardless of this setting
 #define TRACK_REFRACTION_RATE_DEFAULT_OFF
-
-// Seperate pulse-guide rate so centering and guiding don't disturb each other, default=ON
-#define SEPERATE_PULSE_GUIDE_RATE_ON
 
 // Set to ON and OnStep will remember the last auto meridian flip setting (on/off), default=OFF
 #define REMEMBER_AUTO_MERIDIAN_FLIP_OFF
