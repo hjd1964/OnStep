@@ -25,7 +25,7 @@
 // Turns debugging on, used during testing, default=OFF
 #define DEBUG_OFF
 
-// Enables goto assist mount modeling (for Eq mounts), default=OFF
+// Enables goto assist mount modeling (for Eq mounts), default=OFF (Experimental)
 #define ALIGN_GOTOASSIST_OFF
 
 // Default speed for Serial1 com port, Default=9600
@@ -82,7 +82,7 @@
 // Sound state at startup, default=ON.
 #define DEFAULT_SOUND_ON
 
-// Optionally adjust tracking rate to compensate for atmospheric refraction, default=OFF (limited testing done)
+// Optionally adjust tracking rate to compensate for atmospheric refraction, default=OFF
 // can be turned on/off with the :Te# and :Td# commands regardless of this setting
 #define TRACK_REFRACTION_RATE_DEFAULT_OFF
 
