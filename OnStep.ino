@@ -55,6 +55,9 @@
 
 #include "TM4C.h"
 #include "Config.h"
+#ifdef SEPERATE_PULSE_GUIDE_RATE_ON
+#define SEPARATE_PULSE_GUIDE_RATE_ON
+#endif
 #include "Pins.h"
 #include "errno.h"
 #include "math.h"
