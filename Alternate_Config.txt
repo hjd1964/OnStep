@@ -60,7 +60,7 @@
 #define ST4_ALTERNATE_PINS_ON
 
 // Separate pulse-guide rate so centering and guiding don't disturb each other, default=ON
-#define SEPARATE_PULSE_GUIDE_RATE_OFF
+#define SEPARATE_PULSE_GUIDE_RATE_ON
 
 // RTC (Real Time Clock) support, Default=OFF. Other options: RTC_DS3234 for a DS3234 on the default SPI interface pins (and CS on pin 10, optionally wire the SQW output to the PPS pin below.)
 #define RTC_OFF
