@@ -41,12 +41,15 @@
 // ST4 interface on pins 47, 49, 51, 53.  Pin 47 is RA- (West), Pin 49 is Dec- (South), Pin 51 is Dec+ (North), Pin 53 is RA+ (East.)  Teensy3.1 pins 24, 25, 26, 27.
 // ST4_ON enables the interface.  ST4_PULLUP enables the interface and any internal pullup resistors.
 // It is up to you to create an interface that meets the electrical specifications of any connected device, use at your own risk.
-// ST4_HAND_CONTROL_ON allows guide rates >1x while SEPERATE_PULSE_GUIDE_RATE_ON is enabled
+// ST4_HAND_CONTROL_ON allows guide rates >1x while SEPARATE_PULSE_GUIDE_RATE_ON is enabled
 // ST4_ALTERNATE_PINS_ON moves the interface (Mega2560 only) to pins 43, 45, 47, 49.  Pin 43 is Dec- (South), Pin 45 is Dec+ (North), Pin 47 is RA- (West), Pin 49 is RA+ (East.)
 // ST4_ALTERNATE_PINS_ON is required for Steve's ST4 board and is also required if the ST4 interface is to be used alongside the Arduino Ethernet Shield
 #define ST4_OFF
 #define ST4_HAND_CONTROL_OFF
 #define ST4_ALTERNATE_PINS_OFF
+
+// Seperate pulse-guide rate so centering and guiding don't disturb each other, default=ON
+#define SEPARATE_PULSE_GUIDE_RATE_ON
 
 // RTC (Real Time Clock) support, Default=OFF. Other options: RTC_DS3234 for a DS3234 on the default SPI interface pins (and CS on pin 10, optionally wire the SQW output to the PPS pin below.)
 #define RTC_OFF
@@ -85,9 +88,6 @@
 // Optionally adjust tracking rate to compensate for atmospheric refraction, default=OFF
 // can be turned on/off with the :Te# and :Td# commands regardless of this setting
 #define TRACK_REFRACTION_RATE_DEFAULT_OFF
-
-// Seperate pulse-guide rate so centering and guiding don't disturb each other, default=ON
-#define SEPERATE_PULSE_GUIDE_RATE_ON
 
 // Set to ON and OnStep will remember the last auto meridian flip setting (on/off), default=OFF
 #define REMEMBER_AUTO_MERIDIAN_FLIP_OFF
@@ -132,6 +132,8 @@
 
 #define MinutesPastMeridianE      60 // for goto's, how far past the meridian to allow before we do a flip (if on the East side of the pier) - one hour of RA is the default = 60.  Sometimes used for Fork mounts in Align mode.  Ignored on Alt/Azm mounts.
 #define MinutesPastMeridianW      60 // as above, if on the West side of the pier.  If left alone, the mount will stop tracking when it hits the this limit.  Sometimes used for Fork mounts in Align mode.  Ignored on Alt/Azm mounts.
+                                     // The above two lines can be removed and settings in EEPROM will be used instead, be sure to set the Meridian limits in control software if you do this!  
+                                     // If you don't remove these lines Meridian limits will return to these defaults on power up.
 #define UnderPoleLimit             9 // maximum allowed hour angle (+/-) under the celestial pole. OnStep will flip the mount and move the Dec. >90 degrees (+/-) once past this limit.  Sometimes used for Fork mounts in Align mode.  Ignored on Alt/Azm mounts.
                                      // If left alone, the mount will stop tracking when it hits this limit.  Valid range is 7 to 11 hours.
 #define MinDec                   -91 // minimum allowed declination, default = -91 (off)  Ignored on Alt/Azm mounts.
