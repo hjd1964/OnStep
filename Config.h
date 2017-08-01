@@ -49,7 +49,7 @@
 #define ST4_ALTERNATE_PINS_OFF
 
 // Separate pulse-guide rate so centering and guiding don't disturb each other, default=ON
-#define SEPARATE_PULSE_GUIDE_RATE_OFF
+#define SEPARATE_PULSE_GUIDE_RATE_ON
 
 // Guide time limit (in seconds,) default=0 (no limit.)  A safety feature, some guides are started with one command and stopped with another.  
 // If the stop command is never recieved the guide will continue forever unless this is enabled.
