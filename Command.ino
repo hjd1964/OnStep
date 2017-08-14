@@ -102,7 +102,7 @@ void processCommands() {
 
           // Two star and three star align not supported with Fork mounts in alternate mode
 #ifdef MOUNT_TYPE_FORK_ALT
-          if (n==1) {
+          if (command[1]=='1') {
 #endif
         
           // telescope should be set in the polar home (CWD) for a starting point
