@@ -138,8 +138,8 @@
 #define MinutesPastMeridianW      60 // as above, if on the West side of the pier.  If left alone, the mount will stop tracking when it hits the this limit.  Sometimes used for Fork mounts in Align mode.  Ignored on Alt/Azm mounts.
                                      // The above two lines can be removed and settings in EEPROM will be used instead, be sure to set the Meridian limits in control software if you do this!  
                                      // If you don't remove these lines Meridian limits will return to these defaults on power up.
-#define UnderPoleLimit             9 // maximum allowed hour angle (+/-) under the celestial pole. OnStep will flip the mount and move the Dec. >90 degrees (+/-) once past this limit.  Sometimes used for Fork mounts in Align mode.  Ignored on Alt/Azm mounts.
-                                     // If left alone, the mount will stop tracking when it hits this limit.  Valid range is 7 to 11 hours.
+#define UnderPoleLimit            12 // maximum allowed hour angle (+/-) under the celestial pole.  Default=12.  Ignored on Alt/Azm mounts.
+                                     // If left alone, the mount will stop tracking when it hits this limit.  Valid range is 10 to 12 hours.
 #define MinDec                   -91 // minimum allowed declination, default = -91 (off)  Ignored on Alt/Azm mounts.
 #define MaxDec                   +91 // maximum allowed declination, default =  91 (off)  Ignored on Alt/Azm mounts.
                                      // For example, a value of +80 would stop gotos/tracking near the north celestial pole.
