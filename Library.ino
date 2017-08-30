@@ -14,7 +14,7 @@ Library::Library()
   #elif defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
   #define E2END 6143
   #endif
-  byteMax=E2END;                       // default=4095 (or 2047 on Teensy3.1)
+  byteMax=E2END;
 
   byteCount=(byteMax-byteMin)+1;
   bytePos=byteMin;
