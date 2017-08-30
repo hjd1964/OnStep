@@ -881,7 +881,10 @@ void processCommands() {
           commandError=true;
         else {
           if (parameter[0]=='-') longitude=-longitude;
-          EEPROM_writeFloat(EE_sites+(currentSite)*25+4,longitude);
+          if ((longitude>=-180.0) && (longitude<=360.0)) {
+            if (longitude>=180.0) longitude-=360.0;
+            EEPROM_writeFloat(EE_sites+(currentSite)*25+4,longitude);
+          } else commandError=true;
         }
         update_lst(jd2last(JD,UT1,false));
         highPrecision=i;
