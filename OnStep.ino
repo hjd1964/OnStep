@@ -36,7 +36,7 @@
 // Use Config.h to configure OnStep to your requirements 
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "07 31 17"
+#define FirmwareDate   "08 30 17"
 #define FirmwareNumber "1.0b"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
@@ -57,6 +57,9 @@
 #include "Config.h"
 #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
 #define SEPARATE_PULSE_GUIDE_RATE_ON
+#endif
+#ifndef GUIDE_TIME_LIMIT
+#define GUIDE_TIME_LIMIT 0
 #endif
 #include "Pins.h"
 #include "errno.h"
@@ -673,10 +676,10 @@ void loop() {
           if (c1!=ST4DirAxis1) {
             ST4DirAxis1=c1;
             if ((c1=='e') || (c1=='w')) {
-    #if defined(SEPERATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
-              startGuideAxis1(c1,currentPulseGuideRate,-1);
+    #if defined(SEPARATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
+              startGuideAxis1(c1,currentPulseGuideRate,GUIDE_TIME_LIMIT*1000);
     #else
-              startGuideAxis1(c1,currentGuideRate,-1);
+              startGuideAxis1(c1,currentGuideRate,GUIDE_TIME_LIMIT*1000);
     #endif
             }
             if (c1=='b') stopGuideAxis1();
@@ -690,10 +693,10 @@ void loop() {
           if (c2!=ST4DirAxis2) {
             ST4DirAxis2=c2;
             if ((c2=='n') || (c2=='s')) {
-    #if defined(SEPERATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
-              startGuideAxis2(c2,currentPulseGuideRate,-1);
+    #if defined(SEPARATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
+              startGuideAxis2(c2,currentPulseGuideRate,GUIDE_TIME_LIMIT*1000);
     #else
-              startGuideAxis2(c2,currentGuideRate,-1);
+              startGuideAxis2(c2,currentGuideRate,GUIDE_TIME_LIMIT*1000);
     #endif
             }
             if (c2=='b') stopGuideAxis2();

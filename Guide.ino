@@ -77,7 +77,7 @@ bool startGuideAxis1(char direction, int guideRate, long guideDuration) {
 // stops guide in RA or Azm
 void stopGuideAxis1() {
   if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
-    cli(); if ((guideDirAxis1) && (guideDirAxis1!='b')) { guideDirAxis1='b'; guideBreakTimeAxis1=millis(); } sei();
+    cli(); if ((guideDirAxis1) && (guideDirAxis1!='b')) { guideDirAxis1='b'; guideTimeRemainingAxis1=0; guideBreakTimeAxis1=millis(); } sei();
   }
 }
   
@@ -104,7 +104,7 @@ bool startGuideAxis2(char c, int guideRate, long guideDuration) {
 // stops guide in Dec or Alt
 void stopGuideAxis2() {
   if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
-    cli(); if ((guideDirAxis2) && (guideDirAxis2!='b')) { guideDirAxis2='b'; guideBreakTimeAxis2=millis(); } sei();
+    cli(); if ((guideDirAxis2) && (guideDirAxis2!='b')) { guideDirAxis2='b'; guideTimeRemainingAxis2=0; guideBreakTimeAxis2=millis(); } sei();
   }
 }
 
