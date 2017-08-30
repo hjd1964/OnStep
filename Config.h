@@ -38,7 +38,7 @@
 // Strict parking, default=OFF.  Set to ON and unparking is only allowed if successfully parked.  Otherwise unparking is allowed if at home and not parked (the Home/Reset command ":hF#" sets this state.) 
 #define STRICT_PARKING_OFF
 
-// ST4 interface on pins 47, 49, 51, 53.  Pin 47 is RA- (West), Pin 49 is Dec- (South), Pin 51 is Dec+ (North), Pin 53 is RA+ (East.)  Teensy3.1 pins 24, 25, 26, 27.
+// ST4 interface on pins 47, 49, 51, 53.  Pin 47 is RA- (West), Pin 49 is Dec- (South), Pin 51 is Dec+ (North), Pin 53 is RA+ (East.)  Teensy3.x pins 24, 25, 26, 27.
 // ST4_ON enables the interface.  ST4_PULLUP enables the interface and any internal pullup resistors.
 // It is up to you to create an interface that meets the electrical specifications of any connected device, use at your own risk.
 // ST4_HAND_CONTROL_ON allows guide rates >1x while SEPARATE_PULSE_GUIDE_RATE_ON is enabled
@@ -48,15 +48,19 @@
 #define ST4_HAND_CONTROL_OFF
 #define ST4_ALTERNATE_PINS_OFF
 
-// Seperate pulse-guide rate so centering and guiding don't disturb each other, default=ON
+// Separate pulse-guide rate so centering and guiding don't disturb each other, default=ON
 #define SEPARATE_PULSE_GUIDE_RATE_ON
+
+// Guide time limit (in seconds,) default=0 (no limit.)  A safety feature, some guides are started with one command and stopped with another.  
+// If the stop command is never received the guide will continue forever unless this is enabled.
+#define GUIDE_TIME_LIMIT 0
 
 // RTC (Real Time Clock) support, Default=OFF. Other options: RTC_DS3234 for a DS3234 on the default SPI interface pins (and CS on pin 10, optionally wire the SQW output to the PPS pin below.)
 #define RTC_OFF
-// PPS use _ON or _PULLUP to enable the input and use the built-in pullup resistor.  Sense rising edge on pin 21 for optional precision clock source (GPS, for example), default=OFF (Teensy3.1 Pin 23)
+// PPS use _ON or _PULLUP to enable the input and use the built-in pullup resistor.  Sense rising edge on pin 21 for optional precision clock source (GPS, for example), default=OFF (Teensy3.x Pin 23)
 #define PPS_SENSE_OFF
 
-// PEC sense on pin 2 or threshold value on Analog 1 (Analog 14 on Teensy3.1) use _ON or _PULLUP to enable the input and use the built-in pullup resistor, default=OFF
+// PEC sense on pin 2 or threshold value on Analog 1 (Analog 14 on Teensy3.x) use _ON or _PULLUP to enable the input and use the built-in pullup resistor, default=OFF
 // analog values range from 0 to 1023 which indicate voltages from 0-5VDC (or 0-3.3VDC) on the analog pin, for example "PEC_SENSE 600" would detect an index when the voltage exceeds 2.92V (or 1.93V)
 // with either index detection method, once triggered 60s must expire before another detection can happen.  This gives time for the index magnet to pass by the detector before another cycle begins.
 // Ignored on Alt/Azm mounts.
@@ -70,12 +74,12 @@
 // Light status LED by sink to ground (pin 9) and source +5V (pin 8), default=ON
 // _ON and OnStep keeps this illuminated to indicate that the controller is active.  When sidereal tracking this LED will rapidly flash
 #define STATUS_LED_PINS_OFF
-// Light 2nd status LED by sink to ground (pin 10), default=OFF, must be off for Teensy3.1 (pin 7)
+// Light 2nd status LED by sink to ground (pin 10), default=OFF, must be off for Teensy3.x (pin 7)
 // _ON sets this to blink at 1 sec intervals when PPS is synced
 // n sets this to dimly light a polar finder reticle, for example I use STATUS_LED2_PINS 250
 // The default SPI device CS is at pin 10 also, so if the SPI interface is used this must be _OFF
 #define STATUS_LED2_PINS_OFF
-// Light reticule LED by sink to ground (pin 44), default=OFF.  Defaults to pin 9 on the Teensy3.1 (STATUS_LED_PINS must be _ON)
+// Light reticule LED by sink to ground (pin 44), default=OFF.  Defaults to pin 9 on the Teensy3.x (STATUS_LED_PINS must be _ON)
 // RETICULE_LED_PINS n, where n=0 to 255 activates this feature and sets default brightness
 #define RETICULE_LED_PINS_OFF
 
@@ -146,7 +150,7 @@
 
 // STEPPER DRIVER CONTROL --------------------------------------------------------------------------------------------------
 
-// Optional stepper driver Enable support, just wire Enable to Pins 25 (Axis1) and 30 (Axis2) and OnStep will pull these HIGH (Teensy3.1 Pins 16,21)
+// Optional stepper driver Enable support, just wire Enable to Pins 25 (Axis1) and 30 (Axis2) and OnStep will pull these HIGH (Teensy3.x Pins 16,21)
 // by default to disable stepper drivers on startup and when Parked. An Align or UnPark will enable the drivers.  Adjust below if you need these pulled LOW to disable the drivers.
 #define AXIS1_DISABLED_HIGH
 #define AXIS2_DISABLED_HIGH
@@ -155,7 +159,7 @@
 #define AUTO_POWER_DOWN_AXIS2_OFF
 
 // Stepper driver Mode control
-// M0, M1, and M2 are on Pins 22,23, and 24 for RA (Teensy3.1 Pins 13,14,15.)  M0, M1, M2 are on Pins 27,28,29 for Dec (Teensy3.1 Pins 18,19,20.)
+// M0, M1, and M2 are on Pins 22,23, and 24 for RA (Teensy3.x Pins 13,14,15.)  M0, M1, M2 are on Pins 27,28,29 for Dec (Teensy3.x Pins 18,19,20.)
 // values 0 to 7 (0b000 to 111): for example "#define AXIS1_MODE 4" is the same as "#define AXIS1_MODE 0b100" which sets M2 to HIGH, M1 to LOW, and M0 to LOW
 //                                                                                                      / | \
 //                                                                                                    M2  M1 M0
@@ -189,13 +193,11 @@
 #define MODE_SWITCH_SLEEP_OFF
 
 // Stepper driver Fault detection
-// just wire driver Fault signal to Pins 26 (Axis1) and 31 (Axis2), default=OFF (Teensy3.1 Pins 17,22) other settings are LOW and HIGH
+// just wire driver Fault signal to Pins 26 (Axis1) and 31 (Axis2), default=OFF (Teensy3.x Pins 17,22) other settings are LOW and HIGH
 #define AXIS1_FAULT_OFF
 #define AXIS2_FAULT_OFF
 
 // THAT'S IT FOR USER CONFIGURATION!
 
 // -------------------------------------------------------------------------------------------------------------------------
-
-
 
