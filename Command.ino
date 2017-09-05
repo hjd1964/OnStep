@@ -865,10 +865,16 @@ void processCommands() {
 //                  1 on success
       if (command[1]=='C')  { if (dateToDouble(&JD,parameter)) { EEPROM_writeFloat(EE_JD,JD); update_lst(jd2last(JD,UT1,true)); } else commandError=true; } else 
 //  :SdsDD*MM#
-//          Set target object declination to sDD*MM or sDD*MM:SS depending on the current precision setting
+//          Set target object declination to sDD*MM or sDD*MM:SS depending on the current precision setting, automatically detects low/high precision
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='d')  { if (!dmsToDouble(&newTargetDec,parameter,true)) commandError=true; } else 
+      if (command[1]=='d')  { 
+        if (!dmsToDouble(&newTargetDec,parameter,true)) {
+          i=highPrecision; highPrecision=!highPrecision;
+          if (!dmsToDouble(&newTargetDec,parameter,true)) commandError=true; 
+          highPrecision=i;
+        }
+      } else 
 //  :SgsDDD*MM# or :SgDDD*MM#
 //          Set current sites longitude to sDDD*MM an ASCII position string, East longitudes can be as negative or >180 degrees
 //          Return: 0 on failure
@@ -958,10 +964,16 @@ void processCommands() {
       } else commandError=true; } else
 //  :SrHH:MM.T#
 //  :SrHH:MM:SS#
-//          Set target object RA to HH:MM.T or HH:MM:SS (based on precision setting)
+//          Set target object RA to HH:MM.T or HH:MM:SS based on precision setting, automatically detects low/high precision
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='r')  { if (!hmsToDouble(&newTargetRA,parameter)) commandError=true; else newTargetRA*=15.0; } else 
+      if (command[1]=='r')  {
+        if (!hmsToDouble(&newTargetRA,parameter)) {
+          i=highPrecision; highPrecision=!highPrecision;
+          if (!hmsToDouble(&newTargetRA,parameter)) commandError=true; else newTargetRA*=15.0;
+          highPrecision=i;
+        } else newTargetRA*=15.0;
+      } else 
 //  :SSHH:MM:SS#
 //          Sets the local (apparent) sideral time to HH:MM:SS
 //          Return: 0 on failure
