@@ -20,6 +20,11 @@ void Init_Startup_Values() {
   trueAxis2          = 90L*(long)StepsPerDegreeAxis2;
   sei();
 
+#ifdef ROTATOR_ON
+  targetAxis3.fixed = 0;
+  amountRotateAxis3.fixed=0;
+#endif
+
   // default values for state variables
   pierSide            = PierSideNone;
   dirAxis1            = 1;
@@ -91,6 +96,11 @@ void Init_Pins() {
 #endif
   pinMode(Axis2StepPin,OUTPUT); 
   pinMode(Axis2DirPin,OUTPUT); 
+
+#ifdef ROTATOR_ON
+  pinMode(Axis3StepPin,OUTPUT);
+  pinMode(Axis3DirPin,OUTPUT); 
+#endif
 
 // override any status LED and set the reset pin HIGH
 #if defined(W5100_ON) && defined(__ARM_Teensy3__)

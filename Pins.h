@@ -62,6 +62,10 @@
 #define Axis2_Aux     31    // Pin 31 (Aux - SPI MISO)
 #define Axis2_Mode    33    // Pin 33 (Mode switch for Axis2)
 
+// Pins to rotator stepper driver
+#define Axis3DirPin   A8    // Pin A8 (Dir)
+#define Axis3StepPin  A9    // Pin A9 (Step)
+
 // ST4 interface
 #ifdef ST4_ALTERNATE_PINS_ON
 #define ST4RAw        47    // Pin 47 ST4 RA- West
@@ -129,6 +133,10 @@
 #define Axis2_Aux     38    // Pin 38 (Aux - SPI MISO)
 #define Axis2_Mode    40    // Pin 40 (Aux Decay Mode for Axis2)
 
+// Pins to rotator stepper driver
+#define Axis3DirPin   A8    // Pin A8 (Dir)
+#define Axis3StepPin  A9    // Pin A9 (Step)
+
 // ST4 interface
 #define ST4RAw        47    // Pin 47 ST4 RA- West
 #define ST4DEs        43    // Pin 43 ST4 DE- South
@@ -181,6 +189,10 @@
 #define Axis2_FAULT   22    // Pin 22 (Fault)
 #define Axis2_Aux     22    // Pin 22 (Aux - ESP8266 GPIO0 or SPI MISO)
 
+// Pins to rotator stepper driver
+#define Axis3DirPin   33    // Pin 33 (Dir)
+#define Axis3StepPin  34    // Pin 34 (Step)
+
 // ST4 interface
 #define ST4RAw        24    // Pin 24 ST4 RA- West
 #define ST4DEs        25    // Pin 25 ST4 DE- South
@@ -231,6 +243,10 @@
 #define Axis2_M1       7    // Pin  7 (Microstep Mode 1 or SPI SCK)
 #define Axis2_M0       8    // Pin  8 (Microstep Mode 0 or SPI MOSI)
 #define Axis2_EN       9    // Pin  9 (Enable)
+
+// Pins to rotator stepper driver
+#define Axis3DirPin   33    // Pin 33 (Dir)
+#define Axis3StepPin  34    // Pin 34 (Step)
 
 // ST4 interface
 #ifdef ST4_ALTERNATE_PINS_ON
@@ -303,6 +319,10 @@
 #define Axis2_EN      18               // Pin E0 (Enable)
 #define Axis2_FAULT   17               // Pin F0 (Fault) NOTE, this is connected to pushbutton switch 2
 
+// Pins to rotator stepper driver
+#define Axis3DirPin   38               // Pin 38 (Dir)
+#define Axis3StepPin  17               // Pin 17 (Step)
+
 // ST4 interface
 #define ST4RAw         7               // Pin B4 ST4 RA- West
 #define ST4DEs         8               // Pin A5 ST4 DE- South
@@ -361,6 +381,10 @@
 #define Axis2_M0      29               // Pin E3 (Microstep Mode 2)
 #define Axis2_EN      30               // Pin F1 (Enable)
 #define Axis2_FAULT   26               // Pin D3 (Fault) NOTE, this is connected to pushbutton switch 2
+
+// Pins to rotator stepper driver
+#define Axis3DirPin   34               // Pin 34 (Dir)
+#define Axis3StepPin  26               // Pin 26 (Step)
 
 // ST4 interface
 #define ST4RAw        18               // Pin E0 ST4 RA- West
@@ -422,6 +446,10 @@
 #define Axis2_M2      15               // Pin D1 (Microstep Mode 2)
 #define Axis2_EN      18               // Pin H2 (Enable)
 #define Axis2_FAULT   17               // Pin H3 (Fault) NOTE, this is connected to pushbutton switch 2
+
+// Pins to rotator stepper driver
+#define Axis3DirPin   38               // Pin 38 (Dir)
+#define Axis3StepPin  17               // Pin 17 (Step)
 
 // ST4 interface
 #define ST4RAw         7               // Pin D3 ST4 RA- West

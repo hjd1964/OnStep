@@ -830,6 +830,100 @@ void processCommands() {
       } else commandError=true;
      } else
 
+#ifdef ROTATOR_ON
+//   r - Rotator/De-rotator Commands
+      if (command[0]=='r') {
+#ifdef MOUNT_TYPE_ALTAZM
+//  :r+#   Enable de-rotator
+//         Returns: Nothing
+      if (command[1]=='+') {
+        deRotate=true;
+        quietReply=true; 
+      } else
+//  :r-#   Disable de-rotator
+//         Returns: Nothing
+      if (command[1]=='-') {
+        deRotate=false;
+        quietReply=true; 
+      } else
+//  :rP#   Move rotator to the parallactic angle
+//         Returns: Nothing
+      if (command[1]=='P') {
+        double h,d;
+        getApproxEqu(&h,&d,true);
+        targetAxis3.part.m=(long)(ParallacticAngle(h,d)*(double)StepsPerDegreeAxis3); targetAxis3.part.f=0;
+        quietReply=true; 
+      } else
+#endif
+//  :rR#   Reverse de-rotator direction
+//         Returns: Nothing
+      if (command[1]=='R') {
+        deRotateReverse!=deRotateReverse;
+        quietReply=true; 
+      } else
+//  :rF#   Reset rotator at the home position
+//         Returns: Nothing
+      if (command[1]=='F') {
+        posAxis3=0;
+        targetAxis3.fixed=0;
+        amountRotateAxis3.fixed=0;
+        axis3Increment=1;
+        quietReply=true; 
+      } else
+//  :rC#   Moves rotator to the home position
+//         Returns: Nothing
+      if (command[1]=='C') {
+        targetAxis3.fixed=0;
+        amountRotateAxis3.fixed=0;
+        quietReply=true; 
+      } else
+//  :rG#   Get rotator current position in degrees
+//         Returns: sDDD*MM'SS#
+      if (command[1]=='G') {
+        f1=((double)posAxis3+0.5)/(double)StepsPerDegreeAxis3;
+        i=highPrecision; highPrecision=false;
+        if (!doubleToDms(reply,&f1,true,true)) commandError=true; else quietReply=true;
+        highPrecision=i;
+      } else
+//  :r>#   Move clockwise as set by :rn# command, default = 1 degree
+//         Returns: Nothing
+      if (command[1]=='>') {
+        fixed_t xl;
+        xl.part.m=(long)((double)axis3Increment*(double)StepsPerDegreeAxis3*1000.0); xl.fixed/=1000;
+        targetAxis3.fixed+=xl.fixed;
+        if ((long)targetAxis3.part.m>(long)MaxRot*StepsPerDegreeAxis3) { targetAxis3.part.m=(long)MaxRot*StepsPerDegreeAxis3; targetAxis3.part.f=0; }
+        quietReply=true;
+      } else
+//  :r<#   Move counter clockwise as set by :rn# command, default = 1 degree
+//         Returns: Nothing
+      if (command[1]=='<') {
+        fixed_t xl;
+        xl.part.m=(long)((double)axis3Increment*(double)StepsPerDegreeAxis3*1000.0); xl.fixed/=1000;
+        targetAxis3.fixed-=xl.fixed;
+        if ((long)targetAxis3.part.m<(long)MinRot*StepsPerDegreeAxis3) { targetAxis3.part.m=(long)MinRot*StepsPerDegreeAxis3; targetAxis3.part.f=0; }
+        quietReply=true;
+      } else
+//  :rn#   Move increment, 1=1 degrees, 2=5 degrees, 3=10 degrees
+//         Returns: Nothing
+      if ((command[1]-'0'>=1) && (command[1]-'0'<=3)) {
+        if (command[1]=='1') axis3Increment=1;
+        if (command[1]=='2') axis3Increment=5;
+        if (command[1]=='3') axis3Increment=10;
+        quietReply=true;
+      } else
+//  :rSsDDD*MM'SS#  Set position
+//         Return: 0 on failure
+//                 1 on success
+      if (command[1]=='S') {
+        i=highPrecision; highPrecision=true;
+        if (parameter[0]=='-') f=-1.0; else f=1.0;
+        if ((parameter[0]=='+') || (parameter[0]=='-')) i1=1; else i1=0;
+        if (!dmsToDouble(&f1,&parameter[i1],true)) commandError=true; else { targetAxis3.part.m=(f*f1)*StepsPerDegreeAxis3; targetAxis3.part.f=0; }
+        highPrecision=i;
+      } else commandError=true;
+     } else
+#endif
+
 //   S - Telescope Set Commands
       if (command[0]=='S') {
 //  :SasDD*MM#

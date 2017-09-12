@@ -278,6 +278,23 @@ int    minAlt;                                     // the minimum altitude, in d
 int    maxAlt;                                     // the maximum altitude, in degrees, for goTo's (to keep the telescope tube away from the mount/tripod)
 bool   autoMeridianFlip = false;                   // automatically do a meridian flip and continue when we hit the MinutesPastMeridianW
 
+// Globals for rotator/de-rotator ------------------------------------------------------------------------------------------
+#ifdef ROTATOR_ON
+bool deRotate        = false;
+bool deRotateReverse = false;
+long posAxis3        = 0;                          // rotator position in steps
+fixed_t targetAxis3;                               // rotator goto position in steps
+fixed_t amountRotateAxis3;                         // rotator goto position in steps
+long axis3Increment  = 1;                          // rotator increment for manual control
+#ifdef REVERSE_AXIS3_ON
+#define AXIS3_FORWARD LOW
+#define AXIS3_REVERSE HIGH
+#else
+#define AXIS3_FORWARD HIGH
+#define AXIS3_REVERSE LOW
+#endif
+#endif
+
 // Fast port writting help -------------------------------------------------------------------------------------------------
 #if defined(__ARM_TI_TM4C__)
 #define CLR(x,y) (GPIOPinWrite(x,y,0))
@@ -726,6 +743,28 @@ void loop() {
   if (tempLst!=siderealTimer) {
     siderealTimer=tempLst;
 
+#ifdef ROTATOR_ON
+    // move rotator up to 100x a second
+
+#ifdef MOUNT_TYPE_ALTAZM
+    // do de-rotate movement
+    if (deRotate && (trackingState==TrackingSidereal)) targetAxis3.fixed+=amountRotateAxis3.fixed;
+#endif
+
+    if (lst%MaxRateAxis3==0) {
+      if ((posAxis3<(long)targetAxis3.part.m) && (posAxis3<(long)MaxRot*StepsPerDegreeAxis3)) {
+        digitalWrite(Axis3StepPin,LOW); delayMicroseconds(10);
+        digitalWrite(Axis3DirPin,AXIS3_FORWARD); delayMicroseconds(10);
+        digitalWrite(Axis3StepPin,HIGH); posAxis3++;
+      }
+      if ((posAxis3>(long)targetAxis3.part.m) && (posAxis3>(long)MinRot*StepsPerDegreeAxis3)) {
+        digitalWrite(Axis3StepPin,LOW); delayMicroseconds(10);
+        digitalWrite(Axis3DirPin,AXIS3_REVERSE); delayMicroseconds(10);
+        digitalWrite(Axis3StepPin,HIGH); posAxis3--;
+      }
+    }
+#endif
+
 #ifndef MOUNT_TYPE_ALTAZM
     // WRITE PERIODIC ERROR CORRECTION TO EEPROM
     if (pecAutoRecord>0) {
@@ -824,6 +863,26 @@ void loop() {
   unsigned long ms=millis();
   if ((long)(ms-housekeepingTimer)>0) {
     housekeepingTimer=ms+1000UL;
+
+#if defined(ROTATOR_ON) && defined(MOUNT_TYPE_ALTAZM)
+    // calculate new de-rotation rate if needed
+    if (deRotate && (trackingState==TrackingSidereal)) {
+      double h,d;
+      getApproxEqu(&h,&d,true);
+      double pr=ParallacticRate(h,d)*StepsPerDegreeAxis3;     // in steps per second
+      amountRotateAxis3.fixed=doubleToFixed(pr/100.0);        // in steps per 1/100 second
+      if (deRotateReverse) amountRotateAxis3.fixed=-amountRotateAxis3.fixed;
+/*      
+      PSerial1.puts(" p=");
+      PSerial1.putf(ParallacticAngle(h,d));                    // in degrees
+      PSerial1.puts(", pr=");
+      PSerial1.putf(ParallacticRate(h,d)*60.0);                // in degrees per minute
+      PSerial1.puts(", rot=");
+      PSerial1.putf(((double)posAxis3/StepsPerDegreeAxis3));   // in degrees
+      PSerial1.puts("\r\n");
+*/
+    }
+#endif
 
     // adjust tracking rate for Alt/Azm mounts
     // adjust tracking rate for refraction

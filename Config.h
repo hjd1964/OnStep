@@ -12,6 +12,9 @@
  * RA/Az :  Gnd,13,12,11 = Gnd,Step,N/C,Direction (Teensy3.x Gnd,12,N/C,10)
  * Dec/Alt:   7, 6, 5, 4 = Gnd,Step,N/C,Direction (Teensy3.x Gnd, 6,N/C, 4)
  *
+ * The optional Rotator (Axis3) stepper driver connection is as follows:
+ * Rotator: A9,A8 = Step,Dir (Teensy3.x 34,33)
+ * 
  * Optionally, a bluetooth adapter (HC05 or RN42 for example) plugs into pins Tx1/Rx1 and pins +5V/Gnd. 
  * I use two 2-wire cables for 0.1" headers.  Remember Rx goes to Tx and Tx goes to Rx. If using a Mega2560
  * be sure to get a BT module designed for 5 volt operation and signaling otherwise you'll have to design
@@ -25,7 +28,8 @@
 // Turns debugging on, used during testing, default=OFF
 #define DEBUG_OFF
 
-// Enables goto assist mount modeling (for Eq mounts), default=OFF (Experimental)
+// Enables internal goto assist mount modeling (for Eq mounts), default=OFF (Experimental)
+// Goto Assist in Sky Planetarium works even if this is off
 #define ALIGN_GOTOASSIST_OFF
 
 // Default speed for Serial1 com port, Default=9600
@@ -123,7 +127,6 @@
                                      // Takahashi EM10b  :  200           * 8           * 18 * (1.25)     *  144/360              = 14400
                                      // the EM10b has two spur gears that drive the RA/Dec worms, they give an additional 1.25:1 reduction
                                      // in addition to the 18:1 gear heads on the steppers for a 22.5:1 final ratio before the worm/wheels at 144:1
-                                     
                                      // PEC, number of steps for a complete worm rotation (in RA), (StepsPerDegreeAxis1*360)/gear_reduction2.  Ignored on Alt/Azm mounts.
 #define StepsPerWormRotationAxis1 36000
                                      // Tak EM10         : (14400*360)/144 = 36000
@@ -147,6 +150,18 @@
                                      // that can be easily worked around by doing an alignment once and saving a park position (assuming a 
                                      // fork/yolk mount with meridian flips turned off by setting the minutesPastMeridian values to cover the whole sky)
 #define MaxAzm                   180 // Alt/Az mounts only. +/- maximum allowed Azimuth, default =  180.  Allowed range is 180 to 360
+                                     // Axis3 is optional and for a rotator/de-rotator
+
+// FOCUSER ROTATOR OR ALT/AZ DE-ROTATION ----------------------------------------------------------------------------------
+#define ROTATOR_OFF                  // enable or disable rotator feature, default=OFF (de-rotator is avaliable only for MOUNT_TYPE_ALTAZM mode.)
+#define MaxRateAxis3               1 // this is the minimum number of centi-seconds between micro-steps, default=1
+#define StepsPerDegreeAxis3     64.0 // calculated as    :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
+                                     // Rotator          :  24            * 8           * 20              *  6/360                = 64
+                                     // For de-rotation of Alt/Az mounts a quick estimate of the required resolution (in StepsPerDegree)
+                                     // would be an estimate of the circumference of the useful imaging circle in (pixels * 2)/360
+#define REVERSE_AXIS3_OFF            // reverse the direction of Axis3 rotator movement
+#define MinRot                  -180 // minimum allowed Axis3 rotator, default = -180
+#define MaxRot                   180 // maximum allowed Axis3 rotator, default =  180
 
 // STEPPER DRIVER CONTROL --------------------------------------------------------------------------------------------------
 
@@ -200,4 +215,5 @@
 // THAT'S IT FOR USER CONFIGURATION!
 
 // -------------------------------------------------------------------------------------------------------------------------
+
 
