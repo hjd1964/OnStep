@@ -458,6 +458,17 @@ void processCommands() {
                 if (preferredPierSide==PPS_WEST) strcpy(reply,"W"); else strcpy(reply,"B");
                 quietReply=true; break;
               case '7': dtostrf(slewSpeed,3,1,reply); quietReply=true; break;                               // slew speed
+              case '8': 
+#ifdef ROTATOR_ON
+#ifdef MOUNT_TYPE_ALTAZM
+                strcpy(reply,"2");
+#else
+                strcpy(reply,"1");
+#endif
+#else
+                strcpy(reply,"0");
+#endif
+                quietReply=true; break; // rotator availablity 2=rotate/derotate, 1=rotate, 0=off
             }
           } else
           if (parameter[0]=='E') { // En: Get settings
