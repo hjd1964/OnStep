@@ -869,7 +869,7 @@ void processCommands() {
 //  :rR#   Reverse de-rotator direction
 //         Returns: Nothing
       if (command[1]=='R') {
-        deRotateReverse!=deRotateReverse;
+        deRotateReverse=!deRotateReverse;
         quietReply=true; 
       } else
 //  :rF#   Reset rotator at the home position

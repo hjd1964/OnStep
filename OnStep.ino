@@ -870,8 +870,8 @@ void loop() {
       double h,d;
       getApproxEqu(&h,&d,true);
       double pr=ParallacticRate(h,d)*StepsPerDegreeAxis3;     // in steps per second
+      if (deRotateReverse) pr=-pr;
       amountRotateAxis3.fixed=doubleToFixed(pr/100.0);        // in steps per 1/100 second
-      if (deRotateReverse) amountRotateAxis3.fixed=-amountRotateAxis3.fixed;
 /*      
       PSerial1.puts(" p=");
       PSerial1.putf(ParallacticAngle(h,d));                    // in degrees
