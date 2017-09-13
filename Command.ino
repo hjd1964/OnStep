@@ -461,12 +461,12 @@ void processCommands() {
               case '8': 
 #ifdef ROTATOR_ON
 #ifdef MOUNT_TYPE_ALTAZM
-                strcpy(reply,"2");
+                strcpy(reply,"D");
 #else
-                strcpy(reply,"1");
+                strcpy(reply,"R");
 #endif
 #else
-                strcpy(reply,"0");
+                strcpy(reply,"N");
 #endif
                 quietReply=true; break; // rotator availablity 2=rotate/derotate, 1=rotate, 0=off
             }
