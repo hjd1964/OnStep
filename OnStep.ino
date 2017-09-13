@@ -286,6 +286,7 @@ long posAxis3        = 0;                          // rotator position in steps
 fixed_t targetAxis3;                               // rotator goto position in steps
 fixed_t amountRotateAxis3;                         // rotator goto position in steps
 long axis3Increment  = 1;                          // rotator increment for manual control
+unsigned long rotateMs=0;
 #ifdef REVERSE_AXIS3_ON
 #define AXIS3_FORWARD LOW
 #define AXIS3_REVERSE HIGH
@@ -668,6 +669,9 @@ void setup() {
   cli(); siderealTimer=lst; guideSiderealTimer=lst; PecSiderealTimer=lst; sei();
   housekeepingTimer=millis()+1000UL; 
   last_loop_micros=micros();
+#ifdef ROTATOR_ON
+  rotateMs=millis()+(unsigned long)MaxRateAxis3;
+#endif
 }
 
 void loop() {
@@ -743,28 +747,6 @@ void loop() {
   if (tempLst!=siderealTimer) {
     siderealTimer=tempLst;
 
-#ifdef ROTATOR_ON
-    // move rotator up to 100x a second
-
-#ifdef MOUNT_TYPE_ALTAZM
-    // do de-rotate movement
-    if (deRotate && (trackingState==TrackingSidereal)) targetAxis3.fixed+=amountRotateAxis3.fixed;
-#endif
-
-    if (lst%MaxRateAxis3==0) {
-      if ((posAxis3<(long)targetAxis3.part.m) && (posAxis3<(long)MaxRot*StepsPerDegreeAxis3)) {
-        digitalWrite(Axis3StepPin,LOW); delayMicroseconds(10);
-        digitalWrite(Axis3DirPin,AXIS3_FORWARD); delayMicroseconds(10);
-        digitalWrite(Axis3StepPin,HIGH); posAxis3++;
-      }
-      if ((posAxis3>(long)targetAxis3.part.m) && (posAxis3>(long)MinRot*StepsPerDegreeAxis3)) {
-        digitalWrite(Axis3StepPin,LOW); delayMicroseconds(10);
-        digitalWrite(Axis3DirPin,AXIS3_REVERSE); delayMicroseconds(10);
-        digitalWrite(Axis3StepPin,HIGH); posAxis3--;
-      }
-    }
-#endif
-
 #ifndef MOUNT_TYPE_ALTAZM
     // WRITE PERIODIC ERROR CORRECTION TO EEPROM
     if (pecAutoRecord>0) {
@@ -797,6 +779,11 @@ void loop() {
         }
       }
     }
+
+#if defined(ROTATOR_ON) && defined(MOUNT_TYPE_ALTAZM)
+    // do de-rotate movement
+    if (deRotate && (trackingState==TrackingSidereal)) targetAxis3.fixed+=amountRotateAxis3.fixed;
+#endif
 
     // figure out the current Altitude
     if (lst%3==0) do_fastalt_calc();
@@ -852,6 +839,25 @@ void loop() {
     // This just needs to be accurate to the nearest second, it's about 10x better
     UT1=UT1_start+(t2/3600.0);
   }
+
+  // ROTATOR/DEROTATOR ---------------------------------------------------------------------------------
+#ifdef ROTATOR_ON
+  unsigned long tempMs=millis();
+  if ((long)(tempMs-rotateMs)>0) {
+    rotateMs=tempMs+(unsigned long)MaxRateAxis3;
+
+    if ((posAxis3<(long)targetAxis3.part.m) && (posAxis3<(long)MaxRot*StepsPerDegreeAxis3)) {
+      digitalWrite(Axis3StepPin,LOW); delayMicroseconds(10);
+      digitalWrite(Axis3DirPin,AXIS3_FORWARD); delayMicroseconds(10);
+      digitalWrite(Axis3StepPin,HIGH); posAxis3++;
+    }
+    if ((posAxis3>(long)targetAxis3.part.m) && (posAxis3>(long)MinRot*StepsPerDegreeAxis3)) {
+      digitalWrite(Axis3StepPin,LOW); delayMicroseconds(10);
+      digitalWrite(Axis3DirPin,AXIS3_REVERSE); delayMicroseconds(10);
+      digitalWrite(Axis3StepPin,HIGH); posAxis3--;
+    }
+  }
+#endif
 
   // WORKLOAD MONITORING -------------------------------------------------------------------------------
   long this_loop_micros=micros(); 
