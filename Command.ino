@@ -691,29 +691,25 @@ void processCommands() {
           quietReply=true; 
           supress_frame=true;
         } else { reply[0]='4'; reply[1]=0; }
-      } else 
+      } else
 //  :Mgdnnnn# Pulse guide command
 //          Returns: Nothing
       if (command[1]=='g') {
         if ( (atoi2((char *)&parameter[1],&i)) && ((i>=0) && (i<=16399)) && (parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) { 
           if (((parameter[0]=='e') || (parameter[0]=='w')) && (guideDirAxis1==0)) {
-            if (axis1Enabled) {
 #ifdef SEPARATE_PULSE_GUIDE_RATE_ON
-              startGuideAxis1(parameter[0],currentPulseGuideRate,i);
+            startGuideAxis1(parameter[0],currentPulseGuideRate,i);
 #else
-              startGuideAxis1(parameter[0],currentGuideRate,i);
+            startGuideAxis1(parameter[0],currentGuideRate,i);
 #endif
-            }
             quietReply=true;
           } else
           if (((parameter[0]=='n') || (parameter[0]=='s')) && (guideDirAxis2==0)) { 
-            if (axis1Enabled) {
 #ifdef SEPARATE_PULSE_GUIDE_RATE_ON
-              startGuideAxis2(parameter[0],currentPulseGuideRate,i);
+            startGuideAxis2(parameter[0],currentPulseGuideRate,i);
 #else
-              startGuideAxis2(parameter[0],currentGuideRate,i);
+            startGuideAxis2(parameter[0],currentGuideRate,i);
 #endif
-            }
             quietReply=true;
           } else commandError=true;
         } else commandError=true;
@@ -721,13 +717,13 @@ void processCommands() {
 //  :Me# & :Mw#      Move Telescope East or West at current slew rate
 //         Returns: Nothing
       if ((command[1]=='e') || (command[1]=='w')) {
-        if (axis1Enabled) startGuideAxis1(command[1],currentGuideRate,GUIDE_TIME_LIMIT*1000);
+        startGuideAxis1(command[1],currentGuideRate,GUIDE_TIME_LIMIT*1000);
         quietReply=true;
       } else
 //  :Mn# & :Ms#      Move Telescope North or South at current slew rate
 //         Returns: Nothing
       if ((command[1]=='n') || (command[1]=='s')) {
-        if (axis1Enabled) startGuideAxis2(command[1],currentGuideRate,GUIDE_TIME_LIMIT*1000);
+        startGuideAxis2(command[1],currentGuideRate,GUIDE_TIME_LIMIT*1000);
         quietReply=true;
       } else
 

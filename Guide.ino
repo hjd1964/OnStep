@@ -56,7 +56,7 @@ void Guide() {
 
 // start a guide in RA or Azm, direction must be 'e', 'w', or 'b', guideRate is the rate selection (0 to 9), guideDuration is in ms (-1 to ignore) 
 bool startGuideAxis1(char direction, int guideRate, long guideDuration) {
-  if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo) && (direction!=guideDirAxis1)) {
+  if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo) && (direction!=guideDirAxis1) && (axis1Enabled)) {
     // block user from changing direction at high rates, just stop the guide instead
     if ((guideDirAxis1) && (fabs(guideTimerRateAxis1)>2)) { 
       stopGuideAxis1();
@@ -83,7 +83,7 @@ void stopGuideAxis1() {
   
 // start a guide in Dec or Alt, direction must be 'n', 's', or 'b', guideRate is the rate selection (0 to 9), guideDuration is in ms (-1 to ignore) 
 bool startGuideAxis2(char c, int guideRate, long guideDuration) {
-  if (((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) && (c!=guideDirAxis2)) {
+  if (((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) && (c!=guideDirAxis2) && (axis1Enabled)) {
     // block user from changing direction at high rates, just stop the guide instead
     if ((guideDirAxis2) && (fabs(guideTimerRateAxis2)>2)) { 
       stopGuideAxis2();
