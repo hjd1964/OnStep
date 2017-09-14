@@ -676,7 +676,7 @@ void processCommands() {
       } else
 
 //   M - Telescope Movement Commands
-      if ((command[0]=='M') && (axis1Enabled)) {
+      if (command[0]=='M') {
 //  :MA#   Goto the target Alt and Az
 //         Returns:
 //         0=Goto is Possible
@@ -684,30 +684,36 @@ void processCommands() {
 //         2=No object selected
 //         4=Position unreachable
 //         6=Outside limits
-      if (command[1]=='A') { 
-        i=goToHor(&newTargetAlt, &newTargetAzm);
-        reply[0]=i+'0'; reply[1]=0; 
-        quietReply=true; 
-        supress_frame=true;
+      if (command[1]=='A') {
+        if (axis1Enabled) {
+          i=goToHor(&newTargetAlt, &newTargetAzm);
+          reply[0]=i+'0'; reply[1]=0; 
+          quietReply=true; 
+          supress_frame=true;
+        } else { reply[0]='4'; reply[1]=0; }
       } else 
 //  :Mgdnnnn# Pulse guide command
 //          Returns: Nothing
       if (command[1]=='g') {
         if ( (atoi2((char *)&parameter[1],&i)) && ((i>=0) && (i<=16399)) && (parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) { 
           if (((parameter[0]=='e') || (parameter[0]=='w')) && (guideDirAxis1==0)) {
+            if (axis1Enabled) {
 #ifdef SEPARATE_PULSE_GUIDE_RATE_ON
-            startGuideAxis1(parameter[0],currentPulseGuideRate,i);
+              startGuideAxis1(parameter[0],currentPulseGuideRate,i);
 #else
-            startGuideAxis1(parameter[0],currentGuideRate,i);
+              startGuideAxis1(parameter[0],currentGuideRate,i);
 #endif
+            }
             quietReply=true;
           } else
           if (((parameter[0]=='n') || (parameter[0]=='s')) && (guideDirAxis2==0)) { 
+            if (axis1Enabled) {
 #ifdef SEPARATE_PULSE_GUIDE_RATE_ON
-            startGuideAxis2(parameter[0],currentPulseGuideRate,i);
+              startGuideAxis2(parameter[0],currentPulseGuideRate,i);
 #else
-            startGuideAxis2(parameter[0],currentGuideRate,i);
+              startGuideAxis2(parameter[0],currentGuideRate,i);
 #endif
+            }
             quietReply=true;
           } else commandError=true;
         } else commandError=true;
@@ -715,13 +721,13 @@ void processCommands() {
 //  :Me# & :Mw#      Move Telescope East or West at current slew rate
 //         Returns: Nothing
       if ((command[1]=='e') || (command[1]=='w')) {
-        startGuideAxis1(command[1],currentGuideRate,GUIDE_TIME_LIMIT*1000);
+        if (axis1Enabled) startGuideAxis1(command[1],currentGuideRate,GUIDE_TIME_LIMIT*1000);
         quietReply=true;
       } else
 //  :Mn# & :Ms#      Move Telescope North or South at current slew rate
 //         Returns: Nothing
       if ((command[1]=='n') || (command[1]=='s')) {
-        startGuideAxis2(command[1],currentGuideRate,GUIDE_TIME_LIMIT*1000);
+        if (axis1Enabled) startGuideAxis2(command[1],currentGuideRate,GUIDE_TIME_LIMIT*1000);
         quietReply=true;
       } else
 
@@ -734,14 +740,16 @@ void processCommands() {
 //         5=Busy                    Goto already active
 //         6=Outside limits          Outside limits, above the Zenith limit
       if (command[1]=='P')  {
-        double r,d;
-        getEqu(&r,&d,false);
-        GeoAlign.altCor=0.0;
-        GeoAlign.azmCor=0.0;
-        i=goToEqu(r,d);
-        reply[0]=i+'0'; reply[1]=0;
-        quietReply=true;
-        supress_frame=true;
+        if (axis1Enabled) {
+          double r,d;
+          getEqu(&r,&d,false);
+          GeoAlign.altCor=0.0;
+          GeoAlign.azmCor=0.0;
+          i=goToEqu(r,d);
+          reply[0]=i+'0'; reply[1]=0;
+          quietReply=true;
+          supress_frame=true;
+        } else { reply[0]='4'; reply[1]=0; }
       } else
 
 //  :MS#   Goto the Target Object
@@ -753,10 +761,12 @@ void processCommands() {
 //         5=Busy                    Goto already active
 //         6=Outside limits          Outside limits, above the Zenith limit
       if (command[1]=='S')  {
-        i=goToEqu(newTargetRA,newTargetDec);
-        reply[0]=i+'0'; reply[1]=0;
-        quietReply=true;
-        supress_frame=true; 
+        if (axis1Enabled) {
+          i=goToEqu(newTargetRA,newTargetDec);
+          reply[0]=i+'0'; reply[1]=0;
+          quietReply=true;
+          supress_frame=true; 
+        } else { reply[0]='4'; reply[1]=0; }
       } else commandError=true;
       
       } else
