@@ -13,7 +13,7 @@
  * Dec/Alt: 22,24 = Dir,Step (Teensy3.x  2, 3)
  *
  * The optional Rotator (Axis3) stepper driver connection is as follows:
- * Rotator: A9,A8 = Step,Dir (Teensy3.x 34,33)
+ * Rotator: A9,A8 = Step,Dir (Teensy3.x 30,33)
  * 
  * Optionally, a bluetooth or WiFi adapter (HC05, RN42, or ESP8266 for example) plugs into pins Tx1/Rx1.
  * +5VDC is normally used for the BT Adapter and +3.3VDC for the ESP8266 (make sure the regulator is sufficient to supply required current.)

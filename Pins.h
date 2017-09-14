@@ -191,7 +191,7 @@
 
 // Pins to rotator stepper driver
 #define Axis3DirPin   33    // Pin 33 (Dir)
-#define Axis3StepPin  34    // Pin 34 (Step)
+#define Axis3StepPin  30    // Pin 30 (Step)
 
 // ST4 interface
 #define ST4RAw        24    // Pin 24 ST4 RA- West
@@ -246,7 +246,7 @@
 
 // Pins to rotator stepper driver
 #define Axis3DirPin   33    // Pin 33 (Dir)
-#define Axis3StepPin  34    // Pin 34 (Step)
+#define Axis3StepPin  30    // Pin 30 (Step)
 
 // ST4 interface
 #ifdef ST4_ALTERNATE_PINS_ON

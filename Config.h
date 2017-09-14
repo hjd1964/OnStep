@@ -13,7 +13,7 @@
  * Dec/Alt:   7, 6, 5, 4 = Gnd,Step,N/C,Direction (Teensy3.x Gnd, 6,N/C, 4)
  *
  * The optional Rotator (Axis3) stepper driver connection is as follows:
- * Rotator: A9,A8 = Step,Dir (Teensy3.x 34,33)
+ * Rotator: A9,A8 = Step,Dir (Teensy3.x 30,33)
  * 
  * Optionally, a bluetooth adapter (HC05 or RN42 for example) plugs into pins Tx1/Rx1 and pins +5V/Gnd. 
  * I use two 2-wire cables for 0.1" headers.  Remember Rx goes to Tx and Tx goes to Rx. If using a Mega2560
