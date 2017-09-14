@@ -681,7 +681,7 @@ void loop() {
 
 #if defined(ST4_ON) || defined(ST4_PULLUP)
     // ST4 INTERFACE
-    if (parkStatus==NotParked) {
+    if ((parkStatus==NotParked) && (axis1Enabled)) {
       byte w1=digitalRead(ST4RAw); byte e1=digitalRead(ST4RAe); byte n1=digitalRead(ST4DEn); byte s1=digitalRead(ST4DEs);
       delayMicroseconds(50);
       byte w2=digitalRead(ST4RAw); byte e2=digitalRead(ST4RAe); byte n2=digitalRead(ST4DEn); byte s2=digitalRead(ST4DEs);

@@ -175,7 +175,7 @@
 // STEPPER DRIVER CONTROL --------------------------------------------------------------------------------------------------
 
 // Stepper driver Enable support, just wire Enable to Pins 23 (Axis1) and 36 (Axis2) and OnStep will pull these HIGH (Teensy3.x Pins 14,9)
-// to disable stepper drivers on startup and when Parked or Homed.  An Align or Un-Park will enable the drivers.  Adjust below if you need these pulled LOW to disable the drivers.
+// to disable stepper drivers on startup and when Parked or Homed.  An Align, Sync, or Un-Park will enable the drivers.  Adjust below if you need these pulled LOW to disable the drivers.
 #define AXIS1_DISABLED_HIGH
 #define AXIS2_DISABLED_HIGH
 // For equatorial mounts, _ON powers down the Declination axis when it's not being used to help lower power use.  During low rate guiding (<=1x) the axis stays enabled
