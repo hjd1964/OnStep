@@ -187,7 +187,7 @@
 #define Axis2_M2      20    // Pin 20 (Microstep Mode 2)
 #define Axis2_EN      21    // Pin 21 (Enable)
 #define Axis2_FAULT   22    // Pin 22 (Fault)
-#define Axis2_Aux     22    // Pin 22 (Aux - ESP8266 GPIO0 or SPI MISO)
+#define Axis2_Aux     22    // Pin 22 (Aux - ESP8266 Rst or SPI MISO)
 
 // Pins to rotator stepper driver
 #define Axis3DirPin   33    // Pin 33 (Dir)
