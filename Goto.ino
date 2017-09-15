@@ -35,7 +35,11 @@ int syncEqu(double RA, double Dec) {
   if (pierSide==PierSideNone) {
     trackingState=TrackingSidereal;
     atHome=false;
-    // should enable motors here!  Why not?
+
+    // enable the stepper drivers
+    digitalWrite(Axis1_EN,Axis1_Enabled); axis1Enabled=true;
+    digitalWrite(Axis2_EN,Axis2_Enabled); axis2Enabled=true;
+    delay(10);
   }
 
   if (meridianFlip!=MeridianFlipNever) {
