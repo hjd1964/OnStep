@@ -655,14 +655,10 @@ void setup() {
   // telescope should be set in the polar home (CWD) for a starting point
   // this command sets indexAxis1, indexAxis2, azmCor=0; altCor=0;
   setHome();
-  
-  // enable the stepper drivers
-  digitalWrite(Axis1_EN,Axis1_Enabled); axis1Enabled=true;
-  digitalWrite(Axis2_EN,Axis2_Enabled); axis2Enabled=true;
-  delay(10);
 
   // start tracking
   trackingState=TrackingSidereal;
+  EnableStepperDrivers();
 #endif
 
   // prep counters (for keeping time in main loop)

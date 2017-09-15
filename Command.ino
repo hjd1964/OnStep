@@ -109,13 +109,9 @@ void processCommands() {
           // this command sets indexAxis1, indexAxis2, azmCor=0; altCor=0;
           setHome();
           
-          // enable the stepper drivers
-          digitalWrite(Axis1_EN,Axis1_Enabled); axis1Enabled=true;
-          digitalWrite(Axis2_EN,Axis2_Enabled); axis2Enabled=true;
-          delay(10);
-        
           // start tracking
           trackingState=TrackingSidereal;
+          EnableStepperDrivers();
         
           // start align...
           alignNumStars=command[1]-'0';
@@ -1248,7 +1244,7 @@ void processCommands() {
        if (command[1]=='Q') { SetTrackingRate(default_tracking_rate); quietReply=true; } else                // sidereal tracking rate
        if (command[1]=='R') { siderealInterval=15956313L; quietReply=true; } else                            // reset master sidereal clock interval
        if (command[1]=='K') { SetTrackingRate(0.99953004401); refraction=false; quietReply=true; } else      // king tracking rate 60.136Hz
-       if ((command[1]=='e') && (axis1Enabled) && (trackingState==TrackingNone) && (parkStatus==NotParked)) trackingState=TrackingSidereal; else
+       if ((command[1]=='e') && (trackingState==TrackingNone) && (parkStatus==NotParked)) { trackingState=TrackingSidereal; EnableStepperDrivers(); } else
        if ((command[1]=='d') && (trackingState==TrackingSidereal)) trackingState=TrackingNone; else
        if (command[1]=='o') { refraction=refraction_enable; onTrack=true;  SetTrackingRate(default_tracking_rate); } else  // turn full compensation on, defaults to base sidereal tracking rate
        if (command[1]=='r') { refraction=refraction_enable; onTrack=false; SetTrackingRate(default_tracking_rate); } else  // turn refraction compensation on, defaults to base sidereal tracking rate

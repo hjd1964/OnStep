@@ -180,11 +180,6 @@ boolean unpark() {
     parkStatus=Parked;
     if (parkStatus==Parked) {
       if (parkSaved) {
-        // enable the stepper drivers
-        digitalWrite(Axis1_EN,Axis1_Enabled); axis1Enabled=true;
-        digitalWrite(Axis2_EN,Axis2_Enabled); axis2Enabled=true;
-        delay(10);
-
         // get corrections
         GeoAlign.readCoe();
         indexAxis1=EEPROM_readFloat(EE_indexAxis1);
@@ -224,6 +219,7 @@ boolean unpark() {
           
         // start tracking the sky
         trackingState=TrackingSidereal;
+        EnableStepperDrivers();
 
         // get PEC status
         pecStatus  =EEPROM.read(EE_pecStatus);

@@ -560,3 +560,12 @@ void Init_Start_Timers() {
 #endif
 }
 
+void EnableStepperDrivers() {
+  // enable the stepper drivers
+  if (axis1Enabled==false) {
+    digitalWrite(Axis1_EN,Axis1_Enabled); axis1Enabled=true;
+    digitalWrite(Axis2_EN,Axis2_Enabled); axis2Enabled=true;
+    delay(10);
+  }
+}
+

@@ -34,12 +34,8 @@ int syncEqu(double RA, double Dec) {
   // just turn on tracking
   if (pierSide==PierSideNone) {
     trackingState=TrackingSidereal;
+    EnableStepperDrivers();
     atHome=false;
-
-    // enable the stepper drivers
-    digitalWrite(Axis1_EN,Axis1_Enabled); axis1Enabled=true;
-    digitalWrite(Axis2_EN,Axis2_Enabled); axis2Enabled=true;
-    delay(10);
   }
 
   if (meridianFlip!=MeridianFlipNever) {
