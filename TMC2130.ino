@@ -97,7 +97,7 @@ void TMC2130_setup(bool intpol, bool stealth_chop, byte micro_step_mode, bool lo
   // CHOPCONF
   // native 256 microsteps, mres=0, tbl=1=24, toff=8
   // data_out=0x00008008UL;
-  // toff,    default=4, range 2 to 15
+  // toff,    default=4, range 2 to 15 (Off time setting, slow decay phase)
   // hstrt,   default=0, range 0 to 7  (Hysteresis start 1, 2, ..., 8)
   // hend,    default=0, range 0 to 15 (Hysteresis -3, -2, -1, 0, 1 ..., 12)
   // rndtf   ,default=0, range 0 to 1  (Enables small random value to be added to TOFF)
