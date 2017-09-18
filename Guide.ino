@@ -54,22 +54,16 @@ void Guide() {
   }
 }
 
-// start a guide in RA or Azm, direction must be 'e', 'w', or 'b', guideRate is the rate selection (0 to 9), guideDuration is in ms (-1 to ignore) 
+// start a guide in RA or Azm, direction must be 'e', 'w', or 'b', guideRate is the rate selection (0 to 9), guideDuration is in ms (0 to ignore) 
 bool startGuideAxis1(char direction, int guideRate, long guideDuration) {
   if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo) && (direction!=guideDirAxis1) && (axis1Enabled)) {
-    // block user from changing direction at high rates, just stop the guide instead
-    if ((guideDirAxis1) && (fabs(guideTimerRateAxis1)>2)) { 
-      stopGuideAxis1();
-    } else {
-      enableGuideRate(guideRate);
-      guideDirAxis1=direction;
-      guideTimeThisIntervalAxis1=micros();
-      guideTimeRemainingAxis1=guideDuration*1000L;
-      cli();
-      guideStartTimeAxis1=millis();
-      if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRate; else guideTimerRateAxis1=guideTimerBaseRate; 
-      sei();
-    }
+    enableGuideRate(guideRate);
+    guideDirAxis1=direction;
+    guideTimeThisIntervalAxis1=micros();
+    guideTimeRemainingAxis1=guideDuration*1000L;
+    cli();
+    if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRate; else guideTimerRateAxis1=guideTimerBaseRate; 
+    sei();
   } else return false;
   return true;
 }
@@ -77,26 +71,20 @@ bool startGuideAxis1(char direction, int guideRate, long guideDuration) {
 // stops guide in RA or Azm
 void stopGuideAxis1() {
   if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
-    cli(); if ((guideDirAxis1) && (guideDirAxis1!='b')) { guideDirAxis1='b'; guideTimeRemainingAxis1=0; guideBreakTimeAxis1=millis(); } sei();
+    cli(); if ((guideDirAxis1) && (guideDirAxis1!='b')) { guideDirAxis1='b'; } sei();
   }
 }
   
-// start a guide in Dec or Alt, direction must be 'n', 's', or 'b', guideRate is the rate selection (0 to 9), guideDuration is in ms (-1 to ignore) 
+// start a guide in Dec or Alt, direction must be 'n', 's', or 'b', guideRate is the rate selection (0 to 9), guideDuration is in ms (0 to ignore) 
 bool startGuideAxis2(char c, int guideRate, long guideDuration) {
   if (((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) && (c!=guideDirAxis2) && (axis1Enabled)) {
-    // block user from changing direction at high rates, just stop the guide instead
-    if ((guideDirAxis2) && (fabs(guideTimerRateAxis2)>2)) { 
-      stopGuideAxis2();
-    } else {
-      enableGuideRate(guideRate);
-      guideDirAxis2=c;
-      guideTimeThisIntervalAxis2=micros();
-      guideTimeRemainingAxis2=guideDuration*1000L;
-      cli();
-      guideStartTimeAxis2=millis();
-      if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRate; else guideTimerRateAxis2=guideTimerBaseRate; 
-      sei();
-    }
+    enableGuideRate(guideRate);
+    guideDirAxis2=c;
+    guideTimeThisIntervalAxis2=micros();
+    guideTimeRemainingAxis2=guideDuration*1000L;
+    cli();
+    if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRate; else guideTimerRateAxis2=guideTimerBaseRate; 
+    sei();
   } else return false;
   return true;
 }
@@ -104,7 +92,7 @@ bool startGuideAxis2(char c, int guideRate, long guideDuration) {
 // stops guide in Dec or Alt
 void stopGuideAxis2() {
   if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
-    cli(); if ((guideDirAxis2) && (guideDirAxis2!='b')) { guideDirAxis2='b'; guideTimeRemainingAxis2=0; guideBreakTimeAxis2=millis(); } sei();
+    cli(); if ((guideDirAxis2) && (guideDirAxis2!='b')) { guideDirAxis2='b'; } sei();
   }
 }
 

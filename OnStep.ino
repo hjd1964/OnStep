@@ -405,6 +405,7 @@ bbspi BBSpi;
 #define slewRate (1.0/(((double)StepsPerDegreeAxis1*(MaxRate/1000000.0)))*3600.0)
 #define slewRateX (slewRate/15.0)
 #define halfSlewRate (slewRate/2.0)
+#define acc (slewRateX/DegreesForAcceleration)  // say 5 degrees to 240x for example = 240/5 = 48X/s
 double  guideRates[10]={3.75,7.5,15,30,60,120,360,720,halfSlewRate,slewRate};
 //                      .25X .5x 1x 2x 4x  8x 24x 48x half-MaxRate MaxRate
 
@@ -419,10 +420,6 @@ char          ST4DirAxis2             = 'b';
 
 volatile double   guideTimerRateAxis1 = 0.0;
 volatile double   guideTimerRateAxis2 = 0.0;
-volatile uint32_t guideStartTimeAxis1 = 0;
-volatile uint32_t guideStartTimeAxis2 = 0;
-volatile uint32_t guideBreakTimeAxis1 = 0;
-volatile uint32_t guideBreakTimeAxis2 = 0;
 
 double  guideTimerBaseRate = 0;
 fixed_t amountGuideAxis1;
