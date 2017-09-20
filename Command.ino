@@ -891,7 +891,7 @@ void processCommands() {
         quietReply=true; 
       } else
 //  :rG#   Get rotator current position in degrees
-//         Returns: sDDD*MM'SS#
+//         Returns: sDDD*MM#
       if (command[1]=='G') {
         f1=((double)posAxis3+0.5)/(double)StepsPerDegreeAxis3;
         i=highPrecision; highPrecision=false;
