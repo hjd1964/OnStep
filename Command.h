@@ -52,6 +52,7 @@ class cb {
       return pb;
     }
     bool ready() {
+      if (!cbp) return false;
       if ((cb[cbp-1]=='#') && (cbp==1)) flush();
       return (cb[cbp-1]=='#');
     }
