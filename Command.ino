@@ -691,7 +691,7 @@ void processCommands() {
 //  :Mgdnnnn# Pulse guide command
 //          Returns: Nothing
       if (command[1]=='g') {
-        if ( (atoi2((char *)&parameter[1],&i)) && ((i>=0) && (i<=16399)) && (parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) { 
+        if ( (atoi2((char *)&parameter[1],&i)) && ((i>=0) && (i<=16399)) && (parkStatus==NotParked) && (trackingState==TrackingSidereal)) { 
           if (((parameter[0]=='e') || (parameter[0]=='w')) && (guideDirAxis1==0)) {
 #ifdef SEPARATE_PULSE_GUIDE_RATE_ON
             startGuideAxis1(parameter[0],currentPulseGuideRate,i);

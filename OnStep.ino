@@ -691,7 +691,7 @@ void loop() {
             ST4DirAxis1=c1;
             if ((c1=='e') || (c1=='w')) {
     #if defined(SEPARATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
-              startGuideAxis1(c1,currentPulseGuideRate,GUIDE_TIME_LIMIT*1000);
+              if (trackingState==TrackingSidereal) startGuideAxis1(c1,currentPulseGuideRate,GUIDE_TIME_LIMIT*1000);
     #else
               startGuideAxis1(c1,currentGuideRate,GUIDE_TIME_LIMIT*1000);
     #endif
@@ -708,7 +708,7 @@ void loop() {
             ST4DirAxis2=c2;
             if ((c2=='n') || (c2=='s')) {
     #if defined(SEPARATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
-              startGuideAxis2(c2,currentPulseGuideRate,GUIDE_TIME_LIMIT*1000);
+              if (trackingState==TrackingSidereal) startGuideAxis2(c2,currentPulseGuideRate,GUIDE_TIME_LIMIT*1000);
     #else
               startGuideAxis2(c2,currentGuideRate,GUIDE_TIME_LIMIT*1000);
     #endif
