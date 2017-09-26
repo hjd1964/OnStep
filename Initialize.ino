@@ -382,9 +382,9 @@ void Init_ReadEEPROM_Values() {
   pauseHome=EEPROM.read(EE_pauseHome);
 #endif
 
-  // set the default guide rate, 16x sidereal
-  setGuideRate(GuideRate16x);
-  enableGuideRate(GuideRate16x);
+  // set the default guide rate, 24x sidereal
+  setGuideRate(GuideRate24x);
+  enableGuideRate(GuideRate24x);
 }
 
 void Init_EEPROM_Values() {

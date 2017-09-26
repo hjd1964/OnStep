@@ -399,7 +399,7 @@ bbspi BBSpi;
 
 // Guide command ------------------------------------------------------------------------------------------------------------
 #define GuideRate1x        2
-#define GuideRate16x       6
+#define GuideRate24x       6
 #define GuideRateNone      255
 
 #define slewRate (1.0/(((double)StepsPerDegreeAxis1*(MaxRate/1000000.0)))*3600.0)
@@ -409,7 +409,7 @@ bbspi BBSpi;
 double  guideRates[10]={3.75,7.5,15,30,60,120,360,720,halfSlewRate,slewRate};
 //                      .25X .5x 1x 2x 4x  8x 24x 48x half-MaxRate MaxRate
 
-byte currentGuideRate        = GuideRate16x;
+byte currentGuideRate        = GuideRate24x;
 byte currentPulseGuideRate   = GuideRate1x;
 volatile byte activeGuideRate= GuideRateNone;
 
