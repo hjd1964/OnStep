@@ -1106,16 +1106,17 @@ void processCommands() {
         }
         highPrecision=i;
       } else 
-//  :STdd.ddddd#
+//  :STdd.ddddd#    Set Tracking Rate
 //          Return: 0 on failure
 //                  1 on success
       if (command[1]=='T')  { 
         if ((trackingState==TrackingSidereal) || (trackingState==TrackingNone)) {
           f=strtod(parameter,&conv_end);
           if ( (&parameter[0]!=conv_end) && (((f>=30.0) && (f<90.0)) || (abs(f)<0.1))) {
-            if (abs(f)<0.1) { 
+            if (abs(f)<0.1) {
               trackingState=TrackingNone;
             } else {
+              if (trackingState==TrackingNone) { trackingState=TrackingSidereal; EnableStepperDrivers(); }
               SetTrackingRate((f/60.0)/1.00273790935);
             }
           } else commandError=true;
