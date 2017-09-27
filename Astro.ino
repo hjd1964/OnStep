@@ -732,4 +732,28 @@ void soundAlert() {
   }
 }
 
+// Sound/beep
+void soundBeep() {
+  if (soundEnabled) {
+    #ifdef BUZZER_ON
+      digitalWrite(TonePin,HIGH); buzzerDuration=25;
+    #endif
+    #ifdef BUZZER
+      tone(TonePin,BUZZER,250);
+    #endif
+  }
+}
+
+// Sound/click
+void soundClick() {
+  if (soundEnabled) {
+    #ifdef BUZZER_ON
+      digitalWrite(TonePin,HIGH); buzzerDuration=5;
+    #endif
+    #ifdef BUZZER
+      tone(TonePin,BUZZER,50);
+    #endif
+  }
+}
+
 

@@ -45,11 +45,14 @@
 // ST4 interface on pins 47, 49, 51, 53.  Pin 47 is RA- (West), Pin 49 is Dec- (South), Pin 51 is Dec+ (North), Pin 53 is RA+ (East.)  Teensy3.x pins 24, 25, 26, 27.
 // ST4_ON enables the interface.  ST4_PULLUP enables the interface and any internal pullup resistors.
 // It is up to you to create an interface that meets the electrical specifications of any connected device, use at your own risk.
-// ST4_HAND_CONTROL_ON allows guide rates >1x while SEPARATE_PULSE_GUIDE_RATE_ON is enabled
+#define ST4_OFF
+// If SEPARATE_PULSE_GUIDE_RATE_ON is used the ST4 port is limited to guide rates <= 1X except when ST4_HAND_CONTROL_ON is used.
+// Additionally, ST4_HAND_CONTROL_ON enables special hand control features: Press and hold [E]+[W] buttons for > 2 seconds...  In this mode [E]/[W] increases or decreases guide rates (or if tracking isn't on yet it adjusts the illuminated recticule brightness.)
+// [S] for Sync (or Accept if in align mode.) [N] for Tracking on/off (or meridian flip continue.)  -OR- Press and hold [N]+[S] buttons for > 2 seconds...  In this mode [E]/[W] select prior or next user catalog item.
+// [N] to do a Goto to the catalog item.  [S] for Sound on/off.  The keypad returns to normal operation after 4 seconds of inactivity.  ST4_HAND_CONTROL_ON also adds a 100ms de-bounce to all button presses.
+#define ST4_HAND_CONTROL_OFF
 // ST4_ALTERNATE_PINS_ON moves the interface (Mega2560 only) to pins 43, 45, 47, 49.  Pin 43 is Dec- (South), Pin 45 is Dec+ (North), Pin 47 is RA- (West), Pin 49 is RA+ (East.)
 // ST4_ALTERNATE_PINS_ON is required for Steve's ST4 board and is also required if the ST4 interface is to be used alongside the Arduino Ethernet Shield
-#define ST4_OFF
-#define ST4_HAND_CONTROL_OFF
 #define ST4_ALTERNATE_PINS_OFF
 
 // Separate pulse-guide rate so centering and guiding don't disturb each other, default=ON
@@ -176,7 +179,7 @@
 // Stepper driver Mode control
 // M0, M1, and M2 are on Pins 22,23, and 24 for RA (Teensy3.x Pins 13,14,15.)  M0, M1, M2 are on Pins 27,28,29 for Dec (Teensy3.x Pins 18,19,20.)
 // values 0 to 7 (0b000 to 111): for example "#define AXIS1_MODE 4" is the same as "#define AXIS1_MODE 0b100" which sets M2 to HIGH, M1 to LOW, and M0 to LOW
-//                                                                                                      / | \
+//                                                                                                      / | \                  (1)         (0)            (0)
 //                                                                                                    M2  M1 M0
 // DRV8825 or A4988 or RAPS128:
 // use MODE_SWITCH_BEFORE_SLEW_OFF

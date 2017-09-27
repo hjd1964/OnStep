@@ -670,66 +670,14 @@ void setup() {
 void loop() {
 
   // GUIDING -------------------------------------------------------------------------------------------
-  if (trackingState!=TrackingMoveTo) { 
-
-#if defined(ST4_ON) || defined(ST4_PULLUP)
-    // ST4 INTERFACE
-    if ((parkStatus==NotParked) && (axis1Enabled)) {
-      byte w1=digitalRead(ST4RAw); byte e1=digitalRead(ST4RAe); byte n1=digitalRead(ST4DEn); byte s1=digitalRead(ST4DEs);
-      delayMicroseconds(50);
-      byte w2=digitalRead(ST4RAw); byte e2=digitalRead(ST4RAe); byte n2=digitalRead(ST4DEn); byte s2=digitalRead(ST4DEs);
-
-      // if signals aren't stable ignore them
-      if ((w1==w2) && (e1==e2) && (n1==n2) && (s1==s2)) {
-        if (!waitingHome) {
-          char c1=0;
-          if ((w1==HIGH) && (e1==HIGH)) c1='b';
-          if ((w1==LOW)  && (e1==HIGH)) c1='w';
-          if ((w1==HIGH) && (e1==LOW))  c1='e';
-          if ((w1==LOW)  && (e1==LOW))  c1='+';
-          if (c1!=ST4DirAxis1) {
-            ST4DirAxis1=c1;
-            if ((c1=='e') || (c1=='w')) {
-    #if defined(SEPARATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
-              if (trackingState==TrackingSidereal) startGuideAxis1(c1,currentPulseGuideRate,GUIDE_TIME_LIMIT*1000);
-    #else
-              startGuideAxis1(c1,currentGuideRate,GUIDE_TIME_LIMIT*1000);
-    #endif
-            }
-            if (c1=='b') stopGuideAxis1();
-          }
-    
-          char c2=0;
-          if ((n1==HIGH) && (s1==HIGH)) c2='b';
-          if ((n1==LOW)  && (s1==HIGH)) c2='n';
-          if ((n1==HIGH) && (s1==LOW))  c2='s';
-          if ((n1==LOW)  && (s1==LOW))  c2='+';
-          if (c2!=ST4DirAxis2) {
-            ST4DirAxis2=c2;
-            if ((c2=='n') || (c2=='s')) {
-    #if defined(SEPARATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
-              if (trackingState==TrackingSidereal) startGuideAxis2(c2,currentPulseGuideRate,GUIDE_TIME_LIMIT*1000);
-    #else
-              startGuideAxis2(c2,currentGuideRate,GUIDE_TIME_LIMIT*1000);
-    #endif
-            }
-            if (c2=='b') stopGuideAxis2();
-          }
-        } else {
-          // continue if paused at home
-          if ((w1==LOW) || (e1==LOW) || (n1==LOW) || (s1==LOW)) waitingHomeContinue=true;
-        }
-      }
-    }
-#endif
-
-    guideAxis1.fixed=0;
+  if ((trackingState!=TrackingMoveTo) && (parkStatus==NotParked)) {
+    ST4();
     Guide();
   }
 
 #ifndef MOUNT_TYPE_ALTAZM
   // PERIODIC ERROR CORRECTION -------------------------------------------------------------------------
-  if ((trackingState==TrackingSidereal) && (!((guideDirAxis1 || guideDirAxis2) && (activeGuideRate>GuideRate1x)))) { 
+  if ((trackingState==TrackingSidereal) && (parkStatus==NotParked) && (!((guideDirAxis1 || guideDirAxis2) && (activeGuideRate>GuideRate1x)))) { 
     // only active while sidereal tracking with a guide rate that makes sense
     Pec();
   } else DisablePec();
@@ -871,15 +819,6 @@ void loop() {
       double pr=ParallacticRate(h,d)*StepsPerDegreeAxis3;     // in steps per second
       if (deRotateReverse) pr=-pr;
       amountRotateAxis3.fixed=doubleToFixed(pr/100.0);        // in steps per 1/100 second
-/*      
-      PSerial1.puts(" p=");
-      PSerial1.putf(ParallacticAngle(h,d));                    // in degrees
-      PSerial1.puts(", pr=");
-      PSerial1.putf(ParallacticRate(h,d)*60.0);                // in degrees per minute
-      PSerial1.puts(", rot=");
-      PSerial1.putf(((double)posAxis3/StepsPerDegreeAxis3));   // in degrees
-      PSerial1.puts("\r\n");
-*/
     }
 #endif
 

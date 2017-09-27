@@ -9,7 +9,7 @@ unsigned long _coord_t=0;
 double _dec,_ra;
 
 // help with commands
-enum Command {COMMAND_NONE, COMMAND_SERIAL, COMMAND_SERIAL1, COMMAND_SERIAL4, COMMAND_SPI};
+enum Command {COMMAND_NONE, COMMAND_SERIAL, COMMAND_SERIAL1, COMMAND_SERIAL4, COMMAND_SERIALX};
 char reply[50];
 char command[3];
 char parameter[25];
@@ -20,6 +20,7 @@ cb cmd1; // serial1
 #ifdef SER4_AVAILABLE
 cb cmd4; // serial4
 #endif
+cb cmdx;  // serialX
 
 // process commands
 void processCommands() {
@@ -43,6 +44,7 @@ void processCommands() {
 #ifdef SER4_AVAILABLE
     else if (cmd4.ready()) { strcpy(command,cmd4.getCmd()); strcpy(parameter,cmd4.getParameter()); cmd4.flush(); process_command=COMMAND_SERIAL4; }
 #endif
+    else if (cmdx.ready()) { strcpy(command,cmdx.getCmd()); strcpy(parameter,cmdx.getParameter()); cmdx.flush(); process_command=COMMAND_SERIALX; }
     else return;
 
     if (process_command) {
@@ -1599,6 +1601,12 @@ String ConfighSettings() {
   #endif
 
   return c;
+}
+
+void localCommand(const char *s) {
+  cmdx.flush();
+  int l=0;
+  while (s[l]!=0) { cmdx.add(s[l]); l++; }
 }
 
 void forceRefreshGetEqu() {

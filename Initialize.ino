@@ -569,3 +569,12 @@ void EnableStepperDrivers() {
   }
 }
 
+void DisableStepperDrivers() {
+  // disable the stepper drivers
+  if (axis1Enabled==true) {
+    digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
+    digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
+    delay(10);
+  }
+}
+
