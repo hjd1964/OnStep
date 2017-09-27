@@ -167,14 +167,12 @@ void ST4() {
           if (altModeA) {
             int c=currentGuideRate;
             if ((c1=='w') && (c1Time>Debounce_ms)) {
-              if (trackingState==TrackingNone) localCommand(":B+#"); else {
-                if (c>=7) c=8; else if (c>=5) c=7; else if (c>=2) c=5; else if (c<2) c=2; keys_up=false; altModeShed=millis();
-              }
+              if (trackingState==TrackingNone) localCommand(":B+#"); else { if (c>=7) c=8; else if (c>=5) c=7; else if (c>=2) c=5; else if (c<2) c=2; }
+              keys_up=false; altModeShed=millis();
             }
-            if ((c1=='e') && (c1Time>Debounce_ms)) { 
-              if (trackingState==TrackingNone) localCommand(":B-#"); else {
-                if (c<=5) c=2; else if (c<=7) c=5; else if (c<=8) c=7; else if (c>8) c=8; keys_up=false; altModeShed=millis();
-              }
+            if ((c1=='e') && (c1Time>Debounce_ms)) {
+              if (trackingState==TrackingNone) localCommand(":B-#"); else { if (c<=5) c=2; else if (c<=7) c=5; else if (c<=8) c=7; else if (c>8) c=8; }
+              keys_up=false; altModeShed=millis();
             }
             if ((c2=='s') && (c2Time>Debounce_ms)) { if (alignThisStar>alignNumStars) localCommand(":CS#"); else localCommand(":A+#"); keys_up=false; altModeShed=millis(); }
             if ((c2=='n') && (c2Time>Debounce_ms)) {
