@@ -176,9 +176,8 @@ void ST4() {
             }
             if ((c2=='s') && (c2Time>Debounce_ms)) { if (alignThisStar>alignNumStars) localCommand(":CS#"); else localCommand(":A+#"); keys_up=false; altModeShed=millis(); }
             if ((c2=='n') && (c2Time>Debounce_ms)) {
-              if ((pauseHome) && (waitingHome)) waitingHomeContinue=true; else
-                if (trackingState==TrackingSidereal) { trackingState=TrackingNone; DisableStepperDrivers(); } else
-                  if (trackingState==TrackingNone) { trackingState=TrackingSidereal; EnableStepperDrivers(); }
+              if (trackingState==TrackingSidereal) { trackingState=TrackingNone; DisableStepperDrivers(); } else
+                if (trackingState==TrackingNone) { trackingState=TrackingSidereal; EnableStepperDrivers(); }
               keys_up=false; altModeShed=millis();
             }
             if (c!=currentGuideRate) { setGuideRate(c); enableGuideRate(c); keys_up=false; altModeShed=millis(); }
@@ -195,16 +194,18 @@ void ST4() {
       } else {
         if ((altModeA || altModeB)) { altModeA=false; altModeB=false; soundBeep(); }
 #endif
-        if ((axis1Enabled) && (!waitingHome)) {
+        if (axis1Enabled) {
           // guide E/W
           if (c1!=ST4DirAxis1) {
             ST4DirAxis1=c1;
             if (((c1=='e') || (c1=='w')) && ((long)(millis()-c1Time)>=Debounce_ms)) {
-    #if defined(SEPARATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
-              if (trackingState==TrackingSidereal) startGuideAxis1(c1,currentPulseGuideRate,GUIDE_TIME_LIMIT*1000);
-    #else
-              startGuideAxis1(c1,currentGuideRate,GUIDE_TIME_LIMIT*1000);
-    #endif
+              if (waitingHome) waitingHomeContinue=true; else {
+      #if defined(SEPARATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
+                if (trackingState==TrackingSidereal) startGuideAxis1(c1,currentPulseGuideRate,GUIDE_TIME_LIMIT*1000);
+      #else
+                startGuideAxis1(c1,currentGuideRate,GUIDE_TIME_LIMIT*1000);
+      #endif
+              }
             }
             if (c1=='b') stopGuideAxis1();
           }
@@ -213,11 +214,13 @@ void ST4() {
           if (c2!=ST4DirAxis2) {
             ST4DirAxis2=c2;
             if (((c2=='n') || (c2=='s')) && ((long)(millis()-c2Time)>=Debounce_ms)) {
-    #if defined(SEPARATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
-              if (trackingState==TrackingSidereal) startGuideAxis2(c2,currentPulseGuideRate,GUIDE_TIME_LIMIT*1000);
-    #else
-              startGuideAxis2(c2,currentGuideRate,GUIDE_TIME_LIMIT*1000);
-    #endif
+              if (waitingHome) waitingHomeContinue=true; else {
+      #if defined(SEPARATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
+                if (trackingState==TrackingSidereal) startGuideAxis2(c2,currentPulseGuideRate,GUIDE_TIME_LIMIT*1000);
+      #else
+                startGuideAxis2(c2,currentGuideRate,GUIDE_TIME_LIMIT*1000);
+      #endif
+              }
             }
             if (c2=='b') stopGuideAxis2();
           }
