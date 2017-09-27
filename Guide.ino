@@ -197,8 +197,8 @@ void ST4() {
         if (axis1Enabled) {
           // guide E/W
           if (c1!=ST4DirAxis1) {
-            ST4DirAxis1=c1;
             if (((c1=='e') || (c1=='w')) && ((long)(millis()-c1Time)>=Debounce_ms)) {
+              ST4DirAxis1=c1;
 #ifdef ST4_HAND_CONTROL_ON
               if (waitingHome) waitingHomeContinue=true; else
               if (trackingState==TrackingMoveTo) abortSlew=true; else
@@ -210,14 +210,14 @@ void ST4() {
                 startGuideAxis1(c1,currentGuideRate,GUIDE_TIME_LIMIT*1000);
 #endif
               }
-            }
+            } else ST4DirAxis1=0;
             if (c1=='b') stopGuideAxis1();
           }
 
           // guide N/S
           if (c2!=ST4DirAxis2) {
-            ST4DirAxis2=c2;
             if (((c2=='n') || (c2=='s')) && ((long)(millis()-c2Time)>=Debounce_ms)) {
+              ST4DirAxis2=c2;
 #ifdef ST4_HAND_CONTROL_ON
               if (waitingHome) waitingHomeContinue=true; else
               if (trackingState==TrackingMoveTo) abortSlew=true; else
@@ -229,7 +229,7 @@ void ST4() {
                 startGuideAxis2(c2,currentGuideRate,GUIDE_TIME_LIMIT*1000);
 #endif
               }
-            }
+            } else ST4DirAxis2=0;
             if (c2=='b') stopGuideAxis2();
           }
         }
