@@ -213,7 +213,6 @@ void ST4() {
 
           // guide N/S
           if (c2!=ST4DirAxis2) {
-            PSerial.putch(c2); PSerial.puts("\r\n");
             ST4DirAxis2=c2;
             if (((c2=='n') || (c2=='s')) && ((long)(millis()-c2Time)>=Debounce_ms)) {
     #if defined(SEPARATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
