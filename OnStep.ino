@@ -670,10 +670,8 @@ void setup() {
 void loop() {
 
   // GUIDING -------------------------------------------------------------------------------------------
-  if ((trackingState!=TrackingMoveTo) && (parkStatus==NotParked)) {
-    ST4();
-    Guide();
-  }
+  ST4();
+  if ((trackingState!=TrackingMoveTo) && (parkStatus==NotParked)) Guide();
 
 #ifndef MOUNT_TYPE_ALTAZM
   // PERIODIC ERROR CORRECTION -------------------------------------------------------------------------

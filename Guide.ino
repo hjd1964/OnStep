@@ -162,7 +162,7 @@ void ST4() {
       if (c1=='+') stopGuideAxis1(); if (c2=='+') stopGuideAxis2(); // stop any guide that might have been triggered
       if ((c1=='+') && ((long)(millis()-c1Time)>AltMode_ms) && (!altModeB)) { if (!altModeA) { altModeA=true; soundBeep(); } altModeShed=millis(); }
       if ((c2=='+') && ((long)(millis()-c2Time)>AltMode_ms) && (!altModeA)) { if (!altModeB) { altModeB=true; soundBeep(); } altModeShed=millis(); }
-      if ((altModeA || altModeB) && ((long)(millis()-altModeShed)<Shed_ms)) {
+      if ((trackingState!=TrackingMoveTo) && (!waitingHome) && (altModeA || altModeB) && ((long)(millis()-altModeShed)<Shed_ms)) {
         if (keys_up) {
           if (altModeA) {
             int c=currentGuideRate;
@@ -199,12 +199,16 @@ void ST4() {
           if (c1!=ST4DirAxis1) {
             ST4DirAxis1=c1;
             if (((c1=='e') || (c1=='w')) && ((long)(millis()-c1Time)>=Debounce_ms)) {
-              if (waitingHome) waitingHomeContinue=true; else {
-      #if defined(SEPARATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
+#ifdef ST4_HAND_CONTROL_ON
+              if (waitingHome) waitingHomeContinue=true; else
+              if (trackingState==TrackingMoveTo) abortSlew=true; else
+#endif
+              {
+#if defined(SEPARATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
                 if (trackingState==TrackingSidereal) startGuideAxis1(c1,currentPulseGuideRate,GUIDE_TIME_LIMIT*1000);
-      #else
+#else
                 startGuideAxis1(c1,currentGuideRate,GUIDE_TIME_LIMIT*1000);
-      #endif
+#endif
               }
             }
             if (c1=='b') stopGuideAxis1();
@@ -214,12 +218,16 @@ void ST4() {
           if (c2!=ST4DirAxis2) {
             ST4DirAxis2=c2;
             if (((c2=='n') || (c2=='s')) && ((long)(millis()-c2Time)>=Debounce_ms)) {
-              if (waitingHome) waitingHomeContinue=true; else {
-      #if defined(SEPARATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
+#ifdef ST4_HAND_CONTROL_ON
+              if (waitingHome) waitingHomeContinue=true; else
+              if (trackingState==TrackingMoveTo) abortSlew=true; else
+#endif
+              {
+#if defined(SEPARATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
                 if (trackingState==TrackingSidereal) startGuideAxis2(c2,currentPulseGuideRate,GUIDE_TIME_LIMIT*1000);
-      #else
+#else
                 startGuideAxis2(c2,currentGuideRate,GUIDE_TIME_LIMIT*1000);
-      #endif
+#endif
               }
             }
             if (c2=='b') stopGuideAxis2();
