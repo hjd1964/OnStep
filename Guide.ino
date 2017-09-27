@@ -121,10 +121,14 @@ void enableGuideRate(int g) {
 
 // handle the ST4 interface and hand controller features
 
+#if defined(ST4_ON) || defined(ST4_PULLUP)
 #ifdef ST4_HAND_CONTROL_ON
 const long Debounce_ms=100;
 const long AltMode_ms=2000;
 const long Shed_ms=4000;
+#else
+const long Debounce_ms=0;
+#endif
 #endif
 
 void ST4() {
@@ -197,11 +201,7 @@ void ST4() {
           // guide E/W
           if (c1!=ST4DirAxis1) {
             ST4DirAxis1=c1;
-#ifdef ST4_HAND_CONTROL_ON
-            if (((c1=='e') || (c1=='w')) && (c1Time>Debounce_ms)) {
-#else
-            if ((c1=='e') || (c1=='w')) {
-#endif
+            if (((c1=='e') || (c1=='w')) && ((long)(millis()-c1Time)>=Debounce_ms)) {
     #if defined(SEPARATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
               if (trackingState==TrackingSidereal) startGuideAxis1(c1,currentPulseGuideRate,GUIDE_TIME_LIMIT*1000);
     #else
@@ -215,11 +215,7 @@ void ST4() {
           if (c2!=ST4DirAxis2) {
             PSerial.putch(c2); PSerial.puts("\r\n");
             ST4DirAxis2=c2;
-#ifdef ST4_HAND_CONTROL_ON
-            if (((c2=='n') || (c2=='s')) && (c2Time>Debounce_ms)) {
-#else
-            if ((c2=='n') || (c2=='s')) {
-#endif
+            if (((c2=='n') || (c2=='s')) && ((long)(millis()-c2Time)>=Debounce_ms)) {
     #if defined(SEPARATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
               if (trackingState==TrackingSidereal) startGuideAxis2(c2,currentPulseGuideRate,GUIDE_TIME_LIMIT*1000);
     #else
