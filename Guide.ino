@@ -228,9 +228,6 @@ void ST4() {
 #ifdef ST4_HAND_CONTROL_ON
       }
 #endif
-    } else {
-      // continue if paused at home
-      if ((w1==LOW) || (e1==LOW) || (n1==LOW) || (s1==LOW)) waitingHomeContinue=true;
     }
 #endif
 }
