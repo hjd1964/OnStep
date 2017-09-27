@@ -160,36 +160,34 @@ void ST4() {
       static bool altModeB=false;
       static unsigned long altModeShed=0;
       if (c1=='+') stopGuideAxis1(); if (c2=='+') stopGuideAxis2(); // stop any guide that might have been triggered
-      if ((c1=='+') && ((long)(millis()-c1Time)>AltMode_ms) && (!altModeB)) { if (!altModeA) { altModeA=true; soundBeep(); } altModeShed=millis(); }
-      if ((c2=='+') && ((long)(millis()-c2Time)>AltMode_ms) && (!altModeA)) { if (!altModeB) { altModeB=true; soundBeep(); } altModeShed=millis(); }
+      if ((c1=='+') && ((long)(millis()-c1Time)>AltMode_ms) && (!altModeB)) { if (!altModeA) { altModeA=true; soundBeep(); keys_up=false; } altModeShed=millis(); }
+      if ((c2=='+') && ((long)(millis()-c2Time)>AltMode_ms) && (!altModeA)) { if (!altModeB) { altModeB=true; soundBeep(); keys_up=false; } altModeShed=millis(); }
       if ((trackingState!=TrackingMoveTo) && (!waitingHome) && (altModeA || altModeB) && ((long)(millis()-altModeShed)<Shed_ms)) {
         if (keys_up) {
           if (altModeA) {
             int c=currentGuideRate;
-            if ((c1=='w') && (c1Time>Debounce_ms)) {
+            if ((c1=='w') && ((long)(millis()-c1Time)>Debounce_ms)) {
               if (trackingState==TrackingNone) localCommand(":B+#"); else { if (c>=7) c=8; else if (c>=5) c=7; else if (c>=2) c=5; else if (c<2) c=2; }
-              keys_up=false; altModeShed=millis();
+              keys_up=false; altModeShed=millis(); soundClick();
             }
-            if ((c1=='e') && (c1Time>Debounce_ms)) {
+            if ((c1=='e') && ((long)(millis()-c1Time)>Debounce_ms)) {
               if (trackingState==TrackingNone) localCommand(":B-#"); else { if (c<=5) c=2; else if (c<=7) c=5; else if (c<=8) c=7; else if (c>8) c=8; }
-              keys_up=false; altModeShed=millis();
+              keys_up=false; altModeShed=millis(); soundClick();
             }
-            if ((c2=='s') && (c2Time>Debounce_ms)) { if (alignThisStar>alignNumStars) localCommand(":CS#"); else localCommand(":A+#"); keys_up=false; altModeShed=millis(); }
-            if ((c2=='n') && (c2Time>Debounce_ms)) {
-              if (trackingState==TrackingSidereal) { trackingState=TrackingNone; DisableStepperDrivers(); } else
-                if (trackingState==TrackingNone) { trackingState=TrackingSidereal; EnableStepperDrivers(); }
+            if ((c2=='s') && ((long)(millis()-c2Time)>Debounce_ms)) { if (alignThisStar>alignNumStars) localCommand(":CS#"); else localCommand(":A+#"); keys_up=false; altModeShed=millis(); soundClick(); }
+            if ((c2=='n') && ((long)(millis()-c2Time)>Debounce_ms)) {
+              if (trackingState==TrackingSidereal) { trackingState=TrackingNone; DisableStepperDrivers(); soundClick(); } else
+                if (trackingState==TrackingNone) { trackingState=TrackingSidereal; EnableStepperDrivers(); soundClick(); }
               keys_up=false; altModeShed=millis();
             }
             if (c!=currentGuideRate) { setGuideRate(c); enableGuideRate(c); keys_up=false; altModeShed=millis(); }
           }
           if (altModeB) {
-            keys_up=false; altModeShed=millis();
-            if ((c1=='w') && (c1Time>Debounce_ms)) { localCommand(":LN#"); keys_up=false; altModeShed=millis(); }
-            if ((c1=='e') && (c1Time>Debounce_ms)) { localCommand(":LB#"); keys_up=false; altModeShed=millis(); }
-            if ((c2=='s') && (c2Time>Debounce_ms)) { soundEnabled=!soundEnabled; keys_up=false; altModeShed=millis(); }
-            if ((c2=='n') && (c2Time>Debounce_ms)) { localCommand(":LI#"); localCommand(":MS#"); keys_up=false; altModeShed=millis(); }
+            if ((c1=='w') && ((long)(millis()-c1Time)>Debounce_ms)) { localCommand(":LN#"); keys_up=false; altModeShed=millis(); soundClick(); }
+            if ((c1=='e') && ((long)(millis()-c1Time)>Debounce_ms)) { localCommand(":LB#"); keys_up=false; altModeShed=millis(); soundClick(); }
+            if ((c2=='s') && ((long)(millis()-c2Time)>Debounce_ms)) { soundEnabled=!soundEnabled; keys_up=false; altModeShed=millis(); soundClick(); }
+            if ((c2=='n') && ((long)(millis()-c2Time)>Debounce_ms)) { localCommand(":LI#"); keys_up=false; altModeShed=millis(); soundClick(); }
           }
-          soundClick();
         }
       } else {
         if ((altModeA || altModeB)) { altModeA=false; altModeB=false; soundBeep(); }
