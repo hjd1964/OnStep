@@ -254,7 +254,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     if (Axis2PowerOffTimer>0) Axis2PowerOffTimer--; 
 
     // if the guide rate <= 1x and we're guiding on either axis set the timer to 10 minutes
-    if ((fabs(guideTimerBaseRate)<=1.000001) && (guideDirAxis2 || guideDirAxis1)) Axis2PowerOffTimer=10*60*100;
+    if ((fabs(guideTimerBaseRate)<=1.000001) && (guideDirAxis2 || guideDirAxis1)) Axis2PowerOffTimer=10L*60L*100L;
 
     // if Axis2 isn't stationary set the timer to a minimum of 10 seconds
     cli(); if ((posAxis2!=timerLastPosAxis2) && (Axis2PowerOffTimer<10*100)) { timerLastPosAxis2=posAxis2; Axis2PowerOffTimer=10*100; } sei();

@@ -105,7 +105,7 @@ void TMC2130_setup(bool intpol, bool stealth_chop, byte micro_step_mode, bool lo
   // vhighfs, default=0, range 0 to 1  (Enables switch to full-step when VHIGH (THIGH?) is exceeded)
   // vhighchm,default=0, range 0 to 1  (Enables switch to fast-decay mode VHIGH (THIGH?) is exceeded)
   //        toff   + hstrt  + hend   + rndtf + tbl     + vhighfs+ vhighchm
-  data_out=(4UL<<0)+(0UL<<4)+(0UL<<7)+(0<<13)+(1UL<<15)+(0<<18) +(0<<19);
+  data_out=(4UL<<0)+(0UL<<4)+(0UL<<7)+(0<<13)+(1UL<<15)+(0UL<<18)+(0UL<<19);
   // set the interpolation bit
   if (intpol) data_out|=1UL<<28;
   // set the micro-step mode bits
