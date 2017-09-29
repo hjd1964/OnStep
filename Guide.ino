@@ -186,7 +186,7 @@ void ST4() {
             if ((c1=='w') && ((long)(millis()-c1Time)>Debounce_ms)) { localCommand(":LN#"); keys_up=false; altModeShed=millis(); soundClick(); }
             if ((c1=='e') && ((long)(millis()-c1Time)>Debounce_ms)) { localCommand(":LB#"); keys_up=false; altModeShed=millis(); soundClick(); }
             if ((c2=='s') && ((long)(millis()-c2Time)>Debounce_ms)) { soundEnabled=!soundEnabled; keys_up=false; altModeShed=millis(); soundClick(); }
-            if ((c2=='n') && ((long)(millis()-c2Time)>Debounce_ms)) { localCommand(":LI#"); keys_up=false; altModeShed=millis(); soundClick(); }
+            if ((c2=='n') && ((long)(millis()-c2Time)>Debounce_ms)) { localCommand(":LIG#"); keys_up=false; altModeShed=millis(); soundClick(); }
           }
         }
       } else {

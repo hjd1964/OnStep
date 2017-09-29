@@ -567,6 +567,16 @@ void processCommands() {
         quietReply=true;
           
       } else 
+// :LIG#   Get Object Information and goto
+//         Returns: 0..9, see :MS#
+      if ((command[1]=='I') && (parameter[0]=='G') && (parameter[1]==0)) {
+        Lib.readVars(reply,&i,&newTargetRA,&newTargetDec);
+
+        i=goToEqu(newTargetRA,newTargetDec);
+        reply[0]=i+'0'; reply[1]=0;
+        quietReply=true;
+        supress_frame=true; 
+      } else 
 
 // :LR#    Get Object Information including RA and Dec, with advance to next Record
 //          Returns: <string>#
