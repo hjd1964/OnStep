@@ -753,7 +753,7 @@ void processCommands() {
 //         2=above overhead limit
 //         4=mount is parked
 //         5=Goto in progress
-//         6=outside limits (MaxDec, MinDec, UnderPoleLimit)
+//         6=outside limits (MaxDec, MinDec, UnderPoleLimit, MeridianLimit)
 //         7=hardware fault
 //         8=already in motion
 //         9=unspecified error
