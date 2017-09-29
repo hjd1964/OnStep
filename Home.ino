@@ -2,11 +2,8 @@
 // Functions related to Homing the mount
 
 // moves telescope to the home position, then stops tracking
-boolean goHome() {
-  if ((parkStatus!=NotParked) && (parkStatus!=Parking)) return false;  // fail, moving to home not allowed if Parked
-  if (trackingState==TrackingMoveTo)                    return false;  // fail, moving to home not allowed during a move
-  if (guideDirAxis1 || guideDirAxis2)                   return false;  // fail, moving to home not allowed while guiding
-  if (!axis1Enabled)                                    return false;  // fail, moving to home not allowed if drivers aren't enabled
+int goHome() {
+  int f=validateGoto(); if (f==5) f=8; if (f!=0) return f; // goto allowed?
 
   cli();
   #ifdef SYNC_ANYWHERE_ON
@@ -28,7 +25,7 @@ boolean goHome() {
   
   StepperModeGoto();
   
-  return true;
+  return 0;
 }
 
 // sets telescope home position; user manually moves to Hour Angle 90 and Declination 90 (CWD position),

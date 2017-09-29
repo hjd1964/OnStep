@@ -11,7 +11,8 @@ int syncEqu(double RA, double Dec) {
   EquToHor(HA,Dec,&a,&z);
 
   // validate
-  int f=validateGoto(HA,Dec,a); if (f!=0) return f;
+  int f=validateGoto(); if (f!=0) return f;
+  f=validateGotoCoords(HA,Dec,a); if (f!=0) return f;
 
   // correct for polar misalignment only by clearing the index offsets
   indexAxis1=0; indexAxis2=0; indexAxis1Steps=0; indexAxis2Steps=0;
@@ -195,7 +196,8 @@ byte goToEqu(double RA, double Dec) {
   EquToHor(HA,Dec,&a,&z);
 
   // validate
-  int f=validateGoto(HA,Dec,a); if (f==5) abortSlew=true; if (f!=0) return f;
+  int f=validateGoto(); if (f==5) abortSlew=true; if (f!=0) return f;
+  f=validateGotoCoords(HA,Dec,a); if (f!=0) return f;
 
 #ifdef MOUNT_TYPE_ALTAZM
   if (Align.isReady()) {
@@ -284,28 +286,36 @@ byte goToHor(double *Alt, double *Azm) {
 }
 
 // check if goto/sync is valid
-int validateGoto(double HA, double Dec, double Alt) {
-  // Check to see if this goto is valid
-  if ((parkStatus!=NotParked) && (parkStatus!=Parking)) return 4;   // fail, Parked
+byte validateGoto() {
+  // Check state
+  if (faultAxis1 || faultAxis2)                         return 7;   // fail, hardware fault
+  if (!axis1Enabled)                                    return 3;   // fail, in standby
+  if (parkStatus!=NotParked)                            return 4;   // fail, parked or parking or park failed
+  if (guideDirAxis1 || guideDirAxis2)                   return 8;   // fail, already in motion
+  if (trackingState==TrackingMoveTo)                    return 5;   // fail, goto in progress
+  return 0;
+}
+byte validateGotoCoords(double HA, double Dec, double Alt) {
+  // Check coordinates
   if (Alt<minAlt)                                       return 1;   // fail, below horizon
-  if (Alt>maxAlt)                                       return 6;   // fail, outside limits
+  if (Alt>maxAlt)                                       return 2;   // fail, above overhead limit
   if (Dec>MaxDec)                                       return 6;   // fail, outside limits
   if (Dec<MinDec)                                       return 6;   // fail, outside limits
   if ((abs(HA)>(double)UnderPoleLimit*15.0) )           return 6;   // fail, outside limits
-  if (trackingState==TrackingMoveTo)                    return 5;   // fail, goto in progress
-  if (guideDirAxis1 || guideDirAxis2)                   return 7;   // fail, unspecified error
   return 0;
+}
+byte validateGoToEqu(double RA, double Dec) {
+  double a,z;
+  double HA=haRange(LST()*15.0-RA);
+  EquToHor(HA,Dec,&a,&z);
+  int f=validateGoto(); if (f!=0) return f;
+  f=validateGotoCoords(HA,Dec,a);
+  return f;
 }
 
 // moves the mount to a new Hour Angle and Declination - both are in steps.  Alternate targets are used when a meridian flip occurs
 byte goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1, long altTargetAxis2, byte gotoPierSide) {
-  // HA goes from +90...0..-90
-  //                W   .   E
-
-  if (faultAxis1 || faultAxis2) return 7; // fail, unspecified error
-
   atHome=false;
-
   if (meridianFlip!=MeridianFlipNever) {
     // where the allowable hour angles are
     long eastOfPierMaxHA= 12L*15L*(long)StepsPerDegreeAxis1;
@@ -368,10 +378,10 @@ byte goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1, long 
 #ifdef MOUNT_TYPE_ALTAZM
   // allow +/- 360 in Az
   if (((thisTargetAxis1+indexAxis1Steps>(long)StepsPerDegreeAxis1*MaxAzm) || (thisTargetAxis1+indexAxis1Steps<-(long)StepsPerDegreeAxis1*MaxAzm)) ||
-     ((thisTargetAxis2+indexAxis2Steps>(long)StepsPerDegreeAxis2*180L) || (thisTargetAxis2+indexAxis2Steps<-(long)StepsPerDegreeAxis2*180L))) return 7; // fail, unspecified error
+     ((thisTargetAxis2+indexAxis2Steps>(long)StepsPerDegreeAxis2*180L) || (thisTargetAxis2+indexAxis2Steps<-(long)StepsPerDegreeAxis2*180L))) return 9; // fail, unspecified error
 #else
   if (((thisTargetAxis1+indexAxis1Steps>(long)StepsPerDegreeAxis1*180L) || (thisTargetAxis1+indexAxis1Steps<-(long)StepsPerDegreeAxis1*180L)) ||
-     ((thisTargetAxis2+indexAxis2Steps>(long)StepsPerDegreeAxis2*180L) || (thisTargetAxis2+indexAxis2Steps<-(long)StepsPerDegreeAxis2*180L))) return 7; // fail, unspecified error
+     ((thisTargetAxis2+indexAxis2Steps>(long)StepsPerDegreeAxis2*180L) || (thisTargetAxis2+indexAxis2Steps<-(long)StepsPerDegreeAxis2*180L))) return 9; // fail, unspecified error
 #endif
   lastTrackingState=trackingState;
 

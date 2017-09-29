@@ -520,7 +520,7 @@ void processCommands() {
       if (command[1]=='F')  { setHome(); quietReply=true; } else 
 //  :hC#   Moves telescope to the home position
 //         Returns: Nothing
-      if (command[1]=='C')  {  goHome(); quietReply=true; } else 
+      if (command[1]=='C')  { goHome(); quietReply=true; } else 
 //  :hP#   Goto the Park Position
 //          Return: 0 on failure
 //                  1 on success
@@ -533,7 +533,7 @@ void processCommands() {
 //          Return: 0 on failure
 //                  1 on success
       if (command[1]=='R')  { if (!unpark()) commandError=true; }
-      else commandError=true; 
+      else commandError=true;
 
       } else
       
@@ -542,7 +542,7 @@ void processCommands() {
 
 // :LB#    Find previous object and set it as the current target object.
 //          Returns: Nothing
-      if (command[1]=='B') { 
+      if ((command[1]=='B') && (parameter[0]==0)) { 
           Lib.prevRec(); quietReply=true;
       } else 
 
@@ -558,7 +558,7 @@ void processCommands() {
 // :LI#    Get Object Information
 //          Returns: <string>#
 //          Returns a string containing the current target object’s name and object type.
-      if (command[1]=='I') {
+      if ((command[1]=='I') && (parameter[0]==0)) {
         Lib.readVars(reply,&i,&newTargetRA,&newTargetDec);
 
         char const * objType=objectStr[i];
@@ -571,7 +571,7 @@ void processCommands() {
 // :LR#    Get Object Information including RA and Dec, with advance to next Record
 //          Returns: <string>#
 //          Returns a string containing the current target object’s name, type, RA, and Dec.
-      if (command[1]=='R') {
+      if ((command[1]=='R') && (parameter[0]==0)) {
         Lib.readVars(reply,&i,&newTargetRA,&newTargetDec);
 
         char const * objType=objectStr[i];
@@ -628,35 +628,35 @@ void processCommands() {
 
 // :LN#    Find next deep sky target object subject to the current constraints.
 //          Returns: Nothing
-      if (command[1]=='N') { 
+      if ((command[1]=='N') && (parameter[0]==0)) { 
           Lib.nextRec();
           quietReply=true;
       } else 
 
 // :L$#    Move to catalog name record
 //          Returns: 1
-      if (command[1]=='$') { 
+      if ((command[1]=='$') && (parameter[0]==0)) { 
           Lib.nameRec();
           quietReply=false;
       } else 
 
 // :LD#    Clear current record
 //          Returns: Nothing
-      if (command[1]=='D') { 
+      if ((command[1]=='D') && (parameter[0]==0)) { 
           Lib.clearCurrentRec();
           quietReply=true;
       } else 
 
 // :LL#    Clear current catalog
 //          Returns: Nothing
-      if (command[1]=='L') { 
+      if ((command[1]=='L') && (parameter[0]==0)) { 
           Lib.clearLib();
           quietReply=true;
       } else 
 
 // :L!#    Clear library (all catalogs)
 //          Returns: Nothing
-      if (command[1]=='!') { 
+      if ((command[1]=='!') && (parameter[0]==0)) { 
           Lib.clearAll();
           quietReply=true;
       } else 
@@ -676,12 +676,7 @@ void processCommands() {
 //   M - Telescope Movement Commands
       if (command[0]=='M') {
 //  :MA#   Goto the target Alt and Az
-//         Returns:
-//         0=Goto is Possible
-//         1=Object below horizon
-//         2=No object selected
-//         4=Position unreachable
-//         6=Outside limits
+//         Returns: 0..9, see :MS#
       if (command[1]=='A') {
         if (axis1Enabled) {
           i=goToHor(&newTargetAlt, &newTargetAzm);
@@ -726,41 +721,37 @@ void processCommands() {
       } else
 
 //  :MP#   Goto the Current Position for Polar Align
-//         Returns:
-//         0=Goto is Possible
-//         1=Object below horizon    Outside limits, below the Horizon limit
-//         2=No object selected      Failure to resolve coordinates
-//         4=Position unreachable    Not unparked
-//         5=Busy                    Goto already active
-//         6=Outside limits          Outside limits, above the Zenith limit
+//         Returns: 0..9, see :MS#
       if (command[1]=='P')  {
-        if (axis1Enabled) {
-          double r,d;
-          getEqu(&r,&d,false);
+        double r,d;
+        getEqu(&r,&d,false);
+        i=validateGoToEqu(r,d);
+        if (i==0) {
           GeoAlign.altCor=0.0;
           GeoAlign.azmCor=0.0;
           i=goToEqu(r,d);
-          reply[0]=i+'0'; reply[1]=0;
-          quietReply=true;
-          supress_frame=true;
-        } else { reply[0]='4'; reply[1]=0; }
+        }
+        reply[0]=i+'0'; reply[1]=0;
+        quietReply=true;
+        supress_frame=true;
       } else
 
 //  :MS#   Goto the Target Object
 //         Returns:
 //         0=Goto is Possible
-//         1=Object below horizon    Outside limits, below the Horizon limit
-//         2=No object selected      Failure to resolve coordinates
-//         4=Position unreachable    Not unparked
-//         5=Busy                    Goto already active
-//         6=Outside limits          Outside limits, above the Zenith limit
+//         1=below the horizon limit
+//         2=above overhead limit
+//         4=mount is parked
+//         5=Goto in progress
+//         6=outside limits (MaxDec, MinDec, UnderPoleLimit)
+//         7=hardware fault
+//         8=already in motion
+//         9=unspecified error
       if (command[1]=='S')  {
-        if (axis1Enabled) {
-          i=goToEqu(newTargetRA,newTargetDec);
-          reply[0]=i+'0'; reply[1]=0;
-          quietReply=true;
-          supress_frame=true; 
-        } else { reply[0]='4'; reply[1]=0; }
+        i=goToEqu(newTargetRA,newTargetDec);
+        reply[0]=i+'0'; reply[1]=0;
+        quietReply=true;
+        supress_frame=true; 
       } else commandError=true;
       
       } else
