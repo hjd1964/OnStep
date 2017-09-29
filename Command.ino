@@ -748,7 +748,7 @@ void processCommands() {
 
 //  :MS#   Goto the Target Object
 //         Returns:
-//         0=Goto is Possible
+//         0=Goto is possible
 //         1=below the horizon limit
 //         2=above overhead limit
 //         4=mount is parked
