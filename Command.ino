@@ -751,6 +751,7 @@ void processCommands() {
 //         0=Goto is possible
 //         1=below the horizon limit
 //         2=above overhead limit
+//         3=controller in standby
 //         4=mount is parked
 //         5=Goto in progress
 //         6=outside limits (MaxDec, MinDec, UnderPoleLimit, MeridianLimit)
