@@ -84,11 +84,11 @@ void Timer3SetInterval(long iv) {
 #if defined(__AVR_ATmega2560__)
   iv=iv/8L;
   // 0.0327 * 4096 = 134.21s
-  long i=iv; uint16_t t=1; while (iv>65536L) { t*=2; iv=i/t; if (t==4096) { iv=65535L; break; } }
+  uint32_t i=iv; uint16_t t=1; while (iv>65536L) { t*=2; iv=i/t; if (t==4096) { iv=65535L; break; } }
   cli(); nextAxis1Rate=iv-1L; t3rep=t; fastAxis1=(t3rep==1); sei();
 #elif (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__))
   // 4.194 * 32 = 134.21s
-  long i=iv; uint16_t t=1; while (iv>65536L*1024L) { t++; iv=i/t; if (t==32) { iv=65535L*1024L; break; } }
+  uint32_t i=iv; uint16_t t=1; while (iv>65536L*1024L) { t++; iv=i/t; if (t==32) { iv=65535L*1024L; break; } }
   cli(); nextAxis1Rate=(F_BUS/1000000) * (iv*0.0625) * 0.5 - 1; t3rep=t; fastAxis1=(t3rep==1); sei();
 #endif
 }
@@ -104,11 +104,11 @@ void Timer4SetInterval(long iv) {
 #if defined(__AVR_ATmega2560__)
   iv=iv/8L;
   // 0.0327 * 4096 = 134.21s
-  long i=iv; uint16_t t=1; while (iv>65536L) { t*=2; iv=i/t; if (t==4096) { iv=65535L; break; } }
+  uint32_t i=iv; uint16_t t=1; while (iv>65536L) { t*=2; iv=i/t; if (t==4096) { iv=65535L; break; } }
   cli(); nextAxis2Rate=iv-1L; t4rep=t; fastAxis2=(t4rep==1); sei();
 #elif (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__))
   // 4.194 * 32 = 134.21s
-  long i=iv; uint16_t t=1; while (iv>65536L*1024L) { t++; iv=i/t; if (t==32) { iv=65535L*1024L; break; } }
+  uint32_t i=iv; uint16_t t=1; while (iv>65536L*1024L) { t++; iv=i/t; if (t==32) { iv=65535L*1024L; break; } }
   cli(); nextAxis2Rate=(F_BUS/1000000) * (iv*0.0625) * 0.5 - 1; t4rep=t; fastAxis2=(t4rep==1); sei();
 #endif
 }
