@@ -24,6 +24,14 @@ void Init_Startup_Values() {
   targetAxis3.fixed = 0;
   amountRotateAxis3.fixed=0;
 #endif
+#ifdef FOCUSER1_ON
+  targetAxis4.fixed = 0;
+  amountMoveAxis4.fixed=0;
+#endif
+#ifdef FOCUSER2_ON
+  targetAxis5.fixed = 0;
+  amountMoveAxis5.fixed=0;
+#endif
 
   // default values for state variables
   pierSide            = PierSideNone;
@@ -100,6 +108,14 @@ void Init_Pins() {
 #ifdef ROTATOR_ON
   pinMode(Axis3StepPin,OUTPUT);
   pinMode(Axis3DirPin,OUTPUT); 
+#endif
+#ifdef FOCUSER1_ON
+  pinMode(Axis4StepPin,OUTPUT);
+  pinMode(Axis4DirPin,OUTPUT); 
+#endif
+#ifdef FOCUSER2_ON
+  pinMode(Axis5StepPin,OUTPUT);
+  pinMode(Axis5DirPin,OUTPUT); 
 #endif
 
 // override any status LED and set the reset pin HIGH

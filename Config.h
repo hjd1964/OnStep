@@ -11,9 +11,6 @@
  * The RA/Az (Axis1) and Dec/Alt (Axis2) stepper driver plugs in as follows:
  * RA/Az :  Gnd,13,12,11 = Gnd,Step,N/C,Direction (Teensy3.x Gnd,12,N/C,10)
  * Dec/Alt:   7, 6, 5, 4 = Gnd,Step,N/C,Direction (Teensy3.x Gnd, 6,N/C, 4)
- *
- * The optional Rotator (Axis3) stepper driver connection is as follows:
- * Rotator: A9,A8 = Step,Dir (Teensy3.x 30,33)
  * 
  * Optionally, a bluetooth adapter (HC05 or RN42 for example) plugs into pins Tx1/Rx1 and pins +5V/Gnd. 
  * I use two 2-wire cables for 0.1" headers.  Remember Rx goes to Tx and Tx goes to Rx. If using a Mega2560
@@ -156,18 +153,7 @@
 #define MaxAzm                   180 // Alt/Az mounts only. +/- maximum allowed Azimuth, default =  180.  Allowed range is 180 to 360
                                      // Axis3 is optional and for a rotator/de-rotator
 
-// FOCUSER ROTATOR OR ALT/AZ DE-ROTATION ----------------------------------------------------------------------------------
-#define ROTATOR_OFF                  // enable or disable rotator feature (for any mount type,) default=OFF (de-rotator is available only for MOUNT_TYPE_ALTAZM.)
-#define MaxRateAxis3               8 // this is the minimum number of milli-seconds between micro-steps, default=8
-#define StepsPerDegreeAxis3     64.0 // calculated as    :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
-                                     // Rotator          :  24            * 8           * 20              *  6/360                = 64
-                                     // For de-rotation of Alt/Az mounts a quick estimate of the required resolution (in StepsPerDegree)
-                                     // would be an estimate of the circumference of the useful imaging circle in (pixels * 2)/360
-#define REVERSE_AXIS3_OFF            // reverse the direction of Axis3 rotator movement
-#define MinRot                  -180 // minimum allowed Axis3 rotator, default = -180
-#define MaxRot                   180 // maximum allowed Axis3 rotator, default =  180
-
-// STEPPER DRIVER CONTROL --------------------------------------------------------------------------------------------------
+// AXIS1/2 STEPPER DRIVER CONTROL ------------------------------------------------------------------------------------------
 
 // Optional stepper driver Enable support, just wire Enable to Pins 25 (Axis1) and 30 (Axis2) and OnStep will pull these HIGH (Teensy3.x Pins 16,21)
 // by default to disable stepper drivers on startup and when Parked.  An Align, Sync, or UnPark will enable the drivers.  Adjust below if you need these pulled LOW to disable the drivers.
@@ -215,6 +201,37 @@
 // just wire driver Fault signal to Pins 26 (Axis1) and 31 (Axis2), default=OFF (Teensy3.x Pins 17,22) other settings are LOW and HIGH
 #define AXIS1_FAULT_OFF
 #define AXIS2_FAULT_OFF
+
+// ------------------------------------------------------------------------------------------------------------------------
+// FOCUSER ROTATOR OR ALT/AZ DE-ROTATION ----------------------------------------------------------------------------------
+// A9,A8 = Step,Dir (Teensy3.x 30,33 choose either this option or the second focuser, not both)
+#define ROTATOR_OFF                  // enable or disable rotator feature (for any mount type,) default=OFF (de-rotator is available only for MOUNT_TYPE_ALTAZM.)
+#define MaxRateAxis3               8 // this is the minimum number of milli-seconds between micro-steps, default=8
+#define StepsPerDegreeAxis3     64.0 // calculated as    :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
+                                     // Rotator          :  24            * 8           * 20              *  6/360                = 64
+                                     // For de-rotation of Alt/Az mounts a quick estimate of the required resolution (in StepsPerDegree)
+                                     // would be an estimate of the circumference of the useful imaging circle in (pixels * 2)/360
+#define REVERSE_AXIS3_OFF            // reverse the direction of Axis3 rotator movement
+#define MinAxis3                -180 // minimum allowed Axis3 rotator, default = -180
+#define MaxAxis3                 180 // maximum allowed Axis3 rotator, default =  180
+
+// FOCUSER1 ---------------------------------------------------------------------------------------------------------------
+// A11,A10 = Step,Dir (Teensy3.2 pins 31,32) (Teensy3.5/3.6 pins 34,35)
+#define FOCUSER1_ON                  // enable or disable focuser feature, default=OFF
+#define MaxRateAxis4               8 // this is the minimum number of milli-seconds between micro-steps, default=8
+#define StepsPerMicrometerAxis4  0.5 // figure this out by testing or other means
+#define REVERSE_AXIS4_OFF            // reverse the direction of Axis4 focuser movement
+#define MinAxis4               -25.0 // minimum allowed Axis4 position in millimeters, default = -25.0
+#define MaxAxis4                25.0 // maximum allowed Axis4 position in millimeters, default =  25.0
+
+// FOCUSER2 ---------------------------------------------------------------------------------------------------------------
+// A13,A12 = Step,Dir (Teensy3.x pins 30,33 choose either this option or the rotator, not both) 
+#define FOCUSER2_ON                 // enable or disable focuser feature, default=OFF
+#define MaxRateAxis5               8 // this is the minimum number of milli-seconds between micro-steps, default=8
+#define StepsPerMicrometerAxis5  0.5 // figure this out by testing or other means
+#define REVERSE_AXIS5_OFF            // reverse the direction of Axis4 focuser movement
+#define MinAxis5               -25.0 // minimum allowed Axis5 position in millimeters, default = -25.0
+#define MaxAxis5                25.0 // maximum allowed Axis5 position in millimeters, default =  25.0
 
 // THAT'S IT FOR USER CONFIGURATION!
 

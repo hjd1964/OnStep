@@ -66,6 +66,14 @@
 #define Axis3DirPin   A8    // Pin A8 (Dir)
 #define Axis3StepPin  A9    // Pin A9 (Step)
 
+// Pins to focuser1 stepper driver
+#define Axis4DirPin   A10   // Pin A10 (Dir)
+#define Axis4StepPin  A11   // Pin A11 (Step)
+
+// Pins to focuser2 stepper driver
+#define Axis5DirPin   A12   // Pin A12 (Dir)
+#define Axis5StepPin  A13   // Pin A13 (Step)
+
 // ST4 interface
 #ifdef ST4_ALTERNATE_PINS_ON
 #define ST4RAw        47    // Pin 47 ST4 RA- West
@@ -137,6 +145,14 @@
 #define Axis3DirPin   A8    // Pin A8 (Dir)
 #define Axis3StepPin  A9    // Pin A9 (Step)
 
+// Pins to focuser1 stepper driver
+#define Axis4DirPin   A10   // Pin A10 (Dir)
+#define Axis4StepPin  A11   // Pin A11 (Step)
+
+// Pins to focuser2 stepper driver
+#define Axis5DirPin   A12   // Pin A12 (Dir)
+#define Axis5StepPin  A13   // Pin A13 (Step)
+
 // ST4 interface
 #define ST4RAw        47    // Pin 47 ST4 RA- West
 #define ST4DEs        43    // Pin 43 ST4 DE- South
@@ -193,6 +209,21 @@
 #define Axis3DirPin   33    // Pin 33 (Dir)
 #define Axis3StepPin  30    // Pin 30 (Step)
 
+// Pins to focuser1 stepper driver  
+// teensy3.5/3.6
+#if defined(__MK64FX512__) || defined(__MK66FX1M0__)
+#define Axis4DirPin   34    // Pin 34 (Dir)
+#define Axis4StepPin  35    // Pin 35 (Step)
+#else
+// Pins to focuser1 stepper driver teensy3.2
+#define Axis4DirPin   32    // Pin 32 (Dir)
+#define Axis4StepPin  31    // Pin 31 (Step)
+#endif
+
+// Pins to focuser2 stepper driver
+#define Axis4DirPin   33    // Pin 33 (Dir)
+#define Axis4StepPin  30    // Pin 30 (Step)
+
 // ST4 interface
 #define ST4RAw        24    // Pin 24 ST4 RA- West
 #define ST4DEs        25    // Pin 25 ST4 DE- South
@@ -247,6 +278,14 @@
 // Pins to rotator stepper driver
 #define Axis3DirPin   33    // Pin 33 (Dir)
 #define Axis3StepPin  30    // Pin 30 (Step)
+
+// Pins to focuser1 stepper driver
+#define Axis4DirPin   32    // Pin 32 (Dir)
+#define Axis4StepPin  31    // Pin 31 (Step)
+
+// Pins to focuser2 stepper driver
+#define Axis4DirPin   33    // Pin 33 (Dir)
+#define Axis4StepPin  30    // Pin 30 (Step)
 
 // ST4 interface
 #ifdef ST4_ALTERNATE_PINS_ON

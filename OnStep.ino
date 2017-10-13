@@ -61,6 +61,12 @@
 #ifndef GUIDE_TIME_LIMIT
 #define GUIDE_TIME_LIMIT 0
 #endif
+#ifndef MaxRot
+#define MaxRot MaxAxis3
+#endif
+#ifndef MinRot
+#define MinRot MinAxis3
+#endif
 #include "Pins.h"
 #include "errno.h"
 #include "math.h"
@@ -284,15 +290,46 @@ bool deRotate        = false;
 bool deRotateReverse = false;
 long posAxis3        = 0;                          // rotator position in steps
 fixed_t targetAxis3;                               // rotator goto position in steps
-fixed_t amountRotateAxis3;                         // rotator goto position in steps
+fixed_t amountRotateAxis3;                         // rotator movement per 0.01/s
 long axis3Increment  = 1;                          // rotator increment for manual control
-unsigned long rotateMs=0;
+unsigned long axis3Ms=0;
 #ifdef REVERSE_AXIS3_ON
 #define AXIS3_FORWARD LOW
 #define AXIS3_REVERSE HIGH
 #else
 #define AXIS3_FORWARD HIGH
 #define AXIS3_REVERSE LOW
+#endif
+#endif
+
+// Globals for focusers ----------------------------------------------------------------------------------------------------
+#ifdef FOCUSER1_ON
+long posAxis4        = 0;                          // focuser position in steps
+fixed_t targetAxis4;                               // focuser goto position in steps
+fixed_t amountMoveAxis4;                           // focuser movement per 0.01/s
+long axis4Increment  = 1;                          // focuser increment for manual control
+unsigned long axis4Ms=0;
+#ifdef REVERSE_AXIS4_ON
+#define AXIS4_FORWARD LOW
+#define AXIS4_REVERSE HIGH
+#else
+#define AXIS4_FORWARD HIGH
+#define AXIS4_REVERSE LOW
+#endif
+#endif
+
+#ifdef FOCUSER2_ON
+long posAxis5        = 0;                          // focuser position in steps
+fixed_t targetAxis5;                               // focuser goto position in steps
+fixed_t amountMoveAxis5;                           // focuser movement per 0.01/s
+long axis5Increment  = 1;                          // focuser increment for manual control
+unsigned long axis5Ms=0;
+#ifdef REVERSE_AXIS5_ON
+#define AXIS5_FORWARD LOW
+#define AXIS5_REVERSE HIGH
+#else
+#define AXIS5_FORWARD HIGH
+#define AXIS5_REVERSE LOW
 #endif
 #endif
 
@@ -663,7 +700,13 @@ void setup() {
   housekeepingTimer=millis()+1000UL; 
   last_loop_micros=micros();
 #ifdef ROTATOR_ON
-  rotateMs=millis()+(unsigned long)MaxRateAxis3;
+  axis3Ms=millis()+(unsigned long)MaxRateAxis3;
+#endif
+#ifdef FOCUSER1_ON
+  axis4Ms=millis()+(unsigned long)MaxRateAxis4;
+#endif
+#ifdef FOCUSER2_ON
+  axis5Ms=millis()+(unsigned long)MaxRateAxis5;
 #endif
 }
 
@@ -721,7 +764,23 @@ void loop() {
 
 #if defined(ROTATOR_ON) && defined(MOUNT_TYPE_ALTAZM)
     // do de-rotate movement
-    if (deRotate && (trackingState==TrackingSidereal)) targetAxis3.fixed+=amountRotateAxis3.fixed;
+    if (deRotate && (trackingState==TrackingSidereal)) {
+      targetAxis3.fixed+=amountRotateAxis3.fixed;
+      double f=(long)targetAxis3.part.m; f/=(double)StepsPerDegreeAxis3;
+      if ((f<(double)MinAxis3) || (f>(double)MaxAxis3)) { deRotate=false; amountRotateAxis3.fixed=0; }
+    }
+#endif
+#if defined(FOCUSER1_ON)
+    // do automatic movement
+    targetAxis4.fixed+=amountMoveAxis4.fixed;
+    { double f=(long)targetAxis4.part.m; f/=(double)StepsPerMicrometerAxis4;
+    if ((f<(double)MinAxis4*1000.0) || (f>(double)MaxAxis4*1000.0)) amountMoveAxis4.fixed=0; }
+#endif
+#if defined(FOCUSER2_ON)
+    // do automatic movement
+    targetAxis5.fixed+=amountMoveAxis5.fixed;
+    { double f=(long)targetAxis5.part.m; f/=(double)StepsPerMicrometerAxis5;
+    if ((f<(double)MinAxis5*1000.0) || (f>(double)MaxAxis5*1000.0)) amountMoveAxis5.fixed=0; }
 #endif
 
     // figure out the current Altitude
@@ -779,21 +838,61 @@ void loop() {
     UT1=UT1_start+(t2/3600.0);
   }
 
+unsigned long tempMs;
+
   // ROTATOR/DEROTATOR ---------------------------------------------------------------------------------
 #ifdef ROTATOR_ON
-  unsigned long tempMs=millis();
-  if ((long)(tempMs-rotateMs)>0) {
-    rotateMs=tempMs+(unsigned long)MaxRateAxis3;
+  tempMs=millis();
+  if ((long)(tempMs-axis3Ms)>0) {
+    axis3Ms=tempMs+(unsigned long)MaxRateAxis3;
 
-    if ((posAxis3<(long)targetAxis3.part.m) && (posAxis3<(long)MaxRot*StepsPerDegreeAxis3)) {
+    if ((posAxis3<(long)targetAxis3.part.m) && (posAxis3<((double)MaxRot*(double)StepsPerDegreeAxis3))) {
       digitalWrite(Axis3StepPin,LOW); delayMicroseconds(10);
       digitalWrite(Axis3DirPin,AXIS3_FORWARD); delayMicroseconds(10);
       digitalWrite(Axis3StepPin,HIGH); posAxis3++;
     }
-    if ((posAxis3>(long)targetAxis3.part.m) && (posAxis3>(long)MinRot*StepsPerDegreeAxis3)) {
+    if ((posAxis3>(long)targetAxis3.part.m) && (posAxis3>((double)MinRot*(double)StepsPerDegreeAxis3))) {
       digitalWrite(Axis3StepPin,LOW); delayMicroseconds(10);
       digitalWrite(Axis3DirPin,AXIS3_REVERSE); delayMicroseconds(10);
       digitalWrite(Axis3StepPin,HIGH); posAxis3--;
+    }
+  }
+#endif
+
+  // FOCUSER1 -------------------------------------------------------------------------------------------
+#ifdef FOCUSER1_ON
+  tempMs=millis();
+  if ((long)(tempMs-axis4Ms)>0) {
+    axis4Ms=tempMs+(unsigned long)MaxRateAxis4;
+
+    if ((posAxis4<(long)targetAxis4.part.m) && (posAxis4<((double)MaxAxis4*1000.0*(double)StepsPerMicrometerAxis4))) {
+      digitalWrite(Axis4StepPin,LOW); delayMicroseconds(10);
+      digitalWrite(Axis4DirPin,AXIS4_FORWARD); delayMicroseconds(10);
+      digitalWrite(Axis4StepPin,HIGH); posAxis4++;
+    }
+    if ((posAxis4>(long)targetAxis4.part.m) && (posAxis4>((double)MinAxis4*1000.0*(double)StepsPerMicrometerAxis4))) {
+      digitalWrite(Axis4StepPin,LOW); delayMicroseconds(10);
+      digitalWrite(Axis4DirPin,AXIS4_REVERSE); delayMicroseconds(10);
+      digitalWrite(Axis4StepPin,HIGH); posAxis4--;
+    }
+  }
+#endif
+
+  // FOCUSER2 -------------------------------------------------------------------------------------------
+#ifdef FOCUSER2_ON
+  tempMs=millis();
+  if ((long)(tempMs-axis5Ms)>0) {
+    axis5Ms=tempMs+(unsigned long)MaxRateAxis5;
+
+    if ((posAxis5<(long)targetAxis5.part.m) && (posAxis5<((double)MaxAxis5*1000.0*(double)StepsPerMicrometerAxis5))) {
+      digitalWrite(Axis5StepPin,LOW); delayMicroseconds(10);
+      digitalWrite(Axis5DirPin,AXIS5_FORWARD); delayMicroseconds(10);
+      digitalWrite(Axis5StepPin,HIGH); posAxis5++;
+    }
+    if ((posAxis5>(long)targetAxis5.part.m) && (posAxis5>((double)MinAxis5*1000.0*(double)StepsPerMicrometerAxis5))) {
+      digitalWrite(Axis5StepPin,LOW); delayMicroseconds(10);
+      digitalWrite(Axis5DirPin,AXIS5_REVERSE); delayMicroseconds(10);
+      digitalWrite(Axis5StepPin,HIGH); posAxis5--;
     }
   }
 #endif
@@ -805,18 +904,18 @@ void loop() {
   last_loop_micros=this_loop_micros;
 
   // 1 SECOND TIMED ------------------------------------------------------------------------------------
-  unsigned long ms=millis();
-  if ((long)(ms-housekeepingTimer)>0) {
-    housekeepingTimer=ms+1000UL;
+  tempMs=millis();
+  if ((long)(tempMs-housekeepingTimer)>0) {
+    housekeepingTimer=tempMs+1000UL;
 
 #if defined(ROTATOR_ON) && defined(MOUNT_TYPE_ALTAZM)
     // calculate new de-rotation rate if needed
     if (deRotate && (trackingState==TrackingSidereal)) {
       double h,d;
       getApproxEqu(&h,&d,true);
-      double pr=ParallacticRate(h,d)*StepsPerDegreeAxis3;     // in steps per second
+      double pr=ParallacticRate(h,d)*(double)StepsPerDegreeAxis3; // in steps per second
       if (deRotateReverse) pr=-pr;
-      amountRotateAxis3.fixed=doubleToFixed(pr/100.0);        // in steps per 1/100 second
+      amountRotateAxis3.fixed=doubleToFixed(pr/100.0);            // in steps per 1/100 second
     }
 #endif
 

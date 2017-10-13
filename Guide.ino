@@ -163,18 +163,18 @@ void ST4() {
       if ((c1=='+') && ((long)(millis()-c1Time)>AltMode_ms) && (!altModeB)) { if (!altModeA) { altModeA=true; soundBeep(); keys_up=false; } altModeShed=millis(); }
       if ((c2=='+') && ((long)(millis()-c2Time)>AltMode_ms) && (!altModeA)) { if (!altModeB) { altModeB=true; soundBeep(); keys_up=false; } altModeShed=millis(); }
       if ((trackingState!=TrackingMoveTo) && (!waitingHome) && (altModeA || altModeB) && ((long)(millis()-altModeShed)<Shed_ms)) {
-        if (keys_up) {
+        if (keys_up && !cmdWaiting()) {
           if (altModeA) {
             int c=currentGuideRate;
             if ((c1=='w') && ((long)(millis()-c1Time)>Debounce_ms)) {
-              if (trackingState==TrackingNone) localCommand(":B+#"); else { if (c>=7) c=8; else if (c>=5) c=7; else if (c>=2) c=5; else if (c<2) c=2; }
+              if (trackingState==TrackingNone) cmdSend(":B+#",true); else { if (c>=7) c=8; else if (c>=5) c=7; else if (c>=2) c=5; else if (c<2) c=2; }
               keys_up=false; altModeShed=millis(); soundClick();
             }
             if ((c1=='e') && ((long)(millis()-c1Time)>Debounce_ms)) {
-              if (trackingState==TrackingNone) localCommand(":B-#"); else { if (c<=5) c=2; else if (c<=7) c=5; else if (c<=8) c=7; else if (c>8) c=8; }
+              if (trackingState==TrackingNone) cmdSend(":B-#",true); else { if (c<=5) c=2; else if (c<=7) c=5; else if (c<=8) c=7; else if (c>8) c=8; }
               keys_up=false; altModeShed=millis(); soundClick();
             }
-            if ((c2=='s') && ((long)(millis()-c2Time)>Debounce_ms)) { if (alignThisStar>alignNumStars) localCommand(":CS#"); else localCommand(":A+#"); keys_up=false; altModeShed=millis(); soundClick(); }
+            if ((c2=='s') && ((long)(millis()-c2Time)>Debounce_ms)) { if (alignThisStar>alignNumStars) cmdSend(":CS#",true); else cmdSend(":A+#",true); keys_up=false; altModeShed=millis(); soundClick(); }
             if ((c2=='n') && ((long)(millis()-c2Time)>Debounce_ms)) {
               if (trackingState==TrackingSidereal) { trackingState=TrackingNone; DisableStepperDrivers(); soundClick(); } else
                 if (trackingState==TrackingNone) { trackingState=TrackingSidereal; EnableStepperDrivers(); soundClick(); }
@@ -183,10 +183,10 @@ void ST4() {
             if (c!=currentGuideRate) { setGuideRate(c); enableGuideRate(c); keys_up=false; altModeShed=millis(); }
           }
           if (altModeB) {
-            if ((c1=='w') && ((long)(millis()-c1Time)>Debounce_ms)) { localCommand(":LN#"); keys_up=false; altModeShed=millis(); soundClick(); }
-            if ((c1=='e') && ((long)(millis()-c1Time)>Debounce_ms)) { localCommand(":LB#"); keys_up=false; altModeShed=millis(); soundClick(); }
+            if ((c1=='w') && ((long)(millis()-c1Time)>Debounce_ms)) { cmdSend(":LN#",true); keys_up=false; altModeShed=millis(); soundClick(); }
+            if ((c1=='e') && ((long)(millis()-c1Time)>Debounce_ms)) { cmdSend(":LB#",true); keys_up=false; altModeShed=millis(); soundClick(); }
             if ((c2=='s') && ((long)(millis()-c2Time)>Debounce_ms)) { soundEnabled=!soundEnabled; keys_up=false; altModeShed=millis(); soundClick(); }
-            if ((c2=='n') && ((long)(millis()-c2Time)>Debounce_ms)) { localCommand(":LIG#"); keys_up=false; altModeShed=millis(); soundClick(); }
+            if ((c2=='n') && ((long)(millis()-c2Time)>Debounce_ms)) { cmdSend(":LIG#",true); keys_up=false; altModeShed=millis(); soundClick(); }
           }
         }
       } else {

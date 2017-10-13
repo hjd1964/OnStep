@@ -20,6 +20,7 @@ cb cmd1; // serial1
 #ifdef SER4_AVAILABLE
 cb cmd4; // serial4
 #endif
+char replyx[50]="";
 cb cmdx;  // serialX
 
 // process commands
@@ -234,11 +235,154 @@ void processCommands() {
         }
       } else 
 
-      
 //   D - Distance Bars
 //  :D#    returns an "\0x7f#" if the mount is moving, otherwise returns "#".
       if ((command[0]=='D') && (command[1]==0))  { if (trackingState==TrackingMoveTo) { reply[0]=(char)127; reply[1]=0; } else { reply[0]='#'; reply[1]=0; supress_frame=true; } quietReply=true; } else 
- 
+
+#ifdef FOCUSER1_ON
+//   F - Focuser1 Commands
+      if (command[0]=='F') {
+//  :F+#   Move focuser in (toward objective)
+//         Returns: Nothing
+      if (command[1]=='+') {
+        double moveRate=axis4Increment;                      // in steps per second (slow=0.01mm/s and fast=1mm/s)
+        double stepsPerS=(1.0/MaxRateAxis4)*1000.0; if (moveRate>stepsPerS) moveRate=stepsPerS;
+        amountMoveAxis4.fixed=doubleToFixed(moveRate/100.0); // in steps per 1/100 second
+        quietReply=true;
+      } else
+//  :F-#   Move focuser out (away from objective)
+//         Returns: Nothing
+      if (command[1]=='-') {
+        double moveRate=axis4Increment;                       // in steps per second (slow=0.01mm/s and fast=1mm/s)
+        double stepsPerS=(1.0/MaxRateAxis4)*1000.0; if (moveRate>stepsPerS) moveRate=stepsPerS;
+        amountMoveAxis4.fixed=doubleToFixed(-moveRate/100.0); // in steps per 1/100 second
+        quietReply=true;
+      } else
+//  :FQ#   Stop the focuser
+//         Returns: Nothing
+      if (command[1]=='Q') {
+        amountMoveAxis4.fixed=0;
+        quietReply=true;
+      } else
+//  :FG#   Get focuser current position in micrometers
+//         Returns: snnn#
+      if (command[1]=='G') {
+        f1=((double)posAxis4)/(double)StepsPerMicrometerAxis4;
+        sprintf(reply,"%ld",(long int)round(f1));
+        quietReply=true;
+      } else
+//  :FZ#   Set focuser zero position (half travel)
+//         Returns: Nothing
+      if (command[1]=='Z') {
+        posAxis4=0;
+        targetAxis4.part.m=0; targetAxis4.part.f=0;
+        quietReply=true;
+      } else
+//  :FF#   Set focuser for fast motion
+//         Returns: Nothing
+      if (command[1]=='F') {
+        axis4Increment=(double)StepsPerMicrometerAxis4*1000.0;
+        quietReply=true; 
+      } else
+//  :FS#      Set focuser for slow motion
+//            Returns: Nothing
+//  :FSsnnn#  Set focuser target position in micrometers
+//            Returns: Nothing
+      if (command[1]=='S') {
+        if (parameter[0]==0) {
+          axis4Increment=(double)StepsPerMicrometerAxis4*10.0;
+          quietReply=true; 
+        } else {
+          f=atol(parameter);
+          if ((f>=MinAxis4*1000.0) && (f<=MaxAxis4*1000.0)) {
+            targetAxis4.part.m=(long)(f*(double)StepsPerMicrometerAxis4); targetAxis4.part.f=0;
+          }
+        }
+      } else
+//  :Fn#   Movement rate, 1=finest, 2=0.01mm/second, 3=0.1mm/second, 4=1mm/second
+//         Returns: Nothing
+      if ((command[1]-'0'>=1) && (command[1]-'0'<=4)) {
+        if (command[1]=='1') axis4Increment=1;
+        if (command[1]=='2') axis4Increment=(double)StepsPerMicrometerAxis4*10.0;
+        if (command[1]=='3') axis4Increment=(double)StepsPerMicrometerAxis4*100.0;
+        if (command[1]=='4') axis4Increment=(double)StepsPerMicrometerAxis4*1000.0;
+        quietReply=true;
+      } else commandError=true;
+     } else
+#endif
+
+#ifdef FOCUSER2_ON
+//   f - Focuser2 Commands
+      if (command[0]=='f') {
+//  :f+#   Move focuser in (toward objective)
+//         Returns: Nothing
+      if (command[1]=='+') {
+        double moveRate=axis5Increment;                      // in steps per second (slow=0.01mm/s and fast=1mm/s)
+        double stepsPerS=(1.0/MaxRateAxis5)*1000.0; if (moveRate>stepsPerS) moveRate=stepsPerS;
+        amountMoveAxis5.fixed=doubleToFixed(moveRate/100.0); // in steps per 1/100 second
+        quietReply=true;
+      } else
+//  :f-#   Move focuser out (away from objective)
+//         Returns: Nothing
+      if (command[1]=='-') {
+        double moveRate=axis5Increment;                       // in steps per second (slow=0.01mm/s and fast=1mm/s)
+        double stepsPerS=(1.0/MaxRateAxis5)*1000.0; if (moveRate>stepsPerS) moveRate=stepsPerS;
+        amountMoveAxis5.fixed=doubleToFixed(-moveRate/100.0); // in steps per 1/100 second
+        quietReply=true;
+      } else
+//  :fQ#   Stop the focuser
+//         Returns: Nothing
+      if (command[1]=='Q') {
+        amountMoveAxis5.fixed=0;
+        quietReply=true;
+      } else
+//  :fG#   Get focuser current position in micrometers
+//         Returns: snnn#
+      if (command[1]=='G') {
+        f1=((double)posAxis5)/(double)StepsPerMicrometerAxis5;
+        sprintf(reply,"%ld",(long int)round(f1));
+        quietReply=true;
+      } else
+//  :fZ#   Set focuser zero position (half travel)
+//         Returns: Nothing
+      if (command[1]=='Z') {
+        posAxis5=0;
+        targetAxis5.part.m=0; targetAxis5.part.f=0;
+        quietReply=true;
+      } else
+//  :fF#   Set focuser for fast motion
+//         Returns: Nothing
+      if (command[1]=='F') {
+        axis5Increment=(double)StepsPerMicrometerAxis5*1000.0;
+        quietReply=true; 
+      } else
+//  :fS#      Set focuser for slow motion
+//            Returns: Nothing
+//  :fSsnnn#  Set focuser target position in micrometers
+//            Returns: Nothing
+      if (command[1]=='S') {
+        if (parameter[0]==0) {
+          axis5Increment=(double)StepsPerMicrometerAxis5*10.0;
+          quietReply=true; 
+        } else {
+          f=atol(parameter);
+          if ((f>=MinAxis5*1000.0) && (f<=MaxAxis5*1000.0)) {
+            targetAxis5.part.m=(long)(f*(double)StepsPerMicrometerAxis5); targetAxis5.part.f=0;
+          }
+        }
+      } else
+//  :fn#   Movement rate, 1=finest, 2=0.01mm/second, 3=0.1mm/second, 4=1mm/second
+//         Returns: Nothing
+      if ((command[1]-'0'>=1) && (command[1]-'0'<=4)) {
+        if (command[1]=='1') axis5Increment=1;
+        if (command[1]=='2') axis5Increment=(double)StepsPerMicrometerAxis5*10.0;
+        if (command[1]=='3') axis5Increment=(double)StepsPerMicrometerAxis5*100.0;
+        if (command[1]=='4') axis5Increment=(double)StepsPerMicrometerAxis5*1000.0;
+        quietReply=true;
+      } else commandError=true;
+     } else
+#endif
+
 //   G - Get Telescope Information
       if (command[0]=='G') {
 
@@ -565,17 +709,15 @@ void processCommands() {
         strcat(reply,",");
         strcat(reply,objType);
         quietReply=true;
-          
       } else 
+
 // :LIG#   Get Object Information and goto
-//         Returns: 0..9, see :MS#
+//         Returns: Nothing
       if ((command[1]=='I') && (parameter[0]=='G') && (parameter[1]==0)) {
         Lib.readVars(reply,&i,&newTargetRA,&newTargetDec);
 
-        i=goToEqu(newTargetRA,newTargetDec);
-        reply[0]=i+'0'; reply[1]=0;
+        goToEqu(newTargetRA,newTargetDec);
         quietReply=true;
-        supress_frame=true; 
       } else 
 
 // :LR#    Get Object Information including RA and Dec, with advance to next Record
@@ -908,7 +1050,7 @@ void processCommands() {
         fixed_t xl;
         xl.part.m=(long)((double)axis3Increment*(double)StepsPerDegreeAxis3*1000.0); xl.fixed/=1000;
         targetAxis3.fixed+=xl.fixed;
-        if ((long)targetAxis3.part.m>(long)MaxRot*StepsPerDegreeAxis3) { targetAxis3.part.m=(long)MaxRot*StepsPerDegreeAxis3; targetAxis3.part.f=0; }
+        if ((long)targetAxis3.part.m>(double)MaxRot*(double)StepsPerDegreeAxis3) { targetAxis3.part.m=(unsigned long)((double)MaxRot*(double)StepsPerDegreeAxis3); targetAxis3.part.f=0; }
         quietReply=true;
       } else
 //  :r<#   Move counter clockwise as set by :rn# command, default = 1 degree
@@ -917,7 +1059,7 @@ void processCommands() {
         fixed_t xl;
         xl.part.m=(long)((double)axis3Increment*(double)StepsPerDegreeAxis3*1000.0); xl.fixed/=1000;
         targetAxis3.fixed-=xl.fixed;
-        if ((long)targetAxis3.part.m<(long)MinRot*StepsPerDegreeAxis3) { targetAxis3.part.m=(long)MinRot*StepsPerDegreeAxis3; targetAxis3.part.f=0; }
+        if ((long)targetAxis3.part.m<(double)MinRot*(double)StepsPerDegreeAxis3) { targetAxis3.part.m=(unsigned long)((double)MinRot*(double)StepsPerDegreeAxis3); targetAxis3.part.f=0; }
         quietReply=true;
       } else
 //  :rn#   Move increment, 1=1 degrees, 2=5 degrees, 3=10 degrees
@@ -935,7 +1077,7 @@ void processCommands() {
         i=highPrecision; highPrecision=true;
         if (parameter[0]=='-') f=-1.0; else f=1.0;
         if ((parameter[0]=='+') || (parameter[0]=='-')) i1=1; else i1=0;
-        if (!dmsToDouble(&f1,&parameter[i1],true)) commandError=true; else { targetAxis3.part.m=(f*f1)*StepsPerDegreeAxis3; targetAxis3.part.f=0; }
+        if (!dmsToDouble(&f1,&parameter[i1],true)) commandError=true; else { targetAxis3.part.m=(f*f1)*(double)StepsPerDegreeAxis3; targetAxis3.part.f=0; }
         highPrecision=i;
       } else commandError=true;
      } else
@@ -1458,6 +1600,12 @@ void processCommands() {
           Serial4.print(reply);
         }
 #endif
+
+        if (process_command==COMMAND_SERIALX) {
+          if (cmd1.checksum) checksum(reply);
+          if (!supress_frame) strcat(reply,"#");
+          strcpy(replyx,reply);
+        }
       }
       quietReply=false;
    }
@@ -1605,13 +1753,30 @@ String ConfighSettings() {
   return c;
 }
 
-void localCommand(const char *s) {
+void forceRefreshGetEqu() {
+  _coord_t=millis()-100;
+}
+
+// local command processing
+bool _ignoreReply=false;
+// true if command isn't complete
+bool cmdWaiting() {
+  if (cmdx.ready()) return true;
+  if ((replyx[0]!=0) && !_ignoreReply) return true;
+  return false;
+}
+// set command to be processed and if reply should be be ignored
+void cmdSend(const char *s, bool ignoreReply=false) {
+  _ignoreReply=ignoreReply;
+  replyx[0]=0;
   cmdx.flush();
   int l=0;
   while (s[l]!=0) { cmdx.add(s[l]); l++; }
 }
-
-void forceRefreshGetEqu() {
-  _coord_t=millis()-100;
+// get the last command reply
+bool cmdReply(char *s) {
+  if (replyx[0]==0) return false;
+  strcpy(s,replyx); replyx[0]=0;
+  return true;
 }
 
