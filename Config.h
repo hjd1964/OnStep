@@ -217,7 +217,7 @@
 
 // FOCUSER1 ---------------------------------------------------------------------------------------------------------------
 // A11,A10 = Step,Dir (Teensy3.2 pins 31,32) (Teensy3.5/3.6 pins 34,35)
-#define FOCUSER1_ON                  // enable or disable focuser feature, default=OFF
+#define FOCUSER1_OFF                 // enable or disable focuser feature, default=OFF
 #define MaxRateAxis4               8 // this is the minimum number of milli-seconds between micro-steps, default=8
 #define StepsPerMicrometerAxis4  0.5 // figure this out by testing or other means
 #define REVERSE_AXIS4_OFF            // reverse the direction of Axis4 focuser movement
@@ -226,7 +226,7 @@
 
 // FOCUSER2 ---------------------------------------------------------------------------------------------------------------
 // A13,A12 = Step,Dir (Teensy3.x pins 30,33 choose either this option or the rotator, not both) 
-#define FOCUSER2_ON                 // enable or disable focuser feature, default=OFF
+#define FOCUSER2_OFF                 // enable or disable focuser feature, default=OFF
 #define MaxRateAxis5               8 // this is the minimum number of milli-seconds between micro-steps, default=8
 #define StepsPerMicrometerAxis5  0.5 // figure this out by testing or other means
 #define REVERSE_AXIS5_OFF            // reverse the direction of Axis4 focuser movement

@@ -224,7 +224,7 @@
 // ------------------------------------------------------------------------------------------------------------------------
 // FOCUSER ROTATOR OR ALT/AZ DE-ROTATION ----------------------------------------------------------------------------------
 // A9,A8 = Step,Dir (Teensy3.x 30,33 choose either this option or the second focuser, not both)
-#define ROTATOR_ON                  // enable or disable rotator feature (for any mount type,) default=OFF (de-rotator is available only for MOUNT_TYPE_ALTAZM.)
+#define ROTATOR_OFF                  // enable or disable rotator feature (for any mount type,) default=OFF (de-rotator is available only for MOUNT_TYPE_ALTAZM.)
 #define MaxRateAxis3               8 // this is the minimum number of milli-seconds between micro-steps, default=8
 #define StepsPerDegreeAxis3     64.0 // calculated as    :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
                                      // Rotator          :  24            * 8           * 20              *  6/360                = 64
@@ -236,7 +236,7 @@
 
 // FOCUSER1 ---------------------------------------------------------------------------------------------------------------
 // A11,A10 = Step,Dir (Teensy3.2 pins 31,32) (Teensy3.5/3.6 pins 34,35)
-#define FOCUSER1_ON                  // enable or disable focuser feature, default=OFF
+#define FOCUSER1_OFF                 // enable or disable focuser feature, default=OFF
 #define MaxRateAxis4               8 // this is the minimum number of milli-seconds between micro-steps, default=8
 #define StepsPerMicrometerAxis4  0.5 // figure this out by testing or other means
 #define REVERSE_AXIS4_OFF            // reverse the direction of Axis4 focuser movement
