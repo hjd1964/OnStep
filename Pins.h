@@ -221,8 +221,8 @@
 #endif
 
 // Pins to focuser2 stepper driver
-#define Axis4DirPin   33    // Pin 33 (Dir)
-#define Axis4StepPin  30    // Pin 30 (Step)
+#define Axis5DirPin   33    // Pin 33 (Dir)
+#define Axis5StepPin  30    // Pin 30 (Step)
 
 // ST4 interface
 #define ST4RAw        24    // Pin 24 ST4 RA- West
@@ -279,9 +279,16 @@
 #define Axis3DirPin   33    // Pin 33 (Dir)
 #define Axis3StepPin  30    // Pin 30 (Step)
 
-// Pins to focuser1 stepper driver
+// Pins to focuser1 stepper driver  
+// teensy3.5/3.6
+#if defined(__MK64FX512__) || defined(__MK66FX1M0__)
+#define Axis4DirPin   34    // Pin 34 (Dir)
+#define Axis4StepPin  35    // Pin 35 (Step)
+#else
+// Pins to focuser1 stepper driver teensy3.2
 #define Axis4DirPin   32    // Pin 32 (Dir)
 #define Axis4StepPin  31    // Pin 31 (Step)
+#endif
 
 // Pins to focuser2 stepper driver
 #define Axis4DirPin   33    // Pin 33 (Dir)
