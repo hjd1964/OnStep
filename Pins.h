@@ -212,8 +212,8 @@
 // Pins to focuser1 stepper driver  
 // teensy3.5/3.6
 #if defined(__MK64FX512__) || defined(__MK66FX1M0__)
-#define Axis4DirPin   34    // Pin 34 (Dir)
-#define Axis4StepPin  35    // Pin 35 (Step)
+#define Axis4DirPin   35    // Pin 35 (Dir)
+#define Axis4StepPin  34    // Pin 34 (Step)
 #else
 // Pins to focuser1 stepper driver teensy3.2
 #define Axis4DirPin   32    // Pin 32 (Dir)
@@ -282,17 +282,13 @@
 // Pins to focuser1 stepper driver  
 // teensy3.5/3.6
 #if defined(__MK64FX512__) || defined(__MK66FX1M0__)
-#define Axis4DirPin   34    // Pin 34 (Dir)
-#define Axis4StepPin  35    // Pin 35 (Step)
+#define Axis4DirPin   35    // Pin 35 (Dir)
+#define Axis4StepPin  34    // Pin 34 (Step)
 #else
 // Pins to focuser1 stepper driver teensy3.2
 #define Axis4DirPin   32    // Pin 32 (Dir)
 #define Axis4StepPin  31    // Pin 31 (Step)
 #endif
-
-// Pins to focuser2 stepper driver
-#define Axis4DirPin   33    // Pin 33 (Dir)
-#define Axis4StepPin  30    // Pin 30 (Step)
 
 // ST4 interface
 #ifdef ST4_ALTERNATE_PINS_ON
