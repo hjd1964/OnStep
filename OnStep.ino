@@ -33,10 +33,10 @@
  *
  */
 
-// Use Config.h to configure OnStep to your requirements 
+// Use Config.xxxxx.h to configure OnStep to your requirements
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "11 08 17"
+#define FirmwareDate   "12 08 17"
 #define FirmwareNumber "1.0a"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
@@ -54,7 +54,17 @@
 #endif
 
 #include "TM4C.h"
-#include "Config.h"
+
+#include "Config.Classic.h"
+#include "Config.MiniPCB.h"
+#include "Config.MaxPCB.h"
+#include "Config.TM4C.h"
+#include "Config.Ramps14.h"
+
+#if !defined(Classic_ON) && !defined(MiniPCB_ON) && !defined(MaxPCB_ON) && !defined(TM4C_ON) && !defined(Ramps14_ON)
+  #error "Choose ONE Config.xxxxx.h file and enable it for use by turning it _ON."
+#endif
+
 #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
 #define SEPARATE_PULSE_GUIDE_RATE_ON
 #endif
@@ -67,7 +77,6 @@
 #ifndef MinRot
 #define MinRot MinAxis3
 #endif
-#include "Pins.h"
 #include "errno.h"
 #include "math.h"
 #include "FPoint.h"
