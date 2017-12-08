@@ -98,7 +98,7 @@
 
 // ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
 #define REMEMBER_MAX_RATE_OFF        // set to ON and OnStep will remember rates set in the ASCOM driver or Android App, default=OFF 
-#define MaxRate                   32 // this is the minimum number of micro-seconds between micro-steps
+#define MaxRate                   96 // this is the minimum number of micro-seconds between micro-steps
                                      // minimum* (fastest goto) is around 32 (Mega2560,) default=96 higher is ok
                                      // too low and OnStep communicates slowly and/or freezes as the motor timers use up all the MCU time
                                      
@@ -117,8 +117,6 @@
                                      // Axis2 is for Dec/Alt
 #define StepsPerDegreeAxis2  12800.0 // calculated as    :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
                                      // G11              :  400           * 32          * 1               *  360/360              = 12800
-                                     // the EM10b has two spur gears that drive the RA/Dec worms, they give an additional 1.25:1 reduction
-                                     // in addition to the 18:1 gear heads on the steppers for a 22.5:1 final ratio before the worm/wheels at 144:1
                                      
                                      // PEC, number of steps for a complete worm rotation (in RA), (StepsPerDegreeAxis1*360)/gear_reduction2.  Ignored on Alt/Azm mounts.
 #define StepsPerWormRotationAxis1 12800L

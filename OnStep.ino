@@ -60,8 +60,9 @@
 #include "Config.MaxPCB.h"
 #include "Config.TM4C.h"
 #include "Config.Ramps14.h"
+#include "Config.Mega2560Alt.h"
 
-#if !defined(Classic_ON) && !defined(MiniPCB_ON) && !defined(MaxPCB_ON) && !defined(TM4C_ON) && !defined(Ramps14_ON)
+#if !defined(Classic_ON) && !defined(MiniPCB_ON) && !defined(MaxPCB_ON) && !defined(TM4C_ON) && !defined(Ramps14_ON) && !defined(Mega2560Alt_ON)
   #error "Choose ONE Config.xxxxx.h file and enable it for use by turning it _ON."
 #endif
 

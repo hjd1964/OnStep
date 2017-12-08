@@ -96,11 +96,11 @@
 
 // ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
 #define REMEMBER_MAX_RATE_OFF        // set to ON and OnStep will remember rates set in the ASCOM driver or Android App, default=OFF 
-#define MaxRate                   32 // this is the minimum number of micro-seconds between micro-steps
+#define MaxRate                   96 // this is the minimum number of micro-seconds between micro-steps
                                      // minimum* (fastest goto) is 16 (Teensy3.2,) default=96 higher is ok
                                      // too low and OnStep communicates slowly and/or freezes as the motor timers use up all the MCU time
                                      // * = minimum can be lower, when both AXIS1/AXIS2_MODE_GOTO are used by AXIS1/AXIS2_STEP_GOTO times
-                                     
+
 #define DegreesForAcceleration   5.0 // approximate number of degrees for full acceleration or deceleration: higher values=longer acceleration/deceleration
                                      // Default=5.0, too low (about <1) can cause gotos to never end if micro-step mode switching is enabled.
 #define DegreesForRapidStop      1.0 // approximate number of degrees required to stop when requested or if limit is exceeded during a slew: higher values=longer deceleration
@@ -116,8 +116,6 @@
                                      // Axis2 is for Dec/Alt
 #define StepsPerDegreeAxis2  12800.0 // calculated as    :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
                                      // G11              :  400           * 32          * 1               *  360/360              = 12800
-                                     // the EM10b has two spur gears that drive the RA/Dec worms, they give an additional 1.25:1 reduction
-                                     // in addition to the 18:1 gear heads on the steppers for a 22.5:1 final ratio before the worm/wheels at 144:1
                                      
                                      // PEC, number of steps for a complete worm rotation (in RA), (StepsPerDegreeAxis1*360)/gear_reduction2.  Ignored on Alt/Azm mounts.
 #define StepsPerWormRotationAxis1 12800L
@@ -234,6 +232,9 @@
 // THAT'S IT FOR USER CONFIGURATION!
 
 // -------------------------------------------------------------------------------------------------------------------------
+#define RTC_OFF
+#define DECAY_MODE_OFF
+#define DECAY_MODE_GOTO_OFF
 #define ALLOW_DRIVER_FAULT_PULLUP_PULLDOWN
 #include "Pins.MiniPCB.h"
 #endif

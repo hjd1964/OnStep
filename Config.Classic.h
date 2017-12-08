@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------------
-// Configuration for OnStep Classic (Mega2560 or Teensy3.x)
+// Configuration for legacy OnStep Classic (Mega2560 or Teensy3.x)
 // *** this is for backwards compatability with older OnStep systems ***
 
 /*

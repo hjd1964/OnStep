@@ -112,8 +112,6 @@
                                      // Axis2 is for Dec/Alt
 #define StepsPerDegreeAxis2  12800.0 // calculated as    :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
                                      // G11              :  400           * 32          * 1               *  360/360              = 12800
-                                     // the EM10b has two spur gears that drive the RA/Dec worms, they give an additional 1.25:1 reduction
-                                     // in addition to the 18:1 gear heads on the steppers for a 22.5:1 final ratio before the worm/wheels at 144:1
                                      
                                      // PEC, number of steps for a complete worm rotation (in RA), (StepsPerDegreeAxis1*360)/gear_reduction2.  Ignored on Alt/Azm mounts.
 #define StepsPerWormRotationAxis1 12800L
