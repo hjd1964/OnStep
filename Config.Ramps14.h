@@ -1,9 +1,11 @@
 // -----------------------------------------------------------------------------------
 // Configuration for OnStep using RAMPS 1.4 Shield (Arduino Mega2560)
 
-// ***********************************************************************************
-// NOTICE: This configuration is in development/testing  *** USE AT YOUR OWN RISK  ***
-// ***********************************************************************************
+// ****************************************************************************************
+// NOTICE: This configuration is in development/testing       *** USE AT YOUR OWN RISK  ***
+// Be sure to adhear to the design limitations of the RAMPS 1.4
+// with respect to voltage, current, signaling, etc... See http://reprap.org/wiki/RAMPS_1.4           
+// ****************************************************************************************
 
 /*
  * For more information on setting OnStep up see http://www.stellarjourney.com/index.php?r=site/equipment_onstep and 
