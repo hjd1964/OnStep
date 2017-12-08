@@ -159,7 +159,7 @@ void Init_Pins() {
 
 // light reticule LED
 #ifdef RETICULE_LED_PINS
-#if defined(__ARM_Teensy3__) && !defined(ALTERNATE_PINMAP_ON)
+#if defined(__ARM_Teensy3__) && !defined(MiniPCB_ON) && !defined(MaxPCB_ON)
   #ifdef STATUS_LED_PINS_ON
     #undef STATUS_LED_PINS_ON
   #endif
@@ -227,7 +227,7 @@ void Init_Pins() {
 
 // inputs for stepper drivers fault signal
 #ifndef AXIS1_FAULT_OFF
-  #if defined(__ARM_Teensy3__) && defined(ALTERNATE_PINMAP_ON)
+  #if defined(__ARM_Teensy3__) && (defined(ALLOW_DRIVER_FAULT_PULLUP_PULLDOWN))
     #ifdef AXIS1_FAULT_LOW
       pinMode(Axis1_FAULT,INPUT_PULLUP);
     #endif
@@ -239,7 +239,7 @@ void Init_Pins() {
   #endif
 #endif
 #ifndef AXIS2_FAULT_OFF
-  #if defined(__ARM_Teensy3__) && defined(ALTERNATE_PINMAP_ON)
+  #if defined(__ARM_Teensy3__) && defined(ALLOW_DRIVER_FAULT_PULLUP_PULLDOWN)
     #ifdef AXIS2_FAULT_LOW
       pinMode(Axis2_FAULT,INPUT_PULLUP);
     #endif

@@ -65,6 +65,10 @@
   #error "Choose ONE Config.xxxxx.h file and enable it for use by turning it _ON."
 #endif
 
+#if defined(ALTERNATE_PINMAP_ON)
+  #error "ALTERNATE_PINMAP_ON is an obsolete option, you can't use this configuration."
+#endif
+
 #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
 #define SEPARATE_PULSE_GUIDE_RATE_ON
 #endif

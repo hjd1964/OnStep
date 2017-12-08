@@ -234,6 +234,7 @@
 // THAT'S IT FOR USER CONFIGURATION!
 
 // -------------------------------------------------------------------------------------------------------------------------
+#define ALLOW_DRIVER_FAULT_PULLUP_PULLDOWN
 #include "Pins.MiniPCB.h"
 #endif
 
