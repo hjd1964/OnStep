@@ -3,7 +3,7 @@
 
 // ****************************************************************************************
 // NOTICE: This configuration is in development/testing       *** USE AT YOUR OWN RISK  ***
-// Be sure to adhear to the design limitations of the RAMPS 1.4
+// Be sure to adhere to the design limitations of the RAMPS 1.4
 // with respect to voltage, current, signaling, etc... See http://reprap.org/wiki/RAMPS_1.4           
 // ****************************************************************************************
 
