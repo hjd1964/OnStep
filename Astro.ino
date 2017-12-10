@@ -337,6 +337,28 @@ void HorToEqu(double Alt, double Azm, double *HA, double *Dec) {
   *Dec = *Dec*Rad;
 }
 
+#if defined(ROTATOR_ON) && defined(MOUNT_TYPE_ALTAZM)
+// returns parallactic angle in degrees
+double ParallacticAngle(double HA, double Dec) {
+  return atan2(sin(HA/Rad),cos(Dec/Rad)*tan(latitude/Rad)-sin(Dec/Rad)*cos(HA/Rad))*Rad;
+}
+
+// returns parallactic rate in degrees per second
+double ParallacticRate(double HA, double Dec) {
+  // one minute of HA in degrees=15/60=0.25
+  double a1=ParallacticAngle(HA-0.125,Dec);
+  double a2=ParallacticAngle(HA+0.125,Dec);
+  if ((a1>+90.0) && (a2<-90.0)) a2+=360.0;
+  if ((a1<-90.0) && (a2>+90.0)) a1+=360.0;
+  return (a2-a1)/60.0;
+/*
+    double x=cos(Dec*Rad)*tan(latitude*Rad)-sin(Dec*Rad)*cos(HA*Rad);
+    double sin2H=sin(HA*Rad)*sin(HA*Rad);
+    return (0.25*(x*cos(HA*Rad)-sin2H*sin(Dec*Rad))/(x*x+sin2H))/60.0;
+*/
+}
+#endif
+
 // -----------------------------------------------------------------------------------------------------------------------------
 // Refraction rate tracking
 
@@ -706,6 +728,30 @@ void soundAlert() {
     #endif
     #ifdef BUZZER
       tone(TonePin,BUZZER,1000);
+    #endif
+  }
+}
+
+// Sound/beep
+void soundBeep() {
+  if (soundEnabled) {
+    #ifdef BUZZER_ON
+      digitalWrite(TonePin,HIGH); buzzerDuration=25;
+    #endif
+    #ifdef BUZZER
+      tone(TonePin,BUZZER,250);
+    #endif
+  }
+}
+
+// Sound/click
+void soundClick() {
+  if (soundEnabled) {
+    #ifdef BUZZER_ON
+      digitalWrite(TonePin,HIGH); buzzerDuration=5;
+    #endif
+    #ifdef BUZZER
+      tone(TonePin,BUZZER,50);
     #endif
   }
 }

@@ -33,10 +33,10 @@
  *
  */
 
-// Use Config.h to configure OnStep to your requirements 
+// Use Config.xxxxx.h to configure OnStep to your requirements
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "08 30 17"
+#define FirmwareDate   "12 08 17"
 #define FirmwareNumber "1.0b"
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
@@ -54,14 +54,34 @@
 #endif
 
 #include "TM4C.h"
-#include "Config.h"
+
+#include "Config.Classic.h"
+#include "Config.MiniPCB.h"
+#include "Config.MaxPCB.h"
+#include "Config.TM4C.h"
+#include "Config.Ramps14.h"
+#include "Config.Mega2560Alt.h"
+
+#if !defined(Classic_ON) && !defined(MiniPCB_ON) && !defined(MaxPCB_ON) && !defined(TM4C_ON) && !defined(Ramps14_ON) && !defined(Mega2560Alt_ON)
+  #error "Choose ONE Config.xxxxx.h file and enable it for use by turning it _ON."
+#endif
+
+#if defined(ALTERNATE_PINMAP_ON)
+  #error "ALTERNATE_PINMAP_ON is an obsolete option, you can't use this configuration."
+#endif
+
 #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
 #define SEPARATE_PULSE_GUIDE_RATE_ON
 #endif
 #ifndef GUIDE_TIME_LIMIT
 #define GUIDE_TIME_LIMIT 0
 #endif
-#include "Pins.h"
+#ifndef MaxRot
+#define MaxRot MaxAxis3
+#endif
+#ifndef MinRot
+#define MinRot MinAxis3
+#endif
 #include "errno.h"
 #include "math.h"
 #include "FPoint.h"
@@ -278,6 +298,55 @@ int    minAlt;                                     // the minimum altitude, in d
 int    maxAlt;                                     // the maximum altitude, in degrees, for goTo's (to keep the telescope tube away from the mount/tripod)
 bool   autoMeridianFlip = false;                   // automatically do a meridian flip and continue when we hit the MinutesPastMeridianW
 
+// Globals for rotator/de-rotator ------------------------------------------------------------------------------------------
+#ifdef ROTATOR_ON
+bool deRotate        = false;
+bool deRotateReverse = false;
+long posAxis3        = 0;                          // rotator position in steps
+fixed_t targetAxis3;                               // rotator goto position in steps
+fixed_t amountRotateAxis3;                         // rotator movement per 0.01/s
+long axis3Increment  = 1;                          // rotator increment for manual control
+unsigned long axis3Ms=0;
+#ifdef REVERSE_AXIS3_ON
+#define AXIS3_FORWARD LOW
+#define AXIS3_REVERSE HIGH
+#else
+#define AXIS3_FORWARD HIGH
+#define AXIS3_REVERSE LOW
+#endif
+#endif
+
+// Globals for focusers ----------------------------------------------------------------------------------------------------
+#ifdef FOCUSER1_ON
+long posAxis4        = 0;                          // focuser position in steps
+fixed_t targetAxis4;                               // focuser goto position in steps
+fixed_t amountMoveAxis4;                           // focuser movement per 0.01/s
+long axis4Increment  = 1;                          // focuser increment for manual control
+unsigned long axis4Ms=0;
+#ifdef REVERSE_AXIS4_ON
+#define AXIS4_FORWARD LOW
+#define AXIS4_REVERSE HIGH
+#else
+#define AXIS4_FORWARD HIGH
+#define AXIS4_REVERSE LOW
+#endif
+#endif
+
+#ifdef FOCUSER2_ON
+long posAxis5        = 0;                          // focuser position in steps
+fixed_t targetAxis5;                               // focuser goto position in steps
+fixed_t amountMoveAxis5;                           // focuser movement per 0.01/s
+long axis5Increment  = 1;                          // focuser increment for manual control
+unsigned long axis5Ms=0;
+#ifdef REVERSE_AXIS5_ON
+#define AXIS5_FORWARD LOW
+#define AXIS5_REVERSE HIGH
+#else
+#define AXIS5_FORWARD HIGH
+#define AXIS5_REVERSE LOW
+#endif
+#endif
+
 // Fast port writting help -------------------------------------------------------------------------------------------------
 #if defined(__ARM_TI_TM4C__)
 #define CLR(x,y) (GPIOPinWrite(x,y,0))
@@ -381,16 +450,17 @@ bbspi BBSpi;
 
 // Guide command ------------------------------------------------------------------------------------------------------------
 #define GuideRate1x        2
-#define GuideRate16x       6
+#define GuideRate24x       6
 #define GuideRateNone      255
 
 #define slewRate (1.0/(((double)StepsPerDegreeAxis1*(MaxRate/1000000.0)))*3600.0)
 #define slewRateX (slewRate/15.0)
 #define halfSlewRate (slewRate/2.0)
+#define acc (slewRateX/DegreesForAcceleration)  // say 5 degrees to 240x for example = 240/5 = 48X/s
 double  guideRates[10]={3.75,7.5,15,30,60,120,360,720,halfSlewRate,slewRate};
 //                      .25X .5x 1x 2x 4x  8x 24x 48x half-MaxRate MaxRate
 
-byte currentGuideRate        = GuideRate16x;
+byte currentGuideRate        = GuideRate24x;
 byte currentPulseGuideRate   = GuideRate1x;
 volatile byte activeGuideRate= GuideRateNone;
 
@@ -401,10 +471,6 @@ char          ST4DirAxis2             = 'b';
 
 volatile double   guideTimerRateAxis1 = 0.0;
 volatile double   guideTimerRateAxis2 = 0.0;
-volatile uint32_t guideStartTimeAxis1 = 0;
-volatile uint32_t guideStartTimeAxis2 = 0;
-volatile uint32_t guideBreakTimeAxis1 = 0;
-volatile uint32_t guideBreakTimeAxis2 = 0;
 
 double  guideTimerBaseRate = 0;
 fixed_t amountGuideAxis1;
@@ -637,85 +703,36 @@ void setup() {
   // telescope should be set in the polar home (CWD) for a starting point
   // this command sets indexAxis1, indexAxis2, azmCor=0; altCor=0;
   setHome();
-  
-  // enable the stepper drivers
-  digitalWrite(Axis1_EN,Axis1_Enabled); axis1Enabled=true;
-  digitalWrite(Axis2_EN,Axis2_Enabled); axis2Enabled=true;
-  delay(10);
 
   // start tracking
   trackingState=TrackingSidereal;
+  EnableStepperDrivers();
 #endif
 
   // prep counters (for keeping time in main loop)
   cli(); siderealTimer=lst; guideSiderealTimer=lst; PecSiderealTimer=lst; sei();
   housekeepingTimer=millis()+1000UL; 
   last_loop_micros=micros();
+#ifdef ROTATOR_ON
+  axis3Ms=millis()+(unsigned long)MaxRateAxis3;
+#endif
+#ifdef FOCUSER1_ON
+  axis4Ms=millis()+(unsigned long)MaxRateAxis4;
+#endif
+#ifdef FOCUSER2_ON
+  axis5Ms=millis()+(unsigned long)MaxRateAxis5;
+#endif
 }
 
 void loop() {
 
   // GUIDING -------------------------------------------------------------------------------------------
-  if (trackingState!=TrackingMoveTo) { 
-
-#if defined(ST4_ON) || defined(ST4_PULLUP)
-    // ST4 INTERFACE
-    if (parkStatus==NotParked) {
-      byte w1=digitalRead(ST4RAw); byte e1=digitalRead(ST4RAe); byte n1=digitalRead(ST4DEn); byte s1=digitalRead(ST4DEs);
-      delayMicroseconds(50);
-      byte w2=digitalRead(ST4RAw); byte e2=digitalRead(ST4RAe); byte n2=digitalRead(ST4DEn); byte s2=digitalRead(ST4DEs);
-
-      // if signals aren't stable ignore them
-      if ((w1==w2) && (e1==e2) && (n1==n2) && (s1==s2)) {
-        if (!waitingHome) {
-          char c1=0;
-          if ((w1==HIGH) && (e1==HIGH)) c1='b';
-          if ((w1==LOW)  && (e1==HIGH)) c1='w';
-          if ((w1==HIGH) && (e1==LOW))  c1='e';
-          if ((w1==LOW)  && (e1==LOW))  c1='+';
-          if (c1!=ST4DirAxis1) {
-            ST4DirAxis1=c1;
-            if ((c1=='e') || (c1=='w')) {
-    #if defined(SEPARATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
-              startGuideAxis1(c1,currentPulseGuideRate,GUIDE_TIME_LIMIT*1000);
-    #else
-              startGuideAxis1(c1,currentGuideRate,GUIDE_TIME_LIMIT*1000);
-    #endif
-            }
-            if (c1=='b') stopGuideAxis1();
-          }
-    
-          char c2=0;
-          if ((n1==HIGH) && (s1==HIGH)) c2='b';
-          if ((n1==LOW)  && (s1==HIGH)) c2='n';
-          if ((n1==HIGH) && (s1==LOW))  c2='s';
-          if ((n1==LOW)  && (s1==LOW))  c2='+';
-          if (c2!=ST4DirAxis2) {
-            ST4DirAxis2=c2;
-            if ((c2=='n') || (c2=='s')) {
-    #if defined(SEPARATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
-              startGuideAxis2(c2,currentPulseGuideRate,GUIDE_TIME_LIMIT*1000);
-    #else
-              startGuideAxis2(c2,currentGuideRate,GUIDE_TIME_LIMIT*1000);
-    #endif
-            }
-            if (c2=='b') stopGuideAxis2();
-          }
-        } else {
-          // continue if paused at home
-          if ((w1==LOW) || (e1==LOW) || (n1==LOW) || (s1==LOW)) waitingHomeContinue=true;
-        }
-      }
-    }
-#endif
-
-    guideAxis1.fixed=0;
-    Guide();
-  }
+  ST4();
+  if ((trackingState!=TrackingMoveTo) && (parkStatus==NotParked)) Guide();
 
 #ifndef MOUNT_TYPE_ALTAZM
   // PERIODIC ERROR CORRECTION -------------------------------------------------------------------------
-  if ((trackingState==TrackingSidereal) && (!((guideDirAxis1 || guideDirAxis2) && (activeGuideRate>GuideRate1x)))) { 
+  if ((trackingState==TrackingSidereal) && (parkStatus==NotParked) && (!((guideDirAxis1 || guideDirAxis2) && (activeGuideRate>GuideRate1x)))) { 
     // only active while sidereal tracking with a guide rate that makes sense
     Pec();
   } else DisablePec();
@@ -758,6 +775,27 @@ void loop() {
         }
       }
     }
+
+#if defined(ROTATOR_ON) && defined(MOUNT_TYPE_ALTAZM)
+    // do de-rotate movement
+    if (deRotate && (trackingState==TrackingSidereal)) {
+      targetAxis3.fixed+=amountRotateAxis3.fixed;
+      double f=(long)targetAxis3.part.m; f/=(double)StepsPerDegreeAxis3;
+      if ((f<(double)MinAxis3) || (f>(double)MaxAxis3)) { deRotate=false; amountRotateAxis3.fixed=0; }
+    }
+#endif
+#if defined(FOCUSER1_ON)
+    // do automatic movement
+    targetAxis4.fixed+=amountMoveAxis4.fixed;
+    { double f=(long)targetAxis4.part.m; f/=(double)StepsPerMicrometerAxis4;
+    if ((f<(double)MinAxis4*1000.0) || (f>(double)MaxAxis4*1000.0)) amountMoveAxis4.fixed=0; }
+#endif
+#if defined(FOCUSER2_ON)
+    // do automatic movement
+    targetAxis5.fixed+=amountMoveAxis5.fixed;
+    { double f=(long)targetAxis5.part.m; f/=(double)StepsPerMicrometerAxis5;
+    if ((f<(double)MinAxis5*1000.0) || (f>(double)MaxAxis5*1000.0)) amountMoveAxis5.fixed=0; }
+#endif
 
     // figure out the current Altitude
     if (lst%3==0) do_fastalt_calc();
@@ -814,6 +852,65 @@ void loop() {
     UT1=UT1_start+(t2/3600.0);
   }
 
+unsigned long tempMs;
+
+  // ROTATOR/DEROTATOR ---------------------------------------------------------------------------------
+#ifdef ROTATOR_ON
+  tempMs=millis();
+  if ((long)(tempMs-axis3Ms)>0) {
+    axis3Ms=tempMs+(unsigned long)MaxRateAxis3;
+
+    if ((posAxis3<(long)targetAxis3.part.m) && (posAxis3<((double)MaxRot*(double)StepsPerDegreeAxis3))) {
+      digitalWrite(Axis3StepPin,LOW); delayMicroseconds(10);
+      digitalWrite(Axis3DirPin,AXIS3_FORWARD); delayMicroseconds(10);
+      digitalWrite(Axis3StepPin,HIGH); posAxis3++;
+    }
+    if ((posAxis3>(long)targetAxis3.part.m) && (posAxis3>((double)MinRot*(double)StepsPerDegreeAxis3))) {
+      digitalWrite(Axis3StepPin,LOW); delayMicroseconds(10);
+      digitalWrite(Axis3DirPin,AXIS3_REVERSE); delayMicroseconds(10);
+      digitalWrite(Axis3StepPin,HIGH); posAxis3--;
+    }
+  }
+#endif
+
+  // FOCUSER1 -------------------------------------------------------------------------------------------
+#ifdef FOCUSER1_ON
+  tempMs=millis();
+  if ((long)(tempMs-axis4Ms)>0) {
+    axis4Ms=tempMs+(unsigned long)MaxRateAxis4;
+
+    if ((posAxis4<(long)targetAxis4.part.m) && (posAxis4<((double)MaxAxis4*1000.0*(double)StepsPerMicrometerAxis4))) {
+      digitalWrite(Axis4StepPin,LOW); delayMicroseconds(10);
+      digitalWrite(Axis4DirPin,AXIS4_FORWARD); delayMicroseconds(10);
+      digitalWrite(Axis4StepPin,HIGH); posAxis4++;
+    }
+    if ((posAxis4>(long)targetAxis4.part.m) && (posAxis4>((double)MinAxis4*1000.0*(double)StepsPerMicrometerAxis4))) {
+      digitalWrite(Axis4StepPin,LOW); delayMicroseconds(10);
+      digitalWrite(Axis4DirPin,AXIS4_REVERSE); delayMicroseconds(10);
+      digitalWrite(Axis4StepPin,HIGH); posAxis4--;
+    }
+  }
+#endif
+
+  // FOCUSER2 -------------------------------------------------------------------------------------------
+#ifdef FOCUSER2_ON
+  tempMs=millis();
+  if ((long)(tempMs-axis5Ms)>0) {
+    axis5Ms=tempMs+(unsigned long)MaxRateAxis5;
+
+    if ((posAxis5<(long)targetAxis5.part.m) && (posAxis5<((double)MaxAxis5*1000.0*(double)StepsPerMicrometerAxis5))) {
+      digitalWrite(Axis5StepPin,LOW); delayMicroseconds(10);
+      digitalWrite(Axis5DirPin,AXIS5_FORWARD); delayMicroseconds(10);
+      digitalWrite(Axis5StepPin,HIGH); posAxis5++;
+    }
+    if ((posAxis5>(long)targetAxis5.part.m) && (posAxis5>((double)MinAxis5*1000.0*(double)StepsPerMicrometerAxis5))) {
+      digitalWrite(Axis5StepPin,LOW); delayMicroseconds(10);
+      digitalWrite(Axis5DirPin,AXIS5_REVERSE); delayMicroseconds(10);
+      digitalWrite(Axis5StepPin,HIGH); posAxis5--;
+    }
+  }
+#endif
+
   // WORKLOAD MONITORING -------------------------------------------------------------------------------
   long this_loop_micros=micros(); 
   loop_time=this_loop_micros-last_loop_micros;
@@ -821,9 +918,20 @@ void loop() {
   last_loop_micros=this_loop_micros;
 
   // 1 SECOND TIMED ------------------------------------------------------------------------------------
-  unsigned long ms=millis();
-  if ((long)(ms-housekeepingTimer)>0) {
-    housekeepingTimer=ms+1000UL;
+  tempMs=millis();
+  if ((long)(tempMs-housekeepingTimer)>0) {
+    housekeepingTimer=tempMs+1000UL;
+
+#if defined(ROTATOR_ON) && defined(MOUNT_TYPE_ALTAZM)
+    // calculate new de-rotation rate if needed
+    if (deRotate && (trackingState==TrackingSidereal)) {
+      double h,d;
+      getApproxEqu(&h,&d,true);
+      double pr=ParallacticRate(h,d)*(double)StepsPerDegreeAxis3; // in steps per second
+      if (deRotateReverse) pr=-pr;
+      amountRotateAxis3.fixed=doubleToFixed(pr/100.0);            // in steps per 1/100 second
+    }
+#endif
 
     // adjust tracking rate for Alt/Azm mounts
     // adjust tracking rate for refraction

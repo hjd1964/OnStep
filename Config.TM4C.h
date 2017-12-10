@@ -1,31 +1,25 @@
 // -----------------------------------------------------------------------------------
-// Configuration
+// Configuration for OnStep Launchpad TM4C varients
 
 /*
  * For more information on setting OnStep up see http://www.stellarjourney.com/index.php?r=site/equipment_onstep and 
- * join the OnStep yahoo group at https://groups.yahoo.com/neo/groups/onsteptelescope/info
+ * join the OnStep Groups.io at https://groups.io/g/onstep
  * 
- * The Arduino Mega2560, Teensy3.x(3.1/3.2/3.5/3.6,) and some Launchpad TM4C devices are also supported (thanks to Luka.)
- * See the Pins.h file for detailed information on the pin maps
+ * See the Pins.TM4C.h file for detailed information on this pin map to be sure it matches your wiring *** USE AT YOUR OWN RISK ***
  *
- * The RA/Az (Axis1) and Dec/Alt (Axis2) stepper driver plugs in as follows:
- * RA/Az :  Gnd,13,12,11 = Gnd,Step,N/C,Direction (Teensy3.x Gnd,12,N/C,10)
- * Dec/Alt:   7, 6, 5, 4 = Gnd,Step,N/C,Direction (Teensy3.x Gnd, 6,N/C, 4)
- *
- * Optionally, a bluetooth adapter (HC05 or RN42 for example) plugs into pins Tx1/Rx1 and pins +5V/Gnd. 
- * I use two 2-wire cables for 0.1" headers.  Remember Rx goes to Tx and Tx goes to Rx. If using a Mega2560
- * be sure to get a BT module designed for 5 volt operation and signaling otherwise you'll have to design
- * and implement the level conversion hardware yourself.
- * BT: Tx,Rx/+5V,Gnd = Rx1,Tx1/+5V,Gnd
 */
 
+#define Launchpad_OFF   //  <- Turn _ON to use this configuration
+
+#ifdef Launchpad_ON
 // -------------------------------------------------------------------------------------------------------------------------
 // ADJUST THE FOLLOWING TO CONFIGURE YOUR CONTROLLER FEATURES --------------------------------------------------------------
 
 // Turns debugging on, used during testing, default=OFF
 #define DEBUG_OFF
 
-// Enables goto assist mount modeling (for Eq mounts), default=OFF (Experimental)
+// Enables internal goto assist mount modeling (for Eq mounts), default=OFF (Experimental)
+// Note that Goto Assist in Sky Planetarium works even if this is off
 #define ALIGN_GOTOASSIST_OFF
 
 // Default speed for Serial1 com port, Default=9600
@@ -38,15 +32,16 @@
 // Strict parking, default=OFF.  Set to ON and unparking is only allowed if successfully parked.  Otherwise unparking is allowed if at home and not parked (the Home/Reset command ":hF#" sets this state.) 
 #define STRICT_PARKING_OFF
 
-// ST4 interface on pins 47, 49, 51, 53.  Pin 47 is RA- (West), Pin 49 is Dec- (South), Pin 51 is Dec+ (North), Pin 53 is RA+ (East.)  Teensy3.x pins 24, 25, 26, 27.
-// ST4_ON enables the interface.  ST4_PULLUP enables the interface and any internal pullup resistors.
-// It is up to you to create an interface that meets the electrical specifications of any connected device, use at your own risk.
-// ST4_HAND_CONTROL_ON allows guide rates >1x while SEPARATE_PULSE_GUIDE_RATE_ON is enabled
-// ST4_ALTERNATE_PINS_ON moves the interface (Mega2560 only) to pins 43, 45, 47, 49.  Pin 43 is Dec- (South), Pin 45 is Dec+ (North), Pin 47 is RA- (West), Pin 49 is RA+ (East.)
-// ST4_ALTERNATE_PINS_ON is required for Steve's ST4 board and is also required if the ST4 interface is to be used alongside the Arduino Ethernet Shield
+// ST4 interface on Pins (?.)  Pin ? is RA- (West), Pin ? is Dec- (South), Pin ? is Dec+ (North), Pin ? is RA+ (East.)
+// ST4_ON enables the interface, ST4_PULLUP enables the interface and any internal pullup resistors.
+// It is up to you to create an interface that meets the electrical specifications of any connected device, use at your own risk.  Default=OFF
 #define ST4_OFF
-#define ST4_HAND_CONTROL_OFF
-#define ST4_ALTERNATE_PINS_OFF
+// If SEPARATE_PULSE_GUIDE_RATE_ON is used the ST4 port is limited to guide rates <= 1X except when ST4_HAND_CONTROL_ON is used.
+// Additionally, ST4_HAND_CONTROL_ON enables special features: Press and hold [E]+[W] buttons for > 2 seconds...  In this mode [E] decreases and [W] increases guide rates (or if tracking isn't on yet adjusts illuminated recticule brightness.)
+// [S] for Sync (or Accept if in align mode.) [N] for Tracking on/off. -OR- Press and hold [N]+[S] buttons for > 2 seconds...  In this mode [E] selects prior and [W] next user catalog item.
+// [N] to do a Goto to the catalog item.  [S] for Sound on/off.  The keypad returns to normal operation after 4 seconds of inactivity.  ST4_HAND_CONTROL_ON also adds a 100ms de-bounce to all button presses.
+// Finally, during a goto pressing any button aborts the slew.  If meridian flip paused at home, pressing any button continues.
+#define ST4_HAND_CONTROL_ON
 
 // Separate pulse-guide rate so centering and guiding don't disturb each other, default=ON
 #define SEPARATE_PULSE_GUIDE_RATE_ON
@@ -55,42 +50,38 @@
 // If the stop command is never received the guide will continue forever unless this is enabled.
 #define GUIDE_TIME_LIMIT 0
 
-// RTC (Real Time Clock) support, Default=OFF. Other options: RTC_DS3234 for a DS3234 on the default SPI interface pins (and CS on pin 10, optionally wire the SQW output to the PPS pin below.)
-#define RTC_OFF
-// PPS use _ON or _PULLUP to enable the input and use the built-in pullup resistor.  Sense rising edge on pin 21 for optional precision clock source (GPS, for example), default=OFF (Teensy3.x Pin 23)
+// PPS use _ON or _PULLUP to enable the input and use the built-in pullup resistor.  Sense rising edge on Pin ? for optional precision clock source (GPS, for example), default=OFF [infrequently used option]
 #define PPS_SENSE_OFF
 
-// PEC sense on pin 2 or threshold value on Analog 1 (Analog 14 on Teensy3.x) use _ON or _PULLUP to enable the input and use the built-in pullup resistor, default=OFF
-// analog values range from 0 to 1023 which indicate voltages from 0-5VDC (or 0-3.3VDC) on the analog pin, for example "PEC_SENSE 600" would detect an index when the voltage exceeds 2.92V (or 1.93V)
-// with either index detection method, once triggered 60s must expire before another detection can happen.  This gives time for the index magnet to pass by the detector before another cycle begins.
+// PEC sense on Pin ? (A?) use _ON or _PULLUP to enable the input/use the built-in pullup resistor (digital input) or provide a comparison value (see below) for analog operation, default=OFF
+// Analog values range from 0 to 1023 which indicate voltages from 0-3.3VDC on the analog pin, for example "PEC_SENSE 600" would detect an index when the voltage exceeds 1.93V
+// With either index detection method, once triggered 60s must expire before another detection can happen.  This gives time for the index magnet to pass by the detector before another cycle begins.
 // Ignored on Alt/Azm mounts.
 #define PEC_SENSE_OFF
-// PEC sense, rising edge (default with PEC_SENSE_STATE HIGH, use LOW for falling edge) on pin 2 (ex. PEC_SENSE_ON) ; for optional PEC index
+// PEC sense, rising edge (default with PEC_SENSE_STATE HIGH, use LOW for falling edge, ex. PEC_SENSE_ON) ; for optional PEC index
 #define PEC_SENSE_STATE HIGH
 
-// switch close (to ground) on pin 3 for optional limit sense (stops gotos and/or tracking), default=OFF
+// Switch close (to ground) on Pin ? for optional limit sense (stops gotos and/or tracking), default=OFF
 #define LIMIT_SENSE_OFF
 
-// Light status LED by sink to ground (pin 9) and source +5V (pin 8), default=ON
+// Light status LED by sink to ground (Pin ?), default=ON.
 // _ON and OnStep keeps this illuminated to indicate that the controller is active.  When sidereal tracking this LED will rapidly flash
-#define STATUS_LED_PINS_OFF
-// Light 2nd status LED by sink to ground (pin 10), default=OFF, must be off for Teensy3.x (pin 7)
-// _ON sets this to blink at 1 sec intervals when PPS is synced
-// n sets this to dimly light a polar finder reticle, for example I use STATUS_LED2_PINS 250
-// The default SPI device CS is at pin 10 also, so if the SPI interface is used this must be _OFF
+#define STATUS_LED_PINS_ON
+// Light 2nd status LED by sink to ground (Pin ?), default=OFF.
+// _ON sets this to blink at 1 sec intervals when PPS is synced.  Turns off if tracking is stopped.  Turns on during gotos.
 #define STATUS_LED2_PINS_OFF
-// Light reticule LED by sink to ground (pin 44), default=OFF.  Defaults to pin 9 on the Teensy3.x (STATUS_LED_PINS must be _ON)
+// Light reticule LED by sink to ground (Pin ?), default=OFF.  (don't use with STATUS_LED2_PINS_ON)
 // RETICULE_LED_PINS n, where n=0 to 255 activates this feature and sets default brightness
 #define RETICULE_LED_PINS_OFF
 
-// Sound/buzzer on pin 42, default=OFF.  (Teensy3.x Pin 29)
+// Sound/buzzer on Pin ?, default=OFF.
 // Specify frequency for a piezo speaker (for example "BUZZER 2000") or use BUZZER_ON for a piezo buzzer.
 #define BUZZER_OFF
 // Sound state at startup, default=ON.
 #define DEFAULT_SOUND_ON
 
 // Optionally adjust tracking rate to compensate for atmospheric refraction, default=OFF
-// can be turned on/off with the :Te# and :Td# commands regardless of this setting
+// can be turned on/off with the :Tr# and :Tn# commands regardless of this setting
 #define TRACK_REFRACTION_RATE_DEFAULT_OFF
 
 // Set to ON and OnStep will remember the last auto meridian flip setting (on/off), default=OFF
@@ -102,7 +93,7 @@
 // ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
 #define REMEMBER_MAX_RATE_OFF        // set to ON and OnStep will remember rates set in the ASCOM driver or Android App, default=OFF 
 #define MaxRate                   96 // this is the minimum number of micro-seconds between micro-steps
-                                     // minimum* (fastest goto) is around 32 (Mega2560,) 16 (Teensy3.2,) 12 (Teensy3.5,) 8 (Teensy3.6,) default=96 higher is ok
+                                     // minimum* (fastest goto) is around 16 down to about 4 depending on TM4C model, default=96 higher is ok
                                      // too low and OnStep communicates slowly and/or freezes as the motor timers use up all the MCU time
                                      // * = minimum can be lower, when both AXIS1/AXIS2_MODE_GOTO are used by AXIS1/AXIS2_STEP_GOTO times
                                      
@@ -116,17 +107,15 @@
                                      // for the most part this doesn't need to be changed, but adjust when needed.  Default=25
 
                                      // Axis1 is for RA/Az
-#define StepsPerDegreeAxis1  14400.0 // calculated as    :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
-                                     // Takahashi EM10b  :  200           * 8           * 18 * (1.25)     *  144/360              = 14400
+#define StepsPerDegreeAxis1  12800.0 // calculated as    :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
+                                     // G11              :  400           * 32          * 1               *  360/360              = 12800
                                      // Axis2 is for Dec/Alt
-#define StepsPerDegreeAxis2  14400.0 // calculated as    :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
-                                     // Takahashi EM10b  :  200           * 8           * 18 * (1.25)     *  144/360              = 14400
-                                     // the EM10b has two spur gears that drive the RA/Dec worms, they give an additional 1.25:1 reduction
-                                     // in addition to the 18:1 gear heads on the steppers for a 22.5:1 final ratio before the worm/wheels at 144:1
+#define StepsPerDegreeAxis2  12800.0 // calculated as    :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
+                                     // G11              :  400           * 32          * 1               *  360/360              = 12800
                                      
                                      // PEC, number of steps for a complete worm rotation (in RA), (StepsPerDegreeAxis1*360)/gear_reduction2.  Ignored on Alt/Azm mounts.
-#define StepsPerWormRotationAxis1 36000
-                                     // Tak EM10         : (14400*360)/144 = 36000
+#define StepsPerWormRotationAxis1 12800L
+                                     // G11              : (12800*360)/360 = 12800
 
 #define PECBufferSize           824  // PEC, buffer size, max should be no more than 3384, your required buffer size >= StepsPerAxis1WormRotation/(StepsPerDegeeAxis1/240)
                                      // for the most part this doesn't need to be changed, but adjust when needed.  824 seconds is the default.  Ignored on Alt/Azm mounts.
@@ -148,10 +137,12 @@
                                      // fork/yolk mount with meridian flips turned off by setting the minutesPastMeridian values to cover the whole sky)
 #define MaxAzm                   180 // Alt/Az mounts only. +/- maximum allowed Azimuth, default =  180.  Allowed range is 180 to 360
 
-// STEPPER DRIVER CONTROL --------------------------------------------------------------------------------------------------
+// AXIS1/2 STEPPER DRIVER CONTROL ------------------------------------------------------------------------------------------
+// Axis1: Pins  ?, ? = Step,Dir (RA/Azm)
+// Axis2: Pins  ?, ? = Step,Dir (Dec/Alt)
 
-// Optional stepper driver Enable support, just wire Enable to Pins 25 (Axis1) and 30 (Axis2) and OnStep will pull these HIGH (Teensy3.x Pins 16,21)
-// by default to disable stepper drivers on startup and when Parked. An Align or UnPark will enable the drivers.  Adjust below if you need these pulled LOW to disable the drivers.
+// Stepper driver Enable support, just wire Enable to Pins ? (Axis1) and ? (Axis2) and OnStep will pull these HIGH to disable the stepper drivers on startup and when Parked or Homed.  
+// An Align, Sync, or Un-Park will enable the drivers.  Adjust below if you need these pulled LOW to disable the drivers.
 #define AXIS1_DISABLED_HIGH
 #define AXIS2_DISABLED_HIGH
 // For equatorial mounts, _ON powers down the Declination axis when it's not being used to help lower power use.  During low rate guiding (<=1x) the axis stays enabled
@@ -159,9 +150,9 @@
 #define AUTO_POWER_DOWN_AXIS2_OFF
 
 // Stepper driver Mode control
-// M0, M1, and M2 are on Pins 22,23, and 24 for RA (Teensy3.x Pins 13,14,15.)  M0, M1, M2 are on Pins 27,28,29 for Dec (Teensy3.x Pins 18,19,20.)
+// M0, M1, and M2 are on Pins ?,?,? for Axis1 (RA/Azm) and Pins ?,?,? for Axis2 (Dec/Alt.)
 // values 0 to 7 (0b000 to 111): for example "#define AXIS1_MODE 4" is the same as "#define AXIS1_MODE 0b100" which sets M2 to HIGH, M1 to LOW, and M0 to LOW
-//                                                                                                      / | \
+//                                                                                                      / | \                  (1)         (0)            (0)
 //                                                                                                    M2  M1 M0
 // DRV8825 or A4988 or RAPS128:
 // use MODE_SWITCH_BEFORE_SLEW_OFF
@@ -175,29 +166,58 @@
 // 4x  spreadCycle: CFG2 should be OPEN*.  CFG2 can be wired to Vcc (HIGH) or M1 (with AXISn_MODE 2).
 // * = For a pin to be considered OPEN it must be electrically disconnected (not wired in.)
 //
+// SilentStepStick TMC2130 SPI configurations:
+// use MODE_SWITCH_BEFORE_SLEW_SPI.  Default operation in spreadCycle and with 256x interpolation on:
+// AXISn_MODE and AXISn_MODE_GOTO can be set to 0-8 where 0=256x, 1=128x, 2=64x, 3=32x, 4=16x, 5=8x, 6=4x, 7=2x, 8=1x
+// You can also turn stealthChop on (TMC_STEALTHCHOP) and/or disable 256x interpolation (TMC_NINTPOL.) For example 32x mode with stealthChop:
+// AXIS1_MODE (3|TMC_STEALTHCHOP)
+// Another option allows setting 50% power while tracking (TMC_LOWPWR.)  As above, with this option on too:
+// AXIS1_MODE (3|TMC_STEALTHCHOP|TMC_LOWPWR)
+//
 #define AXIS1_MODE_OFF               // programs the RA/Az uStep mode M0/M1/M2, optional and default _OFF.
 #define AXIS1_MODE_GOTO_OFF          // programs the RA/Az uStep mode M0/M1/M2, used during gotos, optional and default _OFF.
 #define AXIS1_STEP_GOTO 1            // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
 #define AXIS2_MODE_OFF               // programs the Dec/Alt uStep mode M0/M1/M2, optional and default _OFF.
 #define AXIS2_MODE_GOTO_OFF          // programs the Dec/Alt uStep mode M0/M1/M2, used during gotos, optional and default _OFF.
 #define AXIS2_STEP_GOTO 1            // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
-#define MODE_SWITCH_BEFORE_SLEW_OFF  // _ON for _MODE and _MODE_GOTO settings to start/stop just before/after the slew, otherwise they are active during the slew at <128uS/step)
+#define MODE_SWITCH_BEFORE_SLEW_OFF  // _ON (or _SPI) for _MODE and _MODE_GOTO settings to start/stop just before/after the slew, otherwise they are active during the slew at <128uS/step speeds
+                                     // _SPI as above but uses SPI (on M0/M1/M2/Aux) to do the switching (TMC2130.)  Uses Pins ? (Aux1) and ? (Aux2,) choose only one feature on Aux1/2.
 
-// Secondary stepper driver decay control (for both Axis, the _DECAY_MODE and _DECAY_MODE_GOTO settings always start/stop just before/after the slew)
-// Axis1 decay mode is on Pin 41 and Axis2 decay mode is on Pin 40.  Options are _HIGH, _LOW, _OPEN, default is _OFF (not supported on Teensy3.x)
-// MODE_SWITCH_BEFORE_SLEW must be _OFF if using this
-#define DECAY_MODE_OFF
-#define DECAY_MODE_GOTO_OFF            
-
-// If the decay/micro-step mode switch happens before/after a slew, inserts a 3ms delay before the motors take a step
+// if the decay/micro-step mode switch happens before/after a slew, inserts a 3ms delay before the motors take a step.
 #define MODE_SWITCH_SLEEP_OFF
 
-// Stepper driver Fault detection
-// just wire driver Fault signal to Pins 26 (Axis1) and 31 (Axis2), default=OFF (Teensy3.x Pins 17,22) other settings are LOW and HIGH
+// Stepper driver Fault detection on Pins ? (Aux1) and ? (Aux2,) choose only one feature to use on Aux1/2.
+// other settings are LOW, HIGH, SPI (Teensy3.2 applies internal pullup if _LOW and pulldown if _HIGH.)  The SPI interface (on M0/M1/M2/Aux) can be used to detect errors on the TMC2130.
 #define AXIS1_FAULT_OFF
 #define AXIS2_FAULT_OFF
 
 // THAT'S IT FOR USER CONFIGURATION!
 
 // -------------------------------------------------------------------------------------------------------------------------
+//  These are not functional for this configuration, don't change!
+#define ESP8266_CONTROL_OFF
+#define ROTATOR_OFF
+#define MaxRateAxis3               8
+#define StepsPerDegreeAxis3     64.0
+#define REVERSE_AXIS3_OFF
+#define DISABLE_AXIS3_OFF
+#define MinAxis3                -180
+#define MaxAxis3                 180
+#define FOCUSER1_OFF
+#define MaxRateAxis4               8
+#define StepsPerMicrometerAxis4  0.5
+#define REVERSE_AXIS4_OFF
+#define DISABLE_AXIS4_OFF
+#define MinAxis4               -25.0
+#define MaxAxis4
+#define FOCUSER2_OFF
+#define MaxRateAxis5
+#define StepsPerMicrometerAxis5
+#define REVERSE_AXIS5_OFF
+#define DISABLE_AXIS5_OFF
+#define MinAxis5               -25.0
+#define MaxAxis5                25.0
+
+#include "Pins.TM4C.h"
+#endif
 

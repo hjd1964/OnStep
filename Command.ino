@@ -9,7 +9,7 @@ unsigned long _coord_t=0;
 double _dec,_ra;
 
 // help with commands
-enum Command {COMMAND_NONE, COMMAND_SERIAL, COMMAND_SERIAL1, COMMAND_SERIAL4, COMMAND_SPI};
+enum Command {COMMAND_NONE, COMMAND_SERIAL, COMMAND_SERIAL1, COMMAND_SERIAL4, COMMAND_SERIALX};
 char reply[50];
 char command[3];
 char parameter[25];
@@ -20,6 +20,8 @@ cb cmd1; // serial1
 #ifdef SER4_AVAILABLE
 cb cmd4; // serial4
 #endif
+char replyx[50]="";
+cb cmdx;  // serialX
 
 // process commands
 void processCommands() {
@@ -43,6 +45,7 @@ void processCommands() {
 #ifdef SER4_AVAILABLE
     else if (cmd4.ready()) { strcpy(command,cmd4.getCmd()); strcpy(parameter,cmd4.getParameter()); cmd4.flush(); process_command=COMMAND_SERIAL4; }
 #endif
+    else if (cmdx.ready()) { strcpy(command,cmdx.getCmd()); strcpy(parameter,cmdx.getParameter()); cmdx.flush(); process_command=COMMAND_SERIALX; }
     else return;
 
     if (process_command) {
@@ -109,13 +112,9 @@ void processCommands() {
           // this command sets indexAxis1, indexAxis2, azmCor=0; altCor=0;
           setHome();
           
-          // enable the stepper drivers
-          digitalWrite(Axis1_EN,Axis1_Enabled); axis1Enabled=true;
-          digitalWrite(Axis2_EN,Axis2_Enabled); axis2Enabled=true;
-          delay(10);
-        
           // start tracking
           trackingState=TrackingSidereal;
+          EnableStepperDrivers();
         
           // start align...
           alignNumStars=command[1]-'0';
@@ -236,11 +235,154 @@ void processCommands() {
         }
       } else 
 
-      
 //   D - Distance Bars
 //  :D#    returns an "\0x7f#" if the mount is moving, otherwise returns "#".
       if ((command[0]=='D') && (command[1]==0))  { if (trackingState==TrackingMoveTo) { reply[0]=(char)127; reply[1]=0; } else { reply[0]='#'; reply[1]=0; supress_frame=true; } quietReply=true; } else 
- 
+
+#ifdef FOCUSER1_ON
+//   F - Focuser1 Commands
+      if (command[0]=='F') {
+//  :F+#   Move focuser in (toward objective)
+//         Returns: Nothing
+      if (command[1]=='+') {
+        double moveRate=axis4Increment;                      // in steps per second (slow=0.01mm/s and fast=1mm/s)
+        double stepsPerS=(1.0/MaxRateAxis4)*1000.0; if (moveRate>stepsPerS) moveRate=stepsPerS;
+        amountMoveAxis4.fixed=doubleToFixed(moveRate/100.0); // in steps per 1/100 second
+        quietReply=true;
+      } else
+//  :F-#   Move focuser out (away from objective)
+//         Returns: Nothing
+      if (command[1]=='-') {
+        double moveRate=axis4Increment;                       // in steps per second (slow=0.01mm/s and fast=1mm/s)
+        double stepsPerS=(1.0/MaxRateAxis4)*1000.0; if (moveRate>stepsPerS) moveRate=stepsPerS;
+        amountMoveAxis4.fixed=doubleToFixed(-moveRate/100.0); // in steps per 1/100 second
+        quietReply=true;
+      } else
+//  :FQ#   Stop the focuser
+//         Returns: Nothing
+      if (command[1]=='Q') {
+        amountMoveAxis4.fixed=0;
+        quietReply=true;
+      } else
+//  :FG#   Get focuser current position in micrometers
+//         Returns: snnn#
+      if (command[1]=='G') {
+        f1=((double)posAxis4)/(double)StepsPerMicrometerAxis4;
+        sprintf(reply,"%ld",(long int)round(f1));
+        quietReply=true;
+      } else
+//  :FZ#   Set focuser zero position (half travel)
+//         Returns: Nothing
+      if (command[1]=='Z') {
+        posAxis4=0;
+        targetAxis4.part.m=0; targetAxis4.part.f=0;
+        quietReply=true;
+      } else
+//  :FF#   Set focuser for fast motion
+//         Returns: Nothing
+      if (command[1]=='F') {
+        axis4Increment=(double)StepsPerMicrometerAxis4*1000.0;
+        quietReply=true; 
+      } else
+//  :FS#      Set focuser for slow motion
+//            Returns: Nothing
+//  :FSsnnn#  Set focuser target position in micrometers
+//            Returns: Nothing
+      if (command[1]=='S') {
+        if (parameter[0]==0) {
+          axis4Increment=(double)StepsPerMicrometerAxis4*10.0;
+          quietReply=true; 
+        } else {
+          f=atol(parameter);
+          if ((f>=MinAxis4*1000.0) && (f<=MaxAxis4*1000.0)) {
+            targetAxis4.part.m=(long)(f*(double)StepsPerMicrometerAxis4); targetAxis4.part.f=0;
+          }
+        }
+      } else
+//  :Fn#   Movement rate, 1=finest, 2=0.01mm/second, 3=0.1mm/second, 4=1mm/second
+//         Returns: Nothing
+      if ((command[1]-'0'>=1) && (command[1]-'0'<=4)) {
+        if (command[1]=='1') axis4Increment=1;
+        if (command[1]=='2') axis4Increment=(double)StepsPerMicrometerAxis4*10.0;
+        if (command[1]=='3') axis4Increment=(double)StepsPerMicrometerAxis4*100.0;
+        if (command[1]=='4') axis4Increment=(double)StepsPerMicrometerAxis4*1000.0;
+        quietReply=true;
+      } else commandError=true;
+     } else
+#endif
+
+#ifdef FOCUSER2_ON
+//   f - Focuser2 Commands
+      if (command[0]=='f') {
+//  :f+#   Move focuser in (toward objective)
+//         Returns: Nothing
+      if (command[1]=='+') {
+        double moveRate=axis5Increment;                      // in steps per second (slow=0.01mm/s and fast=1mm/s)
+        double stepsPerS=(1.0/MaxRateAxis5)*1000.0; if (moveRate>stepsPerS) moveRate=stepsPerS;
+        amountMoveAxis5.fixed=doubleToFixed(moveRate/100.0); // in steps per 1/100 second
+        quietReply=true;
+      } else
+//  :f-#   Move focuser out (away from objective)
+//         Returns: Nothing
+      if (command[1]=='-') {
+        double moveRate=axis5Increment;                       // in steps per second (slow=0.01mm/s and fast=1mm/s)
+        double stepsPerS=(1.0/MaxRateAxis5)*1000.0; if (moveRate>stepsPerS) moveRate=stepsPerS;
+        amountMoveAxis5.fixed=doubleToFixed(-moveRate/100.0); // in steps per 1/100 second
+        quietReply=true;
+      } else
+//  :fQ#   Stop the focuser
+//         Returns: Nothing
+      if (command[1]=='Q') {
+        amountMoveAxis5.fixed=0;
+        quietReply=true;
+      } else
+//  :fG#   Get focuser current position in micrometers
+//         Returns: snnn#
+      if (command[1]=='G') {
+        f1=((double)posAxis5)/(double)StepsPerMicrometerAxis5;
+        sprintf(reply,"%ld",(long int)round(f1));
+        quietReply=true;
+      } else
+//  :fZ#   Set focuser zero position (half travel)
+//         Returns: Nothing
+      if (command[1]=='Z') {
+        posAxis5=0;
+        targetAxis5.part.m=0; targetAxis5.part.f=0;
+        quietReply=true;
+      } else
+//  :fF#   Set focuser for fast motion
+//         Returns: Nothing
+      if (command[1]=='F') {
+        axis5Increment=(double)StepsPerMicrometerAxis5*1000.0;
+        quietReply=true; 
+      } else
+//  :fS#      Set focuser for slow motion
+//            Returns: Nothing
+//  :fSsnnn#  Set focuser target position in micrometers
+//            Returns: Nothing
+      if (command[1]=='S') {
+        if (parameter[0]==0) {
+          axis5Increment=(double)StepsPerMicrometerAxis5*10.0;
+          quietReply=true; 
+        } else {
+          f=atol(parameter);
+          if ((f>=MinAxis5*1000.0) && (f<=MaxAxis5*1000.0)) {
+            targetAxis5.part.m=(long)(f*(double)StepsPerMicrometerAxis5); targetAxis5.part.f=0;
+          }
+        }
+      } else
+//  :fn#   Movement rate, 1=finest, 2=0.01mm/second, 3=0.1mm/second, 4=1mm/second
+//         Returns: Nothing
+      if ((command[1]-'0'>=1) && (command[1]-'0'<=4)) {
+        if (command[1]=='1') axis5Increment=1;
+        if (command[1]=='2') axis5Increment=(double)StepsPerMicrometerAxis5*10.0;
+        if (command[1]=='3') axis5Increment=(double)StepsPerMicrometerAxis5*100.0;
+        if (command[1]=='4') axis5Increment=(double)StepsPerMicrometerAxis5*1000.0;
+        quietReply=true;
+      } else commandError=true;
+     } else
+#endif
+
 //   G - Get Telescope Information
       if (command[0]=='G') {
 
@@ -458,6 +600,17 @@ void processCommands() {
                 if (preferredPierSide==PPS_WEST) strcpy(reply,"W"); else strcpy(reply,"B");
                 quietReply=true; break;
               case '7': dtostrf(slewSpeed,3,1,reply); quietReply=true; break;                               // slew speed
+              case '8': 
+#ifdef ROTATOR_ON
+#ifdef MOUNT_TYPE_ALTAZM
+                strcpy(reply,"D");
+#else
+                strcpy(reply,"R");
+#endif
+#else
+                strcpy(reply,"N");
+#endif
+                quietReply=true; break; // rotator availablity 2=rotate/derotate, 1=rotate, 0=off
             }
           } else
           if (parameter[0]=='E') { // En: Get settings
@@ -511,7 +664,7 @@ void processCommands() {
       if (command[1]=='F')  { setHome(); quietReply=true; } else 
 //  :hC#   Moves telescope to the home position
 //         Returns: Nothing
-      if (command[1]=='C')  {  goHome(); quietReply=true; } else 
+      if (command[1]=='C')  { goHome(); quietReply=true; } else 
 //  :hP#   Goto the Park Position
 //          Return: 0 on failure
 //                  1 on success
@@ -524,7 +677,7 @@ void processCommands() {
 //          Return: 0 on failure
 //                  1 on success
       if (command[1]=='R')  { if (!unpark()) commandError=true; }
-      else commandError=true; 
+      else commandError=true;
 
       } else
       
@@ -533,7 +686,7 @@ void processCommands() {
 
 // :LB#    Find previous object and set it as the current target object.
 //          Returns: Nothing
-      if (command[1]=='B') { 
+      if ((command[1]=='B') && (parameter[0]==0)) { 
           Lib.prevRec(); quietReply=true;
       } else 
 
@@ -549,20 +702,28 @@ void processCommands() {
 // :LI#    Get Object Information
 //          Returns: <string>#
 //          Returns a string containing the current target object’s name and object type.
-      if (command[1]=='I') {
+      if ((command[1]=='I') && (parameter[0]==0)) {
         Lib.readVars(reply,&i,&newTargetRA,&newTargetDec);
 
         char const * objType=objectStr[i];
         strcat(reply,",");
         strcat(reply,objType);
         quietReply=true;
-          
+      } else 
+
+// :LIG#   Get Object Information and goto
+//         Returns: Nothing
+      if ((command[1]=='I') && (parameter[0]=='G') && (parameter[1]==0)) {
+        Lib.readVars(reply,&i,&newTargetRA,&newTargetDec);
+
+        goToEqu(newTargetRA,newTargetDec);
+        quietReply=true;
       } else 
 
 // :LR#    Get Object Information including RA and Dec, with advance to next Record
 //          Returns: <string>#
 //          Returns a string containing the current target object’s name, type, RA, and Dec.
-      if (command[1]=='R') {
+      if ((command[1]=='R') && (parameter[0]==0)) {
         Lib.readVars(reply,&i,&newTargetRA,&newTargetDec);
 
         char const * objType=objectStr[i];
@@ -619,35 +780,35 @@ void processCommands() {
 
 // :LN#    Find next deep sky target object subject to the current constraints.
 //          Returns: Nothing
-      if (command[1]=='N') { 
+      if ((command[1]=='N') && (parameter[0]==0)) { 
           Lib.nextRec();
           quietReply=true;
       } else 
 
 // :L$#    Move to catalog name record
 //          Returns: 1
-      if (command[1]=='$') { 
+      if ((command[1]=='$') && (parameter[0]==0)) { 
           Lib.nameRec();
           quietReply=false;
       } else 
 
 // :LD#    Clear current record
 //          Returns: Nothing
-      if (command[1]=='D') { 
+      if ((command[1]=='D') && (parameter[0]==0)) { 
           Lib.clearCurrentRec();
           quietReply=true;
       } else 
 
 // :LL#    Clear current catalog
 //          Returns: Nothing
-      if (command[1]=='L') { 
+      if ((command[1]=='L') && (parameter[0]==0)) { 
           Lib.clearLib();
           quietReply=true;
       } else 
 
 // :L!#    Clear library (all catalogs)
 //          Returns: Nothing
-      if (command[1]=='!') { 
+      if ((command[1]=='!') && (parameter[0]==0)) { 
           Lib.clearAll();
           quietReply=true;
       } else 
@@ -665,24 +826,21 @@ void processCommands() {
       } else
 
 //   M - Telescope Movement Commands
-      if ((command[0]=='M') && (axis1Enabled)) {
+      if (command[0]=='M') {
 //  :MA#   Goto the target Alt and Az
-//         Returns:
-//         0=Goto is Possible
-//         1=Object below horizon
-//         2=No object selected
-//         4=Position unreachable
-//         6=Outside limits
-      if (command[1]=='A') { 
-        i=goToHor(&newTargetAlt, &newTargetAzm);
-        reply[0]=i+'0'; reply[1]=0; 
-        quietReply=true; 
-        supress_frame=true;
-      } else 
+//         Returns: 0..9, see :MS#
+      if (command[1]=='A') {
+        if (axis1Enabled) {
+          i=goToHor(&newTargetAlt, &newTargetAzm);
+          reply[0]=i+'0'; reply[1]=0; 
+          quietReply=true; 
+          supress_frame=true;
+        } else { reply[0]='4'; reply[1]=0; }
+      } else
 //  :Mgdnnnn# Pulse guide command
 //          Returns: Nothing
       if (command[1]=='g') {
-        if ( (atoi2((char *)&parameter[1],&i)) && ((i>=0) && (i<=16399)) && (parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) { 
+        if ( (atoi2((char *)&parameter[1],&i)) && ((i>=0) && (i<=16399)) ) { 
           if (((parameter[0]=='e') || (parameter[0]=='w')) && (guideDirAxis1==0)) {
 #ifdef SEPARATE_PULSE_GUIDE_RATE_ON
             startGuideAxis1(parameter[0],currentPulseGuideRate,i);
@@ -715,19 +873,16 @@ void processCommands() {
       } else
 
 //  :MP#   Goto the Current Position for Polar Align
-//         Returns:
-//         0=Goto is Possible
-//         1=Object below horizon    Outside limits, below the Horizon limit
-//         2=No object selected      Failure to resolve coordinates
-//         4=Position unreachable    Not unparked
-//         5=Busy                    Goto already active
-//         6=Outside limits          Outside limits, above the Zenith limit
+//         Returns: 0..9, see :MS#
       if (command[1]=='P')  {
         double r,d;
         getEqu(&r,&d,false);
-        GeoAlign.altCor=0.0;
-        GeoAlign.azmCor=0.0;
-        i=goToEqu(r,d);
+        i=validateGoToEqu(r,d);
+        if (i==0) {
+          GeoAlign.altCor=0.0;
+          GeoAlign.azmCor=0.0;
+          i=goToEqu(r,d);
+        }
         reply[0]=i+'0'; reply[1]=0;
         quietReply=true;
         supress_frame=true;
@@ -735,12 +890,16 @@ void processCommands() {
 
 //  :MS#   Goto the Target Object
 //         Returns:
-//         0=Goto is Possible
-//         1=Object below horizon    Outside limits, below the Horizon limit
-//         2=No object selected      Failure to resolve coordinates
-//         4=Position unreachable    Not unparked
-//         5=Busy                    Goto already active
-//         6=Outside limits          Outside limits, above the Zenith limit
+//         0=Goto is possible
+//         1=below the horizon limit
+//         2=above overhead limit
+//         3=controller in standby
+//         4=mount is parked
+//         5=Goto in progress
+//         6=outside limits (MaxDec, MinDec, UnderPoleLimit, MeridianLimit)
+//         7=hardware fault
+//         8=already in motion
+//         9=unspecified error
       if (command[1]=='S')  {
         i=goToEqu(newTargetRA,newTargetDec);
         reply[0]=i+'0'; reply[1]=0;
@@ -830,6 +989,100 @@ void processCommands() {
       } else commandError=true;
      } else
 
+#ifdef ROTATOR_ON
+//   r - Rotator/De-rotator Commands
+      if (command[0]=='r') {
+#ifdef MOUNT_TYPE_ALTAZM
+//  :r+#   Enable de-rotator
+//         Returns: Nothing
+      if (command[1]=='+') {
+        deRotate=true;
+        quietReply=true; 
+      } else
+//  :r-#   Disable de-rotator
+//         Returns: Nothing
+      if (command[1]=='-') {
+        deRotate=false;
+        quietReply=true; 
+      } else
+//  :rP#   Move rotator to the parallactic angle
+//         Returns: Nothing
+      if (command[1]=='P') {
+        double h,d;
+        getApproxEqu(&h,&d,true);
+        targetAxis3.part.m=(long)(ParallacticAngle(h,d)*(double)StepsPerDegreeAxis3); targetAxis3.part.f=0;
+        quietReply=true; 
+      } else
+#endif
+//  :rR#   Reverse de-rotator direction
+//         Returns: Nothing
+      if (command[1]=='R') {
+        deRotateReverse=!deRotateReverse;
+        quietReply=true; 
+      } else
+//  :rF#   Reset rotator at the home position
+//         Returns: Nothing
+      if (command[1]=='F') {
+        posAxis3=0;
+        targetAxis3.fixed=0;
+        amountRotateAxis3.fixed=0;
+        axis3Increment=1;
+        quietReply=true; 
+      } else
+//  :rC#   Moves rotator to the home position
+//         Returns: Nothing
+      if (command[1]=='C') {
+        targetAxis3.fixed=0;
+        amountRotateAxis3.fixed=0;
+        quietReply=true; 
+      } else
+//  :rG#   Get rotator current position in degrees
+//         Returns: sDDD*MM#
+      if (command[1]=='G') {
+        f1=((double)posAxis3+0.5)/(double)StepsPerDegreeAxis3;
+        i=highPrecision; highPrecision=false;
+        if (!doubleToDms(reply,&f1,true,true)) commandError=true; else quietReply=true;
+        highPrecision=i;
+      } else
+//  :r>#   Move clockwise as set by :rn# command, default = 1 degree
+//         Returns: Nothing
+      if (command[1]=='>') {
+        fixed_t xl;
+        xl.part.m=(long)((double)axis3Increment*(double)StepsPerDegreeAxis3*1000.0); xl.fixed/=1000;
+        targetAxis3.fixed+=xl.fixed;
+        if ((long)targetAxis3.part.m>(double)MaxRot*(double)StepsPerDegreeAxis3) { targetAxis3.part.m=(unsigned long)((double)MaxRot*(double)StepsPerDegreeAxis3); targetAxis3.part.f=0; }
+        quietReply=true;
+      } else
+//  :r<#   Move counter clockwise as set by :rn# command, default = 1 degree
+//         Returns: Nothing
+      if (command[1]=='<') {
+        fixed_t xl;
+        xl.part.m=(long)((double)axis3Increment*(double)StepsPerDegreeAxis3*1000.0); xl.fixed/=1000;
+        targetAxis3.fixed-=xl.fixed;
+        if ((long)targetAxis3.part.m<(double)MinRot*(double)StepsPerDegreeAxis3) { targetAxis3.part.m=(unsigned long)((double)MinRot*(double)StepsPerDegreeAxis3); targetAxis3.part.f=0; }
+        quietReply=true;
+      } else
+//  :rn#   Move increment, 1=1 degrees, 2=5 degrees, 3=10 degrees
+//         Returns: Nothing
+      if ((command[1]-'0'>=1) && (command[1]-'0'<=3)) {
+        if (command[1]=='1') axis3Increment=1;
+        if (command[1]=='2') axis3Increment=5;
+        if (command[1]=='3') axis3Increment=10;
+        quietReply=true;
+      } else
+//  :rSsDDD*MM'SS#  Set position
+//         Return: 0 on failure
+//                 1 on success
+      if (command[1]=='S') {
+        i=highPrecision; highPrecision=true;
+        if (parameter[0]=='-') f=-1.0; else f=1.0;
+        if ((parameter[0]=='+') || (parameter[0]=='-')) i1=1; else i1=0;
+        if (!dmsToDouble(&f1,&parameter[i1],true)) commandError=true; else { targetAxis3.part.m=(f*f1)*(double)StepsPerDegreeAxis3; targetAxis3.part.f=0; }
+        highPrecision=i;
+      } else commandError=true;
+     } else
+#endif
+
 //   S - Telescope Set Commands
       if (command[0]=='S') {
 //  :SasDD*MM#
@@ -865,10 +1118,16 @@ void processCommands() {
 //                  1 on success
       if (command[1]=='C')  { if (dateToDouble(&JD,parameter)) { EEPROM_writeFloat(EE_JD,JD); update_lst(jd2last(JD,UT1,true)); } else commandError=true; } else 
 //  :SdsDD*MM#
-//          Set target object declination to sDD*MM or sDD*MM:SS depending on the current precision setting
+//          Set target object declination to sDD*MM or sDD*MM:SS depending on the current precision setting, automatically detects low/high precision
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='d')  { if (!dmsToDouble(&newTargetDec,parameter,true)) commandError=true; } else 
+      if (command[1]=='d')  { 
+        if (!dmsToDouble(&newTargetDec,parameter,true)) {
+          i=highPrecision; highPrecision=!highPrecision;
+          if (!dmsToDouble(&newTargetDec,parameter,true)) commandError=true; 
+          highPrecision=i;
+        }
+      } else 
 //  :SgsDDD*MM# or :SgDDD*MM#
 //          Set current sites longitude to sDDD*MM an ASCII position string, East longitudes can be as negative or >180 degrees
 //          Return: 0 on failure
@@ -958,10 +1217,16 @@ void processCommands() {
       } else commandError=true; } else
 //  :SrHH:MM.T#
 //  :SrHH:MM:SS#
-//          Set target object RA to HH:MM.T or HH:MM:SS (based on precision setting)
+//          Set target object RA to HH:MM.T or HH:MM:SS based on precision setting, automatically detects low/high precision
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='r')  { if (!hmsToDouble(&newTargetRA,parameter)) commandError=true; else newTargetRA*=15.0; } else 
+      if (command[1]=='r')  {
+        if (!hmsToDouble(&newTargetRA,parameter)) {
+          i=highPrecision; highPrecision=!highPrecision;
+          if (!hmsToDouble(&newTargetRA,parameter)) commandError=true; else newTargetRA*=15.0;
+          highPrecision=i;
+        } else newTargetRA*=15.0;
+      } else 
 //  :SSHH:MM:SS#
 //          Sets the local (apparent) sideral time to HH:MM:SS
 //          Return: 0 on failure
@@ -987,16 +1252,17 @@ void processCommands() {
         }
         highPrecision=i;
       } else 
-//  :STdd.ddddd#
+//  :STdd.ddddd#    Set Tracking Rate
 //          Return: 0 on failure
 //                  1 on success
       if (command[1]=='T')  { 
         if ((trackingState==TrackingSidereal) || (trackingState==TrackingNone)) {
           f=strtod(parameter,&conv_end);
           if ( (&parameter[0]!=conv_end) && (((f>=30.0) && (f<90.0)) || (abs(f)<0.1))) {
-            if (abs(f)<0.1) { 
+            if (abs(f)<0.1) {
               trackingState=TrackingNone;
             } else {
+              if (trackingState==TrackingNone) { trackingState=TrackingSidereal; EnableStepperDrivers(); }
               SetTrackingRate((f/60.0)/1.00273790935);
             }
           } else commandError=true;
@@ -1125,7 +1391,7 @@ void processCommands() {
        if (command[1]=='Q') { SetTrackingRate(default_tracking_rate); quietReply=true; } else                // sidereal tracking rate
        if (command[1]=='R') { siderealInterval=15956313L; quietReply=true; } else                            // reset master sidereal clock interval
        if (command[1]=='K') { SetTrackingRate(0.99953004401); refraction=false; quietReply=true; } else      // king tracking rate 60.136Hz
-       if ((command[1]=='e') && (axis1Enabled) && (trackingState==TrackingNone) && (parkStatus==NotParked)) trackingState=TrackingSidereal; else
+       if ((command[1]=='e') && (trackingState==TrackingNone) && (parkStatus==NotParked)) { trackingState=TrackingSidereal; EnableStepperDrivers(); } else
        if ((command[1]=='d') && (trackingState==TrackingSidereal)) trackingState=TrackingNone; else
        if (command[1]=='o') { refraction=refraction_enable; onTrack=true;  SetTrackingRate(default_tracking_rate); } else  // turn full compensation on, defaults to base sidereal tracking rate
        if (command[1]=='r') { refraction=refraction_enable; onTrack=false; SetTrackingRate(default_tracking_rate); } else  // turn refraction compensation on, defaults to base sidereal tracking rate
@@ -1334,6 +1600,12 @@ void processCommands() {
           Serial4.print(reply);
         }
 #endif
+
+        if (process_command==COMMAND_SERIALX) {
+          if (cmd1.checksum) checksum(reply);
+          if (!supress_frame) strcat(reply,"#");
+          strcpy(replyx,reply);
+        }
       }
       quietReply=false;
    }
@@ -1483,5 +1755,28 @@ String ConfighSettings() {
 
 void forceRefreshGetEqu() {
   _coord_t=millis()-100;
+}
+
+// local command processing
+bool _ignoreReply=false;
+// true if command isn't complete
+bool cmdWaiting() {
+  if (cmdx.ready()) return true;
+  if ((replyx[0]!=0) && !_ignoreReply) return true;
+  return false;
+}
+// set command to be processed and if reply should be be ignored
+void cmdSend(const char *s, bool ignoreReply=false) {
+  _ignoreReply=ignoreReply;
+  replyx[0]=0;
+  cmdx.flush();
+  int l=0;
+  while (s[l]!=0) { cmdx.add(s[l]); l++; }
+}
+// get the last command reply
+bool cmdReply(char *s) {
+  if (replyx[0]==0) return false;
+  strcpy(s,replyx); replyx[0]=0;
+  return true;
 }
 

@@ -3,7 +3,7 @@
 
 // sets the park postion as the current position
 boolean setPark() {
-  if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
+  if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo) && (axis1Enabled)) {
     lastTrackingState=trackingState;
     trackingState=TrackingNone;
 
@@ -104,67 +104,64 @@ int parkClearBacklash() {
 
 // moves the telescope to the park position, stops tracking
 byte park() {
-  // Gets park position and moves the mount there
-  if (trackingState!=TrackingMoveTo) {
-    parkSaved=EEPROM.read(EE_parkSaved);
-    if (parkStatus==NotParked) {
-      if (parkSaved) {
-        // stop tracking
-        abortTrackingState=trackingState;
-        lastTrackingState=TrackingNone;
-        trackingState=TrackingNone; 
-
-        // turn off the PEC while we park
-        DisablePec();
-        pecStatus=IgnorePEC;
+  int f=validateGoto(); if (f==5) f=8; if (f!=0) return f; // goto allowed?
   
-        // record our status
-        int lastParkStatus=parkStatus;
-        parkStatus=Parking;
-        EEPROM.write(EE_parkStatus,parkStatus);
-        
-        // save the worm sense position
-        EEPROM_writeLong(EE_wormSensePos,wormSensePos);
-        
-        // get the position we're supposed to park at
-        long h=EEPROM_readLong(EE_posAxis1);
-        long d=EEPROM_readLong(EE_posAxis2);
-        
-        // now, slew to this target HA,Dec
-        byte gotoPierSide=EEPROM.read(EE_pierSide);
+  parkSaved=EEPROM.read(EE_parkSaved);
+  if (parkSaved) {
+    // stop tracking
+    abortTrackingState=trackingState;
+    lastTrackingState=TrackingNone;
+    trackingState=TrackingNone; 
 
-        // if sync anywhere is enabled we have a corrected location, convert to instrument
-        // and make sure we land on full-step, and store this new location so we remember PEC
-  #ifdef SYNC_ANYWHERE_ON
-        long ihs=(indexAxis1Steps/1024L)*1024L;
-        long ids=(indexAxis2Steps/1024L)*1024L;
-        h=h-ihs;
-        d=d-ids;
-        float ih=ihs/(long)StepsPerDegreeAxis1;
-        float id=ids/(long)StepsPerDegreeAxis2;
-  #endif
+    // turn off the PEC while we park
+    DisablePec();
+    pecStatus=IgnorePEC;
 
-        int gotoStatus=goTo(h,d,h,d,gotoPierSide);
+    // record our status
+    int lastParkStatus=parkStatus;
+    parkStatus=Parking;
+    EEPROM.write(EE_parkStatus,parkStatus);
+    
+    // save the worm sense position
+    EEPROM_writeLong(EE_wormSensePos,wormSensePos);
+    
+    // get the position we're supposed to park at
+    long h=EEPROM_readLong(EE_posAxis1);
+    long d=EEPROM_readLong(EE_posAxis2);
+    
+    // now, slew to this target HA,Dec
+    byte gotoPierSide=EEPROM.read(EE_pierSide);
 
-        if (gotoStatus!=0) {
-          // resume tracking state
-          trackingState=abortTrackingState;
-          // if not successful revert the park status
-          parkStatus=lastParkStatus;
-          EEPROM.write(EE_parkStatus,parkStatus);
-        } else {
-          // if successful record the changed index values
-  #ifdef SYNC_ANYWHERE_ON
-          // also save the alignment index values in this mode since they can change widely
-          EEPROM_writeFloat(EE_indexAxis1,ih);
-          EEPROM_writeFloat(EE_indexAxis2,id);
-  #endif
-        }
+    // if sync anywhere is enabled we have a corrected location, convert to instrument
+    // and make sure we land on full-step, and store this new location so we remember PEC
+#ifdef SYNC_ANYWHERE_ON
+    long ihs=(indexAxis1Steps/1024L)*1024L;
+    long ids=(indexAxis2Steps/1024L)*1024L;
+    h=h-ihs;
+    d=d-ids;
+    float ih=ihs/(long)StepsPerDegreeAxis1;
+    float id=ids/(long)StepsPerDegreeAxis2;
+#endif
 
-        return gotoStatus;
-      } else return 1; // no park position saved
-    } else return 2; // not parked
-  } else return 3; // already moving
+    int gotoStatus=goTo(h,d,h,d,gotoPierSide);
+
+    if (gotoStatus!=0) {
+      // resume tracking state
+      trackingState=abortTrackingState;
+      // if not successful revert the park status
+      parkStatus=lastParkStatus;
+      EEPROM.write(EE_parkStatus,parkStatus);
+    } else {
+      // if successful record the changed index values
+#ifdef SYNC_ANYWHERE_ON
+      // also save the alignment index values in this mode since they can change widely
+      EEPROM_writeFloat(EE_indexAxis1,ih);
+      EEPROM_writeFloat(EE_indexAxis2,id);
+#endif
+    }
+
+    return gotoStatus;
+  } else return 10; // no park position saved
 }
 
 // returns a parked telescope to operation, you must set date and time before calling this.  it also
@@ -180,11 +177,6 @@ boolean unpark() {
     parkStatus=Parked;
     if (parkStatus==Parked) {
       if (parkSaved) {
-        // enable the stepper drivers
-        digitalWrite(Axis1_EN,Axis1_Enabled); axis1Enabled=true;
-        digitalWrite(Axis2_EN,Axis2_Enabled); axis2Enabled=true;
-        delay(10);
-
         // get corrections
         GeoAlign.readCoe();
         indexAxis1=EEPROM_readFloat(EE_indexAxis1);
@@ -224,6 +216,7 @@ boolean unpark() {
           
         // start tracking the sky
         trackingState=TrackingSidereal;
+        EnableStepperDrivers();
 
         // get PEC status
         pecStatus  =EEPROM.read(EE_pecStatus);

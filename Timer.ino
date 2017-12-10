@@ -84,11 +84,11 @@ void Timer3SetInterval(long iv) {
 #if defined(__AVR_ATmega2560__)
   iv=iv/8L;
   // 0.0327 * 4096 = 134.21s
-  long i=iv; uint16_t t=1; while (iv>65536L) { t*=2; iv=i/t; if (t==4096) { iv=65535L; break; } }
+  uint32_t i=iv; uint16_t t=1; while (iv>65536L) { t*=2; iv=i/t; if (t==4096) { iv=65535L; break; } }
   cli(); nextAxis1Rate=iv-1L; t3rep=t; fastAxis1=(t3rep==1); sei();
 #elif (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__))
   // 4.194 * 32 = 134.21s
-  long i=iv; uint16_t t=1; while (iv>65536L*1024L) { t++; iv=i/t; if (t==32) { iv=65535L*1024L; break; } }
+  uint32_t i=iv; uint16_t t=1; while (iv>65536L*1024L) { t++; iv=i/t; if (t==32) { iv=65535L*1024L; break; } }
   cli(); nextAxis1Rate=(F_BUS/1000000) * (iv*0.0625) * 0.5 - 1; t3rep=t; fastAxis1=(t3rep==1); sei();
 #endif
 }
@@ -104,11 +104,11 @@ void Timer4SetInterval(long iv) {
 #if defined(__AVR_ATmega2560__)
   iv=iv/8L;
   // 0.0327 * 4096 = 134.21s
-  long i=iv; uint16_t t=1; while (iv>65536L) { t*=2; iv=i/t; if (t==4096) { iv=65535L; break; } }
+  uint32_t i=iv; uint16_t t=1; while (iv>65536L) { t*=2; iv=i/t; if (t==4096) { iv=65535L; break; } }
   cli(); nextAxis2Rate=iv-1L; t4rep=t; fastAxis2=(t4rep==1); sei();
 #elif (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__))
   // 4.194 * 32 = 134.21s
-  long i=iv; uint16_t t=1; while (iv>65536L*1024L) { t++; iv=i/t; if (t==32) { iv=65535L*1024L; break; } }
+  uint32_t i=iv; uint16_t t=1; while (iv>65536L*1024L) { t++; iv=i/t; if (t==32) { iv=65535L*1024L; break; } }
   cli(); nextAxis2Rate=(F_BUS/1000000) * (iv*0.0625) * 0.5 - 1; t4rep=t; fastAxis2=(t4rep==1); sei();
 #endif
 }
@@ -119,12 +119,14 @@ volatile boolean wasInbacklashAxis1=false;
 volatile boolean wasInbacklashAxis2=false;
 volatile boolean gotoRateAxis1=false;
 volatile boolean gotoRateAxis2=false;
-volatile byte cnt = 0;
-volatile double guideTimerRateAxis1A      = 0.0;
-volatile double guideTimerRateAtBreakAxis1= 0.0;
-volatile double guideTimerRateAxis2A      = 0.0;
-volatile double guideTimerRateAtBreakAxis2= 0.0;
+volatile byte cnt=0;
+volatile double guideTimerRateAxis1A=0.0;
+volatile double guideTimerRateAxis2A=0.0;
 volatile long timerLastPosAxis2=0;
+volatile byte guideDirChangeTimerAxis1=0;
+volatile byte lastGuideDirAxis1=0;
+volatile byte guideDirChangeTimerAxis2=0;
+volatile byte lastGuideDirAxis2=0;
 
 #if (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__))
 ISR(TIMER1_COMPA_vect)
@@ -146,31 +148,35 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
   if (trackingState!=TrackingMoveTo) {
     // automatic rate calculation HA
     long calculatedTimerRateAxis1;
-    
+
     // guide rate acceleration/deceleration and control
     if (guideDirAxis1) {
-      if ((fabs(guideTimerRateAxis1)<10.0) && (fabs(guideTimerRateAxis1A)<10.0)) { 
+      if ((fabs(guideTimerRateAxis1)<2.0) && (fabs(guideTimerRateAxis1A)<2.0)) { 
         // slow speed guiding, no acceleration
         guideTimerRateAxis1A=guideTimerRateAxis1; 
         // break
-        if (guideDirAxis1=='b') { guideTimerRateAtBreakAxis1=0; guideDirAxis1=0; guideTimerRateAxis1=0; guideTimerRateAxis1A=0; }
+        if (guideDirAxis1=='b') { guideDirAxis1=0; guideTimerRateAxis1=0.0; guideTimerRateAxis1A=0.0; }
       } else {
-        // use acceleration
+        // high speed guiding
         StepperModeGoto();
-        long t=(millis()-guideStartTimeAxis1);
-        guideTimerRateAxis1A=sqrt(t/(((480.0*DegreesForAcceleration)/slewRateX)*1000.0))*fabs(slewRateX);
-        if (guideTimerRateAxis1A>fabs(guideTimerRateAxis1)) guideTimerRateAxis1A=fabs(guideTimerRateAxis1);
-        if (guideTimerRateAxis1<0) guideTimerRateAxis1A=-guideTimerRateAxis1A;
+
+        double r=10.0-sqrt((abs(guideTimerRateAxis1A)/slewRateX)*100.0);
+        if (r<1.0) r=1.0;
+
+        // acceleration/deceleration control
+        if ((guideDirAxis1!=lastGuideDirAxis1) && (lastGuideDirAxis1!=0)) guideDirChangeTimerAxis1=25;
+        lastGuideDirAxis1=guideDirAxis1;
+        if (guideDirChangeTimerAxis1>0) guideDirChangeTimerAxis1--; else {
+          if (guideTimerRateAxis1A>guideTimerRateAxis1) { guideTimerRateAxis1A-=(acc/750.0)*r; if (guideTimerRateAxis1A<guideTimerRateAxis1) guideTimerRateAxis1A=guideTimerRateAxis1; }
+          if (guideTimerRateAxis1A<guideTimerRateAxis1) { guideTimerRateAxis1A+=(acc/750.0)*r; if (guideTimerRateAxis1A>guideTimerRateAxis1) guideTimerRateAxis1A=guideTimerRateAxis1; }
+        }
+
         // stop guiding
         if (guideDirAxis1=='b') {
-          if (guideTimerRateAtBreakAxis1==0) guideTimerRateAtBreakAxis1=fabs(guideTimerRateAxis1A);
-          long t=(((480.0*DegreesForAcceleration)/slewRateX)*1000.0)*sq(guideTimerRateAtBreakAxis1/fabs(slewRateX))-(millis()-guideBreakTimeAxis1); if (t<0) t=0;
-          guideTimerRateAxis1A=sqrt(t/(((480.0*DegreesForAcceleration)/slewRateX)*1000.0))*fabs(slewRateX);
-          if (guideTimerRateAxis1<0) guideTimerRateAxis1A=-guideTimerRateAxis1A;
-          if (abs(guideTimerRateAxis1A)<1.0) { guideTimerRateAtBreakAxis1=0; guideDirAxis1=0; guideTimerRateAxis1=0; guideTimerRateAxis1A=0; if (!guideDirAxis2) StepperModeTracking(); }
+          if (abs(guideTimerRateAxis1A)<0.001) { guideDirAxis1=0; lastGuideDirAxis1=0; guideTimerRateAxis1=0.0; guideTimerRateAxis1A=0.0; guideDirChangeTimerAxis1=0; if (!guideDirAxis2) StepperModeTracking(); } else guideTimerRateAxis1=0.0;
         }
       }
-    } else { guideTimerRateAxis1A=0; }
+    } else guideTimerRateAxis1A=0.0;
 
     double timerRateAxis1A=trackingTimerRateAxis1;
     double timerRateAxis1B=guideTimerRateAxis1A+pecTimerRateAxis1+timerRateAxis1A;
@@ -185,28 +191,32 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
 
     // guide rate acceleration/deceleration
     if (guideDirAxis2) {
-      if ((fabs(guideTimerRateAxis2)<10.0) && (fabs(guideTimerRateAxis2A)<10.0)) { 
+      if ((fabs(guideTimerRateAxis2)<2.0) && (fabs(guideTimerRateAxis2A)<2.0)) { 
         // slow speed guiding, no acceleration
         guideTimerRateAxis2A=guideTimerRateAxis2; 
         // break mode
-        if (guideDirAxis2=='b') { guideTimerRateAtBreakAxis2=0; guideDirAxis2=0; guideTimerRateAxis2=0; guideTimerRateAxis2A=0; }
+        if (guideDirAxis2=='b') { guideDirAxis2=0; guideTimerRateAxis2=0.0; guideTimerRateAxis2A=0.0; }
       } else {
         // use acceleration
         StepperModeGoto();
-        long t=(millis()-guideStartTimeAxis2);
-        guideTimerRateAxis2A=sqrt(t/(((480.0*DegreesForAcceleration)/slewRateX)*1000.0))*fabs(slewRateX);
-        if (guideTimerRateAxis2A>fabs(guideTimerRateAxis2)) guideTimerRateAxis2A=fabs(guideTimerRateAxis2);
-        if (guideTimerRateAxis2<0) guideTimerRateAxis2A=-guideTimerRateAxis2A;
+
+        double r=10.0-sqrt((abs(guideTimerRateAxis2A)/slewRateX)*100.0);
+        if (r<1.0) r=1.0;
+
+        // acceleration/deceleration control
+        if ((guideDirAxis2!=lastGuideDirAxis2) && (lastGuideDirAxis2!=0)) guideDirChangeTimerAxis2=25;
+        lastGuideDirAxis2=guideDirAxis2;
+        if (guideDirChangeTimerAxis2>0) guideDirChangeTimerAxis2--; else {
+          if (guideTimerRateAxis2A>guideTimerRateAxis2) { guideTimerRateAxis2A-=(acc/750.0)*r; if (guideTimerRateAxis2A<guideTimerRateAxis2) guideTimerRateAxis2A=guideTimerRateAxis2; }
+          if (guideTimerRateAxis2A<guideTimerRateAxis2) { guideTimerRateAxis2A+=(acc/750.0)*r; if (guideTimerRateAxis2A>guideTimerRateAxis2) guideTimerRateAxis2A=guideTimerRateAxis2; }
+        }
+
         // stop guiding
         if (guideDirAxis2=='b') {
-          if (guideTimerRateAtBreakAxis2==0) guideTimerRateAtBreakAxis2=fabs(guideTimerRateAxis2);
-          long t=(((480.0*DegreesForAcceleration)/slewRateX)*1000.0)*sq(guideTimerRateAtBreakAxis2/fabs(slewRateX))-(millis()-guideBreakTimeAxis2); if (t<0) t=0;
-          guideTimerRateAxis2A=sqrt(t/(((480.0*DegreesForAcceleration)/slewRateX)*1000.0))*fabs(slewRateX);
-          if (guideTimerRateAxis2<0) guideTimerRateAxis2A=-guideTimerRateAxis2A;
-          if (abs(guideTimerRateAxis2A)<1.0) { guideTimerRateAtBreakAxis2=0; guideDirAxis2=0; guideTimerRateAxis2=0; guideTimerRateAxis2A=0; if (!guideDirAxis1) StepperModeTracking(); }
+          if (abs(guideTimerRateAxis2A)<0.001) { guideDirAxis2=0; lastGuideDirAxis2=0; guideTimerRateAxis2=0.0; guideTimerRateAxis2A=0.0; guideDirChangeTimerAxis2=0; if (!guideDirAxis1) StepperModeTracking(); } else guideTimerRateAxis2=0.0;
         }
       }
-    } else guideTimerRateAxis2A=0;
+    } else guideTimerRateAxis2A=0.0;
 
     double timerRateAxis2A=trackingTimerRateAxis2;
     double timerRateAxis2B=guideTimerRateAxis2A+timerRateAxis2A;
@@ -218,7 +228,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
   }
   
   thisTimerRateAxis1=timerRateAxis1;
-  thisTimerRateAxis2; if (useTimerRateRatio) { thisTimerRateAxis2=(timerRateAxis2*timerRateRatio); } else { thisTimerRateAxis2=timerRateAxis2; }
+  if (useTimerRateRatio) { thisTimerRateAxis2=(timerRateAxis2*timerRateRatio); } else { thisTimerRateAxis2=timerRateAxis2; }
   
   // override rate during backlash compensation
   if (inbacklashAxis1) { thisTimerRateAxis1=timerRateBacklashAxis1; wasInbacklashAxis1=true; }
@@ -244,7 +254,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     if (Axis2PowerOffTimer>0) Axis2PowerOffTimer--; 
 
     // if the guide rate <= 1x and we're guiding on either axis set the timer to 10 minutes
-    if ((fabs(guideTimerBaseRate)<=1.000001) && (guideDirAxis2 || guideDirAxis1)) Axis2PowerOffTimer=10*60*100;
+    if ((fabs(guideTimerBaseRate)<=1.000001) && (guideDirAxis2 || guideDirAxis1)) Axis2PowerOffTimer=10L*60L*100L;
 
     // if Axis2 isn't stationary set the timer to a minimum of 10 seconds
     cli(); if ((posAxis2!=timerLastPosAxis2) && (Axis2PowerOffTimer<10*100)) { timerLastPosAxis2=posAxis2; Axis2PowerOffTimer=10*100; } sei();

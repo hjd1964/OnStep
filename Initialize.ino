@@ -20,6 +20,19 @@ void Init_Startup_Values() {
   trueAxis2          = 90L*(long)StepsPerDegreeAxis2;
   sei();
 
+#ifdef ROTATOR_ON
+  targetAxis3.fixed = 0;
+  amountRotateAxis3.fixed=0;
+#endif
+#ifdef FOCUSER1_ON
+  targetAxis4.fixed = 0;
+  amountMoveAxis4.fixed=0;
+#endif
+#ifdef FOCUSER2_ON
+  targetAxis5.fixed = 0;
+  amountMoveAxis5.fixed=0;
+#endif
+
   // default values for state variables
   pierSide            = PierSideNone;
   dirAxis1            = 1;
@@ -92,6 +105,19 @@ void Init_Pins() {
   pinMode(Axis2StepPin,OUTPUT); 
   pinMode(Axis2DirPin,OUTPUT); 
 
+#ifdef ROTATOR_ON
+  pinMode(Axis3StepPin,OUTPUT);
+  pinMode(Axis3DirPin,OUTPUT); 
+#endif
+#ifdef FOCUSER1_ON
+  pinMode(Axis4StepPin,OUTPUT);
+  pinMode(Axis4DirPin,OUTPUT); 
+#endif
+#ifdef FOCUSER2_ON
+  pinMode(Axis5StepPin,OUTPUT);
+  pinMode(Axis5DirPin,OUTPUT); 
+#endif
+
 // override any status LED and set the reset pin HIGH
 #if defined(W5100_ON) && defined(__ARM_Teensy3__)
 #ifdef STATUS_LED_PINS_ON
@@ -133,7 +159,7 @@ void Init_Pins() {
 
 // light reticule LED
 #ifdef RETICULE_LED_PINS
-#if defined(__ARM_Teensy3__) && !defined(ALTERNATE_PINMAP_ON)
+#if defined(__ARM_Teensy3__) && !defined(MiniPCB_ON) && !defined(MaxPCB_ON)
   #ifdef STATUS_LED_PINS_ON
     #undef STATUS_LED_PINS_ON
   #endif
@@ -201,7 +227,7 @@ void Init_Pins() {
 
 // inputs for stepper drivers fault signal
 #ifndef AXIS1_FAULT_OFF
-  #if defined(__ARM_Teensy3__) && defined(ALTERNATE_PINMAP_ON)
+  #if defined(__ARM_Teensy3__) && (defined(ALLOW_DRIVER_FAULT_PULLUP_PULLDOWN))
     #ifdef AXIS1_FAULT_LOW
       pinMode(Axis1_FAULT,INPUT_PULLUP);
     #endif
@@ -213,7 +239,7 @@ void Init_Pins() {
   #endif
 #endif
 #ifndef AXIS2_FAULT_OFF
-  #if defined(__ARM_Teensy3__) && defined(ALTERNATE_PINMAP_ON)
+  #if defined(__ARM_Teensy3__) && defined(ALLOW_DRIVER_FAULT_PULLUP_PULLDOWN)
     #ifdef AXIS2_FAULT_LOW
       pinMode(Axis2_FAULT,INPUT_PULLUP);
     #endif
@@ -372,9 +398,9 @@ void Init_ReadEEPROM_Values() {
   pauseHome=EEPROM.read(EE_pauseHome);
 #endif
 
-  // set the default guide rate, 16x sidereal
-  setGuideRate(GuideRate16x);
-  enableGuideRate(GuideRate16x);
+  // set the default guide rate, 24x sidereal
+  setGuideRate(GuideRate24x);
+  enableGuideRate(GuideRate24x);
 }
 
 void Init_EEPROM_Values() {
@@ -548,5 +574,23 @@ void Init_Start_Timers() {
   IntPrioritySet(Int_timer3, 0);
   IntPrioritySet(Int_timer4, 0);
 #endif
+}
+
+void EnableStepperDrivers() {
+  // enable the stepper drivers
+  if (axis1Enabled==false) {
+    digitalWrite(Axis1_EN,Axis1_Enabled); axis1Enabled=true;
+    digitalWrite(Axis2_EN,Axis2_Enabled); axis2Enabled=true;
+    delay(10);
+  }
+}
+
+void DisableStepperDrivers() {
+  // disable the stepper drivers
+  if (axis1Enabled==true) {
+    digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
+    digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
+    delay(10);
+  }
 }
 
