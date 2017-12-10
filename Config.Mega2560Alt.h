@@ -9,7 +9,7 @@
  *
 */
 
-#define Mega2560Alt_ON   //  <- Turn _ON to use this configuration
+#define Mega2560Alt_OFF   //  <- Turn _ON to use this configuration
 
 #ifdef Mega2560Alt_ON
 // -------------------------------------------------------------------------------------------------------------------------
