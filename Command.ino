@@ -239,6 +239,40 @@ void processCommands() {
 //  :D#    returns an "\0x7f#" if the mount is moving, otherwise returns "#".
       if ((command[0]=='D') && (command[1]==0))  { if (trackingState==TrackingMoveTo) { reply[0]=(char)127; reply[1]=0; } else { reply[0]='#'; reply[1]=0; supress_frame=true; } quietReply=true; } else 
 
+#ifdef ESP8266_CONTROL_ON
+//   E - Enter special mode
+//  :ESPFLASH# ESP8266 device flash mode
+//         Returns: Never (infinite loop)
+//       OnStep must be at home and tracking turned off for this command to work.  A power cycle is required to resume normal operation.
+      if (command[0]=='E') {
+        if ((command[1]=='S') && (parameter[0]=='P') && (parameter[1]=='F') && (parameter[2]=='L') && (parameter[3]=='A') && (parameter[4]=='S') && (parameter[5]=='H')) {
+          if ((atHome) && (trackingState==TrackingNone)) {
+            // initialize both serial ports
+            Serial.begin(115200);
+            Serial1.begin(115200);
+            digitalWrite(Axis1_Aux,LOW); delay(20);  // Pgm mode LOW
+            
+            digitalWrite(Axis2_Aux,LOW);  delay(20); // Reset, if LOW
+            digitalWrite(Axis2_Aux,HIGH);            // Reset, inactive HIGH
+
+            while (true) {
+              // read from port 1, send to port 0:
+              if (Serial1.available()) {
+                int inByte = Serial1.read();
+                Serial.write(inByte);
+              }
+              
+              // read from port 0, send to port 1:
+              if (Serial.available()) {
+                int inByte = Serial.read();
+                Serial1.write(inByte);
+              }
+            }
+          }
+        }
+      } else
+#endif
+
 #ifdef FOCUSER1_ON
 //   F - Focuser1 Commands
       if (command[0]=='F') {
