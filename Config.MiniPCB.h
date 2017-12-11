@@ -196,6 +196,7 @@
 #define AXIS2_FAULT_OFF
 
 // ------------------------------------------------------------------------------------------------------------------------
+// THE FOLLOWING ARE INFREQUENTLY USED OPTIONS FOR THE MINIPCB SINCE USING ANY OF THESE WOULD REQUIRE SOLDERING TO THE PCB BACK AND ADDING OFF-PCB CIRCUITRY, MUCH EASIER TO USE A MAXPCB AND TEENSY3.5/3.6
 // FOCUSER ROTATOR OR ALT/AZ DE-ROTATION ----------------------------------------------------------------------------------
 // Pads 30,33 = Step,Dir (choose either this option or the second focuser, not both)
 #define ROTATOR_OFF                  // enable or disable rotator feature (for any mount type,) default=OFF (de-rotator is available only for MOUNT_TYPE_ALTAZM.) [infrequently used option]
@@ -211,7 +212,7 @@
 
 // FOCUSER1 ---------------------------------------------------------------------------------------------------------------
 // Pads 31,32 = Step,Dir
-#define FOCUSER1_OFF                 // enable or disable focuser feature, default=OFF [infrequently used option]
+#define FOCUSER1_OFF                 // enable or disable focuser feature, default=OFF
 #define MaxRateAxis4               8 // this is the minimum number of milli-seconds between micro-steps, default=8
 #define StepsPerMicrometerAxis4  0.5 // figure this out by testing or other means
 #define REVERSE_AXIS4_OFF            // reverse the direction of Axis4 focuser movement
@@ -221,7 +222,7 @@
 
 // FOCUSER2 ---------------------------------------------------------------------------------------------------------------
 // Pads 30,33 = Step,Dir (choose either this option or the rotator, not both)
-#define FOCUSER2_OFF                 // enable or disable focuser feature, default=OFF [infrequently used option]
+#define FOCUSER2_OFF                 // enable or disable focuser feature, default=OFF
 #define MaxRateAxis5               8 // this is the minimum number of milli-seconds between micro-steps, default=8
 #define StepsPerMicrometerAxis5  0.5 // figure this out by testing or other means
 #define REVERSE_AXIS5_OFF            // reverse the direction of Axis4 focuser movement
