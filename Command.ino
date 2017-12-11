@@ -268,8 +268,8 @@ void processCommands() {
                 Serial1.write(inByte);
               }
             }
-          }
-        }
+          } else commandError=true;
+        } else commandError=true;
       } else
 #endif
 
