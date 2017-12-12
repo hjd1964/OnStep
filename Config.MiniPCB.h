@@ -12,6 +12,8 @@
 #define MiniPCB_OFF   //  <- Turn _ON to use this configuration
 
 #ifdef MiniPCB_ON
+
+#define BOARD_SELECTED
 // -------------------------------------------------------------------------------------------------------------------------
 // ADJUST THE FOLLOWING TO CONFIGURE YOUR CONTROLLER FEATURES --------------------------------------------------------------
 
