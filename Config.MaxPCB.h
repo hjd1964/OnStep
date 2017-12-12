@@ -12,6 +12,8 @@
 #define MaxPCB_OFF   //  <- Turn _ON to use this configuration
 
 #ifdef MaxPCB_ON
+
+#define BOARD_SELECTED
 // -------------------------------------------------------------------------------------------------------------------------
 // ADJUST THE FOLLOWING TO CONFIGURE YOUR CONTROLLER FEATURES --------------------------------------------------------------
 

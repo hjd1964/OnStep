@@ -18,6 +18,8 @@
 #define Ramps14_OFF   //  <- turn _ON to use this configuration
 
 #ifdef Ramps14_ON
+
+#define BOARD_SELECTED
 // -------------------------------------------------------------------------------------------------------------------------
 // ADJUST THE FOLLOWING TO CONFIGURE YOUR CONTROLLER FEATURES --------------------------------------------------------------
 

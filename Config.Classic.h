@@ -13,6 +13,8 @@
 #define Classic_OFF   //  <- Turn _ON to use this configuration
 
 #ifdef Classic_ON
+
+#define BOARD_SELECTED
 // -------------------------------------------------------------------------------------------------------------------------
 // ADJUST THE FOLLOWING TO CONFIGURE YOUR CONTROLLER FEATURES --------------------------------------------------------------
 
