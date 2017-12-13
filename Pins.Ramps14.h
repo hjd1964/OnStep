@@ -24,7 +24,7 @@
 #define PpsPin         2    //
 #define PpsInt         0    // Interrupt 0 on Pin 2
 
-// Pins to Axis2 Dec/Alt on RAMPS X
+// Pins to Axis1 RA/Azm on RAMPS X
 #define Axis1DirPin   55    // Pin A1 (Dir)
 #define Axis1DirBit    1    //
 #define Axis1DirPORT  PORTF //
