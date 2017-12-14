@@ -15,9 +15,6 @@
 // -------------------------------------------------------------------------------------------------------------------------
 // ADJUST THE FOLLOWING TO CONFIGURE YOUR CONTROLLER FEATURES --------------------------------------------------------------
 
-// turns debugging on, used during testing, default=OFF
-#define DEBUG_OFF
-
 // Default speed for Serial1 com port, Default=9600
 #define SERIAL1_BAUD_DEFAULT 9600
 

@@ -16,9 +16,6 @@
 // -------------------------------------------------------------------------------------------------------------------------
 // ADJUST THE FOLLOWING TO CONFIGURE YOUR CONTROLLER FEATURES --------------------------------------------------------------
 
-// Turns debugging on, used during testing, default=OFF
-#define DEBUG_OFF
-
 // Enables internal goto assist mount modeling (for Eq mounts), default=OFF (Experimental)
 // Note that Goto Assist in Sky Planetarium works even if this is off
 #define ALIGN_GOTOASSIST_OFF
