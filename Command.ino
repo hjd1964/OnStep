@@ -248,6 +248,9 @@ void processCommands() {
         if ((command[1]=='S') && (parameter[0]=='P') && (parameter[1]=='F') && (parameter[2]=='L') && (parameter[3]=='A') && (parameter[4]=='S') && (parameter[5]=='H')) {
           if ((atHome) && (trackingState==TrackingNone)) {
             // initialize both serial ports
+            Serial.println("The ESP-01 should be reset into Flash upload mode (115,200 Baud.)");
+            Serial.println("Waiting for data.");
+            delay(500);
             Serial.begin(115200);
             Serial1.begin(115200);
             digitalWrite(Axis1_Aux,LOW); delay(20);  // Pgm mode LOW
