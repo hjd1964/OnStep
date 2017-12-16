@@ -40,10 +40,11 @@ Stellarium, etc.
 
 There are also INDI drivers so it can be used from Linux, with CdC or KStars.
 
+
 # More Information
 More information, including the full set of features, detailed designs for
 PCBs, instructions on how to build a controller, and on the software as well,
-can be found in the [Wiki for the OnStep Group](https://groups.io/g/onstep/wiki/home).
+can be found at my [StellarJourney web-site](http://www.stellarjourney.com/index.php?r=site/equipment_onstep) and in the [Wiki for the OnStep Group](https://groups.io/g/onstep/wiki/home).
 
 # License
 OnStep is open source free software, licensed under the GPL.
