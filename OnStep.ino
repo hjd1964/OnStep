@@ -695,7 +695,11 @@ void setup() {
   PSerial1.begin(9600);
 #endif
 #ifdef SER4_AVAILABLE
+#ifdef SERIAL4_BAUD_DEFAULT
+  Serial4.begin(SERIAL4_BAUD_DEFAULT);
+#else
   Serial4.begin(9600);
+#endif
 #endif
  
   // autostart tracking
