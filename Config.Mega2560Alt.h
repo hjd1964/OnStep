@@ -41,7 +41,7 @@
 
 // RTC (Real Time Clock) support, Default=OFF. Other options: RTC_DS3234 for a DS3234 on the default SPI interface pins (and CS on pin 10, optionally wire the SQW output to the PPS pin below.)
 #define RTC_OFF
-// PPS use _ON or _PULLUP to enable the input and use the built-in pullup resistor.  Sense rising edge on pin 21 for optional precision clock source (GPS, for example), default=OFF (Teensy3.1 Pin 23)
+// PPS use _ON or _PULLUP to enable the input and use the built-in pullup resistor.  Sense rising edge on pin 21 for optional precision clock source (GPS, for example), default=OFF
 #define PPS_SENSE_OFF
 
 // PEC sense on Pin 2 use _ON or _PULLUP to enable the input/use the built-in pullup resistor (digital input) or provide a comparison value (see below) for Analog operation (on Pin A1,) default=OFF
@@ -82,9 +82,9 @@
 #define REMEMBER_PAUSE_HOME_OFF
 
 // ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
-#define REMEMBER_MAX_RATE_OFF         // set to ON and OnStep will remember rates set in the ASCOM driver or Android App, default=OFF 
+#define REMEMBER_MAX_RATE_OFF        // set to ON and OnStep will remember rates set in the ASCOM driver or Android App, default=OFF 
 #define MaxRate                   96 // this is the minimum number of micro-seconds between micro-steps
-                                     // minimum* (fastest goto) is around 16 (Teensy3.2) or 32 (Mega2560), default=96 higher is ok
+                                     // minimum* (fastest goto) is around 32, default=96 higher is ok
                                      // too low and OnStep communicates slowly and/or freezes as the motor timers use up all the MCU time
                                      // * = minimum can be lower, when both AXIS1/AXIS2_MODE_GOTO are used by AXIS1/AXIS2_STEP_GOTO times
                                      
@@ -168,7 +168,7 @@
 #define AXIS2_MODE_GOTO_OFF          // programs the Dec/Alt uStep mode M0/M1/M2, used during gotos, optional and default _OFF.
 #define AXIS2_STEP_GOTO 1            // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
 #define MODE_SWITCH_BEFORE_SLEW_OFF  // _ON (or _SPI) for _MODE and _MODE_GOTO settings to start/stop just before/after the slew, otherwise they are active during the slew at <128uS/step speeds
-                                     // _SPI as above but uses SPI (on M0/M1/M2/Aux) to do the switching (TMC2130.)  Uses Teensy3.x Pins 18 (Aux1) and 5 (Aux2,) choose only one feature on Aux1/2.
+                                     // _SPI as above but uses SPI (on M0/M1/M2/Aux) to do the switching (TMC2130.)
 
 // Secondary stepper driver decay control (for both Axis, the _DECAY_MODE and _DECAY_MODE_GOTO settings always start/stop just before/after the slew)
 // typically used for the DRV8825 or A9488 where decay control is seperate from the micro-step mode control.  The driver modules usually need to be modified to accomplish this.
@@ -180,8 +180,8 @@
 // if the decay/micro-step mode switch happens before/after a slew, inserts a 3ms delay before the motors take a step
 #define MODE_SWITCH_SLEEP_OFF
 
-// Stepper driver Fault detection, just wire the driver Fault signal to Pins 39 (Axis1) and 38 (Axis2), default=OFF.  Teensy3.2 Pins 18 (Aux1) and 5 (Aux2,) choose only one feature to use on Aux1/2.
-// other settings are LOW, HIGH, SPI (Teensy3.2 applies internal pullup if _LOW and pulldown if _HIGH.)  The SPI interface (on M0/M1/M2/Aux) can be used to detect errors on the TMC2130.
+// Stepper driver Fault detection, just wire the driver Fault signal to Pins 39 (Axis1) and 38 (Axis2), default=OFF.
+// other settings are LOW, HIGH, SPI.  The SPI interface (on M0/M1/M2/Aux) can be used to detect errors on the TMC2130.
 #define AXIS1_FAULT_OFF
 #define AXIS2_FAULT_OFF
 
