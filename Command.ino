@@ -1134,16 +1134,16 @@ void processCommands() {
         i=(int)(parameter[0]-'0');
         if ((i>=0) && (i<10)) {
           if (process_command==COMMAND_SERIAL) {
-            PSerial.print("1"); while (PSerial.transmit()); delay(20); PSerial.begin(baudRate[i]);
+            PSerial.print("1"); while (PSerial.transmit()); delay(50); PSerial.begin(baudRate[i]);
             quietReply=true; 
           } else
           if (process_command==COMMAND_SERIAL1) {
-            PSerial1.print("1"); while (PSerial1.transmit()); delay(20); PSerial1.begin(baudRate[i]); 
+            PSerial1.print("1"); while (PSerial1.transmit()); delay(50); PSerial1.begin(baudRate[i]); 
             quietReply=true; 
 #ifdef SER4_AVAILABLE
           } else
           if (process_command==COMMAND_SERIAL4) {
-            Serial4.print("1"); delay(20); Serial4.begin(baudRate[i]);
+            Serial4.print("1"); delay(50); Serial4.begin(baudRate[i]);
             quietReply=true; 
 #endif
           } else commandError=true;
