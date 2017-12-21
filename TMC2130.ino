@@ -30,7 +30,36 @@ uint8_t TMC2130_read(byte Address, uint32_t* data_out)
   return status_byte;
 }
 
-// TMC2130 setup:
+// TMC2130 stallGuard ----------------------------------------------------------------
+// COOLCONF
+bool TMC2130_sgSetSgt(int8_t sgt) {
+  // sgt,    default=0, range -64 to +63                         (This  signed  value  controls  stallGuard2  level  for  stall output  and  sets  the  optimum  measurement range for readout. 
+  //                                    . | 2   .     1 .       . A lower value gives a higher sensitivity. Zero is the starting value working with most motors.)
+  //                             10987654321098765432109876543210
+  uint32_t data_out =(sgt<<16)&0b00000000011111110000000000000000UL; // mask sgt since it can be a negative value
+           data_out|=          0b00000001000000000000000000000000UL; // turn on sfilt
+  
+  TMC2130_write(REG_COOLCONF,data_out);
+}
+ 
+int TMC2130_sgGetResult() {
+  // get global status register, look for driver error bit
+  uint32_t data_out=0;
+  uint8_t result=TMC2130_read(REG_DRVSTATUS,&data_out);
+  
+  BBSpi.pause();
+  
+  // first write returns nothing, second the status data
+  data_out=0;
+  result=TMC2130_read(REG_DRVSTATUS,&data_out);
+
+  // get the first 10 bits: SG_RESULT
+  int SG_RESULT=data_out&0b1111111111;
+  
+  return SG_RESULT;
+}
+
+// TMC2130 setup ---------------------------------------------------------------------
 // 256x interpolation:  intpol
 // stealth chop on/off: stealth_chop
 // microstepping mode:  micro_step_mode (0=256x, 1=128x, 2=64x, 3=32x, 4=16x, 5=8x, 6=4x, 7=2x, 8=1x)

@@ -54,12 +54,14 @@ void StepperModeTracking() {
   //       SS      ,SCK     ,MISO     ,MOSI
   BBSpi.begin(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0);
   TMC2130_setup(!nintpol,stealth,AXIS1_MODE&0b001111,lowpwr);  // default 256x interpolation ON, stealthChop OFF (spreadCycle), micro-steps
+  TMC2130_sgSetSgt(EEPROM.read(EE_sgSgtAxis1));
   BBSpi.end();
   nintpol=((AXIS2_MODE & 0b0010000)!=0);
   stealth=((AXIS2_MODE & 0b0100000)!=0);
   lowpwr =((AXIS2_MODE & 0b1000000)!=0);
   BBSpi.begin(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
   TMC2130_setup(!nintpol,stealth,AXIS2_MODE&0b001111,lowpwr);
+  TMC2130_sgSetSgt(EEPROM.read(EE_sgSgtAxis2));
   BBSpi.end();
 
   // allow stealth chop current regulation to ramp up to the initial motor current before moving

@@ -684,7 +684,33 @@ void processCommands() {
               case 'A': sprintf(reply,"%ld%%",(worst_loop_time*100L)/9970L); worst_loop_time=0; quietReply=true; break;                           // DebugA, Workload
               case 'B': cli(); temp=(long)(trackingTimerRateAxis1*1000.0); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;              // DebugB, trackingTimerRateAxis1
             }
-          } else commandError=true;
+          } else
+#ifdef MODE_SWITCH_BEFORE_SLEW_SPI
+          if (parameter[0]=='S') { //Sn: stallGuard
+            switch (parameter[1]) {
+              int result;
+              case '0': sprintf(reply,"%i",(int)((int8_t)EEPROM.read(EE_sgSgtAxis1))); quietReply=true; break; // stallGuard, SGT Axis1
+              case '1': sprintf(reply,"%i",(int)(EEPROM_readInt(EE_sgLimitAxis1)));    quietReply=true; break; // stallGuard, Lower limit Axis 1
+              case '2': sprintf(reply,"%i",(int)((int8_t)EEPROM.read(EE_sgSgtAxis2))); quietReply=true; break; // stallGuard, SGT Axis2
+              case '3': sprintf(reply,"%i",(int)(EEPROM_readInt(EE_sgLimitAxis2)));    quietReply=true; break; // stallGuard, Lower limit Axis 2
+              case '4':                                                                                        // stallGuard, get SG_RESULT Axis1
+                BBSpi.begin(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0);
+                result=TMC2130_sgGetResult();
+                BBSpi.end();
+                sprintf(reply,"%ld",(long)result);
+                quietReply=true;
+                break;
+              case '5':                                                                                        // stallGuard, get SG_RESULT Axis1
+                BBSpi.begin(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
+                result=TMC2130_sgGetResult();
+                BBSpi.end();
+                sprintf(reply,"%ld",(long)result);
+                quietReply=true;
+                break;
+            }
+          } else 
+#endif
+            commandError=true;
         } else commandError=true;
         getEqu(&f,&f1,false);  
       } else 
@@ -1308,7 +1334,8 @@ void processCommands() {
 //  :SXnn,VVVVVV...#   Set OnStep value
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='X')  { 
+      if (command[1]=='X')  {
+        if (parameter[2]!=',') { parameter[0]=0; commandError=true; } // make sure command format is correct
         if (parameter[0]=='0') { // 0n: Align Model
           switch (parameter[1]) {
             case '0': indexAxis1=(double)strtol(&parameter[3],NULL,10)/3600.0; break;        // indexAxis1
@@ -1388,7 +1415,41 @@ void processCommands() {
               break;
             break;
           }
-        } else 
+        } else
+#endif
+#ifdef MODE_SWITCH_BEFORE_SLEW_SPI
+        if (parameter[0]=='S') { //Sn: stallGuard
+          long sgt;
+          long t;
+          switch (parameter[1]) {
+            case '0': // set sgt Axis1
+              sgt=strtol(&parameter[3],NULL,10);
+              if ((sgt>=-64) && (sgt<=63)) {
+                EEPROM.write(EE_sgSgtAxis1,(uint8_t)sgt);
+                BBSpi.begin(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0);
+                TMC2130_sgSetSgt(sgt);
+                BBSpi.end();
+              } else commandError=true;
+            break;
+            case '1': // set sgt threshold Axis1
+              t=strtol(&parameter[3],NULL,10);
+              if ((t>=0) && (t<=1023)) EEPROM_writeInt(EE_sgLimitAxis1,t); else commandError=true;
+            break;
+            case '2': // set sgt Axis2
+              sgt=strtol(&parameter[3],NULL,10);
+              if ((sgt>=-64) && (sgt<=63)) {
+                EEPROM.write(EE_sgSgtAxis2,(uint8_t)sgt);
+                BBSpi.begin(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
+                TMC2130_sgSetSgt(sgt);
+                BBSpi.end();
+              } else commandError=true;
+            break;
+            case '3': // set sgt threshold Axis2
+              t=strtol(&parameter[3],NULL,10);
+              if ((t>=0) && (t<=1023)) EEPROM_writeInt(EE_sgLimitAxis2,t); else commandError=true;
+            break;
+          } 
+        } else
 #endif
           commandError=true;
       } else

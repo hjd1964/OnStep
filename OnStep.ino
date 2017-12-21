@@ -582,7 +582,11 @@ volatile int blAxis2        = 0;
 #define EE_parkStatus  9      // 1
 #define EE_parkSaved   10     // 1
 
-#define EE_currentSite 11     // 1 +2
+#define EE_currentSite 11     // 1
+
+#define EE_sgSgtAxis1  12     // 1
+#define EE_sgSgtAxis2  13     // 1
+
 #define EE_LMT         14     // 4
 #define EE_JD          18     // 4
 
@@ -610,7 +614,11 @@ volatile int blAxis2        = 0;
 #define EE_tfCor       66     // 4
 
 #define EE_pecStatus   70     // 1
-#define EE_pecRecorded 71     // 1 +4
+#define EE_pecRecorded 71     // 1
+
+#define EE_sgLimitAxis1 72    // 2
+#define EE_sgLimitAxis2 74    // 2
+
 #define EE_wormSensePos 76    // 4
 
 #define EE_backlashAxis1 80   // 4
