@@ -9,9 +9,9 @@
  *
 */
 
-#define Launchpad_OFF   //  <- Turn _ON to use this configuration
+#define TM4C_OFF   //  <- Turn _ON to use this configuration
 
-#ifdef Launchpad_ON
+#ifdef TM4C_ON
 // -------------------------------------------------------------------------------------------------------------------------
 // ADJUST THE FOLLOWING TO CONFIGURE YOUR CONTROLLER FEATURES --------------------------------------------------------------
 

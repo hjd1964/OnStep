@@ -1,7 +1,7 @@
 // -------------------------------------------------------------------------------------------------
 // Pin map for OnStep Launchpad TM4C varients
 
-#ifdef (defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__))
+#if (defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__))
 // Note that TM4C123 has resistors R9 and R10 between pins 14 (B6) and 23 (D0) and between pins 15 (B7) and 24 (D1)
 // Make sure you look at the list of the pins and options to avoid clashes or desolder the two bridges
 // These pins are used for Axis2_M2 (14) and DE_M3 (15) and for Axis2DirPin (23) and Axis25vPin (24)
