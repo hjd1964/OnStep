@@ -1,7 +1,15 @@
-// -----------------------------------------------------------------------------------
-// PROGRAM FOR POINTING A TELESCOPE BY T. TAKI
+// ---------------------------------------------------------------------
+// Program for pointing a telescope by Toshimi Taki
 //
-// CONVERSION TO C++/Arduino BY Howard Dutton, 10/12/2016
+// Original published in Sky & Telescope, February 1989, pages 194-196.
+//
+// Source here, with errors corrected: 
+// http://wwwcdn.skyandtelescope.com/wp-content/uploads/taki.bas
+//
+// Background on equations is on Taki's site:
+// http://www.geocities.jp/toshimi_taki/aim/aim.htm
+//
+// Conversion to C++/Arduino by Howard Dutton, 10/12/2016
 
 #ifdef MOUNT_TYPE_ALTAZM
 TAlign::TAlign()
