@@ -707,8 +707,7 @@ void processCommands() {
 #endif
             commandError=true;
         } else commandError=true;
-        getEqu(&f,&f1,false);  
-      } else 
+      } else
 //  :GZ#   Get telescope azimuth
 //         Returns: DDD*MM# or DDD*MM'SS# (based on precision setting)
       if (command[1]=='Z')  { getHor(&f,&f1); if (!doubleToDms(reply,&f1,true,false)) commandError=true; else quietReply=true; } else commandError=true;
