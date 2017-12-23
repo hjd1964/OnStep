@@ -63,11 +63,20 @@
 #include "Config.Mega2560Alt.h"
 
 #if !defined(Classic_ON) && !defined(MiniPCB_ON) && !defined(MaxPCB_ON) && !defined(TM4C_ON) && !defined(Ramps14_ON) && !defined(Mega2560Alt_ON)
-  #error "Choose ONE Config.xxxxx.h file and enable it for use by turning it _ON."
+  #error "Choose ONE Config.xxx.h file and enable it for use by turning it _ON."
 #endif
 
 #if defined(ALTERNATE_PINMAP_ON)
   #error "ALTERNATE_PINMAP_ON is an obsolete option, you can't use this configuration."
+#endif
+
+#if defined(MODE_SWITCH_BEFORE_SLEW_ON) || defined(MODE_SWITCH_BEFORE_SLEW_SPI)
+#if !defined(AXIS1_MODE) || !defined(AXIS1_MODE_GOTO)
+  #error "Config.xxx.h error: AXIS1_MODE and AXIS1_MODE_GOTO must be set to a valid value."
+#endif
+#if !defined(AXIS2_MODE) || !defined(AXIS2_MODE_GOTO)
+  #error "Config.xxx.h error: AXIS2_MODE and AXIS2_MODE_GOTO must be set to a valid value."
+#endif
 #endif
 
 #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
@@ -89,6 +98,13 @@
 #include "Library.h"
 #include "Align.h"
 #include "Command.h"
+
+#ifdef MODE_SWITCH_BEFORE_SLEW_SPI
+#include "TMC2130.h"
+//               SS      ,SCK     ,MISO     ,MOSI
+tmc2130 tmcAxis1(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0);
+tmc2130 tmcAxis2(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
+#endif
 
 #ifdef RTC_DS3234
 #include <SparkFunDS3234RTC.h>  //https://github.com/sparkfun/SparkFun_DS3234_RTC_Arduino_Library/archive/master.zip
@@ -446,7 +462,6 @@ boolean homeMount        = false;
 unsigned long baudRate[10] = {115200,56700,38400,28800,19200,14400,9600,4800,2400,1200};
 pserial PSerial;
 pserial1 PSerial1;
-bbspi BBSpi;
 
 // Guide command ------------------------------------------------------------------------------------------------------------
 #define GuideRate1x        2
@@ -853,6 +868,12 @@ void loop() {
     BBSpi.end();
   }
 #endif
+#if defined(MODE_SWITCH_BEFORE_SLEW_SPI) && defined(STALL_GUARD_ON)
+  // stallGuard, update SG_RESULTs
+  tmcAxis1.sgUpdateResult();
+  tmcAxis2.sgUpdateResult();
+#endif
+
     if (faultAxis1 || faultAxis2) { lastError=ERR_MOTOR_FAULT; if (trackingState==TrackingMoveTo) abortSlew=true; else { trackingState=TrackingNone; if (guideDirAxis1) guideDirAxis1='b'; if (guideDirAxis2) guideDirAxis2='b'; } }
     // check altitude overhead limit and horizon limit
     if ((currentAlt<minAlt) || (currentAlt>maxAlt)) { lastError=ERR_ALT; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }

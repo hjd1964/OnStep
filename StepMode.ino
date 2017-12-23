@@ -46,23 +46,25 @@ void StepperModeTracking() {
     if ((AXIS2_MODE & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE>>2 & 1)); } else { pinMode(Axis2_M2,INPUT); }
   #endif
 #elif defined(MODE_SWITCH_BEFORE_SLEW_SPI)
+  // default 256x interpolation ON, stealthChop OFF (spreadCycle), micro-steps
   stepAxis1=1;
-  stepAxis2=1;
   bool nintpol=((AXIS1_MODE & 0b0010000)!=0);
   bool stealth=((AXIS1_MODE & 0b0100000)!=0);
   bool lowpwr =((AXIS1_MODE & 0b1000000)!=0);
-  //       SS      ,SCK     ,MISO     ,MOSI
-  BBSpi.begin(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0);
-  TMC2130_setup(!nintpol,stealth,AXIS1_MODE&0b001111,lowpwr);  // default 256x interpolation ON, stealthChop OFF (spreadCycle), micro-steps
-  TMC2130_sgSetSgt(EEPROM.read(EE_sgSgtAxis1));
-  BBSpi.end();
+  tmcAxis1.setup(!nintpol,stealth,AXIS1_MODE&0b001111,lowpwr);
+  #ifdef STALL_GUARD_ON
+  tmcAxis1.sgSetSgt(EEPROM.read(EE_sgSgtAxis1));
+  #endif
+
+  // default 256x interpolation ON, stealthChop OFF (spreadCycle), micro-steps
+  stepAxis2=1;
   nintpol=((AXIS2_MODE & 0b0010000)!=0);
   stealth=((AXIS2_MODE & 0b0100000)!=0);
   lowpwr =((AXIS2_MODE & 0b1000000)!=0);
-  BBSpi.begin(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
-  TMC2130_setup(!nintpol,stealth,AXIS2_MODE&0b001111,lowpwr);
-  TMC2130_sgSetSgt(EEPROM.read(EE_sgSgtAxis2));
-  BBSpi.end();
+  tmcAxis2.setup(!nintpol,stealth,AXIS2_MODE&0b001111,lowpwr);
+  #ifdef STALL_GUARD_ON
+  tmcAxis2.sgSetSgt(EEPROM.read(EE_sgSgtAxis2));
+  #endif
 
   // allow stealth chop current regulation to ramp up to the initial motor current before moving
   if ((((AXIS1_MODE & 0b0100000)!=0) || ((AXIS2_MODE & 0b0100000)!=0)) & (atHome)) delay(100);
@@ -101,21 +103,19 @@ void StepperModeGoto() {
     if ((AXIS2_MODE_GOTO & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE_GOTO>>2 & 1)); } else { pinMode(Axis2_M2,INPUT); }
   #endif
 #elif defined(MODE_SWITCH_BEFORE_SLEW_SPI)
+  // default 256x interpolation ON, stealthChop OFF (spreadCycle), micro-steps
   stepAxis1=AXIS1_STEP_GOTO;
-  stepAxis2=AXIS2_STEP_GOTO;
   bool nintpol=((AXIS1_MODE_GOTO & 0b0010000)!=0);
   bool stealth=((AXIS1_MODE_GOTO & 0b0100000)!=0);
   bool lowpwr =((AXIS1_MODE_GOTO & 0b1000000)!=0);
-  //       CS      ,SCK     ,MISO     ,MOSI
-  BBSpi.begin(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0);
-  TMC2130_setup(!nintpol,stealth,AXIS1_MODE_GOTO&0b001111,lowpwr);  // default 256x interpolation ON, stealthChop OFF (spreadCycle), micro-steps
-  BBSpi.end();
+  tmcAxis1.setup(!nintpol,stealth,AXIS1_MODE_GOTO&0b001111,lowpwr);
+
+  // default 256x interpolation ON, stealthChop OFF (spreadCycle), micro-steps
+  stepAxis2=AXIS2_STEP_GOTO;
   nintpol=((AXIS2_MODE_GOTO & 0b0010000)!=0);
   stealth=((AXIS2_MODE_GOTO & 0b0100000)!=0);
   lowpwr =((AXIS2_MODE_GOTO & 0b1000000)!=0);
-  BBSpi.begin(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
-  TMC2130_setup(!nintpol,stealth,AXIS2_MODE_GOTO&0b001111,lowpwr);
-  BBSpi.end();
+  tmcAxis2.setup(!nintpol,stealth,AXIS2_MODE_GOTO&0b001111,lowpwr);
 #endif
 
 #ifdef MODE_SWITCH_SLEEP_ON
