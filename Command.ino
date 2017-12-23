@@ -602,26 +602,28 @@ void processCommands() {
         if (parameter[2]==(char)0) {
           if (parameter[0]=='0') { // 0n: Align Model
             switch (parameter[1]) {
-              case '0': sprintf(reply,"%ld",(long)(indexAxis1*3600.0)); quietReply=true; break;        // indexAxis1
-              case '1': sprintf(reply,"%ld",(long)(indexAxis2*3600.0)); quietReply=true; break;        // indexAxis2
-              case '2': sprintf(reply,"%ld",(long)(GeoAlign.altCor*3600.0)); quietReply=true; break;   // altCor
-              case '3': sprintf(reply,"%ld",(long)(GeoAlign.azmCor*3600.0)); quietReply=true; break;   // azmCor
-              case '4': sprintf(reply,"%ld",(long)(GeoAlign.doCor*3600.0)); quietReply=true; break;    // doCor
-              case '5': sprintf(reply,"%ld",(long)(GeoAlign.pdCor*3600.0)); quietReply=true; break;    // pdCor
+              case '0': sprintf(reply,"%ld",(long)(indexAxis1*3600.0)); quietReply=true; break;      // indexAxis1
+              case '1': sprintf(reply,"%ld",(long)(indexAxis2*3600.0)); quietReply=true; break;      // indexAxis2
+              case '2': sprintf(reply,"%ld",(long)(GeoAlign.altCor*3600.0)); quietReply=true; break; // altCor
+              case '3': sprintf(reply,"%ld",(long)(GeoAlign.azmCor*3600.0)); quietReply=true; break; // azmCor
+              case '4': sprintf(reply,"%ld",(long)(GeoAlign.doCor*3600.0)); quietReply=true; break;  // doCor
+              case '5': sprintf(reply,"%ld",(long)(GeoAlign.pdCor*3600.0)); quietReply=true; break;  // pdCor
 #if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT)
-              case '6': sprintf(reply,"%ld",(long)(GeoAlign.dfCor*3600.0)); quietReply=true; break;    // ffCor
-              case '7': sprintf(reply,"%ld",(long)(0)); quietReply=true; break;                        // dfCor
+              case '6': sprintf(reply,"%ld",(long)(GeoAlign.dfCor*3600.0)); quietReply=true; break;  // ffCor
+              case '7': sprintf(reply,"%ld",(long)(0)); quietReply=true; break;                      // dfCor
 #else
-              case '6': sprintf(reply,"%ld",(long)(0)); quietReply=true; break;                        // ffCor
-              case '7': sprintf(reply,"%ld",(long)(GeoAlign.dfCor*3600.0)); quietReply=true; break;    // dfCor
+              case '6': sprintf(reply,"%ld",(long)(0)); quietReply=true; break;                      // ffCor
+              case '7': sprintf(reply,"%ld",(long)(GeoAlign.dfCor*3600.0)); quietReply=true; break;  // dfCor
 #endif
-              case '8': sprintf(reply,"%ld",(long)(GeoAlign.tfCor*3600.0)); quietReply=true; break;    // tfCor
+              case '8': sprintf(reply,"%ld",(long)(GeoAlign.tfCor*3600.0)); quietReply=true; break;  // tfCor
+              default:  commandError=true;
             }
           } else
           if (parameter[0]=='8') { // 8n: Date/Time
             switch (parameter[1]) {
               case '0': i=highPrecision; highPrecision=true; f=timeRange(UT1); doubleToHms(reply,&f); highPrecision=i; quietReply=true; break;  // UTC time
               case '1': f1=JD; f=UT1; while (f>=24.0) { f-=24.0; f1+=1; } while (f<0.0) { f+=24.0; f1-=1; } greg(f1,&i2,&i,&i1); i2=(i2/99.99999-floor(i2/99.99999))*100; sprintf(reply,"%d/%d/%d",i,i1,i2); quietReply=true; break; // UTC date
+              default:  commandError=true;
             }
           } else
           if (parameter[0]=='9') { // 9n: Misc.
@@ -648,65 +650,58 @@ void processCommands() {
                 strcpy(reply,"N");
 #endif
                 quietReply=true; break; // rotator availablity 2=rotate/derotate, 1=rotate, 0=off
+              default:  commandError=true;
             }
           } else
           if (parameter[0]=='E') { // En: Get settings
-            if (parameter[1]=='0') { strcpy(reply,(char *)ConfighSettings().c_str()); quietReply=true; } else
-            if (parameter[1]=='1') { sprintf(reply,"%ld",(long)MaxRate); quietReply=true; } else
-            if (parameter[1]=='2') { dtostrf(DegreesForAcceleration,2,1,reply); quietReply=true; } else
-            if (parameter[1]=='3') { sprintf(reply,"%ld",(long)round(BacklashTakeupRate)); quietReply=true; } else
-            if (parameter[1]=='4') { sprintf(reply,"%ld",(long)round(StepsPerDegreeAxis1)); quietReply=true; } else
-            if (parameter[1]=='5') { sprintf(reply,"%ld",(long)round(StepsPerDegreeAxis2)); quietReply=true; } else
-            if (parameter[1]=='6') { dtostrf(StepsPerSecondAxis1,3,6,reply); quietReply=true; } else
-            if (parameter[1]=='7') { sprintf(reply,"%ld",(long)round(StepsPerWormRotationAxis1)); quietReply=true; } else
-            if (parameter[1]=='8') { sprintf(reply,"%ld",(long)round(PECBufferSize)); quietReply=true; } else
+            switch (parameter[1]) {
+              case '0': strcpy(reply,(char *)ConfighSettings().c_str()); quietReply=true; break;
+              case '1': sprintf(reply,"%ld",(long)MaxRate); quietReply=true; break;
+              case '2': dtostrf(DegreesForAcceleration,2,1,reply); quietReply=true; break;
+              case '3': sprintf(reply,"%ld",(long)round(BacklashTakeupRate)); quietReply=true; break;
+              case '4': sprintf(reply,"%ld",(long)round(StepsPerDegreeAxis1)); quietReply=true; break;
+              case '5': sprintf(reply,"%ld",(long)round(StepsPerDegreeAxis2)); quietReply=true; break;
+              case '6': dtostrf(StepsPerSecondAxis1,3,6,reply); quietReply=true; break;
+              case '7': sprintf(reply,"%ld",(long)round(StepsPerWormRotationAxis1)); quietReply=true; break;
+              case '8': sprintf(reply,"%ld",(long)round(PECBufferSize)); quietReply=true; break;
 #ifdef MOUNT_TYPE_GEM
-            if (parameter[1]=='9') { sprintf(reply,"%ld",(long)round(minutesPastMeridianE)); quietReply=true; } else
-            if (parameter[1]=='A') { sprintf(reply,"%ld",(long)round(minutesPastMeridianW)); quietReply=true; } else
+              case '9': sprintf(reply,"%ld",(long)round(minutesPastMeridianE)); quietReply=true; break;
+              case 'A': sprintf(reply,"%ld",(long)round(minutesPastMeridianW)); quietReply=true; break;
 #endif
-            if (parameter[1]=='B') { sprintf(reply,"%ld",(long)round(UnderPoleLimit)); quietReply=true; } else
-            if (parameter[1]=='C') { sprintf(reply,"%ld",(long)round(MinDec)); quietReply=true; } else
-            if (parameter[1]=='D') { sprintf(reply,"%ld",(long)round(MaxDec)); quietReply=true; } else commandError=true;
+              case 'B': sprintf(reply,"%ld",(long)round(UnderPoleLimit)); quietReply=true; break;
+              case 'C': sprintf(reply,"%ld",(long)round(MinDec)); quietReply=true; break;
+              case 'D': sprintf(reply,"%ld",(long)round(MaxDec)); quietReply=true; break;
+              default:  commandError=true;
+            }
           } else
           if (parameter[0]=='F') { // Fn: Debug
             long temp;
             switch (parameter[1]) {
-              case '0': cli(); temp=(long)(posAxis1-((long)targetAxis1.part.m)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;        // Debug0, true vs. target RA position
-              case '1': cli(); temp=(long)(posAxis2-((long)targetAxis2.part.m)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;        // Debug1, true vs. target Dec position
-              case '2': cli(); temp=(long)trackingState; sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                                // Debug2, trackingState
-              case '3': sprintf(reply,"%ld",(long)(az_deltaAxis1*1000.0*1.00273790935)); quietReply=true; break;                                  // Debug3, RA refraction tracking rate
-              case '4': sprintf(reply,"%ld",(long)(az_deltaAxis2*1000.0*1.00273790935)); quietReply=true; break;                                  // Debug4, Dec refraction tracking rate
-              case '5': sprintf(reply,"%ld",(long)(ZenithTrackingRate()*1000.0*1.00273790935)); quietReply=true; break;                           // Debug5, Alt RA refraction tracking rate
-              case '6': cli(); temp=(long)(targetAxis1.part.m); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                         // Debug6, HA target position
-              case '7': cli(); temp=(long)(targetAxis2.part.m); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                         // Debug7, Dec target position
-              case '8': cli(); temp=(long)(posAxis1); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                                   // Debug8, HA motor position
-              case '9': cli(); temp=(long)(posAxis2); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                                   // Debug9, Dec motor position
-              case 'A': sprintf(reply,"%ld%%",(worst_loop_time*100L)/9970L); worst_loop_time=0; quietReply=true; break;                           // DebugA, Workload
-              case 'B': cli(); temp=(long)(trackingTimerRateAxis1*1000.0); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;              // DebugB, trackingTimerRateAxis1
+              case '0': cli(); temp=(long)(posAxis1-((long)targetAxis1.part.m)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break; // Debug0, true vs. target RA position
+              case '1': cli(); temp=(long)(posAxis2-((long)targetAxis2.part.m)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break; // Debug1, true vs. target Dec position
+              case '2': cli(); temp=(long)trackingState; sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                         // Debug2, trackingState
+              case '3': sprintf(reply,"%ld",(long)(az_deltaAxis1*1000.0*1.00273790935)); quietReply=true; break;                           // Debug3, RA refraction tracking rate
+              case '4': sprintf(reply,"%ld",(long)(az_deltaAxis2*1000.0*1.00273790935)); quietReply=true; break;                           // Debug4, Dec refraction tracking rate
+              case '5': sprintf(reply,"%ld",(long)(ZenithTrackingRate()*1000.0*1.00273790935)); quietReply=true; break;                    // Debug5, Alt RA refraction tracking rate
+              case '6': cli(); temp=(long)(targetAxis1.part.m); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                  // Debug6, HA target position
+              case '7': cli(); temp=(long)(targetAxis2.part.m); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                  // Debug7, Dec target position
+              case '8': cli(); temp=(long)(posAxis1); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                            // Debug8, HA motor position
+              case '9': cli(); temp=(long)(posAxis2); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                            // Debug9, Dec motor position
+              case 'A': sprintf(reply,"%ld%%",(worst_loop_time*100L)/9970L); worst_loop_time=0; quietReply=true; break;                    // DebugA, Workload
+              case 'B': cli(); temp=(long)(trackingTimerRateAxis1*1000.0); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;       // DebugB, trackingTimerRateAxis1
+              default:  commandError=true;
             }
           } else
-#ifdef MODE_SWITCH_BEFORE_SLEW_SPI
+#if defined(MODE_SWITCH_BEFORE_SLEW_SPI) && defined(STALL_GUARD_ON)
           if (parameter[0]=='S') { //Sn: stallGuard
             switch (parameter[1]) {
-              int result;
               case '0': sprintf(reply,"%i",(int)((int8_t)EEPROM.read(EE_sgSgtAxis1))); quietReply=true; break; // stallGuard, SGT Axis1
               case '1': sprintf(reply,"%i",(int)(EEPROM_readInt(EE_sgLimitAxis1)));    quietReply=true; break; // stallGuard, Lower limit Axis 1
               case '2': sprintf(reply,"%i",(int)((int8_t)EEPROM.read(EE_sgSgtAxis2))); quietReply=true; break; // stallGuard, SGT Axis2
               case '3': sprintf(reply,"%i",(int)(EEPROM_readInt(EE_sgLimitAxis2)));    quietReply=true; break; // stallGuard, Lower limit Axis 2
-              case '4':                                                                                        // stallGuard, get SG_RESULT Axis1
-                BBSpi.begin(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0);
-                result=TMC2130_sgGetResult();
-                BBSpi.end();
-                sprintf(reply,"%ld",(long)result);
-                quietReply=true;
-                break;
-              case '5':                                                                                        // stallGuard, get SG_RESULT Axis1
-                BBSpi.begin(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
-                result=TMC2130_sgGetResult();
-                BBSpi.end();
-                sprintf(reply,"%ld",(long)result);
-                quietReply=true;
-                break;
+              case '4': sprintf(reply,"%ld",(long)tmcAxis1.sgResult);                  quietReply=true; break; // stallGuard, get SG_RESULT Axis1
+              case '5': sprintf(reply,"%ld",(long)tmcAxis2.sgResult);                  quietReply=true; break; // stallGuard, get SG_RESULT Axis2
+              default:  commandError=true;
             }
           } else 
 #endif
@@ -1335,23 +1330,24 @@ void processCommands() {
 //          Return: 0 on failure
 //                  1 on success
       if (command[1]=='X')  {
-        if (parameter[2]!=',') { parameter[0]=0; commandError=true; } // make sure command format is correct
+        if (parameter[2]!=',') { parameter[0]=0; commandError=true; }                      // make sure command format is correct
         if (parameter[0]=='0') { // 0n: Align Model
           switch (parameter[1]) {
-            case '0': indexAxis1=(double)strtol(&parameter[3],NULL,10)/3600.0; break;        // indexAxis1
-            case '1': indexAxis2=(double)strtol(&parameter[3],NULL,10)/3600.0; break;        // indexAxis2
-            case '2': GeoAlign.altCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;   // altCor
-            case '3': GeoAlign.azmCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;   // azmCor
-            case '4': GeoAlign.doCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;    // doCor
-            case '5': GeoAlign.pdCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;    // pdCor
+            case '0': indexAxis1=(double)strtol(&parameter[3],NULL,10)/3600.0; break;      // indexAxis1
+            case '1': indexAxis2=(double)strtol(&parameter[3],NULL,10)/3600.0; break;      // indexAxis2
+            case '2': GeoAlign.altCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break; // altCor
+            case '3': GeoAlign.azmCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break; // azmCor
+            case '4': GeoAlign.doCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;  // doCor
+            case '5': GeoAlign.pdCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;  // pdCor
 #if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT)
-            case '6': GeoAlign.dfCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;    // ffCor
-            case '7': break;                                                                 // dfCor
+            case '6': GeoAlign.dfCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;  // ffCor
+            case '7': break;                                                               // dfCor
 #else
-            case '6': break;                                                                 // ffCor
-            case '7': GeoAlign.dfCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;    // dfCor
+            case '6': break;                                                               // ffCor
+            case '7': GeoAlign.dfCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;  // dfCor
 #endif
-            case '8': GeoAlign.tfCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;    // tfCor
+            case '8': GeoAlign.tfCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;  // tfCor
+            default:  commandError=true;
           }
         } else
         if (parameter[0]=='9') { // 9n: Misc.
@@ -1371,31 +1367,32 @@ void processCommands() {
                 case '3': maxRate=MaxRate*16L; break; // 100%
                 case '2': maxRate=MaxRate*12L; break; // 150%
                 case '1': maxRate=MaxRate*8L;  break; // 200%
-              break;
+                default:  maxRate=MaxRate*16L;
               }
               EEPROM_writeInt(EE_maxRate,(int)(maxRate/16L));
               SetAccelerationRates(maxRate);
             break;
             case '5': // autoMeridianFlip
-              if ((parameter[3]=='0') || (parameter[3]=='1')) { i=parameter[3]-'0'; autoMeridianFlip=i; EEPROM.write(EE_autoMeridianFlip,autoMeridianFlip); } 
+              if ((parameter[3]=='0') || (parameter[3]=='1')) { i=parameter[3]-'0'; autoMeridianFlip=i; EEPROM.write(EE_autoMeridianFlip,autoMeridianFlip); } else commandError=true;
             break; 
             case '6': // preferred pier side 
               switch (parameter[3]) {
                 case 'E': preferredPierSide=PPS_EAST; break;
                 case 'W': preferredPierSide=PPS_WEST; break;
                 case 'B': preferredPierSide=PPS_BEST; break;
-                default: commandError=true;
+                default:  commandError=true;
               }
             break;
             case '7': // buzzer
-              if ((parameter[3]=='0') || (parameter[3]=='1')) { soundEnabled=parameter[3]-'0'; }
+              if ((parameter[3]=='0') || (parameter[3]=='1')) { soundEnabled=parameter[3]-'0'; } else commandError=true;
             break;
             case '8': // pause at home on meridian flip
-              if ((parameter[3]=='0') || (parameter[3]=='1')) { pauseHome=parameter[3]-'0'; EEPROM.write(EE_pauseHome,pauseHome); }
+              if ((parameter[3]=='0') || (parameter[3]=='1')) { pauseHome=parameter[3]-'0'; EEPROM.write(EE_pauseHome,pauseHome); } else commandError=true;
             break;
             case '9': // continue if paused at home
-              if ((parameter[3]=='1')) { if (waitingHome) waitingHomeContinue=true; }
+              if ((parameter[3]=='1')) { if (waitingHome) waitingHomeContinue=true; } commandError=true;
             break;
+            default: commandError=true;
           }
         } else
 #ifdef MOUNT_TYPE_GEM
@@ -1413,11 +1410,11 @@ void processCommands() {
               if (minutesPastMeridianW<-180) minutesPastMeridianW=-180; 
               EEPROM.write(EE_dpmW,round((minutesPastMeridianW*15.0)/60.0)+128); 
               break;
-            break;
+            default: commandError=true;
           }
         } else
 #endif
-#ifdef MODE_SWITCH_BEFORE_SLEW_SPI
+#if defined(MODE_SWITCH_BEFORE_SLEW_SPI) && defined(STALL_GUARD_ON)
         if (parameter[0]=='S') { //Sn: stallGuard
           long sgt;
           long t;
@@ -1426,9 +1423,7 @@ void processCommands() {
               sgt=strtol(&parameter[3],NULL,10);
               if ((sgt>=-64) && (sgt<=63)) {
                 EEPROM.write(EE_sgSgtAxis1,(uint8_t)sgt);
-                BBSpi.begin(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0);
-                TMC2130_sgSetSgt(sgt);
-                BBSpi.end();
+                tmcAxis1.sgSetSgt(sgt);
               } else commandError=true;
             break;
             case '1': // set sgt threshold Axis1
@@ -1439,15 +1434,14 @@ void processCommands() {
               sgt=strtol(&parameter[3],NULL,10);
               if ((sgt>=-64) && (sgt<=63)) {
                 EEPROM.write(EE_sgSgtAxis2,(uint8_t)sgt);
-                BBSpi.begin(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
-                TMC2130_sgSetSgt(sgt);
-                BBSpi.end();
+                tmcAxis2.sgSetSgt(sgt);
               } else commandError=true;
             break;
             case '3': // set sgt threshold Axis2
               t=strtol(&parameter[3],NULL,10);
               if ((t>=0) && (t<=1023)) EEPROM_writeInt(EE_sgLimitAxis2,t); else commandError=true;
             break;
+            default: commandError=true;
           } 
         } else
 #endif
