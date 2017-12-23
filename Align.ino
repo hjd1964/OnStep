@@ -868,7 +868,7 @@ void TGeoAlign::autoModel(int n) {
   do_search(  128,1,1,1,1,0,0,0,0,0);
 #endif
 
-#if defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__)
+#if defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__) || defined(ARM_STM32)
   // search, this can handle about 9 degrees of polar misalignment, and 2 degrees of cone error, 6' of FF/DF and TF
   if (num>4) {
     do_search(16384,0,0,1,1,0, 0, 0,0,0);

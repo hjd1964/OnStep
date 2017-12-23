@@ -281,9 +281,7 @@ void Init_Pins() {
 #if defined(PPS_SENSE_ON) || defined(PPS_SENSE_PULLUP)
 #if defined(__AVR_ATmega2560__)
   attachInterrupt(PpsInt,ClockSync,RISING);
-#elif defined(__ARM_Teensy3__)
-  attachInterrupt(PpsPin,ClockSync,RISING);
-#elif defined(__ARM_TI_TM4C__)
+#elif defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__) || defined(ARM_STM32)
   attachInterrupt(PpsPin,ClockSync,RISING);
 #endif
 #endif
@@ -561,6 +559,52 @@ void Init_Start_Timers() {
   // set the motor timers to run at the highest priority
   NVIC_SET_PRIORITY(IRQ_PIT_CH1, 0);
   NVIC_SET_PRIORITY(IRQ_PIT_CH2, 0);
+
+#elif defined(ARM_STM32)
+  // set the system timer for millis() to the second highest priority
+  // FIXME 
+  //SCB_SHPR3 = (32 << 24) | (SCB_SHPR3 & 0x00FFFFFF);
+
+  // Pause the timer while we're configuring it
+  itimer3.pause();
+
+  // Set up period
+  itimer3.setPeriod((float)128 * 0.0625); // in microseconds
+
+  // Set up an interrupt on channel 4
+  itimer3.setChannel3Mode(TIMER_OUTPUT_COMPARE);
+  itimer3.setCompare(TIMER_CH3, 1);  // Interrupt 1 count after each update
+  itimer3.attachCompare1Interrupt(TIMER3_COMPA_vect);
+
+  // Refresh the timer's count, prescale, and overflow
+  itimer3.refresh();
+
+  // Start the timer counting
+  itimer3.resume();
+
+  
+  // Pause the timer while we're configuring it
+  itimer4.pause();
+
+  // Set up period
+  itimer4.setPeriod((float)128 * 0.0625); // in microseconds
+
+  // Set up an interrupt on channel 4
+  itimer4.setChannel4Mode(TIMER_OUTPUT_COMPARE);
+  itimer4.setCompare(TIMER_CH4, 1);  // Interrupt 1 count after each update
+  itimer4.attachCompare1Interrupt(TIMER4_COMPA_vect);
+
+  // Refresh the timer's count, prescale, and overflow
+  itimer4.refresh();
+
+  // Start the timer counting
+  itimer4.resume();
+
+  // set the 1/100 second sidereal clock timer to run at the second highest priority
+  nvic_irq_set_priority(NVIC_TIMER1_CC, 2);
+  // set the motor timers to run at the highest priority
+  nvic_irq_set_priority(NVIC_TIMER3, 0);
+  nvic_irq_set_priority(NVIC_TIMER4, 0);
 
 #elif defined(__ARM_TI_TM4C__)
   TimerLoadSet(Timer3_base, TIMER_A, (int) (F_BUS / 1000000 * 128 * 0.0625));
