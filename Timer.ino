@@ -60,6 +60,9 @@ void Timer1SetInterval(long iv) {
 #elif defined(__ARM_Teensy3__)
   itimer1.begin(TIMER1_COMPA_vect, (float)iv * 0.0625);
 #elif defined(ARM_STM32)
+
+  // This code is based on the following document
+  // http://docs.leaflabs.com/static.leaflabs.com/pub/leaflabs/maple-docs/0.0.10/lang/api/hardwaretimer.html#lang-hardwaretimer
   // Pause the timer while we're configuring it
   itimer1.pause();
 
