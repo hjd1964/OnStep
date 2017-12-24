@@ -60,19 +60,24 @@ void Timer1SetInterval(long iv) {
 #elif defined(__ARM_Teensy3__)
   itimer1.begin(TIMER1_COMPA_vect, (float)iv * 0.0625);
 #elif defined(ARM_STM32)
-
   // This code is based on the following document
+  //
   // http://docs.leaflabs.com/static.leaflabs.com/pub/leaflabs/maple-docs/0.0.10/lang/api/hardwaretimer.html#lang-hardwaretimer
+  // And this document:
+  //
+  // http://docs.leaflabs.com/static.leaflabs.com/pub/leaflabs/maple-docs/0.0.12/timers.html
   // Pause the timer while we're configuring it
   itimer1.pause();
 
+  //itimer1.setPrescaleFactor(STM32_PRESCALER);
+  //itimer1.setOverflow(STM32_OVERFLOW);
   // Set up period
   itimer1.setPeriod((float)iv * 0.0625); // in microseconds
 
   // Set up an interrupt on channel 1
   itimer1.setChannel1Mode(TIMER_OUTPUT_COMPARE);
   itimer1.setCompare(TIMER_CH1, 1);  // Interrupt 1 count after each update
-  itimer1.attachCompare1Interrupt(TIMER1_COMPA_vect);
+  itimer1.attachInterrupt(TIMER_CH1, TIMER1_COMPA_vect);
 
   // Refresh the timer's count, prescale, and overflow
   itimer1.refresh();
@@ -393,13 +398,15 @@ ISR(TIMER3_COMPA_vect)
   // Pause the timer while we're configuring it
   itimer3.pause();
 
+  //itimer3.setPrescaleFactor(STM32_PRESCALER);
+  //itimer3.setOverflow(STM32_OVERFLOW);
   // Set up period
   itimer3.setPeriod(nextAxis1Rate*stepAxis1); // in microseconds
 
   // Set up an interrupt on channel 1
   itimer3.setChannel1Mode(TIMER_OUTPUT_COMPARE);
   itimer3.setCompare(TIMER_CH3, 1);  // Interrupt 1 count after each update
-  itimer3.attachCompare1Interrupt(TIMER3_COMPA_vect);
+  itimer3.attachInterrupt(TIMER_CH3, TIMER3_COMPA_vect);
 
   // Refresh the timer's count, prescale, and overflow
   itimer3.refresh();
@@ -503,13 +510,15 @@ ISR(TIMER4_COMPA_vect)
   // Pause the timer while we're configuring it
   itimer4.pause();
 
+  //itimer4.setPrescaleFactor(STM32_PRESCALER);
+  //itimer4.setOverflow(STM32_OVERFLOW);
   // Set up period
   itimer4.setPeriod(nextAxis2Rate*stepAxis2); // in microseconds
 
   // Set up an interrupt on channel 1
   itimer4.setChannel1Mode(TIMER_OUTPUT_COMPARE);
   itimer4.setCompare(TIMER_CH4, 1);  // Interrupt 1 count after each update
-  itimer4.attachCompare1Interrupt(TIMER4_COMPA_vect);
+  itimer4.attachInterrupt(TIMER_CH4, TIMER4_COMPA_vect);
 
   // Refresh the timer's count, prescale, and overflow
   itimer4.refresh();

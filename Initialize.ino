@@ -561,20 +561,19 @@ void Init_Start_Timers() {
   NVIC_SET_PRIORITY(IRQ_PIT_CH2, 0);
 
 #elif defined(ARM_STM32)
-  // set the system timer for millis() to the second highest priority
-  // FIXME 
-  //SCB_SHPR3 = (32 << 24) | (SCB_SHPR3 & 0x00FFFFFF);
 
   // Pause the timer while we're configuring it
   itimer3.pause();
 
+  //itimer3.setPrescaleFactor(SMT32_PRESCALER);
+  //itimer3.setOverflow(STM32_OVERFLOW);
   // Set up period
   itimer3.setPeriod((float)128 * 0.0625); // in microseconds
 
-  // Set up an interrupt on channel 4
+  // Set up an interrupt on channel 3
   itimer3.setChannel3Mode(TIMER_OUTPUT_COMPARE);
   itimer3.setCompare(TIMER_CH3, 1);  // Interrupt 1 count after each update
-  itimer3.attachCompare1Interrupt(TIMER3_COMPA_vect);
+  itimer3.attachInterrupt(TIMER_CH3, TIMER3_COMPA_vect);
 
   // Refresh the timer's count, prescale, and overflow
   itimer3.refresh();
@@ -586,13 +585,15 @@ void Init_Start_Timers() {
   // Pause the timer while we're configuring it
   itimer4.pause();
 
+  //itimer4.setPrescaleFactor(SMT32_PRESCALER);
+  //itimer4.setOverflow(STM32_OVERFLOW);
   // Set up period
   itimer4.setPeriod((float)128 * 0.0625); // in microseconds
 
   // Set up an interrupt on channel 4
   itimer4.setChannel4Mode(TIMER_OUTPUT_COMPARE);
   itimer4.setCompare(TIMER_CH4, 1);  // Interrupt 1 count after each update
-  itimer4.attachCompare1Interrupt(TIMER4_COMPA_vect);
+  itimer4.attachInterrupt(TIMER_CH4, TIMER4_COMPA_vect);
 
   // Refresh the timer's count, prescale, and overflow
   itimer4.refresh();
