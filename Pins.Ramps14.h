@@ -50,12 +50,12 @@
 // Pins to focuser1 stepper driver on RAMPS E0
 #define Axis4DirPin   28    // Pin 28 (Dir)
 #define Axis4StepPin  26    // Pin 26 (Step)
-#define Axis4_EN      38    // Pin 38 (Enable)
+#define Axis4_EN      24    // Pin 24 (Enable)
 
 // Pins to focuser2 stepper driver on RAMPS E1
-#define Axis5DirPin   36    // Pin 36 (Dir)
-#define Axis5StepPin  34    // Pin 34 (Step)
-#define Axis5_EN      38    // Pin 38 (Enable)
+#define Axis5DirPin   34    // Pin 34 (Dir)
+#define Axis5StepPin  36    // Pin 36 (Step)
+#define Axis5_EN      30    // Pin 30 (Enable)
 
 // ST4 interface on RAMPS AUX-2
 #define ST4RAw        A9    // Pin A9  ST4 RA- West
