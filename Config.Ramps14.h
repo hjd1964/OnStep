@@ -178,8 +178,8 @@
 #define MaxAxis4                25.0 // maximum allowed Axis4 position in millimeters, default =  25.0
 
 // FOCUSER2 ---------------------------------------------------------------------------------------------------------------
-// Pins 34,36 = Step,Dir
-#define FOCUSER2_OFF                 // enable or disable focuser feature, default=OFF
+// Pins 36,34 = Step,Dir
+#define FOCUSER2_ON                  // enable or disable focuser feature, default=OFF
 #define MaxRateAxis5               8 // this is the minimum number of milli-seconds between micro-steps, default=8
 #define StepsPerMicrometerAxis5  0.5 // figure this out by testing or other means
 #define REVERSE_AXIS5_OFF            // reverse the direction of Axis4 focuser movement

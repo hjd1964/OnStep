@@ -107,7 +107,7 @@ void Init_Pins() {
 
 #ifdef ROTATOR_ON
   pinMode(Axis3StepPin,OUTPUT);
-  pinMode(Axis3DirPin,OUTPUT); 
+  pinMode(Axis3DirPin,OUTPUT);
 #endif
 #ifdef FOCUSER1_ON
   pinMode(Axis4StepPin,OUTPUT);
@@ -255,6 +255,17 @@ void Init_Pins() {
   pinMode(Axis1_EN,OUTPUT); 
   pinMode(Axis2_EN,OUTPUT);
   StepperModeTrackingInit();
+
+  // turn on the Rotator/Focuser stepper drivers (LOW)
+  #ifdef Axis3_EN
+    pinMode(Axis3_EN,OUTPUT); 
+  #endif
+  #ifdef Axis4_EN
+    pinMode(Axis4_EN,OUTPUT); 
+  #endif
+  #ifdef Axis5_EN
+    pinMode(Axis5_EN,OUTPUT); 
+  #endif
 
 // if the stepper driver mode select pins are wired in, program any requested micro-step mode
 #if !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
