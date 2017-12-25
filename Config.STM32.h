@@ -9,15 +9,19 @@
  *
 */
 
-#define STM32F1_ON   //  <- Turn _ON to use this configuration
+#define STM32_ON   //  <- Turn _ON to use this configuration
 
-#ifdef STM32F1_ON
+#ifdef STM32_ON
 
+// Note: Only STM32F103 V and Z are supported currently. F407 has no EEPROM support"
 #if defined(__STM32F1__)
-// We define a more generic symbol, in case more STM32 boards based on different lines are supported
-#define ARM_STM32
+
 // This is the frequency of your board's MCU. You have to change it manually for different boards.
 #define F_BUS 72000000
+
+// We define a more generic symbol, in case more STM32 boards based on different lines are supported
+#define ARM_STM32
+
 #endif
 
 #include <EEPROM.h>
@@ -248,6 +252,6 @@
 #define DECAY_MODE_OFF
 #define DECAY_MODE_GOTO_OFF
 #define ALLOW_DRIVER_FAULT_PULLUP_PULLDOWN
-#include "Pins.STM32F1.h"
+#include "Pins.STM32.h"
 #endif
 
