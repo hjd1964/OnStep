@@ -46,11 +46,26 @@
 #define TMC_STEALTHCHOP 32
 #define TMC_NINTPOL     16
 #define SYNC_ANYWHERE_ON
+
+// processor dependant platform setup
 #if defined(__arm__) && defined(TEENSYDUINO)
 #define __ARM_Teensy3__
 #endif
 #if defined(__MK64FX512__) || defined(__MK66FX1M0__)
 #define SER4_AVAILABLE
+#endif
+
+#if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
+#define F_BUS SysCtlClockGet() // no pre-scaling of timers on Tiva Launchpads
+#elif defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+#define F_BUS 120000000        // There is a bug with SysCtlClockGet and TM4C1294 MCUs. At the moment we just hardcode the value and set the cpu frequency manually at the start of setup()
+#endif
+
+#if defined(__STM32F1__)
+#define F_BUS F_CPU            // We derive the F_BUS variable from the actual CPU frequency of the selected board.
+#define ARM_STM32              // We define a more generic symbol, in case more STM32 boards based on different lines are supported
+#include <HardwareTimer.h>
+#include <digitalWriteFast.h>  // Get this library from https://github.com/watterott/Arduino-Libs/archive/master.zip
 #endif
 
 #include "TM4C.h"
@@ -110,13 +125,6 @@ tmc2130 tmcAxis2(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
 #ifdef RTC_DS3234
 #include <SparkFunDS3234RTC.h>  //https://github.com/sparkfun/SparkFun_DS3234_RTC_Arduino_Library/archive/master.zip
 #define DS3234_CS_PIN 10
-#endif
-
-#if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
-#define F_BUS SysCtlClockGet() // no pre-scaling of timers on Tiva Launchpads
-#elif defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
-// There is a bug with SysCtlClockGet and TM4C1294 MCUs. At the moment we just hardcode the value and set the cpu frequency manually at the start of setup()
-#define F_BUS 120000000 
 #endif
 
 // forces initialialization of a host of settings in EEPROM. OnStep does this automatically, most likely, you will want to leave this alone
@@ -219,13 +227,10 @@ void TIMER4_COMPA_vect(void);
 
 #elif defined(__ARM_TI_TM4C__)
 // Energia does not have IntervalTimer so we have to initialise timers manually
-
 void TIMER1_COMPA_vect(void); // it gets initialised here and not in timer.ino
 
-//Timer itimer3;
 void TIMER3_COMPA_vect(void);
 
-//Timer itimer4;
 void TIMER4_COMPA_vect(void);
 #elif  defined(ARM_STM32)
 void TIMER1_COMPA_vect(void); // it gets initialised here and not in timer.ino
@@ -235,7 +240,6 @@ void TIMER3_COMPA_vect(void);
 
 HardwareTimer itimer4(4);
 void TIMER4_COMPA_vect(void);
-
 #endif
 
 #if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)

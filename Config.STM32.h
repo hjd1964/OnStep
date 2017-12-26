@@ -12,25 +12,6 @@
 #define STM32_OFF   //  <- Turn _ON to use this configuration
 
 #ifdef STM32_ON
-
-// Note: Only STM32F103V and STM32F103Z are supported currently. 
-// The faster STM32F407 has no EEPROM support at present
-#if defined(__STM32F1__)
-
-// We derive the F_BUS variable from the actual CPU frequency of the selected board. 
-#define F_BUS F_CPU
-
-// We define a more generic symbol, in case more STM32 boards based on different lines are supported
-#define ARM_STM32
-
-#endif
-
-#include <EEPROM.h>
-#include <HardwareTimer.h>
-
-// Get this library from https://github.com/watterott/Arduino-Libs/archive/master.zip
-#include <digitalWriteFast.h>
-
 // -------------------------------------------------------------------------------------------------------------------------
 // ADJUST THE FOLLOWING TO CONFIGURE YOUR CONTROLLER FEATURES --------------------------------------------------------------
 
