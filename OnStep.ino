@@ -61,8 +61,9 @@
 #include "Config.TM4C.h"
 #include "Config.Ramps14.h"
 #include "Config.Mega2560Alt.h"
+#include "Config.STM32.h"
 
-#if !defined(Classic_ON) && !defined(MiniPCB_ON) && !defined(MaxPCB_ON) && !defined(TM4C_ON) && !defined(Ramps14_ON) && !defined(Mega2560Alt_ON)
+#if !defined(Classic_ON) && !defined(MiniPCB_ON) && !defined(MaxPCB_ON) && !defined(TM4C_ON) && !defined(Ramps14_ON) && !defined(Mega2560Alt_ON) && !defined(STM32_ON)
   #error "Choose ONE Config.xxx.h file and enable it for use by turning it _ON."
 #endif
 
@@ -204,7 +205,7 @@ volatile double StepsForRateChangeAxis2= ((double)DegreesForAcceleration/sqrt((d
 #endif
 
 // Interrupts and timers ---------------------------------------------------------------------------------------------------
-#if defined(__ARM_TI_TM4C__)
+#if defined(__ARM_TI_TM4C__) || defined(ARM_STM32)
 #define cli() noInterrupts()
 #define sei() interrupts()
 #endif
@@ -226,6 +227,15 @@ void TIMER3_COMPA_vect(void);
 
 //Timer itimer4;
 void TIMER4_COMPA_vect(void);
+#elif  defined(ARM_STM32)
+void TIMER1_COMPA_vect(void); // it gets initialised here and not in timer.ino
+
+HardwareTimer itimer3(3);
+void TIMER3_COMPA_vect(void);
+
+HardwareTimer itimer4(4);
+void TIMER4_COMPA_vect(void);
+
 #endif
 
 #if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
