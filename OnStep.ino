@@ -883,9 +883,19 @@ void loop() {
   }
 #endif
 #if defined(MODE_SWITCH_BEFORE_SLEW_SPI) && defined(STALL_GUARD_ON)
-  // stallGuard, update SG_RESULTs
   tmcAxis1.sgUpdateResult();
   tmcAxis2.sgUpdateResult();
+  static int sgCountDown=200;
+  if (trackingState==TrackingSidereal) {
+    if (sgCountDown>0) sgCountDown--; else {
+      // stallGuard, update SG_RESULTs, stop the slew if we hit the slew limit (0)
+      bool sgFaultAxis1=false; if ((EEPROM_readInt(EE_sgLimitAxis1)>0) && (tmcAxis1.sgResult<EEPROM_readInt(EE_sgLimitAxis1))) sgFaultAxis1=true;
+      bool sgFaultAxis2=false; if ((EEPROM_readInt(EE_sgLimitAxis2)>0) && (tmcAxis2.sgResult<EEPROM_readInt(EE_sgLimitAxis2))) sgFaultAxis2=true;
+      if (sgFaultAxis1 || sgFaultAxis2) { lastError=ERR_MOTOR_FAULT; if (trackingState==TrackingMoveTo) abortSlew=true; else { trackingState=TrackingNone; if (guideDirAxis1) guideDirAxis1='b'; if (guideDirAxis2) guideDirAxis2='b'; } }
+    }
+  } else {
+    sgCountDown=200;
+  }
 #endif
 
     if (faultAxis1 || faultAxis2) { lastError=ERR_MOTOR_FAULT; if (trackingState==TrackingMoveTo) abortSlew=true; else { trackingState=TrackingNone; if (guideDirAxis1) guideDirAxis1='b'; if (guideDirAxis2) guideDirAxis2='b'; } }
