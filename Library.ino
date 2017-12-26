@@ -13,7 +13,7 @@ Library::Library()
   #define E2END 2047
   #elif defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
   #define E2END 6143
-  #elif defined(ARM_STM32) 
+  #elif defined(__ARM_STM32__) 
   #define E2END 2047
   #endif
   byteMax=E2END;

@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------------
 // Timers and interrupt handling
 
-#if (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__)) || defined(ARM_STM32)
+#if (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__)) || defined(__ARM_STM32__)
 #define ISR(f) void f (void)
 void TIMER1_COMPA_vect(void);
 volatile boolean clearAxis1 = true;
@@ -11,7 +11,7 @@ volatile boolean takeStepAxis2 = false;
 
 #if defined(__ARM_Teensy3__)
 IntervalTimer itimer1;
-#elif defined(ARM_STM32)
+#elif defined(__ARM_STM32__)
 HardwareTimer itimer1(1);
 #endif
 // Energia does not have IntervalTimer so the timers were already initialised in OnStep.ino
@@ -59,7 +59,7 @@ void Timer1SetInterval(long iv) {
   TIMSK1 |= (1 << OCIE1A);
 #elif defined(__ARM_Teensy3__)
   itimer1.begin(TIMER1_COMPA_vect, (float)iv * 0.0625);
-#elif defined(ARM_STM32)
+#elif defined(__ARM_STM32__)
   // This code is based on the following document
   //
   // http://docs.leaflabs.com/static.leaflabs.com/pub/leaflabs/maple-docs/0.0.10/lang/api/hardwaretimer.html#lang-hardwaretimer
@@ -113,7 +113,7 @@ void Timer3SetInterval(long iv) {
   // 0.0327 * 4096 = 134.21s
   uint32_t i=iv; uint16_t t=1; while (iv>65536L) { t*=2; iv=i/t; if (t==4096) { iv=65535L; break; } }
   cli(); nextAxis1Rate=iv-1L; t3rep=t; fastAxis1=(t3rep==1); sei();
-#elif (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__) || defined(ARM_STM32)) 
+#elif (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__) || defined(__ARM_STM32__)) 
   // 4.194 * 32 = 134.21s
   uint32_t i=iv; uint16_t t=1; while (iv>65536L*1024L) { t++; iv=i/t; if (t==32) { iv=65535L*1024L; break; } }
   cli(); nextAxis1Rate=(F_BUS/1000000) * (iv*0.0625) * 0.5 - 1; t3rep=t; fastAxis1=(t3rep==1); sei();
@@ -133,7 +133,7 @@ void Timer4SetInterval(long iv) {
   // 0.0327 * 4096 = 134.21s
   uint32_t i=iv; uint16_t t=1; while (iv>65536L) { t*=2; iv=i/t; if (t==4096) { iv=65535L; break; } }
   cli(); nextAxis2Rate=iv-1L; t4rep=t; fastAxis2=(t4rep==1); sei();
-#elif (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__) || defined(ARM_STM32)) 
+#elif (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__) || defined(__ARM_STM32__)) 
   // 4.194 * 32 = 134.21s
   uint32_t i=iv; uint16_t t=1; while (iv>65536L*1024L) { t++; iv=i/t; if (t==32) { iv=65535L*1024L; break; } }
   cli(); nextAxis2Rate=(F_BUS/1000000) * (iv*0.0625) * 0.5 - 1; t4rep=t; fastAxis2=(t4rep==1); sei();
@@ -155,7 +155,7 @@ volatile byte lastGuideDirAxis1=0;
 volatile byte guideDirChangeTimerAxis2=0;
 volatile byte lastGuideDirAxis2=0;
 
-#if (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__)) || defined(ARM_STM32)
+#if (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__)) || defined(__ARM_STM32__)
 ISR(TIMER1_COMPA_vect)
 #else
 ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
@@ -316,14 +316,14 @@ ISR(TIMER3_COMPA_vect)
   if (!fastAxis1) { t3cnt++; if (t3cnt%t3rep!=0) return; }
 
   // drivers step on the rising edge, need >=1.9uS to settle (for DRV8825 or A4988) so this is early in the routine
-#if defined(__ARM_Teensy3__) || defined(ARM_STM32)
+#if defined(__ARM_Teensy3__) || defined(__ARM_STM32__)
   digitalWriteFast(Axis1StepPin,LOW);
   digitalWriteFast(Axis1StepPin,LOW);
 #else
   CLR(Axis1StepPORT,Axis1StepBit);
 #endif
 
-#if (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__)  || defined(ARM_STM32))
+#if (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__)  || defined(__ARM_STM32__))
   // on the much faster Teensy and Tiva TM4C run this ISR at twice the normal rate and pull the step pin low every other call
   if (clearAxis1) {
     takeStepAxis1=false;
@@ -355,7 +355,7 @@ ISR(TIMER3_COMPA_vect)
 
     // Guessing about 1+2+1+4+4+1=13 clocks between here and the step signal which is 0.81uS
     // Set direction.  Needs >=0.65uS before/after rising step signal (DRV8825 or A4988).
-#if defined(__ARM_Teensy3__) || defined(ARM_STM32)
+#if defined(__ARM_Teensy3__) || defined(__ARM_STM32__)
     #ifdef REVERSE_AXIS1_ON
       if (defaultDirAxis1==dirAxis1) digitalWriteFast(Axis1DirPin, LOW); else digitalWriteFast(Axis1DirPin, HIGH);
     #else                                                                                                 
@@ -376,13 +376,13 @@ ISR(TIMER3_COMPA_vect)
       if (blAxis1>0)             { blAxis1-=stepAxis1; inbacklashAxis1=true; } else { inbacklashAxis1=false; posAxis1-=stepAxis1; }
     }
 
-#if (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__))  || defined(ARM_STM32)
+#if (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__))  || defined(__ARM_STM32__)
       takeStepAxis1=true;
     }
     clearAxis1=false;
   } else { 
     if (takeStepAxis1) {
-#if defined(__ARM_Teensy3__) || defined(ARM_STM32)
+#if defined(__ARM_Teensy3__) || defined(__ARM_STM32__)
       digitalWriteFast(Axis1StepPin,HIGH);
 #else
       SET(Axis1StepPORT, Axis1StepBit); 
@@ -394,7 +394,7 @@ ISR(TIMER3_COMPA_vect)
     PIT_LDVAL1=nextAxis1Rate*stepAxis1;
 #elif defined(__ARM_TI_TM4C__)
     TimerLoadSet(Timer3_base, TIMER_A, nextAxis1Rate*stepAxis1);
-#elif defined(ARM_STM32)
+#elif defined(__ARM_STM32__)
   // Pause the timer while we're configuring it
   itimer3.pause();
 
@@ -430,14 +430,14 @@ ISR(TIMER4_COMPA_vect)
 
   if (!fastAxis2) { t4cnt++; if (t4cnt%t4rep!=0) return; }
 
-#if defined(__ARM_Teensy3__) || defined(ARM_STM32)
+#if defined(__ARM_Teensy3__) || defined(__ARM_STM32__)
   digitalWriteFast(Axis2StepPin,LOW);
 #else
   // drivers step on the rising edge
   CLR(Axis2StepPORT,Axis2StepBit);
 #endif
 
-#if (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__))  || defined(ARM_STM32)
+#if (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__))  || defined(__ARM_STM32__)
   // on the much faster Teensy and Tiva TM4C run this ISR at twice the normal rate and pull the step pin low every other call
   if (clearAxis2) {
     takeStepAxis2=false;
@@ -467,7 +467,7 @@ ISR(TIMER4_COMPA_vect)
     // telescope normally starts on the EAST side of the pier looking at the WEST sky
     if (posAxis2<(long)targetAxis2.part.m) dirAxis2=1; else dirAxis2=0; // Direction control
     // Set direction.  Needs >=0.65uS before/after rising step signal (DRV8825 or A4988).
-#if defined(__ARM_Teensy3__) || defined(ARM_STM32)
+#if defined(__ARM_Teensy3__) || defined(__ARM_STM32__)
     #ifdef REVERSE_AXIS2_ON
       if (defaultDirAxis2==dirAxis2) digitalWriteFast(Axis2DirPin, LOW); else digitalWriteFast(Axis2DirPin, HIGH);
     #else
@@ -488,13 +488,13 @@ ISR(TIMER4_COMPA_vect)
       if (blAxis2>0)             { blAxis2-=stepAxis2; inbacklashAxis2=true; } else { inbacklashAxis2=false; posAxis2-=stepAxis2; }
     }
 
-#if (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__)) || defined(ARM_STM32)
+#if (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__)) || defined(__ARM_STM32__)
       takeStepAxis2=true;
     }
     clearAxis2=false; 
   } else { 
     if (takeStepAxis2) { 
-#if defined(__ARM_Teensy3__) || defined(ARM_STM32)
+#if defined(__ARM_Teensy3__) || defined(__ARM_STM32__)
       digitalWriteFast(Axis2StepPin,HIGH);
 #else
       SET(Axis2StepPORT, Axis2StepBit);
@@ -506,7 +506,7 @@ ISR(TIMER4_COMPA_vect)
     PIT_LDVAL2=nextAxis2Rate*stepAxis2;
 #elif defined(__ARM_TI_TM4C__)
     TimerLoadSet(Timer4_base, TIMER_A, nextAxis2Rate*stepAxis2);
-#elif defined(ARM_STM32)
+#elif defined(__ARM_STM32__)
   // Pause the timer while we're configuring it
   itimer4.pause();
 

@@ -63,7 +63,7 @@
 
 #if defined(__STM32F1__)
 #define F_BUS F_CPU            // We derive the F_BUS variable from the actual CPU frequency of the selected board.
-#define ARM_STM32              // We define a more generic symbol, in case more STM32 boards based on different lines are supported
+#define __ARM_STM32__              // We define a more generic symbol, in case more STM32 boards based on different lines are supported
 #include <HardwareTimer.h>
 #include <digitalWriteFast.h>  // Get this library from https://github.com/watterott/Arduino-Libs/archive/master.zip
 #endif
@@ -213,7 +213,7 @@ volatile double StepsForRateChangeAxis2= ((double)DegreesForAcceleration/sqrt((d
 #endif
 
 // Interrupts and timers ---------------------------------------------------------------------------------------------------
-#if defined(__ARM_TI_TM4C__) || defined(ARM_STM32)
+#if defined(__ARM_TI_TM4C__) || defined(__ARM_STM32__)
 #define cli() noInterrupts()
 #define sei() interrupts()
 #endif
@@ -232,7 +232,7 @@ void TIMER1_COMPA_vect(void); // it gets initialised here and not in timer.ino
 void TIMER3_COMPA_vect(void);
 
 void TIMER4_COMPA_vect(void);
-#elif  defined(ARM_STM32)
+#elif  defined(__ARM_STM32__)
 void TIMER1_COMPA_vect(void); // it gets initialised here and not in timer.ino
 
 HardwareTimer itimer3(3);

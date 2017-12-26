@@ -1,7 +1,7 @@
 // -------------------------------------------------------------------------------------------------
 // Pin map for OnStep STM32F103 V or Z
 
-#if defined(ARM_STM32)
+#if defined(__ARM_STM32__)
 
 // The pins here are not tested yet, and need to change 
 // The PEC index sense is a logic level input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset

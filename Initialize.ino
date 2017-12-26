@@ -292,7 +292,7 @@ void Init_Pins() {
 #if defined(PPS_SENSE_ON) || defined(PPS_SENSE_PULLUP)
 #if defined(__AVR_ATmega2560__)
   attachInterrupt(PpsInt,ClockSync,RISING);
-#elif defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__) || defined(ARM_STM32)
+#elif defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__) || defined(__ARM_STM32__)
   attachInterrupt(PpsPin,ClockSync,RISING);
 #endif
 #endif
@@ -571,7 +571,7 @@ void Init_Start_Timers() {
   NVIC_SET_PRIORITY(IRQ_PIT_CH1, 0);
   NVIC_SET_PRIORITY(IRQ_PIT_CH2, 0);
 
-#elif defined(ARM_STM32)
+#elif defined(__ARM_STM32__)
 
   // Pause the timer while we're configuring it
   itimer3.pause();
