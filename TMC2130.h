@@ -3,7 +3,7 @@
 
 class tmc2130 {
   public:
-    int sgResult;
+    long sgResult;
     
     tmc2130(int cs, int sck, int miso, int mosi) {
       _cs=cs; _sck=sck; _miso=miso; _mosi=mosi;
@@ -38,7 +38,10 @@ class tmc2130 {
       read(REG_DRVSTATUS,&data_out);
     
       // get the first 10 bits: SG_RESULT
-      sgResult=data_out&0b1111111111;
+      long r=data_out&0b1111111111;
+
+      // apply a smoothing filter
+      sgResult=round((((double)sgResult*4.0)+(double)r)/5.0);
       
       BBSpi.end();
       return sgResult;
