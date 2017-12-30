@@ -314,7 +314,7 @@ void processCommands() {
         quietReply=true;
       } else
 //  :FI#  Get full in position (in microns)
-//         Returns: 0#
+//         Returns: n#
         if (command[1]=='I') {
           sprintf(reply,"%ld",(long)round(MinAxis4*1000.0));
           quietReply=true;
@@ -331,12 +331,6 @@ void processCommands() {
           quietReply=true;
           if (amountMoveAxis4.fixed!=0) strcpy(reply,"M"); else strcpy(reply,"S");
         } else
-//  :FS#  Get scale (steps per micron)
-//         Returns: n.nnn#
-        if (command[1]=='S') {
-          dtostrf(StepsPerMicrometerAxis4,1,3,reply);
-          quietReply=true;
-        } else
 //  :FZ#   Set focuser zero position (half travel)
 //         Returns: Nothing
       if (command[1]=='Z') {
@@ -348,7 +342,16 @@ void processCommands() {
 //         Returns: Nothing
       if (command[1]=='F') {
         axis4Increment=(double)StepsPerMicrometerAxis4*1000.0;
-        quietReply=true; 
+        quietReply=true;
+      } else
+//  :FRsnnn#  Set focuser target position relative (in microns)
+//            Returns: Nothing
+      if (command[1]=='R') {
+        f=round((double)((long)targetAxis4.part.m)/(double)(StepsPerMicrometerAxis4)+(double)atol(parameter));
+        if (f<round(MinAxis4*1000.0)) f=round(MinAxis4*1000.0);
+        if (f>round(MaxAxis4*1000.0)) f=round(MaxAxis4*1000.0);
+        targetAxis4.part.m=(long)(f*(double)StepsPerMicrometerAxis4); targetAxis4.part.f=0;
+        quietReply=true;
       } else
 //  :FS#      Set focuser for slow motion
 //            Returns: Nothing
@@ -360,8 +363,8 @@ void processCommands() {
           quietReply=true; 
         } else {
           f=atol(parameter);
-          if ((f>=MinAxis4*1000.0) && (f<=MaxAxis4*1000.0)) {
-            targetAxis4.part.m=(long)(f*(double)StepsPerMicrometerAxis4); targetAxis4.part.f=0;
+          if ((f>=round(MinAxis4*1000.0)) && (f<=round(MaxAxis4*1000.0))) {
+            targetAxis4.part.m=(long)round(f*(double)StepsPerMicrometerAxis4); targetAxis4.part.f=0;
           }
         }
       } else
@@ -415,7 +418,7 @@ void processCommands() {
         quietReply=true;
       } else
 //  :fI#  Get full in position (in microns)
-//         Returns: 0#
+//         Returns: n#
         if (command[1]=='I') {
           sprintf(reply,"%ld",(long)round(MinAxis5*1000.0));
           quietReply=true;
@@ -432,12 +435,6 @@ void processCommands() {
           quietReply=true;
           if (amountMoveAxis5.fixed!=0) strcpy(reply,"M"); else strcpy(reply,"S");
         } else
-//  :fS#  Get scale
-//         Returns: n.nnn# (steps per micron)
-        if (command[1]=='S') {
-          dtostrf(StepsPerMicrometerAxis5,1,3,reply);
-          quietReply=true;
-        } else
 //  :fZ#   Set focuser zero position (half travel)
 //         Returns: Nothing
       if (command[1]=='Z') {
@@ -451,6 +448,15 @@ void processCommands() {
         axis5Increment=(double)StepsPerMicrometerAxis5*1000.0;
         quietReply=true; 
       } else
+//  :fRsnnn#  Set focuser target position relative (in microns)
+//            Returns: Nothing
+      if (command[1]=='R') {
+        f=round((double)((long)targetAxis5.part.m)/(double)(StepsPerMicrometerAxis5)+(double)atol(parameter));
+        if (f<round(MinAxis5*1000.0)) f=round(MinAxis5*1000.0);
+        if (f>round(MaxAxis5*1000.0)) f=round(MaxAxis5*1000.0);
+        targetAxis5.part.m=(long)(f*(double)StepsPerMicrometerAxis5); targetAxis5.part.f=0;
+        quietReply=true;
+      } else
 //  :fS#      Set focuser for slow motion
 //            Returns: Nothing
 //  :fSsnnn#  Set focuser target position (in microns)
@@ -461,8 +467,8 @@ void processCommands() {
           quietReply=true; 
         } else {
           f=atol(parameter);
-          if ((f>=MinAxis5*1000.0) && (f<=MaxAxis5*1000.0)) {
-            targetAxis5.part.m=(long)(f*(double)StepsPerMicrometerAxis5); targetAxis5.part.f=0;
+          if ((f>=round(MinAxis5*1000.0)) && (f<=round(MaxAxis5*1000.0))) {
+            targetAxis5.part.m=(long)round(f*(double)StepsPerMicrometerAxis5); targetAxis5.part.f=0;
           }
         }
       } else
