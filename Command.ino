@@ -282,7 +282,7 @@ void processCommands() {
 //  :FA#  Active?
 //          Return: 0 on failure
 //                  1 on success
-        if (command[1]=='G') {
+        if (command[1]=='A') {
         } else
 //  :F+#   Move focuser in (toward objective)
 //         Returns: Nothing
@@ -383,7 +383,7 @@ void processCommands() {
 //  :fA#  Active?
 //          Return: 0 on failure
 //                  1 on success
-        if (command[1]=='G') {
+        if (command[1]=='A') {
         } else
 //  :f+#   Move focuser in (toward objective)
 //         Returns: Nothing
