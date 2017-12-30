@@ -8,7 +8,7 @@
 #define AnalogPecPin   A3   // Note A3 is (57)
 
 // The limit switch sense is a 5V logic input which uses the internal pull up, shorted to ground it stops gotos/tracking
-#define LimitPin       3    // RAMPS X-MAX (1=LMT, 2=GND, 3=+5)
+#define LimitPin       3    // RAMPS X- (1=LMT, 2=GND, 3=+5)
 
 // The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
 #define LEDnegPin     11    // Pin 11 RAMPS SER1 (1=GND, 2=LED-, 3=+5) (active LOW)
@@ -21,7 +21,7 @@
 // Pin for PPS input on RAMPS X-MIN
 // The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
 // The Arduino attachInterrupt function works in two modes, on the '2560 it takes an Interrupt# on the Teensy and others it takes a Pin#
-#define PpsPin         2    //
+#define PpsPin         2    // RAMPS X+
 #define PpsInt         0    // Interrupt 0 on Pin 2
 
 // Pins to Axis1 RA/Azm on RAMPS X
