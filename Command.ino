@@ -306,23 +306,23 @@ void processCommands() {
         amountMoveAxis4.fixed=0;
         quietReply=true;
       } else
-//  :FG#   Get focuser current position in micrometers
+//  :FG#   Get focuser current position (in microns)
 //         Returns: snnn#
       if (command[1]=='G') {
         f1=((double)posAxis4)/(double)StepsPerMicrometerAxis4;
         sprintf(reply,"%ld",(long int)round(f1));
         quietReply=true;
       } else
-//  :FI#  Get full in position
+//  :FI#  Get full in position (in microns)
 //         Returns: 0#
         if (command[1]=='I') {
-          sprintf(reply,"%ld",(long)(MinAxis4));
+          sprintf(reply,"%ld",(long)round(MinAxis4*1000.0));
           quietReply=true;
         } else
-//  :FM#  Get max position
+//  :FM#  Get max position (in microns)
 //         Returns: n#
         if (command[1]=='M') {
-          sprintf(reply,"%ld",(long)(MaxAxis4));
+          sprintf(reply,"%ld",(long)round(MaxAxis4*1000.0));
           quietReply=true;
         } else
 //  :FT#  get status
@@ -331,7 +331,7 @@ void processCommands() {
           quietReply=true;
           if (amountMoveAxis4.fixed!=0) strcpy(reply,"M"); else strcpy(reply,"S");
         } else
-//  :FS#  Get scale
+//  :FS#  Get scale (steps per micron)
 //         Returns: n.nnn#
         if (command[1]=='S') {
           dtostrf(StepsPerMicrometerAxis4,1,3,reply);
@@ -352,7 +352,7 @@ void processCommands() {
       } else
 //  :FS#      Set focuser for slow motion
 //            Returns: Nothing
-//  :FSsnnn#  Set focuser target position in micrometers
+//  :FSsnnn#  Set focuser target position (in microns)
 //            Returns: Nothing
       if (command[1]=='S') {
         if (parameter[0]==0) {
@@ -407,23 +407,23 @@ void processCommands() {
         amountMoveAxis5.fixed=0;
         quietReply=true;
       } else
-//  :fG#   Get focuser current position in micrometers
+//  :fG#   Get focuser current position (in microns)
 //         Returns: snnn#
       if (command[1]=='G') {
         f1=((double)posAxis5)/(double)StepsPerMicrometerAxis5;
         sprintf(reply,"%ld",(long int)round(f1));
         quietReply=true;
       } else
-//  :fI#  Get full in position
+//  :fI#  Get full in position (in microns)
 //         Returns: 0#
         if (command[1]=='I') {
-          sprintf(reply,"%ld",(long)(MinAxis5));
+          sprintf(reply,"%ld",(long)round(MinAxis5*1000.0));
           quietReply=true;
         } else
-//  :fM#  Get max position
+//  :fM#  Get max position (in microns)
 //         Returns: n#
         if (command[1]=='M') {
-          sprintf(reply,"%ld",(long)(MaxAxis5));
+          sprintf(reply,"%ld",(long)round(MaxAxis5*1000.0));
           quietReply=true;
         } else
 //  :fT#  get status
@@ -433,7 +433,7 @@ void processCommands() {
           if (amountMoveAxis5.fixed!=0) strcpy(reply,"M"); else strcpy(reply,"S");
         } else
 //  :fS#  Get scale
-//         Returns: n.nnn#
+//         Returns: n.nnn# (steps per micron)
         if (command[1]=='S') {
           dtostrf(StepsPerMicrometerAxis5,1,3,reply);
           quietReply=true;
@@ -453,7 +453,7 @@ void processCommands() {
       } else
 //  :fS#      Set focuser for slow motion
 //            Returns: Nothing
-//  :fSsnnn#  Set focuser target position in micrometers
+//  :fSsnnn#  Set focuser target position (in microns)
 //            Returns: Nothing
       if (command[1]=='S') {
         if (parameter[0]==0) {
