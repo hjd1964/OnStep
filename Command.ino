@@ -753,7 +753,7 @@ void processCommands() {
 #if defined(MODE_SWITCH_BEFORE_SLEW_SPI) && defined(STALL_GUARD_ON)
           if (parameter[0]=='S') { //Sn: stallGuard
             switch (parameter[1]) {
-              case 'G': break;
+              case 'A': break;                                                                                 // stallGuard, Active?
               case '0': sprintf(reply,"%i",(int)((int8_t)EEPROM.read(EE_sgSgtAxis1))); quietReply=true; break; // stallGuard, SGT Axis1
               case '1': sprintf(reply,"%i",(int)(EEPROM_readInt(EE_sgLimitAxis1)));    quietReply=true; break; // stallGuard, Lower limit Axis 1
               case '2': sprintf(reply,"%i",(int)((int8_t)EEPROM.read(EE_sgSgtAxis2))); quietReply=true; break; // stallGuard, SGT Axis2
@@ -796,7 +796,7 @@ void processCommands() {
       else commandError=true;
 
       } else
-      
+
 //   L - Object Library Commands
       if (command[0]=='L') {
 
