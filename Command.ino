@@ -23,6 +23,13 @@ cb cmd4; // serial4
 char replyx[50]="";
 cb cmdx;  // serialX
 
+#ifdef FOCUSER1_ON
+char primaryFocuser = 'F';
+#endif
+#ifdef FOCUSER2_ON
+char secondaryFocuser = 'f';
+#endif
+
 // process commands
 void processCommands() {
     boolean supress_frame = false;
@@ -278,11 +285,23 @@ void processCommands() {
 
 #ifdef FOCUSER1_ON
 //   F - Focuser1 Commands
-      if (command[0]=='F') {
+      if (command[0]==primaryFocuser) {
 //  :FA#  Active?
 //          Return: 0 on failure
 //                  1 on success
+//  :FAn# Select focuser 1 or 2
+//          Return: 0 on failure
+//                  1 on success
         if (command[1]=='A') {
+#ifdef FOCUSER2_ON
+          if ((parameter[0]=='1') && (parameter[1]==0)) {
+            primaryFocuser='F'; secondaryFocuser='f';
+          } else
+          if ((parameter[0]=='2') && (parameter[1]==0)) {
+            primaryFocuser='f'; secondaryFocuser='F';
+          } else
+#endif
+          if (parameter[0]!=0) commandError=true;
         } else
 //  :F+#   Move focuser in (toward objective)
 //         Returns: Nothing
@@ -382,11 +401,21 @@ void processCommands() {
 
 #ifdef FOCUSER2_ON
 //   f - Focuser2 Commands
-      if (command[0]=='f') {
+      if (command[0]==secondaryFocuser) {
 //  :fA#  Active?
 //          Return: 0 on failure
 //                  1 on success
+//  :fAn# Select focuser 1 or 2
+//          Return: 0 on failure
+//                  1 on success
         if (command[1]=='A') {
+          if ((parameter[0]=='1') && (parameter[1]==0)) {
+            primaryFocuser='F'; secondaryFocuser='f';
+          } else
+          if ((parameter[0]=='2') && (parameter[1]==0)) {
+            primaryFocuser='f'; secondaryFocuser='F';
+          } else
+          if (parameter[0]!=0) commandError=true;
         } else
 //  :f+#   Move focuser in (toward objective)
 //         Returns: Nothing

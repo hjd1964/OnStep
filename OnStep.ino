@@ -63,7 +63,7 @@
 
 #if defined(__STM32F1__)
 #define F_BUS F_CPU            // We derive the F_BUS variable from the actual CPU frequency of the selected board.
-#define __ARM_STM32__              // We define a more generic symbol, in case more STM32 boards based on different lines are supported
+#define __ARM_STM32__          // We define a more generic symbol, in case more STM32 boards based on different lines are supported
 #include <HardwareTimer.h>
 #include <digitalWriteFast.h>  // Get this library from https://github.com/watterott/Arduino-Libs/archive/master.zip
 #endif
@@ -93,6 +93,10 @@
 #if !defined(AXIS2_MODE) || !defined(AXIS2_MODE_GOTO)
   #error "Config.xxx.h error: AXIS2_MODE and AXIS2_MODE_GOTO must be set to a valid value."
 #endif
+#endif
+
+#if !defined(FOCUSER1_ON) && defined(FOCUSER2_ON)
+#error "Focuser2 can't be enabled without first enabling Focuser1"
 #endif
 
 #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
