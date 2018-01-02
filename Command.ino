@@ -1909,14 +1909,14 @@ String ConfighSettings() {
     c+="0";
   #elif defined(AXIS1_FAULT_HIGH)
     c+="1";
-  #elif defined(AXIS1_FAULT_OFF)
+  #else
     c+="2";
   #endif
   #if defined(AXIS2_FAULT_LOW)
     c+="0";
   #elif defined(AXIS2_FAULT_HIGH)
     c+="1";
-  #elif defined(AXIS2_FAULT_OFF)
+  #else
     c+="2";
   #endif
   #ifdef TRACK_REFRACTION_RATE_DEFAULT_ON

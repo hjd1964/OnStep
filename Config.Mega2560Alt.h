@@ -219,9 +219,6 @@
 // THAT'S IT FOR USER CONFIGURATION!
 
 // -------------------------------------------------------------------------------------------------------------------------
-#define ESP8266_CONTROL_OFF
-#define ST4_ALTERNATE_PINS_OFF
-
 #include "Pins.Mega2560Alt.h"
 #endif
 

@@ -230,10 +230,6 @@
 // THAT'S IT FOR USER CONFIGURATION!
 
 // -------------------------------------------------------------------------------------------------------------------------
-#define RTC_OFF
-#define DECAY_MODE_OFF
-#define DECAY_MODE_GOTO_OFF
-#define ALLOW_DRIVER_FAULT_PULLUP_PULLDOWN
 #include "Pins.MiniPCB.h"
 #endif
 
