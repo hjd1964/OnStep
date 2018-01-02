@@ -191,30 +191,6 @@
 // THAT'S IT FOR USER CONFIGURATION!
 
 // -------------------------------------------------------------------------------------------------------------------------
-//  These are not functional for this configuration, don't change!
-#define ESP8266_CONTROL_OFF
-#define ROTATOR_OFF
-#define MaxRateAxis3               8
-#define StepsPerDegreeAxis3     64.0
-#define REVERSE_AXIS3_OFF
-#define DISABLE_AXIS3_OFF
-#define MinAxis3                -180
-#define MaxAxis3                 180
-#define FOCUSER1_OFF
-#define MaxRateAxis4               8
-#define StepsPerMicrometerAxis4  0.5
-#define REVERSE_AXIS4_OFF
-#define DISABLE_AXIS4_OFF
-#define MinAxis4               -25.0
-#define MaxAxis4
-#define FOCUSER2_OFF
-#define MaxRateAxis5
-#define StepsPerMicrometerAxis5
-#define REVERSE_AXIS5_OFF
-#define DISABLE_AXIS5_OFF
-#define MinAxis5               -25.0
-#define MaxAxis5                25.0
-
 #include "Pins.TM4C.h"
 #endif
 

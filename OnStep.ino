@@ -57,39 +57,8 @@
 #include "Config.TM4C.h"
 #include "Config.STM32.h"
 
-#if !defined(Classic_ON) && !defined(MiniPCB_ON) && !defined(MaxPCB_ON) && !defined(TM4C_ON) && !defined(Ramps14_ON) && !defined(Mega2560Alt_ON) && !defined(STM32_ON)
-  #error "Choose ONE Config.xxx.h file and enable it for use by turning it _ON."
-#endif
+#include "Validate.h"
 
-#if defined(ALTERNATE_PINMAP_ON)
-  #error "ALTERNATE_PINMAP_ON is an obsolete option, you can't use this configuration."
-#endif
-
-#if defined(MODE_SWITCH_BEFORE_SLEW_ON) || defined(MODE_SWITCH_BEFORE_SLEW_SPI)
-#if !defined(AXIS1_MODE) || !defined(AXIS1_MODE_GOTO)
-  #error "Config.xxx.h error: AXIS1_MODE and AXIS1_MODE_GOTO must be set to a valid value."
-#endif
-#if !defined(AXIS2_MODE) || !defined(AXIS2_MODE_GOTO)
-  #error "Config.xxx.h error: AXIS2_MODE and AXIS2_MODE_GOTO must be set to a valid value."
-#endif
-#endif
-
-#if !defined(FOCUSER1_ON) && defined(FOCUSER2_ON)
-#error "Focuser2 can't be enabled without first enabling Focuser1"
-#endif
-
-#ifdef SEPERATE_PULSE_GUIDE_RATE_ON
-#define SEPARATE_PULSE_GUIDE_RATE_ON
-#endif
-#ifndef GUIDE_TIME_LIMIT
-#define GUIDE_TIME_LIMIT 0
-#endif
-#ifndef MaxRot
-#define MaxRot MaxAxis3
-#endif
-#ifndef MinRot
-#define MinRot MinAxis3
-#endif
 #include "errno.h"
 #include "math.h"
 #include "FPoint.h"

@@ -87,6 +87,9 @@ void Init_Startup_Values() {
 }
 
 void Init_Pins() {
+// ------------------------------------------------------------------
+// ESP-01 (ESP8266) firmware flashing control
+
 #ifdef ESP8266_CONTROL_ON
   pinMode(Axis1_Aux,OUTPUT);                // ESP8266 GPIO0
   digitalWrite(Axis1_Aux,HIGH); delay(20);  // Run mode
@@ -95,101 +98,54 @@ void Init_Pins() {
   digitalWrite(Axis2_Aux,HIGH);             // Reset, inactive HIGH
 #endif
 
-// initialize the stepper control pins Axis1 and Axis2
-  pinMode(Axis1StepPin,OUTPUT);
-  pinMode(Axis1DirPin,OUTPUT); 
-#ifdef Axis2GndPin
-  pinMode(Axis2GndPin,OUTPUT);
-  digitalWrite(Axis2GndPin,LOW);
-#endif
-  pinMode(Axis2StepPin,OUTPUT); 
-  pinMode(Axis2DirPin,OUTPUT); 
+// ------------------------------------------------------------------
+// LED and audible feedback
 
-#ifdef ROTATOR_ON
-  pinMode(Axis3StepPin,OUTPUT);
-  pinMode(Axis3DirPin,OUTPUT);
-#endif
-#ifdef FOCUSER1_ON
-  pinMode(Axis4StepPin,OUTPUT);
-  pinMode(Axis4DirPin,OUTPUT); 
-#endif
-#ifdef FOCUSER2_ON
-  pinMode(Axis5StepPin,OUTPUT);
-  pinMode(Axis5DirPin,OUTPUT); 
-#endif
-
-// light status LED (provides GND)
 #ifdef STATUS_LED_PINS_ON
-  pinMode(LEDnegPin,OUTPUT);
-  digitalWrite(LEDnegPin,LOW);
-// sometimes +5v is provided on a pin
+  pinMode(LEDnegPin,OUTPUT); digitalWrite(LEDnegPin,LOW);  // light status LED (provides GND)
 #ifdef LEDposPin
-  pinMode(LEDposPin,OUTPUT);
-  digitalWrite(LEDposPin,HIGH);
+  pinMode(LEDposPin,OUTPUT); digitalWrite(LEDposPin,HIGH); // sometimes +5v is provided on a pin
 #endif
   LED_ON=true;
 #endif
 
-// light status LED (provides pwm'd GND for polar reticule)
 #ifdef STATUS_LED_PINS
-  pinMode(LEDnegPin,OUTPUT);
-  digitalWrite(LEDnegPin,LOW);
-// sometimes +5v is provided on a pin
+  pinMode(LEDnegPin,OUTPUT); digitalWrite(LEDnegPin,LOW);  // light status LED (provides pwm'd GND for polar reticule)
 #ifdef LEDposPin
-  pinMode(LEDposPin,OUTPUT);
-  digitalWrite(LEDposPin,HIGH);
+  pinMode(LEDposPin,OUTPUT); digitalWrite(LEDposPin,HIGH); // sometimes +5v is provided on a pin
 #endif
   analogWrite(LEDnegPin,STATUS_LED_PINS);
   LED_ON=true;
 #endif
 
-// light reticule LED
 #ifdef RETICULE_LED_PINS
-#if defined(__ARM_Teensy3__) && !defined(MiniPCB_ON) && !defined(MaxPCB_ON)
-  #ifdef STATUS_LED_PINS_ON
-    #undef STATUS_LED_PINS_ON
-  #endif
-  #ifdef STATUS_LED_PINS
-    #undef STATUS_LED_PINS
-  #endif
-#endif
-  pinMode(ReticulePin,OUTPUT);
-  analogWrite(ReticulePin,reticuleBrightness);
+  pinMode(ReticulePin,OUTPUT); analogWrite(ReticulePin,reticuleBrightness); // light reticule LED
 #endif
 
-// light second status LED (provides just GND)
 #ifdef STATUS_LED2_PINS_ON
-  pinMode(LEDneg2Pin,OUTPUT);
-  digitalWrite(LEDneg2Pin,LOW);
+  pinMode(LEDneg2Pin,OUTPUT); digitalWrite(LEDneg2Pin,LOW); // light second status LED (provides just GND)
   LED2_ON=false;
-#endif
-// light second status LED (provides pwm'd GND for polar reticule)
-#ifdef STATUS_LED2_PINS
-  pinMode(LEDneg2Pin,OUTPUT);
-  digitalWrite(LEDneg2Pin,LOW);
+#elif STATUS_LED2_PINS
+  pinMode(LEDneg2Pin,OUTPUT); digitalWrite(LEDneg2Pin,LOW); // light second status LED (provides pwm'd GND for polar reticule)
   analogWrite(LEDneg2Pin,STATUS_LED2_PINS);
 #endif
 
 // ready the sound/buzzer pin
-#ifndef BUZZER_OFF
+#if defined(BUZZER) || defined(BUZZER_ON)
   pinMode(TonePin,OUTPUT);
   digitalWrite(TonePin,LOW);
 #endif
 
-// provide 5V power to stepper drivers if requested
-#ifdef POWER_SUPPLY_PINS_ON  
-  pinMode(Axis15vPin,OUTPUT);
-  digitalWrite(Axis15vPin,HIGH);
-  pinMode(Axis25vPin,OUTPUT);
-  digitalWrite(Axis25vPin,HIGH);
-#endif
+// ------------------------------------------------------------------
+// Misc. devices and sensors
 
 // PEC index sense
 #ifdef PEC_SENSE_ON
   pinMode(PecPin,INPUT);
-#endif
-#ifdef PEC_SENSE_PULLUP
+#elif PEC_SENSE_PULLUP
   pinMode(PecPin,INPUT_PULLUP);
+#elif PEC_SENSE_PULLDOWN
+  pinMode(PecPin,INPUT_PULLDOWN);
 #endif
 
 // limit switch sense
@@ -203,85 +159,90 @@ void Init_Pins() {
   pinMode(ST4RAe,INPUT);
   pinMode(ST4DEn,INPUT);
   pinMode(ST4DEs,INPUT);
-#endif
-#ifdef ST4_PULLUP
+#elif ST4_PULLUP
   pinMode(ST4RAw,INPUT_PULLUP);
   pinMode(ST4RAe,INPUT_PULLUP);
   pinMode(ST4DEn,INPUT_PULLUP);
   pinMode(ST4DEs,INPUT_PULLUP);
 #endif
 
+// Pulse per second
+#ifdef PPS_SENSE_ON
+  pinMode(PpsPin,INPUT);
+  attachInterrupt(digitalPinToInterrupt(PpsPin),ClockSync,RISING);
+#elif PPS_SENSE_PULLUP
+  pinMode(PpsPin,INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(PpsPin),ClockSync,RISING);
+#endif
+
+// ------------------------------------------------------------------
+// Stepper driver control
+
+  pinMode(Axis1StepPin,OUTPUT);   // Axis1
+  pinMode(Axis1DirPin,OUTPUT); 
+// provide 5V power to stepper drivers if requested (classic Pin-map)
+#ifdef POWER_SUPPLY_PINS_ON
+  pinMode(Axis15vPin,OUTPUT);
+  digitalWrite(Axis15vPin,HIGH);
+  pinMode(Axis25vPin,OUTPUT);     // Axis2
+  digitalWrite(Axis25vPin,HIGH);
+#endif
+// provide Gnd on next to the Dec stepper pins if requested (classic Pin-map)
+#ifdef Axis2GndPin
+  pinMode(Axis2GndPin,OUTPUT);
+  digitalWrite(Axis2GndPin,LOW);
+#endif
+  pinMode(Axis2StepPin,OUTPUT); 
+  pinMode(Axis2DirPin,OUTPUT); 
+#ifdef ROTATOR_ON
+  pinMode(Axis3StepPin,OUTPUT);   // Axis3
+  pinMode(Axis3DirPin,OUTPUT);
+#endif
+#ifdef FOCUSER1_ON
+  pinMode(Axis4StepPin,OUTPUT);   // Axis4
+  pinMode(Axis4DirPin,OUTPUT); 
+#endif
+#ifdef FOCUSER2_ON
+  pinMode(Axis5StepPin,OUTPUT);   // Axis5
+  pinMode(Axis5DirPin,OUTPUT); 
+#endif
+
 // inputs for stepper drivers fault signal
-#ifndef AXIS1_FAULT_OFF
-  #if defined(__ARM_Teensy3__) && (defined(ALLOW_DRIVER_FAULT_PULLUP_PULLDOWN))
-    #ifdef AXIS1_FAULT_LOW
-      pinMode(Axis1_FAULT,INPUT_PULLUP);
-    #endif
-    #ifdef AXIS1_FAULT_HIGH
-      pinMode(Axis1_FAULT,INPUT_PULLDOWN);
-    #endif
+#ifdef AXIS1_FAULT_LOW
+  pinMode(Axis1_FAULT,INPUT_PULLUP);
+#elif AXIS1_FAULT_HIGH
+  #ifdef INPUT_PULLDOWN
+  pinMode(Axis1_FAULT,INPUT_PULLDOWN);
   #else
-    pinMode(Axis1_FAULT,INPUT);
+  pinMode(Axis1_FAULT,INPUT);
   #endif
 #endif
-#ifndef AXIS2_FAULT_OFF
-  #if defined(__ARM_Teensy3__) && defined(ALLOW_DRIVER_FAULT_PULLUP_PULLDOWN)
-    #ifdef AXIS2_FAULT_LOW
-      pinMode(Axis2_FAULT,INPUT_PULLUP);
-    #endif
-    #ifdef AXIS1_FAULT_HIGH
-      pinMode(Axis2_FAULT,INPUT_PULLDOWN);
-    #endif
+#ifdef AXIS2_FAULT_LOW
+  pinMode(Axis2_FAULT,INPUT_PULLUP);
+#elif AXIS1_FAULT_HIGH
+  #ifdef INPUT_PULLDOWN
+  pinMode(Axis2_FAULT,INPUT_PULLDOWN);
   #else
-    pinMode(Axis2_FAULT,INPUT);
+  pinMode(Axis2_FAULT,INPUT);
   #endif
 #endif
-  
-  // initialize and disable the stepper drivers
+
+// initialize and disable the stepper drivers
   pinMode(Axis1_EN,OUTPUT); 
   pinMode(Axis2_EN,OUTPUT);
   StepperModeTrackingInit();
 
-  // turn on the Rotator/Focuser stepper drivers (LOW)
-  #ifdef Axis3_EN
+// turn on the Rotator/Focuser stepper drivers (LOW)
+#ifdef Axis3_EN
     pinMode(Axis3_EN,OUTPUT); 
-  #endif
-  #ifdef Axis4_EN
+#endif
+#ifdef Axis4_EN
     pinMode(Axis4_EN,OUTPUT); 
-  #endif
-  #ifdef Axis5_EN
+#endif
+#ifdef Axis5_EN
     pinMode(Axis5_EN,OUTPUT); 
-  #endif
-
-// if the stepper driver mode select pins are wired in, program any requested micro-step mode
-#if !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
-  // automatic mode switching during slews, initialize micro-step mode
-  #ifdef AXIS1_MODE
-    if ((AXIS1_MODE & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE    & 1)); } else { pinMode(Axis1_M0,INPUT); }
-    if ((AXIS1_MODE & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE>>1 & 1)); } else { pinMode(Axis1_M1,INPUT); }
-    if ((AXIS1_MODE & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE>>2 & 1)); } else { pinMode(Axis1_M2,INPUT); }
-  #endif
-  
-  #ifdef AXIS2_MODE
-    if ((AXIS2_MODE & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE    & 1)); } else { pinMode(Axis2_M0,INPUT); }
-    if ((AXIS2_MODE & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE>>1 & 1)); } else { pinMode(Axis2_M1,INPUT); }
-    if ((AXIS2_MODE & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE>>2 & 1)); } else { pinMode(Axis2_M2,INPUT); }
-  #endif
 #endif
 
-#ifdef PPS_SENSE_ON
-  pinMode(PpsPin,INPUT);
-#endif
-#ifdef PPS_SENSE_PULLUP
-  pinMode(PpsPin,INPUT_PULLUP);
-#endif
-#if defined(PPS_SENSE_ON) || defined(PPS_SENSE_PULLUP)
-#if defined(__AVR_ATmega2560__)
-  attachInterrupt(PpsInt,ClockSync,RISING);
-#elif defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__) || defined(__ARM_STM32__)
-  attachInterrupt(PpsPin,ClockSync,RISING);
-#endif
-#endif
 }
 
 void Init_ReadEEPROM_Values() {

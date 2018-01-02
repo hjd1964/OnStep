@@ -190,18 +190,6 @@
 // THAT'S IT FOR USER CONFIGURATION!
 
 // -------------------------------------------------------------------------------------------------------------------------
-//  These are not functional for this configuration, don't change!
-#define AXIS1_MODE_OFF
-#define AXIS1_MODE_GOTO_OFF
-#define AXIS1_STEP_GOTO 1
-#define AXIS2_MODE_OFF
-#define AXIS2_MODE_GOTO_OFF
-#define AXIS2_STEP_GOTO 1
-#define MODE_SWITCH_BEFORE_SLEW_OFF
-#define MODE_SWITCH_SLEEP_OFF
-#define AXIS1_FAULT_OFF
-#define AXIS2_FAULT_OFF
-
 #include "Pins.Ramps14.h"
 #endif
 
