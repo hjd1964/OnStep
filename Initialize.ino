@@ -118,20 +118,6 @@ void Init_Pins() {
   pinMode(Axis5DirPin,OUTPUT); 
 #endif
 
-// override any status LED and set the reset pin HIGH
-#if defined(W5100_ON) && defined(__ARM_Teensy3__)
-#ifdef STATUS_LED_PINS_ON
-#undef STATUS_LED_PINS_ON
-#endif
-#ifdef STATUS_LED_PINS
-#undef STATUS_LED_PINS
-#endif
-  pinMode(RstPin,OUTPUT);
-  digitalWrite(RstPin,LOW);
-  delay(500);
-  digitalWrite(RstPin,HIGH);
-#endif
-
 // light status LED (provides GND)
 #ifdef STATUS_LED_PINS_ON
   pinMode(LEDnegPin,OUTPUT);
