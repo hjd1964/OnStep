@@ -32,13 +32,13 @@
   // We use the same HAL for Teensy 3.2, but add this define
   #define SER4_AVAILABLE
 
-#elif defined(__STM32F1__)
-  // STM32F1 board
-  #include "HAL_STM32F1/HAL_STM32F1.h"
-
 #elif defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
   // TI Tiva C
   #include "HAL_Tiva_C/HAL_Tiva_C.h"
+
+#elif defined(__STM32F1__)
+  // STM32F1 board
+  #include "HAL_STM32F1/HAL_STM32F1.h"
 
 #else
   #error "Unsupported Platform! If this is a new platform, it needs the appropriate entries in the HAL directory."
