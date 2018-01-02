@@ -47,28 +47,7 @@
 #define TMC_NINTPOL     16
 #define SYNC_ANYWHERE_ON
 
-// processor dependant platform setup
-#if defined(__arm__) && defined(TEENSYDUINO)
-#define __ARM_Teensy3__
-#endif
-#if defined(__MK64FX512__) || defined(__MK66FX1M0__)
-#define SER4_AVAILABLE
-#endif
-
-#if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
-#define F_BUS SysCtlClockGet() // no pre-scaling of timers on Tiva Launchpads
-#elif defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
-#define F_BUS 120000000        // There is a bug with SysCtlClockGet and TM4C1294 MCUs. At the moment we just hardcode the value and set the cpu frequency manually at the start of setup()
-#endif
-
-#if defined(__STM32F1__)
-#define F_BUS F_CPU            // We derive the F_BUS variable from the actual CPU frequency of the selected board.
-#define __ARM_STM32__          // We define a more generic symbol, in case more STM32 boards based on different lines are supported
-#include <HardwareTimer.h>
-#include <digitalWriteFast.h>  // Get this library from https://github.com/watterott/Arduino-Libs/archive/master.zip
-#endif
-
-#include "TM4C.h"
+#include "src/HAL/HAL.h"
 
 #include "Config.Classic.h"
 #include "Config.MiniPCB.h"
@@ -216,63 +195,6 @@ volatile double StepsForRateChangeAxis2= ((double)DegreesForAcceleration/sqrt((d
 #define DegreesForRapidStop 1.0
 #endif
 
-// Interrupts and timers ---------------------------------------------------------------------------------------------------
-#if defined(__ARM_TI_TM4C__) || defined(__ARM_STM32__)
-#define cli() noInterrupts()
-#define sei() interrupts()
-#endif
-
-#if defined(__ARM_Teensy3__)
-IntervalTimer itimer3;
-void TIMER3_COMPA_vect(void);
-
-IntervalTimer itimer4;
-void TIMER4_COMPA_vect(void);
-
-#elif defined(__ARM_TI_TM4C__)
-// Energia does not have IntervalTimer so we have to initialise timers manually
-void TIMER1_COMPA_vect(void); // it gets initialised here and not in timer.ino
-
-void TIMER3_COMPA_vect(void);
-
-void TIMER4_COMPA_vect(void);
-#elif  defined(__ARM_STM32__)
-void TIMER1_COMPA_vect(void); // it gets initialised here and not in timer.ino
-
-HardwareTimer itimer3(3);
-void TIMER3_COMPA_vect(void);
-
-HardwareTimer itimer4(4);
-void TIMER4_COMPA_vect(void);
-#endif
-
-#if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
-#define Sysctl_Periph_Timer1 SYSCTL_PERIPH_TIMER1
-#define Timer1_base TIMER1_BASE
-#define Int_timer1 INT_TIMER1A
-
-#define Sysctl_Periph_Timer3 SYSCTL_PERIPH_TIMER2
-#define Timer3_base TIMER2_BASE
-#define Int_timer3 INT_TIMER2A
-
-#define Sysctl_Periph_Timer4 SYSCTL_PERIPH_TIMER3
-#define Timer4_base TIMER3_BASE
-#define Int_timer4 INT_TIMER3A
-
-#elif defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
-#define Sysctl_Periph_Timer1 SYSCTL_PERIPH_TIMER1
-#define Timer1_base TIMER1_BASE
-#define Int_timer1 INT_TIMER1A
-
-#define Sysctl_Periph_Timer3 SYSCTL_PERIPH_TIMER2
-#define Timer3_base TIMER2_BASE
-#define Int_timer3 INT_TIMER2A
-
-#define Sysctl_Periph_Timer4 SYSCTL_PERIPH_TIMER3
-#define Timer4_base TIMER3_BASE
-#define Int_timer4 INT_TIMER3A
-#endif
-
 // Location ----------------------------------------------------------------------------------------------------------------
 double latitude  = 0.0;
 double cosLat = 1.0;
@@ -379,17 +301,6 @@ unsigned long axis5Ms=0;
 #define AXIS5_FORWARD HIGH
 #define AXIS5_REVERSE LOW
 #endif
-#endif
-
-// Fast port writting help -------------------------------------------------------------------------------------------------
-#if defined(__ARM_TI_TM4C__)
-#define CLR(x,y) (GPIOPinWrite(x,y,0))
-#define SET(x,y) (GPIOPinWrite(x,y,y))
-#define TGL(x,y) (GPIOPinRead(x,y)==0?GPIOPinWrite(x,y,y):GPIOPinWrite(x,y,0)) // untested, not used in current version
-#else
-#define CLR(x,y) (x&=(~(1<<y)))
-#define SET(x,y) (x|=(1<<y))
-#define TGL(x,y) (x^=(1<<y))
 #endif
 
 // Stepper driver enable/disable and direction -----------------------------------------------------------------------------
@@ -694,11 +605,6 @@ volatile int blAxis2        = 0;
 // Catalog storage starts at 200+PECBufferSize and fills EEPROM
 
 void setup() {
-#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
-  // due to a bug we set the frequency manually here
-  uint32_t g_ui32SysClock = SysCtlClockFreqSet((SYSCTL_XTAL_25MHZ | SYSCTL_OSC_MAIN | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), F_BUS);
-#endif
-
   // set initial values for some variables
   Init_Startup_Values();
 
