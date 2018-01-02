@@ -28,6 +28,9 @@
 #define E2END 6143
 #endif
 
+// Distance in arc-min ahead of and behind the current Equ position, used for rate calculation
+#define RefractionRateRange 10
+
 // Interrupts
 #define cli() noInterrupts()
 #define sei() interrupts()
