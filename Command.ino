@@ -23,6 +23,13 @@ cb cmd4; // serial4
 char replyx[50]="";
 cb cmdx;  // serialX
 
+#ifdef FOCUSER1_ON
+char primaryFocuser = 'F';
+#endif
+#ifdef FOCUSER2_ON
+char secondaryFocuser = 'f';
+#endif
+
 // process commands
 void processCommands() {
     boolean supress_frame = false;
@@ -278,11 +285,23 @@ void processCommands() {
 
 #ifdef FOCUSER1_ON
 //   F - Focuser1 Commands
-      if (command[0]=='F') {
+      if (command[0]==primaryFocuser) {
 //  :FA#  Active?
 //          Return: 0 on failure
 //                  1 on success
+//  :FAn# Select focuser 1 or 2
+//          Return: 0 on failure
+//                  1 on success
         if (command[1]=='A') {
+#ifdef FOCUSER2_ON
+          if ((parameter[0]=='1') && (parameter[1]==0)) {
+            primaryFocuser='F'; secondaryFocuser='f';
+          } else
+          if ((parameter[0]=='2') && (parameter[1]==0)) {
+            primaryFocuser='f'; secondaryFocuser='F';
+          } else
+#endif
+          if (parameter[0]!=0) commandError=true;
         } else
 //  :F+#   Move focuser in (toward objective)
 //         Returns: Nothing
@@ -306,23 +325,23 @@ void processCommands() {
         amountMoveAxis4.fixed=0;
         quietReply=true;
       } else
-//  :FG#   Get focuser current position in micrometers
+//  :FG#   Get focuser current position (in microns)
 //         Returns: snnn#
       if (command[1]=='G') {
         f1=((double)posAxis4)/(double)StepsPerMicrometerAxis4;
         sprintf(reply,"%ld",(long int)round(f1));
         quietReply=true;
       } else
-//  :FI#  Get full in position
-//         Returns: 0#
+//  :FI#  Get full in position (in microns)
+//         Returns: n#
         if (command[1]=='I') {
-          sprintf(reply,"%ld",(long)(MinAxis4));
+          sprintf(reply,"%ld",(long)round(MinAxis4*1000.0));
           quietReply=true;
         } else
-//  :FM#  Get max position
+//  :FM#  Get max position (in microns)
 //         Returns: n#
         if (command[1]=='M') {
-          sprintf(reply,"%ld",(long)(MaxAxis4));
+          sprintf(reply,"%ld",(long)round(MaxAxis4*1000.0));
           quietReply=true;
         } else
 //  :FT#  get status
@@ -330,12 +349,6 @@ void processCommands() {
         if (command[1]=='T') {
           quietReply=true;
           if (amountMoveAxis4.fixed!=0) strcpy(reply,"M"); else strcpy(reply,"S");
-        } else
-//  :FS#  Get scale
-//         Returns: n.nnn#
-        if (command[1]=='S') {
-          dtostrf(StepsPerMicrometerAxis4,1,3,reply);
-          quietReply=true;
         } else
 //  :FZ#   Set focuser zero position (half travel)
 //         Returns: Nothing
@@ -348,11 +361,20 @@ void processCommands() {
 //         Returns: Nothing
       if (command[1]=='F') {
         axis4Increment=(double)StepsPerMicrometerAxis4*1000.0;
-        quietReply=true; 
+        quietReply=true;
+      } else
+//  :FRsnnn#  Set focuser target position relative (in microns)
+//            Returns: Nothing
+      if (command[1]=='R') {
+        f=round((double)((long)targetAxis4.part.m)/(double)(StepsPerMicrometerAxis4)+(double)atol(parameter));
+        if (f<round(MinAxis4*1000.0)) f=round(MinAxis4*1000.0);
+        if (f>round(MaxAxis4*1000.0)) f=round(MaxAxis4*1000.0);
+        targetAxis4.part.m=(long)(f*(double)StepsPerMicrometerAxis4); targetAxis4.part.f=0;
+        quietReply=true;
       } else
 //  :FS#      Set focuser for slow motion
 //            Returns: Nothing
-//  :FSsnnn#  Set focuser target position in micrometers
+//  :FSsnnn#  Set focuser target position (in microns)
 //            Returns: Nothing
       if (command[1]=='S') {
         if (parameter[0]==0) {
@@ -360,8 +382,8 @@ void processCommands() {
           quietReply=true; 
         } else {
           f=atol(parameter);
-          if ((f>=MinAxis4*1000.0) && (f<=MaxAxis4*1000.0)) {
-            targetAxis4.part.m=(long)(f*(double)StepsPerMicrometerAxis4); targetAxis4.part.f=0;
+          if ((f>=round(MinAxis4*1000.0)) && (f<=round(MaxAxis4*1000.0))) {
+            targetAxis4.part.m=(long)round(f*(double)StepsPerMicrometerAxis4); targetAxis4.part.f=0;
           }
         }
       } else
@@ -379,11 +401,21 @@ void processCommands() {
 
 #ifdef FOCUSER2_ON
 //   f - Focuser2 Commands
-      if (command[0]=='f') {
+      if (command[0]==secondaryFocuser) {
 //  :fA#  Active?
 //          Return: 0 on failure
 //                  1 on success
+//  :fAn# Select focuser 1 or 2
+//          Return: 0 on failure
+//                  1 on success
         if (command[1]=='A') {
+          if ((parameter[0]=='1') && (parameter[1]==0)) {
+            primaryFocuser='F'; secondaryFocuser='f';
+          } else
+          if ((parameter[0]=='2') && (parameter[1]==0)) {
+            primaryFocuser='f'; secondaryFocuser='F';
+          } else
+          if (parameter[0]!=0) commandError=true;
         } else
 //  :f+#   Move focuser in (toward objective)
 //         Returns: Nothing
@@ -407,23 +439,23 @@ void processCommands() {
         amountMoveAxis5.fixed=0;
         quietReply=true;
       } else
-//  :fG#   Get focuser current position in micrometers
+//  :fG#   Get focuser current position (in microns)
 //         Returns: snnn#
       if (command[1]=='G') {
         f1=((double)posAxis5)/(double)StepsPerMicrometerAxis5;
         sprintf(reply,"%ld",(long int)round(f1));
         quietReply=true;
       } else
-//  :fI#  Get full in position
-//         Returns: 0#
+//  :fI#  Get full in position (in microns)
+//         Returns: n#
         if (command[1]=='I') {
-          sprintf(reply,"%ld",(long)(MinAxis5));
+          sprintf(reply,"%ld",(long)round(MinAxis5*1000.0));
           quietReply=true;
         } else
-//  :fM#  Get max position
+//  :fM#  Get max position (in microns)
 //         Returns: n#
         if (command[1]=='M') {
-          sprintf(reply,"%ld",(long)(MaxAxis5));
+          sprintf(reply,"%ld",(long)round(MaxAxis5*1000.0));
           quietReply=true;
         } else
 //  :fT#  get status
@@ -431,12 +463,6 @@ void processCommands() {
         if (command[1]=='T') {
           quietReply=true;
           if (amountMoveAxis5.fixed!=0) strcpy(reply,"M"); else strcpy(reply,"S");
-        } else
-//  :fS#  Get scale
-//         Returns: n.nnn#
-        if (command[1]=='S') {
-          dtostrf(StepsPerMicrometerAxis5,1,3,reply);
-          quietReply=true;
         } else
 //  :fZ#   Set focuser zero position (half travel)
 //         Returns: Nothing
@@ -451,9 +477,18 @@ void processCommands() {
         axis5Increment=(double)StepsPerMicrometerAxis5*1000.0;
         quietReply=true; 
       } else
+//  :fRsnnn#  Set focuser target position relative (in microns)
+//            Returns: Nothing
+      if (command[1]=='R') {
+        f=round((double)((long)targetAxis5.part.m)/(double)(StepsPerMicrometerAxis5)+(double)atol(parameter));
+        if (f<round(MinAxis5*1000.0)) f=round(MinAxis5*1000.0);
+        if (f>round(MaxAxis5*1000.0)) f=round(MaxAxis5*1000.0);
+        targetAxis5.part.m=(long)(f*(double)StepsPerMicrometerAxis5); targetAxis5.part.f=0;
+        quietReply=true;
+      } else
 //  :fS#      Set focuser for slow motion
 //            Returns: Nothing
-//  :fSsnnn#  Set focuser target position in micrometers
+//  :fSsnnn#  Set focuser target position (in microns)
 //            Returns: Nothing
       if (command[1]=='S') {
         if (parameter[0]==0) {
@@ -461,8 +496,8 @@ void processCommands() {
           quietReply=true; 
         } else {
           f=atol(parameter);
-          if ((f>=MinAxis5*1000.0) && (f<=MaxAxis5*1000.0)) {
-            targetAxis5.part.m=(long)(f*(double)StepsPerMicrometerAxis5); targetAxis5.part.f=0;
+          if ((f>=round(MinAxis5*1000.0)) && (f<=round(MaxAxis5*1000.0))) {
+            targetAxis5.part.m=(long)round(f*(double)StepsPerMicrometerAxis5); targetAxis5.part.f=0;
           }
         }
       } else
