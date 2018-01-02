@@ -54,6 +54,7 @@
 #include "Config.MaxPCB.h"
 #include "Config.Ramps14.h"
 #include "Config.Mega2560Alt.h"
+#include "Config.TM4C.h"
 #include "Config.STM32.h"
 
 #if !defined(Classic_ON) && !defined(MiniPCB_ON) && !defined(MaxPCB_ON) && !defined(TM4C_ON) && !defined(Ramps14_ON) && !defined(Mega2560Alt_ON) && !defined(STM32_ON)
