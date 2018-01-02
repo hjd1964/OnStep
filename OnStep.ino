@@ -52,7 +52,6 @@
 #include "Config.Classic.h"
 #include "Config.MiniPCB.h"
 #include "Config.MaxPCB.h"
-#include "Config.TM4C.h"
 #include "Config.Ramps14.h"
 #include "Config.Mega2560Alt.h"
 #include "Config.STM32.h"
