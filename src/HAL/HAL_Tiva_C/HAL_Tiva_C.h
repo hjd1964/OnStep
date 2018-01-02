@@ -66,3 +66,75 @@ void TIMER4_COMPA_vect(void);
   // Due to a bug we set the frequency manually on initialization
   uint32_t g_ui32SysClock = SysCtlClockFreqSet((SYSCTL_XTAL_25MHZ | SYSCTL_OSC_MAIN | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), F_BUS);
 #endif
+
+extern long int siderealInterval;
+extern void SetSiderealClockRate (long int);
+
+void HAL_Init_Timer_Sidereal() {
+  // need to initialise timers before using SetSiderealClockRate
+  // all timers are 32 bits
+  // timer 1A is used instead of itimer1
+  // timer 2A is used instead of itimer3
+  // timer 3A is used instead of itimer4
+
+  // Enable Timer 1 Clock
+  SysCtlPeripheralEnable(Sysctl_Periph_Timer1);
+
+  // Configure Timer Operation as Periodic
+  TimerConfigure(Timer1_base, TIMER_CFG_PERIODIC);
+
+  // register interrupt without editing the startup Energia file
+  //IntRegister( INT_TIMER1A, TIMER1_COMPA_vect );
+  TimerIntRegister(Timer1_base, TIMER_A, TIMER1_COMPA_vect );
+
+  // Enable Timer 1A interrupt
+  IntEnable(Int_timer1);
+
+  // Timer 1A generate interrupt when Timeout occurs
+  TimerIntEnable(Timer1_base, TIMER_TIMA_TIMEOUT);
+
+  // Configure Timer Frequency - initialize the timers that handle the sidereal clock, RA, and Dec
+  SetSiderealClockRate(siderealInterval);
+
+  // Start Timer 1A
+  TimerEnable(Timer1_base, TIMER_A);
+
+  // we also initialise timer 2A and 3A here as they may get used uninitialised from
+  // the interrupt for timer 1 if it gets triggered in the meantime
+  // we will not start them yet though
+
+  // Enable Timer 2 and 3 Clocks
+  SysCtlPeripheralEnable(Sysctl_Periph_Timer3);
+  SysCtlPeripheralEnable(Sysctl_Periph_Timer4);
+
+  // Configure Timer Operation as Periodic
+  TimerConfigure(Timer3_base, TIMER_CFG_PERIODIC);
+  TimerConfigure(Timer4_base, TIMER_CFG_PERIODIC);
+
+  // register interrupts without editing the startup Energia file
+  //IntRegister( INT_TIMER2A, TIMER3_COMPA_vect );
+  //IntRegister( INT_TIMER3A, TIMER4_COMPA_vect );
+  TimerIntRegister(Timer3_base, TIMER_A, TIMER3_COMPA_vect );
+  TimerIntRegister(Timer4_base, TIMER_A, TIMER4_COMPA_vect );
+
+  // Enable Timer 2A and 3A interrupts
+  IntEnable(Int_timer3);
+  IntEnable(Int_timer4);
+
+  // Timer 2A and 3A generate interrupt when Timeout occurs
+  TimerIntEnable(Timer3_base, TIMER_TIMA_TIMEOUT);
+  TimerIntEnable(Timer4_base, TIMER_TIMA_TIMEOUT);
+}
+
+void HAL_Init_Timers_Extra() {
+  TimerLoadSet(Timer3_base, TIMER_A, (int) (F_BUS / 1000000 * 128 * 0.0625));
+  TimerLoadSet(Timer4_base, TIMER_A, (int) (F_BUS / 1000000 * 128 * 0.0625));
+
+  // Start Timer 2A and 3A
+  TimerEnable(Timer3_base, TIMER_A);
+  TimerEnable(Timer4_base, TIMER_A);
+
+  IntPrioritySet(Int_timer1, 1);
+  IntPrioritySet(Int_timer3, 0);
+  IntPrioritySet(Int_timer4, 0);
+}
