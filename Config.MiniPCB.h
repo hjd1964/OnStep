@@ -9,7 +9,7 @@
  *
 */
 
-#define MiniPCB_ON   //  <- Turn _ON to use this configuration
+#define MiniPCB_OFF   //  <- Turn _ON to use this configuration
 
 #ifdef MiniPCB_ON
 // -------------------------------------------------------------------------------------------------------------------------
