@@ -3,6 +3,18 @@
 
 #if defined(__AVR_ATmega2560__)
 
+// UART Receive Complete Interrupt Handler for Serial0
+ISR(USART0_RX_vect)  {
+  PSerial._recv_buffer[PSerial._recv_tail]=UDR0; 
+  PSerial._recv_tail++; // buffer is 256 bytes so this byte variable wraps automatically
+}
+
+// UART Receive Complete Interrupt Handler for Serial1
+ISR(USART1_RX_vect)  {
+  PSerial1._recv_buffer[PSerial1._recv_tail]=UDR1; 
+  PSerial1._recv_tail++; // buffer is 256 bytes so this byte variable wraps automatically
+}
+
 // these are more compact and faster than the Arduino provided one's
 void pserial::begin(unsigned long baud) {
   unsigned int ubrr=F_CPU/16/baud-1;
@@ -259,5 +271,4 @@ uint32_t bbspi::transfer32(uint32_t data_out)
 
   return data_in;
 }
-
 
