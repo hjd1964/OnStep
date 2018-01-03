@@ -37,12 +37,13 @@ void TIMER4_COMPA_vect(void);
 extern long int siderealInterval;
 extern void SetSiderealClockRate (long int);
 
+// Initialize the timer that handles the sidereal clock
 void HAL_Init_Timer_Sidereal() {
-  // initialize the timers that handle the sidereal clock, RA, and Dec
   SetSiderealClockRate(siderealInterval);
 }
 
-void HAL_Init_Timers_Extra() {
+// Initialize Axis1 and Axis2 motor timers and set their priorities
+void HAL_Init_Timers_Motor() {
   // Pause the timer while we're configuring it
   itimer3.pause();
 
@@ -61,7 +62,6 @@ void HAL_Init_Timers_Extra() {
 
   // Start the timer counting
   itimer3.resume();
-
   
   // Pause the timer while we're configuring it
   itimer4.pause();

@@ -17,12 +17,13 @@ void TIMER4_COMPA_vect(void);
 extern long int siderealInterval;
 extern void SetSiderealClockRate (long int);
 
+// Initialize the timer that handles the sidereal clock
 void HAL_Init_Timer_Sidereal() {
-  // initialize the timers that handle the sidereal clock, RA, and Dec
   SetSiderealClockRate(siderealInterval);
 }
 
-void HAL_Init_Timers_Extra() {
+// Initialize Axis1 and Axis2 motor timers and set their priorities
+void HAL_Init_Timers_Motor() {
   // set the system timer for millis() to the second highest priority
   SCB_SHPR3 = (32 << 24) | (SCB_SHPR3 & 0x00FFFFFF);
 

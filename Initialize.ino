@@ -439,8 +439,8 @@ void Init_Start_Timers() {
   // wait for the sidereal clock to tick
   delay(15);
 
-  // Initialize additional timers and set priorities
-  HAL_Init_Timers_Extra();
+  // Initialize Axis1 and Axis2 motor timers and set their priorities
+  HAL_Init_Timers_Motor();
 }
 
 void EnableStepperDrivers() {

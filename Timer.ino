@@ -155,10 +155,10 @@ volatile byte lastGuideDirAxis1=0;
 volatile byte guideDirChangeTimerAxis2=0;
 volatile byte lastGuideDirAxis2=0;
 
-#if (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__)) || defined(__ARM_STM32__)
-ISR(TIMER1_COMPA_vect)
-#else
+#ifdef HAL_USE_NOBLOCK_FOR_TIMER1
 ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
+#else
+ISR(TIMER1_COMPA_vect)
 #endif
 {
 #if defined(__ARM_TI_TM4C__)
