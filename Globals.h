@@ -1,3 +1,6 @@
+// -----------------------------------------------------------------------------------
+// Global variables 
+
 // Time keeping ------------------------------------------------------------------------------------------------------------
 long siderealTimer    = 0;           // counter to issue steps during tracking
 long PecSiderealTimer = 0;           // time since worm wheel zero index for PEC
