@@ -7,9 +7,6 @@
 #define SET(x,y) (x|=(1<<y))
 #define TGL(x,y) (x^=(1<<y))
 
-// For align model, MCUs with lower resources use _LOW
-#define HAL_ALIGN_MODEL_HIGH
-
 // Timers
 IntervalTimer itimer3;
 void TIMER3_COMPA_vect(void);

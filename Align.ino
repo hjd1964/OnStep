@@ -866,9 +866,7 @@ void TGeoAlign::autoModel(int n) {
   do_search(  512,1,0,1,1,0,0,0,0,0);
   do_search(  256,1,0,1,1,0,0,0,0,0);
   do_search(  128,1,1,1,1,0,0,0,0,0);
-#endif
-
-#ifdef HAL_ALIGN_MODEL_HIGH
+#else
   // search, this can handle about 9 degrees of polar misalignment, and 2 degrees of cone error, 6' of FF/DF and TF
   if (num>4) {
     do_search(16384,0,0,1,1,0, 0, 0,0,0);

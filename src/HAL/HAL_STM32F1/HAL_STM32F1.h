@@ -14,9 +14,6 @@
 // This is defined for Arduino, but not for other platforms. We use a conservative value.
 #define E2END 2047
 
-// For align model, MCUs with lower resources use _LOW
-#define HAL_ALIGN_MODEL_HIGH
-
 // Interrupts
 #define cli() noInterrupts()
 #define sei() interrupts()
