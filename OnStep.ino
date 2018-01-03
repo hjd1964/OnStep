@@ -66,6 +66,7 @@
 #include "Library.h"
 #include "Align.h"
 #include "Command.h"
+#include "Globals.h"
 
 #ifdef MODE_SWITCH_BEFORE_SLEW_SPI
 #include "TMC2130.h"
@@ -82,9 +83,6 @@ tmc2130 tmcAxis2(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
 // forces initialialization of a host of settings in EEPROM. OnStep does this automatically, most likely, you will want to leave this alone
 #define INIT_KEY false    // set to true to keep automatic initilization from happening.  This is a one-time operation... upload to the Arduino, then set to false and upload again
 #define initKey 915307548 // unique identifier for the current initialization format, do not change
-
-#include "Globals.h"
-
 
 void setup() {
   // set initial values for some variables
