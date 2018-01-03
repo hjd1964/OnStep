@@ -1588,7 +1588,7 @@ void processCommands() {
        // Only burn the new rate if changing the sidereal interval
        if ((!commandError) && ((command[1]=='+') || (command[1]=='-') || (command[1]=='R'))) {
          EEPROM_writeLong(EE_siderealInterval,siderealInterval);
-         SetSiderealClockRate(siderealInterval);
+         SiderealClockSetInterval(siderealInterval);
          cli(); SiderealRate=siderealInterval/StepsPerSecondAxis1; sei();
        }
 

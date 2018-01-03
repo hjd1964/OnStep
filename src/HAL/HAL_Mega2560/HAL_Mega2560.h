@@ -17,11 +17,11 @@
 #define TGL(x,y) (x^=(1<<y))
 
 extern long int siderealInterval;
-extern void SetSiderealClockRate (long int);
+extern void SiderealClockSetInterval (long int);
 
 // Initialize the timer that handles the sidereal clock
 void HAL_Init_Timer_Sidereal() {
-  SetSiderealClockRate(siderealInterval);
+  SiderealClockSetInterval(siderealInterval);
 }
 
 // Initialize Axis1 and Axis2 motor timers and set their priorities

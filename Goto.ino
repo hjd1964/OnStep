@@ -387,7 +387,7 @@ byte goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1, long 
 
   cli();
   trackingState=TrackingMoveTo; 
-  SetSiderealClockRate(siderealInterval);
+  SiderealClockSetInterval(siderealInterval);
 
   startAxis1=posAxis1;
   startAxis2=posAxis2;

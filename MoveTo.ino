@@ -248,7 +248,7 @@ void moveTo() {
 
         // restore trackingState
         trackingState=lastTrackingState; lastTrackingState=TrackingNone;
-        SetSiderealClockRate(siderealInterval);
+        SiderealClockSetInterval(siderealInterval);
 
         // validate location
         byte parkPierSide=EEPROM.read(EE_pierSide);
@@ -271,7 +271,7 @@ void moveTo() {
 
           // restore trackingState
           trackingState=lastTrackingState; lastTrackingState=TrackingNone;
-          SetSiderealClockRate(siderealInterval);
+          SiderealClockSetInterval(siderealInterval);
 
           setHome();
           homeMount=false; 
@@ -283,7 +283,7 @@ void moveTo() {
         } else {
           // restore trackingState
           trackingState=lastTrackingState; lastTrackingState=TrackingNone;
-          SetSiderealClockRate(siderealInterval);
+          SiderealClockSetInterval(siderealInterval);
         }
     }
   }

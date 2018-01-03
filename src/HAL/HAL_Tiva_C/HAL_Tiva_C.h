@@ -68,7 +68,7 @@ void TIMER4_COMPA_vect(void);
 #endif
 
 extern long int siderealInterval;
-extern void SetSiderealClockRate (long int);
+extern void SiderealClockSetInterval (long int);
 
 // Initialize the timer that handles the sidereal clock
 void HAL_Init_Timer_Sidereal() {
@@ -95,7 +95,7 @@ void HAL_Init_Timer_Sidereal() {
   TimerIntEnable(Timer1_base, TIMER_TIMA_TIMEOUT);
 
   // Configure Timer Frequency - initialize the timers that handle the sidereal clock, RA, and Dec
-  SetSiderealClockRate(siderealInterval);
+  SiderealClockSetInterval(siderealInterval);
 
   // Start Timer 1A
   TimerEnable(Timer1_base, TIMER_A);

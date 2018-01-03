@@ -32,7 +32,7 @@ volatile long isrTimerRateAxis1=0;
 volatile long isrTimerRateAxis2=0;
 volatile long runTimerRateAxis1=0;
 volatile long runTimerRateAxis2=0;
-void SetSiderealClockRate(long iv) {
+void SiderealClockSetInterval(long iv) {
   if (trackingState==TrackingMoveTo) Timer1SetInterval(iv/100,PPSrateRatio); else Timer1SetInterval(iv/300,PPSrateRatio);
 
   isrTimerRateAxis1=0; // also force rate update for Axis1/2 timers so that PPS adjustments take hold immediately

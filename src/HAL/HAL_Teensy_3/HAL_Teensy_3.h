@@ -15,11 +15,11 @@ IntervalTimer itimer4;
 void TIMER4_COMPA_vect(void);
 
 extern long int siderealInterval;
-extern void SetSiderealClockRate (long int);
+extern void SiderealClockSetInterval (long int);
 
 // Initialize the timer that handles the sidereal clock
 void HAL_Init_Timer_Sidereal() {
-  SetSiderealClockRate(siderealInterval);
+  SiderealClockSetInterval(siderealInterval);
 }
 
 // Initialize Axis1 and Axis2 motor timers and set their priorities

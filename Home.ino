@@ -18,7 +18,7 @@ int goHome() {
     
   abortTrackingState=trackingState;
   lastTrackingState=TrackingNone;
-  trackingState=TrackingMoveTo; SetSiderealClockRate(siderealInterval);
+  trackingState=TrackingMoveTo; SiderealClockSetInterval(siderealInterval);
   sei();
 
   homeMount=true;
