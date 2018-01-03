@@ -3,6 +3,9 @@
 // This platform doesn't support true double precision math
 #define NoDoublePrecision
 
+// Slower MCUs can't do a wide range of degrees for misalignment
+#define HAL_ALIGN_MODEL_SLOW
+
 // Fast port writing help
 #define CLR(x,y) (x&=(~(1<<y)))
 #define SET(x,y) (x|=(1<<y))
