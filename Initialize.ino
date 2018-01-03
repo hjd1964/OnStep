@@ -125,7 +125,7 @@ void Init_Pins() {
 #ifdef STATUS_LED2_PINS_ON
   pinMode(LEDneg2Pin,OUTPUT); digitalWrite(LEDneg2Pin,LOW); // light second status LED (provides just GND)
   LED2_ON=false;
-#elif STATUS_LED2_PINS
+#elif defined(STATUS_LED2_PINS)
   pinMode(LEDneg2Pin,OUTPUT); digitalWrite(LEDneg2Pin,LOW); // light second status LED (provides pwm'd GND for polar reticule)
   analogWrite(LEDneg2Pin,STATUS_LED2_PINS);
 #endif
@@ -142,9 +142,9 @@ void Init_Pins() {
 // PEC index sense
 #ifdef PEC_SENSE_ON
   pinMode(PecPin,INPUT);
-#elif PEC_SENSE_PULLUP
+#elif defined(PEC_SENSE_PULLUP)
   pinMode(PecPin,INPUT_PULLUP);
-#elif PEC_SENSE_PULLDOWN
+#elif defined(PEC_SENSE_PULLDOWN)
   pinMode(PecPin,INPUT_PULLDOWN);
 #endif
 
@@ -159,7 +159,7 @@ void Init_Pins() {
   pinMode(ST4RAe,INPUT);
   pinMode(ST4DEn,INPUT);
   pinMode(ST4DEs,INPUT);
-#elif ST4_PULLUP
+#elif defined(ST4_PULLUP)
   pinMode(ST4RAw,INPUT_PULLUP);
   pinMode(ST4RAe,INPUT_PULLUP);
   pinMode(ST4DEn,INPUT_PULLUP);
@@ -170,7 +170,7 @@ void Init_Pins() {
 #ifdef PPS_SENSE_ON
   pinMode(PpsPin,INPUT);
   attachInterrupt(digitalPinToInterrupt(PpsPin),ClockSync,RISING);
-#elif PPS_SENSE_PULLUP
+#elif defined(PPS_SENSE_PULLUP)
   pinMode(PpsPin,INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(PpsPin),ClockSync,RISING);
 #endif
@@ -210,7 +210,7 @@ void Init_Pins() {
 // inputs for stepper drivers fault signal
 #ifdef AXIS1_FAULT_LOW
   pinMode(Axis1_FAULT,INPUT_PULLUP);
-#elif AXIS1_FAULT_HIGH
+#elif defined(AXIS1_FAULT_HIGH)
   #ifdef INPUT_PULLDOWN
   pinMode(Axis1_FAULT,INPUT_PULLDOWN);
   #else
@@ -219,7 +219,7 @@ void Init_Pins() {
 #endif
 #ifdef AXIS2_FAULT_LOW
   pinMode(Axis2_FAULT,INPUT_PULLUP);
-#elif AXIS1_FAULT_HIGH
+#elif defined(AXIS1_FAULT_HIGH)
   #ifdef INPUT_PULLDOWN
   pinMode(Axis2_FAULT,INPUT_PULLDOWN);
   #else
