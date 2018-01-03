@@ -856,7 +856,7 @@ void TGeoAlign::autoModel(int n) {
   Ff=0; Df=1;
 #endif
 
-#if defined(__AVR_ATmega2560__)
+#ifdef HAL_ALIGN_MODEL_LOW
   // search, this can handle about 4.5 degrees of polar misalignment, and 1 degree of cone error
   //             DoPdPzPeTfFfDfOdOh
   do_search( 8192,0,0,1,1,0,0,0,0,0);
@@ -868,7 +868,7 @@ void TGeoAlign::autoModel(int n) {
   do_search(  128,1,1,1,1,0,0,0,0,0);
 #endif
 
-#if defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__) || defined(__ARM_STM32__)
+#ifdef HAL_ALIGN_MODEL_HIGH
   // search, this can handle about 9 degrees of polar misalignment, and 2 degrees of cone error, 6' of FF/DF and TF
   if (num>4) {
     do_search(16384,0,0,1,1,0, 0, 0,0,0);

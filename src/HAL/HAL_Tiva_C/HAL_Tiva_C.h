@@ -28,6 +28,9 @@
 #define E2END 6143
 #endif
 
+// For align model, MCUs with lower resources use _LOW
+#define HAL_ALIGN_MODEL_HIGH
+
 // Interrupts
 #define cli() noInterrupts()
 #define sei() interrupts()
