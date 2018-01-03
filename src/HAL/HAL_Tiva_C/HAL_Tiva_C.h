@@ -31,6 +31,9 @@
 // Interrupts
 #define cli() noInterrupts()
 #define sei() interrupts()
+#define HAL_TIMER1_INT_CLEAR TimerIntClear( Timer1_base, TIMER_TIMA_TIMEOUT )
+#define HAL_TIMER3_INT_CLEAR TimerIntClear( Timer3_base, TIMER_TIMA_TIMEOUT )
+#define HAL_TIMER4_INT_CLEAR TimerIntClear( Timer4_base, TIMER_TIMA_TIMEOUT )
 
 // Fast port writing help
 #define CLR(x,y) (GPIOPinWrite(x,y,0))
@@ -135,3 +138,37 @@ void HAL_Init_Timers_Motor() {
   IntPrioritySet(Int_timer3, 0);
   IntPrioritySet(Int_timer4, 0);
 }
+
+//--------------------------------------------------------------------------------------------------
+// Set timer1 to interval (in microseconds*16), this is the 1/100 second sidereal timer
+
+#define ISR(f) void f (void)
+void TIMER1_COMPA_vect(void);
+
+void Timer1SetInterval(long iv, double rateRatio) {
+  iv=round(((double)iv)/rateRatio);
+  TimerLoadSet(Timer1_base, TIMER_A, (int)(F_BUS/1000000 * iv * 0.0625));
+}
+
+//--------------------------------------------------------------------------------------------------
+// Quickly reprogram the interval for the motor timers, must work from within the motor ISR timers
+
+void QuickSetIntervalAxis1(uint32_t r) {
+  TimerLoadSet(Timer3_base, TIMER_A, r);
+}
+
+void QuickSetIntervalAxis2(uint32_t r) {
+  TimerLoadSet(Timer4_base, TIMER_A, r);
+}
+
+// --------------------------------------------------------------------------------------------------
+// We use standard #define's to do **fast** digitalWrite's to the step and dir pins for the Axis1/2 stepper drivers
+#define StepPinAxis1_HIGH SET(Axis1StepPORT, Axis1StepBit)
+#define StepPinAxis1_LOW CLR(Axis1StepPORT, Axis1StepBit)
+#define DirPinAxis1_HIGH SET(Axis1DirPORT, Axis1DirBit)
+#define DirPinAxis1_LOW CLR(Axis1DirPORT, Axis1DirBit)
+
+#define StepPinAxis2_HIGH SET(Axis2StepPORT, Axis2StepBit)
+#define StepPinAxis2_LOW CLR(Axis2StepPORT, Axis2StepBit)
+#define DirPinAxis2_HIGH SET(Axis2DirPORT, Axis2DirBit)
+#define DirPinAxis2_LOW CLR(Axis2DirPORT, Axis2DirBit)
