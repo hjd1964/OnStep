@@ -37,7 +37,14 @@
   #include "HAL_Tiva_C/HAL_Tiva_C.h"
 
 #elif defined(__STM32F1__)
-  // STM32F1 board
+  // STM32F1 boards, following variants:
+  //
+  // STM32103RC: 72MHz, 256K flash, 48K RAM (requires pin changes in the default Pins.STM32.h)
+  // STM32103RE: 72MHz, 512K flash, 64K RAM (requires pin changes in the default Pins.STM32.h)
+  // STM32103VC: 72MHz, 256K flash, 48K RAM
+  // STM32103VE: 72MHz, 512K flash, 64K RAM
+  // STM32103ZE: 72MHz, 512K flash, 64K RAM
+
   #include "HAL_STM32F1/HAL_STM32F1.h"
 
 #else
