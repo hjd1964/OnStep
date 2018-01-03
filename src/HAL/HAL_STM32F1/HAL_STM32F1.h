@@ -34,3 +34,57 @@ void TIMER3_COMPA_vect(void);
 HardwareTimer itimer4(4);
 void TIMER4_COMPA_vect(void);
 
+extern long int siderealInterval;
+extern void SetSiderealClockRate (long int);
+
+void HAL_Init_Timer_Sidereal() {
+  // initialize the timers that handle the sidereal clock, RA, and Dec
+  SetSiderealClockRate(siderealInterval);
+}
+
+void HAL_Init_Timers_Extra() {
+  // Pause the timer while we're configuring it
+  itimer3.pause();
+
+  //itimer3.setPrescaleFactor(SMT32_PRESCALER);
+  //itimer3.setOverflow(STM32_OVERFLOW);
+  // Set up period
+  itimer3.setPeriod((float)128 * 0.0625); // in microseconds
+
+  // Set up an interrupt on channel 3
+  itimer3.setChannel3Mode(TIMER_OUTPUT_COMPARE);
+  itimer3.setCompare(TIMER_CH3, 1);  // Interrupt 1 count after each update
+  itimer3.attachInterrupt(TIMER_CH3, TIMER3_COMPA_vect);
+
+  // Refresh the timer's count, prescale, and overflow
+  itimer3.refresh();
+
+  // Start the timer counting
+  itimer3.resume();
+
+  
+  // Pause the timer while we're configuring it
+  itimer4.pause();
+
+  //itimer4.setPrescaleFactor(SMT32_PRESCALER);
+  //itimer4.setOverflow(STM32_OVERFLOW);
+  // Set up period
+  itimer4.setPeriod((float)128 * 0.0625); // in microseconds
+
+  // Set up an interrupt on channel 4
+  itimer4.setChannel4Mode(TIMER_OUTPUT_COMPARE);
+  itimer4.setCompare(TIMER_CH4, 1);  // Interrupt 1 count after each update
+  itimer4.attachInterrupt(TIMER_CH4, TIMER4_COMPA_vect);
+
+  // Refresh the timer's count, prescale, and overflow
+  itimer4.refresh();
+
+  // Start the timer counting
+  itimer4.resume();
+
+  // set the 1/100 second sidereal clock timer to run at the second highest priority
+  nvic_irq_set_priority(NVIC_TIMER1_CC, 2);
+  // set the motor timers to run at the highest priority
+  nvic_irq_set_priority(NVIC_TIMER3, 0);
+  nvic_irq_set_priority(NVIC_TIMER4, 0);
+}

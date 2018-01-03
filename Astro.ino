@@ -472,13 +472,6 @@ double ZenithTrackingRate() {
   return 15.0 * ((double)(( Alt1 - Alt2 ) / ( Alt1_ - Alt2_ )));
 }
 
-// Distance in arc-min ahead of and behind the current Equ position, used for rate calculation
-#ifdef NoDoublePrecision
-#define RefractionRateRange 30
-#else
-#define RefractionRateRange 10
-#endif
-
 boolean do_refractionRate_calc() {
   boolean done=false;
 
