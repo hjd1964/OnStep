@@ -473,7 +473,7 @@ double ZenithTrackingRate() {
 }
 
 // Distance in arc-min ahead of and behind the current Equ position, used for rate calculation
-#ifdef NoDoublePrecision
+#ifdef HAL_NO_DOUBLE_PRECISION
 #define RefractionRateRange 30
 #else
 #define RefractionRateRange 10

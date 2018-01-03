@@ -1,7 +1,7 @@
 #include <EEPROM.h>
 
 // This platform doesn't support true double precision math
-#define NoDoublePrecision
+#define HAL_NO_DOUBLE_PRECISION
 
 // Slower MCUs can't do a wide range of degrees for misalignment
 #define HAL_ALIGN_MODEL_SLOW
