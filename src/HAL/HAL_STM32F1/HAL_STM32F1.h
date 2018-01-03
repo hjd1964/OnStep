@@ -14,9 +14,6 @@
 // This is defined for Arduino, but not for other platforms. We use a conservative value.
 #define E2END 2047
 
-// Distance in arc-min ahead of and behind the current Equ position, used for rate calculation
-#define RefractionRateRange 10
-
 // Interrupts
 #define cli() noInterrupts()
 #define sei() interrupts()
@@ -25,6 +22,9 @@
 #define CLR(x,y) (x&=(~(1<<y)))
 #define SET(x,y) (x|=(1<<y))
 #define TGL(x,y) (x^=(1<<y))
+
+// Distance in arc-min ahead of and behind the current Equ position, used for rate calculation
+#define RefractionRateRange 10
 
 // Timers
 
