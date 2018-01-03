@@ -27,7 +27,7 @@ volatile bool axis2Powered = false;
 //--------------------------------------------------------------------------------------------------
 // Set hardware timer rates
 
-// set Timer1 master sidereal clock to interval (in microseconds)
+// set Timer1 master sidereal clock to interval (in microseconds*16)
 volatile long isrTimerRateAxis1=0;
 volatile long isrTimerRateAxis2=0;
 volatile long runTimerRateAxis1=0;

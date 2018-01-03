@@ -19,7 +19,7 @@ volatile long lst = 0;               // this is the local (apparent) sidereal ti
 
 long siderealInterval       = 15956313L;
 long masterSiderealInterval = siderealInterval;
-                                     // default = 15956313 ticks per sidereal hundredth second, where a tick is 1/16 uS
+                                     // default = 15956313 ticks per sidereal second, where a tick is 1/16 uS
                                      // this is stored in EEPROM which is updated/adjusted with the ":T+#" and ":T-#" commands
                                      // a higher number here means a longer count which slows down the sidereal clock
 
