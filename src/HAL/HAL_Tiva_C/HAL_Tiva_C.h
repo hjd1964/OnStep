@@ -37,9 +37,6 @@
 #define SET(x,y) (GPIOPinWrite(x,y,y))
 #define TGL(x,y) (GPIOPinRead(x,y)==0?GPIOPinWrite(x,y,y):GPIOPinWrite(x,y,0)) // untested, not used in current version
 
-// Distance in arc-min ahead of and behind the current Equ position, used for rate calculation
-#define RefractionRateRange 10
-
 // Timers
 // The Energia IDE does not have IntervalTimer so we have to initialise timers manually
 

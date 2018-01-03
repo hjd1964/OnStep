@@ -7,9 +7,6 @@
 #define SET(x,y) (x|=(1<<y))
 #define TGL(x,y) (x^=(1<<y))
 
-// Distance in arc-min ahead of and behind the current Equ position, used for rate calculation
-#define RefractionRateRange 10
-
 // Timers
 IntervalTimer itimer3;
 void TIMER3_COMPA_vect(void);
