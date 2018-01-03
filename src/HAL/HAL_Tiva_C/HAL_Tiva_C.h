@@ -67,6 +67,7 @@ void TIMER4_COMPA_vect(void);
 extern long int siderealInterval;
 extern void SetSiderealClockRate (long int);
 
+// Initialize the timer that handles the sidereal clock
 void HAL_Init_Timer_Sidereal() {
   // need to initialise timers before using SetSiderealClockRate
   // all timers are 32 bits
@@ -95,11 +96,10 @@ void HAL_Init_Timer_Sidereal() {
 
   // Start Timer 1A
   TimerEnable(Timer1_base, TIMER_A);
+}
 
-  // we also initialise timer 2A and 3A here as they may get used uninitialised from
-  // the interrupt for timer 1 if it gets triggered in the meantime
-  // we will not start them yet though
-
+// Initialize Axis1 and Axis2 motor timers and set their priorities
+void HAL_Init_Timers_Motor() {
   // Enable Timer 2 and 3 Clocks
   SysCtlPeripheralEnable(Sysctl_Periph_Timer3);
   SysCtlPeripheralEnable(Sysctl_Periph_Timer4);
@@ -121,9 +121,9 @@ void HAL_Init_Timer_Sidereal() {
   // Timer 2A and 3A generate interrupt when Timeout occurs
   TimerIntEnable(Timer3_base, TIMER_TIMA_TIMEOUT);
   TimerIntEnable(Timer4_base, TIMER_TIMA_TIMEOUT);
-}
 
-void HAL_Init_Timers_Extra() {
+  // --------------------------------------------------------
+
   TimerLoadSet(Timer3_base, TIMER_A, (int) (F_BUS / 1000000 * 128 * 0.0625));
   TimerLoadSet(Timer4_base, TIMER_A, (int) (F_BUS / 1000000 * 128 * 0.0625));
 
