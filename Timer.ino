@@ -39,7 +39,7 @@ void SiderealClockSetInterval(long iv) {
   isrTimerRateAxis2=0;
 }
 
-// set Timer3 to interval (in microseconds*16), maximum time is about 134 seconds
+// prepare to set Timer3 to interval (in microseconds*16), maximum time is about 134 seconds
 volatile uint32_t nextAxis1Rate = 100000UL;
 volatile uint16_t t3cnt = 0;
 volatile uint16_t t3rep = 1;
@@ -59,7 +59,7 @@ void Timer3SetInterval(long iv) {
 #endif
 }
 
-// set Timer4 to interval (in microseconds*16), maximum time is about 134 seconds
+// prepare to set Timer4 to interval (in microseconds*16), maximum time is about 134 seconds
 volatile uint32_t nextAxis2Rate = 100000UL;
 volatile uint16_t t4cnt = 0;
 volatile uint16_t t4rep = 1;
