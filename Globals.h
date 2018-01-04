@@ -112,14 +112,18 @@ volatile fixed_t targetAxis1;                            // hour angle of goto e
 volatile byte dirAxis1   = 1;                            // stepping direction + or -
 double newTargetRA       = 0.0;                          // holds the RA for goTos
 fixed_t origTargetAxis1;
-#if defined(AXIS1_MODE) && defined(AXIS1_MODE_GOTO)
+#if defined(AXIS1_STEPPING_SIDEREAL) && defined(AXIS1_STEPPING_SLEW)
 volatile long stepAxis1=1;
 #else
 #define stepAxis1 1
 #endif
 
-unsigned int Axis1SteppingMode;
-unsigned int Axis2SteppingMode;
+// Stepping settings for sidreal rate
+unsigned int Axis1SteppingSidereal;
+unsigned int Axis2SteppingSidereal;
+// Stepping settings for slew (GOTO) rate
+unsigned int Axis1SteppingSlew;
+unsigned int Axis2SteppingSlew;
 
 volatile long posAxis2   = 90L*(long)StepsPerDegreeAxis2;// declination position in steps
 long trueAxis2           = 90L*(long)StepsPerDegreeAxis2;// correction to above for motor shaft position steps
@@ -128,7 +132,7 @@ volatile fixed_t targetAxis2;                            // declination of goto 
 volatile byte dirAxis2   = 1;                            // stepping direction + or -
 double newTargetDec      = 0.0;                          // holds the Dec for goTos
 long origTargetAxis2     = 0;
-#if defined(AXIS2_MODE) && defined(AXIS2_MODE_GOTO)
+#if defined(AXIS2_STEPPING_SIDEREAL) && defined(AXIS2_STEPPING_SLEW)
 volatile long stepAxis2=1;
 #else
 #define stepAxis2 1

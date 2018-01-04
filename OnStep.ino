@@ -47,6 +47,7 @@
 #define TMC_NINTPOL     16
 #define SYNC_ANYWHERE_ON
 
+#include "Constants.h"
 #include "src/HAL/HAL.h"
 
 #include "Config.Classic.h"
@@ -89,8 +90,11 @@ void setup() {
   Init_Startup_Values();
 
   // Translate stepping modes
-  Axis1SteppingMode = TranslateSteppingMode(AXIS1_STEPPING_SIDEREAL);
-  Axis2SteppingMode = TranslateSteppingMode(AXIS2_STEPPING_SIDEREAL);
+  Axis1SteppingSidereal = TranslateSteppingMode(AXIS1_STEPPING_SIDEREAL);
+  Axis2SteppingSidereal = TranslateSteppingMode(AXIS2_STEPPING_SIDEREAL);
+
+  Axis1SteppingSlew = TranslateSteppingMode(AXIS1_STEPPING_SLEW);
+  Axis2SteppingSlew = TranslateSteppingMode(AXIS2_STEPPING_SLEW);
 
   // set pins for input/output as specified in Config.h and PinMap.h
   Init_Pins();

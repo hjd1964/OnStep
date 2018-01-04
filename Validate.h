@@ -10,11 +10,11 @@
 #endif
 
 #if defined(MODE_SWITCH_BEFORE_SLEW_ON) || defined(MODE_SWITCH_BEFORE_SLEW_SPI)
-#if !defined(AXIS1_MODE) || !defined(AXIS1_MODE_GOTO)
-  #error "Config.xxx.h error: AXIS1_MODE and AXIS1_MODE_GOTO must be set to a valid value."
+#if !defined(AXIS1_STEPPING_SIDEREAL) || !defined(AXIS1_STEPPING_SLEW)
+  #error "Config.xxx.h error: AXIS1_STEPPING_SIDEREAL and AXIS1_STEPPING_SLEW must be set to a valid value."
 #endif
-#if !defined(AXIS2_MODE) || !defined(AXIS2_MODE_GOTO)
-  #error "Config.xxx.h error: AXIS2_MODE and AXIS2_MODE_GOTO must be set to a valid value."
+#if !defined(AXIS2_STEPPING_SIDEREAL) || !defined(AXIS2_STEPPING_SLEW)
+  #error "Config.xxx.h error: AXIS2_STEPPING_SIDEREAL and AXIS2_STEPPING_SLEW must be set to a valid value."
 #endif
 #endif
 
@@ -86,16 +86,15 @@
   #if AXIS1_STEPPING_SIDEREAL > 16 || AXIS2_STEPPING_SIDEREAL > 16
     #error "The configured stepper driver model does not support stepping over 16"
   #endif
-#endif
-
-#if STEPPER_DRIVER_MODEL == DRV8825
+#elif STEPPER_DRIVER_MODEL == DRV8825
   #if AXIS1_STEPPING_SIDEREAL > 32 || AXIS2_STEPPING_SIDEREAL > 32
     #error "The configured stepper driver model does not support stepping over 32"
   #endif
-#endif
-#if STEPPER_DRIVER_MODEL == LV8729
+#elif STEPPER_DRIVER_MODEL == LV8729
   #if AXIS1_STEPPING_SIDEREAL > 128 || AXIS2_STEPPING_SIDEREAL > 128
     #error "The configured stepper driver model does not support stepping over 128"
   #endif
+#else
+ #error "No stepper driver model configured!"
 #endif
 
