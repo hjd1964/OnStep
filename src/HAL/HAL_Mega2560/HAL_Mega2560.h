@@ -1,11 +1,6 @@
-#include <EEPROM.h>
+// Platform setup ------------------------------------------------------------------------------------
 
-// Use low overhead serial
-#include "HAL_Serial.h"
-// SERIAL is always enabled SERIAL1 and SERIAL4 are optional
-#define HAL_SERIAL1_ENABLED
-// this tells OnStep that a .transmit() method needs to be called to send data
-#define HAL_SERIAL_TRANSMIT
+#include <EEPROM.h>
 
 // This platform doesn't support true double precision math
 #define HAL_NO_DOUBLE_PRECISION
@@ -14,24 +9,30 @@
 // They can, however, run Motor Timer ISR's w/stepper driver signal timing met in one pass vs. two for faster processors
 #define HAL_SLOW_PROCESSOR
 
+// New symbols for the Serial ports so they can be remapped if necessary -----------------------------
+// Use low overhead serial
+#include "HAL_Serial.h"
+// SERIAL is always enabled SERIAL1 and SERIAL4 are optional
+#define HAL_SERIAL1_ENABLED
+// this tells OnStep that a .transmit() method needs to be called to send data
+#define HAL_SERIAL_TRANSMIT
+
+//--------------------------------------------------------------------------------------------------
+// Initialize timers
+
 // Enable a pseudo low priority level for Timer1 (sidereal clock) so the
 // critical motor ISR's don't get delayed by the big slow sidereal clock ISR
 #define HAL_USE_NOBLOCK_FOR_TIMER1
 
-// Fast port writing help
-#define CLR(x,y) (x&=(~(1<<y)))
-#define SET(x,y) (x|=(1<<y))
-#define TGL(x,y) (x^=(1<<y))
-
 extern long int siderealInterval;
 extern void SiderealClockSetInterval (long int);
 
-// Initialize the timer that handles the sidereal clock
+// Init sidereal clock timer
 void HAL_Init_Timer_Sidereal() {
   SiderealClockSetInterval(siderealInterval);
 }
 
-// Initialize Axis1 and Axis2 motor timers and set their priorities
+// Init Axis1 and Axis2 motor timers and set their priorities
 
 // Note the granularity below, these run at 0.5uS per tick with 16bit depth
 #define HAL_FIXED_PRESCALE_16BIT_MOTOR_TIMERS
@@ -48,7 +49,9 @@ void HAL_Init_Timers_Motor() {
   TIMSK4 = (1 << OCIE4A);
 }
 
-// Set timer1 to interval (in microseconds*16), this is the 1/100 second sidereal timer
+//--------------------------------------------------------------------------------------------------
+// Set timer1 to interval (in microseconds*16), for the 1/100 second sidereal timer
+
 void Timer1SetInterval(long iv, double rateRatio) {
   iv=round(((double)iv)/rateRatio);
 
@@ -74,13 +77,21 @@ void Timer1SetInterval(long iv, double rateRatio) {
   TIMSK1 |= (1 << OCIE1A);
 }
 
+//--------------------------------------------------------------------------------------------------
+// Quickly reprogram the interval for the motor timers, must work from within the motor ISR timers
+// interval (r) is in (in microseconds*2) due to using HAL_FIXED_PRESCALE_16BIT_MOTOR_TIMERS 
+// for a maximum period of 0.032 seconds (16 bit, 65535 maximum interval)
+
 #define QuickSetIntervalAxis1(r) (OCR3A=r)
 #define QuickSetIntervalAxis2(r) (OCR4A=r)
 
-//void QuickSetIntervalAxis1(uint32_t r) { OCR3A=r; }
-//void QuickSetIntervalAxis2(uint32_t r) { OCR4A=r; }
-
 // --------------------------------------------------------------------------------------------------
+// Fast port writing help
+
+#define CLR(x,y) (x&=(~(1<<y)))
+#define SET(x,y) (x|=(1<<y))
+#define TGL(x,y) (x^=(1<<y))
+
 // We use standard #define's to do **fast** digitalWrite's to the step and dir pins for the Axis1/2 stepper drivers
 #define StepPinAxis1_HIGH SET(Axis1StepPORT, Axis1StepBit)
 #define StepPinAxis1_LOW CLR(Axis1StepPORT, Axis1StepBit)
@@ -91,5 +102,4 @@ void Timer1SetInterval(long iv, double rateRatio) {
 #define StepPinAxis2_LOW CLR(Axis2StepPORT, Axis2StepBit)
 #define DirPinAxis2_HIGH SET(Axis2DirPORT, Axis2DirBit)
 #define DirPinAxis2_LOW CLR(Axis2DirPORT, Axis2DirBit)
-
 

@@ -1,15 +1,7 @@
-#define __ARM_TI_TM4C__
+// Platform setup ------------------------------------------------------------------------------------
 
-// New symbols for the Serial ports so they can be remapped if necessary
-#if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
-#define PSerial Serial
-#define PSerial1 Serial1
-#elif defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
-#define PSerial Serial1
-#define PSerial1 Serial7
-#endif
-// SERIAL is always enabled SERIAL1 and SERIAL4 are optional
-#define HAL_SERIAL1_ENABLED
+// We define a more generic symbol, in case more TM4C boards based on different lines are supported
+#define __ARM_TI_TM4C__
 
 #if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
 // no pre-scaling of timers on Tiva Launchpads
@@ -46,12 +38,25 @@
 #define HAL_TIMER3_INT_CLEAR TimerIntClear( Timer3_base, TIMER_TIMA_TIMEOUT )
 #define HAL_TIMER4_INT_CLEAR TimerIntClear( Timer4_base, TIMER_TIMA_TIMEOUT )
 
-// Fast port writing help
-#define CLR(x,y) (GPIOPinWrite(x,y,0))
-#define SET(x,y) (GPIOPinWrite(x,y,y))
-#define TGL(x,y) (GPIOPinRead(x,y)==0?GPIOPinWrite(x,y,y):GPIOPinWrite(x,y,0)) // untested, not used in current version
+// New symbols for the Serial ports so they can be remapped if necessary -----------------------------
+#if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
+#define PSerial Serial
+#define PSerial1 Serial1
+#elif defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+#define PSerial Serial1
+#define PSerial1 Serial7
+#endif
+// SERIAL is always enabled SERIAL1 and SERIAL4 are optional
+#define HAL_SERIAL1_ENABLED
 
-// Timers
+//--------------------------------------------------------------------------------------------------
+// Initialize timers
+
+#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+  // Due to a bug we set the frequency manually on initialization
+  uint32_t g_ui32SysClock = SysCtlClockFreqSet((SYSCTL_XTAL_25MHZ | SYSCTL_OSC_MAIN | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), F_BUS);
+#endif
+
 // The Energia IDE does not have IntervalTimer so we have to initialise timers manually
 
 // We initialize these here and not in timer.ino
@@ -73,15 +78,10 @@ void TIMER4_COMPA_vect(void);
 #define Timer4_base TIMER3_BASE
 #define Int_timer4 INT_TIMER3A
 
-#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
-  // Due to a bug we set the frequency manually on initialization
-  uint32_t g_ui32SysClock = SysCtlClockFreqSet((SYSCTL_XTAL_25MHZ | SYSCTL_OSC_MAIN | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), F_BUS);
-#endif
-
 extern long int siderealInterval;
 extern void SiderealClockSetInterval (long int);
 
-// Initialize the timer that handles the sidereal clock
+// Init sidereal clock timer
 void HAL_Init_Timer_Sidereal() {
   // need to initialise timers before using SetSiderealClockRate
   // all timers are 32 bits
@@ -136,7 +136,7 @@ void HAL_Init_Timers_Motor() {
   TimerIntEnable(Timer3_base, TIMER_TIMA_TIMEOUT);
   TimerIntEnable(Timer4_base, TIMER_TIMA_TIMEOUT);
 
-  // --------------------------------------------------------
+  // *
 
   TimerLoadSet(Timer3_base, TIMER_A, (int) (F_BUS / 1000000 * 128 * 0.0625));
   TimerLoadSet(Timer4_base, TIMER_A, (int) (F_BUS / 1000000 * 128 * 0.0625));
@@ -151,18 +151,17 @@ void HAL_Init_Timers_Motor() {
 }
 
 //--------------------------------------------------------------------------------------------------
-// Set timer1 to interval (in microseconds*16), this is the 1/100 second sidereal timer
+// Set timer1 to interval (in microseconds*16), for the 1/100 second sidereal timer
 
 #define ISR(f) void f (void)
 void TIMER1_COMPA_vect(void);
-
 void Timer1SetInterval(long iv, double rateRatio) {
   iv=round(((double)iv)/rateRatio);
   TimerLoadSet(Timer1_base, TIMER_A, (int)(F_BUS/1000000 * iv * 0.0625));
 }
 
 //--------------------------------------------------------------------------------------------------
-// Quickly reprogram the interval for the motor timers, must work from within the motor ISR timers
+// Quickly reprogram the interval (in microseconds) for the motor timers, must work from within the motor ISR timers
 
 void QuickSetIntervalAxis1(uint32_t r) {
   TimerLoadSet(Timer3_base, TIMER_A, r);
@@ -173,6 +172,12 @@ void QuickSetIntervalAxis2(uint32_t r) {
 }
 
 // --------------------------------------------------------------------------------------------------
+// Fast port writing help
+
+#define CLR(x,y) (GPIOPinWrite(x,y,0))
+#define SET(x,y) (GPIOPinWrite(x,y,y))
+#define TGL(x,y) (GPIOPinRead(x,y)==0?GPIOPinWrite(x,y,y):GPIOPinWrite(x,y,0)) // untested, not used in current version
+
 // We use standard #define's to do **fast** digitalWrite's to the step and dir pins for the Axis1/2 stepper drivers
 #define StepPinAxis1_HIGH SET(Axis1StepPORT, Axis1StepBit)
 #define StepPinAxis1_LOW CLR(Axis1StepPORT, Axis1StepBit)
@@ -183,3 +188,4 @@ void QuickSetIntervalAxis2(uint32_t r) {
 #define StepPinAxis2_LOW CLR(Axis2StepPORT, Axis2StepBit)
 #define DirPinAxis2_HIGH SET(Axis2DirPORT, Axis2DirBit)
 #define DirPinAxis2_LOW CLR(Axis2DirPORT, Axis2DirBit)
+

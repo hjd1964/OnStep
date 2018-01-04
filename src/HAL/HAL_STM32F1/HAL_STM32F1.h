@@ -1,11 +1,9 @@
-// New symbols for the Serial ports so they can be remapped if necessary
-#define PSerial Serial
-#define PSerial1 Serial1
-// SERIAL is always enabled SERIAL1 and SERIAL4 are optional
-#define HAL_SERIAL1_ENABLED
+// Platform setup ------------------------------------------------------------------------------------
 
 // We define a more generic symbol, in case more STM32 boards based on different lines are supported
 #define __ARM_STM32__
+
+#include <EEPROM.h>
 
 // We derive the F_BUS variable from the actual CPU frequency of the selected board.
 #define F_BUS F_CPU
@@ -15,8 +13,6 @@
 // Get this library from https://github.com/watterott/Arduino-Libs/archive/master.zip
 #include <digitalWriteFast.h>
 
-#include <EEPROM.h>
-
 // This is defined for Arduino, but not for other platforms. We use a conservative value.
 #define E2END 2047
 
@@ -24,14 +20,16 @@
 #define cli() noInterrupts()
 #define sei() interrupts()
 
-// Fast port writing help
-#define CLR(x,y) (x&=(~(1<<y)))
-#define SET(x,y) (x|=(1<<y))
-#define TGL(x,y) (x^=(1<<y))
+// New symbols for the Serial ports so they can be remapped if necessary -----------------------------
+#define PSerial Serial
+#define PSerial1 Serial1
+// SERIAL is always enabled SERIAL1 and SERIAL4 are optional
+#define HAL_SERIAL1_ENABLED
 
-// Timers
+//--------------------------------------------------------------------------------------------------
+// Initialize timers
 
-// it gets initialised here and not in timer.ino
+// initialised here and not in timer.ino
 void TIMER1_COMPA_vect(void);
 
 HardwareTimer itimer3(3);
@@ -43,12 +41,12 @@ void TIMER4_COMPA_vect(void);
 extern long int siderealInterval;
 extern void SiderealClockSetInterval (long int);
 
-// Initialize the timer that handles the sidereal clock
+// Init sidereal clock timer
 void HAL_Init_Timer_Sidereal() {
   SiderealClockSetInterval(siderealInterval);
 }
 
-// Initialize Axis1 and Axis2 motor timers and set their priorities
+// Init Axis1 and Axis2 motor timers and set their priorities
 void HAL_Init_Timers_Motor() {
   // Pause the timer while we're configuring it
   itimer3.pause();
@@ -95,7 +93,8 @@ void HAL_Init_Timers_Motor() {
   nvic_irq_set_priority(NVIC_TIMER4, 0);
 }
 
-// Set timer1 to interval (in microseconds*16), this is the 1/100 second sidereal timer
+//--------------------------------------------------------------------------------------------------
+// Set timer1 to interval (in microseconds*16), for the 1/100 second sidereal timer
 
 #define ISR(f) void f (void)
 void TIMER1_COMPA_vect(void);
@@ -129,6 +128,9 @@ void Timer1SetInterval(long iv, double rateRatio) {
   // Start the timer counting
   itimer1.resume();
 }
+
+//--------------------------------------------------------------------------------------------------
+// Quickly reprogram the interval (in microseconds) for the motor timers, must work from within the motor ISR timers
 
 void QuickSetIntervalAxis1(uint32_t r) {
   // Pause the timer while we're configuring it
@@ -173,6 +175,12 @@ void QuickSetIntervalAxis2(uint32_t r) {
 }
 
 // --------------------------------------------------------------------------------------------------
+// Fast port writing help
+
+#define CLR(x,y) (x&=(~(1<<y)))
+#define SET(x,y) (x|=(1<<y))
+#define TGL(x,y) (x^=(1<<y))
+
 // We use standard #define's to do **fast** digitalWrite's to the step and dir pins for the Axis1/2 stepper drivers
 #define StepPinAxis1_HIGH digitalWriteFast(Axis1StepPin, HIGH)
 #define StepPinAxis1_LOW digitalWriteFast(Axis1StepPin, LOW)
@@ -183,3 +191,4 @@ void QuickSetIntervalAxis2(uint32_t r) {
 #define StepPinAxis2_LOW digitalWriteFast(Axis2StepPin, LOW)
 #define DirPinAxis2_HIGH digitalWriteFast(Axis2DirPin, HIGH)
 #define DirPinAxis2_LOW digitalWriteFast(Axis2DirPin, LOW)
+
