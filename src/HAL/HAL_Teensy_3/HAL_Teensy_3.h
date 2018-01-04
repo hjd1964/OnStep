@@ -1,5 +1,16 @@
 #define __ARM_Teensy3__
 
+// New symbols for the Serial ports so they can be remapped if necessary
+#define PSerial Serial
+#define PSerial1 Serial1
+// SERIAL is always enabled SERIAL1 and SERIAL4 are optional
+#define HAL_SERIAL1_ENABLED
+#if defined(__MK64FX512__) || defined(__MK66FX1M0__)
+#define PSerial4 Serial4
+// SERIAL is always enabled SERIAL1 and SERIAL4 are optional
+#define HAL_SERIAL4_ENABLED
+#endif
+
 #include <EEPROM.h>
 
 // Fast port writing help

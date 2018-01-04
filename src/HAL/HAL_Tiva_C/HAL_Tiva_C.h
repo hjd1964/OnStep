@@ -1,5 +1,16 @@
 #define __ARM_TI_TM4C__
 
+// New symbols for the Serial ports so they can be remapped if necessary
+#if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
+#define PSerial Serial
+#define PSerial1 Serial1
+#elif defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+#define PSerial Serial1
+#define PSerial1 Serial7
+#endif
+// SERIAL is always enabled SERIAL1 and SERIAL4 are optional
+#define HAL_SERIAL1_ENABLED
+
 #if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
 // no pre-scaling of timers on Tiva Launchpads
 #define F_BUS SysCtlClockGet()

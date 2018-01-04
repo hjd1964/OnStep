@@ -15,13 +15,15 @@ char command[3];
 char parameter[25];
 boolean commandError = false;
 boolean quietReply   = false;
-cb cmd;  // serial
-cb cmd1; // serial1
-#ifdef SER4_AVAILABLE
-cb cmd4; // serial4
+cb cmd;  // the first Serial is always enabled
+#ifdef HAL_SERIAL1_ENABLED
+cb cmd1;
+#endif
+#ifdef HAL_SERIAL4_ENABLED
+cb cmd4;
 #endif
 char replyx[50]="";
-cb cmdx;  // serialX
+cb cmdx; // virtual command channel for internal use
 
 #ifdef FOCUSER1_ON
 char primaryFocuser = 'F';
@@ -37,19 +39,31 @@ void processCommands() {
 
     // accumulate the command
     if ((PSerial.available()>0) && (!cmd.ready())) cmd.add(PSerial.read());
+#ifdef HAL_SERIAL1_ENABLED
     if ((PSerial1.available()>0) && (!cmd1.ready())) cmd1.add(PSerial1.read());
-#ifdef SER4_AVAILABLE
-    if ((Serial4.available()>0) && (!cmd4.ready())) cmd4.add(Serial4.read());
+#endif
+#ifdef HAL_SERIAL4_ENABLED
+    if ((PSerial4.available()>0) && (!cmd4.ready())) cmd4.add(Serial4.read());
 #endif
 
     // send any reply
-    if (PSerial.transmit() || PSerial1.transmit()) return;
+    #ifdef HAL_SERIAL_TRANSMIT
+    if (PSerial.transmit()) return;
+    #ifdef PSerial1
+    if (PSerial1.transmit()) return;
+    #endif
+    #ifdef PSerial4
+    if (PSerial4.transmit()) return;
+    #endif
+    #endif
 
     // if a command is ready, process it
     Command process_command = COMMAND_NONE;
     if (cmd.ready()) { strcpy(command,cmd.getCmd()); strcpy(parameter,cmd.getParameter()); cmd.flush(); process_command=COMMAND_SERIAL; }
+#ifdef HAL_SERIAL1_ENABLED
     else if (cmd1.ready()) { strcpy(command,cmd1.getCmd()); strcpy(parameter,cmd1.getParameter()); cmd1.flush(); process_command=COMMAND_SERIAL1; }
-#ifdef SER4_AVAILABLE
+#endif
+#ifdef HAL_SERIAL4_ENABLED
     else if (cmd4.ready()) { strcpy(command,cmd4.getCmd()); strcpy(parameter,cmd4.getParameter()); cmd4.flush(); process_command=COMMAND_SERIAL4; }
 #endif
     else if (cmdx.ready()) { strcpy(command,cmdx.getCmd()); strcpy(parameter,cmdx.getParameter()); cmdx.flush(); process_command=COMMAND_SERIALX; }
@@ -1248,16 +1262,30 @@ void processCommands() {
         i=(int)(parameter[0]-'0');
         if ((i>=0) && (i<10)) {
           if (process_command==COMMAND_SERIAL) {
-            PSerial.print("1"); while (PSerial.transmit()); delay(50); PSerial.begin(baudRate[i]);
+            PSerial.print("1"); 
+            #ifdef HAL_SERIAL_TRANSMIT
+            while (PSerial.transmit()); 
+            #endif
+            delay(50); PSerial.begin(baudRate[i]);
             quietReply=true; 
+#ifdef HAL_SERIAL1_ENABLED
           } else
           if (process_command==COMMAND_SERIAL1) {
-            PSerial1.print("1"); while (PSerial1.transmit()); delay(50); PSerial1.begin(baudRate[i]); 
-            quietReply=true; 
-#ifdef SER4_AVAILABLE
+            PSerial1.print("1"); 
+            #ifdef HAL_SERIAL_TRANSMIT
+            while (PSerial1.transmit()); 
+            #endif
+            delay(50); PSerial1.begin(baudRate[i]); 
+            quietReply=true;
+#endif
+#ifdef HAL_SERIAL4_ENABLED
           } else
           if (process_command==COMMAND_SERIAL4) {
-            Serial4.print("1"); delay(50); Serial4.begin(baudRate[i]);
+            PSerial4.print("1"); 
+            #ifdef HAL_SERIAL_TRANSMIT
+            while (PSerial4.transmit()); 
+            #endif
+            delay(50); PSerial4.begin(baudRate[i]);
             quietReply=true; 
 #endif
           } else commandError=true;
@@ -1772,22 +1800,24 @@ void processCommands() {
           PSerial.print(reply);
         } 
   
+#ifdef HAL_SERIAL1_ENABLED
         if (process_command==COMMAND_SERIAL1) {
           if (cmd1.checksum) checksum(reply);
           if (!supress_frame) strcat(reply,"#");
           PSerial1.print(reply);
         }
+#endif
 
-#ifdef SER4_AVAILABLE
+#ifdef HAL_SERIAL4_ENABLED
         if (process_command==COMMAND_SERIAL4) {
           if (cmd4.checksum) checksum(reply);
           if (!supress_frame) strcat(reply,"#");
-          Serial4.print(reply);
+          PSerial4.print(reply);
         }
 #endif
 
         if (process_command==COMMAND_SERIALX) {
-          if (cmd1.checksum) checksum(reply);
+          if (cmdx.checksum) checksum(reply);
           if (!supress_frame) strcat(reply,"#");
           strcpy(replyx,reply);
         }

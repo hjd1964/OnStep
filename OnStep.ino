@@ -62,7 +62,7 @@
 #include "errno.h"
 #include "math.h"
 #include "FPoint.h"
-#include "Serial.h"
+#include "SoftSPI.h"
 #include "Library.h"
 #include "Align.h"
 #include "Command.h"
@@ -115,17 +115,19 @@ void setup() {
   Init_Start_Timers();
 
   // get ready for serial communications
-  PSerial.begin(9600); // for Tiva TM4C the serial is redirected to serial5 in serial.ino file
+  PSerial.begin(9600);
+#ifdef HAL_SERIAL1_ENABLED
 #ifdef SERIAL1_BAUD_DEFAULT
   PSerial1.begin(SERIAL1_BAUD_DEFAULT);
 #else
   PSerial1.begin(9600);
 #endif
-#ifdef SER4_AVAILABLE
+#endif
+#ifdef HAL_SERIAL4_ENABLED
 #ifdef SERIAL4_BAUD_DEFAULT
-  Serial4.begin(SERIAL4_BAUD_DEFAULT);
+  PSerial4.begin(SERIAL4_BAUD_DEFAULT);
 #else
-  Serial4.begin(9600);
+  PSerial4.begin(9600);
 #endif
 #endif
  

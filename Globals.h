@@ -276,8 +276,6 @@ boolean homeMount        = false;
 #define BAUD 9600
 // serial speed
 unsigned long baudRate[10] = {115200,56700,38400,28800,19200,14400,9600,4800,2400,1200};
-pserial PSerial;
-pserial1 PSerial1;
 
 // Guide command ------------------------------------------------------------------------------------------------------------
 #define GuideRate1x        2

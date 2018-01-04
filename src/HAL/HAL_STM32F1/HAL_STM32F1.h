@@ -1,3 +1,9 @@
+// New symbols for the Serial ports so they can be remapped if necessary
+#define PSerial Serial
+#define PSerial1 Serial1
+// SERIAL is always enabled SERIAL1 and SERIAL4 are optional
+#define HAL_SERIAL1_ENABLED
+
 // We define a more generic symbol, in case more STM32 boards based on different lines are supported
 #define __ARM_STM32__
 
