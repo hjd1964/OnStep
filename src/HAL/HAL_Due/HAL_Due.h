@@ -4,7 +4,7 @@
 // __SAM3X8E__
 
 // OnStep needs EEPROM, the DUE doesn't have it and the flash eeprom libraries are limited so use an I2C 
-#include "..\HAL_24LC256.h"
+#include "../drivers/HAL_24LC256.h"
 
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
 #define PSerial Serial
