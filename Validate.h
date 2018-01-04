@@ -94,6 +94,10 @@
   #if AXIS1_STEPPING_SIDEREAL > 128 || AXIS2_STEPPING_SIDEREAL > 128
     #error "The configured stepper driver model does not support stepping over 128"
   #endif
+#elif STEPPER_DRIVER_MODEL == TMC2XXX
+  #if AXIS1_STEPPING_SIDEREAL > 16 || AXIS2_STEPPING_SIDEREAL > 16
+    #error "The configured stepper driver model does not support stepping over 128"
+  #endif
 #else
  #error "No stepper driver model configured!"
 #endif
