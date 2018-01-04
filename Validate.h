@@ -19,16 +19,27 @@
 #endif
 
 #if !defined(FOCUSER1_ON) && defined(FOCUSER2_ON)
-#error "Focuser2 can't be enabled without first enabling Focuser1"
+  #error "Focuser2 can't be enabled without first enabling Focuser1"
 #endif
 
 #if defined(MaxPCB) || defined(MiniPCB)
 #if defined(RETICULE_LED_PINS) && (defined(STATUS_LED_PINS_ON) || defined(STATUS_LED_PINS))
-#error "You can't have the Illuminated Reticule and Status2 LEDs both enabled in this configuration."
+  #error "You can't have the Illuminated Reticule and Status2 LEDs both enabled in this configuration."
 #endif
 #endif
 
-// Figure out how many align star are allowed for the configuration
+// -----------------------------------------------------------------------------------
+// Setup defaults
+
+// set serial port baud rate if not done so already
+#ifndef SERIAL1_BAUD_DEFAULT
+  #define SERIAL1_BAUD_DEFAULT 9600
+#endif
+#ifndef SERIAL4_BAUD_DEFAULT
+  #define SERIAL4_BAUD_DEFAULT 9600
+#endif
+
+// figure out how many align star are allowed for the configuration
 #ifndef ALIGN_GOTOASSIST_ON
   #if defined(MOUNT_TYPE_GEM)
   #define MAX_NUM_ALIGN_STARS '3'

@@ -117,18 +117,10 @@ void setup() {
   // get ready for serial communications
   PSerial.begin(9600);
 #ifdef HAL_SERIAL1_ENABLED
-#ifdef SERIAL1_BAUD_DEFAULT
   PSerial1.begin(SERIAL1_BAUD_DEFAULT);
-#else
-  PSerial1.begin(9600);
-#endif
 #endif
 #ifdef HAL_SERIAL4_ENABLED
-#ifdef SERIAL4_BAUD_DEFAULT
   PSerial4.begin(SERIAL4_BAUD_DEFAULT);
-#else
-  PSerial4.begin(9600);
-#endif
 #endif
  
   // autostart tracking
