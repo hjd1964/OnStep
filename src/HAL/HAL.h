@@ -47,6 +47,10 @@
 
   #include "HAL_STM32F1/HAL_STM32F1.h"
 
+#elif defined(__SAM3X8E__)
+  // Arduino Due
+  #include "HAL_Due/HAL_Due.h"
+
 #else
   #error "Unsupported Platform! If this is a new platform, it needs the appropriate entries in the HAL directory."
 #endif

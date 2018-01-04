@@ -1,7 +1,7 @@
 // -------------------------------------------------------------------------------------------------
-// Pin map for OnStep using RAMPS 1.4 Shield (Arduino Mega2560)
+// Pin map for OnStep using RAMPS 1.4 Shield (Arduino Mega2560 or Arduino DUE)
 
-#if defined(__AVR_ATmega2560__)
+#if defined(__AVR_ATmega2560__) || defined(__SAM3X8E__)
 
 // The PEC index sense is a 5V logic input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
 #define PecPin        57    // RAMPS AUX1, A-OUT (1=+5V, 2=GND, 3=PEC)
