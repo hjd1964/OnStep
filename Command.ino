@@ -43,7 +43,7 @@ void processCommands() {
     if ((PSerial1.available()>0) && (!cmd1.ready())) cmd1.add(PSerial1.read());
 #endif
 #ifdef HAL_SERIAL4_ENABLED
-    if ((PSerial4.available()>0) && (!cmd4.ready())) cmd4.add(Serial4.read());
+    if ((PSerial4.available()>0) && (!cmd4.ready())) cmd4.add(PSerial4.read());
 #endif
 
     // send any reply
