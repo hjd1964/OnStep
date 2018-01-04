@@ -82,4 +82,20 @@
 #define AXIS2_STEP_GOTO 1
 #endif
 
+#if STEPPER_DRIVER_MODEL == A4988
+  #if AXIS1_STEPPING_SIDEREAL > 16 || AXIS2_STEPPING_SIDEREAL > 16
+    #error "The configured stepper driver model does not support stepping over 16"
+  #endif
+#endif
+
+#if STEPPER_DRIVER_MODEL == DRV8825
+  #if AXIS1_STEPPING_SIDEREAL > 32 || AXIS2_STEPPING_SIDEREAL > 32
+    #error "The configured stepper driver model does not support stepping over 32"
+  #endif
+#endif
+#if STEPPER_DRIVER_MODEL == LV8729
+  #if AXIS1_STEPPING_SIDEREAL > 128 || AXIS2_STEPPING_SIDEREAL > 128
+    #error "The configured stepper driver model does not support stepping over 128"
+  #endif
+#endif
 
