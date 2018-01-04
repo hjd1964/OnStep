@@ -5,9 +5,6 @@
 
 #include <EEPROM.h>
 
-// We derive the F_BUS variable from the actual CPU frequency of the selected board.
-#define F_BUS F_CPU
-
 #include <HardwareTimer.h>
 
 // Get this library from https://github.com/watterott/Arduino-Libs/archive/master.zip
@@ -28,6 +25,9 @@
 
 //--------------------------------------------------------------------------------------------------
 // Initialize timers
+
+// frequency compensation (F_COMP/1000000.0) for adjusting microseconds to timer counts
+#define F_COMP 1000000.0
 
 // initialised here and not in timer.ino
 void TIMER1_COMPA_vect(void);
