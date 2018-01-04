@@ -15,7 +15,7 @@
  *
 */
 
-#define Ramps14_ON   //  <- turn _ON to use this configuration
+#define Ramps14_OFF   //  <- turn _ON to use this configuration
 
 #ifdef Ramps14_ON
 // -------------------------------------------------------------------------------------------------------------------------
