@@ -100,7 +100,7 @@
 #define MaxRate                   96 // this is the minimum number of micro-seconds between micro-steps
                                      // minimum* (fastest goto) is around 32 (Mega2560,) 16 (Teensy3.2,) 12 (Teensy3.5,) 8 (Teensy3.6,) default=96 higher is ok
                                      // too low and OnStep communicates slowly and/or freezes as the motor timers use up all the MCU time
-                                     // * = minimum can be lower, when both AXIS1/AXIS2_MODE_GOTO are used by AXIS1/AXIS2_STEP_GOTO times
+                                     // * = minimum can be lower, when both AXIS1/AXIS2_STEPPING_SLEW are used by AXIS1/AXIS2_STEP_GOTO times
                                      
 #define DegreesForAcceleration   5.0 // approximate number of degrees for full acceleration or deceleration: higher values=longer acceleration/deceleration
                                      // Default=5.0, too low (about <1) can cause gotos to never end if micro-step mode switching is enabled.
@@ -157,7 +157,7 @@
 
 // Stepper driver Mode control
 // M0, M1, and M2 are on Pins 22,23, and 24 for RA (Teensy3.x Pins 13,14,15.)  M0, M1, M2 are on Pins 27,28,29 for Dec (Teensy3.x Pins 18,19,20.)
-// values 0 to 7 (0b000 to 111): for example "#define AXIS1_MODE 4" is the same as "#define AXIS1_MODE 0b100" which sets M2 to HIGH, M1 to LOW, and M0 to LOW
+// values 0 to 7 (0b000 to 111): for example "#define AXIS1_STEPPING_SIDEREAL 32" is the same as "#define AXIS1_MODE 0b100" which sets M2 to HIGH, M1 to LOW, and M0 to LOW
 //                                                                                                      / | \                  (1)         (0)            (0)
 //                                                                                                    M2  M1 M0
 // DRV8825 or A4988 or RAPS128:
@@ -171,12 +171,28 @@
 // 16x spreadCycle: CFG1 can be wired to GND (LOW) or M0 (with AXISn_MODE 0).  CFG2 should be OPEN*.  
 // 4x  spreadCycle: CFG2 should be OPEN*.  CFG2 can be wired to Vcc (HIGH) or M1 (with AXISn_MODE 2).
 // * = For a pin to be considered OPEN it must be electrically disconnected (not wired in.)
+
+// -------------------
+// Select your stepper driver model, valid values are: 
 //
-#define AXIS1_MODE_OFF               // programs the RA/Az uStep mode M0/M1/M2, optional and default _OFF.
-#define AXIS1_MODE_GOTO_OFF          // programs the RA/Az uStep mode M0/M1/M2, used during gotos, optional and default _OFF.
+// A4988      (up to 1/16 microsteps)
+// DRV8825    (up to 1/32 microsteps)
+// LV8729     (up to 1/128 microsteps0
+// TMC2xxx    (up to 1/16, but interpolates to 1/256)
+#define STEPPER_DRIVER_MODEL DRV8825
+
+// Axis1 (RA/Alt): What microsteps when the scope is doing sidereal tracking?
+// This must match what you calculated in the spreadsheet
+#define AXIS1_STEPPING_SIDEREAL 16
+
+// What microsteps when slewing (i.e. GOTO operations)?
+#define AXIS1_STEPPING_SLEW     1
+
+// Same as above for Axis2 (DEC/Az)
+#define AXIS2_STEPPING_SIDEREAL 16
+#define AXIS2_STEPPING_SLEW     1
+
 #define AXIS1_STEP_GOTO 1            // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
-#define AXIS2_MODE_OFF               // programs the Dec/Alt uStep mode M0/M1/M2, optional and default _OFF.
-#define AXIS2_MODE_GOTO_OFF          // programs the Dec/Alt uStep mode M0/M1/M2, used during gotos, optional and default _OFF.
 #define AXIS2_STEP_GOTO 1            // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
 #define MODE_SWITCH_BEFORE_SLEW_OFF  // _ON for _MODE and _MODE_GOTO settings to start/stop just before/after the slew, otherwise they are active during the slew at <128uS/step)
 

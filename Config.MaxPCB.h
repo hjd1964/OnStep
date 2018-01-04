@@ -179,11 +179,27 @@
 // Another option allows setting 50% power while tracking (TMC_LOWPWR.)  As above, with this option on too:
 // AXIS1_MODE (3|TMC_STEALTHCHOP|TMC_LOWPWR)
 //
-#define AXIS1_MODE_OFF               // programs the RA/Az uStep mode M0/M1/M2, optional and default _OFF.
-#define AXIS1_MODE_GOTO_OFF          // programs the RA/Az uStep mode M0/M1/M2, used during gotos, optional and default _OFF.
+// -------------------
+// Select your stepper driver model, valid values are: 
+//
+// A4988      (up to 1/16 microsteps)
+// DRV8825    (up to 1/32 microsteps)
+// LV8729     (up to 1/128 microsteps0
+// TMC2xxx    (up to 1/16, but interpolates to 1/256)
+#define STEPPER_DRIVER_MODEL DRV8825
+
+// Axis1 (RA/Alt): What microsteps when the scope is doing sidereal tracking?
+// This must match what you calculated in the spreadsheet
+#define AXIS1_STEPPING_SIDEREAL 16
+
+// What microsteps when slewing (i.e. GOTO operations)?
+#define AXIS1_STEPPING_SLEW     1
+
+// Same as above for Axis2 (DEC/Az)
+#define AXIS2_STEPPING_SIDEREAL 16
+#define AXIS2_STEPPING_SLEW     1
+
 #define AXIS1_STEP_GOTO 1            // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
-#define AXIS2_MODE_OFF               // programs the Dec/Alt uStep mode M0/M1/M2, optional and default _OFF.
-#define AXIS2_MODE_GOTO_OFF          // programs the Dec/Alt uStep mode M0/M1/M2, used during gotos, optional and default _OFF.
 #define AXIS2_STEP_GOTO 1            // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
 #define MODE_SWITCH_BEFORE_SLEW_OFF  // _ON (or _SPI) for _MODE and _MODE_GOTO settings to start/stop just before/after the slew, otherwise they are active during the slew at <128uS/step speeds
                                      // _SPI as above but uses SPI (on M0/M1/M2/Aux) to do the switching (TMC2130.)  Uses Pins 18 (Aux1) and 5 (Aux2,) choose only one feature on Aux1/2.
