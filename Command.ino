@@ -47,15 +47,15 @@ void processCommands() {
 #endif
 
     // send any reply
-    #ifdef HAL_SERIAL_TRANSMIT
+#ifdef HAL_SERIAL_TRANSMIT
     if (PSerial.transmit()) return;
-    #ifdef PSerial1
+  #ifdef HAL_SERIAL1_ENABLED
     if (PSerial1.transmit()) return;
-    #endif
-    #ifdef PSerial4
+  #endif
+  #ifdef HAL_SERIAL4_ENABLED
     if (PSerial4.transmit()) return;
-    #endif
-    #endif
+  #endif
+#endif
 
     // if a command is ready, process it
     Command process_command = COMMAND_NONE;
