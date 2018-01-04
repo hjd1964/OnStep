@@ -52,6 +52,9 @@
 //--------------------------------------------------------------------------------------------------
 // Initialize timers
 
+// frequency compensation (F_COMP/1000000.0) for adjusting microseconds to timer counts
+#define F_COMP F_BUS
+
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
   // Due to a bug we set the frequency manually on initialization
   uint32_t g_ui32SysClock = SysCtlClockFreqSet((SYSCTL_XTAL_25MHZ | SYSCTL_OSC_MAIN | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), F_BUS);
@@ -138,8 +141,8 @@ void HAL_Init_Timers_Motor() {
 
   // *
 
-  TimerLoadSet(Timer3_base, TIMER_A, (int) (F_BUS / 1000000 * 128 * 0.0625));
-  TimerLoadSet(Timer4_base, TIMER_A, (int) (F_BUS / 1000000 * 128 * 0.0625));
+  TimerLoadSet(Timer3_base, TIMER_A, (int) (F_COMP / 1000000 * 128 * 0.0625));
+  TimerLoadSet(Timer4_base, TIMER_A, (int) (F_COMP / 1000000 * 128 * 0.0625));
 
   // Start Timer 2A and 3A
   TimerEnable(Timer3_base, TIMER_A);
@@ -155,13 +158,14 @@ void HAL_Init_Timers_Motor() {
 
 #define ISR(f) void f (void)
 void TIMER1_COMPA_vect(void);
+
 void Timer1SetInterval(long iv, double rateRatio) {
   iv=round(((double)iv)/rateRatio);
-  TimerLoadSet(Timer1_base, TIMER_A, (int)(F_BUS/1000000 * iv * 0.0625));
+  TimerLoadSet(Timer1_base, TIMER_A, (int)(F_COMP/1000000 * iv * 0.0625));
 }
 
 //--------------------------------------------------------------------------------------------------
-// Quickly reprogram the interval (in microseconds) for the motor timers, must work from within the motor ISR timers
+// Quickly reprogram the interval (in microseconds*(F_COMP/1000000.0)) for the motor timers, must work from within the motor ISR timers
 
 void QuickSetIntervalAxis1(uint32_t r) {
   TimerLoadSet(Timer3_base, TIMER_A, r);

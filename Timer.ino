@@ -55,7 +55,7 @@ void Timer3SetInterval(long iv) {
 #else
   // 4.194 * 32 = 134.21s
   uint32_t i=iv; uint16_t t=1; while (iv>65536L*1024L) { t++; iv=i/t; if (t==32) { iv=65535L*1024L; break; } }
-  cli(); nextAxis1Rate=(F_BUS/1000000) * (iv*0.0625) * 0.5 - 1; t3rep=t; fastAxis1=(t3rep==1); sei();
+  cli(); nextAxis1Rate=((F_COMP/1000000.0) * (iv*0.0625) * 0.5 - 1.0); t3rep=t; fastAxis1=(t3rep==1); sei();
 #endif
 }
 
@@ -75,7 +75,7 @@ void Timer4SetInterval(long iv) {
 #else
   // 4.194 * 32 = 134.21s
   uint32_t i=iv; uint16_t t=1; while (iv>65536L*1024L) { t++; iv=i/t; if (t==32) { iv=65535L*1024L; break; } }
-  cli(); nextAxis2Rate=(F_BUS/1000000) * (iv*0.0625) * 0.5 - 1; t4rep=t; fastAxis2=(t4rep==1); sei();
+  cli(); nextAxis2Rate=((F_COMP/1000000.0) * (iv*0.0625) * 0.5 - 1.0); t4rep=t; fastAxis2=(t4rep==1); sei();
 #endif
 }
 

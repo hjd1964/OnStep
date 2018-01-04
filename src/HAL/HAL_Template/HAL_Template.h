@@ -13,6 +13,9 @@
 //--------------------------------------------------------------------------------------------------
 // Initialize timers
 
+// frequency compensation (F_COMP/1000000.0) for adjusting microseconds to timer counts
+#define F_COMP 1000000
+
 #define ISR(f) void f (void)
 void TIMER1_COMPA_vect(void);  // Sidereal timer
 void TIMER3_COMPA_vect(void);  // Axis1 RA/Azm timer
@@ -35,7 +38,7 @@ void Timer1SetInterval(long iv, double rateRatio) {
 }
 
 //--------------------------------------------------------------------------------------------------
-// Quickly reprogram the interval (in microseconds) for the motor timers, must work from within the motor ISR timers
+// Quickly reprogram the interval (in microseconds*(F_COMP/1000000.0)) for the motor timers, must work from within the motor ISR timers
 
 void QuickSetIntervalAxis1(uint32_t r) {
 }

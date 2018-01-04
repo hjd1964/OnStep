@@ -19,6 +19,9 @@
 //--------------------------------------------------------------------------------------------------
 // Initialize timers
 
+// frequency compensation (F_COMP/1000000.0) for adjusting microseconds to timer counts
+#define F_COMP F_BUS
+
 IntervalTimer itimer3;
 void TIMER3_COMPA_vect(void);
 
@@ -62,7 +65,7 @@ void Timer1SetInterval(long iv, double rateRatio) {
 }
 
 //--------------------------------------------------------------------------------------------------
-// Quickly reprogram the interval (in microseconds) for the motor timers, must work from within the motor ISR timers
+// Quickly reprogram the interval (in microseconds*(F_COMP/1000000.0)) for the motor timers, must work from within the motor ISR timers
 
 void QuickSetIntervalAxis1(uint32_t r) {
   PIT_LDVAL1=r;
