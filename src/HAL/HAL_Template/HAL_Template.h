@@ -13,6 +13,13 @@
 //--------------------------------------------------------------------------------------------------
 // Initialize timers
 
+#define ISR(f) void f (void)
+void TIMER1_COMPA_vect(void);  // Sidereal timer
+void TIMER3_COMPA_vect(void);  // Axis1 RA/Azm timer
+void TIMER4_COMPA_vect(void);  // Axis2 DEC/Alt timer
+
+// if possible run TIMER3 and TIMER4 at the highest priority level with everything else below
+
 // Init sidereal clock timer
 void HAL_Init_Timer_Sidereal() {
 }
@@ -23,9 +30,6 @@ void HAL_Init_Timers_Motor() {
 
 //--------------------------------------------------------------------------------------------------
 // Set timer1 to interval (in microseconds*16), for the 1/100 second sidereal timer
-
-#define ISR(f) void f (void)
-void TIMER1_COMPA_vect(void);
 
 void Timer1SetInterval(long iv, double rateRatio) {
 }
