@@ -37,12 +37,13 @@ extern void SiderealClockSetInterval (long int);
 // Init sidereal clock timer
 void HAL_Init_Timer_Sidereal() {
   Timer5.attachInterrupt(TIMER1_COMPA_vect);
+  SiderealClockSetInterval(siderealInterval);
 }
 
 // Init Axis1 and Axis2 motor timers and set their priorities
 void HAL_Init_Timers_Motor() {
-  Timer3.attachInterrupt(TIMER3_COMPA_vect);
-  Timer4.attachInterrupt(TIMER4_COMPA_vect);
+  Timer3.attachInterrupt(TIMER3_COMPA_vect).start(150); // give 0.15ms before the timers fire (and update to the correct rate)
+  Timer4.attachInterrupt(TIMER4_COMPA_vect).start(150);
 }
 
 //--------------------------------------------------------------------------------------------------
