@@ -461,3 +461,42 @@ void DisableStepperDrivers() {
   }
 }
 
+// Translate the human readable microsteps in the configuration 
+// to bit settings 
+unsigned int TranslateSteppingMode(int Mode) {
+  unsigned int SteppingMode;
+  
+  switch(Mode) {
+    case 1:
+      SteppingMode = 0b000;
+      break;
+    case 2:
+      SteppingMode = 0b001;
+      break;
+    case 4:
+      SteppingMode = 0b010;
+      break;
+    case 8:
+      SteppingMode = 0b011;
+      break;
+    case 16:
+      SteppingMode = 0b100;
+      break;
+    case 32:
+      SteppingMode = 0b101;
+      break;
+    case 64:
+      SteppingMode = 0b110;
+      break;
+    case 128:
+      SteppingMode = 0b111;
+      break;
+    default:
+      // Nothing entered? Should we default to a safe 16?
+      SteppingMode = 0b100;
+      break;
+  }
+  return SteppingMode;
+}
+
+

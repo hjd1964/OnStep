@@ -118,6 +118,9 @@ volatile long stepAxis1=1;
 #define stepAxis1 1
 #endif
 
+unsigned int Axis1SteppingMode;
+unsigned int Axis2SteppingMode;
+
 volatile long posAxis2   = 90L*(long)StepsPerDegreeAxis2;// declination position in steps
 long trueAxis2           = 90L*(long)StepsPerDegreeAxis2;// correction to above for motor shaft position steps
 volatile long startAxis2 = 90L*(long)StepsPerDegreeAxis2;// declination of goto start position in steps

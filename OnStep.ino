@@ -88,6 +88,10 @@ void setup() {
   // set initial values for some variables
   Init_Startup_Values();
 
+  // Translate stepping modes
+  Axis1SteppingMode = TranslateSteppingMode(AXIS1_STEPPING_SIDEREAL);
+  Axis2SteppingMode = TranslateSteppingMode(AXIS2_STEPPING_SIDEREAL);
+
   // set pins for input/output as specified in Config.h and PinMap.h
   Init_Pins();
 
