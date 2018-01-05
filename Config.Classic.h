@@ -100,7 +100,7 @@
 #define MaxRate                   96 // this is the minimum number of micro-seconds between micro-steps
                                      // minimum* (fastest goto) is around 32 (Mega2560,) 16 (Teensy3.2,) 12 (Teensy3.5,) 8 (Teensy3.6,) default=96 higher is ok
                                      // too low and OnStep communicates slowly and/or freezes as the motor timers use up all the MCU time
-                                     // * = minimum can be lower, when both AXIS1/AXIS2_STEPPING_SLEW are used by AXIS1/AXIS2_STEP_GOTO times
+                                     // * = minimum can be lower, when both AXIS1/AXIS2_MICROSTEPS are used by AXIS1/AXIS2_STEP_GOTO times
                                      
 #define DegreesForAcceleration   5.0 // approximate number of degrees for full acceleration or deceleration: higher values=longer acceleration/deceleration
                                      // Default=5.0, too low (about <1) can cause gotos to never end if micro-step mode switching is enabled.
@@ -157,7 +157,7 @@
 
 // Stepper driver Mode control
 // M0, M1, and M2 are on Pins 22,23, and 24 for RA (Teensy3.x Pins 13,14,15.)  M0, M1, M2 are on Pins 27,28,29 for Dec (Teensy3.x Pins 18,19,20.)
-// values 0 to 7 (0b000 to 111): for example "#define AXIS1_STEPPING_SIDEREAL 32" is the same as "#define AXIS1_MODE 0b100" which sets M2 to HIGH, M1 to LOW, and M0 to LOW
+// values 0 to 7 (0b000 to 111): for example "#define AXIS1_MICROSTEPS 32" is the same as "#define AXIS1_MODE 0b100" which sets M2 to HIGH, M1 to LOW, and M0 to LOW
 //                                                                                                      / | \                  (1)         (0)            (0)
 //                                                                                                    M2  M1 M0
 // DRV8825 or A4988 or RAPS128:
