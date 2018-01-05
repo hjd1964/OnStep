@@ -147,6 +147,7 @@
 // An Align, Sync, or Un-Park will enable the drivers.  Adjust below if you need these pulled LOW to disable the drivers.
 #define AXIS1_DISABLED_HIGH
 #define AXIS2_DISABLED_HIGH
+
 // For equatorial mounts, _ON powers down the Declination axis when it's not being used to help lower power use.  During low rate guiding (<=1x) the axis stays enabled
 // for 10 minutes after any guide on either axis.  Otherwise, the Dec axis is disabled (powered off) 10 seconds after movement stops.
 #define AUTO_POWER_DOWN_AXIS2_OFF
