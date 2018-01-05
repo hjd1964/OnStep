@@ -209,7 +209,7 @@
 #define MaxAxis3                 180 // maximum allowed Axis3 rotator, default =  180
 
 // FOCUSER1 ---------------------------------------------------------------------------------------------------------------
-// Pads 31,32 = Step,Dir
+// Pins ?,? = Step,Dir
 #define FOCUSER1_OFF                 // enable or disable focuser feature, default=OFF
 #define MaxRateAxis4               8 // this is the minimum number of milli-seconds between micro-steps, default=8
 #define StepsPerMicrometerAxis4  0.5 // figure this out by testing or other means
@@ -219,7 +219,7 @@
 #define MaxAxis4                25.0 // maximum allowed Axis4 position in millimeters, default =  25.0
 
 // FOCUSER2 ---------------------------------------------------------------------------------------------------------------
-// Pads ?,? = Step,Dir (choose either this option or the rotator, not both)
+// Pins ?,? = Step,Dir (choose either this option or the rotator, not both)
 #define FOCUSER2_OFF                 // enable or disable focuser feature, default=OFF
 #define MaxRateAxis5               8 // this is the minimum number of milli-seconds between micro-steps, default=8
 #define StepsPerMicrometerAxis5  0.5 // figure this out by testing or other means
