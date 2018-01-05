@@ -1,5 +1,6 @@
 // -----------------------------------------------------------------------------------
 // Configuration for legacy OnStep "Alternate pin-map" (Mega2560)
+// *** this is for backwards compatability with older OnStep systems ***
 
 /*
  * For more information on setting OnStep up see http://www.stellarjourney.com/index.php?r=site/equipment_onstep and 
