@@ -139,28 +139,6 @@
 // for 10 minutes after any guide on either axis.  Otherwise, the Dec axis is disabled (powered off) 10 seconds after movement stops.
 #define AUTO_POWER_DOWN_AXIS2_OFF
 
-/* Stepper driver Mode control
-// M0, M1, and M2 are on Pins 25,27, and 29 for RA and Pins 34,32,30 for Dec.
-// values 0 to 7 (0b000 to 111): for example "#define AXIS1_MODE 4" is the same as "#define AXIS1_MODE 0b100" which sets M2 to HIGH, M1 to LOW, and M0 to LOW
-//                                                                                                      / | \
-//                                                                                                    M2  M1 M0
-// DRV8825 or A4988 or RAPS128:
-// use MODE_SWITCH_BEFORE_SLEW_OFF
-// micro-stepping modes: 5=32x, 4=16x, 3=8x, 2=4x, 1=2x, 0=1x (RAPS128 also supports 6=64x, 7=128x)
-//
-// SilentStepStick TMC2100/2130 configurations (M0 is CFG1, M1 is CFG2, M2 is CFG3):
-// use MODE_SWITCH_BEFORE_SLEW_ON
-// I recommend keeping CFG3 and CFG2 open (not connected) CFG1 can then be pulled low for 16x micro-stepping (256x intpol) in spreadCycle mode (0b110000 = 48 = OPEN/OPEN/OUTPUT, ignore/ignore/LOW)
-// or keep CFG3 and CFG1 open (not connected) and CFG2 can be pulled high for 4x micro-stepping (256x intpol) in spreadCycle mode (0b101010 = 42 = OPEN/OUTPUT/OPEN, ignore/HIGH/ignore)
-//
-// SilentStepStick TMC2130 SPI configurations:
-// use MODE_SWITCH_BEFORE_SLEW_SPI.  Default operation in spreadCycle and with 256x interpolation on:
-// AXISn_MODE and AXISn_MODE_GOTO can be set to 0-8 where 0=256x, 1=128x, 2=64x, 3=32x, 4=16x, 5=8x, 6=4x, 7=2x, 8=1x
-// You can also turn stealthChop on (TMC_STEALTHCHOP) and/or disable 256x interpolation (TMC_NINTPOL.) For example 32x mode with stealthChop:
-// AXIS1_MODE (3|TMC_STEALTHCHOP)
-// Another option allows setting 50% power while tracking (TMC_LOWPWR.)  As above, with this option on too:
-// AXIS1_MODE (3|TMC_STEALTHCHOP|TMC_LOWPWR)
-*/
 // -------------------
 // Select your stepper driver model, valid values are: 
 //

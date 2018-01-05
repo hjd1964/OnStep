@@ -155,23 +155,6 @@
 // for 10 minutes after any guide on either axis.  Otherwise, the Dec axis is disabled (powered off) 10 seconds after movement stops.
 #define AUTO_POWER_DOWN_AXIS2_OFF
 
-// Stepper driver Mode control
-// M0, M1, and M2 are on Pins 22,23, and 24 for RA (Teensy3.x Pins 13,14,15.)  M0, M1, M2 are on Pins 27,28,29 for Dec (Teensy3.x Pins 18,19,20.)
-// values 0 to 7 (0b000 to 111): for example "#define AXIS1_MICROSTEPS 32" is the same as "#define AXIS1_MODE 0b100" which sets M2 to HIGH, M1 to LOW, and M0 to LOW
-//                                                                                                      / | \                  (1)         (0)            (0)
-//                                                                                                    M2  M1 M0
-// DRV8825 or A4988 or RAPS128:
-// use MODE_SWITCH_BEFORE_SLEW_OFF
-// micro-stepping modes: 5=32x, 4=16x, 3=8x, 2=4x, 1=2x, 0=1x (RAPS128 also supports 6=64x, 7=128x)
-//
-// SilentStepStick TMC2100/2130 configurations (M0 is CFG1, M1 is CFG2, M2 is CFG3):
-// use MODE_SWITCH_BEFORE_SLEW_OFF.  CFG3 should always be OPEN*.  AXISn_MODE_GOTO_OFF is recommended so AXISn_STEP_GOTO would then be 1.
-// Some useful modes (all with 256x interpolation):
-// 16x stealthChop: CFG1 and CFG2 are both OPEN*.
-// 16x spreadCycle: CFG1 can be wired to GND (LOW) or M0 (with AXISn_MODE 0).  CFG2 should be OPEN*.  
-// 4x  spreadCycle: CFG2 should be OPEN*.  CFG2 can be wired to Vcc (HIGH) or M1 (with AXISn_MODE 2).
-// * = For a pin to be considered OPEN it must be electrically disconnected (not wired in.)
-
 // -------------------
 // Select your stepper driver model, valid values are: 
 //

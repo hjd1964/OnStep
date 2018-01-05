@@ -154,31 +154,6 @@
 // for 10 minutes after any guide on either axis.  Otherwise, the Dec axis is disabled (powered off) 10 seconds after movement stops.
 #define AUTO_POWER_DOWN_AXIS2_OFF
 
-// Stepper driver Mode control
-// M0, M1, and M2 are on Pins 15,16,17 for Axis1 (RA/Azm) and Pins 8,7,6 for Axis2 (Dec/Alt.)
-// values 0 to 7 (0b000 to 111): for example "#define AXIS1_MODE 4" is the same as "#define AXIS1_MODE 0b100" which sets M2 to HIGH, M1 to LOW, and M0 to LOW
-//                                                                                                      / | \                  (1)         (0)            (0)
-//                                                                                                    M2  M1 M0
-// DRV8825 or A4988 or RAPS128:
-// use MODE_SWITCH_BEFORE_SLEW_OFF
-// micro-stepping modes: 5=32x, 4=16x, 3=8x, 2=4x, 1=2x, 0=1x (RAPS128 also supports 6=64x, 7=128x)
-//
-// SilentStepStick TMC2100/2130 configurations (M0 is CFG1, M1 is CFG2, M2 is CFG3):
-// use MODE_SWITCH_BEFORE_SLEW_OFF.  CFG3 should always be OPEN*.  AXISn_MODE_GOTO_OFF is recommended so AXISn_STEP_GOTO would then be 1.
-// Some useful modes (all with 256x interpolation):
-// 16x stealthChop: CFG1 and CFG2 are both OPEN*.
-// 16x spreadCycle: CFG1 can be wired to GND (LOW) or M0 (with AXISn_MODE 0).  CFG2 should be OPEN*.  
-// 4x  spreadCycle: CFG2 should be OPEN*.  CFG2 can be wired to Vcc (HIGH) or M1 (with AXISn_MODE 2).
-// * = For a pin to be considered OPEN it must be electrically disconnected (not wired in.)
-//
-// SilentStepStick TMC2130 SPI configurations:
-// use MODE_SWITCH_BEFORE_SLEW_SPI.  Default operation in spreadCycle and with 256x interpolation on:
-// AXISn_MODE and AXISn_MODE_GOTO can be set to 0-8 where 0=256x, 1=128x, 2=64x, 3=32x, 4=16x, 5=8x, 6=4x, 7=2x, 8=1x
-// You can also turn stealthChop on (TMC_STEALTHCHOP) and/or disable 256x interpolation (TMC_NINTPOL.) For example 32x mode with stealthChop:
-// AXIS1_MODE (3|TMC_STEALTHCHOP)
-// Another option allows setting 50% power while tracking (TMC_LOWPWR.)  As above, with this option on too:
-// AXIS1_MODE (3|TMC_STEALTHCHOP|TMC_LOWPWR)
-//
 // -------------------
 // Select your stepper driver model, valid values are: 
 //
