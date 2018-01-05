@@ -1,7 +1,7 @@
 // -------------------------------------------------------------------------------------------------
 // Pin map for legacy OnStep Classic (Mega2560 or Teensy3.x)
 
-#if defined(__AVR_ATmega2560__) || defined(__ARM_Teensy3__)
+#if defined(__AVR_ATmega2560__)
 
 // The PEC index sense is a 5V logic input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
 #define PecPin         2
