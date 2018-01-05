@@ -82,6 +82,14 @@
 #define AXIS2_STEP_GOTO 1
 #endif
 
+#ifndef AXIS1_STEPPING_SIDEREAL
+  #error "AXIS1_STEPPING_SIDEREAL must be defined in your Config.xxx.h file!"
+#endif
+
+#ifndef AXIS2_STEPPING_SIDEREAL
+  #error "AXIS2_STEPPING_SIDEREAL must be defined in your Config.xxx.h file!"
+#endif
+
 #if STEPPER_DRIVER_MODEL == A4988
   #if AXIS1_STEPPING_SIDEREAL > 16 || AXIS2_STEPPING_SIDEREAL > 16
     #error "The configured stepper driver model does not support stepping over 16"
@@ -100,5 +108,21 @@
   #endif
 #else
  #error "No stepper driver model configured!"
+#endif
+
+#ifndef AXIS1_STEPPING_SLEW
+  #error "AXIS1_STEPPING_SLEW is not defined in your Config.xxx.h file!"
+#endif
+
+#ifndef AXIS2_STEPPING_SLEW
+  #error "AXIS2_STEPPING_SLEW is not defined in your Config.xxx.h file!"
+#endif
+
+#if AXIS1_STEPPING_SIDEREAL < AXIS1_STEPPING_SLEW
+  #error "AXIS1_STEPPING_SLEW must be equal to or greater than AXIS1_STEPPING_SIDEREAL"
+#endif
+
+#if AXIS2_STEPPING_SIDEREAL < AXIS2_STEPPING_SLEW
+  #error "AXIS2_STEPPING_SLEW must be equal to or greater than AXIS2_STEPPING_SIDEREAL"
 #endif
 
