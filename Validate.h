@@ -8,16 +8,16 @@
 #if defined(ALTERNATE_PINMAP_ON)
   #error "ALTERNATE_PINMAP_ON is an obsolete option, you can't use this configuration."
 #endif
-
+/*
 #if defined(MODE_SWITCH_BEFORE_SLEW_ON) || defined(MODE_SWITCH_BEFORE_SLEW_SPI)
-#if !defined(AXIS1_STEPPING_SIDEREAL) || !defined(AXIS1_STEPPING_SLEW)
-  #error "Config.xxx.h error: AXIS1_STEPPING_SIDEREAL and AXIS1_STEPPING_SLEW must be set to a valid value."
+#if !defined(AXIS1_MICROSTEPS)
+  #error "Config.xxx.h error: AXIS1_MICROSTEPS must be set to a valid value."
 #endif
-#if !defined(AXIS2_STEPPING_SIDEREAL) || !defined(AXIS2_STEPPING_SLEW)
-  #error "Config.xxx.h error: AXIS2_STEPPING_SIDEREAL and AXIS2_STEPPING_SLEW must be set to a valid value."
+#if !defined(AXIS2_MICROSTEPS)
+  #error "Config.xxx.h error: AXIS2_MICROSTEPS must be set to a valid value."
 #endif
 #endif
-
+*/
 #if !defined(FOCUSER1_ON) && defined(FOCUSER2_ON)
   #error "Focuser2 can't be enabled without first enabling Focuser1"
 #endif
@@ -82,49 +82,65 @@
 #define AXIS2_STEP_GOTO 1
 #endif
 
-#if !defined(Ramps14_ON)
-
-  #ifndef AXIS1_STEPPING_SIDEREAL
-    #error "AXIS1_STEPPING_SIDEREAL must be defined in your Config.xxx.h file!"
+#if defined(AXIS1_MODE) || defined(AXIS2_MODE) || defined(AXIS1_MODE_GOTO) || defined(AXIS2_MODE_GOTO)
+  // We will not use AXISn_MICROSTEPS, this preserves backward compatibility
+#elif defined(Ramps14_ON)
+  // Does not use AXISn_MICROSTEPS 
+#else
+  #ifndef AXIS1_MICROSTEPS
+    #error "AXIS1_MICROSTEPS must be defined in your Config.xxx.h file!"
   #endif
 
-  #ifndef AXIS2_STEPPING_SIDEREAL
-    #error "AXIS2_STEPPING_SIDEREAL must be defined in your Config.xxx.h file!"
+  #ifndef AXIS2_MICROSTEPS
+    #error "AXIS2_MICROSTEPS must be defined in your Config.xxx.h file!"
   #endif
 
-  #if STEPPER_DRIVER_MODEL == A4988
-    #if AXIS1_STEPPING_SIDEREAL > 16 || AXIS2_STEPPING_SIDEREAL > 16
-      #error "The configured stepper driver model does not support stepping over 16"
+  #if AXIS1_DRIVER_MODEL == A4988
+    #if AXIS1_MICROSTEPS > 16
+      #error "The configured stepper driver model for axis 1 does not support stepping over 16"
     #endif
-  #elif STEPPER_DRIVER_MODEL == DRV8825
-    #if AXIS1_STEPPING_SIDEREAL > 32 || AXIS2_STEPPING_SIDEREAL > 32
-      #error "The configured stepper driver model does not support stepping over 32"
+  #elif AXIS1_DRIVER_MODEL == DRV8825
+    #if AXIS1_MICROSTEPS > 32
+      #error "The configured stepper driver model for axis 1  does not support stepping over 32"
     #endif
-  #elif STEPPER_DRIVER_MODEL == LV8729
-    #if AXIS1_STEPPING_SIDEREAL > 128 || AXIS2_STEPPING_SIDEREAL > 128
-      #error "The configured stepper driver model does not support stepping over 128"
+  #elif AXIS1_DRIVER_MODEL == LV8729
+    #if AXIS1_MICROSTEPS > 128
+      #error "The configured stepper driver model for axis 1  does not support stepping over 128"
     #endif
-  #elif STEPPER_DRIVER_MODEL == TMC2XXX
-    #if AXIS1_STEPPING_SIDEREAL > 16 || AXIS2_STEPPING_SIDEREAL > 16
-      #error "The configured stepper driver model does not support stepping over 128"
+  #elif AXIS1_DRIVER_MODEL == TMC2130
+    #if AXIS1_MICROSTEPS > 256
+      #error "The configured stepper driver model for axis 1  does not support stepping over 256"
+    #endif
+  #elif AXIS1_DRIVER_MODEL == TMC2208
+    #if AXIS1_MICROSTEPS > 16
+      #error "The configured stepper driver model for axis 1  does not support stepping over 16"
     #endif
   #else
-    #error "No stepper driver model configured!"
+    #error "No stepper driver model configured for axis 1 !"
   #endif
 
-  #ifndef AXIS1_STEPPING_SLEW
-    #error "AXIS1_STEPPING_SLEW is not defined in your Config.xxx.h file!"
+  #if AXIS2_DRIVER_MODEL == A4988
+    #if AXIS2_MICROSTEPS > 16
+      #error "The configured stepper driver model for axis 1 does not support stepping over 16"
+    #endif
+  #elif AXIS2_DRIVER_MODEL == DRV8825
+    #if AXIS2_MICROSTEPS > 32
+      #error "The configured stepper driver model for axis 1  does not support stepping over 32"
+    #endif
+  #elif AXIS2_DRIVER_MODEL == LV8729
+    #if AXIS2_MICROSTEPS > 128
+      #error "The configured stepper driver model for axis 1  does not support stepping over 128"
+    #endif
+  #elif AXIS2_DRIVER_MODEL == TMC2130
+    #if AXIS2_MICROSTEPS > 256
+      #error "The configured stepper driver model for axis 1  does not support stepping over 256"
+    #endif
+  #elif AXIS2_DRIVER_MODEL == TMC2208
+    #if AXIS2_MICROSTEPS > 16
+      #error "The configured stepper driver model for axis 1  does not support stepping over 16"
+    #endif
+  #else
+    #error "No stepper driver model configured for axis 1 !"
   #endif
 
-  #ifndef AXIS2_STEPPING_SLEW
-    #error "AXIS2_STEPPING_SLEW is not defined in your Config.xxx.h file!"
-  #endif
-
-  #if AXIS1_STEPPING_SIDEREAL < AXIS1_STEPPING_SLEW
-    #error "AXIS1_STEPPING_SLEW must be equal to or greater than AXIS1_STEPPING_SIDEREAL"
-  #endif
-
-  #if AXIS2_STEPPING_SIDEREAL < AXIS2_STEPPING_SLEW
-    #error "AXIS2_STEPPING_SLEW must be equal to or greater than AXIS2_STEPPING_SIDEREAL"
-  #endif
 #endif

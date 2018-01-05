@@ -181,20 +181,18 @@
 //
 // A4988      (up to 1/16 microsteps)
 // DRV8825    (up to 1/32 microsteps)
-// LV8729     (up to 1/128 microsteps0
-// TMC2xxx    (up to 1/16, but interpolates to 1/256)
-#define STEPPER_DRIVER_MODEL DRV8825
+// LV8729     (up to 1/128 microsteps, use this for RAPS128)
+// TMC2208    (up to 1/16, but interpolates to 1/256)
+// TMC2130    (up to 1/256, but interpolates to 1/256)
+#define AXIS1_DRIVER_MODEL DRV8825
 
 // Axis1 (RA/Alt): What microsteps when the scope is doing sidereal tracking?
 // This must match what you calculated in the spreadsheet
-#define AXIS1_STEPPING_SIDEREAL 16
-
-// What microsteps when slewing (i.e. GOTO operations)?
-#define AXIS1_STEPPING_SLEW     1
+#define AXIS1_MICROSTEPS 16
 
 // Same as above for Axis2 (DEC/Az)
-#define AXIS2_STEPPING_SIDEREAL 16
-#define AXIS2_STEPPING_SLEW     1
+#define AXIS2_DRIVER_MODEL DRV8825
+#define AXIS2_MICROSTEPS 16
 
 #define AXIS1_STEP_GOTO 1           // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
 #define AXIS2_STEP_GOTO 1           // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4

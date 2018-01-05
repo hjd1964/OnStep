@@ -9,13 +9,13 @@ volatile boolean clearAxis2 = true;
 volatile boolean takeStepAxis2 = false;
 #endif
 
-#if defined(AXIS1_STEPPING_SIDEREAL) && defined(AXIS1_STEPPING_SLEW)
-volatile long modeAxis1_next=Axis1SteppingSidereal;
+#if defined(AXIS1_MODE) && defined(AXIS1_MODE_GOTO)
+volatile long modeAxis1_next=AXIS1_MODE;
 volatile boolean gotoModeAxis1=false;
 #endif
 
-#if defined(AXIS2_STEPPING_SIDEREAL) && defined(AXIS2_STEPPING_SLEW)
-volatile long modeAxis2_next=Axis2SteppingSidereal;
+#if defined(AXIS2_MODE) && defined(AXIS2_MODE_GOTO)
+volatile long modeAxis2_next=AXIS2_MODE;
 volatile boolean gotoModeAxis2=false;
 #endif
 
@@ -204,10 +204,10 @@ ISR(TIMER1_COMPA_vect)
   // trigger Goto step mode, rapid acceleration (low DegreesForAcceleration) can leave too little time
   // until the home position arrives to actually switch to tracking micro-step mode. the larger step size
   // then causes backlash compensation to activate which in-turn keeps goto micro-step mode from turning off
-  #if defined(AXIS1_STEPPING_SIDEREAL) && defined(AXIS1_STEPPING_SLEW) && !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
+  #if defined(AXIS1_MODE) && defined(AXIS1_MODE_GOTO) && !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
   gotoRateAxis1=(thisTimerRateAxis1<128*16L);   // activate <128us rate
   #endif
-  #if defined(AXIS2_STEPPING_SIDEREAL) && defined(AXIS2_STEPPING_SLEW) && !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
+  #if defined(AXIS2_MODE) && defined(AXIS2_MODE_GOTO) && !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
   gotoRateAxis2=(thisTimerRateAxis2<128*16L);   // activate <128us rate
   #endif
 
@@ -261,13 +261,13 @@ ISR(TIMER3_COMPA_vect)
     takeStepAxis1=false;
 #endif
 
-#if defined(AXIS1_STEPPING_SIDEREAL) && defined(AXIS1_STEPPING_SLEW) && !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
+#if defined(AXIS1_MODE) && defined(AXIS1_MODE_GOTO) && !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
   // switch micro-step mode
   if (gotoModeAxis1!=gotoRateAxis1) {
     // only when at an allowed position
     if (((posAxis1+blAxis1)-trueAxis1)%AXIS1_STEP_GOTO==0) {
       // switch mode
-      if (gotoModeAxis1) { stepAxis1=1; modeAxis1_next=Axis1SteppingSidereal; gotoModeAxis1=false; } else { stepAxis1=AXIS1_STEP_GOTO; modeAxis1_next=AXIS1_STEPPING_SLEW; gotoModeAxis1=true; }
+      if (gotoModeAxis1) { stepAxis1=1; modeAxis1_next=AXIS1_MODE; gotoModeAxis1=false; } else { stepAxis1=AXIS1_STEP_GOTO; modeAxis1_next=AXIS1_MODE_GOTO; gotoModeAxis1=true; }
       digitalWrite(Axis1_M0,(modeAxis1_next & 1));
       digitalWrite(Axis1_M1,(modeAxis1_next>>1 & 1));
       digitalWrite(Axis1_M2,(modeAxis1_next>>2 & 1));
@@ -330,13 +330,13 @@ ISR(TIMER4_COMPA_vect)
     takeStepAxis2=false;
 #endif
 
-#if defined(AXIS2_STEPPING_SIDEREAL) && defined(AXIS2_STEPPING_SLEW) && !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
+#if defined(AXIS2_MODE) && defined(AXIS2_MODE_GOTO) && !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
   // switch micro-step mode
   if (gotoModeAxis2!=gotoRateAxis2) {
     // only when at an allowed position
     if (((posAxis2+blAxis2)-trueAxis2)%AXIS2_STEP_GOTO==0) {
       // switch mode
-      if (gotoModeAxis2) { stepAxis2=1; modeAxis2_next=Axis2SteppingSidereal; gotoModeAxis2=false; } else { stepAxis2=AXIS2_STEP_GOTO; modeAxis2_next=AXIS2_STEPPING_SLEW; gotoModeAxis2=true; }
+      if (gotoModeAxis2) { stepAxis2=1; modeAxis2_next=AXIS2_MODE; gotoModeAxis2=false; } else { stepAxis2=AXIS2_STEP_GOTO; modeAxis2_next=AXIS2_MODE_GOTO; gotoModeAxis2=true; }
       digitalWrite(Axis2_M0,(modeAxis2_next & 1));
       digitalWrite(Axis2_M1,(modeAxis2_next>>1 & 1));
       digitalWrite(Axis2_M2,(modeAxis2_next>>2 & 1));
