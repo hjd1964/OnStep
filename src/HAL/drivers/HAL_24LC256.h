@@ -1,25 +1,35 @@
 // Support for 24LC256 I2C EEPROM
 
-#include <Wire.h>
+// The full EEPROM size causes problems
+//#define E2END 32767
+#define E2END 8191
 
-#define E2END 32767
+#include <Wire.h>
+#define PWire Wire
 
 class _eeprom {
 public:
   _eeprom() {
+    PWire.begin();
+    PWire.setClock(400000);
     lastWrite=millis();
   }
 
   void write(uint16_t address, uint8_t data)
   {
-    // wait for any prior write to complete
-    while ((millis()-lastWrite)<5) {};
+    if (!__firstCall) {
+      // wait for any prior write to complete
+      while ((int32_t)(millis()-lastWrite)<5) {};
+    } else {
+      __firstCall=false;
+    }
     
-    Wire.beginTransmission(80);
-    Wire.write((int)(address >> 8));   // msb
-    Wire.write((int)(address & 0xFF)); // lsb
-    Wire.write(data);
-    Wire.endTransmission();
+    PWire.beginTransmission(80);
+    PWire.write((int)(address >> 8));   // msb
+    PWire.write((int)(address & 0xFF)); // lsb
+    PWire.write(data);
+    PWire.endTransmission();
+
     lastWrite=millis();
   }
 
@@ -28,26 +38,30 @@ public:
     if (data!=read(address)) write(address,data);
   }
    
-  byte read(uint16_t address) 
+  uint8_t read(uint16_t address) 
   {
-    byte result = 0xFF;
-   
-    // wait for any prior write to complete
-    while ((millis()-lastWrite)<5) {};
+    uint8_t result = 0xFF;
 
-    Wire.beginTransmission(80);
-    Wire.write((int)(address >> 8));   // msb
-    Wire.write((int)(address & 0xFF)); // lsb
-    Wire.endTransmission();
+    if (!__firstCall) {
+      // wait for any prior write to complete
+      while ((int32_t)(millis()-lastWrite)<5) {};
+    } else {
+      __firstCall=false;
+    }
+
+    PWire.beginTransmission(80);
+    PWire.write((int)(address >> 8));   // msb
+    PWire.write((int)(address & 0xFF)); // lsb
+    PWire.endTransmission();
    
-    Wire.requestFrom(80,1);
-   
-    if (Wire.available()) result = Wire.read();
-   
+    PWire.requestFrom(80,1);
+    result = PWire.receive();
+    
     return result;
   }
 private:
   uint32_t lastWrite=0;
+  bool __firstCall=true;
 };
 
 _eeprom EEPROM;
