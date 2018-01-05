@@ -82,47 +82,49 @@
 #define AXIS2_STEP_GOTO 1
 #endif
 
-#ifndef AXIS1_STEPPING_SIDEREAL
-  #error "AXIS1_STEPPING_SIDEREAL must be defined in your Config.xxx.h file!"
-#endif
+#if !defined(Ramps14_ON)
 
-#ifndef AXIS2_STEPPING_SIDEREAL
-  #error "AXIS2_STEPPING_SIDEREAL must be defined in your Config.xxx.h file!"
-#endif
-
-#if STEPPER_DRIVER_MODEL == A4988
-  #if AXIS1_STEPPING_SIDEREAL > 16 || AXIS2_STEPPING_SIDEREAL > 16
-    #error "The configured stepper driver model does not support stepping over 16"
+  #ifndef AXIS1_STEPPING_SIDEREAL
+    #error "AXIS1_STEPPING_SIDEREAL must be defined in your Config.xxx.h file!"
   #endif
-#elif STEPPER_DRIVER_MODEL == DRV8825
-  #if AXIS1_STEPPING_SIDEREAL > 32 || AXIS2_STEPPING_SIDEREAL > 32
-    #error "The configured stepper driver model does not support stepping over 32"
+
+  #ifndef AXIS2_STEPPING_SIDEREAL
+    #error "AXIS2_STEPPING_SIDEREAL must be defined in your Config.xxx.h file!"
   #endif
-#elif STEPPER_DRIVER_MODEL == LV8729
-  #if AXIS1_STEPPING_SIDEREAL > 128 || AXIS2_STEPPING_SIDEREAL > 128
-    #error "The configured stepper driver model does not support stepping over 128"
+
+  #if STEPPER_DRIVER_MODEL == A4988
+    #if AXIS1_STEPPING_SIDEREAL > 16 || AXIS2_STEPPING_SIDEREAL > 16
+      #error "The configured stepper driver model does not support stepping over 16"
+    #endif
+  #elif STEPPER_DRIVER_MODEL == DRV8825
+    #if AXIS1_STEPPING_SIDEREAL > 32 || AXIS2_STEPPING_SIDEREAL > 32
+      #error "The configured stepper driver model does not support stepping over 32"
+    #endif
+  #elif STEPPER_DRIVER_MODEL == LV8729
+    #if AXIS1_STEPPING_SIDEREAL > 128 || AXIS2_STEPPING_SIDEREAL > 128
+      #error "The configured stepper driver model does not support stepping over 128"
+    #endif
+  #elif STEPPER_DRIVER_MODEL == TMC2XXX
+    #if AXIS1_STEPPING_SIDEREAL > 16 || AXIS2_STEPPING_SIDEREAL > 16
+      #error "The configured stepper driver model does not support stepping over 128"
+    #endif
+  #else
+    #error "No stepper driver model configured!"
   #endif
-#elif STEPPER_DRIVER_MODEL == TMC2XXX
-  #if AXIS1_STEPPING_SIDEREAL > 16 || AXIS2_STEPPING_SIDEREAL > 16
-    #error "The configured stepper driver model does not support stepping over 128"
+
+  #ifndef AXIS1_STEPPING_SLEW
+    #error "AXIS1_STEPPING_SLEW is not defined in your Config.xxx.h file!"
   #endif
-#else
- #error "No stepper driver model configured!"
-#endif
 
-#ifndef AXIS1_STEPPING_SLEW
-  #error "AXIS1_STEPPING_SLEW is not defined in your Config.xxx.h file!"
-#endif
+  #ifndef AXIS2_STEPPING_SLEW
+    #error "AXIS2_STEPPING_SLEW is not defined in your Config.xxx.h file!"
+  #endif
 
-#ifndef AXIS2_STEPPING_SLEW
-  #error "AXIS2_STEPPING_SLEW is not defined in your Config.xxx.h file!"
-#endif
+  #if AXIS1_STEPPING_SIDEREAL < AXIS1_STEPPING_SLEW
+    #error "AXIS1_STEPPING_SLEW must be equal to or greater than AXIS1_STEPPING_SIDEREAL"
+  #endif
 
-#if AXIS1_STEPPING_SIDEREAL < AXIS1_STEPPING_SLEW
-  #error "AXIS1_STEPPING_SLEW must be equal to or greater than AXIS1_STEPPING_SIDEREAL"
+  #if AXIS2_STEPPING_SIDEREAL < AXIS2_STEPPING_SLEW
+    #error "AXIS2_STEPPING_SLEW must be equal to or greater than AXIS2_STEPPING_SIDEREAL"
+  #endif
 #endif
-
-#if AXIS2_STEPPING_SIDEREAL < AXIS2_STEPPING_SLEW
-  #error "AXIS2_STEPPING_SLEW must be equal to or greater than AXIS2_STEPPING_SIDEREAL"
-#endif
-

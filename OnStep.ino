@@ -89,12 +89,15 @@ void setup() {
   // set initial values for some variables
   Init_Startup_Values();
 
-  // Translate stepping modes
+#ifndef Ramps14_ON
+  // Translate stepping modes. The RAMPS 1.4 board has the M0/M1/M2 pins not connected
+  // to MCU pins, and hence on the fly stepping cannot be used
   Axis1SteppingSidereal = TranslateSteppingMode(AXIS1_STEPPING_SIDEREAL);
   Axis2SteppingSidereal = TranslateSteppingMode(AXIS2_STEPPING_SIDEREAL);
 
   Axis1SteppingSlew = TranslateSteppingMode(AXIS1_STEPPING_SLEW);
   Axis2SteppingSlew = TranslateSteppingMode(AXIS2_STEPPING_SLEW);
+#endif
 
   // set pins for input/output as specified in Config.h and PinMap.h
   Init_Pins();
