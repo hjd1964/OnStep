@@ -41,12 +41,6 @@
 #define FirmwareName   "On-Step"
 #define FirmwareTime   "12:00:00"
 
-// some defines to help with configuration
-#define TMC_LOWPWR      64
-#define TMC_STEALTHCHOP 32
-#define TMC_NINTPOL     16
-#define SYNC_ANYWHERE_ON
-
 #include "Constants.h"
 
 #include "src/HAL/HAL.h"

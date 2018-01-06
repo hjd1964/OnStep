@@ -9,10 +9,10 @@ void Init_Startup_Values() {
   Axis1_Microsteps = TranslateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_MICROSTEPS);
   Axis2_Microsteps = TranslateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_MICROSTEPS);
   #ifdef AXIS1_MICROSTEPS_GOTO
-  Axis1_MicrostepsGoto = TranslateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_MICROSTEPS_GOTO);
+    Axis1_MicrostepsGoto = TranslateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_MICROSTEPS_GOTO)|TMC_AXIS1_MODE;
   #endif  
   #ifdef AXIS2_MICROSTEPS_GOTO
-  Axis2_MicrostepsGoto = TranslateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_MICROSTEPS_GOTO);
+    Axis2_MicrostepsGoto = TranslateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_MICROSTEPS_GOTO)|TMC_AXIS2_MODE;
   #endif  
 #endif
 
@@ -500,6 +500,8 @@ unsigned int TranslateMicrosteps(int axis, int DriverModel, unsigned int Microst
     case TMC2130:
       Mode = searchTable(StepsTMC2130, LEN_TMC2130, Microsteps);
       break;
+    default:
+      Mode=1;
   }
 
   return Mode;
@@ -514,5 +516,8 @@ unsigned int searchTable(unsigned int Table[][2], int TableLen, unsigned int Mic
       return Table[i][1];
     }
   }
+  
+  return 0;
 }
 #endif
+
