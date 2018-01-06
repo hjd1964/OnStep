@@ -461,3 +461,41 @@ void DisableStepperDrivers() {
   }
 }
 
+// Different models of stepper drivers have different bit settings for microsteps
+
+// Translate the human readable microsteps in the configuration to modebit settings 
+unsigned int TranslateMicrosteps(int axis, int DriverModel, unsigned int Microsteps) {
+  unsigned int Mode;
+    
+  // We search for each model, since they are different
+  switch(DriverModel) {
+    case A4988:
+      Mode = searchTable(StepsA4988, LEN_A4988, Microsteps);
+      break;
+    case DRV8825:
+      Mode = searchTable(StepsDRV8825, LEN_DRV8825, Microsteps);
+      break;
+    case LV8729:
+      Mode = searchTable(StepsLV8729, LEN_LV8729, Microsteps);
+      break;
+    case TMC2208:
+      Mode = searchTable(StepsTMC2208, LEN_TMC2208, Microsteps);
+      break;
+    case TMC2130:
+      Mode = searchTable(StepsTMC2130, LEN_TMC2130, Microsteps);
+      break;
+  }
+
+  return Mode;
+}
+
+// Search function
+unsigned int searchTable(unsigned int Table[][2], int TableLen, unsigned int Microsteps) {
+  int i;
+  
+  for(i = 0; i < TableLen; i++) {
+    if (Table[i][0] == Microsteps) {
+      return Table[i][1];
+    }
+  }
+}

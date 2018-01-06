@@ -47,6 +47,7 @@
 #define TMC_NINTPOL     16
 #define SYNC_ANYWHERE_ON
 
+#include "Constants.h"
 #include "src/HAL/HAL.h"
 
 #include "Config.Classic.h"
@@ -87,6 +88,20 @@ tmc2130 tmcAxis2(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
 void setup() {
   // set initial values for some variables
   Init_Startup_Values();
+
+#ifndef Ramps14_ON
+  // Translate microsteps to mode bits
+  
+  // The RAMPS 1.4 board has the M0/M1/M2 pins not connected
+  // to MCU pins, and hence on the fly stepping cannot be used
+  Axis1_Microsteps = TranslateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_MICROSTEPS);
+  Axis2_Microsteps = TranslateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_MICROSTEPS);
+
+  // We don't define directly to a function, so that we calculate the values only once,
+  // and avoid execution of thiscode every time this define is referenced
+  #define AXIS1_MODE Axis1_Microsteps
+  #define AXIS2_MODE Axis2_Microsteps
+#endif
 
   // set pins for input/output as specified in Config.h and PinMap.h
   Init_Pins();
