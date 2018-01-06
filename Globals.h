@@ -87,20 +87,19 @@ volatile double StepsForRateChangeAxis2= ((double)DegreesForAcceleration/sqrt((d
 
   // Microsteps for each axis
   volatile unsigned int Axis1_Microsteps;
+  #define AXIS1_MODE Axis1_Microsteps
+
   volatile unsigned int Axis2_Microsteps;
+  #define AXIS2_MODE Axis2_Microsteps
   
   #ifdef AXIS1_MICROSTEPS_GOTO
     volatile unsigned int Axis1_MicrostepsGoto;
-    volatile unsigned int Axis1_Microsteps_Per_MicrostepsGoto
-  #else
-    #define AXIS1_STEP_GOTO 1
+    #define AXIS1_MODE_GOTO Axis1_MicrostepsGoto
   #endif
   
   #ifdef AXIS2_MICROSTEPS_GOTO
     volatile unsigned int Axis2_MicrostepsGoto;
-    volatile unsigned int Axis2_Microsteps_Per_MicrostepsGoto
-  #else
-    #define AXIS2_STEP_GOTO 1
+    #define AXIS2_MODE_GOTO Axis2_MicrostepsGoto
   #endif
 
 #endif

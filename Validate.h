@@ -8,16 +8,7 @@
 #if defined(ALTERNATE_PINMAP_ON)
   #error "ALTERNATE_PINMAP_ON is an obsolete option, you can't use this configuration."
 #endif
-/*
-#if defined(MODE_SWITCH_BEFORE_SLEW_ON) || defined(MODE_SWITCH_BEFORE_SLEW_SPI)
-#if !defined(AXIS1_MICROSTEPS)
-  #error "Config.xxx.h error: AXIS1_MICROSTEPS must be set to a valid value."
-#endif
-#if !defined(AXIS2_MICROSTEPS)
-  #error "Config.xxx.h error: AXIS2_MICROSTEPS must be set to a valid value."
-#endif
-#endif
-*/
+
 #if !defined(FOCUSER1_ON) && defined(FOCUSER2_ON)
   #error "Focuser2 can't be enabled without first enabling Focuser1"
 #endif
@@ -88,6 +79,7 @@
 #endif
 
 #if defined(AXIS1_DRIVER_MODEL)
+  // attempting to use the simplified stepper driver setup
 
   // tracking mode
   #ifndef AXIS1_MICROSTEPS
@@ -181,9 +173,10 @@
       #if AXIS1_MICROSTEPS_GOTO!=2 && AXIS1_MICROSTEPS_GOTO!=4 && AXIS1_MICROSTEPS_GOTO!=8 && AXIS1_MICROSTEPS_GOTO!=16
         #error "AXIS1_MICROSTEPS_GOTO; TMC2208 invalid micro-step mode, use: 16,8,4,2,or _OFF"
       #endif
-    #else
-      #error "No stepper driver model configured for Axis1!"
     #endif
+
+    // if we get here we have valid AXIS1_MICROSTEPS and AXIS1_MICROSTEPS_GOTO
+    #define AXIS1_STEP_GOTO (AXIS1_MICROSTEPS/AXIS1_MICROSTEPS_GOTO)
   
   #endif
 
@@ -213,11 +206,25 @@
       #if AXIS2_MICROSTEPS_GOTO!=2 && AXIS2_MICROSTEPS_GOTO!=4 && AXIS2_MICROSTEPS_GOTO!=8 && AXIS2_MICROSTEPS_GOTO!=16
         #error "AXIS2_MICROSTEPS_GOTO; TMC2208 invalid micro-step mode, use: 16,8,4,2,or _OFF"
       #endif
-    #else
-      #error "No stepper driver model configured for axis 1 !"
     #endif
+
+    // if we get here we have valid AXIS2_MICROSTEPS and AXIS2_MICROSTEPS_GOTO
+    #define AXIS2_STEP_GOTO (AXIS2_MICROSTEPS/AXIS2_MICROSTEPS_GOTO)
 
   #endif
 
+#else
+  // attempting to use the advanced stepper driver setup
+
+  #if defined(MODE_SWITCH_BEFORE_SLEW_ON) || defined(MODE_SWITCH_BEFORE_SLEW_SPI)
+    #if !defined(AXIS1_MODE) || !defined(AXIS1_MODE_GOTO)
+      #error "Config.xxx.h error: AXIS1_MODE and AXIS1_MODE_GOTO must be set to a valid value."
+    #endif
+    #if !defined(AXIS2_MODE) || !defined(AXIS2_MODE_GOTO)
+      #error "Config.xxx.h error: AXIS2_MODE and AXIS2_MODE_GOTO must be set to a valid value."
+    #endif
+  #endif
+
 #endif
+
 
