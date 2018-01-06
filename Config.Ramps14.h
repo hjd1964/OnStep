@@ -146,8 +146,8 @@
 #define REVERSE_AXIS1_OFF            // RA/Azm axis
 #define REVERSE_AXIS2_OFF            // Dec/Alt axis
 
-// Stepper driver Enable support, just wire Enable to Pins 38 (Axis1) and A2 (Axis2) and OnStep will pull these HIGH
-// to disable stepper drivers on startup and when Parked or Homed.  An Align, Sync, or Un-Park will enable the drivers.  Adjust below if you need these pulled LOW to disable the drivers.
+// Stepper driver Enable support, just wire Enable to Pins 38 (Axis1) and A2 (Axis2) and OnStep will pull these HIGH to disable stepper drivers on startup and when Parked or Homed.
+// An Align, Sync, or Un-Park will enable the drivers.  Adjust below if you need these pulled LOW to disable the drivers.
 #define AXIS1_DISABLED_HIGH
 #define AXIS2_DISABLED_HIGH
 

@@ -152,31 +152,14 @@
 // for 10 minutes after any guide on either axis.  Otherwise, the Dec axis is disabled (powered off) 10 seconds after movement stops.
 #define AUTO_POWER_DOWN_AXIS2_OFF
 
-// -------------------
-// Select your stepper driver model, valid values are: 
-//
-// A4988      (up to 1/16 microsteps)
-// DRV8825    (up to 1/32 microsteps)
-// LV8729     (up to 1/128 microsteps, use this for RAPS128)
-// TMC2208    (up to 1/16, but interpolates to 1/256)
-// TMC2130    (up to 1/256, but interpolates to 1/256)
-#define AXIS1_DRIVER_MODEL DRV8825
+// Select stepper driver model and configure microstepping mode(s) if pins M0, M1, M2 are wired:
+#define AXIS1_DRIVER_MODEL_OFF      // Default _OFF, use A4988, DRV8825, LV8729, RAPS128, TMC2130, TMC2208 (for example: AXIS1_DRIVER_MODEL DRV8825)
+#define AXIS1_MICROSTEPS_OFF        // Axis1 (RA/Alt): Default _OFF, Microstep mode when the scope is doing sidereal tracking (for example: AXIS1_MICROSTEPS 32)
+#define AXIS1_MICROSTEPS_GOTO_OFF   // Axis1 (RA/Alt): Default _OFF, Optional microstep mode used during gotos
 
-// Axis1 (RA/Alt): What microsteps when the scope is doing sidereal tracking?
-// This must match what you calculated in the spreadsheet
-#define AXIS1_MICROSTEPS 16
-
-// Same as above for Axis2 (DEC/Az)
-#define AXIS2_DRIVER_MODEL DRV8825
-#define AXIS2_MICROSTEPS 16
-
-#define AXIS1_STEP_GOTO 1            // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
-#define AXIS2_STEP_GOTO 1            // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
-#define MODE_SWITCH_BEFORE_SLEW_OFF  // _ON (or _SPI) for _MODE and _MODE_GOTO settings to start/stop just before/after the slew, otherwise they are active during the slew at <128uS/step speeds
-                                     // _SPI as above but uses SPI (on M0/M1/M2/Aux) to do the switching (TMC2130.)  Uses Pins 18 (Aux1) and 5 (Aux2,) choose only one feature on Aux1/2.
-
-// if the decay/micro-step mode switch happens before/after a slew, inserts a 3ms delay before the motors take a step.
-#define MODE_SWITCH_SLEEP_OFF
+#define AXIS2_DRIVER_MODEL_OFF      // Default _OFF, use A4988, DRV8825, LV8729, RAPS128, TMC2130, TMC2208
+#define AXIS2_MICROSTEPS_OFF        // Axis2 (RA/Alt): Default _OFF, Microstep mode when the scope is doing sidereal tracking
+#define AXIS2_MICROSTEPS_GOTO_OFF   // Axis2 (RA/Alt): Default _OFF, Optional microstep mode used during gotos
 
 // Stepper driver Fault detection on Pins 18 (Aux1) and 5 (Aux2,) choose only one feature to use on Aux1/2.
 // other settings are LOW, HIGH, SPI (Teensy3.2 applies internal pullup if _LOW and pulldown if _HIGH.)  The SPI interface (on M0/M1/M2/Aux) can be used to detect errors on the TMC2130.

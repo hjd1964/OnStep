@@ -82,65 +82,142 @@
 #define AXIS2_STEP_GOTO 1
 #endif
 
-#if defined(AXIS1_MODE) || defined(AXIS2_MODE) || defined(AXIS1_MODE_GOTO) || defined(AXIS2_MODE_GOTO)
-  // We will not use AXISn_MICROSTEPS, this preserves backward compatibility
-#elif defined(Ramps14_ON)
-  // Does not use AXISn_MICROSTEPS 
-#else
-  #ifndef AXIS1_MICROSTEPS
-    #error "AXIS1_MICROSTEPS must be defined in your Config.xxx.h file!"
-  #endif
+// simplified stepper driver mode setup
+#if (defined(AXIS1_DRIVER_MODEL) && (!defined(AXIS2_DRIVER_MODEL)) || (defined(AXIS2_DRIVER_MODEL) && (!defined(AXIS1_DRIVER_MODEL))
+  #error "AXISn_DRIVER_MODEL; If using the simplified driver mode setup you must use it for both AXIS1 and AXIS2."
+#endif
 
-  #ifndef AXIS2_MICROSTEPS
-    #error "AXIS2_MICROSTEPS must be defined in your Config.xxx.h file!"
+#if defined(AXIS1_DRIVER_MODEL)
+
+  // tracking mode
+  #ifndef AXIS1_MICROSTEPS
+    #error "AXIS1_MICROSTEPS must be defined in your Config.xxx.h file if using AXIS1_DRIVER_MODEL!"
   #endif
 
   #if AXIS1_DRIVER_MODEL == A4988
-    #if AXIS1_MICROSTEPS > 16
-      #error "The configured stepper driver model for axis 1 does not support stepping over 16"
+    #if AXIS1_MICROSTEPS!=1 && AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16
+      #error "AXIS1_MICROSTEPS; A4988 invalid micro-step mode, use: 16,8,4,2,or 1"
     #endif
   #elif AXIS1_DRIVER_MODEL == DRV8825
-    #if AXIS1_MICROSTEPS > 32
-      #error "The configured stepper driver model for axis 1  does not support stepping over 32"
+    #if AXIS1_MICROSTEPS!=1 && AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16 && AXIS1_MICROSTEPS!=32
+      #error "AXIS1_MICROSTEPS; DRV8825 invalid micro-step mode, use: 32,16,8,4,2,or 1"
     #endif
-  #elif AXIS1_DRIVER_MODEL == LV8729
-    #if AXIS1_MICROSTEPS > 128
-      #error "The configured stepper driver model for axis 1  does not support stepping over 128"
+  #elif AXIS1_DRIVER_MODEL == LV8729 || AXIS1_DRIVER_MODEL == RAPS128
+    #if AXIS1_MICROSTEPS!=1 && AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16 && AXIS1_MICROSTEPS!=32 && AXIS1_MICROSTEPS!=64 && AXIS1_MICROSTEPS!=128
+      #error "AXIS1_MICROSTEPS; LV8729/RAPS128 invalid micro-step mode, use: 128,64,32,16,8,4,2,or 1"
+    #endif
+  #elif AXIS1_DRIVER_MODEL == TMC2100
+    #if AXIS1_MICROSTEPS!=_OFF
+      #error "AXIS1_MICROSTEPS; TMC2100 invalid micro-step mode, use: _OFF"
     #endif
   #elif AXIS1_DRIVER_MODEL == TMC2130
-    #if AXIS1_MICROSTEPS > 256
-      #error "The configured stepper driver model for axis 1  does not support stepping over 256"
+    #if AXIS1_MICROSTEPS!=1 && AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16 && AXIS1_MICROSTEPS!=32 && AXIS1_MICROSTEPS!=64 && AXIS1_MICROSTEPS!=128 && AXIS1_MICROSTEPS!=256
+      #error "AXIS1_MICROSTEPS; TMC2130 invalid micro-step mode, use: 256,128,64,32,16,8,4,2,or 1"
     #endif
   #elif AXIS1_DRIVER_MODEL == TMC2208
-    #if AXIS1_MICROSTEPS > 16
-      #error "The configured stepper driver model for axis 1  does not support stepping over 16"
+    #if AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16
+      #error "AXIS1_MICROSTEPS; TMC2208 invalid micro-step mode, use: 16,8,4,or 2"
+    #endif
+  #else
+    #error "No stepper driver model configured for Axis1!"
+  #endif
+
+  #ifndef AXIS2_MICROSTEPS
+    #error "AXIS2_MICROSTEPS must be defined in your Config.xxx.h file if using AXIS2_DRIVER_MODEL!"
+  #endif
+  
+  #if AXIS2_DRIVER_MODEL == A4988
+    #if AXIS2_MICROSTEPS!=1 && AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=8 && AXIS2_MICROSTEPS!=16
+      #error "AXIS2_MICROSTEPS; A4988 invalid micro-step mode, use: 16,8,4,2,or 1"
+    #endif
+  #elif AXIS2_DRIVER_MODEL == DRV8825
+    #if AXIS2_MICROSTEPS!=1 && AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=8 && AXIS2_MICROSTEPS!=16 && AXIS2_MICROSTEPS!=32
+      #error "AXIS2_MICROSTEPS; DRV8825 invalid micro-step mode, use: 32,16,8,4,2,or 1"
+    #endif
+  #elif AXIS2_DRIVER_MODEL == LV8729 || AXIS2_DRIVER_MODEL == RAPS128
+    #if AXIS2_MICROSTEPS!=1 && AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=8 && AXIS2_MICROSTEPS!=16 && AXIS2_MICROSTEPS!=32 && AXIS2_MICROSTEPS!=64 && AXIS2_MICROSTEPS!=128
+      #error "AXIS2_MICROSTEPS; LV8729/RAPS128 invalid micro-step mode, use: 128,64,32,16,8,4,2,or 1"
+    #endif
+  #elif AXIS2_DRIVER_MODEL == TMC2100
+    #if AXIS2_MICROSTEPS!=_OFF
+      #error "AXIS2_MICROSTEPS; TMC2100 invalid micro-step mode, use: _OFF"
+    #endif
+  #elif AXIS2_DRIVER_MODEL == TMC2130
+    #if AXIS2_MICROSTEPS!=1 && AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=8 && AXIS2_MICROSTEPS!=16 && AXIS2_MICROSTEPS!=32 && AXIS2_MICROSTEPS!=64 && AXIS2_MICROSTEPS!=128 && AXIS2_MICROSTEPS!=256
+      #error "AXIS2_MICROSTEPS; TMC2130 invalid micro-step mode, use: 256,128,64,32,16,8,4,2,or 1"
+    #endif
+  #elif AXIS2_DRIVER_MODEL == TMC2208
+    #if AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=8 && AXIS2_MICROSTEPS!=16
+      #error "AXIS2_MICROSTEPS; TMC2208 invalid micro-step mode, use: 16,8,4,or 2"
     #endif
   #else
     #error "No stepper driver model configured for axis 1 !"
   #endif
 
-  #if AXIS2_DRIVER_MODEL == A4988
-    #if AXIS2_MICROSTEPS > 16
-      #error "The configured stepper driver model for axis 1 does not support stepping over 16"
+  // goto mode
+  #ifdef AXIS1_MICROSTEPS_GOTO
+
+    #if AXIS1_DRIVER_MODEL == A4988
+      #if AXIS1_MICROSTEPS_GOTO!=1 && AXIS1_MICROSTEPS_GOTO!=2 && AXIS1_MICROSTEPS_GOTO!=4 && AXIS1_MICROSTEPS_GOTO!=8 && AXIS1_MICROSTEPS_GOTO!=16
+        #error "AXIS1_MICROSTEPS_GOTO; A4988 invalid micro-step mode, use: 16,8,4,2,1,or _OFF"
+      #endif
+    #elif AXIS1_DRIVER_MODEL == DRV8825
+      #if AXIS1_MICROSTEPS_GOTO!=1 && AXIS1_MICROSTEPS_GOTO!=2 && AXIS1_MICROSTEPS_GOTO!=4 && AXIS1_MICROSTEPS_GOTO!=8 && AXIS1_MICROSTEPS_GOTO!=16 && AXIS1_MICROSTEPS_GOTO!=32
+        #error "AXIS1_MICROSTEPS_GOTO; DRV8825 invalid micro-step mode, use: 32,16,8,4,2,1,or _OFF"
+      #endif
+    #elif AXIS1_DRIVER_MODEL == LV8729 || AXIS1_DRIVER_MODEL == RAPS128
+      #if AXIS1_MICROSTEPS_GOTO!=1 && AXIS1_MICROSTEPS_GOTO!=2 && AXIS1_MICROSTEPS_GOTO!=4 && AXIS1_MICROSTEPS_GOTO!=8 && AXIS1_MICROSTEPS_GOTO!=16 && AXIS1_MICROSTEPS_GOTO!=32 && AXIS1_MICROSTEPS_GOTO!=64 && AXIS1_MICROSTEPS_GOTO!=128
+        #error "AXIS1_MICROSTEPS_GOTO; LV8729/RAPS128 invalid micro-step mode, use: 128,64,32,16,8,4,2,1,or _OFF"
+      #endif
+    #elif AXIS1_DRIVER_MODEL == TMC2100
+      #if AXIS1_MICROSTEPS_GOTO!=_OFF
+        #error "AXIS1_MICROSTEPS_GOTO; TMC2100 invalid micro-step mode, use: _OFF"
+      #endif
+    #elif AXIS1_DRIVER_MODEL == TMC2130
+      #if AXIS1_MICROSTEPS_GOTO!=1 && AXIS1_MICROSTEPS_GOTO!=2 && AXIS1_MICROSTEPS_GOTO!=4 && AXIS1_MICROSTEPS_GOTO!=8 && AXIS1_MICROSTEPS_GOTO!=16 && AXIS1_MICROSTEPS_GOTO!=32 && AXIS1_MICROSTEPS_GOTO!=64 && AXIS1_MICROSTEPS_GOTO!=128 && AXIS1_MICROSTEPS_GOTO!=256
+        #error "AXIS1_MICROSTEPS_GOTO; TMC2130 invalid micro-step mode, use: 256,128,64,32,16,8,4,2,1,or _OFF"
+      #endif
+    #elif AXIS1_DRIVER_MODEL == TMC2208
+      #if AXIS1_MICROSTEPS_GOTO!=2 && AXIS1_MICROSTEPS_GOTO!=4 && AXIS1_MICROSTEPS_GOTO!=8 && AXIS1_MICROSTEPS_GOTO!=16
+        #error "AXIS1_MICROSTEPS_GOTO; TMC2208 invalid micro-step mode, use: 16,8,4,2,or _OFF"
+      #endif
+    #else
+      #error "No stepper driver model configured for Axis1!"
     #endif
-  #elif AXIS2_DRIVER_MODEL == DRV8825
-    #if AXIS2_MICROSTEPS > 32
-      #error "The configured stepper driver model for axis 1  does not support stepping over 32"
+  
+  #endif
+
+  #ifdef AXIS2_MICROSTEPS_GOTO
+  
+    #if AXIS2_DRIVER_MODEL == A4988
+      #if AXIS2_MICROSTEPS_GOTO!=1 && AXIS2_MICROSTEPS_GOTO!=2 && AXIS2_MICROSTEPS_GOTO!=4 && AXIS2_MICROSTEPS_GOTO!=8 && AXIS2_MICROSTEPS_GOTO!=16
+        #error "AXIS2_MICROSTEPS_GOTO; A4988 invalid micro-step mode, use: 16,8,4,2,1,or _OFF"
+      #endif
+    #elif AXIS2_DRIVER_MODEL == DRV8825
+      #if AXIS2_MICROSTEPS_GOTO!=1 && AXIS2_MICROSTEPS_GOTO!=2 && AXIS2_MICROSTEPS_GOTO!=4 && AXIS2_MICROSTEPS_GOTO!=8 && AXIS2_MICROSTEPS_GOTO!=16 && AXIS2_MICROSTEPS_GOTO!=32
+        #error "AXIS2_MICROSTEPS_GOTO; DRV8825 invalid micro-step mode, use: 32,16,8,4,2,1,or _OFF"
+      #endif
+    #elif AXIS2_DRIVER_MODEL == LV8729 || AXIS2_DRIVER_MODEL == RAPS128
+      #if AXIS2_MICROSTEPS_GOTO!=1 && AXIS2_MICROSTEPS_GOTO!=2 && AXIS2_MICROSTEPS_GOTO!=4 && AXIS2_MICROSTEPS_GOTO!=8 && AXIS2_MICROSTEPS_GOTO!=16 && AXIS2_MICROSTEPS_GOTO!=32 && AXIS2_MICROSTEPS_GOTO!=64 && AXIS2_MICROSTEPS_GOTO!=128
+        #error "AXIS2_MICROSTEPS_GOTO; LV8729/RAPS128 invalid micro-step mode, use: 128,64,32,16,8,4,2,1,or _OFF"
+      #endif
+    #elif AXIS2_DRIVER_MODEL == TMC2100
+      #if AXIS2_MICROSTEPS_GOTO!=_OFF
+        #error "AXIS2_MICROSTEPS_GOTO; TMC2100 invalid micro-step mode, use: _OFF"
+      #endif
+    #elif AXIS2_DRIVER_MODEL == TMC2130
+      #if AXIS2_MICROSTEPS_GOTO!=1 && AXIS2_MICROSTEPS_GOTO!=2 && AXIS2_MICROSTEPS_GOTO!=4 && AXIS2_MICROSTEPS_GOTO!=8 && AXIS2_MICROSTEPS_GOTO!=16 && AXIS2_MICROSTEPS_GOTO!=32 && AXIS2_MICROSTEPS_GOTO!=64 && AXIS2_MICROSTEPS_GOTO!=128 && AXIS2_MICROSTEPS_GOTO!=256
+        #error "AXIS2_MICROSTEPS_GOTO; TMC2130 invalid micro-step mode, use: 256,128,64,32,16,8,4,2,1,or _OFF"
+      #endif
+    #elif AXIS2_DRIVER_MODEL == TMC2208
+      #if AXIS2_MICROSTEPS_GOTO!=2 && AXIS2_MICROSTEPS_GOTO!=4 && AXIS2_MICROSTEPS_GOTO!=8 && AXIS2_MICROSTEPS_GOTO!=16
+        #error "AXIS2_MICROSTEPS_GOTO; TMC2208 invalid micro-step mode, use: 16,8,4,2,or _OFF"
+      #endif
+    #else
+      #error "No stepper driver model configured for axis 1 !"
     #endif
-  #elif AXIS2_DRIVER_MODEL == LV8729
-    #if AXIS2_MICROSTEPS > 128
-      #error "The configured stepper driver model for axis 1  does not support stepping over 128"
-    #endif
-  #elif AXIS2_DRIVER_MODEL == TMC2130
-    #if AXIS2_MICROSTEPS > 256
-      #error "The configured stepper driver model for axis 1  does not support stepping over 256"
-    #endif
-  #elif AXIS2_DRIVER_MODEL == TMC2208
-    #if AXIS2_MICROSTEPS > 16
-      #error "The configured stepper driver model for axis 1  does not support stepping over 16"
-    #endif
-  #else
-    #error "No stepper driver model configured for axis 1 !"
+
   #endif
 
 #endif
+

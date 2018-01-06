@@ -2,6 +2,20 @@
 // Functions for initializing pins, variables, and timers on startup
 
 void Init_Startup_Values() {
+// simplified stepper driver mode setup
+// if we made through validation and AXIS1_DRIVER_MODEL exists; AXIS2_DRIVER_MODEL, AXIS1_MICROSTEPS, and AXIS2_MICROSTEPS also exist and passed validation in the pre-processor
+#ifdef AXIS1_DRIVER_MODEL
+  // translate microsteps to mode bits
+  Axis1_Microsteps = TranslateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_MICROSTEPS);
+  Axis2_Microsteps = TranslateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_MICROSTEPS);
+  #ifdef AXIS1_MICROSTEPS_GOTO
+  Axis1_MicrostepsGoto = TranslateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_MICROSTEPS_GOTO);
+  #endif  
+  #ifdef AXIS2_MICROSTEPS_GOTO
+  Axis2_MicrostepsGoto = TranslateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_MICROSTEPS_GOTO);
+  #endif  
+#endif
+
   // initialize some fixed-point values
   amountGuideAxis1.fixed=0;
   amountGuideAxis2.fixed=0;
@@ -461,13 +475,15 @@ void DisableStepperDrivers() {
   }
 }
 
-// Different models of stepper drivers have different bit settings for microsteps
+// simplified stepper driver mode setup
+#ifdef AXIS1_DRIVER_MODEL
 
-// Translate the human readable microsteps in the configuration to modebit settings 
+// different models of stepper drivers have different bit settings for microsteps
+// translate the human readable microsteps in the configuration to modebit settings 
 unsigned int TranslateMicrosteps(int axis, int DriverModel, unsigned int Microsteps) {
   unsigned int Mode;
     
-  // We search for each model, since they are different
+  // we search for each model, since they are different
   switch(DriverModel) {
     case A4988:
       Mode = searchTable(StepsA4988, LEN_A4988, Microsteps);
@@ -489,7 +505,7 @@ unsigned int TranslateMicrosteps(int axis, int DriverModel, unsigned int Microst
   return Mode;
 }
 
-// Search function
+// search function
 unsigned int searchTable(unsigned int Table[][2], int TableLen, unsigned int Microsteps) {
   int i;
   
@@ -499,3 +515,4 @@ unsigned int searchTable(unsigned int Table[][2], int TableLen, unsigned int Mic
     }
   }
 }
+#endif

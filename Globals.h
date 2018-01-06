@@ -82,6 +82,29 @@ volatile double StepsForRateChangeAxis2= ((double)DegreesForAcceleration/sqrt((d
 #define DegreesForRapidStop 1.0
 #endif
 
+// Simplified stepper driver mode setup ------------------------------------------------------------------------------------
+#ifdef AXIS1_DRIVER_MODEL
+
+  // Microsteps for each axis
+  volatile unsigned int Axis1_Microsteps;
+  volatile unsigned int Axis2_Microsteps;
+  
+  #ifdef AXIS1_MICROSTEPS_GOTO
+    volatile unsigned int Axis1_MicrostepsGoto;
+    volatile unsigned int Axis1_Microsteps_Per_MicrostepsGoto
+  #else
+    #define AXIS1_STEP_GOTO 1
+  #endif
+  
+  #ifdef AXIS2_MICROSTEPS_GOTO
+    volatile unsigned int Axis2_MicrostepsGoto;
+    volatile unsigned int Axis2_Microsteps_Per_MicrostepsGoto
+  #else
+    #define AXIS2_STEP_GOTO 1
+  #endif
+
+#endif
+
 // Location ----------------------------------------------------------------------------------------------------------------
 double latitude  = 0.0;
 double cosLat = 1.0;
@@ -117,10 +140,6 @@ volatile long stepAxis1=1;
 #else
 #define stepAxis1 1
 #endif
-
-// Microsteps for each axis
-unsigned int Axis1_Microsteps;
-unsigned int Axis2_Microsteps;
 
 volatile long posAxis2   = 90L*(long)StepsPerDegreeAxis2;// declination position in steps
 long trueAxis2           = 90L*(long)StepsPerDegreeAxis2;// correction to above for motor shaft position steps
