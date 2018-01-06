@@ -170,11 +170,13 @@
 // This must match what you calculated in the spreadsheet
 #define AXIS1_MICROSTEPS 16
 
+#define AXIS1_STEP_GOTO 1            // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
+
 // Same as above for Axis2 (DEC/Az)
 #define AXIS2_DRIVER_MODEL DRV8825
 #define AXIS2_MICROSTEPS 16
 
-#define AXIS1_STEP_GOTO 1            // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
+#define AXIS2_STEP_GOTO 1            // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
 #define MODE_SWITCH_BEFORE_SLEW_SPI  // _ON (or _SPI) for _MODE and _MODE_GOTO settings to start/stop just before/after the slew, otherwise they are active during the slew at <128uS/step speeds
                                      // _SPI as above but uses SPI (on M0/M1/M2/Aux) to do the switching (TMC2130.)  Uses Pins 18 (Aux1) and 5 (Aux2,) choose only one feature on Aux1/2.
 
