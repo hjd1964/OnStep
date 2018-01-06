@@ -14,9 +14,9 @@
 #endif
 
 #if defined(MaxPCB) || defined(MiniPCB)
-#if defined(RETICULE_LED_PINS) && (defined(STATUS_LED_PINS_ON) || defined(STATUS_LED_PINS))
-  #error "You can't have the Illuminated Reticule and Status2 LEDs both enabled in this configuration."
-#endif
+  #if defined(RETICULE_LED_PINS) && (defined(STATUS_LED_PINS_ON) || defined(STATUS_LED_PINS))
+    #error "You can't have the Illuminated Reticule and Status2 LEDs both enabled in this configuration."
+  #endif
 #endif
 
 // -----------------------------------------------------------------------------------
@@ -55,32 +55,42 @@
 
 // misc. configuration #defines to correct for backwards compatability etc.
 #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
-#define SEPARATE_PULSE_GUIDE_RATE_ON
+  #define SEPARATE_PULSE_GUIDE_RATE_ON
 #endif
 #ifndef GUIDE_TIME_LIMIT
-#define GUIDE_TIME_LIMIT 0
+  #define GUIDE_TIME_LIMIT 0
 #endif
 #ifndef MaxRot
-#define MaxRot MaxAxis3
+  #define MaxRot MaxAxis3
 #endif
 #ifndef MinRot
-#define MinRot MinAxis3
+  #define MinRot MinAxis3
 #endif
 #ifndef AXIS1_STEP_GOTO
-#define AXIS1_STEP_GOTO 1
+  #define AXIS1_STEP_GOTO 1
 #endif
 #ifndef AXIS2_STEP_GOTO
-#define AXIS2_STEP_GOTO 1
+  #define AXIS2_STEP_GOTO 1
 #endif
 
 // -----------------------------------------------------------------------------------
 // stepper driver mode setup
 
-#if (defined(AXIS1_DRIVER_MODEL) && (!defined(AXIS2_DRIVER_MODEL)) || (defined(AXIS2_DRIVER_MODEL) && (!defined(AXIS1_DRIVER_MODEL))
-  #error "AXISn_DRIVER_MODEL; If using the simplified driver mode setup you must use it for both AXIS1 and AXIS2."
+#ifdef AXIS1_DRIVER_MODEL
+  #ifndef AXIS2_DRIVER_MODEL
+    #error "AXISn_DRIVER_MODEL; If using the simplified driver mode setup you must use it for both AXIS1 and AXIS2."
+  #endif
 #endif
 
-#if defined(AXIS1_DRIVER_MODEL)
+#ifdef AXIS2_DRIVER_MODEL
+  #ifndef AXIS1_DRIVER_MODEL
+    #error "AXISn_DRIVER_MODEL; If using the simplified driver mode setup you must use it for both AXIS1 and AXIS2."
+  #endif
+#endif
+
+/*
+#ifdef AXIS1_DRIVER_MODEL
+*/
   // attempting to use the simplified stepper driver setup
 
   // special SPI modes for TMC2130
@@ -289,5 +299,4 @@
   #endif
 
 #endif
-
 
