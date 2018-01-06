@@ -1,5 +1,6 @@
 // -----------------------------------------------------------------------------------
 // Configuration for legacy OnStep "Alternate pin-map" (Mega2560)
+// *** this is for backwards compatability with older OnStep systems ***
 
 /*
  * For more information on setting OnStep up see http://www.stellarjourney.com/index.php?r=site/equipment_onstep and 
@@ -111,9 +112,6 @@
 #define PECBufferSize           824  // PEC, buffer size, max should be no more than 3384, your required buffer size >= StepsPerAxis1WormRotation/(StepsPerDegeeAxis1/240)
                                      // for the most part this doesn't need to be changed, but adjust when needed.  824 seconds is the default.  Ignored on Alt/Azm mounts.
 
-#define REVERSE_AXIS1_OFF            // reverse the direction of movement for the RA/Azm axis, adjust as needed or reverse your wiring so things move in the right direction
-#define REVERSE_AXIS2_OFF            // reverse the direction of movement for the Dec/Alt axis
-
 #define MinutesPastMeridianE      60 // for goto's, how far past the meridian to allow before we do a flip (if on the East side of the pier) - one hour of RA is the default = 60.  Sometimes used for Fork mounts in Align mode.  Ignored on Alt/Azm mounts.
 #define MinutesPastMeridianW      60 // as above, if on the West side of the pier.  If left alone, the mount will stop tracking when it hits the this limit.  Sometimes used for Fork mounts in Align mode.  Ignored on Alt/Azm mounts.
 #define UnderPoleLimit            12 // maximum allowed hour angle (+/-) under the celestial pole. OnStep will flip the mount and move the Dec. >90 degrees (+/-) once past this limit.  Sometimes used for Fork mounts in Align mode.  Ignored on Alt/Azm mounts.
@@ -131,10 +129,15 @@
 // Axis1: Pins 35,37 = Step,Dir (RA/Azm)
 // Axis2: Pins 22,24 = Step,Dir (Dec/Alt)
 
+// Reverse the direction of movement.  Adjust as needed or reverse your wiring so things move in the right direction
+#define REVERSE_AXIS1_OFF            // RA/Azm axis
+#define REVERSE_AXIS2_OFF            // Dec/Alt axis
+
 // Stepper driver Enable support is always on, just wire Enable to Pins 23 (Axis1) and 36 (Axis2) and OnStep will pull these HIGH
 // to disable stepper drivers on startup and when Parked or Homed.  An Align or UnPark will enable the drivers.  Adjust below if you need these pulled LOW to disable the drivers.
 #define AXIS1_DISABLED_HIGH
 #define AXIS2_DISABLED_HIGH
+
 // For equatorial mounts, _ON powers down the Declination axis when it's not being used to help lower power use.  During low rate guiding (<=1x) the axis stays enabled
 // for 10 minutes after any guide on either axis.  Otherwise, the Dec axis is disabled (powered off) 10 seconds after movement stops.
 #define AUTO_POWER_DOWN_AXIS2_OFF
@@ -204,7 +207,7 @@
 #define FOCUSER2_OFF                 // enable or disable focuser feature, default=OFF
 #define MaxRateAxis5               8 // this is the minimum number of milli-seconds between micro-steps, default=8
 #define StepsPerMicrometerAxis5  0.5 // figure this out by testing or other means
-#define REVERSE_AXIS5_OFF            // reverse the direction of Axis4 focuser movement
+#define REVERSE_AXIS5_OFF            // reverse the direction of Axis5 focuser movement
 #define MinAxis5               -25.0 // minimum allowed Axis5 position in millimeters, default = -25.0
 #define MaxAxis5                25.0 // maximum allowed Axis5 position in millimeters, default =  25.0
 
