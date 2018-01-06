@@ -1,8 +1,6 @@
 // -----------------------------------------------------------------------------------
 // Validate current configuration
 
-#include "Constants.h"
-
 #if !defined(Classic_ON) && !defined(MiniPCB_ON) && !defined(MaxPCB_ON) && !defined(TM4C_ON) && !defined(Ramps14_ON) && !defined(Mega2560Alt_ON) && !defined(STM32_ON)
   #error "Choose ONE Config.xxx.h file and enable it for use by turning it _ON."
 #endif
