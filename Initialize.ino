@@ -2,6 +2,7 @@
 // Functions for initializing pins, variables, and timers on startup
 
 void Init_Startup_Values() {
+  
 // simplified stepper driver mode setup
 // if we made through validation and AXIS1_DRIVER_MODEL exists; AXIS2_DRIVER_MODEL, AXIS1_MICROSTEPS, and AXIS2_MICROSTEPS also exist and passed validation in the pre-processor
 #ifdef AXIS1_DRIVER_MODEL
@@ -9,11 +10,11 @@ void Init_Startup_Values() {
   Axis1_Microsteps = TranslateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_MICROSTEPS);
   Axis2_Microsteps = TranslateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_MICROSTEPS);
   #ifdef AXIS1_MICROSTEPS_GOTO
-    Axis1_MicrostepsGoto = TranslateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_MICROSTEPS_GOTO)|TMC_AXIS1_MODE;
-  #endif  
+    Axis1_MicrostepsGoto = TranslateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_MICROSTEPS_GOTO)|TMC_AXIS1_MODE; // if this isn't a TMC2130 stepper driver TMC_AXISn_MODE = 0
+  #endif
   #ifdef AXIS2_MICROSTEPS_GOTO
     Axis2_MicrostepsGoto = TranslateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_MICROSTEPS_GOTO)|TMC_AXIS2_MODE;
-  #endif  
+  #endif
 #endif
 
   // initialize some fixed-point values
