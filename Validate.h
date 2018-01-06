@@ -88,9 +88,7 @@
   #endif
 #endif
 
-/*
 #ifdef AXIS1_DRIVER_MODEL
-*/
   // attempting to use the simplified stepper driver setup
 
   // special SPI modes for TMC2130
@@ -299,4 +297,4 @@
   #endif
 
 #endif
-
+#endif
