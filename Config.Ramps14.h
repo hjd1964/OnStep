@@ -151,6 +151,18 @@
 #define AXIS1_DISABLED_HIGH
 #define AXIS2_DISABLED_HIGH
 
+// Basic stepper driver mode setup . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+// Connections M0, M1, and M2 are on Pins 23,25,27 for Axis1 (RA/Azm) and Pins 31,33,35 for Axis2 (Dec/Alt.)
+// DRIVER_MODELs are as follows: (for example AXIS1_DRIVER_MODEL DRV8825,) A4988, LV8729, RAPS128, TMC2208, TMC2130 (spreadCycle,) 
+// TMC2130_QUIET (stealthChop tracking,) TMC2130_VQUIET (full stealthChop mode,) add _LOWPWR for 50% power during tracking (for example: TMC2130_QUIET_LOWPWR)
+#define AXIS1_DRIVER_MODEL_OFF      // Axis1 (RA/Azm): Default _OFF
+#define AXIS1_MICROSTEPS_OFF        // Axis1 (RA/Azm): Default _OFF, Microstep mode when the scope is doing sidereal tracking (for example: AXIS1_MICROSTEPS 32)
+#define AXIS1_MICROSTEPS_GOTO_OFF   // Axis1 (RA/Azm): Default _OFF, Optional microstep mode used during gotos
+#define AXIS2_DRIVER_MODEL_OFF      // Axis2 (Dec/Alt): Default _OFF
+#define AXIS2_MICROSTEPS_OFF        // Axis2 (Dec/Alt): Default _OFF, Microstep mode when the scope is doing sidereal tracking
+#define AXIS2_MICROSTEPS_GOTO_OFF   // Axis2 (Dec/Alt): Default _OFF, Optional microstep mode used during gotos
+// Note: you can replace this section with the contents of "AdvancedStepperSetup.txt" . . . . . . . . . . . . . . . . . . . 
+
 // For equatorial mounts, _ON powers down the Declination axis when it's not being used to help lower power use.  During low rate guiding (<=1x) the axis stays enabled
 // for 10 minutes after any guide on either axis.  Otherwise, the Dec axis is disabled (powered off) 10 seconds after movement stops.
 #define AUTO_POWER_DOWN_AXIS2_OFF

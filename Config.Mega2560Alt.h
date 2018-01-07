@@ -142,18 +142,17 @@
 // for 10 minutes after any guide on either axis.  Otherwise, the Dec axis is disabled (powered off) 10 seconds after movement stops.
 #define AUTO_POWER_DOWN_AXIS2_OFF
 
-// Simplified stepper driver mode setup ----------------------
-// Select stepper driver model and configure microstepping mode(s) if pins M0, M1, M2 are wired.  DRIVER_MODELs are as follows:
-// A4988, DRV8825, LV8729, RAPS128, TMC2208 (for example AXIS1_DRIVER_MODEL DRV8825,)
-// TMC2130 (spreadCycle,) TMC2130_QUIET (stealthChop tracking,) TMC2130_VQUIET (full stealthChop mode,) add _LOWPWR for 50% power during tracking (for example: TMC2130_QUIET_LOWPWR)
+// Basic stepper driver mode setup . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+// Connections M0, M1, and M2 are on Pins 25,27, and 29 for RA and Pins 34,32,30 for Dec.
+// DRIVER_MODELs are as follows: (for example AXIS1_DRIVER_MODEL DRV8825,) A4988, LV8729, RAPS128, TMC2208, TMC2130 (spreadCycle,) 
+// TMC2130_QUIET (stealthChop tracking,) TMC2130_VQUIET (full stealthChop mode,) add _LOWPWR for 50% power during tracking (for example: TMC2130_QUIET_LOWPWR)
 #define AXIS1_DRIVER_MODEL_OFF      // Axis1 (RA/Azm): Default _OFF
 #define AXIS1_MICROSTEPS_OFF        // Axis1 (RA/Azm): Default _OFF, Microstep mode when the scope is doing sidereal tracking (for example: AXIS1_MICROSTEPS 32)
 #define AXIS1_MICROSTEPS_GOTO_OFF   // Axis1 (RA/Azm): Default _OFF, Optional microstep mode used during gotos
 #define AXIS2_DRIVER_MODEL_OFF      // Axis2 (Dec/Alt): Default _OFF
 #define AXIS2_MICROSTEPS_OFF        // Axis2 (Dec/Alt): Default _OFF, Microstep mode when the scope is doing sidereal tracking
 #define AXIS2_MICROSTEPS_GOTO_OFF   // Axis2 (Dec/Alt): Default _OFF, Optional microstep mode used during gotos
-// Note: you can replace this section with the contents of "AdvancedStepperSetup.txt"
-// ------------------------------------------------------------
+// Note: you can replace this section with the contents of "AdvancedStepperSetup.txt" . . . . . . . . . . . . . . . . . . . 
 
 // Stepper driver Fault detection, just wire the driver Fault signal to Pins 39 (Axis1) and 38 (Axis2), default=OFF.
 // other settings are LOW, HIGH, SPI.  The SPI interface (on M0/M1/M2/Aux) can be used to detect errors on the TMC2130.

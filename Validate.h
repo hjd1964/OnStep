@@ -219,11 +219,11 @@
       #endif
     #elif AXIS1_DRIVER_MODEL == TMC2100
       #if AXIS1_MICROSTEPS != AXIS1_MICROSTEPS_GOTO
-        #error "Configuration error: AXIS1_MICROSTEPS_GOTO; must be set to the same value as AXIS1_MICROSTEPS"
+        #error "Configuration error: AXIS1_MICROSTEPS_GOTO; must be set to the same value as AXIS1_MICROSTEPS,or _OFF"
       #endif
     #elif AXIS1_DRIVER_MODEL == TMC2130
       #if AXIS1_MICROSTEPS != AXIS1_MICROSTEPS_GOTO
-        #error "Configuration error: AXIS1_MICROSTEPS_GOTO; must be set to the same value as AXIS1_MICROSTEPS"
+        #error "Configuration error: AXIS1_MICROSTEPS_GOTO; must be set to the same value as AXIS1_MICROSTEPS,or _OFF"
       #endif
     #elif AXIS1_DRIVER_MODEL == TMC2208
       #if AXIS1_MICROSTEPS_GOTO!=2 && AXIS1_MICROSTEPS_GOTO!=4 && AXIS1_MICROSTEPS_GOTO!=8 && AXIS1_MICROSTEPS_GOTO!=16
@@ -256,11 +256,11 @@
       #endif
     #elif AXIS2_DRIVER_MODEL == TMC2100
       #if AXIS2_MICROSTEPS != AXIS2_MICROSTEPS_GOTO
-        #error "Configuration error: AXIS2_MICROSTEPS_GOTO; must be set to the same value as AXIS2_MICROSTEPS"
+        #error "Configuration error: AXIS2_MICROSTEPS_GOTO; must be set to the same value as AXIS2_MICROSTEPS,or _OFF"
       #endif
     #elif AXIS2_DRIVER_MODEL == TMC2130
       #if AXIS2_MICROSTEPS!=AXIS2_MICROSTEPS_GOTO
-        #error "Configuration error: AXIS2_MICROSTEPS_GOTO; must be set to the same value as AXIS2_MICROSTEPS"
+        #error "Configuration error: AXIS2_MICROSTEPS_GOTO; must be set to the same value as AXIS2_MICROSTEPS,or _OFF"
       #endif
     #elif AXIS2_DRIVER_MODEL == TMC2208
       #if AXIS2_MICROSTEPS_GOTO!=2 && AXIS2_MICROSTEPS_GOTO!=4 && AXIS2_MICROSTEPS_GOTO!=8 && AXIS2_MICROSTEPS_GOTO!=16
