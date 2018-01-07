@@ -149,10 +149,15 @@
       #error "Configuration error: AXIS1_MICROSTEPS; LV8729/RAPS128 invalid micro-step mode, use: 128,64,32,16,8,4,2,or 1"
     #endif
   #elif AXIS1_DRIVER_MODEL == TMC2100
-    #if AXIS1_MICROSTEPS!=_OFF
-      #error "Configuration error: AXIS1_MICROSTEPS; TMC2100 invalid micro-step mode, use: _OFF"
+    #define MODE_SWITCH_BEFORE_SLEW_ON
+    #define MODE_SWITCH_SLEEP_ON
+    #if AXIS1_MICROSTEPS!=1 && AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=16
+      #error "Configuration error: AXIS1_MICROSTEPS; TMC2100 invalid micro-step mode, use: 16,4,2,or 1"
     #endif
+    #warning "Configuration: AXIS1_MICROSTEPS; This mode is supported in spreadCycle but without 256x interpolation: it's usually best to hard-wire the TMC2100 and use: _OFF here"
   #elif AXIS1_DRIVER_MODEL == TMC2130
+    #define MODE_SWITCH_BEFORE_SLEW_SPI
+    #define MODE_SWITCH_SLEEP_ON
     #if AXIS1_MICROSTEPS!=1 && AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16 && AXIS1_MICROSTEPS!=32 && AXIS1_MICROSTEPS!=64 && AXIS1_MICROSTEPS!=128 && AXIS1_MICROSTEPS!=256
       #error "Configuration error: AXIS1_MICROSTEPS; TMC2130 invalid micro-step mode, use: 256,128,64,32,16,8,4,2,or 1"
     #endif
@@ -181,12 +186,11 @@
       #error "Configuration error: AXIS2_MICROSTEPS; LV8729/RAPS128 invalid micro-step mode, use: 128,64,32,16,8,4,2,or 1"
     #endif
   #elif AXIS2_DRIVER_MODEL == TMC2100
-    #if AXIS2_MICROSTEPS!=_OFF
-      #error "Configuration error: AXIS2_MICROSTEPS; TMC2100 invalid micro-step mode, use: _OFF"
+    #if AXIS2_MICROSTEPS!=1 && AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=16
+      #error "Configuration error: AXIS2_MICROSTEPS; TMC2100 invalid micro-step mode, use: 16,4,2,or 1"
     #endif
+    #warning "Configuration: AXIS2_MICROSTEPS; This mode is supported in spreadCycle but without 256x interpolation: it's usually best to hard-wire the TMC2100 and use: _OFF here"
   #elif AXIS2_DRIVER_MODEL == TMC2130
-    #define MODE_SWITCH_BEFORE_SLEW_SPI
-    #define MODE_SWITCH_SLEEP_ON
     #if AXIS2_MICROSTEPS!=1 && AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=8 && AXIS2_MICROSTEPS!=16 && AXIS2_MICROSTEPS!=32 && AXIS2_MICROSTEPS!=64 && AXIS2_MICROSTEPS!=128 && AXIS2_MICROSTEPS!=256
       #error "Configuration error: AXIS2_MICROSTEPS; TMC2130 invalid micro-step mode, use: 256,128,64,32,16,8,4,2,or 1"
     #endif
@@ -214,17 +218,21 @@
         #error "Configuration error: AXIS1_MICROSTEPS_GOTO; LV8729/RAPS128 invalid micro-step mode, use: 128,64,32,16,8,4,2,1,or _OFF"
       #endif
     #elif AXIS1_DRIVER_MODEL == TMC2100
-      #if AXIS1_MICROSTEPS_GOTO!=_OFF
-        #error "Configuration error: AXIS1_MICROSTEPS_GOTO; TMC2100 invalid micro-step mode, use: _OFF"
+      #if AXIS1_MICROSTEPS != AXIS1_MICROSTEPS_GOTO
+        #error "Configuration error: AXIS1_MICROSTEPS_GOTO; must be set to the same value as AXIS1_MICROSTEPS"
       #endif
     #elif AXIS1_DRIVER_MODEL == TMC2130
-      #if AXIS1_MICROSTEPS_GOTO!=1 && AXIS1_MICROSTEPS_GOTO!=2 && AXIS1_MICROSTEPS_GOTO!=4 && AXIS1_MICROSTEPS_GOTO!=8 && AXIS1_MICROSTEPS_GOTO!=16 && AXIS1_MICROSTEPS_GOTO!=32 && AXIS1_MICROSTEPS_GOTO!=64 && AXIS1_MICROSTEPS_GOTO!=128 && AXIS1_MICROSTEPS_GOTO!=256
-        #error "Configuration error: AXIS1_MICROSTEPS_GOTO; TMC2130 invalid micro-step mode, use: 256,128,64,32,16,8,4,2,1,or _OFF"
+      #if AXIS1_MICROSTEPS != AXIS1_MICROSTEPS_GOTO
+        #error "Configuration error: AXIS1_MICROSTEPS_GOTO; must be set to the same value as AXIS1_MICROSTEPS"
       #endif
     #elif AXIS1_DRIVER_MODEL == TMC2208
       #if AXIS1_MICROSTEPS_GOTO!=2 && AXIS1_MICROSTEPS_GOTO!=4 && AXIS1_MICROSTEPS_GOTO!=8 && AXIS1_MICROSTEPS_GOTO!=16
         #error "Configuration error: AXIS1_MICROSTEPS_GOTO; TMC2208 invalid micro-step mode, use: 16,8,4,2,or _OFF"
       #endif
+    #endif
+
+    #if (AXIS1_MICROSTEPS <= AXIS1_MICROSTEPS_GOTO) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI) && !defined(MODE_SWITCH_BEFORE_SLEW_ON)
+        #error "Configuration error: AXIS1_MICROSTEPS_GOTO should be less than AXIS1_MICROSTEPS or _OFF"
     #endif
 
     // if we get here we have valid AXIS1_MICROSTEPS and AXIS1_MICROSTEPS_GOTO
@@ -247,17 +255,21 @@
         #error "Configuration error: AXIS2_MICROSTEPS_GOTO; LV8729/RAPS128 invalid micro-step mode, use: 128,64,32,16,8,4,2,1,or _OFF"
       #endif
     #elif AXIS2_DRIVER_MODEL == TMC2100
-      #if AXIS2_MICROSTEPS_GOTO!=_OFF
-        #error "Configuration error: AXIS2_MICROSTEPS_GOTO; TMC2100 invalid micro-step mode, use: _OFF"
+      #if AXIS2_MICROSTEPS != AXIS2_MICROSTEPS_GOTO
+        #error "Configuration error: AXIS2_MICROSTEPS_GOTO; must be set to the same value as AXIS2_MICROSTEPS"
       #endif
     #elif AXIS2_DRIVER_MODEL == TMC2130
-      #if AXIS2_MICROSTEPS_GOTO!=1 && AXIS2_MICROSTEPS_GOTO!=2 && AXIS2_MICROSTEPS_GOTO!=4 && AXIS2_MICROSTEPS_GOTO!=8 && AXIS2_MICROSTEPS_GOTO!=16 && AXIS2_MICROSTEPS_GOTO!=32 && AXIS2_MICROSTEPS_GOTO!=64 && AXIS2_MICROSTEPS_GOTO!=128 && AXIS2_MICROSTEPS_GOTO!=256
-        #error "Configuration error: AXIS2_MICROSTEPS_GOTO; TMC2130 invalid micro-step mode, use: 256,128,64,32,16,8,4,2, or 1"
+      #if AXIS2_MICROSTEPS!=AXIS2_MICROSTEPS_GOTO
+        #error "Configuration error: AXIS2_MICROSTEPS_GOTO; must be set to the same value as AXIS2_MICROSTEPS"
       #endif
     #elif AXIS2_DRIVER_MODEL == TMC2208
       #if AXIS2_MICROSTEPS_GOTO!=2 && AXIS2_MICROSTEPS_GOTO!=4 && AXIS2_MICROSTEPS_GOTO!=8 && AXIS2_MICROSTEPS_GOTO!=16
         #error "Configuration error: AXIS2_MICROSTEPS_GOTO; TMC2208 invalid micro-step mode, use: 16,8,4,2,or _OFF"
       #endif
+    #endif
+
+    #if (AXIS2_MICROSTEPS <= AXIS2_MICROSTEPS_GOTO) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI) && !defined(MODE_SWITCH_BEFORE_SLEW_ON)
+        #error "Configuration error: AXIS2_MICROSTEPS_GOTO should be less than AXIS2_MICROSTEPS or _OFF"
     #endif
 
     // if we get here we have valid AXIS2_MICROSTEPS and AXIS2_MICROSTEPS_GOTO
@@ -275,7 +287,7 @@
   #endif
 
 #else
-  // attempting to use the advanced stepper driver setup
+  // attempting to use the advanced stepper driver mode setup
 
   #if defined(MODE_SWITCH_BEFORE_SLEW_ON) || defined(MODE_SWITCH_BEFORE_SLEW_SPI)
     #if !defined(AXIS1_MODE) || !defined(AXIS1_MODE_GOTO)
