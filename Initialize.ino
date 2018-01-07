@@ -7,15 +7,39 @@ void Init_Startup_Values() {
 // if we made through validation and AXIS1_DRIVER_MODEL exists; AXIS2_DRIVER_MODEL, AXIS1_MICROSTEPS, and AXIS2_MICROSTEPS also exist and passed validation in the pre-processor
 #ifdef AXIS1_DRIVER_MODEL
   // translate microsteps to mode bits
-  Axis1_Microsteps = TranslateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_MICROSTEPS);
-  Axis2_Microsteps = TranslateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_MICROSTEPS);
+  Axis1_Microsteps = TranslateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_MICROSTEPS)|TMC_AXIS1_MODE; // if this isn't a TMC2130 stepper driver TMC_AXISn_MODE, etc. = 0
+  Axis2_Microsteps = TranslateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_MICROSTEPS)|TMC_AXIS2_MODE;
   #ifdef AXIS1_MICROSTEPS_GOTO
-    Axis1_MicrostepsGoto = TranslateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_MICROSTEPS_GOTO)|TMC_AXIS1_MODE; // if this isn't a TMC2130 stepper driver TMC_AXISn_MODE = 0
+    Axis1_MicrostepsGoto = TranslateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_MICROSTEPS_GOTO)|TMC_AXIS1_MODE_GOTO;
   #endif
   #ifdef AXIS2_MICROSTEPS_GOTO
-    Axis2_MicrostepsGoto = TranslateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_MICROSTEPS_GOTO)|TMC_AXIS2_MODE;
+    Axis2_MicrostepsGoto = TranslateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_MICROSTEPS_GOTO)|TMC_AXIS2_MODE_GOTO;
   #endif
 #endif
+
+
+//*
+// debugging
+  delay(2000);
+  Serial.begin(9600);
+  delay(1000);
+  
+  Serial.println("A reminder: TMC_LOWPWR=64, TMC_STEALTHCHOP=32");
+
+  Serial.print("AXIS1_MODE=");
+  Serial.print(Axis1_Microsteps);
+  Serial.print(", AXIS1_MODE_GOTO=");
+  Serial.print(Axis1_MicrostepsGoto);
+  Serial.print(", AXIS1_STEP_GOTO=");
+  Serial.println(AXIS1_STEP_GOTO);
+
+  Serial.print("AXIS2_MODE=");
+  Serial.print(Axis2_Microsteps);
+  Serial.print(", AXIS2_MODE_GOTO=");
+  Serial.print(Axis2_MicrostepsGoto);
+  Serial.print(", AXIS2_STEP_GOTO=");
+  Serial.println(AXIS2_STEP_GOTO);
+//*/
 
   // initialize some fixed-point values
   amountGuideAxis1.fixed=0;
@@ -494,6 +518,9 @@ unsigned int TranslateMicrosteps(int axis, int DriverModel, unsigned int Microst
       break;
     case LV8729:
       Mode = searchTable(StepsLV8729, LEN_LV8729, Microsteps);
+      break;
+    case TMC2100:
+      Mode = searchTable(StepsTMC2100, LEN_TMC2100, Microsteps);
       break;
     case TMC2208:
       Mode = searchTable(StepsTMC2208, LEN_TMC2208, Microsteps);
