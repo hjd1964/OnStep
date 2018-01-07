@@ -156,14 +156,17 @@
 // for 10 minutes after any guide on either axis.  Otherwise, the Dec axis is disabled (powered off) 10 seconds after movement stops.
 #define AUTO_POWER_DOWN_AXIS2_OFF
 
-// Select stepper driver model and configure microstepping mode(s) if pins M0, M1, M2 are wired:
-#define AXIS1_DRIVER_MODEL DRV8825  // Default _OFF, use A4988, DRV8825, LV8729, RAPS128, TMC2130, TMC2208 (for example: AXIS1_DRIVER_MODEL DRV8825)
-#define AXIS1_MICROSTEPS 16         // Axis1 (RA/Alt): Default _OFF, Microstep mode when the scope is doing sidereal tracking (for example: AXIS1_MICROSTEPS 32)
-#define AXIS1_MICROSTEPS_GOTO 4     // Axis1 (RA/Alt): Default _OFF, Optional microstep mode used during gotos
-
-#define AXIS2_DRIVER_MODEL DRV8825  // Default _OFF, use A4988, DRV8825, LV8729, RAPS128, TMC2130, TMC2208
-#define AXIS2_MICROSTEPS 16         // Axis2 (RA/Alt): Default _OFF, Microstep mode when the scope is doing sidereal tracking
-#define AXIS2_MICROSTEPS_GOTO 4     // Axis2 (RA/Alt): Default _OFF, Optional microstep mode used during gotos
+// Basic stepper driver mode setup . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+// Connections M0, M1, and M2 are on Pins 15,16,17 for Axis1 (RA/Azm) and Pins 8,7,6 for Axis2 (Dec/Alt.)
+// DRIVER_MODELs are as follows: (for example AXIS1_DRIVER_MODEL DRV8825,) A4988, LV8729, RAPS128, TMC2208, TMC2130 (spreadCycle,) 
+// TMC2130_QUIET (stealthChop tracking,) TMC2130_VQUIET (full stealthChop mode,) add _LOWPWR for 50% power during tracking (for example: TMC2130_QUIET_LOWPWR)
+#define AXIS1_DRIVER_MODEL_OFF      // Axis1 (RA/Azm): Default _OFF
+#define AXIS1_MICROSTEPS_OFF        // Axis1 (RA/Azm): Default _OFF, Microstep mode when the scope is doing sidereal tracking (for example: AXIS1_MICROSTEPS 32)
+#define AXIS1_MICROSTEPS_GOTO_OFF   // Axis1 (RA/Azm): Default _OFF, Optional microstep mode used during gotos
+#define AXIS2_DRIVER_MODEL_OFF      // Axis2 (Dec/Alt): Default _OFF
+#define AXIS2_MICROSTEPS_OFF        // Axis2 (Dec/Alt): Default _OFF, Microstep mode when the scope is doing sidereal tracking
+#define AXIS2_MICROSTEPS_GOTO_OFF   // Axis2 (Dec/Alt): Default _OFF, Optional microstep mode used during gotos
+// Note: you can replace this section with the contents of "AdvancedStepperSetup.txt" . . . . . . . . . . . . . . . . . . . 
 
 // Stepper driver Fault detection on Pins 18 (Aux1) and 5 (Aux2,) choose only one feature to use on Aux1/2.
 // other settings are LOW, HIGH, SPI (Teensy3.2 applies internal pullup if _LOW and pulldown if _HIGH.)  The SPI interface (on M0/M1/M2/Aux) can be used to detect errors on the TMC2130.

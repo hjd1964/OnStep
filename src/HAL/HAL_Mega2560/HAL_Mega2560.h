@@ -9,6 +9,9 @@
 // They can, however, run Motor Timer ISR's w/stepper driver signal timing met in one pass vs. two for faster processors
 #define HAL_SLOW_PROCESSOR
 
+// Lower limit (fastest) step rate in uS for this platform
+#define MaxRateLowerLimit 32
+
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
 // Use low overhead serial
 #include "HAL_Serial.h"

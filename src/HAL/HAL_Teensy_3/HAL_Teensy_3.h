@@ -5,6 +5,15 @@
 
 #include <EEPROM.h>
 
+// Lower limit (fastest) step rate in uS for this platform
+#if defined(__MK64FX512__)
+  #define MaxRate_LowerLimit 12
+#elif defined(__MK66FX1M0__)
+  #define MaxRate_LowerLimit 8
+#else
+  #define MaxRate_LowerLimit 16
+#endif
+
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
 #define PSerial Serial
 #define PSerial1 Serial1

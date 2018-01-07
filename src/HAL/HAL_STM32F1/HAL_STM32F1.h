@@ -5,6 +5,10 @@
 
 #include <EEPROM.h>
 
+// Lower limit (fastest) step rate in uS for this platform
+// the exact model should be detected and these tailored to each, but this is a good starting point
+#define MaxRateLowerLimit 16
+
 #include <HardwareTimer.h>
 
 // Get this library from https://github.com/watterott/Arduino-Libs/archive/master.zip
