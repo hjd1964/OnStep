@@ -319,10 +319,10 @@
 #endif
 
 #if (MaxRate*AXIS1_STEP_GOTO + MaxRate*AXIS2_STEP_GOTO)/2 < __MaxRate_LowerLimit
-  #error "Configuration error: the MaxRate setting exceeds the platform performace, increase MaxRate or use/adjust micro-step mode switching"
+  #error "Configuration error: the MaxRate setting exceeds the platform performance, increase MaxRate or use/adjust micro-step mode switching"
 #endif
 #if (MaxRate*AXIS1_STEP_GOTO + MaxRate*AXIS2_STEP_GOTO)/2 < __MaxRate_LowerLimit*2
-  #warning "Configuration: the MaxRate run-time adjustability (0.5x to 2x MaxRate) can be set to exceed the platform performace, you might want to increase MaxRate or use/adjust micro-step mode switching"
+  #warning "Configuration: the MaxRate run-time adjustability (0.5x to 2x MaxRate) can be set to exceed the platform performance, you might want to increase MaxRate or use/adjust micro-step mode switching"
 #endif
 
 
