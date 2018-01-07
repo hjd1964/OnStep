@@ -278,11 +278,19 @@
   #endif
 
   #if defined(MODE_SWITCH_BEFORE_SLEW_ON) || defined(MODE_SWITCH_BEFORE_SLEW_SPI)
+    // help for TMC2100 and TMC2130 where AXISn_MICROSTEPS_GOTO must be defined
+    #if defined(AXIS1_MICROSTEPS) && !defined(AXIS1_MICROSTEPS_GOTO) 
+      #define AXIS1_MICROSTEPS_GOTO AXIS1_MICROSTEPS
+    #endif
+    #if defined(AXIS2_MICROSTEPS) && !defined(AXIS2_MICROSTEPS_GOTO)
+      #define AXIS2_MICROSTEPS_GOTO AXIS2_MICROSTEPS
+    #endif
+
     #if !defined(AXIS1_MICROSTEPS) || !defined(AXIS1_MICROSTEPS_GOTO)
-      #error "Configuration error: AXIS1_MICROSTEPS and AXIS1_MICROSTEPS_GOTO must be set to a valid value."
+      #error "Configuration error: AXIS1_MICROSTEPS must be set to a valid value."
     #endif
     #if !defined(AXIS2_MICROSTEPS) || !defined(AXIS2_MICROSTEPS_GOTO)
-      #error "Configuration error: AXIS2_MICROSTEPS and AXIS2_MICROSTEPS_GOTO must be set to a valid value."
+      #error "Configuration error: AXIS2_MICROSTEPS must be set to a valid value."
     #endif
   #endif
 
