@@ -3,7 +3,7 @@
 
 void Init_Startup_Values() {
   
-// simplified stepper driver mode setup
+// Basic stepper driver mode setup
 // if we made through validation and AXIS1_DRIVER_MODEL exists; AXIS2_DRIVER_MODEL, AXIS1_MICROSTEPS, and AXIS2_MICROSTEPS also exist and passed validation in the pre-processor
 #ifdef AXIS1_DRIVER_MODEL
   // translate microsteps to mode bits
@@ -500,7 +500,7 @@ void DisableStepperDrivers() {
   }
 }
 
-// simplified stepper driver mode setup
+// Basic stepper driver mode setup
 #ifdef AXIS1_DRIVER_MODEL
 
 // different models of stepper drivers have different bit settings for microsteps

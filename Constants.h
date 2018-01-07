@@ -7,7 +7,7 @@
 #define TMC_NINTPOL     16
 #define SYNC_ANYWHERE_ON
 
-// simplified stepper driver mode setup
+// Basic stepper driver mode setup
 #ifdef AXIS1_DRIVER_MODEL
 
   // Stepper Driver Models

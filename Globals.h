@@ -82,7 +82,7 @@ volatile double StepsForRateChangeAxis2= ((double)DegreesForAcceleration/sqrt((d
 #define DegreesForRapidStop 1.0
 #endif
 
-// Simplified stepper driver mode setup ------------------------------------------------------------------------------------
+// Basic stepper driver mode setup ------------------------------------------------------------------------------------
 #ifdef AXIS1_DRIVER_MODEL
 
   // Microsteps for each axis
