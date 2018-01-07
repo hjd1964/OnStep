@@ -18,7 +18,7 @@ void Init_Startup_Values() {
 #endif
 
 
-//*
+/*
 // debugging
   delay(2000);
   Serial.begin(9600);
@@ -39,7 +39,7 @@ void Init_Startup_Values() {
   Serial.print(Axis2_MicrostepsGoto);
   Serial.print(", AXIS2_STEP_GOTO=");
   Serial.println(AXIS2_STEP_GOTO);
-//*/
+*/
 
   // initialize some fixed-point values
   amountGuideAxis1.fixed=0;
