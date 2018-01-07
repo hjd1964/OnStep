@@ -18,8 +18,7 @@ void Init_Startup_Values() {
 #endif
 
 
-/*
-// debugging
+/* debugging
   delay(2000);
   Serial.begin(9600);
   delay(1000);
@@ -27,16 +26,16 @@ void Init_Startup_Values() {
   Serial.println("A reminder: TMC_LOWPWR=64, TMC_STEALTHCHOP=32");
 
   Serial.print("AXIS1_MODE=");
-  Serial.print(Axis1_Microsteps);
+  Serial.print(AXIS1_MODE);
   Serial.print(", AXIS1_MODE_GOTO=");
-  Serial.print(Axis1_MicrostepsGoto);
+  Serial.print(AXIS1_MODE_GOTO);
   Serial.print(", AXIS1_STEP_GOTO=");
   Serial.println(AXIS1_STEP_GOTO);
 
   Serial.print("AXIS2_MODE=");
-  Serial.print(Axis2_Microsteps);
+  Serial.print(AXIS2_MODE);
   Serial.print(", AXIS2_MODE_GOTO=");
-  Serial.print(Axis2_MicrostepsGoto);
+  Serial.print(AXIS2_MODE_GOTO);
   Serial.print(", AXIS2_STEP_GOTO=");
   Serial.println(AXIS2_STEP_GOTO);
 */
