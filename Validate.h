@@ -79,8 +79,7 @@
 #if defined(AXIS1_DRIVER_MODEL)
   // attempting to use the simplified stepper driver setup
 
-
-  // special SPI modes for TMC2130
+  // special SPI decay modes etc. for TMC2130 AXIS1
   #if AXIS1_DRIVER_MODEL == TMC2130_QUIET
     #undef AXIS1_DRIVER_MODEL
     #define AXIS1_DRIVER_MODEL TMC2130
@@ -106,6 +105,7 @@
     #define TMC_AXIS1_MODE_GOTO 0
   #endif
 
+  // special SPI decay modes etc. for TMC2130 AXIS2
   #if AXIS2_DRIVER_MODEL == TMC2130_QUIET
     #undef AXIS2_DRIVER_MODEL
     #define AXIS2_DRIVER_MODEL TMC2130
@@ -131,7 +131,7 @@
     #define TMC_AXIS2_MODE_GOTO 0
   #endif
 
-  // tracking mode
+  // tracking micro-step mode AXIS1
   #ifndef AXIS1_MICROSTEPS
     #error "Configuration error: AXIS1_MICROSTEPS must be defined in your Config.xxx.h file if using AXIS1_DRIVER_MODEL!"
   #endif
@@ -169,6 +169,7 @@
     #error "Configuration error: Unrecognized stepper driver model for Axis1 !"
   #endif
 
+  // tracking micro-step mode AXIS2
   #ifndef AXIS2_MICROSTEPS
     #error "AXIS2_MICROSTEPS must be defined in your Config.xxx.h file if using AXIS2_DRIVER_MODEL!"
   #endif
@@ -202,7 +203,7 @@
     #error "Configuration error: Unrecognized stepper driver model for Axis2 !"
   #endif
 
-  // goto mode
+  // goto micro-step mode AXIS1
   #ifdef AXIS1_MICROSTEPS_GOTO
 
     #if AXIS1_DRIVER_MODEL == A4988
@@ -240,6 +241,7 @@
   
   #endif
 
+  // goto micro-step mode AXIS2
   #ifdef AXIS2_MICROSTEPS_GOTO
   
     #if AXIS2_DRIVER_MODEL == A4988
@@ -279,7 +281,7 @@
 
   #if defined(MODE_SWITCH_BEFORE_SLEW_ON) || defined(MODE_SWITCH_BEFORE_SLEW_SPI)
     // help for TMC2100 and TMC2130 where AXISn_MICROSTEPS_GOTO must be defined
-    #if defined(AXIS1_MICROSTEPS) && !defined(AXIS1_MICROSTEPS_GOTO) 
+    #if defined(AXIS1_MICROSTEPS) && !defined(AXIS1_MICROSTEPS_GOTO)
       #define AXIS1_MICROSTEPS_GOTO AXIS1_MICROSTEPS
     #endif
     #if defined(AXIS2_MICROSTEPS) && !defined(AXIS2_MICROSTEPS_GOTO)
