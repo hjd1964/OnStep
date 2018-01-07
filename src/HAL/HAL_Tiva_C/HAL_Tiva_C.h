@@ -38,6 +38,15 @@
 #define HAL_TIMER3_INT_CLEAR TimerIntClear( Timer3_base, TIMER_TIMA_TIMEOUT )
 #define HAL_TIMER4_INT_CLEAR TimerIntClear( Timer4_base, TIMER_TIMA_TIMEOUT )
 
+// Lower limit (fastest) step rate in uS for this platform
+#if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+  #define MaxRate_LowerLimit 8
+#elif defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
+  #define MaxRate_LowerLimit 16
+#else
+  #define MaxRate_LowerLimit 16
+#endif
+
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
 #if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
 #define PSerial Serial

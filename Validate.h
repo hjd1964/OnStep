@@ -279,8 +279,8 @@
 
   #endif
 
-  // help for TMC2100 and TMC2130 where AXISn_MICROSTEPS_GOTO must be defined
   #if defined(MODE_SWITCH_BEFORE_SLEW_ON) || defined(MODE_SWITCH_BEFORE_SLEW_SPI)
+    // help for TMC2100 and TMC2130 where AXISn_MICROSTEPS_GOTO must be defined
     #if defined(AXIS1_MICROSTEPS) && !defined(AXIS1_MICROSTEPS_GOTO)
       #define AXIS1_MICROSTEPS_GOTO AXIS1_MICROSTEPS
     #endif
@@ -303,12 +303,28 @@
 
 #endif
 
-// finally, if AXISn_STEP_GOTO isn't defined, do so
+// if AXISn_STEP_GOTO isn't defined, do so
 #ifndef AXIS1_STEP_GOTO
   #define AXIS1_STEP_GOTO 1
 #endif
 #ifndef AXIS2_STEP_GOTO
   #define AXIS2_STEP_GOTO 1
+#endif
+
+// -----------------------------------------------------------------------------------
+// check to see if we're trying to operate at too fast a rate
+#if AXIS2_STEP_GOTO==1 && AXIS1_STEP_GOTO==1
+  #define __MaxRate_LowerLimit MaxRate_LowerLimit
+#else
+  // micro-step mode switching run-time code is compiled in so ISR's are a bit slower
+  #define __MaxRate_LowerLimit MaxRate_LowerLimit*2
+#endif
+
+#if (MaxRate*AXIS1_STEP_GOTO + MaxRate*AXIS2_STEP_GOTO)/2 < __MaxRate_LowerLimit
+  #error "Configuration error: the MaxRate setting exceeds the platform performace, increase MaxRate or use/adjust micro-step mode switching"
+#endif
+#if (MaxRate*AXIS1_STEP_GOTO + MaxRate*AXIS2_STEP_GOTO)/2 < __MaxRate_LowerLimit*2
+  #warning "Configuration: the MaxRate run-time adjustability (0.5x to 2x MaxRate) can be set to exceed the platform performace, you might want to increase MaxRate or use/adjust micro-step mode switching"
 #endif
 
 

@@ -6,6 +6,9 @@
 // OnStep needs EEPROM, the DUE doesn't have it and the flash eeprom libraries are limited so use an I2C 
 #include "../drivers/HAL_24LC256.h"
 
+// Lower limit (fastest) step rate in uS for this platform
+#define MaxRate_LowerLimit 16
+
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
 #define PSerial Serial
 #define PSerial1 Serial1
