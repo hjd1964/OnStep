@@ -3,6 +3,10 @@
 // We define a more generic symbol, in case more Teensy boards based on different lines are supported
 // __SAM3X8E__
 
+// The full EEPROM size causes problems, so we use a smaller one
+//#define E2END 32767
+#define E2END 8191
+
 // OnStep needs EEPROM, the DUE doesn't have it and the flash eeprom libraries are limited so use an I2C 
 #include "../drivers/HAL_24LC256.h"
 
