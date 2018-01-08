@@ -1138,6 +1138,32 @@ void processCommands() {
 
 //   R - Slew Rate Commands
       if (command[0]=='R') {
+
+//   :RAdd.d#   Set Axis1 Slew rate to dd.d degrees per second
+//              Returns: Nothing
+      if (command[1]=='A') {
+        f=strtod(parameter,&conv_end);
+        double maxStepsPerSecond=1000000.0/(maxRate/16.0);
+        if (&parameter[0]!=conv_end) {
+          if (f<1.0/60.0/60.0) f=1.0/60.0/60.0;
+          if (f>maxStepsPerSecond/StepsPerDegreeAxis1) f=maxStepsPerSecond/StepsPerDegreeAxis1;
+          slewRateFactorAxis1=(maxStepsPerSecond/StepsPerDegreeAxis1)/f;
+        }
+        quietReply=true; 
+      } else
+//   :REdd.d#   Set Axis2 Slew rate to dd.d degrees per second
+//              Returns: Nothing
+      if (command[1]=='E') {
+        f=strtod(parameter,&conv_end);
+        double maxStepsPerSecond=(maxRate/16.0)/1000000.0;
+        if (&parameter[0]!=conv_end) {
+          if (f<1.0/60.0/60.0) f=1.0/60.0/60.0;
+          if (f>maxStepsPerSecond/StepsPerDegreeAxis2) f=maxStepsPerSecond/StepsPerDegreeAxis2;
+          slewRateFactorAxis2=(maxStepsPerSecond/StepsPerDegreeAxis2)/f;
+        }
+        quietReply=true; 
+      } else
+
 //  :RG#   Set Slew rate to Guiding Rate (slowest) 1X
 //  :RC#   Set Slew rate to Centering rate (2nd slowest) 8X
 //  :RM#   Set Slew rate to Find Rate (2nd Fastest) 24X

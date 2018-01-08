@@ -56,6 +56,9 @@ boolean onTrack = false;
 boolean onTrackDec = false;
 
 long    maxRate = MaxRate*16L;
+double  slewRateFactorAxis1 = 1.0;
+double  slewRateFactorAxis2 = 1.0;
+
 double  slewSpeed = 0;
 volatile long    timerRateAxis1 = 0;
 volatile long    timerRateBacklashAxis1 = 0;
