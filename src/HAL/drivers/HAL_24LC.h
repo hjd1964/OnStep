@@ -1,4 +1,4 @@
-// Support for 24LC256 I2C EEPROM
+// Support for 24LC series I2C EEPROMs
 
 #include <Wire.h>
 #define PWire Wire
