@@ -1,9 +1,5 @@
 // Support for 24LC256 I2C EEPROM
 
-// The full EEPROM size causes problems
-//#define E2END 32767
-#define E2END 8191
-
 #include <Wire.h>
 #define PWire Wire
 
