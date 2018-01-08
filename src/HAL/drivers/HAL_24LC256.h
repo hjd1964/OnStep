@@ -55,7 +55,7 @@ public:
     PWire.endTransmission();
    
     PWire.requestFrom(80,1);
-    result = PWire.receive();
+    result = PWire.read();
     
     return result;
   }
