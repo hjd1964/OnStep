@@ -1147,7 +1147,7 @@ void processCommands() {
         if (&parameter[0]!=conv_end) {
           if (f<1.0/60.0/60.0) f=1.0/60.0/60.0;
           if (f>maxStepsPerSecond/StepsPerDegreeAxis1) f=maxStepsPerSecond/StepsPerDegreeAxis1;
-          _slewRateFactorAxis1=(maxStepsPerSecond/StepsPerDegreeAxis1)/f;
+          slewRateFactorAxis1=(maxStepsPerSecond/StepsPerDegreeAxis1)/f;
         }
         quietReply=true; 
       } else
@@ -1159,7 +1159,7 @@ void processCommands() {
         if (&parameter[0]!=conv_end) {
           if (f<1.0/60.0/60.0) f=1.0/60.0/60.0;
           if (f>maxStepsPerSecond/StepsPerDegreeAxis2) f=maxStepsPerSecond/StepsPerDegreeAxis2;
-          _slewRateFactorAxis2=(maxStepsPerSecond/StepsPerDegreeAxis2)/f;
+          slewRateFactorAxis2=(maxStepsPerSecond/StepsPerDegreeAxis2)/f;
         }
         quietReply=true; 
       } else
