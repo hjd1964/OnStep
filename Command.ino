@@ -1149,7 +1149,7 @@ void processCommands() {
 //   R - Slew Rate Commands
       if (command[0]=='R') {
 
-//   :RAdd.d#   Set Axis1 Slew rate to dd.d degrees per second
+//   :RAdd.d#   Set Axis1 Guide rate to dd.d degrees per second
 //              Returns: Nothing
       if (command[1]=='A') {
         f=strtod(parameter,&conv_end);
@@ -1157,11 +1157,12 @@ void processCommands() {
         if (&parameter[0]!=conv_end) {
           if (f<1.0/60.0/60.0) f=1.0/60.0/60.0;
           if (f>maxStepsPerSecond/StepsPerDegreeAxis1) f=maxStepsPerSecond/StepsPerDegreeAxis1;
-          cli(); targetSlewRateFactorAxis1=(maxStepsPerSecond/StepsPerDegreeAxis1)/f; sei();
+          guideTimerCustomRateAxis1=f*240.0*15.0;
+          enableGuideRate(currentGuideRate);
         }
         quietReply=true; 
       } else
-//   :REdd.d#   Set Axis2 Slew rate to dd.d degrees per second
+//   :REdd.d#   Set Axis2 Guide rate to dd.d degrees per second
 //              Returns: Nothing
       if (command[1]=='E') {
         f=strtod(parameter,&conv_end);
@@ -1169,7 +1170,8 @@ void processCommands() {
         if (&parameter[0]!=conv_end) {
           if (f<1.0/60.0/60.0) f=1.0/60.0/60.0;
           if (f>maxStepsPerSecond/StepsPerDegreeAxis2) f=maxStepsPerSecond/StepsPerDegreeAxis2;
-          cli(); targetSlewRateFactorAxis2=(maxStepsPerSecond/StepsPerDegreeAxis2)/f; sei();
+          guideTimerCustomRateAxis2=f*240.0*15.0;
+          enableGuideRate(currentGuideRate);
         }
         quietReply=true; 
       } else

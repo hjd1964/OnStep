@@ -192,12 +192,6 @@ ISR(TIMER1_COMPA_vect)
     // remember our "running" rate and only update the actual rate when it changes
     if (runTimerRateAxis2!=calculatedTimerRateAxis2) { timerRateAxis2=calculatedTimerRateAxis2; runTimerRateAxis2=calculatedTimerRateAxis2; }
   }
-
-  // secondary slew rate acceleration/deceleration
-  if (slewRateFactorAxis1>targetSlewRateFactorAxis1) { slewRateFactorAxis1-=accDegreesPerSec/200.0; if (slewRateFactorAxis1<targetSlewRateFactorAxis1) slewRateFactorAxis1=targetSlewRateFactorAxis1; }
-  if (slewRateFactorAxis1<targetSlewRateFactorAxis1) { slewRateFactorAxis1+=accDegreesPerSec/200.0; if (slewRateFactorAxis1>targetSlewRateFactorAxis1) slewRateFactorAxis1=targetSlewRateFactorAxis1; }
-  if (slewRateFactorAxis2>targetSlewRateFactorAxis2) { slewRateFactorAxis2-=accDegreesPerSec/200.0; if (slewRateFactorAxis2<targetSlewRateFactorAxis2) slewRateFactorAxis2=targetSlewRateFactorAxis2; }
-  if (slewRateFactorAxis2<targetSlewRateFactorAxis2) { slewRateFactorAxis2+=accDegreesPerSec/200.0; if (slewRateFactorAxis2>targetSlewRateFactorAxis2) slewRateFactorAxis2=targetSlewRateFactorAxis2; }
   
   thisTimerRateAxis1=timerRateAxis1;
   if (useTimerRateRatio) { thisTimerRateAxis2=(timerRateAxis2*timerRateRatio); } else { thisTimerRateAxis2=timerRateAxis2; }
@@ -226,7 +220,7 @@ ISR(TIMER1_COMPA_vect)
     if (Axis2PowerOffTimer>0) Axis2PowerOffTimer--; 
 
     // if the guide rate <= 1x and we're guiding on either axis set the timer to 10 minutes
-    if ((fabs(guideTimerBaseRate)<=1.000001) && (guideDirAxis2 || guideDirAxis1)) Axis2PowerOffTimer=10L*60L*100L;
+    if ((fabs(guideTimerBaseRateAxis1)<=1.000001) && (guideDirAxis2 || guideDirAxis1)) Axis2PowerOffTimer=10L*60L*100L;
 
     // if Axis2 isn't stationary set the timer to a minimum of 10 seconds
     cli(); if ((posAxis2!=timerLastPosAxis2) && (Axis2PowerOffTimer<10*100)) { timerLastPosAxis2=posAxis2; Axis2PowerOffTimer=10*100; } sei();

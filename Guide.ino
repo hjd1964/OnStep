@@ -63,7 +63,7 @@ bool startGuideAxis1(char direction, int guideRate, long guideDuration) {
     guideTimeThisIntervalAxis1=micros();
     guideTimeRemainingAxis1=guideDuration*1000L;
     cli();
-    if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRate; else guideTimerRateAxis1=guideTimerBaseRate; 
+    if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRateAxis1; else guideTimerRateAxis1=guideTimerBaseRateAxis1; 
     sei();
   } else return false;
   return true;
@@ -84,7 +84,7 @@ bool startGuideAxis2(char direction, int guideRate, long guideDuration) {
     guideTimeThisIntervalAxis2=micros();
     guideTimeRemainingAxis2=guideDuration*1000L;
     cli();
-    if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRate; else guideTimerRateAxis2=guideTimerBaseRate; 
+    if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRateAxis2; else guideTimerRateAxis2=guideTimerBaseRateAxis2; 
     sei();
   } else return false;
   return true;
@@ -101,6 +101,8 @@ void stopGuideAxis2() {
 void setGuideRate(int g) {
   currentGuideRate=g;
   if ((g<=GuideRate1x) && (currentPulseGuideRate!=g)) { currentPulseGuideRate=g; EEPROM.update(EE_pulseGuideRate,g); }
+  guideTimerCustomRateAxis1=0.0;
+  guideTimerCustomRateAxis2=0.0;
 }
 
 // enables the guide rate
@@ -110,13 +112,19 @@ void enableGuideRate(int g) {
   
   activeGuideRate=g;
 
-  // this enables the guide rate
-  guideTimerBaseRate=(double)(guideRates[g]/15.0);
-
-  cli();
-  amountGuideAxis1.fixed=doubleToFixed((guideTimerBaseRate*StepsPerSecondAxis1)/100.0);
-  amountGuideAxis2.fixed=doubleToFixed((guideTimerBaseRate*StepsPerSecondAxis2)/100.0);
-  sei();
+  // this enables the guide rates
+  if (guideTimerCustomRateAxis1!=0.0) {
+    guideTimerBaseRateAxis1=guideTimerCustomRateAxis1;
+  } else {
+    guideTimerBaseRateAxis1=(double)(guideRates[g]/15.0);
+  }
+  if (guideTimerCustomRateAxis2!=0.0) {
+    guideTimerBaseRateAxis2=guideTimerCustomRateAxis2;
+  } else {
+    guideTimerBaseRateAxis2=(double)(guideRates[g]/15.0);
+  }
+  amountGuideAxis1.fixed=doubleToFixed((guideTimerBaseRateAxis1*StepsPerSecondAxis1)/100.0);
+  amountGuideAxis2.fixed=doubleToFixed((guideTimerBaseRateAxis2*StepsPerSecondAxis2)/100.0);
 }
 
 // handle the ST4 interface and hand controller features

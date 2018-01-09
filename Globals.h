@@ -56,10 +56,6 @@ boolean onTrack = false;
 boolean onTrackDec = false;
 
 long    maxRate = MaxRate*16L;
-volatile double  targetSlewRateFactorAxis1 = 1.0;
-volatile double  slewRateFactorAxis1 = 1.0;
-volatile double  targetSlewRateFactorAxis2 = 1.0;
-volatile double  slewRateFactorAxis2 = 1.0;
 
 double  slewSpeed = 0;
 volatile long    timerRateAxis1 = 0;
@@ -327,10 +323,12 @@ char          ST4DirAxis1             = 'b';
 volatile byte guideDirAxis2           = 0;
 char          ST4DirAxis2             = 'b';
 
-volatile double   guideTimerRateAxis1 = 0.0;
-volatile double   guideTimerRateAxis2 = 0.0;
-
-double  guideTimerBaseRate = 0;
+volatile double  guideTimerRateAxis1 = 0.0;
+volatile double  guideTimerRateAxis2 = 0.0;
+volatile double  guideTimerBaseRateAxis1 = 0.0;
+volatile double  guideTimerBaseRateAxis2 = 0.0;
+volatile double  guideTimerCustomRateAxis1 = 0.0;
+volatile double  guideTimerCustomRateAxis2 = 0.0;
 fixed_t amountGuideAxis1;
 fixed_t guideAxis1;
 fixed_t amountGuideAxis2;
