@@ -17,20 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * 
- *
- * Revision History, see GitHub
- *
+ * Description:
+ *   Full featured stepper motor telescope microcontroller for Equatorial and
+ *   Alt-Azimuth mounts, with the LX200 derived command set.
  *
  * Author: Howard Dutton
- * http://www.stellarjourney.com
- * hjd1964@gmail.com
+ *   http://www.stellarjourney.com
+ *   hjd1964@gmail.com
  *
- * Description
+ * Revision history, and newer versions::
+ *   See GitHub: https://github.com/hjd1964/OnStep
  *
- * Arduino Stepper motor controller for Losmandy G11 mounts (and others)
- * with LX200 derived command set.
+ * Documentation:
+ *   https://groups.io/g/onstep/wiki/home
  *
+ * Discussion, Questions, ...etc
+ *   https://groups.io/g/onstep
  */
 
 // Use Config.xxxxx.h to configure OnStep to your requirements
