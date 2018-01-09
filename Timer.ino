@@ -133,8 +133,8 @@ ISR(TIMER1_COMPA_vect)
         if ((guideDirAxis1!=lastGuideDirAxis1) && (lastGuideDirAxis1!=0)) guideDirChangeTimerAxis1=25;
         lastGuideDirAxis1=guideDirAxis1;
         if (guideDirChangeTimerAxis1>0) guideDirChangeTimerAxis1--; else {
-          if (guideTimerRateAxis1A>guideTimerRateAxis1) { guideTimerRateAxis1A-=(accArcsecPerSec/750.0)*r; if (guideTimerRateAxis1A<guideTimerRateAxis1) guideTimerRateAxis1A=guideTimerRateAxis1; }
-          if (guideTimerRateAxis1A<guideTimerRateAxis1) { guideTimerRateAxis1A+=(accArcsecPerSec/750.0)*r; if (guideTimerRateAxis1A>guideTimerRateAxis1) guideTimerRateAxis1A=guideTimerRateAxis1; }
+          if (guideTimerRateAxis1A>guideTimerRateAxis1) { guideTimerRateAxis1A-=(accArcsecPerSec/150.0)*r; if (guideTimerRateAxis1A<guideTimerRateAxis1) guideTimerRateAxis1A=guideTimerRateAxis1; }
+          if (guideTimerRateAxis1A<guideTimerRateAxis1) { guideTimerRateAxis1A+=(accArcsecPerSec/150.0)*r; if (guideTimerRateAxis1A>guideTimerRateAxis1) guideTimerRateAxis1A=guideTimerRateAxis1; }
         }
 
         // stop guiding
@@ -173,8 +173,8 @@ ISR(TIMER1_COMPA_vect)
         if ((guideDirAxis2!=lastGuideDirAxis2) && (lastGuideDirAxis2!=0)) guideDirChangeTimerAxis2=25;
         lastGuideDirAxis2=guideDirAxis2;
         if (guideDirChangeTimerAxis2>0) guideDirChangeTimerAxis2--; else {
-          if (guideTimerRateAxis2A>guideTimerRateAxis2) { guideTimerRateAxis2A-=(accArcsecPerSec/750.0)*r; if (guideTimerRateAxis2A<guideTimerRateAxis2) guideTimerRateAxis2A=guideTimerRateAxis2; }
-          if (guideTimerRateAxis2A<guideTimerRateAxis2) { guideTimerRateAxis2A+=(accArcsecPerSec/750.0)*r; if (guideTimerRateAxis2A>guideTimerRateAxis2) guideTimerRateAxis2A=guideTimerRateAxis2; }
+          if (guideTimerRateAxis2A>guideTimerRateAxis2) { guideTimerRateAxis2A-=(accArcsecPerSec/150.0)*r; if (guideTimerRateAxis2A<guideTimerRateAxis2) guideTimerRateAxis2A=guideTimerRateAxis2; }
+          if (guideTimerRateAxis2A<guideTimerRateAxis2) { guideTimerRateAxis2A+=(accArcsecPerSec/150.0)*r; if (guideTimerRateAxis2A>guideTimerRateAxis2) guideTimerRateAxis2A=guideTimerRateAxis2; }
         }
 
         // stop guiding

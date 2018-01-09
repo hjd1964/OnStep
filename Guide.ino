@@ -97,6 +97,34 @@ void stopGuideAxis2() {
   }
 }
 
+// custom guide rate in RA or Azm, guideDuration is in ms (0 to ignore) 
+bool customGuideRateAxis1(long guideDuration) {
+  enableGuideRate(-1);
+  if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo) && (axis1Enabled) && (guideDirAxis1)) {
+    guideTimeThisIntervalAxis1=micros();
+    guideTimeRemainingAxis1=guideDuration*1000L;
+    cli();
+    if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRateAxis1;
+    if (guideDirAxis1=='w') guideTimerRateAxis1=guideTimerBaseRateAxis1; 
+    sei();
+  } else return false;
+  return true;
+}
+
+// custom guide rate in Dec or Alt, guideDuration is in ms (0 to ignore)
+bool customGuideRateAxis2(long guideDuration) {
+  enableGuideRate(-1);
+  if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo) && (axis2Enabled) && (guideDirAxis2)) {
+    guideTimeThisIntervalAxis2=micros();
+    guideTimeRemainingAxis2=guideDuration*1000L;
+    cli();
+    if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRateAxis2;
+    if (guideDirAxis2=='n') guideTimerRateAxis2=guideTimerBaseRateAxis2; 
+    sei();
+  } else return false;
+  return true;
+}
+
 // sets the rates for guide commands
 void setGuideRate(int g) {
   currentGuideRate=g;
@@ -109,8 +137,8 @@ void setGuideRate(int g) {
 void enableGuideRate(int g) {
   // don't do these calculations unless we have to
   if (activeGuideRate==g) return;
-  
-  activeGuideRate=g;
+
+  if (g>=0) activeGuideRate=g;
 
   // this enables the guide rates
   if (guideTimerCustomRateAxis1!=0.0) {
