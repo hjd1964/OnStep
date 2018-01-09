@@ -28,7 +28,7 @@ connection and for the other(s) choose from the following:
 
 Other software in the OnStep ecosystem include:
 
-* an ASCOM driver (with IP and Serial support),
+* an [ASCOM](http://ascom-standards.org/) driver (with IP and Serial support),
 * an Android App useable over WiFi or Bluetooth equipped Phones/Tablets
   (version 2.3.3 or later),
 * a "built-in" website (on the Ethernet and/or WiFi device),
@@ -38,12 +38,16 @@ OnStep is compatible with the LX200 protocol. This means it can be controlled
 from other planetarium software, like: Sky Safari, CdC (even without ASCOM),
 Stellarium, etc.
 
-There are also INDI drivers so it can be used from Linux, with CdC or KStars.
+There are also [INDI](http://www.indilib.org/about.html) drivers so it can be used from Linux, with CdC or KStars.
 
-# More Information
-More information, including the full set of features, detailed designs for
-PCBs, instructions on how to build a controller, and on the software as well,
-can be found at my [StellarJourney web-site](http://www.stellarjourney.com/index.php?r=site/equipment_onstep) and in the [Wiki for the OnStep Group](https://groups.io/g/onstep/wiki/home).
+# Documentation
+Detailed documentation, including the full set of features, detailed designs for
+PCBs, instructions on how to build a controller, how to configure the firmware
+for your particular mount, can all be found the [OnStep Group Wiki](https://groups.io/g/onstep/wiki/home).
+
+# Support
+Questions and discussion should be on the mailing list (also accessible via the
+web) at the [OnStep Group](https://groups.io/g/onstep/).
 
 # License
 OnStep is open source free software, licensed under the GPL.
