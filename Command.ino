@@ -561,7 +561,12 @@ void processCommands() {
 //  :GD#   Get Telescope Declination
 //         Returns: sDD*MM# or sDD*MM'SS# (based on precision setting)
       if (command[1]=='D')  { 
-        if (millis()-_coord_t<100) { f=_ra; f1=_dec; } else {
+#ifdef HAL_SLOW_PROCESSOR
+        if (millis()-_coord_t<100)
+#else
+        if (millis()-_coord_t<5)
+#endif
+        { f=_ra; f1=_dec; } else {
           getEqu(&f,&f1,false); f/=15.0;
           _ra=f; _dec=f1; _coord_t=millis(); 
         }
@@ -617,8 +622,13 @@ void processCommands() {
       if (command[1]=='o')  { sprintf(reply,"%02d*",maxAlt); quietReply=true; } else
 //  :GR#   Get Telescope RA
 //         Returns: HH:MM.T# or HH:MM:SS# (based on precision setting)
-      if (command[1]=='R')  { 
-        if (millis()-_coord_t<100) { f=_ra; f1=_dec; } else {
+      if (command[1]=='R')  {
+#ifdef HAL_SLOW_PROCESSOR
+        if (millis()-_coord_t<100)
+#else
+        if (millis()-_coord_t<5)
+#endif
+        { f=_ra; f1=_dec; } else {
           getEqu(&f,&f1,false); f/=15.0;
           _ra=f; _dec=f1; _coord_t=millis(); 
         }
@@ -1147,7 +1157,7 @@ void processCommands() {
         if (&parameter[0]!=conv_end) {
           if (f<1.0/60.0/60.0) f=1.0/60.0/60.0;
           if (f>maxStepsPerSecond/StepsPerDegreeAxis1) f=maxStepsPerSecond/StepsPerDegreeAxis1;
-          slewRateFactorAxis1=(maxStepsPerSecond/StepsPerDegreeAxis1)/f;
+          cli(); targetSlewRateFactorAxis1=(maxStepsPerSecond/StepsPerDegreeAxis1)/f; sei();
         }
         quietReply=true; 
       } else
@@ -1155,11 +1165,11 @@ void processCommands() {
 //              Returns: Nothing
       if (command[1]=='E') {
         f=strtod(parameter,&conv_end);
-        double maxStepsPerSecond=(maxRate/16.0)/1000000.0;
+        double maxStepsPerSecond=1000000.0/(maxRate/16.0);
         if (&parameter[0]!=conv_end) {
           if (f<1.0/60.0/60.0) f=1.0/60.0/60.0;
           if (f>maxStepsPerSecond/StepsPerDegreeAxis2) f=maxStepsPerSecond/StepsPerDegreeAxis2;
-          slewRateFactorAxis2=(maxStepsPerSecond/StepsPerDegreeAxis2)/f;
+          cli(); targetSlewRateFactorAxis2=(maxStepsPerSecond/StepsPerDegreeAxis2)/f; sei();
         }
         quietReply=true; 
       } else
@@ -1622,7 +1632,7 @@ void processCommands() {
 //         Return: 0 on failure
 //                 1 on success
 
-     if (command[0]=='T') {
+     if ((command[0]=='T') && (parameter[0]==0)) {
        if (command[1]=='+') { siderealInterval-=HzCf*(0.02); quietReply=true; } else
        if (command[1]=='-') { siderealInterval+=HzCf*(0.02); quietReply=true; } else
        if (command[1]=='S') { SetTrackingRate(0.99726956632); refraction=false; quietReply=true; } else                    // solar tracking rate 60Hz
@@ -1646,6 +1656,8 @@ void processCommands() {
          cli(); SiderealRate=siderealInterval/StepsPerSecondAxis1; sei();
        }
 
+     } else
+     if (command[0]=='T') {
      } else
      
 //   U - Precision Toggle

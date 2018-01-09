@@ -139,7 +139,7 @@ void moveTo() {
   } else {
     temp=(StepsForRateChangeAxis1/isqrt32(distStartAxis1));  // speed up (temp gets smaller)
   }
-  if (temp<maxRate*slewRateFactorAxis1) temp=maxRate*slewRateFactorAxis1; // fastest rate
+  cli(); if (temp<maxRate*slewRateFactorAxis1) temp=maxRate*slewRateFactorAxis1; sei(); // fastest rate 
   if (temp>TakeupRate) temp=TakeupRate;                      // slowest rate
   cli(); timerRateAxis1=temp; sei();
 
@@ -149,7 +149,7 @@ void moveTo() {
   } else {
     temp=(StepsForRateChangeAxis2/isqrt32(distStartAxis2));  // speed up
   }
-  if (temp<maxRate*slewRateFactorAxis2) temp=maxRate*slewRateFactorAxis2; // fastest rate
+  cli(); if (temp<maxRate*slewRateFactorAxis2) temp=maxRate*slewRateFactorAxis2; sei(); // fastest rate
   if (temp>TakeupRate) temp=TakeupRate;                      // slowest rate
   cli(); timerRateAxis2=temp; sei();
 

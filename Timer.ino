@@ -133,8 +133,8 @@ ISR(TIMER1_COMPA_vect)
         if ((guideDirAxis1!=lastGuideDirAxis1) && (lastGuideDirAxis1!=0)) guideDirChangeTimerAxis1=25;
         lastGuideDirAxis1=guideDirAxis1;
         if (guideDirChangeTimerAxis1>0) guideDirChangeTimerAxis1--; else {
-          if (guideTimerRateAxis1A>guideTimerRateAxis1) { guideTimerRateAxis1A-=(acc/750.0)*r; if (guideTimerRateAxis1A<guideTimerRateAxis1) guideTimerRateAxis1A=guideTimerRateAxis1; }
-          if (guideTimerRateAxis1A<guideTimerRateAxis1) { guideTimerRateAxis1A+=(acc/750.0)*r; if (guideTimerRateAxis1A>guideTimerRateAxis1) guideTimerRateAxis1A=guideTimerRateAxis1; }
+          if (guideTimerRateAxis1A>guideTimerRateAxis1) { guideTimerRateAxis1A-=(accArcsecPerSec/750.0)*r; if (guideTimerRateAxis1A<guideTimerRateAxis1) guideTimerRateAxis1A=guideTimerRateAxis1; }
+          if (guideTimerRateAxis1A<guideTimerRateAxis1) { guideTimerRateAxis1A+=(accArcsecPerSec/750.0)*r; if (guideTimerRateAxis1A>guideTimerRateAxis1) guideTimerRateAxis1A=guideTimerRateAxis1; }
         }
 
         // stop guiding
@@ -173,8 +173,8 @@ ISR(TIMER1_COMPA_vect)
         if ((guideDirAxis2!=lastGuideDirAxis2) && (lastGuideDirAxis2!=0)) guideDirChangeTimerAxis2=25;
         lastGuideDirAxis2=guideDirAxis2;
         if (guideDirChangeTimerAxis2>0) guideDirChangeTimerAxis2--; else {
-          if (guideTimerRateAxis2A>guideTimerRateAxis2) { guideTimerRateAxis2A-=(acc/750.0)*r; if (guideTimerRateAxis2A<guideTimerRateAxis2) guideTimerRateAxis2A=guideTimerRateAxis2; }
-          if (guideTimerRateAxis2A<guideTimerRateAxis2) { guideTimerRateAxis2A+=(acc/750.0)*r; if (guideTimerRateAxis2A>guideTimerRateAxis2) guideTimerRateAxis2A=guideTimerRateAxis2; }
+          if (guideTimerRateAxis2A>guideTimerRateAxis2) { guideTimerRateAxis2A-=(accArcsecPerSec/750.0)*r; if (guideTimerRateAxis2A<guideTimerRateAxis2) guideTimerRateAxis2A=guideTimerRateAxis2; }
+          if (guideTimerRateAxis2A<guideTimerRateAxis2) { guideTimerRateAxis2A+=(accArcsecPerSec/750.0)*r; if (guideTimerRateAxis2A>guideTimerRateAxis2) guideTimerRateAxis2A=guideTimerRateAxis2; }
         }
 
         // stop guiding
@@ -192,6 +192,12 @@ ISR(TIMER1_COMPA_vect)
     // remember our "running" rate and only update the actual rate when it changes
     if (runTimerRateAxis2!=calculatedTimerRateAxis2) { timerRateAxis2=calculatedTimerRateAxis2; runTimerRateAxis2=calculatedTimerRateAxis2; }
   }
+
+  // secondary slew rate acceleration/deceleration
+  if (slewRateFactorAxis1>targetSlewRateFactorAxis1) { slewRateFactorAxis1-=accDegreesPerSec/200.0; if (slewRateFactorAxis1<targetSlewRateFactorAxis1) slewRateFactorAxis1=targetSlewRateFactorAxis1; }
+  if (slewRateFactorAxis1<targetSlewRateFactorAxis1) { slewRateFactorAxis1+=accDegreesPerSec/200.0; if (slewRateFactorAxis1>targetSlewRateFactorAxis1) slewRateFactorAxis1=targetSlewRateFactorAxis1; }
+  if (slewRateFactorAxis2>targetSlewRateFactorAxis2) { slewRateFactorAxis2-=accDegreesPerSec/200.0; if (slewRateFactorAxis2<targetSlewRateFactorAxis2) slewRateFactorAxis2=targetSlewRateFactorAxis2; }
+  if (slewRateFactorAxis2<targetSlewRateFactorAxis2) { slewRateFactorAxis2+=accDegreesPerSec/200.0; if (slewRateFactorAxis2>targetSlewRateFactorAxis2) slewRateFactorAxis2=targetSlewRateFactorAxis2; }
   
   thisTimerRateAxis1=timerRateAxis1;
   if (useTimerRateRatio) { thisTimerRateAxis2=(timerRateAxis2*timerRateRatio); } else { thisTimerRateAxis2=timerRateAxis2; }

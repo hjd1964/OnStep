@@ -56,8 +56,10 @@ boolean onTrack = false;
 boolean onTrackDec = false;
 
 long    maxRate = MaxRate*16L;
-double  slewRateFactorAxis1 = 1.0;
-double  slewRateFactorAxis2 = 1.0;
+volatile double  targetSlewRateFactorAxis1 = 1.0;
+volatile double  slewRateFactorAxis1 = 1.0;
+volatile double  targetSlewRateFactorAxis2 = 1.0;
+volatile double  slewRateFactorAxis2 = 1.0;
 
 double  slewSpeed = 0;
 volatile long    timerRateAxis1 = 0;
@@ -307,10 +309,12 @@ unsigned long baudRate[10] = {115200,56700,38400,28800,19200,14400,9600,4800,240
 #define GuideRate24x       6
 #define GuideRateNone      255
 
-#define slewRate (1.0/(((double)StepsPerDegreeAxis1*(MaxRate/1000000.0)))*3600.0)
-#define slewRateX (slewRate/15.0)
+#define DegreesPerSecond (1.0/((double)StepsPerDegreeAxis1*(MaxRate/1000000.0)))         // in degrees per second
+#define slewRate         (1.0/((double)StepsPerDegreeAxis1*(MaxRate/1000000.0))*3600.0)  // in arc-seconds per second
+#define slewRateX (slewRate/15.0)                                                        // in RA seconds per second
 #define halfSlewRate (slewRate/2.0)
-#define acc (slewRateX/DegreesForAcceleration)  // say 5 degrees to 240x for example = 240/5 = 48X/s
+#define accArcsecPerSec  (slewRateX/DegreesForAcceleration)
+#define accDegreesPerSec (DegreesPerSecond/DegreesForAcceleration)
 double  guideRates[10]={3.75,7.5,15,30,60,120,360,720,halfSlewRate,slewRate};
 //                      .25X .5x 1x 2x 4x  8x 24x 48x half-MaxRate MaxRate
 
