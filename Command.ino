@@ -696,7 +696,7 @@ void processCommands() {
         quietReply=true;
       } else
 //  :GVD# Get Telescope Firmware Date
-//         Returns: mm dd yy#
+//         Returns: mmm dd yyyy#
 //  :GVN# Get Telescope Firmware Number
 //         Returns: d.dc.d#
 //  :GVP# Get Telescope Product Name
@@ -705,18 +705,7 @@ void processCommands() {
 //         returns: HH:MM:SS#
       if (command[1]=='V') {
         if (parameter[1]==(char)0) {
-          if (parameter[0]=='D') {
-            int m=-1; int d; int y;
-            if (strlen(FirmwareDate)==11) {
-              strcpy(reply,FirmwareDate);
-              const char months[12][4] = { "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec" };
-              for (int c=0; c<12; c++) if (strstr(reply,months[c])) m=c+1;
-              if (reply[4]==' ') reply[4]='0'; d=10*(reply[4]-'0')+(reply[5]-'0');
-              y=10*(reply[9]-'0')+(reply[10]-'0');
-            }
-            if ((m<1) || (m>12) || (d<1) || (d>31) || (y<0) || (y>99)) { m=1; d=1; y=18; }
-            sprintf(reply,"%02d %02d %02d",m,d,y);
-          } else
+          if (parameter[0]=='D') strcpy(reply,FirmwareDate); else
           if (parameter[0]=='N') sprintf(reply,"%i.%i%s.%i",FirmwareVersionMajor,FirmwareVersionMinor,FirmwareVersionPatch,FirmwareVersionConfig); else
           if (parameter[0]=='P') strcpy(reply,FirmwareName); else
           if (parameter[0]=='T') strcpy(reply,FirmwareTime); else commandError=true;
