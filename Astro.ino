@@ -716,8 +716,8 @@ double cot(double n) {
 void SetAccelerationRates(double maxRate) {
   // set the new acceleration rate
   cli();
-  StepsForRateChangeAxis1= ((double)DegreesForAcceleration/sqrt((double)StepsPerDegreeAxis1))*0.3333333*StepsPerDegreeAxis1*maxRate;
-  StepsForRateChangeAxis2= ((double)DegreesForAcceleration/sqrt((double)StepsPerDegreeAxis2))*0.3333333*StepsPerDegreeAxis2*maxRate;
+  StepsForRateChangeAxis1= (sqrt((double)DegreesForAcceleration*(double)StepsPerDegreeAxis1))*maxRate;
+  StepsForRateChangeAxis2= (sqrt((double)DegreesForAcceleration*(double)StepsPerDegreeAxis2))*maxRate;
   sei();
   slewSpeed=(1000000.0/(maxRate/16L))/StepsPerDegreeAxis1;
 }

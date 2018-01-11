@@ -126,15 +126,16 @@ ISR(TIMER1_COMPA_vect)
         // high speed guiding
         StepperModeGoto();
 
-        double r=10.0-sqrt((abs(guideTimerRateAxis1A)/slewRateX)*100.0);
-        if (r<1.0) r=1.0;
+        // at higher step rates where torque is reduced make smaller rate changes
+        double r=sqrt((slewRateX-abs(guideTimerRateAxis1A)))/(sqrt((slewRateX)/2.0));
+        if (r<0.001) r=0.001;
 
         // acceleration/deceleration control
         if ((guideDirAxis1!=lastGuideDirAxis1) && (lastGuideDirAxis1!=0)) guideDirChangeTimerAxis1=25;
         lastGuideDirAxis1=guideDirAxis1;
         if (guideDirChangeTimerAxis1>0) guideDirChangeTimerAxis1--; else {
-          if (guideTimerRateAxis1A>guideTimerRateAxis1) { guideTimerRateAxis1A-=(accArcsecPerSec/150.0)*r; if (guideTimerRateAxis1A<guideTimerRateAxis1) guideTimerRateAxis1A=guideTimerRateAxis1; }
-          if (guideTimerRateAxis1A<guideTimerRateAxis1) { guideTimerRateAxis1A+=(accArcsecPerSec/150.0)*r; if (guideTimerRateAxis1A>guideTimerRateAxis1) guideTimerRateAxis1A=guideTimerRateAxis1; }
+          if (guideTimerRateAxis1A>guideTimerRateAxis1) { guideTimerRateAxis1A-=(accArcsecPerSec/100.0)*r; if (guideTimerRateAxis1A<guideTimerRateAxis1) guideTimerRateAxis1A=guideTimerRateAxis1; }
+          if (guideTimerRateAxis1A<guideTimerRateAxis1) { guideTimerRateAxis1A+=(accArcsecPerSec/100.0)*r; if (guideTimerRateAxis1A>guideTimerRateAxis1) guideTimerRateAxis1A=guideTimerRateAxis1; }
         }
 
         // stop guiding
@@ -166,15 +167,16 @@ ISR(TIMER1_COMPA_vect)
         // use acceleration
         StepperModeGoto();
 
-        double r=10.0-sqrt((abs(guideTimerRateAxis2A)/slewRateX)*100.0);
-        if (r<1.0) r=1.0;
+        // at higher step rates where torque is reduced make smaller rate changes
+        double r=sqrt((slewRateX-abs(guideTimerRateAxis2A)))/(sqrt((slewRateX)/2.0));
+        if (r<0.001) r=0.001;
 
         // acceleration/deceleration control
         if ((guideDirAxis2!=lastGuideDirAxis2) && (lastGuideDirAxis2!=0)) guideDirChangeTimerAxis2=25;
         lastGuideDirAxis2=guideDirAxis2;
         if (guideDirChangeTimerAxis2>0) guideDirChangeTimerAxis2--; else {
-          if (guideTimerRateAxis2A>guideTimerRateAxis2) { guideTimerRateAxis2A-=(accArcsecPerSec/150.0)*r; if (guideTimerRateAxis2A<guideTimerRateAxis2) guideTimerRateAxis2A=guideTimerRateAxis2; }
-          if (guideTimerRateAxis2A<guideTimerRateAxis2) { guideTimerRateAxis2A+=(accArcsecPerSec/150.0)*r; if (guideTimerRateAxis2A>guideTimerRateAxis2) guideTimerRateAxis2A=guideTimerRateAxis2; }
+          if (guideTimerRateAxis2A>guideTimerRateAxis2) { guideTimerRateAxis2A-=(accArcsecPerSec/100.0)*r; if (guideTimerRateAxis2A<guideTimerRateAxis2) guideTimerRateAxis2A=guideTimerRateAxis2; }
+          if (guideTimerRateAxis2A<guideTimerRateAxis2) { guideTimerRateAxis2A+=(accArcsecPerSec/100.0)*r; if (guideTimerRateAxis2A>guideTimerRateAxis2) guideTimerRateAxis2A=guideTimerRateAxis2; }
         }
 
         // stop guiding
