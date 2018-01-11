@@ -1,7 +1,57 @@
 // -----------------------------------------------------------------------------------
 // Validate current configuration
 
-#if !defined(Classic_ON) && !defined(MiniPCB_ON) && !defined(MaxPCB_ON) && !defined(TM4C_ON) && !defined(Ramps14_ON) && !defined(Mega2560Alt_ON) && !defined(STM32_ON)
+#ifdef Classic_ON
+  #define Configuration_Found
+#endif
+#ifdef MiniPCB_ON
+  #ifdef Configuration_Found
+    #define Configuration_Duplicate
+  #else
+    #define Configuration_Found
+  #endif
+#endif
+#ifdef MaxPCB_ON
+  #ifdef Configuration_Found
+    #define Configuration_Duplicate
+  #else
+    #define Configuration_Found
+  #endif
+#endif
+#ifdef TM4C_ON
+  #ifdef Configuration_Found
+    #define Configuration_Duplicate
+  #else
+    #define Configuration_Found
+  #endif
+#endif
+#ifdef Ramps14_ON
+  #ifdef Configuration_Found
+    #define Configuration_Duplicate
+  #else
+    #define Configuration_Found
+  #endif
+#endif
+#ifdef Mega2560Alt_ON
+  #ifdef Configuration_Found
+    #define Configuration_Duplicate
+  #else
+    #define Configuration_Found
+  #endif
+#endif
+#ifdef STM32_ON
+  #ifdef Configuration_Found
+    #define Configuration_Duplicate
+  #else
+    #define Configuration_Found
+  #endif
+#endif
+
+#ifdef Configuration_Duplicate
+  #error "You have more than one Config.xxx.h file enabled, ONLY ONE can be enabled with _ON."
+#endif
+
+#ifndef Configuration_Found
   #error "Choose ONE Config.xxx.h file and enable it for use by turning it _ON."
 #endif
 
@@ -344,5 +394,4 @@
 #if (MaxRate*AXIS1_STEP_GOTO + MaxRate*AXIS2_STEP_GOTO)/2 < __MaxRate_LowerLimit*2
   #warning "Configuration: the MaxRate run-time adjustability (0.5x to 2x MaxRate) can be set to exceed the platform performance, you might want to increase MaxRate or use/adjust micro-step mode switching"
 #endif
-
 
