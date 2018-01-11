@@ -35,13 +35,16 @@
  *   https://groups.io/g/onstep
  */
 
-// Use Config.xxxxx.h to configure OnStep to your requirements
+// Use Config.xxx.h to configure OnStep to your requirements
 
 // firmware info, these are returned by the ":GV?#" commands
-#define FirmwareDate   "01 09 18"
-#define FirmwareNumber "1.1a"
-#define FirmwareName   "On-Step"
-#define FirmwareTime   "12:00:00"
+#define FirmwareDate          __DATE__
+#define FirmwareVersionMajor  1
+#define FirmwareVersionMinor  1
+#define FirmwareVersionPatch  ""
+#define FirmwareVersionConfig 1          // for example major.minor patch.config: 1.3c.2
+#define FirmwareName          "On-Step"
+#define FirmwareTime          __TIME__
 
 #include "Constants.h"
 

@@ -204,6 +204,7 @@
 // THAT'S IT FOR USER CONFIGURATION!
 
 // -------------------------------------------------------------------------------------------------------------------------
+#define FileVersionConfig 1
 #include "Pins.Ramps14.h"
 #endif
 
