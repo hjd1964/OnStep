@@ -1157,8 +1157,7 @@ void processCommands() {
         if (&parameter[0]!=conv_end) {
           if (f<1.0/60.0/60.0) f=1.0/60.0/60.0;
           if (f>maxStepsPerSecond/StepsPerDegreeAxis1) f=maxStepsPerSecond/StepsPerDegreeAxis1;
-          guideTimerCustomRateAxis1=f*240.0;
-          customGuideRateAxis1(GUIDE_TIME_LIMIT*1000);
+          customGuideRateAxis1(f*240.0,GUIDE_TIME_LIMIT*1000);
         }
         quietReply=true; 
       } else
@@ -1170,8 +1169,7 @@ void processCommands() {
         if (&parameter[0]!=conv_end) {
           if (f<1.0/60.0/60.0) f=1.0/60.0/60.0;
           if (f>maxStepsPerSecond/StepsPerDegreeAxis2) f=maxStepsPerSecond/StepsPerDegreeAxis2;
-          guideTimerCustomRateAxis2=f*240.0;
-          customGuideRateAxis2(GUIDE_TIME_LIMIT*1000);
+          customGuideRateAxis2(f*240.0,GUIDE_TIME_LIMIT*1000);
         }
         quietReply=true; 
       } else

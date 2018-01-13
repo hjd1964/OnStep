@@ -97,8 +97,10 @@ void stopGuideAxis2() {
   }
 }
 
-// custom guide rate in RA or Azm, guideDuration is in ms (0 to ignore) 
-bool customGuideRateAxis1(long guideDuration) {
+// custom guide rate in RA or Azm, rate is in x-sidereal, guideDuration is in ms (0 to ignore) 
+double guideTimerCustomRateAxis1 = 0.0;
+bool customGuideRateAxis1(double rate, long guideDuration) {
+  guideTimerCustomRateAxis1=rate;
   enableGuideRate(-1);
   if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo) && (axis1Enabled) && (guideDirAxis1)) {
     guideTimeThisIntervalAxis1=micros();
@@ -111,8 +113,10 @@ bool customGuideRateAxis1(long guideDuration) {
   return true;
 }
 
-// custom guide rate in Dec or Alt, guideDuration is in ms (0 to ignore)
-bool customGuideRateAxis2(long guideDuration) {
+// custom guide rate in Dec or Alt, rate is in x-sidereal, guideDuration is in ms (0 to ignore)
+double guideTimerCustomRateAxis2 = 0.0;
+bool customGuideRateAxis2(double rate, long guideDuration) {
+  guideTimerCustomRateAxis2=rate;
   enableGuideRate(-1);
   if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo) && (axis2Enabled) && (guideDirAxis2)) {
     guideTimeThisIntervalAxis2=micros();
@@ -134,6 +138,8 @@ void setGuideRate(int g) {
 }
 
 // enables the guide rate
+// -1 to use guideTimerCustomRateAxis1/2, otherwise rates are:
+// 0=.25X 1=.5x 2=1x 3=2x 4=4x 5=8x 6=24x 7=48x 8=half-MaxRate 9=MaxRate
 void enableGuideRate(int g) {
   // don't do these calculations unless we have to
   if (activeGuideRate==g) return;

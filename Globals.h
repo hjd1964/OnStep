@@ -327,8 +327,6 @@ volatile double  guideTimerRateAxis1 = 0.0;
 volatile double  guideTimerRateAxis2 = 0.0;
 volatile double  guideTimerBaseRateAxis1 = 0.0;
 volatile double  guideTimerBaseRateAxis2 = 0.0;
-volatile double  guideTimerCustomRateAxis1 = 0.0;
-volatile double  guideTimerCustomRateAxis2 = 0.0;
 fixed_t amountGuideAxis1;
 fixed_t guideAxis1;
 fixed_t amountGuideAxis2;
