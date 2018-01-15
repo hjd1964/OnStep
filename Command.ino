@@ -698,7 +698,7 @@ void processCommands() {
 //  :GVD# Get Telescope Firmware Date
 //         Returns: mmm dd yyyy#
 //  :GVN# Get Telescope Firmware Number
-//         Returns: d.dc.d#
+//         Returns: d.dc#
 //  :GVP# Get Telescope Product Name
 //         Returns: <string>#
 //  :GVT# Get Telescope Firmware Time
@@ -706,7 +706,7 @@ void processCommands() {
       if (command[1]=='V') {
         if (parameter[1]==(char)0) {
           if (parameter[0]=='D') strcpy(reply,FirmwareDate); else
-          if (parameter[0]=='N') sprintf(reply,"%i.%i%s.%i",FirmwareVersionMajor,FirmwareVersionMinor,FirmwareVersionPatch,FirmwareVersionConfig); else
+          if (parameter[0]=='N') sprintf(reply,"%i.%i%s",FirmwareVersionMajor,FirmwareVersionMinor,FirmwareVersionPatch); else
           if (parameter[0]=='P') strcpy(reply,FirmwareName); else
           if (parameter[0]=='T') strcpy(reply,FirmwareTime); else commandError=true;
         } else commandError=true;
