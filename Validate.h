@@ -148,7 +148,12 @@
   // attempting to use the simplified stepper driver setup
 
   // special SPI decay modes etc. for TMC2130 AXIS1
-  #if AXIS1_DRIVER_MODEL == TMC2130_QUIET
+  #if AXIS1_DRIVER_MODEL == TMC2130_LOWPWR
+    #undef AXIS1_DRIVER_MODEL
+    #define AXIS1_DRIVER_MODEL TMC2130
+    #define TMC_AXIS1_MODE TMC_LOWPWR
+    #define TMC_AXIS1_MODE_GOTO 0
+  #elif AXIS1_DRIVER_MODEL == TMC2130_QUIET
     #undef AXIS1_DRIVER_MODEL
     #define AXIS1_DRIVER_MODEL TMC2130
     #define TMC_AXIS1_MODE TMC_STEALTHCHOP
@@ -174,7 +179,12 @@
   #endif
 
   // special SPI decay modes etc. for TMC2130 AXIS2
-  #if AXIS2_DRIVER_MODEL == TMC2130_QUIET
+  #if AXIS2_DRIVER_MODEL == TMC2130_LOWPWR
+    #undef AXIS2_DRIVER_MODEL
+    #define AXIS2_DRIVER_MODEL TMC2130
+    #define TMC_AXIS2_MODE TMC_LOWPWR
+    #define TMC_AXIS2_MODE_GOTO 0
+  #elif AXIS2_DRIVER_MODEL == TMC2130_QUIET
     #undef AXIS2_DRIVER_MODEL
     #define AXIS2_DRIVER_MODEL TMC2130
     #define TMC_AXIS2_MODE TMC_STEALTHCHOP
