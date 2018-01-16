@@ -21,7 +21,8 @@
 #define TonePin       42    // Pin 42 (Tone)
 
 // The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
-#define PpsPin         21   // Interrupt 2 on Pin 21 (alternate Int3 on Pin20)
+#define PpsPin        21    // Interrupt 2 on Pin 21 (alternate Int3 on Pin20)
+#define DS3234_CS_PIN 10
 
 #define Axis1DirPin   11    // Pin 11 (Dir)  PB5
 #define Axis1DirBit    5    //

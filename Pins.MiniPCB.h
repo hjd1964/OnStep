@@ -17,6 +17,7 @@
 
 // The PPS pin is a 3.3V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
 #define PpsPin        28    // Pin 28 (PPS time source, GPS for example)
+#define DS3234_CS_PIN 10
 
 #define Axis1DirPin   21    // Pin 21 (Dir)
 #define Axis1StepPin  20    // Pin 20 (Step)

@@ -20,6 +20,7 @@
 
 // The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
 #define PpsPin         2    // RAMPS X+, Interrupt 0 on Pin 2
+#define DS3234_CS_PIN 53
 
 // Pins to Axis1 RA/Azm on RAMPS X
 #define Axis1DirPin   55    // Pin A1 (Dir)
