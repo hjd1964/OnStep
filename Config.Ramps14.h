@@ -69,17 +69,17 @@
 // Switch close (to ground) on Pin 3 for optional limit sense (stops gotos and/or tracking), default=_OFF
 #define LIMIT_SENSE_OFF
 
-// Light status LED by sink to ground (Pin 9) and source +5V (Pin 8), default=_ON.
+// Light status LED by sink to ground (Pin 11), default=_ON.
 // _ON and OnStep keeps this illuminated to indicate that the controller is active.  When sidereal tracking this LED will rapidly flash
 #define STATUS_LED_PINS_ON
-// Light 2nd status LED by sink to ground (Pin 7), default=_OFF.
+// Light 2nd status LED by sink to ground (Pin 6), default=_OFF.
 // _ON sets this to blink at 1 sec intervals when PPS is synced.  Turns off if tracking is stopped.  Turns on during gotos.
 #define STATUS_LED2_PINS_OFF
-// Light reticule LED by sink to ground (pin 44), default=_OFF.
+// Light reticule LED by sink to ground (pin 5), default=_OFF.
 // RETICULE_LED_PINS n, where n=0 to 255 activates this feature and sets default brightness
 #define RETICULE_LED_PINS_OFF
 
-// Sound/buzzer on pin 42, default=_OFF.
+// Sound/buzzer on pin 4, default=_OFF.
 // Specify frequency for a piezo speaker (for example "BUZZER 2000") or use BUZZER_ON for a piezo buzzer.
 #define BUZZER_OFF
 // Sound state at startup, default=_ON.
