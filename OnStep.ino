@@ -41,7 +41,7 @@
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  1
 #define FirmwareVersionMinor  1
-#define FirmwareVersionPatch  "c"     // for example major.minor patch: 1.3c
+#define FirmwareVersionPatch  "d"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 1       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
@@ -247,11 +247,7 @@ void loop() {
     faultAxis1=(digitalRead(Axis1_FAULT)==HIGH);
 #endif
 #ifdef AXIS1_FAULT_SPI
-  if (lst%2==0) {
-    BBSpi.begin(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0);
-    faultAxis1=TMC2130_error();
-    BBSpi.end();
-  }
+  if (lst%2==0) tmcAxis1.error();
 #endif
 #ifdef AXIS2_FAULT_LOW
     faultAxis2=(digitalRead(Axis2_FAULT)==LOW);
@@ -260,11 +256,7 @@ void loop() {
     faultAxis2=(digitalRead(Axis2_FAULT)==HIGH);
 #endif
 #ifdef AXIS2_FAULT_SPI
-  if (lst%2==1) {
-    BBSpi.begin(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
-    faultAxis2=TMC2130_error();
-    BBSpi.end();
-  }
+  if (lst%2==1) tmcAxis2.error();
 #endif
 #if defined(MODE_SWITCH_BEFORE_SLEW_SPI) && defined(STALL_GUARD_ON)
   tmcAxis1.sgUpdateResult();
