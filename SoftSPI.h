@@ -10,7 +10,7 @@ class bbspi {
       _sck=sck; pinMode(_sck,OUTPUT); digitalWrite(_sck,HIGH);
 
       _miso=miso; 
-#ifdef ESP8266_CONTROL_ON
+#ifndef ESP8266_CONTROL_ON
       pinMode(_miso,INPUT);
 #endif
       _mosi=mosi; pinMode(_mosi,OUTPUT);
