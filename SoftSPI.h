@@ -8,7 +8,11 @@ class bbspi {
       _cs=cs; pinMode(cs,OUTPUT); digitalWrite(cs,HIGH);
       delayMicroseconds(1);
       _sck=sck; pinMode(_sck,OUTPUT); digitalWrite(_sck,HIGH);
-      _miso=miso; pinMode(_miso,INPUT);
+
+      _miso=miso; 
+#ifdef ESP8266_CONTROL_ON
+      pinMode(_miso,INPUT);
+#endif
       _mosi=mosi; pinMode(_mosi,OUTPUT);
       digitalWrite(cs,LOW);
       delayMicroseconds(1);
@@ -36,7 +40,11 @@ class bbspi {
         digitalWrite(_mosi,bitRead(data_out,i));
         delayMicroseconds(1);
         digitalWrite(_sck,HIGH);
+#ifdef ESP8266_CONTROL_ON
+        bitWrite(data_in,i,0);
+#else
         bitWrite(data_in,i,digitalRead(_miso));
+#endif
         delayMicroseconds(1);
       }
       
@@ -53,7 +61,11 @@ class bbspi {
         digitalWrite(_mosi,bitRead(data_out,i));
         delayMicroseconds(1);
         digitalWrite(_sck,HIGH);
+#ifdef ESP8266_CONTROL_ON
+        bitWrite(data_in,i,0);
+#else
         bitWrite(data_in,i,digitalRead(_miso));
+#endif
         delayMicroseconds(1);
       }
     

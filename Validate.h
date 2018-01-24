@@ -239,6 +239,9 @@
     #if AXIS1_MICROSTEPS!=1 && AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16 && AXIS1_MICROSTEPS!=32 && AXIS1_MICROSTEPS!=64 && AXIS1_MICROSTEPS!=128 && AXIS1_MICROSTEPS!=256
       #error "Configuration: AXIS1_MICROSTEPS; TMC2130 invalid micro-step mode, use: 256,128,64,32,16,8,4,2,or 1"
     #endif
+    #if AXIS2_DRIVER_MODEL != TMC2130
+      #error "Configuration: TMC2130 stepper drivers must be used in pairs (both Axis1 and Axis2.)"
+    #endif
   #elif AXIS1_DRIVER_MODEL == TMC2208
     #if AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16
       #error "Configuration: AXIS1_MICROSTEPS; TMC2208 invalid micro-step mode, use: 16,8,4,or 2"
@@ -369,7 +372,6 @@
 
 #else
   // attempting to use the advanced stepper driver mode setup
-
   #if defined(MODE_SWITCH_BEFORE_SLEW_ON) || defined(MODE_SWITCH_BEFORE_SLEW_SPI)
     #if !defined(AXIS1_MODE) || !defined(AXIS1_MODE_GOTO)
       #error "Configuration: AXIS1_MODE and AXIS1_MODE_GOTO must be set to a valid value."
@@ -390,6 +392,15 @@
 #endif
 
 // -----------------------------------------------------------------------------------
+// warn the user not to have MISO wired up and try to use ESP8266 control too
+#if defined(ESP8266_CONTROL_ON) && defined(MODE_SWITCH_BEFORE_SLEW_SPI)
+  #warning "Configuration: be sure the Aux1 and Aux2 pins are wired into the ESP8266 GPIO0 and RST pins and **NOT** the SSS TMC2130 SDO pins"
+  #if defined(AXIS1_FAULT_SPI) || defined(AXIS2_FAULT_SPI)
+    #error "Configuration: Fault detection across SPI conflicts with ESP8266 control, choose one feature and wire for it correctly"
+  #endif
+#endif
+
+// -----------------------------------------------------------------------------------
 // check to see if we're trying to operate at too fast a rate
 #if AXIS2_STEP_GOTO==1 && AXIS1_STEP_GOTO==1
   #define __MaxRate_LowerLimit MaxRate_LowerLimit
@@ -404,4 +415,5 @@
 #if (MaxRate*AXIS1_STEP_GOTO + MaxRate*AXIS2_STEP_GOTO)/2 < __MaxRate_LowerLimit*2
   #warning "Configuration: the MaxRate run-time adjustability (0.5x to 2x MaxRate) can be set to exceed the platform performance, you might want to increase MaxRate or use/adjust micro-step mode switching"
 #endif
+
 
