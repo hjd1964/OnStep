@@ -8,6 +8,7 @@ To send the firmware I use the Arduino IDE with the add-on for the ESP8266.  To 
 
 Look in the Arduino Preferences menu and place this line in the additional "Boards Manager" area:
 http://arduino.esp8266.com/stable/package_esp8266com_index.json
+
 Then from the "Tools->Boards->Boards Manager" menu select and install the ESP8266 add-on.
 
 Then pick "Tools->Boards->Generic 8266 Module" (for an ESP-01) or select your device from the list.
