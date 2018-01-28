@@ -6,8 +6,6 @@ For my testing I used an Arduino M0 and Arduino Ethernet Shield R3 (W5100.)  Oth
 
 Use the Arduino IDE's "Tools->Boards->Boards Manager" menu to add ARM device support.
 
-Download the OnStepEthernetServer.zip file from GitHub.
-
 This source code is inside your OnStep folder under the "src/Ethernet" subdirectory.
 
 Open the Ethernet.ino file inside this folder.  Find the "Config.h" tab and make any changes as required for your setup.  Upload.
