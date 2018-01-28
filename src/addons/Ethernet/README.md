@@ -8,12 +8,11 @@ Use the Arduino IDE's "Tools->Boards->Boards Manager" menu to add ARM device sup
 
 Download the OnStepEthernetServer.zip file from GitHub.
 
-Unzip the folder inside and rename it to "OnStepEthernetServer". This can be on your desktop or in your ~/Documents/Arduino folder.
+This source code is inside your OnStep folder under the "src/Ethernet" subdirectory.
 
-Open the OnStepEthernetServer.ino file inside this folder.  Find the "Config.h" tab and make any changes as required for your setup.  Upload.
+Open the Ethernet.ino file inside this folder.  Find the "Config.h" tab and make any changes as required for your setup.  Upload.
 
 
 Once the firmware is on the device simply connect the serial interface lines to OnStep's Serial1 port similar to how a Bluetooth module would be connected.
 
-The Teensy3.2 and Launchpad TM4C OnSteps are best for this but the Mega2560 should work too (probably.)
 
