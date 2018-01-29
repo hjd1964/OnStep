@@ -653,15 +653,15 @@ bool TGeoAlign::addStar(int I, int N, double RA, double Dec) {
 
   // First star:
   // Near the celestial equator (Dec=0, HA=0), telescope West of the pier if multi-star align
-  if (I==1) {
+  if ((I==1) && (N==1)) {
     // set the indexAxis1/2 offset
     if (syncEqu(RA,Dec)!=0) { return false; }
   }
 
-  actual[I-1].ha=haRange(LST()*15.0-RA)/Rad;
-  actual[I-1].dec=Dec/Rad;
   mount[I-1].ha=(((double)(long)(targetAxis1.part.m+indexAxis1Steps))/(double)StepsPerDegreeAxis1)/Rad;
   mount[I-1].dec=(((double)(long)(targetAxis2.part.m+indexAxis2Steps))/(double)StepsPerDegreeAxis2)/Rad;
+  actual[I-1].ha=haRange(LST()*15.0-RA)/Rad;
+  actual[I-1].dec=Dec/Rad;
   if (pierSide==PierSideWest) { actual[I-1].side=-1; mount[I-1].side=-1; } else
   if (pierSide==PierSideEast) { actual[I-1].side=1; mount[I-1].side=1; } else { actual[I-1].side=0; mount[I-1].side=0; }
 
