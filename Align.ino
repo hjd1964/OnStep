@@ -581,6 +581,8 @@ void TGeoAlign::InstrToEqu(double Lat, double HA, double Dec, double *HA1, doubl
 // GEOMETRIC ALIGN FOR EQUATORIAL MOUNTS, GOTO ASSIST BASED
 //
 
+#define GOTO_ASSIST_DEBUG_OFF
+
 TGeoAlign::TGeoAlign()
 {
   init();
@@ -663,8 +665,26 @@ bool TGeoAlign::addStar(int I, int N, double RA, double Dec) {
   if (pierSide==PierSideWest) { actual[I-1].side=-1; mount[I-1].side=-1; } else
   if (pierSide==PierSideEast) { actual[I-1].side=1; mount[I-1].side=1; } else { actual[I-1].side=0; mount[I-1].side=0; }
 
+#ifdef GOTO_ASSIST_DEBUG_ON
+  char s[80];
+  double f;
+  PSerial.putch(I-1+'0');
+  PSerial.puts(" Mount h");
+  f=mount[I-1].ha*Rad/15.0; if (f<0) f=f+24.0; doubleToHms(s,&f); PSerial.puts(s);
+  PSerial.puts(",d");
+  f=mount[I-1].dec*Rad; doubleToDms(s,&f,false,true); PSerial.puts(s);
+  PSerial.puts("   Actual h");
+  f=actual[I-1].ha*Rad/15.0; if (f<0) f=f+24.0; doubleToHms(s,&f); PSerial.puts(s);
+  PSerial.puts(",d");
+  f=actual[I-1].dec*Rad; doubleToDms(s,&f,false,true); PSerial.puts(s);
+  PSerial.puts("\r\n");
+#endif
+
   // two or more stars and finished
   if ((I>=2) && (I==N)) {
+#ifdef GOTO_ASSIST_DEBUG_ON
+    PSerial.puts("\r\n");
+#endif
     autoModel(N);
  //   if (syncEqu(RA,Dec)!=0) { return false; }
     geo_ready=true;
@@ -900,6 +920,14 @@ void TGeoAlign::autoModel(int n) {
   dfCor=best_ff/3600.0;
 #endif
   tfCor=best_tf/3600.0;
+
+#ifdef GOTO_ASSIST_DEBUG_ON
+  PSerial.puts("\r\n");
+  char s[80];
+  PSerial.puts("Model Error  =");
+  dtostrf(best_dist*Rad*60.0,6,2,s); PSerial.puts(s);
+  PSerial.puts("\r\n");
+#endif
 
   // offset corrections: doesn't matter, a sync will override this
   indexAxis1=best_ohw/3600.0;
