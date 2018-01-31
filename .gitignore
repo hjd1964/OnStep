@@ -16,7 +16,6 @@
 *.out
 *.app
 
-Config.h
 PecPlus.ino
 Alternate_Config.h
 zConfig*.h
