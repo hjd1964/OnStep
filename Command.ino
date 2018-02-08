@@ -178,10 +178,10 @@ void processCommands() {
       } else
       
 //   $ - Set parameter
-//  :$BDddd# Set Dec Antibacklash
+//  :$BDddd# Set Dec/Alt Antibacklash
 //          Return: 0 on failure
 //                  1 on success
-//  :$BRddd# Set RA Antibacklash
+//  :$BRddd# Set RA/Azm Antibacklash
 //          Return: 0 on failure
 //                  1 on success
 //         Set the Backlash values.  Units are arc-seconds

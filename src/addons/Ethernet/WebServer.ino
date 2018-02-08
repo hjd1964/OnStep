@@ -1,6 +1,9 @@
 // -----------------------------------------------------------------------------------
 // Web server
 
+// Turn _ON to allow webserver debug messages
+#define WEBSERVER_DEBUG_OFF
+
 // SD CARD support, simply enable and provide a webserver.on("filename.htm") to serve each file
 #ifdef SD_CARD_ON
 #include <SD.h>
