@@ -37,7 +37,7 @@
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
 #define FirmwareVersionMinor  "0"
-#define FirmwareVersionPatch  "b"
+#define FirmwareVersionPatch  "c"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
@@ -47,6 +47,16 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFiAP.h>
 #include <EEPROM.h>
+
+// The settings below are for initialization only, afterward they are stored and recalled from EEPROM and must
+// be changed in the web interface OR with a reset (for initialization again) as described in the comments below
+#if SERIAL_BAUD<=28800
+  #define TIMEOUT_WEB 60
+  #define TIMEOUT_CMD 60
+#else
+  #define TIMEOUT_WEB 15
+  #define TIMEOUT_CMD 30
+#endif
 
 #define Default_Password "password"
 char masterPassword[40]=Default_Password;
@@ -159,7 +169,7 @@ void handleNotFound(){
 }
 
 void setup(void){
-  delay(3000);
+
 #ifdef LED_PIN
   pinMode(LED_PIN,OUTPUT);
 #endif
@@ -252,31 +262,34 @@ Again:
     Serial.println();
   }
  
-  // switch OnStep Serial1 up to ? baud
-  Serial.print(SERIAL_BAUD);
-  delay(100);
-  int count=0; c=0;
-  while (Serial.available()>0) { count++; if (count==1) c=Serial.read(); }
-  if (c=='1') {
-      HighSpeedComms();
-  #ifdef SERIAL_SWAP_ON
-      Serial.swap();
-  #endif
-  } else {
+  if (SERIAL_BAUD!=SERIAL_BAUD_DEFAULT) {
+
+    // switch OnStep Serial1 up to ? baud
+    Serial.print(HighSpeedCommsStr(SERIAL_BAUD));
+    delay(100);
+    int count=0; c=0;
+    while (Serial.available()>0) { count++; if (count==1) c=Serial.read(); }
+    if (c=='1') {
+        Serial.begin(SERIAL_BAUD);
+    #ifdef SERIAL_SWAP_ON
+        Serial.swap();
+    #endif
+    } else {
 #ifdef LED_PIN
-    digitalWrite(LED_PIN,HIGH);
+      digitalWrite(LED_PIN,HIGH);
 #endif
-    // got nothing back, toggle baud rate and try again
-    tb++;
-    if (tb==7) tb=1;
-    if (tb==1) Serial.begin(SERIAL_BAUD_DEFAULT);
-    if (tb==4) HighSpeedComms();
-    
-  #ifdef SERIAL_SWAP_ON
-    Serial.swap();
-  #endif
-    delay(1000);
-    goto Again;
+      // got nothing back, toggle baud rate and try again
+      tb++;
+      if (tb==7) tb=1;
+      if (tb==1) Serial.begin(SERIAL_BAUD_DEFAULT);
+      if (tb==4) Serial.begin(SERIAL_BAUD);
+      
+#ifdef SERIAL_SWAP_ON
+      Serial.swap();
+#endif
+      delay(1000);
+      goto Again;
+    }
   }
 #else
   Serial.begin(115200);
@@ -394,11 +407,11 @@ void loop(void){
   }
 }
 
-void HighSpeedComms() {
-  if (!strcmp(SERIAL_BAUD,":SB0#")) Serial.begin(115200); else
-  if (!strcmp(SERIAL_BAUD,":SB1#")) Serial.begin(57600); else
-  if (!strcmp(SERIAL_BAUD,":SB2#")) Serial.begin(38400); else
-  if (!strcmp(SERIAL_BAUD,":SB3#")) Serial.begin(28800); else
-  if (!strcmp(SERIAL_BAUD,":SB4#")) Serial.begin(19200); else Serial.begin(9600);
+const char* HighSpeedCommsStr(long baud) {
+  if (baud==115200) { return ":SB0#"; }
+  if (baud==57600) { return ":SB1#"; }
+  if (baud==38400) { return ":SB2#"; }
+  if (baud==28800) { return ":SB3#"; }
+  if (baud==19200) { return ":SB4#"; } else { return ":SB5#"; }
 }
 
