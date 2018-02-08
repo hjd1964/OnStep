@@ -426,7 +426,7 @@ void Init_EEPROM_Values() {
 
     // init the min and max altitude
     minAlt=-10;
-    maxAlt=85;
+    maxAlt=80;
     EEPROM.write(EE_minAlt,minAlt+128);
     EEPROM.write(EE_maxAlt,maxAlt);
   
