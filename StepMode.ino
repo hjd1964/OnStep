@@ -68,9 +68,6 @@ void StepperModeTracking() {
   bool stealth=((AXIS1_MODE & 0b0100000)!=0);
   bool lowpwr =((AXIS1_MODE & 0b1000000)!=0);
   tmcAxis1.setup(!nintpol,stealth,AXIS1_MODE&0b001111,lowpwr);
-  #ifdef STALL_GUARD_ON
-  tmcAxis1.sgSetSgt(EEPROM.read(EE_sgSgtAxis1));
-  #endif
 
   // default 256x interpolation ON, stealthChop OFF (spreadCycle), micro-steps
   stepAxis2=1;
@@ -78,9 +75,6 @@ void StepperModeTracking() {
   stealth=((AXIS2_MODE & 0b0100000)!=0);
   lowpwr =((AXIS2_MODE & 0b1000000)!=0);
   tmcAxis2.setup(!nintpol,stealth,AXIS2_MODE&0b001111,lowpwr);
-  #ifdef STALL_GUARD_ON
-  tmcAxis2.sgSetSgt(EEPROM.read(EE_sgSgtAxis2));
-  #endif
 
   // allow stealth chop current regulation to ramp up to the initial motor current before moving
   if ((((AXIS1_MODE & 0b0100000)!=0) || ((AXIS2_MODE & 0b0100000)!=0)) & (atHome)) delay(100);
