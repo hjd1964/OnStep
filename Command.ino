@@ -809,20 +809,6 @@ void processCommands() {
               default:  commandError=true;
             }
           } else
-#if defined(MODE_SWITCH_BEFORE_SLEW_SPI) && defined(STALL_GUARD_ON)
-          if (parameter[0]=='S') { //Sn: stallGuard
-            switch (parameter[1]) {
-              case 'A': break;                                                                                 // stallGuard, Active?
-              case '0': sprintf(reply,"%i",(int)((int8_t)EEPROM.read(EE_sgSgtAxis1))); quietReply=true; break; // stallGuard, SGT Axis1
-              case '1': sprintf(reply,"%i",(int)(EEPROM_readInt(EE_sgLimitAxis1)));    quietReply=true; break; // stallGuard, Lower limit Axis 1
-              case '2': sprintf(reply,"%i",(int)((int8_t)EEPROM.read(EE_sgSgtAxis2))); quietReply=true; break; // stallGuard, SGT Axis2
-              case '3': sprintf(reply,"%i",(int)(EEPROM_readInt(EE_sgLimitAxis2)));    quietReply=true; break; // stallGuard, Lower limit Axis 2
-              case '4': sprintf(reply,"%ld",(long)tmcAxis1.sgResult);                  quietReply=true; break; // stallGuard, get SG_RESULT Axis1
-              case '5': sprintf(reply,"%ld",(long)tmcAxis2.sgResult);                  quietReply=true; break; // stallGuard, get SG_RESULT Axis2
-              default:  commandError=true;
-            }
-          } else 
-#endif
             commandError=true;
         } else commandError=true;
       } else
@@ -1569,37 +1555,6 @@ void processCommands() {
               break;
             default: commandError=true;
           }
-        } else
-#endif
-#if defined(MODE_SWITCH_BEFORE_SLEW_SPI) && defined(STALL_GUARD_ON)
-        if (parameter[0]=='S') { //Sn: stallGuard
-          long sgt;
-          long t;
-          switch (parameter[1]) {
-            case '0': // set sgt Axis1
-              sgt=strtol(&parameter[3],NULL,10);
-              if ((sgt>=-64) && (sgt<=63)) {
-                EEPROM.write(EE_sgSgtAxis1,(uint8_t)sgt);
-                tmcAxis1.sgSetSgt(sgt);
-              } else commandError=true;
-            break;
-            case '1': // set sgt threshold Axis1
-              t=strtol(&parameter[3],NULL,10);
-              if ((t>=0) && (t<=1023)) EEPROM_writeInt(EE_sgLimitAxis1,t); else commandError=true;
-            break;
-            case '2': // set sgt Axis2
-              sgt=strtol(&parameter[3],NULL,10);
-              if ((sgt>=-64) && (sgt<=63)) {
-                EEPROM.write(EE_sgSgtAxis2,(uint8_t)sgt);
-                tmcAxis2.sgSetSgt(sgt);
-              } else commandError=true;
-            break;
-            case '3': // set sgt threshold Axis2
-              t=strtol(&parameter[3],NULL,10);
-              if ((t>=0) && (t<=1023)) EEPROM_writeInt(EE_sgLimitAxis2,t); else commandError=true;
-            break;
-            default: commandError=true;
-          } 
         } else
 #endif
           commandError=true;
