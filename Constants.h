@@ -5,7 +5,6 @@
 #define TMC_LOWPWR      64
 #define TMC_STEALTHCHOP 32
 #define TMC_NINTPOL     16
-#define SYNC_ANYWHERE_ON
 
 // Stepper Driver Models
 #define A4988   1

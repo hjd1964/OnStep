@@ -1843,11 +1843,7 @@ String ConfighSettings() {
   #else
     c="0";
   #endif
-  #ifdef SYNC_ANYWHERE_ON
-    c+="1";
-  #else
-    c+="0";
-  #endif
+  c+="1";
   #if defined(MOUNT_TYPE_GEM)
     c+="0";
   #elif defined(MOUNT_TYPE_FORK)

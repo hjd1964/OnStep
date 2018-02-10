@@ -6,13 +6,8 @@ int goHome() {
   int f=validateGoto(); if (f==5) f=8; if (f!=0) return f; // goto allowed?
 
   cli();
-  #ifdef SYNC_ANYWHERE_ON
   if (pierSide==PierSideWest) targetAxis1.part.m=-celestialPoleAxis1*(long)StepsPerDegreeAxis1-indexAxis1Steps; else targetAxis1.part.m=celestialPoleAxis1*(long)StepsPerDegreeAxis1-indexAxis1Steps; targetAxis1.part.f=0;
   targetAxis2.part.m=(long)(celestialPoleAxis2*(double)StepsPerDegreeAxis2)-indexAxis2Steps; targetAxis2.part.f=0;
-  #else
-  if (pierSide==PierSideWest) targetAxis1.part.m=-celestialPoleAxis1*(long)StepsPerDegreeAxis1; else targetAxis1.part.m=celestialPoleAxis1*(long)StepsPerDegreeAxis1; targetAxis1.part.f=0;
-  targetAxis2.part.m=(long)(celestialPoleAxis2*(double)StepsPerDegreeAxis2); targetAxis2.part.f=0;
-  #endif
   startAxis1=posAxis1;
   startAxis2=posAxis2;
     

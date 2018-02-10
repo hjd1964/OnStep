@@ -31,7 +31,6 @@ int syncEqu(double RA, double Dec) {
   GeoAlign.EquToInstr(latitude,HA,Dec,&Axis1,&Axis2);
 #endif
 
-#if defined(SYNC_ANYWHERE_ON)
   // just turn on tracking
   if (pierSide==PierSideNone) {
     trackingState=TrackingSidereal;
@@ -68,7 +67,6 @@ int syncEqu(double RA, double Dec) {
     pierSide=PierSideEast;
     defaultDirAxis2=defaultDirAxis2EInit;
   }
-#endif
 
   // compute index offsets indexAxis1/indexAxis2, if they're within reason 
   // actual posAxis1/posAxis2 are the coords of where this really is
@@ -85,9 +83,6 @@ int syncEqu(double RA, double Dec) {
   indexAxis2Steps=(long)(indexAxis2*(double)StepsPerDegreeAxis2);
   sei();
 
-#ifndef SYNC_ANYWHERE_ON
-  if ((abs(indexAxis2)>30.0) || (abs(indexAxis1)>30.0)) { indexAxis1=0; indexAxis2=0; indexAxis1Steps=0; indexAxis2Steps=0; lastError=ERR_SYNC; return 6; }
-#endif
   return 0;
 }
 
