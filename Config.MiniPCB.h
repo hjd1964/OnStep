@@ -178,9 +178,9 @@
                                      // Rotator          :  24            * 8           * 20              *  6/360                = 64
                                      // For de-rotation of Alt/Az mounts a quick estimate of the required resolution (in StepsPerDegree)
                                      // would be an estimate of the circumference of the useful imaging circle in (pixels * 2)/360
-#define AXIS3_REVERSE_OFF            // reverse the direction of Axis3 rotator movement
 #define MinAxis3                -180 // minimum allowed Axis3 rotator, default = -180
 #define MaxAxis3                 180 // maximum allowed Axis3 rotator, default =  180
+#define AXIS3_REVERSE_OFF            // reverse the direction of Axis3 rotator movement
 
 // FOCUSER1 ---------------------------------------------------------------------------------------------------------------
 // Pads 31,32 = Step,Dir
