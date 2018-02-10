@@ -166,7 +166,7 @@ void moveTo() {
 
   if ((distDestAxis1<=2) && (distDestAxis2<=2)) { 
 #ifdef MOUNT_TYPE_ALTAZM
-    // Near the Zenith disable tracking in AltAz mode for a moment if we're getting close to the target
+    // Disable tracking in AltAz mode for a moment if we're getting close to the target so sync of coords occurs
     if (lastTrackingState==TrackingSiderealDisabled) lastTrackingState=TrackingSidereal;
 #endif
     
@@ -231,41 +231,37 @@ void moveTo() {
       sei();
     } else {
 
-      // sound goto done
-      soundAlert();
-
-      // restore last tracking state
-      cli();
-      timerRateAxis1=SiderealRate;
-      timerRateAxis2=SiderealRate;
-      sei();
-
       StepperModeTracking();
 
       // other special gotos: for parking the mount and homeing the mount
       if (parkStatus==Parking) {
+        // clear the backlash
         int i=parkClearBacklash(); if (i==-1) return; // working
 
         // restore trackingState
         trackingState=lastTrackingState; lastTrackingState=TrackingNone;
         SiderealClockSetInterval(siderealInterval);
+      
+        // sound goto done
+        soundAlert();
 
         // validate location
         byte parkPierSide=EEPROM.read(EE_pierSide);
         if ((posAxis1!=(long)targetAxis1.part.m) || (posAxis2!=(long)targetAxis2.part.m) || (pierSide!=parkPierSide) || (i!=1)) { parkStatus=ParkFailed; EEPROM.write(EE_parkStatus,parkStatus); return; }
 
-        // success, we're parked
-        parkStatus=Parked; EEPROM.write(EE_parkStatus,parkStatus);
-
-        // just store the indexes of our pointing model
-        EEPROM_writeFloat(EE_indexAxis1,indexAxis1);
-        EEPROM_writeFloat(EE_indexAxis2,indexAxis2);
+        // wrap it up
+        parkFinish();
         
-        // disable the stepper drivers
-        digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
-        digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
-      
       } else
+        // sound goto done
+        soundAlert();
+  
+        // restore last tracking state
+        cli();
+        timerRateAxis1=SiderealRate;
+        timerRateAxis2=SiderealRate;
+        sei();
+  
         if (homeMount) {
           if (parkClearBacklash()==-1) return;  // working, no error flagging
 
@@ -276,10 +272,8 @@ void moveTo() {
           setHome();
           homeMount=false; 
           atHome=true;
-          
-          // disable the stepper drivers
-          digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
-          digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
+
+          DisableStepperDrivers();
         } else {
           // restore trackingState
           trackingState=lastTrackingState; lastTrackingState=TrackingNone;
