@@ -143,13 +143,13 @@
 // Axis2: Pins A6,A7 = Step,Dir (Dec/Alt)
 
 // Reverse the direction of movement.  Adjust as needed or reverse your wiring so things move in the right direction
-#define REVERSE_AXIS1_OFF            // RA/Azm axis
-#define REVERSE_AXIS2_OFF            // Dec/Alt axis
+#define AXIS1_REVERSE_OFF            // RA/Azm axis
+#define AXIS2_REVERSE_OFF            // Dec/Alt axis
 
 // Stepper driver Enable support, just wire Enable to Pins 38 (Axis1) and A2 (Axis2) and OnStep will pull these HIGH to disable stepper drivers on startup and when Parked or Homed.
 // An Align, Sync, or Un-Park will enable the drivers.  Adjust below if you need these pulled LOW to disable the drivers.
-#define AXIS1_DISABLED_HIGH
-#define AXIS2_DISABLED_HIGH
+#define AXIS1_DISABLE HIGH
+#define AXIS2_DISABLE HIGH
 
 // Basic stepper driver mode setup . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 // If used, this requires connections M0, M1, and M2 on Pins 23,25,27 for Axis1 (RA/Azm) and Pins 31,33,35 for Axis2 (Dec/Alt.)
@@ -176,30 +176,30 @@
                                      // Rotator          :  24            * 8           * 20              *  6/360                = 64
                                      // For de-rotation of Alt/Az mounts a quick estimate of the required resolution (in StepsPerDegree)
                                      // would be an estimate of the circumference of the useful imaging circle in (pixels * 2)/360
-#define REVERSE_AXIS3_OFF            // reverse the direction of Axis3 rotator movement
-#define DISABLE_AXIS3_OFF            // Pin A8.  Use HIGH for common stepper drivers if you want to power down the motor at stand-still.  Default _OFF.
 #define MinAxis3                -180 // minimum allowed Axis3 rotator, default = -180
 #define MaxAxis3                 180 // maximum allowed Axis3 rotator, default =  180
+#define AXIS3_REVERSE_OFF            // reverse the direction of Axis3 rotator movement
+#define AXIS3_DISABLE_OFF            // Pin A8.  Use HIGH for common stepper drivers if you want to power down the motor at stand-still.  Default _OFF.
 
 // FOCUSER1 ---------------------------------------------------------------------------------------------------------------
 // Pins 26,28 = Step,Dir
 #define FOCUSER1_OFF                 // enable or disable focuser feature, default=_OFF
 #define MaxRateAxis4               8 // this is the minimum number of milli-seconds between micro-steps, default=8
 #define StepsPerMicrometerAxis4  0.5 // figure this out by testing or other means
-#define REVERSE_AXIS4_OFF            // reverse the direction of Axis4 focuser movement
-#define DISABLE_AXIS4_OFF            // Pin 24.  Use HIGH for common stepper drivers if you want to power down the motor at stand-still.  Default _OFF.
 #define MinAxis4               -25.0 // minimum allowed Axis4 position in millimeters, default = -25.0
 #define MaxAxis4                25.0 // maximum allowed Axis4 position in millimeters, default =  25.0
+#define AXIS4_REVERSE_OFF            // reverse the direction of Axis4 focuser movement
+#define AXIS4_DISABLE_OFF            // Pin 24.  Use HIGH for common stepper drivers if you want to power down the motor at stand-still.  Default _OFF.
 
 // FOCUSER2 ---------------------------------------------------------------------------------------------------------------
 // Pins 36,34 = Step,Dir
-#define FOCUSER2_OFF                 // enable or disable focuser feature, default=_OFF
+#define FOCUSER2_OFF                // enable or disable focuser feature, default=_OFF
 #define MaxRateAxis5               8 // this is the minimum number of milli-seconds between micro-steps, default=8
 #define StepsPerMicrometerAxis5  0.5 // figure this out by testing or other means
-#define REVERSE_AXIS5_OFF            // reverse the direction of Axis5 focuser movement
-#define DISABLE_AXIS5_OFF            // Pin 30.  Use HIGH for common stepper drivers if you want to power down the motor at stand-still.  Default _OFF.
 #define MinAxis5               -25.0 // minimum allowed Axis5 position in millimeters, default = -25.0
 #define MaxAxis5                25.0 // maximum allowed Axis5 position in millimeters, default =  25.0
+#define AXIS5_REVERSE_OFF            // reverse the direction of Axis5 focuser movement
+#define AXIS5_DISABLE_OFF            // Pin 30.  Use HIGH for common stepper drivers if you want to power down the motor at stand-still.  Default _OFF.
 
 // THAT'S IT FOR USER CONFIGURATION!
 

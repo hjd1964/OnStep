@@ -135,13 +135,13 @@
 // Axis2: Pins  ?, ? = Step,Dir (Dec/Alt)
 
 // Reverse the direction of movement.  Adjust as needed or reverse your wiring so things move in the right direction
-#define REVERSE_AXIS1_OFF            // RA/Azm axis
-#define REVERSE_AXIS2_OFF            // Dec/Alt axis
+#define AXIS1_REVERSE_OFF            // RA/Azm axis
+#define AXIS2_REVERSE_OFF            // Dec/Alt axis
 
 // Stepper driver Enable support, just wire Enable to Pins ? (Axis1) and ? (Axis2) and OnStep will pull these HIGH to disable the stepper drivers on startup and when Parked or Homed.  
 // An Align, Sync, or Un-Park will enable the drivers.  Adjust below if you need these pulled LOW to disable the drivers.
-#define AXIS1_DISABLED_HIGH
-#define AXIS2_DISABLED_HIGH
+#define AXIS1_DISABLE HIGH
+#define AXIS2_DISABLE HIGH
 
 // For equatorial mounts, _ON powers down the Declination axis when it's not being used to help lower power use.  During low rate guiding (<=1x) the axis stays enabled
 // for 10 minutes after any guide on either axis.  Otherwise, the Dec axis is disabled (powered off) 10 seconds after movement stops.

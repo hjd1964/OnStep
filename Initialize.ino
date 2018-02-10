@@ -265,20 +265,35 @@ void Init_Pins() {
   #endif
 #endif
 
-// initialize and disable the stepper drivers
+// initialize and disable the main axes stepper drivers
   pinMode(Axis1_EN,OUTPUT); 
   pinMode(Axis2_EN,OUTPUT);
   StepperModeTrackingInit();
 
-// turn on the Rotator/Focuser stepper drivers (LOW)
+// initialize and enable/disable the Rotator/Focuser stepper drivers
 #ifdef Axis3_EN
-    pinMode(Axis3_EN,OUTPUT); 
+  pinMode(Axis3_EN,OUTPUT);
+  #ifdef AXIS3_DISABLE
+    digitalWrite(Axis3_EN,AXIS3_DISABLE);
+  #else
+    digitalWrite(Axis3_EN,LOW);
+  #endif
 #endif
 #ifdef Axis4_EN
-    pinMode(Axis4_EN,OUTPUT); 
+  pinMode(Axis4_EN,OUTPUT); 
+  #ifdef AXIS4_DISABLE
+    digitalWrite(Axis4_EN,AXIS4_DISABLE);
+  #else
+    digitalWrite(Axis4_EN,LOW);
+  #endif
 #endif
 #ifdef Axis5_EN
-    pinMode(Axis5_EN,OUTPUT); 
+  pinMode(Axis5_EN,OUTPUT); 
+  #ifdef AXIS5_DISABLE
+    digitalWrite(Axis5_EN,AXIS5_DISABLE);
+  #else
+    digitalWrite(Axis5_EN,LOW);
+  #endif
 #endif
 
 }
@@ -484,8 +499,8 @@ void Init_Start_Timers() {
 void EnableStepperDrivers() {
   // enable the stepper drivers
   if (axis1Enabled==false) {
-    digitalWrite(Axis1_EN,Axis1_Enabled); axis1Enabled=true;
-    digitalWrite(Axis2_EN,Axis2_Enabled); axis2Enabled=true;
+    digitalWrite(Axis1_EN,ENABLE_AXIS1); axis1Enabled=true;
+    digitalWrite(Axis2_EN,ENABLE_AXIS2); axis2Enabled=true;
     delay(10);
   }
 }
@@ -493,8 +508,8 @@ void EnableStepperDrivers() {
 void DisableStepperDrivers() {
   // disable the stepper drivers
   if (axis1Enabled==true) {
-    digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
-    digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
+    digitalWrite(Axis1_EN,AXIS1_DISABLE); axis1Enabled=false;
+    digitalWrite(Axis2_EN,AXIS2_DISABLE); axis2Enabled=false;
     delay(10);
   }
 }

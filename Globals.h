@@ -173,13 +173,6 @@ fixed_t targetAxis3;                               // rotator goto position in s
 fixed_t amountRotateAxis3;                         // rotator movement per 0.01/s
 long axis3Increment  = 1;                          // rotator increment for manual control
 unsigned long axis3Ms=0;
-#ifdef REVERSE_AXIS3_ON
-#define AXIS3_FORWARD LOW
-#define AXIS3_REVERSE HIGH
-#else
-#define AXIS3_FORWARD HIGH
-#define AXIS3_REVERSE LOW
-#endif
 #endif
 
 // Globals for focusers ----------------------------------------------------------------------------------------------------
@@ -189,13 +182,6 @@ fixed_t targetAxis4;                               // focuser goto position in s
 fixed_t amountMoveAxis4;                           // focuser movement per 0.01/s
 long axis4Increment  = 1;                          // focuser increment for manual control
 unsigned long axis4Ms=0;
-#ifdef REVERSE_AXIS4_ON
-#define AXIS4_FORWARD LOW
-#define AXIS4_REVERSE HIGH
-#else
-#define AXIS4_FORWARD HIGH
-#define AXIS4_REVERSE LOW
-#endif
 #endif
 
 #ifdef FOCUSER2_ON
@@ -204,34 +190,9 @@ fixed_t targetAxis5;                               // focuser goto position in s
 fixed_t amountMoveAxis5;                           // focuser movement per 0.01/s
 long axis5Increment  = 1;                          // focuser increment for manual control
 unsigned long axis5Ms=0;
-#ifdef REVERSE_AXIS5_ON
-#define AXIS5_FORWARD LOW
-#define AXIS5_REVERSE HIGH
-#else
-#define AXIS5_FORWARD HIGH
-#define AXIS5_REVERSE LOW
-#endif
 #endif
 
 // Stepper driver enable/disable and direction -----------------------------------------------------------------------------
-#if defined(AXIS1_DISABLED_HIGH)
-#define Axis1_Disabled HIGH
-#define Axis1_Enabled LOW
-#endif
-#if defined(AXIS1_DISABLED_LOW)
-#define Axis1_Disabled LOW
-#define Axis1_Enabled HIGH
-#endif
-boolean axis1Enabled = false;
-#if defined(AXIS2_DISABLED_HIGH)
-#define Axis2_Disabled HIGH
-#define Axis2_Enabled LOW
-#endif
-#if defined(AXIS2_DISABLED_LOW)
-#define Axis2_Disabled LOW
-#define Axis2_Enabled HIGH
-#endif
-boolean axis2Enabled = false;
 
 #define defaultDirAxis2EInit   1
 #define defaultDirAxis2WInit   0

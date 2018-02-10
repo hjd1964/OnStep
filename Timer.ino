@@ -229,9 +229,9 @@ ISR(TIMER1_COMPA_vect)
 
     // enable/disable Axis2
     if (Axis2PowerOffTimer==0) {
-      if (axis2Powered) { digitalWrite(Axis2_EN,Axis2_Disabled); axis2Powered=false; }
+      if (axis2Powered) { digitalWrite(Axis2_EN,AXIS2_DISABLE); axis2Powered=false; }
     } else {
-      if (!axis2Powered) { cli(); digitalWrite(Axis2_EN,Axis2_Enabled); axis2Powered=true; delayMicroseconds(10); sei(); }
+      if (!axis2Powered) { cli(); digitalWrite(Axis2_EN,ENABLE_AXIS2); axis2Powered=true; delayMicroseconds(10); sei(); }
     }
   } else { Axis2PowerOffTimer=0; axis2Powered=true; }
     // ------------------------------------------------------------------------------------------------------------------------------------
@@ -288,7 +288,7 @@ ISR(TIMER3_COMPA_vect)
 
     // set direction
     if (posAxis1<(long)targetAxis1.part.m) dirAxis1=1; else dirAxis1=0;
-    #ifdef REVERSE_AXIS1_ON
+    #ifdef AXIS1_REVERSE_ON
       if (defaultDirAxis1==dirAxis1) DirPinAxis1_LOW; else DirPinAxis1_HIGH;
     #else
       if (defaultDirAxis1==dirAxis1) DirPinAxis1_HIGH; else DirPinAxis1_LOW;
@@ -357,7 +357,7 @@ ISR(TIMER4_COMPA_vect)
     
     // set direction
     if (posAxis2<(long)targetAxis2.part.m) dirAxis2=1; else dirAxis2=0;
-    #ifdef REVERSE_AXIS2_ON
+    #ifdef AXIS2_REVERSE_ON
       if (defaultDirAxis2==dirAxis2) DirPinAxis2_LOW; else DirPinAxis2_HIGH;
     #else
       if (defaultDirAxis2==dirAxis2) DirPinAxis2_HIGH; else DirPinAxis2_LOW;

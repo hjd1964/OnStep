@@ -6,12 +6,12 @@ bool _stepperModeTrack=false;
 // initialize stepper drivers
 void StepperModeTrackingInit() {
   _stepperModeTrack=false; 
-  digitalWrite(Axis1_EN,Axis1_Enabled); axis1Enabled=true;
-  digitalWrite(Axis2_EN,Axis2_Enabled); axis2Enabled=true;
+  digitalWrite(Axis1_EN,ENABLE_AXIS1); axis1Enabled=true;
+  digitalWrite(Axis2_EN,ENABLE_AXIS2); axis2Enabled=true;
   delay(100);
   StepperModeTracking();
-  digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
-  digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
+  digitalWrite(Axis1_EN,AXIS1_DISABLE); axis1Enabled=false;
+  digitalWrite(Axis2_EN,AXIS2_DISABLE); axis2Enabled=false;
 
 // if the stepper driver mode select pins are wired in, program any requested micro-step mode
 #if !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)

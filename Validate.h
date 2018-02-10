@@ -55,7 +55,6 @@
   #error "Choose ONE Config.xxx.h file and enable it for use by turning it _ON."
 #endif
 
-// -----------------------------------------------------------------------------------
 // configuration file version
 
 #ifdef FileVersionConfig
@@ -72,7 +71,6 @@
   #endif
 #endif
 
-// -----------------------------------------------------------------------------------
 // misc.
 
 #if defined(ALTERNATE_PINMAP_ON)
@@ -90,7 +88,66 @@
 #endif
 
 // -----------------------------------------------------------------------------------
+// misc. configuration #defines to correct for backwards compatability etc.
+
+#ifdef SEPERATE_PULSE_GUIDE_RATE_ON
+  #define SEPARATE_PULSE_GUIDE_RATE_ON
+#endif
+#ifndef MaxRot
+  #define MaxRot MaxAxis3
+#endif
+#ifndef MinRot
+  #define MinRot MinAxis3
+#endif
+
+#ifdef REVERSE_AXIS1_ON
+  #define AXIS1_REVERSE_ON
+#endif
+#ifdef REVERSE_AXIS2_ON
+  #define AXIS2_REVERSE_ON
+#endif
+#ifdef REVERSE_AXIS3_ON
+  #define AXIS3_REVERSE_ON
+#endif
+#ifdef REVERSE_AXIS4_ON
+  #define AXIS4_REVERSE_ON
+#endif
+#ifdef REVERSE_AXIS5_ON
+  #define AXIS5_REVERSE_ON
+#endif
+
+#ifndef AXIS1_DISABLE
+  #if defined(AXIS1_DISABLED_HIGH)
+    #define AXIS1_DISABLE HIGH
+  #endif
+  #if defined(AXIS1_DISABLED_LOW)
+    #define AXIS1_DISABLE LOW
+  #endif
+#endif
+#ifndef AXIS2_DISABLE
+  #if defined(AXIS2_DISABLED_HIGH)
+    #define AXIS2_DISABLE HIGH
+  #endif
+  #if defined(AXIS2_DISABLED_LOW)
+    #define AXIS2_DISABLE LOW
+  #endif
+#endif
+#ifdef DISABLE_AXIS3
+  #define AXIS3_DISABLE DISABLE_AXIS3
+#endif
+#ifdef DISABLE_AXIS4
+  #define AXIS3_DISABLE DISABLE_AXIS4
+#endif
+#ifdef DISABLE_AXIS5
+  #define AXIS3_DISABLE DISABLE_AXIS5
+#endif
+
+// -----------------------------------------------------------------------------------
 // setup defaults
+
+#ifndef GUIDE_TIME_LIMIT
+  #define GUIDE_TIME_LIMIT 0
+#endif
 
 // set serial port baud rate if not done so already
 #ifndef SERIAL1_BAUD_DEFAULT
@@ -123,18 +180,66 @@
   #endif
 #endif
 
-// misc. configuration #defines to correct for backwards compatability etc.
-#ifdef SEPERATE_PULSE_GUIDE_RATE_ON
-  #define SEPARATE_PULSE_GUIDE_RATE_ON
+// make both enable and disable values
+#if AXIS1_DISABLE==LOW
+  #define ENABLE_AXIS1 HIGH
 #endif
-#ifndef GUIDE_TIME_LIMIT
-  #define GUIDE_TIME_LIMIT 0
+#if AXIS1_DISABLE==HIGH
+  #define ENABLE_AXIS1 LOW
 #endif
-#ifndef MaxRot
-  #define MaxRot MaxAxis3
+boolean axis1Enabled = false;
+#if AXIS2_DISABLE==LOW
+  #define ENABLE_AXIS2 HIGH
 #endif
-#ifndef MinRot
-  #define MinRot MinAxis3
+#if AXIS2_DISABLE==HIGH
+  #define ENABLE_AXIS2 LOW
+#endif
+boolean axis2Enabled = false;
+#ifdef AXIS3_DISABLE
+  #if AXIS3_DISABLE==HIGH
+    #define AXIS3_ENABLE LOW
+  #endif
+  #if AXIS3_DISABLE==LOW
+    #define AXIS3_ENABLE HIGH
+  #endif
+#endif
+#ifdef AXIS4_DISABLE
+  #if AXIS4_DISABLE==HIGH
+    #define AXIS4_ENABLE LOW
+  #endif
+  #if AXIS4_DISABLE==LOW
+    #define AXIS4_ENABLE HIGH
+  #endif
+#endif
+#ifdef AXIS5_DISABLE
+  #if AXIS5_DISABLE==HIGH
+    #define AXIS5_ENABLE LOW
+  #endif
+  #if AXIS5_DISABLE==LOW
+    #define AXIS5_ENABLE HIGH
+  #endif
+#endif
+
+#ifdef AXIS3_REVERSE_ON
+  #define AXIS3_FORWARD LOW
+  #define AXIS3_REVERSE HIGH
+#else
+  #define AXIS3_FORWARD HIGH
+  #define AXIS3_REVERSE LOW
+#endif
+#ifdef AXIS4_REVERSE_ON
+  #define AXIS4_FORWARD LOW
+  #define AXIS4_REVERSE HIGH
+#else
+  #define AXIS4_FORWARD HIGH
+  #define AXIS4_REVERSE LOW
+#endif
+#ifdef AXIS5_REVERSE_ON
+  #define AXIS5_FORWARD LOW
+  #define AXIS5_REVERSE HIGH
+#else
+  #define AXIS5_FORWARD HIGH
+  #define AXIS5_REVERSE LOW
 #endif
 
 // -----------------------------------------------------------------------------------

@@ -131,13 +131,13 @@
 // Axis2: Pins 22,24 = Step,Dir (Dec/Alt)
 
 // Reverse the direction of movement.  Adjust as needed or reverse your wiring so things move in the right direction
-#define REVERSE_AXIS1_OFF            // RA/Azm axis
-#define REVERSE_AXIS2_OFF            // Dec/Alt axis
+#define AXIS1_REVERSE_OFF            // RA/Azm axis
+#define AXIS2_REVERSE_OFF            // Dec/Alt axis
 
 // Stepper driver Enable support is always on, just wire Enable to Pins 23 (Axis1) and 36 (Axis2) and OnStep will pull these HIGH
 // to disable stepper drivers on startup and when Parked or Homed.  An Align or UnPark will enable the drivers.  Adjust below if you need these pulled LOW to disable the drivers.
-#define AXIS1_DISABLED_HIGH
-#define AXIS2_DISABLED_HIGH
+#define AXIS1_DISABLE HIGH
+#define AXIS2_DISABLE HIGH
 
 // For equatorial mounts, _ON powers down the Declination axis when it's not being used to help lower power use.  During low rate guiding (<=1x) the axis stays enabled
 // for 10 minutes after any guide on either axis.  Otherwise, the Dec axis is disabled (powered off) 10 seconds after movement stops.
@@ -169,27 +169,27 @@
                                      // Rotator          :  24            * 8           * 20              *  6/360                = 64
                                      // For de-rotation of Alt/Az mounts a quick estimate of the required resolution (in StepsPerDegree)
                                      // would be an estimate of the circumference of the useful imaging circle in (pixels * 2)/360
-#define REVERSE_AXIS3_OFF            // reverse the direction of Axis3 rotator movement
 #define MinAxis3                -180 // minimum allowed Axis3 rotator, default = -180
 #define MaxAxis3                 180 // maximum allowed Axis3 rotator, default =  180
+#define AXIS3_REVERSE_OFF            // reverse the direction of Axis3 rotator movement
 
 // FOCUSER1 ---------------------------------------------------------------------------------------------------------------
 // A11,A10 = Step,Dir
 #define FOCUSER1_OFF                 // enable or disable focuser feature, default=_OFF
 #define MaxRateAxis4               8 // this is the minimum number of milli-seconds between micro-steps, default=8
 #define StepsPerMicrometerAxis4  0.5 // figure this out by testing or other means
-#define REVERSE_AXIS4_OFF            // reverse the direction of Axis4 focuser movement
 #define MinAxis4               -25.0 // minimum allowed Axis4 position in millimeters, default = -25.0
 #define MaxAxis4                25.0 // maximum allowed Axis4 position in millimeters, default =  25.0
+#define AXIS4_REVERSE_OFF            // reverse the direction of Axis4 focuser movement
 
 // FOCUSER2 ---------------------------------------------------------------------------------------------------------------
 // A13,A12 = Step,Dir
 #define FOCUSER2_OFF                 // enable or disable focuser feature, default=_OFF
 #define MaxRateAxis5               8 // this is the minimum number of milli-seconds between micro-steps, default=8
 #define StepsPerMicrometerAxis5  0.5 // figure this out by testing or other means
-#define REVERSE_AXIS5_OFF            // reverse the direction of Axis5 focuser movement
 #define MinAxis5               -25.0 // minimum allowed Axis5 position in millimeters, default = -25.0
 #define MaxAxis5                25.0 // maximum allowed Axis5 position in millimeters, default =  25.0
+#define AXIS5_REVERSE_OFF            // reverse the direction of Axis5 focuser movement
 
 // THAT'S IT FOR USER CONFIGURATION!
 
