@@ -38,6 +38,7 @@
 // Use Config.xxx.h to configure OnStep to your requirements
 
 // firmware info, these are returned by the ":GV?#" commands
+
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  1
 #define FirmwareVersionMinor  1
