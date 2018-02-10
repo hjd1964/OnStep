@@ -38,11 +38,10 @@
 // Use Config.xxx.h to configure OnStep to your requirements
 
 // firmware info, these are returned by the ":GV?#" commands
-
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  1
-#define FirmwareVersionMinor  1
-#define FirmwareVersionPatch  "f"     // for example major.minor patch: 1.3c
+#define FirmwareVersionMinor  2
+#define FirmwareVersionPatch  "a"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 1       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
@@ -203,24 +202,13 @@ void loop() {
     }
 
 #if defined(ROTATOR_ON) && defined(MOUNT_TYPE_ALTAZM)
-    // do de-rotate movement
-    if (deRotate && (trackingState==TrackingSidereal)) {
-      targetAxis3.fixed+=amountRotateAxis3.fixed;
-      double f=(long)targetAxis3.part.m; f/=(double)StepsPerDegreeAxis3;
-      if ((f<(double)MinAxis3) || (f>(double)MaxAxis3)) { deRotate=false; amountRotateAxis3.fixed=0; }
-    }
+    RotatorMove();
 #endif
 #if defined(FOCUSER1_ON)
-    // do automatic movement
-    targetAxis4.fixed+=amountMoveAxis4.fixed;
-    { double f=(long)targetAxis4.part.m; f/=(double)StepsPerMicrometerAxis4;
-    if ((f<(double)MinAxis4*1000.0) || (f>(double)MaxAxis4*1000.0)) amountMoveAxis4.fixed=0; }
+    Focuser1Move();
 #endif
 #if defined(FOCUSER2_ON)
-    // do automatic movement
-    targetAxis5.fixed+=amountMoveAxis5.fixed;
-    { double f=(long)targetAxis5.part.m; f/=(double)StepsPerMicrometerAxis5;
-    if ((f<(double)MinAxis5*1000.0) || (f>(double)MaxAxis5*1000.0)) amountMoveAxis5.fixed=0; }
+    Focuser2Move();
 #endif
 
     // figure out the current Altitude
@@ -271,65 +259,19 @@ void loop() {
     UT1=UT1_start+(t2/3600.0);
   }
 
-unsigned long tempMs;
-
-  // ROTATOR/DEROTATOR ---------------------------------------------------------------------------------
+  // ROTATOR/DEROTATOR/FOCUSERS ------------------------------------------------------------------------
 #ifdef ROTATOR_ON
-  tempMs=millis();
-  if ((long)(tempMs-axis3Ms)>0) {
-    axis3Ms=tempMs+(unsigned long)MaxRateAxis3;
-
-    if ((posAxis3<(long)targetAxis3.part.m) && (posAxis3<((double)MaxRot*(double)StepsPerDegreeAxis3))) {
-      digitalWrite(Axis3StepPin,LOW); delayMicroseconds(10);
-      digitalWrite(Axis3DirPin,AXIS3_FORWARD); delayMicroseconds(10);
-      digitalWrite(Axis3StepPin,HIGH); posAxis3++;
-    }
-    if ((posAxis3>(long)targetAxis3.part.m) && (posAxis3>((double)MinRot*(double)StepsPerDegreeAxis3))) {
-      digitalWrite(Axis3StepPin,LOW); delayMicroseconds(10);
-      digitalWrite(Axis3DirPin,AXIS3_REVERSE); delayMicroseconds(10);
-      digitalWrite(Axis3StepPin,HIGH); posAxis3--;
-    }
-  }
+  RotatorFollow();
 #endif
 
-  // FOCUSER1 -------------------------------------------------------------------------------------------
 #ifdef FOCUSER1_ON
-  tempMs=millis();
-  if ((long)(tempMs-axis4Ms)>0) {
-    axis4Ms=tempMs+(unsigned long)MaxRateAxis4;
-
-    if ((posAxis4<(long)targetAxis4.part.m) && (posAxis4<((double)MaxAxis4*1000.0*(double)StepsPerMicrometerAxis4))) {
-      digitalWrite(Axis4StepPin,LOW); delayMicroseconds(10);
-      digitalWrite(Axis4DirPin,AXIS4_FORWARD); delayMicroseconds(10);
-      digitalWrite(Axis4StepPin,HIGH); posAxis4++;
-    }
-    if ((posAxis4>(long)targetAxis4.part.m) && (posAxis4>((double)MinAxis4*1000.0*(double)StepsPerMicrometerAxis4))) {
-      digitalWrite(Axis4StepPin,LOW); delayMicroseconds(10);
-      digitalWrite(Axis4DirPin,AXIS4_REVERSE); delayMicroseconds(10);
-      digitalWrite(Axis4StepPin,HIGH); posAxis4--;
-    }
-  }
+  Focuser1Follow();
 #endif
 
-  // FOCUSER2 -------------------------------------------------------------------------------------------
 #ifdef FOCUSER2_ON
-  tempMs=millis();
-  if ((long)(tempMs-axis5Ms)>0) {
-    axis5Ms=tempMs+(unsigned long)MaxRateAxis5;
-
-    if ((posAxis5<(long)targetAxis5.part.m) && (posAxis5<((double)MaxAxis5*1000.0*(double)StepsPerMicrometerAxis5))) {
-      digitalWrite(Axis5StepPin,LOW); delayMicroseconds(10);
-      digitalWrite(Axis5DirPin,AXIS5_FORWARD); delayMicroseconds(10);
-      digitalWrite(Axis5StepPin,HIGH); posAxis5++;
-    }
-    if ((posAxis5>(long)targetAxis5.part.m) && (posAxis5>((double)MinAxis5*1000.0*(double)StepsPerMicrometerAxis5))) {
-      digitalWrite(Axis5StepPin,LOW); delayMicroseconds(10);
-      digitalWrite(Axis5DirPin,AXIS5_REVERSE); delayMicroseconds(10);
-      digitalWrite(Axis5StepPin,HIGH); posAxis5--;
-    }
-  }
+  Focuser2Follow();
 #endif
-
+  
   // WORKLOAD MONITORING -------------------------------------------------------------------------------
   long this_loop_micros=micros(); 
   loop_time=this_loop_micros-last_loop_micros;
@@ -337,19 +279,12 @@ unsigned long tempMs;
   last_loop_micros=this_loop_micros;
 
   // 1 SECOND TIMED ------------------------------------------------------------------------------------
-  tempMs=millis();
+  unsigned long tempMs=millis();
   if ((long)(tempMs-housekeepingTimer)>0) {
     housekeepingTimer=tempMs+1000UL;
 
 #if defined(ROTATOR_ON) && defined(MOUNT_TYPE_ALTAZM)
-    // calculate new de-rotation rate if needed
-    if (deRotate && (trackingState==TrackingSidereal)) {
-      double h,d;
-      getApproxEqu(&h,&d,true);
-      double pr=ParallacticRate(h,d)*(double)StepsPerDegreeAxis3; // in steps per second
-      if (deRotateReverse) pr=-pr;
-      amountRotateAxis3.fixed=doubleToFixed(pr/100.0);            // in steps per 1/100 second
-    }
+    DeRotate();
 #endif
 
     // adjust tracking rate for Alt/Azm mounts
