@@ -136,10 +136,11 @@ class tmc2130 {
 
     bool error() {
       BBSpi.begin(_cs,_sck,_miso,_mosi);
-      uint32_t data_out=0;
-    
       // get global status register, look for driver error bit
+      uint32_t data_out=0;
       uint8_t result=read(REG_GSTAT,&data_out);
+
+      BBSpi.end();
       if ((result&2)!=0) return true; else return false;
     }
     

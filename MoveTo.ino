@@ -139,7 +139,7 @@ void moveTo() {
   } else {
     temp=(StepsForRateChangeAxis1/isqrt32(distStartAxis1));  // speed up (temp gets smaller)
   }
-  if (temp<maxRate) temp=maxRate;                            // fastest rate
+  if (temp<maxRate) temp=maxRate;                            // fastest rate 
   if (temp>TakeupRate) temp=TakeupRate;                      // slowest rate
   cli(); timerRateAxis1=temp; sei();
 
@@ -248,7 +248,7 @@ void moveTo() {
 
         // restore trackingState
         trackingState=lastTrackingState; lastTrackingState=TrackingNone;
-        SetSiderealClockRate(siderealInterval);
+        SiderealClockSetInterval(siderealInterval);
 
         // validate location
         byte parkPierSide=EEPROM.read(EE_pierSide);
@@ -271,7 +271,7 @@ void moveTo() {
 
           // restore trackingState
           trackingState=lastTrackingState; lastTrackingState=TrackingNone;
-          SetSiderealClockRate(siderealInterval);
+          SiderealClockSetInterval(siderealInterval);
 
           setHome();
           homeMount=false; 
@@ -283,7 +283,7 @@ void moveTo() {
         } else {
           // restore trackingState
           trackingState=lastTrackingState; lastTrackingState=TrackingNone;
-          SetSiderealClockRate(siderealInterval);
+          SiderealClockSetInterval(siderealInterval);
         }
     }
   }

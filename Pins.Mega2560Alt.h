@@ -20,9 +20,8 @@
 #define TonePin       42    // Pin 42 (Tone)
 
 // The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
-// The Arduino attachInterrupt function works in two modes, on the '2560 it takes an Interrupt# on the Teensy and others it takes a Pin#
-#define PpsPin         21   //
-#define PpsInt         2    // Interrupt 2 on Pin 21 (alternate Int3 on Pin20)
+#define PpsPin        21    // Interrupt 2 on Pin 21 (alternate Int3 on Pin20)
+#define DS3234_CS_PIN 10
                          
 // Pins to enable/disable the stepper drivers and set microstep mode, optional and normally just hard-wired (DRV8825)/ignored (BED-A4988)
 #define Axis1DirPin   37    // Pin 37 (Dir)  PC0

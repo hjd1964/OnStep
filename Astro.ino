@@ -472,8 +472,8 @@ double ZenithTrackingRate() {
   return 15.0 * ((double)(( Alt1 - Alt2 ) / ( Alt1_ - Alt2_ )));
 }
 
-// distance in arc-min ahead of and behind the current Equ position, used for rate calculation
-#if defined(__AVR_ATmega2560__)
+// Distance in arc-min ahead of and behind the current Equ position, used for rate calculation
+#ifdef HAL_NO_DOUBLE_PRECISION
 #define RefractionRateRange 30
 #else
 #define RefractionRateRange 10
@@ -715,8 +715,10 @@ double cot(double n) {
 // Acceleration rate calculation
 void SetAccelerationRates(double maxRate) {
   // set the new acceleration rate
-  StepsForRateChangeAxis1= ((double)DegreesForAcceleration/sqrt((double)StepsPerDegreeAxis1))*0.3333333*StepsPerDegreeAxis1*maxRate;
-  StepsForRateChangeAxis2= ((double)DegreesForAcceleration/sqrt((double)StepsPerDegreeAxis2))*0.3333333*StepsPerDegreeAxis2*maxRate;
+  cli();
+  StepsForRateChangeAxis1= (sqrt((double)DegreesForAcceleration*(double)StepsPerDegreeAxis1))*maxRate;
+  StepsForRateChangeAxis2= (sqrt((double)DegreesForAcceleration*(double)StepsPerDegreeAxis2))*maxRate;
+  sei();
   slewSpeed=(1000000.0/(maxRate/16L))/StepsPerDegreeAxis1;
 }
 

@@ -7,15 +7,6 @@ Library::Library()
 
   byteMin=200+PECBufferSize;
   
-  #if defined(TEENSYDUINO) && !defined(E2END)
-  #define E2END 2047
-  #elif defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
-  #define E2END 2047
-  #elif defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
-  #define E2END 6143
-  #elif defined(__ARM_STM32__) 
-  #define E2END 2047
-  #endif
   byteMax=E2END;
 
   byteCount=(byteMax-byteMin)+1;

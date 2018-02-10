@@ -1,28 +1,26 @@
 // -------------------------------------------------------------------------------------------------
-// Pin map for OnStep using RAMPS 1.4 Shield (Arduino Mega2560)
+// Pin map for OnStep using RAMPS 1.4 Shield (Arduino Mega2560 or Arduino DUE)
 
-#if defined(__AVR_ATmega2560__)
+#if defined(__AVR_ATmega2560__) || defined(__SAM3X8E__)
 
 // The PEC index sense is a 5V logic input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
-#define PecPin         57   // RAMPS AUX1, A-OUT (1=+5V, 2=GND, 3=PEC)
-#define AnalogPecPin   A3   // Note A3 is (57)
+#define PecPin        57    // RAMPS AUX1, A-OUT (1=+5V, 2=GND, 3=PEC)
+#define AnalogPecPin  A3    // Note A3 is (57)
 
 // The limit switch sense is a 5V logic input which uses the internal pull up, shorted to ground it stops gotos/tracking
 #define LimitPin       3    // RAMPS X- (1=LMT, 2=GND, 3=+5)
 
 // The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
 #define LEDnegPin     11    // Pin 11 RAMPS SER1 (1=GND, 2=LED-, 3=+5) (active LOW)
-#define LEDneg2Pin    6     // Pin 6  RAMPS SER2 (1=GND, 2=LED-, 3=+5) (active LOW)
-#define ReticulePin   5     // Pin 5  RAMPS SER3 (1=GND, 2=LED-, 3=+5) (active LOW)
+#define LEDneg2Pin     6    // Pin 6  RAMPS SER2 (1=GND, 2=LED-, 3=+5) (active LOW)
+#define ReticulePin    5    // Pin 5  RAMPS SER3 (1=GND, 2=LED-, 3=+5) (active LOW)
 
 // Pin for a piezo buzzer output on RAMPS Y-MIN
-#define TonePin       4     // Pin 4  RAMPS SER4 (1=GND, 2=LED-, 3=+5)
+#define TonePin        4    // Pin 4  RAMPS SER4 (1=GND, 2=LED-, 3=+5)
 
-// Pin for PPS input on RAMPS X-MIN
 // The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
-// The Arduino attachInterrupt function works in two modes, on the '2560 it takes an Interrupt# on the Teensy and others it takes a Pin#
-#define PpsPin         2    // RAMPS X+
-#define PpsInt         0    // Interrupt 0 on Pin 2
+#define PpsPin         2    // RAMPS X+, Interrupt 0 on Pin 2
+#define DS3234_CS_PIN 53
 
 // Pins to Axis1 RA/Azm on RAMPS X
 #define Axis1DirPin   55    // Pin A1 (Dir)
@@ -31,6 +29,10 @@
 #define Axis1StepPin  54    // Pin A0 (Step)
 #define Axis1StepBit   0    //
 #define Axis1StepPORT PORTF //
+#define Axis1_Aux     29    // Pin 29 (Aux - ESP8266 GPIO0 or SPI MISO)
+#define Axis1_M2      27    // Pin 27 (Microstep Mode 2 or SPI CS)
+#define Axis1_M1      25    // Pin 25 (Microstep Mode 1 or SPI SCK)
+#define Axis1_M0      23    // Pin 23 (Microstep Mode 0 or SPI MOSI)
 #define Axis1_EN      38    // Pin 38 (Enable)
 
 // Pins to Axis2 Dec/Alt on RAMPS Y
@@ -40,6 +42,10 @@
 #define Axis2StepPin   60   // Pin A6 (Step)
 #define Axis2StepBit   6    //
 #define Axis2StepPORT PORTF //
+#define Axis2_Aux     37    // Pin 37 (Aux - ESP8266 GPIO0 or SPI MISO)
+#define Axis2_M2      35    // Pin 35 (Microstep Mode 2 or SPI CS)
+#define Axis2_M1      33    // Pin 33 (Microstep Mode 1 or SPI SCK)
+#define Axis2_M0      31    // Pin 31 (Microstep Mode 0 or SPI MOSI)
 #define Axis2_EN      56    // Pin A2 (Enable)
 
 // Pins to rotator stepper driver on RAMPS Z
