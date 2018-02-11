@@ -72,22 +72,24 @@ byte park() {
 
 // records the park position, updates status, shuts down the stepper motors
 void parkFinish() {
-  // success, we're parked
-  parkStatus=Parked; EEPROM.write(EE_parkStatus,parkStatus);
-
-  // trueAxisn is used to translate steps to instrument coords and changes with the pier side
-  EEPROM_writeLong(EE_trueAxis1,trueAxis1);
-  EEPROM_writeLong(EE_trueAxis2,trueAxis2);
-
-  // store the pointing model
-  saveAlignModel();
+  if (parkStatus!=ParkFailed) {
+    // success, we're parked
+    parkStatus=Parked; EEPROM.write(EE_parkStatus,parkStatus);
+  
+    // trueAxisn is used to translate steps to instrument coords and changes with the pier side
+    EEPROM_writeLong(EE_trueAxis1,trueAxis1);
+    EEPROM_writeLong(EE_trueAxis2,trueAxis2);
+  
+    // store the pointing model
+    saveAlignModel();
+  }
   
   DisableStepperDrivers();
 }
 
 // adjusts targetAxis1/2 to the nearest park position for micro-step modes up to PARK_MAX_MICROSTEP
 #define PARK_MAX_MICROSTEP 256
-void findNearestParkPosition() {
+void targetNearestParkPosition() {
   // once set, parkClearBacklash() will synchronize Pos with Target again along with clearing the backlash
   cli(); long parkPosAxis1=targetAxis1.part.m; long parkPosAxis2=targetAxis2.part.m; sei();
   parkPosAxis1-=((long)PARK_MAX_MICROSTEP*2L); 
@@ -109,17 +111,17 @@ bool doParkClearBacklash(int phase) {
   static bool failed=false;
 
   if (phase==1) {
-    findNearestParkPosition();    
+    failed=false;
+    targetNearestParkPosition();
     timeout=(unsigned long)millis()+10000UL; // set timeout in 10s
     return true;
   }
   // wait until done or timed out
   if (phase==2) {
-    cli(); if ((posAxis1==(long)targetAxis1.part.m) && (posAxis2==(long)targetAxis2.part.m)) { sei(); return true; }  sei();
+    cli(); if ((posAxis1==(long)targetAxis1.part.m) && (posAxis2==(long)targetAxis2.part.m) && !inbacklashAxis1 && !inbacklashAxis2) { sei(); return true; }  sei();
     if ((long)(millis()-timeout)>0) { failed=true; return true; } else return false;
   }
   if (phase==3) {
-    failed=false;
     // start by moving fully into the backlash
     cli(); targetAxis1.part.m += backlashAxis1; targetAxis2.part.m += backlashAxis2; sei();
     timeout=(unsigned long)millis()+10000UL; // set timeout in 10s
@@ -127,7 +129,7 @@ bool doParkClearBacklash(int phase) {
   }
   // wait until done or timed out
   if (phase==4) {
-    cli(); if ((posAxis1==(long)targetAxis1.part.m) && (posAxis2==(long)targetAxis2.part.m)) { sei(); return true; }  sei();
+    cli(); if ((posAxis1==(long)targetAxis1.part.m) && (posAxis2==(long)targetAxis2.part.m) && !inbacklashAxis1 && !inbacklashAxis2) { sei(); return true; }  sei();
     if ((long)(millis()-timeout)>0) { failed=true; return true; } else return false;
   }
   if (phase==5) {
@@ -138,7 +140,7 @@ bool doParkClearBacklash(int phase) {
   }
   // wait until done or timed out
   if (phase==6) {
-    cli(); if ((posAxis1==(long)targetAxis1.part.m) && (posAxis2==(long)targetAxis2.part.m)) { sei(); return true; } sei();
+    cli(); if ((posAxis1==(long)targetAxis1.part.m) && (posAxis2==(long)targetAxis2.part.m) && !inbacklashAxis1 && !inbacklashAxis2) { sei(); return true; } sei();
     if ((long)(millis()-timeout)>0) { failed=true; return true; } else return false;
   }
   // we arrive back at the exact same position so targetAxis1/targetAxis2 don't need to be touched
@@ -187,7 +189,7 @@ boolean unpark() {
         sei();
 
         // adjust to the actual park position
-        findNearestParkPosition();
+        targetNearestParkPosition();
         cli();
         posAxis1=targetAxis1.part.m;
         posAxis2=targetAxis2.part.m;

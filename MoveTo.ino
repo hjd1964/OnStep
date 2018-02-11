@@ -238,6 +238,11 @@ void moveTo() {
         // clear the backlash
         int i=parkClearBacklash(); if (i==-1) return; // working
 
+        // set timers for no motion
+        cli(); timerRateAxis1=0; sei();
+        cli(); timerRateAxis2=0; sei();
+        delay(20);
+
         // restore trackingState
         trackingState=lastTrackingState; lastTrackingState=TrackingNone;
         SiderealClockSetInterval(siderealInterval);
@@ -247,7 +252,7 @@ void moveTo() {
 
         // validate location
         byte parkPierSide=EEPROM.read(EE_pierSide);
-        if ((posAxis1!=(long)targetAxis1.part.m) || (posAxis2!=(long)targetAxis2.part.m) || (pierSide!=parkPierSide) || (i!=1)) { parkStatus=ParkFailed; EEPROM.write(EE_parkStatus,parkStatus); return; }
+        if ((posAxis1!=(long)targetAxis1.part.m) || (posAxis2!=(long)targetAxis2.part.m) || (pierSide!=parkPierSide) || (i!=1)) { parkStatus=ParkFailed; EEPROM.write(EE_parkStatus,parkStatus); }
 
         // wrap it up
         parkFinish();
@@ -264,6 +269,11 @@ void moveTo() {
   
         if (homeMount) {
           if (parkClearBacklash()==-1) return;  // working, no error flagging
+
+          // set timers for no motion
+          cli(); timerRateAxis1=0; sei();
+          cli(); timerRateAxis2=0; sei();
+          delay(20);
 
           // restore trackingState
           trackingState=lastTrackingState; lastTrackingState=TrackingNone;

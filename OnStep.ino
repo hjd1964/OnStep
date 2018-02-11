@@ -41,7 +41,7 @@
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  1
 #define FirmwareVersionMinor  2
-#define FirmwareVersionPatch  "a"     // for example major.minor patch: 1.3c
+#define FirmwareVersionPatch  "b"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 1       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
@@ -101,7 +101,7 @@ void setup() {
   timerRateAxis2=SiderealRate;
 
   // backlash takeup rates
-  TakeupRate=round(SiderealRate/1.1);
+  TakeupRate=SiderealRate/BacklashTakeupRate;
   timerRateBacklashAxis1=SiderealRate/BacklashTakeupRate;
   timerRateBacklashAxis2=(SiderealRate/BacklashTakeupRate)*timerRateRatio;
 
