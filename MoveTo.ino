@@ -65,8 +65,8 @@ void moveTo() {
   long distStartAxis1,distStartAxis2,distDestAxis1,distDestAxis2;
 
   cli();
-  distStartAxis1=abs(posAxis1-startAxis1);  // distance from start HA
-  distStartAxis2=abs(posAxis2-startAxis2);  // distance from start Dec
+  distStartAxis1=abs(posAxis1-startAxis1);  // distance from start Axis1
+  distStartAxis2=abs(posAxis2-startAxis2);  // distance from start Axis2
   sei();
   if (distStartAxis1<1) distStartAxis1=1;
   if (distStartAxis2<1) distStartAxis2=1;
@@ -74,8 +74,8 @@ void moveTo() {
   Again:
   cli();
   long tempPosAxis2=posAxis2;
-  distDestAxis1=abs(posAxis1-(long)targetAxis1.part.m);  // distance from dest HA
-  distDestAxis2=abs(tempPosAxis2-(long)targetAxis2.part.m);  // distance from dest Dec
+  distDestAxis1=abs(posAxis1-(long)targetAxis1.part.m);      // distance from dest Axis1
+  distDestAxis2=abs(tempPosAxis2-(long)targetAxis2.part.m);  // distance from dest Axis2
   sei();
 
   // adjust rates near the horizon to help keep from exceeding the minAlt limit
@@ -238,11 +238,6 @@ void moveTo() {
         // clear the backlash
         int i=parkClearBacklash(); if (i==-1) return; // working
 
-        // set timers for no motion
-        cli(); timerRateAxis1=0; sei();
-        cli(); timerRateAxis2=0; sei();
-        delay(20);
-
         // restore trackingState
         trackingState=lastTrackingState; lastTrackingState=TrackingNone;
         SiderealClockSetInterval(siderealInterval);
@@ -252,11 +247,10 @@ void moveTo() {
 
         // validate location
         byte parkPierSide=EEPROM.read(EE_pierSide);
-        if ((posAxis1!=(long)targetAxis1.part.m) || (posAxis2!=(long)targetAxis2.part.m) || (pierSide!=parkPierSide) || (i!=1)) { parkStatus=ParkFailed; EEPROM.write(EE_parkStatus,parkStatus); }
+        if ((blAxis1!=0) || (blAxis2!=0) || (posAxis1!=(long)targetAxis1.part.m) || (posAxis2!=(long)targetAxis2.part.m) || (pierSide!=parkPierSide) || (i!=1)) { parkStatus=ParkFailed; EEPROM.write(EE_parkStatus,parkStatus); }
 
         // wrap it up
         parkFinish();
-        
       } else
         // sound goto done
         soundAlert();
@@ -268,12 +262,8 @@ void moveTo() {
         sei();
   
         if (homeMount) {
+          // clear the backlash
           if (parkClearBacklash()==-1) return;  // working, no error flagging
-
-          // set timers for no motion
-          cli(); timerRateAxis1=0; sei();
-          cli(); timerRateAxis2=0; sei();
-          delay(20);
 
           // restore trackingState
           trackingState=lastTrackingState; lastTrackingState=TrackingNone;

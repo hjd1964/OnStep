@@ -123,7 +123,7 @@ bool doParkClearBacklash(int phase) {
   }
   if (phase==3) {
     // start by moving fully into the backlash
-    cli(); targetAxis1.part.m += backlashAxis1; targetAxis2.part.m += backlashAxis2; sei();
+    cli(); targetAxis1.part.m += 1; targetAxis2.part.m += 1; sei();
     timeout=(unsigned long)millis()+10000UL; // set timeout in 10s
     return true;
   }
@@ -134,7 +134,7 @@ bool doParkClearBacklash(int phase) {
   }
   if (phase==5) {
     // then reverse direction and take it all up
-    cli(); targetAxis1.part.m -= backlashAxis1; targetAxis2.part.m -= backlashAxis2; sei();
+    cli(); targetAxis1.part.m -= 1; targetAxis2.part.m -= 1; sei();
     timeout=(unsigned long)millis()+10000UL; // set timeout in 10s
     return true;
   }
@@ -193,6 +193,8 @@ boolean unpark() {
         cli();
         posAxis1=targetAxis1.part.m;
         posAxis2=targetAxis2.part.m;
+        blAxis1=0;
+        blAxis2=0;
         sei();
 
         // see what side of the pier we're on
