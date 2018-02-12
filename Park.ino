@@ -3,7 +3,7 @@
 
 // sets the park postion as the current position
 boolean setPark() {
-  if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo) && (axis1Enabled) && ((pierSide==PierSideNone) || (pierSide==PierSideEast) || (pierSide==PierSideWest))) {
+  if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo) && ((pierSide==PierSideNone) || (pierSide==PierSideEast) || (pierSide==PierSideWest))) {
     lastTrackingState=trackingState;
     trackingState=TrackingNone;
 
