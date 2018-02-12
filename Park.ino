@@ -3,7 +3,7 @@
 
 // sets the park postion as the current position
 boolean setPark() {
-  if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo) && (axis1Enabled) && ((pierSide==PierSideEast) || (pierSide==PierSideWest))) {
+  if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo) && (axis1Enabled) && ((pierSide==PierSideNone) || (pierSide==PierSideEast) || (pierSide==PierSideWest))) {
     lastTrackingState=trackingState;
     trackingState=TrackingNone;
 
@@ -16,7 +16,8 @@ boolean setPark() {
     EEPROM_writeLong(EE_posAxis2,parkPosAxis2);
 
     // and remember what side of the pier we're on
-    EEPROM.write(EE_pierSide,pierSide);
+    // if no pier side is set use the default
+    if (pierSide==PierSideNone) EEPROM.write(EE_pierSide,PierSideEast); else EEPROM.write(EE_pierSide,pierSide);
     parkSaved=true;
     EEPROM.write(EE_parkSaved,parkSaved);
 
@@ -177,6 +178,9 @@ boolean unpark() {
     parkStatus=Parked;
     if (parkStatus==Parked) {
       if (parkSaved) {
+        // stop the motor timers (except guiding)
+        cli(); trackingTimerRateAxis1=0.0; trackingTimerRateAxis2=0.0; sei(); delay(11);
+
         // load the pointing model
         loadAlignModel();
 
@@ -211,7 +215,7 @@ boolean unpark() {
         // update our status, we're not parked anymore
         parkStatus=NotParked;
         EEPROM.write(EE_parkStatus,parkStatus);
-          
+
         // start tracking
         trackingState=TrackingSidereal;
         EnableStepperDrivers();
