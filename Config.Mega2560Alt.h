@@ -128,7 +128,7 @@
 
 // AXIS1/2 STEPPER DRIVER CONTROL ------------------------------------------------------------------------------------------
 // Axis1: Pins 35,37 = Step,Dir (RA/Azm)
-// Axis2: Pins 22,24 = Step,Dir (Dec/Alt)
+// Axis2: Pins 24,22 = Step,Dir (Dec/Alt)
 
 // Reverse the direction of movement.  Adjust as needed or reverse your wiring so things move in the right direction
 #define REVERSE_AXIS1_OFF            // RA/Azm axis
