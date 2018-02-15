@@ -129,7 +129,7 @@
 
 // AXIS1/2 STEPPER DRIVER CONTROL ------------------------------------------------------------------------------------------
 // Axis1: Pins 35,37 = Step,Dir (RA/Azm)
-// Axis2: Pins 22,24 = Step,Dir (Dec/Alt)
+// Axis2: Pins 24,22 = Step,Dir (Dec/Alt)
 
 // Stepper driver Enable support is always on, just wire Enable to Pins 23 (Axis1) and 36 (Axis2) and OnStep will pull these HIGH
 // to disable stepper drivers on startup and when Parked or Homed.  An Align or UnPark will enable the drivers.  Adjust below if you need these pulled LOW to disable the drivers.
