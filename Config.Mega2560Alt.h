@@ -140,7 +140,7 @@
 #define AUTO_POWER_DOWN_AXIS2_OFF
 
 /* Stepper driver Mode control
-// M0, M1, and M2 are on Pins 25,27, and 29 for RA and Pins 34,32,30 for Dec.
+// M0, M1, and M2 are on Pins 29,27, and 25 for RA and Pins 30,32,34 for Dec.
 // values 0 to 7 (0b000 to 111): for example "#define AXIS1_MODE 4" is the same as "#define AXIS1_MODE 0b100" which sets M2 to HIGH, M1 to LOW, and M0 to LOW
 //                                                                                                      / | \
 //                                                                                                    M2  M1 M0
