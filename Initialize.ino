@@ -349,18 +349,6 @@ void Init_ReadEEPROM_Values() {
     rtc.writeSQW(SQW_SQUARE_1);
   }
 #endif
-#ifdef RTC_DS3231
-  bool _PM; bool _H12=false; bool _CEN;
-  Clock.setClockMode(false);  // set to 24h
-  if ((Clock.getYear()>=0) && (Clock.getYear()<=99) && (Clock.getMonth(_CEN)>=1) && (Clock.getMonth(_CEN)<=12) && (Clock.getDate()>=1) && (Clock.getDate()<=31) &&
-      (Clock.getHour(_H12,_PM)>=0) && (Clock.getHour(_H12,_PM)<=23) && (Clock.getMinute()>=0) && (Clock.getMinute()<=59) && (Clock.getSecond()>=0) && (Clock.getSecond()<=59)) {
-    int y1=Clock.getYear(); if (y1>11) y1=y1+2000; else y1=y1+2100;
-    JD=julian(y1,Clock.getMonth(_CEN),Clock.getDate());
-    LMT=(Clock.getHour(_H12,_PM)+(Clock.getMinute()/60.0)+(Clock.getSecond()/3600.0));
-    // frequency 0 (1Hz) on the SQW pin
-    Clock.enableOscillator(true, false, 0);
-  }
-#endif
   UT1=LMT+timeZone;
   update_lst(jd2last(JD,UT1,false));
 
