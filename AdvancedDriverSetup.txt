@@ -1,14 +1,15 @@
 // ----------------------------------------------------------------
 // Advanced stepper driver mode setup (example)
-// Place this in your config.xxx.h file in place of
+// Place this in your config.xxx.h file in place of the "Basic stepper driver mode setup" section
 //
-// M0, M1, and M2 are on ? Pins for Axis1 (RA/Azm) and ? Pins for Axis2 (Dec/Alt) and are listed in Config.xxx.h's matching Pins.xxx.h file.
+// M0, M1, and M2 for Axis1/2 (RA/Azm) and are listed in Config.xxx.h's matching Pins.xxx.h file.
 // values 0 to 7 (0b000 to 111): for example "#define AXIS1_MODE 4" is the same as "#define AXIS1_MODE 0b100" which sets M2 to HIGH, M1 to LOW, and M0 to LOW
 //                                                                                                      / | \                  (1)         (0)            (0)
 //                                                                                                    M2  M1 M0
-// DRV8825 or A4988 or RAPS128:
-// use MODE_SWITCH_BEFORE_SLEW_OFF
-// micro-stepping modes: 5=32x, 4=16x, 3=8x, 2=4x, 1=2x, 0=1x (RAPS128 also supports 6=64x, 7=128x)
+// DRV8825 micro-stepping modes:                5=32x, 4=16x, 3=8x, 2=4x, 1=2x, 0=1x
+// A4988             "    modes:                       7=16x, 3=8x, 2=4x, 1=2x, 0=1x
+// RAPS128/LV8729    "    modes: 7=128x, 6=64x, 5=32x, 4=16x, 3=8x, 2=4x, 1=2x, 0=1x
+// all use MODE_SWITCH_BEFORE_SLEW_OFF
 //
 // SilentStepStick TMC2100/2130 configurations (M0 is CFG1, M1 is CFG2, M2 is CFG3):
 // use MODE_SWITCH_BEFORE_SLEW_OFF.  CFG3 should always be OPEN*.  AXISn_MODE_GOTO_OFF is recommended so AXISn_STEP_GOTO would then be 1.
@@ -34,6 +35,13 @@
 #define AXIS2_STEP_GOTO 1            // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
 #define MODE_SWITCH_BEFORE_SLEW_OFF  // _ON (or _SPI) for _MODE and _MODE_GOTO settings to start/stop just before/after the slew, otherwise they are active
                                      // during the slew at <128uS/step speeds. _SPI as above but uses SPI (on M0/M1/M2/(and optionally Aux)) to do the switching (TMC2130.)  
+
+// Secondary stepper driver decay control (for both Axis, the _DECAY_MODE and _DECAY_MODE_GOTO settings always start/stop just before/after the slew)
+// typically used for the DRV8825 or A9488 where decay control is separate from the micro-step mode control.  The driver modules usually need to be modified to accomplish this.
+// Axis1/2 decay mode pin locations, if available, are in Pins.xxx.h  Options are HIGH, LOW, OPEN, default is _OFF)
+// MODE_SWITCH_BEFORE_SLEW must be _OFF if using this.
+#define DECAY_MODE_OFF
+#define DECAY_MODE_GOTO_OFF
 
 // if the decay/micro-step mode switch happens before/after a slew, inserts a 3ms delay before the motors take a step.
 #define MODE_SWITCH_SLEEP_OFF

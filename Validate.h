@@ -168,6 +168,24 @@
 #ifdef AUTO_POWER_DOWN_AXIS2_ON
 #define AXIS2_AUTO_POWER_DOWN_ON
 #endif
+#ifdef DECAY_MODE_LOW
+#define DECAY_MODE LOW
+#endif
+#ifdef DECAY_MODE_HIGH
+#define DECAY_MODE HIGH
+#endif
+#ifdef DECAY_MODE_OPEN
+#define DECAY_MODE OPEN
+#endif
+#ifdef DECAY_MODE_GOTO_LOW
+#define DECAY_MODE_GOTO LOW
+#endif
+#ifdef DECAY_MODE_GOTO_HIGH
+#define DECAY_MODE_GOTO HIGH
+#endif
+#ifdef DECAY_MODE_GOTO_OPEN
+#define DECAY_MODE_GOTO OPEN
+#endif
 
 // -----------------------------------------------------------------------------------
 // setup defaults

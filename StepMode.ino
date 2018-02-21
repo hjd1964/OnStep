@@ -35,13 +35,13 @@ void StepperModeTracking() {
   if (_stepperModeTrack) return;
   _stepperModeTrack=true;
   cli();
-#if defined(DECAY_MODE_OPEN)
+#if defined(DECAY_MODE) && (DECAY_MODE==OPEN)
   pinModeOpen(Axis1_Mode);
   pinModeOpen(Axis2_Mode);
-#elif defined(DECAY_MODE_LOW)
+#elif defined(DECAY_MODE) && (DECAY_MODE==LOW)
   pinMode(Axis1_Mode,OUTPUT); digitalWrite(Axis1_Mode,LOW);
   pinMode(Axis2_Mode,OUTPUT); digitalWrite(Axis1_Mode,LOW);
-#elif defined(DECAY_MODE_HIGH)
+#elif defined(DECAY_MODE) && (DECAY_MODE==HIGH)
   pinMode(Axis1_Mode,OUTPUT); digitalWrite(Axis1_Mode,HIGH);
   pinMode(Axis2_Mode,OUTPUT); digitalWrite(Axis2_Mode,HIGH);
 #elif defined(MODE_SWITCH_BEFORE_SLEW_ON)
@@ -90,13 +90,13 @@ void StepperModeGoto() {
   if (!_stepperModeTrack) return;
   _stepperModeTrack=false;
   cli();
-#if defined(DECAY_MODE_GOTO_OPEN)
+#if defined(DECAY_MODE_GOTO) && (DECAY_MODE_GOTO==OPEN)
   pinModeOpen(Axis1_Mode);
   pinModeOpen(Axis2_Mode);
-#elif defined(DECAY_MODE_GOTO_LOW)
+#elif defined(DECAY_MODE_GOTO) && (DECAY_MODE_GOTO==LOW)
   pinMode(Axis1_Mode,OUTPUT); digitalWrite(Axis1_Mode,LOW);
   pinMode(Axis2_Mode,OUTPUT); digitalWrite(Axis1_Mode,LOW);
-#elif defined(DECAY_MODE_GOTO_HIGH)
+#elif defined(DECAY_MODE_GOTO) && (DECAY_MODE_GOTO==HIGH)
   pinMode(Axis1_Mode,OUTPUT); digitalWrite(Axis1_Mode,HIGH);
   pinMode(Axis2_Mode,OUTPUT); digitalWrite(Axis2_Mode,HIGH);
 #elif defined(MODE_SWITCH_BEFORE_SLEW_ON)

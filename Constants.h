@@ -20,6 +20,9 @@
 #define TMC2130_QUIET_LOWPWR 103
 #define TMC2130_VQUIET_LOWPWR 104
 
+// Stepper Driver Decay Mode Open
+#define OPEN 2
+
 // Length of each stepper's table
 #define LEN_A4988   5
 #define LEN_DRV8825 6
