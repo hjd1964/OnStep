@@ -59,12 +59,17 @@
 
 #ifdef FileVersionConfig
   #if FileVersionConfig < FirmwareVersionConfig
-    #error "Configuration: There have been changes to the configuration file format.  You'll have to make a new Config.xxx.h file."
+    // firmware version 2 is compatible with file version 1
+    #if (FileVersionConfig==1) && (FirmwareVersionConfig==2)
+      #warning "Configuration: There have been changes to the configuration file format, but OnStep is still backwards compatible for now."
+    #else
+      #error "Configuration: There have been changes to the configuration file format.  You'll have to make a new Config.xxx.h file."
+    #endif
   #elif FileVersionConfig > FirmwareVersionConfig
     #error "Configuration: Configuration file version mismatch."
   #endif
 #else
-  #if FirmwareVersionConfig == 1
+  #if (FirmwareVersionConfig == 1) || (FirmwareVersionConfig == 2)
     #warning "Configuration: Config.xxx.h file version isn't specified (pre-version 1?)"
   #else
     #error "Configuration: There have been changes to the configuration file format.  You'll have to make a new Config.xxx.h file."
@@ -90,6 +95,7 @@
 // -----------------------------------------------------------------------------------
 // misc. configuration #defines to correct for backwards compatability etc.
 
+// config pre-version 1
 #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
   #define SEPARATE_PULSE_GUIDE_RATE_ON
 #endif
@@ -100,6 +106,7 @@
   #define MinRot MinAxis3
 #endif
 
+// config version 1
 #ifdef REVERSE_AXIS1_ON
   #define AXIS1_REVERSE_ON
 #endif
@@ -115,7 +122,6 @@
 #ifdef REVERSE_AXIS5_ON
   #define AXIS5_REVERSE_ON
 #endif
-
 #ifndef AXIS1_DISABLE
   #if defined(AXIS1_DISABLED_HIGH)
     #define AXIS1_DISABLE HIGH
@@ -140,6 +146,27 @@
 #endif
 #ifdef DISABLE_AXIS5
   #define AXIS3_DISABLE DISABLE_AXIS5
+#endif
+#ifdef AXIS1_FAULT_SPI
+#define AXIS1_FAULT TMC2130
+#endif
+#ifdef AXIS1_FAULT_LOW
+#define AXIS1_FAULT LOW
+#endif
+#ifdef AXIS1_FAULT_HIGH
+#define AXIS1_FAULT HIGH
+#endif
+#ifdef AXIS2_FAULT_SPI
+#define AXIS2_FAULT TMC2130
+#endif
+#ifdef AXIS2_FAULT_LOW
+#define AXIS2_FAULT LOW
+#endif
+#ifdef AXIS2_FAULT_HIGH
+#define AXIS2_FAULT HIGH
+#endif
+#ifdef AUTO_POWER_DOWN_AXIS2_ON
+#define AXIS2_AUTO_POWER_DOWN_ON
 #endif
 
 // -----------------------------------------------------------------------------------
@@ -500,7 +527,7 @@ boolean axis2Enabled = false;
 // warn the user not to have MISO wired up and try to use ESP8266 control too
 #if defined(ESP8266_CONTROL_ON) && defined(MODE_SWITCH_BEFORE_SLEW_SPI)
   #warning "Configuration: be sure the Aux1 and Aux2 pins are wired into the ESP8266 GPIO0 and RST pins and **NOT** the SSS TMC2130 SDO pins"
-  #if defined(AXIS1_FAULT_SPI) || defined(AXIS2_FAULT_SPI)
+  #if (AXIS1_FAULT==TMC2130) || (AXIS2_FAULT==TMC2130)
     #error "Configuration: Fault detection across SPI conflicts with ESP8266 control, choose one feature and wire for it correctly"
   #endif
 #endif

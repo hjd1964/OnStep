@@ -154,7 +154,7 @@
 
 // For equatorial mounts, _ON powers down the Declination axis when it's not being used to help lower power use.  During low rate guiding (<=1x) the axis stays enabled
 // for 10 minutes after any guide on either axis.  Otherwise, the Dec axis is disabled (powered off) 10 seconds after movement stops.
-#define AUTO_POWER_DOWN_AXIS2_OFF
+#define AXIS2_AUTO_POWER_DOWN_OFF
 
 // Basic stepper driver mode setup . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 // If used, this requires connections M0, M1, and M2 on Pins 22,23,24 for Axis1 (RA/Azm) (Teensy3.x Pins 13,14,15.)  M0, M1, M2 are on Pins 27,28,29 for Axis2 (Dec/Alt) (Teensy3.x Pins 18,19,20.)
@@ -169,7 +169,7 @@
 // Note: you can replace this section with the contents of "AdvancedStepperSetup.txt" . . . . . . . . . . . . . . . . . . . 
 
 // Stepper driver Fault detection
-// just wire driver Fault signal to Pins 26 (Axis1) and 31 (Axis2), default=_OFF (Teensy3.x Pins 17,22) other settings are LOW and HIGH
+// just wire driver Fault signal to Pins 26 (Axis1) and 31 (Axis2), default=_OFF (Teensy3.x Pins 17,22) other settings are LOW and HIGH (if available applies internal pullup if LOW and pulldown if HIGH.)
 #define AXIS1_FAULT_OFF
 #define AXIS2_FAULT_OFF
 
@@ -207,7 +207,7 @@
 // THAT'S IT FOR USER CONFIGURATION!
 
 // -------------------------------------------------------------------------------------------------------------------------
-#define FileVersionConfig 1
+#define FileVersionConfig 2
 #include "Pins.Classic.h"
 #endif
 

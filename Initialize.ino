@@ -246,22 +246,27 @@ void Init_Pins() {
 #endif
 
 // inputs for stepper drivers fault signal
-#ifdef AXIS1_FAULT_LOW
-  pinMode(Axis1_FAULT,INPUT_PULLUP);
-#elif defined(AXIS1_FAULT_HIGH)
-  #ifdef INPUT_PULLDOWN
-  pinMode(Axis1_FAULT,INPUT_PULLDOWN);
-  #else
-  pinMode(Axis1_FAULT,INPUT);
+#ifdef AXIS1_FAULT
+  #if AXIS1_FAULT==LOW
+    pinMode(Axis1_FAULT,INPUT_PULLUP);
+  #elif AXIS1_FAULT==HIGH
+    #ifdef INPUT_PULLDOWN
+      pinMode(Axis1_FAULT,INPUT_PULLDOWN);
+    #else
+      pinMode(Axis1_FAULT,INPUT);
+    #endif
   #endif
 #endif
-#ifdef AXIS2_FAULT_LOW
-  pinMode(Axis2_FAULT,INPUT_PULLUP);
-#elif defined(AXIS1_FAULT_HIGH)
-  #ifdef INPUT_PULLDOWN
-  pinMode(Axis2_FAULT,INPUT_PULLDOWN);
-  #else
-  pinMode(Axis2_FAULT,INPUT);
+
+#ifdef AXIS2_FAULT
+  #if AXIS2_FAULT==LOW
+    pinMode(Axis2_FAULT,INPUT_PULLUP);
+  #elif AXIS1_FAULT==HIGH
+    #ifdef INPUT_PULLDOWN
+    pinMode(Axis2_FAULT,INPUT_PULLDOWN);
+    #else
+    pinMode(Axis2_FAULT,INPUT);
+    #endif
   #endif
 #endif
 
@@ -336,12 +341,24 @@ void Init_ReadEEPROM_Values() {
   LMT=EEPROM_readFloat(EE_LMT);
 #ifdef RTC_DS3234
   rtc.begin(DS3234_CS_PIN); rtc.update();
-  if ((rtc.year()>=0) && (rtc.month()<=99) && (rtc.month()>=1) && (rtc.month()<=12) && (rtc.date()>=1) && (rtc.date()<=31) &&
+  if ((rtc.year()>=0) && (rtc.year()<=99) && (rtc.month()>=1) && (rtc.month()<=12) && (rtc.date()>=1) && (rtc.date()<=31) &&
       (rtc.hour()>=0) && (rtc.hour()<=23) && (rtc.minute()>=0) && (rtc.minute()<=59) && (rtc.second()>=0) && (rtc.second()<=59)) {
     int y1=rtc.year(); if (y1>11) y1=y1+2000; else y1=y1+2100;
     JD=julian(y1,rtc.month(),rtc.date());
     LMT=(rtc.hour()+(rtc.minute()/60.0)+(rtc.second()/3600.0));
     rtc.writeSQW(SQW_SQUARE_1);
+  }
+#endif
+#ifdef RTC_DS3231
+  bool _PM; bool _H12=false; bool _CEN;
+  Clock.setClockMode(false);  // set to 24h
+  if ((Clock.getYear()>=0) && (Clock.getYear()<=99) && (Clock.getMonth(_CEN)>=1) && (Clock.getMonth(_CEN)<=12) && (Clock.getDate()>=1) && (Clock.getDate()<=31) &&
+      (Clock.getHour(_H12,_PM)>=0) && (Clock.getHour(_H12,_PM)<=23) && (Clock.getMinute()>=0) && (Clock.getMinute()<=59) && (Clock.getSecond()>=0) && (Clock.getSecond()<=59)) {
+    int y1=Clock.getYear(); if (y1>11) y1=y1+2000; else y1=y1+2100;
+    JD=julian(y1,Clock.getMonth(_CEN),Clock.getDate());
+    LMT=(Clock.getHour(_H12,_PM)+(Clock.getMinute()/60.0)+(Clock.getSecond()/3600.0));
+    // frequency 0 (1Hz) on the SQW pin
+    Clock.enableOscillator(true, false, 0);
   }
 #endif
   UT1=LMT+timeZone;

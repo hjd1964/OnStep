@@ -42,7 +42,7 @@
 #define FirmwareVersionMajor  1
 #define FirmwareVersionMinor  2
 #define FirmwareVersionPatch  "d"     // for example major.minor patch: 1.3c
-#define FirmwareVersionConfig 1       // internal, for tracking configuration file changes
+#define FirmwareVersionConfig 2       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
 
@@ -229,23 +229,27 @@ void loop() {
     if ((ls1==LOW) && (ls2==LOW)) { lastError=ERR_LIMIT_SENSE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
 #endif
     // check for fault signal, stop any slew or guide and turn tracking off
-#ifdef AXIS1_FAULT_LOW
+#ifdef AXIS1_FAULT
+  #if AXIS1_FAULT==LOW
     faultAxis1=(digitalRead(Axis1_FAULT)==LOW);
-#endif
-#ifdef AXIS1_FAULT_HIGH
+  #endif
+  #if AXIS1_FAULT==HIGH
     faultAxis1=(digitalRead(Axis1_FAULT)==HIGH);
+  #endif
+  #if AXIS1_FAULT==TMC2130
+    if (lst%2==0) tmcAxis1.error();
+  #endif
 #endif
-#ifdef AXIS1_FAULT_SPI
-  if (lst%2==0) tmcAxis1.error();
-#endif
-#ifdef AXIS2_FAULT_LOW
+#ifdef AXIS2_FAULT
+  #if AXIS2_FAULT==LOW
     faultAxis2=(digitalRead(Axis2_FAULT)==LOW);
-#endif
-#ifdef AXIS2_FAULT_HIGH
+  #endif
+  #if AXIS2_FAULT==HIGH
     faultAxis2=(digitalRead(Axis2_FAULT)==HIGH);
-#endif
-#ifdef AXIS2_FAULT_SPI
-  if (lst%2==1) tmcAxis2.error();
+  #endif
+  #if AXIS2_FAULT==TMC2130
+    if (lst%2==1) tmcAxis2.error();
+  #endif
 #endif
 
     if (faultAxis1 || faultAxis2) { lastError=ERR_MOTOR_FAULT; if (trackingState==TrackingMoveTo) abortSlew=true; else { trackingState=TrackingNone; if (guideDirAxis1) guideDirAxis1='b'; if (guideDirAxis2) guideDirAxis2='b'; } }

@@ -19,7 +19,7 @@ volatile long modeAxis2_next=AXIS2_MODE;
 volatile boolean gotoModeAxis2=false;
 #endif
 
-#ifdef AUTO_POWER_DOWN_AXIS2_ON
+#ifdef AXIS2_AUTO_POWER_DOWN_ON
 volatile long Axis2PowerOffTimer = 0;
 volatile bool axis2Powered = false;
 #endif
@@ -213,7 +213,7 @@ ISR(TIMER1_COMPA_vect)
   gotoRateAxis2=(thisTimerRateAxis2<128*16L);   // activate <128us rate
   #endif
 
-#if defined(AUTO_POWER_DOWN_AXIS2_ON) && !defined(MOUNT_TYPE_ALTAZM)
+#if defined(AXIS2_AUTO_POWER_DOWN_ON) && !defined(MOUNT_TYPE_ALTAZM)
     // ------------------------------------------------------------------------------------------------------------------------------------
     // Power down the Dec motor
     

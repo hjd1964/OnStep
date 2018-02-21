@@ -1924,19 +1924,23 @@ String ConfighSettings() {
   #else
     c+="9";
   #endif
-  #if defined(AXIS1_FAULT_LOW)
-    c+="0";
-  #elif defined(AXIS1_FAULT_HIGH)
-    c+="1";
-  #else
-    c+="2";
+  #ifdef AXIS1_FAULT
+    #if AXIS1_FAULT==LOW
+      c+="0";
+    #elif AXIS1_FAULT==HIGH
+      c+="1";
+    #else
+      c+="2";
+    #endif
   #endif
-  #if defined(AXIS2_FAULT_LOW)
-    c+="0";
-  #elif defined(AXIS2_FAULT_HIGH)
-    c+="1";
-  #else
-    c+="2";
+  #ifdef AXIS2_FAULT
+    #if AXIS2_FAULT==LOW
+      c+="0";
+    #elif AXIS2_FAULT==HIGH
+      c+="1";
+    #else
+      c+="2";
+    #endif
   #endif
   #ifdef TRACK_REFRACTION_RATE_DEFAULT_ON
     c+="1";
