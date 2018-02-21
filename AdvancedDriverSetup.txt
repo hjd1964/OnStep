@@ -1,5 +1,4 @@
-// ----------------------------------------------------------------
-// Advanced stepper driver mode setup (example)
+// Advanced stepper driver mode setup  . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 // Place this in your config.xxx.h file in place of the "Basic stepper driver mode setup" section
 //
 // M0, M1, and M2 for Axis1/2 (RA/Azm) and are listed in Config.xxx.h's matching Pins.xxx.h file.
@@ -45,4 +44,4 @@
 
 // if the decay/micro-step mode switch happens before/after a slew, inserts a 3ms delay before the motors take a step.
 #define MODE_SWITCH_SLEEP_OFF
-// ----------------------------------------------------------------
+// . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 
