@@ -337,7 +337,7 @@ void processCommands() {
 //         Returns: Nothing
       if (command[1]=='Q') {
         amountMoveAxis4.fixed=0;
-        targetAxis4=posAxis4;
+        targetAxis4.part.m=posAxis4; targetAxis4.part.f=0;
         quietReply=true;
       } else
 //  :FG#   Get focuser current position (in microns)
@@ -452,7 +452,7 @@ void processCommands() {
 //         Returns: Nothing
       if (command[1]=='Q') {
         amountMoveAxis5.fixed=0;
-        targetAxis5=posAxis5;
+        targetAxis5.part.m=posAxis5; targetAxis5.part.f=0;
         quietReply=true;
       } else
 //  :fG#   Get focuser current position (in microns)
