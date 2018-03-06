@@ -133,22 +133,22 @@
 #define Axis2_FAULT   22    // Pin 22 (Fault)
 #define Axis2_Aux     22    // Pin 22 (Aux - ESP8266 Rst or SPI MISO)
 
-// Pins to rotator stepper driver
+// For rotator stepper driver
 #define Axis3DirPin   33    // Pin 33 (Dir)
 #define Axis3StepPin  30    // Pin 30 (Step)
 
-// Pins to focuser1 stepper driver  
-// teensy3.5/3.6
+// For focuser1 stepper driver  
 #if defined(__MK64FX512__) || defined(__MK66FX1M0__)
-#define Axis4DirPin   35    // Pin 35 (Dir)
-#define Axis4StepPin  34    // Pin 34 (Step)
+  // teensy3.5/3.6
+  #define Axis4DirPin   35    // Pin 35 (Dir)
+  #define Axis4StepPin  34    // Pin 34 (Step)
 #else
-// Pins to focuser1 stepper driver teensy3.2
-#define Axis4DirPin   32    // Pin 32 (Dir)
-#define Axis4StepPin  31    // Pin 31 (Step)
+  // teensy3.2
+  #define Axis4DirPin   32    // Pin 32 (Dir)
+  #define Axis4StepPin  31    // Pin 31 (Step)
 #endif
 
-// Pins to focuser2 stepper driver
+// For focuser2 stepper driver
 #define Axis5DirPin   33    // Pin 33 (Dir)
 #define Axis5StepPin  30    // Pin 30 (Step)
 

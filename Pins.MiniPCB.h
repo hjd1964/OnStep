@@ -43,15 +43,15 @@
 #define Axis2_M0       8    // Pin  8 (Microstep Mode 0 or SPI MOSI)
 #define Axis2_EN       9    // Pin  9 (Enable)
 
-// Pins for rotator stepper driver
+// For rotator stepper driver
 #define Axis3DirPin   33    // Pin 33 (Dir)
 #define Axis3StepPin  30    // Pin 30 (Step)
 
-// Pins for focuser1 stepper driver
+// For focuser1 stepper driver
 #define Axis4DirPin   32    // Pin 32 (Dir)
 #define Axis4StepPin  31    // Pin 31 (Step)
 
-// Pins for focuser2 stepper driver
+// For focuser2 stepper driver
 #define Axis5DirPin   33    // Pin 33 (Dir)
 #define Axis5StepPin  30    // Pin 30 (Step)
 

@@ -52,13 +52,17 @@
 
 #define LimitPin       PB2    // The limit switch sense is a logic level input which uses the internal pull up, shorted to ground it stops gotos/tracking
 
-// Pins to focuser2/rotator stepper driver
+// For rotator stepper driver
 #define Axis3DirPin   PC1    // Dir
 #define Axis3StepPin  PC2    // Step
 
 // Pins to focuser1 stepper driver
 #define Axis4DirPin   PC3    // Dir
 #define Axis4StepPin  PC4    // Step
+
+// For focuser2 stepper driver
+#define Axis5DirPin   PC1    // Dir
+#define Axis5StepPin  PC2    // Step
 
 // ST4 interface
 #define ST4RAw        PD10    // ST4 RA- West
