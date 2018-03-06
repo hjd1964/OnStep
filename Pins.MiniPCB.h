@@ -51,6 +51,10 @@
 #define Axis4DirPin   32    // Pin 32 (Dir)
 #define Axis4StepPin  31    // Pin 31 (Step)
 
+// Pins to focuser2 stepper driver
+#define Axis5DirPin   33    // Pin 33 (Dir)
+#define Axis5StepPin  30    // Pin 30 (Step)
+
 // ST4 interface
 #define ST4RAw        10    // Pin 10 ST4 RA- West
 #define ST4DEs        11    // Pin 11 ST4 DE- South
