@@ -25,6 +25,13 @@
 #define HAL_SERIAL4_ENABLED
 #endif
 
+// New symbol for the default I2C port -------------------------------------------------------------
+#if defined(__MK64FX512__) || defined(__MK66FX1M0__)
+#define HAL_Wire Wire1
+#else
+#define HAL_Wire Wire
+#endif
+
 //--------------------------------------------------------------------------------------------------
 // Initialize timers
 

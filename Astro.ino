@@ -228,8 +228,8 @@ double jd2gast(double JulianDay, double ut1) {
 double jd2last(double JulianDay, double ut1, bool updateRTC) {
   // update RTC
   if (updateRTC) {
-#ifdef RTC_DS3234
-  int y,mo,d,h,dow;
+#if defined(RTC_DS3231) || defined(RTC_DS3234)
+  int yy,y,mo,d,h;
   double m,s;
 
   double lmt=ut1-timeZone;
@@ -237,15 +237,21 @@ double jd2last(double JulianDay, double ut1, bool updateRTC) {
   double J=JulianDay;
   while (lmt>=24.0) { lmt=lmt-24.0; J=J-1.0; } 
   if    (lmt<0.0)   { lmt=lmt+24.0; J=J+1.0; }
-  greg(J,&y,&mo,&d); y-=2000; if (y>=100) y-=100;
+  greg(J,&y,&mo,&d); yy=y; y-=2000; if (y>=100) y-=100;
 
   double f1=fabs(lmt)+0.000139;
   h=floor(f1);
   m=(f1-h)*60.0;
   s=(m-floor(m))*60.0;
-  dow=(round(J)%7)+1;
 
+#ifdef RTC_DS3234
+  int dow=(round(J)%7)+1;
   rtc.setTime(floor(s), floor(m), h, dow, d, mo, y);
+#endif
+#ifdef RTC_DS3231
+  RtcDateTime updateTime = RtcDateTime(yy, mo, d, h, floor(m), floor(s));
+  Rtc.SetDateTime(updateTime);
+#endif
 #endif
   }
   // JulianDay is the Local date, jd2gast requires a universal time

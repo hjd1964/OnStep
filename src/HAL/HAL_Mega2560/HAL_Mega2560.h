@@ -20,6 +20,9 @@
 // this tells OnStep that a .transmit() method needs to be called to send data
 #define HAL_SERIAL_TRANSMIT
 
+// New symbol for the default I2C port -------------------------------------------------------------
+#define HAL_Wire Wire
+
 //--------------------------------------------------------------------------------------------------
 // Initialize timers
 

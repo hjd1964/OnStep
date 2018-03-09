@@ -349,6 +349,20 @@ void Init_ReadEEPROM_Values() {
     rtc.writeSQW(SQW_SQUARE_1);
   }
 #endif
+
+#ifdef RTC_DS3231
+  Rtc.Begin(); if (!Rtc.GetIsRunning()) Rtc.SetIsRunning(true);
+  RtcDateTime now = Rtc.GetDateTime();
+  if ((now.Year()>=2018) && (now.Year()<=3000) && (now.Month()>=1) && (now.Month()<=12) && (now.Day()>=1) && (now.Day()<=31) &&
+      (now.Hour()>=0) && (now.Hour()<=23) && (now.Minute()>=0) && (now.Minute()<=59) && (now.Second()>=0) && (now.Second()<=59)) {
+    JD=julian(now.Year(),now.Month(),now.Day());
+    LMT=(now.Hour()+(now.Minute()/60.0)+(now.Second()/3600.0));
+    // frequency 0 (1Hz) on the SQW pin
+    Rtc.SetSquareWavePin(DS3231SquareWavePin_ModeClock);
+    Rtc.SetSquareWavePinClockFrequency(DS3231SquareWaveClock_1Hz);
+  }
+#endif
+
   UT1=LMT+timeZone;
   update_lst(jd2last(JD,UT1,false));
 

@@ -40,8 +40,8 @@
 // firmware info, these are returned by the ":GV?#" commands
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  1
-#define FirmwareVersionMinor  2
-#define FirmwareVersionPatch  "d"     // for example major.minor patch: 1.3c
+#define FirmwareVersionMinor  3
+#define FirmwareVersionPatch  "a"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 2       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
@@ -76,6 +76,11 @@ tmc2130 tmcAxis1(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0);
 tmc2130 tmcAxis2(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
 #endif
 
+#ifdef RTC_DS3231
+#include <Wire.h>
+#include <RtcDS3231.h>          //https://github.com/Makuna/Rtc/archive/master.zip
+RtcDS3231<TwoWire> Rtc(HAL_Wire);
+#endif
 #ifdef RTC_DS3234
 #include <SparkFunDS3234RTC.h>  //https://github.com/sparkfun/SparkFun_DS3234_RTC_Arduino_Library/archive/master.zip
 #endif
