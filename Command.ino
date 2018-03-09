@@ -1586,6 +1586,7 @@ void processCommands() {
           }
           long v=(double)strtol(&parameter[3],NULL,10); 
   #ifdef A21
+          if (Aux5==A21) { if (v==0) analogWrite(Aux5,0); if (v!=0) analogWrite(Aux5,4095); } else
   #endif
           { if (v==0) digitalWrite(Aux5,LOW); if (v!=0) digitalWrite(Aux5,HIGH); }
         } else
