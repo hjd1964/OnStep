@@ -19,6 +19,9 @@
 // SERIAL is always enabled SERIAL1 and SERIAL4 are optional
 #define HAL_SERIAL1_ENABLED
 
+// New symbol for the default I2C port -------------------------------------------------------------
+#define HAL_Wire Wire
+
 // Get this library from https://github.com/ivanseidel/DueTimer
 #include <DueTimer.h>
 
