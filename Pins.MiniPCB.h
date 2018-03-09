@@ -3,12 +3,17 @@
 
 #if defined(__ARM_Teensy3__)
 
+// The multi-purpose pins
+#define Aux0          19
+#define Aux1          18
+#define Aux2          5
+
 // The PEC index sense is a logic level input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
 #define PecPin        23
 #define AnalogPecPin  23    // Pin 23 (PEC Sense, analog or digital)
 
 // The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
-#define LEDnegPin     19    // Pin 19 (Drain)
+#define LEDnegPin     Aux0  // Pin 19 (Drain)
 #define LEDneg2Pin    22    // Pin 22 (Drain)
 #define ReticulePin   22    // Pin 22 (Drain)
 
@@ -21,9 +26,8 @@
 
 #define Axis1DirPin   21    // Pin 21 (Dir)
 #define Axis1StepPin  20    // Pin 20 (Step)
-#define RstPin        19    // Pin 19 (Reset)
-#define Axis1_FAULT   18    // Pin 18 (Fault)
-#define Axis1_Aux     18    // Pin 18 (Aux - ESP8266 GPIO0 or SPI MISO)
+#define Axis1_FAULT   Aux1  // Pin 18 (Fault)
+#define Axis1_Aux     Aux1  // Pin 18 (ESP8266 GPIO0 or SPI MISO)
 #define Axis1_M2      17    // Pin 17 (Microstep Mode 2 or SPI CS)
 #define Axis1_M1      16    // Pin 16 (Microstep Mode 1 or SPI SCK)
 #define Axis1_M0      15    // Pin 15 (Microstep Mode 0 or SPI MOSI)
@@ -36,8 +40,8 @@
 #define Axis2DirPin    2    // Pin  2 (Dir)
 #define Axis2StepPin   3    // Pin  3 (Step)
 #define LimitPin       4    // Pin  4 (The limit switch sense is a logic level input which uses the internal pull up, shorted to ground it stops gotos/tracking)
-#define Axis2_FAULT    5    // Pin  5 (Fault)
-#define Axis2_Aux      5    // Pin  5 (Aux - ESP8266 RST or SPI MISO)
+#define Axis2_FAULT    Aux2 // Pin  5 (Fault)
+#define Axis2_Aux      Aux2 // Pin  5 (ESP8266 RST or SPI MISO)
 #define Axis2_M2       6    // Pin  6 (Microstep Mode 2 or SPI CS)
 #define Axis2_M1       7    // Pin  7 (Microstep Mode 1 or SPI SCK)
 #define Axis2_M0       8    // Pin  8 (Microstep Mode 0 or SPI MOSI)

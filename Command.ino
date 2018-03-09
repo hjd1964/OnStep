@@ -1559,6 +1559,47 @@ void processCommands() {
           }
         } else
 #endif
+#ifdef Aux0
+        if ((parameter[0]=='G') && (parameter[1]=='0')) { static bool init=false; if (!init) { pinMode(Aux0,OUTPUT); init=true; } long v=(double)strtol(&parameter[3],NULL,10); if (v==0) { digitalWrite(Aux0,LOW); };  if (v!=0) { digitalWrite(Aux0,HIGH); }; } else
+#endif
+#ifndef MODE_SWITCH_BEFORE_SLEW_SPI
+  #ifdef Aux1
+        if ((parameter[0]=='G') && (parameter[1]=='1')) { static bool init=false; if (!init) { pinMode(Aux1,OUTPUT); init=true; } long v=(double)strtol(&parameter[3],NULL,10); if (v==0) { digitalWrite(Aux1,LOW); };  if (v!=0) { digitalWrite(Aux1,HIGH); }; } else
+  #endif
+  #ifdef Aux2
+        if ((parameter[0]=='G') && (parameter[1]=='2')) { static bool init=false; if (!init) { pinMode(Aux2,OUTPUT); init=true; } long v=(double)strtol(&parameter[3],NULL,10); if (v==0) { digitalWrite(Aux2,LOW); };  if (v!=0) { digitalWrite(Aux2,HIGH); }; } else
+  #endif
+#endif
+#ifdef Aux3
+        if ((parameter[0]=='G') && (parameter[1]=='3')) { static bool init=false; if (!init) { pinMode(Aux3,OUTPUT); init=true; } long v=(double)strtol(&parameter[3],NULL,10); if (v==0) { digitalWrite(Aux3,LOW); };  if (v!=0) { digitalWrite(Aux3,HIGH); }; } else
+#endif
+#ifdef Aux4
+        if ((parameter[0]=='G') && (parameter[1]=='4')) { static bool init=false; if (!init) { pinMode(Aux4,OUTPUT); init=true; } long v=(double)strtol(&parameter[3],NULL,10); if (v==0) { digitalWrite(Aux4,LOW); };  if (v!=0) { digitalWrite(Aux4,HIGH); }; } else
+#endif
+#ifdef Aux5
+        if ((parameter[0]=='G') && (parameter[1]=='5')) { 
+          static bool init=false; if (!init) { 
+            pinMode(Aux5,OUTPUT); init=true; 
+  #ifdef A21
+            if (Aux5==A21) analogWriteResolution(12); 
+  #endif
+          }
+          long v=(double)strtol(&parameter[3],NULL,10); 
+  #ifdef A21
+          if (Aux5==A21) { if (v==0) analogWrite(Aux5,0); if (v!=0) analogWrite(Aux5,1024); } else
+  #endif
+          { if (v==0) digitalWrite(Aux5,LOW); if (v!=0) digitalWrite(Aux5,HIGH); }
+        } else
+#endif
+#ifdef Aux6
+        if ((parameter[0]=='G') && (parameter[1]=='6')) { static bool init=false; if (!init) { pinMode(Aux6,OUTPUT); init=true; } long v=(double)strtol(&parameter[3],NULL,10); if (v==0) { digitalWrite(Aux6,LOW); };  if (v!=0) { digitalWrite(Aux6,HIGH); }; } else
+#endif
+#ifdef Aux7
+        if ((parameter[0]=='G') && (parameter[1]=='7')) { static bool init=false; if (!init) { pinMode(Aux7,OUTPUT); init=true; } long v=(double)strtol(&parameter[3],NULL,10); if (v==0) { digitalWrite(Aux7,LOW); };  if (v!=0) { digitalWrite(Aux7,HIGH); }; } else
+#endif
+#ifdef Aux8
+        if ((parameter[0]=='G') && (parameter[1]=='8')) { static bool init=false; if (!init) { pinMode(Aux8,OUTPUT); init=true; } long v=(double)strtol(&parameter[3],NULL,10); if (v==0) { digitalWrite(Aux8,LOW); };  if (v!=0) { digitalWrite(Aux8,HIGH); }; } else
+#endif
           commandError=true;
       } else
 //  :SzDDD*MM#

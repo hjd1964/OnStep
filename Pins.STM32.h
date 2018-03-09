@@ -24,7 +24,6 @@
 #define Axis1_M0      PD15   // Microstep Mode 0 or SPI MOSI
 #define Axis1_FAULT   PD9    // Fault
 #define Axis1_Aux     Axis1_Aux    // Aux - ESP8266 GPIO0 or SPI MISO
-//#define RstPin        PD5    // Reset
 
 #define Axis2_EN      PE10   // Enable
 #define Axis2DirPin   PE12   // Motor Direction
