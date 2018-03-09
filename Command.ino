@@ -1578,12 +1578,7 @@ void processCommands() {
 #endif
 #ifdef Aux5
         if ((parameter[0]=='G') && (parameter[1]=='5')) { 
-          static bool init=false; if (!init) { 
-            pinMode(Aux5,OUTPUT); init=true; 
-  #ifdef A21
-            if (Aux5==A21) analogWriteResolution(12); 
-  #endif
-          }
+          static bool init=false; if (!init) {  pinMode(Aux5,OUTPUT); init=true; }
           long v=(double)strtol(&parameter[3],NULL,10); 
   #ifdef A21
           if (Aux5==A21) { if (v==0) analogWrite(Aux5,0); if (v!=0) analogWrite(Aux5,4095); } else
@@ -1592,7 +1587,14 @@ void processCommands() {
         } else
 #endif
 #ifdef Aux6
-        if ((parameter[0]=='G') && (parameter[1]=='6')) { static bool init=false; if (!init) { pinMode(Aux6,OUTPUT); init=true; } long v=(double)strtol(&parameter[3],NULL,10); if (v==0) { digitalWrite(Aux6,LOW); };  if (v!=0) { digitalWrite(Aux6,HIGH); }; } else
+        if ((parameter[0]=='G') && (parameter[1]=='6')) { 
+          static bool init=false; if (!init) { pinMode(Aux6,OUTPUT); init=true; }
+          long v=(double)strtol(&parameter[3],NULL,10); 
+  #ifdef A22
+          if (Aux6==A22) { if (v==0) analogWrite(Aux6,0); if (v!=0) analogWrite(Aux6,4095); } else
+  #endif
+          { if (v==0) digitalWrite(Aux6,LOW); if (v!=0) digitalWrite(Aux6,HIGH); }
+        } else
 #endif
 #ifdef Aux7
         if ((parameter[0]=='G') && (parameter[1]=='7')) { static bool init=false; if (!init) { pinMode(Aux7,OUTPUT); init=true; } long v=(double)strtol(&parameter[3],NULL,10); if (v==0) { digitalWrite(Aux7,LOW); };  if (v!=0) { digitalWrite(Aux7,HIGH); }; } else

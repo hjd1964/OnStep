@@ -49,6 +49,7 @@ extern void SiderealClockSetInterval (long int);
 
 // Init sidereal clock timer
 void HAL_Init_Timer_Sidereal() {
+  analogWriteResolution(12);
   SiderealClockSetInterval(siderealInterval);
 }
 

@@ -10,6 +10,7 @@
 #define Aux3          36
 #define Aux4          39
 #define Aux5         A21
+#define Aux6         A22
 
 // The PEC index sense is a logic level input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
 #define PecPin        23
