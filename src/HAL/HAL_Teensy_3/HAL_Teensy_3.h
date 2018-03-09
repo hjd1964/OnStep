@@ -9,7 +9,7 @@
 #if defined(__MK64FX512__)
   #define MaxRate_LowerLimit 12
 #elif defined(__MK66FX1M0__)
-  #define MaxRate_LowerLimit 8
+  #define MaxRate_LowerLimit 4
 #else
   #define MaxRate_LowerLimit 16
 #endif
