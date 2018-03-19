@@ -36,8 +36,8 @@
 #define FirmwareDate          __DATE__
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
-#define FirmwareVersionMinor  "0"
-#define FirmwareVersionPatch  "c"
+#define FirmwareVersionMinor  "1"
+#define FirmwareVersionPatch  "a"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
@@ -110,48 +110,7 @@ Errors lastError = ERR_NONE;
 byte pierSide = PierSideNone;
 int AlignMaxNumStars = -1;
 
-const char* html_head1 = "<!DOCTYPE HTML>\r\n<html>\r\n<head>\r\n";
-const char* html_headerPec = "<meta http-equiv=\"refresh\" content=\"5; URL=/pec.htm\">\r\n";
-const char* html_headerIdx = "<meta http-equiv=\"refresh\" content=\"5; URL=/index.htm\">\r\n";
-const char* html_head2 = "</head>\r\n<body bgcolor=\"#26262A\">\r\n";
-
-const char* html_main_css1 = "<STYLE>";
-const char* html_main_css2 = ".a { background-color: #111111; } .t { padding: 10px 10px 20px 10px; border: 5px solid #551111;";
-const char* html_main_css3 = " margin: 25px 25px 0px 25px; color: #999999; background-color: #111111; } input { width:4em; font-weight: bold; background-color: #A01010; padding: 2px 2px; }";
-const char* html_main_css4 = ".b { padding: 10px; border-left: 5px solid #551111; border-right: 5px solid #551111; border-bottom: 5px solid #551111; margin: 0px 25px 25px 25px; color: #999999;";
-const char* html_main_css5 = "background-color: #111111; } select { width:4em; font-weight: bold; background-color: #A01010; padding: 2px 2px; } .c { color: #A01010; font-weight: bold; }";
-const char* html_main_css6 = "h1 { text-align: right; } a:hover, a:active { background-color: red; } .g { color: #105010; font-weight: bold; }";
-const char* html_main_css7 = "a:link, a:visited { background-color: #332222; color: #a07070; border:1px solid red; padding: 5px 10px;";
-const char* html_main_css8 = " margin: none; text-align: center; text-decoration: none; display: inline-block; }";
-const char* html_main_css9 = "button { background-color: #A01010; font-weight: bold; border-radius: 5px; font-size: 12px; margin: 2px; padding: 4px 8px; }</STYLE>";
-
-const char* html_links1in = "<a href=\"/index.htm\" style=\"background-color: #552222;\">Status</a><a href=\"/control.htm\">Control</a>";
-const char* html_links2in = "<a href=\"/guide.htm\">Guide</a><a href=\"/pec.htm\">PEC</a><a href=\"/settings.htm\">Settings</a>";
-const char* html_links3in = "<a href=\"/wifi.htm\">WiFi</a><a href=\"/config.htm\">Config.h</a><br />";
-
-const char* html_links1ct = "<a href=\"/index.htm\">Status</a><a href=\"/control.htm\" style=\"background-color: #552222;\">Control</a>";
-const char* html_links2ct = "<a href=\"/guide.htm\">Guide</a><a href=\"/pec.htm\">PEC</a><a href=\"/settings.htm\">Settings</a>";
-const char* html_links3ct = "<a href=\"/wifi.htm\">WiFi</a><a href=\"/config.htm\">Config.h</a><br />";
-
-const char* html_links1gu = "<a href=\"/index.htm\">Status</a><a href=\"/control.htm\">Control</a>";
-const char* html_links2gu = "<a href=\"/guide.htm\" style=\"background-color: #552222;\">Guide</a><a href=\"/pec.htm\">PEC</a><a href=\"/settings.htm\">Settings</a>";
-const char* html_links3gu = "<a href=\"/wifi.htm\">WiFi</a><a href=\"/config.htm\">Config.h</a><br />";
-
-const char* html_links1pe = "<a href=\"/index.htm\">Status</a><a href=\"/control.htm\">Control</a>";
-const char* html_links2pe = "<a href=\"/guide.htm\">Guide</a><a href=\"/pec.htm\" style=\"background-color: #552222;\">PEC</a><a href=\"/settings.htm\">Settings</a>";
-const char* html_links3pe = "<a href=\"/wifi.htm\">WiFi</a><a href=\"/config.htm\">Config.h</a><br />";
-
-const char* html_links1se = "<a href=\"/index.htm\">Status</a><a href=\"/control.htm\">Control</a>";
-const char* html_links2se = "<a href=\"/guide.htm\">Guide</a><a href=\"/pec.htm\">PEC</a><a href=\"/settings.htm\" style=\"background-color: #552222;\">Settings</a>";
-const char* html_links3se = "<a href=\"/wifi.htm\">WiFi</a><a href=\"/config.htm\">Config.h</a><br />";
-
-const char* html_links1es = "<a href=\"/index.htm\">Status</a><a href=\"/control.htm\">Control</a>";
-const char* html_links2es = "<a href=\"/guide.htm\">Guide</a><a href=\"/pec.htm\">PEC</a><a href=\"/settings.htm\">Settings</a>";
-const char* html_links3es = "<a href=\"/wifi.htm\" style=\"background-color: #552222;\">WiFi</a><a href=\"/config.htm\">Config.h</a><br />";
-
-const char* html_links1co = "<a href=\"/index.htm\">Status</a><a href=\"/control.htm\">Control</a>";
-const char* html_links2co = "<a href=\"/guide.htm\">Guide</a><a href=\"/pec.htm\">PEC</a><a href=\"/settings.htm\">Settings</a>";
-const char* html_links3co = "<a href=\"/wifi.htm\">WiFi</a><a href=\"/config.htm\" style=\"background-color: #552222;\">Config.h</a><br />";
+#include "Constants.h"
 
 void handleNotFound(){
   String message = "File Not Found\n\n";
@@ -225,9 +184,9 @@ void setup(void){
   }
 
 #ifndef DEBUG_ON
-  Serial.begin(SERIAL_BAUD_DEFAULT);
+  Ser.begin(SERIAL_BAUD_DEFAULT);
 #ifdef SERIAL_SWAP_ON
-  Serial.swap();
+  Ser.swap();
 #endif
 
 Again:
@@ -238,12 +197,12 @@ Again:
 
   // clear the buffers and any noise on the serial lines
   for (int i=0; i<3; i++) {
-    Serial.print(":#");
+    Ser.print(":#");
 #ifdef LED_PIN
     digitalWrite(LED_PIN,HIGH);
 #endif
     delay(500);
-    Serial.flush();
+    Ser.flush();
     c=serialRecvFlush();
 #ifdef LED_PIN
     digitalWrite(LED_PIN,LOW);
@@ -257,22 +216,22 @@ Again:
     EEPROM_writeInt(0,0); EEPROM_writeInt(2,0);
     accessPointEnabled=true;
     EEPROM.commit();
-    Serial.println();
-    Serial.println("Cycle power for reset to defaults.");
-    Serial.println();
+    Ser.println();
+    Ser.println("Cycle power for reset to defaults.");
+    Ser.println();
   }
  
   if (SERIAL_BAUD!=SERIAL_BAUD_DEFAULT) {
 
     // switch OnStep Serial1 up to ? baud
-    Serial.print(HighSpeedCommsStr(SERIAL_BAUD));
+    Ser.print(HighSpeedCommsStr(SERIAL_BAUD));
     delay(100);
     int count=0; c=0;
-    while (Serial.available()>0) { count++; if (count==1) c=Serial.read(); }
+    while (Ser.available()>0) { count++; if (count==1) c=Ser.read(); }
     if (c=='1') {
-        Serial.begin(SERIAL_BAUD);
+        Ser.begin(SERIAL_BAUD);
     #ifdef SERIAL_SWAP_ON
-        Serial.swap();
+        Ser.swap();
     #endif
     } else {
 #ifdef LED_PIN
@@ -281,39 +240,39 @@ Again:
       // got nothing back, toggle baud rate and try again
       tb++;
       if (tb==7) tb=1;
-      if (tb==1) Serial.begin(SERIAL_BAUD_DEFAULT);
-      if (tb==4) Serial.begin(SERIAL_BAUD);
+      if (tb==1) Ser.begin(SERIAL_BAUD_DEFAULT);
+      if (tb==4) Ser.begin(SERIAL_BAUD);
       
 #ifdef SERIAL_SWAP_ON
-      Serial.swap();
+      Ser.swap();
 #endif
       delay(1000);
       goto Again;
     }
   }
 #else
-  Serial.begin(115200);
+  Ser.begin(115200);
   delay(10000);
   
-  Serial.println(accessPointEnabled);
-  Serial.println(stationEnabled);
-  Serial.println(stationDhcpEnabled);
+  Ser.println(accessPointEnabled);
+  Ser.println(stationEnabled);
+  Ser.println(stationDhcpEnabled);
 
-  Serial.println(WebTimeout);
-  Serial.println(CmdTimeout);
+  Ser.println(WebTimeout);
+  Ser.println(CmdTimeout);
 
-  Serial.println(wifi_sta_ssid);
-  Serial.println(wifi_sta_pwd);
-  Serial.println(wifi_sta_ip.toString());
-  Serial.println(wifi_sta_gw.toString());
-  Serial.println(wifi_sta_sn.toString());
+  Ser.println(wifi_sta_ssid);
+  Ser.println(wifi_sta_pwd);
+  Ser.println(wifi_sta_ip.toString());
+  Ser.println(wifi_sta_gw.toString());
+  Ser.println(wifi_sta_sn.toString());
 
-  Serial.println(wifi_ap_ssid);
-  Serial.println(wifi_ap_pwd);
-  Serial.println(wifi_ap_ch);
-  Serial.println(wifi_ap_ip.toString());
-  Serial.println(wifi_ap_gw.toString());
-  Serial.println(wifi_ap_sn.toString());
+  Ser.println(wifi_ap_ssid);
+  Ser.println(wifi_ap_pwd);
+  Ser.println(wifi_ap_ch);
+  Ser.println(wifi_ap_ip.toString());
+  Ser.println(wifi_ap_gw.toString());
+  Ser.println(wifi_ap_sn.toString());
 
 #endif
 
@@ -337,7 +296,7 @@ Again:
 
   // clear the buffers and any noise on the serial lines
   for (int i=0; i<3; i++) {
-    Serial.print(":#");
+    Ser.print(":#");
     delay(50);
     serialRecvFlush();
   }
@@ -351,13 +310,14 @@ Again:
 
   server.on("/", handleRoot);
   server.on("/index.htm", handleRoot);
+  server.on("/configuration.htm", handleConfiguration);
   server.on("/settings.htm", handleSettings);
   server.on("/control.htm", handleControl);
-  server.on("/guide.htm", handleGuide);
-  server.on("/guide.txt", handleGuideAjax);
+  server.on("/control.txt", controlAjax);
+  server.on("/guide.txt", guideAjax);
   server.on("/pec.htm", handlePec);
+  server.on("/pec.txt", pecAjax);
   server.on("/wifi.htm", handleWifi);
-  server.on("/config.htm", handleConfig);
   
   server.onNotFound(handleNotFound);
 
@@ -366,7 +326,7 @@ Again:
   server.begin();
 
 #ifdef DEBUG_ON
-  Serial.println("HTTP server started");
+  Ser.println("HTTP server started");
 #endif
 }
 

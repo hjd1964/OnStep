@@ -1,3 +1,5 @@
+// -----------------------------------------------------------------------------------
+// Misc functions to help with commands, etc.
 
 // integer numeric conversion with error checking
 boolean atoi2(char *a, int *i) {
@@ -15,8 +17,8 @@ byte readBytesUntil2(char character, char buffer[], int length, boolean* charact
   int pos=0;
   *characterFound=false;
   while (((long)(startTime-millis())>0) && (pos<length)) {
-    if (Serial.available()) {
-      buffer[pos]=Serial.read();
+    if (Ser.available()) {
+      buffer[pos]=Ser.read();
       if (buffer[pos]==character) { *characterFound=true; break; }
       pos++;
     }
@@ -26,21 +28,21 @@ byte readBytesUntil2(char character, char buffer[], int length, boolean* charact
 
 // smart LX200 aware command and response over serial
 boolean readLX200Bytes(char* command,char* recvBuffer,long timeOutMs) {
-  Serial.setTimeout(timeOutMs);
+  Ser.setTimeout(timeOutMs);
   
   // clear the read/write buffers
-  Serial.flush();
+  Ser.flush();
   serialRecvFlush();
 
   // send the command
-  Serial.print(command);
+  Ser.print(command);
 
   boolean noResponse=false;
   boolean shortResponse=false;
   if ((command[0]==(char)6) && (command[1]==0)) shortResponse=true;
   if (command[0]==':') {
     if (command[1]=='A') {
-      if (strchr("W123456789+",command[2])) { shortResponse=true; Serial.setTimeout(timeOutMs*4); }
+      if (strchr("W123456789+",command[2])) { shortResponse=true; Ser.setTimeout(timeOutMs*4); }
     }
     if (command[1]=='M') {
       if (strchr("ewnsg",command[2])) noResponse=true;
@@ -64,7 +66,7 @@ boolean readLX200Bytes(char* command,char* recvBuffer,long timeOutMs) {
     }
     if (command[1]=='h') {
       if (strchr("FC",command[2])) noResponse=true;
-      if (strchr("QPR",command[2])) { shortResponse=true; Serial.setTimeout(timeOutMs*2); }
+      if (strchr("QPR",command[2])) { shortResponse=true; Ser.setTimeout(timeOutMs*2); }
     }
     if (command[1]=='T') {
       if (strchr("QR+-SLK",command[2])) noResponse=true;
@@ -86,7 +88,7 @@ boolean readLX200Bytes(char* command,char* recvBuffer,long timeOutMs) {
     return true;
   } else
   if (shortResponse) {
-    recvBuffer[Serial.readBytes(recvBuffer,1)]=0;
+    recvBuffer[Ser.readBytes(recvBuffer,1)]=0;
     return (recvBuffer[0]!=0);
   } else {
     // get full response, '#' terminated
@@ -94,8 +96,8 @@ boolean readLX200Bytes(char* command,char* recvBuffer,long timeOutMs) {
     int recvBufferPos=0;
     char b=0;
     while (((long)(timeout-millis())>0) && (b!='#')) {
-      if (Serial.available()) {
-        b=Serial.read();
+      if (Ser.available()) {
+        b=Ser.read();
         recvBuffer[recvBufferPos]=b; recvBufferPos++; if (recvBufferPos>39) recvBufferPos=39; recvBuffer[recvBufferPos]=0;
       }
     }
@@ -105,7 +107,7 @@ boolean readLX200Bytes(char* command,char* recvBuffer,long timeOutMs) {
 
 char serialRecvFlush() {
   char c=0;
-  while (Serial.available()>0) c=Serial.read();
+  while (Ser.available()>0) c=Ser.read();
   return c;
 }
 

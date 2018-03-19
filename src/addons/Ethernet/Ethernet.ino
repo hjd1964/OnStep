@@ -36,10 +36,12 @@
 #define FirmwareDate          __DATE__
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
-#define FirmwareVersionMinor  "0"
-#define FirmwareVersionPatch  "c"
+#define FirmwareVersionMinor  "1"
+#define FirmwareVersionPatch  "a"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
+
+#define OETHS
 
 #include <Ethernet.h>
 #include "Config.h"
@@ -83,44 +85,7 @@ Errors lastError = ERR_NONE;
 byte pierSide = PierSideNone;
 int AlignMaxNumStars = -1;
 
-const char* html_head1 = "<!DOCTYPE HTML>\r\n<html>\r\n<head>\r\n";
-const char* html_headerPec = "<meta http-equiv=\"refresh\" content=\"5; URL=/pec.htm\">\r\n";
-const char* html_headerIdx = "<meta http-equiv=\"refresh\" content=\"5; URL=/index.htm\">\r\n";
-const char* html_head2 = "</head>\r\n<body bgcolor=\"#26262A\">\r\n";
-
-const char* html_main_css1 = "<STYLE>";
-const char* html_main_css2 = ".a { background-color: #111111; } .t { padding: 10px 10px 20px 10px; border: 5px solid #551111;";
-const char* html_main_css3 = " margin: 25px 25px 0px 25px; color: #999999; background-color: #111111; } input { width:4em; font-weight: bold; background-color: #A01010; padding: 2px 2px; }";
-const char* html_main_css4 = ".b { padding: 10px; border-left: 5px solid #551111; border-right: 5px solid #551111; border-bottom: 5px solid #551111; margin: 0px 25px 25px 25px; color: #999999;";
-const char* html_main_css5 = "background-color: #111111; } select { width:4em; font-weight: bold; background-color: #A01010; padding: 2px 2px; } .c { color: #A01010; font-weight: bold; }";
-const char* html_main_css6 = "h1 { text-align: right; } a:hover, a:active { background-color: red; } .g { color: #105010; font-weight: bold; }";
-const char* html_main_css7 = "a:link, a:visited { background-color: #332222; color: #a07070; border:1px solid red; padding: 5px 10px;";
-const char* html_main_css8 = " margin: none; text-align: center; text-decoration: none; display: inline-block; }";
-const char* html_main_css9 = "button { background-color: #A01010; font-weight: bold; border-radius: 5px; font-size: 12px; margin: 2px; padding: 4px 8px; }</STYLE>";
-
-const char* html_links1in = "<a href=\"/index.htm\" style=\"background-color: #552222;\">Status</a><a href=\"/control.htm\">Control</a>";
-const char* html_links2in = "<a href=\"/guide.htm\">Guide</a><a href=\"/pec.htm\">PEC</a><a href=\"/settings.htm\">Settings</a>";
-const char* html_links3in = "<a href=\"/config.htm\">Config.h</a><br />";
-
-const char* html_links1ct = "<a href=\"/index.htm\">Status</a><a href=\"/control.htm\" style=\"background-color: #552222;\">Control</a>";
-const char* html_links2ct = "<a href=\"/guide.htm\">Guide</a><a href=\"/pec.htm\">PEC</a><a href=\"/settings.htm\">Settings</a>";
-const char* html_links3ct = "<a href=\"/config.htm\">Config.h</a><br />";
-
-const char* html_links1gu = "<a href=\"/index.htm\">Status</a><a href=\"/control.htm\">Control</a>";
-const char* html_links2gu = "<a href=\"/guide.htm\" style=\"background-color: #552222;\">Guide</a><a href=\"/pec.htm\">PEC</a><a href=\"/settings.htm\">Settings</a>";
-const char* html_links3gu = "<a href=\"/config.htm\">Config.h</a><br />";
-
-const char* html_links1pe = "<a href=\"/index.htm\">Status</a><a href=\"/control.htm\">Control</a>";
-const char* html_links2pe = "<a href=\"/guide.htm\">Guide</a><a href=\"/pec.htm\" style=\"background-color: #552222;\">PEC</a><a href=\"/settings.htm\">Settings</a>";
-const char* html_links3pe = "<a href=\"/config.htm\">Config.h</a><br />";
-
-const char* html_links1se = "<a href=\"/index.htm\">Status</a><a href=\"/control.htm\">Control</a>";
-const char* html_links2se = "<a href=\"/guide.htm\">Guide</a><a href=\"/pec.htm\">PEC</a><a href=\"/settings.htm\" style=\"background-color: #552222;\">Settings</a>";
-const char* html_links3se = "<a href=\"/config.htm\">Config.h</a><br />";
-
-const char* html_links1co = "<a href=\"/index.htm\">Status</a><a href=\"/control.htm\">Control</a>";
-const char* html_links2co = "<a href=\"/guide.htm\">Guide</a><a href=\"/pec.htm\">PEC</a><a href=\"/settings.htm\">Settings</a>";
-const char* html_links3co = "<a href=\"/config.htm\" style=\"background-color: #552222;\">Config.h</a><br />";
+#include "Constants.h"
 
 void handleNotFound(EthernetClient *client) {
   String message = "File Not Found\n\n";
@@ -178,13 +143,15 @@ Again:
   // Initialize the www server
   server.init();
   server.on("index.htm", handleRoot);
+  server.on("configuration.htm", handleConfiguration);
   server.on("settings.htm", handleSettings);
   server.on("control.htm", handleControl);
-  server.on("guide.htm", handleGuide);
-  server.on("guide.txt", handleGuideAjax);
+  server.on("control.txt", controlAjax);
+  server.on("guide.txt", guideAjax);
   server.on("pec.htm", handlePec);
-  server.on("config.htm", handleConfig);
+  server.on("pec.txt", pecAjax);
   server.on("/", handleRoot);
+
   server.onNotFound(handleNotFound);
 
   // Initialize the cmd server, timeout after 500ms

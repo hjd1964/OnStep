@@ -1,107 +1,66 @@
-// The settings.htm page
+// -----------------------------------------------------------------------------------
+// Settings
 
-const char html_settings1[] = "<div class=\"t\"><table width=\"100%%\"><tr><td><b><font size=\"5\">%s</font></b></td><td align=\"right\"><b>" Product " " Version " (OnStep %s)</b>";
-const char html_settings2[] = "</td></tr></table>";
-const char html_settings3[] = "</div><div class=\"b\">\r\n";
-const char html_settings4[] = 
-"Maximum Slew Speed: "
-"<form method=\"get\" action=\"/settings.htm\">"
-"<button name=\"ss\" value=\"vs\" type=\"submit\">Very Slow (0.5x)</button>"
-"<button name=\"ss\" value=\"s\" type=\"submit\">Slow (0.75x)</button>";
-const char html_settingsMaxRate[] =
-"<button name=\"ss\" value=\"n\" type=\"submit\">Normal (1x) </button>"
-"<button name=\"ss\" value=\"f\" type=\"submit\">Fast (1.5x) </button>"
-"<button name=\"ss\" value=\"vf\" type=\"submit\">Very Fast (2x) </button>"
-"</form><br />\r\n";
-const char html_settingsBlAxis1[] =
-"Backlash: <br />"
-"<form method=\"get\" action=\"/settings.htm\">"
-" <input value=\"%d\" type=\"number\" name=\"b1\" min=\"0\" max=\"999\">"
-"<button type=\"submit\">Upload</button>"
-" (Axis1, in arc-seconds 0 to 999)"
-"</form>"
-"\r\n";
-const char html_settingsBlAxis2[] = 
-"<form method=\"get\" action=\"/settings.htm\">"
-" <input value=\"%d\" type=\"number\" name=\"b2\" min=\"0\" max=\"999\">"
-"<button type=\"submit\">Upload</button>"
-" (Axis2, in arc-seconds 0 to 999)"
-"</form>"
-"<br />\r\n";
-const char html_settingsMinAlt[] = 
-"Limits: <br />"
-"<form method=\"get\" action=\"/settings.htm\">"
-" <input value=\"%d\" type=\"number\" name=\"hl\" min=\"-30\" max=\"30\">"
-"<button type=\"submit\">Upload</button>"
-" (Horizon, in degrees +/- 30)"
-"</form>"
-"\r\n";
-const char html_settingsMaxAlt[] = 
-"<form method=\"get\" action=\"/settings.htm\">"
-" <input value=\"%d\" type=\"number\" name=\"ol\" min=\"60\" max=\"90\">"
-"<button type=\"submit\">Upload</button>"
-" (Overhead, in degrees 60 to 90)"
-"</form>"
-"\r\n";
-const char html_settingsPastMerE[] = 
-"<form method=\"get\" action=\"/settings.htm\">"
-" <input value=\"%d\" type=\"number\" name=\"el\" min=\"-45\" max=\"45\">"
-"<button type=\"submit\">Upload</button>"
-" (Past Meridian when East of the pier, in degrees +/-45)"
-"</form>"
-"\r\n";
-const char html_settingsPastMerW[] = 
-"<form method=\"get\" action=\"/settings.htm\">"
-" <input value=\"%d\" type=\"number\" name=\"wl\" min=\"-45\" max=\"45\">"
-"<button type=\"submit\">Upload</button>"
-" (Past Meridian when West of the pier, in degrees +/-45)"
-"</form>"
-"<br />\r\n";
-const char html_settingsLongDeg[] = 
-"Location: <br />"
-"<form method=\"get\" action=\"/settings.htm\">"
-" <input value=\"%s\" type=\"number\" name=\"g1\" min=\"-180\" max=\"180\">&nbsp;&deg;&nbsp;";
-const char html_settingsLongMin[] = 
-" <input value=\"%s\" type=\"number\" name=\"g2\" min=\"0\" max=\"60\">&nbsp;'&nbsp;&nbsp;"
-"<button type=\"submit\">Upload</button>"
-" (Longitude, in deg. and min. +/- 180)"
-"</form>"
-"\r\n";
-const char html_settingsLatDeg[] = 
-"<form method=\"get\" action=\"/settings.htm\">"
-" <input value=\"%s\" type=\"number\" name=\"t1\" min=\"-90\" max=\"90\">&nbsp;&deg;&nbsp;";
-const char html_settingsLatMin[] = 
-" <input value=\"%s\" type=\"number\" name=\"t2\" min=\"0\" max=\"60\">&nbsp;'&nbsp;&nbsp;"
-"<button type=\"submit\">Upload</button>"
-" (Latitude, in deg. and min. +/- 90)"
-"</form>"
-"\r\n";
+const char html_settingsStart[] =
+"<form method='get' action='/settings.htm'>";
 
-const char html_settingsOffsetDeg[] = 
-"<form method=\"get\" action=\"/settings.htm\">"
-" <input value=\"%s\" type=\"number\" name=\"u1\" min=\"-12\" max=\"14\">&nbsp;hrs&nbsp;";
-const char html_settingsOffsetMin1[] = 
-" <select name=\"u2\"><option value=\"0\" %s>00</option><option value=\"30\" %s>30</option><option value=\"45\" %s>45</option></select>&nbsp;min.&nbsp;"
-"<button type=\"submit\">Upload</button>";
-const char html_settingsOffsetMin2[] = 
-" (UTC Offset, in hours -12 to +14)<br />"
-"Opposite of a time-zone value, this is for Standard Time (not Daylight Time.)<br /><br />"
-"</form><br />"
-"\r\n";
+const char html_settingsPark1[] =
+"Park: <br />"
+"<button name='pk' value='s' type='submit'>Set-Park</button>\r\n";
 
+const char html_settingsTrack1[] = 
+"</br></br>Tracking: <br />"
+"<button name='tk' value='on' type='submit'>On</button>"
+"<button name='tk' value='off' type='submit'>Off</button><br />";
+const char html_settingsTrack2[] = 
+"<button name='tk' value='f' type='submit'>+ (0.1Hz faster)</button>"
+"<button name='tk' value='-' type='submit'>- (0.1Hz slower)</button>"
+"<button name='tk' value='r' type='submit'>Reset (default)</button><br />";
+const char html_settingsTrack3[] = 
+"<button name='tk' value='s' type='submit'>Sidereal</button>"
+"<button name='tk' value='l' type='submit'>Lunar</button>"
+"<button name='tk' value='h' type='submit'>Solar</button>\r\n";
+
+const char html_settingsTrackComp[] = 
+"</br></br>Compensated Tracking Rate (Pointing Model/Refraction): </br>"
+"<button name='rr' value='otk' type='submit'>Full</button>"
+"<button name='rr' value='on' type='submit'>Refraction Only</button>"
+"<button name='rr' value='off' type='submit'>Off</button>\r\n";
+
+const char html_settingsBuzzer1[] =
+"<br /><br />Goto Alert, Buzzer: <br />"
+"<button name='ab' value='on' type='submit'>On</button>";
+const char html_settingsBuzzer2[] =
+"<button name='ab' value='off' type='submit'>Off</button>\r\n";
+
+const char html_settingsMFAuto[] = 
+"</br></br>Automatic Meridian Flip (at Limit):<br />"
+"<button name='ma' value='on' type='submit'>On</button>"
+"<button name='ma' value='off' type='submit'>Off</button>";
+const char html_settingsMFPause1[] = 
+"</br></br>Meridian Flip, Pause at Home: <br />"
+"<button name='mp' value='on' type='submit'>On</button>";
+const char html_settingsMFPause2[] =
+"<button name='mp' value='off' type='submit'>Off</button>\r\n";
+
+const char html_settingsEnd[] =
+"</form>\r\n";
+
+#ifdef OETHS
 void handleSettings(EthernetClient *client) {
+#else
+void handleSettings() {
+#endif
   Ser.setTimeout(WebTimeout);
   serialRecvFlush();
-  
-  char temp[320]="";
-  char temp1[80]="";
-  char temp2[80]="";
-  char temp3[80]="";
-  
-  processSettingsGet();
 
-  // send a standard http response header
-  String data=html_head1;
+  char temp2[80]="";
+
+  processSettingsGet();
+  Ser.setTimeout(WebTimeout);
+ 
+  String data=html_headB;
+  data += html_main_cssB;
   data += html_main_css1;
   data += html_main_css2;
   data += html_main_css3;
@@ -110,232 +69,116 @@ void handleSettings(EthernetClient *client) {
   data += html_main_css6;
   data += html_main_css7;
   data += html_main_css8;
-  data += html_main_css9;
-  data += html_head2;
+  data += html_main_cssE;
+  data += html_headE;
+#ifdef OETHS
   client->print(data); data="";
+#endif
 
+  data += html_bodyB;
+
+  // get status
+  char stat[20] = "";
+  Ser.print(":GU#");
+  stat[Ser.readBytesUntil('#',stat,20)]=0;
 
   // finish the standard http response header
-  Ser.print(":GVP#");
-  temp2[Ser.readBytesUntil('#',temp2,20)]=0; 
-  if (strlen(temp2)<=0) { strcpy(temp2,"N/A"); } else { for (int i=2; i<7; i++) temp2[i]=temp2[i+1]; }
-  Ser.print(":GVN#");
-  temp3[Ser.readBytesUntil('#',temp3,20)]=0; 
-  if (strlen(temp3)<=0) { strcpy(temp3,"N/A"); }
-  sprintf(temp,html_settings1,temp2,temp3);
-  data += temp;
-  data += html_settings2;
-  data += html_links1se;
-  data += html_links2se;
-  data += html_links3se;
-  data += html_settings3;
-  data += html_settings4;
-
-  // Slew speed
-  data += html_settingsMaxRate;
+  data += html_onstep_header1;
+  Ser.print(":GVP#"); temp2[Ser.readBytesUntil('#',temp2,20)]=0; if (strlen(temp2)<=0) { strcpy(temp2,"N/A"); } else { for (int i=2; i<7; i++) temp2[i]=temp2[i+1]; } data += temp2;
+  data += html_onstep_header2;
+  Ser.print(":GVN#"); temp2[Ser.readBytesUntil('#',temp2,20)]=0; if (strlen(temp2)<=0) { strcpy(temp2,"N/A"); } data += temp2;
+  data += html_onstep_header3;
+  data += html_links1N;
+  data += html_links2N;
+  data += html_links3N;
+  data += html_links4S;
+  data += html_links5N;
+#ifndef OETHS
+  data += html_links6N;
+#endif
+  data += html_onstep_header4;
+#ifdef OETHS
   client->print(data); data="";
-
-  // Backlash
-  Ser.print(":%BR#");
-  temp2[Ser.readBytesUntil('#',temp2,20)]=0;
-  if (strlen(temp2)<=0) { strcpy(temp2,"0"); }
-  int backlashAxis1=(int)strtol(&temp2[0],NULL,10);
-  sprintf(temp,html_settingsBlAxis1,backlashAxis1);
-  data += temp;
-  Ser.print(":%BD#");
-  temp2[Ser.readBytesUntil('#',temp2,20)]=0;
-  if (strlen(temp2)<=0) { strcpy(temp2,"0"); }
-  int backlashAxis2=(int)strtol(&temp2[0],NULL,10);
-  sprintf(temp,html_settingsBlAxis2,backlashAxis2);
-  data += temp;
-
-  // Limits
-  strcpy(temp2,"");
-  Ser.print(":Gh#");
-  temp2[Ser.readBytesUntil('#',temp2,20)]=0;
-  if (strlen(temp2)<=0) { strcpy(temp2,"0"); }
-  int minAlt=(int)strtol(&temp2[0],NULL,10);
-  sprintf(temp,html_settingsMinAlt,minAlt);
-  data += temp;
-  Ser.print(":Go#");
-  temp2[Ser.readBytesUntil('#',temp2,20)]=0;
-  if (strlen(temp2)<=0) { strcpy(temp2,"0"); }
-  int maxAlt=(int)strtol(&temp2[0],NULL,10);
-  sprintf(temp,html_settingsMaxAlt,maxAlt);
-  data += temp;
-  client->print(data); data="";
-
-  boolean foundHash;
-  strcpy(temp2,"");
-  Ser.print(":GXE9#");
-  temp2[readBytesUntil2('#',temp2,20,&foundHash,WebTimeout)]=0;
-  if (strlen(temp2)<=0) { strcpy(temp2,"0"); }
-  if (foundHash) {
-    int degPastMerE=(int)strtol(&temp2[0],NULL,10);
-    degPastMerE=round((degPastMerE*15.0)/60.0);
-    sprintf(temp,html_settingsPastMerE,degPastMerE);
-    data += temp;
-    strcpy(temp2,"");
-    Ser.print(":GXEA#");
-    temp2[Ser.readBytesUntil('#',temp2,20)]=0;
-    if (strlen(temp2)<=0) { strcpy(temp2,"0"); }
-    int degPastMerW=(int)strtol(&temp2[0],NULL,10);
-    degPastMerW=round((degPastMerW*15.0)/60.0);
-    sprintf(temp,html_settingsPastMerW,degPastMerW);
-    data += temp;
-  } else data += "<br />\r\n";
-
-  // Longitude
-  Ser.print(":Gg#");
-  temp2[Ser.readBytesUntil('#',temp2,20)]=0;
-  if (strlen(temp2)<=0) { strcpy(temp2,"+000*00"); }
-  temp2[4]=0; // deg. part only
-  if (temp2[0]=='+') temp2[0]='0'; // remove +
-  sprintf(temp,html_settingsLongDeg,temp2);
-  data += temp;
-  sprintf(temp,html_settingsLongMin,(char*)&temp2[5]);
-  data += temp;
-
-  // Latitude
-  Ser.print(":Gt#");
-  temp2[Ser.readBytesUntil('#',temp2,20)]=0;
-  if (strlen(temp2)<=0) { strcpy(temp2,"+00*00"); }
-  temp2[3]=0; // deg. part only
-  if (temp2[0]=='+') temp2[0]='0'; // remove +
-  sprintf(temp,html_settingsLatDeg,temp2);
-  data += temp;
-  sprintf(temp,html_settingsLatMin,(char*)&temp2[4]);
-  data += temp;
-
-  // UTC Offset
-  Ser.print(":GG#");
-  temp1[Ser.readBytesUntil('#',temp1,20)]=0;
-  if (strlen(temp1)<=0) { strcpy(temp1,"+00"); }
-  strcpy(temp2,temp1);
-  temp2[3]=0; // deg. part only
-  if (temp2[0]=='+') temp2[0]='0'; // remove +
-  sprintf(temp,html_settingsOffsetDeg,temp2);
-  data += temp;
-  strcpy(temp2,temp1);
-  if (temp2[3]==0) sprintf(temp,html_settingsOffsetMin1,"selected","",""); else
-  if (temp2[4]=='3') sprintf(temp,html_settingsOffsetMin1,"","selected",""); else
-  if (temp2[4]=='4') sprintf(temp,html_settingsOffsetMin1,"","","selected");
-  data += temp;
-  data += html_settingsOffsetMin2;
+#endif
   
-  strcpy(temp,"</div></body></html>");
-  data += temp;
+  data+="<div style='width: 35em;'>";
 
+  data += html_settingsStart;
+
+  data += html_settingsPark1;
+  
+  data += html_settingsTrack1;
+  data += html_settingsTrack2;
+  data += html_settingsTrack3;
+  if (!strstr(stat,"A")) {  // not AltAzm
+    data += html_settingsTrackComp;
+  }
+  data += html_settingsBuzzer1;
+  data += html_settingsBuzzer2;
+  if (strstr(stat,"E")) {  // GEM only
+    data += html_settingsMFAuto;
+    data += html_settingsMFPause1;
+    data += html_settingsMFPause2;
+  }
+
+  data += html_settingsEnd;
+
+  data += "<br />";
+  data += "</div></div></body></html>";
+  
+#ifdef OETHS
   client->print(data);
+#else
+  server.send(200, "text/html", data);
+#endif
 }
 
 void processSettingsGet() {
+  // from the Settings.htm page -------------------------------------------------------------------
   String v;
-  int i;
   char temp[20]="";
 
-  // Slew Speed
-  v=server.arg("ss");
+  v=server.arg("pk");
   if (v!="") {
-    if (v=="vs") Ser.print(":SX93,5#");
-    if (v=="s") Ser.print(":SX93,4#");
-    if (v=="n") Ser.print(":SX93,3#");
-    if (v=="f") Ser.print(":SX93,2#");
-    if (v=="vf") Ser.print(":SX93,1#");
+    if (v=="s") Ser.print(":hQ#");
+    Ser.setTimeout(WebTimeout*4);
   }
-  
-  // Overhead and Horizon Limits
-  v=server.arg("ol");
+  // Tracking control
+  v=server.arg("tk");
   if (v!="") {
-    if ( (atoi2((char*)v.c_str(),&i)) && ((i>=60) && (i<=90))) { 
-      sprintf(temp,":So%d#",i);
-      Ser.print(temp);
-    }
+    if (v=="on") Ser.print(":Te#");
+    if (v=="off") Ser.print(":Td#");
+    if (v=="f") Ser.print(":T+#"); // 0.02hz faster
+    if (v=="-") Ser.print(":T-#"); // 0.02hz slower
+    if (v=="r") Ser.print(":TR#"); // reset
+    if (v=="s") Ser.print(":TQ#"); // sidereal
+    if (v=="l") Ser.print(":TL#"); // lunar
+    if (v=="h") Ser.print(":TS#"); // solar
   }
-  v=server.arg("hl");
+  // Refraction Rate Tracking control
+  v=server.arg("rr");
   if (v!="") {
-    if ( (atoi2((char*)v.c_str(),&i)) && ((i>=-30) && (i<=30))) { 
-      sprintf(temp,":Sh%d#",i);
-      Ser.print(temp);
-    }
+    if (v=="otk") Ser.print(":To#");
+    if (v=="on") Ser.print(":Tr#");
+    if (v=="off") Ser.print(":Tn#");
   }
-
-  // Meridian Limits
-  v=server.arg("el");
+  // Alert buzzer
+  v=server.arg("ab");
   if (v!="") {
-    if ( (atoi2((char*)v.c_str(),&i)) && ((i>=-45) && (i<=45))) { 
-      i=round((i*60.0)/15.0);
-      sprintf(temp,":SXE9,%d#",i);
-      Ser.print(temp);
-    }
+    if (v=="on") Ser.print(":SX97,1#");
+    if (v=="off") Ser.print(":SX97,0#");
   }
-  v=server.arg("wl");
+  // Auto-continue
+  v=server.arg("ma");
   if (v!="") {
-    if ( (atoi2((char*)v.c_str(),&i)) && ((i>=-45) && (i<=45))) { 
-      i=round((i*60.0)/15.0);
-      sprintf(temp,":SXEA,%d#",i);
-      Ser.print(temp);
-    }
+    if (v=="on") Ser.print(":SX95,1#");
+    if (v=="off") Ser.print(":SX95,0#");
   }
-
-  // Backlash Limits
-  v=server.arg("b1");
+  // Pause at meridian flip
+  v=server.arg("mp");
   if (v!="") {
-    if ( (atoi2((char*)v.c_str(),&i)) && ((i>=0) && (i<=999))) { 
-      sprintf(temp,":$BR%d#",i);
-      Ser.print(temp);
-    }
-  }
-  v=server.arg("b2");
-  if (v!="") {
-    if ( (atoi2((char*)v.c_str(),&i)) && ((i>=0) && (i<=999))) { 
-      sprintf(temp,":$BD%d#",i);
-      Ser.print(temp);
-    }
-  }
-
-  // Location
-  int long_deg=-999;
-  v=server.arg("g1");
-  if (v!="") {
-    if ( (atoi2((char*)v.c_str(),&i)) && ((i>=-180) && (i<=180))) { long_deg=i; }
-  }
-  v=server.arg("g2");
-  if (v!="") {
-    if ( (atoi2((char*)v.c_str(),&i)) && ((i>=0) && (i<=60))) { 
-      if ((long_deg>=-180) && (long_deg<=180)) {
-        sprintf(temp,":Sg%+04d*%02d#",long_deg,i);
-        Ser.print(temp);
-      }
-    }
-  }
-  int lat_deg=-999;
-  v=server.arg("t1");
-  if (v!="") {
-    if ( (atoi2((char*)v.c_str(),&i)) && ((i>=-90) && (i<=90))) { lat_deg=i; }
-  }
-  v=server.arg("t2");
-  if (v!="") {
-    if ( (atoi2((char*)v.c_str(),&i)) && ((i>=0) && (i<=60))) {
-      if ((lat_deg>=-90) && (lat_deg<=90)) {
-        sprintf(temp,":St%+03d*%02d#",lat_deg,i);
-        Ser.print(temp);
-      }
-    }
-  }
-  int ut_hrs=-999;
-  v=server.arg("u1");
-  if (v!="") {
-    if ( (atoi2((char*)v.c_str(),&i)) && ((i>=-13) && (i<=13))) { ut_hrs=i; }
-  }
-  v=server.arg("u2");
-  if (v!="") {
-    if ( (atoi2((char*)v.c_str(),&i)) && ((i==00) || (i==30) || (i==45))) {
-      if ((ut_hrs>=-13) && (ut_hrs<=13)) {
-        sprintf(temp,":SG%+03d:%02d#",ut_hrs,i);
-        Ser.print(temp);
-      }
-    }
+    if (v=="on") Ser.print(":SX98,1#");
+    if (v=="off") Ser.print(":SX98,0#");
   }
 
   // clear any possible response

@@ -1,99 +1,97 @@
-// The wifi.htm page
+// -----------------------------------------------------------------------------------
+// Wifi setup
 
-const char html_wifi1[] = "<div class=\"t\"><table width=\"100%%\"><tr><td><b><font size=\"5\">%s</font></b></td><td align=\"right\"><b>" Product " " Version " (OnStep %s)</b>";
-const char html_wifi2[] = "</td></tr></table>";
-const char html_wifi3[] = "</div><div class=\"b\">\r\n";
 const char html_wifiSerial[] = 
 "<b>Performance and compatibility:</b><br/>"
-"<form method=\"post\" action=\"/wifi.htm\">"
-"Command channel serial read time-out: <input style=\"width:4em;\" name=\"ccto\" value=\"%d\" type=\"number\" min=\"5\" max=\"100\"> ms<br/>"
-"Web channel serial read time-out: <input style=\"width:4em;\" name=\"wcto\" value=\"%d\" type=\"number\" min=\"5\" max=\"100\"> ms<br/>"
-"<button type=\"submit\">Upload</button></form><br />\r\n";
+"<form method='post' action='/wifi.htm'>"
+"Command channel serial read time-out: <input style='width:4em' name='ccto' value='%d' type='number' min='5' max='100'> ms<br/>"
+"Web channel serial read time-out: <input style='width:4em' name='wcto' value='%d' type='number' min='5' max='100'> ms<br/>"
+"<button type='submit'>Upload</button></form><br />\r\n";
 const char html_wifiSSID1[] = 
 "<br/><b>Station mode (connect to an Access-Point):</b><br/>"
-"<form method=\"post\" action=\"/wifi.htm\">"
-"SSID: <input style=\"width:6em;\" name=\"stssid\" type=\"text\" value=\"%s\" maxlength=\"32\">&nbsp;&nbsp;&nbsp;"
-"Password: <input style=\"width:8em;\" name=\"stpwd\" type=\"password\" value=\"%s\" maxlength=\"39\"><br/>";
+"<form method='post' action='/wifi.htm'>"
+"SSID: <input style='width:6em' name='stssid' type='text' value='%s' maxlength='32'>&nbsp;&nbsp;&nbsp;"
+"Password: <input style='width:8em' name='stpwd' type='password' value='%s' maxlength='39'><br/>";
 const char html_wifiSSID2[] =
-"Enable DHCP: <input type=\"checkbox\" name=\"stadhcp\" value=\"1\" %s> (Note: above addresses are ignored if DHCP is enabled)<br/>"
-"Enable Station Mode: <input type=\"checkbox\" name=\"staen\" value=\"1\" %s><br/>"
-"<button type=\"submit\">Upload</button></form><br />\r\n";
+"Enable DHCP: <input type='checkbox' name='stadhcp' value='1' %s> (Note: above addresses are ignored if DHCP is enabled)<br/>"
+"Enable Station Mode: <input type='checkbox' name='staen' value='1' %s><br/>"
+"<button type='submit'>Upload</button></form><br />\r\n";
 
 const char html_wifiMAC[] = 
-"MAC: <input style=\"width:10em;\" name=\"stmac\" type=\"text\" value=\"%s\" maxlength=\"17\" disabled><br/>";
+"MAC: <input style='width:10em' name='stmac' type='text' value='%s' maxlength='17' disabled><br/>";
 
 const char html_wifiSTAIP[] =
 "<table><tr><td>IP Address: </td><td>"
-"<input name=\"staip1\" value=\"%d\" type=\"number\" min=\"0\" max=\"255\">&nbsp;.&nbsp;"
-"<input name=\"staip2\" value=\"%d\" type=\"number\" min=\"0\" max=\"255\">&nbsp;.&nbsp;"
-"<input name=\"staip3\" value=\"%d\" type=\"number\" min=\"0\" max=\"255\">&nbsp;.&nbsp;"
-"<input name=\"staip4\" value=\"%d\" type=\"number\" min=\"0\" max=\"255\"></td>";
+"<input name='staip1' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
+"<input name='staip2' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
+"<input name='staip3' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
+"<input name='staip4' value='%d' type='number' min='0' max='255'></td>";
 const char html_wifiSTAGW[] =
 "<tr><td>Gateway: </td><td>"
-"<input name=\"stagw1\" value=\"%d\" type=\"number\" min=\"0\" max=\"255\">&nbsp;.&nbsp;"
-"<input name=\"stagw2\" value=\"%d\" type=\"number\" min=\"0\" max=\"255\">&nbsp;.&nbsp;"
-"<input name=\"stagw3\" value=\"%d\" type=\"number\" min=\"0\" max=\"255\">&nbsp;.&nbsp;"
-"<input name=\"stagw4\" value=\"%d\" type=\"number\" min=\"0\" max=\"255\"></td>";
+"<input name='stagw1' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
+"<input name='stagw2' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
+"<input name='stagw3' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
+"<input name='stagw4' value='%d' type='number' min='0' max='255'></td>";
 const char html_wifiSTASN[] =
 "<tr><td>Subnet: </td><td>"
-"<input name=\"stasn1\" value=\"%d\" type=\"number\" min=\"0\" max=\"255\">&nbsp;.&nbsp;"
-"<input name=\"stasn2\" value=\"%d\" type=\"number\" min=\"0\" max=\"255\">&nbsp;.&nbsp;"
-"<input name=\"stasn3\" value=\"%d\" type=\"number\" min=\"0\" max=\"255\">&nbsp;.&nbsp;"
-"<input name=\"stasn4\" value=\"%d\" type=\"number\" min=\"0\" max=\"255\"></td></tr></table>";
+"<input name='stasn1' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
+"<input name='stasn2' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
+"<input name='stasn3' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
+"<input name='stasn4' value='%d' type='number' min='0' max='255'></td></tr></table>";
 
 const char html_wifiSSID3[] = 
 "<br/><b>Access-Point mode:</b><br/>"
-"<form method=\"post\" action=\"/wifi.htm\">"
-"SSID: <input style=\"width:6em;\" name=\"apssid\" type=\"text\" value=\"%s\" maxlength=\"32\">&nbsp;&nbsp;&nbsp;"
-"Password: <input style=\"width:8em;\" name=\"appwd\" type=\"password\" value=\"%s\" maxlength=\"39\">&nbsp;&nbsp;&nbsp;"
-"Channel: <input style=\"width:2em;\" name=\"apch\" value=\"%d\" type=\"number\" min=\"1\" max=\"11\"><br/>";
+"<form method='post' action='/wifi.htm'>"
+"SSID: <input style='width:6em' name='apssid' type='text' value='%s' maxlength='32'>&nbsp;&nbsp;&nbsp;"
+"Password: <input style='width:8em' name='appwd' type='password' value='%s' maxlength='39'>&nbsp;&nbsp;&nbsp;"
+"Channel: <input style='width:2em' name='apch' value='%d' type='number' min='1' max='11'><br/>";
 
 const char html_wifiApMAC[] = 
-"MAC: <input style=\"width:10em;\" name=\"apmac\" type=\"text\" value=\"%s\" maxlength=\"17\" disabled><br/>";
+"MAC: <input style='width:10em' name='apmac' type='text' value='%s' maxlength='17' disabled><br/>";
 
 const char html_wifiSSID4[] =
 "<table><tr><td>IP Address: </td><td>"
-"<input name=\"apip1\" value=\"%d\" type=\"number\" min=\"0\" max=\"255\">&nbsp;.&nbsp;"
-"<input name=\"apip2\" value=\"%d\" type=\"number\" min=\"0\" max=\"255\">&nbsp;.&nbsp;"
-"<input name=\"apip3\" value=\"%d\" type=\"number\" min=\"0\" max=\"255\">&nbsp;.&nbsp;"
-"<input name=\"apip4\" value=\"%d\" type=\"number\" min=\"0\" max=\"255\"></td>";
+"<input name='apip1' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
+"<input name='apip2' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
+"<input name='apip3' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
+"<input name='apip4' value='%d' type='number' min='0' max='255'></td>";
 const char html_wifiSSID5[] =
 "<tr><td>Gateway: </td><td>"
-"<input name=\"apgw1\" value=\"%d\" type=\"number\" min=\"0\" max=\"255\">&nbsp;.&nbsp;"
-"<input name=\"apgw2\" value=\"%d\" type=\"number\" min=\"0\" max=\"255\">&nbsp;.&nbsp;"
-"<input name=\"apgw3\" value=\"%d\" type=\"number\" min=\"0\" max=\"255\">&nbsp;.&nbsp;"
-"<input name=\"apgw4\" value=\"%d\" type=\"number\" min=\"0\" max=\"255\"></td>";
+"<input name='apgw1' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
+"<input name='apgw2' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
+"<input name='apgw3' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
+"<input name='apgw4' value='%d' type='number' min='0' max='255'></td>";
 const char html_wifiSSID6[] =
 "<tr><td>Subnet: </td><td>"
-"<input name=\"apsn1\" value=\"%d\" type=\"number\" min=\"0\" max=\"255\">&nbsp;.&nbsp;"
-"<input name=\"apsn2\" value=\"%d\" type=\"number\" min=\"0\" max=\"255\">&nbsp;.&nbsp;"
-"<input name=\"apsn3\" value=\"%d\" type=\"number\" min=\"0\" max=\"255\">&nbsp;.&nbsp;"
-"<input name=\"apsn4\" value=\"%d\" type=\"number\" min=\"0\" max=\"255\"></td></tr></table>";
+"<input name='apsn1' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
+"<input name='apsn2' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
+"<input name='apsn3' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
+"<input name='apsn4' value='%d' type='number' min='0' max='255'></td></tr></table>";
 
 const char html_wifiSSID7[] =
-"Enable Access-Point Mode: <input type=\"checkbox\" name=\"apen\" value=\"1\" %s><br/>"
-"<button type=\"submit\">Upload</button></form><br />\r\n";
+"Enable Access-Point Mode: <input type='checkbox' name='apen' value='1' %s><br/>"
+"<button type='submit'>Upload</button></form><br />\r\n";
 
 const char html_logout[] = 
 "<br/><b>WiFi Configuration Security:</b><br/>"
-"<form method=\"post\" action=\"/wifi.htm\">"
-"Password: <input style=\"width:8em;\" name=\"webpwd\" type=\"password\" maxlength=\"39\"> "
-"<button type=\"submit\">Upload</button></form>"
-"<form method=\"post\" action=\"/wifi.htm\">"
-"<button type=\"submit\" name=\"logout\" value=\"1\">Logout</button></form><br />\r\n";
+"<form method='post' action='/wifi.htm'>"
+"Password: <input style='width:8em' name='webpwd' type='password' maxlength='39'> "
+"<button type='submit'>Upload</button></form>"
+"<form method='post' action='/wifi.htm'>"
+"<button type='submit' name='logout' value='1'>Logout</button></form><br />\r\n";
 
 const char html_reboot[] = 
-"<br/><br/><br/><br/><br/><form method=\"get\" action=\"/wifi.htm\">"
+"<br/><br/><br/><br/><br/><form method='get' action='/wifi.htm'>"
 "<b>You must <u>manually</u> restart for changes to take effect.</b><br/><br/>"
-"<button type=\"submit\">Continue</button>"
+"<button type='submit'>Continue</button>"
 "</form><br/><br/><br/><br/>"
 "\r\n";
 
 const char html_login[] = 
-"<br/><form method=\"post\" action=\"/wifi.htm\">"
-"<br/>Enter password to change WiFi configuration: "
-"<input style=\"width:8em;\" name=\"login\" type=\"password\" maxlength=\"39\">"
-"<button type=\"submit\">Ok</button>"
+"<br/><form method='post' action='/wifi.htm'>"
+"<br/>Enter password to change WiFi configuration:<br />"
+"<input style='width:8em' name='login' type='password' maxlength='39'>"
+"<button type='submit'>Ok</button>"
 "</form><br/><br/><br/>"
 "Setup:<br/><br/>"
 "Enable either station <b>OR</b> AP mode, both enabled can cause performance issues.&nbsp;&nbsp;"
@@ -106,16 +104,16 @@ bool restartRequired=false;
 bool loginRequired=true;
 
 void handleWifi() {
-  Serial.setTimeout(WebTimeout);
+  Ser.setTimeout(WebTimeout);
   
   char temp[320]="";
   char temp2[80]="";
-  char temp3[80]="";
   
   processWifiGet();
 
   // send a standard http response header
-  String data=html_head1;
+  String data=html_headB;
+  data += html_main_cssB;
   data += html_main_css1;
   data += html_main_css2;
   data += html_main_css3;
@@ -124,27 +122,30 @@ void handleWifi() {
   data += html_main_css6;
   data += html_main_css7;
   data += html_main_css8;
-  data += html_main_css9;
-  data += html_head2;
+  data += html_main_cssE;
+  data += html_headE;
+
+  data += html_bodyB;
 
   // finish the standard http response header
-  Serial.print(":GVP#");
-  temp2[Serial.readBytesUntil('#',temp2,20)]=0; 
-  if (strlen(temp2)<=0) { strcpy(temp2,"N/A"); } else { for (int i=2; i<7; i++) temp2[i]=temp2[i+1]; }
-  Serial.print(":GVN#");
-  temp3[Serial.readBytesUntil('#',temp3,20)]=0; 
-  if (strlen(temp3)<=0) { strcpy(temp3,"N/A"); }
-  sprintf(temp,html_wifi1,temp2,temp3);
-  data += temp;
-  data += html_wifi2;
-  data += html_links1es;
-  data += html_links2es;
-  data += html_links3es;
-  data += html_wifi3;
+  data += html_onstep_header1;
+  Ser.print(":GVP#"); temp2[Ser.readBytesUntil('#',temp2,20)]=0; if (strlen(temp2)<=0) { strcpy(temp2,"N/A"); } else { for (int i=2; i<7; i++) temp2[i]=temp2[i+1]; } data += temp2;
+  data += html_onstep_header2;
+  Ser.print(":GVN#"); temp2[Ser.readBytesUntil('#',temp2,20)]=0; if (strlen(temp2)<=0) { strcpy(temp2,"N/A"); } data += temp2;
+  data += html_onstep_header3;
+  data += html_links1N;
+  data += html_links2N;
+  data += html_links3N;
+  data += html_links4N;
+  data += html_links5N;
+  data += html_links6S;
+  data += html_onstep_header4;
+
+  data+="<div style='width: 40em;'>";
 
   if (restartRequired) {
     data+=html_reboot;
-    data+="</div></body></html>";
+    data+="</div></div></body></html>";
     server.send(200, "text/html",data);
     restartRequired=false;
     delay(1000);
@@ -154,7 +155,7 @@ void handleWifi() {
 
   if (loginRequired) {
     data+=html_login;
-    data+="</div></body></html>";
+    data+="</div></div></body></html>";
     server.send(200, "text/html",data);
     restartRequired=false;
     delay(1000);
@@ -190,7 +191,7 @@ void handleWifi() {
   sprintf(temp,html_wifiSSID7,accessPointEnabled?"checked":""); data += temp;
   data += html_logout;
 
-  strcpy(temp,"</div></body></html>");
+  strcpy(temp,"</div></div></body></html>");
   data += temp;
 
   server.send(200, "text/html",data);
