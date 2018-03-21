@@ -68,6 +68,7 @@
 #include "Align.h"
 #include "Command.h"
 #include "Globals.h"
+#include "Julian.h"
 
 #ifdef MODE_SWITCH_BEFORE_SLEW_SPI
 #include "TMC2130.h"
@@ -76,14 +77,9 @@ tmc2130 tmcAxis1(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0);
 tmc2130 tmcAxis2(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
 #endif
 
-#ifdef RTC_DS3231
-#include <Wire.h>
-#include <RtcDS3231.h>          //https://github.com/Makuna/Rtc/archive/master.zip
-RtcDS3231<TwoWire> Rtc(HAL_Wire);
-#endif
-#ifdef RTC_DS3234
-#include <SparkFunDS3234RTC.h>  //https://github.com/sparkfun/SparkFun_DS3234_RTC_Arduino_Library/archive/master.zip
-#endif
+// use an RTC (Real Time Clock) if present
+#include "RTCw.h"
+rtcw urtc;
 
 // forces initialialization of a host of settings in EEPROM. OnStep does this automatically, most likely, you will want to leave this alone
 #define INIT_KEY false    // set to true to keep automatic initilization from happening.  This is a one-time operation... upload to the Arduino, then set to false and upload again

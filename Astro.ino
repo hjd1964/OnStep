@@ -166,38 +166,7 @@ void timeZoneToHM(char *reply, double tz) {
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------
-// Date Time conversion
-
-// converts Gregorian date (Y,M,D) to Julian day number
-double julian(int Year, int Month, int Day) {
-  if ((Month==1) || (Month==2)) { Year--; Month=Month+12; }
-  double B=2.0-floor(Year/100.0)+floor(Year/400.0);
-  return (B+floor(365.25*Year)+floor(30.6001*(Month+1.0))+Day+1720994.5); //+(Time/24.0);
-}
-
-// converts Julian day number to Gregorian date (Y,M,D)
-void greg(double JulianDay, int *Year, int *Month, int *Day) {
-  double A,B,C,D,D1,E,F,G,I;
-
-  JulianDay=JulianDay+0.5;
-  I=floor(JulianDay);
- 
-  F=0.0; //  JD-I;
-  if (I>2299160.0) {
-    A=int((I-1867216.25)/36524.25);
-    B=I+1.0+A-floor(A/4.0);
-  } else B=I;
-
-  C=B+1524.0;
-  D=floor((C-122.1)/365.25);
-  E=floor(365.25*D);
-  G=floor((C-E)/30.6001);
-
-  D1=C-E+F-floor(30.6001*G);
-  *Day=floor(D1);
-  if (G<13.5)     *Month=floor(G-1.0);   else *Month=floor(G-13.0);
-  if (*Month>2.5) *Year=floor(D-4716.0); else *Year=floor(D-4715.0);
-}
+// Date/time conversion
 
 // convert date/time to Greenwich Apparent Sidereal time
 double jd2gast(double JulianDay, double ut1) {
@@ -226,33 +195,17 @@ double jd2gast(double JulianDay, double ut1) {
 // convert date/time to Local Apparent Sidereal Time
 // optionally updates the RTC, uses longitude
 double jd2last(double JulianDay, double ut1, bool updateRTC) {
-  // update RTC
   if (updateRTC) {
-#if defined(RTC_DS3231) || defined(RTC_DS3234)
-  int yy,y,mo,d,h;
-  double m,s;
+    // UT to local time
+    double lmt=ut1-timeZone;
 
-  double lmt=ut1-timeZone;
-  // correct for day moving forward/backward... this works for multipule days of up-time
-  double J=JulianDay;
-  while (lmt>=24.0) { lmt=lmt-24.0; J=J-1.0; } 
-  if    (lmt<0.0)   { lmt=lmt+24.0; J=J+1.0; }
-  greg(J,&y,&mo,&d); yy=y; y-=2000; if (y>=100) y-=100;
+    // correct for day moving forward/backward... this works for multipule days of up-time
+    double J=JulianDay;
+    while (lmt>=24.0) { lmt=lmt-24.0; J=J-1.0; } 
+    if    (lmt<0.0)   { lmt=lmt+24.0; J=J+1.0; }
 
-  double f1=fabs(lmt)+0.000139;
-  h=floor(f1);
-  m=(f1-h)*60.0;
-  s=(m-floor(m))*60.0;
-
-#ifdef RTC_DS3234
-  int dow=(round(J)%7)+1;
-  rtc.setTime(floor(s), floor(m), h, dow, d, mo, y);
-#endif
-#ifdef RTC_DS3231
-  RtcDateTime updateTime = RtcDateTime(yy, mo, d, h, floor(m), floor(s));
-  Rtc.SetDateTime(updateTime);
-#endif
-#endif
+    // set the RTC
+    urtc.set(J,lmt);
   }
   // JulianDay is the Local date, jd2gast requires a universal time
   // this is a hack that leaves the date alone and lets the UT1 cover

@@ -339,29 +339,11 @@ void Init_ReadEEPROM_Values() {
   // get date and time from EEPROM, start keeping time
   JD=EEPROM_readFloat(EE_JD);
   LMT=EEPROM_readFloat(EE_LMT);
-#ifdef RTC_DS3234
-  rtc.begin(DS3234_CS_PIN); rtc.update();
-  if ((rtc.year()>=0) && (rtc.year()<=99) && (rtc.month()>=1) && (rtc.month()<=12) && (rtc.date()>=1) && (rtc.date()<=31) &&
-      (rtc.hour()>=0) && (rtc.hour()<=23) && (rtc.minute()>=0) && (rtc.minute()<=59) && (rtc.second()>=0) && (rtc.second()<=59)) {
-    int y1=rtc.year(); if (y1>11) y1=y1+2000; else y1=y1+2100;
-    JD=julian(y1,rtc.month(),rtc.date());
-    LMT=(rtc.hour()+(rtc.minute()/60.0)+(rtc.second()/3600.0));
-    rtc.writeSQW(SQW_SQUARE_1);
-  }
-#endif
 
-#ifdef RTC_DS3231
-  Rtc.Begin(); if (!Rtc.GetIsRunning()) Rtc.SetIsRunning(true);
-  RtcDateTime now = Rtc.GetDateTime();
-  if ((now.Year()>=2018) && (now.Year()<=3000) && (now.Month()>=1) && (now.Month()<=12) && (now.Day()>=1) && (now.Day()<=31) &&
-      (now.Hour()>=0) && (now.Hour()<=23) && (now.Minute()>=0) && (now.Minute()<=59) && (now.Second()>=0) && (now.Second()<=59)) {
-    JD=julian(now.Year(),now.Month(),now.Day());
-    LMT=(now.Hour()+(now.Minute()/60.0)+(now.Second()/3600.0));
-    // frequency 0 (1Hz) on the SQW pin
-    Rtc.SetSquareWavePin(DS3231SquareWavePin_ModeClock);
-    Rtc.SetSquareWavePinClockFrequency(DS3231SquareWaveClock_1Hz);
-  }
-#endif
+  // get the RTC (if present) ready
+  urtc.init();
+  // read the date/time from RTC (if present)
+  urtc.get(JD,LMT);
 
   UT1=LMT+timeZone;
   update_lst(jd2last(JD,UT1,false));
