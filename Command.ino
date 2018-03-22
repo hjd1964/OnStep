@@ -1654,6 +1654,8 @@ void processCommands() {
          cli(); SiderealRate=siderealInterval/StepsPerSecondAxis1; sei();
        }
 
+       SetDeltaTrackingRate();
+
      } else
      if (command[0]=='T') {
      } else
