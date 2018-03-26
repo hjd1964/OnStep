@@ -317,8 +317,6 @@ void loop() {
   #endif
       if (LastPPSrateRatio!=PPSrateRatio) { SiderealClockSetInterval(siderealInterval); LastPPSrateRatio=PPSrateRatio; }
     }
-#else
-    if (trackingState!=TrackingMoveTo) if (LED2_ON) { digitalWrite(LEDneg2Pin,HIGH); LED2_ON=false; }
 #endif
 
 #ifdef STATUS_LED_PINS_ON
@@ -327,8 +325,12 @@ void loop() {
 #endif
 #ifdef STATUS_LED2_PINS_ON
     // LED indicate STOP and GOTO
-    if (trackingState==TrackingNone) if (LED2_ON) { digitalWrite(LEDneg2Pin,HIGH); LED2_ON=false; }
     if (trackingState==TrackingMoveTo) if (!LED2_ON) { digitalWrite(LEDneg2Pin,LOW); LED2_ON=true; }
+#if defined(PPS_SENSE_ON) || defined(PPS_SENSE_PULLUP)
+    if (trackingState==TrackingNone) if (LED2_ON) { digitalWrite(LEDneg2Pin,HIGH); LED2_ON=false; }
+#else
+    if (trackingState!=TrackingMoveTo) if (LED2_ON) { digitalWrite(LEDneg2Pin,HIGH); LED2_ON=false; }
+#endif
 #endif
 
     // SAFETY CHECKS, keeps mount from tracking past the meridian limit, past the UnderPoleLimit, or past the Dec limits
