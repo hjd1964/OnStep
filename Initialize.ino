@@ -161,7 +161,7 @@ void Init_Pins() {
 #endif
 
 #ifdef STATUS_LED2_PINS_ON
-  pinMode(LEDneg2Pin,OUTPUT); digitalWrite(LEDneg2Pin,LOW); // light second status LED (provides just GND)
+  pinMode(LEDneg2Pin,OUTPUT); digitalWrite(LEDneg2Pin,HIGH); // light second status LED (provides just GND)
   LED2_ON=false;
 #elif defined(STATUS_LED2_PINS)
   pinMode(LEDneg2Pin,OUTPUT); digitalWrite(LEDneg2Pin,LOW); // light second status LED (provides pwm'd GND for polar reticule)

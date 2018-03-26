@@ -317,6 +317,8 @@ void loop() {
   #endif
       if (LastPPSrateRatio!=PPSrateRatio) { SiderealClockSetInterval(siderealInterval); LastPPSrateRatio=PPSrateRatio; }
     }
+#else
+    if (trackingState!=TrackingMoveTo) if (LED2_ON) { digitalWrite(LEDneg2Pin,HIGH); LED2_ON=false; }
 #endif
 
 #ifdef STATUS_LED_PINS_ON
