@@ -362,7 +362,7 @@ void processCommands() {
 //         Returns: M# (for moving) or S# (for stopped)
         if (command[1]=='T') {
           quietReply=true;
-          if (amountMoveAxis4.fixed!=0) strcpy(reply,"M"); else strcpy(reply,"S");
+          if (amountMoveAxis4.fixed!=0 || targetAxis4.part.m!=posAxis4)) strcpy(reply,"M"); else strcpy(reply,"S");
         } else
 //  :FZ#   Set focuser zero position (half travel)
 //         Returns: Nothing
@@ -476,7 +476,7 @@ void processCommands() {
 //         Returns: M# (for moving) or S# (for stopped)
         if (command[1]=='T') {
           quietReply=true;
-          if (amountMoveAxis5.fixed!=0) strcpy(reply,"M"); else strcpy(reply,"S");
+          if (amountMoveAxis5.fixed!=0 || targetAxis5.part.m!=posAxis5) strcpy(reply,"M"); else strcpy(reply,"S");
         } else
 //  :fZ#   Set focuser zero position (half travel)
 //         Returns: Nothing
