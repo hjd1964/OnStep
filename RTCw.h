@@ -29,7 +29,7 @@ class rtcw {
       m=(f1-h)*60.0;
       s=(m-floor(m))*60.0;
 
-      int dow=(round(J)%7)+1;
+      int dow=(round(JD)%7)+1;
       rtc.setTime(floor(s), floor(m), h, dow, d, mo, y);
     }
     
