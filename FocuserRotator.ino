@@ -4,6 +4,9 @@
 // ROTATOR/DEROTATOR ----------------------------
 #ifdef ROTATOR_ON
 
+// time to write position to EEPROM after last movement of Focuser 1/2, default = 5 minutes
+#define DelayToWrite 1000L*60L*5L
+
 #ifdef MOUNT_TYPE_ALTAZM
 void RotatorMove() {
   // do de-rotate movement
@@ -80,6 +83,15 @@ void Focuser1Follow() {
   if (!dd && ((millis()-lastMoveAxis4)>10000)) { dd=true; digitalWrite(Axis4_EN,AXIS4_DISABLE); }
 #endif
 
+  // write position to EEPROM
+  // not moving for x minutes?
+  static unsigned long lastMove=millis();
+  if ((posAxis4!=(long)targetAxis4.part.m)) lastMove=millis();
+  // needs updating?
+  if (posAxis4!=EEPROM_readLong(EE_posAxis4)) {
+    if ((long)(millis()-lastMove)>DelayToWrite) EEPROM_writeLong(EE_posAxis4,(long)posAxis4);
+  }
+
   if ((long)(tempMs-axis4Ms)>0) {
     axis4Ms=tempMs+(unsigned long)MaxRateAxis4;
 
@@ -124,6 +136,15 @@ void Focuser2Follow() {
   static bool dd = true;
   if (!dd && ((millis()-lastMoveAxis5)>10000)) { dd=true; digitalWrite(Axis4_EN,AXIS4_DISABLE); }
 #endif
+
+  // write position to EEPROM
+  // not moving for x minutes?
+  static unsigned long lastMove=millis();
+  if ((posAxis5!=(long)targetAxis5.part.m)) lastMove=millis();
+  // needs updating?
+  if (posAxis5!=EEPROM_readLong(EE_posAxis5)) {
+    if ((long)(millis()-lastMove)>DelayToWrite) EEPROM_writeLong(EE_posAxis5,(long)posAxis5);
+  }
 
   if ((long)(tempMs-axis5Ms)>0) {
     axis5Ms=tempMs+(unsigned long)MaxRateAxis5;

@@ -408,6 +408,16 @@ void Init_ReadEEPROM_Values() {
   pauseHome=EEPROM.read(EE_pauseHome);
 #endif
 
+  // read focuser positions
+#ifdef FOCUSER1_ON
+  posAxis4=EEPROM_readLong(EE_posAxis4);
+  targetAxis4.part.m=posAxis4; targetAxis4.part.f=0;
+#endif
+#ifdef FOCUSER2_ON
+  posAxis5=EEPROM_readLong(EE_posAxis5);
+  targetAxis5.part.m=posAxis5; targetAxis5.part.f=0;
+#endif
+
   // set the default guide rate, 24x sidereal
   setGuideRate(GuideRate24x);
   enableGuideRate(GuideRate24x);
@@ -474,15 +484,16 @@ void Init_EEPROM_Values() {
     // init the sidereal tracking rate, use this once - then issue the T+ and T- commands to fine tune
     // 1/16uS resolution timer, ticks per sidereal second
     EEPROM_writeLong(EE_siderealInterval,siderealInterval);
-    
+
+    // set default focuser positions at zero
+    EEPROM_writeLong(EE_posAxis4,0L);
+    EEPROM_writeLong(EE_posAxis5,0L);
+
     // finally, stop the init from happening again
     EEPROM_writeLong(EE_autoInitKey,autoInitKey);
     
     // clear the pointing model
     saveAlignModel();
-
-    // disable OnTrack/Refraction dual axis mode
-    EEPROM.write(EE_onTrackDec,0);
   }
 }
 

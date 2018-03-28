@@ -1643,8 +1643,8 @@ void processCommands() {
        if (command[1]=='o') { refraction=refraction_enable; onTrack=true;  SetTrackingRate(default_tracking_rate); } else  // turn full compensation on, defaults to base sidereal tracking rate
        if (command[1]=='r') { refraction=refraction_enable; onTrack=false; SetTrackingRate(default_tracking_rate); } else  // turn refraction compensation on, defaults to base sidereal tracking rate
        if (command[1]=='n') { refraction=false; onTrack=false; SetTrackingRate(default_tracking_rate); } else              // turn refraction off, sidereal tracking rate resumes
-       if (command[1]=='1') { onTrackDec=false; EEPROM.write(EE_onTrackDec,(byte)onTrackDec); } else                       // turn off dual axis tracking
-       if (command[1]=='2') { onTrackDec=true;  EEPROM.write(EE_onTrackDec,(byte)onTrackDec); } else                       // turn on dual axis tracking
+       if (command[1]=='1') { onTrackDec=false; } else                                                                     // turn off dual axis tracking
+       if (command[1]=='2') { onTrackDec=true;  } else                                                                     // turn on dual axis tracking
          commandError=true;
 
        // Only burn the new rate if changing the sidereal interval

@@ -3,6 +3,13 @@
 
 // moves telescope to the home position, then stops tracking
 int goHome() {
+#ifdef FOCUSER1_ON
+  EEPROM_writeLong(EE_posAxis4,(long)posAxis4);
+#endif
+#ifdef FOCUSER2_ON
+  EEPROM_writeLong(EE_posAxis5,(long)posAxis5);
+#endif
+
   int f=validateGoto(); if (f==5) f=8; if (f!=0) return f; // goto allowed?
 
   cli();

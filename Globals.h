@@ -376,8 +376,7 @@ volatile int blAxis2        = 0;
 
 #define EE_currentSite 11     // 1
 
-#define EE_sgSgtAxis1  12     // 1
-#define EE_sgSgtAxis2  13     // 1
+#define EE_pauseHome   12     // 1 + 1
 
 #define EE_LMT         14     // 4
 #define EE_JD          18     // 4
@@ -408,16 +407,14 @@ volatile int blAxis2        = 0;
 #define EE_pecStatus   70     // 1
 #define EE_pecRecorded 71     // 1
 
-#define EE_sgLimitAxis1 72    // 2
-#define EE_sgLimitAxis2 74    // 2
+#define EE_posAxis4    72     // 4
 
 #define EE_wormSensePos 76    // 4
 
 #define EE_backlashAxis1 80   // 4
 #define EE_backlashAxis2 84   // 4
 #define EE_siderealInterval 88  // 4
-#define EE_onTrackDec  92     // 1
-#define EE_pauseHome   93     // 1 +2
+#define EE_posAxis5      92     // 4
 
 #define EE_autoInitKey 96
 
@@ -432,7 +429,7 @@ volatile int blAxis2        = 0;
 // 133      timeZone  2
 // 134..149 site name 2
 
-// 150..103 latitude  3  ((index 3-1)*25+100)
+// 150..153 latitude  3  ((index 3-1)*25+100)
 // 154..157 longitude 3
 // 158      timeZone  3
 // 159..174 site name 3
