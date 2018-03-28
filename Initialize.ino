@@ -410,12 +410,10 @@ void Init_ReadEEPROM_Values() {
 
   // read focuser positions
 #ifdef FOCUSER1_ON
-  posAxis4=EEPROM_readLong(EE_posAxis4);
-  targetAxis4.part.m=posAxis4; targetAxis4.part.f=0;
+  Focuser1RecallPos();
 #endif
 #ifdef FOCUSER2_ON
-  posAxis5=EEPROM_readLong(EE_posAxis5);
-  targetAxis5.part.m=posAxis5; targetAxis5.part.f=0;
+  Focuser2RecallPos();
 #endif
 
   // set the default guide rate, 24x sidereal

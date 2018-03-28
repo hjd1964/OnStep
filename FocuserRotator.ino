@@ -74,6 +74,15 @@ void Focuser1Move() {
   if ((f<(double)MinAxis4*1000.0) || (f>(double)MaxAxis4*1000.0)) amountMoveAxis4.fixed=0; }
 }
 
+void Focuser1SavePos() {
+  EEPROM_writeLong(EE_posAxis4,(long)posAxis4);
+}
+
+void Focuser1RecallPos() {
+  posAxis4=EEPROM_readLong(EE_posAxis4);
+  targetAxis4.part.m=posAxis4; targetAxis4.part.f=0;
+}
+
 void Focuser1Follow() {
   unsigned long tempMs=millis();
 
@@ -93,7 +102,7 @@ void Focuser1Follow() {
     // not slewing
     if ((trackingState!=TrackingMoveTo) && !guideDirAxis1 && !guideDirAxis2) {
       // enough time has passed
-      if ((long)(millis()-lastMove)>DelayToWrite) EEPROM_writeLong(EE_posAxis4,(long)posAxis4);
+      if ((long)(millis()-lastMove)>DelayToWrite) Focuser1SavePos();
     }
   }
 
@@ -133,6 +142,15 @@ void Focuser2Move() {
   if ((f<(double)MinAxis5*1000.0) || (f>(double)MaxAxis5*1000.0)) amountMoveAxis5.fixed=0; }
 }
 
+void Focuser2SavePos() {
+  EEPROM_writeLong(EE_posAxis5,(long)posAxis5);
+}
+
+void Focuser2RecallPos() {
+  posAxis5=EEPROM_readLong(EE_posAxis5);
+  targetAxis5.part.m=posAxis5; targetAxis5.part.f=0;
+}
+
 void Focuser2Follow() {
   unsigned long tempMs=millis();
 
@@ -152,7 +170,7 @@ void Focuser2Follow() {
     // not slewing
     if ((trackingState!=TrackingMoveTo) && !guideDirAxis1 && !guideDirAxis2) {
       // enough time has passed
-      if ((long)(millis()-lastMove)>DelayToWrite) EEPROM_writeLong(EE_posAxis5,(long)posAxis5);
+      if ((long)(millis()-lastMove)>DelayToWrite) Focuser2SavePos();
     }
   }
 
