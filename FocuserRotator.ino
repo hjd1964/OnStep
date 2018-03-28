@@ -89,7 +89,11 @@ void Focuser1Follow() {
   if ((posAxis4!=(long)targetAxis4.part.m)) lastMove=millis();
   // needs updating?
   if (posAxis4!=EEPROM_readLong(EE_posAxis4)) {
-    if ((long)(millis()-lastMove)>DelayToWrite) EEPROM_writeLong(EE_posAxis4,(long)posAxis4);
+    // not slewing
+    if ((trackingState!=TrackingMoveTo) && !guideDirAxis1 && !guideDirAxis2) {
+      // enough time has passed
+      if ((long)(millis()-lastMove)>DelayToWrite) EEPROM_writeLong(EE_posAxis4,(long)posAxis4);
+    }
   }
 
   if ((long)(tempMs-axis4Ms)>0) {
@@ -143,7 +147,11 @@ void Focuser2Follow() {
   if ((posAxis5!=(long)targetAxis5.part.m)) lastMove=millis();
   // needs updating?
   if (posAxis5!=EEPROM_readLong(EE_posAxis5)) {
-    if ((long)(millis()-lastMove)>DelayToWrite) EEPROM_writeLong(EE_posAxis5,(long)posAxis5);
+    // not slewing
+    if ((trackingState!=TrackingMoveTo) && !guideDirAxis1 && !guideDirAxis2) {
+      // enough time has passed
+      if ((long)(millis()-lastMove)>DelayToWrite) EEPROM_writeLong(EE_posAxis5,(long)posAxis5);
+    }
   }
 
   if ((long)(tempMs-axis5Ms)>0) {
