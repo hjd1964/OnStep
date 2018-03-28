@@ -1,11 +1,11 @@
 // -----------------------------------------------------------------------------------
 // Rotator/DeRotator/Focusers
 
-// ROTATOR/DEROTATOR ----------------------------
-#ifdef ROTATOR_ON
-
 // time to write position to EEPROM after last movement of Focuser 1/2, default = 5 minutes
 #define DelayToWrite 1000L*60L*5L
+
+// ROTATOR/DEROTATOR ----------------------------
+#ifdef ROTATOR_ON
 
 #ifdef MOUNT_TYPE_ALTAZM
 void RotatorMove() {
@@ -95,7 +95,7 @@ void Focuser1Follow() {
 #endif
 
   // write position to EEPROM
-  // not moving for x minutes?
+  // not moving for DelayToWrite minutes?
   static unsigned long lastMove=millis();
   if ((posAxis4!=lastPosAxis4)) { lastMove=millis(); lastPosAxis4=posAxis4; }
   // needs updating?
@@ -164,7 +164,7 @@ void Focuser2Follow() {
 #endif
 
   // write position to EEPROM
-  // not moving for x minutes?
+  // not moving for DelayToWrite minutes?
   static unsigned long lastMove=millis();
   if ((posAxis5!=lastPosAxis5)) { lastMove=millis(); lastPosAxis5=posAxis5; }
   // needs updating?
