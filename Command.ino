@@ -825,36 +825,36 @@ void processCommands() {
 //         Point to the celestial pole with the counterweight pointing downwards (CWD position).
 //         Returns: Nothing
       if (command[1]=='F')  { 
-        setHome(); quietReply=true; 
 #ifdef FOCUSER1_ON
         Focuser1SavePos();
 #endif
 #ifdef FOCUSER2_ON
         Focuser2SavePos();
 #endif
+        setHome(); quietReply=true; 
       } else 
 //  :hC#   Moves telescope to the home position
 //         Returns: Nothing
       if (command[1]=='C')  { 
-        goHome(); quietReply=true; 
 #ifdef FOCUSER1_ON
         Focuser1SavePos();
 #endif
 #ifdef FOCUSER2_ON
         Focuser2SavePos();
 #endif
+        goHome(); quietReply=true; 
       } else 
 //  :hP#   Goto the Park Position
 //          Return: 0 on failure
 //                  1 on success
       if (command[1]=='P')  { 
-        if (park()) commandError=true; 
 #ifdef FOCUSER1_ON
         Focuser1SavePos();
 #endif
 #ifdef FOCUSER2_ON
         Focuser2SavePos();
 #endif
+        if (park()) commandError=true; 
         } else 
 //  :hQ#   Set the park position
 //          Return: 0 on failure

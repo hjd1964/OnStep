@@ -58,19 +58,6 @@ void Init_Startup_Values() {
   trueAxis2          = 90L*(long)StepsPerDegreeAxis2;
   sei();
 
-#ifdef ROTATOR_ON
-  targetAxis3.fixed = 0;
-  amountRotateAxis3.fixed=0;
-#endif
-#ifdef FOCUSER1_ON
-  targetAxis4.fixed = 0;
-  amountMoveAxis4.fixed=0;
-#endif
-#ifdef FOCUSER2_ON
-  targetAxis5.fixed = 0;
-  amountMoveAxis5.fixed=0;
-#endif
-
   // default values for state variables
   pierSide            = PierSideNone;
   dirAxis1            = 1;

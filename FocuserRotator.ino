@@ -2,7 +2,7 @@
 // Rotator/DeRotator/Focusers
 
 // time to write position to EEPROM after last movement of Focuser 1/2, default = 5 minutes
-#define DelayToWrite 1000L*60L*5L
+#define FOCUSER_WRITE_DELAY 1000L*60L*5L
 
 // ROTATOR/DEROTATOR ----------------------------
 #ifdef ROTATOR_ON
@@ -95,7 +95,7 @@ void Focuser1Follow() {
 #endif
 
   // write position to EEPROM
-  // not moving for DelayToWrite minutes?
+  // not moving for FOCUSER_WRITE_DELAY minutes?
   static unsigned long lastMove=millis();
   if ((posAxis4!=lastPosAxis4)) { lastMove=millis(); lastPosAxis4=posAxis4; }
   // needs updating?
@@ -103,7 +103,7 @@ void Focuser1Follow() {
     // not slewing
     if ((trackingState!=TrackingMoveTo) && !guideDirAxis1 && !guideDirAxis2) {
       // enough time has passed
-      if ((long)(millis()-lastMove)>DelayToWrite) Focuser1SavePos();
+      if ((long)(millis()-lastMove)>FOCUSER_WRITE_DELAY) Focuser1SavePos();
     }
   }
 
@@ -164,7 +164,7 @@ void Focuser2Follow() {
 #endif
 
   // write position to EEPROM
-  // not moving for DelayToWrite minutes?
+  // not moving for FOCUSER_WRITE_DELAY minutes?
   static unsigned long lastMove=millis();
   if ((posAxis5!=lastPosAxis5)) { lastMove=millis(); lastPosAxis5=posAxis5; }
   // needs updating?
@@ -172,7 +172,7 @@ void Focuser2Follow() {
     // not slewing
     if ((trackingState!=TrackingMoveTo) && !guideDirAxis1 && !guideDirAxis2) {
       // enough time has passed
-      if ((long)(millis()-lastMove)>DelayToWrite) Focuser2SavePos();
+      if ((long)(millis()-lastMove)>FOCUSER_WRITE_DELAY) Focuser2SavePos();
     }
   }
 
