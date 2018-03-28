@@ -78,9 +78,11 @@ void Focuser1SavePos() {
   EEPROM_writeLong(EE_posAxis4,(long)posAxis4);
 }
 
+long lastPosAxis4=0;
 void Focuser1RecallPos() {
   posAxis4=EEPROM_readLong(EE_posAxis4);
   targetAxis4.part.m=posAxis4; targetAxis4.part.f=0;
+  lastPosAxis4=posAxis4;
 }
 
 void Focuser1Follow() {
@@ -95,8 +97,7 @@ void Focuser1Follow() {
   // write position to EEPROM
   // not moving for x minutes?
   static unsigned long lastMove=millis();
-  static long lastPos=0;
-  if ((posAxis4!=lastPos)) { lastMove=millis(); lastPos=posAxis4; }
+  if ((posAxis4!=lastPosAxis4)) { lastMove=millis(); lastPosAxis4=posAxis4; }
   // needs updating?
   if (posAxis4!=EEPROM_readLong(EE_posAxis4)) {
     // not slewing
@@ -146,9 +147,11 @@ void Focuser2SavePos() {
   EEPROM_writeLong(EE_posAxis5,(long)posAxis5);
 }
 
+long lastPosAxis5=0;
 void Focuser2RecallPos() {
   posAxis5=EEPROM_readLong(EE_posAxis5);
   targetAxis5.part.m=posAxis5; targetAxis5.part.f=0;
+  lastPosAxis5=posAxis5;
 }
 
 void Focuser2Follow() {
@@ -163,8 +166,7 @@ void Focuser2Follow() {
   // write position to EEPROM
   // not moving for x minutes?
   static unsigned long lastMove=millis();
-  static long lastPos=0;
-  if ((posAxis5!=lastPos)) { lastMove=millis(); lastPos=posAxis5; }
+  if ((posAxis5!=lastPosAxis5)) { lastMove=millis(); lastPosAxis5=posAxis5; }
   // needs updating?
   if (posAxis5!=EEPROM_readLong(EE_posAxis5)) {
     // not slewing
