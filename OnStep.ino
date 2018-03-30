@@ -153,6 +153,20 @@ void setup() {
   EnableStepperDrivers();
 #endif
 
+  // start rotator if present
+#ifdef ROTATOR_ON
+  rot.init(Axis3StepPin,Axis3DirPin,Axis3_EN,MaxRateAxis3,StepsPerDegreeAxis3);
+  rot.setMin(MinAxis3);
+  rot.setMax(MaxAxis3);
+  #ifdef AXIS3_REVERSE_ON
+    rot.setReverseState(HIGH);
+  #endif
+  #ifdef AXIS3_DISABLE
+    rot.setDisableState(AXIS3_DISABLE);
+    rot.powerDownActive(true);
+  #endif
+#endif
+
   // start focusers if present
 #ifdef FOCUSER1_ON
   foc1.init(Axis4StepPin,Axis4DirPin,Axis4_EN,EE_posAxis4,MaxRateAxis4,StepsPerMicrometerAxis4);
@@ -166,7 +180,6 @@ void setup() {
     foc1.powerDownActive(true);
   #endif
 #endif
-
 #ifdef FOCUSER2_ON
   foc2.init(Axis5StepPin,Axis5DirPin,Axis5_EN,EE_posAxis5,MaxRateAxis5,StepsPerMicrometerAxis5);
   foc2.setMin(MinAxis5*1000.0);
@@ -177,19 +190,6 @@ void setup() {
   #ifdef AXIS5_DISABLE
     foc2.setDisableState(AXIS4_DISABLE);
     foc2.powerDownActive(true);
-  #endif
-#endif
-
-#ifdef ROTATOR_ON
-  rot.init(Axis3StepPin,Axis3DirPin,Axis3_EN,MaxRateAxis3,StepsPerDegreeAxis3);
-  rot.setMin(MinAxis3);
-  rot.setMax(MaxAxis3);
-  #ifdef AXIS3_REVERSE_ON
-    rot.setReverseState(HIGH);
-  #endif
-  #ifdef AXIS3_DISABLE
-    rot.setDisableState(AXIS3_DISABLE);
-    rot.powerDownActive(true);
   #endif
 #endif
 
