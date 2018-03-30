@@ -305,21 +305,21 @@ void TGeoAlign::init() {
 
 // remember the alignment between sessions
 void TGeoAlign::readCoe() {
-  dfCor=EEPROM_readFloat(EE_dfCor);  // dfCor is ffCor for fork mounts
-  tfCor=EEPROM_readFloat(EE_tfCor);
-  doCor=EEPROM_readFloat(EE_doCor);
-  pdCor=EEPROM_readFloat(EE_pdCor);
-  altCor=EEPROM_readFloat(EE_altCor);
-  azmCor=EEPROM_readFloat(EE_azmCor);
+  dfCor=nv.readFloat(EE_dfCor);  // dfCor is ffCor for fork mounts
+  tfCor=nv.readFloat(EE_tfCor);
+  doCor=nv.readFloat(EE_doCor);
+  pdCor=nv.readFloat(EE_pdCor);
+  altCor=nv.readFloat(EE_altCor);
+  azmCor=nv.readFloat(EE_azmCor);
 }
 
 void TGeoAlign::writeCoe() {
-  EEPROM_writeFloat(EE_dfCor,dfCor);  // dfCor is ffCor for fork mounts
-  EEPROM_writeFloat(EE_tfCor,tfCor);
-  EEPROM_writeFloat(EE_doCor,doCor);
-  EEPROM_writeFloat(EE_pdCor,pdCor);
-  EEPROM_writeFloat(EE_altCor,altCor);
-  EEPROM_writeFloat(EE_azmCor,azmCor);
+  nv.writeFloat(EE_dfCor,dfCor);  // dfCor is ffCor for fork mounts
+  nv.writeFloat(EE_tfCor,tfCor);
+  nv.writeFloat(EE_doCor,doCor);
+  nv.writeFloat(EE_pdCor,pdCor);
+  nv.writeFloat(EE_altCor,altCor);
+  nv.writeFloat(EE_azmCor,azmCor);
 }
 
 // Status
@@ -609,21 +609,21 @@ void TGeoAlign::init() {
 
 // remember the alignment between sessions
 void TGeoAlign::readCoe() {
-  dfCor=EEPROM_readFloat(EE_dfCor);  // dfCor is ffCor for fork mounts
-  tfCor=EEPROM_readFloat(EE_tfCor);
-  doCor=EEPROM_readFloat(EE_doCor);
-  pdCor=EEPROM_readFloat(EE_pdCor);
-  altCor=EEPROM_readFloat(EE_altCor);
-  azmCor=EEPROM_readFloat(EE_azmCor);
+  dfCor=nv.readFloat(EE_dfCor);  // dfCor is ffCor for fork mounts
+  tfCor=nv.readFloat(EE_tfCor);
+  doCor=nv.readFloat(EE_doCor);
+  pdCor=nv.readFloat(EE_pdCor);
+  altCor=nv.readFloat(EE_altCor);
+  azmCor=nv.readFloat(EE_azmCor);
 }
 
 void TGeoAlign::writeCoe() {
-  EEPROM_writeFloat(EE_dfCor,dfCor);  // dfCor is ffCor for fork mounts
-  EEPROM_writeFloat(EE_tfCor,tfCor);
-  EEPROM_writeFloat(EE_doCor,doCor);
-  EEPROM_writeFloat(EE_pdCor,pdCor);
-  EEPROM_writeFloat(EE_altCor,altCor);
-  EEPROM_writeFloat(EE_azmCor,azmCor);
+  nv.writeFloat(EE_dfCor,dfCor);  // dfCor is ffCor for fork mounts
+  nv.writeFloat(EE_tfCor,tfCor);
+  nv.writeFloat(EE_doCor,doCor);
+  nv.writeFloat(EE_pdCor,pdCor);
+  nv.writeFloat(EE_altCor,altCor);
+  nv.writeFloat(EE_azmCor,azmCor);
 }
 
 // Status

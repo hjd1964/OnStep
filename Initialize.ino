@@ -219,18 +219,6 @@ void Init_Pins() {
 #endif
   pinMode(Axis2StepPin,OUTPUT); 
   pinMode(Axis2DirPin,OUTPUT); 
-#ifdef ROTATOR_ON
-  pinMode(Axis3StepPin,OUTPUT);   // Axis3
-  pinMode(Axis3DirPin,OUTPUT);
-#endif
-#ifdef FOCUSER1_ON
-  pinMode(Axis4StepPin,OUTPUT);   // Axis4
-  pinMode(Axis4DirPin,OUTPUT); 
-#endif
-#ifdef FOCUSER2_ON
-  pinMode(Axis5StepPin,OUTPUT);   // Axis5
-  pinMode(Axis5DirPin,OUTPUT); 
-#endif
 
 // inputs for stepper drivers fault signal
 #ifdef AXIS1_FAULT
@@ -262,38 +250,12 @@ void Init_Pins() {
   pinMode(Axis2_EN,OUTPUT);
   StepperModeTrackingInit();
 
-// initialize and enable/disable the Rotator/Focuser stepper drivers
-#ifdef Axis3_EN
-  pinMode(Axis3_EN,OUTPUT);
-  #ifdef AXIS3_DISABLE
-    digitalWrite(Axis3_EN,AXIS3_DISABLE);
-  #else
-    digitalWrite(Axis3_EN,LOW);
-  #endif
-#endif
-#ifdef Axis4_EN
-  pinMode(Axis4_EN,OUTPUT); 
-  #ifdef AXIS4_DISABLE
-    digitalWrite(Axis4_EN,AXIS4_DISABLE);
-  #else
-    digitalWrite(Axis4_EN,LOW);
-  #endif
-#endif
-#ifdef Axis5_EN
-  pinMode(Axis5_EN,OUTPUT); 
-  #ifdef AXIS5_DISABLE
-    digitalWrite(Axis5_EN,AXIS5_DISABLE);
-  #else
-    digitalWrite(Axis5_EN,LOW);
-  #endif
-#endif
-
 }
 
-void Init_ReadEEPROM_Values() {
+void Init_ReadNV_Values() {
   // get the site information, if a GPS were attached we would use that here instead
-  currentSite=EEPROM.read(EE_currentSite); if (currentSite>3) currentSite=0; // site index is valid?
-  latitude=EEPROM_readFloat(EE_sites+(currentSite)*25+0);
+  currentSite=nv.read(EE_currentSite); if (currentSite>3) currentSite=0; // site index is valid?
+  latitude=nv.readFloat(EE_sites+(currentSite)*25+0);
 
 #ifdef MOUNT_TYPE_ALTAZM
   celestialPoleAxis2=AltAzmDecStartPos;
@@ -304,10 +266,10 @@ void Init_ReadEEPROM_Values() {
   cosLat=cos(latitude/Rad);
   sinLat=sin(latitude/Rad);
   if (latitude>0) defaultDirAxis1 = defaultDirAxis1NCPInit; else defaultDirAxis1 = defaultDirAxis1SCPInit;
-  longitude=EEPROM_readFloat(EE_sites+(currentSite)*25+4);
-  timeZone=EEPROM.read(EE_sites+(currentSite)*25+8)-128;
+  longitude=nv.readFloat(EE_sites+(currentSite)*25+4);
+  timeZone=nv.read(EE_sites+(currentSite)*25+8)-128;
   timeZone=decodeTimeZone(timeZone);
-  EEPROM_readString(EE_sites+(currentSite)*25+9,siteName);
+  nv.readString(EE_sites+(currentSite)*25+9,siteName);
 
   // update starting coordinates to reflect NCP or SCP polar home position
   startAxis1 = celestialPoleAxis1*(long)StepsPerDegreeAxis1;
@@ -324,8 +286,8 @@ void Init_ReadEEPROM_Values() {
   sei();
   
   // get date and time from EEPROM, start keeping time
-  JD=EEPROM_readFloat(EE_JD);
-  LMT=EEPROM_readFloat(EE_LMT);
+  JD=nv.readFloat(EE_JD);
+  LMT=nv.readFloat(EE_LMT);
 
   // get the RTC (if present) ready
   urtc.init();
@@ -337,8 +299,8 @@ void Init_ReadEEPROM_Values() {
 
   // get the minutes past meridian east/west
 #ifdef MOUNT_TYPE_GEM
-  minutesPastMeridianE=round(((EEPROM.read(EE_dpmE)-128)*60.0)/15.0); if (abs(minutesPastMeridianE)>180) minutesPastMeridianE=60;
-  minutesPastMeridianW=round(((EEPROM.read(EE_dpmW)-128)*60.0)/15.0); if (abs(minutesPastMeridianW)>180) minutesPastMeridianW=60;
+  minutesPastMeridianE=round(((nv.read(EE_dpmE)-128)*60.0)/15.0); if (abs(minutesPastMeridianE)>180) minutesPastMeridianE=60;
+  minutesPastMeridianW=round(((nv.read(EE_dpmW)-128)*60.0)/15.0); if (abs(minutesPastMeridianW)>180) minutesPastMeridianW=60;
 #endif
   // override if specified in Config.h
 #ifdef MinutesPastMeridianE
@@ -349,58 +311,50 @@ void Init_ReadEEPROM_Values() {
 #endif
   
   // get the min. and max altitude
-  minAlt=EEPROM.read(EE_minAlt)-128;
-  maxAlt=EEPROM.read(EE_maxAlt);
+  minAlt=nv.read(EE_minAlt)-128;
+  maxAlt=nv.read(EE_maxAlt);
 #ifdef MOUNT_TYPE_ALTAZM
   if (maxAlt>87) maxAlt=87;
 #endif
 
   // get the backlash amounts
-  backlashAxis2=EEPROM_readInt(EE_backlashAxis2);
-  backlashAxis1=EEPROM_readInt(EE_backlashAxis1);
+  backlashAxis2=nv.readInt(EE_backlashAxis2);
+  backlashAxis1=nv.readInt(EE_backlashAxis1);
   
   // get the PEC status
-  pecStatus  =EEPROM.read(EE_pecStatus);
-  pecRecorded=EEPROM.read(EE_pecRecorded); if (!pecRecorded) pecStatus=IgnorePEC;
-  for (int i=0; i<PECBufferSize; i++) pecBuffer[i]=EEPROM.read(EE_pecTable+i);
-  wormSensePos=EEPROM_readLong(EE_wormSensePos);
+  pecStatus  =nv.read(EE_pecStatus);
+  pecRecorded=nv.read(EE_pecRecorded); if (!pecRecorded) pecStatus=IgnorePEC;
+  for (int i=0; i<PECBufferSize; i++) pecBuffer[i]=nv.read(EE_pecTable+i);
+  wormSensePos=nv.readLong(EE_wormSensePos);
 #ifdef PEC_SENSE_OFF
   wormSensePos=0;
   pecStatus=IgnorePEC;
 #endif
   
   // get the Park status
-  parkSaved=EEPROM.read(EE_parkSaved);
-  parkStatus=EEPROM.read(EE_parkStatus);
+  parkSaved=nv.read(EE_parkSaved);
+  parkStatus=nv.read(EE_parkStatus);
 
   // get the pulse-guide rate
-  currentPulseGuideRate=EEPROM.read(EE_pulseGuideRate); if (currentPulseGuideRate>GuideRate1x) currentPulseGuideRate=GuideRate1x;
+  currentPulseGuideRate=nv.read(EE_pulseGuideRate); if (currentPulseGuideRate>GuideRate1x) currentPulseGuideRate=GuideRate1x;
 
   // get the Goto rate and constrain values to the limits (1/2 to 2X the MaxRate,) maxRate is in 16MHz clocks but stored in micro-seconds
-  maxRate=EEPROM_readInt(EE_maxRate)*16;
+  maxRate=nv.readInt(EE_maxRate)*16;
   if (maxRate<(MaxRate/2L)*16L) maxRate=(MaxRate/2L)*16L;
   if (maxRate>(MaxRate*2L)*16L) maxRate=(MaxRate*2L)*16L;
 #if !defined(RememberMaxRate_ON) && !defined(REMEMBER_MAX_RATE_ON)
-  if (maxRate!=MaxRate*16L) { maxRate=MaxRate*16L; EEPROM_writeInt(EE_maxRate,(int)(maxRate/16L)); }
+  if (maxRate!=MaxRate*16L) { maxRate=MaxRate*16L; nv.writeInt(EE_maxRate,(int)(maxRate/16L)); }
 #endif
   SetAccelerationRates(maxRate); // set the new acceleration rate
 
   // get autoMeridianFlip
 #if defined(MOUNT_TYPE_GEM) && defined(REMEMBER_AUTO_MERIDIAN_FLIP_ON)
-  autoMeridianFlip=EEPROM.read(EE_autoMeridianFlip);
+  autoMeridianFlip=nv.read(EE_autoMeridianFlip);
 #endif
 
   // get meridian flip pause at home
 #if defined(MOUNT_TYPE_GEM) && defined(REMEMBER_PAUSE_HOME_ON)
-  pauseHome=EEPROM.read(EE_pauseHome);
-#endif
-
-  // read focuser positions
-#ifdef FOCUSER1_ON
-  Focuser1RecallPos();
-#endif
-#ifdef FOCUSER2_ON
-  Focuser2RecallPos();
+  pauseHome=nv.read(EE_pauseHome);
 #endif
 
   // set the default guide rate, 24x sidereal
@@ -408,74 +362,74 @@ void Init_ReadEEPROM_Values() {
   enableGuideRate(GuideRate24x);
 }
 
-void Init_EEPROM_Values() {
+void Init_WriteNV_Values() {
   // EEPROM automatic initialization
   long autoInitKey = initKey;
   long thisAutoInitKey;
-  if (INIT_KEY) EEPROM_writeLong(EE_autoInitKey,autoInitKey);
-  thisAutoInitKey=EEPROM_readLong(EE_autoInitKey);
+  if (INIT_KEY) nv.writeLong(EE_autoInitKey,autoInitKey);
+  thisAutoInitKey=nv.readLong(EE_autoInitKey);
   if (autoInitKey!=thisAutoInitKey) {
     // init the site information, lat/long/tz/name
-    EEPROM.write(EE_currentSite,0);
+    nv.write(EE_currentSite,0);
     latitude=0; longitude=0;
     for (int l=0; l<4; l++) {
-      EEPROM_writeFloat(EE_sites+(l)*25+0,latitude);
-      EEPROM_writeFloat(EE_sites+(l)*25+4,longitude);
-      EEPROM.write(EE_sites+(l)*25+8,128);
-      EEPROM.write(EE_sites+(l)*25+9,0);
+      nv.writeFloat(EE_sites+(l)*25+0,latitude);
+      nv.writeFloat(EE_sites+(l)*25+4,longitude);
+      nv.write(EE_sites+(l)*25+8,128);
+      nv.write(EE_sites+(l)*25+9,0);
     }
   
     // init the date and time January 1, 2013. 0 hours LMT
     JD=2456293.5;
     LMT=0.0;
-    EEPROM_writeFloat(EE_JD,JD);
-    EEPROM_writeFloat(EE_LMT,LMT);
+    nv.writeFloat(EE_JD,JD);
+    nv.writeFloat(EE_LMT,LMT);
   
     // init the minutes past meridian east/west
-    EEPROM.write(EE_dpmE,round((minutesPastMeridianE*15.0)/60.0)+128);
-    EEPROM.write(EE_dpmW,round((minutesPastMeridianW*15.0)/60.0)+128);
+    nv.write(EE_dpmE,round((minutesPastMeridianE*15.0)/60.0)+128);
+    nv.write(EE_dpmW,round((minutesPastMeridianW*15.0)/60.0)+128);
 
     // init the min and max altitude
     minAlt=-10;
     maxAlt=80;
-    EEPROM.write(EE_minAlt,minAlt+128);
-    EEPROM.write(EE_maxAlt,maxAlt);
+    nv.write(EE_minAlt,minAlt+128);
+    nv.write(EE_maxAlt,maxAlt);
   
     // init (clear) the backlash amounts
-    EEPROM_writeInt(EE_backlashAxis2,0);
-    EEPROM_writeInt(EE_backlashAxis1,0);
+    nv.writeInt(EE_backlashAxis2,0);
+    nv.writeInt(EE_backlashAxis1,0);
   
     // init the PEC status, clear the index and buffer
-    EEPROM.write(EE_pecStatus,IgnorePEC);
-    EEPROM.write(EE_pecRecorded,false);
-    for (int l=0; l<PECBufferSize; l++) EEPROM.write(EE_pecTable+l,128);
+    nv.write(EE_pecStatus,IgnorePEC);
+    nv.write(EE_pecRecorded,false);
+    for (int l=0; l<PECBufferSize; l++) nv.write(EE_pecTable+l,128);
     wormSensePos=0;
-    EEPROM_writeLong(EE_wormSensePos,wormSensePos);
+    nv.writeLong(EE_wormSensePos,wormSensePos);
     
     // init the Park status
-    EEPROM.write(EE_parkSaved,false);
-    EEPROM.write(EE_parkStatus,NotParked);
+    nv.write(EE_parkSaved,false);
+    nv.write(EE_parkStatus,NotParked);
   
     // init the pulse-guide rate
-    EEPROM.write(EE_pulseGuideRate,GuideRate1x);
+    nv.write(EE_pulseGuideRate,GuideRate1x);
     
     // init the default maxRate
     if (maxRate<2L*16L) maxRate=2L*16L; if (maxRate>10000L*16L) maxRate=10000L*16L;
-    EEPROM_writeInt(EE_maxRate,(int)(maxRate/16L));
+    nv.writeInt(EE_maxRate,(int)(maxRate/16L));
 
     // init autoMeridianFlip
-    EEPROM.write(EE_autoMeridianFlip,autoMeridianFlip);
+    nv.write(EE_autoMeridianFlip,autoMeridianFlip);
 
     // init the sidereal tracking rate, use this once - then issue the T+ and T- commands to fine tune
     // 1/16uS resolution timer, ticks per sidereal second
-    EEPROM_writeLong(EE_siderealInterval,siderealInterval);
+    nv.writeLong(EE_siderealInterval,siderealInterval);
 
     // set default focuser positions at zero
-    EEPROM_writeLong(EE_posAxis4,0L);
-    EEPROM_writeLong(EE_posAxis5,0L);
+    nv.writeLong(EE_posAxis4,0L);
+    nv.writeLong(EE_posAxis5,0L);
 
     // finally, stop the init from happening again
-    EEPROM_writeLong(EE_autoInitKey,autoInitKey);
+    nv.writeLong(EE_autoInitKey,autoInitKey);
     
     // clear the pointing model
     saveAlignModel();

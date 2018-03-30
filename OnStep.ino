@@ -41,7 +41,7 @@
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  1
 #define FirmwareVersionMinor  4
-#define FirmwareVersionPatch  "e"     // for example major.minor patch: 1.3c
+#define FirmwareVersionPatch  "f"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 2       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
@@ -49,6 +49,9 @@
 #include "Constants.h"
 
 #include "src/HAL/HAL.h"
+
+#include "NV.h"
+nvs nv;
 
 #include "Config.Classic.h"
 #include "Config.MiniPCB.h"
@@ -77,11 +80,26 @@ tmc2130 tmcAxis1(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0);
 tmc2130 tmcAxis2(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
 #endif
 
+#ifdef ROTATOR_ON
+  #include "Rotator.h"
+  rotator rot;
+#endif
+
+#if defined(FOCUSER1_ON) || defined(FOCUSER2_ON)
+  #include "Focuser.h"
+  #ifdef FOCUSER1_ON
+    focuser foc1;
+  #endif
+  #ifdef FOCUSER2_ON
+    focuser foc2;
+  #endif
+#endif
+
 // use an RTC (Real Time Clock) if present
 #include "RTCw.h"
 rtcw urtc;
 
-// forces initialialization of a host of settings in EEPROM. OnStep does this automatically, most likely, you will want to leave this alone
+// forces initialialization of a host of settings in nv. OnStep does this automatically, most likely, you will want to leave this alone
 #define INIT_KEY false    // set to true to keep automatic initilization from happening.  This is a one-time operation... upload to the Arduino, then set to false and upload again
 #define initKey 915307548 // unique identifier for the current initialization format, do not change
 
@@ -93,10 +111,10 @@ void setup() {
   Init_Pins();
 
   // if this is the first startup set EEPROM to defaults
-  Init_EEPROM_Values();
+  Init_WriteNV_Values();
   
   // this sets up the sidereal timer and tracking rates
-  siderealInterval=EEPROM_readLong(EE_siderealInterval); // the number of 16MHz clocks in one sidereal second (this is scaled to actual processor speed)
+  siderealInterval=nv.readLong(EE_siderealInterval); // the number of 16MHz clocks in one sidereal second (this is scaled to actual processor speed)
   SiderealRate=siderealInterval/StepsPerSecondAxis1;
   timerRateAxis1=SiderealRate;
   timerRateAxis2=SiderealRate;
@@ -107,7 +125,7 @@ void setup() {
   timerRateBacklashAxis2=(SiderealRate/BacklashTakeupRate)*timerRateRatio;
 
   // now read any saved values from EEPROM into varaibles to restore our last state
-  Init_ReadEEPROM_Values();
+  Init_ReadNV_Values();
 
   SetTrackingRate(default_tracking_rate);
   SetDeltaTrackingRate();
@@ -135,19 +153,50 @@ void setup() {
   EnableStepperDrivers();
 #endif
 
+  // start focusers if present
+#ifdef FOCUSER1_ON
+  foc1.init(Axis4StepPin,Axis4DirPin,Axis4_EN,EE_posAxis4,MaxRateAxis4,StepsPerMicrometerAxis4);
+  foc1.setMin(MinAxis4*1000.0);
+  foc1.setMax(MaxAxis4*1000.0);
+  #ifdef AXIS4_REVERSE_ON
+    foc1.setReverseState(HIGH);
+  #endif
+  #ifdef AXIS4_DISABLE
+    foc1.setDisableState(AXIS4_DISABLE);
+    foc1.powerDownActive(true);
+  #endif
+#endif
+
+#ifdef FOCUSER2_ON
+  foc2.init(Axis5StepPin,Axis5DirPin,Axis5_EN,EE_posAxis5,MaxRateAxis5,StepsPerMicrometerAxis5);
+  foc2.setMin(MinAxis5*1000.0);
+  foc2.setMax(MaxAxis5*1000.0);
+  #ifdef AXIS5_REVERSE_ON
+    foc2.setReverseState(HIGH);
+  #endif
+  #ifdef AXIS5_DISABLE
+    foc2.setDisableState(AXIS4_DISABLE);
+    foc2.powerDownActive(true);
+  #endif
+#endif
+
+#ifdef ROTATOR_ON
+  rot.init(Axis3StepPin,Axis3DirPin,Axis3_EN,MaxRateAxis3,StepsPerDegreeAxis3);
+  rot.setMin(MinAxis3);
+  rot.setMax(MaxAxis3);
+  #ifdef AXIS3_REVERSE_ON
+    rot.setReverseState(HIGH);
+  #endif
+  #ifdef AXIS3_DISABLE
+    rot.setDisableState(AXIS3_DISABLE);
+    rot.powerDownActive(true);
+  #endif
+#endif
+
   // prep counters (for keeping time in main loop)
   cli(); siderealTimer=lst; guideSiderealTimer=lst; PecSiderealTimer=lst; sei();
   housekeepingTimer=millis()+1000UL; 
   last_loop_micros=micros();
-#ifdef ROTATOR_ON
-  axis3Ms=millis()+(unsigned long)MaxRateAxis3;
-#endif
-#ifdef FOCUSER1_ON
-  axis4Ms=millis()+(unsigned long)MaxRateAxis4;
-#endif
-#ifdef FOCUSER2_ON
-  axis5Ms=millis()+(unsigned long)MaxRateAxis5;
-#endif
 }
 
 void loop() {
@@ -174,7 +223,7 @@ void loop() {
     if (pecAutoRecord>0) {
       // write PEC table to EEPROM, should do several hundred bytes/second
       pecAutoRecord--;
-      EEPROM.update(EE_pecTable+pecAutoRecord,pecBuffer[pecAutoRecord]);
+      nv.update(EE_pecTable+pecAutoRecord,pecBuffer[pecAutoRecord]);
     }
 #endif
 
@@ -202,19 +251,19 @@ void loop() {
       }
     }
 
-#if defined(ROTATOR_ON) && defined(MOUNT_TYPE_ALTAZM)
-    RotatorMove();
+    // ROTATOR/FOCUSERS, MOVE THE TARGET
+#if defined(ROTATOR_ON)
+    rot.move(trackingState==TrackingSidereal);
 #endif
 #if defined(FOCUSER1_ON)
-    Focuser1Move();
+    foc1.move();
 #endif
 #if defined(FOCUSER2_ON)
-    Focuser2Move();
+    foc2.move();
 #endif
 
-    // figure out the current Altitude
+    // CALCULATE SOME TRACKING RATES, ETC.
     if (lst%3==0) do_fastalt_calc();
-
 #ifdef MOUNT_TYPE_ALTAZM
     // figure out the current Alt/Azm tracking rates
     if (lst%3!=0) do_altAzmRate_calc();
@@ -266,15 +315,13 @@ void loop() {
 
   // ROTATOR/DEROTATOR/FOCUSERS ------------------------------------------------------------------------
 #ifdef ROTATOR_ON
-  RotatorFollow();
+  rot.follow();
 #endif
-
 #ifdef FOCUSER1_ON
-  Focuser1Follow();
+  foc1.follow( (trackingState==TrackingMoveTo) || guideDirAxis1 || guideDirAxis2 );
 #endif
-
 #ifdef FOCUSER2_ON
-  Focuser2Follow();
+  foc2.follow( (trackingState==TrackingMoveTo) || guideDirAxis1 || guideDirAxis2 );
 #endif
   
   // WORKLOAD MONITORING -------------------------------------------------------------------------------
@@ -289,7 +336,9 @@ void loop() {
     housekeepingTimer=tempMs+1000UL;
 
 #if defined(ROTATOR_ON) && defined(MOUNT_TYPE_ALTAZM)
-    DeRotate();
+    // calculate and set the derotation rate as required
+    double h,d; getApproxEqu(&h,&d,true);
+    if (trackingState==TrackingSidereal) rot.derotate(h,d);
 #endif
 
     // adjust tracking rate for Alt/Azm mounts

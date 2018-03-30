@@ -75,7 +75,7 @@ libRec_t Library::readRec(int address)
 {
   libRec_t work;
   int l=address*rec_size+byteMin;
-  for (int m=0;m<16;m++) work.libRecBytes[m]=EEPROM.read(l+m);
+  for (int m=0;m<16;m++) work.libRecBytes[m]=nv.read(l+m);
   return work;
 }
 
@@ -83,7 +83,7 @@ void Library::writeRec(int address, libRec_t data)
 {
   if ((address>=0) && (address<recMax)) {
     int l=address*rec_size+byteMin;
-    for (int m=0;m<16;m++) EEPROM.write(l+m,data.libRecBytes[m]);
+    for (int m=0;m<16;m++) nv.write(l+m,data.libRecBytes[m]);
   }
 }
 
@@ -92,7 +92,7 @@ void Library::clearRec(int address)
   if ((address>=0) && (address<recMax)) {
     int l=address*rec_size+byteMin;
     int code=15<<4;
-    EEPROM.write(l+11,(byte)code); // catalog code 15 = deleted
+    nv.write(l+11,(byte)code); // catalog code 15 = deleted
   }
 }
 

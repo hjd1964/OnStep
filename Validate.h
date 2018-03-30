@@ -240,52 +240,6 @@ boolean axis1Enabled = false;
   #define ENABLE_AXIS2 LOW
 #endif
 boolean axis2Enabled = false;
-#ifdef AXIS3_DISABLE
-  #if AXIS3_DISABLE==HIGH
-    #define AXIS3_ENABLE LOW
-  #endif
-  #if AXIS3_DISABLE==LOW
-    #define AXIS3_ENABLE HIGH
-  #endif
-#endif
-#ifdef AXIS4_DISABLE
-  #if AXIS4_DISABLE==HIGH
-    #define AXIS4_ENABLE LOW
-  #endif
-  #if AXIS4_DISABLE==LOW
-    #define AXIS4_ENABLE HIGH
-  #endif
-#endif
-#ifdef AXIS5_DISABLE
-  #if AXIS5_DISABLE==HIGH
-    #define AXIS5_ENABLE LOW
-  #endif
-  #if AXIS5_DISABLE==LOW
-    #define AXIS5_ENABLE HIGH
-  #endif
-#endif
-
-#ifdef AXIS3_REVERSE_ON
-  #define AXIS3_FORWARD LOW
-  #define AXIS3_REVERSE HIGH
-#else
-  #define AXIS3_FORWARD HIGH
-  #define AXIS3_REVERSE LOW
-#endif
-#ifdef AXIS4_REVERSE_ON
-  #define AXIS4_FORWARD LOW
-  #define AXIS4_REVERSE HIGH
-#else
-  #define AXIS4_FORWARD HIGH
-  #define AXIS4_REVERSE LOW
-#endif
-#ifdef AXIS5_REVERSE_ON
-  #define AXIS5_FORWARD LOW
-  #define AXIS5_REVERSE HIGH
-#else
-  #define AXIS5_FORWARD HIGH
-  #define AXIS5_REVERSE LOW
-#endif
 
 // -----------------------------------------------------------------------------------
 // stepper driver mode setup

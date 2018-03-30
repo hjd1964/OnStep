@@ -12,14 +12,14 @@ boolean setPark() {
     long parkPosAxis1=targetAxis1.part.m+indexAxis1Steps;
     long parkPosAxis2=targetAxis2.part.m+indexAxis2Steps;
     sei();
-    EEPROM_writeLong(EE_posAxis1,parkPosAxis1);
-    EEPROM_writeLong(EE_posAxis2,parkPosAxis2);
+    nv.writeLong(EE_posAxis1,parkPosAxis1);
+    nv.writeLong(EE_posAxis2,parkPosAxis2);
 
     // and remember what side of the pier we're on
     // if no pier side is set use the default
-    if (pierSide==PierSideNone) EEPROM.write(EE_pierSide,PierSideEast); else EEPROM.write(EE_pierSide,pierSide);
+    if (pierSide==PierSideNone) nv.write(EE_pierSide,PierSideEast); else nv.write(EE_pierSide,pierSide);
     parkSaved=true;
-    EEPROM.write(EE_parkSaved,parkSaved);
+    nv.write(EE_parkSaved,parkSaved);
 
     // and remember what the index corrections are too (etc.)
     saveAlignModel();
@@ -34,7 +34,7 @@ boolean setPark() {
 byte park() {
   int f=validateGoto(); if (f==5) f=8; if (f!=0) return f; // goto allowed?
   
-  parkSaved=EEPROM.read(EE_parkSaved);
+  parkSaved=nv.read(EE_parkSaved);
   if (parkSaved) {
     // stop tracking
     abortTrackingState=trackingState;
@@ -45,17 +45,17 @@ byte park() {
     DisablePec();
     pecStatus=IgnorePEC;
     // save the worm sense position
-    EEPROM_writeLong(EE_wormSensePos,wormSensePos);
+    nv.writeLong(EE_wormSensePos,wormSensePos);
 
     // record our park status
     int lastParkStatus=parkStatus;
     parkStatus=Parking;
-    EEPROM.write(EE_parkStatus,parkStatus);
+    nv.write(EE_parkStatus,parkStatus);
     
     // get the position we're supposed to park at
-    long a1=EEPROM_readLong(EE_posAxis1)-indexAxis1Steps;
-    long a2=EEPROM_readLong(EE_posAxis2)-indexAxis2Steps;
-    byte gotoPierSide=EEPROM.read(EE_pierSide);
+    long a1=nv.readLong(EE_posAxis1)-indexAxis1Steps;
+    long a2=nv.readLong(EE_posAxis2)-indexAxis2Steps;
+    byte gotoPierSide=nv.read(EE_pierSide);
 
     // now, goto this target coordinate
     int gotoStatus=goTo(a1,a2,a1,a2,gotoPierSide);
@@ -64,7 +64,7 @@ byte park() {
     if (gotoStatus!=0) {
       trackingState=abortTrackingState; // resume tracking state
       parkStatus=lastParkStatus;        // revert the park status
-      EEPROM.write(EE_parkStatus,parkStatus);
+      nv.write(EE_parkStatus,parkStatus);
     }
 
     return gotoStatus;
@@ -75,11 +75,11 @@ byte park() {
 void parkFinish() {
   if (parkStatus!=ParkFailed) {
     // success, we're parked
-    parkStatus=Parked; EEPROM.write(EE_parkStatus,parkStatus);
+    parkStatus=Parked; nv.write(EE_parkStatus,parkStatus);
   
     // trueAxisn is used to translate steps to instrument coords and changes with the pier side
-    EEPROM_writeLong(EE_trueAxis1,trueAxis1);
-    EEPROM_writeLong(EE_trueAxis2,trueAxis2);
+    nv.writeLong(EE_trueAxis1,trueAxis1);
+    nv.writeLong(EE_trueAxis2,trueAxis2);
   
     // store the pointing model
     saveAlignModel();
@@ -173,8 +173,8 @@ boolean unpark() {
 #else
   if ((parkStatus==Parked) || ((atHome) && (parkStatus==NotParked))) {
 #endif
-    parkStatus=EEPROM.read(EE_parkStatus);
-    parkSaved =EEPROM.read(EE_parkSaved);
+    parkStatus=nv.read(EE_parkStatus);
+    parkSaved =nv.read(EE_parkSaved);
     parkStatus=Parked;
     if (parkStatus==Parked) {
       if (parkSaved) {
@@ -186,10 +186,10 @@ boolean unpark() {
 
         // where we were supposed to park
         cli();
-        targetAxis1.part.m=EEPROM_readLong(EE_posAxis1)-indexAxis1Steps; targetAxis1.part.f=0;
-        targetAxis2.part.m=EEPROM_readLong(EE_posAxis2)-indexAxis2Steps; targetAxis2.part.f=0;
-        trueAxis1=EEPROM_readLong(EE_trueAxis1);
-        trueAxis2=EEPROM_readLong(EE_trueAxis2);
+        targetAxis1.part.m=nv.readLong(EE_posAxis1)-indexAxis1Steps; targetAxis1.part.f=0;
+        targetAxis2.part.m=nv.readLong(EE_posAxis2)-indexAxis2Steps; targetAxis2.part.f=0;
+        trueAxis1=nv.readLong(EE_trueAxis1);
+        trueAxis2=nv.readLong(EE_trueAxis2);
         sei();
 
         // adjust to the actual park position
@@ -202,7 +202,7 @@ boolean unpark() {
         sei();
 
         // see what side of the pier we're on
-        pierSide=EEPROM.read(EE_pierSide);
+        pierSide=nv.read(EE_pierSide);
         if (pierSide==PierSideWest) defaultDirAxis2 = defaultDirAxis2WInit; else defaultDirAxis2 = defaultDirAxis2EInit;
 
         // set Meridian Flip behaviour to match mount type
@@ -214,15 +214,15 @@ boolean unpark() {
         
         // update our status, we're not parked anymore
         parkStatus=NotParked;
-        EEPROM.write(EE_parkStatus,parkStatus);
+        nv.write(EE_parkStatus,parkStatus);
 
         // start tracking
         trackingState=TrackingSidereal;
         EnableStepperDrivers();
 
         // get PEC status
-        pecStatus  =EEPROM.read(EE_pecStatus);
-        pecRecorded=EEPROM.read(EE_pecRecorded); if (!pecRecorded) pecStatus=IgnorePEC;
+        pecStatus  =nv.read(EE_pecStatus);
+        pecRecorded=nv.read(EE_pecRecorded); if (!pecRecorded) pecStatus=IgnorePEC;
 
         return true;
       };
@@ -235,8 +235,8 @@ boolean saveAlignModel() {
   // and store our corrections
   GeoAlign.writeCoe();
   cli();
-  EEPROM_writeFloat(EE_indexAxis1,indexAxis1);
-  EEPROM_writeFloat(EE_indexAxis2,indexAxis2);
+  nv.writeFloat(EE_indexAxis1,indexAxis1);
+  nv.writeFloat(EE_indexAxis2,indexAxis2);
   sei();
   return true;
 }
@@ -244,9 +244,9 @@ boolean saveAlignModel() {
 boolean loadAlignModel() {
   // get align/corrections
   cli();
-  indexAxis1=EEPROM_readFloat(EE_indexAxis1);
+  indexAxis1=nv.readFloat(EE_indexAxis1);
   indexAxis1Steps=(long)(indexAxis1*(double)StepsPerDegreeAxis1);
-  indexAxis2=EEPROM_readFloat(EE_indexAxis2);
+  indexAxis2=nv.readFloat(EE_indexAxis2);
   indexAxis2Steps=(long)(indexAxis2*(double)StepsPerDegreeAxis2);
   sei();
   GeoAlign.readCoe();

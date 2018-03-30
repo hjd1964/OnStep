@@ -164,34 +164,6 @@ int    minAlt;                                     // the minimum altitude, in d
 int    maxAlt;                                     // the maximum altitude, in degrees, for goTo's (to keep the telescope tube away from the mount/tripod)
 bool   autoMeridianFlip = false;                   // automatically do a meridian flip and continue when we hit the MinutesPastMeridianW
 
-// Globals for rotator/de-rotator ------------------------------------------------------------------------------------------
-#ifdef ROTATOR_ON
-bool deRotate        = false;
-bool deRotateReverse = false;
-long posAxis3        = 0;                          // rotator position in steps
-fixed_t targetAxis3;                               // rotator goto position in steps
-fixed_t amountRotateAxis3;                         // rotator movement per 0.01/s
-long axis3Increment  = 1;                          // rotator increment for manual control
-unsigned long axis3Ms=0;
-#endif
-
-// Globals for focusers ----------------------------------------------------------------------------------------------------
-#ifdef FOCUSER1_ON
-long posAxis4        = 0;                          // focuser position in steps
-fixed_t targetAxis4;                               // focuser goto position in steps
-fixed_t amountMoveAxis4;                           // focuser movement per 0.01/s
-long axis4Increment  = 1;                          // focuser increment for manual control
-unsigned long axis4Ms=0;
-#endif
-
-#ifdef FOCUSER2_ON
-long posAxis5        = 0;                          // focuser position in steps
-fixed_t targetAxis5;                               // focuser goto position in steps
-fixed_t amountMoveAxis5;                           // focuser movement per 0.01/s
-long axis5Increment  = 1;                          // focuser increment for manual control
-unsigned long axis5Ms=0;
-#endif
-
 // Stepper driver enable/disable and direction -----------------------------------------------------------------------------
 
 #define defaultDirAxis2EInit   1

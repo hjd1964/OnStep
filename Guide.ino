@@ -132,7 +132,7 @@ bool customGuideRateAxis2(double rate, long guideDuration) {
 // sets the rates for guide commands
 void setGuideRate(int g) {
   currentGuideRate=g;
-  if ((g<=GuideRate1x) && (currentPulseGuideRate!=g)) { currentPulseGuideRate=g; EEPROM.update(EE_pulseGuideRate,g); }
+  if ((g<=GuideRate1x) && (currentPulseGuideRate!=g)) { currentPulseGuideRate=g; nv.update(EE_pulseGuideRate,g); }
   guideTimerCustomRateAxis1=0.0;
   guideTimerCustomRateAxis2=0.0;
 }
