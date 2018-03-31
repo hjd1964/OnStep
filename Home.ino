@@ -35,15 +35,15 @@ boolean setHome() {
  
   // not parked, but don't wipe the park position if it's saved - we can still use it
   parkStatus=NotParked;
-  EEPROM.write(EE_parkStatus,parkStatus);
+  nv.write(EE_parkStatus,parkStatus);
   
   // reset PEC, unless we have an index to recover from this
-  pecRecorded=EEPROM.read(EE_pecRecorded);
+  pecRecorded=nv.read(EE_pecRecorded);
   #ifdef PEC_SENSE_OFF
     pecStatus=IgnorePEC;
-    EEPROM.write(EE_pecStatus,pecStatus);
+    nv.write(EE_pecStatus,pecStatus);
   #else
-    pecStatus=EEPROM.read(EE_pecStatus);
+    pecStatus=nv.read(EE_pecStatus);
   #endif
   if (!pecRecorded) pecStatus=IgnorePEC;
 

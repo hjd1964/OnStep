@@ -121,7 +121,7 @@ void moveTo() {
     if (parkStatus==Parking) {
       lastTrackingState=abortTrackingState;
       parkStatus=NotParked;
-      EEPROM.write(EE_parkStatus,parkStatus);
+      nv.write(EE_parkStatus,parkStatus);
     } else
     if (homeMount) {
       lastTrackingState=abortTrackingState;
@@ -246,8 +246,8 @@ void moveTo() {
         SiderealClockSetInterval(siderealInterval);
 
         // validate location
-        byte parkPierSide=EEPROM.read(EE_pierSide);
-        if ((blAxis1!=0) || (blAxis2!=0) || (posAxis1!=(long)targetAxis1.part.m) || (posAxis2!=(long)targetAxis2.part.m) || (pierSide!=parkPierSide) || (i!=1)) { parkStatus=ParkFailed; EEPROM.write(EE_parkStatus,parkStatus); }
+        byte parkPierSide=nv.read(EE_pierSide);
+        if ((blAxis1!=0) || (blAxis2!=0) || (posAxis1!=(long)targetAxis1.part.m) || (posAxis2!=(long)targetAxis2.part.m) || (pierSide!=parkPierSide) || (i!=1)) { parkStatus=ParkFailed; nv.write(EE_parkStatus,parkStatus); }
 
         // sound park done
         soundAlert();
