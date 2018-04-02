@@ -213,6 +213,11 @@ void loop() {
   } else DisablePec();
 #endif
 
+#ifdef HOME_SENSE_ON
+  // AUTOMATIC HOMING ----------------------------------------------------------------------------------
+  checkHome();
+#endif
+
   // 1/100 SECOND TIMED --------------------------------------------------------------------------------
   cli(); long tempLst=lst; sei();
   if (tempLst!=siderealTimer) {
@@ -273,34 +278,36 @@ void loop() {
 #endif
 
     // SAFETY CHECKS
-    // support for limit switch(es)
+    if (safetyLimitsOn) {
+      // support for limit switch(es)
 #ifdef LIMIT_SENSE_ON
-    byte ls1=digitalRead(LimitPin); delayMicroseconds(50); byte ls2=digitalRead(LimitPin);
-    if ((ls1==LOW) && (ls2==LOW)) { lastError=ERR_LIMIT_SENSE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
+      byte ls1=digitalRead(LimitPin); delayMicroseconds(50); byte ls2=digitalRead(LimitPin);
+      if ((ls1==LOW) && (ls2==LOW)) { lastError=ERR_LIMIT_SENSE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
 #endif
-    // check for fault signal, stop any slew or guide and turn tracking off
+      // check for fault signal, stop any slew or guide and turn tracking off
 #ifdef AXIS1_FAULT
   #if AXIS1_FAULT==LOW
-    faultAxis1=(digitalRead(Axis1_FAULT)==LOW);
+      faultAxis1=(digitalRead(Axis1_FAULT)==LOW);
   #endif
   #if AXIS1_FAULT==HIGH
-    faultAxis1=(digitalRead(Axis1_FAULT)==HIGH);
+      faultAxis1=(digitalRead(Axis1_FAULT)==HIGH);
   #endif
   #if AXIS1_FAULT==TMC2130
-    if (lst%2==0) tmcAxis1.error();
+      if (lst%2==0) tmcAxis1.error();
   #endif
 #endif
 #ifdef AXIS2_FAULT
   #if AXIS2_FAULT==LOW
-    faultAxis2=(digitalRead(Axis2_FAULT)==LOW);
+      faultAxis2=(digitalRead(Axis2_FAULT)==LOW);
   #endif
   #if AXIS2_FAULT==HIGH
-    faultAxis2=(digitalRead(Axis2_FAULT)==HIGH);
+      faultAxis2=(digitalRead(Axis2_FAULT)==HIGH);
   #endif
   #if AXIS2_FAULT==TMC2130
-    if (lst%2==1) tmcAxis2.error();
+      if (lst%2==1) tmcAxis2.error();
   #endif
 #endif
+    }
 
     if (faultAxis1 || faultAxis2) { lastError=ERR_MOTOR_FAULT; if (trackingState==TrackingMoveTo) abortSlew=true; else { trackingState=TrackingNone; if (guideDirAxis1) guideDirAxis1='b'; if (guideDirAxis2) guideDirAxis2='b'; } }
     // check altitude overhead limit and horizon limit
@@ -383,33 +390,35 @@ void loop() {
 #endif
 
     // SAFETY CHECKS, keeps mount from tracking past the meridian limit, past the UnderPoleLimit, or past the Dec limits
-    if (meridianFlip!=MeridianFlipNever) {
-      if (pierSide==PierSideWest) {
-        cli(); long p1=posAxis1+indexAxis1Steps; sei();
-        if (p1>(minutesPastMeridianW*(long)StepsPerDegreeAxis1/4L)) {
-          // do an automatic meridian flip and continue if just tracking
-          // checks: enabled && not too far past the meridian (doesn't make sense) && not in inaccessible area between east and west limits && finally that a slew isn't happening
-          if (autoMeridianFlip && (p1<(minutesPastMeridianW*(long)StepsPerDegreeAxis1/4L+(1.0/60.0)*(long)StepsPerDegreeAxis1)) && (p1>(-minutesPastMeridianE*(long)StepsPerDegreeAxis1/4L)) && (trackingState!=TrackingMoveTo)) {
-            double newRA,newDec;
-            getEqu(&newRA,&newDec,false);
-            if (goToEqu(newRA,newDec)) { // returns 0 on success
-              lastError=ERR_MERIDIAN;
-              trackingState=TrackingNone;
+    if (safetyLimitsOn) {
+      if (meridianFlip!=MeridianFlipNever) {
+        if (pierSide==PierSideWest) {
+          cli(); long p1=posAxis1+indexAxis1Steps; sei();
+          if (p1>(minutesPastMeridianW*(long)StepsPerDegreeAxis1/4L)) {
+            // do an automatic meridian flip and continue if just tracking
+            // checks: enabled && not too far past the meridian (doesn't make sense) && not in inaccessible area between east and west limits && finally that a slew isn't happening
+            if (autoMeridianFlip && (p1<(minutesPastMeridianW*(long)StepsPerDegreeAxis1/4L+(1.0/60.0)*(long)StepsPerDegreeAxis1)) && (p1>(-minutesPastMeridianE*(long)StepsPerDegreeAxis1/4L)) && (trackingState!=TrackingMoveTo)) {
+              double newRA,newDec;
+              getEqu(&newRA,&newDec,false);
+              if (goToEqu(newRA,newDec)) { // returns 0 on success
+                lastError=ERR_MERIDIAN;
+                trackingState=TrackingNone;
+              }
+            } else {
+              lastError=ERR_MERIDIAN; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;
             }
-          } else {
-            lastError=ERR_MERIDIAN; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;
           }
         }
-      }
-      if (pierSide==PierSideEast) { cli(); if (posAxis1+indexAxis1Steps>(UnderPoleLimit*15L*(long)StepsPerDegreeAxis1)) { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei(); }
-    } else {
+        if (pierSide==PierSideEast) { cli(); if (posAxis1+indexAxis1Steps>(UnderPoleLimit*15L*(long)StepsPerDegreeAxis1)) { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei(); }
+      } else {
 #ifndef MOUNT_TYPE_ALTAZM
-      // when Fork mounted, ignore pierSide and just stop the mount if it passes the UnderPoleLimit
-      cli(); if (posAxis1+indexAxis1Steps>(UnderPoleLimit*15L*(long)StepsPerDegreeAxis1)) { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
+        // when Fork mounted, ignore pierSide and just stop the mount if it passes the UnderPoleLimit
+        cli(); if (posAxis1+indexAxis1Steps>(UnderPoleLimit*15L*(long)StepsPerDegreeAxis1)) { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
 #else
-      // when Alt/Azm mounted, just stop the mount if it passes MaxAzm
-      cli(); if (posAxis1+indexAxis1Steps>((long)MaxAzm*(long)StepsPerDegreeAxis1)) { lastError=ERR_AZM; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
+        // when Alt/Azm mounted, just stop the mount if it passes MaxAzm
+        cli(); if (posAxis1+indexAxis1Steps>((long)MaxAzm*(long)StepsPerDegreeAxis1)) { lastError=ERR_AZM; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
 #endif
+      }
     }
     // check for exceeding MinDec or MaxDec
 #ifndef MOUNT_TYPE_ALTAZM

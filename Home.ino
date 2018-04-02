@@ -1,10 +1,103 @@
 // -----------------------------------------------------------------------------------
 // Functions related to Homing the mount
 
+#ifdef HOME_SENSE_ON
+enum findHomeModes { FH_OFF,FH_FAST,FH_IDLE,FH_SLOW,FH_DONE };
+volatile findHomeModes findHomeMode=FH_OFF;
+unsigned long findHomeTimeout=0L;
+
+void checkHome() {
+  // check if find home timed out
+  if ((findHomeMode==FH_FAST) || (findHomeMode==FH_SLOW)) {
+    if ((long)(millis()-findHomeTimeout)>0L) {
+      if ((guideDirAxis1=='e') || (guideDirAxis1=='w')) guideDirAxis1='b';
+      if ((guideDirAxis2=='n') || (guideDirAxis2=='s')) guideDirAxis2='b';
+      detachInterrupt(Axis1_HOME);
+      detachInterrupt(Axis2_HOME);
+      safetyLimitsOn=true;
+      lastError=ERR_LIMIT_SENSE;
+      findHomeMode=FH_OFF;
+    }
+  }
+  // we are idle and waiting for a fast guide to stop before the final slow guide to refine the home position
+  if ((findHomeMode==FH_IDLE) && (guideDirAxis1==0) && (guideDirAxis2==0)) {
+    findHomeMode=FH_OFF;
+    goHome(false);
+  }
+  // we are done
+  if ((findHomeMode==FH_DONE) && (guideDirAxis1==0) && (guideDirAxis2==0)) {
+    findHomeMode=FH_OFF;
+    setHome();
+  }
+}
+
+void StopAxis1() {
+  guideDirAxis1='b';
+  detachInterrupt(Axis1_HOME);
+  if ((guideDirAxis2!='n') && (guideDirAxis2!='s')) { safetyLimitsOn=true; if (findHomeMode==FH_SLOW) findHomeMode=FH_DONE; if (findHomeMode==FH_FAST) findHomeMode=FH_IDLE; }
+}
+
+void StopAxis2() {
+  guideDirAxis2='b';
+  detachInterrupt(Axis2_HOME);
+  if ((guideDirAxis1!='e') && (guideDirAxis1!='w')) { safetyLimitsOn=true; if (findHomeMode==FH_SLOW) findHomeMode=FH_DONE; if (findHomeMode==FH_FAST) findHomeMode=FH_IDLE; }
+}
+#endif
+
 // moves telescope to the home position, then stops tracking
-int goHome() {
+int goHome(boolean fast) {
   int f=validateGoto(); if (f==5) f=8; if (f!=0) return f; // goto allowed?
 
+#ifdef HOME_SENSE_ON
+  if (findHomeMode!=FH_OFF) return 8; // guide allowed?
+
+//  pinMode(Axis1_HOME,INPUT_PULLUP);
+//  pinMode(Axis2_HOME,INPUT_PULLUP);
+
+  // stop tracking
+  trackingState=TrackingNone;
+
+  // decide direction to guide
+#ifdef HOME_AXIS1_REVERSE_ON
+  char a1; if (digitalRead(Axis1_HOME)==HIGH) a1='w'; else a1='e';
+#else
+  char a1; if (digitalRead(Axis1_HOME)==HIGH) a1='e'; else a1='w';
+#endif
+#ifdef HOME_AXIS2_REVERSE_ON
+  char a2; if (digitalRead(Axis2_HOME)==HIGH) a2='n'; else a2='s';
+#else
+  char a2; if (digitalRead(Axis2_HOME)==HIGH) a2='s'; else a2='n';
+#endif
+  if (pierSide==PierSideNone) {
+    pierSide=PierSideEast;
+    defaultDirAxis2=defaultDirAxis2EInit;
+  }
+  if (pierSide==PierSideWest) { if (a2=='n') a2='s'; else a2='n'; }
+  
+  // attach interrupts to stop guide
+  attachInterrupt(digitalPinToInterrupt(Axis1_HOME), StopAxis1, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(Axis2_HOME), StopAxis2, CHANGE);
+  
+  // disable limits
+  safetyLimitsOn=false;
+  
+  // start guides
+  if (fast) {
+    findHomeMode=FH_FAST;
+    // 8=HalfMaxRate
+    double secPerDeg=3600.0/(double)guideRates[8];
+    findHomeTimeout=millis()+(unsigned long)(secPerDeg*180.0*1000.0);
+    startGuideAxis1(a1,8,0);
+    startGuideAxis2(a2,8,0);
+  } else {
+    findHomeMode=FH_SLOW;
+    // 6=24x sidereal
+    findHomeTimeout=millis()+60000UL;
+    startGuideAxis1(a1,6,0);
+    startGuideAxis2(a2,6,0);
+  }
+
+#else
   cli();
   if (pierSide==PierSideWest) targetAxis1.part.m=-celestialPoleAxis1*(long)StepsPerDegreeAxis1-indexAxis1Steps; else targetAxis1.part.m=celestialPoleAxis1*(long)StepsPerDegreeAxis1-indexAxis1Steps; targetAxis1.part.f=0;
   targetAxis2.part.m=(long)(celestialPoleAxis2*(double)StepsPerDegreeAxis2)-indexAxis2Steps; targetAxis2.part.f=0;
@@ -19,6 +112,7 @@ int goHome() {
   homeMount=true;
   
   StepperModeGoto();
+#endif
   
   return 0;
 }

@@ -729,7 +729,7 @@ void processCommands() {
 #ifdef FOCUSER2_ON
         foc2.savePosition();
 #endif
-        goHome(); quietReply=true; 
+        goHome(true); quietReply=true;
       } else 
 //  :hP#   Goto the Park Position
 //          Return: 0 on failure

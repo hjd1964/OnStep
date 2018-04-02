@@ -200,6 +200,12 @@ void Init_Pins() {
   attachInterrupt(digitalPinToInterrupt(PpsPin),ClockSync,RISING);
 #endif
 
+// Home position sensing
+#ifdef HOME_SENSE_ON
+  pinMode(Axis1_HOME,INPUT_PULLUP);
+  pinMode(Axis2_HOME,INPUT_PULLUP);
+#endif
+
 // ------------------------------------------------------------------
 // Stepper driver control
 
