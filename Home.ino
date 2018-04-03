@@ -7,9 +7,9 @@ volatile findHomeModes findHomeMode=FH_OFF;
 unsigned long findHomeTimeout=0L;
 
 void checkHome() {
-  // check if find home timed out
+  // check if find home timed out or stopped
   if ((findHomeMode==FH_FAST) || (findHomeMode==FH_SLOW)) {
-    if ((long)(millis()-findHomeTimeout)>0L) {
+    if (((long)(millis()-findHomeTimeout)>0L) || ((guideDirAxis1==0) && (guideDirAxis2==0))) {
       if ((guideDirAxis1=='e') || (guideDirAxis1=='w')) guideDirAxis1='b';
       if ((guideDirAxis2=='n') || (guideDirAxis2=='s')) guideDirAxis2='b';
       detachInterrupt(Axis1_HOME);
@@ -24,8 +24,10 @@ void checkHome() {
     findHomeMode=FH_OFF;
     goHome(false);
   }
-  // we are done
+  // we are finishing off the find home
   if ((findHomeMode==FH_DONE) && (guideDirAxis1==0) && (guideDirAxis2==0)) {
+    detachInterrupt(Axis1_HOME);
+    detachInterrupt(Axis2_HOME);
     findHomeMode=FH_OFF;
     setHome();
   }
@@ -34,13 +36,13 @@ void checkHome() {
 void StopAxis1() {
   guideDirAxis1='b';
   detachInterrupt(Axis1_HOME);
-  if ((guideDirAxis2!='n') && (guideDirAxis2!='s')) { safetyLimitsOn=true; if (findHomeMode==FH_SLOW) findHomeMode=FH_DONE; if (findHomeMode==FH_FAST) findHomeMode=FH_IDLE; }
+  if ((guideDirAxis2!='n') && (guideDirAxis2!='s')) { if (findHomeMode==FH_SLOW) findHomeMode=FH_DONE; if (findHomeMode==FH_FAST) findHomeMode=FH_IDLE; }
 }
 
 void StopAxis2() {
   guideDirAxis2='b';
   detachInterrupt(Axis2_HOME);
-  if ((guideDirAxis1!='e') && (guideDirAxis1!='w')) { safetyLimitsOn=true; if (findHomeMode==FH_SLOW) findHomeMode=FH_DONE; if (findHomeMode==FH_FAST) findHomeMode=FH_IDLE; }
+  if ((guideDirAxis1!='e') && (guideDirAxis1!='w')) { if (findHomeMode==FH_SLOW) findHomeMode=FH_DONE; if (findHomeMode==FH_FAST) findHomeMode=FH_IDLE; }
 }
 #endif
 
@@ -123,6 +125,9 @@ boolean setHome() {
   if (trackingState==TrackingMoveTo) return false;  // fail, forcing home not allowed during a move
 
   Init_Startup_Values();
+
+  // make sure limits are on
+  safetyLimitsOn=true;
 
   // initialize and disable the stepper drivers
   StepperModeTrackingInit();
