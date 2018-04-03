@@ -40,6 +40,7 @@
 #define Axis1StepPin  54    // Pin A0 (Step)
 #define Axis1StepBit   0    //
 #define Axis1StepPORT PORTF //
+#define Axis1_HOME    20    // Pin 20 (Home sw)
 #define Axis1_Aux     Aux1  // Pin 29 (ESP8266 GPIO0 or SPI MISO)
 #define Axis1_M2      27    // Pin 27 (Microstep Mode 2 or SPI CS)
 #define Axis1_M1      25    // Pin 25 (Microstep Mode 1 or SPI SCK)
@@ -53,6 +54,7 @@
 #define Axis2StepPin   60   // Pin A6 (Step)
 #define Axis2StepBit   6    //
 #define Axis2StepPORT PORTF //
+#define Axis2_HOME    21    // Pin 21 (Home sw)
 #define Axis2_Aux     Aux2  // Pin 37 (ESP8266 GPIO0 or SPI MISO)
 #define Axis2_M2      35    // Pin 35 (Microstep Mode 2 or SPI CS)
 #define Axis2_M1      33    // Pin 33 (Microstep Mode 1 or SPI SCK)

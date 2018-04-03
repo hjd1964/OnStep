@@ -54,7 +54,8 @@
 #define GUIDE_TIME_LIMIT 0
 
 // RTC (Real Time Clock) support, default=_OFF. 
-// Other options: RTC_DS3234 for a DS3234 on the default SPI interface pins (CS on pin 10) or RTC_DS3231 for a DS3231 on the default I2C pins (optionally wire the SQW output to the PPS pin below.)
+// Other options: RTC_DS3234 for a DS3234 on the default SPI interface pins (CS on Pin 10) or RTC_DS3231 for a DS3231 on the default I2C port (Pins 20 and 21, choose only one feature on these pins.)
+// Optionally wire the SQW output to the PPS pin below.
 #define RTC_OFF
 // PPS use _ON or _PULLUP to enable the input and use the built-in pullup resistor.  Sense rising edge on pin 2 for optional precision clock source (GPS, for example), default=_OFF
 #define PPS_SENSE_OFF
@@ -95,6 +96,11 @@
 
 // Set to _ON and OnStep will remember the last meridian flip pause at home setting (on/off), default=_OFF
 #define REMEMBER_PAUSE_HOME_OFF
+
+// Automatic homing; switch state changes at the home position (Pins 20 and 21, choose only one feature on these pins.)
+#define HOME_SENSE_OFF               // Default _OFF, use _ON to have OnStep automatically detect and use home switches as follows
+#define HOME_AXIS1_REVERSE_OFF       // Pin 20 state should be HIGH (open) when clockwise of the home position (as seen from front,) reverse if necessary
+#define HOME_AXIS2_REVERSE_OFF       // Pin 21 state should be HIGH (open) when clockwise of the home position (as seen from above,) reverse if necessary
 
 // ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
 #define REMEMBER_MAX_RATE_OFF        // set to _ON and OnStep will remember rates set in the ASCOM driver, Android App, etc. default=_OFF 
@@ -185,7 +191,7 @@
 #define MinAxis3                -180 // minimum allowed Axis3 rotator, default = -180
 #define MaxAxis3                 180 // maximum allowed Axis3 rotator, default =  180
 #define AXIS3_REVERSE_OFF            // reverse the direction of Axis3 rotator movement
-#define AXIS3_DISABLE_OFF            // Pin A8.  Use HIGH for common stepper drivers if you want to power down the motor at stand-still.  Default _OFF.
+#define AXIS3_DISABLE_OFF            // Pin A8 (Aux3.)  Use HIGH for common stepper drivers if you want to power down the motor at stand-still.  Default _OFF.
 
 // FOCUSER1 ---------------------------------------------------------------------------------------------------------------
 // Pins 26,28 = Step,Dir
@@ -195,17 +201,17 @@
 #define MinAxis4               -25.0 // minimum allowed Axis4 position in millimeters, default = -25.0
 #define MaxAxis4                25.0 // maximum allowed Axis4 position in millimeters, default =  25.0
 #define AXIS4_REVERSE_OFF            // reverse the direction of Axis4 focuser movement
-#define AXIS4_DISABLE_OFF            // Pin 24.  Use HIGH for common stepper drivers if you want to power down the motor at stand-still.  Default _OFF.
+#define AXIS4_DISABLE_OFF            // Pin 24 (Aux4.)  Use HIGH for common stepper drivers if you want to power down the motor at stand-still.  Default _OFF.
 
 // FOCUSER2 ---------------------------------------------------------------------------------------------------------------
 // Pins 36,34 = Step,Dir
-#define FOCUSER2_OFF                // enable or disable focuser feature, default=_OFF
+#define FOCUSER2_OFF                 // enable or disable focuser feature, default=_OFF
 #define MaxRateAxis5               8 // this is the minimum number of milli-seconds between micro-steps, default=8
 #define StepsPerMicrometerAxis5  0.5 // figure this out by testing or other means
 #define MinAxis5               -25.0 // minimum allowed Axis5 position in millimeters, default = -25.0
 #define MaxAxis5                25.0 // maximum allowed Axis5 position in millimeters, default =  25.0
 #define AXIS5_REVERSE_OFF            // reverse the direction of Axis5 focuser movement
-#define AXIS5_DISABLE_OFF            // Pin 30.  Use HIGH for common stepper drivers if you want to power down the motor at stand-still.  Default _OFF.
+#define AXIS5_DISABLE_OFF            // Pin 30 (Aux5.)  Use HIGH for common stepper drivers if you want to power down the motor at stand-still.  Default _OFF.
 
 // THAT'S IT FOR USER CONFIGURATION!
 
