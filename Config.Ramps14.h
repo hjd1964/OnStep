@@ -99,8 +99,8 @@
 
 // Automatic homing; switch state changes at the home position (Pins 20 and 21, choose only one feature on these pins.)
 #define HOME_SENSE_OFF               // Default _OFF, use _ON to have OnStep automatically detect and use home switches as follows
-#define HOME_AXIS1_REVERSE_OFF       // Pin 20 state should be HIGH (open) when clockwise of the home position (as seen from front,) reverse if necessary
-#define HOME_AXIS2_REVERSE_OFF       // Pin 21 state should be HIGH (open) when clockwise of the home position (as seen from above,) reverse if necessary
+#define HOME_AXIS1_REVERSE_OFF       // Pin 20 state should be HIGH when clockwise of the home position (as seen from front,) reverse if necessary
+#define HOME_AXIS2_REVERSE_OFF       // Pin 21 state should be HIGH when clockwise of the home position (as seen from above,) reverse if necessary
 
 // ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
 #define REMEMBER_MAX_RATE_OFF        // set to _ON and OnStep will remember rates set in the ASCOM driver, Android App, etc. default=_OFF 
