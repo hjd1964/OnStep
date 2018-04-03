@@ -96,7 +96,7 @@
 // Set to _ON and OnStep will remember the last meridian flip pause at home setting (on/off), default=_OFF
 #define REMEMBER_PAUSE_HOME_OFF
 
-// Automatic homing; switch state changes at the home position (uses Aux3 and Aux4.)
+// Automatic homing; switch state changes at the home position (uses Aux3 and Aux4.)  For MOUNT_TYPE_GEM only.
 #define HOME_SENSE_OFF               // Default _OFF, use _ON to have OnStep automatically detect and use home switches as follows
 #define HOME_AXIS1_REVERSE_OFF       // Pin Aux3 state should be HIGH when clockwise of the home position (as seen from front,) LOW otherwise; reverse if necessary
 #define HOME_AXIS2_REVERSE_OFF       // Pin Aux4 state should be HIGH when clockwise of the home position (as seen from above,) LOW otherwise; reverse if necessary

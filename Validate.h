@@ -505,6 +505,12 @@ boolean axis2Enabled = false;
 #endif
 
 // -----------------------------------------------------------------------------------
+// check to see if home sensing is enabled/supported
+#if defined(HOME_SENSE_ON) && !defined(MOUNT_TYPE_GEM)
+  #error "Configuration: Home sensing is supported on German Equatorial Mounts only."
+#endif
+
+// -----------------------------------------------------------------------------------
 // check to see if we're trying to operate at too fast a rate
 #if AXIS2_STEP_GOTO==1 && AXIS1_STEP_GOTO==1
   #define __MaxRate_LowerLimit MaxRate_LowerLimit
