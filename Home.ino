@@ -121,8 +121,9 @@ int goHome(boolean fast) {
 
 // sets telescope home position; user manually moves to Hour Angle 90 and Declination 90 (CWD position),
 // then the first gotoEqu will set the pier side and turn on tracking
-boolean setHome() {
-  if (trackingState==TrackingMoveTo) return false;  // fail, forcing home not allowed during a move
+int setHome() {
+  if (guideDirAxis1 || guideDirAxis2) return 8;   // fail, already in motion
+  if (trackingState==TrackingMoveTo)  return 5;   // fail, goto in progress
 
   Init_Startup_Values();
 
@@ -163,6 +164,6 @@ boolean setHome() {
   blAxis2            = 0;
   sei();
   
-  return true;
+  return 0;
 }
 
