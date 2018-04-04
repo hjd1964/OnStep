@@ -13,6 +13,12 @@
 #define Aux6           8    // Heaters
 #define Aux7           9
 #define Aux8          10
+#define Aux9          39    // general purpose
+#define Aux10         41
+#define Aux11         43
+#define Aux12         45
+#define Aux13         47
+#define Aux14         32
 
 // The PEC index sense is a 5V logic input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
 #define PecPin        57    // RAMPS AUX1, A-OUT (1=+5V, 2=GND, 3=PEC)
