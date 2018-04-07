@@ -408,8 +408,11 @@ boolean axis2Enabled = false;
         #error "Configuration: AXIS1_MICROSTEPS_GOTO; must be set to the same value as AXIS1_MICROSTEPS,or _OFF"
       #endif
     #elif AXIS1_DRIVER_MODEL == TMC2130
+      #if AXIS1_MICROSTEPS_GOTO!=1 && AXIS1_MICROSTEPS_GOTO!=2 && AXIS1_MICROSTEPS_GOTO!=4 && AXIS1_MICROSTEPS_GOTO!=8 && AXIS1_MICROSTEPS_GOTO!=16 && AXIS1_MICROSTEPS_GOTO!=32 && AXIS1_MICROSTEPS_GOTO!=64 && AXIS1_MICROSTEPS_GOTO!=128 && AXIS1_MICROSTEPS_GOTO!=256
+        #error "Configuration: AXIS1_MICROSTEPS_GOTO; TMC2130 invalid micro-step mode, use: 256,128,64,32,16,8,4,2,or 1"
+      #endif
       #if AXIS1_MICROSTEPS != AXIS1_MICROSTEPS_GOTO
-        #error "Configuration: AXIS1_MICROSTEPS_GOTO; must be set to the same value as AXIS1_MICROSTEPS,or _OFF"
+        #warning "Configuration: AXIS2_MICROSTEPS_GOTO; is NOT equal to AXIS2_MICROSTEPS,or _OFF.  This can effect pointing accuracy slightly (and PEC if index sensing isn't used.)"
       #endif
     #elif AXIS1_DRIVER_MODEL == TMC2208
       #if AXIS1_MICROSTEPS_GOTO!=2 && AXIS1_MICROSTEPS_GOTO!=4 && AXIS1_MICROSTEPS_GOTO!=8 && AXIS1_MICROSTEPS_GOTO!=16
@@ -446,8 +449,11 @@ boolean axis2Enabled = false;
         #error "Configuration: AXIS2_MICROSTEPS_GOTO; must be set to the same value as AXIS2_MICROSTEPS,or _OFF"
       #endif
     #elif AXIS2_DRIVER_MODEL == TMC2130
-      #if AXIS2_MICROSTEPS!=AXIS2_MICROSTEPS_GOTO
-        #error "Configuration: AXIS2_MICROSTEPS_GOTO; must be set to the same value as AXIS2_MICROSTEPS,or _OFF"
+      #if AXIS2_MICROSTEPS_GOTO!=1 && AXIS2_MICROSTEPS_GOTO!=2 && AXIS2_MICROSTEPS_GOTO!=4 && AXIS2_MICROSTEPS_GOTO!=8 && AXIS2_MICROSTEPS_GOTO!=16 && AXIS2_MICROSTEPS_GOTO!=32 && AXIS2_MICROSTEPS_GOTO!=64 && AXIS2_MICROSTEPS_GOTO!=128 && AXIS2_MICROSTEPS_GOTO!=256
+        #error "Configuration: AXIS2_MICROSTEPS_GOTO; TMC2130 invalid micro-step mode, use: 256,128,64,32,16,8,4,2,or 1"
+      #endif
+      #if AXIS2_MICROSTEPS != AXIS2_MICROSTEPS_GOTO
+        #warning "Configuration: AXIS2_MICROSTEPS_GOTO; is NOT equal to AXIS2_MICROSTEPS,or _OFF.  This can effect pointing accuracy slightly (and PEC if index sensing isn't used.)"
       #endif
     #elif AXIS2_DRIVER_MODEL == TMC2208
       #if AXIS2_MICROSTEPS_GOTO!=2 && AXIS2_MICROSTEPS_GOTO!=4 && AXIS2_MICROSTEPS_GOTO!=8 && AXIS2_MICROSTEPS_GOTO!=16
