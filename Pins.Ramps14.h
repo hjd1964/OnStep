@@ -54,10 +54,10 @@
 #define Axis1_EN      38    // Pin 38 (Enable)
 
 // Pins to Axis2 Dec/Alt on RAMPS Y
-#define Axis2DirPin    61   // Pin A7 (Dir)
+#define Axis2DirPin   61    // Pin A7 (Dir)
 #define Axis2DirBit    7    //
 #define Axis2DirPORT  PORTF //
-#define Axis2StepPin   60   // Pin A6 (Step)
+#define Axis2StepPin  60    // Pin A6 (Step)
 #define Axis2StepBit   6    //
 #define Axis2StepPORT PORTF //
 #define Axis2_HOME    21    // Pin 21 (Home sw)
