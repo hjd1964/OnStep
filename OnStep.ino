@@ -148,6 +148,9 @@ void setup() {
   // this command sets indexAxis1, indexAxis2, azmCor=0; altCor=0;
   setHome();
 
+  // orientation is unknown
+  safetyLimitsOn=false;
+
   // start tracking
   trackingState=TrackingSidereal;
   EnableStepperDrivers();
@@ -278,12 +281,13 @@ void loop() {
 #endif
 
     // SAFETY CHECKS
-    if (safetyLimitsOn) {
-      // support for limit switch(es)
+    // support for limit switch(es)
 #ifdef LIMIT_SENSE_ON
-      byte ls1=digitalRead(LimitPin); delayMicroseconds(50); byte ls2=digitalRead(LimitPin);
-      if ((ls1==LOW) && (ls2==LOW)) { lastError=ERR_LIMIT_SENSE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
+    byte ls1=digitalRead(LimitPin); delayMicroseconds(50); byte ls2=digitalRead(LimitPin);
+    if ((ls1==LOW) && (ls2==LOW)) { lastError=ERR_LIMIT_SENSE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
 #endif
+
+    if (safetyLimitsOn) {
       // check for fault signal, stop any slew or guide and turn tracking off
 #ifdef AXIS1_FAULT
   #if AXIS1_FAULT==LOW
@@ -293,7 +297,7 @@ void loop() {
       faultAxis1=(digitalRead(Axis1_FAULT)==HIGH);
   #endif
   #if AXIS1_FAULT==TMC2130
-      if (lst%2==0) tmcAxis1.error();
+      if (lst%2==0) faultAxis1=tmcAxis1.error();
   #endif
 #endif
 #ifdef AXIS2_FAULT
@@ -304,14 +308,15 @@ void loop() {
       faultAxis2=(digitalRead(Axis2_FAULT)==HIGH);
   #endif
   #if AXIS2_FAULT==TMC2130
-      if (lst%2==1) tmcAxis2.error();
+      if (lst%2==1) faultAxis2=tmcAxis2.error();
   #endif
 #endif
-    }
 
     if (faultAxis1 || faultAxis2) { lastError=ERR_MOTOR_FAULT; if (trackingState==TrackingMoveTo) abortSlew=true; else { trackingState=TrackingNone; if (guideDirAxis1) guideDirAxis1='b'; if (guideDirAxis2) guideDirAxis2='b'; } }
+
     // check altitude overhead limit and horizon limit
     if ((currentAlt<minAlt) || (currentAlt>maxAlt)) { lastError=ERR_ALT; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
+    }
 
     // UPDATE THE UT1 CLOCK
     cli(); long cs=lst; sei();
