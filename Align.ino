@@ -446,43 +446,52 @@ void TGeoAlign::EquToInstr(double Lat, double HA, double Dec, double *HA1, doubl
 
   // breaks-down near the pole (limited to >1' from pole)
   if (abs(Dec)<89.98333333) {
-    double h =HA/Rad;
-    double d =Dec/Rad;
-    double sinDec=sin(d);
-    double cosDec=cos(d);
-    double sinHA =sin(h);
-    double cosHA =cos(h);
-    double p=1.0; if (pierSide==PierSideWest) p=-1.0;
 
-    // ------------------------------------------------------------
-    // misalignment due to tube/optics not being perp. to Dec axis
-    // negative numbers are further (S) from the NCP, swing to the
-    // equator and the effect on declination is 0. At the SCP it
-    // becomes a (N) offset.  Unchanged with meridian flips.
-    // expressed as a correction to the Polar axis misalignment
-    double DOh=doCor*(1.0/cosDec)*p;
+    // initial rough guess at instrument HA,Dec
+    double h=HA/Rad;
+    double d=Dec/Rad;
+    
+    for (int pass=0; pass<3; pass++) {
+      double sinDec=sin(d);
+      double cosDec=cos(d);
+      double sinHA =sin(h);
+      double cosHA =cos(h);
+      double p=1.0; if (pierSide==PierSideWest) p=-1.0;
+  
+      // ------------------------------------------------------------
+      // misalignment due to tube/optics not being perp. to Dec axis
+      // negative numbers are further (S) from the NCP, swing to the
+      // equator and the effect on declination is 0. At the SCP it
+      // becomes a (N) offset.  Unchanged with meridian flips.
+      // expressed as a correction to the Polar axis misalignment
+      double DOh=doCor*(1.0/cosDec)*p;
+  
+      // ------------------------------------------------------------
+      // misalignment due to Dec axis being perp. to RA axis
+      double PDh=-pdCor*(sinDec/cosDec)*p;
+  
+  #if defined (MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT)
+      // Fork flex
+      double DFd=dfCor*cosHA;
+  #else
+      // Axis flex
+      double DFd=-dfCor*(cosLat*cosHA+sinLat*(sinDec/cosDec));
+  #endif
+  
+      // Tube flex
+      double TFh=tfCor*(cosLat*sinHA*(1.0/cosDec));
+      double TFd=tfCor*(cosLat*cosHA-sinLat*cosDec);
+  
+      // polar misalignment
+      double h1=-azmCor*cosHA*(sinDec/cosDec) + altCor*sinHA*(sinDec/cosDec);
+      double d1=+azmCor*sinHA                 + altCor*cosHA;
+      *HA1 =HA +(h1+PDh+DOh+TFh);
+      *Dec1=Dec+(d1+DFd+TFd);
 
-    // ------------------------------------------------------------
-    // misalignment due to Dec axis being perp. to RA axis
-    double PDh=-pdCor*(sinDec/cosDec)*p;
-
-#if defined (MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT)
-    // Fork flex
-    double DFd=dfCor*cosHA;
-#else
-    // Axis flex
-    double DFd=-dfCor*(cosLat*cosHA+sinLat*(sinDec/cosDec));
-#endif
-
-    // Tube flex
-    double TFh=tfCor*(cosLat*sinHA*(1.0/cosDec));
-    double TFd=tfCor*(cosLat*cosHA-sinLat*cosDec);
-
-    // polar misalignment
-    double h1=-azmCor*cosHA*(sinDec/cosDec) + altCor*sinHA*(sinDec/cosDec);
-    double d1=+azmCor*sinHA                 + altCor*cosHA;
-    *HA1 =HA +(h1+PDh+DOh+TFh);
-    *Dec1=Dec+(d1+DFd+TFd);
+      // improved guess at instrument HA,Dec
+      h=*HA1/Rad;
+      d=*Dec1/Rad;
+    }
   } else {
     // just ignore the the correction if right on the pole
     *HA1 =HA;
