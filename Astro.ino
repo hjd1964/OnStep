@@ -425,10 +425,7 @@ boolean do_refractionRate_calc() {
   az_step++;
   // load HA/Dec
   if (az_step==1) {
-    if (onTrack)
-      getEqu(&az_Axis1,&az_Axis2,true);
-    else
-      getApproxEqu(&az_Axis1,&az_Axis2,true);
+    if (onTrack) getHADec(&az_Axis1,&az_Axis2); else getApproxEqu(&az_Axis1,&az_Axis2,true);
   } else
 
   // convert units,  get ahead of and behind current position
@@ -438,10 +435,10 @@ boolean do_refractionRate_calc() {
     if (az_step==5)   az_HA =az_HA-(RefractionRateRange/60.0);
     if (az_step==105) az_HA =az_HA+(RefractionRateRange/60.0);
   } else
-  
+
   // get the Horizon coords
   if ((az_step==10) || (az_step==110)) {
-    if (onTrack) GeoAlign.EquToInstr(latitude,az_HA,az_Dec,&az_HA,&az_Dec);
+    if (onTrack) GeoAlign.InstrToEqu(latitude,az_HA,az_Dec,&az_HA,&az_Dec);
   }
 
   // get the Horizon coords
@@ -456,21 +453,16 @@ boolean do_refractionRate_calc() {
 
   // convert back to the Equtorial coords
   if ((az_step==25) || (az_step==125)) {
-    if (onTrack) GeoAlign.InstrToEqu(latitude,az_HA,az_Dec,&az_HA,&az_Dec);
-  }
-
-  // convert back to the Equtorial coords
-  if ((az_step==30) || (az_step==130)) {
     HorToEqu(az_Alt,az_Azm,&az_HA1,&az_Dec1);
     if (az_HA1>180.0) az_HA1-=360.0; // HA range +/-180
   } else
 
   // calculate refraction rate deltas'
-  if ((az_step==35) || (az_step==135)) {
+  if ((az_step==30) || (az_step==130)) {
     // store first calc
-    if (az_step==35) { az_HA2=az_HA1; az_Dec2=az_Dec1; }
+    if (az_step==30) { az_HA2=az_HA1; az_Dec2=az_Dec1; }
     // we have both -0.5hr and +0.5hr values 
-    if (az_step==135) {
+    if (az_step==130) {
       // set rates
       // handle coordinate wrap
       if ((az_HA1<-90.0) && (az_HA2>90.0)) az_HA1+=360.0;
