@@ -425,25 +425,28 @@ boolean do_refractionRate_calc() {
   az_step++;
   // load HA/Dec
   if (az_step==1) {
-    if (onTrack) getHADec(&az_Axis1,&az_Axis2); else getApproxEqu(&az_Axis1,&az_Axis2,true);
+    if (onTrack) getEqu(&az_Axis1,&az_Axis2,true); else getApproxEqu(&az_Axis1,&az_Axis2,true);
   } else
 
   // convert units,  get ahead of and behind current position
   if ((az_step==5) || (az_step==105)) {
-    az_Dec=az_Axis2;
     az_HA =az_Axis1;
+    az_Dec=az_Axis2;
     if (az_step==5)   az_HA =az_HA-(RefractionRateRange/60.0);
     if (az_step==105) az_HA =az_HA+(RefractionRateRange/60.0);
   } else
 
-  // get the Horizon coords
+  // get the instrument coordinates
   if ((az_step==10) || (az_step==110)) {
-    if (onTrack) GeoAlign.InstrToEqu(latitude,az_HA,az_Dec,&az_HA,&az_Dec);
+    if (onTrack) {
+      GeoAlign.EquToInstr(latitude,az_HA,az_Dec,&az_HA1,&az_Dec1);
+      az_HA1+=indexAxis1; az_Dec1+=indexAxis2;
+    }
   }
 
   // get the Horizon coords
   if ((az_step==15) || (az_step==115)) {
-    EquToHor(az_HA,az_Dec,&az_Alt,&az_Azm);
+    EquToHor(az_HA1,az_Dec1,&az_Alt,&az_Azm);
   } else
 
   // apply refraction
