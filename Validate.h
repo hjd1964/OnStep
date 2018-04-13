@@ -227,19 +227,17 @@
 
 // make both enable and disable values
 #if AXIS1_DISABLE==LOW
-  #define ENABLE_AXIS1 HIGH
+  #define AXIS1_ENABLE HIGH
 #endif
 #if AXIS1_DISABLE==HIGH
-  #define ENABLE_AXIS1 LOW
+  #define AXIS1_ENABLE LOW
 #endif
-boolean axis1Enabled = false;
 #if AXIS2_DISABLE==LOW
-  #define ENABLE_AXIS2 HIGH
+  #define AXIS2_ENABLE HIGH
 #endif
 #if AXIS2_DISABLE==HIGH
-  #define ENABLE_AXIS2 LOW
+  #define AXIS2_ENABLE LOW
 #endif
-boolean axis2Enabled = false;
 
 // -----------------------------------------------------------------------------------
 // stepper driver mode setup

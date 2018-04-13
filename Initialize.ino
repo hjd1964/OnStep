@@ -456,8 +456,8 @@ void Init_Start_Timers() {
 void EnableStepperDrivers() {
   // enable the stepper drivers
   if (axis1Enabled==false) {
-    digitalWrite(Axis1_EN,ENABLE_AXIS1); axis1Enabled=true;
-    digitalWrite(Axis2_EN,ENABLE_AXIS2); axis2Enabled=true;
+    digitalWrite(Axis1_EN,AXIS1_ENABLE); axis1Enabled=true;
+    digitalWrite(Axis2_EN,AXIS2_ENABLE); axis2Enabled=true;
     delay(10);
   }
 }

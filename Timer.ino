@@ -231,7 +231,7 @@ ISR(TIMER1_COMPA_vect)
     if (Axis2PowerOffTimer==0) {
       if (axis2Powered) { digitalWrite(Axis2_EN,AXIS2_DISABLE); axis2Powered=false; }
     } else {
-      if (!axis2Powered) { cli(); digitalWrite(Axis2_EN,ENABLE_AXIS2); axis2Powered=true; delayMicroseconds(10); sei(); }
+      if (!axis2Powered) { cli(); digitalWrite(Axis2_EN,AXIS2_ENABLE); axis2Powered=true; delayMicroseconds(10); sei(); }
     }
   } else { Axis2PowerOffTimer=0; axis2Powered=true; }
     // ------------------------------------------------------------------------------------------------------------------------------------

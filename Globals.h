@@ -188,6 +188,8 @@ byte abortTrackingState          = TrackingNone;
 volatile byte lastTrackingState  = TrackingNone;
 boolean abortSlew                = false;
 volatile boolean safetyLimitsOn  = true;
+boolean axis1Enabled             = false;
+boolean axis2Enabled             = false;
 
 #define MeridianFlipNever  0
 #define MeridianFlipAlign  1
