@@ -119,6 +119,14 @@ int goHome(boolean fast) {
   return 0;
 }
 
+boolean isHoming() {
+#ifdef HOME_SENSE_ON
+  return (homeMount || (findHomeMode!=FH_OFF))
+#else
+  return homeMount;
+#endif
+}
+
 // sets telescope home position; user manually moves to Hour Angle 90 and Declination 90 (CWD position),
 // then the first gotoEqu will set the pier side and turn on tracking
 int setHome() {

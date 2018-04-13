@@ -330,10 +330,10 @@ void loop() {
   rot.follow();
 #endif
 #ifdef FOCUSER1_ON
-  foc1.follow( (trackingState==TrackingMoveTo) || guideDirAxis1 || guideDirAxis2 );
+  foc1.follow(isSlewing());
 #endif
 #ifdef FOCUSER2_ON
-  foc2.follow( (trackingState==TrackingMoveTo) || guideDirAxis1 || guideDirAxis2 );
+  foc2.follow(isSlewing());
 #endif
   
   // WORKLOAD MONITORING -------------------------------------------------------------------------------

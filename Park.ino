@@ -32,6 +32,7 @@ boolean setPark() {
 
 // moves the telescope to the park position
 byte park() {
+  if (parkStatus==Parked) return 0;                        // already parked
   int f=validateGoto(); if (f==5) f=8; if (f!=0) return f; // goto allowed?
   
   parkSaved=nv.read(EE_parkSaved);
@@ -229,6 +230,10 @@ boolean unpark() {
     };
   };
   return false;
+}
+
+boolean isParked() {
+  return (parkStatus==Parked);
 }
 
 boolean saveAlignModel() {

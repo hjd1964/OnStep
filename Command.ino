@@ -556,7 +556,7 @@ void processCommands() {
       if (command[1]=='U')  { 
         i=0;
         if (trackingState!=TrackingSidereal)     reply[i++]='n';
-        if (trackingState!=TrackingMoveTo)       reply[i++]='N';
+        if (!isSlewing())                        reply[i++]='N';
         const char *parkStatusCh = "pIPF";       reply[i++]=parkStatusCh[parkStatus]; // not [p]arked, parking [I]n-progress, [P]arked, Park [F]ailed
         if (pecRecorded)                         reply[i++]='R';
         if (pecAutoRecord)                       reply[i++]='W';
@@ -1536,8 +1536,8 @@ void processCommands() {
        if (command[1]=='Q') { SetTrackingRate(default_tracking_rate); quietReply=true; } else                              // sidereal tracking rate
        if (command[1]=='R') { siderealInterval=15956313L; quietReply=true; } else                                          // reset master sidereal clock interval
        if (command[1]=='K') { SetTrackingRate(0.99953004401); refraction=false; quietReply=true; } else                    // king tracking rate 60.136Hz
-       if ((command[1]=='e') && ((trackingState==TrackingSidereal) || (trackingState==TrackingNone)) && (parkStatus==NotParked)) { trackingState=TrackingSidereal; EnableStepperDrivers(); } else
-       if ((command[1]=='d') && ((trackingState==TrackingSidereal) || (trackingState==TrackingNone))) trackingState=TrackingNone; else
+       if ((command[1]=='e') && !isSlewing() && !isHoming() && !isParked() ) { trackingState=TrackingSidereal; EnableStepperDrivers(); } else
+       if ((command[1]=='d') && !isSlewing() && !isHoming() ) trackingState=TrackingNone; else
        if (command[1]=='o') { refraction=refraction_enable; onTrack=true;  SetTrackingRate(default_tracking_rate); } else  // turn full compensation on, defaults to base sidereal tracking rate
        if (command[1]=='r') { refraction=refraction_enable; onTrack=false; SetTrackingRate(default_tracking_rate); } else  // turn refraction compensation on, defaults to base sidereal tracking rate
        if (command[1]=='n') { refraction=false; onTrack=false; SetTrackingRate(default_tracking_rate); } else              // turn refraction off, sidereal tracking rate resumes
