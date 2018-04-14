@@ -155,7 +155,6 @@ volatile long stepAxis2=1;
 #endif
 
 double newTargetAlt=0.0, newTargetAzm=0.0;         // holds the altitude and azmiuth for slews
-double currentAlt = 45;                            // the current altitude
 // for goto's, how far past the meridian to allow before we do a flip (if on the East side of the pier) - one hour of RA is the default = 60.  Sometimes used for Fork mounts in Align mode.  Ignored on Alt/Azm mounts.
 long minutesPastMeridianE = 60L;
 // as above, if on the West side of the pier.  If left alone, the mount will stop tracking when it hits the this limit.  Sometimes used for Fork mounts in Align mode.  Ignored on Alt/Azm mounts.
@@ -163,6 +162,9 @@ long minutesPastMeridianW = 60L;
 int    minAlt;                                     // the minimum altitude, in degrees, for goTo's (so we don't try to point too low)
 int    maxAlt;                                     // the maximum altitude, in degrees, for goTo's (to keep the telescope tube away from the mount/tripod)
 bool   autoMeridianFlip = false;                   // automatically do a meridian flip and continue when we hit the MinutesPastMeridianW
+
+double currentAlt = 45.0;                          // the current altitude
+double currentDec = 0.0;                           // the current declination
 
 // Stepper driver enable/disable and direction -----------------------------------------------------------------------------
 

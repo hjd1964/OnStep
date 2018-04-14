@@ -427,7 +427,7 @@ void loop() {
     }
     // check for exceeding MinDec or MaxDec
 #ifndef MOUNT_TYPE_ALTAZM
-    if ((getApproxDec()<MinDec) || (getApproxDec()>MaxDec)) { lastError=ERR_DEC; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
+    if ((currentDec<MinDec) || (currentDec>MaxDec)) { lastError=ERR_DEC; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
 #endif
 
   } else {
