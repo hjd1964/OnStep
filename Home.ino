@@ -121,7 +121,7 @@ int goHome(boolean fast) {
 
 boolean isHoming() {
 #ifdef HOME_SENSE_ON
-  return (homeMount || (findHomeMode!=FH_OFF))
+  return (homeMount || (findHomeMode!=FH_OFF));
 #else
   return homeMount;
 #endif
