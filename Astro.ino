@@ -418,6 +418,7 @@ double ZenithTrackingRate() {
 
 boolean do_refractionRate_calc() {
   boolean done=false;
+  static bool ot=false;
 
   // turn off if not tracking at sidereal rate
   if (trackingState!=TrackingSidereal) { az_deltaAxis1=az_currentRate*15.0; az_deltaAxis2=0.0; return true; }
@@ -425,7 +426,8 @@ boolean do_refractionRate_calc() {
   az_step++;
   // load HA/Dec
   if (az_step==1) {
-    if (onTrack) getEqu(&az_Axis1,&az_Axis2,true); else getApproxEqu(&az_Axis1,&az_Axis2,true);
+    ot=onTrack;
+    if (ot) getEqu(&az_Axis1,&az_Axis2,true); else getApproxEqu(&az_Axis1,&az_Axis2,true);
   } else
 
   // convert units,  get ahead of and behind current position
@@ -438,15 +440,15 @@ boolean do_refractionRate_calc() {
 
   // get the instrument coordinates
   if ((az_step==10) || (az_step==110)) {
-    if (onTrack) {
-      GeoAlign.EquToInstr(latitude,az_HA,az_Dec,&az_HA1,&az_Dec1);
-      az_HA1+=indexAxis1; az_Dec1+=indexAxis2;
+    if (ot) {
+      GeoAlign.EquToInstr(latitude,az_HA,az_Dec,&az_HA,&az_Dec);
+      az_HA+=indexAxis1; az_Dec+=indexAxis2;
     }
   }
 
   // get the Horizon coords
   if ((az_step==15) || (az_step==115)) {
-    EquToHor(az_HA1,az_Dec1,&az_Alt,&az_Azm);
+    EquToHor(az_HA,az_Dec,&az_Alt,&az_Azm);
   } else
 
   // apply refraction
