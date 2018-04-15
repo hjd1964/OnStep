@@ -28,8 +28,8 @@ const char html_settingsTrackComp1[] =
 "<button name='rr' value='off' type='submit'>Off</button>";
 const char html_settingsTrackComp2[] =
 "</br>"
-"<button name='rr' value='don' type='submit'>Dual Axis On</button>"
-"<button name='rr' value='doff' type='submit'>Dual Axis Off</button>\r\n";
+"<button name='rr' value='don' type='submit'>Dual Axis</button>"
+"<button name='rr' value='doff' type='submit'>Single Axis</button>\r\n";
 
 const char html_settingsBuzzer1[] =
 "<br /><br />Goto Alert, Buzzer: <br />"
