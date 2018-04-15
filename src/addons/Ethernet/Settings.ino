@@ -21,11 +21,15 @@ const char html_settingsTrack3[] =
 "<button name='tk' value='l' type='submit'>Lunar</button>"
 "<button name='tk' value='h' type='submit'>Solar</button>\r\n";
 
-const char html_settingsTrackComp[] = 
+const char html_settingsTrackComp1[] = 
 "</br></br>Compensated Tracking Rate (Pointing Model/Refraction): </br>"
 "<button name='rr' value='otk' type='submit'>Full</button>"
 "<button name='rr' value='on' type='submit'>Refraction Only</button>"
-"<button name='rr' value='off' type='submit'>Off</button>\r\n";
+"<button name='rr' value='off' type='submit'>Off</button>";
+const char html_settingsTrackComp2[] =
+"</br>"
+"<button name='rr' value='don' type='submit'>Dual Axis On</button>"
+"<button name='rr' value='doff' type='submit'>Dual Axis Off</button>\r\n";
 
 const char html_settingsBuzzer1[] =
 "<br /><br />Goto Alert, Buzzer: <br />"
@@ -111,7 +115,8 @@ void handleSettings() {
   data += html_settingsTrack2;
   data += html_settingsTrack3;
   if (!strstr(stat,"A")) {  // not AltAzm
-    data += html_settingsTrackComp;
+    data += html_settingsTrackComp1;
+    data += html_settingsTrackComp2;
   }
   data += html_settingsBuzzer1;
   data += html_settingsBuzzer2;
@@ -161,6 +166,8 @@ void processSettingsGet() {
     if (v=="otk") Ser.print(":To#");
     if (v=="on") Ser.print(":Tr#");
     if (v=="off") Ser.print(":Tn#");
+    if (v=="don") Ser.print(":T2#");
+    if (v=="doff") Ser.print(":T1#");
   }
   // Alert buzzer
   v=server.arg("ab");
