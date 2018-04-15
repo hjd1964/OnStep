@@ -169,7 +169,7 @@ void handleNotFound(){
 }
 
 void setup(void){
-
+delay(5000); //to be sure that the main board (ramps 1.4) is fully started before starting ESP8266
 #ifdef LED_PIN
   pinMode(LED_PIN,OUTPUT);
 #endif
