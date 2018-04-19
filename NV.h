@@ -3,6 +3,9 @@
 
 class nvs {
   public:
+    void init() {
+    }
+  
     byte read(int i) {
       return EEPROM.read(i);
     }

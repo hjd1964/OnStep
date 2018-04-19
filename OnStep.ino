@@ -104,6 +104,9 @@ rtcw urtc;
 #define initKey 915307548 // unique identifier for the current initialization format, do not change
 
 void setup() {
+  // be sure non-volatile memory is ready to go
+  nv.init();
+  
   // set initial values for some variables
   Init_Startup_Values();
 
