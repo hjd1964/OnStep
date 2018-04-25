@@ -16,7 +16,7 @@
 #define ADVANCED_CHARS_ON         // Default=_ON, _OFF for standard "RA/Dec" instead of symbols
 
 // Auxillary switch/feature control; for example: SW0 "Cover" to open/close an OTA cover
-// only unused OnStep Aux pins should be assigned!
+// only OnStep Aux pins that are unused for other purposes should be assigned!
 #define SW0_OFF                   // For Aux0
 #define SW1_OFF                   // For Aux1
 #define SW2_OFF                   // For Aux2
@@ -26,6 +26,22 @@
 #define SW6_OFF                   // For Aux6
 #define SW7_OFF                   // For Aux7
 #define SW8_OFF                   // For Aux8
+#define SW9_OFF                   // For Aux9
+#define SW10_OFF                  // For Aux10
+#define SW11_OFF                  // For Aux11
+#define SW12_OFF                  // For Aux12
+#define SW13_OFF                  // For Aux13
+#define SW14_OFF                  // For Aux14
+#define SW15_OFF                  // For Aux15
+
+// Auxillary analog/feature control; for example: AN7 "Primary Heater" to allow pwm control of a dew heater at 0 to 100% power
+// only Aux3..Aux8 have the ability to support pwm/dac operation in OnStep (see Pins.xxx.h to see which pins are actually available, if any.)
+#define AN3_OFF                   // For Aux3
+#define AN4_OFF                   // For Aux4
+#define AN5_OFF                   // For Aux5
+#define AN6_OFF                   // For Aux6
+#define AN7_OFF                   // For Aux7
+#define AN8_OFF                   // For Aux8
 
 // misc. options that are usually not changed
 #define DEBUG_OFF                 // Turn _ON to allow WiFi startup without OnStep attached (Serial port for debug at 115200 baud)
@@ -34,7 +50,7 @@
 // On first startup an AP will appear with an SSID of "ONSTEP", after connecting:
 // The web-site is at "192.168.0.1" and the cmd channel is at "192.168.0.1:9999".
 //
-// If locked out of the ESP8266, a Sketch (like MultiSerial) uploaded to the OnStep MCU (Teensy3.2, Launchpad, etc.) can recover access.
+// If locked out of the ESP8266, a Sketch (like MultiSerial) uploaded to the OnStep MCU (Teensy3.2, Mega2560, etc.) can recover access.
 // Simply sending an 'R' in reply to any '#' received will cause a reset to AP only enabled and the default SSID/Password.  Be sure to
 // upload OnStep again if necessary and then restart both devices to resume operation.
 
