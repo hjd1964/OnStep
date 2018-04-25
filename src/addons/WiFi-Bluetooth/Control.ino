@@ -180,8 +180,8 @@ const char html_controlDeRotate2[] =
 const char html_controlRotate4[] =
 "</div><br class='clear' />\r\n";
 
-#if defined(SW0) || defined(SW1) || defined(SW2) || defined(SW3) || defined(SW4) || defined(SW5) || defined(SW6) || defined(SW7) || defined(SW8)
-const char html_controlSwitchB[] = "<div class='b1' style='width: 27em'><div align='left'>Switches:</div>";
+#if defined(SW0) || defined(SW1) || defined(SW2) || defined(SW3) || defined(SW4) || defined(SW5) || defined(SW6) || defined(SW7) || defined(SW8) || defined(SW9) || defined(SW10) || defined(SW11) || defined(SW12) || defined(SW13) || defined(SW14) || defined(SW15) || defined(AN3) || defined(AN4) || defined(AN5) || defined(AN6) || defined(AN7) || defined(AN8)
+const char html_controlAuxB[] = "<div class='b1' style='width: 27em'><div align='left'>Aux:</div>";
 #ifdef SW0
 const char html_controlSwitch0[] = SW0 "<br /><button type='button' onpointerdown=\"s('sw0','255')\" >On</button><button type='button' onpointerdown=\"s('sw0','0')\" >Off</button><br />";
 #endif
@@ -230,11 +230,6 @@ const char html_controlSwitch14[] = SW14 "<br /><button type='button' onpointerd
 #ifdef SW15
 const char html_controlSwitch15[] = SW15 "<br /><button type='button' onpointerdown=\"s('swF','255')\" >On</button><button type='button' onpointerdown=\"s('swF','0')\" >Off</button><br />";
 #endif
-const char html_controlSwitchE[] = "</div><br class='clear' />\r\n";
-#endif
-
-#if defined(AN3) || defined(AN4) || defined(AN5) || defined(AN6) || defined(AN7) || defined(AN8)
-const char html_controlAnalogB[] = "<div class='b1' style='width: 27em'><div align='left'>Analog:</div>";
 #ifdef AN3
 const char html_controlAnalog3A[] = AN3 " <span id='an3v'>";
 const char html_controlAnalog3B[] ="</span>%<br /><input style='width: 80%; background: #111' type='range' value='";
@@ -265,8 +260,9 @@ const char html_controlAnalog8A[] = AN8 " <span id='an8v'>";
 const char html_controlAnalog8B[] = "</span>%<br /><input style='width: 80%; background: #111' type='range' value='";
 const char html_controlAnalog8C[] = "' onchange=\"sf('an8',this.value)\"><br />";
 #endif
-const char html_controlAnalogE[] = "</div><br class='clear' />\r\n";
+const char html_controlAuxE[] = "</div><br class='clear' />\r\n";
 #endif
+
 
 const char html_controlEnd[] = 
 "<br />\r\n";
@@ -449,67 +445,66 @@ void handleControl() {
 #endif
   }
 
-  // Switches ------------------------------------------------
-  #if defined(SW0) || defined(SW1) || defined(SW2) || defined(SW3) || defined(SW4) || defined(SW5) || defined(SW6) || defined(SW7) || defined(SW8) || defined(SW9) || defined(SW10) || defined(SW11) || defined(SW12) || defined(SW13) || defined(SW14) || defined(SW15)
-    data += html_controlSwitchB;
+  // Aux -----------------------------------------------------
+  #if defined(SW0) || defined(SW1) || defined(SW2) || defined(SW3) || defined(SW4) || defined(SW5) || defined(SW6) || defined(SW7) || defined(SW8) || defined(SW9) || defined(SW10) || defined(SW11) || defined(SW12) || defined(SW13) || defined(SW14) || defined(SW15) || defined(AN3) || defined(AN4) || defined(AN5) || defined(AN6) || defined(AN7) || defined(AN8)
+    data += html_controlAuxB;
+    // Digital Control
+    int c=0;
     #ifdef SW0
-    data += html_controlSwitch0;
+    data += html_controlSwitch0; c++;
     #endif
     #ifdef SW1
-    data += html_controlSwitch1;
+    data += html_controlSwitch1; c++;
     #endif
     #ifdef SW2
-    data += html_controlSwitch2;
+    data += html_controlSwitch2; c++;
     #endif
     #ifdef SW3
-    data += html_controlSwitch3;
+    data += html_controlSwitch3; c++;
     #endif
     #ifdef SW4
-    data += html_controlSwitch4;
+    data += html_controlSwitch4; c++;
     #endif
     #ifdef SW5
-    data += html_controlSwitch5;
+    data += html_controlSwitch5; c++;
     #endif
     #ifdef SW6
-    data += html_controlSwitch6;
+    data += html_controlSwitch6; c++;
     #endif
     #ifdef SW7
-    data += html_controlSwitch7;
+    data += html_controlSwitch7; c++;
     #endif
     #ifdef SW8
-    data += html_controlSwitch8;
+    data += html_controlSwitch8; c++;
     #endif
     #ifdef SW9
-    data += html_controlSwitch9;
+    data += html_controlSwitch9; c++;
     #endif
     #ifdef SW10
-    data += html_controlSwitch10;
+    data += html_controlSwitch10; c++;
     #endif
     #ifdef SW11
-    data += html_controlSwitch11;
+    data += html_controlSwitch11; c++;
     #endif
     #ifdef SW12
-    data += html_controlSwitch12;
+    data += html_controlSwitch12; c++;
     #endif
     #ifdef SW13
-    data += html_controlSwitch13;
+    data += html_controlSwitch13; c++;
     #endif
     #ifdef SW14
-    data += html_controlSwitch14;
+    data += html_controlSwitch14; c++;
     #endif
     #ifdef SW15
-    data += html_controlSwitch15;
+    data += html_controlSwitch15; c++;
     #endif
-    data += html_controlSwitchE;
-  #endif
+    if (c>0) data+="<br />";
 
 #ifdef OETHS
     client->print(data); data="";
 #endif
 
-  // Analog Control ------------------------------------------
-  #if defined(AN3) || defined(AN4) || defined(AN5) || defined(AN6) || defined(AN7) || defined(AN8)
-    data += html_controlAnalogB;
+    // Analog Control
     #ifdef AN3
     Ser.print(":GXG3#"); temp1[Ser.readBytesUntil('#',temp1,20)]=0; if (temp1[0]==0) { temp1[0]='0'; temp1[1]=0; }
     data += html_controlAnalog3A; data += temp1;
@@ -546,7 +541,8 @@ void handleControl() {
     data += html_controlAnalog8B; data += temp1;
     data += html_controlAnalog8C;
     #endif
-    data += html_controlAnalogE;
+
+    data += html_controlAuxE;
   #endif
 
   data += html_controlEnd;
