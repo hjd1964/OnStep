@@ -3,10 +3,12 @@
 
 #if defined(__ARM_Teensy3__)
 
-// The multi-purpose pins
+// The multi-purpose pins (Aux3..Aux8 can be analog pwm/dac if supported)
 #define Aux0          19
 #define Aux1          18
 #define Aux2          5
+#define Aux3          A14   // true analog output
+#define Aux3_Analog
 
 // The PEC index sense is a logic level input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
 #define PecPin        23

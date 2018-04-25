@@ -698,6 +698,54 @@ void processCommands() {
               default:  commandError=true;
             }
           } else
+#ifdef Aux0
+          if ((parameter[0]=='G') && (parameter[1]=='0')) { sprintf(reply,"%d",(int)round((float)valueAux0/2.55)); quietReply=true; } else
+#endif
+#ifdef Aux1
+          if ((parameter[0]=='G') && (parameter[1]=='1')) { sprintf(reply,"%d",(int)round((float)valueAux1/2.55)); quietReply=true; } else
+#endif
+#ifdef Aux2
+          if ((parameter[0]=='G') && (parameter[1]=='2')) { sprintf(reply,"%d",(int)round((float)valueAux2/2.55)); quietReply=true; } else
+#endif
+#ifdef Aux3
+          if ((parameter[0]=='G') && (parameter[1]=='3')) { sprintf(reply,"%d",(int)round((float)valueAux3/2.55)); quietReply=true; } else
+#endif
+#ifdef Aux4
+          if ((parameter[0]=='G') && (parameter[1]=='4')) { sprintf(reply,"%d",(int)round((float)valueAux4/2.55)); quietReply=true; } else
+#endif
+#ifdef Aux5
+          if ((parameter[0]=='G') && (parameter[1]=='5')) { sprintf(reply,"%d",(int)round((float)valueAux5/2.55)); quietReply=true; } else
+#endif
+#ifdef Aux6
+          if ((parameter[0]=='G') && (parameter[1]=='6')) { sprintf(reply,"%d",(int)round((float)valueAux6/2.55)); quietReply=true; } else
+#endif
+#ifdef Aux7
+          if ((parameter[0]=='G') && (parameter[1]=='7')) { sprintf(reply,"%d",(int)round((float)valueAux7/2.55)); quietReply=true; } else
+#endif
+#ifdef Aux8
+          if ((parameter[0]=='G') && (parameter[1]=='8')) { sprintf(reply,"%d",(int)round((float)valueAux8/2.55)); quietReply=true; } else
+#endif
+#ifdef Aux9
+          if ((parameter[0]=='G') && (parameter[1]=='9')) { sprintf(reply,"%d",(int)round((float)valueAux9/2.55)); quietReply=true; } else
+#endif
+#ifdef Aux10
+          if ((parameter[0]=='G') && (parameter[1]=='A')) { sprintf(reply,"%d",(int)round((float)valueAux10/2.55)); quietReply=true; } else
+#endif
+#ifdef Aux11
+          if ((parameter[0]=='G') && (parameter[1]=='B')) { sprintf(reply,"%d",(int)round((float)valueAux11/2.55)); quietReply=true; } else
+#endif
+#ifdef Aux12
+          if ((parameter[0]=='G') && (parameter[1]=='C')) { sprintf(reply,"%d",(int)round((float)valueAux12/2.55)); quietReply=true; } else
+#endif
+#ifdef Aux13
+          if ((parameter[0]=='G') && (parameter[1]=='D')) { sprintf(reply,"%d",(int)round((float)valueAux13/2.55)); quietReply=true; } else
+#endif
+#ifdef Aux14
+          if ((parameter[0]=='G') && (parameter[1]=='E')) { sprintf(reply,"%d",(int)round((float)valueAux14/2.55)); quietReply=true; } else
+#endif
+#ifdef Aux15
+          if ((parameter[0]=='G') && (parameter[1]=='F')) { sprintf(reply,"%d",(int)round((float)valueAux15/2.55)); quietReply=true; } else
+#endif
             commandError=true;
         } else commandError=true;
       } else
@@ -1436,76 +1484,98 @@ void processCommands() {
           }
         } else
 #endif
+        if (parameter[0]=='G') { // Gn: General purpose output
+          long v=(double)strtol(&parameter[3],NULL,10);
+          if ((v>=0) && (v<=255)) {
 #ifdef Aux0
-        if ((parameter[0]=='G') && (parameter[1]=='0')) { static bool init=false; if (!init) { pinMode(Aux0,OUTPUT); init=true; } long v=(double)strtol(&parameter[3],NULL,10); if (v==0) digitalWrite(Aux0,LOW); else if (v==255) digitalWrite(Aux0,HIGH); else commandError=true; } else
+            if (parameter[1]=='0') { valueAux0=v; byte p=Aux0; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; } if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
 #endif
 #ifndef MODE_SWITCH_BEFORE_SLEW_SPI
-  #ifdef Aux1
-        if ((parameter[0]=='G') && (parameter[1]=='1')) { static bool init=false; if (!init) { pinMode(Aux1,OUTPUT); init=true; } long v=(double)strtol(&parameter[3],NULL,10); if (v==0) digitalWrite(Aux1,LOW); else if (v==255) digitalWrite(Aux1,HIGH); else commandError=true; } else
-  #endif
-  #ifdef Aux2
-        if ((parameter[0]=='G') && (parameter[1]=='2')) { static bool init=false; if (!init) { pinMode(Aux2,OUTPUT); init=true; } long v=(double)strtol(&parameter[3],NULL,10); if (v==0) digitalWrite(Aux2,LOW); else if (v==255) digitalWrite(Aux2,HIGH); else commandError=true; } else
-  #endif
+#ifdef Aux1
+            if (parameter[1]=='1') { valueAux1=v; byte p=Aux1; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; } if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
+#endif
+#ifdef Aux2
+            if (parameter[1]=='2') { valueAux2=v; byte p=Aux2; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; } if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
+#endif
 #endif
 #ifdef Aux3
-        if ((parameter[0]=='G') && (parameter[1]=='3')) { static bool init=false; if (!init) { pinMode(Aux3,OUTPUT); init=true; } long v=(double)strtol(&parameter[3],NULL,10); if (v==0) digitalWrite(Aux3,LOW); else if (v==255) digitalWrite(Aux3,HIGH); else commandError=true; } else
+            if (parameter[1]=='3') { valueAux3=v; byte p=Aux3; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; }
+  #ifdef Aux3_Analog
+              analogWrite(p,v); } else
+  #else
+              if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
+  #endif
 #endif
 #ifdef Aux4
-        if ((parameter[0]=='G') && (parameter[1]=='4')) { static bool init=false; if (!init) { pinMode(Aux4,OUTPUT); init=true; } long v=(double)strtol(&parameter[3],NULL,10); if (v==0) digitalWrite(Aux4,LOW); else if (v==255) digitalWrite(Aux4,HIGH); else commandError=true; } else
+            if (parameter[1]=='4') { valueAux4=v; byte p=Aux4; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; }
+  #ifdef Aux4_Analog
+              analogWrite(p,v); } else
+  #else
+              if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
+  #endif
 #endif
 #ifdef Aux5
-        if ((parameter[0]=='G') && (parameter[1]=='5')) { 
-          static bool init=false; if (!init) {  pinMode(Aux5,OUTPUT); init=true; } long v=(double)strtol(&parameter[3],NULL,10);
-  #ifdef A21
-          if (Aux5==A21) { if ((v>=0) && (v<=255)) analogWrite(Aux5,v); else commandError=true; } else
+            if (parameter[1]=='5') { valueAux5=v; byte p=Aux5; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; }
+  #ifdef Aux5_Analog
+              analogWrite(p,v); } else
+  #else
+              if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
   #endif
-          { if (v==0) digitalWrite(Aux5,LOW); else if (v==255) digitalWrite(Aux5,HIGH); else commandError=true; }
-        } else
 #endif
 #ifdef Aux6
-        if ((parameter[0]=='G') && (parameter[1]=='6')) { 
-          static bool init=false; if (!init) { pinMode(Aux6,OUTPUT); init=true; } long v=(double)strtol(&parameter[3],NULL,10);
-  #ifdef A22
-          if (Aux6==A22) { if ((v>=0) && (v<=255)) analogWrite(Aux6,v); else commandError=true; } else
+            if (parameter[1]=='6') { valueAux6=v; byte p=Aux6; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; }
+  #ifdef Aux6_Analog
+              analogWrite(p,v); } else
+  #else
+              if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
   #endif
-          { if (v==0) digitalWrite(Aux6,LOW); if (v==255) digitalWrite(Aux6,HIGH); else commandError=true; }
-        } else
 #endif
 #ifdef Aux7
-        if ((parameter[0]=='G') && (parameter[1]=='7')) { static bool init=false; if (!init) { pinMode(Aux7,OUTPUT); init=true; } long v=(double)strtol(&parameter[3],NULL,10); if (v==0) digitalWrite(Aux7,LOW); else if (v==255) digitalWrite(Aux7,HIGH); else commandError=true; } else
+            if (parameter[1]=='7') { valueAux7=v; byte p=Aux7; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; }
+  #ifdef Aux7_Analog
+              analogWrite(p,v); } else
+  #else
+              if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
+  #endif
 #endif
 #ifdef Aux8
-        if ((parameter[0]=='G') && (parameter[1]=='8')) { static bool init=false; if (!init) { pinMode(Aux8,OUTPUT); init=true; } long v=(double)strtol(&parameter[3],NULL,10); if (v==0) digitalWrite(Aux8,LOW); else if (v==255) digitalWrite(Aux8,HIGH); else commandError=true; } else
+            if (parameter[1]=='8') { valueAux8=v; byte p=Aux8; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; }
+  #ifdef Aux8_Analog
+              analogWrite(p,v); } else
+  #else
+              if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
+  #endif
 #endif
 #ifdef Aux9
-        if ((parameter[0]=='G') && (parameter[1]=='9')) { static bool init=false; if (!init) { pinMode(Aux9,OUTPUT); init=true; } long v=(double)strtol(&parameter[3],NULL,10); if (v==0) digitalWrite(Aux9,LOW); else if (v==255) digitalWrite(Aux9,HIGH); else commandError=true; } else
+            if (parameter[1]=='9') { valueAux9=v; byte p=Aux9; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; } if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
 #endif
 #ifdef Aux10
-        if ((parameter[0]=='G') && (parameter[1]=='A')) { static bool init=false; if (!init) { pinMode(Aux10,OUTPUT); init=true; } long v=(double)strtol(&parameter[3],NULL,10); if (v==0) digitalWrite(Aux10,LOW); else if (v==255) digitalWrite(Aux10,HIGH); else commandError=true; } else
+            if (parameter[1]=='A') { valueAux10=v; byte p=Aux10; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; } if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
 #endif
 #ifdef Aux11
-        if ((parameter[0]=='G') && (parameter[1]=='B')) { static bool init=false; if (!init) { pinMode(Aux11,OUTPUT); init=true; } long v=(double)strtol(&parameter[3],NULL,10); if (v==0) digitalWrite(Aux11,LOW); else if (v==255) digitalWrite(Aux11,HIGH); else commandError=true; } else
+            if (parameter[1]=='B') { valueAux11=v; byte p=Aux11; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; } if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
 #endif
 #ifdef Aux12
-        if ((parameter[0]=='G') && (parameter[1]=='C')) { static bool init=false; if (!init) { pinMode(Aux12,OUTPUT); init=true; } long v=(double)strtol(&parameter[3],NULL,10); if (v==0) digitalWrite(Aux12,LOW); else if (v==255) digitalWrite(Aux12,HIGH); else commandError=true; } else
+            if (parameter[1]=='C') { valueAux12=v; byte p=Aux12; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; } if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
 #endif
 #ifdef Aux13
-        if ((parameter[0]=='G') && (parameter[1]=='D')) { static bool init=false; if (!init) { pinMode(Aux13,OUTPUT); init=true; } long v=(double)strtol(&parameter[3],NULL,10); if (v==0) digitalWrite(Aux13,LOW); else if (v==255) digitalWrite(Aux13,HIGH); else commandError=true; } else
+            if (parameter[1]=='D') { valueAux13=v; byte p=Aux13; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; } if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
 #endif
 #ifdef Aux14
-        if ((parameter[0]=='G') && (parameter[1]=='E')) { static bool init=false; if (!init) { pinMode(Aux14,OUTPUT); init=true; } long v=(double)strtol(&parameter[3],NULL,10); if (v==0) digitalWrite(Aux14,LOW); else if (v==255) digitalWrite(Aux14,HIGH); else commandError=true; } else
+            if (parameter[1]=='E') { valueAux14=v; byte p=Aux14; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; } if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
 #endif
 #ifdef Aux15
-        if ((parameter[0]=='G') && (parameter[1]=='F')) { static bool init=false; if (!init) { pinMode(Aux15,OUTPUT); init=true; } long v=(double)strtol(&parameter[3],NULL,10); if (v==0) digitalWrite(Aux15,LOW); else if (v==255) digitalWrite(Aux15,HIGH); else commandError=true; } else
+            if (parameter[1]=='F') { valueAux15=v; byte p=Aux15; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; } if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
 #endif
-          commandError=true;
+            commandError=true;
+          } else commandError=true;
+        } else commandError=true;
       } else
 //  :SzDDD*MM#
 //          Sets the target Object Azimuth
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='z')  { if (!dmsToDouble(&newTargetAzm,parameter,false)) commandError=true; } else
-      commandError=true;
+      if (command[1]=='z')  { if (!dmsToDouble(&newTargetAzm,parameter,false)) commandError=true; } else commandError=true;
       } else 
 //   T - Tracking Commands
 //

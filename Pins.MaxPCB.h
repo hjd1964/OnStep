@@ -3,14 +3,16 @@
 
 #if defined(__MK64FX512__) || defined(__MK66FX1M0__)
 
-// The multi-purpose pins
+// The multi-purpose pins (Aux3..Aux8 can be analog pwm/dac if supported)
 #define Aux0          19
 #define Aux1          18
 #define Aux2          5
-#define Aux3          36
+#define Aux3          36    // this should also be ok as pwm analog output (w/#define Aux3_Analog)
 #define Aux4          39
-#define Aux5         A21
-#define Aux6         A22
+#define Aux5         A21    // true analog output
+#define Aux5_Analog
+#define Aux6         A22    // true analog output
+#define Aux6_Analog
 
 // The PEC index sense is a logic level input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
 #define PecPin        23

@@ -341,6 +341,56 @@ volatile int backlashAxis2  = 0;
 volatile int blAxis1        = 0;
 volatile int blAxis2        = 0;
 
+// aux pin control
+#ifdef Aux0
+byte valueAux0 = 0;
+#endif
+#ifdef Aux1
+byte valueAux1 = 0;
+#endif
+#ifdef Aux2
+byte valueAux2 = 0;
+#endif
+#ifdef Aux3
+byte valueAux3 = 0;
+#endif
+#ifdef Aux4
+byte valueAux4 = 0;
+#endif
+#ifdef Aux5
+byte valueAux5 = 0;
+#endif
+#ifdef Aux6
+byte valueAux6 = 0;
+#endif
+#ifdef Aux7
+byte valueAux7 = 0;
+#endif
+#ifdef Aux8
+byte valueAux8 = 0;
+#endif
+#ifdef Aux9
+byte valueAux9 = 0;
+#endif
+#ifdef Aux10
+byte valueAux10 = 0;
+#endif
+#ifdef Aux11
+byte valueAux11 = 0;
+#endif
+#ifdef Aux12
+byte valueAux12 = 0;
+#endif
+#ifdef Aux13
+byte valueAux13 = 0;
+#endif
+#ifdef Aux14
+byte valueAux14 = 0;
+#endif
+#ifdef Aux15
+byte valueAux15 = 0;
+#endif
+
 // EEPROM Info --------------------------------------------------------------------------------------------------------------
 // 0-1023 bytes
 // general purpose storage 0..99

@@ -3,16 +3,18 @@
 
 #if defined(__AVR_ATmega2560__) || defined(__SAM3X8E__)
 
-// The multi-purpose pins
+// The multi-purpose pins (Aux3..Aux8 can be analog (pwm/dac) if supported)
 #define Aux0          11
 #define Aux1          29
 #define Aux2          37
 #define Aux3          62
 #define Aux4          24
 #define Aux5          30
-#define Aux6           8    // Heaters
-#define Aux7           9
-#define Aux8          10
+#define Aux6           8    // heater
+#define Aux7           9    // heater, analog (pwm)
+#define Aux7_Analog
+#define Aux8          10    // heater, analog (pwm)
+#define Aux8_Analog
 #define Aux9          39    // general purpose
 #define Aux10         41
 #define Aux11         43
@@ -61,7 +63,7 @@
 #define Axis2StepBit   6    //
 #define Axis2StepPORT PORTF //
 #define Axis2_HOME    21    // Pin 21 (Home sw)
-#define Axis2_Aux     Aux2  // Pin 37 (ESP8266 GPIO0 or SPI MISO)
+#define Axis2_Aux     Aux2  // Pin 37 (ESP8266 RST or SPI MISO)
 #define Axis2_M2      35    // Pin 35 (Microstep Mode 2 or SPI CS)
 #define Axis2_M1      33    // Pin 33 (Microstep Mode 1 or SPI SCK)
 #define Axis2_M0      31    // Pin 31 (Microstep Mode 0 or SPI MOSI)
