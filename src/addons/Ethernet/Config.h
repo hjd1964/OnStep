@@ -14,7 +14,7 @@
 #define ADVANCED_CHARS_ON         // Default=_ON, _OFF for standard "RA/Dec" instead of symbols
 
 // Auxillary switch/feature control; for example: SW0 "Cover" to open/close an OTA cover
-// only unused OnStep Aux pins should be assigned!
+// only OnStep Aux pins that are unused for other purposes should be assigned!
 #define SW0_OFF                   // For Aux0
 #define SW1_OFF                   // For Aux1
 #define SW2_OFF                   // For Aux2
@@ -24,6 +24,22 @@
 #define SW6_OFF                   // For Aux6
 #define SW7_OFF                   // For Aux7
 #define SW8_OFF                   // For Aux8
+#define SW9_OFF                   // For Aux9
+#define SW10_OFF                  // For Aux10
+#define SW11_OFF                  // For Aux11
+#define SW12_OFF                  // For Aux12
+#define SW13_OFF                  // For Aux13
+#define SW14_OFF                  // For Aux14
+#define SW15_OFF                  // For Aux15
+
+// Auxillary analog/feature control; for example: AN3 "Secondary Mirror Heater" to allow pwm control of a dew heater at 0 to 100% power
+// only OnStep Aux pins that are unused for other purposes should be assigned!
+#define AN3_OFF                   // For Aux3
+#define AN4_OFF                   // For Aux4
+#define AN5_OFF                   // For Aux5
+#define AN6_OFF                   // For Aux6
+#define AN7_OFF                   // For Aux7
+#define AN8_OFF                   // For Aux8
 
 // enter a MAC address for your controller below:
 byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };

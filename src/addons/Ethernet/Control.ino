@@ -49,12 +49,14 @@
 
 const char html_controlScript1[] =
 "<script>\n"
-"function guide(dir,start) {\n"
+"function s(key,v1) {\n"
   "var xhttp = new XMLHttpRequest();\n"
-  "xhttp.open('GET', 'guide.txt?dr='+dir+start+'&x='+new Date().getTime(), true);\n"
+  "xhttp.open('GET', 'guide.txt?'+key+'='+v1+'&x='+new Date().getTime(), true);\n"
   "xhttp.send();\n"
 "}\n"
-"function guidef(dir,start) { guide(dir,start); autoFastRun(); }\n"
+"function g(v1){s('dr',v1);}\n"
+"function gf(v1){s('dr',v1);autoFastRun();}\n"
+"function sf(key,v1){s(key,v1);autoFastRun();}\n"
 "</script>\n";
 
 const char html_controlScript2[] =
@@ -84,28 +86,28 @@ const char html_controlQuick1a[] =
 "<input id='th' type='hidden' name='th'><input id='tm' type='hidden' name='tm'><input id='ts' type='hidden' name='ts'>";
 const char html_controlQuick2[] =
 "</form>"
-"<button type='button' class='bb' onpointerdown=\"guide('q','c')\">" ARROW_R2 HOME_CH ARROW_R2 "</button>";
+"<button type='button' class='bb' onpointerdown=\"g('qc')\">" ARROW_R2 HOME_CH ARROW_R2 "</button>";
 const char html_controlQuick3[] =
 "&nbsp;&nbsp;"
-"<button type='button' class='bb' onpointerdown=\"guide('q','h')\">" ARROW_DR HOME_CH "</button>"
-"<button type='button' class='bb' onpointerdown=\"guide('q','r')\">" CAUTION_CH HOME_CH "</button>";
+"<button type='button' class='bb' onpointerdown=\"g('qh')\">" ARROW_DR HOME_CH "</button>"
+"<button type='button' class='bb' onpointerdown=\"g('qr')\">" CAUTION_CH HOME_CH "</button>";
 const char html_controlQuick4[] =
 "&nbsp;&nbsp;"
-"<button type='button' class='bb' onpointerdown=\"guide('p','u')\">P" ARROW_UR "</button>"
-"<button type='button' class='bb' onpointerdown=\"guide('p','k')\">" ARROW_DR "P</button>";
+"<button type='button' class='bb' onpointerdown=\"g('pu')\">P" ARROW_UR "</button>"
+"<button type='button' class='bb' onpointerdown=\"g('pk')\">" ARROW_DR "P</button>";
 const char html_controlQuick5[] =
 "&nbsp;&nbsp;"
-"<button type='button' class='bb' style=\"height: 2.2em; color: White;\" onpointerdown=\"guide('q','q')\">Stop!</button>"
+"<button type='button' class='bb' style=\"height: 2.2em; color: White;\" onpointerdown=\"g('qq')\">Stop!</button>"
 "</div><br class='clear' />\r\n";
 
 const char html_controlTrack1[] = 
 "<div class='b1' style='width: 8em'>"
 "<div align='left'>Tracking:</div>"
-"<button type='button' class='bbh' style='width: 2em' onpointerdown=\"guide('T','s')\" type='submit'>" SIDEREAL_CH "</button>";
+"<button type='button' class='bbh' style='width: 2em' onpointerdown=\"g('Ts')\" type='submit'>" SIDEREAL_CH "</button>";
 const char html_controlTrack2[] =
-"<button type='button' class='bbh' style='width: 2em' onpointerdown=\"guide('T','l')\" type='submit'>" LUNAR_CH "</button>";
+"<button type='button' class='bbh' style='width: 2em' onpointerdown=\"g('Tl')\" type='submit'>" LUNAR_CH "</button>";
 const char html_controlTrack3[] =
-"<button type='button' class='bbh' style='width: 2em' onpointerdown=\"guide('T','h')\" type='submit'>" SOLAR_CH "</button>"
+"<button type='button' class='bbh' style='width: 2em' onpointerdown=\"g('Th')\" type='submit'>" SOLAR_CH "</button>"
 "</div>";
 const char html_controlAlign1[] = 
 "<div class='b1' style='width: 16.2em'>"
@@ -121,121 +123,146 @@ const char html_controlTrack4[] =
 const char html_controlGuide1[] =
 "<div class='b1' style='width: 27em'>"
 "<div align='left'>Guide:</div>"
-"<button class='gb' type='button' onpointerdown=\"guide('n','1')\" onpointerup=\"guide('n','0')\">" BUTTON_N "</button><br />";
+"<button class='gb' type='button' onpointerdown=\"g('n1')\" onpointerup=\"g('n0')\">" BUTTON_N "</button><br />";
 const char html_controlGuide2[] = 
-"<button class='gb' type='button' onpointerdown=\"guide('e','1')\" onpointerup=\"guide('e','0')\">" BUTTON_E "</button>";
+"<button class='gb' type='button' onpointerdown=\"g('e1')\" onpointerup=\"g('e0')\">" BUTTON_E "</button>";
 const char html_controlGuide3[] = 
-"<button class='gb' type='button' onpointerdown=\"guide('s','y')\">" BUTTON_SYNC "</button>"
-"<button class='gb' type='button' onpointerdown=\"guide('w','1')\" onpointerup=\"guide('w','0')\">" BUTTON_W "</button><br />";
+"<button class='gb' type='button' onpointerdown=\"g('sy')\">" BUTTON_SYNC "</button>"
+"<button class='gb' type='button' onpointerdown=\"g('w1')\" onpointerup=\"g('w0')\">" BUTTON_W "</button><br />";
 const char html_controlGuide4[] = 
-"<button class='gb' type='button' onpointerdown=\"guide('s','1')\" onpointerup=\"guide('s','0')\">" BUTTON_S "</button><br /><br />";
+"<button class='gb' type='button' onpointerdown=\"g('s1')\" onpointerup=\"g('s0')\">" BUTTON_S "</button><br /><br />";
 const char html_controlGuide5[] =
 "<form method='get' action=\"/control.htm\">"
-"<button class='bbh' type='button' onpointerdown=\"guide('R','0')\">0.25x</button>"
-"<button class='bbh' type='button' onpointerdown=\"guide('R','1')\">0.5x</button>";
-//"<button name='gu' value=\"0\" type='submit'>0.25x</button>"
-//"<button name='gu' value=\"1\" type='submit'>0.5x</button>";
+"<button class='bbh' type='button' onpointerdown=\"g('R0')\">0.25x</button>"
+"<button class='bbh' type='button' onpointerdown=\"g('R1')\">0.5x</button>";
 const char html_controlGuide6[] = 
-"<button class='bbh' type='button' onpointerdown=\"guide('R','2')\">1x</button>"
-"<button class='bbh' type='button' onpointerdown=\"guide('R','4')\">Mid</button>";
-//"<button name='gu' value=\"2\" type='submit'>1x</button>"
-//"<button name='gu' value=\"4\" type='submit'>Mid</button>";
+"<button class='bbh' type='button' onpointerdown=\"g('R2')\">1x</button>"
+"<button class='bbh' type='button' onpointerdown=\"g('R4')\">Mid</button>";
 const char html_controlGuide7[] = 
-"<button class='bbh' type='button' onpointerdown=\"guide('R','6')\">Fast</button>"
-"<button class='bbh' type='button' onpointerdown=\"guide('R','8')\">VFast</button>"
-//"<button name='gu' value=\"6\" type='submit'>Fast</button>"
-//"<button name='gu' value=\"8\" type='submit'>VFast</button></form>"
+"<button class='bbh' type='button' onpointerdown=\"g('R6')\">Fast</button>"
+"<button class='bbh' type='button' onpointerdown=\"g('R8')\">VFast</button>"
 "</div><br class='clear' />\r\n";
 
 const char html_controlFocus1[] =
 "<div class='b1' style='width: 27em'>";
 const char html_controlFocus2[] =
-"<button class='bbh' type='button' onpointerdown=\"guidef('F','1')\" >1</button>"
-"<button class='bbh' type='button' onpointerdown=\"guidef('F','2')\" >2</button>&nbsp;&nbsp;&nbsp;&nbsp;";
+"<button class='bbh' type='button' onpointerdown=\"gf('F1')\" >1</button>"
+"<button class='bbh' type='button' onpointerdown=\"gf('F2')\" >2</button>&nbsp;&nbsp;&nbsp;&nbsp;";
 const char html_controlFocus3[] = 
-"<button class='bbh' type='button' onpointerdown=\"guidef('F','z')\" >" RESET_CH "</button>"
-"<button class='bbh' type='button' onpointerdown=\"guidef('F','h')\" >" ARROW_DR HOME_CH "</button>&nbsp;&nbsp;&nbsp;&nbsp;";
+"<button class='bbh' type='button' onpointerdown=\"gf('Fz')\" >" RESET_CH "</button>"
+"<button class='bbh' type='button' onpointerdown=\"gf('Fh')\" >" ARROW_DR HOME_CH "</button>&nbsp;&nbsp;&nbsp;&nbsp;";
 const char html_controlFocus4[] =
-"<button class='bbh' type='button' onpointerdown=\"guidef('F','I')\" onpointerup=\"guide('F','q');\" >" ARROW_DD "</button>"
-"<button class='bbh' type='button' style='width: 2em' onpointerdown=\"guidef('F','i')\" onpointerup=\"guide('F','q')\" >" ARROW_D "</button>";
+"<button class='bbh' type='button' onpointerdown=\"gf('FI')\" onpointerup=\"g('Fq');\" >" ARROW_DD "</button>"
+"<button class='bbh' type='button' style='width: 2em' onpointerdown=\"gf('Fi')\" onpointerup=\"g('Fq')\" >" ARROW_D "</button>";
 const char html_controlFocus5[] =
-"<button class='bbh' type='button' style='width: 2em' onpointerdown=\"guidef('F','o')\" onpointerup=\"guide('F','q')\" >" ARROW_U "</button>"
-"<button class='bbh' type='button' onpointerdown=\"guidef('F','O')\" onpointerup=\"guide('F','q')\" >" ARROW_UU "</button>";
+"<button class='bbh' type='button' style='width: 2em' onpointerdown=\"gf('Fo')\" onpointerup=\"g('Fq')\" >" ARROW_U "</button>"
+"<button class='bbh' type='button' onpointerdown=\"gf('FO')\" onpointerup=\"g('Fq')\" >" ARROW_UU "</button>";
 const char html_controlFocus6[] =
 "</div><br class='clear' />\r\n";
 
 const char html_controlRotate0[] = 
 "<div class='b1' style='width: 27em'>";
 const char html_controlRotate1[] = 
-"<button class='bbh' type='button' style='height: 2.1em' onpointerdown=\"guidef('r','e')\" >" RESET_CH "</button>"
-"<button class='bbh' type='button' style='height: 2.1em' onpointerdown=\"guidef('h','o')\" >" ARROW_DR HOME_CH "</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+"<button class='bbh' type='button' style='height: 2.1em' onpointerdown=\"gf('re')\" >" RESET_CH "</button>"
+"<button class='bbh' type='button' style='height: 2.1em' onpointerdown=\"gf('ho')\" >" ARROW_DR HOME_CH "</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 const char html_controlRotate2[] = 
-"<button class='bbh' type='button' style='height: 2.1em' onpointerdown=\"guidef('b','2')\" >" ARROW_LL "</button>"
-"<button class='bbh' type='button' style='width: 2em' onpointerdown=\"guidef('b','1')\" >" ARROW_L "</button>";
+"<button class='bbh' type='button' style='height: 2.1em' onpointerdown=\"gf('b2')\" >" ARROW_LL "</button>"
+"<button class='bbh' type='button' style='width: 2em' onpointerdown=\"gf('b1')\" >" ARROW_L "</button>";
 const char html_controlRotate3[] =
-"<button class='bbh' type='button' style='width: 2em' onpointerdown=\"guidef('f','1')\" >" ARROW_R "</button>"
-"<button class='bbh' type='button' style='height: 2.1em' onpointerdown=\"guidef('f','2')\" >" ARROW_RR "</button><br />";
+"<button class='bbh' type='button' style='width: 2em' onpointerdown=\"gf('f1')\" >" ARROW_R "</button>"
+"<button class='bbh' type='button' style='height: 2.1em' onpointerdown=\"gf('f2')\" >" ARROW_RR "</button><br />";
 const char html_controlDeRotate1[] = 
-"<button type='button' onpointerdown=\"guidef('d','1')\" >De-Rotate On</button>&nbsp;&nbsp;&nbsp;"
-"<button type='button' onpointerdown=\"guidef('d','r')\" >Rev</button>";
+"<button type='button' onpointerdown=\"gf('d1')\" >De-Rotate On</button>&nbsp;&nbsp;&nbsp;"
+"<button type='button' onpointerdown=\"gf('dr')\" >Rev</button>";
 const char html_controlDeRotate2[] = 
-"<button type='button' onpointerdown=\"guidef('d','p')\" >P</button>&nbsp;&nbsp;&nbsp;"
-"<button type='button' onpointerdown=\"guidef('d','0')\" >De-Rotate Off</button>";
+"<button type='button' onpointerdown=\"gf('dp')\" >P</button>&nbsp;&nbsp;&nbsp;"
+"<button type='button' onpointerdown=\"gf('d0')\" >De-Rotate Off</button>";
 const char html_controlRotate4[] =
 "</div><br class='clear' />\r\n";
 
-#if defined(SW0) || defined(SW1) || defined(SW2) || defined(SW3) || defined(SW4) || defined(SW5) || defined(SW6) || defined(SW7) || defined(SW8)
-const char html_controlSwitchB[] = 
-"<div class='b1' style='width: 27em'>"
-"<div align='left'>Switches:</div>";
+#if defined(SW0) || defined(SW1) || defined(SW2) || defined(SW3) || defined(SW4) || defined(SW5) || defined(SW6) || defined(SW7) || defined(SW8) || defined(SW9) || defined(SW10) || defined(SW11) || defined(SW12) || defined(SW13) || defined(SW14) || defined(SW15) || defined(AN3) || defined(AN4) || defined(AN5) || defined(AN6) || defined(AN7) || defined(AN8)
+const char html_controlAuxB[] = "<div class='b1' style='width: 27em'><div align='left'>Aux:</div>";
 #ifdef SW0
-const char html_controlSwitch0[] = 
-"<button type='button' onpointerdown=\"guidef('o','0')\" >" SW0 " On</button>"
-"<button type='button' onpointerdown=\"guidef('x','0')\" >" SW0 " Off</button><br />";
+const char html_controlSwitch0[] = SW0 "<br /><button type='button' onpointerdown=\"s('sw0','255')\" >On</button><button type='button' onpointerdown=\"s('sw0','0')\" >Off</button><br />";
 #endif
 #ifdef SW1
-const char html_controlSwitch1[] = 
-"<button type='button' onpointerdown=\"guidef('o','1')\" >" SW1 " On</button>"
-"<button type='button' onpointerdown=\"guidef('x','1')\" >" SW1 " Off</button><br />";
+const char html_controlSwitch1[] = SW1 "<br /><button type='button' onpointerdown=\"s('sw1','255')\" >On</button><button type='button' onpointerdown=\"s('sw1','0')\" >Off</button><br />";
 #endif
 #ifdef SW2
-const char html_controlSwitch2[] = 
-"<button type='button' onpointerdown=\"guidef('o','2')\" >" SW2 " On</button>"
-"<button type='button' onpointerdown=\"guidef('x','2')\" >" SW2 " Off</button><br />";
+const char html_controlSwitch2[] = SW2 "<br /><button type='button' onpointerdown=\"s('sw2','255')\" >On</button><button type='button' onpointerdown=\"s('sw2','0')\" >Off</button><br />";
 #endif
 #ifdef SW3
-const char html_controlSwitch3[] = 
-"<button type='button' onpointerdown=\"guidef('o','3')\" >" SW3 " On</button>"
-"<button type='button' onpointerdown=\"guidef('x','3')\" >" SW3 " Off</button><br />";
+const char html_controlSwitch3[] = SW3 "<br /><button type='button' onpointerdown=\"s('sw3','255')\" >On</button><button type='button' onpointerdown=\"s('sw3','0')\" >Off</button><br />";
 #endif
 #ifdef SW4
-const char html_controlSwitch4[] = 
-"<button type='button' onpointerdown=\"guidef('o','4')\" >" SW4 " On</button>"
-"<button type='button' onpointerdown=\"guidef('x','4')\" >" SW4 " Off</button><br />";
+const char html_controlSwitch4[] = SW4 "<br /><button type='button' onpointerdown=\"s('sw4','255')\" >On</button><button type='button' onpointerdown=\"s('sw4','0')\" >Off</button><br />";
 #endif
 #ifdef SW5
-const char html_controlSwitch5[] = 
-"<button type='button' onpointerdown=\"guidef('o','5')\" >" SW5 " On</button>"
-"<button type='button' onpointerdown=\"guidef('x','5')\" >" SW5 " Off</button><br />";
+const char html_controlSwitch5[] = SW5 "<br /><button type='button' onpointerdown=\"s('sw5','255')\" >On</button><button type='button' onpointerdown=\"s('sw5','0')\" >Off</button><br />";
 #endif
 #ifdef SW6
-const char html_controlSwitch6[] = 
-"<button type='button' onpointerdown=\"guidef('o','6')\" >" SW6 " On</button>"
-"<button type='button' onpointerdown=\"guidef('x','6')\" >" SW6 " Off</button><br />";
+const char html_controlSwitch6[] = SW6 "<br /><button type='button' onpointerdown=\"s('sw6','255')\" >On</button><button type='button' onpointerdown=\"s('sw6','0')\" >Off</button><br />";
 #endif
 #ifdef SW7
-const char html_controlSwitch7[] = 
-"<button type='button' onpointerdown=\"guidef('o','7')\" >" SW7 " On</button>"
-"<button type='button' onpointerdown=\"guidef('x','7')\" >" SW7 " Off</button><br />";
+const char html_controlSwitch7[] = SW7 "<br /><button type='button' onpointerdown=\"s('sw7','255')\" >On</button><button type='button' onpointerdown=\"s('sw7','0')\" >Off</button><br />";
 #endif
 #ifdef SW8
-const char html_controlSwitch8[] = 
-"<button type='button' onpointerdown=\"guidef('o','8')\" >" SW8 " On</button>"
-"<button type='button' onpointerdown=\"guidef('x','8')\" >" SW8 " Off</button><br />";
+const char html_controlSwitch8[] = SW8 "<br /><button type='button' onpointerdown=\"s('sw8','255')\" >On</button><button type='button' onpointerdown=\"s('sw8','0')\" >Off</button><br />";
 #endif
-const char html_controlSwitchE[] =
-"</div><br class='clear' />\r\n";
+#ifdef SW9
+const char html_controlSwitch9[] = SW9 "<br /><button type='button' onpointerdown=\"s('sw9','255')\" >On</button><button type='button' onpointerdown=\"s('sw9','0')\" >Off</button><br />";
 #endif
+#ifdef SW10
+const char html_controlSwitch10[] = SW10 "<br /><button type='button' onpointerdown=\"s('swA','255')\" >On</button><button type='button' onpointerdown=\"s('swA','0')\" >Off</button><br />";
+#endif
+#ifdef SW11
+const char html_controlSwitch11[] = SW11 "<br /><button type='button' onpointerdown=\"s('swB','255')\" >On</button><button type='button' onpointerdown=\"s('swB','0')\" >Off</button><br />";
+#endif
+#ifdef SW12
+const char html_controlSwitch12[] = SW12 "<br /><button type='button' onpointerdown=\"s('swC','255')\" >On</button><button type='button' onpointerdown=\"s('swC','0')\" >Off</button><br />";
+#endif
+#ifdef SW13
+const char html_controlSwitch13[] = SW13 "<br /><button type='button' onpointerdown=\"s('swD','255')\" >On</button><button type='button' onpointerdown=\"s('swD','0')\" >Off</button><br />";
+#endif
+#ifdef SW14
+const char html_controlSwitch14[] = SW14 "<br /><button type='button' onpointerdown=\"s('swE','255')\" >On</button><button type='button' onpointerdown=\"s('swE','0')\" >Off</button><br />";
+#endif
+#ifdef SW15
+const char html_controlSwitch15[] = SW15 "<br /><button type='button' onpointerdown=\"s('swF','255')\" >On</button><button type='button' onpointerdown=\"s('swF','0')\" >Off</button><br />";
+#endif
+#ifdef AN3
+const char html_controlAnalog3A[] = AN3 " <span id='an3v'>";
+const char html_controlAnalog3B[] ="</span>%<br /><input style='width: 80%; background: #111' type='range' value='";
+const char html_controlAnalog3C[] = "' onchange=\"sf('an3',this.value)\"><br />";
+#endif
+#ifdef AN4
+const char html_controlAnalog4A[] = AN4 " <span id='an4v'>";
+const char html_controlAnalog4B[] ="</span>%<br /><input style='width: 80%; background: #111' type='range' value='";
+const char html_controlAnalog4C[] = "' onchange=\"sf('an4',this.value)\"><br />";
+#endif
+#ifdef AN5
+const char html_controlAnalog5A[] = AN5 " <span id='an5v'>";
+const char html_controlAnalog5B[] = "</span>%<br /><input style='width: 80%; background: #111' type='range' value='";
+const char html_controlAnalog5C[] = "' onchange=\"sf('an5',this.value)\"><br />";
+#endif
+#ifdef AN6
+const char html_controlAnalog6A[] = AN6 " <span id='an6v'>";
+const char html_controlAnalog6B[] = "</span>%<br /><input style='width: 80%; background: #111' type='range' value='";
+const char html_controlAnalog6C[] = "' onchange=\"sf('an6',this.value)\"><br />";
+#endif
+#ifdef AN7
+const char html_controlAnalog7A[] = AN7 " <span id='an7v'>";
+const char html_controlAnalog7B[] = "</span>%<br /><input style='width: 80%; background: #111' type='range' value='";
+const char html_controlAnalog7C[] = "' onchange=\"sf('an7',this.value)\"><br />";
+#endif
+#ifdef AN8
+const char html_controlAnalog8A[] = AN8 " <span id='an8v'>";
+const char html_controlAnalog8B[] = "</span>%<br /><input style='width: 80%; background: #111' type='range' value='";
+const char html_controlAnalog8C[] = "' onchange=\"sf('an8',this.value)\"><br />";
+#endif
+const char html_controlAuxE[] = "</div><br class='clear' />\r\n";
+#endif
+
 
 const char html_controlEnd[] = 
 "<br />\r\n";
@@ -248,7 +275,7 @@ void handleControl() {
   Ser.setTimeout(WebTimeout);
   serialRecvFlush();
     
-  char temp1[120]="";
+  char temp1[24]="";
   char temp2[120]="";
 
   processControlGet();
@@ -418,37 +445,104 @@ void handleControl() {
 #endif
   }
 
-  // Rotate/De-Rotate ----------------------------------------
-  #if defined(SW0) || defined(SW1) || defined(SW2) || defined(SW3) || defined(SW4) || defined(SW5) || defined(SW6) || defined(SW7) || defined(SW8)
-    data += html_controlSwitchB;
+  // Aux -----------------------------------------------------
+  #if defined(SW0) || defined(SW1) || defined(SW2) || defined(SW3) || defined(SW4) || defined(SW5) || defined(SW6) || defined(SW7) || defined(SW8) || defined(SW9) || defined(SW10) || defined(SW11) || defined(SW12) || defined(SW13) || defined(SW14) || defined(SW15) || defined(AN3) || defined(AN4) || defined(AN5) || defined(AN6) || defined(AN7) || defined(AN8)
+    data += html_controlAuxB;
+    // Digital Control
+    int c=0;
     #ifdef SW0
-    data += html_controlSwitch0;
+    data += html_controlSwitch0; c++;
     #endif
     #ifdef SW1
-    data += html_controlSwitch1;
+    data += html_controlSwitch1; c++;
     #endif
     #ifdef SW2
-    data += html_controlSwitch2;
+    data += html_controlSwitch2; c++;
     #endif
     #ifdef SW3
-    data += html_controlSwitch3;
+    data += html_controlSwitch3; c++;
     #endif
     #ifdef SW4
-    data += html_controlSwitch4;
+    data += html_controlSwitch4; c++;
     #endif
     #ifdef SW5
-    data += html_controlSwitch5;
+    data += html_controlSwitch5; c++;
     #endif
     #ifdef SW6
-    data += html_controlSwitch6;
+    data += html_controlSwitch6; c++;
     #endif
     #ifdef SW7
-    data += html_controlSwitch7;
+    data += html_controlSwitch7; c++;
     #endif
     #ifdef SW8
-    data += html_controlSwitch8;
+    data += html_controlSwitch8; c++;
     #endif
-    data += html_controlSwitchE;
+    #ifdef SW9
+    data += html_controlSwitch9; c++;
+    #endif
+    #ifdef SW10
+    data += html_controlSwitch10; c++;
+    #endif
+    #ifdef SW11
+    data += html_controlSwitch11; c++;
+    #endif
+    #ifdef SW12
+    data += html_controlSwitch12; c++;
+    #endif
+    #ifdef SW13
+    data += html_controlSwitch13; c++;
+    #endif
+    #ifdef SW14
+    data += html_controlSwitch14; c++;
+    #endif
+    #ifdef SW15
+    data += html_controlSwitch15; c++;
+    #endif
+    if (c>0) data+="<br />";
+
+#ifdef OETHS
+    client->print(data); data="";
+#endif
+
+    // Analog Control
+    #ifdef AN3
+    Ser.print(":GXG3#"); temp1[Ser.readBytesUntil('#',temp1,20)]=0; if (temp1[0]==0) { temp1[0]='0'; temp1[1]=0; }
+    data += html_controlAnalog3A; data += temp1;
+    data += html_controlAnalog3B; data += temp1;
+    data += html_controlAnalog3C;
+    #endif
+    #ifdef AN4
+    Ser.print(":GXG4#"); temp1[Ser.readBytesUntil('#',temp1,20)]=0; if (temp1[0]==0) { temp1[0]='0'; temp1[1]=0; }
+    data += html_controlAnalog4A; data += temp1;
+    data += html_controlAnalog4B; data += temp1;
+    data += html_controlAnalog4C;
+    #endif
+    #ifdef AN5
+    Ser.print(":GXG5#"); temp1[Ser.readBytesUntil('#',temp1,20)]=0; if (temp1[0]==0) { temp1[0]='0'; temp1[1]=0; }
+    data += html_controlAnalog5A; data += temp1;
+    data += html_controlAnalog5B; data += temp1;
+    data += html_controlAnalog5C;
+    #endif
+    #ifdef AN6
+    Ser.print(":GXG6#"); temp1[Ser.readBytesUntil('#',temp1,20)]=0; if (temp1[0]==0) { temp1[0]='0'; temp1[1]=0; }
+    data += html_controlAnalog6A; data += temp1;
+    data += html_controlAnalog6B; data += temp1;
+    data += html_controlAnalog6C;
+    #endif
+    #ifdef AN7
+    Ser.print(":GXG7#"); temp1[Ser.readBytesUntil('#',temp1,20)]=0; if (temp1[0]==0) { temp1[0]='0'; temp1[1]=0; }
+    data += html_controlAnalog7A; data += temp1;
+    data += html_controlAnalog7B; data += temp1;
+    data += html_controlAnalog7C;
+    #endif
+    #ifdef AN8
+    Ser.print(":GXG8#"); temp1[Ser.readBytesUntil('#',temp1,20)]=0; if (temp1[0]==0) { temp1[0]='0'; temp1[1]=0; }
+    data += html_controlAnalog8A; data += temp1;
+    data += html_controlAnalog8B; data += temp1;
+    data += html_controlAnalog8C;
+    #endif
+
+    data += html_controlAuxE;
   #endif
 
   data += html_controlEnd;
@@ -492,6 +586,43 @@ void controlAjax() {
   temp[Ser.readBytesUntil('#',temp,20)]=0;
   data += "rotatorpos|";
   if (temp[0]!=0) { temp[9]=temp[5]; temp[10]=temp[6]; temp[11]=0; temp[4]='&'; temp[5]='d'; temp[6]='e'; temp[7]='g'; temp[8]=';'; data += temp; data += "&#39;\n"; } else { data += "?\n"; }
+
+  #ifdef AN3
+    Ser.print(":GXG3#");
+    temp[Ser.readBytesUntil('#',temp,20)]=0;
+    data += "an3v|";
+    if (temp[0]!=0) { data += temp; data += "\n"; } else { data += "?\n"; }
+  #endif
+  #ifdef AN4
+    Ser.print(":GXG4#");
+    temp[Ser.readBytesUntil('#',temp,20)]=0;
+    data += "an4v|";
+    if (temp[0]!=0) { data += temp; data += "\n"; } else { data += "?\n"; }
+  #endif
+  #ifdef AN5
+    Ser.print(":GXG5#");
+    temp[Ser.readBytesUntil('#',temp,20)]=0;
+    data += "an5v|";
+    if (temp[0]!=0) { data += temp; data += "\n"; } else { data += "?\n"; }
+  #endif
+  #ifdef AN6
+    Ser.print(":GXG6#");
+    temp[Ser.readBytesUntil('#',temp,20)]=0;
+    data += "an6v|";
+    if (temp[0]!=0) { data += temp; data += "\n"; } else { data += "?\n"; }
+  #endif
+  #ifdef AN7
+    Ser.print(":GXG7#");
+    temp[Ser.readBytesUntil('#',temp,20)]=0;
+    data += "an7v|";
+    if (temp[0]!=0) { data += temp; data += "\n"; } else { data += "?\n"; }
+  #endif
+  #ifdef AN8
+    Ser.print(":GXG8#");
+    temp[Ser.readBytesUntil('#',temp,20)]=0;
+    data += "an8v|";
+    if (temp[0]!=0) { data += temp; data += "\n"; } else { data += "?\n"; }
+  #endif
 
 #ifdef OETHS
   client->print(data);
@@ -645,46 +776,78 @@ void processControlGet() {
     if (v=="d1") Ser.print(":r+#");
     if (v=="dr") Ser.print(":rR#");
     if (v=="dp") Ser.print(":rP#");
-
-    // Control general purpose switches
-    #ifdef SW0
-    if (v=="o0") { Ser.print(":SXG0,255#"); cl(); }
-    if (v=="x0") { Ser.print(":SXG0,0#"); cl(); }
-    #endif
-    #ifdef SW1
-    if (v=="o1") { Ser.print(":SXG1,255#"); cl(); }
-    if (v=="x1") { Ser.print(":SXG1,0#"); cl(); }
-    #endif
-    #ifdef SW2
-    if (v=="o2") { Ser.print(":SXG2,255#"); cl(); }
-    if (v=="x2") { Ser.print(":SXG2,0#"); cl(); }
-    #endif
-    #ifdef SW3
-    if (v=="o3") { Ser.print(":SXG3,255#"); cl(); }
-    if (v=="x3") { Ser.print(":SXG3,0#"); cl(); }
-    #endif
-    #ifdef SW4
-    if (v=="o4") { Ser.print(":SXG4,255#"); cl(); }
-    if (v=="x4") { Ser.print(":SXG4,0#"); cl(); }
-    #endif
-    #ifdef SW5
-    if (v=="o5") { Ser.print(":SXG5,255#"); cl(); }
-    if (v=="x5") { Ser.print(":SXG5,0#"); cl(); }
-    #endif
-    #ifdef SW6
-    if (v=="o6") { Ser.print(":SXG6,255#"); cl(); }
-    if (v=="x6") { Ser.print(":SXG6,0#"); cl(); }
-    #endif
-    #ifdef SW7
-    if (v=="o7") { Ser.print(":SXG7,255#"); cl(); }
-    if (v=="x7") { Ser.print(":SXG7,0#"); cl(); }
-    #endif
-    #ifdef SW8
-    if (v=="o8") { Ser.print(":SXG8,255#"); cl(); }
-    if (v=="x8") { Ser.print(":SXG8,0#"); cl(); }
-    #endif
-
   }
+
+  // General purpose switches
+  #ifdef SW0
+  v=server.arg("sw0"); if (v!="") { Ser.print(":SXG0,"+v+"#"); cl(); }
+  #endif
+  #ifdef SW1
+  v=server.arg("sw1"); if (v!="") { Ser.print(":SXG1,"+v+"#"); cl(); }
+  #endif
+  #ifdef SW2
+  v=server.arg("sw2"); if (v!="") { Ser.print(":SXG2,"+v+"#"); cl(); }
+  #endif
+  #ifdef SW3
+  v=server.arg("sw3"); if (v!="") { Ser.print(":SXG3,"+v+"#"); cl(); }
+  #endif
+  #ifdef SW4
+  v=server.arg("sw4"); if (v!="") { Ser.print(":SXG4,"+v+"#"); cl(); }
+  #endif
+  #ifdef SW5
+  v=server.arg("sw5"); if (v!="") { Ser.print(":SXG5,"+v+"#"); cl(); }
+  #endif
+  #ifdef SW6
+  v=server.arg("sw6"); if (v!="") { Ser.print(":SXG6,"+v+"#"); cl(); }
+  #endif
+  #ifdef SW7
+  v=server.arg("sw7"); if (v!="") { Ser.print(":SXG7,"+v+"#"); cl(); }
+  #endif
+  #ifdef SW8
+  v=server.arg("sw8"); if (v!="") { Ser.print(":SXG8,"+v+"#"); cl(); }
+  #endif
+  #ifdef SW9
+  v=server.arg("sw9"); if (v!="") { Ser.print(":SXG9,"+v+"#"); cl(); }
+  #endif
+  #ifdef SW10
+  v=server.arg("swA"); if (v!="") { Ser.print(":SXGA,"+v+"#"); cl(); }
+  #endif
+  #ifdef SW11
+  v=server.arg("swB"); if (v!="") { Ser.print(":SXGB,"+v+"#"); cl(); }
+  #endif
+  #ifdef SW12
+  v=server.arg("swC"); if (v!="") { Ser.print(":SXGC,"+v+"#"); cl(); }
+  #endif
+  #ifdef SW13
+  v=server.arg("swD"); if (v!="") { Ser.print(":SXGD,"+v+"#"); cl(); }
+  #endif
+  #ifdef SW14
+  v=server.arg("swE"); if (v!="") { Ser.print(":SXGE,"+v+"#"); cl(); }
+  #endif
+  #ifdef SW15
+  v=server.arg("swF"); if (v!="") { Ser.print(":SXGF,"+v+"#"); cl(); }
+  #endif
+
+  // General purpose analog
+  #ifdef AN3
+  v=server.arg("an3"); if (v!="") { Ser.printf(":SXG3,%ld#",(v.toInt()*255L)/100L); cl(); }
+  #endif
+  #ifdef AN4
+  v=server.arg("an4"); if (v!="") { Ser.printf(":SXG4,%ld#",(v.toInt()*255L)/100L); cl(); }
+  #endif
+  #ifdef AN5
+  v=server.arg("an5"); if (v!="") { Ser.printf(":SXG5,%ld#",(v.toInt()*255L)/100L); cl(); }
+  #endif
+  #ifdef AN6
+  v=server.arg("an6"); if (v!="") { Ser.printf(":SXG6,%ld#",(v.toInt()*255L)/100L); cl(); }
+  #endif
+  #ifdef AN7
+  v=server.arg("an7"); if (v!="") { Ser.printf(":SXG7,%ld#",(v.toInt()*255L)/100L); cl(); }
+  #endif
+  #ifdef AN8
+  v=server.arg("an8"); if (v!="") { Ser.printf(":SXG8,%ld#",(v.toInt()*255L)/100L); cl(); }
+  #endif
+
 }
 
 // clear any possible response
