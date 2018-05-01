@@ -381,24 +381,33 @@ boolean do_fastalt_calc() {
 // -----------------------------------------------------------------------------------------------------------------------------
 // Refraction adjusted tracking
 
-// returns the amount of refraction (in arcminutes) at given altitude (degrees), pressure (millibars), and temperature (celsius)
-double Refrac(double Alt, double Pressure=1010.0, double Temperature=15.0) {
+// returns the amount of refraction (in arcminutes) at the given true altitude (degrees), pressure (millibars), and temperature (celsius)
+double TrueRefrac(double Alt, double Pressure=1010.0, double Temperature=10.0) {
   double TPC=(Pressure/1010.0) * (283.0/(273.0+Temperature));
   double r=( ( 1.02*cot( (Alt+(10.3/(Alt+5.11)))/Rad ) ) ) * TPC;  if (r<0.0) r=0.0;
   return r;
 }
 
-// Alternate tracking rate calculation method
-double ZenithTrackingRate() {
-  double Alt1=currentAlt+0.5; if (Alt1<0.0) Alt1=0.0;
-  double Alt2=currentAlt-0.5; if (Alt2<0.0) Alt2=0.0;
-  if (currentAlt>89.8) return 15.0;
-  if (currentAlt>89.5) return 14.998;
+// returns the amount of refraction (in arcminutes) at the given apparent altitude (degrees), pressure (millibars), and temperature (celsius)
+double ApparentRefrac(double Alt, double Pressure=1010.0, double Temperature=10.0) {
+  double r=TrueRefrac(Alt,Pressure,Temperature);
+  r=TrueRefrac(Alt-(r/60.0),Pressure,Temperature);
+  return r;
+}
 
-  double Alt1_ = Alt1 - ( Refrac(Alt1) / 60.0 );
-  double Alt2_ = Alt2 - ( Refrac(Alt2) / 60.0 );
-  
-  return 15.0 * ((double)(( Alt1 - Alt2 ) / ( Alt1_ - Alt2_ )));
+// Alternate tracking rate calculation method
+double ztr(double a) {
+  if (a>89.8) return 14.9998;
+  if (a>89.5) return 14.9995;
+
+  double Alt1=a+0.25; if (Alt1<0.0) Alt1=0.0;
+  double Alt2=a-0.25; if (Alt2<0.0) Alt2=0.0;
+
+  double Alt1_ = Alt1 - ( TrueRefrac(Alt1) / 60.0 );
+  double Alt2_ = Alt2 - ( TrueRefrac(Alt2) / 60.0 );
+
+  double x=15.0 * ((double)(( Alt1 - Alt2 ) / ( Alt1_ - Alt2_ ))); if (x>15.0) x=15.0;
+  return x;
 }
 
 #ifndef MOUNT_TYPE_ALTAZM
@@ -453,7 +462,7 @@ boolean do_refractionRate_calc() {
 
   // apply refraction
   if ((rr_step==20) || (rr_step==120)) {
-    rr_Alt+=Refrac(rr_Alt)/60.0;
+    rr_Alt+=ApparentRefrac(rr_Alt,ambient.getPressure(),ambient.getTemperature())/60.0;
   } else
 
   // convert back to the Equtorial coords
@@ -474,18 +483,16 @@ boolean do_refractionRate_calc() {
       if ((rr_HA2<-90.0) && (rr_HA1>90.0)) rr_HA2+=360.0;
 
       // set rates
-      double dax1=(rr_HA1-rr_HA2)  *(15.0/(RefractionRateRange/60.0))/2.0;
-      if (abs(_deltaAxis1-dax1)>0.025) _deltaAxis1=dax1; else _deltaAxis1=(_deltaAxis1*9.0+dax1)/10.0;
+      double dax1=(rr_HA1-rr_HA2)*(15.0/(RefractionRateRange/60.0))/2.0;
+      if (abs(_deltaAxis1-dax1)>0.005) _deltaAxis1=dax1; else _deltaAxis1=(_deltaAxis1*9.0+dax1)/10.0;
       double dax2=(rr_Dec1-rr_Dec2)*(15.0/(RefractionRateRange/60.0))/2.0;
-      if (abs(_deltaAxis2-dax2)>0.025) _deltaAxis2=dax2; else _deltaAxis2=(_deltaAxis2*9.0+dax2)/10.0;
+      if (abs(_deltaAxis2-dax2)>0.005) _deltaAxis2=dax2; else _deltaAxis2=(_deltaAxis2*9.0+dax2)/10.0;
       
       // override for special case of near a celestial pole
       if (90.0-fabs(rr_Dec)<(1.0/3600.0)) { _deltaAxis1=_currentRate*15.0; _deltaAxis2=0.0; }
+
       // override for special case of near the zenith
-      if (currentAlt>(90.0-7.5)) {
-        _deltaAxis1=ZenithTrackingRate();
-        _deltaAxis2=0.0;
-      }
+      if (currentAlt>85.0) { _deltaAxis1=ztr(currentAlt); _deltaAxis2=0.0; }
     }
   } else
 

@@ -688,7 +688,6 @@ void processCommands() {
               case '2': cli(); temp=(long)trackingState; sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                         // Debug2, trackingState
               case '3': sprintf(reply,"%ld",(long)(_deltaAxis1*1000.0*1.00273790935)); quietReply=true; break;                             // Debug3, RA refraction tracking rate
               case '4': sprintf(reply,"%ld",(long)(_deltaAxis2*1000.0*1.00273790935)); quietReply=true; break;                             // Debug4, Dec refraction tracking rate
-              case '5': sprintf(reply,"%ld",(long)(ZenithTrackingRate()*1000.0*1.00273790935)); quietReply=true; break;                    // Debug5, Alt RA refraction tracking rate
               case '6': cli(); temp=(long)(targetAxis1.part.m); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                  // Debug6, HA target position
               case '7': cli(); temp=(long)(targetAxis2.part.m); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                  // Debug7, Dec target position
               case '8': cli(); temp=(long)(posAxis1); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                            // Debug8, HA motor position
