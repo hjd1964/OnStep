@@ -627,8 +627,10 @@ void processCommands() {
           } else
           if (parameter[0]=='4') { // 4n: Encoder
             switch (parameter[1]) {
-              case '0': if (getEnc(&f,&f1)==0) { if (!doubleToDms(reply,&f,true,true)) commandError=true; else quietReply=true; } else commandError=true; break;  // Get absolute Axis1
-              case '1': if (getEnc(&f,&f1)==0) { if (!doubleToDms(reply,&f1,true,true)) commandError=true; else quietReply=true; } else commandError=true; break; // Get absolute Axis2
+              case '0': if (getEnc(&f,&f1)==0) { if (!doubleToDms(reply,&f,true,true)) commandError=true; else quietReply=true; } else commandError=true; break;  // Get formatted absolute Axis1
+              case '1': if (getEnc(&f,&f1)==0) { if (!doubleToDms(reply,&f1,true,true)) commandError=true; else quietReply=true; } else commandError=true; break; // Get formatted absolute Axis2
+              case '2': if (getEnc(&f,&f1)==0) { dtostrf(f,0,6,reply); } else commandError=true; break;                                                           // Get absolute Axis1
+              case '3': if (getEnc(&f,&f1)==0) { dtostrf(f1,0,6,reply); } else commandError=true; break;                                                          // Get absolute Axis2
               default:  commandError=true;
             }
           } else
@@ -1429,6 +1431,24 @@ void processCommands() {
 #endif
             case '8': GeoAlign.tfCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;  // tfCor
             default:  commandError=true;
+          }
+        } else
+        if (parameter[0]=='4') { // 4n: Encoder
+          switch (parameter[1]) {
+            static double encoderAxis1=0;
+            static double encoderAxis2=0;
+            case '0': // set encoder Axis1 value
+              f=strtod(parameter,&conv_end);
+              if ( (&parameter[0]!=conv_end) && (f>=-999.9) && (f<=999.9)) encoderAxis1=f; else commandError=true;
+              break;
+            case '1': // set encoder Axis2 value
+              f=strtod(parameter,&conv_end);
+              if ( (&parameter[0]!=conv_end) && (f>=-999.9) && (f<=999.9)) encoderAxis2=f; else commandError=true;
+              break;
+            case '2': // sync encoder to last values
+              if ( (parameter[0]=='1') && (parameter[1]==0)) if (syncEnc(encoderAxis1,encoderAxis2)) commandError=true;
+              break;
+            default: commandError=true;
           }
         } else
         if (parameter[0]=='9') { // 9n: Misc.
