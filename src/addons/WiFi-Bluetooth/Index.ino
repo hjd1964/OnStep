@@ -27,6 +27,9 @@ const char* html_indexSite = "&nbsp;&nbsp;Long. = <font class='c'>%s</font>, Lat
 
 const char* html_indexPosition = "&nbsp;&nbsp;Current: " Axis1 "=<font class='c'>%s</font>, " Axis2 "=<font class='c'>%s</font><br />";
 const char* html_indexTarget = "&nbsp;&nbsp;Target:&nbsp;&nbsp; " Axis1 "=<font class='c'>%s</font>, " Axis2 "=<font class='c'>%s</font><br />";
+#ifdef ENCODERS_ON
+const char* html_indexEncoder = "&nbsp;&nbsp;Abs:&nbsp; Ax1=<font class='c'>%s</font>, Ax2=<font class='c'>%s</font><br />";
+#endif
 const char* html_indexPier = "&nbsp;&nbsp;Pier Side=<font class='c'>%s</font> (meridian flips <font class='c'>%s</font>)<br />";
 
 const char* html_indexCorPolar = "&nbsp;&nbsp;Polar Offset: &Delta; Alt=<font class='c'>%ld</font>\", &Delta; Azm=<font class='c'>%ld</font>\"<br />";
@@ -192,6 +195,18 @@ void handleRoot() {
   sprintf(temp,html_indexTarget,temp2,temp3); 
   data += temp;
 
+#ifdef ENCODERS_ON
+  // RA,Dec encoder position
+  Ser.print(":GX40#");
+  temp2[Ser.readBytesUntil('#',temp2,20)]=0;
+  if (strlen(temp2)<=0) { strcpy(temp2,"N/A"); }
+  Ser.print(":GX41#");
+  temp3[Ser.readBytesUntil('#',temp3,20)]=0;
+  if (strlen(temp3)<=0) { strcpy(temp3,"N/A"); }
+  sprintf(temp,html_indexEncoder,temp2,temp3); 
+  data += temp;
+#endif
+
   // pier side
   Ser.print(":GX94#");
   temp2[Ser.readBytesUntil('#',temp2,20)]=0;
@@ -222,6 +237,7 @@ void handleRoot() {
   }
   sprintf(temp,html_indexPier,temp2,temp3);
   data += temp;
+
 #ifdef OETHS
   client->print(data); data="";
 #endif

@@ -14,6 +14,7 @@
 #define ADVANCED_CHARS_ON         // Default=_ON, _OFF for standard "RA/Dec" instead of symbols
 
 #define AMBIENT_CONDITIONS_OFF    // Default=_OFF, _ON for ambient conditions on status page
+#define ENCODERS_OFF              // Default=_OFF, _ON to enable encoder support
 
 // Auxillary switch/feature control; for example: SW0 "Cover" to open/close an OTA cover
 // only OnStep Aux pins that are unused for other purposes should be assigned!
