@@ -25,24 +25,22 @@ const char* html_indexTime = "&nbsp;<font class='c'>%s</font>&nbsp;UT";
 const char* html_indexSidereal = "&nbsp;(<font class='c'>%s</font>&nbsp; LST)<br />";
 const char* html_indexSite = "&nbsp;&nbsp;Long. = <font class='c'>%s</font>, Lat. = <font class='c'>%s</font><br />";
 
-const char* html_indexTrue = "&nbsp;&nbsp;Absolute Position: " Axis1 "=<font class='c'>%ld</font> steps, " Axis2 "=<font class='c'>%ld</font> steps<br />";
-const char* html_indexIndex = "&nbsp;&nbsp;IHS=<font class='c'>%ld</font> steps, IDS=<font class='c'>%ld</font> steps<br />";
-const char* html_indexCorIdx = "&nbsp;&nbsp;IH=<font class='c'>%ld</font>\", ID=<font class='c'>%ld</font>\"<br />";
-const char* html_indexCorPole = "&nbsp;&nbsp;altCor=<font class='c'>%ld</font>\", azmCor=<font class='c'>%ld</font>\"<br />";
-const char* html_indexCorPolar = "&nbsp;&nbsp;Polar Offset: &Delta; Alt=<font class='c'>%ld</font>\", &Delta; Azm=<font class='c'>%ld</font>\"<br />";
-const char* html_indexCorOrtho = "&nbsp;&nbsp;doCor=<font class='c'>%ld</font>\", pdCor=<font class='c'>%ld</font>\"<br />";
-const char* html_indexRateDeltas = "&nbsp;&nbsp;&Delta; Axis1=<font class='c'>%s</font>\"/s, &Delta; Axis2=<font class='c'>%s</font>\"/s<br /><br />";
-
 const char* html_indexPosition = "&nbsp;&nbsp;Current: " Axis1 "=<font class='c'>%s</font>, " Axis2 "=<font class='c'>%s</font><br />";
 const char* html_indexTarget = "&nbsp;&nbsp;Target:&nbsp;&nbsp; " Axis1 "=<font class='c'>%s</font>, " Axis2 "=<font class='c'>%s</font><br />";
-const char* html_indexAz1 = "&nbsp;&nbsp;Az1: " Axis1 "=<font class='c'>%s</font>, " Axis2 "=<font class='c'>%s</font><br />";
-const char* html_indexAz2 = "&nbsp;&nbsp;Az2: " Axis1 "=<font class='c'>%s</font>, " Axis2 "=<font class='c'>%s</font><br />";
 const char* html_indexPier = "&nbsp;&nbsp;Pier Side=<font class='c'>%s</font> (meridian flips <font class='c'>%s</font>)<br />";
-const char* html_indexTracking = "&nbsp;&nbsp;Tracking: <font class='c'>%s %s</font><br />";
+
+const char* html_indexCorPolar = "&nbsp;&nbsp;Polar Offset: &Delta; Alt=<font class='c'>%ld</font>\", &Delta; Azm=<font class='c'>%ld</font>\"<br />";
+
 const char* html_indexPark = "&nbsp;&nbsp;Parking: <font class='c'>%s</font><br />";
-const char* html_indexLastError = "&nbsp;&nbsp;Last Error: <font class='c'>%s</font><br />";
-const char* html_indexMaxSpeed = "&nbsp;&nbsp;Maximum slew speed: <font class='c'>%s</font>&deg;/s<br />";
+const char* html_indexTracking = "&nbsp;&nbsp;Tracking: <font class='c'>%s %s</font><br />";
 const char* html_indexMaxRate = "&nbsp;&nbsp;Current MaxRate: <font class='c'>%ld</font> (Default MaxRate: <font class='c'>%ld</font>)<br />";
+const char* html_indexMaxSpeed = "&nbsp;&nbsp;Maximum slew speed: <font class='c'>%s</font>&deg;/s<br />";
+
+#ifdef AMBIENT_CONDITIONS_ON
+const char* html_indexTPHD = "&nbsp;&nbsp;%s <font class='c'>%s</font>%s<br />";
+#endif
+
+const char* html_indexLastError = "&nbsp;&nbsp;Last Error: <font class='c'>%s</font><br />";
 const char* html_indexWorkload = "&nbsp;&nbsp;Workload: <font class='c'>%s</font><br />";
 
 #ifdef OETHS
@@ -143,6 +141,33 @@ void handleRoot() {
   data += temp;
 #ifdef OETHS
   client->print(data); data="";
+#endif
+
+#ifdef AMBIENT_CONDITIONS_ON
+  Ser.print(":GX9A#");
+  temp1[Ser.readBytesUntil('#',temp1,20)]=0;
+  if (strlen(temp1)>2) {
+    sprintf(temp,html_indexTPHD,"Temperature:",temp1,"&deg;C");
+    data += temp;
+  }
+  Ser.print(":GX9B#");
+  temp1[Ser.readBytesUntil('#',temp1,20)]=0;
+  if (strlen(temp1)>2) {
+    sprintf(temp,html_indexTPHD,"Barometric Pressure:",temp1,"mb");
+    data += temp;
+  }
+  Ser.print(":GX9C#");
+  temp1[Ser.readBytesUntil('#',temp1,20)]=0;
+  if (strlen(temp1)>2) {
+    sprintf(temp,html_indexTPHD,"Relative Humidity:",temp1,"%");
+    data += temp;
+  }
+  Ser.print(":GX9E#");
+  temp1[Ser.readBytesUntil('#',temp1,20)]=0;
+  if (strlen(temp1)>2) {
+    sprintf(temp,html_indexTPHD,"Dew Point Temperature:",temp1,"&deg;C");
+    data += temp;
+  }
 #endif
 
   data+="<br /><b>Coordinates:</b><br />";
@@ -248,7 +273,7 @@ void handleRoot() {
   temp4[Ser.readBytesUntil('#',temp4,20)]=0;
   if (strlen(temp4)>6) {
     double tr=atof(temp4);
-    sprintf(temp,"Tracking Rate: <font class=\"c\">%5.3f</font>Hz<br />",tr);
+    sprintf(temp,"&nbsp;&nbsp;Tracking Rate: <font class=\"c\">%5.3f</font>Hz<br />",tr);
     data += temp;
   }
 
@@ -275,7 +300,7 @@ void handleRoot() {
   client->print(data); data="";
 #endif
 
-  data+="<br /><b>Errors:</b><br />";
+  data+="<br /><b>State:</b><br />";
 
   // Last Error
   strcpy(temp2,"None");
@@ -299,7 +324,6 @@ void handleRoot() {
   sprintf(temp,html_indexWorkload,temp1);
   data += temp;
 
-  data += "<br />";
   data += "</div><br class=\"clear\" />\r\n";
   data += "</div></body></html>";
 
