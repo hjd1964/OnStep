@@ -1,6 +1,21 @@
 // ---------------------------------------------------------------------------------------------------
 // Guide, commands to move the mount in any direction at a series of fixed rates
 
+#if defined(ST4_ON) || defined(ST4_PULLUP)
+#include "PushButton.h"
+
+#ifdef ST4_HAND_CONTROL_ON
+  #define debounceMs 100
+#else
+  #define debounceMs 5
+#endif
+
+button st4n;
+button st4s;
+button st4e;
+button st4w;
+#endif
+
 long          guideTimeRemainingAxis1    = -1;
 unsigned long guideTimeThisIntervalAxis1 = -1;
 long          guideTimeRemainingAxis2    = -1;
@@ -14,6 +29,18 @@ void initGuide() {
   guideDirAxis2              =  0;
   guideTimeRemainingAxis2    = -1;
   guideTimeThisIntervalAxis2 = -1;
+
+#if defined(ST4_ON) || defined(ST4_PULLUP)
+  #ifdef ST4_ON
+    boolean pullup=false;
+  #else
+    boolean pullup=true;
+  #endif
+  st4n.init(ST4DEn,debounceMs,pullup);
+  st4s.init(ST4DEs,debounceMs,pullup);
+  st4e.init(ST4RAe,debounceMs,pullup);
+  st4w.init(ST4RAw,debounceMs,pullup);
+#endif
 }
 
 void Guide() {
@@ -167,121 +194,135 @@ void enableGuideRate(int g) {
 }
 
 // handle the ST4 interface and hand controller features
-
-#if defined(ST4_ON) || defined(ST4_PULLUP)
-#ifdef ST4_HAND_CONTROL_ON
-const long Debounce_ms=100;
-const long AltMode_ms=2000;
-const long Shed_ms=4000;
-#else
-const long Debounce_ms=0;
-#endif
-#endif
-
 void ST4() {
 #if defined(ST4_ON) || defined(ST4_PULLUP)
-    // ST4 INTERFACE
-    byte w1=digitalRead(ST4RAw); byte e1=digitalRead(ST4RAe); byte n1=digitalRead(ST4DEn); byte s1=digitalRead(ST4DEs);
-    delayMicroseconds(50);
-    byte w2=digitalRead(ST4RAw); byte e2=digitalRead(ST4RAe); byte n2=digitalRead(ST4DEn); byte s2=digitalRead(ST4DEs);
-
-    // if signals aren't stable ignore them
-    if ((w1==w2) && (e1==e2) && (n1==n2) && (s1==s2)) {
-      static char c1=0;
-      static unsigned long c1Time=0;
-      if ((w1==HIGH) && (e1==HIGH)) if (c1!='b') { c1='b'; c1Time=millis(); }
-      if ((w1==LOW)  && (e1==HIGH)) if (c1!='w') { c1='w'; c1Time=millis(); }
-      if ((w1==HIGH) && (e1==LOW))  if (c1!='e') { c1='e'; c1Time=millis(); }
-      if ((w1==LOW)  && (e1==LOW))  if (c1!='+') { c1='+'; c1Time=millis(); }
-      static char c2=0;
-      static unsigned long c2Time=0;
-      if ((n1==HIGH) && (s1==HIGH)) if (c2!='b') { c2='b'; c2Time=millis(); }
-      if ((n1==LOW)  && (s1==HIGH)) if (c2!='n') { c2='n'; c2Time=millis(); }
-      if ((n1==HIGH) && (s1==LOW))  if (c2!='s') { c2='s'; c2Time=millis(); }
-      if ((n1==LOW)  && (s1==LOW))  if (c2!='+') { c2='+'; c2Time=millis(); }
+  // ST4 INTERFACE
+  st4n.poll();
+  st4s.poll();
+  st4e.poll();
+  st4w.poll();
 
 #ifdef ST4_HAND_CONTROL_ON
-      static char keys_up=true;
-      if ((c1=='b') && (c2=='b') && ((long)(millis()-c1Time)>Debounce_ms) && ((long)(millis()-c2Time)>Debounce_ms)) keys_up=true;
-      static bool altModeA=false;
-      static bool altModeB=false;
-      static unsigned long altModeShed=0;
-      if (c1=='+') stopGuideAxis1(); if (c2=='+') stopGuideAxis2(); // stop any guide that might have been triggered
-      if ((c1=='+') && ((long)(millis()-c1Time)>AltMode_ms) && (!altModeB)) { if (!altModeA) { altModeA=true; soundBeep(); keys_up=false; } altModeShed=millis(); }
-      if ((c2=='+') && ((long)(millis()-c2Time)>AltMode_ms) && (!altModeA)) { if (!altModeB) { altModeB=true; soundBeep(); keys_up=false; } altModeShed=millis(); }
-      if ((trackingState!=TrackingMoveTo) && (!waitingHome) && (altModeA || altModeB) && ((long)(millis()-altModeShed)<Shed_ms)) {
-        if (keys_up && !cmdWaiting()) {
-          if (altModeA) {
-            int c=currentGuideRate;
-            if ((c1=='w') && ((long)(millis()-c1Time)>Debounce_ms)) {
-              if (trackingState==TrackingNone) cmdSend(":B+#",true); else { if (c>=7) c=8; else if (c>=5) c=7; else if (c>=2) c=5; else if (c<2) c=2; }
-              keys_up=false; altModeShed=millis(); soundClick();
-            }
-            if ((c1=='e') && ((long)(millis()-c1Time)>Debounce_ms)) {
-              if (trackingState==TrackingNone) cmdSend(":B-#",true); else { if (c<=5) c=2; else if (c<=7) c=5; else if (c<=8) c=7; else if (c>8) c=8; }
-              keys_up=false; altModeShed=millis(); soundClick();
-            }
-            if ((c2=='s') && ((long)(millis()-c2Time)>Debounce_ms)) { if (alignThisStar>alignNumStars) cmdSend(":CS#",true); else cmdSend(":A+#",true); keys_up=false; altModeShed=millis(); soundClick(); }
-            if ((c2=='n') && ((long)(millis()-c2Time)>Debounce_ms)) {
-              if (trackingState==TrackingSidereal) { trackingState=TrackingNone; DisableStepperDrivers(); soundClick(); } else
-                if (trackingState==TrackingNone) { trackingState=TrackingSidereal; EnableStepperDrivers(); soundClick(); }
-              keys_up=false; altModeShed=millis();
-            }
-            if (c!=currentGuideRate) { setGuideRate(c); enableGuideRate(c); keys_up=false; altModeShed=millis(); }
-          }
-          if (altModeB) {
-            if ((c1=='w') && ((long)(millis()-c1Time)>Debounce_ms)) { cmdSend(":LN#",true); keys_up=false; altModeShed=millis(); soundClick(); }
-            if ((c1=='e') && ((long)(millis()-c1Time)>Debounce_ms)) { cmdSend(":LB#",true); keys_up=false; altModeShed=millis(); soundClick(); }
-            if ((c2=='s') && ((long)(millis()-c2Time)>Debounce_ms)) { soundEnabled=!soundEnabled; keys_up=false; altModeShed=millis(); soundClick(); }
-            if ((c2=='n') && ((long)(millis()-c2Time)>Debounce_ms)) { cmdSend(":LIG#",true); keys_up=false; altModeShed=millis(); soundClick(); }
-          }
+  const long Shed_ms=4000;
+  const long AltMode_ms=2000;
+
+  // stop any guide that might be triggered by combination button presses
+  if (st4e.isDown() && st4w.isDown()) stopGuideAxis1(); 
+  if (st4n.isDown() && st4s.isDown()) stopGuideAxis2();
+  
+  // see if a combination was down for long enough for an alternate mode
+  static bool altModeA=false;
+  static bool altModeB=false;
+  if ((st4e.timeDown()>AltMode_ms) && (st4w.timeDown()>AltMode_ms) && (!altModeB)) { if (!altModeA) { altModeA=true; soundBeep(); } }
+  if ((st4n.timeDown()>AltMode_ms) && (st4s.timeDown()>AltMode_ms) && (!altModeA)) { if (!altModeB) { altModeB=true; soundBeep(); } }
+
+  // if the alternate mode is allowed & selected & hasn't timed out, handle it
+  if (((trackingState!=TrackingMoveTo) && (!waitingHome)) && (altModeA || altModeB) && ((st4n.timeUp()<Shed_ms) || (st4s.timeUp()<Shed_ms) || (st4e.timeUp()<Shed_ms) || (st4w.timeUp()<Shed_ms)) ) {
+
+    // make sure no cmdSend() is being processed
+    if (!cmdWaiting()) {
+      if (altModeA) {
+        int c=currentGuideRate;
+        if (st4w.wasPressed() && !st4e.wasPressed()) {
+          if (trackingState==TrackingNone) cmdSend(":B+#",true); else { if (c>=7) c=8; else if (c>=5) c=7; else if (c>=2) c=5; else if (c<2) c=2; }
+          soundClick();
         }
-      } else {
-        if ((altModeA || altModeB)) { altModeA=false; altModeB=false; soundBeep(); }
-#endif
-        if (axis1Enabled) {
-          // guide E/W
-          if ((c1!=ST4DirAxis1) && ((long)(millis()-c1Time)>=Debounce_ms)) {
-            ST4DirAxis1=c1;
-            if ((c1=='e') || (c1=='w')) {
-#ifdef ST4_HAND_CONTROL_ON
-              if (waitingHome) waitingHomeContinue=true; else
-              if (trackingState==TrackingMoveTo) abortSlew=true; else
-#endif
-              {
-#if defined(SEPARATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
-                if (trackingState==TrackingSidereal) startGuideAxis1(c1,currentPulseGuideRate,GUIDE_TIME_LIMIT*1000);
-#else
-                startGuideAxis1(c1,currentGuideRate,GUIDE_TIME_LIMIT*1000);
-#endif
-              }
-            }
-            if (c1=='b') stopGuideAxis1();
-          }
-
-          // guide N/S
-          if ((c2!=ST4DirAxis2) && ((long)(millis()-c2Time)>=Debounce_ms)) {
-            ST4DirAxis2=c2;
-            if ((c2=='n') || (c2=='s')) {
-#ifdef ST4_HAND_CONTROL_ON
-              if (waitingHome) waitingHomeContinue=true; else
-              if (trackingState==TrackingMoveTo) abortSlew=true; else
-#endif
-              {
-#if defined(SEPARATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
-                if (trackingState==TrackingSidereal) startGuideAxis2(c2,currentPulseGuideRate,GUIDE_TIME_LIMIT*1000);
-#else
-                startGuideAxis2(c2,currentGuideRate,GUIDE_TIME_LIMIT*1000);
-#endif
-              }
-            }
-            if (c2=='b') stopGuideAxis2();
-          }
+        if (st4e.wasPressed() && !st4w.wasPressed()) {
+          if (trackingState==TrackingNone) cmdSend(":B-#",true); else { if (c<=5) c=2; else if (c<=7) c=5; else if (c<=8) c=7; else if (c>8) c=8; }
+          soundClick();
         }
-#ifdef ST4_HAND_CONTROL_ON
+        if (st4s.wasPressed() && !st4n.wasPressed()) {
+          if (alignThisStar>alignNumStars) cmdSend(":CS#",true); else cmdSend(":A+#",true);
+          soundClick(); 
+        }
+        if (st4n.wasPressed() && !st4s.wasPressed()) {
+          if (trackingState==TrackingSidereal) { trackingState=TrackingNone; DisableStepperDrivers(); soundClick(); } else
+          if (trackingState==TrackingNone) { trackingState=TrackingSidereal; EnableStepperDrivers(); soundClick(); }
+        }
+        if (c!=currentGuideRate) { setGuideRate(c); enableGuideRate(c); }
       }
+      if (altModeB) {
+#ifdef ST4_HAND_CONTROL_FOCUSER_ON
+        static int fs=0;
+        static int fn=0;
+        if (!fn && !fs) {
+          if (st4w.wasPressed() && !st4e.wasPressed()) { cmdSend(":F2#",true); soundClick(); }
+          if (st4e.wasPressed() && !st4w.wasPressed()) { cmdSend(":F1#",true); soundClick(); }
+        }
+        if (!fn) {
+          if (st4s.isDown() && st4n.isUp()) { if (fs==0) { cmdSend(":FS#",true); fs++; } else if (fs==1) { cmdSend(":F-#",true); fs++; } else if ((st4s.timeDown()>4000) && (fs==2)) { fs++; cmdSend(":FF#",true); } else if (fs==3) { cmdSend(":F-#",true); fs++; } }
+          if (st4s.isUp()) { if (fs>0) { cmdSend(":FQ#",true); fs=0; } }
+        }
+        if (!fs) {
+          if (st4n.isDown() && st4s.isUp()) { if (fn==0) { cmdSend(":FS#",true); fn++; } else if (fn==1) { cmdSend(":F+#",true); fn++; } else if ((st4n.timeDown()>4000) && (fn==2)) { fn++; cmdSend(":FF#",true); } else if (fn==3) { cmdSend(":F+#",true); fn++; }  }
+          if (st4n.isUp()) { if (fn>0) { cmdSend(":FQ#",true); fn=0; } }
+        }
+#else
+        if (st4w.wasPressed() && !st4e.wasPressed()) { cmdSend(":LN#",true); soundClick(); }
+        if (st4e.wasPressed() && !st4w.wasPressed()) { cmdSend(":LB#",true); soundClick(); }
+        if (st4s.wasPressed() && !st4n.wasPressed()) { soundEnabled=!soundEnabled; soundClick(); }
+        if (st4n.wasPressed() && !st4s.wasPressed()) { cmdSend(":LIG#",true); soundClick(); }
 #endif
+      }
     }
+  } else {
+    if ((altModeA || altModeB)) { 
+#ifdef ST4_HAND_CONTROL_FOCUSER_ON
+      cmdSend(":FQ#",true);
+#endif
+      altModeA=false; altModeB=false; soundBeep();
+    }
+#endif
+    if (axis1Enabled) {
+
+      // guide E/W
+      char newDirAxis1='b';
+      if (st4w.isDown() && st4e.isUp()) newDirAxis1='w';
+      if (st4e.isDown() && st4w.isUp()) newDirAxis1='e';
+      
+      if (newDirAxis1!=ST4DirAxis1) {
+        ST4DirAxis1=newDirAxis1;
+        if (newDirAxis1!='b') {
+#ifdef ST4_HAND_CONTROL_ON
+          if (waitingHome) waitingHomeContinue=true; else
+          if (trackingState==TrackingMoveTo) abortSlew=true; else
+#endif
+            {
+#if defined(SEPARATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
+            if (trackingState==TrackingSidereal) startGuideAxis1(newDirAxis1,currentPulseGuideRate,GUIDE_TIME_LIMIT*1000);
+#else
+            startGuideAxis1(newDirAxis1,currentGuideRate,GUIDE_TIME_LIMIT*1000);
+#endif
+          }
+        } else stopGuideAxis1();
+      }
+
+      // guide N/S
+      char newDirAxis2='b';
+      if (st4n.isDown() && st4s.isUp()) newDirAxis2='n';
+      if (st4s.isDown() && st4n.isUp()) newDirAxis2='s';
+
+      if (newDirAxis2!=ST4DirAxis2) {
+       
+        ST4DirAxis2=newDirAxis2;
+        if (newDirAxis2!='b') {
+#ifdef ST4_HAND_CONTROL_ON
+          if (waitingHome) waitingHomeContinue=true; else
+          if (trackingState==TrackingMoveTo) abortSlew=true; else
+#endif
+          {
+#if defined(SEPARATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
+            if (trackingState==TrackingSidereal) startGuideAxis2(newDirAxis2,currentPulseGuideRate,GUIDE_TIME_LIMIT*1000);
+#else
+            startGuideAxis2(newDirAxis2,currentGuideRate,GUIDE_TIME_LIMIT*1000);
+#endif
+          }
+        } else stopGuideAxis2();
+      }
+    }
+#ifdef ST4_HAND_CONTROL_ON
+  }
+#endif
 #endif
 }
 
