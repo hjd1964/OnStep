@@ -44,6 +44,14 @@ boolean readLX200Bytes(char* command,char* recvBuffer,long timeOutMs) {
     if (command[1]=='A') {
       if (strchr("W123456789+",command[2])) { shortResponse=true; Ser.setTimeout(timeOutMs*4); }
     }
+    if ((command[1]=='F') || (command[1]=='f')) {
+      if (strchr("+-QGZHFS1234",command[2])) noResponse=true;
+      if (strchr("A",command[2])) shortResponse=true;
+    }
+    if (command[1]=='r') {
+      if (strchr("+-PRFC<>Q1234",command[2])) noResponse=true;
+      if (strchr("~S",command[2])) shortResponse=true;
+    }
     if (command[1]=='M') {
       if (strchr("ewnsg",command[2])) noResponse=true;
       if (strchr("SA",command[2])) shortResponse=true;
@@ -52,7 +60,7 @@ boolean readLX200Bytes(char* command,char* recvBuffer,long timeOutMs) {
       if (strchr("#ewns",command[2])) noResponse=true;
     }
     if (command[1]=='S') {
-      if (strchr("CLSGtgMNOPrdhoTB",command[2])) shortResponse=true;
+      if (strchr("CLSGtgMNOPrdhoTBX",command[2])) shortResponse=true;
     }
     if (command[1]=='L') {
       if (strchr("BNCDL!",command[2])) noResponse=true;
