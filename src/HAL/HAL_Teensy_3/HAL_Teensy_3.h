@@ -26,6 +26,7 @@
 #endif
 
 // New symbol for the default I2C port -------------------------------------------------------------
+#include <Wire.h>
 #if defined(__MK64FX512__) || defined(__MK66FX1M0__)
 #define HAL_Wire Wire1
 #else
