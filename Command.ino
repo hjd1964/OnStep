@@ -666,7 +666,6 @@ void processCommands() {
           } else
           if (parameter[0]=='E') { // En: Get settings
             switch (parameter[1]) {
-              case '0': strcpy(reply,(char *)ConfighSettings().c_str()); quietReply=true; break;
               case '1': sprintf(reply,"%ld",(long)MaxRate); quietReply=true; break;
               case '2': dtostrf(DegreesForAcceleration,2,1,reply); quietReply=true; break;
               case '3': sprintf(reply,"%ld",(long)round(BacklashTakeupRate)); quietReply=true; break;
@@ -1173,8 +1172,9 @@ void processCommands() {
         highPrecision=i;
       } else
 //  :r~#   Set continuous move mode
-//         Returns: Nothing
-      if (command[1]=='~') { rot.moveContinuous(true); quietReply=true; } else
+//         Return: 0 on failure
+//                 1 on success
+      if (command[1]=='~') { rot.moveContinuous(true); } else
 //  :r>#   Move clockwise as set by :rn# command, default = 1 deg (or 0.1 deg/s in continuous mode)
 //         Returns: Nothing
       if (command[1]=='>') { rot.startMoveCW(); quietReply=true; } else
@@ -1872,132 +1872,6 @@ void checksum(char s[]) {
   byte cks=0; for (unsigned int cksCount0=0; cksCount0<strlen(s); cksCount0++) {  cks+=s[cksCount0]; }
   sprintf(HEXS,"%02X",cks);
   strcat(s,HEXS);
-}
-
-// gets configuration (Config.h) related values
-String ConfighSettings() {
-  String c;
-  #ifdef DEBUG_ON
-    c="1";
-  #else
-    c="0";
-  #endif
-  c+="1";
-  #if defined(MOUNT_TYPE_GEM)
-    c+="0";
-  #elif defined(MOUNT_TYPE_FORK)
-    c+="1";
-  #elif defined(MOUNT_TYPE_FORK_ALT)
-    c+="2";
-  #elif defined(MOUNT_TYPE_ALTAZM)
-    c+="3";
-  #else
-    c+="9";
-  #endif
-  #if defined(ST4_OFF)
-    c+="0";
-  #elif defined(ST4_ON)
-    c+="1";
-  #elif defined(ST4_PULLUP)
-    c+="2";
-  #else
-    c+="0";
-  #endif
-  #if defined(ST4_ALTERNATE_PINS_ON)
-    c+="1";
-  #else
-    c+="0";
-  #endif
-  #ifdef PPS_SENSE_ON
-    c+="1";
-  #elif defined(PPS_SENSE_PULLUP)
-    c+="2";
-  #else
-    c+="0";
-  #endif
-  #if defined(PEC_SENSE_ON)
-    c+="1";
-  #elif defined(PEC_SENSE_PULLUP)
-    c+="2";
-  #else
-    c+="0";
-  #endif
-  #ifdef LIMIT_SENSE_ON
-    c+="1";
-  #else
-    c+="0";
-  #endif
-  #ifdef STATUS_LED_PINS_ON
-    c+="1";
-  #else
-    c+="0";
-  #endif
-  #if defined(STATUS_LED2_PINS_ON)
-    c+="1";
-  #elif defined(STATUS_LED2_PINS)
-    c+="2";
-  #else
-    c+="0";
-  #endif
-  #ifdef RETICULE_LED_PINS
-    c+="1";
-  #else
-    c+="0";
-  #endif
-  #ifdef POWER_SUPPLY_PINS_ON
-    c+="1";
-  #else
-    c+="0";
-  #endif
-  #if defined(AXIS1_DISABLED_HIGH)
-    c+="1";
-  #elif defined(AXIS1_DISABLED_LOW)
-    c+="0";
-  #else
-    c+="9";
-  #endif
-  #if defined(AXIS2_DISABLED_HIGH)
-    c+="1";
-  #elif defined(AXIS2_DISABLED_LOW)
-    c+="0";
-  #else
-    c+="9";
-  #endif
-  #ifdef AXIS1_FAULT
-    #if AXIS1_FAULT==LOW
-      c+="0";
-    #elif AXIS1_FAULT==HIGH
-      c+="1";
-    #else
-      c+="2";
-    #endif
-  #endif
-  #ifdef AXIS2_FAULT
-    #if AXIS2_FAULT==LOW
-      c+="0";
-    #elif AXIS2_FAULT==HIGH
-      c+="1";
-    #else
-      c+="2";
-    #endif
-  #endif
-  #ifdef TRACK_REFRACTION_RATE_DEFAULT_ON
-    c+="1";
-  #else
-    c+="0";
-  #endif
-  #ifdef SEPARATE_PULSE_GUIDE_RATE_ON
-    c+="1";
-  #else
-    c+="0";
-  #endif
-  #if defined(RememberMaxRate_ON) || defined(REMEMBER_MAX_RATE_ON)
-    c+="1";
-  #else
-    c+="0";
-  #endif
-
-  return c;
 }
 
 void forceRefreshGetEqu() {
