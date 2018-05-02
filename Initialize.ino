@@ -178,19 +178,6 @@ void Init_Pins() {
   pinMode(LimitPin,INPUT_PULLUP);
 #endif
 
-// ST4 interface
-#ifdef ST4_ON
-  pinMode(ST4RAw,INPUT);
-  pinMode(ST4RAe,INPUT);
-  pinMode(ST4DEn,INPUT);
-  pinMode(ST4DEs,INPUT);
-#elif defined(ST4_PULLUP)
-  pinMode(ST4RAw,INPUT_PULLUP);
-  pinMode(ST4RAe,INPUT_PULLUP);
-  pinMode(ST4DEn,INPUT_PULLUP);
-  pinMode(ST4DEs,INPUT_PULLUP);
-#endif
-
 // Pulse per second
 #ifdef PPS_SENSE_ON
   pinMode(PpsPin,INPUT);
