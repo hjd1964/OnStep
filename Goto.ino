@@ -86,6 +86,52 @@ int syncEqu(double RA, double Dec) {
   return 0;
 }
 
+// syncs internal counts to shaft encoder position (in degrees)
+int syncEnc(double EncAxis1, double EncAxis2) {
+  long a1,a2;
+
+  // validate
+  int f=validateGoto(); if (f!=0) return f;
+  if ((pierSide!=PierSideWest) && (pierSide!=PierSideEast) && (pierSide!=PierSideNone)) return 9; // unspecified error
+
+  long e1=EncAxis1*(double)StepsPerDegreeAxis1;
+  long e2=EncAxis2*(double)StepsPerDegreeAxis2;
+  
+  cli();
+  a1=(posAxis1+indexAxis1)-trueAxis1;
+  a2=(posAxis2+indexAxis2)-trueAxis2;
+  sei();
+  if (pierSide==PierSideWest) a2=-a2;
+
+  long delta1=a1-e1;
+  long delta2=a2-e2;
+
+  indexAxis1-=delta1;
+  indexAxis2-=delta2;
+
+  return 0;
+}
+
+// get internal counts as shaft encoder position (in degrees)
+int getEnc(double *EncAxis1, double *EncAxis2) {
+  long a1,a2;
+  
+  // validate
+  int f=validateGoto(); if (f!=0) return f;
+  if ((pierSide!=PierSideWest) && (pierSide!=PierSideEast) && (pierSide!=PierSideNone)) return 9; // unspecified error
+
+  cli();
+  a1=(posAxis1+indexAxis1)-trueAxis1;
+  a2=(posAxis2+indexAxis2)-trueAxis2;
+  sei();
+  if (pierSide==PierSideWest) a2=-a2;
+  
+  *EncAxis1=(double)a1/(double)StepsPerDegreeAxis1;
+  *EncAxis2=(double)a2/(double)StepsPerDegreeAxis2;
+
+  return 0;
+}
+
 // this returns the telescopes HA and Dec (index corrected for Alt/Azm)
 void getHADec(double *HA, double *Dec) {
   cli();
