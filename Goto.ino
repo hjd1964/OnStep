@@ -33,6 +33,8 @@ int syncEqu(double RA, double Dec) {
 
   // just turn on tracking
   if (pierSide==PierSideNone) {
+    pierSide=PierSideEast;
+    defaultDirAxis2=defaultDirAxis2EInit;
     trackingState=TrackingSidereal;
     EnableStepperDrivers();
     atHome=false;
@@ -40,26 +42,30 @@ int syncEqu(double RA, double Dec) {
 
   if (meridianFlip!=MeridianFlipNever) {
     // we're in the polar home position, so pick a side (of the pier)
-    if (preferredPierSide==PPS_WEST) {
-      // west side of pier - we're in the eastern sky and the HA's are negative
+    int newPierSide=pierSide;
+    if (preferredPierSide==PPS_WEST) newPierSide=PierSideWest; else // west side of pier - we're in the eastern sky and the HA's are negative
+    if (preferredPierSide==PPS_EAST) newPierSide=PierSideEast; else // east side of pier - we're in the western sky and the HA's are positive
+    { if (Axis1<0) newPierSide=PierSideWest; else newPierSide=PierSideEast; } // best side of pier
+  
+    // if pier side changed set it
+    long flipRA=(long)(180.0*(double)StepsPerDegreeAxis1);
+    if ((newPierSide==PierSideWest) && ((pierSide==PierSideNone) || (pierSide==PierSideEast))) {
       pierSide=PierSideWest;
       defaultDirAxis2=defaultDirAxis2WInit;
+      cli();
+      posAxis1          -=flipRA;
+      targetAxis1.part.m-=flipRA;
+      trueAxis1         -=flipRA;
+      sei();
     } else
-    if (preferredPierSide==PPS_EAST) {
-      // east side of pier - we're in the western sky and the HA's are positive
+    if ((newPierSide==PierSideEast) && (pierSide==PierSideWest)) {
       pierSide=PierSideEast;
       defaultDirAxis2=defaultDirAxis2EInit;
-    } else {
-      // best side of pier
-      if (Axis1<0) {
-        // west side of pier - we're in the eastern sky and the HA's are negative
-        pierSide=PierSideWest;
-        defaultDirAxis2=defaultDirAxis2WInit;
-      } else { 
-        // east side of pier - we're in the western sky and the HA's are positive
-        pierSide=PierSideEast;
-        defaultDirAxis2=defaultDirAxis2EInit;
-      }
+      cli();
+      posAxis1          +=flipRA;
+      targetAxis1.part.m+=flipRA;
+      trueAxis1         +=flipRA;
+      sei();
     }
   } else {
     // always on the "east" side of pier - we're in the western sky and the HA's are positive
@@ -98,16 +104,20 @@ int syncEnc(double EncAxis1, double EncAxis2) {
   long e2=EncAxis2*(double)StepsPerDegreeAxis2;
   
   cli();
-  a1=(posAxis1+indexAxis1)-trueAxis1;
-  a2=(posAxis2+indexAxis2)-trueAxis2;
+  a1=(posAxis1-trueAxis1);
+  a2=(posAxis2-trueAxis2);
   sei();
+  a1+=indexAxis1Steps;
+  a2+=indexAxis2Steps;
   if (pierSide==PierSideWest) a2=-a2;
 
   long delta1=a1-e1;
   long delta2=a2-e2;
 
-  indexAxis1-=delta1;
-  indexAxis2-=delta2;
+  indexAxis1Steps-=delta1;
+  indexAxis1=(double)indexAxis1Steps/(double)StepsPerDegreeAxis1;
+  indexAxis2Steps-=delta2;
+  indexAxis2=(double)indexAxis2Steps/(double)StepsPerDegreeAxis2;
 
   return 0;
 }
@@ -121,9 +131,11 @@ int getEnc(double *EncAxis1, double *EncAxis2) {
   if ((pierSide!=PierSideWest) && (pierSide!=PierSideEast) && (pierSide!=PierSideNone)) return 9; // unspecified error
 
   cli();
-  a1=(posAxis1+indexAxis1)-trueAxis1;
-  a2=(posAxis2+indexAxis2)-trueAxis2;
+  a1=(posAxis1-trueAxis1);
+  a2=(posAxis2-trueAxis2);
   sei();
+  a1+=indexAxis1Steps;
+  a2+=indexAxis2Steps;
   if (pierSide==PierSideWest) a2=-a2;
   
   *EncAxis1=(double)a1/(double)StepsPerDegreeAxis1;

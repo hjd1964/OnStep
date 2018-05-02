@@ -627,8 +627,8 @@ void processCommands() {
           } else
           if (parameter[0]=='4') { // 4n: Encoder
             switch (parameter[1]) {
-              case '0': if (getEnc(&f,&f1)==0) { if (!doubleToDms(reply,&f,false,true)) commandError=true; else quietReply=true; } else commandError=true; break;  // Get absolute Axis1
-              case '1': if (getEnc(&f,&f1)==0) { if (!doubleToDms(reply,&f1,false,true)) commandError=true; else quietReply=true; } else commandError=true; break; // Get absolute Axis2
+              case '0': if (getEnc(&f,&f1)==0) { if (!doubleToDms(reply,&f,true,true)) commandError=true; else quietReply=true; } else commandError=true; break;  // Get absolute Axis1
+              case '1': if (getEnc(&f,&f1)==0) { if (!doubleToDms(reply,&f1,true,true)) commandError=true; else quietReply=true; } else commandError=true; break; // Get absolute Axis2
               default:  commandError=true;
             }
           } else
