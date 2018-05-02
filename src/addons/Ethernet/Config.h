@@ -4,14 +4,16 @@
 // at startup this firmware will attempt to switch OnStep's baud rate to a faster speed and AFTER success, start WiFi, etc.
 // valid baud rates are 115200, 57600, 38400, 28800, 19200, 9600
 
-#define SERIAL_BAUD_DEFAULT 9600     // Default=9600, OnStep must be attached and running it's Serial1 interface this baud rate
+#define SERIAL_BAUD_DEFAULT 9600  // Default=9600, OnStep must be attached and running it's Serial1 interface this baud rate
 
-#define SERIAL_BAUD 57600            // Default=57600, use 19200 for talking to OnStep on a Mega2560
+#define SERIAL_BAUD 57600         // Default=57600, use 19200 for talking to OnStep on a Mega2560
 
-#define PASSWORD "password"          // Default="password", Not currently used
+#define PASSWORD "password"       // Default="password", Not currently used
 
 #define SPECIAL_CHARS_ON          // Default=_ON, _OFF for standard ASCII special symbols (compatibility)
 #define ADVANCED_CHARS_ON         // Default=_ON, _OFF for standard "RA/Dec" instead of symbols
+
+#define AMBIENT_CONDITIONS_OFF    // Default=_OFF, _ON for ambient conditions on status page
 
 // Auxillary switch/feature control; for example: SW0 "Cover" to open/close an OTA cover
 // only OnStep Aux pins that are unused for other purposes should be assigned!
