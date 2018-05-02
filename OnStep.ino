@@ -99,6 +99,10 @@ tmc2130 tmcAxis2(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
 #include "RTCw.h"
 rtcw urtc;
 
+// use weather sensors (temperature, pressure, humidity) if present
+#include "Weather.h"
+weather ambient;
+
 // forces initialialization of a host of settings in nv. OnStep does this automatically, most likely, you will want to leave this alone
 #define INIT_KEY false    // set to true to keep automatic initilization from happening.  This is a one-time operation... upload to the Arduino, then set to false and upload again
 #define initKey 915307548 // unique identifier for the current initialization format, do not change
@@ -106,6 +110,9 @@ rtcw urtc;
 void setup() {
   // be sure non-volatile memory is ready to go
   nv.init();
+
+  // get weather monitoring ready to go
+  ambient.init();
   
   // set initial values for some variables
   Init_Startup_Values();
@@ -432,6 +439,9 @@ void loop() {
 #ifndef MOUNT_TYPE_ALTAZM
     if ((currentDec<MinDec) || (currentDec>MaxDec)) { lastError=ERR_DEC; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
 #endif
+
+    // update weather info
+    if (!isSlewing()) ambient.poll();
 
   } else {
     // COMMAND PROCESSING --------------------------------------------------------------------------------

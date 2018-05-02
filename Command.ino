@@ -656,6 +656,11 @@ void processCommands() {
                 strcpy(reply,"N");
 #endif
                 quietReply=true; break; // rotator availablity 2=rotate/derotate, 1=rotate, 0=off
+              case 'A': dtostrf(ambient.getTemperature(),3,1,reply); quietReply=true; break;       // temperature in deg. C
+              case 'B': dtostrf(ambient.getPressure(),3,1,reply); quietReply=true; break;          // pressure in mb
+              case 'C': dtostrf(ambient.getHumidity(),3,1,reply); quietReply=true; break;          // relative humidity in %
+              case 'D': dtostrf(ambient.getAltitude(),3,1,reply); quietReply=true; break;          // altitude in meters
+              case 'E': dtostrf(ambient.getDewPoint(),3,1,reply); quietReply=true; break;          // dew point in deg. C
               default:  commandError=true;
             }
           } else
@@ -1460,6 +1465,28 @@ void processCommands() {
             break;
             case '9': // continue if paused at home
               if ((parameter[3]=='1')) { if (waitingHome) waitingHomeContinue=true; } commandError=true;
+            break;
+            case 'A': // temperature in deg. C
+              f=strtod(parameter,&conv_end);
+              if ( (&parameter[0]!=conv_end) && (f>=-100.0) && (f<100.0)) {
+                ambient.setTemperature(f);
+              } else commandError=true;
+            break;
+            case 'B': // pressure in mb
+              f=strtod(parameter,&conv_end);
+              if ( (&parameter[0]!=conv_end) && (f>=500.0) && (f<1500.0)) {
+                ambient.setPressure(f);
+              } else commandError=true;
+            break;
+            case 'C': // relative humidity in % 
+              if ( (&parameter[0]!=conv_end) && (f>=0.0) && (f<100.0)) {
+                ambient.setHumidity(f);
+              } else commandError=true;
+            break;
+            case 'D': // altitude 
+              if ( (&parameter[0]!=conv_end) && (f>=0.0) && (f<100.0)) {
+                ambient.setAltitude(f);
+              } else commandError=true;
             break;
             default: commandError=true;
           }
