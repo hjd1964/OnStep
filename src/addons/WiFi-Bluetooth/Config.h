@@ -16,7 +16,21 @@
 #define ADVANCED_CHARS_ON         // Default=_ON, _OFF for standard "RA/Dec" instead of symbols
 
 #define AMBIENT_CONDITIONS_OFF    // Default=_OFF, _ON for ambient conditions on status page
-#define ENCODERS_OFF              // Default=_OFF, _ON to enable encoder support
+
+// Encoder support (either _AB for Quadrature A/B OR _CWCCW for CW/CCW)
+#define AXIS1_ENC_OFF              // RA/Azm Axis, default = _OFF
+#define AXIS1_ENC_A_PIN 12         // specify pin#, for A or CW, default=_OFF
+#define AXIS1_ENC_B_PIN 14         // specify pin#, for B or CCW, default=_OFF
+#define AXIS1_ENC_REVERSE_OFF      // _ON to reverse the count direction, default=_OFF
+#define AXIS1_ENC_TICKS_DEG (200000.0/360.0) // 0.0018 degrees
+#define AXIS1_ENC_DIFF_LIMIT (0.5) // in degrees
+#define AXIS2_ENC_OFF              // Dec/Alt Axis, default = _OFF
+#define AXIS2_ENC_A_PIN 4          // specify pin#, for A or CW, default=_OFF
+#define AXIS2_ENC_B_PIN 5          // specify pin#, for B or CCW, default=_OFF
+#define AXIS2_ENC_REVERSE_OFF      // _ON to reverse the count direction, default=_OFF
+#define AXIS2_ENC_TICKS_DEG (2400.0/360.0) // 0.15 degrees
+#define AXIS2_ENC_DIFF_LIMIT (0.5) // in degrees
+#define ENCODERS_SYNC_ON           // enable sync of OnStep to encoder values
 
 // Auxillary switch/feature control; for example: SW0 "Cover" to open/close an OTA cover
 // only OnStep Aux pins that are unused for other purposes should be assigned!

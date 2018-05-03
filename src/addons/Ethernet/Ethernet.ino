@@ -47,6 +47,10 @@
 #include "Config.h"
 #include "CmdServer.h"
 #include "WebServer.h"
+#include "Constants.h"
+
+#include "Encoders.h"
+Encoders encoders;
 
 #if SERIAL_BAUD<=28800
   #define TIMEOUT_WEB 60
@@ -84,8 +88,6 @@ Errors lastError = ERR_NONE;
 #define PierSideFlipEW3  22
 byte pierSide = PierSideNone;
 int AlignMaxNumStars = -1;
-
-#include "Constants.h"
 
 void handleNotFound(EthernetClient *client) {
   String message = "File Not Found\n\n";
@@ -156,6 +158,8 @@ Again:
 
   // Initialize the cmd server, timeout after 500ms
   cmdSvr.init(9999,500);
+
+  encoders.init();
 }
 
 void loop(void){
@@ -181,6 +185,8 @@ void loop(void){
 
     } else server.handleClient();
   }
+
+  encoders.poll();
 }
 
 const char* HighSpeedCommsStr(long baud) {

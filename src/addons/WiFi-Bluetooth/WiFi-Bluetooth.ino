@@ -47,6 +47,10 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFiAP.h>
 #include <EEPROM.h>
+#include "Constants.h"
+
+#include "Encoders.h"
+Encoders encoders;
 
 // The settings below are for initialization only, afterward they are stored and recalled from EEPROM and must
 // be changed in the web interface OR with a reset (for initialization again) as described in the comments below
@@ -109,8 +113,6 @@ Errors lastError = ERR_NONE;
 #define PierSideFlipEW3  22
 byte pierSide = PierSideNone;
 int AlignMaxNumStars = -1;
-
-#include "Constants.h"
 
 void handleNotFound(){
   String message = "File Not Found\n\n";
@@ -328,6 +330,8 @@ Again:
 #ifdef DEBUG_ON
   Ser.println("HTTP server started");
 #endif
+
+  encoders.init();
 }
 
 void loop(void){
@@ -365,6 +369,8 @@ void loop(void){
 
     } else server.handleClient();
   }
+
+  encoders.poll();
 }
 
 const char* HighSpeedCommsStr(long baud) {

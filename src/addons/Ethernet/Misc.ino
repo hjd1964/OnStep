@@ -119,3 +119,29 @@ char serialRecvFlush() {
   return c;
 }
 
+boolean doubleToDms(char *reply, double *f, boolean fullRange, boolean signPresent) {
+  char sign[]="+";
+  int  o=0,d1,s1=0;
+  double m1,f1;
+  f1=*f;
+
+  // setup formatting, handle adding the sign
+  if (f1<0) { f1=-f1; sign[0]='-'; }
+
+  f1=f1+0.000139; // round to 1/2 arc-second
+  d1=floor(f1);
+  m1=(f1-d1)*60.0;
+  s1=(m1-floor(m1))*60.0;
+  
+  char s[]="+%02d*%02d:%02d";
+  if (signPresent) { 
+    if (sign[0]=='-') { s[0]='-'; } o=1;
+  } else {
+    strcpy(s,"%02d*%02d:%02d");
+  }
+  if (fullRange) s[2+o]='3';
+ 
+  sprintf(reply,s,d1,(int)m1,s1);
+  return true;
+}
+

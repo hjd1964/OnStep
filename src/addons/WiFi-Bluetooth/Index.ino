@@ -28,7 +28,8 @@ const char* html_indexSite = "&nbsp;&nbsp;Long. = <font class='c'>%s</font>, Lat
 const char* html_indexPosition = "&nbsp;&nbsp;Current: " Axis1 "=<font class='c'>%s</font>, " Axis2 "=<font class='c'>%s</font><br />";
 const char* html_indexTarget = "&nbsp;&nbsp;Target:&nbsp;&nbsp; " Axis1 "=<font class='c'>%s</font>, " Axis2 "=<font class='c'>%s</font><br />";
 #ifdef ENCODERS_ON
-const char* html_indexEncoder = "&nbsp;&nbsp;Abs:&nbsp; Ax1=<font class='c'>%s</font>, Ax2=<font class='c'>%s</font><br />";
+const char* html_indexEncoder1 = "&nbsp;&nbsp;OnStep: Ax1=<font class='c'>%s</font>, Ax2=<font class='c'>%s</font><br />";
+const char* html_indexEncoder2 = "&nbsp;&nbsp;Encodr: Ax1=<font class='c'>%s</font>, Ax2=<font class='c'>%s</font><br />";
 #endif
 const char* html_indexPier = "&nbsp;&nbsp;Pier Side=<font class='c'>%s</font> (meridian flips <font class='c'>%s</font>)<br />";
 
@@ -196,14 +197,20 @@ void handleRoot() {
   data += temp;
 
 #ifdef ENCODERS_ON
+  // RA,Dec OnStep position
+  double f=encoders.getOnStepAxis1();
+  doubleToDms(temp2,&f,true,true);
+  f=encoders.getOnStepAxis2();
+  doubleToDms(temp3,&f,true,true);
+  sprintf(temp,html_indexEncoder1,temp2,temp3);
+  data += temp;
+
   // RA,Dec encoder position
-  Ser.print(":GX40#");
-  temp2[Ser.readBytesUntil('#',temp2,20)]=0;
-  if (strlen(temp2)<=0) { strcpy(temp2,"N/A"); }
-  Ser.print(":GX41#");
-  temp3[Ser.readBytesUntil('#',temp3,20)]=0;
-  if (strlen(temp3)<=0) { strcpy(temp3,"N/A"); }
-  sprintf(temp,html_indexEncoder,temp2,temp3); 
+  f=encoders.getAxis1();
+  doubleToDms(temp2,&f,true,true);
+  f=encoders.getAxis2();
+  doubleToDms(temp3,&f,true,true);
+  sprintf(temp,html_indexEncoder2,temp2,temp3);
   data += temp;
 #endif
 
