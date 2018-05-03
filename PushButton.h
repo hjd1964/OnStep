@@ -29,8 +29,8 @@ class button {
 
   private:
     int _pin;
-    int _state;
-    int _lastStableState;
+    int _state = HIGH;
+    int _lastStableState = HIGH;
     unsigned long _debounceMs = 0;
     unsigned long _stableStartMs = 0;
     unsigned long _stableMs = 0;
