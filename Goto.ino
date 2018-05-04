@@ -354,7 +354,7 @@ byte validateGotoCoords(double HA, double Dec, double Alt) {
   if (Alt>maxAlt)                                       return 2;   // fail, above overhead limit
   if (Dec>MaxDec)                                       return 6;   // fail, outside limits
   if (Dec<MinDec)                                       return 6;   // fail, outside limits
-  if ((abs(HA)>(double)UnderPoleLimit*15.0) )           return 6;   // fail, outside limits
+  if ((fabs(HA)>(double)UnderPoleLimit*15.0) )          return 6;   // fail, outside limits
   return 0;
 }
 byte validateGoToEqu(double RA, double Dec) {

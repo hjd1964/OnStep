@@ -84,7 +84,7 @@ void Guide() {
 
 // returns true if rapid movement is happening
 boolean isSlewing() {
-  return ((guideDirAxis1!=0) && (abs(guideTimerRateAxis1)>=2)) || ((guideDirAxis2!=0) && (abs(guideTimerRateAxis2)>=2)) || (trackingState==TrackingMoveTo);
+  return ((guideDirAxis1!=0) && (fabs(guideTimerRateAxis1)>=2)) || ((guideDirAxis2!=0) && (fabs(guideTimerRateAxis2)>=2)) || (trackingState==TrackingMoveTo);
 }
 
 // start a guide in RA or Azm, direction must be 'e', 'w', or 'b', guideRate is the rate selection (0 to 9), guideDuration is in ms (0 to ignore) 

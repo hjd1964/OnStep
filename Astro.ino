@@ -484,9 +484,9 @@ boolean do_refractionRate_calc() {
 
       // set rates
       double dax1=(rr_HA1-rr_HA2)*(15.0/(RefractionRateRange/60.0))/2.0;
-      if (abs(_deltaAxis1-dax1)>0.005) _deltaAxis1=dax1; else _deltaAxis1=(_deltaAxis1*9.0+dax1)/10.0;
+      if (fabs(_deltaAxis1-dax1)>0.005) _deltaAxis1=dax1; else _deltaAxis1=(_deltaAxis1*9.0+dax1)/10.0;
       double dax2=(rr_Dec1-rr_Dec2)*(15.0/(RefractionRateRange/60.0))/2.0;
-      if (abs(_deltaAxis2-dax2)>0.005) _deltaAxis2=dax2; else _deltaAxis2=(_deltaAxis2*9.0+dax2)/10.0;
+      if (fabs(_deltaAxis2-dax2)>0.005) _deltaAxis2=dax2; else _deltaAxis2=(_deltaAxis2*9.0+dax2)/10.0;
       
       // override for special case of near a celestial pole
       if (90.0-fabs(rr_Dec)<(1.0/3600.0)) { _deltaAxis1=_currentRate*15.0; _deltaAxis2=0.0; }

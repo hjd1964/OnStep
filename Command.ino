@@ -1399,8 +1399,8 @@ void processCommands() {
       if (command[1]=='T')  { 
         if ((trackingState==TrackingSidereal) || (trackingState==TrackingNone)) {
           f=strtod(parameter,&conv_end);
-          if ( (&parameter[0]!=conv_end) && (((f>=30.0) && (f<90.0)) || (abs(f)<0.1))) {
-            if (abs(f)<0.1) {
+          if ( (&parameter[0]!=conv_end) && (((f>=30.0) && (f<90.0)) || (fabs(f)<0.1))) {
+            if (fabs(f)<0.1) {
               trackingState=TrackingNone;
             } else {
               if (trackingState==TrackingNone) { trackingState=TrackingSidereal; EnableStepperDrivers(); }
