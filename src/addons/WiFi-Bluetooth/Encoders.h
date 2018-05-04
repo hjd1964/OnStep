@@ -49,7 +49,7 @@
   CwCcwEncoder axis1Pos(AXIS1_ENC_A_PIN,AXIS1_ENC_B_PIN);
 #endif
 #ifdef AXIS2_ENC_CWCCW
-  CwCcwEncoder axis2Pos(AXIS1_ENC_A_PIN,AXIS1_ENC_B_PIN);
+  CwCcwEncoder axis2Pos(AXIS2_ENC_A_PIN,AXIS2_ENC_B_PIN);
 #endif
 // --------------------------------------------------------
 
