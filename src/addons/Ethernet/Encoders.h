@@ -1,7 +1,7 @@
 // -------------------------------------------------------------------------------------------------------
 // Handle encoders, both CW/CCW and Quadrature A/B types are supported
 
-#if (defined(AXIS1_ENC_AB) || defined(AXIS1_ENC_CWCCW)) && (defined(AXIS2_ENC_AB) || defined(AXIS2_ENC_CWCCW))
+#if (!defined(AXIS1_ENC_OFF) && !defined(AXIS2_ENC_OFF))
   #define ENCODERS_ON
 #endif
 
