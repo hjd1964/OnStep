@@ -84,9 +84,10 @@ class Encoders {
         #ifdef AXIS1_ENC_REVERSE_ON
         _enAxis2=-_enAxis2;
         #endif
+        enAxis2=-45.0;
 #ifdef ENCODERS_SYNC_ON
-          if ((abs(_osAxis1-_enAxis1)>(double)AXIS1_ENC_DIFF_LIMIT) ||
-              (abs(_osAxis2-_enAxis2)>(double)AXIS2_ENC_DIFF_LIMIT)) {
+          if ((fabs(_osAxis1-_enAxis1)>(double)AXIS1_ENC_DIFF_LIMIT) ||
+              (fabs(_osAxis2-_enAxis2)>(double)AXIS2_ENC_DIFF_LIMIT)) {
           Ser.print(":SX40,"); Ser.print(_enAxis1,6); Ser.print("#"); Ser.readBytes(s,1);
           Ser.print(":SX41,"); Ser.print(_enAxis2,6); Ser.print("#"); Ser.readBytes(s,1);
           Ser.print(":SX42,1#"); Ser.readBytes(s,1);
