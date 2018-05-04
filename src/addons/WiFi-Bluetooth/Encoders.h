@@ -84,7 +84,6 @@ class Encoders {
         #ifdef AXIS1_ENC_REVERSE_ON
         _enAxis2=-_enAxis2;
         #endif
-        enAxis2=-45.0;
 #ifdef ENCODERS_SYNC_ON
           if ((fabs(_osAxis1-_enAxis1)>(double)AXIS1_ENC_DIFF_LIMIT) ||
               (fabs(_osAxis2-_enAxis2)>(double)AXIS2_ENC_DIFF_LIMIT)) {
