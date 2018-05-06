@@ -94,8 +94,10 @@ void Sst4::end() {
 }
 
 bool Sst4::active() {
+  static unsigned long comp=0;
+  bool result=false;
   noInterrupts();
-  boolean result=(long)(millis()-last)<200L;
+  if (comp!=last) { result=true; comp=last; }
   interrupts();
   return result;
 }
@@ -183,6 +185,6 @@ void dataClock() {
 
 volatile boolean __tone_state=false;
 void shcTone() {
-  if (__tone_state) { __tone_state=false; digitalWrite(ST4RAe,HIGH); } else  { __tone_state=true; digitalWrite(ST4RAe,LOW); }
+  if (__tone_state) { __tone_state=false; digitalWrite(ST4RAe,HIGH); digitalWrite(ST4RAw,LOW); } else  { __tone_state=true; digitalWrite(ST4RAe,LOW); digitalWrite(ST4RAe,LOW); }
 }
 
