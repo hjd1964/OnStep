@@ -40,8 +40,8 @@
 // firmware info, these are returned by the ":GV?#" commands
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  1
-#define FirmwareVersionMinor  7
-#define FirmwareVersionPatch  "c"     // for example major.minor patch: 1.3c
+#define FirmwareVersionMinor  8
+#define FirmwareVersionPatch  "a"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 2       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
@@ -67,6 +67,10 @@ nvs nv;
 #include "math.h"
 #include "FPoint.h"
 #include "SoftSPI.h"
+#ifdef ST4_HAND_CONTROL_ON
+//#include "SerialST4.h"
+#include "St4SerialMaster.h"
+#endif
 #include "Library.h"
 #include "Align.h"
 #include "Command.h"
@@ -119,6 +123,7 @@ void setup() {
 
   // set pins for input/output as specified in Config.h and PinMap.h
   Init_Pins();
+  Init_Guide();
 
   // if this is the first startup set EEPROM to defaults
   Init_WriteNV_Values();
@@ -150,6 +155,9 @@ void setup() {
 #endif
 #ifdef HAL_SERIAL4_ENABLED
   PSerial4.begin(SERIAL4_BAUD_DEFAULT);
+#endif
+#ifdef ST4_HAND_CONTROL_ON
+  PSerialST4.begin();
 #endif
  
   // autostart tracking

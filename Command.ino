@@ -9,7 +9,7 @@ unsigned long _coord_t=0;
 double _dec,_ra;
 
 // help with commands
-enum Command {COMMAND_NONE, COMMAND_SERIAL, COMMAND_SERIAL1, COMMAND_SERIAL4, COMMAND_SERIALX};
+enum Command {COMMAND_NONE, COMMAND_SERIAL, COMMAND_SERIAL1, COMMAND_SERIAL4, COMMAND_SERIALST4, COMMAND_SERIALX};
 char reply[50];
 char command[3];
 char parameter[25];
@@ -21,6 +21,9 @@ cb cmd1;
 #endif
 #ifdef HAL_SERIAL4_ENABLED
 cb cmd4;
+#endif
+#ifdef ST4_HAND_CONTROL_ON
+cb cmdST4;
 #endif
 char replyx[50]="";
 cb cmdx; // virtual command channel for internal use
@@ -46,6 +49,9 @@ void processCommands() {
 #ifdef HAL_SERIAL4_ENABLED
     if ((PSerial4.available()>0) && (!cmd4.ready())) cmd4.add(PSerial4.read());
 #endif
+#ifdef ST4_HAND_CONTROL_ON
+    if ((PSerialST4.available()>0) && (!cmdST4.ready())) cmdST4.add(PSerialST4.read());
+#endif
 
     // send any reply
 #ifdef HAL_SERIAL_TRANSMIT
@@ -66,6 +72,9 @@ void processCommands() {
 #endif
 #ifdef HAL_SERIAL4_ENABLED
     else if (cmd4.ready()) { strcpy(command,cmd4.getCmd()); strcpy(parameter,cmd4.getParameter()); cmd4.flush(); process_command=COMMAND_SERIAL4; }
+#endif
+#ifdef ST4_HAND_CONTROL_ON
+    else if (cmdST4.ready()) { strcpy(command,cmdST4.getCmd()); strcpy(parameter,cmdST4.getParameter()); cmdST4.flush(); process_command=COMMAND_SERIALST4; }
 #endif
     else if (cmdx.ready()) { strcpy(command,cmdx.getCmd()); strcpy(parameter,cmdx.getParameter()); cmdx.flush(); process_command=COMMAND_SERIALX; }
     else return;
@@ -1872,6 +1881,14 @@ void processCommands() {
           if (cmd4.checksum) checksum(reply);
           if (!supress_frame) strcat(reply,"#");
           PSerial4.print(reply);
+        }
+#endif
+
+#ifdef ST4_HAND_CONTROL_ON
+        if (process_command==COMMAND_SERIALST4) {
+          if (cmdST4.checksum) checksum(reply);
+          if (!supress_frame) strcat(reply,"#");
+          PSerialST4.print(reply);
         }
 #endif
 

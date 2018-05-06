@@ -22,7 +22,7 @@ long          guideTimeRemainingAxis2    = -1;
 unsigned long guideTimeThisIntervalAxis2 = -1;
 
 // initialize guiding
-void initGuide() {
+void Init_Guide() {
   guideDirAxis1              =  0;
   guideTimeRemainingAxis1    = -1;
   guideTimeThisIntervalAxis1 = -1;
@@ -196,13 +196,42 @@ void enableGuideRate(int g) {
 // handle the ST4 interface and hand controller features
 void ST4() {
 #if defined(ST4_ON) || defined(ST4_PULLUP)
-  // ST4 INTERFACE
-  st4n.poll();
-  st4s.poll();
+  // get ST4 button presses
   st4e.poll();
-  st4w.poll();
+  static boolean shcActive=false;
+  if (!shcActive) {
+    st4w.poll();
+    st4n.poll();
+    st4s.poll();
+  }
 
 #ifdef ST4_HAND_CONTROL_ON
+
+  // check for smart hand control
+  if (st4e.hasTone()) {
+    if (!shcActive) {
+      pinMode(ST4DEs,OUTPUT);    // clock
+      pinMode(ST4DEn,OUTPUT);    // send data
+      digitalWrite(ST4DEs,HIGH); // idle
+      shcActive=true;
+      PSerialST4.flush();
+    } else { PSerialST4.poll(); return; }
+  } else {
+    if (shcActive) {
+      #ifdef ST4_ON
+        pinMode(ST4DEs,INPUT);
+        pinMode(ST4DEn,INPUT);
+      #else
+        pinMode(ST4DEs,INPUT_PULLUP);
+        pinMode(ST4DEn,INPUT_PULLUP);
+      #endif
+      shcActive=false;
+      PSerialST4.flush();
+      return;
+    }
+  }
+
+  // standard hand control
   const long Shed_ms=4000;
   const long AltMode_ms=2000;
 

@@ -155,9 +155,6 @@ int setHome() {
   #endif
   if (!pecRecorded) pecStatus=IgnorePEC;
 
-  // initialize guiding
-  initGuide();
-
   // the polar home position
   startAxis1 = celestialPoleAxis1*(long)StepsPerDegreeAxis1;
   startAxis2 = celestialPoleAxis2*(double)StepsPerDegreeAxis2;

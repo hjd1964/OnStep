@@ -12,8 +12,9 @@ class button {
     void poll() {
       int lastState=_state;
       _state=digitalRead(_pin);
-      if (lastState!=_state) _stableStartMs=millis();
+      if (lastState!=_state) { _avgPulseDuration=((_avgPulseDuration*39.0)+(double)(millis()-_stableStartMs))/40.0; _stableStartMs=millis(); }
       _stableMs=(long)(millis()-_stableStartMs);
+      if (_stableMs>2000UL) { _avgPulseDuration=((_avgPulseDuration*4.0)+2000.0)/5.0; _stableStartMs=millis(); }
       if (_stableMs>_debounceMs) { if ((_lastStableState==HIGH) && (_state==LOW)) _wasPressed=true; _lastStableState=_state; }
     }
     // is the button down (LOW)
@@ -26,7 +27,9 @@ class button {
     long timeDown() { if ((_stableMs>_debounceMs) && (_state==LOW)) return _stableMs; else return 0; }
     // number of ms up
     long timeUp() { if ((_stableMs>_debounceMs) && (_state==HIGH)) return _stableMs; else return 0; }
-
+    // check to see if this button has the SHC tone
+    boolean hasTone() { if (fabs(_avgPulseDuration-40.0)<5.0) return true; else return false; }
+    double toneFreq() {return _avgPulseDuration; }
   private:
     int _pin;
     int _state = HIGH;
@@ -35,5 +38,6 @@ class button {
     unsigned long _stableStartMs = 0;
     unsigned long _stableMs = 0;
     boolean _wasPressed = false;
+    double _avgPulseDuration = 2000.0;
 };
 
