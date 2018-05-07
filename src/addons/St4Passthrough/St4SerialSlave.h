@@ -122,13 +122,15 @@ size_t Sst4::write(const uint8_t *data, size_t quantity) {
 
 int Sst4::available(void) {
   int a=0;
+  noInterrupts();
   for (byte b=_recv_head; _recv_buffer[b]!=(char)0; b++) a++;
+  interrupts();
   return a;
 }
 
 int Sst4::read(void) {
   noInterrupts();
-  char c=_recv_buffer[_recv_head]; if (c!=0) _recv_head++;
+  int c=_recv_buffer[_recv_head]; if (c!=0) _recv_head++;
   interrupts();
   if (c==0) c=-1;
   return c;
@@ -154,13 +156,13 @@ void Sst4::flush(void) {
 
 Sst4 PSerialST4;
 
-volatile int i=0;
+volatile int i=8;
 volatile uint8_t data_in = 0;
 volatile uint8_t data_out = 0;
 
 void dataClock() {
   unsigned long temp=micros();
-  unsigned long ellapsed=temp-PSerialST4.last;
+  long ellapsed=(long)(temp-PSerialST4.last);
   PSerialST4.last=temp;
 
   if (digitalRead(ST4DEs)==HIGH) {
@@ -168,12 +170,12 @@ void dataClock() {
     if (i==0) {
       if (data_in!=0) {
         PSerialST4._recv_buffer[PSerialST4._recv_tail]=(char)data_in; 
-        PSerialST4._recv_tail++; 
+        PSerialST4._recv_tail++;
       }
       PSerialST4._recv_buffer[PSerialST4._recv_tail]=(char)0;
     }
   } else {
-    if (ellapsed>100) {
+    if (ellapsed>200) {
       i=8;
       data_out=PSerialST4._xmit_buffer[PSerialST4._xmit_head]; 
       if (data_out!=0) PSerialST4._xmit_head++;

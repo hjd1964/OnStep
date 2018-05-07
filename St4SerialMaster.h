@@ -60,8 +60,11 @@ class Mst4 : public Stream
     inline uint8_t trans(uint8_t data_out)
     {
       uint8_t data_in = 0;
-      
-      delayMicroseconds(100); // SHC_CLOCK HIGH for > 100 us means data byte is done on remote
+      static unsigned long lastMicros=0;
+
+      // SHC_CLOCK HIGH for > 200 us means data byte is done on remote (+10%)
+      long t=220L-(long)(micros()-lastMicros);
+      if (t>0) delayMicroseconds(t);
       for (int i=7; i>=0; i--)
       {
         digitalWrite(ST4DEs,LOW); // clock
@@ -71,6 +74,8 @@ class Mst4 : public Stream
         bitWrite(data_in,i,digitalRead(ST4RAw)); // recv
         delayMicroseconds(50);
       }
+      lastMicros=micros();
+
       return data_in;
     }
 
@@ -88,10 +93,8 @@ void Mst4::end() {
 size_t Mst4::write(uint8_t data) {
   unsigned long t_start=millis();
   while (_xmit_tail+1 == _xmit_head) { poll(); if ((long)(millis()-t_start)>time_out) return 0; }
-  noInterrupts();
   _xmit_buffer[_xmit_tail]=data; _xmit_tail++;
   _xmit_buffer[_xmit_tail]=0;
-  interrupts();
   return 1;
 }
 
@@ -110,17 +113,13 @@ int Mst4::available(void) {
 }
 
 int Mst4::read(void) {
-  noInterrupts();
   char c=_recv_buffer[_recv_head]; if (c!=0) _recv_head++;
-  interrupts();
   if (c==0) c=-1;
   return c;
 }
 
 int Mst4::peek(void) {
-  noInterrupts();
   int c=_recv_buffer[_recv_head];
-  interrupts();
   if (c==0) c=-1;
 
   return c;
