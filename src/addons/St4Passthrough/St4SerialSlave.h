@@ -1,4 +1,4 @@
-// ------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------
 // Serial ST4 slave
 
 /*
@@ -36,7 +36,7 @@ void shcTone();
 class Sst4 : public Stream
 {
   public:
-    void begin();
+    void begin(long baudRate);
     void end();
     bool active();
     virtual size_t write(uint8_t);
@@ -64,8 +64,9 @@ class Sst4 : public Stream
     long time_out = 500;
 };
 
-void Sst4::begin() {
-  flush();
+void Sst4::begin(long baudRate=9600) {
+  _xmit_head=0; _xmit_tail=0; _xmit_buffer[0]=0;
+  _recv_head=0; _recv_tail=0; _recv_buffer[0]=0;
   
   pinMode(ST4DEs,INPUT_PULLUP);
   pinMode(ST4DEn,INPUT_PULLUP);
@@ -91,6 +92,8 @@ void Sst4::end() {
 #else
   Timer1.stop();
 #endif
+  _xmit_head=0; _xmit_tail=0; _xmit_buffer[0]=0;
+  _recv_head=0; _recv_tail=0; _recv_buffer[0]=0;
 }
 
 bool Sst4::active() {
@@ -104,7 +107,7 @@ bool Sst4::active() {
 
 size_t Sst4::write(uint8_t data) {
   unsigned long t_start=millis();
-  while (_xmit_tail+1 == _xmit_head) { if ((long)(millis()-t_start)>time_out) return 0; }
+  byte xh=_xmit_head; xh--; while (_xmit_tail == xh) { if ((millis()-t_start)>_timeout) return 0; }
   noInterrupts();
   _xmit_buffer[_xmit_tail]=data; _xmit_tail++;
   _xmit_buffer[_xmit_tail]=0;
@@ -146,42 +149,70 @@ int Sst4::peek(void) {
 }
 
 void Sst4::flush(void) {
-  _xmit_head=0;
-  _xmit_tail=0;
-  _xmit_buffer[0]=0;
-  _recv_head=0;
-  _recv_tail=0;
-  _recv_buffer[0]=0;
+  unsigned long startMs=millis();
+  int c;
+  do {
+    noInterrupts();
+    c=_xmit_buffer[_xmit_head];
+    interrupts();
+  } while ((c!=0) || ((millis()-startMs)<_timeout));
 }
 
-Sst4 PSerialST4;
+Sst4 SerialST4;
 
-volatile int i=8;
 volatile uint8_t data_in = 0;
 volatile uint8_t data_out = 0;
 
 void dataClock() {
-  unsigned long temp=micros();
-  long ellapsed=(long)(temp-PSerialST4.last);
-  PSerialST4.last=temp;
+  static volatile boolean frame_error=false;
+  static volatile boolean send_error=false;
+  static volatile boolean recv_error=false;
+  static volatile int i=8;
+  static volatile uint8_t s_parity=0;
+  static volatile uint8_t r_parity=0;
+  volatile uint8_t state=0;
+  
+  volatile unsigned long temp=micros();
+  volatile long ellapsed=(long)(temp-SerialST4.last);
+  SerialST4.last=temp;
 
   if (digitalRead(ST4DEs)==HIGH) {
-    bitWrite(data_in,i,digitalRead(ST4DEn)); // recv
-    if (i==0) {
-      if (data_in!=0) {
-        PSerialST4._recv_buffer[PSerialST4._recv_tail]=(char)data_in; 
-        PSerialST4._recv_tail++;
+    state=digitalRead(ST4DEn); r_parity+=state;
+    if (i==8) { if (state!=LOW) frame_error=true; }          // recv start bit
+    if ((i>=0) && (i<=7)) bitWrite(data_in,i,state);         // recv data bit
+    if (i==-1) { if ((r_parity&1)!=state) recv_error=true; } // recv parity bit
+    if (i==-2) { if (state==HIGH) send_error=true; }         // recv remote parity, ok?
+    if (i==-3) {                                             // recv stop bit
+      if (state!=LOW) frame_error=true;
+
+      if ((!frame_error) && (!recv_error)) {
+        if (data_in!=0) {
+          SerialST4._recv_buffer[SerialST4._recv_tail]=(char)data_in; 
+          SerialST4._recv_tail++;
+        }
+        SerialST4._recv_buffer[SerialST4._recv_tail]=(char)0;
       }
-      PSerialST4._recv_buffer[PSerialST4._recv_tail]=(char)0;
     }
   } else {
-    if (ellapsed>200) {
-      i=8;
-      data_out=PSerialST4._xmit_buffer[PSerialST4._xmit_head]; 
-      if (data_out!=0) PSerialST4._xmit_head++;
+    if ((ellapsed>1500L) || (i==-3)) {
+      i=9; 
+      r_parity=0; s_parity=0;
+      recv_error=false;
+
+      // send the same data again?
+      if ((!send_error) && (!frame_error)) {
+        data_out=SerialST4._xmit_buffer[SerialST4._xmit_head]; 
+        if (data_out!=0) SerialST4._xmit_head++;
+      } else send_error=false;
     }
-    i--; if (i<0) i=0;
-    digitalWrite(ST4RAw,bitRead(data_out,i)); // send
+    i--;
+    if (i==8) { digitalWrite(ST4RAw,LOW); }                  // send start bit
+    if ((i>=0) && (i<=7)) {                                  // send data bit
+      state=bitRead(data_out,i); s_parity+=state; digitalWrite(ST4RAw,state);
+    }
+    if (i==-1) { digitalWrite(ST4RAw,s_parity&1); }          // send parity bit
+    if (i==-2) { digitalWrite(ST4RAw,recv_error); }          // send local parity check
+    if (i==-3) { digitalWrite(ST4RAw,LOW); }                 // send stop bit
   }
 }
 

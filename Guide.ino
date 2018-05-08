@@ -214,7 +214,7 @@ void ST4() {
       pinMode(ST4DEn,OUTPUT);    // send data
       digitalWrite(ST4DEs,HIGH); // idle
       shcActive=true;
-      PSerialST4.flush();
+      PSerialST4.begin();
     } else { PSerialST4.poll(); return; }
   } else {
     if (shcActive) {
@@ -226,7 +226,7 @@ void ST4() {
         pinMode(ST4DEn,INPUT_PULLUP);
       #endif
       shcActive=false;
-      PSerialST4.flush();
+      PSerialST4.end();
       return;
     }
   }

@@ -11,15 +11,15 @@
 #include "St4SerialSlave.h"
 
 void setup() {
-  PSerialST4.begin();
+  SerialST4.begin();
   Serial.begin(9600);
   delay(2000);
 }
 
 void loop() {
-  if (PSerialST4.active()) {
-    if (Serial.available()) PSerialST4.write(Serial.read());
-    if (PSerialST4.available()) Serial.write(PSerialST4.read());
+  if (SerialST4.active()) {
+    if (Serial.available()) SerialST4.write(Serial.read());
+    if (SerialST4.available()) Serial.write(SerialST4.read());
   }
 }
 
