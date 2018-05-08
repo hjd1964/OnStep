@@ -74,7 +74,7 @@ class Mst4 : public Stream
       uint8_t s_parity=0;
       uint8_t r_parity=0;
 
-      // SHC_CLOCK HIGH for more than 1500 us means that a pair of data bytes is done on being exchanged
+      // SHC_CLOCK HIGH for more than 1500 us means that a pair of data bytes is done being exchanged
       #ifdef HAL_SLOW_PROCESSOR
         #define XMIT_TIME 20
         if ((micros()-lastMicros)<10000L) return false;
