@@ -217,6 +217,7 @@ void ST4() {
         shcActive=true;
         PSerialST4.begin();
       }
+      return;
     } else { PSerialST4.poll(); return; }
   } else {
     if (shcActive) {
