@@ -71,17 +71,18 @@ class Mst4 : public Stream
     inline bool trans(char *data_in, uint8_t data_out)
     {
       static unsigned long lastMicros=0;
-      uint8_t s_parity=0;
-      uint8_t r_parity=0;
 
       // SHC_CLOCK HIGH for more than 1500 us means that a pair of data bytes is done being exchanged
       #ifdef HAL_SLOW_PROCESSOR
         #define XMIT_TIME 20
         if ((micros()-lastMicros)<10000L) return false;
       #else
-        if ((micros()-lastMicros)<2000L) return false;
         #define XMIT_TIME 40
+        if ((micros()-lastMicros)<2000L) return false;
       #endif
+
+      uint8_t s_parity=0;
+      uint8_t r_parity=0;
 
       // assume no errors
       _frame_error=false;
@@ -104,8 +105,8 @@ class Mst4 : public Stream
         digitalWrite(ST4DEn,state);                    // send data bit
         delayMicroseconds(XMIT_TIME);
         digitalWrite(ST4DEs,HIGH);                     // clock
-        state=digitalRead(ST4RAw); r_parity+=state;
-        bitWrite(*data_in,i,state);                    // recv data dit
+        state=digitalRead(ST4RAw); r_parity+=state;    // recv data bit
+        bitWrite(*data_in,i,state);                    
         delayMicroseconds(XMIT_TIME);
       }
       
