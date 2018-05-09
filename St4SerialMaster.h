@@ -2,7 +2,7 @@
 // Serial ST4 master
 
 /*
-Smart ST4 hand controller (SHC) data communication scheme:
+ST4 port data communication scheme:
 
 5V power ---- Teensy3.2, Nano, etc.
 Gnd ---------
@@ -13,13 +13,11 @@ DEs  <---        Clock        ----   Clock
 DEn  <---        Data         ----   Send data
 RAe  ---- 12.5Hz Square wave  --->   100% sure SHC is present, switches DEs & DEn to OUTPUT
 
-Data is exchanged on clock edges similar to SPI so is timing insensitive (no need to disable interrupts.)
+Data is exchanged on clock edges similar to SPI so is timing insensitive (runs with interrupts enabled.)
 
-One data byte is exchanged for each pass of OnStep's main-loop, this takes about 1ms.  The maximum main-loop time is 10ms in OnStep so 100 bytes/second minimum (Mega2560, even during slews.)
-
-Data flows constantly in both directions.
-A value 0x00 byte is ignored on both sides.
-
+One data byte is exchanged (in both directions w/basic error detection and recovery.)  A value 0x00 byte 
+means "no data" and is ignored on both sides.  Mega2560 hardware runs at (fastest) 10mS/byte (100 Bps) and 
+all others (Teensy3.x, etc.) at 2mS/byte (500 Bps.)
 */
 
 #include "Stream.h"
