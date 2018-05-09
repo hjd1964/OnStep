@@ -173,13 +173,13 @@ void dataClock() {
   volatile uint8_t state=0;
   
   volatile unsigned long temp=micros();
-  volatile long ellapsed=(long)(temp-SerialST4.last);
+  volatile long elapsed=(long)(temp-SerialST4.last);
   SerialST4.last=temp;
 
   if (digitalRead(ST4DEs)==HIGH) {
-    state=digitalRead(ST4DEn); r_parity+=state;
+    state=digitalRead(ST4DEn); 
     if (i==8) { if (state!=LOW) frame_error=true; }          // recv start bit
-    if ((i>=0) && (i<=7)) bitWrite(data_in,i,state);         // recv data bit
+    if ((i>=0) && (i<=7)) { r_parity+=state; bitWrite(data_in,i,state); } // recv data bit
     if (i==-1) { if ((r_parity&1)!=state) recv_error=true; } // recv parity bit
     if (i==-2) { if (state==HIGH) send_error=true; }         // recv remote parity, ok?
     if (i==-3) {                                             // recv stop bit
@@ -194,7 +194,7 @@ void dataClock() {
       }
     }
   } else {
-    if ((ellapsed>1500L) || (i==-3)) {
+    if ((elapsed>1500L) || (i==-3)) {
       i=9; 
       r_parity=0; s_parity=0;
       recv_error=false;
@@ -203,7 +203,7 @@ void dataClock() {
       if ((!send_error) && (!frame_error)) {
         data_out=SerialST4._xmit_buffer[SerialST4._xmit_head]; 
         if (data_out!=0) SerialST4._xmit_head++;
-      } else send_error=false;
+      } else { send_error=false; frame_error=false; }
     }
     i--;
     if (i==8) { digitalWrite(ST4RAw,LOW); }                  // send start bit

@@ -6,7 +6,7 @@
 #define ST4RAw 21 // ST4 RA- West,  send data to OnStep
 #define ST4DEs 22 // ST4 DE- South, clock input to ISR
 #define ST4DEn 23 // ST4 DE+ North, recv data from OnStep
-#define ST4RAe 17 // ST4 RA+ East,  always 25 Hz square wave on this pin
+#define ST4RAe 17 // ST4 RA+ East,  always 12.5 Hz square wave on this pin
 
 #include "St4SerialSlave.h"
 
