@@ -210,11 +210,13 @@ void ST4() {
   // check for smart hand control
   if (st4e.hasTone()) {
     if (!shcActive) {
-      pinMode(ST4DEs,OUTPUT);    // clock
-      pinMode(ST4DEn,OUTPUT);    // send data
-      digitalWrite(ST4DEs,HIGH); // idle
-      shcActive=true;
-      PSerialST4.begin();
+      if (st4w.hasTone()) {
+        pinMode(ST4DEs,OUTPUT);    // clock
+        pinMode(ST4DEn,OUTPUT);    // send data
+        digitalWrite(ST4DEs,HIGH); // idle
+        shcActive=true;
+        PSerialST4.begin();
+      }
     } else { PSerialST4.poll(); return; }
   } else {
     if (shcActive) {

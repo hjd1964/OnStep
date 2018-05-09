@@ -34,18 +34,16 @@ void loop() {
   delay(50);
   char temp[21]="";
   temp[SerialST4.readBytesUntil('#',temp,20)]=0;
-  u8g2.drawStr(0,10,temp);  // write something to the internal memory
-  //if (strlen(temp)!=8)
+  u8g2.drawStr(0,10,temp);            // write something to the internal memory
   Serial.print("a"); Serial.print(temp);
   
   SerialST4.write(":GD#");
   delay(50);
   temp[SerialST4.readBytesUntil('#',temp,20)]=0;
-  u8g2.drawStr(0,30,temp);  // write something to the internal memory
+  u8g2.drawStr(0,30,temp);
   Serial.print(" d"); Serial.println(temp);
 
   u8g2.sendBuffer();                  // transfer internal memory to the display
   delay(500);
-
 }
 

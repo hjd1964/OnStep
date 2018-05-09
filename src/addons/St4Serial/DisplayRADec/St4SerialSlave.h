@@ -57,7 +57,7 @@ class Sst4 : public Stream
     volatile byte _xmit_tail        = 0;
     volatile char _recv_buffer[256] = "";
     volatile byte _recv_tail        = 0;
-    volatile unsigned long last=0;
+    volatile unsigned long lastMs   = 0;
 
   private:
     byte _recv_head = 0;
@@ -100,7 +100,7 @@ bool Sst4::active() {
   static unsigned long comp=0;
   bool result=false;
   noInterrupts();
-  if (comp!=last) { result=true; comp=last; }
+  if (comp!=lastMs) { result=true; comp=lastMs; }
   interrupts();
   return result;
 }
@@ -164,17 +164,18 @@ volatile uint8_t data_in = 0;
 volatile uint8_t data_out = 0;
 
 void dataClock() {
+  static volatile unsigned long t=0;
+  static volatile int i=9;
   static volatile boolean frame_error=false;
   static volatile boolean send_error=false;
   static volatile boolean recv_error=false;
-  static volatile int i=8;
   static volatile uint8_t s_parity=0;
   static volatile uint8_t r_parity=0;
   volatile uint8_t state=0;
   
-  volatile unsigned long temp=micros();
-  volatile long elapsed=(long)(temp-SerialST4.last);
-  SerialST4.last=temp;
+  SerialST4.lastMs=millis();
+  unsigned long t1=t; t=micros();
+  volatile unsigned long elapsed=t-t1;
 
   if (digitalRead(ST4DEs)==HIGH) {
     state=digitalRead(ST4DEn); 
@@ -216,8 +217,18 @@ void dataClock() {
   }
 }
 
-volatile boolean __tone_state=false;
+// this routine keeps a 12.5Hz "tone" on the RAe pin (always) but also on the
+// RAw pin when the data comms clock from OnStep isn't running
 void shcTone() {
-  if (__tone_state) { __tone_state=false; digitalWrite(ST4RAe,HIGH); digitalWrite(ST4RAw,LOW); } else  { __tone_state=true; digitalWrite(ST4RAe,LOW); digitalWrite(ST4RAe,LOW); }
+  static volatile boolean tone_state=false;
+  if (tone_state) { 
+    tone_state=false; 
+    digitalWrite(ST4RAe,HIGH); 
+    if (millis()-SerialST4.lastMs>2000L) digitalWrite(ST4RAw,HIGH);
+  } else  {
+    tone_state=true;
+    digitalWrite(ST4RAe,LOW);
+    if (millis()-SerialST4.lastMs>2000L) digitalWrite(ST4RAw,LOW); 
+  }
 }
 
