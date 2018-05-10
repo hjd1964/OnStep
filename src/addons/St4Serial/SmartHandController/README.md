@@ -14,6 +14,7 @@ The SHC can:
 * Set Site (Latitude/Longitude) and Time.
 * Configure most options.  Backlash, limits, etc.
 * Center objects and operate focuser/rotator.
+* Goto stars and deep sky objects.
 
 # Documentation
 None available yet.
