@@ -29,4 +29,4 @@ OnStep is open source free software, licensed under the GPL.
 See [LICENSE.txt](./LICENSE.txt) file.
 
 # Author
-[Charles Lemaire], [Howard Dutton](http://www.stellarjourney.com)
+Charles Lemaire, [Howard Dutton](http://www.stellarjourney.com)
