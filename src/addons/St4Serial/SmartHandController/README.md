@@ -3,8 +3,8 @@ OnStep Smart Hand Controller
 
 # What is a smart hand controller (SHC)?
 This firmware is designed to run on a Teensy3.2 micro-controller which communicates with OnStep across the ST4 guiding port to provide
-setup and control of most features.  While you can point to point wire/assemble you own design many will opt for the inexpensive EasyEDA PCB
-who's schematic serves as wiring instructions for those who choose a more complete DIY experience :)
+setup and control of most features.  While you can point to point wire/assemble you own hardware design many will opt to use the inexpensive 
+EasyEDA PCB.  For those who choose a more complete DIY experience the EasyEDA schematic still can serve as wiring instructions. :)
 
 https://easyeda.com/hdutton/HC-20e242d665db4c85bb565a0cd0b52233
 
