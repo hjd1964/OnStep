@@ -925,6 +925,9 @@ void menuContrast()
   {
     maxContrast = (uint)63 * (current_selection_L3 - 1);
     EEPROM.write(14, maxContrast);
+#ifdef ESP8266
+    EEPROM.commit();
+#endif
     display.setContrast(maxContrast);
   }
 }
@@ -1026,6 +1029,9 @@ void menuWifi()
     case 1:
       wifiOn = !wifiOn;
       EEPROM.write(15, wifiOn);
+#ifdef ESP8266
+      EEPROM.commit();
+#endif
       DisplayMessage("Please", "Reboot!", 3000);
       current_selection_L2 = 0;
       powerCylceRequired = true;
