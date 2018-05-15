@@ -373,7 +373,7 @@ void Init_WriteNV_Values() {
     }
   
     // init the date and time January 1, 2013. 0 hours LMT
-    JD=2456293.5;
+    JD=CompilerDateToJulian();
     LMT=0.0;
     nv.writeFloat(EE_JD,JD);
     nv.writeFloat(EE_LMT,LMT);
