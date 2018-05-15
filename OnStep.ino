@@ -41,17 +41,15 @@
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  1
 #define FirmwareVersionMinor  8
-#define FirmwareVersionPatch  "e"     // for example major.minor patch: 1.3c
+#define FirmwareVersionPatch  "f"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 2       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
 
+#include <errno.h>
+#include <math.h>
+
 #include "Constants.h"
-
-#include "src/HAL/HAL.h"
-
-#include "NV.h"
-nvs nv;
 
 #include "Config.Classic.h"
 #include "Config.MiniPCB.h"
@@ -60,37 +58,38 @@ nvs nv;
 #include "Config.Mega2560Alt.h"
 #include "Config.TM4C.h"
 #include "Config.STM32.h"
-
 #include "Validate.h"
 
-#include "errno.h"
-#include "math.h"
-#include "FPoint.h"
-#include "SoftSPI.h"
-#ifdef ST4_HAND_CONTROL_ON
-//#include "SerialST4.h"
-#include "St4SerialMaster.h"
-#endif
-#include "Library.h"
-#include "Align.h"
-#include "Command.h"
-#include "Globals.h"
-#include "Utils.h"
+#include "src/HAL/HAL.h"
 
+#include "src/lib/NV.h"
+nvs nv;
+#include "src/lib/FPoint.h"
+#include "src/lib/Julian.h"
+#include "src/lib/SoftSPI.h"
+#ifdef ST4_HAND_CONTROL_ON
+#include "src/lib/St4SerialMaster.h"
+#endif
 #ifdef MODE_SWITCH_BEFORE_SLEW_SPI
-#include "TMC2130.h"
+#include "src/lib/TMC2130.h"
 //               SS      ,SCK     ,MISO     ,MOSI
 tmc2130 tmcAxis1(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0);
 tmc2130 tmcAxis2(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
 #endif
 
+#include "Globals.h"
+
+#include "src/lib/Library.h"
+#include "src/lib/Command.h"
+#include "Align.h"
+
 #ifdef ROTATOR_ON
-  #include "Rotator.h"
+  #include "src/lib/Rotator.h"
   rotator rot;
 #endif
 
 #if defined(FOCUSER1_ON) || defined(FOCUSER2_ON)
-  #include "Focuser.h"
+  #include "src/lib/Focuser.h"
   #ifdef FOCUSER1_ON
     focuser foc1;
   #endif
@@ -100,11 +99,11 @@ tmc2130 tmcAxis2(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
 #endif
 
 // use an RTC (Real Time Clock) if present
-#include "RTCw.h"
+#include "src/lib/RTCw.h"
 rtcw urtc;
 
 // use weather sensors (temperature, pressure, humidity) if present
-#include "Weather.h"
+#include "src/lib/Weather.h"
 weather ambient;
 
 // forces initialialization of a host of settings in nv. OnStep does this automatically, most likely, you will want to leave this alone

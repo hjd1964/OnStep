@@ -217,6 +217,6 @@
 
 // -------------------------------------------------------------------------------------------------------------------------
 #define FileVersionConfig 2
-#include "Pins.Ramps14.h"
+#include "src/pinmaps/Pins.Ramps14.h"
 #endif
 

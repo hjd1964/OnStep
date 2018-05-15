@@ -208,6 +208,6 @@
 
 // -------------------------------------------------------------------------------------------------------------------------
 #define FileVersionConfig 2
-#include "Pins.Classic.h"
+#include "src/pinmaps/Pins.Classic.h"
 #endif
 

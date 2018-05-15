@@ -204,6 +204,6 @@
 
 // -------------------------------------------------------------------------------------------------------------------------
 #define FileVersionConfig 2
-#include "Pins.MiniPCB.h"
+#include "src/pinmaps/Pins.MiniPCB.h"
 #endif
 

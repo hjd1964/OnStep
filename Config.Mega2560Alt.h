@@ -195,6 +195,6 @@
 
 // -------------------------------------------------------------------------------------------------------------------------
 #define FileVersionConfig 2
-#include "Pins.Mega2560Alt.h"
+#include "src/pinmaps/Pins.Mega2560Alt.h"
 #endif
 

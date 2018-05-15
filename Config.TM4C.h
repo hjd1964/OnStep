@@ -191,7 +191,7 @@
 // THAT'S IT FOR USER CONFIGURATION!
 
 // -------------------------------------------------------------------------------------------------------------------------
-#define FileVersionConfig 2    
-#include "Pins.TM4C.h"
+#define FileVersionConfig 2
+#include "src/pinmaps/Pins.TM4C.h"
 #endif
 

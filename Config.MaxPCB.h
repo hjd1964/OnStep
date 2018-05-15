@@ -216,6 +216,6 @@
 
 // -------------------------------------------------------------------------------------------------------------------------
 #define FileVersionConfig 2
-#include "Pins.MaxPCB.h"
+#include "src/pinmaps/Pins.MaxPCB.h"
 #endif
 
