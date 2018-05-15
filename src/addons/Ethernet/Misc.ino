@@ -112,6 +112,71 @@ boolean readLX200Bytes(char* command,char* recvBuffer,long timeOutMs) {
   }
 }
 
+
+class MountStatus {
+  public:
+    bool update() {
+      char s[20] = "";
+      Ser.print(":GU#");
+      s[Ser.readBytesUntil('#',s,20)]=0;
+      if (s[0]==0) return false;
+
+      parked      = strstr(s,"P");
+      if (strstr(s,"p")) parked=false;
+      parking     = strstr(s,"I");
+      parkFail    = strstr(s,"F");
+      pecRecorded = strstr(s,"R");
+    
+      atHome      = strstr(s,"H");
+      ppsSync     = strstr(s,"S");
+      guiding     = strstr(s,"G");
+      axisFault   = strstr(s,"f");
+      
+      if (strstr(s,"r")) { if (strstr(s,"s")) rateCompensation=RC_REFR_RA; else rateCompensation=RC_REFR_BOTH; } else
+      if (strstr(s,"t")) { if (strstr(s,"s")) rateCompensation=RC_FULL_RA; else rateCompensation=RC_FULL_BOTH; } else rateCompensation=RC_NONE;
+
+      waitingHome   = strstr(s,"w");
+      pauseAtHome   = strstr(s,"u");
+      buzzerEnabled = strstr(s,"z");
+
+      if (strstr(s,"E")) type=MT_GEM; else
+      if (strstr(s,"K")) type=MT_FORK; else
+      if (strstr(s,"k")) type=MT_FORKALT; else
+      if (strstr(s,"A")) type=MT_ALTAZM; else type=MT_UNKNOWN;
+
+      lastError=(Errors)(s[strlen(s)-1]-'0');
+
+      return true;
+    }
+    bool lastErrorMessage(char message[]) {
+      strcpy(message,"None");
+      if (lastError==ERR_MOTOR_FAULT) strcpy(message,"Motor or Driver Fault"); else
+      if (lastError==ERR_ALT) strcpy(message,"Altitude Min/Max"); else
+      if (lastError==ERR_LIMIT_SENSE) strcpy(message,"Limit Sense"); else
+      if (lastError==ERR_DEC) strcpy(message,"Dec Limit Exceeded"); else
+      if (lastError==ERR_AZM) strcpy(message,"Azm Limit Exceeded"); else
+      if (lastError==ERR_UNDER_POLE) strcpy(message,"Under Pole Limit Exceeded"); else
+      if (lastError==ERR_MERIDIAN) strcpy(message,"Meridian Limit (W) Exceeded"); else
+      if (lastError==ERR_SYNC) strcpy(message,"Sync. ignored >30&deg;");
+      return message;
+    }
+    bool parked=false;
+    bool parking=false;
+    bool parkFail=false;
+    bool pecRecorded=false;
+    bool atHome=false;
+    bool ppsSync=false;
+    bool guiding=false;
+    bool axisFault=false;
+    bool waitingHome=false;
+    bool pauseAtHome=false;
+    bool buzzerEnabled=false;
+    MountTypes type=MT_UNKNOWN;
+    RateCompensation rateCompensation=RC_NONE;
+  private:
+    int lastError=0;
+} mountStatus;
+
 char serialRecvFlush() {
   char c=0;
   while (Ser.available()>0) c=Ser.read();
