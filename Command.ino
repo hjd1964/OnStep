@@ -574,10 +574,10 @@ void processCommands() {
         if ((guideDirAxis1) || (guideDirAxis2))  reply[i++]='G';                      // [G]uide active
         if (faultAxis1 || faultAxis2)            reply[i++]='f';                      // axis [f]ault
 #ifndef MOUNT_TYPE_ALTAZM        
-        if (rateControl==rc_refrAx1)           { reply[i++]='r'; reply[i++]='s'; }    // [r]efr enabled [s]ingle axis
-        if (rateControl==rc_refrBoth)          { reply[i++]='r'; }                    // [r]efr enabled
-        if (rateControl==rc_fullAx1)           { reply[i++]='t'; reply[i++]='s'; }    // on[t]rack enabled [s]ingle axis
-        if (rateControl==rc_fullBoth)          { reply[i++]='t'; }                    // on[t]rack enabled
+        if (rateControl==RC_REFR_RA)           { reply[i++]='r'; reply[i++]='s'; }    // [r]efr enabled [s]ingle axis
+        if (rateControl==RC_REFR_BOTH)          { reply[i++]='r'; }                    // [r]efr enabled
+        if (rateControl==RC_FULL_RA)           { reply[i++]='t'; reply[i++]='s'; }    // on[t]rack enabled [s]ingle axis
+        if (rateControl==RC_FULL_BOTH)          { reply[i++]='t'; }                    // on[t]rack enabled
 #endif
         if (waitingHome)                         reply[i++]='w';                      // [w]aiting at home
         if (pauseHome)                           reply[i++]='u';                      // pa[u]se at home enabled?
@@ -1670,27 +1670,27 @@ void processCommands() {
       if ((command[0]=='T') && (parameter[0]==0)) {
 #ifndef MOUNT_TYPE_ALTAZM
         static bool dualAxis=false;
-        if (command[1]=='o') { rateControl=rc_fullAx1; SetTrackingRate(default_tracking_rate); } else                       // turn full compensation on, defaults to base sidereal tracking rate
-        if (command[1]=='r') { rateControl=rc_refrAx1; SetTrackingRate(default_tracking_rate); } else                       // turn refraction compensation on, defaults to base sidereal tracking rate
-        if (command[1]=='n') { rateControl=rc_none; SetTrackingRate(default_tracking_rate); } else                          // turn refraction off, sidereal tracking rate resumes
+        if (command[1]=='o') { rateControl=RC_FULL_RA; SetTrackingRate(default_tracking_rate); } else                       // turn full compensation on, defaults to base sidereal tracking rate
+        if (command[1]=='r') { rateControl=RC_REFR_RA; SetTrackingRate(default_tracking_rate); } else                       // turn refraction compensation on, defaults to base sidereal tracking rate
+        if (command[1]=='n') { rateControl=RC_NONE; SetTrackingRate(default_tracking_rate); } else                          // turn refraction off, sidereal tracking rate resumes
         if (command[1]=='1') { dualAxis=false; } else                                                                       // turn off dual axis tracking
         if (command[1]=='2') { dualAxis=true;  } else                                                                       // turn on dual axis tracking
 #endif
         if (command[1]=='+') { siderealInterval-=HzCf*(0.02); quietReply=true; } else
         if (command[1]=='-') { siderealInterval+=HzCf*(0.02); quietReply=true; } else
-        if (command[1]=='S') { SetTrackingRate(0.99726956632); rateControl=rc_none; quietReply=true; } else                 // solar tracking rate 60Hz
-        if (command[1]=='L') { SetTrackingRate(0.96236513150); rateControl=rc_none; quietReply=true; } else                 // lunar tracking rate 57.9Hz
+        if (command[1]=='S') { SetTrackingRate(0.99726956632); rateControl=RC_NONE; quietReply=true; } else                 // solar tracking rate 60Hz
+        if (command[1]=='L') { SetTrackingRate(0.96236513150); rateControl=RC_NONE; quietReply=true; } else                 // lunar tracking rate 57.9Hz
         if (command[1]=='Q') { SetTrackingRate(default_tracking_rate); quietReply=true; } else                              // sidereal tracking rate
         if (command[1]=='R') { siderealInterval=15956313L; quietReply=true; } else                                          // reset master sidereal clock interval
-        if (command[1]=='K') { SetTrackingRate(0.99953004401); rateControl=rc_none; quietReply=true; } else                 // king tracking rate 60.136Hz
+        if (command[1]=='K') { SetTrackingRate(0.99953004401); rateControl=RC_NONE; quietReply=true; } else                 // king tracking rate 60.136Hz
         if ((command[1]=='e') && !isSlewing() && !isHoming() && !isParked() ) { trackingState=TrackingSidereal; EnableStepperDrivers(); } else
         if ((command[1]=='d') && !isSlewing() && !isHoming() ) trackingState=TrackingNone; else
           commandError=true;
 
-       if (dualAxis && (rateControl==rc_refrAx1)) rateControl=rc_refrBoth;
-       if (!dualAxis && (rateControl==rc_refrBoth)) rateControl=rc_refrAx1;
-       if (dualAxis && (rateControl==rc_fullAx1)) rateControl=rc_fullBoth;
-       if (!dualAxis && (rateControl==rc_fullBoth)) rateControl=rc_fullAx1;
+       if (dualAxis && (rateControl==RC_REFR_RA)) rateControl=RC_REFR_BOTH;
+       if (!dualAxis && (rateControl==RC_REFR_BOTH)) rateControl=RC_REFR_RA;
+       if (dualAxis && (rateControl==RC_FULL_RA)) rateControl=RC_FULL_BOTH;
+       if (!dualAxis && (rateControl==RC_FULL_BOTH)) rateControl=RC_FULL_RA;
 
         // Only burn the new rate if changing the sidereal interval
         if ((!commandError) && ((command[1]=='+') || (command[1]=='-') || (command[1]=='R'))) {

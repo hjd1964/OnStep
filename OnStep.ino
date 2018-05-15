@@ -295,7 +295,7 @@ void loop() {
     if (lst%3!=0) do_altAzmRate_calc();
 #else
     // figure out the current refraction compensated tracking rate
-    if ((rateControl!=rc_none) && (lst%3!=0)) do_refractionRate_calc();
+    if ((rateControl!=RC_NONE) && (lst%3!=0)) do_refractionRate_calc();
 #endif
 
     // SAFETY CHECKS
