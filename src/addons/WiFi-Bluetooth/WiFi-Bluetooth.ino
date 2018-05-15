@@ -43,24 +43,15 @@
 
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
-#include "Config.h"
 #include <ESP8266WebServer.h>
 #include <ESP8266WiFiAP.h>
 #include <EEPROM.h>
-#include "Constants.h"
 
+#include "Config.h"
+#include "Constants.h"
+#include "Globals.h"
 #include "Encoders.h"
 Encoders encoders;
-
-// The settings below are for initialization only, afterward they are stored and recalled from EEPROM and must
-// be changed in the web interface OR with a reset (for initialization again) as described in the comments below
-#if SERIAL_BAUD<=28800
-  #define TIMEOUT_WEB 60
-  #define TIMEOUT_CMD 60
-#else
-  #define TIMEOUT_WEB 15
-  #define TIMEOUT_CMD 30
-#endif
 
 #define Default_Password "password"
 char masterPassword[40]=Default_Password;
@@ -84,35 +75,10 @@ IPAddress wifi_ap_ip = IPAddress(192,168,0,1);
 IPAddress wifi_ap_gw = IPAddress(192,168,0,1);
 IPAddress wifi_ap_sn = IPAddress(255,255,255,0);
 
-// base timeouts
-int WebTimeout=TIMEOUT_WEB;  // default 15
-int CmdTimeout=TIMEOUT_CMD;  // default 30
-
 ESP8266WebServer server(80);
 
 WiFiServer cmdSvr(9999);
 WiFiClient cmdSvrClient;
-unsigned long clientTime = 0;
-
-char writeBuffer[40]="";
-int writeBufferPos=0;
-byte tb=0;
-
-enum Errors {ERR_NONE, ERR_MOTOR_FAULT, ERR_ALT, ERR_LIMIT_SENSE, ERR_DEC, ERR_AZM, ERR_UNDER_POLE, ERR_MERIDIAN, ERR_SYNC};
-Errors lastError = ERR_NONE;
-
-#define PierSideNone     0
-#define PierSideEast     1
-#define PierSideWest     2
-#define PierSideBest     3
-#define PierSideFlipWE1  10
-#define PierSideFlipWE2  11
-#define PierSideFlipWE3  12
-#define PierSideFlipEW1  20
-#define PierSideFlipEW2  21
-#define PierSideFlipEW3  22
-byte pierSide = PierSideNone;
-int AlignMaxNumStars = -1;
 
 void handleNotFound(){
   String message = "File Not Found\n\n";

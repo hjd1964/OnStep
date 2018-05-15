@@ -1,6 +1,16 @@
 // -----------------------------------------------------------------------------------
 // Constants
 
+// The settings below are for initialization only, afterward they are stored and recalled from EEPROM and must
+// be changed in the web interface OR with a reset (for initialization again) as described in the Config.h comments
+#if SERIAL_BAUD<=28800
+  #define TIMEOUT_WEB 60
+  #define TIMEOUT_CMD 60
+#else
+  #define TIMEOUT_WEB 15
+  #define TIMEOUT_CMD 30
+#endif
+
 #define DEFAULT_AJAX_RATE "5"        // normally 5 seconds between updates
 #define DEFAULT_FAST_AJAX_RATE "1"   // fast update is 1 second/update
 #define DEFAULT_AJAX_SHED_TIME "15"  // time before return to normal update rate

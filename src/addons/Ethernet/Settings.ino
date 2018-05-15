@@ -130,7 +130,7 @@ void handleSettings() {
 
   data += "<br />";
   data += "</div></div></body></html>";
-  
+
 #ifdef OETHS
   client->print(data);
 #else

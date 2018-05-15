@@ -32,6 +32,7 @@
  *
  */
  
+#define OETHS
 #define Product "OnEth"
 #define FirmwareDate          __DATE__
 #define FirmwareTime          __TIME__
@@ -41,53 +42,18 @@
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
-#define OETHS
-
 #include <Ethernet.h>
-#include "Config.h"
 #include "CmdServer.h"
 #include "WebServer.h"
-#include "Constants.h"
 
+#include "Config.h"
+#include "Constants.h"
+#include "Globals.h"
 #include "Encoders.h"
 Encoders encoders;
 
-#if SERIAL_BAUD<=28800
-  #define TIMEOUT_WEB 60
-  #define TIMEOUT_CMD 60
-#else
-  #define TIMEOUT_WEB 15
-  #define TIMEOUT_CMD 30
-#endif
-
-// base timeouts
-int WebTimeout=TIMEOUT_WEB;  // default 15
-int CmdTimeout=TIMEOUT_CMD;  // default 30
-
 WebServer server;
 CmdServer cmdSvr;
-
-unsigned long clientTime = 0;
-
-char writeBuffer[40]="";
-int writeBufferPos=0;
-byte tb=0;
-
-enum Errors {ERR_NONE, ERR_MOTOR_FAULT, ERR_ALT, ERR_LIMIT_SENSE, ERR_DEC, ERR_AZM, ERR_UNDER_POLE, ERR_MERIDIAN, ERR_SYNC};
-Errors lastError = ERR_NONE;
-
-#define PierSideNone     0
-#define PierSideEast     1
-#define PierSideWest     2
-#define PierSideBest     3
-#define PierSideFlipWE1  10
-#define PierSideFlipWE2  11
-#define PierSideFlipWE3  12
-#define PierSideFlipEW1  20
-#define PierSideFlipEW2  21
-#define PierSideFlipEW3  22
-byte pierSide = PierSideNone;
-int AlignMaxNumStars = -1;
 
 void handleNotFound(EthernetClient *client) {
   String message = "File Not Found\n\n";
