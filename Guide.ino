@@ -2,7 +2,7 @@
 // Guide, commands to move the mount in any direction at a series of fixed rates
 
 #if defined(ST4_ON) || defined(ST4_PULLUP)
-#include "PushButton.h"
+#include "src/lib/PushButton.h"
 
 #ifdef ST4_HAND_CONTROL_ON
   #define debounceMs 100
