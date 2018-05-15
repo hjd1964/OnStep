@@ -304,7 +304,7 @@ double _deltaAxis1=15.0,_deltaAxis2=0.0;
 
 void SetDeltaTrackingRate() {
 #ifndef MOUNT_TYPE_ALTAZM
-  if ((rateControl!=RC_REFR_BOTH) && (rateControl!=RC_FULL_BOTH)) _deltaAxis2=0.0;
+  if ((rateCompensation!=RC_REFR_BOTH) && (rateCompensation!=RC_FULL_BOTH)) _deltaAxis2=0.0;
 #endif
   cli();
   // trackingTimerRateAxis1/2 are x the sidereal rate
@@ -435,7 +435,7 @@ boolean do_refractionRate_calc() {
   rr_step++;
   // load HA/Dec
   if (rr_step==1) {
-    if ((rateControl==RC_FULL_RA) || (rateControl==RC_FULL_BOTH)) ot=true; else ot=false;
+    if ((rateCompensation==RC_FULL_RA) || (rateCompensation==RC_FULL_BOTH)) ot=true; else ot=false;
     if (ot) getEqu(&rr_Axis1,&rr_Axis2,true); else getApproxEqu(&rr_Axis1,&rr_Axis2,true);
   } else
 

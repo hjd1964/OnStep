@@ -42,15 +42,15 @@ volatile boolean PPSsynced = false;
 
 // Tracking and rate control -----------------------------------------------------------------------------------------------
 #ifndef MOUNT_TYPE_ALTAZM
-  enum RateControls {RC_NONE, RC_REFR_RA, RC_REFR_BOTH, RC_FULL_RA, RC_FULL_BOTH};
+  enum RateCompensation {RC_NONE, RC_REFR_RA, RC_REFR_BOTH, RC_FULL_RA, RC_FULL_BOTH};
   #ifdef TRACK_REFRACTION_RATE_DEFAULT_ON
-    RateControls rateControl=RC_REFR_RA;
+    RateCompensation rateCompensation=RC_REFR_RA;
   #else
-    RateControls rateControl=RC_NONE;
+    RateCompensation rateCompensation=RC_NONE;
   #endif
 #else
-  enum RateControls {RC_NONE};
-  RateControls rateControl=RC_NONE;
+  enum RateCompensation {RC_NONE};
+  RateCompensation rateCompensation=RC_NONE;
 #endif
 
 long    maxRate = MaxRate*16L;
