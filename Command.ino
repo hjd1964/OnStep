@@ -564,18 +564,25 @@ void processCommands() {
 //         Returns: SS#
       if (command[1]=='U')  { 
         i=0;
-        if (trackingState!=TrackingSidereal)     reply[i++]='n';
-        if (!isSlewing())                        reply[i++]='N';
+        if (trackingState!=TrackingSidereal)     reply[i++]='n';                      // [n]ot tracking
+        if (!isSlewing())                        reply[i++]='N';                      // [N]o goto or guide
         const char *parkStatusCh = "pIPF";       reply[i++]=parkStatusCh[parkStatus]; // not [p]arked, parking [I]n-progress, [P]arked, Park [F]ailed
-        if (pecRecorded)                         reply[i++]='R';
-        if (pecAutoRecord)                       reply[i++]='W';
-        if (atHome)                              reply[i++]='H'; 
-        if (PPSsynced)                           reply[i++]='S';
-        if ((guideDirAxis1) || (guideDirAxis2))  reply[i++]='G';
-        if (faultAxis1 || faultAxis2)            reply[i++]='f';
-        if (refraction)                          reply[i++]='r'; else reply[i++]='s';
-        if (onTrack)                             reply[i++]='t';
-        if (waitingHome)                         reply[i++]='w';
+        if (pecRecorded)                         reply[i++]='R';                      // PEC data has been [R]ecorded
+        if (pecAutoRecord)                       reply[i++]='W';                      // [W]riting PEC data
+        if (atHome)                              reply[i++]='H';                      // at [H]ome
+        if (PPSsynced)                           reply[i++]='S';                      // PPS [S]ync
+        if ((guideDirAxis1) || (guideDirAxis2))  reply[i++]='G';                      // [G]uide active
+        if (faultAxis1 || faultAxis2)            reply[i++]='f';                      // axis [f]ault
+#ifndef MOUNT_TYPE_ALTAZM        
+        if (rateControl==rc_refrAx1)           { reply[i++]='r'; reply[i++]='s'; }    // [r]efr enabled [s]ingle axis
+        if (rateControl==rc_refrBoth)          { reply[i++]='r'; }                    // [r]efr enabled
+        if (rateControl==rc_fullAx1)           { reply[i++]='t'; reply[i++]='s'; }    // on[t]rack enabled [s]ingle axis
+        if (rateControl==rc_fullBoth)          { reply[i++]='t'; }                    // on[t]rack enabled
+#endif
+        if (waitingHome)                         reply[i++]='w';                      // [w]aiting at home
+        if (pauseHome)                           reply[i++]='u';                      // pa[u]se at home enabled?
+        if (soundEnabled)                        reply[i++]='z';                      // bu[z]zer enabled?
+
         // provide mount type
         #ifdef MOUNT_TYPE_GEM
         reply[i++]='E';
@@ -1660,42 +1667,50 @@ void processCommands() {
 //         Return: 0 on failure
 //                 1 on success
 
-     if ((command[0]=='T') && (parameter[0]==0)) {
-       if (command[1]=='+') { siderealInterval-=HzCf*(0.02); quietReply=true; } else
-       if (command[1]=='-') { siderealInterval+=HzCf*(0.02); quietReply=true; } else
-       if (command[1]=='S') { SetTrackingRate(0.99726956632); refraction=false; quietReply=true; } else                    // solar tracking rate 60Hz
-       if (command[1]=='L') { SetTrackingRate(0.96236513150); refraction=false; quietReply=true; } else                    // lunar tracking rate 57.9Hz
-       if (command[1]=='Q') { SetTrackingRate(default_tracking_rate); quietReply=true; } else                              // sidereal tracking rate
-       if (command[1]=='R') { siderealInterval=15956313L; quietReply=true; } else                                          // reset master sidereal clock interval
-       if (command[1]=='K') { SetTrackingRate(0.99953004401); refraction=false; quietReply=true; } else                    // king tracking rate 60.136Hz
-       if ((command[1]=='e') && !isSlewing() && !isHoming() && !isParked() ) { trackingState=TrackingSidereal; EnableStepperDrivers(); } else
-       if ((command[1]=='d') && !isSlewing() && !isHoming() ) trackingState=TrackingNone; else
-       if (command[1]=='o') { refraction=refraction_enable; onTrack=true;  SetTrackingRate(default_tracking_rate); } else  // turn full compensation on, defaults to base sidereal tracking rate
-       if (command[1]=='r') { refraction=refraction_enable; onTrack=false; SetTrackingRate(default_tracking_rate); } else  // turn refraction compensation on, defaults to base sidereal tracking rate
-       if (command[1]=='n') { refraction=false; onTrack=false; SetTrackingRate(default_tracking_rate); } else              // turn refraction off, sidereal tracking rate resumes
-       if (command[1]=='1') { onTrackDec=false; } else                                                                     // turn off dual axis tracking
-       if (command[1]=='2') { onTrackDec=true;  } else                                                                     // turn on dual axis tracking
-         commandError=true;
+      if ((command[0]=='T') && (parameter[0]==0)) {
+#ifndef MOUNT_TYPE_ALTAZM
+        static bool dualAxis=false;
+        if (command[1]=='o') { rateControl=rc_fullAx1; SetTrackingRate(default_tracking_rate); } else                       // turn full compensation on, defaults to base sidereal tracking rate
+        if (command[1]=='r') { rateControl=rc_refrAx1; SetTrackingRate(default_tracking_rate); } else                       // turn refraction compensation on, defaults to base sidereal tracking rate
+        if (command[1]=='n') { rateControl=rc_none; SetTrackingRate(default_tracking_rate); } else                          // turn refraction off, sidereal tracking rate resumes
+        if (command[1]=='1') { dualAxis=false; } else                                                                       // turn off dual axis tracking
+        if (command[1]=='2') { dualAxis=true;  } else                                                                       // turn on dual axis tracking
+#endif
+        if (command[1]=='+') { siderealInterval-=HzCf*(0.02); quietReply=true; } else
+        if (command[1]=='-') { siderealInterval+=HzCf*(0.02); quietReply=true; } else
+        if (command[1]=='S') { SetTrackingRate(0.99726956632); rateControl=rc_none; quietReply=true; } else                 // solar tracking rate 60Hz
+        if (command[1]=='L') { SetTrackingRate(0.96236513150); rateControl=rc_none; quietReply=true; } else                 // lunar tracking rate 57.9Hz
+        if (command[1]=='Q') { SetTrackingRate(default_tracking_rate); quietReply=true; } else                              // sidereal tracking rate
+        if (command[1]=='R') { siderealInterval=15956313L; quietReply=true; } else                                          // reset master sidereal clock interval
+        if (command[1]=='K') { SetTrackingRate(0.99953004401); rateControl=rc_none; quietReply=true; } else                 // king tracking rate 60.136Hz
+        if ((command[1]=='e') && !isSlewing() && !isHoming() && !isParked() ) { trackingState=TrackingSidereal; EnableStepperDrivers(); } else
+        if ((command[1]=='d') && !isSlewing() && !isHoming() ) trackingState=TrackingNone; else
+          commandError=true;
 
-       // Only burn the new rate if changing the sidereal interval
-       if ((!commandError) && ((command[1]=='+') || (command[1]=='-') || (command[1]=='R'))) {
-         nv.writeLong(EE_siderealInterval,siderealInterval);
-         SiderealClockSetInterval(siderealInterval);
-         cli(); SiderealRate=siderealInterval/StepsPerSecondAxis1; sei();
-       }
+       if (dualAxis && (rateControl==rc_refrAx1)) rateControl=rc_refrBoth;
+       if (!dualAxis && (rateControl==rc_refrBoth)) rateControl=rc_refrAx1;
+       if (dualAxis && (rateControl==rc_fullAx1)) rateControl=rc_fullBoth;
+       if (!dualAxis && (rateControl==rc_fullBoth)) rateControl=rc_fullAx1;
 
-       SetDeltaTrackingRate();
+        // Only burn the new rate if changing the sidereal interval
+        if ((!commandError) && ((command[1]=='+') || (command[1]=='-') || (command[1]=='R'))) {
+          nv.writeLong(EE_siderealInterval,siderealInterval);
+          SiderealClockSetInterval(siderealInterval);
+          cli(); SiderealRate=siderealInterval/StepsPerSecondAxis1; sei();
+        }
 
-     } else
-     if (command[0]=='T') {
-     } else
+        SetDeltaTrackingRate();
+
+      } else
+      if (command[0]=='T') {
+      } else
      
 //   U - Precision Toggle
 //  :U#    Toggle between low/hi precision positions
 //         Low -  RA/Dec/etc. displays and accepts HH:MM.M sDD*MM
 //         High - RA/Dec/etc. displays and accepts HH:MM:SS sDD*MM:SS
 //         Returns Nothing
-     if ((command[0]=='U') && (command[1]==0)) { highPrecision=!highPrecision; quietReply=true; } else
+      if ((command[0]=='U') && (command[1]==0)) { highPrecision=!highPrecision; quietReply=true; } else
 
 #ifndef MOUNT_TYPE_ALTAZM
 //   V - PEC Readout
@@ -1704,88 +1719,88 @@ void processCommands() {
 //         Returns: sDDD#
 //         Rate Adjustment factor for worm segment NNNN. PecRate = Steps +/- for this 1 second segment
 //         If NNNN is omitted, returns the currently playing segment
-     if ((command[0]=='V') && (command[1]=='R')) {
-       boolean conv_result=true;
-       if (parameter[0]==0) { i=pecIndex1; } else conv_result=atoi2(parameter,&i);
-       if ((conv_result) && ((i>=0) && (i<PECBufferSize))) {
-         if (parameter[0]==0) {
-           i-=1; if (i<0) i+=SecondsPerWormRotationAxis1; if (i>=SecondsPerWormRotationAxis1) i-=SecondsPerWormRotationAxis1;
-           i1=pecBuffer[i]-128; sprintf(reply,"%+04i,%03i",i1,i);
-         } else {
-           i1=pecBuffer[i]-128; sprintf(reply,"%+04i",i1);
-         }
-       } else commandError=true;
-       quietReply=true;
-     } else
+      if ((command[0]=='V') && (command[1]=='R')) {
+        boolean conv_result=true;
+        if (parameter[0]==0) { i=pecIndex1; } else conv_result=atoi2(parameter,&i);
+        if ((conv_result) && ((i>=0) && (i<PECBufferSize))) {
+          if (parameter[0]==0) {
+            i-=1; if (i<0) i+=SecondsPerWormRotationAxis1; if (i>=SecondsPerWormRotationAxis1) i-=SecondsPerWormRotationAxis1;
+            i1=pecBuffer[i]-128; sprintf(reply,"%+04i,%03i",i1,i);
+          } else {
+            i1=pecBuffer[i]-128; sprintf(reply,"%+04i",i1);
+          }
+        } else commandError=true;
+        quietReply=true;
+      } else
 //  :VrNNNN#
 //         Read out RA PEC ten byte frame in hex format starting at worm segment NNNN
 //         Returns: x0x1x2x3x4x5x6x7x8x9#
 //         Rate Adjustment factor for worm segments. PecRate = Steps +/- for each 1 second segment, hex one byte integer (PecRate=b-128)
 //         leave a delay of about 10ms between calls
-     if ((command[0]=='V') && (command[1]=='r')) {
-       if ( (atoi2(parameter,&i)) && ((i>=0) && (i<PECBufferSize))) {
-         int j=0;
-         byte b;
-         char x[3]="  ";
-         for (j=0; j<10; j++) {
-           if (i+j<PECBufferSize) b=pecBuffer[i+j]; else b=128;
+      if ((command[0]=='V') && (command[1]=='r')) {
+        if ( (atoi2(parameter,&i)) && ((i>=0) && (i<PECBufferSize))) {
+          int j=0;
+          byte b;
+          char x[3]="  ";
+          for (j=0; j<10; j++) {
+            if (i+j<PECBufferSize) b=pecBuffer[i+j]; else b=128;
            
-           sprintf(x,"%02X",b);
-           strcat(reply,x);
-         }
-       } else commandError=true;
-       quietReply=true;
-     } else
+            sprintf(x,"%02X",b);
+            strcat(reply,x);
+          }
+        } else commandError=true;
+        quietReply=true;
+      } else
 //   V - PEC Readout StepsPerWormRotationAxis1
 //  :VW#
 //         Returns: DDDDDD#
-     if ((command[0]=='V') && (command[1]=='W')) {
-       if (parameter[0]==0) {
-         sprintf(reply,"%06ld",(long)StepsPerWormRotationAxis1);
-         quietReply=true;
-       } else commandError=true;
-     } else
+      if ((command[0]=='V') && (command[1]=='W')) {
+        if (parameter[0]==0) {
+          sprintf(reply,"%06ld",(long)StepsPerWormRotationAxis1);
+          quietReply=true;
+        } else commandError=true;
+      } else
 //   V - PEC Readout StepsPerSecondAxis1
 //  :VS#
 //         Returns: DDD.DDDDDD#
-     if ((command[0]=='V') && (command[1]=='S')) {
-       if (parameter[0]==0) {
-         char temp[12];
-         dtostrf(StepsPerSecondAxis1,0,6,temp);
-         strcpy(reply,temp);
-//         sprintf(reply,"%03i",StepsPerSecondAxis1);
-         quietReply=true;
-       } else commandError=true;
-     } else
+      if ((command[0]=='V') && (command[1]=='S')) {
+        if (parameter[0]==0) {
+          char temp[12];
+          dtostrf(StepsPerSecondAxis1,0,6,temp);
+          strcpy(reply,temp);
+//          sprintf(reply,"%03i",StepsPerSecondAxis1);
+          quietReply=true;
+        } else commandError=true;
+      } else
 //  :VH#
 //         Read RA PEC sense index (seconds)
 //         Returns: DDDDD#
-     if ((command[0]=='V') && (command[1]=='H')) {
-       long s=(long)((double)wormSensePos/(double)StepsPerSecondAxis1);
-       while (s>SecondsPerWormRotationAxis1) s-=SecondsPerWormRotationAxis1;
-       while (s<0) s+=SecondsPerWormRotationAxis1;
-       sprintf(reply,"%05ld",s); // indexWorm_sense
-       quietReply=true;
-     } else
+      if ((command[0]=='V') && (command[1]=='H')) {
+        long s=(long)((double)wormSensePos/(double)StepsPerSecondAxis1);
+        while (s>SecondsPerWormRotationAxis1) s-=SecondsPerWormRotationAxis1;
+        while (s<0) s+=SecondsPerWormRotationAxis1;
+        sprintf(reply,"%05ld",s); // indexWorm_sense
+        quietReply=true;
+      } else
 //  :VI#
 //         Read RA PEC record index start (steps)
 //         Returns: DDDDDD#
-     if ((command[0]=='V') && (command[1]=='I')) {
-       sprintf(reply,"%06ld",0L);  // indexWorm_record
-       quietReply=true;
-     } else
+      if ((command[0]=='V') && (command[1]=='I')) {
+        sprintf(reply,"%06ld",0L);  // indexWorm_record
+        quietReply=true;
+      } else
 
 //  :WIDDDDDD#
 //         Write RA PEC index start (steps)
-     if ((command[0]=='W') && (command[1]=='I')) {
-       commandError=true;
-       long l=strtol(parameter,&conv_end,10);
-       // see if it converted and is in range
-       if ( (&parameter[0]!=conv_end) && ((l>=0) && (l<(long)StepsPerWormRotationAxis1))) {
+      if ((command[0]=='W') && (command[1]=='I')) {
+        commandError=true;
+        long l=strtol(parameter,&conv_end,10);
+        // see if it converted and is in range
+        if ( (&parameter[0]!=conv_end) && ((l>=0) && (l<(long)StepsPerWormRotationAxis1))) {
 // ignored
-         commandError=false;
-       }
-    } else
+          commandError=false;
+        }
+     } else
 //  :WR+#
 //         Move PEC Table ahead by one second
 //  :WR-#
@@ -1794,37 +1809,37 @@ void processCommands() {
 //         Write RA PEC Table Entry
 //         Returns: Nothing
 //         Rate Adjustment factor for worm segment NNNN. PecRate = Steps +/- for this 1 second segment
-     if ((command[0]=='W') && (command[1]=='R')) { 
-       commandError=true;
-       if (parameter[1]==0) {
-         if (parameter[0]=='+') {
-           i=pecBuffer[SecondsPerWormRotationAxis1-1];
-           memmove((byte *)&pecBuffer[1],(byte *)&pecBuffer[0],SecondsPerWormRotationAxis1-1);
-           pecBuffer[0]=i;
-           commandError=false;
-         } else
-         if (parameter[0]=='-') {
-           i=pecBuffer[0];
-           memmove((byte *)&pecBuffer[0],(byte *)&pecBuffer[1],SecondsPerWormRotationAxis1-1);
-           pecBuffer[SecondsPerWormRotationAxis1-1]=i;
-           pecRecorded=true;
-           commandError=false;
-         }
-       } else {
-         // it should be an int
-         // see if it converted and is in range
-         if ( (atoi2(parameter,&i)) && ((i>=0) && (i<PECBufferSize))) {
-           // should be another int here
-           // see if it converted and is in range
-           if ( (atoi2((char*)&parameter[5],&i2)) && ((i2>=-128) && (i2<=127))) {
-             pecBuffer[i]=i2+128;
-             pecRecorded =true;
-             commandError=false;
-           }
-         }
-         quietReply=true;
-       }
-     } else
+      if ((command[0]=='W') && (command[1]=='R')) { 
+        commandError=true;
+        if (parameter[1]==0) {
+          if (parameter[0]=='+') {
+            i=pecBuffer[SecondsPerWormRotationAxis1-1];
+            memmove((byte *)&pecBuffer[1],(byte *)&pecBuffer[0],SecondsPerWormRotationAxis1-1);
+            pecBuffer[0]=i;
+            commandError=false;
+          } else
+          if (parameter[0]=='-') {
+            i=pecBuffer[0];
+            memmove((byte *)&pecBuffer[0],(byte *)&pecBuffer[1],SecondsPerWormRotationAxis1-1);
+            pecBuffer[SecondsPerWormRotationAxis1-1]=i;
+            pecRecorded=true;
+            commandError=false;
+          }
+        } else {
+          // it should be an int
+          // see if it converted and is in range
+          if ( (atoi2(parameter,&i)) && ((i>=0) && (i<PECBufferSize))) {
+            // should be another int here
+            // see if it converted and is in range
+            if ( (atoi2((char*)&parameter[5],&i2)) && ((i2>=-128) && (i2<=127))) {
+              pecBuffer[i]=i2+128;
+              pecRecorded =true;
+              commandError=false;
+            }
+          }
+          quietReply=true;
+        }
+      } else
 #endif
 
 //   W - Site Select/Site get

@@ -41,19 +41,17 @@ volatile double LastPPSrateRatio = 1.0;
 volatile boolean PPSsynced = false;
 
 // Tracking and rate control -----------------------------------------------------------------------------------------------
-#ifdef MOUNT_TYPE_ALTAZM
-#define refraction_enable false      // refraction isn't allowed in Alt/Azm mode
+#ifndef MOUNT_TYPE_ALTAZM
+  enum rateControls {rc_none, rc_refrAx1, rc_refrBoth, rc_fullAx1, rc_fullBoth};
+  #ifdef TRACK_REFRACTION_RATE_DEFAULT_ON
+    rateControls rateControl=rc_refrAx1;
+  #else
+    rateControls rateControl=rc_none;
+  #endif
 #else
-#define refraction_enable true       // refraction allowed
+  enum rateControls {rc_none};
+  rateControls rateControl=rc_none;
 #endif
-
-#ifdef TRACK_REFRACTION_RATE_DEFAULT_ON
-boolean refraction = refraction_enable;
-#else
-boolean refraction = false;
-#endif
-boolean onTrack = false;
-boolean onTrackDec = false;
 
 long    maxRate = MaxRate*16L;
 

@@ -285,8 +285,12 @@ void handleRoot() {
   
   strcpy(temp3,"</font>(<font class=\"c\">");
   if (strstr(stat,"S")) strcat(temp3,"PPS Sync, ");
-  if (strstr(stat,"r") && !strstr(temp2,"t")) strcat(temp3,"Refr. Compensation, ");
-  if (strstr(stat,"r") && strstr(temp2,"t")) strcat(temp3,"Full Compensation, ");
+  if (strstr(stat,"r") || strstr(stat,"t")) {
+    if (strstr(stat,"r")) strcat(temp3,"Refr. ");
+    if (strstr(stat,"t")) strcat(temp3,"Full ");
+    strcat(temp3,"Comp. ");
+    if (strstr(stat,"s")) strcat(temp3,"1-Axis, "); else strcat(temp3,"2-Axis, ");
+  }
   if (temp3[strlen(temp3)-2]==',') { temp3[strlen(temp3)-2]=0; strcat(temp3,"</font>)<font class=\"c\">"); } else strcpy(temp3,"");
   sprintf(temp,html_indexTracking,temp2,temp3);
   data += temp;
