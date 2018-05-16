@@ -305,9 +305,9 @@ void handleControl() {
 
   // finish the standard http response header
   data += html_onstep_header1;
-  if (sendCommand(":GVP#",temp1)) { temp1[2]=0; data+=temp1; data+=(char*)&temp1[3]; } else data+="?";
+  if (mountStatus.getId(temp1)) data += temp1; else data += "?";
   data += html_onstep_header2;
-  if (sendCommand(":GVN#",temp1)) data+=temp1; else data+="?";
+  if (mountStatus.getVer(temp1)) data += temp1; else data += "?";
   data += html_onstep_header3;
   data += html_links1N;
   data += html_links2S;
@@ -339,7 +339,7 @@ void handleControl() {
   // Quick controls ------------------------------------------
   data += html_controlQuick1;
   data += html_controlQuick1a;
-  if (mountStatus.mountType==MT_GEM) data += html_controlQuick2;
+  if (mountStatus.mountType()==MT_GEM) data += html_controlQuick2;
   data += html_controlQuick3;
   data += html_controlQuick4;
   data += html_controlQuick5;
@@ -357,8 +357,8 @@ void handleControl() {
 
   // Get the align mode --------------------------------------
   data += html_controlAlign1;
-  if (mountStatus.alignMaxStars<=3) {
-    for (int i=1; i<=mountStatus.alignMaxStars; i++) { char temp2[120]=""; sprintf(temp2,html_controlAlign2,i,i,SIDEREAL_CH); data+=temp2; }
+  if (mountStatus.alignMaxStars()<=3) {
+    for (int i=1; i<=mountStatus.alignMaxStars(); i++) { char temp2[120]=""; sprintf(temp2,html_controlAlign2,i,i,SIDEREAL_CH); data+=temp2; }
   } else {
     char temp2[120]="";
     sprintf(temp2,html_controlAlign2,1,1,SIDEREAL_CH); data+=temp2;

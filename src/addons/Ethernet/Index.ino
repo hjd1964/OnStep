@@ -86,9 +86,9 @@ void handleRoot() {
 
   // finish the standard http response header
   data += html_onstep_header1;
-  if (sendCommand(":GVP#",temp1)) { temp1[2]=0; data+=temp1; data+=(char*)&temp1[3]; } else data+="?";
+  if (mountStatus.getId(temp1)) data += temp1; else data += "?";
   data += html_onstep_header2;
-  if (sendCommand(":GVN#",temp1)) data+=temp1; else data+="?";
+  if (mountStatus.getVer(temp1)) data += temp1; else data += "?";
   data += html_onstep_header3;
   data += html_links1S;
   data += html_links2N;
@@ -170,17 +170,17 @@ void handleRoot() {
 #endif
 
   // pier side and meridian flips
-  if ((mountStatus.pierSide==PierSideFlipWE1) || (mountStatus.pierSide==PierSideFlipWE2) || (mountStatus.pierSide==PierSideFlipWE3)) strcpy(temp1,"Meridian Flip, West to East"); else
-  if ((mountStatus.pierSide==PierSideFlipEW1) || (mountStatus.pierSide==PierSideFlipEW2) || (mountStatus.pierSide==PierSideFlipEW3)) strcpy(temp1,"Meridian Flip, East to West"); else
-  if (mountStatus.pierSide==PierSideWest) strcpy(temp1,"West"); else
-  if (mountStatus.pierSide==PierSideEast) strcpy(temp1,"East"); else
-  if (mountStatus.pierSide==PierSideNone) strcpy(temp1,"None"); else strcpy(temp1,"Unknown");
-  if (!mountStatus.valid) strcpy(temp1,"?");
-  if (mountStatus.meridianFlips) {
+  if ((mountStatus.pierSide()==PierSideFlipWE1) || (mountStatus.pierSide()==PierSideFlipWE2) || (mountStatus.pierSide()==PierSideFlipWE3)) strcpy(temp1,"Meridian Flip, West to East"); else
+  if ((mountStatus.pierSide()==PierSideFlipEW1) || (mountStatus.pierSide()==PierSideFlipEW2) || (mountStatus.pierSide()==PierSideFlipEW3)) strcpy(temp1,"Meridian Flip, East to West"); else
+  if (mountStatus.pierSide()==PierSideWest) strcpy(temp1,"West"); else
+  if (mountStatus.pierSide()==PierSideEast) strcpy(temp1,"East"); else
+  if (mountStatus.pierSide()==PierSideNone) strcpy(temp1,"None"); else strcpy(temp1,"Unknown");
+  if (!mountStatus.valid()) strcpy(temp1,"?");
+  if (mountStatus.meridianFlips()) {
     strcpy(temp2,"On");
-    if (mountStatus.autoMeridianFlips) strcat(temp2,"</font>, <font class=\"c\">Auto");
+    if (mountStatus.autoMeridianFlips()) strcat(temp2,"</font>, <font class=\"c\">Auto");
   } else strcpy(temp2,"Off");
-  if (!mountStatus.valid) strcpy(temp2,"?");
+  if (!mountStatus.valid()) strcpy(temp2,"?");
   sprintf(temp,html_indexPier,temp1,temp2);
   data += temp;
 
@@ -190,7 +190,7 @@ void handleRoot() {
 
   data+="<br /><b>Alignment:</b><br />";
 
-  if ((mountStatus.mountType==MT_GEM) || (mountStatus.mountType==MT_FORK)) {
+  if ((mountStatus.mountType()==MT_GEM) || (mountStatus.mountType()==MT_FORK)) {
     long altCor=0; if (sendCommand(":GX02#",temp1)) { altCor=strtol(&temp1[0],NULL,10); }
     long azmCor=0; if (sendCommand(":GX03#",temp1)) { azmCor=strtol(&temp1[0],NULL,10); }
     sprintf(temp,html_indexCorPolar,(long)(altCor),(long)(azmCor));
@@ -203,26 +203,26 @@ void handleRoot() {
   data+="<br /><b>Operations:</b><br />";
 
   // Park
-  if (mountStatus.parked) strcpy(temp1,"Parked"); else strcpy(temp1,"Not Parked");
-  if (mountStatus.parking) strcpy(temp1,"Parking"); else
-  if (mountStatus.parkFail) strcpy(temp1,"Park Failed");
-  if (mountStatus.atHome) strcat(temp1," </font>(<font class=\"c\">At Home</font>)<font class=\"c\">");
-  if (!mountStatus.valid) strcpy(temp1,"?");
+  if (mountStatus.parked()) strcpy(temp1,"Parked"); else strcpy(temp1,"Not Parked");
+  if (mountStatus.parking()) strcpy(temp1,"Parking"); else
+  if (mountStatus.parkFail()) strcpy(temp1,"Park Failed");
+  if (mountStatus.atHome()) strcat(temp1," </font>(<font class=\"c\">At Home</font>)<font class=\"c\">");
+  if (!mountStatus.valid()) strcpy(temp1,"?");
   sprintf(temp,html_indexPark,temp1);
   data += temp;
 
   // Tracking
-  if (mountStatus.tracking) strcpy(temp1,"On"); else strcpy(temp1,"Off");
-  if (mountStatus.slewing) strcpy(temp1,"Slewing");
-  if (!mountStatus.valid) strcpy(temp1,"?");
+  if (mountStatus.tracking()) strcpy(temp1,"On"); else strcpy(temp1,"Off");
+  if (mountStatus.slewing()) strcpy(temp1,"Slewing");
+  if (!mountStatus.valid()) strcpy(temp1,"?");
   
   strcpy(temp2,"</font>(<font class=\"c\">");
-  if (mountStatus.ppsSync) strcat(temp2,"PPS Sync, ");
-  if (mountStatus.rateCompensation==RC_REFR_RA)   strcat(temp2,"Refr Comp RA Axis, ");
-  if (mountStatus.rateCompensation==RC_REFR_BOTH) strcat(temp2,"Refr Comp Both Axis, ");
-  if (mountStatus.rateCompensation==RC_FULL_RA)   strcat(temp2,"Full Comp RA Axis, ");
-  if (mountStatus.rateCompensation==RC_FULL_BOTH) strcat(temp2,"Full Comp Both Axis, ");
-  if (!mountStatus.valid) strcpy(temp2,"?");
+  if (mountStatus.ppsSync()) strcat(temp2,"PPS Sync, ");
+  if (mountStatus.rateCompensation()==RC_REFR_RA)   strcat(temp2,"Refr Comp RA Axis, ");
+  if (mountStatus.rateCompensation()==RC_REFR_BOTH) strcat(temp2,"Refr Comp Both Axis, ");
+  if (mountStatus.rateCompensation()==RC_FULL_RA)   strcat(temp2,"Full Comp RA Axis, ");
+  if (mountStatus.rateCompensation()==RC_FULL_BOTH) strcat(temp2,"Full Comp Both Axis, ");
+  if (!mountStatus.valid()) strcpy(temp2,"?");
   if (temp2[strlen(temp2)-2]==',') { temp2[strlen(temp2)-2]=0; strcat(temp2,"</font>)<font class=\"c\">"); } else strcpy(temp2,"");
   sprintf(temp,html_indexTracking,temp1,temp2);
   data += temp;
@@ -254,10 +254,10 @@ void handleRoot() {
   data+="<br /><b>State:</b><br />";
 
   // Last Error
-  if (mountStatus.lastError!=ERR_NONE) strcpy(temp1,"</font><font class=\"y\">"); else strcpy(temp1,"");
+  if (mountStatus.lastError()!=ERR_NONE) strcpy(temp1,"</font><font class=\"y\">"); else strcpy(temp1,"");
   mountStatus.getLastErrorMessage(temp2);
   strcat(temp1,temp2);
-  if (!mountStatus.valid) strcpy(temp1,"?");
+  if (!mountStatus.valid()) strcpy(temp1,"?");
   sprintf(temp,html_indexLastError,temp1);
   data += temp;
 

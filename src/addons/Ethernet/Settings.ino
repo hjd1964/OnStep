@@ -89,9 +89,9 @@ void handleSettings() {
 
   // finish the standard http response header
   data += html_onstep_header1;
-  if (sendCommand(":GVP#",temp1)) { temp1[2]=0; data+=temp1; data+=(char*)&temp1[3]; } else data+="?";
+  if (mountStatus.getId(temp1)) data += temp1; else data += "?";
   data += html_onstep_header2;
-  if (sendCommand(":GVN#",temp1)) data+=temp1; else data+="?";
+  if (mountStatus.getVer(temp1)) data += temp1; else data += "?";
   data += html_onstep_header3;
   data += html_links1N;
   data += html_links2N;
@@ -115,20 +115,20 @@ void handleSettings() {
   data += html_settingsTrack1;
   data += html_settingsTrack2;
   data += html_settingsTrack3;
-  if (mountStatus.mountType!=MT_ALTAZM) {
+  if (mountStatus.mountType()!=MT_ALTAZM) {
     data += html_settingsTrackComp1;
     data += html_settingsTrackComp2;
   }
   data += html_settingsBuzzer1;
-  if (mountStatus.valid) { if (mountStatus.buzzerEnabled) data+="On"; else data+="Off"; } else data+="?";
+  if (mountStatus.valid()) { if (mountStatus.buzzerEnabled()) data+="On"; else data+="Off"; } else data+="?";
   data += html_settingsBuzzer2;
 
-  if (mountStatus.mountType==MT_GEM) {
+  if (mountStatus.mountType()==MT_GEM) {
     data += html_settingsMFAuto1;
-    if (mountStatus.valid) { if (mountStatus.autoMeridianFlips) data+="On"; else data+="Off"; } else data+="?";
+    if (mountStatus.valid()) { if (mountStatus.autoMeridianFlips()) data+="On"; else data+="Off"; } else data+="?";
     data += html_settingsMFAuto2;
     data += html_settingsMFPause1;
-    if (mountStatus.valid) { if (mountStatus.pauseAtHome) data+="On"; else data+="Off"; } else data+="?";
+    if (mountStatus.valid()) { if (mountStatus.pauseAtHome()) data+="On"; else data+="Off"; } else data+="?";
     data += html_settingsMFPause2;
   }
 

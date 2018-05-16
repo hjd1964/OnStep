@@ -57,7 +57,7 @@ void handlePec() {
 
   mountStatus.update();
 
-  if (mountStatus.mountType!=MT_ALTAZM) {
+  if (mountStatus.mountType()!=MT_ALTAZM) {
     // active ajax page is: pecAjax();
     data +="<script>var ajaxPage='pec.txt';</script>\n";
     data +=html_ajax_active;
@@ -66,9 +66,9 @@ void handlePec() {
 
   // finish the standard http response header
   data += html_onstep_header1;
-  if (sendCommand(":GVP#",temp1)) { temp1[2]=0; data+=temp1; data+=(char*)&temp1[3]; } else data+="?";
+  if (mountStatus.getId(temp1)) data += temp1; else data += "?";
   data += html_onstep_header2;
-  if (sendCommand(":GVN#",temp1)) data+=temp1; else data+="?";
+  if (mountStatus.getVer(temp1)) data += temp1; else data += "?";
   data += html_onstep_header3;
   data += html_links1N;
   data += html_links2N;
@@ -84,7 +84,7 @@ void handlePec() {
   client->print(data); data="";
 #endif
 
-  if (mountStatus.mountType!=MT_ALTAZM) {
+  if (mountStatus.mountType()!=MT_ALTAZM) {
     data += html_pec2;
     data += html_pecControls0;
     data += html_pecControls1;
@@ -114,13 +114,13 @@ void pecAjax() {
   char temp[80]="";
   
   data += "status|";
-  if ((mountStatus.mountType!=MT_ALTAZM) && (mountStatus.update()) && (sendCommand(":$QZ?#",temp))) {
+  if ((mountStatus.mountType()!=MT_ALTAZM) && (mountStatus.update()) && (sendCommand(":$QZ?#",temp))) {
     if (temp[0]=='I') data +="Idle"; else
     if (temp[0]=='p') data +="Play waiting to start"; else
     if (temp[0]=='P') data +="Playing"; else
     if (temp[0]=='r') data +="Record waiting for index to arrive"; else
     if (temp[0]=='R') data +="Recording"; else data += "Unknown";
-    if (mountStatus.pecRecording) data += " (writing to EEPROM)";
+    if (mountStatus.pecRecording()) data += " (writing to EEPROM)";
   } else { data += "?"; }
   data += "\n";
 
