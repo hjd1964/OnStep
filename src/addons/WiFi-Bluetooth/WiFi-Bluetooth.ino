@@ -36,8 +36,8 @@
 #define FirmwareDate          __DATE__
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
-#define FirmwareVersionMinor  "3"
-#define FirmwareVersionPatch  "c"
+#define FirmwareVersionMinor  "4"
+#define FirmwareVersionPatch  "a"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
@@ -49,9 +49,13 @@
 
 #include "Config.h"
 #include "Constants.h"
-#include "Globals.h"
 #include "Encoders.h"
 Encoders encoders;
+
+#include "MountStatus.h"
+
+int WebTimeout=TIMEOUT_WEB;
+int CmdTimeout=TIMEOUT_CMD;
 
 #define Default_Password "password"
 char masterPassword[40]=Default_Password;
@@ -157,6 +161,7 @@ void setup(void){
   Ser.swap();
 #endif
 
+  byte tb=0;
 Again:
 #ifdef LED_PIN
   digitalWrite(LED_PIN,LOW);
@@ -304,6 +309,7 @@ void loop(void){
   server.handleClient();
 
   // disconnect client
+  static unsigned long clientTime = 0;
   if (cmdSvrClient && (!cmdSvrClient.connected())) cmdSvrClient.stop();
   if (cmdSvrClient && ((long)(clientTime-millis())<0)) cmdSvrClient.stop();
 
@@ -314,6 +320,8 @@ void loop(void){
     clientTime=millis()+2000UL;
   }
 
+  static char writeBuffer[40]="";
+  static int writeBufferPos=0;
   // check clients for data, if found get the command, send cmd and pickup the response, then return the response
   while (cmdSvrClient && cmdSvrClient.connected() && (cmdSvrClient.available()>0)) {
     // get the data

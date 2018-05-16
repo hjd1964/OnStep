@@ -119,9 +119,9 @@ void handleConfiguration() {
 
   // finish the standard http response header
   data += html_onstep_header1;
-  Ser.print(":GVP#"); temp2[Ser.readBytesUntil('#',temp2,20)]=0; if (strlen(temp2)<=0) { strcpy(temp2,"N/A"); } else { for (int i=2; i<7; i++) temp2[i]=temp2[i+1]; } data += temp2;
+  if (sendCommand(":GVP#",temp1)) { temp1[2]=0; data+=temp1; data+=(char*)&temp1[3]; } else data+="?";
   data += html_onstep_header2;
-  Ser.print(":GVN#"); temp2[Ser.readBytesUntil('#',temp2,20)]=0; if (strlen(temp2)<=0) { strcpy(temp2,"N/A"); } data += temp2;
+  if (sendCommand(":GVN#",temp1)) data+=temp1; else data+="?";
   data += html_onstep_header3;
   data += html_links1N;
   data += html_links2N;
@@ -143,51 +143,30 @@ void handleConfiguration() {
 #endif
 
   // Backlash
-  Ser.print(":%BR#");
-  temp2[Ser.readBytesUntil('#',temp2,20)]=0;
-  if (strlen(temp2)<=0) { strcpy(temp2,"0"); }
-  int backlashAxis1=(int)strtol(&temp2[0],NULL,10);
+  if (!sendCommand(":%BR#",temp1)) strcpy(temp1,"0"); int backlashAxis1=(int)strtol(&temp1[0],NULL,10);
   sprintf(temp,html_configBlAxis1,backlashAxis1);
   data += temp;
-  Ser.print(":%BD#");
-  temp2[Ser.readBytesUntil('#',temp2,20)]=0;
-  if (strlen(temp2)<=0) { strcpy(temp2,"0"); }
-  int backlashAxis2=(int)strtol(&temp2[0],NULL,10);
+  if (!sendCommand(":%BD#",temp1)) strcpy(temp1,"0"); int backlashAxis2=(int)strtol(&temp1[0],NULL,10);
   sprintf(temp,html_configBlAxis2,backlashAxis2);
   data += temp;
 #ifdef OETHS
   client->print(data); data="";
 #endif
 
-  // Limits
-  strcpy(temp2,"");
-  Ser.print(":Gh#");
-  temp2[Ser.readBytesUntil('#',temp2,20)]=0;
-  if (strlen(temp2)<=0) { strcpy(temp2,"0"); }
-  int minAlt=(int)strtol(&temp2[0],NULL,10);
+  // Overhead and Horizon Limits
+  if (!sendCommand(":Gh#",temp1)) strcpy(temp1,"0"); int minAlt=(int)strtol(&temp1[0],NULL,10);
   sprintf(temp,html_configMinAlt,minAlt);
   data += temp;
-  Ser.print(":Go#");
-  temp2[Ser.readBytesUntil('#',temp2,20)]=0;
-  if (strlen(temp2)<=0) { strcpy(temp2,"0"); }
-  int maxAlt=(int)strtol(&temp2[0],NULL,10);
+  if (!sendCommand(":Go#",temp1)) strcpy(temp1,"0"); int maxAlt=(int)strtol(&temp1[0],NULL,10);
   sprintf(temp,html_configMaxAlt,maxAlt);
   data += temp;
 
-  boolean foundHash;
-  strcpy(temp2,"");
-  Ser.print(":GXE9#");
-  temp2[readBytesUntil2('#',temp2,20,&foundHash,WebTimeout)]=0;
-  if (strlen(temp2)<=0) { strcpy(temp2,"0"); }
-  if (foundHash) {
-    int degPastMerE=(int)strtol(&temp2[0],NULL,10);
+  // Meridian Limits
+  if ((sendCommand(":GXE9#",temp1)) && (sendCommand(":GXEA#",temp2))) {
+    int degPastMerE=(int)strtol(&temp1[0],NULL,10);
     degPastMerE=round((degPastMerE*15.0)/60.0);
     sprintf(temp,html_configPastMerE,degPastMerE);
     data += temp;
-    strcpy(temp2,"");
-    Ser.print(":GXEA#");
-    temp2[Ser.readBytesUntil('#',temp2,20)]=0;
-    if (strlen(temp2)<=0) { strcpy(temp2,"0"); }
     int degPastMerW=(int)strtol(&temp2[0],NULL,10);
     degPastMerW=round((degPastMerW*15.0)/60.0);
     sprintf(temp,html_configPastMerW,degPastMerW);
@@ -196,40 +175,33 @@ void handleConfiguration() {
 #ifdef OETHS
   client->print(data); data="";
 #endif
- 
 
   // Longitude
-  Ser.print(":Gg#");
-  temp2[Ser.readBytesUntil('#',temp2,20)]=0;
-  if (strlen(temp2)<=0) { strcpy(temp2,"+000*00"); }
-  temp2[4]=0; // deg. part only
-  if (temp2[0]=='+') temp2[0]='0'; // remove +
-  sprintf(temp,html_configLongDeg,temp2);
+  if (!sendCommand(":Gg#",temp1)) strcpy(temp1,"+000*00");
+  temp1[4]=0; // deg. part only
+  if (temp1[0]=='+') temp1[0]='0'; // remove +
+  sprintf(temp,html_configLongDeg,temp1);
   data += temp;
-  sprintf(temp,html_configLongMin,(char*)&temp2[5]);
+  sprintf(temp,html_configLongMin,(char*)&temp1[5]);
   data += temp;
 #ifdef OETHS
   client->print(data); data="";
 #endif
 
   // Latitude
-  Ser.print(":Gt#");
-  temp2[Ser.readBytesUntil('#',temp2,20)]=0;
-  if (strlen(temp2)<=0) { strcpy(temp2,"+00*00"); }
-  temp2[3]=0; // deg. part only
-  if (temp2[0]=='+') temp2[0]='0'; // remove +
-  sprintf(temp,html_configLatDeg,temp2);
+  if (!sendCommand(":Gt#",temp1)) strcpy(temp1,"+00*00");
+  temp1[3]=0; // deg. part only
+  if (temp1[0]=='+') temp1[0]='0'; // remove +
+  sprintf(temp,html_configLatDeg,temp1);
   data += temp;
-  sprintf(temp,html_configLatMin,(char*)&temp2[4]);
+  sprintf(temp,html_configLatMin,(char*)&temp1[4]);
   data += temp;
 #ifdef OETHS
   client->print(data); data="";
 #endif
 
   // UTC Offset
-  Ser.print(":GG#");
-  temp1[Ser.readBytesUntil('#',temp1,20)]=0;
-  if (strlen(temp1)<=0) { strcpy(temp1,"+00"); }
+  if (!sendCommand(":GG#",temp1)) strcpy(temp1,"+00");
   strcpy(temp2,temp1);
   temp2[3]=0; // deg. part only
   if (temp2[0]=='+') temp2[0]='0'; // remove +

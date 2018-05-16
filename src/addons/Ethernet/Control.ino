@@ -276,7 +276,6 @@ void handleControl() {
   serialRecvFlush();
     
   char temp1[24]="";
-  char temp2[120]="";
 
   processControlGet();
   
@@ -302,15 +301,13 @@ void handleControl() {
   data += html_bodyB;
 
   // get status
-  char stat[22] = "";
-  Ser.print(":GU#");
-  stat[Ser.readBytesUntil('#',stat,20)]=0;
+  mountStatus.update();
 
   // finish the standard http response header
   data += html_onstep_header1;
-  Ser.print(":GVP#"); temp2[Ser.readBytesUntil('#',temp2,20)]=0; if (strlen(temp2)<=0) { strcpy(temp2,"N/A"); } else { for (int i=2; i<7; i++) temp2[i]=temp2[i+1]; } data += temp2;
+  if (sendCommand(":GVP#",temp1)) { temp1[2]=0; data+=temp1; data+=(char*)&temp1[3]; } else data+="?";
   data += html_onstep_header2;
-  Ser.print(":GVN#"); temp2[Ser.readBytesUntil('#',temp2,20)]=0; if (strlen(temp2)<=0) { strcpy(temp2,"N/A"); } data += temp2;
+  if (sendCommand(":GVN#",temp1)) data+=temp1; else data+="?";
   data += html_onstep_header3;
   data += html_links1N;
   data += html_links2S;
@@ -342,7 +339,7 @@ void handleControl() {
   // Quick controls ------------------------------------------
   data += html_controlQuick1;
   data += html_controlQuick1a;
-  if (strstr(stat,"E")) data += html_controlQuick2; // GEM only
+  if (mountStatus.mountType==MT_GEM) data += html_controlQuick2;
   data += html_controlQuick3;
   data += html_controlQuick4;
   data += html_controlQuick5;
@@ -359,20 +356,11 @@ void handleControl() {
 #endif
 
   // Get the align mode --------------------------------------
-  if (AlignMaxNumStars==-1) {
-    Ser.print(":A?#");
-    temp1[Ser.readBytesUntil('#',temp1,20)]=0;
-    AlignMaxNumStars=3;
-    if (temp1[0]!=0) {
-      if ((temp1[0]>'0') && (temp1[0]<'9')) AlignMaxNumStars=temp1[0]-'0';
-    }
-    if (AlignMaxNumStars>9) AlignMaxNumStars=9;
-    if (AlignMaxNumStars<1) AlignMaxNumStars=1;
-  }
   data += html_controlAlign1;
-  if (AlignMaxNumStars<=3) {
-    for (int i=1; i<=AlignMaxNumStars; i++) { sprintf(temp2,html_controlAlign2,i,i,SIDEREAL_CH); data+=temp2; }
+  if (mountStatus.alignMaxStars<=3) {
+    for (int i=1; i<=mountStatus.alignMaxStars; i++) { char temp2[120]=""; sprintf(temp2,html_controlAlign2,i,i,SIDEREAL_CH); data+=temp2; }
   } else {
+    char temp2[120]="";
     sprintf(temp2,html_controlAlign2,1,1,SIDEREAL_CH); data+=temp2;
     sprintf(temp2,html_controlAlign2,4,4,SIDEREAL_CH); data+=temp2;
     sprintf(temp2,html_controlAlign2,6,6,SIDEREAL_CH); data+=temp2;
@@ -398,15 +386,8 @@ void handleControl() {
 #endif
 
   // Focusing ------------------------------------------------
-  boolean Focuser1 = false;
-  boolean Focuser2 = false;
-  Ser.print(":FA#");
-  temp2[Ser.readBytesUntil('#',temp2,20)]=0;
-  if (temp2[0]=='1') Focuser1=true; else Focuser1=false;
-  Ser.print(":fA#");
-  temp2[Ser.readBytesUntil('#',temp2,20)]=0;
-  if (temp2[0]=='1') Focuser2=true; else Focuser2=false;
-
+  boolean Focuser1; if (sendCommand(":FA#",temp1,R_BOOL)) Focuser1=true; else Focuser1=false;
+  boolean Focuser2; if (sendCommand(":fA#",temp1,R_BOOL)) Focuser2=true; else Focuser2=false;
   if (Focuser1) {
     data += html_controlFocus1;
     data += "<div style='float: left;'>Focuser:</div><div style='float: right; text-align: right;' id='focuserpos'>?</div><br />";
@@ -423,10 +404,10 @@ void handleControl() {
   // Rotate/De-Rotate ----------------------------------------
   boolean Rotate=false;
   boolean DeRotate=false;
-  Ser.print(":GX98#");
-  temp2[Ser.readBytesUntil('#',temp2,20)]=0;
-  if (temp2[0]=='R') { Rotate=true; DeRotate=false; }
-  if (temp2[0]=='D') { Rotate=true; DeRotate=true; }
+  if (sendCommand(":GX98#",temp1)) {
+    if (temp1[0]=='R') Rotate=true;
+    if (temp1[0]=='D') { Rotate=true; DeRotate=true; }
+  }
   if (Rotate) {
     data += html_controlRotate0;
     data += "<div style='float: left;'>Rotator:</div><div style='float: right; text-align: right;' id='rotatorpos'>?</div><br />";
@@ -506,40 +487,22 @@ void handleControl() {
 
     // Analog Control
     #ifdef AN3
-    Ser.print(":GXG3#"); temp1[Ser.readBytesUntil('#',temp1,20)]=0; if (temp1[0]==0) { temp1[0]='0'; temp1[1]=0; }
-    data += html_controlAnalog3A; data += temp1;
-    data += html_controlAnalog3B; data += temp1;
-    data += html_controlAnalog3C;
+    if (sendCommand(":GXG3#",temp1)) { data += html_controlAnalog3A; data += temp1; data += html_controlAnalog3B; data += temp1; data += html_controlAnalog3C; }
     #endif
     #ifdef AN4
-    Ser.print(":GXG4#"); temp1[Ser.readBytesUntil('#',temp1,20)]=0; if (temp1[0]==0) { temp1[0]='0'; temp1[1]=0; }
-    data += html_controlAnalog4A; data += temp1;
-    data += html_controlAnalog4B; data += temp1;
-    data += html_controlAnalog4C;
+    if (sendCommand(":GXG4#",temp1)) { data += html_controlAnalog4A; data += temp1; data += html_controlAnalog4B; data += temp1; data += html_controlAnalog4C; }
     #endif
     #ifdef AN5
-    Ser.print(":GXG5#"); temp1[Ser.readBytesUntil('#',temp1,20)]=0; if (temp1[0]==0) { temp1[0]='0'; temp1[1]=0; }
-    data += html_controlAnalog5A; data += temp1;
-    data += html_controlAnalog5B; data += temp1;
-    data += html_controlAnalog5C;
+    if (sendCommand(":GXG5#",temp1)) { data += html_controlAnalog5A; data += temp1; data += html_controlAnalog5B; data += temp1; data += html_controlAnalog5C; }
     #endif
     #ifdef AN6
-    Ser.print(":GXG6#"); temp1[Ser.readBytesUntil('#',temp1,20)]=0; if (temp1[0]==0) { temp1[0]='0'; temp1[1]=0; }
-    data += html_controlAnalog6A; data += temp1;
-    data += html_controlAnalog6B; data += temp1;
-    data += html_controlAnalog6C;
+    if (sendCommand(":GXG6#",temp1)) { data += html_controlAnalog6A; data += temp1; data += html_controlAnalog6B; data += temp1; data += html_controlAnalog6C; }
     #endif
     #ifdef AN7
-    Ser.print(":GXG7#"); temp1[Ser.readBytesUntil('#',temp1,20)]=0; if (temp1[0]==0) { temp1[0]='0'; temp1[1]=0; }
-    data += html_controlAnalog7A; data += temp1;
-    data += html_controlAnalog7B; data += temp1;
-    data += html_controlAnalog7C;
+    if (sendCommand(":GXG7#",temp1)) { data += html_controlAnalog7A; data += temp1; data += html_controlAnalog7B; data += temp1; data += html_controlAnalog7C; }
     #endif
     #ifdef AN8
-    Ser.print(":GXG8#"); temp1[Ser.readBytesUntil('#',temp1,20)]=0; if (temp1[0]==0) { temp1[0]='0'; temp1[1]=0; }
-    data += html_controlAnalog8A; data += temp1;
-    data += html_controlAnalog8B; data += temp1;
-    data += html_controlAnalog8C;
+    if (sendCommand(":GXG8#",temp1)) { data += html_controlAnalog8A; data += temp1; data += html_controlAnalog8B; data += temp1; data += html_controlAnalog8C; }
     #endif
 
     data += html_controlAuxE;
@@ -576,52 +539,30 @@ void controlAjax() {
 #endif
   String data="";
   char temp[40]="";
-  
-  Ser.print(":FG#");
-  temp[Ser.readBytesUntil('#',temp,20)]=0;
-  data += "focuserpos|";
-  if (temp[0]!=0) { data += temp; data += " microns\n"; } else { data += "?\n"; }
 
-  Ser.print(":rG#");
-  temp[Ser.readBytesUntil('#',temp,20)]=0;
+  data += "focuserpos|";
+  if (sendCommand(":FG#",temp)) { data += temp; data += " microns\n"; } else { data += "?\n"; }
+
   data += "rotatorpos|";
-  if (temp[0]!=0) { temp[9]=temp[5]; temp[10]=temp[6]; temp[11]=0; temp[4]='&'; temp[5]='d'; temp[6]='e'; temp[7]='g'; temp[8]=';'; data += temp; data += "&#39;\n"; } else { data += "?\n"; }
+  if (sendCommand(":rG#",temp)) { temp[9]=temp[5]; temp[10]=temp[6]; temp[11]=0; temp[4]='&'; temp[5]='d'; temp[6]='e'; temp[7]='g'; temp[8]=';'; data += temp; data += "&#39;\n"; } else { data += "?\n"; }
 
   #ifdef AN3
-    Ser.print(":GXG3#");
-    temp[Ser.readBytesUntil('#',temp,20)]=0;
-    data += "an3v|";
-    if (temp[0]!=0) { data += temp; data += "\n"; } else { data += "?\n"; }
+    data += "an3v|"; if (sendCommand(":GXG3#",temp)) { data += temp; data += "\n"; } else { data += "?\n"; }
   #endif
   #ifdef AN4
-    Ser.print(":GXG4#");
-    temp[Ser.readBytesUntil('#',temp,20)]=0;
-    data += "an4v|";
-    if (temp[0]!=0) { data += temp; data += "\n"; } else { data += "?\n"; }
+    data += "an4v|"; if (sendCommand(":GXG4#",temp)) { data += temp; data += "\n"; } else { data += "?\n"; }
   #endif
   #ifdef AN5
-    Ser.print(":GXG5#");
-    temp[Ser.readBytesUntil('#',temp,20)]=0;
-    data += "an5v|";
-    if (temp[0]!=0) { data += temp; data += "\n"; } else { data += "?\n"; }
+    data += "an5v|"; if (sendCommand(":GXG5#",temp)) { data += temp; data += "\n"; } else { data += "?\n"; }
   #endif
   #ifdef AN6
-    Ser.print(":GXG6#");
-    temp[Ser.readBytesUntil('#',temp,20)]=0;
-    data += "an6v|";
-    if (temp[0]!=0) { data += temp; data += "\n"; } else { data += "?\n"; }
+    data += "an6v|"; if (sendCommand(":GXG6#",temp)) { data += temp; data += "\n"; } else { data += "?\n"; }
   #endif
   #ifdef AN7
-    Ser.print(":GXG7#");
-    temp[Ser.readBytesUntil('#',temp,20)]=0;
-    data += "an7v|";
-    if (temp[0]!=0) { data += temp; data += "\n"; } else { data += "?\n"; }
+    data += "an7v|"; if (sendCommand(":GXG7#",temp)) { data += temp; data += "\n"; } else { data += "?\n"; }
   #endif
   #ifdef AN8
-    Ser.print(":GXG8#");
-    temp[Ser.readBytesUntil('#',temp,20)]=0;
-    data += "an8v|";
-    if (temp[0]!=0) { data += temp; data += "\n"; } else { data += "?\n"; }
+    data += "an8v|"; if (sendCommand(":GXG8#",temp)) { data += temp; data += "\n"; } else { data += "?\n"; }
   #endif
 
 #ifdef OETHS

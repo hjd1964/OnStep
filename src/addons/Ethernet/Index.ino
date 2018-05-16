@@ -58,8 +58,6 @@ void handleRoot() {
   char temp[320]="";
   char temp1[80]="";
   char temp2[80]="";
-  char temp3[80]="";
-  char temp4[40]="";
 
   String data=html_headB;
   data += html_headerIdx; // page refresh
@@ -83,16 +81,14 @@ void handleRoot() {
 
   data += html_bodyB;
 
-  // get status
-  char stat[20] = "";
-  Ser.print(":GU#");
-  stat[Ser.readBytesUntil('#',stat,20)]=0;
+  // get status (all)
+  mountStatus.update(true);
 
   // finish the standard http response header
   data += html_onstep_header1;
-  Ser.print(":GVP#"); temp2[Ser.readBytesUntil('#',temp2,20)]=0; if (strlen(temp2)<=0) { strcpy(temp2,"N/A"); } else { for (int i=2; i<7; i++) temp2[i]=temp2[i+1]; } data += temp2;
+  if (sendCommand(":GVP#",temp1)) { temp1[2]=0; data+=temp1; data+=(char*)&temp1[3]; } else data+="?";
   data += html_onstep_header2;
-  Ser.print(":GVN#"); temp2[Ser.readBytesUntil('#',temp2,20)]=0; if (strlen(temp2)<=0) { strcpy(temp2,"N/A"); } data += temp2;
+  if (sendCommand(":GVN#",temp1)) data+=temp1; else data+="?";
   data += html_onstep_header3;
   data += html_links1S;
   data += html_links2N;
@@ -114,135 +110,78 @@ void handleRoot() {
   data += html_settingsBrowserTime;
 
   // UTC Date
-  Ser.print(":GX81#");
-  temp2[Ser.readBytesUntil('#',temp2,20)]=0;
-  if (strlen(temp2)<=0) { strcpy(temp2,"N/A"); }
-  sprintf(temp,html_indexDate,temp2);
+  if (!sendCommand(":GX81#",temp1)) strcpy(temp1,"?");
+  sprintf(temp,html_indexDate,temp1);
   data += temp;
 
   // UTC Time
-  Ser.print(":GX80#");
-  temp2[Ser.readBytesUntil('#',temp2,20)]=0;
-  if (strlen(temp2)<=0) { strcpy(temp2,"N/A"); }
-  sprintf(temp,html_indexTime,temp2);
+  if (!sendCommand(":GX80#",temp1)) strcpy(temp1,"?");
+  sprintf(temp,html_indexTime,temp1);
   data += temp;
 
   // LST
-  Ser.print(":GS#");
-  temp2[Ser.readBytesUntil('#',temp2,20)]=0;
-  if (strlen(temp2)<=0) { strcpy(temp2,"N/A"); }
-  sprintf(temp,html_indexSidereal,temp2);
+  if (!sendCommand(":GS#",temp1)) strcpy(temp1,"?");
+  sprintf(temp,html_indexSidereal,temp1);
   data += temp;
 
   // Longitude and Latitude
-  Ser.print(":Gg#");
-  temp2[Ser.readBytesUntil('#',temp2,20)]=0; 
-  if (strlen(temp2)<=0) { strcpy(temp2,"N/A"); }
-  Ser.print(":Gt#");
-  temp3[Ser.readBytesUntil('#',temp3,20)]=0;
-  if (strlen(temp3)<=0) { strcpy(temp3,"N/A"); }
-  sprintf(temp,html_indexSite,temp2,temp3);
+  if (!sendCommand(":Gg#",temp1)) strcpy(temp1,"?");
+  if (!sendCommand(":Gt#",temp2)) strcpy(temp2,"?");
+  sprintf(temp,html_indexSite,temp1,temp2);
   data += temp;
 #ifdef OETHS
   client->print(data); data="";
 #endif
 
 #ifdef AMBIENT_CONDITIONS_ON
-  Ser.print(":GX9A#");
-  temp1[Ser.readBytesUntil('#',temp1,20)]=0;
-  if (strlen(temp1)>2) {
-    sprintf(temp,html_indexTPHD,"Temperature:",temp1,"&deg;C");
-    data += temp;
-  }
-  Ser.print(":GX9B#");
-  temp1[Ser.readBytesUntil('#',temp1,20)]=0;
-  if (strlen(temp1)>2) {
-    sprintf(temp,html_indexTPHD,"Barometric Pressure:",temp1,"mb");
-    data += temp;
-  }
-  Ser.print(":GX9C#");
-  temp1[Ser.readBytesUntil('#',temp1,20)]=0;
-  if (strlen(temp1)>2) {
-    sprintf(temp,html_indexTPHD,"Relative Humidity:",temp1,"%");
-    data += temp;
-  }
-  Ser.print(":GX9E#");
-  temp1[Ser.readBytesUntil('#',temp1,20)]=0;
-  if (strlen(temp1)>2) {
-    sprintf(temp,html_indexTPHD,"Dew Point Temperature:",temp1,"&deg;C");
-    data += temp;
-  }
+  if (!sendCommand(":GX9A#",temp1)) strcpy(temp1,"?"); sprintf(temp,html_indexTPHD,"Temperature:",temp1,"&deg;C"); data+=temp;
+  if (!sendCommand(":GX9B#",temp1)) strcpy(temp1,"?"); sprintf(temp,html_indexTPHD,"Barometric Pressure:",temp1,"mb"); data+=temp;
+  if (!sendCommand(":GX9C#",temp1)) strcpy(temp1,"?"); sprintf(temp,html_indexTPHD,"Relative Humidity:",temp1,"%"); data+=temp;
+  if (!sendCommand(":GX9E#",temp1)) strcpy(temp1,"?"); sprintf(temp,html_indexTPHD,"Dew Point Temperature:",temp1,"&deg;C"); data+=temp;
 #endif
 
   data+="<br /><b>Coordinates:</b><br />";
 
   // RA,Dec current
-  Ser.print(":GR#");
-  temp2[Ser.readBytesUntil('#',temp2,20)]=0;
-  if (strlen(temp2)<=0) { strcpy(temp2,"N/A"); }
-  Ser.print(":GD#");
-  temp3[Ser.readBytesUntil('#',temp3,20)]=0;
-  if (strlen(temp3)<=0) { strcpy(temp3,"N/A"); }
-  sprintf(temp,html_indexPosition,temp2,temp3); 
+  if (!sendCommand(":GR#",temp1)) strcpy(temp1,"?");
+  if (!sendCommand(":GD#",temp2)) strcpy(temp2,"?");
+  sprintf(temp,html_indexPosition,temp1,temp2); 
   data += temp;
 
   // RA,Dec target
-  Ser.print(":Gr#");
-  temp2[Ser.readBytesUntil('#',temp2,20)]=0;
-  if (strlen(temp2)<=0) { strcpy(temp2,"N/A"); }
-  Ser.print(":Gd#");
-  temp3[Ser.readBytesUntil('#',temp3,20)]=0;
-  if (strlen(temp3)<=0) { strcpy(temp3,"N/A"); }
-  sprintf(temp,html_indexTarget,temp2,temp3); 
+  if (!sendCommand(":Gr#",temp1)) strcpy(temp1,"?");
+  if (!sendCommand(":Gd#",temp2)) strcpy(temp2,"?");
+  sprintf(temp,html_indexPosition,temp1,temp2); 
   data += temp;
 
 #ifdef ENCODERS_ON
   // RA,Dec OnStep position
-  double f=encoders.getOnStepAxis1();
-  doubleToDms(temp2,&f,true,true);
-  f=encoders.getOnStepAxis2();
-  doubleToDms(temp3,&f,true,true);
-  sprintf(temp,html_indexEncoder1,temp2,temp3);
+  double f;
+  f=encoders.getOnStepAxis1(); doubleToDms(temp1,&f,true,true);
+  f=encoders.getOnStepAxis2(); doubleToDms(temp2,&f,true,true);
+  sprintf(temp,html_indexEncoder1,temp1,temp2);
   data += temp;
 
   // RA,Dec encoder position
-  f=encoders.getAxis1();
-  doubleToDms(temp2,&f,true,true);
-  f=encoders.getAxis2();
-  doubleToDms(temp3,&f,true,true);
-  sprintf(temp,html_indexEncoder2,temp2,temp3);
+  f=encoders.getAxis1(); doubleToDms(temp1,&f,true,true);
+  f=encoders.getAxis2(); doubleToDms(temp2,&f,true,true);
+  sprintf(temp,html_indexEncoder2,temp1,temp2);
   data += temp;
 #endif
 
-  // pier side
-  Ser.print(":GX94#");
-  temp2[Ser.readBytesUntil('#',temp2,20)]=0;
-  if (strlen(temp2)<=0) { strcpy(temp2,"0"); }
-  bool meridianFlipsDisabled=strstr(temp2, "N");
-  pierSide=strtol(&temp2[0],NULL,10);
-  if ((pierSide==PierSideFlipWE1) ||
-      (pierSide==PierSideFlipWE2) ||
-      (pierSide==PierSideFlipWE3)) strcpy(temp2,"Meridian Flip, West to East"); else
-  if ((pierSide==PierSideFlipEW1) ||
-      (pierSide==PierSideFlipEW2) ||
-      (pierSide==PierSideFlipEW3)) strcpy(temp2,"Meridian Flip, East to West"); else
-  if (pierSide==PierSideWest) strcpy(temp2,"West"); else
-  if (pierSide==PierSideEast) strcpy(temp2,"East"); else
-  if (pierSide==PierSideNone) strcpy(temp2,"None"); else strcpy(temp2,"Unknown");
-
-  // meridian flips
-  if (meridianFlipsDisabled) strcpy(temp3,"Off"); else {
-    strcpy(temp3,"On");
-    // automatic meridian flips
-    if (!strstr(stat,"A") && (!meridianFlipsDisabled)) { // not AltAzm and Enabled
-      Ser.print(":GX95#");
-      temp4[Ser.readBytesUntil('#',temp4,20)]=0;
-      if (strlen(temp4)>0) {
-        if (!strstr(temp4, "0")) strcat(temp3,"</font>, <font class=\"c\">Auto. @Limit"); 
-      }
-    }
-  }
-  sprintf(temp,html_indexPier,temp2,temp3);
+  // pier side and meridian flips
+  if ((mountStatus.pierSide==PierSideFlipWE1) || (mountStatus.pierSide==PierSideFlipWE2) || (mountStatus.pierSide==PierSideFlipWE3)) strcpy(temp2,"Meridian Flip, West to East"); else
+  if ((mountStatus.pierSide==PierSideFlipEW1) || (mountStatus.pierSide==PierSideFlipEW2) || (mountStatus.pierSide==PierSideFlipEW3)) strcpy(temp2,"Meridian Flip, East to West"); else
+  if (mountStatus.pierSide==PierSideWest) strcpy(temp1,"West"); else
+  if (mountStatus.pierSide==PierSideEast) strcpy(temp1,"East"); else
+  if (mountStatus.pierSide==PierSideNone) strcpy(temp1,"None"); else strcpy(temp1,"Unknown");
+  if (!mountStatus.valid) strcpy(temp1,"?");
+  if (mountStatus.meridianFlips) {
+    strcpy(temp2,"On");
+    if (mountStatus.autoMeridianFlips) strcat(temp2,"</font>, <font class=\"c\">Auto");
+  } else strcpy(temp2,"Off");
+  if (!mountStatus.valid) strcpy(temp2,"?");
+  sprintf(temp,html_indexPier,temp1,temp2);
   data += temp;
 
 #ifdef OETHS
@@ -251,16 +190,10 @@ void handleRoot() {
 
   data+="<br /><b>Alignment:</b><br />";
 
-  if ((!strstr(stat,"A")) && (!strstr(stat,"k"))) {  // not AltAzm and not Fork_Alt
-    Ser.print(":GX02#");
-    temp2[Ser.readBytesUntil('#',temp2,20)]=0;
-    if (strlen(temp2)<=0) { strcpy(temp2,"0"); }
-    long altCor=strtol(&temp2[0],NULL,10);
-    Ser.print(":GX03#");
-    temp2[Ser.readBytesUntil('#',temp2,20)]=0;
-    if (strlen(temp2)<=0) { strcpy(temp2,"0"); }
-    long azmCor=strtol(&temp2[0],NULL,10);
-    sprintf(temp,html_indexCorPolar,(long)(altCor),(long)(azmCor)); 
+  if ((mountStatus.mountType==MT_GEM) || (mountStatus.mountType==MT_FORK)) {
+    long altCor=0; if (sendCommand(":GX02#",temp1)) { altCor=strtol(&temp1[0],NULL,10); }
+    long azmCor=0; if (sendCommand(":GX03#",temp1)) { azmCor=strtol(&temp1[0],NULL,10); }
+    sprintf(temp,html_indexCorPolar,(long)(altCor),(long)(azmCor));
     data += temp;
   }
 #ifdef OETHS
@@ -270,57 +203,48 @@ void handleRoot() {
   data+="<br /><b>Operations:</b><br />";
 
   // Park
-  if (strstr(stat,"p")) strcpy(temp2,"Not Parked"); else
-  if (strstr(stat,"P")) strcpy(temp2,"Parked"); else
-  if (strstr(stat,"I")) strcpy(temp2,"Parking"); else
-  if (strstr(stat,"F")) strcpy(temp2,"Park Failed"); else strcpy(temp2,"Unknown");
-  if (strstr(stat,"H")) strcat(temp2," </font>(<font class=\"c\">At Home</font>)<font class=\"c\">");
-  sprintf(temp,html_indexPark,temp2);
+  if (mountStatus.parked) strcpy(temp1,"Parked"); else strcpy(temp1,"Not Parked");
+  if (mountStatus.parking) strcpy(temp1,"Parking"); else
+  if (mountStatus.parkFail) strcpy(temp1,"Park Failed");
+  if (mountStatus.atHome) strcat(temp1," </font>(<font class=\"c\">At Home</font>)<font class=\"c\">");
+  if (!mountStatus.valid) strcpy(temp1,"?");
+  sprintf(temp,html_indexPark,temp1);
   data += temp;
 
   // Tracking
-  if (strstr(stat,"N") && strstr(stat,"n")) strcpy(temp2,"Off"); else
-  if (!strstr(stat,"n")) strcpy(temp2,"On"); else
-  if (!strstr(stat,"N")) strcpy(temp2,"Slewing");
+  if (mountStatus.tracking) strcpy(temp1,"On"); else strcpy(temp1,"Off");
+  if (mountStatus.slewing) strcpy(temp1,"Slewing");
+  if (!mountStatus.valid) strcpy(temp1,"?");
   
-  strcpy(temp3,"</font>(<font class=\"c\">");
-  if (strstr(stat,"S")) strcat(temp3,"PPS Sync, ");
-  if (strstr(stat,"r") || strstr(stat,"t")) {
-    if (strstr(stat,"r")) strcat(temp3,"Refr. ");
-    if (strstr(stat,"t")) strcat(temp3,"Full ");
-    strcat(temp3,"Comp. ");
-    if (strstr(stat,"s")) strcat(temp3,"1-Axis, "); else strcat(temp3,"2-Axis, ");
-  }
-  if (temp3[strlen(temp3)-2]==',') { temp3[strlen(temp3)-2]=0; strcat(temp3,"</font>)<font class=\"c\">"); } else strcpy(temp3,"");
-  sprintf(temp,html_indexTracking,temp2,temp3);
+  strcpy(temp2,"</font>(<font class=\"c\">");
+  if (mountStatus.ppsSync) strcat(temp2,"PPS Sync, ");
+  if (mountStatus.rateCompensation==RC_REFR_RA)   strcat(temp2,"Refr Comp RA Axis, ");
+  if (mountStatus.rateCompensation==RC_REFR_BOTH) strcat(temp2,"Refr Comp Both Axis, ");
+  if (mountStatus.rateCompensation==RC_FULL_RA)   strcat(temp2,"Full Comp RA Axis, ");
+  if (mountStatus.rateCompensation==RC_FULL_BOTH) strcat(temp2,"Full Comp Both Axis, ");
+  if (!mountStatus.valid) strcpy(temp2,"?");
+  if (temp2[strlen(temp2)-2]==',') { temp2[strlen(temp2)-2]=0; strcat(temp2,"</font>)<font class=\"c\">"); } else strcpy(temp2,"");
+  sprintf(temp,html_indexTracking,temp1,temp2);
   data += temp;
 
   // Tracking rate
-  Ser.print(":GT#");
-  temp4[Ser.readBytesUntil('#',temp4,20)]=0;
-  if (strlen(temp4)>6) {
-    double tr=atof(temp4);
+  if ((sendCommand(":GT#",temp1)) && (strlen(temp1)>6)) {
+    double tr=atof(temp1);
     sprintf(temp,"&nbsp;&nbsp;Tracking Rate: <font class=\"c\">%5.3f</font>Hz<br />",tr);
     data += temp;
   }
 
   // Slew speed
-  Ser.print(":GX97#");
-  temp1[Ser.readBytesUntil('#',temp1,20)]=0;
-  if (strlen(temp1)>2) {
+  if ((sendCommand(":GX97#",temp1)) && (strlen(temp1)>2)) {
     sprintf(temp,html_indexMaxSpeed,temp1);
     data += temp;
   } else {
     // fall back to MaxRate display if not supported
-    Ser.print(":GX92#");
-    temp1[Ser.readBytesUntil('#',temp1,20)]=0;
-    if (strlen(temp1)<=0) { strcpy(temp1,"0"); }
-    long maxRate=strtol(&temp1[0],NULL,10);
-    Ser.print(":GX93#");
-    temp1[Ser.readBytesUntil('#',temp1,20)]=0;
-    if (strlen(temp1)<=0) { strcpy(temp1,"0"); }
-    long MaxRate=strtol(&temp1[0],NULL,10);;
-    sprintf(temp,html_indexMaxRate,maxRate,MaxRate);
+    if ((sendCommand(":GX92#",temp1)) && (sendCommand(":GX93#",temp2))) { 
+      long maxRate=strtol(&temp1[0],NULL,10);
+      long MaxRate=strtol(&temp2[0],NULL,10);
+      sprintf(temp,html_indexMaxRate,maxRate,MaxRate);
+    } else sprintf(temp,html_indexMaxSpeed,"?");
     data += temp;
   }
 #ifdef OETHS
@@ -330,24 +254,15 @@ void handleRoot() {
   data+="<br /><b>State:</b><br />";
 
   // Last Error
-  strcpy(temp2,"None");
-  lastError=(Errors)(stat[strlen(stat)-1]-'0');
-  if (lastError==ERR_NONE) strcpy(temp2,"None"); else
-  if (lastError==ERR_MOTOR_FAULT) strcpy(temp2,"</font><font class=\"y\">Motor Fault"); else
-  if (lastError==ERR_ALT) strcpy(temp2,"</font><font class=\"y\">Altitude Min/Max"); else
-  if (lastError==ERR_LIMIT_SENSE) strcpy(temp2,"</font><font class=\"y\">Limit Sense"); else
-  if (lastError==ERR_DEC) strcpy(temp2,"</font><font class=\"y\">Dec Limit Exceeded"); else
-  if (lastError==ERR_AZM) strcpy(temp2,"</font><font class=\"y\">Azm Limit Exceeded"); else
-  if (lastError==ERR_UNDER_POLE) strcpy(temp2,"</font><font class=\"y\">Under Pole Limit Exceeded"); else
-  if (lastError==ERR_MERIDIAN) strcpy(temp2,"</font><font class=\"y\">Meridian Limit (W) Exceeded"); else
-  if (lastError==ERR_SYNC) strcpy(temp2,"</font><font class=\"y\">Sync. ignored >30&deg;");
-  sprintf(temp,html_indexLastError,temp2);
+  if (mountStatus.lastError!=ERR_NONE) strcpy(temp1,"</font><font class=\"y\">"); else strcpy(temp1,"");
+  mountStatus.getLastErrorMessage(temp2);
+  strcat(temp1,temp2);
+  if (!mountStatus.valid) strcpy(temp1,"?");
+  sprintf(temp,html_indexLastError,temp1);
   data += temp;
 
   // Loop time
-  Ser.print(":GXFA#");
-  temp1[Ser.readBytesUntil('#',temp1,20)]=0;
-  if (strlen(temp1)<=0) { strcpy(temp1,"?%"); }
+  if (!sendCommand(":GXFA#",temp1)) strcpy(temp1,"?%");
   sprintf(temp,html_indexWorkload,temp1);
   data += temp;
 

@@ -107,7 +107,7 @@ void handleWifi() {
   Ser.setTimeout(WebTimeout);
   
   char temp[320]="";
-  char temp2[80]="";
+  char temp1[80]="";
   
   processWifiGet();
 
@@ -129,9 +129,9 @@ void handleWifi() {
 
   // finish the standard http response header
   data += html_onstep_header1;
-  Ser.print(":GVP#"); temp2[Ser.readBytesUntil('#',temp2,20)]=0; if (strlen(temp2)<=0) { strcpy(temp2,"N/A"); } else { for (int i=2; i<7; i++) temp2[i]=temp2[i+1]; } data += temp2;
+  if (sendCommand(":GVP#",temp1)) { temp1[2]=0; data+=temp1; data+=(char*)&temp1[3]; } else data+="?";
   data += html_onstep_header2;
-  Ser.print(":GVN#"); temp2[Ser.readBytesUntil('#',temp2,20)]=0; if (strlen(temp2)<=0) { strcpy(temp2,"N/A"); } data += temp2;
+  if (sendCommand(":GVN#",temp1)) data+=temp1; else data+="?";
   data += html_onstep_header3;
   data += html_links1N;
   data += html_links2N;

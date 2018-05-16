@@ -37,8 +37,8 @@
 #define FirmwareDate          __DATE__
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
-#define FirmwareVersionMinor  "3"
-#define FirmwareVersionPatch  "c"
+#define FirmwareVersionMinor  "4"
+#define FirmwareVersionPatch  "a"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
@@ -48,9 +48,13 @@
 
 #include "Config.h"
 #include "Constants.h"
-#include "Globals.h"
 #include "Encoders.h"
 Encoders encoders;
+
+#include "MountStatus.h"
+
+int WebTimeout=TIMEOUT_WEB;
+int CmdTimeout=TIMEOUT_CMD;
 
 WebServer server;
 CmdServer cmdSvr;
@@ -66,6 +70,7 @@ void setup(void){
   Ser.begin(SERIAL_BAUD_DEFAULT);
   delay(3000);
   
+  byte tb=0;
 Again:
   char c=0;
 
@@ -133,6 +138,8 @@ void loop(void){
   cmdSvr.handleClient();
 
   // check clients for data, if found get the command, send cmd and pickup the response, then return the response
+  static char writeBuffer[40]="";
+  static int writeBufferPos=0;
   while (cmdSvr.available()) {
     // get the data
     byte b=cmdSvr.read();

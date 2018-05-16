@@ -32,19 +32,23 @@ const char html_settingsTrackComp2[] =
 "<button name='rr' value='doff' type='submit'>Single Axis</button>\r\n";
 
 const char html_settingsBuzzer1[] =
-"<br /><br />Goto Alert, Buzzer: <br />"
-"<button name='ab' value='on' type='submit'>On</button>";
+"<br /><br />Goto Alert, Buzzer (";
 const char html_settingsBuzzer2[] =
+"): <br />"
+"<button name='ab' value='on' type='submit'>On</button>"
 "<button name='ab' value='off' type='submit'>Off</button>\r\n";
 
-const char html_settingsMFAuto[] = 
-"</br></br>Automatic Meridian Flip (at Limit):<br />"
+const char html_settingsMFAuto1[] = 
+"</br></br>Automatic Meridian Flip at Limit (";
+const char html_settingsMFAuto2[] = 
+"):<br />"
 "<button name='ma' value='on' type='submit'>On</button>"
 "<button name='ma' value='off' type='submit'>Off</button>";
 const char html_settingsMFPause1[] = 
-"</br></br>Meridian Flip, Pause at Home: <br />"
-"<button name='mp' value='on' type='submit'>On</button>";
-const char html_settingsMFPause2[] =
+"</br></br>Meridian Flip, Pause at Home (";
+const char html_settingsMFPause2[] = 
+"): <br />"
+"<button name='mp' value='on' type='submit'>On</button>"
 "<button name='mp' value='off' type='submit'>Off</button>\r\n";
 
 const char html_settingsEnd[] =
@@ -58,7 +62,7 @@ void handleSettings() {
   Ser.setTimeout(WebTimeout);
   serialRecvFlush();
 
-  char temp2[80]="";
+  char temp1[80]="";
 
   processSettingsGet();
   Ser.setTimeout(WebTimeout);
@@ -81,16 +85,13 @@ void handleSettings() {
 
   data += html_bodyB;
 
-  // get status
-  char stat[20] = "";
-  Ser.print(":GU#");
-  stat[Ser.readBytesUntil('#',stat,20)]=0;
+  mountStatus.update(true);
 
   // finish the standard http response header
   data += html_onstep_header1;
-  Ser.print(":GVP#"); temp2[Ser.readBytesUntil('#',temp2,20)]=0; if (strlen(temp2)<=0) { strcpy(temp2,"N/A"); } else { for (int i=2; i<7; i++) temp2[i]=temp2[i+1]; } data += temp2;
+  if (sendCommand(":GVP#",temp1)) { temp1[2]=0; data+=temp1; data+=(char*)&temp1[3]; } else data+="?";
   data += html_onstep_header2;
-  Ser.print(":GVN#"); temp2[Ser.readBytesUntil('#',temp2,20)]=0; if (strlen(temp2)<=0) { strcpy(temp2,"N/A"); } data += temp2;
+  if (sendCommand(":GVN#",temp1)) data+=temp1; else data+="?";
   data += html_onstep_header3;
   data += html_links1N;
   data += html_links2N;
@@ -114,15 +115,20 @@ void handleSettings() {
   data += html_settingsTrack1;
   data += html_settingsTrack2;
   data += html_settingsTrack3;
-  if (!strstr(stat,"A")) {  // not AltAzm
+  if (mountStatus.mountType!=MT_ALTAZM) {
     data += html_settingsTrackComp1;
     data += html_settingsTrackComp2;
   }
   data += html_settingsBuzzer1;
+  if (mountStatus.valid) { if (mountStatus.buzzerEnabled) data+="On"; else data+="Off"; } else data+="?";
   data += html_settingsBuzzer2;
-  if (strstr(stat,"E")) {  // GEM only
-    data += html_settingsMFAuto;
+
+  if (mountStatus.mountType==MT_GEM) {
+    data += html_settingsMFAuto1;
+    if (mountStatus.valid) { if (mountStatus.autoMeridianFlips) data+="On"; else data+="Off"; } else data+="?";
+    data += html_settingsMFAuto2;
     data += html_settingsMFPause1;
+    if (mountStatus.valid) { if (mountStatus.pauseAtHome) data+="On"; else data+="Off"; } else data+="?";
     data += html_settingsMFPause2;
   }
 
