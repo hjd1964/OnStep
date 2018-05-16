@@ -170,8 +170,8 @@ void handleRoot() {
 #endif
 
   // pier side and meridian flips
-  if ((mountStatus.pierSide==PierSideFlipWE1) || (mountStatus.pierSide==PierSideFlipWE2) || (mountStatus.pierSide==PierSideFlipWE3)) strcpy(temp2,"Meridian Flip, West to East"); else
-  if ((mountStatus.pierSide==PierSideFlipEW1) || (mountStatus.pierSide==PierSideFlipEW2) || (mountStatus.pierSide==PierSideFlipEW3)) strcpy(temp2,"Meridian Flip, East to West"); else
+  if ((mountStatus.pierSide==PierSideFlipWE1) || (mountStatus.pierSide==PierSideFlipWE2) || (mountStatus.pierSide==PierSideFlipWE3)) strcpy(temp1,"Meridian Flip, West to East"); else
+  if ((mountStatus.pierSide==PierSideFlipEW1) || (mountStatus.pierSide==PierSideFlipEW2) || (mountStatus.pierSide==PierSideFlipEW3)) strcpy(temp1,"Meridian Flip, East to West"); else
   if (mountStatus.pierSide==PierSideWest) strcpy(temp1,"West"); else
   if (mountStatus.pierSide==PierSideEast) strcpy(temp1,"East"); else
   if (mountStatus.pierSide==PierSideNone) strcpy(temp1,"None"); else strcpy(temp1,"Unknown");
