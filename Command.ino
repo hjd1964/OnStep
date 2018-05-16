@@ -574,10 +574,10 @@ void processCommands() {
         if ((guideDirAxis1) || (guideDirAxis2))  reply[i++]='G';                      // [G]uide active
         if (faultAxis1 || faultAxis2)            reply[i++]='f';                      // axis [f]ault
 #ifndef MOUNT_TYPE_ALTAZM        
-        if (rateCompensation==RC_REFR_RA)           { reply[i++]='r'; reply[i++]='s'; }    // [r]efr enabled [s]ingle axis
-        if (rateCompensation==RC_REFR_BOTH)          { reply[i++]='r'; }                    // [r]efr enabled
-        if (rateCompensation==RC_FULL_RA)           { reply[i++]='t'; reply[i++]='s'; }    // on[t]rack enabled [s]ingle axis
-        if (rateCompensation==RC_FULL_BOTH)          { reply[i++]='t'; }                    // on[t]rack enabled
+        if (rateCompensation==RC_REFR_RA)      { reply[i++]='r'; reply[i++]='s'; }    // [r]efr enabled [s]ingle axis
+        if (rateCompensation==RC_REFR_BOTH)    { reply[i++]='r'; }                    // [r]efr enabled
+        if (rateCompensation==RC_FULL_RA)      { reply[i++]='t'; reply[i++]='s'; }    // on[t]rack enabled [s]ingle axis
+        if (rateCompensation==RC_FULL_BOTH)    { reply[i++]='t'; }                    // on[t]rack enabled
 #endif
         if (waitingHome)                         reply[i++]='w';                      // [w]aiting at home
         if (pauseHome)                           reply[i++]='u';                      // pa[u]se at home enabled?
