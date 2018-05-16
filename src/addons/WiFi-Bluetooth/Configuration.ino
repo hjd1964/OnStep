@@ -117,6 +117,9 @@ void handleConfiguration() {
 
   data += html_bodyB;
 
+  // get status
+  mountStatus.update();
+
   // finish the standard http response header
   data += html_onstep_header1;
   if (mountStatus.getId(temp1)) data += temp1; else data += "?";
