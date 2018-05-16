@@ -109,7 +109,7 @@ class MountStatus {
 
     int alignMaxStars = -1;
 
-    int lastError=0;
+    Errors lastError=ERR_NONE;
   private:
 };
 

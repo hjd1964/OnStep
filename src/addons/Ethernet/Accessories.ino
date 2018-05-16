@@ -112,6 +112,7 @@ boolean readLX200Bytes(char* command,char* recvBuffer,long timeOutMs) {
   }
 }
 
+// sends LX200 command and optionally waits for response (w/timeout, up to 20 chars)
 enum Responding {R_NONE, R_ONE, R_BOOL, R_STRING};
 bool sendCommand(const char command[], char response[], Responding responding=R_STRING) {
   Ser.print(command);
