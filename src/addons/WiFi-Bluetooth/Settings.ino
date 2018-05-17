@@ -9,10 +9,12 @@ const char html_settingsPark1[] =
 "<button name='pk' value='s' type='submit'>Set-Park</button>\r\n";
 
 const char html_settingsTrack1[] = 
-"</br></br>Tracking: <br />"
+"</br></br>Tracking (";
+const char html_settingsTrack2[] = 
+"): <br />"
 "<button name='tk' value='on' type='submit'>On</button>"
 "<button name='tk' value='off' type='submit'>Off</button><br />";
-const char html_settingsTrack2[] = 
+const char html_settingsTrack3[] = 
 "<button name='tk' value='f' type='submit'>+ (0.1Hz faster)</button>"
 "<button name='tk' value='-' type='submit'>- (0.1Hz slower)</button>"
 "<button name='tk' value='r' type='submit'>Reset (default)</button>";
@@ -110,7 +112,9 @@ void handleSettings() {
   data += html_settingsPark1;
   
   data += html_settingsTrack1;
+  if (mountStatus.valid()) { if (mountStatus.tracking()) data+="On"; else data+="Off"; } else data+="?";
   data += html_settingsTrack2;
+  data += html_settingsTrack3;
   if (mountStatus.mountType()!=MT_ALTAZM) {
     data += html_settingsTrackComp1;
     data += html_settingsTrackComp2;
