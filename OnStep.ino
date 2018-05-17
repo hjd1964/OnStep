@@ -41,7 +41,7 @@
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  1
 #define FirmwareVersionMinor  8
-#define FirmwareVersionPatch  "f"     // for example major.minor patch: 1.3c
+#define FirmwareVersionPatch  "g"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 2       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
@@ -417,15 +417,8 @@ void loop() {
         if (pierSide==PierSideWest) {
           cli(); long p1=posAxis1+indexAxis1Steps; sei();
           if (p1>(minutesPastMeridianW*(long)StepsPerDegreeAxis1/4L)) {
-            // do an automatic meridian flip and continue if just tracking
-            // checks: enabled && not too far past the meridian (doesn't make sense) && not in inaccessible area between east and west limits && finally that a slew isn't happening
-            if (autoMeridianFlip && (p1<(minutesPastMeridianW*(long)StepsPerDegreeAxis1/4L+(1.0/60.0)*(long)StepsPerDegreeAxis1)) && (p1>(-minutesPastMeridianE*(long)StepsPerDegreeAxis1/4L)) && (trackingState!=TrackingMoveTo)) {
-              double newRA,newDec;
-              getEqu(&newRA,&newDec,false);
-              if (goToEqu(newRA,newDec)) { // returns 0 on success
-                lastError=ERR_MERIDIAN;
-                trackingState=TrackingNone;
-              }
+            if (autoMeridianFlip) {
+              if (goToHere(true)) { lastError=ERR_MERIDIAN; trackingState=TrackingNone; }
             } else {
               lastError=ERR_MERIDIAN; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;
             }

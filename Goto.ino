@@ -240,8 +240,25 @@ boolean getHor(double *Alt, double *Azm) {
   return true;
 }
 
+// causes a goto to the same RA/Dec on the opposite pier side if possible
+GotoErrors goToHere(bool toEastOnly) {
+  bool verified=false;
+  PreferredPierSide p=preferredPierSide;
+  if (meridianFlip==MeridianFlipNever) return GOTO_ERR_OUTSIDE_LIMITS;
+  cli(); long h=posAxis1+indexAxis1Steps; sei();
+  if ((!toEastOnly) && (pierSide==PierSideEast) && (h<(minutesPastMeridianW*(long)StepsPerDegreeAxis1/4L))) { verified=true; preferredPierSide=PPS_WEST; }
+  if ((pierSide==PierSideWest) && (h>(-minutesPastMeridianE*(long)StepsPerDegreeAxis1/4L))) { verified=true; preferredPierSide=PPS_EAST; }
+  if (verified) {
+    double newRA,newDec;
+    getEqu(&newRA,&newDec,false);
+    GotoErrors r=goToEqu(newRA,newDec);
+    preferredPierSide=p;
+    return r;
+  } else return GOTO_ERR_OUTSIDE_LIMITS;
+}
+
 // moves the mount to a new Right Ascension and Declination (RA,Dec) in degrees
-byte goToEqu(double RA, double Dec) {
+GotoErrors goToEqu(double RA, double Dec) {
   double a,z;
 
   // Convert RA into hour angle, get altitude
@@ -249,8 +266,8 @@ byte goToEqu(double RA, double Dec) {
   EquToHor(HA,Dec,&a,&z);
 
   // validate
-  int f=validateGoto(); if (f==5) abortSlew=true; if (f!=0) return f;
-  f=validateGotoCoords(HA,Dec,a); if (f!=0) return f;
+  GotoErrors r=validateGoto(); if (r==GOTO_ERR_GOTO) abortSlew=true; if (r!=GOTO_ERR_NONE) return r;
+  r=validateGotoCoords(HA,Dec,a); if (r!=GOTO_ERR_NONE) return r;
 
 #ifdef MOUNT_TYPE_ALTAZM
   if (Align.isReady()) {
@@ -329,7 +346,7 @@ byte goToEqu(double RA, double Dec) {
 }
 
 // moves the mount to a new Altitude and Azmiuth (Alt,Azm) in degrees
-byte goToHor(double *Alt, double *Azm) {
+GotoErrors goToHor(double *Alt, double *Azm) {
   double HA,Dec;
   
   HorToEqu(*Alt,*Azm,&HA,&Dec);
@@ -339,35 +356,35 @@ byte goToHor(double *Alt, double *Azm) {
 }
 
 // check if goto/sync is valid
-byte validateGoto() {
+GotoErrors validateGoto() {
   // Check state
-  if (faultAxis1 || faultAxis2)                         return 7;   // fail, hardware fault
-  if (!axis1Enabled)                                    return 3;   // fail, in standby
-  if (parkStatus!=NotParked)                            return 4;   // fail, parked or parking or park failed
-  if (guideDirAxis1 || guideDirAxis2)                   return 8;   // fail, already in motion
-  if (trackingState==TrackingMoveTo)                    return 5;   // fail, goto in progress
-  return 0;
+  if (faultAxis1 || faultAxis2)                return GOTO_ERR_HARDWARE_FAULT;
+  if (!axis1Enabled)                           return GOTO_ERR_STANDBY;
+  if (parkStatus!=NotParked)                   return GOTO_ERR_PARK;
+  if (guideDirAxis1 || guideDirAxis2)          return GOTO_ERR_IN_MOTION;
+  if (trackingState==TrackingMoveTo)           return GOTO_ERR_GOTO;
+  return GOTO_ERR_NONE;
 }
-byte validateGotoCoords(double HA, double Dec, double Alt) {
+GotoErrors validateGotoCoords(double HA, double Dec, double Alt) {
   // Check coordinates
-  if (Alt<minAlt)                                       return 1;   // fail, below horizon
-  if (Alt>maxAlt)                                       return 2;   // fail, above overhead limit
-  if (Dec>MaxDec)                                       return 6;   // fail, outside limits
-  if (Dec<MinDec)                                       return 6;   // fail, outside limits
-  if ((fabs(HA)>(double)UnderPoleLimit*15.0) )          return 6;   // fail, outside limits
-  return 0;
+  if (Alt<minAlt)                              return GOTO_ERR_BELOW_HORIZON;
+  if (Alt>maxAlt)                              return GOTO_ERR_ABOVE_OVERHEAD;
+  if (Dec>MaxDec)                              return GOTO_ERR_OUTSIDE_LIMITS;
+  if (Dec<MinDec)                              return GOTO_ERR_OUTSIDE_LIMITS;
+  if ((fabs(HA)>(double)UnderPoleLimit*15.0) ) return GOTO_ERR_OUTSIDE_LIMITS;
+  return GOTO_ERR_NONE;
 }
-byte validateGoToEqu(double RA, double Dec) {
+GotoErrors validateGoToEqu(double RA, double Dec) {
   double a,z;
   double HA=haRange(LST()*15.0-RA);
   EquToHor(HA,Dec,&a,&z);
-  int f=validateGoto(); if (f!=0) return f;
-  f=validateGotoCoords(HA,Dec,a);
-  return f;
+  GotoErrors r=validateGoto(); if (r!=GOTO_ERR_NONE) return r;
+  r=validateGotoCoords(HA,Dec,a);
+  return r;
 }
 
 // moves the mount to a new Hour Angle and Declination - both are in steps.  Alternate targets are used when a meridian flip occurs
-byte goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1, long altTargetAxis2, byte gotoPierSide) {
+GotoErrors goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1, long altTargetAxis2, byte gotoPierSide) {
   atHome=false;
   if (meridianFlip!=MeridianFlipNever) {
     // where the allowable hour angles are
@@ -386,7 +403,7 @@ byte goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1, long 
       if ((thisTargetAxis1+indexAxis1Steps>eastOfPierMaxHA) || (thisTargetAxis1+indexAxis1Steps<eastOfPierMinHA)) {
         pierSide=PierSideFlipEW1;
         thisTargetAxis1 =altTargetAxis1;
-        if (thisTargetAxis1+indexAxis1Steps>westOfPierMaxHA) return 6; // fail, outside limits
+        if (thisTargetAxis1+indexAxis1Steps>westOfPierMaxHA) return GOTO_ERR_OUTSIDE_LIMITS;
         thisTargetAxis2=altTargetAxis2;
       }
     } else
@@ -394,7 +411,7 @@ byte goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1, long 
       if ((thisTargetAxis1+indexAxis1Steps>westOfPierMaxHA) || (thisTargetAxis1+indexAxis1Steps<westOfPierMinHA)) {
         pierSide=PierSideFlipWE1;
         thisTargetAxis1 =altTargetAxis1;
-        if (thisTargetAxis1+indexAxis1Steps<eastOfPierMinHA) return 6; // fail, outside limits
+        if (thisTargetAxis1+indexAxis1Steps<eastOfPierMinHA) return GOTO_ERR_OUTSIDE_LIMITS;
         thisTargetAxis2=altTargetAxis2;
       }
     } else
@@ -431,10 +448,10 @@ byte goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1, long 
 #ifdef MOUNT_TYPE_ALTAZM
   // allow +/- 360 in Az
   if (((thisTargetAxis1+indexAxis1Steps>(long)StepsPerDegreeAxis1*MaxAzm) || (thisTargetAxis1+indexAxis1Steps<-(long)StepsPerDegreeAxis1*MaxAzm)) ||
-     ((thisTargetAxis2+indexAxis2Steps>(long)StepsPerDegreeAxis2*180L) || (thisTargetAxis2+indexAxis2Steps<-(long)StepsPerDegreeAxis2*180L))) return 9; // fail, unspecified error
+     ((thisTargetAxis2+indexAxis2Steps>(long)StepsPerDegreeAxis2*180L) || (thisTargetAxis2+indexAxis2Steps<-(long)StepsPerDegreeAxis2*180L))) return GOTO_ERR_UNSPECIFIED;
 #else
   if (((thisTargetAxis1+indexAxis1Steps>(long)StepsPerDegreeAxis1*180L) || (thisTargetAxis1+indexAxis1Steps<-(long)StepsPerDegreeAxis1*180L)) ||
-     ((thisTargetAxis2+indexAxis2Steps>(long)StepsPerDegreeAxis2*180L) || (thisTargetAxis2+indexAxis2Steps<-(long)StepsPerDegreeAxis2*180L))) return 9; // fail, unspecified error
+     ((thisTargetAxis2+indexAxis2Steps>(long)StepsPerDegreeAxis2*180L) || (thisTargetAxis2+indexAxis2Steps<-(long)StepsPerDegreeAxis2*180L))) return GOTO_ERR_UNSPECIFIED;
 #endif
   lastTrackingState=trackingState;
 
@@ -459,6 +476,6 @@ byte goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1, long 
 
   StepperModeGoto();
 
-  return 0;
+  return GOTO_ERR_NONE;
 }
 

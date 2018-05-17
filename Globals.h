@@ -176,6 +176,7 @@ volatile byte defaultDirAxis1  = defaultDirAxis1NCPInit;
 // Status ------------------------------------------------------------------------------------------------------------------
 enum Errors {ERR_NONE, ERR_MOTOR_FAULT, ERR_ALT, ERR_LIMIT_SENSE, ERR_DEC, ERR_AZM, ERR_UNDER_POLE, ERR_MERIDIAN, ERR_SYNC};
 Errors lastError = ERR_NONE;
+enum GotoErrors {GOTO_ERR_NONE, GOTO_ERR_BELOW_HORIZON, GOTO_ERR_ABOVE_OVERHEAD, GOTO_ERR_STANDBY, GOTO_ERR_PARK, GOTO_ERR_GOTO, GOTO_ERR_OUTSIDE_LIMITS, GOTO_ERR_HARDWARE_FAULT, GOTO_ERR_IN_MOTION, GOTO_ERR_UNSPECIFIED};
 
 boolean highPrecision = true;
 

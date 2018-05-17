@@ -1056,6 +1056,15 @@ void processCommands() {
         quietReply=true;
         supress_frame=true; 
       } else commandError=true;
+
+//  :MN#   Goto current RA/Dec but East of the Pier (within meridian limit overlap for GEM mounts)
+//         Returns: 0..9, see :MS#
+      if (command[1]=='N')  {
+        i=goToHere(true);
+        reply[0]=i+'0'; reply[1]=0;
+        quietReply=true;
+        supress_frame=true; 
+      } else commandError=true;
       
       } else
 //   $Q - PEC Control

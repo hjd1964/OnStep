@@ -15,11 +15,7 @@ const char html_settingsTrack1[] =
 const char html_settingsTrack2[] = 
 "<button name='tk' value='f' type='submit'>+ (0.1Hz faster)</button>"
 "<button name='tk' value='-' type='submit'>- (0.1Hz slower)</button>"
-"<button name='tk' value='r' type='submit'>Reset (default)</button><br />";
-const char html_settingsTrack3[] = 
-"<button name='tk' value='s' type='submit'>Sidereal</button>"
-"<button name='tk' value='l' type='submit'>Lunar</button>"
-"<button name='tk' value='h' type='submit'>Solar</button>\r\n";
+"<button name='tk' value='r' type='submit'>Reset (default)</button>";
 
 const char html_settingsTrackComp1[] = 
 "</br></br>Compensated Tracking Rate (Pointing Model/Refraction): </br>"
@@ -42,6 +38,7 @@ const char html_settingsMFAuto1[] =
 "</br></br>Automatic Meridian Flip at Limit (";
 const char html_settingsMFAuto2[] = 
 "):<br />"
+"<button name='ma' value='now' type='submit'>Now</button>&nbsp;&nbsp;"
 "<button name='ma' value='on' type='submit'>On</button>"
 "<button name='ma' value='off' type='submit'>Off</button>";
 const char html_settingsMFPause1[] = 
@@ -114,7 +111,6 @@ void handleSettings() {
   
   data += html_settingsTrack1;
   data += html_settingsTrack2;
-  data += html_settingsTrack3;
   if (mountStatus.mountType()!=MT_ALTAZM) {
     data += html_settingsTrackComp1;
     data += html_settingsTrackComp2;
@@ -162,9 +158,6 @@ void processSettingsGet() {
     if (v=="f") Ser.print(":T+#"); // 0.02hz faster
     if (v=="-") Ser.print(":T-#"); // 0.02hz slower
     if (v=="r") Ser.print(":TR#"); // reset
-    if (v=="s") Ser.print(":TQ#"); // sidereal
-    if (v=="l") Ser.print(":TL#"); // lunar
-    if (v=="h") Ser.print(":TS#"); // solar
   }
   // Refraction Rate Tracking control
   v=server.arg("rr");
@@ -184,6 +177,7 @@ void processSettingsGet() {
   // Auto-continue
   v=server.arg("ma");
   if (v!="") {
+    if (v=="now") Ser.print(":MN#");
     if (v=="on") Ser.print(":SX95,1#");
     if (v=="off") Ser.print(":SX95,0#");
   }
