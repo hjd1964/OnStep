@@ -9,9 +9,9 @@ const char html_settingsPark1[] =
 "<button name='pk' value='s' type='submit'>Set-Park</button>\r\n";
 
 const char html_settingsTrack1[] = 
-"</br></br>Tracking (";
+"</br></br>Tracking (<span id='tracking'>";
 const char html_settingsTrack2[] = 
-"): <br />"
+"</span>): <br />"
 "<button name='tk' value='on' type='submit'>On</button>"
 "<button name='tk' value='off' type='submit'>Off</button><br />";
 const char html_settingsTrack3[] = 
@@ -30,23 +30,23 @@ const char html_settingsTrackComp2[] =
 "<button name='rr' value='doff' type='submit'>Single Axis</button>\r\n";
 
 const char html_settingsBuzzer1[] =
-"<br /><br />Goto Alert, Buzzer (";
+"<br /><br />Goto Alert, Buzzer (<span id='buzzer'>";
 const char html_settingsBuzzer2[] =
-"): <br />"
+"</span>): <br />"
 "<button name='ab' value='on' type='submit'>On</button>"
 "<button name='ab' value='off' type='submit'>Off</button>\r\n";
 
 const char html_settingsMFAuto1[] = 
-"</br></br>Automatic Meridian Flip at Limit (";
+"</br></br>Automatic Meridian Flip at Limit (<span id='autoFlip'>";
 const char html_settingsMFAuto2[] = 
-"):<br />"
+"</span>):<br />"
 "<button name='ma' value='now' type='submit'>Now</button>&nbsp;&nbsp;"
 "<button name='ma' value='on' type='submit'>On</button>"
 "<button name='ma' value='off' type='submit'>Off</button>";
 const char html_settingsMFPause1[] = 
-"</br></br>Meridian Flip, Pause at Home (";
+"</br></br>Meridian Flip, Pause at Home (<span id='pause'>";
 const char html_settingsMFPause2[] = 
-"): <br />"
+"</span>): <br />"
 "<button name='mp' value='on' type='submit'>On</button>"
 "<button name='mp' value='off' type='submit'>Off</button>\r\n";
 
@@ -83,6 +83,11 @@ void handleSettings() {
 #endif
 
   data += html_bodyB;
+  
+  // active ajax page is: settingsAjax();
+  data +="<script>var ajaxPage='settings.txt';</script>\n";
+  data +=html_ajax_active;
+  data +="<script>auto2Rate=2;</script>";
 
   mountStatus.update(true);
 
@@ -141,6 +146,36 @@ void handleSettings() {
   client->print(data);
 #else
   server.send(200, "text/html", data);
+#endif
+}
+
+#ifdef OETHS
+void settingsAjax(EthernetClient *client) {
+#else
+void settingsAjax() {
+#endif
+  String data="";
+
+  if (mountStatus.update()) {
+    data += "tracking|"; if (mountStatus.tracking()) data+="On"; else data+="Off"; data += "\n";
+    data += "buzzer|"; if (mountStatus.buzzerEnabled()) data+="On"; else data+="Off"; data += "\n";
+    if (mountStatus.mountType()==MT_GEM) {
+      data += "autoFlip|";  if (mountStatus.autoMeridianFlips()) data+="On"; else data+="Off"; data += "\n";
+      data += "pause|";  if (mountStatus.pauseAtHome()) data+="On"; else data+="Off"; data += "\n";
+    }
+  } else {
+    data += "tracking|?\n";
+    data += "buzzer|?\n";
+    if (mountStatus.mountType()==MT_GEM) {
+      data += "autoFlip|?\n";
+      data += "pause|?\n";
+    }
+  }
+
+#ifdef OETHS
+  client->print(data);
+#else
+  server.send(200, "text/plain",data);
 #endif
 }
 

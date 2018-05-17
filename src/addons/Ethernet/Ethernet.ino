@@ -118,6 +118,7 @@ Again:
   server.on("index.htm", handleRoot);
   server.on("configuration.htm", handleConfiguration);
   server.on("settings.htm", handleSettings);
+  server.on("settings.txt", settingsAjax);
   server.on("control.htm", handleControl);
   server.on("control.txt", controlAjax);
   server.on("guide.txt", guideAjax);
