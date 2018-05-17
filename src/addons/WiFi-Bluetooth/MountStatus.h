@@ -62,17 +62,14 @@ class MountStatus {
       if (strstr(s,"k")) _mountType=MT_FORKALT; else
       if (strstr(s,"A")) _mountType=MT_ALTAZM; else _mountType=MT_UNKNOWN;
 
+      if (_mountType==MT_GEM) _autoMeridianFlips = strstr(s,"a"); else _autoMeridianFlips=false;
+
       _lastError=(Errors)(s[strlen(s)-1]-'0');
 
       if (all) {
         Ser.print(":GX94#"); s[Ser.readBytesUntil('#',s,20)]=0; if (s[0]==0) { _valid=false; return false; }
         _meridianFlips=!strstr(s, "N");
         _pierSide=strtol(&s[0],NULL,10);
-
-        if ((_mountType==MT_GEM) || (_mountType==MT_FORK)) {
-          Ser.print(":GX95#"); s[Ser.readBytesUntil('#',s,20)]=0; if (s[0]==0) { _valid=false; return false; }
-          _autoMeridianFlips=(!strstr(s,"0"));
-        } else _autoMeridianFlips=false;
 
         if (_alignMaxStars==-1) {
           Ser.print(":A?#");

@@ -582,6 +582,9 @@ void processCommands() {
         if (waitingHome)                         reply[i++]='w';                      // [w]aiting at home
         if (pauseHome)                           reply[i++]='u';                      // pa[u]se at home enabled?
         if (soundEnabled)                        reply[i++]='z';                      // bu[z]zer enabled?
+#ifdef MOUNT_TYPE_GEM
+        if (autoMeridianFlip)                    reply[i++]='a';                      // [a]uto meridian flip
+#endif
 
         // provide mount type
         #ifdef MOUNT_TYPE_GEM
@@ -1498,9 +1501,11 @@ void processCommands() {
               nv.writeInt(EE_maxRate,(int)(maxRate/16L));
               SetAccelerationRates(maxRate);
             break;
+#ifdef MOUNT_TYPE_GEM
             case '5': // autoMeridianFlip
               if ((parameter[3]=='0') || (parameter[3]=='1')) { i=parameter[3]-'0'; autoMeridianFlip=i; nv.write(EE_autoMeridianFlip,autoMeridianFlip); } else commandError=true;
-            break; 
+            break;
+#endif
             case '6': // preferred pier side 
               switch (parameter[3]) {
                 case 'E': preferredPierSide=PPS_EAST; break;
