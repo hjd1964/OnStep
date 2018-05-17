@@ -76,7 +76,7 @@
 #define RETICULE_LED_PINS_OFF
 
 // Sound/buzzer on Pad 29, default=_OFF.
-// Use BUZZER_ON for piezo buzzer on/off control
+// Specify frequency for a piezo speaker (for example "BUZZER 2000") or use BUZZER_ON for a piezo buzzer.
 #define BUZZER_OFF
 // Sound state at startup, default=_ON.
 #define DEFAULT_SOUND_ON
