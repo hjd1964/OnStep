@@ -9,7 +9,7 @@
  *
 */
 
-#define STM32CZ_ON    //  <- Turn _ON to use this configuration
+#define STM32CZ_OFF    //  <- Turn _ON to use this configuration
 
 #ifdef STM32CZ_ON
 // -------------------------------------------------------------------------------------------------------------------------
