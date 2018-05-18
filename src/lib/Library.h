@@ -1,6 +1,8 @@
 // -----------------------------------------------------------------------------------
 // Object libraries
 
+#pragma once
+
 #include "Arduino.h"
 
 #ifndef Library_h

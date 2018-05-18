@@ -1,5 +1,7 @@
 // Miscellaneous Utility Function
 
+#pragma once
+
 // Convert Gregorian date (Y,M,D) to Julian day number
 double julian(int Year, int Month, int Day) {
   if ((Month==1) || (Month==2)) { Year--; Month=Month+12; }

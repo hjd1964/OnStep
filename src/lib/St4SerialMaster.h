@@ -1,6 +1,8 @@
 // ------------------------------------------------------------------------------------
 // Serial ST4 master
 
+#pragma once
+
 /*
 ST4 port data communication scheme:
 

@@ -1,6 +1,8 @@
 // -----------------------------------------------------------------------------------
 // TMC2130 stepper drivers
 
+#pragma once
+
 class tmc2130 {
   public:
     long sgResult;

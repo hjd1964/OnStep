@@ -1,6 +1,8 @@
 // -----------------------------------------------------------------------------------------------------------------------------
 // Weather related functions
 
+#pragma once
+
 #ifdef WEATHER_BME280_ON
 #include <Adafruit_BME280.h> // https://github.com/adafruit/Adafruit_BME280_Library and https://github.com/adafruit/Adafruit_Sensor
 Adafruit_BME280 bme;

@@ -1,6 +1,8 @@
 // -----------------------------------------------------------------------------------------------------------------------------
 // Handle push buttons
 
+#pragma once
+
 class button {
   public:
     void init(int pin, unsigned long debounceMs, boolean pullup) {

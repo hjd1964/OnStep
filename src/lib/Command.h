@@ -1,6 +1,8 @@
 // -----------------------------------------------------------------------------------
 // Command processing
 
+#pragma once
+
 class cb {
   public:
     bool checksum = false;

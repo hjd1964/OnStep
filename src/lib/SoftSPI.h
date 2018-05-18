@@ -1,6 +1,8 @@
 // -----------------------------------------------------------------------------------
 // Simple soft SPI routines (CPOL=1, CPHA=1)
 
+#pragma once
+
 class bbspi {
   public:  
     void begin(int cs, int sck, int miso, int mosi)

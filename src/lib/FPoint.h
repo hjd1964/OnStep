@@ -1,6 +1,8 @@
 // -----------------------------------------------------------------------------------
 // Fixed point math data type
 
+#pragma once
+
 #include "Arduino.h"
 
 #ifndef FPoint_h

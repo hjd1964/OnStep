@@ -1,6 +1,8 @@
 // -----------------------------------------------------------------------------------
 // non-volatile storage
 
+#pragma once
+
 class nvs {
   public:
     void init() {
