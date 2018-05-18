@@ -49,7 +49,7 @@
 #include <errno.h>
 #include <math.h>
 
-#include "src/lib/Constants.h"
+#include "Constants.h"
 
 #include "Config.Classic.h"
 #include "Config.MiniPCB.h"
@@ -78,7 +78,7 @@ tmc2130 tmcAxis1(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0);
 tmc2130 tmcAxis2(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
 #endif
 
-#include "src/lib/Globals.h"
+#include "Globals.h"
 
 #include "src/lib/Library.h"
 #include "src/lib/Command.h"
