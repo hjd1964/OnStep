@@ -11,6 +11,8 @@
 //
 // Conversion to C++/Arduino by Howard Dutton, 10/12/2016
 
+#pragma once
+
 byte alignNumStars = 0;
 byte alignThisStar = 0;
 

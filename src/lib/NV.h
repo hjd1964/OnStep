@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "EEPROM.h"
+
 class nvs {
   public:
     void init() {

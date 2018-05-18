@@ -1,6 +1,8 @@
 // -----------------------------------------------------------------------------------
 // Validate current configuration
 
+#pragma once
+
 #ifdef Classic_ON
   #define Configuration_Found
 #endif
