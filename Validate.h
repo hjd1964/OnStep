@@ -41,7 +41,14 @@
     #define Configuration_Found
   #endif
 #endif
-#ifdef STM32_ON
+#ifdef STM32CZ_ON
+  #ifdef Configuration_Found
+    #define Configuration_Duplicate
+  #else
+    #define Configuration_Found
+  #endif
+#endif
+#ifdef STM32Black_ON
   #ifdef Configuration_Found
     #define Configuration_Duplicate
   #else

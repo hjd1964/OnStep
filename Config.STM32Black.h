@@ -9,9 +9,9 @@
  *
 */
 
-#define STM32_OFF   //  <- Turn _ON to use this configuration
+#define STM32Black_OFF   //  <- Turn _ON to use this configuration
 
-#ifdef STM32_ON
+#ifdef STM32Black_ON
 // -------------------------------------------------------------------------------------------------------------------------
 // ADJUST THE FOLLOWING TO CONFIGURE YOUR CONTROLLER FEATURES --------------------------------------------------------------
 
