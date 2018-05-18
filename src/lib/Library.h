@@ -5,9 +5,6 @@
 
 #include "Arduino.h"
 
-#ifndef Library_h
-#define Library_h
-
 #pragma pack(1)
 const int rec_size = 16;
 typedef struct {
@@ -333,4 +330,3 @@ void Library::clearAll()
   for (int l=0;l<recMax;l++) clearRec(l);
 }
 
-#endif

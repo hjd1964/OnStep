@@ -4,7 +4,6 @@
 #pragma once
 
 // ROTATOR/DEROTATOR ----------------------------
-#ifdef ROTATOR_ON
 
 class rotator {
 
@@ -287,6 +286,4 @@ class rotator {
     unsigned long lastPhysicalMove=0;
     unsigned long nextPhysicalMove=0;
 };
-
-#endif
 
