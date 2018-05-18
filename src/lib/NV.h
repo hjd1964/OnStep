@@ -1,6 +1,10 @@
 // -----------------------------------------------------------------------------------
 // non-volatile storage
 
+// Check if a file was included in HAL
+#ifndef _NV_H_
+#define _NV_H_
+
 #pragma once
 
 #include "EEPROM.h"
@@ -94,3 +98,4 @@ class nvs {
 
 };
 
+#endif

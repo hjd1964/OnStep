@@ -208,6 +208,6 @@
 
 // -------------------------------------------------------------------------------------------------------------------------
 #define FileVersionConfig 2
-#include "src/pinmaps/Pins.STM32.h"
+#include "src/pinmaps/Pins.STM32CZ.h"
 #endif
 
