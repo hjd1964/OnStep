@@ -6,7 +6,6 @@
 // ROTATOR/DEROTATOR ----------------------------
 
 class rotator {
-
   public:
     void init(int stepPin, int dirPin, int enPin, long maxRate, double stepsPerDeg) {
       this->stepPin=stepPin;
