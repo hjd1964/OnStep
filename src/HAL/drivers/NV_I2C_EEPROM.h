@@ -111,29 +111,40 @@ private:
   uint8_t _eeprom_addr;
 
   void nvs_i2c_ee_write(uint16_t address, uint8_t data) {
-    
-    delay(3);
+
     Wire.beginTransmission(_eeprom_addr);
-    Wire.write((int)(address >> 8));   // msb
-    Wire.write((int)(address & 0xFF)); // lsb
-    Wire.write(data);
-    Wire.endTransmission();
+    if (Wire.endTransmission()==0) {
+        Wire.beginTransmission(_eeprom_addr);
+        Wire.write(address >> 8);
+        Wire.write(address & 0xFF);
+        Wire.write(data);
+        Wire.endTransmission();
+        delay(3);
+    }
+
   }
 
   uint8_t nvs_i2c_ee_read(uint16_t address) {
-    uint8_t result = 0xFF;
+      
+    uint8_t result = 0;
+    int r = 0;
     
-    delay(3);
     Wire.beginTransmission(_eeprom_addr);
-    Wire.write((int)(address >> 8));   // msb
-    Wire.write((int)(address & 0xFF)); // lsb
-    Wire.endTransmission();
-    Wire.requestFrom(_eeprom_addr, 1);
-    result = Wire.read();
-
+    if (Wire.endTransmission() == 0) {   
+        Wire.beginTransmission(_eeprom_addr);
+        Wire.write(address >> 8);
+        Wire.write(address & 0xFF);
+        if (Wire.endTransmission() == 0) {
+          Wire.requestFrom(_eeprom_addr, 1);
+          while (Wire.available() > 0 && r<1) {
+            result = (byte)Wire.read();
+            r++;
+          }
+        }
+    }
     return result;
   }
+  
 };
 
 #endif
-
