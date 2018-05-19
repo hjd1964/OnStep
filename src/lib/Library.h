@@ -26,6 +26,8 @@ class Library
     Library();
     ~Library();
     
+    void Init();
+
     boolean setCatalog(int num);
 
     // 16 byte record
@@ -78,12 +80,17 @@ Library::Library()
   bytePos=byteMin;
   
   recMax=byteCount/rec_size;           // maximum number of records
-
-  firstRec();
 }
 
 Library::~Library()
 {
+}
+
+void Library::Init() {
+  // This is now in the Init() function, because on boards
+  // with an I2C EEPROM nv.init() has to be called before
+  // anything else
+  firstRec();
 }
 
 boolean Library::setCatalog(int num)

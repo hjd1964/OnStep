@@ -113,18 +113,33 @@ private:
 
   void nvs_i2c_ee_write(uint16_t offset, uint8_t data) {
 
+    //Serial.print("nvs write: offset=");
+    //Serial.print(offset, HEX);
+    //Serial.print(", data=");
+    //Serial.print(data, HEX);
+
+    delay(5);
+
     Wire.beginTransmission(_eeprom_addr);
     Wire.write(offset >> 8);
     Wire.write(offset & 0xFF);
     Wire.write(data);
+
     Wire.endTransmission();
-    
-    delay(3);
+
+    delay(5);
+
+    //Serial.println(" Done");
   }
 
   uint8_t nvs_i2c_ee_read(uint16_t offset) {
       
     uint8_t data = 0xFF;
+
+    //Serial.print("nvs read: offset=");
+    //Serial.print(offset, HEX);
+
+    delay(5);
 
     Wire.beginTransmission(_eeprom_addr);
     Wire.write(offset >> 8);
@@ -133,10 +148,11 @@ private:
  
     Wire.requestFrom(_eeprom_addr, 1);
  
-    if (Wire.available()) {
-      data = Wire.read();
-    }
+    data = Wire.read();
  
+    //Serial.print(", data=");
+    //Serial.print(data, HEX);
+
     return data;
   }
 };

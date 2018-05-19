@@ -113,9 +113,12 @@ weather ambient;
 #define initKey 915307548 // unique identifier for the current initialization format, do not change
 
 void setup() {
-  // be sure non-volatile memory is ready to go
+  // Initialize the Non-Volatile Memory
   nv.init();
 
+  // Initialize the Object Library
+  Lib.Init();
+  
   // get weather monitoring ready to go
   ambient.init();
   
