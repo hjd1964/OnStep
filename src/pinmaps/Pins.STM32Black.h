@@ -17,7 +17,7 @@
 // STM32103RC: 72MHz, 256K flash, 48K RAM
 // STM32103RE: 72MHz, 512K flash, 64K RAM
 
-#if defined(__ARM_STM32__)
+#if defined(__STM32F1__)
 
 // The pins here are not tested yet, and need to change 
 

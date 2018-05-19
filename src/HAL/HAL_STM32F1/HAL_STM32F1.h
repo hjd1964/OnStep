@@ -12,8 +12,7 @@
 // End of EEPROM
 #define E2END 4095
 
-//#include <EEPROM.h>
-#include "../drivers/HAL_24LC.h"
+#include "../drivers/NV_I2C_EEPROM.h"
 
 // Lower limit (fastest) step rate in uS for this platform
 // the exact model should be detected and these tailored to each, but this is a good starting point
