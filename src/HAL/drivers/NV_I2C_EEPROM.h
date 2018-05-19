@@ -111,33 +111,33 @@ private:
   // Address of the I2C EEPROM
   uint8_t _eeprom_addr;
 
-  void nvs_i2c_ee_write(uint16_t address, uint8_t data) {
+  void nvs_i2c_ee_write(uint16_t offset, uint8_t data) {
 
     Wire.beginTransmission(_eeprom_addr);
-    Wire.write(address >> 8);
-    Wire.write(address & 0xFF);
+    Wire.write(offset >> 8);
+    Wire.write(offset & 0xFF);
     Wire.write(data);
     Wire.endTransmission();
     
     delay(3);
   }
 
-  uint8_t nvs_i2c_ee_read(uint16_t address) {
+  uint8_t nvs_i2c_ee_read(uint16_t offset) {
       
-    uint8_t result = 0xFF;
+    uint8_t data = 0xFF;
 
     Wire.beginTransmission(_eeprom_addr);
-    Wire.write(address >> 8);
-    Wire.write(address & 0xFF);
+    Wire.write(offset >> 8);
+    Wire.write(offset & 0xFF);
     Wire.endTransmission();
  
     Wire.requestFrom(_eeprom_addr, 1);
  
     if (Wire.available()) {
-      result = Wire.read();
+      data = Wire.read();
     }
  
-    return result;
+    return data;
   }
 };
 
