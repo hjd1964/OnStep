@@ -1,3 +1,4 @@
+
 // non-volatile storage
 
 // Check if file was included
@@ -113,38 +114,32 @@ private:
   void nvs_i2c_ee_write(uint16_t address, uint8_t data) {
 
     Wire.beginTransmission(_eeprom_addr);
-    if (Wire.endTransmission()==0) {
-        Wire.beginTransmission(_eeprom_addr);
-        Wire.write(address >> 8);
-        Wire.write(address & 0xFF);
-        Wire.write(data);
-        Wire.endTransmission();
-        delay(3);
-    }
-
+    Wire.write(address >> 8);
+    Wire.write(address & 0xFF);
+    Wire.write(data);
+    Wire.endTransmission();
+    
+    delay(3);
   }
 
   uint8_t nvs_i2c_ee_read(uint16_t address) {
       
-    uint8_t result = 0;
-    int r = 0;
-    
+    uint8_t result = 0xFF;
+
     Wire.beginTransmission(_eeprom_addr);
-    if (Wire.endTransmission() == 0) {   
-        Wire.beginTransmission(_eeprom_addr);
-        Wire.write(address >> 8);
-        Wire.write(address & 0xFF);
-        if (Wire.endTransmission() == 0) {
-          Wire.requestFrom(_eeprom_addr, 1);
-          while (Wire.available() > 0 && r<1) {
-            result = (byte)Wire.read();
-            r++;
-          }
-        }
+    Wire.write(address >> 8);
+    Wire.write(address & 0xFF);
+    Wire.endTransmission();
+ 
+    Wire.requestFrom(_eeprom_addr, 1);
+ 
+    if (Wire.available()) {
+      result = Wire.read();
     }
+ 
     return result;
   }
-  
 };
 
 #endif
+
