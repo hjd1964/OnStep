@@ -15,6 +15,9 @@
 // I2C EEPROM on DS3231 is 32 kilobits = 4 KiloBytes
 #define E2END 4095
 
+#define MSB(i) (i >> 8)
+#define LSB(i) (i & 0xFF)
+
 class nvs {
   public:    
     void init() {
@@ -114,12 +117,13 @@ private:
   void nvs_i2c_ee_write(uint16_t offset, uint8_t data) {
 
     Wire.beginTransmission(_eeprom_addr);
-    Wire.write(offset >> 8);
-    Wire.write(offset & 0xFF);
+    Wire.write(MSB(offset));
+    Wire.write(LSB(offset));
+
     Wire.write(data);
+
+    nonblocking_delay(10);
     Wire.endTransmission();
-    
-    delay(3);
   }
 
   uint8_t nvs_i2c_ee_read(uint16_t offset) {
@@ -127,18 +131,28 @@ private:
     uint8_t data = 0xFF;
 
     Wire.beginTransmission(_eeprom_addr);
-    Wire.write(offset >> 8);
-    Wire.write(offset & 0xFF);
+    Wire.write(MSB(offset));
+    Wire.write(LSB(offset));
+
+    nonblocking_delay(10);
     Wire.endTransmission();
  
     Wire.requestFrom(_eeprom_addr, 1);
  
-    if (Wire.available()) {
-      data = Wire.read();
-    }
- 
+    data = Wire.read();
+
     return data;
   }
+
+  void nonblocking_delay(int millisecs) {
+
+    int start = millis();
+
+    while((millis() - start) < millisecs) {
+      ;
+    }
+  }
+
 };
 
 #endif

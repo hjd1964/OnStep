@@ -49,6 +49,9 @@
 #include <errno.h>
 #include <math.h>
 
+// Uncomment the following line to enable debugging messages to USB serial
+//#define DEBUG
+
 #include "Constants.h"
 
 #include "Config.Classic.h"
@@ -113,9 +116,15 @@ weather ambient;
 #define initKey 915307548 // unique identifier for the current initialization format, do not change
 
 void setup() {
-  // be sure non-volatile memory is ready to go
+  // Initialize USB serial early, so we can use Serial.print() for debugging, if needed
+  PSerial.begin(9600);
+  
+  // Initialize the Non-Volatile Memory
   nv.init();
 
+  // Initialize the Object Library
+  Lib.Init();
+  
   // get weather monitoring ready to go
   ambient.init();
   
@@ -149,8 +158,6 @@ void setup() {
   // starts the hardware timers that keep sidereal time, move the motors, etc.
   Init_Start_Timers();
 
-  // get ready for serial communications
-  PSerial.begin(9600);
 #ifdef HAL_SERIAL1_ENABLED
   PSerial1.begin(SERIAL1_BAUD_DEFAULT);
 #endif
