@@ -154,7 +154,7 @@ int setHome() {
   if (!pecRecorded) pecStatus=IgnorePEC;
 
   // the polar home position
-  startAxis1 = celestialPoleAxis1*(long)StepsPerDegreeAxis1;
+  startAxis1 = celestialPoleAxis1*(double)StepsPerDegreeAxis1;
   startAxis2 = celestialPoleAxis2*(double)StepsPerDegreeAxis2;
   cli();
   targetAxis1.part.m = startAxis1; targetAxis1.part.f = 0;
