@@ -15,6 +15,9 @@
 // I2C EEPROM on DS3231 is 32 kilobits = 4 KiloBytes
 #define E2END 4095
 
+#define MSB(i) (i >> 8)
+#define LSB(i) (i & 0xFF)
+
 class nvs {
   public:    
     void init() {
@@ -118,16 +121,14 @@ private:
     //Serial.print(", data=");
     //Serial.print(data, HEX);
 
-    delay(5);
-
     Wire.beginTransmission(_eeprom_addr);
-    Wire.write(offset >> 8);
-    Wire.write(offset & 0xFF);
+    Wire.write(MSB(offset));
+    Wire.write(LSB(offset));
+
     Wire.write(data);
 
+    nonblocking_delay(10);
     Wire.endTransmission();
-
-    delay(5);
 
     //Serial.println(" Done");
   }
@@ -136,25 +137,38 @@ private:
       
     uint8_t data = 0xFF;
 
-    //Serial.print("nvs read: offset=");
+    //Serial.print("nvs read: offset=0x");
     //Serial.print(offset, HEX);
+    //Serial.print(",");
+    //Serial.print(offset);
 
-    delay(5);
 
     Wire.beginTransmission(_eeprom_addr);
-    Wire.write(offset >> 8);
-    Wire.write(offset & 0xFF);
+    Wire.write(MSB(offset));
+    Wire.write(LSB(offset));
+
+    nonblocking_delay(10);
     Wire.endTransmission();
  
     Wire.requestFrom(_eeprom_addr, 1);
  
     data = Wire.read();
  
-    //Serial.print(", data=");
+    //Serial.print(", data=0x");
     //Serial.print(data, HEX);
+    //Serial.print(",");
+    //Serial.println(data);
 
     return data;
   }
+
+  void nonblocking_delay(int millisecs) {
+    int start = millis();
+    while((millis() - start) < millisecs) {
+      ;
+    }
+  }
+
 };
 
 #endif
