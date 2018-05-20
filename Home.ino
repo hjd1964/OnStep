@@ -133,8 +133,6 @@ int setHome() {
   if (guideDirAxis1 || guideDirAxis2) return 8;   // fail, already in motion
   if (trackingState==TrackingMoveTo)  return 5;   // fail, goto in progress
 
-  Init_Startup_Values();
-
   // make sure limits are on
   safetyLimitsOn=true;
 
