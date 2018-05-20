@@ -122,7 +122,7 @@ private:
 
     Wire.write(data);
 
-    nonblocking_delay(10);
+    delay(5);
     Wire.endTransmission();
   }
 
@@ -134,7 +134,6 @@ private:
     Wire.write(MSB(offset));
     Wire.write(LSB(offset));
 
-    nonblocking_delay(10);
     Wire.endTransmission();
  
     Wire.requestFrom(_eeprom_addr, 1);
