@@ -4,16 +4,12 @@
 #pragma once
 
 #include <Wire.h>
-
-#define I2C_EEPROM_ADDRESS 0x57
-#define E2END 4095
-#define I2C_CLOCK 400000
+#include <Arduino.h>
 
 // I2C EEPROM Address on DS3231 RTC module
 #define I2C_EEPROM_ADDRESS 0x57
-
-// I2C EEPROM on DS3231 is 32 kilobits = 4 KiloBytes
 #define E2END 4095
+#define I2C_CLOCK 400000
 
 #define MSB(i) (i >> 8)
 #define LSB(i) (i & 0xFF)
@@ -35,7 +31,7 @@ class nvs {
     }
 
     void update(uint16_t i, uint8_t j) {
-      write(i,j);
+      if (j!=read(i)) write(i,j);
     }
 
     // write int numbers into EEPROM at position i (2 uint8_ts)
@@ -113,33 +109,36 @@ class nvs {
 private:
   // Address of the I2C EEPROM
   uint8_t _eeprom_addr;
+  uint16_t lastSeqOffset=-32767;
 
   void nvs_i2c_ee_write(uint16_t offset, uint8_t data) {
+    static uint32_t nextWriteMs=millis()+10UL;
+    while ((int32_t)(millis()-nextWriteMs)<0) {}
 
     HAL_Wire.beginTransmission(_eeprom_addr);
     HAL_Wire.write(MSB(offset));
     HAL_Wire.write(LSB(offset));
-
     HAL_Wire.write(data);
-
-    delay(10);
     HAL_Wire.endTransmission();
+    nextWriteMs=millis()+10UL;
+
+    lastSeqOffset=-32767; // reset
   }
 
   uint8_t nvs_i2c_ee_read(uint16_t offset) {
-      
     uint8_t data = 0xFF;
 
-    HAL_Wire.beginTransmission(_eeprom_addr);
-    HAL_Wire.write(MSB(offset));
-    HAL_Wire.write(LSB(offset));
-
-    delay(10);
-    HAL_Wire.endTransmission();
- 
+    if (lastSeqOffset+1!=offset) { 
+      HAL_Wire.beginTransmission(_eeprom_addr);
+      HAL_Wire.write(MSB(offset));
+      HAL_Wire.write(LSB(offset));
+      HAL_Wire.endTransmission();
+    }
     HAL_Wire.requestFrom(_eeprom_addr, (uint8_t)1);
- 
+    delayMicroseconds(1);
     data = HAL_Wire.read();
+
+    lastSeqOffset=offset;
 
     return data;
   }
@@ -147,3 +146,4 @@ private:
 };
 
 nvs nv;
+
