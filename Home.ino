@@ -136,6 +136,9 @@ int setHome() {
   // make sure limits are on
   safetyLimitsOn=true;
 
+  // Call init startup again, since a soft reset is done when returning to home
+  Init_Startup_Values();
+
   // initialize and disable the stepper drivers
   StepperModeTrackingInit();
  
