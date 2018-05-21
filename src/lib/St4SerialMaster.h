@@ -32,7 +32,7 @@ class Mst4 : public Stream
 
     // recvs one char and transmits one char to/from buffers; recvd chars <32 are returned directly and bypass the buffer
     inline char poll() {
-      char c;
+      char c=0;
       if (trans(&c,_xmit_buffer[_xmit_head])) {
         // data going out was good?
         if (!_send_error) {

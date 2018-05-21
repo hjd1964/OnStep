@@ -1,7 +1,7 @@
 // -------------------------------------------------------------------------------------------------
 // Pin map for OnStep MiniPCB (Teensy3.2)
 
-#if defined(__ARM_Teensy3__)
+#if defined(__MK20DX256__)
 
 // The multi-purpose pins (Aux3..Aux8 can be analog pwm/dac if supported)
 #define Aux0          19

@@ -26,7 +26,7 @@ class Library
     Library();
     ~Library();
     
-    void Init();
+    void init();
 
     boolean setCatalog(int num);
 
@@ -86,7 +86,7 @@ Library::~Library()
 {
 }
 
-void Library::Init() {
+void Library::init() {
   // This is now in the Init() function, because on boards
   // with an I2C EEPROM nv.init() has to be called before
   // anything else

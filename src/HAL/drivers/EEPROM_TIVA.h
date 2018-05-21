@@ -18,6 +18,10 @@
   
   // update added by Luka
   // consolidation to a simple header file by Howard Dutton 1/2/18
+  
+  // The Energia IDE only has EEPROM.read and EEPROM.write, it does not include EEPROM.update.
+  // My patch has been accepted but it will take a while until the next version is released.
+  // Until then you can use the included EEPROM_LP.ino and EEPROM_LP.h.
 */
 
 #ifndef EEPROM_h

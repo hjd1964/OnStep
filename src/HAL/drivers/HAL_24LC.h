@@ -1,7 +1,6 @@
 // Support for 24LC series I2C EEPROMs
 
 #include <Wire.h>
-#define PWire Wire
 
 // Default I2C address of the EEPROM
 #ifndef I2C_EEPROM_ADDRESS

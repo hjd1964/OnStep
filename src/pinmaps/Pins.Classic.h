@@ -86,7 +86,7 @@
 #define ST4RAe        53    // Pin 53 ST4 RA+ East
 #endif
 
-#elif defined(__ARM_Teensy3__)
+#elif defined(__MK20DX256__) || defined(__MK64FX512__) || defined(__MK66FX1M0__)
 
 // The PEC index sense is a logic level input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
 #define PecPin         2

@@ -3,18 +3,7 @@
 // We define a more generic symbol, in case more STM32 boards based on different lines are supported
 #define __ARM_STM32__
 
-// The STM32 platform has no built in EEPROM. Although there is EEPROM emulation in flash, it does
-// work. Therefore a real EEPROM is needed. 
-// The best way is to use the low cost DS3231 RTC module, which has a 4K I2C EEPROM built in.
-// The EEPROM's address is different from the default, so we define it before including HAL_24LC.h
-#define I2C_EEPROM_ADDRESS 0x57
-
-// End of EEPROM
-#define E2END 4095
-
-#include "../drivers/NV_I2C_EEPROM.h"
-
-// Lower limit (fastest) step rate in uS for this platform
+// Lower limit (fastest) step rate in uS for this platform -------------------------------------------
 // the exact model should be detected and these tailored to each, but this is a good starting point
 #define MaxRateLowerLimit 16
 
@@ -35,6 +24,18 @@
 
 // New symbol for the default I2C port -------------------------------------------------------------
 #define HAL_Wire Wire
+
+// Non-volatile storage ------------------------------------------------------------------------------
+#if defined(NV_AT32C32)
+  #include "../drivers/NV_I2C_EEPROM_AT24C32.h"
+#elif defined(NV_MB85RC256V)
+  #include "../drivers/NV_I2C_FRAM_MB85RC256V.h"
+#else
+  #include "../drivers/NV_I2C_EEPROM_AT24C32.h"
+#endif
+
+// Use an RTC (Real Time Clock) if present -----------------------------------------------------------
+#include "../drivers/RTCw.h"
 
 //--------------------------------------------------------------------------------------------------
 // Initialize timers

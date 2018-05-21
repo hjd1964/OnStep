@@ -3,8 +3,6 @@
 // We define a more generic symbol, in case more Teensy boards based on different lines are supported
 #define __ARM_Teensy3__
 
-#include <EEPROM.h>
-
 // Lower limit (fastest) step rate in uS for this platform
 #if defined(__MK64FX512__)
   #define MaxRate_LowerLimit 12
@@ -32,6 +30,18 @@
 #else
 #define HAL_Wire Wire
 #endif
+
+// Non-volatile storage ------------------------------------------------------------------------------
+#if defined(NV_AT32C32)
+  #include "../drivers/NV_I2C_EEPROM_AT24C32.h"
+#elif defined(NV_MB85RC256V)
+  #include "../drivers/NV_I2C_FRAM_MB85RC256V.h"
+#else
+  #include "../drivers/NV_EEPROM.h"
+#endif
+
+// Use an RTC (Real Time Clock) if present -----------------------------------------------------------
+#include "../drivers/RTCw.h"
 
 //--------------------------------------------------------------------------------------------------
 // Initialize timers

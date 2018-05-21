@@ -41,7 +41,7 @@
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  1
 #define FirmwareVersionMinor  8
-#define FirmwareVersionPatch  "g"     // for example major.minor patch: 1.3c
+#define FirmwareVersionPatch  "h"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 2       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
@@ -65,9 +65,6 @@
 #include "Validate.h"
 
 #include "src/HAL/HAL.h"
-
-#include "src/lib/NV.h"
-nvs nv;
 
 #include "src/lib/FPoint.h"
 #include "src/lib/Julian.h"
@@ -103,10 +100,6 @@ tmc2130 tmcAxis2(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
   #endif
 #endif
 
-// use an RTC (Real Time Clock) if present
-#include "src/lib/RTCw.h"
-rtcw urtc;
-
 // use weather sensors (temperature, pressure, humidity) if present
 #include "src/lib/Weather.h"
 weather ambient;
@@ -119,11 +112,11 @@ void setup() {
   // Initialize USB serial early, so we can use Serial.print() for debugging, if needed
   PSerial.begin(9600);
   
-  // Initialize the Non-Volatile Memory
+  // initialize the Non-Volatile Memory
   nv.init();
 
-  // Initialize the Object Library
-  Lib.Init();
+  // initialize the Object Library
+  Lib.init();
   
   // get weather monitoring ready to go
   ambient.init();

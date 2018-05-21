@@ -1,12 +1,12 @@
+// -----------------------------------------------------------------------------------
+// non-volatile storage for AT24C32 (often on DS3231 RTC modules with I2C address 0x57)
 
-// non-volatile storage
-
-// Check if file was included
-#ifndef _NV_H_
-#define _NV_H_
+#pragma once
 
 #include <Wire.h>
 
+#define I2C_EEPROM_ADDRESS 0x57
+#define E2END 4095
 #define I2C_CLOCK 400000
 
 // I2C EEPROM Address on DS3231 RTC module
@@ -21,8 +21,8 @@
 class nvs {
   public:    
     void init() {
-      Wire.begin();
-      Wire.setClock(I2C_CLOCK);
+      HAL_Wire.begin();
+      HAL_Wire.setClock(I2C_CLOCK);
       _eeprom_addr = I2C_EEPROM_ADDRESS;
     }
 
@@ -30,12 +30,12 @@ class nvs {
       return nvs_i2c_ee_read(i);
     }
 
-    void update(uint16_t i, uint8_t j) {
-      write(i,j);
-    }
-
     void write(uint16_t i, uint8_t j) {
       nvs_i2c_ee_write(i,j);
+    }
+
+    void update(uint16_t i, uint8_t j) {
+      write(i,j);
     }
 
     // write int numbers into EEPROM at position i (2 uint8_ts)
@@ -116,44 +116,34 @@ private:
 
   void nvs_i2c_ee_write(uint16_t offset, uint8_t data) {
 
-    Wire.beginTransmission(_eeprom_addr);
-    Wire.write(MSB(offset));
-    Wire.write(LSB(offset));
+    HAL_Wire.beginTransmission(_eeprom_addr);
+    HAL_Wire.write(MSB(offset));
+    HAL_Wire.write(LSB(offset));
 
-    Wire.write(data);
+    HAL_Wire.write(data);
 
-    nonblocking_delay(10);
-    Wire.endTransmission();
+    delay(10);
+    HAL_Wire.endTransmission();
   }
 
   uint8_t nvs_i2c_ee_read(uint16_t offset) {
       
     uint8_t data = 0xFF;
 
-    Wire.beginTransmission(_eeprom_addr);
-    Wire.write(MSB(offset));
-    Wire.write(LSB(offset));
+    HAL_Wire.beginTransmission(_eeprom_addr);
+    HAL_Wire.write(MSB(offset));
+    HAL_Wire.write(LSB(offset));
 
-    nonblocking_delay(10);
-    Wire.endTransmission();
+    delay(10);
+    HAL_Wire.endTransmission();
  
-    Wire.requestFrom(_eeprom_addr, 1);
+    HAL_Wire.requestFrom(_eeprom_addr, (uint8_t)1);
  
-    data = Wire.read();
+    data = HAL_Wire.read();
 
     return data;
   }
 
-  void nonblocking_delay(int millisecs) {
-
-    int start = millis();
-
-    while((millis() - start) < millisecs) {
-      ;
-    }
-  }
-
 };
 
-#endif
-
+nvs nv;

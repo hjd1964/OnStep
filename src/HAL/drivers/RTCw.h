@@ -2,8 +2,7 @@
 // Support for real time clocks (RTC wrapper)
 
 #pragma once
-
-#include "Julian.h"
+#include "../../lib/Julian.h"
 
 #if defined(RTC_DS3234)
 // -----------------------------------------------------------------------------------
@@ -129,3 +128,4 @@ class rtcw {
 };
 #endif
 
+rtcw urtc;

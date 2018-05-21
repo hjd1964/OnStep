@@ -1,7 +1,5 @@
 // Platform setup ------------------------------------------------------------------------------------
 
-#include <EEPROM.h>
-
 // This platform doesn't support true double precision math
 #define HAL_NO_DOUBLE_PRECISION
 
@@ -22,6 +20,24 @@
 
 // New symbol for the default I2C port -------------------------------------------------------------
 #define HAL_Wire Wire
+
+// Non-volatile storage ------------------------------------------------------------------------------
+#if defined(NV_AT32C32)
+  #ifdef E2END
+    #undef E2END
+  #endif
+  #include "../drivers/NV_I2C_EEPROM_AT24C32.h"
+#elif defined(NV_MB85RC256V)
+  #ifdef E2END
+    #undef E2END
+  #endif
+  #include "../drivers/NV_I2C_FRAM_MB85RC256V.h"
+#else
+  #include "../drivers/NV_EEPROM.h"
+#endif
+
+// Use an RTC (Real Time Clock) if present -----------------------------------------------------------
+#include "../drivers/RTCw.h"
 
 //--------------------------------------------------------------------------------------------------
 // Initialize timers

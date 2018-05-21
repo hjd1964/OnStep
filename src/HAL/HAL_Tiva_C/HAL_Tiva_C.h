@@ -19,17 +19,22 @@
 #include <driverlib/interrupt.h>
 #include "inc/hw_ints.h"
 
-// The Energia IDE only has EEPROM.read and EEPROM.write, it does not include EEPROM.update.
-// My patch has been accepted but it will take a while until the next version is released.
-// Until then you can use the included EEPROM_LP.ino and EEPROM_LP.h.
-#include "EEPROM_LP.h"
-
-// Different values for EEPROM end
-#if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
-#define E2END 2047
-#elif defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
-#define E2END 6143
+// Non-volatile storage ------------------------------------------------------------------------------
+#if defined(NV_AT32C32)
+  #include "../drivers/NV_I2C_EEPROM_AT24C32.h"
+#elif defined(NV_MB85RC256V)
+  #include "../drivers/NV_I2C_FRAM_MB85RC256V.h"
+#else
+  #include "../drivers/NV_EEPROM_TIVA.h"
+  #if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
+  #define E2END 2047
+  #elif defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
+  #define E2END 6143
+  #endif
 #endif
+
+// Use an RTC (Real Time Clock) if present -----------------------------------------------------------
+#include "../drivers/RTCw.h"
 
 // Interrupts
 #define cli() noInterrupts()

@@ -46,7 +46,7 @@ static uint8_t conv2d(const char* p) {
 int CompilerMonth(const char* date) {
   // Example input:  "Mar 26 2018"
 
-  int Month;
+  int Month=1;
   // Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec 
 
   switch (date[0]) {
