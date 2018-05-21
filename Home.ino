@@ -133,8 +133,6 @@ int setHome() {
   if (guideDirAxis1 || guideDirAxis2) return 8;   // fail, already in motion
   if (trackingState==TrackingMoveTo)  return 5;   // fail, goto in progress
 
-  Init_Startup_Values();
-
   // make sure limits are on
   safetyLimitsOn=true;
 
@@ -156,7 +154,7 @@ int setHome() {
   if (!pecRecorded) pecStatus=IgnorePEC;
 
   // the polar home position
-  startAxis1 = celestialPoleAxis1*(long)StepsPerDegreeAxis1;
+  startAxis1 = celestialPoleAxis1*(double)StepsPerDegreeAxis1;
   startAxis2 = celestialPoleAxis2*(double)StepsPerDegreeAxis2;
   cli();
   targetAxis1.part.m = startAxis1; targetAxis1.part.f = 0;
