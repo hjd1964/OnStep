@@ -5,8 +5,6 @@
 
 #include <Wire.h>
 
-#define I2C_EEPROM_ADDRESS 0x57
-#define E2END 4095
 #define I2C_CLOCK 400000
 
 // I2C EEPROM Address on DS3231 RTC module
