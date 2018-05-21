@@ -110,23 +110,24 @@ private:
   // Address of the I2C EEPROM
   uint8_t _eeprom_addr;
   uint16_t lastSeqOffset=-32767;
+  uint32_t nextOpMs=millis()+10UL;
 
   void nvs_i2c_ee_write(uint16_t offset, uint8_t data) {
-    static uint32_t nextWriteMs=millis()+10UL;
-    while ((int32_t)(millis()-nextWriteMs)<0) {}
+    while ((int32_t)(millis()-nextOpMs)<0) {}
 
     HAL_Wire.beginTransmission(_eeprom_addr);
     HAL_Wire.write(MSB(offset));
     HAL_Wire.write(LSB(offset));
     HAL_Wire.write(data);
     HAL_Wire.endTransmission();
-    nextWriteMs=millis()+10UL;
+    nextOpMs=millis()+10UL;
 
     lastSeqOffset=-32767; // reset
   }
 
   uint8_t nvs_i2c_ee_read(uint16_t offset) {
     uint8_t data = 0xFF;
+    while ((int32_t)(millis()-nextOpMs)<0) {}
 
     if (lastSeqOffset+1!=offset) { 
       HAL_Wire.beginTransmission(_eeprom_addr);
