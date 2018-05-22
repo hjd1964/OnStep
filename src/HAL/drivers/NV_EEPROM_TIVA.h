@@ -91,7 +91,11 @@ class nvs {
       readQuad(i, (byte*)&l);
       return l;
     }
-
+    
+    // read count bytes from EEPROM starting at position i
+    void readBytes(int i, byte *v, byte count) {
+      for (int j=0; j<count; j++) { *v = read(i + j); v++; }
+    }
 };
 
 nvs nv;

@@ -147,7 +147,7 @@ libRec_t Library::readRec(int address)
 {
   libRec_t work;
   int l=address*rec_size+byteMin;
-  for (int m=0;m<16;m++) work.libRecBytes[m]=nv.read(l+m);
+  nv.readBytes(l,(uint8_t*)&work.libRecBytes,16);
   return work;
 }
 

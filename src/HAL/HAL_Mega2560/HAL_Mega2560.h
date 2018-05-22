@@ -22,7 +22,7 @@
 #define HAL_Wire Wire
 
 // Non-volatile storage ------------------------------------------------------------------------------
-#if defined(NV_AT32C32)
+#if defined(NV_AT24C32)
   #ifdef E2END
     #undef E2END
   #endif

@@ -20,7 +20,7 @@
 #include "inc/hw_ints.h"
 
 // Non-volatile storage ------------------------------------------------------------------------------
-#if defined(NV_AT32C32)
+#if defined(NV_AT24C32)
   #include "../drivers/NV_I2C_EEPROM_AT24C32.h"
 #elif defined(NV_MB85RC256V)
   #include "../drivers/NV_I2C_FRAM_MB85RC256V.h"
