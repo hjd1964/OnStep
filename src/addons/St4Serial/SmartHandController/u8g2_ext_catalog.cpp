@@ -1,42 +1,44 @@
-// -------------------------------------------------------------------------------
-// Selection catalog
+﻿/*
 
-/*
+u8g2_selection_list.c
 
-  u8g2_selection_list.c
-  
-  selection list with scroll option
-  
-  Universal 8bit Graphics Library (https://github.com/olikraus/u8g2/)
+selection list with scroll option
 
-  Copyright (c) 2016, olikraus@gmail.com
-  All rights reserved.
+Universal 8bit Graphics Library (https://github.com/olikraus/u8g2/)
 
-  Redistribution and use in source and binary forms, with or without modification, 
-  are permitted provided that the following conditions are met:
+Copyright (c) 2016, olikraus@gmail.com
+All rights reserved.
 
-  * Redistributions of source code must retain the above copyright notice, this list 
-    of conditions and the following disclaimer.
-    
-  * Redistributions in binary form must reproduce the above copyright notice, this 
-    list of conditions and the following disclaimer in the documentation and/or other 
-    materials provided with the distribution.
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
 
-  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-  CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
-  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
-  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, 
-  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
-  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
-  
+* Redistributions of source code must retain the above copyright notice, this list
+of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice, this
+list of conditions and the following disclaimer in the documentation and/or other
+materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
 */
+#include <U8g2lib.h>
+#include "u8g2_ext_catalog.h"
+#include "u8g2_ext_value.h"
+#include "Catalog.h"
+#include "u8g2_ext_event.h"
 
 #define OC_width 18
 #define OC_height 10
@@ -73,19 +75,20 @@ static unsigned char GX_bits[] U8X8_PROGMEM = {
   0xf8, 0x3f, 0x00, 0xf0, 0x7f, 0x00, 0x80, 0xe7, 0x00, 0x0c, 0xe0, 0x00,
   0x18, 0x70, 0x00, 0xf0, 0x3f, 0x00 };
 
-#include "Selection_catalog.h"
+
 
 #define MY_BORDER_SIZE 1
+
 
 /*
 selection list with string line
 returns line height
 */
 
-static u8g2_uint_t onstep_draw_catalog_list_line(u8g2_t *u8g2, u8g2_uint_t y, unsigned short idx, Catalog cat)
+static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, unsigned short idx, Catalog cat)
 {
   char DEGREE_SYMBOL[] = { 0xB0, '\0' };
-  u8g2_uint_t x=0;
+  u8g2_uint_t x = 0;
   u8g2_uint_t yy;
   char txt1[5];
   char txt2[5];
@@ -106,7 +109,7 @@ static u8g2_uint_t onstep_draw_catalog_list_line(u8g2_t *u8g2, u8g2_uint_t y, un
   {
     uint8_t step0 = u8g2_GetUTF8Width(u8g2, "dec ");
     char line[16];
-    uint8_t vr1, vr2,vr3, vd2;
+    uint8_t vr1, vr2, vr3, vd2;
     short vd1;
     cat_elements = 291;
     cat_letter = &Star_letter[idx];
@@ -124,15 +127,15 @@ static u8g2_uint_t onstep_draw_catalog_list_line(u8g2_t *u8g2, u8g2_uint_t y, un
     memcpy(txt3, u8x8_u8toa(vr3, 2), 3);
     u8g2_DrawUTF8(u8g2, x, y, "ra");
     x += step0;
-    drawRA(u8g2, x, y, txt1, txt2, txt3);
+    ext_drawRA(u8g2, x, y, txt1, txt2, txt3);
     y += line_height;
     x = 0;
     getcatdms(Star_dec[idx], vd1, vd2);
-    memcpy(txt1, u8x8_u8toa((uint8_t) vd1, 2), 3);
+    memcpy(txt1, u8x8_u8toa((uint8_t)abs(vd1), 2), 3);
     memcpy(txt2, u8x8_u8toa(vd2, 2), 3);
     u8g2_DrawUTF8(u8g2, x, y, "dec ");
     x += step0;
-    drawDec(u8g2, x, y, vd1 < 0 ? "-" : "+", txt1, txt2, "00");
+    ext_drawDec(u8g2, x, y, vd1 < 0 ? "-" : "+", txt1, txt2, "00");
     return line_height;
   }
 
@@ -146,13 +149,29 @@ static u8g2_uint_t onstep_draw_catalog_list_line(u8g2_t *u8g2, u8g2_uint_t y, un
     cat_dMag = &Hershel_dMag[idx];
     cat_obj = &Herschel_obj[idx];
     break;
+  case MESSIER:
+    cat_elements = 110;
+    cat_num = NULL;
+    cat_info = NULL;
+    cat_const = &Messier_constellation[idx];
+    cat_dMag = &Messier_dMag[idx];
+    cat_obj = &Messier_obj[idx];
   default:
     break;
   }
 
+
+
   /* check whether this is the current cursor line */
   char line[16];
-  sprintf(line, "%s%u", catalog_txt[cat], *cat_num);
+  if (cat_num != NULL)
+  {
+    sprintf(line, "%s%u", catalog_txt[cat], *cat_num);
+  }
+  else
+  {
+    sprintf(line, "%s%u", catalog_txt[cat], idx +1);
+  }
   /* draw the line */
   if (line == NULL)
     strcpy(line, "");
@@ -167,37 +186,43 @@ static u8g2_uint_t onstep_draw_catalog_list_line(u8g2_t *u8g2, u8g2_uint_t y, un
     switch (*cat_obj)
     {
     case 0:
-      display.drawXBMP(x - 3, y - EN_height, EN_width, EN_height, EN_bits);
+      u8g2_DrawXBMP(u8g2, x - 3, y - EN_height, EN_width, EN_height, EN_bits);
       break;
     case 1:
-      display.drawXBMP(x - 3, y - GC_height, GC_width, GC_height, GC_bits);
+      u8g2_DrawXBMP(u8g2, x - 3, y - GC_height, GC_width, GC_height, GC_bits);
       break;
     case 2:
-      display.drawXBMP(x - 3, y - GX_height, GX_width, GX_height, GX_bits);
+      u8g2_DrawXBMP(u8g2, x - 3, y - GX_height, GX_width, GX_height, GX_bits);
       break;
     case 3:
-      display.drawXBMP(x - 3, y - OC_height, OC_width, OC_height, OC_bits);
+      u8g2_DrawXBMP(u8g2, x - 3, y - OC_height, OC_width, OC_height, OC_bits);
       break;
     case 4:
-      display.drawXBMP(x - 3, y - PN_height, PN_width, PN_height, PN_bits);
+      u8g2_DrawXBMP(u8g2, x - 3, y - PN_height, PN_width, PN_height, PN_bits);
       break;
     default:
       break;
     }
     x += GX_width + 5;
   }
-  
+
   u8g2_DrawUTF8(u8g2, x, y, "mag ");
   x += u8g2_GetUTF8Width(u8g2, "mag ");
-  if (v1<10)
+  if (v1 < 10)
     x += u8g2_GetUTF8Width(u8g2, "1");
   sprintf(line, "%d.%d", v1, v2);
   u8g2_DrawUTF8(u8g2, x, y, line);
   y += line_height;
-  u8g2_DrawUTF8(u8g2, 0, y, Herschel_info_txt[*cat_info - 1]);
+  if (cat_info != NULL)
+  {
+    u8g2_DrawUTF8(u8g2, 0, y, Herschel_info_txt[*cat_info - 1]);
+  }
   y += line_height;
   return line_height;
 }
+
+
+
 
 /*
 title: 		NULL for no title, valid str for title line. Can contain mutliple lines, separated by '\n'
@@ -208,10 +233,11 @@ returns the selected line if user has pressed the select key
 side effects:
 u8g2_SetFontDirection(u8g2, 0);
 u8g2_SetFontPosBaseline(u8g2);
+
 */
-unsigned short onstep_UserInterfaceCatalog(u8g2_t *u8g2, const char *title, unsigned short start_pos, Catalog cat)
+unsigned short ext_UserInterfaceCatalog(u8g2_t *u8g2, Pad* extPad, const char *title, unsigned short start_pos, Catalog cat)
 {
-  display.setFont(u8g2_font_helvR10_te);
+  u8g2_SetFont(u8g2, u8g2_font_helvR10_te);
   unsigned short cur_pos;
   unsigned short tot_pos;
   unsigned short incr = 1;
@@ -222,6 +248,9 @@ unsigned short onstep_UserInterfaceCatalog(u8g2_t *u8g2, const char *title, unsi
     break;
   case STAR:
     tot_pos = 292;
+    break;
+  case MESSIER:
+    tot_pos = 110;
     break;
   default:
     tot_pos = 0;
@@ -241,14 +270,14 @@ unsigned short onstep_UserInterfaceCatalog(u8g2_t *u8g2, const char *title, unsi
   uint8_t title_lines = u8x8_GetStringLineCnt(title);
   uint8_t display_lines;
 
-  if (start_pos > 0) start_pos--; /* issue 112 */
-  cur_pos = start_pos;
 
+  if (start_pos > 0)	/* issue 112 */
+    start_pos--;		/* issue 112 */
+  cur_pos = start_pos;
   u8g2_SetFontPosBaseline(u8g2);
 
   for (;;)
   {
-    /*     LoopMain();*/
     u8g2_FirstPage(u8g2);
     do
     {
@@ -261,21 +290,19 @@ unsigned short onstep_UserInterfaceCatalog(u8g2_t *u8g2, const char *title, unsi
 
         yy += 3;
       }
-      onstep_draw_catalog_list_line(u8g2, yy, cur_pos,cat);
+      ext_draw_catalog_list_line(u8g2, yy, cur_pos, cat);
     } while (u8g2_NextPage(u8g2));
 
 #ifdef U8G2_REF_MAN_PIC
     return 0;
 #endif
 
+
     for (;;)
     {
-      //LoopMain();
-      event = onstep_GetMenuEvent();
-      //event = U8X8_MSG_GPIO_MENU_NEXT;
+      event = ext_GetMenuEvent(extPad);
       if (event == U8X8_MSG_GPIO_MENU_SELECT || event == U8X8_MSG_GPIO_MENU_NEXT)
       {
-
         return cur_pos + 1;		/* +1, issue 112 */
       }
 
@@ -299,8 +326,6 @@ unsigned short onstep_UserInterfaceCatalog(u8g2_t *u8g2, const char *title, unsi
         {
           cur_pos = 0;
         }
-        Ser.println(cur_pos);
-
         break;
       }
       else if (event == U8X8_MSG_GPIO_MENU_UP)
@@ -319,14 +344,13 @@ unsigned short onstep_UserInterfaceCatalog(u8g2_t *u8g2, const char *title, unsi
         {
           cur_pos = tot_pos - 1;
         }
-
-        Ser.println(cur_pos);
         break;
       }
       else
       {
         incr = 0;
       }
+
     }
   }
 }
