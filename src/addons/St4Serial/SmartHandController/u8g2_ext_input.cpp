@@ -1,54 +1,53 @@
+
+#include "u8g2_ext_input.h"
+#include "u8g2_ext_event.h"
 /*
+Copyright (c) 2018, 
+All rights reserved.
 
-  u8g2_input_value.c
-  
-  Universal 8bit Graphics Library (https://github.com/olikraus/u8g2/)
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
 
-  Copyright (c) 2016, olikraus@gmail.com
-  All rights reserved.
+* Redistributions of source code must retain the above copyright notice, this list
+of conditions and the following disclaimer.
 
-  Redistribution and use in source and binary forms, with or without modification, 
-  are permitted provided that the following conditions are met:
+* Redistributions in binary form must reproduce the above copyright notice, this
+list of conditions and the following disclaimer in the documentation and/or other
+materials provided with the distribution.
 
-  * Redistributions of source code must retain the above copyright notice, this list 
-    of conditions and the following disclaimer.
-    
-  * Redistributions in binary form must reproduce the above copyright notice, this 
-    list of conditions and the following disclaimer in the documentation and/or other 
-    materials provided with the distribution.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND
+CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
-  CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, 
-  INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
-  MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR 
-  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-  SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT 
-  NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
-  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, 
-  STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) 
-  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF 
-  ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
-  
 */
 
+
 /*
-  return:
-    0: value is not changed (HOME/Break Button pressed)
-    1: value has been updated
+return:
+0: value is not changed (HOME/Break Button pressed)
+1: value has been updated
 */
 
-uint8_t onstep_UserInterfaceInputValueInteger(u8g2_t *u8g2, const char *title, const char *pre, uint8_t *value, uint8_t lo, uint8_t hi, uint8_t digits, const char *post)
+uint8_t ext_UserInterfaceInputValueInteger(u8g2_t *u8g2, Pad* extPad, const char *title, const char *pre, uint8_t *value, uint8_t lo, uint8_t hi, uint8_t digits, const char *post)
 {
-  display.setFont(u8g2_font_helvR12_te);
+  u8g2_SetFont(u8g2, u8g2_font_helvR12_te);
   uint8_t line_height;
   uint8_t height;
   u8g2_uint_t pixel_height;
   u8g2_uint_t  y, yy;
   u8g2_uint_t  pixel_width;
   u8g2_uint_t  x, xx;
-  
+
   uint8_t local_value = *value;
   //uint8_t r; /* not used ??? */
   uint8_t event;
@@ -58,12 +57,12 @@ uint8_t onstep_UserInterfaceInputValueInteger(u8g2_t *u8g2, const char *title, c
 
   /* force baseline position */
   u8g2_SetFontPosBaseline(u8g2);
-  
+
   /* calculate line height */
   line_height = u8g2_GetAscent(u8g2);
   line_height -= u8g2_GetDescent(u8g2);
-  
-  
+
+
   /* calculate overall height of the input value box */
   height = 1;	/* value input line */
   height += u8x8_GetStringLineCnt(title);
@@ -75,28 +74,27 @@ uint8_t onstep_UserInterfaceInputValueInteger(u8g2_t *u8g2, const char *title, c
 
   /* calculate offset from top */
   y = 0;
-  if ( pixel_height < u8g2_GetDisplayHeight(u8g2)  )
+  if (pixel_height < u8g2_GetDisplayHeight(u8g2))
   {
     y = u8g2_GetDisplayHeight(u8g2);
     y -= pixel_height;
     y /= 2;
   }
-  
+
   /* calculate offset from left for the label */
   x = 0;
   pixel_width = u8g2_GetUTF8Width(u8g2, pre);
   pixel_width += u8g2_GetUTF8Width(u8g2, "0") * digits;
   pixel_width += u8g2_GetUTF8Width(u8g2, post);
-  if ( pixel_width < u8g2_GetDisplayWidth(u8g2) )
+  if (pixel_width < u8g2_GetDisplayWidth(u8g2))
   {
     x = u8g2_GetDisplayWidth(u8g2);
     x -= pixel_width;
     x /= 2;
   }
   /* event loop */
-  for(;;)
+  for (;;)
   {
-    LoopMain();
     u8g2_FirstPage(u8g2);
     do
     {
@@ -116,8 +114,8 @@ uint8_t onstep_UserInterfaceInputValueInteger(u8g2_t *u8g2, const char *title, c
 
     for (;;)
     {
-      event = onstep_GetMenuEvent();
-      if (event == U8X8_MSG_GPIO_MENU_SELECT || event == U8X8_MSG_GPIO_MENU_NEXT )
+      event = ext_GetMenuEvent(extPad);
+      if (event == U8X8_MSG_GPIO_MENU_SELECT || event == U8X8_MSG_GPIO_MENU_NEXT)
       {
         *value = local_value;
         return 1;
@@ -126,7 +124,7 @@ uint8_t onstep_UserInterfaceInputValueInteger(u8g2_t *u8g2, const char *title, c
       {
         return 0;
       }
-      else if ( event == U8X8_MSG_GPIO_MENU_UP)
+      else if (event == U8X8_MSG_GPIO_MENU_UP)
       {
         if (local_value >= hi)
           local_value = lo;
@@ -134,7 +132,7 @@ uint8_t onstep_UserInterfaceInputValueInteger(u8g2_t *u8g2, const char *title, c
           local_value++;
         break;
       }
-      else if (  event == U8X8_MSG_GPIO_MENU_DOWN)
+      else if (event == U8X8_MSG_GPIO_MENU_DOWN)
       {
         if (local_value <= lo)
           local_value = hi;
@@ -155,9 +153,9 @@ return:
 1: value has been updated
 */
 
-uint8_t onstep_UserInterfaceInputValueFloat(u8g2_t *u8g2, const char *title, const char *pre, float *value, float lo, float hi, uint8_t len, uint8_t dec, const char *post)
+uint8_t ext_UserInterfaceInputValueFloat(u8g2_t *u8g2, Pad* extPad, const char *title, const char *pre, float *value, float lo, float hi, uint8_t len, uint8_t dec, const char *post)
 {
-  display.setFont(u8g2_font_helvR12_te);
+  u8g2_SetFont(u8g2, u8g2_font_helvR12_te);
   static char outstr[15];
   uint8_t line_height;
   uint8_t height;
@@ -215,7 +213,6 @@ uint8_t onstep_UserInterfaceInputValueFloat(u8g2_t *u8g2, const char *title, con
   /* event loop */
   for (;;)
   {
-    LoopMain();
     u8g2_FirstPage(u8g2);
     do
     {
@@ -241,7 +238,7 @@ uint8_t onstep_UserInterfaceInputValueFloat(u8g2_t *u8g2, const char *title, con
 
     for (;;)
     {
-      event = onstep_GetMenuEvent();
+      event = ext_GetMenuEvent(extPad);
       if (event == U8X8_MSG_GPIO_MENU_SELECT || event == U8X8_MSG_GPIO_MENU_NEXT)
       {
         *value = local_value;
@@ -298,16 +295,16 @@ return:
 
 
 
-uint8_t onstep_UserInterfaceInputValueDMS(u8g2_t *u8g2, const char *title, long *value, long lo,long hi,
-                                                          uint8_t digits1,
+uint8_t ext_UserInterfaceInputValueDMS(u8g2_t *u8g2, Pad* extPad, const char *title, long *value, long lo, long hi,
+  uint8_t digits1,
 
-                                                          char* symb1, char* symb2, char* symb3,
-                                                          char* symb_plus,char* symb_minus,
-                                                          bool display_seconds)
+  char* symb1, char* symb2, char* symb3,
+  char* symb_plus, char* symb_minus,
+  bool display_seconds)
 {
 
-  display.setFont(u8g2_font_helvR12_te);
-  display.enableUTF8Print();
+  u8g2_SetFont(u8g2, u8g2_font_helvR12_te);
+  //display.enableUTF8Print();
   uint8_t line_height;
   uint8_t height;
   u8g2_uint_t pixel_height;
@@ -324,7 +321,7 @@ uint8_t onstep_UserInterfaceInputValueDMS(u8g2_t *u8g2, const char *title, long 
   uint8_t v3 = 0;
   long local_value = *value;
   gethms(abs(local_value), v1, v2, v3);
- 
+
 
   //uint8_t r; /* not used ??? */
   uint8_t event;
@@ -360,8 +357,8 @@ uint8_t onstep_UserInterfaceInputValueDMS(u8g2_t *u8g2, const char *title, long 
 
   /* calculate offset from left for the label */
   x = 0;
-  pixel_width_sign = u8g2_GetUTF8Width(u8g2, symb_plus) ;
-  if ( u8g2_GetUTF8Width(u8g2, symb_minus) > pixel_width_sign)
+  pixel_width_sign = u8g2_GetUTF8Width(u8g2, symb_plus);
+  if (u8g2_GetUTF8Width(u8g2, symb_minus) > pixel_width_sign)
     pixel_width_sign = u8g2_GetUTF8Width(u8g2, symb_minus);
   pixel_width = pixel_width_sign;
   pixel_width += u8g2_GetUTF8Width(u8g2, symb1);
@@ -382,7 +379,6 @@ uint8_t onstep_UserInterfaceInputValueDMS(u8g2_t *u8g2, const char *title, long 
   /* event loop */
   for (;;)
   {
-    LoopMain();
     u8g2_FirstPage(u8g2);
     do
     {
@@ -410,10 +406,10 @@ uint8_t onstep_UserInterfaceInputValueDMS(u8g2_t *u8g2, const char *title, long 
 
     for (;;)
     {
-      event = onstep_GetMenuEvent();
+      event = ext_GetMenuEvent(extPad);
       if (event == U8X8_MSG_GPIO_MENU_SELECT || event == U8X8_MSG_GPIO_MENU_NEXT)
       {
-        *value = (long)v1* 3600 + (long)v2 * 60;
+        *value = (long)v1 * 3600 + (long)v2 * 60;
         if (display_seconds)
           *value += v3;
         if (local_value < 0)
@@ -467,7 +463,7 @@ uint8_t onstep_UserInterfaceInputValueDMS(u8g2_t *u8g2, const char *title, long 
           }
           else
             incr = -incr_ref;
-          if (incr < -3600 )
+          if (incr < -3600)
             incr = -3600;
           local_value += incr;
           gethms(abs(local_value), v1, v2, v3);
@@ -486,14 +482,11 @@ uint8_t onstep_UserInterfaceInputValueDMS(u8g2_t *u8g2, const char *title, long 
 }
 
 
-uint8_t onstep_UserInterfaceInputValueDate(u8g2_t *u8g2, const char *title, uint8_t& year, uint8_t& month, uint8_t& day)
+uint8_t ext_UserInterfaceInputValueDate(u8g2_t *u8g2, Pad* extPad, const char *title, uint8_t& year, uint8_t& month, uint8_t& day)
 {
   char* symb = "/";
-
-
-
-  display.setFont(u8g2_font_helvR12_te);
-  display.enableUTF8Print();
+  u8g2_SetFont(u8g2, u8g2_font_helvR12_te);
+  //display.enableUTF8Print();
   uint8_t line_height;
   uint8_t height;
   u8g2_uint_t pixel_height;
@@ -505,7 +498,7 @@ uint8_t onstep_UserInterfaceInputValueDate(u8g2_t *u8g2, const char *title, uint
   float incr = 0;
   uint8_t local_year = year;
   uint8_t local_month = month;
-  uint8_t local_day= day;
+  uint8_t local_day = day;
 
 
   uint8_t event;
@@ -556,7 +549,6 @@ uint8_t onstep_UserInterfaceInputValueDate(u8g2_t *u8g2, const char *title, uint
   /* event loop */
   for (;;)
   {
-    LoopMain();
     u8g2_FirstPage(u8g2);
     do
     {
@@ -571,7 +563,7 @@ uint8_t onstep_UserInterfaceInputValueDate(u8g2_t *u8g2, const char *title, uint
       xx += u8g2_DrawUTF8(u8g2, xx, yy, u8x8_u8toa(local_month, 2));
       xx += u8g2_DrawUTF8(u8g2, xx, yy, symb);
       xx += u8g2_DrawUTF8(u8g2, xx, yy, u8x8_u8toa(local_day, 2));
-      
+
     } while (u8g2_NextPage(u8g2));
 
 #ifdef U8G2_REF_MAN_PIC
@@ -580,7 +572,7 @@ uint8_t onstep_UserInterfaceInputValueDate(u8g2_t *u8g2, const char *title, uint
 
     for (;;)
     {
-      event = onstep_GetMenuEvent();
+      event = ext_GetMenuEvent(extPad);
       if (event == U8X8_MSG_GPIO_MENU_SELECT || event == U8X8_MSG_GPIO_MENU_NEXT)
       {
         year = local_year;
@@ -614,7 +606,7 @@ uint8_t onstep_UserInterfaceInputValueDate(u8g2_t *u8g2, const char *title, uint
 
         if (incr < 0)
         {
-            incr = 1.05*incr -incr_ref / 2;
+          incr = 1.05*incr - incr_ref / 2;
         }
         else
           incr = -incr_ref;
@@ -635,83 +627,65 @@ uint8_t onstep_UserInterfaceInputValueDate(u8g2_t *u8g2, const char *title, uint
   //return r;  
 }
 
-uint8_t onstep_UserInterfaceInputValueRA(u8g2_t *u8g2, long *value)
+uint8_t ext_UserInterfaceInputValueRA(u8g2_t *u8g2, Pad *extPad, long *value)
 {
-  return onstep_UserInterfaceInputValueDMS(display.getU8g2(), "Right Asc.", value, 0, 86399, 2, "h", "m", "s", "", "", true);
+  return ext_UserInterfaceInputValueDMS(u8g2, extPad, "Right Asc.", value, 0, 86399, 2, "h", "m", "s", "", "", true);
 }
 
-uint8_t onstep_UserInterfaceInputValueDec(u8g2_t *u8g2, long *value)
-{
-  char DEGREE_SYMBOL[] = { 0xB0, '\0' };
-  return onstep_UserInterfaceInputValueDMS(display.getU8g2(), "Declination", value, -324000, 324000, 2, DEGREE_SYMBOL, "'", "\"", "+", "-", true);
-}
-
-uint8_t onstep_UserInterfaceInputValueUTCTime(u8g2_t *u8g2, long *value)
-{
-  return onstep_UserInterfaceInputValueDMS(display.getU8g2(), "UTC Time", value, 0, 86399, 2,  ":", ":", "", "", "", true);
-}
-
-uint8_t onstep_UserInterfaceInputValueLatitude(u8g2_t *u8g2, long *value)
+uint8_t ext_UserInterfaceInputValueDec(u8g2_t *u8g2, Pad *extPad, long *value)
 {
   char DEGREE_SYMBOL[] = { 0xB0, '\0' };
-  return onstep_UserInterfaceInputValueDMS(display.getU8g2(), "Latitude", value, -324000, 324000, 2, DEGREE_SYMBOL, "'", "\"", "N ", "S ", false);
+  return ext_UserInterfaceInputValueDMS(u8g2, extPad, "Declination", value, -324000, 324000, 2, DEGREE_SYMBOL, "'", "\"", "+", "-", true);
 }
 
-uint8_t onstep_UserInterfaceInputValueLongitude(u8g2_t *u8g2, long *value)
+uint8_t ext_UserInterfaceInputValueUTCTime(u8g2_t *u8g2, Pad *extPad, long *value)
+{
+  return ext_UserInterfaceInputValueDMS(u8g2, extPad, "UTC Time", value, 0, 86399, 2, ":", ":", "", "", "", true);
+}
+
+uint8_t ext_UserInterfaceInputValueLatitude(u8g2_t *u8g2, Pad *extPad, long *value)
 {
   char DEGREE_SYMBOL[] = { 0xB0, '\0' };
-  return onstep_UserInterfaceInputValueDMS(display.getU8g2(), "Longitude", value, -648000, 648000, 3, DEGREE_SYMBOL, "'", "\"", "W ", "E ", false);
+  return ext_UserInterfaceInputValueDMS(u8g2, extPad, "Latitude", value, -324000, 324000, 2, DEGREE_SYMBOL, "'", "\"", "N ", "S ", false);
 }
 
+uint8_t ext_UserInterfaceInputValueLongitude(u8g2_t *u8g2, Pad *extPad, long *value)
+{
+  char DEGREE_SYMBOL[] = { 0xB0, '\0' };
+  return ext_UserInterfaceInputValueDMS(u8g2, extPad, "Longitude", value, -648000, 648000, 3, DEGREE_SYMBOL, "'", "\"", "W ", "E ", false);
+}
 
-
-
-void gethms(const long& v, uint8_t& v1, uint8_t& v2, uint8_t& v3)
+void _gethms(const long& v, uint8_t& v1, uint8_t& v2, uint8_t& v3)
 {
   v3 = v % 60;
   v2 = (v / 60) % 60;
   v1 = v / 3600;
 }
 
-void getdms(const long& v, short& v1, uint8_t& v2, uint8_t& v3)
+void _getdms(const long& v, short& v1, uint8_t& v2, uint8_t& v3)
 {
   v3 = abs(v) % 60;
   v2 = (abs(v) / 60) % 60;
   v1 = v / 3600;
 }
 
-void getcatdms(const short& v, short& v1, uint8_t& v2)
-{
-  v2 = abs(v) % 60;
-  v1 = v / 60;
-}
-
-void getcathms(const unsigned short& v, uint8_t& v1, uint8_t& v2, uint8_t& v3)
-{
-  unsigned long vd = (long)v*2 ;
-  v3 = vd % 60;
-  v2 = (vd / 60) % 60;
-  v1 = vd / 3600;
-}
-
-
 void add_days(uint8_t& year, uint8_t& month, uint8_t& day, int days2add)
 {
 #define LEAP_YEAR(Y)     ( (Y>0) && !(Y%4) && ( (Y%100) || !(Y%400) )) 
   uint16_t months[] = {
     0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-    if ( LEAP_YEAR(2000 + (int)year))
-    {
-      months[2] = 29;
-    }
+  if (LEAP_YEAR(2000 + (int)year))
+  {
+    months[2] = 29;
+  }
 
   while (days2add > 0)
   {
     if (day < months[month])
     {
-       day++;
-       days2add--;
-       continue;
+      day++;
+      days2add--;
+      continue;
     }
     if (month < 12)
     {
