@@ -6,6 +6,7 @@
 #ifdef SERIALSMARTCONTROLLER
   #define SERIAL_BAUD_DEFAULT 9600
   #define Ser Serial
+  #define TIMEOUT_CMD 100           // Default=100 (0.1 seconds)
   
   #ifdef ARDUINO_ESP8266_WEMOS_D1MINI
     #define OLED_DISPLAY 0

@@ -100,7 +100,6 @@ bool readLX200Bytes(char* command, char* recvBuffer, unsigned long timeOutMs) {
     }
     if (command[1] == 'U') noResponse = true;
     if ((command[1] == 'W') && (command[2] != '?')) { noResponse = true; }
-    if ((command[1] == 'W') && (command[2] == '?')) { shortResponse = true; }
     if ((command[1] == '$') && (command[2] == 'Q') && (command[3] == 'Z')) {
       if (strchr("+-Z/!", command[4])) noResponse = true;
     }
@@ -142,7 +141,7 @@ LX200RETURN SetLX200(char* command)
 {
   char out[20];
   memset(out, 0, sizeof(out));
-  if (readLX200Bytes(command, out, 100))
+  if (readLX200Bytes(command, out, TIMEOUT_CMD))
     return  LX200VALUESET;
   else
     return LX200SETVALUEFAILED;
@@ -151,7 +150,7 @@ LX200RETURN SetLX200(char* command)
 LX200RETURN GetLX200(char* command, char* output)
 {
   memset(output, 0, sizeof(output));
-  if (readLX200Bytes(command, output, 100))
+  if (readLX200Bytes(command, output, TIMEOUT_CMD))
     return LX200VALUEGET;
   else
     return LX200GETVALUEFAILED;
@@ -219,7 +218,7 @@ LX200RETURN Move2TargetLX200()
 {
   char out[20];
   memset(out, 0, sizeof(out));
-  int val = readLX200Bytes(":MS#", out, 100);
+  int val = readLX200Bytes(":MS#", out, TIMEOUT_CMD);
   LX200RETURN response;
   switch (out[0])
   {
