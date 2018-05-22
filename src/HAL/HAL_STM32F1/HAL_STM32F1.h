@@ -18,7 +18,7 @@
 
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
 #define PSerial Serial
-#define PSerial1 Serial1
+#define PSerial1 Serial2
 // SERIAL is always enabled SERIAL1 and SERIAL4 are optional
 #define HAL_SERIAL1_ENABLED
 
