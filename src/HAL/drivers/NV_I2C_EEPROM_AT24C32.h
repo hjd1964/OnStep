@@ -4,7 +4,6 @@
 #pragma once
 
 #include <Wire.h>
-#include <Arduino.h>
 
 // I2C EEPROM Address on DS3231 RTC module
 #define I2C_EEPROM_ADDRESS 0x57
