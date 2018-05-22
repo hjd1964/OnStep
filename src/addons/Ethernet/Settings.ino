@@ -155,23 +155,13 @@ void settingsAjax(EthernetClient *client) {
 void settingsAjax() {
 #endif
   String data="";
-
-  if (mountStatus.update()) {
-    data += "tracking|"; if (mountStatus.tracking()) data+="On"; else data+="Off"; data += "\n";
-    data += "buzzer|"; if (mountStatus.buzzerEnabled()) data+="On"; else data+="Off"; data += "\n";
-    if (mountStatus.mountType()==MT_GEM) {
-      data += "autoFlip|";  if (mountStatus.autoMeridianFlips()) data+="On"; else data+="Off"; data += "\n";
-      data += "pause|";  if (mountStatus.pauseAtHome()) data+="On"; else data+="Off"; data += "\n";
-    }
-  } else {
-    data += "tracking|?\n";
-    data += "buzzer|?\n";
-    if (mountStatus.mountType()==MT_GEM) {
-      data += "autoFlip|?\n";
-      data += "pause|?\n";
-    }
+  mountStatus.update();
+  data += "tracking|"; if (mountStatus.valid()) { if (mountStatus.tracking()) data+="On"; else data+="Off"; } else data+="?"; data+="\n";
+  data += "buzzer|"; if (mountStatus.valid()) { if (mountStatus.buzzerEnabled()) data+="On"; else data+="Off"; } else data+="?"; data+="\n";
+  if (mountStatus.mountType()==MT_GEM) {
+    data += "autoFlip|";  if (mountStatus.valid()) { if (mountStatus.autoMeridianFlips()) data+="On"; else data+="Off"; } else data+="?"; data+="\n";
+    data += "pause|";  if (mountStatus.valid()) { if (mountStatus.pauseAtHome()) data+="On"; else data+="Off"; } else data+="?"; data+="\n";
   }
-
 #ifdef OETHS
   client->print(data);
 #else
