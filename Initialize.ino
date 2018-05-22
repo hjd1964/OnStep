@@ -265,7 +265,7 @@ void Init_ReadNV_Values() {
   nv.readString(EE_sites+(currentSite)*25+9,siteName);
 
   // update starting coordinates to reflect NCP or SCP polar home position
-  startAxis1 = celestialPoleAxis1*(long)StepsPerDegreeAxis1;
+  startAxis1 = celestialPoleAxis1*(double)StepsPerDegreeAxis1;
   startAxis2 = celestialPoleAxis2*(double)StepsPerDegreeAxis2;
   cli();
   targetAxis1.part.m = startAxis1;

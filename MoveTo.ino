@@ -23,11 +23,11 @@ void moveTo() {
     cli();
     if (pierSide==PierSideFlipWE1) { 
       if (celestialPoleAxis1==0) targetAxis1.part.m=0*(long)StepsPerDegreeAxis1-indexAxis1Steps; else {
-        if ((currentAlt<10.0) && (startAxis1>-90L*(long)StepsPerDegreeAxis1-indexAxis1Steps)) targetAxis1.part.m=-60L*(long)StepsPerDegreeAxis1-indexAxis1Steps; else targetAxis1.part.m=-celestialPoleAxis1*(long)StepsPerDegreeAxis1-indexAxis1Steps;
+        if ((currentAlt<10.0) && (startAxis1>-90L*(long)StepsPerDegreeAxis1-indexAxis1Steps)) targetAxis1.part.m=-60L*(long)StepsPerDegreeAxis1-indexAxis1Steps; else targetAxis1.part.m=-(long)(celestialPoleAxis1*(double)StepsPerDegreeAxis1)-indexAxis1Steps;
       }
     } else {
       if (celestialPoleAxis1==0) targetAxis1.part.m=0*(long)StepsPerDegreeAxis1-indexAxis1Steps; else {
-        if ((currentAlt<10.0) && (startAxis1<90L*(long)StepsPerDegreeAxis1-indexAxis1Steps)) targetAxis1.part.m=60L*(long)StepsPerDegreeAxis1-indexAxis1Steps; else targetAxis1.part.m=celestialPoleAxis1*(long)StepsPerDegreeAxis1-indexAxis1Steps; 
+        if ((currentAlt<10.0) && (startAxis1<90L*(long)StepsPerDegreeAxis1-indexAxis1Steps)) targetAxis1.part.m=60L*(long)StepsPerDegreeAxis1-indexAxis1Steps; else targetAxis1.part.m=(long)(celestialPoleAxis1*(double)StepsPerDegreeAxis1)-indexAxis1Steps;
       }
     } 
     targetAxis1.part.f=0;
@@ -38,7 +38,7 @@ void moveTo() {
     if (celestialPoleAxis2>0) {
       // if Dec is in the general area of the pole, slew both axis back at once
       if (posAxis2>((long)((90.0-latitude)*(double)StepsPerDegreeAxis2))-indexAxis2Steps) {
-        if (pierSide==PierSideFlipWE1) targetAxis1.part.m=-celestialPoleAxis1*(long)StepsPerDegreeAxis1-indexAxis1Steps; else targetAxis1.part.m=celestialPoleAxis1*(long)StepsPerDegreeAxis1-indexAxis1Steps; targetAxis1.part.f=0;
+        if (pierSide==PierSideFlipWE1) targetAxis1.part.m=-(long)(celestialPoleAxis1*(double)StepsPerDegreeAxis1)-indexAxis1Steps; else targetAxis1.part.m=(long)(celestialPoleAxis1*(double)StepsPerDegreeAxis1)-indexAxis1Steps; targetAxis1.part.f=0;
       } else {
         // override if we're at a low latitude and in the opposite sky, |HA|=6 is very low on the horizon in this orientation and we need to delay arriving there during a meridian flip
         // in the extreme case, where the user is very near the (Earths!) equator an Horizon limit of -10 or -15 may be necessary for proper operation.
@@ -49,7 +49,7 @@ void moveTo() {
     } else {
       // if Dec is in the general area of the pole, slew both axis back at once
       if (posAxis2<((long)((-90.0-latitude)*(double)StepsPerDegreeAxis2))-indexAxis2Steps) {
-        if (pierSide==PierSideFlipWE1) targetAxis1.part.m=-celestialPoleAxis1*(long)StepsPerDegreeAxis1-indexAxis1Steps; else targetAxis1.part.m=celestialPoleAxis1*(long)StepsPerDegreeAxis1-indexAxis1Steps; targetAxis1.part.f=0;
+        if (pierSide==PierSideFlipWE1) targetAxis1.part.m=-(long)(celestialPoleAxis1*(double)StepsPerDegreeAxis1)-indexAxis1Steps; else targetAxis1.part.m=(long)(celestialPoleAxis1*(double)StepsPerDegreeAxis1)-indexAxis1Steps; targetAxis1.part.f=0;
       } else { 
         // override if we're at a low latitude and in the opposite sky, |HA|=6 is very low on the horizon in this orientation and we need to delay arriving there during a meridian flip
         if ((currentAlt<20.0) && (abs(latitude)<45.0) && (posAxis2>0-indexAxis2Steps)) {
@@ -186,7 +186,7 @@ void moveTo() {
         if (pierSide==PierSideFlipEW2) targetAxis1.part.m=180L*(long)StepsPerDegreeAxis1-indexAxis1Steps; else targetAxis1.part.m=-180L*(long)StepsPerDegreeAxis1-indexAxis1Steps; targetAxis1.part.f=0;
       } else {
         // for eq mounts
-        if (pierSide==PierSideFlipEW2) targetAxis1.part.m=celestialPoleAxis1*(long)StepsPerDegreeAxis1-indexAxis1Steps; else targetAxis1.part.m=-celestialPoleAxis1*(long)StepsPerDegreeAxis1-indexAxis1Steps; targetAxis1.part.f=0;
+        if (pierSide==PierSideFlipEW2) targetAxis1.part.m=(long)(celestialPoleAxis1*(double)StepsPerDegreeAxis1)-indexAxis1Steps; else targetAxis1.part.m=-(long)(celestialPoleAxis1*(double)StepsPerDegreeAxis1)-indexAxis1Steps; targetAxis1.part.f=0;
       }
       targetAxis2.part.m=(long)(celestialPoleAxis2*(double)StepsPerDegreeAxis2)-indexAxis2Steps; targetAxis2.part.f=0;
       sei();

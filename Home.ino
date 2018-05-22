@@ -101,7 +101,7 @@ int goHome(boolean fast) {
 
 #else
   cli();
-  if (pierSide==PierSideWest) targetAxis1.part.m=-celestialPoleAxis1*(long)StepsPerDegreeAxis1-indexAxis1Steps; else targetAxis1.part.m=celestialPoleAxis1*(long)StepsPerDegreeAxis1-indexAxis1Steps; targetAxis1.part.f=0;
+  if (pierSide==PierSideWest) targetAxis1.part.m=-(long)(celestialPoleAxis1*(double)StepsPerDegreeAxis1)-indexAxis1Steps; else targetAxis1.part.m=(long)(celestialPoleAxis1*(double)StepsPerDegreeAxis1)-indexAxis1Steps; targetAxis1.part.f=0;
   targetAxis2.part.m=(long)(celestialPoleAxis2*(double)StepsPerDegreeAxis2)-indexAxis2Steps; targetAxis2.part.f=0;
   startAxis1=posAxis1;
   startAxis2=posAxis2;
