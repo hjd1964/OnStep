@@ -1,3 +1,5 @@
+#include <EEPROM.h>
+#include "_EEPROM_ext.h"
 // -----------------------------------------------------------------------------------
 // EEPROM related functions 
 

@@ -33,10 +33,13 @@
 
 */
 
+#include "u8g2_ext_message.h"
+#include "u8g2_ext_event.h"
+
 #define SPACE_BETWEEN_BUTTONS_IN_PIXEL 6
 #define SPACE_BETWEEN_TEXT_AND_BUTTONS_IN_PIXEL 3
 
-uint8_t onstep_draw_button_line(u8g2_t *u8g2, u8g2_uint_t y, u8g2_uint_t w, uint8_t cursor, const char *s)
+u8g2_uint_t ext_draw_button_line(u8g2_t *u8g2, u8g2_uint_t y, u8g2_uint_t w, uint8_t cursor, const char *s)
 {
   u8g2_uint_t button_line_width;
 
@@ -74,8 +77,7 @@ uint8_t onstep_draw_button_line(u8g2_t *u8g2, u8g2_uint_t y, u8g2_uint_t w, uint
     is_invert = 0;
     if (i == cursor)
       is_invert = 1;
-
-    onstep_DrawUTF8Line(u8g2, x, y, 0, u8x8_GetStringLineStart(i, s), 1, is_invert);
+    u8g2_DrawUTF8Line(u8g2, x, y, 0, u8x8_GetStringLineStart(i, s), 1, is_invert);
     x += u8g2_GetUTF8Width(u8g2, u8x8_GetStringLineStart(i, s));
     x += SPACE_BETWEEN_BUTTONS_IN_PIXEL;
   }
@@ -94,7 +96,7 @@ uint8_t onstep_draw_button_line(u8g2_t *u8g2, u8g2_uint_t y, u8g2_uint_t w, uint
     u8g2_SetFontPosBaseline(u8g2);
 */
 
-uint8_t onstep_UserInterfaceMessage(u8g2_t *u8g2, const char *title1, const char *title2, const char *title3, const char *buttons)
+u8g2_uint_t ext_UserInterfaceMessage(u8g2_t *u8g2, Pad *extPad, const char *title1, const char *title2, const char *title3, const char *buttons)
 {
   uint8_t height;
   uint8_t line_height;
@@ -143,7 +145,6 @@ uint8_t onstep_UserInterfaceMessage(u8g2_t *u8g2, const char *title1, const char
 
   for (;;)
   {
-    LoopMain();
     u8g2_FirstPage(u8g2);
     do
     {
@@ -159,7 +160,7 @@ uint8_t onstep_UserInterfaceMessage(u8g2_t *u8g2, const char *title1, const char
       yy += u8g2_DrawUTF8Lines(u8g2, 0, yy, u8g2_GetDisplayWidth(u8g2), line_height, title3);
       yy += SPACE_BETWEEN_TEXT_AND_BUTTONS_IN_PIXEL;
 
-      button_cnt = onstep_draw_button_line(u8g2, yy, u8g2_GetDisplayWidth(u8g2), cursor, buttons);
+      button_cnt = ext_draw_button_line(u8g2, yy, u8g2_GetDisplayWidth(u8g2), cursor, buttons);
 
     } while (u8g2_NextPage(u8g2));
 
@@ -169,8 +170,7 @@ uint8_t onstep_UserInterfaceMessage(u8g2_t *u8g2, const char *title1, const char
 
     for (;;)
     {
-      LoopMain();
-      event = u8x8_GetMenuEvent(u8g2_GetU8x8(u8g2));
+      event = ext_GetMenuEvent(extPad);
       if (event == U8X8_MSG_GPIO_MENU_SELECT)
         return cursor + 1;
       else if (event == U8X8_MSG_GPIO_MENU_HOME)
