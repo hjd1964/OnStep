@@ -237,11 +237,17 @@ void longDec2Dec(long Dec, int& deg, int& min)
   min = Dec % 60;
 }
 
-
-void SmartHandController::setup(const int pin[7],const bool active[7], const int SerialBaud, const OLED model)
+void SmartHandController::setup(const char version[], const int pin[7],const bool active[7], const int SerialBaud, const OLED model)
 {
+  if (strlen(version)<=19) strcpy(_version,version);
+  
   telInfo.lastState = 0;
   buttonPad.setup( pin, active);
+  
+  //choose a 128x64 display supported by U8G2lib (if not listed below there are many many others in u8g2 library example Sketches)
+  //U8G2_SH1106_128X64_NONAME_1_HW_I2C display(U8G2_R0);
+  //U8G2_SSD1306_128X64_NONAME_F_SW_I2C display(U8G2_R0, /* clock=*/ SCL, /* data=*/ SDA, /* reset=*/ U8X8_PIN_NONE);   // All Boards without Reset of the Display
+
   if (model == OLED_SH1106)
     display = new U8G2_EXT_SH1106_128X64_NONAME_1_HW_I2C(U8G2_R0);
   else if (model == OLED_SSD1306)
@@ -722,8 +728,8 @@ void SmartHandController::drawLoad()
     display->setFont(u8g2_font_helvR14_tr);
     x = (display->getDisplayWidth() - display->getStrWidth("Loading")) / 2;
     display->drawStr(x, display->getDisplayHeight()/2. - 14, "Loading");
-    x = (display->getDisplayWidth() - display->getStrWidth("Version " Version)) / 2;
-    display->drawStr(x, display->getDisplayHeight() / 2. + 14, "Version " Version);
+    x = (display->getDisplayWidth() - display->getStrWidth(_version)) / 2;
+    display->drawStr(x, display->getDisplayHeight() / 2. + 14, _version);
   } while (display->nextPage());
 }
 
@@ -1085,7 +1091,8 @@ void SmartHandController::menuSyncGoto(bool sync)
 
 void SmartHandController::menuSolarSys(bool sync)
 {
-  current_selection_SolarSys = max(current_selection_SolarSys, 1);
+  if (current_selection_SolarSys<1) current_selection_SolarSys=1;
+
   const char *string_list_SolarSyst = "Sun\nMercure\nVenus\nMars\nJupiter\nSaturn\nUranus\nNeptun\nMoon\n";
   current_selection_SolarSys = display->UserInterfaceSelectionList(&buttonPad, sync ? "Sync" : "Goto", current_selection_SolarSys, string_list_SolarSyst);
   if (current_selection_SolarSys == 0)

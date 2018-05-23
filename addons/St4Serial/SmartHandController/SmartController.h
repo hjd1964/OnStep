@@ -5,19 +5,23 @@
 #include "Telescope.h"
 #include "LX200.h"
 
+#define SH1106 0
+#define SSD1306 1
+
 class SmartHandController
 {
 public:
-  enum OLED { OLED_SH1106, OLED_SSD1306};
+  enum OLED { OLED_SH1106, OLED_SSD1306 };
   void update();
   void drawIntro();
   void drawLoad();
   void drawReady();
-  void setup(const int pin[7], const bool active[7], const int SerialBaud, const OLED model);
+  void setup(const char version[], const int pin[7], const bool active[7], const int SerialBaud, const OLED model);
 private:
   U8G2_EXT *display = NULL;
   Pad buttonPad;
   Telescope telInfo;
+  char _version[20]="Version ?";
 
   void updateMainDisplay( u8g2_uint_t page);
   bool sleepDisplay = false;
