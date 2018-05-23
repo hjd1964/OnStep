@@ -217,4 +217,5 @@
 #elif defined(STM32CZ_ON)
   #include "src/pinmaps/Pins.STM32CZ.h"
 #endif
+#endif
 
