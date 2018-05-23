@@ -21,21 +21,21 @@
 
 // The pins here are not tested yet, and need to change 
 
-#define Axis1_EN        PD14   // Enable
-#define Axis1_M0        PD12   // Microstep Mode 0
-#define Axis1_M1        PD10   // Microstep Mode 1
-#define Axis1_M2        PD8    // Microstep Mode 2
-#define Axis1StepPin    PB14   // Step
-#define Axis1DirPin     PB12   // Motor Direction
+#define Axis1_EN        PC15   // Enable
+#define Axis1_M0        PC14   // Microstep Mode 0
+#define Axis1_M1        PC13   // Microstep Mode 1
+#define Axis1_M2        PE4    // Microstep Mode 2
+#define Axis1StepPin    PE3    // Step
+#define Axis1DirPin     PE2    // Motor Direction
 //#define Axis1_FAULT   Undefined    // Fault
 //#define Axis1_Aux     Axis1_Aux    // Aux - ESP8266 GPIO0 or SPI MISO
 
-#define Axis2_EN        PA5    // Enable
-#define Axis2_M0        PA4    // Microstep Mode 0
-#define Axis2_M1        PA3    // Microstep Mode 1
-#define Axis2_M2        PA2    // Microstep Mode 2
-#define Axis2StepPin    PA1    // Step
-#define Axis2DirPin     PA0    // Motor Direction
+#define Axis2_EN        PB5    // Enable
+#define Axis2_M0        PB4    // Microstep Mode 0
+#define Axis2_M1        PB3    // Microstep Mode 1
+#define Axis2_M2        PD7    // Microstep Mode 2
+#define Axis2StepPin    PD6    // Step
+#define Axis2DirPin     PD5    // Motor Direction
 //#define Axis2_FAULT   Undefined    // Fault
 //#define Axis2_Aux     Axis2_FAULT  // Aux - ESP8266 RST or SPI MISO
 
