@@ -6,12 +6,11 @@ bool _stepperModeTrack=false;
 // initialize stepper drivers
 void StepperModeTrackingInit() {
   _stepperModeTrack=false; 
-  digitalWrite(Axis1_EN,AXIS1_ENABLE); axis1Enabled=true;
-  digitalWrite(Axis2_EN,AXIS2_ENABLE); axis2Enabled=true;
-  delay(100);
-  StepperModeTracking();
-  digitalWrite(Axis1_EN,AXIS1_DISABLE); axis1Enabled=false;
-  digitalWrite(Axis2_EN,AXIS2_DISABLE); axis2Enabled=false;
+
+  // enable stepper drivers and program the mode then wait for 100ms so TMC2100 or TMC2130 in stealthChop have time to calibrate motor current if needed (a one-time event)
+
+  // normal starting state is with motors disabled
+  DisableStepperDrivers();
 
 // if the stepper driver mode select pins are wired in, program any requested micro-step mode
 #if !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
@@ -133,4 +132,22 @@ void StepperModeGoto() {
 #endif
   sei();
 }
- 
+
+void EnableStepperDrivers() {
+  // enable the stepper drivers
+  if (axis1Enabled==false) {
+    digitalWrite(Axis1_EN,AXIS1_ENABLE); axis1Enabled=true;
+    digitalWrite(Axis2_EN,AXIS2_ENABLE); axis2Enabled=true;
+    delay(5); // enable or coming out of sleep on DRV8825 or A4988 is done in <2ms
+  }
+}
+
+void DisableStepperDrivers() {
+  // disable the stepper drivers
+  if (axis1Enabled==true) {
+    digitalWrite(Axis1_EN,AXIS1_DISABLE); axis1Enabled=false;
+    digitalWrite(Axis2_EN,AXIS2_DISABLE); axis2Enabled=false;
+    delay(5); // enable or coming out of sleep on DRV8825 or A4988 is done in <2ms
+  }
+}
+

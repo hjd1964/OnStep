@@ -431,24 +431,6 @@ void Init_Start_Timers() {
   HAL_Init_Timers_Motor();
 }
 
-void EnableStepperDrivers() {
-  // enable the stepper drivers
-  if (axis1Enabled==false) {
-    digitalWrite(Axis1_EN,AXIS1_ENABLE); axis1Enabled=true;
-    digitalWrite(Axis2_EN,AXIS2_ENABLE); axis2Enabled=true;
-    delay(10);
-  }
-}
-
-void DisableStepperDrivers() {
-  // disable the stepper drivers
-  if (axis1Enabled==true) {
-    digitalWrite(Axis1_EN,AXIS1_DISABLE); axis1Enabled=false;
-    digitalWrite(Axis2_EN,AXIS2_DISABLE); axis2Enabled=false;
-    delay(10);
-  }
-}
-
 // Basic stepper driver mode setup
 #ifdef AXIS1_DRIVER_MODEL
 
