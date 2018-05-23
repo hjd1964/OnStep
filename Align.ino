@@ -677,21 +677,21 @@ bool TGeoAlign::addStar(int I, int N, double RA, double Dec) {
 #ifdef GOTO_ASSIST_DEBUG_ON
   char s[80];
   double f;
-  DBG((char)(I-1+'0'));
-  DBG(" Mount h");
-  f=mount[I-1].ha*Rad/15.0; if (f<0) f=f+24.0; doubleToHms(s,&f); DBG(s);
-  DBG(",d");
-  f=mount[I-1].dec*Rad; doubleToDms(s,&f,false,true); DBG(s);
-  DBG("   Actual h");
-  f=actual[I-1].ha*Rad/15.0; if (f<0) f=f+24.0; doubleToHms(s,&f); DBG(s);
-  DBG(",d");
-  f=actual[I-1].dec*Rad; doubleToDms(s,&f,false,true); DBGL(s);
+  D((char)(I-1+'0'));
+  D(" Mount h");
+  f=mount[I-1].ha*Rad/15.0; if (f<0) f=f+24.0; doubleToHms(s,&f); D(s);
+  D(",d");
+  f=mount[I-1].dec*Rad; doubleToDms(s,&f,false,true); D(s);
+  D("   Actual h");
+  f=actual[I-1].ha*Rad/15.0; if (f<0) f=f+24.0; doubleToHms(s,&f); D(s);
+  D(",d");
+  f=actual[I-1].dec*Rad; doubleToDms(s,&f,false,true); DL(s);
 #endif
 
   // two or more stars and finished
   if ((I>=2) && (I==N)) {
 #ifdef GOTO_ASSIST_DEBUG_ON
-    DBGL("");
+    DL("");
 #endif
     autoModel(N);
  //   if (syncEqu(RA,Dec)!=0) { return false; }
@@ -929,10 +929,10 @@ void TGeoAlign::autoModel(int n) {
   tfCor=best_tf/3600.0;
 
 #ifdef GOTO_ASSIST_DEBUG_ON
-  DBGL("");
+  DL("");
   char s[80];
-  DBG("Model Error  =");
-  dtostrf(best_dist*Rad*60.0,6,2,s); DBGL(s);
+  D("Model Error  =");
+  dtostrf(best_dist*Rad*60.0,6,2,s); DL(s);
 #endif
 
   // offset corrections: doesn't matter, a sync will override this
