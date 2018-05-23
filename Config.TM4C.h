@@ -5,8 +5,10 @@
  * For more information on setting OnStep up see http://www.stellarjourney.com/index.php?r=site/equipment_onstep and 
  * join the OnStep Groups.io at https://groups.io/g/onstep
  * 
- * See the Pins.TM4C.h file for detailed information on this pin map to be sure it matches your wiring *** USE AT YOUR OWN RISK ***
- *
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  * * * * * * * * * *
+ * See the appropriate file below for detailed information on this pin map to be sure it matches your wiring *** USE AT YOUR OWN RISK ***
+ * ~/OnStep/src/pinmaps/Pins.TM4C.h                                                                                                     *  
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  * * * * * * * * * *
 */
 
 #define TM4C_OFF   //  <- Turn _ON to use this configuration
@@ -19,8 +21,13 @@
 // Note that Goto Assist in Sky Planetarium works even if this is off
 #define ALIGN_GOTOASSIST_OFF
 
-// Default speed for Serial1 com port, Default=9600
+// Default speed for Serial1 and Serial4 com ports, Default=9600
 #define SERIAL1_BAUD_DEFAULT 9600
+#define SERIAL4_BAUD_DEFAULT 9600
+
+// ESP8266 reset and GPIO0 control, this sets run mode for normal operation.  Uploading programmer firmware to the OpStep MCU can then enable sending new firmware to the ESP8266-01
+// Pin (Aux1) for GPIO0 and Pin (Aux2) for Rst control.  Choose only one feature on Aux1/2.
+#define ESP8266_CONTROL_OFF
 
 // Mount type, default is _GEM (German Equatorial) other options are _FORK, _FORK_ALT.  _FORK switches off Meridian Flips after (1, 2 or 3 star) alignment is done.  _FORK_ALT disables Meridian Flips (1 star align.)
 // _ALTAZM is for Alt/Azm mounted 'scopes (1 star align only.)
@@ -29,7 +36,7 @@
 // Strict parking, default=_OFF.  Set to _ON and unparking is only allowed if successfully parked.  Otherwise unparking is allowed if at home and not parked (the Home/Reset command ":hF#" sets this state.) 
 #define STRICT_PARKING_OFF
 
-// ST4 interface on Pins (?.)  Pin ? is RA- (West), Pin ? is Dec- (South), Pin ? is Dec+ (North), Pin ? is RA+ (East.)
+// ST4 interface on four pins (see pinmap.)  Pins are RA- (West), Dec- (South), Dec+ (North), RA+ (East.)
 // ST4_ON enables the interface, ST4_PULLUP enables the interface and any internal pullup resistors.
 // It is up to you to create an interface that meets the electrical specifications of any connected device, use at your own risk.  default=_OFF
 #define ST4_OFF
@@ -47,10 +54,10 @@
 // If the stop command is never received the guide will continue forever unless this is enabled.
 #define GUIDE_TIME_LIMIT 0
 
-// PPS use _ON or _PULLUP to enable the input and use the built-in pullup resistor.  Sense rising edge on Pin ? for optional precision clock source (GPS, for example), default=_OFF [infrequently used option]
+// PPS use _ON or _PULLUP to enable the input and use the built-in pullup resistor.  Sense rising edge on pin for optional precision clock source (GPS, for example), default=_OFF [infrequently used option]
 #define PPS_SENSE_OFF
 
-// PEC sense on Pin ? (A?) use _ON or _PULLUP to enable the input/use the built-in pullup resistor (digital input) or provide a comparison value (see below) for analog operation, default=_OFF
+// PEC sense use _ON or _PULLUP to enable the input/use the built-in pullup resistor (digital input) or provide a comparison value (see below) for analog operation, default=_OFF
 // Analog values range from 0 to 1023 which indicate voltages from 0-3.3VDC on the analog pin, for example "PEC_SENSE 600" would detect an index when the voltage exceeds 1.93V
 // With either index detection method, once triggered 60s must expire before another detection can happen.  This gives time for the index magnet to pass by the detector before another cycle begins.
 // Ignored on Alt/Azm mounts.
@@ -58,20 +65,20 @@
 // PEC sense, rising edge (default with PEC_SENSE_STATE HIGH, use LOW for falling edge, ex. PEC_SENSE_ON) ; for optional PEC index
 #define PEC_SENSE_STATE HIGH
 
-// Switch close (to ground) on Pin ? for optional limit sense (stops gotos and/or tracking), default=_OFF
+// Switch close (to ground) for optional limit sense (stops gotos and/or tracking), default=_OFF
 #define LIMIT_SENSE_OFF
 
-// Light status LED by sink to ground (Pin ?), default=_ON.
+// Light status LED by sink to ground, default=_ON.
 // _ON and OnStep keeps this illuminated to indicate that the controller is active.  When sidereal tracking this LED will rapidly flash
-#define STATUS_LED_PINS_ON
-// Light 2nd status LED by sink to ground (Pin ?), default=_OFF.
+#define STATUS_LED_PINS_OFF
+// Light 2nd status LED by sink to ground, default=_OFF.
 // _ON sets this to blink at 1 sec intervals when PPS is synced.  Turns off if tracking is stopped.  Turns on during gotos.
 #define STATUS_LED2_PINS_OFF
-// Light reticule LED by sink to ground (Pin ?), default=_OFF.  (don't use with STATUS_LED2_PINS_ON)
+// Light reticule LED by sink to ground, default=_OFF.  (don't use with STATUS_LED2_PINS_ON)
 // RETICULE_LED_PINS n, where n=0 to 255 activates this feature and sets default brightness
 #define RETICULE_LED_PINS_OFF
 
-// Sound/buzzer on Pin ?, default=_OFF.
+// Sound/buzzer, default=_OFF.
 // Specify frequency for a piezo speaker (for example "BUZZER 2000") or use BUZZER_ON for a piezo buzzer.
 #define BUZZER_OFF
 // Sound state at startup, default=_ON.
@@ -79,18 +86,18 @@
 
 // Optionally adjust tracking rate to compensate for atmospheric refraction, default=_OFF
 // can be turned on/off with the :Tr# and :Tn# commands regardless of this setting
-#define TRACK_REFRACTION_RATE_DEFAULT_OFF
+#define TRACK_REFRACTION_RATE_DEFAULT_ON
 
 // Set to _ON and OnStep will remember the last auto meridian flip setting (on/off), default=_OFF
-#define REMEMBER_AUTO_MERIDIAN_FLIP_OFF
+#define REMEMBER_AUTO_MERIDIAN_FLIP_ON
 
 // Set to _ON and OnStep will remember the last meridian flip pause at home setting (on/off), default=_OFF
-#define REMEMBER_PAUSE_HOME_OFF
+#define REMEMBER_PAUSE_HOME_ON
 
 // ADJUST THE FOLLOWING TO MATCH YOUR MOUNT --------------------------------------------------------------------------------
 #define REMEMBER_MAX_RATE_OFF        // set to _ON and OnStep will remember rates set in the ASCOM driver, Android App, etc. default=_OFF 
 #define MaxRate                   96 // microseconds per microstep default setting for gotos, can be adjusted for two times lower or higher at run-time
-                                     // minimum* (fastest goto) is around 16 down to about 4 depending on TM4C model, default=96 higher is ok
+                                     // minimum* (fastest goto) is around 8 (give or take depending on the TIVA-C model,) default=96 higher is ok
                                      // * = minimum can be lower, when both AXIS1/AXIS2_MICROSTEPS are used the compiler will warn you if it's too low
 
 #define DegreesForAcceleration   5.0 // approximate number of degrees for full acceleration or deceleration: higher values=longer acceleration/deceleration
@@ -131,8 +138,8 @@
 #define MaxAzm                   180 // Alt/Az mounts only. +/- maximum allowed Azimuth, default =  180.  Allowed range is 180 to 360
 
 // AXIS1/2 STEPPER DRIVER CONTROL ------------------------------------------------------------------------------------------
-// Axis1: Pins  ?, ? = Step,Dir (RA/Azm)
-// Axis2: Pins  ?, ? = Step,Dir (Dec/Alt)
+// Axis1: Pins (see pinmap) = Step,Dir (RA/Azm)
+// Axis2: Pins (see pinmap) = Step,Dir (Dec/Alt)
 
 // Reverse the direction of movement.  Adjust as needed or reverse your wiring so things move in the right direction
 #define AXIS1_REVERSE_OFF            // RA/Azm axis
@@ -148,7 +155,7 @@
 #define AXIS2_AUTO_POWER_DOWN_OFF
 
 // Basic stepper driver mode setup . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-// If used, this requires connections M0, M1, and M2 on Pins ?,?,? for Axis1 (RA/Azm) and Pins ?,?,? for Axis2 (Dec/Alt.)
+// If used, this requires connections M0, M1, and M2 on three pins for Axis1 (RA/Azm) and three pins Axis2 (Dec/Alt.)
 // Stepper driver models are as follows: (for example AXIS1_DRIVER_MODEL DRV8825,) A4988, LV8729, RAPS128, TMC2208, TMC2130 (spreadCycle,) 
 // TMC2130_QUIET (stealthChop tracking,) TMC2130_VQUIET (full stealthChop mode,) add _LOWPWR for 50% power during tracking (for example: TMC2130_QUIET_LOWPWR)
 #define AXIS1_DRIVER_MODEL_OFF      // Axis1 (RA/Azm):  Default _OFF, Stepper driver model (see above)
@@ -159,37 +166,47 @@
 #define AXIS2_MICROSTEPS_GOTO_OFF   // Axis2 (Dec/Alt): Default _OFF, Optional microstep mode used during gotos
 // Note: you can replace this section with the contents of "AdvancedStepperSetup.txt" . . . . . . . . . . . . . . . . . . . 
 
-// Stepper driver Fault detection on Pins ? (Aux1) and ? (Aux2,) choose only one feature to use on Aux1/2.  The SPI interface (on M0/M1/M2/Aux) can be used to detect errors on the TMC2130.
+// Stepper driver Fault detection on Pins (Aux1) and (Aux2,) choose only one feature to use on Aux1/2.  The SPI interface (on M0/M1/M2/Aux) can be used to detect errors on the TMC2130.
 // other settings are LOW, HIGH, TMC2130 (if available applies internal pullup if LOW and pulldown if HIGH.)
 #define AXIS1_FAULT_OFF
 #define AXIS2_FAULT_OFF
 
 // ------------------------------------------------------------------------------------------------------------------------
+// THE FOLLOWING ARE INFREQUENTLY USED OPTIONS FOR THE MINIPCB SINCE USING ANY OF THESE WOULD REQUIRE SOLDERING TO THE PCB BACK AND ADDING OFF-PCB CIRCUITRY, MUCH EASIER TO USE A MAXPCB AND TEENSY3.5/3.6
 // FOCUSER ROTATOR OR ALT/AZ DE-ROTATION ----------------------------------------------------------------------------------
-// Pins 17,38 = Step,Dir (choose either this option or the focuser, not both)
-#define ROTATOR_OFF                  // enable or disable rotator feature (for any mount type,) default=_OFF (de-rotator is available only for MOUNT_TYPE_ALTAZM.)
+// Pins (see pinmap) = Step,Dir (choose either this option or the second focuser, not both)
+#define ROTATOR_OFF                  // enable or disable rotator feature (for any mount type,) default=_OFF (de-rotator is available only for MOUNT_TYPE_ALTAZM.) [infrequently used option]
 #define MaxRateAxis3               8 // this is the minimum number of milli-seconds between micro-steps, default=8
 #define StepsPerDegreeAxis3     64.0 // calculated as    :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
                                      // Rotator          :  24            * 8           * 20              *  6/360                = 64
                                      // For de-rotation of Alt/Az mounts a quick estimate of the required resolution (in StepsPerDegree)
                                      // would be an estimate of the circumference of the useful imaging circle in (pixels * 2)/360
+#define AXIS3_REVERSE_OFF            // reverse the direction of Axis3 rotator movement
+#define AXIS3_DISABLE_OFF            // Pin ?.  Use HIGH for common stepper drivers if you want to power down the motor at stand-still.  Default _OFF.
 #define MinAxis3                -180 // minimum allowed Axis3 rotator, default = -180
 #define MaxAxis3                 180 // maximum allowed Axis3 rotator, default =  180
-#define AXIS3_REVERSE_OFF            // reverse the direction of Axis3 rotator movement
-#define AXIS3_DISABLE_OFF            // Pin A8.  Use HIGH for common stepper drivers if you want to power down the motor at stand-still.  Default _OFF.
 
 // FOCUSER1 ---------------------------------------------------------------------------------------------------------------
-// Pins 17,38 = Step,Dir (choose either this option or the rotator, not both)
+// Pins (see pinmap) = Step,Dir
 #define FOCUSER1_OFF                 // enable or disable focuser feature, default=_OFF
 #define MaxRateAxis4               8 // this is the minimum number of milli-seconds between micro-steps, default=8
 #define StepsPerMicrometerAxis4  0.5 // figure this out by testing or other means
+#define AXIS4_REVERSE_OFF            // reverse the direction of Axis4 focuser movement
+#define AXIS4_DISABLE_OFF            // Pin ?.  Use HIGH for common stepper drivers if you want to power down the motor at stand-still.  Default _OFF.
 #define MinAxis4               -25.0 // minimum allowed Axis4 position in millimeters, default = -25.0
 #define MaxAxis4                25.0 // maximum allowed Axis4 position in millimeters, default =  25.0
-#define AXIS4_REVERSE_OFF            // reverse the direction of Axis4 focuser movement
-#define AXIS4_DISABLE_OFF            // Pin 24.  Use HIGH for common stepper drivers if you want to power down the motor at stand-still.  Default _OFF.
+
+// FOCUSER2 ---------------------------------------------------------------------------------------------------------------
+// Pins (see pinmap) = Step,Dir (choose either this option or the rotator, not both)
+#define FOCUSER2_OFF                 // enable or disable focuser feature, default=_OFF
+#define MaxRateAxis5               8 // this is the minimum number of milli-seconds between micro-steps, default=8
+#define StepsPerMicrometerAxis5  0.5 // figure this out by testing or other means
+#define AXIS5_REVERSE_OFF            // reverse the direction of Axis5 focuser movement
+#define AXIS5_DISABLE_OFF            // Pin ?.  Use HIGH for common stepper drivers if you want to power down the motor at stand-still.  Default _OFF.
+#define MinAxis5               -25.0 // minimum allowed Axis5 position in millimeters, default = -25.0
+#define MaxAxis5                25.0 // maximum allowed Axis5 position in millimeters, default =  25.0
 
 // THAT'S IT FOR USER CONFIGURATION!
-
 // -------------------------------------------------------------------------------------------------------------------------
 #define FileVersionConfig 2
 #include "src/pinmaps/Pins.TM4C.h"
