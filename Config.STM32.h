@@ -13,7 +13,7 @@
 */
 
 #define STM32Black_OFF   //  <- Turn _ON to use STM32F103C8T6 Black with this configuration OR
-#define STM32CZ_OFF      //  <- Turn _ON to use STM32F103C8T6 CZ with this configuration
+#define STM32CZ_OFF      //  <- Turn _ON to use STM32F103VET6 CZ with this configuration
 
 #if defined(STM32Black_ON) || defined(STM32CZ_ON)
 // -------------------------------------------------------------------------------------------------------------------------
