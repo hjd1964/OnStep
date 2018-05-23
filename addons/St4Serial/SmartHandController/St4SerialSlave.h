@@ -24,6 +24,14 @@ all others (Teensy3.x, etc.) at 2mS/byte (500 Bps.)
 
 #include "Stream.h"
 
+#if !defined(ST4RAw) && !defined(ST4DEs) && !defined(ST4DEn) && !defined(ST4RAe)
+  #warning "ST4 interface pins aren't defined, using defaults."
+  #define ST4RAw 2
+  #define ST4DEs 3
+  #define ST4DEn 4
+  #define ST4RAe 5
+#endif
+
 void dataClock();
 void shcTone();
 

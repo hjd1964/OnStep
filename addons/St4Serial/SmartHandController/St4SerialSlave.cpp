@@ -26,7 +26,7 @@ all others (Teensy3.x, etc.) at 2mS/byte (500 Bps.)
 
 #ifdef __ARM_Teensy3__
   IntervalTimer Timer1;  // built into Teensyduino
-#else
+#elif __AVR__
   #include <TimerOne.h>  // from https://github.com/PaulStoffregen/TimerOne
 #endif
 
@@ -43,7 +43,7 @@ void Sst4::begin(long baudRate=9600) {
 
 #ifdef __ARM_Teensy3__
   Timer1.begin(shcTone,40000);
-#else
+#elif __AVR__
   Timer1.initialize(40000);
   Timer1.attachInterrupt(shcTone);
 #endif
@@ -55,7 +55,7 @@ void Sst4::end() {
   detachInterrupt(digitalPinToInterrupt(ST4DEs));
 #ifdef __ARM_Teensy3__
   Timer1.end();
-#else
+#elif __AVR__
   Timer1.stop();
 #endif
   _xmit_head=0; _xmit_tail=0; _xmit_buffer[0]=0;
@@ -198,5 +198,4 @@ void shcTone() {
     if (millis()-SerialST4.lastMs>2000L) digitalWrite(ST4RAw,LOW); 
   }
 }
-
 
