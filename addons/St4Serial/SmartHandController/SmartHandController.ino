@@ -33,10 +33,15 @@
 */
 
 #define Product "SHC"
-#define Version "0.1b 05 16 18"
+#define FirmwareDate          __DATE__
+#define FirmwareTime          __TIME__
+#define FirmwareVersionMajor  "0"
+#define FirmwareVersionMinor  "2"
+#define FirmwareVersionPatch  "a"
+
+#define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
 #include "Config.h"
-
 #include "SmartController.h"
 
 const int pin[7] = { B_PIN0,B_PIN1,B_PIN2,B_PIN3,B_PIN4,B_PIN5,B_PIN6 };

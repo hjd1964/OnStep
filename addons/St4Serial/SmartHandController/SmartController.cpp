@@ -718,8 +718,8 @@ void SmartHandController::drawLoad()
     display->setFont(u8g2_font_helvR14_tr);
     x = (display->getDisplayWidth() - display->getStrWidth("Loading")) / 2;
     display->drawStr(x, display->getDisplayHeight()/2. - 14, "Loading");
-    x = (display->getDisplayWidth() - display->getStrWidth("Version 0.0")) / 2;
-    display->drawStr(x, display->getDisplayHeight() / 2. + 14, "Version 0.0");
+    x = (display->getDisplayWidth() - display->getStrWidth("Version " Version)) / 2;
+    display->drawStr(x, display->getDisplayHeight() / 2. + 14, "Version " Version);
   } while (display->nextPage());
 }
 
