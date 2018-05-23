@@ -189,14 +189,14 @@ void Init_Pins() {
 
   pinMode(Axis1StepPin,OUTPUT);   // Axis1
   pinMode(Axis1DirPin,OUTPUT); 
-// provide 5V power to stepper drivers if requested (classic Pin-map)
+  // provide 5V power to stepper drivers if requested (classic Pin-map)
 #ifdef POWER_SUPPLY_PINS_ON
   pinMode(Axis15vPin,OUTPUT);
   digitalWrite(Axis15vPin,HIGH);
   pinMode(Axis25vPin,OUTPUT);     // Axis2
   digitalWrite(Axis25vPin,HIGH);
 #endif
-// provide Gnd on next to the Dec stepper pins if requested (classic Pin-map)
+  // provide Gnd on next to the Dec stepper pins if requested (classic Pin-map)
 #ifdef Axis2GndPin
   pinMode(Axis2GndPin,OUTPUT);
   digitalWrite(Axis2GndPin,LOW);
@@ -204,7 +204,7 @@ void Init_Pins() {
   pinMode(Axis2StepPin,OUTPUT); 
   pinMode(Axis2DirPin,OUTPUT); 
 
-// inputs for stepper drivers fault signal
+  // inputs for stepper drivers fault signal
 #ifdef AXIS1_FAULT
   #if AXIS1_FAULT==LOW
     pinMode(Axis1_FAULT,INPUT_PULLUP);
@@ -229,11 +229,10 @@ void Init_Pins() {
   #endif
 #endif
 
-// initialize and disable the main axes stepper drivers
+  // initialize and disable the main axes stepper drivers
   pinMode(Axis1_EN,OUTPUT); 
   pinMode(Axis2_EN,OUTPUT);
   StepperModeTrackingInit();
-
 }
 
 void Init_ReadNV_Values() {
