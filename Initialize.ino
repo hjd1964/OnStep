@@ -1,6 +1,8 @@
 // -----------------------------------------------------------------------------------
 // Functions for initializing pins, variables, and timers on startup
 
+#define DEBUG_AXIS_MODES_OFF
+
 void Init_Startup_Values() {
   
 // Basic stepper driver mode setup
@@ -17,28 +19,17 @@ void Init_Startup_Values() {
   #endif
 #endif
 
+#ifdef DEBUG_AXIS_MODES_ON
+  DBGL("A reminder: TMC_LOWPWR=64, TMC_STEALTHCHOP=32");
 
-/* debugging
-  delay(2000);
-  Serial.begin(9600);
-  delay(1000);
-  
-  Serial.println("A reminder: TMC_LOWPWR=64, TMC_STEALTHCHOP=32");
+  DBG2("AXIS1_MODE=",AXIS1_MODE);
+  DBG2(", AXIS1_MODE_GOTO=",AXIS1_MODE_GOTO);
+  DBGL2(", AXIS1_STEP_GOTO=",AXIS1_STEP_GOTO);
 
-  Serial.print("AXIS1_MODE=");
-  Serial.print(AXIS1_MODE);
-  Serial.print(", AXIS1_MODE_GOTO=");
-  Serial.print(AXIS1_MODE_GOTO);
-  Serial.print(", AXIS1_STEP_GOTO=");
-  Serial.println(AXIS1_STEP_GOTO);
-
-  Serial.print("AXIS2_MODE=");
-  Serial.print(AXIS2_MODE);
-  Serial.print(", AXIS2_MODE_GOTO=");
-  Serial.print(AXIS2_MODE_GOTO);
-  Serial.print(", AXIS2_STEP_GOTO=");
-  Serial.println(AXIS2_STEP_GOTO);
-*/
+  DBG2("AXIS2_MODE=",AXIS2_MODE);
+  DBG2(", AXIS2_MODE_GOTO=",AXIS2_MODE_GOTO);
+  DBGL2(", AXIS2_STEP_GOTO=",AXIS2_STEP_GOTO);
+#endif
 
   // initialize some fixed-point values
   amountGuideAxis1.fixed=0;

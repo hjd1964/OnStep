@@ -49,8 +49,9 @@
 #include <errno.h>
 #include <math.h>
 
-// Uncomment the following line to enable debugging messages to USB serial
-//#define DEBUG
+// Enable debugging messages on DebugSer
+#define DEBUG_OFF                 // default=_OFF, use "DEBUG_ON" to activate
+#define DebugSer Serial           // default=Serial, or Serial1 for example (always 9600 baud)
 
 #include "Constants.h"
 
@@ -109,8 +110,12 @@ weather ambient;
 #define initKey 915307548 // unique identifier for the current initialization format, do not change
 
 void setup() {
-  // Initialize USB serial early, so we can use Serial.print() for debugging, if needed
-  PSerial.begin(9600);
+
+#ifdef DEBUG_ON
+  // Initialize USB serial debugging early, so we can use DebugSer.print() for debugging, if needed
+  DebugSer.begin(9600);
+  delay(1000);
+#endif
   
   // initialize the Non-Volatile Memory
   nv.init();
@@ -151,6 +156,7 @@ void setup() {
   // starts the hardware timers that keep sidereal time, move the motors, etc.
   Init_Start_Timers();
 
+  PSerial.begin(9600);
 #ifdef HAL_SERIAL1_ENABLED
   PSerial1.begin(SERIAL1_BAUD_DEFAULT);
 #endif

@@ -256,7 +256,7 @@ void SmartHandController::setup(const char version[], const int pin[7],const boo
   drawIntro();
   tickButtons();
 
-#ifdef DebugSer
+#ifdef DEBUG_ON
   DebugSer.begin(9600);
   delay(1000);
 #endif

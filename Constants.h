@@ -128,11 +128,11 @@ unsigned int StepsTMC2130[LEN_TMC2130][2] = { {1,8}, {2,7}, {4,6}, {8,5}, {16,4}
 
 // Helper macros for debugging, with less typing.
 // To use them, uncomment the DEBUG define in OnStep.ino
-#if defined(DEBUG)
-  #define DBG(x)     Serial.print(x)
-  #define DBG2(x,y)  Serial.print(x,y)
-  #define DBGL(x)    Serial.println(x)
-  #define DBGL2(x,y) Serial.println(x,y)
+#if defined(DEBUG_ON)
+  #define DBG(x)     DebugSer.print(x)
+  #define DBG2(x,y)  DebugSer.print(x,y)
+  #define DBGL(x)    DebugSer.println(x)
+  #define DBGL2(x,y) DebugSer.println(x,y)
 #else
   #define DBG(x)   /* nothing */
   #define DBG2(x,y) /* nothing */
