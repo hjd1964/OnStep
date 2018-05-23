@@ -250,6 +250,10 @@ void SmartHandController::setup(const int pin[7],const bool active[7], const int
   drawIntro();
   tickButtons();
 
+#ifdef DebugSer
+  DebugSer.begin(9600);
+  delay(1000);
+#endif
   Ser.begin(SerialBaud);
   for (int i = 0; i < 3; i++)
   {
