@@ -10,8 +10,17 @@
 #define DEBUGBUTTON_OFF           // defualt=_OFF, use "DEBUGBUTTON" to activate
 #define DebugSer Serial           // default=Serial, or Serial1 for example (always 9600 baud)
 
-//#define SERIALSMARTCONTROLLER
-#ifdef SERIALSMARTCONTROLLER
-  #include "SerialSmartConfig.h"
+// Helper macros for debugging, with less typing.
+// To use them, uncomment the DEBUG define in OnStep.ino
+#if defined(DEBUG_ON)
+  #define DBG(x)     SerialSer.print(x)
+  #define DBG2(x,y)  SerialSer.print(x,y)
+  #define DBGL(x)    SerialSer.println(x)
+  #define DBGL2(x,y) SerialSer.println(x,y)
+#else
+  #define DBG(x)   /* nothing */
+  #define DBG2(x,y) /* nothing */
+  #define DBGL(x)   /* nothing */
+  #define DBGL2(x,y) /* nothing */
 #endif
 
