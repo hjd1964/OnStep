@@ -61,8 +61,7 @@
 #include "Config.Ramps14.h"
 #include "Config.Mega2560Alt.h"
 #include "Config.TM4C.h"
-#include "Config.STM32CZ.h"
-#include "Config.STM32Black.h"
+#include "Config.STM32.h"
 #include "Validate.h"
 
 #include "src/HAL/HAL.h"
