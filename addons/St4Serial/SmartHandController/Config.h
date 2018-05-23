@@ -13,14 +13,14 @@
 
 // helper macros for debugging, with less typing
 #if defined(DEBUG_ON)
-  #define DBG(x)     DebugSer.print(x)
-  #define DBG2(x,y)  DebugSer.print(x,y)
-  #define DBGL(x)    DebugSer.println(x)
-  #define DBGL2(x,y) DebugSer.println(x,y)
+  #define D(x)     DebugSer.print(x)
+  #define DH(x,y)  DebugSer.print(x,HEX)
+  #define DL(x)    DebugSer.println(x)
+  #define DHL(x,y) DebugSer.println(x,HEX)
 #else
-  #define DBG(x)   /* nothing */
-  #define DBG2(x,y) /* nothing */
-  #define DBGL(x)   /* nothing */
-  #define DBGL2(x,y) /* nothing */
+  #define D(x)
+  #define DH(x,y)
+  #define DL(x)
+  #define DHL(x,y)
 #endif
 
