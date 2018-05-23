@@ -21,21 +21,21 @@
 
 // The pins here are not tested yet, and need to change 
 
-#define Axis1_EN        PB11   // Enable
-#define Axis1_M0        PB10   // Microstep Mode 0
-#define Axis1_M1        PB1    // Microstep Mode 1
-#define Axis1_M2        PB0    // Microstep Mode 2
-#define Axis1StepPin    PA7    // Step
-#define Axis1DirPin     PA6    // Motor Direction
+#define Axis1_EN        PB1   // Enable
+#define Axis1_M0        PB0   // Microstep Mode 0
+#define Axis1_M1        PA7    // Microstep Mode 1
+#define Axis1_M2        PA6    // Microstep Mode 2
+#define Axis1StepPin    PA5    // Step
+#define Axis1DirPin     PA4    // Motor Direction
 //#define Axis1_FAULT   Undefined    // Fault
 //#define Axis1_Aux     Axis1_Aux    // Aux - ESP8266 GPIO0 or SPI MISO
 
-#define Axis2_EN        PA5    // Enable
-#define Axis2_M0        PA4    // Microstep Mode 0
-#define Axis2_M1        PA3    // Microstep Mode 1
-#define Axis2_M2        PA2    // Microstep Mode 2
-#define Axis2StepPin    PA1    // Step
-#define Axis2DirPin     PA0    // Motor Direction
+#define Axis2_EN        PB13   // Enable
+#define Axis2_M0        PB14   // Microstep Mode 0
+#define Axis2_M1        PB15   // Microstep Mode 1
+#define Axis2_M2        PA8    // Microstep Mode 2
+#define Axis2StepPin    PA11   // Step
+#define Axis2DirPin     PA12   // Motor Direction
 //#define Axis2_FAULT   Undefined    // Fault
 //#define Axis2_Aux     Axis2_FAULT  // Aux - ESP8266 RST or SPI MISO
 
@@ -46,21 +46,21 @@
 //#define ReticulePin   Undefined    // Drain
 
 // For a piezo buzzer
-#define TonePin         PA8  // Tone
+#define TonePin         PB8  // Tone
 
 // ST4 interface
-#define ST4DEn          PB13  // ST4 DE+ North
-#define ST4DEs          PB14  // ST4 DE- South
-#define ST4RAw          PB15  // ST4 RA- West
-#define ST4RAe          PA8   // ST4 RA+ East
+#define ST4DEn          PA15  // ST4 DE+ North
+#define ST4DEs          PB3   // ST4 DE- South
+#define ST4RAw          PB4   // ST4 RA- West
+#define ST4RAe          PB5   // ST4 RA+ East
 
 // Pins to focuser1 stepper driver
-#define Axis4DirPin     A15    // Dir
-#define Axis4StepPin    PB3    // Step
+//#define Axis4DirPin     A15    // Dir
+//#define Axis4StepPin    PB3    // Step
 
 // For rotator stepper driver
-#define Axis3DirPin     PB4    // Dir
-#define Axis3StepPin    PB5    // Step
+//#define Axis3DirPin     PB4    // Dir
+//#define Axis3StepPin    PB5    // Step
 
 // For focuser2 stepper driver
 //#define Axis5DirPin   Undefined    // Dir
