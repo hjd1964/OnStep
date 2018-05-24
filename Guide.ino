@@ -245,11 +245,13 @@ void ST4() {
   // see if a combination was down for long enough for an alternate mode
   static bool altModeA=false;
   static bool altModeB=false;
-  if ((st4e.timeDown()>AltMode_ms) && (st4w.timeDown()>AltMode_ms) && (!altModeB)) { if (!altModeA) { altModeA=true; soundBeep(); } }
-  if ((st4n.timeDown()>AltMode_ms) && (st4s.timeDown()>AltMode_ms) && (!altModeA)) { if (!altModeB) { altModeB=true; soundBeep(); } }
-
+  if ((trackingState!=TrackingMoveTo) && (!waitingHome)) {
+    if ((st4e.timeDown()>AltMode_ms) && (st4w.timeDown()>AltMode_ms) && (!altModeB)) { if (!altModeA) { altModeA=true; soundBeep(); } }
+    if ((st4n.timeDown()>AltMode_ms) && (st4s.timeDown()>AltMode_ms) && (!altModeA)) { if (!altModeB) { altModeB=true; soundBeep(); } }
+  }
+  
   // if the alternate mode is allowed & selected & hasn't timed out, handle it
-  if (((trackingState!=TrackingMoveTo) && (!waitingHome)) && (altModeA || altModeB) && ((st4n.timeUp()<Shed_ms) || (st4s.timeUp()<Shed_ms) || (st4e.timeUp()<Shed_ms) || (st4w.timeUp()<Shed_ms)) ) {
+  if ( (altModeA || altModeB) && ((st4n.timeUp()<Shed_ms) || (st4s.timeUp()<Shed_ms) || (st4e.timeUp()<Shed_ms) || (st4w.timeUp()<Shed_ms)) ) {
 
     // make sure no cmdSend() is being processed
     if (!cmdWaiting()) {
