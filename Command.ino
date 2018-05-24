@@ -9,14 +9,14 @@ unsigned long _coord_t=0;
 double _dec,_ra;
 
 // help with commands
-enum Command {COMMAND_NONE, COMMAND_SERIAL, COMMAND_SERIAL1, COMMAND_SERIAL4, COMMAND_SERIALST4, COMMAND_SERIALX};
+enum Command {COMMAND_NONE, COMMAND_SERIAL, COMMAND_SERIAL_WIFI, COMMAND_SERIAL4, COMMAND_SERIALST4, COMMAND_SERIALX};
 char reply[50];
 char command[3];
 char parameter[25];
 boolean commandError = false;
 boolean quietReply   = false;
 cb cmd;  // the first Serial is always enabled
-#ifdef HAL_SERIAL1_ENABLED
+#ifdef HAL_SERIAL_WIFI_ENABLED
 cb cmd1;
 #endif
 #ifdef HAL_SERIAL4_ENABLED
@@ -43,8 +43,8 @@ void processCommands() {
 
     // accumulate the command
     if ((PSerial.available()>0) && (!cmd.ready())) cmd.add(PSerial.read());
-#ifdef HAL_SERIAL1_ENABLED
-    if ((PSerial1.available()>0) && (!cmd1.ready())) cmd1.add(PSerial1.read());
+#ifdef HAL_SERIAL_WIFI_ENABLED
+    if ((SerialWiFi.available()>0) && (!cmd1.ready())) cmd1.add(SerialWiFi.read());
 #endif
 #ifdef HAL_SERIAL4_ENABLED
     if ((PSerial4.available()>0) && (!cmd4.ready())) cmd4.add(PSerial4.read());
@@ -56,8 +56,8 @@ void processCommands() {
     // send any reply
 #ifdef HAL_SERIAL_TRANSMIT
     if (PSerial.transmit()) return;
-  #ifdef HAL_SERIAL1_ENABLED
-    if (PSerial1.transmit()) return;
+  #ifdef HAL_SERIAL_WIFI_ENABLED
+    if (SerialWiFi.transmit()) return;
   #endif
   #ifdef HAL_SERIAL4_ENABLED
     if (PSerial4.transmit()) return;
@@ -67,8 +67,8 @@ void processCommands() {
     // if a command is ready, process it
     Command process_command = COMMAND_NONE;
     if (cmd.ready()) { strcpy(command,cmd.getCmd()); strcpy(parameter,cmd.getParameter()); cmd.flush(); process_command=COMMAND_SERIAL; }
-#ifdef HAL_SERIAL1_ENABLED
-    else if (cmd1.ready()) { strcpy(command,cmd1.getCmd()); strcpy(parameter,cmd1.getParameter()); cmd1.flush(); process_command=COMMAND_SERIAL1; }
+#ifdef HAL_SERIAL_WIFI_ENABLED
+    else if (cmd1.ready()) { strcpy(command,cmd1.getCmd()); strcpy(parameter,cmd1.getParameter()); cmd1.flush(); process_command=COMMAND_SERIAL_WIFI; }
 #endif
 #ifdef HAL_SERIAL4_ENABLED
     else if (cmd4.ready()) { strcpy(command,cmd4.getCmd()); strcpy(parameter,cmd4.getParameter()); cmd4.flush(); process_command=COMMAND_SERIAL4; }
@@ -1258,14 +1258,14 @@ void processCommands() {
             #endif
             delay(50); PSerial.begin(baudRate[i]);
             quietReply=true; 
-#ifdef HAL_SERIAL1_ENABLED
+#ifdef HAL_SERIAL_WIFI_ENABLED
           } else
-          if (process_command==COMMAND_SERIAL1) {
-            PSerial1.print("1"); 
+          if (process_command==COMMAND_SERIAL_WIFI) {
+            SerialWiFi.print("1"); 
             #ifdef HAL_SERIAL_TRANSMIT
-            while (PSerial1.transmit()); 
+            while (SerialWiFi.transmit()); 
             #endif
-            delay(50); PSerial1.begin(baudRate[i]); 
+            delay(50); SerialWiFi.begin(baudRate[i]); 
             quietReply=true;
 #endif
 #ifdef HAL_SERIAL4_ENABLED
@@ -1897,11 +1897,11 @@ void processCommands() {
           PSerial.print(reply);
         } 
   
-#ifdef HAL_SERIAL1_ENABLED
-        if (process_command==COMMAND_SERIAL1) {
+#ifdef HAL_SERIAL_WIFI_ENABLED
+        if (process_command==COMMAND_SERIAL_WIFI) {
           if (cmd1.checksum) checksum(reply);
           if (!supress_frame) strcat(reply,"#");
-          PSerial1.print(reply);
+          SerialWiFi.print(reply);
         }
 #endif
 

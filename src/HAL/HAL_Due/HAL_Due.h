@@ -8,9 +8,9 @@
 
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
 #define PSerial Serial
-#define PSerial1 Serial1
+#define SerialWiFi Serial1
 // SERIAL is always enabled SERIAL1 and SERIAL4 are optional
-#define HAL_SERIAL1_ENABLED
+#define HAL_SERIAL_WIFI_ENABLED
 
 // New symbol for the default I2C port ---------------------------------------------------------------
 #define HAL_Wire Wire

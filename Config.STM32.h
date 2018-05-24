@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  * * * * * * * * * *
 */
 
-#define STM32Black_OFF   //  <- Turn _ON to use STM32F103C8T6 Black with this configuration OR
+#define STM32Black_ON    //  <- Turn _ON to use STM32F103C8T6 Black with this configuration OR
 #define STM32CZ_OFF      //  <- Turn _ON to use STM32F103VET6 CZ with this configuration
 
 #if defined(STM32Black_ON) || defined(STM32CZ_ON)
@@ -24,7 +24,7 @@
 #define ALIGN_GOTOASSIST_OFF
 
 // Default speed for Serial1 and Serial4 com ports, Default=9600
-#define SERIAL1_BAUD_DEFAULT 9600
+#define SERIAL_WIFI_BAUD_DEFAULT 9600
 #define SERIAL4_BAUD_DEFAULT 9600
 
 // ESP8266 reset and GPIO0 control, this sets run mode for normal operation.  Uploading programmer firmware to the OpStep MCU can then enable sending new firmware to the ESP8266-01

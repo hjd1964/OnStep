@@ -14,9 +14,9 @@
 
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
 #define PSerial Serial
-#define PSerial1 Serial1
+#define SerialWiFi Serial1
 // SERIAL is always enabled SERIAL1 and SERIAL4 are optional
-#define HAL_SERIAL1_ENABLED
+#define HAL_SERIAL_WIFI_ENABLED
 #if defined(__MK64FX512__) || defined(__MK66FX1M0__)
 #define PSerial4 Serial4
 // SERIAL is always enabled SERIAL1 and SERIAL4 are optional

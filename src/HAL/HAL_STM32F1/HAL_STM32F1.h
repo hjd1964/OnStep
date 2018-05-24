@@ -18,9 +18,11 @@
 
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
 #define PSerial Serial
-#define PSerial1 Serial2
+// For STM32F01 MCUs, PA3 is RX2 and PA2 is TX2. These are on Serial2, and should be connected to 
+// an ESP8266's TX and RX respectively
+#define SerialWiFi Serial2
 // SERIAL is always enabled SERIAL1 and SERIAL4 are optional
-#define HAL_SERIAL1_ENABLED
+#define HAL_SERIAL_WIFI_ENABLED
 
 // New symbol for the default I2C port -------------------------------------------------------------
 #define HAL_Wire Wire

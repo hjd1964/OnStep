@@ -204,8 +204,8 @@
 #endif
 
 // set serial port baud rate if not done so already
-#ifndef SERIAL1_BAUD_DEFAULT
-  #define SERIAL1_BAUD_DEFAULT 9600
+#ifndef SERIAL_WIFI_BAUD_DEFAULT
+  #define SERIAL_WIFI_BAUD_DEFAULT 9600
 #endif
 #ifndef SERIAL4_BAUD_DEFAULT
   #define SERIAL4_BAUD_DEFAULT 9600

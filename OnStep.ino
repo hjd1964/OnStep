@@ -159,8 +159,8 @@ void setup() {
   Init_Start_Timers();
 
   PSerial.begin(9600);
-#ifdef HAL_SERIAL1_ENABLED
-  PSerial1.begin(SERIAL1_BAUD_DEFAULT);
+#ifdef HAL_SERIAL_WIFI_ENABLED
+  SerialWiFi.begin(SERIAL_WIFI_BAUD_DEFAULT);
 #endif
 #ifdef HAL_SERIAL4_ENABLED
   PSerial4.begin(SERIAL4_BAUD_DEFAULT);
