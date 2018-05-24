@@ -77,8 +77,8 @@ volatile boolean useTimerRateRatio     = (StepsPerDegreeAxis1!=StepsPerDegreeAxi
 #define BreakDistAxis1                   (2L)
 #define BreakDistAxis2                   (2L)
 #define SecondsPerWormRotationAxis1      ((long)(StepsPerWormRotationAxis1/StepsPerSecondAxis1))
-volatile double StepsForRateChangeAxis1= ((double)DegreesForAcceleration/sqrt((double)StepsPerDegreeAxis1))*0.3333333*StepsPerDegreeAxis1*MaxRate;
-volatile double StepsForRateChangeAxis2= ((double)DegreesForAcceleration/sqrt((double)StepsPerDegreeAxis2))*0.3333333*StepsPerDegreeAxis2*MaxRate;
+volatile double StepsForRateChangeAxis1= (sqrt((double)DegreesForAcceleration*(double)StepsPerDegreeAxis1))*MaxRate;
+volatile double StepsForRateChangeAxis2= (sqrt((double)DegreesForAcceleration*(double)StepsPerDegreeAxis2))*MaxRate;
 #ifndef DegreesForRapidStop
 #define DegreesForRapidStop 1.0
 #endif
@@ -248,7 +248,7 @@ unsigned long baudRate[10] = {115200,56700,38400,28800,19200,14400,9600,4800,240
 #define slewRate         (1.0/((double)StepsPerDegreeAxis1*(MaxRate/1000000.0))*3600.0)  // in arc-seconds per second
 #define slewRateX (slewRate/15.0)                                                        // in RA seconds per second
 #define halfSlewRate (slewRate/2.0)
-#define accArcsecPerSec  (slewRateX/DegreesForAcceleration)
+#define accXPerSec  (slewRateX/DegreesForAcceleration)
 #define accDegreesPerSec (DegreesPerSecond/DegreesForAcceleration)
 double  guideRates[10]={3.75,7.5,15,30,60,120,360,720,halfSlewRate,slewRate};
 //                      .25X .5x 1x 2x 4x  8x 24x 48x half-MaxRate MaxRate
