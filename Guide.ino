@@ -202,9 +202,11 @@ void ST4() {
       static bool altModeB=false;
       static unsigned long altModeShed=0;
       if (c1=='+') stopGuideAxis1(); if (c2=='+') stopGuideAxis2(); // stop any guide that might have been triggered
-      if ((c1=='+') && ((long)(millis()-c1Time)>AltMode_ms) && (!altModeB)) { if (!altModeA) { altModeA=true; soundBeep(); keys_up=false; } altModeShed=millis(); }
-      if ((c2=='+') && ((long)(millis()-c2Time)>AltMode_ms) && (!altModeA)) { if (!altModeB) { altModeB=true; soundBeep(); keys_up=false; } altModeShed=millis(); }
-      if ((trackingState!=TrackingMoveTo) && (!waitingHome) && (altModeA || altModeB) && ((long)(millis()-altModeShed)<Shed_ms)) {
+      if ((trackingState!=TrackingMoveTo) && (!waitingHome)) {
+        if ((c1=='+') && ((long)(millis()-c1Time)>AltMode_ms) && (!altModeB)) { if (!altModeA) { altModeA=true; soundBeep(); keys_up=false; } altModeShed=millis(); }
+        if ((c2=='+') && ((long)(millis()-c2Time)>AltMode_ms) && (!altModeA)) { if (!altModeB) { altModeB=true; soundBeep(); keys_up=false; } altModeShed=millis(); }
+      }
+      if ( (altModeA || altModeB) && ((long)(millis()-altModeShed)<Shed_ms) ) {
         if (keys_up && !cmdWaiting()) {
           if (altModeA) {
             int c=currentGuideRate;
@@ -279,4 +281,3 @@ void ST4() {
     }
 #endif
 }
-
