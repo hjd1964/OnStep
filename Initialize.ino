@@ -21,20 +21,12 @@ void Init_Startup_Values() {
 
 #ifdef DEBUG_AXIS_MODES_ON
   DL("A reminder: TMC_LOWPWR=64, TMC_STEALTHCHOP=32");
-
-  D("AXIS1_MODE=");
-  D(AXIS1_MODE);
-  D(", AXIS1_MODE_GOTO=");
-  D(AXIS1_MODE_GOTO);
-  D(", AXIS1_STEP_GOTO=");
-  DL(AXIS1_STEP_GOTO);
-
-  D("AXIS2_MODE=");
-  D(AXIS2_MODE);
-  D(", AXIS2_MODE_GOTO=");
-  D(AXIS2_MODE_GOTO);
-  D(", AXIS2_STEP_GOTO=");
-  DL(AXIS2_STEP_GOTO);
+  D("AXIS1_MODE="); D(AXIS1_MODE);
+  D(", AXIS1_MODE_GOTO="); D(AXIS1_MODE_GOTO);
+  D(", AXIS1_STEP_GOTO="); DL(AXIS1_STEP_GOTO);
+  D("AXIS2_MODE="); D(AXIS2_MODE);
+  D(", AXIS2_MODE_GOTO="); D(AXIS2_MODE_GOTO);
+  D(", AXIS2_STEP_GOTO="); DL(AXIS2_STEP_GOTO);
 #endif
 
   // initialize some fixed-point values
