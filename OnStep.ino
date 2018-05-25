@@ -49,10 +49,6 @@
 #include <errno.h>
 #include <math.h>
 
-// Enable debugging messages on DebugSer
-#define DEBUG_OFF                 // default=_OFF, use "DEBUG_ON" to activate
-#define DebugSer Serial           // default=Serial, or Serial1 for example (always 9600 baud)
-
 #include "Constants.h"
 
 #include "Config.Classic.h"
@@ -65,13 +61,29 @@
 #include "Validate.h"
 
 #include "src/HAL/HAL.h"
+#include "src/lib/St4SerialMaster.h"
 
+// Enable debugging messages on DebugSer -------------------------------------------------------------
+#define DEBUG_ON                  // default=_OFF, use "DEBUG_ON" to activate
+#define DebugSer PSerialST4       // default=Serial, or Serial1 for example (always 9600 baud)
+
+// Helper macros for debugging, with less typing
+#if defined(DEBUG_ON)
+  #define D(x)       DebugSer.print(x)
+  #define DH(x)      DebugSer.print(x,HEX)
+  #define DL(x)      DebugSer.println(x)
+  #define DHL(x,y)   DebugSer.println(x,HEX)
+#else
+  #define D(x)
+  #define DH(x,y)
+  #define DL(x)
+  #define DHL(x,y)
+#endif
+// ---------------------------------------------------------------------------------------------------
+
+#include "src/lib/SoftSPI.h"
 #include "src/lib/FPoint.h"
 #include "src/lib/Julian.h"
-#include "src/lib/SoftSPI.h"
-#ifdef ST4_HAND_CONTROL_ON
-#include "src/lib/St4SerialMaster.h"
-#endif
 #ifdef MODE_SWITCH_BEFORE_SLEW_SPI
 #include "src/lib/TMC2130.h"
 //               SS      ,SCK     ,MISO     ,MOSI
@@ -372,6 +384,10 @@ void loop() {
   // 1 SECOND TIMED ------------------------------------------------------------------------------------
   unsigned long tempMs=millis();
   if ((long)(tempMs-housekeepingTimer)>0) {
+
+    D("GTR1="); D(guideTimerRateAxis1A);
+    D(", TR1="); DL(timerRateAxis1);
+    
     housekeepingTimer=tempMs+1000UL;
 
 #if defined(ROTATOR_ON) && defined(MOUNT_TYPE_ALTAZM)

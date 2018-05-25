@@ -129,18 +129,3 @@ unsigned int StepsTMC2130[LEN_TMC2130][2] = { {1,8}, {2,7}, {4,6}, {8,5}, {16,4}
 // Unique identifier for the current initialization format for NV, do not change
 #define initKey 915307548
 
-// Helper macros for debugging, with less typing.
-// To use them, uncomment the DEBUG define in OnStep.ino
-#if defined(DEBUG_ON)
-  #define D(x)       DebugSer.print(x)
-  #define DH(x)      DebugSer.print(x,HEX)
-  #define DL(x)      DebugSer.println(x)
-  #define DHL(x,y)   DebugSer.println(x,HEX)
-#else
-  #define D(x)
-  #define DH(x,y)
-  #define DL(x)
-  #define DHL(x,y)
-#endif
-
-
