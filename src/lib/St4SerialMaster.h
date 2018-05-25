@@ -28,6 +28,8 @@ class Mst4 : public Stream
 {
   public:
     void begin();
+    void begin(long baud);
+    
     void end();
 
     // recvs one char and transmits one char to/from buffers; recvd chars <32 are returned directly and bypass the buffer
@@ -144,6 +146,10 @@ class Mst4 : public Stream
 void Mst4::begin() {
   _xmit_head=0; _xmit_tail=0; _xmit_buffer[0]=0;
   _recv_head=0; _recv_tail=0; _recv_buffer[0]=0;
+}
+
+void Mst4::begin(long baud) {
+  begin();
 }
 
 void Mst4::end() {
