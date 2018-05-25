@@ -385,9 +385,8 @@ void loop() {
   unsigned long tempMs=millis();
   if ((long)(tempMs-housekeepingTimer)>0) {
 
-    D("GTR1="); D(guideTimerRateAxis1A);
-    D(", TR1="); DL(timerRateAxis1);
-    
+//    DL(((double)SiderealRate/(double)timerRateAxis1));
+
     housekeepingTimer=tempMs+1000UL;
 
 #if defined(ROTATOR_ON) && defined(MOUNT_TYPE_ALTAZM)
