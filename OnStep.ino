@@ -41,7 +41,7 @@
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  1
 #define FirmwareVersionMinor  8
-#define FirmwareVersionPatch  "i"     // for example major.minor patch: 1.3c
+#define FirmwareVersionPatch  "j"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 2       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
@@ -64,8 +64,8 @@
 #include "src/lib/St4SerialMaster.h"
 
 // Enable debugging messages on DebugSer -------------------------------------------------------------
-#define DEBUG_OFF                 // default=_OFF, use "DEBUG_ON" to activate
-#define DebugSer Serial           // default=Serial, or Serial1 for example (always 9600 baud)
+#define DEBUG_ON                  // default=_OFF, use "DEBUG_ON" to activate
+#define DebugSer PSerialST4       // default=Serial, or Serial1 for example (always 9600 baud)
 
 // Helper macros for debugging, with less typing
 #if defined(DEBUG_ON)
