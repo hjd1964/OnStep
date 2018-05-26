@@ -77,7 +77,7 @@
 
 // The PPS pin is a 3.3V logic input, OnStep measures time between rising edges and
 // adjusts the internal sidereal clock frequency
-//#define PpsPin       Undefined    // Pulse Per Second time source, e.g. GPS
+#define PpsPin         PA12         // Pulse Per Second time source, e.g. GPS
 
 #else
 #error "Wrong processor for this configuration!"
