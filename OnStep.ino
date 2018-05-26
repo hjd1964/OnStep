@@ -63,8 +63,6 @@
 #include "src/HAL/HAL.h"
 #include "src/lib/St4SerialMaster.h"
 
-#define SerialST4 Serial
-
 // Enable debugging messages on DebugSer -------------------------------------------------------------
 #define DEBUG_ON               // default=_OFF, use "DEBUG_ON" to activate
 #define DebugSer SerialST4    // default=Serial, or Serial1 for example (always 9600 baud)
