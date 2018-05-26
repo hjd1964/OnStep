@@ -9,17 +9,17 @@ unsigned long _coord_t=0;
 double _dec,_ra;
 
 // help with commands
-enum Command {COMMAND_NONE, COMMAND_SERIAL, COMMAND_SERIAL1, COMMAND_SERIAL4, COMMAND_SERIALST4, COMMAND_SERIALX};
+enum Command {COMMAND_NONE, COMMAND_SERIAL, COMMAND_SERIAL_B, COMMAND_SERIAL_C, COMMAND_SERIALST4, COMMAND_SERIALX};
 char reply[50];
 char command[3];
 char parameter[25];
 boolean commandError = false;
 boolean quietReply   = false;
 cb cmd;  // the first Serial is always enabled
-#ifdef HAL_SERIAL1_ENABLED
+#ifdef HAL_SERIAL_B_ENABLED
 cb cmd1;
 #endif
-#ifdef HAL_SERIAL4_ENABLED
+#ifdef HAL_SERIAL_C_ENABLED
 cb cmd4;
 #endif
 #ifdef ST4_HAND_CONTROL_ON
@@ -42,36 +42,36 @@ void processCommands() {
     char *conv_end;
 
     // accumulate the command
-    if ((PSerial.available()>0) && (!cmd.ready())) cmd.add(PSerial.read());
-#ifdef HAL_SERIAL1_ENABLED
-    if ((PSerial1.available()>0) && (!cmd1.ready())) cmd1.add(PSerial1.read());
+    if ((SerialA.available()>0) && (!cmd.ready())) cmd.add(SerialA.read());
+#ifdef HAL_SERIAL_B_ENABLED
+    if ((SerialB.available()>0) && (!cmd1.ready())) cmd1.add(SerialB.read());
 #endif
-#ifdef HAL_SERIAL4_ENABLED
-    if ((PSerial4.available()>0) && (!cmd4.ready())) cmd4.add(PSerial4.read());
+#ifdef HAL_SERIAL_C_ENABLED
+    if ((SerialC.available()>0) && (!cmd4.ready())) cmd4.add(SerialC.read());
 #endif
 #ifdef ST4_HAND_CONTROL_ON
-    if ((PSerialST4.available()>0) && (!cmdST4.ready())) cmdST4.add(PSerialST4.read());
+    if ((SerialST4.available()>0) && (!cmdST4.ready())) cmdST4.add(SerialST4.read());
 #endif
 
     // send any reply
 #ifdef HAL_SERIAL_TRANSMIT
-    if (PSerial.transmit()) return;
-  #ifdef HAL_SERIAL1_ENABLED
-    if (PSerial1.transmit()) return;
+    if (SerialA.transmit()) return;
+  #ifdef HAL_SERIAL_B_ENABLED
+    if (SerialB.transmit()) return;
   #endif
-  #ifdef HAL_SERIAL4_ENABLED
-    if (PSerial4.transmit()) return;
+  #ifdef HAL_SERIAL_C_ENABLED
+    if (SerialC.transmit()) return;
   #endif
 #endif
 
     // if a command is ready, process it
     Command process_command = COMMAND_NONE;
     if (cmd.ready()) { strcpy(command,cmd.getCmd()); strcpy(parameter,cmd.getParameter()); cmd.flush(); process_command=COMMAND_SERIAL; }
-#ifdef HAL_SERIAL1_ENABLED
-    else if (cmd1.ready()) { strcpy(command,cmd1.getCmd()); strcpy(parameter,cmd1.getParameter()); cmd1.flush(); process_command=COMMAND_SERIAL1; }
+#ifdef HAL_SERIAL_B_ENABLED
+    else if (cmd1.ready()) { strcpy(command,cmd1.getCmd()); strcpy(parameter,cmd1.getParameter()); cmd1.flush(); process_command=COMMAND_SERIAL_B; }
 #endif
-#ifdef HAL_SERIAL4_ENABLED
-    else if (cmd4.ready()) { strcpy(command,cmd4.getCmd()); strcpy(parameter,cmd4.getParameter()); cmd4.flush(); process_command=COMMAND_SERIAL4; }
+#ifdef HAL_SERIAL_C_ENABLED
+    else if (cmd4.ready()) { strcpy(command,cmd4.getCmd()); strcpy(parameter,cmd4.getParameter()); cmd4.flush(); process_command=COMMAND_SERIAL_C; }
 #endif
 #ifdef ST4_HAND_CONTROL_ON
     else if (cmdST4.ready()) { strcpy(command,cmdST4.getCmd()); strcpy(parameter,cmdST4.getParameter()); cmdST4.flush(); process_command=COMMAND_SERIALST4; }
@@ -279,11 +279,11 @@ void processCommands() {
         if ((command[1]=='S') && (parameter[0]=='P') && (parameter[1]=='F') && (parameter[2]=='L') && (parameter[3]=='A') && (parameter[4]=='S') && (parameter[5]=='H')) {
           if ((atHome) && (trackingState==TrackingNone)) {
             // initialize both serial ports
-            Serial.println("The ESP-01 should now be in flash upload mode (at 115200 Baud.)");
-            Serial.println("Waiting for data.");
+            SerialA.println("The ESP-01 should now be in flash upload mode (at 115200 Baud.)");
+            SerialA.println("Waiting for data.");
             delay(500);
-            Serial.begin(115200);
-            Serial1.begin(115200);
+            SerialA.begin(115200);
+            SerialB.begin(115200);
             digitalWrite(Axis1_Aux,LOW); delay(20);  // Pgm mode LOW
             
             digitalWrite(Axis2_Aux,LOW);  delay(20); // Reset, if LOW
@@ -291,15 +291,15 @@ void processCommands() {
 
             while (true) {
               // read from port 1, send to port 0:
-              if (Serial1.available()) {
-                int inByte = Serial1.read();
-                Serial.write(inByte);
+              if (SerialB.available()) {
+                int inByte = SerialB.read();
+                SerialB.write(inByte);
               }
               
               // read from port 0, send to port 1:
-              if (Serial.available()) {
-                int inByte = Serial.read();
-                Serial1.write(inByte);
+              if (SerialA.available()) {
+                int inByte = SerialA.read();
+                SerialB.write(inByte);
               }
             }
           } else commandError=true;
@@ -1252,30 +1252,30 @@ void processCommands() {
         i=(int)(parameter[0]-'0');
         if ((i>=0) && (i<10)) {
           if (process_command==COMMAND_SERIAL) {
-            PSerial.print("1"); 
+            SerialA.print("1"); 
             #ifdef HAL_SERIAL_TRANSMIT
-            while (PSerial.transmit()); 
+            while (SerialA.transmit()); 
             #endif
-            delay(50); PSerial.begin(baudRate[i]);
+            delay(50); SerialA.begin(baudRate[i]);
             quietReply=true; 
-#ifdef HAL_SERIAL1_ENABLED
+#ifdef HAL_SERIAL_B_ENABLED
           } else
-          if (process_command==COMMAND_SERIAL1) {
-            PSerial1.print("1"); 
+          if (process_command==COMMAND_SERIAL_B) {
+            SerialB.print("1"); 
             #ifdef HAL_SERIAL_TRANSMIT
-            while (PSerial1.transmit()); 
+            while (SerialB.transmit()); 
             #endif
-            delay(50); PSerial1.begin(baudRate[i]); 
+            delay(50); SerialB.begin(baudRate[i]); 
             quietReply=true;
 #endif
-#ifdef HAL_SERIAL4_ENABLED
+#ifdef HAL_SERIAL_C_ENABLED
           } else
-          if (process_command==COMMAND_SERIAL4) {
-            PSerial4.print("1"); 
+          if (process_command==COMMAND_SERIAL_C) {
+            SerialC.print("1"); 
             #ifdef HAL_SERIAL_TRANSMIT
-            while (PSerial4.transmit()); 
+            while (SerialC.transmit()); 
             #endif
-            delay(50); PSerial4.begin(baudRate[i]);
+            delay(50); SerialC.begin(baudRate[i]);
             quietReply=true; 
 #endif
           } else commandError=true;
@@ -1894,22 +1894,22 @@ void processCommands() {
         if (process_command==COMMAND_SERIAL) {
           if (cmd.checksum) checksum(reply);
           if (!supress_frame) strcat(reply,"#");
-          PSerial.print(reply);
+          SerialA.print(reply);
         } 
   
-#ifdef HAL_SERIAL1_ENABLED
-        if (process_command==COMMAND_SERIAL1) {
+#ifdef HAL_SERIAL_B_ENABLED
+        if (process_command==COMMAND_SERIAL_B) {
           if (cmd1.checksum) checksum(reply);
           if (!supress_frame) strcat(reply,"#");
-          PSerial1.print(reply);
+          SerialB.print(reply);
         }
 #endif
 
-#ifdef HAL_SERIAL4_ENABLED
-        if (process_command==COMMAND_SERIAL4) {
+#ifdef HAL_SERIAL_C_ENABLED
+        if (process_command==COMMAND_SERIAL_C) {
           if (cmd4.checksum) checksum(reply);
           if (!supress_frame) strcat(reply,"#");
-          PSerial4.print(reply);
+          SerialC.print(reply);
         }
 #endif
 
@@ -1917,7 +1917,7 @@ void processCommands() {
         if (process_command==COMMAND_SERIALST4) {
           if (cmdST4.checksum) checksum(reply);
           if (!supress_frame) strcat(reply,"#");
-          PSerialST4.print(reply);
+          SerialST4.print(reply);
         }
 #endif
 

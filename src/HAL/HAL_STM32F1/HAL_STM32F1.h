@@ -17,10 +17,10 @@
 #define sei() interrupts()
 
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
-#define PSerial Serial
-#define PSerial1 Serial2
-// SERIAL is always enabled SERIAL1 and SERIAL4 are optional
-#define HAL_SERIAL1_ENABLED
+#define SerialA Serial
+#define SerialB Serial2
+// SERIAL is always enabled SERIAL_A and SERIAL4 are optional
+#define HAL_SERIAL_B_ENABLED
 
 // New symbol for the default I2C port -------------------------------------------------------------
 #define HAL_Wire Wire

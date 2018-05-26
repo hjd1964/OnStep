@@ -13,8 +13,8 @@
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
 // Use low overhead serial
 #include "HAL_Serial.h"
-// SERIAL is always enabled SERIAL1 and SERIAL4 are optional
-#define HAL_SERIAL1_ENABLED
+// SERIAL is always enabled SERIAL_A and SERIAL4 are optional
+#define HAL_SERIAL_B_ENABLED
 // this tells OnStep that a .transmit() method needs to be called to send data
 #define HAL_SERIAL_TRANSMIT
 

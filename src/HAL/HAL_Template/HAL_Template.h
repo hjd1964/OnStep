@@ -4,9 +4,9 @@
 #define __Platform_Name__
 
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
-#define PSerial Serial
+#define SerialA Serial
 // SERIAL is always enabled SERIAL1 and SERIAL4 are optional
-//#define PSerial1 Serial1
+#define SerialB Serial1
 
 // New symbol for the default I2C port -------------------------------------------------------------
 #define HAL_Wire Wire
