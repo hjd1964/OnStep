@@ -1,5 +1,8 @@
+#include "config.h"
+#include "WifiBluetooth.h"
 // -----------------------------------------------------------------------------------
 // Configuration
+
 
 const char html_config1[] = 
 "Maximum Slew Speed: "
@@ -85,9 +88,9 @@ const char html_configOffsetMin[] =
 "</form>"
 "\r\n";
 #ifdef OETHS
-void handleConfiguration(EthernetClient *client) {
+void wifibluetooth::handleConfiguration(EthernetClient *client) {
 #else
-void handleConfiguration() {
+void wifibluetooth::handleConfiguration() {
 #endif
   Ser.setTimeout(WebTimeout);
   serialRecvFlush();
@@ -229,7 +232,7 @@ void handleConfiguration() {
 #endif
 }
 
-void processConfigurationGet() {
+void wifibluetooth::processConfigurationGet() {
   String v;
   int i;
   char temp[20]="";

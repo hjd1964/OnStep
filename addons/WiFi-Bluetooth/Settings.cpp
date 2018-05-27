@@ -1,3 +1,5 @@
+#include "config.h"
+#include "WifiBluetooth.h"
 // -----------------------------------------------------------------------------------
 // Settings
 
@@ -54,9 +56,9 @@ const char html_settingsEnd[] =
 "</form>\r\n";
 
 #ifdef OETHS
-void handleSettings(EthernetClient *client) {
+void wifibluetooth::handleSettings(EthernetClient *client) {
 #else
-void handleSettings() {
+void wifibluetooth::handleSettings() {
 #endif
   Ser.setTimeout(WebTimeout);
   serialRecvFlush();
@@ -120,7 +122,7 @@ void handleSettings() {
   if (mountStatus.valid()) { if (mountStatus.tracking()) data+="On"; else data+="Off"; } else data+="?";
   data += html_settingsTrack2;
   data += html_settingsTrack3;
-  if (mountStatus.mountType()!=MT_ALTAZM) {
+  if (mountStatus.mountType()!= MountStatus::MT_ALTAZM) {
     data += html_settingsTrackComp1;
     data += html_settingsTrackComp2;
   }
@@ -128,7 +130,7 @@ void handleSettings() {
   if (mountStatus.valid()) { if (mountStatus.buzzerEnabled()) data+="On"; else data+="Off"; } else data+="?";
   data += html_settingsBuzzer2;
 
-  if (mountStatus.mountType()==MT_GEM) {
+  if (mountStatus.mountType()== MountStatus::MT_GEM) {
     data += html_settingsMFAuto1;
     if (mountStatus.valid()) { if (mountStatus.autoMeridianFlips()) data+="On"; else data+="Off"; } else data+="?";
     data += html_settingsMFAuto2;
@@ -150,15 +152,15 @@ void handleSettings() {
 }
 
 #ifdef OETHS
-void settingsAjax(EthernetClient *client) {
+void wifibluetooth::settingsAjax(EthernetClient *client) {
 #else
-void settingsAjax() {
+void wifibluetooth::settingsAjax() {
 #endif
   String data="";
   mountStatus.update();
   data += "tracking|"; if (mountStatus.valid()) { if (mountStatus.tracking()) data+="On"; else data+="Off"; } else data+="?"; data+="\n";
   data += "buzzer|"; if (mountStatus.valid()) { if (mountStatus.buzzerEnabled()) data+="On"; else data+="Off"; } else data+="?"; data+="\n";
-  if (mountStatus.mountType()==MT_GEM) {
+  if (mountStatus.mountType()== MountStatus::MT_GEM) {
     data += "autoFlip|";  if (mountStatus.valid()) { if (mountStatus.autoMeridianFlips()) data+="On"; else data+="Off"; } else data+="?"; data+="\n";
     data += "pause|";  if (mountStatus.valid()) { if (mountStatus.pauseAtHome()) data+="On"; else data+="Off"; } else data+="?"; data+="\n";
   }
@@ -169,7 +171,7 @@ void settingsAjax() {
 #endif
 }
 
-void processSettingsGet() {
+void wifibluetooth::processSettingsGet() {
   // from the Settings.htm page -------------------------------------------------------------------
   String v;
   char temp[20]="";

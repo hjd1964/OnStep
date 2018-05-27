@@ -1,3 +1,5 @@
+#include "WifiBluetooth.h"
+#include "config.h"
 // -----------------------------------------------------------------------------------
 // Telescope control related functions 
 
@@ -268,9 +270,9 @@ const char html_controlEnd[] =
 "<br />\r\n";
 
 #ifdef OETHS
-void handleControl(EthernetClient *client) {
+void wifibluetooth::handleControl(EthernetClient *client) {
 #else
-void handleControl() {
+void wifibluetooth::handleControl() {
 #endif
   Ser.setTimeout(WebTimeout);
   serialRecvFlush();
@@ -339,7 +341,7 @@ void handleControl() {
   // Quick controls ------------------------------------------
   data += html_controlQuick1;
   data += html_controlQuick1a;
-  if (mountStatus.mountType()==MT_GEM) data += html_controlQuick2;
+  if (mountStatus.mountType()== MountStatus::MT_GEM) data += html_controlQuick2;
   data += html_controlQuick3;
   data += html_controlQuick4;
   data += html_controlQuick5;
@@ -522,7 +524,7 @@ void handleControl() {
 #ifdef OETHS
 void guideAjax(EthernetClient *client) {
 #else
-void guideAjax() {
+void wifibluetooth::guideAjax() {
 #endif
   processControlGet();
 #ifdef OETHS
@@ -533,9 +535,9 @@ void guideAjax() {
 }
 
 #ifdef OETHS
-void controlAjax(EthernetClient *client) {
+void wifibluetooth::controlAjax(EthernetClient *client) {
 #else
-void controlAjax() {
+void wifibluetooth::controlAjax() {
 #endif
   String data="";
   char temp[40]="";
@@ -579,7 +581,7 @@ int get_temp_hour;
 int get_temp_minute;
 int get_temp_second;
 
-void processControlGet() {
+void wifibluetooth::processControlGet() {
   String v;
   int i;
   char temp[20]="";
@@ -792,7 +794,7 @@ void processControlGet() {
 }
 
 // clear any possible response
-void cl() {
+void wifibluetooth::cl() {
   char temp[20]="";
   Ser.setTimeout(WebTimeout*8);
   temp[Ser.readBytesUntil('#',temp,20)]=0;

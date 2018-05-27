@@ -1,3 +1,5 @@
+#include "config.h"
+#include "WifiBluetooth.h"
 // -----------------------------------------------------------------------------------
 // The home page, status information
 
@@ -48,9 +50,9 @@ const char* html_indexLastError = "&nbsp;&nbsp;Last Error: <font class='c'>%s</f
 const char* html_indexWorkload = "&nbsp;&nbsp;Workload: <font class='c'>%s</font><br />";
 
 #ifdef OETHS
-void handleRoot(EthernetClient *client) {
+void wifibluetooth::handleRoot(EthernetClient *client) {
 #else
-void handleRoot() {
+void wifibluetooth::handleRoot() {
 #endif
   Ser.setTimeout(WebTimeout);
   serialRecvFlush();
@@ -190,7 +192,7 @@ void handleRoot() {
 
   data+="<br /><b>Alignment:</b><br />";
 
-  if ((mountStatus.mountType()==MT_GEM) || (mountStatus.mountType()==MT_FORK)) {
+  if ((mountStatus.mountType()== MountStatus::MT_GEM) || (mountStatus.mountType()== MountStatus::MT_FORK)) {
     long altCor=0; if (sendCommand(":GX02#",temp1)) { altCor=strtol(&temp1[0],NULL,10); }
     long azmCor=0; if (sendCommand(":GX03#",temp1)) { azmCor=strtol(&temp1[0],NULL,10); }
     sprintf(temp,html_indexCorPolar,(long)(altCor),(long)(azmCor));
@@ -218,10 +220,10 @@ void handleRoot() {
   
   strcpy(temp2,"</font>(<font class=\"c\">");
   if (mountStatus.ppsSync()) strcat(temp2,"PPS Sync, ");
-  if (mountStatus.rateCompensation()==RC_REFR_RA)   strcat(temp2,"Refr Comp RA Axis, ");
-  if (mountStatus.rateCompensation()==RC_REFR_BOTH) strcat(temp2,"Refr Comp Both Axis, ");
-  if (mountStatus.rateCompensation()==RC_FULL_RA)   strcat(temp2,"Full Comp RA Axis, ");
-  if (mountStatus.rateCompensation()==RC_FULL_BOTH) strcat(temp2,"Full Comp Both Axis, ");
+  if (mountStatus.rateCompensation()== MountStatus::RC_REFR_RA)   strcat(temp2,"Refr Comp RA Axis, ");
+  if (mountStatus.rateCompensation()== MountStatus::RC_REFR_BOTH) strcat(temp2,"Refr Comp Both Axis, ");
+  if (mountStatus.rateCompensation()== MountStatus::RC_FULL_RA)   strcat(temp2,"Full Comp RA Axis, ");
+  if (mountStatus.rateCompensation()== MountStatus::RC_FULL_BOTH) strcat(temp2,"Full Comp Both Axis, ");
   if (!mountStatus.valid()) strcpy(temp2,"?");
   if (temp2[strlen(temp2)-2]==',') { temp2[strlen(temp2)-2]=0; strcat(temp2,"</font>)<font class=\"c\">"); } else strcpy(temp2,"");
   sprintf(temp,html_indexTracking,temp1,temp2);
@@ -254,7 +256,7 @@ void handleRoot() {
   data+="<br /><b>State:</b><br />";
 
   // Last Error
-  if (mountStatus.lastError()!=ERR_NONE) strcpy(temp1,"</font><font class=\"y\">"); else strcpy(temp1,"");
+  if (mountStatus.lastError()!=MountStatus::ERR_NONE) strcpy(temp1,"</font><font class=\"y\">"); else strcpy(temp1,"");
   mountStatus.getLastErrorMessage(temp2);
   strcat(temp1,temp2);
   if (!mountStatus.valid()) strcpy(temp1,"?");

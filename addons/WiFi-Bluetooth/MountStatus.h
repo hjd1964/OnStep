@@ -1,8 +1,6 @@
 #pragma once
+#include "config.h"
 
-enum RateCompensation {RC_NONE, RC_REFR_RA, RC_REFR_BOTH, RC_FULL_RA, RC_FULL_BOTH};
-enum MountTypes {MT_UNKNOWN, MT_GEM, MT_FORK, MT_FORKALT, MT_ALTAZM};
-enum Errors {ERR_NONE, ERR_MOTOR_FAULT, ERR_ALT, ERR_LIMIT_SENSE, ERR_DEC, ERR_AZM, ERR_UNDER_POLE, ERR_MERIDIAN, ERR_SYNC};
 #define PierSideNone     0
 #define PierSideEast     1
 #define PierSideWest     2
@@ -16,6 +14,10 @@ enum Errors {ERR_NONE, ERR_MOTOR_FAULT, ERR_ALT, ERR_LIMIT_SENSE, ERR_DEC, ERR_A
 
 class MountStatus {
   public:
+    enum RateCompensation { RC_NONE, RC_REFR_RA, RC_REFR_BOTH, RC_FULL_RA, RC_FULL_BOTH };
+    enum MountTypes { MT_UNKNOWN, MT_GEM, MT_FORK, MT_FORKALT, MT_ALTAZM };
+    enum Errors { ERR_NONE, ERR_MOTOR_FAULT, ERR_ALT, ERR_LIMIT_SENSE, ERR_DEC, ERR_AZM, ERR_UNDER_POLE, ERR_MERIDIAN, ERR_SYNC };
+
     bool update(bool all=false) {
 
       char s[20] = "";
@@ -146,4 +148,4 @@ class MountStatus {
     Errors _lastError=ERR_NONE;
 };
 
-MountStatus mountStatus;
+

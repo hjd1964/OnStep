@@ -1,3 +1,5 @@
+#include "config.h"
+#include "WifiBluetooth.h"
 // -----------------------------------------------------------------------------------
 // Controls for PEC
 
@@ -22,9 +24,9 @@ const char html_pecControls5[] =
 "</form></div><br class='clear' /><br />\r\n";
 
 #ifdef OETHS
-void handlePec(EthernetClient *client) {
+void wifibluetooth::handlePec(EthernetClient *client) {
 #else
-void handlePec() {
+void wifibluetooth::handlePec() {
 #endif
   Ser.setTimeout(WebTimeout);
   serialRecvFlush();
@@ -57,7 +59,7 @@ void handlePec() {
 
   mountStatus.update();
 
-  if (mountStatus.mountType()!=MT_ALTAZM) {
+  if (mountStatus.mountType()!= MountStatus::MT_ALTAZM) {
     // active ajax page is: pecAjax();
     data +="<script>var ajaxPage='pec.txt';</script>\n";
     data +=html_ajax_active;
@@ -84,7 +86,7 @@ void handlePec() {
   client->print(data); data="";
 #endif
 
-  if (mountStatus.mountType()!=MT_ALTAZM) {
+  if (mountStatus.mountType()!= MountStatus::MT_ALTAZM) {
     data += html_pec2;
     data += html_pecControls0;
     data += html_pecControls1;
@@ -106,15 +108,15 @@ void handlePec() {
 }
 
 #ifdef OETHS
-void pecAjax(EthernetClient *client) {
+void wifibluetooth::pecAjax(EthernetClient *client) {
 #else
-void pecAjax() {
+void wifibluetooth::pecAjax() {
 #endif
   String data="";
   char temp[80]="";
   
   data += "status|";
-  if ((mountStatus.mountType()!=MT_ALTAZM) && (mountStatus.update()) && (sendCommand(":$QZ?#",temp))) {
+  if ((mountStatus.mountType()!= MountStatus::MT_ALTAZM) && (mountStatus.update()) && (sendCommand(":$QZ?#",temp))) {
     if (temp[0]=='I') data +="Idle"; else
     if (temp[0]=='p') data +="Play waiting to start"; else
     if (temp[0]=='P') data +="Playing"; else
@@ -131,7 +133,7 @@ void pecAjax() {
 #endif
 }
 
-void processPecGet() {
+void wifibluetooth::processPecGet() {
   String v;
 
   // PEC control
