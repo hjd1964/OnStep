@@ -37,7 +37,7 @@
 //   Serial  -> USART 1
 //   Serial1 -> USART 2
 //   Serial2 -> USART 3
-#define SerialB Serial2
+#define SerialB Serial3
 
 // SERIAL is always enabled SERIAL_A and SERIAL4 are optional
 #define HAL_SERIAL_B_ENABLED
