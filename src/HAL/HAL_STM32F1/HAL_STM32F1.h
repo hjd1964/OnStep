@@ -18,7 +18,27 @@
 
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
 #define SerialA Serial
+
+// Which port to use for WiFi?
+//
+// The hardware serial ports and pins for STM32F103 are:
+//   USART1: TX PA9, RX PA10
+//   USART2: TX PA2, RX PA3
+//   USART3: TX PB10, RX PB11
+
+// Note that different flashing methods will remap the port numbers.
+// For DFU (STM32Duino), and ST-Link, ports are:
+//   Serial1 -> USART 1
+//   Serial2 -> USART 2
+//   Serial3 -> USART 3
+
+// If you use a USB to TTL dongle, the flashing method is Serial, and
+// the ports are:
+//   Serial  -> USART 1
+//   Serial1 -> USART 2
+//   Serial2 -> USART 3
 #define SerialB Serial2
+
 // SERIAL is always enabled SERIAL_A and SERIAL4 are optional
 #define HAL_SERIAL_B_ENABLED
 
