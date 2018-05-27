@@ -3,7 +3,8 @@
 
 // at startup this firmware will attempt to switch OnStep's baud rate to a faster speed and AFTER success, start WiFi, etc.
 // valid baud rates are 115200, 57600, 38400, 28800, 19200, 9600
-
+#ifndef CONFIG_H
+#define CONFIG_H
 #define SERIAL_BAUD_DEFAULT 9600  // Default=9600, OnStep must be attached and running it's Serial1 interface this baud rate
 
 #define SERIAL_BAUD 57600         // Default=57600, use 19200 for talking to OnStep on a Mega2560
@@ -73,3 +74,4 @@
 
 // -------------------------------------------------------------------------------
 
+#endif

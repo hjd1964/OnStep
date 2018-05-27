@@ -1,18 +1,20 @@
 // -----------------------------------------------------------------------------------
 // Misc functions to help with commands, etc.
-
 // integer numeric conversion with error checking
-boolean atoi2(char *a, int *i) {
+#include "WifiBluetooth.h"
+#include "config.h"
+
+boolean wifibluetooth::atoi2(char *a, int *i) {
   char *conv_end;
   long l=strtol(a,&conv_end,10);
   
   if ((l<-32767) || (l>32768) || (&a[0]==conv_end)) return false;
   *i=l;
   return true;
-}
+};
 
 // this readBytesUntil() lets you know if the "character" was found
-byte readBytesUntil2(char character, char buffer[], int length, boolean* characterFound, long timeout) {
+byte wifibluetooth::readBytesUntil2(char character, char buffer[], int length, boolean* characterFound, long timeout) {
   unsigned long endTime=millis()+timeout;
   int pos=0;
   *characterFound=false;
@@ -24,10 +26,10 @@ byte readBytesUntil2(char character, char buffer[], int length, boolean* charact
     }
   }
   return pos;
-}
+};
 
 // smart LX200 aware command and response over serial
-boolean readLX200Bytes(char* command,char* recvBuffer,long timeOutMs) {
+boolean wifibluetooth::readLX200Bytes(char* command,char* recvBuffer,long timeOutMs) {
   Ser.setTimeout(timeOutMs);
   
   // clear the read/write buffers
@@ -110,11 +112,11 @@ boolean readLX200Bytes(char* command,char* recvBuffer,long timeOutMs) {
     }
     return (recvBuffer[0]!=0);
   }
-}
+};
 
 // sends LX200 command and optionally waits for response (w/timeout, up to 20 chars)
-enum Responding {R_NONE, R_ONE, R_BOOL, R_STRING};
-bool sendCommand(const char command[], char response[], Responding responding=R_STRING) {
+
+bool wifibluetooth::sendCommand(const char command[], char response[], Responding responding) {
   Ser.print(command);
   strcpy(response,"");
   if (responding==R_NONE) return true;
@@ -122,15 +124,15 @@ bool sendCommand(const char command[], char response[], Responding responding=R_
   if (responding==R_BOOL) { response[Ser.readBytes(response,1)]=0; if (strlen(response)>0) { if (response[0]=='0') return false; else return true; } }
   if (responding==R_STRING) { boolean found=true; response[readBytesUntil2('#',response,20,&found,WebTimeout)]=0; if (!found) return false; }
   return response[0];
-}
+};
 
-char serialRecvFlush() {
+char wifibluetooth::serialRecvFlush() {
   char c=0;
   while (Ser.available()>0) c=Ser.read();
   return c;
-}
+};
 
-boolean doubleToDms(char *reply, double *f, boolean fullRange, boolean signPresent) {
+boolean wifibluetooth::doubleToDms(char *reply, double *f, boolean fullRange, boolean signPresent) {
   char sign[]="+";
   int  o=0,d1,s1=0;
   double m1,f1;
@@ -154,5 +156,5 @@ boolean doubleToDms(char *reply, double *f, boolean fullRange, boolean signPrese
  
   sprintf(reply,s,d1,(int)m1,s1);
   return true;
-}
+};
 

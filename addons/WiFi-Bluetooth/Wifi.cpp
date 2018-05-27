@@ -1,5 +1,9 @@
+#include "WifiBluetooth.h"
+
+
 // -----------------------------------------------------------------------------------
 // Wifi setup
+
 
 const char html_wifiSerial[] = 
 "<b>Performance and compatibility:</b><br/>"
@@ -103,7 +107,28 @@ const char html_login[] =
 bool restartRequired=false;
 bool loginRequired=true;
 
-void handleWifi() {
+// convert hex to int with error checking
+// returns -1 on error
+int wifibluetooth::hexToInt(String s) {
+  int i0;
+  int i1;
+  if (s.length() != 2) return -1;
+  char c0 = s.charAt(0);
+  char c1 = s.charAt(1);
+  if ((((c0 >= '0') && (c0 <= '9')) || ((c0 >= 'A') && (c0 <= 'F'))) &&
+    (((c1 >= '0') && (c1 <= '9')) || ((c1 >= 'A') && (c1 <= 'F')))) {
+    if ((c0 >= '0') && (c0 <= '9')) { i0 = c0 - '0'; }
+    else { i0 = (c0 - 'A') + 10; }
+    if ((c1 >= '0') && (c1 <= '9')) { i1 = c1 - '0'; }
+    else { i1 = (c1 - 'A') + 10; }
+    return i0 * 16 + i1;
+  }
+  else return -1;
+}
+
+
+
+void wifibluetooth::handleWifi() {
   Ser.setTimeout(WebTimeout);
   
   char temp[320]="";
@@ -199,7 +224,7 @@ void handleWifi() {
   server.send(200, "text/html",data);
 }
 
-void processWifiGet() {
+void wifibluetooth::processWifiGet() {
   String v,v1;
   
   boolean EEwrite=false;
@@ -215,7 +240,7 @@ void processWifiGet() {
   v=server.arg("webpwd");
   if (v!="") {
     strcpy(masterPassword,(char*)v.c_str());
-    EEPROM_writeString(200,masterPassword);
+    wifibluetooth::EEPROM_writeString(200, wifibluetooth::masterPassword);
     EEwrite=true;
   }
 
@@ -404,21 +429,5 @@ void processWifiGet() {
   }
 
   if (EEwrite) EEPROM.commit();
-}
-
-// convert hex to int with error checking
-// returns -1 on error
-int hexToInt(String s) {
-  int i0;
-  int i1;
-  if (s.length()!=2) return -1;
-  char c0=s.charAt(0);
-  char c1=s.charAt(1);
-  if ( (((c0>='0') && (c0<='9')) || ((c0>='A') && (c0<='F'))) &&
-       (((c1>='0') && (c1<='9')) || ((c1>='A') && (c1<='F'))) ) {
-    if ((c0>='0') && (c0<='9')) { i0=c0-'0'; } else { i0=(c0-'A')+10; }
-    if ((c1>='0') && (c1<='9')) { i1=c1-'0'; } else { i1=(c1-'A')+10; }
-    return i0*16+i1;
-  } else return -1;
 }
 
