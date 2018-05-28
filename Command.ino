@@ -1701,10 +1701,12 @@ void processCommands() {
         if ((command[1]=='d') && !isSlewing() && !isHoming() ) trackingState=TrackingNone; else
           commandError=true;
 
+#ifndef MOUNT_TYPE_ALTAZM
        if (dualAxis && (rateCompensation==RC_REFR_RA)) rateCompensation=RC_REFR_BOTH;
        if (!dualAxis && (rateCompensation==RC_REFR_BOTH)) rateCompensation=RC_REFR_RA;
        if (dualAxis && (rateCompensation==RC_FULL_RA)) rateCompensation=RC_FULL_BOTH;
        if (!dualAxis && (rateCompensation==RC_FULL_BOTH)) rateCompensation=RC_FULL_RA;
+#endif
 
         // Only burn the new rate if changing the sidereal interval
         if ((!commandError) && ((command[1]=='+') || (command[1]=='-') || (command[1]=='R'))) {
