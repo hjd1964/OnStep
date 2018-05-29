@@ -4,7 +4,7 @@
 #pragma once
 
 // set to _ON to activate this configuration
-#define SERIALSMARTCONTROLLER_ON
+#define SERIALSMARTCONTROLLER_OFF
 
 #ifdef SERIALSMARTCONTROLLER_ON
   #ifdef ARDUINO_ESP8266_WEMOS_D1MINI

@@ -4,7 +4,7 @@
 #pragma once
 
 // set to _ON to activate this configuration
-#define ST4SMARTCONTROLLER_OFF
+#define ST4SMARTCONTROLLER_ON
 
 #ifdef ST4SMARTCONTROLLER_ON
   // the serial interface to/from OnStep (over ST4 pins)
