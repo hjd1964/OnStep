@@ -21,12 +21,12 @@
 
 // The pins here are not tested yet, and need to change 
 
-#define Axis1_EN        PB1   // Enable
-#define Axis1_M0        PB0   // Microstep Mode 0
-#define Axis1_M1        PA7    // Microstep Mode 1
-#define Axis1_M2        PA6    // Microstep Mode 2
-#define Axis1StepPin    PA5    // Step
-#define Axis1DirPin     PA4    // Motor Direction
+#define Axis1_EN        PA2    // Enable
+#define Axis1_M0        PA1    // Microstep Mode 0
+#define Axis1_M1        PA0    // Microstep Mode 1
+#define Axis1_M2        PC13   // Microstep Mode 2
+#define Axis1StepPin    PB9    // Step
+#define Axis1DirPin     PB8    // Motor Direction
 //#define Axis1_FAULT   Undefined    // Fault
 //#define Axis1_Aux     Axis1_Aux    // Aux - ESP8266 GPIO0 or SPI MISO
 
@@ -34,29 +34,31 @@
 #define Axis2_M0        PB14   // Microstep Mode 0
 #define Axis2_M1        PB15   // Microstep Mode 1
 #define Axis2_M2        PA8    // Microstep Mode 2
-#define Axis2StepPin    PA11   // Step
-#define Axis2DirPin     PA12   // Motor Direction
+#define Axis2StepPin    PA9    // Step
+#define Axis2DirPin     PA10   // Motor Direction
 //#define Axis2_FAULT   Undefined    // Fault
 //#define Axis2_Aux     Axis2_FAULT  // Aux - ESP8266 RST or SPI MISO
+
+// ST4 interface
+#define ST4DEn          PA14   // ST4 DE+ North
+#define ST4DEs          PA13   // ST4 DE- South
+#define ST4RAw          PB1    // ST4 RA- West
+#define ST4RAe          PB0    // ST4 RA+ East
 
 // This is the built in LED for the Black Pill board. There is a pin
 // available from it too, in case you want to power another LED with a wire
 #define LEDnegPin       PB12         // Drain
-//#define LEDneg2Pin    Undefined    // Drain
-//#define ReticulePin   Undefined    // Drain
 
 // For a piezo buzzer
-#define TonePin         PB8  // Tone
+#define TonePin         PB4    // Tone
 
-// ST4 interface
-#define ST4DEn          PA15  // ST4 DE+ North
-#define ST4DEs          PB3   // ST4 DE- South
-#define ST4RAw          PB4   // ST4 RA- West
-#define ST4RAe          PB5   // ST4 RA+ East
+// The PPS pin is a 3.3V logic input, OnStep measures time between rising edges and
+// adjusts the internal sidereal clock frequency
+#define PpsPin          PB5    // Pulse Per Second time source, e.g. GPS, RTC
 
 // Pins to focuser1 stepper driver
-//#define Axis4DirPin     A15    // Dir
-//#define Axis4StepPin    PB3    // Step
+#define Axis4DirPin     PA15   // Dir
+#define Axis4StepPin    PB3    // Step
 
 // For rotator stepper driver
 //#define Axis3DirPin     PB4    // Dir
@@ -75,9 +77,9 @@
 //#define PecPin       Undefined
 //#define AnalogPecPin Undefined    // PEC Sense, analog or digital
 
-// The PPS pin is a 3.3V logic input, OnStep measures time between rising edges and
-// adjusts the internal sidereal clock frequency
-#define PpsPin         PA13         // Pulse Per Second time source, e.g. GPS
+//#define LEDneg2Pin    Undefined    // Drain
+
+//#define ReticulePin   Undefined    // Drain
 
 #else
 #error "Wrong processor for this configuration!"
