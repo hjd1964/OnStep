@@ -95,8 +95,8 @@
   #error "Focuser2 can't be enabled without first enabling Focuser1"
 #endif
 
-#if defined(MaxPCB) || defined(MiniPCB)
-  #if defined(RETICULE_LED_PINS) && (defined(STATUS_LED_PINS_ON) || defined(STATUS_LED_PINS))
+#if defined(MaxPCB_ON) || defined(MiniPCB_ON)
+  #if defined(RETICULE_LED_PINS) && defined(STATUS_LED_PINS2_ON)
     #error "You can't have the Illuminated Reticule and Status2 LEDs both enabled in this configuration."
   #endif
 #endif
