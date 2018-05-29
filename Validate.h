@@ -104,6 +104,14 @@
 // -----------------------------------------------------------------------------------
 // misc. configuration #defines to correct for backwards compatability etc.
 
+// set serial port baud rate the old way
+#ifdef SERIAL1_BAUD_DEFAULT
+  #define SERIAL_B_BAUD_DEFAULT SERIAL1_BAUD_DEFAULT
+#endif
+#ifdef SERIAL4_BAUD_DEFAULT
+  #define SERIAL_C_BAUD_DEFAULT SERIAL4_BAUD_DEFAULT
+#endif
+
 // config pre-version 1
 #ifdef SEPERATE_PULSE_GUIDE_RATE_ON
   #define SEPARATE_PULSE_GUIDE_RATE_ON
