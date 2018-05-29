@@ -16,8 +16,8 @@ cb cmdC;
 #ifdef ST4_HAND_CONTROL_ON
 cb cmdST4;
 #endif
-char replyx[50]="";
-cb cmdX; // virtual command channel for internal use
+// virtual command channel for internal use
+char _replyX[50]=""; cb cmdX;
 
 // process commands
 void processCommands() {
@@ -1936,7 +1936,7 @@ void processCommands() {
         if (process_command==COMMAND_SERIAL_X) {
           if (cmdX.checksum) checksum(reply);
           if (!supress_frame) strcat(reply,"#");
-          strcpy(replyx,reply);
+          strcpy(_replyX,reply);
         }
       }
       quietReply=false;
@@ -1968,21 +1968,21 @@ bool _ignoreReply=false;
 // true if command isn't complete
 bool cmdWaiting() {
   if (cmdX.ready()) return true;
-  if ((replyx[0]!=0) && !_ignoreReply) return true;
+  if ((_replyX[0]!=0) && !_ignoreReply) return true;
   return false;
 }
 // set command to be processed and if reply should be be ignored
 void cmdSend(const char *s, bool ignoreReply=false) {
   _ignoreReply=ignoreReply;
-  replyx[0]=0;
+  _replyX[0]=0;
   cmdX.flush();
   int l=0;
   while (s[l]!=0) { cmdX.add(s[l]); l++; }
 }
 // get the last command reply
 bool cmdReply(char *s) {
-  if (replyx[0]==0) return false;
-  strcpy(s,replyx); replyx[0]=0;
+  if (_replyX[0]==0) return false;
+  strcpy(s,_replyX); _replyX[0]=0;
   return true;
 }
 
