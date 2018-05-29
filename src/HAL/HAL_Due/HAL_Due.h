@@ -9,7 +9,7 @@
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
 #define SerialA Serial
 #define SerialB Serial1
-// SERIAL is always enabled SERIAL_A and SERIAL4 are optional
+// SerialA is always enabled, SerialB and SerialC are optional
 #define HAL_SERIAL_B_ENABLED
 
 // New symbol for the default I2C port ---------------------------------------------------------------

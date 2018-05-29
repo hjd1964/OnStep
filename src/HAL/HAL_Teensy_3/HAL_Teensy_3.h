@@ -14,13 +14,12 @@
 
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
 #define SerialA Serial
+// SerialA is always enabled, SerialB and SerialC are optional
 #define SerialB Serial1
-// SERIAL is always enabled SERIAL_B and SERIAL4 are optional
 #define HAL_SERIAL_B_ENABLED
 #if defined(__MK64FX512__) || defined(__MK66FX1M0__)
-#define SerialC Serial4
-// SERIAL is always enabled SERIAL_B and SERIAL4 are optional
-#define HAL_SERIAL_C_ENABLED
+  #define SerialC Serial4
+  #define HAL_SERIAL_C_ENABLED
 #endif
 
 // New symbol for the default I2C port -------------------------------------------------------------

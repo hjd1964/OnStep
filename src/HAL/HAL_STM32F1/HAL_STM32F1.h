@@ -42,7 +42,7 @@
   #define SerialB Serial2
 #endif
 
-// Serial is always enabled (USB), SERIAL_B and SERIAL_C are optional
+// SerialA is always enabled, SerialB and SerialC are optional
 #define HAL_SERIAL_B_ENABLED
 
 // New symbol for the default I2C port -------------------------------------------------------------
