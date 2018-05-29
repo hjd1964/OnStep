@@ -1776,6 +1776,7 @@ void processCommands() {
           quietReply=true;
         } else commandError=true;
       } else
+#endif
 //   V - PEC Readout StepsPerSecondAxis1
 //  :VS#
 //         Returns: DDD.DDDDDD#
@@ -1788,6 +1789,7 @@ void processCommands() {
           quietReply=true;
         } else commandError=true;
       } else
+#ifndef MOUNT_TYPE_ALTAZM
 //  :VH#
 //         Read RA PEC sense index (seconds)
 //         Returns: DDDDD#
