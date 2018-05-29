@@ -15,18 +15,18 @@ char command[3];
 char parameter[25];
 boolean commandError = false;
 boolean quietReply   = false;
-cb cmd;  // the first Serial is always enabled
+cb cmdA;  // the first Serial is always enabled
 #ifdef HAL_SERIAL_B_ENABLED
-cb cmd1;
+cb cmdB;
 #endif
 #ifdef HAL_SERIAL_C_ENABLED
-cb cmd4;
+cb cmdC;
 #endif
 #ifdef ST4_HAND_CONTROL_ON
 cb cmdST4;
 #endif
 char replyx[50]="";
-cb cmdx; // virtual command channel for internal use
+cb cmdX; // virtual command channel for internal use
 
 #ifdef FOCUSER1_ON
 char primaryFocuser = 'F';
@@ -42,12 +42,12 @@ void processCommands() {
     char *conv_end;
 
     // accumulate the command
-    if ((SerialA.available()>0) && (!cmd.ready())) cmd.add(SerialA.read());
+    if ((SerialA.available()>0) && (!cmdA.ready())) cmdA.add(SerialA.read());
 #ifdef HAL_SERIAL_B_ENABLED
-    if ((SerialB.available()>0) && (!cmd1.ready())) cmd1.add(SerialB.read());
+    if ((SerialB.available()>0) && (!cmdB.ready())) cmdB.add(SerialB.read());
 #endif
 #ifdef HAL_SERIAL_C_ENABLED
-    if ((SerialC.available()>0) && (!cmd4.ready())) cmd4.add(SerialC.read());
+    if ((SerialC.available()>0) && (!cmdC.ready())) cmdC.add(SerialC.read());
 #endif
 #ifdef ST4_HAND_CONTROL_ON
     if ((SerialST4.available()>0) && (!cmdST4.ready())) cmdST4.add(SerialST4.read());
@@ -66,17 +66,17 @@ void processCommands() {
 
     // if a command is ready, process it
     Command process_command = COMMAND_NONE;
-    if (cmd.ready()) { strcpy(command,cmd.getCmd()); strcpy(parameter,cmd.getParameter()); cmd.flush(); process_command=COMMAND_SERIAL_A; }
+    if (cmdA.ready()) { strcpy(command,cmdA.getCmd()); strcpy(parameter,cmdA.getParameter()); cmdA.flush(); process_command=COMMAND_SERIAL_A; }
 #ifdef HAL_SERIAL_B_ENABLED
-    else if (cmd1.ready()) { strcpy(command,cmd1.getCmd()); strcpy(parameter,cmd1.getParameter()); cmd1.flush(); process_command=COMMAND_SERIAL_B; }
+    else if (cmdB.ready()) { strcpy(command,cmdB.getCmd()); strcpy(parameter,cmdB.getParameter()); cmdB.flush(); process_command=COMMAND_SERIAL_B; }
 #endif
 #ifdef HAL_SERIAL_C_ENABLED
-    else if (cmd4.ready()) { strcpy(command,cmd4.getCmd()); strcpy(parameter,cmd4.getParameter()); cmd4.flush(); process_command=COMMAND_SERIAL_C; }
+    else if (cmdC.ready()) { strcpy(command,cmdC.getCmd()); strcpy(parameter,cmdC.getParameter()); cmdC.flush(); process_command=COMMAND_SERIAL_C; }
 #endif
 #ifdef ST4_HAND_CONTROL_ON
     else if (cmdST4.ready()) { strcpy(command,cmdST4.getCmd()); strcpy(parameter,cmdST4.getParameter()); cmdST4.flush(); process_command=COMMAND_SERIAL_ST4; }
 #endif
-    else if (cmdx.ready()) { strcpy(command,cmdx.getCmd()); strcpy(parameter,cmdx.getParameter()); cmdx.flush(); process_command=COMMAND_SERIAL_X; }
+    else if (cmdX.ready()) { strcpy(command,cmdX.getCmd()); strcpy(parameter,cmdX.getParameter()); cmdX.flush(); process_command=COMMAND_SERIAL_X; }
     else return;
 
     if (process_command) {
@@ -1896,14 +1896,14 @@ void processCommands() {
       
       if (strlen(reply)>0) {
         if (process_command==COMMAND_SERIAL_A) {
-          if (cmd.checksum) checksum(reply);
+          if (cmdA.checksum) checksum(reply);
           if (!supress_frame) strcat(reply,"#");
           SerialA.print(reply);
         } 
   
 #ifdef HAL_SERIAL_B_ENABLED
         if (process_command==COMMAND_SERIAL_B) {
-          if (cmd1.checksum) checksum(reply);
+          if (cmdB.checksum) checksum(reply);
           if (!supress_frame) strcat(reply,"#");
           SerialB.print(reply);
         }
@@ -1911,7 +1911,7 @@ void processCommands() {
 
 #ifdef HAL_SERIAL_C_ENABLED
         if (process_command==COMMAND_SERIAL_C) {
-          if (cmd4.checksum) checksum(reply);
+          if (cmdC.checksum) checksum(reply);
           if (!supress_frame) strcat(reply,"#");
           SerialC.print(reply);
         }
@@ -1926,7 +1926,7 @@ void processCommands() {
 #endif
 
         if (process_command==COMMAND_SERIAL_X) {
-          if (cmdx.checksum) checksum(reply);
+          if (cmdX.checksum) checksum(reply);
           if (!supress_frame) strcat(reply,"#");
           strcpy(replyx,reply);
         }
@@ -1959,7 +1959,7 @@ void forceRefreshGetEqu() {
 bool _ignoreReply=false;
 // true if command isn't complete
 bool cmdWaiting() {
-  if (cmdx.ready()) return true;
+  if (cmdX.ready()) return true;
   if ((replyx[0]!=0) && !_ignoreReply) return true;
   return false;
 }
@@ -1967,9 +1967,9 @@ bool cmdWaiting() {
 void cmdSend(const char *s, bool ignoreReply=false) {
   _ignoreReply=ignoreReply;
   replyx[0]=0;
-  cmdx.flush();
+  cmdX.flush();
   int l=0;
-  while (s[l]!=0) { cmdx.add(s[l]); l++; }
+  while (s[l]!=0) { cmdX.add(s[l]); l++; }
 }
 // get the last command reply
 bool cmdReply(char *s) {
