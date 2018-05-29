@@ -293,7 +293,7 @@ void processCommands() {
               // read from port 1, send to port 0:
               if (SerialB.available()) {
                 int inByte = SerialB.read();
-                SerialB.write(inByte);
+                SerialA.write(inByte);
               }
               
               // read from port 0, send to port 1:
