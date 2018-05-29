@@ -16,8 +16,7 @@ cb cmdC;
 #ifdef ST4_HAND_CONTROL_ON
 cb cmdST4;
 #endif
-// virtual command channel for internal use
-char _replyX[50]=""; cb cmdX;
+char _replyX[50]=""; cb cmdX;  // virtual command channel for internal use
 
 // process commands
 void processCommands() {
