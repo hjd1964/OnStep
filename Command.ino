@@ -9,7 +9,7 @@ unsigned long _coord_t=0;
 double _dec,_ra;
 
 // help with commands
-enum Command {COMMAND_NONE, COMMAND_SERIAL, COMMAND_SERIAL_B, COMMAND_SERIAL_C, COMMAND_SERIALST4, COMMAND_SERIALX};
+enum Command {COMMAND_NONE, COMMAND_SERIAL_A, COMMAND_SERIAL_B, COMMAND_SERIAL_C, COMMAND_SERIAL_ST4, COMMAND_SERIAL_X};
 char reply[50];
 char command[3];
 char parameter[25];
@@ -66,7 +66,7 @@ void processCommands() {
 
     // if a command is ready, process it
     Command process_command = COMMAND_NONE;
-    if (cmd.ready()) { strcpy(command,cmd.getCmd()); strcpy(parameter,cmd.getParameter()); cmd.flush(); process_command=COMMAND_SERIAL; }
+    if (cmd.ready()) { strcpy(command,cmd.getCmd()); strcpy(parameter,cmd.getParameter()); cmd.flush(); process_command=COMMAND_SERIAL_A; }
 #ifdef HAL_SERIAL_B_ENABLED
     else if (cmd1.ready()) { strcpy(command,cmd1.getCmd()); strcpy(parameter,cmd1.getParameter()); cmd1.flush(); process_command=COMMAND_SERIAL_B; }
 #endif
@@ -74,9 +74,9 @@ void processCommands() {
     else if (cmd4.ready()) { strcpy(command,cmd4.getCmd()); strcpy(parameter,cmd4.getParameter()); cmd4.flush(); process_command=COMMAND_SERIAL_C; }
 #endif
 #ifdef ST4_HAND_CONTROL_ON
-    else if (cmdST4.ready()) { strcpy(command,cmdST4.getCmd()); strcpy(parameter,cmdST4.getParameter()); cmdST4.flush(); process_command=COMMAND_SERIALST4; }
+    else if (cmdST4.ready()) { strcpy(command,cmdST4.getCmd()); strcpy(parameter,cmdST4.getParameter()); cmdST4.flush(); process_command=COMMAND_SERIAL_ST4; }
 #endif
-    else if (cmdx.ready()) { strcpy(command,cmdx.getCmd()); strcpy(parameter,cmdx.getParameter()); cmdx.flush(); process_command=COMMAND_SERIALX; }
+    else if (cmdx.ready()) { strcpy(command,cmdx.getCmd()); strcpy(parameter,cmdx.getParameter()); cmdx.flush(); process_command=COMMAND_SERIAL_X; }
     else return;
 
     if (process_command) {
@@ -1251,7 +1251,7 @@ void processCommands() {
       if (command[1]=='B') {
         i=(int)(parameter[0]-'0');
         if ((i>=0) && (i<10)) {
-          if (process_command==COMMAND_SERIAL) {
+          if (process_command==COMMAND_SERIAL_A) {
             SerialA.print("1"); 
             #ifdef HAL_SERIAL_TRANSMIT
             while (SerialA.transmit()); 
@@ -1895,7 +1895,7 @@ void processCommands() {
       }
       
       if (strlen(reply)>0) {
-        if (process_command==COMMAND_SERIAL) {
+        if (process_command==COMMAND_SERIAL_A) {
           if (cmd.checksum) checksum(reply);
           if (!supress_frame) strcat(reply,"#");
           SerialA.print(reply);
@@ -1918,14 +1918,14 @@ void processCommands() {
 #endif
 
 #ifdef ST4_HAND_CONTROL_ON
-        if (process_command==COMMAND_SERIALST4) {
+        if (process_command==COMMAND_SERIAL_ST4) {
           if (cmdST4.checksum) checksum(reply);
           if (!supress_frame) strcat(reply,"#");
           SerialST4.print(reply);
         }
 #endif
 
-        if (process_command==COMMAND_SERIALX) {
+        if (process_command==COMMAND_SERIAL_X) {
           if (cmdx.checksum) checksum(reply);
           if (!supress_frame) strcat(reply,"#");
           strcpy(replyx,reply);
