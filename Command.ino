@@ -1485,25 +1485,29 @@ void processCommands() {
         } else
         if (parameter[0]=='9') { // 9n: Misc.
           switch (parameter[1]) {
-            case '2': // set new acceleration rate
-              maxRate=strtol(&parameter[3],NULL,10)*16L;
-              if (maxRate<(MaxRate/2L)*16L) maxRate=(MaxRate/2L)*16L;
-              if (maxRate>(MaxRate*2L)*16L) maxRate=(MaxRate*2L)*16L;
-              nv.writeInt(EE_maxRate,(int)(maxRate/16L));
-              SetAccelerationRates(maxRate);
+            case '2': // set new acceleration rate (returns 1 success or 0 failure)
+              if (!isSlewing()) {
+                maxRate=strtol(&parameter[3],NULL,10)*16L;
+                if (maxRate<(MaxRate/2L)*16L) maxRate=(MaxRate/2L)*16L;
+                if (maxRate>(MaxRate*2L)*16L) maxRate=(MaxRate*2L)*16L;
+                nv.writeInt(EE_maxRate,(int)(maxRate/16L));
+                SetAccelerationRates(maxRate);
+              } else commandError=true;
             break;
-            case '3': // acceleration rate preset
+            case '3': // acceleration rate preset (returns nothing)
               quietReply=true;
-              switch (parameter[3]) {
-                case '5': maxRate=MaxRate*32L; break; // 50%
-                case '4': maxRate=MaxRate*24L; break; // 75%
-                case '3': maxRate=MaxRate*16L; break; // 100%
-                case '2': maxRate=MaxRate*12L; break; // 150%
-                case '1': maxRate=MaxRate*8L;  break; // 200%
-                default:  maxRate=MaxRate*16L;
+              if (!isSlewing()) {
+                switch (parameter[3]) {
+                  case '5': maxRate=MaxRate*32L; break; // 50%
+                  case '4': maxRate=MaxRate*24L; break; // 75%
+                  case '3': maxRate=MaxRate*16L; break; // 100%
+                  case '2': maxRate=MaxRate*12L; break; // 150%
+                  case '1': maxRate=MaxRate*8L;  break; // 200%
+                  default:  maxRate=MaxRate*16L;
+                  nv.writeInt(EE_maxRate,(int)(maxRate/16L));
+                  SetAccelerationRates(maxRate);
+                }
               }
-              nv.writeInt(EE_maxRate,(int)(maxRate/16L));
-              SetAccelerationRates(maxRate);
             break;
 #ifdef MOUNT_TYPE_GEM
             case '5': // autoMeridianFlip
