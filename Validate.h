@@ -204,11 +204,11 @@
 #endif
 
 // set serial port baud rate if not done so already
-#ifndef SERIAL_A_BAUD_DEFAULT
-  #define SERIAL_A_BAUD_DEFAULT 9600
-#endif
 #ifndef SERIAL_B_BAUD_DEFAULT
   #define SERIAL_B_BAUD_DEFAULT 9600
+#endif
+#ifndef SERIAL_C_BAUD_DEFAULT
+  #define SERIAL_C_BAUD_DEFAULT 9600
 #endif
 
 // figure out how many align star are allowed for the configuration
