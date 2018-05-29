@@ -17,10 +17,33 @@
 #define sei() interrupts()
 
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
-#define PSerial Serial
-#define PSerial1 Serial2
-// SERIAL is always enabled SERIAL1 and SERIAL4 are optional
-#define HAL_SERIAL1_ENABLED
+#define SerialA Serial
+
+// Which port to use for WiFi?
+//
+// The hardware serial ports and pins for STM32F103 are:
+//   USART1: TX PA9,  RX PA10
+//   USART2: TX PA2,  RX PA3
+//   USART3: TX PB10, RX PB11
+
+// Different flashing methods will remap the port numbers differently, as follows.
+//
+// For DFU (STM32duino), or ST-Link V2, the ports are:
+//   Serial1 -> USART 1
+//   Serial2 -> USART 2
+//   Serial3 -> USART 3
+// If "Serial" method, using a USB to TTL dongle on pins A9 and A10, the ports are:
+//   Serial  -> USART 1
+//   Serial1 -> USART 2
+//   Serial2 -> USART 3
+#if defined(SERIAL_USB)
+  #define SerialB Serial3
+#else
+  #define SerialB Serial2
+#endif
+
+// Serial is always enabled (USB), SERIAL_B and SERIAL_C are optional
+#define HAL_SERIAL_B_ENABLED
 
 // New symbol for the default I2C port -------------------------------------------------------------
 #define HAL_Wire Wire

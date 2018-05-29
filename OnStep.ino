@@ -64,8 +64,8 @@
 #include "src/lib/St4SerialMaster.h"
 
 // Enable debugging messages on DebugSer -------------------------------------------------------------
-#define DEBUG_ON                  // default=_OFF, use "DEBUG_ON" to activate
-#define DebugSer PSerialST4       // default=Serial, or Serial1 for example (always 9600 baud)
+#define DEBUG_OFF              // default=_OFF, use "DEBUG_ON" to activate
+#define DebugSer SerialA       // default=Serial, or Serial1 for example (always 9600 baud)
 
 // Helper macros for debugging, with less typing
 #if defined(DEBUG_ON)
@@ -128,7 +128,7 @@ void setup() {
 #ifdef DEBUG_ON
   // Initialize USB serial debugging early, so we can use DebugSer.print() for debugging, if needed
   DebugSer.begin(9600);
-  delay(1000);
+  delay(5000);
 #endif
   
   // initialize the Non-Volatile Memory
@@ -145,6 +145,7 @@ void setup() {
 
   // set pins for input/output as specified in Config.h and PinMap.h
   Init_Pins();
+  
   Init_Guide();
 
   // if this is the first startup set EEPROM to defaults
@@ -170,15 +171,15 @@ void setup() {
   // starts the hardware timers that keep sidereal time, move the motors, etc.
   Init_Start_Timers();
 
-  PSerial.begin(9600);
-#ifdef HAL_SERIAL1_ENABLED
-  PSerial1.begin(SERIAL1_BAUD_DEFAULT);
+  SerialA.begin(9600);
+#ifdef HAL_SERIAL_B_ENABLED
+  SerialB.begin(SERIAL_B_BAUD_DEFAULT);
 #endif
-#ifdef HAL_SERIAL4_ENABLED
-  PSerial4.begin(SERIAL4_BAUD_DEFAULT);
+#ifdef HAL_SERIAL_C_ENABLED
+  SerialC.begin(SERIAL_C_BAUD_DEFAULT);
 #endif
 #ifdef ST4_HAND_CONTROL_ON
-  PSerialST4.begin();
+  SerialST4.begin();
 #endif
  
   // autostart tracking

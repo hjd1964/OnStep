@@ -26,7 +26,7 @@
 #define ALIGN_GOTOASSIST_OFF
 
 // Default speed for Serial1 com port, Default=9600
-#define SERIAL1_BAUD_DEFAULT 9600
+#define SERIAL_B_BAUD_DEFAULT 9600
 
 // Mount type, default is _GEM (German Equatorial) other options are _FORK, _FORK_ALT.  _FORK switches off Meridian Flips after (1, 2 or 3 star) alignment is done.  _FORK_ALT disables Meridian Flips (1 star align.)
 // _ALTAZM is for Alt/Azm mounted 'scopes (1 star align only.)

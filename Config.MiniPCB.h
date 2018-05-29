@@ -20,7 +20,7 @@
 #define ALIGN_GOTOASSIST_OFF
 
 // Default speed for Serial1 com port, Default=9600
-#define SERIAL1_BAUD_DEFAULT 9600
+#define SERIAL_B_BAUD_DEFAULT 9600
 
 // ESP8266 reset and GPIO0 control, this sets run mode for normal operation.  Uploading programmer firmware to the OpStep MCU can then enable sending new firmware to the ESP8266-01
 // Pin 18 (Aux1) for GPIO0 and Pin 5 (Aux2) for Rst control.  Choose only one feature on Aux1/2.

@@ -7,10 +7,10 @@
 #define MaxRate_LowerLimit 16
 
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
-#define PSerial Serial
-#define PSerial1 Serial1
-// SERIAL is always enabled SERIAL1 and SERIAL4 are optional
-#define HAL_SERIAL1_ENABLED
+#define SerialA Serial
+#define SerialB Serial1
+// SERIAL is always enabled SERIAL_A and SERIAL4 are optional
+#define HAL_SERIAL_B_ENABLED
 
 // New symbol for the default I2C port ---------------------------------------------------------------
 #define HAL_Wire Wire

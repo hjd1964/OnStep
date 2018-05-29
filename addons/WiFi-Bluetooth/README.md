@@ -1,43 +1,48 @@
 # OnStep WiFi Server
-
 This is the ESP8266 webserver for OnStep.
 It enables OnStep to be controlled over WiFi (IP). This access can be over a command channel
 and/or website.
 This server is known to work from personal computers (using a browser), phones and tablets,
 (using the Android OnStep App), Sky Safari, and my ASCOM driver (PC.)
 
-# Flashing The WiFi Server
-For an ESP8266 ESP-01 module to be flashed with this firmware, it needs its pins in a certain
-configuration:
+# Installing the ESP8266 Platform
+Before you can flash the firmware on your ESP8266 device, you need to install the ESP8266
+platform for the Arduino IDE.
 
-Pin CH_PD/EN must be HIGH (connected to 3.3V)
-Pin GPIO0 must be LOW (connected to GND).
-
-For the ESP-01 module, you can by adapter boards that help with flashing from eBay, Amazon
-and other sources.
-
-For a WeMos D1 mini or NodeMCU simply plug in via the USB interface.
-To send the firmware I use the Arduino IDE with the add-on for the ESP8266, as follows:
-
-Under Preferences add this line in the additional "Boards Manager" area:
+nder Preferences add this line in the additional "Boards Manager" area:
 http://arduino.esp8266.com/stable/package_esp8266com_index.json
 
 Then from the "Tools, Boards, Boards Manager" menu select and install the ESP8266 add-on.
 
-Then pick "Tools, Boards, Generic 8266 Module" (for an ESP-01) or select your device from the list.
+# Flashing The WiFi Server
+Then pick your device from "Tools, Boards". 
 
-If you are using an ESP-01, then use the following parameters under Tools:
+For a WeMos D1 Mini or NodeMCU, select the device from the list.
+For an ESP-01, select "Generic 8266 Module" (for an ESP-01)
+
+For devices with a USB port, you can connect directly using the USB connector.
+
+The exact flashing procedure depends on which ESP8826 device you will be using.
+
+For an ESP-01 module, its pins should be in a certain configuration:
+
+Pin CHPD/EN must be HIGH (connected to 3.3V)
+Pin GPIO0 must be LOW (connected to GND).
+
+You can by adapter boards that help with flashing from eBay, Amazon and other sources.
+
+For the ESP-01, use the following parameters under Tools:
 
 - Flash Mode: “DIO”
 - Flash Frequency: “40MHz”
 - CPU Frequency: “80 MHz”
-- Flash Size: “512K (64K SPIFFS)”
+- Flash Size: “1M (64K SPIFFS)”
 - Reset Method: “ck”
 - Upload Speed: “115200”
 - Debug Port: “Disabled”
 - Debug Level: “None”
 
-This source code is inside your OnStep folder under the "addons/WiFi-Bluetooth" subdirectory.
+The source code is inside your OnStep folder under the "addons/WiFi-Bluetooth" subdirectory.
 
 Open the WiFi-Bluetooth.ino file inside this folder. Check the "Config.h" file for information
 about serial port wiring and to configure before uploading.  Once this is done upload to the ESP8266.

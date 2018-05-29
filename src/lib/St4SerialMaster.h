@@ -201,5 +201,5 @@ void Mst4::flush(void) {
   } while ((c!=0) || ((millis()-startMs)<_timeout));
 }
 
-Mst4 PSerialST4;
+Mst4 SerialST4;
 
