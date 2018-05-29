@@ -1,20 +1,11 @@
 // -----------------------------------------------------------------------------------
 // Command processing
 
-// scratch-pad variables
-double f,f1,f2,f3; 
-int    i,i1,i2;
-byte   b;
+// last RA/Dec time
 unsigned long _coord_t=0;
-double _dec,_ra;
 
 // help with commands
 enum Command {COMMAND_NONE, COMMAND_SERIAL_A, COMMAND_SERIAL_B, COMMAND_SERIAL_C, COMMAND_SERIAL_ST4, COMMAND_SERIAL_X};
-char reply[50];
-char command[3];
-char parameter[25];
-boolean commandError = false;
-boolean quietReply   = false;
 cb cmdA;  // the first Serial is always enabled
 #ifdef HAL_SERIAL_B_ENABLED
 cb cmdB;
@@ -28,18 +19,31 @@ cb cmdST4;
 char replyx[50]="";
 cb cmdX; // virtual command channel for internal use
 
-#ifdef FOCUSER1_ON
-char primaryFocuser = 'F';
-#endif
-
-#ifdef FOCUSER2_ON
-char secondaryFocuser = 'f';
-#endif
-
 // process commands
 void processCommands() {
+    // scratch-pad variables
+    double f,f1; 
+    int    i,i1,i2;
+    byte   b;
+    
+    // last RA/Dec
+    static double _dec,_ra;
+
+    // command processing
+    static char reply[50];
+    static char command[3];
+    static char parameter[25];
+    static boolean commandError = false;
+    static boolean quietReply   = false;
+
     boolean supress_frame = false;
     char *conv_end;
+#ifdef FOCUSER1_ON
+    static char primaryFocuser = 'F';
+#endif
+#ifdef FOCUSER2_ON
+    static char secondaryFocuser = 'f';
+#endif
 
     // accumulate the command
     if ((SerialA.available()>0) && (!cmdA.ready())) cmdA.add(SerialA.read());
