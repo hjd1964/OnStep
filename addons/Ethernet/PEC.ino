@@ -92,11 +92,11 @@ void handlePec() {
     data += html_pecControls3;
     data += html_pecControls4;
     data += html_pecControls5;
+    data += "</div></body></html>";
   } else {
     data += "PEC CONTROLS DISABLED";
+    data += "</div><br class='clear' /></body></html>";
   }
-
-  data += "</div></body></html>";
 
 #ifdef OETHS
   client->print(data);
