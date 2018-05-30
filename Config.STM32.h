@@ -1,21 +1,20 @@
 // -----------------------------------------------------------------------------------
 // Configuration for OnStep STM32
 
-/*
- * For more information on setting OnStep up see http://www.stellarjourney.com/index.php?r=site/equipment_onstep and 
- * join the OnStep Groups.io at https://groups.io/g/onstep
- * 
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  * * * * * * * * * *
- * See the appropriate file below for detailed information on this pin map to be sure it matches your wiring *** USE AT YOUR OWN RISK ***
- * ~/OnStep/src/pinmaps/Pins.STM32Black.h                                                                                               *  
- * ~/OnStep/src/pinmaps/Pins.STM32CZ.h                                                                                                  *
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *  * * * * * * * * * *
-*/
+// For more information on setting OnStep up see:
+//   http://www.stellarjourney.com/index.php?r=site/equipment_onstep and 
+// Join the OnStep Groups.io, and view the Wiki at: https://groups.io/g/onstep
+//
+// See the appropriate file below for detailed information on this pin map to be
+// sure it matches your wiring
+//
+// *** USE AT YOUR OWN RISK ***
 
-#define STM32Black_OFF   //  <- Turn _ON to use STM32F103C8T6 Black with this configuration OR
-#define STM32CZ_OFF      //  <- Turn _ON to use STM32F103VET6 CZ with this configuration
+#define STM32Blue_OFF    //  <- Turn _ON to use STM32F103C8T6 Blue Pill, or
+#define STM32Black_OFF   //  <- Turn _ON to use STM32F103C8T6 Black Pill, or
+#define STM32CZ_OFF      //  <- Turn _ON to use STM32F103VET6 CZ Mini
 
-#if defined(STM32Black_ON) || defined(STM32CZ_ON)
+#if defined(STM32Black_ON) || defined(STM32Blue_ON) || defined(STM32CZ_ON)
 // -------------------------------------------------------------------------------------------------------------------------
 // ADJUST THE FOLLOWING TO CONFIGURE YOUR CONTROLLER FEATURES --------------------------------------------------------------
 
@@ -212,10 +211,12 @@
 
 // -------------------------------------------------------------------------------------------------------------------------
 #define FileVersionConfig 2
-#if defined(STM32Black_ON)
-  #include "src/pinmaps/Pins.STM32Black.h"
+
+#if defined(STM32Black_ON) || defined(STM32Blue_ON)
+  #include "src/pinmaps/Pins.STM32B.h"
 #elif defined(STM32CZ_ON)
   #include "src/pinmaps/Pins.STM32CZ.h"
 #endif
+
 #endif
 

@@ -1,12 +1,18 @@
 // -------------------------------------------------------------------------------------------------
 // Pin map for OnStep on STM32
 // 
-// This pin map is for an STM32F103C8T6 "Black Pill" stick.
-// It runs at 72MHz has 128K flash and 20K RAM, and is 3.3V only
+// This pin map is for an STM32F103C8T6 "Black Pill" and "Blue Pill" sticks.
+// They run at 72MHz, have 128K flash and 20K RAM
+// The Black variant is 3.3V only, while the Blue has some pins that are 5V tolerant.
+// The Black Pill has two less pins than the Blue Pill. The Blue Pill has two flaws
+// with workarounds, wrong resistor interfers with flashing via USB, and a flimsy
+// USB connector. 
 //
-// Cost on eBay and AliExpress is less than US $2.50
 // More info, schematic at:
 //   http://wiki.stm32duino.com/index.php?title=Black_Pill
+//   http://wiki.stm32duino.com/index.php?title=Blue_Pill
+//
+// Cost on eBay and AliExpress is less than US $2.50
 //
 // Other boards based on the following chips also have enough flash
 // and RAM for OnStep, and should work, with pin modifications.
@@ -47,7 +53,13 @@
 
 // This is the built in LED for the Black Pill board. There is a pin
 // available from it too, in case you want to power another LED with a wire
-#define LEDnegPin       PB12         // Drain
+#if defined(STM32Black_ON)
+  #define LEDnegPin     PB12   // Drain
+#elif defined(STM32Blue_ON) 
+  #define LEDnegPin     PC13   // Drain
+#else
+  #error "Unknown STM32 Board. Can't assign an LED Pin"
+#endif
 
 // For a piezo buzzer
 #define TonePin         PB4    // Tone
