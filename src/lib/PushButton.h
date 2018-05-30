@@ -16,7 +16,7 @@ class button {
       _state=digitalRead(_pin);
       if (lastState!=_state) { _avgPulseDuration=((_avgPulseDuration*49.0)+(double)(millis()-_stableStartMs))/50.0; _stableStartMs=millis(); }
       _stableMs=(long)(millis()-_stableStartMs);
-      if (_stableMs>3000UL) { _avgPulseDuration=((_avgPulseDuration*4.0)+2000.0)/5.0; _stableStartMs=millis(); }
+      if (_stableMs>3000UL) { _avgPulseDuration=((_avgPulseDuration*4.0)+2000.0)/5.0; }
       if (_stableMs>_debounceMs) { if ((_lastStableState==HIGH) && (_state==LOW)) _wasPressed=true; _lastStableState=_state; }
     }
     // is the button down (LOW)
