@@ -25,12 +25,22 @@
 
 #if defined(__STM32F1__)
 
+#if defined(STM32Black_ON)
+  #define LED           PB12
+  #define A1M2          PC13
+#elif defined(STM32Blue_ON) 
+  #define LED           PC13
+  #define A1M2          PB13
+#else
+  #error "Unknown STM32 Board. This pinmap is only for Blue and Black Pill variants"
+#endif
+
 // The pins here are not tested yet, and need to change 
 
 #define Axis1_EN        PA2    // Enable
 #define Axis1_M0        PA1    // Microstep Mode 0
 #define Axis1_M1        PA0    // Microstep Mode 1
-#define Axis1_M2        PC13   // Microstep Mode 2
+#define Axis1_M2        A1M2   // Microstep Mode 2
 #define Axis1StepPin    PB9    // Step
 #define Axis1DirPin     PB8    // Motor Direction
 //#define Axis1_FAULT   Undefined    // Fault
@@ -53,13 +63,7 @@
 
 // This is the built in LED for the Black Pill board. There is a pin
 // available from it too, in case you want to power another LED with a wire
-#if defined(STM32Black_ON)
-  #define LEDnegPin     PB12   // Drain
-#elif defined(STM32Blue_ON) 
-  #define LEDnegPin     PC13   // Drain
-#else
-  #error "Unknown STM32 Board. Can't assign an LED Pin"
-#endif
+#define LEDnegPin       LED    // Drain
 
 // For a piezo buzzer
 #define TonePin         PB4    // Tone
