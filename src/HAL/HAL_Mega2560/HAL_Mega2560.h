@@ -11,7 +11,7 @@
 #define MaxRateLowerLimit 32
 
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
-#ifndef MEGA2560_STANDARD_SERIAL_ON
+#ifndef MEGA2560_ARDUINO_SERIAL_ON
   // Use low overhead serial
   #include "HAL_Serial.h"
   // SerialA is always enabled, SerialB and SerialC are optional
