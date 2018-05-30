@@ -744,6 +744,7 @@ void SmartHandController::drawReady()
   delay(500);
 }
 
+#ifndef ST4SMARTCONTROLLER_ON
 bool SmartHandController::menuSetStepperGearBox(uint8_t &axis, unsigned short &worm)
 {
   char text[20];
@@ -909,7 +910,7 @@ void SmartHandController::DisplayMotorSettings(uint8_t &axis)
 
   DisplayLongMessage(line1, NULL, line3, line4, -1);
 }
-
+#endif
 
 void SmartHandController::menuMain()
 {
@@ -1274,6 +1275,35 @@ void SmartHandController::menuRADec(bool sync)
 void SmartHandController::menuSettings()
 {
   current_selection_L1 = 1;
+#ifdef ST4SMARTCONTROLLER_ON
+  while (current_selection_L1 != 0)
+  {
+    const char *string_list_SettingsL1 = "Display\n""Alignment\n""Date\n""Time\n""Site\n""Limits";
+    current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Settings", current_selection_L1, string_list_SettingsL1);
+    switch (current_selection_L1)
+    {
+    case 1:
+      menuDisplay();
+      break;
+    case 2:
+      menuAlignment();
+      break;
+    case 3:
+      menuDate();
+      break;
+    case 4:
+      menuUTCTime();
+      break;
+    case 5:
+      menuSite();
+      break;
+    case 6:
+      menuLimits();
+    default:
+      break;
+    }
+  }
+#else
   while (current_selection_L1 != 0)
   {
     const char *string_list_SettingsL1 = "Display\n""Alignment\n""Date\n""Time\n""Mount\n""Site\n""Limits\n""Wifi";
@@ -1307,8 +1337,10 @@ void SmartHandController::menuSettings()
       break;
     }
   }
+#endif
 }
 
+#ifndef ST4SMARTCONTROLLER_ON
 void SmartHandController::menuMount()
 {
   current_selection_L2 = 1;
@@ -1334,8 +1366,8 @@ void SmartHandController::menuMount()
       break;
     }
   }
-
 }
+#endif
 
 void SmartHandController::menuMountType()
 {
@@ -1432,6 +1464,7 @@ void SmartHandController::menuAltMount()
 //void SmartHandController::menuTakahashi() {}
 //void SmartHandController::menuVixen() {}
 
+#ifndef ST4SMARTCONTROLLER_ON
 void SmartHandController::menuMotor(uint8_t axis)
 {
   current_selection_L3 = 1;
@@ -1470,8 +1503,8 @@ void SmartHandController::menuMotor(uint8_t axis)
       break;
     }
   }
-
 }
+#endif
 
 void SmartHandController::menuSite()
 {
@@ -1653,6 +1686,7 @@ void SmartHandController::menuLimits()
   }
 }
 
+#ifndef ST4SMARTCONTROLLER_ON
 void SmartHandController::menuWifi()
 {
   const char *string_list = (wifiOn) ? "Wifi off\nShow Password\nReset to factory" : "wifi on\nShow Password\nReset to factory";
@@ -1687,6 +1721,7 @@ void SmartHandController::menuWifi()
     }
   }
 }
+#endif
 
 void SmartHandController::menuHorizon()
 {
