@@ -13,6 +13,7 @@
 #define HAL_SERIAL_B_ENABLED
 
 // New symbol for the default I2C port ---------------------------------------------------------------
+#include <Wire.h>
 #define HAL_Wire Wire
 
 // Non-volatile storage ------------------------------------------------------------------------------
