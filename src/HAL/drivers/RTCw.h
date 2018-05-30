@@ -56,16 +56,16 @@ class rtcw {
 
 #include <Wire.h>
 #include <RtcDS3231.h>          //https://github.com/Makuna/Rtc/archive/master.zip
-RtcDS3231<TwoWire> Rtc(HAL_Wire);
+RtcDS3231<TwoWire> _Rtc(HAL_Wire);
 
 class rtcw {
   public:
     // initialize (also enables the RTC PPS if available)
     void init() {
-      Rtc.Begin(); if (!Rtc.GetIsRunning()) Rtc.SetIsRunning(true);
+      _Rtc.Begin(); if (!_Rtc.GetIsRunning()) _Rtc.SetIsRunning(true);
       // frequency 0 (1Hz) on the SQW pin
-      Rtc.SetSquareWavePin(DS3231SquareWavePin_ModeClock);
-      Rtc.SetSquareWavePinClockFrequency(DS3231SquareWaveClock_1Hz);
+      _Rtc.SetSquareWavePin(DS3231SquareWavePin_ModeClock);
+      _Rtc.SetSquareWavePinClockFrequency(DS3231SquareWaveClock_1Hz);
       active=true;
     }
 
@@ -84,14 +84,14 @@ class rtcw {
       s=(m-floor(m))*60.0;
       
       RtcDateTime updateTime = RtcDateTime(yy, mo, d, h, floor(m), floor(s));
-      Rtc.SetDateTime(updateTime);
+      _Rtc.SetDateTime(updateTime);
     }
     
     // get the RTC's time (local standard time)
     void get(double &JD, double &LMT) {
       if (!active) return;
 
-      RtcDateTime now = Rtc.GetDateTime();
+      RtcDateTime now = _Rtc.GetDateTime();
       if ((now.Year()>=2018) && (now.Year()<=3000) && (now.Month()>=1) && (now.Month()<=12) && (now.Day()>=1) && (now.Day()<=31) &&
           (now.Hour()>=0) && (now.Hour()<=23) && (now.Minute()>=0) && (now.Minute()<=59) && (now.Second()>=0) && (now.Second()<=59)) {
         JD=julian(now.Year(),now.Month(),now.Day());
