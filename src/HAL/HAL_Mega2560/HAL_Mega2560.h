@@ -11,12 +11,19 @@
 #define MaxRateLowerLimit 32
 
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
-// Use low overhead serial
-#include "HAL_Serial.h"
-// SerialA is always enabled, SerialB and SerialC are optional
-#define HAL_SERIAL_B_ENABLED
-// this tells OnStep that a .transmit() method needs to be called to send data
-#define HAL_SERIAL_TRANSMIT
+#ifndef MEGA2560_STANDARD_SERIAL_ON
+  // Use low overhead serial
+  #include "HAL_Serial.h"
+  // SerialA is always enabled, SerialB and SerialC are optional
+  #define HAL_SERIAL_B_ENABLED
+  // this tells OnStep that a .transmit() method needs to be called to send data
+  #define HAL_SERIAL_TRANSMIT
+#else
+  // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
+  #define SerialA Serial
+  // SerialA is always enabled, SerialB and SerialC are optional
+  #define SerialB Serial1
+#endif
 
 // New symbol for the default I2C port -------------------------------------------------------------
 #define HAL_Wire Wire
