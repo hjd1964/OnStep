@@ -121,9 +121,8 @@ void Sst4::flush(void) {
     noInterrupts();
     c=_xmit_buffer[_xmit_head];
     interrupts();
-  } while ((c!=0) || ((millis()-startMs)<_timeout));
+  } while ((c!=0) && ((millis()-startMs)<_timeout));
 }
-
 
 volatile uint8_t data_in = 0;
 volatile uint8_t data_out = 0;

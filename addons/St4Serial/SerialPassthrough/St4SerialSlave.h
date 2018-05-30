@@ -153,7 +153,7 @@ void Sst4::flush(void) {
     noInterrupts();
     c=_xmit_buffer[_xmit_head];
     interrupts();
-  } while ((c!=0) || ((millis()-startMs)<_timeout));
+  } while ((c!=0) && ((millis()-startMs)<_timeout));
 }
 
 Sst4 SerialST4;
