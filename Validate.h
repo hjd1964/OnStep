@@ -55,7 +55,13 @@
     #define Configuration_Found
   #endif
 #endif
-
+#ifdef STM32Blue_ON
+  #ifdef Configuration_Found
+    #define Configuration_Duplicate
+  #else
+    #define Configuration_Found
+  #endif
+#endif
 #ifdef Configuration_Duplicate
   #error "You have more than one Config.xxx.h file enabled, ONLY ONE can be enabled with _ON."
 #endif
