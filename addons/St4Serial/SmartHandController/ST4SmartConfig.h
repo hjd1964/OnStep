@@ -16,7 +16,7 @@
   #include "St4SerialSlave.h"
   #define Ser SerialST4             // you could also, for example, use the Teensy3.2's Serial1 interface "Ser Serial1"
   #define SERIAL_BAUD_DEFAULT 57200 // default=57200, only used for async comms (not SerialST4)
-  #define TIMEOUT_CMD 1000           // default=1000 (1 second)
+  #define TIMEOUT_CMD 1000          // default=1000 (1 second)
 
   // the display, SSD1306 or SH1106
   #define OLED_DISPLAY SSD1306
