@@ -1763,7 +1763,7 @@ void SmartHandController::menuOverhead()
     float angle = (float)strtol(&out[0], NULL, 10);
     if (display->UserInterfaceInputValueFloat(&buttonPad, "Overhead Limit", "", &angle, 60, 91, 2, 0, " degree"))
     {
-      sprintf(out, ":S0%02d#", (int)angle);
+      sprintf(out, ":So%02d#", (int)angle);
       DisplayMessageLX200(SetLX200(out));
     }
   }
