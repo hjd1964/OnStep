@@ -413,7 +413,15 @@ void SmartHandController::update()
   }
   else if (eventbuttons[0] == E_CLICK && (telInfo.align == Telescope::ALI_RECENTER_1 || telInfo.align == Telescope::ALI_RECENTER_2 || telInfo.align == Telescope::ALI_RECENTER_3))
   {
-    telInfo.addStar();
+    if (telInfo.addStar()) {
+      if (telInfo.align == Telescope::ALI_OFF) {
+        DisplayMessage("Alignment", "Success!", 2000);
+      } else {
+        DisplayMessage("Add Star", "Success!", 2000);
+      }
+    } else {
+      DisplayMessage("Add Star", "Failed!", -1);
+    }
   }
 }
 
@@ -1266,7 +1274,7 @@ void SmartHandController::menuStar(bool sync)
 
 bool SmartHandController::SelectStarAlign()
 {
-  telInfo.alignSelectedStar = display->UserInterfaceCatalog(&buttonPad, "select Star", telInfo.alignSelectedStar, STAR);
+  telInfo.alignSelectedStar = display->UserInterfaceCatalog(&buttonPad, "Select Star", telInfo.alignSelectedStar, STAR);
   if (telInfo.alignSelectedStar != 0)
   {
     bool ok = DisplayMessageLX200(SyncSelectedStarLX200(telInfo.alignSelectedStar),false);

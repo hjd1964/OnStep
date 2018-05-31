@@ -61,7 +61,7 @@ public:
   bool isGuiding();
   PierState getPierState();
   Errors getError();
-  void addStar();
+  bool addStar();
 
 private:
 };
