@@ -568,7 +568,7 @@ void processCommands() {
       if (command[1]=='U')  { 
         i=0;
         if (trackingState!=TrackingSidereal)     reply[i++]='n';                      // [n]ot tracking
-        if (!isSlewing())                        reply[i++]='N';                      // [N]o goto or guide
+        if (trackingState!=TrackingMoveTo)       reply[i++]='N';                      // [N]o goto
         const char *parkStatusCh = "pIPF";       reply[i++]=parkStatusCh[parkStatus]; // not [p]arked, parking [I]n-progress, [P]arked, Park [F]ailed
         if (pecRecorded)                         reply[i++]='R';                      // PEC data has been [R]ecorded
         if (pecAutoRecord)                       reply[i++]='W';                      // [W]riting PEC data
