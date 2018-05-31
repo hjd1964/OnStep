@@ -1194,6 +1194,7 @@ void SmartHandController::menuAlignment()
   }
 }
 
+#ifndef ST4SMARTCONTROLLER_ON
 void SmartHandController::menuPier()
 {
   telInfo.updateTel(true);
@@ -1216,6 +1217,37 @@ void SmartHandController::menuPier()
     }
   }
 }
+#else
+void SmartHandController::menuPier()
+{
+  bool ok = false;
+  telInfo.updateTel(true);
+  
+  // get preferred pier side user setting
+  char ppsState[20]=""; ok = GetLX200(":GX96#",ppsState) == LX200VALUEGET;
+  if (ok) {
+    uint8_t choice = ((uint8_t)telInfo.getPierState());
+    choice = display->UserInterfaceSelectionList(&buttonPad, "Set Side of Pier", choice, "East\nWest");
+    if (choice)
+    {
+      if (choice == 1)
+        ok = DisplayMessageLX200(SetLX200(":SX96,E#"),false);
+      else
+        ok = DisplayMessageLX200(SetLX200(":SX96,W#"),false);
+      if (ok)
+      {
+        DisplayMessage("Please Sync", "with a Target", 1000);
+        menuSyncGoto(true);
+        current_selection_L1 = 0;
+        current_selection_L0 = 0;
+
+        // return preferred pier side to user setting
+        char out[20]=""; sprintf(out,":SX96,%s#",ppsState); SetLX200(out);
+      }
+    }
+  }
+}
+#endif
 
 void SmartHandController::menuStar(bool sync)
 {
@@ -1332,7 +1364,6 @@ void SmartHandController::menuSettings()
 #endif
 }
 
-#ifndef ST4SMARTCONTROLLER_ON
 void SmartHandController::menuMount()
 {
   current_selection_L2 = 1;
@@ -1359,7 +1390,6 @@ void SmartHandController::menuMount()
     }
   }
 }
-#endif
 
 void SmartHandController::menuMountType()
 {
