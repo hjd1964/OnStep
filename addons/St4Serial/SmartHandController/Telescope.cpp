@@ -3,7 +3,7 @@
 
 void Telescope::updateRaDec()
 {
-  if (millis() - lastStateRaDec > 100 && connected)
+  if (millis() - lastStateRaDec > TIMEOUT_CMD && connected)
   {
     hasInfoRa = GetLX200(":GR#", TempRa) == LX200VALUEGET;
     hasInfoDec = GetLX200(":GD#", TempDec) == LX200VALUEGET;
@@ -16,7 +16,7 @@ void Telescope::updateRaDec()
 };
 void Telescope::updateAzAlt()
 {
-  if (millis() - lastStateAzAlt > 100 && connected)
+  if (millis() - lastStateAzAlt > TIMEOUT_CMD && connected)
   {
     hasInfoAz = GetLX200(":GZ#", TempAz) == LX200VALUEGET;
     hasInfoAlt = GetLX200(":GA#", TempAlt) == LX200VALUEGET;
@@ -29,7 +29,7 @@ void Telescope::updateAzAlt()
 }
 void Telescope::updateTime()
 {
-  if (millis() - lastStateTime > 100 && connected)
+  if (millis() - lastStateTime > TIMEOUT_CMD && connected)
   {
     hasInfoUTC = GetLX200(":GL#", TempUTC) == LX200VALUEGET;
     hasInfoSideral = GetLX200(":GS#", TempSideral) == LX200VALUEGET;
@@ -42,7 +42,7 @@ void Telescope::updateTime()
 };
 void Telescope::updateTel()
 {
-  if (millis() - lastStateTel > 100 && connected)
+  if (millis() - lastStateTel > TIMEOUT_CMD && connected)
   {
     hasPierInfo = GetLX200(":Gm#", sideofpier) == LX200VALUEGET;
     hasTelStatus = GetLX200(":GU#", TelStatus) == LX200VALUEGET;

@@ -337,7 +337,7 @@ void SmartHandController::update()
     }
     telInfo.align = static_cast<Telescope::AlignState>(telInfo.align + 1);
   }
-  else if (top - lastpageupdate > 100)
+  else if (top - lastpageupdate > TIMEOUT_CMD)
   {
     updateMainDisplay( page);
   }

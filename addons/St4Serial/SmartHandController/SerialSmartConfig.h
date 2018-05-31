@@ -11,7 +11,7 @@
     // the serial interface to/from OnStep
     #define Ser Serial
     #define SERIAL_BAUD_DEFAULT 9600
-    #define TIMEOUT_CMD 100         // Default=100 (0.1 seconds)
+    #define TIMEOUT_CMD 100         // Default=100 (0.1 seconds) also regulates the display refresh rate
   
     // the display, SSD1306 or SH1106
     #define OLED_DISPLAY SH1106
