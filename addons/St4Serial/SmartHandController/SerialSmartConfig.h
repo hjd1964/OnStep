@@ -11,21 +11,22 @@
     // the serial interface to/from OnStep
     #define Ser Serial
     #define SERIAL_BAUD_DEFAULT 9600
-    #define TIMEOUT_CMD 100         // Default=100 (0.1 seconds)
-  
+    #define TIMEOUT_CMD 100           // Default=100 (0.1 seconds)
+    #define BACKGROUND_CMD_RATE 150   // Defualt=150, regulates the background command rate
+
     // the display, SSD1306 or SH1106
     #define OLED_DISPLAY SH1106
 
     // the hand controller buttons
-    #define B_PIN0 D8               // Shift
-    #define B_PIN1 D7               // N
-    #define B_PIN2 D6               // S
-    #define B_PIN3 D0               // E
-    #define B_PIN4 D5               // W
-    #define B_PIN5 D3               // F
-    #define B_PIN6 D4               // f
+    #define B_PIN0 D8                 // Shift
+    #define B_PIN1 D7                 // N
+    #define B_PIN2 D6                 // S
+    #define B_PIN3 D0                 // E
+    #define B_PIN4 D5                 // W
+    #define B_PIN5 D3                 // F
+    #define B_PIN6 D4                 // f
     
-    #define B_PIN_UP_0 false        // true for active LOW, false if active HIGH
+    #define B_PIN_UP_0 false          // true for active LOW, false if active HIGH
     #define B_PIN_UP_1 false
     #define B_PIN_UP_2 false
     #define B_PIN_UP_3 false

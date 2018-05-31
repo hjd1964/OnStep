@@ -7,9 +7,13 @@ bool _stepperModeTrack=false;
 void StepperModeTrackingInit() {
   _stepperModeTrack=false; 
 
-  // enable stepper drivers and program the mode then wait for 100ms so TMC2100 or TMC2130 in stealthChop have time to calibrate motor current if needed (a one-time event)
-
-  // normal starting state is with motors disabled
+  // enable stepper drivers
+  EnableStepperDrivers();
+  // program the mode
+  StepperModeTracking();
+  // then wait for 100ms so TMC2100 or TMC2130 in stealthChop have time to calibrate motor current if needed (a one-time event)
+  delay(100);
+  // then disable again
   DisableStepperDrivers();
 
 // if the stepper driver mode select pins are wired in, program any requested micro-step mode

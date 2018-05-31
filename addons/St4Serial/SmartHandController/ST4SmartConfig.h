@@ -15,8 +15,9 @@
   #define ST4RAe 5                  // ST4 RA+ East,  always 25 Hz square wave on this pin
   #include "St4SerialSlave.h"
   #define Ser SerialST4             // you could also, for example, use the Teensy3.2's Serial1 interface "Ser Serial1"
-  #define SERIAL_BAUD_DEFAULT 57200 // default=57200, only used for async comms (not SerialST4)
-  #define TIMEOUT_CMD 1000          // default=1000 (1 second)
+  #define SERIAL_BAUD_DEFAULT 57200 // Default=57200, only used for async comms (not SerialST4)
+  #define TIMEOUT_CMD 1000          // Default=1000 (1 second)
+  #define BACKGROUND_CMD_RATE 300   // Default=300, regulates the background command rate
 
   // the display, SSD1306 or SH1106
   #define OLED_DISPLAY SSD1306

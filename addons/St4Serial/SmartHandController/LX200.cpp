@@ -339,8 +339,6 @@ LX200RETURN SyncGotoLX200(bool sync, float &Ra, float &Dec)
   return SyncGotoLX200(sync, vr1, vr2, vr3, vd1, vd2, vd3);
 }
 
-
-
 LX200RETURN GetDateLX200(unsigned int &day, unsigned int &month, unsigned int &year)
 {
   char out[20];
@@ -395,6 +393,7 @@ LX200RETURN SyncGotoCatLX200(bool sync, Catalog cat, int idx)
   cooNow = Ephemeris::equatorialEquinoxToEquatorialJNowAtDateAndTime(coo, epoch, day, month, year, 0, 0, 0);
   return SyncGotoLX200(sync, cooNow.ra, cooNow.dec);
 }
+
 LX200RETURN SyncGotoPlanetLX200(bool sync, unsigned short objSys)
 {
   char out[20];
@@ -442,6 +441,7 @@ LX200RETURN writeReverseLX200(const uint8_t &axis, const bool &reverse)
   text[3] = axis == 1 ? 'R' : 'D';
   return SetLX200(text);
 }
+
 LX200RETURN readBacklashLX200(const uint8_t &axis, float &backlash)
 {
   char out[20];
@@ -452,6 +452,7 @@ LX200RETURN readBacklashLX200(const uint8_t &axis, float &backlash)
   }
   return ok;
 }
+
 LX200RETURN writeBacklashLX200(const uint8_t &axis, const float &backlash)
 {
   char text[20];
@@ -459,6 +460,7 @@ LX200RETURN writeBacklashLX200(const uint8_t &axis, const float &backlash)
   text[3] = axis == 1 ? 'R' : 'D';
   return SetLX200(text);
 }
+
 LX200RETURN readTotGearLX200(const uint8_t &axis, float &totGear)
 {
   char out[20];
@@ -469,6 +471,7 @@ LX200RETURN readTotGearLX200(const uint8_t &axis, float &totGear)
   }
   return ok;
 }
+
 LX200RETURN writeTotGearLX200(const uint8_t &axis, const float &totGear)
 {
   char text[20];
@@ -476,6 +479,7 @@ LX200RETURN writeTotGearLX200(const uint8_t &axis, const float &totGear)
   text[3] = axis == 1 ? 'R' : 'D';
   return SetLX200(text);
 }
+
 LX200RETURN readStepPerRotLX200(const uint8_t &axis, float &stepPerRot)
 {
   char out[20];
@@ -486,6 +490,7 @@ LX200RETURN readStepPerRotLX200(const uint8_t &axis, float &stepPerRot)
   }
   return ok;
 }
+
 LX200RETURN writeStepPerRotLX200(const uint8_t &axis, const float &stepPerRot)
 {
   char text[20];
@@ -493,6 +498,7 @@ LX200RETURN writeStepPerRotLX200(const uint8_t &axis, const float &stepPerRot)
   text[3] = axis == 1 ? 'R' : 'D';
   return SetLX200(text);
 }
+
 LX200RETURN readMicroLX200(const uint8_t &axis, uint8_t &microStep)
 {
   char out[20];
@@ -510,6 +516,7 @@ LX200RETURN readMicroLX200(const uint8_t &axis, uint8_t &microStep)
   }
   return ok;
 }
+
 LX200RETURN writeMicroLX200(const uint8_t &axis, const uint8_t &microStep)
 {
   char text[20];
@@ -517,6 +524,7 @@ LX200RETURN writeMicroLX200(const uint8_t &axis, const uint8_t &microStep)
   text[3] = axis == 1 ? 'R' : 'D';
   return SetLX200(text);
 }
+
 LX200RETURN readLowCurrLX200(const uint8_t &axis, uint8_t &lowCurr)
 {
   char out[20];
@@ -533,6 +541,7 @@ LX200RETURN readLowCurrLX200(const uint8_t &axis, uint8_t &lowCurr)
   }
   return ok;
 }
+
 LX200RETURN writeLowCurrLX200(const uint8_t &axis, const uint8_t &lowCurr)
 {
   char text[20];
@@ -540,6 +549,7 @@ LX200RETURN writeLowCurrLX200(const uint8_t &axis, const uint8_t &lowCurr)
   text[3] = axis == 1 ? 'R' : 'D';
   return SetLX200(text);
 }
+
 LX200RETURN readHighCurrLX200(const uint8_t &axis, uint8_t &highCurr)
 {
   char out[20];
@@ -556,6 +566,7 @@ LX200RETURN readHighCurrLX200(const uint8_t &axis, uint8_t &highCurr)
   }
   return ok;
 }
+
 LX200RETURN writeHighCurrLX200(const uint8_t &axis, const uint8_t &highCurr)
 {
   char text[20];

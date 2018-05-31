@@ -77,14 +77,11 @@ private:
   void menuLatitude();
   void menuLongitude();
   void menuLimits();
-#ifndef ST4SMARTCONTROLLER_ON
   void menuWifi();
-#endif
   void menuHorizon();
   void menuOverhead();
   void menuMeridian();
 
-#ifndef ST4SMARTCONTROLLER_ON
   bool menuSetStepperGearBox(uint8_t &axis, unsigned short &worm);
   bool menuSetReverse(uint8_t &axis);
   bool menuSetBacklash(uint8_t &axis);
@@ -94,7 +91,6 @@ private:
   bool menuSetLowCurrent(uint8_t &axis);
   bool menuSetHighCurrent(uint8_t &axis);
   void DisplayMotorSettings(uint8_t &axis);
-#endif
 
   void DisplayMessage(const char* txt1, const char* txt2 = NULL, int duration = 0);
   void DisplayLongMessage(const char* txt1, const char* txt2 = NULL, const char* txt3 = NULL, const char* txt4 = NULL, int duration = 0);
