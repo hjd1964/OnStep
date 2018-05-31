@@ -14,13 +14,10 @@ static char* RC[4] = { ":Mn#" , ":Ms#" ,":Me#" ,":Mw#" };
 #define teenastro_width 128
 #define teenastro_height 68
 
-
-
 static unsigned char wifi_bits[] U8X8_PROGMEM = {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x1f, 0x80, 0x20, 0x40, 0x4e, 0x00, 0x11,
   0x00, 0x04, 0x00, 0x04, 0x00, 0x04, 0xfe, 0x7f, 0x02, 0x40, 0xda, 0x5f,
   0xda, 0x5f, 0x02, 0x40, 0xfe, 0x7f, 0x00, 0x00 };
-
 
 static unsigned char align1_bits[] U8X8_PROGMEM = {
   0x00, 0x00, 0x00, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x00, 0x00,
@@ -315,12 +312,14 @@ void SmartHandController::update()
     lowContrast = true;
     return;
   }
+  
   if (powerCylceRequired)
   {
     display->setFont(u8g2_font_helvR12_tr);
     DisplayMessage("REBOOT", "DEVICE", 1000);
     return;
   }
+  
   if (telInfo.align == Telescope::ALI_SELECT_STAR_1 || telInfo.align == Telescope::ALI_SELECT_STAR_2 || telInfo.align == Telescope::ALI_SELECT_STAR_3)
   {
     if (telInfo.align == Telescope::ALI_SELECT_STAR_1)
@@ -339,12 +338,14 @@ void SmartHandController::update()
   }
   else if (top - lastpageupdate > BACKGROUND_CMD_RATE/2)
   {
-    updateMainDisplay( page);
+    updateMainDisplay(page);
   }
+  
   if (telInfo.connected == false)
   {
     DisplayMessage("Hand controler", "not connected", -1);
   }
+  
   if (telInfo.connected && (telInfo.getTrackingState() == Telescope::TRK_SLEWING || telInfo.getParkState() == Telescope::PRK_PARKING))
   {
     bool stop = (eventbuttons[0] == E_LONGPRESS || eventbuttons[0] == E_LONGPRESSTART || eventbuttons[0] == E_DOUBLECLICK) ? true : false;
@@ -366,7 +367,6 @@ void SmartHandController::update()
       }
       return;
     }
-
   }
   else
   {
@@ -393,8 +393,8 @@ void SmartHandController::update()
       time_last_action = millis();
       return;
     }
-
   }
+
   if (eventbuttons[0] == E_DOUBLECLICK /*|| eventbuttons[0] == E_CLICK)  && eventbuttons[1] != E_NONE*/)
   {
     menuSpeedRate();
@@ -415,7 +415,6 @@ void SmartHandController::update()
   {
     telInfo.addStar();
   }
-
 }
 
 void SmartHandController::updateMainDisplay( u8g2_uint_t page)
@@ -564,12 +563,10 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
       default:
         break;
       }
-
     }
 
     if (page == 0)
     {
-
       if (telInfo.hasInfoRa && telInfo.hasInfoDec)
       {
         char Rah[3];
@@ -608,7 +605,6 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
     }
     else if (page == 1)
     {
-
       if (telInfo.hasInfoAz && telInfo.hasInfoAlt)
       {
         char Azdeg[4];
@@ -646,13 +642,10 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
 
         display->drawDec( x, y, Altsign, Altdeg, Altmin, Altsec);
         u8g2_DrawUTF8(u8g2, 0, y, "Alt.");
-
-
       }
     }
     else if (page == 2)
     {
-
       if (telInfo.hasInfoUTC && telInfo.hasInfoSideral)
       {
         char Rah[3];
@@ -745,7 +738,6 @@ void SmartHandController::drawReady()
   delay(500);
 }
 
-#ifndef ST4SMARTCONTROLLER_ON
 bool SmartHandController::menuSetStepperGearBox(uint8_t &axis, unsigned short &worm)
 {
   char text[20];
@@ -911,7 +903,6 @@ void SmartHandController::DisplayMotorSettings(uint8_t &axis)
 
   DisplayLongMessage(line1, NULL, line3, line4, -1);
 }
-#endif
 
 void SmartHandController::menuMain()
 {
@@ -1465,7 +1456,6 @@ void SmartHandController::menuAltMount()
 //void SmartHandController::menuTakahashi() {}
 //void SmartHandController::menuVixen() {}
 
-#ifndef ST4SMARTCONTROLLER_ON
 void SmartHandController::menuMotor(uint8_t axis)
 {
   current_selection_L3 = 1;
@@ -1505,7 +1495,6 @@ void SmartHandController::menuMotor(uint8_t axis)
     }
   }
 }
-#endif
 
 void SmartHandController::menuSite()
 {
@@ -1687,7 +1676,6 @@ void SmartHandController::menuLimits()
   }
 }
 
-#ifndef ST4SMARTCONTROLLER_ON
 void SmartHandController::menuWifi()
 {
   const char *string_list = (wifiOn) ? "Wifi off\nShow Password\nReset to factory" : "wifi on\nShow Password\nReset to factory";
@@ -1722,7 +1710,6 @@ void SmartHandController::menuWifi()
     }
   }
 }
-#endif
 
 void SmartHandController::menuHorizon()
 {
@@ -1760,8 +1747,6 @@ void SmartHandController::menuMeridian()
 
   }
 }
-
-
 
 void SmartHandController::DisplayMessage(const char* txt1, const char* txt2, int duration)
 {
@@ -1946,3 +1931,4 @@ bool SmartHandController::DisplayMessageLX200(LX200RETURN val, bool silentOk)
   }
   return isOk(val);
 }
+
