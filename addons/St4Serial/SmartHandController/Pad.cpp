@@ -1,38 +1,52 @@
 #include "Pad.h"
 #include "Config.h"
 
+#define BUTTON_DEBUG_OFF
+
 byte eventbuttons[7] = { E_NONE ,E_NONE ,E_NONE ,E_NONE ,E_NONE ,E_NONE ,E_NONE };
 
 void click_s() {
   eventbuttons[B_SHIFT] = E_CLICK;
+#ifdef BUTTON_DEBUG_ON
   DL("Button s click.");
+#endif
 } // click2
 
 void doubleclick_s() {
   eventbuttons[B_SHIFT] = E_DOUBLECLICK;
+#ifdef BUTTON_DEBUG_ON
   DL("Button s doubleclick.");
+#endif
 } // doubleclick2
 
 void longPressStart_s() {
   eventbuttons[B_SHIFT] = E_LONGPRESSTART;
+#ifdef BUTTON_DEBUG_ON
   DL("Button s longPress start");
+#endif
 } // longPressStart2
 
 void longPress_s() {
   eventbuttons[B_SHIFT] = E_LONGPRESS;
+#ifdef BUTTON_DEBUG_ON
   DL("Button s longPress...");
+#endif
 } // longPress2
 
 void longPressStop_s() {
   eventbuttons[B_SHIFT] = E_LONGPRESSSTOP;
+#ifdef BUTTON_DEBUG_ON
   DL("Button s longPress stop");
+#endif
 } // longPressStop2
 
 
 //------------------------------------------------------------------------------
 void click_N() {
   eventbuttons[B_NORTH] = E_CLICK;
+#ifdef BUTTON_DEBUG_ON
   DL("Button N click.");
+#endif
 } // click2
 
   //void doubleclick_N() {
@@ -44,23 +58,31 @@ void click_N() {
 
 void longPressStart_N() {
   eventbuttons[B_NORTH] = E_LONGPRESSTART;
+#ifdef BUTTON_DEBUG_ON
   DL("Button N longPress start");
+#endif
 } // longPressStart2
 
 void longPress_N() {
   eventbuttons[B_NORTH] = E_LONGPRESS;
+#ifdef BUTTON_DEBUG_ON
   DL("Button N longPress...");
+#endif
 } // longPress2
 
 void longPressStop_N() {
   eventbuttons[B_NORTH] = E_LONGPRESSSTOP;
+#ifdef BUTTON_DEBUG_ON
   DL("Button N longPress stop");
+#endif
 } // long
 
 //------------------------------------------------------------------------------
 void click_S() {
   eventbuttons[B_SOUTH] = E_CLICK;
+#ifdef BUTTON_DEBUG_ON
   DL("Button S click.");
+#endif
 } // click2
 
   //void doubleclick_S() {
@@ -70,24 +92,32 @@ void click_S() {
 
 void longPressStart_S() {
   eventbuttons[B_SOUTH] = E_LONGPRESSTART;
+#ifdef BUTTON_DEBUG_ON
   DL("Button S longPress start");
+#endif
 } // longPressStart2
 
 void longPress_S() {
   eventbuttons[B_SOUTH] = E_LONGPRESS;
+#ifdef BUTTON_DEBUG_ON
   DL("Button S longPress...");
+#endif
 } // longPress2
 
 void longPressStop_S() {
   eventbuttons[B_SOUTH] = E_LONGPRESSSTOP;
+#ifdef BUTTON_DEBUG_ON
   DL("Button S longPress stop");
+#endif
 } // long
 
 
 //------------------------------------------------------------------------------
 void click_E() {
   eventbuttons[B_EAST] = E_CLICK;
+#ifdef BUTTON_DEBUG_ON
   DL("Button E click.");
+#endif
 } // click2
 
   //void doubleclick_E() {
@@ -97,23 +127,31 @@ void click_E() {
 
 void longPressStart_E() {
   eventbuttons[B_EAST] = E_LONGPRESSTART;
+#ifdef BUTTON_DEBUG_ON
   DL("Button E longPress start");
+#endif
 } // longPressStart2
 
 void longPress_E() {
   eventbuttons[B_EAST] = E_LONGPRESS;
+#ifdef BUTTON_DEBUG_ON
   DL("Button E longPress...");
+#endif
 } // longPress2
 
 void longPressStop_E() {
   eventbuttons[B_EAST] = E_LONGPRESSSTOP;
+#ifdef BUTTON_DEBUG_ON
   DL("Button E longPress stop");
+#endif
 } // long
 
 //------------------------------------------------------------------------------
 void click_W() {
   eventbuttons[B_WEST] = E_CLICK;
+#ifdef BUTTON_DEBUG_ON
   DL("Button W click.");
+#endif
 } // click2
 
   //void doubleclick_W() {
@@ -123,69 +161,95 @@ void click_W() {
 
 void longPressStart_W() {
   eventbuttons[B_WEST] = E_LONGPRESSTART;
+#ifdef BUTTON_DEBUG_ON
   DL("Button W longPress start");
+#endif
 } // longPressStart2
 
 void longPress_W() {
   eventbuttons[B_WEST] = E_LONGPRESS;
+#ifdef BUTTON_DEBUG_ON
   DL("Button W longPress...");
+#endif
 } // longPress2
 
 void longPressStop_W() {
   eventbuttons[B_WEST] = E_LONGPRESSSTOP;
+#ifdef BUTTON_DEBUG_ON
   DL("Button W longPress stop");
+#endif
 } // long
 
 //------------------------------------------------------------------------------
 void click_F() {
   eventbuttons[B_F] = E_CLICK;
+#ifdef BUTTON_DEBUG_ON
   DL("Button F click.");
+#endif
 } // click2
 
 void doubleclick_F() {
   eventbuttons[B_F] = E_DOUBLECLICK;
+#ifdef BUTTON_DEBUG_ON
   DL("Button F doubleclick.");
+#endif
 } // doubleclick2
 
 void longPressStart_F() {
   eventbuttons[B_F] = E_LONGPRESSTART;
+#ifdef BUTTON_DEBUG_ON
   DL("Button F longPress start");
+#endif
 } // longPressStart2
 
 void longPress_F() {
   eventbuttons[B_F] = E_LONGPRESS;
+#ifdef BUTTON_DEBUG_ON
   DL("Button F longPress...");
+#endif
 } // longPress2
 
 void longPressStop_F() {
   eventbuttons[B_F] = E_LONGPRESSSTOP;
+#ifdef BUTTON_DEBUG_ON
   DL("Button F longPress stop");
+#endif
 } // long
 
 //------------------------------------------------------------------------------
 void click_f() {
   eventbuttons[B_f] = E_CLICK;
+#ifdef BUTTON_DEBUG_ON
   DL("Button f click.");
+#endif
 } // click2
 
 void doubleclick_f() {
   eventbuttons[B_f] = E_DOUBLECLICK;
+#ifdef BUTTON_DEBUG_ON
   DL("Button f doubleclick.");
+#endif
 } // doubleclick2
 
 void longPressStart_f() {
   eventbuttons[B_f] = E_LONGPRESSTART;
+#ifdef BUTTON_DEBUG_ON
   DL("Button f longPress start");
+#endif
 } // longPressStart2
 
 void longPress_f() {
   eventbuttons[B_f] = E_LONGPRESS;
+#ifdef BUTTON_DEBUG_ON
   DL("Button f longPress...");
+#endif
 } // longPress2
 
 void longPressStop_f() {
   eventbuttons[B_f] = E_LONGPRESSSTOP;
+#ifdef BUTTON_DEBUG_ON
   DL("Button f longPress stop");
+#endif
 } // long
 
 //------------------------------------------------------------------------------
