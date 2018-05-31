@@ -27,12 +27,12 @@
 
 #if defined(STM32Black_ON)
 
-  #define A1EN          PA2
-  #define A1M0          PA1
-  #define A1M1          PA0
-  #define A1M2          PC13
-  #define A1ST          PB9
-  #define A1DR          PB8
+  #define A1EN          PA3
+  #define A1M0          PA2
+  #define A1M1          PA1
+  #define A1M2          PA0  
+  #define A1ST          PC13
+  #define A1DR          PB9
 
   #define A2EN          PB13
   #define A2M0          PB14
@@ -52,6 +52,8 @@
 
   #define F1DR          PB0 
   #define F1ST          PB1 
+
+  #define SPARE1        PB8
 
 #elif defined(STM32Blue_ON) 
 
@@ -84,6 +86,7 @@
   #define SPARE1        PA10
   #define SPARE2        PA13
   #define SPARE3        PA14
+
 #else
   #error "Unknown STM32 Board. This pinmap is only for Blue and Black Pill variants"
 #endif
