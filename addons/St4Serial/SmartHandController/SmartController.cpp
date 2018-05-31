@@ -378,7 +378,6 @@ void SmartHandController::update()
         buttonCommand = true;
         Move[k - 1] = false;
         Ser.print(BreakRC[k - 1]);
-        Ser.flush();
         continue;
       }
       else if (!Move[k - 1] && (eventbuttons[k] == E_LONGPRESS || eventbuttons[k] == E_CLICK || eventbuttons[k] == E_LONGPRESSTART))
@@ -386,7 +385,6 @@ void SmartHandController::update()
         buttonCommand = true;
         Move[k - 1] = true;
         Ser.print(RC[k - 1]);
-        Ser.flush();
         continue;
       }
     }
