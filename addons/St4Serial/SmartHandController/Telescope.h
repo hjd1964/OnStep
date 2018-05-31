@@ -39,6 +39,7 @@ public:
   char TelStatus[20];
   char sideofpier[20];
   unsigned long lastStateTel;
+  unsigned long updateSeq=0;
 public:
   bool connected = true;
   bool hasInfoRa = false;
@@ -50,10 +51,10 @@ public:
   bool hasPierInfo = false;
   bool hasTelStatus = false;
   unsigned long lastState;
-  void updateRaDec();
-  void updateAzAlt();
-  void updateTime();
-  void updateTel();
+  void updateRaDec(boolean immediate=false);
+  void updateAzAlt(boolean immediate=false);
+  void updateTime(boolean immediate=false);
+  void updateTel(boolean immediate=false);
   ParkState getParkState();
   TrackState getTrackingState();
   bool atHome();
@@ -63,6 +64,5 @@ public:
   void addStar();
 
 private:
-
 };
 

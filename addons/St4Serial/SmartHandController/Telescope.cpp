@@ -1,56 +1,36 @@
 #include "Telescope.h"
 #include "LX200.h"
 
-void Telescope::updateRaDec()
+void Telescope::updateRaDec(boolean immediate)
 {
-  if (millis() - lastStateRaDec > TIMEOUT_CMD && connected)
+  if ((millis() - lastStateRaDec > BACKGROUND_CMD_RATE) && ((updateSeq%4==2) || (updateSeq%4==3) || immediate) && connected)
   {
-    hasInfoRa = GetLX200(":GR#", TempRa) == LX200VALUEGET;
-    hasInfoDec = GetLX200(":GD#", TempDec) == LX200VALUEGET;
-    lastStateRaDec = millis();
-    if (!hasInfoRa && !hasInfoDec)
-    {
-      connected = true;
-    }
+    if ((updateSeq%4==2) || immediate) { hasInfoRa = GetLX200(":GR#", TempRa) == LX200VALUEGET; if (!hasInfoRa) connected=true; }
+    if ((updateSeq%4==3) || immediate) { hasInfoDec = GetLX200(":GD#", TempDec) == LX200VALUEGET; if (!hasInfoDec) connected=true; lastStateRaDec = millis(); }
   }
 };
-void Telescope::updateAzAlt()
+void Telescope::updateAzAlt(boolean immediate)
 {
-  if (millis() - lastStateAzAlt > TIMEOUT_CMD && connected)
+  if ((millis() - lastStateAzAlt > BACKGROUND_CMD_RATE) && ((updateSeq%4==2) || (updateSeq%4==3) || immediate) && connected)
   {
-    hasInfoAz = GetLX200(":GZ#", TempAz) == LX200VALUEGET;
-    hasInfoAlt = GetLX200(":GA#", TempAlt) == LX200VALUEGET;
-    lastStateAzAlt = millis();
-    if (!hasInfoAz && !hasInfoAlt)
-    {
-      connected = true;
-    }
+    if ((updateSeq%4==2) || immediate) { hasInfoAz = GetLX200(":GZ#", TempAz) == LX200VALUEGET; if (!hasInfoAz) connected = true; }
+    if ((updateSeq%4==3) || immediate) { hasInfoAlt = GetLX200(":GA#", TempAlt) == LX200VALUEGET; if (!hasInfoAlt) connected = true; lastStateAzAlt = millis(); }
   }
 }
-void Telescope::updateTime()
+void Telescope::updateTime(boolean immediate)
 {
-  if (millis() - lastStateTime > TIMEOUT_CMD && connected)
+  if ((millis() - lastStateTime > BACKGROUND_CMD_RATE) && ((updateSeq%4==2) || (updateSeq%4==3) || immediate) && connected)
   {
-    hasInfoUTC = GetLX200(":GL#", TempUTC) == LX200VALUEGET;
-    hasInfoSideral = GetLX200(":GS#", TempSideral) == LX200VALUEGET;
-    lastStateTime = millis();
-    if (!hasInfoUTC && !hasInfoSideral)
-    {
-      connected = true;
-    }
+    if ((updateSeq%4==2) || immediate) { hasInfoUTC = GetLX200(":GL#", TempUTC) == LX200VALUEGET; if (!hasInfoUTC) connected = true; }
+    if ((updateSeq%4==3) || immediate) { hasInfoSideral = GetLX200(":GS#", TempSideral) == LX200VALUEGET; if (!hasInfoSideral) connected = true; lastStateTime = millis(); }
   }
 };
-void Telescope::updateTel()
+void Telescope::updateTel(boolean immediate)
 {
-  if (millis() - lastStateTel > TIMEOUT_CMD && connected)
+  if ((millis() - lastStateTel > BACKGROUND_CMD_RATE) && ((updateSeq%4==0) || (updateSeq%4==1) || immediate) && connected)
   {
-    hasPierInfo = GetLX200(":Gm#", sideofpier) == LX200VALUEGET;
-    hasTelStatus = GetLX200(":GU#", TelStatus) == LX200VALUEGET;
-    lastStateTel = millis();
-  }
-  if (!hasPierInfo && !hasTelStatus)
-  {
-    connected = true;
+    if ((updateSeq%4==0) || immediate) { hasPierInfo = GetLX200(":Gm#", sideofpier) == LX200VALUEGET; if (!hasPierInfo) connected = true; }
+    if ((updateSeq%4==1) || immediate) { hasTelStatus = GetLX200(":GU#", TelStatus) == LX200VALUEGET; if (!hasTelStatus) connected = true; lastStateTel = millis(); }
   }
 };
 Telescope::ParkState Telescope::getParkState()

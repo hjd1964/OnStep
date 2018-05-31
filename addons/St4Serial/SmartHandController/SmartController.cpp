@@ -337,7 +337,7 @@ void SmartHandController::update()
     }
     telInfo.align = static_cast<Telescope::AlignState>(telInfo.align + 1);
   }
-  else if (top - lastpageupdate > TIMEOUT_CMD)
+  else if (top - lastpageupdate > BACKGROUND_CMD_RATE/2)
   {
     updateMainDisplay( page);
   }
@@ -426,7 +426,10 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
   u8g2_uint_t step1 = u8g2_GetUTF8Width(u8g2, "44");
   u8g2_uint_t step2 = u8g2_GetUTF8Width(u8g2, "4") + 1;
   telInfo.connected = true;
+
+  telInfo.updateSeq++;
   telInfo.updateTel();
+
   if (telInfo.connected == false)
   {
     return;
@@ -915,7 +918,7 @@ void SmartHandController::menuMain()
   current_selection_L0 = 1;
   while (current_selection_L0 != 0)
   {
-    telInfo.updateTel();
+    telInfo.updateTel(true);
     Telescope::ParkState currentstate = telInfo.getParkState();
 
     if (currentstate == Telescope::PRK_PARKED)
@@ -975,7 +978,7 @@ void SmartHandController::menuSpeedRate()
 
 void SmartHandController::menuTrack()
 {
-  telInfo.updateTel();
+  telInfo.updateTel(true);
   Telescope::TrackState currentstate = telInfo.getTrackingState();
   uint8_t choice;
   if (currentstate == Telescope::TRK_ON)
@@ -1202,7 +1205,7 @@ void SmartHandController::menuAlignment()
 
 void SmartHandController::menuPier()
 {
-  telInfo.updateTel();
+  telInfo.updateTel(true);
   uint8_t choice = ((uint8_t)telInfo.getPierState());
   choice = display->UserInterfaceSelectionList(&buttonPad, "Set Side of Pier", choice, "East\nWest");
   bool ok = false;
