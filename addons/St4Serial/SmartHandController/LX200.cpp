@@ -220,7 +220,7 @@ LX200RETURN Move2TargetLX200()
   memset(out, 0, sizeof(out));
   int val = readLX200Bytes(":MS#", out, TIMEOUT_CMD);
   LX200RETURN response;
-  switch (out[0])
+  switch (out[0]-'0')
   {
     //         1=Object below horizon    Outside limits, below the Horizon limit
     //         2=No object selected      Failure to resolve coordinates

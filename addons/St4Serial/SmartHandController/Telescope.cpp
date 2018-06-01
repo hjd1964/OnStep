@@ -77,6 +77,10 @@ bool Telescope::isGuiding()
 {
   return  strchr(&TelStatus[0], 'G') != NULL;
 }
+bool Telescope::isMountGEM()
+{
+  return strchr(&TelStatus[0], 'E') != NULL;
+}
 Telescope::PierState Telescope::getPierState()
 {
   if (strchr(&sideofpier[0], 'E') != NULL)
@@ -111,36 +115,35 @@ Telescope::Errors Telescope::getError()
     }
   }
 }
-void Telescope::addStar()
+bool Telescope::addStar()
 {
   if (align == ALI_RECENTER_1 || align == ALI_RECENTER_2 || align == ALI_RECENTER_3)
   {
-    if (SetLX200(":A+#")==LX200VALUESET)
+    if (SetLX200(":A+#") == LX200VALUESET)
     {
-      bool done = false;
       if (aliMode == ALIM_ONE
         || (aliMode == ALIM_TWO && align == ALI_RECENTER_2)
         || (aliMode == ALIM_THREE && align == ALI_RECENTER_3))
       {
-        //TODO DisplayMessage("Alignment", "Success!", -1);
         align = ALI_OFF;
+        return true;
       }
       else
       {
         align = static_cast<AlignState>(align+1);
-        //TODO DisplayMessage("Add Star", "Success!", -1);
+        return true;
       }
-
     }
     else
     {
-      //TODO DisplayMessage("Add Star", "Failed!", -1);
       align = ALI_OFF;
+      return false;
     }
   }
   else
   {
-    //TODO DisplayMessage("Failed!", "Wrong State", -1);
     align = ALI_OFF;
+    return false;
   }
 }
+
