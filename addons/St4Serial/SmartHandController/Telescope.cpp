@@ -77,6 +77,10 @@ bool Telescope::isGuiding()
 {
   return  strchr(&TelStatus[0], 'G') != NULL;
 }
+bool Telescope::isMountGEM()
+{
+  return strchr(&TelStatus[0], 'E') != NULL;
+}
 Telescope::PierState Telescope::getPierState()
 {
   if (strchr(&sideofpier[0], 'E') != NULL)

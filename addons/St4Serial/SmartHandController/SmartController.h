@@ -80,7 +80,8 @@ private:
   void menuWifi();
   void menuHorizon();
   void menuOverhead();
-  void menuMeridian();
+  void menuMeridianE();
+  void menuMeridianW();
 
   bool menuSetStepperGearBox(uint8_t &axis, unsigned short &worm);
   bool menuSetReverse(uint8_t &axis);

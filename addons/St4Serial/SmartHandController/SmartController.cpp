@@ -1692,7 +1692,14 @@ void SmartHandController::menuLongitude()
 
 void SmartHandController::menuLimits()
 {
-  const char *string_list_LimitsL2 = "Horizon\n""Overhead\n""Meridian";
+  char string_list_LimitsL2[80];
+  
+  if ((telInfo.hasTelStatus) && (telInfo.isMountGEM())) {
+    strcpy(string_list_LimitsL2,"Horizon\n""Overhead\n""MeridianE\n""MeridianW");
+  } else {
+    strcpy(string_list_LimitsL2,"Horizon\n""Overhead");
+  }
+  
   current_selection_L3 = 1;
   while (current_selection_L3 != 0)
   {
@@ -1706,7 +1713,10 @@ void SmartHandController::menuLimits()
       menuOverhead();
       break;
     case 3:
-      menuMeridian();
+      menuMeridianE();
+      break;
+    case 4:
+      menuMeridianW();
       break;
     default:
       break;
@@ -1772,17 +1782,40 @@ void SmartHandController::menuOverhead()
     if (display->UserInterfaceInputValueFloat(&buttonPad, "Overhead Limit", "", &angle, 60, 91, 2, 0, " degree"))
     {
       sprintf(out, ":So%02d#", (int)angle);
-      DisplayMessageLX200(SetLX200(out));
+      DisplayMessageLX200(SetLX200(out),false);
     }
   }
 }
 
-void SmartHandController::menuMeridian()
+void SmartHandController::menuMeridianE()
 {
-  uint8_t angle = 0;
-  if (display->UserInterfaceInputValueInteger(&buttonPad, "Meridian Limit", "", &angle, 0, 20, 2, " degree"))
+  char out[20] = "";
+  if (DisplayMessageLX200(GetLX200(":GXE9#", out)))
   {
+    float angle = (float)strtol(&out[0], NULL, 10);
+    angle = round((angle * 15.0) / 60.0);
+    if (display->UserInterfaceInputValueFloat(&buttonPad, "Merid Limit E", "", &angle, -45, 45, 2, 0, " degree"))
+    {
+      angle = round((angle * 60.0) / 15.0);
+      sprintf(out, ":SXE9,%+02d#", (int)angle);
+      DisplayMessageLX200(SetLX200(out),false);
+    }
+  }
+}
 
+void SmartHandController::menuMeridianW()
+{
+  char out[20] = "";
+  if (DisplayMessageLX200(GetLX200(":GXEA#", out)))
+  {
+    float angle = (float)strtol(&out[0], NULL, 10);
+    angle = round((angle * 15.0) / 60.0);
+    if (display->UserInterfaceInputValueFloat(&buttonPad, "Merid Limit W", "", &angle, -45, 45, 2, 0, " degree"))
+    {
+      angle = round((angle * 60.0) / 15.0);
+      sprintf(out, ":SXEA,%+02d#", (int)angle);
+      DisplayMessageLX200(SetLX200(out),false);
+    }
   }
 }
 

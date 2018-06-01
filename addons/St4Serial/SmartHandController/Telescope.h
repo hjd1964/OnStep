@@ -59,6 +59,7 @@ public:
   TrackState getTrackingState();
   bool atHome();
   bool isGuiding();
+  bool isMountGEM();
   PierState getPierState();
   Errors getError();
   bool addStar();
