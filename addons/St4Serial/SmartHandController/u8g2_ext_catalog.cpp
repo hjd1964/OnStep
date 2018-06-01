@@ -100,11 +100,11 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, unsigned shor
   const unsigned short* cat_num = NULL;
   const byte* cat_letter = NULL;
   const byte* cat_info = NULL;
-  const byte*  cat_const = NULL;
-  const byte*  cat_dMag = NULL;
-  const byte*  cat_obj = NULL;
+  const byte* cat_const = NULL;
+  const byte* cat_dMag = NULL;
+  const byte* cat_obj = NULL;
 
-  //Display for Star Catalog
+  // for Star Catalog
   if (cat == STAR)
   {
     uint8_t step0 = u8g2_GetUTF8Width(u8g2, "dec ");
@@ -139,8 +139,8 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, unsigned shor
     return line_height;
   }
 
-  switch (cat)
-  {
+  // for Herschel and Messier objects
+  switch (cat) {
   case HERSCHEL:
     cat_elements = 400;
     cat_num = &Herschel_NGC[idx];
@@ -160,69 +160,43 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, unsigned shor
     break;
   }
 
-
-
   /* check whether this is the current cursor line */
   char line[16];
-  if (cat_num != NULL)
-  {
-    sprintf(line, "%s%u", catalog_txt[cat], *cat_num);
-  }
-  else
-  {
-    sprintf(line, "%s%u", catalog_txt[cat], idx +1);
-  }
+  if (cat_num != NULL) sprintf(line, "%s%u", catalog_txt[cat], *cat_num); else sprintf(line, "%s%u", catalog_txt[cat], idx +1);
+
   /* draw the line */
-  if (line == NULL)
-    strcpy(line, "");
-  u8g2_DrawUTF8(u8g2, 0, y, line);
+  if (line == NULL) strcpy(line, ""); u8g2_DrawUTF8(u8g2, 0, y, line);
   y += line_height;
+  
   int v1 = *cat_dMag / 10;
   int v2 = *cat_dMag % 10;
   u8g2_DrawUTF8(u8g2, 0, y, constellation_txt[*cat_const - 1]);
   x += u8g2_GetUTF8Width(u8g2, "WWW");
-  if (cat_obj)
-  {
-    switch (*cat_obj)
-    {
-    case 0:
-      u8g2_DrawXBMP(u8g2, x - 3, y - EN_height, EN_width, EN_height, EN_bits);
-      break;
-    case 1:
-      u8g2_DrawXBMP(u8g2, x - 3, y - GC_height, GC_width, GC_height, GC_bits);
-      break;
-    case 2:
-      u8g2_DrawXBMP(u8g2, x - 3, y - GX_height, GX_width, GX_height, GX_bits);
-      break;
-    case 3:
-      u8g2_DrawXBMP(u8g2, x - 3, y - OC_height, OC_width, OC_height, OC_bits);
-      break;
-    case 4:
-      u8g2_DrawXBMP(u8g2, x - 3, y - PN_height, PN_width, PN_height, PN_bits);
-      break;
-    default:
-      break;
+  if (cat_obj) {
+    switch (*cat_obj) {
+      case 0: u8g2_DrawXBMP(u8g2, x - 3, y - EN_height, EN_width, EN_height, EN_bits); break;
+      case 1: u8g2_DrawXBMP(u8g2, x - 3, y - GC_height, GC_width, GC_height, GC_bits); break;
+      case 2: u8g2_DrawXBMP(u8g2, x - 3, y - GX_height, GX_width, GX_height, GX_bits); break;
+      case 3: u8g2_DrawXBMP(u8g2, x - 3, y - OC_height, OC_width, OC_height, OC_bits); break;
+      case 4: u8g2_DrawXBMP(u8g2, x - 3, y - PN_height, PN_width, PN_height, PN_bits); break;
+      default: break;
     }
     x += GX_width + 5;
   }
 
   u8g2_DrawUTF8(u8g2, x, y, "mag ");
   x += u8g2_GetUTF8Width(u8g2, "mag ");
-  if (v1 < 10)
-    x += u8g2_GetUTF8Width(u8g2, "1");
+
+  if (v1 < 10) x += u8g2_GetUTF8Width(u8g2, "1");
   sprintf(line, "%d.%d", v1, v2);
   u8g2_DrawUTF8(u8g2, x, y, line);
   y += line_height;
-  if (cat_info != NULL)
-  {
-    u8g2_DrawUTF8(u8g2, 0, y, Herschel_info_txt[*cat_info - 1]);
-  }
+
+  if (cat_info != NULL) u8g2_DrawUTF8(u8g2, 0, y, Herschel_info_txt[*cat_info - 1]);
   y += line_height;
+
   return line_height;
 }
-
-
-
 
 /*
 title: 		NULL for no title, valid str for title line. Can contain mutliple lines, separated by '\n'
@@ -241,25 +215,13 @@ unsigned short ext_UserInterfaceCatalog(u8g2_t *u8g2, Pad* extPad, const char *t
   unsigned short cur_pos;
   unsigned short tot_pos;
   unsigned short incr = 1;
-  switch (cat)
-  {
-  case HERSCHEL:
-    tot_pos = 400;
-    break;
-  case STAR:
-    tot_pos = 292;
-    break;
-  case MESSIER:
-    tot_pos = 110;
-    break;
-  default:
-    tot_pos = 0;
-    break;
+  switch (cat) {
+    case HERSCHEL: tot_pos = 400; break;
+    case STAR:     tot_pos = 292; break;
+    case MESSIER:  tot_pos = 110; break;
+    default:       tot_pos = 0;   break;
   }
-  if (start_pos > tot_pos)
-  {
-    start_pos = tot_pos;
-  }
+  if (start_pos > tot_pos) start_pos = tot_pos;
 
   u8g2_uint_t yy;
 
@@ -270,24 +232,18 @@ unsigned short ext_UserInterfaceCatalog(u8g2_t *u8g2, Pad* extPad, const char *t
   uint8_t title_lines = u8x8_GetStringLineCnt(title);
   uint8_t display_lines;
 
-
-  if (start_pos > 0)	/* issue 112 */
-    start_pos--;		/* issue 112 */
+  if (start_pos > 0) start_pos--;	/* issue 112 */
   cur_pos = start_pos;
+
   u8g2_SetFontPosBaseline(u8g2);
 
-  for (;;)
-  {
+  for (;;) {
     u8g2_FirstPage(u8g2);
-    do
-    {
+    do  {
       yy = u8g2_GetAscent(u8g2);
-      if (title_lines > 0)
-      {
+      if (title_lines > 0) {
         yy += u8g2_DrawUTF8Lines(u8g2, 0, yy, u8g2_GetDisplayWidth(u8g2), line_height, title);
-
         u8g2_DrawHLine(u8g2, 0, yy - line_height - u8g2_GetDescent(u8g2) + 1, u8g2_GetDisplayWidth(u8g2));
-
         yy += 3;
       }
       ext_draw_catalog_list_line(u8g2, yy, cur_pos, cat);
@@ -297,60 +253,25 @@ unsigned short ext_UserInterfaceCatalog(u8g2_t *u8g2, Pad* extPad, const char *t
     return 0;
 #endif
 
-
-    for (;;)
-    {
+    for (;;) {
       event = ext_GetMenuEvent(extPad);
-      if (event == U8X8_MSG_GPIO_MENU_SELECT || event == U8X8_MSG_GPIO_MENU_NEXT)
-      {
-        return cur_pos + 1;		/* +1, issue 112 */
-      }
-
-      else if (event == U8X8_MSG_GPIO_MENU_HOME || event == U8X8_MSG_GPIO_MENU_PREV)
-      {
-        return 0;				/* issue 112: return 0 instead of start_pos */
-      }
-
-      else if (event == U8X8_MSG_GPIO_MENU_DOWN)
-      {
-        if (cur_pos < tot_pos - 1)
-        {
-          incr += 1;
-          if (incr > 3)
-            incr = 3;
-          cur_pos += incr;
-          if (cur_pos > tot_pos - 1)
-            cur_pos = 0;
-        }
-        else
-        {
-          cur_pos = 0;
-        }
+      if (event == U8X8_MSG_GPIO_MENU_SELECT || event == U8X8_MSG_GPIO_MENU_NEXT) return cur_pos + 1; else    /* issue 112: +1 */
+      if (event == U8X8_MSG_GPIO_MENU_HOME || event == U8X8_MSG_GPIO_MENU_PREV) return 0; else                /* issue 112: return 0 instead of start_pos */
+      if (event == U8X8_MSG_GPIO_MENU_DOWN) {
+        if (cur_pos < tot_pos - 1) {
+          incr += 1; if (incr > 3) incr = 3;
+          cur_pos += incr; if (cur_pos > tot_pos - 1) cur_pos = 0;
+        } else cur_pos = 0;
+        break;
+      } else 
+      if (event == U8X8_MSG_GPIO_MENU_UP) {
+        if (cur_pos > 0) {
+          incr += 1; if (incr > 3) incr = 3;
+          if (cur_pos < incr) cur_pos = tot_pos - 1; else cur_pos -= incr;
+        } else cur_pos = tot_pos - 1;
         break;
       }
-      else if (event == U8X8_MSG_GPIO_MENU_UP)
-      {
-        if (cur_pos > 0)
-        {
-          incr += 1;
-          if (incr > 3)
-            incr = 3;
-          if (cur_pos < incr)
-            cur_pos = tot_pos - 1;
-          else
-            cur_pos -= incr;
-        }
-        else
-        {
-          cur_pos = tot_pos - 1;
-        }
-        break;
-      }
-      else
-      {
-        incr = 0;
-      }
-
+      else incr = 0;
     }
   }
 }

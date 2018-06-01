@@ -279,149 +279,65 @@ void SmartHandController::update()
 {
   tickButtons();
   unsigned long top = millis();
-  if (buttonPressed())
-  {
-    if (sleepDisplay)
-    {
-      display->setContrast(maxContrast);
-      display->sleepOff();
-      sleepDisplay = false;
-      lowContrast = false;
-      time_last_action = millis();
-    }
-    if (lowContrast)
-    {
-      display->setContrast(maxContrast);
-      lowContrast = false;
-      time_last_action = top;
-    }
-  }
-  else if (sleepDisplay)
-  {
-    return;
-  }
-  else if (top - time_last_action > 120000)
-  {
-    display->sleepOn();
-    sleepDisplay = true;
-    return;
-  }
-  else if (top - time_last_action > 30000 && !lowContrast)
-  {
-    display->setContrast(0);
-    lowContrast = true;
-    return;
-  }
+
+  // sleep and wake up display
+  if (buttonPressed()) {
+    if (sleepDisplay) { display->setContrast(maxContrast); display->sleepOff(); sleepDisplay = false; lowContrast = false; time_last_action = millis(); }
+    if (lowContrast)  { display->setContrast(maxContrast); lowContrast = false; time_last_action = top; }
+  } else if (sleepDisplay) return;
+  if (top - time_last_action > 120000) { display->sleepOn(); sleepDisplay = true; return; }
+  if (top - time_last_action > 30000 && !lowContrast) { display->setContrast(0); lowContrast = true; return; }
+
+  // power cycle reqd message
+  if (powerCylceRequired) { display->setFont(u8g2_font_helvR12_tr); DisplayMessage("REBOOT", "DEVICE", 1000); return; }
   
-  if (powerCylceRequired)
-  {
-    display->setFont(u8g2_font_helvR12_tr);
-    DisplayMessage("REBOOT", "DEVICE", 1000);
-    return;
-  }
-  
-  if (telInfo.align == Telescope::ALI_SELECT_STAR_1 || telInfo.align == Telescope::ALI_SELECT_STAR_2 || telInfo.align == Telescope::ALI_SELECT_STAR_3)
-  {
-    if (telInfo.align == Telescope::ALI_SELECT_STAR_1)
-      DisplayLongMessage("Select a Star", "near the Meridian", "& the Celestial Equ.", "in the Western Sky", -1);
-    else if (telInfo.align == Telescope::ALI_SELECT_STAR_2)
-      DisplayLongMessage("Select a Star", "near the Meridian", "& the Celestial Equ.", "in the Eastern Sky", -1);
-    else if (telInfo.align == Telescope::ALI_SELECT_STAR_3)
-      DisplayLongMessage("Select a Star", "HA = -3 hour", "Dec = +- 45 degree", "in the Eastern Sky", -1);
-    if (!SelectStarAlign())
-    {
-      DisplayMessage("Alignment", "Aborted", -1);
-      telInfo.align = Telescope::ALI_OFF;
-      return;
-    }
+  if (telInfo.align == Telescope::ALI_SELECT_STAR_1 || telInfo.align == Telescope::ALI_SELECT_STAR_2 || telInfo.align == Telescope::ALI_SELECT_STAR_3) {
+    // show the align message for this step
+    if (telInfo.align == Telescope::ALI_SELECT_STAR_1) DisplayLongMessage("Select a Star", "near the Meridian", "& the Celestial Equ.", "in the Western Sky", -1); else 
+    if (telInfo.align == Telescope::ALI_SELECT_STAR_2) DisplayLongMessage("Select a Star", "near the Meridian", "& the Celestial Equ.", "in the Eastern Sky", -1); else 
+    if (telInfo.align == Telescope::ALI_SELECT_STAR_3) DisplayLongMessage("Select a Star", "HA = -3 hour", "Dec = +- 45 degree", "in the Eastern Sky", -1);
+    
+    // bring up the list of stars so user can goto the alignment star
+    if (!SelectStarAlign()) { DisplayMessage("Alignment", "Aborted", -1); telInfo.align = Telescope::ALI_OFF; return; }
+
+    // mark this as the next alignment star
     telInfo.align = static_cast<Telescope::AlignState>(telInfo.align + 1);
-  }
-  else if (top - lastpageupdate > BACKGROUND_CMD_RATE/2)
-  {
-    updateMainDisplay(page);
-  }
+  } else
+  if (top - lastpageupdate > BACKGROUND_CMD_RATE/2) updateMainDisplay(page);
   
-  if (telInfo.connected == false)
-  {
-    DisplayMessage("Hand controler", "not connected", -1);
-  }
+  if (telInfo.connected == false) DisplayMessage("Hand controler", "not connected", -1);
   
+  // is a goto happening?
   if (telInfo.connected && (telInfo.getTrackingState() == Telescope::TRK_SLEWING || telInfo.getParkState() == Telescope::PRK_PARKING))
   {
+    // button press to quit?
     bool stop = (eventbuttons[0] == E_LONGPRESS || eventbuttons[0] == E_LONGPRESSTART || eventbuttons[0] == E_DOUBLECLICK) ? true : false;
-    int it = 1;
-    while (!stop && it < 5)
-    {
-      stop = (eventbuttons[it] == E_LONGPRESS || eventbuttons[it] == E_CLICK || eventbuttons[it] == E_LONGPRESSTART);
-      it++;
-    }
-    if (stop)
-    {
-      Ser.print(":Q#");
-      Ser.flush();
+    int it = 1; while (!stop && it < 5) { stop = (eventbuttons[it] == E_LONGPRESS || eventbuttons[it] == E_CLICK || eventbuttons[it] == E_LONGPRESSTART); it++; }
+    if (stop) {
+      Ser.print(":Q#"); Ser.flush();
+      if (telInfo.align != Telescope::ALI_OFF) telInfo.align = static_cast<Telescope::AlignState>(telInfo.align - 1); // try another align star?
       time_last_action = millis();
       display->sleepOff();
-      if (telInfo.align != Telescope::ALI_OFF)
-      {
-        telInfo.align = static_cast<Telescope::AlignState>(telInfo.align - 1);
-      }
       return;
     }
-  }
-  else
+  } 
+  else // guide
   {
     buttonCommand = false;
     for (int k = 1; k < 5; k++)
     {
-      if (Move[k - 1] && (eventbuttons[k] == E_LONGPRESSSTOP || eventbuttons[k] == E_NONE))
-      {
-        buttonCommand = true;
-        Move[k - 1] = false;
-        Ser.print(BreakRC[k - 1]);
-        continue;
-      }
-      else if (!Move[k - 1] && (eventbuttons[k] == E_LONGPRESS || eventbuttons[k] == E_CLICK || eventbuttons[k] == E_LONGPRESSTART))
-      {
-        buttonCommand = true;
-        Move[k - 1] = true;
-        Ser.print(RC[k - 1]);
-        continue;
-      }
+      if (Move[k - 1] && (eventbuttons[k] == E_LONGPRESSSTOP || eventbuttons[k] == E_NONE)) { buttonCommand = true; Move[k - 1] = false; Ser.print(BreakRC[k - 1]); continue; } else 
+      if (!Move[k - 1] && (eventbuttons[k] == E_LONGPRESS || eventbuttons[k] == E_CLICK || eventbuttons[k] == E_LONGPRESSTART)) { buttonCommand = true; Move[k - 1] = true; Ser.print(RC[k - 1]); continue; }
     }
-    if (buttonCommand)
-    {
-      time_last_action = millis();
-      return;
-    }
+    if (buttonCommand) { time_last_action = millis(); return; }
   }
 
-  if (eventbuttons[0] == E_DOUBLECLICK /*|| eventbuttons[0] == E_CLICK)  && eventbuttons[1] != E_NONE*/)
-  {
-    menuSpeedRate();
-    time_last_action = millis();
-  }
-  else if (eventbuttons[0] == E_CLICK && telInfo.align == Telescope::ALI_OFF)
-  {
-    page++;
-    if (page > 2) page = 0;
-    time_last_action = millis();
-  }
-  else if (eventbuttons[0] == E_LONGPRESS && telInfo.align == Telescope::ALI_OFF)
-  {
-    menuMain();
-    time_last_action = millis();
-  }
-  else if (eventbuttons[0] == E_CLICK && (telInfo.align == Telescope::ALI_RECENTER_1 || telInfo.align == Telescope::ALI_RECENTER_2 || telInfo.align == Telescope::ALI_RECENTER_3))
-  {
-    if (telInfo.addStar()) {
-      if (telInfo.align == Telescope::ALI_OFF) {
-        DisplayMessage("Alignment", "Success!", 2000);
-      } else {
-        DisplayMessage("Add Star", "Success!", 2000);
-      }
-    } else {
-      DisplayMessage("Add Star", "Failed!", -1);
-    }
+  // handle shift button features
+  if (eventbuttons[0] == E_DOUBLECLICK) { menuSpeedRate(); time_last_action = millis(); } else                                                                                  // change guide rate
+  if (eventbuttons[0] == E_CLICK     && telInfo.align == Telescope::ALI_OFF) { page++; if (page > 2) page = 0; time_last_action = millis(); } else                              // cycle through disp of Eq, Hor, Time
+  if (eventbuttons[0] == E_LONGPRESS && telInfo.align == Telescope::ALI_OFF) { menuMain(); time_last_action = millis(); } else                                                  // bring up the menus
+  if (eventbuttons[0] == E_CLICK && (telInfo.align == Telescope::ALI_RECENTER_1 || telInfo.align == Telescope::ALI_RECENTER_2 || telInfo.align == Telescope::ALI_RECENTER_3)) { // add this align star
+    if (telInfo.addStar()) { if (telInfo.align == Telescope::ALI_OFF) DisplayMessage("Alignment", "Success!", 2000); else DisplayMessage("Add Star", "Success!", 2000); } else DisplayMessage("Add Star", "Failed!", -1);
   }
 }
 
@@ -432,280 +348,134 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
   u8g2_uint_t line_height = u8g2_GetAscent(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
   u8g2_uint_t step1 = u8g2_GetUTF8Width(u8g2, "44");
   u8g2_uint_t step2 = u8g2_GetUTF8Width(u8g2, "4") + 1;
-  telInfo.connected = true;
 
+  // get the status
+  telInfo.connected = true;
   telInfo.updateSeq++;
   telInfo.updateTel();
+  if (telInfo.connected == false) return;
 
-  if (telInfo.connected == false)
-  {
-    return;
-  }
+  // detect align mode
   if (telInfo.hasTelStatus && telInfo.align != Telescope::ALI_OFF)
   {
     Telescope::TrackState curT = telInfo.getTrackingState();
-    if (curT != Telescope::TRK_SLEWING && (telInfo.align == Telescope::ALI_SLEW_STAR_1 || telInfo.align == Telescope::ALI_SLEW_STAR_2 || telInfo.align == Telescope::ALI_SLEW_STAR_3))
-    {
-      telInfo.align = static_cast<Telescope::AlignState>(telInfo.align + 1);
-    }
+    if (curT != Telescope::TRK_SLEWING && (telInfo.align == Telescope::ALI_SLEW_STAR_1 || telInfo.align == Telescope::ALI_SLEW_STAR_2 || telInfo.align == Telescope::ALI_SLEW_STAR_3)) telInfo.align = static_cast<Telescope::AlignState>(telInfo.align + 1);
     page = 3;
   }
-  else if (page == 0)
-  {
-    telInfo.updateRaDec();
-  }
-  else if (page == 1)
-  {
-    telInfo.updateAzAlt();
-  }
-  else
-  {
-    telInfo.updateTime();
-  }
-  u8g2_FirstPage(u8g2);
 
+  // the graphics loop
+  u8g2_FirstPage(u8g2);
   do
   {
     u8g2_uint_t x = u8g2_GetDisplayWidth(u8g2);
     int k = 0;
-    if (wifiOn)
-      display->drawXBMP(0, 0, icon_width, icon_height, wifi_bits);
 
-    if (telInfo.hasTelStatus)
-    {
+    // wifi status
+    if (wifiOn) display->drawXBMP(0, 0, icon_width, icon_height, wifi_bits);
+
+    // OnStep status
+    if (telInfo.hasTelStatus) {
       Telescope::ParkState curP = telInfo.getParkState();
       Telescope::TrackState curT = telInfo.getTrackingState();
-      if (curP == Telescope::PRK_PARKED)
+      if (curP == Telescope::PRK_PARKED)  { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, parked_bits); x -= icon_width + 1; } else
+      if (curP == Telescope::PRK_PARKING) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, parking_bits); x -= icon_width + 1; } else
+      if (telInfo.atHome())               { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, home_bits); x -= icon_width + 1;  } else 
       {
-        display->drawXBMP(x - icon_width, 0, icon_width, icon_height, parked_bits);
-        x -= icon_width + 1;
-      }
-      else if (curP == Telescope::PRK_PARKING)
-      {
-        display->drawXBMP(x - icon_width, 0, icon_width, icon_height, parking_bits);
-        x -= icon_width + 1;
-      }
-      else if (telInfo.atHome())
-      {
-        display->drawXBMP(x - icon_width, 0, icon_width, icon_height, home_bits);
-        x -= icon_width + 1;
-      }
-      else
-      {
-        if (curT == Telescope::TRK_SLEWING)
-        {
-          display->drawXBMP(x - icon_width, 0, icon_width, icon_height, sleewing_bits);
-          x -= icon_width + 1;
-        }
-        else if (curT == Telescope::TRK_ON)
-        {
-          display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_S_bits);
-          x -= icon_width + 1;
-        }
-        else if (curT == Telescope::TRK_OFF)
-        {
-          display->drawXBMP(x - icon_width, 0, icon_width, icon_height, no_tracking_bits);
-          x -= icon_width + 1;
-        }
+        if (curT == Telescope::TRK_SLEWING) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, sleewing_bits); x -= icon_width + 1; } else
+        if (curT == Telescope::TRK_ON)      { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_S_bits); x -= icon_width + 1; } else
+        if (curT == Telescope::TRK_OFF)     { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, no_tracking_bits); x -= icon_width + 1; }
 
-        if (curP == Telescope::PRK_FAILED)
-        {
-          display->drawXBMP(x - icon_width, 0, icon_width, icon_height, parkingFailed_bits);
-          x -= icon_width + 1;
-        }
+        if (curP == Telescope::PRK_FAILED)  { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, parkingFailed_bits); x -= icon_width + 1; }
+
         if (telInfo.hasPierInfo)
         {
           Telescope::PierState CurP = telInfo.getPierState();
-          if (CurP == Telescope::PIER_E)
-          {
-            display->drawXBMP(x - icon_width, 0, icon_width, icon_height, E_bits);
-            x -= icon_width + 1;
-          }
-          else if (CurP == Telescope::PIER_W)
-          {
-            display->drawXBMP(x - icon_width, 0, icon_width, icon_height, W_bits);
-            x -= icon_width + 1;
-          }
-
+          if (CurP == Telescope::PIER_E) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, E_bits); x -= icon_width + 1; } else 
+          if (CurP == Telescope::PIER_W) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, W_bits); x -= icon_width + 1; }
         }
+
         if (telInfo.align != Telescope::ALI_OFF)
         {
-          if (telInfo.aliMode == Telescope::ALIM_ONE)
-            display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align1_bits);
-          else if (telInfo.aliMode == Telescope::ALIM_TWO)
-            display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align2_bits);
-          else if (telInfo.aliMode == Telescope::ALIM_THREE)
-            display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align3_bits);
-          x -= icon_width + 1;
+          if (telInfo.aliMode == Telescope::ALIM_ONE)   { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align1_bits); x -= icon_width + 1; } else 
+          if (telInfo.aliMode == Telescope::ALIM_TWO)   { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align2_bits); x -= icon_width + 1; } else
+          if (telInfo.aliMode == Telescope::ALIM_THREE) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align3_bits); x -= icon_width + 1; }
         }
 
-        if (telInfo.isGuiding())
-        {
-          display->drawXBMP(x - icon_width, 0, icon_width, icon_height, guiding_bits);
-          x -= icon_width + 1;
-        }
-
+        if (telInfo.isGuiding()) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, guiding_bits); x -= icon_width + 1; }
       }
-      switch (telInfo.getError())
-      {
-      case Telescope::ERR_MOTOR_FAULT:
-        display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrMf_bits);
-        x -= icon_width + 1;
-        break;
-      case  Telescope::ERR_ALT:
-        display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrHo_bits);
-        x -= icon_width + 1;
-        break;
-      case Telescope::ERR_DEC:
-        display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrDe_bits);
-        x -= icon_width + 1;
-        break;
-      case Telescope::ERR_UNDER_POLE:
-        display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrUp_bits);
-        x -= icon_width + 1;
-        break;
-      case Telescope::ERR_MERIDIAN:
-        display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrMe_bits);
-        x -= icon_width + 1;
-        break;
-      default:
-        break;
+
+      switch (telInfo.getError()) {
+        case Telescope::ERR_MOTOR_FAULT: display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrMf_bits); x -= icon_width + 1; break;
+        case Telescope::ERR_ALT:         display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrHo_bits); x -= icon_width + 1; break;
+        case Telescope::ERR_DEC:         display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrDe_bits); x -= icon_width + 1; break;
+        case Telescope::ERR_UNDER_POLE:  display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrUp_bits); x -= icon_width + 1; break;
+        case Telescope::ERR_MERIDIAN:    display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrMe_bits); x -= icon_width + 1; break;
+        default: break;
       }
     }
 
+    // show equatorial coordinates
     if (page == 0)
     {
-      if (telInfo.hasInfoRa && telInfo.hasInfoDec)
-      {
-        char Rah[3];
-        char Ram[3];
-        char Ras[3];
-        char decsign[2];
-        char decdeg[3];
-        char decmin[3];
-        char decsec[3];
-        memcpy(Rah, telInfo.TempRa, 2);
-        Rah[2] = '\0';
-        memcpy(Ram, &telInfo.TempRa[3], 2);
-        Ram[2] = '\0';
-        memcpy(Ras, &telInfo.TempRa[6], 2);
-        Ras[2] = '\0';
-        memcpy(decsign, telInfo.TempDec, 1);
-        decsign[1] = '\0';
-        memcpy(decdeg, &telInfo.TempDec[1], 2);
-        decdeg[2] = '\0';
-        memcpy(decmin, &telInfo.TempDec[4], 2);
-        decmin[2] = '\0';
-        memcpy(decsec, &telInfo.TempDec[7], 2);
-        decsec[2] = '\0';
+      telInfo.updateRaDec();
+      if (telInfo.hasInfoRa && telInfo.hasInfoDec) {
+        char rs[20]; strcpy(rs,telInfo.TempRa); rs[2]=0; rs[5]=0;
+        x = u8g2_GetDisplayWidth(u8g2);  u8g2_uint_t y = 36;
+        u8g2_DrawUTF8(u8g2, 0, y, "RA"); display->drawRA( x, y, rs, &rs[3], &rs[6]);
 
-        u8g2_uint_t y = 36;
-        x = u8g2_GetDisplayWidth(u8g2);
-
-        display->drawRA( x, y, Rah, Ram, Ras);
-        u8g2_DrawUTF8(u8g2, 0, y, "RA");
-
+        char ds[20]; strcpy(ds,telInfo.TempDec); ds[3]=0; ds[6]=0; char sds[2]="x"; sds[0]=ds[0];
         y += line_height + 4;
-        u8g2_DrawUTF8(u8g2, 0, y, "Dec");
-        display->drawDec( x, y, decsign, decdeg, decmin, decsec);
-
+        u8g2_DrawUTF8(u8g2, 0, y, "Dec"); display->drawDec( x, y, sds, &ds[1], &ds[4], &ds[7]);
       }
     }
-    else if (page == 1)
-    {
+
+    // show horizon coordinates
+    if (page == 1) {
+      telInfo.updateAzAlt();
       if (telInfo.hasInfoAz && telInfo.hasInfoAlt)
       {
-        char Azdeg[4];
-        char Azm[3];
-        char Azs[3];
-        char Altsign[2];
-        char Altdeg[3];
-        char Altmin[3];
-        char Altsec[3];
-        memcpy(Azdeg, telInfo.TempAz, 3);
-        Azdeg[3] = '\0';
-        memcpy(Azm, &telInfo.TempAz[4], 2);
-        Azm[2] = '\0';
-        memcpy(Azs, &telInfo.TempAz[7], 2);
-        Azs[2] = '\0';
-        memcpy(Altsign, telInfo.TempAlt, 1);
-        Altsign[1] = '\0';
-        memcpy(Altdeg, &telInfo.TempAlt[1], 2);
-        Altdeg[2] = '\0';
-        memcpy(Altmin, &telInfo.TempAlt[4], 2);
-        Altmin[2] = '\0';
-        memcpy(Altsec, &telInfo.TempAlt[7], 2);
-        Altsec[2] = '\0';
+        char zs[20]; strcpy(zs,telInfo.TempAz); zs[3]=0; zs[6]=0;
+        u8g2_uint_t y = 36; u8g2_uint_t startpos = u8g2_GetUTF8Width(u8g2, "123456"); x = startpos; x = u8g2_GetDisplayWidth(u8g2);
+        u8g2_DrawUTF8(u8g2, 0, y, "Az."); display->drawAz(x, y, zs, &zs[4], &zs[7]);
 
-        u8g2_uint_t y = 36;
-        u8g2_uint_t startpos = u8g2_GetUTF8Width(u8g2, "123456");
-        x = startpos;
-        x = u8g2_GetDisplayWidth(u8g2);
-        u8g2_DrawUTF8(u8g2, 0, y, "Az.");
-        display->drawAz(x, y, Azdeg, Azm, Azs);
-
-        y += line_height + 4;
-        x = startpos;
-        x = u8g2_GetDisplayWidth(u8g2);
-
-        display->drawDec( x, y, Altsign, Altdeg, Altmin, Altsec);
-        u8g2_DrawUTF8(u8g2, 0, y, "Alt.");
+        char as[20]; strcpy(as,telInfo.TempAlt); as[3]=0; as[6]=0; char sas[2]="x"; sas[0]=as[0];
+        y += line_height + 4; x = startpos; x = u8g2_GetDisplayWidth(u8g2);
+        u8g2_DrawUTF8(u8g2, 0, y, "Alt."); display->drawDec( x, y, sas, &as[1], &as[4], &as[7]);
       }
     }
-    else if (page == 2)
-    {
+    
+    // show time
+    if (page == 2) {
+      telInfo.updateTime();
       if (telInfo.hasInfoUTC && telInfo.hasInfoSideral)
       {
-        char Rah[3];
-        char Ram[3];
-        char Ras[3];
-        u8g2_uint_t y = 36;
+        char us[20]; strcpy(us,telInfo.TempUTC); us[2]=0; us[5]=0;
+        x = u8g2_GetDisplayWidth(u8g2);  u8g2_uint_t y = 36;
+        u8g2_DrawUTF8(u8g2, 0, y, "UTC"); display->drawRA( x, y, us, &us[3], &us[6]);
 
-        x = u8g2_GetDisplayWidth(u8g2);
-        memcpy(Rah, telInfo.TempUTC, 2);
-        Rah[2] = '\0';
-        memcpy(Ram, &telInfo.TempUTC[3], 2);
-        Ram[2] = '\0';
-        memcpy(Ras, &telInfo.TempUTC[6], 2);
-        Ras[2] = '\0';
-        u8g2_DrawUTF8(u8g2, 0, y, "UTC");
-        display->drawRA( x, y, Rah, Ram, Ras);
-
+        char ss[20]; strcpy(ss,telInfo.TempSideral); ss[2]=0; ss[5]=0;
         y += line_height + 4;
-        memcpy(Rah, telInfo.TempSideral, 2);
-        Rah[2] = '\0';
-        memcpy(Ram, &telInfo.TempSideral[3], 2);
-        Ram[2] = '\0';
-        memcpy(Ras, &telInfo.TempSideral[6], 2);
-        Ras[2] = '\0';
-        u8g2_DrawUTF8(u8g2, 0, y, "Sideral");
-        display->drawRA(x, y, Rah, Ram, Ras);
+        u8g2_DrawUTF8(u8g2, 0, y, "Sideral"); display->drawRA(x, y, ss, &ss[3], &ss[6]);
       }
     }
-    else if (page == 3)
-    {
-      int idx = telInfo.alignSelectedStar - 1;
-      const byte* cat_letter = NULL;
-      const byte*  cat_const = NULL;
-      cat_letter = &Star_letter[idx];
-      cat_const = &Star_constellation[idx];
-      u8g2_uint_t y = 36;
-      char txt[20];
 
-      if ((telInfo.align - 1) % 3 == 1)
-      {
-        sprintf(txt, "Slew to Star %u", (telInfo.align - 1) / 3 + 1);
-      }
-      else if ((telInfo.align - 1) % 3 == 2)
-      {
-        sprintf(txt, "Recenter Star %u", (telInfo.align - 1) / 3 + 1);
-      }
+    // show align status
+    if (page == 3) {
+      int idx = telInfo.alignSelectedStar - 1;
+      const byte* cat_letter = &Star_letter[idx];;
+      const byte*  cat_const = &Star_constellation[idx];
+      u8g2_uint_t y = 36;
+
+      char txt[20];
+      if ((telInfo.align - 1) % 3 == 1) sprintf(txt, "Slew to Star %u", (telInfo.align - 1) / 3 + 1); else
+      if ((telInfo.align - 1) % 3 == 2) sprintf(txt, "Recenter Star %u", (telInfo.align - 1) / 3 + 1);
       u8g2_DrawUTF8(u8g2, 0, y, txt);
+
       y += line_height + 4;
-      const uint8_t* myfont = u8g2->font;
       u8g2_SetFont(u8g2, u8g2_font_unifont_t_greek);
       u8g2_DrawGlyph(u8g2, 0, y, 944 + *cat_letter);
-      u8g2_SetFont(u8g2, myfont);
+
+      const uint8_t* myfont = u8g2->font; u8g2_SetFont(u8g2, myfont);
       u8g2_DrawUTF8(u8g2, 16, y, constellation_txt[*cat_const - 1]);
     }
 
