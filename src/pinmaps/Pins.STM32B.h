@@ -57,19 +57,19 @@
 
 #elif defined(STM32Blue_ON) 
 
-  #define A1EN          PC14
-  #define A1M0          PC15
-  #define A1M1          PA0
-  #define A1M2          PA1 
-  #define A1ST          PA2 
-  #define A1DR          PA3 
+  #define A1EN          PA9 
+  #define A1M0          PA8 
+  #define A1M1          PB15
+  #define A1M2          PB14
+  #define A1ST          PB13
+  #define A1DR          PB12
 
-  #define A2EN          PA9 
-  #define A2M0          PA8 
-  #define A2M1          PB15
-  #define A2M2          PB14
-  #define A2ST          PB13
-  #define A2DR          PB12
+  #define A2EN          PC14
+  #define A2M0          PC15
+  #define A2M1          PA0
+  #define A2M2          PA1 
+  #define A2ST          PA2 
+  #define A2DR          PA3 
 
   #define S4N           PA15
   #define S4S           PB3 
