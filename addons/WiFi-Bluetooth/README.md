@@ -9,40 +9,41 @@ This server is known to work from personal computers (using a browser), phones a
 Before you can flash the firmware on your ESP8266 device, you need to install the ESP8266
 platform for the Arduino IDE.
 
-nder Preferences add this line in the additional "Boards Manager" area:
-http://arduino.esp8266.com/stable/package_esp8266com_index.json
+Under Preferences add this line in the additional "Boards Manager" area:
+  http://arduino.esp8266.com/stable/package_esp8266com_index.json
 
 Then from the "Tools, Boards, Boards Manager" menu select and install the ESP8266 add-on.
 
 # Flashing The WiFi Server
-Then pick your device from "Tools, Boards". 
-
-For a WeMos D1 Mini or NodeMCU, select the device from the list.
-For an ESP-01, select "Generic 8266 Module" (for an ESP-01)
-
-For devices with a USB port, you can connect directly using the USB connector.
-
 The exact flashing procedure depends on which ESP8826 device you will be using.
 
+In the Arduino IDE, pick your device from "Tools, Boards". 
+
+For a WeMos D1 Mini or NodeMCU, select the device from the list.
+For an ESP-01, select "Generic 8266 Module".
+
+For devices with a USB port (WeMos D1 Mini, NodeMCU), you can connect directly using the USB connector.
 For an ESP-01 module, its pins should be in a certain configuration:
 
 Pin CHPD/EN must be HIGH (connected to 3.3V)
 Pin GPIO0 must be LOW (connected to GND).
 
-You can by adapter boards that help with flashing from eBay, Amazon and other sources.
+You can buy an inexpensive adapter or board that help with flashing the ESP01 from eBay, Amazon and other sources.
 
 For the ESP-01, use the following parameters under Tools:
 
-- Flash Mode: “DIO”
-- Flash Frequency: “40MHz”
-- CPU Frequency: “80 MHz”
-- Flash Size: “1M (64K SPIFFS)”
-- Reset Method: “ck”
-- Upload Speed: “115200”
-- Debug Port: “Disabled”
-- Debug Level: “None”
+- Board: "Generic ESP8266 Module"
+- Flash Mode: "DIO"
+- Erase Flash: "Sketch + WiFi Settings"
+- Flash Size: "1M (64K SPIFFS)" (Most ESP01 have 1M, older ones have 512K)
+- Flash Frequency: "40MHz"
+- CPU Frequency: "80 MHz"
+- Reset Method: "ck"
+- Upload Speed: "115200"
+- Debug Port: "Disabled"
+- Debug Level: "None"
 
-The source code is inside your OnStep folder under the "addons/WiFi-Bluetooth" subdirectory.
+The source code is inside the OnStep folder under the "addons/WiFi-Bluetooth" subdirectory.
 
 Open the WiFi-Bluetooth.ino file inside this folder. Check the "Config.h" file for information
 about serial port wiring and to configure before uploading.  Once this is done upload to the ESP8266.
