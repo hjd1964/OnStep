@@ -25,52 +25,112 @@
 
 #if defined(__STM32F1__)
 
+#if defined(STM32Black_ON)
+
+  #define A1EN          PA3
+  #define A1M0          PA2
+  #define A1M1          PA1
+  #define A1M2          PA0  
+  #define A1ST          PC13
+  #define A1DR          PB9
+
+  #define A2EN          PB13
+  #define A2M0          PB14
+  #define A2M1          PB15
+  #define A2M2          PA8 
+  #define A2ST          PA9
+  #define A2DR          PA10
+
+  #define S4N           PA13
+  #define S4S           PA14
+  #define S4W           PA15
+  #define S4E           PB3
+
+  #define LED           PB12
+  #define TONE          PB4 
+  #define SQW           PB5 
+
+  #define F1DR          PB0 
+  #define F1ST          PB1 
+
+  #define SPARE1        PB8
+
+#elif defined(STM32Blue_ON) 
+
+  #define A1EN          PA9 
+  #define A1M0          PA8 
+  #define A1M1          PB15
+  #define A1M2          PB14
+  #define A1ST          PB13
+  #define A1DR          PB12
+
+  #define A2EN          PC14
+  #define A2M0          PC15
+  #define A2M1          PA0
+  #define A2M2          PA1 
+  #define A2ST          PA2 
+  #define A2DR          PA3 
+
+  #define S4N           PA15
+  #define S4S           PB3 
+  #define S4W           PB4
+  #define S4E           PB5
+
+  #define LED           PC13
+  #define TONE          PB9 
+  #define SQW           PB8 
+
+  #define F1DR          PB0 
+  #define F1ST          PB1
+
+  #define SPARE1        PA10
+  #define SPARE2        PA13
+  #define SPARE3        PA14
+
+#else
+  #error "Unknown STM32 Board. This pinmap is only for Blue and Black Pill variants"
+#endif
+
 // The pins here are not tested yet, and need to change 
 
-#define Axis1_EN        PA2    // Enable
-#define Axis1_M0        PA1    // Microstep Mode 0
-#define Axis1_M1        PA0    // Microstep Mode 1
-#define Axis1_M2        PC13   // Microstep Mode 2
-#define Axis1StepPin    PB9    // Step
-#define Axis1DirPin     PB8    // Motor Direction
+#define Axis1_EN        A1EN   // Enable
+#define Axis1_M0        A1M0   // Microstep Mode 0
+#define Axis1_M1        A1M1   // Microstep Mode 1
+#define Axis1_M2        A1M2   // Microstep Mode 2
+#define Axis1StepPin    A1ST   // Step
+#define Axis1DirPin     A1DR   // Motor Direction
 //#define Axis1_FAULT   Undefined    // Fault
 //#define Axis1_Aux     Axis1_Aux    // Aux - ESP8266 GPIO0 or SPI MISO
 
-#define Axis2_EN        PB13   // Enable
-#define Axis2_M0        PB14   // Microstep Mode 0
-#define Axis2_M1        PB15   // Microstep Mode 1
-#define Axis2_M2        PA8    // Microstep Mode 2
-#define Axis2StepPin    PA9    // Step
-#define Axis2DirPin     PA10   // Motor Direction
+#define Axis2_EN        A2EN   // Enable
+#define Axis2_M0        A2M0   // Microstep Mode 0
+#define Axis2_M1        A2M1   // Microstep Mode 1
+#define Axis2_M2        A2M2   // Microstep Mode 2
+#define Axis2StepPin    A2ST   // Step
+#define Axis2DirPin     A2DR   // Motor Direction
 //#define Axis2_FAULT   Undefined    // Fault
 //#define Axis2_Aux     Axis2_FAULT  // Aux - ESP8266 RST or SPI MISO
 
 // ST4 interface
-#define ST4DEn          PA14   // ST4 DE+ North
-#define ST4DEs          PA13   // ST4 DE- South
-#define ST4RAw          PB1    // ST4 RA- West
-#define ST4RAe          PB0    // ST4 RA+ East
+#define ST4DEn          S4N    // ST4 DE+ North
+#define ST4DEs          S4S    // ST4 DE- South
+#define ST4RAw          S4W    // ST4 RA- West
+#define ST4RAe          S4E    // ST4 RA+ East
 
 // This is the built in LED for the Black Pill board. There is a pin
 // available from it too, in case you want to power another LED with a wire
-#if defined(STM32Black_ON)
-  #define LEDnegPin     PB12   // Drain
-#elif defined(STM32Blue_ON) 
-  #define LEDnegPin     PC13   // Drain
-#else
-  #error "Unknown STM32 Board. Can't assign an LED Pin"
-#endif
+#define LEDnegPin       LED    // Drain
 
 // For a piezo buzzer
-#define TonePin         PB4    // Tone
+#define TonePin         TONE   // Tone
 
 // The PPS pin is a 3.3V logic input, OnStep measures time between rising edges and
 // adjusts the internal sidereal clock frequency
-#define PpsPin          PB5    // Pulse Per Second time source, e.g. GPS, RTC
+#define PpsPin          SQW    // Pulse Per Second time source, e.g. GPS, RTC
 
 // Pins to focuser1 stepper driver
-#define Axis4DirPin     PA15   // Dir
-#define Axis4StepPin    PB3    // Step
+#define Axis4DirPin     F1DR   // Dir
+#define Axis4StepPin    F1ST   // Step
 
 // For rotator stepper driver
 //#define Axis3DirPin     PB4    // Dir
