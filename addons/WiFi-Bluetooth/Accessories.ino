@@ -59,6 +59,9 @@ boolean readLX200Bytes(char* command,char* recvBuffer,long timeOutMs) {
     if (command[1]=='Q') {
       if (strchr("#ewns",command[2])) noResponse=true;
     }
+    if (command[1] == 'R') {
+      if (strchr("AEGCMS0123456789", command[2])) noResponse=true;
+    }
     if (command[1]=='S') {
       if (strchr("CLSGtgMNOPrdhoTBX",command[2])) shortResponse=true;
     }
