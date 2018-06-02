@@ -51,15 +51,15 @@ about serial port wiring and to configure before uploading.  Once this is done u
 If you are using a pre-wired board (e.g. MiniPCB, MaxPCB), you don't need to worry about wiring, since
 it is all done for you.
 
-If you are not using a pre-wired board, you to connect your ESP8266 to certain pins for your
+If you are not using a pre-wired board, you have to connect your ESP8266 to certain pins for your
 microcontroller.  Basically, the TX on the ESP8266 should be connected on Serial1's RX for the
 microcontroller, and RX on the ESP8266 should be connected to TX on Serial1 for the microcontroller.
 
-Note that Serial1 may be remapped in the HAL for your microcontroller, for example on STM32, PA3 and 
-PA2 are used, and they are designated Serial2. If you are using a HAL that is tested and verified
-working, you don't need to worry about this part. 
+Note that Serial1 may be remapped in the HAL for your microcontroller, for example on STM32, PA10/TX
+and PA11/RX are used, and they are designated Serial3. If you are using a HAL that is tested and
+verified working, you don't need to worry about this part. 
 
-You also need to make the CH_PD/EN pin high by connecting it to 3.3V, otherwise, your ESP-01 would
+You also need to make the CHPD/EN pin high by connecting it to 3.3V, otherwise, your ESP-01 would
 not turn on. 
 
 # Power
