@@ -3,10 +3,6 @@
 #include "SmartController.h"
 #include "LX200.h"
 
-static char* BreakRC[4] = { ":Qn#" ,":Qs#" ,":Qe#" ,":Qw#" };
-static char* RC[4] = { ":Mn#" , ":Ms#" ,":Me#" ,":Mw#" };
-
-
 #define MY_BORDER_SIZE 1
 #define icon_width 16
 #define icon_height 16
