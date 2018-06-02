@@ -38,3 +38,4 @@ LX200RETURN readLowCurrLX200(const uint8_t &axis, uint8_t &lowCurr);
 LX200RETURN writeLowCurrLX200(const uint8_t &axis, const uint8_t &lowCurr);
 LX200RETURN readHighCurrLX200(const uint8_t &axis, uint8_t &highCurr);
 LX200RETURN writeHighCurrLX200(const uint8_t &axis, const uint8_t &highCurr);
+

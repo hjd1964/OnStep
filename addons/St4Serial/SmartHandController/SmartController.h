@@ -17,9 +17,13 @@ public:
   void drawLoad();
   void drawReady();
   void setup(const char version[], const int pin[7], const bool active[7], const int SerialBaud, const OLED model);
+  void tickButtons();
 private:
-  U8G2_EXT *display = NULL;
+  unsigned long maxT=0;
+
   Pad buttonPad;
+  U8G2_EXT *display = NULL;
+
   Telescope telInfo;
   char _version[20]="Version ?";
 
@@ -30,7 +34,10 @@ private:
   bool wifiOn = false;
   bool powerCylceRequired = false;
   bool buttonCommand = false;
-  bool Move[4] = { false, false, false, false };
+  bool moveNorth=false;
+  bool moveSouth=false;
+  bool moveEast=false;
+  bool moveWest=false;
 
   unsigned long lastpageupdate = millis();
   unsigned long time_last_action = millis();
@@ -48,8 +55,7 @@ private:
   unsigned short current_selection_Star = 1;
   long angleRA = 0;
   long angleDEC = 0;
-  void tickButtons();
-  bool buttonPressed();
+
   void menuMain();
   void menuSpeedRate();
   void menuTrack();
@@ -97,3 +103,5 @@ private:
   void DisplayLongMessage(const char* txt1, const char* txt2 = NULL, const char* txt3 = NULL, const char* txt4 = NULL, int duration = 0);
   bool DisplayMessageLX200(LX200RETURN val, bool silentOk = true);
 };
+extern SmartHandController HdCrtlr;
+

@@ -271,17 +271,13 @@ void SmartHandController::tickButtons()
   buttonPad.tickButtons();
 }
 
-bool SmartHandController::buttonPressed()
-{
-  return buttonPad.buttonPressed();
-}
 void SmartHandController::update()
 {
   tickButtons();
   unsigned long top = millis();
 
   // sleep and wake up display
-  if (buttonPressed()) {
+  if (buttonPad.anyPressed()) {
     if (sleepDisplay) { display->setContrast(maxContrast); display->sleepOff(); sleepDisplay = false; lowContrast = false; time_last_action = millis(); }
     if (lowContrast)  { display->setContrast(maxContrast); lowContrast = false; time_last_action = top; }
   } else if (sleepDisplay) return;
@@ -310,10 +306,7 @@ void SmartHandController::update()
   // is a goto happening?
   if (telInfo.connected && (telInfo.getTrackingState() == Telescope::TRK_SLEWING || telInfo.getParkState() == Telescope::PRK_PARKING))
   {
-    // button press to quit?
-    bool stop = (eventbuttons[0] == E_LONGPRESS || eventbuttons[0] == E_LONGPRESSTART || eventbuttons[0] == E_DOUBLECLICK) ? true : false;
-    int it = 1; while (!stop && it < 5) { stop = (eventbuttons[it] == E_LONGPRESS || eventbuttons[it] == E_CLICK || eventbuttons[it] == E_LONGPRESSTART); it++; }
-    if (stop) {
+    if (buttonPad.anyPressed()) {
       Ser.print(":Q#"); Ser.flush();
       if (telInfo.align != Telescope::ALI_OFF) telInfo.align = static_cast<Telescope::AlignState>(telInfo.align - 1); // try another align star?
       time_last_action = millis();
@@ -324,20 +317,29 @@ void SmartHandController::update()
   else // guide
   {
     buttonCommand = false;
-    for (int k = 1; k < 5; k++)
-    {
-      if (Move[k - 1] && (eventbuttons[k] == E_LONGPRESSSTOP || eventbuttons[k] == E_NONE)) { buttonCommand = true; Move[k - 1] = false; Ser.print(BreakRC[k - 1]); continue; } else 
-      if (!Move[k - 1] && (eventbuttons[k] == E_LONGPRESS || eventbuttons[k] == E_CLICK || eventbuttons[k] == E_LONGPRESSTART)) { buttonCommand = true; Move[k - 1] = true; Ser.print(RC[k - 1]); continue; }
-    }
+    if (!moveEast  && buttonPad.e.isDown()) { moveEast = true;   Ser.print(":Me#"); buttonCommand=true; } else
+    if (moveEast   && buttonPad.e.isUp())   { moveEast = false;  Ser.print(":Qe#"); buttonCommand=true; buttonPad.e.clearPress(); }
+    if (!moveWest  && buttonPad.w.isDown()) { moveWest = true;   Ser.print(":Mw#"); buttonCommand=true; } else
+    if (moveWest   && buttonPad.w.isUp())   { moveWest = false;  Ser.print(":Qw#"); buttonCommand=true; buttonPad.w.clearPress(); }
+    if (!moveNorth && buttonPad.n.isDown()) { moveNorth = true;  Ser.print(":Mn#"); buttonCommand=true; } else
+    if (moveNorth  && buttonPad.n.isUp())   { moveNorth = false; Ser.print(":Qn#"); buttonCommand=true; buttonPad.n.clearPress(); }
+    if (!moveSouth && buttonPad.s.isDown()) { moveSouth = true;  Ser.print(":Ms#"); buttonCommand=true; } else
+    if (moveSouth  && buttonPad.s.isUp())   { moveSouth = false; Ser.print(":Qs#"); buttonCommand=true; buttonPad.s.clearPress(); }
     if (buttonCommand) { time_last_action = millis(); return; }
   }
 
   // handle shift button features
-  if (eventbuttons[0] == E_DOUBLECLICK) { menuSpeedRate(); time_last_action = millis(); } else                                                                                  // change guide rate
-  if (eventbuttons[0] == E_CLICK     && telInfo.align == Telescope::ALI_OFF) { page++; if (page > 2) page = 0; time_last_action = millis(); } else                              // cycle through disp of Eq, Hor, Time
-  if (eventbuttons[0] == E_LONGPRESS && telInfo.align == Telescope::ALI_OFF) { menuMain(); time_last_action = millis(); } else                                                  // bring up the menus
-  if (eventbuttons[0] == E_CLICK && (telInfo.align == Telescope::ALI_RECENTER_1 || telInfo.align == Telescope::ALI_RECENTER_2 || telInfo.align == Telescope::ALI_RECENTER_3)) { // add this align star
-    if (telInfo.addStar()) { if (telInfo.align == Telescope::ALI_OFF) DisplayMessage("Alignment", "Success!", 2000); else DisplayMessage("Add Star", "Success!", 2000); } else DisplayMessage("Add Star", "Failed!", -1);
+  if (buttonPad.shift.isDown()) {
+    if ((buttonPad.shift.timeDown()>1000) && telInfo.align == Telescope::ALI_OFF) { menuMain(); time_last_action = millis(); }                                                        // bring up the menus
+  } else {
+    // wait long enough that a double press can happen before picking up the press events
+    if (buttonPad.shift.timeUp()>250) {
+      if (buttonPad.shift.wasDoublePressed()) { menuSpeedRate(); time_last_action = millis(); } else                                                                                  // change guide rate
+      if (buttonPad.shift.wasPressed() && telInfo.align == Telescope::ALI_OFF) { page++; if (page > 2) page = 0; time_last_action = millis(); } else                                  // cycle through disp of Eq, Hor, Time
+      if (buttonPad.shift.wasPressed() && (telInfo.align == Telescope::ALI_RECENTER_1 || telInfo.align == Telescope::ALI_RECENTER_2 || telInfo.align == Telescope::ALI_RECENTER_3)) { // add this align star
+        if (telInfo.addStar()) { if (telInfo.align == Telescope::ALI_OFF) DisplayMessage("Alignment", "Success!", 2000); else DisplayMessage("Add Star", "Success!", 2000); } else DisplayMessage("Add Star", "Failed!", -1);
+      }
+    }
   }
 }
 
@@ -387,15 +389,13 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
 
         if (curP == Telescope::PRK_FAILED)  { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, parkingFailed_bits); x -= icon_width + 1; }
 
-        if (telInfo.hasPierInfo)
-        {
+        if (telInfo.hasPierInfo) {
           Telescope::PierState CurP = telInfo.getPierState();
           if (CurP == Telescope::PIER_E) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, E_bits); x -= icon_width + 1; } else 
           if (CurP == Telescope::PIER_W) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, W_bits); x -= icon_width + 1; }
         }
 
-        if (telInfo.align != Telescope::ALI_OFF)
-        {
+        if (telInfo.align != Telescope::ALI_OFF) {
           if (telInfo.aliMode == Telescope::ALIM_ONE)   { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align1_bits); x -= icon_width + 1; } else 
           if (telInfo.aliMode == Telescope::ALIM_TWO)   { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align2_bits); x -= icon_width + 1; } else
           if (telInfo.aliMode == Telescope::ALIM_THREE) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align3_bits); x -= icon_width + 1; }
@@ -1605,18 +1605,7 @@ void SmartHandController::DisplayMessage(const char* txt1, const char* txt2, int
     x = (display->getDisplayWidth() - display->getStrWidth(txt1)) / 2;
     display->drawStr(x, y, txt1);
   } while (display->nextPage());
-  if (duration >= 0)
-    delay(duration);
-  else
-  {
-    for (;;)
-    {
-      tickButtons();
-      delay(50);
-      if (buttonPressed())
-        break;
-    }
-  }
+  if (duration >= 0) delay(duration); else buttonPad.waitForPress();
 }
 
 void SmartHandController::DisplayLongMessage(const char* txt1, const char* txt2, const char* txt3, const char* txt4, int duration)
@@ -1655,18 +1644,7 @@ void SmartHandController::DisplayLongMessage(const char* txt1, const char* txt2,
       display->drawStr(x, y, txt4);
     }
   } while (display->nextPage());
-  if (duration >= 0)
-    delay(duration);
-  else
-  {
-    for (;;)
-    {
-      tickButtons();
-      delay(50);
-      if (buttonPressed())
-        break;
-    }
-  }
+  if (duration >= 0) delay(duration); else buttonPad.waitForPress();
 
   display->setFont(u8g2_font_helvR12_te);
 }

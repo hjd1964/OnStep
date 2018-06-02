@@ -2,6 +2,7 @@
 #include <Ephemeris.h>
 #include "Catalog.h"
 #include "LX200.h"
+#include "SmartController.h"
 
 // integer numeric conversion with error checking
 boolean atoi2(char *a, int *i) {
@@ -45,6 +46,7 @@ byte readBytesUntil2(char character, char buffer[], int length, boolean* charact
       if (buffer[pos] == character) { *characterFound = true; break; }
       pos++;
     }
+    HdCrtlr.tickButtons();
   }
   return pos;
 }
@@ -130,6 +132,7 @@ bool readLX200Bytes(char* command, char* recvBuffer, unsigned long timeOutMs) {
           b = Ser.read();
           recvBuffer[recvBufferPos] = b; recvBufferPos++; if (recvBufferPos > 19) recvBufferPos = 19; recvBuffer[recvBufferPos] = 0;
         }
+        HdCrtlr.tickButtons();
       }
       return (recvBuffer[0] != 0);
     }
@@ -577,3 +580,4 @@ LX200RETURN writeHighCurrLX200(const uint8_t &axis, const uint8_t &highCurr)
   text[3] = axis == 1 ? 'R' : 'D';
   return SetLX200(text);
 }
+
