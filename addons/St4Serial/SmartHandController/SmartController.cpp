@@ -1461,7 +1461,7 @@ void SmartHandController::menuLimits()
   char string_list_LimitsL2[80];
   
   if ((telInfo.hasTelStatus) && (telInfo.isMountGEM())) {
-    strcpy(string_list_LimitsL2,"Horizon\n""Overhead\n""MeridianE\n""MeridianW");
+    strcpy(string_list_LimitsL2,"Horizon\n""Overhead\n""Meridian E\n""Meridian W");
   } else {
     strcpy(string_list_LimitsL2,"Horizon\n""Overhead");
   }
@@ -1560,7 +1560,7 @@ void SmartHandController::menuMeridianE()
   {
     float angle = (float)strtol(&out[0], NULL, 10);
     angle = round((angle * 15.0) / 60.0);
-    if (display->UserInterfaceInputValueFloat(&buttonPad, "Merid Limit E", "", &angle, -45, 45, 2, 0, " degree"))
+    if (display->UserInterfaceInputValueFloat(&buttonPad, "Meridn Limit E", "", &angle, -45, 45, 2, 0, " degree"))
     {
       angle = round((angle * 60.0) / 15.0);
       sprintf(out, ":SXE9,%+02d#", (int)angle);
@@ -1576,7 +1576,7 @@ void SmartHandController::menuMeridianW()
   {
     float angle = (float)strtol(&out[0], NULL, 10);
     angle = round((angle * 15.0) / 60.0);
-    if (display->UserInterfaceInputValueFloat(&buttonPad, "Merid Limit W", "", &angle, -45, 45, 2, 0, " degree"))
+    if (display->UserInterfaceInputValueFloat(&buttonPad, "Meridn Limit W", "", &angle, -45, 45, 2, 0, " degree"))
     {
       angle = round((angle * 60.0) / 15.0);
       sprintf(out, ":SXEA,%+02d#", (int)angle);
