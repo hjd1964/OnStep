@@ -70,6 +70,7 @@ public:
   void tickButtons();
   bool anyPressed();
   void waitForPress();
+  void clearAllPressed();
 
   button shift,n,s,e,w,F,f;
 

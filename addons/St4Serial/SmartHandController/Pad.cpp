@@ -36,3 +36,13 @@ void Pad::waitForPress() {
   for (;;) { tickButtons(); delay(5); if (anyPressed()) break; }
 }
 
+void Pad::clearAllPressed() {
+  shift.clearPress();
+  n.clearPress();
+  s.clearPress();
+  e.clearPress();
+  w.clearPress();
+  F.clearPress();
+  f.clearPress();
+}
+

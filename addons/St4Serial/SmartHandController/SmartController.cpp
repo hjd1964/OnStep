@@ -274,7 +274,7 @@ void SmartHandController::update()
 
   // sleep and wake up display
   if (buttonPad.anyPressed()) {
-    if (sleepDisplay) { display->setContrast(maxContrast); display->sleepOff(); sleepDisplay = false; lowContrast = false; time_last_action = millis(); }
+    if (sleepDisplay) { display->setContrast(maxContrast); display->sleepOff(); sleepDisplay = false; lowContrast = false; buttonPad.clearAllPressed(); time_last_action = millis(); }
     if (lowContrast)  { display->setContrast(maxContrast); lowContrast = false; time_last_action = top; }
   } else if (sleepDisplay) return;
   if (top - time_last_action > 120000) { display->sleepOn(); sleepDisplay = true; return; }
@@ -298,7 +298,7 @@ void SmartHandController::update()
   if (top - lastpageupdate > BACKGROUND_CMD_RATE/2) updateMainDisplay(page);
   
   if (telInfo.connected == false) DisplayMessage("Hand controler", "not connected", -1);
-  
+
   // is a goto happening?
   if (telInfo.connected && (telInfo.getTrackingState() == Telescope::TRK_SLEWING || telInfo.getParkState() == Telescope::PRK_PARKING))
   {
