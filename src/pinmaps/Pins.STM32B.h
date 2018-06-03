@@ -25,6 +25,21 @@
 
 #if defined(__STM32F1__)
 
+// === Pins for WiFi
+// In HAL, Serial_B is mapped to USART3, with the following
+// pins. If you change HAL, this will change:
+//
+// STM32 pin PB10 TX -> RX on ESP8266
+// STM32 pin PB11 RX -> TX on ESP8266
+
+// === Pins for DS3231 RTC/EEPROM
+// Without an EEPROM, the STM32 cannot work. The best EEPROM is
+// a DS3231 module that has an EEPROM chip in it. HAL takes care
+// of its address and size:
+//
+// STM32 pin PB6 -> SCL on DS3231
+// STM32 pin PB7 -> SDA on DS3231
+
 #if defined(STM32Black_ON)
 
   #define A1EN          PA3
