@@ -13,6 +13,7 @@ void Pad::setup(const int pin[7], const bool active[7])
   F.init(pin[5],debounceMs,true,active[5]);
   f.init(pin[6],debounceMs,true,active[6]);
 }
+
 void Pad::tickButtons()
 {
   shift.poll();
