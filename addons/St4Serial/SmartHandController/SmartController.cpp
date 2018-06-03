@@ -291,7 +291,7 @@ void SmartHandController::update()
     
     // bring up the list of stars so user can goto the alignment star
     if (!SelectStarAlign()) { DisplayMessage("Alignment", "Aborted", -1); telInfo.align = Telescope::ALI_OFF; return; }
-
+    
     // mark this as the next alignment star
     telInfo.align = static_cast<Telescope::AlignState>(telInfo.align + 1);
   } else
@@ -1601,7 +1601,7 @@ void SmartHandController::DisplayMessage(const char* txt1, const char* txt2, int
     x = (display->getDisplayWidth() - display->getStrWidth(txt1)) / 2;
     display->drawStr(x, y, txt1);
   } while (display->nextPage());
-  if (duration >= 0) delay(duration); else buttonPad.waitForPress();
+  if (duration >= 0) delay(duration); else { buttonPad.waitForPress(); buttonPad.clearAllPressed(); }
 }
 
 void SmartHandController::DisplayLongMessage(const char* txt1, const char* txt2, const char* txt3, const char* txt4, int duration)
@@ -1640,7 +1640,7 @@ void SmartHandController::DisplayLongMessage(const char* txt1, const char* txt2,
       display->drawStr(x, y, txt4);
     }
   } while (display->nextPage());
-  if (duration >= 0) delay(duration); else buttonPad.waitForPress();
+  if (duration >= 0) delay(duration); else { buttonPad.waitForPress(); buttonPad.clearAllPressed(); }
 
   display->setFont(u8g2_font_helvR12_te);
 }
