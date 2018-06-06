@@ -2,7 +2,7 @@
 // Goto, commands to move the telescope to an location or to report the current location
 
 // syncs the telescope/mount to the sky
-int syncEqu(double RA, double Dec) {
+GotoErrors syncEqu(double RA, double Dec) {
   double a,z;
 
   // Convert RA into hour angle, get altitude
@@ -11,10 +11,14 @@ int syncEqu(double RA, double Dec) {
   EquToHor(HA,Dec,&a,&z);
 
   // validate
-  int f=validateGoto(); if (f!=0) return f;
-  f=validateGotoCoords(HA,Dec,a); if (f!=0) return f;
+  GotoErrors f=validateGoto(); if (f!=GOTO_ERR_NONE) return f;
+  f=validateGotoCoords(HA,Dec,a); if (f!=GOTO_ERR_NONE) return f;
 
   // correct for polar misalignment only by clearing the index offsets
+#if defined(SYNC_CURRENT_PIER_SIDE_ONLY_ON) && defined(MOUNT_TYPE_GEM)
+  double idx1=indexAxis1;
+  double idx2=indexAxis2;
+#endif
   indexAxis1=0; indexAxis2=0; indexAxis1Steps=0; indexAxis2Steps=0;
 
   double Axis1,Axis2;
@@ -45,8 +49,23 @@ int syncEqu(double RA, double Dec) {
     int newPierSide=pierSide;
     if (preferredPierSide==PPS_WEST) newPierSide=PierSideWest; else // west side of pier - we're in the eastern sky and the HA's are negative
     if (preferredPierSide==PPS_EAST) newPierSide=PierSideEast; else // east side of pier - we're in the western sky and the HA's are positive
-    { if (Axis1<0) newPierSide=PierSideWest; else newPierSide=PierSideEast; } // best side of pier
-  
+    {
+#if defined(SYNC_CURRENT_PIER_SIDE_ONLY_ON) && defined(MOUNT_TYPE_GEM)
+      if ((pierSide==PierSideWest) && (haRange(Axis1)> minutesPastMeridianW/4.0)) newPierSide=PierSideEast;
+      if ((pierSide==PierSideEast) && (haRange(Axis1)<-minutesPastMeridianE/4.0)) newPierSide=PierSideWest;
+#else
+      if (Axis1<0) newPierSide=PierSideWest; else newPierSide=PierSideEast; // best side of pier decided based on meridian 
+#endif
+    }
+
+#if defined(SYNC_CURRENT_PIER_SIDE_ONLY_ON) && defined(MOUNT_TYPE_GEM)
+    if (newPierSide!=pierSide) {
+      indexAxis1=idx1; indexAxis1Steps=(long)(indexAxis1*(double)StepsPerDegreeAxis1);
+      indexAxis2=idx2; indexAxis2Steps=(long)(indexAxis2*(double)StepsPerDegreeAxis2);
+      return GOTO_ERR_OUTSIDE_LIMITS;
+    }
+#endif
+
     // if pier side changed set it
     long flipRA=(long)(180.0*(double)StepsPerDegreeAxis1);
     if ((newPierSide==PierSideWest) && ((pierSide==PierSideNone) || (pierSide==PierSideEast))) {
@@ -89,16 +108,16 @@ int syncEqu(double RA, double Dec) {
   indexAxis2Steps=(long)(indexAxis2*(double)StepsPerDegreeAxis2);
   sei();
 
-  return 0;
+  return GOTO_ERR_NONE;
 }
 
 // syncs internal counts to shaft encoder position (in degrees)
-int syncEnc(double EncAxis1, double EncAxis2) {
+GotoErrors syncEnc(double EncAxis1, double EncAxis2) {
   long a1,a2;
 
   // validate
-  int f=validateGoto(); if (f!=0) return f;
-  if ((pierSide!=PierSideWest) && (pierSide!=PierSideEast) && (pierSide!=PierSideNone)) return 9; // unspecified error
+  GotoErrors f=validateGoto(); if (f!=GOTO_ERR_NONE) return f;
+  if ((pierSide!=PierSideWest) && (pierSide!=PierSideEast) && (pierSide!=PierSideNone)) return GOTO_ERR_UNSPECIFIED;
 
   long e1=EncAxis1*(double)StepsPerDegreeAxis1;
   long e2=EncAxis2*(double)StepsPerDegreeAxis2;
@@ -119,7 +138,7 @@ int syncEnc(double EncAxis1, double EncAxis2) {
   indexAxis2Steps-=delta2;
   indexAxis2=(double)indexAxis2Steps/(double)StepsPerDegreeAxis2;
 
-  return 0;
+  return GOTO_ERR_NONE;
 }
 
 // get internal counts as shaft encoder position (in degrees)

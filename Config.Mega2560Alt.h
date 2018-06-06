@@ -77,6 +77,9 @@
 // can be turned on/off with the :Te# and :Td# commands regardless of this setting
 #define TRACK_REFRACTION_RATE_DEFAULT_OFF
 
+// Set to _OFF and OnStep will allow Syncs to change pier side for GEM mounts (on/off), default=_ON
+#define SYNC_CURRENT_PIER_SIDE_ONLY_ON
+
 // Set to _ON and OnStep will remember the last auto meridian flip setting (on/off), default=_OFF
 #define REMEMBER_AUTO_MERIDIAN_FLIP_OFF
 
