@@ -1,15 +1,16 @@
 
 #include <Arduino.h>
 #include "Catalog.h"
+#include "Config.h"
 
 const char *constellation_txt[] = {
   "And",  "Ant",  "Aps",  "Aql",  "Aqr",  "Ara",  "Ari",  "Aur",  "Boo",  "Cae",  "Cam",  "Cap",  "Car",  "Cas",  "Cen",  "Cep",  "Cet",  "Cha",  "Cir",  "CMa",  "CMi",
   "Cnc",  "Col",  "Com",  "CrA",  "CrB",  "Crt",  "Cru",  "Crv",  "CVn",  "Cyg",  "Del",  "Dor",  "Dra",  "Equ",  "Eri",  "For",  "Gem",  "Gru",  "Her",
   "Hor",  "Hya",  "Hyi",  "Ind",  "Lac",  "Leo",  "Lep",  "Lib",  "LMi",  "Lup",  "Lyn",  "Lyr",  "Men",  "Mic",  "Mon",  "Mus",  "Nor",  "Oct",  "Oph",
   "Ori",  "Pav",  "Peg",  "Per",  "Phe",  "Pic",  "PsA",  "Psc",  "Pup",  "Pyx",  "Ret",  "Scl",  "Sco",  "Sct",  "Ser",  "Sex",  "Sge",  "Sgr",  "Tau",
-  "Tel",  "TrA",  "Tri",  "Tuc",  "UMa",  "UMi",  "Vel",  "Vir",  "Vol",  "Vul" };
+  "Tel",  "TrA",  "Tri",  "Tuc",  "UMa",  "UMi",  "Vel",  "Vir",  "Vol",  "Vul", "Unknown" };
 
-const char * catalog_txt[] = { "", "M ", "NGC " };
+const char * catalog_txt[] = { "Star ", "M ", "NGC ", "None " };
 //Herschel
 extern const char * Herschel_info_txt[] = { "Bright Nebulae", "Faint Nebulae", "Very Faint Nebulae","Planetary Nebulae","Very Large Nebulae",
 "Very Rich" , "Bright & Faint", "Scattered" };
@@ -44,26 +45,274 @@ const byte Star_constellation[292] = { 1,1,1,1,4,4,4,4,4,4,4,5,5,5,6,6,6,6,7,7,8
 const unsigned short Star_ra[292] = { 246,2085,3711,1176,35721,35583,34962,34359,35769,36336,34383,39768,38742,41238,31548,31350,31353,30549,3810,3435,9492,10779,9051,9189,10785,8904,25668,27051,27459,25038,36624,39207,11514,16596,15072,19284,16710,17607,14301,18408,270,1698,2568,3423,1209,1470,26385,26385,25308,22839,24591,26259,25398,24012,26970,20871,24885,24882,38352,38658,42579,40470,39921,37356,41085,5463,1305,4896,2055,4176,3120,26466,12153,11478,12846,12552,11403,13317,12690,12645,13776,13410,14889,10185,10524,28038,22392,23028,22530,22050,22626,22071,22491,21900,37239,35115,36660,35544,37380,38187,8217,10008,31509,32295,34578,30864,29517,27744,2925,9231,7137,6693,5343,13632,13635,13956,11925,13200,12114,11241,11484,12153,39840,40875,39414,41052,31038,29706,31047,30033,31986,31047,17025,23961,15798,16056,19485,20787,25386,3561,762,6819,37119,18246,21267,18594,18594,20220,17571,18495,18216,20220,17430,9981,9846,9159,10407,9384,26721,27504,26451,26949,28047,27675,27360,28797,25776,16827,33504,33897,34161,22710,22983,31647,31899,29226,29346,29910,30906,31257,30528,32364,10650,9441,9750,9957,10083,10218,9729,10059,10431,10050,8691,36762,37338,41538,41511,393,39120,40839,40884,39903,41097,6123,5640,5535,6681,7128,7020,5550,786,1977,2649,12249,41325,14502,11928,14079,13110,14625,13473,12294,7632,29670,28806,30300,30957,31713,32022,31869,31602,30351,28764,29430,29871,31518,28323,33036,31722,35961,32568,33024,33120,34272,32922,33234,34128,34488,34053,34404,33765,8271,9786,8058,10125,6822,8052,7215,33201,30246,28644,27558,3387,3882,40149,19908,19851,21411,22059,23220,24111,24816,17181,16170,18510,18666,20349,15300,20085,4437,26721,27621,14682,15738,16860,16434,19401,17901,24150,22845,23262,23463 };
 const short Star_dec[292] = { 1744,2136,2539,1850,531,636,187,832,60,50,-187,20,-265,-849,-2888,-3269,-3338,-3241,1407,1247,2759,2697,2630,2473,2233,1990,1152,2425,2000,1105,-792,-951,-3079,-4099,-3510,-3818,-3524,-3897,-3062,-4199,3548,3642,3613,3819,3391,3468,-3550,-3551,-3579,-2824,-3153,-2511,-2139,-2119,-2515,-3780,-2493,-2420,3754,4233,4656,3504,3491,3709,3971,244,-1079,194,-588,-179,-842,-3782,-918,-963,-1536,-1622,-1797,-1722,-1330,-1564,314,498,552,-2035,-2054,1604,-3776,-3500,-3415,-3437,-1358,-989,-931,-1284,2716,1677,2414,2707,2037,1812,-3297,-3690,3139,3089,4060,3944,3691,3539,-3405,-294,-749,-493,-2380,1914,1914,1682,985,1319,1509,1351,1351,774,-2820,-2706,-2197,-3040,864,1290,1491,1896,1664,2209,-441,-1371,386,358,-950,-1810,-1520,-3624,-4603,-4425,-2801,720,876,1192,1192,1233,1427,1406,1007,927,594,-970,-1154,-1297,-790,-947,-959,-518,-2797,-2573,-2451,-2600,-3115,-2257,-2757,2064,2326,2001,1961,-4133,-4075,754,274,-139,-199,-566,-857,-1381,562,-494,444,-467,380,18,-48,-3,-96,-245,-500,596,418,-3315,-3947,911,1684,910,591,649,1812,371,1475,2990,2456,3209,2866,2400,1912,2329,-2500,-2716,-2560,-3604,-1701,-2281,-2569,-1389,-2214,-1423,-2562,-2964,-3691,-1534,-1283,-2023,-2566,-2580,-2393,-2338,-2214,-2277,-1554,-1465,-1667,-2203,386,-66,-876,1169,-1775,-1690,-2017,-1687,-2114,-1474,-1253,-1259,-1541,-1580,-1620,990,1716,1150,1268,1445,952,749,-2642,-4138,-3755,-4041,1774,2098,-3583,3706,3384,3223,3423,3360,3298,2961,3102,2884,2576,2491,1987,3644,2671,5355,4451,4311,-2801,-3199,-3300,-2556,-2916,-3207,-652,-34,205,659 };
 
-void getcatdms(const short& v, short& v1, uint8_t& v2)
-{
-  v2 = abs(v) % 60;
-  v1 = v / 60;
+// ----------------------------------------------------------
+// Catalog Manager
+
+// initialization
+void CatMgr::setLat(double lat) {
+  _lat=lat;
+  if (lat<9999) {
+    _cosLat=cos(lat/Rad);
+    _sinLat=sin(lat/Rad);
+  }
+  DL(lat);
 }
 
-void getcatdf(const short& v, float& v1)
-{
-  v1 = (double)v / 60.0;
+void CatMgr::setLstT0(double lstT0) {
+  _lstT0=lstT0;
+  DL(_lstT0);
 }
 
-void getcathms(const unsigned short& v, uint8_t& v1, uint8_t& v2, uint8_t& v3)
-{
+// handle catalog selection
+void CatMgr::select(Catalog cat) {
+  _cat=cat;
+  if (_cat==STAR) _selected=0; else
+  if (_cat==MESSIER) _selected=1; else
+  if (_cat==HERSCHEL) _selected=2; else { _selected=0; _cat=CAT_NONE; }
+}
+
+Catalog CatMgr::getCat() {
+  return _cat;
+}
+
+const char* CatMgr::catalogStr() {
+  return catalog_txt[_selected];
+}
+
+// catalog filtering
+bool CatMgr::canFilter() {
+  return ((_lat<9999) && (_lstT0!=0));
+}
+
+void CatMgr::filter(FilterMode fm) {
+  _fm=fm;
+}
+
+bool CatMgr::isFiltered() {
+  double a,z,ar,ad;
+  if (!canFilter()) return false;
+  switch (_fm) {
+    case FM_NONE: return false; break;
+    case FM_ABOVE_HORIZON:
+      EquToHor(ra(),dec(),&a,&z);
+      D("ra="); D(ra()); D(",dec="); D(dec()); D(",alt="); DL(a);
+      return a<0.0;
+    break;
+    case FM_ALIGN_ALL_SKY:
+      // minimum 10 degrees altitude (to limit unlikely align stars and to minimime refraction effects)
+      EquToHor(ra(),dec(),&a,&z);
+      if (a<10.0) return true;
+      // minimum 5 degrees from the pole (for accuracy)
+      if (_lat>=0.0) {
+        if (dec()>85.0) return true;
+      } else {
+        if (dec()<-85.0) return true;
+      }
+      return false;
+    break;
+    case FM_ALIGN_3STAR_1:
+      // minimum 10 degrees altitude (to limit unlikely align stars and to minimime refraction effects)
+      EquToHor(ra(),dec(),&a,&z);
+      if (a<10.0) return true;
+      // maximum 30 degrees from align location
+      ar = HAToRA(-1.0 * 15.0);
+      if (_lat >= 0.0) ad = 10.0; else ad = -10.0;
+      if (DistFromEqu(ar,ad)>30.0) return true;
+      // on our side of meridian
+      if (ha()>0) return true;
+      return false;
+    break;
+    case FM_ALIGN_3STAR_2:
+      // minimum 10 degrees altitude (to limit unlikely align stars and to minimime refraction effects)
+      EquToHor(ra(),dec(),&a,&z);
+      if (a<10.0) return true;
+      // maximum 30 degrees from align location
+      ar = HAToRA(+1.0 * 15.0);
+      if (_lat >= 0.0) ad = 10.0; else ad = -10.0;
+      if (DistFromEqu(ar,ad)>30.0) return true;
+      // on our side of meridian
+      if (ha()<0) return true;
+      return false;
+    break;
+    case FM_ALIGN_3STAR_3:
+      // minimum 10 degrees altitude (to limit unlikely align stars and to minimime refraction effects)
+      EquToHor(ra(),dec(),&a,&z);
+      if (a<10.0) return true;
+      // maximum 30 degrees from align location
+      ar = HAToRA(+6.0 * 15.0);
+      if (_lat >= 0.0) ad = 45.0; else ad = -45.0;
+      if (DistFromEqu(ar,ad)>30.0) return true;
+      return false;
+    break;
+  }
+}
+
+// select catalog record
+void CatMgr::setIndex(int index) {
+  _idx[_selected]=index;
+  decIndex();
+  incIndex();
+}
+
+int CatMgr::getIndex() {
+  return _idx[_selected];
+}
+
+int CatMgr::getMaxIndex() {
+  return _maxIdx[_selected];
+}
+
+void CatMgr::incIndex() {
+  int i=_maxIdx[_selected]+1;
+  do {
+    i--;
+    _idx[_selected]++; if (_idx[_selected]>_maxIdx[_selected]) _idx[_selected]=0;
+  } while (isFiltered() && (i>0));
+}
+
+void CatMgr::decIndex() {
+  int i=_maxIdx[_selected]+1;
+  do {
+    i--;
+    _idx[_selected]--; if (_idx[_selected]<0) _idx[_selected]=_maxIdx[_selected];
+  } while (isFiltered() && (i>0));
+}
+
+// get catalog contents
+
+// RA in degrees
+double CatMgr::ra() {
+  long v;
+  if (_cat==STAR) v=Star_ra[_idx[_selected]]; else
+  if (_cat==MESSIER) v=Messier_ra[_idx[_selected]]; else
+  if (_cat==HERSCHEL) v=Herschel_ra[_idx[_selected]]; else v=0;
+  return (double)(v/1800.0)*15.0;
+}
+
+// HA in degrees
+double CatMgr::ha() {
+  if (!canFilter()) return 0;
+  double lstH = ((double)((long)(_lstT0+millis()))/3600000.0)*1.0027;
+  double h=(lstH*15.0-ra());
+  while (h>180.0) h-=360.0;
+  while (h<-180.0) h+=360.0;
+  return h;
+}
+
+void CatMgr::raHMS(uint8_t& v1, uint8_t& v2, uint8_t& v3) {
+  long v;
+  if (_cat==STAR) v=Star_ra[_idx[_selected]]; else
+  if (_cat==MESSIER) v=Messier_ra[_idx[_selected]]; else
+  if (_cat==HERSCHEL) v=Herschel_ra[_idx[_selected]]; else v=0;
+  
   unsigned long vd = (long)v * 2;
   v3 = vd % 60;
   v2 = (vd / 60) % 60;
   v1 = vd / 3600;
 }
 
-void getcathf(const unsigned short& v, float& v1)
-{
-  v1 = (double)v / 1800.0;
+// Dec in degrees
+double CatMgr::dec() {
+  long v;
+  if (_cat==STAR) v=Star_dec[_idx[_selected]]; else
+  if (_cat==MESSIER) v=Messier_dec[_idx[_selected]]; else
+  if (_cat==HERSCHEL) v=Herschel_dec[_idx[_selected]]; else v=0;
+  return (double)v/60.0;
 }
+
+void CatMgr::decDM(short& v1, uint8_t& v2) {
+  long v;
+  if (_cat==STAR) v=Star_dec[_idx[_selected]]; else
+  if (_cat==MESSIER) v=Messier_dec[_idx[_selected]]; else
+  if (_cat==HERSCHEL) v=Herschel_dec[_idx[_selected]]; else v=0;
+
+  v2 = abs(v) % 60;
+  v1 = v / 60;
+}
+
+int CatMgr::epoch() {
+  if (_cat==STAR) return 2000; else
+  if (_cat==MESSIER) return 2000; else
+  if (_cat==HERSCHEL) return 1950; else return 0;
+}
+
+// Alt in degrees
+double CatMgr::alt() {
+  double a,z;
+  EquToHor(ra()*15.0,dec(),&a,&z);
+  return a;
+}
+
+// Azm in degrees
+double CatMgr::azm() {
+  double a,z;
+  EquToHor(ra()*15.0,dec(),&a,&z);
+  return z;
+}
+
+double CatMgr::magnitude() {
+  double m=250;
+  if (_cat==MESSIER) m=Messier_dMag[_idx[_selected]]; else
+  if (_cat==HERSCHEL) m=Hershel_dMag[_idx[_selected]];
+  return m/10.0;
+}
+
+byte CatMgr::constellation() {
+  if (_cat==STAR) return Star_constellation[_idx[_selected]]; else
+  if (_cat==MESSIER) return Messier_constellation[_idx[_selected]]; else
+  if (_cat==HERSCHEL) return Hershel_constellation[_idx[_selected]]; else return 89;
+}
+
+const char* CatMgr::constellationStr() {
+  return constellation_txt[constellation()-1];
+}
+
+byte CatMgr::objectType() {
+  if (_cat==MESSIER) return Messier_obj[_idx[_selected]]; else
+  if (_cat==HERSCHEL) return Herschel_obj[_idx[_selected]]; else return -1;
+}
+
+const char* CatMgr::objectInfoStr() {
+  if (_cat==STAR) return "Star"; else
+  if (_cat==HERSCHEL) return Herschel_info_txt[Herschel_info[_idx[_selected]]-1]; else return "";
+}
+
+int CatMgr::primaryId() {
+  if (_cat==STAR) return Star_letter[_idx[_selected]]; else
+  if (_cat==MESSIER) return _idx[_selected]+1; else
+  if (_cat==HERSCHEL) return Herschel_NGC[_idx[_selected]]; else return -1;
+}
+
+// support functions
+// convert equatorial coordinates to horizon, in degrees
+void CatMgr::EquToHor(double RA, double Dec, double *Alt, double *Azm) {
+  double lstH = ((double)((long)(_lstT0+millis()))/3600000.0)*1.0027;
+  double HA=(lstH*15.0-RA);
+
+  while (HA<0.0)    HA=HA+360.0;
+  while (HA>=360.0) HA=HA-360.0;
+  HA =HA/Rad;
+  Dec=Dec/Rad;
+  double SinAlt = (sin(Dec) * _sinLat) + (cos(Dec) * _cosLat * cos(HA));  
+  *Alt   = asin(SinAlt);
+  double t1=sin(HA);
+  double t2=cos(HA)*_sinLat-tan(Dec)*_cosLat;
+  *Azm=atan2(t1,t2)*Rad;
+  *Azm=*Azm+180.0;
+  *Alt = *Alt*Rad;
+}
+
+// angular distance from current Equ coords, in degrees
+double CatMgr::DistFromEqu(double RA, double Dec) {
+  RA=RA/Rad; Dec=Dec/Rad;
+  return acos( sin(dec()/Rad)*sin(Dec) + cos(dec()/Rad)*cos(Dec)*cos(ra()/Rad - RA))*Rad;
+}
+
+// convert an HA to RA, in degrees
+double CatMgr::HAToRA(double HA) {
+  double lstH = ((double)((long)(_lstT0+millis()))/3600000.0)*1.0027;
+  return (lstH*15.0-HA);
+}
+
+CatMgr cat_mgr;
+

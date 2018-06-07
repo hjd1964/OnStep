@@ -5,9 +5,9 @@
 #include "u8g2_ext_message.h"
 #include "u8g2_ext_value.h"
 
-unsigned short U8G2_EXT::UserInterfaceCatalog(Pad *extPad, const char *title,  unsigned short start_pos, Catalog cat)
+bool U8G2_EXT::UserInterfaceCatalog(Pad *extPad, const char *title)
 {
-  return ext_UserInterfaceCatalog(U8G2_EXT::getU8g2(), extPad, title, start_pos, cat);
+  return ext_UserInterfaceCatalog(U8G2_EXT::getU8g2(), extPad, title);
 };
 
 uint8_t U8G2_EXT::UserInterfaceMessage(Pad *extPad, const char *title1, const char *title2, const char *title3, const char *buttons)

@@ -1,7 +1,10 @@
 ﻿#pragma once
 #include <Arduino.h>
 
-enum Catalog { STAR, MESSIER, HERSCHEL };
+const double Rad=57.29577951;
+
+enum Catalog { STAR, MESSIER, HERSCHEL, CAT_NONE };
+enum FilterMode { FM_NONE, FM_ABOVE_HORIZON, FM_ALIGN_ALL_SKY, FM_ALIGN_3STAR_1, FM_ALIGN_3STAR_2, FM_ALIGN_3STAR_3 };
 
 extern const char *constellation_txt[];
 extern const char *catalog_txt[];
@@ -33,3 +36,56 @@ void getcatdms(const short& v, short& v1, uint8_t& v2);
 void getcatdf(const short& v, float& v1);
 void getcathms(const unsigned short& v, uint8_t& v1, uint8_t& v2, uint8_t& v3);
 void getcathf(const unsigned short& v, float& v1);
+
+class CatMgr {
+  public:
+// initialization
+    void setLat(double lat);
+    void setLstT0(double lstT0);
+  
+    void select(Catalog cat);
+    Catalog getCat();
+    const char* catalogStr();
+
+    bool canFilter();
+    void filter(FilterMode fm);
+
+    void setIndex(int index);
+    int getIndex();
+    int getMaxIndex();
+    void incIndex();
+    void decIndex();
+    
+    double ra();
+    double ha();
+    void   raHMS(uint8_t& v1, uint8_t& v2, uint8_t& v3);
+    double dec();
+    void   decDM(short& v1, uint8_t& v2);
+    int    epoch();
+    double alt();
+    double azm();
+    double magnitude();
+    byte   constellation();
+    const char* constellationStr();
+    byte   objectType();
+    const char* objectInfoStr();
+    int    primaryId();
+  private:
+    double _lat=-10000;
+    double _cosLat=0;
+    double _sinLat=0;
+    double _lstT0=0;
+    Catalog _cat=CAT_NONE;
+    FilterMode _fm=FM_NONE;
+    int _selected=0;
+    int _idx[4]={0,0,0,0};
+    int _maxIdx[4]={292-1,110-1,400-1,0-1};
+
+    bool isFiltered();
+    void EquToHor(double RA, double Dec, double *Alt, double *Azm);
+    double DistFromEqu(double RA, double Dec);
+    double HAToRA(double ha);
+};
+
+extern CatMgr cat_mgr;
+

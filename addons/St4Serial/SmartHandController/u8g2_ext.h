@@ -6,7 +6,7 @@
 class U8G2_EXT : public U8G2
 {
 public:
-  unsigned short UserInterfaceCatalog(Pad *extPad, const char *title, unsigned short start_pos, Catalog cat);
+  bool UserInterfaceCatalog(Pad *extPad, const char *title);
 
   uint8_t UserInterfaceMessage(Pad *extPad, const char *title1, const char *title2, const char *title3, const char *buttons);
 

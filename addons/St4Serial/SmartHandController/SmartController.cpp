@@ -283,12 +283,18 @@ void SmartHandController::update()
   // power cycle reqd message
   if (powerCylceRequired) { display->setFont(u8g2_font_helvR12_tr); DisplayMessage("REBOOT", "DEVICE", 1000); return; }
   
-  if (telInfo.align == Telescope::ALI_SELECT_STAR_1 || telInfo.align == Telescope::ALI_SELECT_STAR_2 || telInfo.align == Telescope::ALI_SELECT_STAR_3) {
-    // show the align message for this step
-    if (telInfo.align == Telescope::ALI_SELECT_STAR_1) DisplayLongMessage("Select a Star", "near the Meridian", "& the Celestial Equ.", "in the Western Sky", -1); else 
-    if (telInfo.align == Telescope::ALI_SELECT_STAR_2) DisplayLongMessage("Select a Star", "near the Meridian", "& the Celestial Equ.", "in the Eastern Sky", -1); else 
-    if (telInfo.align == Telescope::ALI_SELECT_STAR_3) DisplayLongMessage("Select a Star", "HA = -3 hour", "Dec = +- 45 degree", "in the Eastern Sky", -1);
-    
+  if (telInfo.align == Telescope::ALI_SELECT_STAR_1 || telInfo.align == Telescope::ALI_SELECT_STAR_2 || 
+      telInfo.align == Telescope::ALI_SELECT_STAR_3 || telInfo.align == Telescope::ALI_SELECT_STAR_4 || 
+      telInfo.align == Telescope::ALI_SELECT_STAR_5 || telInfo.align == Telescope::ALI_SELECT_STAR_6) {
+    char message[10]="Star# ?";
+    if (telInfo.align == Telescope::ALI_SELECT_STAR_1) strcpy(message,"Star #1");
+    if (telInfo.align == Telescope::ALI_SELECT_STAR_2) strcpy(message,"Star #2");
+    if (telInfo.align == Telescope::ALI_SELECT_STAR_3) strcpy(message,"Star #3");
+    if (telInfo.align == Telescope::ALI_SELECT_STAR_4) strcpy(message,"Star #4");
+    if (telInfo.align == Telescope::ALI_SELECT_STAR_5) strcpy(message,"Star #5");
+    if (telInfo.align == Telescope::ALI_SELECT_STAR_6) strcpy(message,"Star #6");
+    DisplayLongMessage("Select a Star", "From following list", "", message, -1);
+
     // bring up the list of stars so user can goto the alignment star
     if (!SelectStarAlign()) { DisplayMessage("Alignment", "Aborted", -1); telInfo.align = Telescope::ALI_OFF; return; }
     
@@ -321,6 +327,7 @@ void SmartHandController::update()
     if (moveNorth  && buttonPad.n.isUp())   { moveNorth = false; Ser.print(":Qn#"); buttonCommand=true; buttonPad.n.clearPress(); }
     if (!moveSouth && buttonPad.s.isDown()) { moveSouth = true;  Ser.print(":Ms#"); buttonCommand=true; } else
     if (moveSouth  && buttonPad.s.isUp())   { moveSouth = false; Ser.print(":Qs#"); buttonCommand=true; buttonPad.s.clearPress(); }
+
     if (buttonCommand) { time_last_action = millis(); return; }
   }
 
@@ -331,8 +338,10 @@ void SmartHandController::update()
     // wait long enough that a double press can happen before picking up the press events
     if (buttonPad.shift.timeUp()>250) {
       if (buttonPad.shift.wasDoublePressed()) { menuSpeedRate(); time_last_action = millis(); } else                                                                                  // change guide rate
-      if (buttonPad.shift.wasPressed() && telInfo.align == Telescope::ALI_OFF) { page++; if (page > 2) page = 0; time_last_action = millis(); } else                                  // cycle through disp of Eq, Hor, Time
-      if (buttonPad.shift.wasPressed() && (telInfo.align == Telescope::ALI_RECENTER_1 || telInfo.align == Telescope::ALI_RECENTER_2 || telInfo.align == Telescope::ALI_RECENTER_3)) { // add this align star
+      if (telInfo.align == Telescope::ALI_OFF && buttonPad.shift.wasPressed(false)) { page++; if (page > 2) page = 0; time_last_action = millis(); } else                             // cycle through disp of Eq, Hor, Time
+      if ((telInfo.align == Telescope::ALI_RECENTER_1 || telInfo.align == Telescope::ALI_RECENTER_2 || 
+           telInfo.align == Telescope::ALI_RECENTER_3 || telInfo.align == Telescope::ALI_RECENTER_4 || 
+           telInfo.align == Telescope::ALI_RECENTER_5 || telInfo.align == Telescope::ALI_RECENTER_6) && buttonPad.shift.wasPressed()) {                                               // add this align star
         if (telInfo.addStar()) { if (telInfo.align == Telescope::ALI_OFF) DisplayMessage("Alignment", "Success!", 2000); else DisplayMessage("Add Star", "Success!", 2000); } else DisplayMessage("Add Star", "Failed!", -1);
       }
     }
@@ -357,7 +366,9 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
   if (telInfo.hasTelStatus && telInfo.align != Telescope::ALI_OFF)
   {
     Telescope::TrackState curT = telInfo.getTrackingState();
-    if (curT != Telescope::TRK_SLEWING && (telInfo.align == Telescope::ALI_SLEW_STAR_1 || telInfo.align == Telescope::ALI_SLEW_STAR_2 || telInfo.align == Telescope::ALI_SLEW_STAR_3)) telInfo.align = static_cast<Telescope::AlignState>(telInfo.align + 1);
+    if (curT != Telescope::TRK_SLEWING && (telInfo.align == Telescope::ALI_SLEW_STAR_1 || telInfo.align == Telescope::ALI_SLEW_STAR_2 ||
+                                           telInfo.align == Telescope::ALI_SLEW_STAR_3 || telInfo.align == Telescope::ALI_SLEW_STAR_4 ||
+                                           telInfo.align == Telescope::ALI_SLEW_STAR_5 || telInfo.align == Telescope::ALI_SLEW_STAR_6)) telInfo.align = static_cast<Telescope::AlignState>(telInfo.align + 1);
     page = 3;
   }
 
@@ -457,9 +468,6 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
 
     // show align status
     if (page == 3) {
-      int idx = telInfo.alignSelectedStar - 1;
-      const byte* cat_letter = &Star_letter[idx];;
-      const byte*  cat_const = &Star_constellation[idx];
       u8g2_uint_t y = 36;
 
       char txt[20];
@@ -469,10 +477,10 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
 
       y += line_height + 4;
       u8g2_SetFont(u8g2, u8g2_font_unifont_t_greek);
-      u8g2_DrawGlyph(u8g2, 0, y, 944 + *cat_letter);
+      u8g2_DrawGlyph(u8g2, 0, y, 944 + cat_mgr.primaryId());
 
       const uint8_t* myfont = u8g2->font; u8g2_SetFont(u8g2, myfont);
-      u8g2_DrawUTF8(u8g2, 16, y, constellation_txt[*cat_const - 1]);
+      u8g2_DrawUTF8(u8g2, 16, y, cat_mgr.constellationStr());
     }
 
   } while (u8g2_NextPage(u8g2));
@@ -686,44 +694,39 @@ void SmartHandController::menuMain()
     telInfo.updateTel(true);
     Telescope::ParkState currentstate = telInfo.getParkState();
 
-    if (currentstate == Telescope::PRK_PARKED)
-    {
+    if (currentstate == Telescope::PRK_PARKED) {
       const char *string_list_main_ParkedL0 = "Unpark\n""Settings";
       current_selection_L0 = display->UserInterfaceSelectionList(&buttonPad, "Main Menu", 0, string_list_main_ParkedL0);
-      switch (current_selection_L0)
-      {
-      case 1:
-        break;
-      case 2:
-        menuSettings();
-        break;
-      default:
-        break;
+      switch (current_selection_L0) {
+        case 1:
+          break;
+        case 2:
+          menuSettings();
+          break;
+        default:
+          break;
       }
-    }
-    else if (currentstate == Telescope::PRK_UNPARKED)
-    {
+    } else if (currentstate == Telescope::PRK_UNPARKED) {
       const char *string_list_main_UnParkedL0 = "Goto\nSync\nTracking\nSide of Pier\nSettings";
       current_selection_L0 = display->UserInterfaceSelectionList(&buttonPad, "Main Menu", 0, string_list_main_UnParkedL0);
-      switch (current_selection_L0)
-      {
-      case 1:
-        menuSyncGoto(false);
-        break;
-      case 2:
-        menuSyncGoto(true);
-        break;
-      case 3:
-        menuTrack();
-        break;
-      case 4:
-        menuPier();
-        break;
-      case 5:
-        menuSettings();
-        break;
-      default:
-        break;
+      switch (current_selection_L0) {
+        case 1:
+          menuSyncGoto(false);
+          break;
+        case 2:
+          menuSyncGoto(true);
+          break;
+        case 3:
+          menuTrack();
+          break;
+        case 4:
+          menuPier();
+          break;
+        case 5:
+          menuSettings();
+          break;
+        default:
+          break;
       }
     }
   }
@@ -746,12 +749,10 @@ void SmartHandController::menuTrack()
   telInfo.updateTel(true);
   Telescope::TrackState currentstate = telInfo.getTrackingState();
   uint8_t choice;
-  if (currentstate == Telescope::TRK_ON)
-  {
+  if (currentstate == Telescope::TRK_ON) {
     const char *string_list_main_ParkedL0 = "Stop Tracking\n";
     choice = display->UserInterfaceSelectionList(&buttonPad, "Tracking State", 0, string_list_main_ParkedL0);
-    switch (choice)
-    {
+    switch (choice) {
     case 1:
       char out[20];
       memset(out, 0, sizeof(out));
@@ -772,20 +773,12 @@ void SmartHandController::menuTrack()
   {
     const char *string_list_main_UnParkedL0 = "Start Tracking\n";
     current_selection_L0 = display->UserInterfaceSelectionList(&buttonPad, "Tracking State", 0, string_list_main_UnParkedL0);
-    switch (current_selection_L0)
-    {
-    case 1:
-      if (SetLX200(":Te#") == LX200VALUESET)
-      {
-        DisplayMessage("Tracking", "ON", 500);
-      }
-      else
-      {
-        DisplayMessage("Set State", "Failed", 1000);
-      }
-      break;
-    default:
-      break;
+    switch (current_selection_L0) {
+      case 1:
+        if (SetLX200(":Te#") == LX200VALUESET) DisplayMessage("Tracking", "ON", 500); else DisplayMessage("Set State", "Failed", 1000);
+        break;
+      default:
+        break;
     }
   }
   else
@@ -797,60 +790,48 @@ void SmartHandController::menuTrack()
 void SmartHandController::menuSyncGoto(bool sync)
 {
   current_selection_L1 = 1;
-  while (current_selection_L1 != 0)
-  {
+  while (current_selection_L1 != 0) {
     const char *string_list_gotoL1 = "Messier\nStar\nSolar System\nHerschel\nCoordinates\nHome\nPark";
     current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, sync ? "Sync" : "Goto", current_selection_L1, string_list_gotoL1);
-    switch (current_selection_L1)
-    {
-    case 1:
-      menuMessier(sync);
-      break;
-    case 2:
-      menuStar(sync);
-      break;
-    case 3:
-      menuSolarSys(sync);
-      break;
-    case 4:
-      menuHerschel(sync);
-      break;
-    case 5:
-      menuRADec(sync);
-      break;
-    case 6:
-    {
-      char cmd[5];
-      sprintf(cmd, ":hX#");
-      cmd[2] = sync ? 'F' : 'C';
-      if (SetLX200(cmd) == LX200VALUESET)
+    switch (current_selection_L1) {
+      case 1:
+        menuMessier(sync);
+        break;
+      case 2:
+        menuStar(sync);
+        break;
+      case 3:
+        menuSolarSys(sync);
+        break;
+      case 4:
+        menuHerschel(sync);
+        break;
+      case 5:
+        menuRADec(sync);
+        break;
+      case 6:
       {
-        DisplayMessage(sync ? "Reset at" : "Goto", " Home Position", -1);
+        char cmd[5];
+        sprintf(cmd, ":hX#");
+        cmd[2] = sync ? 'F' : 'C';
+        if (SetLX200(cmd) == LX200VALUESET) DisplayMessage(sync ? "Reset at" : "Goto", " Home Position", -1);
+        // Quit Menu
+        current_selection_L1 = 0;
+        current_selection_L0 = 0;
       }
-      // Quit Menu
-      current_selection_L1 = 0;
-      current_selection_L0 = 0;
-    }
-    break;
-    case 7:
-    {
-      char cmd[5];
-      sprintf(cmd, ":hX#");
-      cmd[2] = sync ? 'O' : 'P';
-      if (SetLX200(cmd) == LX200VALUESET)
+      break;
+      case 7:
       {
-        DisplayMessage(sync ? "Reset at" : "Goto", " Park Position", -1);
+        char cmd[5];
+        sprintf(cmd, ":hX#");
+        cmd[2] = sync ? 'O' : 'P';
+        if (SetLX200(cmd) == LX200VALUESET) DisplayMessage(sync ? "Reset at" : "Goto", " Park Position", -1); else DisplayMessageLX200(LX200NOTOK);
+        // Quit Menu
+        current_selection_L1 = 0;
+        current_selection_L0 = 0;
       }
-      else
-      {
-        DisplayMessageLX200(LX200NOTOK);
-      }
-      // Quit Menu
-      current_selection_L1 = 0;
-      current_selection_L0 = 0;
-    }
-    break;
-    default:
+      break;
+      default:
       break;
     }
   }
@@ -862,110 +843,128 @@ void SmartHandController::menuSolarSys(bool sync)
 
   const char *string_list_SolarSyst = "Sun\nMercure\nVenus\nMars\nJupiter\nSaturn\nUranus\nNeptun\nMoon\n";
   current_selection_SolarSys = display->UserInterfaceSelectionList(&buttonPad, sync ? "Sync" : "Goto", current_selection_SolarSys, string_list_SolarSyst);
-  if (current_selection_SolarSys == 0)
-  {
-    return;
-  }
+  
+  if (current_selection_SolarSys == 0) return;
   current_selection_SolarSys > 3 ? current_selection_SolarSys : current_selection_SolarSys--;
+  
   bool ok = DisplayMessageLX200(SyncGotoPlanetLX200(sync, current_selection_SolarSys),false);
-  if (current_selection_SolarSys != 0 && ok)
-  {
-    // Quit Menu
-    current_selection_L1 = 0;
-    current_selection_L0 = 0;
-  }
+  if (current_selection_SolarSys != 0 && ok) { current_selection_L1 = 0; current_selection_L0 = 0; } // Quit Menu
 }
 
 void SmartHandController::menuHerschel(bool sync)
 {
-  current_selection_Herschel = display->UserInterfaceCatalog(&buttonPad, sync ? "Sync Herschel" : "Goto Herschel", current_selection_Herschel, HERSCHEL);
-  if (current_selection_Herschel != 0)
-  {
-    bool ok = DisplayMessageLX200(SyncGotoCatLX200(sync, HERSCHEL, current_selection_Herschel - 1),false);
-    if (ok)
-    {
-      // Quit Menu
-      current_selection_L1 = 0;
-      current_selection_L0 = 0;
+  if (!cat_mgr.canFilter()) { cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0()); }
+  cat_mgr.select(HERSCHEL);
+  cat_mgr.filter(FM_ABOVE_HORIZON);
+  cat_mgr.setIndex(0);
+  
+  if (cat_mgr.canFilter()) {
+    if (display->UserInterfaceCatalog(&buttonPad, sync ? "Sync Herschel" : "Goto Herschel")) {
+      bool ok = DisplayMessageLX200(SyncGotoCatLX200(sync), false);
+      if (ok) { current_selection_L1 = 0; current_selection_L0 = 0; } // Quit Menu
     }
   }
 }
 
 void SmartHandController::menuMessier(bool sync)
 {
-  current_selection_Messier = display->UserInterfaceCatalog(&buttonPad, sync ? "Sync Messier" : "Goto Messier", current_selection_Messier, MESSIER);
-  if (current_selection_Messier != 0)
-  {
-    bool ok = DisplayMessageLX200(SyncGotoCatLX200(sync, MESSIER, current_selection_Messier - 1), false);
-    if (ok)
-    {
-      // Quit Menu
-      current_selection_L1 = 0;
-      current_selection_L0 = 0;
+  if (!cat_mgr.canFilter()) { cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0()); }
+  cat_mgr.select(MESSIER);
+  cat_mgr.filter(FM_ABOVE_HORIZON);
+  cat_mgr.setIndex(0);
+  
+  if (cat_mgr.canFilter()) {
+    if (display->UserInterfaceCatalog(&buttonPad, sync ? "Sync Messier" : "Goto Messier")) {
+      bool ok = DisplayMessageLX200(SyncGotoCatLX200(sync), false);
+      if (ok) { current_selection_L1 = 0; current_selection_L0 = 0; } // Quit Menu
     }
   }
 }
 
 void SmartHandController::menuAlignment()
 {
+  int maxAlignStars, thisStar, numStars;
+  if (!telInfo.getAlignStars(&maxAlignStars, &thisStar, &numStars)) { maxAlignStars=3; thisStar=1; numStars=1; }
+  bool alignInProgress=false;
+  if ((thisStar>0) && (thisStar<=numStars)) alignInProgress=true;
+
+  telInfo.aliMode = Telescope::ALIM_OFF;
   current_selection_L1 = 1;
   while (current_selection_L1 != 0)
   {
-    const char *string_list_AlignmentL1 = "1-Star Align.\n""2-Star Align.\n""3-Star Align.\n""Show Corr.\n""Clear Corr.";
-    current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Alignment", current_selection_L1, string_list_AlignmentL1);
-    switch (current_selection_L1)
-    {
-    case 1:
-      if (SetLX200(":A1#") == LX200VALUESET)
-      {
-        telInfo.aliMode = Telescope::ALIM_ONE;
-        telInfo.align = Telescope::ALI_SELECT_STAR_1;
+    char string_list_AlignmentL1[80];
+    if (alignInProgress) {
+      strcpy(string_list_AlignmentL1,"Resume Align.\n""Show Corr.\n""Clear Corr.");
+      current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Alignment", current_selection_L1, string_list_AlignmentL1);
+      switch (current_selection_L1) {
+        case 1:
+          switch (numStars) {
+            case 1: telInfo.aliMode = Telescope::ALIM_ONE; break;
+            case 2: telInfo.aliMode = Telescope::ALIM_TWO; break;
+            case 3: telInfo.aliMode = Telescope::ALIM_THREE; break;
+            case 4: telInfo.aliMode = Telescope::ALIM_FOUR; break;
+            case 6: telInfo.aliMode = Telescope::ALIM_SIX; break;
+            defualt: break;
+          }
+        break;
+        case 2: break;
+        case 3: break;
+        default: break;
       }
-      else
-      {
-        DisplayMessage("Alignment", "Failed!", -1);
+    } else
+    if (maxAlignStars==1) {
+      strcpy(string_list_AlignmentL1,"1-Star Align.\n""Show Corr.\n""Clear Corr.");
+      current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Alignment", current_selection_L1, string_list_AlignmentL1);
+      switch (current_selection_L1) {
+        case 1: if (SetLX200(":A1#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_ONE; else DisplayMessage("Alignment", "Failed!", -1); break;
+        case 2: break;
+        case 3: break;
+        default: break;
       }
-      break;
-    case 2:
-      if (SetLX200(":A2#") == LX200VALUESET)
-      {
-        telInfo.aliMode = Telescope::ALIM_TWO;
-        telInfo.align = Telescope::ALI_SELECT_STAR_1;
+    } else
+    if (maxAlignStars==3) {
+      strcpy(string_list_AlignmentL1,"1-Star Align.\n""2-Star Align.\n""3-Star Align.\n""Show Corr.\n""Clear Corr.");
+      current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Alignment", current_selection_L1, string_list_AlignmentL1);
+      switch (current_selection_L1) {
+        case 1: if (SetLX200(":A1#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_ONE; else DisplayMessage("Alignment", "Failed!", -1); break;
+        case 2: if (SetLX200(":A2#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_TWO; else DisplayMessage("Alignment", "Failed!", -1); break;
+        case 3: if (SetLX200(":A3#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_THREE; else DisplayMessage("Alignment", "Failed!", -1); break;
+        case 4: break;
+        case 5: break;
+        default: break;
       }
-      else
-      {
-        DisplayMessage("Alignment", "Failed!", -1);
+    } else
+    if (maxAlignStars>=4) {
+      strcpy(string_list_AlignmentL1,"1-Star Align.\n""4-Star Align.\n""6-Star Align.\n""Show Corr.\n""Clear Corr.");
+      current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Alignment", current_selection_L1, string_list_AlignmentL1);
+      switch (current_selection_L1) {
+        case 1: if (SetLX200(":A1#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_ONE; else DisplayMessage("Alignment", "Failed!", -1); break;
+        case 2: if (SetLX200(":A4#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_FOUR; else DisplayMessage("Alignment", "Failed!", -1); break;
+        case 3: if (SetLX200(":A6#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_SIX; else DisplayMessage("Alignment", "Failed!", -1); break;
+        case 4: break;
+        case 5: break;
+        default: break;
       }
-      break;
-    case 3:
-      if (SetLX200(":A3#") == LX200VALUESET)
-      {
-        telInfo.aliMode = Telescope::ALIM_THREE;
-        telInfo.align = Telescope::ALI_SELECT_STAR_1;
-      }
-      else
-      {
-        DisplayMessage("Alignment", "Failed!", -1);
-      }
-      break;
-    case 4:
-      double val1;
-      double val2;
-      double val3;
-      double val4;
-
-      //DisplaylongMessage("", "", "", "",0);
-
-      break;
-    case 5:
-      break;
-    default:
-      break;
     }
+    
     // Quit Menu
     current_selection_L1 = 0;
     current_selection_L0 = 0;
   }
+
+  if (telInfo.aliMode!=Telescope::ALIM_OFF) {
+    if (!telInfo.getAlignStars(&maxAlignStars, &thisStar, &numStars)) { maxAlignStars=3; thisStar=1; numStars=1; }
+    switch (thisStar) {
+      case 1: telInfo.align = Telescope::ALI_SELECT_STAR_1; break;
+      case 2: telInfo.align = Telescope::ALI_SELECT_STAR_2; break;
+      case 3: telInfo.align = Telescope::ALI_SELECT_STAR_3; break;
+      case 4: telInfo.align = Telescope::ALI_SELECT_STAR_4; break;
+      case 5: telInfo.align = Telescope::ALI_SELECT_STAR_5; break;
+      case 6: telInfo.align = Telescope::ALI_SELECT_STAR_6; break;
+      default: telInfo.align = Telescope::ALI_SELECT_STAR_1; break;
+    }
+  }
+
 }
 
 #ifndef ST4SMARTCONTROLLER_ON
@@ -1025,26 +1024,37 @@ void SmartHandController::menuPier()
 
 void SmartHandController::menuStar(bool sync)
 {
-  current_selection_Star = display->UserInterfaceCatalog(&buttonPad, sync ? "Sync Star" : "Goto Star", current_selection_Star, STAR);
-  if (current_selection_Star != 0)
-  {
-    bool  ok = DisplayMessageLX200(SyncGotoCatLX200(sync, STAR, current_selection_Star - 1),false);
-    if (ok)
-    {
-      // Quit Menu
-      current_selection_L1 = 0;
-      current_selection_L0 = 0;
+  if (!cat_mgr.canFilter()) { cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0()); }
+  cat_mgr.select(STAR);
+  cat_mgr.filter(FM_ABOVE_HORIZON);
+  cat_mgr.setIndex(0);
+  if (cat_mgr.canFilter()) {
+    if (display->UserInterfaceCatalog(&buttonPad, sync ? "Sync Star" : "Goto Star")) {
+      bool  ok = DisplayMessageLX200(SyncGotoCatLX200(sync), false);
+      if (ok) { current_selection_L1 = 0; current_selection_L0 = 0; } // Quit Menu
     }
   }
 }
 
 bool SmartHandController::SelectStarAlign()
 {
-  telInfo.alignSelectedStar = display->UserInterfaceCatalog(&buttonPad, "Select Star", telInfo.alignSelectedStar, STAR);
-  if (telInfo.alignSelectedStar != 0)
-  {
-    bool ok = DisplayMessageLX200(SyncSelectedStarLX200(telInfo.alignSelectedStar),false);
-    return ok;
+  if (!cat_mgr.canFilter()) { cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0()); }
+  cat_mgr.select(STAR);
+  if (telInfo.aliMode == Telescope::ALIM_ONE) {
+    if (telInfo.align == Telescope::ALI_SELECT_STAR_1) { cat_mgr.filter(FM_ALIGN_ALL_SKY); }
+  } else
+  if ((telInfo.aliMode == Telescope::ALIM_TWO) || (telInfo.aliMode == Telescope::ALIM_THREE)) {
+    if (telInfo.align == Telescope::ALI_SELECT_STAR_1) { cat_mgr.filter(FM_ALIGN_3STAR_1); } else 
+    if (telInfo.align == Telescope::ALI_SELECT_STAR_2) { cat_mgr.filter(FM_ALIGN_3STAR_2); } else 
+    if (telInfo.align == Telescope::ALI_SELECT_STAR_3) { cat_mgr.filter(FM_ALIGN_3STAR_3); }
+  } else cat_mgr.filter(FM_ABOVE_HORIZON);
+
+  cat_mgr.setIndex(0);
+  if (cat_mgr.canFilter()) {
+    if (display->UserInterfaceCatalog(&buttonPad, "Select Star")) {
+      bool ok = DisplayMessageLX200(SyncSelectedStarLX200(cat_mgr.getIndex()),false);
+      return ok;
+    }
   }
   return false;
 }

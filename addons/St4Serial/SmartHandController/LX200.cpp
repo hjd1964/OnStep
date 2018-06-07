@@ -309,23 +309,13 @@ LX200RETURN SetTargetDecLX200(short& vd1, uint8_t& vd2, uint8_t& vd3)
 
 LX200RETURN SyncGotoLX200(bool sync, uint8_t& vr1, uint8_t& vr2, uint8_t& vr3, short& vd1, uint8_t& vd2, uint8_t& vd3)
 {
-  if (SetTargetRaLX200(vr1, vr2, vr3) ==  LX200VALUESET && SetTargetDecLX200(vd1, vd2, vd3) == LX200VALUESET)
-  {
-    if (sync)
-    {
+  if (SetTargetRaLX200(vr1, vr2, vr3) ==  LX200VALUESET && SetTargetDecLX200(vd1, vd2, vd3) == LX200VALUESET) {
+    if (sync) {
       Ser.print(":CS#");
       Ser.flush();
       return LX200SYNCED;
-    }
-    else
-    {
-      return Move2TargetLX200();
-    }
-  }
-  else
-  {
-    return LX200SETTARGETFAILED;
-  }
+    } else return Move2TargetLX200();
+  } else return LX200SETTARGETFAILED;
 }
 
 LX200RETURN SyncGotoLX200(bool sync, float &Ra, float &Dec)
@@ -348,53 +338,26 @@ LX200RETURN SyncGotoLX200(bool sync, float &Ra, float &Dec)
 LX200RETURN GetDateLX200(unsigned int &day, unsigned int &month, unsigned int &year)
 {
   char out[20];
-  if (GetLX200(":GC#", out) == LX200VALUEGET)
-  {
+  if (GetLX200(":GC#", out) == LX200VALUEGET) {
     char* pEnd;
     month = strtol(&out[0], &pEnd, 10);
     day = strtol(&out[3], &pEnd, 10);
     year = strtol(&out[6], &pEnd, 10) + 2000L;
     return LX200VALUEGET;
-  }
-  else
-  {
-    return LX200GETVALUEFAILED;
-  }
+  } else return LX200GETVALUEFAILED;
 }
 
-LX200RETURN SyncGotoCatLX200(bool sync, Catalog cat, int idx)
+LX200RETURN SyncGotoCatLX200(bool sync)
 {
   int epoch;
   unsigned int day, month, year, hour, minute, second;
-  if (GetDateLX200(day, month, year) == LX200GETVALUEFAILED)
-  {
-    return LX200GETVALUEFAILED;
-  }
-  float ra, dec;
-  switch (cat)
-  {
-  case STAR:
-    getcathf(Star_ra[idx], ra);
-    getcatdf(Star_dec[idx], dec);
-    epoch = 2000;
-    break;
-  case MESSIER:
-    getcathf(Messier_ra[idx], ra);
-    getcatdf(Messier_dec[idx], dec);
-    epoch = 2000;
-    break;
-  case HERSCHEL:
-    getcathf(Herschel_ra[idx], ra);
-    getcatdf(Herschel_dec[idx], dec);
-    epoch = 1950;
-    break;
-  default:
-    return LX200UNKOWN;
-    break;
-  }
+  if (GetDateLX200(day, month, year) == LX200GETVALUEFAILED) return LX200GETVALUEFAILED;
+  if (cat_mgr.getCat()==CAT_NONE) return LX200UNKOWN;
+  D("ra="); D(cat_mgr.ra()); D(",dec="); DL(cat_mgr.dec()); 
   EquatorialCoordinates coo;
-  coo.ra = ra;
-  coo.dec = dec;
+  coo.ra = cat_mgr.ra()/15.0;
+  coo.dec = cat_mgr.dec();
+  epoch=cat_mgr.epoch(); if (epoch==0) return LX200GETVALUEFAILED;
   EquatorialCoordinates cooNow;
   cooNow = Ephemeris::equatorialEquinoxToEquatorialJNowAtDateAndTime(coo, epoch, day, month, year, 0, 0, 0);
   return SyncGotoLX200(sync, cooNow.ra, cooNow.dec);
@@ -405,14 +368,9 @@ LX200RETURN SyncGotoPlanetLX200(bool sync, unsigned short objSys)
   char out[20];
   unsigned int day, month, year, hour, minute, second;
 
-  if (GetDateLX200(day, month, year) == LX200GETVALUEFAILED)
-  {
-    return LX200GETVALUEFAILED;
-  }
-  if (GetTimeLX200(hour, minute, second) == LX200GETVALUEFAILED)
-  {
-    return LX200GETVALUEFAILED;
-  }
+  if (GetDateLX200(day, month, year) == LX200GETVALUEFAILED) return LX200GETVALUEFAILED;
+  if (GetTimeLX200(hour, minute, second) == LX200GETVALUEFAILED) return LX200GETVALUEFAILED;
+
   Ephemeris Eph;
   SolarSystemObjectIndex objI = static_cast<SolarSystemObjectIndex>(objSys);
   SolarSystemObject obj = Eph.solarSystemObjectAtDateAndTime(objI, day, month, year, hour, minute, second);
@@ -421,22 +379,14 @@ LX200RETURN SyncGotoPlanetLX200(bool sync, unsigned short objSys)
 
 LX200RETURN SyncSelectedStarLX200(unsigned short alignSelectedStar)
 {
-  if (alignSelectedStar > 0 && alignSelectedStar < 292)
-  {
-    return SyncGotoCatLX200(false, STAR, alignSelectedStar - 1);
-  }
-  else
-    return LX200UNKOWN;
+  if (alignSelectedStar >= 0 && alignSelectedStar < 292) return SyncGotoCatLX200(false); else return LX200UNKOWN;
 }
 
 LX200RETURN readReverseLX200(const uint8_t &axis, bool &reverse)
 {
   char out[20];
   LX200RETURN ok = axis == 1 ? GetLX200(":%RR#", out) : GetLX200(":%RD#", out);
-  if (ok == LX200VALUEGET)
-  {
-    reverse = out[0] == '1' ? true : false;
-  }
+  if (ok == LX200VALUEGET) reverse = out[0] == '1' ? true : false;
   return ok;
 }
 
@@ -579,5 +529,85 @@ LX200RETURN writeHighCurrLX200(const uint8_t &axis, const uint8_t &highCurr)
   sprintf(text, ":$CX%u#", highCurr);
   text[3] = axis == 1 ? 'R' : 'D';
   return SetLX200(text);
+}
+
+// convert string in format HH:MM:SS to floating point
+// (also handles)           HH:MM.M
+boolean hmsToDouble(double *f, char *hms) {
+  char h[3],m[5],s[3];
+  int  h1,m1,m2=0,s1=0;
+  boolean highPrecision=true;
+  
+  while (*hms==' ') hms++; // strip prefix white-space
+
+  if (highPrecision) { if (strlen(hms)!= 8) return false; } else if (strlen(hms)!= 7) return false;
+
+  h[0]=*hms++; h[1]=*hms++; h[2]=0; atoi2(h,&h1);
+  if (highPrecision) {
+    if (*hms++!=':') return false; m[0]=*hms++; m[1]=*hms++; m[2]=0; atoi2(m,&m1);
+    if (*hms++!=':') return false; s[0]=*hms++; s[1]=*hms++; s[2]=0; atoi2(s,&s1);
+  } else {
+    if (*hms++!=':') return false; m[0]=*hms++; m[1]=*hms++; m[2]=0; atoi2(m,&m1);
+    if (*hms++!='.') return false; m2=(*hms++)-'0';
+  }
+  if ((h1<0) || (h1>23) || (m1<0) || (m1>59) || (m2<0) || (m2>9) || (s1<0) || (s1>59)) return false;
+  
+  *f=h1+m1/60.0+m2/600.0+s1/3600.0;
+  return true;
+}
+
+// convert string in format sDD:MM:SS to floating point
+// (also handles)           DDD:MM:SS
+//                          sDD:MM
+//                          DDD:MM
+//                          sDD*MM
+//                          DDD*MM
+boolean dmsToDouble(double *f, char *dms, boolean sign_present, boolean highPrecision) {
+  char d[4],m[5],s[3];
+  int d1, m1, s1=0;
+  int lowLimit=0, highLimit=360;
+  int checkLen,checkLen1;
+  double sign = 1.0;
+  boolean secondsOff = false;
+
+  while (*dms==' ') dms++; // strip prefix white-space
+
+  checkLen1=strlen(dms);
+
+  // determine if the seconds field was used and accept it if so
+  if (highPrecision) { 
+    checkLen=9;
+    if (checkLen1 != checkLen) return false;
+  } else {
+    checkLen=6;
+    if (checkLen1 != checkLen) {
+      if (checkLen1==9) { secondsOff=false; checkLen=9; } else return false;
+    } else secondsOff = true;
+  }
+
+  // determine if the sign was used and accept it if so
+  if (sign_present) {
+    if (*dms=='-') sign=-1.0; else if (*dms=='+') sign=1.0; else return false; 
+    dms++; d[0]=*dms++; d[1]=*dms++; d[2]=0; if (!atoi2(d,&d1)) return false;
+  } else {
+    d[0]=*dms++; d[1]=*dms++; d[2]=*dms++; d[3]=0; if (!atoi2(d,&d1)) return false;
+  }
+
+  // make sure the seperator is an allowed character
+  if ((*dms!=':') && (*dms!='*') && (*dms!=char(223))) return false; else dms++;
+
+  m[0]=*dms++; m[1]=*dms++; m[2]=0; if (!atoi2(m,&m1)) return false;
+
+  if ((highPrecision) && (!secondsOff)) {
+    // make sure the seperator is an allowed character
+    if (*dms++!=':') return false; 
+    s[0]=*dms++; s[1]=*dms++; s[2]=0; atoi2(s,&s1);
+  }
+
+  if (sign_present) { lowLimit=-90; highLimit=90; }
+  if ((d1<lowLimit) || (d1>highLimit) || (m1<0) || (m1>59) || (s1<0) || (s1>59)) return false;
+  
+  *f=sign*(d1+m1/60.0+s1/3600.0);
+  return true;
 }
 

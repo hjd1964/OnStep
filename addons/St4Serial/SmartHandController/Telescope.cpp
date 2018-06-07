@@ -33,6 +33,42 @@ void Telescope::updateTel(boolean immediate)
     if ((updateSeq%4==1) || immediate) { hasTelStatus = GetLX200(":GU#", TelStatus) == LX200VALUEGET; if (!hasTelStatus) connected = true; lastStateTel = millis(); }
   }
 };
+
+double Telescope::getLstT0()
+{
+  char temp[20]="";
+  double f=0;
+  if (GetLX200(":GS#", temp) == LX200VALUEGET) 
+  {
+    int l=strlen(temp); if (l>0) temp[l-1]=0;
+    hmsToDouble(&f, temp);
+    f=((unsigned long)(f*3600000.0)-millis());
+  }
+  return f;
+};
+double Telescope::getLat()
+{
+  char temp[20]="";
+  double f=-10000;
+  if (GetLX200(":Gt#", temp) == LX200VALUEGET) {
+    int l=strlen(temp); if (l>0) temp[l-1]=0;
+    dmsToDouble(&f, temp, true, false);
+  }
+  return f;
+};
+int Telescope::getAlignStars(int *maxStars, int *thisStar, int *numStars)
+{
+  char temp[20]="";
+  if (GetLX200(":A?#", temp) == LX200VALUEGET) {
+    int l=strlen(temp); if (l>0) temp[l-1]=0;
+    if (l!=4) return false;
+    int v=temp[0]-'0'; if ((v<0) || (v>9)) return false; *maxStars=v;
+    v=temp[1]-'0'; if ((v<0) || (v>9)) return false; *thisStar=v;
+    v=temp[2]-'0'; if ((v<0) || (v>9)) return false; *numStars=v;
+  } else return false;
+  return true;
+}
+
 Telescope::ParkState Telescope::getParkState()
 {
   if (strchr(&TelStatus[0], 'P') != NULL)
@@ -115,35 +151,24 @@ Telescope::Errors Telescope::getError()
     }
   }
 }
+
 bool Telescope::addStar()
 {
-  if (align == ALI_RECENTER_1 || align == ALI_RECENTER_2 || align == ALI_RECENTER_3)
-  {
-    if (SetLX200(":A+#") == LX200VALUESET)
-    {
-      if (aliMode == ALIM_ONE
-        || (aliMode == ALIM_TWO && align == ALI_RECENTER_2)
-        || (aliMode == ALIM_THREE && align == ALI_RECENTER_3))
-      {
-        align = ALI_OFF;
-        return true;
-      }
-      else
-      {
-        align = static_cast<AlignState>(align+1);
-        return true;
-      }
-    }
-    else
-    {
+  if (align == ALI_RECENTER_1 || align == ALI_RECENTER_2 || align == ALI_RECENTER_3 || align == ALI_RECENTER_4 || align == ALI_RECENTER_5 || align == ALI_RECENTER_6) {
+    if (SetLX200(":A+#") == LX200VALUESET) {
+      if (aliMode == ALIM_ONE || 
+         (aliMode == ALIM_TWO   && align == ALI_RECENTER_2) || 
+         (aliMode == ALIM_THREE && align == ALI_RECENTER_3) || 
+         (aliMode == ALIM_FOUR  && align == ALI_RECENTER_4) || 
+         (aliMode == ALIM_SIX   && align == ALI_RECENTER_6)) { align = ALI_OFF; return true; } else { align = static_cast<AlignState>(align+1); return true; }
+    } else {
       align = ALI_OFF;
       return false;
     }
-  }
-  else
-  {
+  } else {
     align = ALI_OFF;
     return false;
   }
 }
+
 

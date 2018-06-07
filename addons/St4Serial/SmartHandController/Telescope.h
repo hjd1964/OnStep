@@ -7,12 +7,15 @@ class Telescope
 public:
   enum Errors { ERR_NONE, ERR_MOTOR_FAULT, ERR_ALT, ERR_LIMIT_SENSE, ERR_DEC, ERR_AZM, ERR_UNDER_POLE, ERR_MERIDIAN, ERR_SYNC };
 
-  enum AlignMode { ALIM_ONE, ALIM_TWO, ALIM_THREE };
+  enum AlignMode { ALIM_OFF, ALIM_ONE, ALIM_TWO, ALIM_THREE, ALIM_FOUR, ALIM_SIX };
   enum AlignState {
     ALI_OFF,
     ALI_SELECT_STAR_1, ALI_SLEW_STAR_1, ALI_RECENTER_1,
     ALI_SELECT_STAR_2, ALI_SLEW_STAR_2, ALI_RECENTER_2,
-    ALI_SELECT_STAR_3, ALI_SLEW_STAR_3, ALI_RECENTER_3
+    ALI_SELECT_STAR_3, ALI_SLEW_STAR_3, ALI_RECENTER_3,
+    ALI_SELECT_STAR_4, ALI_SLEW_STAR_4, ALI_RECENTER_4,
+    ALI_SELECT_STAR_5, ALI_SLEW_STAR_5, ALI_RECENTER_5,
+    ALI_SELECT_STAR_6, ALI_SLEW_STAR_6, ALI_RECENTER_6
   };
   enum Mount { GEM, FEM };
   enum TrackState { TRK_OFF, TRK_ON, TRK_SLEWING, TRK_UNKNOW };
@@ -55,6 +58,9 @@ public:
   void updateAzAlt(boolean immediate=false);
   void updateTime(boolean immediate=false);
   void updateTel(boolean immediate=false);
+  double getLstT0();
+  double getLat();
+  int getAlignStars(int *maxStars, int *thisStar, int *numStars);
   ParkState getParkState();
   TrackState getTrackingState();
   bool atHome();

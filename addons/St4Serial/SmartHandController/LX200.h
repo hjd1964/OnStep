@@ -22,7 +22,7 @@ LX200RETURN SyncGotoLX200(bool sync, uint8_t& vr1, uint8_t& vr2, uint8_t& vr3, s
 LX200RETURN SyncGotoLX200(bool, float &Ra, float &Dec);
 LX200RETURN SyncSelectedStarLX200(unsigned short alignSelectedStar);
 LX200RETURN GetDateLX200(unsigned int &day, unsigned int &month, unsigned int &year);
-LX200RETURN SyncGotoCatLX200(bool sync, Catalog cat, int idx);
+LX200RETURN SyncGotoCatLX200(bool sync);
 LX200RETURN SyncGotoPlanetLX200(bool sync, unsigned short obj);
 LX200RETURN readReverseLX200(const uint8_t &axis, bool &reverse);
 LX200RETURN writeReverseLX200(const uint8_t &axis, const bool &reverse);
@@ -38,4 +38,8 @@ LX200RETURN readLowCurrLX200(const uint8_t &axis, uint8_t &lowCurr);
 LX200RETURN writeLowCurrLX200(const uint8_t &axis, const uint8_t &lowCurr);
 LX200RETURN readHighCurrLX200(const uint8_t &axis, uint8_t &highCurr);
 LX200RETURN writeHighCurrLX200(const uint8_t &axis, const uint8_t &highCurr);
+
+boolean hmsToDouble(double *f, char *hms);
+boolean dmsToDouble(double *f, char *dms, boolean sign_present, boolean highPrecision);
+
 

@@ -85,52 +85,44 @@ selection list with string line
 returns line height
 */
 
-static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, unsigned short idx, Catalog cat)
+static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y)
 {
   char DEGREE_SYMBOL[] = { 0xB0, '\0' };
   u8g2_uint_t x = 0;
   u8g2_uint_t yy;
-  char txt1[5];
-  char txt2[5];
-  char txt3[5];
 
   u8g2_uint_t  pixel_width;
   u8g2_uint_t line_height = u8g2_GetAscent(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
-  unsigned int cat_elements = 0;
-  const unsigned short* cat_num = NULL;
-  const byte* cat_letter = NULL;
-  const byte* cat_info = NULL;
-  const byte* cat_const = NULL;
-  const byte* cat_dMag = NULL;
-  const byte* cat_obj = NULL;
 
   // for Star Catalog
-  if (cat == STAR)
+  if (cat_mgr.getCat() == STAR)
   {
     uint8_t step0 = u8g2_GetUTF8Width(u8g2, "dec ");
     char line[16];
-    uint8_t vr1, vr2, vr3, vd2;
-    short vd1;
-    cat_elements = 291;
-    cat_letter = &Star_letter[idx];
-    cat_const = &Star_constellation[idx];
     const uint8_t* myfont = u8g2->font;
     u8g2_SetFont(u8g2, u8g2_font_unifont_t_greek);
-    u8g2_DrawGlyph(u8g2, 0, y, 944 + *cat_letter);
+    u8g2_DrawGlyph(u8g2, 0, y, 944 + cat_mgr.primaryId());
     u8g2_SetFont(u8g2, myfont);
 
-    u8g2_DrawUTF8(u8g2, 16, y, constellation_txt[*cat_const - 1]);
+    u8g2_DrawUTF8(u8g2, 16, y, cat_mgr.constellationStr());
+
+    // show RA
+    uint8_t vr1, vr2, vr3;
+    char txt1[5], txt2[5], txt3[5];
     y += line_height;
-    getcathms(Star_ra[idx], vr1, vr2, vr3);
+    cat_mgr.raHMS(vr1,vr2,vr3);
     memcpy(txt1, u8x8_u8toa(vr1, 2), 3);
     memcpy(txt2, u8x8_u8toa(vr2, 2), 3);
     memcpy(txt3, u8x8_u8toa(vr3, 2), 3);
     u8g2_DrawUTF8(u8g2, x, y, "ra");
     x += step0;
     ext_drawRA(u8g2, x, y, txt1, txt2, txt3);
+
+    // show Dec
+    short vd1; uint8_t vd2;
+    cat_mgr.decDM(vd1,vd2);
     y += line_height;
     x = 0;
-    getcatdms(Star_dec[idx], vd1, vd2);
     memcpy(txt1, u8x8_u8toa((uint8_t)abs(vd1), 2), 3);
     memcpy(txt2, u8x8_u8toa(vd2, 2), 3);
     u8g2_DrawUTF8(u8g2, x, y, "dec ");
@@ -139,41 +131,17 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, unsigned shor
     return line_height;
   }
 
-  // for Herschel and Messier objects
-  switch (cat) {
-  case HERSCHEL:
-    cat_elements = 400;
-    cat_num = &Herschel_NGC[idx];
-    cat_info = &Herschel_info[idx];
-    cat_const = &Hershel_constellation[idx];
-    cat_dMag = &Hershel_dMag[idx];
-    cat_obj = &Herschel_obj[idx];
-    break;
-  case MESSIER:
-    cat_elements = 110;
-    cat_num = NULL;
-    cat_info = NULL;
-    cat_const = &Messier_constellation[idx];
-    cat_dMag = &Messier_dMag[idx];
-    cat_obj = &Messier_obj[idx];
-  default:
-    break;
-  }
-
-  /* check whether this is the current cursor line */
+  // for Object Catalogs
   char line[16];
-  if (cat_num != NULL) sprintf(line, "%s%u", catalog_txt[cat], *cat_num); else sprintf(line, "%s%u", catalog_txt[cat], idx +1);
-
-  /* draw the line */
+  sprintf(line, "%s%u", cat_mgr.catalogStr(), cat_mgr.primaryId());
   if (line == NULL) strcpy(line, ""); u8g2_DrawUTF8(u8g2, 0, y, line);
   y += line_height;
-  
-  int v1 = *cat_dMag / 10;
-  int v2 = *cat_dMag % 10;
-  u8g2_DrawUTF8(u8g2, 0, y, constellation_txt[*cat_const - 1]);
+
+  // show icon for type of object
+  u8g2_DrawUTF8(u8g2, 0, y, cat_mgr.constellationStr());
   x += u8g2_GetUTF8Width(u8g2, "WWW");
-  if (cat_obj) {
-    switch (*cat_obj) {
+  if (cat_mgr.objectType()<8) {
+    switch (cat_mgr.objectType()) {
       case 0: u8g2_DrawXBMP(u8g2, x - 3, y - EN_height, EN_width, EN_height, EN_bits); break;
       case 1: u8g2_DrawXBMP(u8g2, x - 3, y - GC_height, GC_width, GC_height, GC_bits); break;
       case 2: u8g2_DrawXBMP(u8g2, x - 3, y - GX_height, GX_width, GX_height, GX_bits); break;
@@ -184,56 +152,39 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, unsigned shor
     x += GX_width + 5;
   }
 
+  // show magnitude
   u8g2_DrawUTF8(u8g2, x, y, "mag ");
   x += u8g2_GetUTF8Width(u8g2, "mag ");
-
-  if (v1 < 10) x += u8g2_GetUTF8Width(u8g2, "1");
-  sprintf(line, "%d.%d", v1, v2);
+  sprintf(line, "%0.1f", (float)cat_mgr.magnitude());
   u8g2_DrawUTF8(u8g2, x, y, line);
-  y += line_height;
 
-  if (cat_info != NULL) u8g2_DrawUTF8(u8g2, 0, y, Herschel_info_txt[*cat_info - 1]);
+  // show extra object information
   y += line_height;
+  if (cat_mgr.objectType()<8) u8g2_DrawUTF8(u8g2, 0, y, cat_mgr.objectInfoStr());
 
+  y += line_height;
   return line_height;
 }
 
 /*
-title: 		NULL for no title, valid str for title line. Can contain mutliple lines, separated by '\n'
-start_pos: 	default position for the cursor, first line is 1.
-sl:			string list (list of strings separated by \n)
-returns 0 if user has pressed the home key
-returns the selected line if user has pressed the select key
+title: NULL for no title, valid str for title line. Can contain mutliple lines, separated by '\n'
+uses: cat_mgr which has catalog selected, cursor line set, and filter set.  On return cat_mgr has object of interest selected.
+returns false if user has pressed the home key
+returns true if user has pressed the select key
 side effects:
 u8g2_SetFontDirection(u8g2, 0);
 u8g2_SetFontPosBaseline(u8g2);
-
 */
-unsigned short ext_UserInterfaceCatalog(u8g2_t *u8g2, Pad* extPad, const char *title, unsigned short start_pos, Catalog cat)
+bool ext_UserInterfaceCatalog(u8g2_t *u8g2, Pad* extPad, const char *title)
 {
   u8g2_SetFont(u8g2, u8g2_font_helvR10_te);
-  unsigned short cur_pos;
-  unsigned short tot_pos;
-  unsigned short incr = 1;
-  switch (cat) {
-    case HERSCHEL: tot_pos = 400; break;
-    case STAR:     tot_pos = 292; break;
-    case MESSIER:  tot_pos = 110; break;
-    default:       tot_pos = 0;   break;
-  }
-  if (start_pos > tot_pos) start_pos = tot_pos;
-
   u8g2_uint_t yy;
 
   uint8_t event;
 
   u8g2_uint_t line_height = u8g2_GetAscent(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
-
   uint8_t title_lines = u8x8_GetStringLineCnt(title);
   uint8_t display_lines;
-
-  if (start_pos > 0) start_pos--;	/* issue 112 */
-  cur_pos = start_pos;
 
   u8g2_SetFontPosBaseline(u8g2);
 
@@ -246,32 +197,19 @@ unsigned short ext_UserInterfaceCatalog(u8g2_t *u8g2, Pad* extPad, const char *t
         u8g2_DrawHLine(u8g2, 0, yy - line_height - u8g2_GetDescent(u8g2) + 1, u8g2_GetDisplayWidth(u8g2));
         yy += 3;
       }
-      ext_draw_catalog_list_line(u8g2, yy, cur_pos, cat);
+      ext_draw_catalog_list_line(u8g2, yy);
     } while (u8g2_NextPage(u8g2));
-
+    
 #ifdef U8G2_REF_MAN_PIC
     return 0;
 #endif
 
     for (;;) {
       event = ext_GetMenuEvent(extPad);
-      if (event == U8X8_MSG_GPIO_MENU_SELECT || event == U8X8_MSG_GPIO_MENU_NEXT) return cur_pos + 1; else    /* issue 112: +1 */
-      if (event == U8X8_MSG_GPIO_MENU_HOME || event == U8X8_MSG_GPIO_MENU_PREV) return 0; else                /* issue 112: return 0 instead of start_pos */
-      if (event == U8X8_MSG_GPIO_MENU_DOWN) {
-        if (cur_pos < tot_pos - 1) {
-          incr += 1; if (incr > 3) incr = 3;
-          cur_pos += incr; if (cur_pos > tot_pos - 1) cur_pos = 0;
-        } else cur_pos = 0;
-        break;
-      } else 
-      if (event == U8X8_MSG_GPIO_MENU_UP) {
-        if (cur_pos > 0) {
-          incr += 1; if (incr > 3) incr = 3;
-          if (cur_pos < incr) cur_pos = tot_pos - 1; else cur_pos -= incr;
-        } else cur_pos = tot_pos - 1;
-        break;
-      }
-      else incr = 0;
+      if (event == U8X8_MSG_GPIO_MENU_SELECT || event == U8X8_MSG_GPIO_MENU_NEXT) return true; else
+      if (event == U8X8_MSG_GPIO_MENU_HOME || event == U8X8_MSG_GPIO_MENU_PREV) return false; else
+      if (event == U8X8_MSG_GPIO_MENU_DOWN) { cat_mgr.incIndex(); break; } else
+      if (event == U8X8_MSG_GPIO_MENU_UP) { cat_mgr.decIndex(); break; }
     }
   }
 }
