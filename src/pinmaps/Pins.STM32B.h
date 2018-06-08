@@ -104,9 +104,11 @@
   #define F1DR          PB0 
   #define F1ST          PB1
 
-  #define SPARE1        PA10
-  #define SPARE2        PA13
-  #define SPARE3        PA14
+  #define SPARE1        PA5 
+  #define SPARE2        PA6 
+  #define SPARE3        PA7 
+  #define SPARE4        PA13
+  #define SPARE5        PA14
 
 #else
   #error "Unknown STM32 Board. This pinmap is only for Blue and Black Pill variants"
