@@ -48,18 +48,20 @@
   #define A1M2          PA0  
   #define A1ST          PC13
   #define A1DR          PB9
+  #define A1MO          PB8
 
-  #define A2EN          PB13
-  #define A2M0          PB14
-  #define A2M1          PB15
+  #define A2EN          PA15
+  #define A2M0          PA10
+  #define A2M1          PA9 
   #define A2M2          PA8 
-  #define A2ST          PA9
-  #define A2DR          PA10
+  #define A2ST          PB15
+  #define A2DR          PB14
+  #define A2MO          PB13
 
-  #define S4N           PA13
-  #define S4S           PA14
-  #define S4W           PA15
-  #define S4E           PB3
+  #define S4N           PA7 
+  #define S4S           PA6 
+  #define S4W           PA5 
+  #define S4E           PA4 
 
   #define LED           PB12
   #define TONE          PB4 
@@ -68,23 +70,27 @@
   #define F1DR          PB0 
   #define F1ST          PB1 
 
-  #define SPARE1        PB8
+  #define SPARE1        PB3
+  #define SPARE2        PA13
+  #define SPARE3        PA14
 
 #elif defined(STM32Blue_ON) 
 
-  #define A1EN          PA9 
-  #define A1M0          PA8 
-  #define A1M1          PB15
-  #define A1M2          PB14
-  #define A1ST          PB13
-  #define A1DR          PB12
+  #define A1EN          PA10
+  #define A1M0          PA9 
+  #define A1M1          PA8 
+  #define A1M2          PB15
+  #define A1ST          PB14
+  #define A1DR          PB13
+  #define A1MO          PB12
 
-  #define A2EN          PC14
-  #define A2M0          PC15
-  #define A2M1          PA0
+  #define A2EN          PA4  
+  #define A2M0          PA3 
+  #define A2M1          PA2
   #define A2M2          PA1 
-  #define A2ST          PA2 
-  #define A2DR          PA3 
+  #define A2ST          PA0 
+  #define A2DR          PC15
+  #define A2MO          PC14
 
   #define S4N           PA15
   #define S4S           PB3 
@@ -114,8 +120,8 @@
 #define Axis1_M2        A1M2   // Microstep Mode 2
 #define Axis1StepPin    A1ST   // Step
 #define Axis1DirPin     A1DR   // Motor Direction
+#define Axis1_Aux       A1MO   // Aux - ESP8266 GPIO0 or SPI MISO
 //#define Axis1_FAULT   Undefined    // Fault
-//#define Axis1_Aux     Axis1_Aux    // Aux - ESP8266 GPIO0 or SPI MISO
 
 #define Axis2_EN        A2EN   // Enable
 #define Axis2_M0        A2M0   // Microstep Mode 0
@@ -123,8 +129,8 @@
 #define Axis2_M2        A2M2   // Microstep Mode 2
 #define Axis2StepPin    A2ST   // Step
 #define Axis2DirPin     A2DR   // Motor Direction
+#define Axis2_Aux       A2MO   // Aux - ESP8266 RST or SPI MISO
 //#define Axis2_FAULT   Undefined    // Fault
-//#define Axis2_Aux     Axis2_FAULT  // Aux - ESP8266 RST or SPI MISO
 
 // ST4 interface
 #define ST4DEn          S4N    // ST4 DE+ North
