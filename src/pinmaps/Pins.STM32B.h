@@ -69,10 +69,10 @@
 
   #define F1DR          PB0 
   #define F1ST          PB1 
+  #define F1EN          PB3
 
-  #define SPARE1        PB3
-  #define SPARE2        PA13
-  #define SPARE3        PA14
+  #define SPARE1        PA13
+  #define SPARE2        PA14
 
 #elif defined(STM32Blue_ON) 
 
@@ -101,14 +101,14 @@
   #define TONE          PB9 
   #define SQW           PB8 
 
-  #define F1DR          PB0 
-  #define F1ST          PB1
+  #define F1DR          PA5 
+  #define F1ST          PA6 
+  #define F1EN          PA7 
 
-  #define SPARE1        PA5 
-  #define SPARE2        PA6 
-  #define SPARE3        PA7 
-  #define SPARE4        PA13
-  #define SPARE5        PA14
+  #define SPARE1        PA13
+  #define SPARE2        PA14
+  #define SPARE3        PB0 
+  #define SPARE4        PB1
 
 #else
   #error "Unknown STM32 Board. This pinmap is only for Blue and Black Pill variants"
@@ -154,14 +154,15 @@
 // Pins to focuser1 stepper driver
 #define Axis4DirPin     F1DR   // Dir
 #define Axis4StepPin    F1ST   // Step
-
-// For rotator stepper driver
-//#define Axis3DirPin     PB4    // Dir
-//#define Axis3StepPin    PB5    // Step
+#define Axis4_EN        F1EN   // Step
 
 // For focuser2 stepper driver
-//#define Axis5DirPin   Undefined    // Dir
-//#define Axis5StepPin  Undefined    // Step
+//#define Axis5DirPin     F2DR   // Dir
+//#define Axis5StepPin    F2ST   // Step
+
+// For rotator stepper driver
+//#define Axis5DirPin   PB4    // Dir
+//#define Axis5StepPin  PB5    // Step
 
 // The limit switch sense is a logic level input which uses the internal pull up,
 // shorted to ground it stops gotos/tracking
@@ -169,8 +170,8 @@
 
 // The PEC index sense is a logic level input, resets the PEC index on rising
 // edge then waits for 60 seconds before allowing another reset
-//#define PecPin       Undefined
-//#define AnalogPecPin Undefined    // PEC Sense, analog or digital
+//#define PecPin        Undefined
+//#define AnalogPecPin  Undefined    // PEC Sense, analog or digital
 
 //#define LEDneg2Pin    Undefined    // Drain
 
