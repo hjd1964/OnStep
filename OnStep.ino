@@ -41,7 +41,7 @@
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  1
 #define FirmwareVersionMinor  8
-#define FirmwareVersionPatch  "k"     // for example major.minor patch: 1.3c
+#define FirmwareVersionPatch  "l"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 2       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
@@ -238,7 +238,6 @@ void setup() {
 
   // prep counters (for keeping time in main loop)
   cli(); siderealTimer=lst; guideSiderealTimer=lst; PecSiderealTimer=lst; sei();
-  housekeepingTimer=millis()+1000UL; 
   last_loop_micros=micros();
 }
 
@@ -382,12 +381,11 @@ void loop() {
   if (loop_time>worst_loop_time) worst_loop_time=loop_time;
   last_loop_micros=this_loop_micros;
 
-  // 1 SECOND TIMED ------------------------------------------------------------------------------------
   unsigned long tempMs=millis();
+
+  // 1 SECOND TIMED ------------------------------------------------------------------------------------
+  static unsigned long housekeepingTimer=millis();
   if ((long)(tempMs-housekeepingTimer)>0) {
-
-//    DL(((double)SiderealRate/(double)timerRateAxis1));
-
     housekeepingTimer=tempMs+1000UL;
 
 #if defined(ROTATOR_ON) && defined(MOUNT_TYPE_ALTAZM)

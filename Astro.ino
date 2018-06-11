@@ -328,6 +328,18 @@ double GetTrackingRate() {
   return _currentRate;
 }
 
+double GetStepsPerSecondAxis1() {
+ double s=(((double)StepsPerDegreeAxis1/240.0)*(_deltaAxis1/15.0));
+ if (s<8.0) s=8.0;
+ return s;
+}
+
+double GetStepsPerSecondAxis2() {
+ double s=(((double)StepsPerDegreeAxis2/240.0)*(_deltaAxis2/15.0));
+ if (s<8.0) s=8.0;
+ return s;
+}
+
 // -----------------------------------------------------------------------------------------------------------------------------
 // Low overhead altitude calculation, 16 calls to complete
 
@@ -650,10 +662,13 @@ double cot(double n) {
 // Acceleration rate calculation
 void SetAccelerationRates(double maxRate) {
   // set the new acceleration rate
+  // set the new goto acceleration rate
   cli();
   StepsForRateChangeAxis1= (sqrt((double)DegreesForAcceleration*(double)StepsPerDegreeAxis1))*maxRate;
   StepsForRateChangeAxis2= (sqrt((double)DegreesForAcceleration*(double)StepsPerDegreeAxis2))*maxRate;
   sei();
+
+  // slewSpeed is in degrees per second
   slewSpeed=(1000000.0/(maxRate/16L))/StepsPerDegreeAxis1;
 }
 

@@ -36,7 +36,7 @@ void Init_Guide() {
   #else
     boolean pullup=true;
   #endif
-  st4n.init(ST4DEn,debounceMs,pullup);
+  st4n.init(ST4DEn,debounceMs,pullup); // active low is default (true)
   st4s.init(ST4DEs,debounceMs,pullup);
   st4e.init(ST4RAe,debounceMs,pullup);
   st4w.init(ST4RAw,debounceMs,pullup);
