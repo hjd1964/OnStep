@@ -50,13 +50,13 @@
   #define A1DR          PB9
   #define A1MO          PB8
 
-  #define A2EN          PA15
-  #define A2M0          PA10
-  #define A2M1          PA9 
-  #define A2M2          PA8 
-  #define A2ST          PB15
-  #define A2DR          PB14
-  #define A2MO          PB13
+  #define A2EN          PA10
+  #define A2M0          PA9 
+  #define A2M1          PA8 
+  #define A2M2          PB15
+  #define A2ST          PB14 
+  #define A2DR          PB13
+  #define A2MO          PA15
 
   #define S4N           PA7 
   #define S4S           PA6 
