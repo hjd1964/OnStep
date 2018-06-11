@@ -76,8 +76,8 @@ volatile boolean useTimerRateRatio     = (StepsPerDegreeAxis1!=StepsPerDegreeAxi
 #define BreakDistAxis1                   (2L)
 #define BreakDistAxis2                   (2L)
 #define SecondsPerWormRotationAxis1      ((long)(StepsPerWormRotationAxis1/StepsPerSecondAxis1))
-volatile double StepsForRateChangeAxis1= (sqrt((double)DegreesForAcceleration*(double)StepsPerDegreeAxis1))*MaxRate;
-volatile double StepsForRateChangeAxis2= (sqrt((double)DegreesForAcceleration*(double)StepsPerDegreeAxis2))*MaxRate;
+volatile double StepsForRateChangeAxis1= (sqrt((double)DegreesForAcceleration*(double)StepsPerDegreeAxis1))*(double)MaxRate*16.0;
+volatile double StepsForRateChangeAxis2= (sqrt((double)DegreesForAcceleration*(double)StepsPerDegreeAxis2))*(double)MaxRate*16.0;
 #ifndef DegreesForRapidStop
 #define DegreesForRapidStop 1.0
 #endif
