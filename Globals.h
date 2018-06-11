@@ -242,15 +242,13 @@ unsigned long baudRate[10] = {115200,56700,38400,28800,19200,14400,9600,4800,240
 #define GuideRate1x        2
 #define GuideRate24x       6
 #define GuideRateNone      255
-
-#define DegreesPerSecond (1.0/((double)StepsPerDegreeAxis1*(MaxRate/1000000.0)))         // in degrees per second
-#define slewRate         (1.0/((double)StepsPerDegreeAxis1*(MaxRate/1000000.0))*3600.0)  // in arc-seconds per second
-#define slewRateX (slewRate/15.0)                                                        // in RA seconds per second
-#define halfSlewRate (slewRate/2.0)
-#define accXPerSec  (slewRateX/DegreesForAcceleration)
-#define accDegreesPerSec (DegreesPerSecond/DegreesForAcceleration)
-double  guideRates[10]={3.75,7.5,15,30,60,120,360,720,halfSlewRate,slewRate};
-//                      .25X .5x 1x 2x 4x  8x 24x 48x half-MaxRate MaxRate
+#define RateToDegPerSec  (1000000.0/(double)StepsPerDegreeAxis1)
+#define RateToASPerSec   (RateToDegPerSec*3600.0)
+#define RateToXPerSec    (RateToASPerSec/15.0)
+double  SlewRateX     =  (RateToXPerSec/MaxRate); // double since exponential factor slows by about 1/2
+double  accXPerSec    =  (SlewRateX/DegreesForAcceleration);
+double  guideRates[10]={3.75,7.5,15,30,60,120,360,720,(RateToASPerSec/MaxRate)/2.0,RateToASPerSec/MaxRate};
+//                      .25X .5x 1x 2x 4x  8x 24x 48x       half-MaxRate                   MaxRate
 
 byte currentGuideRate        = GuideRate24x;
 byte currentPulseGuideRate   = GuideRate1x;
