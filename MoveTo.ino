@@ -157,8 +157,8 @@ void moveTo() {
   // in AltAz mode if the end of slew doesn't get close enough within 3 seconds: stop tracking for a moment to allow target/actual position synchronization
   static bool forceSlewStop=false;
   static unsigned long slewStopTime=0;
-  if ((!forceSlewStop) && (distDestAxis1<=GetStepsPerSecondAxis1()) && (distDestAxis2<=GetStepsPerSecondAxis2())) { slewStopTime=millis()+3000L; forceSlewStop=true; }
-  if ((lastTrackingState==TrackingSidereal) && (forceSlewStop && ((long)(millis()-slewStopTime)>0) )) { lastTrackingState=TrackingSiderealDisabled; forceSlewStop=false; }
+  if ( (!forceSlewStop) && (distDestAxis1<=GetStepsPerSecondAxis1()) && (distDestAxis2<=GetStepsPerSecondAxis2()) ) { slewStopTime=millis()+3000L; forceSlewStop=true; }
+  if ( (lastTrackingState==TrackingSidereal) && (forceSlewStop && ((long)(millis()-slewStopTime)>0)) ) lastTrackingState=TrackingSiderealDisabled;
 #endif
 
   if ((distDestAxis1<=2) && (distDestAxis2<=2)) {
