@@ -396,6 +396,14 @@ double GetTrackingRate() {
   return az_currentRate;
 }
 
+double GetStepsPerSecondAxis1() {
+ return (((double)StepsPerDegreeAxis1/240.0)*(az_deltaAxis1/15.0));
+}
+
+double GetStepsPerSecondAxis2() {
+ return (((double)StepsPerDegreeAxis2/240.0)*(az_deltaAxis2/15.0));
+}
+
 // -----------------------------------------------------------------------------------------------------------------------------
 // Low overhead altitude calculation, 16 calls to complete
 
