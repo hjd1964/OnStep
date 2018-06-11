@@ -397,11 +397,15 @@ double GetTrackingRate() {
 }
 
 double GetStepsPerSecondAxis1() {
- return (((double)StepsPerDegreeAxis1/240.0)*(az_deltaAxis1/15.0));
+ double s=(((double)StepsPerDegreeAxis1/240.0)*(az_deltaAxis1/15.0));
+ if (s<8.0) s=8.0;
+ return s;
 }
 
 double GetStepsPerSecondAxis2() {
- return (((double)StepsPerDegreeAxis2/240.0)*(az_deltaAxis2/15.0));
+ double s=(((double)StepsPerDegreeAxis2/240.0)*(az_deltaAxis2/15.0));
+ if (s<8.0) s=8.0;
+ return s;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------------
