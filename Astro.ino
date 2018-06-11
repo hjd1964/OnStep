@@ -658,10 +658,13 @@ double cot(double n) {
 // Acceleration rate calculation
 void SetAccelerationRates(double maxRate) {
   // set the new acceleration rate
+  // set the new goto acceleration rate
   cli();
   StepsForRateChangeAxis1= (sqrt((double)DegreesForAcceleration*(double)StepsPerDegreeAxis1))*maxRate;
   StepsForRateChangeAxis2= (sqrt((double)DegreesForAcceleration*(double)StepsPerDegreeAxis2))*maxRate;
   sei();
+
+  // slewSpeed is in degrees per second
   slewSpeed=(1000000.0/(maxRate/16L))/StepsPerDegreeAxis1;
 }
 
