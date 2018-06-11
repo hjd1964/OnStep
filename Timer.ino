@@ -127,7 +127,7 @@ ISR(TIMER1_COMPA_vect)
         StepperModeGoto();
 
         // at higher step rates where torque is reduced make smaller rate changes
-        double r=1.2-sqrt((abs(guideTimerRateAxis1A)/slewRateX));
+        double r=1.2-sqrt((abs(guideTimerRateAxis1A)/SlewRateX));
         if (r<0.2) r=0.2; if (r>1.2) r=1.2;
 
         // acceleration/deceleration control
@@ -168,7 +168,7 @@ ISR(TIMER1_COMPA_vect)
         StepperModeGoto();
 
         // at higher step rates where torque is reduced make smaller rate changes
-        double r=1.2-sqrt((abs(guideTimerRateAxis2A)/slewRateX));
+        double r=1.2-sqrt((abs(guideTimerRateAxis2A)/SlewRateX));
         if (r<0.2) r=0.2; if (r>1.2) r=1.2;
 
         // acceleration/deceleration control
