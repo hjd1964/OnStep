@@ -39,10 +39,6 @@
 #define Axis1_M1      16    // Pin 16 (Microstep Mode 1 or SPI SCK)
 #define Axis1_M0      15    // Pin 15 (Microstep Mode 0 or SPI MOSI)
 #define Axis1_EN      14    // Pin 14 (Enable)
-#define Axis1_SDO     18    // Pin 18 (SPI Slave SDO)
-#define Axis1_CS      17    // Pin 17 (SPI Slave CS)
-#define Axis1_SCK     16    // Pin 16 (SPI Slave SCK)
-#define Axis1_SDI     15    // Pin 15 (SPI Slave SDI)
 
 #define Axis2DirPin    2    // Pin  2 (Dir)
 #define Axis2StepPin   3    // Pin  3 (Step)
