@@ -12,7 +12,7 @@
 // The PEC index sense is a 5V logic input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
 #define PecPin        11               // Pin A2
 
-// The limit switch sense is a 5V logic input which uses the internal pull up, shorted to ground it stops gotos/tracking
+// The limit switch sense is a 5V logic input which uses the internal (or external 2k) pull up, shorted to ground it stops gotos/tracking
 #define LimitPin      12               // Pin A3
 
 // The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED

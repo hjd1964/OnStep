@@ -37,7 +37,7 @@
 
 #define Axis2DirPin    2    // Pin  2 (Dir)
 #define Axis2StepPin   3    // Pin  3 (Step)
-#define LimitPin       4    // Pin  4 (The limit switch sense is a logic level input which uses the internal pull up, shorted to ground it stops gotos/tracking)
+#define LimitPin       4    // Pin  4 (The limit switch sense is a logic level input normally pull high (2k resistor,) shorted to ground it stops gotos/tracking)
 #define Axis2_FAULT    Aux2 // Pin  5 (Fault)
 #define Axis2_Aux      Aux2 // Pin  5 (ESP8266 RST or SPI MISO)
 #define Axis2_M2       6    // Pin  6 (Microstep Mode 2 or SPI CS)

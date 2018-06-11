@@ -26,7 +26,7 @@
 #define PecPin        57    // RAMPS AUX1, A-OUT (1=+5V, 2=GND, 3=PEC)
 #define AnalogPecPin  A3    // Note A3 is (57)
 
-// The limit switch sense is a 5V logic input which uses the internal pull up, shorted to ground it stops gotos/tracking
+// The limit switch sense is a 5V logic input which uses the internal (or external 2k) pull up, shorted to ground it stops gotos/tracking
 #define LimitPin       3    // RAMPS X- (1=LMT, 2=GND, 3=+5)
 
 // The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
