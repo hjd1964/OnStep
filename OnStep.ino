@@ -384,7 +384,7 @@ void loop() {
   unsigned long tempMs=millis();
 
   // 1 SECOND TIMED ------------------------------------------------------------------------------------
-  static unsigned long housekeepingTimer=millis();
+  static unsigned long housekeepingTimer=0;
   if ((long)(tempMs-housekeepingTimer)>0) {
     housekeepingTimer=tempMs+1000UL;
 
