@@ -40,23 +40,59 @@
 // STM32 pin PB6 -> SCL on DS3231
 // STM32 pin PB7 -> SDA on DS3231
 
-#if defined(STM32Black_ON)
+#if defined(STM32Blue_ON)
+
+  #define A1EN          PA10
+  #define A1M0          PA9 
+  #define A1M1          PA8 
+  #define A1M2          PB15
+  #define A1MISO        PB14
+  #define A1ST          PB13
+  #define A1DR          PB12
+
+  #define A2EN          PA4  
+  #define A2M0          PA3 
+  #define A2M1          PA2
+  #define A2M2          PA1 
+  #define A2MISO        PA0 
+  #define A2ST          PC15
+  #define A2DR          PC14
+
+  #define S4N           PB5 
+  #define S4S           PB4 
+  #define S4W           PB3
+  #define S4E           PA15
+
+  #define LED           PC13
+  #define TONE          PB9 
+  #define SQW           PB8 
+
+  #define F1EN          PA7 
+  #define F1ST          PB0 
+  #define F1DR          PB1 
+
+  #define SPARE1        PA13
+  #define SPARE2        PA14
+  #define SPARE3        PA5 
+  #define SPARE4        PA6
+
+#elif defined(STM32Black_ON) 
 
   #define A1EN          PA3
   #define A1M0          PA2
   #define A1M1          PA1
   #define A1M2          PA0  
-  #define A1ST          PC13
-  #define A1DR          PB9
-  #define A1MO          PB8
+  #define A1MISO        PC13
+  #define A1ST          PB9
+  #define A1DR          PB8
 
-  #define A2EN          PA10
-  #define A2M0          PA9 
-  #define A2M1          PA8 
-  #define A2M2          PB15
-  #define A2ST          PB14 
-  #define A2DR          PB13
-  #define A2MO          PA15
+  #define A2EN          PA15
+  #define A2M0          PA10
+  #define A2M1          PA9 
+  #define A2M2          PA8  
+  #define A2MISO        PB15 
+  #define A2ST          PB14
+  #define A2DR          PA13
 
   #define S4N           PA7 
   #define S4S           PA6 
@@ -64,51 +100,15 @@
   #define S4E           PA4 
 
   #define LED           PB12
-  #define TONE          PB4 
+  #define TONE          PB1 
   #define SQW           PB5 
 
-  #define F1DR          PB0 
-  #define F1ST          PB1 
-  #define F1EN          PB3
+  #define F1DR          PB4 
+  #define F1ST          PB3 
+  #define F1EN          PB0
 
   #define SPARE1        PA13
   #define SPARE2        PA14
-
-#elif defined(STM32Blue_ON) 
-
-  #define A1EN          PA10
-  #define A1M0          PA9 
-  #define A1M1          PA8 
-  #define A1M2          PB15
-  #define A1ST          PB14
-  #define A1DR          PB13
-  #define A1MO          PB12
-
-  #define A2EN          PA4  
-  #define A2M0          PA3 
-  #define A2M1          PA2
-  #define A2M2          PA1 
-  #define A2ST          PA0 
-  #define A2DR          PC15
-  #define A2MO          PC14
-
-  #define S4N           PA15
-  #define S4S           PB3 
-  #define S4W           PB4
-  #define S4E           PB5
-
-  #define LED           PC13
-  #define TONE          PB9 
-  #define SQW           PB8 
-
-  #define F1DR          PA5 
-  #define F1ST          PA6 
-  #define F1EN          PA7 
-
-  #define SPARE1        PA13
-  #define SPARE2        PA14
-  #define SPARE3        PB0 
-  #define SPARE4        PB1
 
 #else
   #error "Unknown STM32 Board. This pinmap is only for Blue and Black Pill variants"
