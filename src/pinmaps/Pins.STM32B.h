@@ -42,39 +42,39 @@
 
 #if defined(STM32Blue_ON)
 
-  #define A1EN          PA10
-  #define A1M0          PA9 
-  #define A1M1          PA8 
+  #define A1EN          PA12 
+  #define A1M0          PA11  
+  #define A1M1          PA8
   #define A1M2          PB15
-  #define A1MISO        PB14
+  #define A1MISO        PA14
   #define A1ST          PB13
   #define A1DR          PB12
 
-  #define A2EN          PA4  
-  #define A2M0          PA3 
-  #define A2M1          PA2
-  #define A2M2          PA1 
-  #define A2MISO        PA0 
-  #define A2ST          PC15
-  #define A2DR          PC14
+  #define A2EN          PA5  
+  #define A2M0          PA4 
+  #define A2M1          PA3
+  #define A2M2          PA2 
+  #define A2MISO        PA1
+  #define A2ST          PA0
+  #define A2DR          PC15
 
-  #define S4N           PB5 
-  #define S4S           PB4 
-  #define S4W           PB3
-  #define S4E           PA15
+  #define S4N           PA6 
+  #define S4S           PA7
+  #define S4W           PB0
+  #define S4E           PB1
 
   #define LED           PC13
   #define TONE          PB9 
   #define SQW           PB8 
 
-  #define F1EN          PA7 
-  #define F1ST          PB0 
-  #define F1DR          PB1 
+  #define F1EN          PC14
+  #define F1ST          PA14
+  #define F1DR          PA13
 
-  #define SPARE1        PA13
-  #define SPARE2        PA14
-  #define SPARE3        PA5 
-  #define SPARE4        PA6
+  #define SPARE1        PB5   // Unusable
+  #define SPARE2        PB4   // Unusable
+  #define SPARE3        PB3   // Unusable
+  #define SPARE4        PA15  // Unusable
 
 #elif defined(STM32Black_ON) 
 
