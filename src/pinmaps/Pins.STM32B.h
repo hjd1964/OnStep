@@ -42,11 +42,11 @@
 
 #if defined(STM32Blue_ON)
 
-  #define A1EN          PA12 
+  #define A1EN          PA12
   #define A1M0          PA11  
   #define A1M1          PA8
   #define A1M2          PB15
-  #define A1MISO        PA14
+  #define A1MISO        PB14
   #define A1ST          PB13
   #define A1DR          PB12
 
@@ -65,16 +65,17 @@
 
   #define LED           PC13
   #define TONE          PB9 
-  #define SQW           PB8 
+  #define SQW           PB5 
 
   #define F1EN          PC14
   #define F1ST          PA14
   #define F1DR          PA13
 
-  #define SPARE1        PB5   // Unusable
-  #define SPARE2        PB4   // Unusable
-  #define SPARE3        PB3   // Unusable
-  #define SPARE4        PA15  // Unusable
+  #define SPARE1        PB8
+  #define SPARE2        PB3
+
+  #define UNUSABLE1     PA15
+  #define UNUSABLE2     PB4
 
 #elif defined(STM32Black_ON) 
 
@@ -86,9 +87,9 @@
   #define A1ST          PB9
   #define A1DR          PB8
 
-  #define A2EN          PA15
-  #define A2M0          PA10
-  #define A2M1          PA9 
+  #define A2EN          PB3 
+  #define A2M0          PA12
+  #define A2M1          PA11 
   #define A2M2          PA8  
   #define A2MISO        PB15 
   #define A2ST          PB14
@@ -103,12 +104,12 @@
   #define TONE          PB1 
   #define SQW           PB5 
 
-  #define F1DR          PB4 
-  #define F1ST          PB3 
   #define F1EN          PB0
+  #define F1ST          PA14
+  #define F1DR          PA13
 
-  #define SPARE1        PA13
-  #define SPARE2        PA14
+  #define UNUSABLE1     PA15
+  #define UNUSABLE2     PB4
 
 #else
   #error "Unknown STM32 Board. This pinmap is only for Blue and Black Pill variants"
