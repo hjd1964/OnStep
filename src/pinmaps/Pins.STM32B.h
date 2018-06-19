@@ -1,41 +1,33 @@
 // -------------------------------------------------------------------------------------------------
 // Pin map for OnStep on STM32
 // 
-// This pin map is for an STM32F103C8T6 "Black Pill" and "Blue Pill" sticks.
-// They run at 72MHz, have 128K flash and 20K RAM
+// This pin map is for an STM32F103C8T6 "Blue Pill" and "Black Pill" boards..
+// They run at 72MHz, with 20K of RAM, and 128K of flash.
 // The Black variant is 3.3V only, while the Blue has some pins that are 5V tolerant.
-// The Black Pill has two less pins than the Blue Pill. The Blue Pill has two flaws
-// with workarounds, wrong resistor interfers with flashing via USB, and a flimsy
-// USB connector. 
+// The Black Pill has two less pins than the Blue Pill.
 //
 // More info, schematic at:
 //   http://wiki.stm32duino.com/index.php?title=Black_Pill
 //   http://wiki.stm32duino.com/index.php?title=Blue_Pill
 //
 // Cost on eBay and AliExpress is less than US $2.50
-//
-// Other boards based on the following chips also have enough flash
-// and RAM for OnStep, and should work, with pin modifications.
-//
-// STM32103VC: 72MHz, 256K flash, 48K RAM
-// STM32103VE: 72MHz, 512K flash, 64K RAM
-// STM32103ZE: 72MHz, 512K flash, 64K RAM
-// STM32103RC: 72MHz, 256K flash, 48K RAM
-// STM32103RE: 72MHz, 512K flash, 64K RAM
 
 #if defined(__STM32F1__)
 
+// === Pins for USB 
+// In HAL, Serial_A is mapped to USART1, with the following pins:
+// STM32 pin PA9  TX -> RX on CP2102 UART to TTL board
+// STM32 pin PA10 RX -> TX on CP2102 UART to TTL board
+
 // === Pins for WiFi
-// In HAL, Serial_B is mapped to USART3, with the following
-// pins. If you change HAL, this will change:
+// In HAL, Serial_B is mapped to USART3, with the following pins:
 //
 // STM32 pin PB10 TX -> RX on ESP8266
 // STM32 pin PB11 RX -> TX on ESP8266
 
 // === Pins for DS3231 RTC/EEPROM
-// Without an EEPROM, the STM32 cannot work. The best EEPROM is
-// a DS3231 module that has an EEPROM chip in it. HAL takes care
-// of its address and size:
+// The STM32 has no built in EEPROM. Therefore, we use a DS3231 RTC module 
+// which has an EEPROM chip on the board. HAL takes care of its address and size:
 //
 // STM32 pin PB6 -> SCL on DS3231
 // STM32 pin PB7 -> SDA on DS3231
@@ -123,7 +115,7 @@
 #define Axis1_M2        A1M2   // Microstep Mode 2
 #define Axis1StepPin    A1ST   // Step
 #define Axis1DirPin     A1DR   // Motor Direction
-#define Axis1_Aux       A1MO   // Aux - ESP8266 GPIO0 or SPI MISO
+#define Axis1_Aux       A1MISO // Aux - ESP8266 GPIO0 or SPI MISO
 //#define Axis1_FAULT   Undefined    // Fault
 
 #define Axis2_EN        A2EN   // Enable
@@ -132,7 +124,7 @@
 #define Axis2_M2        A2M2   // Microstep Mode 2
 #define Axis2StepPin    A2ST   // Step
 #define Axis2DirPin     A2DR   // Motor Direction
-#define Axis2_Aux       A2MO   // Aux - ESP8266 RST or SPI MISO
+#define Axis2_Aux       A2MISO // Aux - ESP8266 RST or SPI MISO
 //#define Axis2_FAULT   Undefined    // Fault
 
 // ST4 interface
@@ -158,12 +150,12 @@
 #define Axis4_EN        F1EN   // Step
 
 // For focuser2 stepper driver
-//#define Axis5DirPin     F2DR   // Dir
-//#define Axis5StepPin    F2ST   // Step
+//#define Axis5DirPin   Undefined   // Dir
+//#define Axis5StepPin  Undefined   // Step
 
 // For rotator stepper driver
-//#define Axis5DirPin   PB4    // Dir
-//#define Axis5StepPin  PB5    // Step
+//#define Axis5DirPin   Undefined   // Dir
+//#define Axis5StepPin  Undefined   // Step
 
 // The limit switch sense is a logic level input which uses the internal pull up,
 // shorted to ground it stops gotos/tracking
