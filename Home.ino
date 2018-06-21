@@ -70,11 +70,8 @@ int goHome(boolean fast) {
 #else
   char a2; if (digitalRead(Axis2_HOME)==HIGH) a2='s'; else a2='n';
 #endif
-  if (pierSide==PierSideNone) {
-    pierSide=PierSideEast;
-    defaultDirAxis2=defaultDirAxis2EInit;
-  }
-  if (pierSide==PierSideWest) { if (a2=='n') a2='s'; else a2='n'; }
+
+  if (getInstrPierSide()==PierSideWest) { if (a2=='n') a2='s'; else a2='n'; }
   
   // attach interrupts to stop guide
   attachInterrupt(digitalPinToInterrupt(Axis1_HOME), StopAxis1, CHANGE);
@@ -100,20 +97,8 @@ int goHome(boolean fast) {
   }
 
 #else
-  cli();
-  if (pierSide==PierSideWest) targetAxis1.part.m=-(long)(celestialPoleAxis1*(double)StepsPerDegreeAxis1)-indexAxis1Steps; else targetAxis1.part.m=(long)(celestialPoleAxis1*(double)StepsPerDegreeAxis1)-indexAxis1Steps; targetAxis1.part.f=0;
-  targetAxis2.part.m=(long)(celestialPoleAxis2*(double)StepsPerDegreeAxis2)-indexAxis2Steps; targetAxis2.part.f=0;
-  startAxis1=posAxis1;
-  startAxis2=posAxis2;
-    
-  abortTrackingState=trackingState;
-  lastTrackingState=TrackingNone;
-  trackingState=TrackingMoveTo; SiderealClockSetInterval(siderealInterval);
-  sei();
-
+  goTo(celestialPoleAxis1,celestialPoleAxis2,celestialPoleAxis1,celestialPoleAxis2,PierSideEast);
   homeMount=true;
-  
-  StepperModeGoto();
 #endif
   
   return 0;
@@ -156,18 +141,7 @@ int setHome() {
   if (!pecRecorded) pecStatus=IgnorePEC;
 
   // the polar home position
-  startAxis1 = celestialPoleAxis1*(double)StepsPerDegreeAxis1;
-  startAxis2 = celestialPoleAxis2*(double)StepsPerDegreeAxis2;
-  cli();
-  targetAxis1.part.m = startAxis1; targetAxis1.part.f = 0;
-  posAxis1           = startAxis1;
-  trueAxis1          = startAxis1;
-  targetAxis2.part.m = startAxis2; targetAxis2.part.f = 0;
-  posAxis2           = startAxis2;
-  trueAxis2          = startAxis2;
-  blAxis1            = 0;
-  blAxis2            = 0;
-  sei();
+  InitStartPosition();
   
   return 0;
 }

@@ -40,11 +40,9 @@
 // firmware info, these are returned by the ":GV?#" commands
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  1
-
-#define FirmwareVersionMinor  8
-#define FirmwareVersionPatch  "l"     // for example major.minor patch: 1.3c
+#define FirmwareVersionMinor  9
+#define FirmwareVersionPatch  "a"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 2       // internal, for tracking configuration file changes
-
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
 
@@ -66,8 +64,8 @@
 #include "src/lib/St4SerialMaster.h"
 
 // Enable debugging messages on DebugSer -------------------------------------------------------------
-#define DEBUG_OFF              // default=_OFF, use "DEBUG_ON" to activate
-#define DebugSer SerialA       // default=Serial, or Serial1 for example (always 9600 baud)
+#define DEBUG_OFF             // default=_OFF, use "DEBUG_ON" to activate
+#define DebugSer SerialA      // default=SerialA, or SerialB for example (always 9600 baud)
 
 // Helper macros for debugging, with less typing
 #if defined(DEBUG_ON)
@@ -81,6 +79,7 @@
   #define DL(x)
   #define DHL(x,y)
 #endif
+
 // ---------------------------------------------------------------------------------------------------
 
 #include "src/lib/SoftSPI.h"
@@ -94,6 +93,7 @@ tmc2130 tmcAxis2(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
 #endif
 
 #include "Globals.h"
+#include "src/lib/Coord.h"
 
 #include "src/lib/Library.h"
 #include "src/lib/Command.h"
@@ -291,7 +291,7 @@ void loop() {
         // origTargetAxisn isn't used in Alt/Azm mode since meridian flips never happen
         origTargetAxis1.fixed+=fstepAxis1.fixed;
         // don't advance the target during meridian flips
-        if ((pierSide==PierSideEast) || (pierSide==PierSideWest)) {
+        if ((getInstrPierSide()==PierSideEast) || (getInstrPierSide()==PierSideWest)) {
           cli();
           targetAxis1.fixed+=fstepAxis1.fixed;
           targetAxis2.fixed+=fstepAxis2.fixed;
@@ -364,6 +364,9 @@ void loop() {
     double t2=(double)((cs-lst_start)/100.0)/1.00273790935;
     // This just needs to be accurate to the nearest second, it's about 10x better
     UT1=UT1_start+(t2/3600.0);
+
+    // compute the alignment model
+    if (lst%2==0) Align.autoModel(0,false);
   }
 
   // ROTATOR/DEROTATOR/FOCUSERS ------------------------------------------------------------------------
@@ -384,6 +387,13 @@ void loop() {
   last_loop_micros=this_loop_micros;
 
   unsigned long tempMs=millis();
+
+  // 0.5 SECOND TIMED ----------------------------------------------------------------------------------
+  static unsigned long debugTimer=tempMs;
+  if (((long)(tempMs-debugTimer)>0) && (millis()<1200)) {
+    debugTimer=tempMs+500UL;
+    DL(((double)SiderealRate/(double)timerRateAxis1));
+  }
 
   // 1 SECOND TIMED ------------------------------------------------------------------------------------
   static unsigned long housekeepingTimer=0;
@@ -440,24 +450,24 @@ void loop() {
     // SAFETY CHECKS, keeps mount from tracking past the meridian limit, past the UnderPoleLimit, or past the Dec limits
     if (safetyLimitsOn) {
       if (meridianFlip!=MeridianFlipNever) {
-        if (pierSide==PierSideWest) {
-          cli(); long p1=posAxis1+indexAxis1Steps; sei();
-          if (p1>(minutesPastMeridianW*(long)StepsPerDegreeAxis1/4L)) {
+        if (getInstrPierSide()==PierSideWest) {
+          if (getInstrAxis1()>(minutesPastMeridianW/4.0)) {
             if (autoMeridianFlip) {
               if (goToHere(true)) { lastError=ERR_MERIDIAN; trackingState=TrackingNone; }
             } else {
+              DL(getInstrAxis1());
               lastError=ERR_MERIDIAN; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;
             }
           }
         }
-        if (pierSide==PierSideEast) { cli(); if (posAxis1+indexAxis1Steps>(UnderPoleLimit*15L*(long)StepsPerDegreeAxis1)) { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei(); }
+        if (getInstrPierSide()==PierSideEast) { if (getInstrAxis1()>UnderPoleLimit*15.0) { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } }
       } else {
 #ifndef MOUNT_TYPE_ALTAZM
         // when Fork mounted, ignore pierSide and just stop the mount if it passes the UnderPoleLimit
-        cli(); if (posAxis1+indexAxis1Steps>(UnderPoleLimit*15L*(long)StepsPerDegreeAxis1)) { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
+        if (getInstrAxis1()>UnderPoleLimit*15.0) { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
 #else
         // when Alt/Azm mounted, just stop the mount if it passes MaxAzm
-        cli(); if (posAxis1+indexAxis1Steps>((long)MaxAzm*(long)StepsPerDegreeAxis1)) { lastError=ERR_AZM; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } sei();
+        if (getInstrAxis1()>MaxAzm) { lastError=ERR_AZM; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
 #endif
       }
     }

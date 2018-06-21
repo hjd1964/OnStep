@@ -64,9 +64,8 @@ unsigned int StepsTMC2130[LEN_TMC2130][2] = { {1,8}, {2,7}, {4,6}, {8,5}, {16,4}
 #define EE_autoMeridianFlip 25 // 1
 
 #define EE_dfCor       26     // 4
-
-#define EE_trueAxis1   30     // 4
-#define EE_trueAxis2   34     // 4
+#define EE_ax1Cor      30     // 4
+#define EE_ax2Cor      34     // 4
 
 #define EE_dpmE        38     // 1
 #define EE_dpmW        39     // 1
@@ -128,4 +127,15 @@ unsigned int StepsTMC2130[LEN_TMC2130][2] = { {1,8}, {2,7}, {4,6}, {8,5}, {16,4}
 
 // Unique identifier for the current initialization format for NV, do not change
 #define initKey 915307548
+
+#define PierSideNone     0
+#define PierSideEast     1
+#define PierSideWest     2
+#define PierSideBest     3
+#define PierSideFlipWE1  10
+#define PierSideFlipWE2  11
+#define PierSideFlipWE3  12
+#define PierSideFlipEW1  20
+#define PierSideFlipEW2  21
+#define PierSideFlipEW3  22
 

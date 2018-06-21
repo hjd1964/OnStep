@@ -39,16 +39,14 @@ void Init_Startup_Values() {
   fstepAxis2.fixed=0;
   origTargetAxis1.fixed = 0;
   cli();
-  targetAxis1.part.m = 90L*(long)StepsPerDegreeAxis1; targetAxis1.part.f = 0;
-  posAxis1           = 90L*(long)StepsPerDegreeAxis1;
-  trueAxis1          = 90L*(long)StepsPerDegreeAxis1;
-  targetAxis2.part.m = 90L*(long)StepsPerDegreeAxis2; targetAxis2.part.f = 0;
-  posAxis2           = 90L*(long)StepsPerDegreeAxis2;
-  trueAxis2          = 90L*(long)StepsPerDegreeAxis2;
+  targetAxis1.part.m = 0; targetAxis1.part.f = 0;
+  posAxis1           = 0;
+  targetAxis2.part.m = 0; targetAxis2.part.f = 0;
+  posAxis2           = 0;
   sei();
 
   // default values for state variables
-  pierSide            = PierSideNone;
+  pierSideControl     = PierSideNone;
   dirAxis1            = 1;
   dirAxis2            = 1;
   defaultDirAxis2     = defaultDirAxis2EInit;
@@ -67,10 +65,7 @@ void Init_Startup_Values() {
   indexAxis1Steps     = 0;
   indexAxis2          = 0;
   indexAxis2Steps     = 0;
-  #ifdef MOUNT_TYPE_ALTAZM
   Align.init();
-  #endif
-  GeoAlign.init();
 
    // reset meridian flip control
   #ifdef MOUNT_TYPE_GEM
@@ -237,35 +232,24 @@ void Init_ReadNV_Values() {
   // get the site information, if a GPS were attached we would use that here instead
   currentSite=nv.read(EE_currentSite); if (currentSite>3) currentSite=0; // site index is valid?
   latitude=nv.readFloat(EE_sites+(currentSite)*25+0);
-
-#ifdef MOUNT_TYPE_ALTAZM
-  celestialPoleAxis2=AltAzmDecStartPos;
-  if (latitude<0) celestialPoleAxis1=180L; else celestialPoleAxis1=0L;
-#else
-  if (latitude<0) celestialPoleAxis2=-90.0; else celestialPoleAxis2=90.0;
-#endif
   cosLat=cos(latitude/Rad);
   sinLat=sin(latitude/Rad);
   if (latitude>0) defaultDirAxis1 = defaultDirAxis1NCPInit; else defaultDirAxis1 = defaultDirAxis1SCPInit;
   longitude=nv.readFloat(EE_sites+(currentSite)*25+4);
+
+  // the polar home position
+#ifdef MOUNT_TYPE_ALTAZM
+  celestialPoleAxis2=AltAzmDecStartPos;
+  if (latitude<0) celestialPoleAxis1=180.0; else celestialPoleAxis1=0.0;
+#else
+  if (latitude<0) celestialPoleAxis2=-90.0; else celestialPoleAxis2=90.0;
+#endif
+  InitStartPosition();
+
   timeZone=nv.read(EE_sites+(currentSite)*25+8)-128;
   timeZone=decodeTimeZone(timeZone);
   nv.readString(EE_sites+(currentSite)*25+9,siteName);
 
-  // update starting coordinates to reflect NCP or SCP polar home position
-  startAxis1 = celestialPoleAxis1*(double)StepsPerDegreeAxis1;
-  startAxis2 = celestialPoleAxis2*(double)StepsPerDegreeAxis2;
-  cli();
-  targetAxis1.part.m = startAxis1;
-  targetAxis1.part.f = 0;
-  posAxis1           = startAxis1;
-  trueAxis1          = startAxis1;
-  targetAxis2.part.m = startAxis2;
-  targetAxis2.part.f = 0;
-  posAxis2           = startAxis2;
-  trueAxis2          = startAxis2;
-  sei();
-  
   // get date and time from EEPROM, start keeping time
   JD=nv.readFloat(EE_JD);
   LMT=nv.readFloat(EE_LMT);
@@ -341,6 +325,22 @@ void Init_ReadNV_Values() {
   // set the default guide rate, 24x sidereal
   setGuideRate(GuideRate24x);
   enableGuideRate(GuideRate24x);
+}
+
+// the polar home position
+void InitStartPosition() {
+  startAxis1 = 0;
+  startAxis2 = 0;
+  cli();
+  targetAxis1.part.m = 0; targetAxis1.part.f = 0;
+  posAxis1           = 0;
+  targetAxis2.part.m = 0; targetAxis2.part.f = 0;
+  posAxis2           = 0;
+  blAxis1            = 0;
+  blAxis2            = 0;
+  sei();
+  setIndexAxis1(celestialPoleAxis1,PierSideEast);
+  setIndexAxis2(celestialPoleAxis2,PierSideEast);
 }
 
 void Init_WriteNV_Values() {

@@ -86,8 +86,7 @@ volatile boolean wasInbacklashAxis2=false;
 volatile boolean gotoRateAxis1=false;
 volatile boolean gotoRateAxis2=false;
 volatile byte cnt=0;
-volatile double guideTimerRateAxis1A=0.0;
-volatile double guideTimerRateAxis2A=0.0;
+
 volatile long timerLastPosAxis2=0;
 volatile byte guideDirChangeTimerAxis1=0;
 volatile byte lastGuideDirAxis1=0;
@@ -267,7 +266,7 @@ ISR(TIMER3_COMPA_vect)
   // switch micro-step mode
   if (gotoModeAxis1!=gotoRateAxis1) {
     // only when at an allowed position
-    if ((gotoModeAxis1) || (((posAxis1+blAxis1)-trueAxis1)%AXIS1_STEP_GOTO==0)) {
+    if ((gotoModeAxis1) || ((posAxis1+blAxis1)%AXIS1_STEP_GOTO==0)) {
       // switch mode
       if (gotoModeAxis1) { stepAxis1=1; modeAxis1_next=AXIS1_MODE; gotoModeAxis1=false; } else { stepAxis1=AXIS1_STEP_GOTO; modeAxis1_next=AXIS1_MODE_GOTO; gotoModeAxis1=true; }
       digitalWrite(Axis1_M0,(modeAxis1_next & 1));
@@ -336,7 +335,7 @@ ISR(TIMER4_COMPA_vect)
   // switch micro-step mode
   if (gotoModeAxis2!=gotoRateAxis2) {
     // only when at an allowed position
-    if ((gotoModeAxis2) || (((posAxis2+blAxis2)-trueAxis2)%AXIS2_STEP_GOTO==0)) {
+    if ((gotoModeAxis2) || ((posAxis2+blAxis2)%AXIS2_STEP_GOTO==0)) {
       // switch mode
       if (gotoModeAxis2) { stepAxis2=1; modeAxis2_next=AXIS2_MODE; gotoModeAxis2=false; } else { stepAxis2=AXIS2_STEP_GOTO; modeAxis2_next=AXIS2_MODE_GOTO; gotoModeAxis2=true; }
       digitalWrite(Axis2_M0,(modeAxis2_next & 1));

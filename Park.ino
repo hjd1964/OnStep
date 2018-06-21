@@ -3,23 +3,17 @@
 
 // sets the park postion as the current position
 boolean setPark() {
-  if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo) && ((pierSide==PierSideNone) || (pierSide==PierSideEast) || (pierSide==PierSideWest))) {
+  if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo) && ((getInstrPierSide()==PierSideNone) || (getInstrPierSide()==PierSideEast) || (getInstrPierSide()==PierSideWest))) {
     lastTrackingState=trackingState;
     trackingState=TrackingNone;
 
-    // store our position as index corrected raw step counts
-    cli();
-    long parkPosAxis1=targetAxis1.part.m+indexAxis1Steps;
-    long parkPosAxis2=targetAxis2.part.m+indexAxis2Steps;
-    sei();
-    nv.writeLong(EE_posAxis1,parkPosAxis1);
-    nv.writeLong(EE_posAxis2,parkPosAxis2);
+    // store our position
+    nv.writeFloat(EE_posAxis1,getInstrAxis1());
+    nv.writeFloat(EE_posAxis2,getInstrAxis2());
+    int p=getInstrPierSide(); if (p==PierSideNone) nv.write(EE_pierSide,PierSideEast); else nv.write(EE_pierSide,p);
 
-    // and remember what side of the pier we're on
-    // if no pier side is set use the default
-    if (pierSide==PierSideNone) nv.write(EE_pierSide,PierSideEast); else nv.write(EE_pierSide,pierSide);
-    parkSaved=true;
-    nv.write(EE_parkSaved,parkSaved);
+    // record our park status
+    parkSaved=true; nv.write(EE_parkSaved,parkSaved);
 
     // and remember what the index corrections are too (etc.)
     saveAlignModel();
@@ -49,17 +43,16 @@ byte park() {
     nv.writeLong(EE_wormSensePos,wormSensePos);
 
     // record our park status
-    int lastParkStatus=parkStatus;
-    parkStatus=Parking;
-    nv.write(EE_parkStatus,parkStatus);
+    int lastParkStatus=parkStatus; 
+    parkStatus=Parking; nv.write(EE_parkStatus,parkStatus);
     
     // get the position we're supposed to park at
-    long a1=nv.readLong(EE_posAxis1)-indexAxis1Steps;
-    long a2=nv.readLong(EE_posAxis2)-indexAxis2Steps;
-    byte gotoPierSide=nv.read(EE_pierSide);
+    double parkTargetAxis1=nv.readFloat(EE_posAxis1);
+    double parkTargetAxis2=nv.readFloat(EE_posAxis2);
+    int parkPierSide=nv.read(EE_pierSide);
 
     // now, goto this target coordinate
-    int gotoStatus=goTo(a1,a2,a1,a2,gotoPierSide);
+    int gotoStatus=goTo(parkTargetAxis1,parkTargetAxis2,parkTargetAxis1,parkTargetAxis2,parkPierSide);
 
     // if failure
     if (gotoStatus!=0) {
@@ -78,10 +71,6 @@ void parkFinish() {
     // success, we're parked
     parkStatus=Parked; nv.write(EE_parkStatus,parkStatus);
   
-    // trueAxisn is used to translate steps to instrument coords and changes with the pier side
-    nv.writeLong(EE_trueAxis1,trueAxis1);
-    nv.writeLong(EE_trueAxis2,trueAxis2);
-  
     // store the pointing model
     saveAlignModel();
   }
@@ -96,12 +85,12 @@ void targetNearestParkPosition() {
   cli(); long parkPosAxis1=targetAxis1.part.m; long parkPosAxis2=targetAxis2.part.m; sei();
   parkPosAxis1-=((long)PARK_MAX_MICROSTEP*2L); 
   for (int l=0; l<(PARK_MAX_MICROSTEP*4); l++) {
-    if ((parkPosAxis1-trueAxis1)%((long)PARK_MAX_MICROSTEP*4L)==0) break;
+    if ((parkPosAxis1)%((long)PARK_MAX_MICROSTEP*4L)==0) break;
     parkPosAxis1++;
   }
   parkPosAxis2-=((long)PARK_MAX_MICROSTEP*2L);
   for (int l=0; l<(PARK_MAX_MICROSTEP*4); l++) {
-    if ((parkPosAxis2-trueAxis2)%((long)PARK_MAX_MICROSTEP*4L)==0) break;
+    if ((parkPosAxis2)%((long)PARK_MAX_MICROSTEP*4L)==0) break;
     parkPosAxis2++;
   }
   cli(); targetAxis1.part.m=parkPosAxis1; targetAxis1.part.f=0; targetAxis2.part.m=parkPosAxis2; targetAxis2.part.f=0; sei();
@@ -185,15 +174,12 @@ boolean unpark() {
         // load the pointing model
         loadAlignModel();
 
-        // where we were supposed to park
-        cli();
-        targetAxis1.part.m=nv.readLong(EE_posAxis1)-indexAxis1Steps; targetAxis1.part.f=0;
-        targetAxis2.part.m=nv.readLong(EE_posAxis2)-indexAxis2Steps; targetAxis2.part.f=0;
-        trueAxis1=nv.readLong(EE_trueAxis1);
-        trueAxis2=nv.readLong(EE_trueAxis2);
-        sei();
+        // where we parked at
+        int parkPierSide=nv.read(EE_pierSide);
+        setTargetAxis1(nv.readFloat(EE_posAxis1),parkPierSide);
+        setTargetAxis2(nv.readFloat(EE_posAxis2),parkPierSide);
 
-        // adjust to the actual park position
+        // adjust to the actual park position (just like we did when we parked)
         targetNearestParkPosition();
         cli();
         posAxis1=targetAxis1.part.m;
@@ -201,10 +187,6 @@ boolean unpark() {
         blAxis1=0;
         blAxis2=0;
         sei();
-
-        // see what side of the pier we're on
-        pierSide=nv.read(EE_pierSide);
-        if (pierSide==PierSideWest) defaultDirAxis2 = defaultDirAxis2WInit; else defaultDirAxis2 = defaultDirAxis2EInit;
 
         // set Meridian Flip behaviour to match mount type
         #ifdef MOUNT_TYPE_GEM
@@ -238,7 +220,7 @@ boolean isParked() {
 
 boolean saveAlignModel() {
   // and store our corrections
-  GeoAlign.writeCoe();
+  Align.writeCoe();
   cli();
   nv.writeFloat(EE_indexAxis1,indexAxis1);
   nv.writeFloat(EE_indexAxis2,indexAxis2);
@@ -254,7 +236,7 @@ boolean loadAlignModel() {
   indexAxis2=nv.readFloat(EE_indexAxis2);
   indexAxis2Steps=(long)(indexAxis2*(double)StepsPerDegreeAxis2);
   sei();
-  GeoAlign.readCoe();
+  Align.readCoe();
   return true;
 }
 

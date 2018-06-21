@@ -115,9 +115,9 @@ bool startGuideAxis2(char direction, int guideRate, long guideDuration) {
     guideDirAxis2=direction;
     guideTimeThisIntervalAxis2=micros();
     guideTimeRemainingAxis2=guideDuration*1000L;
-    cli();
-    if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRateAxis2; else guideTimerRateAxis2=guideTimerBaseRateAxis2; 
-    sei();
+    if (guideDirAxis2=='s') { cli(); guideTimerRateAxis2=-guideTimerBaseRateAxis2; sei(); } 
+    if (guideDirAxis2=='n') { cli(); guideTimerRateAxis2= guideTimerBaseRateAxis2; sei(); }
+    if (getInstrPierSide()==PierSideWest) { cli(); guideTimerRateAxis2=-guideTimerRateAxis2; sei(); }
   } else return false;
   return true;
 }
@@ -153,10 +153,9 @@ bool customGuideRateAxis2(double rate, long guideDuration) {
   if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo) && (axis2Enabled) && (guideDirAxis2)) {
     guideTimeThisIntervalAxis2=micros();
     guideTimeRemainingAxis2=guideDuration*1000L;
-    cli();
-    if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRateAxis2;
-    if (guideDirAxis2=='n') guideTimerRateAxis2=guideTimerBaseRateAxis2; 
-    sei();
+    if (guideDirAxis2=='s') { cli(); guideTimerRateAxis2=-guideTimerBaseRateAxis2; sei(); } 
+    if (guideDirAxis2=='n') { cli(); guideTimerRateAxis2= guideTimerBaseRateAxis2; sei(); }
+    if (getInstrPierSide()==PierSideWest) { cli(); guideTimerRateAxis2=-guideTimerRateAxis2; sei(); }
   } else return false;
   return true;
 }
@@ -359,3 +358,4 @@ void ST4() {
 #endif
 #endif
 }
+

@@ -3,6 +3,9 @@
 
 #pragma once
 
+volatile double guideTimerRateAxis1A=0.0;
+volatile double guideTimerRateAxis2A=0.0;
+
 // Time keeping ------------------------------------------------------------------------------------------------------------
 long siderealTimer    = 0;           // counter to issue steps during tracking
 long PecSiderealTimer = 0;           // time since worm wheel zero index for PEC
@@ -118,18 +121,17 @@ double longitude = 0.0;
 
 // Coordinates -------------------------------------------------------------------------------------------------------------
 #ifdef MOUNT_TYPE_GEM
-long celestialPoleAxis1  = 90L;
+double celestialPoleAxis1  = 90.0;
 #endif
 #if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT) || defined(MOUNT_TYPE_ALTAZM)
-long celestialPoleAxis1  = 0L;
+double celestialPoleAxis1  = 0.0;
 #endif
 double celestialPoleAxis2 = 90.0;
 // either 0 or (fabs(latitude))
 #define AltAzmDecStartPos (fabs(latitude))
 
-volatile long posAxis1   = 90L*(long)StepsPerDegreeAxis1;// hour angle position in steps
-long trueAxis1           = 90L*(long)StepsPerDegreeAxis1;// correction to above for motor shaft position steps
-volatile long startAxis1 = 90L*(long)StepsPerDegreeAxis1;// hour angle of goto start position in steps
+volatile long posAxis1   = 0;                            // hour angle position in steps
+volatile long startAxis1 = 0;                            // hour angle of goto start position in steps
 volatile fixed_t targetAxis1;                            // hour angle of goto end   position in steps
 volatile byte dirAxis1   = 1;                            // stepping direction + or -
 double newTargetRA       = 0.0;                          // holds the RA for goTos
@@ -140,9 +142,8 @@ volatile long stepAxis1=1;
 #define stepAxis1 1
 #endif
 
-volatile long posAxis2   = 90L*(long)StepsPerDegreeAxis2;// declination position in steps
-long trueAxis2           = 90L*(long)StepsPerDegreeAxis2;// correction to above for motor shaft position steps
-volatile long startAxis2 = 90L*(long)StepsPerDegreeAxis2;// declination of goto start position in steps
+volatile long posAxis2   = 0;                            // declination position in steps
+volatile long startAxis2 = 0;                            // declination of goto start position in steps
 volatile fixed_t targetAxis2;                            // declination of goto end   position in steps
 volatile byte dirAxis2   = 1;                            // stepping direction + or -
 double newTargetDec      = 0.0;                          // holds the Dec for goTos
@@ -209,18 +210,7 @@ byte meridianFlip = MeridianFlipNever;
 byte meridianFlip = MeridianFlipNever;
 #endif
 
-#define PierSideNone     0
-#define PierSideEast     1
-#define PierSideWest     2
-#define PierSideBest     3
-#define PierSideFlipWE1  10
-#define PierSideFlipWE2  11
-#define PierSideFlipWE3  12
-#define PierSideFlipEW1  20
-#define PierSideFlipEW2  21
-#define PierSideFlipEW3  22
-byte pierSide            = PierSideNone;
-
+byte pierSideControl = PierSideNone;
 enum PreferredPierSide {PPS_BEST,PPS_EAST,PPS_WEST};
 PreferredPierSide preferredPierSide = PPS_BEST;
 

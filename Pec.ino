@@ -19,7 +19,7 @@ void Pec() {
   // PEC is only active when we're tracking at the sidereal rate with a guide rate that makes sense
 
   // keep track of our current step position, and when the step position on the worm wraps during playback
-  cli(); long pecPos=(long)targetAxis1.part.m-trueAxis1; sei();
+  cli(); long pecPos=(long)targetAxis1.part.m; sei();
   
   #ifdef PEC_SENSE_OFF
     wormSensedFirst=true;
