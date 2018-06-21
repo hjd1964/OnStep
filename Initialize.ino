@@ -2,6 +2,44 @@
 // Functions for initializing pins, variables, and timers on startup
 
 void Init_Startup_Values() {
+  
+// Basic stepper driver mode setup
+// if we made through validation and AXIS1_DRIVER_MODEL exists; AXIS2_DRIVER_MODEL, AXIS1_MICROSTEPS, and AXIS2_MICROSTEPS also exist and passed validation in the pre-processor
+#ifdef AXIS1_DRIVER_MODEL
+  // translate microsteps to mode bits
+  Axis1_Microsteps = TranslateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_MICROSTEPS)|TMC_AXIS1_MODE; // if this isn't a TMC2130 stepper driver TMC_AXISn_MODE, etc. = 0
+  Axis2_Microsteps = TranslateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_MICROSTEPS)|TMC_AXIS2_MODE;
+  #ifdef AXIS1_MICROSTEPS_GOTO
+    Axis1_MicrostepsGoto = TranslateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_MICROSTEPS_GOTO)|TMC_AXIS1_MODE_GOTO;
+  #endif
+  #ifdef AXIS2_MICROSTEPS_GOTO
+    Axis2_MicrostepsGoto = TranslateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_MICROSTEPS_GOTO)|TMC_AXIS2_MODE_GOTO;
+  #endif
+#endif
+
+
+/* debugging
+  delay(2000);
+  Serial.begin(9600);
+  delay(1000);
+  
+  Serial.println("A reminder: TMC_LOWPWR=64, TMC_STEALTHCHOP=32");
+
+  Serial.print("AXIS1_MODE=");
+  Serial.print(AXIS1_MODE);
+  Serial.print(", AXIS1_MODE_GOTO=");
+  Serial.print(AXIS1_MODE_GOTO);
+  Serial.print(", AXIS1_STEP_GOTO=");
+  Serial.println(AXIS1_STEP_GOTO);
+
+  Serial.print("AXIS2_MODE=");
+  Serial.print(AXIS2_MODE);
+  Serial.print(", AXIS2_MODE_GOTO=");
+  Serial.print(AXIS2_MODE_GOTO);
+  Serial.print(", AXIS2_STEP_GOTO=");
+  Serial.println(AXIS2_STEP_GOTO);
+*/
+
   // initialize some fixed-point values
   amountGuideAxis1.fixed=0;
   amountGuideAxis2.fixed=0;
@@ -87,6 +125,9 @@ void Init_Startup_Values() {
 }
 
 void Init_Pins() {
+// ------------------------------------------------------------------
+// ESP-01 (ESP8266) firmware flashing control
+
 #ifdef ESP8266_CONTROL_ON
   pinMode(Axis1_Aux,OUTPUT);                // ESP8266 GPIO0
   digitalWrite(Axis1_Aux,HIGH); delay(20);  // Run mode
@@ -95,115 +136,54 @@ void Init_Pins() {
   digitalWrite(Axis2_Aux,HIGH);             // Reset, inactive HIGH
 #endif
 
-// initialize the stepper control pins Axis1 and Axis2
-  pinMode(Axis1StepPin,OUTPUT);
-  pinMode(Axis1DirPin,OUTPUT); 
-#ifdef Axis2GndPin
-  pinMode(Axis2GndPin,OUTPUT);
-  digitalWrite(Axis2GndPin,LOW);
-#endif
-  pinMode(Axis2StepPin,OUTPUT); 
-  pinMode(Axis2DirPin,OUTPUT); 
+// ------------------------------------------------------------------
+// LED and audible feedback
 
-#ifdef ROTATOR_ON
-  pinMode(Axis3StepPin,OUTPUT);
-  pinMode(Axis3DirPin,OUTPUT);
-#endif
-#ifdef FOCUSER1_ON
-  pinMode(Axis4StepPin,OUTPUT);
-  pinMode(Axis4DirPin,OUTPUT); 
-#endif
-#ifdef FOCUSER2_ON
-  pinMode(Axis5StepPin,OUTPUT);
-  pinMode(Axis5DirPin,OUTPUT); 
-#endif
-
-// override any status LED and set the reset pin HIGH
-#if defined(W5100_ON) && defined(__ARM_Teensy3__)
 #ifdef STATUS_LED_PINS_ON
-#undef STATUS_LED_PINS_ON
-#endif
-#ifdef STATUS_LED_PINS
-#undef STATUS_LED_PINS
-#endif
-  pinMode(RstPin,OUTPUT);
-  digitalWrite(RstPin,LOW);
-  delay(500);
-  digitalWrite(RstPin,HIGH);
-#endif
-
-// light status LED (provides GND)
-#ifdef STATUS_LED_PINS_ON
-  pinMode(LEDnegPin,OUTPUT);
-  digitalWrite(LEDnegPin,LOW);
-// sometimes +5v is provided on a pin
+  pinMode(LEDnegPin,OUTPUT); digitalWrite(LEDnegPin,LOW);  // light status LED (provides GND)
 #ifdef LEDposPin
-  pinMode(LEDposPin,OUTPUT);
-  digitalWrite(LEDposPin,HIGH);
+  pinMode(LEDposPin,OUTPUT); digitalWrite(LEDposPin,HIGH); // sometimes +5v is provided on a pin
 #endif
   LED_ON=true;
 #endif
 
-// light status LED (provides pwm'd GND for polar reticule)
 #ifdef STATUS_LED_PINS
-  pinMode(LEDnegPin,OUTPUT);
-  digitalWrite(LEDnegPin,LOW);
-// sometimes +5v is provided on a pin
+  pinMode(LEDnegPin,OUTPUT); digitalWrite(LEDnegPin,LOW);  // light status LED (provides pwm'd GND for polar reticule)
 #ifdef LEDposPin
-  pinMode(LEDposPin,OUTPUT);
-  digitalWrite(LEDposPin,HIGH);
+  pinMode(LEDposPin,OUTPUT); digitalWrite(LEDposPin,HIGH); // sometimes +5v is provided on a pin
 #endif
   analogWrite(LEDnegPin,STATUS_LED_PINS);
   LED_ON=true;
 #endif
 
-// light reticule LED
 #ifdef RETICULE_LED_PINS
-#if defined(__ARM_Teensy3__) && !defined(MiniPCB_ON) && !defined(MaxPCB_ON)
-  #ifdef STATUS_LED_PINS_ON
-    #undef STATUS_LED_PINS_ON
-  #endif
-  #ifdef STATUS_LED_PINS
-    #undef STATUS_LED_PINS
-  #endif
-#endif
-  pinMode(ReticulePin,OUTPUT);
-  analogWrite(ReticulePin,reticuleBrightness);
+  pinMode(ReticulePin,OUTPUT); analogWrite(ReticulePin,reticuleBrightness); // light reticule LED
 #endif
 
-// light second status LED (provides just GND)
 #ifdef STATUS_LED2_PINS_ON
-  pinMode(LEDneg2Pin,OUTPUT);
-  digitalWrite(LEDneg2Pin,LOW);
+  pinMode(LEDneg2Pin,OUTPUT); digitalWrite(LEDneg2Pin,LOW); // light second status LED (provides just GND)
   LED2_ON=false;
-#endif
-// light second status LED (provides pwm'd GND for polar reticule)
-#ifdef STATUS_LED2_PINS
-  pinMode(LEDneg2Pin,OUTPUT);
-  digitalWrite(LEDneg2Pin,LOW);
+#elif defined(STATUS_LED2_PINS)
+  pinMode(LEDneg2Pin,OUTPUT); digitalWrite(LEDneg2Pin,LOW); // light second status LED (provides pwm'd GND for polar reticule)
   analogWrite(LEDneg2Pin,STATUS_LED2_PINS);
 #endif
 
 // ready the sound/buzzer pin
-#ifndef BUZZER_OFF
+#if defined(BUZZER) || defined(BUZZER_ON)
   pinMode(TonePin,OUTPUT);
   digitalWrite(TonePin,LOW);
 #endif
 
-// provide 5V power to stepper drivers if requested
-#ifdef POWER_SUPPLY_PINS_ON  
-  pinMode(Axis15vPin,OUTPUT);
-  digitalWrite(Axis15vPin,HIGH);
-  pinMode(Axis25vPin,OUTPUT);
-  digitalWrite(Axis25vPin,HIGH);
-#endif
+// ------------------------------------------------------------------
+// Misc. devices and sensors
 
 // PEC index sense
 #ifdef PEC_SENSE_ON
   pinMode(PecPin,INPUT);
-#endif
-#ifdef PEC_SENSE_PULLUP
+#elif defined(PEC_SENSE_PULLUP)
   pinMode(PecPin,INPUT_PULLUP);
+#elif defined(PEC_SENSE_PULLDOWN)
+  pinMode(PecPin,INPUT_PULLDOWN);
 #endif
 
 // limit switch sense
@@ -217,85 +197,90 @@ void Init_Pins() {
   pinMode(ST4RAe,INPUT);
   pinMode(ST4DEn,INPUT);
   pinMode(ST4DEs,INPUT);
-#endif
-#ifdef ST4_PULLUP
+#elif defined(ST4_PULLUP)
   pinMode(ST4RAw,INPUT_PULLUP);
   pinMode(ST4RAe,INPUT_PULLUP);
   pinMode(ST4DEn,INPUT_PULLUP);
   pinMode(ST4DEs,INPUT_PULLUP);
 #endif
 
+// Pulse per second
+#ifdef PPS_SENSE_ON
+  pinMode(PpsPin,INPUT);
+  attachInterrupt(digitalPinToInterrupt(PpsPin),ClockSync,RISING);
+#elif defined(PPS_SENSE_PULLUP)
+  pinMode(PpsPin,INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(PpsPin),ClockSync,RISING);
+#endif
+
+// ------------------------------------------------------------------
+// Stepper driver control
+
+  pinMode(Axis1StepPin,OUTPUT);   // Axis1
+  pinMode(Axis1DirPin,OUTPUT); 
+// provide 5V power to stepper drivers if requested (classic Pin-map)
+#ifdef POWER_SUPPLY_PINS_ON
+  pinMode(Axis15vPin,OUTPUT);
+  digitalWrite(Axis15vPin,HIGH);
+  pinMode(Axis25vPin,OUTPUT);     // Axis2
+  digitalWrite(Axis25vPin,HIGH);
+#endif
+// provide Gnd on next to the Dec stepper pins if requested (classic Pin-map)
+#ifdef Axis2GndPin
+  pinMode(Axis2GndPin,OUTPUT);
+  digitalWrite(Axis2GndPin,LOW);
+#endif
+  pinMode(Axis2StepPin,OUTPUT); 
+  pinMode(Axis2DirPin,OUTPUT); 
+#ifdef ROTATOR_ON
+  pinMode(Axis3StepPin,OUTPUT);   // Axis3
+  pinMode(Axis3DirPin,OUTPUT);
+#endif
+#ifdef FOCUSER1_ON
+  pinMode(Axis4StepPin,OUTPUT);   // Axis4
+  pinMode(Axis4DirPin,OUTPUT); 
+#endif
+#ifdef FOCUSER2_ON
+  pinMode(Axis5StepPin,OUTPUT);   // Axis5
+  pinMode(Axis5DirPin,OUTPUT); 
+#endif
+
 // inputs for stepper drivers fault signal
-#ifndef AXIS1_FAULT_OFF
-  #if defined(__ARM_Teensy3__) && (defined(ALLOW_DRIVER_FAULT_PULLUP_PULLDOWN))
-    #ifdef AXIS1_FAULT_LOW
-      pinMode(Axis1_FAULT,INPUT_PULLUP);
-    #endif
-    #ifdef AXIS1_FAULT_HIGH
-      pinMode(Axis1_FAULT,INPUT_PULLDOWN);
-    #endif
+#ifdef AXIS1_FAULT_LOW
+  pinMode(Axis1_FAULT,INPUT_PULLUP);
+#elif defined(AXIS1_FAULT_HIGH)
+  #ifdef INPUT_PULLDOWN
+  pinMode(Axis1_FAULT,INPUT_PULLDOWN);
   #else
-    pinMode(Axis1_FAULT,INPUT);
+  pinMode(Axis1_FAULT,INPUT);
   #endif
 #endif
-#ifndef AXIS2_FAULT_OFF
-  #if defined(__ARM_Teensy3__) && defined(ALLOW_DRIVER_FAULT_PULLUP_PULLDOWN)
-    #ifdef AXIS2_FAULT_LOW
-      pinMode(Axis2_FAULT,INPUT_PULLUP);
-    #endif
-    #ifdef AXIS1_FAULT_HIGH
-      pinMode(Axis2_FAULT,INPUT_PULLDOWN);
-    #endif
+#ifdef AXIS2_FAULT_LOW
+  pinMode(Axis2_FAULT,INPUT_PULLUP);
+#elif defined(AXIS1_FAULT_HIGH)
+  #ifdef INPUT_PULLDOWN
+  pinMode(Axis2_FAULT,INPUT_PULLDOWN);
   #else
-    pinMode(Axis2_FAULT,INPUT);
+  pinMode(Axis2_FAULT,INPUT);
   #endif
 #endif
-  
-  // initialize and disable the stepper drivers
+
+// initialize and disable the stepper drivers
   pinMode(Axis1_EN,OUTPUT); 
   pinMode(Axis2_EN,OUTPUT);
   StepperModeTrackingInit();
 
-  // turn on the Rotator/Focuser stepper drivers (LOW)
-  #ifdef Axis3_EN
+// turn on the Rotator/Focuser stepper drivers (LOW)
+#ifdef Axis3_EN
     pinMode(Axis3_EN,OUTPUT); 
-  #endif
-  #ifdef Axis4_EN
+#endif
+#ifdef Axis4_EN
     pinMode(Axis4_EN,OUTPUT); 
-  #endif
-  #ifdef Axis5_EN
+#endif
+#ifdef Axis5_EN
     pinMode(Axis5_EN,OUTPUT); 
-  #endif
-
-// if the stepper driver mode select pins are wired in, program any requested micro-step mode
-#if !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
-  // automatic mode switching during slews, initialize micro-step mode
-  #ifdef AXIS1_MODE
-    if ((AXIS1_MODE & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE    & 1)); } else { pinMode(Axis1_M0,INPUT); }
-    if ((AXIS1_MODE & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE>>1 & 1)); } else { pinMode(Axis1_M1,INPUT); }
-    if ((AXIS1_MODE & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE>>2 & 1)); } else { pinMode(Axis1_M2,INPUT); }
-  #endif
-  
-  #ifdef AXIS2_MODE
-    if ((AXIS2_MODE & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE    & 1)); } else { pinMode(Axis2_M0,INPUT); }
-    if ((AXIS2_MODE & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE>>1 & 1)); } else { pinMode(Axis2_M1,INPUT); }
-    if ((AXIS2_MODE & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE>>2 & 1)); } else { pinMode(Axis2_M2,INPUT); }
-  #endif
 #endif
 
-#ifdef PPS_SENSE_ON
-  pinMode(PpsPin,INPUT);
-#endif
-#ifdef PPS_SENSE_PULLUP
-  pinMode(PpsPin,INPUT_PULLUP);
-#endif
-#if defined(PPS_SENSE_ON) || defined(PPS_SENSE_PULLUP)
-#if defined(__AVR_ATmega2560__)
-  attachInterrupt(PpsInt,ClockSync,RISING);
-#elif defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__) || defined(__ARM_STM32__)
-  attachInterrupt(PpsPin,ClockSync,RISING);
-#endif
-#endif
 }
 
 void Init_ReadEEPROM_Values() {
@@ -441,7 +426,7 @@ void Init_EEPROM_Values() {
 
     // init the min and max altitude
     minAlt=-10;
-    maxAlt=85;
+    maxAlt=80;
     EEPROM.write(EE_minAlt,minAlt+128);
     EEPROM.write(EE_maxAlt,maxAlt);
   
@@ -486,150 +471,14 @@ void Init_EEPROM_Values() {
 }
 
 void Init_Start_Timers() {
-#if defined(__ARM_TI_TM4C__)
-  // need to initialise timers before using SetSiderealClockRate
-  // all timers are 32 bits
-  // timer 1A is used instead of itimer1
-  // timer 2A is used instead of itimer3
-  // timer 3A is used instead of itimer4
-
-  // Enable Timer 1 Clock
-  SysCtlPeripheralEnable(Sysctl_Periph_Timer1);
-
-  // Configure Timer Operation as Periodic
-  TimerConfigure(Timer1_base, TIMER_CFG_PERIODIC);
-
-  // register interrupt without editing the startup Energia file
-  //IntRegister( INT_TIMER1A, TIMER1_COMPA_vect );
-  TimerIntRegister(Timer1_base, TIMER_A, TIMER1_COMPA_vect );
-
-  // Enable Timer 1A interrupt
-  IntEnable(Int_timer1);
-
-  // Timer 1A generate interrupt when Timeout occurs
-  TimerIntEnable(Timer1_base, TIMER_TIMA_TIMEOUT);
-
-  // Configure Timer Frequency - initialize the timers that handle the sidereal clock, RA, and Dec
-  SetSiderealClockRate(siderealInterval);
-
-  // Start Timer 1A
-  TimerEnable(Timer1_base, TIMER_A);
-
-  // we also initialise timer 2A and 3A here as they may get used uninitialised from
-  // the interrupt for timer 1 if it gets triggered in the meantime
-  // we will not start them yet though
-
-  // Enable Timer 2 and 3 Clocks
-  SysCtlPeripheralEnable(Sysctl_Periph_Timer3);
-  SysCtlPeripheralEnable(Sysctl_Periph_Timer4);
-
-  // Configure Timer Operation as Periodic
-  TimerConfigure(Timer3_base, TIMER_CFG_PERIODIC);
-  TimerConfigure(Timer4_base, TIMER_CFG_PERIODIC);
-
-  // register interrupts without editing the startup Energia file
-  //IntRegister( INT_TIMER2A, TIMER3_COMPA_vect );
-  //IntRegister( INT_TIMER3A, TIMER4_COMPA_vect );
-  TimerIntRegister(Timer3_base, TIMER_A, TIMER3_COMPA_vect );
-  TimerIntRegister(Timer4_base, TIMER_A, TIMER4_COMPA_vect );
-
-  // Enable Timer 2A and 3A interrupts
-  IntEnable(Int_timer3);
-  IntEnable(Int_timer4);
-
-  // Timer 2A and 3A generate interrupt when Timeout occurs
-  TimerIntEnable(Timer3_base, TIMER_TIMA_TIMEOUT);
-  TimerIntEnable(Timer4_base, TIMER_TIMA_TIMEOUT);
-
-  //IntMasterEnable(); // not sure if needed, it works without
-#else
-  // initialize the timers that handle the sidereal clock, RA, and Dec
-  SetSiderealClockRate(siderealInterval);
-#endif
+  // Initialize the timers that handle the sidereal clock, RA, and Dec
+  HAL_Init_Timer_Sidereal();
 
   // wait for the sidereal clock to tick
   delay(15);
 
-#if defined(__AVR_ATmega2560__)
-  TCCR3B = (1 << WGM12) | (1 << CS11); // ~0 to 0.032 seconds (31 steps per second minimum, granularity of timer is 0.5uS) /8  pre-scaler
-  TCCR3A = 0;
-  TIMSK3 = (1 << OCIE3A);
-
-  TCCR4B = (1 << WGM12) | (1 << CS11); // ~0 to 0.032 seconds (31 steps per second minimum, granularity of timer is 0.5uS) /8  pre-scaler
-  TCCR4A = 0;
-  TIMSK4 = (1 << OCIE4A);
-#elif defined(__ARM_Teensy3__)
-  // set the system timer for millis() to the second highest priority
-  SCB_SHPR3 = (32 << 24) | (SCB_SHPR3 & 0x00FFFFFF);
-
-  itimer3.begin(TIMER3_COMPA_vect, (float)128 * 0.0625);
-  itimer4.begin(TIMER4_COMPA_vect, (float)128 * 0.0625);
-
-  // set the 1/100 second sidereal clock timer to run at the second highest priority
-  NVIC_SET_PRIORITY(IRQ_PIT_CH0, 32);
-  // set the motor timers to run at the highest priority
-  NVIC_SET_PRIORITY(IRQ_PIT_CH1, 0);
-  NVIC_SET_PRIORITY(IRQ_PIT_CH2, 0);
-
-#elif defined(__ARM_STM32__)
-
-  // Pause the timer while we're configuring it
-  itimer3.pause();
-
-  //itimer3.setPrescaleFactor(SMT32_PRESCALER);
-  //itimer3.setOverflow(STM32_OVERFLOW);
-  // Set up period
-  itimer3.setPeriod((float)128 * 0.0625); // in microseconds
-
-  // Set up an interrupt on channel 3
-  itimer3.setChannel3Mode(TIMER_OUTPUT_COMPARE);
-  itimer3.setCompare(TIMER_CH3, 1);  // Interrupt 1 count after each update
-  itimer3.attachInterrupt(TIMER_CH3, TIMER3_COMPA_vect);
-
-  // Refresh the timer's count, prescale, and overflow
-  itimer3.refresh();
-
-  // Start the timer counting
-  itimer3.resume();
-
-  
-  // Pause the timer while we're configuring it
-  itimer4.pause();
-
-  //itimer4.setPrescaleFactor(SMT32_PRESCALER);
-  //itimer4.setOverflow(STM32_OVERFLOW);
-  // Set up period
-  itimer4.setPeriod((float)128 * 0.0625); // in microseconds
-
-  // Set up an interrupt on channel 4
-  itimer4.setChannel4Mode(TIMER_OUTPUT_COMPARE);
-  itimer4.setCompare(TIMER_CH4, 1);  // Interrupt 1 count after each update
-  itimer4.attachInterrupt(TIMER_CH4, TIMER4_COMPA_vect);
-
-  // Refresh the timer's count, prescale, and overflow
-  itimer4.refresh();
-
-  // Start the timer counting
-  itimer4.resume();
-
-  // set the 1/100 second sidereal clock timer to run at the second highest priority
-  nvic_irq_set_priority(NVIC_TIMER1_CC, 2);
-  // set the motor timers to run at the highest priority
-  nvic_irq_set_priority(NVIC_TIMER3, 0);
-  nvic_irq_set_priority(NVIC_TIMER4, 0);
-
-#elif defined(__ARM_TI_TM4C__)
-  TimerLoadSet(Timer3_base, TIMER_A, (int) (F_BUS / 1000000 * 128 * 0.0625));
-  TimerLoadSet(Timer4_base, TIMER_A, (int) (F_BUS / 1000000 * 128 * 0.0625));
-
-  // Start Timer 2A and 3A
-  TimerEnable(Timer3_base, TIMER_A);
-  TimerEnable(Timer4_base, TIMER_A);
-
-  IntPrioritySet(Int_timer1, 1);
-  IntPrioritySet(Int_timer3, 0);
-  IntPrioritySet(Int_timer4, 0);
-#endif
+  // Initialize Axis1 and Axis2 motor timers and set their priorities
+  HAL_Init_Timers_Motor();
 }
 
 void EnableStepperDrivers() {
@@ -649,4 +498,53 @@ void DisableStepperDrivers() {
     delay(10);
   }
 }
+
+// Basic stepper driver mode setup
+#ifdef AXIS1_DRIVER_MODEL
+
+// different models of stepper drivers have different bit settings for microsteps
+// translate the human readable microsteps in the configuration to modebit settings 
+unsigned int TranslateMicrosteps(int axis, int DriverModel, unsigned int Microsteps) {
+  unsigned int Mode;
+    
+  // we search for each model, since they are different
+  switch(DriverModel) {
+    case A4988:
+      Mode = searchTable(StepsA4988, LEN_A4988, Microsteps);
+      break;
+    case DRV8825:
+      Mode = searchTable(StepsDRV8825, LEN_DRV8825, Microsteps);
+      break;
+    case LV8729:
+      Mode = searchTable(StepsLV8729, LEN_LV8729, Microsteps);
+      break;
+    case TMC2100:
+      Mode = searchTable(StepsTMC2100, LEN_TMC2100, Microsteps);
+      break;
+    case TMC2208:
+      Mode = searchTable(StepsTMC2208, LEN_TMC2208, Microsteps);
+      break;
+    case TMC2130:
+      Mode = searchTable(StepsTMC2130, LEN_TMC2130, Microsteps);
+      break;
+    default:
+      Mode=1;
+  }
+
+  return Mode;
+}
+
+// search function
+unsigned int searchTable(unsigned int Table[][2], int TableLen, unsigned int Microsteps) {
+  int i;
+  
+  for(i = 0; i < TableLen; i++) {
+    if (Table[i][0] == Microsteps) {
+      return Table[i][1];
+    }
+  }
+  
+  return 0;
+}
+#endif
 

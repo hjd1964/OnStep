@@ -63,7 +63,7 @@ bool startGuideAxis1(char direction, int guideRate, long guideDuration) {
     guideTimeThisIntervalAxis1=micros();
     guideTimeRemainingAxis1=guideDuration*1000L;
     cli();
-    if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRate; else guideTimerRateAxis1=guideTimerBaseRate; 
+    if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRateAxis1; else guideTimerRateAxis1=guideTimerBaseRateAxis1; 
     sei();
   } else return false;
   return true;
@@ -84,7 +84,7 @@ bool startGuideAxis2(char direction, int guideRate, long guideDuration) {
     guideTimeThisIntervalAxis2=micros();
     guideTimeRemainingAxis2=guideDuration*1000L;
     cli();
-    if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRate; else guideTimerRateAxis2=guideTimerBaseRate; 
+    if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRateAxis2; else guideTimerRateAxis2=guideTimerBaseRateAxis2; 
     sei();
   } else return false;
   return true;
@@ -97,26 +97,68 @@ void stopGuideAxis2() {
   }
 }
 
+// custom guide rate in RA or Azm, rate is in x-sidereal, guideDuration is in ms (0 to ignore) 
+double guideTimerCustomRateAxis1 = 0.0;
+bool customGuideRateAxis1(double rate, long guideDuration) {
+  guideTimerCustomRateAxis1=rate;
+  enableGuideRate(-1);
+  if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo) && (axis1Enabled) && (guideDirAxis1)) {
+    guideTimeThisIntervalAxis1=micros();
+    guideTimeRemainingAxis1=guideDuration*1000L;
+    cli();
+    if (guideDirAxis1=='e') guideTimerRateAxis1=-guideTimerBaseRateAxis1;
+    if (guideDirAxis1=='w') guideTimerRateAxis1=guideTimerBaseRateAxis1; 
+    sei();
+  } else return false;
+  return true;
+}
+
+// custom guide rate in Dec or Alt, rate is in x-sidereal, guideDuration is in ms (0 to ignore)
+double guideTimerCustomRateAxis2 = 0.0;
+bool customGuideRateAxis2(double rate, long guideDuration) {
+  guideTimerCustomRateAxis2=rate;
+  enableGuideRate(-1);
+  if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo) && (axis2Enabled) && (guideDirAxis2)) {
+    guideTimeThisIntervalAxis2=micros();
+    guideTimeRemainingAxis2=guideDuration*1000L;
+    cli();
+    if (guideDirAxis2=='s') guideTimerRateAxis2=-guideTimerBaseRateAxis2;
+    if (guideDirAxis2=='n') guideTimerRateAxis2=guideTimerBaseRateAxis2; 
+    sei();
+  } else return false;
+  return true;
+}
+
 // sets the rates for guide commands
 void setGuideRate(int g) {
   currentGuideRate=g;
   if ((g<=GuideRate1x) && (currentPulseGuideRate!=g)) { currentPulseGuideRate=g; EEPROM.update(EE_pulseGuideRate,g); }
+  guideTimerCustomRateAxis1=0.0;
+  guideTimerCustomRateAxis2=0.0;
 }
 
 // enables the guide rate
+// -1 to use guideTimerCustomRateAxis1/2, otherwise rates are:
+// 0=.25X 1=.5x 2=1x 3=2x 4=4x 5=8x 6=24x 7=48x 8=half-MaxRate 9=MaxRate
 void enableGuideRate(int g) {
   // don't do these calculations unless we have to
   if (activeGuideRate==g) return;
-  
-  activeGuideRate=g;
 
-  // this enables the guide rate
-  guideTimerBaseRate=(double)(guideRates[g]/15.0);
+  if (g>=0) activeGuideRate=g;
 
-  cli();
-  amountGuideAxis1.fixed=doubleToFixed((guideTimerBaseRate*StepsPerSecondAxis1)/100.0);
-  amountGuideAxis2.fixed=doubleToFixed((guideTimerBaseRate*StepsPerSecondAxis2)/100.0);
-  sei();
+  // this enables the guide rates
+  if (guideTimerCustomRateAxis1!=0.0) {
+    guideTimerBaseRateAxis1=guideTimerCustomRateAxis1;
+  } else {
+    guideTimerBaseRateAxis1=(double)(guideRates[g]/15.0);
+  }
+  if (guideTimerCustomRateAxis2!=0.0) {
+    guideTimerBaseRateAxis2=guideTimerCustomRateAxis2;
+  } else {
+    guideTimerBaseRateAxis2=(double)(guideRates[g]/15.0);
+  }
+  amountGuideAxis1.fixed=doubleToFixed((guideTimerBaseRateAxis1*StepsPerSecondAxis1)/100.0);
+  amountGuideAxis2.fixed=doubleToFixed((guideTimerBaseRateAxis2*StepsPerSecondAxis2)/100.0);
 }
 
 // handle the ST4 interface and hand controller features
@@ -160,9 +202,11 @@ void ST4() {
       static bool altModeB=false;
       static unsigned long altModeShed=0;
       if (c1=='+') stopGuideAxis1(); if (c2=='+') stopGuideAxis2(); // stop any guide that might have been triggered
-      if ((c1=='+') && ((long)(millis()-c1Time)>AltMode_ms) && (!altModeB)) { if (!altModeA) { altModeA=true; soundBeep(); keys_up=false; } altModeShed=millis(); }
-      if ((c2=='+') && ((long)(millis()-c2Time)>AltMode_ms) && (!altModeA)) { if (!altModeB) { altModeB=true; soundBeep(); keys_up=false; } altModeShed=millis(); }
-      if ((trackingState!=TrackingMoveTo) && (!waitingHome) && (altModeA || altModeB) && ((long)(millis()-altModeShed)<Shed_ms)) {
+      if ((trackingState!=TrackingMoveTo) && (!waitingHome)) {
+        if ((c1=='+') && ((long)(millis()-c1Time)>AltMode_ms) && (!altModeB)) { if (!altModeA) { altModeA=true; soundBeep(); keys_up=false; } altModeShed=millis(); }
+        if ((c2=='+') && ((long)(millis()-c2Time)>AltMode_ms) && (!altModeA)) { if (!altModeB) { altModeB=true; soundBeep(); keys_up=false; } altModeShed=millis(); }
+      }
+      if ( (altModeA || altModeB) && ((long)(millis()-altModeShed)<Shed_ms) ) {
         if (keys_up && !cmdWaiting()) {
           if (altModeA) {
             int c=currentGuideRate;
@@ -237,4 +281,3 @@ void ST4() {
     }
 #endif
 }
-

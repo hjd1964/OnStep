@@ -1,20 +1,12 @@
 // -----------------------------------------------------------------------------------
 // Timers and interrupt handling
 
-#if (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__)) || defined(__ARM_STM32__)
-#define ISR(f) void f (void)
-void TIMER1_COMPA_vect(void);
+#ifndef HAL_SLOW_PROCESSOR
+// if we're running the motor timers 2x the MaxRate, these are the variables to keep track of that
 volatile boolean clearAxis1 = true;
 volatile boolean takeStepAxis1 = false;
 volatile boolean clearAxis2 = true;
 volatile boolean takeStepAxis2 = false;
-
-#if defined(__ARM_Teensy3__)
-IntervalTimer itimer1;
-#elif defined(__ARM_STM32__)
-HardwareTimer itimer1(1);
-#endif
-// Energia does not have IntervalTimer so the timers were already initialised in OnStep.ino
 #endif
 
 #if defined(AXIS1_MODE) && defined(AXIS1_MODE_GOTO)
@@ -33,74 +25,21 @@ volatile bool axis2Powered = false;
 #endif
 
 //--------------------------------------------------------------------------------------------------
-// set timer1 to interval (in microseconds*16)
-void Timer1SetInterval(long iv) {
-#if defined(__AVR_ATmega2560__)
-  TCCR1B = 0; TCCR1A = 0;
-  TIMSK1 = 0;
-  iv=iv/PPSrateRatio;
+// Set hardware timer rates
 
-  // set compare match register to desired timer count:
-  if (iv<65536) { TCCR1B |= (1 << CS10); } else {
-  iv=iv/8;
-  if (iv<65536) { TCCR1B |= (1 << CS11); } else {
-  iv=iv/8;
-  if (iv<65536) { TCCR1B |= (1 << CS10); TCCR1B |= (1 << CS11); } else {
-  iv=iv/4;  
-  if (iv<65536) { TCCR1B |= (1 << CS12); } else {
-  iv=iv/4;
-  if (iv<65536) { TCCR1B |= (1 << CS10); TCCR1B |= (1 << CS12); 
-  }}}}}
-  
-  OCR1A = iv-1;
-  // CTC mode
-  TCCR1B |= (1 << WGM12);
-  // timer compare interrupt enable
-  TIMSK1 |= (1 << OCIE1A);
-#elif defined(__ARM_Teensy3__)
-  itimer1.begin(TIMER1_COMPA_vect, (float)iv * 0.0625);
-#elif defined(__ARM_STM32__)
-  // This code is based on the following document
-  //
-  // http://docs.leaflabs.com/static.leaflabs.com/pub/leaflabs/maple-docs/0.0.10/lang/api/hardwaretimer.html#lang-hardwaretimer
-  // And this document:
-  //
-  // http://docs.leaflabs.com/static.leaflabs.com/pub/leaflabs/maple-docs/0.0.12/timers.html
-  // Pause the timer while we're configuring it
-  itimer1.pause();
-
-  //itimer1.setPrescaleFactor(STM32_PRESCALER);
-  //itimer1.setOverflow(STM32_OVERFLOW);
-  // Set up period
-  itimer1.setPeriod((float)iv * 0.0625); // in microseconds
-
-  // Set up an interrupt on channel 1
-  itimer1.setChannel1Mode(TIMER_OUTPUT_COMPARE);
-  itimer1.setCompare(TIMER_CH1, 1);  // Interrupt 1 count after each update
-  itimer1.attachInterrupt(TIMER_CH1, TIMER1_COMPA_vect);
-
-  // Refresh the timer's count, prescale, and overflow
-  itimer1.refresh();
-
-  // Start the timer counting
-  itimer1.resume();
-#elif defined(__ARM_TI_TM4C__)
-  TimerLoadSet(Timer1_base, TIMER_A, (int)(F_BUS/1000000 * iv * 0.0625));
-#endif
-}
-
-// set the master sidereal clock rate, also forces rate update for RA/Dec timer rates so that PPS adjustments take hold immediately
+// set Timer1 master sidereal clock to interval (in microseconds*16)
 volatile long isrTimerRateAxis1=0;
 volatile long isrTimerRateAxis2=0;
 volatile long runTimerRateAxis1=0;
 volatile long runTimerRateAxis2=0;
-void SetSiderealClockRate(long iv) {
-  if (trackingState==TrackingMoveTo) Timer1SetInterval(iv/100); else Timer1SetInterval(iv/300);
-  isrTimerRateAxis1=0;
+void SiderealClockSetInterval(long iv) {
+  if (trackingState==TrackingMoveTo) Timer1SetInterval(iv/100,PPSrateRatio); else Timer1SetInterval(iv/300,PPSrateRatio);
+
+  isrTimerRateAxis1=0; // also force rate update for Axis1/2 timers so that PPS adjustments take hold immediately
   isrTimerRateAxis2=0;
 }
 
-// set timer3 to interval (in microseconds*16), maximum time is about 134 seconds
+// prepare to set Timer3 to interval (in microseconds*16), maximum time is about 134 seconds
 volatile uint32_t nextAxis1Rate = 100000UL;
 volatile uint16_t t3cnt = 0;
 volatile uint16_t t3rep = 1;
@@ -108,19 +47,19 @@ volatile long timerDirAxis1 = 0;
 volatile long thisTimerRateAxis1 = 10000UL;
 volatile boolean fastAxis1 = false;
 void Timer3SetInterval(long iv) {
-#if defined(__AVR_ATmega2560__)
+#ifdef HAL_FIXED_PRESCALE_16BIT_MOTOR_TIMERS
   iv=iv/8L;
   // 0.0327 * 4096 = 134.21s
   uint32_t i=iv; uint16_t t=1; while (iv>65536L) { t*=2; iv=i/t; if (t==4096) { iv=65535L; break; } }
   cli(); nextAxis1Rate=iv-1L; t3rep=t; fastAxis1=(t3rep==1); sei();
-#elif (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__) || defined(__ARM_STM32__)) 
+#else
   // 4.194 * 32 = 134.21s
   uint32_t i=iv; uint16_t t=1; while (iv>65536L*1024L) { t++; iv=i/t; if (t==32) { iv=65535L*1024L; break; } }
-  cli(); nextAxis1Rate=(F_BUS/1000000) * (iv*0.0625) * 0.5 - 1; t3rep=t; fastAxis1=(t3rep==1); sei();
+  cli(); nextAxis1Rate=((F_COMP/1000000.0) * (iv*0.0625) * 0.5 - 1.0); t3rep=t; fastAxis1=(t3rep==1); sei();
 #endif
 }
 
-// set timer4 to interval (in microseconds*16), maximum time is about 134 seconds
+// prepare to set Timer4 to interval (in microseconds*16), maximum time is about 134 seconds
 volatile uint32_t nextAxis2Rate = 100000UL;
 volatile uint16_t t4cnt = 0;
 volatile uint16_t t4rep = 1;
@@ -128,20 +67,20 @@ volatile long timerDirAxis2 = 0;
 volatile long thisTimerRateAxis2 = 10000UL;
 volatile boolean fastAxis2 = false;
 void Timer4SetInterval(long iv) {
-#if defined(__AVR_ATmega2560__)
+#ifdef HAL_FIXED_PRESCALE_16BIT_MOTOR_TIMERS
   iv=iv/8L;
   // 0.0327 * 4096 = 134.21s
   uint32_t i=iv; uint16_t t=1; while (iv>65536L) { t*=2; iv=i/t; if (t==4096) { iv=65535L; break; } }
   cli(); nextAxis2Rate=iv-1L; t4rep=t; fastAxis2=(t4rep==1); sei();
-#elif (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__) || defined(__ARM_STM32__)) 
+#else
   // 4.194 * 32 = 134.21s
   uint32_t i=iv; uint16_t t=1; while (iv>65536L*1024L) { t++; iv=i/t; if (t==32) { iv=65535L*1024L; break; } }
-  cli(); nextAxis2Rate=(F_BUS/1000000) * (iv*0.0625) * 0.5 - 1; t4rep=t; fastAxis2=(t4rep==1); sei();
+  cli(); nextAxis2Rate=((F_COMP/1000000.0) * (iv*0.0625) * 0.5 - 1.0); t4rep=t; fastAxis2=(t4rep==1); sei();
 #endif
 }
 
 //--------------------------------------------------------------------------------------------------
-// Timer1 handles sidereal time and programming the drive rates
+// Timer1 handles sidereal time and setting up the Axis1/2 intervals for later programming
 volatile boolean wasInbacklashAxis1=false;
 volatile boolean wasInbacklashAxis2=false;
 volatile boolean gotoRateAxis1=false;
@@ -155,14 +94,14 @@ volatile byte lastGuideDirAxis1=0;
 volatile byte guideDirChangeTimerAxis2=0;
 volatile byte lastGuideDirAxis2=0;
 
-#if (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__)) || defined(__ARM_STM32__)
-ISR(TIMER1_COMPA_vect)
-#else
+#ifdef HAL_USE_NOBLOCK_FOR_TIMER1
 ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
+#else
+ISR(TIMER1_COMPA_vect)
 #endif
 {
-#if defined(__ARM_TI_TM4C__)
-  TimerIntClear( Timer1_base, TIMER_TIMA_TIMEOUT );
+#ifdef HAL_TIMER1_INT_CLEAR
+  HAL_TIMER1_INT_CLEAR;
 #endif
 
   // run 1/3 of the time at 3x the rate, unless a goto is happening
@@ -187,15 +126,16 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
         // high speed guiding
         StepperModeGoto();
 
-        double r=10.0-sqrt((abs(guideTimerRateAxis1A)/slewRateX)*100.0);
-        if (r<1.0) r=1.0;
+        // at higher step rates where torque is reduced make smaller rate changes
+        double r=1.2-sqrt((abs(guideTimerRateAxis1A)/slewRateX));
+        if (r<0.2) r=0.2; if (r>1.2) r=1.2;
 
         // acceleration/deceleration control
         if ((guideDirAxis1!=lastGuideDirAxis1) && (lastGuideDirAxis1!=0)) guideDirChangeTimerAxis1=25;
         lastGuideDirAxis1=guideDirAxis1;
         if (guideDirChangeTimerAxis1>0) guideDirChangeTimerAxis1--; else {
-          if (guideTimerRateAxis1A>guideTimerRateAxis1) { guideTimerRateAxis1A-=(acc/750.0)*r; if (guideTimerRateAxis1A<guideTimerRateAxis1) guideTimerRateAxis1A=guideTimerRateAxis1; }
-          if (guideTimerRateAxis1A<guideTimerRateAxis1) { guideTimerRateAxis1A+=(acc/750.0)*r; if (guideTimerRateAxis1A>guideTimerRateAxis1) guideTimerRateAxis1A=guideTimerRateAxis1; }
+          if (guideTimerRateAxis1A>guideTimerRateAxis1) { guideTimerRateAxis1A-=(accArcsecPerSec/100.0)*r; if (guideTimerRateAxis1A<guideTimerRateAxis1) guideTimerRateAxis1A=guideTimerRateAxis1; }
+          if (guideTimerRateAxis1A<guideTimerRateAxis1) { guideTimerRateAxis1A+=(accArcsecPerSec/100.0)*r; if (guideTimerRateAxis1A>guideTimerRateAxis1) guideTimerRateAxis1A=guideTimerRateAxis1; }
         }
 
         // stop guiding
@@ -227,15 +167,16 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
         // use acceleration
         StepperModeGoto();
 
-        double r=10.0-sqrt((abs(guideTimerRateAxis2A)/slewRateX)*100.0);
-        if (r<1.0) r=1.0;
+        // at higher step rates where torque is reduced make smaller rate changes
+        double r=1.2-sqrt((abs(guideTimerRateAxis2A)/slewRateX));
+        if (r<0.2) r=0.2; if (r>1.2) r=1.2;
 
         // acceleration/deceleration control
         if ((guideDirAxis2!=lastGuideDirAxis2) && (lastGuideDirAxis2!=0)) guideDirChangeTimerAxis2=25;
         lastGuideDirAxis2=guideDirAxis2;
         if (guideDirChangeTimerAxis2>0) guideDirChangeTimerAxis2--; else {
-          if (guideTimerRateAxis2A>guideTimerRateAxis2) { guideTimerRateAxis2A-=(acc/750.0)*r; if (guideTimerRateAxis2A<guideTimerRateAxis2) guideTimerRateAxis2A=guideTimerRateAxis2; }
-          if (guideTimerRateAxis2A<guideTimerRateAxis2) { guideTimerRateAxis2A+=(acc/750.0)*r; if (guideTimerRateAxis2A>guideTimerRateAxis2) guideTimerRateAxis2A=guideTimerRateAxis2; }
+          if (guideTimerRateAxis2A>guideTimerRateAxis2) { guideTimerRateAxis2A-=(accArcsecPerSec/100.0)*r; if (guideTimerRateAxis2A<guideTimerRateAxis2) guideTimerRateAxis2A=guideTimerRateAxis2; }
+          if (guideTimerRateAxis2A<guideTimerRateAxis2) { guideTimerRateAxis2A+=(accArcsecPerSec/100.0)*r; if (guideTimerRateAxis2A>guideTimerRateAxis2) guideTimerRateAxis2A=guideTimerRateAxis2; }
         }
 
         // stop guiding
@@ -281,7 +222,7 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
     if (Axis2PowerOffTimer>0) Axis2PowerOffTimer--; 
 
     // if the guide rate <= 1x and we're guiding on either axis set the timer to 10 minutes
-    if ((fabs(guideTimerBaseRate)<=1.000001) && (guideDirAxis2 || guideDirAxis1)) Axis2PowerOffTimer=10L*60L*100L;
+    if ((fabs(guideTimerBaseRateAxis1)<=1.000001) && (guideDirAxis2 || guideDirAxis1)) Axis2PowerOffTimer=10L*60L*100L;
 
     // if Axis2 isn't stationary set the timer to a minimum of 10 seconds
     cli(); if ((posAxis2!=timerLastPosAxis2) && (Axis2PowerOffTimer<10*100)) { timerLastPosAxis2=posAxis2; Axis2PowerOffTimer=10*100; } sei();
@@ -309,22 +250,15 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
 
 ISR(TIMER3_COMPA_vect)
 {
-#if defined(__ARM_TI_TM4C__)
-  TimerIntClear( Timer3_base, TIMER_TIMA_TIMEOUT );
-#endif
+  #ifdef HAL_TIMER3_INT_CLEAR
+  HAL_TIMER3_INT_CLEAR;
+  #endif
 
   if (!fastAxis1) { t3cnt++; if (t3cnt%t3rep!=0) return; }
 
-  // drivers step on the rising edge, need >=1.9uS to settle (for DRV8825 or A4988) so this is early in the routine
-#if defined(__ARM_Teensy3__) || defined(__ARM_STM32__)
-  digitalWriteFast(Axis1StepPin,LOW);
-  digitalWriteFast(Axis1StepPin,LOW);
-#else
-  CLR(Axis1StepPORT,Axis1StepBit);
-#endif
+  StepPinAxis1_LOW;
 
-#if (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__)  || defined(__ARM_STM32__))
-  // on the much faster Teensy and Tiva TM4C run this ISR at twice the normal rate and pull the step pin low every other call
+#ifndef HAL_SLOW_PROCESSOR
   if (clearAxis1) {
     takeStepAxis1=false;
 #endif
@@ -343,31 +277,22 @@ ISR(TIMER3_COMPA_vect)
   }
 #endif
 
-#if defined(__AVR_ATmega2560__)
-  OCR3A=nextAxis1Rate*stepAxis1;
+#ifdef HAL_SLOW_PROCESSOR
+  QuickSetIntervalAxis1(nextAxis1Rate*stepAxis1);
 #endif
 
   if ((trackingState!=TrackingMoveTo) && (!inbacklashAxis1)) targetAxis1.part.m+=timerDirAxis1*stepAxis1;
 
-  // Guessing about 4+4+1+ 4+4+1+ 1+ 2+1+2+ 13=37 clocks between here and the step signal which is 2.3uS
-  if (posAxis1!=(long)targetAxis1.part.m) { // Move the RA stepper to the target
-    if (posAxis1<(long)targetAxis1.part.m) dirAxis1=1; else dirAxis1=0; // Direction control
+  // move the RA/Azm stepper to the target
+  if (posAxis1!=(long)targetAxis1.part.m) {
 
-    // Guessing about 1+2+1+4+4+1=13 clocks between here and the step signal which is 0.81uS
-    // Set direction.  Needs >=0.65uS before/after rising step signal (DRV8825 or A4988).
-#if defined(__ARM_Teensy3__) || defined(__ARM_STM32__)
+    // set direction
+    if (posAxis1<(long)targetAxis1.part.m) dirAxis1=1; else dirAxis1=0;
     #ifdef REVERSE_AXIS1_ON
-      if (defaultDirAxis1==dirAxis1) digitalWriteFast(Axis1DirPin, LOW); else digitalWriteFast(Axis1DirPin, HIGH);
-    #else                                                                                                 
-      if (defaultDirAxis1==dirAxis1) digitalWriteFast(Axis1DirPin, HIGH); else digitalWriteFast(Axis1DirPin, LOW);
-    #endif
-#else
-    #ifdef REVERSE_AXIS1_ON
-      if (defaultDirAxis1==dirAxis1) CLR(Axis1DirPORT, Axis1DirBit); else SET(Axis1DirPORT, Axis1DirBit);
+      if (defaultDirAxis1==dirAxis1) DirPinAxis1_LOW; else DirPinAxis1_HIGH;
     #else
-      if (defaultDirAxis1==dirAxis1) SET(Axis1DirPORT, Axis1DirBit); else CLR(Axis1DirPORT, Axis1DirBit);
+      if (defaultDirAxis1==dirAxis1) DirPinAxis1_HIGH; else DirPinAxis1_LOW;
     #endif
-#endif
   
     // telescope moves WEST with the sky, blAxis1 is the amount of EAST backlash
     if (dirAxis1==1) {
@@ -376,69 +301,33 @@ ISR(TIMER3_COMPA_vect)
       if (blAxis1>0)             { blAxis1-=stepAxis1; inbacklashAxis1=true; } else { inbacklashAxis1=false; posAxis1-=stepAxis1; }
     }
 
-#if (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__))  || defined(__ARM_STM32__)
+#ifndef HAL_SLOW_PROCESSOR
       takeStepAxis1=true;
     }
     clearAxis1=false;
   } else { 
-    if (takeStepAxis1) {
-#if defined(__ARM_Teensy3__) || defined(__ARM_STM32__)
-      digitalWriteFast(Axis1StepPin,HIGH);
-#else
-      SET(Axis1StepPORT, Axis1StepBit); 
-#endif
-    }
+    if (takeStepAxis1) StepPinAxis1_HIGH;
     clearAxis1=true;
 
-#if defined(__ARM_Teensy3__)
-    PIT_LDVAL1=nextAxis1Rate*stepAxis1;
-#elif defined(__ARM_TI_TM4C__)
-    TimerLoadSet(Timer3_base, TIMER_A, nextAxis1Rate*stepAxis1);
-#elif defined(__ARM_STM32__)
-  // Pause the timer while we're configuring it
-  itimer3.pause();
-
-  //itimer3.setPrescaleFactor(STM32_PRESCALER);
-  //itimer3.setOverflow(STM32_OVERFLOW);
-  // Set up period
-  itimer3.setPeriod(nextAxis1Rate*stepAxis1); // in microseconds
-
-  // Set up an interrupt on channel 1
-  itimer3.setChannel1Mode(TIMER_OUTPUT_COMPARE);
-  itimer3.setCompare(TIMER_CH3, 1);  // Interrupt 1 count after each update
-  itimer3.attachInterrupt(TIMER_CH3, TIMER3_COMPA_vect);
-
-  // Refresh the timer's count, prescale, and overflow
-  itimer3.refresh();
-
-  // Start the timer counting
-  itimer3.resume();
-
-#endif
+    QuickSetIntervalAxis1(nextAxis1Rate*stepAxis1);
   }
 #else
-    SET(Axis1StepPORT, Axis1StepBit);
+    StepPinAxis1_HIGH;
   }
 #endif
 }
 
 ISR(TIMER4_COMPA_vect)
 {
-#if defined(__ARM_TI_TM4C__)
-  TimerIntClear( Timer4_base, TIMER_TIMA_TIMEOUT );
-#endif
+  #ifdef HAL_TIMER4_INT_CLEAR
+  HAL_TIMER4_INT_CLEAR;
+  #endif
 
   if (!fastAxis2) { t4cnt++; if (t4cnt%t4rep!=0) return; }
 
-#if defined(__ARM_Teensy3__) || defined(__ARM_STM32__)
-  digitalWriteFast(Axis2StepPin,LOW);
-#else
-  // drivers step on the rising edge
-  CLR(Axis2StepPORT,Axis2StepBit);
-#endif
+  StepPinAxis2_LOW;
 
-#if (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__))  || defined(__ARM_STM32__)
-  // on the much faster Teensy and Tiva TM4C run this ISR at twice the normal rate and pull the step pin low every other call
+#ifndef HAL_SLOW_PROCESSOR
   if (clearAxis2) {
     takeStepAxis2=false;
 #endif
@@ -457,29 +346,22 @@ ISR(TIMER4_COMPA_vect)
   }
 #endif
 
-#if defined(__AVR_ATmega2560__)
-  OCR4A=nextAxis2Rate*stepAxis2;
+#ifdef HAL_SLOW_PROCESSOR
+  QuickSetIntervalAxis2(nextAxis2Rate*stepAxis2);
 #endif
 
   if ((trackingState!=TrackingMoveTo) && (!inbacklashAxis2)) targetAxis2.part.m+=timerDirAxis2*stepAxis2;
 
-  if (posAxis2!=(long)targetAxis2.part.m) { // move the Dec stepper to the target
-    // telescope normally starts on the EAST side of the pier looking at the WEST sky
-    if (posAxis2<(long)targetAxis2.part.m) dirAxis2=1; else dirAxis2=0; // Direction control
-    // Set direction.  Needs >=0.65uS before/after rising step signal (DRV8825 or A4988).
-#if defined(__ARM_Teensy3__) || defined(__ARM_STM32__)
+  // move the Dec/Alt stepper to the target
+  if (posAxis2!=(long)targetAxis2.part.m) {
+    
+    // set direction
+    if (posAxis2<(long)targetAxis2.part.m) dirAxis2=1; else dirAxis2=0;
     #ifdef REVERSE_AXIS2_ON
-      if (defaultDirAxis2==dirAxis2) digitalWriteFast(Axis2DirPin, LOW); else digitalWriteFast(Axis2DirPin, HIGH);
+      if (defaultDirAxis2==dirAxis2) DirPinAxis2_LOW; else DirPinAxis2_HIGH;
     #else
-      if (defaultDirAxis2==dirAxis2) digitalWriteFast(Axis2DirPin, HIGH); else digitalWriteFast(Axis2DirPin, LOW);
+      if (defaultDirAxis2==dirAxis2) DirPinAxis2_HIGH; else DirPinAxis2_LOW;
     #endif
-#else
-    #ifdef REVERSE_AXIS2_ON
-      if (defaultDirAxis2==dirAxis2) SET(Axis2DirPORT, Axis2DirBit); else CLR(Axis2DirPORT, Axis2DirBit);
-    #else
-      if (defaultDirAxis2==dirAxis2) CLR(Axis2DirPORT, Axis2DirBit); else SET(Axis2DirPORT, Axis2DirBit);
-    #endif
-#endif
    
     // telescope moving toward celestial pole in the sky, blAxis2 is the amount of opposite backlash
     if (dirAxis2==1) {
@@ -488,47 +370,18 @@ ISR(TIMER4_COMPA_vect)
       if (blAxis2>0)             { blAxis2-=stepAxis2; inbacklashAxis2=true; } else { inbacklashAxis2=false; posAxis2-=stepAxis2; }
     }
 
-#if (defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__)) || defined(__ARM_STM32__)
+#ifndef HAL_SLOW_PROCESSOR
       takeStepAxis2=true;
     }
-    clearAxis2=false; 
+    clearAxis2=false;
   } else { 
-    if (takeStepAxis2) { 
-#if defined(__ARM_Teensy3__) || defined(__ARM_STM32__)
-      digitalWriteFast(Axis2StepPin,HIGH);
-#else
-      SET(Axis2StepPORT, Axis2StepBit);
-#endif
-    }
-    clearAxis2=true; 
+    if (takeStepAxis2) StepPinAxis2_HIGH;
+    clearAxis2=true;
 
-#if defined(__ARM_Teensy3__)
-    PIT_LDVAL2=nextAxis2Rate*stepAxis2;
-#elif defined(__ARM_TI_TM4C__)
-    TimerLoadSet(Timer4_base, TIMER_A, nextAxis2Rate*stepAxis2);
-#elif defined(__ARM_STM32__)
-  // Pause the timer while we're configuring it
-  itimer4.pause();
-
-  //itimer4.setPrescaleFactor(STM32_PRESCALER);
-  //itimer4.setOverflow(STM32_OVERFLOW);
-  // Set up period
-  itimer4.setPeriod(nextAxis2Rate*stepAxis2); // in microseconds
-
-  // Set up an interrupt on channel 1
-  itimer4.setChannel1Mode(TIMER_OUTPUT_COMPARE);
-  itimer4.setCompare(TIMER_CH4, 1);  // Interrupt 1 count after each update
-  itimer4.attachInterrupt(TIMER_CH4, TIMER4_COMPA_vect);
-
-  // Refresh the timer's count, prescale, and overflow
-  itimer4.refresh();
-
-  // Start the timer counting
-  itimer4.resume();
-#endif
+    QuickSetIntervalAxis2(nextAxis2Rate*stepAxis2);
   }
 #else
-    SET(Axis2StepPORT, Axis2StepBit);
+    StepPinAxis2_HIGH;
   }
 #endif
 }
@@ -545,19 +398,4 @@ void ClockSync() {
   PPSlastMicroS=t;
 }
 #endif
-
-#if defined(__AVR_ATmega2560__)
-// UART Receive Complete Interrupt Handler for Serial0
-ISR(USART0_RX_vect)  {
-  PSerial._recv_buffer[PSerial._recv_tail]=UDR0; 
-  PSerial._recv_tail++; // buffer is 256 bytes so this byte variable wraps automatically
-}
-
-// UART Receive Complete Interrupt Handler for Serial1
-ISR(USART1_RX_vect)  {
-  PSerial1._recv_buffer[PSerial1._recv_tail]=UDR1; 
-  PSerial1._recv_tail++; // buffer is 256 bytes so this byte variable wraps automatically
-}
-#endif
-
 

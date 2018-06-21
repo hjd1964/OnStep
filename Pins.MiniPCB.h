@@ -17,6 +17,7 @@
 
 // The PPS pin is a 3.3V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
 #define PpsPin        28    // Pin 28 (PPS time source, GPS for example)
+#define DS3234_CS_PIN 10
 
 #define Axis1DirPin   21    // Pin 21 (Dir)
 #define Axis1StepPin  20    // Pin 20 (Step)
@@ -42,13 +43,17 @@
 #define Axis2_M0       8    // Pin  8 (Microstep Mode 0 or SPI MOSI)
 #define Axis2_EN       9    // Pin  9 (Enable)
 
-// Pins to focuser2/rotator stepper driver
+// Pins for rotator stepper driver
 #define Axis3DirPin   33    // Pin 33 (Dir)
 #define Axis3StepPin  30    // Pin 30 (Step)
 
-// Pins to focuser1 stepper driver
+// Pins for focuser1 stepper driver
 #define Axis4DirPin   32    // Pin 32 (Dir)
 #define Axis4StepPin  31    // Pin 31 (Step)
+
+// Pins for focuser2 stepper driver
+#define Axis5DirPin   33    // Pin 33 (Dir)
+#define Axis5StepPin  30    // Pin 30 (Step)
 
 // ST4 interface
 #define ST4RAw        10    // Pin 10 ST4 RA- West

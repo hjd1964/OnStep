@@ -17,12 +17,13 @@
 
 // The PPS pin is a 3.3V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
 #define PpsPin        28    // Pin 28 (PPS time source, GPS for example)
+#define DS3234_CS_PIN 10
 
 #define Axis1DirPin   21    // Pin 21 (Dir)
 #define Axis1StepPin  20    // Pin 20 (Step)
 #define RstPin        19    // Pin 19 (Reset)
 #define Axis1_FAULT   18    // Pin 18 (Fault)
-#define Axis1_Aux     18    // Pin 18 (Aux - ESP8266 GPIO0 or SPI MISO)
+#define Axis1_Aux     18    // Pin 18 (Aux1 - ESP8266 GPIO0 or SPI MISO)
 #define Axis1_M2      17    // Pin 17 (Microstep Mode 2 or SPI CS)
 #define Axis1_M1      16    // Pin 16 (Microstep Mode 1 or SPI SCK)
 #define Axis1_M0      15    // Pin 15 (Microstep Mode 0 or SPI MOSI)
@@ -36,7 +37,7 @@
 #define Axis2StepPin   3    // Pin  3 (Step)
 #define LimitPin       4    // Pin  4 (The limit switch sense is a logic level input which uses the internal pull up, shorted to ground it stops gotos/tracking)
 #define Axis2_FAULT    5    // Pin  5 (Fault)
-#define Axis2_Aux      5    // Pin  5 (Aux - ESP8266 RST or SPI MISO)
+#define Axis2_Aux      5    // Pin  5 (Aux2 - ESP8266 RST or SPI MISO)
 #define Axis2_M2       6    // Pin  6 (Microstep Mode 2 or SPI CS)
 #define Axis2_M1       7    // Pin  7 (Microstep Mode 1 or SPI SCK)
 #define Axis2_M0       8    // Pin  8 (Microstep Mode 0 or SPI MOSI)
@@ -45,10 +46,12 @@
 // Pins to rotator stepper driver
 #define Axis3DirPin   33    // Pin 33 (Dir)
 #define Axis3StepPin  30    // Pin 30 (Step)
+#define Axis3_EN      36    // Pin 36 (Aux3 - Enable)
 
 // Pins to focuser1 stepper driver
 #define Axis4DirPin   35    // Pin 35 (Dir)
 #define Axis4StepPin  34    // Pin 34 (Step)
+#define Axis4_EN      39    // Pin 39 (Aux4 - Enable)
 
 // Pins to focuser2 stepper driver
 #define Axis5DirPin   33    // Pin 33 (Dir)

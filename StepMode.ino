@@ -12,6 +12,22 @@ void StepperModeTrackingInit() {
   StepperModeTracking();
   digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
   digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
+
+// if the stepper driver mode select pins are wired in, program any requested micro-step mode
+#if !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
+  // automatic mode switching during slews, initialize micro-step mode
+  #ifdef AXIS1_MODE
+    if ((AXIS1_MODE & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE    & 1)); } else { pinMode(Axis1_M0,INPUT); }
+    if ((AXIS1_MODE & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE>>1 & 1)); } else { pinMode(Axis1_M1,INPUT); }
+    if ((AXIS1_MODE & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE>>2 & 1)); } else { pinMode(Axis1_M2,INPUT); }
+  #endif
+  
+  #ifdef AXIS2_MODE
+    if ((AXIS2_MODE & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE    & 1)); } else { pinMode(Axis2_M0,INPUT); }
+    if ((AXIS2_MODE & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE>>1 & 1)); } else { pinMode(Axis2_M1,INPUT); }
+    if ((AXIS2_MODE & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE>>2 & 1)); } else { pinMode(Axis2_M2,INPUT); }
+  #endif
+#endif
 }
 
 // if stepper drive can switch decay mode, set it here
@@ -52,9 +68,6 @@ void StepperModeTracking() {
   bool stealth=((AXIS1_MODE & 0b0100000)!=0);
   bool lowpwr =((AXIS1_MODE & 0b1000000)!=0);
   tmcAxis1.setup(!nintpol,stealth,AXIS1_MODE&0b001111,lowpwr);
-  #ifdef STALL_GUARD_ON
-  tmcAxis1.sgSetSgt(EEPROM.read(EE_sgSgtAxis1));
-  #endif
 
   // default 256x interpolation ON, stealthChop OFF (spreadCycle), micro-steps
   stepAxis2=1;
@@ -62,9 +75,6 @@ void StepperModeTracking() {
   stealth=((AXIS2_MODE & 0b0100000)!=0);
   lowpwr =((AXIS2_MODE & 0b1000000)!=0);
   tmcAxis2.setup(!nintpol,stealth,AXIS2_MODE&0b001111,lowpwr);
-  #ifdef STALL_GUARD_ON
-  tmcAxis2.sgSetSgt(EEPROM.read(EE_sgSgtAxis2));
-  #endif
 
   // allow stealth chop current regulation to ramp up to the initial motor current before moving
   if ((((AXIS1_MODE & 0b0100000)!=0) || ((AXIS2_MODE & 0b0100000)!=0)) & (atHome)) delay(100);

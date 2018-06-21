@@ -581,6 +581,8 @@ void TGeoAlign::InstrToEqu(double Lat, double HA, double Dec, double *HA1, doubl
 // GEOMETRIC ALIGN FOR EQUATORIAL MOUNTS, GOTO ASSIST BASED
 //
 
+#define GOTO_ASSIST_DEBUG_OFF
+
 TGeoAlign::TGeoAlign()
 {
   init();
@@ -651,20 +653,38 @@ bool TGeoAlign::addStar(int I, int N, double RA, double Dec) {
 
   // First star:
   // Near the celestial equator (Dec=0, HA=0), telescope West of the pier if multi-star align
-  if (I==1) {
+  if ((I==1) && (N==1)) {
     // set the indexAxis1/2 offset
     if (syncEqu(RA,Dec)!=0) { return false; }
   }
 
-  actual[I-1].ha=haRange(LST()*15.0-RA)/Rad;
-  actual[I-1].dec=Dec/Rad;
   mount[I-1].ha=(((double)(long)(targetAxis1.part.m+indexAxis1Steps))/(double)StepsPerDegreeAxis1)/Rad;
   mount[I-1].dec=(((double)(long)(targetAxis2.part.m+indexAxis2Steps))/(double)StepsPerDegreeAxis2)/Rad;
+  actual[I-1].ha=haRange(LST()*15.0-RA)/Rad;
+  actual[I-1].dec=Dec/Rad;
   if (pierSide==PierSideWest) { actual[I-1].side=-1; mount[I-1].side=-1; } else
   if (pierSide==PierSideEast) { actual[I-1].side=1; mount[I-1].side=1; } else { actual[I-1].side=0; mount[I-1].side=0; }
 
+#ifdef GOTO_ASSIST_DEBUG_ON
+  char s[80];
+  double f;
+  PSerial.putch(I-1+'0');
+  PSerial.puts(" Mount h");
+  f=mount[I-1].ha*Rad/15.0; if (f<0) f=f+24.0; doubleToHms(s,&f); PSerial.puts(s);
+  PSerial.puts(",d");
+  f=mount[I-1].dec*Rad; doubleToDms(s,&f,false,true); PSerial.puts(s);
+  PSerial.puts("   Actual h");
+  f=actual[I-1].ha*Rad/15.0; if (f<0) f=f+24.0; doubleToHms(s,&f); PSerial.puts(s);
+  PSerial.puts(",d");
+  f=actual[I-1].dec*Rad; doubleToDms(s,&f,false,true); PSerial.puts(s);
+  PSerial.puts("\r\n");
+#endif
+
   // two or more stars and finished
   if ((I>=2) && (I==N)) {
+#ifdef GOTO_ASSIST_DEBUG_ON
+    PSerial.puts("\r\n");
+#endif
     autoModel(N);
  //   if (syncEqu(RA,Dec)!=0) { return false; }
     geo_ready=true;
@@ -856,7 +876,7 @@ void TGeoAlign::autoModel(int n) {
   Ff=0; Df=1;
 #endif
 
-#if defined(__AVR_ATmega2560__)
+#ifdef HAL_SLOW_PROCESSOR
   // search, this can handle about 4.5 degrees of polar misalignment, and 1 degree of cone error
   //             DoPdPzPeTfFfDfOdOh
   do_search( 8192,0,0,1,1,0,0,0,0,0);
@@ -866,9 +886,7 @@ void TGeoAlign::autoModel(int n) {
   do_search(  512,1,0,1,1,0,0,0,0,0);
   do_search(  256,1,0,1,1,0,0,0,0,0);
   do_search(  128,1,1,1,1,0,0,0,0,0);
-#endif
-
-#if defined(__ARM_Teensy3__) || defined(__ARM_TI_TM4C__) || defined(__ARM_STM32__)
+#else
   // search, this can handle about 9 degrees of polar misalignment, and 2 degrees of cone error, 6' of FF/DF and TF
   if (num>4) {
     do_search(16384,0,0,1,1,0, 0, 0,0,0);
@@ -902,6 +920,14 @@ void TGeoAlign::autoModel(int n) {
   dfCor=best_ff/3600.0;
 #endif
   tfCor=best_tf/3600.0;
+
+#ifdef GOTO_ASSIST_DEBUG_ON
+  PSerial.puts("\r\n");
+  char s[80];
+  PSerial.puts("Model Error  =");
+  dtostrf(best_dist*Rad*60.0,6,2,s); PSerial.puts(s);
+  PSerial.puts("\r\n");
+#endif
 
   // offset corrections: doesn't matter, a sync will override this
   indexAxis1=best_ohw/3600.0;

@@ -15,13 +15,15 @@ char command[3];
 char parameter[25];
 boolean commandError = false;
 boolean quietReply   = false;
-cb cmd;  // serial
-cb cmd1; // serial1
-#ifdef SER4_AVAILABLE
-cb cmd4; // serial4
+cb cmd;  // the first Serial is always enabled
+#ifdef HAL_SERIAL1_ENABLED
+cb cmd1;
+#endif
+#ifdef HAL_SERIAL4_ENABLED
+cb cmd4;
 #endif
 char replyx[50]="";
-cb cmdx;  // serialX
+cb cmdx; // virtual command channel for internal use
 
 #ifdef FOCUSER1_ON
 char primaryFocuser = 'F';
@@ -37,19 +39,31 @@ void processCommands() {
 
     // accumulate the command
     if ((PSerial.available()>0) && (!cmd.ready())) cmd.add(PSerial.read());
+#ifdef HAL_SERIAL1_ENABLED
     if ((PSerial1.available()>0) && (!cmd1.ready())) cmd1.add(PSerial1.read());
-#ifdef SER4_AVAILABLE
-    if ((Serial4.available()>0) && (!cmd4.ready())) cmd4.add(Serial4.read());
+#endif
+#ifdef HAL_SERIAL4_ENABLED
+    if ((PSerial4.available()>0) && (!cmd4.ready())) cmd4.add(PSerial4.read());
 #endif
 
     // send any reply
-    if (PSerial.transmit() || PSerial1.transmit()) return;
+#ifdef HAL_SERIAL_TRANSMIT
+    if (PSerial.transmit()) return;
+  #ifdef HAL_SERIAL1_ENABLED
+    if (PSerial1.transmit()) return;
+  #endif
+  #ifdef HAL_SERIAL4_ENABLED
+    if (PSerial4.transmit()) return;
+  #endif
+#endif
 
     // if a command is ready, process it
     Command process_command = COMMAND_NONE;
     if (cmd.ready()) { strcpy(command,cmd.getCmd()); strcpy(parameter,cmd.getParameter()); cmd.flush(); process_command=COMMAND_SERIAL; }
+#ifdef HAL_SERIAL1_ENABLED
     else if (cmd1.ready()) { strcpy(command,cmd1.getCmd()); strcpy(parameter,cmd1.getParameter()); cmd1.flush(); process_command=COMMAND_SERIAL1; }
-#ifdef SER4_AVAILABLE
+#endif
+#ifdef HAL_SERIAL4_ENABLED
     else if (cmd4.ready()) { strcpy(command,cmd4.getCmd()); strcpy(parameter,cmd4.getParameter()); cmd4.flush(); process_command=COMMAND_SERIAL4; }
 #endif
     else if (cmdx.ready()) { strcpy(command,cmdx.getCmd()); strcpy(parameter,cmdx.getParameter()); cmdx.flush(); process_command=COMMAND_SERIALX; }
@@ -164,10 +178,10 @@ void processCommands() {
       } else
       
 //   $ - Set parameter
-//  :$BDddd# Set Dec Antibacklash
+//  :$BDddd# Set Dec/Alt Antibacklash
 //          Return: 0 on failure
 //                  1 on success
-//  :$BRddd# Set RA Antibacklash
+//  :$BRddd# Set RA/Azm Antibacklash
 //          Return: 0 on failure
 //                  1 on success
 //         Set the Backlash values.  Units are arc-seconds
@@ -255,7 +269,7 @@ void processCommands() {
         if ((command[1]=='S') && (parameter[0]=='P') && (parameter[1]=='F') && (parameter[2]=='L') && (parameter[3]=='A') && (parameter[4]=='S') && (parameter[5]=='H')) {
           if ((atHome) && (trackingState==TrackingNone)) {
             // initialize both serial ports
-            Serial.println("The ESP-01 should be reset into Flash upload mode (115,200 Baud.)");
+            Serial.println("The ESP-01 should now be in flash upload mode (at 115200 Baud.)");
             Serial.println("Waiting for data.");
             delay(500);
             Serial.begin(115200);
@@ -547,7 +561,12 @@ void processCommands() {
 //  :GD#   Get Telescope Declination
 //         Returns: sDD*MM# or sDD*MM'SS# (based on precision setting)
       if (command[1]=='D')  { 
-        if (millis()-_coord_t<100) { f=_ra; f1=_dec; } else {
+#ifdef HAL_SLOW_PROCESSOR
+        if (millis()-_coord_t<100)
+#else
+        if (millis()-_coord_t<5)
+#endif
+        { f=_ra; f1=_dec; } else {
           getEqu(&f,&f1,false); f/=15.0;
           _ra=f; _dec=f1; _coord_t=millis(); 
         }
@@ -603,8 +622,13 @@ void processCommands() {
       if (command[1]=='o')  { sprintf(reply,"%02d*",maxAlt); quietReply=true; } else
 //  :GR#   Get Telescope RA
 //         Returns: HH:MM.T# or HH:MM:SS# (based on precision setting)
-      if (command[1]=='R')  { 
-        if (millis()-_coord_t<100) { f=_ra; f1=_dec; } else {
+      if (command[1]=='R')  {
+#ifdef HAL_SLOW_PROCESSOR
+        if (millis()-_coord_t<100)
+#else
+        if (millis()-_coord_t<5)
+#endif
+        { f=_ra; f1=_dec; } else {
           getEqu(&f,&f1,false); f/=15.0;
           _ra=f; _dec=f1; _coord_t=millis(); 
         }
@@ -670,11 +694,11 @@ void processCommands() {
         reply[i++]='0'+lastError;
         reply[i++]=0;
         quietReply=true;
-      } else 
+      } else
 //  :GVD# Get Telescope Firmware Date
-//         Returns: mm dd yy#
+//         Returns: mmm dd yyyy#
 //  :GVN# Get Telescope Firmware Number
-//         Returns: dd.d#
+//         Returns: d.dc#
 //  :GVP# Get Telescope Product Name
 //         Returns: <string>#
 //  :GVT# Get Telescope Firmware Time
@@ -682,7 +706,7 @@ void processCommands() {
       if (command[1]=='V') {
         if (parameter[1]==(char)0) {
           if (parameter[0]=='D') strcpy(reply,FirmwareDate); else
-          if (parameter[0]=='N') strcpy(reply,FirmwareNumber); else
+          if (parameter[0]=='N') sprintf(reply,"%i.%i%s",FirmwareVersionMajor,FirmwareVersionMinor,FirmwareVersionPatch); else
           if (parameter[0]=='P') strcpy(reply,FirmwareName); else
           if (parameter[0]=='T') strcpy(reply,FirmwareTime); else commandError=true;
         } else commandError=true;
@@ -785,20 +809,6 @@ void processCommands() {
               default:  commandError=true;
             }
           } else
-#if defined(MODE_SWITCH_BEFORE_SLEW_SPI) && defined(STALL_GUARD_ON)
-          if (parameter[0]=='S') { //Sn: stallGuard
-            switch (parameter[1]) {
-              case 'A': break;                                                                                 // stallGuard, Active?
-              case '0': sprintf(reply,"%i",(int)((int8_t)EEPROM.read(EE_sgSgtAxis1))); quietReply=true; break; // stallGuard, SGT Axis1
-              case '1': sprintf(reply,"%i",(int)(EEPROM_readInt(EE_sgLimitAxis1)));    quietReply=true; break; // stallGuard, Lower limit Axis 1
-              case '2': sprintf(reply,"%i",(int)((int8_t)EEPROM.read(EE_sgSgtAxis2))); quietReply=true; break; // stallGuard, SGT Axis2
-              case '3': sprintf(reply,"%i",(int)(EEPROM_readInt(EE_sgLimitAxis2)));    quietReply=true; break; // stallGuard, Lower limit Axis 2
-              case '4': sprintf(reply,"%ld",(long)tmcAxis1.sgResult);                  quietReply=true; break; // stallGuard, get SG_RESULT Axis1
-              case '5': sprintf(reply,"%ld",(long)tmcAxis2.sgResult);                  quietReply=true; break; // stallGuard, get SG_RESULT Axis2
-              default:  commandError=true;
-            }
-          } else 
-#endif
             commandError=true;
         } else commandError=true;
       } else
@@ -1124,6 +1134,32 @@ void processCommands() {
 
 //   R - Slew Rate Commands
       if (command[0]=='R') {
+
+//   :RAdd.d#   Set Axis1 Guide rate to dd.d degrees per second
+//              Returns: Nothing
+      if (command[1]=='A') {
+        f=strtod(parameter,&conv_end);
+        double maxStepsPerSecond=1000000.0/(maxRate/16.0);
+        if (&parameter[0]!=conv_end) {
+          if (f<1.0/60.0/60.0) f=1.0/60.0/60.0;
+          if (f>maxStepsPerSecond/StepsPerDegreeAxis1) f=maxStepsPerSecond/StepsPerDegreeAxis1;
+          customGuideRateAxis1(f*240.0,GUIDE_TIME_LIMIT*1000);
+        }
+        quietReply=true; 
+      } else
+//   :REdd.d#   Set Axis2 Guide rate to dd.d degrees per second
+//              Returns: Nothing
+      if (command[1]=='E') {
+        f=strtod(parameter,&conv_end);
+        double maxStepsPerSecond=1000000.0/(maxRate/16.0);
+        if (&parameter[0]!=conv_end) {
+          if (f<1.0/60.0/60.0) f=1.0/60.0/60.0;
+          if (f>maxStepsPerSecond/StepsPerDegreeAxis2) f=maxStepsPerSecond/StepsPerDegreeAxis2;
+          customGuideRateAxis2(f*240.0,GUIDE_TIME_LIMIT*1000);
+        }
+        quietReply=true; 
+      } else
+
 //  :RG#   Set Slew rate to Guiding Rate (slowest) 1X
 //  :RC#   Set Slew rate to Centering rate (2nd slowest) 8X
 //  :RM#   Set Slew rate to Find Rate (2nd Fastest) 24X
@@ -1248,16 +1284,30 @@ void processCommands() {
         i=(int)(parameter[0]-'0');
         if ((i>=0) && (i<10)) {
           if (process_command==COMMAND_SERIAL) {
-            PSerial.print("1"); while (PSerial.transmit()); delay(50); PSerial.begin(baudRate[i]);
+            PSerial.print("1"); 
+            #ifdef HAL_SERIAL_TRANSMIT
+            while (PSerial.transmit()); 
+            #endif
+            delay(50); PSerial.begin(baudRate[i]);
             quietReply=true; 
+#ifdef HAL_SERIAL1_ENABLED
           } else
           if (process_command==COMMAND_SERIAL1) {
-            PSerial1.print("1"); while (PSerial1.transmit()); delay(50); PSerial1.begin(baudRate[i]); 
-            quietReply=true; 
-#ifdef SER4_AVAILABLE
+            PSerial1.print("1"); 
+            #ifdef HAL_SERIAL_TRANSMIT
+            while (PSerial1.transmit()); 
+            #endif
+            delay(50); PSerial1.begin(baudRate[i]); 
+            quietReply=true;
+#endif
+#ifdef HAL_SERIAL4_ENABLED
           } else
           if (process_command==COMMAND_SERIAL4) {
-            Serial4.print("1"); delay(50); Serial4.begin(baudRate[i]);
+            PSerial4.print("1"); 
+            #ifdef HAL_SERIAL_TRANSMIT
+            while (PSerial4.transmit()); 
+            #endif
+            delay(50); PSerial4.begin(baudRate[i]);
             quietReply=true; 
 #endif
           } else commandError=true;
@@ -1507,37 +1557,6 @@ void processCommands() {
           }
         } else
 #endif
-#if defined(MODE_SWITCH_BEFORE_SLEW_SPI) && defined(STALL_GUARD_ON)
-        if (parameter[0]=='S') { //Sn: stallGuard
-          long sgt;
-          long t;
-          switch (parameter[1]) {
-            case '0': // set sgt Axis1
-              sgt=strtol(&parameter[3],NULL,10);
-              if ((sgt>=-64) && (sgt<=63)) {
-                EEPROM.write(EE_sgSgtAxis1,(uint8_t)sgt);
-                tmcAxis1.sgSetSgt(sgt);
-              } else commandError=true;
-            break;
-            case '1': // set sgt threshold Axis1
-              t=strtol(&parameter[3],NULL,10);
-              if ((t>=0) && (t<=1023)) EEPROM_writeInt(EE_sgLimitAxis1,t); else commandError=true;
-            break;
-            case '2': // set sgt Axis2
-              sgt=strtol(&parameter[3],NULL,10);
-              if ((sgt>=-64) && (sgt<=63)) {
-                EEPROM.write(EE_sgSgtAxis2,(uint8_t)sgt);
-                tmcAxis2.sgSetSgt(sgt);
-              } else commandError=true;
-            break;
-            case '3': // set sgt threshold Axis2
-              t=strtol(&parameter[3],NULL,10);
-              if ((t>=0) && (t<=1023)) EEPROM_writeInt(EE_sgLimitAxis2,t); else commandError=true;
-            break;
-            default: commandError=true;
-          } 
-        } else
-#endif
           commandError=true;
       } else
 //  :SzDDD*MM#
@@ -1568,7 +1587,7 @@ void processCommands() {
 //         Return: 0 on failure
 //                 1 on success
 
-     if (command[0]=='T') {
+     if ((command[0]=='T') && (parameter[0]==0)) {
        if (command[1]=='+') { siderealInterval-=HzCf*(0.02); quietReply=true; } else
        if (command[1]=='-') { siderealInterval+=HzCf*(0.02); quietReply=true; } else
        if (command[1]=='S') { SetTrackingRate(0.99726956632); refraction=false; quietReply=true; } else                    // solar tracking rate 60Hz
@@ -1576,8 +1595,8 @@ void processCommands() {
        if (command[1]=='Q') { SetTrackingRate(default_tracking_rate); quietReply=true; } else                              // sidereal tracking rate
        if (command[1]=='R') { siderealInterval=15956313L; quietReply=true; } else                                          // reset master sidereal clock interval
        if (command[1]=='K') { SetTrackingRate(0.99953004401); refraction=false; quietReply=true; } else                    // king tracking rate 60.136Hz
-       if ((command[1]=='e') && (trackingState==TrackingNone) && (parkStatus==NotParked)) { trackingState=TrackingSidereal; EnableStepperDrivers(); } else
-       if ((command[1]=='d') && (trackingState==TrackingSidereal)) trackingState=TrackingNone; else
+       if ((command[1]=='e') && ((trackingState==TrackingSidereal) || (trackingState==TrackingNone)) && (parkStatus==NotParked)) { trackingState=TrackingSidereal; EnableStepperDrivers(); } else
+       if ((command[1]=='d') && ((trackingState==TrackingSidereal) || (trackingState==TrackingNone))) trackingState=TrackingNone; else
        if (command[1]=='o') { refraction=refraction_enable; onTrack=true;  SetTrackingRate(default_tracking_rate); } else  // turn full compensation on, defaults to base sidereal tracking rate
        if (command[1]=='r') { refraction=refraction_enable; onTrack=false; SetTrackingRate(default_tracking_rate); } else  // turn refraction compensation on, defaults to base sidereal tracking rate
        if (command[1]=='n') { refraction=false; onTrack=false; SetTrackingRate(default_tracking_rate); } else              // turn refraction off, sidereal tracking rate resumes
@@ -1588,10 +1607,14 @@ void processCommands() {
        // Only burn the new rate if changing the sidereal interval
        if ((!commandError) && ((command[1]=='+') || (command[1]=='-') || (command[1]=='R'))) {
          EEPROM_writeLong(EE_siderealInterval,siderealInterval);
-         SetSiderealClockRate(siderealInterval);
+         SiderealClockSetInterval(siderealInterval);
          cli(); SiderealRate=siderealInterval/StepsPerSecondAxis1; sei();
        }
 
+       SetDeltaTrackingRate();
+
+     } else
+     if (command[0]=='T') {
      } else
      
 //   U - Precision Toggle
@@ -1649,6 +1672,7 @@ void processCommands() {
          quietReply=true;
        } else commandError=true;
      } else
+#endif
 //   V - PEC Readout StepsPerSecondAxis1
 //  :VS#
 //         Returns: DDD.DDDDDD#
@@ -1661,6 +1685,7 @@ void processCommands() {
          quietReply=true;
        } else commandError=true;
      } else
+#ifndef MOUNT_TYPE_ALTAZM
 //  :VH#
 //         Read RA PEC sense index (seconds)
 //         Returns: DDDDD#
@@ -1772,22 +1797,24 @@ void processCommands() {
           PSerial.print(reply);
         } 
   
+#ifdef HAL_SERIAL1_ENABLED
         if (process_command==COMMAND_SERIAL1) {
           if (cmd1.checksum) checksum(reply);
           if (!supress_frame) strcat(reply,"#");
           PSerial1.print(reply);
         }
+#endif
 
-#ifdef SER4_AVAILABLE
+#ifdef HAL_SERIAL4_ENABLED
         if (process_command==COMMAND_SERIAL4) {
           if (cmd4.checksum) checksum(reply);
           if (!supress_frame) strcat(reply,"#");
-          Serial4.print(reply);
+          PSerial4.print(reply);
         }
 #endif
 
         if (process_command==COMMAND_SERIALX) {
-          if (cmd1.checksum) checksum(reply);
+          if (cmdx.checksum) checksum(reply);
           if (!supress_frame) strcat(reply,"#");
           strcpy(replyx,reply);
         }
@@ -1909,14 +1936,14 @@ String ConfighSettings() {
     c+="0";
   #elif defined(AXIS1_FAULT_HIGH)
     c+="1";
-  #elif defined(AXIS1_FAULT_OFF)
+  #else
     c+="2";
   #endif
   #if defined(AXIS2_FAULT_LOW)
     c+="0";
   #elif defined(AXIS2_FAULT_HIGH)
     c+="1";
-  #elif defined(AXIS2_FAULT_OFF)
+  #else
     c+="2";
   #endif
   #ifdef TRACK_REFRACTION_RATE_DEFAULT_ON

@@ -139,7 +139,7 @@ void moveTo() {
   } else {
     temp=(StepsForRateChangeAxis1/isqrt32(distStartAxis1));  // speed up (temp gets smaller)
   }
-  if (temp<maxRate) temp=maxRate;                            // fastest rate
+  if (temp<maxRate) temp=maxRate;                            // fastest rate 
   if (temp>TakeupRate) temp=TakeupRate;                      // slowest rate
   cli(); timerRateAxis1=temp; sei();
 
@@ -154,20 +154,19 @@ void moveTo() {
   cli(); timerRateAxis2=temp; sei();
 
 #ifdef MOUNT_TYPE_ALTAZM
-  // In AltAz mode & at the end of slew & near the Zenith, disable tracking for a moment if we're getting close to the target
-  if ((distDestAxis1<=(long)StepsPerDegreeAxis1*2L) && (distDestAxis2<=(long)StepsPerDegreeAxis2*2L)) {
-    if ((long)targetAxis2.part.m>80L*(long)StepsPerDegreeAxis2-indexAxis1Steps) {
-      if (lastTrackingState==TrackingSidereal) {
-        lastTrackingState=TrackingSiderealDisabled;
-      }
-    }
-  }
+  // in AltAz mode if the end of slew doesn't get close enough within 3 seconds: stop tracking for a moment to allow target/actual position synchronization
+  static bool forceSlewStop=false;
+  static unsigned long slewStopTime=0;
+  if ( (!forceSlewStop) && (distDestAxis1<=GetStepsPerSecondAxis1()) && (distDestAxis2<=GetStepsPerSecondAxis2()) ) { slewStopTime=millis()+3000L; forceSlewStop=true; }
+  if ( (lastTrackingState==TrackingSidereal) && (forceSlewStop && ((long)(millis()-slewStopTime)>0)) ) lastTrackingState=TrackingSiderealDisabled;
 #endif
 
-  if ((distDestAxis1<=2) && (distDestAxis2<=2)) { 
+  if ((distDestAxis1<=2) && (distDestAxis2<=2)) {
+    
 #ifdef MOUNT_TYPE_ALTAZM
-    // Near the Zenith disable tracking in AltAz mode for a moment if we're getting close to the target
+    // if we stopped tracking turn it back on now
     if (lastTrackingState==TrackingSiderealDisabled) lastTrackingState=TrackingSidereal;
+    forceSlewStop=false;
 #endif
     
     if ((pierSide==PierSideFlipEW2) || (pierSide==PierSideFlipWE2)) {
@@ -248,7 +247,7 @@ void moveTo() {
 
         // restore trackingState
         trackingState=lastTrackingState; lastTrackingState=TrackingNone;
-        SetSiderealClockRate(siderealInterval);
+        SiderealClockSetInterval(siderealInterval);
 
         // validate location
         byte parkPierSide=EEPROM.read(EE_pierSide);
@@ -271,7 +270,7 @@ void moveTo() {
 
           // restore trackingState
           trackingState=lastTrackingState; lastTrackingState=TrackingNone;
-          SetSiderealClockRate(siderealInterval);
+          SiderealClockSetInterval(siderealInterval);
 
           setHome();
           homeMount=false; 
@@ -283,7 +282,7 @@ void moveTo() {
         } else {
           // restore trackingState
           trackingState=lastTrackingState; lastTrackingState=TrackingNone;
-          SetSiderealClockRate(siderealInterval);
+          SiderealClockSetInterval(siderealInterval);
         }
     }
   }
