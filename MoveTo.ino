@@ -21,35 +21,36 @@ void moveTo() {
 
     // first phase, decide if we should move to 60 deg. HA (4 hours) to get away from the horizon limits or just go straight to the home position
     if (pierSideControl==PierSideFlipWE1) {
-      if (celestialPoleAxis1==0.0) targetAxis1.part.m=0; else {
+      if (celestialPoleAxis1==0.0) setTargetAxis1(0.0,PierSideWest); else {
         if ((currentAlt<10.0) && (getStartAxis1()>-90.0)) setTargetAxis1(-60.0,PierSideWest); else setTargetAxis1(-celestialPoleAxis1,PierSideWest);
       }
       setTargetAxis2(celestialPoleAxis2,PierSideWest);
     } else {
-      if (celestialPoleAxis1==0.0) targetAxis1.part.m=0; else {
+      if (celestialPoleAxis1==0.0) setTargetAxis1(0.0,PierSideEast); else {
         if ((currentAlt<10.0) && (getStartAxis1()<90.0)) setTargetAxis1(60.0,PierSideEast); else setTargetAxis1(celestialPoleAxis1,PierSideEast);
       }
       setTargetAxis2(celestialPoleAxis2,PierSideEast);
     }
 
+    // first phase, override above for additional waypoints
     if (celestialPoleAxis2>0.0) {
-      // if Dec is in the general area of the pole, slew both axis back at once
       if (getInstrAxis2()>90.0-latitude) {
+        // if Dec is in the general area of the pole, slew both axis back at once
         if (pierSideControl==PierSideFlipWE1) setTargetAxis1(-celestialPoleAxis1,PierSideWest); else setTargetAxis1(celestialPoleAxis1,PierSideEast);
       } else {
-        // override if we're at a low latitude and in the opposite sky, |HA|=6 is very low on the horizon in this orientation and we need to delay arriving there during a meridian flip
+        // if we're at a low latitude and in the opposite sky, |HA|=6 is very low on the horizon in this orientation and we need to delay arriving there during a meridian flip
         // in the extreme case, where the user is very near the (Earths!) equator an Horizon limit of -10 or -15 may be necessary for proper operation.
-        if ((currentAlt<20.0) && (abs(latitude)<45.0) && (getInstrAxis2()<0)) {
+        if ((currentAlt<20.0) && (abs(latitude)<45.0) && (getInstrAxis2()<0.0)) {
           if (pierSideControl==PierSideFlipWE1) setTargetAxis1(-45.0,PierSideWest); else setTargetAxis1(45.0,PierSideEast);
         }
       }
     } else {
-      // if Dec is in the general area of the pole, slew both axis back at once
       if (getInstrAxis2()<-90.0-latitude) {
+        // if Dec is in the general area of the pole, slew both axis back at once
         if (pierSideControl==PierSideFlipWE1) setTargetAxis1(-celestialPoleAxis1,PierSideWest); else setTargetAxis1(celestialPoleAxis1,PierSideEast);
       } else { 
-        // override if we're at a low latitude and in the opposite sky, |HA|=6 is very low on the horizon in this orientation and we need to delay arriving there during a meridian flip
-        if ((currentAlt<20.0) && (abs(latitude)<45.0) && (getInstrAxis2()>0)) {
+        // if we're at a low latitude and in the opposite sky, |HA|=6 is very low on the horizon in this orientation and we need to delay arriving there during a meridian flip
+        if ((currentAlt<20.0) && (abs(latitude)<45.0) && (getInstrAxis2()>0.0)) {
           if (pierSideControl==PierSideFlipWE1) setTargetAxis1(-45.0,PierSideWest); else setTargetAxis1(45.0,PierSideEast);
         }
       }
