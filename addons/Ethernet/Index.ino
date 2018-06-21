@@ -151,7 +151,7 @@ void handleRoot() {
   // RA,Dec target
   if (!sendCommand(":Gr#",temp1)) strcpy(temp1,"?");
   if (!sendCommand(":Gd#",temp2)) strcpy(temp2,"?");
-  sprintf(temp,html_indexPosition,temp1,temp2); 
+  sprintf(temp,html_indexTarget,temp1,temp2); 
   data += temp;
 
 #ifdef ENCODERS_ON
