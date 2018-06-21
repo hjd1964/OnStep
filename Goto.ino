@@ -366,7 +366,16 @@ GotoErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTarget
   int p=PierSideEast; switch (thisPierSide) { case PierSideWest: case PierSideFlipEW1: p=PierSideWest; break; }
   setTargetAxis1(thisTargetAxis1,p);
   setTargetAxis2(thisTargetAxis2,p);
-  pierSideControl=thisPierSide;
+
+  #ifdef MERIDIAN_FLIP_SKIP_HOME_ON
+  boolean gotoDirect=true;
+  #else
+  boolean gotoDirect=false;
+  #endif
+  if (!pauseHome && gotoDirect) {
+    if (thisPierSide==PierSideFlipWE1) pierSideControl=PierSideEast; else
+    if (thisPierSide==PierSideFlipEW1) pierSideControl=PierSideWest; else pierSideControl=thisPierSide;
+  } else pierSideControl=thisPierSide;
 
   D("Goto Axis1, Current "); D(((double)(long)posAxis1)/(double)StepsPerDegreeAxis1); D(" -to-> "); DL(((double)(long)targetAxis1.part.m)/(double)StepsPerDegreeAxis1);
   D("Goto Axis2, Current "); D(((double)(long)posAxis2)/(double)StepsPerDegreeAxis2); D(" -to-> "); DL(((double)(long)targetAxis2.part.m)/(double)StepsPerDegreeAxis2); DL("");
