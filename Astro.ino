@@ -707,5 +707,3 @@ void soundClick() {
     #endif
   }
 }
-
-

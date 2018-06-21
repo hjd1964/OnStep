@@ -1984,4 +1984,3 @@ bool cmdReply(char *s) {
   strcpy(s,_replyX); _replyX[0]=0;
   return true;
 }
-

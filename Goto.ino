@@ -497,4 +497,3 @@ GotoErrors goTo(long thisTargetAxis1, long thisTargetAxis2, long altTargetAxis1,
 
   return GOTO_ERR_NONE;
 }
-
