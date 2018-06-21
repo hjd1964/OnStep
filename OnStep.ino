@@ -389,7 +389,7 @@ void loop() {
   unsigned long tempMs=millis();
 
   // 0.5 SECOND TIMED ----------------------------------------------------------------------------------
-  static unsigned long debugTimer=tempMs;
+  static unsigned long debugTimer=0;
   if (((long)(tempMs-debugTimer)>0) && (millis()<1200)) {
     debugTimer=tempMs+500UL;
     DL(((double)SiderealRate/(double)timerRateAxis1));
@@ -397,6 +397,10 @@ void loop() {
 
   // 1 SECOND TIMED ------------------------------------------------------------------------------------
   static unsigned long housekeepingTimer=0;
+  if (housekeepingTimer == 0) {
+    housekeepingTimer = millis();
+  }
+
   if ((long)(tempMs-housekeepingTimer)>0) {
     housekeepingTimer=tempMs+1000UL;
 
