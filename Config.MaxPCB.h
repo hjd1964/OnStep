@@ -15,10 +15,6 @@
 // -------------------------------------------------------------------------------------------------------------------------
 // ADJUST THE FOLLOWING TO CONFIGURE YOUR CONTROLLER FEATURES --------------------------------------------------------------
 
-// Enables internal goto assist mount modeling (for Eq mounts), default=_OFF (Experimental)
-// Note that Goto Assist in Sky Planetarium works even if this is off
-#define ALIGN_GOTOASSIST_OFF
-
 // Default speed for Serial1 and Serial4 com ports, Default=9600
 #define SERIAL_B_BAUD_DEFAULT 9600
 #define SERIAL_C_BAUD_DEFAULT 9600

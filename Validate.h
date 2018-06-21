@@ -226,26 +226,14 @@
 #endif
 
 // figure out how many align star are allowed for the configuration
-#ifndef ALIGN_GOTOASSIST_ON
-  #if defined(MOUNT_TYPE_GEM)
-    #define MAX_NUM_ALIGN_STARS '3'
-  #elif defined(MOUNT_TYPE_FORK)
-    #define MAX_NUM_ALIGN_STARS '3'
-  #elif defined(MOUNT_TYPE_FORK_ALT)
-    #define MAX_NUM_ALIGN_STARS '1'
-  #elif defined(MOUNT_TYPE_ALTAZM)
-    #define MAX_NUM_ALIGN_STARS '3'
-  #endif
-#else
-  #if defined(MOUNT_TYPE_GEM)
-    #define MAX_NUM_ALIGN_STARS '6'
-  #elif defined(MOUNT_TYPE_FORK)
-    #define MAX_NUM_ALIGN_STARS '6'
-  #elif defined(MOUNT_TYPE_FORK_ALT)
-    #define MAX_NUM_ALIGN_STARS '1'
-  #elif defined(MOUNT_TYPE_ALTAZM)
-    #define MAX_NUM_ALIGN_STARS '3'
-  #endif
+#if defined(MOUNT_TYPE_GEM)
+  #define MAX_NUM_ALIGN_STARS '6'
+#elif defined(MOUNT_TYPE_FORK)
+  #define MAX_NUM_ALIGN_STARS '6'
+#elif defined(MOUNT_TYPE_FORK_ALT)
+  #define MAX_NUM_ALIGN_STARS '6'
+#elif defined(MOUNT_TYPE_ALTAZM)
+  #define MAX_NUM_ALIGN_STARS '6'
 #endif
 
 // make both enable and disable values

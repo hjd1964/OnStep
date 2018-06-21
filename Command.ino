@@ -168,22 +168,9 @@ void processCommands() {
             // after last star turn meridian flips off when align is done
             if ((alignNumStars==alignThisStar) && (meridianFlip==MeridianFlipAlign)) meridianFlip=MeridianFlipNever;
           
-#ifdef MOUNT_TYPE_ALTAZM
-            // AltAz Taki method
-            if ((alignNumStars>1) && (alignThisStar<=alignNumStars)) {
-              cli();
-              // get the Azm/Alt
-              double F=(double)(posAxis1+indexAxis1Steps)/(double)StepsPerDegreeAxis1;
-              double H=(double)(posAxis2+indexAxis2Steps)/(double)StepsPerDegreeAxis2;
-              sei();
-              // B=RA, D=Dec, H=Elevation (instr), F=Azimuth (instr), all in degrees
-              Align.addStar(alignThisStar,alignNumStars,haRange(LST()*15.0-newTargetRA),newTargetDec,H,F);
-              alignThisStar++;
-            } else
-#endif
             if (alignThisStar<=alignNumStars) {
-              // RA, Dec (in degrees)
-              if (GeoAlign.addStar(alignThisStar,alignNumStars,newTargetRA,newTargetDec)) alignThisStar++; else commandError=true;
+              // AltAz or Equ mode
+              if (Align.addStar(alignThisStar,alignNumStars,newTargetRA,newTargetDec)) alignThisStar++; else commandError=true;
             } else commandError=true;
 
           if (commandError) { alignNumStars=0; alignThisStar=0; }
@@ -437,7 +424,7 @@ void processCommands() {
       if (command[1]=='A')  { getHor(&f,&f1); if (!doubleToDms(reply,&f,false,true)) commandError=true; else quietReply=true; } else
 //  :Ga#   Get Local Time in 12 hour format
 //         Returns: HH:MM:SS#
-      if (command[1]=='a')  { i=highPrecision; highPrecision=true; LMT=timeRange(UT1-timeZone); if (LMT>12.0) LMT-=12.0; if (!doubleToHms(reply,&LMT)) commandError=true; else quietReply=true; highPrecision=i; } else 
+      if (command[1]=='a')  { LMT=timeRange(UT1-timeZone); if (LMT>12.0) LMT-=12.0; if (!doubleToHms(reply,&LMT,true)) commandError=true; else quietReply=true; } else 
 //  :GC#   Get the current date
 //         Returns: MM/DD/YY#
 //         The current local calendar date
@@ -495,7 +482,7 @@ void processCommands() {
 //         Returns: HH:MM:SS#
 //         On devices with single precision fp several days up-time will cause loss of precision as additional mantissa digits are needed to represent hours
 //         Devices with double precision fp are limitated by sidereal clock overflow which takes 249 days
-      if (command[1]=='L')  { i=highPrecision; highPrecision=true; LMT=timeRange(UT1-timeZone); if (!doubleToHms(reply,&LMT)) commandError=true; else quietReply=true; highPrecision=i; } else 
+      if (command[1]=='L')  { LMT=timeRange(UT1-timeZone); if (!doubleToHms(reply,&LMT,true)) commandError=true; else quietReply=true; } else 
 //  :GM#   Get Site 1 Name
 //  :GN#   Get Site 2 Name
 //  :GO#   Get Site 3 Name
@@ -513,9 +500,9 @@ void processCommands() {
 //         A # terminated string with the pier side.
       if (command[1]=='m')  {
         reply[0]='?'; reply[1]=0;
-        if (pierSide==PierSideNone) reply[0]='N';
-        if (pierSide==PierSideEast) reply[0]='E';
-        if (pierSide==PierSideWest) reply[0]='W';
+        if (getInstrPierSide()==PierSideNone) reply[0]='N';
+        if (getInstrPierSide()==PierSideEast) reply[0]='E';
+        if (getInstrPierSide()==PierSideWest) reply[0]='W';
         quietReply=true; } else
 //  :Go#   Get Overhead Limit
 //         Returns: DD*#
@@ -533,15 +520,15 @@ void processCommands() {
           getEqu(&f,&f1,false); f/=15.0;
           _ra=f; _dec=f1; _coord_t=millis(); 
         }
-        if (!doubleToHms(reply,&f)) commandError=true; else quietReply=true;  
+        if (!doubleToHms(reply,&f,highPrecision)) commandError=true; else quietReply=true;  
       } else 
 //  :Gr#   Get current/target object RA
 //         Returns: HH:MM.T# or HH:MM:SS (based on precision setting)
-      if (command[1]=='r')  { f=newTargetRA; f/=15.0; if (!doubleToHms(reply,&f)) commandError=true; else quietReply=true; } else 
+      if (command[1]=='r')  { f=newTargetRA; f/=15.0; if (!doubleToHms(reply,&f,highPrecision)) commandError=true; else quietReply=true; } else 
 //  :GS#   Get the Sidereal Time
 //         Returns: HH:MM:SS#
 //         The Sidereal Time as an ASCII Sexidecimal value in 24 hour format
-      if (command[1]=='S')  { i=highPrecision; highPrecision=true; f=LST(); if (!doubleToHms(reply,&f)) commandError=true; else quietReply=true; highPrecision=i; } else 
+      if (command[1]=='S')  { f=LST(); if (!doubleToHms(reply,&f,true)) commandError=true; else quietReply=true; } else 
 //  :GT#   Get tracking rate
 //         Returns: dd.ddddd# (OnStep returns more decimal places than LX200 standard)
 //         Returns the tracking rate if siderealTracking, 0.0 otherwise
@@ -626,24 +613,32 @@ void processCommands() {
       } else 
 //  :GXnn#   Get OnStep value
 //         Returns: value
-      if (command[1]=='X')  { 
+      if (command[1]=='X')  {
         if (parameter[2]==(char)0) {
           if (parameter[0]=='0') { // 0n: Align Model
+            static int star=0;
             switch (parameter[1]) {
-              case '0': sprintf(reply,"%ld",(long)(indexAxis1*3600.0)); quietReply=true; break;      // indexAxis1
-              case '1': sprintf(reply,"%ld",(long)(indexAxis2*3600.0)); quietReply=true; break;      // indexAxis2
-              case '2': sprintf(reply,"%ld",(long)(GeoAlign.altCor*3600.0)); quietReply=true; break; // altCor
-              case '3': sprintf(reply,"%ld",(long)(GeoAlign.azmCor*3600.0)); quietReply=true; break; // azmCor
-              case '4': sprintf(reply,"%ld",(long)(GeoAlign.doCor*3600.0)); quietReply=true; break;  // doCor
-              case '5': sprintf(reply,"%ld",(long)(GeoAlign.pdCor*3600.0)); quietReply=true; break;  // pdCor
+              case '0': sprintf(reply,"%ld",(long)(Align.ax1Cor*3600.0)); quietReply=true; break; // ax1Cor
+              case '1': sprintf(reply,"%ld",(long)(Align.ax2Cor*3600.0)); quietReply=true; break; // ax2Cor
+              case '2': sprintf(reply,"%ld",(long)(Align.altCor*3600.0)); quietReply=true; break; // altCor
+              case '3': sprintf(reply,"%ld",(long)(Align.azmCor*3600.0)); quietReply=true; break; // azmCor
+              case '4': sprintf(reply,"%ld",(long)(Align.doCor*3600.0)); quietReply=true; break;  // doCor
+              case '5': sprintf(reply,"%ld",(long)(Align.pdCor*3600.0)); quietReply=true; break;  // pdCor
 #if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT)
-              case '6': sprintf(reply,"%ld",(long)(GeoAlign.dfCor*3600.0)); quietReply=true; break;  // ffCor
-              case '7': sprintf(reply,"%ld",(long)(0)); quietReply=true; break;                      // dfCor
+              case '6': sprintf(reply,"%ld",(long)(Align.dfCor*3600.0)); quietReply=true; break;  // ffCor
+              case '7': sprintf(reply,"%ld",(long)(0)); quietReply=true; break;                   // dfCor
 #else
-              case '6': sprintf(reply,"%ld",(long)(0)); quietReply=true; break;                      // ffCor
-              case '7': sprintf(reply,"%ld",(long)(GeoAlign.dfCor*3600.0)); quietReply=true; break;  // dfCor
+              case '6': sprintf(reply,"%ld",(long)(0)); quietReply=true; break;                   // ffCor
+              case '7': sprintf(reply,"%ld",(long)(Align.dfCor*3600.0)); quietReply=true; break;  // dfCor
 #endif
-              case '8': sprintf(reply,"%ld",(long)(GeoAlign.tfCor*3600.0)); quietReply=true; break;  // tfCor
+              case '8': sprintf(reply,"%ld",(long)(Align.tfCor*3600.0)); quietReply=true; break;  // tfCor
+
+              case '9': { int n=0; if (alignThisStar>alignNumStars) n=alignNumStars; sprintf(reply,"%ld",(long)(n)); star=0; quietReply=true; } break; // Number of stars, reset to first star
+              case 'A': { double f=(Align.actual[star].ha*Rad)/15.0; doubleToHms(reply,&f,true);       quietReply=true; } break; // Star  #n HA
+              case 'B': { double f=(Align.actual[star].dec*Rad);     doubleToDms(reply,&f,false,true); quietReply=true; } break; // Star  #n Dec
+              case 'C': { double f=(Align.mount[star].ha*Rad)/15.0;  doubleToHms(reply,&f,true);       quietReply=true; } break; // Mount #n HA
+              case 'D': { double f=(Align.mount[star].dec*Rad);      doubleToDms(reply,&f,false,true); quietReply=true; } break; // Mount #n Dec
+              case 'E': sprintf(reply,"%ld",(long)(Align.mount[star].side)); star++; quietReply=true; break;                     // Mount PierSide (and increment n)
               default:  commandError=true;
             }
           } else
@@ -658,7 +653,7 @@ void processCommands() {
           } else
           if (parameter[0]=='8') { // 8n: Date/Time
             switch (parameter[1]) {
-              case '0': i=highPrecision; highPrecision=true; f=timeRange(UT1); doubleToHms(reply,&f); highPrecision=i; quietReply=true; break;  // UTC time
+              case '0': f=timeRange(UT1); doubleToHms(reply,&f,true); quietReply=true; break;  // UTC time
               case '1': f1=JD; f=UT1; while (f>=24.0) { f-=24.0; f1+=1; } while (f<0.0) { f+=24.0; f1-=1; } greg(f1,&i2,&i,&i1); i2=(i2/99.99999-floor(i2/99.99999))*100; sprintf(reply,"%d/%d/%d",i,i1,i2); quietReply=true; break; // UTC date
               default:  commandError=true;
             }
@@ -669,7 +664,7 @@ void processCommands() {
               case '1': sprintf(reply,"%i",pecAnalogValue); quietReply=true; break;                         // pec analog value
               case '2': sprintf(reply,"%ld",(long)(maxRate/16L)); quietReply=true; break;                   // MaxRate
               case '3': sprintf(reply,"%ld",(long)(MaxRate)); quietReply=true; break;                       // MaxRate (default)
-              case '4': if (meridianFlip==MeridianFlipNever) { sprintf(reply,"%d N",(int)(pierSide)); } else { sprintf(reply,"%d",(int)(pierSide)); } quietReply=true; break; // pierSide (N if never)
+              case '4': if (meridianFlip==MeridianFlipNever) { sprintf(reply,"%d N",getInstrPierSide()); } else { sprintf(reply,"%d",getInstrPierSide()); } quietReply=true; break; // pierSide (N if never)
               case '5': sprintf(reply,"%i",(int)autoMeridianFlip); quietReply=true; break;                  // autoMeridianFlip
               case '6':                                                                                     // preferred pier side
                 if (preferredPierSide==PPS_EAST) strcpy(reply,"E"); else
@@ -888,7 +883,7 @@ void processCommands() {
         strcat(reply,",");
         strcat(reply,objType);
         if (strcmp(reply,",UNK")!=0) {
-          f=newTargetRA; f/=15.0; doubleToHms(ws,&f); strcat(reply,","); strcat(reply,ws);
+          f=newTargetRA; f/=15.0; doubleToHms(ws,&f,highPrecision); strcat(reply,","); strcat(reply,ws);
           doubleToDms(ws,&newTargetDec,false,true); strcat(reply,","); strcat(reply,ws);
         }
         
@@ -1035,8 +1030,8 @@ void processCommands() {
         getEqu(&r,&d,false);
         i=validateGoToEqu(r,d);
         if (i==0) {
-          GeoAlign.altCor=0.0;
-          GeoAlign.azmCor=0.0;
+          Align.altCor=0.0;
+          Align.azmCor=0.0;
           i=goToEqu(r,d);
         }
         reply[0]=i+'0'; reply[1]=0;
@@ -1414,7 +1409,7 @@ void processCommands() {
           nv.writeFloat(100+(currentSite)*25+0,latitude);
 #ifdef MOUNT_TYPE_ALTAZM
           celestialPoleAxis2=AltAzmDecStartPos;
-          if (latitude<0) celestialPoleAxis1=180L; else celestialPoleAxis1=0L;
+          if (latitude<0) celestialPoleAxis1=180.0; else celestialPoleAxis1=0.0;
 #else
           if (latitude<0) celestialPoleAxis2=-90.0; else celestialPoleAxis2=90.0;
 #endif
@@ -1446,21 +1441,28 @@ void processCommands() {
       if (command[1]=='X')  {
         if (parameter[2]!=',') { parameter[0]=0; commandError=true; }                      // make sure command format is correct
         if (parameter[0]=='0') { // 0n: Align Model
+          static int star;
           switch (parameter[1]) {
-            case '0': indexAxis1=(double)strtol(&parameter[3],NULL,10)/3600.0; break;      // indexAxis1
-            case '1': indexAxis2=(double)strtol(&parameter[3],NULL,10)/3600.0; break;      // indexAxis2
-            case '2': GeoAlign.altCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break; // altCor
-            case '3': GeoAlign.azmCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break; // azmCor
-            case '4': GeoAlign.doCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;  // doCor
-            case '5': GeoAlign.pdCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;  // pdCor
+            case '0': Align.ax1Cor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;    // ax1Cor
+            case '1': Align.ax2Cor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;    // ax2Cor 
+            case '2': Align.altCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;    // altCor
+            case '3': Align.azmCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;    // azmCor
+            case '4': Align.doCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;     // doCor
+            case '5': Align.pdCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;     // pdCor
 #if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT)
-            case '6': GeoAlign.dfCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;  // ffCor
+            case '6': Align.dfCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;     // ffCor
             case '7': break;                                                               // dfCor
 #else
             case '6': break;                                                               // ffCor
-            case '7': GeoAlign.dfCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;  // dfCor
+            case '7': Align.dfCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;     // dfCor
 #endif
-            case '8': GeoAlign.tfCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;  // tfCor
+            case '8': Align.tfCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;     // tfCor
+            case '9': { i=strtol(&parameter[3],NULL,10); if (i==1) { alignNumStars=star; alignThisStar=star+1; Align.autoModel(star,true); } else star=0; } break; // use 0 to start upload of stars for align, use 1 to trigger align
+            case 'A': { i=highPrecision; highPrecision=true; if (!hmsToDouble(&Align.actual[star].ha,&parameter[3])) commandError=true; else Align.actual[star].ha=(Align.actual[star].ha*15.0)/Rad; highPrecision=i; } break; // Star  #n HA
+            case 'B': { i=highPrecision; highPrecision=true; if (!dmsToDouble(&Align.actual[star].dec,&parameter[3],true)) commandError=true; else Align.actual[star].dec=Align.actual[star].dec/Rad; highPrecision=i; } break; // Star  #n Dec
+            case 'C': { i=highPrecision; highPrecision=true; if (!hmsToDouble(&Align.mount[star].ha,&parameter[3])) commandError=true; else Align.mount[star].ha=(Align.mount[star].ha*15.0)/Rad; highPrecision=i; } break; // Mount  #n HA
+            case 'D': { i=highPrecision; highPrecision=true; if (!dmsToDouble(&Align.mount[star].dec,&parameter[3],true)) commandError=true; else Align.mount[star].dec=Align.mount[star].dec/Rad; highPrecision=i; } break; // Star  #n Dec
+            case 'E': Align.actual[star].side=Align.mount[star].side=strtol(&parameter[3],NULL,10); star++; break; // Mount PierSide (and increment n)
             default:  commandError=true;
           }
         } else
@@ -1984,3 +1986,4 @@ bool cmdReply(char *s) {
   strcpy(s,_replyX); _replyX[0]=0;
   return true;
 }
+

@@ -42,7 +42,7 @@ boolean hmsToDouble(double *f, char *hms) {
   return true;
 }
 
-boolean doubleToHms(char *reply, double *f) {
+boolean doubleToHms(char *reply, double *f, boolean hp) {
   double h1,m1,f1,s1;
 
   f1=fabs(*f)+0.000139; // round to 1/2 arc-sec
@@ -52,7 +52,7 @@ boolean doubleToHms(char *reply, double *f) {
   s1=(m1-floor(m1));
 
   char s[]="%s%02d:%02d:%02d";
-  if (highPrecision) {
+  if (hp) {
     s1=s1*60.0;
   } else {
     s1=s1*10.0;
@@ -462,7 +462,7 @@ boolean do_refractionRate_calc() {
   // get the instrument coordinates
   if ((rr_step==10) || (rr_step==110)) {
     if (ot) {
-      GeoAlign.EquToInstr(latitude,rr_HA,rr_Dec,&rr_HA,&rr_Dec);
+      Align.EquToInstr(latitude,rr_HA,rr_Dec,&rr_HA,&rr_Dec,getInstrPierSide());
       rr_HA+=indexAxis1; rr_Dec+=indexAxis2;
     }
   }
@@ -523,7 +523,7 @@ boolean do_refractionRate_calc() {
 
 #ifdef MOUNT_TYPE_ALTAZM
 
-#define AltAzTrackingRange 10  // distance in arc-min (20) ahead of and behind the current Equ position, used for rate calculation
+#define AltAzTrackingRange 10  // distance in arc-min (10) ahead of and behind the current Equ position, used for rate calculation
 
 boolean do_altAzmRate_calc() {
   boolean done=false;
@@ -661,7 +661,12 @@ double cot(double n) {
 
 // Acceleration rate calculation
 void SetAccelerationRates(double maxRate) {
-  // set the new acceleration rate
+  
+  // set the new guide acceleration rate
+//  slewRateX  = (RateToXPerSec/(maxRate/16.0))*2.0; // double since exponential factor slows by about 1/2
+//  accXPerSec = slewRateX/DegreesForAcceleration;
+//  guideRates[9]=RateToASPerSec/(maxRate/16.0); guideRates[8]=guideRates[9]/2.0;
+
   // set the new goto acceleration rate
   cli();
   StepsForRateChangeAxis1= (sqrt((double)DegreesForAcceleration*(double)StepsPerDegreeAxis1))*maxRate;
@@ -707,3 +712,5 @@ void soundClick() {
     #endif
   }
 }
+
+
