@@ -19,37 +19,52 @@
 
 // this is for CW/CCW type encoders -----------------------
 #if defined(AXIS1_ENC_CWCCW) || defined(AXIS2_ENC_CWCCW)
-  volatile int32_t __p;
-  void __cw() { __p++; }
-  void __ccw() { __p--; }
+  volatile int32_t __p1;
+  void __cw1() { __p1++; }
+  void __ccw1() { __p1--; }
+
+  volatile int32_t __p2;
+  void __cw2() { __p2++; }
+  void __ccw2() { __p2--; }
   
   class CwCcwEncoder {
     public:
-      CwCcwEncoder(int16_t cwPin, int16_t ccwPin) {
+      CwCcwEncoder(int16_t cwPin, int16_t ccwPin, int16_t axis) {
         _cwPin=cwPin;
         _ccwPin=ccwPin;
+        _axis=axis;
         pinMode(_cwPin,INPUT_PULLUP);
         pinMode(_ccwPin,INPUT_PULLUP);
-        attachInterrupt(digitalPinToInterrupt(_cwPin),__cw,CHANGE);
-        attachInterrupt(digitalPinToInterrupt(_ccwPin),__ccw,CHANGE);
+        if (_axis==1) {
+          attachInterrupt(digitalPinToInterrupt(_cwPin),__cw2,CHANGE);
+          attachInterrupt(digitalPinToInterrupt(_ccwPin),__ccw2,CHANGE);
+        }
+        if (_axis==2) {
+          attachInterrupt(digitalPinToInterrupt(_cwPin),__cw2,CHANGE);
+          attachInterrupt(digitalPinToInterrupt(_ccwPin),__ccw2,CHANGE);
+        }
       }
       int32_t read() {
-        int32_t v; noInterrupts(); v=__p; interrupts();
+        int32_t v=0;
+        if (_axis==1) { noInterrupts(); v=__p1; interrupts(); }
+        if (_axis==2) { noInterrupts(); v=__p2; interrupts(); }
         return v;
       }
       void write(int32_t v) {
-        noInterrupts(); __p=v; interrupts();
+        if (_axis==1) { noInterrupts(); __p1=v; interrupts(); }
+        if (_axis==2) { noInterrupts(); __p2=v; interrupts(); }
       }
     private:
       int16_t _cwPin;
       int16_t _ccwPin;
+      int16_t _axis;
   };
 #endif
 #ifdef AXIS1_ENC_CWCCW
-  CwCcwEncoder axis1Pos(AXIS1_ENC_A_PIN,AXIS1_ENC_B_PIN);
+  CwCcwEncoder axis1Pos(AXIS1_ENC_A_PIN,AXIS1_ENC_B_PIN,1);
 #endif
 #ifdef AXIS2_ENC_CWCCW
-  CwCcwEncoder axis2Pos(AXIS2_ENC_A_PIN,AXIS2_ENC_B_PIN);
+  CwCcwEncoder axis2Pos(AXIS2_ENC_A_PIN,AXIS2_ENC_B_PIN,2);
 #endif
 // --------------------------------------------------------
 
