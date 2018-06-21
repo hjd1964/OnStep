@@ -90,14 +90,13 @@ GotoErrors syncEqu(double RA, double Dec) {
 
 // syncs internal counts to shaft encoder position (in degrees)
 GotoErrors syncEnc(double EncAxis1, double EncAxis2) {
-  long a1,a2;
-
   // validate
   GotoErrors f=validateGoto(); if (f!=GOTO_ERR_NONE) return f;
 
   long e1=EncAxis1*(double)StepsPerDegreeAxis1;
   long e2=EncAxis2*(double)StepsPerDegreeAxis2;
   
+  long a1,a2;
   cli();
   a1=posAxis1;
   a2=posAxis2;
