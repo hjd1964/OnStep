@@ -118,14 +118,18 @@ GotoErrors syncEnc(double EncAxis1, double EncAxis2) {
 
 // get internal counts as shaft encoder position (in degrees)
 int getEnc(double *EncAxis1, double *EncAxis2) {
-//  long a1,a2;
-  
   // validate
   int f=validateGoto(); if (f!=0) return f;
-//  if ((pierSide!=PierSideWest) && (pierSide!=PierSideEast) && (pierSide!=PierSideNone)) return 9; // unspecified error
 
-  *EncAxis1=getInstrAxis1();
-  *EncAxis2=getInstrAxis2();
+  cli();
+  a1=posAxis1;
+  a2=posAxis2;
+  sei();
+  a1+=indexAxis1Steps;
+  a2+=indexAxis2Steps;
+  
+  *EncAxis1=(double)a1/(double)StepsPerDegreeAxis1;
+  *EncAxis2=(double)a2/(double)StepsPerDegreeAxis2;
 
   return 0;
 }
