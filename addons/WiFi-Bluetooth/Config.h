@@ -11,7 +11,7 @@
 #define LED_PIN_OFF               // Default=_OFF, Flashes LED when trying to connect to OnStep, use LED_PIN D4 for WeMos D1 Mini
 
 #define SERIAL_SWAP_OFF            // Default=_OFF, _ON to swap ESP8266 Serial default location GPIO 1(TX)/3(RX) to 15(TX)/13(RX) 
-                                  // useful for WeMos D1 Mini where these are labeled D8(TX) and D7(RX), for example
+                                   // useful for WeMos D1 Mini where these are labeled D8(TXD2) and D7(RXD2), for example
 
 #define SPECIAL_CHARS_ON          // Default=_ON, _OFF for standard ASCII special symbols (compatibility)
 #define ADVANCED_CHARS_ON         // Default=_ON, _OFF for standard "RA/Dec" instead of symbols
