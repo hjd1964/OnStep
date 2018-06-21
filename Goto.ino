@@ -121,6 +121,7 @@ int getEnc(double *EncAxis1, double *EncAxis2) {
   // validate
   int f=validateGoto(); if (f!=0) return f;
 
+  long a1,a2;
   cli();
   a1=posAxis1;
   a2=posAxis2;
