@@ -134,6 +134,7 @@
 #define REVERSE_AXIS1_OFF            // RA/Azm axis
 #define REVERSE_AXIS2_OFF            // Dec/Alt axis
 
+
 // Stepper driver Enable support is always on, just wire Enable to Pins 23 (Axis1) and 36 (Axis2) and OnStep will pull these HIGH
 // to disable stepper drivers on startup and when Parked or Homed.  An Align or UnPark will enable the drivers.  Adjust below if you need these pulled LOW to disable the drivers.
 #define AXIS1_DISABLED_HIGH
@@ -156,6 +157,7 @@
 // Note: you can replace this section with the contents of "AdvancedStepperSetup.txt" . . . . . . . . . . . . . . . . . . . 
 
 // Stepper driver Fault detection, just wire the driver Fault signal to Pins 39 (Axis1) and 38 (Axis2), default=_OFF.
+
 // other settings are LOW, HIGH, SPI.  The SPI interface (on M0/M1/M2/Aux) can be used to detect errors on the TMC2130.
 #define AXIS1_FAULT_OFF
 #define AXIS2_FAULT_OFF
@@ -197,4 +199,3 @@
 #define FileVersionConfig 1
 #include "Pins.Mega2560Alt.h"
 #endif
-
