@@ -7,9 +7,9 @@
 #define MaxRate_LowerLimit 16
 
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
-#define SerialA Serial
-#define SerialB Serial1
+#define SerialA SerialUSB
 // SerialA is always enabled, SerialB and SerialC are optional
+#define SerialB Serial1
 #define HAL_SERIAL_B_ENABLED
 
 // New symbol for the default I2C port ---------------------------------------------------------------
