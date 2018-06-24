@@ -48,6 +48,9 @@
 // frequency compensation (F_COMP/1000000.0) for adjusting microseconds to timer counts
 #define F_COMP F_BUS
 
+void HAL_Init(void) {
+}
+
 IntervalTimer itimer3;
 void TIMER3_COMPA_vect(void);
 

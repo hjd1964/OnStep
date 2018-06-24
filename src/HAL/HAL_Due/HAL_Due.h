@@ -50,6 +50,9 @@ void TIMER4_COMPA_vect(void);
 extern long int siderealInterval;
 extern void SiderealClockSetInterval (long int);
 
+void HAL_Init(void) {
+}
+
 // Init sidereal clock timer
 void HAL_Init_Timer_Sidereal() {
   Timer5.attachInterrupt(TIMER1_COMPA_vect);
