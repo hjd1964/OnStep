@@ -70,6 +70,11 @@
 // frequency compensation (F_COMP/1000000.0) for adjusting microseconds to timer counts
 #define F_COMP 1000000.0
 
+void HAL_Init(void) {
+  // Make sure that debug pins are not reserved, and therefore usable as GPIO
+  disableDebugPorts();
+}
+
 // initialised here and not in timer.ino
 void TIMER1_COMPA_vect(void);
 

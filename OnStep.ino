@@ -133,6 +133,9 @@ void setup() {
   delay(5000);
 #endif
   
+  // Call hardware specific initialization
+  HAL_Init();
+
   // initialize the Non-Volatile Memory
   nv.init();
 

@@ -77,6 +77,9 @@
   uint32_t g_ui32SysClock = SysCtlClockFreqSet((SYSCTL_XTAL_25MHZ | SYSCTL_OSC_MAIN | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), F_BUS);
 #endif
 
+void HAL_Init(void) {
+}
+
 // The Energia IDE does not have IntervalTimer so we have to initialise timers manually
 
 // We initialize these here and not in timer.ino

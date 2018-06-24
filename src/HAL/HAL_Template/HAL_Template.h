@@ -29,6 +29,9 @@
 // frequency compensation (F_COMP/1000000.0) for adjusting microseconds to timer counts
 #define F_COMP 1000000
 
+void HAL_Init(void) {
+}
+
 #define ISR(f) void f (void)
 void TIMER1_COMPA_vect(void);  // Sidereal timer
 void TIMER3_COMPA_vect(void);  // Axis1 RA/Azm timer
