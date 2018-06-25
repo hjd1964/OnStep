@@ -173,7 +173,7 @@
 #define AXIS2_FAULT_OFF
 
 // ------------------------------------------------------------------------------------------------------------------------
-// FOCUSER ROTATOR OR ALT/AZ DE-ROTATION ----------------------------------------------------------------------------------
+// CAMERA ROTATOR OR ALT/AZ DE-ROTATION -----------------------------------------------------------------------------------
 // A9,A8 = Step,Dir (Teensy3.x 30,33 choose either this option or the second focuser, not both)
 #define ROTATOR_OFF                  // use _ON to enable the rotator (for any mount type,) default=_OFF (this is also a de-rotator for MOUNT_TYPE_ALTAZM mounts.)
 #define MaxRateAxis3               8 // this is the minimum number of milli-seconds between micro-steps, default=8

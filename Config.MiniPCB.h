@@ -172,7 +172,7 @@
 
 // ------------------------------------------------------------------------------------------------------------------------
 // THE FOLLOWING ARE INFREQUENTLY USED OPTIONS FOR THE MINIPCB SINCE USING ANY OF THESE WOULD REQUIRE SOLDERING TO THE PCB BACK AND ADDING OFF-PCB CIRCUITRY, MUCH EASIER TO USE A MAXPCB AND TEENSY3.5/3.6
-// FOCUSER ROTATOR OR ALT/AZ DE-ROTATION ----------------------------------------------------------------------------------
+// CAMERA ROTATOR OR ALT/AZ DE-ROTATION -----------------------------------------------------------------------------------
 // Pads 30,33 = Step,Dir (choose either this option or the second focuser, not both)
 #define ROTATOR_OFF                  // use _ON to enable the rotator (for any mount type,) default=_OFF (this is also a de-rotator for MOUNT_TYPE_ALTAZM mounts.)
 #define MaxRateAxis3               8 // this is the minimum number of milli-seconds between micro-steps, default=8

@@ -183,7 +183,7 @@
 #define AXIS2_FAULT_OFF
 
 // ------------------------------------------------------------------------------------------------------------------------
-// FOCUSER ROTATOR OR ALT/AZ DE-ROTATION ----------------------------------------------------------------------------------
+// CAMERA ROTATOR OR ALT/AZ DE-ROTATION -----------------------------------------------------------------------------------
 // Pins 46,48 = Step,Dir
 #define ROTATOR_OFF                  // use _ON to enable the rotator (for any mount type,) default=_OFF (this is also a de-rotator for MOUNT_TYPE_ALTAZM mounts.)
 #define MaxRateAxis3               8 // this is the minimum number of milli-seconds between micro-steps, default=8
