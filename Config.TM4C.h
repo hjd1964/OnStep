@@ -174,10 +174,9 @@
 #define AXIS2_FAULT_OFF
 
 // ------------------------------------------------------------------------------------------------------------------------
-// THE FOLLOWING ARE INFREQUENTLY USED OPTIONS FOR THE MINIPCB SINCE USING ANY OF THESE WOULD REQUIRE SOLDERING TO THE PCB BACK AND ADDING OFF-PCB CIRCUITRY, MUCH EASIER TO USE A MAXPCB AND TEENSY3.5/3.6
 // FOCUSER ROTATOR OR ALT/AZ DE-ROTATION ----------------------------------------------------------------------------------
-// Pins (see pinmap) = Step,Dir (choose either this option or the second focuser, not both)
-#define ROTATOR_OFF                  // enable or disable rotator feature (for any mount type,) default=_OFF (de-rotator is available only for MOUNT_TYPE_ALTAZM.) [infrequently used option]
+// Pins (see pinmap) = Step,Dir (choose either this option or the first focuser, not both)
+#define ROTATOR_OFF                  // use _ON to enable the rotator (for any mount type,) default=_OFF (this is also a de-rotator for MOUNT_TYPE_ALTAZM mounts.)
 #define MaxRateAxis3               8 // this is the minimum number of milli-seconds between micro-steps, default=8
 #define StepsPerDegreeAxis3     64.0 // calculated as    :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
                                      // Rotator          :  24            * 8           * 20              *  6/360                = 64
@@ -189,24 +188,14 @@
 #define MaxAxis3                 180 // maximum allowed Axis3 rotator, default =  180
 
 // FOCUSER1 ---------------------------------------------------------------------------------------------------------------
-// Pins (see pinmap) = Step,Dir
-#define FOCUSER1_OFF                 // enable or disable focuser feature, default=_OFF
+// Pins (see pinmap) = Step,Dir (choose either this option or the rotator, not both)
+#define FOCUSER1_OFF                 // use _ON to enable this focuser, default=_OFF
 #define MaxRateAxis4               8 // this is the minimum number of milli-seconds between micro-steps, default=8
 #define StepsPerMicrometerAxis4  0.5 // figure this out by testing or other means
 #define AXIS4_REVERSE_OFF            // reverse the direction of Axis4 focuser movement
 #define AXIS4_DISABLE_OFF            // Pin ?.  Use HIGH for common stepper drivers if you want to power down the motor at stand-still.  Default _OFF.
 #define MinAxis4               -25.0 // minimum allowed Axis4 position in millimeters, default = -25.0
 #define MaxAxis4                25.0 // maximum allowed Axis4 position in millimeters, default =  25.0
-
-// FOCUSER2 ---------------------------------------------------------------------------------------------------------------
-// Pins (see pinmap) = Step,Dir (choose either this option or the rotator, not both)
-#define FOCUSER2_OFF                 // enable or disable focuser feature, default=_OFF
-#define MaxRateAxis5               8 // this is the minimum number of milli-seconds between micro-steps, default=8
-#define StepsPerMicrometerAxis5  0.5 // figure this out by testing or other means
-#define AXIS5_REVERSE_OFF            // reverse the direction of Axis5 focuser movement
-#define AXIS5_DISABLE_OFF            // Pin ?.  Use HIGH for common stepper drivers if you want to power down the motor at stand-still.  Default _OFF.
-#define MinAxis5               -25.0 // minimum allowed Axis5 position in millimeters, default = -25.0
-#define MaxAxis5                25.0 // maximum allowed Axis5 position in millimeters, default =  25.0
 
 // THAT'S IT FOR USER CONFIGURATION!
 // -------------------------------------------------------------------------------------------------------------------------
