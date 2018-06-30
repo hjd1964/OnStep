@@ -258,11 +258,12 @@ LX200RETURN Move2TargetLX200()
   return response;
 }
 
-LX200RETURN SetTargetRaLX200(uint8_t& vr1, uint8_t& vr2, uint8_t& vr3)
+LX200RETURN SetTargetRaLX200(int vr1, int vr2, int vr3)
 {
   char cmd[20], out[20];
   int iter = 0;
-  sprintf(cmd, ":Sr%02u:%02u:%02u#", vr1, vr2, vr3);
+  if ((vr1<0) || (vr1>24) || (vr2<0) || (vr2>59) || (vr3<0) || (vr3>59)) return  LX200SETVALUEFAILED;
+  sprintf(cmd, ":Sr%02d:%02d:%02d#", vr1, vr2, vr3);
   while (iter < 3)
   {
     if (SetLX200(cmd) ==  LX200VALUESET)
@@ -282,11 +283,12 @@ LX200RETURN SetTargetRaLX200(uint8_t& vr1, uint8_t& vr2, uint8_t& vr3)
   return LX200SETVALUEFAILED;
 }
 
-LX200RETURN SetTargetDecLX200(short& vd1, uint8_t& vd2, uint8_t& vd3)
+LX200RETURN SetTargetDecLX200(char sign, int vd1, int vd2, int vd3)
 {
   char  cmd[20], out[20];
   int iter = 0;
-  sprintf(cmd, ":Sd%+03d:%02u:%02u#", vd1, vd2, vd3);
+  if (((sign!='-') && (sign!='+')) || (vd1<0) || (vd1>90) || (vd2<0) || (vd2>59) || (vd3<0) || (vd3>59)) return  LX200SETVALUEFAILED;
+  sprintf(cmd, ":Sd%c%02d:%02d:%02d#", sign, vd1, vd2, vd3);
   while (iter < 3)
   {
     if (SetLX200(cmd) ==  LX200VALUESET)
@@ -296,7 +298,7 @@ LX200RETURN SetTargetDecLX200(short& vd1, uint8_t& vd2, uint8_t& vd3)
         int deg;
         unsigned int min, sec;
         char2DEC(out, deg, min, sec);
-        if (deg == vd1 && min == vd2 && sec == vd3)
+        if (out[0]==sign && abs(deg) == vd1 && min == vd2 && sec == vd3)
         {
           return LX200VALUESET;
         }
@@ -307,6 +309,25 @@ LX200RETURN SetTargetDecLX200(short& vd1, uint8_t& vd2, uint8_t& vd3)
   return LX200SETVALUEFAILED;
 }
 
+LX200RETURN SyncGotoLX200(bool sync, float &Ra, float &Dec)
+{
+  int ivr1, ivr2, ivd1, ivd2;
+  float fvr3, fvd3;
+  char sign='+';
+  Ephemeris::floatingHoursToHoursMinutesSeconds(Ra, &ivr1, &ivr2, &fvr3);
+  Ephemeris::floatingDegreesToDegreesMinutesSeconds(abs(Dec), &ivd1, &ivd2, &fvd3);
+  if (Dec<0.0) sign='-';
+
+  if (SetTargetRaLX200(ivr1, ivr2, (int)fvr3) ==  LX200VALUESET && SetTargetDecLX200(sign, ivd1, ivd2, (int)fvd3) == LX200VALUESET) {
+    if (sync) {
+      Ser.print(":CS#");
+      Ser.flush();
+      return LX200SYNCED;
+    } else return Move2TargetLX200();
+  } else return LX200SETTARGETFAILED;
+}
+
+/*
 LX200RETURN SyncGotoLX200(bool sync, uint8_t& vr1, uint8_t& vr2, uint8_t& vr3, short& vd1, uint8_t& vd2, uint8_t& vd3)
 {
   if (SetTargetRaLX200(vr1, vr2, vr3) ==  LX200VALUESET && SetTargetDecLX200(vd1, vd2, vd3) == LX200VALUESET) {
@@ -334,6 +355,7 @@ LX200RETURN SyncGotoLX200(bool sync, float &Ra, float &Dec)
   vd3 = (int)fvd3;
   return SyncGotoLX200(sync, vr1, vr2, vr3, vd1, vd2, vd3);
 }
+*/
 
 LX200RETURN GetDateLX200(unsigned int &day, unsigned int &month, unsigned int &year)
 {

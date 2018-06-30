@@ -95,7 +95,6 @@ bool CatMgr::isFiltered() {
     case FM_NONE: return false; break;
     case FM_ABOVE_HORIZON:
       EquToHor(ra(),dec(),&a,&z);
-      D("ra="); D(ra()); D(",dec="); D(dec()); D(",alt="); DL(a);
       return a<0.0;
     break;
     case FM_ALIGN_ALL_SKY:
@@ -135,7 +134,7 @@ bool CatMgr::isFiltered() {
       return false;
     break;
     case FM_ALIGN_3STAR_3:
-      // minimum 10 degrees altitude (to limit unlikely align stars and to minimime refraction effects)
+      // minimum 10 degrees altitude (to limit unlikely align stars and to minimize refraction effects)
       EquToHor(ra(),dec(),&a,&z);
       if (a<10.0) return true;
       // maximum 30 degrees from align location
@@ -168,6 +167,7 @@ void CatMgr::incIndex() {
     i--;
     _idx[_selected]++; if (_idx[_selected]>_maxIdx[_selected]) _idx[_selected]=0;
   } while (isFiltered() && (i>0));
+  D("ra="); D(ra()); D(",dec="); D(dec());
 }
 
 void CatMgr::decIndex() {

@@ -210,7 +210,21 @@ void gethms(const long& v, uint8_t& v1, uint8_t& v2, uint8_t& v3)
   v1 = v / 3600;
 }
 
+/*
 void getdms(const long& v, short& v1, uint8_t& v2, uint8_t& v3)
+{
+  v3 = abs(v) % 60;
+  v2 = (abs(v) / 60) % 60;
+  v1 = v / 3600;
+}
+*/
+
+void secondsToFloat(const long& v, float& f)
+{
+  f = (double)v / 3600.0;
+}
+
+void getDegrees(const long& v, short& v1, uint8_t& v2, uint8_t& v3)
 {
   v3 = abs(v) % 60;
   v2 = (abs(v) / 60) % 60;
@@ -328,6 +342,22 @@ void SmartHandController::update()
     if (!moveSouth && buttonPad.s.isDown()) { moveSouth = true;  Ser.print(":Ms#"); buttonCommand=true; } else
     if (moveSouth  && buttonPad.s.isUp())   { moveSouth = false; Ser.print(":Qs#"); buttonCommand=true; buttonPad.s.clearPress(); }
 
+    if (buttonCommand) { time_last_action = millis(); return; }
+  }
+
+  // handle fF button features
+  static bool moveOut=false;
+  static bool moveIn=false;
+  if (telInfo.atHome()) {
+    if (buttonPad.F.wasPressed()) { Ser.print(":B+#"); time_last_action = millis(); return; } else
+    if (buttonPad.f.wasPressed()) { Ser.print(":B-#"); time_last_action = millis(); return; }
+  } else {
+    // should send the ":FA#" command to see if we have a focuser and revert to always use reticule brightness if not
+    buttonCommand = false;
+    if (!moveOut && buttonPad.F.isDown()) { moveOut = true;  Ser.print(":F+#"); buttonCommand=true; } else
+    if (moveOut && buttonPad.F.isUp())    { moveOut = false; Ser.print(":FQ#"); buttonCommand=true; buttonPad.F.clearPress(); } else
+    if (!moveIn && buttonPad.f.isDown())  { moveIn = true;   Ser.print(":F-#"); buttonCommand=true; } else
+    if (moveIn && buttonPad.f.isUp())     { moveIn = false;  Ser.print(":FQ#"); buttonCommand=true; buttonPad.f.clearPress(); }
     if (buttonCommand) { time_last_action = millis(); return; }
   }
 
@@ -913,36 +943,66 @@ void SmartHandController::menuAlignment()
       }
     } else
     if (maxAlignStars==1) {
-      strcpy(string_list_AlignmentL1,"1-Star Align.\n""Show Corr.\n""Clear Corr.");
+      strcpy(string_list_AlignmentL1,"1-Star Align.");
       current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Alignment", current_selection_L1, string_list_AlignmentL1);
       switch (current_selection_L1) {
         case 1: if (SetLX200(":A1#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_ONE; else DisplayMessage("Alignment", "Failed!", -1); break;
-        case 2: break;
-        case 3: break;
         default: break;
       }
     } else
     if (maxAlignStars==3) {
-      strcpy(string_list_AlignmentL1,"1-Star Align.\n""2-Star Align.\n""3-Star Align.\n""Show Corr.\n""Clear Corr.");
+      strcpy(string_list_AlignmentL1,"1-Star Align.\n""2-Star Align.\n""3-Star Align.\n""Show Model\n""Clear Model");
       current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Alignment", current_selection_L1, string_list_AlignmentL1);
       switch (current_selection_L1) {
         case 1: if (SetLX200(":A1#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_ONE; else DisplayMessage("Alignment", "Failed!", -1); break;
         case 2: if (SetLX200(":A2#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_TWO; else DisplayMessage("Alignment", "Failed!", -1); break;
         case 3: if (SetLX200(":A3#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_THREE; else DisplayMessage("Alignment", "Failed!", -1); break;
-        case 4: break;
-        case 5: break;
+        case 4:
+        {
+          char r2[20]=""; char r3[20]=""; char r4[20]=""; char r5[20]=""; char r8[20]="";
+          if ((GetLX200(":GX02",r2)==LX200VALUEGET) && (GetLX200(":GX03",r3)==LX200VALUEGET) && 
+              (GetLX200(":GX04",r4)==LX200VALUEGET) && (GetLX200(":GX05",r5)==LX200VALUEGET) && 
+              (GetLX200(":GX08",r8)==LX200VALUEGET)) {
+            char s1[20]=""; strcat(s1,"PE="); strcat(s1,r2); strcat(s1,", PZ="); strcat(s1,r3);
+            char s2[20]=""; strcat(s2,"DO (cone)="); strcat(s2,r4);
+            char s3[20]=""; strcat(s3,"PD="); strcat(s3,r5); strcat(s3,", TF="); strcat(s3,r8);
+            DisplayLongMessage("Align results (in \"):", s1, s2, s3, -1);
+          }
+        }
+        break;
+        case 5:
+          if ((SetLX200(":SX02,0#")==LX200VALUESET) && (SetLX200(":SX03,0#")==LX200VALUESET) &&
+              (SetLX200(":SX04,0#")==LX200VALUESET) && (SetLX200(":SX05,0#")==LX200VALUESET) &&
+              (SetLX200(":SX06,0#")==LX200VALUESET) && (SetLX200(":SX07,0#")==LX200VALUESET) &&
+              (SetLX200(":SX08,0#")==LX200VALUESET)) DisplayMessageLX200(LX200VALUESET,false); else DisplayMessageLX200(LX200SETVALUEFAILED,false);
+        break;
         default: break;
       }
     } else
     if (maxAlignStars>=4) {
-      strcpy(string_list_AlignmentL1,"1-Star Align.\n""4-Star Align.\n""6-Star Align.\n""Show Corr.\n""Clear Corr.");
+      strcpy(string_list_AlignmentL1,"1-Star Align.\n""4-Star Align.\n""6-Star Align.\n""Show Model\n""Clear Model");
       current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Alignment", current_selection_L1, string_list_AlignmentL1);
       switch (current_selection_L1) {
         case 1: if (SetLX200(":A1#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_ONE; else DisplayMessage("Alignment", "Failed!", -1); break;
         case 2: if (SetLX200(":A4#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_FOUR; else DisplayMessage("Alignment", "Failed!", -1); break;
         case 3: if (SetLX200(":A6#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_SIX; else DisplayMessage("Alignment", "Failed!", -1); break;
-        case 4: break;
-        case 5: break;
+        case 4:
+        {
+          char r2[20]=""; char r3[20]=""; char r4[20]=""; char r5[20]=""; char r8[20]="";
+          if ((GetLX200(":GX02",r2)==LX200VALUEGET) && (GetLX200(":GX03",r3)==LX200VALUEGET) && 
+              (GetLX200(":GX04",r4)==LX200VALUEGET) && (GetLX200(":GX05",r5)==LX200VALUEGET) && 
+              (GetLX200(":GX08",r8)==LX200VALUEGET)) {
+            char s1[20]=""; strcat(s1,"PE="); strcat(s1,r2); strcat(s1,", PZ="); strcat(s1,r3);
+            char s2[20]=""; strcat(s2,"DO (cone)="); strcat(s2,r4);
+            char s3[20]=""; strcat(s3,"PD="); strcat(s3,r5); strcat(s3,", TF="); strcat(s3,r8);
+            DisplayLongMessage("Align results (in \"):", s1, s2, s3, -1);
+          }
+        }
+        case 5:
+          if ((SetLX200(":SX02,0#")==LX200VALUESET) && (SetLX200(":SX03,0#")==LX200VALUESET) &&
+              (SetLX200(":SX04,0#")==LX200VALUESET) && (SetLX200(":SX05,0#")==LX200VALUESET) &&
+              (SetLX200(":SX06,0#")==LX200VALUESET) && (SetLX200(":SX07,0#")==LX200VALUESET) &&
+              (SetLX200(":SX08,0#")==LX200VALUESET)) DisplayMessageLX200(LX200VALUESET,false); else DisplayMessageLX200(LX200SETVALUEFAILED,false);
         default: break;
       }
     }
@@ -1063,13 +1123,18 @@ void SmartHandController::menuRADec(bool sync)
 {
   if (display->UserInterfaceInputValueRA(&buttonPad, &angleRA))
   {
-    uint8_t vr1, vr2, vr3, vd2, vd3;
-    short vd1;
-    gethms(angleRA, vr1, vr2, vr3);
+//    uint8_t vr1, vr2, vr3, vd2, vd3;
+//    short vd1;
+//    gethms(angleRA, vr1, vr2, vr3);
+    float fR;
+    secondsToFloat(angleRA,fR);
     if (display->UserInterfaceInputValueDec(&buttonPad, &angleDEC))
     {
-      getdms(angleDEC, vd1, vd2, vd3);
-      bool ok = DisplayMessageLX200(SyncGotoLX200(sync, vr1, vr2, vr3, vd1, vd2, vd3));
+      float fD;
+      secondsToFloat(angleDEC,fD);
+//      getdms(angleDEC, vd1, vd2, vd3);
+//      bool ok = DisplayMessageLX200(SyncGotoLX200(sync, vr1, vr2, vr3, vd1, vd2, vd3));
+      bool ok = DisplayMessageLX200(SyncGotoLX200(sync, fR, fD));
       if (ok)
       {
         // Quit Menu
