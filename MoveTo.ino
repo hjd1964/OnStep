@@ -75,12 +75,11 @@ void moveTo() {
   distDestAxis2=abs(posAxis2-(long)targetAxis2.part.m);  // distance from dest Axis2
   sei();
   
-  long a2=abs((getInstrAxis2()-getTargetAxis2())*StepsPerDegreeAxis2);
+  long a2=abs(getInstrAxis2()*StepsPerDegreeAxis2);
   static long lastPosAxis2=0;
 
   // adjust rates near the horizon to help keep from exceeding the minAlt limit
   #ifndef MOUNT_TYPE_ALTAZM
-  if (latitude<0) a2=-a2;
   if (((latitude>10) || (latitude<-10)) && (distStartAxis1>((DegreesForAcceleration*StepsPerDegreeAxis1)/16))) {
     // if Dec is decreasing, slow down Dec
     if (a2<lastPosAxis2) {
