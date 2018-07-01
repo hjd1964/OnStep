@@ -1,8 +1,6 @@
 // -----------------------------------------------------------------------------------
 // Functions to move the mount to the a new position
 
-long lastPosAxis2=0;
-
 // moves the mount
 void moveTo() {
   // HA goes from +90...0..-90
@@ -70,36 +68,34 @@ void moveTo() {
   sei();
   if (distStartAxis1<1) distStartAxis1=1;
   if (distStartAxis2<1) distStartAxis2=1;
-  
+
   Again:
   cli();
-  long tempPosAxis2=posAxis2;
-  distDestAxis1=abs(posAxis1-(long)targetAxis1.part.m);      // distance from dest Axis1
-  distDestAxis2=abs(tempPosAxis2-(long)targetAxis2.part.m);  // distance from dest Axis2
+  distDestAxis1=abs(posAxis1-(long)targetAxis1.part.m);  // distance from dest Axis1
+  distDestAxis2=abs(posAxis2-(long)targetAxis2.part.m);  // distance from dest Axis2
   sei();
+  
+  long a2=abs((getInstrAxis2()-getTargetAxis2())*StepsPerDegreeAxis2);
+  static long lastPosAxis2=0;
 
   // adjust rates near the horizon to help keep from exceeding the minAlt limit
   #ifndef MOUNT_TYPE_ALTAZM
-  tempPosAxis2+=indexAxis2Steps; if (latitude<0) tempPosAxis2=-tempPosAxis2;
+  if (latitude<0) a2=-a2;
   if (((latitude>10) || (latitude<-10)) && (distStartAxis1>((DegreesForAcceleration*StepsPerDegreeAxis1)/16))) {
     // if Dec is decreasing, slow down Dec
-    if (tempPosAxis2<lastPosAxis2) {
-      cli();
+    if (a2<lastPosAxis2) {
       double minAlt2=minAlt+10.0;
       long a=(currentAlt-minAlt2)*StepsPerDegreeAxis2; if (a<((DegreesForAcceleration*StepsPerDegreeAxis2)/8)) a=((DegreesForAcceleration*StepsPerDegreeAxis2)/8);
       if (a<distDestAxis2) distDestAxis2=a;
-      sei();
     } else
     // if Dec is increasing, slow down HA
     {
-      cli();
       double minAlt2=minAlt+10.0;
       long a=(currentAlt-minAlt2)*StepsPerDegreeAxis1; if (a<((DegreesForAcceleration*StepsPerDegreeAxis1)/8)) a=((DegreesForAcceleration*StepsPerDegreeAxis1)/8);
       if (a<distDestAxis1) distDestAxis1=a;
-      sei();
     }
   }
-  lastPosAxis2=tempPosAxis2;
+  lastPosAxis2=a2;
   #endif
 
   if (distDestAxis1<1) distDestAxis1=1;
