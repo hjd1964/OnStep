@@ -58,16 +58,14 @@
   #define LED           PC13
   #define TONE          PB9 
   #define SQW           PB5 
+  #define PECIDX        PB8
 
-  #define F1EN          PC14
-  #define F1ST          PA14
-  #define F1DR          PA13
-
-  #define SPARE1        PB8
-  #define SPARE2        PB3
-
-  #define UNUSABLE1     PA15
-  #define UNUSABLE2     PB4
+  #define SPARE1        PA15
+  #define SPARE2        PC14
+  #define SPARE3        PA14
+  #define SPARE4        PA13
+  #define SPARE5        PB3
+  #define SPARE6        PB4
 
 #elif defined(STM32Black_ON) 
 
@@ -85,7 +83,7 @@
   #define A2M2          PA8  
   #define A2MISO        PB15 
   #define A2ST          PB14
-  #define A2DR          PA13
+  #define A2DR          PB13
 
   #define S4N           PA7 
   #define S4S           PA6 
@@ -96,12 +94,12 @@
   #define TONE          PB1 
   #define SQW           PB5 
 
-  #define F1EN          PB0
-  #define F1ST          PA14
-  #define F1DR          PA13
+  #define PECIDX        PB0
 
-  #define UNUSABLE1     PA15
-  #define UNUSABLE2     PB4
+  #define SPARE1        PA15 // Unknown if it works or not
+  #define SPARE2        PA14 // Unknown if it works or not
+  #define SPARE3        PA13 // Unknown if it works or not
+  #define SPARE4        PB4  // Unknown if it works or not
 
 #else
   #error "Unknown STM32 Board. This pinmap is only for Blue and Black Pill variants"
@@ -145,17 +143,17 @@
 #define PpsPin          SQW    // Pulse Per Second time source, e.g. GPS, RTC
 
 // Pins to focuser1 stepper driver
-#define Axis4DirPin     F1DR   // Dir
-#define Axis4StepPin    F1ST   // Step
-#define Axis4_EN        F1EN   // Step
+//#define Axis4DirPin     F1DR   // Dir
+//#define Axis4StepPin    F1ST   // Step
+//#define Axis4_EN        F1EN   // Step
 
 // For focuser2 stepper driver
 //#define Axis5DirPin   Undefined   // Dir
 //#define Axis5StepPin  Undefined   // Step
 
 // For rotator stepper driver
-//#define Axis5DirPin   Undefined   // Dir
-//#define Axis5StepPin  Undefined   // Step
+//#define Axis3DirPin   Undefined   // Dir
+//#define Axis3StepPin  Undefined   // Step
 
 // The limit switch sense is a logic level input which uses the internal pull up,
 // shorted to ground it stops gotos/tracking
@@ -163,7 +161,7 @@
 
 // The PEC index sense is a logic level input, resets the PEC index on rising
 // edge then waits for 60 seconds before allowing another reset
-//#define PecPin        Undefined
+#define PecPin          PECIDX
 //#define AnalogPecPin  Undefined    // PEC Sense, analog or digital
 
 //#define LEDneg2Pin    Undefined    // Drain
