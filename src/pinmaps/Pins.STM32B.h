@@ -96,10 +96,10 @@
 
   #define PECIDX        PB0
 
-  #define SPARE1        PA15 // Unknown if it works or not
-  #define SPARE2        PA14 // Unknown if it works or not
-  #define SPARE3        PA13 // Unknown if it works or not
-  #define SPARE4        PB4  // Unknown if it works or not
+  #define SPARE1        PA15
+  #define SPARE2        PA14
+  #define SPARE3        PA13
+  #define SPARE4        PB4
 
 #else
   #error "Unknown STM32 Board. This pinmap is only for Blue and Black Pill variants"
