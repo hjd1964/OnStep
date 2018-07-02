@@ -54,8 +54,8 @@ void moveTo() {
       }
     }
 
-    D("Flp1 Axis1, Current "); D(((double)(long)posAxis1)/(double)StepsPerDegreeAxis1); D(" -to-> "); DL(((double)(long)targetAxis1.part.m)/(double)StepsPerDegreeAxis1);
-    D("Flp1 Axis2, Current "); D(((double)(long)posAxis2)/(double)StepsPerDegreeAxis2); D(" -to-> "); DL(((double)(long)targetAxis2.part.m)/(double)StepsPerDegreeAxis2); DL("");
+//    D("Flp1 Axis1, Current "); D(((double)(long)posAxis1)/(double)StepsPerDegreeAxis1); D(" -to-> "); DL(((double)(long)targetAxis1.part.m)/(double)StepsPerDegreeAxis1);
+//    D("Flp1 Axis2, Current "); D(((double)(long)posAxis2)/(double)StepsPerDegreeAxis2); D(" -to-> "); DL(((double)(long)targetAxis2.part.m)/(double)StepsPerDegreeAxis2); DL("");
     pierSideControl++;
     forceRefreshGetEqu();
   }
@@ -101,18 +101,16 @@ void moveTo() {
   if (distDestAxis2<1) distDestAxis2=1;
 
   // quickly slow the motors and stop in DegreesForRapidStop
-  if (abortSlew) {
+  static double deaccXPerSec=0;
+  static double a1r=0;
+  static double a2r=0;
+  if (abortSlew==1) {
     // aborts any meridian flip
     if ((pierSideControl==PierSideFlipWE1) || (pierSideControl==PierSideFlipWE2) || (pierSideControl==PierSideFlipWE3)) pierSideControl=PierSideWest;
     if ((pierSideControl==PierSideFlipEW1) || (pierSideControl==PierSideFlipEW2) || (pierSideControl==PierSideFlipEW3)) pierSideControl=PierSideEast;
     if (pauseHome) { waitingHome=false; waitingHomeContinue=false; }
 
-    // set the destination near where we are now
-    cli();
-    if (distDestAxis1>(long)(StepsPerDegreeAxis1*DegreesForRapidStop)) { if (posAxis1>(long)targetAxis1.part.m) targetAxis1.part.m=posAxis1-(long)(StepsPerDegreeAxis1*DegreesForRapidStop); else targetAxis1.part.m=posAxis1+(long)(StepsPerDegreeAxis1*DegreesForRapidStop); targetAxis1.part.f=0; }
-    if (distDestAxis2>(long)(StepsPerDegreeAxis2*DegreesForRapidStop)) { if (posAxis2>(long)targetAxis2.part.m) targetAxis2.part.m=posAxis2-(long)(StepsPerDegreeAxis2*DegreesForRapidStop); else targetAxis2.part.m=posAxis2+(long)(StepsPerDegreeAxis2*DegreesForRapidStop); targetAxis2.part.f=0; }
-    sei();
-
+    // stop parking/homing
     if (parkStatus==Parking) {
       lastTrackingState=abortTrackingState;
       parkStatus=NotParked;
@@ -122,9 +120,16 @@ void moveTo() {
       lastTrackingState=abortTrackingState;
       homeMount=false;
     }
-    
-    abortSlew=false;
-    goto Again;
+
+    // set rate (in X sidereal) at which we slow down from
+    double rateXPerSec = RateToXPerSec/(maxRate/16.0);
+    D("rateXPerSec="); DL(rateXPerSec);
+    double numSecToStop = (DegreesForRapidStop / (rateXPerSec/240.0));
+    D("numSecToStop="); DL(numSecToStop);
+    deaccXPerSec = (DegreesForRapidStop/numSecToStop)*240.0;
+    D("deaccXPerSec="); DL(deaccXPerSec);
+
+    abortSlew++;
   }
 
   // First, for Right Ascension
@@ -136,6 +141,17 @@ void moveTo() {
   }
   if (temp<maxRate) temp=maxRate;                            // fastest rate 
   if (temp>TakeupRate) temp=TakeupRate;                      // slowest rate
+  if (abortSlew!=0) {
+    //                50x=                  5000/100
+    if (abortSlew==2) { a1r=(double)SiderealRate/(double)temp; } else
+    if (abortSlew==3) {
+      double r=1.2-sqrt((abs(a1r)/slewRateX));
+      if (r<0.2) r=0.2; if (r>1.2) r=1.2;
+      a1r-=(deaccXPerSec/100.0)*r; if (a1r<2.0) a1r=2.0;
+    }
+    // 100=5000/50
+    temp=round((double)SiderealRate/a1r);
+  }
   cli(); timerRateAxis1=temp; sei();
 
   // Now, for Declination
@@ -146,6 +162,18 @@ void moveTo() {
   }
   if (temp<maxRate) temp=maxRate;                            // fastest rate
   if (temp>TakeupRate) temp=TakeupRate;                      // slowest rate
+  if (abortSlew!=0) {
+    if (abortSlew==2) { a2r=(double)SiderealRate/(double)temp; abortSlew++; } else
+    if (abortSlew==3) { 
+      double r=1.2-sqrt((abs(a2r)/slewRateX));
+      if (r<0.2) r=0.2; if (r>1.2) r=1.2;
+      a2r-=(deaccXPerSec/100.0)*r;
+      if (a2r<2.00) a2r=2.0;
+      if ((a1r<2.00001) && (a2r<2.00001)) abortSlew++;
+    } else
+    if (abortSlew==4) { abortSlew=0; cli(); targetAxis1.part.m=posAxis1; targetAxis2.part.m=posAxis2; sei(); distDestAxis1=0; distDestAxis2=0; }
+    temp=round((double)SiderealRate/a2r);
+  }
   cli(); timerRateAxis2=temp; sei();
 
 #ifdef MOUNT_TYPE_ALTAZM
@@ -183,10 +211,9 @@ void moveTo() {
         // for eq mounts
         if (pierSideControl==PierSideFlipEW2) setTargetAxis1(celestialPoleAxis1,PierSideEast); else setTargetAxis1(-celestialPoleAxis1,PierSideWest);
       }
-//      setTargetAxis2(celestialPoleAxis2,PierSideWest);
 
-      D("Flp2 Axis1, Current "); D(((double)(long)posAxis1)/(double)StepsPerDegreeAxis1); D(" -to-> "); DL(((double)(long)targetAxis1.part.m)/(double)StepsPerDegreeAxis1);
-      D("Flp2 Axis2, Current "); D(((double)(long)posAxis2)/(double)StepsPerDegreeAxis2); D(" -to-> "); DL(((double)(long)targetAxis2.part.m)/(double)StepsPerDegreeAxis2); DL("");
+//      D("Flp2 Axis1, Current "); D(((double)(long)posAxis1)/(double)StepsPerDegreeAxis1); D(" -to-> "); DL(((double)(long)targetAxis1.part.m)/(double)StepsPerDegreeAxis1);
+//      D("Flp2 Axis2, Current "); D(((double)(long)posAxis2)/(double)StepsPerDegreeAxis2); D(" -to-> "); DL(((double)(long)targetAxis2.part.m)/(double)StepsPerDegreeAxis2); DL("");
       
       forceRefreshGetEqu();
       pierSideControl++;
@@ -207,8 +234,8 @@ void moveTo() {
       sei();
 
       forceRefreshGetEqu();
-      D("Flp3 Axis1, Current "); D(((long)posAxis1)/StepsPerDegreeAxis1); D(" -to-> "); DL(((long)targetAxis1.part.m)/StepsPerDegreeAxis1);
-      D("Flp3 Axis2, Current "); D(((long)posAxis2)/StepsPerDegreeAxis2); D(" -to-> "); DL(((long)targetAxis2.part.m)/StepsPerDegreeAxis2); DL("");
+//      D("Flp3 Axis1, Current "); D(((long)posAxis1)/StepsPerDegreeAxis1); D(" -to-> "); DL(((long)targetAxis1.part.m)/StepsPerDegreeAxis1);
+//      D("Flp3 Axis2, Current "); D(((long)posAxis2)/StepsPerDegreeAxis2); D(" -to-> "); DL(((long)targetAxis2.part.m)/StepsPerDegreeAxis2); DL("");
     } else {
 
       StepperModeTracking();
@@ -281,5 +308,9 @@ uint32_t isqrt32 (uint32_t n) {
         place = place >> 2;
     }
     return root;
+}
+
+void stopLimit() {
+  if (trackingState==TrackingMoveTo) { if (!abortSlew) abortSlew=StartAbortSlew; } else trackingState=TrackingNone;
 }
 

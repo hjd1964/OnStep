@@ -189,7 +189,8 @@ boolean highPrecision = true;
 volatile byte trackingState      = TrackingNone;
 byte abortTrackingState          = TrackingNone;
 volatile byte lastTrackingState  = TrackingNone;
-boolean abortSlew                = false;
+#define StartAbortSlew 1
+byte abortSlew                   = 0;
 volatile boolean safetyLimitsOn  = true;
 boolean axis1Enabled             = false;
 boolean axis2Enabled             = false;

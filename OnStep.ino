@@ -40,8 +40,8 @@
 // firmware info, these are returned by the ":GV?#" commands
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  1
-#define FirmwareVersionMinor  9
-#define FirmwareVersionPatch  "c"     // for example major.minor patch: 1.3c
+#define FirmwareVersionMinor  10
+#define FirmwareVersionPatch  "a"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 2       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
@@ -328,7 +328,7 @@ void loop() {
     // support for limit switch(es)
 #ifdef LIMIT_SENSE_ON
     byte ls1=digitalRead(LimitPin); delayMicroseconds(50); byte ls2=digitalRead(LimitPin);
-    if ((ls1==LOW) && (ls2==LOW)) { lastError=ERR_LIMIT_SENSE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
+    if ((ls1==LOW) && (ls2==LOW)) { lastError=ERR_LIMIT_SENSE; stopLimit(); }
 #endif
 
     if (safetyLimitsOn) {
@@ -356,10 +356,10 @@ void loop() {
   #endif
 #endif
 
-    if (faultAxis1 || faultAxis2) { lastError=ERR_MOTOR_FAULT; if (trackingState==TrackingMoveTo) abortSlew=true; else { trackingState=TrackingNone; if (guideDirAxis1) guideDirAxis1='b'; if (guideDirAxis2) guideDirAxis2='b'; } }
+    if (faultAxis1 || faultAxis2) { lastError=ERR_MOTOR_FAULT; if (trackingState==TrackingMoveTo) { if (!abortSlew) abortSlew=StartAbortSlew; } else { trackingState=TrackingNone; if (guideDirAxis1) guideDirAxis1='b'; if (guideDirAxis2) guideDirAxis2='b'; } }
 
     // check altitude overhead limit and horizon limit
-    if ((currentAlt<minAlt) || (currentAlt>maxAlt)) { lastError=ERR_ALT; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
+    if ((currentAlt<minAlt) || (currentAlt>maxAlt)) { lastError=ERR_ALT; stopLimit(); }
     }
 
     // UPDATE THE UT1 CLOCK
@@ -395,7 +395,7 @@ void loop() {
   static unsigned long debugTimer=0;
   if (((long)(tempMs-debugTimer)>0) && (millis()<1200)) {
     debugTimer=tempMs+500UL;
-    DL(((double)SiderealRate/(double)timerRateAxis1));
+//    DL(((double)SiderealRate/(double)timerRateAxis1));
   }
 
   // 1 SECOND TIMED ------------------------------------------------------------------------------------
@@ -463,24 +463,24 @@ void loop() {
               if (goToHere(true)) { lastError=ERR_MERIDIAN; trackingState=TrackingNone; }
             } else {
               DL(getInstrAxis1());
-              lastError=ERR_MERIDIAN; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone;
+              lastError=ERR_MERIDIAN; stopLimit();
             }
           }
         }
-        if (getInstrPierSide()==PierSideEast) { if (getInstrAxis1()>UnderPoleLimit*15.0) { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; } }
+        if (getInstrPierSide()==PierSideEast) { if (getInstrAxis1()>UnderPoleLimit*15.0) { lastError=ERR_UNDER_POLE; stopLimit(); } }
       } else {
 #ifndef MOUNT_TYPE_ALTAZM
         // when Fork mounted, ignore pierSide and just stop the mount if it passes the UnderPoleLimit
-        if (getInstrAxis1()>UnderPoleLimit*15.0) { lastError=ERR_UNDER_POLE; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
+        if (getInstrAxis1()>UnderPoleLimit*15.0) { lastError=ERR_UNDER_POLE; stopLimit(); }
 #else
         // when Alt/Azm mounted, just stop the mount if it passes MaxAzm
-        if (getInstrAxis1()>MaxAzm) { lastError=ERR_AZM; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
+        if (getInstrAxis1()>MaxAzm) { lastError=ERR_AZM; stopLimit(); }
 #endif
       }
     }
     // check for exceeding MinDec or MaxDec
 #ifndef MOUNT_TYPE_ALTAZM
-    if ((currentDec<MinDec) || (currentDec>MaxDec)) { lastError=ERR_DEC; if (trackingState==TrackingMoveTo) abortSlew=true; else trackingState=TrackingNone; }
+    if ((currentDec<MinDec) || (currentDec>MaxDec)) { lastError=ERR_DEC; stopLimit(); }
 #endif
 
     // update weather info

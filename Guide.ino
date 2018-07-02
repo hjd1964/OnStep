@@ -318,7 +318,7 @@ void ST4() {
         if (newDirAxis1!='b') {
 #ifdef ST4_HAND_CONTROL_ON
           if (waitingHome) waitingHomeContinue=true; else
-          if (trackingState==TrackingMoveTo) abortSlew=true; else
+          if (trackingState==TrackingMoveTo) { if (!abortSlew) abortSlew=StartAbortSlew; } else
 #endif
             {
 #if defined(SEPARATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)
@@ -341,7 +341,7 @@ void ST4() {
         if (newDirAxis2!='b') {
 #ifdef ST4_HAND_CONTROL_ON
           if (waitingHome) waitingHomeContinue=true; else
-          if (trackingState==TrackingMoveTo) abortSlew=true; else
+          if (trackingState==TrackingMoveTo) { if (!abortSlew) abortSlew=StartAbortSlew; } else
 #endif
           {
 #if defined(SEPARATE_PULSE_GUIDE_RATE_ON) && !defined(ST4_HAND_CONTROL_ON)

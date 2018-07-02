@@ -1948,7 +1948,7 @@ void stopMount() {
   if ((parkStatus==NotParked) || (parkStatus==Parking)) {
     stopGuideAxis1();
     stopGuideAxis2();
-    if (trackingState==TrackingMoveTo) { abortSlew=true; }
+    if (trackingState==TrackingMoveTo) if (!abortSlew) abortSlew=StartAbortSlew;
   }
 }
 
