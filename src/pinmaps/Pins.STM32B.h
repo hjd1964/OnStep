@@ -77,7 +77,7 @@
   #define A1ST          PB9
   #define A1DR          PB8
 
-  #define A2EN          PB3 
+  #define A2EN          PA15
   #define A2M0          PA12
   #define A2M1          PA11 
   #define A2M2          PA8  
@@ -96,10 +96,10 @@
 
   #define PECIDX        PB0
 
-  #define SPARE1        PA15
-  #define SPARE2        PA14
-  #define SPARE3        PA13
-  #define SPARE4        PB4
+  #define SPARE1        PB3 
+  #define SPARE2        PB4
+  #define SPARE3        PA14
+  #define SPARE4        PA13
 
 #else
   #error "Unknown STM32 Board. This pinmap is only for Blue and Black Pill variants"
