@@ -535,4 +535,6 @@
   #warning "Configuration: the MaxRate run-time adjustability (0.5x to 2x MaxRate) can be set to exceed the platform performance, you might want to increase MaxRate or use/adjust micro-step mode switching"
 #endif
 
-
+#if PECBufferSize > 3384
+  #error "PECBufferSize cannot be greater than 3384. Please use the spreadsheet to calculate your correct value"
+#endif
