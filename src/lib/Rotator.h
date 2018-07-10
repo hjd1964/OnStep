@@ -67,8 +67,8 @@ class rotator {
 
     // allows enabling/disabling stepper driver
     void powerDownActive(boolean active) {
-      pda=active;
-      if (pda && (enPin!=-1)) pinMode(enPin,OUTPUT);
+      if (enPin!=-1) pda=active; else pda=false;
+      if (pda) { digitalWrite(enPin,disableState); currentlyDisabled=true; } else { digitalWrite(enPin,enableState); currentlyDisabled=false; }
     }
 
 #ifdef MOUNT_TYPE_ALTAZM
