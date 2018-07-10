@@ -16,6 +16,7 @@ class rotator {
 
       if (stepPin!=-1) pinMode(stepPin,OUTPUT);
       if (dirPin!=-1) pinMode(dirPin,OUTPUT);
+      if (enPin!=-1) { pinMode(enPin,OUTPUT); digitalWrite(enPin,LOW); }
 
       // positions
       target.fixed=0;

@@ -19,6 +19,7 @@ class focuser {
 
       if (stepPin!=-1) pinMode(stepPin,OUTPUT);
       if (dirPin!=-1) pinMode(dirPin,OUTPUT);
+      if (enPin!=-1) { pinMode(enPin,OUTPUT); digitalWrite(enPin,LOW); }
     
       spos=readPos();
       target.part.m=spos; target.part.f=0;
