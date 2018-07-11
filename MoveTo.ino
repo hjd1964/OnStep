@@ -69,7 +69,6 @@ void moveTo() {
   if (distStartAxis1<1) distStartAxis1=1;
   if (distStartAxis2<1) distStartAxis2=1;
 
-  Again:
   cli();
   distDestAxis1=abs(posAxis1-(long)targetAxis1.part.m);  // distance from dest Axis1
   distDestAxis2=abs(posAxis2-(long)targetAxis2.part.m);  // distance from dest Axis2
