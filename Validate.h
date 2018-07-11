@@ -421,7 +421,7 @@
         #error "Configuration: AXIS1_MICROSTEPS_GOTO; TMC2130 invalid micro-step mode, use: 256,128,64,32,16,8,4,2,or 1"
       #endif
       #if AXIS1_MICROSTEPS != AXIS1_MICROSTEPS_GOTO
-        #warning "Configuration: AXIS2_MICROSTEPS_GOTO; is NOT equal to AXIS2_MICROSTEPS,or _OFF.  This can effect pointing accuracy slightly (and PEC if index sensing isn't used.)"
+        #warning "Configuration: AXIS2_MICROSTEPS_GOTO; is NOT _OFF.  This can effect pointing accuracy slightly (and PEC if index sensing isn't used.)"
       #endif
     #elif AXIS1_DRIVER_MODEL == TMC2208
       #if AXIS1_MICROSTEPS_GOTO!=2 && AXIS1_MICROSTEPS_GOTO!=4 && AXIS1_MICROSTEPS_GOTO!=8 && AXIS1_MICROSTEPS_GOTO!=16
@@ -429,7 +429,7 @@
       #endif
     #endif
 
-    #if (AXIS1_MICROSTEPS <= AXIS1_MICROSTEPS_GOTO) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI) && !defined(MODE_SWITCH_BEFORE_SLEW_ON)
+    #if (AXIS1_MICROSTEPS <= AXIS1_MICROSTEPS_GOTO) && (!((defined(MODE_SWITCH_BEFORE_SLEW_ON) || defined(MODE_SWITCH_BEFORE_SLEW_SPI)) && (AXIS1_MICROSTEPS == AXIS1_MICROSTEPS_GOTO)))
         #error "Configuration: AXIS1_MICROSTEPS_GOTO should be less than AXIS1_MICROSTEPS or _OFF"
     #endif
 
@@ -462,7 +462,7 @@
         #error "Configuration: AXIS2_MICROSTEPS_GOTO; TMC2130 invalid micro-step mode, use: 256,128,64,32,16,8,4,2,or 1"
       #endif
       #if AXIS2_MICROSTEPS != AXIS2_MICROSTEPS_GOTO
-        #warning "Configuration: AXIS2_MICROSTEPS_GOTO; is NOT equal to AXIS2_MICROSTEPS,or _OFF.  This can effect pointing accuracy slightly (and PEC if index sensing isn't used.)"
+        #warning "Configuration: AXIS2_MICROSTEPS_GOTO; is NOT _OFF.  This can effect pointing accuracy slightly (and PEC if index sensing isn't used.)"
       #endif
     #elif AXIS2_DRIVER_MODEL == TMC2208
       #if AXIS2_MICROSTEPS_GOTO!=2 && AXIS2_MICROSTEPS_GOTO!=4 && AXIS2_MICROSTEPS_GOTO!=8 && AXIS2_MICROSTEPS_GOTO!=16
@@ -470,7 +470,7 @@
       #endif
     #endif
 
-    #if (AXIS2_MICROSTEPS <= AXIS2_MICROSTEPS_GOTO) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI) && !defined(MODE_SWITCH_BEFORE_SLEW_ON)
+    #if (AXIS2_MICROSTEPS <= AXIS2_MICROSTEPS_GOTO) && (!((defined(MODE_SWITCH_BEFORE_SLEW_ON) || defined(MODE_SWITCH_BEFORE_SLEW_SPI)) && (AXIS2_MICROSTEPS == AXIS2_MICROSTEPS_GOTO)))
         #error "Configuration: AXIS2_MICROSTEPS_GOTO should be less than AXIS2_MICROSTEPS or _OFF"
     #endif
 
