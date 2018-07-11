@@ -107,14 +107,19 @@
 
 // The pins here are not tested yet, and need to change 
 
+// The multi-purpose pins (Aux3..Aux8 can be analog pwm/dac if supported)
+#define Aux0            LED
+#define Aux1            A1MISO
+#define Aux2            A2MISO
+
 #define Axis1_EN        A1EN   // Enable
 #define Axis1_M0        A1M0   // Microstep Mode 0
 #define Axis1_M1        A1M1   // Microstep Mode 1
 #define Axis1_M2        A1M2   // Microstep Mode 2
 #define Axis1StepPin    A1ST   // Step
 #define Axis1DirPin     A1DR   // Motor Direction
-#define Axis1_Aux       A1MISO // Aux - ESP8266 GPIO0 or SPI MISO
-//#define Axis1_FAULT   Undefined    // Fault
+#define Axis1_Aux       Aux1   // Aux - ESP8266 GPIO0 or SPI MISO
+#define Axis1_FAULT     Aux1   // Fault
 
 #define Axis2_EN        A2EN   // Enable
 #define Axis2_M0        A2M0   // Microstep Mode 0
@@ -122,8 +127,8 @@
 #define Axis2_M2        A2M2   // Microstep Mode 2
 #define Axis2StepPin    A2ST   // Step
 #define Axis2DirPin     A2DR   // Motor Direction
-#define Axis2_Aux       A2MISO // Aux - ESP8266 RST or SPI MISO
-//#define Axis2_FAULT   Undefined    // Fault
+#define Axis2_Aux       Aux2   // Aux - ESP8266 RST or SPI MISO
+#define Axis2_FAULT     Aux2   // Fault
 
 // ST4 interface
 #define ST4DEn          S4N    // ST4 DE+ North
@@ -133,7 +138,7 @@
 
 // This is the built in LED for the Black Pill board. There is a pin
 // available from it too, in case you want to power another LED with a wire
-#define LEDnegPin       LED    // Drain
+#define LEDnegPin       Aux0   // Drain
 
 // For a piezo buzzer
 #define TonePin         TONE   // Tone
