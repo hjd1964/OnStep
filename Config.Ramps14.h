@@ -1,5 +1,6 @@
 // -----------------------------------------------------------------------------------
-// Configuration for OnStep using RAMPS 1.4 Shield (Arduino Mega2560)
+// Configuration for OnStep using a RAMPS 1.4/1.5 Shield and Arduino Mega2560 or
+// compatible all-in one devices like the recommended "MKS Gen-L" and others
 
 // ****************************************************************************************
 // NOTICE: This configuration is in development/testing       *** USE AT YOUR OWN RISK  ***
