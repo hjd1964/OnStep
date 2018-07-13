@@ -158,10 +158,7 @@ void processCommands() {
           } else commandError=true;
 #endif
 
-          if (commandError) {
-            alignNumStars=0;
-            alignThisStar=1;
-          }
+          if (commandError) { alignNumStars=0; alignThisStar=1; }
         } else
 //  :A+#  Manual Alignment, set target location
 //         Returns:
@@ -175,10 +172,10 @@ void processCommands() {
           }
         }
         else
-          commandError=true; 
+          commandError=true;
       }
       else
-      
+
 //   $ - Set parameter
 //  :$BDddd# Set Dec/Alt Antibacklash
 //          Return: 0 on failure
@@ -255,11 +252,7 @@ void processCommands() {
               commandError = AlignStar();
               strcpy(reply,"N/A");
             }
-            if (i>0 || commandError) {
-              reply[0]='E';
-              reply[1]='0'+i;
-              reply[2]=0;
-            }
+            if (i>0) { reply[0]='E'; reply[1]='0'+i; reply[2]=0; }
           }
           quietReply=true;
         }
