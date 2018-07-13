@@ -1991,11 +1991,11 @@ bool cmdReply(char *s) {
 
 boolean AlignStar() {
   // after last star turn meridian flips off when align is done
-  if ((alignNumStars==alignThisStar) && (meridianFlip==MeridianFlipAlign)) {
+  if ((alignNumStars == alignThisStar) && (meridianFlip == MeridianFlipAlign)) {
     meridianFlip=MeridianFlipNever;
   }
           
-  if (alignThisStar<=alignNumStars) {
+  if (alignThisStar <= alignNumStars) {
     // AltAz or Equ mode
     if (Align.addStar(alignThisStar,alignNumStars,newTargetRA,newTargetDec)) {
       alignThisStar++;
