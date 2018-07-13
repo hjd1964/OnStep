@@ -158,24 +158,26 @@ void processCommands() {
           } else commandError=true;
 #endif
 
-          if (commandError) { alignNumStars=0; alignThisStar=1; }
+          if (commandError) {
+            alignNumStars=0;
+            alignThisStar=1;
+          }
         } else
 //  :A+#  Manual Alignment, set target location
 //         Returns:
 //         1: If correction is accepted
 //         0: Failure, Manual align mode not set or distance too far 
         if (command[1]=='+') {
-            // after last star turn meridian flips off when align is done
-            if ((alignNumStars==alignThisStar) && (meridianFlip==MeridianFlipAlign)) meridianFlip=MeridianFlipNever;
-          
-            if (alignThisStar<=alignNumStars) {
-              // AltAz or Equ mode
-              if (Align.addStar(alignThisStar,alignNumStars,newTargetRA,newTargetDec)) alignThisStar++; else commandError=true;
-            } else commandError=true;
-
-          if (commandError) { alignNumStars=0; alignThisStar=0; }
-        } else commandError=true; 
-      } else
+          commandError = AlignStar();
+          if (commandError) {
+            alignNumStars=0;
+            alignThisStar=0;
+          }
+        }
+        else
+          commandError=true; 
+      }
+      else
       
 //   $ - Set parameter
 //  :$BDddd# Set Dec/Alt Antibacklash
@@ -249,8 +251,15 @@ void processCommands() {
         if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
           i=syncEqu(newTargetRA,newTargetDec);
           if (command[1]=='M') {
-            if (i==0) strcpy(reply,"N/A");
-            if (i>0) { reply[0]='E'; reply[1]='0'+i; reply[2]=0; }
+            if (i==0) {
+              commandError = AlignStar();
+              strcpy(reply,"N/A");
+            }
+            if (i>0 || commandError) {
+              reply[0]='E';
+              reply[1]='0'+i;
+              reply[2]=0;
+            }
           }
           quietReply=true;
         }
@@ -1987,3 +1996,25 @@ bool cmdReply(char *s) {
   return true;
 }
 
+boolean AlignStar() {
+  // after last star turn meridian flips off when align is done
+  if ((alignNumStars==alignThisStar) && (meridianFlip==MeridianFlipAlign)) {
+    meridianFlip=MeridianFlipNever;
+  }
+          
+  if (alignThisStar<=alignNumStars) {
+    // AltAz or Equ mode
+    if (Align.addStar(alignThisStar,alignNumStars,newTargetRA,newTargetDec)) {
+      alignThisStar++;
+    }
+    else {
+      return true;
+    }
+  }
+  else {
+    return true;
+  }
+
+  // All good
+  return false;
+}
