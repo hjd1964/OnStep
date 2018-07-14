@@ -1280,7 +1280,7 @@ void SmartHandController::menuZone()
     if (hr<0) negative=true;
     uint8_t b=abs(hr);
   
-    if (display->UserInterfaceInputValueInteger(&buttonPad, "UTC Ofs (-Zone)", "", &b, 0, 13, 2, " hrs"))
+    if (display->UserInterfaceInputValueInteger(&buttonPad, "UTC Ofs (-Zone)", "", &b, 0, 14, 2, " hrs"))
     {
       if (display->UserInterfaceInputValueBoolean(&buttonPad, "UTC Ofs - ?", &negative)) {
         hr=b;
