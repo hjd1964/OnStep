@@ -162,24 +162,23 @@ LX200RETURN GetLX200(char* command, char* output)
     return LX200GETVALUEFAILED;
 }
 
-LX200RETURN GetTimeLX200(unsigned int &hour, unsigned int &minute, unsigned int &second)
+LX200RETURN GetTimeLX200(unsigned int &hour, unsigned int &minute, unsigned int &second, boolean ut)
 {
   char out[20];
-  if (GetLX200(":GL#", out) == LX200GETVALUEFAILED)
-    return LX200GETVALUEFAILED;
+  if (ut) {
+    if (GetLX200(":GX80#", out) == LX200GETVALUEFAILED) return LX200GETVALUEFAILED;
+  } else {
+    if (GetLX200(":GL#", out) == LX200GETVALUEFAILED) return LX200GETVALUEFAILED;
+  }
   char2RA(out, hour, minute, second);
-  long value = hour * 60 + minute;
-  value *= 60;
-  value += second;
-  char2RA(out, hour, minute, second);
+
   return LX200VALUEGET;
 }
 
-LX200RETURN GetTimeLX200(long &value)
+LX200RETURN GetTimeLX200(long &value, boolean ut)
 {
   unsigned int hour, minute, second;
-  if (!GetTimeLX200(hour, minute, second) == LX200GETVALUEFAILED)
-    return LX200GETVALUEFAILED;
+  if (!GetTimeLX200(hour, minute, second, ut) == LX200GETVALUEFAILED) return LX200GETVALUEFAILED;
   value = hour * 60 + minute;
   value *= 60;
   value += second;
@@ -196,9 +195,7 @@ LX200RETURN SetTimeLX200(long &value)
   value /= 60;
   hour = value;
   sprintf(out, ":SL%02d:%02d:%02d#", hour, minute, second);
-  if (SetLX200(out) ==  LX200VALUESET)
-    return SetLX200(":SG+00#");
-  return LX200SETVALUEFAILED;
+  return SetLX200(out);
 }
 
 LX200RETURN GetSiteLX200(int& value)
@@ -327,53 +324,26 @@ LX200RETURN SyncGotoLX200(bool sync, float &Ra, float &Dec)
   } else return LX200SETTARGETFAILED;
 }
 
-/*
-LX200RETURN SyncGotoLX200(bool sync, uint8_t& vr1, uint8_t& vr2, uint8_t& vr3, short& vd1, uint8_t& vd2, uint8_t& vd3)
-{
-  if (SetTargetRaLX200(vr1, vr2, vr3) ==  LX200VALUESET && SetTargetDecLX200(vd1, vd2, vd3) == LX200VALUESET) {
-    if (sync) {
-      Ser.print(":CS#");
-      Ser.flush();
-      return LX200SYNCED;
-    } else return Move2TargetLX200();
-  } else return LX200SETTARGETFAILED;
-}
-
-LX200RETURN SyncGotoLX200(bool sync, float &Ra, float &Dec)
-{
-  int ivr1, ivr2, ivd1, ivd2;
-  float fvr3, fvd3;
-  Ephemeris::floatingHoursToHoursMinutesSeconds(Ra, &ivr1, &ivr2, &fvr3);
-  Ephemeris::floatingDegreesToDegreesMinutesSeconds(Dec, &ivd1, &ivd2, &fvd3);
-  uint8_t vr1, vr2, vr3, vd2, vd3;
-  short vd1;
-  vr1 = ivr1;
-  vr2 = ivr2;
-  vr3 = (int)fvr3;
-  vd1 = ivd1;
-  vd2 = ivd2;
-  vd3 = (int)fvd3;
-  return SyncGotoLX200(sync, vr1, vr2, vr3, vd1, vd2, vd3);
-}
-*/
-
-LX200RETURN GetDateLX200(unsigned int &day, unsigned int &month, unsigned int &year)
+LX200RETURN GetDateLX200(unsigned int &day, unsigned int &month, unsigned int &year, boolean ut)
 {
   char out[20];
-  if (GetLX200(":GC#", out) == LX200VALUEGET) {
-    char* pEnd;
-    month = strtol(&out[0], &pEnd, 10);
-    day = strtol(&out[3], &pEnd, 10);
-    year = strtol(&out[6], &pEnd, 10) + 2000L;
-    return LX200VALUEGET;
-  } else return LX200GETVALUEFAILED;
+  if (ut) {
+    if (GetLX200(":GX81#", out) != LX200VALUEGET) return LX200GETVALUEFAILED;
+  } else {
+    if (GetLX200(":GC#", out) != LX200VALUEGET) return LX200GETVALUEFAILED;
+  }
+  char* pEnd;
+  month = strtol(&out[0], &pEnd, 10);
+  day = strtol(&out[3], &pEnd, 10);
+  year = strtol(&out[6], &pEnd, 10) + 2000L;
+  return LX200VALUEGET;
 }
 
 LX200RETURN SyncGotoCatLX200(bool sync)
 {
   int epoch;
   unsigned int day, month, year, hour, minute, second;
-  if (GetDateLX200(day, month, year) == LX200GETVALUEFAILED) return LX200GETVALUEFAILED;
+  if (GetDateLX200(day, month, year, true) == LX200GETVALUEFAILED) return LX200GETVALUEFAILED;
   if (cat_mgr.getCat()==CAT_NONE) return LX200UNKOWN;
   D("ra="); D(cat_mgr.ra()); D(",dec="); DL(cat_mgr.dec()); 
   EquatorialCoordinates coo;
@@ -390,8 +360,8 @@ LX200RETURN SyncGotoPlanetLX200(bool sync, unsigned short objSys)
   char out[20];
   unsigned int day, month, year, hour, minute, second;
 
-  if (GetDateLX200(day, month, year) == LX200GETVALUEFAILED) return LX200GETVALUEFAILED;
-  if (GetTimeLX200(hour, minute, second) == LX200GETVALUEFAILED) return LX200GETVALUEFAILED;
+  if (GetDateLX200(day, month, year, true) == LX200GETVALUEFAILED) return LX200GETVALUEFAILED;
+  if (GetTimeLX200(hour, minute, second, true) == LX200GETVALUEFAILED) return LX200GETVALUEFAILED;
 
   Ephemeris Eph;
   SolarSystemObjectIndex objI = static_cast<SolarSystemObjectIndex>(objSys);

@@ -46,6 +46,14 @@ return:
 1: value has been updated
 */
 
+uint8_t ext_UserInterfaceInputValueBoolean(u8g2_t *u8g2, Pad *extPad, const char *title, boolean *value);
+
+/*
+return:
+0: value is not changed (HOME/Break Button pressed)
+1: value has been updated
+*/
+
 uint8_t ext_UserInterfaceInputValueInteger(u8g2_t *u8g2, Pad *extPad, const char *title, const char *pre, uint8_t *value, uint8_t lo, uint8_t hi, uint8_t digits, const char *post);
 
 /*
@@ -80,7 +88,7 @@ uint8_t ext_UserInterfaceInputValueRA(u8g2_t *u8g2, Pad *extPad, long *value);
 uint8_t ext_UserInterfaceInputValueDec(u8g2_t *u8g2, Pad *extPad, long *value);
 
 
-uint8_t ext_UserInterfaceInputValueUTCTime(u8g2_t *u8g2, Pad *extPad, long *value);
+uint8_t ext_UserInterfaceInputValueTime(u8g2_t *u8g2, Pad *extPad, long *value);
 
 
 uint8_t ext_UserInterfaceInputValueLatitude(u8g2_t *u8g2, Pad *extPad, long *value);

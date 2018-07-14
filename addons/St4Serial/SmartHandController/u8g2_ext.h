@@ -12,6 +12,8 @@ public:
 
   uint8_t UserInterfaceSelectionList(Pad *extPad, const char *title, uint8_t start_pos, const char *sl);
 
+  uint8_t UserInterfaceInputValueBoolean(Pad *extPad, const char *title, boolean *value);
+
   uint8_t UserInterfaceInputValueInteger(Pad *extPad, const char *title, const char *pre, uint8_t *value, uint8_t lo, uint8_t hi, uint8_t digits, const char *post);
 
   uint8_t UserInterfaceInputValueFloat(Pad *extPad, const char *title, const char *pre, float *value, float lo, float hi, uint8_t len, uint8_t dec, const char *post);
@@ -29,7 +31,7 @@ public:
   uint8_t UserInterfaceInputValueDec(Pad *extPad, long *value);
 
 
-  uint8_t UserInterfaceInputValueUTCTime(Pad *extPad, long *value);
+  uint8_t UserInterfaceInputValueTime(Pad *extPad, long *value);
 
 
   uint8_t UserInterfaceInputValueLatitude(Pad *extPad, long *value);

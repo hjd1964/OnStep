@@ -73,10 +73,9 @@ private:
   void menuMotor(uint8_t idx);
   void menuSite();
   void menuSites();
-  void menuUTCTime();
+  void menuLocalDateTime();
   void menuDisplay();
   void menuContrast();
-  void menuDate();
   void menuLatitude();
   void menuLongitude();
   void menuLimits();
