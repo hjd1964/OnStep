@@ -78,6 +78,7 @@ private:
   void menuContrast();
   void menuLatitude();
   void menuLongitude();
+  void menuZone();
   void menuLimits();
   void menuWifi();
   void menuHorizon();
