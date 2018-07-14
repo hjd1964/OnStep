@@ -42,7 +42,7 @@ boolean readLX200Bytes(char* command,char* recvBuffer,long timeOutMs) {
   if ((command[0]==(char)6) && (command[1]==0)) shortResponse=true;
   if (command[0]==':') {
     if (command[1]=='A') {
-      if (strchr("W123456789+",command[2])) { shortResponse=true; Ser.setTimeout(timeOutMs*4); }
+      if (strchr("W123456789+",command[2])) { shortResponse=true; Ser.setTimeout(1000); }
     }
     if ((command[1]=='F') || (command[1]=='f')) {
       if (strchr("+-QGZHFS1234",command[2])) noResponse=true;
