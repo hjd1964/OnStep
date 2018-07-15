@@ -162,6 +162,16 @@ LX200RETURN GetLX200(char* command, char* output)
     return LX200GETVALUEFAILED;
 }
 
+LX200RETURN GetLX200Trim(char* command, char* output)
+{
+  memset(output, 0, sizeof(output));
+  if (readLX200Bytes(command, output, TIMEOUT_CMD)) {
+    if ((strlen(output)>0) && (output[strlen(output)-1]=='#')) output[strlen(output)-1]=0;
+    return LX200VALUEGET;
+  } else
+    return LX200GETVALUEFAILED;
+}
+
 LX200RETURN GetTimeLX200(unsigned int &hour, unsigned int &minute, unsigned int &second, boolean ut)
 {
   char out[20];

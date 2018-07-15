@@ -719,7 +719,11 @@ void SmartHandController::DisplayMotorSettings(uint8_t &axis)
 // Alt Main Menu (double click)
 void SmartHandController::menuSpeedRate()
 {
+#ifndef ST4SMARTCONTROLLER_ON
   char * string_list_Speed = "0.25x\n0.5x\n1.0x\n2.0x\n4.0x\n16.0x\n32.0x\n64.0x\n0.5 Max\nMax";
+#else
+  char * string_list_Speed = "0.25x\n0.5x\n1.0x\n2.0x\n4.0x\n8.0x\n24.0x\n48.0x\n0.5 Max\nMax";
+#endif
   current_selection_speed = display->UserInterfaceSelectionList(&buttonPad, "Set Speed", current_selection_speed, string_list_Speed);
   if (current_selection_speed > 0)
   {
@@ -923,8 +927,10 @@ void SmartHandController::menuLocalDateTime()
 void SmartHandController::menuAlignment()
 {
   int maxAlignStars, thisStar, numStars;
-  if (!telInfo.getAlignStars(&maxAlignStars, &thisStar, &numStars)) { maxAlignStars=3; thisStar=1; numStars=1; }
   bool alignInProgress=false;
+  bool showAlign=false;
+  bool clearAlign=false;
+  if (!telInfo.getAlignStars(&maxAlignStars, &thisStar, &numStars)) { maxAlignStars=3; thisStar=1; numStars=1; }
   if ((thisStar>0) && (thisStar<=numStars)) alignInProgress=true;
 
   telInfo.aliMode = Telescope::ALIM_OFF;
@@ -946,8 +952,8 @@ void SmartHandController::menuAlignment()
             defualt: break;
           }
         break;
-        case 2: break;
-        case 3: break;
+        case 2: showAlign=true; break;
+        case 3: clearAlign=true; break;
         default: break;
       }
     } else
@@ -966,25 +972,8 @@ void SmartHandController::menuAlignment()
         case 1: if (SetLX200(":A1#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_ONE; else DisplayMessage("Alignment", "Failed!", -1); break;
         case 2: if (SetLX200(":A2#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_TWO; else DisplayMessage("Alignment", "Failed!", -1); break;
         case 3: if (SetLX200(":A3#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_THREE; else DisplayMessage("Alignment", "Failed!", -1); break;
-        case 4:
-        {
-          char r2[20]=""; char r3[20]=""; char r4[20]=""; char r5[20]=""; char r8[20]="";
-          if ((GetLX200(":GX02",r2)==LX200VALUEGET) && (GetLX200(":GX03",r3)==LX200VALUEGET) && 
-              (GetLX200(":GX04",r4)==LX200VALUEGET) && (GetLX200(":GX05",r5)==LX200VALUEGET) && 
-              (GetLX200(":GX08",r8)==LX200VALUEGET)) {
-            char s1[20]=""; strcat(s1,"PE="); strcat(s1,r2); strcat(s1,", PZ="); strcat(s1,r3);
-            char s2[20]=""; strcat(s2,"DO (cone)="); strcat(s2,r4);
-            char s3[20]=""; strcat(s3,"PD="); strcat(s3,r5); strcat(s3,", TF="); strcat(s3,r8);
-            DisplayLongMessage("Align results (in \"):", s1, s2, s3, -1);
-          }
-        }
-        break;
-        case 5:
-          if ((SetLX200(":SX02,0#")==LX200VALUESET) && (SetLX200(":SX03,0#")==LX200VALUESET) &&
-              (SetLX200(":SX04,0#")==LX200VALUESET) && (SetLX200(":SX05,0#")==LX200VALUESET) &&
-              (SetLX200(":SX06,0#")==LX200VALUESET) && (SetLX200(":SX07,0#")==LX200VALUESET) &&
-              (SetLX200(":SX08,0#")==LX200VALUESET)) DisplayMessageLX200(LX200VALUESET,false); else DisplayMessageLX200(LX200SETVALUEFAILED,false);
-        break;
+        case 4: showAlign=true; break;
+        case 5: clearAlign=true; break;
         default: break;
       }
     } else
@@ -995,33 +984,36 @@ void SmartHandController::menuAlignment()
         case 1: if (SetLX200(":A1#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_ONE; else DisplayMessage("Alignment", "Failed!", -1); break;
         case 2: if (SetLX200(":A4#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_FOUR; else DisplayMessage("Alignment", "Failed!", -1); break;
         case 3: if (SetLX200(":A6#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_SIX; else DisplayMessage("Alignment", "Failed!", -1); break;
-        case 4:
-        {
-          char r2[20]=""; char r3[20]=""; char r4[20]=""; char r5[20]=""; char r8[20]="";
-          if ((GetLX200(":GX02",r2)==LX200VALUEGET) && (GetLX200(":GX03",r3)==LX200VALUEGET) && 
-              (GetLX200(":GX04",r4)==LX200VALUEGET) && (GetLX200(":GX05",r5)==LX200VALUEGET) && 
-              (GetLX200(":GX08",r8)==LX200VALUEGET)) {
-            char s1[20]=""; strcat(s1,"PE="); strcat(s1,r2); strcat(s1,", PZ="); strcat(s1,r3);
-            char s2[20]=""; strcat(s2,"DO (cone)="); strcat(s2,r4);
-            char s3[20]=""; strcat(s3,"PD="); strcat(s3,r5); strcat(s3,", TF="); strcat(s3,r8);
-            DisplayLongMessage("Align results (in \"):", s1, s2, s3, -1);
-          }
-        }
-        case 5:
-          if ((SetLX200(":SX02,0#")==LX200VALUESET) && (SetLX200(":SX03,0#")==LX200VALUESET) &&
-              (SetLX200(":SX04,0#")==LX200VALUESET) && (SetLX200(":SX05,0#")==LX200VALUESET) &&
-              (SetLX200(":SX06,0#")==LX200VALUESET) && (SetLX200(":SX07,0#")==LX200VALUESET) &&
-              (SetLX200(":SX08,0#")==LX200VALUESET)) DisplayMessageLX200(LX200VALUESET,false); else DisplayMessageLX200(LX200SETVALUEFAILED,false);
+        case 4: showAlign=true; break;
+        case 5: clearAlign=true; break;
         default: break;
       }
     }
-
-    if (SetLX200(":R7#") == LX200VALUESET) DisplayMessage("Guide Rate", "48X Set", 1000);
-    
+        
     // Quit Menu
     current_selection_L1 = 0;
     current_selection_L0 = 0;
   }
+
+  // handle misc. resulting actions
+  if (showAlign) {
+    char r2[20]=""; char r3[20]=""; char r4[20]=""; char r5[20]=""; char r8[20]="";
+    if ((GetLX200Trim(":GX02#",r2)==LX200VALUEGET) && (GetLX200Trim(":GX03#",r3)==LX200VALUEGET) && 
+        (GetLX200Trim(":GX04#",r4)==LX200VALUEGET) && (GetLX200Trim(":GX05#",r5)==LX200VALUEGET) && 
+        (GetLX200Trim(":GX08#",r8)==LX200VALUEGET)) {
+      char s1[20]=""; strcat(s1,"PE:"); strcat(s1,r2); strcat(s1,", PZ:"); strcat(s1,r3);
+      char s2[20]=""; strcat(s2,"DO (cone):"); strcat(s2,r4);
+      char s3[20]=""; strcat(s3,"PD:"); strcat(s3,r5); strcat(s3,", TF:"); strcat(s3,r8);
+      DisplayLongMessage("Align results (in \")", s1, s2, s3, -1);
+    }
+  } else  
+  if (clearAlign) {
+    if ((SetLX200(":SX02,0#")==LX200VALUESET) && (SetLX200(":SX03,0#")==LX200VALUESET) &&
+        (SetLX200(":SX04,0#")==LX200VALUESET) && (SetLX200(":SX05,0#")==LX200VALUESET) &&
+        (SetLX200(":SX06,0#")==LX200VALUESET) && (SetLX200(":SX07,0#")==LX200VALUESET) &&
+        (SetLX200(":SX08,0#")==LX200VALUESET)) DisplayMessageLX200(LX200VALUESET,false); else DisplayMessageLX200(LX200SETVALUEFAILED,false);
+  } else
+    if (SetLX200(":R7#") == LX200VALUESET) DisplayMessage("Guide Rate", "48X Set", 1000);
 
   if (telInfo.aliMode!=Telescope::ALIM_OFF) {
     if (!telInfo.getAlignStars(&maxAlignStars, &thisStar, &numStars)) { maxAlignStars=3; thisStar=1; numStars=1; }

@@ -9,6 +9,7 @@ enum LX200RETURN {
 
 bool isOk(LX200RETURN val);
 LX200RETURN GetLX200(char* command, char* output);
+LX200RETURN GetLX200Trim(char* command, char* output);
 LX200RETURN GetTimeLX200(unsigned int &hour, unsigned int &minute, unsigned int &second, boolean ut=false);
 LX200RETURN GetTimeLX200(long &value, boolean ut=false);
 LX200RETURN SetLX200(char* command);
