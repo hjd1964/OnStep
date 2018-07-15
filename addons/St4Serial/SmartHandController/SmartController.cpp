@@ -1015,6 +1015,8 @@ void SmartHandController::menuAlignment()
         default: break;
       }
     }
+
+    if (SetLX200(":R7#") == LX200VALUESET) DisplayMessage("Guide Rate", "48X Set", 1000);
     
     // Quit Menu
     current_selection_L1 = 0;
