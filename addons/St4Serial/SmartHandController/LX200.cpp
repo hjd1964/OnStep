@@ -311,6 +311,18 @@ LX200RETURN SyncGotoLX200(bool sync, float &Ra, float &Dec)
   int ivr1, ivr2, ivd1, ivd2;
   float fvr3, fvd3;
   char sign='+';
+
+  // apply refraction
+  if (cat_mgr.canFilter()) {
+    double Alt,Azm; 
+    double r=Ra*15.0;
+    double d=Dec;
+    cat_mgr.EquToHor(r,d,&Alt,&Azm);
+    Alt = Alt+cat_mgr.TrueRefrac(Alt) / 60.0;
+    cat_mgr.HorToEqu(Alt,Azm,&r,&d);
+    Ra=r/15.0; Dec=d;
+  }
+  
   Ephemeris::floatingHoursToHoursMinutesSeconds(Ra, &ivr1, &ivr2, &fvr3);
   Ephemeris::floatingDegreesToDegreesMinutesSeconds(abs(Dec), &ivd1, &ivd2, &fvd3);
   if (Dec<0.0) sign='-';
@@ -345,7 +357,6 @@ LX200RETURN SyncGotoCatLX200(bool sync)
   unsigned int day, month, year, hour, minute, second;
   if (GetDateLX200(day, month, year, true) == LX200GETVALUEFAILED) return LX200GETVALUEFAILED;
   if (cat_mgr.getCat()==CAT_NONE) return LX200UNKOWN;
-  D("ra="); D(cat_mgr.ra()); D(",dec="); DL(cat_mgr.dec()); 
   EquatorialCoordinates coo;
   coo.ra = cat_mgr.ra()/15.0;
   coo.dec = cat_mgr.dec();

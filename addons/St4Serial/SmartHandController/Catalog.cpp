@@ -168,7 +168,6 @@ void CatMgr::incIndex() {
     i--;
     _idx[_selected]++; if (_idx[_selected]>_maxIdx[_selected]) _idx[_selected]=0;
   } while (isFiltered() && (i>0));
-  D("ra="); D(ra()); D(",dec="); D(dec());
 }
 
 void CatMgr::decIndex() {
@@ -301,6 +300,38 @@ void CatMgr::EquToHor(double RA, double Dec, double *Alt, double *Azm) {
   *Azm=atan2(t1,t2)*Rad;
   *Azm=*Azm+180.0;
   *Alt = *Alt*Rad;
+}
+
+// convert horizon coordinates to equatorial, in degrees
+void CatMgr::HorToEqu(double Alt, double Azm, double *RA, double *Dec) { 
+  double lstH = ((double)((long)(_lstT0+millis()))/3600000.0)*1.0027;
+  
+  while (Azm<0)      Azm=Azm+360.0;
+  while (Azm>=360.0) Azm=Azm-360.0;
+  Alt  = Alt/Rad;
+  Azm  = Azm/Rad;
+  double SinDec = (sin(Alt) * _sinLat) + (cos(Alt) * _cosLat * cos(Azm));  
+  *Dec = asin(SinDec); 
+  double t1=sin(Azm);
+  double t2=cos(Azm)*_sinLat-tan(Alt)*_cosLat;
+  double HA=atan2(t1,t2)*Rad;
+  HA=HA+180.0;
+  *Dec = *Dec*Rad;
+
+  while (HA<0.0)    HA=HA+360.0;
+  while (HA>=360.0) HA=HA-360.0;
+  *RA=(lstH*15.0-HA);
+}
+
+// returns the amount of refraction (in arcminutes) at the given true altitude (degrees), pressure (millibars), and temperature (celsius)
+double CatMgr::TrueRefrac(double Alt, double Pressure, double Temperature) {
+  double TPC=(Pressure/1010.0) * (283.0/(273.0+Temperature));
+  double r=( ( 1.02*cot( (Alt+(10.3/(Alt+5.11)))/Rad ) ) ) * TPC;  if (r<0.0) r=0.0;
+  return r;
+}
+
+double CatMgr::cot(double n) {
+  return 1.0/tan(n);
 }
 
 // angular distance from current Equ coords, in degrees
