@@ -58,9 +58,9 @@
 #include "Config.Mega2560Alt.h"
 #include "Config.TM4C.h"
 #include "Config.STM32.h"
+#include "src/HAL/HAL.h"
 #include "Validate.h"
 
-#include "src/HAL/HAL.h"
 #include "src/lib/St4SerialMaster.h"
 
 // Enable debugging messages on DebugSer -------------------------------------------------------------
