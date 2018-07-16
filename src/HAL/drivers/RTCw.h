@@ -55,7 +55,7 @@ class rtcw {
 // uses the default I2C port in most cases; though HAL_Wire can redirect to another port (as is done for the Teensy3.5/3.6)
 
 #include <Wire.h>
-#include <RtcDS3231.h>          //https://github.com/Makuna/Rtc/archive/master.zip
+#include <RtcDS3231.h>          // https://github.com/Makuna/Rtc/archive/master.zip
 RtcDS3231<TwoWire> _Rtc(HAL_Wire);
 
 class rtcw {
