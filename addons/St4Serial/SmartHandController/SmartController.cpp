@@ -960,7 +960,7 @@ void SmartHandController::menuAlignment()
         default: break;
       }
     } else
-    if (maxAlignStars==1) {
+    if ((maxAlignStars==1) || (maxAlignStars==2)) {
       strcpy(string_list_AlignmentL1,"1-Star Align\n""Reset Home");
       current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Alignment", current_selection_L1, string_list_AlignmentL1);
       switch (current_selection_L1) {
@@ -973,25 +973,26 @@ void SmartHandController::menuAlignment()
       strcpy(string_list_AlignmentL1,"1-Star Align\n""2-Star Align\n""3-Star Align\n""Show Model\n""Clear Model\n""Reset Home");
       current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Alignment", current_selection_L1, string_list_AlignmentL1);
       switch (current_selection_L1) {
-        case 1: starsForAlign=1; break;
-        case 2: starsForAlign=2; break;
-        case 3: starsForAlign=3; break;
-        case 4: showAlign=true; break;
-        case 5: clearAlign=true; break;
-        case 6: resetAlign=true; break;
+        case 1: starsForAlign=1; break; case 2: starsForAlign=2; break; case 3: starsForAlign=3; break;
+        case 4: showAlign=true; break;  case 5: clearAlign=true; break; case 6: resetAlign=true; break;
         default: break;
       }
     } else
-    if (maxAlignStars>=4) {
-      strcpy(string_list_AlignmentL1,"1-Star Align\n""4-Star Align\n""6-Star Align\n""Show Model\n""Clear Model\n""Reset Home");
+    if ((maxAlignStars==4) || (maxAlignStars==5)) {
+      strcpy(string_list_AlignmentL1,"1-Star Align\n""3-Star Align\n""4-Star Align\n""Show Model\n""Clear Model\n""Reset Home");
       current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Alignment", current_selection_L1, string_list_AlignmentL1);
       switch (current_selection_L1) {
-        case 1: starsForAlign=1; break;
-        case 2: starsForAlign=4; break;
-        case 3: starsForAlign=6; break;
-        case 4: showAlign=true; break;
-        case 5: clearAlign=true; break;
-        case 6: resetAlign=true; break;
+        case 1: starsForAlign=1; break; case 2: starsForAlign=3; break; case 3: starsForAlign=4; break;
+        case 4: showAlign=true; break;  case 5: clearAlign=true; break; case 6: resetAlign=true; break;
+        default: break;
+      }
+    } else
+    if (maxAlignStars>5) {
+      strcpy(string_list_AlignmentL1,"1-Star Align\n""3-Star Align\n""4-Star Align\n""6-Star Align\n""Show Model\n""Clear Model\n""Reset Home");
+      current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Alignment", current_selection_L1, string_list_AlignmentL1);
+      switch (current_selection_L1) {
+        case 1: starsForAlign=1; break; case 2: starsForAlign=3; break; case 3: starsForAlign=4; break; case 4: starsForAlign=6; break;
+        case 5: showAlign=true; break;  case 6: clearAlign=true; break; case 7: resetAlign=true; break;
         default: break;
       }
     }
