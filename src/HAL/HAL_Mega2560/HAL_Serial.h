@@ -28,12 +28,12 @@ class pserial {
                (0 << UPM01)  | (0 << UPM00)  | (0 << UMSEL01) |
                (0 << UMSEL00);
     }
-    
+
     boolean available()
     {
       return !(_recv_buffer[_recv_head]==char(0));
     }
-    
+
     char read()
     {
       char c;
@@ -44,34 +44,13 @@ class pserial {
       if (c!=0) _recv_head++; // buffer is 256 bytes so this byte variable wraps automatically
       return c;
     }
-    
+
     void print(const char data[])
     {
       strcpy(_xmit_buffer,data);
       _xmit_index=0;
     }
-    
-    void putch(char c)
-    {
-      while ( !( UCSR0A & (1<<UDRE0)) ) {  }
-      UDR0 = c;
-    }
-    
-    void putf(double f)
-    {
-      char temp[20]; dtostrf(f,4,6,temp); puts(temp);
-    }
-    
-    void putl(long l)
-    {
-      char temp[20]; sprintf(temp,"%ld",l); puts(temp);
-    }
-    
-    void puts(const char data[]) {
-      print(data);
-      do {} while (transmit());
-    }
-    
+
     // Main loop calls this to send characters on their way without interrupts
     boolean transmit()
     {
@@ -123,12 +102,12 @@ class pserial1 {
                (0 << UPM11)  | (0 << UPM10)  | (0 << UMSEL11) |
                (0 << UMSEL10);
     }
-    
+
     boolean available()
     {
       return !(_recv_buffer[_recv_head]==char(0));
     }
-    
+
     char read()
     {
       char c;
@@ -139,35 +118,13 @@ class pserial1 {
       if (c!=0) _recv_head++; // buffer is 256 bytes so this byte variable wraps automatically
       return c;
     }
-    
+
     void print(const char data[])
     {
       strcpy(_xmit_buffer,data);
       _xmit_index=0;
     }
-    
-    void putch(char c)
-    {
-      while ( !( UCSR1A & (1<<UDRE1)) ) {  }
-      UDR1 = c;
-    }
-    
-    void putf(double f)
-    {
-      char temp[20]; dtostrf(f,4,6,temp); puts(temp);
-    }
-    
-    void putl(long l)
-    {
-      char temp[20]; sprintf(temp,"%ld",l); puts(temp);
-    }
-    
-    void puts(const char data[])
-    {
-      print(data);
-      do {} while (transmit());
-    }
-    
+
     boolean transmit()
     {
       if (_xmit_buffer[_xmit_index]==(char)0) return false;
@@ -219,12 +176,12 @@ class pserial3 {
                (0 << UPM31)  | (0 << UPM30)  | (0 << UMSEL31) |
                (0 << UMSEL30);
     }
-    
+
     boolean available()
     {
       return !(_recv_buffer[_recv_head]==char(0));
     }
-    
+
     char read()
     {
       char c;
@@ -235,35 +192,13 @@ class pserial3 {
       if (c!=0) _recv_head++; // buffer is 256 bytes so this byte variable wraps automatically
       return c;
     }
-    
+
     void print(const char data[])
     {
       strcpy(_xmit_buffer,data);
       _xmit_index=0;
     }
-    
-    void putch(char c)
-    {
-      while ( !( UCSR3A & (1<<UDRE3)) ) {  }
-      UDR3 = c;
-    }
-    
-    void putf(double f)
-    {
-      char temp[20]; dtostrf(f,4,6,temp); puts(temp);
-    }
-    
-    void putl(long l)
-    {
-      char temp[20]; sprintf(temp,"%ld",l); puts(temp);
-    }
-    
-    void puts(const char data[])
-    {
-      print(data);
-      do {} while (transmit());
-    }
-    
+
     boolean transmit()
     {
       if (_xmit_buffer[_xmit_index]==(char)0) return false;
