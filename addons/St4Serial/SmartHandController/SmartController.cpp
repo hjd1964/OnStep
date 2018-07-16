@@ -928,8 +928,10 @@ void SmartHandController::menuAlignment()
 {
   int maxAlignStars, thisStar, numStars;
   bool alignInProgress=false;
+  int starsForAlign=0;
   bool showAlign=false;
   bool clearAlign=false;
+  bool resetAlign=false;
   if (!telInfo.getAlignStars(&maxAlignStars, &thisStar, &numStars)) { maxAlignStars=3; thisStar=1; numStars=1; }
   if ((thisStar>0) && (thisStar<=numStars)) alignInProgress=true;
 
@@ -939,7 +941,7 @@ void SmartHandController::menuAlignment()
   {
     char string_list_AlignmentL1[80];
     if (alignInProgress) {
-      strcpy(string_list_AlignmentL1,"Resume Align.\n""Show Corr.\n""Clear Corr.");
+      strcpy(string_list_AlignmentL1,"Resume Align\n""Show Corr\n""Clear Corr\n""Reset Home");
       current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Alignment", current_selection_L1, string_list_AlignmentL1);
       switch (current_selection_L1) {
         case 1:
@@ -954,38 +956,42 @@ void SmartHandController::menuAlignment()
         break;
         case 2: showAlign=true; break;
         case 3: clearAlign=true; break;
+        case 4: resetAlign=true; break;
         default: break;
       }
     } else
     if (maxAlignStars==1) {
-      strcpy(string_list_AlignmentL1,"1-Star Align.");
+      strcpy(string_list_AlignmentL1,"1-Star Align\n""Reset Home");
       current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Alignment", current_selection_L1, string_list_AlignmentL1);
       switch (current_selection_L1) {
-        case 1: if (SetLX200(":A1#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_ONE; else DisplayMessage("Alignment", "Failed!", -1); break;
+        case 1: starsForAlign=1; break;
+        case 2: resetAlign=true; break;
         default: break;
       }
     } else
     if (maxAlignStars==3) {
-      strcpy(string_list_AlignmentL1,"1-Star Align.\n""2-Star Align.\n""3-Star Align.\n""Show Model\n""Clear Model");
+      strcpy(string_list_AlignmentL1,"1-Star Align\n""2-Star Align\n""3-Star Align\n""Show Model\n""Clear Model\n""Reset Home");
       current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Alignment", current_selection_L1, string_list_AlignmentL1);
       switch (current_selection_L1) {
-        case 1: if (SetLX200(":A1#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_ONE; else DisplayMessage("Alignment", "Failed!", -1); break;
-        case 2: if (SetLX200(":A2#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_TWO; else DisplayMessage("Alignment", "Failed!", -1); break;
-        case 3: if (SetLX200(":A3#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_THREE; else DisplayMessage("Alignment", "Failed!", -1); break;
+        case 1: starsForAlign=1; break;
+        case 2: starsForAlign=2; break;
+        case 3: starsForAlign=3; break;
         case 4: showAlign=true; break;
         case 5: clearAlign=true; break;
+        case 6: resetAlign=true; break;
         default: break;
       }
     } else
     if (maxAlignStars>=4) {
-      strcpy(string_list_AlignmentL1,"1-Star Align.\n""4-Star Align.\n""6-Star Align.\n""Show Model\n""Clear Model");
+      strcpy(string_list_AlignmentL1,"1-Star Align\n""4-Star Align\n""6-Star Align\n""Show Model\n""Clear Model\n""Reset Home");
       current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Alignment", current_selection_L1, string_list_AlignmentL1);
       switch (current_selection_L1) {
-        case 1: if (SetLX200(":A1#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_ONE; else DisplayMessage("Alignment", "Failed!", -1); break;
-        case 2: if (SetLX200(":A4#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_FOUR; else DisplayMessage("Alignment", "Failed!", -1); break;
-        case 3: if (SetLX200(":A6#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_SIX; else DisplayMessage("Alignment", "Failed!", -1); break;
+        case 1: starsForAlign=1; break;
+        case 2: starsForAlign=4; break;
+        case 3: starsForAlign=6; break;
         case 4: showAlign=true; break;
         case 5: clearAlign=true; break;
+        case 6: resetAlign=true; break;
         default: break;
       }
     }
@@ -1013,7 +1019,23 @@ void SmartHandController::menuAlignment()
         (SetLX200(":SX06,0#")==LX200VALUESET) && (SetLX200(":SX07,0#")==LX200VALUESET) &&
         (SetLX200(":SX08,0#")==LX200VALUESET)) DisplayMessageLX200(LX200VALUESET,false); else DisplayMessageLX200(LX200SETVALUEFAILED,false);
   } else
+  if (resetAlign) {
+     if (SetLX200(":hF#") == LX200VALUESET) DisplayMessage("Reset", "Move to Home", -1);
+  } else
+  if (starsForAlign>0) {
+    switch (starsForAlign) {
+      case 1: if (SetLX200(":A1#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_ONE;   else DisplayMessage("Alignment", "Failed!", -1); break;
+      case 2: if (SetLX200(":A2#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_TWO;   else DisplayMessage("Alignment", "Failed!", -1); break;
+      case 3: if (SetLX200(":A3#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_THREE; else DisplayMessage("Alignment", "Failed!", -1); break;
+      case 4: if (SetLX200(":A4#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_FOUR;  else DisplayMessage("Alignment", "Failed!", -1); break;
+      case 6: if (SetLX200(":A6#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_SIX;   else DisplayMessage("Alignment", "Failed!", -1); break;
+    }
+#ifndef ST4SMARTCONTROLLER_ON
+    if (SetLX200(":R7#") == LX200VALUESET) DisplayMessage("Guide Rate", "64X Set", 1000);
+#else
     if (SetLX200(":R7#") == LX200VALUESET) DisplayMessage("Guide Rate", "48X Set", 1000);
+#endif
+  }
 
   if (telInfo.aliMode!=Telescope::ALIM_OFF) {
     if (!telInfo.getAlignStars(&maxAlignStars, &thisStar, &numStars)) { maxAlignStars=3; thisStar=1; numStars=1; }
