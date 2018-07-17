@@ -67,8 +67,8 @@
   #define F1ST          PB3
   #define F1DR          PA15
 
-  #define SPARE3        PA14
-  #define SPARE4        PA13
+  #define SPARE_PA14    PA14
+  #define SPARE_PA13    PA13
 
 #elif defined(STM32Black_ON) 
 
