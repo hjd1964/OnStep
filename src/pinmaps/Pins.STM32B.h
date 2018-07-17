@@ -56,16 +56,19 @@
   #define S4E           PB1
 
   #define LED           PC13
-  #define TONE          PB9 
-  #define SQW           PB5 
+  #define TONE          PC14
+
+  #define RETICLE       PB9 
   #define PECIDX        PB8
 
-  #define SPARE1        PA15
-  #define SPARE2        PC14
+  #define SQW           PB5 
+
+  #define F1EN          PB4
+  #define F1ST          PB3
+  #define F1DR          PA15
+
   #define SPARE3        PA14
   #define SPARE4        PA13
-  #define SPARE5        PB3
-  #define SPARE6        PB4
 
 #elif defined(STM32Black_ON) 
 
@@ -148,9 +151,9 @@
 #define PpsPin          SQW    // Pulse Per Second time source, e.g. GPS, RTC
 
 // Pins to focuser1 stepper driver
-//#define Axis4DirPin     F1DR   // Dir
-//#define Axis4StepPin    F1ST   // Step
-//#define Axis4_EN        F1EN   // Step
+#define Axis4DirPin     F1DR   // Dir
+#define Axis4StepPin    F1ST   // Step
+#define Axis4_EN        F1EN   // Step
 
 // For focuser2 stepper driver
 //#define Axis5DirPin   Undefined   // Dir
@@ -171,7 +174,7 @@
 
 //#define LEDneg2Pin    Undefined    // Drain
 
-//#define ReticulePin   Undefined    // Drain
+#define ReticulePin     RETICLE    // Drain
 
 #else
 #error "Wrong processor for this configuration!"
