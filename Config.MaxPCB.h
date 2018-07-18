@@ -92,6 +92,9 @@
 // Set to _ON and OnStep will remember the last auto meridian flip setting (on/off), default=_OFF
 #define REMEMBER_AUTO_MERIDIAN_FLIP_OFF
 
+// Set to _ON and OnStep will travel directly across a meridian flip without visiting the home position (on/off), default=_OFF (only applies if pause at home is disabled)
+#define MERIDIAN_FLIP_SKIP_HOME_OFF
+
 // Set to _ON and OnStep will remember the last meridian flip pause at home setting (on/off), default=_OFF
 #define REMEMBER_PAUSE_HOME_OFF
 
@@ -178,9 +181,9 @@
 #define AXIS2_FAULT_OFF
 
 // ------------------------------------------------------------------------------------------------------------------------
-// FOCUSER ROTATOR OR ALT/AZ DE-ROTATION ----------------------------------------------------------------------------------
+// CAMERA ROTATOR OR ALT/AZ DE-ROTATION -----------------------------------------------------------------------------------
 // Pins 30,33 = Step,Dir (choose either this option or the second focuser, not both)
-#define ROTATOR_OFF                  // enable or disable rotator feature (for any mount type,) default=_OFF (de-rotator is available only for MOUNT_TYPE_ALTAZM.)
+#define ROTATOR_OFF                  // use _ON to enable the rotator (for any mount type,) default=_OFF (this is also a de-rotator for MOUNT_TYPE_ALTAZM mounts.)
 #define MaxRateAxis3               8 // this is the minimum number of milli-seconds between micro-steps, default=8
 #define StepsPerDegreeAxis3     64.0 // calculated as    :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
                                      // Rotator          :  24            * 8           * 20              *  6/360                = 64
@@ -193,7 +196,7 @@
 
 // FOCUSER1 ---------------------------------------------------------------------------------------------------------------
 // Pins 34,35 = Step,Dir
-#define FOCUSER1_OFF                 // enable or disable focuser feature, default=_OFF
+#define FOCUSER1_OFF                 // use _ON to enable this focuser, default=_OFF
 #define MaxRateAxis4               8 // this is the minimum number of milli-seconds between micro-steps, default=8
 #define StepsPerMicrometerAxis4  0.5 // figure this out by testing or other means
 #define MinAxis4               -25.0 // minimum allowed Axis4 position in millimeters, default = -25.0
@@ -203,7 +206,7 @@
 
 // FOCUSER2 ---------------------------------------------------------------------------------------------------------------
 // Pins 30,33 = Step,Dir (choose either this option or the rotator, not both) 
-#define FOCUSER2_OFF                 // enable or disable focuser feature, default=_OFF
+#define FOCUSER2_OFF                 // use _ON to enable this focuser, default=_OFF
 #define MaxRateAxis5               8 // this is the minimum number of milli-seconds between micro-steps, default=8
 #define StepsPerMicrometerAxis5  0.5 // figure this out by testing or other means
 #define MinAxis5               -25.0 // minimum allowed Axis5 position in millimeters, default = -25.0

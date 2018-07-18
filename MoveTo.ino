@@ -1,8 +1,6 @@
 // -----------------------------------------------------------------------------------
 // Functions to move the mount to the a new position
 
-long lastPosAxis2=0;
-
 // moves the mount
 void moveTo() {
   // HA goes from +90...0..-90
@@ -21,42 +19,43 @@ void moveTo() {
 
     // first phase, decide if we should move to 60 deg. HA (4 hours) to get away from the horizon limits or just go straight to the home position
     if (pierSideControl==PierSideFlipWE1) {
-      if (celestialPoleAxis1==0.0) targetAxis1.part.m=0; else {
+      if (celestialPoleAxis1==0.0) setTargetAxis1(0.0,PierSideWest); else {
         if ((currentAlt<10.0) && (getStartAxis1()>-90.0)) setTargetAxis1(-60.0,PierSideWest); else setTargetAxis1(-celestialPoleAxis1,PierSideWest);
       }
       setTargetAxis2(celestialPoleAxis2,PierSideWest);
     } else {
-      if (celestialPoleAxis1==0.0) targetAxis1.part.m=0; else {
+      if (celestialPoleAxis1==0.0) setTargetAxis1(0.0,PierSideEast); else {
         if ((currentAlt<10.0) && (getStartAxis1()<90.0)) setTargetAxis1(60.0,PierSideEast); else setTargetAxis1(celestialPoleAxis1,PierSideEast);
       }
       setTargetAxis2(celestialPoleAxis2,PierSideEast);
     }
 
+    // first phase, override above for additional waypoints
     if (celestialPoleAxis2>0.0) {
-      // if Dec is in the general area of the pole, slew both axis back at once
       if (getInstrAxis2()>90.0-latitude) {
+        // if Dec is in the general area of the pole, slew both axis back at once
         if (pierSideControl==PierSideFlipWE1) setTargetAxis1(-celestialPoleAxis1,PierSideWest); else setTargetAxis1(celestialPoleAxis1,PierSideEast);
       } else {
-        // override if we're at a low latitude and in the opposite sky, |HA|=6 is very low on the horizon in this orientation and we need to delay arriving there during a meridian flip
+        // if we're at a low latitude and in the opposite sky, |HA|=6 is very low on the horizon in this orientation and we need to delay arriving there during a meridian flip
         // in the extreme case, where the user is very near the (Earths!) equator an Horizon limit of -10 or -15 may be necessary for proper operation.
-        if ((currentAlt<20.0) && (abs(latitude)<45.0) && (getInstrAxis2()<0)) {
+        if ((currentAlt<20.0) && (abs(latitude)<45.0) && (getInstrAxis2()<0.0)) {
           if (pierSideControl==PierSideFlipWE1) setTargetAxis1(-45.0,PierSideWest); else setTargetAxis1(45.0,PierSideEast);
         }
       }
     } else {
-      // if Dec is in the general area of the pole, slew both axis back at once
       if (getInstrAxis2()<-90.0-latitude) {
+        // if Dec is in the general area of the pole, slew both axis back at once
         if (pierSideControl==PierSideFlipWE1) setTargetAxis1(-celestialPoleAxis1,PierSideWest); else setTargetAxis1(celestialPoleAxis1,PierSideEast);
       } else { 
-        // override if we're at a low latitude and in the opposite sky, |HA|=6 is very low on the horizon in this orientation and we need to delay arriving there during a meridian flip
-        if ((currentAlt<20.0) && (abs(latitude)<45.0) && (getInstrAxis2()>0)) {
+        // if we're at a low latitude and in the opposite sky, |HA|=6 is very low on the horizon in this orientation and we need to delay arriving there during a meridian flip
+        if ((currentAlt<20.0) && (abs(latitude)<45.0) && (getInstrAxis2()>0.0)) {
           if (pierSideControl==PierSideFlipWE1) setTargetAxis1(-45.0,PierSideWest); else setTargetAxis1(45.0,PierSideEast);
         }
       }
     }
 
-    D("Flp1 Axis1, Current "); D(((double)(long)posAxis1)/(double)StepsPerDegreeAxis1); D(" -to-> "); DL(((double)(long)targetAxis1.part.m)/(double)StepsPerDegreeAxis1);
-    D("Flp1 Axis2, Current "); D(((double)(long)posAxis2)/(double)StepsPerDegreeAxis2); D(" -to-> "); DL(((double)(long)targetAxis2.part.m)/(double)StepsPerDegreeAxis2); DL("");
+//    D("Flp1 Axis1, Current "); D(((double)(long)posAxis1)/(double)StepsPerDegreeAxis1); D(" -to-> "); DL(((double)(long)targetAxis1.part.m)/(double)StepsPerDegreeAxis1);
+//    D("Flp1 Axis2, Current "); D(((double)(long)posAxis2)/(double)StepsPerDegreeAxis2); D(" -to-> "); DL(((double)(long)targetAxis2.part.m)/(double)StepsPerDegreeAxis2); DL("");
     pierSideControl++;
     forceRefreshGetEqu();
   }
@@ -69,54 +68,47 @@ void moveTo() {
   sei();
   if (distStartAxis1<1) distStartAxis1=1;
   if (distStartAxis2<1) distStartAxis2=1;
-  
-  Again:
-  cli();
-  long tempPosAxis2=posAxis2;
-  distDestAxis1=abs(posAxis1-(long)targetAxis1.part.m);      // distance from dest Axis1
-  distDestAxis2=abs(tempPosAxis2-(long)targetAxis2.part.m);  // distance from dest Axis2
-  sei();
 
+  cli();
+  distDestAxis1=abs(posAxis1-(long)targetAxis1.part.m);  // distance from dest Axis1
+  distDestAxis2=abs(posAxis2-(long)targetAxis2.part.m);  // distance from dest Axis2
+  sei();
+  
   // adjust rates near the horizon to help keep from exceeding the minAlt limit
   #ifndef MOUNT_TYPE_ALTAZM
-  tempPosAxis2+=indexAxis2Steps; if (latitude<0) tempPosAxis2=-tempPosAxis2;
+  long a2=abs(getInstrAxis2()*StepsPerDegreeAxis2);
+  static long lastPosAxis2=0;
   if (((latitude>10) || (latitude<-10)) && (distStartAxis1>((DegreesForAcceleration*StepsPerDegreeAxis1)/16))) {
     // if Dec is decreasing, slow down Dec
-    if (tempPosAxis2<lastPosAxis2) {
-      cli();
+    if (a2<lastPosAxis2) {
       double minAlt2=minAlt+10.0;
       long a=(currentAlt-minAlt2)*StepsPerDegreeAxis2; if (a<((DegreesForAcceleration*StepsPerDegreeAxis2)/8)) a=((DegreesForAcceleration*StepsPerDegreeAxis2)/8);
       if (a<distDestAxis2) distDestAxis2=a;
-      sei();
     } else
     // if Dec is increasing, slow down HA
     {
-      cli();
       double minAlt2=minAlt+10.0;
       long a=(currentAlt-minAlt2)*StepsPerDegreeAxis1; if (a<((DegreesForAcceleration*StepsPerDegreeAxis1)/8)) a=((DegreesForAcceleration*StepsPerDegreeAxis1)/8);
       if (a<distDestAxis1) distDestAxis1=a;
-      sei();
     }
   }
-  lastPosAxis2=tempPosAxis2;
+  lastPosAxis2=a2;
   #endif
 
   if (distDestAxis1<1) distDestAxis1=1;
   if (distDestAxis2<1) distDestAxis2=1;
 
   // quickly slow the motors and stop in DegreesForRapidStop
-  if (abortSlew) {
+  static double deaccXPerSec=0;
+  static double a1r=0;
+  static double a2r=0;
+  if (abortSlew==1) {
     // aborts any meridian flip
     if ((pierSideControl==PierSideFlipWE1) || (pierSideControl==PierSideFlipWE2) || (pierSideControl==PierSideFlipWE3)) pierSideControl=PierSideWest;
     if ((pierSideControl==PierSideFlipEW1) || (pierSideControl==PierSideFlipEW2) || (pierSideControl==PierSideFlipEW3)) pierSideControl=PierSideEast;
     if (pauseHome) { waitingHome=false; waitingHomeContinue=false; }
 
-    // set the destination near where we are now
-    cli();
-    if (distDestAxis1>(long)(StepsPerDegreeAxis1*DegreesForRapidStop)) { if (posAxis1>(long)targetAxis1.part.m) targetAxis1.part.m=posAxis1-(long)(StepsPerDegreeAxis1*DegreesForRapidStop); else targetAxis1.part.m=posAxis1+(long)(StepsPerDegreeAxis1*DegreesForRapidStop); targetAxis1.part.f=0; }
-    if (distDestAxis2>(long)(StepsPerDegreeAxis2*DegreesForRapidStop)) { if (posAxis2>(long)targetAxis2.part.m) targetAxis2.part.m=posAxis2-(long)(StepsPerDegreeAxis2*DegreesForRapidStop); else targetAxis2.part.m=posAxis2+(long)(StepsPerDegreeAxis2*DegreesForRapidStop); targetAxis2.part.f=0; }
-    sei();
-
+    // stop parking/homing
     if (parkStatus==Parking) {
       lastTrackingState=abortTrackingState;
       parkStatus=NotParked;
@@ -126,9 +118,16 @@ void moveTo() {
       lastTrackingState=abortTrackingState;
       homeMount=false;
     }
-    
-    abortSlew=false;
-    goto Again;
+
+    // set rate (in X sidereal) at which we slow down from
+    double rateXPerSec = RateToXPerSec/(maxRate/16.0);
+    D("rateXPerSec="); DL(rateXPerSec);
+    double numSecToStop = (DegreesForRapidStop / (rateXPerSec/240.0));
+    D("numSecToStop="); DL(numSecToStop);
+    deaccXPerSec = (DegreesForRapidStop/numSecToStop)*240.0;
+    D("deaccXPerSec="); DL(deaccXPerSec);
+
+    abortSlew++;
   }
 
   // First, for Right Ascension
@@ -140,6 +139,17 @@ void moveTo() {
   }
   if (temp<maxRate) temp=maxRate;                            // fastest rate 
   if (temp>TakeupRate) temp=TakeupRate;                      // slowest rate
+  if (abortSlew!=0) {
+    //                50x=                  5000/100
+    if (abortSlew==2) { a1r=(double)SiderealRate/(double)temp; } else
+    if (abortSlew==3) {
+      double r=1.2-sqrt((abs(a1r)/slewRateX));
+      if (r<0.2) r=0.2; if (r>1.2) r=1.2;
+      a1r-=(deaccXPerSec/100.0)*r; if (a1r<2.0) a1r=2.0;
+    }
+    // 100=5000/50
+    temp=round((double)SiderealRate/a1r);
+  }
   cli(); timerRateAxis1=temp; sei();
 
   // Now, for Declination
@@ -150,6 +160,18 @@ void moveTo() {
   }
   if (temp<maxRate) temp=maxRate;                            // fastest rate
   if (temp>TakeupRate) temp=TakeupRate;                      // slowest rate
+  if (abortSlew!=0) {
+    if (abortSlew==2) { a2r=(double)SiderealRate/(double)temp; abortSlew++; } else
+    if (abortSlew==3) { 
+      double r=1.2-sqrt((abs(a2r)/slewRateX));
+      if (r<0.2) r=0.2; if (r>1.2) r=1.2;
+      a2r-=(deaccXPerSec/100.0)*r;
+      if (a2r<2.00) a2r=2.0;
+      if ((a1r<2.00001) && (a2r<2.00001)) abortSlew++;
+    } else
+    if (abortSlew==4) { abortSlew=0; cli(); targetAxis1.part.m=posAxis1; targetAxis2.part.m=posAxis2; sei(); distDestAxis1=0; distDestAxis2=0; }
+    temp=round((double)SiderealRate/a2r);
+  }
   cli(); timerRateAxis2=temp; sei();
 
 #ifdef MOUNT_TYPE_ALTAZM
@@ -187,10 +209,9 @@ void moveTo() {
         // for eq mounts
         if (pierSideControl==PierSideFlipEW2) setTargetAxis1(celestialPoleAxis1,PierSideEast); else setTargetAxis1(-celestialPoleAxis1,PierSideWest);
       }
-//      setTargetAxis2(celestialPoleAxis2,PierSideWest);
 
-      D("Flp2 Axis1, Current "); D(((double)(long)posAxis1)/(double)StepsPerDegreeAxis1); D(" -to-> "); DL(((double)(long)targetAxis1.part.m)/(double)StepsPerDegreeAxis1);
-      D("Flp2 Axis2, Current "); D(((double)(long)posAxis2)/(double)StepsPerDegreeAxis2); D(" -to-> "); DL(((double)(long)targetAxis2.part.m)/(double)StepsPerDegreeAxis2); DL("");
+//      D("Flp2 Axis1, Current "); D(((double)(long)posAxis1)/(double)StepsPerDegreeAxis1); D(" -to-> "); DL(((double)(long)targetAxis1.part.m)/(double)StepsPerDegreeAxis1);
+//      D("Flp2 Axis2, Current "); D(((double)(long)posAxis2)/(double)StepsPerDegreeAxis2); D(" -to-> "); DL(((double)(long)targetAxis2.part.m)/(double)StepsPerDegreeAxis2); DL("");
       
       forceRefreshGetEqu();
       pierSideControl++;
@@ -200,11 +221,7 @@ void moveTo() {
       // the blAxis2 gets "reversed" when we Meridian flip, since the NORTH/SOUTH movements are reversed
       cli(); blAxis2=backlashAxis2-blAxis2; sei();
 
-      if (pierSideControl==PierSideFlipEW3) {
-        pierSideControl=PierSideWest;
-      } else {
-        pierSideControl=PierSideEast;
-      }
+      if (pierSideControl==PierSideFlipEW3) pierSideControl=PierSideWest; else pierSideControl=PierSideEast;
     
       // now complete the slew
       cli();
@@ -215,8 +232,8 @@ void moveTo() {
       sei();
 
       forceRefreshGetEqu();
-      D("Flp3 Axis1, Current "); D(((long)posAxis1)/StepsPerDegreeAxis1); D(" -to-> "); DL(((long)targetAxis1.part.m)/StepsPerDegreeAxis1);
-      D("Flp3 Axis2, Current "); D(((long)posAxis2)/StepsPerDegreeAxis2); D(" -to-> "); DL(((long)targetAxis2.part.m)/StepsPerDegreeAxis2); DL("");
+//      D("Flp3 Axis1, Current "); D(((long)posAxis1)/StepsPerDegreeAxis1); D(" -to-> "); DL(((long)targetAxis1.part.m)/StepsPerDegreeAxis1);
+//      D("Flp3 Axis2, Current "); D(((long)posAxis2)/StepsPerDegreeAxis2); D(" -to-> "); DL(((long)targetAxis2.part.m)/StepsPerDegreeAxis2); DL("");
     } else {
 
       StepperModeTracking();
@@ -289,5 +306,9 @@ uint32_t isqrt32 (uint32_t n) {
         place = place >> 2;
     }
     return root;
+}
+
+void stopLimit() {
+  if (trackingState==TrackingMoveTo) { if (!abortSlew) abortSlew=StartAbortSlew; } else trackingState=TrackingNone;
 }
 

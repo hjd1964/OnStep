@@ -117,6 +117,10 @@ bool Telescope::isMountGEM()
 {
   return strchr(&TelStatus[0], 'E') != NULL;
 }
+bool Telescope::isMountAltAz()
+{
+  return strchr(&TelStatus[0], 'A') != NULL;
+}
 Telescope::PierState Telescope::getPierState()
 {
   if (strchr(&sideofpier[0], 'E') != NULL)

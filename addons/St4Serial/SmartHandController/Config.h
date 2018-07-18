@@ -1,5 +1,6 @@
 // -------------------------------------------------------------------------------
 // Configuration
+// *** user configuration is in ST4SmartConfig.h and SerialSmartConfig.h ***
 
 #pragma once
 

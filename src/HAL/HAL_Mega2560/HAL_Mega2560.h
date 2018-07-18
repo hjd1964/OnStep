@@ -12,18 +12,19 @@
 
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
 #ifndef MEGA2560_ARDUINO_SERIAL_ON
-  // Use low overhead serial
-  #include "HAL_Serial.h"
   // SerialA is always enabled, SerialB and SerialC are optional
   #define HAL_SERIAL_B_ENABLED
+//  #define HAL_SERIAL_C_ENABLED
   // this tells OnStep that a .transmit() method needs to be called to send data
   #define HAL_SERIAL_TRANSMIT
+
+  // Use low overhead serial
+  #include "HAL_Serial.h"
 #else
   // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
   #define SerialA Serial
   // SerialA is always enabled, SerialB and SerialC are optional
   #define SerialB Serial1
-  // SerialA is always enabled, SerialB and SerialC are optional
   #define HAL_SERIAL_B_ENABLED
 #endif
 
@@ -57,6 +58,9 @@
 
 extern long int siderealInterval;
 extern void SiderealClockSetInterval (long int);
+
+void HAL_Init(void) {
+}
 
 // Init sidereal clock timer
 void HAL_Init_Timer_Sidereal() {

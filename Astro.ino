@@ -663,10 +663,12 @@ double cot(double n) {
 void SetAccelerationRates(double maxRate) {
   
   // set the new guide acceleration rate
-//  slewRateX  = (RateToXPerSec/(maxRate/16.0))*2.0; // double since exponential factor slows by about 1/2
-//  accXPerSec = slewRateX/DegreesForAcceleration;
-//  guideRates[9]=RateToASPerSec/(maxRate/16.0); guideRates[8]=guideRates[9]/2.0;
-
+  slewRateX  = (RateToXPerSec/(maxRate/16.0))*5.0;       // 5x for exponential factor average rate
+  slewRateX = slewRateX*((MaxRate/2.0)/(maxRate/16.0));  // scale with maxRate so DegreesForAcceleration and DegreesForRapidStop are approximately correct
+  accXPerSec = slewRateX/DegreesForAcceleration;
+  guideRates[9]=RateToASPerSec/(maxRate/16.0); guideRates[8]=guideRates[9]/2.0;
+  activeGuideRate=GuideRateNone;
+  
   // set the new goto acceleration rate
   cli();
   StepsForRateChangeAxis1= (sqrt((double)DegreesForAcceleration*(double)StepsPerDegreeAxis1))*maxRate;

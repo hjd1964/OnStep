@@ -16,29 +16,33 @@
 #define cli() noInterrupts()
 #define sei() interrupts()
 
-// New symbols for the Serial ports so they can be remapped if necessary -----------------------------
-#define SerialA Serial
+/*
+   New symbols for the Serial ports so they can be remapped if necessary -----------------------------
 
-// Which port to use for WiFi?
-//
-// The hardware serial ports and pins for STM32F103 are:
-//   USART1: TX PA9,  RX PA10
-//   USART2: TX PA2,  RX PA3
-//   USART3: TX PB10, RX PB11
+   Which ports to use for WiFi, and USB?
 
-// Different flashing methods will remap the port numbers differently, as follows.
-//
-// For DFU (STM32duino), or ST-Link V2, the ports are:
-//   Serial1 -> USART 1
-//   Serial2 -> USART 2
-//   Serial3 -> USART 3
-// If "Serial" method, using a USB to TTL dongle on pins A9 and A10, the ports are:
-//   Serial  -> USART 1
-//   Serial1 -> USART 2
-//   Serial2 -> USART 3
+   The hardware serial ports and pins for STM32F103 are:
+     USART1: TX PA9,  RX PA10
+     USART2: TX PA2,  RX PA3
+     USART3: TX PB10, RX PB11
+
+   Different flashing methods will remap the port numbers differently, as follows.
+
+   For "DFU" (STM32duino), or ST-Link V2, the ports are:
+     Serial1 -> USART 1
+     Serial2 -> USART 2
+     Serial3 -> USART 3
+
+   If "Serial" method, using a UART to TTL converter on pins A9 and A10, the ports are:
+     Serial  -> USART 1
+     Serial1 -> USART 2
+     Serial2 -> USART 3
+ */
 #if defined(SERIAL_USB)
+  #define SerialA Serial1
   #define SerialB Serial3
 #else
+  #define SerialA Serial
   #define SerialB Serial2
 #endif
 
@@ -66,12 +70,20 @@
 // frequency compensation (F_COMP/1000000.0) for adjusting microseconds to timer counts
 #define F_COMP 1000000.0
 
+void HAL_Init(void) {
+  // Make sure that debug pins are not reserved, and therefore usable as GPIO
+  disableDebugPorts();
+}
+
 // initialised here and not in timer.ino
 void TIMER1_COMPA_vect(void);
 
 HardwareTimer Timer_Axis1(3);
 void TIMER3_COMPA_vect(void);
 
+// We use the STM32 Hardware Timer 2, even thought the called function
+// is called TIMER4_COMPA_vect(). The reason is that Timer 4 on the STM32
+// is used for I2C, which is required for the EEPROM on the RTC module
 HardwareTimer Timer_Axis2(2);
 void TIMER4_COMPA_vect(void);
 
@@ -85,11 +97,10 @@ void HAL_Init_Timer_Sidereal() {
 
 // Init Axis1 and Axis2 motor timers and set their priorities
 void HAL_Init_Timers_Motor() {
+  // ===== Axis 1 Timer =====
   // Pause the timer while we're configuring it
   Timer_Axis1.pause();
 
-  //Timer_Axis1.setPrescaleFactor(SMT32_PRESCALER);
-  //Timer_Axis1.setOverflow(STM32_OVERFLOW);
   // Set up period
   Timer_Axis1.setPeriod((float)128 * 0.0625); // in microseconds
 
@@ -104,13 +115,14 @@ void HAL_Init_Timers_Motor() {
   // Start the timer counting
   Timer_Axis1.resume();
   
+  // ===== Axis 2 Timer =====
   // Pause the timer while we're configuring it
   Timer_Axis2.pause();
 
   // Set up period
   Timer_Axis2.setPeriod((float)128 * 0.0625); // in microseconds
 
-  // Set up an interrupt for the channel
+  // Set up an interrupt on channel 2
   Timer_Axis2.setChannel2Mode(TIMER_OUTPUT_COMPARE);
   Timer_Axis2.setCompare(TIMER_CH2, 1);  // Interrupt 1 count after each update
   Timer_Axis2.attachInterrupt(TIMER_CH2, TIMER4_COMPA_vect);
@@ -121,8 +133,10 @@ void HAL_Init_Timers_Motor() {
   // Start the timer counting
   Timer_Axis2.resume();
 
+  // ===== Set timer priorities =====
   // set the 1/100 second sidereal clock timer to run at the second highest priority
   nvic_irq_set_priority(NVIC_TIMER1_CC, 2);
+
   // set the motor timers to run at the highest priority
   nvic_irq_set_priority(NVIC_TIMER2, 0);
   nvic_irq_set_priority(NVIC_TIMER3, 0);
@@ -133,6 +147,7 @@ void HAL_Init_Timers_Motor() {
 
 #define ISR(f) void f (void)
 void TIMER1_COMPA_vect(void);
+// Sidereal timer is on STM32 Hardware Timer 1
 HardwareTimer Timer_Sidereal(1);
 
 void Timer1SetInterval(long iv, double rateRatio) {
@@ -163,8 +178,8 @@ void Timer1SetInterval(long iv, double rateRatio) {
 }
 
 //--------------------------------------------------------------------------------------------------
-// Quickly reprogram the interval (in microseconds*(F_COMP/1000000.0)) for the motor timers, must work from within the motor ISR timers
-
+// Quickly reprogram the interval (in microseconds*(F_COMP/1000000.0)) for the motor timers, must work
+// from within the motor ISR timers
 void QuickSetIntervalAxis1(uint32_t r) {
   // Pause the timer while we're configuring it
   Timer_Axis1.pause();

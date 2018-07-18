@@ -654,7 +654,7 @@ void processCommands() {
           if (parameter[0]=='8') { // 8n: Date/Time
             switch (parameter[1]) {
               case '0': f=timeRange(UT1); doubleToHms(reply,&f,true); quietReply=true; break;  // UTC time
-              case '1': f1=JD; f=UT1; while (f>=24.0) { f-=24.0; f1+=1; } while (f<0.0) { f+=24.0; f1-=1; } greg(f1,&i2,&i,&i1); i2=(i2/99.99999-floor(i2/99.99999))*100; sprintf(reply,"%d/%d/%d",i,i1,i2); quietReply=true; break; // UTC date
+              case '1': f1=JD; f=UT1; while (f>=24.0) { f-=24.0; f1+=1; } while (f<0.0) { f+=24.0; f1-=1; } greg(f1,&i2,&i,&i1); i2=(i2/99.99999-floor(i2/99.99999))*100; sprintf(reply,"%02d/%02d/%02d",i,i1,i2); quietReply=true; break; // UTC date
               default:  commandError=true;
             }
           } else
@@ -1948,7 +1948,7 @@ void stopMount() {
   if ((parkStatus==NotParked) || (parkStatus==Parking)) {
     stopGuideAxis1();
     stopGuideAxis2();
-    if (trackingState==TrackingMoveTo) { abortSlew=true; }
+    if (trackingState==TrackingMoveTo) if (!abortSlew) abortSlew=StartAbortSlew;
   }
 }
 

@@ -37,7 +37,7 @@
 // Finally, during a goto pressing any button aborts the slew.  If meridian flip paused at home, pressing any button continues.  default=_ON
 #define ST4_HAND_CONTROL_OFF
 // ST4_ALTERNATE_PINS_ON moves the interface (Mega2560 only) to pins 43, 45, 47, 49.  Pin 43 is Dec- (South), Pin 45 is Dec+ (North), Pin 47 is RA- (West), Pin 49 is RA+ (East.)
-// ST4_ALTERNATE_PINS_ON is required for Steve's ST4 board and is also required if the ST4 interface is to be used alongside the Arduino Ethernet Shield
+// ST4_ALTERNATE_PINS_ON is required for Steve's ST4 board and is also required if the ST4 interface is to be used alongside the SPI interface.
 #define ST4_ALTERNATE_PINS_OFF
 
 // Separate pulse-guide rate so centering and guiding don't disturb each other, default=_ON
@@ -47,7 +47,7 @@
 // If the stop command is never received the guide will continue forever unless this is enabled.
 #define GUIDE_TIME_LIMIT 0
 
-// RTC (Real Time Clock) support, default=_OFF. Other options: RTC_DS3234 for a DS3234 on the default SPI interface pins (and CS on pin 10, optionally wire the SQW output to the PPS pin below.)
+// RTC (Real Time Clock) support, default=_OFF. Other options: RTC_DS3234 for a DS3234 on the default SPI interface (and CS on pin 10, optionally wire the SQW output to the PPS pin below.)
 #define RTC_OFF
 // PPS use _ON or _PULLUP to enable the input and use the built-in pullup resistor.  Sense rising edge on pin 21 for optional precision clock source (GPS, for example), default=_OFF (Teensy3.x Pin 23)
 #define PPS_SENSE_OFF
@@ -173,9 +173,9 @@
 #define AXIS2_FAULT_OFF
 
 // ------------------------------------------------------------------------------------------------------------------------
-// FOCUSER ROTATOR OR ALT/AZ DE-ROTATION ----------------------------------------------------------------------------------
+// CAMERA ROTATOR OR ALT/AZ DE-ROTATION -----------------------------------------------------------------------------------
 // A9,A8 = Step,Dir (Teensy3.x 30,33 choose either this option or the second focuser, not both)
-#define ROTATOR_OFF                  // enable or disable rotator feature (for any mount type,) default=_OFF (de-rotator is available only for MOUNT_TYPE_ALTAZM.)
+#define ROTATOR_OFF                  // use _ON to enable the rotator (for any mount type,) default=_OFF (this is also a de-rotator for MOUNT_TYPE_ALTAZM mounts.)
 #define MaxRateAxis3               8 // this is the minimum number of milli-seconds between micro-steps, default=8
 #define StepsPerDegreeAxis3     64.0 // calculated as    :  stepper_steps * micro_steps * gear_reduction1 * (gear_reduction2/360)
                                      // Rotator          :  24            * 8           * 20              *  6/360                = 64
@@ -187,7 +187,7 @@
 
 // FOCUSER1 ---------------------------------------------------------------------------------------------------------------
 // A11,A10 = Step,Dir (Teensy3.2 pins 31,32) (Teensy3.5/3.6 pins 34,35)
-#define FOCUSER1_OFF                 // enable or disable focuser feature, default=_OFF
+#define FOCUSER1_OFF                 // use _ON to enable this focuser, default=_OFF
 #define MaxRateAxis4               8 // this is the minimum number of milli-seconds between micro-steps, default=8
 #define StepsPerMicrometerAxis4  0.5 // figure this out by testing or other means
 #define MinAxis4               -25.0 // minimum allowed Axis4 position in millimeters, default = -25.0
@@ -196,7 +196,7 @@
 
 // FOCUSER2 ---------------------------------------------------------------------------------------------------------------
 // A13,A12 = Step,Dir (Teensy3.x pins 30,33 choose either this option or the rotator, not both) 
-#define FOCUSER2_OFF                 // enable or disable focuser feature, default=_OFF
+#define FOCUSER2_OFF                 // use _ON to enable this focuser, default=_OFF
 #define MaxRateAxis5               8 // this is the minimum number of milli-seconds between micro-steps, default=8
 #define StepsPerMicrometerAxis5  0.5 // figure this out by testing or other means
 #define MinAxis5               -25.0 // minimum allowed Axis5 position in millimeters, default = -25.0

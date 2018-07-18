@@ -7,9 +7,9 @@
 #define MaxRate_LowerLimit 16
 
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
-#define SerialA Serial
-#define SerialB Serial1
+#define SerialA SerialUSB
 // SerialA is always enabled, SerialB and SerialC are optional
+#define SerialB Serial1
 #define HAL_SERIAL_B_ENABLED
 
 // New symbol for the default I2C port ---------------------------------------------------------------
@@ -49,6 +49,9 @@ void TIMER4_COMPA_vect(void);
 
 extern long int siderealInterval;
 extern void SiderealClockSetInterval (long int);
+
+void HAL_Init(void) {
+}
 
 // Init sidereal clock timer
 void HAL_Init_Timer_Sidereal() {

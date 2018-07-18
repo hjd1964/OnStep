@@ -226,14 +226,26 @@
 #endif
 
 // figure out how many align star are allowed for the configuration
-#if defined(MOUNT_TYPE_GEM)
-  #define MAX_NUM_ALIGN_STARS '6'
-#elif defined(MOUNT_TYPE_FORK)
-  #define MAX_NUM_ALIGN_STARS '6'
-#elif defined(MOUNT_TYPE_FORK_ALT)
-  #define MAX_NUM_ALIGN_STARS '6'
-#elif defined(MOUNT_TYPE_ALTAZM)
-  #define MAX_NUM_ALIGN_STARS '6'
+#ifdef HAL_SLOW_PROCESSOR
+  #if defined(MOUNT_TYPE_GEM)
+    #define MAX_NUM_ALIGN_STARS '4'
+  #elif defined(MOUNT_TYPE_FORK)
+    #define MAX_NUM_ALIGN_STARS '4'
+  #elif defined(MOUNT_TYPE_FORK_ALT)
+    #define MAX_NUM_ALIGN_STARS '4'
+  #elif defined(MOUNT_TYPE_ALTAZM)
+    #define MAX_NUM_ALIGN_STARS '4'
+  #endif
+#else
+  #if defined(MOUNT_TYPE_GEM)
+    #define MAX_NUM_ALIGN_STARS '6'
+  #elif defined(MOUNT_TYPE_FORK)
+    #define MAX_NUM_ALIGN_STARS '6'
+  #elif defined(MOUNT_TYPE_FORK_ALT)
+    #define MAX_NUM_ALIGN_STARS '6'
+  #elif defined(MOUNT_TYPE_ALTAZM)
+    #define MAX_NUM_ALIGN_STARS '6'
+  #endif
 #endif
 
 // make both enable and disable values
@@ -421,7 +433,7 @@
         #error "Configuration: AXIS1_MICROSTEPS_GOTO; TMC2130 invalid micro-step mode, use: 256,128,64,32,16,8,4,2,or 1"
       #endif
       #if AXIS1_MICROSTEPS != AXIS1_MICROSTEPS_GOTO
-        #warning "Configuration: AXIS2_MICROSTEPS_GOTO; is NOT equal to AXIS2_MICROSTEPS,or _OFF.  This can effect pointing accuracy slightly (and PEC if index sensing isn't used.)"
+        #warning "Configuration: AXIS2_MICROSTEPS_GOTO; is NOT _OFF.  This can effect pointing accuracy slightly (and PEC if index sensing isn't used.)"
       #endif
     #elif AXIS1_DRIVER_MODEL == TMC2208
       #if AXIS1_MICROSTEPS_GOTO!=2 && AXIS1_MICROSTEPS_GOTO!=4 && AXIS1_MICROSTEPS_GOTO!=8 && AXIS1_MICROSTEPS_GOTO!=16
@@ -429,7 +441,7 @@
       #endif
     #endif
 
-    #if (AXIS1_MICROSTEPS <= AXIS1_MICROSTEPS_GOTO) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI) && !defined(MODE_SWITCH_BEFORE_SLEW_ON)
+    #if (AXIS1_MICROSTEPS <= AXIS1_MICROSTEPS_GOTO) && (!((defined(MODE_SWITCH_BEFORE_SLEW_ON) || defined(MODE_SWITCH_BEFORE_SLEW_SPI)) && (AXIS1_MICROSTEPS == AXIS1_MICROSTEPS_GOTO)))
         #error "Configuration: AXIS1_MICROSTEPS_GOTO should be less than AXIS1_MICROSTEPS or _OFF"
     #endif
 
@@ -462,7 +474,7 @@
         #error "Configuration: AXIS2_MICROSTEPS_GOTO; TMC2130 invalid micro-step mode, use: 256,128,64,32,16,8,4,2,or 1"
       #endif
       #if AXIS2_MICROSTEPS != AXIS2_MICROSTEPS_GOTO
-        #warning "Configuration: AXIS2_MICROSTEPS_GOTO; is NOT equal to AXIS2_MICROSTEPS,or _OFF.  This can effect pointing accuracy slightly (and PEC if index sensing isn't used.)"
+        #warning "Configuration: AXIS2_MICROSTEPS_GOTO; is NOT _OFF.  This can effect pointing accuracy slightly (and PEC if index sensing isn't used.)"
       #endif
     #elif AXIS2_DRIVER_MODEL == TMC2208
       #if AXIS2_MICROSTEPS_GOTO!=2 && AXIS2_MICROSTEPS_GOTO!=4 && AXIS2_MICROSTEPS_GOTO!=8 && AXIS2_MICROSTEPS_GOTO!=16
@@ -470,7 +482,7 @@
       #endif
     #endif
 
-    #if (AXIS2_MICROSTEPS <= AXIS2_MICROSTEPS_GOTO) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI) && !defined(MODE_SWITCH_BEFORE_SLEW_ON)
+    #if (AXIS2_MICROSTEPS <= AXIS2_MICROSTEPS_GOTO) && (!((defined(MODE_SWITCH_BEFORE_SLEW_ON) || defined(MODE_SWITCH_BEFORE_SLEW_SPI)) && (AXIS2_MICROSTEPS == AXIS2_MICROSTEPS_GOTO)))
         #error "Configuration: AXIS2_MICROSTEPS_GOTO should be less than AXIS2_MICROSTEPS or _OFF"
     #endif
 
@@ -535,4 +547,6 @@
   #warning "Configuration: the MaxRate run-time adjustability (0.5x to 2x MaxRate) can be set to exceed the platform performance, you might want to increase MaxRate or use/adjust micro-step mode switching"
 #endif
 
-
+#if PECBufferSize > 3384
+  #error "PECBufferSize cannot be greater than 3384. Please use the spreadsheet to calculate your correct value"
+#endif

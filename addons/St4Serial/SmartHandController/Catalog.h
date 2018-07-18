@@ -70,7 +70,12 @@ class CatMgr {
     byte   objectType();
     const char* objectInfoStr();
     int    primaryId();
-  private:
+
+    void EquToHor(double RA, double Dec, double *Alt, double *Azm);
+    void HorToEqu(double Alt, double Azm, double *RA, double *Dec);
+    double TrueRefrac(double Alt, double Pressure=1010.0, double Temperature=10.0);
+    
+private:
     double _lat=-10000;
     double _cosLat=0;
     double _sinLat=0;
@@ -82,9 +87,9 @@ class CatMgr {
     int _maxIdx[4]={292-1,110-1,400-1,0-1};
 
     bool isFiltered();
-    void EquToHor(double RA, double Dec, double *Alt, double *Azm);
     double DistFromEqu(double RA, double Dec);
     double HAToRA(double ha);
+    double cot(double n);
 };
 
 extern CatMgr cat_mgr;

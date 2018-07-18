@@ -55,12 +55,13 @@ private:
 
   void menuMain();
   void menuSpeedRate();
-  void menuTrack();
   void menuSyncGoto(bool sync);
   void menuSolarSys(bool sync);
   void menuHerschel(bool sync);
   void menuMessier(bool sync);
   void menuAlignment();
+  void menuParking();
+  void menuGotoSpeed();
   void menuPier();
   void menuStar(bool sync);
   bool SelectStarAlign();
@@ -73,12 +74,15 @@ private:
   void menuMotor(uint8_t idx);
   void menuSite();
   void menuSites();
-  void menuUTCTime();
+  void menuLocalDateTime();
   void menuDisplay();
+  void menuSound();
+  void menuMeridianFlips();
+  void menuTracking();
   void menuContrast();
-  void menuDate();
   void menuLatitude();
   void menuLongitude();
+  void menuZone();
   void menuLimits();
   void menuWifi();
   void menuHorizon();
@@ -88,6 +92,7 @@ private:
 
   bool menuSetStepperGearBox(uint8_t &axis, unsigned short &worm);
   bool menuSetReverse(uint8_t &axis);
+  void menuBacklash();
   bool menuSetBacklash(uint8_t &axis);
   bool menuSetTotGear(uint8_t &axis);
   bool menuSetStepPerRot(uint8_t &axis);

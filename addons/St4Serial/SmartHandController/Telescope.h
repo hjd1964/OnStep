@@ -66,6 +66,7 @@ public:
   bool atHome();
   bool isGuiding();
   bool isMountGEM();
+  bool isMountAltAz();
   PierState getPierState();
   Errors getError();
   bool addStar();

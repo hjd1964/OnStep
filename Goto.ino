@@ -90,14 +90,13 @@ GotoErrors syncEqu(double RA, double Dec) {
 
 // syncs internal counts to shaft encoder position (in degrees)
 GotoErrors syncEnc(double EncAxis1, double EncAxis2) {
-  long a1,a2;
-
   // validate
   GotoErrors f=validateGoto(); if (f!=GOTO_ERR_NONE) return f;
 
   long e1=EncAxis1*(double)StepsPerDegreeAxis1;
   long e2=EncAxis2*(double)StepsPerDegreeAxis2;
   
+  long a1,a2;
   cli();
   a1=posAxis1;
   a2=posAxis2;
@@ -118,14 +117,19 @@ GotoErrors syncEnc(double EncAxis1, double EncAxis2) {
 
 // get internal counts as shaft encoder position (in degrees)
 int getEnc(double *EncAxis1, double *EncAxis2) {
-//  long a1,a2;
-  
   // validate
   int f=validateGoto(); if (f!=0) return f;
-//  if ((pierSide!=PierSideWest) && (pierSide!=PierSideEast) && (pierSide!=PierSideNone)) return 9; // unspecified error
 
-  *EncAxis1=getInstrAxis1();
-  *EncAxis2=getInstrAxis2();
+  long a1,a2;
+  cli();
+  a1=posAxis1;
+  a2=posAxis2;
+  sei();
+  a1+=indexAxis1Steps;
+  a2+=indexAxis2Steps;
+  
+  *EncAxis1=(double)a1/(double)StepsPerDegreeAxis1;
+  *EncAxis2=(double)a2/(double)StepsPerDegreeAxis2;
 
   return 0;
 }
@@ -217,7 +221,7 @@ GotoErrors goToEqu(double RA, double Dec) {
   EquToHor(HA,Dec,&a,&z);
 
   // validate
-  GotoErrors r=validateGoto(); if (r==GOTO_ERR_GOTO) abortSlew=true; if (r!=GOTO_ERR_NONE) return r;
+  GotoErrors r=validateGoto(); if (r==GOTO_ERR_GOTO) { if (!abortSlew) abortSlew=StartAbortSlew; } if (r!=GOTO_ERR_NONE) return r;
   r=validateGotoCoords(HA,Dec,a); if (r!=GOTO_ERR_NONE) return r;
 
 #ifdef MOUNT_TYPE_ALTAZM
@@ -366,7 +370,16 @@ GotoErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTarget
   int p=PierSideEast; switch (thisPierSide) { case PierSideWest: case PierSideFlipEW1: p=PierSideWest; break; }
   setTargetAxis1(thisTargetAxis1,p);
   setTargetAxis2(thisTargetAxis2,p);
-  pierSideControl=thisPierSide;
+
+  #ifdef MERIDIAN_FLIP_SKIP_HOME_ON
+  boolean gotoDirect=true;
+  #else
+  boolean gotoDirect=false;
+  #endif
+  if (!pauseHome && gotoDirect) {
+    if (thisPierSide==PierSideFlipWE1) pierSideControl=PierSideEast; else
+    if (thisPierSide==PierSideFlipEW1) pierSideControl=PierSideWest; else pierSideControl=thisPierSide;
+  } else pierSideControl=thisPierSide;
 
   D("Goto Axis1, Current "); D(((double)(long)posAxis1)/(double)StepsPerDegreeAxis1); D(" -to-> "); DL(((double)(long)targetAxis1.part.m)/(double)StepsPerDegreeAxis1);
   D("Goto Axis2, Current "); D(((double)(long)posAxis2)/(double)StepsPerDegreeAxis2); D(" -to-> "); DL(((double)(long)targetAxis2.part.m)/(double)StepsPerDegreeAxis2); DL("");
