@@ -550,172 +550,6 @@ void SmartHandController::drawReady()
   delay(500);
 }
 
-bool SmartHandController::menuSetStepperGearBox(uint8_t &axis, unsigned short &worm)
-{
-  char text[20];
-  float stepperGearBox = 10;
-  sprintf(text, "Gear box M%u", axis);
-  if (display->UserInterfaceInputValueFloat(&buttonPad,text, "Ratio", &stepperGearBox, 1, 100, 5, 0, ""))
-  {
-    return DisplayMessageLX200(writeTotGearLX200(axis, stepperGearBox * worm),false);
-  }
-}
-
-bool SmartHandController::menuSetReverse(uint8_t &axis)
-{
-  bool reverse;
-  if (!DisplayMessageLX200(readReverseLX200(axis, reverse)))
-    return false;
-  char text[20];
-  char * string_list_micro = "Direct\nReversed";
-  sprintf(text, "Rotation M%u", axis);
-  uint8_t choice = display->UserInterfaceSelectionList(&buttonPad, text, (uint8_t)reverse + 1, string_list_micro);
-  if (choice)
-  {
-    reverse = (bool)(choice - 1);
-    return DisplayMessageLX200(writeReverseLX200(axis, reverse),false);
-  }
-  return true;
-}
-bool SmartHandController::menuSetBacklash(uint8_t &axis)
-{
-  float backlash;
-  if (!DisplayMessageLX200(readBacklashLX200(axis, backlash)))
-    return false;
-  char text[20];
-  sprintf(text, "Backlash M%u", axis);
-  if (display->UserInterfaceInputValueFloat(&buttonPad, text, "", &backlash, 0, 1000, 4, 0, " in seconds"))
-  {
-    return DisplayMessageLX200(writeBacklashLX200(axis, backlash),false);
-  }
-  return true;
-}
-bool SmartHandController::menuSetTotGear(uint8_t &axis)
-{
-  float totGear;
-  if (!DisplayMessageLX200(readTotGearLX200(axis, totGear)))
-    return false;
-  char text[20];
-  sprintf(text, "Gear M%u", axis);
-  if (display->UserInterfaceInputValueFloat(&buttonPad, text, "Ratio", &totGear, 1, 10000, 5, 0, ""))
-  {
-    return DisplayMessageLX200(writeTotGearLX200(axis, totGear), false);
-  }
-  return true;
-}
-bool SmartHandController::menuSetStepPerRot(uint8_t &axis)
-{
-  float stepPerRot;
-  if (!DisplayMessageLX200(readStepPerRotLX200(axis, stepPerRot)))
-    return false;
-  char text[20];
-  sprintf(text, "Stepper M%u", axis);
-  if (display->UserInterfaceInputValueFloat(&buttonPad, text, "", &stepPerRot, 1, 400, 3, 0, " Steps"))
-  {
-    return DisplayMessageLX200(writeStepPerRotLX200(axis, stepPerRot),false);
-  }
-  return true;
-}
-bool SmartHandController::menuSetMicro(uint8_t &axis)
-{
-  uint8_t microStep;
-    if (!DisplayMessageLX200(readMicroLX200(axis, microStep)))
-      return false;
-  char text[20];
-  char * string_list_micro = "16 (~256)\n32\n64\n128\n256";
-  sprintf(text, "Stepper M%u", axis);
-  uint8_t choice = microStep - 4 + 1;
-  choice = display->UserInterfaceSelectionList(&buttonPad, text, choice, string_list_micro);
-  if (choice)
-  {
-    microStep = choice - 1 + 4;
-    return DisplayMessageLX200(writeMicroLX200(axis, microStep),false);
-  }
-  return true;
-}
-bool SmartHandController::menuSetLowCurrent(uint8_t &axis)
-{
-  uint8_t lowCurr;
-  if (!DisplayMessageLX200(readLowCurrLX200(axis, lowCurr)))
-  {
-    return false;
-  }
-  char text[20];
-  sprintf(text, "Low Curr. M%u", axis);
-  if (display->UserInterfaceInputValueInteger(&buttonPad, text, "", &lowCurr, 10, 200, 3, "0 mA"))
-  {
-    return DisplayMessageLX200(writeLowCurrLX200(axis, lowCurr),false);
-  }
-  return true;
-}
-
-bool SmartHandController::menuSetHighCurrent(uint8_t &axis)
-{
-  uint8_t highCurr;
-  if (!DisplayMessageLX200(readHighCurrLX200(axis, highCurr)))
-  {
-    return false;
-  }
-  char text[20];
-  sprintf(text, "High Curr. M%u", axis);
-  if (display->UserInterfaceInputValueInteger(&buttonPad, text, "", &highCurr, 10, 200, 3, "0 mA"))
-  {
-    return DisplayMessageLX200(writeHighCurrLX200(axis, highCurr));
-  }
-  return true;
-}
-
-void SmartHandController::DisplayMotorSettings(uint8_t &axis)
-{
-  char line1[32]="";
-  char line2[32]="";
-  char line3[32]="";
-  char line4[32]="";
-  bool reverse;
-  float backlash,totGear,stepPerRot;
-  uint8_t microStep,lowCurr,highCurr;
-  sprintf(line1, "Motor %u Settings", axis);
-  if (DisplayMessageLX200(readReverseLX200(axis, reverse)))
-  {
-    reverse ? sprintf(line3, "Reversed Rotation") : sprintf(line3, "Direct Rotation");
-  }
-  if (DisplayMessageLX200(readTotGearLX200(axis, totGear)))
-  {
-    sprintf(line4, "Ratio: %u", (unsigned int)totGear);
-  }
-  DisplayLongMessage(line1, NULL, line3, line4, -1);
-
-  line2[0] = 0;
-  line3[0] = 0;
-  line4[0] = 0;
-  if (DisplayMessageLX200(readStepPerRotLX200(axis, stepPerRot)))
-  {
-    sprintf(line2, "%u Steps per Rot.", (unsigned int)stepPerRot);
-  }
-  if (DisplayMessageLX200(readMicroLX200(axis, microStep)))
-  {
-    sprintf(line3, "MicroStep: %u", (unsigned int)pow(2, microStep));
-  }
-  if (DisplayMessageLX200(readBacklashLX200(axis, backlash)))
-  {
-    sprintf(line4, "Backlash: %u sec.", (unsigned int)backlash);
-  }
-  DisplayLongMessage(line1, line2, line3, line4, -1);
-  line2[0] = 0;
-  line3[0] = 0;
-  line4[0] = 0;
-  if (DisplayMessageLX200(readLowCurrLX200(axis, lowCurr)))
-  {
-    sprintf(line3, "Low Curr. %u0 mA", (unsigned int)lowCurr);
-  }
-  if (DisplayMessageLX200(readHighCurrLX200(axis, highCurr)))
-  {
-    sprintf(line4, "High Curr. %u0 mA", (unsigned int)highCurr);
-  }
-
-  DisplayLongMessage(line1, NULL, line3, line4, -1);
-}
-
 // Alt Main Menu (double click)
 void SmartHandController::menuSpeedRate()
 {
@@ -739,77 +573,21 @@ void SmartHandController::menuMain()
   current_selection_L0 = 1;
   while (current_selection_L0 != 0)
   {
-    telInfo.updateTel(true);
-    Telescope::ParkState currentstate = telInfo.getParkState();
-
-    if (currentstate == Telescope::PRK_PARKED) {
-      const char *string_list_main_ParkedL0 = "Unpark\n""Settings";
-      current_selection_L0 = display->UserInterfaceSelectionList(&buttonPad, "Main Menu", 0, string_list_main_ParkedL0);
-      switch (current_selection_L0) {
-        case 1:
-          break;
-        case 2:
-          menuSettings();
-          break;
-        default:
-          break;
-      }
-    } else if (currentstate == Telescope::PRK_UNPARKED) {
-      const char *string_list_main_UnParkedL0 = "Goto\nSync\nTracking\nSettings";
-      current_selection_L0 = display->UserInterfaceSelectionList(&buttonPad, "Main Menu", 0, string_list_main_UnParkedL0);
-      switch (current_selection_L0) {
-        case 1:
-          menuSyncGoto(false);
-          break;
-        case 2:
-          menuSyncGoto(true);
-          break;
-        case 3:
-          menuTrack();
-          break;
-        case 4:
-          menuSettings();
-          break;
-        default:
-          break;
-      }
+    boolean sync=false;
+    const char *string_list_main_UnParkedL0 = "Goto\n""Sync\n""Align\n""Parking\n""Settings";
+    current_selection_L0 = display->UserInterfaceSelectionList(&buttonPad, "Main Menu", current_selection_L0, string_list_main_UnParkedL0);
+    switch (current_selection_L0) {
+      case 1: menuSyncGoto(false); break;
+      case 2: if (display->UserInterfaceInputValueBoolean(&buttonPad, "Sync Here?", &sync)) if (sync) DisplayMessageLX200(SetLX200(":CS#"),false); break;
+      case 3: menuAlignment(); break;
+      case 4: menuParking(); break;
+      case 5: menuSettings(); break;
+      default: break;
     }
   }
 }
 
 #include "MenusSyncGoto.h"
-
-void SmartHandController::menuTrack()
-{
-  telInfo.updateTel(true);
-  Telescope::TrackState currentstate = telInfo.getTrackingState();
-  uint8_t choice;
-  if (currentstate == Telescope::TRK_ON) {
-    const char *string_list_main_ParkedL0 = "Stop Tracking\n";
-    choice = display->UserInterfaceSelectionList(&buttonPad, "Tracking State", 0, string_list_main_ParkedL0);
-    switch (choice) {
-    case 1:
-      char out[20];
-      memset(out, 0, sizeof(out));
-      if (SetLX200(":Td#")== LX200VALUESET) DisplayMessage("Tracking", "OFF", 500); else DisplayMessage("Set State", "Failed", 1000);
-      break;
-    default:
-      break;
-    }
-  }
-  else if (currentstate == Telescope::TRK_OFF)
-  {
-    const char *string_list_main_UnParkedL0 = "Start Tracking\n";
-    current_selection_L0 = display->UserInterfaceSelectionList(&buttonPad, "Tracking State", 0, string_list_main_UnParkedL0);
-    switch (current_selection_L0) {
-      case 1:
-        if (SetLX200(":Te#") == LX200VALUESET) DisplayMessage("Tracking", "ON", 500); else DisplayMessage("Set State", "Failed", 1000);
-        break;
-      default:
-        break;
-    }
-  } else DisplayMessage("currently Tracking", "cannot be changed", 1000);
-}
 
 bool SmartHandController::SelectStarAlign()
 {
@@ -834,58 +612,78 @@ bool SmartHandController::SelectStarAlign()
   return false;
 }
 
+// Parking Menu
+void SmartHandController::menuParking()
+{
+  telInfo.updateTel(true);
+  Telescope::ParkState currentstate = telInfo.getParkState();
+
+  if (currentstate == Telescope::PRK_PARKED) { }
+  if (currentstate == Telescope::PRK_UNPARKED) { }
+
+  current_selection_L1 = 1;
+  boolean meridianFlips = false;
+  if ((telInfo.hasTelStatus) && (telInfo.isMountGEM())) meridianFlips=true;
+  while (current_selection_L1 != 0)
+  {
+    if (meridianFlips) {
+      const char *string_list_SettingsL1 = "Park\n""Un-Park\n""Set-Park";
+      current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Parking", current_selection_L1, string_list_SettingsL1);
+      switch (current_selection_L1)
+      {
+      case 1: DisplayMessageLX200(SetLX200(":hP#"),false); break;
+      case 2: DisplayMessageLX200(SetLX200(":hR#"),false); break;
+      case 3: DisplayMessageLX200(SetLX200(":hQ#"),false); break;
+      default: break;
+      }
+    }
+  }
+}
+
 // Settings Menu
 void SmartHandController::menuSettings()
 {
   current_selection_L1 = 1;
+  boolean meridianFlips = false;
+  if ((telInfo.hasTelStatus) && (telInfo.isMountGEM())) meridianFlips=true;
 #ifdef ST4SMARTCONTROLLER_ON
   while (current_selection_L1 != 0)
   {
-    const char *string_list_SettingsL1 = "Date/Time\n""Alignment\n""Display\n""Pier Side\n""Limits\n""Site";
-    current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Settings", current_selection_L1, string_list_SettingsL1);
-    switch (current_selection_L1)
-    {
-    case 1:
-      menuLocalDateTime(); break;
-    case 2:
-      menuAlignment(); break;
-    case 3:
-      menuDisplay(); break;
-    case 4:
-      menuPier(); break;
-    case 5:
-      menuLimits(); break;
-    case 6:
-      menuSite(); break;
-    default:
-      break;
+    if (meridianFlips) {
+      const char *string_list_SettingsL1 = "Date/Time\n""Display\n""Buzzer\n""Meridian Flp\n""Tracking\n""Configuration\n""Site";
+      current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Settings", current_selection_L1, string_list_SettingsL1);
+      switch (current_selection_L1)
+      {
+      case 1: menuLocalDateTime(); break;
+      case 2: menuDisplay(); break;
+      case 3: menuSound(); break;
+      case 4: if (meridianFlips) menuMeridianFlips(); else DisplayMessage("Meridian flips", "are disabled", 1500); break;
+      case 5: menuTracking(); break;
+      case 6: menuMount(); break;
+      case 7: menuSite(); break;
+      default: break;
+      }
     }
   }
 #else
   while (current_selection_L1 != 0)
   {
-    const char *string_list_SettingsL1 = "Date/Time\n""Alignment\n""Display\n""Pier Side\n""Mount\n""Limits\n""Wifi\n""Site";
+    const char *string_list_SettingsL1 = "Date/Time\n""Pier Side\n""Goto Speed\n""Display\n""Buzzer\n""Meridian Flp\n""Tracking Rates\n""Mount\n""Limits\n""Wifi\n""Site";
     current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Settings", current_selection_L1, string_list_SettingsL1);
     switch (current_selection_L1)
     {
-    case 1:
-      menuLocalDateTime(); break;
-    case 2:
-      menuAlignment(); break;
-    case 3:
-      menuDisplay(); break;
-    case 4:
-      menuPier(); break;
-    case 5:
-      menuMount(); break;
-    case 6:
-      menuLimits(); break;
-    case 7:
-      menuWifi(); break;
-    case 8:
-      menuSite(); break;
-    default: 
-      break;
+    case 1:  menuLocalDateTime(); break;
+    case 2:  menuPier(); break;
+    case 3:  menuGotoSpeed(); break;
+    case 4:  menuDisplay(); break;
+    case 5:  menuSound(); break;
+    case 6:  if (meridianFlips) menuMeridianFlips(); else DisplayMessage("Meridian flips", "are disabled", 1500); break;
+    case 7:  menuTracking(); break;
+    case 8:  menuMount(); break;
+    case 9:  menuLimits(); break;
+    case 10: menuWifi(); break;
+    case 11: menuSite(); break;
+    default: break;
     }
   }
 #endif
@@ -928,10 +726,7 @@ void SmartHandController::menuAlignment()
 {
   int maxAlignStars, thisStar, numStars;
   bool alignInProgress=false;
-  int starsForAlign=0;
-  bool showAlign=false;
-  bool clearAlign=false;
-  bool resetAlign=false;
+
   if (!telInfo.getAlignStars(&maxAlignStars, &thisStar, &numStars)) { maxAlignStars=3; thisStar=1; numStars=1; }
   if ((thisStar>0) && (thisStar<=numStars)) alignInProgress=true;
 
@@ -939,6 +734,11 @@ void SmartHandController::menuAlignment()
   current_selection_L1 = 1;
   while (current_selection_L1 != 0)
   {
+    int starsForAlign=0;
+    bool showAlign=false;
+    bool clearAlign=false;
+    bool resetAlign=false;
+  
     char string_list_AlignmentL1[80];
     if (alignInProgress) {
       strcpy(string_list_AlignmentL1,"Resume Align\n""Show Corr\n""Clear Corr\n""Reset Home");
@@ -953,6 +753,7 @@ void SmartHandController::menuAlignment()
             case 6: telInfo.aliMode = Telescope::ALIM_SIX; break;
             defualt: break;
           }
+          current_selection_L1 = 0; current_selection_L0 = 0; // Quit Menu
         break;
         case 2: showAlign=true; break;
         case 3: clearAlign=true; break;
@@ -996,46 +797,44 @@ void SmartHandController::menuAlignment()
         default: break;
       }
     }
-        
-    // Quit Menu
-    current_selection_L1 = 0;
-    current_selection_L0 = 0;
-  }
-
-  // handle misc. resulting actions
-  if (showAlign) {
-    char r2[20]=""; char r3[20]=""; char r4[20]=""; char r5[20]=""; char r8[20]="";
-    if ((GetLX200Trim(":GX02#",r2)==LX200VALUEGET) && (GetLX200Trim(":GX03#",r3)==LX200VALUEGET) && 
-        (GetLX200Trim(":GX04#",r4)==LX200VALUEGET) && (GetLX200Trim(":GX05#",r5)==LX200VALUEGET) && 
-        (GetLX200Trim(":GX08#",r8)==LX200VALUEGET)) {
-      char s1[20]=""; strcat(s1,"PE:"); strcat(s1,r2); strcat(s1,", PZ:"); strcat(s1,r3);
-      char s2[20]=""; strcat(s2,"DO (cone):"); strcat(s2,r4);
-      char s3[20]=""; strcat(s3,"PD:"); strcat(s3,r5); strcat(s3,", TF:"); strcat(s3,r8);
-      DisplayLongMessage("Align results (in \")", s1, s2, s3, -1);
+  
+    // handle misc. resulting actions
+    if (showAlign) {
+      char r2[20]=""; char r3[20]=""; char r4[20]=""; char r5[20]=""; char r8[20]="";
+      if ((GetLX200Trim(":GX02#",r2)==LX200VALUEGET) && (GetLX200Trim(":GX03#",r3)==LX200VALUEGET) && 
+          (GetLX200Trim(":GX04#",r4)==LX200VALUEGET) && (GetLX200Trim(":GX05#",r5)==LX200VALUEGET) && 
+          (GetLX200Trim(":GX08#",r8)==LX200VALUEGET)) {
+        char s1[20]=""; strcat(s1,"PE:"); strcat(s1,r2); strcat(s1,", PZ:"); strcat(s1,r3);
+        char s2[20]=""; strcat(s2,"DO (cone):"); strcat(s2,r4);
+        char s3[20]=""; strcat(s3,"PD:"); strcat(s3,r5); strcat(s3,", TF:"); strcat(s3,r8);
+        DisplayLongMessage("Align results (in \")", s1, s2, s3, -1);
+      }
+    } else  
+    if (clearAlign) {
+      if ((SetLX200(":SX02,0#")==LX200VALUESET) && (SetLX200(":SX03,0#")==LX200VALUESET) &&
+          (SetLX200(":SX04,0#")==LX200VALUESET) && (SetLX200(":SX05,0#")==LX200VALUESET) &&
+          (SetLX200(":SX06,0#")==LX200VALUESET) && (SetLX200(":SX07,0#")==LX200VALUESET) &&
+          (SetLX200(":SX08,0#")==LX200VALUESET)) DisplayMessageLX200(LX200VALUESET,false); else DisplayMessageLX200(LX200SETVALUEFAILED,false);
+    } else
+    if (resetAlign) {
+      current_selection_L1 = 0; current_selection_L0 = 0; // Quit Menu
+      if (SetLX200(":hF#") == LX200VALUESET) DisplayMessage("Reset", "Move to Home", -1);
+    } else
+    if (starsForAlign>0) {
+      switch (starsForAlign) {
+        case 1: if (SetLX200(":A1#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_ONE;   else DisplayMessage("Alignment", "Failed!", -1); break;
+        case 2: if (SetLX200(":A2#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_TWO;   else DisplayMessage("Alignment", "Failed!", -1); break;
+        case 3: if (SetLX200(":A3#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_THREE; else DisplayMessage("Alignment", "Failed!", -1); break;
+        case 4: if (SetLX200(":A4#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_FOUR;  else DisplayMessage("Alignment", "Failed!", -1); break;
+        case 6: if (SetLX200(":A6#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_SIX;   else DisplayMessage("Alignment", "Failed!", -1); break;
+      }
+  #ifndef ST4SMARTCONTROLLER_ON
+      if (SetLX200(":R7#") == LX200VALUESET) DisplayMessage("Guide Rate", "64X Set", 1000);
+  #else
+      if (SetLX200(":R7#") == LX200VALUESET) DisplayMessage("Guide Rate", "48X Set", 1000);
+  #endif
+      current_selection_L1 = 0; current_selection_L0 = 0; // Quit Menu
     }
-  } else  
-  if (clearAlign) {
-    if ((SetLX200(":SX02,0#")==LX200VALUESET) && (SetLX200(":SX03,0#")==LX200VALUESET) &&
-        (SetLX200(":SX04,0#")==LX200VALUESET) && (SetLX200(":SX05,0#")==LX200VALUESET) &&
-        (SetLX200(":SX06,0#")==LX200VALUESET) && (SetLX200(":SX07,0#")==LX200VALUESET) &&
-        (SetLX200(":SX08,0#")==LX200VALUESET)) DisplayMessageLX200(LX200VALUESET,false); else DisplayMessageLX200(LX200SETVALUEFAILED,false);
-  } else
-  if (resetAlign) {
-     if (SetLX200(":hF#") == LX200VALUESET) DisplayMessage("Reset", "Move to Home", -1);
-  } else
-  if (starsForAlign>0) {
-    switch (starsForAlign) {
-      case 1: if (SetLX200(":A1#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_ONE;   else DisplayMessage("Alignment", "Failed!", -1); break;
-      case 2: if (SetLX200(":A2#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_TWO;   else DisplayMessage("Alignment", "Failed!", -1); break;
-      case 3: if (SetLX200(":A3#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_THREE; else DisplayMessage("Alignment", "Failed!", -1); break;
-      case 4: if (SetLX200(":A4#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_FOUR;  else DisplayMessage("Alignment", "Failed!", -1); break;
-      case 6: if (SetLX200(":A6#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_SIX;   else DisplayMessage("Alignment", "Failed!", -1); break;
-    }
-#ifndef ST4SMARTCONTROLLER_ON
-    if (SetLX200(":R7#") == LX200VALUESET) DisplayMessage("Guide Rate", "64X Set", 1000);
-#else
-    if (SetLX200(":R7#") == LX200VALUESET) DisplayMessage("Guide Rate", "48X Set", 1000);
-#endif
   }
 
   if (telInfo.aliMode!=Telescope::ALIM_OFF) {
@@ -1075,28 +874,6 @@ void SmartHandController::menuPier()
     }
   }
 }
-#else
-void SmartHandController::menuPier()
-{
-  bool ok = false;
-  telInfo.updateTel(true);
-  
-  // get preferred pier side user setting
-  char ppsState[20]=""; ok = GetLX200(":GX96#",ppsState) == LX200VALUEGET;
-  if (ok) {
-    uint8_t choice = 1;
-    if (ppsState[0]=='B') choice=1; else
-    if (ppsState[0]=='E') choice=2; else
-    if (ppsState[0]=='W') choice=3;
-    
-    choice = display->UserInterfaceSelectionList(&buttonPad, "Preferred Pier Side", choice, "Best\nEast\nWest");
-    if (choice) {
-      if (choice == 1) ok = DisplayMessageLX200(SetLX200(":SX96,B#"),false); else
-      if (choice == 2) ok = DisplayMessageLX200(SetLX200(":SX96,E#"),false); else
-      if (choice == 3) ok = DisplayMessageLX200(SetLX200(":SX96,W#"),false);
-    }
-  }
-}
 #endif
 
 void SmartHandController::menuDisplay()
@@ -1125,41 +902,118 @@ void SmartHandController::menuDisplay()
   }
 }
 
-#include "MenusMount.h"
-
-void SmartHandController::menuLimits()
+void SmartHandController::menuSound()
 {
-  char string_list_LimitsL2[80];
-  
-  if ((telInfo.hasTelStatus) && (telInfo.isMountGEM())) {
-    strcpy(string_list_LimitsL2,"Horizon\n""Overhead\n""Meridian E\n""Meridian W");
-  } else {
-    strcpy(string_list_LimitsL2,"Horizon\n""Overhead");
+  boolean sound = false;
+  if (display->UserInterfaceInputValueBoolean(&buttonPad, "Buzzer On?", &sound)) {
+    if (sound) DisplayMessageLX200(SetLX200(":SX97,1#"),false); else DisplayMessageLX200(SetLX200(":SX97,0#"),false);
   }
-  
-  current_selection_L3 = 1;
-  while (current_selection_L3 != 0)
+}
+
+void SmartHandController::menuMeridianFlips()
+{
+  const char *string_list = "Now!\n""Automatic\n""Pause at Home";
+  current_selection_L2 = 1;
+  while (current_selection_L2 != 0)
   {
-    current_selection_L3 = display->UserInterfaceSelectionList(&buttonPad, "Limits", current_selection_L3, string_list_LimitsL2);
-    switch (current_selection_L3)
+    boolean autoflip = false;
+    boolean pause = false;
+    current_selection_L2 = display->UserInterfaceSelectionList(&buttonPad, "Meridian Flip", current_selection_L2, string_list);
+    switch (current_selection_L2)
     {
     case 1:
-      menuHorizon();
+      DisplayMessageLX200(SetLX200(":MN#"),false);
       break;
     case 2:
-      menuOverhead();
+      if (display->UserInterfaceInputValueBoolean(&buttonPad, "Auto Flip?", &autoflip)) {
+        if (autoflip) DisplayMessageLX200(SetLX200(":SX95,1#"),false); else DisplayMessageLX200(SetLX200(":SX95,0#"),false);
+      }
       break;
     case 3:
-      menuMeridianE();
-      break;
-    case 4:
-      menuMeridianW();
+      if (display->UserInterfaceInputValueBoolean(&buttonPad, "Pause Flip?", &pause)) {
+        if (pause) DisplayMessageLX200(SetLX200(":SX97,1#"),false); else DisplayMessageLX200(SetLX200(":SX97,0#"),false);
+      }
       break;
     default:
       break;
     }
   }
 }
+
+void SmartHandController::menuTracking()
+{
+  telInfo.updateTel(true);
+
+  boolean altAz = false;
+  if ((telInfo.hasTelStatus) && (telInfo.isMountAltAz())) altAz=true;
+
+  Telescope::TrackState currentstate = telInfo.getTrackingState();
+
+  if (altAz) {
+    const char *string_list;
+    current_selection_L2 = 1;
+    while (current_selection_L2 != 0)
+    {
+      if (currentstate == Telescope::TRK_ON) {
+        string_list = "Stop\n""Sidereal\n""Solar\n""Lunar\n""Rate Reset\n""Rate +\n""Rate -";
+      } else {
+        string_list = "Start\n""Sidereal\n""Solar\n""Lunar\n""Rate Reset\n""Rate +\n""Rate -";
+      }
+      current_selection_L2 = display->UserInterfaceSelectionList(&buttonPad, "Tracking", current_selection_L2, string_list);
+      switch (current_selection_L2)
+      {
+      case 1:
+        if (currentstate == Telescope::TRK_ON) {
+          char out[20]=""; if (SetLX200(":Td#")== LX200VALUESET) { DisplayMessage("Tracking", "OFF", 500); currentstate=Telescope::TRK_OFF; } else DisplayMessage("Set State", "Failed", 1000);
+        } else {
+          char out[20]=""; if (SetLX200(":Te#")== LX200VALUESET) { DisplayMessage("Tracking", "ON", 500); currentstate=Telescope::TRK_ON; } else DisplayMessage("Set State", "Failed", 1000);
+        }
+      break;
+      case 2: DisplayMessageLX200(SetLX200(":TQ#"),false); break;
+      case 3: DisplayMessageLX200(SetLX200(":TS#"),false); break;
+      case 4: DisplayMessageLX200(SetLX200(":TL#"),false); break;
+      case 5: DisplayMessageLX200(SetLX200(":TR#"),false); break;
+      case 6: DisplayMessageLX200(SetLX200(":T+#"),false); break;
+      case 7: DisplayMessageLX200(SetLX200(":T-#"),false); break;
+      }
+    }
+  } else {
+    const char *string_list;
+    current_selection_L2 = 1;
+    while (current_selection_L2 != 0)
+    {
+      if (currentstate == Telescope::TRK_ON) {
+        string_list = "Stop\n""Sidereal\n""Solar\n""Lunar\n""Comp Full\n""Comp Refr\n""Comp Off\n""Comp Sngl Ax\n""Comp Dual Ax\n""Rate Reset\n""Rate +0.02Hz\n""Rate -0.02Hz";
+      } else {
+        string_list = "Start\n""Sidereal\n""Solar\n""Lunar\n""Comp Full\n""Comp Refr\n""Comp Off\n""Comp Sngl Ax\n""Comp Dual Ax\n""Rate Reset\n""Rate +0.02Hz\n""Rate -0.02Hz";
+      }
+      current_selection_L2 = display->UserInterfaceSelectionList(&buttonPad, "Tracking", current_selection_L2, string_list);
+      switch (current_selection_L2)
+      {
+      case 1:
+        if (currentstate == Telescope::TRK_ON) {
+          char out[20]=""; if (SetLX200(":Td#")== LX200VALUESET) { DisplayMessage("Tracking", "OFF", 500); currentstate=Telescope::TRK_OFF; } else DisplayMessage("Set State", "Failed", 1000);
+        } else {
+          char out[20]=""; if (SetLX200(":Te#")== LX200VALUESET) { DisplayMessage("Tracking", "ON", 500); currentstate=Telescope::TRK_ON; } else DisplayMessage("Set State", "Failed", 1000);
+        }
+      break;
+      case 2:  DisplayMessageLX200(SetLX200(":TQ#"),false); break;
+      case 3:  DisplayMessageLX200(SetLX200(":TS#"),false); break;
+      case 4:  DisplayMessageLX200(SetLX200(":TL#"),false); break;
+      case 5:  DisplayMessageLX200(SetLX200(":To#"),false); break;
+      case 6:  DisplayMessageLX200(SetLX200(":Tr#"),false); break;
+      case 7:  DisplayMessageLX200(SetLX200(":Tn#"),false); break;
+      case 8:  DisplayMessageLX200(SetLX200(":T1#"),false); break;
+      case 9:  DisplayMessageLX200(SetLX200(":T2#"),false); break;
+      case 10: DisplayMessageLX200(SetLX200(":TR#"),false); break;
+      case 11: DisplayMessageLX200(SetLX200(":T+#"),false); break;
+      case 12: DisplayMessageLX200(SetLX200(":T-#"),false); break;
+      }
+    }
+  }
+}
+
+#include "MenusMount.h"
 
 void SmartHandController::menuWifi()
 {
@@ -1172,8 +1026,6 @@ void SmartHandController::menuWifi()
     {
     case 1:
       wifiOn = !wifiOn;
-      //EEPROM.write(15, wifiOn);
-      //EEPROM.commit();
       DisplayMessage("Please", "Reboot!", 3000);
       current_selection_L2 = 0;
       current_selection_L1 = 0;
@@ -1183,8 +1035,6 @@ void SmartHandController::menuWifi()
     case 2:
       DisplayMessage("masterPassword is", "password", 1000);
     case 3:
-      //EEPROM_writeInt(0, 0);
-      //EEPROM.commit();
       DisplayMessage("Please", "Reboot!", 3000);
       current_selection_L2 = 0;
       current_selection_L1 = 0;
@@ -1205,20 +1055,11 @@ void SmartHandController::menuSite()
     current_selection_L2 = display->UserInterfaceSelectionList(&buttonPad, "Menu Site", current_selection_L2, string_list_SiteL2);
     switch (current_selection_L2)
     {
-    case 1:
-      menuSites();
-      break;
-    case 2:
-      menuLatitude();
-      break;
-    case 3:
-      menuLongitude();
-      break;
-    case 4:
-      menuZone();
-      break;
-    default:
-      break;
+    case 1: menuSites(); break;
+    case 2: menuLatitude(); break;
+    case 3: menuLongitude(); break;
+    case 4: menuZone(); break;
+    default: break;
     }
   }
 }
@@ -1321,66 +1162,6 @@ void SmartHandController::menuContrast()
     //EEPROM.write(14, maxContrast);
     //EEPROM.commit();
     display->setContrast(maxContrast);
-  }
-}
-
-void SmartHandController::menuHorizon()
-{
-  char out[20];
-  if (DisplayMessageLX200(GetLX200(":Gh#", out)))
-  {
-    float angle = (float)strtol(&out[0], NULL, 10);
-    if (display->UserInterfaceInputValueFloat(&buttonPad, "Horizon Limit", "", &angle, -10, 20, 2, 0, " degree"))
-    {
-      sprintf(out, ":Sh%+03d#", (int)angle);
-      DisplayMessageLX200(SetLX200(out),false);
-    }
-  }
-}
-
-void SmartHandController::menuOverhead()
-{
-  char out[20];
-  if (DisplayMessageLX200(GetLX200(":Go#", out)))
-  {
-    float angle = (float)strtol(&out[0], NULL, 10);
-    if (display->UserInterfaceInputValueFloat(&buttonPad, "Overhead Limit", "", &angle, 60, 91, 2, 0, " degree"))
-    {
-      sprintf(out, ":So%02d#", (int)angle);
-      DisplayMessageLX200(SetLX200(out),false);
-    }
-  }
-}
-
-void SmartHandController::menuMeridianE()
-{
-  char out[20] = "";
-  if (DisplayMessageLX200(GetLX200(":GXE9#", out)))
-  {
-    float angle = (float)strtol(&out[0], NULL, 10);
-    angle = round((angle * 15.0) / 60.0);
-    if (display->UserInterfaceInputValueFloat(&buttonPad, "Meridn Limit E", "", &angle, -45, 45, 2, 0, " degree"))
-    {
-      angle = round((angle * 60.0) / 15.0);
-      sprintf(out, ":SXE9,%+02d#", (int)angle);
-      DisplayMessageLX200(SetLX200(out),false);
-    }
-  }
-}
-
-void SmartHandController::menuMeridianW()
-{
-  char out[20] = "";
-  if (DisplayMessageLX200(GetLX200(":GXEA#", out)))
-  {
-    float angle = (float)strtol(&out[0], NULL, 10);
-    angle = round((angle * 15.0) / 60.0);
-    if (display->UserInterfaceInputValueFloat(&buttonPad, "Meridn Limit W", "", &angle, -45, 45, 2, 0, " degree"))
-    {
-      angle = round((angle * 60.0) / 15.0);
-      sprintf(out, ":SXEA,%+02d#", (int)angle);
-      DisplayMessageLX200(SetLX200(out),false);
-    }
   }
 }
 
