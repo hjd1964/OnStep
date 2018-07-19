@@ -124,7 +124,7 @@ void TGeoAlignH::correct(double azm, double alt, double pierSide, double sf, dou
   double DF,DFd,TF,FF,FFd,TFh,TFd;
   double lat;
 
-  lat=90.0; // 90 deg. latitude for Alt/Azm
+  lat=90.0/Rad; // 90 deg. latitude for Alt/Azm
 
 // ------------------------------------------------------------
 // A. Misalignment due to tube/optics not being perp. to Dec axis
