@@ -64,6 +64,9 @@ public:
   ParkState getParkState();
   TrackState getTrackingState();
   bool atHome();
+  bool isPecPlaying();
+  bool isPecRecording();
+  bool isPecWaiting();
   bool isGuiding();
   bool isMountGEM();
   bool isMountAltAz();

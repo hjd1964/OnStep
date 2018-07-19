@@ -61,6 +61,7 @@ private:
   void menuMessier(bool sync);
   void menuAlignment();
   void menuParking();
+  void menuPEC();
   void menuGotoSpeed();
   void menuPier();
   void menuStar(bool sync);

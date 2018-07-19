@@ -260,7 +260,8 @@ fixed_t amountGuideAxis2;
 fixed_t guideAxis2;
 
 // PEC control --------------------------------------------------------------------------------------------------------------
-#define PECStatusString  "IpPrR"
+#define PECStatusString    "IpPrR"
+#define PECStatusStringAlt "/,~;^"
 #define IgnorePEC        0
 #define ReadyPlayPEC     1
 #define PlayPEC          2

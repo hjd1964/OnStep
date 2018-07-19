@@ -3,7 +3,7 @@ void SmartHandController::menuSyncGoto(bool sync)
 {
   current_selection_L1 = 1;
   while (current_selection_L1 != 0) {
-    const char *string_list_gotoL1 = "Messier\nStar\nSolar System\nHerschel\nCoordinates\nHome\nPark";
+    const char *string_list_gotoL1 = "Messier\nStar\nSolar System\nHerschel\nCoordinates\nHome";
     current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, sync ? "Sync" : "Goto", current_selection_L1, string_list_gotoL1);
     switch (current_selection_L1) {
       case 1:
@@ -27,17 +27,6 @@ void SmartHandController::menuSyncGoto(bool sync)
         sprintf(cmd, ":hX#");
         cmd[2] = sync ? 'F' : 'C';
         if (SetLX200(cmd) == LX200VALUESET) DisplayMessage(sync ? "Reset at" : "Goto", " Home Position", -1);
-        // Quit Menu
-        current_selection_L1 = 0;
-        current_selection_L0 = 0;
-      }
-      break;
-      case 7:
-      {
-        char cmd[5];
-        sprintf(cmd, ":hX#");
-        cmd[2] = sync ? 'O' : 'P';
-        if (SetLX200(cmd) == LX200VALUESET) DisplayMessage(sync ? "Reset at" : "Goto", " Park Position", -1); else DisplayMessageLX200(LX200NOTOK);
         // Quit Menu
         current_selection_L1 = 0;
         current_selection_L0 = 0;
@@ -82,7 +71,7 @@ void SmartHandController::menuSolarSys(bool sync)
 {
   if (current_selection_SolarSys<1) current_selection_SolarSys=1;
 
-  const char *string_list_SolarSyst = "Sun\nMercure\nVenus\nMars\nJupiter\nSaturn\nUranus\nNeptun\nMoon\n";
+  const char *string_list_SolarSyst = "Sun\nMercury\nVenus\nMars\nJupiter\nSaturn\nUranus\nNeptun\nMoon\n";
   current_selection_SolarSys = display->UserInterfaceSelectionList(&buttonPad, sync ? "Sync" : "Goto", current_selection_SolarSys, string_list_SolarSyst);
   
   if (current_selection_SolarSys == 0) return;

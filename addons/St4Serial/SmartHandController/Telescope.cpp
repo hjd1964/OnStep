@@ -109,6 +109,20 @@ bool Telescope::atHome()
 {
   return strchr(&TelStatus[0], 'H') != NULL;
 }
+bool Telescope::isPecPlaying()
+{
+  // PEC Status is one of "/,~;^" for ignore, wait play, play, wait rec, rec
+  // "." is an index detect but isn't implemented yet
+  return strchr(&TelStatus[0], '~') != NULL;
+}
+bool Telescope::isPecRecording()
+{
+  return strchr(&TelStatus[0], '^') != NULL;
+}
+bool Telescope::isPecWaiting()
+{
+  return (strchr(&TelStatus[0], ',') != NULL) || (strchr(&TelStatus[0], ';') != NULL);
+}
 bool Telescope::isGuiding()
 {
   return  strchr(&TelStatus[0], 'G') != NULL;
