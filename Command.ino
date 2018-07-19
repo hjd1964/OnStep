@@ -558,7 +558,6 @@ void processCommands() {
         if (trackingState!=TrackingMoveTo)       reply[i++]='N';                      // [N]o goto
         const char *parkStatusCh = "pIPF";       reply[i++]=parkStatusCh[parkStatus]; // not [p]arked, parking [I]n-progress, [P]arked, Park [F]ailed
         if (pecRecorded)                         reply[i++]='R';                      // PEC data has been [R]ecorded
-        if (pecAutoRecord)                       reply[i++]='W';                      // [W]riting PEC data
         if (atHome)                              reply[i++]='H';                      // at [H]ome
         if (PPSsynced)                           reply[i++]='S';                      // PPS [S]ync
         if ((guideDirAxis1) || (guideDirAxis2))  reply[i++]='G';                      // [G]uide active
@@ -575,7 +574,10 @@ void processCommands() {
 #ifdef MOUNT_TYPE_GEM
         if (autoMeridianFlip)                    reply[i++]='a';                      // [a]uto meridian flip
 #endif
-
+#ifndef MOUNT_TYPE_ALTAZM        
+        const char *pch = PECStatusStringAlt; reply[i++]=pch[pecStatus];              // PEC Status is one of "/,~;^" (/)gnore, get ready to (,)lay, (~)laying, get ready to (;)ecord, (^)ecording
+        // if (wormSensedAgain) { reply[i++]='.'; wormSensedAgain=false; }            // PEC optional (.) to indicate an index detect since last call
+#endif
         // provide mount type
         #ifdef MOUNT_TYPE_GEM
         reply[i++]='E';
