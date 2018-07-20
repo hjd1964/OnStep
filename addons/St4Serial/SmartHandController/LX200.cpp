@@ -70,7 +70,7 @@ bool readLX200Bytes(char* command, char* recvBuffer, unsigned long timeOutMs) {
       Ser.setTimeout(timeOutMs * 4);
     }
     if (command[1] == 'A') {
-      if (strchr("W123456789+", command[2])) { shortResponse = true; Ser.setTimeout(timeOutMs * 4); }
+      if (strchr("W123456789+", command[2])) { shortResponse = true; Ser.setTimeout(2000); }
     }
     if (command[1] == 'M') {
       if (strchr("ewnsg", command[2])) noResponse = true;

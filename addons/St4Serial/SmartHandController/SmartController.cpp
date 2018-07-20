@@ -759,7 +759,7 @@ void SmartHandController::menuAlignment()
     bool clearAlign=false;
     bool resetAlign=false;
   
-    char string_list_AlignmentL1[80];
+    char string_list_AlignmentL1[120];
     if (alignInProgress) {
       strcpy(string_list_AlignmentL1,"Resume Align\n""Show Corr\n""Clear Corr\n""Reset Home");
       current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Alignment", current_selection_L1, string_list_AlignmentL1);
