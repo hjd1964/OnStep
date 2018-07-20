@@ -53,6 +53,8 @@ class TGeoAlignH
     double avgAlt;
     double avgAzm;
 
+    double lat,cosLat,sinLat;
+
     long num,l;
     long Ff,Df;
     double best_deo, best_pd, best_pz, best_pe, best_ohw, best_odw, best_ohe, best_ode, best_tf, best_df, best_ff;
@@ -110,6 +112,8 @@ class TGeoAlign
     boolean geo_ready;
     double avgDec;
     double avgHA;
+
+    double lat,cosLat,sinLat;
 
     long num,l;
     long Ff,Df;

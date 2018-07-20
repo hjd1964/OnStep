@@ -108,18 +108,20 @@ void TGeoAlign::correct(double ha, double dec, double pierSide, double sf, doubl
   double PD,PDh;
   double PZ,PA;
   double DF,DFd,TF,FF,FFd,TFh,TFd;
-  double lat;
 
-  lat=latitude/Rad;
+  double cosDec=cos(dec);
+  double tanDec=tan(dec);
+  double sinHa=sin(ha);
+  double cosHa=cos(ha);
 
 // ------------------------------------------------------------
 // A. Misalignment due to tube/optics not being perp. to Dec axis
 // negative numbers are further (S) from the NCP, swing to the
 // equator and the effect on declination is 0. At the SCP it
 // becomes a (N) offset.  Unchanged with meridian flips.
-  DO1 =((_deo*sf)/3600.0)/Rad;
+  DO1 =_deo*sf;
 // works on HA.  meridian flips effect this in HA
-  DOh = DO1*(1.0/cos(dec))*pierSide;
+  DOh = DO1*(1.0/cosDec)*pierSide;
 
 // ------------------------------------------------------------
 // B. Misalignment, Declination axis relative to Polar axis
@@ -127,39 +129,39 @@ void TGeoAlign::correct(double ha, double dec, double pierSide, double sf, doubl
 // negative numbers are further (S) from the NCP, swing to the
 // equator and the effect on declination is 0.
 // At the SCP it is, again, a (S) offset
-  PD  =((_pd*sf)/3600.0)/Rad;
+  PD  =_pd*sf;
 // works on HA.
-  PDh = -PD*tan(dec)*pierSide;
+  PDh = -PD*tanDec*pierSide;
 
 // ------------------------------------------------------------
 // Misalignment, relative to NCP
 // negative numbers are east of the pole
 // C. polar left-right misalignment
-  PZ  =((_pz*sf)/3600.0)/Rad;
+  PZ  =_pz*sf;
 // D. negative numbers are below the pole
 // polar below-above misalignment
-  PA  =((_pe*sf)/3600.0)/Rad;
+  PA  =_pe*sf;
 
 // ------------------------------------------------------------
 // Axis flex
-  DF  =((_da*sf)/3600.0)/Rad;
-  DFd =-DF*(cos(lat)*cos(ha)+sin(lat)*tan(dec));
+  DF  =_da*sf;
+  DFd =-DF*(cosLat*cosHa+sinLat*tanDec);
 
 // ------------------------------------------------------------
 // Fork flex
-  FF  =((_ff*sf)/3600.0)/Rad;
-  FFd =FF*cos(ha);
+  FF  =_ff*sf;
+  FFd =FF*cosHa;
 
 // ------------------------------------------------------------
 // Optical axis sag
-  TF  =((_tf*sf)/3600.0)/Rad;
+  TF  =_tf*sf;
 
-  TFh =TF*(cos(lat)*sin(ha)*(1.0/cos(dec)));
-  TFd =TF*(cos(lat)*cos(ha)-sin(lat)*cos(dec));
+  TFh =TF*(cosLat*sinHa*(1.0/cosDec));
+  TFd =TF*(cosLat*cosHa-sinLat*cosDec);
 
 // ------------------------------------------------------------
-  *h1  =(-PZ*cos(ha)*tan(dec) + PA*sin(ha)*tan(dec) + DOh +  PDh +       TFh);
-  *d1  =(+PZ*sin(ha)          + PA*cos(ha)                +  DFd + FFd + TFd);
+  *h1  =(-PZ*cosHa*tanDec + PA*sinHa*tanDec + DOh +  PDh +       TFh);
+  *d1  =(+PZ*sinHa        + PA*cosHa              +  DFd + FFd + TFd);
 }
 
 void TGeoAlign::do_search(double sf, int p1, int p2, int p3, int p4, int p5, int p6, int p7, int p8, int p9)
@@ -177,6 +179,8 @@ void TGeoAlign::do_search(double sf, int p1, int p2, int p3, int p4, int p5, int
   _od_m,_od_p,
   
   _deo,_pd,_pz,_pe, _df,_tf,_ff, _ode,_ohe;
+
+  double sf1=sf/(3600.0*Rad);
 
   // search
   // set Parameter Space
@@ -200,9 +204,9 @@ void TGeoAlign::do_search(double sf, int p1, int p2, int p3, int p4, int p5, int
   for (_tf=_tf_m; _tf<=_tf_p; _tf++)
   for (_ohe=_oh_m; _ohe<=_oh_p; _ohe++)
   for (_ode=_od_m; _ode<=_od_p; _ode++) {
-    ode=((((double)_ode)*sf)/(3600.0*Rad));
+    ode=((double)_ode)*sf1;
     odw=-ode;
-    ohe=((((double)_ohe)*sf)/(3600.0*Rad));
+    ohe=((double)_ohe)*sf1;
     ohw=ohe;
     
     // check the combinations for all samples
@@ -220,10 +224,10 @@ void TGeoAlign::do_search(double sf, int p1, int p2, int p3, int p4, int p5, int
         mh=mh+ohe;
         md=md+ode;
       }
-      correct(mh,md,mount[l].side,sf,_deo,_pd,_pz,_pe,_df,_ff,_tf,&h1,&d1);
+      correct(mh,md,mount[l].side,sf1,_deo,_pd,_pz,_pe,_df,_ff,_tf,&h1,&d1);
 
       delta[l].ha=actual[l].ha-(mh-h1);
-      if (delta[l].ha>PI) delta[l].ha=delta[l].ha-PI*2.0;
+      if (delta[l].ha>PI) delta[l].ha=delta[l].ha-PI*2.0; else
       if (delta[l].ha<-PI) delta[l].ha=delta[l].ha+PI*2.0;
       delta[l].dec=actual[l].dec-(md-d1);
       delta[l].side=mount[l].side;
@@ -263,6 +267,10 @@ void TGeoAlign::autoModel(int n, bool start) {
   if (step==1) {
     num=n; // how many stars?
   
+    lat=latitude/Rad;
+    cosLat=cos(lat);
+    sinLat=sin(lat);
+
     best_dist   =3600.0*180.0;
     best_deo    =0.0;
     best_pd     =0.0;
@@ -294,17 +302,18 @@ void TGeoAlign::autoModel(int n, bool start) {
 #ifdef HAL_SLOW_PROCESSOR
   // search, this can handle about 4.5 degrees of polar misalignment, and 1 degree of cone error
   //                           DoPdPzPeTfFfDfOdOh
-  if (step==2)  do_search( 8192,0,0,1,1,0,0,0,1,1);
-  if (step==4)  do_search( 4096,0,0,1,1,0,0,0,1,1);
-  if (step==6)  do_search( 2048,1,0,1,1,0,0,0,1,1);
-  if (step==20) do_search( 1024,1,0,1,1,0,0,0,1,1);
-  if (step==30) do_search(  512,1,0,1,1,0,0,0,1,1);
-  if (step==40) do_search(  256,1,0,1,1,0,0,0,1,1);
+  if (step==2)  do_search(16384,0,0,1,1,0,0,0,1,0);
+  if (step==10) do_search( 8192,0,0,1,1,0,0,0,1,0);
+  if (step==15) do_search( 4096,1,0,1,1,0,0,0,1,0);
+  if (step==20) do_search( 2048,1,0,1,1,0,0,0,1,0);
+  if (step==25) do_search( 1024,1,0,1,1,0,0,0,1,0);
+  if (step==30) do_search(  512,0,0,1,1,0,0,0,1,1);
+  if (step==40) do_search(  256,0,0,1,1,0,0,0,1,1);
 #elif HAL_FAST_PROCESSOR
   // search, this can handle about 9 degrees of polar misalignment, and 2 degrees of cone error, 8' of FF/DF/PD
   //                           DoPdPzPeTfFf Df OdOh
   if (step==2)  do_search(16384,0,0,1,1,0, 0, 0,1,1);
-  if (step==4)  do_search( 8192,0,0,1,1,0, 0, 0,1,1);
+  if (step==4)  do_search( 8192,1,0,1,1,0, 0, 0,1,1);
   if (step==6)  do_search( 4096,1,0,1,1,0, 0, 0,1,1);
   if (step==8)  do_search( 2048,1,0,1,1,0, 0, 0,1,1);
   if (step==10) do_search( 1024,1,0,1,1,0, 0, 0,1,1);
@@ -322,11 +331,11 @@ void TGeoAlign::autoModel(int n, bool start) {
   // search, this can handle about 9 degrees of polar misalignment, and 2 degrees of cone error
   //                           DoPdPzPeTfFf Df OdOh
   if (step==2)  do_search(16384,0,0,1,1,0, 0, 0,1,1);
-  if (step==4)  do_search( 8192,0,0,1,1,0, 0, 0,1,1);
-  if (step==6)  do_search( 4096,1,0,1,1,0, 0, 0,1,1);
-  if (step==8)  do_search( 2048,1,0,1,1,0, 0, 0,1,1);
-  if (step==10) do_search( 1024,1,0,1,1,0, 0, 0,1,1);
-  if (step==20) do_search(  512,1,0,1,1,0, 0, 0,1,1);
+  if (step==5)  do_search( 8192,1,0,1,1,0, 0, 0,1,1);
+  if (step==10) do_search( 4096,1,0,1,1,0, 0, 0,1,1);
+  if (step==15) do_search( 2048,1,0,1,1,0, 0, 0,1,1);
+  if (step==20) do_search( 1024,1,0,1,1,0, 0, 0,1,1);
+  if (step==25) do_search(  512,1,0,1,1,0, 0, 0,1,1);
   if (step==30) do_search(  256,1,0,1,1,0, 0, 0,1,1);
   if (step==40) do_search(  128,1,0,1,1,0, 0, 0,1,1);
 #endif
