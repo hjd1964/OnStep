@@ -42,7 +42,7 @@
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  1
 #define FirmwareVersionMinor  1
-#define FirmwareVersionPatch  "g"     // for example major.minor patch: 1.3c
+#define FirmwareVersionPatch  "h"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 1       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
