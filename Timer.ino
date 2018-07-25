@@ -133,22 +133,24 @@ ISR(TIMER1_COMPA_vect)
         // acceleration/deceleration control
         if ((guideDirAxis1!=lastGuideDirAxis1) && (lastGuideDirAxis1!=0)) guideDirChangeTimerAxis1=25;
         lastGuideDirAxis1=guideDirAxis1;
+
+        double gtr1=guideTimerRateAxis1; if (guideDirAxis1=='b') gtr1=0.0;
         if (guideDirChangeTimerAxis1>0) guideDirChangeTimerAxis1--; else {
-          if (guideTimerRateAxis1A>guideTimerRateAxis1) { guideTimerRateAxis1A-=(accArcsecPerSec/100.0)*r; if (guideTimerRateAxis1A<guideTimerRateAxis1) guideTimerRateAxis1A=guideTimerRateAxis1; }
-          if (guideTimerRateAxis1A<guideTimerRateAxis1) { guideTimerRateAxis1A+=(accArcsecPerSec/100.0)*r; if (guideTimerRateAxis1A>guideTimerRateAxis1) guideTimerRateAxis1A=guideTimerRateAxis1; }
+          if (guideTimerRateAxis1A>gtr1) { guideTimerRateAxis1A-=(accXPerSec/100.0)*r; if (guideTimerRateAxis1A<gtr1) guideTimerRateAxis1A=gtr1; }
+          if (guideTimerRateAxis1A<gtr1) { guideTimerRateAxis1A+=(accXPerSec/100.0)*r; if (guideTimerRateAxis1A>gtr1) guideTimerRateAxis1A=gtr1; }
         }
 
         // stop guiding
         if (guideDirAxis1=='b') {
-          if (abs(guideTimerRateAxis1A)<0.001) { guideDirAxis1=0; lastGuideDirAxis1=0; guideTimerRateAxis1=0.0; guideTimerRateAxis1A=0.0; guideDirChangeTimerAxis1=0; if (!guideDirAxis2) StepperModeTracking(); } else guideTimerRateAxis1=0.0;
+          if (abs(guideTimerRateAxis1A)<0.001) { guideDirAxis1=0; lastGuideDirAxis1=0; guideTimerRateAxis1=0.0; guideTimerRateAxis1A=0.0; guideDirChangeTimerAxis1=0; if (!guideDirAxis2) StepperModeTracking(); }
         }
       }
     } else guideTimerRateAxis1A=0.0;
 
     double timerRateAxis1A=trackingTimerRateAxis1;
     double timerRateAxis1B=guideTimerRateAxis1A+pecTimerRateAxis1+timerRateAxis1A;
-    if (timerRateAxis1B<0) { timerRateAxis1B=fabs(timerRateAxis1B); cli(); timerDirAxis1=-1; sei(); } else { cli(); timerDirAxis1=1; sei(); }
-    if (timerRateAxis1B<0.00001) { timerDirAxis1=0; timerRateAxis1B=0.5; }
+    if (timerRateAxis1B<-0.00001) { timerRateAxis1B=fabs(timerRateAxis1B); cli(); timerDirAxis1=-1; sei(); } else 
+      if (timerRateAxis1B>0.00001) { cli(); timerDirAxis1=1; sei(); } else { cli(); timerDirAxis1=0; sei(); timerRateAxis1B=0.5; }
     calculatedTimerRateAxis1=round((double)SiderealRate/timerRateAxis1B);
     // remember our "running" rate and only update the actual rate when it changes
     if (runTimerRateAxis1!=calculatedTimerRateAxis1) { timerRateAxis1=calculatedTimerRateAxis1; runTimerRateAxis1=calculatedTimerRateAxis1; }
@@ -174,22 +176,24 @@ ISR(TIMER1_COMPA_vect)
         // acceleration/deceleration control
         if ((guideDirAxis2!=lastGuideDirAxis2) && (lastGuideDirAxis2!=0)) guideDirChangeTimerAxis2=25;
         lastGuideDirAxis2=guideDirAxis2;
+
+        double gtr2=guideTimerRateAxis2; if (guideDirAxis2=='b') gtr2=0.0;
         if (guideDirChangeTimerAxis2>0) guideDirChangeTimerAxis2--; else {
-          if (guideTimerRateAxis2A>guideTimerRateAxis2) { guideTimerRateAxis2A-=(accArcsecPerSec/100.0)*r; if (guideTimerRateAxis2A<guideTimerRateAxis2) guideTimerRateAxis2A=guideTimerRateAxis2; }
-          if (guideTimerRateAxis2A<guideTimerRateAxis2) { guideTimerRateAxis2A+=(accArcsecPerSec/100.0)*r; if (guideTimerRateAxis2A>guideTimerRateAxis2) guideTimerRateAxis2A=guideTimerRateAxis2; }
+          if (guideTimerRateAxis2A>gtr2) { guideTimerRateAxis2A-=(accXPerSec/100.0)*r; if (guideTimerRateAxis2A<gtr2) guideTimerRateAxis2A=gtr2; }
+          if (guideTimerRateAxis2A<gtr2) { guideTimerRateAxis2A+=(accXPerSec/100.0)*r; if (guideTimerRateAxis2A>gtr2) guideTimerRateAxis2A=gtr2; }
         }
 
         // stop guiding
         if (guideDirAxis2=='b') {
-          if (abs(guideTimerRateAxis2A)<0.001) { guideDirAxis2=0; lastGuideDirAxis2=0; guideTimerRateAxis2=0.0; guideTimerRateAxis2A=0.0; guideDirChangeTimerAxis2=0; if (!guideDirAxis1) StepperModeTracking(); } else guideTimerRateAxis2=0.0;
+          if (abs(guideTimerRateAxis2A)<0.001) { guideDirAxis2=0; lastGuideDirAxis2=0; guideTimerRateAxis2=0.0; guideTimerRateAxis2A=0.0; guideDirChangeTimerAxis2=0; if (!guideDirAxis1) StepperModeTracking(); }
         }
       }
     } else guideTimerRateAxis2A=0.0;
 
     double timerRateAxis2A=trackingTimerRateAxis2;
     double timerRateAxis2B=guideTimerRateAxis2A+timerRateAxis2A;
-    if (timerRateAxis2B<0) { timerRateAxis2B=fabs(timerRateAxis2B); cli(); timerDirAxis2=-1; sei(); } else { cli(); timerDirAxis2=1; sei(); }
-    if (timerRateAxis2B<0.0001) { timerDirAxis2=0; timerRateAxis2B=0.5; }
+    if (timerRateAxis2B<-0.0001) { timerRateAxis2B=fabs(timerRateAxis2B); cli(); timerDirAxis2=-1; sei(); } else
+      if (timerRateAxis2B>0.0001) { cli(); timerDirAxis2=1; sei(); } else { cli(); timerDirAxis2=0; sei(); timerRateAxis2B=0.5; }
     calculatedTimerRateAxis2=round((double)SiderealRate/timerRateAxis2B);
     // remember our "running" rate and only update the actual rate when it changes
     if (runTimerRateAxis2!=calculatedTimerRateAxis2) { timerRateAxis2=calculatedTimerRateAxis2; runTimerRateAxis2=calculatedTimerRateAxis2; }
