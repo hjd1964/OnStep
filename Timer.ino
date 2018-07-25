@@ -86,7 +86,8 @@ volatile boolean wasInbacklashAxis2=false;
 volatile boolean gotoRateAxis1=false;
 volatile boolean gotoRateAxis2=false;
 volatile byte cnt=0;
-
+volatile double guideTimerRateAxis1A=0.0;
+volatile double guideTimerRateAxis2A=0.0;
 volatile long timerLastPosAxis2=0;
 volatile byte guideDirChangeTimerAxis1=0;
 volatile byte lastGuideDirAxis1=0;
@@ -185,7 +186,8 @@ ISR(TIMER1_COMPA_vect)
         // stop guiding
         if (guideDirAxis2=='b') {
           if (abs(guideTimerRateAxis2A)<0.001) { guideDirAxis2=0; lastGuideDirAxis2=0; guideTimerRateAxis2=0.0; guideTimerRateAxis2A=0.0; guideDirChangeTimerAxis2=0; if (!guideDirAxis1) StepperModeTracking(); }
-        }      }
+        }
+      }
     } else guideTimerRateAxis2A=0.0;
 
     double timerRateAxis2A=trackingTimerRateAxis2;

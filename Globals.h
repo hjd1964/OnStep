@@ -3,9 +3,6 @@
 
 #pragma once
 
-volatile double guideTimerRateAxis1A=0.0;
-volatile double guideTimerRateAxis2A=0.0;
-
 // Time keeping ------------------------------------------------------------------------------------------------------------
 long siderealTimer    = 0;           // counter to issue steps during tracking
 long PecSiderealTimer = 0;           // time since worm wheel zero index for PEC
