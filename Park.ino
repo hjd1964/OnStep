@@ -235,21 +235,17 @@ boolean isParked() {
 boolean saveAlignModel() {
   // and store our corrections
   Align.writeCoe();
-  cli();
   nv.writeFloat(EE_indexAxis1,indexAxis1);
   nv.writeFloat(EE_indexAxis2,indexAxis2);
-  sei();
   return true;
 }
 
 boolean loadAlignModel() {
   // get align/corrections
-  cli();
   indexAxis1=nv.readFloat(EE_indexAxis1);
   indexAxis1Steps=(long)(indexAxis1*(double)StepsPerDegreeAxis1);
   indexAxis2=nv.readFloat(EE_indexAxis2);
   indexAxis2Steps=(long)(indexAxis2*(double)StepsPerDegreeAxis2);
-  sei();
   Align.readCoe();
   return true;
 }
