@@ -148,8 +148,8 @@ ISR(TIMER1_COMPA_vect)
 
     double timerRateAxis1A=trackingTimerRateAxis1;
     double timerRateAxis1B=guideTimerRateAxis1A+pecTimerRateAxis1+timerRateAxis1A;
-    if (timerRateAxis1B<0) { timerRateAxis1B=fabs(timerRateAxis1B); cli(); timerDirAxis1=-1; sei(); } else { cli(); timerDirAxis1=1; sei(); }
-    if (timerRateAxis1B<0.00001) { timerDirAxis1=0; timerRateAxis1B=0.5; }
+    if (timerRateAxis1B<-0.00001) { timerRateAxis1B=fabs(timerRateAxis1B); cli(); timerDirAxis1=-1; sei(); } else 
+      if (timerRateAxis1B>0.00001) { cli(); timerDirAxis1=1; sei(); } else { cli(); timerDirAxis1=0; sei(); timerRateAxis1B=0.5; }
     calculatedTimerRateAxis1=round((double)SiderealRate/timerRateAxis1B);
     // remember our "running" rate and only update the actual rate when it changes
     if (runTimerRateAxis1!=calculatedTimerRateAxis1) { timerRateAxis1=calculatedTimerRateAxis1; runTimerRateAxis1=calculatedTimerRateAxis1; }
@@ -190,8 +190,8 @@ ISR(TIMER1_COMPA_vect)
 
     double timerRateAxis2A=trackingTimerRateAxis2;
     double timerRateAxis2B=guideTimerRateAxis2A+timerRateAxis2A;
-    if (timerRateAxis2B<0) { timerRateAxis2B=fabs(timerRateAxis2B); cli(); timerDirAxis2=-1; sei(); } else { cli(); timerDirAxis2=1; sei(); }
-    if (timerRateAxis2B<0.0001) { timerDirAxis2=0; timerRateAxis2B=0.5; }
+    if (timerRateAxis2B<-0.0001) { timerRateAxis2B=fabs(timerRateAxis2B); cli(); timerDirAxis2=-1; sei(); } else
+      if (timerRateAxis2B>0.0001) { cli(); timerDirAxis2=1; sei(); } else { cli(); timerDirAxis2=0; sei(); timerRateAxis2B=0.5; }
     calculatedTimerRateAxis2=round((double)SiderealRate/timerRateAxis2B);
     // remember our "running" rate and only update the actual rate when it changes
     if (runTimerRateAxis2!=calculatedTimerRateAxis2) { timerRateAxis2=calculatedTimerRateAxis2; runTimerRateAxis2=calculatedTimerRateAxis2; }
