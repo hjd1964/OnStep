@@ -782,7 +782,7 @@ void processCommands() {
       } else
 //  :GZ#   Get telescope azimuth
 //         Returns: DDD*MM# or DDD*MM'SS# (based on precision setting)
-      if (command[1]=='Z')  { getHor(&f,&f1); if (!doubleToDms(reply,&f1,true,false)) commandError=true; else quietReply=true; } else commandError=true;
+      if (command[1]=='Z')  { getHor(&f,&f1); f1=degRange(f1); if (!doubleToDms(reply,&f1,true,false)) commandError=true; else quietReply=true; } else commandError=true;
       } else
 
 //  h - Home Position Commands
