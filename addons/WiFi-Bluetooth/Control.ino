@@ -357,14 +357,13 @@ void handleControl() {
 
   // Get the align mode --------------------------------------
   data += html_controlAlign1;
-  if (mountStatus.alignMaxStars()<=3) {
-    for (int i=1; i<=mountStatus.alignMaxStars(); i++) { char temp2[120]=""; sprintf(temp2,html_controlAlign2,i,i,SIDEREAL_CH); data+=temp2; }
-  } else {
-    char temp2[120]="";
-    sprintf(temp2,html_controlAlign2,1,1,SIDEREAL_CH); data+=temp2;
-    sprintf(temp2,html_controlAlign2,4,4,SIDEREAL_CH); data+=temp2;
-    sprintf(temp2,html_controlAlign2,6,6,SIDEREAL_CH); data+=temp2;
-  }
+  byte sc[3];
+  int n=1;
+  if (mountStatus.alignMaxStars()<3) { n=1; sc[0]=1; } else
+  if (mountStatus.alignMaxStars()<4) { n=3; sc[0]=1; sc[1]=2; sc[2]=3; } else
+  if (mountStatus.alignMaxStars()<6) { n=3; sc[0]=1; sc[1]=3; sc[2]=4; } else
+                                     { n=3; sc[0]=1; sc[1]=4; sc[2]=6; }
+  for (int i=0; i<n; i++) { char temp2[120]=""; sprintf(temp2,html_controlAlign2,sc[i],sc[i],SIDEREAL_CH); data+=temp2; }
   data += html_controlAlign3;
 #ifdef OETHS
   client->print(data); data="";
