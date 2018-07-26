@@ -80,7 +80,7 @@ void StepperModeTracking() {
   tmcAxis2.setup(!nintpol,stealth,AXIS2_MODE&0b001111,lowpwr);
 
   // allow stealth chop current regulation to ramp up to the initial motor current before moving
-  if ((((AXIS1_MODE & 0b0100000)!=0) || ((AXIS2_MODE & 0b0100000)!=0)) & (atHome)) delay(100);
+  if ((((AXIS1_MODE & 0b0100000)!=0) || ((AXIS2_MODE & 0b0100000)!=0)) && (atHome)) delay(100);
 #endif
 
 #ifdef MODE_SWITCH_SLEEP_ON
