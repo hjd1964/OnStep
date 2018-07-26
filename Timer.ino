@@ -136,8 +136,8 @@ ISR(TIMER1_COMPA_vect)
 
         double gtr1=guideTimerRateAxis1; if (guideDirAxis1=='b') gtr1=0.0;
         if (guideDirChangeTimerAxis1>0) guideDirChangeTimerAxis1--; else {
-          if (guideTimerRateAxis1A>gtr1) { guideTimerRateAxis1A-=(accXPerSec/100.0)*r; if (guideTimerRateAxis1A<gtr1) guideTimerRateAxis1A=gtr1; }
-          if (guideTimerRateAxis1A<gtr1) { guideTimerRateAxis1A+=(accXPerSec/100.0)*r; if (guideTimerRateAxis1A>gtr1) guideTimerRateAxis1A=gtr1; }
+          if (guideTimerRateAxis1A>gtr1) { guideTimerRateAxis1A-=(accArcsecPerSec/100.0)*r; if (guideTimerRateAxis1A<gtr1) guideTimerRateAxis1A=gtr1; }
+          if (guideTimerRateAxis1A<gtr1) { guideTimerRateAxis1A+=(accArcsecPerSec/100.0)*r; if (guideTimerRateAxis1A>gtr1) guideTimerRateAxis1A=gtr1; }
         }
 
         // stop guiding
@@ -179,8 +179,8 @@ ISR(TIMER1_COMPA_vect)
 
         double gtr2=guideTimerRateAxis2; if (guideDirAxis2=='b') gtr2=0.0;
         if (guideDirChangeTimerAxis2>0) guideDirChangeTimerAxis2--; else {
-          if (guideTimerRateAxis2A>gtr2) { guideTimerRateAxis2A-=(accXPerSec/100.0)*r; if (guideTimerRateAxis2A<gtr2) guideTimerRateAxis2A=gtr2; }
-          if (guideTimerRateAxis2A<gtr2) { guideTimerRateAxis2A+=(accXPerSec/100.0)*r; if (guideTimerRateAxis2A>gtr2) guideTimerRateAxis2A=gtr2; }
+          if (guideTimerRateAxis2A>gtr2) { guideTimerRateAxis2A-=(accArcsecPerSec/100.0)*r; if (guideTimerRateAxis2A<gtr2) guideTimerRateAxis2A=gtr2; }
+          if (guideTimerRateAxis2A<gtr2) { guideTimerRateAxis2A+=(accArcsecPerSec/100.0)*r; if (guideTimerRateAxis2A>gtr2) guideTimerRateAxis2A=gtr2; }
         }
 
         // stop guiding
