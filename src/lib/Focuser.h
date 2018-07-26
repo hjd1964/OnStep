@@ -19,7 +19,6 @@ class focuser {
 
       if (stepPin!=-1) pinMode(stepPin,OUTPUT);
       if (dirPin!=-1) pinMode(dirPin,OUTPUT);
-      if (enPin!=-1) { pinMode(enPin,OUTPUT); digitalWrite(enPin,LOW); }
     
       spos=readPos();
       target.part.m=spos; target.part.f=0;
@@ -67,6 +66,7 @@ class focuser {
     void setDisableState(boolean disableState) {
       this->disableState=disableState;
       if (disableState==LOW) enableState=HIGH; else enableState=LOW;
+      if (enPin!=-1) { pinMode(enPin,OUTPUT); digitalWrite(enPin,LOW); }
     }
 
     // allows enabling/disabling stepper driver

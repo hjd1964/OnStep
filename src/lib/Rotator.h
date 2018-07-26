@@ -16,7 +16,6 @@ class rotator {
 
       if (stepPin!=-1) pinMode(stepPin,OUTPUT);
       if (dirPin!=-1) pinMode(dirPin,OUTPUT);
-      if (enPin!=-1) { pinMode(enPin,OUTPUT); digitalWrite(enPin,LOW); }
 
       // positions
       target.fixed=0;
@@ -63,6 +62,7 @@ class rotator {
     void setDisableState(boolean disableState) {
       this->disableState=disableState;
       if (disableState==LOW) enableState=HIGH; else enableState=LOW;
+      if (enPin!=-1) { pinMode(enPin,OUTPUT); digitalWrite(enPin,LOW); }
     }
 
     // allows enabling/disabling stepper driver
