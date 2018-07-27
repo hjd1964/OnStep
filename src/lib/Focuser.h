@@ -71,8 +71,9 @@ class focuser {
 
     // allows enabling/disabling stepper driver
     void powerDownActive(boolean active) {
-      if (enPin!=-1) pda=active; else pda=false;
-      if (pda) { digitalWrite(enPin,disableState); currentlyDisabled=true; } else { digitalWrite(enPin,enableState); currentlyDisabled=false; }
+      if (enPin==-1) { pda=false; return; }
+      pda=active;
+      if (pda) { pinMode(enPin,OUTPUT); digitalWrite(enPin,disableState); currentlyDisabled=true; }
     }
 
     // set movement rate in microns/second
