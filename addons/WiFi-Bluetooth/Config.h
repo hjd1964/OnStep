@@ -1,7 +1,8 @@
 // -------------------------------------------------------------------------------
 // Configuration
 
-// at startup this firmware will attempt to switch OnStep's baud rate to a faster speed and AFTER success, start WiFi, etc.
+// at startup this firmware will attempt to switch OnStep's baud rate to a faster speed and AFTER success, configure WiFi, etc.
+// if establishing a link to OnStep was ***unsuccessful*** the ESP8266 will retain prior settings including it's SSID (from factory defaults, for example)
 // valid baud rates are 115200, 57600, 38400, 28800, 19200, 9600
 
 #define SERIAL_BAUD_DEFAULT 9600  // Default=9600, OnStep must be attached and running it's Serial1 interface this baud rate
@@ -65,7 +66,7 @@
 #define DEBUG_OFF                 // Turn _ON to allow WiFi startup without OnStep attached (Serial port for debug at 115200 baud)
 #define Ser Serial                // Default=Serial, This is the hardware serial port where OnStep is attached
 
-// On first startup an AP will appear with an SSID of "ONSTEP", after connecting:
+// On first successful startup an AP will appear with an SSID of "ONSTEP", after connecting:
 // The web-site is at "192.168.0.1" and the cmd channel is at "192.168.0.1:9999".
 //
 // If locked out of the ESP8266, a Sketch (like MultiSerial) uploaded to the OnStep MCU (Teensy3.2, Mega2560, etc.) can recover access.
