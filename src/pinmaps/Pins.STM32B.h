@@ -150,18 +150,19 @@
 // adjusts the internal sidereal clock frequency
 #define PpsPin          SQW    // Pulse Per Second time source, e.g. GPS, RTC
 
+// For rotator stepper driver
+#define Axis3DirPin     F1DR   // Dir
+#define Axis3StepPin    F1ST   // Step
+#define Axis3_EN        F1EN   // Enable
+
 // Pins to focuser1 stepper driver
 #define Axis4DirPin     F1DR   // Dir
 #define Axis4StepPin    F1ST   // Step
-#define Axis4_EN        F1EN   // Step
+#define Axis4_EN        F1EN   // Enable
 
 // For focuser2 stepper driver
 //#define Axis5DirPin   Undefined   // Dir
 //#define Axis5StepPin  Undefined   // Step
-
-// For rotator stepper driver
-//#define Axis3DirPin   Undefined   // Dir
-//#define Axis3StepPin  Undefined   // Step
 
 // The limit switch sense is a logic level input which uses the internal pull up,
 // shorted to ground it stops gotos/tracking
