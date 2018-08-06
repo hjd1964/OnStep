@@ -195,7 +195,8 @@
 #define MinAxis3                -180 // minimum allowed Axis3 rotator, default = -180
 #define MaxAxis3                 180 // maximum allowed Axis3 rotator, default =  180
 #define AXIS3_REVERSE_OFF            // reverse the direction of Axis3 rotator movement
-#define AXIS3_DISABLE_OFF            // Pin A8 (Aux3.)  Use HIGH for common stepper drivers if you want to power down the motor at stand-still.  Default _OFF.
+#define AXIS3_DISABLE HIGH           // Pin A8 (Aux3.)  Default HIGH, for common stepper drivers.
+#define AXIS3_AUTO_POWER_DOWN_OFF    // use _ON if you want to power down the motor at stand-still.  Default _OFF.
 
 // FOCUSER1 ---------------------------------------------------------------------------------------------------------------
 // Pins 26,28 = Step,Dir
@@ -205,7 +206,8 @@
 #define MinAxis4               -25.0 // minimum allowed Axis4 position in millimeters, default = -25.0
 #define MaxAxis4                25.0 // maximum allowed Axis4 position in millimeters, default =  25.0
 #define AXIS4_REVERSE_OFF            // reverse the direction of Axis4 focuser movement
-#define AXIS4_DISABLE_OFF            // Pin 24 (Aux4.)  Use HIGH for common stepper drivers if you want to power down the motor at stand-still.  Default _OFF.
+#define AXIS4_DISABLE HIGH           // Pin 24 (Aux4.)  Default HIGH, for common stepper drivers.
+#define AXIS4_AUTO_POWER_DOWN_OFF    // use _ON if you want to power down the motor at stand-still.  Default _OFF.
 
 // FOCUSER2 ---------------------------------------------------------------------------------------------------------------
 // Pins 36,34 = Step,Dir
@@ -215,7 +217,8 @@
 #define MinAxis5               -25.0 // minimum allowed Axis5 position in millimeters, default = -25.0
 #define MaxAxis5                25.0 // maximum allowed Axis5 position in millimeters, default =  25.0
 #define AXIS5_REVERSE_OFF            // reverse the direction of Axis5 focuser movement
-#define AXIS5_DISABLE_OFF            // Pin 30 (Aux5.)  Use HIGH for common stepper drivers if you want to power down the motor at stand-still.  Default _OFF.
+#define AXIS5_DISABLE HIGH           // Pin 30 (Aux5.)  Default HIGH, for common stepper drivers.
+#define AXIS5_AUTO_POWER_DOWN_OFF    // use _ON if you want to power down the motor at stand-still.  Default _OFF.
 
 // THAT'S IT FOR USER CONFIGURATION!
 
