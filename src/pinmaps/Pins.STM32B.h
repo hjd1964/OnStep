@@ -56,10 +56,10 @@
   #define S4E           PB1
 
   #define LED           PC13
-  #define TONE          PC14
 
-  #define RETICLE       PB9 
-  #define PECIDX        PB8
+  #define TONE          PB9 
+  #define RETICLE       PB8
+  #define PECIDX        PC14
 
   #define SQW           PB5 
 
