@@ -194,9 +194,9 @@
 #define FOCUSER1_OFF                 // use _ON to enable this focuser, default=_OFF
 #define MaxRateAxis4               8 // this is the minimum number of milli-seconds between micro-steps, default=8
 #define StepsPerMicrometerAxis4  0.5 // figure this out by testing or other means
-#define AXIS4_REVERSE_OFF            // reverse the direction of Axis4 focuser movement
 #define MinAxis4               -25.0 // minimum allowed Axis4 position in millimeters, default = -25.0
 #define MaxAxis4                25.0 // maximum allowed Axis4 position in millimeters, default =  25.0
+#define AXIS4_REVERSE_OFF            // reverse the direction of Axis4 focuser movement
 #define AXIS4_DISABLE HIGH           // Pin ?.  Default HIGH, for common stepper drivers.
 #define AXIS4_AUTO_POWER_DOWN_OFF    // use _ON if you want to power down the motor at stand-still.  Default _OFF.
 
