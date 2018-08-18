@@ -217,9 +217,6 @@ void moveTo() {
       pierSideControl++;
     } else
     if ((pierSideControl==PierSideFlipEW3) || (pierSideControl==PierSideFlipWE3)) {
-      
-      // the blAxis2 gets "reversed" when we Meridian flip, since the NORTH/SOUTH movements are reversed
-      cli(); blAxis2=backlashAxis2-blAxis2; sei();
 
       if (pierSideControl==PierSideFlipEW3) pierSideControl=PierSideWest; else pierSideControl=PierSideEast;
     
