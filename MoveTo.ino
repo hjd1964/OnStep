@@ -178,7 +178,7 @@ void moveTo() {
   // in AltAz mode if the end of slew doesn't get close enough within 3 seconds: stop tracking for a moment to allow target/actual position synchronization
   static bool forceSlewStop=false;
   static unsigned long slewStopTime=0;
-  if ( (!forceSlewStop) && (distDestAxis1<=GetStepsPerSecondAxis1()) && (distDestAxis2<=GetStepsPerSecondAxis2()) ) { slewStopTime=millis()+3000L; forceSlewStop=true; }
+  if ( (!forceSlewStop) && (distDestAxis1<=getStepsPerSecondAxis1()) && (distDestAxis2<=getStepsPerSecondAxis2()) ) { slewStopTime=millis()+3000L; forceSlewStop=true; }
   if ( (lastTrackingState==TrackingSidereal) && (forceSlewStop && ((long)(millis()-slewStopTime)>0)) ) lastTrackingState=TrackingSiderealDisabled;
 #endif
 
@@ -233,7 +233,7 @@ void moveTo() {
 //      D("Flp3 Axis2, Current "); D(((long)posAxis2)/StepsPerDegreeAxis2); D(" -to-> "); DL(((long)targetAxis2.part.m)/StepsPerDegreeAxis2); DL("");
     } else {
 
-      StepperModeTracking();
+      stepperModeTracking();
 
       // other special gotos: for parking the mount and homing the mount
       if (parkStatus==Parking) {
@@ -278,7 +278,7 @@ void moveTo() {
           homeMount=false; 
           atHome=true;
 
-          DisableStepperDrivers();
+          disableStepperDrivers();
         } else {
           // restore trackingState
           trackingState=lastTrackingState; lastTrackingState=TrackingNone;

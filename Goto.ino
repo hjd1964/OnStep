@@ -25,7 +25,7 @@ GotoErrors validateGotoCoords(double HA, double Dec, double Alt) {
 GotoErrors validateGoToEqu(double RA, double Dec) {
   double a,z;
   double HA=haRange(LST()*15.0-RA);
-  EquToHor(HA,Dec,&a,&z);
+  equToHor(HA,Dec,&a,&z);
   GotoErrors r=validateGoto(); if (r!=GOTO_ERR_NONE) return r;
   r=validateGotoCoords(HA,Dec,a);
   return r;
@@ -38,7 +38,7 @@ GotoErrors syncEqu(double RA, double Dec) {
   // Convert RA into hour angle, get altitude
   // hour angleTrackingMoveTo
   double HA=haRange(LST()*15.0-RA);
-  EquToHor(HA,Dec,&a,&z);
+  equToHor(HA,Dec,&a,&z);
 
   // validate
   GotoErrors f=validateGoto(); if (f!=GOTO_ERR_NONE) return f;
@@ -46,17 +46,17 @@ GotoErrors syncEqu(double RA, double Dec) {
 
   double Axis1,Axis2;
 #ifdef MOUNT_TYPE_ALTAZM
-  EquToHor(HA,Dec,&Axis2,&Axis1);
-  Align.HorToInstr(Axis2,Axis1,&Axis2,&Axis1,getInstrPierSide());
+  equToHor(HA,Dec,&Axis2,&Axis1);
+  Align.horToInstr(Axis2,Axis1,&Axis2,&Axis1,getInstrPierSide());
   Axis1=haRange(Axis1);
 #else
-  Align.EquToInstr(latitude,HA,Dec,&Axis1,&Axis2,getInstrPierSide());
+  Align.equToInstr(latitude,HA,Dec,&Axis1,&Axis2,getInstrPierSide());
 #endif
 
   // just turn on tracking
   if (atHome) {
     trackingState=TrackingSidereal;
-    EnableStepperDrivers();
+    enableStepperDrivers();
     atHome=false;
   }
 
@@ -142,13 +142,13 @@ boolean getEqu(double *RA, double *Dec, boolean returnHA) {
   HA=getInstrAxis1();
   *Dec=getInstrAxis2();
   // apply pointing model
-  Align.InstrToEqu(latitude,HA,*Dec,&HA,Dec,getInstrPierSide());
+  Align.instrToEqu(latitude,HA,*Dec,&HA,Dec,getInstrPierSide());
 #else
   double Z=getInstrAxis1();
   double A=getInstrAxis2();
   // apply pointing model
-  Align.InstrToHor(A,Z,&A,&Z,getInstrPierSide());
-  HorToEqu(A,Z,&HA,Dec);
+  Align.instrToHor(A,Z,&A,&Z,getInstrPierSide());
+  horToEqu(A,Z,&HA,Dec);
 #endif
 
   // return either the RA or the HA depending on returnHA
@@ -171,7 +171,7 @@ boolean getApproxEqu(double *RA, double *Dec, boolean returnHA) {
 #else
   double Z=getInstrAxis1();
   double A=getInstrAxis2();
-  HorToEqu(A,Z,&HA,Dec);
+  horToEqu(A,Z,&HA,Dec);
 #endif
 
   HA=haRange(HA);
@@ -189,7 +189,7 @@ boolean getApproxEqu(double *RA, double *Dec, boolean returnHA) {
 boolean getHor(double *Alt, double *Azm) {
   double h,d;
   getEqu(&h,&d,true);
-  EquToHor(h,d,Alt,Azm);
+  equToHor(h,d,Alt,Azm);
   return true;
 }
 
@@ -218,15 +218,15 @@ GotoErrors goToEqu(double RA, double Dec) {
 
   // Convert RA into hour angle, get altitude
   double HA=haRange(LST()*15.0-RA);
-  EquToHor(HA,Dec,&a,&z);
+  equToHor(HA,Dec,&a,&z);
 
   // validate
   GotoErrors r=validateGoto(); if (r==GOTO_ERR_GOTO) { if (!abortSlew) abortSlew=StartAbortSlew; } if (r!=GOTO_ERR_NONE) return r;
   r=validateGotoCoords(HA,Dec,a); if (r!=GOTO_ERR_NONE) return r;
 
 #ifdef MOUNT_TYPE_ALTAZM
-  EquToHor(HA,Dec,&a,&z);
-  Align.HorToInstr(a,z,&a,&z,getInstrPierSide());
+  equToHor(HA,Dec,&a,&z);
+  Align.horToInstr(a,z,&a,&z,getInstrPierSide());
   z=haRange(z);
 
   if ((MaxAzm>180) && (MaxAzm<=360)) {
@@ -258,11 +258,11 @@ GotoErrors goToEqu(double RA, double Dec) {
   Axis2Alt=a;
 #else
   // correct for polar offset, refraction, coordinate systems, operation past pole, etc. as required
-  Align.EquToInstr(latitude,HA,Dec,&Axis1,&Axis2,getInstrPierSide());
+  Align.equToInstr(latitude,HA,Dec,&Axis1,&Axis2,getInstrPierSide());
 
   // as above... for the opposite pier side just incase we need to do a meridian flip
   int p=PierSideNone; if (getInstrPierSide()==PierSideEast) p=PierSideWest; else if (getInstrPierSide()==PierSideWest) p=PierSideEast;
-  Align.EquToInstr(latitude,HA,Dec,&Axis1Alt,&Axis2Alt,p);
+  Align.equToInstr(latitude,HA,Dec,&Axis1Alt,&Axis2Alt,p);
 #endif
 
   // goto function takes HA and Dec in steps
@@ -287,7 +287,7 @@ GotoErrors goToEqu(double RA, double Dec) {
 GotoErrors goToHor(double *Alt, double *Azm) {
   double HA,Dec;
   
-  HorToEqu(*Alt,*Azm,&HA,&Dec);
+  horToEqu(*Alt,*Azm,&HA,&Dec);
   double RA=degRange(LST()*15.0-HA);
   
   return goToEqu(RA,Dec);
@@ -384,9 +384,9 @@ GotoErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTarget
   D("Goto Axis1, Current "); D(((double)(long)posAxis1)/(double)StepsPerDegreeAxis1); D(" -to-> "); DL(((double)(long)targetAxis1.part.m)/(double)StepsPerDegreeAxis1);
   D("Goto Axis2, Current "); D(((double)(long)posAxis2)/(double)StepsPerDegreeAxis2); D(" -to-> "); DL(((double)(long)targetAxis2.part.m)/(double)StepsPerDegreeAxis2); DL("");
 
-  DisablePec();
+  disablePec();
   soundAlert();
-  StepperModeGoto();
+  stepperModeGoto();
 
   return GOTO_ERR_NONE;
 }

@@ -3,19 +3,19 @@
 
 #define DEBUG_AXIS_MODES_OFF
 
-void Init_Startup_Values() {
+void initStartupValues() {
   
 // Basic stepper driver mode setup
 // if we made through validation and AXIS1_DRIVER_MODEL exists; AXIS2_DRIVER_MODEL, AXIS1_MICROSTEPS, and AXIS2_MICROSTEPS also exist and passed validation in the pre-processor
 #ifdef AXIS1_DRIVER_MODEL
   // translate microsteps to mode bits
-  Axis1_Microsteps = TranslateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_MICROSTEPS)|TMC_AXIS1_MODE; // if this isn't a TMC2130 stepper driver TMC_AXISn_MODE, etc. = 0
-  Axis2_Microsteps = TranslateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_MICROSTEPS)|TMC_AXIS2_MODE;
+  Axis1_Microsteps = translateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_MICROSTEPS)|TMC_AXIS1_MODE; // if this isn't a TMC2130 stepper driver TMC_AXISn_MODE, etc. = 0
+  Axis2_Microsteps = translateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_MICROSTEPS)|TMC_AXIS2_MODE;
   #ifdef AXIS1_MICROSTEPS_GOTO
-    Axis1_MicrostepsGoto = TranslateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_MICROSTEPS_GOTO)|TMC_AXIS1_MODE_GOTO;
+    Axis1_MicrostepsGoto = translateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_MICROSTEPS_GOTO)|TMC_AXIS1_MODE_GOTO;
   #endif
   #ifdef AXIS2_MICROSTEPS_GOTO
-    Axis2_MicrostepsGoto = TranslateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_MICROSTEPS_GOTO)|TMC_AXIS2_MODE_GOTO;
+    Axis2_MicrostepsGoto = translateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_MICROSTEPS_GOTO)|TMC_AXIS2_MODE_GOTO;
   #endif
 #endif
 
@@ -95,7 +95,7 @@ void Init_Startup_Values() {
   sei();
 }
 
-void Init_Pins() {
+void initPins() {
 // ------------------------------------------------------------------
 // ESP-01 (ESP8266) firmware flashing control
 
@@ -165,10 +165,10 @@ void Init_Pins() {
 // Pulse per second
 #ifdef PPS_SENSE_ON
   pinMode(PpsPin,INPUT);
-  attachInterrupt(digitalPinToInterrupt(PpsPin),ClockSync,RISING);
+  attachInterrupt(digitalPinToInterrupt(PpsPin),clockSync,RISING);
 #elif defined(PPS_SENSE_PULLUP)
   pinMode(PpsPin,INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(PpsPin),ClockSync,RISING);
+  attachInterrupt(digitalPinToInterrupt(PpsPin),clockSync,RISING);
 #endif
 
 // Home position sensing
@@ -228,7 +228,7 @@ void Init_Pins() {
   StepperModeTrackingInit();
 }
 
-void Init_ReadNV_Values() {
+void initReadNvValues() {
   // get the site information, if a GPS were attached we would use that here instead
   currentSite=nv.read(EE_currentSite); if (currentSite>3) currentSite=0; // site index is valid?
   latitude=nv.readFloat(EE_sites+(currentSite)*25+0);
@@ -260,7 +260,7 @@ void Init_ReadNV_Values() {
   urtc.get(JD,LMT);
 
   UT1=LMT+timeZone;
-  update_lst(jd2last(JD,UT1,false));
+  updateLST(jd2last(JD,UT1,false));
 
   // get the minutes past meridian east/west
 #ifdef MOUNT_TYPE_GEM
@@ -310,7 +310,7 @@ void Init_ReadNV_Values() {
 #if !defined(RememberMaxRate_ON) && !defined(REMEMBER_MAX_RATE_ON)
   if (maxRate!=MaxRate*16L) { maxRate=MaxRate*16L; nv.writeInt(EE_maxRate,(int)(maxRate/16L)); }
 #endif
-  SetAccelerationRates(maxRate); // set the new acceleration rate
+  setAccelerationRates(maxRate); // set the new acceleration rate
 
   // get autoMeridianFlip
 #if defined(MOUNT_TYPE_GEM) && defined(REMEMBER_AUTO_MERIDIAN_FLIP_ON)
@@ -343,7 +343,7 @@ void InitStartPosition() {
   setIndexAxis2(celestialPoleAxis2,PierSideEast);
 }
 
-void Init_WriteNV_Values() {
+void initWriteNvValues() {
   // EEPROM automatic initialization
   long autoInitKey = initKey;
   long thisAutoInitKey;
@@ -417,7 +417,7 @@ void Init_WriteNV_Values() {
   }
 }
 
-void Init_Start_Timers() {
+void initStartTimers() {
   // Initialize the timers that handle the sidereal clock, RA, and Dec
   HAL_Init_Timer_Sidereal();
 
@@ -433,7 +433,7 @@ void Init_Start_Timers() {
 
 // different models of stepper drivers have different bit settings for microsteps
 // translate the human readable microsteps in the configuration to modebit settings 
-unsigned int TranslateMicrosteps(int axis, int DriverModel, unsigned int Microsteps) {
+unsigned int translateMicrosteps(int axis, int DriverModel, unsigned int Microsteps) {
   unsigned int Mode;
     
   // we search for each model, since they are different

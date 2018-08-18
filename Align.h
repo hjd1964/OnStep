@@ -44,8 +44,8 @@ class TGeoAlignH
     void writeCoe();
     bool isReady();
     bool addStar(int I, int N, double RA, double Dec);
-    void HorToInstr(double Alt, double Azm, double *Alt1, double *Azm1, int PierSide);
-    void InstrToHor(double Alt, double Azm, double *Alt1, double *Azm1, int PierSide);
+    void horToInstr(double Alt, double Azm, double *Alt1, double *Azm1, int PierSide);
+    void instrToHor(double Alt, double Azm, double *Alt1, double *Azm1, int PierSide);
     void autoModel(int n, bool start);
 
   private:
@@ -104,8 +104,8 @@ class TGeoAlign
     void writeCoe();
     bool isReady();
     bool addStar(int I, int N, double RA, double Dec);
-    void EquToInstr(double Lat, double HA, double Dec, double *HA1, double *Dec1, int PierSide);
-    void InstrToEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1, int PierSide);
+    void equToInstr(double Lat, double HA, double Dec, double *HA1, double *Dec1, int PierSide);
+    void instrToEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1, int PierSide);
     void autoModel(int n, bool start);
 
   private:

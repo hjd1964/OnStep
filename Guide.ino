@@ -22,7 +22,7 @@ long          guideTimeRemainingAxis2    = -1;
 unsigned long guideTimeThisIntervalAxis2 = -1;
 
 // initialize guiding
-void Init_Guide() {
+void initGuide() {
   guideDirAxis1              =  0;
   guideTimeRemainingAxis1    = -1;
   guideTimeThisIntervalAxis1 = -1;
@@ -43,7 +43,7 @@ void Init_Guide() {
 #endif
 }
 
-void Guide() {
+void guide() {
   // 1/100 second sidereal timer, controls issue of steps at the selected RA and/or Dec rate(s) 
   guideAxis1.fixed=0;
   cli(); long guideLst=lst; sei();
@@ -269,8 +269,8 @@ void ST4() {
           soundClick(); 
         }
         if (st4n.wasPressed() && !st4s.wasPressed()) {
-          if (trackingState==TrackingSidereal) { trackingState=TrackingNone; DisableStepperDrivers(); soundClick(); } else
-          if (trackingState==TrackingNone) { trackingState=TrackingSidereal; EnableStepperDrivers(); soundClick(); }
+          if (trackingState==TrackingSidereal) { trackingState=TrackingNone; disableStepperDrivers(); soundClick(); } else
+          if (trackingState==TrackingNone) { trackingState=TrackingSidereal; enableStepperDrivers(); soundClick(); }
         }
         if (c!=currentGuideRate) { setGuideRate(c); enableGuideRate(c); }
       }

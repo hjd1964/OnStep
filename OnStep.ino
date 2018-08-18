@@ -146,15 +146,16 @@ void setup() {
   ambient.init();
   
   // set initial values for some variables
-  Init_Startup_Values();
+  initStartupValues();
 
   // set pins for input/output as specified in Config.h and PinMap.h
-  Init_Pins();
-  
-  Init_Guide();
+  initPins();
+
+  // get guiding ready
+  initGuide();
 
   // if this is the first startup set EEPROM to defaults
-  Init_WriteNV_Values();
+  initWriteNvValues();
   
   // this sets up the sidereal timer and tracking rates
   siderealInterval=nv.readLong(EE_siderealInterval); // the number of 16MHz clocks in one sidereal second (this is scaled to actual processor speed)
@@ -168,13 +169,12 @@ void setup() {
   timerRateBacklashAxis2=(SiderealRate/BacklashTakeupRate)*timerRateRatio;
 
   // now read any saved values from EEPROM into varaibles to restore our last state
-  Init_ReadNV_Values();
-
-  SetTrackingRate(default_tracking_rate);
-  SetDeltaTrackingRate();
+  initReadNvValues();
 
   // starts the hardware timers that keep sidereal time, move the motors, etc.
-  Init_Start_Timers();
+  setTrackingRate(default_tracking_rate);
+  setDeltaTrackingRate();
+  initStartTimers();
 
   SerialA.begin(9600);
 #ifdef HAL_SERIAL_B_ENABLED
@@ -262,14 +262,14 @@ void loop() {
 
   // GUIDING -------------------------------------------------------------------------------------------
   ST4();
-  if ((trackingState!=TrackingMoveTo) && (parkStatus==NotParked)) Guide();
+  if ((trackingState!=TrackingMoveTo) && (parkStatus==NotParked)) guide();
 
 #ifndef MOUNT_TYPE_ALTAZM
   // PERIODIC ERROR CORRECTION -------------------------------------------------------------------------
   if ((trackingState==TrackingSidereal) && (parkStatus==NotParked) && (!((guideDirAxis1 || guideDirAxis2) && (activeGuideRate>GuideRate1x)))) { 
     // only active while sidereal tracking with a guide rate that makes sense
-    Pec();
-  } else DisablePec();
+    pec();
+  } else disablePec();
 #endif
 
 #ifdef HOME_SENSE_ON
@@ -327,13 +327,13 @@ void loop() {
 #endif
 
     // CALCULATE SOME TRACKING RATES, ETC.
-    if (lst%3==0) do_fastalt_calc();
+    if (lst%3==0) doFastAltCalc();
 #ifdef MOUNT_TYPE_ALTAZM
     // figure out the current Alt/Azm tracking rates
-    if (lst%3!=0) do_altAzmRate_calc();
+    if (lst%3!=0) doHorRateCalc();
 #else
     // figure out the current refraction compensated tracking rate
-    if ((rateCompensation!=RC_NONE) && (lst%3!=0)) do_refractionRate_calc();
+    if ((rateCompensation!=RC_NONE) && (lst%3!=0)) doRefractionRateCalc();
 #endif
 
     // SAFETY CHECKS
@@ -427,7 +427,7 @@ void loop() {
 
     // adjust tracking rate for Alt/Azm mounts
     // adjust tracking rate for refraction
-    SetDeltaTrackingRate();
+    setDeltaTrackingRate();
 
     // basic check to see if we're not at home
     if (trackingState!=TrackingNone) atHome=false;

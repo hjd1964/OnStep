@@ -8,13 +8,13 @@ void StepperModeTrackingInit() {
   _stepperModeTrack=false; 
 
   // enable stepper drivers
-  EnableStepperDrivers();
+  enableStepperDrivers();
   // program the mode
-  StepperModeTracking();
+  stepperModeTracking();
   // then wait for 100ms so TMC2100 or TMC2130 in stealthChop have time to calibrate motor current if needed (a one-time event)
   delay(100);
   // then disable again
-  DisableStepperDrivers();
+  disableStepperDrivers();
 
 // if the stepper driver mode select pins are wired in, program any requested micro-step mode
 #if !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
@@ -34,7 +34,7 @@ void StepperModeTrackingInit() {
 }
 
 // if stepper drive can switch decay mode, set it here
-void StepperModeTracking() {
+void stepperModeTracking() {
   if (_stepperModeTrack) return;
   _stepperModeTrack=true;
   cli();
@@ -89,7 +89,7 @@ void StepperModeTracking() {
   sei();
 }
 
-void StepperModeGoto() {
+void stepperModeGoto() {
   if (!_stepperModeTrack) return;
   _stepperModeTrack=false;
   cli();
@@ -137,7 +137,7 @@ void StepperModeGoto() {
   sei();
 }
 
-void EnableStepperDrivers() {
+void enableStepperDrivers() {
   // enable the stepper drivers
   if (axis1Enabled==false) {
     digitalWrite(Axis1_EN,AXIS1_ENABLE); axis1Enabled=true;
@@ -146,7 +146,7 @@ void EnableStepperDrivers() {
   }
 }
 
-void DisableStepperDrivers() {
+void disableStepperDrivers() {
   // disable the stepper drivers
   if (axis1Enabled==true) {
     digitalWrite(Axis1_EN,AXIS1_DISABLE); axis1Enabled=false;

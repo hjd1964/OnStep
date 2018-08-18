@@ -77,7 +77,7 @@ the pdCor  term is 100% in HA
 // RA, Dec (all in degrees)
 bool TGeoAlignH::addStar(int I, int N, double RA, double Dec) {
   double a,z;
-  EquToHor(haRange(LST()*15.0-RA),Dec,&a,&z);
+  equToHor(haRange(LST()*15.0-RA),Dec,&a,&z);
 
   // First star:
   // Near the celestial equator (Dec=0, HA=0), telescope West of the pier if multi-star align
@@ -88,7 +88,7 @@ bool TGeoAlignH::addStar(int I, int N, double RA, double Dec) {
 
   mount[I-1].azm=getInstrAxis1();
   mount[I-1].alt=getInstrAxis2();
-  HorToEqu(mount[I-1].alt,mount[I-1].azm,&mount[I-1].ha,&mount[I-1].dec);
+  horToEqu(mount[I-1].alt,mount[I-1].azm,&mount[I-1].ha,&mount[I-1].dec);
   mount[I-1].azm=mount[I-1].azm/Rad;
   mount[I-1].alt=mount[I-1].alt/Rad;
   mount[I-1].ha=degRange(mount[I-1].ha)/Rad;
@@ -96,7 +96,7 @@ bool TGeoAlignH::addStar(int I, int N, double RA, double Dec) {
 
   actual[I-1].ha =haRange(LST()*15.0-RA);
   actual[I-1].dec=Dec;
-  EquToHor(actual[I-1].ha,actual[I-1].dec,&actual[I-1].alt,&actual[I-1].azm);
+  equToHor(actual[I-1].ha,actual[I-1].dec,&actual[I-1].alt,&actual[I-1].azm);
   actual[I-1].alt=actual[I-1].alt/Rad;
   actual[I-1].azm=actual[I-1].azm/Rad;
   actual[I-1].ha =degRange(actual[I-1].ha)/Rad;
@@ -375,7 +375,7 @@ void TGeoAlignH::autoModel(int n, bool start) {
   }
 }
 
-void TGeoAlignH::HorToInstr(double Alt, double Azm, double *Alt1, double *Azm1, int PierSide) {
+void TGeoAlignH::horToInstr(double Alt, double Azm, double *Alt1, double *Azm1, int PierSide) {
   double p=1.0; if (PierSide==PierSideWest) p=-1.0;
   
   double cosLat=cos(90.0/Rad); double sinLat=sin(90.0/Rad);
@@ -442,7 +442,7 @@ void TGeoAlignH::HorToInstr(double Alt, double Azm, double *Alt1, double *Azm1, 
 }
 
 // takes the instrument equatorial coordinates and applies corrections to arrive at topocentric refracted coordinates
-void TGeoAlignH::InstrToHor(double Alt, double Azm, double *Alt1, double *Azm1, int PierSide) { 
+void TGeoAlignH::instrToHor(double Alt, double Azm, double *Alt1, double *Azm1, int PierSide) { 
   double p=1.0; if (PierSide==PierSideWest) p=-1.0;
   
   double cosLat=cos(90.0/Rad); double sinLat=sin(90.0/Rad);

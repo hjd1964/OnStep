@@ -148,7 +148,7 @@ void processCommands() {
           
           // start tracking
           trackingState=TrackingSidereal;
-          EnableStepperDrivers();
+          enableStepperDrivers();
         
           // start align...
           alignNumStars=command[1]-'0';
@@ -535,7 +535,7 @@ void processCommands() {
       if (command[1]=='T')  {
         if (trackingState==TrackingSidereal) {
 #ifdef MOUNT_TYPE_ALTAZM
-          f=GetTrackingRate()*1.00273790935*60.0; 
+          f=getTrackingRate()*1.00273790935*60.0; 
 #else
           f=(trackingTimerRateAxis1*1.00273790935)*60.0; 
 #endif
@@ -829,7 +829,7 @@ void processCommands() {
 //  :hR#   Restore parked telescope to operation
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='R')  { if (!unpark()) commandError=true; }
+      if (command[1]=='R')  { if (!unPark()) commandError=true; }
       else commandError=true;
 
       } else
@@ -1285,7 +1285,7 @@ void processCommands() {
 //          Change Date to MM/DD/YY
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='C')  { if (dateToDouble(&JD,parameter)) { nv.writeFloat(EE_JD,JD); update_lst(jd2last(JD,UT1,true)); } else commandError=true; } else 
+      if (command[1]=='C')  { if (dateToDouble(&JD,parameter)) { nv.writeFloat(EE_JD,JD); updateLST(jd2last(JD,UT1,true)); } else commandError=true; } else 
 //  :SdsDD*MM#
 //          Set target object declination to sDD*MM or sDD*MM:SS depending on the current precision setting, automatically detects low/high precision
 //          Return: 0 on failure
@@ -1314,7 +1314,7 @@ void processCommands() {
             nv.writeFloat(EE_sites+(currentSite)*25+4,longitude);
           } else commandError=true;
         }
-        update_lst(jd2last(JD,UT1,false));
+        updateLST(jd2last(JD,UT1,false));
         highPrecision=i;
         } else
 //  :SGsHH#
@@ -1336,7 +1336,7 @@ void processCommands() {
             if (i<0) timeZone=i-f; else timeZone=i+f;
             b=encodeTimeZone(timeZone)+128;
             nv.update(EE_sites+(currentSite)*25+8,b);
-            update_lst(jd2last(JD,UT1,true));
+            updateLST(jd2last(JD,UT1,true));
           } else commandError=true;
         } else commandError=true; 
       } else
@@ -1356,7 +1356,7 @@ void processCommands() {
         if (!hmsToDouble(&LMT,parameter)) commandError=true; else {
           nv.writeFloat(EE_LMT,LMT); 
           UT1=LMT+timeZone;
-          update_lst(jd2last(JD,UT1,true));
+          updateLST(jd2last(JD,UT1,true));
         }
         highPrecision=i;
       } else 
@@ -1400,7 +1400,7 @@ void processCommands() {
 //          Sets the local (apparent) sideral time to HH:MM:SS
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='S')  { i=highPrecision; highPrecision=true; if (!hmsToDouble(&f,parameter)) commandError=true; else update_lst(f); highPrecision=i; } else 
+      if (command[1]=='S')  { i=highPrecision; highPrecision=true; if (!hmsToDouble(&f,parameter)) commandError=true; else updateLST(f); highPrecision=i; } else 
 //  :StsDD*MM#
 //          Sets the current site latitude to sDD*MM#
 //          Return: 0 on failure
@@ -1431,8 +1431,8 @@ void processCommands() {
             if (fabs(f)<0.1) {
               trackingState=TrackingNone;
             } else {
-              if (trackingState==TrackingNone) { trackingState=TrackingSidereal; EnableStepperDrivers(); }
-              SetTrackingRate((f/60.0)/1.00273790935);
+              if (trackingState==TrackingNone) { trackingState=TrackingSidereal; enableStepperDrivers(); }
+              setTrackingRate((f/60.0)/1.00273790935);
             }
           } else commandError=true;
         } else commandError=true;
@@ -1494,7 +1494,7 @@ void processCommands() {
                 if (maxRate<(MaxRate/2L)*16L) maxRate=(MaxRate/2L)*16L;
                 if (maxRate>(MaxRate*2L)*16L) maxRate=(MaxRate*2L)*16L;
                 nv.writeInt(EE_maxRate,(int)(maxRate/16L));
-                SetAccelerationRates(maxRate);
+                setAccelerationRates(maxRate);
               } else commandError=true;
             break;
             case '3': // acceleration rate preset (returns nothing)
@@ -1508,7 +1508,7 @@ void processCommands() {
                   case '1': maxRate=MaxRate*8L;  break; // 200%
                   default:  maxRate=MaxRate*16L;
                   nv.writeInt(EE_maxRate,(int)(maxRate/16L));
-                  SetAccelerationRates(maxRate);
+                  setAccelerationRates(maxRate);
                 }
               }
             break;
@@ -1695,20 +1695,20 @@ void processCommands() {
       if ((command[0]=='T') && (parameter[0]==0)) {
 #ifndef MOUNT_TYPE_ALTAZM
         static bool dualAxis=false;
-        if (command[1]=='o') { rateCompensation=RC_FULL_RA; SetTrackingRate(default_tracking_rate); } else                  // turn full compensation on, defaults to base sidereal tracking rate
-        if (command[1]=='r') { rateCompensation=RC_REFR_RA; SetTrackingRate(default_tracking_rate); } else                  // turn refraction compensation on, defaults to base sidereal tracking rate
-        if (command[1]=='n') { rateCompensation=RC_NONE; SetTrackingRate(default_tracking_rate); } else                     // turn refraction off, sidereal tracking rate resumes
+        if (command[1]=='o') { rateCompensation=RC_FULL_RA; setTrackingRate(default_tracking_rate); } else                  // turn full compensation on, defaults to base sidereal tracking rate
+        if (command[1]=='r') { rateCompensation=RC_REFR_RA; setTrackingRate(default_tracking_rate); } else                  // turn refraction compensation on, defaults to base sidereal tracking rate
+        if (command[1]=='n') { rateCompensation=RC_NONE; setTrackingRate(default_tracking_rate); } else                     // turn refraction off, sidereal tracking rate resumes
         if (command[1]=='1') { dualAxis=false; } else                                                                       // turn off dual axis tracking
         if (command[1]=='2') { dualAxis=true;  } else                                                                       // turn on dual axis tracking
 #endif
         if (command[1]=='+') { siderealInterval-=HzCf*(0.02); quietReply=true; } else
         if (command[1]=='-') { siderealInterval+=HzCf*(0.02); quietReply=true; } else
-        if (command[1]=='S') { SetTrackingRate(0.99726956632); rateCompensation=RC_NONE; quietReply=true; } else            // solar tracking rate 60Hz
-        if (command[1]=='L') { SetTrackingRate(0.96236513150); rateCompensation=RC_NONE; quietReply=true; } else            // lunar tracking rate 57.9Hz
-        if (command[1]=='Q') { SetTrackingRate(default_tracking_rate); quietReply=true; } else                              // sidereal tracking rate
+        if (command[1]=='S') { setTrackingRate(0.99726956632); rateCompensation=RC_NONE; quietReply=true; } else            // solar tracking rate 60Hz
+        if (command[1]=='L') { setTrackingRate(0.96236513150); rateCompensation=RC_NONE; quietReply=true; } else            // lunar tracking rate 57.9Hz
+        if (command[1]=='Q') { setTrackingRate(default_tracking_rate); quietReply=true; } else                              // sidereal tracking rate
         if (command[1]=='R') { siderealInterval=15956313L; quietReply=true; } else                                          // reset master sidereal clock interval
-        if (command[1]=='K') { SetTrackingRate(0.99953004401); rateCompensation=RC_NONE; quietReply=true; } else            // king tracking rate 60.136Hz
-        if ((command[1]=='e') && !isSlewing() && !isHoming() && !isParked() ) { trackingState=TrackingSidereal; EnableStepperDrivers(); } else
+        if (command[1]=='K') { setTrackingRate(0.99953004401); rateCompensation=RC_NONE; quietReply=true; } else            // king tracking rate 60.136Hz
+        if ((command[1]=='e') && !isSlewing() && !isHoming() && !isParked() ) { trackingState=TrackingSidereal; enableStepperDrivers(); } else
         if ((command[1]=='d') && !isSlewing() && !isHoming() ) trackingState=TrackingNone; else
           commandError=true;
 
@@ -1726,7 +1726,7 @@ void processCommands() {
           cli(); SiderealRate=siderealInterval/StepsPerSecondAxis1; sei();
         }
 
-        SetDeltaTrackingRate();
+        setDeltaTrackingRate();
 
       } else
       if (command[0]=='T') {

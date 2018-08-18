@@ -37,7 +37,7 @@ byte park() {
     trackingState=TrackingNone;
 
     // turn off the PEC while we park
-    DisablePec();
+    disablePec();
     pecStatus=IgnorePEC;
     // save the worm sense position
     nv.writeLong(EE_wormSensePos,wormSensePos);
@@ -75,7 +75,7 @@ void parkFinish() {
     saveAlignModel();
   }
   
-  DisableStepperDrivers();
+  disableStepperDrivers();
 }
 
 // adjusts targetAxis1/2 to the nearest park position for micro-step modes up to PARK_MAX_MICROSTEP
@@ -157,7 +157,7 @@ int parkClearBacklash() {
 
 // returns a parked telescope to operation, you must set date and time before calling this.  it also
 // depends on the latitude, longitude, and timeZone; but those are stored and recalled automatically
-boolean unpark() {
+boolean unPark() {
 #ifdef STRICT_PARKING_ON
   if (parkStatus==Parked) {
 #else
@@ -215,7 +215,7 @@ boolean unpark() {
 
         // start tracking
         trackingState=TrackingSidereal;
-        EnableStepperDrivers();
+        enableStepperDrivers();
 
         // get PEC status
         pecStatus  =nv.read(EE_pecStatus);

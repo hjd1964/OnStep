@@ -15,7 +15,7 @@ long pecRecordStopTime  = 0;
 long wormRotationPos    = 0;
 long lastWormRotationPos=-1;
 
-void Pec() {
+void pec() {
   // PEC is only active when we're tracking at the sidereal rate with a guide rate that makes sense
 
   // keep track of our current step position, and when the step position on the worm wraps during playback
@@ -91,7 +91,7 @@ void Pec() {
     pecRecorded=true;
     pecFirstRecord=false;
 #ifdef PEC_CLEANUP_ON
-    CleanupPec();
+    cleanupPec();
 #endif
   }
 
@@ -134,14 +134,14 @@ void Pec() {
   }
 }
  
-void DisablePec() {
+void disablePec() {
   // give up recording if we stop tracking at the sidereal rate
   if (pecStatus==RecordPEC)  { pecStatus=IgnorePEC; pecTimerRateAxis1=0.0; } // don't zero the PEC offset, we don't want things moving and it really doesn't matter 
   // get ready to re-index when tracking comes back
   if (pecStatus==PlayPEC)  { pecStatus=ReadyPlayPEC; pecTimerRateAxis1=0.0; } 
 }
 
-void CleanupPec() {
+void cleanupPec() {
   // low pass filter ----------------------------------------------------------
   int j,J1,J4,J9,J17;
   for (int scc=0+3; scc<SecondsPerWormRotationAxis1+3; scc++) {

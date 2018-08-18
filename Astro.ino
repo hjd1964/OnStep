@@ -215,7 +215,7 @@ double jd2last(double JulianDay, double ut1, bool updateRTC) {
 }
 
 // passes Local Apparent Sidereal Time to stepper timer
-void update_lst(double t) {
+void updateLST(double t) {
   long lst1=(t/24.0)*8640000.0;
 
   // set the local sidereal time
@@ -266,7 +266,7 @@ double encodeTimeZone(double tz) {
 
 // convert equatorial coordinates to horizon
 // this takes approx. 1.4mS on a 16MHz Mega2560
-void EquToHor(double HA, double Dec, double *Alt, double *Azm) {
+void equToHor(double HA, double Dec, double *Alt, double *Azm) {
   while (HA<0.0)    HA=HA+360.0;
   while (HA>=360.0) HA=HA-360.0;
   HA =HA/Rad;
@@ -282,7 +282,7 @@ void EquToHor(double HA, double Dec, double *Alt, double *Azm) {
       
 // convert horizon coordinates to equatorial
 // this takes approx. 1.4mS
-void HorToEqu(double Alt, double Azm, double *HA, double *Dec) { 
+void horToEqu(double Alt, double Azm, double *HA, double *Dec) { 
   while (Azm<0)      Azm=Azm+360.0;
   while (Azm>=360.0) Azm=Azm-360.0;
   Alt  = Alt/Rad;
@@ -302,7 +302,7 @@ void HorToEqu(double Alt, double Azm, double *HA, double *Dec) {
 // _deltaAxis1/2 are in arc-seconds/second
 double _deltaAxis1=15.0,_deltaAxis2=0.0;
 
-void SetDeltaTrackingRate() {
+void setDeltaTrackingRate() {
 #ifndef MOUNT_TYPE_ALTAZM
   if ((rateCompensation!=RC_REFR_BOTH) && (rateCompensation!=RC_FULL_BOTH)) _deltaAxis2=0.0;
 #endif
@@ -316,7 +316,7 @@ void SetDeltaTrackingRate() {
 }
 
 double _currentRate=1.0;
-void SetTrackingRate(double r) {
+void setTrackingRate(double r) {
   _currentRate=r;
 #ifndef MOUNT_TYPE_ALTAZM
   _deltaAxis1=r*15.0;
@@ -324,17 +324,17 @@ void SetTrackingRate(double r) {
 #endif
 }
 
-double GetTrackingRate() {
+double getTrackingRate() {
   return _currentRate;
 }
 
-double GetStepsPerSecondAxis1() {
+double getStepsPerSecondAxis1() {
  double s=(((double)StepsPerDegreeAxis1/240.0)*(_deltaAxis1/15.0));
  if (s<8.0) s=8.0;
  return s;
 }
 
-double GetStepsPerSecondAxis2() {
+double getStepsPerSecondAxis2() {
  double s=(((double)StepsPerDegreeAxis2/240.0)*(_deltaAxis2/15.0));
  if (s<8.0) s=8.0;
  return s;
@@ -343,7 +343,7 @@ double GetStepsPerSecondAxis2() {
 // -----------------------------------------------------------------------------------------------------------------------------
 // Low overhead altitude calculation, 16 calls to complete
 
-boolean do_fastalt_calc() {
+boolean doFastAltCalc() {
   boolean done=false;
   
   static byte ac_step = 0;
@@ -394,16 +394,16 @@ boolean do_fastalt_calc() {
 // Refraction adjusted tracking
 
 // returns the amount of refraction (in arcminutes) at the given true altitude (degrees), pressure (millibars), and temperature (celsius)
-double TrueRefrac(double Alt, double Pressure=1010.0, double Temperature=10.0) {
+double trueRefrac(double Alt, double Pressure=1010.0, double Temperature=10.0) {
   double TPC=(Pressure/1010.0) * (283.0/(273.0+Temperature));
   double r=( ( 1.02*cot( (Alt+(10.3/(Alt+5.11)))/Rad ) ) ) * TPC;  if (r<0.0) r=0.0;
   return r;
 }
 
 // returns the amount of refraction (in arcminutes) at the given apparent altitude (degrees), pressure (millibars), and temperature (celsius)
-double ApparentRefrac(double Alt, double Pressure=1010.0, double Temperature=10.0) {
-  double r=TrueRefrac(Alt,Pressure,Temperature);
-  r=TrueRefrac(Alt-(r/60.0),Pressure,Temperature);
+double apparentRefrac(double Alt, double Pressure=1010.0, double Temperature=10.0) {
+  double r=trueRefrac(Alt,Pressure,Temperature);
+  r=trueRefrac(Alt-(r/60.0),Pressure,Temperature);
   return r;
 }
 
@@ -415,8 +415,8 @@ double ztr(double a) {
   double Alt1=a+0.25; if (Alt1<0.0) Alt1=0.0;
   double Alt2=a-0.25; if (Alt2<0.0) Alt2=0.0;
 
-  double Alt1_ = Alt1 - ( TrueRefrac(Alt1) / 60.0 );
-  double Alt2_ = Alt2 - ( TrueRefrac(Alt2) / 60.0 );
+  double Alt1_ = Alt1 - ( trueRefrac(Alt1) / 60.0 );
+  double Alt2_ = Alt2 - ( trueRefrac(Alt2) / 60.0 );
 
   double x=15.0 * ((double)(( Alt1 - Alt2 ) / ( Alt1_ - Alt2_ ))); if (x>15.0) x=15.0;
   return x;
@@ -431,7 +431,7 @@ double ztr(double a) {
 #define RefractionRateRange 10
 #endif
 
-boolean do_refractionRate_calc() {
+boolean doRefractionRateCalc() {
   boolean done=false;
   static boolean ot=false;
 
@@ -462,24 +462,24 @@ boolean do_refractionRate_calc() {
   // get the instrument coordinates
   if ((rr_step==10) || (rr_step==110)) {
     if (ot) {
-      Align.EquToInstr(latitude,rr_HA,rr_Dec,&rr_HA,&rr_Dec,getInstrPierSide());
+      Align.equToInstr(latitude,rr_HA,rr_Dec,&rr_HA,&rr_Dec,getInstrPierSide());
       rr_HA+=indexAxis1; rr_Dec+=indexAxis2;
     }
   }
 
   // get the Horizon coords
   if ((rr_step==15) || (rr_step==115)) {
-    EquToHor(rr_HA,rr_Dec,&rr_Alt,&rr_Azm);
+    equToHor(rr_HA,rr_Dec,&rr_Alt,&rr_Azm);
   } else
 
   // apply refraction
   if ((rr_step==20) || (rr_step==120)) {
-    rr_Alt+=ApparentRefrac(rr_Alt,ambient.getPressure(),ambient.getTemperature())/60.0;
+    rr_Alt+=apparentRefrac(rr_Alt,ambient.getPressure(),ambient.getTemperature())/60.0;
   } else
 
   // convert back to the Equtorial coords
   if ((rr_step==25) || (rr_step==125)) {
-    HorToEqu(rr_Alt,rr_Azm,&rr_HA1,&rr_Dec1);
+    horToEqu(rr_Alt,rr_Azm,&rr_HA1,&rr_Dec1);
     if (rr_HA1>180.0) rr_HA1-=360.0; // HA range +/-180
   } else
 
@@ -525,7 +525,7 @@ boolean do_refractionRate_calc() {
 
 #define AltAzTrackingRange 10  // distance in arc-min (10) ahead of and behind the current Equ position, used for rate calculation
 
-boolean do_altAzmRate_calc() {
+boolean doHorRateCalc() {
   boolean done=false;
 
   static int az_step=0;
@@ -560,7 +560,7 @@ boolean do_altAzmRate_calc() {
 
   // convert to Equatorial coords
   if ((az_step==5)) {
-    HorToEqu(az_Alt,az_Azm,&az_HA1,&az_Dec1);
+    horToEqu(az_Alt,az_Azm,&az_HA1,&az_Dec1);
   } else
 
   // look ahead of and behind the current position
@@ -572,7 +572,7 @@ boolean do_altAzmRate_calc() {
 
   // each back to the Horizon coords
   if ((az_step==15) || (az_step==115)) {
-    EquToHor(az_HA,az_Dec,&az_Alt,&az_Azm);
+    equToHor(az_HA,az_Dec,&az_Alt,&az_Azm);
     if (az_Azm>180.0)  az_Azm-=360.0;
     if (az_Azm<-180.0) az_Azm+=360.0;
 
@@ -660,7 +660,7 @@ double cot(double n) {
 }
 
 // Acceleration rate calculation
-void SetAccelerationRates(double maxRate) {
+void setAccelerationRates(double maxRate) {
   
   // set the new guide acceleration rate
   slewRateX  = (RateToXPerSec/(maxRate/16.0))*5.0;       // 5x for exponential factor average rate

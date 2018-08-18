@@ -362,7 +362,7 @@ void TGeoAlign::autoModel(int n, bool start) {
 }
 
 // takes the topocentric refracted coordinates and applies corrections to arrive at instrument equatorial coordinates 
-void TGeoAlign::EquToInstr(double Lat, double HA, double Dec, double *HA1, double *Dec1, int PierSide) {
+void TGeoAlign::equToInstr(double Lat, double HA, double Dec, double *HA1, double *Dec1, int PierSide) {
   double p=1.0; if (PierSide==PierSideWest) p=-1.0;
 
   if (Dec>90.0) Dec=90.0;
@@ -427,7 +427,7 @@ void TGeoAlign::EquToInstr(double Lat, double HA, double Dec, double *HA1, doubl
 }
 
 // takes the instrument equatorial coordinates and applies corrections to arrive at topocentric refracted coordinates
-void TGeoAlign::InstrToEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1, int PierSide) { 
+void TGeoAlign::instrToEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1, int PierSide) { 
   double p=1.0; if (PierSide==PierSideWest) p=-1.0;
   
   HA =HA +ax1Cor;

@@ -46,7 +46,7 @@ volatile uint16_t t3rep = 1;
 volatile long timerDirAxis1 = 0;
 volatile long thisTimerRateAxis1 = 10000UL;
 volatile boolean fastAxis1 = false;
-void Timer3SetInterval(long iv) {
+void timer3SetInterval(long iv) {
 #ifdef HAL_FIXED_PRESCALE_16BIT_MOTOR_TIMERS
   iv=iv/8L;
   // 0.0327 * 4096 = 134.21s
@@ -66,7 +66,7 @@ volatile uint16_t t4rep = 1;
 volatile long timerDirAxis2 = 0;
 volatile long thisTimerRateAxis2 = 10000UL;
 volatile boolean fastAxis2 = false;
-void Timer4SetInterval(long iv) {
+void timer4SetInterval(long iv) {
 #ifdef HAL_FIXED_PRESCALE_16BIT_MOTOR_TIMERS
   iv=iv/8L;
   // 0.0327 * 4096 = 134.21s
@@ -124,7 +124,7 @@ ISR(TIMER1_COMPA_vect)
         if (guideDirAxis1=='b') { guideDirAxis1=0; guideTimerRateAxis1=0.0; guideTimerRateAxis1A=0.0; }
       } else {
         // high speed guiding
-        StepperModeGoto();
+        stepperModeGoto();
 
         // at higher step rates where torque is reduced make smaller rate changes
         double r=1.2-sqrt((abs(guideTimerRateAxis1A)/slewRateX));
@@ -142,7 +142,7 @@ ISR(TIMER1_COMPA_vect)
 
         // stop guiding
         if (guideDirAxis1=='b') {
-          if (abs(guideTimerRateAxis1A)<0.001) { guideDirAxis1=0; lastGuideDirAxis1=0; guideTimerRateAxis1=0.0; guideTimerRateAxis1A=0.0; guideDirChangeTimerAxis1=0; if (!guideDirAxis2) StepperModeTracking(); }
+          if (abs(guideTimerRateAxis1A)<0.001) { guideDirAxis1=0; lastGuideDirAxis1=0; guideTimerRateAxis1=0.0; guideTimerRateAxis1A=0.0; guideDirChangeTimerAxis1=0; if (!guideDirAxis2) stepperModeTracking(); }
         }
       }
     } else guideTimerRateAxis1A=0.0;
@@ -167,7 +167,7 @@ ISR(TIMER1_COMPA_vect)
         if (guideDirAxis2=='b') { guideDirAxis2=0; guideTimerRateAxis2=0.0; guideTimerRateAxis2A=0.0; }
       } else {
         // use acceleration
-        StepperModeGoto();
+        stepperModeGoto();
 
         // at higher step rates where torque is reduced make smaller rate changes
         double r=1.2-sqrt((abs(guideTimerRateAxis2A)/slewRateX));
@@ -185,7 +185,7 @@ ISR(TIMER1_COMPA_vect)
 
         // stop guiding
         if (guideDirAxis2=='b') {
-          if (abs(guideTimerRateAxis2A)<0.001) { guideDirAxis2=0; lastGuideDirAxis2=0; guideTimerRateAxis2=0.0; guideTimerRateAxis2A=0.0; guideDirChangeTimerAxis2=0; if (!guideDirAxis1) StepperModeTracking(); }
+          if (abs(guideTimerRateAxis2A)<0.001) { guideDirAxis2=0; lastGuideDirAxis2=0; guideTimerRateAxis2=0.0; guideTimerRateAxis2A=0.0; guideDirChangeTimerAxis2=0; if (!guideDirAxis1) stepperModeTracking(); }
         }
       }
     } else guideTimerRateAxis2A=0.0;
@@ -243,11 +243,11 @@ ISR(TIMER1_COMPA_vect)
 
   // set the rates
   if (thisTimerRateAxis1!=isrTimerRateAxis1) {
-    Timer3SetInterval(thisTimerRateAxis1/PPSrateRatio);
+    timer3SetInterval(thisTimerRateAxis1/PPSrateRatio);
     isrTimerRateAxis1=thisTimerRateAxis1;
   }
   if (thisTimerRateAxis2!=isrTimerRateAxis2) {
-    Timer4SetInterval(thisTimerRateAxis2/PPSrateRatio);
+    timer4SetInterval(thisTimerRateAxis2/PPSrateRatio);
     isrTimerRateAxis2=thisTimerRateAxis2;
   }
 }
@@ -392,7 +392,7 @@ ISR(TIMER4_COMPA_vect)
 
 #if defined(PPS_SENSE_ON) || defined(PPS_SENSE_PULLUP)
 // PPS interrupt
-void ClockSync() {
+void clockSync() {
   unsigned long t=micros();
   unsigned long oneS=(t-PPSlastMicroS);
   if ((oneS>1000000-20000) && (oneS<1000000+20000)) {
