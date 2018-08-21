@@ -150,12 +150,6 @@ ISR(USART1_RX_vect)  {
 #endif
 
 #ifdef HAL_SERIAL_C_ENABLED
-
-// default to Serial3 if the user didn't specify
-#if !defined(HAL_SERIAL_C_SERIAL2) && !defined(HAL_SERIAL_C_SERIAL3)
-#define HAL_SERIAL_C_SERIAL3
-#endif
-
 #ifdef HAL_SERIAL_C_SERIAL2
 class pserial2 {
   public:
@@ -228,9 +222,9 @@ ISR(USART2_RX_vect)  {
   SerialC._recv_buffer[SerialC._recv_tail]=UDR2; 
   SerialC._recv_tail++; // buffer is 256 bytes so this byte variable wraps automatically
 }
-#endif
 
-#ifdef HAL_SERIAL_C_SERIAL3
+#else
+
 class pserial3 {
   public:
     void begin(unsigned long baud) {
