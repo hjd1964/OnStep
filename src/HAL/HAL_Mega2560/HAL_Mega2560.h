@@ -15,8 +15,11 @@
   // SerialA is always enabled, SerialB and SerialC are optional
   #define HAL_SERIAL_B_ENABLED     // Enable support for RX1/TX1
 
-//  #define HAL_SERIAL_C_ENABLED     // Enable support for third serial channel
-//  #define HAL_SERIAL_C_SERIAL2     // Use RX2/TX2 for channel C (defaults to RX3/TX3 otherwise.)
+  // on a Ramps1.4 board always enable SerialC and default to using Serial2 for it
+  #ifdef Ramps14_ON
+    #define HAL_SERIAL_C_ENABLED     // Enable support for third serial channel
+    #define HAL_SERIAL_C_SERIAL2     // Use RX2/TX2 for channel C (defaults to RX3/TX3 otherwise.)
+  #endif
 
   // this tells OnStep that a .transmit() method needs to be called to send data
   #define HAL_SERIAL_TRANSMIT
