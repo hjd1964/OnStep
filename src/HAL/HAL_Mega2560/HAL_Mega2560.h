@@ -3,7 +3,7 @@
 // This platform doesn't support true double precision math
 #define HAL_NO_DOUBLE_PRECISION
 
-// This is for ~16MHz AVR processors or similar.  These MCUs can't do a wide range of degrees for misalignment modeling (Goto Assist.)
+// This is for ~16MHz AVR processors or similar.
 // They can, however, run Motor Timer ISR's w/stepper driver signal timing met in one pass vs. two for faster processors
 #define HAL_SLOW_PROCESSOR
 

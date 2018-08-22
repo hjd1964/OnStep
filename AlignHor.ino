@@ -314,7 +314,7 @@ void TGeoAlignH::autoModel(int n, bool start) {
   }
   
 #ifdef HAL_SLOW_PROCESSOR
-  // search, this can handle about 4.5 degrees of polar misalignment, and 1 degree of cone error
+  // search, this can handle about 9 degrees of polar misalignment, and 2 degree of cone error
   //                           DoPdPzPeTfFfDfOdOh
   if (step==2)  do_search(16384,0,0,1,1,0,0,0,1,0);
   if (step==10) do_search( 8192,0,0,1,1,0,0,0,1,0);
@@ -324,7 +324,7 @@ void TGeoAlignH::autoModel(int n, bool start) {
   if (step==30) do_search(  512,1,0,1,1,0,0,0,1,0);
   if (step==40) do_search(  256,1,0,1,1,0,0,0,1,0);
 #elif HAL_FAST_PROCESSOR
-  // search, this can handle about 9 degrees of polar misalignment, and 2 degrees of cone error, 8' of FF/DF/PD
+  // search, this can handle about 9 degrees of polar misalignment, and 4 degrees of cone error, 8' of FF/DF/PD
   //                           DoPdPzPeTfFf Df OdOh
   if (step==2)  do_search(16384,0,0,1,1,0, 0, 0,1,1);
   if (step==4)  do_search( 8192,1,0,1,1,0, 0, 0,1,1);
@@ -342,7 +342,7 @@ void TGeoAlignH::autoModel(int n, bool start) {
   if (step==40) do_search(   64,1,0,1,1,0, 0, 0,1,1);
   }
 #else
-  // search, this can handle about 9 degrees of polar misalignment, and 2 degrees of cone error
+  // search, this can handle about 9 degrees of polar misalignment, and 4 degrees of cone error
   //                           DoPdPzPeTfFf Df OdOh
   if (step==2)  do_search(16384,0,0,1,1,0, 0, 0,1,1);
   if (step==5)  do_search( 8192,1,0,1,1,0, 0, 0,1,1);
