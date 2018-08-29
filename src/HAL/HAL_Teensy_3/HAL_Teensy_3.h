@@ -60,12 +60,6 @@ void TIMER4_COMPA_vect(void);
 extern long int siderealInterval;
 extern void SiderealClockSetInterval (long int);
 
-// Init sidereal clock timer
-void HAL_Init_Timer_Sidereal() {
-  analogWriteResolution(8);
-  SiderealClockSetInterval(siderealInterval);
-}
-
 // Init Axis1 and Axis2 motor timers and set their priorities
 void HAL_Init_Timers_Motor() {
   // set the system timer for millis() to the second highest priority
@@ -88,6 +82,12 @@ void HAL_Init_Timers_Motor() {
 void TIMER1_COMPA_vect(void);
 
 IntervalTimer itimer1;
+
+// Init sidereal clock timer
+void HAL_Init_Timer_Sidereal() {
+  analogWriteResolution(8);
+  SiderealClockSetInterval(siderealInterval);
+}
 
 void Timer1SetInterval(long iv, double rateRatio) {
   iv=round(((double)iv)/rateRatio);
