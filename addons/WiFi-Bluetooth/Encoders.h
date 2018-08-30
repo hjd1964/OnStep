@@ -36,8 +36,8 @@
         pinMode(_cwPin,INPUT_PULLUP);
         pinMode(_ccwPin,INPUT_PULLUP);
         if (_axis==1) {
-          attachInterrupt(digitalPinToInterrupt(_cwPin),__cw2,CHANGE);
-          attachInterrupt(digitalPinToInterrupt(_ccwPin),__ccw2,CHANGE);
+          attachInterrupt(digitalPinToInterrupt(_cwPin),__cw1,CHANGE);
+          attachInterrupt(digitalPinToInterrupt(_ccwPin),__ccw1,CHANGE);
         }
         if (_axis==2) {
           attachInterrupt(digitalPinToInterrupt(_cwPin),__cw2,CHANGE);
