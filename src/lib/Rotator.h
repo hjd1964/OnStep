@@ -62,14 +62,14 @@ class rotator {
     void setDisableState(boolean disableState) {
       this->disableState=disableState;
       if (disableState==LOW) enableState=HIGH; else enableState=LOW;
-      if (enPin!=-1) { pinMode(enPin,OUTPUT); digitalWrite(enPin,LOW); }
+      if (enPin!=-1) { pinMode(enPin,OUTPUT); enableDriver(); currentlyDisabled=false; }
     }
 
     // allows enabling/disabling stepper driver
     void powerDownActive(boolean active) {
       if (enPin==-1) { pda=false; return; }
       pda=active;
-      if (pda) { pinMode(enPin,OUTPUT); digitalWrite(enPin,disableState); currentlyDisabled=true; }
+      if (pda) { pinMode(enPin,OUTPUT); disableDriver(); currentlyDisabled=true; }
     }
 
 #ifdef MOUNT_TYPE_ALTAZM
@@ -196,21 +196,21 @@ class rotator {
 #endif
     
     void follow() {
-      if (pda && !currentlyDisabled && ((millis()-lastPhysicalMove)>10000L)) { currentlyDisabled=true; digitalWrite(enPin,disableState); }
+      if (pda && !currentlyDisabled && ((millis()-lastPhysicalMove)>10000L)) { currentlyDisabled=true; disableDriver(); }
       
       unsigned long tempMs=millis();
       if ((long)(tempMs-nextPhysicalMove)>0) {
         nextPhysicalMove=tempMs+(unsigned long)maxRate;
       
         if ((spos<(long)target.part.m) && (spos<smax)) {
-          if (pda && currentlyDisabled) { currentlyDisabled=false; digitalWrite(enPin,enableState); delayMicroseconds(10); }
+          if (pda && currentlyDisabled) { currentlyDisabled=false; enableDriver(); delayMicroseconds(10); }
           digitalWrite(stepPin,LOW); delayMicroseconds(10);
           digitalWrite(dirPin,forwardState); delayMicroseconds(10);
           digitalWrite(stepPin,HIGH); spos++;
           lastPhysicalMove=millis();
         } else
         if ((spos>(long)target.part.m) && (spos>smin)) {
-          if (pda && currentlyDisabled) { currentlyDisabled=false; digitalWrite(enPin,enableState); delayMicroseconds(10); }
+          if (pda && currentlyDisabled) { currentlyDisabled=false; enableDriver(); delayMicroseconds(10); }
           digitalWrite(stepPin,LOW); delayMicroseconds(10);
           digitalWrite(dirPin,reverseState); delayMicroseconds(10);
           digitalWrite(stepPin,HIGH); spos--;
@@ -220,6 +220,23 @@ class rotator {
     }
 
   private:
+
+    void enableDriver() {
+      // for Aux5/Aux6 (DAC) support for stepper driver EN control on MaxPCB
+#if defined(A21) && defined(A22)
+      if (enPin==A21) { if (enableState==HIGH) analogWrite(A21,1024); else analogWrite(A21,0); return; }
+      if (enPin==A22) { if (enableState==HIGH) analogWrite(A22,1024); else analogWrite(A22,0); return; }
+#endif
+      digitalWrite(enPin,enableState);
+    }
+
+    void disableDriver() {
+#if defined(A21) && defined(A22)
+      if (enPin==A21) { if (disableState==HIGH) analogWrite(A21,1024); else analogWrite(A21,0); return; }
+      if (enPin==A22) { if (disableState==HIGH) analogWrite(A22,1024); else analogWrite(A22,0); return; }
+#endif
+      digitalWrite(enPin,disableState);
+    }
 
 #ifdef MOUNT_TYPE_ALTAZM
     // returns parallactic angle in degrees

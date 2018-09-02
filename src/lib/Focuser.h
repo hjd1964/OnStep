@@ -66,14 +66,14 @@ class focuser {
     void setDisableState(boolean disableState) {
       this->disableState=disableState;
       if (disableState==LOW) enableState=HIGH; else enableState=LOW;
-      if (enPin!=-1) { pinMode(enPin,OUTPUT); digitalWrite(enPin,LOW); }
+      if (enPin!=-1) { pinMode(enPin,OUTPUT); enableDriver(); currentlyDisabled=false; }
     }
 
     // allows enabling/disabling stepper driver
     void powerDownActive(boolean active) {
       if (enPin==-1) { pda=false; return; }
       pda=active;
-      if (pda) { pinMode(enPin,OUTPUT); digitalWrite(enPin,disableState); currentlyDisabled=true; }
+      if (pda) { pinMode(enPin,OUTPUT); disableDriver(); currentlyDisabled=true; }
     }
 
     // set movement rate in microns/second
@@ -138,7 +138,7 @@ class focuser {
     void follow(boolean slewing) {
 
       // if enabled and the timeout has elapsed, disable the stepper driver
-      if (pda && !currentlyDisabled && ((millis()-lastPhysicalMove)>10000L)) { digitalWrite(enPin,disableState); currentlyDisabled=true; }
+      if (pda && !currentlyDisabled && ((millis()-lastPhysicalMove)>10000L)) { disableDriver(); currentlyDisabled=true; }
     
       // write position to non-volatile storage if not moving for FOCUSER_WRITE_DELAY milliseconds
       if ((spos!=lastPos)) { lastMove=millis(); lastPos=spos; }
@@ -152,14 +152,14 @@ class focuser {
         nextPhysicalMove=tempMs+(unsigned long)maxRate;
     
         if ((spos<(long)target.part.m) && (spos<smax)) {
-          if (pda && currentlyDisabled) { digitalWrite(enPin,enableState); currentlyDisabled=false; delayMicroseconds(10); }
+          if (pda && currentlyDisabled) { enableDriver(); currentlyDisabled=false; delayMicroseconds(10); }
           digitalWrite(stepPin,LOW); delayMicroseconds(10);
           digitalWrite(dirPin,forwardState); delayMicroseconds(10);
           digitalWrite(stepPin,HIGH); spos++;
           lastPhysicalMove=millis();
         } else
         if ((spos>(long)target.part.m) && (spos>smin)) {
-          if (pda && currentlyDisabled) { digitalWrite(enPin,enableState); currentlyDisabled=false; delayMicroseconds(10); }
+          if (pda && currentlyDisabled) { enableDriver(); currentlyDisabled=false; delayMicroseconds(10); }
           digitalWrite(stepPin,LOW); delayMicroseconds(10);
           digitalWrite(dirPin,reverseState); delayMicroseconds(10);
           digitalWrite(stepPin,HIGH); spos--;
@@ -179,6 +179,23 @@ class focuser {
 
     void writePos(long p) {
       nv.writeLong(nvAddress,(long)p);
+    }
+
+    void enableDriver() {
+      // for Aux5/Aux6 (DAC) support for stepper driver EN control on MaxPCB
+#if defined(A21) && defined(A22)
+      if (enPin==A21) { if (enableState==HIGH) analogWrite(A21,1024); else analogWrite(A21,0); return; }
+      if (enPin==A22) { if (enableState==HIGH) analogWrite(A22,1024); else analogWrite(A22,0); return; }
+#endif
+      digitalWrite(enPin,enableState);
+    }
+
+    void disableDriver() {
+#if defined(A21) && defined(A22)
+      if (enPin==A21) { if (disableState==HIGH) analogWrite(A21,1024); else analogWrite(A21,0); return; }
+      if (enPin==A22) { if (disableState==HIGH) analogWrite(A22,1024); else analogWrite(A22,0); return; }
+#endif
+      digitalWrite(enPin,disableState);
     }
 
     // parameters
