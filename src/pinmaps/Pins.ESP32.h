@@ -38,8 +38,8 @@
 #define Axis1_M0      Aux6  // Pin 25 (Microstep Mode 0 or SPI MOSI)
 #define Axis1_EN      4     // Pin 4  (Enable)
 
-#define Axis2DirPin   10    // Pin 10 (Dir)
-#define Axis2StepPin  11    // Pin 11 (Step)
+#define Axis2DirPin   26    // Pin 27 (Dir)
+#define Axis2StepPin  27    // Pin 26 (Step)
 #define Axis2_HOME    Aux4  // Pin 14 (Home sw)
 #define Axis2_Aux     Aux1  // Pin 39 (SPI MISO)
 #define Axis2_M2      Aux4  // Pin 14 (Microstep Mode 2 or SPI CS)
