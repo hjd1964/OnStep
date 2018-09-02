@@ -10,6 +10,9 @@ class nvs {
     void init() {
     }
 
+    void poll() {
+    }
+
     byte read(int i) {
       return EEPROM.read(i);
     }

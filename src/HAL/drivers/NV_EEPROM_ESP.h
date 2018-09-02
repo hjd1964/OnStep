@@ -1,30 +1,39 @@
 // -----------------------------------------------------------------------------------
-// non-volatile storage for MB85RC256V, Adafruit I2C FRAM module
+// non-volatile storage (default/built-in)
 
 #pragma once
 
-#include <Wire.h>
-#include "Adafruit_FRAM_I2C.h"  // https://github.com/hjd1964/Adafruit_FRAM_I2C
-Adafruit_FRAM_I2C fram = Adafruit_FRAM_I2C();
-#define E2END 32767
+#define EEPROM_SIZE 2048
+#define E2END 2048
+
+#include "EEPROM.h"
+#include "Arduino.h"
 
 class nvs {
   public:
     void init() {
-    fram.begin(&HAL_Wire);
+      EEPROM.begin(EEPROM_SIZE);
     }
 
     void poll() {
+      if (_dirtyPool && ((long)(millis()-_lastWrite)>5000)) {
+        timerAlarmsDisable();
+        EEPROM.commit();
+        timerAlarmsEnable();
+        _dirtyPool=false; 
+      }
     }
 
     byte read(int i) {
-      delayMicroseconds(3);
-      return fram.read8(i);
+      return EEPROM.read(i);
     }
 
     void update(int i, byte j) {
-      delayMicroseconds(3);
-      fram.write8(i,j);
+      if (EEPROM.read(i)!=j) {
+        EEPROM.write(i, j);
+        _lastWrite=millis();
+        _dirtyPool=true;
+      }
     }
 
     void write(int i, byte j) {
@@ -102,9 +111,12 @@ class nvs {
     }
 
     // read count bytes from EEPROM starting at position i
-    void readBytes(int i, byte *v, byte count) {
+    void readBytes(uint16_t i, byte *v, uint8_t count) {
       for (int j=0; j<count; j++) { *v = read(i + j); v++; }
     }
+  private:
+    unsigned long _lastWrite;
+    bool _dirtyPool=false;
 };
 
 nvs nv;

@@ -21,6 +21,9 @@ class nvs {
       _eeprom_addr = I2C_EEPROM_ADDRESS;
     }
 
+    void poll() {
+    }
+
     uint8_t read(int i) {
       uint8_t j;
       ee_read(i,&j,1);
