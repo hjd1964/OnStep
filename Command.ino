@@ -1268,7 +1268,7 @@ void processCommands() {
             delay(50); SerialB.begin(baudRate[i]); 
             quietReply=true;
 #endif
-#ifdef HAL_SERIAL_C_ENABLED
+#if defined(HAL_SERIAL_C_ENABLED) && !defined(HAL_SERIAL_C_BLUETOOTH)
           } else
           if (process_command==COMMAND_SERIAL_C) {
             SerialC.print("1"); 
