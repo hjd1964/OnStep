@@ -612,7 +612,7 @@ void processControlGet() {
     if (v=="9") Ser.print(":A9#");
     if (v=="n") Ser.print(":A+#");
     if (v=="q") Ser.print(":Q#");
-    Ser.setTimeout(WebTimeout*4);
+    Ser.setTimeout(1000);
 
     // clear any possible response
     temp[Ser.readBytesUntil('#',temp,20)]=0;
