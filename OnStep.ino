@@ -40,8 +40,8 @@
 // firmware info, these are returned by the ":GV?#" commands
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  1
-#define FirmwareVersionMinor  12
-#define FirmwareVersionPatch  "b"     // for example major.minor patch: 1.3c
+#define FirmwareVersionMinor  13
+#define FirmwareVersionPatch  "a"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 2       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
@@ -259,7 +259,6 @@ void setup() {
 }
 
 void loop() {
-
   // GUIDING -------------------------------------------------------------------------------------------
   ST4();
   if ((trackingState!=TrackingMoveTo) && (parkStatus==NotParked)) guide();
@@ -282,6 +281,10 @@ void loop() {
   if (tempLst!=siderealTimer) {
     siderealTimer=tempLst;
 
+#ifdef ESP32
+    timerSuper();
+#endif
+    
 #ifndef MOUNT_TYPE_ALTAZM
     // WRITE PERIODIC ERROR CORRECTION TO EEPROM
     if (pecAutoRecord>0) {
@@ -368,10 +371,10 @@ void loop() {
   #endif
 #endif
 
-    if (faultAxis1 || faultAxis2) { lastError=ERR_MOTOR_FAULT; if (trackingState==TrackingMoveTo) { if (!abortSlew) abortSlew=StartAbortSlew; } else { trackingState=TrackingNone; if (guideDirAxis1) guideDirAxis1='b'; if (guideDirAxis2) guideDirAxis2='b'; } }
+      if (faultAxis1 || faultAxis2) { lastError=ERR_MOTOR_FAULT; if (trackingState==TrackingMoveTo) { if (!abortSlew) abortSlew=StartAbortSlew; } else { trackingState=TrackingNone; if (guideDirAxis1) guideDirAxis1='b'; if (guideDirAxis2) guideDirAxis2='b'; } }
 
-    // check altitude overhead limit and horizon limit
-    if ((currentAlt<minAlt) || (currentAlt>maxAlt)) { lastError=ERR_ALT; stopLimit(); }
+      // check altitude overhead limit and horizon limit
+      if ((currentAlt<minAlt) || (currentAlt>maxAlt)) { lastError=ERR_ALT; stopLimit(); }
     }
 
     // OPTION TO POWER DOWN AXIS2 IF NOT MOVING
@@ -399,7 +402,7 @@ void loop() {
 #ifdef FOCUSER2_ON
   foc2.follow(isSlewing());
 #endif
-  
+ 
   // WORKLOAD MONITORING -------------------------------------------------------------------------------
   long this_loop_micros=micros(); 
   loop_time=this_loop_micros-last_loop_micros;
@@ -502,6 +505,9 @@ void loop() {
 
     // update weather info
     if (!isSlewing()) ambient.poll();
+
+    // update NV info, if required
+    if (!isSlewing()) nv.poll();
 
   } else {
     // COMMAND PROCESSING --------------------------------------------------------------------------------

@@ -19,9 +19,7 @@ volatile long modeAxis2_next=AXIS2_MODE;
 volatile boolean gotoModeAxis2=false;
 #endif
 
-#ifdef AXIS2_AUTO_POWER_DOWN_ON
-volatile bool axis2Powered = false;
-#endif
+volatile bool axis2Powered = true;
 
 //--------------------------------------------------------------------------------------------------
 // Set hardware timer rates
@@ -87,7 +85,6 @@ volatile boolean gotoRateAxis2=false;
 volatile byte cnt=0;
 volatile double guideTimerRateAxis1A=0.0;
 volatile double guideTimerRateAxis2A=0.0;
-volatile long timerLastPosAxis2=0;
 volatile byte guideDirChangeTimerAxis1=0;
 volatile byte lastGuideDirAxis1=0;
 volatile byte guideDirChangeTimerAxis2=0;
@@ -96,20 +93,42 @@ volatile byte lastGuideDirAxis2=0;
 #ifdef HAL_USE_NOBLOCK_FOR_TIMER1
 ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
 #else
-ISR(TIMER1_COMPA_vect)
+IRAM_ATTR ISR(TIMER1_COMPA_vect)
 #endif
 {
 #ifdef HAL_TIMER1_INT_CLEAR
   HAL_TIMER1_INT_CLEAR;
 #endif
+#ifdef ESP32
+  portENTER_CRITICAL_ISR(&siderealTimerMux);
+#endif
 
   // run 1/3 of the time at 3x the rate, unless a goto is happening
-  if (trackingState!=TrackingMoveTo) { cnt++; if (cnt%3!=0) return; cnt=0; }
+  if (trackingState!=TrackingMoveTo) { 
+    cnt++; 
+    if (cnt%3!=0) {
+#ifdef ESP32
+      portEXIT_CRITICAL_ISR(&siderealTimerMux);
+#endif
+      return;
+    }
+    cnt=0; 
+  }
   lst++;
 
   // handle buzzer
   if (buzzerDuration>0) { buzzerDuration--; if (buzzerDuration==0) digitalWrite(TonePin,LOW); }
 
+#ifndef ESP32
+  timerSuper();
+#endif
+
+#ifdef ESP32
+  portEXIT_CRITICAL_ISR(&siderealTimerMux);
+#endif 
+}
+
+void timerSuper() {
   if (trackingState!=TrackingMoveTo) {
     // automatic rate calculation HA
     long calculatedTimerRateAxis1;
@@ -227,13 +246,24 @@ ISR(TIMER1_COMPA_vect)
   }
 }
 
-ISR(TIMER3_COMPA_vect)
+IRAM_ATTR ISR(TIMER3_COMPA_vect)
 {
   #ifdef HAL_TIMER3_INT_CLEAR
   HAL_TIMER3_INT_CLEAR;
   #endif
+#ifdef ESP32
+  portENTER_CRITICAL_ISR(&motorTimerMux);
+#endif
 
-  if (!fastAxis1) { t3cnt++; if (t3cnt%t3rep!=0) return; }
+  if (!fastAxis1) {
+    t3cnt++;
+    if (t3cnt%t3rep!=0) {
+#ifdef ESP32
+      portEXIT_CRITICAL_ISR(&motorTimerMux);
+#endif
+      return;
+    }
+  }
 
   StepPinAxis1_LOW;
 
@@ -294,15 +324,30 @@ ISR(TIMER3_COMPA_vect)
     StepPinAxis1_HIGH;
   }
 #endif
+
+#ifdef ESP32
+  portEXIT_CRITICAL_ISR(&motorTimerMux);
+#endif
 }
 
-ISR(TIMER4_COMPA_vect)
+IRAM_ATTR ISR(TIMER4_COMPA_vect)
 {
   #ifdef HAL_TIMER4_INT_CLEAR
   HAL_TIMER4_INT_CLEAR;
   #endif
+#ifdef ESP32
+  portENTER_CRITICAL_ISR(&motorTimerMux);
+#endif
 
-  if (!fastAxis2) { t4cnt++; if (t4cnt%t4rep!=0) return; }
+  if (!fastAxis2) {
+    t4cnt++;
+    if (t4cnt%t4rep!=0) {
+#ifdef ESP32
+      portEXIT_CRITICAL_ISR(&motorTimerMux);
+#endif
+      return;
+    }
+  }
 
   StepPinAxis2_LOW;
 
@@ -332,7 +377,7 @@ ISR(TIMER4_COMPA_vect)
   if ((trackingState!=TrackingMoveTo) && (!inbacklashAxis2)) targetAxis2.part.m+=timerDirAxis2*stepAxis2;
 
   // move the Dec/Alt stepper to the target
-  if (posAxis2!=(long)targetAxis2.part.m) {
+  if (axis2Powered && (posAxis2!=(long)targetAxis2.part.m)) {
     
     // set direction
     if (posAxis2<(long)targetAxis2.part.m) dirAxis2=1; else dirAxis2=0;
@@ -362,6 +407,10 @@ ISR(TIMER4_COMPA_vect)
 #else
     StepPinAxis2_HIGH;
   }
+#endif
+
+#ifdef ESP32
+  portEXIT_CRITICAL_ISR(&motorTimerMux);
 #endif
 }
 
