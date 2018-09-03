@@ -374,6 +374,11 @@ void loop() {
     if ((currentAlt<minAlt) || (currentAlt>maxAlt)) { lastError=ERR_ALT; stopLimit(); }
     }
 
+    // OPTION TO POWER DOWN AXIS2 IF NOT MOVING
+#if defined(AXIS2_AUTO_POWER_DOWN_ON) && !defined(MOUNT_TYPE_ALTAZM)
+    autoPowerDownAxis2();
+#endif
+
     // UPDATE THE UT1 CLOCK
     cli(); long cs=lst; sei();
     double t2=(double)((cs-lst_start)/100.0)/1.00273790935;

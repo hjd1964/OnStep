@@ -20,7 +20,6 @@ volatile boolean gotoModeAxis2=false;
 #endif
 
 #ifdef AXIS2_AUTO_POWER_DOWN_ON
-volatile long Axis2PowerOffTimer = 0;
 volatile bool axis2Powered = false;
 #endif
 
@@ -217,30 +216,6 @@ ISR(TIMER1_COMPA_vect)
   gotoRateAxis2=(thisTimerRateAxis2<128*16L);   // activate <128us rate
   #endif
 
-#if defined(AXIS2_AUTO_POWER_DOWN_ON) && !defined(MOUNT_TYPE_ALTAZM)
-    // ------------------------------------------------------------------------------------------------------------------------------------
-    // Power down the Dec motor
-    
-  if (axis2Enabled) {
-    // timer count down
-    if (Axis2PowerOffTimer>0) Axis2PowerOffTimer--; 
-
-    // if the guide rate <= 1x and we're guiding on either axis set the timer to 10 minutes
-    if ((fabs(guideTimerBaseRateAxis1)<=1.000001) && (guideDirAxis2 || guideDirAxis1)) Axis2PowerOffTimer=10L*60L*100L;
-
-    // if Axis2 isn't stationary set the timer to a minimum of 10 seconds
-    cli(); if ((posAxis2!=timerLastPosAxis2) && (Axis2PowerOffTimer<10*100)) { timerLastPosAxis2=posAxis2; Axis2PowerOffTimer=10*100; } sei();
-
-    // enable/disable Axis2
-    if (Axis2PowerOffTimer==0) {
-      if (axis2Powered) { digitalWrite(Axis2_EN,AXIS2_DISABLE); axis2Powered=false; }
-    } else {
-      if (!axis2Powered) { cli(); digitalWrite(Axis2_EN,AXIS2_ENABLE); axis2Powered=true; delayMicroseconds(10); sei(); }
-    }
-  } else { Axis2PowerOffTimer=0; axis2Powered=true; }
-    // ------------------------------------------------------------------------------------------------------------------------------------
-#endif
-
   // set the rates
   if (thisTimerRateAxis1!=isrTimerRateAxis1) {
     timer3SetInterval(thisTimerRateAxis1/PPSrateRatio);
@@ -389,6 +364,33 @@ ISR(TIMER4_COMPA_vect)
   }
 #endif
 }
+
+#if defined(AXIS2_AUTO_POWER_DOWN_ON) && !defined(MOUNT_TYPE_ALTAZM)
+// Auto power down the Dec motor
+void autoPowerDownAxis2() {
+  static long Axis2PowerOffTimer = 0;
+  static long timerLastPosAxis2 = 0;
+  if (axis2Enabled) {
+    // timer count down
+    if (Axis2PowerOffTimer>0) Axis2PowerOffTimer--; 
+
+    // if the guide rate <= 1x and we're guiding on either axis set the timer to 10 minutes
+    if ((fabs(guideTimerBaseRateAxis1)<=1.000001) && (guideDirAxis2 || guideDirAxis1)) Axis2PowerOffTimer=10L*60L*100L;
+
+    // if Axis2 isn't stationary, or needs to move, set the timer to a minimum of 10 seconds
+    cli(); 
+    if (((posAxis2!=timerLastPosAxis2) || (posAxis2!=(long)targetAxis2.part.m)) && (Axis2PowerOffTimer<10*100)) { timerLastPosAxis2=posAxis2; Axis2PowerOffTimer=10*100; }
+
+    // enable/disable Axis2
+    if (Axis2PowerOffTimer==0) {
+      if (axis2Powered && !takeStepAxis2) { axis2Powered=false; digitalWrite(Axis2_EN,AXIS2_DISABLE); }
+    } else {
+      if (!axis2Powered) { digitalWrite(Axis2_EN,AXIS2_ENABLE); axis2Powered=true; delayMicroseconds(10); }
+    }
+    sei();
+  } else { Axis2PowerOffTimer=0; axis2Powered=true; }
+}
+#endif
 
 #if defined(PPS_SENSE_ON) || defined(PPS_SENSE_PULLUP)
 // PPS interrupt
