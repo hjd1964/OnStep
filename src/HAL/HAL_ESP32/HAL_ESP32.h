@@ -11,10 +11,10 @@
 // SerialA is always enabled, SerialB and SerialC are optional
 #define SerialB Serial2
 #define HAL_SERIAL_B_ENABLED
-#include <BluetoothSerial.h>
-BluetoothSerial SerialC;
-#define HAL_SERIAL_C_ENABLED
-#define HAL_SERIAL_C_BLUETOOTH
+//#include <BluetoothSerial.h>
+//BluetoothSerial SerialC;
+//#define HAL_SERIAL_C_ENABLED
+//#define HAL_SERIAL_C_BLUETOOTH
 
 // New symbol for the default I2C port ---------------------------------------------------------------
 #include <Wire.h>
