@@ -73,12 +73,12 @@ void HAL_Init_Timers_Motor() {
   // set the system timer for millis() to the second highest priority
   itimer3 = timerBegin(2, 5, true);  // the timer frequency of an ESP32 is 80MHz.  80/5 = 16 MHz (which is a timer count in OnStep due to it's Mega2560 heritage.)
   timerAttachInterrupt(itimer3, &TIMER3_COMPA_vect, true);
-  timerAlarmWrite(itimer3, 1000, true);
+  timerAlarmWrite(itimer3, 1000*16, true);
   timerAlarmEnable(itimer3);
   
   itimer4 = timerBegin(3, 5, true);
   timerAttachInterrupt(itimer4, &TIMER4_COMPA_vect, true);
-  timerAlarmWrite(itimer4, 1000, true);
+  timerAlarmWrite(itimer4, 1000*16, true);
   timerAlarmEnable(itimer4);
 }
 
@@ -89,7 +89,7 @@ void HAL_Init_Timers_Motor() {
 void HAL_Init_Timer_Sidereal() {
   itimer1 = timerBegin(1, 5, true);
   timerAttachInterrupt(itimer1, &TIMER1_COMPA_vect, true);
-  timerAlarmWrite(itimer1, 1000, true);
+  timerAlarmWrite(itimer1, 1000*16, true);
   timerAlarmEnable(itimer1);
 
   SiderealClockSetInterval(siderealInterval);
