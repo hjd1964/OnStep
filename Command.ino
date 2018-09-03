@@ -1354,7 +1354,9 @@ void processCommands() {
       if (command[1]=='L')  {  
         i=highPrecision; highPrecision=true; 
         if (!hmsToDouble(&LMT,parameter)) commandError=true; else {
-          nv.writeFloat(EE_LMT,LMT); 
+#ifndef ESP32
+          nv.writeFloat(EE_LMT,LMT);
+#endif
           UT1=LMT+timeZone;
           updateLST(jd2last(JD,UT1,true));
         }
