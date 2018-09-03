@@ -95,7 +95,7 @@ GotoErrors syncEnc(double EncAxis1, double EncAxis2) {
 
   long e1=EncAxis1*(double)StepsPerDegreeAxis1;
   long e2=EncAxis2*(double)StepsPerDegreeAxis2;
-  
+
   long a1,a2;
   cli();
   a1=posAxis1;
@@ -117,9 +117,6 @@ GotoErrors syncEnc(double EncAxis1, double EncAxis2) {
 
 // get internal counts as shaft encoder position (in degrees)
 int getEnc(double *EncAxis1, double *EncAxis2) {
-  // validate
-  int f=validateGoto(); if (f!=0) return f;
-
   long a1,a2;
   cli();
   a1=posAxis1;

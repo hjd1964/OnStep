@@ -4,7 +4,9 @@
 // at startup this firmware will attempt to switch OnStep's baud rate to a faster speed and AFTER success, start WiFi, etc.
 // valid baud rates are 115200, 57600, 38400, 28800, 19200, 9600
 
-#define SERIAL_BAUD_DEFAULT 9600  // Default=9600, OnStep must be attached and running it's Serial1 interface this baud rate
+#define W5500_ON                  // Turn _ON if using a W5500 ethernet adapter, reset control is on Pin9, SPI is at the default location for the board (CS on Pin10)
+
+#define SERIAL_BAUD_DEFAULT 57600  // Default=9600, OnStep must be attached and running it's Serial1 interface this baud rate
 
 #define SERIAL_BAUD 57600         // Default=57600, use 19200 for talking to OnStep on a Mega2560
 
@@ -13,7 +15,7 @@
 #define SPECIAL_CHARS_ON          // Default=_ON, _OFF for standard ASCII special symbols (compatibility)
 #define ADVANCED_CHARS_ON         // Default=_ON, _OFF for standard "RA/Dec" instead of symbols
 
-#define AMBIENT_CONDITIONS_OFF    // Default=_OFF, _ON for ambient conditions on status page
+#define AMBIENT_CONDITIONS_OFF     // Default=_OFF, _ON for ambient conditions on status page
 
 // Encoder support (either _AB for Quadrature A/B OR _CWCCW for CW/CCW)
 #define AXIS1_ENC_OFF              // RA/Azm Axis, default = _OFF
@@ -68,8 +70,8 @@ IPAddress gateway(192, 168, 1, 1);
 IPAddress subnet(255, 255, 255, 0);
 
 // misc. options that are usually not changed
-#define DEBUG_OFF                    // Turn _ON to allow Ethernet startup without OnStep attached (Serial port for debug at 9600 baud)
-#define Ser Serial1                  // Default=Serial1, This is the hardware serial port where OnStep is attached
+#define DEBUG_OFF                   // Turn _ON to allow Ethernet startup without OnStep attached (Serial port for debug at 9600 baud)
+#define Ser Serial1                 // Default=Serial1, This is the hardware serial port where OnStep is attached
 
 // -------------------------------------------------------------------------------
 

@@ -38,11 +38,15 @@
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
 #define FirmwareVersionMinor  "4"
-#define FirmwareVersionPatch  "i"
+#define FirmwareVersionPatch  "j"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
-#include <Ethernet.h>
+#ifdef W5500_ON
+  #include <Ethernet3.h>  // https://github.com/PaulStoffregen/Ethernet
+#else
+  #include <Ethernet.h>
+#endif
 #include "CmdServer.h"
 #include "WebServer.h"
 
@@ -112,6 +116,16 @@ Again:
       serialRecvFlush();
     }
   }
+
+#ifdef W5500_ON
+  // reset a W5500
+  pinMode(9, OUTPUT); 
+  digitalWrite(9, LOW);
+  delayMicroseconds(500);
+  digitalWrite(9, HIGH);
+  delayMicroseconds(1000);
+  delay(1000);
+#endif
 
   // Initialize the www server
   server.init();
