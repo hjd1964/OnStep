@@ -308,6 +308,7 @@ Again:
 
 void loop(void){
   server.handleClient();
+  encoders.poll();
 
   // disconnect client
   static unsigned long clientTime = 0;
@@ -342,10 +343,8 @@ void loop(void){
         }
       }
 
-    } else server.handleClient();
+    } else { server.handleClient(); encoders.poll(); }
   }
-
-  encoders.poll();
 }
 
 const char* HighSpeedCommsStr(long baud) {
