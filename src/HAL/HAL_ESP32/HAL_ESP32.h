@@ -36,6 +36,11 @@ void TIMER4_COMPA_vect(void);
 portMUX_TYPE siderealTimerMux = portMUX_INITIALIZER_UNLOCKED;
 portMUX_TYPE motorTimerMux = portMUX_INITIALIZER_UNLOCKED;
 
+// Override cli/sei and use for muxes
+#undef cli
+IRAM_ATTR void cli() { portENTER_CRITICAL(&motorTimerMux); portENTER_CRITICAL(&siderealTimerMux); }
+#undef sei
+IRAM_ATTR void sei() { portEXIT_CRITICAL(&siderealTimerMux); portEXIT_CRITICAL(&motorTimerMux); }
 void timerAlarmsEnable() { timerAlarmEnable(itimer1); timerAlarmEnable(itimer3); timerAlarmEnable(itimer4); }
 void timerAlarmsDisable() { timerAlarmDisable(itimer1); timerAlarmDisable(itimer3); timerAlarmDisable(itimer4); }
 
