@@ -1,13 +1,15 @@
 // -------------------------------------------------------------------------------------------------
 // Pin map for OnStep MiniPCB (Teensy3.2)
 
-#if defined(__MK20DX256__)
+#if defined(__MK20DX256__) || defined(_mk20dx128_h_) || defined(__MK20DX128__)
 
 // The multi-purpose pins (Aux3..Aux8 can be analog pwm/dac if supported)
 #define Aux0          19
 #define Aux1          18
 #define Aux2          5
+#if !defined(_mk20dx128_h_) && !defined(__MK20DX128__)
 #define Aux3          A14   // true analog output
+#endif
 #define Aux3_Analog
 
 // The PEC index sense is a logic level input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset

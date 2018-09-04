@@ -26,6 +26,10 @@
   // Arduino Mega 2560
   #include "HAL_Mega2560/HAL_Mega2560.h"
 
+#elif defined(_mk20dx128_h_) || defined(__MK20DX128__)
+  // Teensy 3.0
+  #include "HAL_Teensy_3/HAL_Teensy_3.h"
+
 #elif defined(__MK20DX256__)
   // Teensy 3.2
   #include "HAL_Teensy_3/HAL_Teensy_3.h"
