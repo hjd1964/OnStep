@@ -41,7 +41,7 @@
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  1
 #define FirmwareVersionMinor  13
-#define FirmwareVersionPatch  "b"     // for example major.minor patch: 1.3c
+#define FirmwareVersionPatch  "c"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 2       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
@@ -52,11 +52,11 @@
 #include "Constants.h"
 
 #include "Config.Classic.h"
-#include "Config.MiniPCB.h"
+#include "Config.MaxESP.h"
 #include "Config.MaxPCB.h"
-#include "Config.Ramps14.h"
 #include "Config.Mega2560Alt.h"
-#include "Config.TM4C.h"
+#include "Config.MiniPCB.h"
+#include "Config.Ramps14.h"
 #include "Config.STM32.h"
 #include "src/HAL/HAL.h"
 #include "Validate.h"
