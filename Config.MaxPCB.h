@@ -221,6 +221,10 @@
 
 // -------------------------------------------------------------------------------------------------------------------------
 #define FileVersionConfig 2
-#include "src/pinmaps/Pins.MaxPCB.h"
+#ifdef ESP32
+  #include "src/pinmaps/Pins.MaxESP.h"
+#else
+  #include "src/pinmaps/Pins.MaxPCB.h"
+#endif
 #endif
 
