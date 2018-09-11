@@ -20,7 +20,7 @@
   #define BACKGROUND_CMD_RATE 300   // Default=300, regulates the background command rate
 
   // the display, SSD1306 or SH1106
-  #define OLED_DISPLAY SSD1306
+  #define OLED_DISPLAY SH1106
 
   // the hand controller buttons
   #define B_PIN0 21                 // Shift
