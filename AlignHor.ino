@@ -57,21 +57,6 @@ bool TGeoAlignH::isReady() {
   return geo_ready;
 }
 
-/*
-Alignment Logic:
-Near the celestial equator (Dec=0, HA=0)...
-the azmCor term is 0% in Dec
-the altCor term is 100% in Dec
-the doCor  term is 100% in HA
-the pdCor  term is 0% in HA
-
-Near HA=6 and Dec=45...
-the azmCor term is 100% in Dec
-the altCor term is 0% in Dec
-the doCor  term is 0% in HA
-the pdCor  term is 100% in HA
-*/
-
 // I=1 for 1st star, I=2 for 2nd star, I=3 for 3rd star
 // N=total number of stars for this align (1 to 9)
 // RA, Dec (all in degrees)
@@ -505,4 +490,3 @@ void TGeoAlignH::instrToHor(double Alt, double Azm, double *Alt1, double *Azm1, 
   if (*Alt1<-90.0) *Alt1=-90.0;
 }
 #endif
-
