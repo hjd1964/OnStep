@@ -64,8 +64,7 @@ bool TGeoAlignH::addStar(int I, int N, double RA, double Dec) {
   double a,z;
   equToHor(haRange(LST()*15.0-RA),Dec,&a,&z);
 
-  // First star:
-  // Near the celestial equator (Dec=0, HA=0), telescope West of the pier if multi-star align
+  // First star, just sync
   if (I==1) {
     // set the indexAxis1/2 offset
     if (syncEqu(RA,Dec)!=0) return true;
