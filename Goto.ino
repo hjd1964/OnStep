@@ -41,7 +41,7 @@ GotoErrors syncEqu(double RA, double Dec) {
   equToHor(HA,Dec,&a,&z);
 
   // validate
-  GotoErrors f=validateGoto(); if (f!=GOTO_ERR_NONE) return f;
+  GotoErrors f=validateGoto(); if ((f!=GOTO_ERR_NONE) && (f!=GOTO_ERR_STANDBY)) return f;
   f=validateGotoCoords(HA,Dec,a); if (f!=GOTO_ERR_NONE) return f;
 
   double Axis1,Axis2;
@@ -54,14 +54,11 @@ GotoErrors syncEqu(double RA, double Dec) {
 #endif
 
   // just turn on tracking
-  if (atHome) {
-    trackingState=TrackingSidereal;
-    enableStepperDrivers();
-    atHome=false;
-  }
+  if (atHome) { trackingState=TrackingSidereal; enableStepperDrivers(); }
 
   int newPierSide=getInstrPierSide();
   if (meridianFlip!=MeridianFlipNever) {
+    if (atHome) { if (Axis1<0) newPierSide=PierSideWest; else newPierSide=PierSideEast; } else // best side of pier decided based on meridian
     if (preferredPierSide==PPS_WEST) newPierSide=PierSideWest; else // west side of pier - we're in the eastern sky and the HA's are negative
     if (preferredPierSide==PPS_EAST) newPierSide=PierSideEast; else // east side of pier - we're in the western sky and the HA's are positive
     {
@@ -69,18 +66,19 @@ GotoErrors syncEqu(double RA, double Dec) {
       if ((getInstrPierSide()==PierSideWest) && (haRange(Axis1)> minutesPastMeridianW/4.0)) newPierSide=PierSideEast;
       if ((getInstrPierSide()==PierSideEast) && (haRange(Axis1)<-minutesPastMeridianE/4.0)) newPierSide=PierSideWest;
 #else
-      if (Axis1<0) newPierSide=PierSideWest; else newPierSide=PierSideEast; // best side of pier decided based on meridian 
+      if (Axis1<0) newPierSide=PierSideWest; else newPierSide=PierSideEast; // best side of pier decided based on meridian
 #endif
     }
-
+  
 #if defined(SYNC_CURRENT_PIER_SIDE_ONLY_ON) && defined(MOUNT_TYPE_GEM)
-    if (newPierSide!=getInstrPierSide()) return GOTO_ERR_OUTSIDE_LIMITS;
+    if (!atHome && (newPierSide!=getInstrPierSide())) return GOTO_ERR_OUTSIDE_LIMITS;
 #endif
   } else {
     // always on the "east" side of pier - we're in the western sky and the HA's are positive
     // this is the default in the polar-home position and also for MOUNT_TYPE_FORK and MOUNT_TYPE_ALTAZM.  MOUNT_TYPE_FORK_ALT ends up pierSideEast, but flips are allowed until aligned.
     newPierSide=PierSideEast;
   }
+
   D("Sync Axis1="); D(Axis1); D(", Axis2="); D(Axis2); D(", Pierside="); DL(newPierSide); DL("");
   setIndexAxis1(Axis1,newPierSide);
   setIndexAxis2(Axis2,newPierSide);
@@ -387,4 +385,3 @@ GotoErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTarget
 
   return GOTO_ERR_NONE;
 }
-
