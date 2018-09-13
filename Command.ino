@@ -165,11 +165,10 @@ void processCommands() {
 //         1: If correction is accepted
 //         0: Failure, Manual align mode not set or distance too far 
         if (command[1]=='+') {
-          commandError = AlignStar();
-          if (commandError) {
-            alignNumStars=0;
-            alignThisStar=0;
-          }
+          if (alignActive()) {
+            commandError = !alignStar();
+            if (commandError) { alignNumStars=0; alignThisStar=0; }
+          } else commandError=true;
         }
         else
           commandError=true;
@@ -246,14 +245,18 @@ void processCommands() {
 //         Returns: "N/A#" on success, "En#" on failure where n is the error code per the :MS# command
       if ((command[0]=='C') && ((command[1]=='S') || command[1]=='M'))  {
         if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
-          i=syncEqu(newTargetRA,newTargetDec);
+
+          if (alignActive()) {
+            if (alignStar()) i=GOTO_ERR_NONE; else { i=GOTO_ERR_UNSPECIFIED; alignNumStars=0; alignThisStar=0; }
+          } else { 
+            i=syncEqu(newTargetRA,newTargetDec); 
+          }
+
           if (command[1]=='M') {
-            if (i==0) {
-              commandError = AlignStar();
-              strcpy(reply,"N/A");
-            }
+            if (i==0) strcpy(reply,"N/A");
             if (i>0) { reply[0]='E'; reply[1]='0'+i; reply[2]=0; }
           }
+
           quietReply=true;
         }
       } else 
@@ -1993,25 +1996,19 @@ bool cmdReply(char *s) {
   return true;
 }
 
-boolean AlignStar() {
-  // after last star turn meridian flips off when align is done
-  if ((alignNumStars == alignThisStar) && (meridianFlip == MeridianFlipAlign)) {
-    meridianFlip=MeridianFlipNever;
-  }
-          
-  if (alignThisStar <= alignNumStars) {
-    // AltAz or Equ mode
-    if (Align.addStar(alignThisStar,alignNumStars,newTargetRA,newTargetDec)) {
-      alignThisStar++;
-    }
-    else {
-      return true;
-    }
-  }
-  else {
-    return true;
-  }
+// checks to see if an alignment is active
+boolean alignActive() {
+  return (alignNumStars>0) && (alignThisStar <= alignNumStars);
+}
 
-  // All good
-  return false;
+// adds an alignment star, returns true on success
+boolean alignStar() {
+  // after last star turn meridian flips off when align is done
+  if ((alignNumStars == alignThisStar) && (meridianFlip == MeridianFlipAlign)) meridianFlip=MeridianFlipNever;
+
+  if (alignThisStar <= alignNumStars) {
+    if (Align.addStar(alignThisStar,alignNumStars,newTargetRA,newTargetDec)) alignThisStar++; else return false;
+  } else return false;
+
+  return true;
 }
