@@ -10,6 +10,17 @@
 */
 
 #define MaxESP_OFF  //  <- Turn _ON to use this configuration
+#define MaxESP_ON  //  <- Turn _ON to use this configuration
+
+// Notes:
+
+// The stock ESP32 Release 1.0.0 BluetoothSerial.h library doesn't work
+// Copy the latest BluetoothSerial library (just it's folder) from https://github.com/espressif/arduino-esp32 into
+// C:\Users\xxxxxx\AppData\Local\Arduino15\packages\esp32\hardware\esp32\1.0.0\libraries\Bluetooth
+
+// The stock ESP32 Release 1.0.0 Wire.h library doesn't work
+// Copy the latest Wire.h library file (only) from ~\OnStep\src\HAL\HAL_ESP32 into
+// C:\Users\xxxxxx\AppData\Local\Arduino15\packages\esp32\hardware\esp32\1.0.0\libraries\Wire\src
 
 #ifdef MaxESP_ON
 // -------------------------------------------------------------------------------------------------------------------------
@@ -18,7 +29,7 @@
 // Default speed for Serial1 and Serial4 com ports, Default=9600
 #define SERIAL_B_BAUD_DEFAULT 9600
 // For an ESP32 SerialC is the Bluetooth port so use a name instead of a baud "ONSTEP", etc.
-#define SERIAL_C_BAUD_DEFAULT "OnStep"
+//#define SERIAL_C_BAUD_DEFAULT "OnStep"
 
 // Mount type, default is _GEM (German Equatorial) other options are _FORK, _FORK_ALT.  _FORK switches off Meridian Flips after (1, 2 or 3 star) alignment is done.  _FORK_ALT disables Meridian Flips (1 star align.)
 // _ALTAZM is for Alt/Azm mounted 'scopes (1 star align only.)
@@ -162,7 +173,7 @@
 
 // For equatorial mounts, _ON powers down the Declination axis when it's not being used to help lower power use.  During low rate guiding (<=1x) the axis stays enabled
 // for 10 minutes after any guide on either axis.  Otherwise, the Dec axis is disabled (powered off) 10 seconds after movement stops.
-#define AXIS2_AUTO_POWER_DOWN_ON
+#define AXIS2_AUTO_POWER_DOWN_OFF
 
 // Stepper driver Fault detection on Pins 5 (Aux3) and 14 (Aux4,) choose only one feature to use on Aux3/4.
 // other settings are LOW, HIGH (if available applies internal pullup if LOW and pulldown if HIGH.)
@@ -186,7 +197,7 @@
 
 // FOCUSER1 ---------------------------------------------------------------------------------------------------------------
 // Pins 34,35 = Step,Dir
-#define FOCUSER1_OFF                 // use _ON to enable this focuser, default=_OFF
+#define FOCUSER1_ON                 // use _ON to enable this focuser, default=_OFF
 #define MaxRateAxis4               8 // this is the minimum number of milli-seconds between micro-steps, default=8
 #define StepsPerMicrometerAxis4  0.5 // figure this out by testing or other means
 #define MinAxis4               -25.0 // minimum allowed Axis4 position in millimeters, default = -25.0
