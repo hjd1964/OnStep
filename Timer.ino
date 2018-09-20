@@ -96,24 +96,12 @@ ISR(TIMER1_COMPA_vect,ISR_NOBLOCK)
 IRAM_ATTR ISR(TIMER1_COMPA_vect)
 #endif
 {
-#ifdef HAL_TIMER1_INT_CLEAR
-  HAL_TIMER1_INT_CLEAR;
-#endif
-#ifdef ESP32
-  portENTER_CRITICAL_ISR(&siderealTimerMux);
+#ifdef HAL_TIMER1_PREFIX
+  HAL_TIMER1_PREFIX;
 #endif
 
   // run 1/3 of the time at 3x the rate, unless a goto is happening
-  if (trackingState!=TrackingMoveTo) { 
-    cnt++; 
-    if (cnt%3!=0) {
-#ifdef ESP32
-      portEXIT_CRITICAL_ISR(&siderealTimerMux);
-#endif
-      return;
-    }
-    cnt=0; 
-  }
+  if (trackingState!=TrackingMoveTo) { cnt++; if (cnt%3!=0) goto done; cnt=0; }
   lst++;
 
   // handle buzzer
@@ -123,9 +111,10 @@ IRAM_ATTR ISR(TIMER1_COMPA_vect)
   timerSuper();
 #endif
 
-#ifdef ESP32
-  portEXIT_CRITICAL_ISR(&siderealTimerMux);
-#endif 
+done: {}
+#ifdef HAL_TIMER1_SUFFIX
+  HAL_TIMER1_SUFFIX;
+#endif
 }
 
 void timerSuper() {
@@ -248,22 +237,11 @@ void timerSuper() {
 
 IRAM_ATTR ISR(TIMER3_COMPA_vect)
 {
-  #ifdef HAL_TIMER3_INT_CLEAR
-  HAL_TIMER3_INT_CLEAR;
-  #endif
-#ifdef ESP32
-  portENTER_CRITICAL_ISR(&motorTimerMux);
+#ifdef HAL_TIMER3_PREFIX
+  HAL_TIMER3_PREFIX;
 #endif
 
-  if (!fastAxis1) {
-    t3cnt++;
-    if (t3cnt%t3rep!=0) {
-#ifdef ESP32
-      portEXIT_CRITICAL_ISR(&motorTimerMux);
-#endif
-      return;
-    }
-  }
+  if (!fastAxis1) { t3cnt++; if (t3cnt%t3rep!=0) goto done; }
 
   StepPinAxis1_LOW;
 
@@ -325,29 +303,19 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
   }
 #endif
 
-#ifdef ESP32
-  portEXIT_CRITICAL_ISR(&motorTimerMux);
+done: {}
+#ifdef HAL_TIMER3_SUFFIX
+  HAL_TIMER3_SUFFIX;
 #endif
 }
 
 IRAM_ATTR ISR(TIMER4_COMPA_vect)
 {
-  #ifdef HAL_TIMER4_INT_CLEAR
-  HAL_TIMER4_INT_CLEAR;
-  #endif
-#ifdef ESP32
-  portENTER_CRITICAL_ISR(&motorTimerMux);
+#ifdef HAL_TIMER4_PREFIX
+  HAL_TIMER4_PREFIX;
 #endif
 
-  if (!fastAxis2) {
-    t4cnt++;
-    if (t4cnt%t4rep!=0) {
-#ifdef ESP32
-      portEXIT_CRITICAL_ISR(&motorTimerMux);
-#endif
-      return;
-    }
-  }
+  if (!fastAxis2) { t4cnt++; if (t4cnt%t4rep!=0) goto done; }
 
   StepPinAxis2_LOW;
 
@@ -409,8 +377,9 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
   }
 #endif
 
-#ifdef ESP32
-  portEXIT_CRITICAL_ISR(&motorTimerMux);
+done: {}
+#ifdef HAL_TIMER4_SUFFIX
+  HAL_TIMER4_SUFFIX;
 #endif
 }
 
@@ -453,4 +422,3 @@ void clockSync() {
   PPSlastMicroS=t;
 }
 #endif
-

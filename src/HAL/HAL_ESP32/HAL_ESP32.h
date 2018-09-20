@@ -48,6 +48,13 @@ void TIMER4_COMPA_vect(void);
 portMUX_TYPE siderealTimerMux = portMUX_INITIALIZER_UNLOCKED;
 portMUX_TYPE motorTimerMux = portMUX_INITIALIZER_UNLOCKED;
 
+#define HAL_TIMER1_PREFIX portENTER_CRITICAL_ISR( &siderealTimerMux )
+#define HAL_TIMER3_PREFIX portENTER_CRITICAL_ISR( &motorTimerMux )
+#define HAL_TIMER4_PREFIX portENTER_CRITICAL_ISR( &motorTimerMux )
+#define HAL_TIMER1_SUFFIX portEXIT_CRITICAL_ISR( &siderealTimerMux )
+#define HAL_TIMER3_SUFFIX portEXIT_CRITICAL_ISR( &motorTimerMux )
+#define HAL_TIMER4_SUFFIX portEXIT_CRITICAL_ISR( &motorTimerMux )
+
 // Override cli/sei and use for muxes
 #undef cli
 IRAM_ATTR void cli() { portENTER_CRITICAL(&motorTimerMux); portENTER_CRITICAL(&siderealTimerMux); }
@@ -140,4 +147,3 @@ IRAM_ATTR void QuickSetIntervalAxis2(uint32_t r) {
 #define StepPinAxis2_LOW digitalWrite(Axis2StepPin, LOW)
 #define DirPinAxis2_HIGH digitalWrite(Axis2DirPin, HIGH)
 #define DirPinAxis2_LOW digitalWrite(Axis2DirPin, LOW)
-

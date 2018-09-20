@@ -39,9 +39,9 @@
 // Interrupts
 #define cli() noInterrupts()
 #define sei() interrupts()
-#define HAL_TIMER1_INT_CLEAR TimerIntClear( Timer1_base, TIMER_TIMA_TIMEOUT )
-#define HAL_TIMER3_INT_CLEAR TimerIntClear( Timer3_base, TIMER_TIMA_TIMEOUT )
-#define HAL_TIMER4_INT_CLEAR TimerIntClear( Timer4_base, TIMER_TIMA_TIMEOUT )
+#define HAL_TIMER1_PREFIX TimerIntClear( Timer1_base, TIMER_TIMA_TIMEOUT )
+#define HAL_TIMER3_PREFIX TimerIntClear( Timer3_base, TIMER_TIMA_TIMEOUT )
+#define HAL_TIMER4_PREFIX TimerIntClear( Timer4_base, TIMER_TIMA_TIMEOUT )
 
 // Lower limit (fastest) step rate in uS for this platform
 #if defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
@@ -212,4 +212,3 @@ void QuickSetIntervalAxis2(uint32_t r) {
 #define StepPinAxis2_LOW CLR(Axis2StepPORT, Axis2StepBit)
 #define DirPinAxis2_HIGH SET(Axis2DirPORT, Axis2DirBit)
 #define DirPinAxis2_LOW CLR(Axis2DirPORT, Axis2DirBit)
-
