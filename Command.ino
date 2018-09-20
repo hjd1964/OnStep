@@ -249,7 +249,7 @@ void processCommands() {
           if (alignActive()) {
             if (alignStar()) i=GOTO_ERR_NONE; else { i=GOTO_ERR_UNSPECIFIED; alignNumStars=0; alignThisStar=0; }
           } else { 
-            i=syncEqu(newTargetRA,newTargetDec); 
+            i=syncEqu(newTargetRA,newTargetDec);
           }
 
           if (command[1]=='M') {
@@ -1466,7 +1466,7 @@ void processCommands() {
             case '7': Align.dfCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;     // dfCor
 #endif
             case '8': Align.tfCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;     // tfCor
-            case '9': { i=strtol(&parameter[3],NULL,10); if (i==1) { alignNumStars=star; alignThisStar=star+1; Align.autoModel(star,true); } else star=0; } break; // use 0 to start upload of stars for align, use 1 to trigger align
+            case '9': { i=strtol(&parameter[3],NULL,10); if (i==1) { alignNumStars=star; alignThisStar=star+1; Align.autoModel(star); } else star=0; } break; // use 0 to start upload of stars for align, use 1 to trigger align
             case 'A': { i=highPrecision; highPrecision=true; if (!hmsToDouble(&Align.actual[star].ha,&parameter[3])) commandError=true; else Align.actual[star].ha=(Align.actual[star].ha*15.0)/Rad; highPrecision=i; } break; // Star  #n HA
             case 'B': { i=highPrecision; highPrecision=true; if (!dmsToDouble(&Align.actual[star].dec,&parameter[3],true)) commandError=true; else Align.actual[star].dec=Align.actual[star].dec/Rad; highPrecision=i; } break; // Star  #n Dec
             case 'C': { i=highPrecision; highPrecision=true; if (!hmsToDouble(&Align.mount[star].ha,&parameter[3])) commandError=true; else Align.mount[star].ha=(Align.mount[star].ha*15.0)/Rad; highPrecision=i; } break; // Mount  #n HA
@@ -1996,19 +1996,3 @@ bool cmdReply(char *s) {
   return true;
 }
 
-// checks to see if an alignment is active
-boolean alignActive() {
-  return (alignNumStars>0) && (alignThisStar <= alignNumStars);
-}
-
-// adds an alignment star, returns true on success
-boolean alignStar() {
-  // after last star turn meridian flips off when align is done
-  if ((alignNumStars == alignThisStar) && (meridianFlip == MeridianFlipAlign)) meridianFlip=MeridianFlipNever;
-
-  if (alignThisStar <= alignNumStars) {
-    if (Align.addStar(alignThisStar,alignNumStars,newTargetRA,newTargetDec)) alignThisStar++; else return false;
-  } else return false;
-
-  return true;
-}

@@ -8,9 +8,6 @@
 
 #pragma once
 
-byte alignNumStars = 0;
-byte alignThisStar = 0;
-
 // -----------------------------------------------------------------------------------
 // ADVANCED GEOMETRIC ALIGN FOR ALT/AZM MOUNTS (GOTO ASSIST)
 
@@ -46,7 +43,7 @@ class TGeoAlignH
     bool addStar(int I, int N, double RA, double Dec);
     void horToInstr(double Alt, double Azm, double *Alt1, double *Azm1, int PierSide);
     void instrToHor(double Alt, double Azm, double *Alt1, double *Azm1, int PierSide);
-    void autoModel(int n, bool start);
+    void autoModel(int n);
 
   private:
     boolean geo_ready;
@@ -106,7 +103,8 @@ class TGeoAlign
     bool addStar(int I, int N, double RA, double Dec);
     void equToInstr(double Lat, double HA, double Dec, double *HA1, double *Dec1, int PierSide);
     void instrToEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1, int PierSide);
-    void autoModel(int n, bool start);
+    void autoModel(int n);
+    void model(int n);
 
   private:
     boolean geo_ready;
@@ -132,4 +130,24 @@ class TGeoAlign
 
 TGeoAlign Align;
 #endif
+
+byte alignNumStars = 0;
+byte alignThisStar = 0;
+
+// checks to see if an alignment is active
+boolean alignActive() {
+  return (alignNumStars>0) && (alignThisStar <= alignNumStars);
+}
+
+// adds an alignment star, returns true on success
+boolean alignStar() {
+  // after last star turn meridian flips off when align is done
+  if ((alignNumStars == alignThisStar) && (meridianFlip == MeridianFlipAlign)) meridianFlip=MeridianFlipNever;
+
+  if (alignThisStar <= alignNumStars) {
+    if (Align.addStar(alignThisStar,alignNumStars,newTargetRA,newTargetDec)) alignThisStar++; else return false;
+  } else return false;
+
+  return true;
+}
 

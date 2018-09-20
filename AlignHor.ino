@@ -65,10 +65,7 @@ bool TGeoAlignH::addStar(int I, int N, double RA, double Dec) {
   equToHor(haRange(LST()*15.0-RA),Dec,&a,&z);
 
   // First star, just sync
-  if (I==1) {
-    // set the indexAxis1/2 offset
-    if (syncEqu(RA,Dec)!=0) return true;
-  }
+  if (I==1) { if (syncEqu(RA,Dec)!=GOTO_ERR_NONE) return false; }
 
   mount[I-1].azm=getInstrAxis1();
   mount[I-1].alt=getInstrAxis2();
@@ -90,14 +87,18 @@ bool TGeoAlignH::addStar(int I, int N, double RA, double Dec) {
   if (getInstrPierSide()==PierSideEast) { actual[I-1].side=1; mount[I-1].side=1; } else { actual[I-1].side=0; mount[I-1].side=0; }
 
   // two or more stars and finished
-  if ((I>=2) && (I==N)) {
-#ifdef GOTO_ASSIST_DEBUG_ON
-    DL("");
-#endif
-    autoModel(N,true);
-  }
+  if ((I>=2) && (I==N)) model(N);
 
   return true;
+}
+
+// kick off modeling
+void TGeoAlignH::model(int n) {
+  static bool busy=false;
+  static int numStars=0;
+  if (busy) return;                                                           // busy
+  if (n>0) { numStars=n; return; }                                            // command
+  if (numStars>0) { busy=true; autoModel(numStars); busy=false; numStars=0; } // waiting to solve
 }
 
 // returns the correction to be added to the requested RA,Dec to yield the actual RA,Dec that we will arrive at
@@ -253,110 +254,91 @@ void TGeoAlignH::do_search(double sf, int p1, int p2, int p3, int p4, int p5, in
       if (p9!=0) best_ohw=ohw*Rad*3600.0;
       if (p9!=0) best_ohe=ohe*Rad*3600.0;
     }
+
+    // keep the main loop running
+    loop2();
   }
 }
 
-void TGeoAlignH::autoModel(int n, bool start) {
-  static int step=51;
-  if (start) step=0;
-  if (step>50) return;
-  step++;
+void TGeoAlignH::autoModel(int n) {
 
-  if (step==1) {
-    num=n; // how many stars?
+  num=n; // how many stars?
 
-    lat=90.0/Rad; // 90 deg. latitude for Alt/Azm
-    cosLat=cos(lat);
-    sinLat=sin(lat);
-  
-    best_dist   =3600.0*180.0;
-    best_deo    =0.0;
-    best_pd     =0.0;
-    best_pz     =0.0;
-    best_pe     =0.0;
-    best_tf     =0.0;
-    best_ff     =0.0;
-    best_df     =0.0;
-    best_ode    =0.0;
-    best_ohe    =0.0;
-  
-    // figure out the average HA offset as a starting point
-    ohe=0;
-    for (l=1; l<num; l++) {
-      z1=actual[l].azm-mount[l].azm;
-      if (z1>PI)  z1=z1-PI*2.0;
-      if (z1<-PI) z1=z1+PI*2.0;
-      ohe=ohe+z1;
-    }
-    ohe=ohe/num; best_ohe=round(ohe*Rad*3600.0); best_ohw=best_ohe;
-  
+  lat=90.0/Rad; // 90 deg. latitude for Alt/Azm
+  cosLat=cos(lat);
+  sinLat=sin(lat);
+
+  best_dist   =3600.0*180.0;
+  best_deo    =0.0;
+  best_pd     =0.0;
+  best_pz     =0.0;
+  best_pe     =0.0;
+  best_tf     =0.0;
+  best_ff     =0.0;
+  best_df     =0.0;
+  best_ode    =0.0;
+  best_ohe    =0.0;
+
+  // figure out the average Az offset as a starting point
+  ohe=0;
+  for (l=1; l<num; l++) {
+    z1=actual[l].azm-mount[l].azm;
+    if (z1>PI)  z1=z1-PI*2.0;
+    if (z1<-PI) z1=z1+PI*2.0;
+    ohe=ohe+z1;
+  }
+  ohe=ohe/num; best_ohe=round(ohe*Rad*3600.0); best_ohw=best_ohe;
+
 #if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT) || defined(MOUNT_TYPE_ALTAZM)
-    Ff=1; Df=0;
+  Ff=1; Df=0;
 #else
-    Ff=0; Df=1;
+  Ff=0; Df=1;
 #endif
-  }
   
-#ifdef HAL_SLOW_PROCESSOR
-  // search, this can handle about 9 degrees of polar misalignment, and 2 degree of cone error
-  //                           DoPdPzPeTfFfDfOdOh
-  if (step==2)  do_search(16384,0,0,1,1,0,0,0,1,0);
-  if (step==10) do_search( 8192,0,0,1,1,0,0,0,1,0);
-  if (step==15) do_search( 4096,1,0,1,1,0,0,0,1,0);
-  if (step==20) do_search( 2048,1,0,1,1,0,0,0,1,0);
-  if (step==25) do_search( 1024,1,0,1,1,0,0,0,1,0);
-  if (step==30) do_search(  512,1,0,1,1,0,0,0,1,0);
-  if (step==40) do_search(  256,1,0,1,1,0,0,0,1,0);
-#elif HAL_FAST_PROCESSOR
-  // search, this can handle about 9 degrees of polar misalignment, and 4 degrees of cone error, 8' of FF/DF/PD
-  //                           DoPdPzPeTfFf Df OdOh
-  if (step==2)  do_search(16384,0,0,1,1,0, 0, 0,1,1);
-  if (step==4)  do_search( 8192,1,0,1,1,0, 0, 0,1,1);
-  if (step==6)  do_search( 4096,1,0,1,1,0, 0, 0,1,1);
-  if (step==8)  do_search( 2048,1,0,1,1,0, 0, 0,1,1);
-  if (step==10) do_search( 1024,1,0,1,1,0, 0, 0,1,1);
-  if (step==15) do_search(  512,1,0,1,1,0, 0, 0,1,1);
-  if (num>4) {
-  if (step==20) do_search(  256,1,1,1,1,0,Ff,Df,1,1);
-  if (step==30) do_search(  128,1,1,1,1,0,Ff,Df,1,1);
-  if (step==40) do_search(   64,1,1,1,1,0,Ff,Df,1,1);
-  } else {
-  if (step==20) do_search(  256,1,0,1,1,0, 0, 0,1,1);
-  if (step==30) do_search(  128,1,0,1,1,0, 0, 0,1,1);
-  if (step==40) do_search(   64,1,0,1,1,0, 0, 0,1,1);
-  }
-#else
   // search, this can handle about 9 degrees of polar misalignment, and 4 degrees of cone error
-  //                           DoPdPzPeTfFf Df OdOh
-  if (step==2)  do_search(16384,0,0,1,1,0, 0, 0,1,1);
-  if (step==5)  do_search( 8192,1,0,1,1,0, 0, 0,1,1);
-  if (step==10) do_search( 4096,1,0,1,1,0, 0, 0,1,1);
-  if (step==15) do_search( 2048,1,0,1,1,0, 0, 0,1,1);
-  if (step==20) do_search( 1024,1,0,1,1,0, 0, 0,1,1);
-  if (step==25) do_search(  512,1,0,1,1,0, 0, 0,1,1);
-  if (step==30) do_search(  256,1,0,1,1,0, 0, 0,1,1);
-  if (step==40) do_search(  128,1,0,1,1,0, 0, 0,1,1);
-#endif
-
-  if (step==50) {
-    // geometric corrections
-    doCor=best_deo/3600.0;
-    pdCor=best_pd/3600.0;
-    azmCor=best_pz/3600.0;
-    altCor=best_pe/3600.0;
-
-    tfCor=best_tf/3600.0;
-#if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT) || defined(MOUNT_TYPE_ALTAZM)
-    dfCor=best_df/3600.0;
+  //              DoPdPzPeTfFf Df OdOh
+  do_search(16384,0,0,1,1,0, 0, 0,1,1);
+  do_search( 8192,1,0,1,1,0, 0, 0,1,1);
+  do_search( 4096,1,0,1,1,0, 0, 0,1,1);
+  do_search( 2048,1,0,1,1,0, 0, 0,1,1);
+  do_search( 1024,1,0,1,1,0, 0, 0,1,1);
+  do_search(  512,1,0,1,1,0, 0, 0,1,1);
+#ifdef HAL_SLOW_PROCESSOR
+  //              DoPdPzPeTfFf Df OdOh
+  do_search(  256,1,0,1,1,0, 0, 0,1,1);
+  do_search(  128,1,0,1,1,0, 0, 0,1,1);
 #else
-    dfCor=best_ff/3600.0;
+  if (num>4) {
+    //              DoPdPzPeTfFf Df OdOh
+    do_search(  256,1,1,1,1,0,Ff,Df,1,1);
+    do_search(  128,1,1,1,1,0,Ff,Df,1,1);
+    do_search(   64,1,1,1,1,0,Ff,Df,1,1);
+    do_search(   32,1,1,1,1,0,Ff,Df,1,1);
+  } else {
+    do_search(  256,1,0,1,1,0, 0, 0,1,1);
+    do_search(  128,1,0,1,1,0, 0, 0,1,1);
+    do_search(   64,1,0,1,1,0, 0, 0,1,1);
+    do_search(   32,1,0,1,1,0, 0, 0,1,1);
+  }
 #endif
 
-    ax1Cor=best_ohw/3600.0;
-    ax2Cor=best_odw/3600.0;
+  // geometric corrections
+  doCor=best_deo/3600.0;
+  pdCor=best_pd/3600.0;
+  azmCor=best_pz/3600.0;
+  altCor=best_pe/3600.0;
 
-    geo_ready=true;
-  }
+  tfCor=best_tf/3600.0;
+#if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT) || defined(MOUNT_TYPE_ALTAZM)
+  dfCor=best_df/3600.0;
+#else
+  dfCor=best_ff/3600.0;
+#endif
+
+  ax1Cor=best_ohw/3600.0;
+  ax2Cor=best_odw/3600.0;
+
+  geo_ready=true;
 }
 
 void TGeoAlignH::horToInstr(double Alt, double Azm, double *Alt1, double *Azm1, int PierSide) {

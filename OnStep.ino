@@ -259,6 +259,11 @@ void setup() {
 }
 
 void loop() {
+  loop2();
+  Align.model(0); // GTA compute pointing model, this will call loop2() during extended processing
+}
+
+void loop2() {
   // GUIDING -------------------------------------------------------------------------------------------
   ST4();
   if ((trackingState!=TrackingMoveTo) && (parkStatus==NotParked)) guide();
@@ -387,9 +392,6 @@ void loop() {
     double t2=(double)((cs-lst_start)/100.0)/1.00273790935;
     // This just needs to be accurate to the nearest second, it's about 10x better
     UT1=UT1_start+(t2/3600.0);
-
-    // compute the alignment model
-    if (lst%2==0) Align.autoModel(0,false);
   }
 
   // ROTATOR/DEROTATOR/FOCUSERS ------------------------------------------------------------------------

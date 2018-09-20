@@ -91,6 +91,9 @@ GotoErrors syncEnc(double EncAxis1, double EncAxis2) {
   // validate
   GotoErrors f=validateGoto(); if (f!=GOTO_ERR_NONE) return f;
 
+  // no sync from encoders during an alignment!
+  if (alignActive()) return GOTO_ERR_NONE;
+
   long e1=EncAxis1*(double)StepsPerDegreeAxis1;
   long e2=EncAxis2*(double)StepsPerDegreeAxis2;
 
