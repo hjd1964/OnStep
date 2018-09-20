@@ -18,6 +18,9 @@ class weather {
         _p=bme.readPressure()/100.0;
         _h=bme.readHumidity();
       }
+#ifdef ESP32
+      HAL_Wire.end();
+#endif
 #endif
     }
 
@@ -26,9 +29,15 @@ class weather {
 #ifdef WEATHER_BME280_ON
       if (!_disabled) {
         static int phase=0;
-        if (phase==0) _t=bme.readTemperature();
-        if (phase==20) _p=bme.readPressure()/100.0;
-        if (phase==40) _h=bme.readHumidity();
+#ifdef ESP32
+        if ((phase==10) || (phase==30) || (phase==50)) HAL_Wire.begin();
+#endif
+        if (phase==10) _t=bme.readTemperature();
+        if (phase==30) _p=bme.readPressure()/100.0;
+        if (phase==50) _h=bme.readHumidity();
+#ifdef ESP32
+        if ((phase==10) || (phase==30) || (phase==50)) HAL_Wire.end();  
+#endif
         phase++; if (phase==60) phase=0;
       }
 #endif

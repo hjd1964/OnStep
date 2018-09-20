@@ -67,12 +67,18 @@ class rtcw {
       _Rtc.SetSquareWavePin(DS3231SquareWavePin_ModeClock);
       _Rtc.SetSquareWavePinClockFrequency(DS3231SquareWaveClock_1Hz);
       active=true;
+#ifdef ESP32
+      HAL_Wire.end();
+#endif
     }
 
     // set the RTC's time (local standard time)
     void set(double JD, double LMT) {
       if (!active) return;
-      
+#ifdef ESP32
+      HAL_Wire.begin();
+#endif
+
       int yy,y,mo,d,h;
       double m,s;
     
@@ -85,11 +91,18 @@ class rtcw {
       
       RtcDateTime updateTime = RtcDateTime(yy, mo, d, h, floor(m), floor(s));
       _Rtc.SetDateTime(updateTime);
+
+#ifdef ESP32
+      HAL_Wire.end();
+#endif
     }
     
     // get the RTC's time (local standard time)
     void get(double &JD, double &LMT) {
       if (!active) return;
+#ifdef ESP32
+      HAL_Wire.begin();
+#endif
 
       RtcDateTime now = _Rtc.GetDateTime();
       if ((now.Year()>=2018) && (now.Year()<=3000) && (now.Month()>=1) && (now.Month()<=12) && (now.Day()>=1) && (now.Day()<=31) &&
@@ -97,6 +110,10 @@ class rtcw {
         JD=julian(now.Year(),now.Month(),now.Day());
         LMT=(now.Hour()+(now.Minute()/60.0)+(now.Second()/3600.0));
       }
+
+#ifdef ESP32
+      HAL_Wire.end();
+#endif
     }
   private:
     bool active=false;
