@@ -87,13 +87,13 @@ int goHome(boolean fast) {
     double secPerDeg=3600.0/(double)guideRates[8];
     findHomeTimeout=millis()+(unsigned long)(secPerDeg*180.0*1000.0);
     startGuideAxis1(a1,8,0);
-    startGuideAxis2(a2,8,0);
+    startGuideAxis2(a2,8,0,true);
   } else {
     findHomeMode=FH_SLOW;
     // 6=24x sidereal
     findHomeTimeout=millis()+60000UL;
     startGuideAxis1(a1,6,0);
-    startGuideAxis2(a2,6,0);
+    startGuideAxis2(a2,6,0,true);
   }
 
 #else
