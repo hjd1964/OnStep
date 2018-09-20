@@ -24,7 +24,7 @@
 // The PPS pin is a 3.3V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
 #define PpsPin        Aux0  // Pin 25 (PPS time source, GPS for example)
 
-#define LimitPin      Aux5  // Pin 0  (The limit switch sense is a logic level input normally pull high (2k resistor,) shorted to ground it stops gotos/tracking)
+#define LimitPin      39    // Pin 39 (The limit switch sense is a logic level input normally pull high (2k resistor,) shorted to ground it stops gotos/tracking)
 
 #define Axis1DirPin   19    // Pin 19 (Dir)
 #define Axis1StepPin  18    // Pin 18 (Step)
@@ -56,4 +56,3 @@
 #error "Wrong processor for this configuration!"
 
 #endif
-
