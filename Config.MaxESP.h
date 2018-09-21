@@ -10,7 +10,6 @@
 */
 
 #define MaxESP_OFF  //  <- Turn _ON to use this configuration
-#define MaxESP_ON  //  <- Turn _ON to use this configuration
 
 // Notes:
 
