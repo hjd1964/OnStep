@@ -381,11 +381,13 @@ void loop(void){
   if (!cmdSvrClient && (cmdSvr.hasClient())) {
     // find free/disconnected spot
     cmdSvrClient = cmdSvr.available();
-    clientTime=millis()+2000UL;
+    clientTime=millis()+100UL;
   }
 
   // check clients for data, if found get the command, send cmd and pickup the response, then return the response
   while (cmdSvrClient && cmdSvrClient.connected() && (cmdSvrClient.available()>0)) {
+    clientTime=millis()+100UL;
+
     // get the data
     byte b=cmdSvrClient.read();
     writeBuffer[writeBufferPos]=b; writeBufferPos++; if (writeBufferPos>39) writeBufferPos=39; writeBuffer[writeBufferPos]=0;
