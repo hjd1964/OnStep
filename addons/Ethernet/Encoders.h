@@ -1,6 +1,8 @@
 // -------------------------------------------------------------------------------------------------------
 // Handle encoders, both CW/CCW and Quadrature A/B types are supported
 
+#include "MountStatus.h"
+
 #if (!defined(AXIS1_ENC_OFF) && !defined(AXIS2_ENC_OFF))
   #define ENCODERS_ON
 #endif
@@ -20,12 +22,12 @@
 // this is for CW/CCW type encoders -----------------------
 #if defined(AXIS1_ENC_CWCCW) || defined(AXIS2_ENC_CWCCW)
   volatile int32_t __p1;
-  void __cw1() { __p1++; }
-  void __ccw1() { __p1--; }
+  void ICACHE_RAM_ATTR __cw1() { __p1++; }
+  void ICACHE_RAM_ATTR __ccw1() { __p1--; }
 
   volatile int32_t __p2;
-  void __cw2() { __p2++; }
-  void __ccw2() { __p2--; }
+  void ICACHE_RAM_ATTR __cw2() { __p2++; }
+  void ICACHE_RAM_ATTR __ccw2() { __p2--; }
   
   class CwCcwEncoder {
     public:
@@ -36,8 +38,8 @@
         pinMode(_cwPin,INPUT_PULLUP);
         pinMode(_ccwPin,INPUT_PULLUP);
         if (_axis==1) {
-          attachInterrupt(digitalPinToInterrupt(_cwPin),__cw2,CHANGE);
-          attachInterrupt(digitalPinToInterrupt(_ccwPin),__ccw2,CHANGE);
+          attachInterrupt(digitalPinToInterrupt(_cwPin),__cw1,CHANGE);
+          attachInterrupt(digitalPinToInterrupt(_ccwPin),__ccw1,CHANGE);
         }
         if (_axis==2) {
           attachInterrupt(digitalPinToInterrupt(_cwPin),__cw2,CHANGE);
@@ -96,17 +98,36 @@ class Encoders {
         _enAxis1=-_enAxis1;
         #endif
         _enAxis2=(double)axis2Pos.read()/(double)AXIS2_ENC_TICKS_DEG;
-        #ifdef AXIS1_ENC_REVERSE_ON
+        #ifdef AXIS2_ENC_REVERSE_ON
         _enAxis2=-_enAxis2;
         #endif
 #ifdef ENCODERS_SYNC_ON
-          if ((fabs(_osAxis1-_enAxis1)>(double)AXIS1_ENC_DIFF_LIMIT) ||
-              (fabs(_osAxis2-_enAxis2)>(double)AXIS2_ENC_DIFF_LIMIT)) {
-          Ser.print(":SX40,"); Ser.print(_enAxis1,6); Ser.print("#"); Ser.readBytes(s,1);
-          Ser.print(":SX41,"); Ser.print(_enAxis2,6); Ser.print("#"); Ser.readBytes(s,1);
-          Ser.print(":SX42,1#"); Ser.readBytes(s,1);
-#endif
+          mountStatus.update();
+          if (mountStatus.valid()) {
+            if (mountStatus.atHome() || mountStatus.parked()) {
+              // automatically sync the encoders to OnStep's position when at home or parked
+            #ifdef AXIS1_ENC_REVERSE_ON
+              axis1Pos.write(-_osAxis1*(double)AXIS1_ENC_TICKS_DEG);
+            #else
+              axis1Pos.write(_osAxis1*(double)AXIS1_ENC_TICKS_DEG);
+            #endif
+            #ifdef AXIS2_ENC_REVERSE_ON
+              axis2Pos.write(-_osAxis2*(double)AXIS2_ENC_TICKS_DEG);
+            #else
+              axis2Pos.write(_osAxis2*(double)AXIS2_ENC_TICKS_DEG);
+            #endif
+          }
+          if (!mountStatus.slewing() && !mountStatus.guiding()) {
+            if ((fabs(_osAxis1-_enAxis1)>(double)AXIS1_ENC_DIFF_LIMIT) ||
+                (fabs(_osAxis2-_enAxis2)>(double)AXIS2_ENC_DIFF_LIMIT)) {
+              // automatically sync OnStep to the encoders' position
+              Ser.print(":SX40,"); Ser.print(_enAxis1,6); Ser.print("#"); Ser.readBytes(s,1);
+              Ser.print(":SX41,"); Ser.print(_enAxis2,6); Ser.print("#"); Ser.readBytes(s,1);
+              Ser.print(":SX42,1#"); Ser.readBytes(s,1);
+            }
+          }
         }
+#endif
       }
 #endif
     }

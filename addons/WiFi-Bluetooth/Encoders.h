@@ -104,8 +104,8 @@ class Encoders {
 #ifdef ENCODERS_SYNC_ON
           mountStatus.update();
           if (mountStatus.valid()) {
-            if (mountStatus.atHome()) {
-              // automatically sync the encoders to OnStep's position when at home
+            if (mountStatus.atHome() || mountStatus.parked()) {
+              // automatically sync the encoders to OnStep's position when at home or parked
             #ifdef AXIS1_ENC_REVERSE_ON
               axis1Pos.write(-_osAxis1*(double)AXIS1_ENC_TICKS_DEG);
             #else

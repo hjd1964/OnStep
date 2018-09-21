@@ -38,7 +38,7 @@
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
 #define FirmwareVersionMinor  "4"
-#define FirmwareVersionPatch  "j"
+#define FirmwareVersionPatch  "k"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
@@ -52,6 +52,7 @@
 
 #include "Config.h"
 #include "Constants.h"
+#define ICACHE_RAM_ATTR
 #include "Encoders.h"
 Encoders encoders;
 
