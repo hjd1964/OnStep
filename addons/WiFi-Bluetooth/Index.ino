@@ -261,13 +261,6 @@ void handleRoot() {
   sprintf(temp,html_indexLastError,temp1);
   data += temp;
 
-#ifdef CommandStreamDebug_ON
-  { int e=strlen(cmd_stream)-1; int s=0; while (s < e) { char c=cmd_stream[s]; cmd_stream[s]=cmd_stream[e]; cmd_stream[e]=c; s++; e--; } }
-  sprintf(temp,"&nbsp;&nbsp;Command Stream: <smaller>%s</smaller><br />",cmd_stream);
-  { int e=strlen(cmd_stream)-1; int s=0; while (s < e) { char c=cmd_stream[s]; cmd_stream[s]=cmd_stream[e]; cmd_stream[e]=c; s++; e--; } }
-  data += temp;
-#endif
-
   // Loop time
   if (!sendCommand(":GXFA#",temp1)) strcpy(temp1,"?%");
   sprintf(temp,html_indexWorkload,temp1);

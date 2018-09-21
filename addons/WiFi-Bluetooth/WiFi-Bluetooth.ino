@@ -41,7 +41,6 @@
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
-
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
@@ -84,11 +83,6 @@ ESP8266WebServer server(80);
 
 WiFiServer cmdSvr(9999);
 WiFiClient cmdSvrClient;
-
-#ifdef CommandStreamDebug_ON
-char cmd_stream[120]="";
-int Qw=0; int Mw=0;
-#endif
 
 void handleNotFound(){
   String message = "File Not Found\n\n";
@@ -334,23 +328,6 @@ void loop(void){
   while (cmdSvrClient && cmdSvrClient.connected() && (cmdSvrClient.available()>0)) {
     // get the data
     byte b=cmdSvrClient.read();
-
-#ifdef CommandStreamDebug_ON
-// :GR#:GD#:Qw#:GU#:GU#:GS#:A?#:Gm#:GT#:Mw#:GT#:$QZ?#:VR#:VH#:GR#:GD#:GU#:GU#:GS#:A?#:Qw#:Gm#:GT#:GT#:$QZ?#:VR#:VH#:GR#
-    memmove(cmd_stream+1,cmd_stream+0,119); cmd_stream[0]=(char)b; cmd_stream[119]=0;
-    if (cmd_stream[0]=='#') {
-      rs(cmd_stream,"#RG:");
-      rs(cmd_stream,"#DG:");
-      rs(cmd_stream,"#UG:");
-      rs(cmd_stream,"#SG:");
-      rs(cmd_stream,"#?A:");
-      rs(cmd_stream,"#mG:");
-      rs(cmd_stream,"#TG:");
-      rs(cmd_stream,"#?ZQ$:");
-      rs(cmd_stream,"#RV:");
-      rs(cmd_stream,"#HV:");
-    }
-#endif
 
     writeBuffer[writeBufferPos]=b; writeBufferPos++; if (writeBufferPos>39) writeBufferPos=39; writeBuffer[writeBufferPos]=0;
 
