@@ -319,14 +319,14 @@ void loop(void){
   if (!cmdSvrClient && (cmdSvr.hasClient())) {
     // find free/disconnected spot
     cmdSvrClient = cmdSvr.available();
-    clientTime=millis()+100UL;
+    clientTime=millis()+2000UL;
   }
 
   static char writeBuffer[40]="";
   static int writeBufferPos=0;
   // check clients for data, if found get the command, send cmd and pickup the response, then return the response
   while (cmdSvrClient && cmdSvrClient.connected() && (cmdSvrClient.available()>0)) {
-    clientTime=millis()+100UL;
+    clientTime=millis()+2000UL;
 
     // get the data
     byte b=cmdSvrClient.read();
@@ -346,7 +346,7 @@ void loop(void){
         }
       }
 
-    } else { server.handleClient(); encoders.poll(); }
+    } else { server.handleClient(); encoders.poll(); clientTime=millis()+2000UL; }
   }
 }
 
