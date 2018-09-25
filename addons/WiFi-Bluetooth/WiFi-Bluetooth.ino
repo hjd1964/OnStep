@@ -345,8 +345,6 @@ void loop(void){
   static int writeBufferPos=0;
   // check clients for data, if found get the command, send cmd and pickup the response, then return the response
   while (cmdSvrClient && cmdSvrClient.connected() && (cmdSvrClient.available()>0)) {
-    clientTime=millis()+2000UL;
-
     // get the data
     byte b=cmdSvrClient.read();
 
@@ -370,7 +368,6 @@ void loop(void){
 #ifdef ENCODERS_ON
       encoders.poll();
 #endif
-      clientTime=millis()+2000UL; 
     }
   }
 }
