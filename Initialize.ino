@@ -85,6 +85,8 @@ void initStartupValues() {
   homeMount           = false;
   atHome              = true;
   lastError           = ERR_NONE;
+  waitingHome         = false;
+  waitingHomeContinue = false;
 
   // reset tracking and rates
   cli();
