@@ -433,7 +433,6 @@ double ztr(double a) {
 
 boolean doRefractionRateCalc() {
   boolean done=false;
-  static boolean ot=false;
 
   static int rr_step = 0;
   static double rr_Axis1=0,rr_Axis2=0;
@@ -447,8 +446,7 @@ boolean doRefractionRateCalc() {
   rr_step++;
   // load HA/Dec
   if (rr_step==1) {
-    if ((rateCompensation==RC_FULL_RA) || (rateCompensation==RC_FULL_BOTH)) ot=true; else ot=false;
-    if (ot) getEqu(&rr_Axis1,&rr_Axis2,true); else getApproxEqu(&rr_Axis1,&rr_Axis2,true);
+    if ((rateCompensation==RC_FULL_RA) || (rateCompensation==RC_FULL_BOTH)) getEqu(&rr_Axis1,&rr_Axis2,true); else getApproxEqu(&rr_Axis1,&rr_Axis2,true);
   } else
 
   // convert units,  get ahead of and behind current position
@@ -461,7 +459,7 @@ boolean doRefractionRateCalc() {
 
   // get the instrument coordinates
   if ((rr_step==10) || (rr_step==110)) {
-    if (ot) {
+    if ((rateCompensation==RC_FULL_RA) || (rateCompensation==RC_FULL_BOTH)) {
       Align.equToInstr(latitude,rr_HA,rr_Dec,&rr_HA,&rr_Dec,getInstrPierSide());
       rr_HA+=indexAxis1; rr_Dec+=indexAxis2;
     }
