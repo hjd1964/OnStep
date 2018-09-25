@@ -37,8 +37,8 @@
 #define FirmwareDate          __DATE__
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
-#define FirmwareVersionMinor  "4"
-#define FirmwareVersionPatch  "k"
+#define FirmwareVersionMinor  "5"
+#define FirmwareVersionPatch  "a"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
@@ -54,7 +54,9 @@
 #include "Constants.h"
 #define ICACHE_RAM_ATTR
 #include "Encoders.h"
+#ifdef ENCODERS_ON
 Encoders encoders;
+#endif
 
 #include "MountStatus.h"
 
@@ -74,7 +76,27 @@ void setup(void){
   SerialUSB.begin(9600);
   Ser.begin(SERIAL_BAUD_DEFAULT);
   delay(3000);
-  
+
+/*
+   // EEPROM Init
+#ifdef EEPROM_ON
+  if ((EEPROM_readInt(0)!=8266) || (EEPROM_readInt(2)!=0)) {
+    EEPROM_writeInt(0,8266);
+    EEPROM_writeInt(2,0);
+#ifdef ENCODERS_ON
+    EEPROM_writeLong(600,Axis1EncDiffLimit);
+    EEPROM_writeLong(604,Axis2EncDiffLimit);
+#endif
+    EEPROM.commit();
+  } else {  
+#ifdef ENCODERS_ON
+    Axis1EncDiffLimit=EEPROM_readLong(600);
+    Axis2EncDiffLimit=EEPROM_readLong(604);
+#endif
+  }
+#endif
+*/
+
   byte tb=0;
 Again:
   char c=0;
@@ -136,6 +158,9 @@ Again:
   server.on("settings.txt", settingsAjax);
   server.on("control.htm", handleControl);
   server.on("control.txt", controlAjax);
+#ifdef ENCODERS_ON
+  server.on("/enc.htm", handleEncoders);
+#endif
   server.on("guide.txt", guideAjax);
   server.on("pec.htm", handlePec);
   server.on("pec.txt", pecAjax);
@@ -146,12 +171,17 @@ Again:
   // Initialize the cmd server, timeout after 500ms
   cmdSvr.init(9999,500);
 
+#ifdef ENCODERS_ON
   encoders.init();
+#endif
 }
 
 void loop(void){
   server.handleClient();
   cmdSvr.handleClient();
+#ifdef ENCODERS_ON
+  encoders.poll();
+#endif
 
   // check clients for data, if found get the command, send cmd and pickup the response, then return the response
   static char writeBuffer[40]="";
@@ -172,10 +202,13 @@ void loop(void){
         delay(2);
       }
 
-    } else server.handleClient();
+    } else {
+      server.handleClient();
+#ifdef ENCODERS_ON
+      encoders.poll();
+#endif
+    }
   }
-
-  encoders.poll();
 }
 
 const char* HighSpeedCommsStr(long baud) {

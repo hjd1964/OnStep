@@ -100,6 +100,9 @@ void handleSettings() {
   data += html_links1N;
   data += html_links2N;
   data += html_links3N;
+#ifdef ENCODERS_ON
+  data += html_linksEncN;
+#endif
   data += html_links4S;
   data += html_links5N;
 #ifndef OETHS

@@ -7,6 +7,12 @@
   #define ENCODERS_ON
 #endif
 
+#ifdef ENCODERS_ON
+
+bool encAutoSync=true;
+long Axis1EncDiffLimit=AXIS1_ENC_DIFF_LIMIT;
+long Axis2EncDiffLimit=AXIS2_ENC_DIFF_LIMIT;
+
 // this is for Quadrature type encoders -------------------
 #if defined(AXIS1_ENC_AB) || defined(AXIS2_ENC_AB)
   #include <Encoder.h> // from https://github.com/PaulStoffregen/Encoder 
@@ -74,8 +80,27 @@ class Encoders {
   public:
     void init() {
     }
+    void syncFromOnStep() {
+      // automatically sync the encoders to OnStep's position when at home or parked
+      #ifdef AXIS1_ENC_REVERSE_ON
+        axis1Pos.write(-_osAxis1*(double)AXIS1_ENC_TICKS_DEG);
+      #else
+        axis1Pos.write(_osAxis1*(double)AXIS1_ENC_TICKS_DEG);
+      #endif
+      #ifdef AXIS2_ENC_REVERSE_ON
+        axis2Pos.write(-_osAxis2*(double)AXIS2_ENC_TICKS_DEG);
+      #else
+        axis2Pos.write(_osAxis2*(double)AXIS2_ENC_TICKS_DEG);
+      #endif
+    }
+    void syncToOnStep() {
+        char s[22];
+        // automatically sync OnStep to the encoders' position
+        Ser.print(":SX40,"); Ser.print(_enAxis1,6); Ser.print("#"); Ser.readBytes(s,1);
+        Ser.print(":SX41,"); Ser.print(_enAxis2,6); Ser.print("#"); Ser.readBytes(s,1);
+        Ser.print(":SX42,1#"); Ser.readBytes(s,1);
+    }
     void poll() {
-#ifdef ENCODERS_ON
       // check encoders and sync OnStep if diff is too great, checks every 2 seconds
       static unsigned long nextEncCheckMs=millis()+2000UL;
       unsigned long temp=millis();
@@ -104,32 +129,14 @@ class Encoders {
 #ifdef ENCODERS_SYNC_ON
           mountStatus.update();
           if (mountStatus.valid()) {
-            if (mountStatus.atHome() || mountStatus.parked()) {
-              // automatically sync the encoders to OnStep's position when at home or parked
-            #ifdef AXIS1_ENC_REVERSE_ON
-              axis1Pos.write(-_osAxis1*(double)AXIS1_ENC_TICKS_DEG);
-            #else
-              axis1Pos.write(_osAxis1*(double)AXIS1_ENC_TICKS_DEG);
-            #endif
-            #ifdef AXIS2_ENC_REVERSE_ON
-              axis2Pos.write(-_osAxis2*(double)AXIS2_ENC_TICKS_DEG);
-            #else
-              axis2Pos.write(_osAxis2*(double)AXIS2_ENC_TICKS_DEG);
-            #endif
-          }
-          if (!mountStatus.slewing() && !mountStatus.guiding()) {
-            if ((fabs(_osAxis1-_enAxis1)>(double)AXIS1_ENC_DIFF_LIMIT) ||
-                (fabs(_osAxis2-_enAxis2)>(double)AXIS2_ENC_DIFF_LIMIT)) {
-              // automatically sync OnStep to the encoders' position
-              Ser.print(":SX40,"); Ser.print(_enAxis1,6); Ser.print("#"); Ser.readBytes(s,1);
-              Ser.print(":SX41,"); Ser.print(_enAxis2,6); Ser.print("#"); Ser.readBytes(s,1);
-              Ser.print(":SX42,1#"); Ser.readBytes(s,1);
-            }
+            if (mountStatus.atHome() || mountStatus.parked()) syncFromOnStep();
+          if (!mountStatus.slewing() && !mountStatus.guiding() && encAutoSync) {
+            if ((fabs(_osAxis1-_enAxis1)>(double)(Axis1EncDiffLimit/3600.0)) ||
+                (fabs(_osAxis2-_enAxis2)>(double)(Axis2EncDiffLimit/3600.0))) syncToOnStep();
           }
         }
 #endif
       }
-#endif
     }
   
     double getAxis1() { return _enAxis1; }
@@ -143,4 +150,6 @@ class Encoders {
     double _enAxis1=0;
     double _enAxis2=0;
 };
+
+#endif
 

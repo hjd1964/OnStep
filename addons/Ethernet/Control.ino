@@ -312,6 +312,9 @@ void handleControl() {
   data += html_links1N;
   data += html_links2S;
   data += html_links3N;
+#ifdef ENCODERS_ON
+  data += html_linksEncN;
+#endif
   data += html_links4N;
   data += html_links5N;
 #ifndef OETHS
@@ -612,7 +615,7 @@ void processControlGet() {
     if (v=="9") Ser.print(":A9#");
     if (v=="n") Ser.print(":A+#");
     if (v=="q") Ser.print(":Q#");
-    Ser.setTimeout(WebTimeout*4);
+    Ser.setTimeout(1000);
 
     // clear any possible response
     temp[Ser.readBytesUntil('#',temp,20)]=0;

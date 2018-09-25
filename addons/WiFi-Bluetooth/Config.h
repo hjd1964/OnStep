@@ -25,13 +25,13 @@
 #define AXIS1_ENC_B_PIN 12         // specify pin#, for B or CCW, default=_OFF
 #define AXIS1_ENC_REVERSE_OFF      // _ON to reverse the count direction, default=_OFF
 #define AXIS1_ENC_TICKS_DEG (200000.0/360.0) // 0.0018 degrees
-#define AXIS1_ENC_DIFF_LIMIT (0.5) // in degrees
 #define AXIS2_ENC_OFF              // Dec/Alt Axis, default = _OFF
+#define AXIS1_ENC_DIFF_LIMIT 1800  // in arcseconds (0.5 degrees)
 #define AXIS2_ENC_A_PIN 5          // specify pin#, for A or CW, default=_OFF
 #define AXIS2_ENC_B_PIN 4          // specify pin#, for B or CCW, default=_OFF
 #define AXIS2_ENC_REVERSE_OFF      // _ON to reverse the count direction, default=_OFF
 #define AXIS2_ENC_TICKS_DEG (4800.0/360.0) // 0.075 degrees
-#define AXIS2_ENC_DIFF_LIMIT (0.5) // in degrees
+#define AXIS2_ENC_DIFF_LIMIT 1800  // in arcseconds (0.5 degrees)
 #define ENCODERS_SYNC_ON           // enable sync of OnStep to encoder values
 
 // Auxillary switch/feature control; for example: SW0 "Cover" to open/close an OTA cover

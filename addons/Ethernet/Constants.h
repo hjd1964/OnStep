@@ -46,6 +46,8 @@ const char* html_links2S = "<a href='/control.htm' style='background-color: #552
 const char* html_links2N = "<a href='/control.htm'>Control</a>";
 const char* html_links3S = "<a href='/pec.htm' style='background-color: #552222;'>PEC</a>";
 const char* html_links3N = "<a href='/pec.htm'>PEC</a>";
+const char* html_linksEncS = "<a href='/enc.htm' style='background-color: #552222;'>Encoders</a>";
+const char* html_linksEncN = "<a href='/enc.htm'>Encoders</a>";
 const char* html_links4S = "<a href='/settings.htm' style='background-color: #552222;'>Settings</a>";
 const char* html_links4N = "<a href='/settings.htm'>Settings</a>";
 const char* html_links5S = "<a href='/configuration.htm' style='background-color: #552222;'>Configuration</a>";

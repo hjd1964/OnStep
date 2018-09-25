@@ -36,8 +36,8 @@
 #define FirmwareDate          __DATE__
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
-#define FirmwareVersionMinor  "4"
-#define FirmwareVersionPatch  "k"
+#define FirmwareVersionMinor  "5"
+#define FirmwareVersionPatch  "a"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
@@ -50,7 +50,9 @@
 #include "Config.h"
 #include "Constants.h"
 #include "Encoders.h"
+#ifdef ENCODERS_ON
 Encoders encoders;
+#endif
 
 #include "MountStatus.h"
 
@@ -118,6 +120,11 @@ void setup(void){
     EEPROM_writeInt(10,(int)WebTimeout);
     EEPROM_writeInt(12,(int)CmdTimeout);
 
+#ifdef ENCODERS_ON
+    EEPROM_writeLong(600,Axis1EncDiffLimit);
+    EEPROM_writeLong(604,Axis2EncDiffLimit);
+#endif
+
     EEPROM_writeString(100,wifi_sta_ssid);
     EEPROM_writeString(150,wifi_sta_pwd);
     EEPROM_writeString(200,masterPassword);
@@ -139,6 +146,11 @@ void setup(void){
 
     WebTimeout=EEPROM_readInt(10);
     CmdTimeout=EEPROM_readInt(12);
+
+#ifdef ENCODERS_ON
+    Axis1EncDiffLimit=EEPROM_readLong(600);
+    Axis2EncDiffLimit=EEPROM_readLong(604);
+#endif
 
     EEPROM_readString(100,wifi_sta_ssid);
     EEPROM_readString(150,wifi_sta_pwd);
@@ -287,6 +299,9 @@ Again:
   server.on("/settings.htm", handleSettings);
   server.on("/settings.txt", settingsAjax);
   server.on("/control.htm", handleControl);
+#ifdef ENCODERS_ON
+  server.on("/enc.htm", handleEncoders);
+#endif
   server.on("/control.txt", controlAjax);
   server.on("/guide.txt", guideAjax);
   server.on("/pec.htm", handlePec);
@@ -303,12 +318,16 @@ Again:
   Ser.println("HTTP server started");
 #endif
 
+#ifdef ENCODERS_ON
   encoders.init();
+#endif
 }
 
 void loop(void){
   server.handleClient();
+#ifdef ENCODERS_ON
   encoders.poll();
+#endif
 
   // disconnect client
   static unsigned long clientTime = 0;
@@ -346,7 +365,13 @@ void loop(void){
         }
       }
 
-    } else { server.handleClient(); encoders.poll(); clientTime=millis()+2000UL; }
+    } else { 
+      server.handleClient(); 
+#ifdef ENCODERS_ON
+      encoders.poll();
+#endif
+      clientTime=millis()+2000UL; 
+    }
   }
 }
 
