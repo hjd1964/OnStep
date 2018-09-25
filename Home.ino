@@ -92,8 +92,8 @@ int goHome(boolean fast) {
     findHomeMode=FH_SLOW;
     // 6=24x sidereal
     findHomeTimeout=millis()+60000UL;
-    startGuideAxis1(a1,6,0);
-    startGuideAxis2(a2,6,0,true);
+    startGuideAxis1(a1,7,0);
+    startGuideAxis2(a2,7,0,true);
   }
 
 #else
