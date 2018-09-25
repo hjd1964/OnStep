@@ -461,7 +461,6 @@ boolean doRefractionRateCalc() {
   if ((rr_step==10) || (rr_step==110)) {
     if ((rateCompensation==RC_FULL_RA) || (rateCompensation==RC_FULL_BOTH)) {
       Align.equToInstr(latitude,rr_HA,rr_Dec,&rr_HA,&rr_Dec,getInstrPierSide());
-      rr_HA+=indexAxis1; rr_Dec+=indexAxis2;
     }
   }
 
