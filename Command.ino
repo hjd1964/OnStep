@@ -1803,7 +1803,6 @@ void processCommands() {
           char temp[12];
           dtostrf(StepsPerSecondAxis1,0,6,temp);
           strcpy(reply,temp);
-//          sprintf(reply,"%03i",StepsPerSecondAxis1);
           quietReply=true;
         } else commandError=true;
       } else
