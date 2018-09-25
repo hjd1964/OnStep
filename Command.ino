@@ -1173,9 +1173,9 @@ void processCommands() {
 //  :Rn#   Set Slew rate to n, where n=0..9
 //         Returns: Nothing
       if ((command[1]=='G') || (command[1]=='C') || (command[1]=='M') || (command[1]=='S') || ((command[1]>='0') && (command[1]<='9'))) {
-        if (command[1]=='G') i=2; else
-        if (command[1]=='C') i=5; else
-        if (command[1]=='M') i=6; else
+        if (command[1]=='G') i=2; else // 1x
+        if (command[1]=='C') i=5; else // 8x
+        if (command[1]=='M') i=6; else // 24x
         if (command[1]=='S') i=8; else i=command[1]-'0';
         setGuideRate(i);
         quietReply=true; 
