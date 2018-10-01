@@ -88,6 +88,8 @@ void initStartupValues() {
   waitingHome         = false;
   waitingHomeContinue = false;
 
+  // PEC check
+
   // reset tracking and rates
   cli();
   trackingState       = TrackingNone;

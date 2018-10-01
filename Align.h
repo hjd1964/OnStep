@@ -44,6 +44,7 @@ class TGeoAlignH
     void horToInstr(double Alt, double Azm, double *Alt1, double *Azm1, int PierSide);
     void instrToHor(double Alt, double Azm, double *Alt1, double *Azm1, int PierSide);
     void autoModel(int n);
+    void model(int n);
 
   private:
     boolean geo_ready;
