@@ -326,9 +326,9 @@ void initReadNvValues() {
   pauseHome=nv.read(EE_pauseHome);
 #endif
 
-  // set the default guide rate, 24x sidereal
-  setGuideRate(GuideRate24x);
-  enableGuideRate(GuideRate24x);
+  // set the default guide rate
+  setGuideRate(GuideRateDefault);
+  enableGuideRate(GuideRateDefault);
 }
 
 // the polar home position

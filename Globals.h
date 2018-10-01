@@ -228,7 +228,9 @@ unsigned long baudRate[10] = {115200,56700,38400,28800,19200,14400,9600,4800,240
 
 // Guide command ------------------------------------------------------------------------------------------------------------
 #define GuideRate1x        2
-#define GuideRate24x       6
+#ifndef GuideRateDefault
+#define GuideRateDefault   6  // 24x
+#endif
 #define GuideRateNone      255
 #define RateToDegPerSec  (1000000.0/(double)StepsPerDegreeAxis1)
 #define RateToASPerSec   (RateToDegPerSec*3600.0)
@@ -238,7 +240,7 @@ double  accXPerSec    =  (slewRateX/DegreesForAcceleration);
 double  guideRates[10]={3.75,7.5,15,30,60,120,360,720,(RateToASPerSec/MaxRate)/2.0,RateToASPerSec/MaxRate};
 //                      .25X .5x 1x 2x 4x  8x 24x 48x       half-MaxRate                   MaxRate
 
-byte currentGuideRate        = GuideRate24x;
+byte currentGuideRate        = GuideRateDefault;
 byte currentPulseGuideRate   = GuideRate1x;
 volatile byte activeGuideRate= GuideRateNone;
 
