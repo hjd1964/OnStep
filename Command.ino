@@ -602,6 +602,8 @@ void processCommands() {
       } else
 //  :GVD# Get Telescope Firmware Date
 //         Returns: mmm dd yyyy#
+//  :GVM# General Message
+//         returns: s# (where s is a string up to 16 chars)
 //  :GVN# Get Telescope Firmware Number
 //         Returns: d.dc#
 //  :GVP# Get Telescope Product Name
@@ -611,6 +613,7 @@ void processCommands() {
       if (command[1]=='V') {
         if (parameter[1]==(char)0) {
           if (parameter[0]=='D') strcpy(reply,FirmwareDate); else
+          if (parameter[0]=='M') sprintf(reply,"OnStep %i.%i%s",FirmwareVersionMajor,FirmwareVersionMinor,FirmwareVersionPatch); else
           if (parameter[0]=='N') sprintf(reply,"%i.%i%s",FirmwareVersionMajor,FirmwareVersionMinor,FirmwareVersionPatch); else
           if (parameter[0]=='P') strcpy(reply,FirmwareName); else
           if (parameter[0]=='T') strcpy(reply,FirmwareTime); else commandError=true;
