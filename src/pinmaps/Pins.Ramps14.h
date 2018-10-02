@@ -30,12 +30,12 @@
 #define LimitPin       3    // RAMPS X- (1=LMT, 2=GND, 3=+5)
 
 // The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
-#define LEDnegPin     Aux0  // Pin 11 RAMPS SER1 (1=GND, 2=LED-, 3=+5) (active LOW)
-#define LEDneg2Pin     6    // Pin 6  RAMPS SER2 (1=GND, 2=LED-, 3=+5) (active LOW)
-#define ReticulePin    5    // Pin 5  RAMPS SER3 (1=GND, 2=LED-, 3=+5) (active LOW)
+#define LEDnegPin     Aux0  // Pin 11 RAMPS SERVO1 (1=GND, 2=+5, 3=LED-) (active LOW)
+#define LEDneg2Pin     6    // Pin 6  RAMPS SERVO2 (1=GND, 2=+5, 3=LED-) (active LOW)
+#define ReticulePin    5    // Pin 5  RAMPS SERVO3 (1=GND, 2=+5, 3=LED-) (active LOW)
 
 // Pin for a piezo buzzer output on RAMPS Y-MIN
-#define TonePin        4    // Pin 4  RAMPS SER4 (1=GND, 2=LED-, 3=+5)
+#define TonePin        4    // Pin 4  RAMPS SERVO4 (1=GND, 2=+5, 3=TONE+) (active HIGH)
 
 // The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
 #define PpsPin         2    // RAMPS X+, Interrupt 0 on Pin 2
