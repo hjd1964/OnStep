@@ -4,10 +4,12 @@
 #define __ARM_Teensy3__
 
 // Lower limit (fastest) step rate in uS for this platform
-#if defined(__MK64FX512__) || defined(_mk20dx128_h_) || defined(__MK20DX128__)
+#if defined(__MK64FX512__) 
   #define MaxRate_LowerLimit 12
+  #define HAL_FAST_PROCESSOR
 #elif defined(__MK66FX1M0__)
   #define MaxRate_LowerLimit 4
+  #define HAL_FAST_PROCESSOR
 #else
   #define MaxRate_LowerLimit 16
 #endif

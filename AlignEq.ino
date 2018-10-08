@@ -275,12 +275,12 @@ void TGeoAlign::autoModel(int n) {
   }
   ohe=ohe/num; best_ohe=round(ohe*Rad*3600.0); best_ohw=best_ohe;
 
-#if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT) || defined(MOUNT_TYPE_ALTAZM)
+#if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT)
   Ff=1; Df=0;
 #else
   Ff=0; Df=1;
 #endif
-  
+
   // search, this can handle about 9 degrees of polar misalignment, and 4 degrees of cone error
   //              DoPdPzPeTfFf Df OdOh
   do_search(16384,0,0,1,1,0, 0, 0,1,1);
@@ -297,14 +297,20 @@ void TGeoAlign::autoModel(int n) {
   if (num>4) {
     //              DoPdPzPeTfFf Df OdOh
     do_search(  256,1,1,1,1,0,Ff,Df,1,1);
-    do_search(  128,1,1,1,1,0,Ff,Df,1,1);
-    do_search(   64,1,1,1,1,0,Ff,Df,1,1);
-    do_search(   32,1,1,1,1,0,Ff,Df,1,1);
+    do_search(  128,1,1,1,1,1,Ff,Df,1,1);
+    do_search(   64,1,1,1,1,1,Ff,Df,1,1);
+#ifdef HAL_FAST_PROCESSOR
+    do_search(   32,1,1,1,1,1,Ff,Df,1,1);
+    do_search(   16,1,1,1,1,1,Ff,Df,1,1);
+#endif
   } else {
     do_search(  256,1,0,1,1,0, 0, 0,1,1);
     do_search(  128,1,0,1,1,0, 0, 0,1,1);
     do_search(   64,1,0,1,1,0, 0, 0,1,1);
     do_search(   32,1,0,1,1,0, 0, 0,1,1);
+#ifdef HAL_FAST_PROCESSOR
+    do_search(   16,1,0,1,1,0, 0, 0,1,1);
+#endif
   }
 #endif
 
