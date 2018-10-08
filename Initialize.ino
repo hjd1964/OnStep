@@ -88,6 +88,9 @@ void initStartupValues() {
   waitingHome         = false;
   waitingHomeContinue = false;
 
+  // PEC sanity check
+  if (SecondsPerWormRotationAxis1>PECBufferSize) SecondsPerWormRotationAxis1=PECBufferSize;
+
   // reset tracking and rates
   cli();
   trackingState       = TrackingNone;
