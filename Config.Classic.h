@@ -141,6 +141,8 @@
                                      // Axis3 is optional and for a rotator/de-rotator
 
 // AXIS1/2 STEPPER DRIVER CONTROL ------------------------------------------------------------------------------------------
+// Axis1: Pins 13,11 = Step,Dir (RA/Azm) (Teensy3.x Pins 12,10)
+// Axis2: Pins 6,4 = Step,Dir (Dec/Alt)  (Teensy3.x Pins 6,4)
 
 // Reverse the direction of movement.  Adjust as needed or reverse your wiring so things move in the right direction
 #define AXIS1_REVERSE_OFF            // RA/Azm axis
