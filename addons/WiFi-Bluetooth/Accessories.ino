@@ -40,57 +40,64 @@ boolean readLX200Bytes(char* command,char* recvBuffer,long timeOutMs) {
   boolean noResponse=false;
   boolean shortResponse=false;
   if ((command[0]==(char)6) && (command[1]==0)) shortResponse=true;
-  if (command[0]==':') {
-    if (command[1]=='A') {
-      if (strchr("W123456789+",command[2])) { shortResponse=true; Ser.setTimeout(1000); }
-    }
-    if ((command[1]=='F') || (command[1]=='f')) {
-      if (strchr("+-QZHFS1234",command[2])) noResponse=true;
-      if (strchr("A",command[2])) shortResponse=true;
-    }
-    if (command[1]=='r') {
-      if (strchr("+-PRFC<>Q1234",command[2])) noResponse=true;
-      if (strchr("~S",command[2])) shortResponse=true;
-    }
+  if ((command[0]==':') || (command[0]==';')) {
+    if (command[1]=='G') {
+      if (strchr("RD",command[2])) { timeOutMs*=2; }
+    } else
     if (command[1]=='M') {
       if (strchr("ewnsg",command[2])) noResponse=true;
       if (strchr("SA",command[2])) shortResponse=true;
-    }
+    } else
     if (command[1]=='Q') {
       if (strchr("#ewns",command[2])) noResponse=true;
-    }
+    } else
+    if (command[1]=='A') {
+      if (strchr("W123456789+",command[2])) { shortResponse=true; timeOutMs=1000; }
+    } else
+    if ((command[1]=='F') || (command[1]=='f')) {
+      if (strchr("+-QZHFS1234",command[2])) noResponse=true;
+      if (strchr("A",command[2])) shortResponse=true;
+    } else
+    if (command[1]=='r') {
+      if (strchr("+-PRFC<>Q1234",command[2])) noResponse=true;
+      if (strchr("~S",command[2])) shortResponse=true;
+    } else
     if (command[1] == 'R') {
       if (strchr("AEGCMS0123456789", command[2])) noResponse=true;
-    }
+    } else
     if (command[1]=='S') {
       if (strchr("CLSGtgMNOPrdhoTBX",command[2])) shortResponse=true;
-    }
+    } else
     if (command[1]=='L') {
       if (strchr("BNCDL!",command[2])) noResponse=true;
       if (strchr("o$W",command[2])) shortResponse=true;
-    }
+    } else
     if (command[1]=='B') {
       if (strchr("+-",command[2])) noResponse=true;
-    }
+    } else
     if (command[1]=='C') {
       if (strchr("S",command[2])) noResponse=true;
-    }
+    } else
     if (command[1]=='h') {
-      if (strchr("FC",command[2])) noResponse=true;
-      if (strchr("QPR",command[2])) { shortResponse=true; Ser.setTimeout(timeOutMs*2); }
-    }
+      if (strchr("FC",command[2])) { noResponse=true; timeOutMs=1000; }
+      if (strchr("QPR",command[2])) { shortResponse=true; timeOutMs*=2; }
+    } else
     if (command[1]=='T') {
       if (strchr("QR+-SLK",command[2])) noResponse=true;
       if (strchr("edrn",command[2])) shortResponse=true;
-    }
-    if (command[1]=='U') noResponse=true;
-    if ((command[1]=='W') && (command[2]!='?')) { noResponse=true; }
+    } else
+    if (command[1]=='U') {
+      noResponse=true; 
+    } else
+    if ((command[1]=='W') && (command[2]!='?')) { 
+      noResponse=true; 
+    } else
     if ((command[1]=='$') && (command[2]=='Q') && (command[3]=='Z')) {
       if (strchr("+-Z/!",command[4])) noResponse=true;
     }
-    if (command[1]=='G') {
-      if (strchr("RD",command[2])) { timeOutMs*=2; }
-    }
+
+    // override for checksum protocol
+    if (command[0]==';') { noResponse=false; shortResponse=false; }
   }
 
   if (noResponse) {
@@ -98,6 +105,7 @@ boolean readLX200Bytes(char* command,char* recvBuffer,long timeOutMs) {
     return true;
   } else
   if (shortResponse) {
+    Ser.setTimeout(timeOutMs);
     recvBuffer[Ser.readBytes(recvBuffer,1)]=0;
     return (recvBuffer[0]!=0);
   } else {

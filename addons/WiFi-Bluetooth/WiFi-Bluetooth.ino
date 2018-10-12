@@ -37,7 +37,7 @@
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
 #define FirmwareVersionMinor  "5"
-#define FirmwareVersionPatch  "a"
+#define FirmwareVersionPatch  "b"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
@@ -363,7 +363,7 @@ void loop(void){
         }
       }
 
-    } else { 
+    } else {
       server.handleClient(); 
 #ifdef ENCODERS_ON
       encoders.poll();
