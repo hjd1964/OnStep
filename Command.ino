@@ -1129,6 +1129,7 @@ void processCommands() {
 //         Returns: Nothing
         if ( ( (command[1]=='e') || (command[1]=='w') ) && (parameter[0]==0) ) {
           stopGuideAxis1();
+          quietReply=true;
         } else
 //  :Qn# & Qs#   Halt north/southward Slews
 //         Returns: Nothing
