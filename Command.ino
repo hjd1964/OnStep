@@ -1001,7 +1001,7 @@ void processCommands() {
 //  :Mgdnnnn# Pulse guide command
 //          Returns: Nothing
       if (command[1]=='g') {
-        if ( (atoi2((char *)&parameter[1],&i)) && ((i>=0) && (i<=16399)) ) { 
+        if ( (atoi2((char *)&parameter[1],&i)) && ((i>=0) && (i<=16399)) ) {
           if (((parameter[0]=='e') || (parameter[0]=='w')) && (guideDirAxis1==0)) {
 #ifdef SEPARATE_PULSE_GUIDE_RATE_ON
             startGuideAxis1(parameter[0],currentPulseGuideRate,i);
@@ -1022,13 +1022,13 @@ void processCommands() {
       } else
 //  :Me# & :Mw#      Move Telescope East or West at current slew rate
 //         Returns: Nothing
-      if ((command[1]=='e') || (command[1]=='w')) {
+      if ( ( (command[1]=='e') || (command[1]=='w') ) && (parameter[0]==0) ) {
         startGuideAxis1(command[1],currentGuideRate,GUIDE_TIME_LIMIT*1000);
         quietReply=true;
       } else
 //  :Mn# & :Ms#      Move Telescope North or South at current slew rate
 //         Returns: Nothing
-      if ((command[1]=='n') || (command[1]=='s')) {
+      if ( ( (command[1]=='n') || (command[1]=='s') ) && (parameter[0]==0) ) {
         startGuideAxis2(command[1],currentGuideRate,GUIDE_TIME_LIMIT*1000);
         quietReply=true;
       } else
@@ -1075,7 +1075,7 @@ void processCommands() {
         reply[0]=i+'0'; reply[1]=0;
         quietReply=true;
         supress_frame=true; 
-      } else commandError=true;
+      } else
       
       } else
 //   $Q - PEC Control
@@ -1129,15 +1129,14 @@ void processCommands() {
         } else
 //  :Qe# & Qw#   Halt east/westward Slews
 //         Returns: Nothing
-        if ((command[1]=='e') || (command[1]=='w')) { 
+        if ( ( (command[1]=='e') || (command[1]=='w') ) && (parameter[0]==0) ) {
           stopGuideAxis1();
-          quietReply=true; 
         } else
 //  :Qn# & Qs#   Halt north/southward Slews
 //         Returns: Nothing
-        if ((command[1]=='n') || (command[1]=='s')) {
+        if ( ( (command[1]=='n') || (command[1]=='s') ) && (parameter[0]==0) ) {
           stopGuideAxis2();
-          quietReply=true; 
+          quietReply=true;
         } else commandError=true;
       } else
 
