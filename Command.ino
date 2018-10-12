@@ -1920,7 +1920,7 @@ void processCommands() {
 
       if ((strlen(reply)>0) || (cmdA.checksum)) {
         if (process_command==COMMAND_SERIAL_A) {
-          if (cmdA.checksum)  { checksum(reply); supress_frame=false; }
+          if (cmdA.checksum)  { checksum(reply); strcat(reply,cmdA.getSeq()); supress_frame=false; }
           if (!supress_frame) strcat(reply,"#");
           SerialA.print(reply);
         }
@@ -1929,7 +1929,7 @@ void processCommands() {
 #ifdef HAL_SERIAL_B_ENABLED
       if ((strlen(reply)>0) || (cmdB.checksum)) {
         if (process_command==COMMAND_SERIAL_B) {
-          if (cmdB.checksum)  { checksum(reply); supress_frame=false; }
+          if (cmdB.checksum)  { checksum(reply); strcat(reply,cmdB.getSeq()); supress_frame=false; }
           if (!supress_frame) strcat(reply,"#");
           SerialB.print(reply);
         }
@@ -1939,7 +1939,7 @@ void processCommands() {
 #ifdef HAL_SERIAL_C_ENABLED
       if ((strlen(reply)>0) || (cmdC.checksum)) {
         if (process_command==COMMAND_SERIAL_C) {
-          if (cmdC.checksum)  { checksum(reply); supress_frame=false; }
+          if (cmdC.checksum)  { checksum(reply); strcat(reply,cmdC.getSeq()); supress_frame=false; }
           if (!supress_frame) strcat(reply,"#");
           SerialC.print(reply);
         }
@@ -1949,7 +1949,7 @@ void processCommands() {
 #ifdef ST4_HAND_CONTROL_ON
       if ((strlen(reply)>0) || (cmdST4.checksum)) {
         if (process_command==COMMAND_SERIAL_ST4) {
-          if (cmdST4.checksum)  { checksum(reply); supress_frame=false; }
+          if (cmdST4.checksum)  { checksum(reply); strcat(reply,cmdST4.getSeq()); supress_frame=false; }
           if (!supress_frame) strcat(reply,"#");
           SerialST4.print(reply);
         }
@@ -1958,7 +1958,7 @@ void processCommands() {
 
       if ((strlen(reply)>0) || (cmdX.checksum)) {
         if (process_command==COMMAND_SERIAL_X) {
-          if (cmdX.checksum)  { checksum(reply); supress_frame=false; }
+          if (cmdX.checksum)  { checksum(reply); strcat(reply,cmdX.getSeq()); supress_frame=false; }
           if (!supress_frame) strcat(reply,"#");
           strcpy(_replyX,reply);
         }

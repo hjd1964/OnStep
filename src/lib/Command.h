@@ -29,15 +29,25 @@ class cb {
 
         checksum=(cb[0]==';');
         if (checksum) {
-          // checksum the data, for example ";11111126".  I don't include the command frame in the checksum.  The error response is a checksumed string "CK_FAIL#" to request re-transmit.
           byte len=strlen(cb)-1;
-          byte cks=0; for (int cksCount0=1; cksCount0<len-2; cksCount0++) {  cks+=cb[cksCount0]; }
-          char chkSum[3]; sprintf(chkSum,"%02X",cks); 
-          if (!((chkSum[0]==cb[len-2]) && (chkSum[1]==cb[len-1]))) { 
+
+          // Minimum length for a valid command is 5 ';SCC#'
+          if (len<5) {
             flush(); cb[0]=':'; cb[1]=(char)6; cb[2]='0'; cb[3]='#'; cb[4]=0; cbp=4; 
             return true; 
           }
-          --len; cb[--len]=0;
+          
+          // checksum the data, for example ";111111SCC#".  I don't include the command frame in the checksum.  The error response is a checksumed string "CK_FAILS#" to request re-transmit.
+          byte cks=0; for (int cksCount0=1; cksCount0<len-3; cksCount0++) {  cks+=cb[cksCount0]; }
+          char chkSum[3]; sprintf(chkSum,"%02X",cks);
+          seq=cb[len-3];
+          if (!((chkSum[0]==cb[len-2]) && (chkSum[1]==cb[len-1]))) { 
+            flush(); cb[0]=':'; cb[1]=(char)6; cb[2]='0'; cb[3]='#'; cb[4]=0; cbp=4; 
+            return true;
+          }
+
+          // remove the sequence char and checksum from string
+          --len; --len; cb[--len]=0;
         }
 
         return true;
@@ -58,6 +68,11 @@ class cb {
       if (cbp>4) memmove(pb,(char *)&cb[3],cbp-4); pb[cbp-4]=0;
       return pb;
     }
+    char* getSeq() {
+      static char s[2]=" ";
+      s[0]=seq;
+      return s;
+    }
     bool ready() {
       if (!cbp) return false;
       if ((cb[cbp-1]=='#') && (cbp==1)) flush();
@@ -74,5 +89,6 @@ class cb {
     char pb[bufferSize]="";
     char cb[bufferSize]="";
     int cbp=0;
+    char seq=0;
 };
 
