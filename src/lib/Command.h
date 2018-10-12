@@ -24,14 +24,19 @@ class cb {
 
       if (c=='#') {
         // validate the command frame, normal command
-        if (!(cbp>1) && (cb[0]==':') && (cb[cbp-1]=='#')) { flush(); return false; }
-        if ((cb[0]==':') && (cb[1]=='#') && (cb[2]==0)) { flush(); return false; }
+        if (!(cbp>1) && ((cb[0]==':') || (cb[0]==';')) && (cb[cbp-1]=='#')) { flush(); return false; }
+        if (((cb[0]==':') || (cb[0]==';')) && (cb[1]=='#') && (cb[2]==0)) { flush(); return false; }
 
+        checksum=(cb[0]==';');
         if (checksum) {
-          // checksum the data, for example ":11111126".  I don't include the command frame in the checksum.  The error response is a checksumed null string "00#" which means re-transmit.
+          // checksum the data, for example ";11111126".  I don't include the command frame in the checksum.  The error response is a checksumed string "CK_FAIL#" to request re-transmit.
           byte len=strlen(cb)-1;
           byte cks=0; for (int cksCount0=1; cksCount0<len-2; cksCount0++) {  cks+=cb[cksCount0]; }
-          char chkSum[3]; sprintf(chkSum,"%02X",cks); if (!((chkSum[0]==cb[len-2]) && (chkSum[1]==cb[len-1]))) { flush(); cb[0]=':'; cb[1]=(char)6; cb[2]='0'; cb[3]='#'; cb[4]=0; cbp=4; }
+          char chkSum[3]; sprintf(chkSum,"%02X",cks); 
+          if (!((chkSum[0]==cb[len-2]) && (chkSum[1]==cb[len-1]))) { 
+            flush(); cb[0]=':'; cb[1]=(char)6; cb[2]='0'; cb[3]='#'; cb[4]=0; cbp=4; 
+            return true; 
+          }
           --len; cb[--len]=0;
         }
 

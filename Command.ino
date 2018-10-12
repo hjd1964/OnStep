@@ -91,7 +91,7 @@ void processCommands() {
 //   (char)6 - Special
       if (command[0]==(char)6) {
         if (command[1]=='0') {
-          reply[0]=command[1]; reply[1]=command[1]; reply[2]=0; // last cmd checksum failed, 00#
+          reply[0]=command[1]; strcpy(reply,"CK_FAIL");  // last cmd checksum failed
         } else {
           reply[0]=command[1]; reply[1]=0; // Equatorial or Horizon mode, A or P
           supress_frame=true;
@@ -1913,40 +1913,48 @@ void processCommands() {
         reply[1]=0;
         supress_frame=true;
       }
-      
-      if (strlen(reply)>0) {
+
+      if ((strlen(reply)>0) || (cmdA.checksum)) {
         if (process_command==COMMAND_SERIAL_A) {
-          if (cmdA.checksum) checksum(reply);
+          if (cmdA.checksum)  { checksum(reply); supress_frame=false; }
           if (!supress_frame) strcat(reply,"#");
           SerialA.print(reply);
-        } 
-  
+        }
+      }
+
 #ifdef HAL_SERIAL_B_ENABLED
+      if ((strlen(reply)>0) || (cmdB.checksum)) {
         if (process_command==COMMAND_SERIAL_B) {
-          if (cmdB.checksum) checksum(reply);
+          if (cmdB.checksum)  { checksum(reply); supress_frame=false; }
           if (!supress_frame) strcat(reply,"#");
           SerialB.print(reply);
         }
+      }
 #endif
 
 #ifdef HAL_SERIAL_C_ENABLED
+      if ((strlen(reply)>0) || (cmdC.checksum)) {
         if (process_command==COMMAND_SERIAL_C) {
-          if (cmdC.checksum) checksum(reply);
+          if (cmdC.checksum)  { checksum(reply); supress_frame=false; }
           if (!supress_frame) strcat(reply,"#");
           SerialC.print(reply);
         }
+      }
 #endif
 
 #ifdef ST4_HAND_CONTROL_ON
+      if ((strlen(reply)>0) || (cmdST4.checksum)) {
         if (process_command==COMMAND_SERIAL_ST4) {
-          if (cmdST4.checksum) checksum(reply);
+          if (cmdST4.checksum)  { checksum(reply); supress_frame=false; }
           if (!supress_frame) strcat(reply,"#");
           SerialST4.print(reply);
         }
+      }
 #endif
 
+      if ((strlen(reply)>0) || (cmdX.checksum)) {
         if (process_command==COMMAND_SERIAL_X) {
-          if (cmdX.checksum) checksum(reply);
+          if (cmdX.checksum)  { checksum(reply); supress_frame=false; }
           if (!supress_frame) strcat(reply,"#");
           strcpy(_replyX,reply);
         }
