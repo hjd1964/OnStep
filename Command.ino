@@ -1858,7 +1858,6 @@ void processCommands() {
             i=pecBuffer[0];
             memmove((byte *)&pecBuffer[0],(byte *)&pecBuffer[1],SecondsPerWormRotationAxis1-1);
             pecBuffer[SecondsPerWormRotationAxis1-1]=i;
-            pecRecorded=true;
             commandError=false;
           }
         } else {
