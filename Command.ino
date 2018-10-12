@@ -557,7 +557,7 @@ void processCommands() {
       if (command[1]=='t')  { i=highPrecision; highPrecision=false; if (!doubleToDms(reply,&latitude,false,true)) commandError=true; else quietReply=true; highPrecision=i; } else 
 //  :GU#   Get telescope Status
 //         Returns: SS#
-      if (command[1]=='U')  { 
+      if (command[1]=='U')  {
         i=0;
         if (trackingState!=TrackingSidereal)     reply[i++]='n';                      // [n]ot tracking
         if (trackingState!=TrackingMoveTo)       reply[i++]='N';                      // [N]o goto
@@ -567,7 +567,7 @@ void processCommands() {
         if (PPSsynced)                           reply[i++]='S';                      // PPS [S]ync
         if ((guideDirAxis1) || (guideDirAxis2))  reply[i++]='G';                      // [G]uide active
         if (faultAxis1 || faultAxis2)            reply[i++]='f';                      // axis [f]ault
-#ifndef MOUNT_TYPE_ALTAZM        
+#ifndef MOUNT_TYPE_ALTAZM
         if (rateCompensation==RC_REFR_RA)      { reply[i++]='r'; reply[i++]='s'; }    // [r]efr enabled [s]ingle axis
         if (rateCompensation==RC_REFR_BOTH)    { reply[i++]='r'; }                    // [r]efr enabled
         if (rateCompensation==RC_FULL_RA)      { reply[i++]='t'; reply[i++]='s'; }    // on[t]rack enabled [s]ingle axis
@@ -584,21 +584,19 @@ void processCommands() {
         // if (wormSensedAgain) { reply[i++]='.'; wormSensedAgain=false; }            // PEC optional (.) to indicate an index detect since last call
 #endif
         // provide mount type
-        #ifdef MOUNT_TYPE_GEM
+        #if defined(MOUNT_TYPE_GEM)
         reply[i++]='E';
-        #endif
-        #ifdef MOUNT_TYPE_FORK
+        #elif defined(MOUNT_TYPE_FORK)
         reply[i++]='K';
-        #endif
-        #ifdef MOUNT_TYPE_FORK_ALT
+        #elif defined(MOUNT_TYPE_FORK_ALT)
         reply[i++]='k';
-        #endif
-        #ifdef MOUNT_TYPE_ALTAZM
+        #elif defined(MOUNT_TYPE_ALTAZM)
         reply[i++]='A';
         #endif
         reply[i++]='0'+lastError;
         reply[i++]=0;
         quietReply=true;
+
       } else
 //  :GVD# Get Telescope Firmware Date
 //         Returns: mmm dd yyyy#
@@ -1075,9 +1073,9 @@ void processCommands() {
         reply[0]=i+'0'; reply[1]=0;
         quietReply=true;
         supress_frame=true; 
-      } else
-      
       } else commandError=true;
+      
+      } else
 //   $Q - PEC Control
 //  :$QZ+  Enable RA PEC compensation 
 //         Returns: nothing
