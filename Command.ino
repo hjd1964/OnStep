@@ -1066,7 +1066,7 @@ void processCommands() {
         reply[0]=i+'0'; reply[1]=0;
         quietReply=true;
         supress_frame=true; 
-      } else commandError=true;
+      } else
 
 //  :MN#   Goto current RA/Dec but East of the Pier (within meridian limit overlap for GEM mounts)
 //         Returns: 0..9, see :MS#
@@ -1077,7 +1077,7 @@ void processCommands() {
         supress_frame=true; 
       } else
       
-      } else
+      } else commandError=true;
 //   $Q - PEC Control
 //  :$QZ+  Enable RA PEC compensation 
 //         Returns: nothing
