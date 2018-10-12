@@ -593,6 +593,13 @@ void processCommands() {
         #elif defined(MOUNT_TYPE_ALTAZM)
         reply[i++]='A';
         #endif
+
+        // provide pier side info.
+        if (getInstrPierSide()==PierSideNone) reply[i++]='o'; else                    // pier side n[o]ne
+        if (getInstrPierSide()==PierSideEast) reply[i++]='T'; else                    // pier side eas[T]
+        if (getInstrPierSide()==PierSideWest) reply[i++]='W';                         // pier side [W]est
+
+        // provide last error
         reply[i++]='0'+lastError;
         reply[i++]=0;
         quietReply=true;
