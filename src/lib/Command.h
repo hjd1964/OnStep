@@ -84,7 +84,7 @@ class cb {
       return true;
     }
   private:
-    const static int bufferSize=25;
+    const static int bufferSize=30;
     char cmd[4]="";
     char pb[bufferSize]="";
     char cb[bufferSize]="";
