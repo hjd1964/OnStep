@@ -58,6 +58,11 @@ class pserial {
       if ( ( UCSR0A & (1<<UDRE0)) ) { UDR0 = _xmit_buffer[_xmit_index]; _xmit_index++; }
       return true;
     }
+
+    void flush()
+    {
+      while (transmit()) {};
+    }
     
     volatile char _recv_buffer[256]   = "";
     volatile byte _recv_tail = 0;
@@ -130,6 +135,11 @@ class pserial1 {
       if (_xmit_buffer[_xmit_index]==(char)0) return false;
       if ( ( UCSR1A & (1<<UDRE1)) ) { UDR1 = _xmit_buffer[_xmit_index]; _xmit_index++; }
       return true;
+    }
+
+    void flush()
+    {
+      while (transmit()) {};
     }
 
     volatile char _recv_buffer[256]   = "";
@@ -207,6 +217,11 @@ class pserial2 {
       return true;
     }
 
+    void flush()
+    {
+      while (transmit()) {};
+    }
+
     volatile char _recv_buffer[256]   = "";
     volatile byte _recv_tail = 0;
   private:
@@ -279,6 +294,11 @@ class pserial3 {
       if (_xmit_buffer[_xmit_index]==(char)0) return false;
       if ( ( UCSR3A & (1<<UDRE3)) ) { UDR3 = _xmit_buffer[_xmit_index]; _xmit_index++; }
       return true;
+    }
+
+    void flush()
+    {
+      while (transmit()) {};
     }
 
     volatile char _recv_buffer[256]   = "";
