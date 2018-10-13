@@ -11,7 +11,7 @@ const char html_wifiSSID1[] =
 "<br/><b>Station mode (connect to an Access-Point):</b><br/>"
 "<form method='post' action='/wifi.htm'>"
 "SSID: <input style='width:6em' name='stssid' type='text' value='%s' maxlength='32'>&nbsp;&nbsp;&nbsp;"
-"Password: <input style='width:8em' name='stpwd' type='password' value='%s' maxlength='39'><br/>";
+"Password: <input style='width:8em' name='stpwd' type='password' value='%s' maxlength='39'> (8 char min.)<br/>";
 const char html_wifiSSID2[] =
 "Enable DHCP: <input type='checkbox' name='stadhcp' value='1' %s> (Note: above addresses are ignored if DHCP is enabled)<br/>"
 "Enable Station Mode: <input type='checkbox' name='staen' value='1' %s><br/>"
@@ -43,7 +43,7 @@ const char html_wifiSSID3[] =
 "<br/><b>Access-Point mode:</b><br/>"
 "<form method='post' action='/wifi.htm'>"
 "SSID: <input style='width:6em' name='apssid' type='text' value='%s' maxlength='32'>&nbsp;&nbsp;&nbsp;"
-"Password: <input style='width:8em' name='appwd' type='password' value='%s' maxlength='39'>&nbsp;&nbsp;&nbsp;"
+"Password: <input style='width:8em' name='appwd' type='password' value='%s' maxlength='39'> (8 char min.)&nbsp;&nbsp;&nbsp;"
 "Channel: <input style='width:2em' name='apch' value='%d' type='number' min='1' max='11'><br/>";
 
 const char html_wifiApMAC[] = 
