@@ -47,14 +47,15 @@ void StopAxis2() {
 #endif
 
 // moves telescope to the home position, then stops tracking
-int goHome(boolean fast) {
-  int f=validateGoto(); if (f==5) f=8; if (f!=0) return f; // goto allowed?
+GotoErrors goHome(boolean fast) {
 
+  GotoErrors f=validateGoto();
+  
 #ifdef HOME_SENSE_ON
-  if (findHomeMode!=FH_OFF) return 8; // guide allowed?
+  // goto allowed?
+  if ((f!=GOTO_ERR_NONE) && (f!=GOTO_ERR_STANDBY)) return f; 
 
-//  pinMode(Axis1_HOME,INPUT_PULLUP);
-//  pinMode(Axis2_HOME,INPUT_PULLUP);
+  if (findHomeMode!=FH_OFF) return GOTO_ERR_IN_MOTION; // guide allowed?
 
   // stop tracking
   trackingState=TrackingNone;
@@ -71,7 +72,7 @@ int goHome(boolean fast) {
   char a2; if (digitalRead(Axis2_HOME)==HIGH) a2='s'; else a2='n';
 #endif
 
-  if (getInstrPierSide()==PierSideWest) { if (a2=='n') a2='s'; else a2='n'; }
+ // if (getInstrPierSide()==PierSideWest) { if (a2=='n') a2='s'; else a2='n'; }
   
   // attach interrupts to stop guide
   attachInterrupt(digitalPinToInterrupt(Axis1_HOME), StopAxis1, CHANGE);
@@ -82,6 +83,14 @@ int goHome(boolean fast) {
   
   // start guides
   if (fast) {
+    // telescope should be set in the polar home (CWD) for a starting point
+    // this command sets indexAxis1, indexAxis2, azmCor=0; altCor=0;
+    setHome();
+          
+    // make sure tracking is enabled
+    trackingState=TrackingSidereal;
+    enableStepperDrivers();
+
     findHomeMode=FH_FAST;
     // 8=HalfMaxRate
     double secPerDeg=3600.0/(double)guideRates[8];
@@ -90,18 +99,21 @@ int goHome(boolean fast) {
     startGuideAxis2(a2,8,0,true);
   } else {
     findHomeMode=FH_SLOW;
-    // 6=24x sidereal
+    // 7=48x sidereal
     findHomeTimeout=millis()+60000UL;
     startGuideAxis1(a1,7,0);
     startGuideAxis2(a2,7,0,true);
   }
 
 #else
+  // goto allowed?
+  if (f!=GOTO_ERR_NONE) return f; 
+
   goTo(celestialPoleAxis1,celestialPoleAxis2,celestialPoleAxis1,celestialPoleAxis2,PierSideEast);
   homeMount=true;
 #endif
   
-  return 0;
+  return GOTO_ERR_NONE;
 }
 
 boolean isHoming() {
@@ -114,9 +126,9 @@ boolean isHoming() {
 
 // sets telescope home position; user manually moves to Hour Angle 90 and Declination 90 (CWD position),
 // then the first gotoEqu will set the pier side and turn on tracking
-int setHome() {
-  if (guideDirAxis1 || guideDirAxis2) return 8;   // fail, already in motion
-  if (trackingState==TrackingMoveTo)  return 5;   // fail, goto in progress
+GotoErrors setHome() {
+  if (guideDirAxis1 || guideDirAxis2) return GOTO_ERR_IN_MOTION;
+  if (trackingState==TrackingMoveTo)  return GOTO_ERR_GOTO;
 
   initStartupValues();
 
@@ -143,6 +155,6 @@ int setHome() {
   // the polar home position
   InitStartPosition();
   
-  return 0;
+  return GOTO_ERR_NONE;
 }
 

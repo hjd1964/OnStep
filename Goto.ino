@@ -79,7 +79,6 @@ GotoErrors syncEqu(double RA, double Dec) {
     newPierSide=PierSideEast;
   }
 
-  D("Sync Axis1="); D(Axis1); D(", Axis2="); D(Axis2); D(", Pierside="); DL(newPierSide); DL("");
   setIndexAxis1(Axis1,newPierSide);
   setIndexAxis2(Axis2,newPierSide);
 
