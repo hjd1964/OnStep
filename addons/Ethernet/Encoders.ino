@@ -159,7 +159,9 @@ void processEncodersGet() {
     int i;
     if ( (atoi2((char*)v.c_str(),&i)) && ((i>=0) && (i<=9999))) { 
       Axis1EncDiffLimit=i;
-//      EEPROM_writeLong(600,Axis1EncDiffLimit);
+#ifndef EEPROM_DISABLED
+      EEPROM_writeLong(600,Axis1EncDiffLimit);
+#endif
       EEwrite=true;
     }
   }
@@ -168,12 +170,17 @@ void processEncodersGet() {
     int i;
     if ( (atoi2((char*)v.c_str(),&i)) && ((i>=0) && (i<=9999))) { 
       Axis2EncDiffLimit=i;
-//      EEPROM_writeLong(604,Axis2EncDiffLimit);
+#ifndef EEPROM_DISABLED
+      EEPROM_writeLong(604,Axis2EncDiffLimit);
+#endif
       EEwrite=true;
     }
   }
 
-//  if (EEwrite) EEPROM.commit();
+#ifndef EEPROM_COMMIT_DISABLED
+  if (EEwrite) EEPROM.commit();
+#endif
+
   // clear any possible response
   temp[Ser.readBytesUntil('#',temp,20)]=0;
 }

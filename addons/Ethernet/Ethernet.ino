@@ -38,7 +38,7 @@
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
 #define FirmwareVersionMinor  "5"
-#define FirmwareVersionPatch  "a"
+#define FirmwareVersionPatch  "b"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
@@ -66,6 +66,13 @@ int CmdTimeout=TIMEOUT_CMD;
 WebServer server;
 CmdServer cmdSvr;
 
+#if defined(_mk20dx128_h_) || defined(__MK20DX128__) || defined(__MK20DX256__)
+  #include <EEPROM.h>
+#else
+  #define EEPROM_DISABLED
+#endif
+#define EEPROM_COMMIT_DISABLED
+
 void handleNotFound(EthernetClient *client) {
   String message = "File Not Found\n\n";
   client->print(message);
@@ -77,17 +84,15 @@ void setup(void){
   Ser.begin(SERIAL_BAUD_DEFAULT);
   delay(3000);
 
-/*
-   // EEPROM Init
-#ifdef EEPROM_ON
-  if ((EEPROM_readInt(0)!=8266) || (EEPROM_readInt(2)!=0)) {
-    EEPROM_writeInt(0,8266);
+// EEPROM Init
+#ifndef EEPROM_DISABLED
+  if ((EEPROM_readInt(0)!=8267) || (EEPROM_readInt(2)!=0)) {
+    EEPROM_writeInt(0,8267);
     EEPROM_writeInt(2,0);
 #ifdef ENCODERS_ON
     EEPROM_writeLong(600,Axis1EncDiffLimit);
     EEPROM_writeLong(604,Axis2EncDiffLimit);
 #endif
-    EEPROM.commit();
   } else {  
 #ifdef ENCODERS_ON
     Axis1EncDiffLimit=EEPROM_readLong(600);
@@ -95,7 +100,6 @@ void setup(void){
 #endif
   }
 #endif
-*/
 
   byte tb=0;
 Again:
