@@ -113,6 +113,9 @@ void handleEncoders() {
   if (encAutoSync) data+="On"; else data+="Off";
   data += html_encEn2;
   data += html_encEn3;
+#ifdef OETHS
+  client->print(data); data="";
+#endif
   
   sprintf(temp,html_encMxAxis1,Axis1EncDiffLimit);
   data += temp;
@@ -156,7 +159,9 @@ void processEncodersGet() {
     int i;
     if ( (atoi2((char*)v.c_str(),&i)) && ((i>=0) && (i<=9999))) { 
       Axis1EncDiffLimit=i;
+#ifndef EEPROM_DISABLED
       EEPROM_writeLong(600,Axis1EncDiffLimit);
+#endif
       EEwrite=true;
     }
   }
@@ -165,12 +170,16 @@ void processEncodersGet() {
     int i;
     if ( (atoi2((char*)v.c_str(),&i)) && ((i>=0) && (i<=9999))) { 
       Axis2EncDiffLimit=i;
+#ifndef EEPROM_DISABLED
       EEPROM_writeLong(604,Axis2EncDiffLimit);
+#endif
       EEwrite=true;
     }
   }
 
+#ifndef EEPROM_COMMIT_DISABLED
   if (EEwrite) EEPROM.commit();
+#endif
 
   // clear any possible response
   temp[Ser.readBytesUntil('#',temp,20)]=0;
