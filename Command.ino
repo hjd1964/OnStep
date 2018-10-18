@@ -1474,7 +1474,7 @@ void processCommands() {
             case '7': Align.dfCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;     // dfCor
 #endif
             case '8': Align.tfCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;     // tfCor
-            case '9': { i=strtol(&parameter[3],NULL,10); if (i==1) { alignNumStars=star; alignThisStar=star+1; Align.autoModel(star); } else star=0; } break; // use 0 to start upload of stars for align, use 1 to trigger align
+            case '9': { i=strtol(&parameter[3],NULL,10); if (i==1) { alignNumStars=star; alignThisStar=star+1; Align.model(star); } else star=0; } break; // use 0 to start upload of stars for align, use 1 to trigger align
             case 'A': { i=highPrecision; highPrecision=true; if (!hmsToDouble(&Align.actual[star].ha,&parameter[3])) commandError=true; else Align.actual[star].ha=(Align.actual[star].ha*15.0)/Rad; highPrecision=i; } break; // Star  #n HA
             case 'B': { i=highPrecision; highPrecision=true; if (!dmsToDouble(&Align.actual[star].dec,&parameter[3],true)) commandError=true; else Align.actual[star].dec=Align.actual[star].dec/Rad; highPrecision=i; } break; // Star  #n Dec
             case 'C': { i=highPrecision; highPrecision=true; if (!hmsToDouble(&Align.mount[star].ha,&parameter[3])) commandError=true; else Align.mount[star].ha=(Align.mount[star].ha*15.0)/Rad; highPrecision=i; } break; // Mount  #n HA
