@@ -1,16 +1,17 @@
 // Platform setup ------------------------------------------------------------------------------------
 
-// We define a more generic symbol, in case more Teensy boards based on different lines are supported
-// ESP32
-
 // Lower limit (fastest) step rate in uS for this platform -------------------------------------------
 #define MaxRate_LowerLimit 16
 
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
 #define SerialA Serial
 // SerialA is always enabled, SerialB and SerialC are optional
+
+// SerialB
 #define SerialB Serial2
 #define HAL_SERIAL_B_ENABLED
+
+// SerialC
 // The stock ESP32 Release 1.0.0 BluetoothSerial.h library doesn't work
 // Copy the latest BluetoothSerial library (just it's folder) from https://github.com/espressif/arduino-esp32 into
 // C:\Users\xxxxxx\AppData\Local\Arduino15\packages\esp32\hardware\esp32\1.0.0\libraries\Bluetooth
