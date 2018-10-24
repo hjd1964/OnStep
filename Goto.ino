@@ -270,13 +270,6 @@ GotoErrors goToEqu(double RA, double Dec) {
     if (preferredPierSide==PPS_EAST) thisPierSide=PierSideEast;
   }
 
-  // only for 2+ star aligns
-  if (alignNumStars>1) {
-    // and only for the first three stars
-    if (alignThisStar<4) {
-      if (alignThisStar==1) thisPierSide=PierSideWest; else thisPierSide=PierSideEast;
-    }
-  }
   return goTo(Axis1,Axis2,Axis1Alt,Axis2Alt,thisPierSide);
 }
 
