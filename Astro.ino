@@ -494,7 +494,12 @@ boolean doRefractionRateCalc() {
       // set rates
       double dax1=(rr_HA1-rr_HA2)*(15.0/(RefractionRateRange/60.0))/2.0;
       if (fabs(_deltaAxis1-dax1)>0.005) _deltaAxis1=dax1; else _deltaAxis1=(_deltaAxis1*9.0+dax1)/10.0;
-      double dax2=(rr_Dec1-rr_Dec2)*(15.0/(RefractionRateRange/60.0))/2.0;
+      double dax2;
+      if (getInstrPierSide()==PierSideWest) {
+        dax2=(rr_Dec2-rr_Dec1)*(15.0/(RefractionRateRange/60.0))/2.0;
+      } else {
+        dax2=(rr_Dec1-rr_Dec2)*(15.0/(RefractionRateRange/60.0))/2.0;
+      }
       if (fabs(_deltaAxis2-dax2)>0.005) _deltaAxis2=dax2; else _deltaAxis2=(_deltaAxis2*9.0+dax2)/10.0;
       
       // override for special case of near a celestial pole
