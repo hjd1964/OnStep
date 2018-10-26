@@ -80,7 +80,6 @@ void handleNotFound(EthernetClient *client) {
 }
 
 void setup(void){
-  SerialUSB.begin(9600);
   Ser.begin(SERIAL_BAUD_DEFAULT);
   delay(3000);
 
@@ -125,8 +124,8 @@ Again:
       // got nothing back, toggle baud rate and try again
       tb++;
       if (tb==7) tb=1;
-      if (tb==1) Serial.begin(SERIAL_BAUD_DEFAULT);
-      if (tb==4) Serial.begin(SERIAL_BAUD);
+      if (tb==1) Ser.begin(SERIAL_BAUD_DEFAULT);
+      if (tb==4) Ser.begin(SERIAL_BAUD);
   
       delay(1000);
 #ifndef DEBUG_ON
