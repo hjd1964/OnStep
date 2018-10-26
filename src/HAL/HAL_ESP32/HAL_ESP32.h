@@ -2,6 +2,7 @@
 
 // Lower limit (fastest) step rate in uS for this platform -------------------------------------------
 #define MaxRate_LowerLimit 16
+#define HAL_FAST_PROCESSOR
 
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
 #define SerialA Serial
