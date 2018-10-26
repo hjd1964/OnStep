@@ -42,8 +42,13 @@ class MountStatus {
       if (strstr(s,"p")) _parked=false;
       _parking     = strstr(s,"I");
       _parkFail    = strstr(s,"F");
+
       _pecRecorded = strstr(s,"R");
-      _pecRecording= strstr(s,"W");
+      _pecIgnore   = strstr(s,"/");
+      _pecReadyPlay= strstr(s,",");
+      _pecPlaying  = strstr(s,"~");
+      _pecReadyRec = strstr(s,";");
+      _pecRecording= strstr(s,"^");
     
       _atHome      = strstr(s,"H");
       _ppsSync     = strstr(s,"S");
@@ -90,6 +95,10 @@ class MountStatus {
     bool parked() { return _parked; }
     bool parking() { return _parking; }
     bool parkFail() { return _parkFail; }
+    bool pecIgnore() { return _pecIgnore; }
+    bool pecReadyPlay() { return _pecReadyPlay; }
+    bool pecPlaying() { return _pecPlaying; }
+    bool pecReadyRec() { return _pecReadyRec; }
     bool pecRecorded() { return _pecRecorded; }
     bool pecRecording() { return _pecRecording; }
     bool atHome() { return _atHome; }
@@ -128,6 +137,10 @@ class MountStatus {
     bool _parked=false;
     bool _parking=false;
     bool _parkFail=false;
+    bool _pecIgnore=false;
+    bool _pecReadyPlay=false;
+    bool _pecPlaying=false;
+    bool _pecReadyRec=false;
     bool _pecRecorded=false;
     bool _pecRecording=false;
     bool _atHome=false;
