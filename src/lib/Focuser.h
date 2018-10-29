@@ -184,18 +184,20 @@ class focuser {
     void enableDriver() {
       // for Aux5/Aux6 (DAC) support for stepper driver EN control on MaxPCB
 #if defined(A21) && defined(A22)
-      if (enPin==A21) { if (enableState==HIGH) analogWrite(A21,1024); else analogWrite(A21,0); return; }
-      if (enPin==A22) { if (enableState==HIGH) analogWrite(A22,1024); else analogWrite(A22,0); return; }
-#endif
+      if (enPin==A21) { if (enableState==HIGH) analogWrite(A21,255); else analogWrite(A21,0); return; } else
+      if (enPin==A22) { if (enableState==HIGH) analogWrite(A22,255); else analogWrite(A22,0); return; } else digitalWrite(enPin,enableState);
+#else
       digitalWrite(enPin,enableState);
+#endif
     }
 
     void disableDriver() {
 #if defined(A21) && defined(A22)
-      if (enPin==A21) { if (disableState==HIGH) analogWrite(A21,1024); else analogWrite(A21,0); return; }
-      if (enPin==A22) { if (disableState==HIGH) analogWrite(A22,1024); else analogWrite(A22,0); return; }
-#endif
+      if (enPin==A21) { if (disableState==HIGH) analogWrite(A21,255); else analogWrite(A21,0); return; } else
+      if (enPin==A22) { if (disableState==HIGH) analogWrite(A22,255); else analogWrite(A22,0); return; } else digitalWrite(enPin,disableState);
+#else
       digitalWrite(enPin,disableState);
+#endif
     }
 
     // parameters
