@@ -291,36 +291,39 @@ void TGeoAlignH::autoModel(int n) {
 
   // these don't apply for Alt/Az
   Ff=0; Df=0;
+
+  // only search for cone error if > 2 stars
+  int Do=0; if (num>2) Do=1;
   
   // search, this can handle about 9 degrees of polar misalignment, and 4 degrees of cone error
   //              DoPdPzPeTfFf Df OdOh
-  do_search(16384,0,0,1,1,0, 0, 0,1,1);
-  do_search( 8192,1,0,1,1,0, 0, 0,1,1);
-  do_search( 4096,1,0,1,1,0, 0, 0,1,1);
-  do_search( 2048,1,0,1,1,0, 0, 0,1,1);
-  do_search( 1024,1,0,1,1,0, 0, 0,1,1);
-  do_search(  512,1,0,1,1,0, 0, 0,1,1);
+  do_search(16384,0 ,0,1,1,0, 0, 0,1,1);
+  do_search( 8192,Do,0,1,1,0, 0, 0,1,1);
+  do_search( 4096,Do,0,1,1,0, 0, 0,1,1);
+  do_search( 2048,Do,0,1,1,0, 0, 0,1,1);
+  do_search( 1024,Do,0,1,1,0, 0, 0,1,1);
+  do_search(  512,Do,0,1,1,0, 0, 0,1,1);
 #ifdef HAL_SLOW_PROCESSOR
   //              DoPdPzPeTfFf Df OdOh
-  do_search(  256,1,0,1,1,0, 0, 0,1,1);
-  do_search(  128,1,0,1,1,0, 0, 0,1,1);
+  do_search(  256,Do,0,1,1,0, 0, 0,1,1);
+  do_search(  128,Do,0,1,1,0, 0, 0,1,1);
 #else
   if (num>4) {
     //              DoPdPzPeTfFf Df OdOh
-    do_search(  256,1,1,1,1,0,Ff,Df,1,1);
-    do_search(  128,1,1,1,1,1,Ff,Df,1,1);
-    do_search(   64,1,1,1,1,1,Ff,Df,1,1);
+    do_search(  256,Do,1,1,1,0,Ff,Df,1,1);
+    do_search(  128,Do,1,1,1,1,Ff,Df,1,1);
+    do_search(   64,Do,1,1,1,1,Ff,Df,1,1);
 #ifdef HAL_FAST_PROCESSOR
-    do_search(   32,1,1,1,1,1,Ff,Df,1,1);
-    do_search(   16,1,1,1,1,1,Ff,Df,1,1);
+    do_search(   32,Do,1,1,1,1,Ff,Df,1,1);
+    do_search(   16,Do,1,1,1,1,Ff,Df,1,1);
 #endif
   } else {
-    do_search(  256,1,0,1,1,0, 0, 0,1,1);
-    do_search(  128,1,0,1,1,0, 0, 0,1,1);
-    do_search(   64,1,0,1,1,0, 0, 0,1,1);
-    do_search(   32,1,0,1,1,0, 0, 0,1,1);
+    do_search(  256,Do,0,1,1,0, 0, 0,1,1);
+    do_search(  128,Do,0,1,1,0, 0, 0,1,1);
+    do_search(   64,Do,0,1,1,0, 0, 0,1,1);
+    do_search(   32,Do,0,1,1,0, 0, 0,1,1);
 #ifdef HAL_FAST_PROCESSOR
-    do_search(   16,1,0,1,1,0, 0, 0,1,1);
+    do_search(   16,Do,0,1,1,0, 0, 0,1,1);
 #endif
   }
 #endif

@@ -226,14 +226,26 @@
 #endif
 
 // figure out how many align star are allowed for the configuration
-#if defined(MOUNT_TYPE_GEM)
-  #define MAX_NUM_ALIGN_STARS '6'
-#elif defined(MOUNT_TYPE_FORK)
-  #define MAX_NUM_ALIGN_STARS '6'
-#elif defined(MOUNT_TYPE_FORK_ALT)
-  #define MAX_NUM_ALIGN_STARS '6'
-#elif defined(MOUNT_TYPE_ALTAZM)
-  #define MAX_NUM_ALIGN_STARS '6'
+#if defined(HAL_FAST_PROCESSOR)
+  #if defined(MOUNT_TYPE_GEM)
+    #define MAX_NUM_ALIGN_STARS '9'
+  #elif defined(MOUNT_TYPE_FORK)
+    #define MAX_NUM_ALIGN_STARS '9'
+  #elif defined(MOUNT_TYPE_FORK_ALT)
+    #define MAX_NUM_ALIGN_STARS '9'
+  #elif defined(MOUNT_TYPE_ALTAZM)
+    #define MAX_NUM_ALIGN_STARS '9'
+  #endif
+#else
+  #if defined(MOUNT_TYPE_GEM)
+    #define MAX_NUM_ALIGN_STARS '6'
+  #elif defined(MOUNT_TYPE_FORK)
+    #define MAX_NUM_ALIGN_STARS '6'
+  #elif defined(MOUNT_TYPE_FORK_ALT)
+    #define MAX_NUM_ALIGN_STARS '6'
+  #elif defined(MOUNT_TYPE_ALTAZM)
+    #define MAX_NUM_ALIGN_STARS '6'
+  #endif
 #endif
 
 // make both enable and disable values
@@ -348,7 +360,6 @@
     #warning "Configuration: AXIS1_MICROSTEPS; This mode is supported in spreadCycle but without 256x interpolation: it's usually best to hard-wire the TMC2100 and use: _OFF here"
   #elif AXIS1_DRIVER_MODEL == TMC2130
     #define MODE_SWITCH_BEFORE_SLEW_SPI
-    #define MODE_SWITCH_SLEEP_ON
     #if AXIS1_MICROSTEPS!=1 && AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16 && AXIS1_MICROSTEPS!=32 && AXIS1_MICROSTEPS!=64 && AXIS1_MICROSTEPS!=128 && AXIS1_MICROSTEPS!=256
       #error "Configuration: AXIS1_MICROSTEPS; TMC2130 invalid micro-step mode, use: 256,128,64,32,16,8,4,2,or 1"
     #endif
