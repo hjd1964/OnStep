@@ -182,7 +182,7 @@ void moveTo() {
   if ( (lastTrackingState==TrackingSidereal) && (forceSlewStop && ((long)(millis()-slewStopTime)>0)) ) lastTrackingState=TrackingSiderealDisabled;
 #endif
 
-  if ((distDestAxis1<=2) && (distDestAxis2<=2)) {
+  if ((distDestAxis1<=stepAxis1+1) && (distDestAxis2<=stepAxis2+1)) {
     
 #ifdef MOUNT_TYPE_ALTAZM
     // if we stopped tracking turn it back on now
