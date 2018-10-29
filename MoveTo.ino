@@ -209,12 +209,9 @@ void moveTo() {
         // for eq mounts
         if (pierSideControl==PierSideFlipEW2) setTargetAxis1(celestialPoleAxis1,PierSideEast); else setTargetAxis1(-celestialPoleAxis1,PierSideWest);
       }
-
-//      D("Flp2 Axis1, Current "); D(((double)(long)posAxis1)/(double)StepsPerDegreeAxis1); D(" -to-> "); DL(((double)(long)targetAxis1.part.m)/(double)StepsPerDegreeAxis1);
-//      D("Flp2 Axis2, Current "); D(((double)(long)posAxis2)/(double)StepsPerDegreeAxis2); D(" -to-> "); DL(((double)(long)targetAxis2.part.m)/(double)StepsPerDegreeAxis2); DL("");
-      
-      forceRefreshGetEqu();
       pierSideControl++;
+
+      forceRefreshGetEqu();
     } else
     if ((pierSideControl==PierSideFlipEW3) || (pierSideControl==PierSideFlipWE3)) {
 
@@ -229,8 +226,6 @@ void moveTo() {
       sei();
 
       forceRefreshGetEqu();
-//      D("Flp3 Axis1, Current "); D(((long)posAxis1)/StepsPerDegreeAxis1); D(" -to-> "); DL(((long)targetAxis1.part.m)/StepsPerDegreeAxis1);
-//      D("Flp3 Axis2, Current "); D(((long)posAxis2)/StepsPerDegreeAxis2); D(" -to-> "); DL(((long)targetAxis2.part.m)/StepsPerDegreeAxis2); DL("");
     } else {
 
       stepperModeTracking();
@@ -256,7 +251,7 @@ void moveTo() {
 
         // wrap it up
         parkFinish();
-      } else
+      } else {
         // sound goto done
         soundAlert();
   
@@ -284,6 +279,7 @@ void moveTo() {
           trackingState=lastTrackingState; lastTrackingState=TrackingNone;
           SiderealClockSetInterval(siderealInterval);
         }
+      }
     }
   }
 }
