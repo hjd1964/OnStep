@@ -1,6 +1,11 @@
 // -----------------------------------------------------------------------------------
 // The home page, status information
 
+#define leftTri  "&#x25c4;"
+#define rightTri "&#x25ba;"
+#define upTri    "&#x25b2;"
+#define downTri  "&#x25bc;"
+
 #ifdef ADVANCED_CHARS_ON
   #define Axis1 "&alpha;"
   #define Axis1A "&alpha;"
@@ -33,7 +38,7 @@ const char* html_indexEncoder2 = "&nbsp;&nbsp;Encodr: Ax1=<font class='c'>%s</fo
 #endif
 const char* html_indexPier = "&nbsp;&nbsp;Pier Side=<font class='c'>%s</font> (meridian flips <font class='c'>%s</font>)<br />";
 
-const char* html_indexCorPolar = "&nbsp;&nbsp;Polar Offset: &Delta; Alt=<font class='c'>%ld</font>\", &Delta; Azm=<font class='c'>%ld</font>\"<br />";
+const char* html_indexCorPolar = "&nbsp;&nbsp;%s <font class='c'>%ld</font>%c &nbsp; %s <font class='c'>%ld</font>%c<br />";
 
 const char* html_indexPark = "&nbsp;&nbsp;Parking: <font class='c'>%s</font><br />";
 const char* html_indexTracking = "&nbsp;&nbsp;Tracking: <font class='c'>%s %s</font><br />";
@@ -191,12 +196,30 @@ void handleRoot() {
   client->print(data); data="";
 #endif
 
-  data+="<br /><b>Alignment:</b><br />";
-
+  data+="<br /><b>Polar Alignment:</b><br />";
+  
   if ((mountStatus.mountType()==MT_GEM) || (mountStatus.mountType()==MT_FORK)) {
-    long altCor=0; if (sendCommand(":GX02#",temp1)) { altCor=strtol(&temp1[0],NULL,10); }
-    long azmCor=0; if (sendCommand(":GX03#",temp1)) { azmCor=strtol(&temp1[0],NULL,10); }
-    sprintf(temp,html_indexCorPolar,(long)(altCor),(long)(azmCor));
+    long lat=LONG_MIN; if (sendCommand(":Gt#",temp1)) { temp1[3]=0; if (temp1[0]=='+') temp1[0]='0'; lat=strtol(temp1,NULL,10); }
+    long ud=LONG_MIN; if (sendCommand(":GX02#",temp1)) { ud=strtol(&temp1[0],NULL,10); if (lat<0) ud=-ud; }
+    long lr=LONG_MIN; if (sendCommand(":GX03#",temp1)) { lr=strtol(&temp1[0],NULL,10); lr=lr/cos(lat/57.295); }
+
+    if ((lat!=LONG_MIN) && (ud!=LONG_MIN) && (lr!=LONG_MIN)) {
+
+      // default to arc-minutes unless we get close, then arc-seconds
+      char units='"';
+      if ((abs(ud)>=300) || (abs(lr)>=300)) { 
+        ud=ud/60.0; lr=lr/60.0;
+        units='\'';
+      }
+
+      // show direction
+      if ((ud< 0) && (lr< 0)) sprintf(temp,html_indexCorPolar,rightTri,(long)(abs(lr)),units,downTri,(long)(abs(ud)),units); else
+      if ((ud>=0) && (lr< 0)) sprintf(temp,html_indexCorPolar,rightTri,(long)(abs(lr)),units,upTri  ,(long)(abs(ud)),units); else
+      if ((ud< 0) && (lr>=0)) sprintf(temp,html_indexCorPolar,leftTri ,(long)(abs(lr)),units,downTri,(long)(abs(ud)),units); else
+      if ((ud>=0) && (lr>=0)) sprintf(temp,html_indexCorPolar,leftTri ,(long)(abs(lr)),units,upTri  ,(long)(abs(ud)),units);
+    } else {
+      sprintf(temp,"&nbsp;&nbsp;?<br />");
+    }
     data += temp;
   }
 #ifdef OETHS

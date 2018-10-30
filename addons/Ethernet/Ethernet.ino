@@ -38,10 +38,11 @@
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
 #define FirmwareVersionMinor  "5"
-#define FirmwareVersionPatch  "d"
+#define FirmwareVersionPatch  "e"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
+#include <limits.h>
 #ifdef W5500_ON
   #include <Ethernet3.h>  // https://github.com/PaulStoffregen/Ethernet
 #else

@@ -1,6 +1,8 @@
 // -----------------------------------------------------------------------------------
 // EEPROM related functions 
 
+#ifndef EEPROM_DISABLED
+
 // write int numbers into EEPROM at position i (2 bytes)
 void EEPROM_writeInt(int i,int j) {
   uint8_t *k = (uint8_t*)&j;
@@ -70,3 +72,6 @@ long EEPROM_readLong(int i) {
   EEPROM_readQuad(i,(byte*)&l);
   return l;
 }
+
+#endif
+
