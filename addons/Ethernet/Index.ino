@@ -196,31 +196,34 @@ void handleRoot() {
   client->print(data); data="";
 #endif
 
-  data+="<br /><b>Polar Alignment:</b><br />";
-  
   if ((mountStatus.mountType()==MT_GEM) || (mountStatus.mountType()==MT_FORK)) {
     long lat=LONG_MIN; if (sendCommand(":Gt#",temp1)) { temp1[3]=0; if (temp1[0]=='+') temp1[0]='0'; lat=strtol(temp1,NULL,10); }
-    long ud=LONG_MIN; if (sendCommand(":GX02#",temp1)) { ud=strtol(&temp1[0],NULL,10); if (lat<0) ud=-ud; }
-    long lr=LONG_MIN; if (sendCommand(":GX03#",temp1)) { lr=strtol(&temp1[0],NULL,10); lr=lr/cos(lat/57.295); }
+    if (abs(lat)<=89) {
 
-    if ((lat!=LONG_MIN) && (ud!=LONG_MIN) && (lr!=LONG_MIN)) {
-
-      // default to arc-minutes unless we get close, then arc-seconds
-      char units='"';
-      if ((abs(ud)>=300) || (abs(lr)>=300)) { 
-        ud=ud/60.0; lr=lr/60.0;
-        units='\'';
+      long ud=LONG_MIN; if (sendCommand(":GX02#",temp1)) { ud=strtol(&temp1[0],NULL,10); if (lat<0) ud=-ud; }
+      long lr=LONG_MIN; if (sendCommand(":GX03#",temp1)) { lr=strtol(&temp1[0],NULL,10); lr=lr/cos(lat/57.295); }
+  
+      if ((lat!=LONG_MIN) && (ud!=LONG_MIN) && (lr!=LONG_MIN)) {
+        data+="<br /><b>Alignment (Mount relative to ";
+        if (lat<0) data+="SCP"; else data+="NCP";
+        data+="):</b><br />";
+  
+        // default to arc-minutes unless we get close, then arc-seconds
+        char units='"';
+        if ((abs(ud)>=300) || (abs(lr)>=300)) { 
+          ud=ud/60.0; lr=lr/60.0;
+          units='\'';
+        }
+  
+        // show direction
+        if ((ud< 0) && (lr< 0)) sprintf(temp,html_indexCorPolar,rightTri,(long)(abs(lr)),units,downTri,(long)(abs(ud)),units); else
+        if ((ud>=0) && (lr< 0)) sprintf(temp,html_indexCorPolar,rightTri,(long)(abs(lr)),units,upTri  ,(long)(abs(ud)),units); else
+        if ((ud< 0) && (lr>=0)) sprintf(temp,html_indexCorPolar,leftTri ,(long)(abs(lr)),units,downTri,(long)(abs(ud)),units); else
+        if ((ud>=0) && (lr>=0)) sprintf(temp,html_indexCorPolar,leftTri ,(long)(abs(lr)),units,upTri  ,(long)(abs(ud)),units);
+  
+        data += temp;
       }
-
-      // show direction
-      if ((ud< 0) && (lr< 0)) sprintf(temp,html_indexCorPolar,rightTri,(long)(abs(lr)),units,downTri,(long)(abs(ud)),units); else
-      if ((ud>=0) && (lr< 0)) sprintf(temp,html_indexCorPolar,rightTri,(long)(abs(lr)),units,upTri  ,(long)(abs(ud)),units); else
-      if ((ud< 0) && (lr>=0)) sprintf(temp,html_indexCorPolar,leftTri ,(long)(abs(lr)),units,downTri,(long)(abs(ud)),units); else
-      if ((ud>=0) && (lr>=0)) sprintf(temp,html_indexCorPolar,leftTri ,(long)(abs(lr)),units,upTri  ,(long)(abs(ud)),units);
-    } else {
-      sprintf(temp,"&nbsp;&nbsp;?<br />");
     }
-    data += temp;
   }
 #ifdef OETHS
   client->print(data); data="";
