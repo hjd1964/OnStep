@@ -365,7 +365,8 @@ void handleControl() {
   if (mountStatus.alignMaxStars()<3) { n=1; sc[0]=1; } else
   if (mountStatus.alignMaxStars()<4) { n=3; sc[0]=1; sc[1]=2; sc[2]=3; } else
   if (mountStatus.alignMaxStars()<6) { n=3; sc[0]=1; sc[1]=3; sc[2]=4; } else
-                                     { n=3; sc[0]=1; sc[1]=4; sc[2]=6; }
+  if (mountStatus.alignMaxStars()<8) { n=3; sc[0]=1; sc[1]=3; sc[2]=6; } else
+                                     { n=3; sc[0]=1; sc[1]=3; sc[2]=9; }
   for (int i=0; i<n; i++) { char temp2[120]=""; sprintf(temp2,html_controlAlign2,sc[i],sc[i],SIDEREAL_CH); data+=temp2; }
   data += html_controlAlign3;
 #ifdef OETHS

@@ -88,7 +88,7 @@ void TGeoAlign::model(int n) {
 }
 
 // returns the correction to be added to the requested RA,Dec to yield the actual RA,Dec that we will arrive at
-void TGeoAlign::correct(double ha, double dec, double pierSide, double sf, double _deo, double _pd, double _pz, double _pe, double _da, double _ff, double _tf, double *h1, double *d1) {
+void TGeoAlign::correct(double ha, double dec, double pierSide, double sf, double _deo, double _pd, double _pz, double _pe, double _df, double _ff, double _tf, double *h1, double *d1) {
   double DO1,DOh;
   double PD,PDh;
   double PZ,PA;
@@ -129,7 +129,7 @@ void TGeoAlign::correct(double ha, double dec, double pierSide, double sf, doubl
 
 // ------------------------------------------------------------
 // Axis flex
-  DF  =_da*sf;
+  DF  =_df*sf;
   DFd =-DF*(cosLat*cosHa+sinLat*tanDec);
 
 // ------------------------------------------------------------
@@ -239,6 +239,7 @@ void TGeoAlign::do_search(double sf, int p1, int p2, int p3, int p4, int p5, int
       if (p8!=0) best_ode=ode*Rad*3600.0; else best_ode=-best_pe/2.0;
       if (p9!=0) best_ohw=ohw*Rad*3600.0;
       if (p9!=0) best_ohe=ohe*Rad*3600.0;
+
     }
 
     // keep the main loop running
@@ -267,7 +268,7 @@ void TGeoAlign::autoModel(int n) {
 
   // figure out the average HA offset as a starting point
   ohe=0;
-  for (l=1; l<num; l++) {
+  for (l=0; l<num; l++) {
     h1=actual[l].ha-mount[l].ha;
     if (h1>PI)  h1=h1-PI*2.0;
     if (h1<-PI) h1=h1+PI*2.0;
@@ -325,9 +326,9 @@ void TGeoAlign::autoModel(int n) {
 
   tfCor=best_tf/3600.0;
 #if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT) || defined(MOUNT_TYPE_ALTAZM)
-  dfCor=best_df/3600.0;
-#else
   dfCor=best_ff/3600.0;
+#else
+  dfCor=best_df/3600.0;
 #endif
 
   ax1Cor=best_ohw/3600.0;

@@ -102,7 +102,7 @@ void TGeoAlignH::model(int n) {
 }
 
 // returns the correction to be added to the requested RA,Dec to yield the actual RA,Dec that we will arrive at
-void TGeoAlignH::correct(double azm, double alt, double pierSide, double sf, double _deo, double _pd, double _pz, double _pe, double _da, double _ff, double _tf, double *z1, double *a1) {
+void TGeoAlignH::correct(double azm, double alt, double pierSide, double sf, double _deo, double _pd, double _pz, double _pe, double _df, double _ff, double _tf, double *z1, double *a1) {
   double DO1,DOh;
   double PD,PDh;
   double PZ,PA;
@@ -143,7 +143,7 @@ void TGeoAlignH::correct(double azm, double alt, double pierSide, double sf, dou
 
 // ------------------------------------------------------------
 // Axis flex
-  DF  =_da*sf;
+  DF  =_df*sf;
   DFd =-DF*(cosLat*cosAzm+sinLat*tanAlt);
 
 // ------------------------------------------------------------
@@ -281,7 +281,7 @@ void TGeoAlignH::autoModel(int n) {
 
   // figure out the average Az offset as a starting point
   ohe=0;
-  for (l=1; l<num; l++) {
+  for (l=0; l<num; l++) {
     z1=actual[l].azm-mount[l].azm;
     if (z1>PI)  z1=z1-PI*2.0;
     if (z1<-PI) z1=z1+PI*2.0;
@@ -336,9 +336,9 @@ void TGeoAlignH::autoModel(int n) {
 
   tfCor=best_tf/3600.0;
 #if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT) || defined(MOUNT_TYPE_ALTAZM)
-  dfCor=best_df/3600.0;
-#else
   dfCor=best_ff/3600.0;
+#else
+  dfCor=best_df/3600.0;
 #endif
 
   ax1Cor=best_ohw/3600.0;
@@ -380,7 +380,7 @@ void TGeoAlignH::horToInstr(double Alt, double Azm, double *Alt1, double *Azm1, 
       // misalignment due to Alt axis being perp. to Azm axis
       double PDh=-pdCor*(sinAlt/cosAlt)*p;
   
-  #if defined (MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT)
+  #if defined (MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT) || defined(MOUNT_TYPE_ALTAZM)
       // Fork flex
       double DFd=dfCor*cosAzm;
   #else

@@ -639,7 +639,7 @@ void processCommands() {
               case '3': sprintf(reply,"%ld",(long)(Align.azmCor*3600.0)); quietReply=true; break; // azmCor
               case '4': sprintf(reply,"%ld",(long)(Align.doCor*3600.0)); quietReply=true; break;  // doCor
               case '5': sprintf(reply,"%ld",(long)(Align.pdCor*3600.0)); quietReply=true; break;  // pdCor
-#if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT)
+#if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT) || defined(MOUNT_TYPE_ALTAZM)
               case '6': sprintf(reply,"%ld",(long)(Align.dfCor*3600.0)); quietReply=true; break;  // ffCor
               case '7': sprintf(reply,"%ld",(long)(0)); quietReply=true; break;                   // dfCor
 #else
