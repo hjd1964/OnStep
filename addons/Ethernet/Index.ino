@@ -202,7 +202,7 @@ void handleRoot() {
     long lr=LONG_MIN; if (sendCommand(":GX03#",temp1)) { lr=strtol(&temp1[0],NULL,10); lr=lr/cos(lat/57.295); }
 
     if ((lat!=LONG_MIN) && (ud!=LONG_MIN) && (lr!=LONG_MIN)) {
-      data+="<br /><b>Alignment (Mount relative to ";
+      data+="<br /><b>Polar Alignment (Mount relative to ";
       if (mountStatus.mountType()==MT_ALTAZM) {
         data+="Zenith";
       } else {
