@@ -174,6 +174,7 @@ void dataClock() {
           SerialST4._recv_buffer[SerialST4._recv_tail]=(char)data_in; 
           SerialST4._recv_tail++;
         }
+        DL("dataClock() recevied data");
         SerialST4._recv_buffer[SerialST4._recv_tail]=(char)0;
       }
     }
@@ -186,6 +187,7 @@ void dataClock() {
       // send the same data again?
       if ((!send_error) && (!frame_error)) {
         data_out=SerialST4._xmit_buffer[SerialST4._xmit_head]; 
+        DL("dataClock() sent data");
         if (data_out!=0) SerialST4._xmit_head++;
       } else { send_error=false; frame_error=false; }
     }
@@ -204,23 +206,17 @@ void dataClock() {
 // RAw pin when the data comms clock from OnStep isn't running
 void shcTone() {
   static volatile boolean tone_state=false;
-  D("lastMs: ");
-  D(SerialST4.lastMs);
-  D("millis: ");
-  DL(millis());
 
   if (tone_state) { 
     tone_state=false; 
     digitalWrite(ST4RAe,HIGH); 
     if (millis()-SerialST4.lastMs>2000L) {
-      DL("Yes > 2000, RAw HIGH: ");
       digitalWrite(ST4RAw,HIGH);
     }
   } else  {
     tone_state=true;
     digitalWrite(ST4RAe,LOW);
     if (millis()-SerialST4.lastMs>2000L) {
-      DL("Yes > 2000, RAw LOW: ");
       digitalWrite(ST4RAw,LOW); 
     }
   }
