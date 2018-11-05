@@ -102,7 +102,7 @@ void HAL_Init_Timers_Motor() {
   Timer_Axis1.pause();
 
   // Set up period
-  Timer_Axis1.setPeriod((float)128 * 0.0625); // in microseconds
+  Timer_Axis1.setPeriod(128.0 * 0.0625); // in microseconds
 
   // Set up an interrupt on channel 3
   Timer_Axis1.setChannel3Mode(TIMER_OUTPUT_COMPARE);
@@ -120,7 +120,7 @@ void HAL_Init_Timers_Motor() {
   Timer_Axis2.pause();
 
   // Set up period
-  Timer_Axis2.setPeriod((float)128 * 0.0625); // in microseconds
+  Timer_Axis2.setPeriod(128.0 * 0.0625); // in microseconds
 
   // Set up an interrupt on channel 2
   Timer_Axis2.setChannel2Mode(TIMER_OUTPUT_COMPARE);
@@ -145,6 +145,14 @@ void HAL_Init_Timers_Motor() {
 //--------------------------------------------------------------------------------------------------
 // Set timer1 to interval (in microseconds*16), for the 1/100 second sidereal timer
 
+// This code is based on the following document
+//
+// http://docs.leaflabs.com/static.leaflabs.com/pub/leaflabs/maple-docs/0.0.10/lang/api/hardwaretimer.html#lang-hardwaretimer
+// And this document:
+//
+// http://docs.leaflabs.com/static.leaflabs.com/pub/leaflabs/maple-docs/0.0.12/timers.html
+// Pause the timer while we're configuring it
+
 #define ISR(f) void f (void)
 void TIMER1_COMPA_vect(void);
 // Sidereal timer is on STM32 Hardware Timer 1
@@ -153,22 +161,20 @@ HardwareTimer Timer_Sidereal(1);
 void Timer1SetInterval(long iv, double rateRatio) {
   iv=round(((double)iv)/rateRatio);
 
-  // This code is based on the following document
-  //
-  // http://docs.leaflabs.com/static.leaflabs.com/pub/leaflabs/maple-docs/0.0.10/lang/api/hardwaretimer.html#lang-hardwaretimer
-  // And this document:
-  //
-  // http://docs.leaflabs.com/static.leaflabs.com/pub/leaflabs/maple-docs/0.0.12/timers.html
-  // Pause the timer while we're configuring it
   Timer_Sidereal.pause();
 
   // Set up period
-  Timer_Sidereal.setPeriod((float)iv * 0.0625); // in microseconds
+  Timer_Sidereal.setPeriod(round((double)iv * 0.0625)); // in microseconds
 
   // Set up an interrupt on channel 1
-  Timer_Sidereal.setChannel1Mode(TIMER_OUTPUT_COMPARE);
-  Timer_Sidereal.setCompare(TIMER_CH1, 1);  // Interrupt 1 count after each update
-  Timer_Sidereal.attachInterrupt(TIMER_CH1, TIMER1_COMPA_vect);
+  static boolean initClock=true;
+  if (initClock) {
+    Timer_Sidereal.setChannel1Mode(TIMER_OUTPUT_COMPARE);
+    Timer_Sidereal.setCompare(TIMER_CH1, 1);  // Interrupt 1 count after each update
+    Timer_Sidereal.attachInterrupt(TIMER_CH1, TIMER1_COMPA_vect);
+    // I suspect the above three lines are only needed once, if so, initClock can be set to false below
+    initClock=true;
+  }
 
   // Refresh the timer's count, prescale, and overflow
   Timer_Sidereal.refresh();
@@ -185,9 +191,10 @@ void QuickSetIntervalAxis1(uint32_t r) {
   Timer_Axis1.pause();
 
   // Set up period
-  Timer_Axis1.setPeriod(r); // in microseconds
+  Timer_Axis1.setPeriod(r-1); // in microseconds
 
   // Set up an interrupt on channel 1
+  // I suspect the following three lines are not needed so can/should be removed
   Timer_Axis1.setChannel3Mode(TIMER_OUTPUT_COMPARE);
   Timer_Axis1.setCompare(TIMER_CH3, 1);  // Interrupt 1 count after each update
   Timer_Axis1.attachInterrupt(TIMER_CH3, TIMER3_COMPA_vect);
@@ -204,9 +211,10 @@ void QuickSetIntervalAxis2(uint32_t r) {
   Timer_Axis2.pause();
 
   // Set up period
-  Timer_Axis2.setPeriod(r); // in microseconds
+  Timer_Axis2.setPeriod(r-1); // in microseconds
 
   // Set up an interrupt on channel 1
+  // I suspect the following three lines are not needed so can/should be removed
   Timer_Axis2.setChannel2Mode(TIMER_OUTPUT_COMPARE);
   Timer_Axis2.setCompare(TIMER_CH2, 1);  // Interrupt 1 count after each update
   Timer_Axis2.attachInterrupt(TIMER_CH2, TIMER4_COMPA_vect);
