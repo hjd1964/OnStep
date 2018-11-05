@@ -53,10 +53,10 @@
     #define B_PIN5 39   // F
     #define B_PIN6 35   // f
 
-    #define ST4RAw 19   // ST4 RA- West,  send data to OnStep
-    #define ST4DEs 18   // ST4 DE- South, clock input to ISR
-    #define ST4DEn 17   // ST4 DE+ North, recv data from OnStep
-    #define ST4RAe  5   // ST4 RA+ East,  always 25 Hz square wave on this pin
+    #define ST4RAw 12   // ST4 RA- West,  send data to OnStep
+    #define ST4DEs 14   // ST4 DE- South, clock input to ISR
+    #define ST4DEn 27   // ST4 DE+ North, recv data from OnStep
+    #define ST4RAe 26   // ST4 RA+ East,  always 25 Hz square wave on this pin
   #endif 
 
   #include "St4SerialSlave.h"
