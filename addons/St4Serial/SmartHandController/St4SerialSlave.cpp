@@ -24,10 +24,15 @@ all others (Teensy3.x, etc.) at 2mS/byte (500 Bps.)
 #include "St4SerialSlave.h"
 #include "Config.h"
 
+#define INTERVAL 40000 // microseconds
+
 #ifdef __ARM_Teensy3__
   IntervalTimer Timer1;  // built into Teensyduino
 #elif __AVR__
   #include <TimerOne.h>  // from https://github.com/PaulStoffregen/TimerOne
+#elif ESP32
+  hw_timer_t * Timer1 = NULL;
+
 #endif
 
 void Sst4::begin(long baudRate=9600) {
@@ -42,21 +47,31 @@ void Sst4::begin(long baudRate=9600) {
   attachInterrupt(digitalPinToInterrupt(ST4DEs),dataClock,CHANGE);
 
 #ifdef __ARM_Teensy3__
-  Timer1.begin(shcTone,40000);
+  Timer1.begin(shcTone, INTERVAL);
 #elif __AVR__
-  Timer1.initialize(40000);
+  Timer1.initialize(INTERVAL);
   Timer1.attachInterrupt(shcTone);
+#elif ESP32
+  Timer1 = timerBegin(0, 80, true);
+  timerAttachInterrupt(Timer1, &shcTone, true);
+  timerAlarmWrite(Timer1, INTERVAL, true);
+  timerAlarmEnable(Timer1);
 #endif
 }
 
 void Sst4::end() {
   pinMode(ST4RAe,INPUT_PULLUP);
   pinMode(ST4RAw,INPUT_PULLUP);
+
   detachInterrupt(digitalPinToInterrupt(ST4DEs));
+
 #ifdef __ARM_Teensy3__
   Timer1.end();
 #elif __AVR__
   Timer1.stop();
+#elif ESP32
+  timerEnd(Timer1);
+  Timer1 = NULL;
 #endif
   _xmit_head=0; _xmit_tail=0; _xmit_buffer[0]=0;
   _recv_head=0; _recv_tail=0; _recv_buffer[0]=0;
@@ -143,6 +158,8 @@ void dataClock() {
   unsigned long t1=t; t=micros();
   volatile unsigned long elapsed=t-t1;
 
+  DL("dataClock()");
+
   if (digitalRead(ST4DEs)==HIGH) {
     state=digitalRead(ST4DEn); 
     if (i==8) { if (state!=LOW) frame_error=true; }          // recv start bit
@@ -187,14 +204,25 @@ void dataClock() {
 // RAw pin when the data comms clock from OnStep isn't running
 void shcTone() {
   static volatile boolean tone_state=false;
+  D("lastMs: ");
+  D(SerialST4.lastMs);
+  D("millis: ");
+  DL(millis());
+
   if (tone_state) { 
     tone_state=false; 
     digitalWrite(ST4RAe,HIGH); 
-    if (millis()-SerialST4.lastMs>2000L) digitalWrite(ST4RAw,HIGH);
+    if (millis()-SerialST4.lastMs>2000L) {
+      DL("Yes > 2000, RAw HIGH: ");
+      digitalWrite(ST4RAw,HIGH);
+    }
   } else  {
     tone_state=true;
     digitalWrite(ST4RAe,LOW);
-    if (millis()-SerialST4.lastMs>2000L) digitalWrite(ST4RAw,LOW); 
+    if (millis()-SerialST4.lastMs>2000L) {
+      DL("Yes > 2000, RAw LOW: ");
+      digitalWrite(ST4RAw,LOW); 
+    }
   }
 }
 
