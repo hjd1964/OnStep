@@ -166,14 +166,14 @@ void Timer1SetInterval(long iv, double rateRatio) {
   // Set up period
   Timer_Sidereal.setPeriod(round((double)iv * 0.0625)); // in microseconds
 
-  // Set up an interrupt on channel 1
-  static boolean initClock=true;
-  if (initClock) {
+  static boolean firstPass = true;
+  if (firstPass) {
+    // Set up an interrupt on channel 1
     Timer_Sidereal.setChannel1Mode(TIMER_OUTPUT_COMPARE);
     Timer_Sidereal.setCompare(TIMER_CH1, 1);  // Interrupt 1 count after each update
     Timer_Sidereal.attachInterrupt(TIMER_CH1, TIMER1_COMPA_vect);
-    // I suspect the above three lines are only needed once, if so, initClock can be set to false below
-    initClock=true;
+
+    firstPass = false;
   }
 
   // Refresh the timer's count, prescale, and overflow
@@ -193,12 +193,6 @@ void QuickSetIntervalAxis1(uint32_t r) {
   // Set up period
   Timer_Axis1.setPeriod(r-1); // in microseconds
 
-  // Set up an interrupt on channel 1
-  // I suspect the following three lines are not needed so can/should be removed
-  Timer_Axis1.setChannel3Mode(TIMER_OUTPUT_COMPARE);
-  Timer_Axis1.setCompare(TIMER_CH3, 1);  // Interrupt 1 count after each update
-  Timer_Axis1.attachInterrupt(TIMER_CH3, TIMER3_COMPA_vect);
-
   // Refresh the timer's count, prescale, and overflow
   Timer_Axis1.refresh();
 
@@ -212,12 +206,6 @@ void QuickSetIntervalAxis2(uint32_t r) {
 
   // Set up period
   Timer_Axis2.setPeriod(r-1); // in microseconds
-
-  // Set up an interrupt on channel 1
-  // I suspect the following three lines are not needed so can/should be removed
-  Timer_Axis2.setChannel2Mode(TIMER_OUTPUT_COMPARE);
-  Timer_Axis2.setCompare(TIMER_CH2, 1);  // Interrupt 1 count after each update
-  Timer_Axis2.attachInterrupt(TIMER_CH2, TIMER4_COMPA_vect);
 
   // Refresh the timer's count, prescale, and overflow
   Timer_Axis2.refresh();
