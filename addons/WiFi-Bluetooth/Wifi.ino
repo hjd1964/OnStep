@@ -105,11 +105,14 @@ bool loginRequired=true;
 
 void handleWifi() {
   Ser.setTimeout(WebTimeout);
+  serialRecvFlush();
   
   char temp[320]="";
   char temp1[80]="";
   
   processWifiGet();
+
+  sendHtmlStart();
 
   // send a standard http response header
   String data=html_headB;
@@ -119,13 +122,14 @@ void handleWifi() {
   data += html_main_css3;
   data += html_main_css4;
   data += html_main_css5;
+  sendHtml(data); data="";
   data += html_main_css6;
   data += html_main_css7;
   data += html_main_css8;
   data += html_main_cssE;
   data += html_headE;
-
   data += html_bodyB;
+  sendHtml(data); data="";
 
   mountStatus.update(true);
 
@@ -138,6 +142,7 @@ void handleWifi() {
   data += html_links1N;
   data += html_links2N;
   data += html_links3N;
+  sendHtml(data); data="";
 #ifdef ENCODERS_ON
   data += html_linksEncN;
 #endif
@@ -145,61 +150,53 @@ void handleWifi() {
   data += html_links5N;
   data += html_links6S;
   data += html_onstep_header4;
+  sendHtml(data); data="";
 
   data+="<div style='width: 40em;'>";
 
   if (restartRequired) {
+    restartRequired=false;
     data+=html_reboot;
-    data+="</div></div></body></html>";
-    server.send(200, "text/html",data);
-    restartRequired=false;
-    delay(1000);
-//    ESP.restart();
-    return;
-  }
-
+  } else
   if (loginRequired) {
-    data+=html_login;
-    data+="</div></div></body></html>";
-    server.send(200, "text/html",data);
     restartRequired=false;
-    delay(1000);
-  //  ESP.restart();
-    return;
-  }
-
-  EEPROM_readString(100,wifi_sta_ssid);
-  EEPROM_readString(150,wifi_sta_pwd);
+    data+=html_login;
+  } else {
+    EEPROM_readString(100,wifi_sta_ssid);
+    EEPROM_readString(150,wifi_sta_pwd);
+      
+    sprintf(temp,html_wifiSerial,CmdTimeout,WebTimeout); data += temp;
+    sprintf(temp,html_wifiSSID1,wifi_sta_ssid,""); data += temp;
     
-  sprintf(temp,html_wifiSerial,CmdTimeout,WebTimeout); data += temp;
-  sprintf(temp,html_wifiSSID1,wifi_sta_ssid,""); data += temp;
+    uint8_t mac[6] = {0,0,0,0,0,0}; WiFi.macAddress(mac);
+    char wifi_sta_mac[80]="";
+    for (int i=0; i<6; i++) { sprintf(wifi_sta_mac,"%s%02x:",wifi_sta_mac,mac[i]); } wifi_sta_mac[strlen(wifi_sta_mac)-1]=0;
+    sprintf(temp,html_wifiMAC,wifi_sta_mac); data += temp;
   
-  uint8_t mac[6] = {0,0,0,0,0,0}; WiFi.macAddress(mac);
-  char wifi_sta_mac[80]="";
-  for (int i=0; i<6; i++) { sprintf(wifi_sta_mac,"%s%02x:",wifi_sta_mac,mac[i]); } wifi_sta_mac[strlen(wifi_sta_mac)-1]=0;
-  sprintf(temp,html_wifiMAC,wifi_sta_mac); data += temp;
-
-  sprintf(temp,html_wifiSTAIP,wifi_sta_ip[0],wifi_sta_ip[1],wifi_sta_ip[2],wifi_sta_ip[3]); data += temp;
-  sprintf(temp,html_wifiSTAGW,wifi_sta_gw[0],wifi_sta_gw[1],wifi_sta_gw[2],wifi_sta_gw[3]); data += temp;
-  sprintf(temp,html_wifiSTASN,wifi_sta_sn[0],wifi_sta_sn[1],wifi_sta_sn[2],wifi_sta_sn[3]); data += temp;
-  sprintf(temp,html_wifiSSID2,stationDhcpEnabled?"checked":"",stationEnabled?"checked":""); data += temp;
-  sprintf(temp,html_wifiSSID3,wifi_ap_ssid,"",wifi_ap_ch); data += temp;
-
-  uint8_t macap[6] = {0,0,0,0,0,0}; WiFi.softAPmacAddress(macap);
-  char wifi_ap_mac[80]="";
-  for (int i=0; i<6; i++) { sprintf(wifi_ap_mac,"%s%02x:",wifi_ap_mac,macap[i]); } wifi_ap_mac[strlen(wifi_ap_mac)-1]=0;
-  sprintf(temp,html_wifiApMAC,wifi_ap_mac); data += temp;
+    sprintf(temp,html_wifiSTAIP,wifi_sta_ip[0],wifi_sta_ip[1],wifi_sta_ip[2],wifi_sta_ip[3]); data += temp;
+    sprintf(temp,html_wifiSTAGW,wifi_sta_gw[0],wifi_sta_gw[1],wifi_sta_gw[2],wifi_sta_gw[3]); data += temp;
+    sprintf(temp,html_wifiSTASN,wifi_sta_sn[0],wifi_sta_sn[1],wifi_sta_sn[2],wifi_sta_sn[3]); data += temp;
+    sprintf(temp,html_wifiSSID2,stationDhcpEnabled?"checked":"",stationEnabled?"checked":""); data += temp;
+    sprintf(temp,html_wifiSSID3,wifi_ap_ssid,"",wifi_ap_ch); data += temp;
+    sendHtml(data); data="";
   
-  sprintf(temp,html_wifiSSID4,wifi_ap_ip[0],wifi_ap_ip[1],wifi_ap_ip[2],wifi_ap_ip[3]); data += temp;
-  sprintf(temp,html_wifiSSID5,wifi_ap_gw[0],wifi_ap_gw[1],wifi_ap_gw[2],wifi_ap_gw[3]); data += temp;
-  sprintf(temp,html_wifiSSID6,wifi_ap_sn[0],wifi_ap_sn[1],wifi_ap_sn[2],wifi_ap_sn[3]); data += temp;
-  sprintf(temp,html_wifiSSID7,accessPointEnabled?"checked":""); data += temp;
-  data += html_logout;
-
+    uint8_t macap[6] = {0,0,0,0,0,0}; WiFi.softAPmacAddress(macap);
+    char wifi_ap_mac[80]="";
+    for (int i=0; i<6; i++) { sprintf(wifi_ap_mac,"%s%02x:",wifi_ap_mac,macap[i]); } wifi_ap_mac[strlen(wifi_ap_mac)-1]=0;
+    sprintf(temp,html_wifiApMAC,wifi_ap_mac); data += temp;
+    
+    sprintf(temp,html_wifiSSID4,wifi_ap_ip[0],wifi_ap_ip[1],wifi_ap_ip[2],wifi_ap_ip[3]); data += temp;
+    sprintf(temp,html_wifiSSID5,wifi_ap_gw[0],wifi_ap_gw[1],wifi_ap_gw[2],wifi_ap_gw[3]); data += temp;
+    sprintf(temp,html_wifiSSID6,wifi_ap_sn[0],wifi_ap_sn[1],wifi_ap_sn[2],wifi_ap_sn[3]); data += temp;
+    sprintf(temp,html_wifiSSID7,accessPointEnabled?"checked":""); data += temp;
+    data += html_logout;
+  }
+  
   strcpy(temp,"</div></div></body></html>");
   data += temp;
 
-  server.send(200, "text/html",data);
+  sendHtml(data);
+  sendHtmlDone();
 }
 
 void processWifiGet() {

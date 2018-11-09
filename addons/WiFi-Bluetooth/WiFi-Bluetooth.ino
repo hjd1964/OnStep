@@ -37,7 +37,7 @@
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
 #define FirmwareVersionMinor  "5"
-#define FirmwareVersionPatch  "d"
+#define FirmwareVersionPatch  "e"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
@@ -56,6 +56,11 @@ Encoders encoders;
 #endif
 
 #include "MountStatus.h"
+
+// macros to help with sending webpage data
+#define sendHtmlStart() server.setContentLength(CONTENT_LENGTH_UNKNOWN); server.send(200, "text/html", "");
+#define sendHtml(x) server.sendContent(x)
+#define sendHtmlDone() server.client().stop()
 
 int WebTimeout=TIMEOUT_WEB;
 int CmdTimeout=TIMEOUT_CMD;
@@ -124,6 +129,12 @@ void setup(void){
 #ifdef ENCODERS_ON
     EEPROM_writeLong(600,Axis1EncDiffLimit);
     EEPROM_writeLong(604,Axis2EncDiffLimit);
+    EEPROM_writeLong(608,20);  // enc short term average samples
+    EEPROM_writeLong(612,200); // enc long term average samples
+    EEPROM_writeLong(616,0);   // enc rate comp
+    EEPROM_writeLong(624,1);   // intpol phase
+    EEPROM_writeLong(628,0);   // intpol mag
+    EEPROM_writeLong(632,10);  // prop
 #endif
 
     EEPROM_writeString(100,wifi_sta_ssid);
@@ -151,6 +162,16 @@ void setup(void){
 #ifdef ENCODERS_ON
     Axis1EncDiffLimit=EEPROM_readLong(600);
     Axis2EncDiffLimit=EEPROM_readLong(604);
+#ifdef AXIS1_ENC_RATE_CONTROL_ON
+    Axis1EncStaSamples=EEPROM_readLong(608);
+    Axis1EncLtaSamples=EEPROM_readLong(612);
+    long l=EEPROM_readLong(616); Axis1EncRateComp=1.0+(float)l/1000000.0;
+#ifdef AXIS1_ENC_INTPOL_COS_ON
+    Axis1EncIntPolPhase =EEPROM_readLong(624);
+    Axis1EncIntPolMag   =EEPROM_readLong(628);
+#endif
+    Axis1EncProp        =EEPROM_readLong(632);
+#endif
 #endif
 
     EEPROM_readString(100,wifi_sta_ssid);
@@ -302,9 +323,13 @@ Again:
   server.on("/control.htm", handleControl);
 #ifdef ENCODERS_ON
   server.on("/enc.htm", handleEncoders);
+  server.on("/encA.txt", encAjaxGet);
+#ifdef AXIS1_ENC_RATE_CONTROL_ON
+  server.on("/enc.txt", encAjax);
+#endif
 #endif
   server.on("/control.txt", controlAjax);
-  server.on("/guide.txt", guideAjax);
+  server.on("/controlA.txt", controlAjaxGet);
   server.on("/pec.htm", handlePec);
   server.on("/pec.txt", pecAjax);
   server.on("/wifi.htm", handleWifi);

@@ -51,7 +51,7 @@ const char html_controlScript1[] =
 "<script>\n"
 "function s(key,v1) {\n"
   "var xhttp = new XMLHttpRequest();\n"
-  "xhttp.open('GET', 'guide.txt?'+key+'='+v1+'&x='+new Date().getTime(), true);\n"
+  "xhttp.open('GET', 'controlA.txt?'+key+'='+v1+'&x='+new Date().getTime(), true);\n"
   "xhttp.send();\n"
 "}\n"
 "function g(v1){s('dr',v1);}\n"
@@ -278,6 +278,8 @@ void handleControl() {
   char temp1[24]="";
 
   processControlGet();
+
+  sendHtmlStart();
   
   String data=html_headB;
   data += html_main_cssB;
@@ -287,6 +289,7 @@ void handleControl() {
   data += html_main_css4;
   data += html_main_css5;
   data += html_main_css6;
+  sendHtml(data); data="";
   data += html_main_css7;
   data += html_main_css8;
   data += html_main_css_control1;
@@ -294,11 +297,8 @@ void handleControl() {
   data += html_main_css_control3;
   data += html_main_cssE;
   data += html_headE;
-#ifdef OETHS
-  client->print(data); data="";
-#endif
-
   data += html_bodyB;
+  sendHtml(data); data="";
 
   // get status
   mountStatus.update();
@@ -315,15 +315,14 @@ void handleControl() {
 #ifdef ENCODERS_ON
   data += html_linksEncN;
 #endif
+  sendHtml(data); data="";
   data += html_links4N;
   data += html_links5N;
 #ifndef OETHS
   data += html_links6N;
 #endif
   data += html_onstep_header4;
-#ifdef OETHS
-  client->print(data); data="";
-#endif
+  sendHtml(data); data="";
 
   // guide (etc) script
   data += html_controlScript1;
@@ -335,9 +334,7 @@ void handleControl() {
   // active ajax page is: controlAjax();
   data +="<script>var ajaxPage='control.txt';</script>\n";
   data +=html_ajax_active;
-#ifdef OETHS
-  client->print(data); data="";
-#endif
+  sendHtml(data); data="";
 
   // Quick controls ------------------------------------------
   data += html_controlQuick1;
@@ -346,17 +343,13 @@ void handleControl() {
   data += html_controlQuick3;
   data += html_controlQuick4;
   data += html_controlQuick5;
-#ifdef OETHS
-  client->print(data); data="";
-#endif
+  sendHtml(data); data="";
 
   // Tracking control ----------------------------------------
   data += html_controlTrack1;
   data += html_controlTrack2;
   data += html_controlTrack3;
-#ifdef OETHS
-  client->print(data); data="";
-#endif
+  sendHtml(data); data="";
 
   // Get the align mode --------------------------------------
   data += html_controlAlign1;
@@ -369,9 +362,7 @@ void handleControl() {
                                      { n=3; sc[0]=1; sc[1]=3; sc[2]=9; }
   for (int i=0; i<n; i++) { char temp2[120]=""; sprintf(temp2,html_controlAlign2,sc[i],sc[i],SIDEREAL_CH); data+=temp2; }
   data += html_controlAlign3;
-#ifdef OETHS
-  client->print(data); data="";
-#endif
+  sendHtml(data); data="";
   
   // Tracking ------------------------------------------------
   data += html_controlTrack4;
@@ -381,12 +372,11 @@ void handleControl() {
   data += html_controlGuide2;
   data += html_controlGuide3;
   data += html_controlGuide4;
+  sendHtml(data); data="";
   data += html_controlGuide5;
   data += html_controlGuide6;
   data += html_controlGuide7;
-#ifdef OETHS
-  client->print(data); data="";
-#endif
+  sendHtml(data); data="";
 
   // Focusing ------------------------------------------------
   boolean Focuser1; if (sendCommand(":FA#",temp1,R_BOOL)) Focuser1=true; else Focuser1=false;
@@ -399,9 +389,7 @@ void handleControl() {
     data += html_controlFocus4;
     data += html_controlFocus5;
     data += html_controlFocus6;
-#ifdef OETHS
-    client->print(data); data="";
-#endif
+  sendHtml(data); data="";
   }
 
   // Rotate/De-Rotate ----------------------------------------
@@ -424,10 +412,8 @@ void handleControl() {
   }
   if (Rotate) {
     data += html_controlRotate4;
-#ifdef OETHS
-    client->print(data); data="";
-#endif
   }
+  sendHtml(data); data="";
 
   // Aux -----------------------------------------------------
   #if defined(SW0) || defined(SW1) || defined(SW2) || defined(SW3) || defined(SW4) || defined(SW5) || defined(SW6) || defined(SW7) || defined(SW8) || defined(SW9) || defined(SW10) || defined(SW11) || defined(SW12) || defined(SW13) || defined(SW14) || defined(SW15) || defined(AN3) || defined(AN4) || defined(AN5) || defined(AN6) || defined(AN7) || defined(AN8)
@@ -483,10 +469,7 @@ void handleControl() {
     data += html_controlSwitch15; c++;
     #endif
     if (c>0) data+="<br />";
-
-#ifdef OETHS
-    client->print(data); data="";
-#endif
+    sendHtml(data); data="";
 
     // Analog Control
     #ifdef AN3
@@ -507,6 +490,7 @@ void handleControl() {
     #ifdef AN8
     if (sendCommand(":GXG8#",temp1)) { data += html_controlAnalog8A; data += temp1; data += html_controlAnalog8B; data += temp1; data += html_controlAnalog8C; }
     #endif
+    sendHtml(data); data="";
 
     data += html_controlAuxE;
   #endif
@@ -515,17 +499,14 @@ void handleControl() {
   
   data += "</div></body></html>";
 
-#ifdef OETHS
-  client->print(data);
-#else
-  server.send(200, "text/html",data);
-#endif
+  sendHtml(data);
+  sendHtmlDone();
 }
 
 #ifdef OETHS
-void guideAjax(EthernetClient *client) {
+void controlAjaxGet(EthernetClient *client) {
 #else
-void guideAjax() {
+void controlAjaxGet() {
 #endif
   processControlGet();
 #ifdef OETHS
@@ -541,7 +522,7 @@ void controlAjax(EthernetClient *client) {
 void controlAjax() {
 #endif
   String data="";
-  char temp[40]="";
+  char temp[80]="";
 
   data += "focuserpos|";
   if (sendCommand(":FG#",temp)) { data += temp; data += " microns\n"; } else { data += "?\n"; }
