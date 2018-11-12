@@ -542,7 +542,9 @@ void processCommands() {
 #ifdef MOUNT_TYPE_ALTAZM
           f=getTrackingRate()*1.00273790935*60.0; 
 #else
-          f=(trackingTimerRateAxis1*1.00273790935)*60.0; 
+          cli();
+          f=(trackingTimerRateAxis1*1.00273790935)*60.0;
+          sei();
 #endif
         }
         else f=0.0;
@@ -663,6 +665,7 @@ void processCommands() {
               case '1': if (getEnc(&f,&f1)==0) { if (!doubleToDms(reply,&f1,true,true)) commandError=true; else quietReply=true; } else commandError=true; break; // Get formatted absolute Axis2 angle 
               case '2': if (getEnc(&f,&f1)==0) { dtostrf(f,0,6,reply); quietReply=true; } else commandError=true; break;                                          // Get absolute Axis1 angle in degrees
               case '3': if (getEnc(&f,&f1)==0) { dtostrf(f1,0,6,reply); quietReply=true; } else commandError=true; break;                                         // Get absolute Axis2 angle in degrees
+              case '9': cli(); dtostrf(trackingTimerRateAxis1,1,8,reply); sei(); quietReply=true; break;                                                                        // Get current tracking rate
               default:  commandError=true;
             }
           } else
