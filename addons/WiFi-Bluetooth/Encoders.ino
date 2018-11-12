@@ -323,7 +323,17 @@ void encAjax() {
   data += "stL|"; sprintf(temp,"%+1.4f\n",axis1EncRateLta); data += temp;
   data += "ipC|"; sprintf(temp,"%+1.4f\n",intpolComp); data += temp;
   data += "ipP|"; sprintf(temp,"%d\n",(int)intpolPhase); data += temp;
-  data += "rtF|"; sprintf(temp,"%1.5f\n",(float)rateFinal); data += temp;
+
+if (finalCorrection==0) {
+  data += "rtF|"; sprintf(temp,"None\n"); data += temp;
+} else
+if (finalCorrection>0) {
+  data += "rtF|"; sprintf(temp,"West %ld ms\n",finalCorrection); data += temp;
+} else
+if (finalCorrection<0) {
+  data += "rtF|"; sprintf(temp,"East %ld ms\n",-finalCorrection); data += temp;
+}
+
   data += "orc|"; if (encRateControl) data+="On\n"; else data+="Off\n";
 #endif
   data += "aste|";  if (encAutoSync) data+="On\n"; else data+="Off\n";

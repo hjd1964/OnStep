@@ -31,12 +31,12 @@ long Axis2EncDiffLimit=AXIS2_ENC_DIFF_LIMIT;
   float intpolPhase=0;
   float arcSecondsPerTick=(1.0/AXIS1_ENC_TICKS_DEG)*3600.0;        // (0.0018)*3600 = 6.48
   float usPerTick=(arcSecondsPerTick/15.041)*1000000.0;            // 6.48/15.041 = 0.4308 seconds per tick
-  volatile uint32_t usPerTickMin=(double)usPerTick*0.333333;
-  volatile uint32_t usPerTickMax=(double)usPerTick*3.0;
+  volatile uint32_t usPerTickMin=(double)usPerTick*0.2;
+  volatile uint32_t usPerTickMax=(double)usPerTick*5.0;
   float axis1EncRateSta=0;
   float axis1EncRateLta=0;
   float axis1Rate=0;
-  float rateFinal=0;
+  long finalCorrection=0;
 
   volatile int32_t Tsta=0;
   volatile int32_t Tlta=0;
@@ -269,18 +269,26 @@ class Encoders {
           } else axis1Rate=0;
         }
 
-        // smooth the tracking rate just a little and send it along once in a while
-        static float rate;
-        float r=(axis1Rate-axis1EncRateSta)*((float)Axis1EncProp/100.0);
-        rate=r;
-  
-        // set the tracking rate adjustment once every four seconds
-        // set the tracking rate adjustment
-        if (!encRateControl) rateFinal=0.0; else rateFinal=rate;
-        if (rateFinal>0.01) rateFinal=0.01;
-        if (rateFinal<-0.01) rateFinal=-0.01;
-        Ser.print(":SX49,"); Ser.print(rateFinal); Ser.print("#");
-        s[Ser.readBytes(s,1)]=0;
+        // accumulate tracking rate departures
+        static float correction=0;
+        float r=(axis1Rate-axis1EncRateSta)*((float)Axis1EncProp/100.0)*2.0;  // rate delta * 2 seconds
+        correction+=r;
+
+        if (!encRateControl) correction=0.0;
+        if (correction>0.25) {
+          finalCorrection=round(correction*1000.0);
+          if (finalCorrection>2000) finalCorrection=2000;
+          Ser.print(":Mgw"); Ser.print(finalCorrection); Ser.print("#");
+          if (correction>2.0) correction-=2.0; else correction=0;
+        } else
+        if (correction<-0.25) {
+          finalCorrection=round(-correction*1000.0);
+          if (finalCorrection>2000) finalCorrection=2000;
+          Ser.print(":Mge"); Ser.print(finalCorrection); Ser.print("#");
+          finalCorrection=-finalCorrection;
+          if (correction<-2.0) correction+=2.0; else correction=0;
+        } else 
+          finalCorrection=0;
 #endif
       }
     }
