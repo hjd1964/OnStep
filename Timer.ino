@@ -419,10 +419,11 @@ void autoPowerDownAxis2() {
 #if defined(PPS_SENSE_ON) || defined(PPS_SENSE_PULLUP)
 // PPS interrupt
 void clockSync() {
+  #define NUM_SECS_TO_AVERAGE 40
   unsigned long t=micros();
   unsigned long oneS=(t-PPSlastMicroS);
   if ((oneS>1000000-20000) && (oneS<1000000+20000)) {
-    PPSavgMicroS=(PPSavgMicroS*19+oneS)/20;
+    PPSavgMicroS=(PPSavgMicroS*(NUM_SECS_TO_AVERAGE-1)+oneS)/NUM_SECS_TO_AVERAGE;
     PPSsynced=true;
   } else PPSsynced=false;
   PPSlastMicroS=t;
