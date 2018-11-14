@@ -36,6 +36,12 @@ void SiderealClockSetInterval(long iv) {
   isrTimerRateAxis2=0;
 }
 
+#if defined(__ARM_STM32__)
+  #define MULTIPLIER  2L
+#else 
+  #define MULTIPLIER  1024L
+#endif 
+
 // prepare to set Timer3 to interval (in microseconds*16), maximum time is about 134 seconds
 volatile uint32_t nextAxis1Rate = 100000UL;
 volatile uint16_t t3cnt = 0;
@@ -49,12 +55,9 @@ void timer3SetInterval(long iv) {
   // 0.0327 * 4096 = 134.21s
   uint32_t i=iv; uint16_t t=1; while (iv>65536L) { t*=2; iv=i/t; if (t==4096) { iv=65535L; break; } }
   cli(); nextAxis1Rate=iv-1L; t3rep=t; fastAxis1=(t3rep==1); sei();
-#elif defined(__ARM_STM32__)
-  uint32_t i=iv; uint16_t t=1; while (iv>65536L*2L) { t++; iv=i/t; if (t==32) { iv=65535L*2L; break; } }
-  cli(); nextAxis1Rate=((F_COMP/1000000.0) * (iv*0.0625) * 0.5 - 1.0); t3rep=t; fastAxis1=(t3rep==1); sei();
 #else
   // 4.194 * 32 = 134.21s
-  uint32_t i=iv; uint16_t t=1; while (iv>65536L*1024L) { t++; iv=i/t; if (t==32) { iv=65535L*1024L; break; } }
+  uint32_t i=iv; uint16_t t=1; while (iv>65536L*MULTIPLIER) { t++; iv=i/t; if (t==32) { iv=65535L*MULTIPLIER; break; } }
   cli(); nextAxis1Rate=((F_COMP/1000000.0) * (iv*0.0625) * 0.5 - 1.0); t3rep=t; fastAxis1=(t3rep==1); sei();
 #endif
 }
@@ -72,12 +75,9 @@ void timer4SetInterval(long iv) {
   // 0.0327 * 4096 = 134.21s
   uint32_t i=iv; uint16_t t=1; while (iv>65536L) { t*=2; iv=i/t; if (t==4096) { iv=65535L; break; } }
   cli(); nextAxis2Rate=iv-1L; t4rep=t; fastAxis2=(t4rep==1); sei();
-#elif defined(__ARM_STM32__)
-  uint32_t i=iv; uint16_t t=1; while (iv>65536L*2L) { t++; iv=i/t; if (t==32) { iv=65535L*2L; break; } }
-  cli(); nextAxis2Rate=((F_COMP/1000000.0) * (iv*0.0625) * 0.5 - 1.0); t4rep=t; fastAxis2=(t4rep==1); sei();
 #else
   // 4.194 * 32 = 134.21s
-  uint32_t i=iv; uint16_t t=1; while (iv>65536L*1024L) { t++; iv=i/t; if (t==32) { iv=65535L*1024L; break; } }
+  uint32_t i=iv; uint16_t t=1; while (iv>65536L*MULTIPLIER) { t++; iv=i/t; if (t==32) { iv=65535L*MULTIPLIER; break; } }
   cli(); nextAxis2Rate=((F_COMP/1000000.0) * (iv*0.0625) * 0.5 - 1.0); t4rep=t; fastAxis2=(t4rep==1); sei();
 #endif
 }
