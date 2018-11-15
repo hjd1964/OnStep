@@ -174,6 +174,9 @@ void moveTo() {
   }
   cli(); timerRateAxis2=temp; sei();
 
+  // make sure we're using the tracking mode microstep setting near the end of slew
+  if ((distDestAxis1<=getStepsPerSecondAxis1()) && (distDestAxis2<=getStepsPerSecondAxis2()) ) stepperModeTracking();
+
 #ifdef MOUNT_TYPE_ALTAZM
   // in AltAz mode if the end of slew doesn't get close enough within 3 seconds: stop tracking for a moment to allow target/actual position synchronization
   static bool forceSlewStop=false;
@@ -182,7 +185,7 @@ void moveTo() {
   if ( (lastTrackingState==TrackingSidereal) && (forceSlewStop && ((long)(millis()-slewStopTime)>0)) ) lastTrackingState=TrackingSiderealDisabled;
 #endif
 
-  if ((distDestAxis1<=stepAxis1+1) && (distDestAxis2<=stepAxis2+1)) {
+  if ((distDestAxis1<=ceil(abs(fixedToDouble(fstepAxis1)))) && (distDestAxis2<=ceil(abs(fixedToDouble(fstepAxis2))))) {
     
 #ifdef MOUNT_TYPE_ALTAZM
     // if we stopped tracking turn it back on now
@@ -227,8 +230,6 @@ void moveTo() {
 
       forceRefreshGetEqu();
     } else {
-
-      stepperModeTracking();
 
       // other special gotos: for parking the mount and homing the mount
       if (parkStatus==Parking) {
@@ -278,6 +279,7 @@ void moveTo() {
           // restore trackingState
           trackingState=lastTrackingState; lastTrackingState=TrackingNone;
           SiderealClockSetInterval(siderealInterval);
+          setDeltaTrackingRate();
         }
       }
     }
