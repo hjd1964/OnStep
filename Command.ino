@@ -742,6 +742,7 @@ void processCommands() {
               case '9': cli(); temp=(long)(posAxis2); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                            // Debug9, Dec motor position
               case 'A': sprintf(reply,"%ld%%",(worst_loop_time*100L)/9970L); worst_loop_time=0; quietReply=true; break;                    // DebugA, Workload
               case 'B': cli(); temp=(long)(trackingTimerRateAxis1*1000.0); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;       // DebugB, trackingTimerRateAxis1
+              case 'E': double ra, de; cli(); getEqu(&ra,&de,false); sei(); sprintf(reply,"%f,%f",ra,de); quietReply=true; break;          // DebugE, equatorial coordinates degrees (no division by 15)
               default:  commandError=true;
             }
           } else
