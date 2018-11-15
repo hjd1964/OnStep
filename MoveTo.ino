@@ -177,22 +177,18 @@ void moveTo() {
   // make sure we're using the tracking mode microstep setting near the end of slew
   if ((distDestAxis1<=getStepsPerSecondAxis1()) && (distDestAxis2<=getStepsPerSecondAxis2()) ) stepperModeTracking();
 
-#ifdef MOUNT_TYPE_ALTAZM
-  // in AltAz mode if the end of slew doesn't get close enough within 3 seconds: stop tracking for a moment to allow target/actual position synchronization
-  static bool forceSlewStop=false;
+  // the end of slew doesn't get close enough within 6 seconds: stop tracking for a moment to allow target/actual position synchronization
   static unsigned long slewStopTime=0;
-  if ( (!forceSlewStop) && (distDestAxis1<=getStepsPerSecondAxis1()) && (distDestAxis2<=getStepsPerSecondAxis2()) ) { slewStopTime=millis()+3000L; forceSlewStop=true; }
-  if ( (lastTrackingState==TrackingSidereal) && (forceSlewStop && ((long)(millis()-slewStopTime)>0)) ) lastTrackingState=TrackingSiderealDisabled;
-#endif
+  static bool slewEnding=false;
+  static bool slewAbort=false;
+  if ( !slewEnding && (distDestAxis1<=getStepsPerSecondAxis1()*2L) && (distDestAxis2<=getStepsPerSecondAxis2()*2L) ) { slewStopTime=millis()+6000L; slewEnding=true; }
+  if ( slewEnding && (long)(millis()-slewStopTime)>0) { lastError=ERR_GOTO_SYNC; slewAbort=true; }
 
-  if ((distDestAxis1<=ceil(abs(fixedToDouble(fstepAxis1)))+1) && (distDestAxis2<=ceil(abs(fixedToDouble(fstepAxis2))))+1) {
-    
-#ifdef MOUNT_TYPE_ALTAZM
-    // if we stopped tracking turn it back on now
-    if (lastTrackingState==TrackingSiderealDisabled) lastTrackingState=TrackingSidereal;
-    forceSlewStop=false;
-#endif
-    
+  if ( ((distDestAxis1<=ceil(abs(fixedToDouble(fstepAxis1)))+1) && (distDestAxis2<=ceil(abs(fixedToDouble(fstepAxis2)))+1) ) || slewAbort) {
+    slewEnding=false;
+    slewAbort=false;
+    stepperModeTracking();
+
     if ((pierSideControl==PierSideFlipEW2) || (pierSideControl==PierSideFlipWE2)) {
       // just wait stop here until we get notification to continue
       if (pauseHome) {
