@@ -542,7 +542,9 @@ void processCommands() {
 #ifdef MOUNT_TYPE_ALTAZM
           f=getTrackingRate()*1.00273790935*60.0; 
 #else
-          f=(trackingTimerRateAxis1*1.00273790935)*60.0; 
+          cli();
+          f=(trackingTimerRateAxis1*1.00273790935)*60.0;
+          sei();
 #endif
         }
         else f=0.0;
@@ -663,6 +665,7 @@ void processCommands() {
               case '1': if (getEnc(&f,&f1)==0) { if (!doubleToDms(reply,&f1,true,true)) commandError=true; else quietReply=true; } else commandError=true; break; // Get formatted absolute Axis2 angle 
               case '2': if (getEnc(&f,&f1)==0) { dtostrf(f,0,6,reply); quietReply=true; } else commandError=true; break;                                          // Get absolute Axis1 angle in degrees
               case '3': if (getEnc(&f,&f1)==0) { dtostrf(f1,0,6,reply); quietReply=true; } else commandError=true; break;                                         // Get absolute Axis2 angle in degrees
+              case '9': cli(); dtostrf(trackingTimerRateAxis1,1,8,reply); sei(); quietReply=true; break;                                                                        // Get current tracking rate
               default:  commandError=true;
             }
           } else
@@ -739,6 +742,7 @@ void processCommands() {
               case '9': cli(); temp=(long)(posAxis2); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                            // Debug9, Dec motor position
               case 'A': sprintf(reply,"%ld%%",(worst_loop_time*100L)/9970L); worst_loop_time=0; quietReply=true; break;                    // DebugA, Workload
               case 'B': cli(); temp=(long)(trackingTimerRateAxis1*1000.0); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;       // DebugB, trackingTimerRateAxis1
+              case 'E': double ra, de; cli(); getEqu(&ra,&de,false); sei(); sprintf(reply,"%f,%f",ra,de); quietReply=true; break;          // DebugE, equatorial coordinates degrees (no division by 15)
               default:  commandError=true;
             }
           } else

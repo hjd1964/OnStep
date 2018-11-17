@@ -104,10 +104,12 @@ void HAL_Init_Timers_Motor() {
   // Set up period
   Timer_Axis1.setPeriod(128.0 * 0.0625); // in microseconds
 
+  Timer_Axis1.setPrescaleFactor(0);
+
   // Set up an interrupt on channel 3
-  Timer_Axis1.setChannel3Mode(TIMER_OUTPUT_COMPARE);
-  Timer_Axis1.setCompare(TIMER_CH3, 1);  // Interrupt 1 count after each update
-  Timer_Axis1.attachInterrupt(TIMER_CH3, TIMER3_COMPA_vect);
+  Timer_Axis1.setMode(TIMER_CH1, TIMER_OUTPUT_COMPARE);
+  Timer_Axis1.setCompare(TIMER_CH1, 1);  // Interrupt 1 count after each update
+  Timer_Axis1.attachInterrupt(TIMER_CH1, TIMER3_COMPA_vect);
 
   // Refresh the timer's count, prescale, and overflow
   Timer_Axis1.refresh();
@@ -122,10 +124,12 @@ void HAL_Init_Timers_Motor() {
   // Set up period
   Timer_Axis2.setPeriod(128.0 * 0.0625); // in microseconds
 
+  Timer_Axis2.setPrescaleFactor(0);
+
   // Set up an interrupt on channel 2
-  Timer_Axis2.setChannel2Mode(TIMER_OUTPUT_COMPARE);
-  Timer_Axis2.setCompare(TIMER_CH2, 1);  // Interrupt 1 count after each update
-  Timer_Axis2.attachInterrupt(TIMER_CH2, TIMER4_COMPA_vect);
+  Timer_Axis2.setMode(TIMER_CH1, TIMER_OUTPUT_COMPARE);
+  Timer_Axis2.setCompare(TIMER_CH1, 1);  // Interrupt 1 count after each update
+  Timer_Axis2.attachInterrupt(TIMER_CH1, TIMER4_COMPA_vect);
 
   // Refresh the timer's count, prescale, and overflow
   Timer_Axis2.refresh();
@@ -159,17 +163,19 @@ void TIMER1_COMPA_vect(void);
 HardwareTimer Timer_Sidereal(1);
 
 void Timer1SetInterval(long iv, double rateRatio) {
+
   iv=round(((double)iv)/rateRatio);
 
   Timer_Sidereal.pause();
 
   // Set up period
-  Timer_Sidereal.setPeriod(round((double)iv * 0.0625)); // in microseconds
+  Timer_Sidereal.setPeriod(round((double)iv * 0.0625));
 
   static boolean firstPass = true;
   if (firstPass) {
+    Timer_Sidereal.setPrescaleFactor(0);
     // Set up an interrupt on channel 1
-    Timer_Sidereal.setChannel1Mode(TIMER_OUTPUT_COMPARE);
+    Timer_Sidereal.setMode(TIMER_CH1, TIMER_OUTPUT_COMPARE);
     Timer_Sidereal.setCompare(TIMER_CH1, 1);  // Interrupt 1 count after each update
     Timer_Sidereal.attachInterrupt(TIMER_CH1, TIMER1_COMPA_vect);
 

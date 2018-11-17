@@ -38,7 +38,7 @@ const char* html_indexEncoder2 = "&nbsp;&nbsp;Encodr: Ax1=<font class='c'>%s</fo
 #endif
 const char* html_indexPier = "&nbsp;&nbsp;Pier Side=<font class='c'>%s</font> (meridian flips <font class='c'>%s</font>)<br />";
 
-const char* html_indexCorPolar = "&nbsp;&nbsp;%s <font class='c'>%ld</font>%c &nbsp; %s <font class='c'>%ld</font>%c<br />";
+const char* html_indexCorPolar = "&nbsp;&nbsp;%s <font class='c'>%ld</font>%c &nbsp; %s <font class='c'>%ld</font>%c &nbsp;(Mount relative to %s)<br />";
 
 const char* html_indexPark = "&nbsp;&nbsp;Parking: <font class='c'>%s</font><br />";
 const char* html_indexTracking = "&nbsp;&nbsp;Tracking: <font class='c'>%s %s</font><br />";
@@ -64,6 +64,8 @@ void handleRoot() {
   char temp1[80]="";
   char temp2[80]="";
 
+  sendHtmlStart();
+
   String data=html_headB;
   data += html_headerIdx; // page refresh
   data += html_main_cssB;
@@ -73,6 +75,7 @@ void handleRoot() {
   data += html_main_css4;
   data += html_main_css5;
   data += html_main_css6;
+  sendHtml(data); data="";
   data += html_main_css7;
   data += html_main_css8;
   data += html_main_css_control1;
@@ -80,11 +83,8 @@ void handleRoot() {
   data += html_main_css_control3;
   data += html_main_cssE;
   data += html_headE;
-#ifdef OETHS
-  client->print(data); data="";
-#endif
-
   data += html_bodyB;
+  sendHtml(data); data="";
 
   // get status (all)
   mountStatus.update(true);
@@ -98,6 +98,7 @@ void handleRoot() {
   data += html_links1S;
   data += html_links2N;
   data += html_links3N;
+  sendHtml(data); data="";
 #ifdef ENCODERS_ON
   data += html_linksEncN;
 #endif
@@ -107,9 +108,7 @@ void handleRoot() {
   data += html_links6N;
 #endif
   data += html_onstep_header4;
-#ifdef OETHS
-  client->print(data); data="";
-#endif
+  sendHtml(data); data="";
 
   data+="<div style='width: 27em;'>";
 
@@ -137,9 +136,7 @@ void handleRoot() {
   if (!sendCommand(":Gt#",temp2)) strcpy(temp2,"?");
   sprintf(temp,html_indexSite,temp1,temp2);
   data += temp;
-#ifdef OETHS
-  client->print(data); data="";
-#endif
+  sendHtml(data); data="";
 
 #ifdef AMBIENT_CONDITIONS_ON
   if (!sendCommand(":GX9A#",temp1)) strcpy(temp1,"?"); sprintf(temp,html_indexTPHD,"Temperature:",temp1,"&deg;C"); data+=temp;
@@ -191,10 +188,7 @@ void handleRoot() {
   if (!mountStatus.valid()) strcpy(temp2,"?");
   sprintf(temp,html_indexPier,temp1,temp2);
   data += temp;
-
-#ifdef OETHS
-  client->print(data); data="";
-#endif
+  sendHtml(data); data="";
 
   long lat=LONG_MIN; if (sendCommand(":Gt#",temp1)) { temp1[3]=0; if (temp1[0]=='+') temp1[0]='0'; lat=strtol(temp1,NULL,10); }
   if (abs(lat)<=89) {
@@ -202,13 +196,7 @@ void handleRoot() {
     long lr=LONG_MIN; if (sendCommand(":GX03#",temp1)) { lr=strtol(&temp1[0],NULL,10); lr=lr/cos(lat/57.295); }
 
     if ((lat!=LONG_MIN) && (ud!=LONG_MIN) && (lr!=LONG_MIN)) {
-      data+="<br /><b>Polar Alignment (Mount relative to ";
-      if (mountStatus.mountType()==MT_ALTAZM) {
-        data+="Zenith";
-      } else {
-        if (lat<0) data+="SCP"; else data+="NCP";
-      }
-      data+="):</b><br />";
+      data+="<br /><b>Polar Alignment:</b><br />";
 
       // default to arc-minutes unless we get close, then arc-seconds
       char units='"';
@@ -217,18 +205,22 @@ void handleRoot() {
         units='\'';
       }
 
+      if (mountStatus.mountType()==MT_ALTAZM) {
+        strcpy(temp1,"Zenith");
+      } else {
+        if (lat<0) strcpy(temp1,"SCP"); else strcpy(temp1,"NCP");
+      }
+
       // show direction
-      if ((ud< 0) && (lr< 0)) sprintf(temp,html_indexCorPolar,rightTri,(long)(abs(lr)),units,downTri,(long)(abs(ud)),units); else
-      if ((ud>=0) && (lr< 0)) sprintf(temp,html_indexCorPolar,rightTri,(long)(abs(lr)),units,upTri  ,(long)(abs(ud)),units); else
-      if ((ud< 0) && (lr>=0)) sprintf(temp,html_indexCorPolar,leftTri ,(long)(abs(lr)),units,downTri,(long)(abs(ud)),units); else
-      if ((ud>=0) && (lr>=0)) sprintf(temp,html_indexCorPolar,leftTri ,(long)(abs(lr)),units,upTri  ,(long)(abs(ud)),units);
+      if ((ud< 0) && (lr< 0)) sprintf(temp,html_indexCorPolar,rightTri,(long)(abs(lr)),units,downTri,(long)(abs(ud)),units,temp1); else
+      if ((ud>=0) && (lr< 0)) sprintf(temp,html_indexCorPolar,rightTri,(long)(abs(lr)),units,upTri  ,(long)(abs(ud)),units,temp1); else
+      if ((ud< 0) && (lr>=0)) sprintf(temp,html_indexCorPolar,leftTri ,(long)(abs(lr)),units,downTri,(long)(abs(ud)),units,temp1); else
+      if ((ud>=0) && (lr>=0)) sprintf(temp,html_indexCorPolar,leftTri ,(long)(abs(lr)),units,upTri  ,(long)(abs(ud)),units,temp1);
 
       data += temp;
     }
   }
-#ifdef OETHS
-  client->print(data); data="";
-#endif
+  sendHtml(data); data="";
 
   data+="<br /><b>Operations:</b><br />";
 
@@ -256,6 +248,7 @@ void handleRoot() {
   if (temp2[strlen(temp2)-2]==',') { temp2[strlen(temp2)-2]=0; strcat(temp2,"</font>)<font class=\"c\">"); } else strcpy(temp2,"");
   sprintf(temp,html_indexTracking,temp1,temp2);
   data += temp;
+  sendHtml(data); data="";
 
   // Tracking rate
   if ((sendCommand(":GT#",temp1)) && (strlen(temp1)>6)) {
@@ -277,9 +270,7 @@ void handleRoot() {
     } else sprintf(temp,html_indexMaxSpeed,"?");
     data += temp;
   }
-#ifdef OETHS
-  client->print(data); data="";
-#endif
+  sendHtml(data); data="";
 
   data+="<br /><b>State:</b><br />";
 
@@ -299,10 +290,7 @@ void handleRoot() {
   data += "</div><br class=\"clear\" />\r\n";
   data += "</div></body></html>";
 
-#ifdef OETHS
-  client->print(data);
-#else
-  server.send(200, "text/html",data);
-#endif
+  sendHtml(data);
+  sendHtmlDone();
 }
 

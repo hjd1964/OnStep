@@ -33,6 +33,8 @@ void handlePec() {
 
   processPecGet();
 
+  sendHtmlStart();
+
   // send a standard http response header
   String data=html_headB;
   data += html_main_cssB;
@@ -42,6 +44,7 @@ void handlePec() {
   data += html_main_css4;
   data += html_main_css5;
   data += html_main_css6;
+  sendHtml(data); data="";
   data += html_main_css7;
   data += html_main_css8;
   data += html_main_css_control1;
@@ -49,11 +52,8 @@ void handlePec() {
   data += html_main_css_control3;
   data += html_main_cssE;
   data += html_headE;
-#ifdef OETHS
-  client->print(data); data="";
-#endif
-
   data += html_bodyB;
+  sendHtml(data); data="";
 
   mountStatus.update();
 
@@ -83,9 +83,7 @@ void handlePec() {
 #endif
   data += html_onstep_header4;
   data += html_pec1;
-#ifdef OETHS
-  client->print(data); data="";
-#endif
+  sendHtml(data); data="";
 
   if (mountStatus.mountType()!=MT_ALTAZM) {
     data += html_pec2;
@@ -101,11 +99,8 @@ void handlePec() {
     data += "</div><br class='clear' /></body></html>";
   }
 
-#ifdef OETHS
-  client->print(data);
-#else
-  server.send(200, "text/html",data);
-#endif
+  sendHtml(data);
+  sendHtmlDone();
 }
 
 #ifdef OETHS
