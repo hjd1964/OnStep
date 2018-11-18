@@ -161,13 +161,19 @@ void dataClock() {
   DL("dataClock()");
 
   if (digitalRead(ST4DEs)==HIGH) {
+    DL("dataClock() ST4DEs HIGH");
     state=digitalRead(ST4DEn); 
+    D("dataClock() ST4DEn: ");
+    DL(state);
     if (i==8) { if (state!=LOW) frame_error=true; }          // recv start bit
     if ((i>=0) && (i<=7)) { r_parity+=state; bitWrite(data_in,i,state); } // recv data bit
     if (i==-1) { if ((r_parity&1)!=state) recv_error=true; } // recv parity bit
     if (i==-2) { if (state==HIGH) send_error=true; }         // recv remote parity, ok?
     if (i==-3) {                                             // recv stop bit
       if (state!=LOW) frame_error=true;
+
+      if (frame_error) DL("dataClock() frame error");
+      if (recv_error)  DL("dataClock() recv error");
 
       if ((!frame_error) && (!recv_error)) {
         if (data_in!=0) {
@@ -179,6 +185,7 @@ void dataClock() {
       }
     }
   } else {
+    DL("dataClock() ST4DEs not HIGH");
     if ((elapsed>1500L) || (i==-3)) {
       i=9; 
       r_parity=0; s_parity=0;
