@@ -68,7 +68,7 @@
 // Initialize timers
 
 // frequency compensation (F_COMP/1000000.0) for adjusting microseconds to timer counts
-#define F_COMP 1000000.0
+#define F_COMP 4000000.0
 
 void HAL_Init(void) {
   // Make sure that debug pins are not reserved, and therefore usable as GPIO
@@ -101,15 +101,16 @@ void HAL_Init_Timers_Motor() {
   // Pause the timer while we're configuring it
   Timer_Axis1.pause();
 
-  // Set up period
-  Timer_Axis1.setPeriod(128.0 * 0.0625); // in microseconds
-
-  Timer_Axis1.setPrescaleFactor(0);
-
   // Set up an interrupt on channel 3
-  Timer_Axis1.setMode(TIMER_CH1, TIMER_OUTPUT_COMPARE);
-  Timer_Axis1.setCompare(TIMER_CH1, 1);  // Interrupt 1 count after each update
-  Timer_Axis1.attachInterrupt(TIMER_CH1, TIMER3_COMPA_vect);
+  Timer_Axis1.setMode(TIMER_CH3, TIMER_OUTPUT_COMPARE);
+  Timer_Axis1.setCompare(TIMER_CH3, 1);  // Interrupt 1 count after each update
+  Timer_Axis1.attachInterrupt(TIMER_CH3, TIMER3_COMPA_vect);
+
+  // Set up period
+//  Timer_Axis1.setPeriod(100000.0);
+
+  Timer_Axis1.setPrescaleFactor(18);
+  Timer_Axis1.setOverflow(100000L/4L);
 
   // Refresh the timer's count, prescale, and overflow
   Timer_Axis1.refresh();
@@ -121,15 +122,15 @@ void HAL_Init_Timers_Motor() {
   // Pause the timer while we're configuring it
   Timer_Axis2.pause();
 
-  // Set up period
-  Timer_Axis2.setPeriod(128.0 * 0.0625); // in microseconds
-
-  Timer_Axis2.setPrescaleFactor(0);
-
   // Set up an interrupt on channel 2
-  Timer_Axis2.setMode(TIMER_CH1, TIMER_OUTPUT_COMPARE);
-  Timer_Axis2.setCompare(TIMER_CH1, 1);  // Interrupt 1 count after each update
-  Timer_Axis2.attachInterrupt(TIMER_CH1, TIMER4_COMPA_vect);
+  Timer_Axis2.setMode(TIMER_CH2, TIMER_OUTPUT_COMPARE);
+  Timer_Axis2.setCompare(TIMER_CH2, 1);  // Interrupt 1 count after each update
+  Timer_Axis2.attachInterrupt(TIMER_CH2, TIMER4_COMPA_vect);
+
+  // Set up period
+//  Timer_Axis2.setPeriod(100000.0); // in microseconds
+  Timer_Axis2.setPrescaleFactor(18);
+  Timer_Axis2.setOverflow(100000L/4L);
 
   // Refresh the timer's count, prescale, and overflow
   Timer_Axis2.refresh();
@@ -163,24 +164,16 @@ void TIMER1_COMPA_vect(void);
 HardwareTimer Timer_Sidereal(1);
 
 void Timer1SetInterval(long iv, double rateRatio) {
-
   iv=round(((double)iv)/rateRatio);
 
   Timer_Sidereal.pause();
 
+  Timer_Sidereal.setMode(TIMER_CH1, TIMER_OUTPUT_COMPARE);
+  Timer_Sidereal.setCompare(TIMER_CH1, 1);  // Interrupt 1 count after each update
+  Timer_Sidereal.attachInterrupt(TIMER_CH1, TIMER1_COMPA_vect);
+
   // Set up period
   Timer_Sidereal.setPeriod(round((double)iv * 0.0625));
-
-  static boolean firstPass = true;
-  if (firstPass) {
-    Timer_Sidereal.setPrescaleFactor(0);
-    // Set up an interrupt on channel 1
-    Timer_Sidereal.setMode(TIMER_CH1, TIMER_OUTPUT_COMPARE);
-    Timer_Sidereal.setCompare(TIMER_CH1, 1);  // Interrupt 1 count after each update
-    Timer_Sidereal.attachInterrupt(TIMER_CH1, TIMER1_COMPA_vect);
-
-    firstPass = false;
-  }
 
   // Refresh the timer's count, prescale, and overflow
   Timer_Sidereal.refresh();
@@ -193,31 +186,13 @@ void Timer1SetInterval(long iv, double rateRatio) {
 // Quickly reprogram the interval (in microseconds*(F_COMP/1000000.0)) for the motor timers, must work
 // from within the motor ISR timers
 void QuickSetIntervalAxis1(uint32_t r) {
-  // Pause the timer while we're configuring it
-  Timer_Axis1.pause();
-
   // Set up period
-  Timer_Axis1.setPeriod(r-1); // in microseconds
-
-  // Refresh the timer's count, prescale, and overflow
-  Timer_Axis1.refresh();
-
-  // Start the timer counting
-  Timer_Axis1.resume();
+  Timer_Axis1.setOverflow(r);
 }
 
 void QuickSetIntervalAxis2(uint32_t r) {
-  // Pause the timer while we're configuring it
-  Timer_Axis2.pause();
-
   // Set up period
-  Timer_Axis2.setPeriod(r-1); // in microseconds
-
-  // Refresh the timer's count, prescale, and overflow
-  Timer_Axis2.refresh();
-
-  // Start the timer counting
-  Timer_Axis2.resume();
+  Timer_Axis2.setOverflow(r);
 }
 
 // --------------------------------------------------------------------------------------------------
