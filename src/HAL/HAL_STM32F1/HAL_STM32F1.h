@@ -65,34 +65,65 @@
 #include "../drivers/RTCw.h"
 
 //--------------------------------------------------------------------------------------------------
-// Initialize timers
-
-// frequency compensation (F_COMP/1000000.0) for adjusting microseconds to timer counts
-#define F_COMP 4000000.0
+// General purpose initialize for HAL
 
 void HAL_Init(void) {
   // Make sure that debug pins are not reserved, and therefore usable as GPIO
   disableDebugPorts();
 }
 
-// initialised here and not in timer.ino
+//--------------------------------------------------------------------------------------------------
+// Initialize timers
+
+#if (F_CPU!=48000000) && (F_CPU!=72000000)
+  #error "OnStep STM32 HAL timer design might not be appropraite for this clock rate, choose 72MHz or 48MHz."
+#endif
+
+// This code is based on the following document
+//
+// http://docs.leaflabs.com/static.leaflabs.com/pub/leaflabs/maple-docs/0.0.10/lang/api/hardwaretimer.html#lang-hardwaretimer
+// And this document:
+//
+// http://docs.leaflabs.com/static.leaflabs.com/pub/leaflabs/maple-docs/0.0.12/timers.html
+// Pause the timer while we're configuring it
+
+// frequency compensation (F_COMP/1000000.0) for adjusting microseconds to timer counts
+#define F_COMP 4000000.0
+#define ISR(f) void f (void)
+
+// Sidereal timer is on STM32 Hardware Timer 1
+HardwareTimer Timer_Sidereal(1);
 void TIMER1_COMPA_vect(void);
 
+// Axis1 motor timer is on STM32 Hardware Timer 3
 HardwareTimer Timer_Axis1(3);
 void TIMER3_COMPA_vect(void);
 
-// We use the STM32 Hardware Timer 2, even thought the called function
-// is called TIMER4_COMPA_vect(). The reason is that Timer 4 on the STM32
-// is used for I2C, which is required for the EEPROM on the RTC module
+// Axis2 motor timer is on STM32 Hardware Timer 2
+// Even though the called function is TIMER4_COMPA_vect(). The reason is that Timer 4
+// on the STM32 is used for I2C, which is required for the EEPROM on the RTC module
 HardwareTimer Timer_Axis2(2);
 void TIMER4_COMPA_vect(void);
 
-extern long int siderealInterval;
-extern void SiderealClockSetInterval (long int);
-
 // Init sidereal clock timer
 void HAL_Init_Timer_Sidereal() {
-  SiderealClockSetInterval(siderealInterval);
+  Timer_Sidereal.pause();
+
+  Timer_Sidereal.setMode(TIMER_CH1, TIMER_OUTPUT_COMPARE);
+  Timer_Sidereal.setCompare(TIMER_CH1, 1); // Interrupt 1 count after each update
+  Timer_Sidereal.attachInterrupt(TIMER_CH1, TIMER1_COMPA_vect);
+
+  // Set up period
+  // 0.166... us per count (72/12 = 6MHz) 10.922 ms max, more than enough for the 1/100 second sidereal clock +/- any PPS adjustment for xo error
+  unsigned long psf = F_CPU/6000000; // for example, 72000000/6000000 = 12
+  Timer_Sidereal.setPrescaleFactor(psf);
+  Timer_Sidereal.setOverflow(round((60000.0/1.00273790935)/3.0));
+
+  // Refresh the timer's count, prescale, and overflow
+  Timer_Sidereal.refresh();
+
+  // Start the timer counting
+  Timer_Sidereal.resume();
 }
 
 // Init Axis1 and Axis2 motor timers and set their priorities
@@ -107,10 +138,10 @@ void HAL_Init_Timers_Motor() {
   Timer_Axis1.attachInterrupt(TIMER_CH3, TIMER3_COMPA_vect);
 
   // Set up period
-//  Timer_Axis1.setPeriod(100000.0);
-
-  Timer_Axis1.setPrescaleFactor(18);
-  Timer_Axis1.setOverflow(100000L/4L);
+  // 0.016384... us per count (72/18 = 4MHz) 16.384 ms max, good resolution for accurate motor timing and still a reasonable range (for lower steps per degree)
+  unsigned long psf = F_CPU/4000000; // for example, 72000000/4000000 = 18
+  Timer_Axis1.setPrescaleFactor(psf);
+  Timer_Axis1.setOverflow(65535); // allow enough time that the sidereal clock will tick
 
   // Refresh the timer's count, prescale, and overflow
   Timer_Axis1.refresh();
@@ -128,9 +159,8 @@ void HAL_Init_Timers_Motor() {
   Timer_Axis2.attachInterrupt(TIMER_CH2, TIMER4_COMPA_vect);
 
   // Set up period
-//  Timer_Axis2.setPeriod(100000.0); // in microseconds
-  Timer_Axis2.setPrescaleFactor(18);
-  Timer_Axis2.setOverflow(100000L/4L);
+  Timer_Axis2.setPrescaleFactor(psf);
+  Timer_Axis2.setOverflow(65535); // allow enough time that the sidereal clock will tick
 
   // Refresh the timer's count, prescale, and overflow
   Timer_Axis2.refresh();
@@ -147,44 +177,12 @@ void HAL_Init_Timers_Motor() {
   nvic_irq_set_priority(NVIC_TIMER3, 0);
 }
 
-//--------------------------------------------------------------------------------------------------
-// Set timer1 to interval (in microseconds*16), for the 1/100 second sidereal timer
-
-// This code is based on the following document
-//
-// http://docs.leaflabs.com/static.leaflabs.com/pub/leaflabs/maple-docs/0.0.10/lang/api/hardwaretimer.html#lang-hardwaretimer
-// And this document:
-//
-// http://docs.leaflabs.com/static.leaflabs.com/pub/leaflabs/maple-docs/0.0.12/timers.html
-// Pause the timer while we're configuring it
-
-#define ISR(f) void f (void)
-void TIMER1_COMPA_vect(void);
-// Sidereal timer is on STM32 Hardware Timer 1
-HardwareTimer Timer_Sidereal(1);
-
+// Set timer1 to interval (in 0.0625 microsecond units), for the 1/100 second sidereal timer
 void Timer1SetInterval(long iv, double rateRatio) {
-  iv=round(((double)iv)/rateRatio);
-
-  Timer_Sidereal.pause();
-
-  Timer_Sidereal.setMode(TIMER_CH1, TIMER_OUTPUT_COMPARE);
-  Timer_Sidereal.setCompare(TIMER_CH1, 1);  // Interrupt 1 count after each update
-  Timer_Sidereal.attachInterrupt(TIMER_CH1, TIMER1_COMPA_vect);
-
-  // Set up period
-  Timer_Sidereal.setPeriod(round((double)iv * 0.0625));
-
-  // Refresh the timer's count, prescale, and overflow
-  Timer_Sidereal.refresh();
-
-  // Start the timer counting
-  Timer_Sidereal.resume();
+  Timer_Sidereal.setOverflow(round((((double)iv/16.0)*6.0)/rateRatio)); // our "clock" ticks at 6MHz due to the pre-scaler setting
 }
 
-//--------------------------------------------------------------------------------------------------
-// Quickly reprogram the interval (in microseconds*(F_COMP/1000000.0)) for the motor timers, must work
-// from within the motor ISR timers
+// Set the interval (in microseconds*(F_COMP/1000000.0)) for the motor timers, must work from within the motor ISR timers
 void QuickSetIntervalAxis1(uint32_t r) {
   // Set up period
   Timer_Axis1.setOverflow(r);
@@ -212,4 +210,3 @@ void QuickSetIntervalAxis2(uint32_t r) {
 #define StepPinAxis2_LOW digitalWriteFast(Axis2StepPin, LOW)
 #define DirPinAxis2_HIGH digitalWriteFast(Axis2DirPin, HIGH)
 #define DirPinAxis2_LOW digitalWriteFast(Axis2DirPin, LOW)
-
