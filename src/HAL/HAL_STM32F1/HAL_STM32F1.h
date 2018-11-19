@@ -138,7 +138,7 @@ void HAL_Init_Timers_Motor() {
   Timer_Axis1.attachInterrupt(TIMER_CH3, TIMER3_COMPA_vect);
 
   // Set up period
-  // 0.016384... us per count (72/18 = 4MHz) 16.384 ms max, good resolution for accurate motor timing and still a reasonable range (for lower steps per degree)
+  // 0.25... us per count (72/18 = 4MHz) 16.384 ms max, good resolution for accurate motor timing and still a reasonable range (for lower steps per degree)
   unsigned long psf = F_CPU/4000000; // for example, 72000000/4000000 = 18
   Timer_Axis1.setPrescaleFactor(psf);
   Timer_Axis1.setOverflow(65535); // allow enough time that the sidereal clock will tick
