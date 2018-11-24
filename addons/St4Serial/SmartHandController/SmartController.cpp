@@ -25,8 +25,20 @@ static unsigned char align3_bits[] U8X8_PROGMEM = {
 static unsigned char align4_bits[] U8X8_PROGMEM = {
   0x00, 0x00, 0x00, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x00, 0x00, 0xc0, 0x03, 0xc0, 0x00, 0x40, 0x01, 0x40, 0x02, 0x14, 0x04, 0x14, 0x08, 0x1c, 0x10, 0x10, 0x20, 0x10, 0x00, 0x00, 0x00 };
 
+static unsigned char align5_bits[] U8X8_PROGMEM = {
+  0x00, 0x00, 0x00, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x00, 0x00, 0xc0, 0x03, 0xc0, 0x00, 0x40, 0x01, 0x40, 0x02, 0x1c, 0x04, 0x04, 0x08, 0x1c, 0x10, 0x10, 0x20, 0x1c, 0x00, 0x00, 0x00 };
+
 static unsigned char align6_bits[] U8X8_PROGMEM = {
   0x00, 0x00, 0x00, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x00, 0x00, 0xc0, 0x03, 0xc0, 0x00, 0x40, 0x01, 0x40, 0x02, 0x1c, 0x04, 0x04, 0x08, 0x1c, 0x10, 0x14, 0x20, 0x1c, 0x00, 0x00, 0x00 };
+
+static unsigned char align7_bits[] U8X8_PROGMEM = {
+  0x00, 0x00, 0x00, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x00, 0x00, 0xc0, 0x03, 0xc0, 0x00, 0x40, 0x01, 0x40, 0x02, 0x1c, 0x04, 0x10, 0x08, 0x08, 0x10, 0x08, 0x20, 0x04, 0x00, 0x00, 0x00 };
+
+static unsigned char align8_bits[] U8X8_PROGMEM = {
+  0x00, 0x00, 0x00, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x00, 0x00, 0xc0, 0x03, 0xc0, 0x00, 0x40, 0x01, 0x40, 0x02, 0x1c, 0x04, 0x14, 0x08, 0x1c, 0x10, 0x14, 0x20, 0x1c, 0x00, 0x00, 0x00 };
+
+static unsigned char align9_bits[] U8X8_PROGMEM = {
+  0x00, 0x00, 0x00, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x1c, 0x00, 0x00, 0x00, 0xc0, 0x03, 0xc0, 0x00, 0x40, 0x01, 0x40, 0x02, 0x1c, 0x04, 0x14, 0x08, 0x1c, 0x10, 0x10, 0x20, 0x10, 0x00, 0x00, 0x00 };
 
 static unsigned char home_bits[] U8X8_PROGMEM = {
   0x00, 0x02, 0x00, 0x07, 0x80, 0x0f, 0xc0, 0x1f, 0x80, 0x3f, 0x00, 0x7f, 0x00, 0x7e, 0x00, 0x7f, 0x80, 0xfb, 0xc0, 0xc1, 0xe0, 0x01, 0xbc, 0x49, 0x9e, 0x49, 0x9e, 0x79, 0x8c, 0x49, 0x80, 0x49 };
@@ -272,9 +284,9 @@ void SmartHandController::update()
   // power cycle reqd message
   if (powerCylceRequired) { display->setFont(u8g2_font_helvR12_tr); DisplayMessage("REBOOT", "DEVICE", 1000); return; }
   
-  if (telInfo.align == Telescope::ALI_SELECT_STAR_1 || telInfo.align == Telescope::ALI_SELECT_STAR_2 || 
-      telInfo.align == Telescope::ALI_SELECT_STAR_3 || telInfo.align == Telescope::ALI_SELECT_STAR_4 || 
-      telInfo.align == Telescope::ALI_SELECT_STAR_5 || telInfo.align == Telescope::ALI_SELECT_STAR_6) {
+  if (telInfo.align == Telescope::ALI_SELECT_STAR_1 || telInfo.align == Telescope::ALI_SELECT_STAR_2 || telInfo.align == Telescope::ALI_SELECT_STAR_3 || 
+      telInfo.align == Telescope::ALI_SELECT_STAR_4 || telInfo.align == Telescope::ALI_SELECT_STAR_5 || telInfo.align == Telescope::ALI_SELECT_STAR_6 ||
+      telInfo.align == Telescope::ALI_SELECT_STAR_7 || telInfo.align == Telescope::ALI_SELECT_STAR_8 || telInfo.align == Telescope::ALI_SELECT_STAR_9) {
     char message[10]="Star# ?";
     if (telInfo.align == Telescope::ALI_SELECT_STAR_1) strcpy(message,"Star #1");
     if (telInfo.align == Telescope::ALI_SELECT_STAR_2) strcpy(message,"Star #2");
@@ -282,6 +294,9 @@ void SmartHandController::update()
     if (telInfo.align == Telescope::ALI_SELECT_STAR_4) strcpy(message,"Star #4");
     if (telInfo.align == Telescope::ALI_SELECT_STAR_5) strcpy(message,"Star #5");
     if (telInfo.align == Telescope::ALI_SELECT_STAR_6) strcpy(message,"Star #6");
+    if (telInfo.align == Telescope::ALI_SELECT_STAR_7) strcpy(message,"Star #7");
+    if (telInfo.align == Telescope::ALI_SELECT_STAR_8) strcpy(message,"Star #8");
+    if (telInfo.align == Telescope::ALI_SELECT_STAR_9) strcpy(message,"Star #9");
     DisplayLongMessage("Select a Star", "From following list", "", message, -1);
 
     // bring up the list of stars so user can goto the alignment star
@@ -344,9 +359,10 @@ void SmartHandController::update()
     if (buttonPad.shift.timeUp()>250) {
       if (buttonPad.shift.wasDoublePressed()) { menuSpeedRate(); time_last_action = millis(); } else                                                                                  // change guide rate
       if (telInfo.align == Telescope::ALI_OFF && buttonPad.shift.wasPressed(false)) { page++; if (page > 2) page = 0; time_last_action = millis(); } else                             // cycle through disp of Eq, Hor, Time
-      if ((telInfo.align == Telescope::ALI_RECENTER_1 || telInfo.align == Telescope::ALI_RECENTER_2 || 
-           telInfo.align == Telescope::ALI_RECENTER_3 || telInfo.align == Telescope::ALI_RECENTER_4 || 
-           telInfo.align == Telescope::ALI_RECENTER_5 || telInfo.align == Telescope::ALI_RECENTER_6) && buttonPad.shift.wasPressed()) {                                               // add this align star
+      if ((telInfo.align == Telescope::ALI_RECENTER_1 || telInfo.align == Telescope::ALI_RECENTER_2 || telInfo.align == Telescope::ALI_RECENTER_3 ||
+           telInfo.align == Telescope::ALI_RECENTER_4 || telInfo.align == Telescope::ALI_RECENTER_5 || telInfo.align == Telescope::ALI_RECENTER_6 ||
+           telInfo.align == Telescope::ALI_RECENTER_7 || telInfo.align == Telescope::ALI_RECENTER_8 || telInfo.align == Telescope::ALI_RECENTER_9) && 
+           buttonPad.shift.wasPressed()) {                                             // add this align star
         if (telInfo.addStar()) { if (telInfo.align == Telescope::ALI_OFF) DisplayMessage("Alignment", "Success!", 2000); else DisplayMessage("Add Star", "Success!", 2000); } else DisplayMessage("Add Star", "Failed!", -1);
       }
     }
@@ -371,9 +387,11 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
   if (telInfo.hasTelStatus && telInfo.align != Telescope::ALI_OFF)
   {
     Telescope::TrackState curT = telInfo.getTrackingState();
-    if (curT != Telescope::TRK_SLEWING && (telInfo.align == Telescope::ALI_SLEW_STAR_1 || telInfo.align == Telescope::ALI_SLEW_STAR_2 ||
-                                           telInfo.align == Telescope::ALI_SLEW_STAR_3 || telInfo.align == Telescope::ALI_SLEW_STAR_4 ||
-                                           telInfo.align == Telescope::ALI_SLEW_STAR_5 || telInfo.align == Telescope::ALI_SLEW_STAR_6)) telInfo.align = static_cast<Telescope::AlignState>(telInfo.align + 1);
+    if (curT != Telescope::TRK_SLEWING && 
+       (telInfo.align == Telescope::ALI_SLEW_STAR_1 || telInfo.align == Telescope::ALI_SLEW_STAR_2 || telInfo.align == Telescope::ALI_SLEW_STAR_3 || 
+        telInfo.align == Telescope::ALI_SLEW_STAR_4 || telInfo.align == Telescope::ALI_SLEW_STAR_5 || telInfo.align == Telescope::ALI_SLEW_STAR_6 ||
+        telInfo.align == Telescope::ALI_SLEW_STAR_7 || telInfo.align == Telescope::ALI_SLEW_STAR_8 || telInfo.align == Telescope::ALI_SLEW_STAR_9)
+       ) telInfo.align = static_cast<Telescope::AlignState>(telInfo.align + 1);
     page = 3;
   }
 
@@ -412,7 +430,11 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
           if (telInfo.aliMode == Telescope::ALIM_TWO)   { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align2_bits); x -= icon_width + 1; } else
           if (telInfo.aliMode == Telescope::ALIM_THREE) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align3_bits); x -= icon_width + 1; } else
           if (telInfo.aliMode == Telescope::ALIM_FOUR)  { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align4_bits); x -= icon_width + 1; } else
-          if (telInfo.aliMode == Telescope::ALIM_SIX)   { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align6_bits); x -= icon_width + 1; }
+          if (telInfo.aliMode == Telescope::ALIM_FIVE)  { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align5_bits); x -= icon_width + 1; } else
+          if (telInfo.aliMode == Telescope::ALIM_SIX)   { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align6_bits); x -= icon_width + 1; } else
+          if (telInfo.aliMode == Telescope::ALIM_SEVEN) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align7_bits); x -= icon_width + 1; } else
+          if (telInfo.aliMode == Telescope::ALIM_EIGHT) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align8_bits); x -= icon_width + 1; } else
+          if (telInfo.aliMode == Telescope::ALIM_NINE ) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align9_bits); x -= icon_width + 1; }
         }
 
         if (telInfo.isPecPlaying())   { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, pec_play_bits);   x -= icon_width + 1; } else
@@ -588,14 +610,8 @@ bool SmartHandController::SelectStarAlign()
 {
   if (!cat_mgr.canFilter()) { cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0()); }
   cat_mgr.select(STAR);
-  if (telInfo.aliMode == Telescope::ALIM_ONE) {
-    if (telInfo.align == Telescope::ALI_SELECT_STAR_1) { cat_mgr.filter(FM_ALIGN_ALL_SKY); }
-  } else
-  if ((telInfo.aliMode == Telescope::ALIM_TWO) || (telInfo.aliMode == Telescope::ALIM_THREE)) {
-    if (telInfo.align == Telescope::ALI_SELECT_STAR_1) { cat_mgr.filter(FM_ALIGN_3STAR_1); } else 
-    if (telInfo.align == Telescope::ALI_SELECT_STAR_2) { cat_mgr.filter(FM_ALIGN_3STAR_2); } else 
-    if (telInfo.align == Telescope::ALI_SELECT_STAR_3) { cat_mgr.filter(FM_ALIGN_3STAR_3); }
-  } else cat_mgr.filter(FM_ABOVE_HORIZON);
+  
+  cat_mgr.filter(FM_ALIGN_ALL_SKY);
 
   cat_mgr.setIndex(0);
   if (cat_mgr.canFilter()) {
@@ -770,7 +786,11 @@ void SmartHandController::menuAlignment()
             case 2: telInfo.aliMode = Telescope::ALIM_TWO; break;
             case 3: telInfo.aliMode = Telescope::ALIM_THREE; break;
             case 4: telInfo.aliMode = Telescope::ALIM_FOUR; break;
+            case 5: telInfo.aliMode = Telescope::ALIM_FIVE; break;
             case 6: telInfo.aliMode = Telescope::ALIM_SIX; break;
+            case 7: telInfo.aliMode = Telescope::ALIM_SEVEN; break;
+            case 8: telInfo.aliMode = Telescope::ALIM_EIGHT; break;
+            case 9: telInfo.aliMode = Telescope::ALIM_NINE; break;
             defualt: break;
           }
           current_selection_L1 = 0; current_selection_L0 = 0; // Quit Menu
@@ -808,11 +828,20 @@ void SmartHandController::menuAlignment()
         default: break;
       }
     } else
-    if (maxAlignStars>5) {
+    if (maxAlignStars==6) {
       strcpy(string_list_AlignmentL1,"1-Star Align\n""3-Star Align\n""4-Star Align\n""6-Star Align\n""Show Model\n""Clear Model\n""Reset Home");
       current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Alignment", current_selection_L1, string_list_AlignmentL1);
       switch (current_selection_L1) {
         case 1: starsForAlign=1; break; case 2: starsForAlign=3; break; case 3: starsForAlign=4; break; case 4: starsForAlign=6; break;
+        case 5: showAlign=true; break;  case 6: clearAlign=true; break; case 7: resetAlign=true; break;
+        default: break;
+      }
+    } else
+    if (maxAlignStars==9) {
+      strcpy(string_list_AlignmentL1,"1-Star Align\n""3-Star Align\n""6-Star Align\n""9-Star Align\n""Show Model\n""Clear Model\n""Reset Home");
+      current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Alignment", current_selection_L1, string_list_AlignmentL1);
+      switch (current_selection_L1) {
+        case 1: starsForAlign=1; break; case 2: starsForAlign=3; break; case 3: starsForAlign=6; break; case 4: starsForAlign=9; break;
         case 5: showAlign=true; break;  case 6: clearAlign=true; break; case 7: resetAlign=true; break;
         default: break;
       }
@@ -846,7 +875,11 @@ void SmartHandController::menuAlignment()
         case 2: if (SetLX200(":A2#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_TWO;   else DisplayMessage("Alignment", "Failed!", -1); break;
         case 3: if (SetLX200(":A3#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_THREE; else DisplayMessage("Alignment", "Failed!", -1); break;
         case 4: if (SetLX200(":A4#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_FOUR;  else DisplayMessage("Alignment", "Failed!", -1); break;
+        case 5: if (SetLX200(":A5#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_FIVE;  else DisplayMessage("Alignment", "Failed!", -1); break;
         case 6: if (SetLX200(":A6#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_SIX;   else DisplayMessage("Alignment", "Failed!", -1); break;
+        case 7: if (SetLX200(":A7#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_SEVEN; else DisplayMessage("Alignment", "Failed!", -1); break;
+        case 8: if (SetLX200(":A8#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_EIGHT; else DisplayMessage("Alignment", "Failed!", -1); break;
+        case 9: if (SetLX200(":A9#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_NINE;  else DisplayMessage("Alignment", "Failed!", -1); break;
       }
   #ifndef ST4SMARTCONTROLLER_ON
       if (SetLX200(":R7#") == LX200VALUESET) DisplayMessage("Guide Rate", "64X Set", 1000);
@@ -866,6 +899,9 @@ void SmartHandController::menuAlignment()
       case 4: telInfo.align = Telescope::ALI_SELECT_STAR_4; break;
       case 5: telInfo.align = Telescope::ALI_SELECT_STAR_5; break;
       case 6: telInfo.align = Telescope::ALI_SELECT_STAR_6; break;
+      case 7: telInfo.align = Telescope::ALI_SELECT_STAR_7; break;
+      case 8: telInfo.align = Telescope::ALI_SELECT_STAR_8; break;
+      case 9: telInfo.align = Telescope::ALI_SELECT_STAR_9; break;
       default: telInfo.align = Telescope::ALI_SELECT_STAR_1; break;
     }
   }
