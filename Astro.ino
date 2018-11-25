@@ -323,12 +323,15 @@ void setDeltaTrackingRate() {
     getEqu(&r,&d,false);
     d1=r-newTargetRA;
     d2=d-newTargetDec;
+    if (getInstrPierSide()==PierSideEast) d2=-d2;
   #endif
     if ((abs(d1)<ArcSecPerStepAxis1/3600.0) && (abs(d2)<ArcSecPerStepAxis2/3600.0)) {
       trackingSyncSeconds=0;
     } else {
-      f1=(d1*3600.0)/20.0; if (f1<-5.0) f1=-5.0; if (f1>5.0) f1=5.0; // 0.75"/s per arc-second distance
-      f2=(d2*3600.0)/20.0; if (f2<-5.0) f2=-5.0; if (f2>5.0) f2=5.0;
+      f1=(d1*3600.0)/60.0; if (f1<-5.0) f1=-5.0; if (f1>5.0) f1=5.0;
+      if (abs(d1)<ArcSecPerStepAxis1/3600.0) f1=0.0;
+      f2=(d2*3600.0)/60.0; if (f2<-5.0) f2=-5.0; if (f2>5.0) f2=5.0;
+      if (abs(d2)<ArcSecPerStepAxis2/3600.0) f2=0.0;
     }
   }
 
