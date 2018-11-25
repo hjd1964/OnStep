@@ -89,7 +89,7 @@ boolean isSlewing() {
 
 // start a guide in RA or Azm, direction must be 'e', 'w', or 'b', guideRate is the rate selection (0 to 9), guideDuration is in ms (0 to ignore) 
 bool startGuideAxis1(char direction, int guideRate, long guideDuration) {
-  if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo) && (direction!=guideDirAxis1) && (axis1Enabled)) {
+  if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo) && (!trackingSyncInProgress()) && (direction!=guideDirAxis1) && (axis1Enabled)) {
     enableGuideRate(guideRate);
     guideDirAxis1=direction;
     guideTimeThisIntervalAxis1=micros();
@@ -110,7 +110,7 @@ void stopGuideAxis1() {
   
 // start a guide in Dec or Alt, direction must be 'n', 's', or 'b', guideRate is the rate selection (0 to 9), guideDuration is in ms (0 to ignore) 
 bool startGuideAxis2(char direction, int guideRate, long guideDuration, bool absolute) {
-  if (((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) && (direction!=guideDirAxis2) && (axis1Enabled)) {
+  if (((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) && (!trackingSyncInProgress()) && (direction!=guideDirAxis2) && (axis1Enabled)) {
     enableGuideRate(guideRate);
     guideDirAxis2=direction;
     guideTimeThisIntervalAxis2=micros();

@@ -276,6 +276,9 @@ void moveTo() {
           trackingState=lastTrackingState; lastTrackingState=TrackingNone;
           SiderealClockSetInterval(siderealInterval);
           setDeltaTrackingRate();
+          
+          // allow 10 seconds for synchronization of coordinates after goto ends
+          if (trackingState==TrackingSidereal) trackingSyncSeconds=10;
         }
       }
     }
