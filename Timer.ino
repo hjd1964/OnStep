@@ -50,8 +50,9 @@ void timer3SetInterval(long iv) {
   uint32_t i=iv; uint16_t t=1; while (iv>65536L) { t*=2; iv=i/t; if (t==4096) { iv=65535L; break; } }
   cli(); nextAxis1Rate=iv-1L; t3rep=t; fastAxis1=(t3rep==1); sei();
 #elif defined(__ARM_STM32__)
-  uint32_t i=iv; uint16_t t=1; while (iv>65536L*2L) { t++; iv=i/t; if (t==32) { iv=65535L*2L; break; } }
-  cli(); nextAxis1Rate=((F_COMP/1000000.0) * (iv*0.0625) * 0.5 - 1.0); t3rep=t; fastAxis1=(t3rep==1); sei();
+  // 0.0327 * 4096 = 134.21s
+  uint32_t i=iv; uint16_t t=1; while (iv>65536L*8L) { t*=2; iv=i/t; if (t==4096) { iv=65535L*8L; break; } }
+  cli(); nextAxis1Rate=((F_COMP/1000000.0) * (iv*0.0625) * 0.5); t3rep=t; fastAxis1=(t3rep==1); sei();
 #else
   // 4.194 * 32 = 134.21s
   uint32_t i=iv; uint16_t t=1; while (iv>65536L*1024L) { t++; iv=i/t; if (t==32) { iv=65535L*1024L; break; } }
@@ -73,8 +74,9 @@ void timer4SetInterval(long iv) {
   uint32_t i=iv; uint16_t t=1; while (iv>65536L) { t*=2; iv=i/t; if (t==4096) { iv=65535L; break; } }
   cli(); nextAxis2Rate=iv-1L; t4rep=t; fastAxis2=(t4rep==1); sei();
 #elif defined(__ARM_STM32__)
-  uint32_t i=iv; uint16_t t=1; while (iv>65536L*2L) { t++; iv=i/t; if (t==32) { iv=65535L*2L; break; } }
-  cli(); nextAxis2Rate=((F_COMP/1000000.0) * (iv*0.0625) * 0.5 - 1.0); t4rep=t; fastAxis2=(t4rep==1); sei();
+  // 0.0327 * 4096 = 134.21s
+  uint32_t i=iv; uint16_t t=1; while (iv>65536L*8L) { t*=2; iv=i/t; if (t==4096) { iv=65535L*8L; break; } }
+  cli(); nextAxis2Rate=((F_COMP/1000000.0) * (iv*0.0625) * 0.5); t4rep=t; fastAxis2=(t4rep==1); sei();
 #else
   // 4.194 * 32 = 134.21s
   uint32_t i=iv; uint16_t t=1; while (iv>65536L*1024L) { t++; iv=i/t; if (t==32) { iv=65535L*1024L; break; } }

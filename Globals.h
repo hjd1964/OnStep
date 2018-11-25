@@ -72,7 +72,9 @@ volatile double  trackingTimerRateAxis2= default_tracking_rate;
 volatile double  timerRateRatio        = ((double)StepsPerDegreeAxis1/(double)StepsPerDegreeAxis2);
 volatile boolean useTimerRateRatio     = (StepsPerDegreeAxis1!=StepsPerDegreeAxis2);
 #define StepsPerSecondAxis1              ((double)StepsPerDegreeAxis1/240.0)
+#define ArcSecPerStepAxis1               (3600.0/StepsPerDegreeAxis1)
 #define StepsPerSecondAxis2              ((double)StepsPerDegreeAxis2/240.0)
+#define ArcSecPerStepAxis2               (3600.0/StepsPerDegreeAxis2)
 #define BreakDistAxis1                   (2L)
 #define BreakDistAxis2                   (2L)
 long SecondsPerWormRotationAxis1       = ((long)(StepsPerWormRotationAxis1/StepsPerSecondAxis1));
@@ -182,10 +184,10 @@ boolean highPrecision = true;
 #define TrackingNone             0
 #define TrackingSidereal         1
 #define TrackingMoveTo           2
-#define TrackingSiderealDisabled 3
 volatile byte trackingState      = TrackingNone;
 byte abortTrackingState          = TrackingNone;
 volatile byte lastTrackingState  = TrackingNone;
+int trackingSyncSeconds          = 0;
 #define StartAbortSlew 1
 byte abortSlew                   = 0;
 volatile boolean safetyLimitsOn  = true;

@@ -41,7 +41,7 @@
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  1
 #define FirmwareVersionMinor  16
-#define FirmwareVersionPatch  "c"     // for example major.minor patch: 1.3c
+#define FirmwareVersionPatch  "g"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 2       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
@@ -188,17 +188,20 @@ void setup() {
 #endif
  
   // autostart tracking
-#if defined(AUTOSTART_TRACKING_ON) && (defined(MOUNT_TYPE_GEM) || defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORKALT))
-  // telescope should be set in the polar home (CWD) for a starting point
-  // this command sets indexAxis1, indexAxis2, azmCor=0; altCor=0;
-  setHome();
-
-  // orientation is unknown
-  safetyLimitsOn=false;
-
-  // start tracking
-  trackingState=TrackingSidereal;
-  enableStepperDrivers();
+#if defined(AUTOSTART_TRACKING_ON) 
+  #if !defined(MOUNT_TYPE_ALTAZM)
+    // telescope should be set in the polar home (CWD) for a starting point
+    setHome();
+  
+    // orientation is unknown
+    safetyLimitsOn=false;
+  
+    // start tracking
+    trackingState=TrackingSidereal;
+    enableStepperDrivers();
+  #else
+    #warning "AUTOSTART_TRACKING_ON ignored for MOUNT_TYPE_ALTAZM"
+  #endif
 #endif
 
   // start rotator if present

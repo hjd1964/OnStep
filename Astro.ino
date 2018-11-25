@@ -302,14 +302,43 @@ void horToEqu(double Alt, double Azm, double *HA, double *Dec) {
 // _deltaAxis1/2 are in arc-seconds/second
 double _deltaAxis1=15.0,_deltaAxis2=0.0;
 
+boolean trackingSyncInProgress() {
+  return ((trackingSyncSeconds > 0) && (trackingState==TrackingSidereal));
+}
+
 void setDeltaTrackingRate() {
+  double f1=0.0, f2=0.0;
+
+  if (trackingSyncInProgress()) {
+    trackingSyncSeconds--;
+  #ifdef MOUNT_TYPE_ALTAZM
+    double a,z,d1,d2,newTargetAlt,newTargetAzm;
+    getHor(&a,&z);
+    double newTargetHA=haRange(LST()*15.0-newTargetRA);
+    equToHor(newTargetHA,newTargetDec,&newTargetAlt,&newTargetAzm);
+    d1=-(z-newTargetAzm);
+    d2=-(a-newTargetAlt);
+  #else
+    double r,d,d1,d2;
+    getEqu(&r,&d,false);
+    d1=r-newTargetRA;
+    d2=d-newTargetDec;
+  #endif
+    if ((abs(d1)<ArcSecPerStepAxis1/3600.0) && (abs(d2)<ArcSecPerStepAxis2/3600.0)) {
+      trackingSyncSeconds=0;
+    } else {
+      f1=(d1*3600.0)/20.0; if (f1<-5.0) f1=-5.0; if (f1>5.0) f1=5.0; // 0.75"/s per arc-second distance
+      f2=(d2*3600.0)/20.0; if (f2<-5.0) f2=-5.0; if (f2>5.0) f2=5.0;
+    }
+  }
+
 #ifndef MOUNT_TYPE_ALTAZM
   if ((rateCompensation!=RC_REFR_BOTH) && (rateCompensation!=RC_FULL_BOTH)) _deltaAxis2=0.0;
 #endif
   cli();
   // trackingTimerRateAxis1/2 are x the sidereal rate
-  if (trackingState==TrackingSidereal) trackingTimerRateAxis1=_deltaAxis1/15.0; else trackingTimerRateAxis1=0.0;
-  if (trackingState==TrackingSidereal) trackingTimerRateAxis2=_deltaAxis2/15.0; else trackingTimerRateAxis2=0.0;
+  if (trackingState==TrackingSidereal) trackingTimerRateAxis1=(_deltaAxis1/15.0)+f1; else trackingTimerRateAxis1=0.0;
+  if (trackingState==TrackingSidereal) trackingTimerRateAxis2=(_deltaAxis2/15.0)+f2; else trackingTimerRateAxis2=0.0;
   sei();
   fstepAxis1.fixed=doubleToFixed( (((double)StepsPerDegreeAxis1/240.0)*(_deltaAxis1/15.0))/100.0 );
   fstepAxis2.fixed=doubleToFixed( (((double)StepsPerDegreeAxis2/240.0)*(_deltaAxis2/15.0))/100.0 );
