@@ -278,7 +278,7 @@ void moveTo() {
           setDeltaTrackingRate();
           
           // allow 10 seconds for synchronization of coordinates after goto ends
-          if (trackingState==TrackingSidereal) trackingSyncSeconds=10;
+          if (trackingState==TrackingSidereal) trackingSyncSeconds=15;
         }
       }
     }
