@@ -158,13 +158,15 @@ void dataClock() {
   unsigned long t1=t; t=micros();
   volatile unsigned long elapsed=t-t1;
 
-  DL("dataClock()");
+  D("dataClock(): ");
 
   if (digitalRead(ST4DEs)==HIGH) {
-    DL("dataClock() ST4DEs HIGH");
+    D(" ST4DEs HIGH");
     state=digitalRead(ST4DEn); 
-    D("dataClock() ST4DEn: ");
-    DL(state);
+    D(" ST4DEn: ");
+    D(state);
+    D(",");
+    DL(i);
     if (i==8) { if (state!=LOW) frame_error=true; }          // recv start bit
     if ((i>=0) && (i<=7)) { r_parity+=state; bitWrite(data_in,i,state); } // recv data bit
     if (i==-1) { if ((r_parity&1)!=state) recv_error=true; } // recv parity bit
@@ -172,20 +174,20 @@ void dataClock() {
     if (i==-3) {                                             // recv stop bit
       if (state!=LOW) frame_error=true;
 
-      if (frame_error) DL("dataClock() frame error");
-      if (recv_error)  DL("dataClock() recv error");
-
       if ((!frame_error) && (!recv_error)) {
+        DL("dataClock() no errors");
         if (data_in!=0) {
           SerialST4._recv_buffer[SerialST4._recv_tail]=(char)data_in; 
           SerialST4._recv_tail++;
         }
-        DL("dataClock() recevied data");
         SerialST4._recv_buffer[SerialST4._recv_tail]=(char)0;
       }
     }
+    if (frame_error) DL("dataClock() frame error");
+    if (recv_error)  DL("dataClock() recv error");
+
   } else {
-    DL("dataClock() ST4DEs not HIGH");
+    D(" ST4DEs not HIGH");
     if ((elapsed>1500L) || (i==-3)) {
       i=9; 
       r_parity=0; s_parity=0;
