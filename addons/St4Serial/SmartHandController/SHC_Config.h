@@ -8,7 +8,7 @@
 
 #ifdef SHC_ON
   // The serial interface to/from OnStep
-  #define Ser SerialST4             // You could also, for example, use the Teensy3.2's Serial1 interface "Ser Serial1"
+  #define Ser SerialST4             // You could also, for example, use the Teensy3.2's Serial3 interface "Ser Serial3"
   #define SERIAL_BAUD_DEFAULT 57200 // Default=57200, only used for async comms (not SerialST4)
   
   // Select the display type 0.96" is SSD1306 and 1.3" is SH1106
