@@ -556,7 +556,7 @@ void SmartHandController::drawReady()
 // Alt Main Menu (double click)
 void SmartHandController::menuSpeedRate()
 {
-#ifndef ST4SMARTCONTROLLER_ON
+#ifndef SHC_ON
   char * string_list_Speed = "0.25x\n0.5x\n1.0x\n2.0x\n4.0x\n16.0x\n32.0x\n64.0x\n0.5 Max\nMax";
 #else
   char * string_list_Speed = "0.25x\n0.5x\n1.0x\n2.0x\n4.0x\n8.0x\n24.0x\n48.0x\n0.5 Max\nMax";
@@ -669,7 +669,7 @@ void SmartHandController::menuPEC()
 void SmartHandController::menuSettings()
 {
   current_selection_L1 = 1;
-#ifdef ST4SMARTCONTROLLER_ON
+#ifdef SHC_ON
   while (current_selection_L1 != 0)
   {
     if (telInfo.isMountGEM()) {
@@ -881,7 +881,7 @@ void SmartHandController::menuAlignment()
         case 8: if (SetLX200(":A8#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_EIGHT; else DisplayMessage("Alignment", "Failed!", -1); break;
         case 9: if (SetLX200(":A9#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_NINE;  else DisplayMessage("Alignment", "Failed!", -1); break;
       }
-  #ifndef ST4SMARTCONTROLLER_ON
+  #ifndef SHC_ON
       if (SetLX200(":R7#") == LX200VALUESET) DisplayMessage("Guide Rate", "64X Set", 1000);
   #else
       if (SetLX200(":R7#") == LX200VALUESET) DisplayMessage("Guide Rate", "48X Set", 1000);
@@ -907,7 +907,7 @@ void SmartHandController::menuAlignment()
   }
 }
 
-#ifndef ST4SMARTCONTROLLER_ON
+#ifndef SHC_ON
 void SmartHandController::menuPier()
 {
   uint8_t choice = ((uint8_t)telInfo.getPierState());

@@ -1,5 +1,5 @@
 
-#ifndef ST4SMARTCONTROLLER_ON
+#ifndef SHC_ON
 void SmartHandController::menuMount()
 {
   current_selection_L2 = 1;

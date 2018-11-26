@@ -4,20 +4,20 @@
 #pragma once
 
 // set to _ON to activate this configuration
-#define SERIALSMARTCONTROLLER_OFF
+#define TEEN_ASTRO_OFF
 
-#ifdef SERIALSMARTCONTROLLER_ON
+#ifdef TEEN_ASTRO_ON
   #ifdef ARDUINO_ESP8266_WEMOS_D1MINI
-    // the serial interface to/from OnStep
+    // The serial interface to/from OnStep
     #define Ser Serial
     #define SERIAL_BAUD_DEFAULT 9600
     #define TIMEOUT_CMD 100           // Default=100 (0.1 seconds)
     #define BACKGROUND_CMD_RATE 150   // Defualt=150, regulates the background command rate
 
-    // the display, SSD1306 or SH1106
+    // The display, SSD1306 or SH1106
     #define OLED_DISPLAY SH1106
 
-    // the hand controller buttons
+    // The hand controller buttons
     #define B_PIN0 D8                 // Shift
     #define B_PIN1 D7                 // N
     #define B_PIN2 D6                 // S

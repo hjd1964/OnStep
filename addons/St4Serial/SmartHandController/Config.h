@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "ST4SmartConfig.h"
-#include "SerialSmartConfig.h"
+#include "SHC_Config.h"
+#include "TeenAstro_Config.h"
 
 // Enable debugging messages on DebugSer
 #define DEBUG_OFF                 // default=_OFF, use "DEBUG_ON" to activate
