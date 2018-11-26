@@ -1,6 +1,6 @@
 // -------------------------------------------------------------------------------
 // Configuration
-// *** user configuration is in ST4SmartConfig.h and SerialSmartConfig.h ***
+// *** user configuration is in SHC_Config.h and TeenAstro_Config.h ***
 
 #pragma once
 
