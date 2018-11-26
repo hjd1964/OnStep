@@ -12,7 +12,7 @@
   #define OLED_DISPLAY SH1106
 
   // Uncomment this to enable debugging. Only for developers!
-  #define DEBUG_ON
+  #define DEBUG_OFF
 
   // If we are not on an ESP32, then assume a Teensy 3.2
   #ifndef ESP32
