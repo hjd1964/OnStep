@@ -453,6 +453,8 @@ void processCommands() {
        } else
 //  :GD#   Get Telescope Declination
 //         Returns: sDD*MM# or sDD*MM'SS# (based on precision setting)
+//  :GDe#   Get Telescope Declination
+//         Returns: sDD*MM'SS.s#
       if (command[1]=='D')  { 
 #ifdef HAL_SLOW_PROCESSOR
         if (millis()-_coord_t<100)
@@ -463,11 +465,25 @@ void processCommands() {
           getEqu(&f,&f1,false); f/=15.0;
           _ra=f; _dec=f1; _coord_t=millis(); 
         }
-        if (!doubleToDms(reply,&f1,false,true)) commandError=true; else quietReply=true; 
+        if (parameter[0]==0) {
+          if (!doubleToDms(reply,&f1,false,true)) commandError=true; else quietReply=true; 
+        } else
+        if ((parameter[0]=='e') && (parameter[1]==0)) {
+          if (!doubleToDmsd(reply,&f1)) commandError=true; else quietReply=true; 
+        } else commandError=true;
       } else 
 //  :Gd#   Get Currently Selected Target Declination
 //         Returns: sDD*MM# or sDD*MM'SS# (based on precision setting)
-      if (command[1]=='d')  { if (!doubleToDms(reply,&newTargetDec,false,true)) commandError=true; else quietReply=true; } else 
+//  :Gde#  Get Currently Selected Target Declination
+//         Returns: sDD*MM'SS.s#
+      if (command[1]=='d')  { 
+        if (parameter[0]==0) {
+          if (!doubleToDms(reply,&newTargetDec,false,true)) commandError=true; else quietReply=true; 
+        } else
+        if ((parameter[0]=='e') && (parameter[1]==0)) {
+          if (!doubleToDmsd(reply,&newTargetDec)) commandError=true; else quietReply=true; 
+        } else commandError=true;
+      } else 
 //  :GG#   Get UTC offset time
 //         Returns: sHH#
 //         The number of decimal hours to add to local time to convert it to UTC
@@ -515,6 +531,8 @@ void processCommands() {
       if (command[1]=='o')  { sprintf(reply,"%02d*",maxAlt); quietReply=true; } else
 //  :GR#   Get Telescope RA
 //         Returns: HH:MM.T# or HH:MM:SS# (based on precision setting)
+//  :GRa#  Get Telescope RA
+//         Returns: HH:MM:SS.s#
       if (command[1]=='R')  {
 #ifdef HAL_SLOW_PROCESSOR
         if (millis()-_coord_t<100)
@@ -525,11 +543,26 @@ void processCommands() {
           getEqu(&f,&f1,false); f/=15.0;
           _ra=f; _dec=f1; _coord_t=millis(); 
         }
-        if (!doubleToHms(reply,&f,highPrecision)) commandError=true; else quietReply=true;  
+        if (parameter[0]==0) {
+           if (!doubleToHms(reply,&f,highPrecision)) commandError=true; else quietReply=true;  
+        } else
+        if ((parameter[0]=='a') && (parameter[1]==0)) {
+          if (!doubleToHmsd(reply,&f)) commandError=true; else quietReply=true;
+        } else commandError=true;
       } else 
 //  :Gr#   Get current/target object RA
 //         Returns: HH:MM.T# or HH:MM:SS (based on precision setting)
-      if (command[1]=='r')  { f=newTargetRA; f/=15.0; if (!doubleToHms(reply,&f,highPrecision)) commandError=true; else quietReply=true; } else 
+//  :Gra#  Get Telescope RA
+//         Returns: HH:MM:SS.ss#
+      if (command[1]=='r')  {
+        f=newTargetRA; f/=15.0;
+        if (parameter[0]==0) {
+           if (!doubleToHms(reply,&f,highPrecision)) commandError=true; else quietReply=true;
+        } else
+        if ((parameter[0]=='a') && (parameter[1]==0)) {
+          if (!doubleToHmsd(reply,&f)) commandError=true; else quietReply=true;
+        } else commandError=true;
+      } else 
 //  :GS#   Get the Sidereal Time
 //         Returns: HH:MM:SS#
 //         The Sidereal Time as an ASCII Sexidecimal value in 24 hour format
@@ -665,7 +698,7 @@ void processCommands() {
               case '1': if (getEnc(&f,&f1)==0) { if (!doubleToDms(reply,&f1,true,true)) commandError=true; else quietReply=true; } else commandError=true; break; // Get formatted absolute Axis2 angle 
               case '2': if (getEnc(&f,&f1)==0) { dtostrf(f,0,6,reply); quietReply=true; } else commandError=true; break;                                          // Get absolute Axis1 angle in degrees
               case '3': if (getEnc(&f,&f1)==0) { dtostrf(f1,0,6,reply); quietReply=true; } else commandError=true; break;                                         // Get absolute Axis2 angle in degrees
-              case '9': cli(); dtostrf(trackingTimerRateAxis1,1,8,reply); sei(); quietReply=true; break;                                                                        // Get current tracking rate
+              case '9': cli(); dtostrf(trackingTimerRateAxis1,1,8,reply); sei(); quietReply=true; break;                                                          // Get current tracking rate
               default:  commandError=true;
             }
           } else

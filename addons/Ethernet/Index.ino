@@ -1,6 +1,8 @@
 // -----------------------------------------------------------------------------------
 // The home page, status information
 
+#define HIGH_PRECISION_COORDS_ON
+
 #define leftTri  "&#x25c4;"
 #define rightTri "&#x25ba;"
 #define upTri    "&#x25b2;"
@@ -147,6 +149,19 @@ void handleRoot() {
 
   data+="<br /><b>Coordinates:</b><br />";
 
+#ifdef HIGH_PRECISION_COORDS_ON
+  // RA,Dec current
+  if (!sendCommand(":GRa#",temp1)) strcpy(temp1,"?");
+  if (!sendCommand(":GDe#",temp2)) strcpy(temp2,"?");
+  sprintf(temp,html_indexPosition,temp1,temp2); 
+  data += temp;
+
+  // RA,Dec target
+  if (!sendCommand(":Gra#",temp1)) strcpy(temp1,"?");
+  if (!sendCommand(":Gde#",temp2)) strcpy(temp2,"?");
+  sprintf(temp,html_indexTarget,temp1,temp2); 
+  data += temp;
+#else
   // RA,Dec current
   if (!sendCommand(":GR#",temp1)) strcpy(temp1,"?");
   if (!sendCommand(":GD#",temp2)) strcpy(temp2,"?");
@@ -158,6 +173,7 @@ void handleRoot() {
   if (!sendCommand(":Gd#",temp2)) strcpy(temp2,"?");
   sprintf(temp,html_indexTarget,temp1,temp2); 
   data += temp;
+#endif
 
 #ifdef ENCODERS_ON
   // RA,Dec OnStep position
