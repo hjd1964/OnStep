@@ -7,16 +7,19 @@
 #define SHC_ON
 
 #ifdef SHC_ON
+  // Select the display type by commenting out the one you don't use, and leaving the other one commented out
+
+  // SH1106 is the 1.3"
+  //#define OLED_DISPLAY SH1106
+  // SSD1306 is the 0.96"
+  #define OLED_DISPLAY SSD1306
+
   // The serial interface to/from OnStep
   #define Ser SerialST4             // You could also, for example, use the Teensy3.2's Serial3 interface "Ser Serial3"
   #define SERIAL_BAUD_DEFAULT 57200 // Default=57200, only used for async comms (not SerialST4)
-  
-  // Select the display type 0.96" is SSD1306 and 1.3" is SH1106
-  #define OLED_DISPLAY SH1106
 
-  // THAT'S IT FOR USER CONFIGURATION!
-
-  // -------------------------------------------------------------------------------
+  // THAT IS ALL FOR USER CONFIGURABLE PARAMETERS! Do not change anything below this line!
+  // -------------------------------------------------------------------------------------
 
   // If we are not on an ESP32, then assume a Teensy 3.2
   #ifndef ESP32
