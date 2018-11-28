@@ -2,7 +2,7 @@
 
 enum RateCompensation {RC_NONE, RC_REFR_RA, RC_REFR_BOTH, RC_FULL_RA, RC_FULL_BOTH};
 enum MountTypes {MT_UNKNOWN, MT_GEM, MT_FORK, MT_FORKALT, MT_ALTAZM};
-enum Errors {ERR_NONE, ERR_MOTOR_FAULT, ERR_ALT, ERR_LIMIT_SENSE, ERR_DEC, ERR_AZM, ERR_UNDER_POLE, ERR_MERIDIAN, ERR_SYNC};
+enum Errors {ERR_NONE, ERR_MOTOR_FAULT, ERR_ALT, ERR_LIMIT_SENSE, ERR_DEC, ERR_AZM, ERR_UNDER_POLE, ERR_MERIDIAN, ERR_SYNC, ERR_PARK, ERR_GOTO_SYNC};
 #define PierSideNone     0
 #define PierSideEast     1
 #define PierSideWest     2
@@ -125,7 +125,10 @@ class MountStatus {
       if (_lastError==ERR_AZM) strcpy(message,"Azm Limit Exceeded"); else
       if (_lastError==ERR_UNDER_POLE) strcpy(message,"Under Pole Limit Exceeded"); else
       if (_lastError==ERR_MERIDIAN) strcpy(message,"Meridian Limit (W) Exceeded"); else
-      if (_lastError==ERR_SYNC) strcpy(message,"Sync. ignored >30&deg;");
+      if (_lastError==ERR_SYNC) strcpy(message,"Sync. ignored >30&deg;"); else
+      if (_lastError==ERR_PARK) strcpy(message,"Park Failed"); else
+      if (_lastError==ERR_GOTO_SYNC) strcpy(message,"Goto Sync. Failed"); else
+        sprintf(message,"Unknown Error, code %d",(int)_lastError);
       return message[0];
     }
   private:
