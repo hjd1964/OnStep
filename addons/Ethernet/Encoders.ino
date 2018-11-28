@@ -32,10 +32,13 @@ const char html_encScript2[] =
     "ctx.moveTo(0, 150); ctx.lineTo(600, 150);"
     "ctx.stroke();"
 
-    "ctx.beginPath();"
-    "ctx.strokeStyle='#111111';"
-    "ctx.moveTo(x, 0); ctx.lineTo(x, 300);"
-    "ctx.stroke();"
+    "if (document.getElementById('osc').innerText=='On') {"
+      "ctx.beginPath();"
+      "ctx.strokeStyle='#111111';"
+      "x1=x+1; if (x1>599) x1=0;"
+      "ctx.moveTo(x1, 0); ctx.lineTo(x1, 300);"
+      "ctx.stroke();"
+    "};"
 
     "var stO=document.getElementById('stO').innerText;"
 
@@ -113,9 +116,9 @@ const char html_encLtaAxis1[] =
 const char html_encPropAxis1[] = 
 "Encoder proportional response: <br />"
 "<form method='get' action='/enc.htm'>"
-" <input 'width: 75px' value='%ld' type='number' name='pr' min='50' max='1000'>"
+" <input 'width: 75px' value='%ld' type='number' name='pr' min='50' max='5000'>"
 "<button type='submit'>Upload</button>"
-" (P 50 to 1000&#x25;)"
+" (P 50 to 5000&#x25;)"
 "</form><br />";
 
 #ifndef AXIS1_ENC_AUTO_RATE_COMP_ON
@@ -143,6 +146,13 @@ const char html_encIntPolMagAxis1[] =
 " (Magnitude 0 to 29999 PPM, 0 to 3&#x25;)"
 "</form><br />";
 #endif
+
+const char html_encSweepEn1[] =
+"<br />&nbsp; Sweep (<span id='osc'>?</span>):<br />";
+const char html_encSweepEn2[] =
+"&nbsp; <button type='button' onpointerdown=\"s('sw','on')\" >On</button>"
+"<button type='button' onpointerdown=\"s('sw','off')\" >Off</button>"
+"<br /><br />";
 
 const char html_encEnd[] = 
 "</form>";
@@ -293,6 +303,9 @@ void handleEncoders() {
   data += "<br /><canvas id='myCanvas' width='600' height='300' style='margin-left: 8px; border:2px solid #999999;'></canvas>";
   data += "&nbsp; Center: OnStep rate, Blue: STA (range &#xb1;0.1), Green: LTA (range &#xb1;0.01)<br />";
 
+  data += html_encSweepEn1;
+  data += html_encSweepEn2;
+
   encoders.clearAverages();
 #endif
 
@@ -335,6 +348,7 @@ if (finalCorrection<0) {
 }
 
   data += "orc|"; if (encRateControl) data+="On\n"; else data+="Off\n";
+  data += "osc|"; if (encSweep) data+="On\n"; else data+="Off\n";
 #endif
   data += "aste|";  if (encAutoSync) data+="On\n"; else data+="Off\n";
 
@@ -436,7 +450,7 @@ void processEncodersGet() {
   v=server.arg("pr");
   if (v!="") {
     int i;
-    if ( (atoi2((char*)v.c_str(),&i)) && ((i>=50) && (i<=1000))) { 
+    if ( (atoi2((char*)v.c_str(),&i)) && ((i>=50) && (i<=5000))) { 
       Axis1EncProp=i;
 #ifndef EEPROM_DISABLED
       EEPROM_writeLong(632,Axis1EncProp);
@@ -484,6 +498,14 @@ void processEncodersGet() {
     }
   }
 #endif // AXIS1_ENC_INTPOL_COS_ON
+
+  // Sweep control
+  v=server.arg("sw");
+  if (v!="") {
+    if (v=="on") encSweep=true;
+    if (v=="off") encSweep=false;
+  }
+
 #endif // AXIS1_ENC_RATE_CONTROL_ON
 
 #ifndef EEPROM_COMMIT_DISABLED
