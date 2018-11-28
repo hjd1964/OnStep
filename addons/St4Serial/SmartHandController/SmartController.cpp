@@ -487,15 +487,15 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
     // show time
     if (page == 2) {
       telInfo.updateTime();
-      if (telInfo.hasInfoUTC && telInfo.hasInfoSideral)
+      if (telInfo.hasInfoUTC && telInfo.hasInfoSidereal)
       {
         char us[20]; strcpy(us,telInfo.TempUTC); us[2]=0; us[5]=0;
         x = u8g2_GetDisplayWidth(u8g2);  u8g2_uint_t y = 36;
         u8g2_DrawUTF8(u8g2, 0, y, "UTC"); display->drawRA( x, y, us, &us[3], &us[6]);
 
-        char ss[20]; strcpy(ss,telInfo.TempSideral); ss[2]=0; ss[5]=0;
+        char ss[20]; strcpy(ss,telInfo.TempSidereal); ss[2]=0; ss[5]=0;
         y += line_height + 4;
-        u8g2_DrawUTF8(u8g2, 0, y, "Sideral"); display->drawRA(x, y, ss, &ss[3], &ss[6]);
+        u8g2_DrawUTF8(u8g2, 0, y, "Sidereal"); display->drawRA(x, y, ss, &ss[3], &ss[6]);
       }
     }
 
