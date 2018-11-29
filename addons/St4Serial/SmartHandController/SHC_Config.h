@@ -14,6 +14,10 @@
   // SSD1306 is the 0.96"
   //#define OLED_DISPLAY SSD1306
 
+  // Configure defaults for display dimming and blanking (in milliseconds, 0 disables)
+  #define DISPLAY_DIM_TIME     30000        // original value 30000
+  #define DISPLAY_BLANK_TIME  120000        // original value 120000
+
   // The serial interface to/from OnStep
   #define Ser SerialST4             // You could also, for example, use the Teensy3.2's Serial3 interface "Ser Serial3"
   #define SERIAL_BAUD_DEFAULT 57200 // Default=57200, only used for async comms (not SerialST4)

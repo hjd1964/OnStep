@@ -278,8 +278,8 @@ void SmartHandController::update()
     if (sleepDisplay) { display->setContrast(maxContrast); display->sleepOff(); sleepDisplay = false; lowContrast = false; buttonPad.clearAllPressed(); time_last_action = millis(); }
     if (lowContrast)  { display->setContrast(maxContrast); lowContrast = false; time_last_action = top; }
   } else if (sleepDisplay) return;
-  if (top - time_last_action > 120000) { display->sleepOn(); sleepDisplay = true; return; }
-  if (top - time_last_action > 30000 && !lowContrast) { display->setContrast(0); lowContrast = true; return; }
+  if (DISPLAY_BLANK_TIME && top - time_last_action > DISPLAY_BLANK_TIME) { display->sleepOn(); sleepDisplay = true; return; }
+  if (DISPLAY_DIM_TIME   && top - time_last_action > DISPLAY_DIM_TIME && !lowContrast) { display->setContrast(0); lowContrast = true; return; }
 
   // power cycle reqd message
   if (powerCylceRequired) { display->setFont(u8g2_font_helvR12_tr); DisplayMessage("REBOOT", "DEVICE", 1000); return; }
@@ -1377,4 +1377,3 @@ bool SmartHandController::DisplayMessageLX200(LX200RETURN val, bool silentOk)
   }
   return isOk(val);
 }
-
