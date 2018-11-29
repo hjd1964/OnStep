@@ -50,14 +50,17 @@
 // For rotator stepper driver
 #define Axis3DirPin   33    // Pin 33 (Dir)
 #define Axis3StepPin  30    // Pin 30 (Step)
+#define Axis3_EN      -1    // No EN Pin
 
 // For focuser1 stepper driver
 #define Axis4DirPin   32    // Pin 32 (Dir)
 #define Axis4StepPin  31    // Pin 31 (Step)
+#define Axis4_EN      -1    // No EN Pin
 
 // For focuser2 stepper driver
 #define Axis5DirPin   33    // Pin 33 (Dir)
 #define Axis5StepPin  30    // Pin 30 (Step)
+#define Axis5_EN      -1    // No EN Pin
 
 // ST4 interface
 #define ST4RAw        10    // Pin 10 ST4 RA- West
