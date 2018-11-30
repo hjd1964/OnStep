@@ -10,9 +10,13 @@
   // Select the display type by commenting out the one you don't use, and leaving the other one commented out
 
   // SH1106 is the 1.3"
-  //#define OLED_DISPLAY SH1106
+  #define OLED_DISPLAY SH1106
   // SSD1306 is the 0.96"
-  #define OLED_DISPLAY SSD1306
+  //#define OLED_DISPLAY SSD1306
+
+  // Configure defaults for display dimming and blanking (in milliseconds, 0 disables)
+  #define DISPLAY_DIM_TIME     30000        // original value 30000
+  #define DISPLAY_BLANK_TIME  120000        // original value 120000
 
   // The serial interface to/from OnStep
   #define Ser SerialST4             // You could also, for example, use the Teensy3.2's Serial3 interface "Ser Serial3"
@@ -60,10 +64,10 @@
     #define B_PIN5 39   // F
     #define B_PIN6 35   // f
 
-    #define ST4RAw 26   // ST4 RA- West,  send data to OnStep
-    #define ST4DEs 27   // ST4 DE- South, clock input to ISR
-    #define ST4DEn 14   // ST4 DE+ North, recv data from OnStep
-    #define ST4RAe 23   // ST4 RA+ East,  always 12.5 Hz square wave on this pin
+    #define ST4RAw 23   // ST4 RA- West,  send data to OnStep
+    #define ST4DEs 14   // ST4 DE- South, clock input to ISR
+    #define ST4DEn 27   // ST4 DE+ North, recv data from OnStep
+    #define ST4RAe 26   // ST4 RA+ East,  always 12.5 Hz square wave on this pin
   #endif 
 
   #include "St4SerialSlave.h"

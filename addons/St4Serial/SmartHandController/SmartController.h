@@ -81,6 +81,8 @@ private:
   void menuMeridianFlips();
   void menuTracking();
   void menuContrast();
+  void menuDimTimeout();
+  void menuBlankTimeout();
   void menuLatitude();
   void menuLongitude();
   void menuZone();
@@ -107,4 +109,3 @@ private:
   bool DisplayMessageLX200(LX200RETURN val, bool silentOk = true);
 };
 extern SmartHandController HdCrtlr;
-

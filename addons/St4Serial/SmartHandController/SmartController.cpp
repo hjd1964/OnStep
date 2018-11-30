@@ -190,6 +190,9 @@ static const unsigned char teenastro_bits[] U8X8_PROGMEM = {
   0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
   0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 
+unsigned long display_blank_time = DISPLAY_BLANK_TIME;
+unsigned long display_dim_time = DISPLAY_DIM_TIME;  
+
 void gethms(const long& v, uint8_t& v1, uint8_t& v2, uint8_t& v3)
 {
   v3 = v % 60;
@@ -278,8 +281,8 @@ void SmartHandController::update()
     if (sleepDisplay) { display->setContrast(maxContrast); display->sleepOff(); sleepDisplay = false; lowContrast = false; buttonPad.clearAllPressed(); time_last_action = millis(); }
     if (lowContrast)  { display->setContrast(maxContrast); lowContrast = false; time_last_action = top; }
   } else if (sleepDisplay) return;
-  if (top - time_last_action > 120000) { display->sleepOn(); sleepDisplay = true; return; }
-  if (top - time_last_action > 30000 && !lowContrast) { display->setContrast(0); lowContrast = true; return; }
+  if (display_blank_time && top - time_last_action > display_blank_time) { display->sleepOn(); sleepDisplay = true; return; }
+  if (display_dim_time && top - time_last_action > display_dim_time && !lowContrast) { display->setContrast(0); lowContrast = true; return; }
 
   // power cycle reqd message
   if (powerCylceRequired) { display->setFont(u8g2_font_helvR12_tr); DisplayMessage("REBOOT", "DEVICE", 1000); return; }
@@ -933,7 +936,7 @@ void SmartHandController::menuPier()
 
 void SmartHandController::menuDisplay()
 {
-  const char *string_list_Display = "Turn Off\nContrast";
+  const char *string_list_Display = "Turn Off\nContrast\nDim Timeout\nBlank Timeout";
   current_selection_L2 = 1;
   while (current_selection_L2 != 0)
   {
@@ -950,6 +953,12 @@ void SmartHandController::menuDisplay()
       break;
     case 2:
       menuContrast();
+      break;
+    case 3:
+      menuDimTimeout();
+      break;
+    case 4:
+      menuBlankTimeout();
       break;
     default:
       break;
@@ -1213,6 +1222,34 @@ void SmartHandController::menuContrast()
     //EEPROM.write(14, maxContrast);
     //EEPROM.commit();
     display->setContrast(maxContrast);
+  }
+}
+
+void SmartHandController::menuDimTimeout()
+{
+  const char *string_list_Display = "Disable\n30 sec\n60 sec";
+  current_selection_L3 = 2;
+
+  if (current_selection_L3 > 0)
+  {
+    current_selection_L3 = display->UserInterfaceSelectionList(&buttonPad, "Dim Timeout", current_selection_L3, string_list_Display);
+    display_dim_time = (current_selection_L3 - 1) * 30000;
+    //EEPROM.writeLong(16, display_dim_time);
+    //EEPROM.commit();
+  }
+}
+
+void SmartHandController::menuBlankTimeout()
+{
+  const char *string_list_Display = "Disable\n1 min\n2 min\n3 min\n4 min\n5 min";
+  current_selection_L3 = 3;
+
+  if (current_selection_L3 > 0)
+  {
+    current_selection_L3 = display->UserInterfaceSelectionList(&buttonPad, "Blank Timeout", current_selection_L3, string_list_Display);
+    display_blank_time = (current_selection_L3 - 1) * 60 * 1000;
+    //EEPROM.writeLong(20, display_blank_time);
+    //EEPROM.commit();
   }
 }
 
