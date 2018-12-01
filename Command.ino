@@ -131,17 +131,11 @@ void processCommands() {
 //         8) Issue a goto command
 //         9) Center the star/object using the guide commands (as needed)
 //         10) Call :A+# command to accept the correction
-//         Returns:
-//         1: When ready for your goto commands
-//         0: If mount is busy
-        if ((command[1]>='1') && (command[1]<='9')) {
+//          Return: 0 on failure
+//                  1 on success
+        if ((command[1]>='1') && (command[1]<=MAX_NUM_ALIGN_STARS) && (parameter[0]==0)) {
           // set current time and date before calling this routine
 
-          // Two star and three star align not supported with Fork mounts in alternate mode
-#ifdef MOUNT_TYPE_FORK_ALT
-          if (command[1]=='1') {
-#endif
-        
           // telescope should be set in the polar home (CWD) for a starting point
           // this command sets indexAxis1, indexAxis2, azmCor=0; altCor=0;
           setHome();
@@ -154,10 +148,6 @@ void processCommands() {
           alignNumStars=command[1]-'0';
           alignThisStar=1;
        
-#if defined(MOUNT_TYPE_FORK_ALT)
-          } else commandError=true;
-#endif
-
           if (commandError) { alignNumStars=0; alignThisStar=1; }
         } else
 //  :A+#  Manual Alignment, set target location
