@@ -338,7 +338,11 @@ LX200RETURN SyncGotoLX200(bool sync, float &Ra, float &Dec)
   }
   
   Ephemeris::floatingHoursToHoursMinutesSeconds(Ra, &ivr1, &ivr2, &fvr3);
-  Ephemeris::floatingDegreesToDegreesMinutesSeconds(abs(Dec), &ivd1, &ivd2, &fvd3);
+  Ephemeris::floatingDegreesToDegreesMinutesSeconds(Dec, &ivd1, &ivd2, &fvd3);
+
+  // Make sure that degrees does not have a sign, if we are south of the celestial equator
+  ivd1 = abs(ivd1);
+
   if (Dec<0.0) sign='-';
 
   if (SetTargetRaLX200(ivr1, ivr2, (int)fvr3) ==  LX200VALUESET && SetTargetDecLX200(sign, ivd1, ivd2, (int)fvd3) == LX200VALUESET) {
