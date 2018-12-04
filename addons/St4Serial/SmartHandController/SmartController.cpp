@@ -588,26 +588,28 @@ void SmartHandController::menuMain()
   {
     boolean sync=false;
     if (!telInfo.isMountAltAz()) {
-      const char *string_list_main_UnParkedL0 = "Goto\n""Sync\n""Align\n""Parking\n""PEC\n""Settings";
+      const char *string_list_main_UnParkedL0 = "Goto\n""Sync\n""Align\n""Parking\n""Tracking\n""PEC\n""Settings";
       current_selection_L0 = display->UserInterfaceSelectionList(&buttonPad, "Main Menu", current_selection_L0, string_list_main_UnParkedL0);
       switch (current_selection_L0) {
         case 1: menuSyncGoto(false); break;
         case 2: if (display->UserInterfaceInputValueBoolean(&buttonPad, "Sync Here?", &sync)) if (sync) DisplayMessageLX200(SetLX200(":CS#"),false); break;
         case 3: menuAlignment(); break;
         case 4: menuParking(); break;
-        case 5: menuPEC(); break;
-        case 6: menuSettings(); break;
+        case 5: menuTracking(); break;
+        case 6: menuPEC(); break;
+        case 7: menuSettings(); break;
         default: break;
       }
     } else {
-      const char *string_list_main_UnParkedL0 = "Goto\n""Sync\n""Align\n""Parking\n""Settings";
+      const char *string_list_main_UnParkedL0 = "Goto\n""Sync\n""Align\n""Parking\n""Tracking\n""Settings";
       current_selection_L0 = display->UserInterfaceSelectionList(&buttonPad, "Main Menu", current_selection_L0, string_list_main_UnParkedL0);
       switch (current_selection_L0) {
         case 1: menuSyncGoto(false); break;
         case 2: if (display->UserInterfaceInputValueBoolean(&buttonPad, "Sync Here?", &sync)) if (sync) DisplayMessageLX200(SetLX200(":CS#"),false); break;
         case 3: menuAlignment(); break;
         case 4: menuParking(); break;
-        case 5: menuSettings(); break;
+        case 5: menuTracking(); break;
+        case 6: menuSettings(); break;
         default: break;
       }
     }
@@ -683,7 +685,7 @@ void SmartHandController::menuSettings()
   while (current_selection_L1 != 0)
   {
     if (telInfo.isMountGEM()) {
-      const char *string_list_SettingsL1 = "Date/Time\n""Display\n""Buzzer\n""Meridian Flp\n""Tracking\n""Configuration\n""Site";
+      const char *string_list_SettingsL1 = "Date/Time\n""Display\n""Buzzer\n""Meridian Flp\n""Configuration\n""Site";
       current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Settings", current_selection_L1, string_list_SettingsL1);
       switch (current_selection_L1)
       {
@@ -691,22 +693,20 @@ void SmartHandController::menuSettings()
       case 2: menuDisplay(); break;
       case 3: menuSound(); break;
       case 4: menuMeridianFlips(); break;
-      case 5: menuTracking(); break;
       case 6: menuMount(); break; // Configuration
       case 7: menuSite(); break;
       default: break;
       }
     } else {
-      const char *string_list_SettingsL1 = "Date/Time\n""Display\n""Buzzer\n""Tracking\n""Configuration\n""Site";
+      const char *string_list_SettingsL1 = "Date/Time\n""Display\n""Buzzer\n""Configuration\n""Site";
       current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Settings", current_selection_L1, string_list_SettingsL1);
       switch (current_selection_L1)
       {
       case 1: menuLocalDateTime(); break;
       case 2: menuDisplay(); break;
       case 3: menuSound(); break;
-      case 4: menuTracking(); break;
-      case 5: menuMount(); break; // Configuration
-      case 6: menuSite(); break;
+      case 4: menuMount(); break; // Configuration
+      case 5: menuSite(); break;
       default: break;
       }
     }
@@ -714,7 +714,7 @@ void SmartHandController::menuSettings()
 #else
   while (current_selection_L1 != 0)
   {
-    const char *string_list_SettingsL1 = "Date/Time\n""Pier Side\n""Goto Speed\n""Display\n""Buzzer\n""Meridian Flp\n""Tracking Rates\n""Mount\n""Limits\n""Wifi\n""Site";
+    const char *string_list_SettingsL1 = "Date/Time\n""Pier Side\n""Goto Speed\n""Display\n""Buzzer\n""Meridian Flp\n""Mount\n""Limits\n""Wifi\n""Site";
     current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Settings", current_selection_L1, string_list_SettingsL1);
     switch (current_selection_L1)
     {
@@ -724,11 +724,10 @@ void SmartHandController::menuSettings()
     case 4:  menuDisplay(); break;
     case 5:  menuSound(); break;
     case 6:  if (telInfo.isMountGEM()) menuMeridianFlips(); else DisplayMessage("Meridian flips", "are disabled", 1500); break;
-    case 7:  menuTracking(); break;
-    case 8:  menuMount(); break;
-    case 9:  menuLimits(); break;
-    case 10: menuWifi(); break;
-    case 11: menuSite(); break;
+    case 7:  menuMount(); break;
+    case 8:  menuLimits(); break;
+    case 9:  menuWifi(); break;
+    case 10: menuSite(); break;
     default: break;
     }
   }
