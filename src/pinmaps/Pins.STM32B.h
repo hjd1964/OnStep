@@ -50,10 +50,10 @@
   #define A2ST          PA0
   #define A2DR          PC15
 
-  #define S4N           PA6 
-  #define S4S           PA7
-  #define S4W           PB0
-  #define S4E           PB1
+  #define S4N           PA7
+  #define S4S           PA6
+  #define S4W           PB1
+  #define S4E           PB0
 
   #define LED           PC13
 
