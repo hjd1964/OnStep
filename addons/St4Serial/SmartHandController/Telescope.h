@@ -39,7 +39,7 @@ public:
   char TempAz[20];
   char TempAlt[20];
   unsigned long lastStateAzAlt;
-  char TempUTC[20];
+  char TempLocalTime[20];
   char TempSidereal[20];
   unsigned long lastStateTime;
   char TelStatus[20];
