@@ -693,8 +693,8 @@ void SmartHandController::menuSettings()
       case 2: menuDisplay(); break;
       case 3: menuSound(); break;
       case 4: menuMeridianFlips(); break;
-      case 6: menuMount(); break; // Configuration
-      case 7: menuSite(); break;
+      case 5: menuMount(); break; // Configuration
+      case 6: menuSite(); break;
       default: break;
       }
     } else {
