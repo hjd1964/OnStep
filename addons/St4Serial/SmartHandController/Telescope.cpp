@@ -21,7 +21,7 @@ void Telescope::updateTime(boolean immediate)
 {
   if ((millis() - lastStateTime > BACKGROUND_CMD_RATE) && ((updateSeq%4==2) || (updateSeq%4==3) || immediate) && connected)
   {
-    if ((updateSeq%4==2) || immediate) { hasInfoUTC = GetLX200(":GL#", TempUTC) == LX200VALUEGET; if (!hasInfoUTC) connected = true; }
+    if ((updateSeq%4==2) || immediate) { hasInfoUTC = GetLX200(":GL#", TempLocalTime) == LX200VALUEGET; if (!hasInfoUTC) connected = true; }
     if ((updateSeq%4==3) || immediate) { hasInfoSidereal = GetLX200(":GS#", TempSidereal) == LX200VALUEGET; if (!hasInfoSidereal) connected = true; lastStateTime = millis(); }
   }
 };
