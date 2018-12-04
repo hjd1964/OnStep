@@ -398,6 +398,16 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
     page = 3;
   }
 
+  // update status info.
+  if (page == 0)
+    telInfo.updateRaDec();
+  else
+    if (page == 1)
+      telInfo.updateAzAlt();
+    else
+      if (page == 2)
+        telInfo.updateTime();
+ 
   // the graphics loop
   u8g2_FirstPage(u8g2);
   do
@@ -460,7 +470,6 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
     // show equatorial coordinates
     if (page == 0)
     {
-      telInfo.updateRaDec();
       if (telInfo.hasInfoRa && telInfo.hasInfoDec) {
         char rs[20]; strcpy(rs,telInfo.TempRa); rs[2]=0; rs[5]=0;
         x = u8g2_GetDisplayWidth(u8g2);  u8g2_uint_t y = 36;
@@ -474,7 +483,6 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
 
     // show horizon coordinates
     if (page == 1) {
-      telInfo.updateAzAlt();
       if (telInfo.hasInfoAz && telInfo.hasInfoAlt)
       {
         char zs[20]; strcpy(zs,telInfo.TempAz); zs[3]=0; zs[6]=0;
@@ -489,7 +497,6 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
     
     // show time
     if (page == 2) {
-      telInfo.updateTime();
       if (telInfo.hasInfoUTC && telInfo.hasInfoSidereal)
       {
         char us[20]; strcpy(us,telInfo.TempUTC); us[2]=0; us[5]=0;
@@ -1414,4 +1421,3 @@ bool SmartHandController::DisplayMessageLX200(LX200RETURN val, bool silentOk)
   }
   return isOk(val);
 }
-
