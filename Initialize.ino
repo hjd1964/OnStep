@@ -452,6 +452,9 @@ unsigned int translateMicrosteps(int axis, int DriverModel, unsigned int Microst
     case LV8729:
       Mode = searchTable(StepsLV8729, LEN_LV8729, Microsteps);
       break;
+    case ST820:
+      Mode = searchTable(StepsST820, LEN_ST820, Microsteps);
+      break;
     case TMC2100:
       Mode = searchTable(StepsTMC2100, LEN_TMC2100, Microsteps);
       break;
