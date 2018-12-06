@@ -353,7 +353,11 @@
     #endif
   #elif AXIS1_DRIVER_MODEL == ST820
     #if AXIS1_MICROSTEPS!=1 && AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16 && AXIS1_MICROSTEPS!=32 && AXIS1_MICROSTEPS!=128 && AXIS1_MICROSTEPS!=256
-      #error "Configuration: AXIS1_MICROSTEPS; ST820 invalid micro-step mode, use: 256,128,,32,16,8,4,2,or 1"
+      #error "Configuration: AXIS1_MICROSTEPS; ST820 invalid micro-step mode, use: 256,128,32,16,8,4,2,or 1"
+    #endif
+  #elif AXIS1_DRIVER_MODEL == S109
+    #if AXIS1_MICROSTEPS!=1 && AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16 && AXIS1_MICROSTEPS!=32
+      #error "Configuration: AXIS1_MICROSTEPS; ST820 invalid micro-step mode, use: 32,16,8,4,2,or 1"
     #endif
   #elif AXIS1_DRIVER_MODEL == TMC2100
     #define MODE_SWITCH_BEFORE_SLEW_ON
@@ -397,7 +401,11 @@
     #endif
   #elif AXIS2_DRIVER_MODEL == ST820
     #if AXIS2_MICROSTEPS!=1 && AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=8 && AXIS2_MICROSTEPS!=16 && AXIS2_MICROSTEPS!=32 && AXIS2_MICROSTEPS!=128 && AXIS2_MICROSTEPS!=256
-      #error "Configuration: AXIS2_MICROSTEPS; ST820 invalid micro-step mode, use: 256,128,,32,16,8,4,2,or 1"
+      #error "Configuration: AXIS2_MICROSTEPS; ST820 invalid micro-step mode, use: 256,128,32,16,8,4,2,or 1"
+    #endif
+  #elif AXIS2_DRIVER_MODEL == S109
+    #if AXIS2_MICROSTEPS!=1 && AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=8 && AXIS2_MICROSTEPS!=16 && AXIS2_MICROSTEPS!=32 
+      #error "Configuration: AXIS2_MICROSTEPS; ST820 invalid micro-step mode, use: 32,16,8,4,2,or 1"
     #endif
   #elif AXIS2_DRIVER_MODEL == TMC2100
     #if AXIS2_MICROSTEPS!=1 && AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=16
