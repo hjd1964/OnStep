@@ -14,6 +14,17 @@ button st4n;
 button st4s;
 button st4e;
 button st4w;
+
+// Single byte guide commands
+#define ccMe 14
+#define ccMw 15
+#define ccMn 16
+#define ccMs 17
+#define ccQe 18
+#define ccQw 19
+#define ccQn 20
+#define ccQs 21
+
 #endif
 
 long          guideTimeRemainingAxis1    = -1;
@@ -221,7 +232,19 @@ void ST4() {
         SerialST4.begin();
       }
       return;
-    } else { SerialST4.poll(); return; }
+    } else { 
+      char c=SerialST4.poll();
+
+      // process any single byte guide commands
+      if (c==ccMe) startGuideAxis1('e',currentGuideRate,GUIDE_TIME_LIMIT*1000);
+      if (c==ccMw) startGuideAxis1('w',currentGuideRate,GUIDE_TIME_LIMIT*1000);
+      if (c==ccMn) startGuideAxis2('n',currentGuideRate,GUIDE_TIME_LIMIT*1000);
+      if (c==ccMs) startGuideAxis2('s',currentGuideRate,GUIDE_TIME_LIMIT*1000);
+      if ((c==ccQe) || (c==ccQw)) stopGuideAxis1();
+      if ((c==ccQn) || (c==ccQs)) stopGuideAxis2();
+      
+      return;
+    }
   } else {
     if (shcActive) {
       #ifdef ST4_ON
@@ -362,4 +385,3 @@ void ST4() {
 #endif
 #endif
 }
-

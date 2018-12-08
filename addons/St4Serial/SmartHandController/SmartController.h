@@ -8,6 +8,16 @@
 #define SH1106 0
 #define SSD1306 1
 
+// Single byte guide commands
+#define ccMe 14
+#define ccMw 15
+#define ccMn 16
+#define ccMs 17
+#define ccQe 18
+#define ccQw 19
+#define ccQn 20
+#define ccQs 21
+
 class SmartHandController
 {
 public:

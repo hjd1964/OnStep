@@ -326,15 +326,14 @@ void SmartHandController::update()
   else // guide
   {
     buttonCommand = false;
-    if (!moveEast  && buttonPad.e.isDown()) { moveEast = true;   Ser.print(":Me#"); buttonCommand=true; } else
-    if (moveEast   && buttonPad.e.isUp())   { moveEast = false;  Ser.print(":Qe#"); buttonCommand=true; buttonPad.e.clearPress(); }
-    if (!moveWest  && buttonPad.w.isDown()) { moveWest = true;   Ser.print(":Mw#"); buttonCommand=true; } else
-    if (moveWest   && buttonPad.w.isUp())   { moveWest = false;  Ser.print(":Qw#"); buttonCommand=true; buttonPad.w.clearPress(); }
-    if (!moveNorth && buttonPad.n.isDown()) { moveNorth = true;  Ser.print(":Mn#"); buttonCommand=true; } else
-    if (moveNorth  && buttonPad.n.isUp())   { moveNorth = false; Ser.print(":Qn#"); buttonCommand=true; buttonPad.n.clearPress(); }
-    if (!moveSouth && buttonPad.s.isDown()) { moveSouth = true;  Ser.print(":Ms#"); buttonCommand=true; } else
-    if (moveSouth  && buttonPad.s.isUp())   { moveSouth = false; Ser.print(":Qs#"); buttonCommand=true; buttonPad.s.clearPress(); }
-
+    if (!moveEast  && buttonPad.e.isDown()) { moveEast = true;   Ser.write(ccMe); buttonCommand=true; } else
+    if (moveEast   && buttonPad.e.isUp()  ) { moveEast = false;  Ser.write(ccQe); buttonCommand=true; buttonPad.e.clearPress(); }
+    if (!moveWest  && buttonPad.w.isDown()) { moveWest = true;   Ser.write(ccMw); buttonCommand=true; } else
+    if (moveWest   && buttonPad.w.isUp()  ) { moveWest = false;  Ser.write(ccQw); buttonCommand=true; buttonPad.w.clearPress(); }
+    if (!moveNorth && buttonPad.n.isDown()) { moveNorth = true;  Ser.write(ccMn); buttonCommand=true; } else
+    if (moveNorth  && buttonPad.n.isUp()  ) { moveNorth = false; Ser.write(ccQn); buttonCommand=true; buttonPad.n.clearPress(); }
+    if (!moveSouth && buttonPad.s.isDown()) { moveSouth = true;  Ser.write(ccMs); buttonCommand=true; } else
+    if (moveSouth  && buttonPad.s.isUp()  ) { moveSouth = false; Ser.write(ccQs); buttonCommand=true; buttonPad.s.clearPress(); }
     if (buttonCommand) { time_last_action = millis(); return; }
   }
 
