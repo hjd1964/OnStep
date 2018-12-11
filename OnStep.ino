@@ -176,6 +176,9 @@ void setup() {
   setDeltaTrackingRate();
   initStartTimers();
 
+  // give the ESP8266, etc. a moment to boot before we take control of the Serial TX lines
+  delay(500);
+
   SerialA.begin(9600);
 #ifdef HAL_SERIAL_B_ENABLED
   SerialB.begin(SERIAL_B_BAUD_DEFAULT);
