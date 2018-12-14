@@ -177,13 +177,13 @@ void handleEncoders() {
   data +="<script>var ajaxPage='enc.txt';</script>\n";
   data +=html_ajax_active;
   data +="<script>auto2Rate=2;</script>";
-  sendHtml(data); data="";
+  sendHtml(data);
 
   data += html_encScript1;
-  sendHtml(data); data="";
+  sendHtml(data);
 
   data += html_encScript2;
-  sendHtml(data); data="";
+  sendHtml(data);
 
   // send a standard http response header
   data += html_main_cssB;
@@ -192,14 +192,14 @@ void handleEncoders() {
   data += html_main_css3;
   data += html_main_css4;
   data += html_main_css5;
-  sendHtml(data); data="";
+  sendHtml(data);
   data += html_main_css6;
   data += html_main_css7;
   data += html_main_css8;
   data += html_main_cssE;
   data += html_headE;
   data += html_bodyB;
-  sendHtml(data); data="";
+  sendHtml(data);
 
   // get status
   mountStatus.update();
@@ -220,7 +220,7 @@ void handleEncoders() {
   data += html_linksEncS;
 #endif
   data += html_links4N;
-  sendHtml(data); data="";
+  sendHtml(data);
   data += html_links5N;
 #ifndef OETHS
   data += html_links6N;
@@ -236,7 +236,7 @@ void handleEncoders() {
   // Autosync
   data += html_encEn1;
   data += html_encEn2;
-  sendHtml(data); data="";
+  sendHtml(data);
   
   // Encoder sync thresholds
   sprintf(temp,html_encMxAxis0);
@@ -245,7 +245,7 @@ void handleEncoders() {
   data += temp;
   sprintf(temp,html_encMxAxis2,Axis2EncDiffLimit);
   data += temp;
-  sendHtml(data); data="";
+  sendHtml(data);
   
 #ifdef AXIS1_ENC_RATE_CONTROL_ON
   // OnStep rate control
@@ -258,7 +258,7 @@ void handleEncoders() {
   data += temp;
   sprintf(temp,html_encLtaAxis1,Axis1EncLtaSamples);
   data += temp;
-  sendHtml(data); data="";
+  sendHtml(data);
 
   // Encoder poportional response
   sprintf(temp,html_encPropAxis1,Axis1EncProp);
@@ -279,7 +279,7 @@ void handleEncoders() {
   sprintf(temp,html_encIntPolMagAxis1,Axis1EncIntPolMag);
   data += temp;
 #endif
-  sendHtml(data); data="";
+  sendHtml(data);
 
   // Encoder status display
   sprintf(temp,"Axis1 rates (x Sidereal):<br />");
@@ -298,7 +298,7 @@ void handleEncoders() {
   data += temp;
   sprintf(temp,"&nbsp; Intpol Phase = <span id='ipP'>?</span><br />");
   data += temp;
-  sendHtml(data); data="";
+  sendHtml(data);
 
   data += "<br /><canvas id='myCanvas' width='600' height='300' style='margin-left: 8px; border:2px solid #999999;'></canvas>";
   data += "&nbsp; Center: OnStep rate, Blue: STA (range &#xb1;0.1), Green: LTA (range &#xb1;0.01)<br />";
@@ -318,7 +318,7 @@ void handleEncoders() {
   data += temp;
   sendHtml(data);
 
-  sendHtmlDone();
+  sendHtmlDone(data);
 }
 
 #ifdef OETHS
@@ -517,4 +517,3 @@ void processEncodersGet() {
 }
 
 #endif
-

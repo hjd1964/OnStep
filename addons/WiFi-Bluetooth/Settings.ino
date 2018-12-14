@@ -74,14 +74,14 @@ void handleSettings() {
   data += html_main_css3;
   data += html_main_css4;
   data += html_main_css5;
-  sendHtml(data); data="";
+  sendHtml(data);
   data += html_main_css6;
   data += html_main_css7;
   data += html_main_css8;
   data += html_main_cssE;
   data += html_headE;
   data += html_bodyB;
-  sendHtml(data); data="";
+  sendHtml(data);
   
   // active ajax page is: settingsAjax();
   data +="<script>var ajaxPage='settings.txt';</script>\n";
@@ -99,7 +99,7 @@ void handleSettings() {
   data += html_links1N;
   data += html_links2N;
   data += html_links3N;
-  sendHtml(data); data="";
+  sendHtml(data);
 #ifdef ENCODERS_ON
   data += html_linksEncN;
 #endif
@@ -109,7 +109,7 @@ void handleSettings() {
   data += html_links6N;
 #endif
   data += html_onstep_header4;
-  sendHtml(data); data="";
+  sendHtml(data);
   
   data+="<div style='width: 35em;'>";
 
@@ -125,7 +125,7 @@ void handleSettings() {
     data += html_settingsTrackComp1;
     data += html_settingsTrackComp2;
   }
-  sendHtml(data); data="";
+  sendHtml(data);
   data += html_settingsBuzzer1;
   if (mountStatus.valid()) { if (mountStatus.buzzerEnabled()) data+="On"; else data+="Off"; } else data+="?";
   data += html_settingsBuzzer2;
@@ -145,7 +145,7 @@ void handleSettings() {
   data += "</div></div></body></html>";
   
   sendHtml(data);
-  sendHtmlDone();
+  sendHtmlDone(data);
 }
 
 #ifdef OETHS
@@ -219,4 +219,3 @@ void processSettingsGet() {
   // clear any possible response
   temp[Ser.readBytesUntil('#',temp,20)]=0;
 }
-

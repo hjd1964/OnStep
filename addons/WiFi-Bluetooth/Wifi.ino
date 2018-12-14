@@ -96,7 +96,7 @@ const char html_login[] =
 "Setup:<br/><br/>"
 "Enable either station <b>OR</b> AP mode, both enabled can cause performance issues.&nbsp;&nbsp;"
 "However, if just setting up or testing it can be desirable to enable both modes temporarily to guard against being locked out.<br/>"
-"If locked out of the ESP8266, a Sketch uploaded to the MCU (Teensy3.2, Launchpad, etc.) which sends an 'R' at 9600 baud on the serial interface "
+"If locked out of the ESP8266, a Sketch uploaded to the MCU (Teensy3.x, STM32, Mega2560, etc.) which sends an 'R' at 9600 baud on the serial interface "
 "in reply to any '#' received will cause a reset to AP only enabled and the default SSID/Password.<br/><br/>"
 "\r\n";
 
@@ -122,14 +122,14 @@ void handleWifi() {
   data += html_main_css3;
   data += html_main_css4;
   data += html_main_css5;
-  sendHtml(data); data="";
+  sendHtml(data);
   data += html_main_css6;
   data += html_main_css7;
   data += html_main_css8;
   data += html_main_cssE;
   data += html_headE;
   data += html_bodyB;
-  sendHtml(data); data="";
+  sendHtml(data);
 
   mountStatus.update(true);
 
@@ -142,7 +142,7 @@ void handleWifi() {
   data += html_links1N;
   data += html_links2N;
   data += html_links3N;
-  sendHtml(data); data="";
+  sendHtml(data);
 #ifdef ENCODERS_ON
   data += html_linksEncN;
 #endif
@@ -150,7 +150,7 @@ void handleWifi() {
   data += html_links5N;
   data += html_links6S;
   data += html_onstep_header4;
-  sendHtml(data); data="";
+  sendHtml(data);
 
   data+="<div style='width: 40em;'>";
 
@@ -178,7 +178,7 @@ void handleWifi() {
     sprintf(temp,html_wifiSTASN,wifi_sta_sn[0],wifi_sta_sn[1],wifi_sta_sn[2],wifi_sta_sn[3]); data += temp;
     sprintf(temp,html_wifiSSID2,stationDhcpEnabled?"checked":"",stationEnabled?"checked":""); data += temp;
     sprintf(temp,html_wifiSSID3,wifi_ap_ssid,"",wifi_ap_ch); data += temp;
-    sendHtml(data); data="";
+    sendHtml(data);
   
     uint8_t macap[6] = {0,0,0,0,0,0}; WiFi.softAPmacAddress(macap);
     char wifi_ap_mac[80]="";
@@ -196,7 +196,7 @@ void handleWifi() {
   data += temp;
 
   sendHtml(data);
-  sendHtmlDone();
+  sendHtmlDone(data);
 }
 
 void processWifiGet() {
@@ -421,4 +421,3 @@ int hexToInt(String s) {
     return i0*16+i1;
   } else return -1;
 }
-

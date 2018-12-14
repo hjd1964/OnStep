@@ -77,7 +77,7 @@ void handleRoot() {
   data += html_main_css4;
   data += html_main_css5;
   data += html_main_css6;
-  sendHtml(data); data="";
+  sendHtml(data);
   data += html_main_css7;
   data += html_main_css8;
   data += html_main_css_control1;
@@ -86,7 +86,7 @@ void handleRoot() {
   data += html_main_cssE;
   data += html_headE;
   data += html_bodyB;
-  sendHtml(data); data="";
+  sendHtml(data);
 
   // get status (all)
   mountStatus.update(true);
@@ -100,7 +100,7 @@ void handleRoot() {
   data += html_links1S;
   data += html_links2N;
   data += html_links3N;
-  sendHtml(data); data="";
+  sendHtml(data);
 #ifdef ENCODERS_ON
   data += html_linksEncN;
 #endif
@@ -110,7 +110,7 @@ void handleRoot() {
   data += html_links6N;
 #endif
   data += html_onstep_header4;
-  sendHtml(data); data="";
+  sendHtml(data);
 
   data+="<div style='width: 27em;'>";
 
@@ -138,7 +138,7 @@ void handleRoot() {
   if (!sendCommand(":Gt#",temp2)) strcpy(temp2,"?");
   sprintf(temp,html_indexSite,temp1,temp2);
   data += temp;
-  sendHtml(data); data="";
+  sendHtml(data);
 
 #ifdef AMBIENT_CONDITIONS_ON
   if (!sendCommand(":GX9A#",temp1)) strcpy(temp1,"?"); sprintf(temp,html_indexTPHD,"Temperature:",temp1,"&deg;C"); data+=temp;
@@ -204,7 +204,7 @@ void handleRoot() {
   if (!mountStatus.valid()) strcpy(temp2,"?");
   sprintf(temp,html_indexPier,temp1,temp2);
   data += temp;
-  sendHtml(data); data="";
+  sendHtml(data);
 
   long lat=LONG_MIN; if (sendCommand(":Gt#",temp1)) { temp1[3]=0; if (temp1[0]=='+') temp1[0]='0'; lat=strtol(temp1,NULL,10); }
   if (abs(lat)<=89) {
@@ -236,7 +236,7 @@ void handleRoot() {
       data += temp;
     }
   }
-  sendHtml(data); data="";
+  sendHtml(data);
 
   data+="<br /><b>Operations:</b><br />";
 
@@ -264,7 +264,7 @@ void handleRoot() {
   if (temp2[strlen(temp2)-2]==',') { temp2[strlen(temp2)-2]=0; strcat(temp2,"</font>)<font class=\"c\">"); } else strcpy(temp2,"");
   sprintf(temp,html_indexTracking,temp1,temp2);
   data += temp;
-  sendHtml(data); data="";
+  sendHtml(data);
 
   // Tracking rate
   if ((sendCommand(":GT#",temp1)) && (strlen(temp1)>6)) {
@@ -286,7 +286,7 @@ void handleRoot() {
     } else sprintf(temp,html_indexMaxSpeed,"?");
     data += temp;
   }
-  sendHtml(data); data="";
+  sendHtml(data);
 
   data+="<br /><b>State:</b><br />";
 
@@ -307,6 +307,5 @@ void handleRoot() {
   data += "</div></body></html>";
 
   sendHtml(data);
-  sendHtmlDone();
+  sendHtmlDone(data);
 }
-

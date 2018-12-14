@@ -37,7 +37,7 @@
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
 #define FirmwareVersionMinor  "5"
-#define FirmwareVersionPatch  "e"
+#define FirmwareVersionPatch  "f"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
@@ -57,10 +57,17 @@ Encoders encoders;
 
 #include "MountStatus.h"
 
-// macros to help with sending webpage data
-#define sendHtmlStart() server.setContentLength(CONTENT_LENGTH_UNKNOWN); server.send(200, "text/html", "");
-#define sendHtml(x) server.sendContent(x)
-#define sendHtmlDone() server.client().stop()
+#ifndef LEGACY_TRANSMIT_ON
+  // macros to help with sending webpage data, chunked
+  #define sendHtmlStart() server.setContentLength(CONTENT_LENGTH_UNKNOWN); server.sendHeader("Cache-Control","no-cache"); server.send(200, "text/html", String());
+  #define sendHtml(x) server.sendContent(x); x=""
+  #define sendHtmlDone(x) server.sendContent("");
+#else
+  // macros to help with sending webpage data, normal method
+  #define sendHtmlStart()
+  #define sendHtml(x)
+  #define sendHtmlDone(x) server.send(200, "text/html", x)
+#endif
 
 int WebTimeout=TIMEOUT_WEB;
 int CmdTimeout=TIMEOUT_CMD;
@@ -405,4 +412,3 @@ const char* HighSpeedCommsStr(long baud) {
   if (baud==28800) { return ":SB3#"; }
   if (baud==19200) { return ":SB4#"; } else { return ":SB5#"; }
 }
-
