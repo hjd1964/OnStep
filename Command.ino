@@ -584,8 +584,8 @@ void processCommands() {
 //         Returns: SS#
       if (command[1]=='U')  {
         i=0;
-        if (trackingState!=TrackingSidereal)     reply[i++]='n';                      // [n]ot tracking
-        if (trackingState!=TrackingMoveTo)       reply[i++]='N';                      // [N]o goto
+        if ((trackingState!=TrackingSidereal) || trackingSyncInProgress()) reply[i++]='n'; // [n]ot tracking
+        if ((trackingState!=TrackingMoveTo) && !trackingSyncInProgress())  reply[i++]='N'; // [N]o goto
         const char *parkStatusCh = "pIPF";       reply[i++]=parkStatusCh[parkStatus]; // not [p]arked, parking [I]n-progress, [P]arked, Park [F]ailed
         if (pecRecorded)                         reply[i++]='R';                      // PEC data has been [R]ecorded
         if (atHome)                              reply[i++]='H';                      // at [H]ome
@@ -2044,4 +2044,3 @@ bool cmdReply(char *s) {
   strcpy(s,_replyX); _replyX[0]=0;
   return true;
 }
-

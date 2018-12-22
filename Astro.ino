@@ -352,7 +352,8 @@ void horToEqu(double Alt, double Azm, double *HA, double *Dec) {
 double _deltaAxis1=15.0,_deltaAxis2=0.0;
 
 boolean trackingSyncInProgress() {
-  return ((trackingSyncSeconds > 0) && (trackingState==TrackingSidereal));
+  if ((trackingSyncSeconds > 0) && (trackingState!=TrackingSidereal)) trackingSyncSeconds=0;
+  return trackingSyncSeconds > 0;
 }
 
 void setDeltaTrackingRate() {
@@ -797,5 +798,3 @@ void soundClick() {
     #endif
   }
 }
-
-
