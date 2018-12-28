@@ -51,6 +51,7 @@ const char* html_indexMaxSpeed = "&nbsp;&nbsp;Maximum slew speed: <font class='c
 const char* html_indexTPHD = "&nbsp;&nbsp;%s <font class='c'>%s</font>%s<br />";
 #endif
 
+const char* html_indexDriverStatus = " Driver: <font class='c'>%s</font><br />";
 const char* html_indexLastError = "&nbsp;&nbsp;Last Error: <font class='c'>%s</font><br />";
 const char* html_indexWorkload = "&nbsp;&nbsp;Workload: <font class='c'>%s</font><br />";
 
@@ -289,6 +290,56 @@ void handleRoot() {
   sendHtml(data);
 
   data+="<br /><b>State:</b><br />";
+
+  if (mountStatus.axisStatusValid()) {
+    // Stepper driver status Axis1
+    strcpy(temp1,"");
+    if (mountStatus.axis1StSt()) strcat(temp1,"Standstill, "); else {
+      if (mountStatus.axis1OLa() || mountStatus.axis1OLb()) {
+        strcat(temp1,"Open Load ");
+        if (mountStatus.axis1OLa()) strcat(temp1,"A");
+        if (mountStatus.axis1OLb()) strcat(temp1,"B");
+        strcat(temp1,", ");
+      }
+    }
+    if (mountStatus.axis1S2Ga() || mountStatus.axis1S2Ga()) {
+      strcat(temp1,"Short Gnd ");
+      if (mountStatus.axis1S2Ga()) strcat(temp1,"A");
+      if (mountStatus.axis1S2Gb()) strcat(temp1,"B");
+      strcat(temp1,", ");
+    }
+    if (mountStatus.axis1OT()) strcat(temp1,"Shutdown Over 150C, ");
+    if (mountStatus.axis1OTPW()) strcat(temp1,"Pre-warning &gt;120C, ");
+    if (strlen(temp1)>2) temp1[strlen(temp1)-2]=0;
+    if (strlen(temp1)==0) strcpy(temp1,"Ok");
+    sprintf(temp,html_indexDriverStatus,temp1);
+    data += "&nbsp;&nbsp;Axis1";
+    data += temp;
+  
+    // Stepper driver status Axis2
+    strcpy(temp1,"");
+    if (mountStatus.axis2StSt()) strcat(temp1,"Standstill, "); else {
+      if (mountStatus.axis2OLa() || mountStatus.axis2OLb()) {
+        strcat(temp1,"Open Load ");
+        if (mountStatus.axis2OLa()) strcat(temp1,"A");
+        if (mountStatus.axis2OLb()) strcat(temp1,"B");
+        strcat(temp1,", ");
+      }
+    }
+    if (mountStatus.axis2S2Ga() || mountStatus.axis2S2Ga()) {
+      strcat(temp1,"Short Gnd ");
+      if (mountStatus.axis2S2Ga()) strcat(temp1,"A");
+      if (mountStatus.axis2S2Gb()) strcat(temp1,"B");
+      strcat(temp1,", ");
+    }
+    if (mountStatus.axis2OT()) strcat(temp1,"Shutdown Over 150C, ");
+    if (mountStatus.axis2OTPW()) strcat(temp1,"Pre-warning &gt;120C, ");
+    if (strlen(temp1)>2) temp1[strlen(temp1)-2]=0;
+    if (strlen(temp1)==0) strcpy(temp1,"Ok");
+    sprintf(temp,html_indexDriverStatus,temp1);
+    data += "&nbsp;&nbsp;Axis2";
+    data += temp;
+  }
 
   // Last Error
   if (mountStatus.lastError()!=ERR_NONE) strcpy(temp1,"</font><font class=\"y\">"); else strcpy(temp1,"");

@@ -731,6 +731,36 @@ void processCommands() {
               default:  commandError=true;
             }
           } else
+#if (AXIS1_FAULT==TMC2130) && (AXIS2_FAULT==TMC2130)
+          if (parameter[0]=='U') { // Un: Get stepper driver statUs
+
+            switch (parameter[1]) {
+              case '1':
+                tmcAxis1.getStatus();
+                strcat(reply,tmcAxis1.statusSTST() ? "ST," : ","); // Standstill
+                strcat(reply,tmcAxis1.statusOLa() ? "OA," : ",");  // Open Load A
+                strcat(reply,tmcAxis1.statusOLb() ? "OB," : ",");  // Open Load B
+                strcat(reply,tmcAxis1.statusS2Ga() ? "GA," : ","); // Short to Ground A
+                strcat(reply,tmcAxis1.statusS2Gb() ? "GB," : ","); // Short to Ground B
+                strcat(reply,tmcAxis1.statusOT() ? "OT," : ",");   // Overtemperature Shutdown 150C
+                strcat(reply,tmcAxis1.statusOTPW() ? "PW" : "");   // Overtemperature Pre-warning 120C
+                quietReply=true;
+              break;
+              case '2':
+                tmcAxis2.getStatus();
+                strcat(reply,tmcAxis2.statusSTST() ? "ST," : ","); // Standstill
+                strcat(reply,tmcAxis2.statusOLa() ? "OA," : ",");  // Open Load A
+                strcat(reply,tmcAxis2.statusOLb() ? "OB," : ",");  // Open Load B
+                strcat(reply,tmcAxis2.statusS2Ga() ? "GA," : ","); // Short to Ground A
+                strcat(reply,tmcAxis2.statusS2Gb() ? "GB," : ","); // Short to Ground B
+                strcat(reply,tmcAxis2.statusOT() ? "OT," : ",");   // Overtemperature Shutdown 150C
+                strcat(reply,tmcAxis2.statusOTPW() ? "PW" : "");   // Overtemperature Pre-warning 120C
+                quietReply=true;
+              break;
+              default:  commandError=true;
+            }
+          } else
+#endif
           if (parameter[0]=='E') { // En: Get settings
             switch (parameter[1]) {
               case '1': sprintf(reply,"%ld",(long)MaxRate); quietReply=true; break;
