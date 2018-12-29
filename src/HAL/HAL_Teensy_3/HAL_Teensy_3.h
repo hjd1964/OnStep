@@ -64,7 +64,7 @@ float HAL_MCU_Temperature(void) {
   float v=(analogRead(Tpin)/4096.0)*3.3;
   float t=(-(v-0.719)/0.001715)+25.0;
   analogReadResolution(10);
-  return -999;
+  return t;
 }
 
 //--------------------------------------------------------------------------------------------------
