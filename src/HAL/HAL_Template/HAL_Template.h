@@ -24,13 +24,21 @@
 #include "../drivers/RTCw.h"
 
 //--------------------------------------------------------------------------------------------------
+// General purpose initialize for HAL
+void HAL_Init(void) {
+}
+
+//--------------------------------------------------------------------------------------------------
+// Internal MCU temperature (in degrees C)
+float HAL_MCU_Temperature(void) {
+  return -999;
+}
+
+//--------------------------------------------------------------------------------------------------
 // Initialize timers
 
 // frequency compensation (F_COMP/1000000.0) for adjusting microseconds to timer counts
 #define F_COMP 1000000
-
-void HAL_Init(void) {
-}
 
 #define ISR(f) void f (void)
 void TIMER1_COMPA_vect(void);  // Sidereal timer
@@ -79,4 +87,3 @@ void QuickSetIntervalAxis2(uint32_t r) {
 #define StepPinAxis2_LOW digitalWrite(Axis2StepPin, LOW)
 #define DirPinAxis2_HIGH digitalWrite(Axis2DirPin, HIGH)
 #define DirPinAxis2_LOW digitalWrite(Axis2DirPin, LOW)
-

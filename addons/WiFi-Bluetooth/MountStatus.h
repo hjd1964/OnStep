@@ -146,7 +146,7 @@ class MountStatus {
     bool axis2S2Gb() { return _s2gb2; }
     bool axis2OT() { return _ot2; }
     bool axis2OTPW() { return _otpw2; }
-    
+
     bool waitingHome() { return _waitingHome; }
     bool pauseAtHome() { return _pauseAtHome; }
     bool buzzerEnabled() { return _buzzerEnabled; }

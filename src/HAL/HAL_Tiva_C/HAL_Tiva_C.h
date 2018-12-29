@@ -67,6 +67,17 @@
 #define HAL_Wire Wire
 
 //--------------------------------------------------------------------------------------------------
+// General purpose initialize for HAL
+void HAL_Init(void) {
+}
+
+//--------------------------------------------------------------------------------------------------
+// Internal MCU temperature (in degrees C)
+float HAL_MCU_Temperature(void) {
+  return -999;
+}
+
+//--------------------------------------------------------------------------------------------------
 // Initialize timers
 
 // frequency compensation (F_COMP/1000000.0) for adjusting microseconds to timer counts
@@ -76,9 +87,6 @@
   // Due to a bug we set the frequency manually on initialization
   uint32_t g_ui32SysClock = SysCtlClockFreqSet((SYSCTL_XTAL_25MHZ | SYSCTL_OSC_MAIN | SYSCTL_USE_PLL | SYSCTL_CFG_VCO_480), F_BUS);
 #endif
-
-void HAL_Init(void) {
-}
 
 // The Energia IDE does not have IntervalTimer so we have to initialise timers manually
 

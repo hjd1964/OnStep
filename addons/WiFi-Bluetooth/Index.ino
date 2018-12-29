@@ -47,9 +47,7 @@ const char* html_indexTracking = "&nbsp;&nbsp;Tracking: <font class='c'>%s %s</f
 const char* html_indexMaxRate = "&nbsp;&nbsp;Current MaxRate: <font class='c'>%ld</font> (Default MaxRate: <font class='c'>%ld</font>)<br />";
 const char* html_indexMaxSpeed = "&nbsp;&nbsp;Maximum slew speed: <font class='c'>%s</font>&deg;/s<br />";
 
-#ifdef AMBIENT_CONDITIONS_ON
 const char* html_indexTPHD = "&nbsp;&nbsp;%s <font class='c'>%s</font>%s<br />";
-#endif
 
 const char* html_indexDriverStatus = " Driver: <font class='c'>%s</font><br />";
 const char* html_indexLastError = "&nbsp;&nbsp;Last Error: <font class='c'>%s</font><br />";
@@ -340,6 +338,10 @@ void handleRoot() {
     data += "&nbsp;&nbsp;Axis2";
     data += temp;
   }
+
+#ifdef INTERNAL_TEMPERATURE_ON
+  if (!sendCommand(":GX9F#",temp1)) strcpy(temp1,"?"); sprintf(temp,html_indexTPHD,"Controller Internal Temperature:",temp1,"&deg;C"); data+=temp;
+#endif
 
   // Last Error
   if (mountStatus.lastError()!=ERR_NONE) strcpy(temp1,"</font><font class=\"y\">"); else strcpy(temp1,"");

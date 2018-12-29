@@ -728,6 +728,7 @@ void processCommands() {
               case 'C': dtostrf(ambient.getHumidity(),3,1,reply); quietReply=true; break;          // relative humidity in %
               case 'D': dtostrf(ambient.getAltitude(),3,1,reply); quietReply=true; break;          // altitude in meters
               case 'E': dtostrf(ambient.getDewPoint(),3,1,reply); quietReply=true; break;          // dew point in deg. C
+              case 'F': { float t=HAL_MCU_Temperature(); if (t>-999) { dtostrf(t,1,0,reply); quietReply=true; } else commandError=true; } break; // internal MCU temperature in deg. C
               default:  commandError=true;
             }
           } else

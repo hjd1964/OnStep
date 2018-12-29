@@ -35,6 +35,21 @@
 #endif
 
 //--------------------------------------------------------------------------------------------------
+// General purpose initialize for HAL
+void HAL_Init(void) {
+}
+
+//--------------------------------------------------------------------------------------------------
+// Internal MCU temperature (in degrees C)
+
+// Correction for ESP32's internal temperture sensor
+#define INTERNAL_TEMP_CORRECTION 0
+
+float HAL_MCU_Temperature(void) {
+  return temperatureRead() + INTERNAL_TEMP_CORRECTION;
+}
+
+//--------------------------------------------------------------------------------------------------
 // Interrupts
 
 #define ISR(f) void f (void)
@@ -82,9 +97,6 @@ void timerAlarmsDisable() { timerAlarmDisable(itimer1); timerAlarmDisable(itimer
 
 // frequency compensation (F_COMP/1000000.0) for adjusting microseconds to timer counts
 #define F_COMP 16000000.0
-
-void HAL_Init(void) {
-}
 
 extern long int siderealInterval;
 extern void SiderealClockSetInterval (long int);

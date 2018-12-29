@@ -18,6 +18,7 @@
 #define ADVANCED_CHARS_ON         // Default=_ON, _OFF for standard "RA/Dec" instead of symbols
 
 #define AMBIENT_CONDITIONS_OFF    // Default=_OFF, _ON for ambient conditions on status page
+#define INTERNAL_TEMPERATURE_OFF  // Default=_OFF, _ON for internal MCU temperature display
 
 // --------------------------------------------------------------------------------------
 // Encoder support (either _AB for Quadrature A/B OR _CWCCW for CW/CCW)
