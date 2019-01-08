@@ -37,8 +37,8 @@
 #define FirmwareDate          __DATE__
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
-#define FirmwareVersionMinor  "5"
-#define FirmwareVersionPatch  "f"
+#define FirmwareVersionMinor  "6"
+#define FirmwareVersionPatch  "b"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
@@ -64,7 +64,7 @@ Encoders encoders;
 // macros to help with sending webpage data
 #define sendHtmlStart()
 #define sendHtml(x) client->print(x)
-#define sendHtmlDone()
+#define sendHtmlDone(x) client->print(x);
 
 int WebTimeout=TIMEOUT_WEB;
 int CmdTimeout=TIMEOUT_CMD;
@@ -185,9 +185,7 @@ Again:
 #ifdef ENCODERS_ON
   server.on("/enc.htm", handleEncoders);
   server.on("/encA.txt", encAjaxGet);
-#ifdef AXIS1_ENC_RATE_CONTROL_ON
   server.on("/enc.txt", encAjax);
-#endif
 #endif
   server.on("/control.txt", controlAjax);
   server.on("/controlA.txt", controlAjaxGet);
@@ -247,5 +245,3 @@ const char* HighSpeedCommsStr(long baud) {
   if (baud==28800) { return ":SB3#"; }
   if (baud==19200) { return ":SB4#"; } else { return ":SB5#"; }
 }
-
-

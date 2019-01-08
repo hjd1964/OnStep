@@ -93,4 +93,3 @@ const char html_ajax_active[] =
   "}"
 "}\n"
 "</script>\n";
-

@@ -182,8 +182,10 @@ void handleEncoders() {
   data += html_encScript1;
   sendHtml(data);
 
+#ifdef AXIS1_ENC_RATE_CONTROL_ON
   data += html_encScript2;
   sendHtml(data);
+#endif
 
   // send a standard http response header
   data += html_main_cssB;

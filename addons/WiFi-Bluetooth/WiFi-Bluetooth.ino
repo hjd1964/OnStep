@@ -115,7 +115,6 @@ void handleNotFound(){
 }
 
 void setup(void){
-
 #ifdef LED_PIN
   pinMode(LED_PIN,OUTPUT);
 #endif
@@ -331,9 +330,7 @@ Again:
 #ifdef ENCODERS_ON
   server.on("/enc.htm", handleEncoders);
   server.on("/encA.txt", encAjaxGet);
-#ifdef AXIS1_ENC_RATE_CONTROL_ON
   server.on("/enc.txt", encAjax);
-#endif
 #endif
   server.on("/control.txt", controlAjax);
   server.on("/controlA.txt", controlAjaxGet);

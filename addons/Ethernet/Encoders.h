@@ -316,4 +316,3 @@ class Encoders {
 };
 
 #endif
-

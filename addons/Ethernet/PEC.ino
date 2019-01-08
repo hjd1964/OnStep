@@ -44,7 +44,7 @@ void handlePec() {
   data += html_main_css4;
   data += html_main_css5;
   data += html_main_css6;
-  sendHtml(data); data="";
+  sendHtml(data);
   data += html_main_css7;
   data += html_main_css8;
   data += html_main_css_control1;
@@ -53,7 +53,7 @@ void handlePec() {
   data += html_main_cssE;
   data += html_headE;
   data += html_bodyB;
-  sendHtml(data); data="";
+  sendHtml(data);
 
   mountStatus.update();
 
@@ -83,7 +83,7 @@ void handlePec() {
 #endif
   data += html_onstep_header4;
   data += html_pec1;
-  sendHtml(data); data="";
+  sendHtml(data);
 
   if (mountStatus.mountType()!=MT_ALTAZM) {
     data += html_pec2;
@@ -100,7 +100,7 @@ void handlePec() {
   }
 
   sendHtml(data);
-  sendHtmlDone();
+  sendHtmlDone(data);
 }
 
 #ifdef OETHS
@@ -152,4 +152,3 @@ void processPecGet() {
     }
   }
 }
-
