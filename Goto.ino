@@ -374,6 +374,7 @@ GotoErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTarget
   D("Goto Axis1, Current "); D(((double)(long)posAxis1)/(double)StepsPerDegreeAxis1); D(" -to-> "); DL(((double)(long)targetAxis1.part.m)/(double)StepsPerDegreeAxis1);
   D("Goto Axis2, Current "); D(((double)(long)posAxis2)/(double)StepsPerDegreeAxis2); D(" -to-> "); DL(((double)(long)targetAxis2.part.m)/(double)StepsPerDegreeAxis2); DL("");
 
+  reactivateBacklashComp();
   disablePec();
   soundAlert();
   stepperModeGoto();

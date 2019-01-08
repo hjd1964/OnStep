@@ -125,6 +125,8 @@ boolean isHoming() {
 // then the first gotoEqu will set the pier side and turn on tracking
 GotoErrors setHome() {
   if (guideDirAxis1 || guideDirAxis2) return GOTO_ERR_IN_MOTION;
+  reactivateBacklashComp();
+
   if (trackingState==TrackingMoveTo)  return GOTO_ERR_GOTO;
 
   initStartupValues();

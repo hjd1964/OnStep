@@ -177,11 +177,13 @@ void processCommands() {
         if ((strlen(parameter)>1) && (strlen(parameter)<5)) {
           if ( (atoi2((char*)&parameter[1],&i)) && ((i>=0) && (i<=999))) { 
             if (parameter[0]=='D') {
-              backlashAxis2=(int)round(((double)i*(double)StepsPerDegreeAxis2)/3600.0);
+              reactivateBacklashComp();
+              cli(); backlashAxis2=(int)round(((double)i*(double)StepsPerDegreeAxis2)/3600.0); sei();
               nv.writeInt(EE_backlashAxis2,backlashAxis2);
             } else
             if (parameter[0]=='R') {
-              backlashAxis1 =(int)round(((double)i*(double)StepsPerDegreeAxis1)/3600.0);
+              reactivateBacklashComp();
+              cli(); backlashAxis1 =(int)round(((double)i*(double)StepsPerDegreeAxis1)/3600.0); sei();
               nv.writeInt(EE_backlashAxis1,backlashAxis1);
             } else commandError=true;
           } else commandError=true;

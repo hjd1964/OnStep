@@ -98,9 +98,28 @@ boolean isSlewing() {
   return ((guideDirAxis1!=0) && (fabs(guideTimerRateAxis1)>=2)) || ((guideDirAxis2!=0) && (fabs(guideTimerRateAxis2)>=2)) || (trackingState==TrackingMoveTo);
 }
 
+// reactivate or deactivate backlash comp. if necessary
+int backlashAxis1PriorToGuide=0;
+int backlashAxis2PriorToGuide=0;
+
+void reactivateBacklashComp() {
+#ifdef GUIDES_DISABLE_BACKLASH_ON
+  if (backlashAxis1PriorToGuide==0) { backlashAxis1PriorToGuide=backlashAxis1; cli(); backlashAxis1=0; sei(); }
+  if (backlashAxis2PriorToGuide==0) { backlashAxis2PriorToGuide=backlashAxis2; cli(); backlashAxis2=0; sei(); }
+#endif
+}
+
+void deactivateBacklashComp() {
+#ifdef GUIDES_DISABLE_BACKLASH_ON
+  if (backlashAxis1PriorToGuide>0) { cli(); backlashAxis1=backlashAxis1PriorToGuide; sei(); backlashAxis1PriorToGuide=0; }
+  if (backlashAxis2PriorToGuide>0) { cli(); backlashAxis2=backlashAxis2PriorToGuide; sei(); backlashAxis2PriorToGuide=0; }
+#endif
+}
+
 // start a guide in RA or Azm, direction must be 'e', 'w', or 'b', guideRate is the rate selection (0 to 9), guideDuration is in ms (0 to ignore) 
 bool startGuideAxis1(char direction, int guideRate, long guideDuration) {
   if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo) && (!trackingSyncInProgress()) && (direction!=guideDirAxis1) && (axis1Enabled)) {
+    if (guideRate<3) deactivateBacklashComp(); else reactivateBacklashComp();
     enableGuideRate(guideRate);
     guideDirAxis1=direction;
     guideTimeThisIntervalAxis1=micros();
@@ -118,11 +137,12 @@ void stopGuideAxis1() {
     cli(); if ((guideDirAxis1) && (guideDirAxis1!='b')) { guideDirAxis1='b'; } sei();
   }
 }
-  
+
 // start a guide in Dec or Alt, direction must be 'n', 's', or 'b', guideRate is the rate selection (0 to 9), guideDuration is in ms (0 to ignore) 
 bool startGuideAxis2(char direction, int guideRate, long guideDuration, bool absolute) {
   if (((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) && (!trackingSyncInProgress()) && (direction!=guideDirAxis2) && (axis1Enabled)) {
     enableGuideRate(guideRate);
+    if (guideRate<3) deactivateBacklashComp(); else reactivateBacklashComp();
     guideDirAxis2=direction;
     guideTimeThisIntervalAxis2=micros();
     guideTimeRemainingAxis2=guideDuration*1000L;
