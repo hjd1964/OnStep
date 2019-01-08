@@ -198,12 +198,14 @@ void processCommands() {
 //          Get the Backlash values.  Units are arc-seconds
       if ((command[0]=='%') && (command[1]=='B')) {
         if (parameter[0]=='D') {
+            reactivateBacklashComp();
             i=(int)round(((double)backlashAxis2*3600.0)/(double)StepsPerDegreeAxis2);
             if (i<0) i=0; if (i>999) i=999;
             sprintf(reply,"%d",i);
             quietReply=true;
         } else
         if (parameter[0]=='R') {
+            reactivateBacklashComp();
             i=(int)round(((double)backlashAxis1*3600.0)/(double)StepsPerDegreeAxis1);
             if (i<0) i=0; if (i>999) i=999;
             sprintf(reply,"%d",i);
