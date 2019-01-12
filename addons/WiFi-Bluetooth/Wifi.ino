@@ -69,7 +69,7 @@ const char html_wifiSSID6[] =
 "<input name='apsn4' value='%d' type='number' min='0' max='255'></td></tr></table>";
 
 const char html_wifiSSID7[] =
-"Enable Access-Point Mode: <input type='checkbox' name='apen' value='1' %s><br/>"
+"Enable Access-Point Mode: <input type='checkbox' name='apen' value='1' %s> (Note: auto-enabled if Station Mode fails to connect)<br/>"
 "<button type='submit'>Upload</button></form><br />\r\n";
 
 const char html_logout[] = 
