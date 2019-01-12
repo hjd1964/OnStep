@@ -67,7 +67,7 @@ class rtcw {
       _Rtc.SetSquareWavePin(DS3231SquareWavePin_ModeClock);
       _Rtc.SetSquareWavePinClockFrequency(DS3231SquareWaveClock_1Hz);
       active=true;
-#ifdef ESP32
+#if defined(ESP32) & defined(WIRE_END_SUPPORT)
       HAL_Wire.end();
 #endif
     }
@@ -75,7 +75,7 @@ class rtcw {
     // set the RTC's time (local standard time)
     void set(double JD, double LMT) {
       if (!active) return;
-#ifdef ESP32
+#if defined(ESP32) & defined(WIRE_END_SUPPORT)
       HAL_Wire.begin();
 #endif
 
@@ -92,7 +92,7 @@ class rtcw {
       RtcDateTime updateTime = RtcDateTime(yy, mo, d, h, floor(m), floor(s));
       _Rtc.SetDateTime(updateTime);
 
-#ifdef ESP32
+#if defined(ESP32) & defined(WIRE_END_SUPPORT)
       HAL_Wire.end();
 #endif
     }
@@ -100,7 +100,7 @@ class rtcw {
     // get the RTC's time (local standard time)
     void get(double &JD, double &LMT) {
       if (!active) return;
-#ifdef ESP32
+#if defined(ESP32) & defined(WIRE_END_SUPPORT)
       HAL_Wire.begin();
 #endif
 
@@ -111,7 +111,7 @@ class rtcw {
         LMT=(now.Hour()+(now.Minute()/60.0)+(now.Second()/3600.0));
       }
 
-#ifdef ESP32
+#if defined(ESP32) & defined(WIRE_END_SUPPORT)
       HAL_Wire.end();
 #endif
     }

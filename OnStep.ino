@@ -41,7 +41,7 @@
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  1
 #define FirmwareVersionMinor  18
-#define FirmwareVersionPatch  "a"     // for example major.minor patch: 1.3c
+#define FirmwareVersionPatch  "b"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 2       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
@@ -52,7 +52,7 @@
 #include "Constants.h"
 
 #include "Config.Classic.h"
-#include "Config.MaxESP.h"
+#include "Config.MaxESP2.h"
 #include "Config.MaxPCB.h"
 #include "Config.Mega2560Alt.h"
 #include "Config.MiniPCB.h"
@@ -188,7 +188,7 @@ void setup() {
 #endif
  
   // autostart tracking
-#if defined(AUTOSTART_TRACKING_ON) 
+#if defined(AUTOSTART_TRACKING_ON)
   #if !defined(MOUNT_TYPE_ALTAZM)
     // telescope should be set in the polar home (CWD) for a starting point
     setHome();

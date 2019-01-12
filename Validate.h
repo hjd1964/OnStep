@@ -20,7 +20,7 @@
     #define Configuration_Found
   #endif
 #endif
-#ifdef MaxESP_ON
+#ifdef MaxESP2_ON
   #ifdef Configuration_Found
     #define Configuration_Duplicate
   #else
@@ -101,7 +101,7 @@
   #error "Focuser2 can't be enabled without first enabling Focuser1"
 #endif
 
-#if defined(MaxPCB_ON) || defined(MaxESP_ON) || defined(MiniPCB_ON)
+#if defined(MaxPCB_ON) || defined(MaxESP2_ON) || defined(MiniPCB_ON)
   #if defined(RETICULE_LED_PINS) && defined(STATUS_LED_PINS2_ON)
     #error "You can't have the Illuminated Reticule and Status2 LEDs both enabled in this configuration."
   #endif

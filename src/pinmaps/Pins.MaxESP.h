@@ -1,5 +1,5 @@
 // -------------------------------------------------------------------------------------------------
-// Pin map for OnStep MaxESP (ESP32)
+// Pin map for OnStep MaxESP (ESP32) Version 1.x
 
 #if defined(ESP32)
 
