@@ -62,7 +62,7 @@ const char html_configLongDeg[] =
 const char html_configLongMin[] = 
 " <input value='%s' type='number' name='g2' min='0' max='60'>&nbsp;'&nbsp;&nbsp;"
 "<button type='submit'>Upload</button>"
-" (Longitude, in deg. and min. +/- 180)"
+" (Longitude, in deg. and min. +/- 180, W is +)"
 "</form>"
 "\r\n";
 const char html_configLatDeg[] = 
@@ -71,7 +71,7 @@ const char html_configLatDeg[] =
 const char html_configLatMin[] = 
 " <input value='%s' type='number' name='t2' min='0' max='60'>&nbsp;'&nbsp;&nbsp;"
 "<button type='submit'>Upload</button>"
-" (Latitude, in deg. and min. +/- 90)"
+" (Latitude, in deg. and min. +/- 90, N is +)"
 "</form>"
 "\r\n";
 const char html_configOffsetDeg[] = 
