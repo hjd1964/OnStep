@@ -37,7 +37,7 @@
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
 #define FirmwareVersionMinor  "6"
-#define FirmwareVersionPatch  "a"
+#define FirmwareVersionPatch  "b"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
@@ -289,6 +289,7 @@ Again:
 
 #endif
 
+TryAgain:
   if ((stationEnabled) && (!stationDhcpEnabled)) WiFi.config(wifi_sta_ip, wifi_sta_gw, wifi_sta_sn);
   if (accessPointEnabled) WiFi.softAPConfig(wifi_ap_ip, wifi_ap_gw, wifi_ap_sn);
   
@@ -307,18 +308,22 @@ Again:
     WiFi.mode(WIFI_AP_STA);
   }
 
+  // wait for connection in station mode, if it fails fall back to access-point mode
+  if (!accessPointEnabled && stationEnabled) {
+    for (int i=0; i<5; i++)
+      if (WiFi.status() != WL_CONNECTED) delay(1000); else break;
+    if (WiFi.status() != WL_CONNECTED) {
+      stationEnabled=false;
+      accessPointEnabled=true;
+      goto TryAgain;
+    }
+  }
+
   // clear the buffers and any noise on the serial lines
   for (int i=0; i<3; i++) {
     Ser.print(":#");
     delay(50);
     serialRecvFlush();
-  }
-
-  // Wait for connection
-  if (stationEnabled) {
-    while (WiFi.status() != WL_CONNECTED) {
-      delay(500);
-    }
   }
 
   server.on("/", handleRoot);
