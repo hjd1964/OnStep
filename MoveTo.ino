@@ -249,9 +249,6 @@ void moveTo() {
         // wrap it up
         parkFinish();
       } else {
-        // sound goto done
-        soundAlert();
-  
         // restore last tracking state
         cli();
         timerRateAxis1=SiderealRate;
@@ -259,6 +256,9 @@ void moveTo() {
         sei();
   
         if (homeMount) {
+          // sound goto done
+          soundAlert();
+          
           // clear the backlash
           if (parkClearBacklash()==-1) return;  // working, no error flagging
 
@@ -305,4 +305,3 @@ uint32_t isqrt32 (uint32_t n) {
 void stopLimit() {
   if (trackingState==TrackingMoveTo) { if (!abortSlew) abortSlew=StartAbortSlew; } else trackingState=TrackingNone;
 }
-

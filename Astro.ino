@@ -352,7 +352,15 @@ void horToEqu(double Alt, double Azm, double *HA, double *Dec) {
 double _deltaAxis1=15.0,_deltaAxis2=0.0;
 
 boolean trackingSyncInProgress() {
+  static int lastTrackingSyncSeconds=0;
+  
   if ((trackingSyncSeconds > 0) && (trackingState!=TrackingSidereal)) trackingSyncSeconds=0;
+
+  // sound goto done
+  if ((trackingSyncSeconds==0) and (lastTrackingSyncSeconds!=trackingSyncSeconds)) soundAlert();
+
+  lastTrackingSyncSeconds=trackingSyncSeconds;
+
   return trackingSyncSeconds > 0;
 }
 
@@ -361,6 +369,7 @@ void setDeltaTrackingRate() {
 
   if (trackingSyncInProgress()) {
     trackingSyncSeconds--;
+    
   #ifdef MOUNT_TYPE_ALTAZM
     double a,z,d1,d2,newTargetAlt,newTargetAzm;
     getHor(&a,&z);
