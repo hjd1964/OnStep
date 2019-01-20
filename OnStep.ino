@@ -350,8 +350,17 @@ void loop2() {
     // SAFETY CHECKS
     // support for limit switch(es)
 #ifdef LIMIT_SENSE_ON
-    byte ls1=digitalRead(LimitPin); delayMicroseconds(50); byte ls2=digitalRead(LimitPin);
-    if ((ls1==LOW) && (ls2==LOW)) { lastError=ERR_LIMIT_SENSE; stopLimit(); }
+    byte limit_1st = digitalRead(LimitPin);
+    if (limit_1st == LOW) {
+      // Wait for a short while, then read again
+      delayMicroseconds(50);
+      byte limit_2nd = digitalRead(LimitPin);
+      if (limit_2nd == LOW) {
+        // It is still low, there must be a problem
+        lastError=ERR_LIMIT_SENSE;
+        stopLimit();
+      }
+    }
 #endif
 
     if (safetyLimitsOn) {
