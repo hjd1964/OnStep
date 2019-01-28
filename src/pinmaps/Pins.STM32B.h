@@ -67,7 +67,7 @@
   #define F1ST          PB3
   #define F1DR          PA15
 
-  #define SPARE_PA14    PA14
+  #define LIMIT         PA14
   #define SPARE_PA13    PA13
 
 #elif defined(STM32Black_ON) 
@@ -166,7 +166,7 @@
 
 // The limit switch sense is a logic level input which uses the internal pull up,
 // shorted to ground it stops gotos/tracking
-//#define LimitPin      Undefined   
+#define LimitPin        LIMIT
 
 // The PEC index sense is a logic level input, resets the PEC index on rising
 // edge then waits for 60 seconds before allowing another reset
