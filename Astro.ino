@@ -551,7 +551,7 @@ boolean doRefractionRateCalc() {
   // get the instrument coordinates
   if ((rr_step==10) || (rr_step==110)) {
     if ((rateCompensation==RC_FULL_RA) || (rateCompensation==RC_FULL_BOTH)) {
-      Align.equToInstr(latitude,rr_HA,rr_Dec,&rr_HA,&rr_Dec,getInstrPierSide());
+      Align.equToInstr(rr_HA,rr_Dec,&rr_HA,&rr_Dec,getInstrPierSide());
     }
   }
 
