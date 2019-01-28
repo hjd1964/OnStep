@@ -249,9 +249,13 @@ void processWifiGet() {
         // digits all in 0..9,A..F and validate
         v.toUpperCase();
         uint8_t mac[6];
-        mac[0]=hexToInt(v.substring(0,2)); mac[1]=hexToInt(v.substring(3,2)); mac[2]=hexToInt(v.substring(6,2));
-        mac[3]=hexToInt(v.substring(9,2)); mac[4]=hexToInt(v.substring(12,2)); mac[5]=hexToInt(v.substring(15,2));
-        if ((mac[0]>=0) && (mac[1]>=0) && (mac[2]>=0) && (mac[3]>=0) && (mac[4]>=0) && (mac[5]>=0)) { WiFi.macAddress(mac); restartRequired=true; }
+        int imac[6];
+        imac[0]=hexToInt(v.substring(0,2)); imac[1]=hexToInt(v.substring(3,2)); imac[2]=hexToInt(v.substring(6,2));
+        imac[3]=hexToInt(v.substring(9,2)); imac[4]=hexToInt(v.substring(12,2)); imac[5]=hexToInt(v.substring(15,2));
+        if ((imac[0]>=0) && (imac[1]>=0) && (imac[2]>=0) && (imac[3]>=0) && (imac[4]>=0) && (imac[5]>=0)) {
+          mac[0]=imac[0]; mac[1]=imac[1]; mac[2]=imac[2]; mac[3]=imac[3]; mac[4]=imac[4]; mac[5]=imac[5]; 
+          WiFi.macAddress(mac); restartRequired=true; 
+        }
       }
     }
   }
@@ -332,9 +336,13 @@ void processWifiGet() {
         // digits all in 0..9,A..F and validate
         v.toUpperCase();
         uint8_t mac[6];
-        mac[0]=hexToInt(v.substring(0,2)); mac[1]=hexToInt(v.substring(3,2)); mac[2]=hexToInt(v.substring(6,2));
-        mac[3]=hexToInt(v.substring(9,2)); mac[4]=hexToInt(v.substring(12,2)); mac[5]=hexToInt(v.substring(15,2));
-        if ((mac[0]>=0) && (mac[1]>=0) && (mac[2]>=0) && (mac[3]>=0) && (mac[4]>=0) && (mac[5]>=0)) { WiFi.softAPmacAddress(mac); restartRequired=true; }
+        int imac[6];
+        imac[0]=hexToInt(v.substring(0,2)); imac[1]=hexToInt(v.substring(3,2)); imac[2]=hexToInt(v.substring(6,2));
+        imac[3]=hexToInt(v.substring(9,2)); imac[4]=hexToInt(v.substring(12,2)); imac[5]=hexToInt(v.substring(15,2));
+        if ((imac[0]>=0) && (imac[1]>=0) && (imac[2]>=0) && (imac[3]>=0) && (imac[4]>=0) && (imac[5]>=0)) {
+          mac[0]=imac[0]; mac[1]=imac[1]; mac[2]=imac[2]; mac[3]=imac[3]; mac[4]=imac[4]; mac[5]=imac[5];
+          WiFi.softAPmacAddress(mac); restartRequired=true; 
+        }
       }
     }
   }
