@@ -24,7 +24,7 @@ class rtcw {
     void set(double JD, double LMT) {
       int y,mo,d,h;
       double m,s;
-    
+
       greg(JD,&y,&mo,&d); y-=2000; if (y>=100) y-=100;
     
       double f1=fabs(LMT)+0.000139;
@@ -132,11 +132,15 @@ class rtcw {
 
     // set the RTC's time (local standard time)
     void set(double JD, double LMT) {
+      (void)JD;
+      (void)LMT;
       if (!active) return;
     }
     
     // get the RTC's time (local standard time)
     void get(double &JD, double &LMT) {
+      (void)JD;
+      (void)LMT;
       if (!active) return;
     }
 
