@@ -57,21 +57,21 @@
 #define Axis3DirPin   33    // Pin 33 (Dir)
 #define Axis3StepPin  30    // Pin 30 (Step)
 #ifndef Axis3_EN
-#define Axis3_EN      Aux3  // Pin 36 (Enable)
+#define Axis3_EN      Aux5  // Pin A21 (Enable)
 #endif
 
 // For focuser1 stepper driver
 #define Axis4DirPin   35    // Pin 35 (Dir)
 #define Axis4StepPin  34    // Pin 34 (Step)
 #ifndef Axis4_EN
-#define Axis4_EN      Aux4  // Pin 39 (Enable)
+#define Axis4_EN      Aux6  // Pin A22 (Enable)
 #endif
 
 // For focuser2 stepper driver
 #define Axis5DirPin   33    // Pin 33 (Dir)
 #define Axis5StepPin  30    // Pin 30 (Step)
 #ifndef Axis5_EN
-#define Axis5_EN      Aux3  // Pin 36 (Enable)
+#define Axis5_EN      Aux5  // Pin A21 (Enable)
 #endif
 
 // ST4 interface
