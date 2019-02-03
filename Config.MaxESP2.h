@@ -78,10 +78,10 @@
 // Light status LED by sink to ground Aux8 (Pin 25), default=_OFF. Choose only one feature on Aux8.
 // _ON and OnStep keeps this illuminated to indicate that the controller is active.  When sidereal tracking this LED will rapidly flash.
 #define STATUS_LED_PINS_OFF
-// Light 2nd status LED by sink to ground Aux7 (Pin 39), default=_OFF.  Choose only one feature on Aux7.
+// Light 2nd status LED by sink to ground Aux8 (Pin 25), default=_OFF.  Choose only one feature on Aux8.
 // _ON sets this to blink at 1 sec intervals when PPS is synced.  Turns off if tracking is stopped.  Turns on during gotos.
 #define STATUS_LED2_PINS_OFF
-// Light reticule LED by sink to ground Aux7 (Pin 39), default=_OFF.  Choose only one feature on Aux7.
+// Light reticule LED by sink to ground Aux8 (Pin 25), default=_OFF.  Choose only one feature on Aux8.
 // RETICULE_LED_PINS n, where n=0 to 255 activates this feature and sets default brightness
 #define RETICULE_LED_PINS_OFF
 

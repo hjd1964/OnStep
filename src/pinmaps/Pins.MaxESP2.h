@@ -14,12 +14,14 @@
 #define Aux10         "V3"  // Virtual Aux Pin3 (usually maps to AXIS2_ENC_B_PIN)
 
 // these enable virtual pin support
+/*
 int vpin_array[8] = {-1,-1,-1,-1,-1,-1,-1,-1};
 void pinMode(const char* pin, byte mode) {}
 void digitalWrite(const char* pin, int state) { int p=pin[1]-'0'; if ((pin[0]=='V') && (pin[2]==0) && (p>=0) && (p<=7)) { vpin_array[p]=state; } }
 void analogWrite(const char* pin, int state) { int p=pin[1]-'0'; if ((pin[0]=='V') && (pin[2]==0) && (p>=0) && (p<=7)) { vpin_array[p]=state; } }
 char* getVPins1to4() { static char s[20]; sprintf(s,"%d,%d,%d,%d",vpin_array[0],vpin_array[1],vpin_array[2],vpin_array[3]); return s; }
 char* getVPins5to8() { static char s[20]; sprintf(s,"%d,%d,%d,%d",vpin_array[4],vpin_array[5],vpin_array[6],vpin_array[7]); return s; }
+*/
 
 // The PEC index sense is a logic level input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
 #define PecPin        36
@@ -27,8 +29,8 @@ char* getVPins5to8() { static char s[20]; sprintf(s,"%d,%d,%d,%d",vpin_array[4],
 
 // The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
 #define LEDnegPin     Aux8  // Pin 25 (Drain)
-#define LEDneg2Pin    Aux7  // Pin 39 (Drain)
-#define ReticulePin   Aux7  // Pin 39 (Drain)
+#define LEDneg2Pin    Aux8  // Pin 39 (Drain)
+#define ReticulePin   Aux8  // Pin 39 (Drain)
 
 // For a piezo buzzer
 #define TonePin       Aux8  // Pin 25 (Tone)
@@ -45,16 +47,16 @@ char* getVPins5to8() { static char s[20]; sprintf(s,"%d,%d,%d,%d",vpin_array[4],
 #define Axis1_M2      23    // Pin 23 (Microstep Mode 2 or SPI CS)
 #define Axis1_M1      14    // Pin 14 (Microstep Mode 1 or SPI SCK)
 #define Axis1_M0      13    // Pin 13 (Microstep Mode 0 or SPI MOSI)
-#define Axis1_EN      26    // Pin 26 (Enable)
+#define Axis1_EN       4    // Pin  4 (Enable)
 
 #define Axis2_HOME    Aux4  // Pin 39 (Home sw)
 #define Axis2DirPin   26    // Pin 26 (Dir)
 #define Axis2StepPin  27    // Pin 27 (Step)
 #define Axis2_Aux     12    // Pin 12 (ESP8266 RST or SPI MISO)
-#define Axis2_M2       5    // Pin  5 (Microstep Mode 2 or SPI CS)
+#define Axis2_M2      5     // Pin 5  (Microstep Mode 2 or SPI CS)
 #define Axis2_M1      14    // Pin 14 (Microstep Mode 1 or SPI SCK)
 #define Axis2_M0      13    // Pin 13 (Microstep Mode 0 or SPI MOSI)
-#define Axis2_EN      26    // Pin 26 (Enable)
+#define Axis2_EN      4     // Pin 4  (Enable)
 
 // For rotator stepper driver
 #define Axis3DirPin   15    // Pin 15 (Dir)
