@@ -39,12 +39,12 @@ class stepperDC {
       digitalWrite(_enPin,_enableState); delayMicroseconds(2);
 
       // take a step backwards to our new home, position 1, coil A +
-      digitalWrite(_stepPin,LOW); delayMicroseconds(2);
+      digitalWrite(_dirPin,LOW); delayMicroseconds(2);
       step();
       _phase=1;
 
       // move forward from now on
-      digitalWrite(_stepPin,HIGH); delayMicroseconds(2);
+      digitalWrite(_dirPin,HIGH); delayMicroseconds(2);
 
       // disable the stepper driver
       digitalWrite(_enPin,_disableState); delayMicroseconds(2);
