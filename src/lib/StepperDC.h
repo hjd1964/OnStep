@@ -142,25 +142,19 @@ class stepperDC {
 
     void enableDriver() {
       if (_enPin==-1) return;
-      // for Aux5/Aux6 (DAC) support for stepper driver EN control on MaxPCB
-#if defined(A21) && defined(A22)
-      if (_enPin==A21) { if (_enableState==HIGH) analogWrite(A21,255); else analogWrite(A21,0); return; } else
-      if (_enPin==A22) { if (_enableState==HIGH) analogWrite(A22,255); else analogWrite(A22,0); return; } else digitalWrite(_enPin,_enableState);
-#else
-      digitalWrite(_enPin,_enableState);
-#endif
-      delayMicroseconds(2);
+      if (_en_state==1) return;
+      // for Aux5/Aux6 (DAC) support for stepper driver EN control on MaxPCB Aux5=A21=66 Aux6=A22=67
+      if ((_enPin==66) || (_enPin==67)) { if (_enableState==HIGH) analogWrite(_enPin,255); else analogWrite(_enPin,0); delayMicroseconds(30); } else
+        { digitalWrite(_enPin,_enableState); delayMicroseconds(2); }
+      _en_state=1;
     }
 
     void disableDriver() {
       if (_enPin==-1) return;
-#if defined(A21) && defined(A22)
-      if (_enPin==A21) { if (_disableState==HIGH) analogWrite(A21,255); else analogWrite(A21,0); return; } else
-      if (_enPin==A22) { if (_disableState==HIGH) analogWrite(A22,255); else analogWrite(A22,0); return; } else digitalWrite(_enPin,_disableState);
-#else
-      digitalWrite(_enPin,_disableState);
-#endif
-      delayMicroseconds(2);
+      if (_en_state==0) return;
+      if ((_enPin==66) || (_enPin==67)) { if (_disableState==HIGH) analogWrite(_enPin,255); else analogWrite(_enPin,0); delayMicroseconds(30); } else
+        { digitalWrite(_enPin,_disableState); delayMicroseconds(2); }
+      _en_state=0;
     }
 
     byte _phase=1;
@@ -173,6 +167,7 @@ class stepperDC {
     long _maxRate=-1;
     bool _disableState=HIGH;
     int _enableState=LOW;
+    byte _en_state=0;
 };
 
 stepperDC dcMotor;

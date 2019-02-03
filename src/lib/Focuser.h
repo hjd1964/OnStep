@@ -152,16 +152,16 @@ class focuser {
         nextPhysicalMove=tempMs+(unsigned long)maxRate;
     
         if ((spos<(long)target.part.m) && (spos<smax)) {
-          if (pda && currentlyDisabled) { enableDriver(); currentlyDisabled=false; delayMicroseconds(10); }
-          digitalWrite(stepPin,LOW); delayMicroseconds(10);
-          digitalWrite(dirPin,forwardState); delayMicroseconds(10);
+          if (pda && currentlyDisabled) { enableDriver(); currentlyDisabled=false; delayMicroseconds(5); }
+          digitalWrite(stepPin,LOW); delayMicroseconds(5);
+          digitalWrite(dirPin,forwardState); delayMicroseconds(5);
           digitalWrite(stepPin,HIGH); spos++;
           lastPhysicalMove=millis();
         } else
         if ((spos>(long)target.part.m) && (spos>smin)) {
-          if (pda && currentlyDisabled) { enableDriver(); currentlyDisabled=false; delayMicroseconds(10); }
-          digitalWrite(stepPin,LOW); delayMicroseconds(10);
-          digitalWrite(dirPin,reverseState); delayMicroseconds(10);
+          if (pda && currentlyDisabled) { enableDriver(); currentlyDisabled=false; delayMicroseconds(5); }
+          digitalWrite(stepPin,LOW); delayMicroseconds(5);
+          digitalWrite(dirPin,reverseState); delayMicroseconds(5);
           digitalWrite(stepPin,HIGH); spos--;
           lastPhysicalMove=millis();
         }
@@ -183,23 +183,15 @@ class focuser {
 
     void enableDriver() {
       if (enPin==-1) return;
-      // for Aux5/Aux6 (DAC) support for stepper driver EN control on MaxPCB
-#if defined(A21) && defined(A22)
-      if (enPin==A21) { if (enableState==HIGH) analogWrite(A21,255); else analogWrite(A21,0); return; } else
-      if (enPin==A22) { if (enableState==HIGH) analogWrite(A22,255); else analogWrite(A22,0); return; } else digitalWrite(enPin,enableState);
-#else
-      digitalWrite(enPin,enableState);
-#endif
+      // for Aux5/Aux6 (DAC) support for stepper driver EN control on MaxPCB Aux5=A21=66 Aux6=A22=67
+      if ((enPin==66) || (enPin==67)) { if (enableState==HIGH) analogWrite(enPin,255); else analogWrite(enPin,0); delayMicroseconds(30); } else 
+      { digitalWrite(enPin,enableState); delayMicroseconds(5); }
     }
 
     void disableDriver() {
       if (enPin==-1) return;
-#if defined(A21) && defined(A22)
-      if (enPin==A21) { if (disableState==HIGH) analogWrite(A21,255); else analogWrite(A21,0); return; } else
-      if (enPin==A22) { if (disableState==HIGH) analogWrite(A22,255); else analogWrite(A22,0); return; } else digitalWrite(enPin,disableState);
-#else
-      digitalWrite(enPin,disableState);
-#endif
+      if ((enPin==66) || (enPin==67)) { if (disableState==HIGH) analogWrite(enPin,255); else analogWrite(enPin,0); delayMicroseconds(30); } else 
+      { digitalWrite(enPin,disableState); delayMicroseconds(5); }
     }
 
     // parameters
@@ -241,4 +233,3 @@ class focuser {
     unsigned long nextPhysicalMove=0;
 
 };
-
