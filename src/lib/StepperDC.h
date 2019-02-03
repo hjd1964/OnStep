@@ -36,7 +36,7 @@ class stepperDC {
       // 8 + -
 
       // enable the stepper driver
-      digitalWrite(_enPin,_enableState); delayMicroseconds(2);
+      enableDriver();
 
       // take a step backwards to our new home, position 1, coil A +
       digitalWrite(_dirPin,LOW); delayMicroseconds(2);
@@ -47,7 +47,7 @@ class stepperDC {
       digitalWrite(_dirPin,HIGH); delayMicroseconds(2);
 
       // disable the stepper driver
-      digitalWrite(_enPin,_disableState); delayMicroseconds(2);
+      disableDriver();
 
       setPower(0);
       enabled(false);
@@ -61,7 +61,7 @@ class stepperDC {
       if ((long)(tempMs-nextPass)>0) {
         nextPass=tempMs+(unsigned long)_maxRate;      
 
-        if (_power==0 || !_en) { digitalWrite(_enPin,_disableState); delayMicroseconds(2); return; }
+        if (_power==0 || !_en) { disableDriver(); return; }
 
         static int seq=0;
         seq++; if (seq>9) seq=0;
@@ -78,8 +78,7 @@ class stepperDC {
           {0,1,1,1,1,1,1,1,1,1},
           {1,1,1,1,1,1,1,1,1,1}
         };
-        if ((bool)pwr[_power-1][seq]) digitalWrite(_enPin,_enableState); else digitalWrite(_enPin,_disableState);
-        delayMicroseconds(2);
+        if ((bool)pwr[_power-1][seq]) enableDriver(); else disableDriver();
       }
     }
 
@@ -91,7 +90,7 @@ class stepperDC {
     }
     void enabled(bool enState) {
       _en=enState;
-      if (!_en) { digitalWrite(_enPin,_disableState); delayMicroseconds(2); }
+      if (!_en) disableDriver();
     }
 
     // sets logic state for disabling stepper driver
@@ -117,28 +116,51 @@ class stepperDC {
   private:
     void nextDirection() {
       if ((_enPin<0) || (_stepPin<0)) return;
-      if (!_A4988) digitalWrite(_enPin,_enableState); else digitalWrite(_enPin,_disableState); delayMicroseconds(2);
+      if (!_A4988) enableDriver(); else disableDriver();
       step(); step(); step(); step();
-      if (!_A4988) { digitalWrite(_enPin,_disableState); delayMicroseconds(2); }
+      if (!_A4988) disableDriver();
     }
 
     void nextPhase() {
       if ((_enPin<0) || (_stepPin<0)) return;
-      if (!_A4988) digitalWrite(_enPin,_enableState); else digitalWrite(_enPin,_disableState); delayMicroseconds(2);
+      if (!_A4988) enableDriver(); else disableDriver();
       step(); step();
-      if (!_A4988) { digitalWrite(_enPin,_disableState); delayMicroseconds(2); }
+      if (!_A4988) disableDriver();
     }
 
     void priorPhase() {
       if ((_enPin<0) || (_stepPin<0)) return;
-      if (!_A4988) digitalWrite(_enPin,_enableState); else digitalWrite(_enPin,_disableState); delayMicroseconds(2);
+      if (!_A4988) enableDriver(); else disableDriver();
       step(); step(); step(); step(); step(); step();
-      if (!_A4988) { digitalWrite(_enPin,_disableState); delayMicroseconds(2); }
+      if (!_A4988) disableDriver();
     }
 
     void step() {
       digitalWrite(_stepPin,HIGH); delayMicroseconds(2); digitalWrite(_stepPin,LOW); delayMicroseconds(2);
       _phase++; if (_phase>8) _phase=1;
+    }
+
+    void enableDriver() {
+      if (_enPin==-1) return;
+      // for Aux5/Aux6 (DAC) support for stepper driver EN control on MaxPCB
+#if defined(A21) && defined(A22)
+      if (_enPin==A21) { if (_enableState==HIGH) analogWrite(A21,255); else analogWrite(A21,0); return; } else
+      if (_enPin==A22) { if (_enableState==HIGH) analogWrite(A22,255); else analogWrite(A22,0); return; } else digitalWrite(_enPin,_enableState);
+#else
+      digitalWrite(_enPin,_enableState);
+#endif
+      delayMicroseconds(2);
+    }
+
+    void disableDriver() {
+      if (_enPin==-1) return;
+#if defined(A21) && defined(A22)
+      if (_enPin==A21) { if (_disableState==HIGH) analogWrite(A21,255); else analogWrite(A21,0); return; } else
+      if (_enPin==A22) { if (_disableState==HIGH) analogWrite(A22,255); else analogWrite(A22,0); return; } else digitalWrite(_enPin,_disableState);
+#else
+      digitalWrite(_enPin,_disableState);
+#endif
+      delayMicroseconds(2);
     }
 
     byte _phase=1;
