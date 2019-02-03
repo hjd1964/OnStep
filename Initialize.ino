@@ -102,6 +102,13 @@ void initStartupValues() {
 
 void initPins() {
 // ------------------------------------------------------------------
+// Pull the Axis1/2 RST Pin HIGH on the MaxESP2
+
+#ifdef MaxESP2_ON
+pinMode(Axis1_Aux,INPUT_PULLUP);
+#endif
+
+// ------------------------------------------------------------------
 // ESP-01 (ESP8266) firmware flashing control
 
 #ifdef ESP8266_CONTROL_ON
