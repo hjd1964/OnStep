@@ -68,6 +68,11 @@ char* getVPins5to8() { static char s[20]; sprintf(s,"%d,%d,%d,%d",vpin_array[4],
 #define Axis4StepPin  2     // Pin 2  (Step)
 #define Axis4_EN      0     // Pin 0  (Enable)
 
+// For focuser2 stepper driver
+#define Axis5DirPin   15    // Pin 15 (Dir)
+#define Axis5StepPin  2     // Pin 2  (Step)
+#define Axis5_EN      0     // Pin 0  (Enable)
+
 // ST4 interface
 #define ST4RAw        34    // Pin 34 ST4 RA- West
 #define ST4DEs        32    // Pin 32 ST4 DE- South

@@ -40,8 +40,8 @@
 // firmware info, these are returned by the ":GV?#" commands
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  1
-#define FirmwareVersionMinor  18
-#define FirmwareVersionPatch  "c"     // for example major.minor patch: 1.3c
+#define FirmwareVersionMinor  19
+#define FirmwareVersionPatch  "a"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 2       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
@@ -105,12 +105,23 @@ tmc2130 tmcAxis2(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
 #endif
 
 #if defined(FOCUSER1_ON) || defined(FOCUSER2_ON)
-  #include "src/lib/Focuser.h"
   #ifdef FOCUSER1_ON
-    focuser foc1;
+    #ifdef AXIS4_DC_MODE_ON
+      #include "src/lib/FocuserDC.h"
+      focuserDC foc1;
+    #else
+      #include "src/lib/Focuser.h"
+      focuser foc1;
+    #endif
   #endif
   #ifdef FOCUSER2_ON
-    focuser foc2;
+    #ifdef AXIS5_DC_MODE_ON
+      #include "src/lib/FocuserDC.h"
+      focuserDC foc2;
+    #else
+      #include "src/lib/Focuser.h"
+      focuser foc2;
+    #endif
   #endif
 #endif
 
@@ -227,6 +238,9 @@ void setup() {
   foc1.init(Axis4StepPin,Axis4DirPin,Axis4_EN,EE_posAxis4,MaxRateAxis4,StepsPerMicrometerAxis4);
   foc1.setMin(MinAxis4*1000.0);
   foc1.setMax(MaxAxis4*1000.0);
+  #ifdef AXIS4_DC_MODE_ON
+    foc1.setPhaseA();
+  #endif
   #ifdef AXIS4_REVERSE_ON
     foc1.setReverseState(HIGH);
   #endif
@@ -243,11 +257,14 @@ void setup() {
   foc2.init(Axis5StepPin,Axis5DirPin,Axis5_EN,EE_posAxis5,MaxRateAxis5,StepsPerMicrometerAxis5);
   foc2.setMin(MinAxis5*1000.0);
   foc2.setMax(MaxAxis5*1000.0);
+  #ifdef AXIS5_DC_MODE_ON
+    foc2.setPhaseB();
+  #endif
   #ifdef AXIS5_REVERSE_ON
     foc2.setReverseState(HIGH);
   #endif
   #ifdef AXIS5_DISABLE
-    foc2.setDisableState(AXIS4_DISABLE);
+    foc2.setDisableState(AXIS5_DISABLE);
     #ifdef AXIS5_AUTO_POWER_DOWN_ON
       foc2.powerDownActive(true);
     #else

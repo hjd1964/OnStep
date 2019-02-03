@@ -161,8 +161,9 @@
 #define Axis4_EN        F1EN   // Enable
 
 // For focuser2 stepper driver
-//#define Axis5DirPin   Undefined   // Dir
-//#define Axis5StepPin  Undefined   // Step
+#define Axis5DirPin     F1DR   // Dir
+#define Axis5StepPin    F1ST   // Step
+#define Axis5_EN        F1EN   // Enable
 
 // The limit switch sense is a logic level input which uses the internal pull up,
 // shorted to ground it stops gotos/tracking
@@ -181,4 +182,3 @@
 #error "Wrong processor for this configuration!"
 
 #endif
-
