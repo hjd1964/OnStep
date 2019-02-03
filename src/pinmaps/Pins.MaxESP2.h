@@ -6,12 +6,12 @@
 // The multi-purpose pins (Aux3..Aux8 can be analog pwm/dac if supported)
 #define Aux3          21    // Home SW for Axis1 (or I2C SDA)
 #define Aux4          22    // Home SW for Axis2 (or I2C SCL)
-#define Aux5          "V0"  // Virtual Aux Pin0 (usually maps to AXIS1_ENC_A_PIN)
-#define Aux6          "V1"  // Virtual Aux Pin1 (usually maps to AXIS1_ENC_B_PIN)
+//#define Aux5          "V0"  // Virtual Aux Pin0 (usually maps to AXIS1_ENC_A_PIN)
+//#define Aux6          "V1"  // Virtual Aux Pin1 (usually maps to AXIS1_ENC_B_PIN)
 #define Aux7          39    // Limit SW, Status LED2, Reticule, etc.
 #define Aux8          25    // Status LED, PPS, Tone, etc.
-#define Aux9          "V2"  // Virtual Aux Pin2 (usually maps to AXIS2_ENC_A_PIN)
-#define Aux10         "V3"  // Virtual Aux Pin3 (usually maps to AXIS2_ENC_B_PIN)
+//#define Aux9          "V2"  // Virtual Aux Pin2 (usually maps to AXIS2_ENC_A_PIN)
+//#define Aux10         "V3"  // Virtual Aux Pin3 (usually maps to AXIS2_ENC_B_PIN)
 
 // these enable virtual pin support
 /*
