@@ -28,7 +28,7 @@
 // ADJUST THE FOLLOWING TO CONFIGURE YOUR CONTROLLER FEATURES --------------------------------------------------------------
 
 // Default speed for Serial2 com port, Default=9600
-#define SERIAL_B_BAUD_DEFAULT 115200
+#define SERIAL_B_BAUD_DEFAULT 9600
 // For an ESP32 SerialC is the Bluetooth port so use a name instead of a baud "ONSTEP", etc.
 #define SERIAL_C_BAUD_DEFAULT_OFF
 
