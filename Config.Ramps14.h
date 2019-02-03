@@ -193,8 +193,8 @@
                                      // Rotator          :  24            * 8           * 20              *  6/360                = 64
                                      // For de-rotation of Alt/Az mounts a quick estimate of the required resolution (in StepsPerDegree)
                                      // would be an estimate of the circumference of the useful imaging circle in (pixels * 2)/360
-#define MinAxis3                -180 // minimum allowed Axis3 rotator, default = -180
-#define MaxAxis3                 180 // maximum allowed Axis3 rotator, default =  180
+#define MinAxis3                -180 // minimum allowed rotator angle, default = -180
+#define MaxAxis3                 180 // maximum allowed rotator angle, default =  180
 #define AXIS3_REVERSE_OFF            // reverse the direction of Axis3 rotator movement
 #define AXIS3_DISABLE HIGH           // Pin A8 (Aux3.)  Default HIGH, for common stepper drivers.
 #define AXIS3_AUTO_POWER_DOWN_OFF    // use _ON if you want to power down the motor at stand-still.  Default _OFF.
@@ -206,8 +206,8 @@
 #define StepsPerMicrometerAxis4  0.5 // figure this out by testing or other means.  In DC motor mode this is the % power level needed to move at 1mm per second (1 to 100%)
 #define MinAxis4               -25.0 // minimum allowed position in millimeters, default = -25.0
 #define MaxAxis4                25.0 // maximum allowed position in millimeters, default =  25.0
-#define AXIS4_REVERSE_OFF            // reverse the direction of Axis4 focuser movement.
-#define AXIS4_DISABLE_OFF            // Pin 0 (Aux5.)  Default _OFF, use HIGH for common stepper drivers
+#define AXIS4_REVERSE_OFF            // reverse the direction of focuser movement.
+#define AXIS4_DISABLE_OFF            // Pin 24 (Aux4.)  Default _OFF, use HIGH for common stepper drivers
 #define AXIS4_AUTO_POWER_DOWN_OFF    // use _ON if you want to power down the motor at stand-still.  Default _OFF.  Ignored in DC motor mode.
 #define AXIS4_DC_MODE_OFF            // enable DC focuser instead of a stepper motor.  Automatically uses Phase A if enabled.  Default _OFF.
 
@@ -218,9 +218,9 @@
 #define StepsPerMicrometerAxis5  0.5 // figure this out by testing or other means.  In DC motor mode this is the % power level needed to move at 1mm per second (1 to 100%)
 #define MinAxis5               -25.0 // minimum allowed position in millimeters, default = -25.0
 #define MaxAxis5                25.0 // maximum allowed position in millimeters, default =  25.0
-#define AXIS5_REVERSE_OFF            // reverse the direction of Axis4 focuser movement.
-#define AXIS5_DISABLE_OFF            // Pin 0 (Aux5.)  Default _OFF, use HIGH for common stepper drivers
-#define AXIS4_AUTO_POWER_DOWN_OFF    // use _ON if you want to power down the motor at stand-still.  Default _OFF.  Ignored in DC motor mode.
+#define AXIS5_REVERSE_OFF            // reverse the direction of focuser movement.
+#define AXIS5_DISABLE_OFF            // Pin 30 (Aux5.) Default _OFF, use HIGH for common stepper drivers
+#define AXIS5_AUTO_POWER_DOWN_OFF    // use _ON if you want to power down the motor at stand-still.  Default _OFF.  Ignored in DC motor mode.
 #define AXIS5_DC_MODE_OFF            // enable DC focuser instead of a stepper motor.  Automatically uses Phase B if enabled.  Default _OFF.
 
 // THAT'S IT FOR USER CONFIGURATION!
