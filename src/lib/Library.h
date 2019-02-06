@@ -74,7 +74,7 @@ Library::Library()
 
   byteMin=200+PECBufferSize;
   
-  byteMax=E2END;
+  byteMax=E2END-100;
 
   byteCount=(byteMax-byteMin)+1;
   bytePos=byteMin;
@@ -336,4 +336,3 @@ void Library::clearAll()
 {
   for (int l=0;l<recMax;l++) clearRec(l);
 }
-

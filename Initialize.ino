@@ -337,6 +337,15 @@ void initReadNvValues() {
   // set the default guide rate
   setGuideRate(GuideRateDefault);
   enableGuideRate(GuideRateDefault);
+
+  // for DC focusers read in the % power
+#ifdef AXIS4_DC_MODE_ON
+  dcPwrAxis4=nv.read(EE_dcPwrAxis4);
+#endif
+#ifdef AXIS5_DC_MODE_ON
+  dcPwrAxis5=nv.read(EE_dcPwrAxis5);
+#endif
+
 }
 
 // the polar home position
@@ -420,6 +429,13 @@ void initWriteNvValues() {
     // set default focuser positions at zero
     nv.writeLong(EE_posAxis4,0L);
     nv.writeLong(EE_posAxis5,0L);
+    // for DC focusers read in the % power
+#ifdef AXIS4_DC_MODE_ON
+    nv.write(EE_dcPwrAxis4,50);
+#endif
+#ifdef AXIS5_DC_MODE_ON
+    nv.write(EE_dcPwrAxis5,50);
+#endif
 
     // finally, stop the init from happening again
     nv.writeLong(EE_autoInitKey,autoInitKey);

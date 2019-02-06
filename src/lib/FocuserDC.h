@@ -18,9 +18,7 @@ class focuserDC {
       
       this->nvAddress=nvAddress;
       this->maxRate=maxRate;
-      this->spm=1;
-      this->powerFor1mmSec=stepsPerMicro;
-      dcMotor.setPower(powerFor1mmSec);  // stepsPerMicro is the % power level needed to move at 1mm/s (1 to 100%)
+      this->spm=stepsPerMicro;
     
       spos=readPos();
       target.part.m=spos; target.part.f=0;
@@ -38,6 +36,10 @@ class focuserDC {
 
       nextPhysicalMove=millis()+(unsigned long)maxRate;
       lastPhysicalMove=nextPhysicalMove;
+    }
+
+    void setDcPower(byte power) {
+      this->powerFor1mmSec=power;
     }
 
     void setPhaseA() {
@@ -84,7 +86,6 @@ class focuserDC {
       // a rate of 1000 gives 1mm/second (fastest)
       moveRate=rate*spm;                                  // in steps per second, for a DC motor a step is 1 micron.
       if (moveRate>spsMax) moveRate=spsMax;               // limit to maxRate
-      dcMotor.setPower((moveRate/1000.0)*powerFor1mmSec); // rate is some fraction of 1 millimeter per second so this is the % power for 1 millimeter per second motion
     }
 
     // check if moving
@@ -94,11 +95,14 @@ class focuserDC {
 
     // move in
     void startMoveIn() {
+      // rate is some fraction of 1 millimeter per second so this is the % power for 1 millimeter per second motion
+      dcMotor.setPower((moveRate/1000.0)*powerFor1mmSec);
       delta.fixed=doubleToFixed(+moveRate/100.0); // in steps per centi-second
     }
 
     // move out
     void startMoveOut() {
+      dcMotor.setPower((moveRate/1000.0)*powerFor1mmSec);
       delta.fixed=doubleToFixed(-moveRate/100.0); // in steps per centi-second
     }
 
@@ -122,12 +126,14 @@ class focuserDC {
 
     // sets target position in microns
     void setTarget(double pos) {
+      dcMotor.setPower((moveRate/1000.0)*powerFor1mmSec);
       target.part.m=round(pos*spm); target.part.f=0;
       if ((long)target.part.m<smin) target.part.m=smin; if ((long)target.part.m>smax) target.part.m=smax;
     }
 
     // sets target relative position in microns
     void relativeTarget(double pos) {
+      dcMotor.setPower((moveRate/1000.0)*powerFor1mmSec);
       target.part.m+=round(pos*spm); target.part.f=0;
       if ((long)target.part.m<smin) target.part.m=smin; if ((long)target.part.m>smax) target.part.m=smax;
     }

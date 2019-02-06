@@ -46,8 +46,7 @@ unsigned int StepsTMC2100[LEN_TMC2100][2] = { {1,0}, {2,1}, {4,2}, {16,3} };
 unsigned int StepsTMC2130[LEN_TMC2130][2] = { {1,8}, {2,7}, {4,6}, {8,5}, {16,4}, {32,3}, {64,2}, {128,1}, {256,0} };
 
 // EEPROM Info --------------------------------------------------------------------------------------------------------------
-// 0-1023 bytes
-// general purpose storage 0..99
+// General purpose storage A (100 bytes), 0..99
 
 #define EE_posAxis1    0      // 4
 #define EE_posAxis2    4      // 4
@@ -121,14 +120,20 @@ unsigned int StepsTMC2130[LEN_TMC2130][2] = { {1,8}, {2,7}, {4,6}, {8,5}, {16,4}
 
 #define EE_sites    100
 
-// PEC table: 200...PECBufferSize+200-1
+// PEC table: 200...PECBufferSize+199
 // PECBufferSize table of byte sized integers -128..+127, units are steps
 
 #define EE_pecTable 200
 
 // Library
-// Catalog storage starts at 200+PECBufferSize and fills EEPROM
+// Catalog storage starts at 200+PECBufferSize and ends at E2END-100
 
+// General purpose storage B (100 bytes), E2END-99..E2END
+#define GSB (E2END-100)
+#define EE_dcPwrAxis4  GSB+0   // 1
+#define EE_dcPwrAxis5  GSB+1   // 1
+
+// --------------------------------------------------------------------------------------------------------------------------
 // Unique identifier for the current initialization format for NV, do not change
 #define initKey 915307548
 

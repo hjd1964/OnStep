@@ -25,7 +25,7 @@
  *   http://www.stellarjourney.com
  *   hjd1964@gmail.com
  *
- * Revision history, and newer versions::
+ * Revision history, and newer versions:
  *   See GitHub: https://github.com/hjd1964/OnStep
  *
  * Documentation:
@@ -41,7 +41,7 @@
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  1
 #define FirmwareVersionMinor  19
-#define FirmwareVersionPatch  "b"     // for example major.minor patch: 1.3c
+#define FirmwareVersionPatch  "c"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 2       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
@@ -239,6 +239,7 @@ void setup() {
   foc1.setMin(MinAxis4*1000.0);
   foc1.setMax(MaxAxis4*1000.0);
   #ifdef AXIS4_DC_MODE_ON
+    foc1.setDcPower(dcPwrAxis4);
     foc1.setPhaseA();
   #endif
   #ifdef AXIS4_REVERSE_ON
@@ -258,6 +259,7 @@ void setup() {
   foc2.setMin(MinAxis5*1000.0);
   foc2.setMax(MaxAxis5*1000.0);
   #ifdef AXIS5_DC_MODE_ON
+    foc2.setDcPower(dcPwrAxis5);
     foc2.setPhaseB();
   #endif
   #ifdef AXIS5_REVERSE_ON

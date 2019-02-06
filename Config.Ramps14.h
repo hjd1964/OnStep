@@ -195,7 +195,7 @@
                                      // would be an estimate of the circumference of the useful imaging circle in (pixels * 2)/360
 #define MinAxis3                -180 // minimum allowed rotator angle, default = -180
 #define MaxAxis3                 180 // maximum allowed rotator angle, default =  180
-#define AXIS3_REVERSE_OFF            // reverse the direction of Axis3 rotator movement
+#define AXIS3_REVERSE_OFF            // reverse the direction of Axis3 rotator movement.
 #define AXIS3_DISABLE HIGH           // Pin A8 (Aux3.)  Default HIGH, for common stepper drivers.
 #define AXIS3_AUTO_POWER_DOWN_OFF    // use _ON if you want to power down the motor at stand-still.  Default _OFF.
 
@@ -203,7 +203,7 @@
 // Pins 26,28 = Step,Dir
 #define FOCUSER1_OFF                 // use _ON to enable this focuser, default=_OFF
 #define MaxRateAxis4               8 // this is the minimum number of milli-seconds between steps, default=8.  In DC motor mode PWM frequency.
-#define StepsPerMicrometerAxis4  0.5 // figure this out by testing or other means.  In DC motor mode this is the % power level needed to move at 1mm per second (1 to 100%)
+#define StepsPerMicrometerAxis4  0.5 // figure this out by testing or other means.
 #define MinAxis4               -25.0 // minimum allowed position in millimeters, default = -25.0
 #define MaxAxis4                25.0 // maximum allowed position in millimeters, default =  25.0
 #define AXIS4_REVERSE_OFF            // reverse the direction of focuser movement.
@@ -215,7 +215,7 @@
 // Pins 36,34 = Step,Dir
 #define FOCUSER2_OFF                 // use _ON to enable this focuser, default=_OFF
 #define MaxRateAxis5               8 // this is the minimum number of milli-seconds between steps, default=8.  In DC motor mode PWM frequency.
-#define StepsPerMicrometerAxis5  0.5 // figure this out by testing or other means.  In DC motor mode this is the % power level needed to move at 1mm per second (1 to 100%)
+#define StepsPerMicrometerAxis5  0.5 // figure this out by testing or other means.
 #define MinAxis5               -25.0 // minimum allowed position in millimeters, default = -25.0
 #define MaxAxis5                25.0 // maximum allowed position in millimeters, default =  25.0
 #define AXIS5_REVERSE_OFF            // reverse the direction of focuser movement.

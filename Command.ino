@@ -342,6 +342,29 @@ void processCommands() {
 //  :FF#   Set focuser for fast motion (1mm/s)
 //         Returns: Nothing
       if (command[1]=='F') { foc1.setMoveRate(1000); quietReply=true; } else
+#ifdef AXIS4_DC_MODE_ON
+//  :FP#      Get focuser DC Motor Power Level (in %)
+//            Returns: nnn#
+//  :FPnnn#   Set focuser DC Motor Power Level (in %)
+//            Return: 0 on failure
+//                    1 on success
+      if (command[1]=='P') {
+        if (parameter[0]==0) {
+          sprintf(reply,"%d",(int)dcPwrAxis4); quietReply=true; 
+        } else {
+          i=atol(parameter);
+          if ((i>=0) && (i<=100)) { dcPwrAxis4=i; foc1.setDcPower(dcPwrAxis4); nv.write(EE_dcPwrAxis4,i); } else commandError=true; 
+        }
+      } else
+#endif
+//  :Fp#      Check for focuser pseudo absolute mode
+//            Return: 0 on failure
+//                    1 on success
+      if (command[1]>='p') {
+#ifndef AXIS4_DC_MODE_ON
+      commandError=true;
+#endif
+      } else 
 //  :FRsnnn#  Set focuser target position relative (in microns)
 //            Returns: Nothing
       if (command[1]=='R') { foc1.relativeTarget(atol(parameter)); quietReply=true; } else
@@ -353,7 +376,7 @@ void processCommands() {
 //  :Fn#   Movement rate, 1=finest, 2=0.01mm/second, 3=0.1mm/second, 4=1mm/second
 //         Returns: Nothing
       if ((command[1]>='1') && (command[1]<='4')) { i=command[1]-'1'; int p[] = {1,10,100,1000}; foc1.setMoveRate(p[i]); quietReply=true; } else commandError=true;
-     } else
+      } else
 #endif
 
 #ifdef FOCUSER2_ON
@@ -400,6 +423,29 @@ void processCommands() {
 //  :fF#   Set focuser for fast motion (1mm/s)
 //         Returns: Nothing
       if (command[1]=='F') { foc2.setMoveRate(1000); quietReply=true; } else
+#ifdef AXIS5_DC_MODE_ON
+//  :fP#      Get focuser DC Motor Power Level (in %)
+//            Returns: nnn#
+//  :fPnnn#   Set focuser DC Motor Power Level (in %)
+//            Return: 0 on failure
+//                    1 on success
+      if (command[1]=='p') {
+        if (parameter[0]==0) {
+          sprintf(reply,"%d",(int)dcPwrAxis5); quietReply=true; 
+        } else {
+          i=atol(parameter);
+          if ((i>=0) && (i<=100)) { dcPwrAxis5=i; foc2.setDcPower(dcPwrAxis5); nv.write(EE_dcPwrAxis5,i); } else commandError=true; 
+        }
+      } else
+#endif
+//  :fp#      Check for focuser pseudo absolute mode
+//            Return: 0 on failure
+//                    1 on success
+      if (command[1]>='p') {
+#ifndef AXIS5_DC_MODE_ON
+      commandError=true;
+#endif
+      } else 
 //  :fRsnnn#  Set focuser target position relative (in microns)
 //            Returns: Nothing
       if (command[1]=='R') { foc2.relativeTarget(atol(parameter)); quietReply=true; } else

@@ -194,19 +194,19 @@
 // Pads 31,32 = Step,Dir
 #define FOCUSER1_OFF                 // use _ON to enable this focuser, default=_OFF
 #define MaxRateAxis4               8 // this is the minimum number of milli-seconds between micro-steps, default=8
-#define StepsPerMicrometerAxis4  0.5 // figure this out by testing or other means
+#define StepsPerMicrometerAxis4  0.5 // figure this out by testing or other means.
 #define MinAxis4               -25.0 // minimum allowed position in millimeters, default = -25.0
 #define MaxAxis4                25.0 // maximum allowed position in millimeters, default =  25.0
-#define AXIS4_REVERSE_OFF            // reverse the direction of Axis4 focuser movement
+#define AXIS4_REVERSE_OFF            // reverse the direction of Axis4 focuser movement.
 
 // FOCUSER2 ---------------------------------------------------------------------------------------------------------------
 // Pads 30,33 = Step,Dir (choose either this option or the rotator, not both)
 #define FOCUSER2_OFF                 // use _ON to enable this focuser, default=_OFF
 #define MaxRateAxis5               8 // this is the minimum number of milli-seconds between micro-steps, default=8
-#define StepsPerMicrometerAxis5  0.5 // figure this out by testing or other means
+#define StepsPerMicrometerAxis5  0.5 // figure this out by testing or other means.
 #define MinAxis5               -25.0 // minimum allowed position in millimeters, default = -25.0
 #define MaxAxis5                25.0 // maximum allowed position in millimeters, default =  25.0
-#define AXIS5_REVERSE_OFF            // reverse the direction of Axis5 focuser movement
+#define AXIS5_REVERSE_OFF            // reverse the direction of Axis5 focuser movement.
 
 // THAT'S IT FOR USER CONFIGURATION!
 
