@@ -106,10 +106,10 @@ class stepperDC {
       if (_phase==5 || _phase==7) nextDirection();  // switch to move out
     }
     
-    void setPhaseA() {
+    void setPhase1() {
       if (_phase==3 || _phase==7) priorPhase(); // switch to phase A
     }
-    void setPhaseB() {
+    void setPhase2() {
       if (_phase==1 || _phase==5) nextPhase(); // switch to phase B
     }
   

@@ -42,11 +42,11 @@ class focuserDC {
       this->powerFor1mmSec=power;
     }
 
-    void setPhaseA() {
-      phaseA=true;
+    void setPhase1() {
+      phase1=true;
     }
-    void setPhaseB() {
-      phaseA=false;
+    void setPhase2() {
+      phase1=false;
     }
 
     // setMin(MinAxis5)
@@ -173,7 +173,7 @@ class focuserDC {
       }
 
       if (moving()) {
-        if (phaseA) dcMotor.setPhaseA(); else dcMotor.setPhaseB();
+        if (phase1) dcMotor.setPhase1(); else dcMotor.setPhase2();
         dcMotor.enabled(true);
         dcMotor.poll();
         lastPollingTime=millis();
@@ -203,7 +203,7 @@ class focuserDC {
     long umax=+6L*25400L;
     long smax=-1;
     bool reverse=false;
-    bool phaseA=true;
+    bool phase1=true;
 
     // conversion
     double spm=1.0;

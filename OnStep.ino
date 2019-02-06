@@ -240,7 +240,7 @@ void setup() {
   foc1.setMax(MaxAxis4*1000.0);
   #ifdef AXIS4_DC_MODE_ON
     foc1.setDcPower(dcPwrAxis4);
-    foc1.setPhaseA();
+    foc1.setPhase1();
   #endif
   #ifdef AXIS4_REVERSE_ON
     foc1.setReverseState(HIGH);
@@ -260,7 +260,7 @@ void setup() {
   foc2.setMax(MaxAxis5*1000.0);
   #ifdef AXIS5_DC_MODE_ON
     foc2.setDcPower(dcPwrAxis5);
-    foc2.setPhaseB();
+    foc2.setPhase2();
   #endif
   #ifdef AXIS5_REVERSE_ON
     foc2.setReverseState(HIGH);

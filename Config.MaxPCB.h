@@ -205,7 +205,7 @@
 #define AXIS4_REVERSE_OFF            // reverse the direction of focuser movement.
 #define AXIS4_DISABLE_OFF            // Pin A22 (Aux6.)  Default _OFF, use HIGH for common stepper drivers.
 #define AXIS4_AUTO_POWER_DOWN_OFF    // use _ON if you want to power down the motor at stand-still.  Default _OFF.  Ignored in DC motor mode.
-#define AXIS4_DC_MODE_ON             // enable DC focuser instead of a stepper motor.  Automatically uses Phase A if enabled.  Default _OFF.
+#define AXIS4_DC_MODE_ON             // enable DC focuser instead of a stepper motor.  Automatically uses Phase 1 if enabled.  Default _OFF.
 
 // FOCUSER2 ---------------------------------------------------------------------------------------------------------------
 // Pins 30,33 = Step,Dir (choose either this option or the rotator, not both) 
@@ -217,7 +217,7 @@
 #define AXIS5_REVERSE_OFF            // reverse the direction of focuser movement.
 #define AXIS5_DISABLE_OFF            // Pin A21 (Aux5.)  Default _OFF, use HIGH for common stepper drivers.
 #define AXIS5_AUTO_POWER_DOWN_OFF    // use _ON if you want to power down the motor at stand-still.  Default _OFF.  Ignored in DC motor mode.
-#define AXIS5_DC_MODE_OFF            // enable DC focuser instead of a stepper motor.  Automatically uses Phase B if enabled.  Default _OFF.
+#define AXIS5_DC_MODE_OFF            // enable DC focuser instead of a stepper motor.  Automatically uses Phase 2 if enabled.  Default _OFF.
 
 //#define Axis3_EN 36                  // Early version 1.x MaxPCB's had the option of using pin 36 for Axis3 EN
 //#define Axis4_EN 39                  // Early version 1.x MaxPCB's had the option of using pin 39 for Axis4/Axis5 EN
