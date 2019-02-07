@@ -187,6 +187,8 @@ void moveTo() {
   if ( ((distDestAxis1<=ceil(abs(fixedToDouble(fstepAxis1)))+1) && (distDestAxis2<=ceil(abs(fixedToDouble(fstepAxis2)))+1) ) || slewAbort) {
     slewEnding=false;
     slewAbort=false;
+
+    // assurance that we're really in tracking mode
     stepperModeTracking();
 
     if ((pierSideControl==PierSideFlipEW2) || (pierSideControl==PierSideFlipWE2)) {
@@ -210,6 +212,7 @@ void moveTo() {
       }
       pierSideControl++;
 
+      stepperModeGoto();
       forceRefreshGetEqu();
     } else
     if ((pierSideControl==PierSideFlipEW3) || (pierSideControl==PierSideFlipWE3)) {
@@ -224,6 +227,7 @@ void moveTo() {
       targetAxis2.part.m=origTargetAxis2; targetAxis2.part.f=0;
       sei();
 
+      stepperModeGoto();
       forceRefreshGetEqu();
     } else {
 
