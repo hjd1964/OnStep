@@ -82,6 +82,7 @@ void stepperModeTracking() {
 #endif
 
 #ifdef MODE_SWITCH_SLEEP_ON
+  if (atHome) delay(20);
   delay(3);
 #endif
   sei();
