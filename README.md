@@ -46,6 +46,12 @@ Detailed documentation, including the full set of features, detailed designs for
 PCBs, instructions on how to build a controller, how to configure the firmware
 for your particular mount, can all be found the [OnStep Group Wiki](https://groups.io/g/onstep/wiki/home).
 
+# Change Log
+All the changes are tracking in git, and a detailed list can be accessed using the
+following git command:
+ 
+git log --date=short --pretty=format:"%h %ad %<(20)%an %<(150,trunc)%s"
+
 # Support
 Questions and discussion should be on the mailing list (also accessible via the
 web) at the [OnStep Group](https://groups.io/g/onstep/).
