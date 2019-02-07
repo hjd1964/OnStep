@@ -14,14 +14,14 @@
 
 // SerialC
 // The stock ESP32 Release 1.0.0 BluetoothSerial.h library doesn't work
-// Copy the latest BluetoothSerial library (just it's folder) from https://github.com/espressif/arduino-esp32 into
-// C:\Users\xxxxxx\AppData\Local\Arduino15\packages\esp32\hardware\esp32\1.0.0\libraries\Bluetooth
+// Copy the latest BluetoothSerial library (just its folder) from https://github.com/espressif/arduino-esp32 into
+// C:\Users\xxxxxx\AppData\Local\Arduino15\packages\esp32\hardware\esp32\1.0.0\libraries
 #ifdef SERIAL_C_BAUD_DEFAULT
   #include <BluetoothSerial.h>
   BluetoothSerial SerialC;
   #define HAL_SERIAL_C_ENABLED
   #define HAL_SERIAL_C_BLUETOOTH
-  #warning "The stock ESP32 Release 1.0.0 BluetoothSerial.h library doesn't work!"
+  #warning "Bluetooth only works on ESP32 Release 1.0.0 and then only with a corrected BluetoothSerial.h library, see Config.MaxESP2.h!"
 #endif
 
 // New symbol for the default I2C port ---------------------------------------------------------------
@@ -31,8 +31,23 @@
 #include <Wire.h>
 #define HAL_Wire Wire
 #ifndef WIRE_END_SUPPORT
-#error "The stock ESP32 Release 1.0.0 Wire.h library doesn't work.  See the above HAL_ESP32.h file for instructions to correct this!"
+#warning "The stock ESP32 Release 1.0.0 Wire.h library doesn't work.  See the above HAL_ESP32.h file for instructions to correct this!"
 #endif
+
+//--------------------------------------------------------------------------------------------------
+// General purpose initialize for HAL
+void HAL_Init(void) {
+}
+
+//--------------------------------------------------------------------------------------------------
+// Internal MCU temperature (in degrees C)
+
+// Correction for ESP32's internal temperture sensor
+#define INTERNAL_TEMP_CORRECTION 0
+
+float HAL_MCU_Temperature(void) {
+  return temperatureRead() + INTERNAL_TEMP_CORRECTION;
+}
 
 //--------------------------------------------------------------------------------------------------
 // Interrupts
@@ -82,9 +97,6 @@ void timerAlarmsDisable() { timerAlarmDisable(itimer1); timerAlarmDisable(itimer
 
 // frequency compensation (F_COMP/1000000.0) for adjusting microseconds to timer counts
 #define F_COMP 16000000.0
-
-void HAL_Init(void) {
-}
 
 extern long int siderealInterval;
 extern void SiderealClockSetInterval (long int);

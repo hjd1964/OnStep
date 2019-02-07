@@ -45,13 +45,33 @@
 #include "../drivers/RTCw.h"
 
 //--------------------------------------------------------------------------------------------------
+// General purpose initialize for HAL
+void HAL_Init(void) {
+}
+
+//--------------------------------------------------------------------------------------------------
+// Internal MCU temperature (in degrees C)
+float HAL_MCU_Temperature(void) {
+#if defined(__MK64FX512__)
+  int Tpin=70;
+#elif defined(__MK66FX1M0__)
+  int Tpin=70;
+#else // Teensy3.0,3.1,3.2
+  int Tpin=38;
+#endif
+  // delta of -1.715 mV/C where 25C measures 719 mV
+  analogReadResolution(12);
+  float v=(analogRead(Tpin)/4096.0)*3.3;
+  float t=(-(v-0.719)/0.001715)+25.0;
+  analogReadResolution(10);
+  return t;
+}
+
+//--------------------------------------------------------------------------------------------------
 // Initialize timers
 
 // frequency compensation (F_COMP/1000000.0) for adjusting microseconds to timer counts
 #define F_COMP F_BUS
-
-void HAL_Init(void) {
-}
 
 IntervalTimer itimer3;
 void TIMER3_COMPA_vect(void);
@@ -124,4 +144,3 @@ void QuickSetIntervalAxis2(uint32_t r) {
 #define StepPinAxis2_LOW digitalWriteFast(Axis2StepPin, LOW)
 #define DirPinAxis2_HIGH digitalWriteFast(Axis2DirPin, HIGH)
 #define DirPinAxis2_LOW digitalWriteFast(Axis2DirPin, LOW)
-

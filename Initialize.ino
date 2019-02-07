@@ -102,6 +102,13 @@ void initStartupValues() {
 
 void initPins() {
 // ------------------------------------------------------------------
+// Pull the Axis1/2 RST Pin HIGH on the MaxESP2
+
+#ifdef MaxESP2_ON
+pinMode(Axis1_Aux,INPUT_PULLUP);
+#endif
+
+// ------------------------------------------------------------------
 // ESP-01 (ESP8266) firmware flashing control
 
 #ifdef ESP8266_CONTROL_ON
@@ -330,6 +337,15 @@ void initReadNvValues() {
   // set the default guide rate
   setGuideRate(GuideRateDefault);
   enableGuideRate(GuideRateDefault);
+
+  // for DC focusers read in the % power
+#ifdef AXIS4_DC_MODE_ON
+  dcPwrAxis4=nv.read(EE_dcPwrAxis4);
+#endif
+#ifdef AXIS5_DC_MODE_ON
+  dcPwrAxis5=nv.read(EE_dcPwrAxis5);
+#endif
+
 }
 
 // the polar home position
@@ -413,6 +429,13 @@ void initWriteNvValues() {
     // set default focuser positions at zero
     nv.writeLong(EE_posAxis4,0L);
     nv.writeLong(EE_posAxis5,0L);
+    // for DC focusers read in the % power
+#ifdef AXIS4_DC_MODE_ON
+    nv.write(EE_dcPwrAxis4,50);
+#endif
+#ifdef AXIS5_DC_MODE_ON
+    nv.write(EE_dcPwrAxis5,50);
+#endif
 
     // finally, stop the init from happening again
     nv.writeLong(EE_autoInitKey,autoInitKey);
@@ -452,6 +475,9 @@ unsigned int translateMicrosteps(int axis, int DriverModel, unsigned int Microst
     case LV8729:
       Mode = searchTable(StepsLV8729, LEN_LV8729, Microsteps);
       break;
+    case ST820:
+      Mode = searchTable(StepsST820, LEN_ST820, Microsteps);
+      break;
     case TMC2100:
       Mode = searchTable(StepsTMC2100, LEN_TMC2100, Microsteps);
       break;
@@ -481,4 +507,3 @@ unsigned int searchTable(unsigned int Table[][2], int TableLen, unsigned int Mic
   return 0;
 }
 #endif
-

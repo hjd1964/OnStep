@@ -39,8 +39,8 @@ public:
   char TempAz[20];
   char TempAlt[20];
   unsigned long lastStateAzAlt;
-  char TempUTC[20];
-  char TempSideral[20];
+  char TempLocalTime[20];
+  char TempSidereal[20];
   unsigned long lastStateTime;
   char TelStatus[20];
   char sideofpier[20];
@@ -53,7 +53,7 @@ public:
   bool hasInfoAz = false;
   bool hasInfoAlt = false;
   bool hasInfoUTC = false;
-  bool hasInfoSideral = false;
+  bool hasInfoSidereal = false;
   bool hasPierInfo = false;
   bool hasTelStatus = false;
   unsigned long lastState;

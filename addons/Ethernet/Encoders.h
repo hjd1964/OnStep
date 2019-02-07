@@ -20,6 +20,7 @@ long Axis2EncDiffLimit=AXIS2_ENC_DIFF_LIMIT;
 // encoder rate control
 #ifdef AXIS1_ENC_RATE_CONTROL_ON
   bool encRateControl=false;
+  bool encSweep=true;
   volatile long Axis1EncStaSamples=20;
   volatile long Axis1EncLtaSamples=200;
   long Axis1EncProp=10;
@@ -275,13 +276,13 @@ class Encoders {
         correction+=r;
 
         if (!encRateControl) correction=0.0;
-        if (correction>0.25) {
+        if (correction>0.1) {
           finalCorrection=round(correction*1000.0);
           if (finalCorrection>2000) finalCorrection=2000;
           Ser.print(":Mgw"); Ser.print(finalCorrection); Ser.print("#");
           if (correction>2.0) correction-=2.0; else correction=0;
         } else
-        if (correction<-0.25) {
+        if (correction<-0.1) {
           finalCorrection=round(-correction*1000.0);
           if (finalCorrection>2000) finalCorrection=2000;
           Ser.print(":Mge"); Ser.print(finalCorrection); Ser.print("#");
@@ -315,4 +316,3 @@ class Encoders {
 };
 
 #endif
-

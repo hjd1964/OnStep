@@ -332,6 +332,14 @@ volatile int backlashAxis2  = 0;
 volatile int blAxis1        = 0;
 volatile int blAxis2        = 0;
 
+// focuser control
+#ifdef AXIS4_DC_MODE_ON
+byte dcPwrAxis4 = 50;
+#endif
+#ifdef AXIS5_DC_MODE_ON
+byte dcPwrAxis5 = 50;
+#endif
+
 // aux pin control
 #ifdef Aux0
 byte valueAux0 = 0;
@@ -381,5 +389,3 @@ byte valueAux14 = 0;
 #ifdef Aux15
 byte valueAux15 = 0;
 #endif
-
-

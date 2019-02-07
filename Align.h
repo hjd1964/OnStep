@@ -102,8 +102,8 @@ class TGeoAlign
     void writeCoe();
     bool isReady();
     bool addStar(int I, int N, double RA, double Dec);
-    void equToInstr(double Lat, double HA, double Dec, double *HA1, double *Dec1, int PierSide);
-    void instrToEqu(double Lat, double HA, double Dec, double *HA1, double *Dec1, int PierSide);
+    void equToInstr(double HA, double Dec, double *HA1, double *Dec1, int PierSide);
+    void instrToEqu(double HA, double Dec, double *HA1, double *Dec1, int PierSide);
     void autoModel(int n);
     void model(int n);
 
@@ -151,4 +151,3 @@ boolean alignStar() {
 
   return true;
 }
-

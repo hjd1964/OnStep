@@ -190,6 +190,9 @@ static const unsigned char teenastro_bits[] U8X8_PROGMEM = {
   0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
   0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
 
+unsigned long display_blank_time = DISPLAY_BLANK_TIME;
+unsigned long display_dim_time = DISPLAY_DIM_TIME;  
+
 void gethms(const long& v, uint8_t& v1, uint8_t& v2, uint8_t& v3)
 {
   v3 = v % 60;
@@ -278,8 +281,8 @@ void SmartHandController::update()
     if (sleepDisplay) { display->setContrast(maxContrast); display->sleepOff(); sleepDisplay = false; lowContrast = false; buttonPad.clearAllPressed(); time_last_action = millis(); }
     if (lowContrast)  { display->setContrast(maxContrast); lowContrast = false; time_last_action = top; }
   } else if (sleepDisplay) return;
-  if (top - time_last_action > 120000) { display->sleepOn(); sleepDisplay = true; return; }
-  if (top - time_last_action > 30000 && !lowContrast) { display->setContrast(0); lowContrast = true; return; }
+  if (display_blank_time && top - time_last_action > display_blank_time) { display->sleepOn(); sleepDisplay = true; return; }
+  if (display_dim_time && top - time_last_action > display_dim_time && !lowContrast) { display->setContrast(0); lowContrast = true; return; }
 
   // power cycle reqd message
   if (powerCylceRequired) { display->setFont(u8g2_font_helvR12_tr); DisplayMessage("REBOOT", "DEVICE", 1000); return; }
@@ -323,15 +326,14 @@ void SmartHandController::update()
   else // guide
   {
     buttonCommand = false;
-    if (!moveEast  && buttonPad.e.isDown()) { moveEast = true;   Ser.print(":Me#"); buttonCommand=true; } else
-    if (moveEast   && buttonPad.e.isUp())   { moveEast = false;  Ser.print(":Qe#"); buttonCommand=true; buttonPad.e.clearPress(); }
-    if (!moveWest  && buttonPad.w.isDown()) { moveWest = true;   Ser.print(":Mw#"); buttonCommand=true; } else
-    if (moveWest   && buttonPad.w.isUp())   { moveWest = false;  Ser.print(":Qw#"); buttonCommand=true; buttonPad.w.clearPress(); }
-    if (!moveNorth && buttonPad.n.isDown()) { moveNorth = true;  Ser.print(":Mn#"); buttonCommand=true; } else
-    if (moveNorth  && buttonPad.n.isUp())   { moveNorth = false; Ser.print(":Qn#"); buttonCommand=true; buttonPad.n.clearPress(); }
-    if (!moveSouth && buttonPad.s.isDown()) { moveSouth = true;  Ser.print(":Ms#"); buttonCommand=true; } else
-    if (moveSouth  && buttonPad.s.isUp())   { moveSouth = false; Ser.print(":Qs#"); buttonCommand=true; buttonPad.s.clearPress(); }
-
+    if (!moveEast  && buttonPad.e.isDown()) { moveEast = true;   Ser.write(ccMe); buttonCommand=true; } else
+    if (moveEast   && buttonPad.e.isUp()  ) { moveEast = false;  Ser.write(ccQe); buttonCommand=true; buttonPad.e.clearPress(); }
+    if (!moveWest  && buttonPad.w.isDown()) { moveWest = true;   Ser.write(ccMw); buttonCommand=true; } else
+    if (moveWest   && buttonPad.w.isUp()  ) { moveWest = false;  Ser.write(ccQw); buttonCommand=true; buttonPad.w.clearPress(); }
+    if (!moveNorth && buttonPad.n.isDown()) { moveNorth = true;  Ser.write(ccMn); buttonCommand=true; } else
+    if (moveNorth  && buttonPad.n.isUp()  ) { moveNorth = false; Ser.write(ccQn); buttonCommand=true; buttonPad.n.clearPress(); }
+    if (!moveSouth && buttonPad.s.isDown()) { moveSouth = true;  Ser.write(ccMs); buttonCommand=true; } else
+    if (moveSouth  && buttonPad.s.isUp()  ) { moveSouth = false; Ser.write(ccQs); buttonCommand=true; buttonPad.s.clearPress(); }
     if (buttonCommand) { time_last_action = millis(); return; }
   }
 
@@ -395,6 +397,16 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
     page = 3;
   }
 
+  // update status info.
+  if (page == 0)
+    telInfo.updateRaDec();
+  else
+    if (page == 1)
+      telInfo.updateAzAlt();
+    else
+      if (page == 2)
+        telInfo.updateTime();
+ 
   // the graphics loop
   u8g2_FirstPage(u8g2);
   do
@@ -457,7 +469,6 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
     // show equatorial coordinates
     if (page == 0)
     {
-      telInfo.updateRaDec();
       if (telInfo.hasInfoRa && telInfo.hasInfoDec) {
         char rs[20]; strcpy(rs,telInfo.TempRa); rs[2]=0; rs[5]=0;
         x = u8g2_GetDisplayWidth(u8g2);  u8g2_uint_t y = 36;
@@ -471,7 +482,6 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
 
     // show horizon coordinates
     if (page == 1) {
-      telInfo.updateAzAlt();
       if (telInfo.hasInfoAz && telInfo.hasInfoAlt)
       {
         char zs[20]; strcpy(zs,telInfo.TempAz); zs[3]=0; zs[6]=0;
@@ -486,16 +496,15 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
     
     // show time
     if (page == 2) {
-      telInfo.updateTime();
-      if (telInfo.hasInfoUTC && telInfo.hasInfoSideral)
+      if (telInfo.hasInfoUTC && telInfo.hasInfoSidereal)
       {
-        char us[20]; strcpy(us,telInfo.TempUTC); us[2]=0; us[5]=0;
+        char us[20]; strcpy(us,telInfo.TempLocalTime); us[2]=0; us[5]=0;
         x = u8g2_GetDisplayWidth(u8g2);  u8g2_uint_t y = 36;
-        u8g2_DrawUTF8(u8g2, 0, y, "UTC"); display->drawRA( x, y, us, &us[3], &us[6]);
+        u8g2_DrawUTF8(u8g2, 0, y, "Local"); display->drawRA( x, y, us, &us[3], &us[6]);
 
-        char ss[20]; strcpy(ss,telInfo.TempSideral); ss[2]=0; ss[5]=0;
+        char ss[20]; strcpy(ss,telInfo.TempSidereal); ss[2]=0; ss[5]=0;
         y += line_height + 4;
-        u8g2_DrawUTF8(u8g2, 0, y, "Sideral"); display->drawRA(x, y, ss, &ss[3], &ss[6]);
+        u8g2_DrawUTF8(u8g2, 0, y, "Sidereal"); display->drawRA(x, y, ss, &ss[3], &ss[6]);
       }
     }
 
@@ -578,26 +587,28 @@ void SmartHandController::menuMain()
   {
     boolean sync=false;
     if (!telInfo.isMountAltAz()) {
-      const char *string_list_main_UnParkedL0 = "Goto\n""Sync\n""Align\n""Parking\n""PEC\n""Settings";
+      const char *string_list_main_UnParkedL0 = "Goto\n""Sync\n""Align\n""Parking\n""Tracking\n""PEC\n""Settings";
       current_selection_L0 = display->UserInterfaceSelectionList(&buttonPad, "Main Menu", current_selection_L0, string_list_main_UnParkedL0);
       switch (current_selection_L0) {
         case 1: menuSyncGoto(false); break;
         case 2: if (display->UserInterfaceInputValueBoolean(&buttonPad, "Sync Here?", &sync)) if (sync) DisplayMessageLX200(SetLX200(":CS#"),false); break;
         case 3: menuAlignment(); break;
         case 4: menuParking(); break;
-        case 5: menuPEC(); break;
-        case 6: menuSettings(); break;
+        case 5: menuTracking(); break;
+        case 6: menuPEC(); break;
+        case 7: menuSettings(); break;
         default: break;
       }
     } else {
-      const char *string_list_main_UnParkedL0 = "Goto\n""Sync\n""Align\n""Parking\n""Settings";
+      const char *string_list_main_UnParkedL0 = "Goto\n""Sync\n""Align\n""Parking\n""Tracking\n""Settings";
       current_selection_L0 = display->UserInterfaceSelectionList(&buttonPad, "Main Menu", current_selection_L0, string_list_main_UnParkedL0);
       switch (current_selection_L0) {
         case 1: menuSyncGoto(false); break;
         case 2: if (display->UserInterfaceInputValueBoolean(&buttonPad, "Sync Here?", &sync)) if (sync) DisplayMessageLX200(SetLX200(":CS#"),false); break;
         case 3: menuAlignment(); break;
         case 4: menuParking(); break;
-        case 5: menuSettings(); break;
+        case 5: menuTracking(); break;
+        case 6: menuSettings(); break;
         default: break;
       }
     }
@@ -673,7 +684,7 @@ void SmartHandController::menuSettings()
   while (current_selection_L1 != 0)
   {
     if (telInfo.isMountGEM()) {
-      const char *string_list_SettingsL1 = "Date/Time\n""Display\n""Buzzer\n""Meridian Flp\n""Tracking\n""Configuration\n""Site";
+      const char *string_list_SettingsL1 = "Date/Time\n""Display\n""Buzzer\n""Meridian Flp\n""Configuration\n""Site";
       current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Settings", current_selection_L1, string_list_SettingsL1);
       switch (current_selection_L1)
       {
@@ -681,22 +692,20 @@ void SmartHandController::menuSettings()
       case 2: menuDisplay(); break;
       case 3: menuSound(); break;
       case 4: menuMeridianFlips(); break;
-      case 5: menuTracking(); break;
-      case 6: menuMount(); break; // Configuration
-      case 7: menuSite(); break;
+      case 5: menuMount(); break; // Configuration
+      case 6: menuSite(); break;
       default: break;
       }
     } else {
-      const char *string_list_SettingsL1 = "Date/Time\n""Display\n""Buzzer\n""Tracking\n""Configuration\n""Site";
+      const char *string_list_SettingsL1 = "Date/Time\n""Display\n""Buzzer\n""Configuration\n""Site";
       current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Settings", current_selection_L1, string_list_SettingsL1);
       switch (current_selection_L1)
       {
       case 1: menuLocalDateTime(); break;
       case 2: menuDisplay(); break;
       case 3: menuSound(); break;
-      case 4: menuTracking(); break;
-      case 5: menuMount(); break; // Configuration
-      case 6: menuSite(); break;
+      case 4: menuMount(); break; // Configuration
+      case 5: menuSite(); break;
       default: break;
       }
     }
@@ -704,7 +713,7 @@ void SmartHandController::menuSettings()
 #else
   while (current_selection_L1 != 0)
   {
-    const char *string_list_SettingsL1 = "Date/Time\n""Pier Side\n""Goto Speed\n""Display\n""Buzzer\n""Meridian Flp\n""Tracking Rates\n""Mount\n""Limits\n""Wifi\n""Site";
+    const char *string_list_SettingsL1 = "Date/Time\n""Pier Side\n""Goto Speed\n""Display\n""Buzzer\n""Meridian Flp\n""Mount\n""Limits\n""Wifi\n""Site";
     current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Settings", current_selection_L1, string_list_SettingsL1);
     switch (current_selection_L1)
     {
@@ -714,11 +723,10 @@ void SmartHandController::menuSettings()
     case 4:  menuDisplay(); break;
     case 5:  menuSound(); break;
     case 6:  if (telInfo.isMountGEM()) menuMeridianFlips(); else DisplayMessage("Meridian flips", "are disabled", 1500); break;
-    case 7:  menuTracking(); break;
-    case 8:  menuMount(); break;
-    case 9:  menuLimits(); break;
-    case 10: menuWifi(); break;
-    case 11: menuSite(); break;
+    case 7:  menuMount(); break;
+    case 8:  menuLimits(); break;
+    case 9:  menuWifi(); break;
+    case 10: menuSite(); break;
     default: break;
     }
   }
@@ -933,7 +941,7 @@ void SmartHandController::menuPier()
 
 void SmartHandController::menuDisplay()
 {
-  const char *string_list_Display = "Turn Off\nContrast";
+  const char *string_list_Display = "Turn Off\nContrast\nDim Timeout\nBlank Timeout";
   current_selection_L2 = 1;
   while (current_selection_L2 != 0)
   {
@@ -950,6 +958,12 @@ void SmartHandController::menuDisplay()
       break;
     case 2:
       menuContrast();
+      break;
+    case 3:
+      menuDimTimeout();
+      break;
+    case 4:
+      menuBlankTimeout();
       break;
     default:
       break;
@@ -1216,6 +1230,34 @@ void SmartHandController::menuContrast()
   }
 }
 
+void SmartHandController::menuDimTimeout()
+{
+  const char *string_list_Display = "Disable\n30 sec\n60 sec";
+  current_selection_L3 = 2;
+
+  if (current_selection_L3 > 0)
+  {
+    current_selection_L3 = display->UserInterfaceSelectionList(&buttonPad, "Dim Timeout", current_selection_L3, string_list_Display);
+    display_dim_time = (current_selection_L3 - 1) * 30000;
+    //EEPROM.writeLong(16, display_dim_time);
+    //EEPROM.commit();
+  }
+}
+
+void SmartHandController::menuBlankTimeout()
+{
+  const char *string_list_Display = "Disable\n1 min\n2 min\n3 min\n4 min\n5 min";
+  current_selection_L3 = 3;
+
+  if (current_selection_L3 > 0)
+  {
+    current_selection_L3 = display->UserInterfaceSelectionList(&buttonPad, "Blank Timeout", current_selection_L3, string_list_Display);
+    display_blank_time = (current_selection_L3 - 1) * 60 * 1000;
+    //EEPROM.writeLong(20, display_blank_time);
+    //EEPROM.commit();
+  }
+}
+
 void SmartHandController::DisplayMessage(const char* txt1, const char* txt2, int duration)
 {
   uint8_t x;
@@ -1377,4 +1419,3 @@ bool SmartHandController::DisplayMessageLX200(LX200RETURN val, bool silentOk)
   }
   return isOk(val);
 }
-

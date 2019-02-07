@@ -87,12 +87,25 @@ bool Sst4::active() {
 }
 
 size_t Sst4::write(uint8_t data) {
+  // wait for room in buffer to become available or give up
   unsigned long t_start=millis();
   byte xh=_xmit_head; xh--; while (_xmit_tail == xh) { if ((millis()-t_start)>_timeout) return 0; }
-  noInterrupts();
-  _xmit_buffer[_xmit_tail]=data; _xmit_tail++;
-  _xmit_buffer[_xmit_tail]=0;
-  interrupts();
+
+  // is this a control code command?  is the buffer not empty?
+  if ((data>0) && (data<32) && (_xmit_buffer[_xmit_head]!=0)) {
+    noInterrupts();
+    // insert the command into the buffer
+    byte hd,hs; hd=_xmit_head; hs=_xmit_head; hs--;
+    for (int i=0; i<254; i++) {  hs--; hd--; _xmit_buffer[hd]=_xmit_buffer[hs]; if (_xmit_buffer[hs]==0) break; }
+    _xmit_head++; _xmit_buffer[_xmit_head]=data; _xmit_head--; _xmit_tail++;
+    _xmit_buffer[_xmit_tail]=0;
+    interrupts();
+  } else {
+    noInterrupts();
+    _xmit_buffer[_xmit_tail]=data; _xmit_tail++;
+    _xmit_buffer[_xmit_tail]=0;
+    interrupts();
+  }
   return 1;
 }
 
@@ -217,4 +230,3 @@ void shcTone() {
     }
   }
 }
-

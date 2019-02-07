@@ -56,6 +56,17 @@
 #include "../drivers/RTCw.h"
 
 //--------------------------------------------------------------------------------------------------
+// General purpose initialize for HAL
+void HAL_Init(void) {
+}
+
+//--------------------------------------------------------------------------------------------------
+// Internal MCU temperature (in degrees C)
+float HAL_MCU_Temperature(void) {
+  return -999;
+}
+
+//--------------------------------------------------------------------------------------------------
 // Initialize timers
 
 // Enable a pseudo low priority level for Timer1 (sidereal clock) so the
@@ -64,9 +75,6 @@
 
 extern long int siderealInterval;
 extern void SiderealClockSetInterval (long int);
-
-void HAL_Init(void) {
-}
 
 // Init sidereal clock timer
 void HAL_Init_Timer_Sidereal() {
@@ -143,4 +151,3 @@ void Timer1SetInterval(long iv, double rateRatio) {
 #define StepPinAxis2_LOW CLR(Axis2StepPORT, Axis2StepBit)
 #define DirPinAxis2_HIGH SET(Axis2DirPORT, Axis2DirBit)
 #define DirPinAxis2_LOW CLR(Axis2DirPORT, Axis2DirBit)
-

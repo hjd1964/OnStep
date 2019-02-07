@@ -131,17 +131,11 @@ void processCommands() {
 //         8) Issue a goto command
 //         9) Center the star/object using the guide commands (as needed)
 //         10) Call :A+# command to accept the correction
-//         Returns:
-//         1: When ready for your goto commands
-//         0: If mount is busy
-        if ((command[1]>='1') && (command[1]<='9')) {
+//          Return: 0 on failure
+//                  1 on success
+        if ((command[1]>='1') && (command[1]<=MAX_NUM_ALIGN_STARS) && (parameter[0]==0)) {
           // set current time and date before calling this routine
 
-          // Two star and three star align not supported with Fork mounts in alternate mode
-#ifdef MOUNT_TYPE_FORK_ALT
-          if (command[1]=='1') {
-#endif
-        
           // telescope should be set in the polar home (CWD) for a starting point
           // this command sets indexAxis1, indexAxis2, azmCor=0; altCor=0;
           setHome();
@@ -154,10 +148,6 @@ void processCommands() {
           alignNumStars=command[1]-'0';
           alignThisStar=1;
        
-#if defined(MOUNT_TYPE_FORK_ALT)
-          } else commandError=true;
-#endif
-
           if (commandError) { alignNumStars=0; alignThisStar=1; }
         } else
 //  :A+#  Manual Alignment, set target location
@@ -187,11 +177,13 @@ void processCommands() {
         if ((strlen(parameter)>1) && (strlen(parameter)<5)) {
           if ( (atoi2((char*)&parameter[1],&i)) && ((i>=0) && (i<=999))) { 
             if (parameter[0]=='D') {
-              backlashAxis2=(int)round(((double)i*(double)StepsPerDegreeAxis2)/3600.0);
+              reactivateBacklashComp();
+              cli(); backlashAxis2=(int)round(((double)i*(double)StepsPerDegreeAxis2)/3600.0); sei();
               nv.writeInt(EE_backlashAxis2,backlashAxis2);
             } else
             if (parameter[0]=='R') {
-              backlashAxis1 =(int)round(((double)i*(double)StepsPerDegreeAxis1)/3600.0);
+              reactivateBacklashComp();
+              cli(); backlashAxis1 =(int)round(((double)i*(double)StepsPerDegreeAxis1)/3600.0); sei();
               nv.writeInt(EE_backlashAxis1,backlashAxis1);
             } else commandError=true;
           } else commandError=true;
@@ -206,12 +198,14 @@ void processCommands() {
 //          Get the Backlash values.  Units are arc-seconds
       if ((command[0]=='%') && (command[1]=='B')) {
         if (parameter[0]=='D') {
+            reactivateBacklashComp();
             i=(int)round(((double)backlashAxis2*3600.0)/(double)StepsPerDegreeAxis2);
             if (i<0) i=0; if (i>999) i=999;
             sprintf(reply,"%d",i);
             quietReply=true;
         } else
         if (parameter[0]=='R') {
+            reactivateBacklashComp();
             i=(int)round(((double)backlashAxis1*3600.0)/(double)StepsPerDegreeAxis1);
             if (i<0) i=0; if (i>999) i=999;
             sprintf(reply,"%d",i);
@@ -348,6 +342,29 @@ void processCommands() {
 //  :FF#   Set focuser for fast motion (1mm/s)
 //         Returns: Nothing
       if (command[1]=='F') { foc1.setMoveRate(1000); quietReply=true; } else
+#ifdef AXIS4_DC_MODE_ON
+//  :FP#      Get focuser DC Motor Power Level (in %)
+//            Returns: nnn#
+//  :FPnnn#   Set focuser DC Motor Power Level (in %)
+//            Return: 0 on failure
+//                    1 on success
+      if (command[1]=='P') {
+        if (parameter[0]==0) {
+          sprintf(reply,"%d",(int)dcPwrAxis4); quietReply=true; 
+        } else {
+          i=atol(parameter);
+          if ((i>=0) && (i<=100)) { dcPwrAxis4=i; foc1.setDcPower(dcPwrAxis4); nv.write(EE_dcPwrAxis4,i); } else commandError=true; 
+        }
+      } else
+#endif
+//  :Fp#      Check for focuser pseudo absolute mode
+//            Return: 0 on failure
+//                    1 on success
+      if (command[1]>='p') {
+#ifndef AXIS4_DC_MODE_ON
+      commandError=true;
+#endif
+      } else 
 //  :FRsnnn#  Set focuser target position relative (in microns)
 //            Returns: Nothing
       if (command[1]=='R') { foc1.relativeTarget(atol(parameter)); quietReply=true; } else
@@ -359,7 +376,7 @@ void processCommands() {
 //  :Fn#   Movement rate, 1=finest, 2=0.01mm/second, 3=0.1mm/second, 4=1mm/second
 //         Returns: Nothing
       if ((command[1]>='1') && (command[1]<='4')) { i=command[1]-'1'; int p[] = {1,10,100,1000}; foc1.setMoveRate(p[i]); quietReply=true; } else commandError=true;
-     } else
+      } else
 #endif
 
 #ifdef FOCUSER2_ON
@@ -406,6 +423,29 @@ void processCommands() {
 //  :fF#   Set focuser for fast motion (1mm/s)
 //         Returns: Nothing
       if (command[1]=='F') { foc2.setMoveRate(1000); quietReply=true; } else
+#ifdef AXIS5_DC_MODE_ON
+//  :fP#      Get focuser DC Motor Power Level (in %)
+//            Returns: nnn#
+//  :fPnnn#   Set focuser DC Motor Power Level (in %)
+//            Return: 0 on failure
+//                    1 on success
+      if (command[1]=='p') {
+        if (parameter[0]==0) {
+          sprintf(reply,"%d",(int)dcPwrAxis5); quietReply=true; 
+        } else {
+          i=atol(parameter);
+          if ((i>=0) && (i<=100)) { dcPwrAxis5=i; foc2.setDcPower(dcPwrAxis5); nv.write(EE_dcPwrAxis5,i); } else commandError=true; 
+        }
+      } else
+#endif
+//  :fp#      Check for focuser pseudo absolute mode
+//            Return: 0 on failure
+//                    1 on success
+      if (command[1]>='p') {
+#ifndef AXIS5_DC_MODE_ON
+      commandError=true;
+#endif
+      } else 
 //  :fRsnnn#  Set focuser target position relative (in microns)
 //            Returns: Nothing
       if (command[1]=='R') { foc2.relativeTarget(atol(parameter)); quietReply=true; } else
@@ -453,6 +493,8 @@ void processCommands() {
        } else
 //  :GD#   Get Telescope Declination
 //         Returns: sDD*MM# or sDD*MM'SS# (based on precision setting)
+//  :GDe#   Get Telescope Declination
+//         Returns: sDD*MM'SS.s#
       if (command[1]=='D')  { 
 #ifdef HAL_SLOW_PROCESSOR
         if (millis()-_coord_t<100)
@@ -463,11 +505,25 @@ void processCommands() {
           getEqu(&f,&f1,false); f/=15.0;
           _ra=f; _dec=f1; _coord_t=millis(); 
         }
-        if (!doubleToDms(reply,&f1,false,true)) commandError=true; else quietReply=true; 
+        if (parameter[0]==0) {
+          if (!doubleToDms(reply,&f1,false,true)) commandError=true; else quietReply=true; 
+        } else
+        if ((parameter[0]=='e') && (parameter[1]==0)) {
+          if (!doubleToDmsd(reply,&f1)) commandError=true; else quietReply=true; 
+        } else commandError=true;
       } else 
 //  :Gd#   Get Currently Selected Target Declination
 //         Returns: sDD*MM# or sDD*MM'SS# (based on precision setting)
-      if (command[1]=='d')  { if (!doubleToDms(reply,&newTargetDec,false,true)) commandError=true; else quietReply=true; } else 
+//  :Gde#  Get Currently Selected Target Declination
+//         Returns: sDD*MM'SS.s#
+      if (command[1]=='d')  { 
+        if (parameter[0]==0) {
+          if (!doubleToDms(reply,&newTargetDec,false,true)) commandError=true; else quietReply=true; 
+        } else
+        if ((parameter[0]=='e') && (parameter[1]==0)) {
+          if (!doubleToDmsd(reply,&newTargetDec)) commandError=true; else quietReply=true; 
+        } else commandError=true;
+      } else 
 //  :GG#   Get UTC offset time
 //         Returns: sHH#
 //         The number of decimal hours to add to local time to convert it to UTC
@@ -515,6 +571,8 @@ void processCommands() {
       if (command[1]=='o')  { sprintf(reply,"%02d*",maxAlt); quietReply=true; } else
 //  :GR#   Get Telescope RA
 //         Returns: HH:MM.T# or HH:MM:SS# (based on precision setting)
+//  :GRa#  Get Telescope RA
+//         Returns: HH:MM:SS.s#
       if (command[1]=='R')  {
 #ifdef HAL_SLOW_PROCESSOR
         if (millis()-_coord_t<100)
@@ -525,11 +583,26 @@ void processCommands() {
           getEqu(&f,&f1,false); f/=15.0;
           _ra=f; _dec=f1; _coord_t=millis(); 
         }
-        if (!doubleToHms(reply,&f,highPrecision)) commandError=true; else quietReply=true;  
+        if (parameter[0]==0) {
+           if (!doubleToHms(reply,&f,highPrecision)) commandError=true; else quietReply=true;  
+        } else
+        if ((parameter[0]=='a') && (parameter[1]==0)) {
+          if (!doubleToHmsd(reply,&f)) commandError=true; else quietReply=true;
+        } else commandError=true;
       } else 
 //  :Gr#   Get current/target object RA
 //         Returns: HH:MM.T# or HH:MM:SS (based on precision setting)
-      if (command[1]=='r')  { f=newTargetRA; f/=15.0; if (!doubleToHms(reply,&f,highPrecision)) commandError=true; else quietReply=true; } else 
+//  :Gra#  Get Telescope RA
+//         Returns: HH:MM:SS.ss#
+      if (command[1]=='r')  {
+        f=newTargetRA; f/=15.0;
+        if (parameter[0]==0) {
+           if (!doubleToHms(reply,&f,highPrecision)) commandError=true; else quietReply=true;
+        } else
+        if ((parameter[0]=='a') && (parameter[1]==0)) {
+          if (!doubleToHmsd(reply,&f)) commandError=true; else quietReply=true;
+        } else commandError=true;
+      } else 
 //  :GS#   Get the Sidereal Time
 //         Returns: HH:MM:SS#
 //         The Sidereal Time as an ASCII Sexidecimal value in 24 hour format
@@ -561,8 +634,8 @@ void processCommands() {
 //         Returns: SS#
       if (command[1]=='U')  {
         i=0;
-        if (trackingState!=TrackingSidereal)     reply[i++]='n';                      // [n]ot tracking
-        if (trackingState!=TrackingMoveTo)       reply[i++]='N';                      // [N]o goto
+        if ((trackingState!=TrackingSidereal) || trackingSyncInProgress()) reply[i++]='n'; // [n]ot tracking
+        if ((trackingState!=TrackingMoveTo) && !trackingSyncInProgress())  reply[i++]='N'; // [N]o goto
         const char *parkStatusCh = "pIPF";       reply[i++]=parkStatusCh[parkStatus]; // not [p]arked, parking [I]n-progress, [P]arked, Park [F]ailed
         if (pecRecorded)                         reply[i++]='R';                      // PEC data has been [R]ecorded
         if (atHome)                              reply[i++]='H';                      // at [H]ome
@@ -665,7 +738,7 @@ void processCommands() {
               case '1': if (getEnc(&f,&f1)==0) { if (!doubleToDms(reply,&f1,true,true)) commandError=true; else quietReply=true; } else commandError=true; break; // Get formatted absolute Axis2 angle 
               case '2': if (getEnc(&f,&f1)==0) { dtostrf(f,0,6,reply); quietReply=true; } else commandError=true; break;                                          // Get absolute Axis1 angle in degrees
               case '3': if (getEnc(&f,&f1)==0) { dtostrf(f1,0,6,reply); quietReply=true; } else commandError=true; break;                                         // Get absolute Axis2 angle in degrees
-              case '9': cli(); dtostrf(trackingTimerRateAxis1,1,8,reply); sei(); quietReply=true; break;                                                                        // Get current tracking rate
+              case '9': cli(); dtostrf(trackingTimerRateAxis1,1,8,reply); sei(); quietReply=true; break;                                                          // Get current tracking rate
               default:  commandError=true;
             }
           } else
@@ -705,9 +778,40 @@ void processCommands() {
               case 'C': dtostrf(ambient.getHumidity(),3,1,reply); quietReply=true; break;          // relative humidity in %
               case 'D': dtostrf(ambient.getAltitude(),3,1,reply); quietReply=true; break;          // altitude in meters
               case 'E': dtostrf(ambient.getDewPoint(),3,1,reply); quietReply=true; break;          // dew point in deg. C
+              case 'F': { float t=HAL_MCU_Temperature(); if (t>-999) { dtostrf(t,1,0,reply); quietReply=true; } else commandError=true; } break; // internal MCU temperature in deg. C
               default:  commandError=true;
             }
           } else
+#if (AXIS1_FAULT==TMC2130) && (AXIS2_FAULT==TMC2130)
+          if (parameter[0]=='U') { // Un: Get stepper driver statUs
+
+            switch (parameter[1]) {
+              case '1':
+                tmcAxis1.getStatus();
+                strcat(reply,tmcAxis1.statusSTST() ? "ST," : ","); // Standstill
+                strcat(reply,tmcAxis1.statusOLa() ? "OA," : ",");  // Open Load A
+                strcat(reply,tmcAxis1.statusOLb() ? "OB," : ",");  // Open Load B
+                strcat(reply,tmcAxis1.statusS2Ga() ? "GA," : ","); // Short to Ground A
+                strcat(reply,tmcAxis1.statusS2Gb() ? "GB," : ","); // Short to Ground B
+                strcat(reply,tmcAxis1.statusOT() ? "OT," : ",");   // Overtemperature Shutdown 150C
+                strcat(reply,tmcAxis1.statusOTPW() ? "PW" : "");   // Overtemperature Pre-warning 120C
+                quietReply=true;
+              break;
+              case '2':
+                tmcAxis2.getStatus();
+                strcat(reply,tmcAxis2.statusSTST() ? "ST," : ","); // Standstill
+                strcat(reply,tmcAxis2.statusOLa() ? "OA," : ",");  // Open Load A
+                strcat(reply,tmcAxis2.statusOLb() ? "OB," : ",");  // Open Load B
+                strcat(reply,tmcAxis2.statusS2Ga() ? "GA," : ","); // Short to Ground A
+                strcat(reply,tmcAxis2.statusS2Gb() ? "GB," : ","); // Short to Ground B
+                strcat(reply,tmcAxis2.statusOT() ? "OT," : ",");   // Overtemperature Shutdown 150C
+                strcat(reply,tmcAxis2.statusOTPW() ? "PW" : "");   // Overtemperature Pre-warning 120C
+                quietReply=true;
+              break;
+              default:  commandError=true;
+            }
+          } else
+#endif
           if (parameter[0]=='E') { // En: Get settings
             switch (parameter[1]) {
               case '1': sprintf(reply,"%ld",(long)MaxRate); quietReply=true; break;
@@ -2021,4 +2125,3 @@ bool cmdReply(char *s) {
   strcpy(s,_replyX); _replyX[0]=0;
   return true;
 }
-

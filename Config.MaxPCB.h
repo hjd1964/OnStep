@@ -49,11 +49,10 @@
 #define GUIDE_TIME_LIMIT 0
 
 // RTC (Real Time Clock) support, default=_OFF. 
-// Other options: RTC_DS3234 for a DS3234 on the default SPI interface pins (CS on pin 10) or RTC_DS3231 for a DS3231 on the default I2C pins (optionally wire the SQW output to the PPS pin below.)
 #define RTC_OFF
+// Other options: RTC_DS3231 for a DS3231 on the default I2C pins (optionally wire the SQW output to the PPS pin below.)
 // PPS use _ON or _PULLUP to enable the input and use the built-in pullup resistor.  Sense rising edge on Pin 28 for optional precision clock source (GPS, for example), default=_OFF
 #define PPS_SENSE_OFF
-// Note: The MaxPCB has a DS3234 connector
 
 // PEC sense on Pin 23 (A9) use _ON or _PULLUP to enable the input/use the built-in pullup resistor (digital input) or provide a comparison value (see below) for analog operation, default=_OFF
 // Analog values range from 0 to 1023 which indicate voltages from 0-3.3VDC on the analog pin, for example "PEC_SENSE 600" would detect an index when the voltage exceeds 1.93V
@@ -63,16 +62,16 @@
 // PEC sense, rising edge (default with PEC_SENSE_STATE HIGH, use LOW for falling edge, ex. PEC_SENSE_ON) ; for optional PEC index
 #define PEC_SENSE_STATE HIGH
 
-// Switch close (to ground) on Pin 4 for optional limit sense (stops gotos and/or tracking), default=_OFF
 #define LIMIT_SENSE_OFF
+// Switch close (to ground) on Aux7 (Pin 4) for optional limit sense (stops gotos and/or tracking), default=_OFF  Choose only one feature on Aux7.
 
 // Light status LED by sink to ground (Pin 19), default=_ON.
 // _ON and OnStep keeps this illuminated to indicate that the controller is active.  When sidereal tracking this LED will rapidly flash.
 #define STATUS_LED_PINS_ON
-// Light 2nd status LED by sink to ground (Pin 22), default=_OFF.
+// Light 2nd status LED by sink to ground Aux8 (Pin 22), default=_OFF.  Choose only one feature on Aux8.
 // _ON sets this to blink at 1 sec intervals when PPS is synced.  Turns off if tracking is stopped.  Turns on during gotos.
 #define STATUS_LED2_PINS_OFF
-// Light reticule LED by sink to ground (Pin 22), default=_OFF.  (don't use with STATUS_LED2_PINS_ON)
+// Light reticule LED by sink to ground Aux8 (Pin 22), default=_OFF.  Choose only one feature on Aux8.
 // RETICULE_LED_PINS n, where n=0 to 255 activates this feature and sets default brightness
 #define RETICULE_LED_PINS_OFF
 
@@ -114,6 +113,7 @@
 #define DegreesForRapidStop      1.0 // approximate number of degrees required to stop when requested or if limit is exceeded during a slew: higher values=longer deceleration
                                      // Default=1.0, too low (about <1) can cause gotos to never end if micro-step mode switching is enabled.
 
+#define GUIDES_DISABLE_BACKLASH_OFF  // Set to _ON to disable backlash takeup during guiding at <= 1X, default=_OFF
 #define BacklashTakeupRate        25 // backlash takeup rate (in multipules of the sidereal rate): too fast and your motors will stall,
                                      // too slow and the mount will be sluggish while it moves through the backlash
                                      // for the most part this doesn't need to be changed, but adjust when needed.  Default=25
@@ -143,7 +143,7 @@
                                      // For example, a value of +80 would stop gotos/tracking near the north celestial pole.
                                      // For a Northern Hemisphere user, this would stop tracking when the mount is in the polar home position but
                                      // that can be easily worked around by doing an alignment once and saving a park position (assuming a 
-                                     // fork/yolk mount with meridian flips turned off by setting the minutesPastMeridian values to cover the whole sky)
+                                     // fork/yoke mount with meridian flips turned off by setting the minutesPastMeridian values to cover the whole sky)
 #define MaxAzm                   180 // Alt/Az mounts only. +/- maximum allowed Azimuth, default =  180.  Allowed range is 180 to 360
 
 // AXIS1/2 STEPPER DRIVER CONTROL ------------------------------------------------------------------------------------------
@@ -165,7 +165,7 @@
 
 // Basic stepper driver mode setup . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 // If used, this requires connections M0, M1, and M2 on Pins 15,16,17 for Axis1 (RA/Azm) and Pins 8,7,6 for Axis2 (Dec/Alt.)
-// Stepper driver models are as follows: (for example AXIS1_DRIVER_MODEL DRV8825,) A4988, LV8729, RAPS128, TMC2208, TMC2130 (spreadCycle,) 
+// Stepper driver models are as follows: (for example AXIS1_DRIVER_MODEL DRV8825,) A4988, LV8729, RAPS128, S109, ST820, TMC2208, TMC2130 (spreadCycle,) 
 // TMC2130_QUIET (stealthChop tracking,) TMC2130_VQUIET (full stealthChop mode,) add _LOWPWR for 50% power during tracking (for example: TMC2130_QUIET_LOWPWR)
 #define AXIS1_DRIVER_MODEL_OFF      // Axis1 (RA/Azm):  Default _OFF, Stepper driver model (see above)
 #define AXIS1_MICROSTEPS_OFF        // Axis1 (RA/Azm):  Default _OFF, Microstep mode when the scope is doing sidereal tracking (for example: AXIS1_MICROSTEPS 32)
@@ -189,33 +189,38 @@
                                      // Rotator          :  24            * 8           * 20              *  6/360                = 64
                                      // For de-rotation of Alt/Az mounts a quick estimate of the required resolution (in StepsPerDegree)
                                      // would be an estimate of the circumference of the useful imaging circle in (pixels * 2)/360
-#define MinAxis3                -180 // minimum allowed Axis3 rotator, default = -180
-#define MaxAxis3                 180 // maximum allowed Axis3 rotator, default =  180
-#define AXIS3_REVERSE_OFF            // reverse the direction of Axis3 rotator movement
-#define AXIS3_DISABLE_OFF            // Pin 36 (Aux3.)  Default _OFF, use HIGH for common stepper drivers.
+#define MinAxis3                -180 // minimum allowed rotator angle, default = -180
+#define MaxAxis3                 180 // maximum allowed rotator angle, default =  180
+#define AXIS3_REVERSE_OFF            // reverse the direction of Axis3 rotator movement.
+#define AXIS3_DISABLE_OFF            // Pin A21 (Aux5.)  Default _OFF, use HIGH for common stepper drivers.
 #define AXIS3_AUTO_POWER_DOWN_OFF    // use _ON if you want to power down the motor at stand-still.  Default _OFF.
 
 // FOCUSER1 ---------------------------------------------------------------------------------------------------------------
 // Pins 34,35 = Step,Dir
 #define FOCUSER1_OFF                 // use _ON to enable this focuser, default=_OFF
-#define MaxRateAxis4               8 // this is the minimum number of milli-seconds between micro-steps, default=8
-#define StepsPerMicrometerAxis4  0.5 // figure this out by testing or other means
-#define MinAxis4               -25.0 // minimum allowed Axis4 position in millimeters, default = -25.0
-#define MaxAxis4                25.0 // maximum allowed Axis4 position in millimeters, default =  25.0
-#define AXIS4_REVERSE_OFF            // reverse the direction of Axis4 focuser movement
-#define AXIS4_DISABLE_OFF            // Pin 39 (Aux4.)  Default _OFF, use HIGH for common stepper drivers.
-#define AXIS4_AUTO_POWER_DOWN_OFF    // use _ON if you want to power down the motor at stand-still.  Default _OFF.
+#define MaxRateAxis4               8 // this is the minimum number of milli-seconds between steps, default=8.  In DC motor mode PWM frequency.
+#define StepsPerMicrometerAxis4  0.5 // figure this out by testing or other means.
+#define MinAxis4               -25.0 // minimum allowed position in millimeters, default = -25.0
+#define MaxAxis4                25.0 // maximum allowed position in millimeters, default =  25.0
+#define AXIS4_REVERSE_OFF            // reverse the direction of focuser movement.
+#define AXIS4_DISABLE_OFF            // Pin A22 (Aux6.)  Default _OFF, use HIGH for common stepper drivers.
+#define AXIS4_AUTO_POWER_DOWN_OFF    // use _ON if you want to power down the motor at stand-still.  Default _OFF.  Ignored in DC motor mode.
+#define AXIS4_DC_MODE_ON             // enable DC focuser instead of a stepper motor.  Automatically uses Phase 1 if enabled.  Default _OFF.
 
 // FOCUSER2 ---------------------------------------------------------------------------------------------------------------
 // Pins 30,33 = Step,Dir (choose either this option or the rotator, not both) 
 #define FOCUSER2_OFF                 // use _ON to enable this focuser, default=_OFF
-#define MaxRateAxis5               8 // this is the minimum number of milli-seconds between micro-steps, default=8
-#define StepsPerMicrometerAxis5  0.5 // figure this out by testing or other means
-#define MinAxis5               -25.0 // minimum allowed Axis5 position in millimeters, default = -25.0
-#define MaxAxis5                25.0 // maximum allowed Axis5 position in millimeters, default =  25.0
-#define AXIS5_REVERSE_OFF            // reverse the direction of Axis5 focuser movement
-#define AXIS5_DISABLE_OFF            // Pin 36 (Aux3.)  Default _OFF, use HIGH for common stepper drivers.
-#define AXIS5_AUTO_POWER_DOWN_OFF    // use _ON if you want to power down the motor at stand-still.  Default _OFF.
+#define MaxRateAxis5               8 // this is the minimum number of milli-seconds between steps, default=8.  In DC motor mode PWM frequency.
+#define StepsPerMicrometerAxis5  0.5 // figure this out by testing or other means.
+#define MinAxis5               -25.0 // minimum allowed position in millimeters, default = -25.0
+#define MaxAxis5                25.0 // maximum allowed position in millimeters, default =  25.0
+#define AXIS5_REVERSE_OFF            // reverse the direction of focuser movement.
+#define AXIS5_DISABLE_OFF            // Pin A21 (Aux5.)  Default _OFF, use HIGH for common stepper drivers.
+#define AXIS5_AUTO_POWER_DOWN_OFF    // use _ON if you want to power down the motor at stand-still.  Default _OFF.  Ignored in DC motor mode.
+#define AXIS5_DC_MODE_OFF            // enable DC focuser instead of a stepper motor.  Automatically uses Phase 2 if enabled.  Default _OFF.
+
+//#define Axis3_EN 36                  // Early version 1.x MaxPCB's had the option of using pin 36 for Axis3 EN
+//#define Axis4_EN 39                  // Early version 1.x MaxPCB's had the option of using pin 39 for Axis4/Axis5 EN
 
 // THAT'S IT FOR USER CONFIGURATION!
 

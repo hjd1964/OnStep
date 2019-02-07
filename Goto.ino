@@ -50,7 +50,7 @@ GotoErrors syncEqu(double RA, double Dec) {
   Align.horToInstr(Axis2,Axis1,&Axis2,&Axis1,getInstrPierSide());
   Axis1=haRange(Axis1);
 #else
-  Align.equToInstr(latitude,HA,Dec,&Axis1,&Axis2,getInstrPierSide());
+  Align.equToInstr(HA,Dec,&Axis1,&Axis2,getInstrPierSide());
 #endif
 
   // just turn on tracking
@@ -139,7 +139,7 @@ boolean getEqu(double *RA, double *Dec, boolean returnHA) {
   HA=getInstrAxis1();
   *Dec=getInstrAxis2();
   // apply pointing model
-  Align.instrToEqu(latitude,HA,*Dec,&HA,Dec,getInstrPierSide());
+  Align.instrToEqu(HA,*Dec,&HA,Dec,getInstrPierSide());
 #else
   double Z=getInstrAxis1();
   double A=getInstrAxis2();
@@ -255,11 +255,11 @@ GotoErrors goToEqu(double RA, double Dec) {
   Axis2Alt=a;
 #else
   // correct for polar offset, refraction, coordinate systems, operation past pole, etc. as required
-  Align.equToInstr(latitude,HA,Dec,&Axis1,&Axis2,getInstrPierSide());
+  Align.equToInstr(HA,Dec,&Axis1,&Axis2,getInstrPierSide());
 
   // as above... for the opposite pier side just incase we need to do a meridian flip
   int p=PierSideNone; if (getInstrPierSide()==PierSideEast) p=PierSideWest; else if (getInstrPierSide()==PierSideWest) p=PierSideEast;
-  Align.equToInstr(latitude,HA,Dec,&Axis1Alt,&Axis2Alt,p);
+  Align.equToInstr(HA,Dec,&Axis1Alt,&Axis2Alt,p);
 #endif
 
   // goto function takes HA and Dec in steps
@@ -374,6 +374,7 @@ GotoErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTarget
   D("Goto Axis1, Current "); D(((double)(long)posAxis1)/(double)StepsPerDegreeAxis1); D(" -to-> "); DL(((double)(long)targetAxis1.part.m)/(double)StepsPerDegreeAxis1);
   D("Goto Axis2, Current "); D(((double)(long)posAxis2)/(double)StepsPerDegreeAxis2); D(" -to-> "); DL(((double)(long)targetAxis2.part.m)/(double)StepsPerDegreeAxis2); DL("");
 
+  reactivateBacklashComp();
   disablePec();
   soundAlert();
   stepperModeGoto();

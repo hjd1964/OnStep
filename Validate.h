@@ -20,7 +20,7 @@
     #define Configuration_Found
   #endif
 #endif
-#ifdef MaxESP_ON
+#ifdef MaxESP2_ON
   #ifdef Configuration_Found
     #define Configuration_Duplicate
   #else
@@ -101,7 +101,7 @@
   #error "Focuser2 can't be enabled without first enabling Focuser1"
 #endif
 
-#if defined(MaxPCB_ON) || defined(MaxESP_ON) || defined(MiniPCB_ON)
+#if defined(MaxPCB_ON) || defined(MaxESP2_ON) || defined(MiniPCB_ON)
   #if defined(RETICULE_LED_PINS) && defined(STATUS_LED_PINS2_ON)
     #error "You can't have the Illuminated Reticule and Status2 LEDs both enabled in this configuration."
   #endif
@@ -345,11 +345,15 @@
     #endif
   #elif AXIS1_DRIVER_MODEL == DRV8825
     #if AXIS1_MICROSTEPS!=1 && AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16 && AXIS1_MICROSTEPS!=32
-      #error "Configuration: AXIS1_MICROSTEPS; DRV8825 invalid micro-step mode, use: 32,16,8,4,2,or 1"
+      #error "Configuration: AXIS1_MICROSTEPS; DRV8825/S109 invalid micro-step mode, use: 32,16,8,4,2,or 1"
     #endif
   #elif AXIS1_DRIVER_MODEL == LV8729 || AXIS1_DRIVER_MODEL == RAPS128
     #if AXIS1_MICROSTEPS!=1 && AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16 && AXIS1_MICROSTEPS!=32 && AXIS1_MICROSTEPS!=64 && AXIS1_MICROSTEPS!=128
       #error "Configuration: AXIS1_MICROSTEPS; LV8729/RAPS128 invalid micro-step mode, use: 128,64,32,16,8,4,2,or 1"
+    #endif
+  #elif AXIS1_DRIVER_MODEL == ST820
+    #if AXIS1_MICROSTEPS!=1 && AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16 && AXIS1_MICROSTEPS!=32 && AXIS1_MICROSTEPS!=128 && AXIS1_MICROSTEPS!=256
+      #error "Configuration: AXIS1_MICROSTEPS; ST820 invalid micro-step mode, use: 256,128,32,16,8,4,2,or 1"
     #endif
   #elif AXIS1_DRIVER_MODEL == TMC2100
     #define MODE_SWITCH_BEFORE_SLEW_ON
@@ -391,6 +395,10 @@
     #if AXIS2_MICROSTEPS!=1 && AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=8 && AXIS2_MICROSTEPS!=16 && AXIS2_MICROSTEPS!=32 && AXIS2_MICROSTEPS!=64 && AXIS2_MICROSTEPS!=128
       #error "Configuration: AXIS2_MICROSTEPS; LV8729/RAPS128 invalid micro-step mode, use: 128,64,32,16,8,4,2,or 1"
     #endif
+  #elif AXIS2_DRIVER_MODEL == ST820
+    #if AXIS2_MICROSTEPS!=1 && AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=8 && AXIS2_MICROSTEPS!=16 && AXIS2_MICROSTEPS!=32 && AXIS2_MICROSTEPS!=128 && AXIS2_MICROSTEPS!=256
+      #error "Configuration: AXIS2_MICROSTEPS; ST820 invalid micro-step mode, use: 256,128,32,16,8,4,2,or 1"
+    #endif
   #elif AXIS2_DRIVER_MODEL == TMC2100
     #if AXIS2_MICROSTEPS!=1 && AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=16
       #error "Configuration: AXIS2_MICROSTEPS; TMC2100 invalid micro-step mode, use: 16,4,2,or 1"
@@ -417,7 +425,7 @@
       #endif
     #elif AXIS1_DRIVER_MODEL == DRV8825
       #if AXIS1_MICROSTEPS_GOTO!=1 && AXIS1_MICROSTEPS_GOTO!=2 && AXIS1_MICROSTEPS_GOTO!=4 && AXIS1_MICROSTEPS_GOTO!=8 && AXIS1_MICROSTEPS_GOTO!=16 && AXIS1_MICROSTEPS_GOTO!=32
-        #error "Configuration: AXIS1_MICROSTEPS_GOTO; DRV8825 invalid micro-step mode, use: 32,16,8,4,2,1,or _OFF"
+        #error "Configuration: AXIS1_MICROSTEPS_GOTO; DRV8825/S109 invalid micro-step mode, use: 32,16,8,4,2,1,or _OFF"
       #endif
     #elif AXIS1_DRIVER_MODEL == LV8729 || AXIS1_DRIVER_MODEL == RAPS128
       #if AXIS1_MICROSTEPS_GOTO!=1 && AXIS1_MICROSTEPS_GOTO!=2 && AXIS1_MICROSTEPS_GOTO!=4 && AXIS1_MICROSTEPS_GOTO!=8 && AXIS1_MICROSTEPS_GOTO!=16 && AXIS1_MICROSTEPS_GOTO!=32 && AXIS1_MICROSTEPS_GOTO!=64 && AXIS1_MICROSTEPS_GOTO!=128

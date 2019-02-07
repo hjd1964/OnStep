@@ -7,10 +7,12 @@
 #define Aux0          19
 #define Aux1          18
 #define Aux2          5
+#define Aux3          4    // should be ok as pwm analog output (w/#define Aux3_Analog)
+#define Aux4          22   // should be ok as pwm analog output (w/#define Aux4_Analog)
 #if !defined(_mk20dx128_h_) && !defined(__MK20DX128__)
-#define Aux3          A14   // true analog output
+#define Aux5          A14   // true analog output
 #endif
-#define Aux3_Analog
+#define Aux5_Analog
 
 // The PEC index sense is a logic level input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
 #define PecPin        23
@@ -18,8 +20,8 @@
 
 // The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
 #define LEDnegPin     Aux0  // Pin 19 (Drain)
-#define LEDneg2Pin    22    // Pin 22 (Drain)
-#define ReticulePin   22    // Pin 22 (Drain)
+#define LEDneg2Pin    Aux4  // Pin 22 (Drain)
+#define ReticulePin   Aux4  // Pin 22 (Drain)
 
 // For a piezo buzzer
 #define TonePin       29    // Pin 29 (Tone)
@@ -39,7 +41,7 @@
 
 #define Axis2DirPin    2    // Pin  2 (Dir)
 #define Axis2StepPin   3    // Pin  3 (Step)
-#define LimitPin       4    // Pin  4 (The limit switch sense is a logic level input normally pull high (2k resistor,) shorted to ground it stops gotos/tracking)
+#define LimitPin       Aux3 // Pin  4 (The limit switch sense is a logic level input normally pull high (2k resistor,) shorted to ground it stops gotos/tracking)
 #define Axis2_FAULT    Aux2 // Pin  5 (Fault)
 #define Axis2_Aux      Aux2 // Pin  5 (ESP8266 RST or SPI MISO)
 #define Axis2_M2       6    // Pin  6 (Microstep Mode 2 or SPI CS)
@@ -50,14 +52,17 @@
 // For rotator stepper driver
 #define Axis3DirPin   33    // Pin 33 (Dir)
 #define Axis3StepPin  30    // Pin 30 (Step)
+#define Axis3_EN      -1    // No EN Pin
 
 // For focuser1 stepper driver
 #define Axis4DirPin   32    // Pin 32 (Dir)
 #define Axis4StepPin  31    // Pin 31 (Step)
+#define Axis4_EN      -1    // No EN Pin
 
 // For focuser2 stepper driver
 #define Axis5DirPin   33    // Pin 33 (Dir)
 #define Axis5StepPin  30    // Pin 30 (Step)
+#define Axis5_EN      -1    // No EN Pin
 
 // ST4 interface
 #define ST4RAw        10    // Pin 10 ST4 RA- West
@@ -69,4 +74,3 @@
 #error "Wrong processor for this configuration!"
 
 #endif
-

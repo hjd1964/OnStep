@@ -187,6 +187,8 @@ void moveTo() {
   if ( ((distDestAxis1<=ceil(abs(fixedToDouble(fstepAxis1)))+1) && (distDestAxis2<=ceil(abs(fixedToDouble(fstepAxis2)))+1) ) || slewAbort) {
     slewEnding=false;
     slewAbort=false;
+
+    // assurance that we're really in tracking mode
     stepperModeTracking();
 
     if ((pierSideControl==PierSideFlipEW2) || (pierSideControl==PierSideFlipWE2)) {
@@ -210,6 +212,7 @@ void moveTo() {
       }
       pierSideControl++;
 
+      stepperModeGoto();
       forceRefreshGetEqu();
     } else
     if ((pierSideControl==PierSideFlipEW3) || (pierSideControl==PierSideFlipWE3)) {
@@ -224,6 +227,7 @@ void moveTo() {
       targetAxis2.part.m=origTargetAxis2; targetAxis2.part.f=0;
       sei();
 
+      stepperModeGoto();
       forceRefreshGetEqu();
     } else {
 
@@ -249,9 +253,6 @@ void moveTo() {
         // wrap it up
         parkFinish();
       } else {
-        // sound goto done
-        soundAlert();
-  
         // restore last tracking state
         cli();
         timerRateAxis1=SiderealRate;
@@ -259,6 +260,9 @@ void moveTo() {
         sei();
   
         if (homeMount) {
+          // sound goto done
+          soundAlert();
+          
           // clear the backlash
           if (parkClearBacklash()==-1) return;  // working, no error flagging
 
@@ -305,4 +309,3 @@ uint32_t isqrt32 (uint32_t n) {
 void stopLimit() {
   if (trackingState==TrackingMoveTo) { if (!abortSlew) abortSlew=StartAbortSlew; } else trackingState=TrackingNone;
 }
-

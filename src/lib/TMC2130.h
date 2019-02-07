@@ -112,32 +112,32 @@ class tmc2130 {
       data_out    =(128UL<<0)+(4UL<<8)+(1UL<<16)+(1UL<<18)+(0UL<<19);
       write(REG_PWMCONF,data_out);
       spiPause();
-    
     */
-    
+
+      #define _cc_toff 4UL     // default=4, range 2 to 15 (Off time setting, slow decay phase)
+      #define _cc_hstart 0UL   // default=0, range 0 to 7  (Hysteresis start 1, 2, ..., 8)
+      #define _cc_hend 0UL     // default=0, range 0 to 15 (Hysteresis -3, -2, -1, 0, 1 ..., 12)
+      #define _cc_rndtf 0UL    // default=0, range 0 to 1  (Enables small random value to be added to TOFF)
+      #define _cc_tbl 1UL      // default=1, range 0 to 3  (for 6, 24, 36 or 54 clocks)
+      #define _cc_vsense 0UL   // default=0, range 0 to 1  (0 for high sensitivity, 1 for low sensitivity @ 50% current setting)
+      #define _cc_vhighfs 0UL  // default=0, range 0 to 1  (Enables switch to full-step when VHIGH (THIGH?) is exceeded)
+      #define _cc_vhighchm 0UL // default=0, range 0 to 1  (Enables switch to fast-decay mode VHIGH (THIGH?) is exceeded)
+
       // CHOPCONF
-      // native 256 microsteps, mres=0, tbl=1=24, toff=8
-      // data_out=0x00008008UL;
-      // toff,    default=4, range 2 to 15 (Off time setting, slow decay phase)
-      // hstrt,   default=0, range 0 to 7  (Hysteresis start 1, 2, ..., 8)
-      // hend,    default=0, range 0 to 15 (Hysteresis -3, -2, -1, 0, 1 ..., 12)
-      // rndtf   ,default=0, range 0 to 1  (Enables small random value to be added to TOFF)
-      // tbl,     default=1, range 0 to 3  (for 6, 24, 36 or 54 clocks)
-      // vhighfs, default=0, range 0 to 1  (Enables switch to full-step when VHIGH (THIGH?) is exceeded)
-      // vhighchm,default=0, range 0 to 1  (Enables switch to fast-decay mode VHIGH (THIGH?) is exceeded)
-      //        toff   + hstrt  + hend   + rndtf + tbl     + vhighfs+ vhighchm
-      data_out=(4UL<<0)+(0UL<<4)+(0UL<<7)+(0<<13)+(1UL<<15)+(0UL<<18)+(0UL<<19);
+      // native 256 microsteps, mres=0, tbl=1=24, toff=8 ( data_out=0x00008008UL; )
+      data_out=(_cc_toff<<0)+(_cc_hstart<<4)+(_cc_hend<<7)+(_cc_rndtf<<13)+(_cc_tbl<<15)+(_cc_vsense<<17)+(_cc_vhighfs<<18)+(_cc_vhighchm<<19);
       // set the interpolation bit
       if (intpol) data_out|=1UL<<28;
       // set the micro-step mode bits
       data_out|=((uint32_t)micro_step_mode)<<24;
       write(REG_CHOPCONF,data_out);
-    
+
       BBSpi.end();
     }
 
     bool error() {
       BBSpi.begin(_cs,_sck,_miso,_mosi);
+
       // get global status register, look for driver error bit
       uint32_t data_out=0;
       uint8_t result=read(REG_GSTAT,&data_out);
@@ -146,6 +146,66 @@ class tmc2130 {
       if ((result&2)!=0) return true; else return false;
     }
     
+    int getStatus() {
+      BBSpi.begin(_cs,_sck,_miso,_mosi);
+      // get global status register, look for driver error bit
+      uint32_t data_out=0;
+      read(REG_DRVSTATUS,&data_out);
+      
+      BBSpi.pause();
+      
+      // first write returns nothing, second the status data
+      data_out=0;
+      read(REG_DRVSTATUS,&data_out);
+
+      // get the extended status info.
+      _stst=(bool)bitRead(data_out,31); // DRV_STATUS 31 Standstill
+      _olb =(bool)bitRead(data_out,30); // DRV_STATUS 30 Open Load B
+      _ola =(bool)bitRead(data_out,29); // DRV_STATUS 29 Open Load A
+      _s2ga=(bool)bitRead(data_out,28); // DRV_STATUS 28 Short to Ground B
+      _s2gb=(bool)bitRead(data_out,27); // DRV_STATUS 27 Short to Ground A
+      _otpw=(bool)bitRead(data_out,26); // DRV_STATUS 26 Overtemperature Pre-warning 120C
+      _ot  =(bool)bitRead(data_out,25); // DRV_STATUS 25 Overtemperature Shutdown 150C
+      
+      BBSpi.end();
+      return sgResult;
+    }
+
+    // Standstill
+    bool statusSTST() {
+      return _stst;
+    }
+
+    // Open Load A
+    bool statusOLa() {
+      return _ola;
+    }
+
+    // Open Load B
+    bool statusOLb() {
+      return _olb;
+    }
+
+    // Short to Ground A
+    bool statusS2Ga() {
+      return _s2ga;
+    }
+
+    // Short to Ground B
+    bool statusS2Gb() {
+      return _s2gb;
+    }
+
+    // Overtemperature Shutdown 150C
+    bool statusOT() {
+      return _ot;
+    }
+
+    // Overtemperature Pre-warning 120C
+    bool statusOTPW() {
+      return _otpw;
+    }
+
   private:
     uint8_t write(byte Address, uint32_t data_out)
     {
@@ -183,5 +243,11 @@ class tmc2130 {
     const static uint8_t REG_DRVSTATUS  = 0x6F;
     const static uint8_t REG_PWMCONF    = 0x70;
 
+    bool _stst = false;
+    bool _olb = false;
+    bool _ola = false;
+    bool _s2ga = false;
+    bool _s2gb = false;
+    bool _ot = false;
+    bool _otpw = false;
 };
-

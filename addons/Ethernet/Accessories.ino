@@ -29,10 +29,9 @@ byte readBytesUntil2(char character, char buffer[], int length, boolean* charact
 // smart LX200 aware command and response over serial
 boolean readLX200Bytes(char* command,char* recvBuffer,long timeOutMs) {
   Ser.setTimeout(timeOutMs);
-
+  
   // clear the read/write buffers
   Ser.flush();
-  delay(50);
   serialRecvFlush();
 
   // send the command
@@ -167,4 +166,3 @@ boolean doubleToDms(char *reply, double *f, boolean fullRange, boolean signPrese
   sprintf(reply,s,d1,(int)m1,s1);
   return true;
 }
-

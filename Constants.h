@@ -11,10 +11,12 @@
 // Stepper Driver Models
 #define A4988   1
 #define DRV8825 2
+#define S109    2
 #define LV8729  3
 #define RAPS128 3
 #define TMC2100 4
 #define TMC2208 5
+#define ST820   6
 
 #define TMC2130 100
 #define TMC2130_QUIET 101  // these variations don't appear at run-time and are changed to "TMC2130"
@@ -29,6 +31,7 @@
 #define LEN_A4988   5
 #define LEN_DRV8825 6
 #define LEN_LV8729  8
+#define LEN_ST820   8
 #define LEN_TMC2100 4
 #define LEN_TMC2208 4
 #define LEN_TMC2130 9
@@ -36,14 +39,14 @@
 // The various microsteps for different driver models, with the bit modes for each
 unsigned int StepsA4988  [LEN_A4988]  [2] = { {1,0}, {2,1}, {4,2}, {8,3}, {16,7} };
 unsigned int StepsDRV8825[LEN_DRV8825][2] = { {1,0}, {2,1}, {4,2}, {8,3}, {16,4}, {32,5} };
-unsigned int StepsLV8729 [LEN_LV8729] [2] = { {1,0}, {2,1}, {4,2}, {8,3}, {16,4}, {32,5}, {64,6}, {128,7} };
+unsigned int StepsLV8729 [LEN_LV8729] [2] = { {1,0}, {2,1}, {4,2}, {8,3}, {16,4}, {32,5}, {64,6},  {128,7} };
+unsigned int StepsST820  [LEN_ST820]  [2] = { {1,0}, {2,1}, {4,2}, {8,3}, {16,4}, {32,5}, {128,6}, {256,7} };
 unsigned int StepsTMC2208[LEN_TMC2208][2] = {        {2,1}, {4,2}, {8,0}, {16,3} };
 unsigned int StepsTMC2100[LEN_TMC2100][2] = { {1,0}, {2,1}, {4,2}, {16,3} };
 unsigned int StepsTMC2130[LEN_TMC2130][2] = { {1,8}, {2,7}, {4,6}, {8,5}, {16,4}, {32,3}, {64,2}, {128,1}, {256,0} };
 
 // EEPROM Info --------------------------------------------------------------------------------------------------------------
-// 0-1023 bytes
-// general purpose storage 0..99
+// General purpose storage A (100 bytes), 0..99
 
 #define EE_posAxis1    0      // 4
 #define EE_posAxis2    4      // 4
@@ -117,14 +120,20 @@ unsigned int StepsTMC2130[LEN_TMC2130][2] = { {1,8}, {2,7}, {4,6}, {8,5}, {16,4}
 
 #define EE_sites    100
 
-// PEC table: 200...PECBufferSize+200-1
+// PEC table: 200...PECBufferSize+199
 // PECBufferSize table of byte sized integers -128..+127, units are steps
 
 #define EE_pecTable 200
 
 // Library
-// Catalog storage starts at 200+PECBufferSize and fills EEPROM
+// Catalog storage starts at 200+PECBufferSize and ends at E2END-100
 
+// General purpose storage B (100 bytes), E2END-99..E2END
+#define GSB (E2END-100)
+#define EE_dcPwrAxis4  GSB+0   // 1
+#define EE_dcPwrAxis5  GSB+1   // 1
+
+// --------------------------------------------------------------------------------------------------------------------------
 // Unique identifier for the current initialization format for NV, do not change
 #define initKey 915307548
 
@@ -138,4 +147,3 @@ unsigned int StepsTMC2130[LEN_TMC2130][2] = { {1,8}, {2,7}, {4,6}, {8,5}, {16,4}
 #define PierSideFlipEW1  20
 #define PierSideFlipEW2  21
 #define PierSideFlipEW3  22
-

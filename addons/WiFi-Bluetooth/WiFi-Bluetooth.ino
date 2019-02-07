@@ -36,8 +36,8 @@
 #define FirmwareDate          __DATE__
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
-#define FirmwareVersionMinor  "5"
-#define FirmwareVersionPatch  "e"
+#define FirmwareVersionMinor  "6"
+#define FirmwareVersionPatch  "c"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
@@ -57,10 +57,17 @@ Encoders encoders;
 
 #include "MountStatus.h"
 
-// macros to help with sending webpage data
-#define sendHtmlStart() server.setContentLength(CONTENT_LENGTH_UNKNOWN); server.send(200, "text/html", "");
-#define sendHtml(x) server.sendContent(x)
-#define sendHtmlDone() server.client().stop()
+#ifndef LEGACY_TRANSMIT_ON
+  // macros to help with sending webpage data, chunked
+  #define sendHtmlStart() server.setContentLength(CONTENT_LENGTH_UNKNOWN); server.sendHeader("Cache-Control","no-cache"); server.send(200, "text/html", String());
+  #define sendHtml(x) server.sendContent(x); x=""
+  #define sendHtmlDone(x) server.sendContent("");
+#else
+  // macros to help with sending webpage data, normal method
+  #define sendHtmlStart()
+  #define sendHtml(x)
+  #define sendHtmlDone(x) server.send(200, "text/html", x)
+#endif
 
 int WebTimeout=TIMEOUT_WEB;
 int CmdTimeout=TIMEOUT_CMD;
@@ -108,7 +115,6 @@ void handleNotFound(){
 }
 
 void setup(void){
-
 #ifdef LED_PIN
   pinMode(LED_PIN,OUTPUT);
 #endif
@@ -283,6 +289,7 @@ Again:
 
 #endif
 
+TryAgain:
   if ((stationEnabled) && (!stationDhcpEnabled)) WiFi.config(wifi_sta_ip, wifi_sta_gw, wifi_sta_sn);
   if (accessPointEnabled) WiFi.softAPConfig(wifi_ap_ip, wifi_ap_gw, wifi_ap_sn);
   
@@ -301,18 +308,22 @@ Again:
     WiFi.mode(WIFI_AP_STA);
   }
 
+  // wait for connection in station mode, if it fails fall back to access-point mode
+  if (!accessPointEnabled && stationEnabled) {
+    for (int i=0; i<5; i++)
+      if (WiFi.status() != WL_CONNECTED) delay(1000); else break;
+    if (WiFi.status() != WL_CONNECTED) {
+      stationEnabled=false;
+      accessPointEnabled=true;
+      goto TryAgain;
+    }
+  }
+
   // clear the buffers and any noise on the serial lines
   for (int i=0; i<3; i++) {
     Ser.print(":#");
     delay(50);
     serialRecvFlush();
-  }
-
-  // Wait for connection
-  if (stationEnabled) {
-    while (WiFi.status() != WL_CONNECTED) {
-      delay(500);
-    }
   }
 
   server.on("/", handleRoot);
@@ -324,9 +335,7 @@ Again:
 #ifdef ENCODERS_ON
   server.on("/enc.htm", handleEncoders);
   server.on("/encA.txt", encAjaxGet);
-#ifdef AXIS1_ENC_RATE_CONTROL_ON
   server.on("/enc.txt", encAjax);
-#endif
 #endif
   server.on("/control.txt", controlAjax);
   server.on("/controlA.txt", controlAjaxGet);
@@ -405,4 +414,3 @@ const char* HighSpeedCommsStr(long baud) {
   if (baud==28800) { return ":SB3#"; }
   if (baud==19200) { return ":SB4#"; } else { return ":SB5#"; }
 }
-

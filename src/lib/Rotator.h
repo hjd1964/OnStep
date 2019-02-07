@@ -222,6 +222,7 @@ class rotator {
   private:
 
     void enableDriver() {
+      if (enPin==-1) return;
       // for Aux5/Aux6 (DAC) support for stepper driver EN control on MaxPCB
 #if defined(A21) && defined(A22)
       if (enPin==A21) { if (enableState==HIGH) analogWrite(A21,1024); else analogWrite(A21,0); return; }
@@ -231,6 +232,7 @@ class rotator {
     }
 
     void disableDriver() {
+      if (enPin==-1) return;
 #if defined(A21) && defined(A22)
       if (enPin==A21) { if (disableState==HIGH) analogWrite(A21,1024); else analogWrite(A21,0); return; }
       if (enPin==A22) { if (disableState==HIGH) analogWrite(A22,1024); else analogWrite(A22,0); return; }

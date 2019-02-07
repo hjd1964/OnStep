@@ -32,10 +32,13 @@ const char html_encScript2[] =
     "ctx.moveTo(0, 150); ctx.lineTo(600, 150);"
     "ctx.stroke();"
 
-    "ctx.beginPath();"
-    "ctx.strokeStyle='#111111';"
-    "ctx.moveTo(x, 0); ctx.lineTo(x, 300);"
-    "ctx.stroke();"
+    "if (document.getElementById('osc').innerText=='On') {"
+      "ctx.beginPath();"
+      "ctx.strokeStyle='#111111';"
+      "x1=x+1; if (x1>599) x1=0;"
+      "ctx.moveTo(x1, 0); ctx.lineTo(x1, 300);"
+      "ctx.stroke();"
+    "};"
 
     "var stO=document.getElementById('stO').innerText;"
 
@@ -113,9 +116,9 @@ const char html_encLtaAxis1[] =
 const char html_encPropAxis1[] = 
 "Encoder proportional response: <br />"
 "<form method='get' action='/enc.htm'>"
-" <input 'width: 75px' value='%ld' type='number' name='pr' min='50' max='1000'>"
+" <input 'width: 75px' value='%ld' type='number' name='pr' min='50' max='5000'>"
 "<button type='submit'>Upload</button>"
-" (P 50 to 1000&#x25;)"
+" (P 50 to 5000&#x25;)"
 "</form><br />";
 
 #ifndef AXIS1_ENC_AUTO_RATE_COMP_ON
@@ -144,6 +147,13 @@ const char html_encIntPolMagAxis1[] =
 "</form><br />";
 #endif
 
+const char html_encSweepEn1[] =
+"<br />&nbsp; Sweep (<span id='osc'>?</span>):<br />";
+const char html_encSweepEn2[] =
+"&nbsp; <button type='button' onpointerdown=\"s('sw','on')\" >On</button>"
+"<button type='button' onpointerdown=\"s('sw','off')\" >Off</button>"
+"<br /><br />";
+
 const char html_encEnd[] = 
 "</form>";
 
@@ -167,13 +177,15 @@ void handleEncoders() {
   data +="<script>var ajaxPage='enc.txt';</script>\n";
   data +=html_ajax_active;
   data +="<script>auto2Rate=2;</script>";
-  sendHtml(data); data="";
+  sendHtml(data);
 
   data += html_encScript1;
-  sendHtml(data); data="";
+  sendHtml(data);
 
+#ifdef AXIS1_ENC_RATE_CONTROL_ON
   data += html_encScript2;
-  sendHtml(data); data="";
+  sendHtml(data);
+#endif
 
   // send a standard http response header
   data += html_main_cssB;
@@ -182,14 +194,14 @@ void handleEncoders() {
   data += html_main_css3;
   data += html_main_css4;
   data += html_main_css5;
-  sendHtml(data); data="";
+  sendHtml(data);
   data += html_main_css6;
   data += html_main_css7;
   data += html_main_css8;
   data += html_main_cssE;
   data += html_headE;
   data += html_bodyB;
-  sendHtml(data); data="";
+  sendHtml(data);
 
   // get status
   mountStatus.update();
@@ -210,7 +222,7 @@ void handleEncoders() {
   data += html_linksEncS;
 #endif
   data += html_links4N;
-  sendHtml(data); data="";
+  sendHtml(data);
   data += html_links5N;
 #ifndef OETHS
   data += html_links6N;
@@ -226,7 +238,7 @@ void handleEncoders() {
   // Autosync
   data += html_encEn1;
   data += html_encEn2;
-  sendHtml(data); data="";
+  sendHtml(data);
   
   // Encoder sync thresholds
   sprintf(temp,html_encMxAxis0);
@@ -235,7 +247,7 @@ void handleEncoders() {
   data += temp;
   sprintf(temp,html_encMxAxis2,Axis2EncDiffLimit);
   data += temp;
-  sendHtml(data); data="";
+  sendHtml(data);
   
 #ifdef AXIS1_ENC_RATE_CONTROL_ON
   // OnStep rate control
@@ -248,7 +260,7 @@ void handleEncoders() {
   data += temp;
   sprintf(temp,html_encLtaAxis1,Axis1EncLtaSamples);
   data += temp;
-  sendHtml(data); data="";
+  sendHtml(data);
 
   // Encoder poportional response
   sprintf(temp,html_encPropAxis1,Axis1EncProp);
@@ -269,7 +281,7 @@ void handleEncoders() {
   sprintf(temp,html_encIntPolMagAxis1,Axis1EncIntPolMag);
   data += temp;
 #endif
-  sendHtml(data); data="";
+  sendHtml(data);
 
   // Encoder status display
   sprintf(temp,"Axis1 rates (x Sidereal):<br />");
@@ -288,10 +300,13 @@ void handleEncoders() {
   data += temp;
   sprintf(temp,"&nbsp; Intpol Phase = <span id='ipP'>?</span><br />");
   data += temp;
-  sendHtml(data); data="";
+  sendHtml(data);
 
   data += "<br /><canvas id='myCanvas' width='600' height='300' style='margin-left: 8px; border:2px solid #999999;'></canvas>";
   data += "&nbsp; Center: OnStep rate, Blue: STA (range &#xb1;0.1), Green: LTA (range &#xb1;0.01)<br />";
+
+  data += html_encSweepEn1;
+  data += html_encSweepEn2;
 
   encoders.clearAverages();
 #endif
@@ -305,7 +320,7 @@ void handleEncoders() {
   data += temp;
   sendHtml(data);
 
-  sendHtmlDone();
+  sendHtmlDone(data);
 }
 
 #ifdef OETHS
@@ -335,6 +350,7 @@ if (finalCorrection<0) {
 }
 
   data += "orc|"; if (encRateControl) data+="On\n"; else data+="Off\n";
+  data += "osc|"; if (encSweep) data+="On\n"; else data+="Off\n";
 #endif
   data += "aste|";  if (encAutoSync) data+="On\n"; else data+="Off\n";
 
@@ -436,7 +452,7 @@ void processEncodersGet() {
   v=server.arg("pr");
   if (v!="") {
     int i;
-    if ( (atoi2((char*)v.c_str(),&i)) && ((i>=50) && (i<=1000))) { 
+    if ( (atoi2((char*)v.c_str(),&i)) && ((i>=50) && (i<=5000))) { 
       Axis1EncProp=i;
 #ifndef EEPROM_DISABLED
       EEPROM_writeLong(632,Axis1EncProp);
@@ -484,6 +500,14 @@ void processEncodersGet() {
     }
   }
 #endif // AXIS1_ENC_INTPOL_COS_ON
+
+  // Sweep control
+  v=server.arg("sw");
+  if (v!="") {
+    if (v=="on") encSweep=true;
+    if (v=="off") encSweep=false;
+  }
+
 #endif // AXIS1_ENC_RATE_CONTROL_ON
 
 #ifndef EEPROM_COMMIT_DISABLED
@@ -495,4 +519,3 @@ void processEncodersGet() {
 }
 
 #endif
-

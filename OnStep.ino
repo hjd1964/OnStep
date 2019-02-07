@@ -25,7 +25,7 @@
  *   http://www.stellarjourney.com
  *   hjd1964@gmail.com
  *
- * Revision history, and newer versions::
+ * Revision history, and newer versions:
  *   See GitHub: https://github.com/hjd1964/OnStep
  *
  * Documentation:
@@ -40,8 +40,8 @@
 // firmware info, these are returned by the ":GV?#" commands
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  1
-#define FirmwareVersionMinor  16
-#define FirmwareVersionPatch  "h"     // for example major.minor patch: 1.3c
+#define FirmwareVersionMinor  19
+#define FirmwareVersionPatch  "d"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 2       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
@@ -52,7 +52,7 @@
 #include "Constants.h"
 
 #include "Config.Classic.h"
-#include "Config.MaxESP.h"
+#include "Config.MaxESP2.h"
 #include "Config.MaxPCB.h"
 #include "Config.Mega2560Alt.h"
 #include "Config.MiniPCB.h"
@@ -105,12 +105,23 @@ tmc2130 tmcAxis2(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
 #endif
 
 #if defined(FOCUSER1_ON) || defined(FOCUSER2_ON)
-  #include "src/lib/Focuser.h"
   #ifdef FOCUSER1_ON
-    focuser foc1;
+    #ifdef AXIS4_DC_MODE_ON
+      #include "src/lib/FocuserDC.h"
+      focuserDC foc1;
+    #else
+      #include "src/lib/Focuser.h"
+      focuser foc1;
+    #endif
   #endif
   #ifdef FOCUSER2_ON
-    focuser foc2;
+    #ifdef AXIS5_DC_MODE_ON
+      #include "src/lib/FocuserDC.h"
+      focuserDC foc2;
+    #else
+      #include "src/lib/Focuser.h"
+      focuser foc2;
+    #endif
   #endif
 #endif
 
@@ -188,7 +199,7 @@ void setup() {
 #endif
  
   // autostart tracking
-#if defined(AUTOSTART_TRACKING_ON) 
+#if defined(AUTOSTART_TRACKING_ON)
   #if !defined(MOUNT_TYPE_ALTAZM)
     // telescope should be set in the polar home (CWD) for a starting point
     setHome();
@@ -227,6 +238,10 @@ void setup() {
   foc1.init(Axis4StepPin,Axis4DirPin,Axis4_EN,EE_posAxis4,MaxRateAxis4,StepsPerMicrometerAxis4);
   foc1.setMin(MinAxis4*1000.0);
   foc1.setMax(MaxAxis4*1000.0);
+  #ifdef AXIS4_DC_MODE_ON
+    foc1.setDcPower(dcPwrAxis4);
+    foc1.setPhase1();
+  #endif
   #ifdef AXIS4_REVERSE_ON
     foc1.setReverseState(HIGH);
   #endif
@@ -243,11 +258,15 @@ void setup() {
   foc2.init(Axis5StepPin,Axis5DirPin,Axis5_EN,EE_posAxis5,MaxRateAxis5,StepsPerMicrometerAxis5);
   foc2.setMin(MinAxis5*1000.0);
   foc2.setMax(MaxAxis5*1000.0);
+  #ifdef AXIS5_DC_MODE_ON
+    foc2.setDcPower(dcPwrAxis5);
+    foc2.setPhase2();
+  #endif
   #ifdef AXIS5_REVERSE_ON
     foc2.setReverseState(HIGH);
   #endif
   #ifdef AXIS5_DISABLE
-    foc2.setDisableState(AXIS4_DISABLE);
+    foc2.setDisableState(AXIS5_DISABLE);
     #ifdef AXIS5_AUTO_POWER_DOWN_ON
       foc2.powerDownActive(true);
     #else
@@ -350,8 +369,17 @@ void loop2() {
     // SAFETY CHECKS
     // support for limit switch(es)
 #ifdef LIMIT_SENSE_ON
-    byte ls1=digitalRead(LimitPin); delayMicroseconds(50); byte ls2=digitalRead(LimitPin);
-    if ((ls1==LOW) && (ls2==LOW)) { lastError=ERR_LIMIT_SENSE; stopLimit(); }
+    byte limit_1st = digitalRead(LimitPin);
+    if (limit_1st == LOW) {
+      // Wait for a short while, then read again
+      delayMicroseconds(50);
+      byte limit_2nd = digitalRead(LimitPin);
+      if (limit_2nd == LOW) {
+        // It is still low, there must be a problem
+        lastError=ERR_LIMIT_SENSE;
+        stopLimit();
+      }
+    }
 #endif
 
     if (safetyLimitsOn) {
