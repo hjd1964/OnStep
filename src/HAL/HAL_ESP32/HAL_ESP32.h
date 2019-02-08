@@ -34,6 +34,12 @@
 #warning "The stock ESP32 Release 1.0.0 Wire.h library doesn't work.  See the above HAL_ESP32.h file for instructions to correct this!"
 #endif
 
+// Pretend AnalogWrite
+void analogWrite(int pin, int value) {
+  if (value==0) digitalWrite(pin,LOW);
+  if (value==255) digitalWrite(pin,HIGH);
+}
+
 //--------------------------------------------------------------------------------------------------
 // General purpose initialize for HAL
 void HAL_Init(void) {
