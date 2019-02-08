@@ -1,7 +1,7 @@
 /*
 * Title       Smart Hand Controller (based on TeenAstro)
 *
-* Copyright (C) 2018 Charles Lemaire, Howard Dutton
+* Copyright (C) 2018 to 2019 Charles Lemaire, Howard Dutton
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -57,4 +57,3 @@ void loop()
 {
   HdCrtlr.update();
 }
-
