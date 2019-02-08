@@ -137,6 +137,8 @@ weather ambient;
 #define INIT_KEY false
 
 void setup() {
+  // take a half-second to let any connected devices come up before we start setting up pins
+  delay(500);
 
 #ifdef DEBUG_ON
   // Initialize USB serial debugging early, so we can use DebugSer.print() for debugging, if needed
