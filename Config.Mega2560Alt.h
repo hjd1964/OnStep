@@ -41,6 +41,9 @@
 // If the stop command is never received the guide will continue forever unless this is enabled.
 #define GUIDE_TIME_LIMIT 0
 
+// Set to _ON to disable backlash takeup during guiding at <= 1X, default=_OFF
+#define GUIDES_DISABLE_BACKLASH_OFF
+
 // RTC (Real Time Clock) support, default=_OFF. Other options: RTC_DS3234 for a DS3234 on the default SPI interface pins (and CS on pin 10, optionally wire the SQW output to the PPS pin below.)
 #define RTC_OFF
 // PPS use _ON or _PULLUP to enable the input and use the built-in pullup resistor.  Sense rising edge on pin 21 for optional precision clock source (GPS, for example), default=_OFF
@@ -100,7 +103,6 @@
 #define DegreesForRapidStop      1.0 // approximate number of degrees required to stop when requested or if limit is exceeded during a slew: higher values=longer deceleration
                                      // Default=1.0, too low (about <1) can cause gotos to never end if micro-step mode switching is enabled.
 
-#define GUIDES_DISABLE_BACKLASH_OFF  // Set to _ON to disable backlash takeup during guiding at <= 1X, default=_OFF
 #define BacklashTakeupRate        25 // backlash takeup rate (in multipules of the sidereal rate): too fast and your motors will stall,
                                      // too slow and the mount will be sluggish while it moves through the backlash
                                      // for the most part this doesn't need to be changed, but adjust when needed.  Default=25
