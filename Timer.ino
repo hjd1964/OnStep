@@ -131,7 +131,7 @@ void timerSuper() {
     long calculatedTimerRateAxis1;
 
     // guide rate acceleration/deceleration and control
-    if (guideDirAxis1) {
+    if (guideDirAxis1 && !inbacklashAxis1) {
       if ((fabs(guideTimerRateAxis1)<2.0) && (fabs(guideTimerRateAxis1A)<2.0)) { 
         // slow speed guiding, no acceleration
         guideTimerRateAxis1A=guideTimerRateAxis1; 
@@ -174,7 +174,7 @@ void timerSuper() {
     long calculatedTimerRateAxis2;
 
     // guide rate acceleration/deceleration
-    if (guideDirAxis2) {
+    if (guideDirAxis2 && !inbacklashAxis2) {
       if ((fabs(guideTimerRateAxis2)<2.0) && (fabs(guideTimerRateAxis2A)<2.0)) { 
         // slow speed guiding, no acceleration
         guideTimerRateAxis2A=guideTimerRateAxis2; 
