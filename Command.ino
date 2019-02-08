@@ -2100,7 +2100,7 @@ void checksum(char s[]) {
 }
 
 void forceRefreshGetEqu() {
-  _coord_t=millis()-100;
+  _coord_t=millis()-100UL;
 }
 
 // local command processing
