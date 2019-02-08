@@ -13,8 +13,8 @@
 //#define Aux9          "V2"  // Virtual Aux Pin2 (usually maps to AXIS2_ENC_A_PIN)
 //#define Aux10         "V3"  // Virtual Aux Pin3 (usually maps to AXIS2_ENC_B_PIN)
 
-// these enable virtual pin support
 /*
+// these enable virtual pin support
 int vpin_array[8] = {-1,-1,-1,-1,-1,-1,-1,-1};
 void pinMode(const char* pin, byte mode) {}
 void digitalWrite(const char* pin, int state) { int p=pin[1]-'0'; if ((pin[0]=='V') && (pin[2]==0) && (p>=0) && (p<=7)) { vpin_array[p]=state; } }
