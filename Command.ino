@@ -1705,84 +1705,84 @@ void processCommands() {
           long v=(double)strtol(&parameter[3],NULL,10);
           if ((v>=0) && (v<=255)) {
 #ifdef Aux0
-            if (parameter[1]=='0') { valueAux0=v; byte p=Aux0; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; } if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
+            if (parameter[1]=='0') { valueAux0=v; static bool init=false; if (!init) { pinMode(Aux0,OUTPUT); init=true; } if (v==0) digitalWrite(Aux0,LOW); else digitalWrite(Aux0,HIGH); } else
 #endif
 #ifndef MODE_SWITCH_BEFORE_SLEW_SPI
 #ifdef Aux1
-            if (parameter[1]=='1') { valueAux1=v; byte p=Aux1; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; } if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
+            if (parameter[1]=='1') { valueAux1=v; static bool init=false; if (!init) { pinMode(Aux1,OUTPUT); init=true; } if (v==0) digitalWrite(Aux1,LOW); else digitalWrite(Aux1,HIGH); } else
 #endif
 #ifdef Aux2
-            if (parameter[1]=='2') { valueAux2=v; byte p=Aux2; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; } if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
+            if (parameter[1]=='2') { valueAux2=v; static bool init=false; if (!init) { pinMode(Aux2,OUTPUT); init=true; } if (v==0) digitalWrite(Aux2,LOW); else digitalWrite(Aux2,HIGH); } else
 #endif
 #endif
 #ifdef Aux3
-            if (parameter[1]=='3') { valueAux3=v; byte p=Aux3; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; }
+            if (parameter[1]=='3') { valueAux3=v; static bool init=false; if (!init) { pinMode(Aux3,OUTPUT); init=true; }
   #ifdef Aux3_Analog
-              analogWrite(p,v); } else
+              analogWrite(Aux3,v); } else
   #else
-              if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
+              if (v==0) digitalWrite(Aux3,LOW); else digitalWrite(Aux3,HIGH); } else
   #endif
 #endif
 #ifdef Aux4
-            if (parameter[1]=='4') { valueAux4=v; byte p=Aux4; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; }
+            if (parameter[1]=='4') { valueAux4=v; static bool init=false; if (!init) { pinMode(Aux4,OUTPUT); init=true; }
   #ifdef Aux4_Analog
-              analogWrite(p,v); } else
+              analogWrite(Aux4,v); } else
   #else
-              if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
+              if (v==0) digitalWrite(Aux4,LOW); else digitalWrite(Aux4,HIGH); } else
   #endif
 #endif
 #ifdef Aux5
-            if (parameter[1]=='5') { valueAux5=v; byte p=Aux5; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; }
+            if (parameter[1]=='5') { valueAux5=v; static bool init=false; if (!init) { pinMode(Aux5,OUTPUT); init=true; }
   #ifdef Aux5_Analog
-              analogWrite(p,v); } else
+              analogWrite(Aux5,v); } else
   #else
-              if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
+              if (v==0) digitalWrite(Aux5,LOW); else digitalWrite(Aux5,HIGH); } else
   #endif
 #endif
 #ifdef Aux6
-            if (parameter[1]=='6') { valueAux6=v; byte p=Aux6; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; }
+            if (parameter[1]=='6') { valueAux6=v; static bool init=false; if (!init) { pinMode(Aux6,OUTPUT); init=true; }
   #ifdef Aux6_Analog
-              analogWrite(p,v); } else
+              analogWrite(Aux6,v); } else
   #else
-              if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
+              if (v==0) digitalWrite(Aux6,LOW); else digitalWrite(Aux6,HIGH); } else
   #endif
 #endif
 #ifdef Aux7
-            if (parameter[1]=='7') { valueAux7=v; byte p=Aux7; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; }
+            if (parameter[1]=='7') { valueAux7=v; static bool init=false; if (!init) { pinMode(Aux7,OUTPUT); init=true; }
   #ifdef Aux7_Analog
-              analogWrite(p,v); } else
+              analogWrite(Aux7,v); } else
   #else
-              if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
+              if (v==0) digitalWrite(Aux7,LOW); else digitalWrite(Aux7,HIGH); } else
   #endif
 #endif
 #ifdef Aux8
-            if (parameter[1]=='8') { valueAux8=v; byte p=Aux8; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; }
+            if (parameter[1]=='8') { valueAux8=v; static bool init=false; if (!init) { pinMode(Aux8,OUTPUT); init=true; }
   #ifdef Aux8_Analog
-              analogWrite(p,v); } else
+              analogWrite(Aux8,v); } else
   #else
-              if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
+              if (v==0) digitalWrite(Aux8,LOW); else digitalWrite(Aux8,HIGH); } else
   #endif
 #endif
 #ifdef Aux9
-            if (parameter[1]=='9') { valueAux9=v; byte p=Aux9; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; } if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
+            if (parameter[1]=='9') { valueAux9=v; static bool init=false; if (!init) { pinMode(Aux9,OUTPUT); init=true; } if (v==0) digitalWrite(Aux9,LOW); else digitalWrite(Aux9,HIGH); } else
 #endif
 #ifdef Aux10
-            if (parameter[1]=='A') { valueAux10=v; byte p=Aux10; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; } if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
+            if (parameter[1]=='A') { valueAux10=v; static bool init=false; if (!init) { pinMode(Aux10,OUTPUT); init=true; } if (v==0) digitalWrite(Aux10,LOW); else digitalWrite(Aux10,HIGH); } else
 #endif
 #ifdef Aux11
-            if (parameter[1]=='B') { valueAux11=v; byte p=Aux11; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; } if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
+            if (parameter[1]=='B') { valueAux11=v; static bool init=false; if (!init) { pinMode(Aux11,OUTPUT); init=true; } if (v==0) digitalWrite(Aux11,LOW); else digitalWrite(Aux11,HIGH); } else
 #endif
 #ifdef Aux12
-            if (parameter[1]=='C') { valueAux12=v; byte p=Aux12; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; } if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
+            if (parameter[1]=='C') { valueAux12=v; static bool init=false; if (!init) { pinMode(Aux12,OUTPUT); init=true; } if (v==0) digitalWrite(Aux12,LOW); else digitalWrite(Aux12,HIGH); } else
 #endif
 #ifdef Aux13
-            if (parameter[1]=='D') { valueAux13=v; byte p=Aux13; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; } if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
+            if (parameter[1]=='D') { valueAux13=v; static bool init=false; if (!init) { pinMode(Aux13,OUTPUT); init=true; } if (v==0) digitalWrite(Aux13,LOW); else digitalWrite(Aux13,HIGH); } else
 #endif
 #ifdef Aux14
-            if (parameter[1]=='E') { valueAux14=v; byte p=Aux14; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; } if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
+            if (parameter[1]=='E') { valueAux14=v; static bool init=false; if (!init) { pinMode(Aux14,OUTPUT); init=true; } if (v==0) digitalWrite(Aux14,LOW); else digitalWrite(Aux14,HIGH); } else
 #endif
 #ifdef Aux15
-            if (parameter[1]=='F') { valueAux15=v; byte p=Aux15; static bool init=false; if (!init) { pinMode(p,OUTPUT); init=true; } if (v==0) digitalWrite(p,LOW); else digitalWrite(p,HIGH); } else
+            if (parameter[1]=='F') { valueAux15=v; static bool init=false; if (!init) { pinMode(Aux15,OUTPUT); init=true; } if (v==0) digitalWrite(Aux15,LOW); else digitalWrite(Aux15,HIGH); } else
 #endif
             commandError=true;
           } else commandError=true;
