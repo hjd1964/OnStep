@@ -104,15 +104,15 @@ int backlashAxis2PriorToGuide=0;
 
 void reactivateBacklashComp() {
 #ifdef GUIDES_DISABLE_BACKLASH_ON
-  if (backlashAxis1PriorToGuide==0) { backlashAxis1PriorToGuide=backlashAxis1; cli(); backlashAxis1=0; sei(); }
-  if (backlashAxis2PriorToGuide==0) { backlashAxis2PriorToGuide=backlashAxis2; cli(); backlashAxis2=0; sei(); }
+  if (backlashAxis1PriorToGuide>0) { cli(); backlashAxis1=backlashAxis1PriorToGuide; sei(); backlashAxis1PriorToGuide=0; }
+  if (backlashAxis2PriorToGuide>0) { cli(); backlashAxis2=backlashAxis2PriorToGuide; sei(); backlashAxis2PriorToGuide=0; }
 #endif
 }
 
 void deactivateBacklashComp() {
 #ifdef GUIDES_DISABLE_BACKLASH_ON
-  if (backlashAxis1PriorToGuide>0) { cli(); backlashAxis1=backlashAxis1PriorToGuide; sei(); backlashAxis1PriorToGuide=0; }
-  if (backlashAxis2PriorToGuide>0) { cli(); backlashAxis2=backlashAxis2PriorToGuide; sei(); backlashAxis2PriorToGuide=0; }
+  if (backlashAxis1PriorToGuide==0) { backlashAxis1PriorToGuide=backlashAxis1; cli(); backlashAxis1=0; sei(); }
+  if (backlashAxis2PriorToGuide==0) { backlashAxis2PriorToGuide=backlashAxis2; cli(); backlashAxis2=0; sei(); }
 #endif
 }
 
