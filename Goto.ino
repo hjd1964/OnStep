@@ -8,6 +8,7 @@ GotoErrors validateGoto() {
   if (!axis1Enabled)                           return GOTO_ERR_STANDBY;
   if (parkStatus!=NotParked)                   return GOTO_ERR_PARK;
   if (guideDirAxis1 || guideDirAxis2)          return GOTO_ERR_IN_MOTION;
+  if (trackingSyncInProgress())                return GOTO_ERR_GOTO;
   if (trackingState==TrackingMoveTo)           return GOTO_ERR_GOTO;
   return GOTO_ERR_NONE;
 }
