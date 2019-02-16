@@ -1,24 +1,4 @@
 
-#ifndef SHC_ON
-void SmartHandController::menuMount()
-{
-  current_selection_L2 = 1;
-  while (current_selection_L2 != 0)
-  {
-    const char *string_list_Mount = "Predefined\n""Mount type\n""Motor 1\n""Motor 2";
-    current_selection_L2 = display->UserInterfaceSelectionList(&buttonPad, "Mount", current_selection_L2, string_list_Mount);
-    switch (current_selection_L2)
-    {
-    case 1: menuPredefinedMount(); break;
-    case 2: menuMountType(); break;
-    case 3: menuMotor(1); break;
-    case 4: menuMotor(2); break;
-    default: break;
-    }
-  }
-}
-#endif
-
 void SmartHandController::menuMountType()
 {
   current_selection_L3 = 1;
@@ -256,4 +236,3 @@ void SmartHandController::DisplayMotorSettings(uint8_t &axis)
 
   DisplayLongMessage(line1, NULL, line3, line4, -1);
 }
-

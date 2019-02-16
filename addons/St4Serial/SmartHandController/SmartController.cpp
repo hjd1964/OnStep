@@ -565,11 +565,7 @@ void SmartHandController::drawReady()
 // Alt Main Menu (double click)
 void SmartHandController::menuSpeedRate()
 {
-#ifndef SHC_ON
-  char * string_list_Speed = "0.25x\n0.5x\n1.0x\n2.0x\n4.0x\n16.0x\n32.0x\n64.0x\n0.5 Max\nMax";
-#else
   char * string_list_Speed = "0.25x\n0.5x\n1.0x\n2.0x\n4.0x\n8.0x\n24.0x\n48.0x\n0.5 Max\nMax";
-#endif
   current_selection_speed = display->UserInterfaceSelectionList(&buttonPad, "Set Speed", current_selection_speed, string_list_Speed);
   if (current_selection_speed > 0)
   {
@@ -680,7 +676,6 @@ void SmartHandController::menuPEC()
 void SmartHandController::menuSettings()
 {
   current_selection_L1 = 1;
-#ifdef SHC_ON
   while (current_selection_L1 != 0)
   {
     if (telInfo.isMountGEM()) {
@@ -710,27 +705,6 @@ void SmartHandController::menuSettings()
       }
     }
   }
-#else
-  while (current_selection_L1 != 0)
-  {
-    const char *string_list_SettingsL1 = "Date/Time\n""Pier Side\n""Goto Speed\n""Display\n""Buzzer\n""Meridian Flp\n""Mount\n""Limits\n""Wifi\n""Site";
-    current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Settings", current_selection_L1, string_list_SettingsL1);
-    switch (current_selection_L1)
-    {
-    case 1:  menuLocalDateTime(); break;
-    case 2:  menuPier(); break;
-    case 3:  menuGotoSpeed(); break;
-    case 4:  menuDisplay(); break;
-    case 5:  menuSound(); break;
-    case 6:  if (telInfo.isMountGEM()) menuMeridianFlips(); else DisplayMessage("Meridian flips", "are disabled", 1500); break;
-    case 7:  menuMount(); break;
-    case 8:  menuLimits(); break;
-    case 9:  menuWifi(); break;
-    case 10: menuSite(); break;
-    default: break;
-    }
-  }
-#endif
 }
 
 void SmartHandController::menuLocalDateTime()
@@ -889,11 +863,7 @@ void SmartHandController::menuAlignment()
         case 8: if (SetLX200(":A8#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_EIGHT; else DisplayMessage("Alignment", "Failed!", -1); break;
         case 9: if (SetLX200(":A9#") == LX200VALUESET) telInfo.aliMode = Telescope::ALIM_NINE;  else DisplayMessage("Alignment", "Failed!", -1); break;
       }
-  #ifndef SHC_ON
-      if (SetLX200(":R7#") == LX200VALUESET) DisplayMessage("Guide Rate", "64X Set", 1000);
-  #else
       if (SetLX200(":R7#") == LX200VALUESET) DisplayMessage("Guide Rate", "48X Set", 1000);
-  #endif
       current_selection_L1 = 0; current_selection_L0 = 0; // Quit Menu
     }
   }
@@ -914,30 +884,6 @@ void SmartHandController::menuAlignment()
     }
   }
 }
-
-#ifndef SHC_ON
-void SmartHandController::menuPier()
-{
-  uint8_t choice = ((uint8_t)telInfo.getPierState());
-  choice = display->UserInterfaceSelectionList(&buttonPad, "Set Side of Pier", choice, "East\nWest");
-  bool ok = false;
-  if (choice)
-  {
-    if (choice == 1)
-      ok = DisplayMessageLX200(SetLX200(":SmE#"),false);
-    else
-      ok = DisplayMessageLX200(SetLX200(":SmW#"),false);
-    if (ok)
-    {
-      DisplayMessage("Please Sync", "with a Target", 1000);
-      menuSyncGoto(true);
-      current_selection_L1 = 0;
-      current_selection_L0 = 0;
-      DisplayMessageLX200(SetLX200(":SmN#"),false);
-    }
-  }
-}
-#endif
 
 void SmartHandController::menuDisplay()
 {

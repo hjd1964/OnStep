@@ -1,5 +1,4 @@
 
-#ifdef SHC_ON
 void SmartHandController::menuMount()
 {
   current_selection_L2 = 1;
@@ -183,5 +182,3 @@ void SmartHandController::menuPier()
     }
   }
 }
-#endif
-
