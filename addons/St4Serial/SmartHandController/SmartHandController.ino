@@ -36,10 +36,11 @@
 #define FirmwareDate          __DATE__
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "0"
-#define FirmwareVersionMinor  "8"
-#define FirmwareVersionPatch  "b"
+#define FirmwareVersionMinor  "9"
+#define FirmwareVersionPatch  "a"
 
 #include "Config.h"
+
 #include "SmartController.h"
 
 const char Version[] = "Version " FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch;
