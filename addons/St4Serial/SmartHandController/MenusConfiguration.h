@@ -24,11 +24,11 @@ void SmartHandController::menuGotoSpeed()
 
   char mr[20]=""; boolean ok = GetLX200Trim(":GX93#",mr) == LX200VALUEGET;
   if (ok) {
-    long rateDefault=atol(mr);
+    double rateDefault=atof(mr);
     ok = GetLX200Trim(":GX92#",mr) == LX200VALUEGET;
     if (ok) {
-      long rateCurrent=atol(mr);
-      double r=(double)rateDefault/(double)rateCurrent;
+      double rateCurrent=atof(mr);
+      double r=rateDefault/rateCurrent;
       if (r>1.75) current_selection_L3 = 1; else
       if (r>1.25) current_selection_L3 = 2; else
       if (r>0.875) current_selection_L3 = 3; else
