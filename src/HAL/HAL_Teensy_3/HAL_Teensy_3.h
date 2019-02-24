@@ -85,6 +85,7 @@
 //--------------------------------------------------------------------------------------------------
 // General purpose initialize for HAL
 void HAL_Init(void) {
+  analogReadResolution(10);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -98,10 +99,11 @@ float HAL_MCU_Temperature(void) {
   int Tpin=38;
 #endif
   // delta of -1.715 mV/C where 25C measures 719 mV
-  analogReadResolution(12);
-  float v=(analogRead(Tpin)/4096.0)*3.3;
+//  analogReadResolution(12);
+//  delayMicroseconds(10);
+  float v=(analogRead(Tpin)/1024.0)*3.3;
   float t=(-(v-0.719)/0.001715)+25.0;
-  analogReadResolution(10);
+//  analogReadResolution(10);
   return t;
 }
 
