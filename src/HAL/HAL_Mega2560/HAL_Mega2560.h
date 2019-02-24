@@ -6,7 +6,11 @@
 // This is for ~16MHz AVR processors or similar.
 // They can, however, run Motor Timer ISR's w/stepper driver signal timing met in one pass vs. two for faster processors
 #define HAL_SLOW_PROCESSOR
-#define HAL_PULSE_STEP
+
+// Set default timer mode unless specified
+#if !defined(HAL_PULSE_STEP) && !defined(HAL_DEDGE_STEP) && !defined(HAL_SQW_STEP)
+  #define HAL_PULSE_STEP
+#endif
 
 // Lower limit (fastest) step rate in uS for this platform
 #if defined(HAL_PULSE_STEP) || defined(HAL_DEDGE_STEP)
