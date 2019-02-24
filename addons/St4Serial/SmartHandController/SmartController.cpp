@@ -565,7 +565,7 @@ void SmartHandController::drawReady()
 // Alt Main Menu (double click)
 void SmartHandController::menuSpeedRate()
 {
-  char * string_list_Speed = "0.25x\n0.5x\n1.0x\n2.0x\n4.0x\n8.0x\n24.0x\n48.0x\n0.5 Max\nMax";
+  char * string_list_Speed = "0.25x\n0.5x\n1.0x\n2.0x\n4.0x\n8.0x\n20.0x\n48.0x\n0.5 Max\nMax";
   current_selection_speed = display->UserInterfaceSelectionList(&buttonPad, "Set Speed", current_selection_speed, string_list_Speed);
   if (current_selection_speed > 0)
   {
