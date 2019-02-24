@@ -50,14 +50,7 @@
 #include <math.h>
 
 #include "Constants.h"
-
-#include "Config.Classic.h"
-#include "Config.MaxESP2.h"
-#include "Config.MaxPCB.h"
-#include "Config.Mega2560Alt.h"
-#include "Config.MiniPCB.h"
-#include "Config.Ramps14.h"
-#include "Config.STM32.h"
+#include "Config.h"
 #include "src/HAL/HAL.h"
 #include "Validate.h"
 
