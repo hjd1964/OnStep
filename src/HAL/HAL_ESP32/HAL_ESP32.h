@@ -2,12 +2,7 @@
 
 // Lower limit (fastest) step rate in uS for this platform -------------------------------------------
 #define HAL_FAST_PROCESSOR
-
-#if defined(HAL_PULSE_STEP) || defined(HAL_DEDGE_STEP)
-  #define MaxRate_LowerLimit 10
-#else
-  #define MaxRate_LowerLimit 16
-#endif
+#define MaxRate_LowerLimit 16
 
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
 #define SerialA Serial

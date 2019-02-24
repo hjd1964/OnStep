@@ -12,12 +12,8 @@
   #define HAL_PULSE_STEP
 #endif
 
-// Lower limit (fastest) step rate in uS for this platform
-#if defined(HAL_PULSE_STEP) || defined(HAL_DEDGE_STEP)
-  #define MaxRate_LowerLimit 32
-#else
-  #define MaxRate_LowerLimit 64
-#endif
+// Lower limit (fastest) step rate in uS for this platform (in SQW mode)
+#define MaxRate_LowerLimit 51.2
 
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
 #ifndef MEGA2560_ARDUINO_SERIAL_ON

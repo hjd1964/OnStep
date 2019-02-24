@@ -314,6 +314,11 @@ void stopLimit() {
 long maxRateLowerLimit() {
   double r_us=MaxRate_LowerLimit;  // for example 16us, this basis rate has platform (STM32/Teensy3.2/3.5/3.6/Mega2560), clock rate, and ISR operating mode (Sqw/Pulse/Dedge) factored in (from HAL.)
   
+  // higher speed ISR code path?
+  #if defined(HAL_PULSE_STEP) || defined(HAL_DEDGE_STEP)
+    r_us=r_us/1.6; // about 1.6x faster than SQW mode in my testing
+  #endif
+  
   // on-the-fly mode switching used?
   #if !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
     if ((AXIS1_STEP_GOTO!=1) || (AXIS2_STEP_GOTO!=1)) r_us=MaxRate_LowerLimit*1.7;  // if this code is enabled, 27us
@@ -330,5 +335,5 @@ long maxRateLowerLimit() {
   if (r_us<0.25) r_us=0.25;
 
   // return rate in 1/16us units
-  return r_us*16.0;
+  return round(r_us*16.0);
 }
