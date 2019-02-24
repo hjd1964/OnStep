@@ -762,7 +762,7 @@ void processCommands() {
                 if (preferredPierSide==PPS_WEST) strcpy(reply,"W"); else strcpy(reply,"B");
                 quietReply=true; break;
               case '7': dtostrf(slewSpeed,3,1,reply); quietReply=true; break;                               // slew speed
-              case '8': 
+              case '8':
 #ifdef ROTATOR_ON
 #ifdef MOUNT_TYPE_ALTAZM
                 strcpy(reply,"D");
@@ -773,11 +773,12 @@ void processCommands() {
                 strcpy(reply,"N");
 #endif
                 quietReply=true; break; // rotator availablity 2=rotate/derotate, 1=rotate, 0=off
-              case 'A': dtostrf(ambient.getTemperature(),3,1,reply); quietReply=true; break;       // temperature in deg. C
-              case 'B': dtostrf(ambient.getPressure(),3,1,reply); quietReply=true; break;          // pressure in mb
-              case 'C': dtostrf(ambient.getHumidity(),3,1,reply); quietReply=true; break;          // relative humidity in %
-              case 'D': dtostrf(ambient.getAltitude(),3,1,reply); quietReply=true; break;          // altitude in meters
-              case 'E': dtostrf(ambient.getDewPoint(),3,1,reply); quietReply=true; break;          // dew point in deg. C
+              case '9': dtostrf((double)maxRateLowerLimit()/16.0,3,3,reply); quietReply=true; break; // MaxRate (fastest/lowest)
+              case 'A': dtostrf(ambient.getTemperature(),3,1,reply); quietReply=true; break;         // temperature in deg. C
+              case 'B': dtostrf(ambient.getPressure(),3,1,reply); quietReply=true; break;            // pressure in mb
+              case 'C': dtostrf(ambient.getHumidity(),3,1,reply); quietReply=true; break;            // relative humidity in %
+              case 'D': dtostrf(ambient.getAltitude(),3,1,reply); quietReply=true; break;            // altitude in meters
+              case 'E': dtostrf(ambient.getDewPoint(),3,1,reply); quietReply=true; break;            // dew point in deg. C
               case 'F': { float t=HAL_MCU_Temperature(); if (t>-999) { dtostrf(t,1,0,reply); quietReply=true; } else commandError=true; } break; // internal MCU temperature in deg. C
               default:  commandError=true;
             }
