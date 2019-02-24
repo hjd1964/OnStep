@@ -377,33 +377,33 @@ void loop2() {
     }
 #endif
 
-    if (safetyLimitsOn) {
-      // check for fault signal, stop any slew or guide and turn tracking off
+    // check for fault signal, stop any slew or guide and turn tracking off
 #ifdef AXIS1_FAULT
   #if AXIS1_FAULT==LOW
-      faultAxis1=(digitalRead(Axis1_FAULT)==LOW);
+    faultAxis1=(digitalRead(Axis1_FAULT)==LOW);
   #endif
   #if AXIS1_FAULT==HIGH
-      faultAxis1=(digitalRead(Axis1_FAULT)==HIGH);
+    faultAxis1=(digitalRead(Axis1_FAULT)==HIGH);
   #endif
   #if AXIS1_FAULT==TMC2130
-      if (lst%2==0) faultAxis1=tmcAxis1.error();
+    if (lst%2==0) faultAxis1=tmcAxis1.error();
   #endif
 #endif
 #ifdef AXIS2_FAULT
   #if AXIS2_FAULT==LOW
-      faultAxis2=(digitalRead(Axis2_FAULT)==LOW);
+    faultAxis2=(digitalRead(Axis2_FAULT)==LOW);
   #endif
   #if AXIS2_FAULT==HIGH
-      faultAxis2=(digitalRead(Axis2_FAULT)==HIGH);
+    faultAxis2=(digitalRead(Axis2_FAULT)==HIGH);
   #endif
   #if AXIS2_FAULT==TMC2130
-      if (lst%2==1) faultAxis2=tmcAxis2.error();
+    if (lst%2==1) faultAxis2=tmcAxis2.error();
   #endif
 #endif
 
-      if (faultAxis1 || faultAxis2) { lastError=ERR_MOTOR_FAULT; if (trackingState==TrackingMoveTo) { if (!abortSlew) abortSlew=StartAbortSlew; } else { trackingState=TrackingNone; if (guideDirAxis1) guideDirAxis1='b'; if (guideDirAxis2) guideDirAxis2='b'; } }
+    if (faultAxis1 || faultAxis2) { lastError=ERR_MOTOR_FAULT; if (trackingState==TrackingMoveTo) { if (!abortSlew) abortSlew=StartAbortSlew; } else { trackingState=TrackingNone; if (guideDirAxis1) guideDirAxis1='b'; if (guideDirAxis2) guideDirAxis2='b'; } }
 
+    if (safetyLimitsOn) {
       // check altitude overhead limit and horizon limit
       if ((currentAlt<minAlt) || (currentAlt>maxAlt)) { lastError=ERR_ALT; stopLimit(); }
     }
