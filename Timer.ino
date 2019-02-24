@@ -1,22 +1,32 @@
 // -----------------------------------------------------------------------------------
 // Timers and interrupt handling
 
-#ifndef HAL_SLOW_PROCESSOR
-// if we're running the motor timers 2x the MaxRate, these are the variables to keep track of that
-volatile boolean clearAxis1 = true;
-volatile boolean takeStepAxis1 = false;
-volatile boolean clearAxis2 = true;
-volatile boolean takeStepAxis2 = false;
+#if defined(HAL_PULSE_STEP)
+  // motor timers at 1x rate
+  #define TIMER_PULSE_STEP_MULTIPLIER 1
+#elif defined(HAL_DEDGE_STEP)
+  // motor timers at 1x rate
+  #define TIMER_PULSE_STEP_MULTIPLIER 1
+  volatile byte toggleStateAxis1 = 0;
+  volatile byte toggleStateAxis2 = 0;
+#else
+  // motor timers at 2x rate
+  #define TIMER_PULSE_STEP_MULTIPLIER 0.5
+  #define TIMER_SQW_STEP
+  volatile boolean clearAxis1 = true;
+  volatile boolean takeStepAxis1 = false;
+  volatile boolean clearAxis2 = true;
+  volatile boolean takeStepAxis2 = false;
 #endif
 
 #if defined(AXIS1_MODE) && defined(AXIS1_MODE_GOTO)
-volatile long modeAxis1_next=AXIS1_MODE;
-volatile boolean gotoModeAxis1=false;
+  volatile long modeAxis1_next=AXIS1_MODE;
+  volatile boolean gotoModeAxis1=false;
 #endif
 
 #if defined(AXIS2_MODE) && defined(AXIS2_MODE_GOTO)
-volatile long modeAxis2_next=AXIS2_MODE;
-volatile boolean gotoModeAxis2=false;
+  volatile long modeAxis2_next=AXIS2_MODE;
+  volatile boolean gotoModeAxis2=false;
 #endif
 
 volatile bool axis2Powered = true;
@@ -48,15 +58,15 @@ void timer3SetInterval(long iv) {
   iv=iv/8L;
   // 0.0327 * 4096 = 134.21s
   uint32_t i=iv; uint16_t t=1; while (iv>65536L) { t*=2; iv=i/t; if (t==4096) { iv=65535L; break; } }
-  cli(); nextAxis1Rate=iv-1L; t3rep=t; fastAxis1=(t3rep==1); sei();
+  cli(); nextAxis1Rate=(iv * TIMER_PULSE_STEP_MULTIPLIER) - 1L; t3rep=t; fastAxis1=(t3rep==1); sei();
 #elif defined(__ARM_STM32__)
   // 0.0327 * 4096 = 134.21s
   uint32_t i=iv; uint16_t t=1; while (iv>65536L*8L) { t*=2; iv=i/t; if (t==4096) { iv=65535L*8L; break; } }
-  cli(); nextAxis1Rate=((F_COMP/1000000.0) * (iv*0.0625) * 0.5); t3rep=t; fastAxis1=(t3rep==1); sei();
+  cli(); nextAxis1Rate=((F_COMP/1000000.0) * (iv*0.0625) * TIMER_PULSE_STEP_MULTIPLIER); t3rep=t; fastAxis1=(t3rep==1); sei();
 #else
   // 4.194 * 32 = 134.21s
   uint32_t i=iv; uint16_t t=1; while (iv>65536L*1024L) { t++; iv=i/t; if (t==32) { iv=65535L*1024L; break; } }
-  cli(); nextAxis1Rate=((F_COMP/1000000.0) * (iv*0.0625) * 0.5 - 1.0); t3rep=t; fastAxis1=(t3rep==1); sei();
+  cli(); nextAxis1Rate=((F_COMP/1000000.0) * (iv*0.0625) * TIMER_PULSE_STEP_MULTIPLIER - 1.0); t3rep=t; fastAxis1=(t3rep==1); sei();
 #endif
 }
 
@@ -72,15 +82,15 @@ void timer4SetInterval(long iv) {
   iv=iv/8L;
   // 0.0327 * 4096 = 134.21s
   uint32_t i=iv; uint16_t t=1; while (iv>65536L) { t*=2; iv=i/t; if (t==4096) { iv=65535L; break; } }
-  cli(); nextAxis2Rate=iv-1L; t4rep=t; fastAxis2=(t4rep==1); sei();
+  cli(); nextAxis2Rate=(iv * TIMER_PULSE_STEP_MULTIPLIER) - 1L; t4rep=t; fastAxis2=(t4rep==1); sei();
 #elif defined(__ARM_STM32__)
   // 0.0327 * 4096 = 134.21s
   uint32_t i=iv; uint16_t t=1; while (iv>65536L*8L) { t*=2; iv=i/t; if (t==4096) { iv=65535L*8L; break; } }
-  cli(); nextAxis2Rate=((F_COMP/1000000.0) * (iv*0.0625) * 0.5); t4rep=t; fastAxis2=(t4rep==1); sei();
+  cli(); nextAxis2Rate=((F_COMP/1000000.0) * (iv*0.0625) * TIMER_PULSE_STEP_MULTIPLIER); t4rep=t; fastAxis2=(t4rep==1); sei();
 #else
   // 4.194 * 32 = 134.21s
   uint32_t i=iv; uint16_t t=1; while (iv>65536L*1024L) { t++; iv=i/t; if (t==32) { iv=65535L*1024L; break; } }
-  cli(); nextAxis2Rate=((F_COMP/1000000.0) * (iv*0.0625) * 0.5 - 1.0); t4rep=t; fastAxis2=(t4rep==1); sei();
+  cli(); nextAxis2Rate=((F_COMP/1000000.0) * (iv*0.0625) * TIMER_PULSE_STEP_MULTIPLIER - 1.0); t4rep=t; fastAxis2=(t4rep==1); sei();
 #endif
 }
 
@@ -90,7 +100,7 @@ volatile boolean wasInbacklashAxis1=false;
 volatile boolean wasInbacklashAxis2=false;
 volatile boolean gotoRateAxis1=false;
 volatile boolean gotoRateAxis2=false;
-volatile byte cnt=0;
+volatile byte siderealClockCycleCount=0;
 volatile double guideTimerRateAxis1A=0.0;
 volatile double guideTimerRateAxis2A=0.0;
 volatile byte guideDirChangeTimerAxis1=0;
@@ -109,55 +119,70 @@ IRAM_ATTR ISR(TIMER1_COMPA_vect)
 #endif
 
   // run 1/3 of the time at 3x the rate, unless a goto is happening
-  if (trackingState!=TrackingMoveTo) { cnt++; if (cnt%3!=0) goto done; cnt=0; }
-  lst++;
+  if (trackingState!=TrackingMoveTo) {
+    siderealClockCycleCount++;
+    // on fast processors allow the timerSuper() to run at full speed (instead of 10ms) for lower latency guiding
+    #ifndef HAL_FAST_PROCESSOR
+      if (siderealClockCycleCount%3!=0) goto done;
+    #endif
+  } else siderealClockCycleCount=0;
+  bool isCentiSecond=(siderealClockCycleCount%3==0);
 
-  // handle buzzer
-  if (buzzerDuration>0) { buzzerDuration--; if (buzzerDuration==0) digitalWrite(TonePin,LOW); }
+  if (isCentiSecond) {
+    // tick the clock
+    lst++;
+    // handle buzzer
+    if (buzzerDuration>0) { buzzerDuration--; if (buzzerDuration==0) digitalWrite(TonePin,LOW); }
+  }
 
 #ifndef ESP32
-  timerSuper();
+  timerSupervisor(isCentiSecond);
 #endif
 
-done: {}
+#ifndef HAL_FAST_PROCESSOR
+  done: {}
+#endif
+
 #ifdef HAL_TIMER1_SUFFIX
   HAL_TIMER1_SUFFIX;
 #endif
 }
 
-void timerSuper() {
+void timerSupervisor(bool isCentiSecond) {
   if (trackingState!=TrackingMoveTo) {
     // automatic rate calculation HA
     long calculatedTimerRateAxis1;
 
     // guide rate acceleration/deceleration and control
     if (guideDirAxis1) {
-      if ((fabs(guideTimerRateAxis1)<2.0) && (fabs(guideTimerRateAxis1A)<2.0)) { 
+      if ((fabs(guideTimerRateAxis1)<10.0) && (fabs(guideTimerRateAxis1A)<10.0)) {
         // slow speed guiding, no acceleration
         guideTimerRateAxis1A=guideTimerRateAxis1; 
         // break
         if (guideDirAxis1=='b') { guideDirAxis1=0; guideTimerRateAxis1=0.0; guideTimerRateAxis1A=0.0; }
       } else {
-        // high speed guiding
-        stepperModeGoto();
+        if ((isCentiSecond) && (!inbacklashAxis1)) {
+          // high speed guiding
+          stepperModeGoto();
 
-        // at higher step rates where torque is reduced make smaller rate changes
-        double r=1.2-sqrt((abs(guideTimerRateAxis1A)/slewRateX));
-        if (r<0.2) r=0.2; if (r>1.2) r=1.2;
-
-        // acceleration/deceleration control
-        if ((guideDirAxis1!=lastGuideDirAxis1) && (lastGuideDirAxis1!=0)) guideDirChangeTimerAxis1=25;
-        lastGuideDirAxis1=guideDirAxis1;
-
-        double gtr1=guideTimerRateAxis1; if (guideDirAxis1=='b') gtr1=0.0;
-        if (guideDirChangeTimerAxis1>0) guideDirChangeTimerAxis1--; else {
-          if (guideTimerRateAxis1A>gtr1) { guideTimerRateAxis1A-=(accXPerSec/100.0)*r; if (guideTimerRateAxis1A<gtr1) guideTimerRateAxis1A=gtr1; }
-          if (guideTimerRateAxis1A<gtr1) { guideTimerRateAxis1A+=(accXPerSec/100.0)*r; if (guideTimerRateAxis1A>gtr1) guideTimerRateAxis1A=gtr1; }
-        }
-
-        // stop guiding
-        if (guideDirAxis1=='b') {
-          if (abs(guideTimerRateAxis1A)<0.001) { guideDirAxis1=0; lastGuideDirAxis1=0; guideTimerRateAxis1=0.0; guideTimerRateAxis1A=0.0; guideDirChangeTimerAxis1=0; if (!guideDirAxis2) stepperModeTracking(); }
+          // at higher step rates where torque is reduced make smaller rate changes
+          double r=1.2-sqrt((abs(guideTimerRateAxis1A)/slewRateX));
+          if (r<0.2) r=0.2; if (r>1.2) r=1.2;
+  
+          // acceleration/deceleration control
+          if ((guideDirAxis1!=lastGuideDirAxis1) && (lastGuideDirAxis1!=0)) guideDirChangeTimerAxis1=25;
+          lastGuideDirAxis1=guideDirAxis1;
+  
+          double gtr1=guideTimerRateAxis1; if (guideDirAxis1=='b') gtr1=0.0;
+          if (guideDirChangeTimerAxis1>0) guideDirChangeTimerAxis1--; else {
+            if (guideTimerRateAxis1A>gtr1) { guideTimerRateAxis1A-=(accXPerSec/100.0)*r; if (guideTimerRateAxis1A<gtr1) guideTimerRateAxis1A=gtr1; }
+            if (guideTimerRateAxis1A<gtr1) { guideTimerRateAxis1A+=(accXPerSec/100.0)*r; if (guideTimerRateAxis1A>gtr1) guideTimerRateAxis1A=gtr1; }
+          }
+  
+          // stop guiding
+          if (guideDirAxis1=='b') {
+            if (abs(guideTimerRateAxis1A)<0.001) { guideDirAxis1=0; lastGuideDirAxis1=0; guideTimerRateAxis1=0.0; guideTimerRateAxis1A=0.0; guideDirChangeTimerAxis1=0; if (!guideDirAxis2) stepperModeTracking(); }
+          }
         }
       }
     } else guideTimerRateAxis1A=0.0;
@@ -175,32 +200,34 @@ void timerSuper() {
 
     // guide rate acceleration/deceleration
     if (guideDirAxis2) {
-      if ((fabs(guideTimerRateAxis2)<2.0) && (fabs(guideTimerRateAxis2A)<2.0)) { 
+      if ((fabs(guideTimerRateAxis2)<10.0) && (fabs(guideTimerRateAxis2A)<10.0)) {
         // slow speed guiding, no acceleration
         guideTimerRateAxis2A=guideTimerRateAxis2; 
         // break mode
         if (guideDirAxis2=='b') { guideDirAxis2=0; guideTimerRateAxis2=0.0; guideTimerRateAxis2A=0.0; }
       } else {
-        // use acceleration
-        stepperModeGoto();
-
-        // at higher step rates where torque is reduced make smaller rate changes
-        double r=1.2-sqrt((abs(guideTimerRateAxis2A)/slewRateX));
-        if (r<0.2) r=0.2; if (r>1.2) r=1.2;
-
-        // acceleration/deceleration control
-        if ((guideDirAxis2!=lastGuideDirAxis2) && (lastGuideDirAxis2!=0)) guideDirChangeTimerAxis2=25;
-        lastGuideDirAxis2=guideDirAxis2;
-
-        double gtr2=guideTimerRateAxis2; if (guideDirAxis2=='b') gtr2=0.0;
-        if (guideDirChangeTimerAxis2>0) guideDirChangeTimerAxis2--; else {
-          if (guideTimerRateAxis2A>gtr2) { guideTimerRateAxis2A-=(accXPerSec/100.0)*r; if (guideTimerRateAxis2A<gtr2) guideTimerRateAxis2A=gtr2; }
-          if (guideTimerRateAxis2A<gtr2) { guideTimerRateAxis2A+=(accXPerSec/100.0)*r; if (guideTimerRateAxis2A>gtr2) guideTimerRateAxis2A=gtr2; }
-        }
-
-        // stop guiding
-        if (guideDirAxis2=='b') {
-          if (abs(guideTimerRateAxis2A)<0.001) { guideDirAxis2=0; lastGuideDirAxis2=0; guideTimerRateAxis2=0.0; guideTimerRateAxis2A=0.0; guideDirChangeTimerAxis2=0; if (!guideDirAxis1) stepperModeTracking(); }
+        if ((isCentiSecond) && (!inbacklashAxis2)) {
+          // use acceleration
+          stepperModeGoto();
+  
+          // at higher step rates where torque is reduced make smaller rate changes
+          double r=1.2-sqrt((abs(guideTimerRateAxis2A)/slewRateX));
+          if (r<0.2) r=0.2; if (r>1.2) r=1.2;
+  
+          // acceleration/deceleration control
+          if ((guideDirAxis2!=lastGuideDirAxis2) && (lastGuideDirAxis2!=0)) guideDirChangeTimerAxis2=25;
+          lastGuideDirAxis2=guideDirAxis2;
+  
+          double gtr2=guideTimerRateAxis2; if (guideDirAxis2=='b') gtr2=0.0;
+          if (guideDirChangeTimerAxis2>0) guideDirChangeTimerAxis2--; else {
+            if (guideTimerRateAxis2A>gtr2) { guideTimerRateAxis2A-=(accXPerSec/100.0)*r; if (guideTimerRateAxis2A<gtr2) guideTimerRateAxis2A=gtr2; }
+            if (guideTimerRateAxis2A<gtr2) { guideTimerRateAxis2A+=(accXPerSec/100.0)*r; if (guideTimerRateAxis2A>gtr2) guideTimerRateAxis2A=gtr2; }
+          }
+  
+          // stop guiding
+          if (guideDirAxis2=='b') {
+            if (abs(guideTimerRateAxis2A)<0.001) { guideDirAxis2=0; lastGuideDirAxis2=0; guideTimerRateAxis2=0.0; guideTimerRateAxis2A=0.0; guideDirChangeTimerAxis2=0; if (!guideDirAxis1) stepperModeTracking(); }
+          }
         }
       }
     } else guideTimerRateAxis2A=0.0;
@@ -251,9 +278,11 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
 
   if (!fastAxis1) { t3cnt++; if (t3cnt%t3rep!=0) goto done; }
 
+#ifndef HAL_DEDGE_STEP
   StepPinAxis1_LOW;
+#endif
 
-#ifndef HAL_SLOW_PROCESSOR
+#ifdef TIMER_SQW_STEP
   if (clearAxis1) {
     takeStepAxis1=false;
 #endif
@@ -272,7 +301,7 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
   }
 #endif
 
-#ifdef HAL_SLOW_PROCESSOR
+#if defined(HAL_PULSE_STEP) || defined(HAL_DEDGE_STEP)
   QuickSetIntervalAxis1(nextAxis1Rate*stepAxis1);
 #endif
 
@@ -296,7 +325,7 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
       if (blAxis1>0)             { blAxis1-=stepAxis1; inbacklashAxis1=true; } else { inbacklashAxis1=false; posAxis1-=stepAxis1; }
     }
 
-#ifndef HAL_SLOW_PROCESSOR
+#ifdef TIMER_SQW_STEP
       takeStepAxis1=true;
     }
     clearAxis1=false;
@@ -307,7 +336,12 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
     QuickSetIntervalAxis1(nextAxis1Rate*stepAxis1);
   }
 #else
+#ifdef HAL_DEDGE_STEP
+    toggleStateAxis1++;
+    if (toggleStateAxis1%2==0) StepPinAxis1_LOW; else StepPinAxis1_HIGH;
+#else
     StepPinAxis1_HIGH;
+#endif
   }
 #endif
 
@@ -325,9 +359,11 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
 
   if (!fastAxis2) { t4cnt++; if (t4cnt%t4rep!=0) goto done; }
 
+#ifndef HAL_DEDGE_STEP
   StepPinAxis2_LOW;
+#endif
 
-#ifndef HAL_SLOW_PROCESSOR
+#ifdef TIMER_SQW_STEP
   if (clearAxis2) {
     takeStepAxis2=false;
 #endif
@@ -346,7 +382,7 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
   }
 #endif
 
-#ifdef HAL_SLOW_PROCESSOR
+#if defined(HAL_PULSE_STEP) || defined(HAL_DEDGE_STEP)
   QuickSetIntervalAxis2(nextAxis2Rate*stepAxis2);
 #endif
 
@@ -370,7 +406,7 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
       if (blAxis2>0)             { blAxis2-=stepAxis2; inbacklashAxis2=true; } else { inbacklashAxis2=false; posAxis2-=stepAxis2; }
     }
 
-#ifndef HAL_SLOW_PROCESSOR
+#ifdef TIMER_SQW_STEP
       takeStepAxis2=true;
     }
     clearAxis2=false;
@@ -381,7 +417,12 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
     QuickSetIntervalAxis2(nextAxis2Rate*stepAxis2);
   }
 #else
+#ifdef HAL_DEDGE_STEP
+    toggleStateAxis2++;
+    if (toggleStateAxis2%2==0) StepPinAxis2_LOW; else StepPinAxis2_HIGH;
+#else
     StepPinAxis2_HIGH;
+#endif
   }
 #endif
 
