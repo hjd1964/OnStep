@@ -133,14 +133,15 @@ const char html_controlGuide4[] =
 "<button class='gb' type='button' onpointerdown=\"g('s1')\" onpointerup=\"g('s0')\">" BUTTON_S "</button><br /><br />";
 const char html_controlGuide5[] =
 "<form method='get' action=\"/control.htm\">"
-"<button class='bbh' type='button' onpointerdown=\"g('R0')\">0.25x</button>"
-"<button class='bbh' type='button' onpointerdown=\"g('R1')\">0.5x</button>";
+"<button class='bbh' type='button' onpointerdown=\"g('R0')\">0.25</button>"
+"<button class='bbh' type='button' onpointerdown=\"g('R1')\">0.5</button>"
+"<button class='bbh' type='button' onpointerdown=\"g('R2')\">1x</button>";
 const char html_controlGuide6[] = 
-"<button class='bbh' type='button' onpointerdown=\"g('R2')\">1x</button>"
-"<button class='bbh' type='button' onpointerdown=\"g('R4')\">Mid</button>";
+"<button class='bbh' type='button' onpointerdown=\"g('R5')\">Cntr</button>"
+"<button class='bbh' type='button' onpointerdown=\"g('R6')\">Find</button>";
 const char html_controlGuide7[] = 
-"<button class='bbh' type='button' onpointerdown=\"g('R6')\">Fast</button>"
-"<button class='bbh' type='button' onpointerdown=\"g('R8')\">VFast</button>"
+"<button class='bbh' type='button' onpointerdown=\"g('R7')\">Fast</button>"
+"<button class='bbh' type='button' onpointerdown=\"g('R8')\">VF</button>"
 "</div><br class='clear' />\r\n";
 
 const char html_controlFocus1[] =
