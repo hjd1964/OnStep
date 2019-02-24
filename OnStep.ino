@@ -2,7 +2,7 @@
  * Title       OnStep
  * by          Howard Dutton
  *
- * Copyright (C) 2012 to 2018 Howard Dutton
+ * Copyright (C) 2012 to 2019 Howard Dutton
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,8 +40,8 @@
 // firmware info, these are returned by the ":GV?#" commands
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  1
-#define FirmwareVersionMinor  20
-#define FirmwareVersionPatch  "b"     // for example major.minor patch: 1.3c
+#define FirmwareVersionMinor  21
+#define FirmwareVersionPatch  "a"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 2       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
@@ -304,7 +304,7 @@ void loop2() {
     siderealTimer=tempLst;
 
 #ifdef ESP32
-    timerSuper();
+    timerSupervisor(true);
 #endif
     
 #ifndef MOUNT_TYPE_ALTAZM
