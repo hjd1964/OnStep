@@ -1613,10 +1613,11 @@ void processCommands() {
           switch (parameter[1]) {
             case '2': // set new acceleration rate (returns 1 success or 0 failure)
               if (!isSlewing()) {
-                maxRate=strtol(&parameter[3],NULL,10)*16L;
-                if (maxRate<(MaxRate/2L)*16L) maxRate=(MaxRate/2L)*16L;
-                if (maxRate>(MaxRate*2L)*16L) maxRate=(MaxRate*2L)*16L;
-                nv.writeInt(EE_maxRate,(int)(maxRate/16L));
+                maxRate=strtod(&parameter[3],&conv_end)*16.0;
+                if (maxRate<(double)MaxRate*8.0) maxRate=(double)MaxRate*8.0;
+                if (maxRate>(double)MaxRate*32.0) maxRate=(double)MaxRate*32.0;
+                if (maxRate<maxRateLowerLimit()) maxRate=maxRateLowerLimit();
+                nv.writeLong(EE_maxRateL,maxRate);
                 setAccelerationRates(maxRate);
               } else commandError=true;
             break;
@@ -1624,15 +1625,17 @@ void processCommands() {
               quietReply=true;
               if (!isSlewing()) {
                 switch (parameter[3]) {
-                  case '5': maxRate=MaxRate*32L; break; // 50%
-                  case '4': maxRate=MaxRate*24L; break; // 75%
-                  case '3': maxRate=MaxRate*16L; break; // 100%
-                  case '2': maxRate=MaxRate*12L; break; // 150%
-                  case '1': maxRate=MaxRate*8L;  break; // 200%
-                  default:  maxRate=MaxRate*16L;
-                  nv.writeInt(EE_maxRate,(int)(maxRate/16L));
-                  setAccelerationRates(maxRate);
+                  case '5': maxRate=(double)MaxRate*32.0; break; // 50%
+                  case '4': maxRate=(double)MaxRate*24.0; break; // 75%
+                  case '3': maxRate=(double)MaxRate*16.0; break; // 100%
+                  case '2': maxRate=(double)MaxRate*12.0; break; // 150%
+                  case '1': maxRate=(double)MaxRate*8.0;  break; // 200%
+                  default:  maxRate=(double)MaxRate*16.0;
                 }
+                if (maxRate<maxRateLowerLimit()) maxRate=maxRateLowerLimit();
+
+                nv.writeLong(EE_maxRateL,maxRate);
+                setAccelerationRates(maxRate);
               }
             break;
 #ifdef MOUNT_TYPE_GEM
