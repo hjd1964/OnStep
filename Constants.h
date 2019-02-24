@@ -132,6 +132,7 @@ unsigned int StepsTMC2130[LEN_TMC2130][2] = { {1,8}, {2,7}, {4,6}, {8,5}, {16,4}
 #define GSB (E2END-100)
 #define EE_dcPwrAxis4  GSB+0   // 1
 #define EE_dcPwrAxis5  GSB+1   // 1
+#define EE_maxRateL    GSB+2   // 4
 
 // --------------------------------------------------------------------------------------------------------------------------
 // Unique identifier for the current initialization format for NV, do not change

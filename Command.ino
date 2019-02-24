@@ -753,8 +753,8 @@ void processCommands() {
             switch (parameter[1]) {
               case '0': dtostrf(guideRates[currentPulseGuideRate]/15.0,2,2,reply); quietReply=true; break;  // pulse-guide rate
               case '1': sprintf(reply,"%i",pecAnalogValue); quietReply=true; break;                         // pec analog value
-              case '2': sprintf(reply,"%ld",(long)(maxRate/16L)); quietReply=true; break;                   // MaxRate
-              case '3': sprintf(reply,"%ld",(long)(MaxRate)); quietReply=true; break;                       // MaxRate (default)
+              case '2': dtostrf(maxRate/16.0,3,3,reply); quietReply=true; break;                            // MaxRate (current)
+              case '3': dtostrf((double)MaxRate,3,3,reply); quietReply=true; break;                         // MaxRate (default)
               case '4': if (meridianFlip==MeridianFlipNever) { sprintf(reply,"%d N",getInstrPierSide()); } else { sprintf(reply,"%d",getInstrPierSide()); } quietReply=true; break; // pierSide (N if never)
               case '5': sprintf(reply,"%i",(int)autoMeridianFlip); quietReply=true; break;                  // autoMeridianFlip
               case '6':                                                                                     // preferred pier side
@@ -814,7 +814,7 @@ void processCommands() {
 #endif
           if (parameter[0]=='E') { // En: Get settings
             switch (parameter[1]) {
-              case '1': sprintf(reply,"%ld",(long)MaxRate); quietReply=true; break;
+              case '1': dtostrf((double)MaxRate,3,3,reply); quietReply=true; break;
               case '2': dtostrf(DegreesForAcceleration,2,1,reply); quietReply=true; break;
               case '3': sprintf(reply,"%ld",(long)round(BacklashTakeupRate)); quietReply=true; break;
               case '4': sprintf(reply,"%ld",(long)round(StepsPerDegreeAxis1)); quietReply=true; break;

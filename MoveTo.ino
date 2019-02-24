@@ -309,3 +309,26 @@ uint32_t isqrt32 (uint32_t n) {
 void stopLimit() {
   if (trackingState==TrackingMoveTo) { if (!abortSlew) abortSlew=StartAbortSlew; } else trackingState=TrackingNone;
 }
+
+// check for platform rate limit (lowest maxRate) in 1/16us units
+long maxRateLowerLimit() {
+  double r_us=MaxRate_LowerLimit;  // for example 16us, this basis rate has platform (STM32/Teensy3.2/3.5/3.6/Mega2560), clock rate, and ISR operating mode (Sqw/Pulse/Dedge) factored in (from HAL.)
+  
+  // on-the-fly mode switching used?
+  #if !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
+    if ((AXIS1_STEP_GOTO!=1) || (AXIS2_STEP_GOTO!=1)) r_us=MaxRate_LowerLimit*1.7;  // if this code is enabled, 27us
+  #endif
+
+  // average required goto us rates for each axis with any micro-step mode switching applied, if tracking in 32X mode using 4X for gotos (32/4 = 8,) that's an 8x lower true rate so 27/8 = 3.4 is allowed
+  double r_us_axis1=r_us/AXIS1_STEP_GOTO;
+  double r_us_axis2=r_us/AXIS2_STEP_GOTO;
+  
+  // average in axis2 step rate scaling for drives where the reduction ratio isn't equal
+  r_us=(r_us_axis1+r_us_axis2/timerRateRatio)/2.0;  // if Axis1 is 10000 step/deg & Axis2 is 20000 steps/deg, Axis2 needs to run 2x speed so we must slow down.  3.4 on one axis and 6.8 on the other for an average of 5.1
+
+  // the timer granulaity can start to make for some very abrupt rate changes below 0.25us
+  if (r_us<0.25) r_us=0.25;
+
+  // return rate in 1/16us units
+  return r_us*16.0;
+}

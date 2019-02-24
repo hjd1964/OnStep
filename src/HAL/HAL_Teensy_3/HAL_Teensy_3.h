@@ -4,14 +4,52 @@
 #define __ARM_Teensy3__
 
 // Lower limit (fastest) step rate in uS for this platform
-#if defined(__MK64FX512__) 
-  #define MaxRate_LowerLimit 12
-  #define HAL_FAST_PROCESSOR
-#elif defined(__MK66FX1M0__)
-  #define MaxRate_LowerLimit 4
-  #define HAL_FAST_PROCESSOR
+#if defined(HAL_PULSE_STEP) || defined(HAL_DEDGE_STEP)
+  #if defined(__MK64FX512__) 
+    #define MaxRate_LowerLimit 8
+    #define HAL_FAST_PROCESSOR
+  #elif defined(__MK66FX1M0__)
+    #if F_CPU>=240000000
+      #define MaxRate_LowerLimit 1.25
+    #elif F_CPU>=180000000
+      #define MaxRate_LowerLimit 1.625
+    #else
+      #define MaxRate_LowerLimit 2.0
+    #endif
+    #define HAL_FAST_PROCESSOR
+  #else
+    // Teensy3.2,3.1,etc.
+    #if F_CPU>=960000000
+      #define MaxRate_LowerLimit 7.5
+    #elif F_CPU>=72000000
+      #define MaxRate_LowerLimit 8.75
+    #else
+      #define MaxRate_LowerLimit 18
+    #endif
+  #endif
 #else
-  #define MaxRate_LowerLimit 16
+  #if defined(__MK64FX512__) 
+    #define MaxRate_LowerLimit 12
+    #define HAL_FAST_PROCESSOR
+  #elif defined(__MK66FX1M0__)
+    #if F_CPU>=240000000
+      #define MaxRate_LowerLimit 2.5
+    #elif F_CPU>=180000000
+      #define MaxRate_LowerLimit 3.25
+    #else
+      #define MaxRate_LowerLimit 6.5
+    #endif
+    #define HAL_FAST_PROCESSOR
+  #else
+    // Teensy3.2,3.1,etc.
+    #if F_CPU>=96000000
+      #define MaxRate_LowerLimit 12
+    #elif F_CPU>=72000000
+      #define MaxRate_LowerLimit 14
+    #else
+      #define MaxRate_LowerLimit 28
+    #endif
+  #endif
 #endif
 
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------

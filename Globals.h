@@ -54,7 +54,7 @@ volatile boolean PPSsynced = false;
   RateCompensation rateCompensation=RC_NONE;
 #endif
 
-long    maxRate = MaxRate*16L;
+long    maxRate = (double)MaxRate*16.0;
 
 double  slewSpeed = 0;
 volatile long    timerRateAxis1 = 0;

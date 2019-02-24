@@ -5,7 +5,11 @@
 
 // Lower limit (fastest) step rate in uS for this platform -------------------------------------------
 // the exact model should be detected and these tailored to each, but this is a good starting point
-#define MaxRateLowerLimit 16
+#if defined(HAL_PULSE_STEP) || defined(HAL_DEDGE_STEP)
+  #define MaxRateLowerLimit 15
+#else
+  #define MaxRateLowerLimit 24
+#endif
 
 #include <HardwareTimer.h>
 
