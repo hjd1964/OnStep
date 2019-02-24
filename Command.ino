@@ -1284,15 +1284,17 @@ void processCommands() {
 
 //  :RG#   Set Slew rate to Guiding Rate (slowest) 1X
 //  :RC#   Set Slew rate to Centering rate (2nd slowest) 8X
-//  :RM#   Set Slew rate to Find Rate (2nd Fastest) 24X
+//  :RM#   Set Slew rate to Find Rate (2nd Fastest) 20X
+//  :RF#   Set Slew rate to Fast Rate (Fastest) 48X
 //  :RS#   Set Slew rate to max (fastest) ?X (1/2 of MaxRate)
 //  :Rn#   Set Slew rate to n, where n=0..9
 //         Returns: Nothing
       if ((command[1]=='G') || (command[1]=='C') || (command[1]=='M') || (command[1]=='S') || ((command[1]>='0') && (command[1]<='9'))) {
         if (command[1]=='G') i=2; else // 1x
         if (command[1]=='C') i=5; else // 8x
-        if (command[1]=='M') i=6; else // 24x
-        if (command[1]=='S') i=8; else i=command[1]-'0';
+        if (command[1]=='M') i=6; else // 20x
+        if (command[1]=='F') i=7; else // 48x
+        if (command[1]=='S') i=8; else i=command[1]-'0'; // typically 240x to 480x can be as low as 60x
         setGuideRate(i);
         quietReply=true; 
       } else commandError=true;
