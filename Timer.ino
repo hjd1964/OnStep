@@ -118,6 +118,8 @@ IRAM_ATTR ISR(TIMER1_COMPA_vect)
   HAL_TIMER1_PREFIX;
 #endif
 
+  bool isCentiSecond;
+
   // run 1/3 of the time at 3x the rate, unless a goto is happening
   if (trackingState!=TrackingMoveTo) {
     siderealClockCycleCount++;
@@ -126,7 +128,7 @@ IRAM_ATTR ISR(TIMER1_COMPA_vect)
       if (siderealClockCycleCount%3!=0) goto done;
     #endif
   } else siderealClockCycleCount=0;
-  bool isCentiSecond=(siderealClockCycleCount%3==0);
+  isCentiSecond=(siderealClockCycleCount%3==0);
 
   if (isCentiSecond) {
     // tick the clock
