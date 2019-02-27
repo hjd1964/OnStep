@@ -32,3 +32,10 @@
 *.vsarduino.h
 *.vmps.xml
 *.suo
+*.log
+*.db
+*.db-shm
+*.db-wal
+*.json
+*.sqlite
+*.config
