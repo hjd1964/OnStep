@@ -5,7 +5,7 @@
 
 // Lower limit (fastest) step rate in uS for this platform -------------------------------------------
 // the exact model should be detected and these tailored to each, but this is a good starting point
-#define MaxRateLowerLimit 24
+#define MaxRate_LowerLimit 24
 
 #include <HardwareTimer.h>
 
