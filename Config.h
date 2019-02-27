@@ -7,12 +7,14 @@
 #pragma once
 
 #include "Config.Classic.h"
+//#include "Config.MaxESP.h"
 #include "Config.MaxESP2.h"
 #include "Config.MaxPCB.h"
-#include "Config.Mega2560Alt.h"
+//#include "Config.Mega2560Alt.h"
 #include "Config.MiniPCB.h"
 #include "Config.Ramps14.h"
 #include "Config.STM32.h"
+//#include "Config.TM4C.h"
 
 #ifdef Classic_ON
   #define Configuration_Found
@@ -25,6 +27,13 @@
   #endif
 #endif
 #ifdef MaxPCB_ON
+  #ifdef Configuration_Found
+    #define Configuration_Duplicate
+  #else
+    #define Configuration_Found
+  #endif
+#endif
+#ifdef MaxESP_ON
   #ifdef Configuration_Found
     #define Configuration_Duplicate
   #else
@@ -73,6 +82,14 @@
     #define Configuration_Found
   #endif
 #endif
+#ifdef TM4C_ON
+  #ifdef Configuration_Found
+    #define Configuration_Duplicate
+  #else
+    #define Configuration_Found
+  #endif
+#endif
+
 #ifdef Configuration_Duplicate
   #error "You have more than one Config.xxx.h file enabled, ONLY ONE can be enabled with _ON."
 #endif
