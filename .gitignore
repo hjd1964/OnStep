@@ -33,3 +33,9 @@ OnStep.vcxproj.user
 *.elf
 *.hex
 *.buildinfo
+*.bin
+*.sln
+*.user
+*.filters
+*.vcxproj
+addons/WiFi-Bluetooth/__vm/.WiFi-Bluetooth.vsarduino.h
