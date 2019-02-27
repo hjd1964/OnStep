@@ -5,7 +5,7 @@
 // if establishing a link to OnStep was ***unsuccessful*** the ESP8266 will retain prior settings including it's SSID (from factory defaults, for example)
 // valid baud rates are 115200, 57600, 38400, 28800, 19200, 9600
 
-#define SERIAL_BAUD_DEFAULT 9600  // Default=9600, OnStep must be attached and running it's Serial1 interface this baud rate
+#define SERIAL_BAUD_DEFAULT 9600   // Default=9600, OnStep's attached Serial port must be run at this baud rate
 
 #define SERIAL_BAUD 57600         // Default=57600, use 19200 for talking to OnStep on a Mega2560
 
