@@ -16,19 +16,10 @@
 *.out
 *.app
 
-PecPlus.ino
-Alternate_Config.h
-zConfig*.h
-Timer.ino.old
-Display.ino
-.vs/OnStep/v15/.suo
-__vm/.OnStep.vsarduino.h
-__vm/Compile.vmps.xml
-__vm/Configuration.Release.vmps.xml
-__vm/Upload.vmps.xml
-OnStep.vcxproj
-OnStep.vcxproj.filters
-OnStep.vcxproj.user
+# Visual studio
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
 *.d
 *.elf
 *.hex
@@ -38,4 +29,6 @@ OnStep.vcxproj.user
 *.user
 *.filters
 *.vcxproj
-addons/WiFi-Bluetooth/__vm/.WiFi-Bluetooth.vsarduino.h
+*.vsarduino.h
+*.vmps.xml
+*.suo
