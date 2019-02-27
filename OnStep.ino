@@ -78,6 +78,9 @@
 #include "src/lib/SoftSPI.h"
 #include "src/lib/FPoint.h"
 #include "src/lib/Julian.h"
+
+#include "Globals.h"
+
 #ifdef MODE_SWITCH_BEFORE_SLEW_SPI
 #include "src/lib/TMC2130.h"
 //               SS      ,SCK     ,MISO     ,MOSI
@@ -85,7 +88,6 @@ tmc2130 tmcAxis1(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0);
 tmc2130 tmcAxis2(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
 #endif
 
-#include "Globals.h"
 #include "src/lib/Coord.h"
 
 #include "src/lib/Library.h"
