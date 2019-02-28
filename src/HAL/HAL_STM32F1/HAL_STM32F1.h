@@ -6,6 +6,9 @@
 // Lower limit (fastest) step rate in uS for this platform (in SQW mode)
 #define HAL_MAXRATE_LOWER_LIMIT 20
 
+// Width of step pulse
+#define HAL_PULSE_WIDTH 1200
+
 #include <HardwareTimer.h>
 
 // Get this library from https://github.com/watterott/Arduino-Libs/archive/master.zip

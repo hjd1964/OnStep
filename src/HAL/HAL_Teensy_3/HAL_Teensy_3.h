@@ -6,24 +6,31 @@
 // Lower limit (fastest) step rate in uS for this platform, width of step pulse, and set HAL_FAST_PROCESSOR is needed
 #if defined(__MK64FX512__) 
   #define HAL_MAXRATE_LOWER_LIMIT 12
+  #define HAL_PULSE_WIDTH 500
   #define HAL_FAST_PROCESSOR
 #elif defined(__MK66FX1M0__)
   #if (F_CPU>=240000000)
     #define HAL_MAXRATE_LOWER_LIMIT 2
+    #define HAL_PULSE_WIDTH 260
   #elif (F_CPU>=180000000)
     #define HAL_MAXRATE_LOWER_LIMIT 2.6
+    #define HAL_PULSE_WIDTH 400
   #else
     #define HAL_MAXRATE_LOWER_LIMIT 4.8
+    #define HAL_PULSE_WIDTH 500
   #endif
   #define HAL_FAST_PROCESSOR
 #else
   // Teensy3.2,3.1,etc.
   #if (F_CPU>=96000000)
     #define HAL_MAXRATE_LOWER_LIMIT 12
+    #define HAL_PULSE_WIDTH 500
   #elif (F_CPU>=72000000)
     #define HAL_MAXRATE_LOWER_LIMIT 14
+    #define HAL_PULSE_WIDTH 700
   #else
     #define HAL_MAXRATE_LOWER_LIMIT 28
+    #define HAL_PULSE_WIDTH 800
   #endif
 #endif
 

@@ -14,6 +14,9 @@
 // Lower limit (fastest) step rate in uS for this platform (in SQW mode)
 #define HAL_MAXRATE_LOWER_LIMIT 51.2
 
+// Width of step pulse
+#define HAL_PULSE_WIDTH 5000
+
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
 #ifndef MEGA2560_ARDUINO_SERIAL_ON
   // SerialA is always enabled, SerialB and SerialC are optional

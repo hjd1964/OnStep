@@ -121,6 +121,19 @@
 // -----------------------------------------------------------------------------------
 // setup defaults
 
+// Set timer wave mode
+#ifndef STEP_WAVE_FORM
+  #define STEP_WAVE_FORM SQUARE
+#endif
+#if STEP_WAVE_FORM!=PULSE && STEP_WAVE_FORM!=SQUARE && STEP_WAVE_FORM!=DEDGE
+  #error "Configuration: STEP_WAVE_FORM; Unknown value, please correct your configuration."
+#endif
+#if STEP_WAVE_FORM != PULSE
+  #undef HAL_PULSE_WIDTH
+  // Set pulse width in SQW and DEDGE mode well above triggering PULSE check code
+  #define HAL_PULSE_WIDTH 10000
+#endif
+
 #ifndef GUIDE_TIME_LIMIT
   #define GUIDE_TIME_LIMIT 0
 #endif
@@ -252,17 +265,43 @@
     #if AXIS1_MICROSTEPS!=1 && AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16
       #error "Configuration: AXIS1_MICROSTEPS; A4988 invalid micro-step mode, use: 16,8,4,2,or 1"
     #endif
+    #if HAL_PULSE_WIDTH < A4988_PULSE_WIDTH
+      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the A4988 stepper driver specifications."
+    #endif
   #elif AXIS1_DRIVER_MODEL == DRV8825
     #if AXIS1_MICROSTEPS!=1 && AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16 && AXIS1_MICROSTEPS!=32
-      #error "Configuration: AXIS1_MICROSTEPS; DRV8825/S109 invalid micro-step mode, use: 32,16,8,4,2,or 1"
+      #error "Configuration: AXIS1_MICROSTEPS; DRV8825 invalid micro-step mode, use: 32,16,8,4,2,or 1"
     #endif
-  #elif AXIS1_DRIVER_MODEL == LV8729 || AXIS1_DRIVER_MODEL == RAPS128
+    #if HAL_PULSE_WIDTH < DRV8825_PULSE_WIDTH
+      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the DRV8825 stepper driver specifications."
+    #endif
+  #elif AXIS1_DRIVER_MODEL == S109
+    #if AXIS1_MICROSTEPS!=1 && AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16 && AXIS1_MICROSTEPS!=32
+      #error "Configuration: AXIS1_MICROSTEPS; S109 invalid micro-step mode, use: 32,16,8,4,2,or 1"
+    #endif
+    #if HAL_PULSE_WIDTH < S109_PULSE_WIDTH
+      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the S109 stepper driver specifications."
+    #endif
+  #elif AXIS1_DRIVER_MODEL == RAPS128
     #if AXIS1_MICROSTEPS!=1 && AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16 && AXIS1_MICROSTEPS!=32 && AXIS1_MICROSTEPS!=64 && AXIS1_MICROSTEPS!=128
-      #error "Configuration: AXIS1_MICROSTEPS; LV8729/RAPS128 invalid micro-step mode, use: 128,64,32,16,8,4,2,or 1"
+      #error "Configuration: AXIS1_MICROSTEPS; RAPS128 invalid micro-step mode, use: 128,64,32,16,8,4,2,or 1"
+    #endif
+    #if HAL_PULSE_WIDTH < RAPS128_PULSE_WIDTH
+      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the RAPS128 stepper driver specifications."
+    #endif
+  #elif AXIS1_DRIVER_MODEL == LV8729
+    #if AXIS1_MICROSTEPS!=1 && AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16 && AXIS1_MICROSTEPS!=32 && AXIS1_MICROSTEPS!=64 && AXIS1_MICROSTEPS!=128
+      #error "Configuration: AXIS1_MICROSTEPS; LV8729 invalid micro-step mode, use: 128,64,32,16,8,4,2,or 1"
+    #endif
+    #if HAL_PULSE_WIDTH < LV8729_PULSE_WIDTH
+      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the LV8729 stepper driver specifications."
     #endif
   #elif AXIS1_DRIVER_MODEL == ST820
     #if AXIS1_MICROSTEPS!=1 && AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16 && AXIS1_MICROSTEPS!=32 && AXIS1_MICROSTEPS!=128 && AXIS1_MICROSTEPS!=256
       #error "Configuration: AXIS1_MICROSTEPS; ST820 invalid micro-step mode, use: 256,128,32,16,8,4,2,or 1"
+    #endif
+    #if HAL_PULSE_WIDTH < ST820_PULSE_WIDTH
+      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the ST820 stepper driver specifications."
     #endif
   #elif AXIS1_DRIVER_MODEL == TMC2100
     #define MODE_SWITCH_BEFORE_SLEW_ON
@@ -271,6 +310,9 @@
       #error "Configuration: AXIS1_MICROSTEPS; TMC2100 invalid micro-step mode, use: 16,4,2,or 1"
     #endif
     #warning "Configuration: AXIS1_MICROSTEPS; This mode is supported in spreadCycle but without 256x interpolation: it's usually best to hard-wire the TMC2100 and use: _OFF here"
+    #if HAL_PULSE_WIDTH < TMC2100_PULSE_WIDTH
+      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the TMC2100 stepper driver specifications."
+    #endif
   #elif AXIS1_DRIVER_MODEL == TMC2130
     #define MODE_SWITCH_BEFORE_SLEW_SPI
     #if AXIS1_MICROSTEPS!=1 && AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16 && AXIS1_MICROSTEPS!=32 && AXIS1_MICROSTEPS!=64 && AXIS1_MICROSTEPS!=128 && AXIS1_MICROSTEPS!=256
@@ -279,9 +321,15 @@
     #if AXIS2_DRIVER_MODEL != TMC2130
       #error "Configuration: TMC2130 stepper drivers must be used in pairs (both Axis1 and Axis2.)"
     #endif
+    #if HAL_PULSE_WIDTH < TMC2130_PULSE_WIDTH
+      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the TMC2130 stepper driver specifications."
+    #endif
   #elif AXIS1_DRIVER_MODEL == TMC2208
     #if AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16
       #error "Configuration: AXIS1_MICROSTEPS; TMC2208 invalid micro-step mode, use: 16,8,4,or 2"
+    #endif
+    #if HAL_PULSE_WIDTH < TMC2208_PULSE_WIDTH
+      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the TMC2208 stepper driver specifications."
     #endif
   #else
     #error "Configuration: Unrecognized stepper driver model for Axis1 !"
@@ -296,30 +344,65 @@
     #if AXIS2_MICROSTEPS!=1 && AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=8 && AXIS2_MICROSTEPS!=16
       #error "Configuration: AXIS2_MICROSTEPS; A4988 invalid micro-step mode, use: 16,8,4,2,or 1"
     #endif
+    #if HAL_PULSE_WIDTH < A4988_PULSE_WIDTH
+      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the A4988 stepper driver specifications."
+    #endif
   #elif AXIS2_DRIVER_MODEL == DRV8825
     #if AXIS2_MICROSTEPS!=1 && AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=8 && AXIS2_MICROSTEPS!=16 && AXIS2_MICROSTEPS!=32
       #error "Configuration: AXIS2_MICROSTEPS; DRV8825 invalid micro-step mode, use: 32,16,8,4,2,or 1"
     #endif
-  #elif AXIS2_DRIVER_MODEL == LV8729 || AXIS2_DRIVER_MODEL == RAPS128
+    #if HAL_PULSE_WIDTH < DRV8825_PULSE_WIDTH
+      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the DRV8825 stepper driver specifications."
+    #endif
+  #elif AXIS2_DRIVER_MODEL == S109
+    #if AXIS2_MICROSTEPS!=1 && AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=8 && AXIS2_MICROSTEPS!=16 && AXIS2_MICROSTEPS!=32
+      #error "Configuration: AXIS2_MICROSTEPS; S109 invalid micro-step mode, use: 32,16,8,4,2,or 1"
+    #endif
+    #if HAL_PULSE_WIDTH < S109_PULSE_WIDTH
+      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the S109 stepper driver specifications."
+    #endif
+  #elif AXIS2_DRIVER_MODEL == RAPS128
     #if AXIS2_MICROSTEPS!=1 && AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=8 && AXIS2_MICROSTEPS!=16 && AXIS2_MICROSTEPS!=32 && AXIS2_MICROSTEPS!=64 && AXIS2_MICROSTEPS!=128
-      #error "Configuration: AXIS2_MICROSTEPS; LV8729/RAPS128 invalid micro-step mode, use: 128,64,32,16,8,4,2,or 1"
+      #error "Configuration: AXIS2_MICROSTEPS; RAPS128 invalid micro-step mode, use: 128,64,32,16,8,4,2,or 1"
+    #endif
+    #if HAL_PULSE_WIDTH < RAPS128_PULSE_WIDTH
+      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the RAPS128 stepper driver specifications."
+    #endif
+  #elif AXIS2_DRIVER_MODEL == LV8729
+    #if AXIS2_MICROSTEPS!=1 && AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=8 && AXIS2_MICROSTEPS!=16 && AXIS2_MICROSTEPS!=32 && AXIS2_MICROSTEPS!=64 && AXIS2_MICROSTEPS!=128
+      #error "Configuration: AXIS2_MICROSTEPS; LV8729 invalid micro-step mode, use: 128,64,32,16,8,4,2,or 1"
+    #endif
+    #if HAL_PULSE_WIDTH < LV8729_PULSE_WIDTH
+      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the LV8729 stepper driver specifications."
     #endif
   #elif AXIS2_DRIVER_MODEL == ST820
     #if AXIS2_MICROSTEPS!=1 && AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=8 && AXIS2_MICROSTEPS!=16 && AXIS2_MICROSTEPS!=32 && AXIS2_MICROSTEPS!=128 && AXIS2_MICROSTEPS!=256
       #error "Configuration: AXIS2_MICROSTEPS; ST820 invalid micro-step mode, use: 256,128,32,16,8,4,2,or 1"
+    #endif
+    #if HAL_PULSE_WIDTH < ST820_PULSE_WIDTH
+      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the ST820 stepper driver specifications."
     #endif
   #elif AXIS2_DRIVER_MODEL == TMC2100
     #if AXIS2_MICROSTEPS!=1 && AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=16
       #error "Configuration: AXIS2_MICROSTEPS; TMC2100 invalid micro-step mode, use: 16,4,2,or 1"
     #endif
     #warning "Configuration: AXIS2_MICROSTEPS; This mode is supported in spreadCycle but without 256x interpolation: it's usually best to hard-wire the TMC2100 and use: _OFF here"
+    #if HAL_PULSE_WIDTH < TMC2100_PULSE_WIDTH
+      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width exceeds the TMC2100 stepper driver specifications."
+    #endif
   #elif AXIS2_DRIVER_MODEL == TMC2130
     #if AXIS2_MICROSTEPS!=1 && AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=8 && AXIS2_MICROSTEPS!=16 && AXIS2_MICROSTEPS!=32 && AXIS2_MICROSTEPS!=64 && AXIS2_MICROSTEPS!=128 && AXIS2_MICROSTEPS!=256
       #error "Configuration: AXIS2_MICROSTEPS; TMC2130 invalid micro-step mode, use: 256,128,64,32,16,8,4,2,or 1"
     #endif
+    #if HAL_PULSE_WIDTH < TMC2130_PULSE_WIDTH
+      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the TMC2130 stepper driver specifications."
+    #endif
   #elif AXIS2_DRIVER_MODEL == TMC2208
     #if AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=8 && AXIS2_MICROSTEPS!=16
       #error "Configuration: AXIS2_MICROSTEPS; TMC2208 invalid micro-step mode, use: 16,8,4,or 2"
+    #endif
+    #if HAL_PULSE_WIDTH < TMC2208_PULSE_WIDTH
+      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the TMC2208 stepper driver specifications."
     #endif
   #else
     #error "Configuration error: Unrecognized stepper driver model for Axis2 !"
@@ -332,7 +415,7 @@
       #if AXIS1_MICROSTEPS_GOTO!=1 && AXIS1_MICROSTEPS_GOTO!=2 && AXIS1_MICROSTEPS_GOTO!=4 && AXIS1_MICROSTEPS_GOTO!=8 && AXIS1_MICROSTEPS_GOTO!=16
         #error "Configuration: AXIS1_MICROSTEPS_GOTO; A4988 invalid micro-step mode, use: 16,8,4,2,1,or _OFF"
       #endif
-    #elif AXIS1_DRIVER_MODEL == DRV8825
+    #elif AXIS1_DRIVER_MODEL == DRV8825 || AXIS1_DRIVER_MODEL == S109
       #if AXIS1_MICROSTEPS_GOTO!=1 && AXIS1_MICROSTEPS_GOTO!=2 && AXIS1_MICROSTEPS_GOTO!=4 && AXIS1_MICROSTEPS_GOTO!=8 && AXIS1_MICROSTEPS_GOTO!=16 && AXIS1_MICROSTEPS_GOTO!=32
         #error "Configuration: AXIS1_MICROSTEPS_GOTO; DRV8825/S109 invalid micro-step mode, use: 32,16,8,4,2,1,or _OFF"
       #endif
@@ -373,7 +456,7 @@
       #if AXIS2_MICROSTEPS_GOTO!=1 && AXIS2_MICROSTEPS_GOTO!=2 && AXIS2_MICROSTEPS_GOTO!=4 && AXIS2_MICROSTEPS_GOTO!=8 && AXIS2_MICROSTEPS_GOTO!=16
         #error "Configuration: AXIS2_MICROSTEPS_GOTO; A4988 invalid micro-step mode, use: 16,8,4,2,1,or _OFF"
       #endif
-    #elif AXIS2_DRIVER_MODEL == DRV8825
+    #elif AXIS2_DRIVER_MODEL == DRV8825 || AXIS1_DRIVER_MODEL == S109
       #if AXIS2_MICROSTEPS_GOTO!=1 && AXIS2_MICROSTEPS_GOTO!=2 && AXIS2_MICROSTEPS_GOTO!=4 && AXIS2_MICROSTEPS_GOTO!=8 && AXIS2_MICROSTEPS_GOTO!=16 && AXIS2_MICROSTEPS_GOTO!=32
         #error "Configuration: AXIS2_MICROSTEPS_GOTO; DRV8825 invalid micro-step mode, use: 32,16,8,4,2,1,or _OFF"
       #endif

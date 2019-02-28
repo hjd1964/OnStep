@@ -6,6 +6,9 @@
 // Lower limit (fastest) step rate in uS for this platform (in SQW mode)
 #define HAL_MAXRATE_LOWER_LIMIT 16
 
+// Width of step pulse, conservative guess
+#define HAL_PULSE_WIDTH 500
+
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
 #define SerialA Serial
 // SerialA is always enabled, SerialB and SerialC are optional
