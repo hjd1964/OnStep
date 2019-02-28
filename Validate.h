@@ -13,8 +13,11 @@
 #endif
 
 // option to replace REMEMBER_MAX_RATE with REMEMBER_SLEW_RATE
+#ifdef RememberMaxRate_ON
+  #define REMEMBER_MAX_RATE_ON
+#endif
 #if !defined(REMEMBER_MAX_RATE_ON) && defined(REMEMBER_SLEW_RATE_ON)
-#define REMEMBER_MAXRATE_ON
+  #define REMEMBER_MAXRATE_ON
 #endif
 
 // set serial port baud rate the old way

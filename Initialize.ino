@@ -323,8 +323,12 @@ void initReadNvValues() {
   if (maxRate<(double)MaxRate*8.0) maxRate=(double)MaxRate*8.0;
   if (maxRate>(double)MaxRate*32.0) maxRate=(double)MaxRate*32.0;
   if (maxRate<maxRateLowerLimit()) maxRate=maxRateLowerLimit();
-#if !defined(RememberMaxRate_ON) && !defined(REMEMBER_MAX_RATE_ON)
-  if (maxRate!=(long)((double)MaxRate*16.0)) { maxRate=(double)MaxRate*16.0; nv.writeLong(EE_maxRateL,maxRate); }
+#if !defined(REMEMBER_MAX_RATE_ON)
+  if (maxRate!=(long)((double)MaxRate*16.0)) {
+    maxRate=(double)MaxRate*16.0; 
+    if (maxRate<maxRateLowerLimit()) maxRate=maxRateLowerLimit(); 
+    nv.writeLong(EE_maxRateL,maxRate);
+  }
 #endif
   setAccelerationRates(maxRate); // set the new acceleration rate
 
