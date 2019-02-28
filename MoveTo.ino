@@ -312,7 +312,7 @@ void stopLimit() {
 
 // check for platform rate limit (lowest maxRate) in 1/16us units
 long maxRateLowerLimit() {
-  double r_us=MaxRate_LowerLimit;  // for example 16us, this basis rate has platform (STM32/Teensy3.2/3.5/3.6/Mega2560), clock rate, and ISR operating mode (Sqw/Pulse/Dedge) factored in (from HAL.)
+  double r_us=HAL_MAXRATE_LOWER_LIMIT;  // for example 16us, this basis rate has platform (STM32/Teensy3.2/3.5/3.6/Mega2560), clock rate, and ISR operating mode (Sqw/Pulse/Dedge) factored in (from HAL.)
   
   // higher speed ISR code path?
   #if defined(HAL_PULSE_STEP) || defined(HAL_DEDGE_STEP)
@@ -321,7 +321,7 @@ long maxRateLowerLimit() {
   
   // on-the-fly mode switching used?
   #if !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
-    if ((AXIS1_STEP_GOTO!=1) || (AXIS2_STEP_GOTO!=1)) r_us=MaxRate_LowerLimit*1.7;  // if this code is enabled, 27us
+    if ((AXIS1_STEP_GOTO!=1) || (AXIS2_STEP_GOTO!=1)) r_us=HAL_MAXRATE_LOWER_LIMIT*1.7;  // if this code is enabled, 27us
   #endif
 
   // average required goto us rates for each axis with any micro-step mode switching applied, if tracking in 32X mode using 4X for gotos (32/4 = 8,) that's an 8x lower true rate so 27/8 = 3.4 is allowed

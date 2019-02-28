@@ -1,8 +1,10 @@
 // Platform setup ------------------------------------------------------------------------------------
 
-// Lower limit (fastest) step rate in uS for this platform -------------------------------------------
+// This is for fast processors with hardware FP
 #define HAL_FAST_PROCESSOR
-#define MaxRate_LowerLimit 16
+
+// Lower limit (fastest) step rate in uS for this platform (in SQW mode)
+#define HAL_MAXRATE_LOWER_LIMIT 16
 
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
 #define SerialA Serial

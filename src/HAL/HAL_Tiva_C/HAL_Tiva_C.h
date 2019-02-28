@@ -3,6 +3,12 @@
 // We define a more generic symbol, in case more TM4C boards based on different lines are supported
 #define __ARM_TI_TM4C__
 
+// Lower limit (fastest) step rate in uS for this platform (in SQW mode)
+#define HAL_MAXRATE_LOWER_LIMIT 16
+
+// width of step pulse
+#define HAL_PULSE_WIDTH 500
+
 #if defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__)
 // no pre-scaling of timers on Tiva Launchpads
 #define F_BUS SysCtlClockGet()

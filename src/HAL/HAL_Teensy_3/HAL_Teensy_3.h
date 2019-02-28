@@ -3,27 +3,27 @@
 // We define a more generic symbol, in case more Teensy boards based on different lines are supported
 #define __ARM_Teensy3__
 
-// Lower limit (fastest) step rate in uS for this platform
+// Lower limit (fastest) step rate in uS for this platform, width of step pulse, and set HAL_FAST_PROCESSOR is needed
 #if defined(__MK64FX512__) 
-  #define MaxRate_LowerLimit 12
+  #define HAL_MAXRATE_LOWER_LIMIT 12
   #define HAL_FAST_PROCESSOR
 #elif defined(__MK66FX1M0__)
-  #if F_CPU>=240000000
-    #define MaxRate_LowerLimit 2
-  #elif F_CPU>=180000000
-    #define MaxRate_LowerLimit 2.6
+  #if (F_CPU>=240000000)
+    #define HAL_MAXRATE_LOWER_LIMIT 2
+  #elif (F_CPU>=180000000)
+    #define HAL_MAXRATE_LOWER_LIMIT 2.6
   #else
-    #define MaxRate_LowerLimit 4.8
+    #define HAL_MAXRATE_LOWER_LIMIT 4.8
   #endif
   #define HAL_FAST_PROCESSOR
 #else
   // Teensy3.2,3.1,etc.
-  #if F_CPU>=96000000
-    #define MaxRate_LowerLimit 12
-  #elif F_CPU>=72000000
-    #define MaxRate_LowerLimit 14
+  #if (F_CPU>=96000000)
+    #define HAL_MAXRATE_LOWER_LIMIT 12
+  #elif (F_CPU>=72000000)
+    #define HAL_MAXRATE_LOWER_LIMIT 14
   #else
-    #define MaxRate_LowerLimit 28
+    #define HAL_MAXRATE_LOWER_LIMIT 28
   #endif
 #endif
 

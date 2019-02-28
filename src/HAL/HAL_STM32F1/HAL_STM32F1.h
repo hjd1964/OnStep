@@ -3,9 +3,8 @@
 // We define a more generic symbol, in case more STM32 boards based on different lines are supported
 #define __ARM_STM32__
 
-// Lower limit (fastest) step rate in uS for this platform -------------------------------------------
-// the exact model should be detected and these tailored to each, but this is a good starting point
-#define MaxRate_LowerLimit 20
+// Lower limit (fastest) step rate in uS for this platform (in SQW mode)
+#define HAL_MAXRATE_LOWER_LIMIT 20
 
 #include <HardwareTimer.h>
 

@@ -4,7 +4,7 @@
 #define __Platform_Name__
 
 // Lower limit (fastest) step rate in uS for this platform (in SQW mode)
-#define MaxRate_LowerLimit 16
+#define HAL_MAXRATE_LOWER_LIMIT 16
 
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
 #define SerialA Serial
