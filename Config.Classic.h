@@ -146,6 +146,9 @@
 // Axis1: Pins 13,11 = Step,Dir (RA/Azm) (Teensy3.x Pins 12,10)
 // Axis2: Pins 6,4 = Step,Dir (Dec/Alt)  (Teensy3.x Pins 6,4)
 
+// Step signal wave form.  Use SQUARE for best compatibility or use PULSE to allow faster step rates.  Default _OFF.
+#define STEP_WAVE_FORM_OFF
+
 // Reverse the direction of movement.  Adjust as needed or reverse your wiring so things move in the right direction
 #define AXIS1_REVERSE_OFF            // RA/Azm axis
 #define AXIS2_REVERSE_OFF            // Dec/Alt axis

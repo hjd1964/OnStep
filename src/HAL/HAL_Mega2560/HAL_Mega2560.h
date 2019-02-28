@@ -7,8 +7,8 @@
 #define HAL_SLOW_PROCESSOR
 
 // Set default timer mode unless specified
-#if !defined(HAL_PULSE_STEP) && !defined(HAL_DEDGE_STEP) && !defined(HAL_SQW_STEP)
-  #define HAL_PULSE_STEP
+#ifndef STEP_WAVE_FORM
+  #define STEP_WAVE_FORM PULSE
 #endif
 
 // Lower limit (fastest) step rate in uS for this platform (in SQW mode)

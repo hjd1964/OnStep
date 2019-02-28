@@ -24,6 +24,11 @@
 #define TMC2130_QUIET_LOWPWR 103
 #define TMC2130_VQUIET_LOWPWR 104
 
+// Stepper driver wave forms
+#define SQUARE 1
+#define PULSE 2
+#define DEDGE 3
+
 // Stepper Driver Decay Mode Open
 #define OPEN 2
 

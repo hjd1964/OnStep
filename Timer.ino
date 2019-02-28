@@ -1,10 +1,10 @@
 // -----------------------------------------------------------------------------------
 // Timers and interrupt handling
 
-#if defined(HAL_PULSE_STEP)
+#if STEP_WAVE_FORM==PULSE
   // motor timers at 1x rate
   #define TIMER_PULSE_STEP_MULTIPLIER 1
-#elif defined(HAL_DEDGE_STEP)
+#elif STEP_WAVE_FORM==DEDGE
   // motor timers at 1x rate
   #define TIMER_PULSE_STEP_MULTIPLIER 1
   volatile byte toggleStateAxis1 = 0;
@@ -12,7 +12,6 @@
 #else
   // motor timers at 2x rate
   #define TIMER_PULSE_STEP_MULTIPLIER 0.5
-  #define TIMER_SQW_STEP
   volatile boolean clearAxis1 = true;
   volatile boolean takeStepAxis1 = false;
   volatile boolean clearAxis2 = true;
@@ -280,11 +279,11 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
 
   if (!fastAxis1) { t3cnt++; if (t3cnt%t3rep!=0) goto done; }
 
-#ifndef HAL_DEDGE_STEP
+#if STEP_WAVE_FORM!=DEDGE
   StepPinAxis1_LOW;
 #endif
 
-#ifdef TIMER_SQW_STEP
+#if STEP_WAVE_FORM==SQUARE
   if (clearAxis1) {
     takeStepAxis1=false;
 #endif
@@ -303,7 +302,7 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
   }
 #endif
 
-#if defined(HAL_PULSE_STEP) || defined(HAL_DEDGE_STEP)
+#if STEP_WAVE_FORM!=SQUARE
   QuickSetIntervalAxis1(nextAxis1Rate*stepAxis1);
 #endif
 
@@ -327,7 +326,7 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
       if (blAxis1>0)             { blAxis1-=stepAxis1; inbacklashAxis1=true; } else { inbacklashAxis1=false; posAxis1-=stepAxis1; }
     }
 
-#ifdef TIMER_SQW_STEP
+#if STEP_WAVE_FORM==SQUARE
       takeStepAxis1=true;
     }
     clearAxis1=false;
@@ -338,7 +337,7 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
     QuickSetIntervalAxis1(nextAxis1Rate*stepAxis1);
   }
 #else
-#ifdef HAL_DEDGE_STEP
+#if STEP_WAVE_FORM==DEDGE
     toggleStateAxis1++;
     if (toggleStateAxis1%2==0) StepPinAxis1_LOW; else StepPinAxis1_HIGH;
 #else
@@ -361,11 +360,11 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
 
   if (!fastAxis2) { t4cnt++; if (t4cnt%t4rep!=0) goto done; }
 
-#ifndef HAL_DEDGE_STEP
+#if STEP_WAVE_FORM!=DEDGE
   StepPinAxis2_LOW;
 #endif
 
-#ifdef TIMER_SQW_STEP
+#if STEP_WAVE_FORM==SQUARE
   if (clearAxis2) {
     takeStepAxis2=false;
 #endif
@@ -384,7 +383,7 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
   }
 #endif
 
-#if defined(HAL_PULSE_STEP) || defined(HAL_DEDGE_STEP)
+#if STEP_WAVE_FORM!=SQUARE
   QuickSetIntervalAxis2(nextAxis2Rate*stepAxis2);
 #endif
 
@@ -408,7 +407,7 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
       if (blAxis2>0)             { blAxis2-=stepAxis2; inbacklashAxis2=true; } else { inbacklashAxis2=false; posAxis2-=stepAxis2; }
     }
 
-#ifdef TIMER_SQW_STEP
+#if STEP_WAVE_FORM==SQUARE
       takeStepAxis2=true;
     }
     clearAxis2=false;
@@ -419,7 +418,7 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
     QuickSetIntervalAxis2(nextAxis2Rate*stepAxis2);
   }
 #else
-#ifdef HAL_DEDGE_STEP
+#if STEP_WAVE_FORM==DEDGE
     toggleStateAxis2++;
     if (toggleStateAxis2%2==0) StepPinAxis2_LOW; else StepPinAxis2_HIGH;
 #else

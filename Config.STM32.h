@@ -145,6 +145,9 @@
 // Axis1: Pins (see pinmap) = Step,Dir (RA/Azm)
 // Axis2: Pins (see pinmap) = Step,Dir (Dec/Alt)
 
+// Step signal wave form.  Use SQUARE for best compatibility or use PULSE to allow faster step rates.  Default SQUARE.
+#define STEP_WAVE_FORM SQUARE
+
 // Reverse the direction of movement.  Adjust as needed or reverse your wiring so things move in the right direction
 #define AXIS1_REVERSE_OFF            // RA/Azm axis
 #define AXIS2_REVERSE_OFF            // Dec/Alt axis
