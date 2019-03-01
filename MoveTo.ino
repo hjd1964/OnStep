@@ -315,7 +315,7 @@ long maxRateLowerLimit() {
   double r_us=HAL_MAXRATE_LOWER_LIMIT;  // for example 16us, this basis rate has platform (STM32/Teensy3.2/3.5/3.6/Mega2560), clock rate, and ISR operating mode (Sqw/Pulse/Dedge) factored in (from HAL.)
   
   // higher speed ISR code path?
-  #if defined(HAL_PULSE_STEP) || defined(HAL_DEDGE_STEP)
+  #if STEP_WAVE_FORM==PULSE || STEP_WAVE_FORM==DEDGE
     r_us=r_us/1.6; // about 1.6x faster than SQW mode in my testing
   #endif
   
