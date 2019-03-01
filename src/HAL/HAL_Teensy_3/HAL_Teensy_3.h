@@ -25,7 +25,7 @@
   #if (F_CPU>=120000000)
     #define HAL_MAXRATE_LOWER_LIMIT 10
     #define HAL_PULSE_WIDTH 800
-  #if (F_CPU>=96000000)
+  #elif (F_CPU>=96000000)
     #define HAL_MAXRATE_LOWER_LIMIT 12
     #define HAL_PULSE_WIDTH 900
   #elif (F_CPU>=72000000)
