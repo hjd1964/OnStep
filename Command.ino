@@ -754,11 +754,7 @@ void processCommands() {
               case '0': dtostrf(guideRates[currentPulseGuideRate]/15.0,2,2,reply); quietReply=true; break;  // pulse-guide rate
               case '1': sprintf(reply,"%i",pecAnalogValue); quietReply=true; break;                         // pec analog value
               case '2': dtostrf(maxRate/16.0,3,3,reply); quietReply=true; break;                            // MaxRate (current)
-              case '3': 
-                f=maxRateLowerLimit()/16.0;
-                if ((double)MaxRate<f) dtostrf(f,3,3,reply); else dtostrf((double)MaxRate,3,3,reply);
-                quietReply=true; 
-              break;                         // MaxRate (default)
+              case '3': dtostrf((double)MaxRateDef,3,3,reply); quietReply=true; break;                      // MaxRateDef (default)
               case '4': if (meridianFlip==MeridianFlipNever) { sprintf(reply,"%d N",getInstrPierSide()); } else { sprintf(reply,"%d",getInstrPierSide()); } quietReply=true; break; // pierSide (N if never)
               case '5': sprintf(reply,"%i",(int)autoMeridianFlip); quietReply=true; break;                  // autoMeridianFlip
               case '6':                                                                                     // preferred pier side
@@ -819,7 +815,7 @@ void processCommands() {
 #endif
           if (parameter[0]=='E') { // En: Get settings
             switch (parameter[1]) {
-              case '1': dtostrf((double)MaxRate,3,3,reply); quietReply=true; break;
+              case '1': dtostrf((double)MaxRateDef,3,3,reply); quietReply=true; break;
               case '2': dtostrf(DegreesForAcceleration,2,1,reply); quietReply=true; break;
               case '3': sprintf(reply,"%ld",(long)round(BacklashTakeupRate)); quietReply=true; break;
               case '4': sprintf(reply,"%ld",(long)round(StepsPerDegreeAxis1)); quietReply=true; break;
@@ -1291,7 +1287,7 @@ void processCommands() {
 //  :RC#   Set Slew rate to Centering rate (2nd slowest) 8X
 //  :RM#   Set Slew rate to Find Rate (2nd Fastest) 20X
 //  :RF#   Set Slew rate to Fast Rate (Fastest) 48X
-//  :RS#   Set Slew rate to max (fastest) ?X (1/2 of MaxRate)
+//  :RS#   Set Slew rate to max (fastest) ?X (1/2 of maxRate)
 //  :Rn#   Set Slew rate to n, where n=0..9
 //         Returns: Nothing
       if ((command[1]=='G') || (command[1]=='C') || (command[1]=='M') || (command[1]=='S') || ((command[1]>='0') && (command[1]<='9'))) {
@@ -1621,8 +1617,8 @@ void processCommands() {
             case '2': // set new acceleration rate (returns 1 success or 0 failure)
               if (!isSlewing()) {
                 maxRate=strtod(&parameter[3],&conv_end)*16.0;
-                if (maxRate<(double)MaxRate*8.0) maxRate=(double)MaxRate*8.0;
-                if (maxRate>(double)MaxRate*32.0) maxRate=(double)MaxRate*32.0;
+                if (maxRate<(double)MaxRateDef*8.0) maxRate=(double)MaxRateDef*8.0;
+                if (maxRate>(double)MaxRateDef*32.0) maxRate=(double)MaxRateDef*32.0;
                 if (maxRate<maxRateLowerLimit()) maxRate=maxRateLowerLimit();
                 nv.writeLong(EE_maxRateL,maxRate);
                 setAccelerationRates(maxRate);
@@ -1632,12 +1628,12 @@ void processCommands() {
               quietReply=true;
               if (!isSlewing()) {
                 switch (parameter[3]) {
-                  case '5': maxRate=(double)MaxRate*32.0; break; // 50%
-                  case '4': maxRate=(double)MaxRate*24.0; break; // 75%
-                  case '3': maxRate=(double)MaxRate*16.0; break; // 100%
-                  case '2': maxRate=(double)MaxRate*12.0; break; // 150%
-                  case '1': maxRate=(double)MaxRate*8.0;  break; // 200%
-                  default:  maxRate=(double)MaxRate*16.0;
+                  case '5': maxRate=(double)MaxRateDef*32.0; break; // 50%
+                  case '4': maxRate=(double)MaxRateDef*24.0; break; // 75%
+                  case '3': maxRate=(double)MaxRateDef*16.0; break; // 100%
+                  case '2': maxRate=(double)MaxRateDef*12.0; break; // 150%
+                  case '1': maxRate=(double)MaxRateDef*8.0;  break; // 200%
+                  default:  maxRate=(double)MaxRateDef*16.0;
                 }
                 if (maxRate<maxRateLowerLimit()) maxRate=maxRateLowerLimit();
 

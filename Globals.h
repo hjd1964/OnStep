@@ -55,6 +55,7 @@ volatile boolean PPSsynced = false;
 #endif
 
 long    maxRate = (double)MaxRate*16.0;
+double  MaxRateDef = (double)MaxRate;
 
 double  slewSpeed = 0;
 volatile long    timerRateAxis1 = 0;

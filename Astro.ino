@@ -756,8 +756,8 @@ double cot(double n) {
 void setAccelerationRates(double maxRate) {
   
   // set the new guide acceleration rate
-  slewRateX  = (RateToXPerSec/(maxRate/16.0))*5.0;       // 5x for exponential factor average rate
-  slewRateX = slewRateX*((MaxRate/2.0)/(maxRate/16.0));  // scale with maxRate so DegreesForAcceleration and DegreesForRapidStop are approximately correct
+  slewRateX  = (RateToXPerSec/(maxRate/16.0))*5.0;         // 5x for exponential factor average rate
+  slewRateX = slewRateX*((MaxRateDef/2.0)/(maxRate/16.0)); // scale with maxRate so DegreesForAcceleration and DegreesForRapidStop are approximately correct
   accXPerSec = slewRateX/DegreesForAcceleration;
   guideRates[9]=RateToASPerSec/(maxRate/16.0); guideRates[8]=guideRates[9]/2.0;
   activeGuideRate=GuideRateNone;

@@ -315,18 +315,22 @@ void initReadNvValues() {
   // get the pulse-guide rate
   currentPulseGuideRate=nv.read(EE_pulseGuideRate); if (currentPulseGuideRate>GuideRate1x) currentPulseGuideRate=GuideRate1x;
 
+  // set the default MaxRate based on the desired goto speed
+  MaxRateDef=MaxRate;
+  if (MaxRateDef<maxRateLowerLimit()/16.0) MaxRateDef=maxRateLowerLimit()/16.0;
+
   // get the max goto rate
   maxRate=(int16_t)nv.readInt(EE_maxRate)*16; // maxRate is in 16MHz clocks but stored in micro-seconds
   // check for flag that maxRate is stored in EE_maxRateL, if not move it there
   if (maxRate==-16) maxRate=nv.readLong(EE_maxRateL); else { nv.writeInt(EE_maxRate,-1); nv.writeLong(EE_maxRateL,maxRate); }
-  // constrain values to the limits (1/2 to 2X the MaxRate) and platform limits
-  if (maxRate<(double)MaxRate*8.0) maxRate=(double)MaxRate*8.0;
-  if (maxRate>(double)MaxRate*32.0) maxRate=(double)MaxRate*32.0;
+  // constrain values to the limits (1/2 to 2X the MaxRateDef) and platform limits
+  if (maxRate<(double)MaxRateDef*8.0) maxRate=(double)MaxRateDef*8.0;
+  if (maxRate>(double)MaxRateDef*32.0) maxRate=(double)MaxRateDef*32.0;
   if (maxRate<maxRateLowerLimit()) maxRate=maxRateLowerLimit();
+  
 #if !defined(REMEMBER_MAX_RATE_ON)
-  if (maxRate!=(long)((double)MaxRate*16.0)) {
-    maxRate=(double)MaxRate*16.0; 
-    if (maxRate<maxRateLowerLimit()) maxRate=maxRateLowerLimit(); 
+  if (maxRate!=(long)((double)MaxRateDef*16.0)) {
+    maxRate=(double)MaxRateDef*16.0; 
     nv.writeLong(EE_maxRateL,maxRate);
   }
 #endif
