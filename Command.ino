@@ -754,7 +754,11 @@ void processCommands() {
               case '0': dtostrf(guideRates[currentPulseGuideRate]/15.0,2,2,reply); quietReply=true; break;  // pulse-guide rate
               case '1': sprintf(reply,"%i",pecAnalogValue); quietReply=true; break;                         // pec analog value
               case '2': dtostrf(maxRate/16.0,3,3,reply); quietReply=true; break;                            // MaxRate (current)
-              case '3': dtostrf((double)MaxRate,3,3,reply); quietReply=true; break;                         // MaxRate (default)
+              case '3': 
+                f=maxRateLowerLimit()/16.0;
+                if ((double)MaxRate<f) dtostrf(f,3,3,reply); else dtostrf((double)MaxRate,3,3,reply);
+                quietReply=true; 
+              break;                         // MaxRate (default)
               case '4': if (meridianFlip==MeridianFlipNever) { sprintf(reply,"%d N",getInstrPierSide()); } else { sprintf(reply,"%d",getInstrPierSide()); } quietReply=true; break; // pierSide (N if never)
               case '5': sprintf(reply,"%i",(int)autoMeridianFlip); quietReply=true; break;                  // autoMeridianFlip
               case '6':                                                                                     // preferred pier side
