@@ -22,15 +22,18 @@
   #define HAL_FAST_PROCESSOR
 #else
   // Teensy3.2,3.1,etc.
+  #if (F_CPU>=120000000)
+    #define HAL_MAXRATE_LOWER_LIMIT 10
+    #define HAL_PULSE_WIDTH 800
   #if (F_CPU>=96000000)
     #define HAL_MAXRATE_LOWER_LIMIT 12
-    #define HAL_PULSE_WIDTH 500
+    #define HAL_PULSE_WIDTH 900
   #elif (F_CPU>=72000000)
     #define HAL_MAXRATE_LOWER_LIMIT 14
-    #define HAL_PULSE_WIDTH 700
+    #define HAL_PULSE_WIDTH 1000
   #else
     #define HAL_MAXRATE_LOWER_LIMIT 28
-    #define HAL_PULSE_WIDTH 800
+    #define HAL_PULSE_WIDTH 1500
   #endif
 #endif
 

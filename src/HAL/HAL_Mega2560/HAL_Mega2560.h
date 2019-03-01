@@ -15,7 +15,7 @@
 #define HAL_MAXRATE_LOWER_LIMIT 51.2
 
 // Width of step pulse
-#define HAL_PULSE_WIDTH 5000
+#define HAL_PULSE_WIDTH 10000
 
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
 #ifndef MEGA2560_ARDUINO_SERIAL_ON
