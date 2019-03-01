@@ -330,7 +330,7 @@ void initReadNvValues() {
   if (maxRate>(double)MaxRateDef*32.0) maxRate=(double)MaxRateDef*32.0;
   if (maxRate<maxRateLowerLimit()) maxRate=maxRateLowerLimit();
   
-#if !defined(REMEMBER_MAX_RATE_ON)
+#ifndef REMEMBER_SLEW_RATE_ON
   if (maxRate!=(long)((double)MaxRateDef*16.0)) {
     maxRate=(double)MaxRateDef*16.0; 
     nv.writeLong(EE_maxRateL,maxRate);

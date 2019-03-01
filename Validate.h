@@ -9,15 +9,14 @@
 
 // automatically set MaxRate if DefaultSlewRate is present
 #if !defined(MaxRate) && defined(DesiredBaseSlewRate)
-#define MaxRate ((1000000.0/DesiredBaseSlewRate)/StepsPerDegreeAxis1)
+  #define MaxRate ((1000000.0/DesiredBaseSlewRate)/StepsPerDegreeAxis1)
 #endif
 
-// option to replace REMEMBER_MAX_RATE with REMEMBER_SLEW_RATE
-#ifdef RememberMaxRate_ON
-  #define REMEMBER_MAX_RATE_ON
-#endif
-#if !defined(REMEMBER_MAX_RATE_ON) && defined(REMEMBER_SLEW_RATE_ON)
-  #define REMEMBER_MAXRATE_ON
+// replace REMEMBER_MAX_RATE_ON or RememberMaxRate_ON with REMEMBER_SLEW_RATE_ON
+#if defined(RememberMaxRate_ON) || defined(REMEMBER_MAX_RATE_ON)
+  #ifndef REMEMBER_SLEW_RATE_ON
+    #define REMEMBER_SLEW_RATE_ON
+  #endif
 #endif
 
 // set serial port baud rate the old way
