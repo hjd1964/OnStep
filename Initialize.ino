@@ -312,7 +312,7 @@ void initReadNvValues() {
   parkSaved=nv.read(EE_parkSaved);
   parkStatus=nv.read(EE_parkStatus);
   // tried to park but crashed?
-  if (parkStatus==Parking) parkStatus=ParkFailed;
+  if (parkStatus==Parking) { parkStatus=ParkFailed; nv.write(EE_parkStatus,parkStatus); }
 
   // get the pulse-guide rate
   currentPulseGuideRate=nv.read(EE_pulseGuideRate); if (currentPulseGuideRate>GuideRate1x) currentPulseGuideRate=GuideRate1x;
