@@ -27,7 +27,7 @@
   #define ARROW_UR "-&gt;"
   #define ARROW_R2 "&gt;"
   #define CAUTION_CH "/!\\"
-  #define CLOCK_CH "T";
+  #define CLOCK_CH "T"
   #define ARROW_LL "&lt;&lt;"
   #define ARROW_L "&lt;"
   #define ARROW_R "&gt;"
