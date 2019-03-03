@@ -119,6 +119,60 @@ class rtcw {
     bool active=false;
 };
 
+#elif defined(RTC_TEENSY)
+// -----------------------------------------------------------------------------------
+// TEENSY 3.2 RTC support 
+ 
+#include <TimeLib.h>            //https://github.com/PaulStoffregen/Time/archive/master.zip
+ 
+class rtcw {
+  public:
+    // initialize (also enables the RTC PPS if available)
+    void init() {
+      active=true;
+    }
+ 
+    // set the RTC's time (local standard time)
+    void set(double JD, double LMT) {
+    
+        int y,mo,d,h;
+        double m,s;
+        
+        greg(JD,&y,&mo,&d); y-=2000; if (y>=100) y-=100;
+ 
+        double f1=fabs(LMT)+0.000139;
+        h=floor(f1);
+        m=(f1-h)*60.0;
+        s=(m-floor(m))*60.0;
+        //  dow=(round(J)%7)+1;
+ 
+        setTime(h, floor(m), floor(s), d, mo, y);   //set current system time
+ 
+        unsigned long TeensyTime;
+        TeensyTime = now();                         //get time in epoch
+        Teensy3Clock.set(TeensyTime);               //set Teensy time
+    }
+    
+    // get the RTC's time (local standard time)
+    void get(double &JD, double &LMT) {
+        unsigned long TeensyTime;
+  
+        TeensyTime = Teensy3Clock.get();            //get time from Teensy RTC
+        setTime(TeensyTime);                        //set system time
+  
+        if ((year()>=0) && (month()<=99) && (month()>=1) && (month()<=12) && (day()>=1) && (day()<=31) &&
+            (hour()>=0) && (hour()<=23) && (minute()>=0) && (minute()<=59) && (second()>=0) && (second()<=59)) 
+        {
+            int y1=year(); if (y1>11) y1=y1+2000; else y1=y1+2100;
+            JD=julian(y1,month(),day());
+            LMT=(hour()+(minute()/60.0)+(second()/3600.0));
+        }
+ 
+    }
+  private:
+    bool active=false;
+};
+
 #else
 // -----------------------------------------------------------------------------------
 // empty class if no RTC is present

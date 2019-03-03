@@ -50,6 +50,10 @@
 // Set to _ON to disable backlash takeup during guiding at <= 1X, default=_OFF
 #define GUIDES_DISABLE_BACKLASH_ON
 
+// RTC (Real Time Clock) support, default=_OFF. 
+// Other options: RTC_TEENSY for enabling internal Teensy RTC - a resonator soldered to Teensy board and an external battery are required.
+#define RTC_OFF
+
 // PPS use _ON or _PULLUP to enable the input and use the built-in pullup resistor.  Sense rising edge on Pad 28 for optional precision clock source (GPS, for example), default=_OFF [infrequently used option]
 #define PPS_SENSE_OFF
 
