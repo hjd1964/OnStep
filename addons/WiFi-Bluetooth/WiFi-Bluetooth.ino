@@ -28,7 +28,7 @@
  *
  * Description
  *
- * ESP8266-01 OnStep control
+ * ESP8266 OnStep control
  *
  */
 
@@ -37,7 +37,7 @@
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
 #define FirmwareVersionMinor  "6"
-#define FirmwareVersionPatch  "d"
+#define FirmwareVersionPatch  "e"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 

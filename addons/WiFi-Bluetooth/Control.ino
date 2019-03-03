@@ -264,9 +264,13 @@ const char html_controlAnalog8C[] = "' onchange=\"sf('an8',this.value)\"><br />"
 const char html_controlAuxE[] = "</div><br class='clear' />\r\n";
 #endif
 
-
 const char html_controlEnd[] = 
 "<br />\r\n";
+
+boolean Focuser1;
+boolean Focuser2;
+boolean Rotate;
+boolean DeRotate;
 
 #ifdef OETHS
 void handleControl(EthernetClient *client) {
@@ -380,8 +384,8 @@ void handleControl() {
   sendHtml(data);
 
   // Focusing ------------------------------------------------
-  boolean Focuser1; if (sendCommand(":FA#",temp1,R_BOOL)) Focuser1=true; else Focuser1=false;
-  boolean Focuser2; if (sendCommand(":fA#",temp1,R_BOOL)) Focuser2=true; else Focuser2=false;
+  if (sendCommand(":FA#",temp1,R_BOOL)) Focuser1=true; else Focuser1=false;
+  if (sendCommand(":fA#",temp1,R_BOOL)) Focuser2=true; else Focuser2=false;
   if (Focuser1) {
     data += html_controlFocus1;
     data += "<div style='float: left;'>Focuser:</div><div style='float: right; text-align: right;' id='focuserpos'>?</div><br />";
@@ -390,12 +394,12 @@ void handleControl() {
     data += html_controlFocus4;
     data += html_controlFocus5;
     data += html_controlFocus6;
-  sendHtml(data);
+    sendHtml(data);
   }
 
   // Rotate/De-Rotate ----------------------------------------
-  boolean Rotate=false;
-  boolean DeRotate=false;
+  Rotate=false;
+  DeRotate=false;
   if (sendCommand(":GX98#",temp1)) {
     if (temp1[0]=='R') Rotate=true;
     if (temp1[0]=='D') { Rotate=true; DeRotate=true; }
@@ -406,15 +410,17 @@ void handleControl() {
     data += html_controlRotate1;
     data += html_controlRotate2;
     data += html_controlRotate3;
+    sendHtml(data);
   }
   if (DeRotate) {
     data += html_controlDeRotate1;
     data += html_controlDeRotate2;
+    sendHtml(data);
   }
   if (Rotate) {
     data += html_controlRotate4;
+    sendHtml(data);
   }
-  sendHtml(data);
 
   // Aux -----------------------------------------------------
   #if defined(SW0) || defined(SW1) || defined(SW2) || defined(SW3) || defined(SW4) || defined(SW5) || defined(SW6) || defined(SW7) || defined(SW8) || defined(SW9) || defined(SW10) || defined(SW11) || defined(SW12) || defined(SW13) || defined(SW14) || defined(SW15) || defined(AN3) || defined(AN4) || defined(AN5) || defined(AN6) || defined(AN7) || defined(AN8)
@@ -469,29 +475,29 @@ void handleControl() {
     #ifdef SW15
     data += html_controlSwitch15; c++;
     #endif
-    if (c>0) data+="<br />";
-    sendHtml(data);
+    if (c>0) { data+="<br />"; sendHtml(data); }
 
     // Analog Control
+    c=0;
     #ifdef AN3
-    if (sendCommand(":GXG3#",temp1)) { data += html_controlAnalog3A; data += temp1; data += html_controlAnalog3B; data += temp1; data += html_controlAnalog3C; }
+    if (sendCommand(":GXG3#",temp1)) { data += html_controlAnalog3A; data += temp1; data += html_controlAnalog3B; data += temp1; data += html_controlAnalog3C; c++; }
     #endif
     #ifdef AN4
-    if (sendCommand(":GXG4#",temp1)) { data += html_controlAnalog4A; data += temp1; data += html_controlAnalog4B; data += temp1; data += html_controlAnalog4C; }
+    if (sendCommand(":GXG4#",temp1)) { data += html_controlAnalog4A; data += temp1; data += html_controlAnalog4B; data += temp1; data += html_controlAnalog4C; c++; }
     #endif
     #ifdef AN5
-    if (sendCommand(":GXG5#",temp1)) { data += html_controlAnalog5A; data += temp1; data += html_controlAnalog5B; data += temp1; data += html_controlAnalog5C; }
+    if (sendCommand(":GXG5#",temp1)) { data += html_controlAnalog5A; data += temp1; data += html_controlAnalog5B; data += temp1; data += html_controlAnalog5C; c++; }
     #endif
     #ifdef AN6
-    if (sendCommand(":GXG6#",temp1)) { data += html_controlAnalog6A; data += temp1; data += html_controlAnalog6B; data += temp1; data += html_controlAnalog6C; }
+    if (sendCommand(":GXG6#",temp1)) { data += html_controlAnalog6A; data += temp1; data += html_controlAnalog6B; data += temp1; data += html_controlAnalog6C; c++; }
     #endif
     #ifdef AN7
-    if (sendCommand(":GXG7#",temp1)) { data += html_controlAnalog7A; data += temp1; data += html_controlAnalog7B; data += temp1; data += html_controlAnalog7C; }
+    if (sendCommand(":GXG7#",temp1)) { data += html_controlAnalog7A; data += temp1; data += html_controlAnalog7B; data += temp1; data += html_controlAnalog7C; c++; }
     #endif
     #ifdef AN8
-    if (sendCommand(":GXG8#",temp1)) { data += html_controlAnalog8A; data += temp1; data += html_controlAnalog8B; data += temp1; data += html_controlAnalog8C; }
+      if (sendCommand(":GXG8#",temp1)) { data += html_controlAnalog8A; data += temp1; data += html_controlAnalog8B; data += temp1; data += html_controlAnalog8C; c++; } 
     #endif
-    sendHtml(data);
+    if (c>0) sendHtml(data);
 
     data += html_controlAuxE;
   #endif
@@ -525,11 +531,15 @@ void controlAjax() {
   String data="";
   char temp[80]="";
 
-  data += "focuserpos|";
-  if (sendCommand(":FG#",temp)) { data += temp; data += " microns\n"; } else { data += "?\n"; }
+  if (Focuser1) {
+    data += "focuserpos|";
+    if (sendCommand(":FG#",temp)) { data += temp; data += " microns\n"; } else { data += "?\n"; }
+  }
 
-  data += "rotatorpos|";
-  if (sendCommand(":rG#",temp)) { temp[9]=temp[5]; temp[10]=temp[6]; temp[11]=0; temp[4]='&'; temp[5]='d'; temp[6]='e'; temp[7]='g'; temp[8]=';'; data += temp; data += "&#39;\n"; } else { data += "?\n"; }
+  if (Rotate) {
+    data += "rotatorpos|";
+    if (sendCommand(":rG#",temp)) { temp[9]=temp[5]; temp[10]=temp[6]; temp[11]=0; temp[4]='&'; temp[5]='d'; temp[6]='e'; temp[7]='g'; temp[8]=';'; data += temp; data += "&#39;\n"; } else { data += "?\n"; }
+  }
 
   #ifdef AN3
     data += "an3v|"; if (sendCommand(":GXG3#",temp)) { data += temp; data += "\n"; } else { data += "?\n"; }
@@ -549,7 +559,6 @@ void controlAjax() {
   #ifdef AN8
     data += "an8v|"; if (sendCommand(":GXG8#",temp)) { data += temp; data += "\n"; } else { data += "?\n"; }
   #endif
-
 #ifdef OETHS
   client->print(data);
 #else
