@@ -3,6 +3,7 @@
 #include "Catalog.h"
 #include "LX200.h"
 #include "SmartController.h"
+#include "constants.h"
 
 // integer numeric conversion with error checking
 boolean atoi2(char *a, int *i) {
@@ -326,6 +327,12 @@ LX200RETURN SyncGotoLX200(bool sync, float &Ra, float &Dec)
   float fvr3, fvd3;
   char sign='+';
 
+  /*
+   * This code is commented out, since OnStep has its own Refraction
+   * Compensation Tracking. Use that, or the Full Compensated Tracking 
+   * instead
+   */
+  /*
   // apply refraction
   if (cat_mgr.canFilter()) {
     double Alt,Azm; 
@@ -336,6 +343,7 @@ LX200RETURN SyncGotoLX200(bool sync, float &Ra, float &Dec)
     cat_mgr.HorToEqu(Alt,Azm,&r,&d);
     Ra=r/15.0; Dec=d;
   }
+  */
   
   Ephemeris::floatingHoursToHoursMinutesSeconds(Ra, &ivr1, &ivr2, &fvr3);
   Ephemeris::floatingDegreesToDegreesMinutesSeconds(Dec, &ivd1, &ivd2, &fvd3);
@@ -376,7 +384,7 @@ LX200RETURN SyncGotoCatLX200(bool sync)
   if (GetDateLX200(day, month, year, true) == LX200GETVALUEFAILED) return LX200GETVALUEFAILED;
   if (cat_mgr.getCat()==CAT_NONE) return LX200UNKOWN;
   EquatorialCoordinates coo;
-  coo.ra = cat_mgr.ra()/15.0;
+  coo.ra = cat_mgr.ra();
   coo.dec = cat_mgr.dec();
   epoch=cat_mgr.epoch(); if (epoch==0) return LX200GETVALUEFAILED;
   EquatorialCoordinates cooNow;
@@ -400,7 +408,7 @@ LX200RETURN SyncGotoPlanetLX200(bool sync, unsigned short objSys)
 
 LX200RETURN SyncSelectedStarLX200(unsigned short alignSelectedStar)
 {
-  if (alignSelectedStar >= 0 && alignSelectedStar < 292) return SyncGotoCatLX200(false); else return LX200UNKOWN;
+  if (alignSelectedStar >= 0 && alignSelectedStar < NUM_STARS) return SyncGotoCatLX200(false); else return LX200UNKOWN;
 }
 
 LX200RETURN readReverseLX200(const uint8_t &axis, bool &reverse)

@@ -1,6 +1,6 @@
 // This data is machine generated from the Open NGC database.
 // Do NOT edit it manually. Rather, fix the import programs and rerun.
-st_dso Cat_Messier[107] = {
+st_dso Cat_Messier[NUM_MESSIER] = {
   { 77,    1, 15,   840,   5.5755,  22.0145 }, // M  001, Tau,   SNR,   8.40, 05:34:31, +22:00:5, NGC1952
   {  4,    2,  8,   625,  21.5575,  -0.8233 }, // M  002, Aqr,   GCl,   6.25, 21:33:27, -00:49:2, NGC7089
   { 11,    3,  8,   639,  13.7031,  28.3754 }, // M  003, CVn,   GCl,   6.39, 13:42:11, +28:22:3, NGC5272

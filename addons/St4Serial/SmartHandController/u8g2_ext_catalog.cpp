@@ -119,12 +119,13 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y)
     ext_drawRA(u8g2, x, y, txt1, txt2, txt3);
 
     // show Dec
-    short vd1; uint8_t vd2;
-    cat_mgr.decDM(vd1,vd2);
+    short vd1; uint8_t vd2; uint8_t vd3;
+    cat_mgr.decDMS(vd1,vd2, vd3);
     y += line_height;
     x = 0;
     memcpy(txt1, u8x8_u8toa((uint8_t)abs(vd1), 2), 3);
     memcpy(txt2, u8x8_u8toa(vd2, 2), 3);
+    memcpy(txt3, u8x8_u8toa(vd3, 2), 3);
     u8g2_DrawUTF8(u8g2, x, y, "dec ");
     x += step0;
     ext_drawDec(u8g2, x, y, vd1 < 0 ? "-" : "+", txt1, txt2, "00");
@@ -142,11 +143,11 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y)
   x += u8g2_GetUTF8Width(u8g2, "WWW");
   if (cat_mgr.objectType()<8) {
     switch (cat_mgr.objectType()) {
-      case 0: u8g2_DrawXBMP(u8g2, x - 3, y - EN_height, EN_width, EN_height, EN_bits); break;
-      case 1: u8g2_DrawXBMP(u8g2, x - 3, y - GC_height, GC_width, GC_height, GC_bits); break;
-      case 2: u8g2_DrawXBMP(u8g2, x - 3, y - GX_height, GX_width, GX_height, GX_bits); break;
-      case 3: u8g2_DrawXBMP(u8g2, x - 3, y - OC_height, OC_width, OC_height, OC_bits); break;
-      case 4: u8g2_DrawXBMP(u8g2, x - 3, y - PN_height, PN_width, PN_height, PN_bits); break;
+      case  0: u8g2_DrawXBMP(u8g2, x - 3, y - GX_height, GX_width, GX_height, GX_bits); break;
+      case  1: u8g2_DrawXBMP(u8g2, x - 3, y - OC_height, OC_width, OC_height, OC_bits); break;
+      case  8: u8g2_DrawXBMP(u8g2, x - 3, y - GC_height, GC_width, GC_height, GC_bits); break;
+      case  9: u8g2_DrawXBMP(u8g2, x - 3, y - PN_height, PN_width, PN_height, PN_bits); break;
+      case 16: u8g2_DrawXBMP(u8g2, x - 3, y - EN_height, EN_width, EN_height, EN_bits); break;
       default: break;
     }
     x += GX_width + 5;
