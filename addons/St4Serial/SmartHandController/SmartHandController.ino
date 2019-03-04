@@ -35,9 +35,9 @@
 #define Product "SHC"
 #define FirmwareDate          __DATE__
 #define FirmwareTime          __TIME__
-#define FirmwareVersionMajor  "0"
-#define FirmwareVersionMinor  "9"
-#define FirmwareVersionPatch  "b"
+#define FirmwareVersionMajor  "1"
+#define FirmwareVersionMinor  "0"
+#define FirmwareVersionPatch  "a"
 
 #include "Config.h"
 
