@@ -117,33 +117,18 @@ IRAM_ATTR ISR(TIMER1_COMPA_vect)
   HAL_TIMER1_PREFIX;
 #endif
 
-  bool isCentiSecond;
-
   // run 1/3 of the time at 3x the rate, unless a goto is happening
-  if (trackingState!=TrackingMoveTo) {
-    siderealClockCycleCount++;
-    // on fast processors allow the timerSuper() to run at full speed (instead of 10ms) for lower latency guiding
-    #ifndef HAL_FAST_PROCESSOR
-      if (siderealClockCycleCount%3!=0) goto done;
-    #endif
-  } else siderealClockCycleCount=0;
-  isCentiSecond=(siderealClockCycleCount%3==0);
+  if (trackingState!=TrackingMoveTo) { siderealClockCycleCount++; if (siderealClockCycleCount%3!=0) goto done; siderealClockCycleCount=0; }
+  lst++;
 
-  if (isCentiSecond) {
-    // tick the clock
-    lst++;
-    // handle buzzer
-    if (buzzerDuration>0) { buzzerDuration--; if (buzzerDuration==0) digitalWrite(TonePin,LOW); }
-  }
+  // handle buzzer
+  if (buzzerDuration>0) { buzzerDuration--; if (buzzerDuration==0) digitalWrite(TonePin,LOW); }
 
 #ifndef ESP32
-  timerSupervisor(isCentiSecond);
+  timerSupervisor(true);
 #endif
 
-#ifndef HAL_FAST_PROCESSOR
-  done: {}
-#endif
-
+done: {}
 #ifdef HAL_TIMER1_SUFFIX
   HAL_TIMER1_SUFFIX;
 #endif
