@@ -91,34 +91,50 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y)
   u8g2_uint_t x = 0;
   u8g2_uint_t yy;
 
+  uint8_t step0;
+  const uint8_t* myfont = u8g2->font;
   u8g2_uint_t  pixel_width;
   u8g2_uint_t line_height = u8g2_GetAscent(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
+
+  char line[16];
 
   // for Star Catalog
   if (cat_mgr.getCat() == STAR)
   {
-    uint8_t step0 = u8g2_GetUTF8Width(u8g2, "dec ");
-    char line[16];
-    const uint8_t* myfont = u8g2->font;
+
+    // Bayer designation of the star (Greek letter)
     u8g2_SetFont(u8g2, u8g2_font_unifont_t_greek);
-    u8g2_DrawGlyph(u8g2, 0, y, 944 + cat_mgr.primaryId());
+    x = 0;
+    u8g2_DrawGlyph(u8g2, x, y, 944 + cat_mgr.primaryId());
     u8g2_SetFont(u8g2, myfont);
 
-    u8g2_DrawUTF8(u8g2, 16, y, cat_mgr.constellationStr());
+    // Constellation Abbreviation
+    x = 12;
+    u8g2_DrawUTF8(u8g2, x, y, cat_mgr.constellationStr());
 
-    // show RA
+    // Common name for the star
+    // Width of constellation abbreviation
+    step0 = u8g2_GetUTF8Width(u8g2, "-WWW-");
+    x = step0;
+    u8g2_DrawUTF8(u8g2, x, y, cat_mgr.objectName());
+
+    y += line_height;
+    x = 0;
+    // RA
     uint8_t vr1, vr2, vr3;
     char txt1[5], txt2[5], txt3[5];
-    y += line_height;
     cat_mgr.raHMS(vr1,vr2,vr3);
     memcpy(txt1, u8x8_u8toa(vr1, 2), 3);
     memcpy(txt2, u8x8_u8toa(vr2, 2), 3);
     memcpy(txt3, u8x8_u8toa(vr3, 2), 3);
-    u8g2_DrawUTF8(u8g2, x, y, "ra");
+    u8g2_DrawUTF8(u8g2, 0, y, "RA");
+    step0 = u8g2_GetUTF8Width(u8g2, "DE ");
     x += step0;
     ext_drawRA(u8g2, x, y, txt1, txt2, txt3);
 
-    // show Dec
+    sprintf(line, "%0.1f", (float)cat_mgr.magnitude());
+
+    // Declination
     short vd1; uint8_t vd2; uint8_t vd3;
     cat_mgr.decDMS(vd1,vd2, vd3);
     y += line_height;
@@ -126,44 +142,46 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y)
     memcpy(txt1, u8x8_u8toa((uint8_t)abs(vd1), 2), 3);
     memcpy(txt2, u8x8_u8toa(vd2, 2), 3);
     memcpy(txt3, u8x8_u8toa(vd3, 2), 3);
-    u8g2_DrawUTF8(u8g2, x, y, "dec ");
+    u8g2_DrawUTF8(u8g2, x, y, "DE");
     x += step0;
-    ext_drawDec(u8g2, x, y, vd1 < 0 ? "-" : "+", txt1, txt2, "00");
+    ext_drawDec(u8g2, x, y, vd1 < 0 ? "-" : "+", txt1, txt2, txt3);
+
+    // Magnitude
+    x = u8g2_GetUTF8Width(u8g2, "DE +DD:MM:SS ");
+    u8g2_DrawUTF8(u8g2, x, y, line);
+
     return line_height;
   }
 
-  // for Object Catalogs
-  char line[16];
+  // Object Catalogs
+  //
+  // Catalog letter and Object ID
+  step0 = u8g2_GetUTF8Width(u8g2, "W 9999 ");
   sprintf(line, "%s%u", cat_mgr.catalogStr(), cat_mgr.primaryId());
-  if (line == NULL) strcpy(line, ""); u8g2_DrawUTF8(u8g2, 0, y, line);
-  y += line_height;
+  x = 0;
+  u8g2_DrawUTF8(u8g2, x, y, line);
+ 
+  // Constellation Abberviation
+  x += step0;
+  u8g2_DrawUTF8(u8g2, x, y, cat_mgr.constellationStr());
+  step0 = u8g2_GetUTF8Width(u8g2, " WWW ");
 
-  // show icon for type of object
-  u8g2_DrawUTF8(u8g2, 0, y, cat_mgr.constellationStr());
-  x += u8g2_GetUTF8Width(u8g2, "WWW");
-  if (cat_mgr.objectType()<8) {
-    switch (cat_mgr.objectType()) {
-      case  0: u8g2_DrawXBMP(u8g2, x - 3, y - GX_height, GX_width, GX_height, GX_bits); break;
-      case  1: u8g2_DrawXBMP(u8g2, x - 3, y - OC_height, OC_width, OC_height, OC_bits); break;
-      case  8: u8g2_DrawXBMP(u8g2, x - 3, y - GC_height, GC_width, GC_height, GC_bits); break;
-      case  9: u8g2_DrawXBMP(u8g2, x - 3, y - PN_height, PN_width, PN_height, PN_bits); break;
-      case 16: u8g2_DrawXBMP(u8g2, x - 3, y - EN_height, EN_width, EN_height, EN_bits); break;
-      default: break;
-    }
-    x += GX_width + 5;
-  }
-
-  // show magnitude
-  u8g2_DrawUTF8(u8g2, x, y, "mag ");
-  x += u8g2_GetUTF8Width(u8g2, "mag ");
+  // Magnitude
+  //step0 = u8g2_GetUTF8Width(u8g2, "X99.9X");
+  x += step0;
   sprintf(line, "%0.1f", (float)cat_mgr.magnitude());
   u8g2_DrawUTF8(u8g2, x, y, line);
 
-  // show extra object information
+  // Object type text
   y += line_height;
-  if (cat_mgr.objectType()<8) u8g2_DrawUTF8(u8g2, 0, y, cat_mgr.objectInfoStr());
+  x = 0;
+  u8g2_DrawUTF8(u8g2, x, y, cat_mgr.objectTypeStr());
 
-  y += line_height;
+  // Object Name, when the DSO catalogs include it
+  // y += line_height;
+  // x = 0;
+  //u8g2_DrawUTF8(u8g2, x, y, cat_mgr.objectName());
+
   return line_height;
 }
 
