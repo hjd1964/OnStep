@@ -13,8 +13,8 @@
 // Struct for Deep Space Objects (Messier, Herschel, ..etc.)
 typedef struct {
   const byte           Cons;
+  const byte           Obj_type;
   const unsigned short Obj_id;
-  const unsigned short Obj_type;
   const          short Mag;
   const float          RA;
   const float          DE;
@@ -27,6 +27,7 @@ typedef struct {
   const signed   short Mag;
   const float          RA;
   const float          DE;
+  const char           Name[16];
   } st_star;
 
 // Bayer designation, the Greek letter for each star within a constellation
@@ -72,10 +73,10 @@ const char * Txt_Object_Type[20] = {
   "Planetary Nebula",
   "Nebula",
   "Hii Region",
-  "Cluster w Nebula",
+  "Cluster + Nebula",
   "Asterism",
-  "Reflection Nebula",
-  "SuperNova Remnant",
+  "Reflectn Nebula",
+  "SuperNova Rmnnt",
   "Emission Nebula",
   "NonExist",
   "Nova",
@@ -179,7 +180,7 @@ const char* Txt_Constellations[89] = {
 const char * Txt_Catalog[] = {
   "Star ",
   "M ",
-  "NGC ",
+  "N ",
   "None "
 };
 
@@ -435,10 +436,16 @@ byte CatMgr::objectType() {
   if (_cat==HERSCHEL) return Cat_Herschel[_idx[_selected]].Obj_type; else return -1;
 }
 
-const char* CatMgr::objectInfoStr() {
+const char* CatMgr::objectTypeStr() {
   if (_cat==STAR)     return "Star"; else
   if (_cat==MESSIER)  return Txt_Object_Type[objectType()]; else return "";
   if (_cat==HERSCHEL) return Txt_Object_Type[objectType()]; else return "";
+}
+
+const char* CatMgr::objectName() {
+  if (_cat==STAR)     return Cat_Stars[_idx[_selected]].Name; else
+  if (_cat==MESSIER)  return "";
+  if (_cat==HERSCHEL) return "";
 }
 
 int CatMgr::primaryId() {

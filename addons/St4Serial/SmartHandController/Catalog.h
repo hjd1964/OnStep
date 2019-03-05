@@ -43,7 +43,8 @@ class CatMgr {
     byte   constellation();
     const char* constellationStr();
     byte   objectType();
-    const char* objectInfoStr();
+    const char* objectTypeStr();
+    const char* objectName();
     int    primaryId();
 
     void EquToHor(double RA, double Dec, double *Alt, double *Azm);
