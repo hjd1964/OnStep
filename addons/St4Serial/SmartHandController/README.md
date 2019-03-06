@@ -1,12 +1,11 @@
-OnStep Smart Hand Controller
-===========================
+OnStep Smart Hand Controller (SHC)
+==================================
 
-# What is a smart hand controller (SHC)?
-This firmware is designed to run on a supported smart hand controller hardware to communicate
-with an OnStep controller over the ST4 guiding port. Most of the setup and control functions
-are available.
+The SHC adds the functionality of a "handbox/hand controller" to an OnStep telescope controller. 
+This firmware is desgined to run on supported hardware, and communicates with OnStep over the 
+ST4 guiding port. It can replace most of the functions provided by the OnStep2 Android App. 
 
-This is almost entirely based on [Charles Lemaire](https://pixelstelescopes.wordpress.com/)'s excellent [TeenAstro fork](https://groups.io/g/TeenAstro/wiki/home).
+The SHC is almost entirely based on [Charles Lemaire](https://pixelstelescopes.wordpress.com/)'s excellent [TeenAstro fork](https://groups.io/g/TeenAstro/wiki/home).
 
 # Features
 The SHC can:
@@ -20,10 +19,7 @@ The SHC can:
 At present, there are two hardware designs:
 
 a) Teensy3.2 microcontroller
-While you can point to point wire/assemble you own hardware design many will opt to use the
-inexpensive [EasyEDA Teensy SHC PCB](https://easyeda.com/hdutton/HC-20e242d665db4c85bb565a0cd0b52233).
-For those who choose a more complete DIY experience the EasyEDA schematic still can serve as wiring
-instructions. :)
+An inexpensive [EasyEDA Teensy SHC 3.2 PCB](https://easyeda.com/hdutton/HC-20e242d665db4c85bb565a0cd0b52233) is available. For those who choose a more complete DIY experience the EasyEDA schematic still can serve as wiring instructions for your perfboard project. :)
 
 b) ESP32 microcontroller.
 This offers a lower cost, and easier to source alternative to the Teensy, with the same features.
