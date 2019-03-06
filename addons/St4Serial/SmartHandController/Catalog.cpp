@@ -3,8 +3,6 @@
 #include "Config.h"
 #include "math.h"
 
-#include <Ephemeris.h> // https://github.com/hjd1964/ephemeris
-
 #include "constants.h"
 
 // Do not change anything in the structs or arrays below, since they
@@ -12,23 +10,23 @@
 
 // Struct for Deep Space Objects (Messier, Herschel, ..etc.)
 typedef struct {
-  const byte           Cons;
-  const byte           Obj_type;
+  const char           Cons;
+  const char           Obj_type;
   const unsigned short Obj_id;
-  const          short Mag;
+  const signed   short Mag;
   const float          RA;
   const float          DE;
-  } st_dso;
+  } dso_t;
 
 // Struct for stars
 typedef struct {
-  const byte           Cons;
-  const byte           Bayer;
+  const char           Cons;
+  const char           Bayer;
   const signed   short Mag;
   const float          RA;
   const float          DE;
   const char           Name[16];
-  } st_star;
+  } star_t;
 
 // Bayer designation, the Greek letter for each star within a constellation
 const char* Txt_Bayer[24] = {
@@ -186,6 +184,7 @@ const char * Txt_Catalog[] = {
 
 // Data for different catalogs, each is a collection of certain celestial objects
 // These are machine generated using scripts from Open NGC and KStars' Star data
+// Do NOT edit manually. Rerun the scripts instead. 
 #include "messier.h"
 #include "herschel.h"
 #include "stars.h"
