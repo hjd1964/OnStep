@@ -6,7 +6,7 @@ This firmware is designed to run on a supported smart hand controller hardware t
 with an OnStep controller over the ST4 guiding port. Most of the setup and control functions
 are available.
 
-This is almost entirely based on Charles Lemaire's excellent TeenAstro work.
+This is almost entirely based on [Charles Lemaire](https://pixelstelescopes.wordpress.com/)'s excellent [TeenAstro fork](https://groups.io/g/TeenAstro/wiki/home).
 
 # Features
 The SHC can:
