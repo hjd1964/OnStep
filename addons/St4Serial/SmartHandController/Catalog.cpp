@@ -61,8 +61,8 @@ const char* Txt_Bayer[24] = {
 const char * Txt_Object_Type[20] = {
   "Galaxy",
   "Open Cluster",
-  "*",
-  "**",
+  "Star",
+  "Double Star",
   "Other",
   "Galaxy Pair",
   "Galaxy Triplet",
