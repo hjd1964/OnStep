@@ -437,7 +437,7 @@ byte CatMgr::objectType() {
 
 const char* CatMgr::objectTypeStr() {
   if (_cat==STAR)     return "Star"; else
-  if (_cat==MESSIER)  return Txt_Object_Type[objectType()]; else return "";
+  if (_cat==MESSIER)  return Txt_Object_Type[objectType()]; else
   if (_cat==HERSCHEL) return Txt_Object_Type[objectType()]; else return "";
 }
 
@@ -517,4 +517,3 @@ double CatMgr::HAToRA(double HA) {
 }
 
 CatMgr cat_mgr;
-
