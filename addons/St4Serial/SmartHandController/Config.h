@@ -42,10 +42,16 @@
   #define B_PIN5 22   // F
   #define B_PIN6 23   // f
 
-  #define ST4RAw 2    // ST4 RA- West,  send data to OnStep
-  #define ST4DEs 3    // ST4 DE- South, clock input to ISR
-  #define ST4DEn 4    // ST4 DE+ North, recv data from OnStep
-  #define ST4RAe 5    // ST4 RA+ East,  always 25 Hz square wave on this pin
+  #define ST4RAw 2    // ST4 (OnStep) RA- West,  send data to OnStep
+  #define ST4DEs 3    // ST4 (OnStep) DE- South, clock input to ISR
+  #define ST4DEn 4    // ST4 (OnStep) DE+ North, recv data from OnStep
+  #define ST4RAe 5    // ST4 (OnStep) RA+ East,  always 25 Hz square wave on this pin
+
+// Uncomment to activate the auxillary ST4 port on the SHC
+//  #define ST4AuxRAw 6 // ST4 (Aux) RA- West
+//  #define ST4AuxDEs 7 // ST4 (Aux) DE- South
+//  #define ST4AuxDEn 8 // ST4 (Aux) DE+ North
+//  #define ST4AuxRAe 9 // ST4 (Aux) RA+ East
 #endif
 
 #ifdef ESP32
@@ -57,13 +63,20 @@
   #define B_PIN5 39   // F
   #define B_PIN6 35   // f
 
-  #define ST4RAw 23   // ST4 RA- West,  send data to OnStep
-  #define ST4DEs 14   // ST4 DE- South, clock input to ISR
-  #define ST4DEn 27   // ST4 DE+ North, recv data from OnStep
-  #define ST4RAe 26   // ST4 RA+ East,  always 12.5 Hz square wave on this pin
+  #define ST4RAw 23   // ST4 (OnStep) RA- West,  send data to OnStep
+  #define ST4DEs 14   // ST4 (OnStep) DE- South, clock input to ISR
+  #define ST4DEn 27   // ST4 (OnStep) DE+ North, recv data from OnStep
+  #define ST4RAe 26   // ST4 (OnStep) RA+ East,  always 12.5 Hz square wave on this pin
+
+// Uncomment to activate the auxillary ST4 port on the SHC
+//  #define ST4AuxRAw 19 // ST4 (Aux) RA- West
+//  #define ST4AuxDEs 18 // ST4 (Aux) DE- South
+//  #define ST4AuxDEn 17 // ST4 (Aux) DE+ North
+//  #define ST4AuxRAe 5  // ST4 (Aux) RA+ East
 #endif 
 
 #include "St4SerialSlave.h"
+#include "St4Aux.h"
 
 #define TIMEOUT_CMD         1000  // Default=1000 (1 second)
 #define BACKGROUND_CMD_RATE 300   // Default=300, regulates the background command rate
