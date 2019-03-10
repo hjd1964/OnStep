@@ -39,3 +39,4 @@
 *.json
 *.sqlite
 *.config
+*.bak
