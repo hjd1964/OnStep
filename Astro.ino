@@ -1,6 +1,33 @@
 // -----------------------------------------------------------------------------------------------------------------------------
 // Astronomy related functions
 
+// integer numeric conversion with error checking
+bool atoi2(char *a, int *i, bool sign=true) {
+  int len=strlen(a);
+  if (len>6) return false;
+  for (int l=0; l<len; l++) {
+    if ((l==0) && (a[l]=='-') && sign) continue;
+    if ((a[l]<'0') || (a[l]>'9')) return false;
+  }
+  long l=atol(a);
+  if ((l<-32767) || (l>32768)) return false;
+  *i=l;
+  return true;
+}
+
+// floating point numeric conversion with error checking
+bool atof2(char *a, double *d, bool sign=true) {
+  int dc=0;
+  int len=strlen(a);
+  for (int l=0; l<len; l++) {
+    if ((l==0) && (a[l]=='-') && sign) continue;
+    if (a[l]=='.') { if (dc==0) { dc++; continue; } else return false; }
+    if ((a[l]<'0') || (a[l]>'9')) return false;
+  }
+  *d=atof(a);
+  return true;
+}
+
 // convert string in format MM/DD/YY to julian date
 boolean dateToDouble(double *JulianDay, char *date) {
   char m[3],d[3],y[3];
@@ -8,9 +35,9 @@ boolean dateToDouble(double *JulianDay, char *date) {
   
   if (strlen(date)!= 8) return false;
 
-  m[0]=*date++; m[1]=*date++; m[2]=0; atoi2(m,&m1);
-  if (*date++!='/') return false; d[0]=*date++; d[1]=*date++; d[2]=0; atoi2(d,&d1);
-  if (*date++!='/') return false; y[0]=*date++; y[1]=*date++; y[2]=0; atoi2(y,&y1);
+  m[0]=*date++; m[1]=*date++; m[2]=0; if (!atoi2(m,&m1,false)) return false;
+  if (*date++!='/') return false; d[0]=*date++; d[1]=*date++; d[2]=0; if (!atoi2(d,&d1,false)) return false;
+  if (*date++!='/') return false; y[0]=*date++; y[1]=*date++; y[2]=0; if (!atoi2(y,&y1,false)) return false;
   if ((m1<1) || (m1>12) || (d1<1) || (d1>31) || (y1<0) || (y1>99)) return false;
   if (y1>11) y1=y1+2000; else y1=y1+2100;
   
@@ -20,27 +47,32 @@ boolean dateToDouble(double *JulianDay, char *date) {
 
 // convert string in format HH:MM:SS to floating point
 // (also handles)           HH:MM.M
-// (also handles)           HH:MM:SS.ss
+// (also handles)           HH:MM:SS
+// (also handles)           HH:MM:SS.s
 boolean hmsToDouble(double *f, char *hms) {
-  char h[3],m[5],s[3],sd[3];
-  int  h1,m1,m2=0,s1=0,s2=0;
-  
+  char h[3],m[5],sd[20];
+  int  h1,m1,m2=0;
+  double s1=0;
+
   while (*hms==' ') hms++; // strip prefix white-space
 
-  if (highPrecision) { if ((strlen(hms)!= 8) && (strlen(hms)!= 11)) return false; } else if (strlen(hms)!= 7) return false;
+  int actualLen=strlen(hms);
+  if (actualLen>14) hms[14]=0; // maximum length
+  
+  if (highPrecision) { if ((strlen(hms)!=8) && (strlen(hms)<10)) return false; } else if (strlen(hms)!= 7) return false;
 
-  h[0]=*hms++; h[1]=*hms++; h[2]=0; atoi2(h,&h1);
+  h[0]=*hms++; h[1]=*hms++; h[2]=0; if (!atoi2(h,&h1,false)) return false;
   if (highPrecision) {
-    if (*hms++!=':') return false; m[0]=*hms++; m[1]=*hms++; m[2]=0; atoi2(m,&m1);
-    if (*hms++!=':') return false; s[0]=*hms++; s[1]=*hms++; s[2]=0; atoi2(s,&s1);
-    if (*hms++=='.') { sd[0]=*hms++; sd[1]=*hms++; sd[2]=0; atoi2(sd,&s2); }
+    if (*hms++!=':') return false; m[0]=*hms++; m[1]=*hms++; m[2]=0; if (!atoi2(m,&m1,false)) return false;
+    if (*hms++!=':') return false;
+    if (!atof2(hms,&s1,false)) return false;
   } else {
-    if (*hms++!=':') return false; m[0]=*hms++; m[1]=*hms++; m[2]=0; atoi2(m,&m1);
+    if (*hms++!=':') return false; m[0]=*hms++; m[1]=*hms++; m[2]=0; if (!atoi2(m,&m1,false)) return false;
     if (*hms++!='.') return false; m2=(*hms++)-'0';
   }
-  if ((h1<0) || (h1>23) || (m1<0) || (m1>59) || (m2<0) || (m2>9) || (s1<0) || (s1>59) || (s2<0) || (s2>99)) return false;
+  if ((h1<0) || (h1>23) || (m1<0) || (m1>59) || (m2<0) || (m2>9) || (s1<0) || (s1>59.99999)) return false;
 
-  *f=h1+m1/60.0+m2/600.0+s1/3600.0+s2/360000.0;
+  *f=h1+m1/60.0+m2/600.0+s1/3600.0;
   return true;
 }
 
@@ -92,59 +124,56 @@ boolean doubleToHmsd(char *reply, double *f) {
 //                          sDD*MM
 //                          DDD*MM
 boolean dmsToDouble(double *f, char *dms, boolean sign_present) {
-  char d[4],m[5],s[3],sd[2];
-  int d1, m1, s1=0, s2=0;
+  char d[4], m[5];
+  int d1, m1;
+  double s1=0;
   int lowLimit=0, highLimit=360;
-  int checkLen,checkLen1;
+  int checkLen,actualLen;
   double sign = 1.0;
   boolean secondsOff = false;
 
   while (*dms==' ') dms++; // strip prefix white-space
+  if (strlen(dms)>14) dms[14]=0; // maximum length
 
-  checkLen1=strlen(dms);
+  actualLen=strlen(dms);
 
   // determine if the seconds field was used and accept it if so
   if (highPrecision) { 
     checkLen=9;
-    if (checkLen1 != checkLen) {
+    if (actualLen != checkLen) {
       checkLen=11;
-      if (checkLen1 != checkLen) return false;
+      if (!(actualLen >= checkLen)) return false;
     }
   } else {
     checkLen=6;
-    if (checkLen1 != checkLen) {
-      if (checkLen1==9) { secondsOff=false; checkLen=9; } else return false;
+    if (actualLen != checkLen) {
+      if (actualLen==9) { secondsOff=false; checkLen=9; } else return false;
     } else secondsOff = true;
   }
 
   // determine if the sign was used and accept it if so
   if (sign_present) {
     if (*dms=='-') sign=-1.0; else if (*dms=='+') sign=1.0; else return false; 
-    dms++; d[0]=*dms++; d[1]=*dms++; d[2]=0; if (!atoi2(d,&d1)) return false;
+    dms++; d[0]=*dms++; d[1]=*dms++; d[2]=0; if (!atoi2(d,&d1,false)) return false;
   } else {
-    d[0]=*dms++; d[1]=*dms++; d[2]=*dms++; d[3]=0; if (!atoi2(d,&d1)) return false;
+    d[0]=*dms++; d[1]=*dms++; d[2]=*dms++; d[3]=0; if (!atoi2(d,&d1,false)) return false;
   }
 
   // make sure the seperator is an allowed character
   if ((*dms!=':') && (*dms!='*') && (*dms!=char(223))) return false; else dms++;
 
-  m[0]=*dms++; m[1]=*dms++; m[2]=0; if (!atoi2(m,&m1)) return false;
+  m[0]=*dms++; m[1]=*dms++; m[2]=0; if (!atoi2(m,&m1,false)) return false;
 
   if ((highPrecision) && (!secondsOff)) {
     // make sure the seperator is an allowed character
     if (*dms++!=':') return false; 
-    s[0]=*dms++; s[1]=*dms++; s[2]=0; atoi2(s,&s1);
-    // get the tenths second if present
-    if (checkLen1==11) {
-      if (*dms++!='.') return false;
-      sd[0]=*dms++; sd[1]=0; atoi2(sd,&s2);
-    }
+    if (!atof2(dms,&s1,false)) return false;
   }
 
   if (sign_present) { lowLimit=-90; highLimit=90; }
-  if ((d1<lowLimit) || (d1>highLimit) || (m1<0) || (m1>59) || (s1<0) || (s1>59) || (s2<0) || (s2>9)) return false;
+  if ((d1<lowLimit) || (d1>highLimit) || (m1<0) || (m1>59) || (s1<0) || (s1>59.9999)) return false;
   
-  *f=sign*(d1+m1/60.0+s1/3600.0+s2/36000.0);
+  *f=sign*(d1+m1/60.0+s1/3600.0);
   return true;
 }
 
@@ -734,15 +763,7 @@ double angDist(double h, double d, double h1, double d1) {
   return acos(sin(d/Rad)*sin(d1/Rad)+cos(d/Rad)*cos(d1/Rad)*cos((h1-h)/Rad))*Rad;
 }
 
-// integer numeric conversion with error checking
-boolean atoi2(char *a, int *i) {
-  char *conv_end;
-  long l=strtol(a,&conv_end,10);
-  
-  if ((l<-32767) || (l>32768) || (&a[0]==conv_end)) return false;
-  *i=l;
-  return true;
-}
+
 
 double frac(double v) {
   return v - ((long)v);
