@@ -21,7 +21,7 @@ boolean dateToDouble(double *JulianDay, char *date) {
 // convert string in format HH:MM:SS to floating point
 // (also handles)           HH:MM.M
 // (also handles)           HH:MM:SS
-// (also handles)           HH:MM:SS.s
+// (also handles)           HH:MM:SS.ssss
 boolean hmsToDouble(double *f, char *hms) {
   char h[3],m[5];
   int  h1,m1,m2=0;
@@ -30,7 +30,7 @@ boolean hmsToDouble(double *f, char *hms) {
   while (*hms==' ') hms++; // strip prefix white-space
 
   int actualLen=strlen(hms);
-  if (actualLen>14) hms[14]=0; // maximum length
+  if (actualLen>13) hms[13]=0; // maximum length
   
   if (highPrecision) { if ((strlen(hms)!=8) && (strlen(hms)<10)) return false; } else if (strlen(hms)!= 7) return false;
 
@@ -43,7 +43,7 @@ boolean hmsToDouble(double *f, char *hms) {
     if (*hms++!=':') return false; m[0]=*hms++; m[1]=*hms++; m[2]=0; if (!atoi2(m,&m1,false)) return false;
     if (*hms++!='.') return false; m2=(*hms++)-'0';
   }
-  if ((h1<0) || (h1>23) || (m1<0) || (m1>59) || (m2<0) || (m2>9) || (s1<0) || (s1>59.99999)) return false;
+  if ((h1<0) || (h1>23) || (m1<0) || (m1>59) || (m2<0) || (m2>9) || (s1<0) || (s1>59.9999)) return false;
 
   *f=h1+m1/60.0+m2/600.0+s1/3600.0;
   return true;
@@ -75,13 +75,13 @@ boolean doubleToHms(char *reply, double *f, boolean hp) {
 boolean doubleToHmsd(char *reply, double *f) {
   double h1,m1,f1,s1,sd;
 
-  f1=fabs(*f)+0.00000139; // round to 0.005 sec
+  f1=fabs(*f)+0.0000000139; // round to 0.00005 sec
 
   h1=floor(f1);
   m1=(f1-h1)*60;
   s1=(m1-floor(m1))*60;
-  sd=(s1-floor(s1))*100;
-  char s[]="%s%02d:%02d:%02d.%02d";
+  sd=(s1-floor(s1))*10000;
+  char s[]="%s%02d:%02d:%02d.%04d";
   char sign[2]="";
   if (((sd!=0) || (s1!=0) || (m1!=0) || (h1!=0)) && (*f<0.0)) strcpy(sign,"-");
   sprintf(reply,s,sign,(int)h1,(int)m1,(int)s1,(int)sd);
@@ -90,7 +90,7 @@ boolean doubleToHmsd(char *reply, double *f) {
 }
 
 // convert string in format sDD:MM:SS to floating point
-// (also handles)           sDD:MM:SS.s
+// (also handles)           sDD:MM:SS.sss
 //                          DDD:MM:SS
 //                          sDD:MM
 //                          DDD:MM
@@ -106,7 +106,7 @@ boolean dmsToDouble(double *f, char *dms, boolean sign_present) {
   boolean secondsOff = false;
 
   while (*dms==' ') dms++; // strip prefix white-space
-  if (strlen(dms)>14) dms[14]=0; // maximum length
+  if (strlen(dms)>13) dms[13]=0; // maximum length
 
   actualLen=strlen(dms);
 
@@ -144,7 +144,7 @@ boolean dmsToDouble(double *f, char *dms, boolean sign_present) {
   }
 
   if (sign_present) { lowLimit=-90; highLimit=90; }
-  if ((d1<lowLimit) || (d1>highLimit) || (m1<0) || (m1>59) || (s1<0) || (s1>59.9999)) return false;
+  if ((d1<lowLimit) || (d1>highLimit) || (m1<0) || (m1>59) || (s1<0) || (s1>59.999)) return false;
   
   *f=sign*(d1+m1/60.0+s1/3600.0);
   return true;
@@ -190,13 +190,13 @@ boolean doubleToDmsd(char *reply, double *f) {
   // setup formatting, handle adding the sign
   if (f1<0) { f1=-f1; sign[0]='-'; }
 
-  f1=f1+0.0000139; // round to 0.05 arc-second
+  f1=f1+0.000000139; // round to 0.0005 arc-second
   d1=floor(f1);
   m1=(f1-d1)*60.0;
   s1=(m1-floor(m1))*60.0;
-  s2=(s1-floor(s1))*10.0;
+  s2=(s1-floor(s1))*1000.0;
   
-  char s[]="+%02d*%02d:%02d.%01d";
+  char s[]="+%02d*%02d:%02d.%03d";
   if (sign[0]=='-') { s[0]='-'; }
   sprintf(reply,s,(int)d1,(int)m1,(int)s1,(int)s2);
 
