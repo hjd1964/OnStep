@@ -41,7 +41,7 @@
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  1
 #define FirmwareVersionMinor  22      // minor version 0 to 99
-#define FirmwareVersionPatch  "a"     // for example major.minor patch: 1.3c
+#define FirmwareVersionPatch  "b"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 2       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
@@ -75,11 +75,13 @@
 
 // ---------------------------------------------------------------------------------------------------
 
-#include "src/lib/SoftSPI.h"
 #include "src/lib/FPoint.h"
-#include "src/lib/Julian.h"
-
 #include "Globals.h"
+
+#include "src/lib/SoftSPI.h"
+#include "src/lib/Julian.h"
+#include "src/lib/Misc.h"
+#include "src/lib/Sound.h"
 
 #ifdef MODE_SWITCH_BEFORE_SLEW_SPI
 #include "src/lib/TMC2130.h"

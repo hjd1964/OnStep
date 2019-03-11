@@ -572,7 +572,7 @@ void processCommands() {
 //  :GR#   Get Telescope RA
 //         Returns: HH:MM.T# or HH:MM:SS# (based on precision setting)
 //  :GRa#  Get Telescope RA
-//         Returns: HH:MM:SS.s#
+//         Returns: HH:MM:SS.ss#
       if (command[1]=='R')  {
 #ifdef HAL_SLOW_PROCESSOR
         if (millis()-_coord_t<100)
