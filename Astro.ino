@@ -21,7 +21,7 @@ boolean dateToDouble(double *JulianDay, char *date) {
 // convert string in format HH:MM:SS to floating point
 // (also handles)           HH:MM.M
 // (also handles)           HH:MM:SS
-// (also handles)           HH:MM:SS.ssss
+// (also handles)           HH:MM:SS.SSSS
 boolean hmsToDouble(double *f, char *hms) {
   char h[3],m[5];
   int  h1,m1,m2=0;
@@ -49,6 +49,7 @@ boolean hmsToDouble(double *f, char *hms) {
   return true;
 }
 
+// convert double to string in a variety of formats (as above) 
 boolean doubleToHms(char *reply, double *f, boolean hp) {
   double h1,m1,f1,s1;
 
@@ -72,6 +73,7 @@ boolean doubleToHms(char *reply, double *f, boolean hp) {
   return true;
 }
 
+// convert double to string in format HH:MM:SS.SSSS
 boolean doubleToHmsd(char *reply, double *f) {
   double h1,m1,f1,s1,sd;
 
@@ -90,7 +92,7 @@ boolean doubleToHmsd(char *reply, double *f) {
 }
 
 // convert string in format sDD:MM:SS to floating point
-// (also handles)           sDD:MM:SS.sss
+// (also handles)           sDD:MM:SS.SSS
 //                          DDD:MM:SS
 //                          sDD:MM
 //                          DDD:MM
@@ -150,6 +152,7 @@ boolean dmsToDouble(double *f, char *dms, boolean sign_present) {
   return true;
 }
 
+// convert double to string in a variety of formats (as above) 
 boolean doubleToDms(char *reply, double *f, boolean fullRange, boolean signPresent) {
   char sign[]="+";
   int  o=0,d1,s1=0;
@@ -182,6 +185,7 @@ boolean doubleToDms(char *reply, double *f, boolean fullRange, boolean signPrese
   return true;
 }
 
+// convert double to string in format sDD:MM:SS.SSS
 boolean doubleToDmsd(char *reply, double *f) {
   char sign[]="+";
   double d1,m1,s1,s2,f1;
@@ -203,6 +207,7 @@ boolean doubleToDmsd(char *reply, double *f) {
   return true;
 }
 
+// convert timezone to string in format sHHH:MM[:SS]
 void timeZoneToHM(char *reply, double tz) {
   double f=fabs(frac(tz));
   sprintf(reply,"%+03d",(int)tz);
@@ -707,6 +712,7 @@ boolean doHorRateCalc() {
 }
 #endif
 
+// -----------------------------------------------------------------------------------------------------------------------------
 // Acceleration rate calculation
 void setAccelerationRates(double maxRate) {
   
