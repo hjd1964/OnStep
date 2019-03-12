@@ -323,9 +323,9 @@ void CatMgr::decIndex() {
 // RA in degrees
 double CatMgr::ra() {
   double f;
-  if (_cat==STAR)     f=Cat_Stars[_idx[_selected]].RA; else
-  if (_cat==MESSIER)  f=Cat_Messier[_idx[_selected]].RA; else
-  if (_cat==HERSCHEL) f=Cat_Herschel[_idx[_selected]].RA; else f=0;
+  if (_cat==STAR)     f=Cat_Stars[_idx[_selected]].RA*15.0; else
+  if (_cat==MESSIER)  f=Cat_Messier[_idx[_selected]].RA*15.0; else
+  if (_cat==HERSCHEL) f=Cat_Herschel[_idx[_selected]].RA*15.0; else f=0;
   return f;
 }
 
@@ -340,9 +340,9 @@ double CatMgr::ha() {
 
 void CatMgr::raHMS(uint8_t& h, uint8_t& m, uint8_t& s) {
   double f;
-  if (_cat==STAR)     f=Cat_Stars[_idx[_selected]].RA; else
-  if (_cat==MESSIER)  f=Cat_Messier[_idx[_selected]].RA; else
-  if (_cat==HERSCHEL) f=Cat_Herschel[_idx[_selected]].RA; else f=0;
+  if (_cat==STAR)     f=Cat_Stars[_idx[_selected]].RA*15.0; else
+  if (_cat==MESSIER)  f=Cat_Messier[_idx[_selected]].RA*15.0; else
+  if (_cat==HERSCHEL) f=Cat_Herschel[_idx[_selected]].RA*15.0; else f=0;
   
   double h1,m1,s1;
 
