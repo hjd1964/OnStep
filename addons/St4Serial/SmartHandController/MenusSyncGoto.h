@@ -40,12 +40,12 @@ void SmartHandController::menuSyncGoto(bool sync)
 
 void SmartHandController::menuMessier(bool sync)
 {
-  if (!cat_mgr.canFilter()) { cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0()); }
+  if (!cat_mgr.isInitialized()) { cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0()); }
   cat_mgr.select(MESSIER);
   cat_mgr.filter(FM_ABOVE_HORIZON);
   cat_mgr.setIndex(0);
   
-  if (cat_mgr.canFilter()) {
+  if (cat_mgr.isInitialized()) {
     if (display->UserInterfaceCatalog(&buttonPad, sync ? "Sync Messier" : "Goto Messier")) {
       bool ok = DisplayMessageLX200(SyncGotoCatLX200(sync), false);
       if (ok) { current_selection_L1 = 0; current_selection_L0 = 0; } // Quit Menu
@@ -55,11 +55,11 @@ void SmartHandController::menuMessier(bool sync)
 
 void SmartHandController::menuStar(bool sync)
 {
-  if (!cat_mgr.canFilter()) { cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0()); }
+  if (!cat_mgr.isInitialized()) { cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0()); }
   cat_mgr.select(STAR);
   cat_mgr.filter(FM_ABOVE_HORIZON);
   cat_mgr.setIndex(0);
-  if (cat_mgr.canFilter()) {
+  if (cat_mgr.isInitialized()) {
     if (display->UserInterfaceCatalog(&buttonPad, sync ? "Sync Star" : "Goto Star")) {
       bool  ok = DisplayMessageLX200(SyncGotoCatLX200(sync), false);
       if (ok) { current_selection_L1 = 0; current_selection_L0 = 0; } // Quit Menu
@@ -83,12 +83,12 @@ void SmartHandController::menuSolarSys(bool sync)
 
 void SmartHandController::menuHerschel(bool sync)
 {
-  if (!cat_mgr.canFilter()) { cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0()); }
+  if (!cat_mgr.isInitialized()) { cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0()); }
   cat_mgr.select(HERSCHEL);
   cat_mgr.filter(FM_ABOVE_HORIZON);
   cat_mgr.setIndex(0);
   
-  if (cat_mgr.canFilter()) {
+  if (cat_mgr.isInitialized()) {
     if (display->UserInterfaceCatalog(&buttonPad, sync ? "Sync Herschel" : "Goto Herschel")) {
       bool ok = DisplayMessageLX200(SyncGotoCatLX200(sync), false);
       if (ok) { current_selection_L1 = 0; current_selection_L0 = 0; } // Quit Menu
@@ -121,4 +121,3 @@ void SmartHandController::menuRADec(bool sync)
     }
   }
 }
-

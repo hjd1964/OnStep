@@ -615,13 +615,13 @@ void SmartHandController::menuMain()
 
 bool SmartHandController::SelectStarAlign()
 {
-  if (!cat_mgr.canFilter()) { cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0()); }
+  if (!cat_mgr.isInitialized()) { cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0()); }
   cat_mgr.select(STAR);
   
   cat_mgr.filter(FM_ALIGN_ALL_SKY);
 
   cat_mgr.setIndex(0);
-  if (cat_mgr.canFilter()) {
+  if (cat_mgr.isInitialized()) {
     if (display->UserInterfaceCatalog(&buttonPad, "Select Star")) {
       bool ok = DisplayMessageLX200(SyncSelectedStarLX200(cat_mgr.getIndex()),false);
       return ok;

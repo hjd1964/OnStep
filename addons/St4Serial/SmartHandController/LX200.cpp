@@ -328,7 +328,7 @@ LX200RETURN SyncGotoLX200(bool sync, float &Ra, float &Dec)
   char sign='+';
 
   // apply refraction, this converts from the "Topocentric" to "Observed" place for higher accuracy
-  if (cat_mgr.canFilter()) {
+  if (cat_mgr.isInitialized()) {
     double Alt,Azm; 
     double r=Ra*15.0;
     double d=Dec;

@@ -17,6 +17,7 @@ class CatMgr {
 // initialization
     void setLat(double lat);
     void setLstT0(double lstT0);
+    bool isInitialized();
 
 // time
     double lstDegs();
@@ -28,7 +29,6 @@ class CatMgr {
     const char* catalogStr();
 
 // catalog filtering
-    bool canFilter();
     void filter(FilterMode fm);
 
 // select catalog record

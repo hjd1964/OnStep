@@ -234,7 +234,7 @@ const char* CatMgr::catalogStr() {
 }
 
 // catalog filtering
-bool CatMgr::canFilter() {
+bool CatMgr::isInitialized() {
   return ((_lat<9999) && (_lstT0!=0));
 }
 
@@ -244,7 +244,7 @@ void CatMgr::filter(FilterMode fm) {
 
 bool CatMgr::isFiltered() {
   double ar,ad;
-  if (!canFilter()) return false;
+  if (!isInitialized()) return false;
   switch (_fm) {
     case FM_NONE:
       return false;
@@ -348,7 +348,7 @@ double CatMgr::rah() {
 
 // HA in degrees
 double CatMgr::ha() {
-  if (!canFilter()) return 0;
+  if (!isInitialized()) return 0;
   double h=(lstDegs()-ra());
   while (h>180.0) h-=360.0;
   while (h<-180.0) h+=360.0;
