@@ -95,7 +95,6 @@ private:
   void menuLongitude();
   void menuZone();
   void menuLimits();
-  void menuWifi();
   void menuHorizon();
   void menuOverhead();
   void menuMeridianE();

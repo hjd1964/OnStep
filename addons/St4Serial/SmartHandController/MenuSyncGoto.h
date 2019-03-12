@@ -1,3 +1,4 @@
+// SyncGoto menu
 
 void SmartHandController::menuSyncGoto(bool sync)
 {

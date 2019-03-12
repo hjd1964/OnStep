@@ -3,10 +3,6 @@
 
 #pragma once
 
-/*
-ST4 aux port
-*/
-
 class Ast4
 {
   public:

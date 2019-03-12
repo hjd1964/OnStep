@@ -1,10 +1,6 @@
 // -----------------------------------------------------------------------------------
 // ST4 aux port
 
-/*
-ST4 aux port
-*/
-
 #include "St4Aux.h"
 #include <Arduino.h>
 #include "Config.h"
