@@ -48,6 +48,7 @@ class CatMgr {
     int    epoch();
     double alt();
     double azm();
+    void topocentricToObservedPlace(float *RA, float *Dec);
 
     double magnitude();
     
@@ -59,7 +60,7 @@ class CatMgr {
     const char* objectName();
     
     int    primaryId();
-    
+
 private:
     double _lat=-10000;
     double _cosLat=0;
@@ -73,13 +74,14 @@ private:
     int _maxIdx[4]={NUM_STARS-1,NUM_MESSIER-1,NUM_HERSCHEL-1,0-1};
 
     bool isFiltered();
+
     double DistFromEqu(double RA, double Dec);
     double HAToRA(double ha);
-    double cot(double n);
-
     void EquToHor(double RA, double Dec, double *Alt, double *Azm);
     void HorToEqu(double Alt, double Azm, double *RA, double *Dec);
     double TrueRefrac(double Alt, double Pressure=1010.0, double Temperature=10.0);
+
+    double cot(double n);
 };
 
 extern CatMgr cat_mgr;

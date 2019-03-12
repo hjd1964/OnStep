@@ -328,15 +328,7 @@ LX200RETURN SyncGotoLX200(bool sync, float &Ra, float &Dec)
   char sign='+';
 
   // apply refraction, this converts from the "Topocentric" to "Observed" place for higher accuracy
-  if (cat_mgr.isInitialized()) {
-    double Alt,Azm; 
-    double r=Ra*15.0;
-    double d=Dec;
-    cat_mgr.EquToHor(r,d,&Alt,&Azm);
-    Alt = Alt+cat_mgr.TrueRefrac(Alt) / 60.0;
-    cat_mgr.HorToEqu(Alt,Azm,&r,&d);
-    Ra=r/15.0; Dec=d;
-  }
+  cat_mgr.topocentricToObservedPlace(&Ra,&Dec);
   
   Ephemeris::floatingHoursToHoursMinutesSeconds(Ra, &ivr1, &ivr2, &fvr3);
   Ephemeris::floatingDegreesToDegreesMinutesSeconds(Dec, &ivd1, &ivd2, &fvd3);

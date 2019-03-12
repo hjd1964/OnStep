@@ -423,6 +423,19 @@ double CatMgr::azm() {
   return z;
 }
 
+// apply refraction, this converts from the "Topocentric" to "Observed" place for higher accuracy
+void CatMgr::topocentricToObservedPlace(float *RA, float *Dec) {
+  if (isInitialized()) {
+    double Alt,Azm;
+    double r=*RA*15.0;
+    double d=*Dec;
+    EquToHor(r,d,&Alt,&Azm);
+    Alt = Alt+TrueRefrac(Alt) / 60.0;
+    HorToEqu(Alt,Azm,&r,&d);
+    *RA=r/15.0; *Dec=d;
+  }
+}
+
 double CatMgr::magnitude() {
   double m=250;
   if (_cat==STAR)     m=Cat_Stars[_idx[_selected]].Mag; else
@@ -465,6 +478,18 @@ int CatMgr::primaryId() {
 }
 
 // support functions
+
+// angular distance from current Equ coords, in degrees
+double CatMgr::DistFromEqu(double RA, double Dec) {
+  RA=RA/Rad; Dec=Dec/Rad;
+  return acos( sin(dec()/Rad)*sin(Dec) + cos(dec()/Rad)*cos(Dec)*cos(ra()/Rad - RA))*Rad;
+}
+
+// convert an HA to RA, in degrees
+double CatMgr::HAToRA(double HA) {
+  return (lstDegs()-HA);
+}
+
 // convert equatorial coordinates to horizon, in degrees
 void CatMgr::EquToHor(double RA, double Dec, double *Alt, double *Azm) {
   double HA=lstDegs()-RA;
@@ -512,17 +537,6 @@ double CatMgr::TrueRefrac(double Alt, double Pressure, double Temperature) {
 
 double CatMgr::cot(double n) {
   return 1.0/tan(n);
-}
-
-// angular distance from current Equ coords, in degrees
-double CatMgr::DistFromEqu(double RA, double Dec) {
-  RA=RA/Rad; Dec=Dec/Rad;
-  return acos( sin(dec()/Rad)*sin(Dec) + cos(dec()/Rad)*cos(Dec)*cos(ra()/Rad - RA))*Rad;
-}
-
-// convert an HA to RA, in degrees
-double CatMgr::HAToRA(double HA) {
-  return (lstDegs()-HA);
 }
 
 CatMgr cat_mgr;
