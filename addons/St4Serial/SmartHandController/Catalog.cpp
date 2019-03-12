@@ -423,7 +423,7 @@ double CatMgr::azm() {
   return z;
 }
 
-// apply refraction, this converts from the "Topocentric" to "Observed" place for higher accuracy
+// apply refraction, this converts from the "Topocentric" to "Observed" place for higher accuracy, RA in hours Dec in degrees
 void CatMgr::topocentricToObservedPlace(float *RA, float *Dec) {
   if (isInitialized()) {
     double Alt,Azm;
