@@ -18,9 +18,9 @@ class CatMgr {
     void setLat(double lat);
     void setLstT0(double lstT0);
 
-// time  
-    double lstDeg();
-    double lst();
+// time
+    double lstDegs();
+    double lstHours();
 
 // catalog selection
     void select(Catalog cat);

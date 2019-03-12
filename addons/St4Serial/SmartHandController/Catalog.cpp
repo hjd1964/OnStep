@@ -207,12 +207,12 @@ void CatMgr::setLstT0(double lstT0) {
 }
 
 // time
-double CatMgr::lstDeg() {
-  return (lst()*15.0);
+double CatMgr::lstDegs() {
+  return (lstHours()*15.0);
 }
 
-double CatMgr::lst() {
-  double msSinceT0=millis()-_lstMillisT0;
+double CatMgr::lstHours() {
+  double msSinceT0=(unsigned long)(millis()-_lstMillisT0);
   double siderealSecondsSinceT0=(msSinceT0/1000.0)*1.00277778;
   return _lstT0+siderealSecondsSinceT0/3600.0;
 }
@@ -254,7 +254,7 @@ bool CatMgr::isFiltered() {
       return alt()<0.0;
       break;
     case FM_ALIGN_ALL_SKY:
-      // minimum 10 degrees altitude (to limit unlikely align stars and to minimime refraction effects)
+      // minimum 10 degrees altitude (to limit unlikely align stars and to minimize refraction effects)
       if (alt()<10.0) return true;
       // minimum 5 degrees from the pole (for accuracy)
       if (_lat>=0.0) {
@@ -265,7 +265,7 @@ bool CatMgr::isFiltered() {
       return false;
       break;
     case FM_ALIGN_3STAR_1:
-      // minimum 10 degrees altitude (to limit unlikely align stars and to minimime refraction effects)
+      // minimum 10 degrees altitude (to limit unlikely align stars and to minimize refraction effects)
       if (alt()<10.0) return true;
       // maximum 30 degrees from align location
       ar = HAToRA(-1.0 * 15.0);
@@ -276,7 +276,7 @@ bool CatMgr::isFiltered() {
       return false;
       break;
     case FM_ALIGN_3STAR_2:
-      // minimum 10 degrees altitude (to limit unlikely align stars and to minimime refraction effects)
+      // minimum 10 degrees altitude (to limit unlikely align stars and to minimize refraction effects)
       if (alt()<10.0) return true;
       // maximum 30 degrees from align location
       ar = HAToRA(+1.0 * 15.0);
@@ -345,7 +345,7 @@ double CatMgr::ra() {
 // HA in degrees
 double CatMgr::ha() {
   if (!canFilter()) return 0;
-  double h=(lstDeg()-ra());
+  double h=(lstDegs()-ra());
   while (h>180.0) h-=360.0;
   while (h<-180.0) h+=360.0;
   return h;
@@ -498,7 +498,7 @@ void CatMgr::HorToEqu(double Alt, double Azm, double *RA, double *Dec) {
 
   while (HA<0.0)    HA=HA+360.0;
   while (HA>=360.0) HA=HA-360.0;
-  *RA=(lstDeg()-HA);
+  *RA=(lstDegs()-HA);
 }
 
 // returns the amount of refraction (in arcminutes) at the given true altitude (degrees), pressure (millibars), and temperature (celsius)
@@ -520,7 +520,7 @@ double CatMgr::DistFromEqu(double RA, double Dec) {
 
 // convert an HA to RA, in degrees
 double CatMgr::HAToRA(double HA) {
-  return (lstDeg()-HA);
+  return (lstDegs()-HA);
 }
 
 CatMgr cat_mgr;
