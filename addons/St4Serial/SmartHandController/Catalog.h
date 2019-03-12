@@ -17,20 +17,28 @@ class CatMgr {
 // initialization
     void setLat(double lat);
     void setLstT0(double lstT0);
-  
+
+// time  
+    double lstToDeg();
+    double lst();
+
+// catalog selection
     void select(Catalog cat);
     Catalog getCat();
     const char* catalogStr();
 
+// catalog filtering
     bool canFilter();
     void filter(FilterMode fm);
 
+// select catalog record
     void setIndex(int index);
     int getIndex();
     int getMaxIndex();
     void incIndex();
     void decIndex();
-    
+
+// get catalog contents
     double ra();
     double ha();
     void   raHMS(uint8_t& h, uint8_t& m, uint8_t& s);
@@ -39,24 +47,24 @@ class CatMgr {
     int    epoch();
     double alt();
     double azm();
+
     double magnitude();
+    
     byte   constellation();
     const char* constellationStr();
+    
     byte   objectType();
     const char* objectTypeStr();
     const char* objectName();
+    
     int    primaryId();
-
-    void EquToHor(double RA, double Dec, double *Alt, double *Azm);
-    void HorToEqu(double Alt, double Azm, double *RA, double *Dec);
-    double TrueRefrac(double Alt, double Pressure=1010.0, double Temperature=10.0);
-    double lstToDeg();
     
 private:
     double _lat=-10000;
     double _cosLat=0;
     double _sinLat=0;
     double _lstT0=0;
+    unsigned long _lstMillisT0=0;
     Catalog _cat=CAT_NONE;
     FilterMode _fm=FM_NONE;
     int _selected=0;
@@ -67,7 +75,10 @@ private:
     double DistFromEqu(double RA, double Dec);
     double HAToRA(double ha);
     double cot(double n);
+
+    void EquToHor(double RA, double Dec, double *Alt, double *Azm);
+    void HorToEqu(double Alt, double Azm, double *RA, double *Dec);
+    double TrueRefrac(double Alt, double Pressure=1010.0, double Temperature=10.0);
 };
 
 extern CatMgr cat_mgr;
-
