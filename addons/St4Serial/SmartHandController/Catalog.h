@@ -40,6 +40,7 @@ class CatMgr {
 
 // get catalog contents
     double ra();
+    double rah();
     double ha();
     void   raHMS(uint8_t& h, uint8_t& m, uint8_t& s);
     double dec();

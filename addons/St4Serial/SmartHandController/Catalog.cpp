@@ -217,7 +217,6 @@ double CatMgr::lstHours() {
   return _lstT0+siderealSecondsSinceT0/3600.0;
 }
 
-
 // handle catalog selection
 void CatMgr::select(Catalog cat) {
   _cat=cat;
@@ -335,10 +334,15 @@ void CatMgr::decIndex() {
 
 // RA in degrees
 double CatMgr::ra() {
+  return rah()*15.0;
+}
+
+// RA in hours
+double CatMgr::rah() {
   double f;
-  if (_cat==STAR)     f=Cat_Stars[_idx[_selected]].RA*15.0; else
-  if (_cat==MESSIER)  f=Cat_Messier[_idx[_selected]].RA*15.0; else
-  if (_cat==HERSCHEL) f=Cat_Herschel[_idx[_selected]].RA*15.0; else f=0;
+  if (_cat==STAR)     f=Cat_Stars[_idx[_selected]].RA; else
+  if (_cat==MESSIER)  f=Cat_Messier[_idx[_selected]].RA; else
+  if (_cat==HERSCHEL) f=Cat_Herschel[_idx[_selected]].RA; else f=0;
   return f;
 }
 
@@ -353,9 +357,9 @@ double CatMgr::ha() {
 
 void CatMgr::raHMS(uint8_t& h, uint8_t& m, uint8_t& s) {
   double f;
-  if (_cat==STAR)     f=Cat_Stars[_idx[_selected]].RA*15.0; else
-  if (_cat==MESSIER)  f=Cat_Messier[_idx[_selected]].RA*15.0; else
-  if (_cat==HERSCHEL) f=Cat_Herschel[_idx[_selected]].RA*15.0; else f=0;
+  if (_cat==STAR)     f=Cat_Stars[_idx[_selected]].RA; else
+  if (_cat==MESSIER)  f=Cat_Messier[_idx[_selected]].RA; else
+  if (_cat==HERSCHEL) f=Cat_Herschel[_idx[_selected]].RA; else f=0;
   
   double h1,m1,s1;
 
@@ -463,8 +467,7 @@ int CatMgr::primaryId() {
 // support functions
 // convert equatorial coordinates to horizon, in degrees
 void CatMgr::EquToHor(double RA, double Dec, double *Alt, double *Azm) {
-  double HA=(_lstT0-RA)*15.0;
-
+  double HA=lstDegs()-RA;
   //D("RA="); D(RA);
   //D(",DE="); D(Dec);
   while (HA<0.0)    HA=HA+360.0;
@@ -483,7 +486,6 @@ void CatMgr::EquToHor(double RA, double Dec, double *Alt, double *Azm) {
 
 // convert horizon coordinates to equatorial, in degrees
 void CatMgr::HorToEqu(double Alt, double Azm, double *RA, double *Dec) { 
-  
   while (Azm<0)      Azm=Azm+360.0;
   while (Azm>=360.0) Azm=Azm-360.0;
   Alt  = Alt/Rad;

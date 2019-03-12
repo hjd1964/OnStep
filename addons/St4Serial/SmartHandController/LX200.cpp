@@ -384,7 +384,7 @@ LX200RETURN SyncGotoCatLX200(bool sync)
   if (GetDateLX200(day, month, year, true) == LX200GETVALUEFAILED) return LX200GETVALUEFAILED;
   if (cat_mgr.getCat()==CAT_NONE) return LX200UNKOWN;
   EquatorialCoordinates coo;
-  coo.ra = cat_mgr.ra();
+  coo.ra = cat_mgr.rah();
   coo.dec = cat_mgr.dec();
   epoch=cat_mgr.epoch(); if (epoch==0) return LX200GETVALUEFAILED;
   EquatorialCoordinates cooNow;
@@ -639,4 +639,3 @@ boolean dmsToDouble(double *f, char *dms, boolean sign_present, boolean highPrec
   *f=sign*(d1+m1/60.0+s1/3600.0);
   return true;
 }
-
