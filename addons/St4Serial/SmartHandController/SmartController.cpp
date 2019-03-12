@@ -58,8 +58,8 @@ static unsigned char guiding_bits[] U8X8_PROGMEM = {
 static unsigned char no_tracking_bits[] U8X8_PROGMEM = {
   0x00, 0x00, 0x00, 0x00, 0x38, 0x1c, 0x7c, 0x3e, 0x7c, 0x3e, 0x7c, 0x3e, 0x7c, 0x3e, 0x7c, 0x3e, 0x7c, 0x3e, 0x7c, 0x3e, 0x7c, 0x3e, 0x7c, 0x3e, 0x7c, 0x3e, 0x7c, 0x3e, 0x38, 0x1c, 0x00, 0x00 };
 
-static unsigned char tracking_bits[] U8X8_PROGMEM = {
-  0x00, 0x00, 0x02, 0x00, 0x06, 0x00, 0x0e, 0x00, 0x1e, 0x00, 0x3e, 0x00, 0x7e, 0x00, 0xfe, 0x38, 0xfe, 0x44, 0x7e, 0x44, 0x3e, 0x20, 0x1e, 0x10, 0x0e, 0x10, 0x06, 0x00, 0x02, 0x10, 0x00, 0x00 };
+//static unsigned char tracking_bits[] U8X8_PROGMEM = {
+//  0x00, 0x00, 0x02, 0x00, 0x06, 0x00, 0x0e, 0x00, 0x1e, 0x00, 0x3e, 0x00, 0x7e, 0x00, 0xfe, 0x38, 0xfe, 0x44, 0x7e, 0x44, 0x3e, 0x20, 0x1e, 0x10, 0x0e, 0x10, 0x06, 0x00, 0x02, 0x10, 0x00, 0x00 };
 
 static unsigned char tracking_S_bits[] U8X8_PROGMEM = {
   0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x06, 0x00, 0x0e, 0x00, 0x1e, 0x00, 0x3e, 0x00, 0x7e, 0x00, 0xfe, 0x38, 0x7e, 0x04, 0x3e, 0x04, 0x1e, 0x18, 0x0e, 0x20, 0x06, 0x20, 0x02, 0x1c, 0x00, 0x00 };
@@ -376,8 +376,6 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
   u8g2_t *u8g2 = display->getU8g2();
   display->setFont(u8g2_font_helvR12_te);
   u8g2_uint_t line_height = u8g2_GetAscent(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
-  u8g2_uint_t step1 = u8g2_GetUTF8Width(u8g2, "44");
-  u8g2_uint_t step2 = u8g2_GetUTF8Width(u8g2, "4") + 1;
 
   // get the status
   telInfo.connected = true;
@@ -412,7 +410,6 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
   do
   {
     u8g2_uint_t x = u8g2_GetDisplayWidth(u8g2);
-    int k = 0;
 
     // wifi status
     if (wifiOn) display->drawXBMP(0, 0, icon_width, icon_height, wifi_bits);
@@ -565,7 +562,7 @@ void SmartHandController::drawReady()
 // Alt Main Menu (double click)
 void SmartHandController::menuSpeedRate()
 {
-  char * string_list_Speed = "0.25x\n0.5x\n1.0x\n2.0x\n4.0x\n8.0x\n20.0x\n48.0x\n0.5 Max\nMax";
+  char string_list_Speed[] = "0.25x\n0.5x\n1.0x\n2.0x\n4.0x\n8.0x\n20.0x\n48.0x\n0.5 Max\nMax";
   current_selection_speed = display->UserInterfaceSelectionList(&buttonPad, "Set Speed", current_selection_speed, string_list_Speed);
   if (current_selection_speed > 0)
   {
@@ -593,7 +590,6 @@ void SmartHandController::menuMain()
         case 5: menuTracking(); break;
         case 6: menuPEC(); break;
         case 7: menuSettings(); break;
-        default: break;
       }
     } else {
       const char *string_list_main_UnParkedL0 = "Goto\n""Sync\n""Align\n""Parking\n""Tracking\n""Settings";
@@ -605,7 +601,6 @@ void SmartHandController::menuMain()
         case 4: menuParking(); break;
         case 5: menuTracking(); break;
         case 6: menuSettings(); break;
-        default: break;
       }
     }
   }
@@ -631,7 +626,6 @@ void SmartHandController::menuParking()
     case 1: DisplayMessageLX200(SetLX200(":hP#"),false); break;
     case 2: DisplayMessageLX200(SetLX200(":hR#"),false); break;
     case 3: DisplayMessageLX200(SetLX200(":hQ#"),false); break;
-    default: break;
     }
   }
 }
@@ -655,9 +649,9 @@ void SmartHandController::menuTracking()
       {
       case 1:
         if (currentstate == Telescope::TRK_ON) {
-          char out[20]=""; if (SetLX200(":Td#")== LX200VALUESET) { DisplayMessage("Tracking", "OFF", 500); currentstate=Telescope::TRK_OFF; } else DisplayMessage("Set State", "Failed", 1000);
+          if (SetLX200(":Td#")== LX200VALUESET) { DisplayMessage("Tracking", "OFF", 500); currentstate=Telescope::TRK_OFF; } else DisplayMessage("Set State", "Failed", 1000);
         } else {
-          char out[20]=""; if (SetLX200(":Te#")== LX200VALUESET) { DisplayMessage("Tracking", "ON", 500); currentstate=Telescope::TRK_ON; } else DisplayMessage("Set State", "Failed", 1000);
+          if (SetLX200(":Te#")== LX200VALUESET) { DisplayMessage("Tracking", "ON", 500); currentstate=Telescope::TRK_ON; } else DisplayMessage("Set State", "Failed", 1000);
         }
       break;
       case 2: DisplayMessageLX200(SetLX200(":TQ#"),false); break;
@@ -683,9 +677,9 @@ void SmartHandController::menuTracking()
       {
       case 1:
         if (currentstate == Telescope::TRK_ON) {
-          char out[20]=""; if (SetLX200(":Td#")== LX200VALUESET) { DisplayMessage("Tracking", "OFF", 500); currentstate=Telescope::TRK_OFF; } else DisplayMessage("Set State", "Failed", 1000);
+          if (SetLX200(":Td#")== LX200VALUESET) { DisplayMessage("Tracking", "OFF", 500); currentstate=Telescope::TRK_OFF; } else DisplayMessage("Set State", "Failed", 1000);
         } else {
-          char out[20]=""; if (SetLX200(":Te#")== LX200VALUESET) { DisplayMessage("Tracking", "ON", 500); currentstate=Telescope::TRK_ON; } else DisplayMessage("Set State", "Failed", 1000);
+          if (SetLX200(":Te#")== LX200VALUESET) { DisplayMessage("Tracking", "ON", 500); currentstate=Telescope::TRK_ON; } else DisplayMessage("Set State", "Failed", 1000);
         }
       break;
       case 2:  DisplayMessageLX200(SetLX200(":TQ#"),false); break;

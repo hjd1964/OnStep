@@ -33,8 +33,6 @@ void SmartHandController::menuSyncGoto(bool sync)
         current_selection_L0 = 0;
       }
       break;
-      default:
-      break;
     }
   }
 }

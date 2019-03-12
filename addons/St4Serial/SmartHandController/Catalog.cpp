@@ -293,7 +293,10 @@ bool CatMgr::isFiltered() {
       if (_lat >= 0.0) ad = 45.0; else ad = -45.0;
       if (DistFromEqu(ar,ad)>30.0) return true;
       return false;
-      break;
+    break;
+    default:
+      return false;
+    break;
   }
 }
 
@@ -467,8 +470,8 @@ const char* CatMgr::objectTypeStr() {
 
 const char* CatMgr::objectName() {
   if (_cat==STAR)     return Cat_Stars[_idx[_selected]].Name; else
-  if (_cat==MESSIER)  return "";
-  if (_cat==HERSCHEL) return "";
+  if (_cat==MESSIER)  return ""; else
+  if (_cat==HERSCHEL) return ""; else return "";
 }
 
 int CatMgr::primaryId() {
