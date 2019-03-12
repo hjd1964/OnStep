@@ -327,13 +327,7 @@ LX200RETURN SyncGotoLX200(bool sync, float &Ra, float &Dec)
   float fvr3, fvd3;
   char sign='+';
 
-  /*
-   * This code is commented out, since OnStep has its own Refraction
-   * Compensation Tracking. Use that, or the Full Compensated Tracking 
-   * instead
-   */
-  /*
-  // apply refraction
+  // apply refraction, this converts from the "Topocentric" to "Observed" place for higher accuracy
   if (cat_mgr.canFilter()) {
     double Alt,Azm; 
     double r=Ra*15.0;
@@ -343,7 +337,6 @@ LX200RETURN SyncGotoLX200(bool sync, float &Ra, float &Dec)
     cat_mgr.HorToEqu(Alt,Azm,&r,&d);
     Ra=r/15.0; Dec=d;
   }
-  */
   
   Ephemeris::floatingHoursToHoursMinutesSeconds(Ra, &ivr1, &ivr2, &fvr3);
   Ephemeris::floatingDegreesToDegreesMinutesSeconds(Dec, &ivd1, &ivd2, &fvd3);
