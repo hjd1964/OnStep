@@ -345,7 +345,7 @@ double CatMgr::ra() {
 // HA in degrees
 double CatMgr::ha() {
   if (!canFilter()) return 0;
-  double h=(lstToDeg()-ra());
+  double h=(lstDeg()-ra());
   while (h>180.0) h-=360.0;
   while (h<-180.0) h+=360.0;
   return h;
@@ -498,7 +498,7 @@ void CatMgr::HorToEqu(double Alt, double Azm, double *RA, double *Dec) {
 
   while (HA<0.0)    HA=HA+360.0;
   while (HA>=360.0) HA=HA-360.0;
-  *RA=(lstToDeg()-HA);
+  *RA=(lstDeg()-HA);
 }
 
 // returns the amount of refraction (in arcminutes) at the given true altitude (degrees), pressure (millibars), and temperature (celsius)
@@ -520,7 +520,7 @@ double CatMgr::DistFromEqu(double RA, double Dec) {
 
 // convert an HA to RA, in degrees
 double CatMgr::HAToRA(double HA) {
-  return (lstToDeg()-HA);
+  return (lstDeg()-HA);
 }
 
 CatMgr cat_mgr;

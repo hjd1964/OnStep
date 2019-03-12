@@ -19,7 +19,7 @@ class CatMgr {
     void setLstT0(double lstT0);
 
 // time  
-    double lstToDeg();
+    double lstDeg();
     double lst();
 
 // catalog selection
