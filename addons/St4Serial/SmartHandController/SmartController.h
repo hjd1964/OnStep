@@ -73,16 +73,14 @@ private:
   void menuParking();
   void menuPEC();
   void menuGotoSpeed();
+  void menuBacklash();
+  bool menuSetBacklash(uint8_t &axis);
   void menuPier();
   void menuStar(bool sync);
   bool SelectStarAlign();
   void menuRADec(bool sync);
   void menuSettings();
   void menuMount();
-  void menuMountType();
-  void menuPredefinedMount();
-  void menuAltMount();
-  void menuMotor(uint8_t idx);
   void menuSite();
   void menuSites();
   void menuLocalDateTime();
@@ -102,17 +100,6 @@ private:
   void menuOverhead();
   void menuMeridianE();
   void menuMeridianW();
-
-  bool menuSetStepperGearBox(uint8_t &axis, unsigned short &worm);
-  bool menuSetReverse(uint8_t &axis);
-  void menuBacklash();
-  bool menuSetBacklash(uint8_t &axis);
-  bool menuSetTotGear(uint8_t &axis);
-  bool menuSetStepPerRot(uint8_t &axis);
-  bool menuSetMicro(uint8_t &axis);
-  bool menuSetLowCurrent(uint8_t &axis);
-  bool menuSetHighCurrent(uint8_t &axis);
-  void DisplayMotorSettings(uint8_t &axis);
 
   void DisplayMessage(const char* txt1, const char* txt2 = NULL, int duration = 0);
   void DisplayLongMessage(const char* txt1, const char* txt2 = NULL, const char* txt3 = NULL, const char* txt4 = NULL, int duration = 0);

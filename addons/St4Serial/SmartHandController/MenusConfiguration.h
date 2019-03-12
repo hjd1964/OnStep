@@ -69,6 +69,19 @@ void SmartHandController::menuBacklash()
   }
 }
 
+bool SmartHandController::menuSetBacklash(uint8_t &axis)
+{
+  float backlash;
+  if (!DisplayMessageLX200(readBacklashLX200(axis, backlash))) return false;
+  char text[20];
+  sprintf(text, "Backlash Axis%u", axis);
+  if (display->UserInterfaceInputValueFloat(&buttonPad, text, "", &backlash, 0, 999, 3, 0, " arc-sec"))
+  {
+    return DisplayMessageLX200(writeBacklashLX200(axis, backlash),false);
+  }
+  return true;
+}
+
 void SmartHandController::menuLimits()
 {
   char string_list_LimitsL2[80];
