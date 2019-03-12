@@ -203,7 +203,20 @@ void CatMgr::setLat(double lat) {
 
 void CatMgr::setLstT0(double lstT0) {
   _lstT0=lstT0;
+  _lstMillisT0=millis();
 }
+
+// time
+double CatMgr::lstDeg() {
+  return (lst()*15.0);
+}
+
+double CatMgr::lst() {
+  double msSinceT0=millis()-_lstMillisT0;
+  double siderealSecondsSinceT0=(msSinceT0/1000.0)*1.00277778;
+  return _lstT0+siderealSecondsSinceT0/3600.0;
+}
+
 
 // handle catalog selection
 void CatMgr::select(Catalog cat) {
@@ -508,11 +521,6 @@ double CatMgr::DistFromEqu(double RA, double Dec) {
 // convert an HA to RA, in degrees
 double CatMgr::HAToRA(double HA) {
   return (lstToDeg()-HA);
-}
-
-// Convert the Local Sidereal Time from Hours to Degrees
-double CatMgr::lstToDeg() {
-  return (_lstT0*1.00277778*15.0);
 }
 
 CatMgr cat_mgr;
