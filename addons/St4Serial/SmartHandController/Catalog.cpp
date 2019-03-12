@@ -206,6 +206,10 @@ void CatMgr::setLstT0(double lstT0) {
   _lstMillisT0=millis();
 }
 
+bool CatMgr::isInitialized() {
+  return ((_lat<9999) && (_lstT0!=0));
+}
+
 // time
 double CatMgr::lstDegs() {
   return (lstHours()*15.0);
@@ -234,10 +238,6 @@ const char* CatMgr::catalogStr() {
 }
 
 // catalog filtering
-bool CatMgr::isInitialized() {
-  return ((_lat<9999) && (_lstT0!=0));
-}
-
 void CatMgr::filter(FilterMode fm) {
   _fm=fm;
 }
