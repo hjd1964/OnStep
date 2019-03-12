@@ -50,6 +50,7 @@ class CatMgr {
     void EquToHor(double RA, double Dec, double *Alt, double *Azm);
     void HorToEqu(double Alt, double Azm, double *RA, double *Dec);
     double TrueRefrac(double Alt, double Pressure=1010.0, double Temperature=10.0);
+    double lstToDeg();
     
 private:
     double _lat=-10000;

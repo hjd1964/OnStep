@@ -42,7 +42,6 @@ double Telescope::getLstT0()
   {
     int l=strlen(temp); if (l>0) temp[l-1]=0;
     hmsToDouble(&f, temp);
-    f=((unsigned long)(f*3600000.0)-millis());
   }
   return f;
 };

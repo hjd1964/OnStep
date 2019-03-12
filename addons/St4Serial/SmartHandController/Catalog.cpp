@@ -199,12 +199,10 @@ void CatMgr::setLat(double lat) {
     _cosLat=cos(lat/Rad);
     _sinLat=sin(lat/Rad);
   }
-  DL(lat);
 }
 
 void CatMgr::setLstT0(double lstT0) {
   _lstT0=lstT0;
-  DL(_lstT0);
 }
 
 // handle catalog selection
@@ -233,20 +231,18 @@ void CatMgr::filter(FilterMode fm) {
 }
 
 bool CatMgr::isFiltered() {
-  double a,z,ar,ad;
+  double ar,ad;
   if (!canFilter()) return false;
   switch (_fm) {
     case FM_NONE:
       return false;
-    break;
+      break;
     case FM_ABOVE_HORIZON:
-      EquToHor(ra(),dec(),&a,&z);
-      return a<0.0;
-    break;
+      return alt()<0.0;
+      break;
     case FM_ALIGN_ALL_SKY:
       // minimum 10 degrees altitude (to limit unlikely align stars and to minimime refraction effects)
-      EquToHor(ra(),dec(),&a,&z);
-      if (a<10.0) return true;
+      if (alt()<10.0) return true;
       // minimum 5 degrees from the pole (for accuracy)
       if (_lat>=0.0) {
         if (dec()>85.0) return true;
@@ -254,11 +250,10 @@ bool CatMgr::isFiltered() {
         if (dec()<-85.0) return true;
       }
       return false;
-    break;
+      break;
     case FM_ALIGN_3STAR_1:
       // minimum 10 degrees altitude (to limit unlikely align stars and to minimime refraction effects)
-      EquToHor(ra(),dec(),&a,&z);
-      if (a<10.0) return true;
+      if (alt()<10.0) return true;
       // maximum 30 degrees from align location
       ar = HAToRA(-1.0 * 15.0);
       if (_lat >= 0.0) ad = 10.0; else ad = -10.0;
@@ -266,11 +261,10 @@ bool CatMgr::isFiltered() {
       // on our side of meridian
       if (ha()>0) return true;
       return false;
-    break;
+      break;
     case FM_ALIGN_3STAR_2:
       // minimum 10 degrees altitude (to limit unlikely align stars and to minimime refraction effects)
-      EquToHor(ra(),dec(),&a,&z);
-      if (a<10.0) return true;
+      if (alt()<10.0) return true;
       // maximum 30 degrees from align location
       ar = HAToRA(+1.0 * 15.0);
       if (_lat >= 0.0) ad = 10.0; else ad = -10.0;
@@ -281,14 +275,13 @@ bool CatMgr::isFiltered() {
     break;
     case FM_ALIGN_3STAR_3:
       // minimum 10 degrees altitude (to limit unlikely align stars and to minimize refraction effects)
-      EquToHor(ra(),dec(),&a,&z);
-      if (a<10.0) return true;
+      if (alt()<10.0) return true;
       // maximum 30 degrees from align location
       ar = HAToRA(+6.0 * 15.0);
       if (_lat >= 0.0) ad = 45.0; else ad = -45.0;
       if (DistFromEqu(ar,ad)>30.0) return true;
       return false;
-    break;
+      break;
   }
 }
 
@@ -311,7 +304,8 @@ void CatMgr::incIndex() {
   int i=_maxIdx[_selected]+1;
   do {
     i--;
-    _idx[_selected]++; if (_idx[_selected]>_maxIdx[_selected]) _idx[_selected]=0;
+    _idx[_selected]++;
+    if (_idx[_selected]>_maxIdx[_selected]) _idx[_selected]=0;
   } while (isFiltered() && (i>0));
 }
 
@@ -319,7 +313,8 @@ void CatMgr::decIndex() {
   int i=_maxIdx[_selected]+1;
   do {
     i--;
-    _idx[_selected]--; if (_idx[_selected]<0) _idx[_selected]=_maxIdx[_selected];
+    _idx[_selected]--;
+    if (_idx[_selected]<0) _idx[_selected]=_maxIdx[_selected];
   } while (isFiltered() && (i>0));
 }
 
@@ -337,8 +332,7 @@ double CatMgr::ra() {
 // HA in degrees
 double CatMgr::ha() {
   if (!canFilter()) return 0;
-  double lstH = ((double)((long)(_lstT0+millis()))/3600000.0)*1.0027;
-  double h=(lstH*15.0-ra());
+  double h=(lstToDeg()-ra());
   while (h>180.0) h-=360.0;
   while (h<-180.0) h+=360.0;
   return h;
@@ -401,14 +395,14 @@ int CatMgr::epoch() {
 // Alt in degrees
 double CatMgr::alt() {
   double a,z;
-  EquToHor(ra()*15.0,dec(),&a,&z);
+  EquToHor(ra(),dec(),&a,&z);
   return a;
 }
 
 // Azm in degrees
 double CatMgr::azm() {
   double a,z;
-  EquToHor(ra()*15.0,dec(),&a,&z);
+  EquToHor(ra(),dec(),&a,&z);
   return z;
 }
 
@@ -456,9 +450,10 @@ int CatMgr::primaryId() {
 // support functions
 // convert equatorial coordinates to horizon, in degrees
 void CatMgr::EquToHor(double RA, double Dec, double *Alt, double *Azm) {
-  double lstH = ((double)((long)(_lstT0+millis()))/3600000.0)*1.0027;
-  double HA=(lstH*15.0-RA);
+  double HA=(_lstT0-RA)*15.0;
 
+  //D("RA="); D(RA);
+  //D(",DE="); D(Dec);
   while (HA<0.0)    HA=HA+360.0;
   while (HA>=360.0) HA=HA-360.0;
   HA =HA/Rad;
@@ -470,11 +465,11 @@ void CatMgr::EquToHor(double RA, double Dec, double *Alt, double *Azm) {
   *Azm=atan2(t1,t2)*Rad;
   *Azm=*Azm+180.0;
   *Alt = *Alt*Rad;
+  //D(",Alt="); DL(*Alt);
 }
 
 // convert horizon coordinates to equatorial, in degrees
 void CatMgr::HorToEqu(double Alt, double Azm, double *RA, double *Dec) { 
-  double lstH = ((double)((long)(_lstT0+millis()))/3600000.0)*1.0027;
   
   while (Azm<0)      Azm=Azm+360.0;
   while (Azm>=360.0) Azm=Azm-360.0;
@@ -490,7 +485,7 @@ void CatMgr::HorToEqu(double Alt, double Azm, double *RA, double *Dec) {
 
   while (HA<0.0)    HA=HA+360.0;
   while (HA>=360.0) HA=HA-360.0;
-  *RA=(lstH*15.0-HA);
+  *RA=(lstToDeg()-HA);
 }
 
 // returns the amount of refraction (in arcminutes) at the given true altitude (degrees), pressure (millibars), and temperature (celsius)
@@ -512,8 +507,12 @@ double CatMgr::DistFromEqu(double RA, double Dec) {
 
 // convert an HA to RA, in degrees
 double CatMgr::HAToRA(double HA) {
-  double lstH = ((double)((long)(_lstT0+millis()))/3600000.0)*1.0027;
-  return (lstH*15.0-HA);
+  return (lstToDeg()-HA);
+}
+
+// Convert the Local Sidereal Time from Hours to Degrees
+double CatMgr::lstToDeg() {
+  return (_lstT0*1.00277778*15.0);
 }
 
 CatMgr cat_mgr;
