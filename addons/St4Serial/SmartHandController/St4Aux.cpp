@@ -16,10 +16,10 @@ void Ast4::tickButtons() {
 }
 
 void Ast4::setup() {
-  n.init(ST4AuxDEn,debounceMs,true,LOW);
-  s.init(ST4AuxDEs,debounceMs,true,LOW);
-  e.init(ST4AuxRAe,debounceMs,true,LOW);
-  w.init(ST4AuxRAw,debounceMs,true,LOW);
+  n.init(ST4AuxDEn,debounceMs,false);
+  s.init(ST4AuxDEs,debounceMs,false);
+  e.init(ST4AuxRAe,debounceMs,false);
+  w.init(ST4AuxRAw,debounceMs,false);
 }
 
 Ast4 auxST4;
