@@ -1,27 +1,24 @@
 // -----------------------------------------------------------------------------------
 // ST4 aux port
 
-#include "St4Aux.h"
+#if defined(ST4AuxRAw) && defined(ST4AuxDEs) && defined(ST4AuxDEn) && defined(ST4AuxRAe)
+
 #include <Arduino.h>
+#include "St4Aux.h"
 #include "Config.h"
+#include "PushButton.h"
 
 #if !defined(ST4AuxRAw) || !defined(ST4AuxDEs) || !defined(ST4AuxDEn) || !defined(ST4AuxRAe)
-  Ast4::Ast4(void) {}
-  bool Ast4::guideNorth() { return false; }
-  bool Ast4::guideSouth() { return false; }
-  bool Ast4::guideEast() { return false; }
-  bool Ast4::guideWest() { return false; }
+  void Ast4::setup() { }
 #else
-  Ast4::Ast4(void) {
-    pinMode(ST4AuxRAw,INPUT);
-    pinMode(ST4AuxDEs,INPUT);
-    pinMode(ST4AuxDEn,INPUT);
-    pinMode(ST4AuxRAe,INPUT);
+  void Ast4::setup() {
+    n.init(ST4AuxDEn,debounceMs,true,LOW);
+    s.init(ST4AuxDEs,debounceMs,true,LOW);
+    e.init(ST4AuxRAe,debounceMs,true,LOW);
+    w.init(ST4AuxRAw,debounceMs,true,LOW);
   }
-  bool Ast4::guideNorth() { v=digitalRead(ST4AuxRAw); delayMicroseconds(2); v1=digitalRead(ST4AuxRAw); return ((v==LOW) && (v1==LOW)); }
-  bool Ast4::guideSouth() { v=digitalRead(ST4AuxDEs); delayMicroseconds(2); v1=digitalRead(ST4AuxDEs); return ((v==LOW) && (v1==LOW)); }
-  bool Ast4::guideEast()  { v=digitalRead(ST4AuxDEn); delayMicroseconds(2); v1=digitalRead(ST4AuxDEn); return ((v==LOW) && (v1==LOW)); }
-  bool Ast4::guideWest()  { v=digitalRead(ST4AuxRAe); delayMicroseconds(2); v1=digitalRead(ST4AuxRAe); return ((v==LOW) && (v1==LOW)); }
 #endif
 
 Ast4 auxST4;
+
+#endif

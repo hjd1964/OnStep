@@ -326,14 +326,25 @@ void SmartHandController::update()
   else // guide
   {
     buttonCommand = false;
-    if (!moveEast  && (buttonPad.e.isDown() || auxST4.guideEast()))   { moveEast = true;   Ser.write(ccMe); buttonCommand=true; } else
-    if (moveEast   && (buttonPad.e.isUp()   && !auxST4.guideEast()))  { moveEast = false;  Ser.write(ccQe); buttonCommand=true; buttonPad.e.clearPress(); }
-    if (!moveWest  && (buttonPad.w.isDown() || auxST4.guideWest()))   { moveWest = true;   Ser.write(ccMw); buttonCommand=true; } else
-    if (moveWest   && (buttonPad.w.isUp()   && !auxST4.guideWest()))  { moveWest = false;  Ser.write(ccQw); buttonCommand=true; buttonPad.w.clearPress(); }
-    if (!moveNorth && (buttonPad.n.isDown() || auxST4.guideNorth()))  { moveNorth = true;  Ser.write(ccMn); buttonCommand=true; } else
-    if (moveNorth  && (buttonPad.n.isUp()   && !auxST4.guideNorth())) { moveNorth = false; Ser.write(ccQn); buttonCommand=true; buttonPad.n.clearPress(); }
-    if (!moveSouth && (buttonPad.s.isDown() || auxST4.guideSouth()))  { moveSouth = true;  Ser.write(ccMs); buttonCommand=true; } else
-    if (moveSouth  && (buttonPad.s.isUp()   && !auxST4.guideSouth())) { moveSouth = false; Ser.write(ccQs); buttonCommand=true; buttonPad.s.clearPress(); }
+#if defined(ST4AuxRAw) && defined(ST4AuxDEs) && defined(ST4AuxDEn) && defined(ST4AuxRAe)
+    if (!moveEast  && (buttonPad.e.isDown() || auxST4.e.isDown())) { moveEast = true;   Ser.write(ccMe); buttonCommand=true; } else
+    if (moveEast   && (buttonPad.e.isUp()   && auxST4.e.isUp()))   { moveEast = false;  Ser.write(ccQe); buttonCommand=true; buttonPad.e.clearPress(); auxST4.e.clearPress(); }
+    if (!moveWest  && (buttonPad.w.isDown() || auxST4.w.isDown())) { moveWest = true;   Ser.write(ccMw); buttonCommand=true; } else
+    if (moveWest   && (buttonPad.w.isUp()   && auxST4.w.isUp()))   { moveWest = false;  Ser.write(ccQw); buttonCommand=true; buttonPad.w.clearPress(); auxST4.w.clearPress(); }
+    if (!moveNorth && (buttonPad.n.isDown() || auxST4.n.isDown())) { moveNorth = true;  Ser.write(ccMn); buttonCommand=true; } else
+    if (moveNorth  && (buttonPad.n.isUp()   && auxST4.n.isUp()))   { moveNorth = false; Ser.write(ccQn); buttonCommand=true; buttonPad.n.clearPress(); auxST4.n.clearPress(); }
+    if (!moveSouth && (buttonPad.s.isDown() || auxST4.s.isDown())) { moveSouth = true;  Ser.write(ccMs); buttonCommand=true; } else
+    if (moveSouth  && (buttonPad.s.isUp()   && auxST4.s.isUp()))   { moveSouth = false; Ser.write(ccQs); buttonCommand=true; buttonPad.s.clearPress(); auxST4.s.clearPress(); }
+#else
+    if (!moveEast  && (buttonPad.e.isDown())) { moveEast = true;   Ser.write(ccMe); buttonCommand=true; } else
+    if (moveEast   && (buttonPad.e.isUp()  )) { moveEast = false;  Ser.write(ccQe); buttonCommand=true; buttonPad.e.clearPress(); }
+    if (!moveWest  && (buttonPad.w.isDown())) { moveWest = true;   Ser.write(ccMw); buttonCommand=true; } else
+    if (moveWest   && (buttonPad.w.isUp()  )) { moveWest = false;  Ser.write(ccQw); buttonCommand=true; buttonPad.w.clearPress(); }
+    if (!moveNorth && (buttonPad.n.isDown())) { moveNorth = true;  Ser.write(ccMn); buttonCommand=true; } else
+    if (moveNorth  && (buttonPad.n.isUp()  )) { moveNorth = false; Ser.write(ccQn); buttonCommand=true; buttonPad.n.clearPress(); }
+    if (!moveSouth && (buttonPad.s.isDown())) { moveSouth = true;  Ser.write(ccMs); buttonCommand=true; } else
+    if (moveSouth  && (buttonPad.s.isUp()  )) { moveSouth = false; Ser.write(ccQs); buttonCommand=true; buttonPad.s.clearPress(); }
+#endif
     if (buttonCommand) { time_last_action = millis(); return; }
   }
 

@@ -3,16 +3,20 @@
 
 #pragma once
 
+#if defined(ST4AuxRAw) && defined(ST4AuxDEs) && defined(ST4AuxDEn) && defined(ST4AuxRAe)
+
+#include "Config.h"
+#include "PushButton.h"
+
 class Ast4
 {
   public:
-    Ast4();
-    bool guideNorth();
-    bool guideSouth();
-    bool guideEast();
-    bool guideWest();
+    void setup();
+    button n,s,e,w;
   private:
-    int v,v1;
+    int debounceMs = 20;
 };
 
 extern Ast4 auxST4;
+
+#endif
