@@ -3,10 +3,10 @@
 
 #pragma once
 
-#if defined(ST4AuxRAw) && defined(ST4AuxDEs) && defined(ST4AuxDEn) && defined(ST4AuxRAe)
-
 #include "Config.h"
 #include "PushButton.h"
+
+#if defined(ST4AuxRAw) && defined(ST4AuxDEs) && defined(ST4AuxDEn) && defined(ST4AuxRAe)
 
 class Ast4
 {
