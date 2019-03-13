@@ -269,6 +269,9 @@ void SmartHandController::setup(const char version[], const int pin[7],const boo
 void SmartHandController::tickButtons()
 {
   buttonPad.tickButtons();
+#ifdef AUX_ST4_ON
+  auxST4.tickButtons();
+#endif
 }
 
 void SmartHandController::update()
@@ -326,7 +329,7 @@ void SmartHandController::update()
   else // guide
   {
     buttonCommand = false;
-#if defined(ST4AuxRAw) && defined(ST4AuxDEs) && defined(ST4AuxDEn) && defined(ST4AuxRAe)
+#ifdef AUX_ST4_ON
     if (!moveEast  && (buttonPad.e.isDown() || auxST4.e.isDown())) { moveEast = true;   Ser.write(ccMe); buttonCommand=true; } else
     if (moveEast   && (buttonPad.e.isUp()   && auxST4.e.isUp()))   { moveEast = false;  Ser.write(ccQe); buttonCommand=true; buttonPad.e.clearPress(); auxST4.e.clearPress(); }
     if (!moveWest  && (buttonPad.w.isDown() || auxST4.w.isDown())) { moveWest = true;   Ser.write(ccMw); buttonCommand=true; } else
