@@ -8,6 +8,13 @@
 
 #if defined(ST4AuxRAw) && defined(ST4AuxDEs) && defined(ST4AuxDEn) && defined(ST4AuxRAe)
 
+void Ast4::tickButtons() {
+  n.poll();
+  s.poll();
+  e.poll();
+  w.poll();
+}
+
 void Ast4::setup() {
   n.init(ST4AuxDEn,debounceMs,true,LOW);
   s.init(ST4AuxDEs,debounceMs,true,LOW);
