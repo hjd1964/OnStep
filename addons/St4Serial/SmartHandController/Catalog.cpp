@@ -201,6 +201,7 @@ void CatMgr::setLat(double lat) {
   }
 }
 
+// Set Local Sidereal Time, and number of milliseconds
 void CatMgr::setLstT0(double lstT0) {
   _lstT0=lstT0;
   _lstMillisT0=millis();
@@ -210,13 +211,15 @@ bool CatMgr::isInitialized() {
   return ((_lat<9999) && (_lstT0!=0));
 }
 
-// time
+// Get Local Sidereal Time, converted from hours to degrees
 double CatMgr::lstDegs() {
   return (lstHours()*15.0);
 }
 
+// Get Local Sidereal Time, in hours, and adjust for time inside the menus
 double CatMgr::lstHours() {
   double msSinceT0=(unsigned long)(millis()-_lstMillisT0);
+  // Convert from Solar to Sidereal
   double siderealSecondsSinceT0=(msSinceT0/1000.0)*1.00277778;
   return _lstT0+siderealSecondsSinceT0/3600.0;
 }
@@ -229,10 +232,12 @@ void CatMgr::select(Catalog cat) {
   if (_cat==HERSCHEL) _selected=2; else { _selected=0; _cat=CAT_NONE; }
 }
 
+// Get active catalog
 Catalog CatMgr::getCat() {
   return _cat;
 }
 
+// Get active catalog description
 const char* CatMgr::catalogStr() {
   return Txt_Catalog[_selected];
 }
@@ -335,7 +340,7 @@ void CatMgr::decIndex() {
 
 // get catalog contents
 
-// RA in degrees
+// RA, converted from hours to degrees
 double CatMgr::ra() {
   return rah()*15.0;
 }
@@ -358,6 +363,7 @@ double CatMgr::ha() {
   return h;
 }
 
+// Get RA of an object, in hours, as HH:MM:SS
 void CatMgr::raHMS(uint8_t& h, uint8_t& m, uint8_t& s) {
   double f;
   if (_cat==STAR)     f=Cat_Stars[_idx[_selected]].RA; else
@@ -386,6 +392,7 @@ double CatMgr::dec() {
   return f;
 }
 
+// Declination as DD:MM:SS
 void CatMgr::decDMS(short& d, uint8_t& m, uint8_t& s) {
   double f;
   if (_cat==STAR)     f=Cat_Stars[_idx[_selected]].DE; else
@@ -406,6 +413,7 @@ void CatMgr::decDMS(short& d, uint8_t& m, uint8_t& s) {
   s = (int)s1;
 }
 
+// Epoch for catalog
 int CatMgr::epoch() {
   if (_cat==STAR) return 2000; else
   if (_cat==MESSIER) return 2000; else
@@ -439,6 +447,7 @@ void CatMgr::topocentricToObservedPlace(float *RA, float *Dec) {
   }
 }
 
+// Magnitude of an object
 double CatMgr::magnitude() {
   double m=250;
   if (_cat==STAR)     m=Cat_Stars[_idx[_selected]].Mag; else
@@ -447,33 +456,39 @@ double CatMgr::magnitude() {
   return m/100.0;
 }
 
+// Constellation number for an object
 byte CatMgr::constellation() {
   if (_cat==STAR)     return Cat_Stars[_idx[_selected]].Cons; else
   if (_cat==MESSIER)  return Cat_Messier[_idx[_selected]].Cons; else
   if (_cat==HERSCHEL) return Cat_Herschel[_idx[_selected]].Cons; else return 89;
 }
 
+// Constellation string, from constellation number
 const char* CatMgr::constellationStr() {
   return Txt_Constellations[constellation()];
 }
 
+// Object type number
 byte CatMgr::objectType() {
   if (_cat==MESSIER)  return Cat_Messier[_idx[_selected]].Obj_type; else
   if (_cat==HERSCHEL) return Cat_Herschel[_idx[_selected]].Obj_type; else return -1;
 }
 
+// Object type string
 const char* CatMgr::objectTypeStr() {
   if (_cat==STAR)     return "Star"; else
   if (_cat==MESSIER)  return Txt_Object_Type[objectType()]; else
   if (_cat==HERSCHEL) return Txt_Object_Type[objectType()]; else return "";
 }
 
+// Object name
 const char* CatMgr::objectName() {
   if (_cat==STAR)     return Cat_Stars[_idx[_selected]].Name; else
   if (_cat==MESSIER)  return ""; else
   if (_cat==HERSCHEL) return ""; else return "";
 }
 
+// Object ID
 int CatMgr::primaryId() {
   if (_cat==STAR)     return Cat_Stars[_idx[_selected]].Bayer + 1; else
   if (_cat==MESSIER)  return Cat_Messier[_idx[_selected]].Obj_id; else
@@ -496,8 +511,6 @@ double CatMgr::HAToRA(double HA) {
 // convert equatorial coordinates to horizon, in degrees
 void CatMgr::EquToHor(double RA, double Dec, double *Alt, double *Azm) {
   double HA=lstDegs()-RA;
-  //D("RA="); D(RA);
-  //D(",DE="); D(Dec);
   while (HA<0.0)    HA=HA+360.0;
   while (HA>=360.0) HA=HA-360.0;
   HA =HA/Rad;
@@ -509,7 +522,6 @@ void CatMgr::EquToHor(double RA, double Dec, double *Alt, double *Azm) {
   *Azm=atan2(t1,t2)*Rad;
   *Azm=*Azm+180.0;
   *Alt = *Alt*Rad;
-  //D(",Alt="); DL(*Alt);
 }
 
 // convert horizon coordinates to equatorial, in degrees
