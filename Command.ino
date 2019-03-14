@@ -859,8 +859,8 @@ void processCommands() {
               case '0': cli(); temp=(long)(posAxis1-((long)targetAxis1.part.m)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break; // Debug0, true vs. target RA position
               case '1': cli(); temp=(long)(posAxis2-((long)targetAxis2.part.m)); sei(); sprintf(reply,"%ld",temp); quietReply=true; break; // Debug1, true vs. target Dec position
               case '2': cli(); temp=(long)trackingState; sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                         // Debug2, trackingState
-              case '3': dtostrf(getFrequencyHzAxis1(),3,6,reply); quietReply=true; break;                                                  // Debug3, Ax1 final tracking rate Hz
-              case '4': dtostrf(getFrequencyHzAxis2(),3,6,reply); quietReply=true; break;                                                  // Debug4, Ax2 final tracking rate Hz
+              case '3': dtostrf(getFrequencyHzAxis1(),3,6,reply); quietReply=true; break;                                                  // Axis1 final tracking rate Hz
+              case '4': dtostrf(getFrequencyHzAxis2(),3,6,reply); quietReply=true; break;                                                  // Axis2 final tracking rate Hz
               case '6': cli(); temp=(long)(targetAxis1.part.m); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                  // Debug6, HA target position
               case '7': cli(); temp=(long)(targetAxis2.part.m); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                  // Debug7, Dec target position
               case '8': cli(); temp=(long)(posAxis1); sei(); sprintf(reply,"%ld",temp); quietReply=true; break;                            // Debug8, HA motor position

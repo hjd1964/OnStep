@@ -338,9 +338,13 @@ done: {}
 }
 
 double getFrequencyHzAxis1() {
-  if (trackingState==TrackingMoveTo)
-    return (16000000.0/(double)isrTimerRateAxis1)*((double)stepAxis1); else
-    return (16000000.0/(double)isrTimerRateAxis1)*((double)timerDirAxis1*(double)stepAxis1);
+  if (trackingState==TrackingMoveTo) {
+    if (posAxis1==(long)targetAxis1.part.m)
+      return 0.0;
+    else
+      return (16000000.0/(double)isrTimerRateAxis1)*((double)stepAxis1);
+    } else
+      return (16000000.0/(double)isrTimerRateAxis1)*((double)timerDirAxis1*(double)stepAxis1);
 }
 
 IRAM_ATTR ISR(TIMER4_COMPA_vect)
@@ -425,8 +429,12 @@ done: {}
 }
 
 double getFrequencyHzAxis2() {
-  if (trackingState==TrackingMoveTo)
-    return (16000000.0/(double)isrTimerRateAxis2)*((double)stepAxis2); else
+  if (trackingState==TrackingMoveTo) {
+    if (posAxis2==(long)targetAxis2.part.m)
+      return 0.0;
+    else
+      return (16000000.0/(double)isrTimerRateAxis2)*((double)stepAxis2);
+  } else
     return (16000000.0/(double)isrTimerRateAxis2)*((double)timerDirAxis2*(double)stepAxis2);
 }
 

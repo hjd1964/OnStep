@@ -554,7 +554,7 @@ double ztr(double a) {
 #ifdef HAL_NO_DOUBLE_PRECISION
 #define RefractionRateRange 30.0
 #else
-#define RefractionRateRange 0.5
+#define RefractionRateRange 1.0
 #endif
 
 boolean doRefractionRateCalc() {
