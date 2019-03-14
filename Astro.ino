@@ -371,7 +371,10 @@ void topocentricToObservedPlace(double *RA, double *Dec) {
   double Alt,Azm;
   double h=LST()*15.0-*RA;
   double d=*Dec;
-  equToHor(h,d,&Alt,&Azm);
+  // within about 1/20 arc-second of NCP
+  if (fabs(d-90.0)<0.00001) { Azm=0.0; Alt=latitude; } else 
+  // within about 1/20 arc-second of SCP
+  if (fabs(d+90.0)<0.00001) { Azm=180.0; Alt=-latitude; } else equToHor(h,d,&Alt,&Azm);
   Alt = Alt+trueRefrac(Alt)/60.0;
   horToEqu(Alt,Azm,&h,&d);
   *RA=degRange(LST()*15.0-h); *Dec=d;
@@ -382,7 +385,10 @@ void observedPlaceToTopocentric(double *RA, double *Dec) {
   double Alt,Azm;
   double h=LST()*15.0-*RA;
   double d=*Dec;
-  equToHor(h,d,&Alt,&Azm);
+  // within about 1/20 arc-second of the "refracted" NCP
+  if (fabs(d-90.0)<0.00001) { Azm=0.0; Alt=latitude; } else
+  // within about 1/20 arc-second of the "refracted" SCP
+  if (fabs(d+90.0)<0.00001) { Azm=180.0; Alt=-latitude; } else equToHor(h,d,&Alt,&Azm);
   Alt = Alt-apparentRefrac(Alt)/60.0;
   horToEqu(Alt,Azm,&h,&d);
   *RA=degRange(LST()*15.0-h); *Dec=d;
