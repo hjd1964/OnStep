@@ -552,9 +552,9 @@ double ztr(double a) {
 
 // Distance in arc-min ahead of and behind the current Equ position, used for rate calculation
 #ifdef HAL_NO_DOUBLE_PRECISION
-#define RefractionRateRange 30
+#define RefractionRateRange 30.0
 #else
-#define RefractionRateRange 10
+#define RefractionRateRange 0.5
 #endif
 
 boolean doRefractionRateCalc() {
