@@ -337,6 +337,12 @@ done: {}
 #endif
 }
 
+double getFrequencyHzAxis1() {
+  if (trackingState==TrackingMoveTo)
+    return (16000000.0/(double)isrTimerRateAxis1)*((double)stepAxis1); else
+    return (16000000.0/(double)isrTimerRateAxis1)*((double)timerDirAxis1*(double)stepAxis1);
+}
+
 IRAM_ATTR ISR(TIMER4_COMPA_vect)
 {
 #ifdef HAL_TIMER4_PREFIX
@@ -416,6 +422,12 @@ done: {}
 #ifdef HAL_TIMER4_SUFFIX
   HAL_TIMER4_SUFFIX;
 #endif
+}
+
+double getFrequencyHzAxis2() {
+  if (trackingState==TrackingMoveTo)
+    return (16000000.0/(double)isrTimerRateAxis2)*((double)stepAxis2); else
+    return (16000000.0/(double)isrTimerRateAxis2)*((double)timerDirAxis2*(double)stepAxis2);
 }
 
 #if defined(AXIS2_AUTO_POWER_DOWN_ON) && !defined(MOUNT_TYPE_ALTAZM)
