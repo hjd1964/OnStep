@@ -3,7 +3,13 @@
 
 #pragma once
 
-// some defines to help with configuration
+// coordinate mode for getting and setting RA/Dec
+#define OBSERVED_PLACE 1
+#define TOPOCENTRIC 2
+#define ASTROMETRIC_J2000 3
+#define TELESCOPE_COORDINATES OBSERVED_PLACE
+
+// some defines to help with TMC2130 configuration
 #define TMC_LOWPWR      64
 #define TMC_STEALTHCHOP 32
 #define TMC_NINTPOL     16

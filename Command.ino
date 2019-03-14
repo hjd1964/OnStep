@@ -240,6 +240,11 @@ void processCommands() {
       if ((command[0]=='C') && ((command[1]=='S') || command[1]=='M'))  {
         if ((parkStatus==NotParked) && (trackingState!=TrackingMoveTo)) {
 
+          newTargetRA=origTargetRA; newTargetDec=origTargetDec;
+#if TELESCOPE_COORDINATES==TOPOCENTRIC
+          topocentricToObservedPlace(&newTargetRA,&newTargetDec);
+#endif
+
           if (alignActive()) {
             if (alignStar()) i=GOTO_ERR_NONE; else { i=GOTO_ERR_UNSPECIFIED; alignNumStars=0; alignThisStar=0; }
           } else { 
@@ -497,19 +502,22 @@ void processCommands() {
 //         Returns: sDD*MM'SS.s#
       if (command[1]=='D')  { 
 #ifdef HAL_SLOW_PROCESSOR
-        if (millis()-_coord_t<100)
+        if (millis()-_coord_t>100)
 #else
-        if (millis()-_coord_t<5)
+        if (millis()-_coord_t>50)
 #endif
-        { f=_ra; f1=_dec; } else {
-          getEqu(&f,&f1,false); f/=15.0;
-          _ra=f; _dec=f1; _coord_t=millis(); 
+        {
+          getEqu(&f,&f1,false);
+#if TELESCOPE_COORDINATES==TOPOCENTRIC
+          observedPlaceToTopocentric(&f,&f1);
+#endif
+          _ra=f/15.0; _dec=f1; _coord_t=millis(); 
         }
         if (parameter[0]==0) {
-          if (!doubleToDms(reply,&f1,false,true)) commandError=true; else quietReply=true; 
+          if (!doubleToDms(reply,&_dec,false,true)) commandError=true; else quietReply=true; 
         } else
         if ((parameter[0]=='e') && (parameter[1]==0)) {
-          if (!doubleToDmsd(reply,&f1)) commandError=true; else quietReply=true; 
+          if (!doubleToDmsd(reply,&_dec)) commandError=true; else quietReply=true; 
         } else commandError=true;
       } else 
 //  :Gd#   Get Currently Selected Target Declination
@@ -518,10 +526,10 @@ void processCommands() {
 //         Returns: sDD*MM'SS.s#
       if (command[1]=='d')  { 
         if (parameter[0]==0) {
-          if (!doubleToDms(reply,&newTargetDec,false,true)) commandError=true; else quietReply=true; 
+          if (!doubleToDms(reply,&origTargetDec,false,true)) commandError=true; else quietReply=true; 
         } else
         if ((parameter[0]=='e') && (parameter[1]==0)) {
-          if (!doubleToDmsd(reply,&newTargetDec)) commandError=true; else quietReply=true; 
+          if (!doubleToDmsd(reply,&origTargetDec)) commandError=true; else quietReply=true; 
         } else commandError=true;
       } else 
 //  :GG#   Get UTC offset time
@@ -575,19 +583,22 @@ void processCommands() {
 //         Returns: HH:MM:SS.ss#
       if (command[1]=='R')  {
 #ifdef HAL_SLOW_PROCESSOR
-        if (millis()-_coord_t<100)
+        if (millis()-_coord_t>100)
 #else
-        if (millis()-_coord_t<5)
+        if (millis()-_coord_t>50)
 #endif
-        { f=_ra; f1=_dec; } else {
-          getEqu(&f,&f1,false); f/=15.0;
-          _ra=f; _dec=f1; _coord_t=millis(); 
+        {
+          getEqu(&f,&f1,false);
+#if TELESCOPE_COORDINATES==TOPOCENTRIC
+          observedPlaceToTopocentric(&f,&f1);
+#endif
+          _ra=f/15.0; _dec=f1; _coord_t=millis(); 
         }
         if (parameter[0]==0) {
-           if (!doubleToHms(reply,&f,highPrecision)) commandError=true; else quietReply=true;  
+           if (!doubleToHms(reply,&_ra,highPrecision)) commandError=true; else quietReply=true;  
         } else
         if ((parameter[0]=='a') && (parameter[1]==0)) {
-          if (!doubleToHmsd(reply,&f)) commandError=true; else quietReply=true;
+          if (!doubleToHmsd(reply,&_ra)) commandError=true; else quietReply=true;
         } else commandError=true;
       } else 
 //  :Gr#   Get current/target object RA
@@ -595,7 +606,7 @@ void processCommands() {
 //  :Gra#  Get Telescope RA
 //         Returns: HH:MM:SS.ss#
       if (command[1]=='r')  {
-        f=newTargetRA; f/=15.0;
+        f=origTargetRA; f/=15.0;
         if (parameter[0]==0) {
            if (!doubleToHms(reply,&f,highPrecision)) commandError=true; else quietReply=true;
         } else
@@ -830,6 +841,15 @@ void processCommands() {
               case 'B': sprintf(reply,"%ld",(long)round(UnderPoleLimit)); quietReply=true; break;
               case 'C': sprintf(reply,"%ld",(long)round(MinDec)); quietReply=true; break;
               case 'D': sprintf(reply,"%ld",(long)round(MaxDec)); quietReply=true; break;
+              case 'E': 
+                // coordinate mode for getting and setting RA/Dec
+                // 0 = OBSERVED_PLACE
+                // 1 = TOPOCENTRIC (does refraction)
+                // 2 = ASTROMETRIC_J2000
+                reply[0]='0'+(TELESCOPE_COORDINATES-1);
+                quietReply=true;
+                supress_frame=true;
+              break;
               default:  commandError=true;
             }
           } else
@@ -978,7 +998,7 @@ void processCommands() {
 //          Returns: <string>#
 //          Returns a string containing the current target object’s name and object type.
       if ((command[1]=='I') && (parameter[0]==0)) {
-        Lib.readVars(reply,&i,&newTargetRA,&newTargetDec);
+        Lib.readVars(reply,&i,&origTargetRA,&origTargetDec);
 
         char const * objType=objectStr[i];
         strcat(reply,",");
@@ -989,7 +1009,12 @@ void processCommands() {
 // :LIG#   Get Object Information and goto
 //         Returns: Nothing
       if ((command[1]=='I') && (parameter[0]=='G') && (parameter[1]==0)) {
-        Lib.readVars(reply,&i,&newTargetRA,&newTargetDec);
+        Lib.readVars(reply,&i,&origTargetRA,&origTargetDec);
+
+        newTargetRA=origTargetRA; newTargetDec=origTargetDec;
+#if TELESCOPE_COORDINATES==TOPOCENTRIC
+        topocentricToObservedPlace(&newTargetRA,&newTargetDec);
+#endif
 
         goToEqu(newTargetRA,newTargetDec);
         quietReply=true;
@@ -999,7 +1024,7 @@ void processCommands() {
 //          Returns: <string>#
 //          Returns a string containing the current target object’s name, type, RA, and Dec.
       if ((command[1]=='R') && (parameter[0]==0)) {
-        Lib.readVars(reply,&i,&newTargetRA,&newTargetDec);
+        Lib.readVars(reply,&i,&origTargetRA,&origTargetDec);
 
         char const * objType=objectStr[i];
         char ws[20];
@@ -1007,8 +1032,8 @@ void processCommands() {
         strcat(reply,",");
         strcat(reply,objType);
         if (strcmp(reply,",UNK")!=0) {
-          f=newTargetRA; f/=15.0; doubleToHms(ws,&f,highPrecision); strcat(reply,","); strcat(reply,ws);
-          doubleToDms(ws,&newTargetDec,false,true); strcat(reply,","); strcat(reply,ws);
+          f=origTargetRA; f/=15.0; doubleToHms(ws,&f,highPrecision); strcat(reply,","); strcat(reply,ws);
+          doubleToDms(ws,&origTargetDec,false,true); strcat(reply,","); strcat(reply,ws);
         }
         
         Lib.nextRec();
@@ -1050,7 +1075,7 @@ void processCommands() {
           for (l=0; l<=15; l++) { if (strcmp(objType,objectStr[l])==0) i=l; }
         }
         
-        if (Lib.firstFreeRec()) Lib.writeVars(name,i,newTargetRA,newTargetDec); else commandError=true;
+        if (Lib.firstFreeRec()) Lib.writeVars(name,i,origTargetRA,origTargetDec); else commandError=true;
       } else 
 
 // :LN#    Find next deep sky target object subject to the current constraints.
@@ -1176,6 +1201,10 @@ void processCommands() {
 //         8=already in motion
 //         9=unspecified error
       if (command[1]=='S')  {
+        newTargetRA=origTargetRA; newTargetDec=origTargetDec;
+#if TELESCOPE_COORDINATES==TOPOCENTRIC
+        topocentricToObservedPlace(&newTargetRA,&newTargetDec);
+#endif
         i=goToEqu(newTargetRA,newTargetDec);
         reply[0]=i+'0'; reply[1]=0;
         quietReply=true;
@@ -1415,9 +1444,9 @@ void processCommands() {
 //          Return: 0 on failure
 //                  1 on success
       if (command[1]=='d')  { 
-        if (!dmsToDouble(&newTargetDec,parameter,true)) {
+        if (!dmsToDouble(&origTargetDec,parameter,true)) {
           i=highPrecision; highPrecision=!highPrecision;
-          if (!dmsToDouble(&newTargetDec,parameter,true)) commandError=true; 
+          if (!dmsToDouble(&origTargetDec,parameter,true)) commandError=true; 
           highPrecision=i;
         }
       } else 
@@ -1516,11 +1545,11 @@ void processCommands() {
 //          Return: 0 on failure
 //                  1 on success
       if (command[1]=='r')  {
-        if (!hmsToDouble(&newTargetRA,parameter)) {
+        if (!hmsToDouble(&origTargetRA,parameter)) {
           i=highPrecision; highPrecision=!highPrecision;
-          if (!hmsToDouble(&newTargetRA,parameter)) commandError=true; else newTargetRA*=15.0;
+          if (!hmsToDouble(&origTargetRA,parameter)) commandError=true; else origTargetRA*=15.0;
           highPrecision=i;
-        } else newTargetRA*=15.0;
+        } else origTargetRA*=15.0;
       } else 
 //  :SSHH:MM:SS#
 //          Sets the local (apparent) sideral time to HH:MM:SS

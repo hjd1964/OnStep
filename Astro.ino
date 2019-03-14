@@ -18,7 +18,7 @@ boolean dateToDouble(double *JulianDay, char *date) {
   return true;
 }
 
-// convert string in format HH:MM:SS to floating point
+// convert string in format HH:MM:SS to double
 // (also handles)           HH:MM.M
 // (also handles)           HH:MM:SS
 // (also handles)           HH:MM:SS.SSSS
@@ -91,7 +91,7 @@ boolean doubleToHmsd(char *reply, double *f) {
   return true;
 }
 
-// convert string in format sDD:MM:SS to floating point
+// convert string in format sDD:MM:SS to double
 // (also handles)           sDD:MM:SS.SSS
 //                          DDD:MM:SS
 //                          sDD:MM
@@ -352,6 +352,42 @@ void horToEqu(double Alt, double Azm, double *HA, double *Dec) {
   *Dec = *Dec*Rad;
 }
 
+// returns the amount of refraction (in arcminutes) at the given true altitude (degrees), pressure (millibars), and temperature (celsius)
+double trueRefrac(double Alt, double Pressure=1010.0, double Temperature=10.0) {
+  double TPC=(Pressure/1010.0) * (283.0/(273.0+Temperature));
+  double r=( ( 1.02*cot( (Alt+(10.3/(Alt+5.11)))/Rad ) ) ) * TPC;  if (r<0.0) r=0.0;
+  return r;
+}
+
+// returns the amount of refraction (in arcminutes) at the given apparent altitude (degrees), pressure (millibars), and temperature (celsius)
+double apparentRefrac(double Alt, double Pressure=1010.0, double Temperature=10.0) {
+  double r=trueRefrac(Alt,Pressure,Temperature);
+  r=trueRefrac(Alt-(r/60.0),Pressure,Temperature);
+  return r;
+}
+
+// converts from the "Topocentric" to "Observed"
+void topocentricToObservedPlace(double *RA, double *Dec) {
+  double Alt,Azm;
+  double h=LST()*15.0-*RA;
+  double d=*Dec;
+  equToHor(h,d,&Alt,&Azm);
+  Alt = Alt+trueRefrac(Alt)/60.0;
+  horToEqu(Alt,Azm,&h,&d);
+  *RA=degRange(LST()*15.0-h); *Dec=d;
+}
+
+// converts from the "Observed" to "Topocentric"
+void observedPlaceToTopocentric(double *RA, double *Dec) {
+  double Alt,Azm;
+  double h=LST()*15.0-*RA;
+  double d=*Dec;
+  equToHor(h,d,&Alt,&Azm);
+  Alt = Alt-apparentRefrac(Alt)/60.0;
+  horToEqu(Alt,Azm,&h,&d);
+  *RA=degRange(LST()*15.0-h); *Dec=d;
+}
+
 // -----------------------------------------------------------------------------------------------------------------------------
 // Tracking rate control
 
@@ -490,20 +526,6 @@ boolean doFastAltCalc() {
 
 // -----------------------------------------------------------------------------------------------------------------------------
 // Refraction adjusted tracking
-
-// returns the amount of refraction (in arcminutes) at the given true altitude (degrees), pressure (millibars), and temperature (celsius)
-double trueRefrac(double Alt, double Pressure=1010.0, double Temperature=10.0) {
-  double TPC=(Pressure/1010.0) * (283.0/(273.0+Temperature));
-  double r=( ( 1.02*cot( (Alt+(10.3/(Alt+5.11)))/Rad ) ) ) * TPC;  if (r<0.0) r=0.0;
-  return r;
-}
-
-// returns the amount of refraction (in arcminutes) at the given apparent altitude (degrees), pressure (millibars), and temperature (celsius)
-double apparentRefrac(double Alt, double Pressure=1010.0, double Temperature=10.0) {
-  double r=trueRefrac(Alt,Pressure,Temperature);
-  r=trueRefrac(Alt-(r/60.0),Pressure,Temperature);
-  return r;
-}
 
 // Alternate tracking rate calculation method
 double ztr(double a) {

@@ -8,6 +8,11 @@
 #define SH1106 0
 #define SSD1306 1
 
+// coordinate mode for getting and setting RA/Dec
+#define OBSERVED_PLACE 1
+#define TOPOCENTRIC 2
+#define ASTROMETRIC_J2000 3
+
 // Single byte guide commands
 #define ccMe 14
 #define ccMw 15
@@ -22,6 +27,8 @@ class SmartHandController
 {
 public:
   enum OLED { OLED_SH1106, OLED_SSD1306 };
+  int telescopeCoordinates=1;
+
   void update();
   void drawIntro();
   void drawLoad();

@@ -266,7 +266,26 @@ void SmartHandController::setup(const char version[], const int pin[7],const boo
     Ser.flush();
     delay(500);
   }
+
+  // OnStep coordinate mode for getting and setting RA/Dec
+  // 0 = OBSERVED_PLACE (same as not supported)
+  // 1 = TOPOCENTRIC (does refraction)
+  // 2 = ASTROMETRIC_J2000 (does refraction and precession/nutation)
+  char s[20]="";
+
+  int thisTry=0;
+again:
+  delay(4000);
+  if (GetLX200(":GXEE#", s) == LX200VALUEGET) {
+    if (s[0]=='0') telescopeCoordinates=OBSERVED_PLACE; else 
+    if (s[0]=='1') telescopeCoordinates=TOPOCENTRIC; else 
+    if (s[0]=='2') telescopeCoordinates=ASTROMETRIC_J2000;
+  } else {
+    if (++thisTry <= 3) goto again;
+    telescopeCoordinates=OBSERVED_PLACE;
+  }
 }
+
 void SmartHandController::tickButtons()
 {
   buttonPad.tickButtons();
