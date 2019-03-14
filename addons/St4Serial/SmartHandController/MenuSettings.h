@@ -14,9 +14,8 @@ void SmartHandController::menuSettings()
       case 2: menuDisplay(); break;
       case 3: menuSound(); break;
       case 4: menuMeridianFlips(); break;
-      case 5: menuMount(); break; // Configuration
+      case 5: menuMount(); break;
       case 6: menuSite(); break;
-      default: break;
       }
     } else {
       const char *string_list_SettingsL1 = "Date/Time\n""Display\n""Buzzer\n""Configuration\n""Site";
@@ -26,9 +25,8 @@ void SmartHandController::menuSettings()
       case 1: menuLocalDateTime(); break;
       case 2: menuDisplay(); break;
       case 3: menuSound(); break;
-      case 4: menuMount(); break; // Configuration
+      case 4: menuMount(); break;
       case 5: menuSite(); break;
-      default: break;
       }
     }
   }
@@ -92,8 +90,6 @@ void SmartHandController::menuDisplay()
       break;
     case 4:
       menuBlankTimeout();
-      break;
-    default:
       break;
     }
   }
@@ -174,8 +170,6 @@ void SmartHandController::menuMeridianFlips()
         if (pause) DisplayMessageLX200(SetLX200(":SX97,1#"),false); else DisplayMessageLX200(SetLX200(":SX97,0#"),false);
       }
       break;
-    default:
-      break;
     }
   }
 }
@@ -195,14 +189,12 @@ void SmartHandController::menuSite()
     case 2: menuLatitude(); break;
     case 3: menuLongitude(); break;
     case 4: menuZone(); break;
-    default: break;
     }
   }
 }
 
 void SmartHandController::menuSites()
 {
-  char out[20];
   int val;
 
   if (DisplayMessageLX200(GetSiteLX200(val)))

@@ -9,10 +9,13 @@ enum LX200RETURN {
 
 bool isOk(LX200RETURN val);
 LX200RETURN GetLX200(char* command, char* output);
+LX200RETURN GetLX200(const char* command, char* output); // overloaded to allow const char* strings without compiler warnings, similar follow below
 LX200RETURN GetLX200Trim(char* command, char* output);
+LX200RETURN GetLX200Trim(const char* command, char* output);
 LX200RETURN GetTimeLX200(unsigned int &hour, unsigned int &minute, unsigned int &second, boolean ut=false);
 LX200RETURN GetTimeLX200(long &value, boolean ut=false);
 LX200RETURN SetLX200(char* command);
+LX200RETURN SetLX200(const char* command);
 LX200RETURN SetTimeLX200(long &value);
 LX200RETURN GetSiteLX200(int &value);
 void SetSiteLX200(int &value);
@@ -41,5 +44,3 @@ LX200RETURN writeHighCurrLX200(const uint8_t &axis, const uint8_t &highCurr);
 
 boolean hmsToDouble(double *f, char *hms);
 boolean dmsToDouble(double *f, char *dms, boolean sign_present, boolean highPrecision);
-
-
