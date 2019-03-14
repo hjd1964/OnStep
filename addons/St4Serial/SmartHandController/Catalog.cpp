@@ -293,10 +293,7 @@ bool CatMgr::isFiltered() {
       if (_lat >= 0.0) ad = 45.0; else ad = -45.0;
       if (DistFromEqu(ar,ad)>30.0) return true;
       return false;
-    break;
-    default:
-      return false;
-    break;
+      break;
   }
 }
 

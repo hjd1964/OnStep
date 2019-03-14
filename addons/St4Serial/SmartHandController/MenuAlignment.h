@@ -33,12 +33,14 @@ void SmartHandController::menuAlignment()
             case 7: telInfo.aliMode = Telescope::ALIM_SEVEN; break;
             case 8: telInfo.aliMode = Telescope::ALIM_EIGHT; break;
             case 9: telInfo.aliMode = Telescope::ALIM_NINE; break;
+            defualt: break;
           }
           current_selection_L1 = 0; current_selection_L0 = 0; // Quit Menu
         break;
         case 2: showAlign=true; break;
         case 3: clearAlign=true; break;
         case 4: resetAlign=true; break;
+        default: break;
       }
     } else
     if ((maxAlignStars==1) || (maxAlignStars==2)) {
@@ -47,6 +49,7 @@ void SmartHandController::menuAlignment()
       switch (current_selection_L1) {
         case 1: starsForAlign=1; break;
         case 2: resetAlign=true; break;
+        default: break;
       }
     } else
     if (maxAlignStars==3) {
@@ -55,6 +58,7 @@ void SmartHandController::menuAlignment()
       switch (current_selection_L1) {
         case 1: starsForAlign=1; break; case 2: starsForAlign=2; break; case 3: starsForAlign=3; break;
         case 4: showAlign=true; break;  case 5: clearAlign=true; break; case 6: resetAlign=true; break;
+        default: break;
       }
     } else
     if ((maxAlignStars==4) || (maxAlignStars==5)) {
@@ -63,6 +67,7 @@ void SmartHandController::menuAlignment()
       switch (current_selection_L1) {
         case 1: starsForAlign=1; break; case 2: starsForAlign=3; break; case 3: starsForAlign=4; break;
         case 4: showAlign=true; break;  case 5: clearAlign=true; break; case 6: resetAlign=true; break;
+        default: break;
       }
     } else
     if (maxAlignStars==6) {
@@ -71,6 +76,7 @@ void SmartHandController::menuAlignment()
       switch (current_selection_L1) {
         case 1: starsForAlign=1; break; case 2: starsForAlign=3; break; case 3: starsForAlign=4; break; case 4: starsForAlign=6; break;
         case 5: showAlign=true; break;  case 6: clearAlign=true; break; case 7: resetAlign=true; break;
+        default: break;
       }
     } else
     if (maxAlignStars==9) {
@@ -79,6 +85,7 @@ void SmartHandController::menuAlignment()
       switch (current_selection_L1) {
         case 1: starsForAlign=1; break; case 2: starsForAlign=3; break; case 3: starsForAlign=6; break; case 4: starsForAlign=9; break;
         case 5: showAlign=true; break;  case 6: clearAlign=true; break; case 7: resetAlign=true; break;
+        default: break;
       }
     }
   

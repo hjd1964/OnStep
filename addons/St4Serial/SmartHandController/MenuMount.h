@@ -13,6 +13,7 @@ void SmartHandController::menuMount()
     case 2: menuBacklash(); break;
     case 3: menuLimits(); break;
     case 4: menuPier(); break;
+    default: break;
     }
   }
 }
@@ -46,6 +47,7 @@ void SmartHandController::menuGotoSpeed()
     case 3: SetLX200(":SX93,3#"); DisplayMessage("Goto Speed", "1X", 1500); break;
     case 4: SetLX200(":SX93,4#"); DisplayMessage("Goto Speed", "0.75X", 1500); break;
     case 5: SetLX200(":SX93,5#"); DisplayMessage("Goto Speed", "0.5X", 1500); break;
+    default: break;
     }
   }
 }
@@ -108,6 +110,8 @@ void SmartHandController::menuLimits()
       break;
     case 4:
       menuMeridianW();
+      break;
+    default:
       break;
     }
   }
