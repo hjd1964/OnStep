@@ -7,7 +7,7 @@
 #define OBSERVED_PLACE 1
 #define TOPOCENTRIC 2
 #define ASTROMETRIC_J2000 3
-#define TELESCOPE_COORDINATES OBSERVED_PLACE
+#define TELESCOPE_COORDINATES TOPOCENTRIC
 
 // some defines to help with TMC2130 configuration
 #define TMC_LOWPWR      64
