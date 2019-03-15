@@ -160,10 +160,10 @@ class rtcw {
         TeensyTime = Teensy3Clock.get();            //get time from Teensy RTC
         setTime(TeensyTime);                        //set system time
   
-        if ((year()>=0) && (month()<=99) && (month()>=1) && (month()<=12) && (day()>=1) && (day()<=31) &&
+        if ((year()>=0) && (year()<=3000) && (month()>=1) && (month()<=12) && (day()>=1) && (day()<=31) &&
             (hour()>=0) && (hour()<=23) && (minute()>=0) && (minute()<=59) && (second()>=0) && (second()<=59)) 
         {
-            int y1=year(); if (y1>11) y1=y1+2000; else y1=y1+2100;
+            int y1=year();
             JD=julian(y1,month(),day());
             LMT=(hour()+(minute()/60.0)+(second()/3600.0));
         }
