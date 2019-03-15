@@ -32,8 +32,7 @@
 // For an ESP32 SerialC is the Bluetooth port so use a name instead of a baud "ONSTEP", etc.
 #define SERIAL_C_BAUD_DEFAULT_OFF
 
-// Mount type, default is _GEM (German Equatorial) other options are _FORK, _FORK_ALT.  _FORK switches off Meridian Flips after (1, 2 or 3 star) alignment is done.  _FORK_ALT disables Meridian Flips (1 star align.)
-// _ALTAZM is for Alt/Azm mounted 'scopes (1 star align only.)
+// Mount type, default is _GEM (German Equatorial) other options are _FORK, _FORK_ALT.  _FORK switches off Meridian Flips after alignment is done.  _FORK_ALT disables Meridian Flips.  _ALTAZM is for Alt/Azm mounted 'scopes.
 #define MOUNT_TYPE_GEM
 
 // Strict parking, default=_OFF.  Set to _ON and unparking is only allowed if successfully parked.  Otherwise unparking is allowed if at home and not parked (the Home/Reset command ":hF#" sets this state.) 
