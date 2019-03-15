@@ -287,12 +287,14 @@ void processCommands() {
               // read from port 1, send to port 0:
               if (SerialB.available()) {
                 int inByte = SerialB.read();
+                delayMicroseconds(10);
                 SerialA.write(inByte);
               }
-              
+              delayMicroseconds(10);
               // read from port 0, send to port 1:
               if (SerialA.available()) {
                 int inByte = SerialA.read();
+                delayMicroseconds(10);
                 SerialB.write(inByte);
               }
             }
