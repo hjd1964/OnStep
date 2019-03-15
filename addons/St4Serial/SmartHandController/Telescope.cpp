@@ -166,7 +166,7 @@ Telescope::Errors Telescope::getError()
     default:
       return ERR_NONE;
     }
-  }
+  } else return ERR_NONE;
 }
 
 bool Telescope::addStar()
@@ -191,5 +191,3 @@ bool Telescope::addStar()
     return false;
   }
 }
-
-

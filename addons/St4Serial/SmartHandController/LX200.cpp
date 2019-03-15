@@ -158,6 +158,11 @@ LX200RETURN SetLX200(char* command)
     return LX200SETVALUEFAILED;
 }
 
+LX200RETURN SetLX200(const char* command)
+{
+  return SetLX200((char *)command);
+}
+
 LX200RETURN GetLX200(char* command, char* output)
 {
   memset(output, 0, sizeof(output));
@@ -165,6 +170,11 @@ LX200RETURN GetLX200(char* command, char* output)
     return LX200VALUEGET;
   else
     return LX200GETVALUEFAILED;
+}
+
+LX200RETURN GetLX200(const char* command, char* output)
+{
+  return GetLX200((char *)command, output);
 }
 
 LX200RETURN GetLX200Trim(char* command, char* output)
@@ -175,6 +185,11 @@ LX200RETURN GetLX200Trim(char* command, char* output)
     return LX200VALUEGET;
   } else
     return LX200GETVALUEFAILED;
+}
+
+LX200RETURN GetLX200Trim(const char* command, char* output)
+{
+  return GetLX200Trim((char *)command, output);
 }
 
 LX200RETURN GetTimeLX200(unsigned int &hour, unsigned int &minute, unsigned int &second, boolean ut)
@@ -193,7 +208,8 @@ LX200RETURN GetTimeLX200(unsigned int &hour, unsigned int &minute, unsigned int 
 LX200RETURN GetTimeLX200(long &value, boolean ut)
 {
   unsigned int hour, minute, second;
-  if (!GetTimeLX200(hour, minute, second, ut) == LX200GETVALUEFAILED) return LX200GETVALUEFAILED;
+  // this had a not (!) before GetTimeLX200 below, no reason it should be there?
+  if (GetTimeLX200(hour, minute, second, ut) == LX200GETVALUEFAILED) return LX200GETVALUEFAILED;
   value = hour * 60 + minute;
   value *= 60;
   value += second;
@@ -236,7 +252,7 @@ LX200RETURN Move2TargetLX200()
 {
   char out[20];
   memset(out, 0, sizeof(out));
-  int val = readLX200Bytes(":MS#", out, TIMEOUT_CMD);
+  readLX200Bytes((char *)":MS#", out, TIMEOUT_CMD);
   LX200RETURN response;
   switch (out[0]-'0')
   {
@@ -284,7 +300,7 @@ LX200RETURN SetTargetRaLX200(int vr1, int vr2, int vr3)
       {
         unsigned int hour, minute, second;
         char2RA(out, hour, minute, second);
-        if (hour == vr1 && minute == vr2 && second == vr3)
+        if ((int)hour == vr1 && (int)minute == vr2 && (int)second == vr3)
         {
           return LX200VALUESET;
         }
@@ -310,7 +326,7 @@ LX200RETURN SetTargetDecLX200(char sign, int vd1, int vd2, int vd3)
         int deg;
         unsigned int min, sec;
         char2DEC(out, deg, min, sec);
-        if (out[0]==sign && abs(deg) == vd1 && min == vd2 && sec == vd3)
+        if (out[0]==sign && abs(deg) == vd1 && (int)min == vd2 && (int)sec == vd3)
         {
           return LX200VALUESET;
         }
@@ -365,7 +381,7 @@ LX200RETURN GetDateLX200(unsigned int &day, unsigned int &month, unsigned int &y
 LX200RETURN SyncGotoCatLX200(bool sync)
 {
   int epoch;
-  unsigned int day, month, year, hour, minute, second;
+  unsigned int day, month, year;
   if (GetDateLX200(day, month, year, true) == LX200GETVALUEFAILED) return LX200GETVALUEFAILED;
   if (cat_mgr.getCat()==CAT_NONE) return LX200UNKOWN;
   EquatorialCoordinates coo;
@@ -379,7 +395,6 @@ LX200RETURN SyncGotoCatLX200(bool sync)
 
 LX200RETURN SyncGotoPlanetLX200(bool sync, unsigned short objSys)
 {
-  char out[20];
   unsigned int day, month, year, hour, minute, second;
 
   if (GetDateLX200(day, month, year, true) == LX200GETVALUEFAILED) return LX200GETVALUEFAILED;
