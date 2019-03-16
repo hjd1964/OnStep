@@ -4,7 +4,7 @@ void SmartHandController::menuSyncGoto(bool sync)
 {
   current_selection_L1 = 1;
   while (current_selection_L1 != 0) {
-    const char *string_list_gotoL1 = "Messier\nStar\nSolar System\nHerschel\nCoordinates\nHome";
+    const char *string_list_gotoL1 = "Messier\nStar\nSolar System\nCaldwell\nHerschel\nCoordinates\nHome";
     current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, sync ? "Sync" : "Goto", current_selection_L1, string_list_gotoL1);
     switch (current_selection_L1) {
       case 1:
@@ -17,12 +17,15 @@ void SmartHandController::menuSyncGoto(bool sync)
         menuSolarSys(sync);
         break;
       case 4:
+	menuCaldwell(sync);
+	break;
+      case 5:
         menuHerschel(sync);
         break;
-      case 5:
+      case 6:
         menuRADec(sync);
         break;
-      case 6:
+      case 7:
       {
         char cmd[5];
         sprintf(cmd, ":hX#");
@@ -46,6 +49,21 @@ void SmartHandController::menuMessier(bool sync)
   
   if (cat_mgr.isInitialized()) {
     if (display->UserInterfaceCatalog(&buttonPad, sync ? "Sync Messier" : "Goto Messier")) {
+      bool ok = DisplayMessageLX200(SyncGotoCatLX200(sync), false);
+      if (ok) { current_selection_L1 = 0; current_selection_L0 = 0; } // Quit Menu
+    }
+  }
+}
+
+void SmartHandController::menuCaldwell(bool sync)
+{
+  if (!cat_mgr.isInitialized()) { cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0()); }
+  cat_mgr.select(CALDWELL);
+  cat_mgr.filter(FM_ABOVE_HORIZON);
+  cat_mgr.setIndex(0);
+  
+  if (cat_mgr.isInitialized()) {
+    if (display->UserInterfaceCatalog(&buttonPad, sync ? "Sync Caldwell" : "Goto Caldwell")) {
       bool ok = DisplayMessageLX200(SyncGotoCatLX200(sync), false);
       if (ok) { current_selection_L1 = 0; current_selection_L0 = 0; } // Quit Menu
     }
