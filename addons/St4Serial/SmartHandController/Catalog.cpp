@@ -179,6 +179,7 @@ const char* Txt_Constellations[89] = {
 const char * Txt_Catalog[] = {
   "Star ",
   "M ",
+  "C ",
   "N ",
   "None "
 };
