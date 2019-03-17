@@ -458,8 +458,8 @@ void CatMgr::topocentricToObservedPlace(float *RA, float *Dec) {
 }
 
 // Magnitude of an object
-double CatMgr::magnitude() {
-  double m=250;
+float CatMgr::magnitude() {
+  float m=250;
   if (_cat==STAR)     m=Cat_Stars[_idx[_selected]].Mag; else
   if (_cat==MESSIER)  m=Cat_Messier[_idx[_selected]].Mag; else
   if (_cat==CALDWELL) m=Cat_Caldwell[_idx[_selected]].Mag; else

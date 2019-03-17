@@ -112,14 +112,15 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y)
     x = 12;
     u8g2_DrawUTF8(u8g2, x, y, cat_mgr.constellationStr());
 
-    // Common name for the star
     // Width of constellation abbreviation
-    step0 = u8g2_GetUTF8Width(u8g2, "-WWW-");
-    x = step0;
+    x = u8g2_GetUTF8Width(u8g2, "-WWW-");
+    
+    // Common name for the star
     u8g2_DrawUTF8(u8g2, x, y, cat_mgr.objectName());
 
     y += line_height;
     x = 0;
+
     // RA
     uint8_t vr1, vr2, vr3;
     char txt1[5], txt2[5], txt3[5];
@@ -132,7 +133,8 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y)
     x += step0;
     ext_drawRA(u8g2, x, y, txt1, txt2, txt3);
 
-    sprintf(line, "%0.1f", (float)cat_mgr.magnitude());
+    // Magnitude
+    sprintf(line, "%0.1f", cat_mgr.magnitude());
 
     // Declination
     short vd1; uint8_t vd2; uint8_t vd3;
@@ -146,43 +148,42 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y)
     x += step0;
     ext_drawDec(u8g2, x, y, vd1 < 0 ? "-" : "+", txt1, txt2, txt3);
 
-    // Magnitude
     x = u8g2_GetUTF8Width(u8g2, "DE +DD:MM:SS ");
     u8g2_DrawUTF8(u8g2, x, y, line);
 
     return line_height;
   }
+  else {
+    // Object Catalogs
 
-  // Object Catalogs
-  //
-  // Catalog letter and Object ID
-  step0 = u8g2_GetUTF8Width(u8g2, "W 9999 ");
-  sprintf(line, "%s%u", cat_mgr.catalogStr(), cat_mgr.primaryId());
-  x = 0;
-  u8g2_DrawUTF8(u8g2, x, y, line);
+    // Catalog letter and Object ID
+    step0 = u8g2_GetUTF8Width(u8g2, "W 9999 ");
+    sprintf(line, "%s%u", cat_mgr.catalogStr(), cat_mgr.primaryId());
+    x = 0;
+    u8g2_DrawUTF8(u8g2, x, y, line);
  
-  // Constellation Abberviation
-  x += step0;
-  u8g2_DrawUTF8(u8g2, x, y, cat_mgr.constellationStr());
-  step0 = u8g2_GetUTF8Width(u8g2, " WWW ");
+    // Constellation Abberviation
+    x += step0;
+    u8g2_DrawUTF8(u8g2, x, y, cat_mgr.constellationStr());
+    step0 = u8g2_GetUTF8Width(u8g2, " WWW ");
 
-  // Magnitude
-  //step0 = u8g2_GetUTF8Width(u8g2, "X99.9X");
-  x += step0;
-  sprintf(line, "%0.1f", (float)cat_mgr.magnitude());
-  u8g2_DrawUTF8(u8g2, x, y, line);
+    // Magnitude
+    x += step0;
+    sprintf(line, "%0.1f", cat_mgr.magnitude());
+    u8g2_DrawUTF8(u8g2, x, y, line);
 
-  // Object type text
-  y += line_height;
-  x = 0;
-  u8g2_DrawUTF8(u8g2, x, y, cat_mgr.objectTypeStr());
+    // Object type text
+    y += line_height;
+    x = 0;
+    u8g2_DrawUTF8(u8g2, x, y, cat_mgr.objectTypeStr());
 
-  // Object Name, when the DSO catalogs include it
-  // y += line_height;
-  // x = 0;
-  //u8g2_DrawUTF8(u8g2, x, y, cat_mgr.objectName());
+    // Object Name, when the DSO catalogs include it
+    // y += line_height;
+    // x = 0;
+    //u8g2_DrawUTF8(u8g2, x, y, cat_mgr.objectName());
 
-  return line_height;
+    return line_height;
+  }
 }
 
 /*

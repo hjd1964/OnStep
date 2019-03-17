@@ -50,7 +50,7 @@ class CatMgr {
     double azm();
     void topocentricToObservedPlace(float *RA, float *Dec);
 
-    double magnitude();
+    float magnitude();
     
     byte   constellation();
     const char* constellationStr();
