@@ -6,7 +6,7 @@ void SmartHandController::menuSettings()
   while (current_selection_L1 != 0)
   {
     if (telInfo.isMountGEM()) {
-      const char *string_list_SettingsL1 = "Date/Time\n""Display\n""Buzzer\n""Meridian Flp\n""Configuration\n""Site";
+      const char *string_list_SettingsL1 = "Date/Time\n""Display\n""Buzzer\n""Meridian Flip\n""Configuration\n""Site\n""Firmware Ver";
       current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Settings", current_selection_L1, string_list_SettingsL1);
       switch (current_selection_L1)
       {
@@ -16,6 +16,7 @@ void SmartHandController::menuSettings()
       case 4: menuMeridianFlips(); break;
       case 5: menuMount(); break;
       case 6: menuSite(); break;
+      case 7: menuFirmware(); break;
       }
     } else {
       const char *string_list_SettingsL1 = "Date/Time\n""Display\n""Buzzer\n""Configuration\n""Site";
@@ -275,5 +276,22 @@ void SmartHandController::menuZone()
         DisplayMessageLX200(SetLX200(out),false);
       }
     }
+  }
+}
+
+void SmartHandController::menuFirmware()
+{
+  char out[20];
+  
+  sprintf(out,"SHC %s", _version);
+  DisplayMessage(out, __DATE__, 3000);
+
+  char temp1[20];
+  char temp2[20];
+  if ( (DisplayMessageLX200(GetLX200(":GVN#", temp1)))&&(DisplayMessageLX200(GetLX200(":GVD#", temp2))) )
+  { for (char* p = temp1; p = strchr(p, '#'); ++p) { *p = 0;} 
+    for (char* p = temp2; p = strchr(p, '#'); ++p) { *p = 0;} 
+    sprintf(out,"OnStep %s",temp1);
+    DisplayMessage(out, temp2, 3000);
   }
 }
