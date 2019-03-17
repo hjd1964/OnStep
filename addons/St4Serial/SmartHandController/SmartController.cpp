@@ -450,6 +450,11 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
     // wifi status
     if (wifiOn) display->drawXBMP(0, 0, icon_width, icon_height, wifi_bits);
 
+    // last selected guide rate
+      char *string_Speed[10] = {"0.25x","0.5x","1.0x","2.0x","4.0x","8.0x","20.0x","48.0x","0.5 Max","Max"};
+      if ((current_selection_speed>0)&&(current_selection_speed<=10))
+        u8g2_DrawUTF8(u8g2, 0, icon_height, string_Speed[current_selection_speed-1]); 
+
     // OnStep status
     if (telInfo.hasTelStatus) {
       Telescope::ParkState curP = telInfo.getParkState();
@@ -659,9 +664,14 @@ void SmartHandController::menuParking()
     current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Parking", current_selection_L1, string_list_SettingsL1);
     switch (current_selection_L1)
     {
-    case 1: DisplayMessageLX200(SetLX200(":hP#"),false); break;
-    case 2: DisplayMessageLX200(SetLX200(":hR#"),false); break;
-    case 3: DisplayMessageLX200(SetLX200(":hQ#"),false); break;
+    case 1: if (SetLX200(":hP#")== LX200VALUESET) DisplayMessage("Parking", "scope", 500); else DisplayMessage("Park", "Failed", 1000); break;
+    case 2: if (SetLX200(":hR#")== LX200VALUESET) DisplayMessage("Un-Parking", "scope", 500); else DisplayMessage("Un-Park", "Failed", 1000); break;
+    case 3: boolean SetP=false; 
+            if (display->UserInterfaceInputValueBoolean(&buttonPad, "Set-Park?", &SetP)) 
+             if (SetP){
+              if (SetLX200(":hQ#")== LX200VALUESET) DisplayMessage("Set-Park", "OK", 500); else DisplayMessage("Set-Park", "Failed", 1000); 
+             } else DisplayMessage("Set-Park", "Canceled", 500);
+            break;           
     }
   }
 }
