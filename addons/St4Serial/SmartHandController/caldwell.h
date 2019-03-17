@@ -1,5 +1,5 @@
 // This data is machine generated from the Open NGC database.
-// Do NOT edit it manually. Rather, fix the import programs and rerun.
+// Do NOT edit this data manually. Rather, fix the import programs and rerun.
 dso_t Cat_Caldwell[NUM_CALDWELL] = {
   { 18,  1,    1,   810,    0.791,  85.2696 }, // C    1, Cep,   OCl,   8.10, 00:47:27, +85:16:1, NGC0188
   { 18,  9,    2,  1189,    0.217,  72.5219 }, // C    2, Cep,    PN,  11.89, 00:13:01, +72:31:1, NGC0040
