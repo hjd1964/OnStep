@@ -58,7 +58,7 @@ const char* Txt_Bayer[24] = {
 
 // Type of object, in the Open NGC database. Do not change the
 // order of this, since it has to match what is in Open NGC
-const char * Txt_Object_Type[20] = {
+const char * Txt_Object_Type[21] = {
   "Galaxy",
   "Open Cluster",
   "Star",
@@ -78,7 +78,8 @@ const char * Txt_Object_Type[20] = {
   "Emission Nebula",
   "NonExist",
   "Nova",
-  "Dup"
+  "Duplicate",
+  "Dark Nebula",
 };
 
 // Constellation abbreviation, alphabetical order
@@ -178,6 +179,7 @@ const char* Txt_Constellations[89] = {
 const char * Txt_Catalog[] = {
   "Star ",
   "M ",
+  "C ",
   "N ",
   "None "
 };
@@ -186,6 +188,7 @@ const char * Txt_Catalog[] = {
 // These are machine generated using scripts from Open NGC and KStars' Star data
 // Do NOT edit manually. Rerun the scripts instead. 
 #include "messier.h"
+#include "caldwell.h"
 #include "herschel.h"
 #include "stars.h"
 
@@ -227,9 +230,11 @@ double CatMgr::lstHours() {
 // handle catalog selection
 void CatMgr::select(Catalog cat) {
   _cat=cat;
-  if (_cat==STAR) _selected=0; else
-  if (_cat==MESSIER) _selected=1; else
-  if (_cat==HERSCHEL) _selected=2; else { _selected=0; _cat=CAT_NONE; }
+  if (_cat==STAR)     _selected = STAR; else
+  if (_cat==MESSIER)  _selected = MESSIER; else
+  if (_cat==CALDWELL) _selected = CALDWELL; else
+  if (_cat==HERSCHEL) _selected = HERSCHEL; else
+    { _selected=0; _cat=CAT_NONE; }
 }
 
 // Get active catalog
@@ -350,6 +355,7 @@ double CatMgr::rah() {
   double f;
   if (_cat==STAR)     f=Cat_Stars[_idx[_selected]].RA; else
   if (_cat==MESSIER)  f=Cat_Messier[_idx[_selected]].RA; else
+  if (_cat==CALDWELL) f=Cat_Caldwell[_idx[_selected]].RA; else
   if (_cat==HERSCHEL) f=Cat_Herschel[_idx[_selected]].RA; else f=0;
   return f;
 }
@@ -368,6 +374,7 @@ void CatMgr::raHMS(uint8_t& h, uint8_t& m, uint8_t& s) {
   double f;
   if (_cat==STAR)     f=Cat_Stars[_idx[_selected]].RA; else
   if (_cat==MESSIER)  f=Cat_Messier[_idx[_selected]].RA; else
+  if (_cat==CALDWELL) f=Cat_Caldwell[_idx[_selected]].RA; else
   if (_cat==HERSCHEL) f=Cat_Herschel[_idx[_selected]].RA; else f=0;
   
   double h1,m1,s1;
@@ -388,6 +395,7 @@ double CatMgr::dec() {
   double f;
   if (_cat==STAR)     f=Cat_Stars[_idx[_selected]].DE; else
   if (_cat==MESSIER)  f=Cat_Messier[_idx[_selected]].DE; else
+  if (_cat==CALDWELL) f=Cat_Caldwell[_idx[_selected]].DE; else
   if (_cat==HERSCHEL) f=Cat_Herschel[_idx[_selected]].DE; else f=0;
   return f;
 }
@@ -397,6 +405,7 @@ void CatMgr::decDMS(short& d, uint8_t& m, uint8_t& s) {
   double f;
   if (_cat==STAR)     f=Cat_Stars[_idx[_selected]].DE; else
   if (_cat==MESSIER)  f=Cat_Messier[_idx[_selected]].DE; else
+  if (_cat==CALDWELL) f=Cat_Caldwell[_idx[_selected]].DE; else
   if (_cat==HERSCHEL) f=Cat_Herschel[_idx[_selected]].DE; else f=0;
 
   double d1, m1, s1;
@@ -417,6 +426,7 @@ void CatMgr::decDMS(short& d, uint8_t& m, uint8_t& s) {
 int CatMgr::epoch() {
   if (_cat==STAR) return 2000; else
   if (_cat==MESSIER) return 2000; else
+  if (_cat==CALDWELL) return 2000; else
   if (_cat==HERSCHEL) return 2000; else return 0;
 }
 
@@ -448,10 +458,11 @@ void CatMgr::topocentricToObservedPlace(float *RA, float *Dec) {
 }
 
 // Magnitude of an object
-double CatMgr::magnitude() {
-  double m=250;
+float CatMgr::magnitude() {
+  float m=250;
   if (_cat==STAR)     m=Cat_Stars[_idx[_selected]].Mag; else
   if (_cat==MESSIER)  m=Cat_Messier[_idx[_selected]].Mag; else
+  if (_cat==CALDWELL) m=Cat_Caldwell[_idx[_selected]].Mag; else
   if (_cat==HERSCHEL) m=Cat_Herschel[_idx[_selected]].Mag;
   return m/100.0;
 }
@@ -460,6 +471,7 @@ double CatMgr::magnitude() {
 byte CatMgr::constellation() {
   if (_cat==STAR)     return Cat_Stars[_idx[_selected]].Cons; else
   if (_cat==MESSIER)  return Cat_Messier[_idx[_selected]].Cons; else
+  if (_cat==CALDWELL) return Cat_Caldwell[_idx[_selected]].Cons; else
   if (_cat==HERSCHEL) return Cat_Herschel[_idx[_selected]].Cons; else return 89;
 }
 
@@ -471,6 +483,7 @@ const char* CatMgr::constellationStr() {
 // Object type number
 byte CatMgr::objectType() {
   if (_cat==MESSIER)  return Cat_Messier[_idx[_selected]].Obj_type; else
+  if (_cat==CALDWELL) return Cat_Caldwell[_idx[_selected]].Obj_type; else
   if (_cat==HERSCHEL) return Cat_Herschel[_idx[_selected]].Obj_type; else return -1;
 }
 
@@ -478,6 +491,7 @@ byte CatMgr::objectType() {
 const char* CatMgr::objectTypeStr() {
   if (_cat==STAR)     return "Star"; else
   if (_cat==MESSIER)  return Txt_Object_Type[objectType()]; else
+  if (_cat==CALDWELL) return Txt_Object_Type[objectType()]; else
   if (_cat==HERSCHEL) return Txt_Object_Type[objectType()]; else return "";
 }
 
@@ -485,6 +499,7 @@ const char* CatMgr::objectTypeStr() {
 const char* CatMgr::objectName() {
   if (_cat==STAR)     return Cat_Stars[_idx[_selected]].Name; else
   if (_cat==MESSIER)  return ""; else
+  if (_cat==CALDWELL) return ""; else
   if (_cat==HERSCHEL) return ""; else return "";
 }
 
@@ -492,6 +507,7 @@ const char* CatMgr::objectName() {
 int CatMgr::primaryId() {
   if (_cat==STAR)     return Cat_Stars[_idx[_selected]].Bayer + 1; else
   if (_cat==MESSIER)  return Cat_Messier[_idx[_selected]].Obj_id; else
+  if (_cat==CALDWELL) return Cat_Messier[_idx[_selected]].Obj_id; else
   if (_cat==HERSCHEL) return Cat_Herschel[_idx[_selected]].Obj_id; else return -1;
 }
 

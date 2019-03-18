@@ -79,6 +79,7 @@ private:
   void menuSolarSys(bool sync);
   void menuHerschel(bool sync);
   void menuMessier(bool sync);
+  void menuCaldwell(bool sync);
   void menuAlignment();
   void menuParking();
   void menuPEC();

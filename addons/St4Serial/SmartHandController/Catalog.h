@@ -4,7 +4,7 @@
 
 const double Rad=57.29577951;
 
-enum Catalog { STAR, MESSIER, HERSCHEL, CAT_NONE };
+enum Catalog { STAR, MESSIER, CALDWELL, HERSCHEL, CAT_NONE };
 enum FilterMode { FM_NONE, FM_ABOVE_HORIZON, FM_ALIGN_ALL_SKY, FM_ALIGN_3STAR_1, FM_ALIGN_3STAR_2, FM_ALIGN_3STAR_3 };
 
 void getcatdms(const short& v, short& v1, uint8_t& v2);
@@ -50,7 +50,7 @@ class CatMgr {
     double azm();
     void topocentricToObservedPlace(float *RA, float *Dec);
 
-    double magnitude();
+    float magnitude();
     
     byte   constellation();
     const char* constellationStr();
@@ -71,7 +71,12 @@ private:
     FilterMode _fm=FM_NONE;
     int _selected=0;
     int _idx[4]={0,0,0,0};
-    int _maxIdx[4]={NUM_STARS-1,NUM_MESSIER-1,NUM_HERSCHEL-1,0-1};
+    int _maxIdx[5]={
+	    NUM_STARS-1,
+	    NUM_MESSIER-1,
+	    NUM_CALDWELL-1,
+	    NUM_HERSCHEL-1,
+	    0-1};
 
     bool isFiltered();
 
