@@ -83,6 +83,9 @@
 // Sound state at startup, default=_ON.
 #define DEFAULT_SOUND_ON
 
+// External temparature monitoring via DS1820 on ONE WIRE interface (Pin 30.)  Default _OFF.
+#define TEMPERATURE_DS1820_OFF
+
 // Optionally adjust tracking rate to compensate for atmospheric refraction, default=_OFF
 // can be turned on/off with the :Tr# and :Tn# commands regardless of this setting
 #define TRACK_REFRACTION_RATE_DEFAULT_OFF
