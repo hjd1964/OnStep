@@ -6,17 +6,30 @@ void SmartHandController::menuSettings()
   while (current_selection_L1 != 0)
   {
     if (telInfo.isMountGEM()) {
+#ifdef UTILITY_LIGHT_ON      
+      const char *string_list_SettingsL1 = "Date/Time\n""Display\n""Utility light\n""Buzzer\n""Meridian Flip\n""Configuration\n""Site\n""Firmware Ver";
+#else      
       const char *string_list_SettingsL1 = "Date/Time\n""Display\n""Buzzer\n""Meridian Flip\n""Configuration\n""Site\n""Firmware Ver";
+#endif      
       current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Settings", current_selection_L1, string_list_SettingsL1);
       switch (current_selection_L1)
       {
       case 1: menuLocalDateTime(); break;
       case 2: menuDisplay(); break;
+#ifdef UTILITY_LIGHT_ON      
+      case 3: menuUtilityLight(); break;
+      case 4: menuSound(); break;
+      case 5: menuMeridianFlips(); break;
+      case 6: menuMount(); break;
+      case 7: menuSite(); break;
+      case 8: menuFirmware(); break;
+#else      
       case 3: menuSound(); break;
       case 4: menuMeridianFlips(); break;
       case 5: menuMount(); break;
       case 6: menuSite(); break;
       case 7: menuFirmware(); break;
+#endif      
       }
     } else {
       const char *string_list_SettingsL1 = "Date/Time\n""Display\n""Buzzer\n""Configuration\n""Site";
@@ -295,3 +308,24 @@ void SmartHandController::menuFirmware()
     DisplayMessage(out, temp2, 3000);
   }
 }
+
+#ifdef UTILITY_LIGHT_ON
+void SmartHandController::menuUtilityLight()
+{
+  const char *string_utility_light = "Off\nMin\nLow\nMedium\nHigh\nMax";
+  uint8_t last_selection = current_selection_utility_light;
+
+  current_selection_utility_light = display->UserInterfaceSelectionList(&buttonPad, "Set Brightness", current_selection_utility_light, string_utility_light);
+  if (current_selection_utility_light > 0)
+  { switch(current_selection_utility_light){
+    case 1:   ledcWrite(0, 0); break;
+    case 2:   ledcWrite(0, 15);break;
+    case 3:   ledcWrite(0, 31);break;
+    case 4:   ledcWrite(0, 63);break;
+    case 5:   ledcWrite(0, 127);break;
+    case 6:   ledcWrite(0, 255);break;
+    }
+  }
+  else  current_selection_utility_light = last_selection;
+}
+#endif

@@ -244,6 +244,12 @@ void SmartHandController::setup(const char version[], const int pin[7],const boo
   auxST4.setup();
 #endif
 
+#ifdef UTILITY_LIGHT_ON
+  ledcSetup(0, 5000, 8);
+  ledcAttachPin(UTILITY_LIGHT_PIN, 0);
+  ledcWrite(0, 127);
+#endif
+
   //choose a 128x64 display supported by U8G2lib (if not listed below there are many many others in u8g2 library example Sketches)
   //U8G2_SH1106_128X64_NONAME_1_HW_I2C display(U8G2_R0);
   //U8G2_SSD1306_128X64_NONAME_F_SW_I2C display(U8G2_R0, /* clock=*/ SCL, /* data=*/ SDA, /* reset=*/ U8X8_PIN_NONE);   // All Boards without Reset of the Display
@@ -450,7 +456,7 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
     // wifi status
     if (wifiOn) display->drawXBMP(0, 0, icon_width, icon_height, wifi_bits);
 
-    // last selected guide rate
+    // last selected guide rate (does not get updated if guide rate is changed from other source than SHC)
       char *string_Speed[10] = {"0.25x","0.5x","1.0x","2.0x","4.0x","8.0x","20.0x","48.0x","0.5 Max","Max"};
       if ((current_selection_speed>0)&&(current_selection_speed<=10))
         u8g2_DrawUTF8(u8g2, 0, icon_height, string_Speed[current_selection_speed-1]); 
@@ -604,6 +610,7 @@ void SmartHandController::drawReady()
 void SmartHandController::menuSpeedRate()
 {
   char string_list_Speed[] = "0.25x\n0.5x\n1.0x\n2.0x\n4.0x\n8.0x\n20.0x\n48.0x\n0.5 Max\nMax";
+  uint8_t last_selection_speed = current_selection_speed;
   current_selection_speed = display->UserInterfaceSelectionList(&buttonPad, "Set Speed", current_selection_speed, string_list_Speed);
   if (current_selection_speed > 0)
   {
@@ -611,6 +618,7 @@ void SmartHandController::menuSpeedRate()
     cmd[2] = '0' + current_selection_speed - 1;
     DisplayMessageLX200(SetLX200(cmd));
   }
+  else current_selection_speed = last_selection_speed;
 }
 
 // Main Menu
