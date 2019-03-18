@@ -4,14 +4,14 @@
 // Configuration
 
 // Select the display type by commenting out the one you don't use and leaving the other
-#define OLED_DISPLAY SH1106   // SH1106 is the 1.3"
-//#define OLED_DISPLAY SSD1306  // SSD1306 is the 0.96"
+#define OLED_DISPLAY SH1106       // SH1106 is the 1.3"
+//#define OLED_DISPLAY SSD1306    // SSD1306 is the 0.96"
 
 // The serial interface to/from OnStep
 #define Ser SerialST4             // You could also, for example, use the Teensy3.2's Serial3 interface "Ser Serial3"
 #define SERIAL_BAUD_DEFAULT 57200 // Default=57200, only used for async comms (not SerialST4)
 
-#define UTILITY_LIGHT_OFF          // Utility light, PWM controlled, currently for ESP only, default _OFF
+#define UTILITY_LIGHT_OFF         // Utility light, PWM controlled, default _OFF
 
 // THAT IS ALL FOR USER CONFIGURABLE PARAMETERS! Do not change anything below this line!
 // -------------------------------------------------------------------------------------
@@ -54,6 +54,8 @@
 //  #define ST4AuxDEs 7 // ST4 (Aux) DE- South
 //  #define ST4AuxDEn 8 // ST4 (Aux) DE+ North
 //  #define ST4AuxRAe 9 // ST4 (Aux) RA+ East
+
+  #define UTILITY_LIGHT_PIN  10    // Pin10 used as PWM output to drive utility lamp LED
 #endif
 
 #ifdef ESP32
@@ -65,8 +67,6 @@
   #define B_PIN5 39   // F
   #define B_PIN6 35   // f
 
-  #define UTILITY_LIGHT_PIN  13    //GPIO13 used as PWM output to drive utitlity lamp LED
-
   #define ST4RAw 23   // ST4 (OnStep) RA- West,  send data to OnStep
   #define ST4DEs 14   // ST4 (OnStep) DE- South, clock input to ISR
   #define ST4DEn 27   // ST4 (OnStep) DE+ North, recv data from OnStep
@@ -77,6 +77,8 @@
 //  #define ST4AuxDEs 18 // ST4 (Aux) DE- South
 //  #define ST4AuxDEn 17 // ST4 (Aux) DE+ North
 //  #define ST4AuxRAe 5  // ST4 (Aux) RA+ East
+
+  #define UTILITY_LIGHT_PIN  13    // GPIO13 used as PWM output to drive utility lamp LED
 #endif 
 
 #include "St4SerialSlave.h"

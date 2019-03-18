@@ -316,16 +316,25 @@ void SmartHandController::menuUtilityLight()
   uint8_t last_selection = current_selection_utility_light;
 
   current_selection_utility_light = display->UserInterfaceSelectionList(&buttonPad, "Set Brightness", current_selection_utility_light, string_utility_light);
+
   if (current_selection_utility_light > 0)
-  { switch(current_selection_utility_light){
-    case 1:   ledcWrite(0, 0); break;
-    case 2:   ledcWrite(0, 15);break;
-    case 3:   ledcWrite(0, 31);break;
-    case 4:   ledcWrite(0, 63);break;
-    case 5:   ledcWrite(0, 127);break;
-    case 6:   ledcWrite(0, 255);break;
+  {
+    int i;
+    switch(current_selection_utility_light) 
+    {
+      case 1: i=0;   break;
+      case 2: i=15;  break;
+      case 3: i=31;  break;
+      case 4: i=63;  break;
+      case 5: i=127; break;
+      case 6: i=255; break;
+      default: i=127; break;
     }
-  }
-  else  current_selection_utility_light = last_selection;
+#ifdef ESP32
+    ledcWrite(0, i);
+#else
+    analogWrite(UTILITY_LIGHT_PIN, i);
+#endif
+  } else  current_selection_utility_light = last_selection;
 }
 #endif

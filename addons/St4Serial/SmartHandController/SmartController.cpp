@@ -245,9 +245,14 @@ void SmartHandController::setup(const char version[], const int pin[7],const boo
 #endif
 
 #ifdef UTILITY_LIGHT_ON
-  ledcSetup(0, 5000, 8);
-  ledcAttachPin(UTILITY_LIGHT_PIN, 0);
-  ledcWrite(0, 127);
+  #ifdef ESP32
+    ledcSetup(0, 5000, 8);
+    ledcAttachPin(UTILITY_LIGHT_PIN, 0);
+    ledcWrite(0, 127);
+  #else
+    pinMode(UTILITY_LIGHT_PIN, OUTPUT);
+    analogWrite(UTILITY_LIGHT_PIN, 127);
+  #endif
 #endif
 
   //choose a 128x64 display supported by U8G2lib (if not listed below there are many many others in u8g2 library example Sketches)
