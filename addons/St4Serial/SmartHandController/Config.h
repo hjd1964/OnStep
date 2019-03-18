@@ -11,6 +11,8 @@
 #define Ser SerialST4             // You could also, for example, use the Teensy3.2's Serial3 interface "Ser Serial3"
 #define SERIAL_BAUD_DEFAULT 57200 // Default=57200, only used for async comms (not SerialST4)
 
+#define UTILITY_LIGHT_OFF          // Utility light, PWM controlled, currently for ESP only, default _OFF
+
 // THAT IS ALL FOR USER CONFIGURABLE PARAMETERS! Do not change anything below this line!
 // -------------------------------------------------------------------------------------
 
@@ -62,6 +64,8 @@
   #define B_PIN4 34   // W
   #define B_PIN5 39   // F
   #define B_PIN6 35   // f
+
+  #define UTILITY_LIGHT_PIN  13    //GPIO13 used as PWM output to drive utitlity lamp LED
 
   #define ST4RAw 23   // ST4 (OnStep) RA- West,  send data to OnStep
   #define ST4DEs 14   // ST4 (OnStep) DE- South, clock input to ISR

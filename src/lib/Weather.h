@@ -8,6 +8,12 @@
 Adafruit_BME280 bme;
 #endif
 
+#ifdef TEMPERATURE_DS1820_ON
+#include <OneWire.h>                    // added via built in Arduino IDE library manager
+#include <DallasTemperature.h>          // added via built in Arduino IDE library manager
+OneWire oneWire(DS1820_ONE_WIRE_BUS);
+DallasTemperature DS18B20(&oneWire);
+#endif
 class weather {
   public:
     void init() {
@@ -21,6 +27,13 @@ class weather {
 #ifdef ESP32
       HAL_Wire.end();
 #endif
+#endif
+#ifdef TEMPERATURE_DS1820_ON
+      _disabled=false;
+      if (!_disabled) {
+        DS18B20.requestTemperatures(); 
+        _t=DS18B20.getTempCByIndex(0);
+      }
 #endif
     }
 
@@ -38,6 +51,15 @@ class weather {
 #ifdef ESP32
         if ((phase==10) || (phase==30) || (phase==50)) HAL_Wire.end();  
 #endif
+        phase++; if (phase==60) phase=0;
+      }
+#endif
+#ifdef TEMPERATURE_DS1820_ON
+      if (!_disabled) {
+        static int phase=0;
+        if (phase==10) { DS18B20.requestTemperatures(); _t=DS18B20.getTempCByIndex(0); } 
+        if (phase==30) ;    //nothing to do here
+        if (phase==50) ;    //nothing to do here
         phase++; if (phase==60) phase=0;
       }
 #endif

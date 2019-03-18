@@ -65,6 +65,9 @@ private:
   uint8_t current_selection_L2 = 1;
   uint8_t current_selection_L3 = 1;
   uint8_t current_selection_L4 = 1;
+#ifdef UTILITY_LIGHT_ON  
+  uint8_t current_selection_utility_light = 5;
+#endif  
   uint8_t current_selection_speed = 5;
   unsigned short current_selection_SolarSys = 1;
   long angleRA = 0;
@@ -92,6 +95,9 @@ private:
   void menuSites();
   void menuLocalDateTime();
   void menuDisplay();
+#ifdef UTILITY_LIGHT_ON  
+  void menuUtilityLight();
+#endif  
   void menuSound();
   void menuMeridianFlips();
   void menuTracking();
