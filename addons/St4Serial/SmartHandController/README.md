@@ -55,6 +55,11 @@ Questions and discussion should be on the mailing list (also accessible via the
 web) at the [OnStep Group](https://groups.io/g/onstep/).
 
 # Catalogs
+At present, the SHC contains the following catalogs:
+- Messier (109 objects, with M102 considered a duplicate)
+- Caldwell (all 109 objects)
+- Herschel (388 out of 400 objects)
+
 The SHC's catalogs incorporates data from various sources, with licenses that allow incorporation
 in a GPL-licensed project.
 
