@@ -56,10 +56,31 @@ web) at the [OnStep Group](https://groups.io/g/onstep/).
 
 # Catalogs
 At present, the SHC contains the following catalogs:
-- 408 stars up to magnitude 3.85. Includes most named stars.
-- Messier (109 objects, with M102 considered a duplicate).
-- Caldwell (all 109 objects)
-- Herschel (388 out of 400 objects)
+- Stars:
+  408 stars up to magnitude 3.85. The list includes most Named Stars.
+- Messier Objects:
+  All 109 objects are included.
+  The identity of M102 is uncertain and therefore not included. See more [here](http://www.messier.seds.org/m/m102d.html) and [here](https://en.wikipedia.org/wiki/Messier_102)
+- Caldwell Objects:
+  All 109 objects
+- Herschel
+  All objects are effectively included (398 out of 400 objects)
+
+  Two objects are 'missing', but they are actually included under a different number:
+    NGC 2372 is the same object as 2371, which is already in the catalog
+    NGC 6885 is the same object as 6882, which is already in the catalog
+
+  Ten other objects were replaced by what they are duplicates of, per the OpenNGC database.
+    NGC  651 Duplicate of 650
+    NGC 2244 Duplicate of 2239
+    NGC 2527 Duplicate of 2520
+    NGC 3190 Duplicate of 3189
+    NGC 3384 Duplicate of 3371
+    NGC 3912 Duplicate of 3899
+    NGC 4665 Duplicate of 4624
+    NGC 5364 Duplicate of 5317
+    NGC 5907 Duplicate of 5906
+    NGC 7296 Duplicate of 7295
 
 The SHC's catalogs incorporates data from various sources, with licenses that allow incorporation
 in a GPL-licensed project.
