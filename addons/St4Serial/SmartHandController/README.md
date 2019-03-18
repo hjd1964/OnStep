@@ -56,7 +56,8 @@ web) at the [OnStep Group](https://groups.io/g/onstep/).
 
 # Catalogs
 At present, the SHC contains the following catalogs:
-- Messier (109 objects, with M102 considered a duplicate)
+- 408 stars up to magnitude 3.85. Includes most named stars.
+- Messier (109 objects, with M102 considered a duplicate).
 - Caldwell (all 109 objects)
 - Herschel (388 out of 400 objects)
 
