@@ -4,16 +4,17 @@
 #pragma once
 
 #ifdef WEATHER_BME280_ON
-#include <Adafruit_BME280.h> // https://github.com/adafruit/Adafruit_BME280_Library and https://github.com/adafruit/Adafruit_Sensor
-Adafruit_BME280 bme;
+  #include <Adafruit_BME280.h> // https://github.com/adafruit/Adafruit_BME280_Library and https://github.com/adafruit/Adafruit_Sensor
+  Adafruit_BME280 bme;
 #endif
 
 #ifdef TEMPERATURE_DS1820_ON
-#include <OneWire.h>                    // added via built in Arduino IDE library manager
-#include <DallasTemperature.h>          // added via built in Arduino IDE library manager
-OneWire oneWire(DS1820_ONE_WIRE_BUS);
-DallasTemperature DS18B20(&oneWire);
+  #include <OneWire.h>                    // added via built in Arduino IDE library manager
+  #include <DallasTemperature.h>          // added via built in Arduino IDE library manager
+  OneWire oneWire(OneWirePin);
+  DallasTemperature DS18B20(&oneWire);
 #endif
+
 class weather {
   public:
     void init() {
@@ -24,9 +25,9 @@ class weather {
         _p=bme.readPressure()/100.0;
         _h=bme.readHumidity();
       }
-#ifdef ESP32
+  #ifdef ESP32
       HAL_Wire.end();
-#endif
+  #endif
 #endif
 #ifdef TEMPERATURE_DS1820_ON
       _disabled=false;
@@ -42,15 +43,15 @@ class weather {
 #ifdef WEATHER_BME280_ON
       if (!_disabled) {
         static int phase=0;
-#ifdef ESP32
+  #ifdef ESP32
         if ((phase==10) || (phase==30) || (phase==50)) HAL_Wire.begin();
-#endif
+  #endif
         if (phase==10) _t=bme.readTemperature();
         if (phase==30) _p=bme.readPressure()/100.0;
         if (phase==50) _h=bme.readHumidity();
-#ifdef ESP32
+  #ifdef ESP32
         if ((phase==10) || (phase==30) || (phase==50)) HAL_Wire.end();  
-#endif
+  #endif
         phase++; if (phase==60) phase=0;
       }
 #endif
@@ -118,4 +119,3 @@ class weather {
     double _h = 70.0;
     double _a = 200.0;
 };
-

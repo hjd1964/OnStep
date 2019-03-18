@@ -16,6 +16,9 @@
 #define Aux7           4    // should be ok as pwm analog output (w/#define Aux7_Analog)
 #define Aux8          22    // should be ok as pwm analog output (w/#define Aux8_Analog)
 
+// Optional one wire bus
+#define OneWirePin    Aux4   // Pin 39
+
 // The PEC index sense is a logic level input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
 #define PecPin        23
 #define AnalogPecPin  23    // Pin 23 (PEC Sense, analog or digital)
