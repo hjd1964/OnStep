@@ -430,6 +430,9 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
   telInfo.updateTel();
   if (telInfo.connected == false) return;
 
+  // update guide rate (if available)
+  if (telInfo.getGuideRate()>=0) current_selection_speed=telInfo.getGuideRate()+1;
+
   // detect align mode
   if (telInfo.hasTelStatus && telInfo.align != Telescope::ALI_OFF)
   {
