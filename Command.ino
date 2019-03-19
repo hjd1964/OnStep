@@ -649,27 +649,26 @@ void processCommands() {
         i=0;
         if ((trackingState!=TrackingSidereal) || trackingSyncInProgress()) reply[i++]='n'; // [n]ot tracking
         if ((trackingState!=TrackingMoveTo) && !trackingSyncInProgress())  reply[i++]='N'; // [N]o goto
-        const char *parkStatusCh = "pIPF";       reply[i++]=parkStatusCh[parkStatus]; // not [p]arked, parking [I]n-progress, [P]arked, Park [F]ailed
-        if (pecRecorded)                         reply[i++]='R';                      // PEC data has been [R]ecorded
-        if (atHome)                              reply[i++]='H';                      // at [H]ome
-        if (PPSsynced)                           reply[i++]='S';                      // PPS [S]ync
-        if ((guideDirAxis1) || (guideDirAxis2))  reply[i++]='G';                      // [G]uide active
-        if (faultAxis1 || faultAxis2)            reply[i++]='f';                      // axis [f]ault
+        const char *parkStatusCh = "pIPF";       reply[i++]=parkStatusCh[parkStatus];      // not [p]arked, parking [I]n-progress, [P]arked, Park [F]ailed
+        if (pecRecorded)                         reply[i++]='R';                           // PEC data has been [R]ecorded
+        if (atHome)                              reply[i++]='H';                           // at [H]ome
+        if (PPSsynced)                           reply[i++]='S';                           // PPS [S]ync
+        if ((guideDirAxis1) || (guideDirAxis2))  reply[i++]='G';                           // [G]uide active
 #ifndef MOUNT_TYPE_ALTAZM
-        if (rateCompensation==RC_REFR_RA)      { reply[i++]='r'; reply[i++]='s'; }    // [r]efr enabled [s]ingle axis
-        if (rateCompensation==RC_REFR_BOTH)    { reply[i++]='r'; }                    // [r]efr enabled
-        if (rateCompensation==RC_FULL_RA)      { reply[i++]='t'; reply[i++]='s'; }    // on[t]rack enabled [s]ingle axis
-        if (rateCompensation==RC_FULL_BOTH)    { reply[i++]='t'; }                    // on[t]rack enabled
+        if (rateCompensation==RC_REFR_RA)      { reply[i++]='r'; reply[i++]='s'; }         // [r]efr enabled [s]ingle axis
+        if (rateCompensation==RC_REFR_BOTH)    { reply[i++]='r'; }                         // [r]efr enabled
+        if (rateCompensation==RC_FULL_RA)      { reply[i++]='t'; reply[i++]='s'; }         // on[t]rack enabled [s]ingle axis
+        if (rateCompensation==RC_FULL_BOTH)    { reply[i++]='t'; }                         // on[t]rack enabled
 #endif
-        if (waitingHome)                         reply[i++]='w';                      // [w]aiting at home
-        if (pauseHome)                           reply[i++]='u';                      // pa[u]se at home enabled?
-        if (soundEnabled)                        reply[i++]='z';                      // bu[z]zer enabled?
+        if (waitingHome)                         reply[i++]='w';                           // [w]aiting at home 
+        if (pauseHome)                           reply[i++]='u';                           // pa[u]se at home enabled?
+        if (soundEnabled)                        reply[i++]='z';                           // bu[z]zer enabled?
 #ifdef MOUNT_TYPE_GEM
-        if (autoMeridianFlip)                    reply[i++]='a';                      // [a]uto meridian flip
+        if (autoMeridianFlip)                    reply[i++]='a';                           // [a]uto meridian flip
 #endif
 #ifndef MOUNT_TYPE_ALTAZM        
-        const char *pch = PECStatusStringAlt; reply[i++]=pch[pecStatus];              // PEC Status is one of "/,~;^" (/)gnore, get ready to (,)lay, (~)laying, get ready to (;)ecord, (^)ecording
-        // if (wormSensedAgain) { reply[i++]='.'; wormSensedAgain=false; }            // PEC optional (.) to indicate an index detect since last call
+        const char *pch = PECStatusStringAlt; reply[i++]=pch[pecStatus];                   // PEC Status is one of "/,~;^" (/)gnore, get ready to (,)lay, (~)laying, get ready to (;)ecord, (^)ecording
+        // if (wormSensedAgain) { reply[i++]='.'; wormSensedAgain=false; }                 // PEC optional (.) to indicate an index detect since last call
 #endif
         // provide mount type
         #if defined(MOUNT_TYPE_GEM)
@@ -683,9 +682,9 @@ void processCommands() {
         #endif
 
         // provide pier side info.
-        if (getInstrPierSide()==PierSideNone) reply[i++]='o'; else                    // pier side n[o]ne
-        if (getInstrPierSide()==PierSideEast) reply[i++]='T'; else                    // pier side eas[T]
-        if (getInstrPierSide()==PierSideWest) reply[i++]='W';                         // pier side [W]est
+        if (getInstrPierSide()==PierSideNone) reply[i++]='o'; else                         // pier side n[o]ne
+        if (getInstrPierSide()==PierSideEast) reply[i++]='T'; else                         // pier side eas[T]
+        if (getInstrPierSide()==PierSideWest) reply[i++]='W';                              // pier side [W]est
 
         // provide pulse-guide rate
         reply[i++]='0'+getPulseGuideRate();
