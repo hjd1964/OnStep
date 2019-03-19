@@ -33,7 +33,13 @@ void Telescope::updateTel(boolean immediate)
     if ((updateSeq%4==1) || immediate) { hasTelStatus = GetLX200(":GU#", TelStatus) == LX200VALUEGET; if (!hasTelStatus) connected = true; lastStateTel = millis(); }
   }
 };
-
+void Telescope::updateTrackingRate(boolean immediate)
+{
+  if ((millis() - lastStateTrackingRate > (4 * BACKGROUND_CMD_RATE)) && ((updateSeq%4==0) || (updateSeq%4==1) || immediate) && connected)
+  {
+    if ((updateSeq%4==0) || immediate) { hasTrackingRate = GetLX200(":GT#", TempTrackingRate) == LX200VALUEGET; if (!hasTrackingRate) connected = true; lastStateTrackingRate = millis(); }
+  }
+};
 double Telescope::getLstT0()
 {
   char temp[20]="";
