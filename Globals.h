@@ -221,6 +221,7 @@ PreferredPierSide preferredPierSide = PPS_BEST;
 #define Parking          1
 #define Parked           2
 #define ParkFailed       3
+#define ParkUnknown      4
 byte    parkStatus       = NotParked;
 boolean parkSaved        = false;
 boolean atHome           = true;

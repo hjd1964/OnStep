@@ -703,9 +703,10 @@ void processCommands() {
         if (rateCompensation==RC_FULL_BOTH)          reply[0]|=0b10100000;                       // OnTrack enabled
 #endif
         if (rateCompensation==RC_NONE) {
-        if (abs(getTrackingRate60Hz()-57.900)<0.001) reply[1]|=0b10000001; else                  // Lunar rate selected
-        if (abs(getTrackingRate60Hz()-60.000)<0.001) reply[1]|=0b10000010; else                  // Solar rate selected
-        if (abs(getTrackingRate60Hz()-60.136)<0.001) reply[1]|=0b10000011;                       // King rate selected
+          double tr=getTrackingRate60Hz();
+          if (abs(tr-57.900)<0.001)                  reply[1]|=0b10000001; else                  // Lunar rate selected
+          if (abs(tr-60.000)<0.001)                  reply[1]|=0b10000010; else                  // Solar rate selected
+          if (abs(tr-60.136)<0.001)                  reply[1]|=0b10000011;                       // King rate selected
         }
         
         if (atHome)                                  reply[2]|=0b10000001;                       // At home
