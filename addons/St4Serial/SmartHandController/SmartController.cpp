@@ -64,6 +64,15 @@ static unsigned char no_tracking_bits[] U8X8_PROGMEM = {
 static unsigned char tracking_S_bits[] U8X8_PROGMEM = {
   0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x06, 0x00, 0x0e, 0x00, 0x1e, 0x00, 0x3e, 0x00, 0x7e, 0x00, 0xfe, 0x38, 0x7e, 0x04, 0x3e, 0x04, 0x1e, 0x18, 0x0e, 0x20, 0x06, 0x20, 0x02, 0x1c, 0x00, 0x00 };
 
+static unsigned char tracking_sid_bits[] U8X8_PROGMEM = {
+  0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x06, 0x00, 0x0E, 0x00, 0x1E, 0x00, 0x3E, 0x00, 0x7E, 0x08, 0xFE, 0x08, 0x7E, 0x7F, 0x3E, 0x3E, 0x1E, 0x1C, 0x0E, 0x3E, 0x06, 0x22, 0x02, 0x00, 0x00, 0x00 };
+
+static unsigned char tracking_sol_bits[] U8X8_PROGMEM = {
+  0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x06, 0x00, 0x0E, 0x00, 0x1E, 0x00, 0x3E, 0x00, 0x7E, 0x00, 0xFE, 0x1C, 0x7E, 0x22, 0x3E, 0x41, 0x1E, 0x49, 0x0E, 0x41, 0x06, 0x22, 0x02, 0x1C, 0x00, 0x00 };
+
+static unsigned char tracking_lun_bits[] U8X8_PROGMEM = {
+  0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x06, 0x00, 0x0E, 0x00, 0x1E, 0x00, 0x3E, 0x00, 0x7E, 0x38, 0xFE, 0x1C, 0x7E, 0x06, 0x3E, 0x06, 0x1E, 0x06, 0x0E, 0x06, 0x06, 0x1C, 0x02, 0x38, 0x00, 0x00 };  
+
 static unsigned char sleewing_bits[] U8X8_PROGMEM = {
   0x00, 0x00, 0x00, 0x00, 0x02, 0x01, 0x06, 0x03, 0x0e, 0x07, 0x1e, 0x0f, 0x3e, 0x1f, 0x7e, 0x3f, 0xfe, 0x7f, 0x7e, 0x3f, 0x3e, 0x1f, 0x1e, 0x0f, 0x0e, 0x07, 0x06, 0x03, 0x02, 0x01, 0x00, 0x00 };
   
@@ -429,6 +438,7 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
   telInfo.updateSeq++;
   telInfo.updateTel();
   if (telInfo.connected == false) return;
+  telInfo.updateTrackingRate();
 
   // update guide rate (if available)
   if (telInfo.getGuideRate()>=0) current_selection_speed=telInfo.getGuideRate()+1;
@@ -478,7 +488,14 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
       if (telInfo.atHome())               { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, home_bits); x -= icon_width + 1;  } else 
       {
         if (curT == Telescope::TRK_SLEWING) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, sleewing_bits); x -= icon_width + 1; } else
-        if (curT == Telescope::TRK_ON)      { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_S_bits); x -= icon_width + 1; } else
+        if (curT == Telescope::TRK_ON)      
+        {
+          double tr=atof(telInfo.TempTrackingRate);
+          if (tr == 60.16427)     { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_sid_bits); x -= icon_width + 1; }
+          else if (tr == 57.900)  { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_lun_bits); x -= icon_width + 1; }
+          else if (tr == 60.000)  { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_sol_bits); x -= icon_width + 1; }
+          else                    { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_S_bits); x -= icon_width + 1; }
+         } else
         if (curT == Telescope::TRK_OFF)     { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, no_tracking_bits); x -= icon_width + 1; }
 
         if (curP == Telescope::PRK_FAILED)  { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, parkingFailed_bits); x -= icon_width + 1; }

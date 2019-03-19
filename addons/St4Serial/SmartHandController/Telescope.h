@@ -45,6 +45,8 @@ public:
   char TelStatus[25];
   char sideofpier[25];
   unsigned long lastStateTel;
+  char TempTrackingRate[25];
+  unsigned long lastStateTrackingRate;  
   unsigned long updateSeq=0;
 public:
   bool connected = true;
@@ -56,11 +58,13 @@ public:
   bool hasInfoSidereal = false;
   bool hasPierInfo = false;
   bool hasTelStatus = false;
+  bool hasTrackingRate = false;
   unsigned long lastState;
   void updateRaDec(boolean immediate=false);
   void updateAzAlt(boolean immediate=false);
   void updateTime(boolean immediate=false);
   void updateTel(boolean immediate=false);
+  void updateTrackingRate(boolean immediate=false);
   double getLstT0();
   double getLat();
   int getAlignStars(int *maxStars, int *thisStar, int *numStars);
