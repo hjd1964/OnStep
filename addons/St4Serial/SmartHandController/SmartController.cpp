@@ -464,9 +464,9 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
     // wifi status
     if (wifiOn) display->drawXBMP(0, 0, icon_width, icon_height, wifi_bits);
 
-    // last selected guide rate (does not get updated if guide rate is changed from other source than SHC)
+    // last selected guide rate
       char *string_Speed[10] = {"0.25x","0.5x","1.0x","2.0x","4.0x","8.0x","20.0x","48.0x","0.5 Max","Max"};
-      if ((current_selection_speed>0)&&(current_selection_speed<=10))
+      if ((current_selection_speed>0) && (current_selection_speed<=10))
         u8g2_DrawUTF8(u8g2, 0, icon_height, string_Speed[current_selection_speed-1]); 
 
     // OnStep status
