@@ -27,6 +27,11 @@ void SmartHandController::menuSyncGoto(bool sync)
         break;
       case 7:
       {
+        boolean GotoHome=false; 
+        DisplayMessage("Goto Home will", "clear the Model", 2000);
+        if (display->UserInterfaceInputValueBoolean(&buttonPad, "Goto Home?", &GotoHome)) 
+             if (GotoHome)
+             {
         char cmd[5];
         sprintf(cmd, ":hX#");
         cmd[2] = sync ? 'F' : 'C';
@@ -34,6 +39,7 @@ void SmartHandController::menuSyncGoto(bool sync)
         // Quit Menu
         current_selection_L1 = 0;
         current_selection_L0 = 0;
+      }
       }
       break;
     }
@@ -93,6 +99,16 @@ void SmartHandController::menuSolarSys(bool sync)
   
   if (current_selection_SolarSys == 0) return;
   current_selection_SolarSys > 3 ? current_selection_SolarSys : current_selection_SolarSys--;
+  
+  if (current_selection_SolarSys == 0)
+  { 
+    boolean GotoSun=false; 
+    DisplayMessage("Pointing at the Sun", "can be dangerous", 2000);
+    if (display->UserInterfaceInputValueBoolean(&buttonPad, "Goto Sun?", &GotoSun))
+      { if (!GotoSun) return;
+      }
+    else return;
+  }
   
   bool ok = DisplayMessageLX200(SyncGotoPlanetLX200(sync, current_selection_SolarSys),false);
   if (current_selection_SolarSys != 0 && ok) { current_selection_L1 = 0; current_selection_L0 = 0; } // Quit Menu
