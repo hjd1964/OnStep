@@ -337,16 +337,6 @@ done: {}
 #endif
 }
 
-double getFrequencyHzAxis1() {
-  if (trackingState==TrackingMoveTo) {
-    if (posAxis1==(long)targetAxis1.part.m)
-      return 0.0;
-    else
-      return (16000000.0/(double)isrTimerRateAxis1)*((double)stepAxis1);
-    } else
-      return (16000000.0/(double)isrTimerRateAxis1)*((double)timerDirAxis1*(double)stepAxis1);
-}
-
 IRAM_ATTR ISR(TIMER4_COMPA_vect)
 {
 #ifdef HAL_TIMER4_PREFIX
@@ -428,10 +418,20 @@ done: {}
 #endif
 }
 
+double getFrequencyHzAxis1() {
+  if (trackingState==TrackingMoveTo) {
+    if (posAxis1==(long)targetAxis1.part.m) {
+      return getStepsPerSecondAxis1()*1.00273790935;
+    } else
+      return (16000000.0/(double)isrTimerRateAxis1)*((double)stepAxis1);
+    } else
+      return (16000000.0/(double)isrTimerRateAxis1)*((double)timerDirAxis1*(double)stepAxis1);
+}
+
 double getFrequencyHzAxis2() {
   if (trackingState==TrackingMoveTo) {
     if (posAxis2==(long)targetAxis2.part.m)
-      return 0.0;
+      return getStepsPerSecondAxis2()*1.00273790935;
     else
       return (16000000.0/(double)isrTimerRateAxis2)*((double)stepAxis2);
   } else
