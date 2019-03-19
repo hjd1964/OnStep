@@ -687,6 +687,12 @@ void processCommands() {
         if (getInstrPierSide()==PierSideEast) reply[i++]='T'; else                    // pier side eas[T]
         if (getInstrPierSide()==PierSideWest) reply[i++]='W';                         // pier side [W]est
 
+        // provide pulse-guide rate
+        reply[i++]='0'+getPulseGuideRate();
+
+        // provide guide rate
+        reply[i++]='0'+getGuideRate();
+
         // provide last error
         reply[i++]='0'+lastError;
         reply[i++]=0;

@@ -146,6 +146,26 @@ Telescope::PierState Telescope::getPierState()
   }
   return PIER_UNKNOW;
 }
+int Telescope::getGuideRate()
+{
+  if (strlen(TelStatus) > 3)
+  {
+    int l = strlen(TelStatus) - 3;
+    int g = TelStatus[l]-'0';
+    if ((g<0) || (g>9)) g = -1;
+    return g;
+  } else return -1;
+}
+int Telescope::getPulseGuideRate()
+{
+  if (strlen(TelStatus) > 4)
+  {
+    int l = strlen(TelStatus) - 4;
+    int g = TelStatus[l]-'0';
+    if ((g<0) || (g>9)) g = -1;
+    return g;
+  } else return -1;
+}
 Telescope::Errors Telescope::getError()
 {
   if (strlen(TelStatus) > 2)

@@ -74,9 +74,10 @@ public:
   bool isMountGEM();
   bool isMountAltAz();
   PierState getPierState();
+  int getGuideRate();
+  int getPulseGuideRate();
   Errors getError();
   bool addStar();
 
 private:
 };
-

@@ -203,6 +203,20 @@ void setGuideRate(int g) {
   guideTimerCustomRateAxis2=0.0;
 }
 
+// gets the rate for guide commands
+int getGuideRate() {
+  return currentGuideRate;
+}
+
+// gets the rate for pulse-guide commands
+int getPulseGuideRate() {
+#ifdef SEPARATE_PULSE_GUIDE_RATE_ON
+  return currentPulseGuideRate; 
+#else
+  return currentGuideRate;
+#endif
+}
+
 // enables the guide rate
 // -1 to use guideTimerCustomRateAxis1/2, otherwise rates are:
 // 0=.25X 1=.5x 2=1x 3=2x 4=4x 5=8x 6=24x 7=48x 8=half-MaxRate 9=MaxRate
