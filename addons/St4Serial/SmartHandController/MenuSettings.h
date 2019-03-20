@@ -302,8 +302,8 @@ void SmartHandController::menuFirmware()
   char temp1[20];
   char temp2[20];
   if ( (DisplayMessageLX200(GetLX200(":GVN#", temp1)))&&(DisplayMessageLX200(GetLX200(":GVD#", temp2))) )
-  { for (char* p = temp1; p = strchr(p, '#'); ++p) { *p = 0;} 
-    for (char* p = temp2; p = strchr(p, '#'); ++p) { *p = 0;} 
+  { for (char* p = temp1; (p = strchr(p, '#')); ++p) { *p = 0;} 
+    for (char* p = temp2; (p = strchr(p, '#')); ++p) { *p = 0;} 
     sprintf(out,"OnStep %s",temp1);
     DisplayMessage(out, temp2, 3000);
   }

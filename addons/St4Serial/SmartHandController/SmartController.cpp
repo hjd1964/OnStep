@@ -438,10 +438,10 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
   telInfo.updateSeq++;
   telInfo.updateTel();
   if (telInfo.connected == false) return;
-  telInfo.updateTrackingRate();
 
   // update guide rate (if available)
-  if (telInfo.getGuideRate()>=0) current_selection_speed=telInfo.getGuideRate()+1;
+  if (telInfo.getGuideRate()>=0) current_selection_guide_rate=telInfo.getGuideRate()+1;
+  int display_selection_guide_rate=current_selection_guide_rate;
 
   // detect align mode
   if (telInfo.hasTelStatus && telInfo.align != Telescope::ALI_OFF)
@@ -475,14 +475,14 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
     if (wifiOn) display->drawXBMP(0, 0, icon_width, icon_height, wifi_bits);
 
     // last selected guide rate
-      char *string_Speed[10] = {"0.25x","0.5x","1.0x","2.0x","4.0x","8.0x","20.0x","48.0x","0.5 Max","Max"};
-      if ((current_selection_speed>0) && (current_selection_speed<=10))
-        u8g2_DrawUTF8(u8g2, 0, icon_height, string_Speed[current_selection_speed-1]); 
+    char string_Speed[][7] = {"0.25X","0.5X","1X","2X","4X","8X","20X","48X","½ Max","Max"};
+    if ((display_selection_guide_rate>0) && (display_selection_guide_rate<=10)) u8g2_DrawUTF8(u8g2, 0, icon_height, string_Speed[display_selection_guide_rate-1]); 
 
     // OnStep status
     if (telInfo.hasTelStatus) {
       Telescope::ParkState curP = telInfo.getParkState();
       Telescope::TrackState curT = telInfo.getTrackingState();
+      Telescope::TrackRate curTR = telInfo.getTrackingRate();
       if (curP == Telescope::PRK_PARKED)  { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, parked_bits); x -= icon_width + 1; } else
       if (curP == Telescope::PRK_PARKING) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, parking_bits); x -= icon_width + 1; } else
       if (telInfo.atHome())               { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, home_bits); x -= icon_width + 1;  } else 
@@ -490,21 +490,18 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
         if (curT == Telescope::TRK_SLEWING) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, sleewing_bits); x -= icon_width + 1; } else
         if (curT == Telescope::TRK_ON)      
         {
-          double tr=atof(telInfo.TempTrackingRate);
-          if (tr == 60.16427)     { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_sid_bits); x -= icon_width + 1; }
-          else if (tr == 57.900)  { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_lun_bits); x -= icon_width + 1; }
-          else if (tr == 60.000)  { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_sol_bits); x -= icon_width + 1; }
-          else                    { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_S_bits); x -= icon_width + 1; }
+          if (curTR == Telescope::TR_SIDEREAL) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_sid_bits); x -= icon_width + 1; } else
+          if (curTR == Telescope::TR_LUNAR)    { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_lun_bits); x -= icon_width + 1; } else
+          if (curTR == Telescope::TR_SOLAR)    { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_sol_bits); x -= icon_width + 1; } else
+                                               { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_S_bits); x -= icon_width + 1; }
          } else
         if (curT == Telescope::TRK_OFF)     { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, no_tracking_bits); x -= icon_width + 1; }
 
         if (curP == Telescope::PRK_FAILED)  { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, parkingFailed_bits); x -= icon_width + 1; }
 
-        if (telInfo.hasPierInfo) {
-          Telescope::PierState CurP = telInfo.getPierState();
-          if (CurP == Telescope::PIER_E) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, E_bits); x -= icon_width + 1; } else 
-          if (CurP == Telescope::PIER_W) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, W_bits); x -= icon_width + 1; }
-        }
+        Telescope::PierState CurP = telInfo.getPierState();
+        if (CurP == Telescope::PIER_E) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, E_bits); x -= icon_width + 1; } else 
+        if (CurP == Telescope::PIER_W) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, W_bits); x -= icon_width + 1; }
 
         if (telInfo.align != Telescope::ALI_OFF) {
           if (telInfo.aliMode == Telescope::ALIM_ONE)   { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align1_bits); x -= icon_width + 1; } else 
@@ -634,16 +631,16 @@ void SmartHandController::drawReady()
 // Alt Main Menu (double click)
 void SmartHandController::menuSpeedRate()
 {
-  char string_list_Speed[] = "0.25x\n0.5x\n1.0x\n2.0x\n4.0x\n8.0x\n20.0x\n48.0x\n0.5 Max\nMax";
-  uint8_t last_selection_speed = current_selection_speed;
-  current_selection_speed = display->UserInterfaceSelectionList(&buttonPad, "Set Speed", current_selection_speed, string_list_Speed);
-  if (current_selection_speed > 0)
+  const char string_list_Speed[] = "0.25X\n0.5X\n1X\n2X\n4X\n8X\n20X\n48X\n1/2 Max\nMax";
+  uint8_t last_selection_guide_rate = current_selection_guide_rate;
+  current_selection_guide_rate = display->UserInterfaceSelectionList(&buttonPad, "Set Speed", current_selection_guide_rate, string_list_Speed);
+  if (current_selection_guide_rate > 0)
   {
     char cmd[5]= ":Rn#";
-    cmd[2] = '0' + current_selection_speed - 1;
+    cmd[2] = '0' + current_selection_guide_rate - 1;
     DisplayMessageLX200(SetLX200(cmd));
   }
-  else current_selection_speed = last_selection_speed;
+  else current_selection_guide_rate = last_selection_guide_rate;
 }
 
 // Main Menu
@@ -697,14 +694,16 @@ void SmartHandController::menuParking()
     current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Parking", current_selection_L1, string_list_SettingsL1);
     switch (current_selection_L1)
     {
-    case 1: if (SetLX200(":hP#")== LX200VALUESET) DisplayMessage("Parking", "scope", 500); else DisplayMessage("Park", "Failed", 1000); break;
-    case 2: if (SetLX200(":hR#")== LX200VALUESET) DisplayMessage("Un-Parking", "scope", 500); else DisplayMessage("Un-Park", "Failed", 1000); break;
-    case 3: boolean SetP=false; 
-            if (display->UserInterfaceInputValueBoolean(&buttonPad, "Set-Park?", &SetP)) 
-             if (SetP){
-              if (SetLX200(":hQ#")== LX200VALUESET) DisplayMessage("Set-Park", "OK", 500); else DisplayMessage("Set-Park", "Failed", 1000); 
-             } else DisplayMessage("Set-Park", "Canceled", 500);
-            break;           
+      case 1: if (SetLX200(":hP#")== LX200VALUESET) DisplayMessage("Parking", "scope", 500); else DisplayMessage("Park", "Failed", 1000); break;
+      case 2: if (SetLX200(":hR#")== LX200VALUESET) DisplayMessage("Un-Parking", "scope", 500); else DisplayMessage("Un-Park", "Failed", 1000); break;
+      case 3: 
+        boolean SetP=false; 
+        if (display->UserInterfaceInputValueBoolean(&buttonPad, "Set-Park?", &SetP)) {
+          if (SetP) {
+            if (SetLX200(":hQ#")== LX200VALUESET) DisplayMessage("Set-Park", "OK", 500); else DisplayMessage("Set-Park", "Failed", 1000); 
+          } else DisplayMessage("Set-Park", "Canceled", 500);
+        } else DisplayMessage("Set-Park", "Canceled", 500);
+      break;
     }
   }
 }

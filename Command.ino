@@ -624,18 +624,8 @@ void processCommands() {
 //         Returns: dd.ddddd# (OnStep returns more decimal places than LX200 standard)
 //         Returns the tracking rate if siderealTracking, 0.0 otherwise
       if (command[1]=='T')  {
-        if (trackingState==TrackingSidereal) {
-#ifdef MOUNT_TYPE_ALTAZM
-          f=getTrackingRate()*1.00273790935*60.0; 
-#else
-          cli();
-          f=(trackingTimerRateAxis1*1.00273790935)*60.0;
-          sei();
-#endif
-        }
-        else f=0.0;
         char temp[10];
-        dtostrf(f,0,5,temp);
+        dtostrf(getTrackingRate60Hz(),0,5,temp);
         strcpy(reply,temp);
         quietReply=true;
       } else 
@@ -697,6 +687,62 @@ void processCommands() {
         reply[i++]=0;
         quietReply=true;
 
+      } else
+//  :Gu#   Get bit packed telescope status
+//         Returns: SS#
+      if (command[1]=='u')  {
+        memset(reply,(char)0b10000000,9);
+        if ((trackingState!=TrackingSidereal) || trackingSyncInProgress()) reply[0]|=0b10000001; // Not tracking
+        if ((trackingState!=TrackingMoveTo) && !trackingSyncInProgress())  reply[0]|=0b10000010; // No goto
+        if (PPSsynced)                               reply[0]|=0b10000100;                       // PPS sync
+        if ((guideDirAxis1) || (guideDirAxis2))      reply[0]|=0b10001000;                       // Guide active
+#ifndef MOUNT_TYPE_ALTAZM
+        if (rateCompensation==RC_REFR_RA)            reply[0]|=0b11010000;                       // Refr enabled Single axis
+        if (rateCompensation==RC_REFR_BOTH)          reply[0]|=0b10010000;                       // Refr enabled
+        if (rateCompensation==RC_FULL_RA)            reply[0]|=0b11100000;                       // OnTrack enabled Single axis
+        if (rateCompensation==RC_FULL_BOTH)          reply[0]|=0b10100000;                       // OnTrack enabled
+#endif
+        if (rateCompensation==RC_NONE) {
+          double tr=getTrackingRate60Hz();
+          if (abs(tr-57.900)<0.001)                  reply[1]|=0b10000001; else                  // Lunar rate selected
+          if (abs(tr-60.000)<0.001)                  reply[1]|=0b10000010; else                  // Solar rate selected
+          if (abs(tr-60.136)<0.001)                  reply[1]|=0b10000011;                       // King rate selected
+        }
+        
+        if (atHome)                                  reply[2]|=0b10000001;                       // At home
+        if (waitingHome)                             reply[2]|=0b10000010;                       // Waiting at home
+        if (pauseHome)                               reply[2]|=0b10000100;                       // Pause at home enabled?
+        if (soundEnabled)                            reply[2]|=0b10001000;                       // Buzzer enabled?
+#ifdef MOUNT_TYPE_GEM
+        if (autoMeridianFlip)                        reply[2]|=0b10010000;                       // Auto meridian flip
+#endif
+        if (pecRecorded)                             reply[2]|=0b10100000;                       // PEC data has been recorded
+
+        // provide mount type
+        #if defined(MOUNT_TYPE_GEM)
+                                                     reply[3]|=0b10000001;                       // GEM
+        #elif defined(MOUNT_TYPE_FORK)
+                                                     reply[3]|=0b10000010;                       // FORK
+        #elif defined(MOUNT_TYPE_FORK_ALT)
+                                                     reply[3]|=0b10000100;                       // FORK ALT
+        #elif defined(MOUNT_TYPE_ALTAZM)
+                                                     reply[3]|=0b10001000;                       // ALTAZM
+        #endif
+
+        // provide pier side info.
+        if (getInstrPierSide()==PierSideNone)        reply[3]|=0b10010000; else                  // Pier side none
+        if (getInstrPierSide()==PierSideEast)        reply[3]|=0b10100000; else                  // Pier side east
+        if (getInstrPierSide()==PierSideWest)        reply[3]|=0b11000000;                       // Pier side west
+
+#ifndef MOUNT_TYPE_ALTAZM
+        reply[4]=pecStatus|0b10000000;                                                           // PEC status: 0 ignore, 1 get ready to play, 2 playing, 3 get ready to record, 4 recording
+#endif
+        reply[5]=parkStatus|0b10000000;                                                          // Park status: 0 not parked, 1 parking in-progress, 2 parked, 3 park failed
+        reply[6]=getPulseGuideRate()|0b10000000;                                                 // Pulse-guide rate
+        reply[7]=getGuideRate()|0b10000000;                                                      // Guide rate
+        reply[8]=lastError|0b10000000;                                                           // Last error
+        reply[9]=0;
+        quietReply=true;
       } else
 //  :GVD# Get Telescope Firmware Date
 //         Returns: mmm dd yyyy#

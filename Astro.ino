@@ -468,6 +468,18 @@ double getTrackingRate() {
   return _currentRate;
 }
 
+double getTrackingRate60Hz() {
+  double f;
+  if (trackingState==TrackingSidereal) {
+#ifdef MOUNT_TYPE_ALTAZM
+    f=getTrackingRate()*1.00273790935*60.0; 
+#else
+    cli(); f=(trackingTimerRateAxis1*1.00273790935)*60.0; sei();
+#endif
+  } else f=0.0;
+  return f;
+}
+
 double getStepsPerSecondAxis1() {
  double s=(((double)StepsPerDegreeAxis1/240.0)*(_deltaAxis1/15.0));
  if (s<8.0) s=8.0;
