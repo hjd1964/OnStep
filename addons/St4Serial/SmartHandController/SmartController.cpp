@@ -439,10 +439,6 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
   telInfo.updateTel();
   if (telInfo.connected == false) return;
 
-  // update guide rate (if available)
-  if (telInfo.getGuideRate()>=0) current_selection_guide_rate=telInfo.getGuideRate()+1;
-  int display_selection_guide_rate=current_selection_guide_rate;
-
   // detect align mode
   if (telInfo.hasTelStatus && telInfo.align != Telescope::ALI_OFF)
   {
@@ -471,18 +467,27 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
   {
     u8g2_uint_t x = u8g2_GetDisplayWidth(u8g2);
 
-    // wifi status
-    if (wifiOn) display->drawXBMP(0, 0, icon_width, icon_height, wifi_bits);
-
-    // last selected guide rate
-    char string_Speed[][7] = {"0.25X","0.5X","1X","2X","4X","8X","20X","48X","½ Max","Max"};
-    if ((display_selection_guide_rate>0) && (display_selection_guide_rate<=10)) u8g2_DrawUTF8(u8g2, 0, icon_height, string_Speed[display_selection_guide_rate-1]); 
-
     // OnStep status
-    if (telInfo.hasTelStatus) {
+    if (telInfo.hasTelStatus) { 
+
+      // update guide rate (if available)
+      if (telInfo.getGuideRate()>=0) {
+        char string_Speed[][8] = {"¼x","½x","1x","2x","4x","8x","20x","48x","½Mx","Max"};
+        char string_PSpeed[][6] = {"(¼x)","(½x)","(1x)"};
+        int gr=telInfo.getGuideRate(); current_selection_guide_rate=gr;
+        int pgr=telInfo.getPulseGuideRate();
+        if ((pgr!=gr) && (pgr>=0) && (pgr<2)) strcat(string_Speed[gr],string_PSpeed[pgr]); 
+        if ((gr>=0) && (gr<=9)) {
+          display->setFont(u8g2_font_helvR10_te);
+          u8g2_DrawUTF8(u8g2, 0, icon_height, string_Speed[gr]);
+          display->setFont(u8g2_font_helvR12_te);
+        }
+      }
+
       Telescope::ParkState curP = telInfo.getParkState();
       Telescope::TrackState curT = telInfo.getTrackingState();
       Telescope::TrackRate curTR = telInfo.getTrackingRate();
+    
       if (curP == Telescope::PRK_PARKED)  { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, parked_bits); x -= icon_width + 1; } else
       if (curP == Telescope::PRK_PARKING) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, parking_bits); x -= icon_width + 1; } else
       if (telInfo.atHome())               { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, home_bits); x -= icon_width + 1;  } else 
