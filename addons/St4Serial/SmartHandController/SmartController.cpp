@@ -941,7 +941,7 @@ bool SmartHandController::DisplayMessageLX200(LX200RETURN val, bool silentOk)
     }
     else if (val == LX200UNKOWN)
     {
-      sprintf(text1, "Unkown");
+      sprintf(text1, "Unknown");
       sprintf(text2, "Error");
     }
     else
