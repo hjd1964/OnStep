@@ -129,6 +129,16 @@ Telescope::TrackRate Telescope::getTrackingRate()
   if (strlen(TelStatus)<2) return TR_UNKNOW;
   return (TrackRate)(TelStatus[1]&0b00000011);
 }
+Telescope::TrackRateComp Telescope::getTrackingRateComp()
+{
+  if (strlen(TelStatus)<1) return RC_UNKNOWN;
+  char temp = TelStatus[0] & 0b01110000;
+  if (temp == 0b01010000) return RC_REFR_RA; else
+  if (temp == 0b00010000) return RC_REFR_BOTH; else
+  if (temp == 0b01100000) return RC_FULL_RA; else  
+  if (temp == 0b00100000) return RC_FULL_BOTH; else
+  return RC_UNKNOWN;
+}
 int Telescope::getPulseGuideRate()
 {
   if (strlen(TelStatus)<7) return -1;

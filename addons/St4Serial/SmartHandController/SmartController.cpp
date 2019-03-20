@@ -67,6 +67,18 @@ static unsigned char tracking_S_bits[] U8X8_PROGMEM = {
 static unsigned char tracking_sid_bits[] U8X8_PROGMEM = {
   0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x06, 0x00, 0x0E, 0x00, 0x1E, 0x00, 0x3E, 0x00, 0x7E, 0x08, 0xFE, 0x08, 0x7E, 0x7F, 0x3E, 0x3E, 0x1E, 0x1C, 0x0E, 0x3E, 0x06, 0x22, 0x02, 0x00, 0x00, 0x00 };
 
+static unsigned char tracking_sid_rs_bits[] U8X8_PROGMEM = {
+  0x00, 0x00, 0x00, 0x75, 0x02, 0x0B, 0x06, 0x31, 0x0E, 0x41, 0x1E, 0x39, 0x3E, 0x00, 0x7E, 0x08, 0xFE, 0x08, 0x7E, 0x7F, 0x3E, 0x3E, 0x1E, 0x1C, 0x0E, 0x3E, 0x06, 0x22, 0x02, 0x00, 0x00, 0x00 };   
+
+static unsigned char tracking_sid_rd_bits[] U8X8_PROGMEM = {  
+  0x00, 0x40, 0x00, 0x45, 0x02, 0x73, 0x06, 0x49, 0x0E, 0x49, 0x1E, 0x71, 0x3E, 0x00, 0x7E, 0x08, 0xFE, 0x08, 0x7E, 0x7F, 0x3E, 0x3E, 0x1E, 0x1C, 0x0E, 0x3E, 0x06, 0x22, 0x02, 0x00, 0x00, 0x00 }; 
+
+static unsigned char tracking_sid_fs_bits[] U8X8_PROGMEM = {  
+  0x00, 0x06, 0x00, 0x71, 0x02, 0x09, 0x86, 0x33, 0x0E, 0x41, 0x1E, 0x39, 0x3E, 0x00, 0x7E, 0x08, 0xFE, 0x08, 0x7E, 0x7F, 0x3E, 0x3E, 0x1E, 0x1C, 0x0E, 0x3E, 0x06, 0x22, 0x02, 0x00, 0x00, 0x00 };
+
+static unsigned char tracking_sid_fd_bits[] U8X8_PROGMEM = {  
+  0x00, 0x46, 0x00, 0x41, 0x02, 0x71, 0x86, 0x4B, 0x0E, 0x49, 0x1E, 0x71,0x3E, 0x00, 0x7E, 0x08, 0xFE, 0x08, 0x7E, 0x7F, 0x3E, 0x3E, 0x1E, 0x1C, 0x0E, 0x3E, 0x06, 0x22, 0x02, 0x00, 0x00, 0x00 }; 
+
 static unsigned char tracking_sol_bits[] U8X8_PROGMEM = {
   0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x06, 0x00, 0x0E, 0x00, 0x1E, 0x00, 0x3E, 0x00, 0x7E, 0x00, 0xFE, 0x1C, 0x7E, 0x22, 0x3E, 0x41, 0x1E, 0x49, 0x0E, 0x41, 0x06, 0x22, 0x02, 0x1C, 0x00, 0x00 };
 
@@ -483,6 +495,7 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
       Telescope::ParkState curP = telInfo.getParkState();
       Telescope::TrackState curT = telInfo.getTrackingState();
       Telescope::TrackRate curTR = telInfo.getTrackingRate();
+      Telescope::TrackRateComp curRC = telInfo.getTrackingRateComp();
       if (curP == Telescope::PRK_PARKED)  { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, parked_bits); x -= icon_width + 1; } else
       if (curP == Telescope::PRK_PARKING) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, parking_bits); x -= icon_width + 1; } else
       if (telInfo.atHome())               { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, home_bits); x -= icon_width + 1;  } else 
@@ -490,7 +503,13 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
         if (curT == Telescope::TRK_SLEWING) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, sleewing_bits); x -= icon_width + 1; } else
         if (curT == Telescope::TRK_ON)      
         {
-          if (curTR == Telescope::TR_SIDEREAL) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_sid_bits); x -= icon_width + 1; } else
+          if (curTR == Telescope::TR_SIDEREAL) { 
+                                                  if (curRC == Telescope::RC_REFR_RA)    { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_sid_rs_bits); x -= icon_width + 1; } else
+                                                  if (curRC == Telescope::RC_REFR_BOTH)  { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_sid_rd_bits); x -= icon_width + 1; } else
+                                                  if (curRC == Telescope::RC_FULL_RA)    { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_sid_fs_bits); x -= icon_width + 1; } else
+                                                  if (curRC == Telescope::RC_FULL_BOTH)  { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_sid_fd_bits); x -= icon_width + 1; } else
+                                                  { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_sid_bits); x -= icon_width + 1; }
+                                               } else
           if (curTR == Telescope::TR_LUNAR)    { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_lun_bits); x -= icon_width + 1; } else
           if (curTR == Telescope::TR_SOLAR)    { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_sol_bits); x -= icon_width + 1; } else
                                                { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_S_bits); x -= icon_width + 1; }

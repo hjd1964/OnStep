@@ -25,6 +25,7 @@ public:
   enum TrackRate { TR_SIDEREAL, TR_LUNAR, TR_SOLAR, TR_KING, TR_UNKNOW };
   enum ParkState { PRK_UNPARKED, PRK_PARKING, PRK_PARKED, PRK_FAILED, PRK_UNKNOW };
   enum PierState { PIER_NONE, PIER_E, PIER_W, PIER_UNKNOW };
+  enum TrackRateComp { RC_NONE, RC_REFR_RA, RC_REFR_BOTH, RC_FULL_RA, RC_FULL_BOTH, RC_UNKNOWN };
 
 public: 
   AlignState      align = ALI_OFF;
@@ -74,6 +75,7 @@ public:
   bool isMountAltAz();
   PierState getPierState();
   TrackRate getTrackingRate();
+  TrackRateComp getTrackingRateComp();
   int getGuideRate();
   int getPulseGuideRate();
   Errors getError();
