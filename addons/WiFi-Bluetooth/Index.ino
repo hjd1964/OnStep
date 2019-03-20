@@ -52,6 +52,9 @@ const char* html_indexTPHD = "&nbsp;&nbsp;%s <font class='c'>%s</font>%s<br />";
 const char* html_indexDriverStatus = " Driver: <font class='c'>%s</font><br />";
 const char* html_indexLastError = "&nbsp;&nbsp;Last Error: <font class='c'>%s</font><br />";
 const char* html_indexWorkload = "&nbsp;&nbsp;Workload: <font class='c'>%s</font><br />";
+#ifdef POWER_SUPPLY_READOUT_ON
+const char* html_indexVoltage = "&nbsp;&nbsp;Power Supply (battery) voltage: <font class=\"c\">%s</font><br />";
+#endif
 #ifdef WIFI_SIGNAL_STRENGTH_ON
 const char* html_indexSignalStrength = "&nbsp;&nbsp;Wireless signal strength: <font class=\"c\">%s</font><br />";
 #endif
@@ -358,6 +361,14 @@ void handleRoot() {
   if (!sendCommand(":GXFA#",temp1)) strcpy(temp1,"?%");
   sprintf(temp,html_indexWorkload,temp1);
   data += temp;
+
+#ifdef POWER_SUPPLY_READOUT_ON
+  Serial.print(":b#");
+  temp1[Serial.readBytesUntil('#',temp1,20)]=0;
+  if (strlen(temp1)<=0) { strcpy(temp1,"?%"); }
+  sprintf(temp,html_indexVoltage,temp1);
+  data += temp;
+#endif
 
 #ifdef WIFI_SIGNAL_STRENGTH_ON
   long signal_strength_dbm=WiFi.RSSI();

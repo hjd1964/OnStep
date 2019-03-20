@@ -19,6 +19,11 @@
 #define OneWirePin    24    // Pin 24
 #endif
 
+// Optional Power Supply Readout Analogue input pin
+#ifndef PowerSupplyReadoutPin
+#define PowerSupplyReadoutPin   A10
+#endif
+
 // The PEC index sense is a logic level input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
 #define PecPin        23
 #define AnalogPecPin  23    // Pin 23 (PEC Sense, analog or digital)

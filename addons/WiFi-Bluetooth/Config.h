@@ -19,6 +19,7 @@
 
 #define AMBIENT_CONDITIONS_OFF    // Default=_OFF, _ON for ambient conditions on status page
 #define INTERNAL_TEMPERATURE_OFF  // Default=_OFF, _ON for internal MCU temperature display
+#define POWER_SUPPLY_READOUT_OFF  // Default=_OFF, _ON if power supply monitoring is implemented in OnStep
 #define WIFI_SIGNAL_STRENGTH_OFF   // Default=_OFF, _ON if wireless signal strength is to be reported via web interface
 
 // --------------------------------------------------------------------------------------

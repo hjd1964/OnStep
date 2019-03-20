@@ -83,6 +83,15 @@
 // Sound state at startup, default=_ON.
 #define DEFAULT_SOUND_ON
 
+// Power Supply (battery) voltage monitoring, default =_OFF
+// Needs a harware mod - a voltage divider that consists of two resistors (one to supply input, one to GND), series input resistor
+// and two schottky diodes (one to 3V3, one to GND)
+#define POWER_SUPPLY_READOUT_OFF                                    // Default _OFF to disable voltage monitoring
+#define POWER_SUPPLY_DIVIDER        ((100.0 + 8.2)/8.2 * 0.997)     // (Ra + Rb)/Rb x Cor where Cor is correction for tolerance of the used resistors
+                                                                    //   and Vref, start with Corr =1.0, get a readout, measure voltage with a voltmeter
+                                                                    //   at supply input and calculate Corr value
+#define POWER_SUPPLY_WARNING        (3.2 * 4)                       // Default _OFF to disable the warning, otherwise [V] (buzzer will beep if the voltage is lower)
+
 // External temparature monitoring via DS1820 on ONE WIRE interface (Pin 24.)  Default _OFF.
 #define TEMPERATURE_DS1820_OFF
 
