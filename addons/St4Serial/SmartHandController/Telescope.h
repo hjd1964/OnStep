@@ -23,6 +23,7 @@ public:
   enum Mount { GEM, FEM };
   enum TrackState { TRK_OFF, TRK_ON, TRK_SLEWING, TRK_UNKNOW };
   enum TrackRate { TR_SIDEREAL, TR_LUNAR, TR_SOLAR, TR_KING, TR_UNKNOW };
+  enum RateCompensation {RC_NONE, RC_REFR_RA, RC_REFR_BOTH, RC_FULL_RA, RC_FULL_BOTH};
   enum ParkState { PRK_UNPARKED, PRK_PARKING, PRK_PARKED, PRK_FAILED, PRK_UNKNOW };
   enum PierState { PIER_NONE, PIER_E, PIER_W, PIER_UNKNOW };
 
@@ -74,6 +75,7 @@ public:
   bool isMountAltAz();
   PierState getPierState();
   TrackRate getTrackingRate();
+  RateCompensation getRateCompensation();
   int getGuideRate();
   int getPulseGuideRate();
   Errors getError();
