@@ -3,43 +3,36 @@
 
 void Telescope::updateRaDec(boolean immediate)
 {
-  if ((millis() - lastStateRaDec > BACKGROUND_CMD_RATE) && ((updateSeq%4==2) || (updateSeq%4==3) || immediate) && connected)
+  if ((millis() - lastStateRaDec > BACKGROUND_CMD_RATE) && ((updateSeq%3==1) || (updateSeq%3==2) || immediate) && connected)
   {
-    if ((updateSeq%4==2) || immediate) { hasInfoRa = GetLX200(":GR#", TempRa) == LX200VALUEGET; if (!hasInfoRa) connected=true; }
-    if ((updateSeq%4==3) || immediate) { hasInfoDec = GetLX200(":GD#", TempDec) == LX200VALUEGET; if (!hasInfoDec) connected=true; lastStateRaDec = millis(); }
+    if ((updateSeq%3==1) || immediate) { hasInfoRa = GetLX200(":GR#", TempRa) == LX200VALUEGET; if (!hasInfoRa) connected=true; }
+    if ((updateSeq%3==2) || immediate) { hasInfoDec = GetLX200(":GD#", TempDec) == LX200VALUEGET; if (!hasInfoDec) connected=true; lastStateRaDec = millis(); }
   }
 };
 void Telescope::updateAzAlt(boolean immediate)
 {
-  if ((millis() - lastStateAzAlt > BACKGROUND_CMD_RATE) && ((updateSeq%4==2) || (updateSeq%4==3) || immediate) && connected)
+  if ((millis() - lastStateAzAlt > BACKGROUND_CMD_RATE) && ((updateSeq%3==1) || (updateSeq%3==2) || immediate) && connected)
   {
-    if ((updateSeq%4==2) || immediate) { hasInfoAz = GetLX200(":GZ#", TempAz) == LX200VALUEGET; if (!hasInfoAz) connected = true; }
-    if ((updateSeq%4==3) || immediate) { hasInfoAlt = GetLX200(":GA#", TempAlt) == LX200VALUEGET; if (!hasInfoAlt) connected = true; lastStateAzAlt = millis(); }
+    if ((updateSeq%3==1) || immediate) { hasInfoAz = GetLX200(":GZ#", TempAz) == LX200VALUEGET; if (!hasInfoAz) connected = true; }
+    if ((updateSeq%3==2) || immediate) { hasInfoAlt = GetLX200(":GA#", TempAlt) == LX200VALUEGET; if (!hasInfoAlt) connected = true; lastStateAzAlt = millis(); }
   }
 }
 void Telescope::updateTime(boolean immediate)
 {
-  if ((millis() - lastStateTime > BACKGROUND_CMD_RATE) && ((updateSeq%4==2) || (updateSeq%4==3) || immediate) && connected)
+  if ((millis() - lastStateTime > BACKGROUND_CMD_RATE) && ((updateSeq%3==1) || (updateSeq%3==2) || immediate) && connected)
   {
-    if ((updateSeq%4==2) || immediate) { hasInfoUTC = GetLX200(":GL#", TempLocalTime) == LX200VALUEGET; if (!hasInfoUTC) connected = true; }
-    if ((updateSeq%4==3) || immediate) { hasInfoSidereal = GetLX200(":GS#", TempSidereal) == LX200VALUEGET; if (!hasInfoSidereal) connected = true; lastStateTime = millis(); }
+    if ((updateSeq%3==1) || immediate) { hasInfoUTC = GetLX200(":GL#", TempLocalTime) == LX200VALUEGET; if (!hasInfoUTC) connected = true; }
+    if ((updateSeq%3==2) || immediate) { hasInfoSidereal = GetLX200(":GS#", TempSidereal) == LX200VALUEGET; if (!hasInfoSidereal) connected = true; lastStateTime = millis(); }
   }
 };
 void Telescope::updateTel(boolean immediate)
 {
-  if ((millis() - lastStateTel > BACKGROUND_CMD_RATE) && ((updateSeq%4==0) || (updateSeq%4==1) || immediate) && connected)
+  if ((millis() - lastStateTel > BACKGROUND_CMD_RATE) && ((updateSeq%3==0) || immediate) && connected)
   {
-    if ((updateSeq%4==0) || immediate) { hasPierInfo = GetLX200(":Gm#", sideofpier) == LX200VALUEGET; if (!hasPierInfo) connected = true; }
-    if ((updateSeq%4==1) || immediate) { hasTelStatus = GetLX200(":GU#", TelStatus) == LX200VALUEGET; if (!hasTelStatus) connected = true; lastStateTel = millis(); }
+    if ((updateSeq%3==0) || immediate) { hasTelStatus = GetLX200(":Gu#", TelStatus) == LX200VALUEGET; if (!hasTelStatus) connected = true; lastStateTel = millis(); }
   }
 };
-void Telescope::updateTrackingRate(boolean immediate)
-{
-  if ((millis() - lastStateTrackingRate > (4 * BACKGROUND_CMD_RATE)) && ((updateSeq%4==0) || (updateSeq%4==1) || immediate) && connected)
-  {
-    if ((updateSeq%4==0) || immediate) { hasTrackingRate = GetLX200(":GT#", TempTrackingRate) == LX200VALUEGET; if (!hasTrackingRate) connected = true; lastStateTrackingRate = millis(); }
-  }
-};
+
 double Telescope::getLstT0()
 {
   char temp[20]="";
@@ -76,123 +69,80 @@ int Telescope::getAlignStars(int *maxStars, int *thisStar, int *numStars)
 
 Telescope::ParkState Telescope::getParkState()
 {
-  if (strchr(&TelStatus[0], 'P') != NULL)
-  {
-    return PRK_PARKED;
-  }
-  else if (strchr(&TelStatus[0], 'p') != NULL)
-  {
-    return PRK_UNPARKED;
-  }
-  else if (strchr(&TelStatus[0], 'I') != NULL)
-  {
-    return PRK_PARKING;
-  }
-  else if (strchr(&TelStatus[0], 'F') != NULL)
-  {
-    return PRK_FAILED;
-  }
-  return PRK_UNKNOW;
+  // Park status: 0 not parked, 1 parking, 2 parked, 3 park failed
+  if (strlen(TelStatus)<6) return PRK_UNKNOW;
+  return (ParkState)(TelStatus[5]&0b00000011);
 }
 Telescope::TrackState Telescope::getTrackingState()
 {
-  if (strchr(&TelStatus[0], 'N') == NULL)
-  {
-    return TRK_SLEWING;
-  }
-  else if (strchr(&TelStatus[0], 'n') == NULL)
-  {
-    return TRK_ON;
-  }
-  if (strchr(&TelStatus[0], 'n') != NULL && strchr(&TelStatus[0], 'N') != NULL)
-  {
-    return TRK_OFF;
-  }
-  return TRK_UNKNOW;
+  if (strlen(TelStatus)<1) return TRK_UNKNOW;
+  bool tracking=false; bool slewing=false;
+  if (!(TelStatus[0]&0b00000010)) slewing=true; else tracking=(!(TelStatus[0]&0b00000001));
+  if (slewing) return TRK_SLEWING; else
+  if (tracking) return TRK_ON; else return TRK_OFF;
 }
 bool Telescope::atHome()
 {
-  return strchr(&TelStatus[0], 'H') != NULL;
+  if (strlen(TelStatus)<3) return false;
+  if (TelStatus[2]&0b00000001) return true; else return false;
 }
 bool Telescope::isPecPlaying()
 {
-  // PEC Status is one of "/,~;^" for ignore, wait play, play, wait rec, rec
-  // "." is an index detect but isn't implemented yet
-  return strchr(&TelStatus[0], '~') != NULL;
+  // PEC status: 0 ignore, 1 get ready to play, 2 playing, 3 get ready to record, 4 recording
+  if (strlen(TelStatus)<5) return false;
+  if ((TelStatus[4]&0b00000111)==2) return true; else return false;
 }
 bool Telescope::isPecRecording()
 {
-  return strchr(&TelStatus[0], '^') != NULL;
+  if (strlen(TelStatus)<5) return false;
+  if ((TelStatus[4]&0b00000111)==4) return true; else return false;
 }
 bool Telescope::isPecWaiting()
 {
-  return (strchr(&TelStatus[0], ',') != NULL) || (strchr(&TelStatus[0], ';') != NULL);
+  if (strlen(TelStatus)<5) return false;
+  if (((TelStatus[4]&0b00000111)==1) || ((TelStatus[4]&0b00000111)==3)) return true; else return false;
 }
 bool Telescope::isGuiding()
 {
-  return  strchr(&TelStatus[0], 'G') != NULL;
+  if (strlen(TelStatus)<1) return false;
+  return (TelStatus[0]&0b00001000);
 }
 bool Telescope::isMountGEM()
 {
-  return strchr(&TelStatus[0], 'E') != NULL;
+  if (strlen(TelStatus)<4) return false;
+  return (TelStatus[3]&0b00000001);
 }
 bool Telescope::isMountAltAz()
 {
-  return strchr(&TelStatus[0], 'A') != NULL;
+  if (strlen(TelStatus)<4) return false;
+  return (TelStatus[3]&0b00001000);
 }
 Telescope::PierState Telescope::getPierState()
 {
-  if (strchr(&sideofpier[0], 'E') != NULL)
-  {
-    return PIER_E;
-  }
-  else if (strchr(&sideofpier[0], 'W') != NULL)
-  {
-    return PIER_W;
-  }
-  return PIER_UNKNOW;
+  if (strlen(TelStatus)<4) return PIER_UNKNOW;
+  if (TelStatus[3]&0b00010000) return PIER_NONE; else
+  if (TelStatus[3]&0b00100000) return PIER_E; else
+  if (TelStatus[3]&0b01000000) return PIER_W; else return PIER_UNKNOW;
 }
-int Telescope::getGuideRate()
+Telescope::TrackRate Telescope::getTrackingRate()
 {
-  if (strlen(TelStatus) > 3)
-  {
-    int l = strlen(TelStatus) - 3;
-    int g = TelStatus[l]-'0';
-    if ((g<0) || (g>9)) g = -1;
-    return g;
-  } else return -1;
+  if (strlen(TelStatus)<2) return TR_UNKNOW;
+  return (TrackRate)(TelStatus[1]&0b00000011);
 }
 int Telescope::getPulseGuideRate()
 {
-  if (strlen(TelStatus) > 4)
-  {
-    int l = strlen(TelStatus) - 4;
-    int g = TelStatus[l]-'0';
-    if ((g<0) || (g>9)) g = -1;
-    return g;
-  } else return -1;
+  if (strlen(TelStatus)<7) return -1;
+  return TelStatus[6]&0b00001111;
+}
+int Telescope::getGuideRate()
+{
+  if (strlen(TelStatus)<8) return -1;
+  return TelStatus[7]&0b00001111;
 }
 Telescope::Errors Telescope::getError()
 {
-  if (strlen(TelStatus) > 2)
-  {
-    int l = strlen(TelStatus) - 2;
-    switch (TelStatus[l])
-    {
-    case '1':
-      return ERR_MOTOR_FAULT;
-    case '2':
-      return ERR_ALT;
-    case '4':
-      return ERR_DEC;
-    case '6':
-      return ERR_UNDER_POLE;
-    case '7':
-      return ERR_MERIDIAN;
-    default:
-      return ERR_NONE;
-    }
-  } else return ERR_NONE;
+  if (strlen(TelStatus)<9) return ERR_NONE;
+  return (Errors)(TelStatus[8]&0b00001111);
 }
 
 bool Telescope::addStar()

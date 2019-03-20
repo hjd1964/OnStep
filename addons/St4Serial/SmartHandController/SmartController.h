@@ -68,7 +68,7 @@ private:
 #ifdef UTILITY_LIGHT_ON  
   uint8_t current_selection_utility_light = 5;
 #endif  
-  uint8_t current_selection_speed = 5;
+  uint8_t current_selection_guide_rate = 5;
   unsigned short current_selection_SolarSys = 1;
   long angleRA = 0;
   long angleDEC = 0;
