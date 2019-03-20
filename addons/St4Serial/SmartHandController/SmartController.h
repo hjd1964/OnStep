@@ -48,7 +48,6 @@ private:
   bool sleepDisplay = false;
   bool lowContrast = false;
   uint8_t maxContrast = 255;
-  bool wifiOn = false;
   bool powerCylceRequired = false;
   bool buttonCommand = false;
   bool moveNorth=false;
