@@ -262,14 +262,14 @@ void SmartHandController::setup(const char version[], const int pin[7],const boo
   auxST4.setup();
 #endif
 
-#ifdef UTILITY_LIGHT_ON
+#ifdef UTILITY_LIGHT
   #ifdef ESP32
     ledcSetup(0, 5000, 8);
     ledcAttachPin(UTILITY_LIGHT_PIN, 0);
-    ledcWrite(0, 127);
+    ledcWrite(0, UTILITY_LIGHT);
   #else
     pinMode(UTILITY_LIGHT_PIN, OUTPUT);
-    analogWrite(UTILITY_LIGHT_PIN, 127);
+    analogWrite(UTILITY_LIGHT_PIN, UTILITY_LIGHT);
   #endif
 #endif
 

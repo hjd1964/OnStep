@@ -6,7 +6,7 @@ void SmartHandController::menuSettings()
   while (current_selection_L1 != 0)
   {
     if (telInfo.isMountGEM()) {
-#ifdef UTILITY_LIGHT_ON      
+#ifdef UTILITY_LIGHT      
       const char *string_list_SettingsL1 = "Date/Time\n""Display\n""Utility light\n""Buzzer\n""Meridian Flip\n""Configuration\n""Site\n""Firmware Ver";
 #else      
       const char *string_list_SettingsL1 = "Date/Time\n""Display\n""Buzzer\n""Meridian Flip\n""Configuration\n""Site\n""Firmware Ver";
@@ -16,7 +16,7 @@ void SmartHandController::menuSettings()
       {
       case 1: menuLocalDateTime(); break;
       case 2: menuDisplay(); break;
-#ifdef UTILITY_LIGHT_ON      
+#ifdef UTILITY_LIGHT      
       case 3: menuUtilityLight(); break;
       case 4: menuSound(); break;
       case 5: menuMeridianFlips(); break;
@@ -309,7 +309,7 @@ void SmartHandController::menuFirmware()
   }
 }
 
-#ifdef UTILITY_LIGHT_ON
+#ifdef UTILITY_LIGHT
 void SmartHandController::menuUtilityLight()
 {
   const char *string_utility_light = "Off\nMin\nLow\nMedium\nHigh\nMax";
