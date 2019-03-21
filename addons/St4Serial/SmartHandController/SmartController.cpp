@@ -1,7 +1,17 @@
 
-#include "_EEPROM_ext.h"
+#ifdef ESP32
+#include "NV_EEPROM_ESP32.h"
+#else
+#include "NV_EEPROM.h"
+#endif
+
 #include "SmartController.h"
 #include "LX200.h"
+
+unsigned long display_blank_time = DISPLAY_BLANK_TIME;
+unsigned long display_dim_time = DISPLAY_DIM_TIME;  
+
+#include "Initialize.h"
 
 #define MY_BORDER_SIZE 1
 #define icon_width 16
@@ -100,20 +110,26 @@ static unsigned char W_bits[] U8X8_PROGMEM = {
 static unsigned char E_bits[] U8X8_PROGMEM = {
   0x00, 0x00, 0x00, 0x00, 0xe0, 0x03, 0x10, 0x04, 0x08, 0x08, 0xe4, 0x13, 0x22, 0x20, 0x22, 0x20, 0xe2, 0x21, 0x22, 0x20, 0x22, 0x20, 0xe4, 0x13, 0x08, 0x08, 0x10, 0x04, 0xe0, 0x03, 0x00, 0x00 };
 
-static unsigned char ErrDe_bits[] U8X8_PROGMEM = {
-  0xff, 0xff, 0x00, 0x80, 0x0e, 0xb0, 0x02, 0xb0, 0x66, 0xb3, 0x22, 0xb1, 0x2e, 0xb1, 0x00, 0xb0, 0x1e, 0xb0, 0x22, 0xb0, 0xa2, 0xb3, 0xa2, 0xb2, 0xa2, 0x83, 0xa2, 0xb0, 0x9e, 0xb3, 0x00, 0x80 };
-
-static unsigned char ErrHo_bits[] U8X8_PROGMEM = {
-  0xff, 0xff, 0x00, 0x80, 0x0e, 0xb0, 0x02, 0xb0, 0x66, 0xb3, 0x22, 0xb1, 0x2e, 0xb1, 0x00, 0xb0, 0x22, 0xb0, 0x22, 0xb0, 0x22, 0xb3, 0xbe, 0xb4, 0xa2, 0x84, 0xa2, 0xb4, 0x22, 0xb3, 0x00, 0x80 };
-
-static unsigned char ErrMe_bits[] U8X8_PROGMEM = {
-  0xff, 0xff, 0x00, 0x80, 0x0e, 0xb0, 0x02, 0xb0, 0x66, 0xb3, 0x22, 0xb1, 0x2e, 0xb1, 0x00, 0xb0, 0x22, 0xb0, 0x36, 0xb0, 0xaa, 0xb3, 0xa2, 0xb2, 0xa2, 0x83, 0xa2, 0xb0, 0xa2, 0xb3, 0x00, 0x80 };
-
 static unsigned char ErrMf_bits[] U8X8_PROGMEM = {
   0xff, 0xff, 0x00, 0x80, 0x0e, 0xb0, 0x02, 0xb0, 0x66, 0xb3, 0x22, 0xb1, 0x2e, 0xb1, 0x00, 0xb0, 0x22, 0xb0, 0x36, 0xb0, 0xaa, 0xb3, 0xa2, 0xb0, 0xa2, 0x81, 0xa2, 0xb0, 0xa2, 0xb0, 0x00, 0x80 };
 
+static unsigned char ErrAlt_bits[] U8X8_PROGMEM = {
+  0xff, 0xff, 0x00, 0x80, 0x0e, 0xb0, 0x02, 0xb0, 0x66, 0xb3, 0x22, 0xb1, 0x2e, 0xb1, 0x00, 0xb0, 0x1e, 0xb0, 0x06, 0xb0, 0x4a, 0xb0, 0x90, 0xb4, 0x20, 0x85, 0x00, 0xb6, 0x00, 0xb7, 0x00, 0x80 };
+
+static unsigned char ErrLs_bits[] U8X8_PROGMEM = {
+  0xff, 0xff, 0x00, 0x80, 0x0e, 0xb0, 0x02, 0xb0, 0x66, 0xb3, 0x22, 0xb1, 0x2e, 0xb1, 0x00, 0xb0, 0x00, 0xb2, 0x40, 0xb2, 0x80, 0xb2, 0xfe, 0xb3, 0x80, 0x82, 0x40, 0xb2, 0x00, 0xb2, 0x00, 0x80 };
+
+static unsigned char ErrDe_bits[] U8X8_PROGMEM = {
+  0xff, 0xff, 0x00, 0x80, 0x0e, 0xb0, 0x02, 0xb0, 0x66, 0xb3, 0x22, 0xb1, 0x2e, 0xb1, 0x00, 0xb0, 0x1e, 0xb0, 0x22, 0xb0, 0xa2, 0xb3, 0xa2, 0xb2, 0xa2, 0x83, 0xa2, 0xb0, 0x9e, 0xb3, 0x00, 0x80 };
+
+static unsigned char ErrAz_bits[] U8X8_PROGMEM = {
+  0xff, 0xff, 0x00, 0x80, 0x0e, 0xb0, 0x02, 0xb0, 0x66, 0xb3, 0x22, 0xb1, 0x2e, 0xb1, 0x00, 0xb0, 0x08, 0xb0, 0x14, 0xb0, 0xa2, 0xb3, 0x22, 0xb2, 0x3e, 0x81, 0xa2, 0xb0, 0xa2, 0xb3, 0x00, 0x80 };
+
 static unsigned char ErrUp_bits[] U8X8_PROGMEM = {
   0xff, 0xff, 0x00, 0x80, 0x0e, 0xb0, 0x02, 0xb0, 0x66, 0xb3, 0x22, 0xb1, 0x2e, 0xb1, 0x00, 0xb0, 0x22, 0xb0, 0x22, 0xb0, 0xa2, 0xb3, 0xa2, 0xb2, 0xa2, 0x83, 0xa2, 0xb0, 0x9c, 0xb0, 0x00, 0x80 };
+
+static unsigned char ErrMe_bits[] U8X8_PROGMEM = {
+  0xff, 0xff, 0x00, 0x80, 0x0e, 0xb0, 0x02, 0xb0, 0x66, 0xb3, 0x22, 0xb1, 0x2e, 0xb1, 0x00, 0xb0, 0x22, 0xb0, 0x36, 0xb0, 0xaa, 0xb3, 0xa2, 0xb2, 0xa2, 0x83, 0xa2, 0xb0, 0xa2, 0xb3, 0x00, 0x80 };
 
 static const unsigned char onstep_logo_bits[] U8X8_PROGMEM = {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
@@ -208,9 +224,6 @@ static const unsigned char onstep_logo_bits[] U8X8_PROGMEM = {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, };
 
-unsigned long display_blank_time = DISPLAY_BLANK_TIME;
-unsigned long display_dim_time = DISPLAY_DIM_TIME;  
-
 void gethms(const long& v, uint8_t& v1, uint8_t& v2, uint8_t& v3)
 {
   v3 = v % 60;
@@ -254,6 +267,13 @@ void longDec2Dec(long Dec, int& deg, int& min)
 
 void SmartHandController::setup(const char version[], const int pin[7],const bool active[7], const int SerialBaud, const OLED model)
 {
+  // get "EEPROM" ready
+  nv.init();
+  // initialize if necessary
+  initInitNvValues();
+  // read the saved values
+  initReadNvValues();
+   
   if (strlen(version)<=19) strcpy(_version,version);
   
   telInfo.lastState = 0;
@@ -282,6 +302,7 @@ void SmartHandController::setup(const char version[], const int pin[7],const boo
   else if (model == OLED_SSD1306)
     display = new U8G2_EXT_SSD1306_128X64_NONAME_F_HW_I2C(U8G2_R0);
   display->begin();
+  display->setContrast(maxContrast);
   drawIntro();
   tickButtons();
 
@@ -315,6 +336,7 @@ again:
     if (++thisTry <= 3) goto again;
     telescopeCoordinates=OBSERVED_PLACE;
   }
+
 }
 
 void SmartHandController::tickButtons()
@@ -327,6 +349,9 @@ void SmartHandController::tickButtons()
 
 void SmartHandController::update()
 {
+  // keep "EEPROM" subsystem awake
+  nv.poll();
+  
   tickButtons();
   unsigned long top = millis();
 
@@ -483,7 +508,7 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
       // update guide rate (if available)
       if (telInfo.getGuideRate()>=0) {
         char string_Speed[][8] = {"¼x","½x","1x","2x","4x","8x","20x","48x","½Mx","Max"};
-        char string_PSpeed[][6] = {"(¼x)","(½x)","(1x)"};
+        char string_PSpeed[][6] = {" ¼x"," ½x"," 1x"};
         int gr=telInfo.getGuideRate(); current_selection_guide_rate=gr+1;
         int pgr=telInfo.getPulseGuideRate();
         if ((pgr!=gr) && (pgr>=0) && (pgr<3)) strcat(string_Speed[gr],string_PSpeed[pgr]); 
@@ -537,22 +562,21 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
           if (telInfo.aliMode == Telescope::ALIM_NINE ) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, align9_bits); x -= icon_width + 1; }
         }
 
-        if (telInfo.getError() == Telescope::ERR_NONE) {
-          if (telInfo.isPecPlaying())   { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, pec_play_bits);   x -= icon_width + 1; } else
-          if (telInfo.isPecRecording()) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, pec_record_bits); x -= icon_width + 1; } else
-          if (telInfo.isPecWaiting())   { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, pec_wait_bits);   x -= icon_width + 1; }
-        }
+        if (telInfo.isPecPlaying())   { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, pec_play_bits);   x -= icon_width + 1; } else
+        if (telInfo.isPecRecording()) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, pec_record_bits); x -= icon_width + 1; } else
+        if (telInfo.isPecWaiting())   { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, pec_wait_bits);   x -= icon_width + 1; }
 
         if (telInfo.isGuiding()) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, guiding_bits); x -= icon_width + 1; }
       }
 
-      switch (telInfo.getError()) {
-        // ERR_NONE, ERR_MOTOR_FAULT, ERR_ALT, ERR_LIMIT_SENSE, ERR_DEC, ERR_AZM, ERR_UNDER_POLE, ERR_MERIDIAN, ERR_SYNC, ERR_PARK, ERR_GOTO_SYNC
-        case Telescope::ERR_MOTOR_FAULT: display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrMf_bits); x -= icon_width + 1; break;
-        case Telescope::ERR_ALT:         display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrHo_bits); x -= icon_width + 1; break;
-        case Telescope::ERR_DEC:         display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrDe_bits); x -= icon_width + 1; break;
-        case Telescope::ERR_UNDER_POLE:  display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrUp_bits); x -= icon_width + 1; break;
-        case Telescope::ERR_MERIDIAN:    display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrMe_bits); x -= icon_width + 1; break;
+      switch (telInfo.getError() && (!telInfo.isGuiding())) {
+        case Telescope::ERR_MOTOR_FAULT: display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrMf_bits); x -= icon_width + 1; break; // motor fault
+        case Telescope::ERR_ALT:         display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrAlt_bits);x -= icon_width + 1; break; // above overhead or below horizon
+        case Telescope::ERR_LIMIT_SENSE: display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrLs_bits); x -= icon_width + 1; break; // physical limit switch triggered
+        case Telescope::ERR_DEC:         display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrDe_bits); x -= icon_width + 1; break; // past the rarely used Dec limit
+        case Telescope::ERR_AZM:         display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrAz_bits); x -= icon_width + 1; break; // for AltAz mounts, past limit in Az
+        case Telescope::ERR_UNDER_POLE:  display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrUp_bits); x -= icon_width + 1; break; // for Eq mounts, past limit in HA
+        case Telescope::ERR_MERIDIAN:    display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrMe_bits); x -= icon_width + 1; break; // for Eq mounts, past meridian limit
         default: break;
       }
     }
@@ -591,11 +615,17 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
       {
         char us[20]; strcpy(us,telInfo.TempLocalTime); us[2]=0; us[5]=0;
         x = u8g2_GetDisplayWidth(u8g2);  u8g2_uint_t y = 36;
-        u8g2_DrawUTF8(u8g2, 0, y, "Local"); display->drawRA( x, y, us, &us[3], &us[6]);
+        display->setFont(u8g2_font_helvR10_tf);
+        u8g2_DrawUTF8(u8g2, 0, y, "Local");
+        display->setFont(u8g2_font_helvR12_te); 
+        display->drawRA( x, y, us, &us[3], &us[6]);
 
         char ss[20]; strcpy(ss,telInfo.TempSidereal); ss[2]=0; ss[5]=0;
         y += line_height + 4;
-        u8g2_DrawUTF8(u8g2, 0, y, "Sidereal"); display->drawRA(x, y, ss, &ss[3], &ss[6]);
+        display->setFont(u8g2_font_helvR10_tf);
+        u8g2_DrawUTF8(u8g2, 0, y, "Sidereal"); 
+        display->setFont(u8g2_font_helvR12_te);
+        display->drawRA(x, y, ss, &ss[3], &ss[6]);
       }
     }
 

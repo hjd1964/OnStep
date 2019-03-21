@@ -72,6 +72,9 @@ private:
   long angleRA = 0;
   long angleDEC = 0;
 
+  void initInitNvValues();
+  void initReadNvValues();
+
   void menuMain();
   void menuSpeedRate();
   void menuSyncGoto(bool sync);

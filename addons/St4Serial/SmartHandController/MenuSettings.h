@@ -118,9 +118,8 @@ void SmartHandController::menuContrast()
   if (current_selection_L3 > 0)
   {
     maxContrast = (uint)63 * (current_selection_L3 - 1);
-    //EEPROM.write(14, maxContrast);
-    //EEPROM.commit();
     display->setContrast(maxContrast);
+    nv.writeLong(EE_dispMaxContrast,(long)maxContrast);
   }
 }
 
@@ -133,8 +132,7 @@ void SmartHandController::menuDimTimeout()
   {
     current_selection_L3 = display->UserInterfaceSelectionList(&buttonPad, "Dim Timeout", current_selection_L3, string_list_Display);
     display_dim_time = (current_selection_L3 - 1) * 30000;
-    //EEPROM.writeLong(16, display_dim_time);
-    //EEPROM.commit();
+    nv.writeLong(EE_dispDimTimeout,(long)display_dim_time);
   }
 }
 
@@ -147,8 +145,7 @@ void SmartHandController::menuBlankTimeout()
   {
     current_selection_L3 = display->UserInterfaceSelectionList(&buttonPad, "Blank Timeout", current_selection_L3, string_list_Display);
     display_blank_time = (current_selection_L3 - 1) * 60 * 1000;
-    //EEPROM.writeLong(20, display_blank_time);
-    //EEPROM.commit();
+    nv.writeLong(EE_dispBlankTimeout,(long)display_blank_time);
   }
 }
 
@@ -335,6 +332,6 @@ void SmartHandController::menuUtilityLight()
 #else
     analogWrite(UTILITY_LIGHT_PIN, i);
 #endif
-  } else  current_selection_utility_light = last_selection;
+  } else current_selection_utility_light = last_selection;
 }
 #endif
