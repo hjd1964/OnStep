@@ -486,7 +486,7 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
         char string_PSpeed[][6] = {"(¼x)","(½x)","(1x)"};
         int gr=telInfo.getGuideRate(); current_selection_guide_rate=gr+1;
         int pgr=telInfo.getPulseGuideRate();
-        if ((pgr!=gr) && (pgr>=0) && (pgr<2)) strcat(string_Speed[gr],string_PSpeed[pgr]); 
+        if ((pgr!=gr) && (pgr>=0) && (pgr<3)) strcat(string_Speed[gr],string_PSpeed[pgr]); 
         if ((gr>=0) && (gr<=9)) {
           display->setFont(u8g2_font_helvR10_te);
           u8g2_DrawUTF8(u8g2, 0, icon_height, string_Speed[gr]);
