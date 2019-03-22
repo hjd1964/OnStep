@@ -1,6 +1,6 @@
 
 #ifdef ESP32
-#include "NV_EEPROM_ESP32.h"
+#include "NV_EEPROM_ESP.h"
 #else
 #include "NV_EEPROM.h"
 #endif
