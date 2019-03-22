@@ -41,6 +41,7 @@ class Sst4 : public Stream
   public:
     void begin(long baudRate);
     void end();
+    void paused(bool state);
     bool active();
     virtual size_t write(uint8_t);
     virtual size_t write(const uint8_t *, size_t);

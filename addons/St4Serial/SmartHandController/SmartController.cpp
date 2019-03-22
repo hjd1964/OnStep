@@ -1,15 +1,17 @@
 
-#ifdef ESP32
-#include "NV_EEPROM_ESP.h"
-#else
-#include "NV_EEPROM.h"
-#endif
-
 #include "SmartController.h"
 #include "LX200.h"
 
 unsigned long display_blank_time = DISPLAY_BLANK_TIME;
 unsigned long display_dim_time = DISPLAY_DIM_TIME;  
+
+#ifdef ESP32
+  void timerAlarmsEnable() { SerialST4.paused(false); }
+  void timerAlarmsDisable() { SerialST4.paused(true); }
+  #include "NV_EEPROM_ESP.h"
+#else
+#include "NV_EEPROM.h"
+#endif
 
 #include "Initialize.h"
 

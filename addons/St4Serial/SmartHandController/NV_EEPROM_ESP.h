@@ -17,9 +17,9 @@ class nvs {
 
     void poll() {
       if (_dirtyPool && ((long)(millis()-_lastWrite)>5000)) {
-//      timerAlarmsDisable();
+        timerAlarmsDisable();
         EEPROM.commit();
-//      timerAlarmsEnable();
+        timerAlarmsEnable();
         _dirtyPool=false; 
       }
     }

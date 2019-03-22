@@ -77,6 +77,14 @@ void Sst4::end() {
   _recv_head=0; _recv_tail=0; _recv_buffer[0]=0;
 }
 
+void Sst4::paused(bool state) {
+#ifdef ESP32
+  if (Timer1!=NULL) {
+    if (state==true) timerAlarmDisable(Timer1); else timerAlarmEnable(Timer1);
+  }
+#endif
+}
+
 bool Sst4::active() {
   static unsigned long comp=0;
   bool result=false;
