@@ -6,7 +6,7 @@ void SmartHandController::menuSettings()
   while (current_selection_L1 != 0)
   {
     if (telInfo.isMountGEM()) {
-#ifdef UTILITY_LIGHT_ON      
+#ifdef UTILITY_LIGHT      
       const char *string_list_SettingsL1 = "Date/Time\n""Display\n""Utility light\n""Buzzer\n""Meridian Flip\n""Configuration\n""Site\n""Firmware Ver";
 #else      
       const char *string_list_SettingsL1 = "Date/Time\n""Display\n""Buzzer\n""Meridian Flip\n""Configuration\n""Site\n""Firmware Ver";
@@ -16,7 +16,7 @@ void SmartHandController::menuSettings()
       {
       case 1: menuLocalDateTime(); break;
       case 2: menuDisplay(); break;
-#ifdef UTILITY_LIGHT_ON      
+#ifdef UTILITY_LIGHT      
       case 3: menuUtilityLight(); break;
       case 4: menuSound(); break;
       case 5: menuMeridianFlips(); break;
@@ -118,9 +118,8 @@ void SmartHandController::menuContrast()
   if (current_selection_L3 > 0)
   {
     maxContrast = (uint)63 * (current_selection_L3 - 1);
-    //EEPROM.write(14, maxContrast);
-    //EEPROM.commit();
     display->setContrast(maxContrast);
+    nv.writeLong(EE_dispMaxContrast,(long)maxContrast);
   }
 }
 
@@ -133,8 +132,7 @@ void SmartHandController::menuDimTimeout()
   {
     current_selection_L3 = display->UserInterfaceSelectionList(&buttonPad, "Dim Timeout", current_selection_L3, string_list_Display);
     display_dim_time = (current_selection_L3 - 1) * 30000;
-    //EEPROM.writeLong(16, display_dim_time);
-    //EEPROM.commit();
+    nv.writeLong(EE_dispDimTimeout,(long)display_dim_time);
   }
 }
 
@@ -147,8 +145,7 @@ void SmartHandController::menuBlankTimeout()
   {
     current_selection_L3 = display->UserInterfaceSelectionList(&buttonPad, "Blank Timeout", current_selection_L3, string_list_Display);
     display_blank_time = (current_selection_L3 - 1) * 60 * 1000;
-    //EEPROM.writeLong(20, display_blank_time);
-    //EEPROM.commit();
+    nv.writeLong(EE_dispBlankTimeout,(long)display_blank_time);
   }
 }
 
@@ -309,7 +306,7 @@ void SmartHandController::menuFirmware()
   }
 }
 
-#ifdef UTILITY_LIGHT_ON
+#ifdef UTILITY_LIGHT
 void SmartHandController::menuUtilityLight()
 {
   const char *string_utility_light = "Off\nMin\nLow\nMedium\nHigh\nMax";
@@ -335,6 +332,6 @@ void SmartHandController::menuUtilityLight()
 #else
     analogWrite(UTILITY_LIGHT_PIN, i);
 #endif
-  } else  current_selection_utility_light = last_selection;
+  } else current_selection_utility_light = last_selection;
 }
 #endif

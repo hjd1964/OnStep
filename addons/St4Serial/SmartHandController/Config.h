@@ -11,7 +11,9 @@
 #define Ser SerialST4             // You could also, for example, use the Teensy3.2's Serial3 interface "Ser Serial3"
 #define SERIAL_BAUD_DEFAULT 57200 // Default=57200, only used for async comms (not SerialST4)
 
-#define UTILITY_LIGHT_OFF         // Utility light, PWM controlled, default _OFF
+// Utility Light, default=_OFF
+// UTILITY_LIGHT n, where n=0 to 255 activates this feature and sets default brightness
+#define UTILITY_LIGHT_OFF
 
 // THAT IS ALL FOR USER CONFIGURABLE PARAMETERS! Do not change anything below this line!
 // -------------------------------------------------------------------------------------

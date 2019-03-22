@@ -3,7 +3,7 @@
 
 void Telescope::updateRaDec(boolean immediate)
 {
-  if ((millis() - lastStateRaDec > BACKGROUND_CMD_RATE) && ((updateSeq%3==1) || (updateSeq%3==2) || immediate) && connected)
+  if ((millis() - lastStateRaDec > BACKGROUND_CMD_RATE) && connected)
   {
     if ((updateSeq%3==1) || immediate) { hasInfoRa = GetLX200(":GR#", TempRa) == LX200VALUEGET; if (!hasInfoRa) connected=true; }
     if ((updateSeq%3==2) || immediate) { hasInfoDec = GetLX200(":GD#", TempDec) == LX200VALUEGET; if (!hasInfoDec) connected=true; lastStateRaDec = millis(); }
@@ -11,7 +11,7 @@ void Telescope::updateRaDec(boolean immediate)
 };
 void Telescope::updateAzAlt(boolean immediate)
 {
-  if ((millis() - lastStateAzAlt > BACKGROUND_CMD_RATE) && ((updateSeq%3==1) || (updateSeq%3==2) || immediate) && connected)
+  if ((millis() - lastStateAzAlt > BACKGROUND_CMD_RATE) && connected)
   {
     if ((updateSeq%3==1) || immediate) { hasInfoAz = GetLX200(":GZ#", TempAz) == LX200VALUEGET; if (!hasInfoAz) connected = true; }
     if ((updateSeq%3==2) || immediate) { hasInfoAlt = GetLX200(":GA#", TempAlt) == LX200VALUEGET; if (!hasInfoAlt) connected = true; lastStateAzAlt = millis(); }
@@ -19,7 +19,7 @@ void Telescope::updateAzAlt(boolean immediate)
 }
 void Telescope::updateTime(boolean immediate)
 {
-  if ((millis() - lastStateTime > BACKGROUND_CMD_RATE) && ((updateSeq%3==1) || (updateSeq%3==2) || immediate) && connected)
+  if ((millis() - lastStateTime > BACKGROUND_CMD_RATE) && connected)
   {
     if ((updateSeq%3==1) || immediate) { hasInfoUTC = GetLX200(":GL#", TempLocalTime) == LX200VALUEGET; if (!hasInfoUTC) connected = true; }
     if ((updateSeq%3==2) || immediate) { hasInfoSidereal = GetLX200(":GS#", TempSidereal) == LX200VALUEGET; if (!hasInfoSidereal) connected = true; lastStateTime = millis(); }
@@ -27,7 +27,7 @@ void Telescope::updateTime(boolean immediate)
 };
 void Telescope::updateTel(boolean immediate)
 {
-  if ((millis() - lastStateTel > BACKGROUND_CMD_RATE) && ((updateSeq%3==0) || immediate) && connected)
+  if ((millis() - lastStateTel > BACKGROUND_CMD_RATE) && connected)
   {
     if ((updateSeq%3==0) || immediate) { hasTelStatus = GetLX200(":Gu#", TelStatus) == LX200VALUEGET; if (!hasTelStatus) connected = true; lastStateTel = millis(); }
   }
@@ -129,15 +129,14 @@ Telescope::TrackRate Telescope::getTrackingRate()
   if (strlen(TelStatus)<2) return TR_UNKNOW;
   return (TrackRate)(TelStatus[1]&0b00000011);
 }
-Telescope::TrackRateComp Telescope::getTrackingRateComp()
+
+Telescope::RateCompensation Telescope::getRateCompensation()
 {
-  if (strlen(TelStatus)<1) return RC_UNKNOWN;
-  char temp = TelStatus[0] & 0b01110000;
-  if (temp == 0b01010000) return RC_REFR_RA; else
-  if (temp == 0b00010000) return RC_REFR_BOTH; else
-  if (temp == 0b01100000) return RC_FULL_RA; else  
-  if (temp == 0b00100000) return RC_FULL_BOTH; else
-  return RC_UNKNOWN;
+  RateCompensation rateCompensation=RC_NONE;
+  if (TelStatus[0]&0b00010000) { if (TelStatus[0]&0b01000000) rateCompensation=RC_REFR_RA; else rateCompensation=RC_REFR_BOTH; } else
+  if (TelStatus[0]&0b00100000) { if (TelStatus[0]&0b01000000) rateCompensation=RC_FULL_RA; else rateCompensation=RC_FULL_BOTH; } else rateCompensation=RC_NONE;
+  return rateCompensation;
+
 }
 int Telescope::getPulseGuideRate()
 {

@@ -48,7 +48,6 @@ private:
   bool sleepDisplay = false;
   bool lowContrast = false;
   uint8_t maxContrast = 255;
-  bool wifiOn = false;
   bool powerCylceRequired = false;
   bool buttonCommand = false;
   bool moveNorth=false;
@@ -73,6 +72,9 @@ private:
   long angleRA = 0;
   long angleDEC = 0;
 
+  void initInitNvValues();
+  void initReadNvValues();
+
   void menuMain();
   void menuSpeedRate();
   void menuSyncGoto(bool sync);
@@ -96,7 +98,7 @@ private:
   void menuSites();
   void menuLocalDateTime();
   void menuDisplay();
-#ifdef UTILITY_LIGHT_ON  
+#ifdef UTILITY_LIGHT  
   void menuUtilityLight();
 #endif  
   void menuSound();
