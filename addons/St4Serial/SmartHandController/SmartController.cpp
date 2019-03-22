@@ -1,15 +1,17 @@
 
-#ifdef ESP32
-#include "NV_EEPROM_ESP32.h"
-#else
-#include "NV_EEPROM.h"
-#endif
-
 #include "SmartController.h"
 #include "LX200.h"
 
 unsigned long display_blank_time = DISPLAY_BLANK_TIME;
 unsigned long display_dim_time = DISPLAY_DIM_TIME;  
+
+#ifdef ESP32
+  void timerAlarmsEnable() { SerialST4.paused(false); }
+  void timerAlarmsDisable() { SerialST4.paused(true); }
+  #include "NV_EEPROM_ESP.h"
+#else
+#include "NV_EEPROM.h"
+#endif
 
 #include "Initialize.h"
 
@@ -571,15 +573,17 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
         if (telInfo.isGuiding()) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, guiding_bits); x -= icon_width + 1; }
       }
 
-      switch (telInfo.getError() && (!telInfo.isGuiding())) {
-        case Telescope::ERR_MOTOR_FAULT: display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrMf_bits); x -= icon_width + 1; break; // motor fault
-        case Telescope::ERR_ALT:         display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrAlt_bits);x -= icon_width + 1; break; // above overhead or below horizon
-        case Telescope::ERR_LIMIT_SENSE: display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrLs_bits); x -= icon_width + 1; break; // physical limit switch triggered
-        case Telescope::ERR_DEC:         display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrDe_bits); x -= icon_width + 1; break; // past the rarely used Dec limit
-        case Telescope::ERR_AZM:         display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrAz_bits); x -= icon_width + 1; break; // for AltAz mounts, past limit in Az
-        case Telescope::ERR_UNDER_POLE:  display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrUp_bits); x -= icon_width + 1; break; // for Eq mounts, past limit in HA
-        case Telescope::ERR_MERIDIAN:    display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrMe_bits); x -= icon_width + 1; break; // for Eq mounts, past meridian limit
-        default: break;
+      if (!telInfo.isGuiding()) {
+        switch (telInfo.getError()) {
+          case Telescope::ERR_MOTOR_FAULT: display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrMf_bits); x -= icon_width + 1; break; // motor fault
+          case Telescope::ERR_ALT:         display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrAlt_bits);x -= icon_width + 1; break; // above overhead or below horizon
+          case Telescope::ERR_LIMIT_SENSE: display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrLs_bits); x -= icon_width + 1; break; // physical limit switch triggered
+          case Telescope::ERR_DEC:         display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrDe_bits); x -= icon_width + 1; break; // past the rarely used Dec limit
+          case Telescope::ERR_AZM:         display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrAz_bits); x -= icon_width + 1; break; // for AltAz mounts, past limit in Az
+          case Telescope::ERR_UNDER_POLE:  display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrUp_bits); x -= icon_width + 1; break; // for Eq mounts, past limit in HA
+          case Telescope::ERR_MERIDIAN:    display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrMe_bits); x -= icon_width + 1; break; // for Eq mounts, past meridian limit
+          default: break;
+        }
       }
     }
 

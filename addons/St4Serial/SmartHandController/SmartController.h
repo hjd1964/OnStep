@@ -64,7 +64,7 @@ private:
   uint8_t current_selection_L2 = 1;
   uint8_t current_selection_L3 = 1;
   uint8_t current_selection_L4 = 1;
-#ifdef UTILITY_LIGHT_ON  
+#ifdef UTILITY_LIGHT 
   uint8_t current_selection_utility_light = 5;
 #endif  
   uint8_t current_selection_guide_rate = 5;
