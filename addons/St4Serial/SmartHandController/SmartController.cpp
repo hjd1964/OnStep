@@ -780,7 +780,7 @@ void SmartHandController::menuSpeedRate()
 
   int i=1,j=-1,k=-1,l=-1,m=-1,n=-1;
   #ifdef UTILITY_LIGHT
-    { i++; j=i; strcat(string_feature_Modes,"\nUtil Lght Brightness"); }
+    { i++; j=i; strcat(string_feature_Modes,"\nUtility Light"); }
   #endif
   if (telInfo.hasReticle()) { i++; k=i; strcat(string_feature_Modes,"\nReticle"); }
   if (telInfo.hasFocuser1()) { i++; l=i; if (telInfo.hasFocuser2()) strcat(string_feature_Modes,"\nFocuser 1"); else strcat(string_feature_Modes,"\nFocuser"); }
