@@ -797,7 +797,7 @@ void SmartHandController::menuSpeedRate()
     if (current_selection_feature_mode==l) featureKeyMode=4; else // focuser 1
     if (current_selection_feature_mode==m) featureKeyMode=5; else // focuser 2
     if (current_selection_feature_mode==n) featureKeyMode=6; else // rotator
-    featureKeyMode=0;
+    { featureKeyMode=1; current_selection_feature_mode=1; } // default to guide rate
   } else current_selection_feature_mode = last_selection_feature_mode;
 }
 #endif
