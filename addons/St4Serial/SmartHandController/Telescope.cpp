@@ -154,6 +154,57 @@ Telescope::Errors Telescope::getError()
   return (Errors)(TelStatus[8]&0b00001111);
 }
 
+bool Telescope::hasFocuser1()
+{
+  static int focuser1 = -1;
+  if (focuser1==-1) {
+    char out[20];
+    if ((GetLX200(":FA#", out) == LX200VALUEGET)) focuser1=(out[0]=='1'); 
+  }
+  if (focuser1>0) return true; else return false;
+}
+
+bool Telescope::hasFocuser2()
+{
+  static int focuser2 = -1;
+  if (focuser2==-1) {
+    char out[20];
+    if ((GetLX200(":fA#", out) == LX200VALUEGET)) focuser2=(out[0]=='1'); 
+  }
+  return (focuser2>0);
+}
+
+static int _rotator  = -1;
+static int _derotator  = -1;
+bool Telescope::hasRotator()
+{
+  if (_rotator==-1) {
+    char out[20];
+    if (GetLX200(":GX98#",out) == LX200VALUEGET) {
+      _rotator=(out[0]=='R');
+      _derotator=(out[0]=='D'); if (_derotator) _rotator=true;
+    }
+  }
+  return (_rotator>0);
+}
+
+bool Telescope::hasDeRotator()
+{
+  if (_rotator==-1) {
+    char out[20];
+    if (GetLX200(":GX98#",out) == LX200VALUEGET) {
+      _rotator=(out[0]=='R');
+      _derotator=(out[0]=='D'); if (_derotator) _rotator=true;
+    }
+  }
+  return (_derotator>0);
+}
+
+bool Telescope::hasReticle()
+{
+  return true;  
+}
+
 bool Telescope::addStar()
 {
   if (align == ALI_RECENTER_1 || align == ALI_RECENTER_2 || align == ALI_RECENTER_3 || align == ALI_RECENTER_4 || align == ALI_RECENTER_5 || align == ALI_RECENTER_6 || align == ALI_RECENTER_7 || align == ALI_RECENTER_8 || align == ALI_RECENTER_9) {

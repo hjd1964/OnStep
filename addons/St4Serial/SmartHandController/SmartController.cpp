@@ -3,7 +3,7 @@
 #include "LX200.h"
 
 unsigned long display_blank_time = DISPLAY_BLANK_TIME;
-unsigned long display_dim_time = DISPLAY_DIM_TIME;  
+unsigned long display_dim_time = DISPLAY_DIM_TIME;
 
 #ifdef ESP32
   void timerAlarmsEnable() { SerialST4.paused(false); }
@@ -352,7 +352,9 @@ void SmartHandController::tickButtons()
 void SmartHandController::update()
 {
   // keep "EEPROM" subsystem awake
+#ifndef DISABLE_EEPROM_COMMIT_ON
   nv.poll();
+#endif
   
   tickButtons();
   unsigned long top = millis();
@@ -403,8 +405,10 @@ void SmartHandController::update()
       display->sleepOff();
       return;
     }
-  } 
-  else // guide
+  } else
+
+  // -------------------------------------------------------------------------------------------------------------------
+  // handle the guiding buttons
   {
     buttonCommand = false;
 #ifdef AUX_ST4_ON
@@ -429,22 +433,70 @@ void SmartHandController::update()
     if (buttonCommand) { time_last_action = millis(); return; }
   }
 
-  // handle fF button features
-  static bool moveOut=false;
-  static bool moveIn=false;
-  if (telInfo.atHome()) {
-    if (buttonPad.F.wasPressed()) { Ser.print(":B+#"); time_last_action = millis(); return; } else
-    if (buttonPad.f.wasPressed()) { Ser.print(":B-#"); time_last_action = millis(); return; }
-  } else {
-    // should send the ":FA#" command to see if we have a focuser and revert to always use reticule brightness if not
-    buttonCommand = false;
-    if (!moveOut && buttonPad.F.isDown()) { moveOut = true;  Ser.print(":F+#"); buttonCommand=true; } else
-    if (moveOut && buttonPad.F.isUp())    { moveOut = false; Ser.print(":FQ#"); buttonCommand=true; buttonPad.F.clearPress(); } else
-    if (!moveIn && buttonPad.f.isDown())  { moveIn = true;   Ser.print(":F-#"); buttonCommand=true; } else
-    if (moveIn && buttonPad.f.isUp())     { moveIn = false;  Ser.print(":FQ#"); buttonCommand=true; buttonPad.f.clearPress(); }
-    if (buttonCommand) { time_last_action = millis(); return; }
+  // -------------------------------------------------------------------------------------------------------------------
+  // handle the feature buttons
+  char cmd[10];
+  static bool focOut=false;
+  static bool focIn=false;
+  static bool rotCw=false;
+  static bool rotCcw=false;
+  buttonCommand=false;
+  switch (featureKeyMode) {
+    case 1:   // guide rate
+      if (buttonPad.F.wasPressed()) { current_selection_guide_rate--; strcpy(briefMessage,"Guide Slower"); buttonCommand=true; } else
+      if (buttonPad.f.wasPressed()) { current_selection_guide_rate++; strcpy(briefMessage,"Guide Faster"); buttonCommand=true; }
+      if (buttonCommand) {
+        if (current_selection_guide_rate<1)  current_selection_guide_rate=1;
+        if (current_selection_guide_rate>10) current_selection_guide_rate=10;
+        char cmd[5]= ":Rn#"; cmd[2] = '0' + current_selection_guide_rate - 1;
+        DisplayMessageLX200(SetLX200(cmd));
+      }
+    break;
+    case 2:   // util. light
+#ifdef UTILITY_LIGHT
+      if (buttonPad.F.wasPressed()) { current_selection_utility_light--; strcpy(briefMessage,"Util Dimmer"); buttonCommand=true; } else
+      if (buttonPad.f.wasPressed()) { current_selection_utility_light++; strcpy(briefMessage,"Util Brighter"); buttonCommand=true; }
+      if (buttonCommand) {
+        if (current_selection_utility_light<1) current_selection_utility_light=1;
+        if (current_selection_utility_light>6) current_selection_utility_light=6;
+        int i; switch(current_selection_utility_light) { case 1: i=0; break; case 2: i=15; break; case 3: i=31; break; case 4: i=63; break; case 5: i=127; break; case 6: i=255; break; default: i=127; break; }
+#ifdef ESP32
+        ledcWrite(0, i);
+#else
+        analogWrite(UTILITY_LIGHT_PIN, i);
+#endif
+      }
+#endif
+    break;
+    case 3:  // reticule
+      if (buttonPad.F.wasPressed()) { Ser.print(":B-#"); strcpy(briefMessage,"Reticle Dimmer"); } else
+      if (buttonPad.f.wasPressed()) { Ser.print(":B+#"); strcpy(briefMessage,"Reticle Brighter"); }
+    break;
+    case 4: case 5:  // focuser1/2
+      if (featureKeyMode==4) strcpy(cmd,":FA1#"); else strcpy(cmd,":FA2#"); 
+           if (!focOut && buttonPad.F.isDown()) { focOut = true;  strcat(cmd,":FS#:F+#"); SetLX200(cmd); strcpy(briefMessage,"Focus Out"); buttonCommand=true; }
+      else if ( focOut && buttonPad.F.isUp())   { focOut = false; Ser.print(":FQ#"); buttonCommand=true; buttonPad.F.clearPress(); }
+      else if (!focIn  && buttonPad.f.isDown()) { focIn = true;   strcat(cmd,":FS#:F-#"); SetLX200(cmd); strcpy(briefMessage,"Focus In"); buttonCommand=true; }
+      else if ( focIn  && buttonPad.f.isUp())   { focIn = false;  Ser.print(":FQ#"); buttonCommand=true; buttonPad.f.clearPress(); }
+#ifndef FOCUSER_ACCELERATE_DISABLE_ON
+      // acceleration control
+      else if ((focOut && buttonPad.F.isDown() && (buttonPad.F.timeDown()>5000))) { Ser.print(":FF#:F+#"); strcpy(briefMessage,"Focus Fast"); }
+      else if ((focIn  && buttonPad.f.isDown() && (buttonPad.f.timeDown()>5000))) { Ser.print(":FF#:F-#"); strcpy(briefMessage,"Focus Fast"); }
+#endif
+    break;
+    case 6:  // rotator
+           if (!rotCw  && buttonPad.F.isDown()) { rotCcw = true;  strcat(cmd,":r2#:rc#:r<#"); Ser.print(cmd); strcpy(briefMessage,"Rotate Ccw"); buttonCommand=true; }
+      else if ( rotCw  && buttonPad.F.isUp())   { rotCcw = false; Ser.print(":rQ#"); buttonCommand=true; buttonPad.F.clearPress(); }
+      else if (!rotCcw && buttonPad.f.isDown()) { rotCw = true;   strcat(cmd,":r2#:rc#:r>#"); Ser.print(cmd); strcpy(briefMessage,"Rotate Cw"); buttonCommand=true; }
+      else if ( rotCcw && buttonPad.f.isUp())   { rotCw = false;  Ser.print(":rQ#"); buttonCommand=true; buttonPad.f.clearPress(); }
+      // acceleration control
+      else if ((rotCcw && buttonPad.F.isDown() && (buttonPad.F.timeDown()>5000))) { Ser.print(":r5#:rc#:r<#"); strcpy(briefMessage,"Rotate Fast"); }
+      else if (( rotCw && buttonPad.f.isDown() && (buttonPad.f.timeDown()>5000))) { Ser.print(":r5#:rc#:r>#"); strcpy(briefMessage,"Rotate Fast"); };
+    break;
   }
+  if (buttonCommand) { time_last_action = millis(); return; }
 
+  // -------------------------------------------------------------------------------------------------------------------
   // handle shift button features
   if (buttonPad.shift.isDown()) {
     if ((buttonPad.shift.timeDown()>1000) && telInfo.align == Telescope::ALI_OFF) { menuMain(); time_last_action = millis(); }                                                        // bring up the menus
@@ -587,6 +639,18 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
       }
     }
 
+    // show brief message, simply place the message in the briefMessage string and it'll show for one second
+    static char lastMessage[20]="";
+    if ((strlen(briefMessage)!=0) || (strlen(lastMessage)!=0)) {
+      static unsigned long startTime=0;
+      if (strlen(briefMessage)!=0) { startTime=millis(); strcpy(lastMessage,briefMessage); strcpy(briefMessage,""); }
+
+      x = u8g2_GetDisplayWidth(u8g2);  u8g2_uint_t y = 36;  u8g2_uint_t x1 = u8g2_GetStrWidth(u8g2,lastMessage);
+      u8g2_DrawUTF8(u8g2, (x/2)-(x1/2), y+8, lastMessage);
+
+      if (millis()-startTime>1000) { startTime=0; strcpy(lastMessage,""); }
+    } else
+
     // show equatorial coordinates
     if (page == 0)
     {
@@ -599,7 +663,7 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
         y += line_height + 4;
         u8g2_DrawUTF8(u8g2, 0, y, "Dec"); display->drawDec( x, y, sds, &ds[1], &ds[4], &ds[7]);
       }
-    }
+    } else
 
     // show horizon coordinates
     if (page == 1) {
@@ -613,7 +677,7 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
         y += line_height + 4; x = startpos; x = u8g2_GetDisplayWidth(u8g2);
         u8g2_DrawUTF8(u8g2, 0, y, "Alt."); display->drawDec( x, y, sas, &as[1], &as[4], &as[7]);
       }
-    }
+    } else
     
     // show time
     if (page == 2) {
@@ -633,7 +697,7 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
         display->setFont(u8g2_font_helvR12_te);
         display->drawRA(x, y, ss, &ss[3], &ss[6]);
       }
-    }
+    } else
 
     // show align status
     if (page == 3) {
@@ -651,6 +715,7 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
       const uint8_t* myfont = u8g2->font; u8g2_SetFont(u8g2, myfont);
       u8g2_DrawUTF8(u8g2, 16, y, cat_mgr.constellationStr());
     }
+
 
   } while (u8g2_NextPage(u8g2));
   lastpageupdate = millis();
@@ -690,6 +755,8 @@ void SmartHandController::drawReady()
 }
 
 // Alt Main Menu (double click)
+#ifdef GUIDE_RATE_ALT_MENU_ON
+
 void SmartHandController::menuSpeedRate()
 {
   const char string_list_Speed[] = "0.25x\n0.5x\n1x\n2x\n4x\n8x\n20x\n48x\n1/2 Max\nMax";
@@ -703,6 +770,39 @@ void SmartHandController::menuSpeedRate()
   }
   else current_selection_guide_rate = last_selection_guide_rate;
 }
+
+#else
+
+// Alt Main Menu (double click)
+void SmartHandController::menuSpeedRate()
+{
+  char out[20];
+
+  char string_feature_Modes[120] = "Guide Rate";
+
+  int i=1,j=-1,k=-1,l=-1,m=-1,n=-1;
+  #ifdef UTILITY_LIGHT
+    { i++; j=i; strcat(string_feature_Modes,"\nUtility Light"); }
+  #endif
+  if (telInfo.hasReticle()) { i++; k=i; strcat(string_feature_Modes,"\nReticle"); }
+  if (telInfo.hasFocuser1()) { i++; l=i; if (telInfo.hasFocuser2()) strcat(string_feature_Modes,"\nFocuser 1"); else strcat(string_feature_Modes,"\nFocuser"); }
+  if (telInfo.hasFocuser2()) { i++; m=i; strcat(string_feature_Modes,"\nFocuser 2"); }
+  if (telInfo.hasRotator())  { i++; n=i; strcat(string_feature_Modes,"\nRotator");   }
+
+  uint8_t last_selection_feature_mode = current_selection_feature_mode;
+  current_selection_feature_mode = display->UserInterfaceSelectionList(&buttonPad, "Feature Keys", current_selection_feature_mode, string_feature_Modes);
+
+  if (last_selection_feature_mode>0) {
+    if (current_selection_feature_mode==1) featureKeyMode=1; else // guide rate
+    if (current_selection_feature_mode==j) featureKeyMode=2; else // util. light
+    if (current_selection_feature_mode==k) featureKeyMode=3; else // reticule
+    if (current_selection_feature_mode==l) featureKeyMode=4; else // focuser 1
+    if (current_selection_feature_mode==m) featureKeyMode=5; else // focuser 2
+    if (current_selection_feature_mode==n) featureKeyMode=6; else // rotator
+    { featureKeyMode=1; current_selection_feature_mode=1; } // default to guide rate
+  } else current_selection_feature_mode = last_selection_feature_mode;
+}
+#endif
 
 // Main Menu
 void SmartHandController::menuMain()

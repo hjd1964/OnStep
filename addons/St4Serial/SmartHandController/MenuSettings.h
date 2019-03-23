@@ -316,17 +316,7 @@ void SmartHandController::menuUtilityLight()
 
   if (current_selection_utility_light > 0)
   {
-    int i;
-    switch(current_selection_utility_light) 
-    {
-      case 1: i=0;   break;
-      case 2: i=15;  break;
-      case 3: i=31;  break;
-      case 4: i=63;  break;
-      case 5: i=127; break;
-      case 6: i=255; break;
-      default: i=127; break;
-    }
+    int i; switch(current_selection_utility_light) { case 1: i=0; break; case 2: i=15; break; case 3: i=31; break; case 4: i=63; break; case 5: i=127; break; case 6: i=255; break; default: i=127; break; }
 #ifdef ESP32
     ledcWrite(0, i);
 #else

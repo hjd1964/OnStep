@@ -43,6 +43,7 @@ private:
 
   Telescope telInfo;
   char _version[20]="Version ?";
+  char briefMessage[20]="";
 
   void updateMainDisplay( u8g2_uint_t page);
   bool sleepDisplay = false;
@@ -68,6 +69,9 @@ private:
   uint8_t current_selection_utility_light = 5;
 #endif  
   uint8_t current_selection_guide_rate = 5;
+  uint8_t current_selection_feature_mode = 1;
+  uint8_t featureKeyMode = 1; // guide rate
+
   unsigned short current_selection_SolarSys = 1;
   long angleRA = 0;
   long angleDEC = 0;
