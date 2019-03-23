@@ -61,6 +61,9 @@
 #endif
 
 #ifdef ESP32
+  // workaround for ESP32 crashing on EEPROM commit
+  #define DISABLE_EEPROM_COMMIT_ON
+
   #define B_PIN0 33   // Shift
   #define B_PIN1 25   // N
   #define B_PIN2 32   // S

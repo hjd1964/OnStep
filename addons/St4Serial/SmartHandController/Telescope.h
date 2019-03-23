@@ -79,6 +79,11 @@ public:
   int getGuideRate();
   int getPulseGuideRate();
   Errors getError();
+  bool hasFocuser1();
+  bool hasFocuser2();
+  bool hasRotator();
+  bool hasDeRotator();
+  bool hasReticle();
   bool addStar();
 
 private:
