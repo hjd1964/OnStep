@@ -403,6 +403,7 @@ void SmartHandController::update()
       if (telInfo.align != Telescope::ALI_OFF) telInfo.align = static_cast<Telescope::AlignState>(telInfo.align - 1); // try another align star?
       time_last_action = millis();
       display->sleepOff();
+      buttonPad.clearAllPressed();
       return;
     }
   } else
