@@ -76,7 +76,10 @@ public:
   PierState getPierState();
   TrackRate getTrackingRate();
 <<<<<<< HEAD
+<<<<<<< HEAD
   RateCompensation getRateCompensation();
+=======
+>>>>>>> parent of 3c119c0... Added icons for Tracking Rate compensation
 =======
 >>>>>>> parent of 3c119c0... Added icons for Tracking Rate compensation
   int getGuideRate();
