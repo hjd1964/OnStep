@@ -61,9 +61,13 @@ void SmartHandController::menuLocalDateTime()
       sprintf(out, ":SC%02d/%02d/%02d#", month, day, year); DisplayMessageLX200(SetLX200(out),false);
       // Time
       long value;
+      boolean pmf=false;
       boolean dst=false;
       if (DisplayMessageLX200(GetTimeLX200(value))) {
+        if (value>=43200) { value-=43200; pmf=true; }
         if (display->UserInterfaceInputValueTime(&buttonPad, &value)) {
+          if (display->UserInterfaceInputValueBoolean(&buttonPad, "Local Time PM?", &pmf)) {
+            if (pmf) value+=43200; // AM or PM?
             if (display->UserInterfaceInputValueBoolean(&buttonPad, "Local Time DST?", &dst)) {
               if (dst) value-=3600; // Dst?
               DisplayMessageLX200(SetTimeLX200(value),false);
@@ -73,6 +77,7 @@ void SmartHandController::menuLocalDateTime()
       }
     }
   }
+}
 
 void SmartHandController::menuDisplay()
 {
