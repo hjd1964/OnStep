@@ -444,12 +444,12 @@ void SmartHandController::update()
   buttonCommand=false;
   switch (featureKeyMode) {
     case 1:   // guide rate
-      if (buttonPad.F.wasPressed()) { current_selection_guide_rate--; strcpy(briefMessage,"Guide Slower"); buttonCommand=true; } else
-      if (buttonPad.f.wasPressed()) { current_selection_guide_rate++; strcpy(briefMessage,"Guide Faster"); buttonCommand=true; }
+      if (buttonPad.F.wasPressed()) { activeGuideRate--; strcpy(briefMessage,"Guide Slower"); buttonCommand=true; } else
+      if (buttonPad.f.wasPressed()) { activeGuideRate++; strcpy(briefMessage,"Guide Faster"); buttonCommand=true; }
       if (buttonCommand) {
-        if (current_selection_guide_rate<1)  current_selection_guide_rate=1;
-        if (current_selection_guide_rate>10) current_selection_guide_rate=10;
-        char cmd[5]= ":Rn#"; cmd[2] = '0' + current_selection_guide_rate - 1;
+        if (activeGuideRate<1)  activeGuideRate=1;
+        if (activeGuideRate>10) activeGuideRate=10;
+        char cmd[5]= ":Rn#"; cmd[2] = '0' + activeGuideRate - 1;
         DisplayMessageLX200(SetLX200(cmd));
       }
     break;
