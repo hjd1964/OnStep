@@ -75,10 +75,7 @@ public:
   bool isMountAltAz();
   PierState getPierState();
   TrackRate getTrackingRate();
-<<<<<<< HEAD
   RateCompensation getRateCompensation();
-=======
->>>>>>> parent of 3c119c0... Added icons for Tracking Rate compensation
   int getGuideRate();
   int getPulseGuideRate();
   Errors getError();

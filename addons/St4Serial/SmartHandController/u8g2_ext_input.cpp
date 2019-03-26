@@ -600,7 +600,7 @@ uint8_t ext_UserInterfaceInputValueDec(u8g2_t *u8g2, Pad *extPad, long *value)
 
 uint8_t ext_UserInterfaceInputValueTime(u8g2_t *u8g2, Pad *extPad, long *value)
 {
-  return ext_UserInterfaceInputValueDMS(u8g2, extPad, "Local Time", value, 0, 86399, 2, ":", ":", "", "", "", true);
+  return ext_UserInterfaceInputValueDMS(u8g2, extPad, "Local Time", value, 0, 43199, 2, ":", ":", "", "", "", true);
 }
 
 uint8_t ext_UserInterfaceInputValueLatitude(u8g2_t *u8g2, Pad *extPad, long *value)
