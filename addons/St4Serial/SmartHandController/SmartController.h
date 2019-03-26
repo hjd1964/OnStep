@@ -100,9 +100,6 @@ private:
   void menuSites();
   void menuLocalDateTime();
   void menuDisplay();
-#ifdef UTILITY_LIGHT  
-  void menuUtilityLight();
-#endif  
   void menuSound();
   void menuMeridianFlips();
   void menuTracking();
