@@ -129,6 +129,7 @@ Telescope::TrackRate Telescope::getTrackingRate()
   if (strlen(TelStatus)<2) return TR_UNKNOW;
   return (TrackRate)(TelStatus[1]&0b00000011);
 }
+<<<<<<< HEAD
 
 Telescope::RateCompensation Telescope::getRateCompensation()
 {
@@ -138,6 +139,8 @@ Telescope::RateCompensation Telescope::getRateCompensation()
   return rateCompensation;
 
 }
+=======
+>>>>>>> parent of 3c119c0... Added icons for Tracking Rate compensation
 int Telescope::getPulseGuideRate()
 {
   if (strlen(TelStatus)<7) return -1;

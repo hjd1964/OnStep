@@ -26,7 +26,6 @@ public:
   enum RateCompensation {RC_NONE, RC_REFR_RA, RC_REFR_BOTH, RC_FULL_RA, RC_FULL_BOTH};
   enum ParkState { PRK_UNPARKED, PRK_PARKING, PRK_PARKED, PRK_FAILED, PRK_UNKNOW };
   enum PierState { PIER_NONE, PIER_E, PIER_W, PIER_UNKNOW };
-  enum TrackRateComp { RC_NONE, RC_REFR_RA, RC_REFR_BOTH, RC_FULL_RA, RC_FULL_BOTH, RC_UNKNOWN };
 
 public: 
   AlignState      align = ALI_OFF;
@@ -76,7 +75,10 @@ public:
   bool isMountAltAz();
   PierState getPierState();
   TrackRate getTrackingRate();
+<<<<<<< HEAD
   RateCompensation getRateCompensation();
+=======
+>>>>>>> parent of 3c119c0... Added icons for Tracking Rate compensation
   int getGuideRate();
   int getPulseGuideRate();
   Errors getError();

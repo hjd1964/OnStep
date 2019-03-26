@@ -76,6 +76,7 @@ static unsigned char tracking_S_bits[] U8X8_PROGMEM = {
 static unsigned char tracking_sid_bits[] U8X8_PROGMEM = {
   0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x06, 0x00, 0x0E, 0x00, 0x1E, 0x00, 0x3E, 0x00, 0x7E, 0x08, 0xFE, 0x08, 0x7E, 0x7F, 0x3E, 0x3E, 0x1E, 0x1C, 0x0E, 0x3E, 0x06, 0x22, 0x02, 0x00, 0x00, 0x00 };
 
+<<<<<<< HEAD
 static unsigned char tracking_sid_r_bits[] U8X8_PROGMEM = {
   0x00, 0x00, 0x80, 0x03, 0x82, 0x04, 0x86, 0x03, 0x8e, 0x04, 0x9e, 0x04, 0x3e, 0x00, 0x7e, 0x08, 0xfe, 0x08, 0x7e, 0x7f, 0x3e, 0x3e, 0x1e, 0x1c, 0x0e, 0x3e, 0x06, 0x22, 0x02, 0x00, 0x00, 0x00 };
 
@@ -88,6 +89,8 @@ static unsigned char tracking_sid_f_bits[] U8X8_PROGMEM = {
 static unsigned char tracking_sid_fd_bits[] U8X8_PROGMEM = {
   0x00, 0x00, 0x80, 0x33, 0x82, 0x50, 0x86, 0x53, 0x8e, 0x50, 0x9e, 0x30, 0x3e, 0x00, 0x7e, 0x08, 0xfe, 0x08, 0x7e, 0x7f, 0x3e, 0x3e, 0x1e, 0x1c, 0x0e, 0x3e, 0x06, 0x22, 0x02, 0x00, 0x00, 0x00 };
 
+=======
+>>>>>>> parent of 3c119c0... Added icons for Tracking Rate compensation
 static unsigned char tracking_sol_bits[] U8X8_PROGMEM = {
   0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x06, 0x00, 0x0E, 0x00, 0x1E, 0x00, 0x3E, 0x00, 0x7E, 0x00, 0xFE, 0x1C, 0x7E, 0x22, 0x3E, 0x41, 0x1E, 0x49, 0x0E, 0x41, 0x06, 0x22, 0x02, 0x1C, 0x00, 0x00 };
 
@@ -577,7 +580,10 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
       Telescope::ParkState curP = telInfo.getParkState();
       Telescope::TrackState curT = telInfo.getTrackingState();
       Telescope::TrackRate curTR = telInfo.getTrackingRate();
+<<<<<<< HEAD
 
+=======
+>>>>>>> parent of 3c119c0... Added icons for Tracking Rate compensation
       if (curP == Telescope::PRK_PARKED)  { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, parked_bits); x -= icon_width + 1; } else
       if (curP == Telescope::PRK_PARKING) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, parking_bits); x -= icon_width + 1; } else
       if (telInfo.atHome())               { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, home_bits); x -= icon_width + 1;  } else 
@@ -585,6 +591,7 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
         if (curT == Telescope::TRK_SLEWING) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, sleewing_bits); x -= icon_width + 1; } else
         if (curT == Telescope::TRK_ON)      
         {
+<<<<<<< HEAD
 
           if (curTR == Telescope::TR_SIDEREAL) {
             Telescope::RateCompensation rc = telInfo.getRateCompensation();
@@ -598,6 +605,12 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
           if (curTR == Telescope::TR_SOLAR)  { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_sol_bits); x -= icon_width + 1; } else
                                              { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_S_bits); x -= icon_width + 1; }
 
+=======
+          if (curTR == Telescope::TR_SIDEREAL) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_sid_bits); x -= icon_width + 1; } else
+          if (curTR == Telescope::TR_LUNAR)    { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_lun_bits); x -= icon_width + 1; } else
+          if (curTR == Telescope::TR_SOLAR)    { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_sol_bits); x -= icon_width + 1; } else
+                                               { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, tracking_S_bits); x -= icon_width + 1; }
+>>>>>>> parent of 3c119c0... Added icons for Tracking Rate compensation
          } else
         if (curT == Telescope::TRK_OFF) { display->drawXBMP(x - icon_width, 0, icon_width, icon_height, no_tracking_bits); x -= icon_width + 1; }
 
