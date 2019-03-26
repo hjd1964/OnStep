@@ -573,7 +573,7 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
       if (telInfo.getGuideRate()>=0) {
         char string_Speed[][8] = {"¼x","½x","1x","2x","4x","8x","20x","48x","½Mx","Max"};
         char string_PSpeed[][6] = {" ¼x"," ½x"," 1x"};
-        int gr=telInfo.getGuideRate(); current_selection_guide_rate=gr+1;
+        int gr=telInfo.getGuideRate(); activeGuideRate=gr+1;
         int pgr=telInfo.getPulseGuideRate();
         if ((pgr!=gr) && (pgr>=0) && (pgr<3)) strcat(string_Speed[gr],string_PSpeed[pgr]); 
         if ((gr>=0) && (gr<=9)) {
