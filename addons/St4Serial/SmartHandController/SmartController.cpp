@@ -305,22 +305,30 @@ void SmartHandController::setup(const char version[], const int pin[7],const boo
     display = new U8G2_EXT_SSD1306_128X64_NONAME_F_HW_I2C(U8G2_R0);
   display->begin();
   display->setContrast(maxContrast);
-  drawIntro();
-  tickButtons();
+  display->setFont(u8g2_font_helvR10_te);
 
 #ifdef DEBUG_ON
   DebugSer.begin(9600);
   delay(1000);
 #endif
+
+  // establish comms and clear the channel
   Ser.begin(SerialBaud);
+  
+  // display the splash screen
+  drawIntro();
+  tickButtons();
+
   for (int i = 0; i < 3; i++)
   {
     Ser.print(":#");
-    delay(500);
+    delay(400);
     Ser.flush();
-    delay(500);
+    delay(100);
   }
 
+  DisplayMessage("Establishing", "Connection", 1000);
+  
   // OnStep coordinate mode for getting and setting RA/Dec
   // 0 = OBSERVED_PLACE (same as not supported)
   // 1 = TOPOCENTRIC (does refraction)
@@ -331,14 +339,15 @@ void SmartHandController::setup(const char version[], const int pin[7],const boo
 again:
   delay(4000);
   if (GetLX200(":GXEE#", s) == LX200VALUEGET) {
+    DisplayMessage("Connection", "Ok!", 1000);
     if (s[0]=='0') telescopeCoordinates=OBSERVED_PLACE; else 
     if (s[0]=='1') telescopeCoordinates=TOPOCENTRIC; else 
     if (s[0]=='2') telescopeCoordinates=ASTROMETRIC_J2000;
   } else {
-    if (++thisTry <= 3) goto again;
+    if (++thisTry <= 4) goto again;
     telescopeCoordinates=OBSERVED_PLACE;
+    DisplayMessage("Connetion", "Failed!", 1000);
   }
-
 }
 
 void SmartHandController::tickButtons()
@@ -444,12 +453,12 @@ void SmartHandController::update()
   buttonCommand=false;
   switch (featureKeyMode) {
     case 1:   // guide rate
-      if (buttonPad.F.wasPressed()) { current_selection_guide_rate--; strcpy(briefMessage,"Guide Slower"); buttonCommand=true; } else
-      if (buttonPad.f.wasPressed()) { current_selection_guide_rate++; strcpy(briefMessage,"Guide Faster"); buttonCommand=true; }
+      if (buttonPad.F.wasPressed()) { activeGuideRate--; strcpy(briefMessage,"Guide Slower"); buttonCommand=true; } else
+      if (buttonPad.f.wasPressed()) { activeGuideRate++; strcpy(briefMessage,"Guide Faster"); buttonCommand=true; }
       if (buttonCommand) {
-        if (current_selection_guide_rate<1)  current_selection_guide_rate=1;
-        if (current_selection_guide_rate>10) current_selection_guide_rate=10;
-        char cmd[5]= ":Rn#"; cmd[2] = '0' + current_selection_guide_rate - 1;
+        if (activeGuideRate<1)  activeGuideRate=1;
+        if (activeGuideRate>10) activeGuideRate=10;
+        char cmd[5]= ":Rn#"; cmd[2] = '0' + activeGuideRate - 1;
         DisplayMessageLX200(SetLX200(cmd));
       }
     break;
@@ -486,13 +495,13 @@ void SmartHandController::update()
 #endif
     break;
     case 6:  // rotator
-           if (!rotCw  && buttonPad.F.isDown()) { rotCcw = true;  strcat(cmd,":r2#:rc#:r<#"); Ser.print(cmd); strcpy(briefMessage,"Rotate Ccw"); buttonCommand=true; }
-      else if ( rotCw  && buttonPad.F.isUp())   { rotCcw = false; Ser.print(":rQ#"); buttonCommand=true; buttonPad.F.clearPress(); }
-      else if (!rotCcw && buttonPad.f.isDown()) { rotCw = true;   strcat(cmd,":r2#:rc#:r>#"); Ser.print(cmd); strcpy(briefMessage,"Rotate Cw"); buttonCommand=true; }
-      else if ( rotCcw && buttonPad.f.isUp())   { rotCw = false;  Ser.print(":rQ#"); buttonCommand=true; buttonPad.f.clearPress(); }
+           if (!rotCcw && buttonPad.F.isDown()) { rotCcw = true;  Ser.print(":r2#:rc#:r<#"); strcpy(briefMessage,"Rotate Ccw"); buttonCommand=true; }
+      else if ( rotCcw && buttonPad.F.isUp())   { rotCcw = false; Ser.print(":rQ#"); buttonCommand=true; buttonPad.F.clearPress(); }
+      else if (!rotCw  && buttonPad.f.isDown()) { rotCw = true;   Ser.print(":r2#:rc#:r>#"); strcpy(briefMessage,"Rotate Cw"); buttonCommand=true; }
+      else if ( rotCw  && buttonPad.f.isUp())   { rotCw = false;  Ser.print(":rQ#"); buttonCommand=true; buttonPad.f.clearPress(); }
       // acceleration control
-      else if ((rotCcw && buttonPad.F.isDown() && (buttonPad.F.timeDown()>5000))) { Ser.print(":r5#:rc#:r<#"); strcpy(briefMessage,"Rotate Fast"); }
-      else if (( rotCw && buttonPad.f.isDown() && (buttonPad.f.timeDown()>5000))) { Ser.print(":r5#:rc#:r>#"); strcpy(briefMessage,"Rotate Fast"); };
+      else if ((rotCcw && buttonPad.F.isDown() && (buttonPad.F.timeDown()>5000))) { Ser.print(":r4#:rc#:r<#"); strcpy(briefMessage,"Rotate Fast"); }
+      else if (( rotCw && buttonPad.f.isDown() && (buttonPad.f.timeDown()>5000))) { Ser.print(":r4#:rc#:r>#"); strcpy(briefMessage,"Rotate Fast"); }
     break;
   }
   if (buttonCommand) { time_last_action = millis(); return; }
@@ -564,7 +573,7 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
       if (telInfo.getGuideRate()>=0) {
         char string_Speed[][8] = {"¼x","½x","1x","2x","4x","8x","20x","48x","½Mx","Max"};
         char string_PSpeed[][6] = {" ¼x"," ½x"," 1x"};
-        int gr=telInfo.getGuideRate(); current_selection_guide_rate=gr+1;
+        int gr=telInfo.getGuideRate(); activeGuideRate=gr+1;
         int pgr=telInfo.getPulseGuideRate();
         if ((pgr!=gr) && (pgr>=0) && (pgr<3)) strcat(string_Speed[gr],string_PSpeed[pgr]); 
         if ((gr>=0) && (gr<=9)) {
@@ -726,237 +735,10 @@ void SmartHandController::drawIntro()
   do {
     display->drawXBMP(0, 0, onstep_logo_width, onstep_logo_height, onstep_logo_bits);
   } while (display->nextPage());
-  delay(2000);
+  delay(1000);
 }
 
-void SmartHandController::drawLoad()
-{
-  display->firstPage();
-  uint8_t x = 0;
-  do {
-    display->setFont(u8g2_font_helvR14_tr);
-    x = (display->getDisplayWidth() - display->getStrWidth("Loading")) / 2;
-    display->drawStr(x, display->getDisplayHeight()/2. - 14, "Loading");
-    x = (display->getDisplayWidth() - display->getStrWidth(_version)) / 2;
-    display->drawStr(x, display->getDisplayHeight() / 2. + 14, _version);
-  } while (display->nextPage());
-}
-
-void SmartHandController::drawReady()
-{
-  display->firstPage();
-  uint8_t x = 0;
-  do {
-    x = (display->getDisplayWidth() - display->getStrWidth("Ready!")) / 2;
-    display->drawStr(x, display->getDisplayHeight() / 2, "Ready!");
-  } while (display->nextPage());
-  delay(500);
-}
-
-// Alt Main Menu (double click)
-#ifdef GUIDE_RATE_ALT_MENU_ON
-
-void SmartHandController::menuSpeedRate()
-{
-  const char string_list_Speed[] = "0.25x\n0.5x\n1x\n2x\n4x\n8x\n20x\n48x\n1/2 Max\nMax";
-  uint8_t last_selection_guide_rate = current_selection_guide_rate;
-  current_selection_guide_rate = display->UserInterfaceSelectionList(&buttonPad, "Set Speed", current_selection_guide_rate, string_list_Speed);
-  if (current_selection_guide_rate > 0)
-  {
-    char cmd[5]= ":Rn#";
-    cmd[2] = '0' + current_selection_guide_rate - 1;
-    DisplayMessageLX200(SetLX200(cmd));
-  }
-  else current_selection_guide_rate = last_selection_guide_rate;
-}
-
-#else
-
-// Alt Main Menu (double click)
-void SmartHandController::menuSpeedRate()
-{
-  char out[20];
-
-  char string_feature_Modes[120] = "Guide Rate";
-
-  int i=1,j=-1,k=-1,l=-1,m=-1,n=-1;
-  #ifdef UTILITY_LIGHT
-    { i++; j=i; strcat(string_feature_Modes,"\nUtility Light"); }
-  #endif
-  if (telInfo.hasReticle()) { i++; k=i; strcat(string_feature_Modes,"\nReticle"); }
-  if (telInfo.hasFocuser1()) { i++; l=i; if (telInfo.hasFocuser2()) strcat(string_feature_Modes,"\nFocuser 1"); else strcat(string_feature_Modes,"\nFocuser"); }
-  if (telInfo.hasFocuser2()) { i++; m=i; strcat(string_feature_Modes,"\nFocuser 2"); }
-  if (telInfo.hasRotator())  { i++; n=i; strcat(string_feature_Modes,"\nRotator");   }
-
-  uint8_t last_selection_feature_mode = current_selection_feature_mode;
-  current_selection_feature_mode = display->UserInterfaceSelectionList(&buttonPad, "Feature Keys", current_selection_feature_mode, string_feature_Modes);
-
-  if (last_selection_feature_mode>0) {
-    if (current_selection_feature_mode==1) featureKeyMode=1; else // guide rate
-    if (current_selection_feature_mode==j) featureKeyMode=2; else // util. light
-    if (current_selection_feature_mode==k) featureKeyMode=3; else // reticule
-    if (current_selection_feature_mode==l) featureKeyMode=4; else // focuser 1
-    if (current_selection_feature_mode==m) featureKeyMode=5; else // focuser 2
-    if (current_selection_feature_mode==n) featureKeyMode=6; else // rotator
-    { featureKeyMode=1; current_selection_feature_mode=1; } // default to guide rate
-  } else current_selection_feature_mode = last_selection_feature_mode;
-}
-#endif
-
-// Main Menu
-void SmartHandController::menuMain()
-{
-  current_selection_L0 = 1;
-  while (current_selection_L0 != 0)
-  {
-    boolean sync=false;
-    if (!telInfo.isMountAltAz()) {
-      const char *string_list_main_UnParkedL0 = "Goto\n""Sync\n""Align\n""Parking\n""Tracking\n""PEC\n""Settings";
-      current_selection_L0 = display->UserInterfaceSelectionList(&buttonPad, "Main Menu", current_selection_L0, string_list_main_UnParkedL0);
-      switch (current_selection_L0) {
-        case 1: menuSyncGoto(false); break;
-        case 2: if (display->UserInterfaceInputValueBoolean(&buttonPad, "Sync Here?", &sync)) if (sync) DisplayMessageLX200(SetLX200(":CS#"),false); break;
-        case 3: menuAlignment(); break;
-        case 4: menuParking(); break;
-        case 5: menuTracking(); break;
-        case 6: menuPEC(); break;
-        case 7: menuSettings(); break;
-      }
-    } else {
-      const char *string_list_main_UnParkedL0 = "Goto\n""Sync\n""Align\n""Parking\n""Tracking\n""Settings";
-      current_selection_L0 = display->UserInterfaceSelectionList(&buttonPad, "Main Menu", current_selection_L0, string_list_main_UnParkedL0);
-      switch (current_selection_L0) {
-        case 1: menuSyncGoto(false); break;
-        case 2: if (display->UserInterfaceInputValueBoolean(&buttonPad, "Sync Here?", &sync)) if (sync) DisplayMessageLX200(SetLX200(":CS#"),false); break;
-        case 3: menuAlignment(); break;
-        case 4: menuParking(); break;
-        case 5: menuTracking(); break;
-        case 6: menuSettings(); break;
-      }
-    }
-  }
-}
-
-#include "MenuSyncGoto.h"
-#include "MenuAlignment.h"
-
-// Parking Menu
-void SmartHandController::menuParking()
-{
-  Telescope::ParkState currentstate = telInfo.getParkState();
-  if (currentstate == Telescope::PRK_PARKED) { }
-  if (currentstate == Telescope::PRK_UNPARKED) { }
-
-  current_selection_L1 = 1;
-  while (current_selection_L1 != 0)
-  {
-    const char *string_list_SettingsL1 = "Park\n""Un-Park\n""Set-Park";
-    current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Parking", current_selection_L1, string_list_SettingsL1);
-    switch (current_selection_L1)
-    {
-      case 1: if (SetLX200(":hP#")== LX200VALUESET) DisplayMessage("Parking", "scope", 500); else DisplayMessage("Park", "Failed", 1000); break;
-      case 2: if (SetLX200(":hR#")== LX200VALUESET) DisplayMessage("Un-Parking", "scope", 500); else DisplayMessage("Un-Park", "Failed", 1000); break;
-      case 3: 
-        boolean SetP=false; 
-        if (display->UserInterfaceInputValueBoolean(&buttonPad, "Set-Park?", &SetP)) {
-          if (SetP) {
-            if (SetLX200(":hQ#")== LX200VALUESET) DisplayMessage("Set-Park", "OK", 500); else DisplayMessage("Set-Park", "Failed", 1000); 
-          } else DisplayMessage("Set-Park", "Canceled", 500);
-        } else DisplayMessage("Set-Park", "Canceled", 500);
-      break;
-    }
-  }
-}
-
-void SmartHandController::menuTracking()
-{
-  Telescope::TrackState currentstate = telInfo.getTrackingState();
-
-  if (telInfo.isMountAltAz()) {
-    const char *string_list;
-    current_selection_L2 = 1;
-    while (current_selection_L2 != 0)
-    {
-      if (currentstate == Telescope::TRK_ON) {
-        string_list = "Stop\n""Sidereal\n""Solar\n""Lunar\n""Rate Reset\n""Rate +\n""Rate -";
-      } else {
-        string_list = "Start\n""Sidereal\n""Solar\n""Lunar\n""Rate Reset\n""Rate +\n""Rate -";
-      }
-      current_selection_L2 = display->UserInterfaceSelectionList(&buttonPad, "Tracking", current_selection_L2, string_list);
-      switch (current_selection_L2)
-      {
-      case 1:
-        if (currentstate == Telescope::TRK_ON) {
-          if (SetLX200(":Td#")== LX200VALUESET) { DisplayMessage("Tracking", "OFF", 500); currentstate=Telescope::TRK_OFF; } else DisplayMessage("Set State", "Failed", 1000);
-        } else {
-          if (SetLX200(":Te#")== LX200VALUESET) { DisplayMessage("Tracking", "ON", 500); currentstate=Telescope::TRK_ON; } else DisplayMessage("Set State", "Failed", 1000);
-        }
-      break;
-      case 2: DisplayMessageLX200(SetLX200(":TQ#"),false); break;
-      case 3: DisplayMessageLX200(SetLX200(":TS#"),false); break;
-      case 4: DisplayMessageLX200(SetLX200(":TL#"),false); break;
-      case 5: DisplayMessageLX200(SetLX200(":TR#"),false); break;
-      case 6: DisplayMessageLX200(SetLX200(":T+#"),false); break;
-      case 7: DisplayMessageLX200(SetLX200(":T-#"),false); break;
-      }
-    }
-  } else {
-    const char *string_list;
-    current_selection_L2 = 1;
-    while (current_selection_L2 != 0)
-    {
-      if (currentstate == Telescope::TRK_ON) {
-        string_list = "Stop\n""Sidereal\n""Solar\n""Lunar\n""Comp Full\n""Comp Refr\n""Comp Off\n""Comp Sngl Ax\n""Comp Dual Ax\n""Rate Reset\n""Rate +0.02Hz\n""Rate -0.02Hz";
-      } else {
-        string_list = "Start\n""Sidereal\n""Solar\n""Lunar\n""Comp Full\n""Comp Refr\n""Comp Off\n""Comp Sngl Ax\n""Comp Dual Ax\n""Rate Reset\n""Rate +0.02Hz\n""Rate -0.02Hz";
-      }
-      current_selection_L2 = display->UserInterfaceSelectionList(&buttonPad, "Tracking", current_selection_L2, string_list);
-      switch (current_selection_L2)
-      {
-      case 1:
-        if (currentstate == Telescope::TRK_ON) {
-          if (SetLX200(":Td#")== LX200VALUESET) { DisplayMessage("Tracking", "OFF", 500); currentstate=Telescope::TRK_OFF; } else DisplayMessage("Set State", "Failed", 1000);
-        } else {
-          if (SetLX200(":Te#")== LX200VALUESET) { DisplayMessage("Tracking", "ON", 500); currentstate=Telescope::TRK_ON; } else DisplayMessage("Set State", "Failed", 1000);
-        }
-      break;
-      case 2:  DisplayMessageLX200(SetLX200(":TQ#"),false); break;
-      case 3:  DisplayMessageLX200(SetLX200(":TS#"),false); break;
-      case 4:  DisplayMessageLX200(SetLX200(":TL#"),false); break;
-      case 5:  DisplayMessageLX200(SetLX200(":To#"),false); break;
-      case 6:  DisplayMessageLX200(SetLX200(":Tr#"),false); break;
-      case 7:  DisplayMessageLX200(SetLX200(":Tn#"),false); break;
-      case 8:  DisplayMessageLX200(SetLX200(":T1#"),false); break;
-      case 9:  DisplayMessageLX200(SetLX200(":T2#"),false); break;
-      case 10: DisplayMessageLX200(SetLX200(":TR#"),false); break;
-      case 11: DisplayMessageLX200(SetLX200(":T+#"),false); break;
-      case 12: DisplayMessageLX200(SetLX200(":T-#"),false); break;
-      }
-    }
-  }
-}
-
-#include "MenuSettings.h"
-
-// PEC Menu
-void SmartHandController::menuPEC()
-{
-  current_selection_L1 = 1;
-  while (current_selection_L1 != 0)
-  {
-    const char *string_list_SettingsL1 = "Play\n""Stop\n""Clear\n""Record\n""Write to NV";
-    current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "PEC", current_selection_L1, string_list_SettingsL1);
-    switch (current_selection_L1)
-    {
-    case 1: DisplayMessageLX200(SetLX200(":$QZ+#"),true); current_selection_L0=0; current_selection_L1=0; DisplayMessage("PEC", "Playing", 1000); break;
-    case 2: DisplayMessageLX200(SetLX200(":$QZ-#"),true); current_selection_L0=0; current_selection_L1=0; DisplayMessage("PEC", "Stopped", 1000); break;
-    case 3: DisplayMessageLX200(SetLX200(":$QZZ#"),false); break;
-    case 4: DisplayMessageLX200(SetLX200(":$QZ/#"),true); current_selection_L0=0; current_selection_L1=0; DisplayMessage("PEC", "Recording", 1000); break;
-    case 5: DisplayMessageLX200(SetLX200(":$QZ!#"),false); break;
-    default: break;
-    }
-  }
-}
+#include "MenuMain.h"
 
 // misc.
 

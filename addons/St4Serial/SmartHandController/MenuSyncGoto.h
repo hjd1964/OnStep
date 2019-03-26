@@ -4,7 +4,7 @@ void SmartHandController::menuSyncGoto(bool sync)
 {
   current_selection_L1 = 1;
   while (current_selection_L1 != 0) {
-    const char *string_list_gotoL1 = "Messier\nStar\nSolar System\nCaldwell\nHerschel\nCoordinates\nHome";
+    const char *string_list_gotoL1 = "Messier\nStar\nSolar System\nCaldwell\nHerschel\nUser Catalog\nCoordinates\nHome";
     current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, sync ? "Sync" : "Goto", current_selection_L1, string_list_gotoL1);
     switch (current_selection_L1) {
       case 1:
@@ -17,15 +17,18 @@ void SmartHandController::menuSyncGoto(bool sync)
         menuSolarSys(sync);
         break;
       case 4:
-	menuCaldwell(sync);
-	break;
+	      menuCaldwell(sync);
+      break;
       case 5:
         menuHerschel(sync);
         break;
       case 6:
-        menuRADec(sync);
+        menuUser(sync);
         break;
       case 7:
+        menuRADec(sync);
+        break;
+      case 8:
       {
         boolean GotoHome=false; 
         DisplayMessage("Goto Home will", "clear the Model", 2000);
@@ -127,6 +130,33 @@ void SmartHandController::menuHerschel(bool sync)
       if (ok) { current_selection_L1 = 0; current_selection_L0 = 0; } // Quit Menu
     }
   }
+}
+
+void SmartHandController::menuUser(bool sync)
+{
+  if (current_selection_UserCatalog<1) current_selection_UserCatalog=1;
+
+  char string_list_UserCatalogs[240] = "";
+
+  // read user catalog items into a list
+  char temp[10];
+  for (int l=0; l<6; l++) {
+    char temp1[80];
+    strcpy(temp,":Lo0#"); temp[3]=l+'0';
+    SetLX200(temp);
+    SetLX200(":L$#");
+    GetLX200(":LI#",temp1);
+    
+    int len = strlen(temp1);
+    if (len>4) temp1[len-5]=0;
+    if (temp1[0]==0) continue;
+
+    if (l!=0) strcat(string_list_UserCatalogs,"\n");
+    strcat(string_list_UserCatalogs,(char*)(&temp1[1]));
+  }
+
+  // read user catalogs into a list
+  current_selection_UserCatalog = display->UserInterfaceSelectionList(&buttonPad, sync ? "Sync Catalog" : "Goto Catalog", current_selection_UserCatalog, string_list_UserCatalogs);
 }
 
 void SmartHandController::menuRADec(bool sync)

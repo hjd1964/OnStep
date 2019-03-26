@@ -31,8 +31,6 @@ public:
 
   void update();
   void drawIntro();
-  void drawLoad();
-  void drawReady();
   void setup(const char version[], const int pin[7], const bool active[7], const int SerialBaud, const OLED model);
   void tickButtons();
 private:
@@ -67,8 +65,9 @@ private:
   uint8_t current_selection_L4 = 1;
 #ifdef UTILITY_LIGHT 
   uint8_t current_selection_utility_light = 5;
-#endif  
-  uint8_t current_selection_guide_rate = 5;
+#endif
+  uint8_t current_selection_UserCatalog = -1;
+  uint8_t activeGuideRate = 5;
   uint8_t current_selection_feature_mode = 1;
   uint8_t featureKeyMode = 1; // guide rate
 
@@ -86,6 +85,7 @@ private:
   void menuHerschel(bool sync);
   void menuMessier(bool sync);
   void menuCaldwell(bool sync);
+  void menuUser(bool sync);
   void menuAlignment();
   void menuParking();
   void menuPEC();
@@ -102,15 +102,15 @@ private:
   void menuSites();
   void menuLocalDateTime();
   void menuDisplay();
-#ifdef UTILITY_LIGHT  
-  void menuUtilityLight();
-#endif  
   void menuSound();
   void menuMeridianFlips();
   void menuTracking();
   void menuContrast();
   void menuDimTimeout();
   void menuBlankTimeout();
+  void menuFocuser1();
+  void menuFocuser2();
+  void menuRotator();
   void menuLatitude();
   void menuLongitude();
   void menuZone();
