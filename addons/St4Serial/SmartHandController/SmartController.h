@@ -65,7 +65,8 @@ private:
   uint8_t current_selection_L4 = 1;
 #ifdef UTILITY_LIGHT 
   uint8_t current_selection_utility_light = 5;
-#endif  
+#endif
+  uint8_t current_selection_UserCatalog = -1;
   uint8_t activeGuideRate = 5;
   uint8_t current_selection_feature_mode = 1;
   uint8_t featureKeyMode = 1; // guide rate
@@ -84,6 +85,7 @@ private:
   void menuHerschel(bool sync);
   void menuMessier(bool sync);
   void menuCaldwell(bool sync);
+  void menuUser(bool sync);
   void menuAlignment();
   void menuParking();
   void menuPEC();
