@@ -31,8 +31,6 @@ public:
 
   void update();
   void drawIntro();
-  void drawLoad();
-  void drawReady();
   void setup(const char version[], const int pin[7], const bool active[7], const int SerialBaud, const OLED model);
   void tickButtons();
 private:
