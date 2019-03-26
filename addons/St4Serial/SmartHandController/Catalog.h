@@ -70,12 +70,12 @@ private:
     Catalog _cat=CAT_NONE;
     FilterMode _fm=FM_NONE;
     int _selected=0;
-    int _idx[4]={0,0,0,0};
+    int _idx[5]={0,0,0,0,0};
     int _maxIdx[5]={
 	    NUM_STARS-1,
 	    NUM_MESSIER-1,
 	    NUM_CALDWELL-1,
-	    NUM_HERSCHEL-1,
+      NUM_HERSCHEL-1,
 	    0-1};
 
     bool isFiltered();
