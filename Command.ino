@@ -232,27 +232,6 @@ void processCommands() {
         quietReply=true;
       } else 
 
-//   b - suply (battery) voltage readout
-//  :b#   read power supply (battery) voltage
-//         Returns: battery voltage in volts
-      if (command[0]=='b')  {
-#ifdef POWER_SUPPLY_READOUT_ON
-        analogReadResolution(16);
-        long adcvalue = 0;
-        for(int i = 0; i < 8; i++) adcvalue+=analogRead(PowerSupplyReadoutPin);                   //read the analogue input
-        adcvalue /= 8;
-        analogReadResolution(10);
-        float adcvolts = (adcvalue * 3.3 / 65536.0) * POWER_SUPPLY_DIVIDER;                       //convert to [V]
-#ifdef POWER_SUPPLY_WARNING        
-        if (adcvolts < POWER_SUPPLY_WARNING)
-          sprintf(reply,"%.2fV LOW",adcvolts);
-        else
-#endif        
-          sprintf(reply,"%.2fV",adcvolts);       
-#endif
-        quietReply=true;
-      } else 
-
 //   C - Sync Control
 //  :CS#   Synchonize the telescope with the current right ascension and declination coordinates
 //         Returns: Nothing (Sync's fail silently)
@@ -778,25 +757,7 @@ void processCommands() {
       if (command[1]=='V') {
         if (parameter[1]==(char)0) {
           if (parameter[0]=='D') strcpy(reply,FirmwareDate); else
-          if (parameter[0]=='M') 
-           {
-#ifdef POWER_SUPPLY_READOUT_ON
-        analogReadResolution(16);
-        long adcvalue = 0;
-        for(int i = 0; i < 8; i++) adcvalue+=analogRead(PowerSupplyReadoutPin);                   //read the analogue input
-        adcvalue /= 8;
-        analogReadResolution(10);
-        float adcvolts = (adcvalue * 3.3 / 65536.0) * POWER_SUPPLY_DIVIDER;                       //convert to [V]
-#ifdef POWER_SUPPLY_WARNING        
-        if (adcvolts < POWER_SUPPLY_WARNING)
-          sprintf(reply,"%.2fV LOW",adcvolts);
-        else
-#endif        
-          sprintf(reply,"%.2fV",adcvolts);       
-#else
-           sprintf(reply,"OnStep %i.%i%s",FirmwareVersionMajor,FirmwareVersionMinor,FirmwareVersionPatch); 
-#endif
-           } else            
+          if (parameter[0]=='M') sprintf(reply,"OnStep %i.%i%s",FirmwareVersionMajor,FirmwareVersionMinor,FirmwareVersionPatch); else
           if (parameter[0]=='N') sprintf(reply,"%i.%i%s",FirmwareVersionMajor,FirmwareVersionMinor,FirmwareVersionPatch); else
           if (parameter[0]=='P') strcpy(reply,FirmwareName); else
           if (parameter[0]=='T') strcpy(reply,FirmwareTime); else commandError=true;

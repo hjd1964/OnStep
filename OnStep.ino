@@ -542,18 +542,6 @@ void loop2() {
     if (!isSlewing()) nv.poll();
 
   } else {
-
-//check power supply (battery) voltage and sound the buzzer if lower than set threshold
-#if defined(POWER_SUPPLY_READOUT_ON) && defined(POWER_SUPPLY_WARNING)
-        analogReadResolution(16);
-        long adcvalue = 0;
-        for(int i = 0; i < 8; i++) adcvalue += analogRead(PowerSupplyReadoutPin);  
-        adcvalue /= 8;
-        analogReadResolution(10);
-        float adcvolts = (adcvalue * 3.3 / 65536.0) * POWER_SUPPLY_DIVIDER;     //convert to [V]
-        if (adcvolts < (POWER_SUPPLY_WARNING * 0.9))  soundBeep();              //if voltage lower than 90% of warning level               
-        else if (adcvolts < POWER_SUPPLY_WARNING)     soundClick();             //if voltage lower than warning level               
-#endif
     // COMMAND PROCESSING --------------------------------------------------------------------------------
     processCommands();
   }
