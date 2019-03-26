@@ -5,44 +5,31 @@ void SmartHandController::menuSettings()
   current_selection_L1 = 1;
   while (current_selection_L1 != 0)
   {
-    if (telInfo.isMountGEM()) {
-#ifdef UTILITY_LIGHT      
-      const char *string_list_SettingsL1 = "Date/Time\n""Display\n""Utility light\n""Buzzer\n""Meridian Flip\n""Configuration\n""Site\n""Firmware Ver";
-#else      
-      const char *string_list_SettingsL1 = "Date/Time\n""Display\n""Buzzer\n""Meridian Flip\n""Configuration\n""Site\n""Firmware Ver";
-#endif      
-      current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Settings", current_selection_L1, string_list_SettingsL1);
-      switch (current_selection_L1)
-      {
-      case 1: menuLocalDateTime(); break;
-      case 2: menuDisplay(); break;
-#ifdef UTILITY_LIGHT      
-      case 3: menuUtilityLight(); break;
-      case 4: menuSound(); break;
-      case 5: menuMeridianFlips(); break;
-      case 6: menuMount(); break;
-      case 7: menuSite(); break;
-      case 8: menuFirmware(); break;
-#else      
-      case 3: menuSound(); break;
-      case 4: menuMeridianFlips(); break;
-      case 5: menuMount(); break;
-      case 6: menuSite(); break;
-      case 7: menuFirmware(); break;
-#endif      
-      }
-    } else {
-      const char *string_list_SettingsL1 = "Date/Time\n""Display\n""Buzzer\n""Configuration\n""Site";
-      current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Settings", current_selection_L1, string_list_SettingsL1);
-      switch (current_selection_L1)
-      {
-      case 1: menuLocalDateTime(); break;
-      case 2: menuDisplay(); break;
-      case 3: menuSound(); break;
-      case 4: menuMount(); break;
-      case 5: menuSite(); break;
-      }
-    }
+    char string_list_SettingsL1[150] = "";
+
+    int i=1; int index[11];
+    index[1]=i++; strcat(string_list_SettingsL1,"Date/Time");
+    index[2]=i++; strcat(string_list_SettingsL1,"\nSite");
+    if (telInfo.hasFocuser1()) { index[3]=i++; if (telInfo.hasFocuser2()) strcat(string_list_SettingsL1,"\nFocuser1"); else strcat(string_list_SettingsL1,"\nFocuser"); } else index[3]=-1;
+    if (telInfo.hasFocuser2()) { index[4]=i++; strcat(string_list_SettingsL1,"\nFocuser2"); } else index[4]=-1;
+    if (telInfo.hasRotator())  { index[5]=i++; strcat(string_list_SettingsL1,"\nRotator"); } else index[5]=-1;
+    index[6]=i++; strcat(string_list_SettingsL1,"\nDisplay");
+    index[7]=i++; strcat(string_list_SettingsL1,"\nBuzzer");
+    if (telInfo.isMountGEM()) { index[8]=i++; strcat(string_list_SettingsL1,"\nMeridian Flip"); } else index[8]=-1;
+    index[9]=i++; strcat(string_list_SettingsL1,"\nConfiguration");
+    index[10]=i++; strcat(string_list_SettingsL1,"\nFirmware Ver");
+
+    current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Settings", current_selection_L1, string_list_SettingsL1);
+    if (current_selection_L1==index[1]) menuLocalDateTime();
+    if (current_selection_L1==index[2]) menuSite();
+    if (current_selection_L1==index[3]) menuFocuser1();
+    if (current_selection_L1==index[4]) menuFocuser2();
+    if (current_selection_L1==index[5]) menuRotator();
+    if (current_selection_L1==index[6]) menuDisplay();
+    if (current_selection_L1==index[7]) menuSound();
+    if (current_selection_L1==index[8]) menuMeridianFlips();
+    if (current_selection_L1==index[9]) menuMount();
+    if (current_selection_L1==index[10]) menuFirmware();
   }
 }
 
@@ -306,8 +293,85 @@ void SmartHandController::menuFirmware()
   }
 }
 
+void SmartHandController::menuFocuser1()
 {
-
-
+  current_selection_L2 = 1;
+  while (current_selection_L2 != 0)
   {
+    const char *string_list_SiteL2 = "Return Home\n""At Home";
+    
+    if (telInfo.hasFocuser2())
+      current_selection_L2 = display->UserInterfaceSelectionList(&buttonPad, "Focuser 1", current_selection_L2, string_list_SiteL2);
+    else
+      current_selection_L2 = display->UserInterfaceSelectionList(&buttonPad, "Focuser", current_selection_L2, string_list_SiteL2);
+    switch (current_selection_L2)
+    {
+    case 1:
+      DisplayMessageLX200(SetLX200(":FA1#:FS0#"),false);
+      break;
+    case 2:
+      bool isOk=false;
+      if (display->UserInterfaceInputValueBoolean(&buttonPad, "At Home/Zero?", &isOk)) {
+        if (isOk) { DisplayMessageLX200(SetLX200(":FA1#:FZ#"),false); }
+      }
+      break;
+    }
+  }
+}
+
+void SmartHandController::menuFocuser2()
+{
+  current_selection_L2 = 1;
+  while (current_selection_L2 != 0)
+  {
+    const char *string_list_SiteL2 = "Return Home\n""At Home";
+    current_selection_L2 = display->UserInterfaceSelectionList(&buttonPad, "Focuser 2", current_selection_L2, string_list_SiteL2);
+    switch (current_selection_L2)
+    {
+    case 1:
+      DisplayMessageLX200(SetLX200(":FA2#:FS0#"),false);
+    break;
+    case 2:
+      bool isOk=false;
+      if (display->UserInterfaceInputValueBoolean(&buttonPad, "At Home/Zero?", &isOk)) {
+        if (isOk) { DisplayMessageLX200(SetLX200(":FA2#:FZ#"),false); }
+      }
+    break;
+    }
+  }
+}
+
+void SmartHandController::menuRotator()
+{
+  current_selection_L2 = 1;
+  while (current_selection_L2 != 0)
+  {
+    char string_list_SiteL2[80];
+    if (telInfo.hasDeRotator())
+      strcpy(string_list_SiteL2,"Return Home\n""At Home\n""De-rotate\nMove to PA\nReverse");
+    else
+      strcpy(string_list_SiteL2,"Return Home\n""At Home");
+    current_selection_L2 = display->UserInterfaceSelectionList(&buttonPad, "Rotator", current_selection_L2, string_list_SiteL2);
+    bool isOk=false;
+    switch (current_selection_L2)
+    {
+    case 1: SetLX200(":rC#"); DisplayMessage("Value", "Set!", 1500); break;
+    case 2:
+      if (display->UserInterfaceInputValueBoolean(&buttonPad, "At Home/Zero?", &isOk)) {
+        if (isOk) { SetLX200(":rF#"); DisplayMessage("Value", "Set!", 1500); }
+      }
+    break;
+    case 3:
+      if (display->UserInterfaceInputValueBoolean(&buttonPad, "De-rotate On?", &isOk)) {
+        if (isOk) { SetLX200(":r+#"); DisplayMessage("Value", "Set!", 1500); } else { SetLX200(":r-#"); DisplayMessage("Value", "Set!", 1500); }
+      }
+    break;
+    case 4: DisplayMessageLX200(SetLX200(":rP#"),true); break;
+    case 5:
+      if (display->UserInterfaceInputValueBoolean(&buttonPad, "Reverse?", &isOk)) {
+        if (isOk) { SetLX200(":rR#"); DisplayMessage("Value", "Set!", 1500); }
+      }
+    break;
+    }
+  }
 }

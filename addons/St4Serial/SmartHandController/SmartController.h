@@ -106,6 +106,9 @@ private:
   void menuContrast();
   void menuDimTimeout();
   void menuBlankTimeout();
+  void menuFocuser1();
+  void menuFocuser2();
+  void menuRotator();
   void menuLatitude();
   void menuLongitude();
   void menuZone();

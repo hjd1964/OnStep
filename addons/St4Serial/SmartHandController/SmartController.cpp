@@ -486,13 +486,13 @@ void SmartHandController::update()
 #endif
     break;
     case 6:  // rotator
-           if (!rotCw  && buttonPad.F.isDown()) { rotCcw = true;  strcat(cmd,":r2#:rc#:r<#"); Ser.print(cmd); strcpy(briefMessage,"Rotate Ccw"); buttonCommand=true; }
-      else if ( rotCw  && buttonPad.F.isUp())   { rotCcw = false; Ser.print(":rQ#"); buttonCommand=true; buttonPad.F.clearPress(); }
-      else if (!rotCcw && buttonPad.f.isDown()) { rotCw = true;   strcat(cmd,":r2#:rc#:r>#"); Ser.print(cmd); strcpy(briefMessage,"Rotate Cw"); buttonCommand=true; }
-      else if ( rotCcw && buttonPad.f.isUp())   { rotCw = false;  Ser.print(":rQ#"); buttonCommand=true; buttonPad.f.clearPress(); }
+           if (!rotCcw && buttonPad.F.isDown()) { rotCcw = true;  Ser.print(":r2#:rc#:r<#"); strcpy(briefMessage,"Rotate Ccw"); buttonCommand=true; }
+      else if ( rotCcw && buttonPad.F.isUp())   { rotCcw = false; Ser.print(":rQ#"); buttonCommand=true; buttonPad.F.clearPress(); }
+      else if (!rotCw  && buttonPad.f.isDown()) { rotCw = true;   Ser.print(":r2#:rc#:r>#"); strcpy(briefMessage,"Rotate Cw"); buttonCommand=true; }
+      else if ( rotCw  && buttonPad.f.isUp())   { rotCw = false;  Ser.print(":rQ#"); buttonCommand=true; buttonPad.f.clearPress(); }
       // acceleration control
-      else if ((rotCcw && buttonPad.F.isDown() && (buttonPad.F.timeDown()>5000))) { Ser.print(":r5#:rc#:r<#"); strcpy(briefMessage,"Rotate Fast"); }
-      else if (( rotCw && buttonPad.f.isDown() && (buttonPad.f.timeDown()>5000))) { Ser.print(":r5#:rc#:r>#"); strcpy(briefMessage,"Rotate Fast"); };
+      else if ((rotCcw && buttonPad.F.isDown() && (buttonPad.F.timeDown()>5000))) { Ser.print(":r4#:rc#:r<#"); strcpy(briefMessage,"Rotate Fast"); }
+      else if (( rotCw && buttonPad.f.isDown() && (buttonPad.f.timeDown()>5000))) { Ser.print(":r4#:rc#:r>#"); strcpy(briefMessage,"Rotate Fast"); }
     break;
   }
   if (buttonCommand) { time_last_action = millis(); return; }
