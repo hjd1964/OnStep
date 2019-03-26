@@ -305,22 +305,30 @@ void SmartHandController::setup(const char version[], const int pin[7],const boo
     display = new U8G2_EXT_SSD1306_128X64_NONAME_F_HW_I2C(U8G2_R0);
   display->begin();
   display->setContrast(maxContrast);
-  drawIntro();
-  tickButtons();
+  display->setFont(u8g2_font_helvR10_te);
 
 #ifdef DEBUG_ON
   DebugSer.begin(9600);
   delay(1000);
 #endif
+
+  // establish comms and clear the channel
   Ser.begin(SerialBaud);
+  
+  // display the splash screen
+  drawIntro();
+  tickButtons();
+
   for (int i = 0; i < 3; i++)
   {
     Ser.print(":#");
-    delay(500);
+    delay(400);
     Ser.flush();
-    delay(500);
+    delay(100);
   }
 
+  DisplayMessage("Establishing", "Connection", 1000);
+  
   // OnStep coordinate mode for getting and setting RA/Dec
   // 0 = OBSERVED_PLACE (same as not supported)
   // 1 = TOPOCENTRIC (does refraction)
@@ -331,14 +339,15 @@ void SmartHandController::setup(const char version[], const int pin[7],const boo
 again:
   delay(4000);
   if (GetLX200(":GXEE#", s) == LX200VALUEGET) {
+    DisplayMessage("Connection", "Ok!", 1000);
     if (s[0]=='0') telescopeCoordinates=OBSERVED_PLACE; else 
     if (s[0]=='1') telescopeCoordinates=TOPOCENTRIC; else 
     if (s[0]=='2') telescopeCoordinates=ASTROMETRIC_J2000;
   } else {
-    if (++thisTry <= 3) goto again;
+    if (++thisTry <= 4) goto again;
     telescopeCoordinates=OBSERVED_PLACE;
+    DisplayMessage("Connetion", "Failed!", 1000);
   }
-
 }
 
 void SmartHandController::tickButtons()
@@ -726,8 +735,6 @@ void SmartHandController::drawIntro()
   do {
     display->drawXBMP(0, 0, onstep_logo_width, onstep_logo_height, onstep_logo_bits);
   } while (display->nextPage());
-  delay(2000);
-}
   delay(1000);
 }
 
