@@ -15,5 +15,5 @@ public:
   button shift,n,s,e,w,F,f;
 
 private:
-  int debounceMs = 50;
+  int debounceMs = 30;
 };
