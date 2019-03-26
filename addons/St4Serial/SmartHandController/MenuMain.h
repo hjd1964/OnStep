@@ -79,19 +79,26 @@ void SmartHandController::menuParking()
     switch (current_selection_L1)
     {
       case 1:
-        if (SetLX200(":hP#")== LX200VALUESET) DisplayMessage("Parking", "scope", 500); else DisplayMessage("Park", "Failed", 1000);
-        current_selection_L1 = 0;
-        current_selection_L0 = 0;
+        if (SetLX200(":hP#")== LX200VALUESET) {
+          DisplayMessage("Parking", "scope", 500); 
+          current_selection_L1 = 0;
+          current_selection_L0 = 0;
+        } else DisplayMessage("Park", "Failed", 1000);
       break;
       case 2:
-        if (SetLX200(":hR#")== LX200VALUESET) DisplayMessage("Un-Parking", "scope", 500); else DisplayMessage("Un-Park", "Failed", 1000);
-        current_selection_L1 = 0;
+        if (SetLX200(":hR#")== LX200VALUESET) {
+          DisplayMessage("Un-Parking", "scope", 500); 
+          current_selection_L1 = 0;
+        } else DisplayMessage("Un-Park", "Failed", 1000);
         break;
       case 3: 
         boolean SetP=false; 
         if (display->UserInterfaceInputValueBoolean(&buttonPad, "Set-Park?", &SetP)) {
           if (SetP) {
-            if (SetLX200(":hQ#")== LX200VALUESET) DisplayMessage("Set-Park", "OK", 500); else DisplayMessage("Set-Park", "Failed", 1000); 
+            if (SetLX200(":hQ#")== LX200VALUESET) {
+              DisplayMessage("Set-Park", "OK", 500);
+              current_selection_L1 = 0;
+            } else DisplayMessage("Set-Park", "Failed", 1000); 
           } else DisplayMessage("Set-Park", "Canceled", 500);
         } else DisplayMessage("Set-Park", "Canceled", 500);
       break;
