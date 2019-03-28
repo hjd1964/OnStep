@@ -8,6 +8,8 @@ class U8G2_EXT : public U8G2
 public:
   bool UserInterfaceCatalog(Pad *extPad, const char *title);
 
+  bool UserInterfaceUserCatalog(Pad *extPad, const char *title);
+
   uint8_t UserInterfaceMessage(Pad *extPad, const char *title1, const char *title2, const char *title3, const char *buttons);
 
   uint8_t UserInterfaceSelectionList(Pad *extPad, const char *title, uint8_t start_pos, const char *sl);

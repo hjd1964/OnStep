@@ -39,6 +39,7 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "u8g2_ext_value.h"
 #include "Catalog.h"
 #include "u8g2_ext_event.h"
+#include "LX200.h"
 
 #define OC_width 18
 #define OC_height 10
@@ -78,7 +79,6 @@ static unsigned char GX_bits[] U8X8_PROGMEM = {
 
 
 #define MY_BORDER_SIZE 1
-
 
 /*
 selection list with string line
@@ -234,3 +234,98 @@ bool ext_UserInterfaceCatalog(u8g2_t *u8g2, Pad* extPad, const char *title)
   }
 }
 
+/*
+selection list with string line
+returns line height
+*/
+
+static uint8_t ext_draw_user_catalog_list_line(u8g2_t *u8g2, uint8_t y)
+{
+  char DEGREE_SYMBOL[] = { 0xB0, '\0' };
+  u8g2_uint_t x = 0;
+  u8g2_uint_t yy;
+
+  const uint8_t* myfont = u8g2->font;
+  u8g2_uint_t  pixel_width;
+  u8g2_uint_t line_height = u8g2_GetAscent(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
+
+  char line1[16];
+  char line2[16];
+
+  // user object catalog
+  GetLX200(":LI#",line1);
+
+  bool nextString=false;
+  int j=0;
+  int len=strlen(line1); if (len>15) len=15;
+  for (int i=0; i<len; i++) {
+    if (line1[i]==',') { line1[i]=0; nextString=true; continue; }
+    if (nextString) { if (line1[i]=='#') { line2[j++]=0; break; } line2[j++]=line1[i]; }
+  }
+
+  // null object
+  if ((line1[0]==0) || (line1[0]=='$')) return 0;
+
+  // object name
+  x = 0;
+  u8g2_DrawUTF8(u8g2, x, y, line1);
+
+  // Object type text
+  y += line_height;
+  x = 0;
+  u8g2_DrawUTF8(u8g2, x, y, line2);
+
+  return line_height;
+}
+
+/*
+title: NULL for no title, valid str for title line. Can contain mutliple lines, separated by '\n'
+returns false if user has pressed the home key
+returns true if user has pressed the select key
+side effects:
+u8g2_SetFontDirection(u8g2, 0);
+u8g2_SetFontPosBaseline(u8g2);
+*/
+bool ext_UserInterfaceUserCatalog(u8g2_t *u8g2, Pad* extPad, const char *title)
+{
+  u8g2_SetFont(u8g2, u8g2_font_helvR10_te);
+  u8g2_uint_t yy;
+
+  uint8_t event;
+
+  u8g2_uint_t line_height = u8g2_GetAscent(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
+  uint8_t title_lines = u8x8_GetStringLineCnt(title);
+  uint8_t display_lines;
+
+  u8g2_SetFontPosBaseline(u8g2);
+  
+  char oppositeMove[20]="";
+  
+  for (;;) {
+    u8g2_FirstPage(u8g2);
+    do  {
+      yy = u8g2_GetAscent(u8g2);
+      if (title_lines > 0) {
+        yy += u8g2_DrawUTF8Lines(u8g2, 0, yy, u8g2_GetDisplayWidth(u8g2), line_height, title);
+        u8g2_DrawHLine(u8g2, 0, yy - line_height - u8g2_GetDescent(u8g2) + 1, u8g2_GetDisplayWidth(u8g2));
+        yy += 3;
+      }
+      if (ext_draw_user_catalog_list_line(u8g2, yy)==0) {
+        // display of item failed due to it being a key or beyond end of list
+        if (strlen(oppositeMove)>0) { SetLX200(oppositeMove); strcpy(oppositeMove,""); }
+      }
+    } while (u8g2_NextPage(u8g2));
+    
+#ifdef U8G2_REF_MAN_PIC
+    return 0;
+#endif
+
+    for (;;) {
+      event = ext_GetMenuEvent(extPad);
+      if (event == U8X8_MSG_GPIO_MENU_SELECT || event == U8X8_MSG_GPIO_MENU_NEXT) return true; else
+      if (event == U8X8_MSG_GPIO_MENU_HOME || event == U8X8_MSG_GPIO_MENU_PREV) return false; else
+      if (event == U8X8_MSG_GPIO_MENU_DOWN) { strcpy(oppositeMove,":LB#"); SetLX200(":LN#"); break; } else
+      if (event == U8X8_MSG_GPIO_MENU_UP) { strcpy(oppositeMove,":LN#"); SetLX200(":LB#"); break; }
+    }
+  }
+}

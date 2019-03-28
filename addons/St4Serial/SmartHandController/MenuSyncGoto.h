@@ -134,14 +134,14 @@ void SmartHandController::menuHerschel(bool sync)
 
 void SmartHandController::menuUser(bool sync)
 {
-  if (current_selection_UserCatalog<1) current_selection_UserCatalog=1;
-
   char string_list_UserCatalogs[240] = "";
 
-  // read user catalog items into a list
+  // read user catalogs names into a list
+  int userCatalog[15];
+  int i=0;
   char temp[10];
-  for (int l=0; l<6; l++) {
-    char temp1[80];
+  char temp1[500];
+  for (int l=0; l<=14; l++) {
     strcpy(temp,":Lo0#"); temp[3]=l+'0';
     SetLX200(temp);
     SetLX200(":L$#");
@@ -153,10 +153,29 @@ void SmartHandController::menuUser(bool sync)
 
     if (l!=0) strcat(string_list_UserCatalogs,"\n");
     strcat(string_list_UserCatalogs,(char*)(&temp1[1]));
+    userCatalog[i++]=l;
   }
 
-  // read user catalogs into a list
-  current_selection_UserCatalog = display->UserInterfaceSelectionList(&buttonPad, sync ? "Sync Catalog" : "Goto Catalog", current_selection_UserCatalog, string_list_UserCatalogs);
+  if (i>0) {
+    if (current_selection_UserCatalog<1) current_selection_UserCatalog=1;
+    while (current_selection_UserCatalog>0) {
+      int last_selection_UserCatalog = current_selection_UserCatalog;
+      current_selection_UserCatalog = display->UserInterfaceSelectionList(&buttonPad, "Select User Cat", current_selection_UserCatalog, string_list_UserCatalogs);
+
+      if (current_selection_UserCatalog>0) {
+        // select user catalog
+        strcpy(temp,":Lo0#"); temp[3]=userCatalog[current_selection_UserCatalog-1]+'0';
+        SetLX200(temp);
+    
+        // show the catalog objects
+        if (display->UserInterfaceUserCatalog(&buttonPad, sync ? "Sync User Item" : "Goto User Item")) {
+          bool ok = DisplayMessageLX200(SetLX200(":LIG#"));
+          if (ok) { current_selection_L1 = 0; current_selection_L0 = 0; current_selection_UserCatalog = 0; } // Quit all menus, selection succeeded
+        }
+      }
+    }
+    
+  } else  current_selection_L1 = 0; // Quit this menu, nothing to display
 }
 
 void SmartHandController::menuRADec(bool sync)
