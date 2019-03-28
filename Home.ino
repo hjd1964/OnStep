@@ -134,6 +134,10 @@ GotoErrors setHome() {
   // make sure limits are on
   safetyLimitsOn=true;
 
+  // no errors
+  currentAlt=45.0;
+  lastError=ERR_NONE;
+
   // initialize and disable the stepper drivers
   StepperModeTrackingInit();
  
@@ -156,4 +160,3 @@ GotoErrors setHome() {
   
   return GOTO_ERR_NONE;
 }
-
