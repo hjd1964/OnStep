@@ -56,9 +56,9 @@ uint8_t U8G2_EXT::UserInterfaceInputValueDec(Pad *extPad, long *value)
   return ext_UserInterfaceInputValueDec(U8G2_EXT::getU8g2(), extPad, value);
 };
 
-uint8_t U8G2_EXT::UserInterfaceInputValueTime(Pad *extPad, long *value)
+uint8_t U8G2_EXT::UserInterfaceInputValueTime(Pad *extPad, long *value, bool hrs24)
 {
-  return ext_UserInterfaceInputValueTime(U8G2_EXT::getU8g2(), extPad, value);
+  return ext_UserInterfaceInputValueTime(U8G2_EXT::getU8g2(), extPad, value, hrs24);
 };
 
 uint8_t U8G2_EXT::UserInterfaceInputValueLatitude(Pad *extPad, long *value)

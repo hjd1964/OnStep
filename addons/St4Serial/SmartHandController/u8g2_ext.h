@@ -31,7 +31,7 @@ public:
   uint8_t UserInterfaceInputValueDec(Pad *extPad, long *value);
 
 
-  uint8_t UserInterfaceInputValueTime(Pad *extPad, long *value);
+  uint8_t UserInterfaceInputValueTime(Pad *extPad, long *value, bool hrs24);
 
 
   uint8_t UserInterfaceInputValueLatitude(Pad *extPad, long *value);

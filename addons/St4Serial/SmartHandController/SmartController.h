@@ -28,6 +28,7 @@ class SmartHandController
 public:
   enum OLED { OLED_SH1106, OLED_SSD1306 };
   int telescopeCoordinates=1;
+  boolean hrs24=USE_24HR_TIME;
 
   void update();
   void drawIntro();

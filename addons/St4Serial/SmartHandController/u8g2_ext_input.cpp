@@ -598,9 +598,9 @@ uint8_t ext_UserInterfaceInputValueDec(u8g2_t *u8g2, Pad *extPad, long *value)
   return ext_UserInterfaceInputValueDMS(u8g2, extPad, "Declination", value, -324000, 324000, 2, DEGREE_SYMBOL, "'", "\"", "+", "-", true);
 }
 
-uint8_t ext_UserInterfaceInputValueTime(u8g2_t *u8g2, Pad *extPad, long *value)
+uint8_t ext_UserInterfaceInputValueTime(u8g2_t *u8g2, Pad *extPad, long *value, bool hrs24)
 {
-  return ext_UserInterfaceInputValueDMS(u8g2, extPad, "Local Time", value, 0, 43199, 2, ":", ":", "", "", "", true);
+  return ext_UserInterfaceInputValueDMS(u8g2, extPad, "Local Time", value, 0, hrs24 ? 86399:43199, 2, ":", ":", "", "", "", true);
 }
 
 uint8_t ext_UserInterfaceInputValueLatitude(u8g2_t *u8g2, Pad *extPad, long *value)
@@ -711,4 +711,3 @@ void supress_days(uint8_t& year, uint8_t& month, uint8_t& day, int days2supress)
       months[2] = 28;
   }
 }
-
