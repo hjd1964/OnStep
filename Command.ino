@@ -1414,10 +1414,9 @@ void processCommands() {
         if (!doubleToDms(reply,&f1,true,true)) commandError=true; else quietReply=true;
         highPrecision=i;
       } else
-//  :r~#   Set continuous move mode
-//         Return: 0 on failure
-//                 1 on success
-      if (command[1]=='~') { rot.moveContinuous(true); } else
+//  :rc#   Set continuous move mode (for next move command)
+//         Returns: Nothing
+      if (command[1]=='c') { rot.moveContinuous(true); quietReply=true; } else
 //  :r>#   Move clockwise as set by :rn# command, default = 1 deg (or 0.1 deg/s in continuous mode)
 //         Returns: Nothing
       if (command[1]=='>') { rot.startMoveCW(); quietReply=true; } else
@@ -1426,7 +1425,7 @@ void processCommands() {
       if (command[1]=='<') { rot.startMoveCCW(); quietReply=true; } else
 //  :rQ#   Stops movement (except derotator)
 //         Returns: Nothing
-      if (command[1]=='Q') { rot.stopMove(); quietReply=true; } else
+      if (command[1]=='Q') { rot.stopMove(); rot.moveContinuous(false); quietReply=true; } else
 //  :rn#   Move increment, 1=1 degrees, 2=2 degrees, 3=5 degrees, 4=10 degrees
 //         Move rate     , 1=.01 deg/s, 2=0.1 deg/s, 3=1.0 deg/s, 4=5.0 deg/s
 //         Returns: Nothing
