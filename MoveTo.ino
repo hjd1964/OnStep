@@ -180,13 +180,14 @@ void moveTo() {
   // the end of slew doesn't get close enough within 6 seconds: stop tracking for a moment to allow target/actual position synchronization
   static unsigned long slewStopTime=0;
   static bool slewEnding=false;
-  static bool slewAbort=false;
+  static bool slewForceEnd=false;
   if ( !slewEnding && (distDestAxis1<=getStepsPerSecondAxis1()*2L) && (distDestAxis2<=getStepsPerSecondAxis2()*2L) ) { slewStopTime=millis()+6000L; slewEnding=true; }
-  if ( slewEnding && (long)(millis()-slewStopTime)>0) { lastError=ERR_GOTO_SYNC; slewAbort=true; }
+  if ( slewEnding && (long)(millis()-slewStopTime)>0) { lastError=ERR_GOTO_SYNC; slewForceEnd=true; }
 
-  if ( ((distDestAxis1<=ceil(abs(fixedToDouble(fstepAxis1)))+1) && (distDestAxis2<=ceil(abs(fixedToDouble(fstepAxis2)))+1) ) || slewAbort) {
+  if ( ((distDestAxis1<=ceil(abs(fixedToDouble(fstepAxis1)))+1) && (distDestAxis2<=ceil(abs(fixedToDouble(fstepAxis2)))+1) ) || slewForceEnd) {
     slewEnding=false;
-    slewAbort=false;
+    slewForceEnd=false;
+    abortSlew=0;
 
     // assurance that we're really in tracking mode
     stepperModeTracking();
