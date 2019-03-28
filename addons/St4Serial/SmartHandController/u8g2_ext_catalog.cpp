@@ -263,6 +263,23 @@ static uint8_t ext_draw_user_catalog_list_line(u8g2_t *u8g2, uint8_t y)
     if (nextString) { if (line1[i]=='#') { line2[j++]=0; break; } line2[j++]=line1[i]; }
   }
 
+  // "UNK",  "OC",  "GC",  "PN",  "DN",  "SG",  "EG",  "IG", "KNT", "SNR", "GAL",  "CN", "STR", "PLA", "CMT", "AST"
+  if (strstr(line2,"UNK")) strcpy(line2,"Unknown"); else
+  if (strstr(line2,"OC"))  strcpy(line2,"Open Cluster"); else
+  if (strstr(line2,"GC"))  strcpy(line2,"Globular Cluster"); else
+  if (strstr(line2,"PN"))  strcpy(line2,"Planetary Nebula"); else
+  if (strstr(line2,"SG"))  strcpy(line2,"Spirial Galaxy"); else
+  if (strstr(line2,"EG"))  strcpy(line2,"Eliptical Galaxy"); else
+  if (strstr(line2,"IG"))  strcpy(line2,"Irregular Galaxy"); else
+  if (strstr(line2,"KNT")) strcpy(line2,"Knot"); else
+  if (strstr(line2,"SNR")) strcpy(line2,"SuperNova Rmnnt"); else
+  if (strstr(line2,"GAL")) strcpy(line2,"Galaxy"); else
+  if (strstr(line2,"CN"))  strcpy(line2,"Cluster + Nebula"); else
+  if (strstr(line2,"STR")) strcpy(line2,"Star"); else
+  if (strstr(line2,"PLA")) strcpy(line2,"Planet"); else
+  if (strstr(line2,"CMT")) strcpy(line2,"Comet"); else
+  if (strstr(line2,"CMT")) strcpy(line2,"Asteroid");
+    
   // null object
   if ((line1[0]==0) || (line1[0]=='$')) return 0;
 

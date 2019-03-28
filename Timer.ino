@@ -231,9 +231,9 @@ void timerSupervisor(bool isCentiSecond) {
   if (useTimerRateRatio) { thisTimerRateAxis2=(timerRateAxis2*timerRateRatio); } else { thisTimerRateAxis2=timerRateAxis2; }
   
   // override rate during backlash compensation
-  if (inbacklashAxis1) { thisTimerRateAxis1=timerRateBacklashAxis1; wasInbacklashAxis1=true; }
+  if (inbacklashAxis1) thisTimerRateAxis1=timerRateBacklashAxis1;
   // override rate during backlash compensation
-  if (inbacklashAxis2) { thisTimerRateAxis2=timerRateBacklashAxis2; wasInbacklashAxis2=true; }
+  if (inbacklashAxis2) thisTimerRateAxis2=timerRateBacklashAxis2;
 
   // trigger Goto step mode, rapid acceleration (low DegreesForAcceleration) can leave too little time
   // until the home position arrives to actually switch to tracking micro-step mode. the larger step size

@@ -8,7 +8,7 @@
 // Do not change anything in the structs or arrays below, since they
 // have to be in sync with the extractions scripts.
 
-// Struct for Deep Space Objects (Messier, Herschel, ..etc.)
+// Struct for Deep Space Objects (Messier, Herschel, ..etc.) 14 bytes
 typedef struct {
   const char           Cons;
   const char           Obj_type;
@@ -18,7 +18,7 @@ typedef struct {
   const float          DE;
   } dso_t;
 
-// Struct for stars
+// Struct for stars 28 bytes
 typedef struct {
   const char           Cons;
   const char           Bayer;
