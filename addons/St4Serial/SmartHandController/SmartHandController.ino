@@ -36,7 +36,7 @@
 #define FirmwareDate          __DATE__
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
-#define FirmwareVersionMinor  "3"
+#define FirmwareVersionMinor  "4"
 #define FirmwareVersionPatch  "a"
 
 #include "Config.h"
@@ -51,6 +51,7 @@ SmartHandController HdCrtlr;
 
 void setup(void)
 {
+  Serial.begin(9600);
   HdCrtlr.setup(Version, pin, active, SERIAL_BAUD_DEFAULT, static_cast<SmartHandController::OLED>(OLED_DISPLAY));
 }
 
