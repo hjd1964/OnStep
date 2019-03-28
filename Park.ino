@@ -157,7 +157,7 @@ int parkClearBacklash() {
 
 // returns a parked telescope to operation, you must set date and time before calling this.  it also
 // depends on the latitude, longitude, and timeZone; but those are stored and recalled automatically
-boolean unPark() {
+boolean unPark(bool withTrackingOn) {
 #ifdef STRICT_PARKING_ON
   if (parkStatus==Parked) {
 #else
@@ -208,18 +208,20 @@ boolean unPark() {
         #else
         meridianFlip=MeridianFlipNever;
         #endif
-        
-        // update our status, we're not parked anymore
-        parkStatus=NotParked;
-        nv.write(EE_parkStatus,parkStatus);
 
-        // start tracking
-        trackingState=TrackingSidereal;
-        enableStepperDrivers();
-
-        // get PEC status
-        pecStatus  =nv.read(EE_pecStatus);
-        pecRecorded=nv.read(EE_pecRecorded); if (!pecRecorded) pecStatus=IgnorePEC;
+        if (withTrackingOn) {
+          // update our status, we're not parked anymore
+          parkStatus=NotParked;
+          nv.write(EE_parkStatus,parkStatus);
+  
+          // start tracking
+          trackingState=TrackingSidereal;
+          enableStepperDrivers();
+  
+          // get PEC status
+          pecStatus  =nv.read(EE_pecStatus);
+          pecRecorded=nv.read(EE_pecRecorded); if (!pecRecorded) pecStatus=IgnorePEC;
+        }
 
         return true;
       };
@@ -249,4 +251,3 @@ boolean loadAlignModel() {
   Align.readCoe();
   return true;
 }
-

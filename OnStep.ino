@@ -200,18 +200,24 @@ void setup() {
   // autostart tracking
 #if defined(AUTOSTART_TRACKING_ON)
   #if !defined(MOUNT_TYPE_ALTAZM)
-    // telescope should be set in the polar home (CWD) for a starting point
-    setHome();
-  
-    // orientation is unknown
-    safetyLimitsOn=false;
-  
+
+    // tailor behaviour depending on RTC presence
+    if (!urtc.active) {
+      setHome();
+      safetyLimitsOn=false;
+    } else {
+      if (parkStatus==Parked) unPark(true); else setHome();
+    }
+    
     // start tracking
     trackingState=TrackingSidereal;
     enableStepperDrivers();
   #else
     #warning "AUTOSTART_TRACKING_ON ignored for MOUNT_TYPE_ALTAZM"
   #endif
+#else
+  // unpark without tracking, if parked
+  if (parkStatus==Parked) unPark(false);
 #endif
 
   // start rotator if present

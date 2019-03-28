@@ -1024,7 +1024,7 @@ void processCommands() {
 //  :hR#   Restore parked telescope to operation
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='R')  { if (!unPark()) commandError=true; }
+      if (command[1]=='R')  { if (!unPark(true)) commandError=true; }
       else commandError=true;
 
       } else
