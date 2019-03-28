@@ -15,8 +15,8 @@
 // UTILITY_LIGHT n, where n=0 to 255 activates this feature and sets default brightness
 #define UTILITY_LIGHT_OFF
 
-// Use 24 hour format for entering time, default=false
-#define USE_24HR_TIME false
+// Use 24 hour format for entering time, default=true
+#define USE_24HR_TIME true
 
 // THAT IS ALL FOR USER CONFIGURABLE PARAMETERS! Do not change anything below this line!
 // -------------------------------------------------------------------------------------
