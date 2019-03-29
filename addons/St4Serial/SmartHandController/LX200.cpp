@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <Ephemeris.h> // https://github.com/hjd1964/ephemeris
+#include <Ephemeris.h> // Get it from: https://github.com/MarScaper/ephemeris
 #include "Catalog.h"
 #include "LX200.h"
 #include "SmartController.h"
@@ -354,6 +354,10 @@ LX200RETURN SyncGotoLX200(bool sync, float &Ra, float &Dec)
 
   if (Dec<0.0) sign='-';
 
+  //D(ivr1); D(":"); D(ivr2); D(":"); DL(fvr3);
+
+  //D(sign); D(ivd1); D(":"); D(ivd2); D(":"); DL(fvd3);
+
   if (SetTargetRaLX200(ivr1, ivr2, (int)fvr3) ==  LX200VALUESET && SetTargetDecLX200(sign, ivd1, ivd2, (int)fvd3) == LX200VALUESET) {
     if (sync) {
       Ser.print(":CS#");
@@ -396,13 +400,35 @@ LX200RETURN SyncGotoCatLX200(bool sync)
 LX200RETURN SyncGotoPlanetLX200(bool sync, unsigned short objSys)
 {
   unsigned int day, month, year, hour, minute, second;
+  int lat_deg, lat_min, lon_deg, lon_min;
+  char result[10];
 
   if (GetDateLX200(day, month, year, true) == LX200GETVALUEFAILED) return LX200GETVALUEFAILED;
   if (GetTimeLX200(hour, minute, second, true) == LX200GETVALUEFAILED) return LX200GETVALUEFAILED;
 
   Ephemeris Eph;
+
+  GetLX200(":Gt#", result);
+  sscanf(result, "%d*%d#", &lat_deg, &lat_min);
+  //DL(result);
+
+  GetLX200(":Gg#", result);
+  sscanf(result, "%d*%d#", &lon_deg, &lon_min);
+  //DL(result);
+
+  // OnStep uses + for West, so we need to convert it back to how others do it
+  lon_deg *= -1;
+
+  //D(lat_deg); D(":"); DL(lat_min);
+  //D(lon_deg); D(":"); DL(lon_min);
+
+  // Set our location on Earth before we get the solar system object position
+  Eph.setLocationOnEarth(lat_deg, lat_min, 0, lon_deg, lon_min, 0);
+
+  // Get the solar system object data at the current date and time
   SolarSystemObjectIndex objI = static_cast<SolarSystemObjectIndex>(objSys);
   SolarSystemObject obj = Eph.solarSystemObjectAtDateAndTime(objI, day, month, year, hour, minute, second);
+
   return SyncGotoLX200(sync, obj.equaCoordinates.ra, obj.equaCoordinates.dec);
 }
 
