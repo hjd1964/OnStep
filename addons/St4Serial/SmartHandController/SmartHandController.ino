@@ -51,7 +51,6 @@ SmartHandController HdCrtlr;
 
 void setup(void)
 {
-  Serial.begin(9600);
   HdCrtlr.setup(Version, pin, active, SERIAL_BAUD_DEFAULT, static_cast<SmartHandController::OLED>(OLED_DISPLAY));
 }
 
