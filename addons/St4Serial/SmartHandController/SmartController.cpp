@@ -540,7 +540,6 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
   u8g2_t *u8g2 = display->getU8g2();
   display->setFont(u8g2_font_helvR12_te);
   u8g2_uint_t line_height = u8g2_GetAscent(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
-  u8g2_uint_t line_ascent = u8g2_GetAscent(u8g2);
 
   // get the status
   telInfo.connected = true;

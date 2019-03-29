@@ -32,17 +32,17 @@ void SmartHandController::menuSyncGoto(bool sync)
       {
         boolean GotoHome=false; 
         DisplayMessage("Goto Home will", "clear the Model", 2000);
-        if (display->UserInterfaceInputValueBoolean(&buttonPad, "Goto Home?", &GotoHome)) 
-             if (GotoHome)
-             {
-        char cmd[5];
-        sprintf(cmd, ":hX#");
-        cmd[2] = sync ? 'F' : 'C';
-        if (SetLX200(cmd) == LX200VALUESET) DisplayMessage(sync ? "Reset at" : "Goto", " Home Position", -1);
-        // Quit Menu
-        current_selection_L1 = 0;
-        current_selection_L0 = 0;
-      }
+        if (display->UserInterfaceInputValueBoolean(&buttonPad, "Goto Home?", &GotoHome)) {
+          if (GotoHome) {
+            char cmd[5];
+            sprintf(cmd, ":hX#");
+            cmd[2] = sync ? 'F' : 'C';
+            if (SetLX200(cmd) == LX200VALUESET) DisplayMessage(sync ? "Reset at" : "Goto", " Home Position", -1);
+            // Quit Menu
+            current_selection_L1 = 0;
+            current_selection_L0 = 0;
+          }
+        }
       }
       break;
     }
@@ -158,8 +158,8 @@ void SmartHandController::menuUser(bool sync)
 
   if (i>0) {
     if (current_selection_UserCatalog<1) current_selection_UserCatalog=1;
+    int last_selection_UserCatalog = current_selection_UserCatalog;
     while (current_selection_UserCatalog>0) {
-      int last_selection_UserCatalog = current_selection_UserCatalog;
       current_selection_UserCatalog = display->UserInterfaceSelectionList(&buttonPad, "Select User Cat", current_selection_UserCatalog, string_list_UserCatalogs);
 
       if (current_selection_UserCatalog>0) {
@@ -174,8 +174,12 @@ void SmartHandController::menuUser(bool sync)
         }
       }
     }
+    if (current_selection_UserCatalog==0) current_selection_UserCatalog=last_selection_UserCatalog;
     
-  } else  current_selection_L1 = 0; // Quit this menu, nothing to display
+  } else {
+    DisplayMessage("Select User Cat", "No Catalogs.", 2000);
+    current_selection_L1 = 0;
+  }
 }
 
 void SmartHandController::menuRADec(bool sync)

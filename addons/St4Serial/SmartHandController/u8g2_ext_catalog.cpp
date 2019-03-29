@@ -87,13 +87,10 @@ returns line height
 
 static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y)
 {
-  char DEGREE_SYMBOL[] = { 0xB0, '\0' };
   u8g2_uint_t x = 0;
-  u8g2_uint_t yy;
 
   uint8_t step0;
   const uint8_t* myfont = u8g2->font;
-  u8g2_uint_t  pixel_width;
   u8g2_uint_t line_height = u8g2_GetAscent(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
 
   char line[16];
@@ -204,7 +201,6 @@ bool ext_UserInterfaceCatalog(u8g2_t *u8g2, Pad* extPad, const char *title)
 
   u8g2_uint_t line_height = u8g2_GetAscent(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
   uint8_t title_lines = u8x8_GetStringLineCnt(title);
-  uint8_t display_lines;
 
   u8g2_SetFontPosBaseline(u8g2);
 
@@ -241,12 +237,8 @@ returns line height
 
 static uint8_t ext_draw_user_catalog_list_line(u8g2_t *u8g2, uint8_t y)
 {
-  char DEGREE_SYMBOL[] = { 0xB0, '\0' };
   u8g2_uint_t x = 0;
-  u8g2_uint_t yy;
 
-  const uint8_t* myfont = u8g2->font;
-  u8g2_uint_t  pixel_width;
   u8g2_uint_t line_height = u8g2_GetAscent(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
 
   char line1[16];
@@ -312,7 +304,6 @@ bool ext_UserInterfaceUserCatalog(u8g2_t *u8g2, Pad* extPad, const char *title)
 
   u8g2_uint_t line_height = u8g2_GetAscent(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
   uint8_t title_lines = u8x8_GetStringLineCnt(title);
-  uint8_t display_lines;
 
   u8g2_SetFontPosBaseline(u8g2);
   
