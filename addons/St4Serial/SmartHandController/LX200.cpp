@@ -378,6 +378,28 @@ LX200RETURN GetDateLX200(unsigned int &day, unsigned int &month, unsigned int &y
   return LX200VALUEGET;
 }
 
+LX200RETURN GetLatitudeLX200(int &degree, int &minute, int &second)
+{
+  char out[20];
+  if (GetLX200(":Gt#", out) != LX200VALUEGET) return LX200GETVALUEFAILED;
+  char* pEnd;
+  degree = strtol(&out[0], &pEnd, 10);
+  minute = strtol(&out[4], &pEnd, 10);
+  second = 0;
+  return LX200VALUEGET;
+}
+
+LX200RETURN GetLongitudeLX200(int &degree, int &minute, int &second)
+{
+  char out[20];
+  if (GetLX200(":Gg#", out) != LX200VALUEGET) return LX200GETVALUEFAILED;
+  char* pEnd;
+  degree = strtol(&out[0], &pEnd, 10);
+  minute = strtol(&out[5], &pEnd, 10);
+  second = 0;
+  return LX200VALUEGET;
+}
+
 LX200RETURN SyncGotoCatLX200(bool sync)
 {
   int epoch;
@@ -395,12 +417,22 @@ LX200RETURN SyncGotoCatLX200(bool sync)
 
 LX200RETURN SyncGotoPlanetLX200(bool sync, unsigned short objSys)
 {
-  unsigned int day, month, year, hour, minute, second;
+  Ephemeris Eph;
 
+  unsigned int day, month, year;
+  unsigned int hour, minute, second;
   if (GetDateLX200(day, month, year, true) == LX200GETVALUEFAILED) return LX200GETVALUEFAILED;
   if (GetTimeLX200(hour, minute, second, true) == LX200GETVALUEFAILED) return LX200GETVALUEFAILED;
 
-  Ephemeris Eph;
+  int longD, longM, longS;
+  int latD, latM, latS;
+  if (GetLongitudeLX200(longD, longM, longS) == LX200GETVALUEFAILED) return LX200GETVALUEFAILED;
+  if (GetLatitudeLX200(latD, latM, latS) == LX200GETVALUEFAILED) return LX200GETVALUEFAILED;
+
+  Eph.setLocationOnEarth(latD,latM,latS,longD,longM,longS); // Set Latitude and Longitude
+  Eph.flipLongitude(true);                                  // East is negative and West is positive
+  Eph.setAltitude(100);                                     // A good average altitude (in meters?) for observers?
+  
   SolarSystemObjectIndex objI = static_cast<SolarSystemObjectIndex>(objSys);
   SolarSystemObject obj = Eph.solarSystemObjectAtDateAndTime(objI, day, month, year, hour, minute, second);
   return SyncGotoLX200(sync, obj.equaCoordinates.ra, obj.equaCoordinates.dec);
