@@ -4,23 +4,23 @@ void SmartHandController::menuSyncGoto(bool sync)
 {
   current_selection_L1 = 1;
   while (current_selection_L1 != 0) {
-    const char *string_list_gotoL1 = "Messier\nStar\nSolar System\nCaldwell\nHerschel\nUser Catalog\nCoordinates\nHome";
+    const char *string_list_gotoL1 = "Star\nMessier\nCaldwell\nHerschel\nSolar System\nUser Catalog\nCoordinates\nHome";
     current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, sync ? "Sync" : "Goto", current_selection_L1, string_list_gotoL1);
     switch (current_selection_L1) {
       case 1:
-        menuMessier(sync);
-        break;
-      case 2:
         menuStar(sync);
         break;
-      case 3:
-        menuSolarSys(sync);
+      case 2:
+        menuMessier(sync);
         break;
-      case 4:
+      case 3:
 	      menuCaldwell(sync);
       break;
-      case 5:
+      case 4:
         menuHerschel(sync);
+        break;
+      case 5:
+        menuSolarSys(sync);
         break;
       case 6:
         menuUser(sync);
