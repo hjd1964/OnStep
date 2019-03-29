@@ -339,10 +339,20 @@ void SmartHandController::setup(const char version[], const int pin[7],const boo
 again:
   delay(4000);
   if (GetLX200(":GXEE#", s) == LX200VALUEGET) {
-    DisplayMessage("Connection", "Ok!", 1000);
-    if (s[0]=='0') telescopeCoordinates=OBSERVED_PLACE; else 
-    if (s[0]=='1') telescopeCoordinates=TOPOCENTRIC; else 
-    if (s[0]=='2') telescopeCoordinates=ASTROMETRIC_J2000;
+    if (s[0]=='0') {
+      telescopeCoordinates=OBSERVED_PLACE; 
+      DisplayMessage("Connetion", "Warning!", 1000);
+      DisplayMessage("Coordinates", "Observed Place.", 2000);
+  } else 
+    if (s[0]=='1') {
+      telescopeCoordinates=TOPOCENTRIC; 
+      DisplayMessage("Connetion", "Ok!", 1000);
+    } else 
+    if (s[0]=='2') {
+      telescopeCoordinates=ASTROMETRIC_J2000;
+      DisplayMessage("Connetion", "Warning!", 1000);
+      DisplayMessage("Coordinates", "J2000 Mode?", 2000);
+    }
   } else {
     if (++thisTry <= 4) goto again;
     telescopeCoordinates=OBSERVED_PLACE;
