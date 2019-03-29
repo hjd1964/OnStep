@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <Ephemeris.h> // Get it from: https://github.com/MarScaper/ephemeris
+#include <Ephemeris.h> // Get it from here: https://github.com/MarScaper/ephemeris
 #include "Catalog.h"
 #include "LX200.h"
 #include "SmartController.h"
