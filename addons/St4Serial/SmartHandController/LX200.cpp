@@ -354,10 +354,6 @@ LX200RETURN SyncGotoLX200(bool sync, float &Ra, float &Dec)
 
   if (Dec<0.0) sign='-';
 
-  //D(ivr1); D(":"); D(ivr2); D(":"); DL(fvr3);
-
-  //D(sign); D(ivd1); D(":"); D(ivd2); D(":"); DL(fvd3);
-
   if (SetTargetRaLX200(ivr1, ivr2, (int)fvr3) ==  LX200VALUESET && SetTargetDecLX200(sign, ivd1, ivd2, (int)fvd3) == LX200VALUESET) {
     if (sync) {
       Ser.print(":CS#");
@@ -410,17 +406,12 @@ LX200RETURN SyncGotoPlanetLX200(bool sync, unsigned short objSys)
 
   GetLX200(":Gt#", result);
   sscanf(result, "%d*%d#", &lat_deg, &lat_min);
-  //DL(result);
 
   GetLX200(":Gg#", result);
   sscanf(result, "%d*%d#", &lon_deg, &lon_min);
-  //DL(result);
 
   // OnStep uses + for West, so we need to convert it back to how others do it
   lon_deg *= -1;
-
-  //D(lat_deg); D(":"); DL(lat_min);
-  //D(lon_deg); D(":"); DL(lon_min);
 
   // Set our location on Earth before we get the solar system object position
   Eph.setLocationOnEarth(lat_deg, lat_min, 0, lon_deg, lon_min, 0);
