@@ -63,8 +63,8 @@ Encoders encoders;
 
 // macros to help with sending webpage data
 #define sendHtmlStart()
-#define sendHtml(x) client->print(x)
-#define sendHtmlDone(x) client->print(x);
+#define sendHtml(x) client->print(x); x=""
+#define sendHtmlDone(x) client->print(x); x=""
 
 int WebTimeout=TIMEOUT_WEB;
 int CmdTimeout=TIMEOUT_CMD;
