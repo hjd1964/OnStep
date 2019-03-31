@@ -151,7 +151,7 @@ bool isOk(LX200RETURN val)
 LX200RETURN SetLX200(char* command)
 {
   char out[20];
-  memset(out, 0, sizeof(out));
+  memset(out, 0, sizeof(*out));
   if (readLX200Bytes(command, out, TIMEOUT_CMD))
     return  LX200VALUESET;
   else
@@ -165,7 +165,7 @@ LX200RETURN SetLX200(const char* command)
 
 LX200RETURN GetLX200(char* command, char* output)
 {
-  memset(output, 0, sizeof(output));
+  memset(output, 0, sizeof(*output));
   if (readLX200Bytes(command, output, TIMEOUT_CMD))
     return LX200VALUEGET;
   else
@@ -179,7 +179,7 @@ LX200RETURN GetLX200(const char* command, char* output)
 
 LX200RETURN GetLX200Trim(char* command, char* output)
 {
-  memset(output, 0, sizeof(output));
+  memset(output, 0, sizeof(*output));
   if (readLX200Bytes(command, output, TIMEOUT_CMD)) {
     if ((strlen(output)>0) && (output[strlen(output)-1]=='#')) output[strlen(output)-1]=0;
     return LX200VALUEGET;
