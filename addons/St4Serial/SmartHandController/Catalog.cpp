@@ -256,14 +256,12 @@ void CatMgr::filterAdd(int fm) {
   _fm|=fm;
 }
 
-// catalog filtering
 void CatMgr::filterAdd(int fm, int param) {
   _fm|=fm;
   if (fm&FM_CONSTELLATION) _fm_con=param;
   if (fm&FM_OBJ_TYPE) _fm_obj_type=param;
 }
 
-// returns true if the object is filtered out
 bool CatMgr::isFiltered() {
   if (!isInitialized()) return false;
   if (_fm==FM_NONE) return false;
@@ -277,7 +275,6 @@ bool CatMgr::isFiltered() {
     } else {
       if (dec()<-85.0) return true;
     }
-    return false;
   }
   if (_fm&FM_CONSTELLATION) {
     if (constellation()!=_fm_con) return true;
