@@ -4,7 +4,7 @@ void SmartHandController::menuSyncGoto(bool sync)
 {
   current_selection_L1 = 1;
   while (current_selection_L1 != 0) {
-    const char *string_list_gotoL1 = "Star\nMessier\nCaldwell\nHerschel\nSolar System\nUser Catalog\nCoordinates\nHome";
+    const char *string_list_gotoL1 = "Star\nMessier\nCaldwell\nHerschel\n^Filter^\nSolar System\nUser Catalog\nCoordinates\nHome";
     current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, sync ? "Sync" : "Goto", current_selection_L1, string_list_gotoL1);
     switch (current_selection_L1) {
       case 1:
@@ -20,15 +20,18 @@ void SmartHandController::menuSyncGoto(bool sync)
         menuHerschel(sync);
         break;
       case 5:
-        menuSolarSys(sync);
+        menuFilters();
         break;
       case 6:
-        menuUser(sync);
+        menuSolarSys(sync);
         break;
       case 7:
-        menuRADec(sync);
+        menuUser(sync);
         break;
       case 8:
+        menuRADec(sync);
+        break;
+      case 9:
       {
         boolean GotoHome=false; 
         DisplayMessage("Goto Home will", "clear the Model", 2000);
@@ -44,7 +47,22 @@ void SmartHandController::menuSyncGoto(bool sync)
           }
         }
       }
-      break;
+    }
+  }
+}
+
+void SmartHandController::menuStar(bool sync)
+{
+  if (!cat_mgr.isInitialized()) { cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0()); }
+  cat_mgr.select(STAR);
+  setCatMgrFilters();
+  if (!cat_mgr.setIndex(0)) 
+    DisplayMessage(sync ? "Sync Star" : "Goto Star", "No Stars", 2000);
+  else
+  if (cat_mgr.isInitialized()) {
+    if (display->UserInterfaceCatalog(&buttonPad, sync ? "Sync Star" : "Goto Star")) {
+      bool  ok = DisplayMessageLX200(SyncGotoCatLX200(sync), false);
+      if (ok) { current_selection_L1 = 0; current_selection_L0 = 0; } // Quit Menu
     }
   }
 }
@@ -53,9 +71,10 @@ void SmartHandController::menuMessier(bool sync)
 {
   if (!cat_mgr.isInitialized()) { cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0()); }
   cat_mgr.select(MESSIER);
-  cat_mgr.filter(FM_ABOVE_HORIZON);
-  cat_mgr.setIndex(0);
-  
+  setCatMgrFilters();
+  if (!cat_mgr.setIndex(0)) 
+    DisplayMessage(sync ? "Sync Messier" : "Goto Messier", "No Objects", 2000);
+  else
   if (cat_mgr.isInitialized()) {
     if (display->UserInterfaceCatalog(&buttonPad, sync ? "Sync Messier" : "Goto Messier")) {
       bool ok = DisplayMessageLX200(SyncGotoCatLX200(sync), false);
@@ -68,9 +87,10 @@ void SmartHandController::menuCaldwell(bool sync)
 {
   if (!cat_mgr.isInitialized()) { cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0()); }
   cat_mgr.select(CALDWELL);
-  cat_mgr.filter(FM_ABOVE_HORIZON);
-  cat_mgr.setIndex(0);
-  
+  setCatMgrFilters();
+  if (!cat_mgr.setIndex(0)) 
+    DisplayMessage(sync ? "Sync Caldwell" : "Goto Caldwell", "No Objects", 2000);
+  else
   if (cat_mgr.isInitialized()) {
     if (display->UserInterfaceCatalog(&buttonPad, sync ? "Sync Caldwell" : "Goto Caldwell")) {
       bool ok = DisplayMessageLX200(SyncGotoCatLX200(sync), false);
@@ -79,15 +99,17 @@ void SmartHandController::menuCaldwell(bool sync)
   }
 }
 
-void SmartHandController::menuStar(bool sync)
+void SmartHandController::menuHerschel(bool sync)
 {
   if (!cat_mgr.isInitialized()) { cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0()); }
-  cat_mgr.select(STAR);
-  cat_mgr.filter(FM_ABOVE_HORIZON);
-  cat_mgr.setIndex(0);
+  cat_mgr.select(HERSCHEL);
+  setCatMgrFilters();
+  if (!cat_mgr.setIndex(0)) 
+    DisplayMessage(sync ? "Sync Herschel" : "Goto Herschel", "No Objects", 2000);
+  else
   if (cat_mgr.isInitialized()) {
-    if (display->UserInterfaceCatalog(&buttonPad, sync ? "Sync Star" : "Goto Star")) {
-      bool  ok = DisplayMessageLX200(SyncGotoCatLX200(sync), false);
+    if (display->UserInterfaceCatalog(&buttonPad, sync ? "Sync Herschel" : "Goto Herschel")) {
+      bool ok = DisplayMessageLX200(SyncGotoCatLX200(sync), false);
       if (ok) { current_selection_L1 = 0; current_selection_L0 = 0; } // Quit Menu
     }
   }
@@ -117,19 +139,180 @@ void SmartHandController::menuSolarSys(bool sync)
   if (current_selection_SolarSys != 0 && ok) { current_selection_L1 = 0; current_selection_L0 = 0; } // Quit Menu
 }
 
-void SmartHandController::menuHerschel(bool sync)
+void SmartHandController::menuFilters()
 {
-  if (!cat_mgr.isInitialized()) { cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0()); }
-  cat_mgr.select(HERSCHEL);
-  cat_mgr.filter(FM_ABOVE_HORIZON);
-  cat_mgr.setIndex(0);
-  
-  if (cat_mgr.isInitialized()) {
-    if (display->UserInterfaceCatalog(&buttonPad, sync ? "Sync Herschel" : "Goto Herschel")) {
-      bool ok = DisplayMessageLX200(SyncGotoCatLX200(sync), false);
-      if (ok) { current_selection_L1 = 0; current_selection_L0 = 0; } // Quit Menu
+  const char *string_list_SolarSyst = "Clear all filters\nBy Constellation\nBy Type";
+
+  current_selection_L2 = 1;
+  while (current_selection_L2 != 0) {
+    current_selection_L2 = display->UserInterfaceSelectionList(&buttonPad, "Filter Objects", current_selection_L2, string_list_SolarSyst);
+
+    switch (current_selection_L2) {
+      case 1:
+        current_selection_filter_con=1;
+        current_selection_filter_type=1;
+        DisplayMessage("Filters", "Cleared", 1000);
+      break;
+      case 2:
+        menuFilterCon();
+      break;
+      case 3:
+        menuFilterType();
+      break;
     }
+    if (current_selection_L2 == 0) return;
   }
+}
+
+void SmartHandController::setCatMgrFilters()
+{
+  cat_mgr.filtersClear();
+  cat_mgr.filterAdd(FM_ABOVE_HORIZON);
+  if (current_selection_filter_con>1) cat_mgr.filterAdd(FM_CONSTELLATION,current_selection_filter_con-2);
+  if (current_selection_filter_type>1) cat_mgr.filterAdd(FM_OBJ_TYPE,current_selection_filter_type-2);
+}
+
+// Constellation abbreviation, alphabetical order
+const char* Txt_Constellation[89] = {
+  "All",
+  "And",
+  "Ant",
+  "Aps",
+  "Aql",
+  "Aqr",
+  "Ara",
+  "Ari",
+  "Aur",
+  "Boo",
+  "CMa",
+  "CMi",
+  "CVn",
+  "Cae",
+  "Cam",
+  "Cap",
+  "Car",
+  "Cas",
+  "Cen",
+  "Cep",
+  "Cet",
+  "Cha",
+  "Cir",
+  "Cnc", //  22
+  "Col", //  23
+  "Com", //  24
+  "CrA", //  25
+  "CrB", //  26
+  "Crt", //  27
+  "Cru", //  28
+  "Crv", //  29
+  "Cyg", //  30
+  "Del", //  31
+  "Dor", //  32
+  "Dra", //  33
+  "Equ", //  34
+  "Eri", //  35
+  "For", //  36
+  "Gem", //  37
+  "Gru", //  38
+  "Her", //  39
+  "Hor", //  40
+  "Hya", //  41
+  "Hyi", //  42
+  "Ind", //  43
+  "LMi", //  44
+  "Lac", //  45
+  "Leo", //  46
+  "Lep", //  47
+  "Lib", //  48
+  "Lup", //  49
+  "Lyn", //  50
+  "Lyr", //  51
+  "Men", //  52
+  "Mic",
+  "Mon",
+  "Mus",
+  "Nor",
+  "Oct",
+  "Oph",
+  "Ori",
+  "Pav",
+  "Peg",
+  "Per",
+  "Phe",
+  "Pic",
+  "PsA",
+  "Psc",
+  "Pup",
+  "Pyx",
+  "Ret",
+  "Scl",
+  "Sco",
+  "Sct",
+  "Ser",
+  "Sex",
+  "Sge",
+  "Sgr",
+  "Tau",
+  "Tel",
+  "TrA",
+  "Tri",
+  "Tuc",
+  "UMa",
+  "UMi",
+  "Vel",
+  "Vir",
+  "Vol",
+  "Vul",
+};
+
+void SmartHandController::menuFilterCon()
+{
+  char string_list_fCon[1000]="";
+  for (int l=0; l<89; l++) {
+    strcat(string_list_fCon,Txt_Constellation[l]);
+    if (l<88) strcat(string_list_fCon,"\n");
+  }
+  int last_selection_filter_con = current_selection_filter_con;
+  current_selection_filter_con = display->UserInterfaceSelectionList(&buttonPad, "Filter by Con", current_selection_filter_con, string_list_fCon);
+  
+  if (current_selection_filter_con == 0) current_selection_filter_con=last_selection_filter_con;
+}
+
+const char * Txt_Object_Types[22] = {
+  "All",
+  "Galaxy",
+  "Open Cluster",
+  "Star",
+  "Double Star",
+  "Other",
+  "Galaxy Pair",
+  "Galaxy Triplet",
+  "Galaxy Group",
+  "Globular Cluster",
+  "Planetary Nebula",
+  "Nebula",
+  "Hii Region",
+  "Cluster + Nebula",
+  "Asterism",
+  "Reflectn Nebula",
+  "SuperNova Rmnnt",
+  "Emission Nebula",
+  "NonExist",
+  "Nova",
+  "Duplicate",
+  "Dark Nebula",
+};
+void SmartHandController::menuFilterType()
+{
+  char string_list_fType[500]="";
+  for (int l=0; l<22; l++) {
+    strcat(string_list_fType,Txt_Object_Types[l]);
+    if (l<21) strcat(string_list_fType,"\n");
+  }
+  int last_selection_filter_type = current_selection_filter_type;
+  current_selection_filter_type = display->UserInterfaceSelectionList(&buttonPad, "Filter by Type", current_selection_filter_type, string_list_fType);
+  
+  if (current_selection_filter_type == 0) current_selection_filter_type=last_selection_filter_type;
 }
 
 void SmartHandController::menuUser(bool sync)
@@ -177,7 +360,7 @@ void SmartHandController::menuUser(bool sync)
     if (current_selection_UserCatalog==0) current_selection_UserCatalog=last_selection_UserCatalog;
     
   } else {
-    DisplayMessage("Select User Cat", "No Catalogs.", 2000);
+    DisplayMessage("Select User Cat", "No Catalogs", 2000);
     current_selection_L1 = 0;
   }
 }

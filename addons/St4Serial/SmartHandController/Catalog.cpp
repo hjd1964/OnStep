@@ -248,73 +248,51 @@ const char* CatMgr::catalogStr() {
 }
 
 // catalog filtering
-void CatMgr::filter(FilterMode fm) {
-  _fm=fm;
+void CatMgr::filtersClear() {
+  _fm=FM_NONE;
 }
 
-bool CatMgr::isFiltered() {
-  double ar,ad;
-  if (!isInitialized()) return false;
-  switch (_fm) {
-    case FM_NONE:
-      return false;
-      break;
-    case FM_ABOVE_HORIZON:
-      return alt()<0.0;
-      break;
-    case FM_ALIGN_ALL_SKY:
-      // minimum 10 degrees altitude (to limit unlikely align stars and to minimize refraction effects)
-      if (alt()<10.0) return true;
-      // minimum 5 degrees from the pole (for accuracy)
-      if (_lat>=0.0) {
-        if (dec()>85.0) return true;
-      } else {
-        if (dec()<-85.0) return true;
-      }
-      return false;
-      break;
-    case FM_ALIGN_3STAR_1:
-      // minimum 10 degrees altitude (to limit unlikely align stars and to minimize refraction effects)
-      if (alt()<10.0) return true;
-      // maximum 30 degrees from align location
-      ar = HAToRA(-1.0 * 15.0);
-      if (_lat >= 0.0) ad = 10.0; else ad = -10.0;
-      if (DistFromEqu(ar,ad)>30.0) return true;
-      // on our side of meridian
-      if (ha()>0) return true;
-      return false;
-      break;
-    case FM_ALIGN_3STAR_2:
-      // minimum 10 degrees altitude (to limit unlikely align stars and to minimize refraction effects)
-      if (alt()<10.0) return true;
-      // maximum 30 degrees from align location
-      ar = HAToRA(+1.0 * 15.0);
-      if (_lat >= 0.0) ad = 10.0; else ad = -10.0;
-      if (DistFromEqu(ar,ad)>30.0) return true;
-      // on our side of meridian
-      if (ha()<0) return true;
-      return false;
-    break;
-    case FM_ALIGN_3STAR_3:
-      // minimum 10 degrees altitude (to limit unlikely align stars and to minimize refraction effects)
-      if (alt()<10.0) return true;
-      // maximum 30 degrees from align location
-      ar = HAToRA(+6.0 * 15.0);
-      if (_lat >= 0.0) ad = 45.0; else ad = -45.0;
-      if (DistFromEqu(ar,ad)>30.0) return true;
-      return false;
-    break;
-    default:
-      return false;
-    break;
-  }
+void CatMgr::filterAdd(int fm) {
+  _fm|=fm;
 }
+
+// catalog filtering
+void CatMgr::filterAdd(int fm, int param) {
+  _fm|=fm;
+  if (fm&FM_CONSTELLATION) _fm_con=param;
+  if (fm&FM_OBJ_TYPE) _fm_obj_type=param;
+}
+
+// returns true if the object is filtered out
+bool CatMgr::isFiltered() {
+  if (!isInitialized()) return false;
+  if (_fm==FM_NONE) return false;
+  if (_fm&FM_ABOVE_HORIZON) { if (alt()<0.0) return true; }
+  if (_fm&FM_ALIGN_ALL_SKY) {
+    // minimum 10 degrees altitude (to limit unlikely align stars and to minimize refraction effects)
+    if (alt()<10.0) return true;
+    // minimum 5 degrees from the pole (for accuracy)
+    if (_lat>=0.0) {
+      if (dec()>85.0) return true;
+    } else {
+      if (dec()<-85.0) return true;
+    }
+    return false;
+  }
+  if (_fm&FM_CONSTELLATION) {
+    if (constellation()!=_fm_con) return true;
+  }
+  if ((_cat!=STAR) && (_fm&FM_OBJ_TYPE)) {
+    if (objectType()!=_fm_obj_type) return true;
+  }
+  return false;
+}  
 
 // select catalog record
-void CatMgr::setIndex(int index) {
+bool CatMgr::setIndex(int index) {
   _idx[_selected]=index;
   decIndex();
-  incIndex();
+  return incIndex();
 }
 
 int CatMgr::getIndex() {
@@ -325,22 +303,24 @@ int CatMgr::getMaxIndex() {
   return _maxIdx[_selected];
 }
 
-void CatMgr::incIndex() {
+bool CatMgr::incIndex() {
   int i=_maxIdx[_selected]+1;
   do {
     i--;
     _idx[_selected]++;
     if (_idx[_selected]>_maxIdx[_selected]) _idx[_selected]=0;
   } while (isFiltered() && (i>0));
+  if (isFiltered()) return false; else return true;
 }
 
-void CatMgr::decIndex() {
+bool CatMgr::decIndex() {
   int i=_maxIdx[_selected]+1;
   do {
     i--;
     _idx[_selected]--;
     if (_idx[_selected]<0) _idx[_selected]=_maxIdx[_selected];
   } while (isFiltered() && (i>0));
+  if (isFiltered()) return false; else return true;
 }
 
 // get catalog contents

@@ -5,7 +5,11 @@
 const double Rad=57.29577951;
 
 enum Catalog { STAR, MESSIER, CALDWELL, HERSCHEL, CAT_NONE };
-enum FilterMode { FM_NONE, FM_ABOVE_HORIZON, FM_ALIGN_ALL_SKY, FM_ALIGN_3STAR_1, FM_ALIGN_3STAR_2, FM_ALIGN_3STAR_3 };
+const int FM_NONE = 0;
+const int FM_ABOVE_HORIZON = 1;
+const int FM_ALIGN_ALL_SKY = 2;
+const int FM_CONSTELLATION = 4;
+const int FM_OBJ_TYPE      = 8;
 
 void getcatdms(const short& v, short& v1, uint8_t& v2);
 void getcatdf(const short& v, float& v1);
@@ -29,14 +33,16 @@ class CatMgr {
     const char* catalogStr();
 
 // catalog filtering
-    void filter(FilterMode fm);
+    void filtersClear();
+    void filterAdd(int fm);
+    void filterAdd(int fm, int param);
 
 // select catalog record
-    void setIndex(int index);
+    bool setIndex(int index);
     int getIndex();
     int getMaxIndex();
-    void incIndex();
-    void decIndex();
+    bool incIndex();
+    bool decIndex();
 
 // get catalog contents
     double ra();
@@ -68,7 +74,11 @@ private:
     double _lstT0=0;
     unsigned long _lstMillisT0=0;
     Catalog _cat=CAT_NONE;
-    FilterMode _fm=FM_NONE;
+    
+    int _fm=FM_NONE;
+    int _fm_con=0;
+    int _fm_obj_type=0;
+    
     int _selected=0;
     int _idx[5]={0,0,0,0,0};
     int _maxIdx[5]={
