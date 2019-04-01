@@ -55,12 +55,15 @@ void SmartHandController::menuStar(bool sync)
 {
   if (!cat_mgr.isInitialized()) { cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0()); }
   cat_mgr.select(STAR);
-  setCatMgrFilters();
+
+  char title[20]; if (sync) strcpy(title,"Sync "); else strcpy(title,"Goto "); strcat(title,"Star");
+  if (setCatMgrFilters()) strcat(title," Ÿ");
+
   if (!cat_mgr.setIndex(0)) 
-    DisplayMessage(sync ? "Sync Star" : "Goto Star", "No Stars", 2000);
+    DisplayMessage(title, "No Stars", 2000);
   else
   if (cat_mgr.isInitialized()) {
-    if (display->UserInterfaceCatalog(&buttonPad, sync ? "Sync Star" : "Goto Star")) {
+    if (display->UserInterfaceCatalog(&buttonPad, title)) {
       bool  ok = DisplayMessageLX200(SyncGotoCatLX200(sync), false);
       if (ok) { current_selection_L1 = 0; current_selection_L0 = 0; } // Quit Menu
     }
@@ -71,12 +74,15 @@ void SmartHandController::menuMessier(bool sync)
 {
   if (!cat_mgr.isInitialized()) { cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0()); }
   cat_mgr.select(MESSIER);
-  setCatMgrFilters();
+
+  char title[20]; if (sync) strcpy(title,"Sync "); else strcpy(title,"Goto "); strcat(title,"Messier");
+  if (setCatMgrFilters()) strcat(title," Ÿ");
+  
   if (!cat_mgr.setIndex(0)) 
-    DisplayMessage(sync ? "Sync Messier" : "Goto Messier", "No Objects", 2000);
+    DisplayMessage(title, "No Objects", 2000);
   else
   if (cat_mgr.isInitialized()) {
-    if (display->UserInterfaceCatalog(&buttonPad, sync ? "Sync Messier" : "Goto Messier")) {
+    if (display->UserInterfaceCatalog(&buttonPad, title)) {
       bool ok = DisplayMessageLX200(SyncGotoCatLX200(sync), false);
       if (ok) { current_selection_L1 = 0; current_selection_L0 = 0; } // Quit Menu
     }
@@ -87,12 +93,15 @@ void SmartHandController::menuCaldwell(bool sync)
 {
   if (!cat_mgr.isInitialized()) { cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0()); }
   cat_mgr.select(CALDWELL);
-  setCatMgrFilters();
+
+  char title[20]; if (sync) strcpy(title,"Sync "); else strcpy(title,"Goto "); strcat(title,"Caldwell");
+  if (setCatMgrFilters()) strcat(title," Ÿ");
+
   if (!cat_mgr.setIndex(0)) 
-    DisplayMessage(sync ? "Sync Caldwell" : "Goto Caldwell", "No Objects", 2000);
+    DisplayMessage(title, "No Objects", 2000);
   else
   if (cat_mgr.isInitialized()) {
-    if (display->UserInterfaceCatalog(&buttonPad, sync ? "Sync Caldwell" : "Goto Caldwell")) {
+    if (display->UserInterfaceCatalog(&buttonPad, title)) {
       bool ok = DisplayMessageLX200(SyncGotoCatLX200(sync), false);
       if (ok) { current_selection_L1 = 0; current_selection_L0 = 0; } // Quit Menu
     }
@@ -103,12 +112,15 @@ void SmartHandController::menuHerschel(bool sync)
 {
   if (!cat_mgr.isInitialized()) { cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0()); }
   cat_mgr.select(HERSCHEL);
-  setCatMgrFilters();
+
+  char title[20]; if (sync) strcpy(title,"Sync "); else strcpy(title,"Goto "); strcat(title,"Herschel");
+  if (setCatMgrFilters()) strcat(title," Ÿ");
+
   if (!cat_mgr.setIndex(0)) 
-    DisplayMessage(sync ? "Sync Herschel" : "Goto Herschel", "No Objects", 2000);
+    DisplayMessage(title, "No Objects", 2000);
   else
   if (cat_mgr.isInitialized()) {
-    if (display->UserInterfaceCatalog(&buttonPad, sync ? "Sync Herschel" : "Goto Herschel")) {
+    if (display->UserInterfaceCatalog(&buttonPad, title)) {
       bool ok = DisplayMessageLX200(SyncGotoCatLX200(sync), false);
       if (ok) { current_selection_L1 = 0; current_selection_L0 = 0; } // Quit Menu
     }
@@ -164,105 +176,26 @@ void SmartHandController::menuFilters()
   }
 }
 
-void SmartHandController::setCatMgrFilters()
+bool SmartHandController::setCatMgrFilters()
 {
   cat_mgr.filtersClear();
   cat_mgr.filterAdd(FM_ABOVE_HORIZON);
-  if (current_selection_filter_con>1) cat_mgr.filterAdd(FM_CONSTELLATION,current_selection_filter_con-2);
-  if (current_selection_filter_type>1) cat_mgr.filterAdd(FM_OBJ_TYPE,current_selection_filter_type-2);
+  bool extraFilterActive=false;
+  if (current_selection_filter_con>1) { cat_mgr.filterAdd(FM_CONSTELLATION,current_selection_filter_con-2); extraFilterActive=true; }
+  if (current_selection_filter_type>1) { cat_mgr.filterAdd(FM_OBJ_TYPE,current_selection_filter_type-2); extraFilterActive=true; }
+  return extraFilterActive;
 }
 
 // Constellation abbreviation, alphabetical order
 const char* Txt_Constellation[89] = {
-  "All",
-  "And",
-  "Ant",
-  "Aps",
-  "Aql",
-  "Aqr",
-  "Ara",
-  "Ari",
-  "Aur",
-  "Boo",
-  "CMa",
-  "CMi",
-  "CVn",
-  "Cae",
-  "Cam",
-  "Cap",
-  "Car",
-  "Cas",
-  "Cen",
-  "Cep",
-  "Cet",
-  "Cha",
-  "Cir",
-  "Cnc", //  22
-  "Col", //  23
-  "Com", //  24
-  "CrA", //  25
-  "CrB", //  26
-  "Crt", //  27
-  "Cru", //  28
-  "Crv", //  29
-  "Cyg", //  30
-  "Del", //  31
-  "Dor", //  32
-  "Dra", //  33
-  "Equ", //  34
-  "Eri", //  35
-  "For", //  36
-  "Gem", //  37
-  "Gru", //  38
-  "Her", //  39
-  "Hor", //  40
-  "Hya", //  41
-  "Hyi", //  42
-  "Ind", //  43
-  "LMi", //  44
-  "Lac", //  45
-  "Leo", //  46
-  "Lep", //  47
-  "Lib", //  48
-  "Lup", //  49
-  "Lyn", //  50
-  "Lyr", //  51
-  "Men", //  52
-  "Mic",
-  "Mon",
-  "Mus",
-  "Nor",
-  "Oct",
-  "Oph",
-  "Ori",
-  "Pav",
-  "Peg",
-  "Per",
-  "Phe",
-  "Pic",
-  "PsA",
-  "Psc",
-  "Pup",
-  "Pyx",
-  "Ret",
-  "Scl",
-  "Sco",
-  "Sct",
-  "Ser",
-  "Sex",
-  "Sge",
-  "Sgr",
-  "Tau",
-  "Tel",
-  "TrA",
-  "Tri",
-  "Tuc",
-  "UMa",
-  "UMi",
-  "Vel",
-  "Vir",
-  "Vol",
-  "Vul",
+  "All","And","Ant","Aps","Aql","Aqr","Ara","Ari","Aur","Boo","CMa",
+  "CMi","CVn","Cae","Cam","Cap","Car","Cas","Cen","Cep","Cet","Cha",
+  "Cir","Cnc","Col","Com","CrA","CrB","Crt","Cru","Crv","Cyg","Del",
+  "Dor","Dra","Equ","Eri","For","Gem","Gru","Her","Hor","Hya","Hyi",
+  "Ind","LMi","Lac","Leo","Lep","Lib","Lup","Lyn","Lyr","Men","Mic",
+  "Mon","Mus","Nor","Oct","Oph","Ori","Pav","Peg","Per","Phe","Pic",
+  "PsA","Psc","Pup","Pyx","Ret","Scl","Sco","Sct","Ser","Sex","Sge",
+  "Sgr","Tau","Tel","TrA","Tri","Tuc","UMa","UMi","Vel","Vir","Vol","Vul"
 };
 
 void SmartHandController::menuFilterCon()
@@ -300,7 +233,7 @@ const char * Txt_Object_Types[22] = {
   "NonExist",
   "Nova",
   "Duplicate",
-  "Dark Nebula",
+  "Dark Nebula"
 };
 void SmartHandController::menuFilterType()
 {
