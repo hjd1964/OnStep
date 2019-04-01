@@ -700,10 +700,10 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
     if (page == 2) {
       if (telInfo.hasInfoUTC && telInfo.hasInfoSidereal)
       {
-        char us[20]; strcpy(us,telInfo.TempLocalTime); us[2]=0; us[5]=0;
+        char us[20]; strcpy(us,telInfo.TempUniversalTime); us[2]=0; us[5]=0;
         x = u8g2_GetDisplayWidth(u8g2);  u8g2_uint_t y = 36;
         display->setFont(u8g2_font_helvR10_tf);
-        u8g2_DrawUTF8(u8g2, 0, y, "Local");
+        u8g2_DrawUTF8(u8g2, 0, y, "UT");
         display->setFont(u8g2_font_helvR12_te); 
         display->drawRA( x, y, us, &us[3], &us[6]);
 
