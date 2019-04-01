@@ -88,7 +88,7 @@ private:
   void menuHerschel(bool sync);
   void menuMessier(bool sync);
   void menuCaldwell(bool sync);
-  void setCatMgrFilters();
+  bool setCatMgrFilters();
   void menuFilters();
   void menuFilterCon();
   void menuFilterType();
