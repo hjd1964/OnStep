@@ -251,10 +251,10 @@ void initReadNvValues() {
 
   // the polar home position
 #ifdef MOUNT_TYPE_ALTAZM
-  celestialPoleAxis2=AltAzmDecStartPos;
-  if (latitude<0) celestialPoleAxis1=180.0; else celestialPoleAxis1=0.0;
+  homePositionAxis2=AltAzmDecStartPos;
+  if (latitude<0) homePositionAxis1=180.0; else homePositionAxis1=0.0;
 #else
-  if (latitude<0) celestialPoleAxis2=-90.0; else celestialPoleAxis2=90.0;
+  if (latitude<0) homePositionAxis2=-90.0; else homePositionAxis2=90.0;
 #endif
   InitStartPosition();
 
@@ -374,8 +374,8 @@ void InitStartPosition() {
   blAxis1            = 0;
   blAxis2            = 0;
   sei();
-  setIndexAxis1(celestialPoleAxis1,PierSideEast);
-  setIndexAxis2(celestialPoleAxis2,PierSideEast);
+  setIndexAxis1(homePositionAxis1,PierSideEast);
+  setIndexAxis2(homePositionAxis2,PierSideEast);
 }
 
 void initWriteNvValues() {

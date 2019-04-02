@@ -106,7 +106,7 @@ GotoErrors goHome(boolean fast) {
   // goto allowed?
   if (f!=GOTO_ERR_NONE) return f; 
 
-  goTo(celestialPoleAxis1,celestialPoleAxis2,celestialPoleAxis1,celestialPoleAxis2,PierSideEast);
+  goTo(homePositionAxis1,homePositionAxis2,homePositionAxis1,homePositionAxis2,PierSideEast);
   homeMount=true;
 #endif
   

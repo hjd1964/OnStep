@@ -1624,10 +1624,10 @@ void processCommands() {
         if (!dmsToDouble(&latitude,parameter,true)) { commandError=true; } else {
           nv.writeFloat(100+(currentSite)*25+0,latitude);
 #ifdef MOUNT_TYPE_ALTAZM
-          celestialPoleAxis2=AltAzmDecStartPos;
-          if (latitude<0) celestialPoleAxis1=180.0; else celestialPoleAxis1=0.0;
+          homePositionAxis2=AltAzmDecStartPos;
+          if (latitude<0) homePositionAxis1=180.0; else homePositionAxis1=0.0;
 #else
-          if (latitude<0) celestialPoleAxis2=-90.0; else celestialPoleAxis2=90.0;
+          if (latitude<0) homePositionAxis2=-90.0; else homePositionAxis2=90.0;
 #endif
           cosLat=cos(latitude/Rad);
           sinLat=sin(latitude/Rad);
@@ -2095,9 +2095,9 @@ void processCommands() {
           currentSite=command[1]-'0'; nv.update(EE_currentSite,currentSite); quietReply=true;
           latitude=nv.readFloat(EE_sites+(currentSite*25+0));
 #ifdef MOUNT_TYPE_ALTAZM
-          celestialPoleAxis2=AltAzmDecStartPos;
+          homePositionAxis2=AltAzmDecStartPos;
 #else
-          if (latitude<0.0) celestialPoleAxis2=-90.0; else celestialPoleAxis2=90.0;
+          if (latitude<0.0) homePositionAxis2=-90.0; else homePositionAxis2=90.0;
 #endif
           cosLat=cos(latitude/Rad);
           sinLat=sin(latitude/Rad);
