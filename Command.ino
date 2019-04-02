@@ -1166,6 +1166,13 @@ void processCommands() {
           quietReply=true;
       } else 
 
+// :L?#    Get library free records (all catalogs)
+//          Returns: n#
+      if ((command[1]=='?') && (parameter[0]==0)) { 
+          sprintf(reply,"%d",Lib.recFree());
+          quietReply=true;
+      } else 
+
 // :Lonn#  Select Library catalog where nn specifies user catalog number
 //         in OnStep catalog# range from 0-14. Catalogs 0-6 are user defined, the remainder are reserved.
 //          Return: 0 on failure
