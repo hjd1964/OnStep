@@ -828,7 +828,7 @@ void SmartHandController::DisplayLongMessage(const char* txt1, const char* txt2,
 
   display->setFont(u8g2_font_helvR12_te);
 }
-
+  
 bool SmartHandController::DisplayMessageLX200(LX200RETURN val, bool silentOk)
 {
   char text1[20] = "";
@@ -836,96 +836,31 @@ bool SmartHandController::DisplayMessageLX200(LX200RETURN val, bool silentOk)
   int time = -1;
   if (val < LX200OK)
   {
-    if (val == LX200NOTOK)
-    {
-      sprintf(text1, "LX200 Command");
-      sprintf(text2, "has failed!");
-    }
-    else if (val == LX200SETVALUEFAILED)
-    {
-      sprintf(text1, "Set Value");
-      sprintf(text2, "has failed!");
-    }
-    else if (val == LX200GETVALUEFAILED)
-    {
-      sprintf(text1, "Get Value");
-      sprintf(text2, "has failed!");
-    }
-    else if (val == LX200SYNCFAILED)
-    {
-      sprintf(text1, "Sync");
-      sprintf(text2, "has failed!");
-    }
-    else if (val == LX200SETTARGETFAILED)
-    {
-      sprintf(text1, "Set Target");
-      sprintf(text2, "has failed!");
-    }
-    else if (val == LX200BELOWHORIZON)
-    {
-      sprintf(text1, "Target is");
-      sprintf(text2, "Below Horizon!");
-    }
-    else if (val == LX200NOOBJECTSELECTED)
-    {
-      sprintf(text1, "No Object");
-      sprintf(text2, "Selected!");
-    }
-    else if (val == LX200PARKED)
-    {
-      sprintf(text1, "Telescope");
-      sprintf(text2, "is Parked!");
-    }
-    else if (val == LX200BUSY)
-    {
-      sprintf(text1, "Telescope");
-      sprintf(text2, "is busy!");
-    }
-    else if (val == LX200LIMITS)
-    {
-      sprintf(text1, "Target");
-      sprintf(text2, "outside limits");
-    }
-    else if (val == LX200UNKOWN)
-    {
-      sprintf(text1, "Unknown");
-      sprintf(text2, "Error");
-    }
-    else
-    {
-      sprintf(text1, "Error");
-      sprintf(text2, "-1");
-    }
+         if (val == LX200NOTOK)                    { sprintf(text1, "LX200 Command"); sprintf(text2, "has failed!");    }
+    else if (val == LX200SETVALUEFAILED)           { sprintf(text1, "Set Value");     sprintf(text2, "has failed!");    }
+    else if (val == LX200GETVALUEFAILED)           { sprintf(text1, "Get Value");     sprintf(text2, "has failed!");    }
+    else if (val == LX200SETTARGETFAILED)          { sprintf(text1, "Set Target");    sprintf(text2, "has failed!");    }
+    else if (val == LX200NOOBJECTSELECTED)         { sprintf(text1, "No Object");     sprintf(text2, "Selected!");      }
+    else if (val == LX200_GOTO_ERR_BELOW_HORIZON)  { sprintf(text1, "Target is");     sprintf(text2, "Below Horizon!"); }
+    else if (val == LX200_GOTO_ERR_ABOVE_OVERHEAD) { sprintf(text1, "Target is");     sprintf(text2, "Above Limit!");   }
+    else if (val == LX200_GOTO_ERR_STANDBY)        { sprintf(text1, "Telescope");     sprintf(text2, "in standby!");    }
+    else if (val == LX200_GOTO_ERR_PARK)           { sprintf(text1, "Telescope");     sprintf(text2, "is Parked!");     }
+    else if (val == LX200_GOTO_ERR_GOTO)           { sprintf(text1, "Goto already");  sprintf(text2, "in progress!");   }
+    else if (val == LX200_GOTO_ERR_OUTSIDE_LIMITS) { sprintf(text1, "Target");        sprintf(text2, "outside lmts!");  }
+    else if (val == LX200_GOTO_ERR_HARDWARE_FAULT) { sprintf(text1, "Telescope");     sprintf(text2, "h/w fault!");     }
+    else if (val == LX200_GOTO_ERR_IN_MOTION)      { sprintf(text1, "Telescope");     sprintf(text2, "in motion!");     }
+    else if (val == LX200_GOTO_ERR_UNSPECIFIED)    { sprintf(text1, "Goto unknown");  sprintf(text2, "error!");         }
+    else { sprintf(text1, "Error"); sprintf(text2, "-1"); }
     DisplayMessage(text1, text2, -1);
   }
   else if (!silentOk)
   {
     time = 1000;
-    if (val == LX200OK)
-    {
-      sprintf(text1, "LX200 Command");
-      sprintf(text2, "Done!");
-    }
-    else if (val == LX200VALUESET)
-    {
-      sprintf(text1, "Value");
-      sprintf(text2, "Set!");
-    }
-    else if (val == LX200GETVALUEFAILED)
-    {
-      sprintf(text1, "Value");
-      sprintf(text2, "Get!");
-    }
-    else if (val == LX200SYNCED)
-    {
-      sprintf(text1, "Telescope");
-      sprintf(text2, "Synced!");
-    }
-    else if (LX200GOINGTO)
-    {
-      sprintf(text1, "Slew to");
-      sprintf(text2, "Target");
-    }
+         if (val == LX200OK)            { sprintf(text1, "LX200 Command"); sprintf(text2, "Done!");   }
+    else if (val == LX200VALUESET)      { sprintf(text1, "Value");         sprintf(text2, "Set!");    }
+    else if (val == LX200VALUEGET)      { sprintf(text1, "Value");         sprintf(text2, "Get!");    }
+    else if (val == LX200SYNCED)        { sprintf(text1, "Telescope");     sprintf(text2, "Synced!"); }
+    else if (val == LX200_GOTO_GOINGTO) { sprintf(text1, "Slew to");       sprintf(text2, "Target");  }
     DisplayMessage(text1, text2, time);
   }
   return isOk(val);
