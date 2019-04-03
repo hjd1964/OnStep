@@ -4,46 +4,49 @@ void SmartHandController::menuSyncGoto(bool sync)
 {
   current_selection_L1 = 1;
   while (current_selection_L1 != 0) {
-    const char *string_list_gotoL1 = "Star\nMessier\nCaldwell\nHerschel\n^Filter^\nSolar System\nUser Catalog\nCoordinates\nHome";
+    char string_list_gotoL1[60+cat_mgr.numCatalogs()*10]="";
+
+    // build the list of star/dso catalogs
+    for (int i=0; i<cat_mgr.numCatalogs(); i++) {
+      cat_mgr.select(i);
+      strcat(string_list_gotoL1,cat_mgr.catalogTitle()); strcat(string_list_gotoL1,"\n");
+    }
+    // add the normal filtering, solarsys, etc. items
+    strcat(string_list_gotoL1,"^Filter^\nSolar System\nUser Catalog\nCoordinates\nHome");
+    
     current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, sync ? "Sync" : "Goto", current_selection_L1, string_list_gotoL1);
-    switch (current_selection_L1) {
-      case 1:
-        menuStar(sync);
-        break;
-      case 2:
-        menuMessier(sync);
-        break;
-      case 3:
-	      menuCaldwell(sync);
-      break;
-      case 4:
-        menuHerschel(sync);
-        break;
-      case 5:
-        menuFilters();
-        break;
-      case 6:
-        menuSolarSys(sync);
-        break;
-      case 7:
-        menuUser(sync);
-        break;
-      case 8:
-        menuRADec(sync);
-        break;
-      case 9:
-      {
-        boolean GotoHome=false; 
-        DisplayMessage("Goto Home will", "clear the Model", 2000);
-        if (display->UserInterfaceInputValueBoolean(&buttonPad, "Goto Home?", &GotoHome)) {
-          if (GotoHome) {
-            char cmd[5];
-            sprintf(cmd, ":hX#");
-            cmd[2] = sync ? 'F' : 'C';
-            if (SetLX200(cmd) == LX200VALUESET) DisplayMessage(sync ? "Reset at" : "Goto", " Home Position", -1);
-            // Quit Menu
-            current_selection_L1 = 0;
-            current_selection_L0 = 0;
+
+    if (current_selection_L1 != 0) {
+      if ((current_selection_L1>0) && (current_selection_L1<=cat_mgr.numCatalogs())) {
+        menuCatalog(sync,current_selection_L1-1);
+      } else
+      switch (current_selection_L1-cat_mgr.numCatalogs()) {
+        case 1:
+          menuFilters();
+          break;
+        case 2:
+          menuSolarSys(sync);
+          break;
+        case 3:
+          menuUser(sync);
+          break;
+        case 4:
+          menuRADec(sync);
+          break;
+        case 5:
+        {
+          boolean GotoHome=false; 
+          DisplayMessage("Goto Home will", "clear the Model", 2000);
+          if (display->UserInterfaceInputValueBoolean(&buttonPad, "Goto Home?", &GotoHome)) {
+            if (GotoHome) {
+              char cmd[5];
+              sprintf(cmd, ":hX#");
+              cmd[2] = sync ? 'F' : 'C';
+              if (SetLX200(cmd) == LX200VALUESET) DisplayMessage(sync ? "Reset at" : "Goto", " Home Position", -1);
+              // Quit Menu
+              current_selection_L1 = 0;
+              current_selection_L0 = 0;
+            }
           }
         }
       }
@@ -51,77 +54,21 @@ void SmartHandController::menuSyncGoto(bool sync)
   }
 }
 
-void SmartHandController::menuStar(bool sync)
+void SmartHandController::menuCatalog(bool sync, int number)
 {
   if (!cat_mgr.isInitialized()) { cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0()); }
-  cat_mgr.select(STAR);
+  cat_mgr.select(number);
 
-  char title[20]; if (sync) strcpy(title,"Sync "); else strcpy(title,"Goto "); strcat(title,"Star");
+  char title[20]; if (sync) strcpy(title,"Sync "); else strcpy(title,"Goto "); strcat(title,cat_mgr.catalogTitle());
   if (setCatMgrFilters()) strcat(title," Ÿ");
 
-  if (!cat_mgr.setIndex(0)) 
-    DisplayMessage(title, "No Stars", 2000);
-  else
+  if (!cat_mgr.setIndex(0)) {
+    strcpy(title,"No "); strcat(title,cat_mgr.catalogTitle());
+    DisplayMessage(title, title, 2000);
+  } else
   if (cat_mgr.isInitialized()) {
     if (display->UserInterfaceCatalog(&buttonPad, title)) {
       bool  ok = DisplayMessageLX200(SyncGotoCatLX200(sync), false);
-      if (ok) { current_selection_L1 = 0; current_selection_L0 = 0; } // Quit Menu
-    }
-  }
-}
-
-void SmartHandController::menuMessier(bool sync)
-{
-  if (!cat_mgr.isInitialized()) { cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0()); }
-  cat_mgr.select(MESSIER);
-
-  char title[20]; if (sync) strcpy(title,"Sync "); else strcpy(title,"Goto "); strcat(title,"Messier");
-  if (setCatMgrFilters()) strcat(title," Ÿ");
-  
-  if (!cat_mgr.setIndex(0)) 
-    DisplayMessage(title, "No Objects", 2000);
-  else
-  if (cat_mgr.isInitialized()) {
-    if (display->UserInterfaceCatalog(&buttonPad, title)) {
-      bool ok = DisplayMessageLX200(SyncGotoCatLX200(sync), false);
-      if (ok) { current_selection_L1 = 0; current_selection_L0 = 0; } // Quit Menu
-    }
-  }
-}
-
-void SmartHandController::menuCaldwell(bool sync)
-{
-  if (!cat_mgr.isInitialized()) { cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0()); }
-  cat_mgr.select(CALDWELL);
-
-  char title[20]; if (sync) strcpy(title,"Sync "); else strcpy(title,"Goto "); strcat(title,"Caldwell");
-  if (setCatMgrFilters()) strcat(title," Ÿ");
-
-  if (!cat_mgr.setIndex(0)) 
-    DisplayMessage(title, "No Objects", 2000);
-  else
-  if (cat_mgr.isInitialized()) {
-    if (display->UserInterfaceCatalog(&buttonPad, title)) {
-      bool ok = DisplayMessageLX200(SyncGotoCatLX200(sync), false);
-      if (ok) { current_selection_L1 = 0; current_selection_L0 = 0; } // Quit Menu
-    }
-  }
-}
-
-void SmartHandController::menuHerschel(bool sync)
-{
-  if (!cat_mgr.isInitialized()) { cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0()); }
-  cat_mgr.select(HERSCHEL);
-
-  char title[20]; if (sync) strcpy(title,"Sync "); else strcpy(title,"Goto "); strcat(title,"Herschel");
-  if (setCatMgrFilters()) strcat(title," Ÿ");
-
-  if (!cat_mgr.setIndex(0)) 
-    DisplayMessage(title, "No Objects", 2000);
-  else
-  if (cat_mgr.isInitialized()) {
-    if (display->UserInterfaceCatalog(&buttonPad, title)) {
-      bool ok = DisplayMessageLX200(SyncGotoCatLX200(sync), false);
       if (ok) { current_selection_L1 = 0; current_selection_L0 = 0; } // Quit Menu
     }
   }

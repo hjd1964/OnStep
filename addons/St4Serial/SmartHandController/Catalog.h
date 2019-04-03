@@ -1,10 +1,11 @@
 ﻿#pragma once
 #include <Arduino.h>
-#include "constants.h"
+
+// maximum number of catalogs supported
+#define MaxCatalogs 64
 
 const double Rad=57.29577951;
 
-enum Catalog { STAR, MESSIER, CALDWELL, HERSCHEL, CAT_NONE };
 const int FM_NONE = 0;
 const int FM_ABOVE_HORIZON = 1;
 const int FM_ALIGN_ALL_SKY = 2;
@@ -28,9 +29,12 @@ class CatMgr {
     double lstHours();
 
 // catalog selection
-    void select(Catalog cat);
-    Catalog getCat();
-    const char* catalogStr();
+    int numCatalogs();
+    void select(int cat);
+    bool isStarCatalog();
+    bool isDsoCatalog();
+    const char* catalogTitle();
+    const char* catalogPrefix();
 
 // catalog filtering
     void filtersClear();
@@ -73,20 +77,12 @@ private:
     double _sinLat=0;
     double _lstT0=0;
     unsigned long _lstMillisT0=0;
-    Catalog _cat=CAT_NONE;
     
     int _fm=FM_NONE;
     int _fm_con=0;
     int _fm_obj_type=0;
     
     int _selected=0;
-    int _idx[5]={0,0,0,0,0};
-    int _maxIdx[5]={
-	    NUM_STARS-1,
-	    NUM_MESSIER-1,
-	    NUM_CALDWELL-1,
-      NUM_HERSCHEL-1,
-	    0-1};
 
     bool isFiltered();
 

@@ -95,8 +95,8 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y)
 
   char line[16];
 
-  // for Star Catalog
-  if (cat_mgr.getCat() == STAR)
+  // for Star Catalogs
+  if (cat_mgr.isStarCatalog())
   {
 
     // Bayer designation of the star (Greek letter)
@@ -155,7 +155,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y)
 
     // Catalog letter and Object ID
     step0 = u8g2_GetUTF8Width(u8g2, "W 9999 ");
-    sprintf(line, "%s%u", cat_mgr.catalogStr(), cat_mgr.primaryId());
+    sprintf(line, "%s%u", cat_mgr.catalogPrefix(), cat_mgr.primaryId());
     x = 0;
     u8g2_DrawUTF8(u8g2, x, y, line);
  

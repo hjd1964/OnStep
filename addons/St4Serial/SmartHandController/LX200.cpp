@@ -3,7 +3,6 @@
 #include "Catalog.h"
 #include "LX200.h"
 #include "SmartController.h"
-#include "constants.h"
 
 // integer numeric conversion with error checking
 boolean atoi2(char *a, int *i) {
@@ -382,7 +381,7 @@ LX200RETURN SyncGotoCatLX200(bool sync)
   int epoch;
   unsigned int day, month, year;
   if (GetDateLX200(day, month, year, true) == LX200GETVALUEFAILED) return LX200GETVALUEFAILED;
-  if (cat_mgr.getCat()==CAT_NONE) return LX200UNKOWN;
+  if (!cat_mgr.isStarCatalog() && !cat_mgr.isDsoCatalog()) return LX200UNKOWN;
   EquatorialCoordinates coo;
   coo.ra = cat_mgr.rah();
   coo.dec = cat_mgr.dec();
@@ -417,7 +416,7 @@ LX200RETURN SyncGotoPlanetLX200(bool sync, unsigned short objSys)
 
 LX200RETURN SyncSelectedStarLX200(unsigned short alignSelectedStar)
 {
-  if (alignSelectedStar >= 0 && alignSelectedStar < NUM_STARS) return SyncGotoCatLX200(false); else return LX200UNKOWN;
+  if (alignSelectedStar >= 0) return SyncGotoCatLX200(false); else return LX200UNKOWN;
 }
 
 LX200RETURN readBacklashLX200(const uint8_t &axis, float &backlash)

@@ -2,197 +2,29 @@
 #include "Catalog.h"
 #include "Config.h"
 #include "math.h"
+#include "Constants.h"
 
-#include "constants.h"
-
-// Do not change anything in the structs or arrays below, since they
-// have to be in sync with the extractions scripts.
-
-// Struct for Deep Space Objects (Messier, Herschel, ..etc.) 14 bytes
-typedef struct {
-  const char           Cons;
-  const char           Obj_type;
-  const unsigned short Obj_id;
-  const signed   short Mag;
-  const float          RA;
-  const float          DE;
-  } dso_t;
-
-// Struct for stars 28 bytes
-typedef struct {
-  const char           Cons;
-  const char           Bayer;
-  const signed   short Mag;
-  const float          RA;
-  const float          DE;
-  const char           Name[16];
-  } star_t;
-
-// Bayer designation, the Greek letter for each star within a constellation
-const char* Txt_Bayer[24] = {
-  "Alp",
-  "Bet",
-  "Gam",
-  "Del",
-  "Eps",
-  "Zet",
-  "Eta",
-  "The",
-  "Iot",
-  "Kap",
-  "Lam",
-  "Mu" ,
-  "Nu" ,
-  "Xi" ,
-  "Omi",
-  "Pi" ,
-  "Rho",
-  "Sig",
-  "Tau",
-  "Ups",
-  "Phi",
-  "Chi",
-  "Psi",
-  "Ome"
-};
-
-// Type of object, in the Open NGC database. Do not change the
-// order of this, since it has to match what is in Open NGC
-const char * Txt_Object_Type[21] = {
-  "Galaxy",
-  "Open Cluster",
-  "Star",
-  "Double Star",
-  "Other",
-  "Galaxy Pair",
-  "Galaxy Triplet",
-  "Galaxy Group",
-  "Globular Cluster",
-  "Planetary Nebula",
-  "Nebula",
-  "Hii Region",
-  "Cluster + Nebula",
-  "Asterism",
-  "Reflectn Nebula",
-  "SuperNova Rmnnt",
-  "Emission Nebula",
-  "NonExist",
-  "Nova",
-  "Duplicate",
-  "Dark Nebula",
-};
-
-// Constellation abbreviation, alphabetical order
-const char* Txt_Constellations[89] = {
-  "And", //  0
-  "Ant", //  1
-  "Aps", //  2
-  "Aql", //  3
-  "Aqr", //  4
-  "Ara", //  5
-  "Ari", //  6
-  "Aur", //  7
-  "Boo", //  8
-  "CMa", //  9
-  "CMi", //  10
-  "CVn", //  11
-  "Cae", //  12
-  "Cam", //  13
-  "Cap", //  14
-  "Car", //  15
-  "Cas", //  16
-  "Cen", //  17
-  "Cep", //  18
-  "Cet", //  19
-  "Cha", //  20
-  "Cir", //  21
-  "Cnc", //  22
-  "Col", //  23
-  "Com", //  24
-  "CrA", //  25
-  "CrB", //  26
-  "Crt", //  27
-  "Cru", //  28
-  "Crv", //  29
-  "Cyg", //  30
-  "Del", //  31
-  "Dor", //  32
-  "Dra", //  33
-  "Equ", //  34
-  "Eri", //  35
-  "For", //  36
-  "Gem", //  37
-  "Gru", //  38
-  "Her", //  39
-  "Hor", //  40
-  "Hya", //  41
-  "Hyi", //  42
-  "Ind", //  43
-  "LMi", //  44
-  "Lac", //  45
-  "Leo", //  46
-  "Lep", //  47
-  "Lib", //  48
-  "Lup", //  49
-  "Lyn", //  50
-  "Lyr", //  51
-  "Men", //  52
-  "Mic", //  53
-  "Mon", //  54
-  "Mus", //  55
-  "Nor", //  56
-  "Oct", //  57
-  "Oph", //  58
-  "Ori", //  59
-  "Pav", //  60
-  "Peg", //  61
-  "Per", //  62
-  "Phe", //  63
-  "Pic", //  64
-  "PsA", //  65
-  "Psc", //  66
-  "Pup", //  67
-  "Pyx", //  68
-  "Ret", //  69
-  "Scl", //  70
-  "Sco", //  71
-  "Sct", //  72
-  "Ser", //  73
-  "Sex", //  74
-  "Sge", //  75
-  "Sgr", //  76
-  "Tau", //  77
-  "Tel", //  78
-  "TrA", //  79
-  "Tri", //  80
-  "Tuc", //  81
-  "UMa", //  82
-  "UMi", //  83
-  "Vel", //  84
-  "Vir", //  85
-  "Vol", //  86
-  "Vul", //  87
-  "Unknown" // 88
-};
-
-// Catalog names. 
-const char * Txt_Catalog[] = {
-  "Star ",
-  "M ",
-  "C ",
-  "N ",
-  "None "
-};
-
+// --------------------------------------------------------------------------------
 // Data for different catalogs, each is a collection of certain celestial objects
-// These are machine generated using scripts from Open NGC and KStars' Star data
-// Do NOT edit manually. Rerun the scripts instead. 
+// ** In this section is everything you need touch to add a new "catalog.h"      **
+// ** file and use it within the SHC.                                            **
+
+#include "stars.h"
 #include "messier.h"
 #include "caldwell.h"
 #include "herschel.h"
-#include "stars.h"
 
-// ----------------------------------------------------------
+catalog_t catalog[] = {
+// note: Alignment always uses the first catalog!
+// Title       Prefix   Num records   Catalog data  Catalog name string  Star?  Epoch
+  {"Stars",    "Star ", NUM_STARS,    Cat_Stars,    Cat_Stars_Names,     true,  2000, 0},
+  {"Messier",  "M ",    NUM_MESSIER,  Cat_Messier,  Cat_Messier_Names,   false, 2000, 0},
+  {"Caldwell", "C ",    NUM_CALDWELL, Cat_Caldwell, Cat_Caldwell_Names,  false, 2000, 0},
+  {"Herschel", "N ",    NUM_HERSCHEL, Cat_Herschel, Cat_Herschel_Names,  false, 2000, 0},
+  {"",         "",                 0,         NULL,               NULL,  false,    0, 0}
+};
+
+// --------------------------------------------------------------------------------
 // Catalog Manager
 
 // initialization
@@ -227,24 +59,42 @@ double CatMgr::lstHours() {
   return _lstT0+siderealSecondsSinceT0/3600.0;
 }
 
-// handle catalog selection
-void CatMgr::select(Catalog cat) {
-  _cat=cat;
-  if (_cat==STAR)     _selected = STAR; else
-  if (_cat==MESSIER)  _selected = MESSIER; else
-  if (_cat==CALDWELL) _selected = CALDWELL; else
-  if (_cat==HERSCHEL) _selected = HERSCHEL; else
-    { _selected=0; _cat=CAT_NONE; }
+// number of catalogs available
+int CatMgr::numCatalogs() {
+  for (int i=0; i<MaxCatalogs; i++) {
+    if (catalog[i].NumObjects==0) return i;
+  }
+  return 32;
 }
 
-// Get active catalog
-Catalog CatMgr::getCat() {
-  return _cat;
+star_t* _starCatalog = NULL;
+dso_t*  _dsoCatalog = NULL;
+
+// handle catalog selection (0..n)
+void CatMgr::select(int number) {
+  _starCatalog=NULL;
+  _dsoCatalog=NULL;
+  if ((number<0) || (number>=numCatalogs())) number=-1; // invalid catalog?
+  _selected=number;
+  if (_selected>=0) {
+    if (catalog[_selected].isStarCatalog) _starCatalog=(star_t*)(catalog[_selected].Objects); else _dsoCatalog=(dso_t*)(catalog[_selected].Objects);
+  }
 }
 
-// Get active catalog description
-const char* CatMgr::catalogStr() {
-  return Txt_Catalog[_selected];
+// DSO or star catalog?
+bool CatMgr::isStarCatalog() { return (_starCatalog!=NULL); }
+bool CatMgr::isDsoCatalog()  { return (_dsoCatalog!=NULL);  }
+
+// Get active catalog title
+const char* CatMgr::catalogTitle() {
+  if (_selected<0) return "";
+  return catalog[_selected].Title;
+}
+
+// Get active catalog prefix
+const char* CatMgr::catalogPrefix() {
+  if (_selected<0) return "";
+  return catalog[_selected].Prefix;
 }
 
 // catalog filtering
@@ -267,19 +117,13 @@ bool CatMgr::isFiltered() {
   if (_fm==FM_NONE) return false;
   if (_fm&FM_ABOVE_HORIZON) { if (alt()<0.0) return true; }
   if (_fm&FM_ALIGN_ALL_SKY) {
-    // minimum 10 degrees altitude (to limit unlikely align stars and to minimize refraction effects)
-    if (alt()<10.0) return true;
-    // minimum 5 degrees from the pole (for accuracy)
-    if (_lat>=0.0) {
-      if (dec()>85.0) return true;
-    } else {
-      if (dec()<-85.0) return true;
-    }
+    if (alt()<10.0) return true;      // minimum 10 degrees altitude
+    if (abs(dec())>85.0) return true; // minimum 5 degrees from the pole (for accuracy)
   }
   if (_fm&FM_CONSTELLATION) {
     if (constellation()!=_fm_con) return true;
   }
-  if ((_cat!=STAR) && (_fm&FM_OBJ_TYPE)) {
+  if (isDsoCatalog() && (_fm&FM_OBJ_TYPE)) {
     if (objectType()!=_fm_obj_type) return true;
   }
   return false;
@@ -287,35 +131,36 @@ bool CatMgr::isFiltered() {
 
 // select catalog record
 bool CatMgr::setIndex(int index) {
-  _idx[_selected]=index;
+  if (_selected<0) return false;
+  catalog[_selected].Index=index;
   decIndex();
   return incIndex();
 }
 
 int CatMgr::getIndex() {
-  return _idx[_selected];
+  return catalog[_selected].Index;
 }
 
 int CatMgr::getMaxIndex() {
-  return _maxIdx[_selected];
+  return catalog[_selected].NumObjects-1;
 }
 
 bool CatMgr::incIndex() {
-  int i=_maxIdx[_selected]+1;
+  int i=getMaxIndex()+1;
   do {
     i--;
-    _idx[_selected]++;
-    if (_idx[_selected]>_maxIdx[_selected]) _idx[_selected]=0;
+    catalog[_selected].Index++;
+    if (catalog[_selected].Index>getMaxIndex()) catalog[_selected].Index=0;
   } while (isFiltered() && (i>0));
   if (isFiltered()) return false; else return true;
 }
 
 bool CatMgr::decIndex() {
-  int i=_maxIdx[_selected]+1;
+  int i=getMaxIndex()+1;
   do {
     i--;
-    _idx[_selected]--;
-    if (_idx[_selected]<0) _idx[_selected]=_maxIdx[_selected];
+    catalog[_selected].Index--; 
+    if (catalog[_selected].Index<0) catalog[_selected].Index=getMaxIndex();
   } while (isFiltered() && (i>0));
   if (isFiltered()) return false; else return true;
 }
@@ -330,10 +175,11 @@ double CatMgr::ra() {
 // RA in hours
 double CatMgr::rah() {
   double f;
-  if (_cat==STAR)     f=Cat_Stars[_idx[_selected]].RA; else
-  if (_cat==MESSIER)  f=Cat_Messier[_idx[_selected]].RA; else
-  if (_cat==CALDWELL) f=Cat_Caldwell[_idx[_selected]].RA; else
-  if (_cat==HERSCHEL) f=Cat_Herschel[_idx[_selected]].RA; else f=0;
+  int s=0;
+  if (_selected<0) return 0;
+  if (_starCatalog!=NULL) { f=_starCatalog[catalog[_selected].Index].RA; s=sizeof(_starCatalog[catalog[_selected].Index].RA); } else
+  if (_dsoCatalog!=NULL) { f=_dsoCatalog[catalog[_selected].Index].RA; s=sizeof(_dsoCatalog[catalog[_selected].Index].RA); } else f=0;
+  if (s==2) f/=2730.6666666666666;
   return f;
 }
 
@@ -348,12 +194,7 @@ double CatMgr::ha() {
 
 // Get RA of an object, in hours, as HH:MM:SS
 void CatMgr::raHMS(uint8_t& h, uint8_t& m, uint8_t& s) {
-  double f;
-  if (_cat==STAR)     f=Cat_Stars[_idx[_selected]].RA; else
-  if (_cat==MESSIER)  f=Cat_Messier[_idx[_selected]].RA; else
-  if (_cat==CALDWELL) f=Cat_Caldwell[_idx[_selected]].RA; else
-  if (_cat==HERSCHEL) f=Cat_Herschel[_idx[_selected]].RA; else f=0;
-  
+  double f=rah();
   double h1,m1,s1;
 
   h1=floor(f);
@@ -370,30 +211,25 @@ void CatMgr::raHMS(uint8_t& h, uint8_t& m, uint8_t& s) {
 // Dec in degrees
 double CatMgr::dec() {
   double f;
-  if (_cat==STAR)     f=Cat_Stars[_idx[_selected]].DE; else
-  if (_cat==MESSIER)  f=Cat_Messier[_idx[_selected]].DE; else
-  if (_cat==CALDWELL) f=Cat_Caldwell[_idx[_selected]].DE; else
-  if (_cat==HERSCHEL) f=Cat_Herschel[_idx[_selected]].DE; else f=0;
+  int s=0;
+  if (_selected<0) return 0;
+  if (_starCatalog!=NULL) { f=_starCatalog[catalog[_selected].Index].DE; s=sizeof(_starCatalog[catalog[_selected].Index].DE); } else
+  if (_dsoCatalog!=NULL) { f=_dsoCatalog[catalog[_selected].Index].DE; s=sizeof(_dsoCatalog[catalog[_selected].Index].DE); } else f=0;
+  if (s==2) f/=364.07777777777777;
   return f;
 }
 
 // Declination as DD:MM:SS
 void CatMgr::decDMS(short& d, uint8_t& m, uint8_t& s) {
-  double f;
-  if (_cat==STAR)     f=Cat_Stars[_idx[_selected]].DE; else
-  if (_cat==MESSIER)  f=Cat_Messier[_idx[_selected]].DE; else
-  if (_cat==CALDWELL) f=Cat_Caldwell[_idx[_selected]].DE; else
-  if (_cat==HERSCHEL) f=Cat_Herschel[_idx[_selected]].DE; else f=0;
-
+  double f=dec();
   double d1, m1, s1;
+
   d1=floor(f);
   m1=(f-d1)*60;
   s1=(m1-floor(m1))*60.0;
 
   d = (int)d1;
-  if (f<0) {
-    d *= -1;
-  }
+  if (f<0) d *= -1;
 
   m = (int)m1;
   s = (int)s1;
@@ -401,10 +237,8 @@ void CatMgr::decDMS(short& d, uint8_t& m, uint8_t& s) {
 
 // Epoch for catalog
 int CatMgr::epoch() {
-  if (_cat==STAR) return 2000; else
-  if (_cat==MESSIER) return 2000; else
-  if (_cat==CALDWELL) return 2000; else
-  if (_cat==HERSCHEL) return 2000; else return 0;
+  if (_selected<0) return -1;
+  return catalog[_selected].Epoch;
 }
 
 // Alt in degrees
@@ -436,20 +270,20 @@ void CatMgr::topocentricToObservedPlace(float *RA, float *Dec) {
 
 // Magnitude of an object
 float CatMgr::magnitude() {
-  float m=250;
-  if (_cat==STAR)     m=Cat_Stars[_idx[_selected]].Mag; else
-  if (_cat==MESSIER)  m=Cat_Messier[_idx[_selected]].Mag; else
-  if (_cat==CALDWELL) m=Cat_Caldwell[_idx[_selected]].Mag; else
-  if (_cat==HERSCHEL) m=Cat_Herschel[_idx[_selected]].Mag;
-  return m/100.0;
+  float m=9990;
+  int s=0;
+  if (_selected<0) return m/100;
+  if (_starCatalog!=NULL) { m=_starCatalog[catalog[_selected].Index].Mag; s=sizeof(_starCatalog[catalog[_selected].Index].Mag); } else
+  if (_dsoCatalog!=NULL) { m=_dsoCatalog[catalog[_selected].Index].Mag; s=sizeof(_dsoCatalog[catalog[_selected].Index].Mag); }
+  if (s==1) { m = (m / 10.0) - 2.5; if (abs(m-23.0)<0.001) m = 99.9; } else m = m / 100.0;
+  return m;
 }
 
 // Constellation number for an object
 byte CatMgr::constellation() {
-  if (_cat==STAR)     return Cat_Stars[_idx[_selected]].Cons; else
-  if (_cat==MESSIER)  return Cat_Messier[_idx[_selected]].Cons; else
-  if (_cat==CALDWELL) return Cat_Caldwell[_idx[_selected]].Cons; else
-  if (_cat==HERSCHEL) return Cat_Herschel[_idx[_selected]].Cons; else return 89;
+  if (_selected<0) return 89;
+  if (_starCatalog!=NULL) return _starCatalog[catalog[_selected].Index].Cons; else
+  if (_dsoCatalog!=NULL) return _dsoCatalog[catalog[_selected].Index].Cons; else return 89;
 }
 
 // Constellation string, from constellation number
@@ -457,35 +291,62 @@ const char* CatMgr::constellationStr() {
   return Txt_Constellations[constellation()];
 }
 
-// Object type number
+// Object type code
 byte CatMgr::objectType() {
-  if (_cat==MESSIER)  return Cat_Messier[_idx[_selected]].Obj_type; else
-  if (_cat==CALDWELL) return Cat_Caldwell[_idx[_selected]].Obj_type; else
-  if (_cat==HERSCHEL) return Cat_Herschel[_idx[_selected]].Obj_type; else return -1;
+  if (_selected<0) return -1;
+  if (_starCatalog!=NULL) return 2; else
+  if (_dsoCatalog!=NULL) return _dsoCatalog[catalog[_selected].Index].Obj_type; else return -1;
 }
 
 // Object type string
 const char* CatMgr::objectTypeStr() {
-  if (_cat==STAR)     return "Star"; else
-  if (_cat==MESSIER)  return Txt_Object_Type[objectType()]; else
-  if (_cat==CALDWELL) return Txt_Object_Type[objectType()]; else
-  if (_cat==HERSCHEL) return Txt_Object_Type[objectType()]; else return "";
+  int t=objectType();
+  if ((t>=0) && (t<=20)) return Txt_Object_Type[t]; else return "";
 }
 
 // Object name
 const char* CatMgr::objectName() {
-  if (_cat==STAR)     return Cat_Stars[_idx[_selected]].Name; else
-  if (_cat==MESSIER)  return ""; else
-  if (_cat==CALDWELL) return ""; else
-  if (_cat==HERSCHEL) return ""; else return "";
+  if (_selected<0) return "";
+  static char result[40] = "";
+
+  // does it have a name? if not just return
+  if (_starCatalog!=NULL) { if (!_starCatalog[catalog[_selected].Index].HasName) return ""; } else
+  if (_dsoCatalog!=NULL) { if (!_dsoCatalog[catalog[_selected].Index].HasName) return ""; }
+
+  // find the string number
+  int _nameIndex=-1;
+  int j=catalog[_selected].Index;
+  if (j>getMaxIndex()) j=-1;
+  if (j<0) return "";
+  if (_starCatalog!=NULL) { for (int i=0; i<=j; i++) { if (_starCatalog[i].HasName) _nameIndex++; } } else
+  if (_dsoCatalog!=NULL) { for (int i=0; i<=j; i++) { if (_dsoCatalog[i].HasName) _nameIndex++; } } else return "";
+
+  // find the string start index
+  j=-1;
+  int n=_nameIndex;
+  unsigned int len=strlen(catalog[_selected].ObjectNames);
+  for (unsigned int i=0; i<len; i++) {
+    if (n==0) { j=i; break; }
+    if (catalog[_selected].ObjectNames[i]==',') { n--; }
+  }
+
+  // if found, return the string
+  if (j>-1) {
+    int k=0;
+    for (unsigned int i=j; i<len; i++) {
+      result[k++]=catalog[_selected].ObjectNames[i];
+      if (result[k-1]==',') { result[k-1]=0; break; }
+      if (i==len-1) { result[k]=0; break; }
+    }
+    return result;
+  } else return "";
 }
 
 // Object ID
 int CatMgr::primaryId() {
-  if (_cat==STAR)     return Cat_Stars[_idx[_selected]].Bayer + 1; else
-  if (_cat==MESSIER)  return Cat_Messier[_idx[_selected]].Obj_id; else
-  if (_cat==CALDWELL) return Cat_Messier[_idx[_selected]].Obj_id; else
-  if (_cat==HERSCHEL) return Cat_Herschel[_idx[_selected]].Obj_id; else return -1;
+  if (_selected<0) return -1;
+  if (_starCatalog!=NULL) return _starCatalog[catalog[_selected].Index].Bayer+1; else
+  if (_dsoCatalog!=NULL) return _dsoCatalog[catalog[_selected].Index].Obj_id; else return -1;
 }
 
 // support functions

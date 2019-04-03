@@ -754,7 +754,7 @@ void SmartHandController::drawIntro()
 bool SmartHandController::SelectStarAlign()
 {
   if (!cat_mgr.isInitialized()) { cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0()); }
-  cat_mgr.select(STAR);
+  cat_mgr.select(0);
 
   cat_mgr.filtersClear();
   cat_mgr.filterAdd(FM_ALIGN_ALL_SKY);

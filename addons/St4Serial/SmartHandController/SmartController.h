@@ -84,10 +84,7 @@ private:
   void menuMain();
   void menuSpeedRate();
   void menuSyncGoto(bool sync);
-  void menuStar(bool sync);
-  void menuHerschel(bool sync);
-  void menuMessier(bool sync);
-  void menuCaldwell(bool sync);
+  void menuCatalog(bool sync, int number);
   bool setCatMgrFilters();
   void menuFilters();
   void menuFilterCon();
