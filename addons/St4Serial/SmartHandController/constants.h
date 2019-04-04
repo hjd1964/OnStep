@@ -1,12 +1,15 @@
 #pragma once
 
-// ----------------------------------------------------------
-// Do not change anything in the structs or arrays below, since they
-// have to be in sync with the extraction scripts.
+// maximum number of catalogs supported
+#define MaxCatalogs 64
 
 // use the compact record type for Stars or DSO's
 #define USE_COMPACT_STARS_OFF
 #define USE_COMPACT_DSOS_OFF
+
+// ----------------------------------------------------------
+// Do not change anything in the structs or arrays below, since they
+// have to be in sync with the extraction scripts.
 
 // Struct for catalog header
 typedef struct {
@@ -80,7 +83,7 @@ const char* Txt_Bayer[24] = {
 
 // Type of object, in the Open NGC database. Do not change the
 // order of this, since it has to match what is in Open NGC
-const char * Txt_Object_Type[21] = {
+const char* Txt_Object_Type[21] = {
   "Galaxy",          "Open Cluster",     "Star",             "Double Star", "Other",      "Galaxy Pair",      "Galaxy Triplet",
   "Galaxy Group",    "Globular Cluster", "Planetary Nebula", "Nebula",      "Hii Region", "Cluster + Nebula", "Asterism",
   "Reflectn Nebula", "SuperNova Rmnnt",  "Emission Nebula",  "NonExist",    "Nova",       "Duplicate",        "Dark Nebula"

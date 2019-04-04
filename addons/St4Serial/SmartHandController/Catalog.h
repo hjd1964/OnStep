@@ -1,9 +1,6 @@
 ﻿#pragma once
 #include <Arduino.h>
 
-// maximum number of catalogs supported
-#define MaxCatalogs 64
-
 const double Rad=57.29577951;
 
 const int FM_NONE = 0;
