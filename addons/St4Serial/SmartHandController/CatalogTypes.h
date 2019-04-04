@@ -89,7 +89,7 @@ typedef struct {
   const unsigned long  SubClass:4;   // Harvard classification 0 to 9 (0-16)
   const unsigned long  Star_type: 3; // n/a, variable, double, triple, etc. (0-7)
   const unsigned long  Sep1: 10;     // seperation component A/B 0.1 to 100.0" where 0 means n/a, 1001 means >100.0" (0-1023)
-  const unsigned long  Sep1: 10;     // seperation component A/C 0.1 to 100.0" where 0 means n/a, 1001 means >100.0" (0-1023)
+  const unsigned long  Sep2: 10;     // seperation component A/C 0.1 to 100.0" where 0 means n/a, 1001 means >100.0" (0-1023)
   const float          Period;       // in days
 
   const float          RA;
