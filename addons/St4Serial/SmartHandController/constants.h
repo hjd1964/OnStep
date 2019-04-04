@@ -3,7 +3,7 @@
 // maximum number of catalogs supported
 #define MaxCatalogs 64
 
-// use the compact record type for Stars or DSO's
+// _ON use the compact record type for Stars or DSO's
 #define USE_COMPACT_STARS_OFF
 #define USE_COMPACT_DSOS_OFF
 
