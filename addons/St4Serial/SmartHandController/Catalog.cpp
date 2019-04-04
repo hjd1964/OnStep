@@ -2,7 +2,7 @@
 #include "Catalog.h"
 #include "Config.h"
 #include "math.h"
-#include "Constants.h"
+#include "CatalogTypes.h"
 
 // --------------------------------------------------------------------------------
 // Data for different catalogs, each is a collection of certain celestial objects
