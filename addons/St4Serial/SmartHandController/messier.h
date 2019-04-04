@@ -2,7 +2,7 @@
 // Do NOT edit this data manually. Rather, fix the import programs and rerun.
 #define NUM_MESSIER 109
 const char *Cat_Messier_Names="Andromeda";
-const char *Cat_Messier_SubIds="";
+const char *Cat_Messier_Notes="";
 #ifndef USE_COMPACT_DSOS_ON
 dso_t Cat_Messier[NUM_MESSIER] = {
   { 0, 77, 15, 0,    1,   840,   5.5755,  22.0145 }, // M  001, Tau,   SNR,   8.40, 05:34:31, +22:00:5, NGC1952

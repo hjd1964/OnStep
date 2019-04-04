@@ -73,8 +73,8 @@ class CatMgr {
 
     unsigned int primaryId();
 
-    int         subId();
-    const char* subIdStr();
+    int         note();
+    const char* noteStr();
 
 private:
     double _lat=-10000;

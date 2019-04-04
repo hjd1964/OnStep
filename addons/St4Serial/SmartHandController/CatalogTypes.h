@@ -11,6 +11,8 @@
 // Do not change anything in the structs or arrays below, since they
 // have to be in sync with the extraction scripts.
 
+enum CAT_TYPES {CAT_NONE, CAT_GEN_STAR, CAT_EXT_STAR, CAT_DSO};
+
 // Struct for catalog header
 typedef struct {
   const char           Title[10];
@@ -18,8 +20,8 @@ typedef struct {
   const unsigned short NumObjects;
   void*                Objects;
   const char*          ObjectNames;
-  const char*          ObjectSubIds;
-  bool                 isStarCatalog;
+  const char*          ObjectNotes;
+  CAT_TYPES            CatalogType;
   int                  Epoch;
   int                  Index;
 } catalog_t;
@@ -32,7 +34,7 @@ typedef struct {
     const char           Has_name: 1;
     const char           Cons: 7;
     const char           Obj_type: 7;
-    const char           Has_subId: 1;
+    const char           Has_note: 1;
     const unsigned short Obj_id;
     const signed   short Mag;
     const float          RA;
@@ -43,7 +45,7 @@ typedef struct {
     const char           Has_name: 1;
     const char           Cons: 7;
     const char           Obj_type: 7;
-    const char           Has_subId: 1;
+    const char           Has_note: 1;
     const unsigned short Obj_id;
     const char           Mag;
     const unsigned short RA;
@@ -51,13 +53,13 @@ typedef struct {
   } dso_t;
 #endif
 
-// Struct for stars
-#ifndef USE_COMPACT_DSOS_ON
+// Struct for general star catalog
+#ifndef USE_COMPACT_STARS_ON
   typedef struct {
     const char           Has_name: 1;
     const char           Cons: 7;
     const char           Bayer: 5;
-    const char           Has_subId: 1;
+    const char           Has_note: 1;
     const signed short   Mag;
     const float          RA;
     const float          DE;
@@ -67,12 +69,32 @@ typedef struct {
     const char           Has_name: 1;
     const char           Cons: 7;
     const char           Bayer: 5;
-    const char           Has_subId: 1;
+    const char           Has_note: 1;
     const char           Mag;
     const unsigned short RA;
     const signed short   DE;
   } star_t;
 #endif
+
+// Struct for extended star catalog
+typedef struct {
+  const char           Has_name: 1;
+  const char           Cons: 7;
+  const char           Bayer: 5;
+  const char           Has_note: 1;
+  const signed short   Mag;
+
+                                     // total for this section is 8 bytes/rec
+  const unsigned long  Class: 5;     // Harvard classification none,O,B,A,F,G,K,M... (0-32)
+  const unsigned long  SubClass:4;   // Harvard classification 0 to 9 (0-16)
+  const unsigned long  Star_type: 3; // n/a, variable, double, triple, etc. (0-7)
+  const unsigned long  Sep1: 10;     // seperation component A/B 0.1 to 100.0" where 0 means n/a, 1001 means >100.0" (0-1023)
+  const unsigned long  Sep1: 10;     // seperation component A/C 0.1 to 100.0" where 0 means n/a, 1001 means >100.0" (0-1023)
+  const float          Period;       // in days
+
+  const float          RA;
+  const float          DE;
+} xstar_t;
 
 #pragma pack()
 

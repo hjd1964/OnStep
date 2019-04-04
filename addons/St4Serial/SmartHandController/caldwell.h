@@ -2,7 +2,7 @@
 // Do NOT edit this data manually. Rather, fix the import programs and rerun.
 #define NUM_CALDWELL 109
 const char *Cat_Caldwell_Names="";
-const char *Cat_Caldwell_SubIds="";
+const char *Cat_Caldwell_Notes="";
 #ifndef USE_COMPACT_DSOS_ON
 dso_t Cat_Caldwell[NUM_CALDWELL] = {
   { 0, 18,  1, 0,    1,   810,    0.791,  85.2696 }, // C    1, Cep,   OCl,   8.10, 00:47:27, +85:16:1, NGC0188

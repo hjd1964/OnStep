@@ -9,7 +9,7 @@ const char *Cat_Stars_Names="Alpheratz,Mirach,Almach,Altair,Alshain,Tarazed,Al T
 "Mintaka,Alnilam,Alnitak,Na'ir al Saif,Saiph,Peacock,Markab,Scheat,Algenib,Enif,Homan,Matar,Baham,Sadalbari,Mirfak,Algol,Atik,Ankaa,Fomalhaut,Naos,Asmidiske,Antares,Graffias,Dschubba,Sargas,Shaula,Al Niyat,"
 "Lesath,Unukalhai,Chow,Al Nasl,Kaus Media,Kaus Australis,Kaus Borealis,Nunki,Aldebaran,Alnath,Primus Hyadum,Ain,Alcyone,Mothallah,Dubhe,Merak,Phecda,Megrez,Alioth,Mizar,Alkaid,Talitha Boreali,Talitha Austral,"
 "Tania Borealis,Tania Australis,Alula Borealis,Muscida,Polaris,Kocab,Pherkab,Regor,Merkab,Suhail,Tseen Ke,Spica,Zawijah,Auva,Vindemiatrix,Heze";
-const char *Cat_Stars_SubIds="";
+const char *Cat_Stars_Notes="";
 #ifndef USE_COMPACT_STARS_ON
 star_t Cat_Stars[NUM_STARS] = {
   { 1,  0,  0, 0,   206,    0.1398,   29.0904 }, // alp And,   2.07, 00:08:23.26, +29:05:25.6, Alpheratz

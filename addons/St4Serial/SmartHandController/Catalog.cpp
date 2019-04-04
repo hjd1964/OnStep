@@ -16,12 +16,12 @@
 
 catalog_t catalog[] = {
 // note: Alignment always uses the first catalog!
-// Title       Prefix   Num records   Catalog data  Catalog name string  Catalog subId string  Star?  Epoch
-  {"Stars",    "Star ", NUM_STARS,    Cat_Stars,    Cat_Stars_Names,     Cat_Stars_SubIds,     true,  2000, 0},
-  {"Messier",  "M ",    NUM_MESSIER,  Cat_Messier,  Cat_Messier_Names,   Cat_Messier_SubIds,   false, 2000, 0},
-  {"Caldwell", "C ",    NUM_CALDWELL, Cat_Caldwell, Cat_Caldwell_Names,  Cat_Caldwell_SubIds,  false, 2000, 0},
-  {"Herschel", "N ",    NUM_HERSCHEL, Cat_Herschel, Cat_Herschel_Names,  Cat_Herschel_SubIds,  false, 2000, 0},
-  {"",         "",                 0,         NULL,               NULL,                 NULL,  false,    0, 0}
+// Title       Prefix   Num records   Catalog data  Catalog name string  Catalog notes string  Type           Epoch
+  {"Stars",    "Star ", NUM_STARS,    Cat_Stars,    Cat_Stars_Names,     Cat_Stars_Notes,      CAT_GEN_STAR,  2000, 0},
+  {"Messier",  "M ",    NUM_MESSIER,  Cat_Messier,  Cat_Messier_Names,   Cat_Messier_Notes,    CAT_DSO,       2000, 0},
+  {"Caldwell", "C ",    NUM_CALDWELL, Cat_Caldwell, Cat_Caldwell_Names,  Cat_Caldwell_Notes,   CAT_DSO,       2000, 0},
+  {"Herschel", "N ",    NUM_HERSCHEL, Cat_Herschel, Cat_Herschel_Names,  Cat_Herschel_Notes,   CAT_DSO,       2000, 0},
+  {"",         "",                 0,         NULL,               NULL,                NULL,   CAT_NONE,         0, 0}
 };
 
 // --------------------------------------------------------------------------------
@@ -67,22 +67,26 @@ int CatMgr::numCatalogs() {
   return 32;
 }
 
-star_t* _starCatalog = NULL;
-dso_t*  _dsoCatalog = NULL;
+star_t*  _starCatalog  = NULL;
+xstar_t* _xstarCatalog = NULL;
+dso_t*   _dsoCatalog   = NULL;
 
 // handle catalog selection (0..n)
 void CatMgr::select(int number) {
-  _starCatalog=NULL;
-  _dsoCatalog=NULL;
+  _starCatalog =NULL;
+  _xstarCatalog=NULL;
+  _dsoCatalog  =NULL;
   if ((number<0) || (number>=numCatalogs())) number=-1; // invalid catalog?
   _selected=number;
   if (_selected>=0) {
-    if (catalog[_selected].isStarCatalog) _starCatalog=(star_t*)(catalog[_selected].Objects); else _dsoCatalog=(dso_t*)(catalog[_selected].Objects);
+    if (catalog[_selected].CatalogType==CAT_GEN_STAR) _starCatalog=(star_t*)(catalog[_selected].Objects); else
+    if (catalog[_selected].CatalogType==CAT_EXT_STAR) _xstarCatalog=(xstar_t*)(catalog[_selected].Objects); else
+    if (catalog[_selected].CatalogType==CAT_DSO)      _dsoCatalog=(dso_t*)(catalog[_selected].Objects);
   }
 }
 
 // DSO or star catalog?
-bool CatMgr::isStarCatalog() { return (_starCatalog!=NULL); }
+bool CatMgr::isStarCatalog() { return (_starCatalog!=NULL) || (_xstarCatalog!=NULL); }
 bool CatMgr::isDsoCatalog()  { return (_dsoCatalog!=NULL);  }
 
 // Get active catalog title
@@ -160,8 +164,9 @@ double CatMgr::rah() {
   double f;
   int s=0;
   if (_selected<0) return 0;
-  if (_starCatalog!=NULL) { f=_starCatalog[catalog[_selected].Index].RA; s=sizeof(_starCatalog[catalog[_selected].Index].RA); } else
-  if (_dsoCatalog!=NULL) { f=_dsoCatalog[catalog[_selected].Index].RA; s=sizeof(_dsoCatalog[catalog[_selected].Index].RA); } else f=0;
+  if (_starCatalog!=NULL)  { f=_starCatalog[catalog[_selected].Index].RA;  s=sizeof(_starCatalog[catalog[_selected].Index].RA); } else
+  if (_xstarCatalog!=NULL) { f=_xstarCatalog[catalog[_selected].Index].RA; s=sizeof(_xstarCatalog[catalog[_selected].Index].RA); } else
+  if (_dsoCatalog!=NULL)   { f=_dsoCatalog[catalog[_selected].Index].RA;   s=sizeof(_dsoCatalog[catalog[_selected].Index].RA); } else f=0;
   if (s==2) f/=2730.6666666666666;
   return f;
 }
@@ -196,8 +201,9 @@ double CatMgr::dec() {
   double f;
   int s=0;
   if (_selected<0) return 0;
-  if (_starCatalog!=NULL) { f=_starCatalog[catalog[_selected].Index].DE; s=sizeof(_starCatalog[catalog[_selected].Index].DE); } else
-  if (_dsoCatalog!=NULL) { f=_dsoCatalog[catalog[_selected].Index].DE; s=sizeof(_dsoCatalog[catalog[_selected].Index].DE); } else f=0;
+  if (_starCatalog!=NULL)  { f=_starCatalog[catalog[_selected].Index].DE;  s=sizeof(_starCatalog[catalog[_selected].Index].DE); } else
+  if (_xstarCatalog!=NULL) { f=_xstarCatalog[catalog[_selected].Index].DE; s=sizeof(_xstarCatalog[catalog[_selected].Index].DE); } else
+  if (_dsoCatalog!=NULL)   { f=_dsoCatalog[catalog[_selected].Index].DE;   s=sizeof(_dsoCatalog[catalog[_selected].Index].DE); } else f=0;
   if (s==2) f/=364.07777777777777;
   return f;
 }
@@ -256,8 +262,9 @@ float CatMgr::magnitude() {
   float m=9990;
   int s=0;
   if (_selected<0) return m/100;
-  if (_starCatalog!=NULL) { m=_starCatalog[catalog[_selected].Index].Mag; s=sizeof(_starCatalog[catalog[_selected].Index].Mag); } else
-  if (_dsoCatalog!=NULL) { m=_dsoCatalog[catalog[_selected].Index].Mag; s=sizeof(_dsoCatalog[catalog[_selected].Index].Mag); }
+  if (_starCatalog!=NULL)  { m=_starCatalog[catalog[_selected].Index].Mag;  s=sizeof(_starCatalog[catalog[_selected].Index].Mag); } else
+  if (_xstarCatalog!=NULL) { m=_xstarCatalog[catalog[_selected].Index].Mag; s=sizeof(_xstarCatalog[catalog[_selected].Index].Mag); } else
+  if (_dsoCatalog!=NULL)   { m=_dsoCatalog[catalog[_selected].Index].Mag;   s=sizeof(_dsoCatalog[catalog[_selected].Index].Mag); }
   if (s==1) { m = (m / 10.0) - 2.5; if (abs(m-23.0)<0.001) m = 99.9; } else m = m / 100.0;
   return m;
 }
@@ -265,8 +272,9 @@ float CatMgr::magnitude() {
 // Constellation number for an object
 byte CatMgr::constellation() {
   if (_selected<0) return 89;
-  if (_starCatalog!=NULL) return _starCatalog[catalog[_selected].Index].Cons; else
-  if (_dsoCatalog!=NULL) return _dsoCatalog[catalog[_selected].Index].Cons; else return 89;
+  if (_starCatalog!=NULL) return  _starCatalog[catalog[_selected].Index].Cons; else
+  if (_xstarCatalog!=NULL) return _xstarCatalog[catalog[_selected].Index].Cons; else
+  if (_dsoCatalog!=NULL) return   _dsoCatalog[catalog[_selected].Index].Cons; else return 89;
 }
 
 // Constellation string, from constellation number
@@ -278,6 +286,7 @@ const char* CatMgr::constellationStr() {
 byte CatMgr::objectType() {
   if (_selected<0) return -1;
   if (_starCatalog!=NULL) return 2; else
+  if (_xstarCatalog!=NULL) return 2; else
   if (_dsoCatalog!=NULL) return _dsoCatalog[catalog[_selected].Index].Obj_type; else return -1;
 }
 
@@ -292,16 +301,18 @@ int CatMgr::objectName() {
   if (_selected<0) return -1;
 
   // does it have a name? if not just return
-  if (_starCatalog!=NULL) { if (!_starCatalog[catalog[_selected].Index].Has_name) return -1; } else
-  if (_dsoCatalog!=NULL) { if (!_dsoCatalog[catalog[_selected].Index].Has_name) return -1; }
+  if (_starCatalog!=NULL)  { if (!_starCatalog[catalog[_selected].Index].Has_name) return -1; } else
+  if (_xstarCatalog!=NULL) { if (!_xstarCatalog[catalog[_selected].Index].Has_name) return -1; } else
+  if (_dsoCatalog!=NULL)   { if (!_dsoCatalog[catalog[_selected].Index].Has_name) return -1; }
 
   // find the code
   int result=-1;
   int j=catalog[_selected].Index;
   if (j>getMaxIndex()) j=-1;
   if (j<0) return -1;
-  if (_starCatalog!=NULL) { for (int i=0; i<=j; i++) { if (_starCatalog[i].Has_name) result++; } } else
-  if (_dsoCatalog!=NULL) { for (int i=0; i<=j; i++) { if (_dsoCatalog[i].Has_name) result++; } } else return -1;
+  if (_starCatalog!=NULL)  { for (int i=0; i<=j; i++) { if (_starCatalog[i].Has_name) result++; } } else
+  if (_xstarCatalog!=NULL) { for (int i=0; i<=j; i++) { if (_xstarCatalog[i].Has_name) result++; } } else
+  if (_dsoCatalog!=NULL)   { for (int i=0; i<=j; i++) { if (_dsoCatalog[i].Has_name) result++; } } else return -1;
   return result;
 }
 
@@ -315,33 +326,36 @@ const char* CatMgr::objectNameStr() {
 // Object Id
 unsigned int CatMgr::primaryId() {
   if (_selected<0) return -1;
-  if (_starCatalog!=NULL) return _starCatalog[catalog[_selected].Index].Bayer+1; else
-  if (_dsoCatalog!=NULL) return _dsoCatalog[catalog[_selected].Index].Obj_id; else return -1;
+  if (_starCatalog!=NULL)  return _starCatalog[catalog[_selected].Index].Bayer+1; else
+  if (_xstarCatalog!=NULL) return _xstarCatalog[catalog[_selected].Index].Bayer+1; else
+  if (_dsoCatalog!=NULL)   return _dsoCatalog[catalog[_selected].Index].Obj_id; else return -1;
 }
 
-// Object subId code (encoded by Has_subId.)  Returns -1 if the object doesn't have a subId code.
-int CatMgr::subId() {
+// Object note code (encoded by Has_note.)  Returns -1 if the object doesn't have a note code.
+int CatMgr::note() {
   if (_selected<0) return -1;
 
   // does it have a name? if not just return
-  if (_starCatalog!=NULL) { if (!_starCatalog[catalog[_selected].Index].Has_subId) return -1; } else
-  if (_dsoCatalog!=NULL) { if (!_dsoCatalog[catalog[_selected].Index].Has_subId) return -1; }
+  if (_starCatalog!=NULL)  { if (!_starCatalog[catalog[_selected].Index].Has_note) return -1; } else
+  if (_xstarCatalog!=NULL) { if (!_xstarCatalog[catalog[_selected].Index].Has_note) return -1; } else
+  if (_dsoCatalog!=NULL)   { if (!_dsoCatalog[catalog[_selected].Index].Has_note) return -1; }
 
   // find the code
   int result=-1;
   int j=catalog[_selected].Index;
   if (j>getMaxIndex()) j=-1;
   if (j<0) return -1;
-  if (_starCatalog!=NULL) { for (int i=0; i<=j; i++) { if (_starCatalog[i].Has_subId) result++; } } else
-  if (_dsoCatalog!=NULL) { for (int i=0; i<=j; i++) { if (_dsoCatalog[i].Has_subId) result++; } } else return -1;
+  if (_starCatalog!=NULL)  { for (int i=0; i<=j; i++) { if (_starCatalog[i].Has_note) result++; } } else
+  if (_xstarCatalog!=NULL) { for (int i=0; i<=j; i++) { if (_xstarCatalog[i].Has_note) result++; } } else
+  if (_dsoCatalog!=NULL)   { for (int i=0; i<=j; i++) { if (_dsoCatalog[i].Has_note) result++; } } else return -1;
   return result;
 }
 
-// Object name type string
-const char* CatMgr::subIdStr() {
+// Object note string
+const char* CatMgr::noteStr() {
   if (_selected<0) return "";
-  int elementNum=subId();
-  if (elementNum>=0) return getElementFromString(catalog[_selected].ObjectSubIds,elementNum); else return "";
+  int elementNum=note();
+  if (elementNum>=0) return getElementFromString(catalog[_selected].ObjectNotes,elementNum); else return "";
 }
 
 // support functions
