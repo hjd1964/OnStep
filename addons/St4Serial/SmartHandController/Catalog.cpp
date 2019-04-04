@@ -16,12 +16,12 @@
 
 catalog_t catalog[] = {
 // note: Alignment always uses the first catalog!
-// Title       Prefix   Num records   Catalog data  Catalog name string  Star?  Epoch
-  {"Stars",    "Star ", NUM_STARS,    Cat_Stars,    Cat_Stars_Names,     true,  2000, 0},
-  {"Messier",  "M ",    NUM_MESSIER,  Cat_Messier,  Cat_Messier_Names,   false, 2000, 0},
-  {"Caldwell", "C ",    NUM_CALDWELL, Cat_Caldwell, Cat_Caldwell_Names,  false, 2000, 0},
-  {"Herschel", "N ",    NUM_HERSCHEL, Cat_Herschel, Cat_Herschel_Names,  false, 2000, 0},
-  {"",         "",                 0,         NULL,               NULL,  false,    0, 0}
+// Title       Prefix   Num records   Catalog data  Catalog name string  Catalog subId string  Star?  Epoch
+  {"Stars",    "Star ", NUM_STARS,    Cat_Stars,    Cat_Stars_Names,     Cat_Stars_SubIds,     true,  2000, 0},
+  {"Messier",  "M ",    NUM_MESSIER,  Cat_Messier,  Cat_Messier_Names,   Cat_Messier_SubIds,   false, 2000, 0},
+  {"Caldwell", "C ",    NUM_CALDWELL, Cat_Caldwell, Cat_Caldwell_Names,  Cat_Caldwell_SubIds,  false, 2000, 0},
+  {"Herschel", "N ",    NUM_HERSCHEL, Cat_Herschel, Cat_Herschel_Names,  Cat_Herschel_SubIds,  false, 2000, 0},
+  {"",         "",                 0,         NULL,               NULL,                 NULL,  false,    0, 0}
 };
 
 // --------------------------------------------------------------------------------
@@ -111,23 +111,6 @@ void CatMgr::filterAdd(int fm, int param) {
   if (fm&FM_CONSTELLATION) _fm_con=param;
   if (fm&FM_OBJ_TYPE) _fm_obj_type=param;
 }
-
-bool CatMgr::isFiltered() {
-  if (!isInitialized()) return false;
-  if (_fm==FM_NONE) return false;
-  if (_fm&FM_ABOVE_HORIZON) { if (alt()<0.0) return true; }
-  if (_fm&FM_ALIGN_ALL_SKY) {
-    if (alt()<10.0) return true;      // minimum 10 degrees altitude
-    if (abs(dec())>85.0) return true; // minimum 5 degrees from the pole (for accuracy)
-  }
-  if (_fm&FM_CONSTELLATION) {
-    if (constellation()!=_fm_con) return true;
-  }
-  if (isDsoCatalog() && (_fm&FM_OBJ_TYPE)) {
-    if (objectType()!=_fm_obj_type) return true;
-  }
-  return false;
-}  
 
 // select catalog record
 bool CatMgr::setIndex(int index) {
@@ -304,52 +287,108 @@ const char* CatMgr::objectTypeStr() {
   if ((t>=0) && (t<=20)) return Txt_Object_Type[t]; else return "";
 }
 
-// Object name
-const char* CatMgr::objectName() {
-  if (_selected<0) return "";
-  static char result[40] = "";
+// Object name code (encoded by Has_name.)  Returns -1 if the object doesn't have a name code.
+int CatMgr::objectName() {
+  if (_selected<0) return -1;
 
   // does it have a name? if not just return
-  if (_starCatalog!=NULL) { if (!_starCatalog[catalog[_selected].Index].HasName) return ""; } else
-  if (_dsoCatalog!=NULL) { if (!_dsoCatalog[catalog[_selected].Index].HasName) return ""; }
+  if (_starCatalog!=NULL) { if (!_starCatalog[catalog[_selected].Index].Has_name) return -1; } else
+  if (_dsoCatalog!=NULL) { if (!_dsoCatalog[catalog[_selected].Index].Has_name) return -1; }
 
-  // find the string number
-  int _nameIndex=-1;
+  // find the code
+  int result=-1;
   int j=catalog[_selected].Index;
   if (j>getMaxIndex()) j=-1;
-  if (j<0) return "";
-  if (_starCatalog!=NULL) { for (int i=0; i<=j; i++) { if (_starCatalog[i].HasName) _nameIndex++; } } else
-  if (_dsoCatalog!=NULL) { for (int i=0; i<=j; i++) { if (_dsoCatalog[i].HasName) _nameIndex++; } } else return "";
+  if (j<0) return -1;
+  if (_starCatalog!=NULL) { for (int i=0; i<=j; i++) { if (_starCatalog[i].Has_name) result++; } } else
+  if (_dsoCatalog!=NULL) { for (int i=0; i<=j; i++) { if (_dsoCatalog[i].Has_name) result++; } } else return -1;
+  return result;
+}
+
+// Object name type string
+const char* CatMgr::objectNameStr() {
+  if (_selected<0) return "";
+  int elementNum=objectName();
+  if (elementNum>=0) return getElementFromString(catalog[_selected].ObjectNames,elementNum); else return "";
+}
+
+// Object Id
+unsigned int CatMgr::primaryId() {
+  if (_selected<0) return -1;
+  if (_starCatalog!=NULL) return _starCatalog[catalog[_selected].Index].Bayer+1; else
+  if (_dsoCatalog!=NULL) return _dsoCatalog[catalog[_selected].Index].Obj_id; else return -1;
+}
+
+// Object subId code (encoded by Has_subId.)  Returns -1 if the object doesn't have a subId code.
+int CatMgr::subId() {
+  if (_selected<0) return -1;
+
+  // does it have a name? if not just return
+  if (_starCatalog!=NULL) { if (!_starCatalog[catalog[_selected].Index].Has_subId) return -1; } else
+  if (_dsoCatalog!=NULL) { if (!_dsoCatalog[catalog[_selected].Index].Has_subId) return -1; }
+
+  // find the code
+  int result=-1;
+  int j=catalog[_selected].Index;
+  if (j>getMaxIndex()) j=-1;
+  if (j<0) return -1;
+  if (_starCatalog!=NULL) { for (int i=0; i<=j; i++) { if (_starCatalog[i].Has_subId) result++; } } else
+  if (_dsoCatalog!=NULL) { for (int i=0; i<=j; i++) { if (_dsoCatalog[i].Has_subId) result++; } } else return -1;
+  return result;
+}
+
+// Object name type string
+const char* CatMgr::subIdStr() {
+  if (_selected<0) return "";
+  int elementNum=subId();
+  if (elementNum>=0) return getElementFromString(catalog[_selected].ObjectSubIds,elementNum); else return "";
+}
+
+// support functions
+
+// checks to see if the currently selected object is filtered (returns true if filtered out)
+bool CatMgr::isFiltered() {
+  if (!isInitialized()) return false;
+  if (_fm==FM_NONE) return false;
+  if (_fm&FM_ABOVE_HORIZON) { if (alt()<0.0) return true; }
+  if (_fm&FM_ALIGN_ALL_SKY) {
+    if (alt()<10.0) return true;      // minimum 10 degrees altitude
+    if (abs(dec())>85.0) return true; // minimum 5 degrees from the pole (for accuracy)
+  }
+  if (_fm&FM_CONSTELLATION) {
+    if (constellation()!=_fm_con) return true;
+  }
+  if (isDsoCatalog() && (_fm&FM_OBJ_TYPE)) {
+    if (objectType()!=_fm_obj_type) return true;
+  }
+  return false;
+}  
+
+// returns elementNum 'th element from the comma delimited string where the 0th element is the first etc.
+const char* CatMgr::getElementFromString(const char *data, int elementNum) {
+  static char result[40] = "";
 
   // find the string start index
-  j=-1;
-  int n=_nameIndex;
-  unsigned int len=strlen(catalog[_selected].ObjectNames);
+  bool found=false;
+  unsigned int j=0;
+  int n=elementNum;
+  unsigned int len=strlen(data);
   for (unsigned int i=0; i<len; i++) {
-    if (n==0) { j=i; break; }
-    if (catalog[_selected].ObjectNames[i]==',') { n--; }
+    if (n==0) { j=i; found=true; break; }
+    if (data[i]==',') { n--; }
   }
 
-  // if found, return the string
-  if (j>-1) {
+  // return the string
+  if (found) {
     int k=0;
     for (unsigned int i=j; i<len; i++) {
-      result[k++]=catalog[_selected].ObjectNames[i];
+      result[k++]=data[i];
       if (result[k-1]==',') { result[k-1]=0; break; }
       if (i==len-1) { result[k]=0; break; }
     }
     return result;
   } else return "";
 }
-
-// Object ID
-int CatMgr::primaryId() {
-  if (_selected<0) return -1;
-  if (_starCatalog!=NULL) return _starCatalog[catalog[_selected].Index].Bayer+1; else
-  if (_dsoCatalog!=NULL) return _dsoCatalog[catalog[_selected].Index].Obj_id; else return -1;
-}
-
-// support functions
 
 // angular distance from current Equ coords, in degrees
 double CatMgr::DistFromEqu(double RA, double Dec) {

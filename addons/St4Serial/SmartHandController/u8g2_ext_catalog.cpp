@@ -113,7 +113,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y)
     x = u8g2_GetUTF8Width(u8g2, "-WWW-");
     
     // Common name for the star
-    u8g2_DrawUTF8(u8g2, x, y, cat_mgr.objectName());
+    u8g2_DrawUTF8(u8g2, x, y, cat_mgr.objectNameStr());
 
     y += line_height;
     x = 0;

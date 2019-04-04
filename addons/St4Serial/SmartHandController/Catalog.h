@@ -20,56 +20,64 @@ void getcathf(const unsigned short& v, float& v1);
 class CatMgr {
   public:
 // initialization
-    void setLat(double lat);
-    void setLstT0(double lstT0);
-    bool isInitialized();
+    void        setLat(double lat);
+    void        setLstT0(double lstT0);
+    bool        isInitialized();
 
 // time
-    double lstDegs();
-    double lstHours();
+    double      lstDegs();
+    double      lstHours();
 
 // catalog selection
-    int numCatalogs();
-    void select(int cat);
-    bool isStarCatalog();
-    bool isDsoCatalog();
+    int         numCatalogs();
+    void        select(int cat);
+    bool        isStarCatalog();
+    bool        isDsoCatalog();
     const char* catalogTitle();
     const char* catalogPrefix();
 
 // catalog filtering
-    void filtersClear();
-    void filterAdd(int fm);
-    void filterAdd(int fm, int param);
+    void        filtersClear();
+    void        filterAdd(int fm);
+    void        filterAdd(int fm, int param);
 
 // select catalog record
-    bool setIndex(int index);
-    int getIndex();
-    int getMaxIndex();
-    bool incIndex();
-    bool decIndex();
+    bool        setIndex(int index);
+    int         getIndex();
+    int         getMaxIndex();
+    bool        incIndex();
+    bool        decIndex();
 
 // get catalog contents
-    double ra();
-    double rah();
-    double ha();
-    void   raHMS(uint8_t& h, uint8_t& m, uint8_t& s);
-    double dec();
-    void   decDMS(short& d, uint8_t& m, uint8_t& s);
-    int    epoch();
-    double alt();
-    double azm();
-    void topocentricToObservedPlace(float *RA, float *Dec);
+    int         epoch();
 
-    float magnitude();
+    double      ra();
+    double      rah();
+    double      ha();
+    void        raHMS(uint8_t& h, uint8_t& m, uint8_t& s);
+
+    double      dec();
+    void        decDMS(short& d, uint8_t& m, uint8_t& s);
+
+    double      alt();
+    double      azm();
+    void        topocentricToObservedPlace(float *RA, float *Dec);
+
+    float       magnitude();
     
-    byte   constellation();
+    byte        constellation();
     const char* constellationStr();
     
-    byte   objectType();
+    byte        objectType();
     const char* objectTypeStr();
-    const char* objectName();
-    
-    int    primaryId();
+
+    int         objectName();
+    const char* objectNameStr();
+
+    unsigned int primaryId();
+
+    int         subId();
+    const char* subIdStr();
 
 private:
     double _lat=-10000;
@@ -86,6 +94,7 @@ private:
 
     bool isFiltered();
 
+    const char* getElementFromString(const char *data, int elementNum);
     double DistFromEqu(double RA, double Dec);
     double HAToRA(double ha);
     void EquToHor(double RA, double Dec, double *Alt, double *Azm);

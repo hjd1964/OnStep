@@ -4,6 +4,10 @@
 // Do not change anything in the structs or arrays below, since they
 // have to be in sync with the extraction scripts.
 
+// use the compact record type for Stars or DSO's
+#define USE_COMPACT_STARS_OFF
+#define USE_COMPACT_DSOS_OFF
+
 // Struct for catalog header
 typedef struct {
   const char           Title[10];
@@ -11,6 +15,7 @@ typedef struct {
   const unsigned short NumObjects;
   void*                Objects;
   const char*          ObjectNames;
+  const char*          ObjectSubIds;
   bool                 isStarCatalog;
   int                  Epoch;
   int                  Index;
@@ -19,46 +24,52 @@ typedef struct {
 #pragma pack(1)
 
 // Struct for Deep Space Objects (Messier, Herschel, ..etc.)
-typedef struct {
-  const char           HasName: 1;
-  const char           Cons: 7;
-  const char           Obj_type;
-  const unsigned short Obj_id;
-  const signed   short Mag;
-  const float          RA;
-  const float          DE;
-} dso_t;
-
-// Reduced size equal
-typedef struct {
-  const char           HasName: 1;
-  const char           Cons: 7;
-  const char           Obj_type;
-  const unsigned short Obj_id;
-  const char           Mag;
-  const unsigned short RA;
-  const signed short   DE;
-} dso__t;
+#ifndef USE_COMPACT_DSOS_ON
+  typedef struct {
+    const char           Has_name: 1;
+    const char           Cons: 7;
+    const char           Obj_type: 7;
+    const char           Has_subId: 1;
+    const unsigned short Obj_id;
+    const signed   short Mag;
+    const float          RA;
+    const float          DE;
+  } dso_t;
+#else
+  typedef struct {
+    const char           Has_name: 1;
+    const char           Cons: 7;
+    const char           Obj_type: 7;
+    const char           Has_subId: 1;
+    const unsigned short Obj_id;
+    const char           Mag;
+    const unsigned short RA;
+    const signed short   DE;
+  } dso_t;
+#endif
 
 // Struct for stars
-typedef struct {
-  const char           HasName: 1;
-  const char           Cons: 7;
-  const char           Bayer;
-  const signed   short Mag;
-  const float          RA;
-  const float          DE;
-} star_t;
-
-// Reduced size equal
-typedef struct {
-  const char           HasName: 1;
-  const char           Cons: 7;
-  const char           Bayer;
-  const char           Mag;
-  const unsigned short RA;
-  const signed short   DE;
-} star__t;
+#ifndef USE_COMPACT_DSOS_ON
+  typedef struct {
+    const char           Has_name: 1;
+    const char           Cons: 7;
+    const char           Bayer: 5;
+    const char           Has_subId: 1;
+    const signed short   Mag;
+    const float          RA;
+    const float          DE;
+  } star_t;
+#else
+  typedef struct {
+    const char           Has_name: 1;
+    const char           Cons: 7;
+    const char           Bayer: 5;
+    const char           Has_subId: 1;
+    const char           Mag;
+    const unsigned short RA;
+    const signed short   DE;
+  } star_t;
+#endif
 
 #pragma pack()
 
