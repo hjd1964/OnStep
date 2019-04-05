@@ -388,7 +388,7 @@ void SmartHandController::update()
   if (display_dim_time && top - time_last_action > display_dim_time && !lowContrast) { display->setContrast(0); lowContrast = true; return; }
 
   // power cycle reqd message
-  if (powerCylceRequired) { display->setFont(u8g2_font_helvR12_tr); DisplayMessage("REBOOT", "DEVICE", 1000); return; }
+  if (powerCylceRequired) { display->setFont(u8g2_font_helvR12_te); DisplayMessage("REBOOT", "DEVICE", 1000); return; }
   
   if (telInfo.align == Telescope::ALI_SELECT_STAR_1 || telInfo.align == Telescope::ALI_SELECT_STAR_2 || telInfo.align == Telescope::ALI_SELECT_STAR_3 || 
       telInfo.align == Telescope::ALI_SELECT_STAR_4 || telInfo.align == Telescope::ALI_SELECT_STAR_5 || telInfo.align == Telescope::ALI_SELECT_STAR_6 ||
@@ -703,14 +703,14 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
       {
         char us[20]; strcpy(us,telInfo.TempUniversalTime); us[2]=0; us[5]=0;
         x = u8g2_GetDisplayWidth(u8g2);  u8g2_uint_t y = 36;
-        display->setFont(u8g2_font_helvR10_tf);
+        display->setFont(u8g2_font_helvR10_te);
         u8g2_DrawUTF8(u8g2, 0, y, "UT");
         display->setFont(u8g2_font_helvR12_te); 
         display->drawRA( x, y, us, &us[3], &us[6]);
 
         char ss[20]; strcpy(ss,telInfo.TempSidereal); ss[2]=0; ss[5]=0;
         y += line_height + 4;
-        display->setFont(u8g2_font_helvR10_tf);
+        display->setFont(u8g2_font_helvR10_te);
         u8g2_DrawUTF8(u8g2, 0, y, "Sidereal"); 
         display->setFont(u8g2_font_helvR12_te);
         display->drawRA(x, y, ss, &ss[3], &ss[6]);
@@ -791,7 +791,7 @@ void SmartHandController::DisplayMessage(const char* txt1, const char* txt2, int
 
 void SmartHandController::DisplayLongMessage(const char* txt1, const char* txt2, const char* txt3, const char* txt4, int duration)
 {
-  display->setFont(u8g2_font_helvR10_tr);
+  display->setFont(u8g2_font_helvR10_te);
   uint8_t h = 15;
   uint8_t x = 0;
   uint8_t y = h;
