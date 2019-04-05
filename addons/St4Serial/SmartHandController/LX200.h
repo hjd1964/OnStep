@@ -1,5 +1,4 @@
 #pragma once
-#include "Catalog.h"
 #include "Config.h"
 
 enum LX200RETURN {

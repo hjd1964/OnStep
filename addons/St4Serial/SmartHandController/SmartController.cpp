@@ -1,6 +1,7 @@
 
 #include "SmartController.h"
 #include "LX200.h"
+#include "Catalog.h"
 
 unsigned long display_blank_time = DISPLAY_BLANK_TIME;
 unsigned long display_dim_time = DISPLAY_DIM_TIME;

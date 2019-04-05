@@ -40,7 +40,6 @@
 #define FirmwareVersionPatch  "b"
 
 #include "Config.h"
-
 #include "SmartController.h"
 
 const char Version[] = "Version " FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch;

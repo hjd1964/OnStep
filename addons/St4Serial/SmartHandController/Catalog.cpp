@@ -1,7 +1,7 @@
 #include <Arduino.h>
-#include "Catalog.h"
+#include <math.h>
 #include "Config.h"
-#include "math.h"
+#include "Catalog.h"
 #include "CatalogTypes.h"
 
 // --------------------------------------------------------------------------------

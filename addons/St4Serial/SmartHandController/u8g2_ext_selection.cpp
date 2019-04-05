@@ -213,10 +213,7 @@ uint8_t ext_UserInterfaceSelectionList(u8g2_t *u8g2, Pad *extPad, const char *ti
   uint8_t title_lines = u8x8_GetStringLineCnt(title);
   uint8_t display_lines;
 
-
-  if (start_pos > 0)	/* issue 112 */
-    start_pos--;		/* issue 112 */
-
+  if (start_pos > 0) start_pos--;
 
   if (title_lines > 0)
   {

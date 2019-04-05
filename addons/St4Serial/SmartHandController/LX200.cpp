@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <Ephemeris.h> // https://github.com/MarScaper/ephemeris
-#include "Catalog.h"
 #include "LX200.h"
+#include "Catalog.h"
 #include "SmartController.h"
 
 // integer numeric conversion with error checking

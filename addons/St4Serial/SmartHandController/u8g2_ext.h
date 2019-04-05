@@ -1,6 +1,5 @@
 #pragma once
 #include <U8g2lib.h> // https://github.com/olikraus/u8g2/
-#include "Catalog.h"
 #include "u8g2_ext_event.h"
 
 class U8G2_EXT : public U8G2

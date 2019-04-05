@@ -37,9 +37,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <U8g2lib.h>
 #include "u8g2_ext_catalog.h"
 #include "u8g2_ext_value.h"
-#include "Catalog.h"
 #include "u8g2_ext_event.h"
 #include "LX200.h"
+#include "Catalog.h"
 
 #define OC_width 18
 #define OC_height 10
