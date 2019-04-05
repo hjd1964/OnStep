@@ -269,7 +269,7 @@ float CatMgr::magnitude() {
   return m;
 }
 
-// Constellation number for an object
+// Constellation number
 byte CatMgr::constellation() {
   if (_selected<0) return 89;
   if (_starCatalog!=NULL) return  _starCatalog[catalog[_selected].Index].Cons; else
@@ -277,9 +277,14 @@ byte CatMgr::constellation() {
   if (_dsoCatalog!=NULL) return   _dsoCatalog[catalog[_selected].Index].Cons; else return 89;
 }
 
-// Constellation string, from constellation number
+// Constellation string
 const char* CatMgr::constellationStr() {
   return Txt_Constellations[constellation()];
+}
+
+// Constellation string, from constellation number
+const char* CatMgr::constellationCodeToStr(int code) {
+  if ((code>=0) && (code<=87)) return Txt_Constellations[code]; else return "";
 }
 
 // Object type code
@@ -294,6 +299,11 @@ byte CatMgr::objectType() {
 const char* CatMgr::objectTypeStr() {
   int t=objectType();
   if ((t>=0) && (t<=20)) return Txt_Object_Type[t]; else return "";
+}
+
+// Object Type string, from code number
+const char* CatMgr::objectTypeCodeToStr(int code) {
+  if ((code>=0) && (code<=20)) return Txt_Object_Type[code]; else return "";
 }
 
 // Object name code (encoded by Has_name.)  Returns -1 if the object doesn't have a name code.

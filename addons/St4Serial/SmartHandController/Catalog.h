@@ -64,9 +64,11 @@ class CatMgr {
     
     byte        constellation();
     const char* constellationStr();
+    const char* constellationCodeToStr(int code);
 
     byte        objectType();
     const char* objectTypeStr();
+    const char* objectTypeCodeToStr(int code);
 
     int         objectName();
     const char* objectNameStr();

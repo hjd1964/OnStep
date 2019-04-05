@@ -133,23 +133,11 @@ bool SmartHandController::setCatMgrFilters()
   return extraFilterActive;
 }
 
-// Constellation abbreviation, alphabetical order
-const char* Txt_Constellation[89] = {
-  "All","And","Ant","Aps","Aql","Aqr","Ara","Ari","Aur","Boo","CMa",
-  "CMi","CVn","Cae","Cam","Cap","Car","Cas","Cen","Cep","Cet","Cha",
-  "Cir","Cnc","Col","Com","CrA","CrB","Crt","Cru","Crv","Cyg","Del",
-  "Dor","Dra","Equ","Eri","For","Gem","Gru","Her","Hor","Hya","Hyi",
-  "Ind","LMi","Lac","Leo","Lep","Lib","Lup","Lyn","Lyr","Men","Mic",
-  "Mon","Mus","Nor","Oct","Oph","Ori","Pav","Peg","Per","Phe","Pic",
-  "PsA","Psc","Pup","Pyx","Ret","Scl","Sco","Sct","Ser","Sex","Sge",
-  "Sgr","Tau","Tel","TrA","Tri","Tuc","UMa","UMi","Vel","Vir","Vol","Vul"
-};
-
 void SmartHandController::menuFilterCon()
 {
   char string_list_fCon[1000]="";
   for (int l=0; l<89; l++) {
-    strcat(string_list_fCon,Txt_Constellation[l]);
+    if (l==0) strcat(string_list_fCon,"All"); else strcat(string_list_fCon,cat_mgr.constellationCodeToStr(l-1));
     if (l<88) strcat(string_list_fCon,"\n");
   }
   int last_selection_filter_con = current_selection_filter_con;
@@ -158,35 +146,11 @@ void SmartHandController::menuFilterCon()
   if (current_selection_filter_con == 0) current_selection_filter_con=last_selection_filter_con;
 }
 
-const char * Txt_Object_Types[22] = {
-  "All",
-  "Galaxy",
-  "Open Cluster",
-  "Star",
-  "Double Star",
-  "Other",
-  "Galaxy Pair",
-  "Galaxy Triplet",
-  "Galaxy Group",
-  "Globular Cluster",
-  "Planetary Nebula",
-  "Nebula",
-  "Hii Region",
-  "Cluster + Nebula",
-  "Asterism",
-  "Reflectn Nebula",
-  "SuperNova Rmnnt",
-  "Emission Nebula",
-  "NonExist",
-  "Nova",
-  "Duplicate",
-  "Dark Nebula"
-};
 void SmartHandController::menuFilterType()
 {
   char string_list_fType[500]="";
   for (int l=0; l<22; l++) {
-    strcat(string_list_fType,Txt_Object_Types[l]);
+    if (l==0) strcat(string_list_fType,"All"); else strcat(string_list_fType,cat_mgr.objectTypeCodeToStr(l-1));
     if (l<21) strcat(string_list_fType,"\n");
   }
   int last_selection_filter_type = current_selection_filter_type;
