@@ -168,12 +168,11 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y)
     sprintf(line, "%s", cat_mgr.subIdStr());
     u8g2_DrawUTF8(u8g2, x+x1, y, line);
     x += step0;
-    step0 = u8g2_GetUTF8Width(u8g2, "&A-B");
+    step0 = u8g2_GetUTF8Width(u8g2, "A&B-C");
     u8g2_SetFont(u8g2, myfont);
 
     // Constellation Abberviation
     x += step0;
-    step0 = u8g2_GetUTF8Width(u8g2, " XXX");
     u8g2_DrawUTF8(u8g2, x, y, cat_mgr.constellationStr());
 
     // Magnitude
@@ -235,12 +234,17 @@ bool ext_UserInterfaceCatalog(u8g2_t *u8g2, Pad* extPad, const char *title)
     return 0;
 #endif
 
+    int scrollSpeed;
+    if (cat_mgr.getMaxIndex()>1000) scrollSpeed=20; else scrollSpeed=2;
+
     for (;;) {
       event = ext_GetMenuEvent(extPad);
       if (event == U8X8_MSG_GPIO_MENU_SELECT || event == U8X8_MSG_GPIO_MENU_NEXT) return true; else
       if (event == U8X8_MSG_GPIO_MENU_HOME || event == U8X8_MSG_GPIO_MENU_PREV) return false; else
       if (event == U8X8_MSG_GPIO_MENU_DOWN) { cat_mgr.incIndex(); break; } else
-      if (event == U8X8_MSG_GPIO_MENU_UP) { cat_mgr.decIndex(); break; }
+      if (event == MSG_MENU_DOWN_FAST)      { for (int i=0; i<scrollSpeed; i++) cat_mgr.incIndex(); break; } else
+      if (event == U8X8_MSG_GPIO_MENU_UP)   { cat_mgr.decIndex(); break; } else
+      if (event == MSG_MENU_UP_FAST)        { for (int i=0; i<scrollSpeed; i++) cat_mgr.decIndex(); break; }
     }
   }
 }
@@ -347,8 +351,8 @@ bool ext_UserInterfaceUserCatalog(u8g2_t *u8g2, Pad* extPad, const char *title)
       event = ext_GetMenuEvent(extPad);
       if (event == U8X8_MSG_GPIO_MENU_SELECT || event == U8X8_MSG_GPIO_MENU_NEXT) return true; else
       if (event == U8X8_MSG_GPIO_MENU_HOME || event == U8X8_MSG_GPIO_MENU_PREV) return false; else
-      if (event == U8X8_MSG_GPIO_MENU_DOWN) { strcpy(oppositeMove,":LB#"); SetLX200(":LN#"); break; } else
-      if (event == U8X8_MSG_GPIO_MENU_UP) { strcpy(oppositeMove,":LN#"); SetLX200(":LB#"); break; }
+      if (event == U8X8_MSG_GPIO_MENU_DOWN || event == MSG_MENU_DOWN_FAST) { strcpy(oppositeMove,":LB#"); SetLX200(":LN#"); break; } else
+      if (event == U8X8_MSG_GPIO_MENU_UP || event == MSG_MENU_UP_FAST) { strcpy(oppositeMove,":LN#"); SetLX200(":LB#"); break; }
     }
   }
 }

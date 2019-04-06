@@ -271,12 +271,12 @@ uint8_t ext_UserInterfaceSelectionList(u8g2_t *u8g2, Pad *extPad, const char *ti
         return 0;				/* issue 112: return 0 instead of start_pos */
       }
 
-      else if (event == U8X8_MSG_GPIO_MENU_DOWN)
+      else if (event == U8X8_MSG_GPIO_MENU_DOWN || event == MSG_MENU_DOWN_FAST)
       {
         u8sl_Next(&u8sl);
         break;
       }
-      else if (event == U8X8_MSG_GPIO_MENU_UP)
+      else if (event == U8X8_MSG_GPIO_MENU_UP || event == MSG_MENU_UP_FAST)
       {
         u8sl_Prev(&u8sl);
         break;

@@ -111,7 +111,7 @@ uint8_t ext_UserInterfaceInputValueBoolean(u8g2_t *u8g2, Pad* extPad, const char
       event = ext_GetMenuEvent(extPad);
       if (event == U8X8_MSG_GPIO_MENU_SELECT || event == U8X8_MSG_GPIO_MENU_NEXT) { *value = local_value; return 1; }
       else if (event == U8X8_MSG_GPIO_MENU_HOME || event == U8X8_MSG_GPIO_MENU_PREV) return 0;
-      else if (event == U8X8_MSG_GPIO_MENU_UP || event == U8X8_MSG_GPIO_MENU_DOWN) { local_value=!local_value; break; }
+      else if (event == U8X8_MSG_GPIO_MENU_UP || event == U8X8_MSG_GPIO_MENU_DOWN || event == MSG_MENU_UP_FAST || event == MSG_MENU_DOWN_FAST) { local_value=!local_value; break; }
     }
   }
 }
@@ -190,8 +190,8 @@ uint8_t ext_UserInterfaceInputValueInteger(u8g2_t *u8g2, Pad* extPad, const char
       event = ext_GetMenuEvent(extPad);
       if (event == U8X8_MSG_GPIO_MENU_SELECT || event == U8X8_MSG_GPIO_MENU_NEXT) { *value = local_value; return 1; }
       else if (event == U8X8_MSG_GPIO_MENU_HOME || event == U8X8_MSG_GPIO_MENU_PREV) { return 0; }
-      else if (event == U8X8_MSG_GPIO_MENU_UP) { if (local_value >= hi) local_value = lo; else local_value++; break; }
-      else if (event == U8X8_MSG_GPIO_MENU_DOWN) { if (local_value <= lo) local_value = hi; else local_value--; break; }
+      else if (event == U8X8_MSG_GPIO_MENU_UP || event == MSG_MENU_UP_FAST) { if (local_value >= hi) local_value = lo; else local_value++; break; }
+      else if (event == U8X8_MSG_GPIO_MENU_DOWN || event == MSG_MENU_DOWN_FAST) { if (local_value <= lo) local_value = hi; else local_value--; break; }
     }
   }
 }
@@ -296,7 +296,7 @@ uint8_t ext_UserInterfaceInputValueFloat(u8g2_t *u8g2, Pad* extPad, const char *
       {
         return 0;
       }
-      else if (event == U8X8_MSG_GPIO_MENU_UP)
+      else if (event == U8X8_MSG_GPIO_MENU_UP || event == MSG_MENU_UP_FAST)
       {
         if (local_value >= hi)
         {
@@ -310,7 +310,7 @@ uint8_t ext_UserInterfaceInputValueFloat(u8g2_t *u8g2, Pad* extPad, const char *
         }
         break;
       }
-      else if (event == U8X8_MSG_GPIO_MENU_DOWN)
+      else if (event == U8X8_MSG_GPIO_MENU_DOWN || event == MSG_MENU_DOWN_FAST)
       {
         if (local_value <= lo)
         {
@@ -441,7 +441,7 @@ uint8_t ext_UserInterfaceInputValueDMS(u8g2_t *u8g2, Pad* extPad, const char *ti
         return 1;
       }
       else if (event == U8X8_MSG_GPIO_MENU_PREV) { return 0; }
-      else if (event == U8X8_MSG_GPIO_MENU_UP)
+      else if (event == U8X8_MSG_GPIO_MENU_UP || event == MSG_MENU_UP_FAST)
       {
         if (local_value >= hi) {
           local_value = lo;
@@ -457,7 +457,7 @@ uint8_t ext_UserInterfaceInputValueDMS(u8g2_t *u8g2, Pad* extPad, const char *ti
         }
         break;
       }
-      else if (event == U8X8_MSG_GPIO_MENU_DOWN) {
+      else if (event == U8X8_MSG_GPIO_MENU_DOWN || event == MSG_MENU_DOWN_FAST) {
         if (local_value <= lo) {
           local_value = hi;
           incr = 0;
@@ -566,7 +566,7 @@ uint8_t ext_UserInterfaceInputValueDate(u8g2_t *u8g2, Pad* extPad, const char *t
         return 1;
       }
       else if (event == U8X8_MSG_GPIO_MENU_HOME || event == U8X8_MSG_GPIO_MENU_PREV) { return 0; }
-      else if (event == U8X8_MSG_GPIO_MENU_UP)
+      else if (event == U8X8_MSG_GPIO_MENU_UP || event == MSG_MENU_UP_FAST)
       {
         if (incr > 0) { incr = 1.05*incr + incr_ref / 2; } else incr = incr_ref;
         if (incr > 30) incr = 30;
@@ -574,7 +574,7 @@ uint8_t ext_UserInterfaceInputValueDate(u8g2_t *u8g2, Pad* extPad, const char *t
         add_days(local_year, local_month, local_day, incr);
         break;
       }
-      else if (event == U8X8_MSG_GPIO_MENU_DOWN)
+      else if (event == U8X8_MSG_GPIO_MENU_DOWN || event == MSG_MENU_DOWN_FAST)
       {
         if (incr < 0) { incr = 1.05*incr - incr_ref / 2; } else incr = -incr_ref;
         if (incr < -30) incr = -30;
