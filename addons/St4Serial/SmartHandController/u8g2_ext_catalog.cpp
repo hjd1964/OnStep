@@ -131,7 +131,8 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y)
     ext_drawRA(u8g2, x, y, txt1, txt2, txt3);
 
     // Magnitude
-    sprintf(line, "%0.1f", cat_mgr.magnitude());
+    float mf=cat_mgr.magnitude();
+    if (abs(mf-99.90)<0.001) sprintf(line, " ?.?"); else dtostrf(mf, 3, 1, line);
 
     // Declination
     short vd1; uint8_t vd2; uint8_t vd3;
@@ -155,7 +156,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y)
 
     // Catalog letter and Object ID
     step0 = u8g2_GetUTF8Width(u8g2, "W 9999 ");
-    sprintf(line, "%s%u", cat_mgr.catalogPrefix(), cat_mgr.primaryId());
+    sprintf(line, "%s%u%s", cat_mgr.catalogPrefix(), cat_mgr.primaryId(), cat_mgr.subIdStr());
     x = 0;
     u8g2_DrawUTF8(u8g2, x, y, line);
  
@@ -166,7 +167,8 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y)
 
     // Magnitude
     x += step0;
-    sprintf(line, "%0.1f", cat_mgr.magnitude());
+    float mf=cat_mgr.magnitude();
+    if (abs(mf-99.90)<0.001) sprintf(line, " ?.?"); else dtostrf(mf, 3, 1, line);
     u8g2_DrawUTF8(u8g2, x, y, line);
 
     // Object type text
@@ -175,9 +177,9 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y)
     u8g2_DrawUTF8(u8g2, x, y, cat_mgr.objectTypeStr());
 
     // Object Name, when the DSO catalogs include it
-    // y += line_height;
-    // x = 0;
-    //u8g2_DrawUTF8(u8g2, x, y, cat_mgr.objectName());
+    y += line_height;
+    x = 0;
+    u8g2_DrawUTF8(u8g2, x, y, cat_mgr.objectNameStr());
 
     return line_height;
   }

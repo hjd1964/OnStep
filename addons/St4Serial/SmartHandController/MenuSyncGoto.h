@@ -63,8 +63,7 @@ void SmartHandController::menuCatalog(bool sync, int number)
   if (setCatMgrFilters()) strcat(title," Ÿ");
 
   if (!cat_mgr.setIndex(0)) {
-    strcpy(title,"No "); strcat(title,cat_mgr.catalogTitle());
-    DisplayMessage(title, title, 2000);
+    DisplayMessage(cat_mgr.catalogTitle(), "No Object", 2000);
   } else
   if (cat_mgr.isInitialized()) {
     if (display->UserInterfaceCatalog(&buttonPad, title)) {

@@ -14,6 +14,8 @@ void getcatdf(const short& v, float& v1);
 void getcathms(const unsigned short& v, uint8_t& v1, uint8_t& v2, uint8_t& v3);
 void getcathf(const unsigned short& v, float& v1);
 
+enum CAT_TYPES {CAT_NONE, CAT_GEN_STAR, CAT_GEN_STAR_COMP, CAT_EXT_STAR, CAT_DSO, CAT_DSO_COMP, CAT_DSO_VCOMP};
+
 class CatMgr {
   public:
 // initialization
@@ -28,6 +30,7 @@ class CatMgr {
 // catalog selection
     int         numCatalogs();
     void        select(int cat);
+    CAT_TYPES   catalogType();
     bool        isStarCatalog();
     bool        isDsoCatalog();
     const char* catalogTitle();
@@ -74,9 +77,8 @@ class CatMgr {
     const char* objectNameStr();
 
     unsigned int primaryId();
-
-    int         note();
-    const char* noteStr();
+    int          subId();
+    const char*  subIdStr();
 
 private:
     double _lat=-10000;
