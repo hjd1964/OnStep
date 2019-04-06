@@ -62,7 +62,7 @@ void SmartHandController::menuCatalog(bool sync, int number)
   char title[20]; if (sync) strcpy(title,"Sync "); else strcpy(title,"Goto "); strcat(title,cat_mgr.catalogTitle());
   if (setCatMgrFilters()) strcat(title," Ÿ");
 
-  if (!cat_mgr.setIndex(0)) {
+  if (!cat_mgr.setIndex(cat_mgr.getIndex())) {
     DisplayMessage(cat_mgr.catalogTitle(), "No Object", 2000);
   } else
   if (cat_mgr.isInitialized()) {
