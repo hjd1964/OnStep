@@ -103,14 +103,14 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y)
     u8g2_SetFont(u8g2, u8g2_font_unifont_t_greek);
     x = 0;
     u8g2_DrawGlyph(u8g2, x, y, 944 + cat_mgr.primaryId());
-    u8g2_SetFont(u8g2, myfont);
 
     // Constellation Abbreviation
-    x = 12;
+    u8g2_SetFont(u8g2, u8g2_font_helvR10_te);
+    x = 10;
     u8g2_DrawUTF8(u8g2, x, y, cat_mgr.constellationStr());
 
     // Width of constellation abbreviation
-    x = u8g2_GetUTF8Width(u8g2, "-WWW-");
+    x = u8g2_GetUTF8Width(u8g2, "-WWw-");
     
     // Common name for the star
     u8g2_DrawUTF8(u8g2, x, y, cat_mgr.objectNameStr());
@@ -119,6 +119,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y)
     x = 0;
 
     // RA
+    u8g2_SetFont(u8g2, myfont);
     uint8_t vr1, vr2, vr3;
     char txt1[5], txt2[5], txt3[5];
     cat_mgr.raHMS(vr1,vr2,vr3);
@@ -129,10 +130,6 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y)
     step0 = u8g2_GetUTF8Width(u8g2, "DE ");
     x += step0;
     ext_drawRA(u8g2, x, y, txt1, txt2, txt3);
-
-    // Magnitude
-    float mf=cat_mgr.magnitude();
-    if (abs(mf-99.90)<0.001) sprintf(line, " ?.?"); else dtostrf(mf, 3, 1, line);
 
     // Declination
     short vd1; uint8_t vd2; uint8_t vd3;
@@ -146,7 +143,12 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y)
     x += step0;
     ext_drawDec(u8g2, x, y, vd1 < 0 ? "-" : "+", txt1, txt2, txt3);
 
-    x = u8g2_GetUTF8Width(u8g2, "DE +DD:MM:SS ");
+    // Magnitude
+    x = u8g2_GetDisplayWidth(u8g2);
+    float mf=cat_mgr.magnitude();
+    if (abs(mf-99.90)<0.001) sprintf(line, "?.?"); else dtostrf(mf, 3, 1, line);
+    step0 = u8g2_GetUTF8Width(u8g2, line);
+    x -= step0;
     u8g2_DrawUTF8(u8g2, x, y, line);
 
     return line_height;
@@ -155,20 +157,31 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y)
     // Object Catalogs
 
     // Catalog letter and Object ID
-    step0 = u8g2_GetUTF8Width(u8g2, "W 9999 ");
-    sprintf(line, "%s%u%s", cat_mgr.catalogPrefix(), cat_mgr.primaryId(), cat_mgr.subIdStr());
     x = 0;
+    sprintf(line, "%s%u", cat_mgr.catalogPrefix(), cat_mgr.primaryId());
+    step0 = u8g2_GetUTF8Width(u8g2, "N8888");
+    int x1= u8g2_GetUTF8Width(u8g2, line);
     u8g2_DrawUTF8(u8g2, x, y, line);
- 
+     
+    // Object SubID
+    u8g2_SetFont(u8g2, u8g2_font_helvR08_te);
+    sprintf(line, "%s", cat_mgr.subIdStr());
+    u8g2_DrawUTF8(u8g2, x+x1, y, line);
+    x += step0;
+    step0 = u8g2_GetUTF8Width(u8g2, "&A-B");
+    u8g2_SetFont(u8g2, myfont);
+
     // Constellation Abberviation
     x += step0;
+    step0 = u8g2_GetUTF8Width(u8g2, " XXX");
     u8g2_DrawUTF8(u8g2, x, y, cat_mgr.constellationStr());
-    step0 = u8g2_GetUTF8Width(u8g2, " WWW ");
 
     // Magnitude
-    x += step0;
+    x = u8g2_GetDisplayWidth(u8g2);
     float mf=cat_mgr.magnitude();
-    if (abs(mf-99.90)<0.001) sprintf(line, " ?.?"); else dtostrf(mf, 3, 1, line);
+    if (abs(mf-99.90)<0.001) sprintf(line, "?.?"); else dtostrf(mf, 3, 1, line);
+    step0 = u8g2_GetUTF8Width(u8g2, line);
+    x -= step0;
     u8g2_DrawUTF8(u8g2, x, y, line);
 
     // Object type text
