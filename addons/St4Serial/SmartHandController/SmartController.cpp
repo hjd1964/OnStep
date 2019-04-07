@@ -710,9 +710,7 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
 
         char ss[20]; strcpy(ss,telInfo.TempSidereal); ss[2]=0; ss[5]=0;
         y += line_height + 4;
-        display->setFont(u8g2_font_helvR10_te);
-        u8g2_DrawUTF8(u8g2, 0, y, "Sidereal"); 
-        display->setFont(u8g2_font_helvR12_te);
+        u8g2_DrawUTF8(u8g2, 0, y, "LST"); 
         display->drawRA(x, y, ss, &ss[3], &ss[6]);
       }
     } else
