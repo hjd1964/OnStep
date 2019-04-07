@@ -11,7 +11,7 @@ public:
 
   uint8_t UserInterfaceMessage(Pad *extPad, const char *title1, const char *title2, const char *title3, const char *buttons);
 
-  uint8_t UserInterfaceSelectionList(Pad *extPad, const char *title, uint8_t start_pos, const char *sl);
+  uint8_t UserInterfaceSelectionList(Pad *extPad, const char *title, uint8_t start_pos, const char *sl, bool wrap=false);
 
   uint8_t UserInterfaceInputValueBoolean(Pad *extPad, const char *title, boolean *value);
 

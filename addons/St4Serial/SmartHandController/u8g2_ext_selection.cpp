@@ -200,7 +200,7 @@ u8g2_SetFontDirection(u8g2, 0);
 u8g2_SetFontPosBaseline(u8g2);
 
 */
-uint8_t ext_UserInterfaceSelectionList(u8g2_t *u8g2, Pad *extPad, const char *title, uint8_t start_pos, const char *sl)
+uint8_t ext_UserInterfaceSelectionList(u8g2_t *u8g2, Pad *extPad, const char *title, uint8_t start_pos, const char *sl, bool wrap)
 {
   u8g2_SetFont(u8g2, u8g2_font_helvR10_te);
   u8sl_t u8sl;
@@ -231,10 +231,8 @@ uint8_t ext_UserInterfaceSelectionList(u8g2_t *u8g2, Pad *extPad, const char *ti
   u8sl.first_pos = 0;
   u8sl.current_pos = start_pos;
 
-  if (u8sl.current_pos >= u8sl.total)
-    u8sl.current_pos = u8sl.total - 1;
-  if (u8sl.first_pos + u8sl.visible <= u8sl.current_pos)
-    u8sl.first_pos = u8sl.current_pos - u8sl.visible + 1;
+  if (u8sl.current_pos >= u8sl.total) u8sl.current_pos = u8sl.total - 1;
+  if (u8sl.first_pos + u8sl.visible <= u8sl.current_pos) u8sl.first_pos = u8sl.current_pos - u8sl.visible + 1;
 
   u8g2_SetFontPosBaseline(u8g2);
 
@@ -247,9 +245,7 @@ uint8_t ext_UserInterfaceSelectionList(u8g2_t *u8g2, Pad *extPad, const char *ti
       if (title_lines > 0)
       {
         yy += u8g2_DrawUTF8Lines(u8g2, 0, yy, u8g2_GetDisplayWidth(u8g2), line_height, title);
-
         u8g2_DrawHLine(u8g2, 0, yy - line_height - u8g2_GetDescent(u8g2) + 1, u8g2_GetDisplayWidth(u8g2));
-
         yy += 3;
       }
       u8g2_DrawSelectionList(u8g2, &u8sl, yy, sl);
@@ -261,25 +257,15 @@ uint8_t ext_UserInterfaceSelectionList(u8g2_t *u8g2, Pad *extPad, const char *ti
     for (;;)
     {
       event = ext_GetMenuEvent(extPad);
-      if (event == U8X8_MSG_GPIO_MENU_NEXT)
-      {
-        return u8sl.current_pos + 1;		/* +1, issue 112 */
-      }
-
-      else if (event == U8X8_MSG_GPIO_MENU_PREV)
-      {
-        return 0;				/* issue 112: return 0 instead of start_pos */
-      }
-
-      else if (event == U8X8_MSG_GPIO_MENU_DOWN || event == MSG_MENU_DOWN_FAST)
-      {
-        u8sl_Next(&u8sl);
-        break;
-      }
-      else if (event == U8X8_MSG_GPIO_MENU_UP || event == MSG_MENU_UP_FAST)
-      {
-        u8sl_Prev(&u8sl);
-        break;
+      if (event == U8X8_MSG_GPIO_MENU_NEXT) { return u8sl.current_pos + 1; } else
+      if (event == U8X8_MSG_GPIO_MENU_PREV) { return 0; } else
+      if (event == U8X8_MSG_GPIO_MENU_DOWN || event == MSG_MENU_DOWN_FAST) { 
+        if (!wrap && (u8sl.current_pos+1 >= u8sl.total)) u8sl.current_pos-=1; 
+        u8sl_Next(&u8sl); break; 
+      } else
+      if (event == U8X8_MSG_GPIO_MENU_UP || event == MSG_MENU_UP_FAST) {
+        if (!wrap && (u8sl.current_pos == 0)) u8sl.current_pos+=1;
+        u8sl_Prev(&u8sl); break;
       }
     }
   }
