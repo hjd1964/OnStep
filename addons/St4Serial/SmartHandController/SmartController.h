@@ -69,6 +69,7 @@ private:
 #endif
   uint8_t current_selection_UserCatalog = 1;
   uint8_t current_selection_feature_mode = 1;
+  bool    current_selection_filter_above = true;
   uint8_t current_selection_filter_con = 1;
   uint8_t current_selection_filter_type = 1;
   uint8_t activeGuideRate = 5;

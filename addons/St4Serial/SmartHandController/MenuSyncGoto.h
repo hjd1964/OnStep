@@ -99,22 +99,33 @@ void SmartHandController::menuSolarSys(bool sync)
 
 void SmartHandController::menuFilters()
 {
-  const char *string_list_SolarSyst = "Clear all filters\nBy Constellation\nBy Type";
-
   current_selection_L2 = 1;
   while (current_selection_L2 != 0) {
-    current_selection_L2 = display->UserInterfaceSelectionList(&buttonPad, "Filter Objects", current_selection_L2, string_list_SolarSyst);
-
+    char string_list_Filters[120] = "Reset filters";
+    char s[8];
+    if (current_selection_filter_above) strcpy(s,"\xb7"); else strcpy(s,"");
+    strcat(string_list_Filters,"\n"); strcat(string_list_Filters,s); strcat(string_list_Filters,"Above Horizon"); strcat(string_list_Filters,s);
+    if (current_selection_filter_con>1) strcpy(s,"\xb7"); else strcpy(s,"");
+    strcat(string_list_Filters,"\n"); strcat(string_list_Filters,s); strcat(string_list_Filters,"Constellation"); strcat(string_list_Filters,s);
+    if (current_selection_filter_type>1) strcpy(s,"\xb7"); else strcpy(s,"");
+    strcat(string_list_Filters,"\n"); strcat(string_list_Filters,s); strcat(string_list_Filters,"Type"); strcat(string_list_Filters,s);
+    current_selection_L2 = display->UserInterfaceSelectionList(&buttonPad, "Filter Objects", current_selection_L2, string_list_Filters);
     switch (current_selection_L2) {
       case 1:
-        current_selection_filter_con=1;
+        current_selection_filter_above=true;
+        current_selection_filter_con =1;
         current_selection_filter_type=1;
-        DisplayMessage("Filters", "Cleared", 1000);
+        DisplayMessage("Filters", "Reset", 1000);
       break;
       case 2:
-        menuFilterCon();
+        if (display->UserInterfaceInputValueBoolean(&buttonPad, "Above Only?", &current_selection_filter_above)) {
+          if (current_selection_filter_above) DisplayMessage("Filter", "On", 1000); else DisplayMessage("Filter", "Off", 1000);
+        }
       break;
       case 3:
+        menuFilterCon();
+      break;
+      case 4:
         menuFilterType();
       break;
     }
@@ -125,9 +136,10 @@ void SmartHandController::menuFilters()
 bool SmartHandController::setCatMgrFilters()
 {
   cat_mgr.filtersClear();
-  cat_mgr.filterAdd(FM_ABOVE_HORIZON);
+  
   bool extraFilterActive=false;
-  if (current_selection_filter_con>1) { cat_mgr.filterAdd(FM_CONSTELLATION,current_selection_filter_con-2); extraFilterActive=true; }
+  if (current_selection_filter_above)  { cat_mgr.filterAdd(FM_ABOVE_HORIZON); extraFilterActive=true; }
+  if (current_selection_filter_con>1)  { cat_mgr.filterAdd(FM_CONSTELLATION,current_selection_filter_con-2); extraFilterActive=true; }
   if (current_selection_filter_type>1) { cat_mgr.filterAdd(FM_OBJ_TYPE,current_selection_filter_type-2); extraFilterActive=true; }
   return extraFilterActive;
 }
