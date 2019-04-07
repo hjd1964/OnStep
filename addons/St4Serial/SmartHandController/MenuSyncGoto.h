@@ -109,7 +109,7 @@ void SmartHandController::menuFilters()
     strcat(string_list_Filters,"\n"); strcat(string_list_Filters,s); strcat(string_list_Filters,"Constellation"); strcat(string_list_Filters,s);
     if (current_selection_filter_type>1) strcpy(s,"\xb7"); else strcpy(s,"");
     strcat(string_list_Filters,"\n"); strcat(string_list_Filters,s); strcat(string_list_Filters,"Type"); strcat(string_list_Filters,s);
-    current_selection_L2 = display->UserInterfaceSelectionList(&buttonPad, "Filter Objects", current_selection_L2, string_list_Filters);
+    current_selection_L2 = display->UserInterfaceSelectionList(&buttonPad, "Filter Settings", current_selection_L2, string_list_Filters);
     switch (current_selection_L2) {
       case 1:
         current_selection_filter_above=true;
