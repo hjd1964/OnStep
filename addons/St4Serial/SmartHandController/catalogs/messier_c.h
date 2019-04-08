@@ -72,9 +72,9 @@ const char *Cat_Messier_SubId=
 "N6626;"
 "N6913;"
 "N7099;"
-"N0224;"
-"N0221;"
-"N0598;"
+"N224;"
+"N221;"
+"N598;"
 "N1039;"
 "N2168;"
 "N1960;"
@@ -115,9 +115,9 @@ const char *Cat_Messier_SubId=
 "N6838;"
 "N6981;"
 "N6994;"
-"N0628;"
+"N628;"
 "N6864;"
-"N0650;"
+"N650;"
 "N1068;"
 "N2068;"
 "N1904;"
@@ -143,14 +143,14 @@ const char *Cat_Messier_SubId=
 "N4254;"
 "N4321;"
 "N5457;"
-"N0581;"
+"N581;"
 "N4594;"
 "N3379;"
 "N4258;"
 "N6171;"
 "N3556;"
 "N3992;"
-"N0205;";
+"N205;";
 
 CAT_TYPES Cat_Messier_Type=CAT_DSO_COMP;
 const dso_comp_t Cat_Messier[NUM_MESSIER] = {
