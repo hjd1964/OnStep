@@ -2,17 +2,21 @@
 // Contains all NGC objects except for those designated NEDSxx.
 // Do NOT edit this data manually. Rather, fix the import programs and rerun.
 #define NUM_NGC 8154
+
 const char *Cat_NGC_Names="";
-const char *Cat_NGC_SubId="A;B;A;A;B;B;A;A;A;B;A;B;C;D;A;B;A;B;A;A;A;A;B;B;A;B;A;B;C;A;B;A;B;A;A;A;"
-                          "A;B;A;A;B;A;A;A;A;B;C;A;A;B;A;A;B;A;B;A;B;A;A;B;A;A;B;A;B;A;B;A;A;B;A;B;"
-                          "A;A;B;A;B;A;B;A;B;C;A;A;B;B;A;B;A;B;A;B;A;A;A;B;A;B;A;B;A;A;A;A;B;A;B;A;"
-                          "B;A;A;A;B;C;D;E;A;B;C;A;B;C;D;E;A;B;C;A;B;C;D;A;B;A;B;A;B;A;B;C;A;A;A;B;"
-                          "B;A;B;B;A;B;A;A;A;A;A;B;A;B;A;A;A;A;B;A;A;B;A;B;B;A;A;A;B;A;B;A;A;A;A;A;"
-                          "B;A;B;A;B;C;B;A;B;A;B;A;A;A;B;C;A;B;C;A;B;C;D;A;B;A;B;A;A;B;A;B;C;D;E;A;"
-                          "B;A;A;A;A;B;A;B;A;A;A;B;A;A;B;C;A;A;A;A;B;A;A;B;A;A;A;B;A;A;B;C;B;C;B;A;"
-                          "A;B;C;A;B;A;B;B;A;A;A;B;C;D;E;B;B;A;B;C;A;A;A;B;A;A;A;B;A;A;A;A;A;B;C;D;"
-                          "A;B;B;C;D;E;F;A;A;A;A;B;A;A;A;A;B;A;A;A;A;A;A;B;A;A;B;A;A;B;A;B;A;B;A;B;"
-                          "C;B;A;A;A;B;A;A;A;B;A;A;B;A;B;C;A;B;A;A;A";
+
+const char *Cat_NGC_SubId=
+"A;B;A;A;B;B;A;A;A;B;A;B;C;D;A;B;A;B;A;A;A;A;B;B;A;B;A;B;C;A;B;A;B;A;A;A;"
+"A;B;A;A;B;A;A;A;A;B;C;A;A;B;A;A;B;A;B;A;B;A;A;B;A;A;B;A;B;A;B;A;A;B;A;B;"
+"A;A;B;A;B;A;B;A;B;C;A;A;B;B;A;B;A;B;A;B;A;A;A;B;A;B;A;B;A;A;A;A;B;A;B;A;"
+"B;A;A;A;B;C;D;E;A;B;C;A;B;C;D;E;A;B;C;A;B;C;D;A;B;A;B;A;B;A;B;C;A;A;A;B;"
+"B;A;B;B;A;B;A;A;A;A;A;B;A;B;A;A;A;A;B;A;A;B;A;B;B;A;A;A;B;A;B;A;A;A;A;A;"
+"B;A;B;A;B;C;B;A;B;A;B;A;A;A;B;C;A;B;C;A;B;C;D;A;B;A;B;A;A;B;A;B;C;D;E;A;"
+"B;A;A;A;A;B;A;B;A;A;A;B;A;A;B;C;A;A;A;A;B;A;A;B;A;A;A;B;A;A;B;C;B;C;B;A;"
+"A;B;C;A;B;A;B;B;A;A;A;B;C;D;E;B;B;A;B;C;A;A;A;B;A;A;A;B;A;A;A;A;A;B;C;D;"
+"A;B;B;C;D;E;F;A;A;A;A;B;A;A;A;A;B;A;A;A;A;A;A;B;A;A;B;A;A;B;A;B;A;B;A;B;"
+"C;B;A;A;A;B;A;A;A;B;A;A;B;A;B;C;A;B;A;A;A";
+
 CAT_TYPES Cat_NGC_Type=CAT_DSO;
 const dso_t Cat_NGC[NUM_NGC] = {
   { 0, 61,  0, 0,     1,  9990,   0.12107,  27.70808}, // NGC0001,     G, 00:07:15.84, +27:42:29.1, Peg, 

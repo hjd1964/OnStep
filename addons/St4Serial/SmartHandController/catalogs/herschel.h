@@ -1,8 +1,11 @@
 // This data is machine generated from the Open NGC database.
 // Do NOT edit this data manually. Rather, fix the import programs and rerun.
 #define NUM_HERSCHEL 398
+
 const char *Cat_Herschel_Names="";
+
 const char *Cat_Herschel_SubId="";
+
 CAT_TYPES Cat_Herschel_Type=CAT_DSO;
 const dso_t Cat_Herschel[NUM_HERSCHEL] = {
   { 0, 18,  9, 0,   40,  1189,    0.217,  72.5219 }, // H   40, Cep,    PN,  11.89, 00:13:01, +72:31:1, NGC0040

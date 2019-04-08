@@ -2,6 +2,7 @@
 // Contains all Collinder objects
 // Do NOT edit this data manually. Rather, fix the import formulas.
 #define NUM_COLLINDER 471
+
 const char *Cat_Collinder_Names=
 "Plei 30*, 5';"
 "Plei 20*, 21';"

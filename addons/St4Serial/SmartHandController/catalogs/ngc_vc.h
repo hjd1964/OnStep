@@ -2,19 +2,23 @@
 // Contains all NGC objects except for those designated NEDSxx or secondary related objects (suffix of A,B,C etc.)
 // Do NOT edit this data manually. Rather, fix the import programs and rerun.
 #define NUM_NGC 7840
+
 const char *Cat_NGC_Names="";
-const char *Cat_NGC_SubId="&A,B;&A;&A,B;&B;&A;&A;&A,B;&A-D;A&B;A&B;&A;&A;&A;&A,B;&B;A&B;&A-C;A&B;A&B;"
-                          "&A;&A;&A;A&B;&A;A&B;&A;&A;&A;&A-C;&A;&A,B;&A;&A,B;&A;&B;&A,B;&A;A&B;&A;"
-                          "&A;&B;&A,B;A&B;&A;A&B;&A,B;&A;&A,B;&A,B;A&B;&A-C;&A;&A;&B;&B;&A;&B;A&B;"
-                          "A&B;&A;&A;&A;&B;&A,B;A&B;&A;&A;&A;A&B;A&B;&A,B;&A;&A;&A-E;&A-C;&A-E;&A-C;"
-                          "&A-D;&A,B;&A,B;&A,B;&A-C;&A;&A;A&B;&B;A&B;&B;&A,B;&A;&A;&A;&A;&A,B;&A,B;&A;"
-                          "&A;&A;&A,B;&A;&A;&B;A&B;&B;&A;&A;&A,B;&A,B;&A;&A;&A;&A;&A;&B;&A,B;A&B,C;"
-                          "&B;&A,B;A&B;&A;&A;&A-C;&A-C;&A-D;&A,B;&A,B;&A;&A,B;&A-E;&A,B;&A;&A;&A;"
-                          "A&B;A&B;&A;&A;&A,B;&A;&A-C;&A;&A;&A;&A,B;&A;&A,B;&A;&A;A&B;&A;&A,B;&C;"
-                          "&B,C;&B;&A;&A-C;A&B;&A;&B;&B;&A;&A;&A-E;&B;&B;&A;&B,C;&A;&A;A&B;&A;&A;&A,B;"
-                          "&A;&A;&A;&A;&A-D;&A,B;&B-F;&A;&A;&A;&A,B;&A;&A;&A;&A,B;&A;&A;&A;&A;&A;"
-                          "A&B;&A;&A,B;&A;&A,B;&A,B;&A,B;&A,B;&C;&B;&A;&A;&A,B;&A;&A;&A,B;&A;&A,B;"
-                          "&A-C;A&B;&A;&A;&A";
+
+const char *Cat_NGC_SubId=
+"&A,B;&A;&A,B;&B;&A;&A;&A,B;&A-D;A&B;A&B;&A;&A;&A;&A,B;&B;A&B;&A-C;A&B;A&B;"
+"&A;&A;&A;A&B;&A;A&B;&A;&A;&A;&A-C;&A;&A,B;&A;&A,B;&A;&B;&A,B;&A;A&B;&A;"
+"&A;&B;&A,B;A&B;&A;A&B;&A,B;&A;&A,B;&A,B;A&B;&A-C;&A;&A;&B;&B;&A;&B;A&B;"
+"A&B;&A;&A;&A;&B;&A,B;A&B;&A;&A;&A;A&B;A&B;&A,B;&A;&A;&A-E;&A-C;&A-E;&A-C;"
+"&A-D;&A,B;&A,B;&A,B;&A-C;&A;&A;A&B;&B;A&B;&B;&A,B;&A;&A;&A;&A;&A,B;&A,B;&A;"
+"&A;&A;&A,B;&A;&A;&B;A&B;&B;&A;&A;&A,B;&A,B;&A;&A;&A;&A;&A;&B;&A,B;A&B,C;"
+"&B;&A,B;A&B;&A;&A;&A-C;&A-C;&A-D;&A,B;&A,B;&A;&A,B;&A-E;&A,B;&A;&A;&A;"
+"A&B;A&B;&A;&A;&A,B;&A;&A-C;&A;&A;&A;&A,B;&A;&A,B;&A;&A;A&B;&A;&A,B;&C;"
+"&B,C;&B;&A;&A-C;A&B;&A;&B;&B;&A;&A;&A-E;&B;&B;&A;&B,C;&A;&A;A&B;&A;&A;&A,B;"
+"&A;&A;&A;&A;&A-D;&A,B;&B-F;&A;&A;&A;&A,B;&A;&A;&A;&A,B;&A;&A;&A;&A;&A;"
+"A&B;&A;&A,B;&A;&A,B;&A,B;&A,B;&A,B;&C;&B;&A;&A;&A,B;&A;&A;&A,B;&A;&A,B;"
+"&A-C;A&B;&A;&A;&A";
+
 CAT_TYPES Cat_NGC_Type=CAT_DSO_VCOMP;
 const dso_vcomp_t Cat_NGC[NUM_NGC] = {
   { 0, 61,  0, 0,   255,   331,  10088}, // NGC0001,     G, 00:07:15.84, +27:42:29.1, Peg,       

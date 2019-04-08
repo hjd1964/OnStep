@@ -3,11 +3,15 @@
 // with no visual magnitude or a surface brightness >= 23.0m/arc-sec^2.
 // Do NOT edit this data manually. Rather, fix the import programs and rerun.
 #define NUM_NGC 3438
+
 const char *Cat_NGC_Names="";
-const char *Cat_NGC_SubId="A;A;B;D;A;B;A;A;B;A;A;A;A;B;A;A;A;A;A;A;B;B;A;A;A;A;A;A;A;B;B;B;C;A;A;B;"
-                          "A;A;B;B;B;A;A;B;A;A;B;A;A;A;B;A;A;B;A;B;A;A;A;B;D;A;B;A;A;B;A;A;A;B;A;A;"
-                          "B;A;A;A;B;B;B;C;A;B;A;B;D;A;B;A;A;A;B;B;D;B;A;A;A;B;A;A;B;A;A;A;A;A;B;B;"
-                          "A;A";
+
+const char *Cat_NGC_SubId=
+"A;A;B;D;A;B;A;A;B;A;A;A;A;B;A;A;A;A;A;A;B;B;A;A;A;A;A;A;A;B;B;B;C;A;A;B;"
+"A;A;B;B;B;A;A;B;A;A;B;A;A;A;B;A;A;B;A;B;A;A;A;B;D;A;B;A;A;B;A;A;A;B;A;A;"
+"B;A;A;A;B;B;B;C;A;B;A;B;D;A;B;A;A;A;B;B;D;B;A;A;A;B;A;A;B;A;A;A;A;A;B;B;"
+"A;A";
+
 CAT_TYPES Cat_NGC_Type=CAT_DSO_COMP;
 const dso_comp_t Cat_NGC[NUM_NGC] = {
   { 0, 61,  3, 0,     8,   178,   398,   8679}, // NGC0008,    **, 00:08:45.30, +23:50:20.0, Peg,  15.32, ()

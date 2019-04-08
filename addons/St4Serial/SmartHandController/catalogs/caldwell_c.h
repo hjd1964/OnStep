@@ -1,6 +1,7 @@
 // This data is machine generated from the Open NGC database.
 // Do NOT edit this data manually. Rather, fix the import programs and rerun.
 #define NUM_CALDWELL 109
+
 const char *Cat_Caldwell_Names=
 "Bow-Tie Nebula;"
 "Iris Nebula;"

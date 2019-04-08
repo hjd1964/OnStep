@@ -1,6 +1,7 @@
 // This data is machine generated from the Open NGC database.
 // Do NOT edit this data manually. Rather, fix the import programs and rerun.
 #define NUM_CALDWELL 109
+
 const char *Cat_Caldwell_Names=
 "Bow-Tie Nebula;"
 "Iris Nebula;"
@@ -48,7 +49,6 @@ const char *Cat_Caldwell_Names=
 "Theta Car Cluster;"
 "Tarantula Nebula;"
 "47 Tucanae;";
-
 const char *Cat_Caldwell_SubId=
 " N188;"
 " N40;"
@@ -161,6 +161,7 @@ const char *Cat_Caldwell_SubId=
 " N3195;";
 
 CAT_TYPES Cat_Caldwell_Type=CAT_DSO;
+
 const dso_t Cat_Caldwell[NUM_CALDWELL] = {
   { 0, 18,  1, 1,    1,   810,    0.791,  85.2696 }, // C    1, Cep,   OCl,   8.10, 00:47:27, +85:16:1, NGC0188
   { 1, 18,  9, 1,    2,  1189,    0.217,  72.5219 }, // C    2, Cep,    PN,  11.89, 00:13:01, +72:31:1, NGC0040

@@ -2,8 +2,11 @@
 // Contains all IC objects except for those designated NEDSxx.
 // Do NOT edit this data manually. Rather, fix the import programs and rerun.
 #define NUM_IC 5400
+
 const char *Cat_IC_Names="";
+
 const char *Cat_IC_SubId="A;B;A;B;A;E;A;B;A;B;A;B;A;B;A;B;A;B;A;B;A;B;A;B;A;B";
+
 CAT_TYPES Cat_IC_Type=CAT_DSO;
 const dso_t Cat_IC[NUM_IC] = {
   { 0, 61,  3, 0,     1,  9990,   0.14085,  27.71767}, //  IC0001,    **, 00:08:27.05, +27:43:03.6, Peg,       

@@ -3,8 +3,11 @@
 // with no visual magnitude or a surface brightness >= 23.0m/arc-sec^2.
 // Do NOT edit this data manually. Rather, fix the import programs and rerun.
 #define NUM_IC 1024
+
 const char *Cat_IC_Names="";
+
 const char *Cat_IC_SubId="A;B;A;B;A;B;A;B";
+
 CAT_TYPES Cat_IC_Type=CAT_DSO_COMP;
 const dso_comp_t Cat_IC[NUM_IC] = {
   { 0, 19,  0, 0,     9,   255,   898,  -5053}, //  IC0009,     G, 00:19:43.98, -14:07:18.8, Cet,       , (22.88)
