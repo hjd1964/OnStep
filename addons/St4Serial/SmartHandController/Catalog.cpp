@@ -17,6 +17,7 @@
   #include "catalogs/herschel_c.h"
   #include "catalogs/ngc_select_c.h"
   #include "catalogs/ic_select_c.h"
+  #include "catalogs/collinder.h"
 
 // And uncomment the matching line below:
 catalog_t catalog[] = {
@@ -30,6 +31,7 @@ catalog_t catalog[] = {
 //{"IC",        "I",     NUM_IC,       Cat_IC,       Cat_IC_Names,        Cat_IC_SubId,         Cat_IC_Type,        2000, 0},
   {"Select NGC","N",     NUM_NGC,      Cat_NGC,      Cat_NGC_Names,       Cat_NGC_SubId,        Cat_NGC_Type,       2000, 0},
   {"Select IC", "I",     NUM_IC,       Cat_IC,       Cat_IC_Names,        Cat_IC_SubId,         Cat_IC_Type,        2000, 0},
+  {"Collinder", "Cr",    NUM_COLLINDER,Cat_Collinder,Cat_Collinder_Names, Cat_Collinder_SubId,  Cat_Collinder_Type, 2000, 0},  
   {"",          "",                 0,         NULL,               NULL,                NULL,   CAT_NONE,              0, 0}
 };
 
