@@ -10,13 +10,18 @@ bool U8G2_EXT::UserInterfaceCatalog(Pad *extPad, const char *title)
   return ext_UserInterfaceCatalog(U8G2_EXT::getU8g2(), extPad, title);
 };
 
+bool U8G2_EXT::UserInterfaceUserCatalog(Pad *extPad, const char *title)
+{
+  return ext_UserInterfaceUserCatalog(U8G2_EXT::getU8g2(), extPad, title);
+};
+
 uint8_t U8G2_EXT::UserInterfaceMessage(Pad *extPad, const char *title1, const char *title2, const char *title3, const char *buttons)
 {
   return ext_UserInterfaceMessage(U8G2_EXT::getU8g2(), extPad, title1, title2, title3, buttons);
 };
-uint8_t U8G2_EXT::UserInterfaceSelectionList(Pad *extPad, const char *title, uint8_t start_pos, const char *sl)
+uint8_t U8G2_EXT::UserInterfaceSelectionList(Pad *extPad, const char *title, uint8_t start_pos, const char *sl, boolean wrap)
 {
-  return ext_UserInterfaceSelectionList(U8G2_EXT::getU8g2(), extPad, title, start_pos, sl);
+  return ext_UserInterfaceSelectionList(U8G2_EXT::getU8g2(), extPad, title, start_pos, sl, wrap);
 };
 
 uint8_t U8G2_EXT::UserInterfaceInputValueBoolean(Pad *extPad, const char *title, boolean *value)
@@ -56,9 +61,9 @@ uint8_t U8G2_EXT::UserInterfaceInputValueDec(Pad *extPad, long *value)
   return ext_UserInterfaceInputValueDec(U8G2_EXT::getU8g2(), extPad, value);
 };
 
-uint8_t U8G2_EXT::UserInterfaceInputValueTime(Pad *extPad, long *value)
+uint8_t U8G2_EXT::UserInterfaceInputValueTime(Pad *extPad, long *value, bool hrs24)
 {
-  return ext_UserInterfaceInputValueTime(U8G2_EXT::getU8g2(), extPad, value);
+  return ext_UserInterfaceInputValueTime(U8G2_EXT::getU8g2(), extPad, value, hrs24);
 };
 
 uint8_t U8G2_EXT::UserInterfaceInputValueLatitude(Pad *extPad, long *value)

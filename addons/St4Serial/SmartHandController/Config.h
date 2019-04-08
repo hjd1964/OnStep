@@ -15,6 +15,12 @@
 // UTILITY_LIGHT n, where n=0 to 255 activates this feature and sets default brightness
 #define UTILITY_LIGHT_OFF
 
+// Use 24 hour format for entering time, default=true
+#define USE_24HR_TIME true
+
+// Use _ON to enable "pass-through" Aux ST4 port, default=_OFF
+#define AUX_ST4_OFF
+
 // THAT IS ALL FOR USER CONFIGURABLE PARAMETERS! Do not change anything below this line!
 // -------------------------------------------------------------------------------------
 
@@ -51,11 +57,12 @@
   #define ST4DEn 4    // ST4 (OnStep) DE+ North, recv data from OnStep
   #define ST4RAe 5    // ST4 (OnStep) RA+ East,  always 25 Hz square wave on this pin
 
-// Uncomment to activate the auxiliary ST4 port on the SHC
-//  #define ST4AuxRAw 6 // ST4 (Aux) RA- West
-//  #define ST4AuxDEs 7 // ST4 (Aux) DE- South
-//  #define ST4AuxDEn 8 // ST4 (Aux) DE+ North
-//  #define ST4AuxRAe 9 // ST4 (Aux) RA+ East
+  #ifdef AUX_ST4_ON
+    #define ST4AuxRAw 6 // ST4 (Aux) RA- West
+    #define ST4AuxDEs 7 // ST4 (Aux) DE- South
+    #define ST4AuxDEn 8 // ST4 (Aux) DE+ North
+    #define ST4AuxRAe 9 // ST4 (Aux) RA+ East
+  #endif
 
   #define UTILITY_LIGHT_PIN  10    // Pin10 used as PWM output to drive utility lamp LED
 #endif
@@ -77,11 +84,12 @@
   #define ST4DEn 27   // ST4 (OnStep) DE+ North, recv data from OnStep
   #define ST4RAe 26   // ST4 (OnStep) RA+ East,  always 12.5 Hz square wave on this pin
 
-// Uncomment to activate the auxiliary ST4 port on the SHC
-//  #define ST4AuxRAw 19 // ST4 (Aux) RA- West
-//  #define ST4AuxDEs 18 // ST4 (Aux) DE- South
-//  #define ST4AuxDEn 17 // ST4 (Aux) DE+ North
-//  #define ST4AuxRAe 5  // ST4 (Aux) RA+ East
+  #ifdef AUX_ST4_ON
+    #define ST4AuxRAw 19 // ST4 (Aux) RA- West
+    #define ST4AuxDEs 18 // ST4 (Aux) DE- South
+    #define ST4AuxDEn 17 // ST4 (Aux) DE+ North
+    #define ST4AuxRAe 5  // ST4 (Aux) RA+ East
+  #endif
 
   #define UTILITY_LIGHT_PIN  13    // GPIO13 used as PWM output to drive utility lamp LED
 #endif 

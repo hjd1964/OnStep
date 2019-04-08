@@ -88,7 +88,7 @@ uint8_t ext_UserInterfaceInputValueRA(u8g2_t *u8g2, Pad *extPad, long *value);
 uint8_t ext_UserInterfaceInputValueDec(u8g2_t *u8g2, Pad *extPad, long *value);
 
 
-uint8_t ext_UserInterfaceInputValueTime(u8g2_t *u8g2, Pad *extPad, long *value);
+uint8_t ext_UserInterfaceInputValueTime(u8g2_t *u8g2, Pad *extPad, long *value, bool hrs24);
 
 
 uint8_t ext_UserInterfaceInputValueLatitude(u8g2_t *u8g2, Pad *extPad, long *value);
@@ -106,5 +106,3 @@ void gethms(const long& v, uint8_t& v1, uint8_t& v2, uint8_t& v3);
 void add_days(uint8_t& year, uint8_t& month, uint8_t& day, int days2add);
 
 void supress_days(uint8_t& year, uint8_t& month, uint8_t& day, int days2supress);
-
-

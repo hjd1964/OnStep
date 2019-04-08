@@ -6,7 +6,7 @@ bool atoi2(char *a, int *i, bool sign=true) {
   int len=strlen(a);
   if (len>6) return false;
   for (int l=0; l<len; l++) {
-    if ((l==0) && (a[l]=='-') && sign) continue;
+    if ((l==0) && ((a[l]=='+') || (a[l]=='-')) && sign) continue;
     if ((a[l]<'0') || (a[l]>'9')) return false;
   }
   long l=atol(a);
@@ -20,7 +20,7 @@ bool atof2(char *a, double *d, bool sign=true) {
   int dc=0;
   int len=strlen(a);
   for (int l=0; l<len; l++) {
-    if ((l==0) && (a[l]=='-') && sign) continue;
+    if ((l==0) && ((a[l]=='+') || (a[l]=='-')) && sign) continue;
     if (a[l]=='.') { if (dc==0) { dc++; continue; } else return false; }
     if ((a[l]<'0') || (a[l]>'9')) return false;
   }

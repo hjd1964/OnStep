@@ -28,6 +28,7 @@ class SmartHandController
 public:
   enum OLED { OLED_SH1106, OLED_SSD1306 };
   int telescopeCoordinates=1;
+  boolean hrs24=USE_24HR_TIME;
 
   void update();
   void drawIntro();
@@ -66,9 +67,12 @@ private:
 #ifdef UTILITY_LIGHT 
   uint8_t current_selection_utility_light = 5;
 #endif
-  uint8_t current_selection_UserCatalog = -1;
-  uint8_t activeGuideRate = 5;
+  uint8_t current_selection_UserCatalog = 1;
   uint8_t current_selection_feature_mode = 1;
+  bool    current_selection_filter_above = true;
+  uint8_t current_selection_filter_con = 1;
+  uint8_t current_selection_filter_type = 1;
+  uint8_t activeGuideRate = 5;
   uint8_t featureKeyMode = 1; // guide rate
 
   unsigned short current_selection_SolarSys = 1;
@@ -81,10 +85,12 @@ private:
   void menuMain();
   void menuSpeedRate();
   void menuSyncGoto(bool sync);
+  void menuCatalog(bool sync, int number);
+  bool setCatMgrFilters();
+  void menuFilters();
+  void menuFilterCon();
+  void menuFilterType();
   void menuSolarSys(bool sync);
-  void menuHerschel(bool sync);
-  void menuMessier(bool sync);
-  void menuCaldwell(bool sync);
   void menuUser(bool sync);
   void menuAlignment();
   void menuParking();
@@ -93,7 +99,6 @@ private:
   void menuBacklash();
   bool menuSetBacklash(uint8_t &axis);
   void menuPier();
-  void menuStar(bool sync);
   bool SelectStarAlign();
   void menuRADec(bool sync);
   void menuSettings();

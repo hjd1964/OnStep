@@ -1,6 +1,7 @@
 
 #include "SmartController.h"
 #include "LX200.h"
+#include "Catalog.h"
 
 unsigned long display_blank_time = DISPLAY_BLANK_TIME;
 unsigned long display_dim_time = DISPLAY_DIM_TIME;
@@ -339,10 +340,20 @@ void SmartHandController::setup(const char version[], const int pin[7],const boo
 again:
   delay(4000);
   if (GetLX200(":GXEE#", s) == LX200VALUEGET) {
-    DisplayMessage("Connection", "Ok!", 1000);
-    if (s[0]=='0') telescopeCoordinates=OBSERVED_PLACE; else 
-    if (s[0]=='1') telescopeCoordinates=TOPOCENTRIC; else 
-    if (s[0]=='2') telescopeCoordinates=ASTROMETRIC_J2000;
+    if (s[0]=='0') {
+      telescopeCoordinates=OBSERVED_PLACE; 
+      DisplayMessage("Connetion", "Warning!", 1000);
+      DisplayMessage("Coordinates", "Observed Place.", 2000);
+  } else 
+    if (s[0]=='1') {
+      telescopeCoordinates=TOPOCENTRIC; 
+      DisplayMessage("Connetion", "Ok!", 1000);
+    } else 
+    if (s[0]=='2') {
+      telescopeCoordinates=ASTROMETRIC_J2000;
+      DisplayMessage("Connetion", "Warning!", 1000);
+      DisplayMessage("Coordinates", "J2000 Mode?", 2000);
+    }
   } else {
     if (++thisTry <= 4) goto again;
     telescopeCoordinates=OBSERVED_PLACE;
@@ -377,7 +388,7 @@ void SmartHandController::update()
   if (display_dim_time && top - time_last_action > display_dim_time && !lowContrast) { display->setContrast(0); lowContrast = true; return; }
 
   // power cycle reqd message
-  if (powerCylceRequired) { display->setFont(u8g2_font_helvR12_tr); DisplayMessage("REBOOT", "DEVICE", 1000); return; }
+  if (powerCylceRequired) { display->setFont(u8g2_font_helvR12_te); DisplayMessage("REBOOT", "DEVICE", 1000); return; }
   
   if (telInfo.align == Telescope::ALI_SELECT_STAR_1 || telInfo.align == Telescope::ALI_SELECT_STAR_2 || telInfo.align == Telescope::ALI_SELECT_STAR_3 || 
       telInfo.align == Telescope::ALI_SELECT_STAR_4 || telInfo.align == Telescope::ALI_SELECT_STAR_5 || telInfo.align == Telescope::ALI_SELECT_STAR_6 ||
@@ -530,7 +541,6 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
   u8g2_t *u8g2 = display->getU8g2();
   display->setFont(u8g2_font_helvR12_te);
   u8g2_uint_t line_height = u8g2_GetAscent(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
-  u8g2_uint_t line_ascent = u8g2_GetAscent(u8g2);
 
   // get the status
   telInfo.connected = true;
@@ -691,18 +701,16 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
     if (page == 2) {
       if (telInfo.hasInfoUTC && telInfo.hasInfoSidereal)
       {
-        char us[20]; strcpy(us,telInfo.TempLocalTime); us[2]=0; us[5]=0;
+        char us[20]; strcpy(us,telInfo.TempUniversalTime); us[2]=0; us[5]=0;
         x = u8g2_GetDisplayWidth(u8g2);  u8g2_uint_t y = 36;
-        display->setFont(u8g2_font_helvR10_tf);
-        u8g2_DrawUTF8(u8g2, 0, y, "Local");
+        display->setFont(u8g2_font_helvR10_te);
+        u8g2_DrawUTF8(u8g2, 0, y, "UT");
         display->setFont(u8g2_font_helvR12_te); 
         display->drawRA( x, y, us, &us[3], &us[6]);
 
         char ss[20]; strcpy(ss,telInfo.TempSidereal); ss[2]=0; ss[5]=0;
         y += line_height + 4;
-        display->setFont(u8g2_font_helvR10_tf);
-        u8g2_DrawUTF8(u8g2, 0, y, "Sidereal"); 
-        display->setFont(u8g2_font_helvR12_te);
+        u8g2_DrawUTF8(u8g2, 0, y, "LST"); 
         display->drawRA(x, y, ss, &ss[3], &ss[6]);
       }
     } else
@@ -745,9 +753,10 @@ void SmartHandController::drawIntro()
 bool SmartHandController::SelectStarAlign()
 {
   if (!cat_mgr.isInitialized()) { cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0()); }
-  cat_mgr.select(STAR);
-  
-  cat_mgr.filter(FM_ALIGN_ALL_SKY);
+  cat_mgr.select(0);
+
+  cat_mgr.filtersClear();
+  cat_mgr.filterAdd(FM_ALIGN_ALL_SKY);
 
   cat_mgr.setIndex(0);
   if (cat_mgr.isInitialized()) {
@@ -780,7 +789,7 @@ void SmartHandController::DisplayMessage(const char* txt1, const char* txt2, int
 
 void SmartHandController::DisplayLongMessage(const char* txt1, const char* txt2, const char* txt3, const char* txt4, int duration)
 {
-  display->setFont(u8g2_font_helvR10_tr);
+  display->setFont(u8g2_font_helvR10_te);
   uint8_t h = 15;
   uint8_t x = 0;
   uint8_t y = h;
@@ -818,7 +827,7 @@ void SmartHandController::DisplayLongMessage(const char* txt1, const char* txt2,
 
   display->setFont(u8g2_font_helvR12_te);
 }
-
+  
 bool SmartHandController::DisplayMessageLX200(LX200RETURN val, bool silentOk)
 {
   char text1[20] = "";
@@ -826,96 +835,31 @@ bool SmartHandController::DisplayMessageLX200(LX200RETURN val, bool silentOk)
   int time = -1;
   if (val < LX200OK)
   {
-    if (val == LX200NOTOK)
-    {
-      sprintf(text1, "LX200 Command");
-      sprintf(text2, "has failed!");
-    }
-    else if (val == LX200SETVALUEFAILED)
-    {
-      sprintf(text1, "Set Value");
-      sprintf(text2, "has failed!");
-    }
-    else if (val == LX200GETVALUEFAILED)
-    {
-      sprintf(text1, "Get Value");
-      sprintf(text2, "has failed!");
-    }
-    else if (val == LX200SYNCFAILED)
-    {
-      sprintf(text1, "Sync");
-      sprintf(text2, "has failed!");
-    }
-    else if (val == LX200SETTARGETFAILED)
-    {
-      sprintf(text1, "Set Target");
-      sprintf(text2, "has failed!");
-    }
-    else if (val == LX200BELOWHORIZON)
-    {
-      sprintf(text1, "Target is");
-      sprintf(text2, "Below Horizon!");
-    }
-    else if (val == LX200NOOBJECTSELECTED)
-    {
-      sprintf(text1, "No Object");
-      sprintf(text2, "Selected!");
-    }
-    else if (val == LX200PARKED)
-    {
-      sprintf(text1, "Telescope");
-      sprintf(text2, "is Parked!");
-    }
-    else if (val == LX200BUSY)
-    {
-      sprintf(text1, "Telescope");
-      sprintf(text2, "is busy!");
-    }
-    else if (val == LX200LIMITS)
-    {
-      sprintf(text1, "Target");
-      sprintf(text2, "outside limits");
-    }
-    else if (val == LX200UNKOWN)
-    {
-      sprintf(text1, "Unknown");
-      sprintf(text2, "Error");
-    }
-    else
-    {
-      sprintf(text1, "Error");
-      sprintf(text2, "-1");
-    }
+         if (val == LX200NOTOK)                    { sprintf(text1, "LX200 Command"); sprintf(text2, "has failed!");    }
+    else if (val == LX200SETVALUEFAILED)           { sprintf(text1, "Set Value");     sprintf(text2, "has failed!");    }
+    else if (val == LX200GETVALUEFAILED)           { sprintf(text1, "Get Value");     sprintf(text2, "has failed!");    }
+    else if (val == LX200SETTARGETFAILED)          { sprintf(text1, "Set Target");    sprintf(text2, "has failed!");    }
+    else if (val == LX200NOOBJECTSELECTED)         { sprintf(text1, "No Object");     sprintf(text2, "Selected!");      }
+    else if (val == LX200_GOTO_ERR_BELOW_HORIZON)  { sprintf(text1, "Target is");     sprintf(text2, "Below Horizon!"); }
+    else if (val == LX200_GOTO_ERR_ABOVE_OVERHEAD) { sprintf(text1, "Target is");     sprintf(text2, "Above Limit!");   }
+    else if (val == LX200_GOTO_ERR_STANDBY)        { sprintf(text1, "Telescope");     sprintf(text2, "in standby!");    }
+    else if (val == LX200_GOTO_ERR_PARK)           { sprintf(text1, "Telescope");     sprintf(text2, "is Parked!");     }
+    else if (val == LX200_GOTO_ERR_GOTO)           { sprintf(text1, "Goto already");  sprintf(text2, "in progress!");   }
+    else if (val == LX200_GOTO_ERR_OUTSIDE_LIMITS) { sprintf(text1, "Target");        sprintf(text2, "outside lmts!");  }
+    else if (val == LX200_GOTO_ERR_HARDWARE_FAULT) { sprintf(text1, "Telescope");     sprintf(text2, "h/w fault!");     }
+    else if (val == LX200_GOTO_ERR_IN_MOTION)      { sprintf(text1, "Telescope");     sprintf(text2, "in motion!");     }
+    else if (val == LX200_GOTO_ERR_UNSPECIFIED)    { sprintf(text1, "Goto unknown");  sprintf(text2, "error!");         }
+    else { sprintf(text1, "Error"); sprintf(text2, "-1"); }
     DisplayMessage(text1, text2, -1);
   }
   else if (!silentOk)
   {
     time = 1000;
-    if (val == LX200OK)
-    {
-      sprintf(text1, "LX200 Command");
-      sprintf(text2, "Done!");
-    }
-    else if (val == LX200VALUESET)
-    {
-      sprintf(text1, "Value");
-      sprintf(text2, "Set!");
-    }
-    else if (val == LX200GETVALUEFAILED)
-    {
-      sprintf(text1, "Value");
-      sprintf(text2, "Get!");
-    }
-    else if (val == LX200SYNCED)
-    {
-      sprintf(text1, "Telescope");
-      sprintf(text2, "Synced!");
-    }
-    else if (LX200GOINGTO)
-    {
-      sprintf(text1, "Slew to");
-      sprintf(text2, "Target");
-    }
+         if (val == LX200OK)            { sprintf(text1, "LX200 Command"); sprintf(text2, "Done!");   }
+    else if (val == LX200VALUESET)      { sprintf(text1, "Value");         sprintf(text2, "Set!");    }
+    else if (val == LX200VALUEGET)      { sprintf(text1, "Value");         sprintf(text2, "Get!");    }
+    else if (val == LX200SYNCED)        { sprintf(text1, "Telescope");     sprintf(text2, "Synced!"); }
+    else if (val == LX200_GOTO_GOINGTO) { sprintf(text1, "Slew to");       sprintf(text2, "Target");  }
     DisplayMessage(text1, text2, time);
   }
   return isOk(val);

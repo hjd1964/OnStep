@@ -1,6 +1,5 @@
 #pragma once
 #include <Arduino.h>
-#include "Catalog.h"
 
 class Telescope
 {
@@ -41,7 +40,7 @@ public:
   char TempAz[20];
   char TempAlt[20];
   unsigned long lastStateAzAlt;
-  char TempLocalTime[20];
+  char TempUniversalTime[20];
   char TempSidereal[20];
   unsigned long lastStateTime;
   char TelStatus[20];

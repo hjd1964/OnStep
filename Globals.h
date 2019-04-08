@@ -121,12 +121,12 @@ double longitude = 0.0;
 
 // Coordinates -------------------------------------------------------------------------------------------------------------
 #ifdef MOUNT_TYPE_GEM
-double celestialPoleAxis1  = 90.0;
+double homePositionAxis1  = 90.0;
 #endif
 #if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT) || defined(MOUNT_TYPE_ALTAZM)
-double celestialPoleAxis1  = 0.0;
+double homePositionAxis1  = 0.0;
 #endif
-double celestialPoleAxis2 = 90.0;
+double homePositionAxis2 = 90.0;
 // either 0 or (fabs(latitude))
 #define AltAzmDecStartPos (fabs(latitude))
 

@@ -1024,7 +1024,7 @@ void processCommands() {
 //  :hR#   Restore parked telescope to operation
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='R')  { if (!unPark()) commandError=true; }
+      if (command[1]=='R')  { if (!unPark(true)) commandError=true; }
       else commandError=true;
 
       } else
@@ -1163,6 +1163,13 @@ void processCommands() {
 //          Returns: Nothing
       if ((command[1]=='!') && (parameter[0]==0)) { 
           Lib.clearAll();
+          quietReply=true;
+      } else 
+
+// :L?#    Get library free records (all catalogs)
+//          Returns: n#
+      if ((command[1]=='?') && (parameter[0]==0)) { 
+          sprintf(reply,"%d",Lib.recFree());
           quietReply=true;
       } else 
 
@@ -1414,10 +1421,9 @@ void processCommands() {
         if (!doubleToDms(reply,&f1,true,true)) commandError=true; else quietReply=true;
         highPrecision=i;
       } else
-//  :r~#   Set continuous move mode
-//         Return: 0 on failure
-//                 1 on success
-      if (command[1]=='~') { rot.moveContinuous(true); } else
+//  :rc#   Set continuous move mode (for next move command)
+//         Returns: Nothing
+      if (command[1]=='c') { rot.moveContinuous(true); quietReply=true; } else
 //  :r>#   Move clockwise as set by :rn# command, default = 1 deg (or 0.1 deg/s in continuous mode)
 //         Returns: Nothing
       if (command[1]=='>') { rot.startMoveCW(); quietReply=true; } else
@@ -1426,7 +1432,7 @@ void processCommands() {
       if (command[1]=='<') { rot.startMoveCCW(); quietReply=true; } else
 //  :rQ#   Stops movement (except derotator)
 //         Returns: Nothing
-      if (command[1]=='Q') { rot.stopMove(); quietReply=true; } else
+      if (command[1]=='Q') { rot.stopMove(); rot.moveContinuous(false); quietReply=true; } else
 //  :rn#   Move increment, 1=1 degrees, 2=2 degrees, 3=5 degrees, 4=10 degrees
 //         Move rate     , 1=.01 deg/s, 2=0.1 deg/s, 3=1.0 deg/s, 4=5.0 deg/s
 //         Returns: Nothing
@@ -1618,10 +1624,10 @@ void processCommands() {
         if (!dmsToDouble(&latitude,parameter,true)) { commandError=true; } else {
           nv.writeFloat(100+(currentSite)*25+0,latitude);
 #ifdef MOUNT_TYPE_ALTAZM
-          celestialPoleAxis2=AltAzmDecStartPos;
-          if (latitude<0) celestialPoleAxis1=180.0; else celestialPoleAxis1=0.0;
+          homePositionAxis2=AltAzmDecStartPos;
+          if (latitude<0) homePositionAxis1=180.0; else homePositionAxis1=0.0;
 #else
-          if (latitude<0) celestialPoleAxis2=-90.0; else celestialPoleAxis2=90.0;
+          if (latitude<0) homePositionAxis2=-90.0; else homePositionAxis2=90.0;
 #endif
           cosLat=cos(latitude/Rad);
           sinLat=sin(latitude/Rad);
@@ -2089,9 +2095,9 @@ void processCommands() {
           currentSite=command[1]-'0'; nv.update(EE_currentSite,currentSite); quietReply=true;
           latitude=nv.readFloat(EE_sites+(currentSite*25+0));
 #ifdef MOUNT_TYPE_ALTAZM
-          celestialPoleAxis2=AltAzmDecStartPos;
+          homePositionAxis2=AltAzmDecStartPos;
 #else
-          if (latitude<0.0) celestialPoleAxis2=-90.0; else celestialPoleAxis2=90.0;
+          if (latitude<0.0) homePositionAxis2=-90.0; else homePositionAxis2=90.0;
 #endif
           cosLat=cos(latitude/Rad);
           sinLat=sin(latitude/Rad);

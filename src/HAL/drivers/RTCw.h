@@ -181,7 +181,7 @@ class rtcw {
   public:
     // initialize (also enables the RTC PPS if available)
     void init() {
-      active=true;
+      active=false;
     }
 
     // set the RTC's time (local standard time)

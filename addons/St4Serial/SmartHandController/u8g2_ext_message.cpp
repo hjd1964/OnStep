@@ -175,14 +175,14 @@ u8g2_uint_t ext_UserInterfaceMessage(u8g2_t *u8g2, Pad *extPad, const char *titl
         return cursor + 1;
       else if (event == U8X8_MSG_GPIO_MENU_HOME)
         return 0;
-      else if (event == U8X8_MSG_GPIO_MENU_NEXT || event == U8X8_MSG_GPIO_MENU_DOWN)
+      else if (event == U8X8_MSG_GPIO_MENU_NEXT || event == U8X8_MSG_GPIO_MENU_DOWN || event == MSG_MENU_DOWN_FAST)
       {
         cursor++;
         if (cursor >= button_cnt)
           cursor = 0;
         break;
       }
-      else if (event == U8X8_MSG_GPIO_MENU_PREV || event == U8X8_MSG_GPIO_MENU_UP)
+      else if (event == U8X8_MSG_GPIO_MENU_PREV || event == U8X8_MSG_GPIO_MENU_UP || event == MSG_MENU_UP_FAST)
       {
         if (cursor == 0)
           cursor = button_cnt;
@@ -194,4 +194,3 @@ u8g2_uint_t ext_UserInterfaceMessage(u8g2_t *u8g2, Pad *extPad, const char *titl
   /* never reached */
   //return 0;
 }
-

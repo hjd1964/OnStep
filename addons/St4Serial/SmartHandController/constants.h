@@ -1,4 +1,0 @@
-#define NUM_STARS 408
-#define NUM_MESSIER 109
-#define NUM_CALDWELL 109
-#define NUM_HERSCHEL 398

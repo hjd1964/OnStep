@@ -51,9 +51,9 @@ void SmartHandController::menuLocalDateTime()
       boolean pmf=false;
       boolean dst=false;
       if (DisplayMessageLX200(GetTimeLX200(value))) {
-        if (value>=43200) { value-=43200; pmf=true; }
-        if (display->UserInterfaceInputValueTime(&buttonPad, &value)) {
-          if (display->UserInterfaceInputValueBoolean(&buttonPad, "Local Time PM?", &pmf)) {
+        if ((!hrs24) && (value>=43200)) { value-=43200; pmf=true; }
+        if (display->UserInterfaceInputValueTime(&buttonPad, &value, hrs24)) {
+          if (hrs24 || (display->UserInterfaceInputValueBoolean(&buttonPad, "Local Time PM?", &pmf))) {
             if (pmf) value+=43200; // AM or PM?
             if (display->UserInterfaceInputValueBoolean(&buttonPad, "Local Time DST?", &dst)) {
               if (dst) value-=3600; // Dst?

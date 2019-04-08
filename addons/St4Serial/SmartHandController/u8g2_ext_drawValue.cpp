@@ -30,8 +30,8 @@ uint8_t ext_drawRA(u8g2_t *u8g2, uint8_t x, uint8_t y, const char* Rah, const ch
     u8g2_DrawUTF8(u8g2, x, y, ":");
     x += step2;
     x += u8g2_DrawUTF8(u8g2, x, y, Ras);
-    return x;
   }
+  return x;
 
 }
 
@@ -87,7 +87,7 @@ uint8_t ext_drawDec(u8g2_t *u8g2, uint8_t x, uint8_t y, const char* decsign, con
     x += step2 - u8g2_GetUTF8Width(u8g2, " ") / 2;
     x += u8g2_DrawUTF8(u8g2, x, y, decsec);
   }
-
+  return x;
 }
 
 uint8_t ext_drawAz(u8g2_t *u8g2, uint8_t x, uint8_t y, const char* Azdeg, const char* Azmin, const char* Azsec)
@@ -121,4 +121,5 @@ uint8_t ext_drawAz(u8g2_t *u8g2, uint8_t x, uint8_t y, const char* Azdeg, const 
     x += step2 - u8g2_GetUTF8Width(u8g2, " ") / 2;
     x += u8g2_DrawUTF8(u8g2, x, y, Azsec);
   }
+  return x;
 }

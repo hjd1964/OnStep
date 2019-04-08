@@ -48,6 +48,7 @@ class Library
     void clearAll(); // clears all libraries
 
     int recCount(); // actual number of records for this library
+    int recFree();  // number records available for this library
     int recPos;     // currently selected record#
     int recMax;     // last record#
     
@@ -301,6 +302,12 @@ int Library::recCount()
   }
   
   return c;
+}
+
+// catalog records available
+int Library::recFree()
+{
+  return recMax-recCount();
 }
 
 // mark this catalog record as empty

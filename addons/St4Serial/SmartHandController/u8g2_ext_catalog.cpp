@@ -37,8 +37,9 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <U8g2lib.h>
 #include "u8g2_ext_catalog.h"
 #include "u8g2_ext_value.h"
-#include "Catalog.h"
 #include "u8g2_ext_event.h"
+#include "LX200.h"
+#include "Catalog.h"
 
 #define OC_width 18
 #define OC_height 10
@@ -79,7 +80,6 @@ static unsigned char GX_bits[] U8X8_PROGMEM = {
 
 #define MY_BORDER_SIZE 1
 
-
 /*
 selection list with string line
 returns line height
@@ -87,41 +87,39 @@ returns line height
 
 static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y)
 {
-  char DEGREE_SYMBOL[] = { 0xB0, '\0' };
   u8g2_uint_t x = 0;
-  u8g2_uint_t yy;
 
   uint8_t step0;
   const uint8_t* myfont = u8g2->font;
-  u8g2_uint_t  pixel_width;
   u8g2_uint_t line_height = u8g2_GetAscent(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
 
   char line[16];
 
-  // for Star Catalog
-  if (cat_mgr.getCat() == STAR)
+  // for Star Catalogs
+  if (cat_mgr.isStarCatalog())
   {
 
     // Bayer designation of the star (Greek letter)
     u8g2_SetFont(u8g2, u8g2_font_unifont_t_greek);
     x = 0;
     u8g2_DrawGlyph(u8g2, x, y, 944 + cat_mgr.primaryId());
-    u8g2_SetFont(u8g2, myfont);
 
     // Constellation Abbreviation
-    x = 12;
+    u8g2_SetFont(u8g2, u8g2_font_helvR10_te);
+    x = 10;
     u8g2_DrawUTF8(u8g2, x, y, cat_mgr.constellationStr());
 
     // Width of constellation abbreviation
-    x = u8g2_GetUTF8Width(u8g2, "-WWW-");
+    x = u8g2_GetUTF8Width(u8g2, "-WWw-");
     
     // Common name for the star
-    u8g2_DrawUTF8(u8g2, x, y, cat_mgr.objectName());
+    u8g2_DrawUTF8(u8g2, x, y, cat_mgr.objectNameStr());
 
     y += line_height;
     x = 0;
 
     // RA
+    u8g2_SetFont(u8g2, myfont);
     uint8_t vr1, vr2, vr3;
     char txt1[5], txt2[5], txt3[5];
     cat_mgr.raHMS(vr1,vr2,vr3);
@@ -132,9 +130,6 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y)
     step0 = u8g2_GetUTF8Width(u8g2, "DE ");
     x += step0;
     ext_drawRA(u8g2, x, y, txt1, txt2, txt3);
-
-    // Magnitude
-    sprintf(line, "%0.1f", cat_mgr.magnitude());
 
     // Declination
     short vd1; uint8_t vd2; uint8_t vd3;
@@ -148,7 +143,12 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y)
     x += step0;
     ext_drawDec(u8g2, x, y, vd1 < 0 ? "-" : "+", txt1, txt2, txt3);
 
-    x = u8g2_GetUTF8Width(u8g2, "DE +DD:MM:SS ");
+    // Magnitude
+    x = u8g2_GetDisplayWidth(u8g2);
+    float mf=cat_mgr.magnitude();
+    if (abs(mf-99.90)<0.001) sprintf(line, "?.?"); else dtostrf(mf, 3, 1, line);
+    step0 = u8g2_GetUTF8Width(u8g2, line);
+    x -= step0;
     u8g2_DrawUTF8(u8g2, x, y, line);
 
     return line_height;
@@ -157,19 +157,30 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y)
     // Object Catalogs
 
     // Catalog letter and Object ID
-    step0 = u8g2_GetUTF8Width(u8g2, "W 9999 ");
-    sprintf(line, "%s%u", cat_mgr.catalogStr(), cat_mgr.primaryId());
     x = 0;
+    sprintf(line, "%s%u", cat_mgr.catalogPrefix(), cat_mgr.primaryId());
+    step0 = u8g2_GetUTF8Width(u8g2, "N8888");
+    int x1= u8g2_GetUTF8Width(u8g2, line);
     u8g2_DrawUTF8(u8g2, x, y, line);
- 
+     
+    // Object SubID
+    u8g2_SetFont(u8g2, u8g2_font_helvR08_te);
+    sprintf(line, "%s", cat_mgr.subIdStr());
+    u8g2_DrawUTF8(u8g2, x+x1, y, line);
+    x += step0;
+    step0 = u8g2_GetUTF8Width(u8g2, "A&B-C");
+    u8g2_SetFont(u8g2, myfont);
+
     // Constellation Abberviation
     x += step0;
     u8g2_DrawUTF8(u8g2, x, y, cat_mgr.constellationStr());
-    step0 = u8g2_GetUTF8Width(u8g2, " WWW ");
 
     // Magnitude
-    x += step0;
-    sprintf(line, "%0.1f", cat_mgr.magnitude());
+    x = u8g2_GetDisplayWidth(u8g2);
+    float mf=cat_mgr.magnitude();
+    if (abs(mf-99.90)<0.001) sprintf(line, "?.?"); else dtostrf(mf, 3, 1, line);
+    step0 = u8g2_GetUTF8Width(u8g2, line);
+    x -= step0;
     u8g2_DrawUTF8(u8g2, x, y, line);
 
     // Object type text
@@ -178,9 +189,9 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y)
     u8g2_DrawUTF8(u8g2, x, y, cat_mgr.objectTypeStr());
 
     // Object Name, when the DSO catalogs include it
-    // y += line_height;
-    // x = 0;
-    //u8g2_DrawUTF8(u8g2, x, y, cat_mgr.objectName());
+    y += line_height;
+    x = 0;
+    u8g2_DrawUTF8(u8g2, x, y, cat_mgr.objectNameStr());
 
     return line_height;
   }
@@ -204,7 +215,6 @@ bool ext_UserInterfaceCatalog(u8g2_t *u8g2, Pad* extPad, const char *title)
 
   u8g2_uint_t line_height = u8g2_GetAscent(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
   uint8_t title_lines = u8x8_GetStringLineCnt(title);
-  uint8_t display_lines;
 
   u8g2_SetFontPosBaseline(u8g2);
 
@@ -224,13 +234,125 @@ bool ext_UserInterfaceCatalog(u8g2_t *u8g2, Pad* extPad, const char *title)
     return 0;
 #endif
 
+    int scrollSpeed;
+    if (cat_mgr.getMaxIndex()>1000) scrollSpeed=20; else scrollSpeed=2;
+
     for (;;) {
       event = ext_GetMenuEvent(extPad);
       if (event == U8X8_MSG_GPIO_MENU_SELECT || event == U8X8_MSG_GPIO_MENU_NEXT) return true; else
       if (event == U8X8_MSG_GPIO_MENU_HOME || event == U8X8_MSG_GPIO_MENU_PREV) return false; else
       if (event == U8X8_MSG_GPIO_MENU_DOWN) { cat_mgr.incIndex(); break; } else
-      if (event == U8X8_MSG_GPIO_MENU_UP) { cat_mgr.decIndex(); break; }
+      if (event == MSG_MENU_DOWN_FAST)      { for (int i=0; i<scrollSpeed; i++) cat_mgr.incIndex(); break; } else
+      if (event == U8X8_MSG_GPIO_MENU_UP)   { cat_mgr.decIndex(); break; } else
+      if (event == MSG_MENU_UP_FAST)        { for (int i=0; i<scrollSpeed; i++) cat_mgr.decIndex(); break; }
     }
   }
 }
 
+/*
+selection list with string line
+returns line height
+*/
+
+static uint8_t ext_draw_user_catalog_list_line(u8g2_t *u8g2, uint8_t y)
+{
+  u8g2_uint_t x = 0;
+
+  u8g2_uint_t line_height = u8g2_GetAscent(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
+
+  char line1[16];
+  char line2[16];
+
+  // user object catalog
+  GetLX200(":LI#",line1);
+
+  bool nextString=false;
+  int j=0;
+  int len=strlen(line1); if (len>15) len=15;
+  for (int i=0; i<len; i++) {
+    if (line1[i]==',') { line1[i]=0; nextString=true; continue; }
+    if (nextString) { if (line1[i]=='#') { line2[j++]=0; break; } line2[j++]=line1[i]; }
+  }
+
+  // "UNK",  "OC",  "GC",  "PN",  "DN",  "SG",  "EG",  "IG", "KNT", "SNR", "GAL",  "CN", "STR", "PLA", "CMT", "AST"
+  if (strstr(line2,"UNK")) strcpy(line2,"Unknown"); else
+  if (strstr(line2,"OC"))  strcpy(line2,"Open Cluster"); else
+  if (strstr(line2,"GC"))  strcpy(line2,"Globular Cluster"); else
+  if (strstr(line2,"PN"))  strcpy(line2,"Planetary Nebula"); else
+  if (strstr(line2,"SG"))  strcpy(line2,"Spirial Galaxy"); else
+  if (strstr(line2,"EG"))  strcpy(line2,"Eliptical Galaxy"); else
+  if (strstr(line2,"IG"))  strcpy(line2,"Irregular Galaxy"); else
+  if (strstr(line2,"KNT")) strcpy(line2,"Knot"); else
+  if (strstr(line2,"SNR")) strcpy(line2,"SuperNova Rmnnt"); else
+  if (strstr(line2,"GAL")) strcpy(line2,"Galaxy"); else
+  if (strstr(line2,"CN"))  strcpy(line2,"Cluster + Nebula"); else
+  if (strstr(line2,"STR")) strcpy(line2,"Star"); else
+  if (strstr(line2,"PLA")) strcpy(line2,"Planet"); else
+  if (strstr(line2,"CMT")) strcpy(line2,"Comet"); else
+  if (strstr(line2,"CMT")) strcpy(line2,"Asteroid");
+    
+  // null object
+  if ((line1[0]==0) || (line1[0]=='$')) return 0;
+
+  // object name
+  x = 0;
+  u8g2_DrawUTF8(u8g2, x, y, line1);
+
+  // Object type text
+  y += line_height;
+  x = 0;
+  u8g2_DrawUTF8(u8g2, x, y, line2);
+
+  return line_height;
+}
+
+/*
+title: NULL for no title, valid str for title line. Can contain mutliple lines, separated by '\n'
+returns false if user has pressed the home key
+returns true if user has pressed the select key
+side effects:
+u8g2_SetFontDirection(u8g2, 0);
+u8g2_SetFontPosBaseline(u8g2);
+*/
+bool ext_UserInterfaceUserCatalog(u8g2_t *u8g2, Pad* extPad, const char *title)
+{
+  u8g2_SetFont(u8g2, u8g2_font_helvR10_te);
+  u8g2_uint_t yy;
+
+  uint8_t event;
+
+  u8g2_uint_t line_height = u8g2_GetAscent(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
+  uint8_t title_lines = u8x8_GetStringLineCnt(title);
+
+  u8g2_SetFontPosBaseline(u8g2);
+  
+  char oppositeMove[20]="";
+  
+  for (;;) {
+    u8g2_FirstPage(u8g2);
+    do  {
+      yy = u8g2_GetAscent(u8g2);
+      if (title_lines > 0) {
+        yy += u8g2_DrawUTF8Lines(u8g2, 0, yy, u8g2_GetDisplayWidth(u8g2), line_height, title);
+        u8g2_DrawHLine(u8g2, 0, yy - line_height - u8g2_GetDescent(u8g2) + 1, u8g2_GetDisplayWidth(u8g2));
+        yy += 3;
+      }
+      if (ext_draw_user_catalog_list_line(u8g2, yy)==0) {
+        // display of item failed due to it being a key or beyond end of list
+        if (strlen(oppositeMove)>0) { SetLX200(oppositeMove); strcpy(oppositeMove,""); }
+      }
+    } while (u8g2_NextPage(u8g2));
+    
+#ifdef U8G2_REF_MAN_PIC
+    return 0;
+#endif
+
+    for (;;) {
+      event = ext_GetMenuEvent(extPad);
+      if (event == U8X8_MSG_GPIO_MENU_SELECT || event == U8X8_MSG_GPIO_MENU_NEXT) return true; else
+      if (event == U8X8_MSG_GPIO_MENU_HOME || event == U8X8_MSG_GPIO_MENU_PREV) return false; else
+      if (event == U8X8_MSG_GPIO_MENU_DOWN || event == MSG_MENU_DOWN_FAST) { strcpy(oppositeMove,":LB#"); SetLX200(":LN#"); break; } else
+      if (event == U8X8_MSG_GPIO_MENU_UP || event == MSG_MENU_UP_FAST) { strcpy(oppositeMove,":LN#"); SetLX200(":LB#"); break; }
+    }
+  }
+}

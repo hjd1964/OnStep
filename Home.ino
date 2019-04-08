@@ -106,7 +106,7 @@ GotoErrors goHome(boolean fast) {
   // goto allowed?
   if (f!=GOTO_ERR_NONE) return f; 
 
-  goTo(celestialPoleAxis1,celestialPoleAxis2,celestialPoleAxis1,celestialPoleAxis2,PierSideEast);
+  goTo(homePositionAxis1,homePositionAxis2,homePositionAxis1,homePositionAxis2,PierSideEast);
   homeMount=true;
 #endif
   
@@ -134,6 +134,10 @@ GotoErrors setHome() {
   // make sure limits are on
   safetyLimitsOn=true;
 
+  // no errors
+  currentAlt=45.0;
+  lastError=ERR_NONE;
+
   // initialize and disable the stepper drivers
   StepperModeTrackingInit();
  
@@ -156,4 +160,3 @@ GotoErrors setHome() {
   
   return GOTO_ERR_NONE;
 }
-

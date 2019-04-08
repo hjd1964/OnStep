@@ -111,7 +111,7 @@ uint8_t ext_UserInterfaceInputValueBoolean(u8g2_t *u8g2, Pad* extPad, const char
       event = ext_GetMenuEvent(extPad);
       if (event == U8X8_MSG_GPIO_MENU_SELECT || event == U8X8_MSG_GPIO_MENU_NEXT) { *value = local_value; return 1; }
       else if (event == U8X8_MSG_GPIO_MENU_HOME || event == U8X8_MSG_GPIO_MENU_PREV) return 0;
-      else if (event == U8X8_MSG_GPIO_MENU_UP || event == U8X8_MSG_GPIO_MENU_DOWN) { local_value=!local_value; break; }
+      else if (event == U8X8_MSG_GPIO_MENU_UP || event == U8X8_MSG_GPIO_MENU_DOWN || event == MSG_MENU_UP_FAST || event == MSG_MENU_DOWN_FAST) { local_value=!local_value; break; }
     }
   }
 }
@@ -190,8 +190,8 @@ uint8_t ext_UserInterfaceInputValueInteger(u8g2_t *u8g2, Pad* extPad, const char
       event = ext_GetMenuEvent(extPad);
       if (event == U8X8_MSG_GPIO_MENU_SELECT || event == U8X8_MSG_GPIO_MENU_NEXT) { *value = local_value; return 1; }
       else if (event == U8X8_MSG_GPIO_MENU_HOME || event == U8X8_MSG_GPIO_MENU_PREV) { return 0; }
-      else if (event == U8X8_MSG_GPIO_MENU_UP) { if (local_value >= hi) local_value = lo; else local_value++; break; }
-      else if (event == U8X8_MSG_GPIO_MENU_DOWN) { if (local_value <= lo) local_value = hi; else local_value--; break; }
+      else if (event == U8X8_MSG_GPIO_MENU_UP || event == MSG_MENU_UP_FAST) { if (local_value >= hi) local_value = lo; else local_value++; break; }
+      else if (event == U8X8_MSG_GPIO_MENU_DOWN || event == MSG_MENU_DOWN_FAST) { if (local_value <= lo) local_value = hi; else local_value--; break; }
     }
   }
 }
@@ -296,7 +296,7 @@ uint8_t ext_UserInterfaceInputValueFloat(u8g2_t *u8g2, Pad* extPad, const char *
       {
         return 0;
       }
-      else if (event == U8X8_MSG_GPIO_MENU_UP)
+      else if (event == U8X8_MSG_GPIO_MENU_UP || event == MSG_MENU_UP_FAST)
       {
         if (local_value >= hi)
         {
@@ -310,7 +310,7 @@ uint8_t ext_UserInterfaceInputValueFloat(u8g2_t *u8g2, Pad* extPad, const char *
         }
         break;
       }
-      else if (event == U8X8_MSG_GPIO_MENU_DOWN)
+      else if (event == U8X8_MSG_GPIO_MENU_DOWN || event == MSG_MENU_DOWN_FAST)
       {
         if (local_value <= lo)
         {
@@ -441,7 +441,7 @@ uint8_t ext_UserInterfaceInputValueDMS(u8g2_t *u8g2, Pad* extPad, const char *ti
         return 1;
       }
       else if (event == U8X8_MSG_GPIO_MENU_PREV) { return 0; }
-      else if (event == U8X8_MSG_GPIO_MENU_UP)
+      else if (event == U8X8_MSG_GPIO_MENU_UP || event == MSG_MENU_UP_FAST)
       {
         if (local_value >= hi) {
           local_value = lo;
@@ -457,7 +457,7 @@ uint8_t ext_UserInterfaceInputValueDMS(u8g2_t *u8g2, Pad* extPad, const char *ti
         }
         break;
       }
-      else if (event == U8X8_MSG_GPIO_MENU_DOWN) {
+      else if (event == U8X8_MSG_GPIO_MENU_DOWN || event == MSG_MENU_DOWN_FAST) {
         if (local_value <= lo) {
           local_value = hi;
           incr = 0;
@@ -479,7 +479,7 @@ uint8_t ext_UserInterfaceInputValueDMS(u8g2_t *u8g2, Pad* extPad, const char *ti
 
 uint8_t ext_UserInterfaceInputValueDate(u8g2_t *u8g2, Pad* extPad, const char *title, uint8_t& year, uint8_t& month, uint8_t& day)
 {
-  char* symb = "/";
+  char symb[] = "/";
   u8g2_SetFont(u8g2, u8g2_font_helvR12_te);
   //display.enableUTF8Print();
   uint8_t line_height;
@@ -566,7 +566,7 @@ uint8_t ext_UserInterfaceInputValueDate(u8g2_t *u8g2, Pad* extPad, const char *t
         return 1;
       }
       else if (event == U8X8_MSG_GPIO_MENU_HOME || event == U8X8_MSG_GPIO_MENU_PREV) { return 0; }
-      else if (event == U8X8_MSG_GPIO_MENU_UP)
+      else if (event == U8X8_MSG_GPIO_MENU_UP || event == MSG_MENU_UP_FAST)
       {
         if (incr > 0) { incr = 1.05*incr + incr_ref / 2; } else incr = incr_ref;
         if (incr > 30) incr = 30;
@@ -574,7 +574,7 @@ uint8_t ext_UserInterfaceInputValueDate(u8g2_t *u8g2, Pad* extPad, const char *t
         add_days(local_year, local_month, local_day, incr);
         break;
       }
-      else if (event == U8X8_MSG_GPIO_MENU_DOWN)
+      else if (event == U8X8_MSG_GPIO_MENU_DOWN || event == MSG_MENU_DOWN_FAST)
       {
         if (incr < 0) { incr = 1.05*incr - incr_ref / 2; } else incr = -incr_ref;
         if (incr < -30) incr = -30;
@@ -589,30 +589,30 @@ uint8_t ext_UserInterfaceInputValueDate(u8g2_t *u8g2, Pad* extPad, const char *t
 
 uint8_t ext_UserInterfaceInputValueRA(u8g2_t *u8g2, Pad *extPad, long *value)
 {
-  return ext_UserInterfaceInputValueDMS(u8g2, extPad, "Right Asc.", value, 0, 86399, 2, "h", "m", "s", "", "", true);
+  return ext_UserInterfaceInputValueDMS(u8g2, extPad, "Right Asc.", value, 0, 86399, 2, (char *)"h", (char *)"m", (char *)"s", (char *)"", (char *)"", true);
 }
 
 uint8_t ext_UserInterfaceInputValueDec(u8g2_t *u8g2, Pad *extPad, long *value)
 {
   char DEGREE_SYMBOL[] = { 0xB0, '\0' };
-  return ext_UserInterfaceInputValueDMS(u8g2, extPad, "Declination", value, -324000, 324000, 2, DEGREE_SYMBOL, "'", "\"", "+", "-", true);
+  return ext_UserInterfaceInputValueDMS(u8g2, extPad, "Declination", value, -324000, 324000, 2, (char *)DEGREE_SYMBOL, (char *)"'", (char *)"\"", (char *)"+", (char *)"-", true);
 }
 
-uint8_t ext_UserInterfaceInputValueTime(u8g2_t *u8g2, Pad *extPad, long *value)
+uint8_t ext_UserInterfaceInputValueTime(u8g2_t *u8g2, Pad *extPad, long *value, bool hrs24)
 {
-  return ext_UserInterfaceInputValueDMS(u8g2, extPad, "Local Time", value, 0, 43199, 2, ":", ":", "", "", "", true);
+  return ext_UserInterfaceInputValueDMS(u8g2, extPad, "Local Time", value, 0, hrs24 ? 86399:43199, 2, (char *)":", (char *)":", (char *)"", (char *)"", (char *)"", true);
 }
 
 uint8_t ext_UserInterfaceInputValueLatitude(u8g2_t *u8g2, Pad *extPad, long *value)
 {
   char DEGREE_SYMBOL[] = { 0xB0, '\0' };
-  return ext_UserInterfaceInputValueDMS(u8g2, extPad, "Latitude", value, -324000, 324000, 2, DEGREE_SYMBOL, "'", "\"", "N ", "S ", false);
+  return ext_UserInterfaceInputValueDMS(u8g2, extPad, "Latitude", value, -324000, 324000, 2, (char *)DEGREE_SYMBOL, (char *)"'", (char *)"\"", (char *)"N ", (char *)"S ", false);
 }
 
 uint8_t ext_UserInterfaceInputValueLongitude(u8g2_t *u8g2, Pad *extPad, long *value)
 {
   char DEGREE_SYMBOL[] = { 0xB0, '\0' };
-  return ext_UserInterfaceInputValueDMS(u8g2, extPad, "Longitude", value, -648000, 648000, 3, DEGREE_SYMBOL, "'", "\"", "W ", "E ", false);
+  return ext_UserInterfaceInputValueDMS(u8g2, extPad, "Longitude", value, -648000, 648000, 3, (char *)DEGREE_SYMBOL, (char *)"'", (char *)"\"", (char *)"W ", (char *)"E ", false);
 }
 
 void _gethms(const long& v, uint8_t& v1, uint8_t& v2, uint8_t& v3)
@@ -711,4 +711,3 @@ void supress_days(uint8_t& year, uint8_t& month, uint8_t& day, int days2supress)
       months[2] = 28;
   }
 }
-
