@@ -18,6 +18,9 @@
 // Use 24 hour format for entering time, default=true
 #define USE_24HR_TIME true
 
+// Allow menus to wrap, default false
+#define ALLOW_MENU_WRAP false
+
 // Use _ON to enable "pass-through" Aux ST4 port, default=_OFF
 #define AUX_ST4_OFF
 
