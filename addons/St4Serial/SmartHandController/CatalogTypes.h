@@ -42,7 +42,7 @@ typedef struct {
   const unsigned short Obj_id;
   const unsigned char  Mag;
   const unsigned short RA;
-  const signed short   DE;
+  const signed   short DE;
 } dso_comp_t; // 9 bytes/rec (as above except except Mag/RA/Dec use smaller data types)
 
 typedef struct {
@@ -52,7 +52,7 @@ typedef struct {
   const unsigned char  Has_subId: 1;
   const unsigned char  Mag;
   const unsigned short RA;
-  const signed short   DE;
+  const signed   short DE;
 } dso_vcomp_t; // 7 bytes/rec (as above except Obj_id is replaced by the record count)
 
 // Struct for general star catalog
@@ -61,7 +61,7 @@ typedef struct {
   const unsigned char  Cons: 7;
   const unsigned char  Bayer: 5;
   const unsigned char  Has_subId: 1;
-  const signed short   Mag;
+  const signed   short Mag;
   const float          RA;
   const float          DE;
 } gen_star_t; // 12 bytes/rec
@@ -74,7 +74,7 @@ typedef struct {
   const unsigned char  Has_subId: 1;
   const unsigned char  Mag;
   const unsigned short RA;
-  const signed short   DE;
+  const signed   short DE;
 } gen_star_comp_t; // 7 bytes/rec (as above except except Mag/RA/Dec use smaller data types)
 
 // Struct for extended star catalog (example)
