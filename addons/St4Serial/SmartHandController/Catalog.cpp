@@ -9,15 +9,15 @@
 // ** In this section is everything you need touch to add a new "catalog.h"      **
 // ** file and use it within the SHC.                                            **
 
-// Simply include the catalog you want here.  There are also _x, _c and _v suffixes for some catalogs which...
+// Simply include the catalog you want here.  There are also _x, _c and _vc suffixes for some catalogs which...
 // mean expanded, compact, and very-compact.  These options effect available catalogs, features, and accuracy.
   #include "catalogs/stars.h"
   #include "catalogs/messier_c.h"
   #include "catalogs/caldwell_c.h"
   #include "catalogs/herschel_c.h"
+  #include "catalogs/collinder_vc.h"
   #include "catalogs/ngc_select_c.h"
   #include "catalogs/ic_select_c.h"
-  #include "catalogs/collinder.h"
 
 // And uncomment the matching line below:
 catalog_t catalog[] = {
@@ -27,11 +27,11 @@ catalog_t catalog[] = {
   {"Messier",     "M",     NUM_MESSIER,  Cat_Messier,  Cat_Messier_Names,   Cat_Messier_SubId,    Cat_Messier_Type,   2000, 0},
   {"Caldwell",    "C",     NUM_CALDWELL, Cat_Caldwell, Cat_Caldwell_Names,  Cat_Caldwell_SubId,   Cat_Caldwell_Type,  2000, 0},
   {"Herschel 400","N",     NUM_HERSCHEL, Cat_Herschel, Cat_Herschel_Names,  Cat_Herschel_SubId,   Cat_Herschel_Type,  2000, 0},
+  {"Collinder",   "Cr",    NUM_COLLINDER,Cat_Collinder,Cat_Collinder_Names, Cat_Collinder_SubId,  Cat_Collinder_Type, 2000, 0},
 //{"NGC",         "N",     NUM_NGC,      Cat_NGC,      Cat_NGC_Names,       Cat_NGC_SubId,        Cat_NGC_Type,       2000, 0},
 //{"IC",          "I",     NUM_IC,       Cat_IC,       Cat_IC_Names,        Cat_IC_SubId,         Cat_IC_Type,        2000, 0},
   {"Select NGC",  "N",     NUM_NGC,      Cat_NGC,      Cat_NGC_Names,       Cat_NGC_SubId,        Cat_NGC_Type,       2000, 0},
   {"Select IC",   "I",     NUM_IC,       Cat_IC,       Cat_IC_Names,        Cat_IC_SubId,         Cat_IC_Type,        2000, 0},
-  {"Collinder",   "Cr",    NUM_COLLINDER,Cat_Collinder,Cat_Collinder_Names, Cat_Collinder_SubId,  Cat_Collinder_Type, 2000, 0},
   {"",            "",                 0,         NULL,               NULL,                NULL,   CAT_NONE,              0, 0}
 };
 
