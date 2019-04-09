@@ -155,6 +155,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y)
   }
   else {
     // Object Catalogs
+    int dx = u8g2_GetDisplayWidth(u8g2);
 
     // Catalog letter and Object ID
     x = 0;
@@ -171,22 +172,21 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y)
     step0 = u8g2_GetUTF8Width(u8g2, "A&B-C");
     u8g2_SetFont(u8g2, myfont);
 
-    // Constellation Abberviation
-    x += step0;
-    u8g2_DrawUTF8(u8g2, x, y, cat_mgr.constellationStr());
-
     // Magnitude
-    x = u8g2_GetDisplayWidth(u8g2);
     float mf=cat_mgr.magnitude();
     if (abs(mf-99.90)<0.001) sprintf(line, "?.?"); else dtostrf(mf, 3, 1, line);
     step0 = u8g2_GetUTF8Width(u8g2, line);
-    x -= step0;
-    u8g2_DrawUTF8(u8g2, x, y, line);
+    u8g2_DrawUTF8(u8g2, dx-step0, y, line);
 
     // Object type text
     y += line_height;
     x = 0;
     u8g2_DrawUTF8(u8g2, x, y, cat_mgr.objectTypeStr());
+
+    // Constellation Abberviation
+    sprintf(line,"%s",cat_mgr.constellationStr());
+    step0 = u8g2_GetUTF8Width(u8g2, line);
+    u8g2_DrawUTF8(u8g2, dx-step0, y, line);
 
     // Object Name, when the DSO catalogs include it
     y += line_height;

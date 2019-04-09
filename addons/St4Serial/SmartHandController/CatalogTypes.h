@@ -107,9 +107,9 @@ const char* Txt_Bayer[24] = {
 // Type of object, in the Open NGC database. Do not change the
 // order of this, since it has to match what is in Open NGC
 const char* Txt_Object_Type[21] = {
-  "Galaxy",          "Open Cluster",     "Star",             "Double Star", "Other",      "Galaxy Pair",      "Galaxy Triplet",
-  "Galaxy Group",    "Globular Cluster", "Planetary Nebula", "Nebula",      "Hii Region", "Cluster + Nebula", "Asterism",
-  "Reflectn Nebula", "SuperNova Rmnnt",  "Emission Nebula",  "Non Existant","Nova",       "Duplicate",        "Dark Nebula"
+  "Galaxy",        "Open Cluster",   "Star",           "Double Star", "Other",      "Galaxy Pair",      "Galaxy Triplet",
+  "Galaxy Group",  "Globular Clstr", "Planetary Nbla", "Nebula",      "Hii Region", "Cluster + Nebula", "Asterism",
+  "Reflectn Nbla", "SuperNov Rmnt",  "Emission Nbla",  "Non Existant","Nova",       "Duplicate",        "Dark Nebula"
 };
 
 // Constellation abbreviation, alphabetical order
