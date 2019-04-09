@@ -100,8 +100,8 @@ typedef struct {
 #pragma pack()
 
 // Bayer designation, the Greek letter for each star within a constellation
-const char* Txt_Bayer[24] = {
-  "Alp","Bet","Gam","Del","Eps","Zet","Eta","The","Iot","Kap","Lam","Mu" ,"Nu","Xi","Omi","Pi","Rho","Sig","Tau","Ups","Phi","Chi","Psi","Ome"
+const char* Txt_Bayer[25] = {
+  "Alp","Bet","Gam","Del","Eps","Zet","Eta","The","Iot","Kap","Lam","Mu","Nu","Xi","Omi","Pi","Rho","Sig","Tau","Ups","Phi","Chi","Psi","Ome","?"
 };
 
 // Type of object, in the Open NGC database. Do not change the
