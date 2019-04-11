@@ -41,11 +41,7 @@ public:
 
   uint8_t UserInterfaceInputValueLongitude(Pad *extPad, long *value);
 
-  uint8_t drawRA(uint8_t x, uint8_t y, const char* Rah, const char* Ram, const char* Ras);
-
-  uint8_t drawDec(uint8_t x, uint8_t y, const char* decsign, const char* decdeg, const char* decmin, const char* decsec);
-
-  uint8_t drawAz(uint8_t x, uint8_t y, const char* Azdeg, const char* Azmin, const char* Azsec);
+  uint8_t drawFixedWidthNumeric(uint8_t x, uint8_t y, const char* text);
 
 };
 

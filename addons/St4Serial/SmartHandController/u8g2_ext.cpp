@@ -45,7 +45,6 @@ uint8_t U8G2_EXT::UserInterfaceInputValueDMS(Pad *extPad, const char *title, lon
   return ext_UserInterfaceInputValueDMS(U8G2_EXT::getU8g2(), extPad, title, value, lo, hi, digits1, symb1, symb2, symb3, symb_plus, symb_minus, display_seconds);
 };
 
-
 uint8_t U8G2_EXT::UserInterfaceInputValueDate(Pad *extPad, const char *title, uint8_t& year, uint8_t& month, uint8_t& day)
 {
   return ext_UserInterfaceInputValueDate(U8G2_EXT::getU8g2(), extPad, title, year, month, day);
@@ -71,25 +70,12 @@ uint8_t U8G2_EXT::UserInterfaceInputValueLatitude(Pad *extPad, long *value)
   return ext_UserInterfaceInputValueLatitude(U8G2_EXT::getU8g2(), extPad, value);
 };
 
-
 uint8_t U8G2_EXT::UserInterfaceInputValueLongitude(Pad *extPad, long *value)
 {
   return ext_UserInterfaceInputValueLongitude(U8G2_EXT::getU8g2(), extPad, value);
 };
 
-
-uint8_t U8G2_EXT::drawRA(uint8_t x, uint8_t y, const char* Rah, const char* Ram, const char* Ras)
+uint8_t U8G2_EXT::drawFixedWidthNumeric(uint8_t x, uint8_t y, const char* text)
 {
-  return ext_drawRA(U8G2_EXT::getU8g2(), x, y, Rah, Ram, Ras);
-};
-
-
-uint8_t U8G2_EXT::drawDec(uint8_t x, uint8_t y, const char* decsign, const char* decdeg, const char* decmin, const char* decsec)
-{
-  return ext_drawDec(U8G2_EXT::getU8g2(), x,  y, decsign, decdeg,  decmin, decsec);
-};
-
-uint8_t U8G2_EXT::drawAz(uint8_t x, uint8_t y, const char* Azdeg, const char* Azmin, const char* Azsec)
-{
-  return ext_drawAz(U8G2_EXT::getU8g2(), x, y, Azdeg, Azmin, Azsec);
+  return ext_drawFixedWidthNumeric(U8G2_EXT::getU8g2(), x, y, text);
 };

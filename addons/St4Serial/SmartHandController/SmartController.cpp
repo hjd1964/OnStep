@@ -673,13 +673,18 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
     if (page == 0)
     {
       if (telInfo.hasInfoRa && telInfo.hasInfoDec) {
-        char rs[20]; strcpy(rs,telInfo.TempRa); rs[2]=0; rs[5]=0;
-        x = u8g2_GetDisplayWidth(u8g2);  u8g2_uint_t y = 36;
-        u8g2_DrawUTF8(u8g2, 0, y, "RA"); display->drawRA( x, y, rs, &rs[3], &rs[6]);
+        char rs[20]; strcpy(rs,telInfo.TempRa); int l=strlen(rs); if (l>1) rs[l-1]=0;
+        u8g2_uint_t x = u8g2_GetDisplayWidth(u8g2)-u8g2_GetUTF8Width(u8g2,"00000000");
+        u8g2_uint_t y = 36;
 
-        char ds[20]; strcpy(ds,telInfo.TempDec); ds[3]=0; ds[6]=0; char sds[2]="x"; sds[0]=ds[0];
+        u8g2_DrawUTF8(u8g2, 0, y, "RA");
+        display->drawFixedWidthNumeric(x, y, rs);
+
+        char ds[20]; strcpy(ds,telInfo.TempDec); l=strlen(ds); if (l>1) ds[l-1]=0; if (l>8) { ds[3]='\xb0'; ds[6]='\''; }
+        x = u8g2_GetDisplayWidth(u8g2)-u8g2_GetUTF8Width(u8g2,"000000000");
         y += line_height + 4;
-        u8g2_DrawUTF8(u8g2, 0, y, "Dec"); display->drawDec( x, y, sds, &ds[1], &ds[4], &ds[7]);
+        u8g2_DrawUTF8(u8g2, 0, y, "Dec"); 
+        display->drawFixedWidthNumeric(x, y, ds);
       }
     } else
 
@@ -687,13 +692,16 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
     if (page == 1) {
       if (telInfo.hasInfoAz && telInfo.hasInfoAlt)
       {
-        char zs[20]; strcpy(zs,telInfo.TempAz); zs[3]=0; zs[6]=0;
-        u8g2_uint_t y = 36; u8g2_uint_t startpos = u8g2_GetUTF8Width(u8g2, "123456"); x = startpos; x = u8g2_GetDisplayWidth(u8g2);
-        u8g2_DrawUTF8(u8g2, 0, y, "Az."); display->drawAz(x, y, zs, &zs[4], &zs[7]);
+        char zs[20]; strcpy(zs,telInfo.TempAz); int l=strlen(zs); if (l>1) zs[l-1]=0; if (l>8) { zs[3]='\xb0'; zs[6]='\''; }
+        x = u8g2_GetDisplayWidth(u8g2)-u8g2_GetUTF8Width(u8g2,"000000000");
+        u8g2_uint_t y = 36; 
+        u8g2_DrawUTF8(u8g2, 0, y, "Az.");
+        display->drawFixedWidthNumeric(x,y,zs);
 
-        char as[20]; strcpy(as,telInfo.TempAlt); as[3]=0; as[6]=0; char sas[2]="x"; sas[0]=as[0];
-        y += line_height + 4; x = startpos; x = u8g2_GetDisplayWidth(u8g2);
-        u8g2_DrawUTF8(u8g2, 0, y, "Alt."); display->drawDec( x, y, sas, &as[1], &as[4], &as[7]);
+        char as[20]; strcpy(as,telInfo.TempAlt); l=strlen(as); if (l>1) as[l-1]=0; if (l>8) { as[3]='\xb0'; as[6]='\''; }
+        y += line_height + 4; 
+        u8g2_DrawUTF8(u8g2, 0, y, "Alt.");
+        display->drawFixedWidthNumeric(x,y,as);
       }
     } else
     
@@ -701,17 +709,16 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
     if (page == 2) {
       if (telInfo.hasInfoUTC && telInfo.hasInfoSidereal)
       {
-        char us[20]; strcpy(us,telInfo.TempUniversalTime); us[2]=0; us[5]=0;
-        x = u8g2_GetDisplayWidth(u8g2);  u8g2_uint_t y = 36;
-        display->setFont(u8g2_font_helvR10_te);
-        u8g2_DrawUTF8(u8g2, 0, y, "UT");
-        display->setFont(u8g2_font_helvR12_te); 
-        display->drawRA( x, y, us, &us[3], &us[6]);
+        char us[20]; strcpy(us,telInfo.TempUniversalTime); int l=strlen(us); if (l>1) us[l-1]=0;
+        x = u8g2_GetDisplayWidth(u8g2)-u8g2_GetUTF8Width(u8g2,"00000000");
+        u8g2_uint_t y = 36;
+        display->setFont(u8g2_font_helvR10_te); u8g2_DrawUTF8(u8g2, 0, y, "UT"); display->setFont(u8g2_font_helvR12_te);
+        display->drawFixedWidthNumeric(x,y,us);
 
-        char ss[20]; strcpy(ss,telInfo.TempSidereal); ss[2]=0; ss[5]=0;
+        char ss[20]; strcpy(ss,telInfo.TempSidereal); l=strlen(ss); if (l>1) ss[l-1]=0;
         y += line_height + 4;
-        u8g2_DrawUTF8(u8g2, 0, y, "LST"); 
-        display->drawRA(x, y, ss, &ss[3], &ss[6]);
+        u8g2_DrawUTF8(u8g2, 0, y, "LST");
+        display->drawFixedWidthNumeric(x,y,ss);
       }
     } else
 

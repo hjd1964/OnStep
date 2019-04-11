@@ -60,6 +60,8 @@ public:
   void updateAzAlt(boolean immediate=false);
   void updateTime(boolean immediate=false);
   void updateTel(boolean immediate=false);
+  bool getRA(double &RA);
+  bool getDec(double &Dec);
   double getLstT0();
   double getLat();
   int getAlignStars(int *maxStars, int *thisStar, int *numStars);

@@ -80,14 +80,14 @@ static unsigned char GX_bits[] U8X8_PROGMEM = {
 
 #define MY_BORDER_SIZE 1
 
-enum CATALOG_DISPLAY_MODES {DM_INFO, DM_EQ_COORDS};
+enum CATALOG_DISPLAY_MODES {DM_INFO, DM_EQ_COORDS, DM_HOR_COORDS};
 
 /*
 selection list with string line
 returns line height
 */
 
-static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPLAY_MODES displayMode)
+static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPLAY_MODES displayMode, bool firstPass)
 {
   u8g2_uint_t x = 0;
 
@@ -115,10 +115,13 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     // |----name----  2225ly|
     // |Per 2.5d            |
 
-    // Bayer designation of the star (Greek letter)
+    // Bayer designation of the star (Greek letter) or Fleemstead designation of star (number)
     u8g2_SetFont(u8g2, u8g2_font_unifont_t_greek);
     x = 0;
-    u8g2_DrawGlyph(u8g2, x, y, 944 + cat_mgr.primaryId());
+    int p=cat_mgr.primaryId();
+    if (p<0) u8g2_DrawUTF8(u8g2, x, y, "?"); else
+    if (p<24) u8g2_DrawGlyph(u8g2, x, y, 945 + p); else 
+    { sprintf(line,"%d",p); u8g2_DrawUTF8(u8g2, x, y, line); }
 
     // Constellation Abbreviation
     u8g2_SetFont(u8g2, u8g2_font_helvR10_te);
@@ -188,34 +191,50 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
   }
 
   if (displayMode==DM_EQ_COORDS) {
-    uint8_t vr1, vr2, vr3;
     char txt1[5], txt2[5], txt3[5];
+    uint8_t vr1, vr2, vr3;
+    short vd1; uint8_t vd2, vd3;
+
+    u8g2_SetFont(u8g2, myfont);
+    step0 = u8g2_GetUTF8Width(u8g2, "XXXXX ");
 
     // RA
-    y += line_height;
-    x = 0;
-    u8g2_SetFont(u8g2, myfont);
     cat_mgr.raHMS(vr1,vr2,vr3);
-    memcpy(txt1, u8x8_u8toa(vr1, 2), 3);
-    memcpy(txt2, u8x8_u8toa(vr2, 2), 3);
-    memcpy(txt3, u8x8_u8toa(vr3, 2), 3);
-    u8g2_DrawUTF8(u8g2, 0, y, "RA");
-    step0 = u8g2_GetUTF8Width(u8g2, "DE ");
-    x += step0;
-    ext_drawRA(u8g2, x, y, txt1, txt2, txt3);
+    sprintf(line," %02d:%02d:%02d",vr1,vr2,vr3);
+    y += line_height;
+    u8g2_DrawUTF8(u8g2, 8, y, "RA");
+    ext_drawFixedWidthNumeric(u8g2, step0, y, line);
 
     // Declination
-    short vd1; uint8_t vd2; uint8_t vd3;
-    y += line_height;
-    x = 0;
     cat_mgr.decDMS(vd1,vd2, vd3);
-    memcpy(txt1, u8x8_u8toa((uint8_t)abs(vd1), 2), 3);
-    memcpy(txt2, u8x8_u8toa(vd2, 2), 3);
-    memcpy(txt3, u8x8_u8toa(vd3, 2), 3);
-    u8g2_DrawUTF8(u8g2, x, y, "DE");
-    x += step0;
-    ext_drawDec(u8g2, x, y, vd1 < 0 ? "-" : "+", txt1, txt2, txt3);
+    sprintf(line,"%s%02d\xb0%02d'%02d",vd1 < 0 ? "-" : "+",abs(vd1),vd2,vd3);
+    y += line_height;
+    u8g2_DrawUTF8(u8g2, 8, y, "DE");
+    ext_drawFixedWidthNumeric(u8g2, step0, y, line);
   }
+
+  if (displayMode==DM_HOR_COORDS) {
+    static short va1, vz1; 
+    static uint8_t va2, va3, vz2, vz3;
+
+    u8g2_SetFont(u8g2, myfont);
+    step0 = u8g2_GetUTF8Width(u8g2, "XXXXX ");
+
+    // Az
+    if (firstPass) cat_mgr.azmDMS(vz1, vz2, vz3);
+    sprintf(line,"%03d\xb0%02d'%02d",vz1,vz2,vz3);
+    y += line_height;
+    u8g2_DrawUTF8(u8g2, 8, y, "Az.");
+    ext_drawFixedWidthNumeric(u8g2, step0, y, line);
+
+    // Alt
+    if (firstPass) cat_mgr.altDMS(va1, va2, va3);
+    sprintf(line,"%s%02d\xb0%02d'%02d",va1 < 0 ? "-" : "+",abs(va1),va2,va3);
+    y += line_height;
+    u8g2_DrawUTF8(u8g2, 8, y, "Alt.");
+    ext_drawFixedWidthNumeric(u8g2, step0, y, line);
+  }
+
   return line_height;
 }
 
@@ -242,6 +261,7 @@ bool ext_UserInterfaceCatalog(u8g2_t *u8g2, Pad* extPad, const char *title)
   u8g2_SetFontPosBaseline(u8g2);
 
   for (;;) {
+    bool firstPass=true;
     u8g2_FirstPage(u8g2);
     do  {
       yy = u8g2_GetAscent(u8g2);
@@ -250,7 +270,8 @@ bool ext_UserInterfaceCatalog(u8g2_t *u8g2, Pad* extPad, const char *title)
         u8g2_DrawHLine(u8g2, 0, yy - line_height - u8g2_GetDescent(u8g2) + 1, u8g2_GetDisplayWidth(u8g2));
         yy += 3;
       }
-      ext_draw_catalog_list_line(u8g2, yy, thisDisplayMode);
+      ext_draw_catalog_list_line(u8g2, yy, thisDisplayMode, firstPass);
+      firstPass=false;
     } while (u8g2_NextPage(u8g2));
     
 #ifdef U8G2_REF_MAN_PIC
@@ -263,12 +284,16 @@ bool ext_UserInterfaceCatalog(u8g2_t *u8g2, Pad* extPad, const char *title)
     for (;;) {
       event = ext_GetMenuEvent(extPad);
       if (event == U8X8_MSG_GPIO_MENU_SELECT || event == U8X8_MSG_GPIO_MENU_NEXT) return true; else
-      if (event == U8X8_MSG_GPIO_MENU_HOME) { thisDisplayMode=(CATALOG_DISPLAY_MODES)((int)thisDisplayMode+1); if (thisDisplayMode>DM_EQ_COORDS) thisDisplayMode=DM_INFO; break; }
+      if (event == U8X8_MSG_GPIO_MENU_HOME) { thisDisplayMode=(CATALOG_DISPLAY_MODES)((int)thisDisplayMode+1); if (thisDisplayMode>DM_HOR_COORDS) thisDisplayMode=DM_INFO; break; }
       if (event == U8X8_MSG_GPIO_MENU_PREV) return false; else
       if (event == U8X8_MSG_GPIO_MENU_DOWN) { cat_mgr.incIndex(); break; } else
       if (event == MSG_MENU_DOWN_FAST)      { for (int i=0; i<scrollSpeed; i++) cat_mgr.incIndex(); break; } else
       if (event == U8X8_MSG_GPIO_MENU_UP)   { cat_mgr.decIndex(); break; } else
       if (event == MSG_MENU_UP_FAST)        { for (int i=0; i<scrollSpeed; i++) cat_mgr.decIndex(); break; }
+
+      // auto-refresh display
+      static unsigned long lastRefresh=0;
+      if ((thisDisplayMode==DM_HOR_COORDS) && (millis()-lastRefresh>2000)) { lastRefresh=millis(); break; }
     }
   }
 }

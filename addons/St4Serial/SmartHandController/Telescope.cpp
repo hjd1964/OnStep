@@ -33,6 +33,38 @@ void Telescope::updateTel(boolean immediate)
   }
 };
 
+bool Telescope::getRA(double &RA)
+{
+  char temp[20]="";
+  if (GetLX200(":GR#", temp) == LX200VALUEGET) 
+  {
+    int l=strlen(temp); if (l>0) temp[l-1]=0;
+    double f;
+    hmsToDouble(&f, temp);
+    if ((f>=0) && (f<=24.0)) {
+      RA=f*15.0;
+      return true;
+    }
+  }
+  return false;
+};
+
+bool Telescope::getDec(double &Dec)
+{
+  char temp[20]="";
+  if (GetLX200(":GD#", temp) == LX200VALUEGET) 
+  {
+    int l=strlen(temp); if (l>0) temp[l-1]=0;
+    double f;
+    dmsToDouble(&f, temp, true, true);
+    if ((f>=-90.0) && (f<=90.0)) {
+      Dec=f;
+      return true;
+    }
+  }
+  return false;
+};
+
 double Telescope::getLstT0()
 {
   char temp[20]="";

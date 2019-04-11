@@ -72,6 +72,8 @@ private:
   bool    current_selection_filter_above = true;
   uint8_t current_selection_filter_con = 1;
   uint8_t current_selection_filter_type = 1;
+  uint8_t current_selection_filter_byMag = 1;
+  uint8_t current_selection_filter_nearby = 1;
   uint8_t activeGuideRate = 5;
   uint8_t featureKeyMode = 1; // guide rate
 
@@ -90,6 +92,8 @@ private:
   void menuFilters();
   void menuFilterCon();
   void menuFilterType();
+  void menuFilterByMag();
+  void menuFilterNearby();
   void menuSolarSys(bool sync);
   void menuUser(bool sync);
   void menuAlignment();
