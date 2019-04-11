@@ -202,7 +202,7 @@ u8g2_SetFontPosBaseline(u8g2);
 */
 uint8_t ext_UserInterfaceSelectionList(u8g2_t *u8g2, Pad *extPad, const char *title, uint8_t start_pos, const char *sl, bool wrap)
 {
-  u8g2_SetFont(u8g2, u8g2_font_helvR10_te);
+  u8g2_SetFont(u8g2, u8g2_font_helvR10_tf);
   u8sl_t u8sl;
   u8g2_uint_t yy;
 

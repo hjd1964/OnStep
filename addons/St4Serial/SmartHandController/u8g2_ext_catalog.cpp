@@ -124,7 +124,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     { sprintf(line,"%d",p); u8g2_DrawUTF8(u8g2, x, y, line); }
 
     // Constellation Abbreviation
-    u8g2_SetFont(u8g2, u8g2_font_helvR10_te);
+    u8g2_SetFont(u8g2, u8g2_font_helvR10_tf);
     x = 10;
     u8g2_DrawUTF8(u8g2, x, y, cat_mgr.constellationStr());
   
@@ -157,7 +157,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     u8g2_DrawUTF8(u8g2, x, y, line);
      
     // Object SubID
-    u8g2_SetFont(u8g2, u8g2_font_helvR08_te);
+    u8g2_SetFont(u8g2, u8g2_font_helvR08_tr);
     sprintf(line, "%s", cat_mgr.subIdStr());
     u8g2_DrawUTF8(u8g2, x+x1, y, line);
     x += step0;
@@ -249,7 +249,7 @@ u8g2_SetFontPosBaseline(u8g2);
 */
 bool ext_UserInterfaceCatalog(u8g2_t *u8g2, Pad* extPad, const char *title)
 {
-  u8g2_SetFont(u8g2, u8g2_font_helvR10_te);
+  u8g2_SetFont(u8g2, u8g2_font_helvR10_tf);
   u8g2_uint_t yy;
 
   uint8_t event;
@@ -365,7 +365,7 @@ u8g2_SetFontPosBaseline(u8g2);
 */
 bool ext_UserInterfaceUserCatalog(u8g2_t *u8g2, Pad* extPad, const char *title)
 {
-  u8g2_SetFont(u8g2, u8g2_font_helvR10_te);
+  u8g2_SetFont(u8g2, u8g2_font_helvR10_tf);
   u8g2_uint_t yy;
 
   uint8_t event;

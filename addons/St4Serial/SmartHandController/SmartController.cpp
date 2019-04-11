@@ -306,7 +306,7 @@ void SmartHandController::setup(const char version[], const int pin[7],const boo
     display = new U8G2_EXT_SSD1306_128X64_NONAME_F_HW_I2C(U8G2_R0);
   display->begin();
   display->setContrast(maxContrast);
-  display->setFont(u8g2_font_helvR10_te);
+  display->setFont(u8g2_font_helvR10_tf);
 
 #ifdef DEBUG_ON
   DebugSer.begin(9600);
@@ -388,7 +388,7 @@ void SmartHandController::update()
   if (display_dim_time && top - time_last_action > display_dim_time && !lowContrast) { display->setContrast(0); lowContrast = true; return; }
 
   // power cycle reqd message
-  if (powerCylceRequired) { display->setFont(u8g2_font_helvR12_te); DisplayMessage("REBOOT", "DEVICE", 1000); return; }
+  if (powerCylceRequired) { display->setFont(u8g2_font_helvR12_tf); DisplayMessage("REBOOT", "DEVICE", 1000); return; }
   
   if (telInfo.align == Telescope::ALI_SELECT_STAR_1 || telInfo.align == Telescope::ALI_SELECT_STAR_2 || telInfo.align == Telescope::ALI_SELECT_STAR_3 || 
       telInfo.align == Telescope::ALI_SELECT_STAR_4 || telInfo.align == Telescope::ALI_SELECT_STAR_5 || telInfo.align == Telescope::ALI_SELECT_STAR_6 ||
@@ -539,7 +539,7 @@ void SmartHandController::update()
 void SmartHandController::updateMainDisplay( u8g2_uint_t page)
 {
   u8g2_t *u8g2 = display->getU8g2();
-  display->setFont(u8g2_font_helvR12_te);
+  display->setFont(u8g2_font_helvR12_tf);
   u8g2_uint_t line_height = u8g2_GetAscent(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
 
   // get the status
@@ -587,9 +587,9 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
         int pgr=telInfo.getPulseGuideRate();
         if ((pgr!=gr) && (pgr>=0) && (pgr<3)) strcat(string_Speed[gr],string_PSpeed[pgr]); 
         if ((gr>=0) && (gr<=9)) {
-          display->setFont(u8g2_font_helvR10_te);
+          display->setFont(u8g2_font_helvR10_tf);
           u8g2_DrawUTF8(u8g2, 0, icon_height, string_Speed[gr]);
-          display->setFont(u8g2_font_helvR12_te);
+          display->setFont(u8g2_font_helvR12_tf);
         }
       }
 
@@ -796,7 +796,7 @@ void SmartHandController::DisplayMessage(const char* txt1, const char* txt2, int
 
 void SmartHandController::DisplayLongMessage(const char* txt1, const char* txt2, const char* txt3, const char* txt4, int duration)
 {
-  display->setFont(u8g2_font_helvR10_te);
+  display->setFont(u8g2_font_helvR10_tf);
   uint8_t h = 15;
   uint8_t x = 0;
   uint8_t y = h;
@@ -832,7 +832,7 @@ void SmartHandController::DisplayLongMessage(const char* txt1, const char* txt2,
   } while (display->nextPage());
   if (duration >= 0) delay(duration); else { buttonPad.waitForPress(); buttonPad.clearAllPressed(); }
 
-  display->setFont(u8g2_font_helvR12_te);
+  display->setFont(u8g2_font_helvR12_tf);
 }
   
 bool SmartHandController::DisplayMessageLX200(LX200RETURN val, bool silentOk)
