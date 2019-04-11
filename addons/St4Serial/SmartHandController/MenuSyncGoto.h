@@ -108,8 +108,12 @@ void SmartHandController::menuFilters()
     if (current_selection_filter_con>1) strcpy(s,"\xb7"); else strcpy(s,"");
     strcat(string_list_Filters,"\n"); strcat(string_list_Filters,s); strcat(string_list_Filters,"Constellation"); strcat(string_list_Filters,s);
     if (current_selection_filter_type>1) strcpy(s,"\xb7"); else strcpy(s,"");
-    strcat(string_list_Filters,"\n"); strcat(string_list_Filters,s); strcat(string_list_Filters,"Type"); strcat(string_list_Filters,s);
-    current_selection_L2 = display->UserInterfaceSelectionList(&buttonPad, "Filter Settings", current_selection_L2, string_list_Filters);
+    strcat(string_list_Filters,"\n"); strcat(string_list_Filters,s); strcat(string_list_Filters,"Classification"); strcat(string_list_Filters,s);
+    if (current_selection_filter_byMag>1) strcpy(s,"\xb7"); else strcpy(s,"");
+    strcat(string_list_Filters,"\n"); strcat(string_list_Filters,s); strcat(string_list_Filters,"Magnitude"); strcat(string_list_Filters,s);
+    if (current_selection_filter_nearby>1) strcpy(s,"\xb7"); else strcpy(s,"");
+    strcat(string_list_Filters,"\n"); strcat(string_list_Filters,s); strcat(string_list_Filters,"Nearby"); strcat(string_list_Filters,s);
+    current_selection_L2 = display->UserInterfaceSelectionList(&buttonPad, "Filters Allow", current_selection_L2, string_list_Filters);
     switch (current_selection_L2) {
       case 1:
         current_selection_filter_above=true;
@@ -128,6 +132,12 @@ void SmartHandController::menuFilters()
       case 4:
         menuFilterType();
       break;
+      case 5:
+        menuFilterByMag();
+      break;
+      case 6:
+        menuFilterNearby();
+      break;
     }
     if (current_selection_L2 == 0) return;
   }
@@ -138,9 +148,18 @@ bool SmartHandController::setCatMgrFilters()
   cat_mgr.filtersClear();
   
   bool extraFilterActive=false;
-  if (current_selection_filter_above)  { cat_mgr.filterAdd(FM_ABOVE_HORIZON); extraFilterActive=true; }
-  if (current_selection_filter_con>1)  { cat_mgr.filterAdd(FM_CONSTELLATION,current_selection_filter_con-2); extraFilterActive=true; }
-  if (current_selection_filter_type>1) { cat_mgr.filterAdd(FM_OBJ_TYPE,current_selection_filter_type-2); extraFilterActive=true; }
+  if (current_selection_filter_above)    { cat_mgr.filterAdd(FM_ABOVE_HORIZON);                                extraFilterActive=true; }
+  if (current_selection_filter_con>1)    { cat_mgr.filterAdd(FM_CONSTELLATION,current_selection_filter_con-2); extraFilterActive=true; }
+  if (current_selection_filter_type>1)   { cat_mgr.filterAdd(FM_OBJ_TYPE,current_selection_filter_type-2);     extraFilterActive=true; }
+  if (current_selection_filter_byMag>1)  { cat_mgr.filterAdd(FM_BY_MAG,current_selection_filter_byMag-2);      extraFilterActive=true; }
+  if (current_selection_filter_nearby>1) { 
+    double r,d;
+    if (telInfo.getRA(r) && telInfo.getDec(d)) {
+      cat_mgr.setLastTeleEqu(r,d);
+      cat_mgr.filterAdd(FM_NEARBY,current_selection_filter_nearby-2);
+      extraFilterActive=true;
+    } else current_selection_filter_nearby=1;
+  }
   return extraFilterActive;
 }
 
@@ -168,6 +187,25 @@ void SmartHandController::menuFilterType()
   current_selection_filter_type = display->UserInterfaceSelectionList(&buttonPad, "Filter by Type", current_selection_filter_type, string_list_fType);
   
   if (current_selection_filter_type == 0) current_selection_filter_type=last_selection_filter_type;
+}
+
+void SmartHandController::menuFilterByMag()
+{
+  const char* string_list_fMag="All\n3\"/80mm 13.5\n4\"/100mm 14.0\n7\"/180mm 15.0\n12\"/300mm 16.0\n17\"/430mm 16.5\n22\"/560mm 17.0\n";
+  int last_selection_filter_byMag = current_selection_filter_byMag;
+
+  current_selection_filter_byMag = display->UserInterfaceSelectionList(&buttonPad, "Filter Magnitude", current_selection_filter_byMag, string_list_fMag);
+  
+  if (current_selection_filter_byMag == 0) current_selection_filter_byMag=last_selection_filter_byMag;
+}
+
+void SmartHandController::menuFilterNearby()
+{
+  const char* string_list_fNearby="Off\nWithin 15°\nWithin 10°\nWithin 5°\nWithin 1°";
+  int last_selection_filter_nearby = current_selection_filter_nearby;
+  current_selection_filter_nearby = display->UserInterfaceSelectionList(&buttonPad, "Filter Nearby", current_selection_filter_nearby, string_list_fNearby);
+  
+  if (current_selection_filter_nearby == 0) current_selection_filter_nearby=last_selection_filter_nearby;
 }
 
 void SmartHandController::menuUser(bool sync)
