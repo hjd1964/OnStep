@@ -232,11 +232,11 @@ void SmartHandController::menuFilterNearby()
 
 void SmartHandController::menuFilterDblMinSep()
 {
-  const char* string_list_fDblMin="Off\nMin. 0.2 arc-sec\nMin. 0.5 arc-sec\nMin. 1.0 arc-sec\nMin. 1.5 arc-sec\nMin. 2.0 arc-sec\nMin. 3.0 arc-sec\nMin. 5.0 arc-sec\nMin. 10 arc-sec\nMin. 20 arc-sec\nMin. 50 arc-sec";
+  const char* string_list_fDblMin="Off\nMin 0.2\"\nMin 0.5\"\nMin 1.0\"\nMin 1.5\"\nMin 2.0\"\nMin 3.0\"\nMin 5.0\"\nMin 10\"\nMin 20\"\nMin 50\"";
   int last_selection_filter_dblmin = current_selection_filter_dblmin;
 
   while (current_selection_filter_dblmin != 0) {
-    current_selection_filter_dblmin = display->UserInterfaceSelectionList(&buttonPad, "Filter Dbl* Sep", current_selection_filter_dblmin, string_list_fDblMin);
+    current_selection_filter_dblmin = display->UserInterfaceSelectionList(&buttonPad, "Filter Dbl* Sep.", current_selection_filter_dblmin, string_list_fDblMin);
     if (current_selection_filter_dblmax<=1) break;                               // any minimum is ok
     if (current_selection_filter_dblmin<=current_selection_filter_dblmax) break; // minimum is below max, all is well exit
     DisplayMessage("Min Sep must", "be < Max Sep.", 1000);                       // provide a hint
@@ -248,11 +248,11 @@ void SmartHandController::menuFilterDblMinSep()
 
 void SmartHandController::menuFilterDblMaxSep()
 {
-  const char* string_list_fDblMax="Off\nMax. 0.5 arc-sec\nMax. 1.0 arc-sec\nMax. 1.5 arc-sec\nMax. 2.0 arc-sec\nMax. 3.0 arc-sec\nMax. 5.0 arc-sec\nMax. 10 arc-sec\nMax. 20 arc-sec\nMax. 50 arc-sec\nMax. 100 arc-sec";
+  const char* string_list_fDblMax="Off\nMax 0.5\"\nMax 1.0\"\nMax 1.5\"\nMax 2.0\"\nMax 3.0\"\nMax 5.0\"\nMax 10\"\nMax 20\"\nMax 50\"\nMax 100\"";
   int last_selection_filter_dblmax = current_selection_filter_dblmax;
 
   while (current_selection_filter_dblmax != 0) {
-    current_selection_filter_dblmax = display->UserInterfaceSelectionList(&buttonPad, "Filter Dbl* Sep", current_selection_filter_dblmax, string_list_fDblMax);
+    current_selection_filter_dblmax = display->UserInterfaceSelectionList(&buttonPad, "Filter Dbl* Sep.", current_selection_filter_dblmax, string_list_fDblMax);
     if (current_selection_filter_dblmin<=1) break;                               // any maximum is ok
     if (current_selection_filter_dblmax>=current_selection_filter_dblmin) break; // maximum is above min, all is well exit
     DisplayMessage("Max Sep must", "be > Min Sep.", 1000);                       // provide a hint
@@ -264,7 +264,7 @@ void SmartHandController::menuFilterDblMaxSep()
 
 void SmartHandController::menuFilterVarMaxPer()
 {
-  const char* string_list_fVarMax="Off\nMax. 0.5 days\nMax. 1.0 days\nMax. 2.0 days\nMax. 5.0 days\nMax. 10 days\nMax. 20 days\nMax. 50 days\nMax. 100 days";
+  const char* string_list_fVarMax="Off\nMax 0.5 days\nMax 1.0 days\nMax 2.0 days\nMax 5.0 days\nMax 10 days\nMax 20 days\nMax 50 days\nMax 100 days";
   int last_selection_filter_varmax = current_selection_filter_varmax;
   current_selection_filter_varmax = display->UserInterfaceSelectionList(&buttonPad, "Filter Var* Period", current_selection_filter_varmax, string_list_fVarMax);
   
