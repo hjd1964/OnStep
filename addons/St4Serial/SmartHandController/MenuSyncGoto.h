@@ -184,7 +184,7 @@ void SmartHandController::menuFilterType()
     if (l<21) strcat(string_list_fType,"\n");
   }
   int last_selection_filter_type = current_selection_filter_type;
-  current_selection_filter_type = display->UserInterfaceSelectionList(&buttonPad, "Filter by Type", current_selection_filter_type, string_list_fType);
+  current_selection_filter_type = display->UserInterfaceSelectionList(&buttonPad, "Filter by Class", current_selection_filter_type, string_list_fType);
   
   if (current_selection_filter_type == 0) current_selection_filter_type=last_selection_filter_type;
 }
