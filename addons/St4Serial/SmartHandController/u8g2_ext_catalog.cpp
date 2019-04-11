@@ -191,26 +191,27 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
   }
 
   if (displayMode==DM_EQ_COORDS) {
-    char txt1[5], txt2[5], txt3[5];
+    char txt1[5], txt2[5], txt3[5], epoch[6];
     uint8_t vr1, vr2, vr3;
     short vd1; uint8_t vd2, vd3;
 
-    u8g2_SetFont(u8g2, myfont);
-    step0 = u8g2_GetUTF8Width(u8g2, "XXXXX ");
-
     // RA
+    sprintf(epoch,"%04d",cat_mgr.epoch());
     cat_mgr.raHMS(vr1,vr2,vr3);
     sprintf(line," %02d:%02d:%02d",vr1,vr2,vr3);
     y += line_height;
-    u8g2_DrawUTF8(u8g2, 8, y, "RA");
-    ext_drawFixedWidthNumeric(u8g2, step0, y, line);
+    x = u8g2_DrawUTF8(u8g2, 0, y, "RA"); u8g2_SetFont(u8g2, u8g2_font_helvR08_tr); u8g2_DrawUTF8(u8g2, x, y, epoch); u8g2_SetFont(u8g2, myfont);
+    x = u8g2_GetDisplayWidth(u8g2)-u8g2_GetUTF8Width(u8g2,"000000000");
+    ext_drawFixedWidthNumeric(u8g2, x, y, line);
 
     // Declination
     cat_mgr.decDMS(vd1,vd2, vd3);
     sprintf(line,"%s%02d\xb0%02d'%02d",vd1 < 0 ? "-" : "+",abs(vd1),vd2,vd3);
     y += line_height;
-    u8g2_DrawUTF8(u8g2, 8, y, "DE");
-    ext_drawFixedWidthNumeric(u8g2, step0, y, line);
+    x = u8g2_DrawUTF8(u8g2, 0, y, "DE"); u8g2_SetFont(u8g2, u8g2_font_helvR08_tr); u8g2_DrawUTF8(u8g2, x, y, epoch); u8g2_SetFont(u8g2, myfont);
+
+    x = u8g2_GetDisplayWidth(u8g2)-u8g2_GetUTF8Width(u8g2,"000000000");
+    ext_drawFixedWidthNumeric(u8g2, x, y, line);
   }
 
   if (displayMode==DM_HOR_COORDS) {
@@ -220,6 +221,19 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     u8g2_SetFont(u8g2, myfont);
     step0 = u8g2_GetUTF8Width(u8g2, "XXXXX ");
 
+    // Horizon Coords
+    if (firstPass) cat_mgr.azmDMS(vz1, vz2, vz3);
+    if (firstPass) cat_mgr.altDMS(va1, va2, va3);
+    vz2=vz2/6;
+    va2=va2/6;
+    sprintf(line,"%3d.%d",vz1,vz2);
+    x=0; y += line_height;
+    x += u8g2_DrawUTF8(u8g2, x, y, "Az ");
+    x += (ext_drawFixedWidthNumeric(u8g2, x, y, line) + 24);
+    sprintf(line,"%s%2d.%d",va1 < 0 ? "-" : "+",abs(va1),va2);
+    x += u8g2_DrawUTF8(u8g2, x, y, "Alt ");
+    ext_drawFixedWidthNumeric(u8g2, x, y, line);
+/*
     // Az
     if (firstPass) cat_mgr.azmDMS(vz1, vz2, vz3);
     sprintf(line,"%03d\xb0%02d'%02d",vz1,vz2,vz3);
@@ -233,6 +247,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     y += line_height;
     u8g2_DrawUTF8(u8g2, 8, y, "Alt.");
     ext_drawFixedWidthNumeric(u8g2, step0, y, line);
+*/
   }
 
   return line_height;
