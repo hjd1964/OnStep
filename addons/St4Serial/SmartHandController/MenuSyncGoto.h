@@ -237,9 +237,10 @@ void SmartHandController::menuFilterDblMinSep()
 
   while (current_selection_filter_dblmin != 0) {
     current_selection_filter_dblmin = display->UserInterfaceSelectionList(&buttonPad, "Filter Dbl* Sep.", current_selection_filter_dblmin, string_list_fDblMin);
+    if (current_selection_filter_dblmin==0) break;                               // abort
     if (current_selection_filter_dblmax<=1) break;                               // any minimum is ok
     if (current_selection_filter_dblmin<=current_selection_filter_dblmax) break; // minimum is below max, all is well exit
-    DisplayMessage("Min Sep must", "be < Max Sep.", 1000);                       // provide a hint
+    DisplayMessage("Min Sep must", "be < Max Sep.", 2000);                       // provide a hint
     current_selection_filter_dblmin=current_selection_filter_dblmax;             // 
   }
   
@@ -253,9 +254,10 @@ void SmartHandController::menuFilterDblMaxSep()
 
   while (current_selection_filter_dblmax != 0) {
     current_selection_filter_dblmax = display->UserInterfaceSelectionList(&buttonPad, "Filter Dbl* Sep.", current_selection_filter_dblmax, string_list_fDblMax);
+    if (current_selection_filter_dblmax==0) break;                               // abort
     if (current_selection_filter_dblmin<=1) break;                               // any maximum is ok
     if (current_selection_filter_dblmax>=current_selection_filter_dblmin) break; // maximum is above min, all is well exit
-    DisplayMessage("Max Sep must", "be > Min Sep.", 1000);                       // provide a hint
+    DisplayMessage("Max Sep must", "be > Min Sep.", 2000);                       // provide a hint
     current_selection_filter_dblmax=current_selection_filter_dblmin;             // 
   }
   
