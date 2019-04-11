@@ -3,24 +3,27 @@
 
 const double Rad=57.29577951;
 
-const int FM_NONE = 0;
-const int FM_ABOVE_HORIZON = 1;
-const int FM_ALIGN_ALL_SKY = 2;
-const int FM_CONSTELLATION = 4;
-const int FM_OBJ_TYPE      = 8;
+const unsigned int FM_NONE = 0;
+const unsigned int FM_ABOVE_HORIZON = 1;
+const unsigned int FM_ALIGN_ALL_SKY = 2;
+const unsigned int FM_CONSTELLATION = 4;
+const unsigned int FM_OBJ_TYPE      = 8;
+const unsigned int FM_BY_MAG        = 16;
+const unsigned int FM_NEARBY        = 32;
 
 void getcatdms(const short& v, short& v1, uint8_t& v2);
 void getcatdf(const short& v, float& v1);
 void getcathms(const unsigned short& v, uint8_t& v1, uint8_t& v2, uint8_t& v3);
 void getcathf(const unsigned short& v, float& v1);
 
-enum CAT_TYPES {CAT_NONE, CAT_GEN_STAR, CAT_GEN_STAR_COMP, CAT_EXT_STAR, CAT_DSO, CAT_DSO_COMP, CAT_DSO_VCOMP};
+enum CAT_TYPES {CAT_NONE, CAT_GEN_STAR, CAT_GEN_STAR_COMP, CAT_DBL_STAR, CAT_VAR_STAR, CAT_DSO, CAT_DSO_COMP, CAT_DSO_VCOMP};
 
 class CatMgr {
   public:
 // initialization
     void        setLat(double lat);
     void        setLstT0(double lstT0);
+    void        setLastTeleEqu(double RA, double Dec);
     bool        isInitialized();
 
 // time
@@ -54,13 +57,14 @@ class CatMgr {
     double      ra();
     double      rah();
     double      ha();
-    void        raHMS(uint8_t& h, uint8_t& m, uint8_t& s);
-
+    void        raHMS(uint8_t &h, uint8_t &m, uint8_t &s);
     double      dec();
-    void        decDMS(short& d, uint8_t& m, uint8_t& s);
-
+    void        decDMS(short &d, uint8_t &m, uint8_t &s);
     double      alt();
+    void        altDMS(short &d, uint8_t &m, uint8_t &s);
     double      azm();
+    void        azmDMS(short &d, uint8_t &m, uint8_t &s);
+
     void        topocentricToObservedPlace(float *RA, float *Dec);
 
     float       magnitude();
@@ -85,11 +89,15 @@ private:
     double _cosLat=0;
     double _sinLat=0;
     double _lstT0=0;
+    double _lastTeleRA=0;
+    double _lastTeleDec=0;
     unsigned long _lstMillisT0=0;
     
     int _fm=FM_NONE;
     int _fm_con=0;
     int _fm_obj_type=0;
+    double _fm_mag_limit=100.0;
+    double _fm_nearby_dist=10000.0;
     
     int _selected=0;
 
