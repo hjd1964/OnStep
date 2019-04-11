@@ -191,7 +191,7 @@ void SmartHandController::menuFilterType()
 
 void SmartHandController::menuFilterByMag()
 {
-  const char* string_list_fMag="All\n3\"/80mm 13.5\n4\"/100mm 14.0\n7\"/180mm 15.0\n12\"/300mm 16.0\n17\"/430mm 16.5\n22\"/560mm 17.0\n";
+  const char* string_list_fMag="All\n" "10th 1.6\"/40mm\n" "12th   3\"/ 80mm\n" "13th  4\"/100mm\n" "14th  7\"/180mm\n" "15th 12\"/300mm\n" "16th 17\"/430mm\n" "17th 22\"/560mm";
   int last_selection_filter_byMag = current_selection_filter_byMag;
 
   current_selection_filter_byMag = display->UserInterfaceSelectionList(&buttonPad, "Filter Magnitude", current_selection_filter_byMag, string_list_fMag);

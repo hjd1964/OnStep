@@ -153,12 +153,13 @@ void CatMgr::filterAdd(int fm, int param) {
   _fm|=fm;
   if (fm&FM_CONSTELLATION) _fm_con=param;
   if (fm&FM_BY_MAG) {
-    if (param==0) _fm_mag_limit=13.5; else
-    if (param==1) _fm_mag_limit=14.0; else
-    if (param==2) _fm_mag_limit=15.0; else
-    if (param==3) _fm_mag_limit=16.0; else
-    if (param==4) _fm_mag_limit=16.5; else
-    if (param==5) _fm_mag_limit=17.0; else _fm_mag_limit=100.0;
+    if (param==0) _fm_mag_limit=10.0; else
+    if (param==1) _fm_mag_limit=12.0; else
+    if (param==2) _fm_mag_limit=13.0; else
+    if (param==3) _fm_mag_limit=14.0; else
+    if (param==4) _fm_mag_limit=15.0; else
+    if (param==5) _fm_mag_limit=16.0; else
+    if (param==6) _fm_mag_limit=17.0; else _fm_mag_limit=100.0;
   }
   if (fm&FM_NEARBY) {
     if (param==0) _fm_nearby_dist=15.0; else
