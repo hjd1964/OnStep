@@ -712,7 +712,7 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
         char us[20]; strcpy(us,telInfo.TempUniversalTime); int l=strlen(us); if (l>1) us[l-1]=0;
         x = u8g2_GetDisplayWidth(u8g2)-u8g2_GetUTF8Width(u8g2,"00000000");
         u8g2_uint_t y = 36;
-        display->setFont(u8g2_font_helvR10_te); u8g2_DrawUTF8(u8g2, 0, y, "UT"); display->setFont(u8g2_font_helvR12_te);
+        display->setFont(u8g2_font_helvR10_tf); u8g2_DrawUTF8(u8g2, 0, y, "UT"); display->setFont(u8g2_font_helvR12_tf);
         display->drawFixedWidthNumeric(x,y,us);
 
         char ss[20]; strcpy(ss,telInfo.TempSidereal); l=strlen(ss); if (l>1) ss[l-1]=0;
