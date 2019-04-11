@@ -101,7 +101,7 @@ void SmartHandController::menuFilters()
 {
   current_selection_L2 = 1;
   while (current_selection_L2 != 0) {
-    char string_list_Filters[120] = "Reset filters";
+    char string_list_Filters[200] = "Reset filters";
     char s[8];
     if (current_selection_filter_above) strcpy(s,"\xb7"); else strcpy(s,"");
     strcat(string_list_Filters,"\n"); strcat(string_list_Filters,s); strcat(string_list_Filters,"Above Horizon"); strcat(string_list_Filters,s);
@@ -113,6 +113,16 @@ void SmartHandController::menuFilters()
     strcat(string_list_Filters,"\n"); strcat(string_list_Filters,s); strcat(string_list_Filters,"Magnitude"); strcat(string_list_Filters,s);
     if (current_selection_filter_nearby>1) strcpy(s,"\xb7"); else strcpy(s,"");
     strcat(string_list_Filters,"\n"); strcat(string_list_Filters,s); strcat(string_list_Filters,"Nearby"); strcat(string_list_Filters,s);
+    if (cat_mgr.hasVarStarCatalog()) {
+      if (current_selection_filter_varmax>1) strcpy(s,"\xb7"); else strcpy(s,"");
+      strcat(string_list_Filters,"\n"); strcat(string_list_Filters,s); strcat(string_list_Filters,"Var* Max Per."); strcat(string_list_Filters,s);
+    }
+    if (cat_mgr.hasDblStarCatalog()) {
+      if (current_selection_filter_dblmin>1) strcpy(s,"\xb7"); else strcpy(s,"");
+      strcat(string_list_Filters,"\n"); strcat(string_list_Filters,s); strcat(string_list_Filters,"Dbl* Min Sep."); strcat(string_list_Filters,s);
+      if (current_selection_filter_dblmax>1) strcpy(s,"\xb7"); else strcpy(s,"");
+      strcat(string_list_Filters,"\n"); strcat(string_list_Filters,s); strcat(string_list_Filters,"Dbl* Max Sep."); strcat(string_list_Filters,s);
+    }
     current_selection_L2 = display->UserInterfaceSelectionList(&buttonPad, "Filters Allow", current_selection_L2, string_list_Filters);
     switch (current_selection_L2) {
       case 1:
@@ -138,6 +148,15 @@ void SmartHandController::menuFilters()
       case 6:
         menuFilterNearby();
       break;
+      case 7:
+        if (cat_mgr.hasVarStarCatalog()) menuFilterVarMaxPer(); else { if (cat_mgr.hasDblStarCatalog()) menuFilterDblMinSep(); }
+      break;
+      case 8:
+        if (cat_mgr.hasVarStarCatalog()) { if (cat_mgr.hasDblStarCatalog()) menuFilterDblMinSep(); } else { if (cat_mgr.hasDblStarCatalog()) menuFilterDblMaxSep(); }
+      break;
+      case 9:
+        if (cat_mgr.hasVarStarCatalog()) { if (cat_mgr.hasDblStarCatalog()) menuFilterDblMaxSep(); }
+      break;
     }
     if (current_selection_L2 == 0) return;
   }
@@ -160,6 +179,9 @@ bool SmartHandController::setCatMgrFilters()
       extraFilterActive=true;
     } else current_selection_filter_nearby=1;
   }
+  if (current_selection_filter_dblmin>1)  { cat_mgr.filterAdd(FM_DBL_MIN_SEP,current_selection_filter_dblmin-2); extraFilterActive=true; }
+  if (current_selection_filter_dblmax>1)  { cat_mgr.filterAdd(FM_DBL_MAX_SEP,current_selection_filter_dblmax-2); extraFilterActive=true; }
+  if (current_selection_filter_varmax>1)  { cat_mgr.filterAdd(FM_VAR_MAX_PER,current_selection_filter_varmax-2); extraFilterActive=true; }
   return extraFilterActive;
 }
 
@@ -201,11 +223,52 @@ void SmartHandController::menuFilterByMag()
 
 void SmartHandController::menuFilterNearby()
 {
-  const char* string_list_fNearby="Off\nWithin 15°\nWithin 10°\nWithin 5°\nWithin 1°";
+  const char* string_list_fNearby="Off\nWithin  1°\nWithin  5°\nWithin 10°\nWithin 15°";
   int last_selection_filter_nearby = current_selection_filter_nearby;
   current_selection_filter_nearby = display->UserInterfaceSelectionList(&buttonPad, "Filter Nearby", current_selection_filter_nearby, string_list_fNearby);
   
   if (current_selection_filter_nearby == 0) current_selection_filter_nearby=last_selection_filter_nearby;
+}
+
+void SmartHandController::menuFilterDblMinSep()
+{
+  const char* string_list_fDblMin="Off\nMin. 0.2 arc-sec\nMin. 0.5 arc-sec\nMin. 1.0 arc-sec\nMin. 1.5 arc-sec\nMin. 2.0 arc-sec\nMin. 3.0 arc-sec\nMin. 5.0 arc-sec\nMin. 10 arc-sec\nMin. 20 arc-sec\nMin. 50 arc-sec";
+  int last_selection_filter_dblmin = current_selection_filter_dblmin;
+
+  while (current_selection_filter_dblmin != 0) {
+    current_selection_filter_dblmin = display->UserInterfaceSelectionList(&buttonPad, "Filter Dbl* Sep", current_selection_filter_dblmin, string_list_fDblMin);
+    if (current_selection_filter_dblmax<=1) break;                               // any minimum is ok
+    if (current_selection_filter_dblmin<=current_selection_filter_dblmax) break; // minimum is below max, all is well exit
+    DisplayMessage("Min Sep must", "be < Max Sep.", 1000);                       // provide a hint
+    current_selection_filter_dblmin=current_selection_filter_dblmax;             // 
+  }
+  
+  if (current_selection_filter_dblmin == 0) current_selection_filter_dblmin=last_selection_filter_dblmin;
+}
+
+void SmartHandController::menuFilterDblMaxSep()
+{
+  const char* string_list_fDblMax="Off\nMax. 0.5 arc-sec\nMax. 1.0 arc-sec\nMax. 1.5 arc-sec\nMax. 2.0 arc-sec\nMax. 3.0 arc-sec\nMax. 5.0 arc-sec\nMax. 10 arc-sec\nMax. 20 arc-sec\nMax. 50 arc-sec\nMax. 100 arc-sec";
+  int last_selection_filter_dblmax = current_selection_filter_dblmax;
+
+  while (current_selection_filter_dblmax != 0) {
+    current_selection_filter_dblmax = display->UserInterfaceSelectionList(&buttonPad, "Filter Dbl* Sep", current_selection_filter_dblmax, string_list_fDblMax);
+    if (current_selection_filter_dblmin<=1) break;                               // any maximum is ok
+    if (current_selection_filter_dblmax>=current_selection_filter_dblmin) break; // maximum is above min, all is well exit
+    DisplayMessage("Max Sep must", "be > Min Sep.", 1000);                       // provide a hint
+    current_selection_filter_dblmax=current_selection_filter_dblmin;             // 
+  }
+  
+  if (current_selection_filter_dblmax == 0) current_selection_filter_dblmax=last_selection_filter_dblmax;
+}
+
+void SmartHandController::menuFilterVarMaxPer()
+{
+  const char* string_list_fVarMax="Off\nMax. 0.5 days\nMax. 1.0 days\nMax. 2.0 days\nMax. 5.0 days\nMax. 10 days\nMax. 20 days\nMax. 50 days\nMax. 100 days";
+  int last_selection_filter_varmax = current_selection_filter_varmax;
+  current_selection_filter_varmax = display->UserInterfaceSelectionList(&buttonPad, "Filter Var* Period", current_selection_filter_varmax, string_list_fVarMax);
+  
+  if (current_selection_filter_varmax == 0) current_selection_filter_dblmax=last_selection_filter_varmax;
 }
 
 void SmartHandController::menuUser(bool sync)
@@ -262,17 +325,12 @@ void SmartHandController::menuRADec(bool sync)
 {
   if (display->UserInterfaceInputValueRA(&buttonPad, &angleRA))
   {
-//    uint8_t vr1, vr2, vr3, vd2, vd3;
-//    short vd1;
-//    gethms(angleRA, vr1, vr2, vr3);
     float fR;
     secondsToFloat(angleRA,fR);
     if (display->UserInterfaceInputValueDec(&buttonPad, &angleDEC))
     {
       float fD;
       secondsToFloat(angleDEC,fD);
-//      getdms(angleDEC, vd1, vd2, vd3);
-//      bool ok = DisplayMessageLX200(SyncGotoLX200(sync, vr1, vr2, vr3, vd1, vd2, vd3));
       bool ok = DisplayMessageLX200(SyncGotoLX200(sync, fR, fD));
       if (ok)
       {

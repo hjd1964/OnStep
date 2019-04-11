@@ -695,12 +695,12 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
         char zs[20]; strcpy(zs,telInfo.TempAz); int l=strlen(zs); if (l>1) zs[l-1]=0; if (l>8) { zs[3]='\xb0'; zs[6]='\''; }
         x = u8g2_GetDisplayWidth(u8g2)-u8g2_GetUTF8Width(u8g2,"000000000");
         u8g2_uint_t y = 36; 
-        u8g2_DrawUTF8(u8g2, 0, y, "Az.");
+        u8g2_DrawUTF8(u8g2, 0, y, "Az");
         display->drawFixedWidthNumeric(x,y,zs);
 
         char as[20]; strcpy(as,telInfo.TempAlt); l=strlen(as); if (l>1) as[l-1]=0; if (l>8) { as[3]='\xb0'; as[6]='\''; }
         y += line_height + 4; 
-        u8g2_DrawUTF8(u8g2, 0, y, "Alt.");
+        u8g2_DrawUTF8(u8g2, 0, y, "Alt");
         display->drawFixedWidthNumeric(x,y,as);
       }
     } else
@@ -733,7 +733,7 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
 
       y += line_height + 4;
       u8g2_SetFont(u8g2, u8g2_font_unifont_t_greek);
-      u8g2_DrawGlyph(u8g2, 0, y, 944 + cat_mgr.primaryId());
+      u8g2_DrawGlyph(u8g2, 0, y, 944 + cat_mgr.bayerFlam());
 
       const uint8_t* myfont = u8g2->font; u8g2_SetFont(u8g2, myfont);
       u8g2_DrawUTF8(u8g2, 16, y, cat_mgr.constellationStr());

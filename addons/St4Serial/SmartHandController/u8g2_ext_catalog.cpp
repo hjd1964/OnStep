@@ -101,46 +101,112 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
   if (cat_mgr.isStarCatalog())
   {  
     // Normal star mode
-    // |bAnd            15.2|
-    // |Alpheratz       25ly|
-    // |                    |
+    // |bAnd              15.2|
+    // |Alpheratz         25ly|
+    // |                      |
   
     // Double star mode
-    // |bAnd       11.2,15.2|
-    // |----name----  2225ly|
-    // |Sep 2.5" PA 225     |
+    // |Σ0060AB ηCas 3.52,7.36|
+    // |----name----    2225ly|
+    // |Sep 2.5" PA 225       |
   
     // Variable star mode
-    // |bAnd       11.2,15.2|
-    // |----name----  2225ly|
-    // |Per 2.5d            |
+    // |bAnd         11.2,15.2|
+    // |----name----    2225ly|
+    // |Per 2.5d              |
+
+    x = 0;
+
+    // Prefix
+    sprintf(line,cat_mgr.catalogPrefix());
+    if (strstr(line,"Star")) {
+      // nothing
+    } else
+    if (strstr(line,"STF")) {
+      u8g2_SetFont(u8g2, u8g2_font_unifont_t_greek);
+      x+=u8g2_DrawGlyph(u8g2, x, y, 931); // sigma
+      u8g2_SetFont(u8g2, myfont);
+    } else
+    if (strstr(line,"STT")) {
+      u8g2_SetFont(u8g2, u8g2_font_unifont_t_greek);
+      x+=u8g2_DrawGlyph(u8g2, x, y, 931); // sigma
+      x+=u8g2_DrawGlyph(u8g2, x, y, 927); // omicron
+      u8g2_SetFont(u8g2, myfont);
+    } else {
+      x+=u8g2_DrawUTF8(u8g2, x, y, line);
+    }
+
+    // Catalog number
+    if (!strstr(line,"Star")) {
+      sprintf(line, "%ld", cat_mgr.primaryId());
+      x+=u8g2_DrawUTF8(u8g2, x, y, line);
+    }
+
+    // Star SubId
+    sprintf(line, "%s", cat_mgr.subIdStr());
+    u8g2_SetFont(u8g2, u8g2_font_helvR08_tr);
+    x+=u8g2_DrawUTF8(u8g2, x, y, line);
+    u8g2_SetFont(u8g2, myfont);
+
+    // If anything is present on this line so far, add a space
+    if (x!=0) {
+      sprintf(line, "%s", " ");
+      x+=u8g2_DrawUTF8(u8g2, x, y, line);
+    }
 
     // Bayer designation of the star (Greek letter) or Fleemstead designation of star (number)
+    int p=cat_mgr.bayerFlam();
     u8g2_SetFont(u8g2, u8g2_font_unifont_t_greek);
-    x = 0;
-    int p=cat_mgr.primaryId();
-    if (p<0) u8g2_DrawUTF8(u8g2, x, y, "?"); else
-    if (p<24) u8g2_DrawGlyph(u8g2, x, y, 945 + p); else 
-    { sprintf(line,"%d",p); u8g2_DrawUTF8(u8g2, x, y, line); }
+    if ((p>0) && (p<24)) x+=u8g2_DrawGlyph(u8g2, x, y, 945 + p); else { if (p>24) { sprintf(line,"%d",p); x+=u8g2_DrawUTF8(u8g2, x, y, line); } }
+    u8g2_SetFont(u8g2, myfont);
 
     // Constellation Abbreviation
-    u8g2_SetFont(u8g2, u8g2_font_helvR10_tf);
-    x = 10;
     u8g2_DrawUTF8(u8g2, x, y, cat_mgr.constellationStr());
   
-    // Magnitude
-    float mf=cat_mgr.magnitude();
-    if (abs(mf-99.90)<0.001) sprintf(line, "?.?"); else dtostrf(mf, 3, 1, line);
-    step0 = u8g2_GetUTF8Width(u8g2, line);
-    u8g2_DrawUTF8(u8g2, dx-step0, y, line);
+    // Magnitudes
+    float mf =cat_mgr.magnitude();
+    float mf2=cat_mgr.magnitude2();
+    if ((mf2>99) && (mf>99)) {
+      sprintf(line, "?.??");
+    } else {
+      if (mf2>99) {
+        dtostrf(mf, 4, 1, line);
+        ext_drawFixedWidthNumeric(u8g2, 100, y, line);
+      } else {
+        char mfs[8], mfs2[8];
+        dtostrf(mf, 4, 1, mfs);
+        dtostrf(mf2, 4, 1, mfs2);
+        u8g2_SetFont(u8g2, u8g2_font_helvR08_tr);
+        ext_drawFixedWidthNumeric(u8g2, 84, y, mfs);
+        ext_drawFixedWidthNumeric(u8g2, 108, y, mfs2);
+        u8g2_SetFont(u8g2, myfont);
+      }
+    }
 
-    // RA/Dec were here
-    // Display lines 2 and 3
+    // Display line 2 and 3
+    x = 0;
     if (displayMode==DM_INFO) {
       y += line_height;
-      x = 0;
-      // Common name for the star
+      // Name or note string
       u8g2_DrawUTF8(u8g2, x, y, cat_mgr.objectNameStr());
+
+      // line 3
+      x = 0;
+      y += line_height;
+      if (cat_mgr.isDblStarCatalog()) {
+        // |Sep 2.5" PA 225       |
+        char seps[16];
+        dtostrf(cat_mgr.separation(), 4, 1, seps);
+        sprintf(line,"Sep%s\" PA%d\xb0",seps,cat_mgr.positionAngle());
+        ext_drawFixedWidthNumeric(u8g2, x, y, line);
+      } else
+      if (cat_mgr.isVarStarCatalog()) {
+        // |Per 2.5d              |
+        char pers[16];
+        dtostrf(cat_mgr.period(), 8, 2, pers);
+        sprintf(line,"Period %sd",pers);
+        ext_drawFixedWidthNumeric(u8g2, x, y, line);
+      }
     }
   }
   else {
@@ -151,12 +217,12 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     
     // Prefix and catalog number
     x = 0;
-    sprintf(line, "%s%u", cat_mgr.catalogPrefix(), cat_mgr.primaryId());
+    sprintf(line, "%s%ld", cat_mgr.catalogPrefix(), cat_mgr.primaryId());
     step0 = u8g2_GetUTF8Width(u8g2, "N8888");
     int x1= u8g2_GetUTF8Width(u8g2, line);
     u8g2_DrawUTF8(u8g2, x, y, line);
      
-    // Object SubID
+    // Object SubId
     u8g2_SetFont(u8g2, u8g2_font_helvR08_tr);
     sprintf(line, "%s", cat_mgr.subIdStr());
     u8g2_DrawUTF8(u8g2, x+x1, y, line);
@@ -219,35 +285,19 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     static uint8_t va2, va3, vz2, vz3;
 
     u8g2_SetFont(u8g2, myfont);
-    step0 = u8g2_GetUTF8Width(u8g2, "XXXXX ");
 
     // Horizon Coords
     if (firstPass) cat_mgr.azmDMS(vz1, vz2, vz3);
     if (firstPass) cat_mgr.altDMS(va1, va2, va3);
     vz2=vz2/6;
     va2=va2/6;
-    sprintf(line,"%3d.%d",vz1,vz2);
+    sprintf(line,"%3d.%d\xb0",vz1,vz2);
     x=0; y += line_height;
-    x += u8g2_DrawUTF8(u8g2, x, y, "Az ");
-    x += (ext_drawFixedWidthNumeric(u8g2, x, y, line) + 24);
-    sprintf(line,"%s%2d.%d",va1 < 0 ? "-" : "+",abs(va1),va2);
-    x += u8g2_DrawUTF8(u8g2, x, y, "Alt ");
+    x += u8g2_DrawUTF8(u8g2, x, y, "Az")+2;
+    x += (ext_drawFixedWidthNumeric(u8g2, x, y, line) + 15);
+    sprintf(line,"%3d.%d\xb0",va1,va2);
+    x += u8g2_DrawUTF8(u8g2, x, y, "Alt")+2;
     ext_drawFixedWidthNumeric(u8g2, x, y, line);
-/*
-    // Az
-    if (firstPass) cat_mgr.azmDMS(vz1, vz2, vz3);
-    sprintf(line,"%03d\xb0%02d'%02d",vz1,vz2,vz3);
-    y += line_height;
-    u8g2_DrawUTF8(u8g2, 8, y, "Az.");
-    ext_drawFixedWidthNumeric(u8g2, step0, y, line);
-
-    // Alt
-    if (firstPass) cat_mgr.altDMS(va1, va2, va3);
-    sprintf(line,"%s%02d\xb0%02d'%02d",va1 < 0 ? "-" : "+",abs(va1),va2,va3);
-    y += line_height;
-    u8g2_DrawUTF8(u8g2, 8, y, "Alt.");
-    ext_drawFixedWidthNumeric(u8g2, step0, y, line);
-*/
   }
 
   return line_height;

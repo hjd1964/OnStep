@@ -26,7 +26,7 @@ LX200RETURN Move2TargetLX200();
 LX200RETURN SetTargetRaLX200(int vr1, int vr2, int vr3);
 LX200RETURN SetTargetDecLX200(int vd1, int vd2, int vd3);
 LX200RETURN SyncGotoLX200(bool, float &Ra, float &Dec);
-LX200RETURN SyncSelectedStarLX200(unsigned short alignSelectedStar);
+LX200RETURN SyncSelectedStarLX200(long alignSelectedStar);
 LX200RETURN GetDateLX200(unsigned int &day, unsigned int &month, unsigned int &year, boolean ut=false);
 LX200RETURN SyncGotoCatLX200(bool sync);
 LX200RETURN SyncGotoPlanetLX200(bool sync, unsigned short obj);

@@ -3,20 +3,18 @@
 
 const double Rad=57.29577951;
 
-const unsigned int FM_NONE = 0;
-const unsigned int FM_ABOVE_HORIZON = 1;
-const unsigned int FM_ALIGN_ALL_SKY = 2;
-const unsigned int FM_CONSTELLATION = 4;
-const unsigned int FM_OBJ_TYPE      = 8;
-const unsigned int FM_BY_MAG        = 16;
-const unsigned int FM_NEARBY        = 32;
+const unsigned int FM_NONE           = 0;
+const unsigned int FM_ABOVE_HORIZON  = 1;
+const unsigned int FM_ALIGN_ALL_SKY  = 2;
+const unsigned int FM_CONSTELLATION  = 4;
+const unsigned int FM_OBJ_TYPE       = 8;
+const unsigned int FM_BY_MAG         = 16;
+const unsigned int FM_NEARBY         = 32;
+const unsigned int FM_DBL_MIN_SEP    = 64;
+const unsigned int FM_DBL_MAX_SEP    = 128;
+const unsigned int FM_VAR_MAX_PER    = 256;
 
-void getcatdms(const short& v, short& v1, uint8_t& v2);
-void getcatdf(const short& v, float& v1);
-void getcathms(const unsigned short& v, uint8_t& v1, uint8_t& v2, uint8_t& v3);
-void getcathf(const unsigned short& v, float& v1);
-
-enum CAT_TYPES {CAT_NONE, CAT_GEN_STAR, CAT_GEN_STAR_COMP, CAT_DBL_STAR, CAT_VAR_STAR, CAT_DSO, CAT_DSO_COMP, CAT_DSO_VCOMP};
+enum CAT_TYPES {CAT_NONE, CAT_GEN_STAR, CAT_GEN_STAR_VCOMP, CAT_DBL_STAR, CAT_VAR_STAR, CAT_DSO, CAT_DSO_COMP, CAT_DSO_VCOMP};
 
 class CatMgr {
   public:
@@ -34,7 +32,12 @@ class CatMgr {
     int         numCatalogs();
     void        select(int cat);
     CAT_TYPES   catalogType();
+
+    bool        hasDblStarCatalog();
+    bool        hasVarStarCatalog();
     bool        isStarCatalog();
+    bool        isDblStarCatalog();
+    bool        isVarStarCatalog();
     bool        isDsoCatalog();
     const char* catalogTitle();
     const char* catalogPrefix();
@@ -45,9 +48,9 @@ class CatMgr {
     void        filterAdd(int fm, int param);
 
 // select catalog record
-    bool        setIndex(int index);
-    int         getIndex();
-    int         getMaxIndex();
+    bool        setIndex(long index);
+    long        getIndex();
+    long        getMaxIndex();
     bool        incIndex();
     bool        decIndex();
 
@@ -67,7 +70,12 @@ class CatMgr {
 
     void        topocentricToObservedPlace(float *RA, float *Dec);
 
+    float       period();
+    int         positionAngle();
+    float       separation();
+
     float       magnitude();
+    float       magnitude2();
     
     byte        constellation();
     const char* constellationStr();
@@ -77,12 +85,15 @@ class CatMgr {
     const char* objectTypeStr();
     const char* objectTypeCodeToStr(int code);
 
-    int         objectName();
+    long        objectName();
     const char* objectNameStr();
 
-    unsigned int primaryId();
-    int          subId();
-    const char*  subIdStr();
+    long        primaryId();
+    long        subId();
+    const char* subIdStr();
+
+    int         bayerFlam();
+    const char* bayerFlamStr();
 
 private:
     double _lat=-10000;
@@ -98,12 +109,15 @@ private:
     int _fm_obj_type=0;
     double _fm_mag_limit=100.0;
     double _fm_nearby_dist=10000.0;
+    double _fm_dbl_min=0.0;
+    double _fm_dbl_max=100000.0;
+    double _fm_var_max=100000.0;
     
     int _selected=0;
 
     bool isFiltered();
 
-    const char* getElementFromString(const char *data, int elementNum);
+    const char* getElementFromString(const char *data, long elementNum);
     double DistFromEqu(double RA, double Dec);
     double HAToRA(double ha);
     void EquToHor(double RA, double Dec, double *Alt, double *Azm);

@@ -9,9 +9,12 @@
 // ** In this section is everything you need touch to add a new "catalog.h"      **
 // ** file and use it within the SHC.                                            **
 
-// Simply include the catalog you want here.  There are also _x, _c and _vc suffixes for some catalogs which...
-// mean expanded, compact, and very-compact.  These options effect available catalogs, features, and accuracy.
-  #include "catalogs/stars.h"
+// Simply include the catalog you want here.  There are also _c and _vc suffixes for some catalogs which mean compact 
+// and very-compact.  Some catalogs also have an _select option where only the brighter objects are included. These 
+// options effect available catalogs, features, and accuracy (and are very useful on the Teensy3.2 where flash is more limited.)
+// Note: You can navigate to and open the SmartHandController's catalogs directory in the Arduino IDE to see the available catalogs.
+  #include "catalogs/stars_vc.h"
+//#include "catalogs/stf.h"
   #include "catalogs/messier_c.h"
   #include "catalogs/caldwell_c.h"
   #include "catalogs/herschel_c.h"
@@ -24,6 +27,7 @@ catalog_t catalog[] = {
 // Note: Alignment always uses the first catalog!
 // Title         Prefix   Num records   Catalog data  Catalog name string  Catalog subId string  Type                Epoch
   {"Stars",       "Star ", NUM_STARS,    Cat_Stars,    Cat_Stars_Names,     Cat_Stars_SubId,      Cat_Stars_Type,     2000, 0},
+//{"STF Dbl*",    "STF",   NUM_STF,      Cat_STF,      Cat_STF_Names,       Cat_STF_SubId,        Cat_STF_Type,       2000, 0},
   {"Messier",     "M",     NUM_MESSIER,  Cat_Messier,  Cat_Messier_Names,   Cat_Messier_SubId,    Cat_Messier_Type,   2000, 0},
   {"Caldwell",    "C",     NUM_CALDWELL, Cat_Caldwell, Cat_Caldwell_Names,  Cat_Caldwell_SubId,   Cat_Caldwell_Type,  2000, 0},
   {"Herschel400", "N",     NUM_HERSCHEL, Cat_Herschel, Cat_Herschel_Names,  Cat_Herschel_SubId,   Cat_Herschel_Type,  2000, 0},
@@ -84,32 +88,32 @@ int CatMgr::numCatalogs() {
   return 32;
 }
 
-gen_star_t*      _genStarCatalog     = NULL;
-gen_star_comp_t* _genStarCompCatalog = NULL;
-dbl_star_t*      _dblStarCatalog     = NULL;
-var_star_t*      _varStarCatalog     = NULL;
-dso_t*           _dsoCatalog         = NULL;
-dso_comp_t*      _dsoCompCatalog     = NULL;
-dso_vcomp_t*     _dsoVCompCatalog    = NULL;
+gen_star_t*       _genStarCatalog      = NULL;
+gen_star_vcomp_t* _genStarVCompCatalog = NULL;
+dbl_star_t*       _dblStarCatalog      = NULL;
+var_star_t*       _varStarCatalog      = NULL;
+dso_t*            _dsoCatalog          = NULL;
+dso_comp_t*       _dsoCompCatalog      = NULL;
+dso_vcomp_t*      _dsoVCompCatalog     = NULL;
 
 // handle catalog selection (0..n)
 void CatMgr::select(int number) {
-  _genStarCatalog     =NULL;
-  _genStarCompCatalog =NULL;
-  _dblStarCatalog     =NULL;
-  _dsoCatalog         =NULL;
-  _dsoCompCatalog     =NULL;
-  _dsoVCompCatalog    =NULL;
+  _genStarCatalog      =NULL;
+  _genStarVCompCatalog =NULL;
+  _dblStarCatalog      =NULL;
+  _dsoCatalog          =NULL;
+  _dsoCompCatalog      =NULL;
+  _dsoVCompCatalog     =NULL;
   if ((number<0) || (number>=numCatalogs())) number=-1; // invalid catalog?
   _selected=number;
   if (_selected>=0) {
-    if (catalog[_selected].CatalogType==CAT_GEN_STAR)      _genStarCatalog    =(gen_star_t*)catalog[_selected].Objects; else
-    if (catalog[_selected].CatalogType==CAT_GEN_STAR_COMP) _genStarCompCatalog=(gen_star_comp_t*)catalog[_selected].Objects; else
-    if (catalog[_selected].CatalogType==CAT_DBL_STAR)      _dblStarCatalog    =(dbl_star_t*)catalog[_selected].Objects; else
-    if (catalog[_selected].CatalogType==CAT_VAR_STAR)      _varStarCatalog    =(var_star_t*)catalog[_selected].Objects; else
-    if (catalog[_selected].CatalogType==CAT_DSO)           _dsoCatalog        =(dso_t*)catalog[_selected].Objects; else
-    if (catalog[_selected].CatalogType==CAT_DSO_COMP)      _dsoCompCatalog    =(dso_comp_t*)catalog[_selected].Objects; else
-    if (catalog[_selected].CatalogType==CAT_DSO_VCOMP)     _dsoVCompCatalog   =(dso_vcomp_t*)catalog[_selected].Objects; else _selected=-1;
+    if (catalog[_selected].CatalogType==CAT_GEN_STAR)       _genStarCatalog     =(gen_star_t*)catalog[_selected].Objects; else
+    if (catalog[_selected].CatalogType==CAT_GEN_STAR_VCOMP) _genStarVCompCatalog=(gen_star_vcomp_t*)catalog[_selected].Objects; else
+    if (catalog[_selected].CatalogType==CAT_DBL_STAR)       _dblStarCatalog     =(dbl_star_t*)catalog[_selected].Objects; else
+    if (catalog[_selected].CatalogType==CAT_VAR_STAR)       _varStarCatalog     =(var_star_t*)catalog[_selected].Objects; else
+    if (catalog[_selected].CatalogType==CAT_DSO)            _dsoCatalog         =(dso_t*)catalog[_selected].Objects; else
+    if (catalog[_selected].CatalogType==CAT_DSO_COMP)       _dsoCompCatalog     =(dso_comp_t*)catalog[_selected].Objects; else
+    if (catalog[_selected].CatalogType==CAT_DSO_VCOMP)      _dsoVCompCatalog    =(dso_vcomp_t*)catalog[_selected].Objects; else _selected=-1;
   }
 }
 
@@ -118,12 +122,36 @@ CAT_TYPES CatMgr::catalogType()  {
   return catalog[_selected].CatalogType;
 }
 
-// Star catalog?
-bool CatMgr::isStarCatalog() {
-  return (catalogType()==CAT_GEN_STAR) || (catalogType()==CAT_GEN_STAR_COMP) || (catalogType()==CAT_DBL_STAR);
+// check so see if there's a double star catalog present
+bool CatMgr::hasDblStarCatalog() {
+  for (int i=0; i<MaxCatalogs; i++) {
+    if (catalog[i].CatalogType==CAT_DBL_STAR) return true;
+    if (catalog[i].CatalogType==CAT_NONE) break;
+  }
+  return false;
 }
 
-// Dso catalog?
+// check so see if theres a variable star catalog present
+bool CatMgr::hasVarStarCatalog() {
+  for (int i=0; i<MaxCatalogs; i++) {
+    if (catalog[i].CatalogType==CAT_VAR_STAR) return true;
+    if (catalog[i].CatalogType==CAT_NONE) break;
+  }
+  return false;
+}
+
+bool CatMgr::isStarCatalog() {
+  return (catalogType()==CAT_GEN_STAR) || (catalogType()==CAT_GEN_STAR_VCOMP) || (catalogType()==CAT_DBL_STAR) || (catalogType()==CAT_VAR_STAR);
+}
+
+bool CatMgr::isDblStarCatalog() {
+  return catalogType()==CAT_DBL_STAR;
+}
+
+bool CatMgr::isVarStarCatalog() {
+  return catalogType()==CAT_VAR_STAR;
+}
+
 bool CatMgr::isDsoCatalog()  {
   return (catalogType()==CAT_DSO) || (catalogType()==CAT_DSO_COMP) || (catalogType()==CAT_DSO_VCOMP);
 }
@@ -162,32 +190,65 @@ void CatMgr::filterAdd(int fm, int param) {
     if (param==6) _fm_mag_limit=17.0; else _fm_mag_limit=100.0;
   }
   if (fm&FM_NEARBY) {
-    if (param==0) _fm_nearby_dist=15.0; else
-    if (param==1) _fm_nearby_dist=10.0; else
-    if (param==2) _fm_nearby_dist=5.0; else
-    if (param==3) _fm_nearby_dist=1.0; else _fm_nearby_dist=9999.0;
+    if (param==0) _fm_nearby_dist=1.0; else
+    if (param==1) _fm_nearby_dist=5.0; else
+    if (param==2) _fm_nearby_dist=10.0; else
+    if (param==3) _fm_nearby_dist=15.0; else _fm_nearby_dist=9999.0;
   }
   if (fm&FM_OBJ_TYPE) _fm_obj_type=param;
+  if (fm&FM_DBL_MIN_SEP) {
+    if (param==0) _fm_dbl_min=0.2; else
+    if (param==1) _fm_dbl_min=0.5; else
+    if (param==2) _fm_dbl_min=1.0; else
+    if (param==3) _fm_dbl_min=1.5; else
+    if (param==4) _fm_dbl_min=2.0; else
+    if (param==5) _fm_dbl_min=3.0; else
+    if (param==6) _fm_dbl_min=5.0; else
+    if (param==7) _fm_dbl_min=10.0; else
+    if (param==8) _fm_dbl_min=20.0; else
+    if (param==9) _fm_dbl_min=50.0; else _fm_dbl_min=0.0;
+  }
+  if (fm&FM_DBL_MAX_SEP) {
+    if (param==0) _fm_dbl_max=0.5; else
+    if (param==1) _fm_dbl_max=1.0; else
+    if (param==2) _fm_dbl_max=1.5; else
+    if (param==3) _fm_dbl_max=2.0; else
+    if (param==4) _fm_dbl_max=3.0; else
+    if (param==5) _fm_dbl_max=5.0; else
+    if (param==6) _fm_dbl_max=10.0; else
+    if (param==7) _fm_dbl_max=20.0; else
+    if (param==8) _fm_dbl_max=50.0; else
+    if (param==9) _fm_dbl_max=100.0; else _fm_dbl_max=0.0;
+  }
+  if (fm&FM_VAR_MAX_PER) {
+    if (param==0) _fm_var_max=0.5; else
+    if (param==1) _fm_var_max=1.0; else
+    if (param==2) _fm_var_max=2.0; else
+    if (param==3) _fm_var_max=5.0; else
+    if (param==4) _fm_var_max=10.0; else
+    if (param==5) _fm_var_max=20.0; else
+    if (param==6) _fm_var_max=50.0; else
+    if (param==7) _fm_var_max=100.0; else _fm_var_max=0.0;  }
 }
 
 // select catalog record
-bool CatMgr::setIndex(int index) {
+bool CatMgr::setIndex(long index) {
   if (_selected<0) return false;
   catalog[_selected].Index=index;
   decIndex();
   return incIndex();
 }
 
-int CatMgr::getIndex() {
+long CatMgr::getIndex() {
   return catalog[_selected].Index;
 }
 
-int CatMgr::getMaxIndex() {
+long CatMgr::getMaxIndex() {
   return catalog[_selected].NumObjects-1;
 }
 
 bool CatMgr::incIndex() {
-  int i=getMaxIndex()+1;
+  long i=getMaxIndex()+1;
   do {
     i--;
     catalog[_selected].Index++;
@@ -197,7 +258,7 @@ bool CatMgr::incIndex() {
 }
 
 bool CatMgr::decIndex() {
-  int i=getMaxIndex()+1;
+  long i=getMaxIndex()+1;
   do {
     i--;
     catalog[_selected].Index--;
@@ -216,13 +277,13 @@ double CatMgr::ra() {
 // RA in hours
 double CatMgr::rah() {
   if (_selected<0) return 0;
-  if (catalogType()==CAT_GEN_STAR)      return _genStarCatalog[catalog[_selected].Index].RA; else
-  if (catalogType()==CAT_GEN_STAR_COMP) return _genStarCompCatalog[catalog[_selected].Index].RA/2730.6666666666666; else
-  if (catalogType()==CAT_DBL_STAR)      return _dblStarCatalog[catalog[_selected].Index].RA; else
-  if (catalogType()==CAT_VAR_STAR)      return _varStarCatalog[catalog[_selected].Index].RA; else
-  if (catalogType()==CAT_DSO)           return _dsoCatalog[catalog[_selected].Index].RA; else
-  if (catalogType()==CAT_DSO_COMP)      return _dsoCompCatalog[catalog[_selected].Index].RA/2730.6666666666666; else
-  if (catalogType()==CAT_DSO_VCOMP)     return _dsoVCompCatalog[catalog[_selected].Index].RA/2730.6666666666666; else return 0;
+  if (catalogType()==CAT_GEN_STAR)       return _genStarCatalog[catalog[_selected].Index].RA; else
+  if (catalogType()==CAT_GEN_STAR_VCOMP) return _genStarVCompCatalog[catalog[_selected].Index].RA/2730.6666666666666; else
+  if (catalogType()==CAT_DBL_STAR)       return _dblStarCatalog[catalog[_selected].Index].RA; else
+  if (catalogType()==CAT_VAR_STAR)       return _varStarCatalog[catalog[_selected].Index].RA; else
+  if (catalogType()==CAT_DSO)            return _dsoCatalog[catalog[_selected].Index].RA; else
+  if (catalogType()==CAT_DSO_COMP)       return _dsoCompCatalog[catalog[_selected].Index].RA/2730.6666666666666; else
+  if (catalogType()==CAT_DSO_VCOMP)      return _dsoVCompCatalog[catalog[_selected].Index].RA/2730.6666666666666; else return 0;
 }
 
 // HA in degrees
@@ -250,13 +311,13 @@ void CatMgr::raHMS(uint8_t &h, uint8_t &m, uint8_t &s) {
 
 // Dec in degrees
 double CatMgr::dec() {
-  if (catalogType()==CAT_GEN_STAR)      return _genStarCatalog[catalog[_selected].Index].DE; else
-  if (catalogType()==CAT_GEN_STAR_COMP) return _genStarCompCatalog[catalog[_selected].Index].DE/364.07777777777777; else
-  if (catalogType()==CAT_DBL_STAR)      return _dblStarCatalog[catalog[_selected].Index].DE; else
-  if (catalogType()==CAT_VAR_STAR)      return _varStarCatalog[catalog[_selected].Index].DE; else
-  if (catalogType()==CAT_DSO)           return _dsoCatalog[catalog[_selected].Index].DE; else
-  if (catalogType()==CAT_DSO_COMP)      return _dsoCompCatalog[catalog[_selected].Index].DE/364.07777777777777; else
-  if (catalogType()==CAT_DSO_VCOMP)     return _dsoVCompCatalog[catalog[_selected].Index].DE/364.07777777777777; else return 0;
+  if (catalogType()==CAT_GEN_STAR)       return _genStarCatalog[catalog[_selected].Index].DE; else
+  if (catalogType()==CAT_GEN_STAR_VCOMP) return _genStarVCompCatalog[catalog[_selected].Index].DE/364.07777777777777; else
+  if (catalogType()==CAT_DBL_STAR)       return _dblStarCatalog[catalog[_selected].Index].DE; else
+  if (catalogType()==CAT_VAR_STAR)       return _varStarCatalog[catalog[_selected].Index].DE; else
+  if (catalogType()==CAT_DSO)            return _dsoCatalog[catalog[_selected].Index].DE; else
+  if (catalogType()==CAT_DSO_COMP)       return _dsoCompCatalog[catalog[_selected].Index].DE/364.07777777777777; else
+  if (catalogType()==CAT_DSO_VCOMP)      return _dsoVCompCatalog[catalog[_selected].Index].DE/364.07777777777777; else return 0;
 }
 
 // Declination as degrees, minutes, seconds
@@ -338,28 +399,58 @@ void CatMgr::topocentricToObservedPlace(float *RA, float *Dec) {
   }
 }
 
+// Period of variable star, in days
+float CatMgr::period() {
+  if (_selected<0) return -1;
+  float p=-1;
+  if (catalogType()==CAT_VAR_STAR) p=_varStarCatalog[catalog[_selected].Index].Period; else return -1;
+  
+  // Period 0.00 to 9.99 days (0 to 999) period 10.0 to 3186.6 days (1000 to 32766), 32767 = Unknown
+  if ((p>0)   && (p<=999)) return p/100.0; else
+  if ((p>999) && (p<=32766)) return (p-900)/10.0; else return -1;
+}
+
+// Position angle of double star, in degrees
+int CatMgr::positionAngle() {
+  if (_selected<0) return -1;
+  if (catalogType()==CAT_DBL_STAR) return _dblStarCatalog[catalog[_selected].Index].PA; else return -1;
+}
+
+// Separation of double star, in arc-seconds
+float CatMgr::separation() {
+  if (_selected<0) return 999.9;
+  if (catalogType()==CAT_DBL_STAR) return _dblStarCatalog[catalog[_selected].Index].Sep/100.0; else return 999.9;
+}
+
 // Magnitude of an object
 float CatMgr::magnitude() {
   if (_selected<0) return 99.9;
-  if (catalogType()==CAT_GEN_STAR)      return _genStarCatalog[catalog[_selected].Index].Mag/100.0; else
-  if (catalogType()==CAT_GEN_STAR_COMP) { int m=_genStarCompCatalog[catalog[_selected].Index].Mag; if (m==255) return 99.9; else return (m/10.0)-2.5; } else
-  if (catalogType()==CAT_DBL_STAR)      return _dblStarCatalog[catalog[_selected].Index].Mag/100.0; else
-  if (catalogType()==CAT_VAR_STAR)      return _varStarCatalog[catalog[_selected].Index].Mag/100.0; else
-  if (catalogType()==CAT_DSO)           return _dsoCatalog[catalog[_selected].Index].Mag/100.0; else
-  if (catalogType()==CAT_DSO_COMP)      { int m=_dsoCompCatalog[catalog[_selected].Index].Mag; if (m==255) return 99.9; else return (m/10.0)-2.5; } else
-  if (catalogType()==CAT_DSO_VCOMP)     { int m=_dsoVCompCatalog[catalog[_selected].Index].Mag; if (m==255) return 99.9; else return (m/10.0)-2.5; } else return 0;
+  if (catalogType()==CAT_GEN_STAR)       return _genStarCatalog[catalog[_selected].Index].Mag/100.0; else
+  if (catalogType()==CAT_GEN_STAR_VCOMP) { int m=_genStarVCompCatalog[catalog[_selected].Index].Mag; if (m==255) return 99.9; else return (m/10.0)-2.5; } else
+  if (catalogType()==CAT_DBL_STAR)       return _dblStarCatalog[catalog[_selected].Index].Mag/100.0; else
+  if (catalogType()==CAT_VAR_STAR)       return _varStarCatalog[catalog[_selected].Index].Mag/100.0; else
+  if (catalogType()==CAT_DSO)            return _dsoCatalog[catalog[_selected].Index].Mag/100.0; else
+  if (catalogType()==CAT_DSO_COMP)       { int m=_dsoCompCatalog[catalog[_selected].Index].Mag; if (m==255) return 99.9; else return (m/10.0)-2.5; } else
+  if (catalogType()==CAT_DSO_VCOMP)      { int m=_dsoVCompCatalog[catalog[_selected].Index].Mag; if (m==255) return 99.9; else return (m/10.0)-2.5; } else return 99.9;
+}
+
+// Secondary magnitude of an star.  For double stars this is the magnitude of the secondary.  For variables this is the minimum brightness.
+float CatMgr::magnitude2() {
+  if (_selected<0) return 99.9;
+  if (catalogType()==CAT_DBL_STAR)       return _dblStarCatalog[catalog[_selected].Index].Mag2/100.0; else
+  if (catalogType()==CAT_VAR_STAR)       return _varStarCatalog[catalog[_selected].Index].Mag2/100.0; else return 99.9;
 }
 
 // Constellation number
 byte CatMgr::constellation() {
   if (_selected<0) return 89;
-  if (catalogType()==CAT_GEN_STAR)      return _genStarCatalog[catalog[_selected].Index].Cons; else
-  if (catalogType()==CAT_GEN_STAR_COMP) return _genStarCompCatalog[catalog[_selected].Index].Cons; else
-  if (catalogType()==CAT_DBL_STAR)      return _dblStarCatalog[catalog[_selected].Index].Cons; else
-  if (catalogType()==CAT_VAR_STAR)      return _varStarCatalog[catalog[_selected].Index].Cons; else
-  if (catalogType()==CAT_DSO)           return _dsoCatalog[catalog[_selected].Index].Cons; else
-  if (catalogType()==CAT_DSO_COMP)      return _dsoCompCatalog[catalog[_selected].Index].Cons; else
-  if (catalogType()==CAT_DSO_VCOMP)     return _dsoVCompCatalog[catalog[_selected].Index].Cons; else return 0;
+  if (catalogType()==CAT_GEN_STAR)       return _genStarCatalog[catalog[_selected].Index].Cons; else
+  if (catalogType()==CAT_GEN_STAR_VCOMP) return _genStarVCompCatalog[catalog[_selected].Index].Cons; else
+  if (catalogType()==CAT_DBL_STAR)       return _dblStarCatalog[catalog[_selected].Index].Cons; else
+  if (catalogType()==CAT_VAR_STAR)       return _varStarCatalog[catalog[_selected].Index].Cons; else
+  if (catalogType()==CAT_DSO)            return _dsoCatalog[catalog[_selected].Index].Cons; else
+  if (catalogType()==CAT_DSO_COMP)       return _dsoCompCatalog[catalog[_selected].Index].Cons; else
+  if (catalogType()==CAT_DSO_VCOMP)      return _dsoVCompCatalog[catalog[_selected].Index].Cons; else return 0;
 }
 
 // Constellation string
@@ -375,12 +466,12 @@ const char* CatMgr::constellationCodeToStr(int code) {
 // Object type code
 byte CatMgr::objectType() {
   if (_selected<0) return -1;
-  if (catalogType()==CAT_GEN_STAR)      return 2; else
-  if (catalogType()==CAT_GEN_STAR_COMP) return 2; else
-  if (catalogType()==CAT_DBL_STAR)      return 2; else
-  if (catalogType()==CAT_DSO)           return _dsoCatalog[catalog[_selected].Index].Obj_type; else
-  if (catalogType()==CAT_DSO_COMP)      return _dsoCompCatalog[catalog[_selected].Index].Obj_type; else
-  if (catalogType()==CAT_DSO_VCOMP)     return _dsoVCompCatalog[catalog[_selected].Index].Obj_type; else return -1;
+  if (catalogType()==CAT_GEN_STAR)       return 2; else
+  if (catalogType()==CAT_GEN_STAR_VCOMP) return 2; else
+  if (catalogType()==CAT_DBL_STAR)       return 2; else
+  if (catalogType()==CAT_DSO)            return _dsoCatalog[catalog[_selected].Index].Obj_type; else
+  if (catalogType()==CAT_DSO_COMP)       return _dsoCompCatalog[catalog[_selected].Index].Obj_type; else
+  if (catalogType()==CAT_DSO_VCOMP)      return _dsoVCompCatalog[catalog[_selected].Index].Obj_type; else return -1;
 }
 
 // Object type string
@@ -395,30 +486,30 @@ const char* CatMgr::objectTypeCodeToStr(int code) {
 }
 
 // Object name code (encoded by Has_name.)  Returns -1 if the object doesn't have a name code.
-int CatMgr::objectName() {
+long CatMgr::objectName() {
   if (_selected<0) return -1;
 
   // does it have a name? if not just return
-  if (catalogType()==CAT_GEN_STAR)      { if (!_genStarCatalog[catalog[_selected].Index].Has_name) return -1; } else
-  if (catalogType()==CAT_GEN_STAR_COMP) { if (!_genStarCompCatalog[catalog[_selected].Index].Has_name) return -1; } else
-  if (catalogType()==CAT_DBL_STAR)      { if (!_dblStarCatalog[catalog[_selected].Index].Has_name) return -1; } else
-  if (catalogType()==CAT_VAR_STAR)      { if (!_varStarCatalog[catalog[_selected].Index].Has_name) return -1; } else
-  if (catalogType()==CAT_DSO)           { if (!_dsoCatalog[catalog[_selected].Index].Has_name) return -1; } else
-  if (catalogType()==CAT_DSO_COMP)      { if (!_dsoCompCatalog[catalog[_selected].Index].Has_name) return -1; } else
-  if (catalogType()==CAT_DSO_VCOMP)     { if (!_dsoVCompCatalog[catalog[_selected].Index].Has_name) return -1; } else return -1;
+  if (catalogType()==CAT_GEN_STAR)       { if (!_genStarCatalog[catalog[_selected].Index].Has_name) return -1; } else
+  if (catalogType()==CAT_GEN_STAR_VCOMP) { if (!_genStarVCompCatalog[catalog[_selected].Index].Has_name) return -1; } else
+  if (catalogType()==CAT_DBL_STAR)       { if (!_dblStarCatalog[catalog[_selected].Index].Has_name) return -1; } else
+  if (catalogType()==CAT_VAR_STAR)       { if (!_varStarCatalog[catalog[_selected].Index].Has_name) return -1; } else
+  if (catalogType()==CAT_DSO)            { if (!_dsoCatalog[catalog[_selected].Index].Has_name) return -1; } else
+  if (catalogType()==CAT_DSO_COMP)       { if (!_dsoCompCatalog[catalog[_selected].Index].Has_name) return -1; } else
+  if (catalogType()==CAT_DSO_VCOMP)      { if (!_dsoVCompCatalog[catalog[_selected].Index].Has_name) return -1; } else return -1;
 
   // find the code
-  int result=-1;
-  int j=catalog[_selected].Index;
+  long result=-1;
+  long j=catalog[_selected].Index;
   if (j>getMaxIndex()) j=-1;
   if (j<0) return -1;
-  if (catalogType()==CAT_GEN_STAR)      { for (int i=0; i<=j; i++) { if (_genStarCatalog[i].Has_name) result++; } } else
-  if (catalogType()==CAT_GEN_STAR_COMP) { for (int i=0; i<=j; i++) { if (_genStarCompCatalog[i].Has_name) result++; } } else
-  if (catalogType()==CAT_DBL_STAR)      { for (int i=0; i<=j; i++) { if (_dblStarCatalog[i].Has_name) result++; } } else
-  if (catalogType()==CAT_VAR_STAR)      { for (int i=0; i<=j; i++) { if (_varStarCatalog[i].Has_name) result++; } } else
-  if (catalogType()==CAT_DSO)           { for (int i=0; i<=j; i++) { if (_dsoCatalog[i].Has_name) result++; } } else
-  if (catalogType()==CAT_DSO_COMP)      { for (int i=0; i<=j; i++) { if (_dsoCompCatalog[i].Has_name) result++; } } else
-  if (catalogType()==CAT_DSO_VCOMP)     { for (int i=0; i<=j; i++) { if (_dsoVCompCatalog[i].Has_name) result++; } } else return -1;
+  if (catalogType()==CAT_GEN_STAR)       { for (long i=0; i<=j; i++) { if (_genStarCatalog[i].Has_name) result++; } } else
+  if (catalogType()==CAT_GEN_STAR_VCOMP) { for (long i=0; i<=j; i++) { if (_genStarVCompCatalog[i].Has_name) result++; } } else
+  if (catalogType()==CAT_DBL_STAR)       { for (long i=0; i<=j; i++) { if (_dblStarCatalog[i].Has_name) result++; } } else
+  if (catalogType()==CAT_VAR_STAR)       { for (long i=0; i<=j; i++) { if (_varStarCatalog[i].Has_name) result++; } } else
+  if (catalogType()==CAT_DSO)            { for (long i=0; i<=j; i++) { if (_dsoCatalog[i].Has_name) result++; } } else
+  if (catalogType()==CAT_DSO_COMP)       { for (long i=0; i<=j; i++) { if (_dsoCompCatalog[i].Has_name) result++; } } else
+  if (catalogType()==CAT_DSO_VCOMP)      { for (long i=0; i<=j; i++) { if (_dsoVCompCatalog[i].Has_name) result++; } } else return -1;
 
   return result;
 }
@@ -426,49 +517,47 @@ int CatMgr::objectName() {
 // Object name type string
 const char* CatMgr::objectNameStr() {
   if (_selected<0) return "";
-  int elementNum=objectName();
+  long elementNum=objectName();
   if (elementNum>=0) return getElementFromString(catalog[_selected].ObjectNames,elementNum); else return "";
 }
 
-// Object Id (for Bayer designated Stars 0 = Alp, etc. to 23. Fleemstead designated Stars 25 = '1', etc.)
-unsigned int CatMgr::primaryId() {
+// Object Id
+long CatMgr::primaryId() {
   if (_selected<0) return -1;
-  int bf=24;
-  if (catalogType()==CAT_GEN_STAR)      bf=_genStarCatalog[catalog[_selected].Index].BayerFlam; else
-  if (catalogType()==CAT_GEN_STAR_COMP) bf=_genStarCompCatalog[catalog[_selected].Index].BayerFlam; else
-  if (catalogType()==CAT_DBL_STAR)      bf=_dblStarCatalog[catalog[_selected].Index].BayerFlam; else
-  if (catalogType()==CAT_VAR_STAR)      bf=_varStarCatalog[catalog[_selected].Index].BayerFlam; else
-  if (catalogType()==CAT_DSO)           return _dsoCatalog[catalog[_selected].Index].Obj_id; else
-  if (catalogType()==CAT_DSO_COMP)      return _dsoCompCatalog[catalog[_selected].Index].Obj_id; else
-  if (catalogType()==CAT_DSO_VCOMP)     return catalog[_selected].Index+1; else return -1;
-  if (bf==24) return -1; else return bf;
+  if (catalogType()==CAT_GEN_STAR)       return _genStarCatalog[catalog[_selected].Index].Obj_id; else
+  if (catalogType()==CAT_GEN_STAR_VCOMP) return catalog[_selected].Index+1; else
+  if (catalogType()==CAT_DBL_STAR)       return _dblStarCatalog[catalog[_selected].Index].Obj_id; else
+  if (catalogType()==CAT_VAR_STAR)       return _varStarCatalog[catalog[_selected].Index].Obj_id; else
+  if (catalogType()==CAT_DSO)            return _dsoCatalog[catalog[_selected].Index].Obj_id; else
+  if (catalogType()==CAT_DSO_COMP)       return _dsoCompCatalog[catalog[_selected].Index].Obj_id; else
+  if (catalogType()==CAT_DSO_VCOMP)      return catalog[_selected].Index+1; else return -1;
 }
 
 // Object note code (encoded by Has_note.)  Returns -1 if the object doesn't have a note code.
-int CatMgr::subId() {
+long CatMgr::subId() {
   if (_selected<0) return -1;
 
   // does it have a note? if not just return
-  if (catalogType()==CAT_GEN_STAR)      { if (!_genStarCatalog[catalog[_selected].Index].Has_subId) return -1; } else
-  if (catalogType()==CAT_GEN_STAR_COMP) { if (!_genStarCatalog[catalog[_selected].Index].Has_subId) return -1; } else
-  if (catalogType()==CAT_DBL_STAR)      { if (!_dblStarCatalog[catalog[_selected].Index].Has_subId) return -1; } else
-  if (catalogType()==CAT_VAR_STAR)      { if (!_varStarCatalog[catalog[_selected].Index].Has_subId) return -1; } else
-  if (catalogType()==CAT_DSO)           { if (!_dsoCatalog[catalog[_selected].Index].Has_subId) return -1; } else
-  if (catalogType()==CAT_DSO_COMP)      { if (!_dsoCompCatalog[catalog[_selected].Index].Has_subId) return -1; } else
-  if (catalogType()==CAT_DSO_VCOMP)     { if (!_dsoCompCatalog[catalog[_selected].Index].Has_subId) return -1; } else return -1;
+  if (catalogType()==CAT_GEN_STAR)       { if (!_genStarCatalog[catalog[_selected].Index].Has_subId) return -1; } else
+  if (catalogType()==CAT_GEN_STAR_VCOMP) { if (!_genStarCatalog[catalog[_selected].Index].Has_subId) return -1; } else
+  if (catalogType()==CAT_DBL_STAR)       { if (!_dblStarCatalog[catalog[_selected].Index].Has_subId) return -1; } else
+  if (catalogType()==CAT_VAR_STAR)       { if (!_varStarCatalog[catalog[_selected].Index].Has_subId) return -1; } else
+  if (catalogType()==CAT_DSO)            { if (!_dsoCatalog[catalog[_selected].Index].Has_subId) return -1; } else
+  if (catalogType()==CAT_DSO_COMP)       { if (!_dsoCompCatalog[catalog[_selected].Index].Has_subId) return -1; } else
+  if (catalogType()==CAT_DSO_VCOMP)      { if (!_dsoCompCatalog[catalog[_selected].Index].Has_subId) return -1; } else return -1;
 
   // find the code
-  int result=-1;
-  int j=catalog[_selected].Index;
+  long result=-1;
+  long j=catalog[_selected].Index;
   if (j>getMaxIndex()) j=-1;
   if (j<0) return -1;
-  if (catalogType()==CAT_GEN_STAR)      { for (int i=0; i<=j; i++) { if (_genStarCatalog[i].Has_subId) result++; } } else
-  if (catalogType()==CAT_GEN_STAR_COMP) { for (int i=0; i<=j; i++) { if (_genStarCompCatalog[i].Has_subId) result++; } } else
-  if (catalogType()==CAT_DBL_STAR)      { for (int i=0; i<=j; i++) { if (_dblStarCatalog[i].Has_subId) result++; } } else
-  if (catalogType()==CAT_VAR_STAR)      { for (int i=0; i<=j; i++) { if (_varStarCatalog[i].Has_subId) result++; } } else
-  if (catalogType()==CAT_DSO)           { for (int i=0; i<=j; i++) { if (_dsoCatalog[i].Has_subId) result++; } } else
-  if (catalogType()==CAT_DSO_COMP)      { for (int i=0; i<=j; i++) { if (_dsoCompCatalog[i].Has_subId) result++; } } else
-  if (catalogType()==CAT_DSO_VCOMP)     { for (int i=0; i<=j; i++) { if (_dsoVCompCatalog[i].Has_subId) result++; } } else return -1;
+  if (catalogType()==CAT_GEN_STAR)       { for (long i=0; i<=j; i++) { if (_genStarCatalog[i].Has_subId) result++; } } else
+  if (catalogType()==CAT_GEN_STAR_VCOMP) { for (long i=0; i<=j; i++) { if (_genStarVCompCatalog[i].Has_subId) result++; } } else
+  if (catalogType()==CAT_DBL_STAR)       { for (long i=0; i<=j; i++) { if (_dblStarCatalog[i].Has_subId) result++; } } else
+  if (catalogType()==CAT_VAR_STAR)       { for (long i=0; i<=j; i++) { if (_varStarCatalog[i].Has_subId) result++; } } else
+  if (catalogType()==CAT_DSO)            { for (long i=0; i<=j; i++) { if (_dsoCatalog[i].Has_subId) result++; } } else
+  if (catalogType()==CAT_DSO_COMP)       { for (long i=0; i<=j; i++) { if (_dsoCompCatalog[i].Has_subId) result++; } } else
+  if (catalogType()==CAT_DSO_VCOMP)      { for (long i=0; i<=j; i++) { if (_dsoVCompCatalog[i].Has_subId) result++; } } else return -1;
 
   return result;
 }
@@ -476,8 +565,35 @@ int CatMgr::subId() {
 // Object note string
 const char* CatMgr::subIdStr() {
   if (_selected<0) return "";
-  int elementNum=subId();
+  long elementNum=subId();
   if (elementNum>=0) return getElementFromString(catalog[_selected].ObjectSubIds,elementNum); else return "";
+}
+
+// For Bayer designated Stars 0 = Alp, etc. to 23. For Fleemstead designated Stars 25 = '1', etc.
+int CatMgr::bayerFlam() {
+  if (_selected<0) return -1;
+  int bf=24;
+  if (catalogType()==CAT_GEN_STAR)       bf=_genStarCatalog[catalog[_selected].Index].BayerFlam; else
+  if (catalogType()==CAT_GEN_STAR_VCOMP) bf=_genStarVCompCatalog[catalog[_selected].Index].BayerFlam; else
+  if (catalogType()==CAT_DBL_STAR)       bf=_dblStarCatalog[catalog[_selected].Index].BayerFlam; else
+  if (catalogType()==CAT_VAR_STAR)       bf=_varStarCatalog[catalog[_selected].Index].BayerFlam; else return -1;
+  if (bf==24) return -1; else return bf;
+}
+
+// For Bayer designated Stars return greek letter or Flamsteed designated stars return number
+const char* CatMgr::bayerFlamStr() {
+  if (_selected<0) return "";
+  static char bfStr[3]="";
+  int bfNum=bayerFlam();
+  if ((bfNum>=0) && (bfNum<24)) {
+    sprintf(bfStr,"%d",bfNum);
+    return bfStr;
+  } else
+  if (bfNum>24) {
+    sprintf(bfStr,"%d",bfNum-24);
+    return bfStr;
+  } else
+  return "";
 }
 
 // support functions
@@ -486,45 +602,64 @@ const char* CatMgr::subIdStr() {
 bool CatMgr::isFiltered() {
   if (!isInitialized()) return false;
   if (_fm==FM_NONE) return false;
-  if (_fm&FM_ABOVE_HORIZON) { if (alt()<0.0) return true; }
-  if (_fm&FM_ALIGN_ALL_SKY) {
+  if (_fm & FM_ABOVE_HORIZON) { if (alt()<0.0) return true; }
+  if (_fm & FM_ALIGN_ALL_SKY) {
     if (alt()<10.0) return true;      // minimum 10 degrees altitude
     if (abs(dec())>85.0) return true; // minimum 5 degrees from the pole (for accuracy)
   }
-  if (_fm&FM_CONSTELLATION) {
+  if (_fm & FM_CONSTELLATION) {
     if (constellation()!=_fm_con) return true;
   }
-  if (isDsoCatalog() && (_fm&FM_OBJ_TYPE)) {
+  if (isDsoCatalog() && (_fm & FM_OBJ_TYPE)) {
     if (objectType()!=_fm_obj_type) return true;
   }
-  if (_fm&FM_BY_MAG) {
+  if (_fm & FM_BY_MAG) {
     if (magnitude()>=_fm_mag_limit) return true;
   }
-  if (_fm&FM_NEARBY) {
+  if (_fm & FM_NEARBY) {
     double d=DistFromEqu(_lastTeleRA,_lastTeleDec);
     if (d>=_fm_nearby_dist) return true;
   }
+  if (_fm & FM_DBL_MAX_SEP) {
+    double s=separation();
+    if (isDblStarCatalog()) {
+      if (s>_fm_dbl_max) return true;
+    }
+  }
+  if (_fm & FM_DBL_MIN_SEP) {
+    double s=separation();
+    if (isDblStarCatalog()) {
+      if (s<_fm_dbl_min) return true;
+    }
+  }
+  if (_fm & FM_VAR_MAX_PER) {
+    double p=period();
+    if (isVarStarCatalog()) {
+      if (p>_fm_var_max) return true;
+    }
+  }
+
   return false;
 }  
 
 // returns elementNum 'th element from the comma delimited string where the 0th element is the first etc.
-const char* CatMgr::getElementFromString(const char *data, int elementNum) {
+const char* CatMgr::getElementFromString(const char *data, long elementNum) {
   static char result[40] = "";
 
   // find the string start index
   bool found=false;
-  unsigned int j=0;
-  int n=elementNum;
-  unsigned int len=strlen(data);
-  for (unsigned int i=0; i<len; i++) {
+  long j=0;
+  long n=elementNum;
+  long len=strlen(data);
+  for (long i=0; i<len; i++) {
     if (n==0) { j=i; found=true; break; }
     if (data[i]==';') { n--; }
   }
 
   // return the string
   if (found) {
-    int k=0;
-    for (unsigned int i=j; i<len; i++) {
+    long k=0;
+    for (long i=j; i<len; i++) {
       result[k++]=data[i];
       if (result[k-1]==';') { result[k-1]=0; break; }
       if (i==len-1) { result[k]=0; break; }

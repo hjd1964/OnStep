@@ -17,7 +17,7 @@ typedef struct {
   const char*          ObjectSubIds;
   CAT_TYPES            CatalogType;
   int                  Epoch;
-  int                  Index;
+  long                 Index;
 } catalog_t;
 
 #pragma pack(1)
@@ -57,35 +57,37 @@ typedef struct {
 
 // Struct for general star catalog
 typedef struct {
-  const unsigned char  Has_name: 1;
-  const unsigned char  Cons: 7;
-  const unsigned char  BayerFlam: 8;
-  const unsigned char  Has_subId: 1;
+  const unsigned long  Has_name: 1;
+  const unsigned long  Cons: 7;
+  const unsigned long  BayerFlam: 8; // 0 to 23 are coded Bayer, 24=Invalid, 25 to 255 are the Flamsteed# (for 1 to 231.)
+  const unsigned long  Has_subId: 1;
+  const unsigned long  Obj_id: 15;   // to 32767
   const signed   short Mag;
   const float          RA;
   const float          DE;
-} gen_star_t; // 13 bytes/rec
+} gen_star_t; // 14 bytes/rec
 
-// Struct for general star catalog compact
+// Struct for general star catalog very compact
 typedef struct {
   const unsigned char  Has_name: 1;
   const unsigned char  Cons: 7;
-  const unsigned char  BayerFlam: 7;
+  const unsigned char  BayerFlam: 7; // 0 to 23 are coded Bayer, 24=Invalid, 25 to 127 are the Flamsteed# (for 1 to 103.)
   const unsigned char  Has_subId: 1;
   const unsigned char  Mag;
   const unsigned short RA;
   const signed   short DE;
-} gen_star_comp_t; // 7 bytes/rec (as above except except Mag/RA/Dec use smaller data types)
+} gen_star_vcomp_t; // 7 bytes/rec (as above except except Mag/RA/Dec use smaller data types and Obj_id is replaced by the record count)
 
 // Struct for double star catalog
 typedef struct {
   const unsigned long  Has_name: 1;
   const unsigned long  Cons: 7;
-  const unsigned long  BayerFlam: 8;
+  const unsigned long  BayerFlam: 8; // 0 to 23 are coded Bayer, 24=Invalid, 25 to 255 are the Flamsteed# (for 1 to 231.)
   const unsigned long  Has_subId: 1;
+  const unsigned long  Obj_id: 15;   // to 32767
 
-  const unsigned long  Sep: 14;      // separation of components 0.0 to 999.8" (0 to 9998), 999.9 (9999) = Unknown
-  const unsigned int   PA: 9;        // position angle in degrees
+  const unsigned int   Sep: 14;      // separation of components 0.0 to 999.8" (0 to 9998), 999.9 (9999) = Unknown
+  const unsigned int   PA: 9;        // position angle in degrees, -1 = Unknown
   const signed short   Mag2;
 
   const signed short   Mag;
@@ -97,16 +99,17 @@ typedef struct {
 typedef struct {
   const unsigned long  Has_name: 1;
   const unsigned long  Cons: 7;
-  const unsigned long  BayerFlam: 8;
+  const unsigned long  BayerFlam: 8; // 0 to 23 are coded Bayer, 24=Invalid, 25 to 255 are the Flamsteed# (for 1 to 231.)
   const unsigned long  Has_subId: 1;
+  const unsigned long  Obj_id: 15;   // to 32767
 
-  const unsigned long  Period: 15;   // Period 0.00 to 9.99 days (0 to 999) period 10.0 to 3276.6 days (10000 to 32766), 32767 = Unknown
+  const unsigned int   Period: 15;   // Period 0.00 to 9.99 days (0 to 999) period 10.0 to 3186.6 days (1000 to 32766), 32767 = Unknown
   const signed short   Mag2;
 
   const signed short   Mag;
   const float          RA;
   const float          DE;
-} var_star_t; // 14 bytes per record
+} var_star_t; // 18 bytes per record
 
 #pragma pack()
 

@@ -414,7 +414,7 @@ LX200RETURN SyncGotoPlanetLX200(bool sync, unsigned short objSys)
   return SyncGotoLX200(sync, obj.equaCoordinates.ra, obj.equaCoordinates.dec);
 }
 
-LX200RETURN SyncSelectedStarLX200(unsigned short alignSelectedStar)
+LX200RETURN SyncSelectedStarLX200(long alignSelectedStar)
 {
   if (alignSelectedStar >= 0) return SyncGotoCatLX200(false); else return LX200UNKOWN;
 }
