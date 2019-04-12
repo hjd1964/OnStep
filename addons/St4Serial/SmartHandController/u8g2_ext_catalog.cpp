@@ -162,7 +162,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
       u8g2_SetFont(u8g2, myfont);
     } else {
       if (p>24) {
-        sprintf(line,"%d",p-25);
+        sprintf(line,"%d",p-24);
         x+=u8g2_DrawUTF8(u8g2, x, y, line);
       } 
     }

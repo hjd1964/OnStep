@@ -1,4 +1,4 @@
-﻿// This data is machine generated from the WDS database 
+// This data is machine generated from the WDS database 
 // Contains STF objects 
 // Do NOT edit this data manually. Rather, fix the import formulas. 
 #define NUM_STF 4313

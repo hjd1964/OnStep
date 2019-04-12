@@ -95,6 +95,23 @@ typedef struct {
   const float          DE;
 } dbl_star_t; // 18 bytes per record
 
+// Struct for double star catalog compact
+typedef struct {
+  const unsigned long  Has_name: 1;
+  const unsigned long  Cons: 7;
+  const unsigned long  BayerFlam: 8; // 0 to 23 are coded Bayer, 24=Invalid, 25 to 255 are the Flamsteed# (for 1 to 231.)
+  const unsigned long  Has_subId: 1;
+  const unsigned long  Obj_id: 15;   // to 32767
+
+  const unsigned long  Sep: 14;      // separation of components 0.0 to 999.8" (0 to 9998), 999.9 (9999) = Unknown
+  const unsigned long  PA: 9;        // position angle in degrees, -1 = Unknown
+  const unsigned long  Mag2: 8;
+
+  const unsigned char  Mag;
+  const unsigned short RA;
+  const signed   short DE;
+} dbl_star_comp_t; // 11 bytes per record
+
 // Struct for variable star catalog
 typedef struct {
   const unsigned long  Has_name: 1;
