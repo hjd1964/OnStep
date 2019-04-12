@@ -156,9 +156,16 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
 
     // Bayer designation of the star (Greek letter) or Fleemstead designation of star (number)
     int p=cat_mgr.bayerFlam();
-    u8g2_SetFont(u8g2, u8g2_font_unifont_t_greek);
-    if ((p>0) && (p<24)) x+=u8g2_DrawGlyph(u8g2, x, y, 945 + p); else { if (p>24) { sprintf(line,"%d",p-25); x+=u8g2_DrawUTF8(u8g2, x, y, line); } }
-    u8g2_SetFont(u8g2, myfont);
+    if ((p>0) && (p<24)) {
+      u8g2_SetFont(u8g2, u8g2_font_unifont_t_greek);
+      x+=u8g2_DrawGlyph(u8g2, x, y, 945 + p);
+      u8g2_SetFont(u8g2, myfont);
+    } else {
+      if (p>24) {
+        sprintf(line,"%d",p-25);
+        x+=u8g2_DrawUTF8(u8g2, x, y, line);
+      } 
+    }
 
     // Constellation Abbreviation
     u8g2_DrawUTF8(u8g2, x, y, cat_mgr.constellationStr());
@@ -173,10 +180,15 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
         dtostrf(mf, 4, 1, line);
         ext_DrawFwNumeric(u8g2, 100, y, line);
       } else {
-        dtostrf(mf, 4, 1, line);
-        ext_DrawFwNumeric(u8g2, dx-ext_GetFwNumericWidth(u8g2, line), y, line);
-        dtostrf(mf2, 4, 1, line);
-        if (displayMode==DM_INFO) ext_DrawFwNumeric(u8g2, dx-ext_GetFwNumericWidth(u8g2, line), y+line_height, line);
+        if (displayMode==DM_INFO) {
+          char mfs[8], mf2s[8];
+          dtostrf(mf, 3, 1, mfs);
+          dtostrf(mf2, 3, 1, mf2s);
+          u8g2_SetFont(u8g2, u8g2_font_helvR08_tr);
+          sprintf(line,"%s, %s",mfs,mf2s);
+          u8g2_DrawUTF8(u8g2, dx-u8g2_GetUTF8Width(u8g2, line), y+line_height, line);
+          u8g2_SetFont(u8g2, myfont);
+        }
       }
     }
 
