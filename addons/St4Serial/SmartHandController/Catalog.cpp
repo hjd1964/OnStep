@@ -430,13 +430,15 @@ float CatMgr::period() {
 // Position angle of double star, in degrees
 int CatMgr::positionAngle() {
   if (_selected<0) return -1;
-  if (catalogType()==CAT_DBL_STAR) return _dblStarCatalog[catalog[_selected].Index].PA; else return -1;
+  if (catalogType()==CAT_DBL_STAR) return _dblStarCatalog[catalog[_selected].Index].PA; else
+  if (catalogType()==CAT_DBL_STAR_COMP) return _dblStarCompCatalog[catalog[_selected].Index].PA; else return -1;
 }
 
 // Separation of double star, in arc-seconds
 float CatMgr::separation() {
   if (_selected<0) return 999.9;
-  if (catalogType()==CAT_DBL_STAR) return _dblStarCatalog[catalog[_selected].Index].Sep/10.0; else return 999.9;
+  if (catalogType()==CAT_DBL_STAR) return _dblStarCatalog[catalog[_selected].Index].Sep/10.0; else
+  if (catalogType()==CAT_DBL_STAR_COMP) return _dblStarCompCatalog[catalog[_selected].Index].Sep/10.0; else return 999.9;
 }
 
 // Magnitude of an object
