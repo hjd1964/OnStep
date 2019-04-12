@@ -1215,8 +1215,8 @@ const char *Cat_STT_SubId=
 "AB;"
 "AC;"
 ;
-CAT_TYPES Cat_STT_Type=CAT_DBL_STAR; 
-const dbl_star_t Cat_STT[NUM_STT] = {
+CAT_TYPES Cat_STT_Type=CAT_DBL_STAR_COMP; 
+const dbl_star_comp_t Cat_STT[NUM_STT] = {
   { 1, 16,  24, 0,     1,    16,  212, 120,  99,   539,  24075 },
   { 1,  0,  24, 1,     2,     4,  157, 102,  93,   610,   9826 },
   { 1,  0,  24, 1,     2,   180,  224, 129,  88,   610,   9826 },
