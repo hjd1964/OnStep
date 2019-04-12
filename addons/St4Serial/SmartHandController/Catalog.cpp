@@ -9,13 +9,17 @@
 // ** In this section is everything you need touch to add a new "catalog.h"      **
 // ** file and use it within the SHC.                                            **
 
-// Simply include the catalog you want here.  There are also _c and _vc suffixes for some catalogs which mean compact 
-// and very-compact.  Some catalogs also have an _select option where only the brighter objects are included. These 
-// options effect available catalogs, features, and accuracy (and are very useful on the Teensy3.2 where flash is more limited.)
+// Simply include the catalog you want here:
+// Each catalog type has the possiblity of several different combinations depending on the _select, _c, and _vc suffixes available.
+// For example:
+// ngc.h          // for the full ngc catalog at the highest accuracy.
+// ngc_vc.h       // for a nearly complete ngc catalog at somewhat reduced accuracy, but much smaller size (50% of above.)
+// ngc_select_c.h // for a selection of the brighter objects from the ngc catalog at somewhat reduced accuracy.
+
 // Note: You can navigate to and open the SmartHandController's catalogs directory in the Arduino IDE to see the available catalogs.
   #include "catalogs/stars_vc.h"
-//#include "catalogs/stf.h"
-//#include "catalogs/stt.h"
+  #include "catalogs/stf_select_c.h"
+  #include "catalogs/stt_select_c.h"
   #include "catalogs/messier_c.h"
   #include "catalogs/caldwell_c.h"
   #include "catalogs/herschel_c.h"
@@ -28,16 +32,18 @@ catalog_t catalog[] = {
 // Note: Alignment always uses the first catalog!
 // Title         Prefix   Num records   Catalog data  Catalog name string  Catalog subId string  Type                Epoch
   {"Stars",       "Star ", NUM_STARS,    Cat_Stars,    Cat_Stars_Names,     Cat_Stars_SubId,      Cat_Stars_Type,     2000, 0},
-//{"STF Dbl*",    "STF",   NUM_STF,      Cat_STF,      Cat_STF_Names,       Cat_STF_SubId,        Cat_STF_Type,       2000, 0},
-//{"STT Dbl*",    "STT",   NUM_STT,      Cat_STT,      Cat_STT_Names,       Cat_STT_SubId,        Cat_STT_Type,       2000, 0},
+  {"Slct STF**",  "STF",   NUM_STF,      Cat_STF,      Cat_STF_Names,       Cat_STF_SubId,        Cat_STF_Type,       2000, 0},
+  {"Slct STT**",  "STT",   NUM_STT,      Cat_STT,      Cat_STT_Names,       Cat_STT_SubId,        Cat_STT_Type,       2000, 0},
+//{"STF **",      "STF",   NUM_STF,      Cat_STF,      Cat_STF_Names,       Cat_STF_SubId,        Cat_STF_Type,       2000, 0},
+//{"STT **",      "STT",   NUM_STT,      Cat_STT,      Cat_STT_Names,       Cat_STT_SubId,        Cat_STT_Type,       2000, 0},
   {"Messier",     "M",     NUM_MESSIER,  Cat_Messier,  Cat_Messier_Names,   Cat_Messier_SubId,    Cat_Messier_Type,   2000, 0},
   {"Caldwell",    "C",     NUM_CALDWELL, Cat_Caldwell, Cat_Caldwell_Names,  Cat_Caldwell_SubId,   Cat_Caldwell_Type,  2000, 0},
   {"Herschel400", "N",     NUM_HERSCHEL, Cat_Herschel, Cat_Herschel_Names,  Cat_Herschel_SubId,   Cat_Herschel_Type,  2000, 0},
   {"Collinder",   "Cr",    NUM_COLLINDER,Cat_Collinder,Cat_Collinder_Names, Cat_Collinder_SubId,  Cat_Collinder_Type, 2000, 0},
-//{"NGC",         "N",     NUM_NGC,      Cat_NGC,      Cat_NGC_Names,       Cat_NGC_SubId,        Cat_NGC_Type,       2000, 0},
-//{"IC",          "I",     NUM_IC,       Cat_IC,       Cat_IC_Names,        Cat_IC_SubId,         Cat_IC_Type,        2000, 0},
   {"Select NGC",  "N",     NUM_NGC,      Cat_NGC,      Cat_NGC_Names,       Cat_NGC_SubId,        Cat_NGC_Type,       2000, 0},
   {"Select IC",   "I",     NUM_IC,       Cat_IC,       Cat_IC_Names,        Cat_IC_SubId,         Cat_IC_Type,        2000, 0},
+//{"NGC",         "N",     NUM_NGC,      Cat_NGC,      Cat_NGC_Names,       Cat_NGC_SubId,        Cat_NGC_Type,       2000, 0},
+//{"IC",          "I",     NUM_IC,       Cat_IC,       Cat_IC_Names,        Cat_IC_SubId,         Cat_IC_Type,        2000, 0},
   {"",            "",                 0,         NULL,               NULL,                NULL,   CAT_NONE,              0, 0}
 };
 
