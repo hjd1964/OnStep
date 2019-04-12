@@ -205,10 +205,12 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
       if (cat_mgr.isDblStarCatalog()) {
         // |Sep 2.5" PA 225       |
         char seps[16];
-        dtostrf(cat_mgr.separation(), 3, 1, seps);
+        float f=cat_mgr.separation();
+        if (f<=999.8) dtostrf(f, 3, 1, seps); else strcpy(seps,"?.?");
         sprintf(line,"Sep %s\"",seps);
         ext_DrawFwNumeric(u8g2, x, y, line);
-        sprintf(line,"PA %d\xb0",cat_mgr.positionAngle());
+        int p=cat_mgr.positionAngle();
+        if (p>=0) sprintf(line,"PA %d\xb0",p); else sprintf(line,"PA ?\xb0");
         ext_DrawFwNumeric(u8g2, dx-ext_GetFwNumericWidth(u8g2, line), y, line);
       } else
       if (cat_mgr.isVarStarCatalog()) {
