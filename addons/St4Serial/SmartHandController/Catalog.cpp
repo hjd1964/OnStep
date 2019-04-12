@@ -15,6 +15,7 @@
 // Note: You can navigate to and open the SmartHandController's catalogs directory in the Arduino IDE to see the available catalogs.
   #include "catalogs/stars_vc.h"
 //#include "catalogs/stf.h"
+//#include "catalogs/stt.h"
   #include "catalogs/messier_c.h"
   #include "catalogs/caldwell_c.h"
   #include "catalogs/herschel_c.h"
@@ -28,6 +29,7 @@ catalog_t catalog[] = {
 // Title         Prefix   Num records   Catalog data  Catalog name string  Catalog subId string  Type                Epoch
   {"Stars",       "Star ", NUM_STARS,    Cat_Stars,    Cat_Stars_Names,     Cat_Stars_SubId,      Cat_Stars_Type,     2000, 0},
 //{"STF Dbl*",    "STF",   NUM_STF,      Cat_STF,      Cat_STF_Names,       Cat_STF_SubId,        Cat_STF_Type,       2000, 0},
+//{"STT Dbl*",    "STT",   NUM_STT,      Cat_STT,      Cat_STT_Names,       Cat_STT_SubId,        Cat_STT_Type,       2000, 0},
   {"Messier",     "M",     NUM_MESSIER,  Cat_Messier,  Cat_Messier_Names,   Cat_Messier_SubId,    Cat_Messier_Type,   2000, 0},
   {"Caldwell",    "C",     NUM_CALDWELL, Cat_Caldwell, Cat_Caldwell_Names,  Cat_Caldwell_SubId,   Cat_Caldwell_Type,  2000, 0},
   {"Herschel400", "N",     NUM_HERSCHEL, Cat_Herschel, Cat_Herschel_Names,  Cat_Herschel_SubId,   Cat_Herschel_Type,  2000, 0},
