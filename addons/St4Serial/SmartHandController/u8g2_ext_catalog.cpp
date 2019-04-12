@@ -95,7 +95,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
   const uint8_t* myfont = u8g2->font;
   u8g2_uint_t line_height = u8g2_GetAscent(u8g2) - u8g2_GetDescent(u8g2) + MY_BORDER_SIZE;
 
-  char line[16];
+  char line[32];
 
   int dx = u8g2_GetDisplayWidth(u8g2);
   if (cat_mgr.isStarCatalog())

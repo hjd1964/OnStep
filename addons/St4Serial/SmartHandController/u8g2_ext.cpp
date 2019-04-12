@@ -39,8 +39,7 @@ uint8_t U8G2_EXT::UserInterfaceInputValueFloat(Pad *extPad, const char *title, c
   return ext_UserInterfaceInputValueFloat(U8G2_EXT::getU8g2(), extPad, title, pre, value, lo,  hi,  len,  dec, post);
 }
 
-uint8_t U8G2_EXT::UserInterfaceInputValueDMS(Pad *extPad, const char *title, long *value, long lo, long hi,
-  uint8_t digits1, char* symb1, char* symb2, char* symb3, char* symb_plus, char* symb_minus, bool display_seconds)
+uint8_t U8G2_EXT::UserInterfaceInputValueDMS(Pad *extPad, const char *title, long *value, long lo, long hi, uint8_t digits1, char* symb1, char* symb2, char* symb3, char* symb_plus, char* symb_minus, bool display_seconds)
 {
   return ext_UserInterfaceInputValueDMS(U8G2_EXT::getU8g2(), extPad, title, value, lo, hi, digits1, symb1, symb2, symb3, symb_plus, symb_minus, display_seconds);
 };
@@ -75,7 +74,12 @@ uint8_t U8G2_EXT::UserInterfaceInputValueLongitude(Pad *extPad, long *value)
   return ext_UserInterfaceInputValueLongitude(U8G2_EXT::getU8g2(), extPad, value);
 };
 
-uint8_t U8G2_EXT::drawFixedWidthNumeric(uint8_t x, uint8_t y, const char* text)
+uint8_t U8G2_EXT::DrawFwNumeric(uint8_t x, uint8_t y, const char* text)
 {
   return ext_DrawFwNumeric(U8G2_EXT::getU8g2(), x, y, text);
+};
+
+uint8_t U8G2_EXT::GetFwNumericWidth(const char* text)
+{
+  return ext_GetFwNumericWidth(U8G2_EXT::getU8g2(), text);
 };
