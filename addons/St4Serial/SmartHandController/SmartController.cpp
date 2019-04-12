@@ -678,13 +678,13 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
         u8g2_uint_t y = 36;
 
         u8g2_DrawUTF8(u8g2, 0, y, "RA");
-        display->drawFixedWidthNumeric(x, y, rs);
+        display->DrawFwNumeric(x, y, rs);
 
         char ds[20]; strcpy(ds,telInfo.TempDec); l=strlen(ds); if (l>1) ds[l-1]=0; if (l>8) { ds[3]='\xb0'; ds[6]='\''; }
         x = u8g2_GetDisplayWidth(u8g2)-u8g2_GetUTF8Width(u8g2,"000000000");
         y += line_height + 4;
         u8g2_DrawUTF8(u8g2, 0, y, "Dec"); 
-        display->drawFixedWidthNumeric(x, y, ds);
+        display->DrawFwNumeric(x, y, ds);
       }
     } else
 
@@ -696,12 +696,12 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
         x = u8g2_GetDisplayWidth(u8g2)-u8g2_GetUTF8Width(u8g2,"000000000");
         u8g2_uint_t y = 36; 
         u8g2_DrawUTF8(u8g2, 0, y, "Az");
-        display->drawFixedWidthNumeric(x,y,zs);
+        display->DrawFwNumeric(x,y,zs);
 
         char as[20]; strcpy(as,telInfo.TempAlt); l=strlen(as); if (l>1) as[l-1]=0; if (l>8) { as[3]='\xb0'; as[6]='\''; }
         y += line_height + 4; 
         u8g2_DrawUTF8(u8g2, 0, y, "Alt");
-        display->drawFixedWidthNumeric(x,y,as);
+        display->DrawFwNumeric(x,y,as);
       }
     } else
     
@@ -713,12 +713,12 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
         x = u8g2_GetDisplayWidth(u8g2)-u8g2_GetUTF8Width(u8g2,"00000000");
         u8g2_uint_t y = 36;
         display->setFont(u8g2_font_helvR10_tf); u8g2_DrawUTF8(u8g2, 0, y, "UT"); display->setFont(u8g2_font_helvR12_tf);
-        display->drawFixedWidthNumeric(x,y,us);
+        display->DrawFwNumeric(x,y,us);
 
         char ss[20]; strcpy(ss,telInfo.TempSidereal); l=strlen(ss); if (l>1) ss[l-1]=0;
         y += line_height + 4;
         u8g2_DrawUTF8(u8g2, 0, y, "LST");
-        display->drawFixedWidthNumeric(x,y,ss);
+        display->DrawFwNumeric(x,y,ss);
       }
     } else
 
