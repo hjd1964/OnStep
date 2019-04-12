@@ -129,8 +129,8 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     } else
     if (strstr(line,"STT")) {
       u8g2_SetFont(u8g2, u8g2_font_unifont_t_greek);
-      x+=u8g2_DrawGlyph(u8g2, x, y, 931); // sigma
       x+=u8g2_DrawGlyph(u8g2, x, y, 927); // omicron
+      x+=u8g2_DrawGlyph(u8g2, x, y, 931); // sigma
       u8g2_SetFont(u8g2, myfont);
     } else {
       x+=u8g2_DrawUTF8(u8g2, x, y, line);
@@ -157,7 +157,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     // Bayer designation of the star (Greek letter) or Fleemstead designation of star (number)
     int p=cat_mgr.bayerFlam();
     u8g2_SetFont(u8g2, u8g2_font_unifont_t_greek);
-    if ((p>0) && (p<24)) x+=u8g2_DrawGlyph(u8g2, x, y, 945 + p); else { if (p>24) { sprintf(line,"%d",p); x+=u8g2_DrawUTF8(u8g2, x, y, line); } }
+    if ((p>0) && (p<24)) x+=u8g2_DrawGlyph(u8g2, x, y, 945 + p); else { if (p>24) { sprintf(line,"%d",p-25); x+=u8g2_DrawUTF8(u8g2, x, y, line); } }
     u8g2_SetFont(u8g2, myfont);
 
     // Constellation Abbreviation
@@ -171,15 +171,12 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     } else {
       if (mf2>99) {
         dtostrf(mf, 4, 1, line);
-        ext_drawFixedWidthNumeric(u8g2, 100, y, line);
+        ext_DrawFwNumeric(u8g2, 100, y, line);
       } else {
-        char mfs[8], mfs2[8];
-        dtostrf(mf, 4, 1, mfs);
-        dtostrf(mf2, 4, 1, mfs2);
-        u8g2_SetFont(u8g2, u8g2_font_helvR08_tr);
-        ext_drawFixedWidthNumeric(u8g2, 84, y, mfs);
-        ext_drawFixedWidthNumeric(u8g2, 108, y, mfs2);
-        u8g2_SetFont(u8g2, myfont);
+        dtostrf(mf, 4, 1, line);
+        ext_DrawFwNumeric(u8g2, dx-ext_GetFwNumericWidth(u8g2, line), y, line);
+        dtostrf(mf2, 4, 1, line);
+        if (displayMode==DM_INFO) ext_DrawFwNumeric(u8g2, dx-ext_GetFwNumericWidth(u8g2, line), y+line_height, line);
       }
     }
 
@@ -196,16 +193,18 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
       if (cat_mgr.isDblStarCatalog()) {
         // |Sep 2.5" PA 225       |
         char seps[16];
-        dtostrf(cat_mgr.separation(), 4, 1, seps);
-        sprintf(line,"Sep%s\" PA%d\xb0",seps,cat_mgr.positionAngle());
-        ext_drawFixedWidthNumeric(u8g2, x, y, line);
+        dtostrf(cat_mgr.separation(), 3, 1, seps);
+        sprintf(line,"Sep %s\"",seps);
+        ext_DrawFwNumeric(u8g2, x, y, line);
+        sprintf(line,"PA %d\xb0",cat_mgr.positionAngle());
+        ext_DrawFwNumeric(u8g2, dx-ext_GetFwNumericWidth(u8g2, line), y, line);
       } else
       if (cat_mgr.isVarStarCatalog()) {
         // |Per 2.5d              |
         char pers[16];
         dtostrf(cat_mgr.period(), 8, 2, pers);
         sprintf(line,"Period %sd",pers);
-        ext_drawFixedWidthNumeric(u8g2, x, y, line);
+        ext_DrawFwNumeric(u8g2, x, y, line);
       }
     }
   }
@@ -268,7 +267,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     y += line_height;
     x = u8g2_DrawUTF8(u8g2, 0, y, "RA"); u8g2_SetFont(u8g2, u8g2_font_helvR08_tr); u8g2_DrawUTF8(u8g2, x, y, epoch); u8g2_SetFont(u8g2, myfont);
     x = u8g2_GetDisplayWidth(u8g2)-u8g2_GetUTF8Width(u8g2,"000000000");
-    ext_drawFixedWidthNumeric(u8g2, x, y, line);
+    ext_DrawFwNumeric(u8g2, x, y, line);
 
     // Declination
     cat_mgr.decDMS(vd1,vd2, vd3);
@@ -277,7 +276,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     x = u8g2_DrawUTF8(u8g2, 0, y, "DE"); u8g2_SetFont(u8g2, u8g2_font_helvR08_tr); u8g2_DrawUTF8(u8g2, x, y, epoch); u8g2_SetFont(u8g2, myfont);
 
     x = u8g2_GetDisplayWidth(u8g2)-u8g2_GetUTF8Width(u8g2,"000000000");
-    ext_drawFixedWidthNumeric(u8g2, x, y, line);
+    ext_DrawFwNumeric(u8g2, x, y, line);
   }
 
   if (displayMode==DM_HOR_COORDS) {
@@ -294,10 +293,10 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     sprintf(line,"%3d.%d\xb0",vz1,vz2);
     x=0; y += line_height;
     x += u8g2_DrawUTF8(u8g2, x, y, "Az")+2;
-    x += (ext_drawFixedWidthNumeric(u8g2, x, y, line) + 15);
+    x += (ext_DrawFwNumeric(u8g2, x, y, line) + 15);
     sprintf(line,"%3d.%d\xb0",va1,va2);
     x += u8g2_DrawUTF8(u8g2, x, y, "Alt")+2;
-    ext_drawFixedWidthNumeric(u8g2, x, y, line);
+    ext_DrawFwNumeric(u8g2, x, y, line);
   }
 
   return line_height;

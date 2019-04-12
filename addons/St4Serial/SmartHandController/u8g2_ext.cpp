@@ -77,5 +77,5 @@ uint8_t U8G2_EXT::UserInterfaceInputValueLongitude(Pad *extPad, long *value)
 
 uint8_t U8G2_EXT::drawFixedWidthNumeric(uint8_t x, uint8_t y, const char* text)
 {
-  return ext_drawFixedWidthNumeric(U8G2_EXT::getU8g2(), x, y, text);
+  return ext_DrawFwNumeric(U8G2_EXT::getU8g2(), x, y, text);
 };

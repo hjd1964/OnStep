@@ -419,7 +419,7 @@ int CatMgr::positionAngle() {
 // Separation of double star, in arc-seconds
 float CatMgr::separation() {
   if (_selected<0) return 999.9;
-  if (catalogType()==CAT_DBL_STAR) return _dblStarCatalog[catalog[_selected].Index].Sep/100.0; else return 999.9;
+  if (catalogType()==CAT_DBL_STAR) return _dblStarCatalog[catalog[_selected].Index].Sep/10.0; else return 999.9;
 }
 
 // Magnitude of an object
