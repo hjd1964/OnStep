@@ -190,7 +190,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
           sprintf(line,"%s",mf2s);
           x=ext_DrawFwNumeric(u8g2, dx-ext_GetFwNumericWidth(u8g2, line), y+line_height, line);
           sprintf(line,"%s",mfs);
-          ext_DrawFwNumeric(u8g2, dx-(ext_GetFwNumericWidth(u8g2, line)+x+8), y+line_height, line);
+          ext_DrawFwNumeric(u8g2, dx-(ext_GetFwNumericWidth(u8g2, line)+x+4), y+line_height, line);
           u8g2_SetFont(u8g2, myfont);
         }
       }
