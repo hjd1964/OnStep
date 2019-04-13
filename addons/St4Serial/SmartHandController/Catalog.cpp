@@ -22,6 +22,7 @@
   #include "catalogs/caldwell_c.h"      // The Caldwell (supplement) catalog of 109 DSO's
   #include "catalogs/herschel_c.h"      // Herschel's "400 best of the NGC" catalog
   #include "catalogs/collinder_vc.h"    // The Collinder catalog of 471 open clusters
+//#include "catalogs/carbon.h"          // Carbon stars
   #include "catalogs/stf_select_c.h"    // Struve STF catalog of of 931 double stars brighter than Magnitude 9.0
   #include "catalogs/stt_select_c.h"    // Struve STT catalog of of 766 double stars brighter than Magnitude 9.0
   #include "catalogs/ngc_select_c.h"    // The New General Catalog of 3438 DSO's
@@ -36,6 +37,7 @@ catalog_t catalog[] = {
   {"Caldwell",    "C",     NUM_CALDWELL, Cat_Caldwell, Cat_Caldwell_Names,  Cat_Caldwell_SubId,   Cat_Caldwell_Type,  2000, 0},
   {"Herschel400", "N",     NUM_HERSCHEL, Cat_Herschel, Cat_Herschel_Names,  Cat_Herschel_SubId,   Cat_Herschel_Type,  2000, 0},
   {"Collinder",   "Cr",    NUM_COLLINDER,Cat_Collinder,Cat_Collinder_Names, Cat_Collinder_SubId,  Cat_Collinder_Type, 2000, 0},
+//{"Carbon ~*",   "CV",    NUM_CARBON,   Cat_Carbon,   Cat_Carbon_Names,    Cat_Carbon_SubId,     Cat_Carbon_Type,    2000, 0},
   {"Slct STF**",  "STF",   NUM_STF,      Cat_STF,      Cat_STF_Names,       Cat_STF_SubId,        Cat_STF_Type,       2000, 0},
   {"Slct STT**",  "STT",   NUM_STT,      Cat_STT,      Cat_STT_Names,       Cat_STT_SubId,        Cat_STT_Type,       2000, 0},
   {"Select NGC",  "N",     NUM_NGC,      Cat_NGC,      Cat_NGC_Names,       Cat_NGC_SubId,        Cat_NGC_Type,       2000, 0},
@@ -544,15 +546,18 @@ const char* CatMgr::objectNameStr() {
 
 // Object Id
 long CatMgr::primaryId() {
+  long id=-1;
   if (_selected<0) return -1;
-  if (catalogType()==CAT_GEN_STAR)       return _genStarCatalog[catalog[_selected].Index].Obj_id; else
-  if (catalogType()==CAT_GEN_STAR_VCOMP) return catalog[_selected].Index+1; else
-  if (catalogType()==CAT_DBL_STAR)       return _dblStarCatalog[catalog[_selected].Index].Obj_id; else
-  if (catalogType()==CAT_DBL_STAR_COMP)  return _dblStarCompCatalog[catalog[_selected].Index].Obj_id; else
-  if (catalogType()==CAT_VAR_STAR)       return _varStarCatalog[catalog[_selected].Index].Obj_id; else
-  if (catalogType()==CAT_DSO)            return _dsoCatalog[catalog[_selected].Index].Obj_id; else
-  if (catalogType()==CAT_DSO_COMP)       return _dsoCompCatalog[catalog[_selected].Index].Obj_id; else
-  if (catalogType()==CAT_DSO_VCOMP)      return catalog[_selected].Index+1; else return -1;
+  if (catalogType()==CAT_GEN_STAR)       id=_genStarCatalog[catalog[_selected].Index].Obj_id; else
+  if (catalogType()==CAT_GEN_STAR_VCOMP) id= catalog[_selected].Index+1; else
+  if (catalogType()==CAT_DBL_STAR)       id=_dblStarCatalog[catalog[_selected].Index].Obj_id; else
+  if (catalogType()==CAT_DBL_STAR_COMP)  id=_dblStarCompCatalog[catalog[_selected].Index].Obj_id; else
+  if (catalogType()==CAT_VAR_STAR)       id=_varStarCatalog[catalog[_selected].Index].Obj_id; else
+  if (catalogType()==CAT_DSO)            id=_dsoCatalog[catalog[_selected].Index].Obj_id; else
+  if (catalogType()==CAT_DSO_COMP)       id=_dsoCompCatalog[catalog[_selected].Index].Obj_id; else
+  if (catalogType()==CAT_DSO_VCOMP)      id=catalog[_selected].Index+1; else return -1;
+  if (id<1) return -1;
+  return id;
 }
 
 // Object note code (encoded by Has_note.)  Returns -1 if the object doesn't have a note code.

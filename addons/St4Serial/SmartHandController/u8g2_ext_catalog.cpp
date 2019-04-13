@@ -138,7 +138,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
 
     // Catalog number
     if (!strstr(line,"Star")) {
-      sprintf(line, "%ld", cat_mgr.primaryId());
+      long p=cat_mgr.primaryId(); if (p>0) sprintf(line, "%ld", p); else sprintf(line,"?");
       x+=u8g2_DrawUTF8(u8g2, x, y, line);
     }
 
@@ -153,8 +153,8 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
       sprintf(line, "%s", " ");
       x+=u8g2_DrawUTF8(u8g2, x, y, line);
     }
-
-    // Bayer designation of the star (Greek letter) or Fleemstead designation of star (number)
+    
+    // Bayer designation of the star (Greek letter) or Fleemstead designation of star (number) just before Con Abv.
     int p=cat_mgr.bayerFlam();
     if ((p>0) && (p<24)) {
       u8g2_SetFont(u8g2, u8g2_font_unifont_t_greek);
@@ -163,7 +163,9 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     } else {
       if (p>24) {
         sprintf(line,"%d",p-24);
+        u8g2_SetFont(u8g2, u8g2_font_6x13_tf);
         x+=u8g2_DrawUTF8(u8g2, x, y, line);
+        u8g2_SetFont(u8g2, myfont);
       } 
     }
 
@@ -221,8 +223,10 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
       if (cat_mgr.isVarStarCatalog()) {
         // |Per 2.5d              |
         char pers[16];
-        dtostrf(cat_mgr.period(), 8, 2, pers);
-        sprintf(line,"Period %sd",pers);
+        float p=cat_mgr.period();
+        // Period 0.00 to 9.99 days, period 10.0 to 3186.6 days, -1 = Unknown
+        if ((p>=0.0)  && (p<   10.0)) { dtostrf(p, 6, 2, pers); sprintf(line,"Period%sd",pers); } else
+        if ((p>=10.0) && (p<=3186.6)) { dtostrf(p, 6, 1, pers); sprintf(line,"Period%sd",pers); } else sprintf(line,"Period%s"," ?");
         ext_DrawFwNumeric(u8g2, x, y, line);
       }
     }
