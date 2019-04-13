@@ -2,6 +2,8 @@
 // Contains all IC objects except for those designated NEDSxx and those
 // with no visual magnitude or surface brightness >= 23.0m/arc-sec^2.
 // Do NOT edit this data manually. Rather, fix the import programs and rerun.
+#define Cat_IC_Title "Select IC"
+#define Cat_IC_Prefix "I"
 #define NUM_IC 1024
 
 const char *Cat_IC_Names="";

@@ -1,7 +1,10 @@
 // This data is machine generated from the WDS database 
 // Contains STT objects 
 // Do NOT edit this data manually. Rather, fix the import formulas. 
+#define Cat_STT_Title "STT**"
+#define Cat_STT_Prefix "STT"
 #define NUM_STT 766
+
 const char *Cat_STT_Names=
 "A0;"
 "F8V;"

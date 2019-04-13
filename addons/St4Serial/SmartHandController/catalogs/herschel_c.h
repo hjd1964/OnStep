@@ -1,5 +1,7 @@
 // This data is machine generated from the Open NGC database.
 // Do NOT edit this data manually. Rather, fix the import programs and rerun.
+#define Cat_Herschel_Title "Herschel400"
+#define Cat_Herschel_Prefix "N"
 #define NUM_HERSCHEL 398
 
 const char *Cat_Herschel_Names="";

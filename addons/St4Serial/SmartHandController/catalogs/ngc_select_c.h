@@ -2,6 +2,8 @@
 // Contains all NGC objects except for those designated NEDSxx and those
 // with no visual magnitude or surface brightness >= 23.0m/arc-sec^2.
 // Do NOT edit this data manually. Rather, fix the import programs and rerun.
+#define Cat_NGC_Title "Select NGC"
+#define Cat_NGC_Prefix "N"
 #define NUM_NGC 3438
 
 const char *Cat_NGC_Names="";

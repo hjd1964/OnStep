@@ -1,7 +1,10 @@
 // This data is machine generated from the WDS database 
 // Contains STT objects to magnitude 9.0
 // Do NOT edit this data manually. Rather, fix the import formulas. 
+#define Cat_STF_Title "Slct STF**"
+#define Cat_STF_Prefix "STF"
 #define NUM_STF 931
+
 const char *Cat_STF_Names=
 "A4IV;"
 "B8V;"
