@@ -144,7 +144,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
 
     // Star SubId
     sprintf(line, "%s", cat_mgr.subIdStr());
-    u8g2_SetFont(u8g2, u8g2_font_helvR08_tr);
+    u8g2_SetFont(u8g2, u8g2_font_6x13_tf);
     x+=u8g2_DrawUTF8(u8g2, x, y, line);
     u8g2_SetFont(u8g2, myfont);
 
@@ -178,15 +178,17 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     } else {
       if (mf2>99) {
         dtostrf(mf, 4, 1, line);
-        ext_DrawFwNumeric(u8g2, 100, y, line);
+        ext_DrawFwNumeric(u8g2, dx-ext_GetFwNumericWidth(u8g2, line), y, line);
       } else {
         if (displayMode==DM_INFO) {
           char mfs[8], mf2s[8];
-          dtostrf(mf, 3, 1, mfs);
-          dtostrf(mf2, 3, 1, mf2s);
-          u8g2_SetFont(u8g2, u8g2_font_helvR08_tr);
-          sprintf(line,"%s, %s",mfs,mf2s);
-          u8g2_DrawUTF8(u8g2, dx-u8g2_GetUTF8Width(u8g2, line), y+line_height, line);
+          dtostrf(mf, 4, 1, mfs);
+          dtostrf(mf2, 4, 1, mf2s);
+          u8g2_SetFont(u8g2, u8g2_font_6x13_tf);
+          sprintf(line,"%s",mf2s);
+          x=ext_DrawFwNumeric(u8g2, dx-ext_GetFwNumericWidth(u8g2, line), y+line_height, line);
+          sprintf(line,"%s",mfs);
+          ext_DrawFwNumeric(u8g2, dx-(ext_GetFwNumericWidth(u8g2, line)+x+8), y+line_height, line);
           u8g2_SetFont(u8g2, myfont);
         }
       }
@@ -206,12 +208,15 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
         // |Sep 2.5" PA 225       |
         char seps[16];
         float f=cat_mgr.separation();
-        if (f<=999.8) dtostrf(f, 3, 1, seps); else strcpy(seps,"?.?");
-        sprintf(line,"Sep %s\"",seps);
+        if (f<=999.8) dtostrf(f, 5, 1, seps); else strcpy(seps,"?.?");
+        x=u8g2_DrawUTF8(u8g2, 0, y, "Sep");
+        sprintf(line,"%s\"",seps);
         ext_DrawFwNumeric(u8g2, x, y, line);
+
         int p=cat_mgr.positionAngle();
-        if (p>=0) sprintf(line,"PA %d\xb0",p); else sprintf(line,"PA ?\xb0");
-        ext_DrawFwNumeric(u8g2, dx-ext_GetFwNumericWidth(u8g2, line), y, line);
+        if (p>=0) sprintf(line,"%3d\xb0",p); else sprintf(line,"  ?\xb0");
+        x=ext_DrawFwNumeric(u8g2, dx-ext_GetFwNumericWidth(u8g2, line), y, line);
+        u8g2_DrawUTF8(u8g2, dx-(u8g2_GetUTF8Width(u8g2, "PA ")+x), y, "PA ");
       } else
       if (cat_mgr.isVarStarCatalog()) {
         // |Per 2.5d              |
@@ -232,11 +237,11 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     x = 0;
     sprintf(line, "%s%ld", cat_mgr.catalogPrefix(), cat_mgr.primaryId());
     step0 = u8g2_GetUTF8Width(u8g2, "N8888");
-    int x1= u8g2_GetUTF8Width(u8g2, line);
+    int x1= u8g2_GetUTF8Width(u8g2, line)+1;
     u8g2_DrawUTF8(u8g2, x, y, line);
      
     // Object SubId
-    u8g2_SetFont(u8g2, u8g2_font_helvR08_tr);
+    u8g2_SetFont(u8g2, u8g2_font_6x13_tf);
     sprintf(line, "%s", cat_mgr.subIdStr());
     u8g2_DrawUTF8(u8g2, x+x1, y, line);
     x += step0;
@@ -270,7 +275,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
   }
 
   if (displayMode==DM_EQ_COORDS) {
-    char txt1[5], txt2[5], txt3[5], epoch[6];
+    char epoch[6];
     uint8_t vr1, vr2, vr3;
     short vd1; uint8_t vd2, vd3;
 
@@ -279,18 +284,15 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     cat_mgr.raHMS(vr1,vr2,vr3);
     sprintf(line," %02d:%02d:%02d",vr1,vr2,vr3);
     y += line_height;
-    x = u8g2_DrawUTF8(u8g2, 0, y, "RA"); u8g2_SetFont(u8g2, u8g2_font_helvR08_tr); u8g2_DrawUTF8(u8g2, x, y, epoch); u8g2_SetFont(u8g2, myfont);
-    x = u8g2_GetDisplayWidth(u8g2)-u8g2_GetUTF8Width(u8g2,"000000000");
-    ext_DrawFwNumeric(u8g2, x, y, line);
+    x = u8g2_DrawUTF8(u8g2, 0, y, "RA"); u8g2_SetFont(u8g2, u8g2_font_6x13_tf); u8g2_DrawUTF8(u8g2, x, y, epoch); u8g2_SetFont(u8g2, myfont);
+    ext_DrawFwNumeric(u8g2, dx-ext_GetFwNumericWidth(u8g2, line), y, line);
 
     // Declination
     cat_mgr.decDMS(vd1,vd2, vd3);
     sprintf(line,"%s%02d\xb0%02d'%02d",vd1 < 0 ? "-" : "+",abs(vd1),vd2,vd3);
     y += line_height;
-    x = u8g2_DrawUTF8(u8g2, 0, y, "DE"); u8g2_SetFont(u8g2, u8g2_font_helvR08_tr); u8g2_DrawUTF8(u8g2, x, y, epoch); u8g2_SetFont(u8g2, myfont);
-
-    x = u8g2_GetDisplayWidth(u8g2)-u8g2_GetUTF8Width(u8g2,"000000000");
-    ext_DrawFwNumeric(u8g2, x, y, line);
+    x = u8g2_DrawUTF8(u8g2, 0, y, "DE"); u8g2_SetFont(u8g2, u8g2_font_6x13_tf); u8g2_DrawUTF8(u8g2, x, y, epoch); u8g2_SetFont(u8g2, myfont);
+    ext_DrawFwNumeric(u8g2, dx-ext_GetFwNumericWidth(u8g2, line), y, line);
   }
 
   if (displayMode==DM_HOR_COORDS) {
@@ -307,10 +309,10 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     sprintf(line,"%3d.%d\xb0",vz1,vz2);
     x=0; y += line_height;
     x += u8g2_DrawUTF8(u8g2, x, y, "Az")+2;
-    x += (ext_DrawFwNumeric(u8g2, x, y, line) + 15);
+    x += (ext_DrawFwNumeric(u8g2, x, y, line));
     sprintf(line,"%3d.%d\xb0",va1,va2);
-    x += u8g2_DrawUTF8(u8g2, x, y, "Alt")+2;
-    ext_DrawFwNumeric(u8g2, x, y, line);
+    x=dx-ext_DrawFwNumeric(u8g2, dx-ext_GetFwNumericWidth(u8g2, line), y, line);
+    u8g2_DrawUTF8(u8g2, x-(u8g2_GetUTF8Width(u8g2, "Alt")+4), y, "Alt");
   }
 
   return line_height;
