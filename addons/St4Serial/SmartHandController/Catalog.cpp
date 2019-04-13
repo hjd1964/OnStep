@@ -415,14 +415,16 @@ void CatMgr::topocentricToObservedPlace(float *RA, float *Dec) {
 }
 
 // Period of variable star, in days
+// -2 = irregular, -1 = unknown
 float CatMgr::period() {
   if (_selected<0) return -1;
   float p=-1;
   if (catalogType()==CAT_VAR_STAR) p=_varStarCatalog[catalog[_selected].Index].Period; else return -1;
   
-  // Period 0.00 to 9.99 days (0 to 999) period 10.0 to 3186.6 days (1000 to 32766), 32767 = Unknown
+  // Period 0.00 to 9.99 days (0 to 999) period 10.0 to 3186.6 days (1000 to 32766), 32766 = Irregular, 32767 = Unknown
   if ((p>0)   && (p<=999)) return p/100.0; else
-  if ((p>999) && (p<=32766)) return (p-900)/10.0; else return -1;
+  if ((p>999) && (p<=32765)) return (p-900)/10.0; else
+  if (p==32766) return -2; else return -1;
 }
 
 // Position angle of double star, in degrees
