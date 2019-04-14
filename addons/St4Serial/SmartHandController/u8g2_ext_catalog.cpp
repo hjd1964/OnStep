@@ -156,7 +156,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     
     // Bayer designation of the star (Greek letter) or Fleemstead designation of star (number) just before Con Abv.
     int p=cat_mgr.bayerFlam();
-    if ((p>0) && (p<24)) {
+    if ((p>=0) && (p<24)) {
       u8g2_SetFont(u8g2, u8g2_font_unifont_t_greek);
       x+=u8g2_DrawGlyph(u8g2, x, y, 945 + p);
       u8g2_SetFont(u8g2, myfont);
