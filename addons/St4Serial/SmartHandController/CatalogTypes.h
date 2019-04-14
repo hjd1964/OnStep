@@ -10,7 +10,7 @@
 // Struct for catalog header
 typedef struct {
   const char           Title[16];
-  const char           Prefix[8];
+  const char*          Prefix;
   const unsigned short NumObjects;
   const void*          Objects;
   const char*          ObjectNames;

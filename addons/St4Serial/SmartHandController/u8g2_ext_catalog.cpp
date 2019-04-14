@@ -137,7 +137,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     }
 
     // Catalog number
-    if (!strstr(line,"Star")) {
+    if (!strstr(line,"Star") && !cat_mgr.hasPrimaryIdInPrefix()) {
       long p=cat_mgr.primaryId(); if (p>0) sprintf(line, "%ld", p); else sprintf(line,"?");
       x+=u8g2_DrawUTF8(u8g2, x, y, line);
     }
@@ -241,17 +241,15 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     
     // Prefix and catalog number
     x = 0;
-    sprintf(line, "%s%ld", cat_mgr.catalogPrefix(), cat_mgr.primaryId());
-    step0 = u8g2_GetUTF8Width(u8g2, "N8888");
-    int x1= u8g2_GetUTF8Width(u8g2, line)+1;
-    u8g2_DrawUTF8(u8g2, x, y, line);
+    sprintf(line, "%s", cat_mgr.catalogPrefix());
+    x += u8g2_DrawUTF8(u8g2, x, y, line);
+    if (!cat_mgr.hasPrimaryIdInPrefix()) sprintf(line, "%ld", cat_mgr.primaryId());
+    x += u8g2_DrawUTF8(u8g2, x, y, line);
      
     // Object SubId
     u8g2_SetFont(u8g2, u8g2_font_6x13_tf);
     sprintf(line, "%s", cat_mgr.subIdStr());
-    u8g2_DrawUTF8(u8g2, x+x1, y, line);
-    x += step0;
-    step0 = u8g2_GetUTF8Width(u8g2, "A&B-C");
+    x += u8g2_DrawUTF8(u8g2, x, y, line);
     u8g2_SetFont(u8g2, myfont);
 
     // Magnitude

@@ -149,6 +149,12 @@ bool CatMgr::hasVarStarCatalog() {
   return false;
 }
 
+// check to see if the primaryId() was moved to the prefix
+bool CatMgr::hasPrimaryIdInPrefix() {
+  const char *s=catalog[_selected].Prefix;
+  return strstr(s,";");
+}
+
 bool CatMgr::isStarCatalog() {
   return (catalogType()==CAT_GEN_STAR) || (catalogType()==CAT_GEN_STAR_VCOMP) || 
          (catalogType()==CAT_DBL_STAR) || (catalogType()==CAT_DBL_STAR_COMP) ||
@@ -178,7 +184,22 @@ const char* CatMgr::catalogTitle() {
 // Get active catalog prefix
 const char* CatMgr::catalogPrefix() {
   if (_selected<0) return "";
-  return catalog[_selected].Prefix;
+  const char *s=catalog[_selected].Prefix;
+  
+  // array type prefix?
+  if (strstr(s,";")) {
+    const char *s1;
+    long p=primaryId();
+    if (p>=0) {
+      s1=getElementFromString(s,p);
+      if (strlen(s1)>0) return s1; else {
+        s1=getElementFromString(s,0);
+        static char s2[24];
+        sprintf(s2,"%s%ld",s1,p);
+        return s2;
+      }
+    } else return "?";
+  } else return s;
 }
 
 // catalog filtering
