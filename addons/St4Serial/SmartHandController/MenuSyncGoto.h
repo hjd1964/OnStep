@@ -60,7 +60,7 @@ void SmartHandController::menuCatalog(bool sync, int number)
   cat_mgr.select(number);
 
   char title[20]; if (sync) strcpy(title,"Sync "); else strcpy(title,"Goto "); strcat(title,cat_mgr.catalogTitle());
-  if (setCatMgrFilters()) strcat(title," Ÿ");
+  if (setCatMgrFilters()) strcat(title," \xa5");
 
   if (!cat_mgr.setIndex(cat_mgr.getIndex())) {
     DisplayMessage(cat_mgr.catalogTitle(), "No Object", 2000);
@@ -108,7 +108,7 @@ void SmartHandController::menuFilters()
     if (current_selection_filter_con>1) strcpy(s,"\xb7"); else strcpy(s,"");
     strcat(string_list_Filters,"\n"); strcat(string_list_Filters,s); strcat(string_list_Filters,"Constellation"); strcat(string_list_Filters,s);
     if (current_selection_filter_type>1) strcpy(s,"\xb7"); else strcpy(s,"");
-    strcat(string_list_Filters,"\n"); strcat(string_list_Filters,s); strcat(string_list_Filters,"Classification"); strcat(string_list_Filters,s);
+    strcat(string_list_Filters,"\n"); strcat(string_list_Filters,s); strcat(string_list_Filters,"Type"); strcat(string_list_Filters,s);
     if (current_selection_filter_byMag>1) strcpy(s,"\xb7"); else strcpy(s,"");
     strcat(string_list_Filters,"\n"); strcat(string_list_Filters,s); strcat(string_list_Filters,"Magnitude"); strcat(string_list_Filters,s);
     if (current_selection_filter_nearby>1) strcpy(s,"\xb7"); else strcpy(s,"");
@@ -167,7 +167,7 @@ bool SmartHandController::setCatMgrFilters()
   cat_mgr.filtersClear();
   
   bool extraFilterActive=false;
-  if (current_selection_filter_above)    { cat_mgr.filterAdd(FM_ABOVE_HORIZON);                                extraFilterActive=true; }
+  if (current_selection_filter_above)    { cat_mgr.filterAdd(FM_ABOVE_HORIZON); }
   if (current_selection_filter_con>1)    { cat_mgr.filterAdd(FM_CONSTELLATION,current_selection_filter_con-2); extraFilterActive=true; }
   if (current_selection_filter_type>1)   { cat_mgr.filterAdd(FM_OBJ_TYPE,current_selection_filter_type-2);     extraFilterActive=true; }
   if (current_selection_filter_byMag>1)  { cat_mgr.filterAdd(FM_BY_MAG,current_selection_filter_byMag-2);      extraFilterActive=true; }
@@ -206,7 +206,7 @@ void SmartHandController::menuFilterType()
     if (l<21) strcat(string_list_fType,"\n");
   }
   int last_selection_filter_type = current_selection_filter_type;
-  current_selection_filter_type = display->UserInterfaceSelectionList(&buttonPad, "Filter by Class", current_selection_filter_type, string_list_fType);
+  current_selection_filter_type = display->UserInterfaceSelectionList(&buttonPad, "Filter by Type", current_selection_filter_type, string_list_fType);
   
   if (current_selection_filter_type == 0) current_selection_filter_type=last_selection_filter_type;
 }
