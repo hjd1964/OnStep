@@ -1,7 +1,7 @@
 // This data is machine generated from the WDS database 
 // Contains STF objects 
 // Do NOT edit this data manually. Rather, fix the import formulas. 
-#define Cat_STF_Title "Slct STF**"
+#define Cat_STF_Title "STF**"
 #define Cat_STF_Prefix "STF"
 #define NUM_STF 4313
 
