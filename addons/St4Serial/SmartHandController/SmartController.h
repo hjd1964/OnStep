@@ -91,8 +91,9 @@ private:
   void menuSpeedRate();
   void menuSyncGoto(bool sync);
   void menuCatalog(bool sync, int number);
-  bool setCatMgrFilters();
+  void menuSolarSys(bool sync);
   void menuFilters();
+  bool setCatMgrFilters();
   void menuFilterCon();
   void menuFilterType();
   void menuFilterByMag();
@@ -100,7 +101,6 @@ private:
   void menuFilterDblMinSep();
   void menuFilterDblMaxSep();
   void menuFilterVarMaxPer();
-  void menuSolarSys(bool sync);
   void menuUser(bool sync);
   void menuAlignment();
   void menuParking();
