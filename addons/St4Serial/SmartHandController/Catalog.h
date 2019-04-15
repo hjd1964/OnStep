@@ -41,6 +41,7 @@ class CatMgr {
     bool        isDsoCatalog();
     const char* catalogTitle();
     const char* catalogPrefix();
+    bool        hasPrimaryIdInPrefix();
 
 // catalog filtering
     void        filtersClear();

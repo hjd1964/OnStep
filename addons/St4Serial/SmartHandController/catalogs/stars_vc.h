@@ -1,5 +1,7 @@
 // This data is machine generated from the KStars Star database.
 // Do NOT edit this data manually. Rather, fix the import programs and rerun.
+#define Cat_Stars_Title "Stars"
+#define Cat_Stars_Prefix "Star "
 #define NUM_STARS 408
 
 const char *Cat_Stars_Names=

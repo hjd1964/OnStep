@@ -1,5 +1,7 @@
 // This data is machine generated from the Open NGC database.
 // Do NOT edit this data manually. Rather, fix the import programs and rerun.
+#define Cat_Messier_Title "Messier"
+#define Cat_Messier_Prefix "M"
 #define NUM_MESSIER 109
 
 const char *Cat_Messier_Names=

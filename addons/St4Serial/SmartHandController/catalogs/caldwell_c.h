@@ -1,5 +1,7 @@
 // This data is machine generated from the Open NGC database.
 // Do NOT edit this data manually. Rather, fix the import programs and rerun.
+#define Cat_Caldwell_Title "Caldwell"
+#define Cat_Caldwell_Prefix "C"
 #define NUM_CALDWELL 109
 
 const char *Cat_Caldwell_Names=

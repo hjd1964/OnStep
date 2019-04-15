@@ -28,21 +28,21 @@
   #include "catalogs/ngc_select_c.h"    // The New General Catalog of 3438 DSO's
   #include "catalogs/ic_select_c.h"     // The Index Catalog (supplement) of 1024 DSO's
 
-// And uncomment the matching line below:
+// Note: There should be a matching line below for every catalog #included above (catalogs appear in the menus in the order the appear below):
 catalog_t catalog[] = {
 // Note: Alignment always uses the first catalog!
-// Title         Prefix   Num records   Catalog data  Catalog name string  Catalog subId string  Type                Epoch
-  {"Stars",       "Star ", NUM_STARS,    Cat_Stars,    Cat_Stars_Names,     Cat_Stars_SubId,      Cat_Stars_Type,     2000, 0},
-  {"Messier",     "M",     NUM_MESSIER,  Cat_Messier,  Cat_Messier_Names,   Cat_Messier_SubId,    Cat_Messier_Type,   2000, 0},
-  {"Caldwell",    "C",     NUM_CALDWELL, Cat_Caldwell, Cat_Caldwell_Names,  Cat_Caldwell_SubId,   Cat_Caldwell_Type,  2000, 0},
-  {"Herschel400", "N",     NUM_HERSCHEL, Cat_Herschel, Cat_Herschel_Names,  Cat_Herschel_SubId,   Cat_Herschel_Type,  2000, 0},
-  {"Collinder",   "Cr",    NUM_COLLINDER,Cat_Collinder,Cat_Collinder_Names, Cat_Collinder_SubId,  Cat_Collinder_Type, 2000, 0},
-//{"Carbon ~*",   "CV",    NUM_CARBON,   Cat_Carbon,   Cat_Carbon_Names,    Cat_Carbon_SubId,     Cat_Carbon_Type,    2000, 0},
-  {"Slct STF**",  "STF",   NUM_STF,      Cat_STF,      Cat_STF_Names,       Cat_STF_SubId,        Cat_STF_Type,       2000, 0},
-  {"Slct STT**",  "STT",   NUM_STT,      Cat_STT,      Cat_STT_Names,       Cat_STT_SubId,        Cat_STT_Type,       2000, 0},
-  {"Select NGC",  "N",     NUM_NGC,      Cat_NGC,      Cat_NGC_Names,       Cat_NGC_SubId,        Cat_NGC_Type,       2000, 0},
-  {"Select IC",   "I",     NUM_IC,       Cat_IC,       Cat_IC_Names,        Cat_IC_SubId,         Cat_IC_Type,        2000, 0},
-  {"",            "",      0,            NULL,         NULL,                NULL,                 CAT_NONE,           0,    0}
+// Title               Prefix               Num records   Catalog data  Catalog name string  Catalog subId string  Type                Epoch
+  {Cat_Stars_Title,    Cat_Stars_Prefix,    NUM_STARS,    Cat_Stars,    Cat_Stars_Names,     Cat_Stars_SubId,      Cat_Stars_Type,     2000, 0},
+  {Cat_Messier_Title,  Cat_Messier_Prefix,  NUM_MESSIER,  Cat_Messier,  Cat_Messier_Names,   Cat_Messier_SubId,    Cat_Messier_Type,   2000, 0},
+  {Cat_Caldwell_Title, Cat_Caldwell_Prefix, NUM_CALDWELL, Cat_Caldwell, Cat_Caldwell_Names,  Cat_Caldwell_SubId,   Cat_Caldwell_Type,  2000, 0},
+  {Cat_Herschel_Title, Cat_Herschel_Prefix, NUM_HERSCHEL, Cat_Herschel, Cat_Herschel_Names,  Cat_Herschel_SubId,   Cat_Herschel_Type,  2000, 0},
+  {Cat_Collinder_Title,Cat_Collinder_Prefix,NUM_COLLINDER,Cat_Collinder,Cat_Collinder_Names, Cat_Collinder_SubId,  Cat_Collinder_Type, 2000, 0},
+//{Cat_Carbon_Title,   Cat_Carbon_Prefix,   NUM_CARBON,   Cat_Carbon,   Cat_Carbon_Names,    Cat_Carbon_SubId,     Cat_Carbon_Type,    2000, 0},
+  {Cat_STF_Title,      Cat_STF_Prefix,      NUM_STF,      Cat_STF,      Cat_STF_Names,       Cat_STF_SubId,        Cat_STF_Type,       2000, 0},
+  {Cat_STT_Title,      Cat_STT_Prefix,      NUM_STT,      Cat_STT,      Cat_STT_Names,       Cat_STT_SubId,        Cat_STT_Type,       2000, 0},
+  {Cat_NGC_Title,      Cat_NGC_Prefix,      NUM_NGC,      Cat_NGC,      Cat_NGC_Names,       Cat_NGC_SubId,        Cat_NGC_Type,       2000, 0},
+  {Cat_IC_Title,       Cat_IC_Prefix,       NUM_IC,       Cat_IC,       Cat_IC_Names,        Cat_IC_SubId,         Cat_IC_Type,        2000, 0},
+  {"",                 "",                  0,            NULL,         NULL,                NULL,                 CAT_NONE,           0,    0}
 };
 
 // --------------------------------------------------------------------------------
@@ -149,6 +149,12 @@ bool CatMgr::hasVarStarCatalog() {
   return false;
 }
 
+// check to see if the primaryId() was moved to the prefix
+bool CatMgr::hasPrimaryIdInPrefix() {
+  const char *s=catalog[_selected].Prefix;
+  return strstr(s,";");
+}
+
 bool CatMgr::isStarCatalog() {
   return (catalogType()==CAT_GEN_STAR) || (catalogType()==CAT_GEN_STAR_VCOMP) || 
          (catalogType()==CAT_DBL_STAR) || (catalogType()==CAT_DBL_STAR_COMP) ||
@@ -178,7 +184,22 @@ const char* CatMgr::catalogTitle() {
 // Get active catalog prefix
 const char* CatMgr::catalogPrefix() {
   if (_selected<0) return "";
-  return catalog[_selected].Prefix;
+  const char *s=catalog[_selected].Prefix;
+  
+  // array type prefix?
+  if (strstr(s,";")) {
+    const char *s1;
+    long p=primaryId();
+    if (p>=0) {
+      s1=getElementFromString(s,p);
+      if (strlen(s1)>0) return s1; else {
+        s1=getElementFromString(s,0);
+        static char s2[24];
+        sprintf(s2,"%s%ld",s1,p);
+        return s2;
+      }
+    } else return "?";
+  } else return s;
 }
 
 // catalog filtering
