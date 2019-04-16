@@ -18,8 +18,8 @@
 
 // Note: You can navigate to and open the SmartHandController's catalogs directory in the Arduino IDE to see the available catalogs.
   #include "catalogs/stars_vc.h"        // Catalog of 408 bright stars
-  #include "catalogs/stf_select_c.h"    // Struve STF catalog of of 931 double stars brighter than Magnitude 9.0
-  #include "catalogs/stt_select_c.h"    // Struve STT catalog of of 766 double stars brighter than Magnitude 9.0
+  #include "catalogs/stf_select_c.h"    // Struve STF catalog of 931 double stars brighter than Magnitude 9.0
+  #include "catalogs/stt_select_c.h"    // Struve STT catalog of 766 double stars brighter than Magnitude 9.0
 //#include "catalogs/carbon.h"          // Carbon stars
   #include "catalogs/messier_c.h"       // Charles Messier's famous catalog of 109 DSO's
   #include "catalogs/caldwell_c.h"      // The Caldwell (supplement) catalog of 109 DSO's
