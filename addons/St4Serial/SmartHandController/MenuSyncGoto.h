@@ -12,15 +12,15 @@ MENU_RESULT SmartHandController::menuSyncGoto(bool sync)
     char title[16]="";
     char thisSubmenu[16]="";
     char lastSubmenu[16]="";
-    for (int i=0; i<cat_mgr.numCatalogs(); i++) {
-      cat_mgr.select(i);
+    for (int i=1; i<=cat_mgr.numCatalogs(); i++) {
+      cat_mgr.select(i-1);
       strcpy(title,cat_mgr.catalogTitle());
       strcpy(lastSubmenu,thisSubmenu);
       strcpy(thisSubmenu,cat_mgr.catalogSubMenu());
 
       bool duplicate=false;
-      if (strlen(thisSubmenu)>0) { 
-        if ((strlen(thisSubmenu)==strlen(lastSubmenu)) && (strstr(thisSubmenu,lastSubmenu))) { duplicate=true; } 
+      if (strlen(thisSubmenu)>0) {
+        if ((strlen(thisSubmenu)==strlen(lastSubmenu)) && (strstr(thisSubmenu,lastSubmenu))) duplicate=true;
       }
       if ((!duplicate) && (strlen(thisSubmenu)>0)) { strcpy(title,thisSubmenu); strcat(title,">"); }
 
@@ -31,7 +31,7 @@ MENU_RESULT SmartHandController::menuSyncGoto(bool sync)
       }
     }
     // add the normal filtering, solarsys, etc. items
-    strcat(string_list_gotoL1,"^Filter^\nSolar System>\nUser Catalog>\nCoordinates\nHome");
+    strcat(string_list_gotoL1,"User>\nSolar System>\n^Filter^\nCoordinates\nHome");
 
     int selection = display->UserInterfaceSelectionList(&buttonPad, sync ? "Sync" : "Goto", current_selection, string_list_gotoL1);
     if (selection == 0) return MR_CANCEL;
@@ -39,17 +39,17 @@ MENU_RESULT SmartHandController::menuSyncGoto(bool sync)
 
     if (current_selection<=catalog_index_count) {
       int catalogNum=catalog_index[current_selection-1];
-      if (catalogNum>=0) { if (menuCatalog(sync,catalogNum)==MR_QUIT) return MR_QUIT; } else { if (subMenuSyncGoto(sync,-catalogNum)==MR_QUIT) return MR_QUIT; }
+      if (catalogNum>=0) { if (menuCatalog(sync,catalogNum-1)==MR_QUIT) return MR_QUIT; } else { if (subMenuSyncGoto(sync,(-catalogNum)-1)==MR_QUIT) return MR_QUIT; }
     } else
     switch (current_selection-catalog_index_count) {
       case 1:
-        menuFilters();
+        if (menuUser(sync)==MR_QUIT) return MR_QUIT;
         break;
       case 2:
         if (menuSolarSys(sync)==MR_QUIT) return MR_QUIT;
         break;
       case 3:
-        if (menuUser(sync)==MR_QUIT) return MR_QUIT;
+        menuFilters();
         break;
       case 4:
         if (menuRADec(sync)==MR_QUIT) return MR_QUIT;
@@ -110,7 +110,7 @@ MENU_RESULT SmartHandController::subMenuSyncGoto(char sync, int subMenuNum)
     
     if (current_selection[subMenuNum]<=cat_mgr.numCatalogs()) {
       int catalogNum=catalog_index[current_selection[subMenuNum]-1];
-      if ((catalogNum>0) && (catalogNum<=cat_mgr.numCatalogs())) {
+      if ((catalogNum>=0) && (catalogNum<cat_mgr.numCatalogs())) {
         if (menuCatalog(sync,catalogNum)==MR_QUIT) return MR_QUIT;
       }
     }
@@ -141,7 +141,7 @@ MENU_RESULT SmartHandController::menuSolarSys(bool sync)
   if (current_selection<1) current_selection=1;
 
   const char *string_list_SolarSyst = "Sun\nMercury\nVenus\nMars\nJupiter\nSaturn\nUranus\nNeptune\nMoon";
-  current_selection = display->UserInterfaceSelectionList(&buttonPad, sync ? "Sync" : "Goto", current_selection, string_list_SolarSyst);
+  current_selection = display->UserInterfaceSelectionList(&buttonPad, sync ? "Sync Sol Sys" : "Goto Sol Sys", current_selection, string_list_SolarSyst);
   if (current_selection == 0) return MR_CANCEL;
 
   if (current_selection>3) current_selection++;
@@ -154,6 +154,52 @@ MENU_RESULT SmartHandController::menuSolarSys(bool sync)
 
   if (DisplayMessageLX200(SyncGotoPlanetLX200(sync, current_selection-1),false)) return MR_QUIT;
   return MR_CANCEL;
+}
+
+MENU_RESULT SmartHandController::menuUser(bool sync)
+{
+  static int current_selection_UserCatalog = 1;
+  if (current_selection_UserCatalog<1) current_selection_UserCatalog=1;
+
+  char string_list_UserCatalogs[240] = "";
+
+  // read user catalogs names into a list
+  int userCatalog[15];
+  int i=0;
+  char temp[10];
+  char temp1[500];
+  for (int l=0; l<=14; l++) {
+    strcpy(temp,":Lo0#"); temp[3]=l+'0';
+    SetLX200(temp);
+    SetLX200(":L$#");
+    GetLX200(":LI#",temp1);
+    
+    int len = strlen(temp1);
+    if (len>4) temp1[len-5]=0;
+    if (temp1[0]==0) continue;
+
+    if (l!=0) strcat(string_list_UserCatalogs,"\n");
+    strcat(string_list_UserCatalogs,(char*)(&temp1[1]));
+    userCatalog[i++]=l;
+  }
+
+  // no catalogs found, just exit
+  if (i<=0) { DisplayMessage("Select User Cat", "No Catalogs", 2000); return MR_OK; }
+
+  int last_selection_UserCatalog = current_selection_UserCatalog;
+  while (true) {
+    current_selection_UserCatalog = display->UserInterfaceSelectionList(&buttonPad, sync ? "Sync User" : "Goto User", current_selection_UserCatalog, string_list_UserCatalogs);
+    if (current_selection_UserCatalog==0) { current_selection_UserCatalog=last_selection_UserCatalog; return MR_CANCEL; }
+
+    // select this user catalog
+    strcpy(temp,":Lo0#"); temp[3]=userCatalog[current_selection_UserCatalog-1]+'0';
+    SetLX200(temp);
+
+    // show the catalog objects
+    if (display->UserInterfaceUserCatalog(&buttonPad, sync ? "Sync User Item" : "Goto User Item")) {
+      if (DisplayMessageLX200(SetLX200(":LIG#"))) return MR_QUIT;
+    }
+  }
 }
 
 MENU_RESULT SmartHandController::menuFilters()
@@ -333,52 +379,6 @@ MENU_RESULT SmartHandController::menuFilterVarMaxPer()
   current_selection_filter_varmax = display->UserInterfaceSelectionList(&buttonPad, "Filter Var* Period", current_selection_filter_varmax, string_list_fVarMax);
   if (current_selection_filter_varmax == 0) { current_selection_filter_dblmax=last_selection_filter_varmax; return MR_CANCEL; }
   return MR_OK;
-}
-
-MENU_RESULT SmartHandController::menuUser(bool sync)
-{
-  static int current_selection_UserCatalog = 1;
-  if (current_selection_UserCatalog<1) current_selection_UserCatalog=1;
-
-  char string_list_UserCatalogs[240] = "";
-
-  // read user catalogs names into a list
-  int userCatalog[15];
-  int i=0;
-  char temp[10];
-  char temp1[500];
-  for (int l=0; l<=14; l++) {
-    strcpy(temp,":Lo0#"); temp[3]=l+'0';
-    SetLX200(temp);
-    SetLX200(":L$#");
-    GetLX200(":LI#",temp1);
-    
-    int len = strlen(temp1);
-    if (len>4) temp1[len-5]=0;
-    if (temp1[0]==0) continue;
-
-    if (l!=0) strcat(string_list_UserCatalogs,"\n");
-    strcat(string_list_UserCatalogs,(char*)(&temp1[1]));
-    userCatalog[i++]=l;
-  }
-
-  // no catalogs found, just exit
-  if (i<=0) { DisplayMessage("Select User Cat", "No Catalogs", 2000); return MR_OK; }
-
-  int last_selection_UserCatalog = current_selection_UserCatalog;
-  while (true) {
-    current_selection_UserCatalog = display->UserInterfaceSelectionList(&buttonPad, "Select User Cat", current_selection_UserCatalog, string_list_UserCatalogs);
-    if (current_selection_UserCatalog==0) { current_selection_UserCatalog=last_selection_UserCatalog; return MR_CANCEL; }
-
-    // select this user catalog
-    strcpy(temp,":Lo0#"); temp[3]=userCatalog[current_selection_UserCatalog-1]+'0';
-    SetLX200(temp);
-
-    // show the catalog objects
-    if (display->UserInterfaceUserCatalog(&buttonPad, sync ? "Sync User Item" : "Goto User Item")) {
-      if (DisplayMessageLX200(SetLX200(":LIG#"))) return MR_QUIT;
-    }
-  }
 }
 
 MENU_RESULT SmartHandController::menuRADec(bool sync)
