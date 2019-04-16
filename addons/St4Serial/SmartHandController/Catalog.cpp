@@ -9,7 +9,7 @@
 // ** In this section is everything you need touch to add a new "catalog.h"      **
 // ** file and use it within the SHC.                                            **
 
-// Simply include the catalog you want here:
+// Simply include the catalog you want here, up to 64 catalogs are supported.
 // Each catalog type has the possiblity of several different combinations depending on the _select, _c, and _vc suffixes available.
 // For example:
 // ngc.h          // for the full ngc catalog at the highest accuracy.
@@ -31,7 +31,7 @@
 // Note: There should be a matching line below for every catalog #included above (catalogs appear in the menus in the order the appear below):
 catalog_t catalog[] = {
 // Note: Alignment always uses the first catalog!
-// Note: Sub Menu items should be grouped together in this list!  There is provision for up to 16 different Sub Menu's.
+// Note: Sub Menu items should be grouped together in this list!
 // Sub Menu     Title               Prefix               Num records   Catalog data  Catalog name string  Catalog subId string  Type                Epoch
   {             Cat_Stars_Title,    Cat_Stars_Prefix,    NUM_STARS,    Cat_Stars,    Cat_Stars_Names,     Cat_Stars_SubId,      Cat_Stars_Type,     2000, 0},
   {             Cat_Messier_Title,  Cat_Messier_Prefix,  NUM_MESSIER,  Cat_Messier,  Cat_Messier_Names,   Cat_Messier_SubId,    Cat_Messier_Type,   2000, 0},

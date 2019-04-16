@@ -1,6 +1,7 @@
 #pragma once
 
 // maximum number of catalogs supported
+// there is a matching array in subMenuSyncGoto() that also needs adjustment if this is increased
 #define MaxCatalogs 64
 
 // ----------------------------------------------------------

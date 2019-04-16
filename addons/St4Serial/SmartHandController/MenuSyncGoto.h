@@ -74,7 +74,7 @@ MENU_RESULT SmartHandController::menuSyncGoto(bool sync)
 
 MENU_RESULT SmartHandController::subMenuSyncGoto(char sync, int subMenuNum)
 {
-  static uint8_t current_selection[16] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+  static uint8_t current_selection[64] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
 
   while (true) {
     // build the list of star/dso catalogs
