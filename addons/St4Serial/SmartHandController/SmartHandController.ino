@@ -36,8 +36,8 @@
 #define FirmwareDate          __DATE__
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
-#define FirmwareVersionMinor  "4"
-#define FirmwareVersionPatch  "c"
+#define FirmwareVersionMinor  "5"
+#define FirmwareVersionPatch  "a"
 
 #include "Config.h"
 #include "SmartController.h"
