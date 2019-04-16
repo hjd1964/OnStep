@@ -31,7 +31,7 @@ MENU_RESULT SmartHandController::menuSyncGoto(bool sync)
       }
     }
     // add the normal filtering, solarsys, etc. items
-    strcat(string_list_gotoL1,"User>\nSolar System>\n^Filter^\nCoordinates\nHome");
+    strcat(string_list_gotoL1,"User>\nSolar System>\nFilters \xa5\nCoordinates\nHome");
 
     int selection = display->UserInterfaceSelectionList(&buttonPad, sync ? "Sync" : "Goto", current_selection, string_list_gotoL1);
     if (selection == 0) return MR_CANCEL;
