@@ -48,6 +48,7 @@ class CatMgr {
     void        filtersClear();
     void        filterAdd(int fm);
     void        filterAdd(int fm, int param);
+    bool        hasActiveFilter();
 
 // select catalog record
     bool        setIndex(long index);

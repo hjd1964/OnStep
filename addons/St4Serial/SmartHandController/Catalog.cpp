@@ -285,6 +285,54 @@ void CatMgr::filterAdd(int fm, int param) {
     if (param==7) _fm_var_max=100.0; else _fm_var_max=0.0;  }
 }
 
+// checks to see if the currently selected catalog has an active filter
+bool CatMgr::hasActiveFilter() {
+  if (!isInitialized()) return false;
+  if (_fm==FM_NONE) return false;
+//if (_fm & FM_ABOVE_HORIZON) return true; // doesn't apply to this indication
+  if (_fm & FM_CONSTELLATION) return true;
+  if (isDsoCatalog() && (_fm & FM_OBJ_TYPE)) return true;
+  if (_fm & FM_BY_MAG) return true;
+  if (_fm & FM_NEARBY) return true;
+  if (isDblStarCatalog() && (_fm & FM_DBL_MAX_SEP)) return true;
+  if (isDblStarCatalog() && (_fm & FM_DBL_MIN_SEP)) return true;
+  if (isVarStarCatalog() && (_fm & FM_VAR_MAX_PER)) return true;
+  return false;
+}  
+
+// checks to see if the currently selected object is filtered (returns true if filtered out)
+bool CatMgr::isFiltered() {
+  if (!isInitialized()) return false;
+  if (_fm==FM_NONE) return false;
+  if (_fm & FM_ABOVE_HORIZON) { if (alt()<0.0) return true; }
+  if (_fm & FM_ALIGN_ALL_SKY) {
+    if (alt()<10.0) return true;      // minimum 10 degrees altitude
+    if (abs(dec())>85.0) return true; // minimum 5 degrees from the pole (for accuracy)
+  }
+  if (_fm & FM_CONSTELLATION) {
+    if (constellation()!=_fm_con) return true;
+  }
+  if (_fm & FM_OBJ_TYPE) {
+    if (isDsoCatalog() && (objectType()!=_fm_obj_type)) return true;
+  }
+  if (_fm & FM_BY_MAG) {
+    if (magnitude()>=_fm_mag_limit) return true;
+  }
+  if (_fm & FM_NEARBY) {
+    if (DistFromEqu(_lastTeleRA,_lastTeleDec)>=_fm_nearby_dist) return true;
+  }
+  if (_fm & FM_DBL_MAX_SEP) {
+    if (isDblStarCatalog() && (separation()>_fm_dbl_max)) return true;
+  }
+  if (_fm & FM_DBL_MIN_SEP) {
+    if (isDblStarCatalog() && (separation()<_fm_dbl_min)) return true;
+  }
+  if (_fm & FM_VAR_MAX_PER) {
+    if (isVarStarCatalog() && (period()>_fm_var_max)) return true;
+  }
+  return false;
+}  
+
 // select catalog record
 bool CatMgr::setIndex(long index) {
   if (_selected<0) return false;
@@ -670,50 +718,6 @@ const char* CatMgr::bayerFlamStr() {
 }
 
 // support functions
-
-// checks to see if the currently selected object is filtered (returns true if filtered out)
-bool CatMgr::isFiltered() {
-  if (!isInitialized()) return false;
-  if (_fm==FM_NONE) return false;
-  if (_fm & FM_ABOVE_HORIZON) { if (alt()<0.0) return true; }
-  if (_fm & FM_ALIGN_ALL_SKY) {
-    if (alt()<10.0) return true;      // minimum 10 degrees altitude
-    if (abs(dec())>85.0) return true; // minimum 5 degrees from the pole (for accuracy)
-  }
-  if (_fm & FM_CONSTELLATION) {
-    if (constellation()!=_fm_con) return true;
-  }
-  if (isDsoCatalog() && (_fm & FM_OBJ_TYPE)) {
-    if (objectType()!=_fm_obj_type) return true;
-  }
-  if (_fm & FM_BY_MAG) {
-    if (magnitude()>=_fm_mag_limit) return true;
-  }
-  if (_fm & FM_NEARBY) {
-    double d=DistFromEqu(_lastTeleRA,_lastTeleDec);
-    if (d>=_fm_nearby_dist) return true;
-  }
-  if (_fm & FM_DBL_MAX_SEP) {
-    double s=separation();
-    if (isDblStarCatalog()) {
-      if (s>_fm_dbl_max) return true;
-    }
-  }
-  if (_fm & FM_DBL_MIN_SEP) {
-    double s=separation();
-    if (isDblStarCatalog()) {
-      if (s<_fm_dbl_min) return true;
-    }
-  }
-  if (_fm & FM_VAR_MAX_PER) {
-    double p=period();
-    if (isVarStarCatalog()) {
-      if (p>_fm_var_max) return true;
-    }
-  }
-
-  return false;
-}  
 
 // returns elementNum 'th element from the comma delimited string where the 0th element is the first etc.
 const char* CatMgr::getElementFromString(const char *data, long elementNum) {
