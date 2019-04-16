@@ -3,7 +3,7 @@
 
 #pragma once
 
-#ifdef WEATHER_BME280_ON
+#if defined(WEATHER_BME280_ON) || defined(WEATHER_BME280)
   #include <Adafruit_BME280.h> // https://github.com/adafruit/Adafruit_BME280_Library and https://github.com/adafruit/Adafruit_Sensor
   Adafruit_BME280 bme;
 #endif
@@ -18,8 +18,12 @@
 class weather {
   public:
     void init() {
-#ifdef WEATHER_BME280_ON
-      if (bme.begin(&HAL_Wire)) _disabled=false;
+#if defined(WEATHER_BME280_ON) || defined(WEATHER_BME280)
+      #ifdef WEATHER_BME280
+        if (bme.begin(WEATHER_BME280,&HAL_Wire)) _disabled=false;
+      #else
+        if (bme.begin(&HAL_Wire)) _disabled=false;
+      #endif
       if (!_disabled) {
         _t=bme.readTemperature();
         _p=bme.readPressure()/100.0;
@@ -40,7 +44,7 @@ class weather {
 
     // designed for a 1s polling interval to refresh readings once a minute
     void poll() {
-#ifdef WEATHER_BME280_ON
+#if defined(WEATHER_BME280_ON) || defined(WEATHER_BME280)
       if (!_disabled) {
         static int phase=0;
   #ifdef ESP32

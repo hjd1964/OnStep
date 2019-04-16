@@ -93,7 +93,7 @@
 // Sound state at startup, default=_ON.
 #define DEFAULT_SOUND_OFF
 
-// Set to _ON and wire in BME280 on the I2C port Aux3/4 (SCL,SDA) for temperature, pressure, humidity.  Default=_OFF.  Choose either I2C OR Home Sense support on Aux3/4.
+// Set to _ON (or the I2C device address if other than 0x77) and wire in BME280 on the I2C port Aux3/4 (SCL,SDA) for temperature, pressure, humidity.  Default=_OFF.  Choose either I2C OR Home Sense support on Aux3/4.
 #define WEATHER_BME280_OFF
 
 // Optionally adjust tracking rate to compensate for atmospheric refraction, default=_OFF

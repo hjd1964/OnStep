@@ -83,8 +83,8 @@
 // Sound state at startup, default=_ON.
 #define DEFAULT_SOUND_ON
 
-// Set to _ON and wire in BME280 on the I2C port (SCL1,SDA1) for temperature, pressure, humidity.  Default=_OFF.
 #define WEATHER_BME280_OFF
+// Set to _ON (or the I2C device address if other than 0x77) and wire in BME280 on the I2C port (SCL1,SDA1) for temperature, pressure, humidity.  Default=_OFF.
 
 // External temparature monitoring via DS1820 on ONE WIRE interface (uses Aux4.)  Default _OFF.
 #define TEMPERATURE_DS1820_OFF
