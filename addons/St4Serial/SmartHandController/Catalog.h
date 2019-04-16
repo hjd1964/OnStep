@@ -40,6 +40,7 @@ class CatMgr {
     bool        isVarStarCatalog();
     bool        isDsoCatalog();
     const char* catalogTitle();
+    const char* catalogSubMenu();
     const char* catalogPrefix();
     bool        hasPrimaryIdInPrefix();
 

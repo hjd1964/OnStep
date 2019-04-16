@@ -4,6 +4,7 @@
 #define Cat_STT_Title "STT**" 
 #define Cat_STT_Prefix "STT"  
 #define NUM_STT 766
+
 const char *Cat_STT_Names=
 "A0;"
 "F8V;"

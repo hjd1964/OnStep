@@ -23,6 +23,8 @@
 #define ccQn 20
 #define ccQs 21
 
+enum MENU_RESULT { MR_OK, MR_CANCEL, MR_QUIT };
+
 class SmartHandController
 {
 public:
@@ -67,8 +69,6 @@ private:
 #ifdef UTILITY_LIGHT 
   uint8_t current_selection_utility_light = 5;
 #endif
-  uint8_t current_selection_UserCatalog = 1;
-  uint8_t current_selection_feature_mode = 1;
   bool    current_selection_filter_above = true;
   uint8_t current_selection_filter_con = 1;
   uint8_t current_selection_filter_type = 1;
@@ -80,7 +80,6 @@ private:
   uint8_t activeGuideRate = 5;
   uint8_t featureKeyMode = 1; // guide rate
 
-  unsigned short current_selection_SolarSys = 1;
   long angleRA = 0;
   long angleDEC = 0;
 
@@ -89,19 +88,23 @@ private:
 
   void menuMain();
   void menuSpeedRate();
-  void menuSyncGoto(bool sync);
-  void menuCatalog(bool sync, int number);
-  void menuSolarSys(bool sync);
-  void menuFilters();
+  
+  MENU_RESULT menuSyncGoto(bool sync);
+  MENU_RESULT subMenuSyncGoto(char sync, int subMenuNum);
+  MENU_RESULT menuCatalog(bool sync, int number);
+  MENU_RESULT menuSolarSys(bool sync);
+  MENU_RESULT menuFilters();
   bool setCatMgrFilters();
-  void menuFilterCon();
-  void menuFilterType();
-  void menuFilterByMag();
-  void menuFilterNearby();
-  void menuFilterDblMinSep();
-  void menuFilterDblMaxSep();
-  void menuFilterVarMaxPer();
-  void menuUser(bool sync);
+  MENU_RESULT menuFilterCon();
+  MENU_RESULT menuFilterType();
+  MENU_RESULT menuFilterByMag();
+  MENU_RESULT menuFilterNearby();
+  MENU_RESULT menuFilterDblMinSep();
+  MENU_RESULT menuFilterDblMaxSep();
+  MENU_RESULT menuFilterVarMaxPer();
+  MENU_RESULT menuUser(bool sync);
+  MENU_RESULT menuRADec(bool sync);
+  
   void menuAlignment();
   void menuParking();
   void menuPEC();
@@ -110,7 +113,6 @@ private:
   bool menuSetBacklash(uint8_t &axis);
   void menuPier();
   bool SelectStarAlign();
-  void menuRADec(bool sync);
   void menuSettings();
   void menuMount();
   void menuSite();

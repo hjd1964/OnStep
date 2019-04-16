@@ -2,6 +2,9 @@
 // Alt Main Menu (double click)
 void SmartHandController::menuSpeedRate()
 {
+  static unsigned short current_selection_feature_mode = 1;
+  unsigned short last_selection_feature_mode = current_selection_feature_mode;
+
   char string_feature_Modes[120] = "Guide Rate";
 
   int i=1,j=-1,k=-1,l=-1,m=-1,n=-1;
@@ -13,7 +16,6 @@ void SmartHandController::menuSpeedRate()
   if (telInfo.hasFocuser2()) { i++; m=i; strcat(string_feature_Modes,"\nFocuser 2"); }
   if (telInfo.hasRotator())  { i++; n=i; strcat(string_feature_Modes,"\nRotator");   }
 
-  uint8_t last_selection_feature_mode = current_selection_feature_mode;
   current_selection_feature_mode = display->UserInterfaceSelectionList(&buttonPad, "Feature Keys", current_selection_feature_mode, string_feature_Modes);
 
   if (last_selection_feature_mode>0) {
@@ -38,7 +40,7 @@ void SmartHandController::menuMain()
       const char *string_list_main_UnParkedL0 = "Goto\n""Sync\n""Align\n""Parking\n""Tracking\n""PEC\n""Settings";
       current_selection_L0 = display->UserInterfaceSelectionList(&buttonPad, "Main Menu", current_selection_L0, string_list_main_UnParkedL0);
       switch (current_selection_L0) {
-        case 1: menuSyncGoto(false); break;
+        case 1: if (menuSyncGoto(false)==MR_QUIT) return; break;
         case 2: if (display->UserInterfaceInputValueBoolean(&buttonPad, "Sync Here?", &sync)) if (sync) DisplayMessageLX200(SetLX200(":CS#"),false); break;
         case 3: menuAlignment(); break;
         case 4: menuParking(); break;
@@ -50,7 +52,7 @@ void SmartHandController::menuMain()
       const char *string_list_main_UnParkedL0 = "Goto\n""Sync\n""Align\n""Parking\n""Tracking\n""Settings";
       current_selection_L0 = display->UserInterfaceSelectionList(&buttonPad, "Main Menu", current_selection_L0, string_list_main_UnParkedL0);
       switch (current_selection_L0) {
-        case 1: menuSyncGoto(false); break;
+        case 1: if (menuSyncGoto(false)==MR_QUIT) return; break;
         case 2: if (display->UserInterfaceInputValueBoolean(&buttonPad, "Sync Here?", &sync)) if (sync) DisplayMessageLX200(SetLX200(":CS#"),false); break;
         case 3: menuAlignment(); break;
         case 4: menuParking(); break;
