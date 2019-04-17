@@ -94,7 +94,7 @@ private:
   MENU_RESULT menuCatalog(bool sync, int number);
   MENU_RESULT menuSolarSys(bool sync);
   MENU_RESULT menuFilters();
-  bool setCatMgrFilters();
+  void setCatMgrFilters();
   MENU_RESULT menuFilterCon();
   MENU_RESULT menuFilterType();
   MENU_RESULT menuFilterByMag();
