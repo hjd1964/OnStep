@@ -456,7 +456,7 @@ void SmartHandController::update()
 
   // -------------------------------------------------------------------------------------------------------------------
   // handle the feature buttons
-  char cmd[10];
+  char cmd[32];
   static bool focOut=false;
   static bool focIn=false;
   static bool rotCw=false;
