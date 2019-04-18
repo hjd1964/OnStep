@@ -34,7 +34,6 @@ typedef struct {
   const float          RA;
   const float          DE;
 } dso_t; // 14 bytes/rec
-
 typedef struct {
   const unsigned char  Has_name: 1;
   const unsigned char  Cons: 7;
@@ -44,8 +43,7 @@ typedef struct {
   const unsigned char  Mag;
   const unsigned short RA;
   const signed   short DE;
-} dso_comp_t; // 9 bytes/rec (as above except except Mag/RA/Dec use smaller data types)
-
+} dso_comp_t; // compact, 9 bytes/rec
 typedef struct {
   const unsigned char  Has_name: 1;
   const unsigned char  Cons: 7;
@@ -54,7 +52,7 @@ typedef struct {
   const unsigned char  Mag;
   const unsigned short RA;
   const signed   short DE;
-} dso_vcomp_t; // 7 bytes/rec (as above except Obj_id is replaced by the record count)
+} dso_vcomp_t; // very compact, 7 bytes/rec
 
 // Struct for general star catalog
 typedef struct {
@@ -67,8 +65,6 @@ typedef struct {
   const float          RA;
   const float          DE;
 } gen_star_t; // 14 bytes/rec
-
-// Struct for general star catalog very compact
 typedef struct {
   const unsigned char  Has_name: 1;
   const unsigned char  Cons: 7;
@@ -77,7 +73,7 @@ typedef struct {
   const unsigned char  Mag;
   const unsigned short RA;
   const signed   short DE;
-} gen_star_vcomp_t; // 7 bytes/rec (as above except except Mag/RA/Dec use smaller data types and Obj_id is replaced by the record count)
+} gen_star_vcomp_t; // very compact, 7 bytes/rec
 
 // Struct for double star catalog
 typedef struct {
@@ -95,8 +91,6 @@ typedef struct {
   const float          RA;
   const float          DE;
 } dbl_star_t; // 18 bytes per record
-
-// Struct for double star catalog compact
 typedef struct {
   const unsigned long  Has_name: 1;
   const unsigned long  Cons: 7;
@@ -111,7 +105,7 @@ typedef struct {
   const unsigned char  Mag;
   const unsigned short RA;
   const signed   short DE;
-} dbl_star_comp_t; // 11 bytes per record
+} dbl_star_comp_t; // compact, 13 bytes per record
 
 // Struct for variable star catalog
 typedef struct {
@@ -128,6 +122,20 @@ typedef struct {
   const float          RA;
   const float          DE;
 } var_star_t; // 18 bytes per record
+typedef struct {
+  const unsigned long  Has_name: 1;
+  const unsigned long  Cons: 7;
+  const unsigned long  BayerFlam: 8; // 0 to 23 are coded Bayer, 24=Invalid, 25 to 255 are the Flamsteed# (for 1 to 231.)
+  const unsigned long  Has_subId: 1;
+  const unsigned long  Obj_id: 15;   // to 32767
+
+  const unsigned int   Period: 15;   // Period 0.00 to 9.99 days (0 to 999) period 10.0 to 3186.5 days (1000 to 32765), 32766 = Irregular, 32767 = Unknown
+  const unsigned char  Mag2;
+
+  const unsigned char  Mag;
+  const unsigned short RA;
+  const signed   short DE;
+} var_star_comp_t; // compact, 12 bytes per record
 
 #pragma pack()
 

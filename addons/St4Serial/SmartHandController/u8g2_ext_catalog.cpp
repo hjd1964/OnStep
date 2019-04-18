@@ -176,7 +176,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     float mf =cat_mgr.magnitude();
     float mf2=cat_mgr.magnitude2();
     if ((mf2>99) && (mf>99)) {
-      sprintf(line, "?.??");
+      sprintf(line, "?.?");
     } else {
       if (mf2>99) {
         dtostrf(mf, 4, 1, line);
@@ -227,8 +227,8 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
         // Period 0.00 to 9.99 days, period 10.0 to 3186.6 days, -1 = Unknown, -2 = Irregular
         if (abs(p+1.0)<0.1)           { sprintf(line,"Period Unknown"); } else
         if (abs(p+2.0)<0.1)           { sprintf(line,"Period Irregular"); } else
-        if ((p>=0.0)  && (p<   10.0)) { dtostrf(p, 6, 2, pers); sprintf(line,"Period%sd",pers); } else
-        if ((p>=10.0) && (p<=3186.6)) { dtostrf(p, 6, 1, pers); sprintf(line,"Period%sd",pers); } else sprintf(line,"Period ?");
+        if ((p>=0.0)  && (p<   10.0)) { dtostrf(p, 7, 2, pers); sprintf(line,"Period%sd",pers); } else
+        if ((p>=10.0) && (p<=3186.6)) { dtostrf(p, 7, 1, pers); sprintf(line,"Period%sd",pers); } else sprintf(line,"Period ?");
         ext_DrawFwNumeric(u8g2, x, y, line);
       }
     }
@@ -254,7 +254,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
 
     // Magnitude
     float mf=cat_mgr.magnitude();
-    if (abs(mf-99.90)<0.001) sprintf(line, "?.?"); else dtostrf(mf, 3, 1, line);
+    if (mf>99) sprintf(line, "?.?"); else dtostrf(mf, 3, 1, line);
     step0 = u8g2_GetUTF8Width(u8g2, line);
     u8g2_DrawUTF8(u8g2, dx-step0, y, line);
 
