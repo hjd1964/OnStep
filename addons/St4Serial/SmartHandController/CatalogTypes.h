@@ -105,7 +105,7 @@ typedef struct {
   const unsigned long  Obj_id: 15;   // to 32767
 
   const unsigned long  Sep: 14;      // separation of components 0.0 to 999.8" (0 to 9998), 999.9 (9999) = Unknown
-  const unsigned long  PA: 9;        // position angle in degrees, -1 = Unknown
+  const unsigned long  PA: 9;        // position angle in degrees, 361 = Unknown
   const unsigned long  Mag2: 8;
 
   const unsigned char  Mag;
@@ -121,7 +121,7 @@ typedef struct {
   const unsigned long  Has_subId: 1;
   const unsigned long  Obj_id: 15;   // to 32767
 
-  const unsigned int   Period: 15;   // Period 0.00 to 9.99 days (0 to 999) period 10.0 to 3186.6 days (1000 to 32766), 32767 = Unknown
+  const unsigned int   Period: 15;   // Period 0.00 to 9.99 days (0 to 999) period 10.0 to 3186.5 days (1000 to 32765), 32766 = Irregular, 32767 = Unknown
   const signed short   Mag2;
 
   const signed short   Mag;

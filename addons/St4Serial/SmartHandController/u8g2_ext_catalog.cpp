@@ -210,7 +210,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
         // |Sep 2.5" PA 225       |
         char seps[16];
         float f=cat_mgr.separation();
-        if (f<=999.8) dtostrf(f, 5, 1, seps); else strcpy(seps,"?.?");
+        if (f>=0) dtostrf(f, 5, 1, seps); else strcpy(seps,"?.?");
         x=u8g2_DrawUTF8(u8g2, 0, y, "Sep");
         sprintf(line,"%s\"",seps);
         ext_DrawFwNumeric(u8g2, x, y, line);

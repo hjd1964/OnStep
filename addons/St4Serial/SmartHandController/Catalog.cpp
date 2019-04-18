@@ -322,13 +322,13 @@ bool CatMgr::isFiltered() {
     if (DistFromEqu(_lastTeleRA,_lastTeleDec)>=_fm_nearby_dist) return true;
   }
   if (_fm & FM_DBL_MAX_SEP) {
-    if (isDblStarCatalog() && (separation()>_fm_dbl_max)) return true;
+    if (isDblStarCatalog() && ((separation()>_fm_dbl_max) || (separation()<0))) return true;
   }
   if (_fm & FM_DBL_MIN_SEP) {
-    if (isDblStarCatalog() && (separation()<_fm_dbl_min)) return true;
+    if (isDblStarCatalog() && ((separation()<_fm_dbl_min) || (separation()<0))) return true;
   }
   if (_fm & FM_VAR_MAX_PER) {
-    if (isVarStarCatalog() && (period()>_fm_var_max)) return true;
+    if (isVarStarCatalog() && ((period()>_fm_var_max) || (period()<0))) return true;
   }
   return false;
 }  
@@ -507,30 +507,38 @@ void CatMgr::topocentricToObservedPlace(float *RA, float *Dec) {
 // -2 = irregular, -1 = unknown
 float CatMgr::period() {
   if (_selected<0) return -1;
-  float p=-1;
+  float p;
   if (catalogType()==CAT_VAR_STAR) p=_varStarCatalog[catalog[_selected].Index].Period; else return -1;
-  
   // Period 0.00 to 9.99 days (0 to 999) period 10.0 to 3186.6 days (1000 to 32766), 32766 = Irregular, 32767 = Unknown
-  if ((p>0)   && (p<=999)) return p/100.0; else
+  if ((p>=0)  && (p<=999)) return p/100.0; else
   if ((p>999) && (p<=32765)) return (p-900)/10.0; else
   if (p==32766) return -2; else return -1;
 }
 
 // Position angle of double star, in degrees
+// -1 = Unknown
 int CatMgr::positionAngle() {
   if (_selected<0) return -1;
-  if (catalogType()==CAT_DBL_STAR) return _dblStarCatalog[catalog[_selected].Index].PA; else
-  if (catalogType()==CAT_DBL_STAR_COMP) return _dblStarCompCatalog[catalog[_selected].Index].PA; else return -1;
+  int p;
+  if (catalogType()==CAT_DBL_STAR) p=_dblStarCatalog[catalog[_selected].Index].PA; else
+  if (catalogType()==CAT_DBL_STAR_COMP) p=_dblStarCompCatalog[catalog[_selected].Index].PA; else return -1;
+  // Position angle 0 to 360 degrees, 361 = Unknown
+  if (p==361) return -1; else return p;
 }
 
 // Separation of double star, in arc-seconds
+// -1 = Unknown
 float CatMgr::separation() {
-  if (_selected<0) return 999.9;
-  if (catalogType()==CAT_DBL_STAR) return _dblStarCatalog[catalog[_selected].Index].Sep/10.0; else
-  if (catalogType()==CAT_DBL_STAR_COMP) return _dblStarCompCatalog[catalog[_selected].Index].Sep/10.0; else return 999.9;
+  if (_selected<0) return -1;
+  float s;
+  if (catalogType()==CAT_DBL_STAR) s=_dblStarCatalog[catalog[_selected].Index].Sep/10.0; else
+  if (catalogType()==CAT_DBL_STAR_COMP) s=_dblStarCompCatalog[catalog[_selected].Index].Sep/10.0; else return -1;
+  // Seperation 0 to 999.8 (0 to 9998) arc-seconds, 9999=unknown
+  if (abs(s-999.9)<0.01) return -1; else return s;
 }
 
 // Magnitude of an object
+// 99.9 = Unknown
 float CatMgr::magnitude() {
   if (_selected<0) return 99.9;
   if (catalogType()==CAT_GEN_STAR)       return _genStarCatalog[catalog[_selected].Index].Mag/100.0; else
@@ -544,6 +552,7 @@ float CatMgr::magnitude() {
 }
 
 // Secondary magnitude of an star.  For double stars this is the magnitude of the secondary.  For variables this is the minimum brightness.
+// 99.9 = Unknown
 float CatMgr::magnitude2() {
   if (_selected<0) return 99.9;
   if (catalogType()==CAT_DBL_STAR)       return _dblStarCatalog[catalog[_selected].Index].Mag2/100.0; else
@@ -552,6 +561,7 @@ float CatMgr::magnitude2() {
 }
 
 // Constellation number
+// 89 = Unknown
 byte CatMgr::constellation() {
   if (_selected<0) return 89;
   if (catalogType()==CAT_GEN_STAR)       return _genStarCatalog[catalog[_selected].Index].Cons; else
@@ -561,7 +571,7 @@ byte CatMgr::constellation() {
   if (catalogType()==CAT_VAR_STAR)       return _varStarCatalog[catalog[_selected].Index].Cons; else
   if (catalogType()==CAT_DSO)            return _dsoCatalog[catalog[_selected].Index].Cons; else
   if (catalogType()==CAT_DSO_COMP)       return _dsoCompCatalog[catalog[_selected].Index].Cons; else
-  if (catalogType()==CAT_DSO_VCOMP)      return _dsoVCompCatalog[catalog[_selected].Index].Cons; else return 0;
+  if (catalogType()==CAT_DSO_VCOMP)      return _dsoVCompCatalog[catalog[_selected].Index].Cons; else return 89;
 }
 
 // Constellation string
