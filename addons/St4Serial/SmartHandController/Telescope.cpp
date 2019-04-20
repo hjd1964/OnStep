@@ -257,3 +257,67 @@ bool Telescope::addStar()
     return false;
   }
 }
+
+bool Telescope::getT(double &T)
+{
+  char temp[20]="";
+  static double f=0;
+  static bool hasValue=false;
+  static unsigned long last=0;
+  if ((millis()-last>30000) || (!hasValue))
+    if (GetLX200(":GX9A#", temp) == LX200VALUEGET) 
+    {
+      int l=strlen(temp); if (l>0) temp[l-1]=0;
+      f=atof(temp);
+      if ((f>=-50.0) && (f<=100.0)) { last=millis(); hasValue=true; }
+    }
+  if (hasValue) { T=f; return true; } else return false;
+};
+
+bool Telescope::getP(double &P)
+{
+  char temp[20]="";
+  static double f=0;
+  static bool hasValue=false;
+  static unsigned long last=0;
+  if ((millis()-last>75000) || (!hasValue))
+    if (GetLX200(":GX9B#", temp) == LX200VALUEGET) 
+    {
+      int l=strlen(temp); if (l>0) temp[l-1]=0;
+      f=atof(temp);
+      if ((f>=500.0) && (f<=2000.0)) { last=millis(); hasValue=true; }
+    }
+  if (hasValue) { P=f; return true; } else return false;
+};
+
+bool Telescope::getH(double &H)
+{
+  char temp[20]="";
+  static double f=0;
+  static bool hasValue=false;
+  static unsigned long last=0;
+  if ((millis()-last>75000) || (!hasValue))
+    if (GetLX200(":GX9C#", temp) == LX200VALUEGET) 
+    {
+      int l=strlen(temp); if (l>0) temp[l-1]=0;
+      f=atof(temp);
+      if ((f>=0.0) && (f<=100.0)) { last=millis(); hasValue=true; }
+    }
+  if (hasValue) { H=f; return true; } else return false;
+};
+
+bool Telescope::getDP(double &DP)
+{
+  char temp[20]="";
+  static double f=0;
+  static bool hasValue=false;
+  static unsigned long last=0;
+  if ((millis()-last>30000) || (!hasValue))
+    if (GetLX200(":GX9E#", temp) == LX200VALUEGET) 
+    {
+      int l=strlen(temp); if (l>0) temp[l-1]=0;
+      f=atof(temp);
+      if ((f>=-50.0) && (f<=100.0)) { last=millis(); hasValue=true; }
+    }
+  if (hasValue) { DP=f; return true; } else return false;
+};

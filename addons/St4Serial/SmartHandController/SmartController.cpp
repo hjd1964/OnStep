@@ -520,16 +520,24 @@ void SmartHandController::update()
   // -------------------------------------------------------------------------------------------------------------------
   // handle shift button features
   if (buttonPad.shift.isDown()) {
-    if ((buttonPad.shift.timeDown()>1000) && telInfo.align == Telescope::ALI_OFF) { menuMain(); time_last_action = millis(); }                                                        // bring up the menus
+    if ((buttonPad.shift.timeDown()>1000) && telInfo.align == Telescope::ALI_OFF) { menuMain(); time_last_action = millis(); } // bring up the menus
   } else {
     // wait long enough that a double press can happen before picking up the press events
     if (buttonPad.shift.timeUp()>250) {
-      if (buttonPad.shift.wasDoublePressed()) { menuSpeedRate(); time_last_action = millis(); } else                                                                                  // change guide rate
-      if (telInfo.align == Telescope::ALI_OFF && buttonPad.shift.wasPressed(false)) { page++; if (page > 2) page = 0; time_last_action = millis(); } else                             // cycle through disp of Eq, Hor, Time
+      if (buttonPad.shift.wasDoublePressed()) { menuSpeedRate(); time_last_action = millis(); } else // change guide rate
+      if (telInfo.align == Telescope::ALI_OFF && buttonPad.shift.wasPressed(false)) { // cycle through disp of Eq, Hor, Time
+        page++;
+#ifdef AMBIENT_CONDITIONS_ON
+        if (page > 3) page = 0;
+#else
+        if (page > 2) page = 0;
+#endif
+        time_last_action = millis(); 
+      } else
       if ((telInfo.align == Telescope::ALI_RECENTER_1 || telInfo.align == Telescope::ALI_RECENTER_2 || telInfo.align == Telescope::ALI_RECENTER_3 ||
            telInfo.align == Telescope::ALI_RECENTER_4 || telInfo.align == Telescope::ALI_RECENTER_5 || telInfo.align == Telescope::ALI_RECENTER_6 ||
            telInfo.align == Telescope::ALI_RECENTER_7 || telInfo.align == Telescope::ALI_RECENTER_8 || telInfo.align == Telescope::ALI_RECENTER_9) && 
-           buttonPad.shift.wasPressed()) {                                             // add this align star
+           buttonPad.shift.wasPressed()) { // add this align star
         if (telInfo.addStar()) { if (telInfo.align == Telescope::ALI_OFF) DisplayMessage("Alignment", "Success!", 2000); else DisplayMessage("Add Star", "Success!", 2000); } else DisplayMessage("Add Star", "Failed!", -1);
       }
     }
@@ -557,7 +565,7 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
         telInfo.align == Telescope::ALI_SLEW_STAR_4 || telInfo.align == Telescope::ALI_SLEW_STAR_5 || telInfo.align == Telescope::ALI_SLEW_STAR_6 ||
         telInfo.align == Telescope::ALI_SLEW_STAR_7 || telInfo.align == Telescope::ALI_SLEW_STAR_8 || telInfo.align == Telescope::ALI_SLEW_STAR_9)
        ) telInfo.align = static_cast<Telescope::AlignState>(telInfo.align + 1);
-    page = 3;
+    page = 4;
   }
 
   // update status info.
@@ -722,8 +730,38 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
       }
     } else
 
-    // show align status
     if (page == 3) {
+      // T24.6 P997mb
+      // H46% DP13.7C
+      display->setFont(u8g2_font_helvR10_tf);
+
+      double T,P,H,DP;
+      if (telInfo.getT(T) && telInfo.getP(P) && telInfo.getH(H) && telInfo.getDP(DP)) {
+        char temp[20],line[20];
+        u8g2_uint_t y = 36;
+        u8g2_uint_t dx = u8g2_GetDisplayWidth(u8g2);
+
+        dtostrf(T,3,1,temp);
+        sprintf(line,"T%s\xb0%s",temp,"C");
+        display->DrawFwNumeric(0,y,line);
+
+        sprintf(line,"P%dmb",(int)round(P));
+        display->DrawFwNumeric(dx-display->GetFwNumericWidth(line),y,line);
+
+        y += line_height + 4;
+        sprintf(line,"H%d%%",(int)round(H));
+        display->DrawFwNumeric(0,y,line);
+
+        dtostrf(DP,3,1,temp);
+        sprintf(line,"DP%s\xb0%s",temp,"C");
+        display->DrawFwNumeric(dx-display->GetFwNumericWidth(line),y,line);
+      }
+      
+      display->setFont(u8g2_font_helvR12_tf);
+    } else
+
+    // show align status
+    if (page == 4) {
       u8g2_uint_t y = 36;
 
       char txt[20];
@@ -738,8 +776,7 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
       const uint8_t* myfont = u8g2->font; u8g2_SetFont(u8g2, myfont);
       u8g2_DrawUTF8(u8g2, 16, y, cat_mgr.constellationStr());
     }
-
-
+    
   } while (u8g2_NextPage(u8g2));
   lastpageupdate = millis();
 }

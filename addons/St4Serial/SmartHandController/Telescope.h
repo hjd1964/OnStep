@@ -74,6 +74,10 @@ public:
   bool isGuiding();
   bool isMountGEM();
   bool isMountAltAz();
+  bool getT(double &T);
+  bool getP(double &P);
+  bool getH(double &H);
+  bool getDP(double &DP);
   PierState getPierState();
   TrackRate getTrackingRate();
   RateCompensation getRateCompensation();
