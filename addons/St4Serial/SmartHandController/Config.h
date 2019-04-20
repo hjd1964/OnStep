@@ -27,12 +27,12 @@
 // Use _ON to enable "pass-through" Aux ST4 port, default=_OFF
 #define AUX_ST4_OFF
 
-// THAT IS ALL FOR USER CONFIGURABLE PARAMETERS! Do not change anything below this line!
-// -------------------------------------------------------------------------------------
-
 // Configure defaults for display dimming and blanking (in milliseconds, 0 disables)
 #define DISPLAY_DIM_TIME     30000        // original value 30000
 #define DISPLAY_BLANK_TIME  120000        // original value 120000
+
+// THAT IS ALL FOR USER CONFIGURABLE PARAMETERS! Do not change anything below this line!
+// -------------------------------------------------------------------------------------
 
 // If we are not on an ESP32, then assume a Teensy 3.2
 #ifndef ESP32
