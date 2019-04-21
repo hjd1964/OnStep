@@ -771,7 +771,7 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
 
       y += line_height + 4;
       u8g2_SetFont(u8g2, u8g2_font_unifont_t_greek);
-      u8g2_DrawGlyph(u8g2, 0, y, 944 + cat_mgr.bayerFlam());
+      u8g2_DrawGlyph(u8g2, 0, y, 945 + cat_mgr.bayerFlam());
 
       const uint8_t* myfont = u8g2->font; u8g2_SetFont(u8g2, myfont);
       u8g2_DrawUTF8(u8g2, 16, y, cat_mgr.constellationStr());
