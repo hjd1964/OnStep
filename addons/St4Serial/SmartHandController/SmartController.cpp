@@ -559,6 +559,7 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
   // detect align mode
   if (telInfo.hasTelStatus && telInfo.align != Telescope::ALI_OFF)
   {
+    telInfo.updateTel(true); // really make sure we have the status
     Telescope::TrackState curT = telInfo.getTrackingState();
     if (curT != Telescope::TRK_SLEWING && 
        (telInfo.align == Telescope::ALI_SLEW_STAR_1 || telInfo.align == Telescope::ALI_SLEW_STAR_2 || telInfo.align == Telescope::ALI_SLEW_STAR_3 || 
@@ -765,7 +766,7 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
       u8g2_uint_t y = 36;
 
       char txt[20];
-      if ((telInfo.align - 1) % 3 == 1) sprintf(txt, "Slew to Star %u", (telInfo.align - 1) / 3 + 1); else
+      if ((telInfo.align - 1) % 3 == 1) sprintf(txt, "Slewing to Star %u", (telInfo.align - 1) / 3 + 1); else
       if ((telInfo.align - 1) % 3 == 2) sprintf(txt, "Recenter Star %u", (telInfo.align - 1) / 3 + 1);
       u8g2_DrawUTF8(u8g2, 0, y, txt);
 
