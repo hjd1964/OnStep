@@ -170,7 +170,7 @@ class nvs {
 private:
   // Address of the I2C EEPROM
   uint8_t _eeprom_addr;
-  uint32_t nextOpMs=millis()+10UL;
+  uint32_t nextOpMs=0;
   uint8_t cache[4096];
   uint8_t cacheReadState[512];
   uint8_t cacheWriteState[512];
