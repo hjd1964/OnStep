@@ -453,6 +453,9 @@ void initWriteNvValues() {
     nv.write(EE_dcPwrAxis5,50);
 #endif
 
+    // clear the library/catalogs
+    Lib.clearAll();
+
     // finally, stop the init from happening again
     nv.writeLong(EE_autoInitKey,autoInitKey);
     
