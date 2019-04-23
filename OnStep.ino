@@ -440,6 +440,9 @@ void loop2() {
 #ifdef FOCUSER2_ON
   foc2.follow(isSlewing());
 #endif
+
+  // FASTEST PPOLLING ----------------------------------------------------------------------------------
+  if (!isSlewing()) nv.poll();
  
   // WORKLOAD MONITORING -------------------------------------------------------------------------------
   long this_loop_micros=micros(); 
@@ -543,9 +546,6 @@ void loop2() {
 
     // update weather info
     if (!isSlewing()) ambient.poll();
-
-    // update NV info, if required
-    if (!isSlewing()) nv.poll();
 
   } else {
     // COMMAND PROCESSING --------------------------------------------------------------------------------
