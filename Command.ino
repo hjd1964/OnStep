@@ -1165,7 +1165,7 @@ void processCommands() {
 // :L?#    Get library free records (all catalogs)
 //          Returns: n#
       if ((command[1]=='?') && (parameter[0]==0)) { 
-          sprintf(reply,"%d",Lib.recFree());
+          sprintf(reply,"%d",Lib.recFreeAll());
           quietReply=true;
       } else 
 

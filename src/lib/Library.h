@@ -47,10 +47,12 @@ class Library
     void clearLib(); // clears this library
     void clearAll(); // clears all libraries
 
-    int recCount(); // actual number of records for this library
-    int recFree();  // number records available for this library
-    int recPos;     // currently selected record#
-    int recMax;     // last record#
+    int recCount();    // actual number of records for this catalog
+    int recFree();     // number records available for this catalog
+    int recCountAll(); // actual number of records for this library
+    int recFreeAll();  // number records available for this library
+    int recPos;        // currently selected record#
+    int recMax;        // last record#
     
   private:
     libRec_t readRec(int address);
@@ -304,10 +306,28 @@ int Library::recCount()
   return c;
 }
 
-// catalog records available
-int Library::recFree()
+// count all library records (index or otherwise)
+int Library::recCountAll()
 {
-  return recMax-recCount();
+  libRec_t work;
+
+  int cat;
+  int c=0;
+  
+  for (int l=0;l<recMax;l++) {
+    work=readRec(l);
+
+    cat=(int)work.libRec.code>>4;
+    if ((cat>=0) && (cat<=14)) c++;
+  }
+  
+  return c;
+}
+
+// library records available
+int Library::recFreeAll()
+{
+  return recMax-recCountAll();
 }
 
 // mark this catalog record as empty
