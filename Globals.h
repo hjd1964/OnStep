@@ -114,7 +114,7 @@ double sinLat = 0.0;
 double longitude = 0.0;
 
 // fix UnderPoleLimit for fork mounts
-#if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT)
+#ifdef MOUNT_TYPE_FORK
 #undef UnderPoleLimit
 #define UnderPoleLimit 12
 #endif
@@ -123,7 +123,7 @@ double longitude = 0.0;
 #ifdef MOUNT_TYPE_GEM
 double homePositionAxis1  = 90.0;
 #endif
-#if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT) || defined(MOUNT_TYPE_ALTAZM)
+#if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_ALTAZM)
 double homePositionAxis1  = 0.0;
 #endif
 double homePositionAxis2 = 90.0;
@@ -204,9 +204,6 @@ boolean axis2Enabled             = false;
 byte meridianFlip = MeridianFlipAlways;
 #endif
 #ifdef MOUNT_TYPE_FORK
-byte meridianFlip = MeridianFlipAlign;
-#endif
-#ifdef MOUNT_TYPE_FORK_ALT
 byte meridianFlip = MeridianFlipNever;
 #endif
 #ifdef MOUNT_TYPE_ALTAZM

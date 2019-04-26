@@ -19,7 +19,8 @@
 // Default speed for Serial1 com port, Default=9600
 #define SERIAL_B_BAUD_DEFAULT 9600
 
-// Mount type, default is _GEM (German Equatorial) other options are _FORK, _FORK_ALT.  _FORK switches off Meridian Flips after alignment is done.  _FORK_ALT disables Meridian Flips.  _ALTAZM is for Alt/Azm mounted 'scopes.
+// Mount type, default is _GEM (German Equatorial.) This allows Meridian flips and can be used for other mount types if that behaviour is desired.  _FORK switches off Meridian Flips 
+// but allows travel across the Meridian. _ALTAZM is for Alt/Azm mounted 'scopes.
 #define MOUNT_TYPE_GEM
 
 // Strict parking, default=_OFF.  Set to _ON and unparking is only allowed if successfully parked.  Otherwise unparking is allowed if at home and not parked (the Home/Reset command ":hF#" sets this state.) 

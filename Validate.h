@@ -7,6 +7,11 @@
 // -----------------------------------------------------------------------------------
 // correct for configuration backwards compatability
 
+// the mount type FORK with Meridian flips enabled for align (only) is not-longer required use _FORK instead
+#ifdef MOUNT_TYPE_FORK_ALT
+  #define MOUNT_TYPE_FORK
+#endif
+
 // automatically set MaxRate if DefaultSlewRate is present
 #if !defined(MaxRate) && defined(DesiredBaseSlewRate)
   #define MaxRate ((1000000.0/DesiredBaseSlewRate)/StepsPerDegreeAxis1)
@@ -154,8 +159,6 @@
     #define MAX_NUM_ALIGN_STARS '9'
   #elif defined(MOUNT_TYPE_FORK)
     #define MAX_NUM_ALIGN_STARS '9'
-  #elif defined(MOUNT_TYPE_FORK_ALT)
-    #define MAX_NUM_ALIGN_STARS '9'
   #elif defined(MOUNT_TYPE_ALTAZM)
     #define MAX_NUM_ALIGN_STARS '9'
   #endif
@@ -163,8 +166,6 @@
   #if defined(MOUNT_TYPE_GEM)
     #define MAX_NUM_ALIGN_STARS '6'
   #elif defined(MOUNT_TYPE_FORK)
-    #define MAX_NUM_ALIGN_STARS '6'
-  #elif defined(MOUNT_TYPE_FORK_ALT)
     #define MAX_NUM_ALIGN_STARS '6'
   #elif defined(MOUNT_TYPE_ALTAZM)
     #define MAX_NUM_ALIGN_STARS '6'

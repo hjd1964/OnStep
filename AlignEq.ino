@@ -276,7 +276,7 @@ void TGeoAlign::autoModel(int n) {
   }
   ohe=ohe/num; best_ohe=round(ohe*Rad*3600.0); best_ohw=best_ohe;
 
-#if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT)
+#ifdef MOUNT_TYPE_FORK
   Ff=1; Df=0;
 #else
   Ff=0; Df=1;
@@ -325,7 +325,7 @@ void TGeoAlign::autoModel(int n) {
   altCor=best_pe/3600.0;
 
   tfCor=best_tf/3600.0;
-#if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT) || defined(MOUNT_TYPE_ALTAZM)
+#if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_ALTAZM)
   dfCor=best_ff/3600.0;
 #else
   dfCor=best_df/3600.0;
@@ -369,7 +369,7 @@ void TGeoAlign::equToInstr(double HA, double Dec, double *HA1, double *Dec1, int
       // misalignment due to Dec axis being perp. to RA axis
       double PDh=-pdCor*(sinDec/cosDec)*p;
   
-  #if defined (MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT)
+  #ifdef MOUNT_TYPE_FORK
       // Fork flex
       double DFd=dfCor*cosHA;
   #else
@@ -432,7 +432,7 @@ void TGeoAlign::instrToEqu(double HA, double Dec, double *HA1, double *Dec1, int
     // works on HA instead.  meridian flips affect this in HA
     double PDh=-pdCor*(sinDec/cosDec)*p;
 
-#if defined (MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT)
+#ifdef MOUNT_TYPE_FORK
     // Fork flex
     double DFd=dfCor*cosHA;
 #else

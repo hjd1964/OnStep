@@ -72,9 +72,6 @@ void initStartupValues() {
   meridianFlip = MeridianFlipAlways;
   #endif
   #ifdef MOUNT_TYPE_FORK
-  meridianFlip = MeridianFlipAlign;
-  #endif
-  #ifdef MOUNT_TYPE_FORK_ALT
   meridianFlip = MeridianFlipNever;
   #endif
   #ifdef MOUNT_TYPE_ALTAZM

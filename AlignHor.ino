@@ -335,7 +335,7 @@ void TGeoAlignH::autoModel(int n) {
   altCor=best_pe/3600.0;
 
   tfCor=best_tf/3600.0;
-#if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT) || defined(MOUNT_TYPE_ALTAZM)
+#if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_ALTAZM)
   dfCor=best_ff/3600.0;
 #else
   dfCor=best_df/3600.0;
@@ -380,7 +380,7 @@ void TGeoAlignH::horToInstr(double Alt, double Azm, double *Alt1, double *Azm1, 
       // misalignment due to Alt axis being perp. to Azm axis
       double PDh=-pdCor*(sinAlt/cosAlt)*p;
   
-  #if defined (MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT) || defined(MOUNT_TYPE_ALTAZM)
+  #if defined (MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_ALTAZM)
       // Fork flex
       double DFd=dfCor*cosAzm;
   #else
@@ -446,7 +446,7 @@ void TGeoAlignH::instrToHor(double Alt, double Azm, double *Alt1, double *Azm1, 
     // works on Azm instead.  meridian flips affect this in Azm
     double PDh=-pdCor*(sinAlt/cosAlt)*p;
 
-#if defined (MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT)
+#ifdef MOUNT_TYPE_FORK
     // Fork flex
     double DFd=dfCor*cosAzm;
 #else

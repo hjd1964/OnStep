@@ -665,8 +665,6 @@ void processCommands() {
         reply[i++]='E';
         #elif defined(MOUNT_TYPE_FORK)
         reply[i++]='K';
-        #elif defined(MOUNT_TYPE_FORK_ALT)
-        reply[i++]='k';
         #elif defined(MOUNT_TYPE_ALTAZM)
         reply[i++]='A';
         #endif
@@ -723,8 +721,6 @@ void processCommands() {
                                                      reply[3]|=0b10000001;                       // GEM
         #elif defined(MOUNT_TYPE_FORK)
                                                      reply[3]|=0b10000010;                       // FORK
-        #elif defined(MOUNT_TYPE_FORK_ALT)
-                                                     reply[3]|=0b10000100;                       // FORK ALT
         #elif defined(MOUNT_TYPE_ALTAZM)
                                                      reply[3]|=0b10001000;                       // ALTAZM
         #endif
@@ -778,7 +774,7 @@ void processCommands() {
               case '3': sprintf(reply,"%ld",(long)(Align.azmCor*3600.0)); quietReply=true; break; // azmCor
               case '4': sprintf(reply,"%ld",(long)(Align.doCor*3600.0)); quietReply=true; break;  // doCor
               case '5': sprintf(reply,"%ld",(long)(Align.pdCor*3600.0)); quietReply=true; break;  // pdCor
-#if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT) || defined(MOUNT_TYPE_ALTAZM)
+#if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_ALTAZM)
               case '6': sprintf(reply,"%ld",(long)(Align.dfCor*3600.0)); quietReply=true; break;  // ffCor
               case '7': sprintf(reply,"%ld",(long)(0)); quietReply=true; break;                   // dfCor
 #else
@@ -1665,7 +1661,7 @@ void processCommands() {
             case '3': Align.azmCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;    // azmCor
             case '4': Align.doCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;     // doCor
             case '5': Align.pdCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;     // pdCor
-#if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_FORK_ALT)
+#ifdef MOUNT_TYPE_FORK
             case '6': Align.dfCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;     // ffCor
             case '7': break;                                                               // dfCor
 #else
