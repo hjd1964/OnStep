@@ -1,5 +1,5 @@
 #pragma once
-#include <U8g2lib.h> // https://github.com/olikraus/u8g2/
+#include <U8g2lib.h> // https://github.com/olikraus/u8g2/wiki/u8g2install
 #include "u8g2_ext_event.h"
 #include "Config.h"
 
