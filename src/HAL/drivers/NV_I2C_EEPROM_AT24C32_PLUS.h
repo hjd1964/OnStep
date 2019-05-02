@@ -86,14 +86,13 @@ class nvs {
 
     void update(int i, byte j) {
       if (i>E2END2) {
+        uint8_t k=read(i);
         i=i-(E2END2+1);
-        uint8_t k;
-        k=read(i);
         if (j!=k) {
           // store
           cache[i]=j;
   
-          // mark as write as dirty (needs to be written)
+          // mark write as dirty (needs to be written)
           bitWrite(cacheWriteState[i/8],i%8,1);
   
           // mark read as clean (so we don't overwrite the cache)
