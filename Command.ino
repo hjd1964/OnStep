@@ -761,6 +761,27 @@ void processCommands() {
         
         quietReply=true; 
       } else 
+//  :GW# Get Scope Alignment Status
+//         returns: <mount><tracking><alignment>#
+//            where mount: A-AzEl mounted, P-Equatorially mounted, G-german mounted equatorial
+//                  tracking: T-tracking, N-not tracking
+//                  alignment: 0-needs alignment, 1-one star aligned, 2-two star aligned, 3-three star aligned
+       if ((command[1]=='W') && (parameter[0]==0)) {
+        // mount type
+        #if defined(MOUNT_TYPE_GEM)
+        reply[0]='G';
+        #elif defined(MOUNT_TYPE_FORK)
+        reply[0]='P';
+        #elif defined(MOUNT_TYPE_ALTAZM)
+        reply[0]='A';
+        #endif
+        // tracking
+        if ((trackingState!=TrackingSidereal) || trackingSyncInProgress()) reply[1]='N'; else reply[1]='T';
+        // align status
+        i=alignThisStar-1; if (i<0) i=0; if (i>3) i=3; reply[2]='0'+i;
+        reply[3]=0;
+        quietReply=true;
+       } else
 //  :GXnn#   Get OnStep value
 //         Returns: value
       if (command[1]=='X')  {
