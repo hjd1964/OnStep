@@ -763,9 +763,9 @@ void processCommands() {
       } else 
 //  :GW# Get Scope Alignment Status
 //         returns: <mount><tracking><alignment>#
-//            where mount: A-AzEl mounted, P-Equatorially mounted, G-german mounted equatorial
+//            where mount: A-AltAzm, P-Fork, G-GEM
 //                  tracking: T-tracking, N-not tracking
-//                  alignment: 0-needs alignment, 1-one star aligned, 2-two star aligned, 3-three star aligned
+//                  alignment: 0-needs alignment, 1-one star aligned, 2-two star aligned, >= 3-three star aligned
        if ((command[1]=='W') && (parameter[0]==0)) {
         // mount type
         #if defined(MOUNT_TYPE_GEM)
