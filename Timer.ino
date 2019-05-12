@@ -95,8 +95,6 @@ void timer4SetInterval(long iv) {
 
 //--------------------------------------------------------------------------------------------------
 // Timer1 handles sidereal time and setting up the Axis1/2 intervals for later programming
-volatile boolean wasInbacklashAxis1=false;
-volatile boolean wasInbacklashAxis2=false;
 volatile boolean gotoRateAxis1=false;
 volatile boolean gotoRateAxis2=false;
 volatile byte siderealClockCycleCount=0;
@@ -308,7 +306,7 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
   if ((trackingState!=TrackingMoveTo) && (!inbacklashAxis1)) targetAxis1.part.m+=timerDirAxis1*stepAxis1;
 
   // move the RA/Azm stepper to the target
-  if (posAxis1!=(long)targetAxis1.part.m) {
+  if ((posAxis1!=(long)targetAxis1.part.m) || inbacklashAxis1) {
 
     // set direction
     if (posAxis1<(long)targetAxis1.part.m) dirAxis1=1; else dirAxis1=0;
@@ -389,7 +387,7 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
   if ((trackingState!=TrackingMoveTo) && (!inbacklashAxis2)) targetAxis2.part.m+=timerDirAxis2*stepAxis2;
 
   // move the Dec/Alt stepper to the target
-  if (axis2Powered && (posAxis2!=(long)targetAxis2.part.m)) {
+  if (axis2Powered && ((posAxis2!=(long)targetAxis2.part.m) || inbacklashAxis2)) {
     
     // set direction
     if (posAxis2<(long)targetAxis2.part.m) dirAxis2=1; else dirAxis2=0;
