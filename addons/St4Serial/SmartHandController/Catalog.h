@@ -124,6 +124,7 @@ private:
     double DistFromEqu(double RA, double Dec);
     double HAToRA(double ha);
     void EquToHor(double RA, double Dec, double *Alt, double *Azm);
+    void EquToAlt(double RA, double Dec, double *Alt);
     void HorToEqu(double Alt, double Azm, double *RA, double *Dec);
     double TrueRefrac(double Alt, double Pressure=1010.0, double Temperature=10.0);
 

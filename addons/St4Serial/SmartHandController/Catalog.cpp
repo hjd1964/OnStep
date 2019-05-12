@@ -266,32 +266,18 @@ bool CatMgr::hasActiveFilter() {
 // checks to see if the currently selected object is filtered (returns true if filtered out)
 bool CatMgr::isFiltered() {
   if (!isInitialized()) return false;
-  if (_fm==FM_NONE) return false;
+  if (_fm == FM_NONE)   return false;
+  if (_fm & FM_CONSTELLATION) { if (constellation()!=_fm_con) return true; }
+  if (_fm & FM_OBJ_TYPE)      { if (isDsoCatalog() && (objectType()!=_fm_obj_type)) return true; }
+  if (_fm & FM_BY_MAG)        { if (magnitude()>=_fm_mag_limit) return true; }
+  if (_fm & FM_NEARBY)        { if (DistFromEqu(_lastTeleRA,_lastTeleDec)>=_fm_nearby_dist) return true; }
+  if (_fm & FM_DBL_MAX_SEP)   { if (isDblStarCatalog() && ((separation()>_fm_dbl_max) || (separation()<0))) return true; }
+  if (_fm & FM_DBL_MIN_SEP)   { if (isDblStarCatalog() && ((separation()<_fm_dbl_min) || (separation()<0))) return true; }
+  if (_fm & FM_VAR_MAX_PER)   { if (isVarStarCatalog() && ((period()    >_fm_var_max) || (period()    <0))) return true; }
   if (_fm & FM_ABOVE_HORIZON) { if (alt()<0.0) return true; }
   if (_fm & FM_ALIGN_ALL_SKY) {
     if (alt()<10.0) return true;      // minimum 10 degrees altitude
     if (abs(dec())>85.0) return true; // minimum 5 degrees from the pole (for accuracy)
-  }
-  if (_fm & FM_CONSTELLATION) {
-    if (constellation()!=_fm_con) return true;
-  }
-  if (_fm & FM_OBJ_TYPE) {
-    if (isDsoCatalog() && (objectType()!=_fm_obj_type)) return true;
-  }
-  if (_fm & FM_BY_MAG) {
-    if (magnitude()>=_fm_mag_limit) return true;
-  }
-  if (_fm & FM_NEARBY) {
-    if (DistFromEqu(_lastTeleRA,_lastTeleDec)>=_fm_nearby_dist) return true;
-  }
-  if (_fm & FM_DBL_MAX_SEP) {
-    if (isDblStarCatalog() && ((separation()>_fm_dbl_max) || (separation()<0))) return true;
-  }
-  if (_fm & FM_DBL_MIN_SEP) {
-    if (isDblStarCatalog() && ((separation()<_fm_dbl_min) || (separation()<0))) return true;
-  }
-  if (_fm & FM_VAR_MAX_PER) {
-    if (isVarStarCatalog() && ((period()>_fm_var_max) || (period()<0))) return true;
   }
   return false;
 }  
@@ -413,8 +399,8 @@ int CatMgr::epoch() {
 
 // Alt in degrees
 double CatMgr::alt() {
-  double a,z;
-  EquToHor(ra(),dec(),&a,&z);
+  double a;
+  EquToAlt(ra(),dec(),&a);
   return a;
 }
 
@@ -756,6 +742,18 @@ void CatMgr::EquToHor(double RA, double Dec, double *Alt, double *Azm) {
   double t2=cos(HA)*_sinLat-tan(Dec)*_cosLat;
   *Azm=atan2(t1,t2)*Rad;
   *Azm=*Azm+180.0;
+  *Alt = *Alt*Rad;
+}
+
+// convert equatorial coordinates to horizon, in degrees
+void CatMgr::EquToAlt(double RA, double Dec, double *Alt) {
+  double HA=lstDegs()-RA;
+  while (HA<0.0)    HA=HA+360.0;
+  while (HA>=360.0) HA=HA-360.0;
+  HA =HA/Rad;
+  Dec=Dec/Rad;
+  double SinAlt = (sin(Dec) * _sinLat) + (cos(Dec) * _cosLat * cos(HA));  
+  *Alt = asin(SinAlt);
   *Alt = *Alt*Rad;
 }
 
