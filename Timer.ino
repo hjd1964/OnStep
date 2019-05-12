@@ -117,18 +117,32 @@ IRAM_ATTR ISR(TIMER1_COMPA_vect)
   HAL_TIMER1_PREFIX;
 #endif
 
-  // run 1/3 of the time at 3x the rate, unless a goto is happening
-  if (trackingState!=TrackingMoveTo) { siderealClockCycleCount++; if (siderealClockCycleCount%3!=0) goto done; siderealClockCycleCount=0; }
-  lst++;
-
-  // handle buzzer
-  if (buzzerDuration>0) { buzzerDuration--; if (buzzerDuration==0) digitalWrite(TonePin,LOW); }
+  // run at 3x the rate, unless a goto is happening
+  bool centiSecond=true;
+  if (trackingState!=TrackingMoveTo) {
+    siderealClockCycleCount++; 
+    if (siderealClockCycleCount%3!=0) {
+      centiSecond=false;
+#ifndef HAL_FAST_PROCESSOR
+      goto done;
+#endif
+    } else siderealClockCycleCount=0;
+  }
+  
+  if (centiSecond) {
+    lst++;
+    // handle buzzer
+    if (buzzerDuration>0) { buzzerDuration--; if (buzzerDuration==0) digitalWrite(TonePin,LOW); }
+  }
 
 #ifndef ESP32
-  timerSupervisor(true);
+  timerSupervisor(centiSecond);
 #endif
 
+#ifndef HAL_FAST_PROCESSOR
 done: {}
+#endif
+
 #ifdef HAL_TIMER1_SUFFIX
   HAL_TIMER1_SUFFIX;
 #endif
