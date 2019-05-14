@@ -62,7 +62,7 @@
 #elif defined(NV_MB85RC256V)
   #include "../drivers/NV_I2C_FRAM_MB85RC256V.h"
 #else
-  #include "../drivers/NV_I2C_EEPROM_AT24C32.h"
+  #include "../drivers/NV_I2C_EEPROM_AT24C32_C.h"
 #endif
 
 // Use an RTC (Real Time Clock) if present -----------------------------------------------------------
