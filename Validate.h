@@ -154,21 +154,25 @@
 #endif
 
 // figure out how many align star are allowed for the configuration
-#if defined(HAL_FAST_PROCESSOR)
-  #if defined(MOUNT_TYPE_GEM)
-    #define MAX_NUM_ALIGN_STARS '9'
-  #elif defined(MOUNT_TYPE_FORK)
-    #define MAX_NUM_ALIGN_STARS '9'
-  #elif defined(MOUNT_TYPE_ALTAZM)
-    #define MAX_NUM_ALIGN_STARS '9'
-  #endif
+#if defined(MAX_NUM_ALIGN_STARS)
+  #warning MAX_NUM_ALIGN_STARS explicitly defined in Config.x.h file. Controller may be slow after last star align.
 #else
-  #if defined(MOUNT_TYPE_GEM)
-    #define MAX_NUM_ALIGN_STARS '6'
-  #elif defined(MOUNT_TYPE_FORK)
-    #define MAX_NUM_ALIGN_STARS '6'
-  #elif defined(MOUNT_TYPE_ALTAZM)
-    #define MAX_NUM_ALIGN_STARS '6'
+  #if defined(HAL_FAST_PROCESSOR)
+    #if defined(MOUNT_TYPE_GEM)
+      #define MAX_NUM_ALIGN_STARS '9'
+    #elif defined(MOUNT_TYPE_FORK)
+      #define MAX_NUM_ALIGN_STARS '9'
+    #elif defined(MOUNT_TYPE_ALTAZM)
+      #define MAX_NUM_ALIGN_STARS '9'
+    #endif
+  #else
+    #if defined(MOUNT_TYPE_GEM)
+      #define MAX_NUM_ALIGN_STARS '6'
+    #elif defined(MOUNT_TYPE_FORK)
+      #define MAX_NUM_ALIGN_STARS '6'
+    #elif defined(MOUNT_TYPE_ALTAZM)
+      #define MAX_NUM_ALIGN_STARS '6'
+    #endif
   #endif
 #endif
 
