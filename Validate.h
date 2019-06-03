@@ -155,7 +155,7 @@
 
 // figure out how many align star are allowed for the configuration
 #if defined(MAX_NUM_ALIGN_STARS)
-  #if MAX_NUM_ALIGN_STARS > 9 || MAX_NUM_ALIGN_STARS < 6
+  #if MAX_NUM_ALIGN_STARS > '9' || MAX_NUM_ALIGN_STARS < '6'
     #error MAX_NUM_ALIGN_STARS must be 6 to 9
   #else
     #warning MAX_NUM_ALIGN_STARS explicitly defined in Config file. Controller may be slow for a few minutes after last star align.
