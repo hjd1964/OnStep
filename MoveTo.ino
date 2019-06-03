@@ -282,8 +282,8 @@ void moveTo() {
           SiderealClockSetInterval(siderealInterval);
           setDeltaTrackingRate();
           
-          // allow 10 seconds for synchronization of coordinates after goto ends
-          if (trackingState==TrackingSidereal) trackingSyncSeconds=15;
+          // allow 5 seconds for synchronization of coordinates after goto ends
+          if (trackingState==TrackingSidereal) trackingSyncSeconds=5;
         }
       }
     }
