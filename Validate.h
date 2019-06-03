@@ -162,21 +162,9 @@
   #endif
 #else
   #if defined(HAL_FAST_PROCESSOR)
-    #if defined(MOUNT_TYPE_GEM)
-      #define MAX_NUM_ALIGN_STARS '9'
-    #elif defined(MOUNT_TYPE_FORK)
-      #define MAX_NUM_ALIGN_STARS '9'
-    #elif defined(MOUNT_TYPE_ALTAZM)
-      #define MAX_NUM_ALIGN_STARS '9'
-    #endif
+    #define MAX_NUM_ALIGN_STARS '9'
   #else
-    #if defined(MOUNT_TYPE_GEM)
-      #define MAX_NUM_ALIGN_STARS '6'
-    #elif defined(MOUNT_TYPE_FORK)
-      #define MAX_NUM_ALIGN_STARS '6'
-    #elif defined(MOUNT_TYPE_ALTAZM)
-      #define MAX_NUM_ALIGN_STARS '6'
-    #endif
+    #define MAX_NUM_ALIGN_STARS '6'
   #endif
 #endif
 
