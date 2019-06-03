@@ -139,7 +139,7 @@
                                      // For a Northern Hemisphere user, this would stop tracking when the mount is in the polar home position but
                                      // that can be easily worked around by doing an alignment once and saving a park position (assuming a 
                                      // fork/yoke mount with meridian flips turned off by setting the minutesPastMeridian values to cover the whole sky)
-#define MaxAzm                   180 // Alt/Az mounts only. +/- maximum allowed Azimuth, default =  180.  Allowed range is 180 to 360
+#define MaxAzm                   360 // Alt/Az mounts only. +/- maximum allowed Azimuth, default = 360.  Allowed range is 180 to 360
                                      // Axis3 is optional and for a rotator/de-rotator
 
 // AXIS1/2 STEPPER DRIVER CONTROL ------------------------------------------------------------------------------------------
