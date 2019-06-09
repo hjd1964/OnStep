@@ -15,8 +15,8 @@ const char html_settingsTrack2[] =
 "<button name='tk' value='on' type='submit'>On</button>"
 "<button name='tk' value='off' type='submit'>Off</button><br />";
 const char html_settingsTrack3[] = 
-"<button name='tk' value='f' type='submit'>+ (0.1Hz faster)</button>"
-"<button name='tk' value='-' type='submit'>- (0.1Hz slower)</button>"
+"<button name='tk' value='f' type='submit'>+ (0.02Hz faster)</button>"
+"<button name='tk' value='-' type='submit'>- (0.02Hz slower)</button>"
 "<button name='tk' value='r' type='submit'>Reset (default)</button>";
 
 const char html_settingsTrackComp1[] = 
