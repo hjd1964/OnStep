@@ -40,7 +40,7 @@
 // firmware info, these are returned by the ":GV?#" commands
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  2
-#define FirmwareVersionMinor  0       // minor version 0 to 99
+#define FirmwareVersionMinor  22      // minor version 0 to 99
 #define FirmwareVersionPatch  "b"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 2       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
