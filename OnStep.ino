@@ -375,11 +375,11 @@ void loop2() {
     // support for limit switch(es)
 #ifdef LIMIT_SENSE_ON
     byte limit_1st = digitalRead(LimitPin);
-    if (limit_1st == LOW) {
+    if (limit_1st == LIMIT_SENSE_STATE) {
       // Wait for a short while, then read again
       delayMicroseconds(50);
       byte limit_2nd = digitalRead(LimitPin);
-      if (limit_2nd == LOW) {
+      if (limit_2nd == LIMIT_SENSE_STATE) {
         // It is still low, there must be a problem
         lastError=ERR_LIMIT_SENSE;
         stopLimit();
