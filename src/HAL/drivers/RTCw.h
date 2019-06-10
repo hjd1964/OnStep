@@ -60,6 +60,8 @@ RtcDS3231<TwoWire> _Rtc(HAL_Wire);
 
 class rtcw {
   public:
+    bool active=false;
+
     // initialize (also enables the RTC PPS if available)
     void init() {
       _Rtc.Begin(); if (!_Rtc.GetIsRunning()) _Rtc.SetIsRunning(true);
@@ -115,8 +117,6 @@ class rtcw {
       HAL_Wire.end();
 #endif
     }
-  private:
-    bool active=false;
 };
 
 #elif defined(RTC_TEENSY)
@@ -127,6 +127,8 @@ class rtcw {
  
 class rtcw {
   public:
+    bool active=false;
+
     // initialize (also enables the RTC PPS if available)
     void init() {
       active=true;
@@ -169,8 +171,6 @@ class rtcw {
         }
  
     }
-  private:
-    bool active=false;
 };
 
 #else
@@ -179,6 +179,8 @@ class rtcw {
 
 class rtcw {
   public:
+    bool active=false;
+
     // initialize (also enables the RTC PPS if available)
     void init() {
       active=false;
@@ -197,9 +199,6 @@ class rtcw {
       (void)LMT;
       if (!active) return;
     }
-
-  private:
-    bool active=false;
 };
 #endif
 
