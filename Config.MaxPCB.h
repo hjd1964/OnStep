@@ -65,8 +65,8 @@
 // PEC sense, rising edge (default with PEC_SENSE_STATE HIGH, use LOW for falling edge, ex. PEC_SENSE_ON) ; for optional PEC index
 #define PEC_SENSE_STATE HIGH
 
-#define LIMIT_SENSE_OFF
 // Switch close (to ground) on Aux7 (Pin 4) for optional limit sense (stops gotos and/or tracking), default=_OFF  Choose only one feature on Aux7.
+#define LIMIT_SENSE_OFF
 // Change this to HIGH if your switch is on when tripped
 #define LIMIT_SENSE_STATE LOW
 
@@ -240,4 +240,3 @@
 #define FileVersionConfig 2
   #include "src/pinmaps/Pins.MaxPCB.h"
 #endif
-
