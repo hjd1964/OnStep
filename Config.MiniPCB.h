@@ -67,6 +67,8 @@
 
 #define LIMIT_SENSE_OFF
 // Switch close (to ground) on Aux3 (Pin 4) for optional limit sense (stops gotos and/or tracking), default=_OFF  Choose only one feature on Aux4.
+// Change this to HIGH if your switch is on when tripped
+#define LIMIT_SENSE_STATE LOW
 
 // Light status LED by sink to ground (Pin 19), default=_ON.
 // _ON and OnStep keeps this illuminated to indicate that the controller is active.  When sidereal tracking this LED will rapidly flash

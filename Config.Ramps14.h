@@ -70,6 +70,8 @@
 
 // Switch close (to ground) on Pin 3 for optional limit sense (stops gotos and/or tracking), default=_OFF
 #define LIMIT_SENSE_OFF
+// Change this to HIGH if your switch is on when tripped
+#define LIMIT_SENSE_STATE LOW
 
 // Light status LED by sink to ground (Pin 11), default=_ON.
 // _ON and OnStep keeps this illuminated to indicate that the controller is active.  When sidereal tracking this LED will rapidly flash

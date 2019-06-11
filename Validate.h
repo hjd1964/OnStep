@@ -528,6 +528,16 @@
   #define AXIS2_STEP_GOTO 1
 #endif
 
+// Limit sense state
+#ifdef LIMIT_SENSE_STATE
+  #if LIMIT_SENSE_STATE != LOW && LIMIT_SENSE_STATE != HIGH
+    #error "LIMIT_SENSE_STATE must be either HIGH or LOW"
+  #endif
+#else
+  // Default to low
+  #define LIMIT_SENSE_STATE LOW
+#endif
+
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
 // misc. validation
