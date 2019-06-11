@@ -70,7 +70,7 @@
 
 // Switch close (to ground) on Pin 3 for optional limit sense (stops gotos and/or tracking), default=_OFF
 #define LIMIT_SENSE_OFF
-// Change this to HIGH if your switch is on when tripped
+// Default LOW for NO (normally open) limit switches which close when triggered, change this to HIGH if your switch is NC (normally closed) and only opens when triggered.
 #define LIMIT_SENSE_STATE LOW
 
 // Light status LED by sink to ground (Pin 11), default=_ON.
@@ -234,4 +234,3 @@
 #define FileVersionConfig 2
 #include "src/pinmaps/Pins.Ramps14.h"
 #endif
-

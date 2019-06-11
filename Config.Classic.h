@@ -63,9 +63,9 @@
 // PEC sense, rising edge (default with PEC_SENSE_STATE HIGH, use LOW for falling edge) on pin 2 (ex. PEC_SENSE_ON) ; for optional PEC index
 #define PEC_SENSE_STATE HIGH
 
-// switch close (to ground) on pin 3 for optional limit sense (stops gotos and/or tracking), default=_OFF
+// Switch close (to ground) on pin 3 for optional limit sense (stops gotos and/or tracking), default=_OFF
 #define LIMIT_SENSE_OFF
-// Change this to HIGH if your switch is on when tripped
+// Default LOW for NO (normally open) limit switches which close when triggered, change this to HIGH if your switch is NC (normally closed) and only opens when triggered.
 #define LIMIT_SENSE_STATE LOW
 
 // Light status LED by sink to ground (pin 9) and source +5V (pin 8), default=_ON

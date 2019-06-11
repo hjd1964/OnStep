@@ -77,7 +77,7 @@
 
 // Switch close (to ground) on Aux7 (Pin 39) for optional limit sense (stops gotos and/or tracking), Built-in pullup resistors are not available. Default=_OFF.  Choose only one feature on Aux7.
 #define LIMIT_SENSE_OFF
-// Change this to HIGH if your switch is on when tripped
+// Default LOW for NO (normally open) limit switches which close when triggered, change this to HIGH if your switch is NC (normally closed) and only opens when triggered.
 #define LIMIT_SENSE_STATE LOW
 
 // Light status LED by sink to ground Aux8 (Pin 25), default=_OFF. Choose only one feature on Aux8.
