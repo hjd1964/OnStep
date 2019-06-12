@@ -15,8 +15,8 @@
   volatile boolean clearAxis1 = true;
   volatile boolean takeStepAxis1 = false;
   volatile boolean clearAxis2 = true;
-  volatile boolean takeStepAxis2 = false;
 #endif
+  volatile boolean takeStepAxis2 = false;
 
 #if defined(AXIS1_MODE) && defined(AXIS1_MODE_GOTO)
   volatile long modeAxis1_next=AXIS1_MODE;
