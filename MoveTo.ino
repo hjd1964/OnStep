@@ -177,11 +177,11 @@ void moveTo() {
   // make sure we're using the tracking mode microstep setting near the end of slew
   if ((distDestAxis1<=getStepsPerSecondAxis1()) && (distDestAxis2<=getStepsPerSecondAxis2()) ) stepperModeTracking();
 
-  // the end of slew doesn't get close enough within 6 seconds: stop tracking for a moment to allow target/actual position synchronization
+  // the end of slew doesn't get close enough within 4 seconds force the slew to end
   static unsigned long slewStopTime=0;
   static bool slewEnding=false;
   static bool slewForceEnd=false;
-  if ( !slewEnding && (distDestAxis1<=getStepsPerSecondAxis1()*2L) && (distDestAxis2<=getStepsPerSecondAxis2()*2L) ) { slewStopTime=millis()+6000L; slewEnding=true; }
+  if ( !slewEnding && (distDestAxis1<=getStepsPerSecondAxis1()*4L) && (distDestAxis2<=getStepsPerSecondAxis2()*4L) ) { slewStopTime=millis()+4000L; slewEnding=true; }
   if ( slewEnding && (long)(millis()-slewStopTime)>0) { lastError=ERR_GOTO_SYNC; slewForceEnd=true; }
 
   if ( ((distDestAxis1<=ceil(abs(fixedToDouble(fstepAxis1)))+1) && (distDestAxis2<=ceil(abs(fixedToDouble(fstepAxis2)))+1) ) || slewForceEnd) {
