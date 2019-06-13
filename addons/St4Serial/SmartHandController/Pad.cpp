@@ -32,6 +32,13 @@ bool Pad::anyPressed()
   return false;
 }
 
+bool Pad::nsewPressed()
+{
+  if (n.isDown() || s.isDown() || e.isDown() || w.isDown()) return true;
+  if (n.wasPressed(true) || s.wasPressed(true) || e.wasPressed(true) || w.wasPressed(true)) return true;
+  return false;
+}
+
 void Pad::waitForPress() {
   for (;;) { tickButtons(); delay(5); if (anyPressed()) break; }
 }

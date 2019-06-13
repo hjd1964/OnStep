@@ -9,6 +9,7 @@ public:
 
   void tickButtons();
   bool anyPressed();
+  bool nsewPressed();  
   void waitForPress();
   void clearAllPressed();
 

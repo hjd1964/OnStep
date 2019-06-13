@@ -418,12 +418,13 @@ void SmartHandController::update()
   // is a goto happening?
   if (telInfo.connected && (telInfo.getTrackingState() == Telescope::TRK_SLEWING || telInfo.getParkState() == Telescope::PRK_PARKING))
   {
-    if (buttonPad.anyPressed()) {
+    if (buttonPad.nsewPressed()) {
       Ser.print(":Q#"); Ser.flush();
       if (telInfo.align != Telescope::ALI_OFF) telInfo.align = static_cast<Telescope::AlignState>(telInfo.align - 1); // try another align star?
       time_last_action = millis();
       display->sleepOff();
       buttonPad.clearAllPressed();
+      DisplayMessage("Slew to target", "canceled!", 1000);
       return;
     }
   } else
