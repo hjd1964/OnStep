@@ -184,7 +184,7 @@ void moveTo() {
   if (!slewEnding && (distDestAxis1<=getStepsPerSecondAxis1()*4L) && (distDestAxis2<=getStepsPerSecondAxis2()*4L) ) { slewStopTime=millis()+4000L; slewEnding=true; }
   if (slewEnding && (long)(millis()-slewStopTime)>0) { lastError=ERR_GOTO_SYNC; slewForceEnd=true; }
 
-  if (slewForceEnd) {
+  if ( ((distDestAxis1<=ceil(abs(fixedToDouble(fstepAxis1)))+4) && (distDestAxis2<=ceil(abs(fixedToDouble(fstepAxis2)))+4) ) || slewForceEnd ) {
     slewEnding=false;
     slewForceEnd=false;
     abortSlew=0;
