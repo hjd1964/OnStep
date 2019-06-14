@@ -219,8 +219,13 @@ GotoErrors goToEqu(double RA, double Dec) {
   equToHor(HA,Dec,&a,&z);
 
   // validate
-  GotoErrors r=validateGoto(); if (r==GOTO_ERR_GOTO) { if (!abortSlew) abortSlew=StartAbortSlew; } if (r!=GOTO_ERR_NONE) return r;
-  r=validateGotoCoords(HA,Dec,a); if (r!=GOTO_ERR_NONE) return r;
+  GotoErrors r=validateGoto(); 
+#ifndef GOTO_ERR_GOTO_OFF
+  if (r==GOTO_ERR_GOTO) { if (!abortSlew) abortSlew=StartAbortSlew; } 
+#endif
+  if (r!=GOTO_ERR_NONE) return r;
+  r=validateGotoCoords(HA,Dec,a);
+  if (r!=GOTO_ERR_NONE) return r;
 
 #ifdef MOUNT_TYPE_ALTAZM
   equToHor(HA,Dec,&a,&z);
