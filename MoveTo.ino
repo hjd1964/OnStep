@@ -182,7 +182,11 @@ void moveTo() {
   static bool slewEnding=false;
   static bool slewForceEnd=false;
   if (!slewEnding && (distDestAxis1<=getStepsPerSecondAxis1()*4L) && (distDestAxis2<=getStepsPerSecondAxis2()*4L) ) { slewStopTime=millis()+4000L; slewEnding=true; }
-  if (slewEnding && (long)(millis()-slewStopTime)>0) { lastError=ERR_GOTO_SYNC; slewForceEnd=true; }
+  if (slewEnding && ((long)(millis()-slewStopTime)>0)) {
+    if (abortSlew!=0) { cli(); targetAxis1.part.m=posAxis1; targetAxis2.part.m=posAxis2; sei(); }
+    lastError=ERR_GOTO_SYNC;
+    slewForceEnd=true;
+  }
 
   if ( ((distDestAxis1<=ceil(abs(fixedToDouble(fstepAxis1)))+4) && (distDestAxis2<=ceil(abs(fixedToDouble(fstepAxis2)))+4) ) || slewForceEnd ) {
     slewEnding=false;
