@@ -470,13 +470,11 @@ double getTrackingRate() {
 
 double getTrackingRate60Hz() {
   double f;
-  if (trackingState==TrackingSidereal) {
 #ifdef MOUNT_TYPE_ALTAZM
     f=getTrackingRate()*1.00273790935*60.0; 
 #else
     cli(); f=(trackingTimerRateAxis1*1.00273790935)*60.0; sei();
 #endif
-  } else f=0.0;
   return f;
 }
 

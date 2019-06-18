@@ -625,7 +625,8 @@ void processCommands() {
 //         Returns the tracking rate if siderealTracking, 0.0 otherwise
       if (command[1]=='T')  {
         char temp[10];
-        dtostrf(getTrackingRate60Hz(),0,5,temp);
+        if ((trackingState==TrackingSidereal) && !trackingSyncInProgress()) f=getTrackingRate60Hz(); else f=0.0;
+        dtostrf(f,0,5,temp);
         strcpy(reply,temp);
         quietReply=true;
       } else 
