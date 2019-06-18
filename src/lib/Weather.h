@@ -114,6 +114,8 @@ class weather {
     // accurate to +/- 1 deg. C for RH above 50%
     double getDewPoint() {
       return _t-((100.0-_h)/5.0);
+      // a more accurate formula?
+      // return 243.04*(log(_h/100.0)+((17.625*_t)/(243.04+_t)))/(17.625-log(_h/100.0)-((17.625*_t)/(243.04+_t)));
     }
 
   private:
