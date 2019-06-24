@@ -224,6 +224,11 @@
     #define TMC_AXIS1_MODE_GOTO 0
   #endif
 
+  // basic check to see if a valid stepper driver code exists
+  #if ((AXIS1_DRIVER_MODEL < A4988) || (AXIS1_DRIVER_MODEL > ST820)) && (AXIS1_DRIVER_MODEL != TMC2130)
+    #error "AXIS1_DRIVER_MODEL; Unknown stepper driver specified, check your configuration file."
+  #endif
+
   // special SPI decay modes etc. for TMC2130 AXIS2
   #if AXIS2_DRIVER_MODEL == TMC2130_LOWPWR
     #undef AXIS2_DRIVER_MODEL
@@ -253,6 +258,11 @@
   #else
     #define TMC_AXIS2_MODE 0
     #define TMC_AXIS2_MODE_GOTO 0
+  #endif
+
+  // basic check to see if a valid stepper driver code exists
+  #if ((AXIS2_DRIVER_MODEL < A4988) || (AXIS2_DRIVER_MODEL > ST820)) && (AXIS2_DRIVER_MODEL != TMC2130)
+    #error "AXIS2_DRIVER_MODEL; Unknown stepper driver specified, check your configuration file."
   #endif
 
   // tracking micro-step mode AXIS1

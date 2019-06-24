@@ -27,8 +27,9 @@
 #define TMC2130 100
 #define TMC2130_QUIET 101  // these variations don't appear at run-time and are changed to "TMC2130"
 #define TMC2130_VQUIET 102
-#define TMC2130_QUIET_LOWPWR 103
-#define TMC2130_VQUIET_LOWPWR 104
+#define TMC2130_LOWPWR 103
+#define TMC2130_QUIET_LOWPWR 104
+#define TMC2130_VQUIET_LOWPWR 105
 
 // Stepper driver minimum pulse width
 #define A4988_PULSE_WIDTH   1000
