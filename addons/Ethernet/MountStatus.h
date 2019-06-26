@@ -2,7 +2,7 @@
 
 enum RateCompensation {RC_NONE, RC_REFR_RA, RC_REFR_BOTH, RC_FULL_RA, RC_FULL_BOTH};
 enum MountTypes {MT_UNKNOWN, MT_GEM, MT_FORK, MT_FORKALT, MT_ALTAZM};
-enum Errors {ERR_NONE, ERR_MOTOR_FAULT, ERR_ALT, ERR_LIMIT_SENSE, ERR_DEC, ERR_AZM, ERR_UNDER_POLE, ERR_MERIDIAN, ERR_SYNC, ERR_PARK, ERR_GOTO_SYNC};
+enum Errors {ERR_NONE, ERR_MOTOR_FAULT, ERR_ALT_MIN, ERR_LIMIT_SENSE, ERR_DEC, ERR_AZM, ERR_UNDER_POLE, ERR_MERIDIAN, ERR_SYNC, ERR_PARK, ERR_GOTO_SYNC, ERR_UNSPECIFIED, ERR_ALT_MAX, ERR_GOTO_ERR_NONE, ERR_GOTO_ERR_BELOW_HORIZON, ERR_GOTO_ERR_ABOVE_OVERHEAD, ERR_GOTO_ERR_STANDBY, ERR_GOTO_ERR_PARK, ERR_GOTO_ERR_GOTO, ERR_GOTO_ERR_OUTSIDE_LIMITS, ERR_GOTO_ERR_HARDWARE_FAULT, ERR_GOTO_ERR_IN_MOTION, ERR_GOTO_ERR_UNSPECIFIED};
 #define PierSideNone     0
 #define PierSideEast     1
 #define PierSideWest     2
@@ -160,16 +160,28 @@ class MountStatus {
     bool getLastErrorMessage(char message[]) {
       strcpy(message,"");
       if (_lastError==ERR_NONE) strcpy(message,"None"); else
-      if (_lastError==ERR_MOTOR_FAULT) strcpy(message,"Motor or Driver Fault"); else
-      if (_lastError==ERR_ALT) strcpy(message,"Altitude Min/Max"); else
+      if (_lastError==ERR_MOTOR_FAULT) strcpy(message,"Motor/Driver Fault"); else
+      if (_lastError==ERR_ALT_MIN) strcpy(message,"Below Horizon Limit"); else
       if (_lastError==ERR_LIMIT_SENSE) strcpy(message,"Limit Sense"); else
       if (_lastError==ERR_DEC) strcpy(message,"Dec Limit Exceeded"); else
       if (_lastError==ERR_AZM) strcpy(message,"Azm Limit Exceeded"); else
       if (_lastError==ERR_UNDER_POLE) strcpy(message,"Under Pole Limit Exceeded"); else
       if (_lastError==ERR_MERIDIAN) strcpy(message,"Meridian Limit (W) Exceeded"); else
-      if (_lastError==ERR_SYNC) strcpy(message,"Sync. ignored >30&deg;"); else
+      if (_lastError==ERR_SYNC) strcpy(message,"Sync Safety Limit Exceeded"); else
       if (_lastError==ERR_PARK) strcpy(message,"Park Failed"); else
-      if (_lastError==ERR_GOTO_SYNC) strcpy(message,"Goto Sync. Failed"); else
+      if (_lastError==ERR_GOTO_SYNC) strcpy(message,"Goto Sync Failed"); else
+      if (_lastError==ERR_UNSPECIFIED) strcpy(message,"Unknown Error"); else
+      if (_lastError==ERR_ALT_MAX) strcpy(message,"Above Overhead Limit"); else
+      if (_lastError==ERR_GOTO_ERR_NONE) strcpy(message,"Goto No Error"); else
+      if (_lastError==ERR_GOTO_ERR_BELOW_HORIZON) strcpy(message, "Goto Below Horizon"); else
+      if (_lastError==ERR_GOTO_ERR_ABOVE_OVERHEAD) strcpy(message,"Goto Abv Overhead"); else
+      if (_lastError==ERR_GOTO_ERR_STANDBY) strcpy(message,"Goto Err Standby"); else
+      if (_lastError==ERR_GOTO_ERR_PARK) strcpy(message,"Goto Err Park"); else
+      if (_lastError==ERR_GOTO_ERR_GOTO) strcpy(message,"Goto Err Goto"); else
+      if (_lastError==ERR_GOTO_ERR_OUTSIDE_LIMITS) strcpy(message,"Goto Outside Limits"); else
+      if (_lastError==ERR_GOTO_ERR_HARDWARE_FAULT) strcpy(message,"Goto H/W Fault"); else
+      if (_lastError==ERR_GOTO_ERR_IN_MOTION) strcpy(message,"Goto Err Motion"); else
+      if (_lastError==ERR_GOTO_ERR_UNSPECIFIED) strcpy(message,"Goto Unknown Error"); else
         sprintf(message,"Unknown Error, code %d",(int)_lastError);
       return message[0];
     }

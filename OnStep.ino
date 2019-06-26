@@ -41,7 +41,7 @@
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  2
 #define FirmwareVersionMinor  22      // minor version 0 to 99
-#define FirmwareVersionPatch  "g"     // for example major.minor patch: 1.3c
+#define FirmwareVersionPatch  "h"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 2       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
@@ -415,7 +415,8 @@ void loop2() {
 
     if (safetyLimitsOn) {
       // check altitude overhead limit and horizon limit
-      if ((currentAlt<minAlt) || (currentAlt>maxAlt)) { lastError=ERR_ALT; stopLimit(); }
+      if (currentAlt<minAlt) { lastError=ERR_ALT_MIN; stopLimit(); }
+      if (currentAlt>maxAlt) { lastError=ERR_ALT_MAX; stopLimit(); }
     }
 
     // OPTION TO POWER DOWN AXIS2 IF NOT MOVING

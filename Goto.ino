@@ -32,6 +32,13 @@ GotoErrors validateGoToEqu(double RA, double Dec) {
   return r;
 }
 
+void setLastErrorForGoto(GotoErrors r) {
+  // check to see if lastError was a goto error and clear it if so
+  if ((lastError>ERR_GOTO_ERR_NONE) && (lastError<=ERR_GOTO_ERR_UNSPECIFIED)) lastError=ERR_NONE;
+  // if an goto error exists log it
+  if (r!=GOTO_ERR_NONE) lastError=(Errors)((int)ERR_GOTO_ERR_NONE+(int)r);
+}
+
 // syncs the telescope/mount to the sky
 GotoErrors syncEqu(double RA, double Dec) {
   double a,z;
@@ -42,8 +49,10 @@ GotoErrors syncEqu(double RA, double Dec) {
   equToHor(HA,Dec,&a,&z);
 
   // validate
-  GotoErrors f=validateGoto(); if ((f!=GOTO_ERR_NONE) && (f!=GOTO_ERR_STANDBY)) return f;
-  f=validateGotoCoords(HA,Dec,a); if (f!=GOTO_ERR_NONE) return f;
+  GotoErrors r=validateGoto(); setLastErrorForGoto(r);
+  if ((r!=GOTO_ERR_NONE) && (r!=GOTO_ERR_STANDBY)) return r;
+  r=validateGotoCoords(HA,Dec,a); setLastErrorForGoto(r);
+  if (r!=GOTO_ERR_NONE) return r;
 
   double Axis1,Axis2;
 #ifdef MOUNT_TYPE_ALTAZM
@@ -219,12 +228,12 @@ GotoErrors goToEqu(double RA, double Dec) {
   equToHor(HA,Dec,&a,&z);
 
   // validate
-  GotoErrors r=validateGoto(); 
+  GotoErrors r=validateGoto(); setLastErrorForGoto(r);
 #ifndef GOTO_ERR_GOTO_OFF
   if (r==GOTO_ERR_GOTO) { if (!abortSlew) abortSlew=StartAbortSlew; } 
 #endif
   if (r!=GOTO_ERR_NONE) return r;
-  r=validateGotoCoords(HA,Dec,a);
+  r=validateGotoCoords(HA,Dec,a); setLastErrorForGoto(r);
   if (r!=GOTO_ERR_NONE) return r;
 
 #ifdef MOUNT_TYPE_ALTAZM
