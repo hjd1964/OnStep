@@ -52,6 +52,9 @@ const char* html_indexTPHD = "&nbsp;&nbsp;%s <font class='c'>%s</font>%s<br />";
 const char* html_indexDriverStatus = " Driver: <font class='c'>%s</font><br />";
 const char* html_indexLastError = "&nbsp;&nbsp;Last Error: <font class='c'>%s</font><br />";
 const char* html_indexWorkload = "&nbsp;&nbsp;Workload: <font class='c'>%s</font><br />";
+#ifdef WIFI_SIGNAL_STRENGTH_ON
+const char* html_indexSignalStrength = "&nbsp;&nbsp;Wireless signal strength: <font class=\"c\">%s</font><br />";
+#endif
 
 #ifdef OETHS
 void handleRoot(EthernetClient *client) {
@@ -268,7 +271,8 @@ void handleRoot() {
   // Tracking rate
   if ((sendCommand(":GT#",temp1)) && (strlen(temp1)>6)) {
     double tr=atof(temp1);
-    sprintf(temp,"&nbsp;&nbsp;Tracking Rate: <font class=\"c\">%5.3f</font>Hz<br />",tr);
+    dtostrf(tr,5,3,temp1);
+    sprintf(temp,"&nbsp;&nbsp;Tracking Rate: <font class=\"c\">%s</font>Hz<br />",temp1);
     data += temp;
   }
 
@@ -356,6 +360,15 @@ void handleRoot() {
   sprintf(temp,html_indexWorkload,temp1);
   data += temp;
 
+#ifdef WIFI_SIGNAL_STRENGTH_ON
+  long signal_strength_dbm=WiFi.RSSI();
+  int signal_strength_qty=2*(signal_strength_dbm+100);
+  if (signal_strength_qty>100) signal_strength_qty=100; 
+  else if (signal_strength_qty<0) signal_strength_qty=0;
+  sprintf(temp1,"%idBm (%i%%)",signal_strength_dbm,signal_strength_qty);
+  sprintf(temp,html_indexSignalStrength,temp1);
+  data += temp;
+#endif
   data += "</div><br class=\"clear\" />\r\n";
   data += "</div></body></html>";
 

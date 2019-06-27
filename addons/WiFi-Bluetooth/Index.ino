@@ -271,7 +271,8 @@ void handleRoot() {
   // Tracking rate
   if ((sendCommand(":GT#",temp1)) && (strlen(temp1)>6)) {
     double tr=atof(temp1);
-    sprintf(temp,"&nbsp;&nbsp;Tracking Rate: <font class=\"c\">%5.3f</font>Hz<br />",tr);
+    dtostrf(tr,5,3,temp1);
+    sprintf(temp,"&nbsp;&nbsp;Tracking Rate: <font class=\"c\">%s</font>Hz<br />",temp1);
     data += temp;
   }
 
