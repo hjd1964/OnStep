@@ -37,8 +37,12 @@
   // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
   #define SerialA Serial
   // SerialA is always enabled, SerialB and SerialC are optional
-  #define SerialB Serial1
   #define HAL_SERIAL_B_ENABLED
+  #define SerialB Serial1
+  #ifdef Ramps14_ON
+    #define HAL_SERIAL_C_ENABLED     // Enable support for third serial channel
+    #define SerialC Serial2
+  #endif
 #endif
 
 // New symbol for the default I2C port -------------------------------------------------------------
