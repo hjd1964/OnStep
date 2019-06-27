@@ -323,33 +323,31 @@ double encodeTimeZone(double tz) {
 // convert equatorial coordinates to horizon
 // this takes approx. 1.4mS on a 16MHz Mega2560
 void equToHor(double HA, double Dec, double *Alt, double *Azm) {
-  while (HA<0.0)    HA=HA+360.0;
-  while (HA>=360.0) HA=HA-360.0;
   HA =HA/Rad;
   Dec=Dec/Rad;
-  double SinAlt = (sin(Dec) * sinLat) + (cos(Dec) * cosLat * cos(HA));  
+  double cosHA=cos(HA);
+  double SinAlt = (sin(Dec) * sinLat) + (cos(Dec) * cosLat * cosHA);  
   *Alt   = asin(SinAlt);
   double t1=sin(HA);
-  double t2=cos(HA)*sinLat-tan(Dec)*cosLat;
+  double t2=cosHA*sinLat-tan(Dec)*cosLat;
   *Azm=atan2(t1,t2)*Rad;
   *Azm=*Azm+180.0;
-  *Alt = *Alt*Rad;
+  *Alt=*Alt*Rad;
 }
       
 // convert horizon coordinates to equatorial
 // this takes approx. 1.4mS
 void horToEqu(double Alt, double Azm, double *HA, double *Dec) { 
-  while (Azm<0)      Azm=Azm+360.0;
-  while (Azm>=360.0) Azm=Azm-360.0;
   Alt  = Alt/Rad;
   Azm  = Azm/Rad;
-  double SinDec = (sin(Alt) * sinLat) + (cos(Alt) * cosLat * cos(Azm));  
+  double cosAzm=cos(Azm);
+  double SinDec = (sin(Alt) * sinLat) + (cos(Alt) * cosLat * cosAzm);  
   *Dec = asin(SinDec); 
   double t1=sin(Azm);
-  double t2=cos(Azm)*sinLat-tan(Alt)*cosLat;
-  *HA=atan2(t1,t2)*Rad;
-  *HA=*HA+180.0;
-  *Dec = *Dec*Rad;
+  double t2=cosAzm*sinLat-tan(Alt)*cosLat;
+  *HA =atan2(t1,t2)*Rad;
+  *HA =*HA+180.0;
+  *Dec=*Dec*Rad;
 }
 
 // returns the amount of refraction (in arcminutes) at the given true altitude (degrees), pressure (millibars), and temperature (celsius)
