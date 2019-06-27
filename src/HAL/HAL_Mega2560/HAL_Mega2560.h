@@ -12,7 +12,7 @@
 #endif
 
 // Lower limit (fastest) step rate in uS for this platform (in SQW mode)
-#define HAL_MAXRATE_LOWER_LIMIT 51.2
+#define HAL_MAXRATE_LOWER_LIMIT 76.8
 
 // Width of step pulse
 #define HAL_PULSE_WIDTH 10000
