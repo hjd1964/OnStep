@@ -22,8 +22,10 @@
 // -------------------------------------------------------------------------------------------------------------------------
 // ADJUST THE FOLLOWING TO CONFIGURE YOUR CONTROLLER FEATURES --------------------------------------------------------------
 
-// Default speed for Serial1 com port, Default=9600
+// Default speed for Serial1 com port (RX1/TX1), Default=9600
 #define SERIAL_B_BAUD_DEFAULT 9600
+// Default speed for Serial2 com port (RX2/TX2), Default=9600
+#define SERIAL_C_BAUD_DEFAULT 9600
 
 // Mount type, default is _GEM (German Equatorial.) This allows Meridian flips and can be used for other mount types if that behaviour is desired.  _FORK switches off Meridian Flips 
 // but allows travel across the Meridian. _ALTAZM is for Alt/Azm mounted 'scopes.
