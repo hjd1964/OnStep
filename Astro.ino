@@ -491,7 +491,7 @@ double getStepsPerSecondAxis2() {
 // -----------------------------------------------------------------------------------------------------------------------------
 // Low overhead altitude calculation, 16 calls to complete
 
-boolean doFastAltCalc() {
+boolean doFastAltCalc(bool recalc) {
   boolean done=false;
   
   static byte ac_step = 0;
@@ -499,6 +499,8 @@ boolean doFastAltCalc() {
   static double ac_sindec,ac_cosdec,ac_cosha;
   static double ac_sinalt;
 
+  if (recalc==true) { ac_step=0; return false; }
+  
   ac_step++;
   // load HA/Dec
   if (ac_step==1) {

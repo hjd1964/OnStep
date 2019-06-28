@@ -136,6 +136,7 @@ GotoErrors setHome() {
 
   // no errors
   currentAlt=45.0;
+  doFastAltCalc(true);
   lastError=ERR_NONE;
 
   // initialize and disable the stepper drivers
