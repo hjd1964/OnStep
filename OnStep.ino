@@ -365,7 +365,7 @@ void loop2() {
     if (lst%3==0) doFastAltCalc(false);
 #ifdef MOUNT_TYPE_ALTAZM
     // figure out the current Alt/Azm tracking rates
-    if (lst%3!=0) doHorRateCalc(false);
+    if (lst%3!=0) doHorRateCalc();
 #else
     // figure out the current refraction compensated tracking rate
     if ((rateCompensation!=RC_NONE) && (lst%3!=0)) doRefractionRateCalc();
