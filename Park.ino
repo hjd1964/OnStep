@@ -168,6 +168,22 @@ boolean unPark(bool withTrackingOn) {
     parkStatus=Parked;
     if (parkStatus==Parked) {
       if (parkSaved) {
+        initStartupValues();
+      
+        // make sure limits are on
+        safetyLimitsOn=true;
+      
+        // no errors
+        currentAlt=45.0;
+        doFastAltCalc(true);
+        lastError=ERR_NONE;
+      
+        // initialize and disable the stepper drivers
+        StepperModeTrackingInit();
+         
+        // the polar home position
+        InitStartPosition();
+  
         // stop the motor timers (except guiding)
         cli(); trackingTimerRateAxis1=0.0; trackingTimerRateAxis2=0.0; sei(); delay(11);
 
