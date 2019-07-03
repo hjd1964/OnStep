@@ -94,10 +94,11 @@ const char html_login[] =
 "<button type='submit'>Ok</button>"
 "</form><br/><br/><br/>"
 "Setup:<br/><br/>"
-"Enable either station <b>OR</b> AP mode, both enabled can cause performance issues.&nbsp;&nbsp;"
-"However, if just setting up or testing it can be desirable to enable both modes temporarily to guard against being locked out.<br/>"
-"If locked out of the ESP8266, a Sketch uploaded to the MCU (Teensy3.x, STM32, Mega2560, etc.) which sends an 'R' at 9600 baud on the serial interface "
-"in reply to any '#' received will cause a reset to AP only enabled and the default SSID/Password.<br/><br/>"
+"Enable either Station <b>OR</b> Access Point mode, enabling both can cause performance issues. "
+"If you want OnStep to connect to your home WiFi network, enable only Station mode and disable Access Point mode. "
+"If OnStep cannot connect to your home WiFi network it will automatically re-enable Station mode; this is useful when you are away at a dark site and/or to guard against becoming locked out.<br/><br/>"
+"If locked out of WiFi you can use the Arduino IDE to reset the ESP8266 flash memory (and hence go back to defaults.) "
+"From the Arduino Tools menu, change Erase Flash 'Only Sketch' to Erase Flash 'All Flash Contents' and upload the WiFi-Bluetooth sketch again.<br/><br/>"
 "\r\n";
 
 bool restartRequired=false;
