@@ -4,6 +4,13 @@
 const char html_settingsStart[] =
 "<form method='get' action='/settings.htm'>";
 
+const char html_settingsRefine1[] =
+"Refine Polar Alignment: <br />"
+"<button name='rp' value='a' type='submit'>Refine PA</button><br />\r\n"
+"Setup &amp; Align mount.  Goto bright star near NCP or SCP but Dec between 50 &amp; 80&deg; (N/S.) "
+"Press [Refine PA] button.  Use mount's PA adjust controls to center the star again."
+"Optionally align the mount again.</br><br />";
+
 const char html_settingsPark1[] =
 "Park: <br />"
 "<button name='pk' value='s' type='submit'>Set-Park</button>\r\n";
@@ -115,6 +122,10 @@ void handleSettings() {
 
   data += html_settingsStart;
 
+  if (mountStatus.mountType()!=MT_ALTAZM) {
+    data += html_settingsRefine1;
+  }
+
   data += html_settingsPark1;
   
   data += html_settingsTrack1;
@@ -173,6 +184,12 @@ void processSettingsGet() {
   String v;
   char temp[20]="";
 
+  // refine polar align
+  v=server.arg("rp");
+  if (v!="") {
+    if (v=="a") Ser.print(":MP#");
+  }
+  // set-park
   v=server.arg("pk");
   if (v!="") {
     if (v=="s") Ser.print(":hQ#");
