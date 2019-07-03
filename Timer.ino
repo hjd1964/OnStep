@@ -435,9 +435,9 @@ double getFrequencyHzAxis1() {
     if (posAxis1==(long)targetAxis1.part.m) {
       return getStepsPerSecondAxis1()*1.00273790935;
     } else
-      return (16000000.0/(double)isrTimerRateAxis1)*((double)stepAxis1);
-    } else
-      return (16000000.0/(double)isrTimerRateAxis1)*((double)timerDirAxis1*(double)stepAxis1);
+      return 16000000.0/(double)isrTimerRateAxis1;
+  } else
+    return (16000000.0/(double)isrTimerRateAxis1)*(double)timerDirAxis1;
 }
 
 double getFrequencyHzAxis2() {
@@ -445,9 +445,9 @@ double getFrequencyHzAxis2() {
     if (posAxis2==(long)targetAxis2.part.m)
       return getStepsPerSecondAxis2()*1.00273790935;
     else
-      return (16000000.0/(double)isrTimerRateAxis2)*((double)stepAxis2);
+      return 16000000.0/(double)isrTimerRateAxis2;
   } else
-    return (16000000.0/(double)isrTimerRateAxis2)*((double)timerDirAxis2*(double)stepAxis2);
+    return (16000000.0/(double)isrTimerRateAxis2)*(double)timerDirAxis2;
 }
 
 #if defined(AXIS2_AUTO_POWER_DOWN_ON) && !defined(MOUNT_TYPE_ALTAZM)
