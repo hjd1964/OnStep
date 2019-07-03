@@ -46,7 +46,7 @@ boolean readLX200Bytes(char* command,char* recvBuffer,long timeOutMs) {
     } else
     if (command[1]=='M') {
       if (strchr("ewnsg",command[2])) noResponse=true;
-      if (strchr("SA",command[2])) shortResponse=true;
+      if (strchr("SAP",command[2])) shortResponse=true;
     } else
     if (command[1]=='Q') {
       if (strchr("#ewns",command[2])) noResponse=true;
@@ -166,4 +166,3 @@ boolean doubleToDms(char *reply, double *f, boolean fullRange, boolean signPrese
   sprintf(reply,s,d1,(int)m1,s1);
   return true;
 }
-
