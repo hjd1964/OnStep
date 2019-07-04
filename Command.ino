@@ -2090,10 +2090,12 @@ void processCommands() {
         } else {
           // it should be an int
           // see if it converted and is in range
-          if ( (atoi2(parameter,&i)) && ((i>=0) && (i<PECBufferSize))) {
+          i=atoi(parameter);
+          if ((i>=0) && (i<PECBufferSize)) {
             // should be another int here
             // see if it converted and is in range
-            if ( (atoi2((char*)&parameter[5],&i2)) && ((i2>=-128) && (i2<=127))) {
+            i2=atoi((char*)&parameter[5]);
+            if ((i2>=-128) && (i2<=127)) {
               pecBuffer[i]=i2+128;
               pecRecorded =true;
               commandError=false;
