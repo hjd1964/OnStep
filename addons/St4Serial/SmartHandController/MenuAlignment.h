@@ -18,6 +18,7 @@ void SmartHandController::menuAlignment()
     bool showAlign=false;
     bool clearAlign=false;
     bool resetAlign=false;
+    bool refinePA=false;
   
     char string_list_AlignmentL1[200];
     if (alignInProgress) {
@@ -42,6 +43,10 @@ void SmartHandController::menuAlignment()
         strcat(string_list_AlignmentL1,s);
       }
       strcat(string_list_AlignmentL1,"Show Model\n""Clear Model\n""Reset Home");
+      if (!telInfo.isMountAltAz()) {
+        sprintf(s,"\nRefine PA");
+        strcat(string_list_AlignmentL1,s);
+      }
       current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Alignment", current_selection_L1, string_list_AlignmentL1);
       if (current_selection_L1<=maxAlignStars) {
         starsForAlign=current_selection_L1;
@@ -49,6 +54,7 @@ void SmartHandController::menuAlignment()
         if (current_selection_L1==maxAlignStars+1) showAlign=true;
         if (current_selection_L1==maxAlignStars+2) clearAlign=true;
         if (current_selection_L1==maxAlignStars+3) resetAlign=true;
+        if (current_selection_L1==maxAlignStars+4) refinePA=true;
       }
     }
   
@@ -79,6 +85,18 @@ void SmartHandController::menuAlignment()
       if (SetLX200(s) == LX200VALUESET) telInfo.aliMode = (Telescope::AlignMode)starsForAlign; else DisplayMessage("Alignment", "Failed!", -1);
       if (SetLX200(":R7#") == LX200VALUESET) { DisplayMessage("Guide Rate", "48X Set", 1000);  activeGuideRate=8; }
       current_selection_L1 = 0; current_selection_L0 = 0; // Quit Menu
+    } else
+    if (refinePA) {
+      DisplayMessage("Setup & 3+ star",   "align mount." ,     3500);
+      DisplayMessage("Goto bright star",  "near NCP/SCP w/",   3500);
+      DisplayMessage("Dec in 50 to 80" ,  "deg range N/S.",    3500);
+      DisplayMessage("Answr YES below.",  "Use Polar Align",   3500);
+      DisplayMessage("adjust controls to","center star again.",4500);
+      DisplayMessage("Optionally align",  "the mount again.",  3500);
+      if (display->UserInterfaceInputValueBoolean(&buttonPad, "Refine PA?", &refinePA)) {
+        if ((refinePA) && (SetLX200(":MP#") == LX200VALUESET)) DisplayMessage("Center star again", "using PA controls", -1);
+        if (refinePA) { current_selection_L0 = 0; current_selection_L1 = 0; } // Quit Menu
+      }
     }
   }
 

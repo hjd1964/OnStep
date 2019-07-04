@@ -78,7 +78,7 @@ bool readLX200Bytes(char* command, char* recvBuffer, unsigned long timeOutMs) {
     }
     if (command[1] == 'M') {
       if (strchr("ewnsg", command[2])) noResponse = true;
-      if (strchr("SA", command[2])) shortResponse = true;
+      if (strchr("SAP", command[2])) shortResponse = true;
     }
     if (command[1] == 'Q') {
       if (strchr("#ewns", command[2])) noResponse = true;
