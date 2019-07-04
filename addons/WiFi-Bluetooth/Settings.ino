@@ -7,7 +7,7 @@ const char html_settingsStart[] =
 const char html_settingsRefine1[] =
 "Refine Polar Alignment: <br />"
 "<button name='rp' value='a' type='submit'>Refine PA</button><br />\r\n"
-"Setup &amp; Align mount.  Goto bright star near NCP or SCP but Dec between 50 &amp; 80&deg; (N/S.) "
+"Setup &amp; 3+ Star Align mount.  Goto bright star near NCP or SCP with Dec in 50 to 80&deg; range (N or S.) "
 "Press [Refine PA] button.  Use mount's PA adjust controls to center the star again."
 "Optionally align the mount again.</br><br />";
 
