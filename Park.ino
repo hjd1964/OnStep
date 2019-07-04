@@ -190,12 +190,6 @@ boolean unPark(bool withTrackingOn) {
         // load the pointing model
         loadAlignModel();
 
-        // remember current target position
-        cli();
-        long tempTargetAxis1=targetAxis1.part.m;
-        long tempTargetAxis2=targetAxis2.part.m;
-        sei();
-
         // get suggested park position
         int parkPierSide=nv.read(EE_pierSide);
         setTargetAxis1(nv.readFloat(EE_posAxis1),parkPierSide);
@@ -204,19 +198,11 @@ boolean unPark(bool withTrackingOn) {
         // adjust target to the actual park position (just like we did when we parked)
         targetNearestParkPosition();
 
-        // the coordinates of where the park position really is
-        double axis1=getTargetAxis1();
-        double axis2=getTargetAxis2();
-
-        // restore target position
+        // and set the instrument position to agree
         cli();
-        targetAxis1.part.m=tempTargetAxis1;
-        targetAxis2.part.m=tempTargetAxis2;
+        posAxis1=targetAxis1.part.m;
+        posAxis2=targetAxis2.part.m;
         sei();
-
-        // and set the true park position
-        setIndexAxis1(axis1,parkPierSide);
-        setIndexAxis2(axis2,parkPierSide);
         
         // set Meridian Flip behaviour to match mount type
         #ifdef MOUNT_TYPE_GEM
