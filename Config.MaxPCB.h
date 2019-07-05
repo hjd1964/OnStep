@@ -49,7 +49,7 @@
 #define GUIDE_TIME_LIMIT 0
 
 // Set to _ON to disable backlash takeup during guiding at <= 1X, default=_OFF
-#define GUIDES_DISABLE_BACKLASH_ON
+#define GUIDES_DISABLE_BACKLASH_OFF
 
 // RTC (Real Time Clock) support, default=_OFF. 
 #define RTC_OFF
