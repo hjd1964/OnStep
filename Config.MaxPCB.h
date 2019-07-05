@@ -52,8 +52,8 @@
 #define GUIDES_DISABLE_BACKLASH_OFF
 
 // RTC (Real Time Clock) support, default=_OFF. 
-#define RTC_OFF
 // Other options: RTC_DS3231 for a DS3231 on the default I2C pins (optionally wire the SQW output to the PPS pin below.)
+#define RTC_OFF
 // PPS use _ON or _PULLUP to enable the input and use the built-in pullup resistor.  Sense rising edge on Pin 28 for optional precision clock source (GPS, for example), default=_OFF
 #define PPS_SENSE_OFF
 
