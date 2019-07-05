@@ -5,7 +5,7 @@
  * For more information on setting OnStep up see http://www.stellarjourney.com/index.php?r=site/equipment_onstep and 
  * join the OnStep Groups.io at https://groups.io/g/onstep
  * 
- * See the Pins.MaxESP.h file for detailed information on this pin map to be sure it matches your wiring *** USE AT YOUR OWN RISK ***
+ * See the Pins.MaxESP2.h file for detailed information on this pin map to be sure it matches your wiring *** USE AT YOUR OWN RISK ***
  *
 */
 
