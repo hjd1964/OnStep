@@ -66,23 +66,24 @@ GotoErrors syncEqu(double RA, double Dec) {
   // just turn on tracking
   if (atHome) { trackingState=TrackingSidereal; enableStepperDrivers(); }
 
+  // west side of pier - we're in the eastern sky and the HA's are negative
+  // east side of pier - we're in the western sky and the HA's are positive
   int newPierSide=getInstrPierSide();
   if (meridianFlip!=MeridianFlipNever) {
     if (atHome) { if (Axis1<0) newPierSide=PierSideWest; else newPierSide=PierSideEast; } else // best side of pier decided based on meridian
-    if (preferredPierSide==PPS_WEST) newPierSide=PierSideWest; else // west side of pier - we're in the eastern sky and the HA's are negative
-    if (preferredPierSide==PPS_EAST) newPierSide=PierSideEast; else // east side of pier - we're in the western sky and the HA's are positive
+#if !defined(SYNC_CURRENT_PIER_SIDE_ONLY_ON)
+    if (preferredPierSide==PPS_WEST) { newPierSide=PierSideWest; if (haRange(Axis1)> minutesPastMeridianW/4.0) newPierSide=PierSideEast; } else
+    if (preferredPierSide==PPS_EAST) { newPierSide=PierSideEast; if (haRange(Axis1)<-minutesPastMeridianE/4.0) newPierSide=PierSideWest; } else
+#endif
     {
-#if defined(SYNC_CURRENT_PIER_SIDE_ONLY_ON) && defined(MOUNT_TYPE_GEM)
       if ((getInstrPierSide()==PierSideWest) && (haRange(Axis1)> minutesPastMeridianW/4.0)) newPierSide=PierSideEast;
       if ((getInstrPierSide()==PierSideEast) && (haRange(Axis1)<-minutesPastMeridianE/4.0)) newPierSide=PierSideWest;
-#else
-      if (Axis1<0) newPierSide=PierSideWest; else newPierSide=PierSideEast; // best side of pier decided based on meridian
-#endif
     }
-  
-#if defined(SYNC_CURRENT_PIER_SIDE_ONLY_ON) && defined(MOUNT_TYPE_GEM)
-    if (!atHome && (newPierSide!=getInstrPierSide())) return GOTO_ERR_OUTSIDE_LIMITS;
+
+#if defined(SYNC_CURRENT_PIER_SIDE_ONLY_ON)
+    if ((!atHome) && (newPierSide!=getInstrPierSide())) return GOTO_ERR_OUTSIDE_LIMITS;
 #endif
+
   } else {
     // always on the "east" side of pier - we're in the western sky and the HA's are positive
     // this is the default in the polar-home position and also for MOUNT_TYPE_FORK and MOUNT_TYPE_ALTAZM.
