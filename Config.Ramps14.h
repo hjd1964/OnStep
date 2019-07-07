@@ -3,7 +3,6 @@
 // compatible all-in one devices like the recommended "MKS Gen-L" and others
 
 // ****************************************************************************************
-// NOTICE: This configuration is in development/testing       *** USE AT YOUR OWN RISK  ***
 // Be sure to adhere to the design limitations of the RAMPS 1.4
 // with respect to voltage, current, signaling, etc... See http://reprap.org/wiki/RAMPS_1.4           
 // ****************************************************************************************
