@@ -23,17 +23,12 @@
 
 // --------------------------------------------------------------------------------------
 // Encoder support (either _AB for Quadrature A/B OR _CWCCW for CW/CCW)
-#define AXIS1_ENC_OFF              // RA/Azm Axis, default = _OFF
-#define AXIS1_ENC_A_PIN 14         // specify pin#, for A or CW, default=14
-#define AXIS1_ENC_B_PIN 12         // specify pin#, for B or CCW, default=12
+#define AXIS1_ENC_OFF              // RA/Azm Axis on Pin 14 (A or CW) and Pin 12 (B or CCW), default = _OFF
 #define AXIS1_ENC_REVERSE_OFF      // _ON to reverse the count direction, default=_OFF
 #define AXIS1_ENC_TICKS_DEG (200000.0/360.0) // 0.0018 degrees
 #define AXIS1_ENC_DIFF_LIMIT  900  // in arcseconds (0.25 degrees)
 
-#define AXIS2_ENC_OFF              // Dec/Alt Axis, default = _OFF
-#define AXIS2_ENC_A_PIN 5          // specify pin#, for A or CW, default=5
-#define AXIS2_ENC_B_PIN 4          // specify pin#, for B or CCW, default=4
-#define AXIS2_ENC_REVERSE_OFF      // _ON to reverse the count direction, default=_OFF
+#define AXIS2_ENC_OFF              // Dec/Alt Axis on Pin 5 (A or CW) and Pin 4 (B or CCW), default = _OFF
 #define AXIS2_ENC_TICKS_DEG (4800.0/360.0) // 0.075 degrees
 #define AXIS2_ENC_DIFF_LIMIT  900  // in arcseconds (0.25 degrees)
 

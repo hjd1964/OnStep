@@ -50,6 +50,10 @@
 
 #include "Config.h"
 #include "Constants.h"
+#define AXIS1_ENC_A_PIN 14 // pin# for Axis1 encoder, for A or CW
+#define AXIS1_ENC_B_PIN 12 // pin# for Axis1 encoder, for B or CCW
+#define AXIS2_ENC_A_PIN 5  // pin# for Axis1 encoder, for A or CW
+#define AXIS2_ENC_B_PIN 4  // pin# for Axis1 encoder, for B or CCW
 #include "Encoders.h"
 #ifdef ENCODERS_ON
 Encoders encoders;

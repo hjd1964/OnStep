@@ -54,6 +54,10 @@
 #include "Config.h"
 #include "Constants.h"
 #define ICACHE_RAM_ATTR
+#define AXIS1_ENC_A_PIN 5  // pin# for Axis1 encoder, for A or CW
+#define AXIS1_ENC_B_PIN 6  // pin# for Axis1 encoder, for B or CCW
+#define AXIS2_ENC_A_PIN 7  // pin# for Axis2 encoder, for A or CW
+#define AXIS2_ENC_B_PIN 8  // pin# for Axis2 encoder, for B or CCW
 #include "Encoders.h"
 #ifdef ENCODERS_ON
 Encoders encoders;
