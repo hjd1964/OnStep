@@ -20,6 +20,9 @@ long Axis2EncDiffLimit=AXIS2_ENC_DIFF_LIMIT;
 // encoder position
 volatile int32_t __p1,__p2;
 
+// encoder polling rate in seconds, default=2.0
+#define POLLING_RATE 2.0
+
 // encoder rate control
 #ifdef AXIS1_ENC_RATE_CONTROL_ON
 
@@ -317,11 +320,11 @@ class Encoders {
     }
     void poll() {
       // check encoders and sync OnStep if diff is too great, checks every 2 seconds
-      static unsigned long nextEncCheckMs=millis()+2000UL;
+      static unsigned long nextEncCheckMs=millis()+(unsigned long)(POLLING_RATE*1000.0);
       unsigned long temp=millis();
       char *conv_end;
       if ((long)(temp-nextEncCheckMs)>0) {
-        nextEncCheckMs=temp+2000UL;
+        nextEncCheckMs=temp+(unsigned long)(POLLING_RATE*1000.0);
         char s[22];
         Ser.print(":GX42#"); s[Ser.readBytesUntil('#',s,20)]=0;
         if (strlen(s)>1) { // can return error code "0" also, which is ignored
@@ -402,14 +405,14 @@ class Encoders {
           if (axis1EncRateComp<-0.01) axis1EncRateComp=-0.01;
           axis1RateDelta=0;
         }
-        axis1RateDelta+=(axis1Rate-axis1EncRateSta)*2.0;
+        axis1RateDelta+=(axis1Rate-axis1EncRateSta)*POLLING_RATE;
 #endif
 
         // accumulate tracking rate departures for pulse-guide, rate delta * 2 seconds
-        guideCorrection+=(axis1Rate-axis1EncRateSta)*((float)Axis1EncProp/100.0)*2.0;
+        guideCorrection+=(axis1Rate-axis1EncRateSta)*((float)Axis1EncProp/100.0)*POLLING_RATE;
 
-        if (guideCorrection>2) clearAverages(); else
-        if (guideCorrection<-2) clearAverages(); else
+        if (guideCorrection>POLLING_RATE) clearAverages(); else
+        if (guideCorrection<-POLLING_RATE) clearAverages(); else
         if (guideCorrection>Axis1EncMinGuide/1000.0) {
           guideCorrectionMillis=round(guideCorrection*1000.0);
           Ser.print(":Mgw"); Ser.print(guideCorrectionMillis); Ser.print("#");
