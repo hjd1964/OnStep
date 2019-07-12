@@ -100,7 +100,11 @@ const char html_encRateEn2[] =
 "<br /><br />";
 
 const char html_encStaAxis1[] =
+#ifdef AXIS1_ENC_BIN_AVG
+"Encoder rate averaging, binned samples: <br />"
+#else
 "Encoder rate averaging, samples: <br />"
+#endif
 "<form method='get' action='/enc.htm'>"
 " <input value='%ld' type='number' name='sa' min='1' max='999'>"
 "<button type='submit'>Upload</button>"
@@ -114,14 +118,22 @@ const char html_encLtaAxis1[] =
 "</form><br />";
 
 const char html_encPropAxis1[] = 
-"Encoder proportional response: <br />"
+"Proportional response: <br />"
 "<form method='get' action='/enc.htm'>"
 " <input 'width: 75px' value='%ld' type='number' name='pr' min='50' max='5000'>"
 "<button type='submit'>Upload</button>"
 " (P 50 to 5000&#x25;)"
 "</form><br />";
 
-#ifndef AXIS1_ENC_AUTO_RATE_COMP_ON
+const char html_encMinGuideAxis1[] = 
+"Minimum guide: <br />"
+"<form method='get' action='/enc.htm'>"
+" <input 'width: 75px' value='%ld' type='number' name='mg' min='25' max='1000'>"
+"<button type='submit'>Upload</button>"
+" (25 to 1000mS)"
+"</form><br />";
+
+#ifndef AXIS1_ENC_RATE_AUTO
 const char html_encErc2Axis1[] = 
 "Encoder rate comp: <br />"
 "<form method='get' action='/enc.htm'>"
@@ -266,9 +278,13 @@ void handleEncoders() {
   sprintf(temp,html_encPropAxis1,Axis1EncProp);
   data += temp;
 
+  // Encoder minimum guide
+  sprintf(temp,html_encMinGuideAxis1,Axis1EncMinGuide);
+  data += temp;
+
   // Encoder rate compensation
-#ifndef AXIS1_ENC_AUTO_RATE_COMP_ON
-  long l=round((Axis1EncRateComp-1.0)*1000000.0);
+#ifndef AXIS1_ENC_RATE_AUTO
+  long l=round(axis1EncRateComp*1000000.0);
   sprintf(temp,html_encErc2Axis1,l);
   data += temp;
 #endif
@@ -284,22 +300,29 @@ void handleEncoders() {
   sendHtml(data);
 
   // Encoder status display
-  sprintf(temp,"Axis1 rates (x Sidereal):<br />");
+  sprintf(temp,"Axis1 rates (sidereal):<br />");
   data += temp;
   sprintf(temp,"&nbsp; OnStep = <span id='stO'>?</span><br />");
+  data += temp;
+#ifdef AXIS1_ENC_INTPOL_COS_ON
+  sprintf(temp,"&nbsp; Intpol Comp = <span id='ipC'>?</span><br />");
+  data += temp;
+  sprintf(temp,"&nbsp; Intpol Phase = <span id='ipP'>?</span><br />");
+  data += temp;
+#endif
+#ifdef AXIS1_ENC_RATE_AUTO
+  sprintf(temp,"&nbsp; Encoder ARC = <span id='erA'>?</span><br />");
+  data += temp;
+#endif
+  sprintf(temp,"&nbsp; Encoder STA = <span id='stS'>?</span> x<br />");
+  data += temp;
+  sprintf(temp,"&nbsp; Encoder LTA = <span id='stL'>?</span> x<br />");
   data += temp;
   sprintf(temp,"&nbsp; Delta &nbsp;= <span id='stD'>?</span><br />");
   data += temp;
   sprintf(temp,"&nbsp; Guide &nbsp;= <span id='rtF'>?</span><br />");
   data += temp;
-  sprintf(temp,"&nbsp; Encoder STA = <span id='stS'>?</span><br />");
-  data += temp;
-  sprintf(temp,"&nbsp; Encoder LTA = <span id='stL'>?</span><br />");
-  data += temp;
-  sprintf(temp,"&nbsp; Intpol Comp = <span id='ipC'>?</span><br />");
-  data += temp;
-  sprintf(temp,"&nbsp; Intpol Phase = <span id='ipP'>?</span><br />");
-  data += temp;
+
   sendHtml(data);
 
   data += "<br /><canvas id='myCanvas' width='600' height='300' style='margin-left: 8px; border:2px solid #999999;'></canvas>";
@@ -336,17 +359,22 @@ void encAjax() {
   data += "stD|"; sprintf(temp,"%+1.4f\n",axis1Rate-axis1EncRateSta); data += temp;
   data += "stS|"; sprintf(temp,"%+1.4f\n",axis1EncRateSta); data += temp;
   data += "stL|"; sprintf(temp,"%+1.4f\n",axis1EncRateLta); data += temp;
+#ifdef AXIS1_ENC_INTPOL_COS_ON
   data += "ipC|"; sprintf(temp,"%+1.4f\n",intpolComp); data += temp;
   data += "ipP|"; sprintf(temp,"%d\n",(int)intpolPhase); data += temp;
+#endif
+#ifdef AXIS1_ENC_RATE_AUTO
+  data += "erA|"; sprintf(temp,"%+1.5f\n",axis1EncRateComp); data += temp;
+#endif
 
-if (finalCorrection==0) {
+if (guideCorrectionMillis==0) {
   data += "rtF|"; sprintf(temp,"None\n"); data += temp;
 } else
-if (finalCorrection>0) {
-  data += "rtF|"; sprintf(temp,"West %ld ms\n",finalCorrection); data += temp;
+if (guideCorrectionMillis>0) {
+  data += "rtF|"; sprintf(temp,"West %ld ms\n",guideCorrectionMillis); data += temp;
 } else
-if (finalCorrection<0) {
-  data += "rtF|"; sprintf(temp,"East %ld ms\n",-finalCorrection); data += temp;
+if (guideCorrectionMillis<0) {
+  data += "rtF|"; sprintf(temp,"East %ld ms\n",-guideCorrectionMillis); data += temp;
 }
 
   data += "orc|"; if (encRateControl) data+="On\n"; else data+="Off\n";
@@ -460,6 +488,19 @@ void processEncodersGet() {
       EEwrite=true;
     }
   }
+  
+  // Encoder minimum guide
+  v=server.arg("mg");
+  if (v!="") {
+    int i;
+    if ( (atoi2((char*)v.c_str(),&i)) && ((i>=25) && (i<=1000))) { 
+      Axis1EncMinGuide=i;
+#ifndef EEPROM_DISABLED
+      EEPROM_writeLong(636,Axis1EncMinGuide);
+#endif
+      EEwrite=true;
+    }
+  }
 
   // Encoder rate compensation
   v=server.arg("er");
@@ -467,7 +508,7 @@ void processEncodersGet() {
     int l=0;
     l=strtol(v.c_str(),NULL,10);
     if ((l>=-99999) && (l<=99999)) {
-      Axis1EncRateComp=1.0+(float)l/1000000.0;
+      axis1EncRateComp=(float)l/1000000.0;
 #ifndef EEPROM_DISABLED
       EEPROM_writeLong(616,l);
 #endif

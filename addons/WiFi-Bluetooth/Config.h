@@ -24,27 +24,25 @@
 // --------------------------------------------------------------------------------------
 // Encoder support (either _AB for Quadrature A/B OR _CWCCW for CW/CCW)
 #define AXIS1_ENC_OFF              // RA/Azm Axis, default = _OFF
-#define AXIS1_ENC_A_PIN 14         // specify pin#, for A or CW, default=_OFF
-#define AXIS1_ENC_B_PIN 12         // specify pin#, for B or CCW, default=_OFF
+#define AXIS1_ENC_A_PIN 14         // specify pin#, for A or CW, default=14
+#define AXIS1_ENC_B_PIN 12         // specify pin#, for B or CCW, default=12
 #define AXIS1_ENC_REVERSE_OFF      // _ON to reverse the count direction, default=_OFF
 #define AXIS1_ENC_TICKS_DEG (200000.0/360.0) // 0.0018 degrees
-#define AXIS1_ENC_DIFF_LIMIT  450  // in arcseconds (0.125 degrees)
-
-#define AXIS1_ENC_RATE_CONTROL_OFF // if a high resolution encoder is on Axis1 this enables RA rate control (EQ mounts)
-#define AXIS1_ENC_RATE_AUTO_OFF    // adjusts the encoder rate to account for the average rate over the last worm period, this should smooth out the encoder display but not while OnStep rate control is active, default=_OFF
-#define AXIS1_SEC_PER_WORM_ROT 600 // if encoder rate control is used this lets the system know how long the worm period is
-#define AXIS1_ENC_INTPOL_COS_OFF   // enable cosine compensation feature, default=_OFF
-#define AXIS1_ENC_BIN_AVG_ON       // enable binned rolling average compensation feature, default=_OFF
-#define AXIS1_ENC_INTPOL_PERIOD 20 // period (in counts) for encoder interpolation
+#define AXIS1_ENC_DIFF_LIMIT  900  // in arcseconds (0.25 degrees)
 
 #define AXIS2_ENC_OFF              // Dec/Alt Axis, default = _OFF
-#define AXIS2_ENC_A_PIN 5          // specify pin#, for A or CW, default=_OFF
-#define AXIS2_ENC_B_PIN 4          // specify pin#, for B or CCW, default=_OFF
-#define AXIS2_ENC_REVERSE_ON       // _ON to reverse the count direction, default=_OFF
+#define AXIS2_ENC_A_PIN 5          // specify pin#, for A or CW, default=5
+#define AXIS2_ENC_B_PIN 4          // specify pin#, for B or CCW, default=4
+#define AXIS2_ENC_REVERSE_OFF      // _ON to reverse the count direction, default=_OFF
 #define AXIS2_ENC_TICKS_DEG (4800.0/360.0) // 0.075 degrees
 #define AXIS2_ENC_DIFF_LIMIT  900  // in arcseconds (0.25 degrees)
 
-#define ENCODERS_AUTO_SYNC_ON     // enable support for auto sync of OnStep to encoder values
+#define ENCODERS_AUTO_SYNC_OFF     // enable support for auto sync of OnStep to encoder values, default=_OFF
+
+#define AXIS1_ENC_RATE_CONTROL_OFF // if a high resolution encoder is on Axis1 this enables RA rate control (EQ mounts); _ON to enable
+#define AXIS1_ENC_INTPOL_COS_OFF   // enable cosine compensation feature, default=_OFF; _ON to enable
+#define AXIS1_ENC_RATE_AUTO_OFF    // adjusts the encoder pulse rate to account for skew in the average guide rate over the last worm period, default=_OFF; set to worm period in seconds to enable; for example AXIS1_ENC_RATE_AUTO 600
+#define AXIS1_ENC_BIN_AVG_OFF      // enable binned rolling average feature, default=_OFF; set to number of bins to enable; for example AXIS1_ENC_BIN_AVG 20
 
 // --------------------------------------------------------------------------------------
 // Auxillary switch/feature control; for example: SW0 "Cover" to open/close an OTA cover

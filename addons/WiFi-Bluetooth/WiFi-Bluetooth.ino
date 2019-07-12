@@ -36,8 +36,8 @@
 #define FirmwareDate          __DATE__
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
-#define FirmwareVersionMinor  "6"
-#define FirmwareVersionPatch  "g"
+#define FirmwareVersionMinor  "7"
+#define FirmwareVersionPatch  "a"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
@@ -171,12 +171,13 @@ void setup(void){
 #ifdef AXIS1_ENC_RATE_CONTROL_ON
     Axis1EncStaSamples=EEPROM_readLong(608);
     Axis1EncLtaSamples=EEPROM_readLong(612);
-    long l=EEPROM_readLong(616); Axis1EncRateComp=1.0+(float)l/1000000.0;
+    long l=EEPROM_readLong(616); axis1EncRateComp=(float)l/1000000.0;
 #ifdef AXIS1_ENC_INTPOL_COS_ON
     Axis1EncIntPolPhase =EEPROM_readLong(624);
     Axis1EncIntPolMag   =EEPROM_readLong(628);
 #endif
     Axis1EncProp        =EEPROM_readLong(632);
+    Axis1EncMinGuide    =EEPROM_readLong(636);
 #endif
 #endif
 
