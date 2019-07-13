@@ -277,7 +277,7 @@ bool CatMgr::isFiltered() {
   if (_fm & FM_ABOVE_HORIZON) { if (alt()<0.0) return true; }
   if (_fm & FM_ALIGN_ALL_SKY) {
     if (alt()<10.0) return true;      // minimum 10 degrees altitude
-    if (abs(dec())>85.0) return true; // minimum 5 degrees from the pole (for accuracy)
+    if (abs(dec())>80.0) return true; // minimum 10 degrees from the pole (for accuracy)
   }
   return false;
 }  
