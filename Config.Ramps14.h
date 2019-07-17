@@ -213,7 +213,7 @@
 #define MinAxis4               -25.0 // minimum allowed position in millimeters, default = -25.0
 #define MaxAxis4                25.0 // maximum allowed position in millimeters, default =  25.0
 #define AXIS4_REVERSE_OFF            // reverse the direction of focuser movement.
-#define AXIS4_DISABLE_OFF            // Pin 24 (Aux4.)  Default _OFF, use HIGH for common stepper drivers
+#define AXIS4_DISABLE HIGH           // Pin 24 (Aux4.)  Default HIGH for common stepper drivers
 #define AXIS4_AUTO_POWER_DOWN_OFF    // use _ON if you want to power down the motor at stand-still.  Default _OFF.  Ignored in DC motor mode.
 #define AXIS4_DC_MODE_OFF            // enable DC focuser instead of a stepper motor.  Automatically uses Phase 1 if enabled.  Default _OFF.
 
@@ -225,7 +225,7 @@
 #define MinAxis5               -25.0 // minimum allowed position in millimeters, default = -25.0
 #define MaxAxis5                25.0 // maximum allowed position in millimeters, default =  25.0
 #define AXIS5_REVERSE_OFF            // reverse the direction of focuser movement.
-#define AXIS5_DISABLE_OFF            // Pin 30 (Aux5.) Default _OFF, use HIGH for common stepper drivers
+#define AXIS5_DISABLE HIGH           // Pin 30 (Aux5.) Default HIGH for common stepper drivers
 #define AXIS5_AUTO_POWER_DOWN_OFF    // use _ON if you want to power down the motor at stand-still.  Default _OFF.  Ignored in DC motor mode.
 #define AXIS5_DC_MODE_OFF            // enable DC focuser instead of a stepper motor.  Automatically uses Phase 2 if enabled.  Default _OFF.
 
