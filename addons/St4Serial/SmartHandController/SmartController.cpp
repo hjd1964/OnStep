@@ -408,7 +408,7 @@ void SmartHandController::update()
     // bring up the list of stars so user can goto the alignment star
     if (!SelectStarAlign()) { DisplayMessage("Alignment", "Aborted", -1); telInfo.align = Telescope::ALI_OFF; return; }
     
-    // mark this as the next alignment star
+    // mark this as the next alignment star 
     telInfo.align = static_cast<Telescope::AlignState>(telInfo.align + 1);
   } else
   if (top - lastpageupdate > BACKGROUND_CMD_RATE/2) updateMainDisplay(page);
@@ -463,6 +463,7 @@ void SmartHandController::update()
   static bool rotCw=false;
   static bool rotCcw=false;
   buttonCommand=false;
+  if (telInfo.align != Telescope::ALI_OFF) featureKeyMode = 1;
   switch (featureKeyMode) {
     case 1:   // guide rate
       if (buttonPad.F.wasPressed()) { activeGuideRate--; strcpy(briefMessage,"Guide Slower"); buttonCommand=true; } else
@@ -521,26 +522,44 @@ void SmartHandController::update()
   // -------------------------------------------------------------------------------------------------------------------
   // handle shift button features
   if (buttonPad.shift.isDown()) {
+    // a long press brings up the main menu
     if ((buttonPad.shift.timeDown()>1000) && telInfo.align == Telescope::ALI_OFF) { menuMain(); time_last_action = millis(); } // bring up the menus
   } else {
-    // wait long enough that a double press can happen before picking up the press events
+    // wait long enough that a double press can happen before picking up other press events
     if (buttonPad.shift.timeUp()>250) {
-      if (buttonPad.shift.wasDoublePressed()) { menuSpeedRate(); time_last_action = millis(); } else // change guide rate
-      if (telInfo.align == Telescope::ALI_OFF && buttonPad.shift.wasPressed(false)) { // cycle through disp of Eq, Hor, Time
-        page++;
-#ifdef AMBIENT_CONDITIONS_ON
-        if (page > 3) page = 0;
-#else
-        if (page > 2) page = 0;
-#endif
-        time_last_action = millis(); 
+      if (buttonPad.shift.wasDoublePressed()) { 
+        if (telInfo.align == Telescope::ALI_OFF) {
+          // display feature key menu OR...
+          menuFeatureKey();
+        } else {
+          // ...if aligning, go back and select a different star
+          if ((telInfo.align == Telescope::ALI_RECENTER_1 || telInfo.align == Telescope::ALI_RECENTER_2 || telInfo.align == Telescope::ALI_RECENTER_3 ||
+             telInfo.align == Telescope::ALI_RECENTER_4 || telInfo.align == Telescope::ALI_RECENTER_5 || telInfo.align == Telescope::ALI_RECENTER_6 ||
+             telInfo.align == Telescope::ALI_RECENTER_7 || telInfo.align == Telescope::ALI_RECENTER_8 || telInfo.align == Telescope::ALI_RECENTER_9)) {
+            telInfo.align = static_cast<Telescope::AlignState>(telInfo.align - 2);
+          }
+        }
+        time_last_action = millis();
       } else
-      if ((telInfo.align == Telescope::ALI_RECENTER_1 || telInfo.align == Telescope::ALI_RECENTER_2 || telInfo.align == Telescope::ALI_RECENTER_3 ||
-           telInfo.align == Telescope::ALI_RECENTER_4 || telInfo.align == Telescope::ALI_RECENTER_5 || telInfo.align == Telescope::ALI_RECENTER_6 ||
-           telInfo.align == Telescope::ALI_RECENTER_7 || telInfo.align == Telescope::ALI_RECENTER_8 || telInfo.align == Telescope::ALI_RECENTER_9) && 
-           buttonPad.shift.wasPressed()) { // add this align star
-        if (telInfo.addStar()) { if (telInfo.align == Telescope::ALI_OFF) DisplayMessage("Alignment", "Success!", 2000); else DisplayMessage("Add Star", "Success!", 2000); } else DisplayMessage("Add Star", "Failed!", -1);
+      if (buttonPad.shift.wasPressed()) {
+        if (telInfo.align == Telescope::ALI_OFF) {
+          // cycles through disp of Eq, Hor, Time, Ambient OR...
+          page++;
+  #ifdef AMBIENT_CONDITIONS_ON
+          if (page > 3) page = 0;
+  #else
+          if (page > 2) page = 0;
+  #endif
+        } else {
+          // ...if aligning, accept the align star
+          if ((telInfo.align == Telescope::ALI_RECENTER_1 || telInfo.align == Telescope::ALI_RECENTER_2 || telInfo.align == Telescope::ALI_RECENTER_3 ||
+             telInfo.align == Telescope::ALI_RECENTER_4 || telInfo.align == Telescope::ALI_RECENTER_5 || telInfo.align == Telescope::ALI_RECENTER_6 ||
+             telInfo.align == Telescope::ALI_RECENTER_7 || telInfo.align == Telescope::ALI_RECENTER_8 || telInfo.align == Telescope::ALI_RECENTER_9)) {
+            if (telInfo.addStar()) { if (telInfo.align == Telescope::ALI_OFF) DisplayMessage("Alignment", "Success!", 2000); else DisplayMessage("Add Star", "Success!", 2000); } else DisplayMessage("Add Star", "Failed!", -1);
+          }
+        }
       }
+      time_last_action = millis();
     }
   }
 }

@@ -1,6 +1,6 @@
 
-// Alt Main Menu (double click)
-void SmartHandController::menuSpeedRate()
+// Feature Key Menu (double click)
+void SmartHandController::menuFeatureKey()
 {
   static unsigned short current_selection_feature_mode = 1;
   unsigned short last_selection_feature_mode = current_selection_feature_mode;

@@ -87,7 +87,7 @@ private:
   void initReadNvValues();
 
   void menuMain();
-  void menuSpeedRate();
+  void menuFeatureKey();
   
   MENU_RESULT menuSyncGoto(bool sync);
   MENU_RESULT subMenuSyncGoto(char sync, int subMenuNum);
