@@ -558,8 +558,8 @@ void SmartHandController::update()
             if (telInfo.addStar()) { if (telInfo.align == Telescope::ALI_OFF) DisplayMessage("Alignment", "Success!", 2000); else DisplayMessage("Add Star", "Success!", 2000); } else DisplayMessage("Add Star", "Failed!", -1);
           }
         }
+        time_last_action = millis();
       }
-      time_last_action = millis();
     }
   }
 }
