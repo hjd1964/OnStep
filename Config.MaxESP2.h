@@ -19,7 +19,7 @@
 //   Copy the latest Wire.h library file (only) from ~\OnStep\src\HAL\HAL_ESP32 into
 //   C:\Users\xxxxxx\AppData\Local\Arduino15\packages\esp32\hardware\esp32\1.0.0\libraries\Wire\src
 
-// ESP32 Release 1.0.1 Notes:
+// ESP32 Release 1.0.1 and 1.0.2 Notes:
 // The stock BluetoothSerial.h library doesn't, I know of no solution for this
 // The stock Wire.h library appears to work properly
 
