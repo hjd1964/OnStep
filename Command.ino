@@ -1390,11 +1390,11 @@ void processCommands() {
         quietReply=true; 
       } else
 
-//  :RG#   Set Slew rate to Guiding Rate (slowest) 1X
-//  :RC#   Set Slew rate to Centering rate (2nd slowest) 8X
-//  :RM#   Set Slew rate to Find Rate (2nd Fastest) 20X
-//  :RF#   Set Slew rate to Fast Rate (Fastest) 48X
-//  :RS#   Set Slew rate to max (fastest) ?X (1/2 of maxRate)
+//  :RG#   Set Slew rate to Guiding Rate   1X
+//  :RC#   Set Slew rate to Centering rate 8X
+//  :RM#   Set Slew rate to Find Rate     20X
+//  :RF#   Set Slew rate to Fast Rate     48X
+//  :RS#   Set Slew rate to Half Max (VF)  ?X (1/2 of maxRate)
 //  :Rn#   Set Slew rate to n, where n=0..9
 //         Returns: Nothing
       if ((command[1]=='G') || (command[1]=='C') || (command[1]=='M') || (command[1]=='S') || ((command[1]>='0') && (command[1]<='9'))) {
