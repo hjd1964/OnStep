@@ -214,6 +214,7 @@
 #define StepsPerMicrometerAxis4  0.5 // figure this out by testing or other means.
 #define MinAxis4               -25.0 // minimum allowed position in millimeters, default = -25.0
 #define MaxAxis4                25.0 // maximum allowed position in millimeters, default =  25.0
+#define AXIS4_MIN_MOVE_RATE 10       // minimum micrometers per second, default=10.  In DC motor mode power for slow movement (1-1000 range.)
 #define AXIS4_REVERSE_OFF            // reverse the direction of focuser movement.
 #define AXIS4_DISABLE_OFF            // Pin A22 (Aux6.)  Default _OFF, use HIGH for common stepper drivers.
 #define AXIS4_AUTO_POWER_DOWN_OFF    // use _ON if you want to power down the motor at stand-still.  Default _OFF.  Ignored in DC motor mode.
@@ -226,6 +227,7 @@
 #define StepsPerMicrometerAxis5  0.5 // figure this out by testing or other means.
 #define MinAxis5               -25.0 // minimum allowed position in millimeters, default = -25.0
 #define MaxAxis5                25.0 // maximum allowed position in millimeters, default =  25.0
+#define AXIS5_MIN_MOVE_RATE 10       // minimum micrometers per second, default=10.  In DC motor mode power for slow movement (1-1000 range.)
 #define AXIS5_REVERSE_OFF            // reverse the direction of focuser movement.
 #define AXIS5_DISABLE_OFF            // Pin A21 (Aux5.)  Default _OFF, use HIGH for common stepper drivers.
 #define AXIS5_AUTO_POWER_DOWN_OFF    // use _ON if you want to power down the motor at stand-still.  Default _OFF.  Ignored in DC motor mode.

@@ -379,10 +379,10 @@ void processCommands() {
 //            Returns: Nothing
 //  :FSsnnn#  Set focuser target position (in microns)
 //            Returns: Nothing
-      if (command[1]=='S') { if (parameter[0]==0) { foc1.setMoveRate(10); quietReply=true; } else foc1.setTarget(atol(parameter)); } else
+      if (command[1]=='S') { if (parameter[0]==0) { foc1.setMoveRate(constrain(1,AXIS4_MIN_MOVE_RATE,1000)); quietReply=true; } else foc1.setTarget(atol(parameter)); } else
 //  :Fn#   Movement rate, 1=finest, 2=0.01mm/second, 3=0.1mm/second, 4=1mm/second
 //         Returns: Nothing
-      if ((command[1]>='1') && (command[1]<='4')) { i=command[1]-'1'; int p[] = {1,10,100,1000}; foc1.setMoveRate(p[i]); quietReply=true; } else commandError=true;
+      if ((command[1]>='1') && (command[1]<='4')) { i=command[1]-'1'; int p[] = {1,10,100,1000}; foc1.setMoveRate(constrain(p[i],AXIS4_MIN_MOVE_RATE,1000)); quietReply=true; } else commandError=true;
       } else
 #endif
 
@@ -460,10 +460,10 @@ void processCommands() {
 //            Returns: Nothing
 //  :fSsnnn#  Set focuser target position (in microns)
 //            Returns: Nothing
-      if (command[1]=='S') { if (parameter[0]==0) { foc2.setMoveRate(10); quietReply=true; } else foc2.setTarget(atol(parameter)); } else
+      if (command[1]=='S') { if (parameter[0]==0) { foc2.setMoveRate(constrain(1,AXIS5_MIN_MOVE_RATE,1000)); quietReply=true; } else foc2.setTarget(atol(parameter)); } else
 //  :fn#   Movement rate, 1=finest, 2=0.01mm/second, 3=0.1mm/second, 4=1mm/second
 //         Returns: Nothing
-      if ((command[1]>='1') && (command[1]<='4')) { i=command[1]-'1'; int p[] = {1,10,100,1000}; foc2.setMoveRate(p[i]); quietReply=true; } else commandError=true;
+      if ((command[1]>='1') && (command[1]<='4')) { i=command[1]-'1'; int p[] = {1,10,100,1000}; foc2.setMoveRate(constrain(p[i],AXIS5_MIN_MOVE_RATE,1000)); quietReply=true; } else commandError=true;
      } else
 #endif
 

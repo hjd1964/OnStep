@@ -7,6 +7,14 @@
 // -----------------------------------------------------------------------------------
 // correct for configuration backwards compatability
 
+// automatically set minimum move rates for focusers if they aren't defined
+#ifndef AXIS4_MIN_MOVE_RATE
+  #define AXIS4_MIN_MOVE_RATE 10
+#endif
+#ifndef AXIS5_MIN_MOVE_RATE
+  #define AXIS5_MIN_MOVE_RATE 10
+#endif
+
 // the mount type FORK with Meridian flips enabled for align (only) is not-longer required use _FORK instead
 #ifdef MOUNT_TYPE_FORK_ALT
   #define MOUNT_TYPE_FORK
