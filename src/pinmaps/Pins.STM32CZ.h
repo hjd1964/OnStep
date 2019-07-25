@@ -36,8 +36,8 @@
 #define Axis1_M2        PE4    // Microstep Mode 2
 #define Axis1StepPin    PE3    // Step
 #define Axis1DirPin     PE2    // Motor Direction
-#define Axis1_Aux       Aux1   // Aux - ESP8266 GPIO0 or SPI MISO or Tone
-#define Axis1_FAULT     Aux1   // Fault
+#define Axis1_Aux       Aux1   // Aux1 - ESP8266 GPIO0 or SPI MISO or Tone or Fault
+#define Axis1_FAULT     Aux1   // Aux1 - ESP8266 GPIO0 or SPI MISO or Tone or Fault
 
 #define Axis2_EN        PB5    // Enable
 #define Axis2_M0        PB4    // Microstep Mode 0
@@ -45,8 +45,8 @@
 #define Axis2_M2        PD7    // Microstep Mode 2
 #define Axis2StepPin    PD6    // Step
 #define Axis2DirPin     PD5    // Motor Direction
-#define Axis2_Aux       Aux2   // Aux - ESP8266 RST or SPI MISO or PPS
-#define Axis2_FAULT     Aux2   // Fault
+#define Axis2_Aux       Aux2   // Aux2 - ESP8266 RST or SPI MISO or PPS or Fault
+#define Axis2_FAULT     Aux2   // Aux2 - ESP8266 RST or SPI MISO or PPS or Fault
 
 // This is the built in LED for the Black Pill board. There is a pin
 // available from it too, in case you want to power another LED with a wire
@@ -55,7 +55,7 @@
 //#define ReticulePin   Undefined // Drain
 
 // For a piezo buzzer
-#define TonePin         Aux1     // Tone
+#define TonePin         Aux1  // Aux1 - ESP8266 GPIO0 or SPI MISO or Tone or Fault
 
 // ST4 interface
 #define ST4DEn          PB13  // ST4 DE+ North
@@ -86,10 +86,9 @@
 
 // The PPS pin is a 3.3V logic input, OnStep measures time between rising edges and
 // adjusts the internal sidereal clock frequency
-#define PpsPin         Aux2         // Pulse Per Second time source, e.g. GPS
+#define PpsPin         Aux2         // Aux2 - ESP8266 RST or SPI MISO or PPS or Fault
 
 #else
 #error "Wrong processor for this configuration!"
 
 #endif
-
