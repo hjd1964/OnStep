@@ -47,6 +47,10 @@
 #define DS3234_CS_PIN 53
 #define BME280_CS_PIN 49
 
+// For ESP8266 control
+#define ESP8266Gpio0Pin  Aux1
+#define ESP8266RstPin    Aux2
+
 // Pins to Axis1 RA/Azm on RAMPS X
 #define Axis1DirPin   55    // Pin A1 (Dir)
 #define Axis1DirBit    1    //

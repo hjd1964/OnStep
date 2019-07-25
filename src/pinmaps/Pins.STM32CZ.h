@@ -26,6 +26,10 @@
 #define Aux1            PA8
 #define Aux2            PA12
 
+// For ESP8266 control
+#define ESP8266Gpio0Pin  Aux1  // Aux1 - ESP8266 GPIO0 or SPI MISO or Tone or Fault
+#define ESP8266RstPin    Aux2  // Aux2 - ESP8266 RST or SPI MISO or PPS
+
 #define Axis1_EN        PC15   // Enable
 #define Axis1_M0        PC14   // Microstep Mode 0
 #define Axis1_M1        PC13   // Microstep Mode 1

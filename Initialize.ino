@@ -109,11 +109,11 @@ pinMode(Axis1_Aux,INPUT_PULLUP);
 // ESP-01 (ESP8266) firmware flashing control
 
 #ifdef ESP8266_CONTROL_ON
-  pinMode(Axis1_Aux,OUTPUT);                // ESP8266 GPIO0
-  digitalWrite(Axis1_Aux,HIGH); delay(20);  // Run mode
-  pinMode(Axis2_Aux,OUTPUT);                // ESP8266 RST
-  digitalWrite(Axis2_Aux,LOW);  delay(200); // Reset, if LOW
-  digitalWrite(Axis2_Aux,HIGH);             // Reset, inactive HIGH
+  pinMode(ESP8266Gpio0Pin,OUTPUT);                // ESP8266 GPIO0
+  digitalWrite(ESP8266Gpio0Pin,HIGH); delay(20);  // Run mode
+  pinMode(ESP8266RstPin,OUTPUT);                  // ESP8266 RST
+  digitalWrite(ESP8266RstPin,LOW);  delay(200);   // Reset, if LOW
+  digitalWrite(ESP8266RstPin,HIGH);               // Reset, inactive HIGH
 #endif
 
 // ------------------------------------------------------------------

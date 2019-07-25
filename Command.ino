@@ -278,10 +278,10 @@ void processCommands() {
             delay(500);
             SerialA.begin(115200);
             SerialB.begin(115200);
-            digitalWrite(Axis1_Aux,LOW); delay(20);  // Pgm mode LOW
+            digitalWrite(ESP8266Gpio0Pin,LOW); delay(20); // Pgm mode LOW
             
-            digitalWrite(Axis2_Aux,LOW);  delay(20); // Reset, if LOW
-            digitalWrite(Axis2_Aux,HIGH);            // Reset, inactive HIGH
+            digitalWrite(ESP8266RstPin,LOW);  delay(20);  // Reset, if LOW
+            digitalWrite(ESP8266RstPin,HIGH);             // Reset, inactive HIGH
 
             while (true) {
               // read from port 1, send to port 0:

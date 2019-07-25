@@ -35,6 +35,10 @@
 #define PpsPin        28    // Pin 28 (PPS time source, GPS for example)
 #define DS3234_CS_PIN 10
 
+// For ESP8266 control
+#define ESP8266Gpio0Pin  Aux1 // Pin 18 (Aux1 - ESP8266 GPIO0 or SPI MISO or Fault)
+#define ESP8266RstPin    Aux2 // Pin  5 (Aux2 - ESP8266 RST or SPI MISO or Fault)
+
 #define Axis1DirPin   21    // Pin 21 (Dir)
 #define Axis1StepPin  20    // Pin 20 (Step)
 #define Axis1_HOME    Aux3  // Pin 36 (Home sw)
