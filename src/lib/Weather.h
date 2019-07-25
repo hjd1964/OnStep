@@ -3,9 +3,17 @@
 
 #pragma once
 
-#if defined(WEATHER_BME280_ON) || defined(WEATHER_BME280)
+#if defined(WEATHER_BME280_ON) || defined(WEATHER_BME280) || defined(WEATHER_BME280SPI_ON) || defined(WEATHER_BME280SPI)
   #include <Adafruit_BME280.h> // https://github.com/adafruit/Adafruit_BME280_Library and https://github.com/adafruit/Adafruit_Sensor
-  Adafruit_BME280 bme;
+  #if defined(WEATHER_BME280SPI_ON)
+    Adafruit_BME280 bme(BME280_CS_PIN); // hardware SPI
+//  Adafruit_BME280 bme(BME280_CS_PIN, SSPI_MOSI, SSPI_MISO, SSPI_SCK); // software SPI
+  #elif defined(WEATHER_BME280SPI)
+    Adafruit_BME280 bme(WEATHER_BME280SPI); // hardware SPI (user defined CS)
+//  Adafruit_BME280 bme(WEATHER_BME280SPI, SSPI_MOSI, SSPI_MISO, SSPI_SCK); // software SPI (user defined CS)
+  #else
+    Adafruit_BME280 bme;
+  #endif
 #endif
 
 #ifdef TEMPERATURE_DS1820_ON
@@ -18,11 +26,13 @@
 class weather {
   public:
     void init() {
-#if defined(WEATHER_BME280_ON) || defined(WEATHER_BME280)
-      #ifdef WEATHER_BME280
+#if defined(WEATHER_BME280_ON) || defined(WEATHER_BME280) || defined(WEATHER_BME280SPI_ON) || defined(WEATHER_BME280SPI)
+      #if defined(WEATHER_BME280)
         if (bme.begin(WEATHER_BME280,&HAL_Wire)) _disabled=false;
-      #else
+      #elif defined(WEATHER_BME280_ON)
         if (bme.begin(&HAL_Wire)) _disabled=false;
+      #else
+        if (bme.begin()) _disabled=false;
       #endif
       if (!_disabled) {
         _t=bme.readTemperature();
@@ -44,7 +54,7 @@ class weather {
 
     // designed for a 1s polling interval to refresh readings once a minute
     void poll() {
-#if defined(WEATHER_BME280_ON) || defined(WEATHER_BME280)
+#if defined(WEATHER_BME280_ON) || defined(WEATHER_BME280) || defined(WEATHER_BME280SPI_ON) || defined(WEATHER_BME280SPI)
       if (!_disabled) {
         static int phase=0;
   #ifdef ESP32

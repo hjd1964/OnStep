@@ -22,6 +22,11 @@
 #define Aux13         47
 #define Aux14         32
 
+// For software SPI
+#define SSPI_SCK 52
+#define SSPI_MISO 50
+#define SSPI_MOSI 51
+
 // The PEC index sense is a 5V logic input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
 #define PecPin        57    // RAMPS AUX1, A-OUT (1=+5V, 2=GND, 3=PEC)
 #define AnalogPecPin  A3    // Note A3 is (57)
@@ -40,6 +45,7 @@
 // The PPS pin is a 5V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
 #define PpsPin         2    // RAMPS X+, Interrupt 0 on Pin 2
 #define DS3234_CS_PIN 53
+#define BME280_CS_PIN 49
 
 // Pins to Axis1 RA/Azm on RAMPS X
 #define Axis1DirPin   55    // Pin A1 (Dir)
