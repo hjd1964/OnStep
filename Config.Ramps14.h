@@ -90,7 +90,7 @@
 // Sound state at startup, default=_ON.
 #define DEFAULT_SOUND_ON
 
-// Set WEATHER_BME280 to _ON (or the I2C device address if other than 0x77) and wire in BME280 on the I2C port pins 20 (SDA) and 21 (SCL). for temperature, pressure, humidity.  Default=_OFF.
+// Set WEATHER_BME280 to _ON (or the I2C device address if other than 0x77) and wire in BME280 on the I2C port pins 20 (SDA) and 21 (SCL) for temperature, pressure, humidity.  Default=_OFF.
 // Other options: Set WEATHER_BME280SPI_ON for a BME280 on the default SPI interface pins (CS on Pin 49, or set WEATHER_BME280SPI to CS pin# instead of using _ON.)
 #define WEATHER_BME280_OFF
 
