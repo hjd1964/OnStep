@@ -18,7 +18,7 @@
   #define Axis2 "DEC"
 #endif
 
-const char html_settingsBrowserTime[] =
+const char html_settingsBrowserTime[] PROGMEM =
 "&nbsp;&nbsp;<span id=\"datetime\"></span> UT (web browser)"
 "<script> "
 "function pad(num, size) { var s = '000000000' + num; return s.substr(s.length-size); }"
@@ -27,33 +27,33 @@ const char html_settingsBrowserTime[] =
 "' '+pad(now.getUTCHours().toString(),2)+':'+pad(now.getUTCMinutes().toString(),2)+':'+pad(now.getUTCSeconds().toString(),2); "
 "</script><br />\r\n";
 
-const char* html_indexDate = "&nbsp;&nbsp;<font class='c'>%s</font>";
-const char* html_indexTime = "&nbsp;<font class='c'>%s</font>&nbsp;UT";
-const char* html_indexSidereal = "&nbsp;(<font class='c'>%s</font>&nbsp; LST)<br />";
-const char* html_indexSite = "&nbsp;&nbsp;Long. = <font class='c'>%s</font>, Lat. = <font class='c'>%s</font><br />";
+const char html_indexDate[] PROGMEM = "&nbsp;&nbsp;<font class='c'>%s</font>";
+const char html_indexTime[] PROGMEM = "&nbsp;<font class='c'>%s</font>&nbsp;UT";
+const char html_indexSidereal[] PROGMEM = "&nbsp;(<font class='c'>%s</font>&nbsp; LST)<br />";
+const char html_indexSite[] PROGMEM = "&nbsp;&nbsp;Long. = <font class='c'>%s</font>, Lat. = <font class='c'>%s</font><br />";
 
-const char* html_indexPosition = "&nbsp;&nbsp;Current: " Axis1 "=<font class='c'>%s</font>, " Axis2 "=<font class='c'>%s</font><br />";
-const char* html_indexTarget = "&nbsp;&nbsp;Target:&nbsp;&nbsp; " Axis1 "=<font class='c'>%s</font>, " Axis2 "=<font class='c'>%s</font><br />";
+const char html_indexPosition[] PROGMEM = "&nbsp;&nbsp;Current: " Axis1 "=<font class='c'>%s</font>, " Axis2 "=<font class='c'>%s</font><br />";
+const char html_indexTarget[] PROGMEM = "&nbsp;&nbsp;Target:&nbsp;&nbsp; " Axis1 "=<font class='c'>%s</font>, " Axis2 "=<font class='c'>%s</font><br />";
 #ifdef ENCODERS_ON
-const char* html_indexEncoder1 = "&nbsp;&nbsp;OnStep: Ax1=<font class='c'>%s</font>, Ax2=<font class='c'>%s</font><br />";
-const char* html_indexEncoder2 = "&nbsp;&nbsp;Encodr: Ax1=<font class='c'>%s</font>, Ax2=<font class='c'>%s</font><br />";
+const char html_indexEncoder1[] PROGMEM = "&nbsp;&nbsp;OnStep: Ax1=<font class='c'>%s</font>, Ax2=<font class='c'>%s</font><br />";
+const char html_indexEncoder2[] PROGMEM = "&nbsp;&nbsp;Encodr: Ax1=<font class='c'>%s</font>, Ax2=<font class='c'>%s</font><br />";
 #endif
-const char* html_indexPier = "&nbsp;&nbsp;Pier Side=<font class='c'>%s</font> (meridian flips <font class='c'>%s</font>)<br />";
+const char html_indexPier[] PROGMEM = "&nbsp;&nbsp;Pier Side=<font class='c'>%s</font> (meridian flips <font class='c'>%s</font>)<br />";
 
-const char* html_indexCorPolar = "&nbsp;&nbsp;%s <font class='c'>%ld</font>%c &nbsp; %s <font class='c'>%ld</font>%c &nbsp;(Mount relative to %s)<br />";
+const char html_indexCorPolar[] PROGMEM = "&nbsp;&nbsp;%s <font class='c'>%ld</font>%c &nbsp; %s <font class='c'>%ld</font>%c &nbsp;(Mount relative to %s)<br />";
 
-const char* html_indexPark = "&nbsp;&nbsp;Parking: <font class='c'>%s</font><br />";
-const char* html_indexTracking = "&nbsp;&nbsp;Tracking: <font class='c'>%s %s</font><br />";
-const char* html_indexMaxRate = "&nbsp;&nbsp;Current MaxRate: <font class='c'>%ld</font> (Default MaxRate: <font class='c'>%ld</font>)<br />";
-const char* html_indexMaxSpeed = "&nbsp;&nbsp;Maximum slew speed: <font class='c'>%s</font>&deg;/s<br />";
+const char html_indexPark[] PROGMEM = "&nbsp;&nbsp;Parking: <font class='c'>%s</font><br />";
+const char html_indexTracking[] PROGMEM = "&nbsp;&nbsp;Tracking: <font class='c'>%s %s</font><br />";
+const char html_indexMaxRate[] PROGMEM = "&nbsp;&nbsp;Current MaxRate: <font class='c'>%ld</font> (Default MaxRate: <font class='c'>%ld</font>)<br />";
+const char html_indexMaxSpeed[] PROGMEM = "&nbsp;&nbsp;Maximum slew speed: <font class='c'>%s</font>&deg;/s<br />";
 
-const char* html_indexTPHD = "&nbsp;&nbsp;%s <font class='c'>%s</font>%s<br />";
+const char html_indexTPHD[] PROGMEM = "&nbsp;&nbsp;%s <font class='c'>%s</font>%s<br />";
 
-const char* html_indexDriverStatus = " Driver: <font class='c'>%s</font><br />";
-const char* html_indexLastError = "&nbsp;&nbsp;Last Error: <font class='c'>%s</font><br />";
-const char* html_indexWorkload = "&nbsp;&nbsp;Workload: <font class='c'>%s</font><br />";
+const char html_indexDriverStatus[] PROGMEM = " Driver: <font class='c'>%s</font><br />";
+const char html_indexLastError[] PROGMEM = "&nbsp;&nbsp;Last Error: <font class='c'>%s</font><br />";
+const char html_indexWorkload[] PROGMEM = "&nbsp;&nbsp;Workload: <font class='c'>%s</font><br />";
 #ifdef WIFI_SIGNAL_STRENGTH_ON
-const char* html_indexSignalStrength = "&nbsp;&nbsp;Wireless signal strength: <font class=\"c\">%s</font><br />";
+const char html_indexSignalStrength[] PROGMEM = "&nbsp;&nbsp;Wireless signal strength: <font class=\"c\">%s</font><br />";
 #endif
 
 #ifdef OETHS
@@ -70,83 +70,83 @@ void handleRoot() {
 
   sendHtmlStart();
 
-  String data=html_headB;
-  data += html_headerIdx; // page refresh
-  data += html_main_cssB;
-  data += html_main_css1;
-  data += html_main_css2;
-  data += html_main_css3;
-  data += html_main_css4;
-  data += html_main_css5;
-  data += html_main_css6;
+  String data=FPSTR(html_headB);
+  data += FPSTR(FPSTR(html_headerIdx)); // page refresh
+  data += FPSTR(html_main_cssB);
+  data += FPSTR(html_main_css1);
+  data += FPSTR(html_main_css2);
+  data += FPSTR(html_main_css3);
+  data += FPSTR(html_main_css4);
+  data += FPSTR(html_main_css5);
+  data += FPSTR(html_main_css6);
   sendHtml(data);
-  data += html_main_css7;
-  data += html_main_css8;
-  data += html_main_css_control1;
-  data += html_main_css_control2;
-  data += html_main_css_control3;
-  data += html_main_cssE;
-  data += html_headE;
-  data += html_bodyB;
+  data += FPSTR(html_main_css7);
+  data += FPSTR(html_main_css8);
+  data += FPSTR(html_main_css_control1);
+  data += FPSTR(html_main_css_control2);
+  data += FPSTR(html_main_css_control3);
+  data += FPSTR(html_main_cssE);
+  data += FPSTR(html_headE);
+  data += FPSTR(html_bodyB);
   sendHtml(data);
 
   // get status (all)
   mountStatus.update(true);
 
   // finish the standard http response header
-  data += html_onstep_header1;
+  data += FPSTR(html_onstep_header1);
   if (mountStatus.getId(temp1)) data += temp1; else data += "?";
-  data += html_onstep_header2;
+  data += FPSTR(html_onstep_header2);
   if (mountStatus.getVer(temp1)) data += temp1; else data += "?";
-  data += html_onstep_header3;
-  data += html_links1S;
-  data += html_links2N;
-  data += html_links3N;
+  data += FPSTR(html_onstep_header3);
+  data += FPSTR(html_links1S);
+  data += FPSTR(html_links2N);
+  data += FPSTR(html_links3N);
   sendHtml(data);
 #ifdef ENCODERS_ON
-  data += html_linksEncN;
+  data += FPSTR(html_linksEncN);
 #endif
-  data += html_links4N;
-  data += html_links5N;
+  data += FPSTR(html_links4N);
+  data += FPSTR(html_links5N);
 #ifndef OETHS
-  data += html_links6N;
+  data += FPSTR(html_links6N);
 #endif
-  data += html_onstep_header4;
+  data += FPSTR(html_onstep_header4);
   sendHtml(data);
 
   data+="<div style='width: 27em;'>";
 
   data+="<b>Site:</b><br />";
   // Browser time
-  data += html_settingsBrowserTime;
+  data += FPSTR(html_settingsBrowserTime);
 
   // UTC Date
   if (!sendCommand(":GX81#",temp1)) strcpy(temp1,"?");
-  sprintf(temp,html_indexDate,temp1);
+  sprintf_P(temp,html_indexDate,temp1);
   data += temp;
 
   // UTC Time
   if (!sendCommand(":GX80#",temp1)) strcpy(temp1,"?");
-  sprintf(temp,html_indexTime,temp1);
+  sprintf_P(temp,html_indexTime,temp1);
   data += temp;
 
   // LST
   if (!sendCommand(":GS#",temp1)) strcpy(temp1,"?");
-  sprintf(temp,html_indexSidereal,temp1);
+  sprintf_P(temp,html_indexSidereal,temp1);
   data += temp;
 
   // Longitude and Latitude
   if (!sendCommand(":Gg#",temp1)) strcpy(temp1,"?");
   if (!sendCommand(":Gt#",temp2)) strcpy(temp2,"?");
-  sprintf(temp,html_indexSite,temp1,temp2);
+  sprintf_P(temp,html_indexSite,temp1,temp2);
   data += temp;
   sendHtml(data);
 
 #ifdef AMBIENT_CONDITIONS_ON
-  if (!sendCommand(":GX9A#",temp1)) strcpy(temp1,"?"); sprintf(temp,html_indexTPHD,"Temperature:",temp1,"&deg;C"); data+=temp;
-  if (!sendCommand(":GX9B#",temp1)) strcpy(temp1,"?"); sprintf(temp,html_indexTPHD,"Barometric Pressure:",temp1,"mb"); data+=temp;
-  if (!sendCommand(":GX9C#",temp1)) strcpy(temp1,"?"); sprintf(temp,html_indexTPHD,"Relative Humidity:",temp1,"%"); data+=temp;
-  if (!sendCommand(":GX9E#",temp1)) strcpy(temp1,"?"); sprintf(temp,html_indexTPHD,"Dew Point Temperature:",temp1,"&deg;C"); data+=temp;
+  if (!sendCommand(":GX9A#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,"Temperature:",temp1,"&deg;C"); data+=temp;
+  if (!sendCommand(":GX9B#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,"Barometric Pressure:",temp1,"mb"); data+=temp;
+  if (!sendCommand(":GX9C#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,"Relative Humidity:",temp1,"%"); data+=temp;
+  if (!sendCommand(":GX9E#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,"Dew Point Temperature:",temp1,"&deg;C"); data+=temp;
 #endif
 
   data+="<br /><b>Coordinates:</b><br />";
@@ -155,25 +155,25 @@ void handleRoot() {
   // RA,Dec current
   if (!sendCommand(":GRa#",temp1)) strcpy(temp1,"?");
   if (!sendCommand(":GDe#",temp2)) strcpy(temp2,"?");
-  sprintf(temp,html_indexPosition,temp1,temp2); 
+  sprintf_P(temp,html_indexPosition,temp1,temp2); 
   data += temp;
 
   // RA,Dec target
   if (!sendCommand(":Gra#",temp1)) strcpy(temp1,"?");
   if (!sendCommand(":Gde#",temp2)) strcpy(temp2,"?");
-  sprintf(temp,html_indexTarget,temp1,temp2); 
+  sprintf_P(temp,html_indexTarget,temp1,temp2); 
   data += temp;
 #else
   // RA,Dec current
   if (!sendCommand(":GR#",temp1)) strcpy(temp1,"?");
   if (!sendCommand(":GD#",temp2)) strcpy(temp2,"?");
-  sprintf(temp,html_indexPosition,temp1,temp2); 
+  sprintf_P(temp,html_indexPosition,temp1,temp2); 
   data += temp;
 
   // RA,Dec target
   if (!sendCommand(":Gr#",temp1)) strcpy(temp1,"?");
   if (!sendCommand(":Gd#",temp2)) strcpy(temp2,"?");
-  sprintf(temp,html_indexTarget,temp1,temp2); 
+  sprintf_P(temp,html_indexTarget,temp1,temp2); 
   data += temp;
 #endif
 
@@ -182,13 +182,13 @@ void handleRoot() {
   double f;
   f=encoders.getOnStepAxis1(); doubleToDms(temp1,&f,true,true);
   f=encoders.getOnStepAxis2(); doubleToDms(temp2,&f,true,true);
-  sprintf(temp,html_indexEncoder1,temp1,temp2);
+  sprintf_P(temp,html_indexEncoder1,temp1,temp2);
   data += temp;
 
   // RA,Dec encoder position
   f=encoders.getAxis1(); doubleToDms(temp1,&f,true,true);
   f=encoders.getAxis2(); doubleToDms(temp2,&f,true,true);
-  sprintf(temp,html_indexEncoder2,temp1,temp2);
+  sprintf_P(temp,html_indexEncoder2,temp1,temp2);
   data += temp;
 #endif
 
@@ -204,7 +204,7 @@ void handleRoot() {
     if (mountStatus.autoMeridianFlips()) strcat(temp2,"</font>, <font class=\"c\">Auto");
   } else strcpy(temp2,"Off");
   if (!mountStatus.valid()) strcpy(temp2,"?");
-  sprintf(temp,html_indexPier,temp1,temp2);
+  sprintf_P(temp,html_indexPier,temp1,temp2);
   data += temp;
   sendHtml(data);
 
@@ -230,10 +230,10 @@ void handleRoot() {
       }
 
       // show direction
-      if ((ud< 0) && (lr< 0)) sprintf(temp,html_indexCorPolar,rightTri,(long)(abs(lr)),units,downTri,(long)(abs(ud)),units,temp1); else
-      if ((ud>=0) && (lr< 0)) sprintf(temp,html_indexCorPolar,rightTri,(long)(abs(lr)),units,upTri  ,(long)(abs(ud)),units,temp1); else
-      if ((ud< 0) && (lr>=0)) sprintf(temp,html_indexCorPolar,leftTri ,(long)(abs(lr)),units,downTri,(long)(abs(ud)),units,temp1); else
-      if ((ud>=0) && (lr>=0)) sprintf(temp,html_indexCorPolar,leftTri ,(long)(abs(lr)),units,upTri  ,(long)(abs(ud)),units,temp1);
+      if ((ud< 0) && (lr< 0)) sprintf_P(temp,html_indexCorPolar,rightTri,(long)(abs(lr)),units,downTri,(long)(abs(ud)),units,temp1); else
+      if ((ud>=0) && (lr< 0)) sprintf_P(temp,html_indexCorPolar,rightTri,(long)(abs(lr)),units,upTri  ,(long)(abs(ud)),units,temp1); else
+      if ((ud< 0) && (lr>=0)) sprintf_P(temp,html_indexCorPolar,leftTri ,(long)(abs(lr)),units,downTri,(long)(abs(ud)),units,temp1); else
+      if ((ud>=0) && (lr>=0)) sprintf_P(temp,html_indexCorPolar,leftTri ,(long)(abs(lr)),units,upTri  ,(long)(abs(ud)),units,temp1);
 
       data += temp;
     }
@@ -248,7 +248,7 @@ void handleRoot() {
   if (mountStatus.parkFail()) strcpy(temp1,"Park Failed");
   if (mountStatus.atHome()) strcat(temp1," </font>(<font class=\"c\">At Home</font>)<font class=\"c\">");
   if (!mountStatus.valid()) strcpy(temp1,"?");
-  sprintf(temp,html_indexPark,temp1);
+  sprintf_P(temp,html_indexPark,temp1);
   data += temp;
 
   // Tracking
@@ -264,7 +264,7 @@ void handleRoot() {
   if (mountStatus.rateCompensation()==RC_FULL_BOTH) strcat(temp2,"Full Comp Both Axis, ");
   if (!mountStatus.valid()) strcpy(temp2,"?");
   if (temp2[strlen(temp2)-2]==',') { temp2[strlen(temp2)-2]=0; strcat(temp2,"</font>)<font class=\"c\">"); } else strcpy(temp2,"");
-  sprintf(temp,html_indexTracking,temp1,temp2);
+  sprintf_P(temp,html_indexTracking,temp1,temp2);
   data += temp;
   sendHtml(data);
 
@@ -278,15 +278,15 @@ void handleRoot() {
 
   // Slew speed
   if ((sendCommand(":GX97#",temp1)) && (strlen(temp1)>2)) {
-    sprintf(temp,html_indexMaxSpeed,temp1);
+    sprintf_P(temp,html_indexMaxSpeed,temp1);
     data += temp;
   } else {
     // fall back to MaxRate display if not supported
     if ((sendCommand(":GX92#",temp1)) && (sendCommand(":GX93#",temp2))) { 
       long maxRate=strtol(&temp1[0],NULL,10);
       long MaxRate=strtol(&temp2[0],NULL,10);
-      sprintf(temp,html_indexMaxRate,maxRate,MaxRate);
-    } else sprintf(temp,html_indexMaxSpeed,"?");
+      sprintf_P(temp,html_indexMaxRate,maxRate,MaxRate);
+    } else sprintf_P(temp,html_indexMaxSpeed,"?");
     data += temp;
   }
   sendHtml(data);
@@ -314,7 +314,7 @@ void handleRoot() {
     if (mountStatus.axis1OTPW()) strcat(temp1,"Pre-warning &gt;120C, ");
     if (strlen(temp1)>2) temp1[strlen(temp1)-2]=0;
     if (strlen(temp1)==0) strcpy(temp1,"Ok");
-    sprintf(temp,html_indexDriverStatus,temp1);
+    sprintf_P(temp,html_indexDriverStatus,temp1);
     data += "&nbsp;&nbsp;Axis1";
     data += temp;
   
@@ -338,13 +338,13 @@ void handleRoot() {
     if (mountStatus.axis2OTPW()) strcat(temp1,"Pre-warning &gt;120C, ");
     if (strlen(temp1)>2) temp1[strlen(temp1)-2]=0;
     if (strlen(temp1)==0) strcpy(temp1,"Ok");
-    sprintf(temp,html_indexDriverStatus,temp1);
+    sprintf_P(temp,html_indexDriverStatus,temp1);
     data += "&nbsp;&nbsp;Axis2";
     data += temp;
   }
 
 #ifdef INTERNAL_TEMPERATURE_ON
-  if (!sendCommand(":GX9F#",temp1)) strcpy(temp1,"?"); sprintf(temp,html_indexTPHD,"Controller Internal Temperature:",temp1,"&deg;C"); data+=temp;
+  if (!sendCommand(":GX9F#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,"Controller Internal Temperature:",temp1,"&deg;C"); data+=temp;
 #endif
 
   // Last Error
@@ -352,12 +352,12 @@ void handleRoot() {
   mountStatus.getLastErrorMessage(temp2);
   strcat(temp1,temp2);
   if (!mountStatus.valid()) strcpy(temp1,"?");
-  sprintf(temp,html_indexLastError,temp1);
+  sprintf_P(temp,html_indexLastError,temp1);
   data += temp;
 
   // Loop time
   if (!sendCommand(":GXFA#",temp1)) strcpy(temp1,"?%");
-  sprintf(temp,html_indexWorkload,temp1);
+  sprintf_P(temp,html_indexWorkload,temp1);
   data += temp;
 
 #ifdef WIFI_SIGNAL_STRENGTH_ON
@@ -366,7 +366,7 @@ void handleRoot() {
   if (signal_strength_qty>100) signal_strength_qty=100; 
   else if (signal_strength_qty<0) signal_strength_qty=0;
   sprintf(temp1,"%idBm (%i%%)",signal_strength_dbm,signal_strength_qty);
-  sprintf(temp,html_indexSignalStrength,temp1);
+  sprintf_P(temp,html_indexSignalStrength,temp1);
   data += temp;
 #endif
   data += "</div><br class=\"clear\" />\r\n";

@@ -3,13 +3,13 @@
 
 #ifdef ENCODERS_ON
 
-const char html_encBeg[] = 
+const char html_encBeg[] PROGMEM = 
 "";
 
-const char html_encStart[] =
+const char html_encStart[] PROGMEM =
 "";
 
-const char html_encScript1[] =
+const char html_encScript1[] PROGMEM =
 "<script>"
 "function s(key,v1) {"
   "var xhttp = new XMLHttpRequest();"
@@ -18,7 +18,7 @@ const char html_encScript1[] =
 "}"
 "</script>\n";
 
-const char html_encScript2[] =
+const char html_encScript2[] PROGMEM =
 "<script>"
   "var autoG=setInterval(autoRunG,1000);"
   "var x=0;"
@@ -59,47 +59,47 @@ const char html_encScript2[] =
   "};"
 "</script>\n";
 
-const char html_syncOnStepNow[] =
+const char html_syncOnStepNow[] PROGMEM =
 "Sync OnStep to Encoders: <br />"
 "<form method='get' action='/enc.htm'>"
 "<button name='ms' value='ons' type='submit'>Now</button>"
 "<br />";
 
-const char html_syncEncodersNow[] =
+const char html_syncEncodersNow[] PROGMEM =
 "Sync Encoders to OnStep: <br />"
 "<button name='ms' value='enc' type='submit'>Now</button>"
 "</form><br />";
 
-const char html_encEn1[] =
+const char html_encEn1[] PROGMEM =
 "Automatically sync. OnStep to Encoders (<span id='aste'>?</span>):<br />";
-const char html_encEn2[] =
+const char html_encEn2[] PROGMEM =
 "<button type='button' onpointerdown=\"s('as','on')\" >On</button>"
 "<button type='button' onpointerdown=\"s('as','off')\" >Off</button>"
 "<br /><br />";
 
-const char html_encMxAxis0[] =
+const char html_encMxAxis0[] PROGMEM =
 "Max angular distance (Encoders vs. OnStep): <br />"
 "<form method='get' action='/enc.htm'>";
-const char html_encMxAxis1[] =
+const char html_encMxAxis1[] PROGMEM =
 " <input value='%ld' type='number' name='d1' min='0' max='9999'>"
 "<button type='submit'>Upload</button>"
 " (Axis1, arc-sec 0 to 9999)"
 "</form>";
-const char html_encMxAxis2[] = 
+const char html_encMxAxis2[] PROGMEM = 
 "<form method='get' action='/enc.htm'>"
 " <input value='%ld' type='number' name='d2' min='0' max='9999'>"
 "<button type='submit'>Upload</button>"
 " (Axis2, arc-sec 0 to 9999)"
 "</form><br />";
 
-const char html_encRateEn1[] =
+const char html_encRateEn1[] PROGMEM =
 "OnStep rate control (<span id='orc'>?</span>):<br />";
-const char html_encRateEn2[] =
+const char html_encRateEn2[] PROGMEM =
 "<button type='button' onpointerdown=\"s('rc','on')\" >On</button>"
 "<button type='button' onpointerdown=\"s('rc','off')\" >Off</button>"
 "<br /><br />";
 
-const char html_encStaAxis1[] =
+const char html_encStaAxis1[] PROGMEM =
 #ifdef AXIS1_ENC_BIN_AVG
 "Encoder rate averaging, binned samples: <br />"
 #else
@@ -110,14 +110,14 @@ const char html_encStaAxis1[] =
 "<button type='submit'>Upload</button>"
 " (STA 1 to 999)"
 "</form>";
-const char html_encLtaAxis1[] = 
+const char html_encLtaAxis1[] PROGMEM = 
 "<form method='get' action='/enc.htm'>"
 " <input value='%ld' type='number' name='la' min='1' max='999'>"
 "<button type='submit'>Upload</button>"
 " (LTA 1 to 999)"
 "</form><br />";
 
-const char html_encPropAxis1[] = 
+const char html_encPropAxis1[] PROGMEM = 
 "Proportional response: <br />"
 "<form method='get' action='/enc.htm'>"
 " <input 'width: 75px' value='%ld' type='number' name='pr' min='50' max='5000'>"
@@ -125,7 +125,7 @@ const char html_encPropAxis1[] =
 " (P 50 to 5000&#x25;)"
 "</form><br />";
 
-const char html_encMinGuideAxis1[] = 
+const char html_encMinGuideAxis1[] PROGMEM = 
 "Minimum guide: <br />"
 "<form method='get' action='/enc.htm'>"
 " <input 'width: 75px' value='%ld' type='number' name='mg' min='25' max='1000'>"
@@ -134,7 +134,7 @@ const char html_encMinGuideAxis1[] =
 "</form><br />";
 
 #ifndef AXIS1_ENC_RATE_AUTO
-const char html_encErc2Axis1[] = 
+const char html_encErc2Axis1[] PROGMEM = 
 "Encoder rate comp: <br />"
 "<form method='get' action='/enc.htm'>"
 " <input style='width: 75px' value='%ld' type='number' name='er' min='-99999' max='99999'>"
@@ -144,14 +144,14 @@ const char html_encErc2Axis1[] =
 #endif
 
 #ifdef AXIS1_ENC_INTPOL_COS_ON
-const char html_encIntPolPhaseAxis1[] = 
+const char html_encIntPolPhaseAxis1[] PROGMEM = 
 "<form method='get' action='/enc.htm'>"
 " <input value='%ld' type='number' name='ip' min='0' max='255'>"
 "<button type='submit'>Upload</button>"
 " (Phase 1 to 256 counts)"
 "</form>";
 
-const char html_encIntPolMagAxis1[] = 
+const char html_encIntPolMagAxis1[] PROGMEM = 
 "<form method='get' action='/enc.htm'>"
 " <input style='width: 75px' value='%ld' type='number' name='im' min='0' max='29999'>"
 "<button type='submit'>Upload</button>"
@@ -159,14 +159,14 @@ const char html_encIntPolMagAxis1[] =
 "</form><br />";
 #endif
 
-const char html_encSweepEn1[] =
+const char html_encSweepEn1[] PROGMEM =
 "<br />&nbsp; Sweep (<span id='osc'>?</span>):<br />";
-const char html_encSweepEn2[] =
+const char html_encSweepEn2[] PROGMEM =
 "&nbsp; <button type='button' onpointerdown=\"s('sw','on')\" >On</button>"
 "<button type='button' onpointerdown=\"s('sw','off')\" >Off</button>"
 "<br /><br />";
 
-const char html_encEnd[] = 
+const char html_encEnd[] PROGMEM = 
 "</form>";
 
 #ifdef OETHS
@@ -183,11 +183,11 @@ void handleEncoders() {
 
   sendHtmlStart();
 
-  String data=html_headB;
+  String data=FPSTR(html_headB);
 
   // active ajax page is: encAjax();
   data +="<script>var ajaxPage='enc.txt';</script>\n";
-  data +=html_ajax_active;
+  data +=FPSTR(html_ajax_active);
   data +="<script>auto2Rate=2;</script>";
   sendHtml(data);
 
@@ -200,19 +200,19 @@ void handleEncoders() {
 #endif
 
   // send a standard http response header
-  data += html_main_cssB;
-  data += html_main_css1;
-  data += html_main_css2;
-  data += html_main_css3;
-  data += html_main_css4;
-  data += html_main_css5;
+  data += FPSTR(html_main_cssB);
+  data += FPSTR(html_main_css1);
+  data += FPSTR(html_main_css2);
+  data += FPSTR(html_main_css3);
+  data += FPSTR(html_main_css4);
+  data += FPSTR(html_main_css5);
   sendHtml(data);
-  data += html_main_css6;
-  data += html_main_css7;
-  data += html_main_css8;
-  data += html_main_cssE;
-  data += html_headE;
-  data += html_bodyB;
+  data += FPSTR(html_main_css6);
+  data += FPSTR(html_main_css7);
+  data += FPSTR(html_main_css8);
+  data += FPSTR(html_main_cssE);
+  data += FPSTR(html_headE);
+  data += FPSTR(html_bodyB);
   sendHtml(data);
 
   // get status
@@ -221,80 +221,80 @@ void handleEncoders() {
   // finish the standard http response header
   {
     char temp1[40]="";
-    data += html_onstep_header1;
+    data += FPSTR(html_onstep_header1);
     if (mountStatus.getId(temp1)) data += temp1; else data += "?";
-    data += html_onstep_header2;
+    data += FPSTR(html_onstep_header2);
     if (mountStatus.getVer(temp1)) data += temp1; else data += "?";
-    data += html_onstep_header3;
+    data += FPSTR(html_onstep_header3);
   }
-  data += html_links1N;
-  data += html_links2N;
-  data += html_links3N;
+  data += FPSTR(html_links1N);
+  data += FPSTR(html_links2N);
+  data += FPSTR(html_links3N);
 #ifdef ENCODERS_ON
-  data += html_linksEncS;
+  data += FPSTR(html_linksEncS);
 #endif
-  data += html_links4N;
+  data += FPSTR(html_links4N);
   sendHtml(data);
-  data += html_links5N;
+  data += FPSTR(html_links5N);
 #ifndef OETHS
-  data += html_links6N;
+  data += FPSTR(html_links6N);
 #endif
-  data += html_onstep_header4;
-  data += html_encBeg;
+  data += FPSTR(html_onstep_header4);
+  data += FPSTR(html_encBeg);
 
   data+="<div style='width: 35em;'>";
 
-  data += html_syncOnStepNow;
-  data += html_syncEncodersNow;
+  data += FPSTR(html_syncOnStepNow);
+  data += FPSTR(html_syncEncodersNow);
 
   // Autosync
-  data += html_encEn1;
-  data += html_encEn2;
+  data += FPSTR(html_encEn1);
+  data += FPSTR(html_encEn2);
   sendHtml(data);
   
   // Encoder sync thresholds
-  sprintf(temp,html_encMxAxis0);
+  sprintf_P(temp,html_encMxAxis0);
   data += temp;
-  sprintf(temp,html_encMxAxis1,Axis1EncDiffLimit);
+  sprintf_P(temp,html_encMxAxis1,Axis1EncDiffLimit);
   data += temp;
-  sprintf(temp,html_encMxAxis2,Axis2EncDiffLimit);
+  sprintf_P(temp,html_encMxAxis2,Axis2EncDiffLimit);
   data += temp;
   sendHtml(data);
   
 #ifdef AXIS1_ENC_RATE_CONTROL_ON
   // OnStep rate control
   data+="<br />";
-  data += html_encRateEn1;
-  data += html_encRateEn2;
+  data += FPSTR(html_encRateEn1);
+  data += FPSTR(html_encRateEn2);
 
   // Encoder averaging (integration) samples
-  sprintf(temp,html_encStaAxis1,Axis1EncStaSamples);
+  sprintf_P(temp,html_encStaAxis1,Axis1EncStaSamples);
   data += temp;
-  sprintf(temp,html_encLtaAxis1,Axis1EncLtaSamples);
+  sprintf_P(temp,html_encLtaAxis1,Axis1EncLtaSamples);
   data += temp;
   sendHtml(data);
 
   // Encoder poportional response
-  sprintf(temp,html_encPropAxis1,Axis1EncProp);
+  sprintf_P(temp,html_encPropAxis1,Axis1EncProp);
   data += temp;
 
   // Encoder minimum guide
-  sprintf(temp,html_encMinGuideAxis1,Axis1EncMinGuide);
+  sprintf_P(temp,html_encMinGuideAxis1,Axis1EncMinGuide);
   data += temp;
 
   // Encoder rate compensation
 #ifndef AXIS1_ENC_RATE_AUTO
   long l=round(axis1EncRateComp*1000000.0);
-  sprintf(temp,html_encErc2Axis1,l);
+  sprintf_P(temp,html_encErc2Axis1,l);
   data += temp;
 #endif
 
 #ifdef AXIS1_ENC_INTPOL_COS_ON
   // Encoder interpolation compensation
-  sprintf(temp,html_encIntPolPhaseAxis1,Axis1EncIntPolPhase);
+  sprintf_P(temp,html_encIntPolPhaseAxis1,Axis1EncIntPolPhase);
   data += temp;
 
-  sprintf(temp,html_encIntPolMagAxis1,Axis1EncIntPolMag);
+  sprintf_P(temp,html_encIntPolMagAxis1,Axis1EncIntPolMag);
   data += temp;
 #endif
   sendHtml(data);
@@ -328,14 +328,14 @@ void handleEncoders() {
   data += "<br /><canvas id='myCanvas' width='600' height='300' style='margin-left: 8px; border:2px solid #999999;'></canvas>";
   data += "&nbsp; Center: OnStep rate, Blue: STA (range &#xb1;0.1), Green: LTA (range &#xb1;0.01)<br />";
 
-  data += html_encSweepEn1;
-  data += html_encSweepEn2;
+  data += FPSTR(html_encSweepEn1);
+  data += FPSTR(html_encSweepEn2);
 
   encoders.clearAverages();
 #endif
 
   // end of page
-  sprintf(temp,html_encEnd);
+  sprintf_P(temp,html_encEnd);
   data += temp;
   data+="<br />";
 

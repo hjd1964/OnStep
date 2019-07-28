@@ -21,7 +21,7 @@ long Axis2EncDiffLimit=AXIS2_ENC_DIFF_LIMIT;
 volatile int32_t __p1,__p2;
 
 // encoder polling rate in seconds, default=2.0
-#define POLLING_RATE 2.0
+#define POLLING_RATE 0.5
 
 // encoder rate control
 #ifdef AXIS1_ENC_RATE_CONTROL_ON

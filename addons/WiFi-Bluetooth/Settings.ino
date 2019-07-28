@@ -1,63 +1,63 @@
 // -----------------------------------------------------------------------------------
 // Settings
 
-const char html_settingsStart[] =
+const char html_settingsStart[] PROGMEM =
 "<form method='get' action='/settings.htm'>";
 
-const char html_settingsRefine1[] =
+const char html_settingsRefine1[] PROGMEM =
 "Refine Polar Alignment: <br />"
 "<button name='rp' value='a' type='submit'>Refine PA</button><br />\r\n"
 "Setup &amp; 3+ Star Align mount.  Goto bright star near NCP or SCP with Dec in 50 to 80&deg; range (N or S.) "
 "Press [Refine PA] button.  Use mount's PA adjust controls to center the star again."
 "Optionally align the mount again.</br><br />";
 
-const char html_settingsPark1[] =
+const char html_settingsPark1[] PROGMEM =
 "Park: <br />"
 "<button name='pk' value='s' type='submit'>Set-Park</button>\r\n";
 
-const char html_settingsTrack1[] = 
+const char html_settingsTrack1[] PROGMEM =
 "</br></br>Tracking (<span id='tracking'>";
 const char html_settingsTrack2[] = 
 "</span>): <br />"
 "<button name='tk' value='on' type='submit'>On</button>"
 "<button name='tk' value='off' type='submit'>Off</button><br />";
-const char html_settingsTrack3[] = 
+const char html_settingsTrack3[] PROGMEM =
 "<button name='tk' value='f' type='submit'>+ (0.02Hz faster)</button>"
 "<button name='tk' value='-' type='submit'>- (0.02Hz slower)</button>"
 "<button name='tk' value='r' type='submit'>Reset (default)</button>";
 
-const char html_settingsTrackComp1[] = 
+const char html_settingsTrackComp1[] PROGMEM =
 "</br></br>Compensated Tracking Rate (Pointing Model/Refraction): </br>"
 "<button name='rr' value='otk' type='submit'>Full</button>"
 "<button name='rr' value='on' type='submit'>Refraction Only</button>"
 "<button name='rr' value='off' type='submit'>Off</button>";
-const char html_settingsTrackComp2[] =
+const char html_settingsTrackComp2[] PROGMEM =
 "</br>"
 "<button name='rr' value='don' type='submit'>Dual Axis</button>"
 "<button name='rr' value='doff' type='submit'>Single Axis</button>\r\n";
 
-const char html_settingsBuzzer1[] =
+const char html_settingsBuzzer1[] PROGMEM =
 "<br /><br />Goto Alert, Buzzer (<span id='buzzer'>";
-const char html_settingsBuzzer2[] =
+const char html_settingsBuzzer2[] PROGMEM =
 "</span>): <br />"
 "<button name='ab' value='on' type='submit'>On</button>"
 "<button name='ab' value='off' type='submit'>Off</button>\r\n";
 
-const char html_settingsMFAuto1[] = 
+const char html_settingsMFAuto1[] PROGMEM =
 "</br></br>Automatic Meridian Flip at Limit (<span id='autoFlip'>";
-const char html_settingsMFAuto2[] = 
+const char html_settingsMFAuto2[] PROGMEM =
 "</span>):<br />"
 "<button name='ma' value='now' type='submit'>Now</button>&nbsp;&nbsp;"
 "<button name='ma' value='on' type='submit'>On</button>"
 "<button name='ma' value='off' type='submit'>Off</button>";
-const char html_settingsMFPause1[] = 
+const char html_settingsMFPause1[] PROGMEM =
 "</br></br>Meridian Flip, Pause at Home (<span id='pause'>";
-const char html_settingsMFPause2[] = 
+const char html_settingsMFPause2[] PROGMEM =
 "</span>): <br />"
 "<button name='mp' value='on' type='submit'>On</button>"
 "<button name='mp' value='off' type='submit'>Off</button>\r\n";
 
-const char html_settingsEnd[] =
+const char html_settingsEnd[] PROGMEM =
 "</form>\r\n";
 
 #ifdef OETHS
@@ -74,83 +74,83 @@ void handleSettings() {
   
   sendHtmlStart();
  
-  String data=html_headB;
-  data += html_main_cssB;
-  data += html_main_css1;
-  data += html_main_css2;
-  data += html_main_css3;
-  data += html_main_css4;
-  data += html_main_css5;
+  String data=FPSTR(html_headB);
+  data += FPSTR(html_main_cssB);
+  data += FPSTR(html_main_css1);
+  data += FPSTR(html_main_css2);
+  data += FPSTR(html_main_css3);
+  data += FPSTR(html_main_css4);
+  data += FPSTR(html_main_css5);
   sendHtml(data);
-  data += html_main_css6;
-  data += html_main_css7;
-  data += html_main_css8;
-  data += html_main_cssE;
-  data += html_headE;
-  data += html_bodyB;
+  data += FPSTR(html_main_css6);
+  data += FPSTR(html_main_css7);
+  data += FPSTR(html_main_css8);
+  data += FPSTR(html_main_cssE);
+  data += FPSTR(html_headE);
+  data += FPSTR(html_bodyB);
   sendHtml(data);
   
   // active ajax page is: settingsAjax();
   data +="<script>var ajaxPage='settings.txt';</script>\n";
-  data +=html_ajax_active;
+  data +=FPSTR(html_ajax_active);
   data +="<script>auto2Rate=2;</script>";
 
   mountStatus.update(true);
 
   // finish the standard http response header
-  data += html_onstep_header1;
+  data += FPSTR(html_onstep_header1);
   if (mountStatus.getId(temp1)) data += temp1; else data += "?";
-  data += html_onstep_header2;
+  data += FPSTR(html_onstep_header2);
   if (mountStatus.getVer(temp1)) data += temp1; else data += "?";
-  data += html_onstep_header3;
-  data += html_links1N;
-  data += html_links2N;
-  data += html_links3N;
+  data += FPSTR(html_onstep_header3);
+  data += FPSTR(html_links1N);
+  data += FPSTR(html_links2N);
+  data += FPSTR(html_links3N);
   sendHtml(data);
 #ifdef ENCODERS_ON
-  data += html_linksEncN;
+  data += FPSTR(html_linksEncN);
 #endif
-  data += html_links4S;
-  data += html_links5N;
+  data += FPSTR(html_links4S);
+  data += FPSTR(html_links5N);
 #ifndef OETHS
-  data += html_links6N;
+  data += FPSTR(html_links6N);
 #endif
-  data += html_onstep_header4;
+  data += FPSTR(html_onstep_header4);
   sendHtml(data);
   
   data+="<div style='width: 35em;'>";
 
-  data += html_settingsStart;
+  data += FPSTR(html_settingsStart);
 
   if (mountStatus.mountType()!=MT_ALTAZM) {
-    data += html_settingsRefine1;
+    data += FPSTR(html_settingsRefine1);
   }
 
-  data += html_settingsPark1;
+  data += FPSTR(html_settingsPark1);
   
-  data += html_settingsTrack1;
+  data += FPSTR(html_settingsTrack1);
   if (mountStatus.valid()) { if (mountStatus.tracking()) data+="On"; else data+="Off"; } else data+="?";
-  data += html_settingsTrack2;
-  data += html_settingsTrack3;
+  data += FPSTR(html_settingsTrack2);
+  data += FPSTR(html_settingsTrack3);
   if (mountStatus.mountType()!=MT_ALTAZM) {
-    data += html_settingsTrackComp1;
-    data += html_settingsTrackComp2;
+    data += FPSTR(html_settingsTrackComp1);
+    data += FPSTR(html_settingsTrackComp2);
   }
   sendHtml(data);
-  data += html_settingsBuzzer1;
+  data += FPSTR(html_settingsBuzzer1);
   if (mountStatus.valid()) { if (mountStatus.buzzerEnabled()) data+="On"; else data+="Off"; } else data+="?";
-  data += html_settingsBuzzer2;
+  data += FPSTR(html_settingsBuzzer2);
 
   if (mountStatus.mountType()==MT_GEM) {
-    data += html_settingsMFAuto1;
+    data += FPSTR(html_settingsMFAuto1);
     if (mountStatus.valid()) { if (mountStatus.autoMeridianFlips()) data+="On"; else data+="Off"; } else data+="?";
-    data += html_settingsMFAuto2;
-    data += html_settingsMFPause1;
+    data += FPSTR(html_settingsMFAuto2);
+    data += FPSTR(html_settingsMFPause1);
     if (mountStatus.valid()) { if (mountStatus.pauseAtHome()) data+="On"; else data+="Off"; } else data+="?";
-    data += html_settingsMFPause2;
+    data += FPSTR(html_settingsMFPause2);
   }
 
-  data += html_settingsEnd;
+  data += FPSTR(html_settingsEnd);
 
   data += "<br />";
   data += "</div></div></body></html>";

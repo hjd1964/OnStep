@@ -38,9 +38,12 @@
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
 #define FirmwareVersionMinor  "7"
-#define FirmwareVersionPatch  "a"
+#define FirmwareVersionPatch  "b"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
+
+// work around PROGMEM use on Teensy3.2: FPSTR() gets ignored
+#define FPSTR
 
 #include <limits.h>
 #ifdef W5500_ON
