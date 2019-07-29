@@ -2,7 +2,6 @@
 // Telescope control related functions 
 
 #ifdef SPECIAL_CHARS_ON
-  #define RESET_CH "@"
   #define HOME_CH "&#x1F3E0;"
   #define ARROW_DR "&#x27A5;"
   #define ARROW_UR "&#x27A6;"
@@ -21,12 +20,11 @@
   #define LUNAR_CH "&#9790;"
   #define SOLAR_CH "&#9737;"
 #else
-  #define RESET_CH "@"
   #define HOME_CH "H"
   #define ARROW_DR "-&gt;"
   #define ARROW_UR "-&gt;"
   #define ARROW_R2 "&gt;"
-  #define CAUTION_CH "/!\\"
+  #define CAUTION_CH "!"
   #define CLOCK_CH "T"
   #define ARROW_LL "&lt;&lt;"
   #define ARROW_L "&lt;"
@@ -150,8 +148,8 @@ const char html_controlFocus2[] PROGMEM =
 "<button class='bbh' type='button' onpointerdown=\"gf('F1')\" title='Select Focuser 1'>1</button>"
 "<button class='bbh' type='button' onpointerdown=\"gf('F2')\" title='Select Focuser 2'>2</button>&nbsp;&nbsp;&nbsp;&nbsp;";
 const char html_controlFocus3[] PROGMEM =
-"<button class='bbh' type='button' onpointerdown=\"gf('Fz')\" title='Home (Reset) Focuser'>" RESET_CH "</button>"
-"<button class='bbh' type='button' onpointerdown=\"gf('Fh')\" title='Find Focuser Home'>" ARROW_DR HOME_CH "</button>&nbsp;&nbsp;&nbsp;&nbsp;";
+"<button class='bbh' type='button' onpointerdown=\"gf('Fh')\" title='Find Focuser Home'>" ARROW_DR HOME_CH "</button>"
+"<button class='bbh' type='button' onpointerdown=\"gf('Fz')\" title='Home (Reset) Focuser'>" CAUTION_CH HOME_CH "</button>&nbsp;&nbsp;&nbsp;&nbsp;";
 const char html_controlFocus4[] PROGMEM =
 "<button class='bbh' type='button' onpointerdown=\"gf('FI')\" onpointerup=\"g('Fq');\" >" ARROW_DD "</button>"
 "<button class='bbh' type='button' style='width: 2em' onpointerdown=\"gf('Fi')\" onpointerup=\"g('Fq')\" >" ARROW_D "</button>";
@@ -164,8 +162,8 @@ const char html_controlFocus6[] PROGMEM =
 const char html_controlRotate0[] PROGMEM =
 "<div class='b1' style='width: 27em'>";
 const char html_controlRotate1[] PROGMEM =
-"<button class='bbh' type='button' style='height: 2.1em' onpointerdown=\"gf('re')\" title='Home (Reset) Rotator'>" RESET_CH "</button>"
-"<button class='bbh' type='button' style='height: 2.1em' onpointerdown=\"gf('ho')\" title='Find Rotator Home'>" ARROW_DR HOME_CH "</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+"<button class='bbh' type='button' style='height: 2.1em' onpointerdown=\"gf('ho')\" title='Find Rotator Home'>" ARROW_DR HOME_CH "</button>"
+"<button class='bbh' type='button' style='height: 2.1em' onpointerdown=\"gf('re')\" title='Home (Reset) Rotator'>" CAUTION_CH HOME_CH "</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 const char html_controlRotate2[] PROGMEM =
 "<button class='bbh' type='button' style='height: 2.1em' onpointerdown=\"gf('b2')\" >" ARROW_LL "</button>"
 "<button class='bbh' type='button' style='width: 2em' onpointerdown=\"gf('b1')\" >" ARROW_L "</button>";
