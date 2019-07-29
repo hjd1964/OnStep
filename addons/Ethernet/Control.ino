@@ -79,35 +79,35 @@ const char html_controlScript4[] =
 const char html_controlQuick1[] PROGMEM =
 "<div style='text-align: center; width: 30em'>"
 "<form style='display: inline;' method='get' action='/control.htm'>"
-"<button name='qb' class='bb' value='st' type='submit' onpointerdown='SetDateTime();'>" CLOCK_CH "</button>"
+"<button name='qb' class='bb' value='st' type='submit' onpointerdown='SetDateTime();' title='Set Date/Time'>" CLOCK_CH "</button>"
 "&nbsp;&nbsp;";
 const char html_controlQuick1a[] PROGMEM =
 "<input id='dm' type='hidden' name='dm'><input id='dd' type='hidden' name='dd'><input id='dy' type='hidden' name='dy'>"
 "<input id='th' type='hidden' name='th'><input id='tm' type='hidden' name='tm'><input id='ts' type='hidden' name='ts'>";
 const char html_controlQuick2[] PROGMEM =
 "</form>"
-"<button type='button' class='bb' onpointerdown=\"g('qc')\">" ARROW_R2 HOME_CH ARROW_R2 "</button>";
+"<button type='button' class='bb' onpointerdown=\"g('qc')\" title='Continue Goto (when paused at home)'>" ARROW_R2 HOME_CH ARROW_R2 "</button>";
 const char html_controlQuick3[] PROGMEM =
 "&nbsp;&nbsp;"
-"<button type='button' class='bb' onpointerdown=\"g('qh')\">" ARROW_DR HOME_CH "</button>"
-"<button type='button' class='bb' onpointerdown=\"g('qr')\">" CAUTION_CH HOME_CH "</button>";
+"<button type='button' class='bb' onpointerdown=\"g('qh')\" title='Find Home'>" ARROW_DR HOME_CH "</button>"
+"<button type='button' class='bb' onpointerdown=\"g('qr')\" title='Home (Reset)'>" CAUTION_CH HOME_CH "</button>";
 const char html_controlQuick4[] PROGMEM =
 "&nbsp;&nbsp;"
-"<button type='button' class='bb' onpointerdown=\"g('pu')\">P" ARROW_UR "</button>"
-"<button type='button' class='bb' onpointerdown=\"g('pk')\">" ARROW_DR "P</button>";
+"<button type='button' class='bb' onpointerdown=\"g('pu')\" title='Un-Park'>P" ARROW_UR "</button>"
+"<button type='button' class='bb' onpointerdown=\"g('pk')\" title='Park'>" ARROW_DR "P</button>";
 const char html_controlQuick5[] PROGMEM =
 "&nbsp;&nbsp;"
-"<button type='button' class='bb' style=\"height: 2.2em; color: White;\" onpointerdown=\"g('qq')\">Stop!</button>"
+"<button type='button' class='bb' style=\"height: 2.2em; color: White;\" onpointerdown=\"g('qq')\" title='Emergency Stop!'>Stop!</button>"
 "</div><br class='clear' />\r\n";
 
 const char html_controlTrack1[] PROGMEM = 
 "<div class='b1' style='width: 8em'>"
 "<div align='left'>Tracking:</div>"
-"<button type='button' class='bbh' style='width: 2em' onpointerdown=\"g('Ts')\" type='submit'>" SIDEREAL_CH "</button>";
+"<button type='button' class='bbh' style='width: 2em' onpointerdown=\"g('Ts')\" type='submit' title='Sidereal Rate'>" SIDEREAL_CH "</button>";
 const char html_controlTrack2[] PROGMEM =
-"<button type='button' class='bbh' style='width: 2em' onpointerdown=\"g('Tl')\" type='submit'>" LUNAR_CH "</button>";
+"<button type='button' class='bbh' style='width: 2em' onpointerdown=\"g('Tl')\" type='submit' title='Lunar Rate'>" LUNAR_CH "</button>";
 const char html_controlTrack3[] PROGMEM =
-"<button type='button' class='bbh' style='width: 2em' onpointerdown=\"g('Th')\" type='submit'>" SOLAR_CH "</button>"
+"<button type='button' class='bbh' style='width: 2em' onpointerdown=\"g('Th')\" type='submit' title='Solar Rate'>" SOLAR_CH "</button>"
 "</div>";
 const char html_controlAlign1[] PROGMEM = 
 "<div class='b1' style='width: 16.2em'>"
@@ -127,7 +127,7 @@ const char html_controlGuide1[] PROGMEM =
 const char html_controlGuide2[] PROGMEM =
 "<button class='gb' type='button' onpointerdown=\"g('e1')\" onpointerup=\"g('e0')\">" BUTTON_E "</button>";
 const char html_controlGuide3[] PROGMEM =
-"<button class='gb' type='button' onpointerdown=\"g('sy')\">" BUTTON_SYNC "</button>"
+"<button class='gb' type='button' onpointerdown=\"g('sy')\" title='Sync'>" BUTTON_SYNC "</button>"
 "<button class='gb' type='button' onpointerdown=\"g('w1')\" onpointerup=\"g('w0')\">" BUTTON_W "</button><br />";
 const char html_controlGuide4[] PROGMEM =
 "<button class='gb' type='button' onpointerdown=\"g('s1')\" onpointerup=\"g('s0')\">" BUTTON_S "</button><br /><br />";
@@ -147,11 +147,11 @@ const char html_controlGuide7[] PROGMEM =
 const char html_controlFocus1[] PROGMEM =
 "<div class='b1' style='width: 27em'>";
 const char html_controlFocus2[] PROGMEM =
-"<button class='bbh' type='button' onpointerdown=\"gf('F1')\" >1</button>"
-"<button class='bbh' type='button' onpointerdown=\"gf('F2')\" >2</button>&nbsp;&nbsp;&nbsp;&nbsp;";
+"<button class='bbh' type='button' onpointerdown=\"gf('F1')\" title='Select Focuser 1'>1</button>"
+"<button class='bbh' type='button' onpointerdown=\"gf('F2')\" title='Select Focuser 2'>2</button>&nbsp;&nbsp;&nbsp;&nbsp;";
 const char html_controlFocus3[] PROGMEM =
-"<button class='bbh' type='button' onpointerdown=\"gf('Fz')\" >" RESET_CH "</button>"
-"<button class='bbh' type='button' onpointerdown=\"gf('Fh')\" >" ARROW_DR HOME_CH "</button>&nbsp;&nbsp;&nbsp;&nbsp;";
+"<button class='bbh' type='button' onpointerdown=\"gf('Fz')\" title='Home (Reset) Focuser'>" RESET_CH "</button>"
+"<button class='bbh' type='button' onpointerdown=\"gf('Fh')\" title='Find Focuser Home'>" ARROW_DR HOME_CH "</button>&nbsp;&nbsp;&nbsp;&nbsp;";
 const char html_controlFocus4[] PROGMEM =
 "<button class='bbh' type='button' onpointerdown=\"gf('FI')\" onpointerup=\"g('Fq');\" >" ARROW_DD "</button>"
 "<button class='bbh' type='button' style='width: 2em' onpointerdown=\"gf('Fi')\" onpointerup=\"g('Fq')\" >" ARROW_D "</button>";
@@ -164,8 +164,8 @@ const char html_controlFocus6[] PROGMEM =
 const char html_controlRotate0[] PROGMEM =
 "<div class='b1' style='width: 27em'>";
 const char html_controlRotate1[] PROGMEM =
-"<button class='bbh' type='button' style='height: 2.1em' onpointerdown=\"gf('re')\" >" RESET_CH "</button>"
-"<button class='bbh' type='button' style='height: 2.1em' onpointerdown=\"gf('ho')\" >" ARROW_DR HOME_CH "</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+"<button class='bbh' type='button' style='height: 2.1em' onpointerdown=\"gf('re')\" title='Home (Reset) Rotator'>" RESET_CH "</button>"
+"<button class='bbh' type='button' style='height: 2.1em' onpointerdown=\"gf('ho')\" title='Find Rotator Home'>" ARROW_DR HOME_CH "</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 const char html_controlRotate2[] PROGMEM =
 "<button class='bbh' type='button' style='height: 2.1em' onpointerdown=\"gf('b2')\" >" ARROW_LL "</button>"
 "<button class='bbh' type='button' style='width: 2em' onpointerdown=\"gf('b1')\" >" ARROW_L "</button>";
@@ -174,9 +174,9 @@ const char html_controlRotate3[] PROGMEM =
 "<button class='bbh' type='button' style='height: 2.1em' onpointerdown=\"gf('f2')\" >" ARROW_RR "</button><br />";
 const char html_controlDeRotate1[] PROGMEM =
 "<button type='button' onpointerdown=\"gf('d1')\" >De-Rotate On</button>&nbsp;&nbsp;&nbsp;"
-"<button type='button' onpointerdown=\"gf('dr')\" >Rev</button>";
+"<button type='button' onpointerdown=\"gf('dr')\" title='Reverse Rotator Motion'>Rev</button>";
 const char html_controlDeRotate2[] PROGMEM =
-"<button type='button' onpointerdown=\"gf('dp')\" >P</button>&nbsp;&nbsp;&nbsp;"
+"<button type='button' onpointerdown=\"gf('dp')\" title='Move Rotator to Parallactic angle'>P</button>&nbsp;&nbsp;&nbsp;"
 "<button type='button' onpointerdown=\"gf('d0')\" >De-Rotate Off</button>";
 const char html_controlRotate4[] PROGMEM =
 "</div><br class='clear' />\r\n";
