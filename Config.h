@@ -7,8 +7,7 @@
 #pragma once
 
 #include "Config.Classic.h"
-//#include "Config.MaxESP.h"
-#include "Config.MaxESP2.h"
+#include "Config.MaxESP.h"
 #include "Config.MaxPCB.h"
 //#include "Config.Mega2560Alt.h"
 #include "Config.MiniPCB.h"
@@ -41,6 +40,13 @@
   #endif
 #endif
 #ifdef MaxESP2_ON
+  #ifdef Configuration_Found
+    #define Configuration_Duplicate
+  #else
+    #define Configuration_Found
+  #endif
+#endif
+#ifdef MaxESP3_ON
   #ifdef Configuration_Found
     #define Configuration_Duplicate
   #else
