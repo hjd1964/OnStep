@@ -520,16 +520,18 @@ void loop2() {
     if (safetyLimitsOn) {
       if (meridianFlip!=MeridianFlipNever) {
         if (getInstrPierSide()==PierSideWest) {
-          if (getInstrAxis1()>(minutesPastMeridianW/4.0)) {
+          if (getInstrAxis1()>minutesPastMeridianW/4.0) {
             if (autoMeridianFlip) {
               if (goToHere(true)) { lastError=ERR_MERIDIAN; trackingState=TrackingNone; }
             } else {
-              DL(getInstrAxis1());
               lastError=ERR_MERIDIAN; stopLimit();
             }
           }
+        } else
+        if (getInstrPierSide()==PierSideEast) {
+          if (getInstrAxis1()<-minutesPastMeridianE/4.0) { lastError=ERR_MERIDIAN; stopLimit(); }
+          if (getInstrAxis1()>UnderPoleLimit*15.0) { lastError=ERR_UNDER_POLE; stopLimit(); }
         }
-        if (getInstrPierSide()==PierSideEast) { if (getInstrAxis1()>UnderPoleLimit*15.0) { lastError=ERR_UNDER_POLE; stopLimit(); } }
       } else {
 #ifndef MOUNT_TYPE_ALTAZM
         // when Fork mounted, ignore pierSide and just stop the mount if it passes the UnderPoleLimit
