@@ -40,8 +40,8 @@
 // firmware info, these are returned by the ":GV?#" commands
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  2
-#define FirmwareVersionMinor  22      // minor version 0 to 99
-#define FirmwareVersionPatch  "l"     // for example major.minor patch: 1.3c
+#define FirmwareVersionMinor  23      // minor version 0 to 99
+#define FirmwareVersionPatch  "a"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 2       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
@@ -245,7 +245,7 @@ void setup() {
   foc1.setMax(MaxAxis4*1000.0);
   #ifdef AXIS4_DC_MODE_ON
     foc1.setDcPower(dcPwrAxis4);
-    foc1.setPhase1();
+    foc1.setPhase2();
   #endif
   #ifdef AXIS4_REVERSE_ON
     foc1.setReverseState(HIGH);
@@ -265,7 +265,7 @@ void setup() {
   foc2.setMax(MaxAxis5*1000.0);
   #ifdef AXIS5_DC_MODE_ON
     foc2.setDcPower(dcPwrAxis5);
-    foc2.setPhase2();
+    foc2.setPhase1();
   #endif
   #ifdef AXIS5_REVERSE_ON
     foc2.setReverseState(HIGH);
