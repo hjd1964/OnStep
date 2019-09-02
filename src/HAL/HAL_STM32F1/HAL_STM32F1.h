@@ -192,14 +192,21 @@ void Timer1SetInterval(long iv, double rateRatio) {
   Timer_Sidereal.setOverflow(round((((double)iv/16.0)*6.0)/rateRatio)); // our "clock" ticks at 6MHz due to the pre-scaler setting
 }
 
-// Set the interval (in microseconds*(F_COMP/1000000.0)) for the motor timers, must work from within the motor ISR timers
-void QuickSetIntervalAxis1(uint32_t r) {
-  // Set up period
-  Timer_Axis1.setOverflow(r);
+//--------------------------------------------------------------------------------------------------
+// Re-program interval for the motor timers
+
+// prepare to set Axis1/2 hw timers to interval (in microseconds*16), maximum time is about 134 seconds
+void PresetTimerInterval(long iv, float TPSM, volatile uint32_t *nextRate, volatile uint16_t *nextRep) {
+  // 0.0327 * 4096 = 134.21s
+  uint32_t i=iv; uint16_t t=1; while (iv>65536L*8L) { t*=2; iv=i/t; if (t==4096) { iv=65535L*8L; break; } }
+  cli(); *nextRate=((F_COMP/1000000.0) * (iv*0.0625) * TPSM); *nextRep=t; sei();
 }
 
+// Must work from within the motor ISR timers, in microseconds*(F_COMP/1000000.0) units
+void QuickSetIntervalAxis1(uint32_t r) {
+  Timer_Axis1.setOverflow(r);
+}
 void QuickSetIntervalAxis2(uint32_t r) {
-  // Set up period
   Timer_Axis2.setOverflow(r);
 }
 

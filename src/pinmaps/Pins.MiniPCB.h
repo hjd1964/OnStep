@@ -1,7 +1,7 @@
 // -------------------------------------------------------------------------------------------------
 // Pin map for OnStep MiniPCB (Teensy3.2)
 
-#if defined(__MK20DX256__) || defined(_mk20dx128_h_) || defined(__MK20DX128__)
+#if defined(__MK20DX256__) || defined(_mk20dx128_h_) || defined(__MK20DX128__) || defined(__IMXRT1052__) || defined(__IMXRT1062__)
 
 // The multi-purpose pins (Aux3..Aux8 can be analog pwm/dac if supported)
 #define Aux0          19
@@ -9,7 +9,7 @@
 #define Aux2          5
 #define Aux3          4    // should be ok as pwm analog output (w/#define Aux3_Analog)
 #define Aux4          22   // should be ok as pwm analog output (w/#define Aux4_Analog)
-#if !defined(_mk20dx128_h_) && !defined(__MK20DX128__)
+#if !defined(_mk20dx128_h_) && !defined(__MK20DX128__) && !defined(__IMXRT1052__) && !defined(__IMXRT1062__)
 #define Aux5          A14   // true analog output
 #endif
 #define Aux5_Analog

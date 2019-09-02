@@ -16,8 +16,9 @@
 #define Aux7           4    // should be ok as pwm analog output (w/#define Aux7_Analog)
 #define Aux8          22    // should be ok as pwm analog output (w/#define Aux8_Analog)
 
-// Optional one wire bus
-#define OneWirePin    Aux4   // Pin 39
+// Misc. pins
+#define OneWirePin    Aux4  // Optional one wire bus
+#define DS3234_CS_PIN 10    // Optional RTC CS pin
 
 // The PEC index sense is a logic level input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
 #define PecPin        23
@@ -33,7 +34,8 @@
 
 // The PPS pin is a 3.3V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
 #define PpsPin        28    // Pin 28 (PPS time source, GPS for example)
-#define DS3234_CS_PIN 10
+
+#define LimitPin      Aux7  // Pin  4 (The limit switch sense is a logic level input normally pull high (2k resistor,) shorted to ground it stops gotos/tracking)
 
 // For ESP8266 control
 #define ESP8266Gpio0Pin  Aux1 // Pin 18 (Aux1 - ESP8266 GPIO0 or SPI MISO or Fault)
@@ -51,7 +53,6 @@
 
 #define Axis2DirPin    2    // Pin  2 (Dir)
 #define Axis2StepPin   3    // Pin  3 (Step)
-#define LimitPin      Aux7  // Pin  4 (The limit switch sense is a logic level input normally pull high (2k resistor,) shorted to ground it stops gotos/tracking)
 #define Axis2_HOME    Aux4  // Pin 39 (Home sw)
 #define Axis2_FAULT   Aux2  // Pin  5 (Aux2 - ESP8266 RST or SPI MISO or Fault)
 #define Axis2_Aux     Aux2  // Pin  5 (Aux2 - ESP8266 RST or SPI MISO or Fault)

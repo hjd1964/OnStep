@@ -68,11 +68,18 @@ void Timer1SetInterval(long iv, double rateRatio) {
 }
 
 //--------------------------------------------------------------------------------------------------
-// Quickly reprogram the interval (in microseconds*(F_COMP/1000000.0)) for the motor timers, must work from within the motor ISR timers
+// Re-program interval for the motor timers
 
-void QuickSetIntervalAxis1(uint32_t r) {
+// iv: the interval in microseconds*16
+// TPSM: the pulse vs. sqwave mode speed up (1.0 or 0.5 respectively)
+// nextRate: the rate to be passed to QuickSetIntervalAxisn() in microseconds*(F_COMP/1000000.0) units
+// nextRep:  the rate slow-down multiplier.  ISR is called this many times before allowed to run, set to 0 to run every time.
+void PresetTimerInterval(long iv, float TPSM, volatile uint32_t *nextRate, volatile uint16_t *nextRep) {
 }
 
+// Must work from within the motor ISR timers, in microseconds*(F_COMP/1000000.0) units
+void QuickSetIntervalAxis1(uint32_t r) {
+}
 void QuickSetIntervalAxis2(uint32_t r) {
 }
 

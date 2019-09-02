@@ -138,10 +138,20 @@ void Timer1SetInterval(long iv, double rateRatio) {
 }
 
 //--------------------------------------------------------------------------------------------------
-// Quickly reprogram the interval for the motor timers, must work from within the motor ISR timers
+// Re-program interval for the motor timers
+
 // interval (r) is in (in microseconds*2) due to using HAL_FIXED_PRESCALE_16BIT_MOTOR_TIMERS 
 // for a maximum period of 0.032 seconds (16 bit, 65535 maximum interval)
 
+// prepare to set Axis1/2 hw timers to interval (in microseconds*16), maximum time is about 134 seconds
+void PresetTimerInterval(long iv, float TPSM, volatile uint32_t *nextRate, volatile uint16_t *nextRep) {
+  iv=iv/8L;
+  // 0.0327 * 4096 = 134.21s
+  uint32_t i=iv; uint16_t t=1; while (iv>65536L) { t*=2; iv=i/t; if (t==4096) { iv=65535L; break; } }
+  cli(); *nextRate=(iv * TPSM) - 1L; *nextRep=t; sei();
+}
+
+// Must work from within the motor ISR timers, in microseconds*(F_COMP/1000000.0) units
 #define QuickSetIntervalAxis1(r) (OCR3A=r)
 #define QuickSetIntervalAxis2(r) (OCR4A=r)
 

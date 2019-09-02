@@ -145,12 +145,19 @@ void Timer1SetInterval(long iv, double rateRatio) {
 }
 
 //--------------------------------------------------------------------------------------------------
-// Quickly reprogram the interval (in microseconds*(F_COMP/1000000.0)) for the motor timers, must work from within the motor ISR timers
+// Re-program the interval (in microseconds*(F_COMP/1000000.0)) for the motor timers
 
+// Prepare to set Axis1/2 hw timers to interval (in microseconds*16), maximum time is about 134 seconds
+void PresetTimerInterval(long iv, float TPSM, volatile uint32_t *nextRate, volatile uint16_t *nextRep) {
+  // 0.262 * 512 = 134.21s
+  uint32_t i=iv; uint16_t t=1; while (iv>65536L*64L) { t++; iv=i/t; if (t==512) { iv=65535L*64L; break; } }
+  cli(); *nextRate=((F_COMP/1000000.0) * (iv*0.0625) * TPSM - 1.0); *nextRep=t; sei();
+}
+
+// Must work from within the motor ISR timers
 IRAM_ATTR void QuickSetIntervalAxis1(uint32_t r) {
   timerAlarmWrite(itimer3, r, true);
 }
-
 IRAM_ATTR void QuickSetIntervalAxis2(uint32_t r) {
   timerAlarmWrite(itimer4, r, true);
 }

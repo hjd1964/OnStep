@@ -1,37 +1,10 @@
 // Platform setup ------------------------------------------------------------------------------------
 
 // Lower limit (fastest) step rate in uS for this platform, width of step pulse, and set HAL_FAST_PROCESSOR is needed
-#if defined(__MK64FX512__) 
-  #define HAL_MAXRATE_LOWER_LIMIT 12
-  #define HAL_PULSE_WIDTH 500
+#if defined(__IMXRT1052__) || defined(__IMXRT1062__) 
+  #define HAL_MAXRATE_LOWER_LIMIT 1
+  #define HAL_PULSE_WIDTH 0 // effectively disable pulse mode since the pulse width is unknown at this time
   #define HAL_FAST_PROCESSOR
-#elif defined(__MK66FX1M0__)
-  #if (F_CPU>=240000000)
-    #define HAL_MAXRATE_LOWER_LIMIT 2
-    #define HAL_PULSE_WIDTH 260
-  #elif (F_CPU>=180000000)
-    #define HAL_MAXRATE_LOWER_LIMIT 2.6
-    #define HAL_PULSE_WIDTH 400
-  #else
-    #define HAL_MAXRATE_LOWER_LIMIT 4.8
-    #define HAL_PULSE_WIDTH 500
-  #endif
-  #define HAL_FAST_PROCESSOR
-#else
-  // Teensy3.2,3.1,etc.
-  #if (F_CPU>=120000000)
-    #define HAL_MAXRATE_LOWER_LIMIT 10
-    #define HAL_PULSE_WIDTH 800
-  #elif (F_CPU>=96000000)
-    #define HAL_MAXRATE_LOWER_LIMIT 12
-    #define HAL_PULSE_WIDTH 900
-  #elif (F_CPU>=72000000)
-    #define HAL_MAXRATE_LOWER_LIMIT 14
-    #define HAL_PULSE_WIDTH 1000
-  #else
-    #define HAL_MAXRATE_LOWER_LIMIT 28
-    #define HAL_PULSE_WIDTH 1500
-  #endif
 #endif
 
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
@@ -39,18 +12,10 @@
 // SerialA is always enabled, SerialB and SerialC are optional
 #define SerialB Serial1
 #define HAL_SERIAL_B_ENABLED
-#if defined(__MK64FX512__) || defined(__MK66FX1M0__)
-  #define SerialC Serial4
-  #define HAL_SERIAL_C_ENABLED
-#endif
 
 // New symbol for the default I2C port -------------------------------------------------------------
 #include <Wire.h>
-#if defined(__MK64FX512__) || defined(__MK66FX1M0__)
-#define HAL_Wire Wire1
-#else
 #define HAL_Wire Wire
-#endif
 
 // Non-volatile storage ------------------------------------------------------------------------------
 #if defined(NV_AT24C32_PLUS)
@@ -68,39 +33,37 @@
 
 //--------------------------------------------------------------------------------------------------
 // General purpose initialize for HAL
+#include "imxrt.h"
+
 void HAL_Init(void) {
   analogReadResolution(10);
+
+  // clear/make available all PIT timers
+  CCM_CCGR1 |= CCM_CCGR1_PIT(CCM_CCGR_ON);
+  PIT_MCR = 1;
+  PIT_TCTRL0=0;
+  PIT_TCTRL1=0;
+  PIT_TCTRL2=0;
+  PIT_TCTRL3=0;
 }
 
 //--------------------------------------------------------------------------------------------------
 // Internal MCU temperature (in degrees C)
 float HAL_MCU_Temperature(void) {
-#if defined(__MK64FX512__)
-  int Tpin=70;
-#elif defined(__MK66FX1M0__)
-  int Tpin=70;
-#else // Teensy3.0,3.1,3.2
-  int Tpin=38;
-#endif
-  // delta of -1.715 mV/C where 25C measures 719 mV
-//  analogReadResolution(12);
-//  delayMicroseconds(10);
-  float v=(analogRead(Tpin)/1024.0)*3.3;
-  float t=(-(v-0.719)/0.001715)+25.0;
-//  analogReadResolution(10);
-  return t;
+  return 25.0;
 }
 
 //--------------------------------------------------------------------------------------------------
 // Initialize timers
 
 // frequency compensation (F_COMP/1000000.0) for adjusting microseconds to timer counts
+#define F_BUS 24000000
 #define F_COMP F_BUS
 
-IntervalTimer itimer3;
+static IntervalTimer itimer3;
 void TIMER3_COMPA_vect(void);
 
-IntervalTimer itimer4;
+static IntervalTimer itimer4;
 void TIMER4_COMPA_vect(void);
 
 extern long int siderealInterval;
@@ -109,16 +72,12 @@ extern void SiderealClockSetInterval (long int);
 // Init Axis1 and Axis2 motor timers and set their priorities
 void HAL_Init_Timers_Motor() {
   // set the system timer for millis() to the second highest priority
-  SCB_SHPR3 = (32 << 24) | (SCB_SHPR3 & 0x00FFFFFF);
+//  SCB_SHPR3 = (32 << 24) | (SCB_SHPR3 & 0x00FFFFFF);
 
-  itimer3.begin(TIMER3_COMPA_vect, (float)128 * 0.0625);
-  itimer4.begin(TIMER4_COMPA_vect, (float)128 * 0.0625);
-
-  // set the 1/100 second sidereal clock timer to run at the second highest priority
-  NVIC_SET_PRIORITY(IRQ_PIT_CH0, 32);
-  // set the motor timers to run at the highest priority
-  NVIC_SET_PRIORITY(IRQ_PIT_CH1, 0);
-  NVIC_SET_PRIORITY(IRQ_PIT_CH2, 0);
+  if (!itimer3.begin(TIMER3_COMPA_vect, (float)128 * 0.0625)) Serial.println("Error assigning timer3");
+  itimer3.priority(0);
+  if (!itimer4.begin(TIMER4_COMPA_vect, (float)128 * 0.0625)) Serial.println("Error assigning timer4");
+  itimer4.priority(0);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -127,7 +86,7 @@ void HAL_Init_Timers_Motor() {
 #define ISR(f) void f (void)
 void TIMER1_COMPA_vect(void);
 
-IntervalTimer itimer1;
+static IntervalTimer itimer1;
 
 // Init sidereal clock timer
 void HAL_Init_Timer_Sidereal() {
@@ -137,7 +96,8 @@ void HAL_Init_Timer_Sidereal() {
 
 void Timer1SetInterval(long iv, double rateRatio) {
   iv=round(((double)iv)/rateRatio);
-  itimer1.begin(TIMER1_COMPA_vect, (float)iv * 0.0625);
+  if (!itimer1.begin(TIMER1_COMPA_vect, (float)iv * 0.0625)) Serial.println("Error assigning timer1");
+  itimer1.priority(32);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -147,15 +107,15 @@ void Timer1SetInterval(long iv, double rateRatio) {
 void PresetTimerInterval(long iv, float TPSM, volatile uint32_t *nextRate, volatile uint16_t *nextRep) {
   // 0.262 * 512 = 134.21s
   uint32_t i=iv; uint16_t t=1; while (iv>65536L*64L) { t++; iv=i/t; if (t==512) { iv=65535L*64L; break; } }
-  cli(); *nextRate=((F_COMP/1000000.0) * (iv*0.0625) * TPSM - 1.0); *nextRep=t; sei();
+  cli(); *nextRate=iv*TPSM; *nextRep=t; sei();
 }
 
 // Must work from within the motor ISR timers, in microseconds*(F_COMP/1000000.0) units
 void QuickSetIntervalAxis1(uint32_t r) {
-  PIT_LDVAL1=r;
+  itimer3.update((float)r * 0.0625);
 }
 void QuickSetIntervalAxis2(uint32_t r) {
-  PIT_LDVAL2=r;
+  itimer4.update((float)r * 0.0625);
 }
 
 // --------------------------------------------------------------------------------------------------

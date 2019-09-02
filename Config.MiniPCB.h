@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------------
-// Configuration for OnStep MiniPCB (Teensy3.2)
+// Configuration for OnStep MiniPCB (Teensy3.0,3.1,3.2,4.0)
 
 /*
  * For more information on setting OnStep up see http://www.stellarjourney.com/index.php?r=site/equipment_onstep and 

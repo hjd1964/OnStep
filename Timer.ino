@@ -31,66 +31,31 @@
 volatile bool axis2Powered = true;
 
 //--------------------------------------------------------------------------------------------------
-// Set hardware timer rates
+// Hardware timer rates
 
-// set Timer1 master sidereal clock to interval (in microseconds*16)
 volatile long isrTimerRateAxis1=0;
 volatile long isrTimerRateAxis2=0;
 volatile long runTimerRateAxis1=0;
 volatile long runTimerRateAxis2=0;
+
+volatile uint32_t nextAxis1Rate = 100000UL;
+volatile uint16_t slowAxis1Cnt = 0;
+volatile uint16_t slowAxis1Rep = 1;
+volatile long timerDirAxis1 = 0;
+volatile long thisTimerRateAxis1 = 10000UL;
+
+volatile uint32_t nextAxis2Rate = 100000UL;
+volatile uint16_t slowAxis2Cnt = 0;
+volatile uint16_t slowAxis2Rep = 1;
+volatile long timerDirAxis2 = 0;
+volatile long thisTimerRateAxis2 = 10000UL;
+
+// set Timer1 master sidereal clock to interval (in microseconds*16)
 void SiderealClockSetInterval(long iv) {
   if (trackingState==TrackingMoveTo) Timer1SetInterval(iv/100,PPSrateRatio); else Timer1SetInterval(iv/300,PPSrateRatio);
 
   isrTimerRateAxis1=0; // also force rate update for Axis1/2 timers so that PPS adjustments take hold immediately
   isrTimerRateAxis2=0;
-}
-
-// prepare to set Timer3 to interval (in microseconds*16), maximum time is about 134 seconds
-volatile uint32_t nextAxis1Rate = 100000UL;
-volatile uint16_t t3cnt = 0;
-volatile uint16_t t3rep = 1;
-volatile long timerDirAxis1 = 0;
-volatile long thisTimerRateAxis1 = 10000UL;
-volatile boolean fastAxis1 = false;
-void timer3SetInterval(long iv) {
-#ifdef HAL_FIXED_PRESCALE_16BIT_MOTOR_TIMERS
-  iv=iv/8L;
-  // 0.0327 * 4096 = 134.21s
-  uint32_t i=iv; uint16_t t=1; while (iv>65536L) { t*=2; iv=i/t; if (t==4096) { iv=65535L; break; } }
-  cli(); nextAxis1Rate=(iv * TIMER_PULSE_STEP_MULTIPLIER) - 1L; t3rep=t; fastAxis1=(t3rep==1); sei();
-#elif defined(__ARM_STM32__)
-  // 0.0327 * 4096 = 134.21s
-  uint32_t i=iv; uint16_t t=1; while (iv>65536L*8L) { t*=2; iv=i/t; if (t==4096) { iv=65535L*8L; break; } }
-  cli(); nextAxis1Rate=((F_COMP/1000000.0) * (iv*0.0625) * TIMER_PULSE_STEP_MULTIPLIER); t3rep=t; fastAxis1=(t3rep==1); sei();
-#else
-  // 0.262 * 512 = 134.21s
-  uint32_t i=iv; uint16_t t=1; while (iv>65536L*64L) { t++; iv=i/t; if (t==512) { iv=65535L*64L; break; } }
-  cli(); nextAxis1Rate=((F_COMP/1000000.0) * (iv*0.0625) * TIMER_PULSE_STEP_MULTIPLIER - 1.0); t3rep=t; fastAxis1=(t3rep==1); sei();
-#endif
-}
-
-// prepare to set Timer4 to interval (in microseconds*16), maximum time is about 134 seconds
-volatile uint32_t nextAxis2Rate = 100000UL;
-volatile uint16_t t4cnt = 0;
-volatile uint16_t t4rep = 1;
-volatile long timerDirAxis2 = 0;
-volatile long thisTimerRateAxis2 = 10000UL;
-volatile boolean fastAxis2 = false;
-void timer4SetInterval(long iv) {
-#ifdef HAL_FIXED_PRESCALE_16BIT_MOTOR_TIMERS
-  iv=iv/8L;
-  // 0.0327 * 4096 = 134.21s
-  uint32_t i=iv; uint16_t t=1; while (iv>65536L) { t*=2; iv=i/t; if (t==4096) { iv=65535L; break; } }
-  cli(); nextAxis2Rate=(iv * TIMER_PULSE_STEP_MULTIPLIER) - 1L; t4rep=t; fastAxis2=(t4rep==1); sei();
-#elif defined(__ARM_STM32__)
-  // 0.0327 * 4096 = 134.21s
-  uint32_t i=iv; uint16_t t=1; while (iv>65536L*8L) { t*=2; iv=i/t; if (t==4096) { iv=65535L*8L; break; } }
-  cli(); nextAxis2Rate=((F_COMP/1000000.0) * (iv*0.0625) * TIMER_PULSE_STEP_MULTIPLIER); t4rep=t; fastAxis2=(t4rep==1); sei();
-#else
-  // 0.262 * 512 = 134.21s
-  uint32_t i=iv; uint16_t t=1; while (iv>65536L*64L) { t++; iv=i/t; if (t==512) { iv=65535L*64L; break; } }
-  cli(); nextAxis2Rate=((F_COMP/1000000.0) * (iv*0.0625) * TIMER_PULSE_STEP_MULTIPLIER - 1.0); t4rep=t; fastAxis2=(t4rep==1); sei();
-#endif
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -259,11 +224,11 @@ void timerSupervisor(bool isCentiSecond) {
 
   // set the rates
   if (thisTimerRateAxis1!=isrTimerRateAxis1) {
-    timer3SetInterval(thisTimerRateAxis1/PPSrateRatio);
+    PresetTimerInterval(thisTimerRateAxis1/PPSrateRatio, TIMER_PULSE_STEP_MULTIPLIER, &nextAxis1Rate, &slowAxis1Rep);
     isrTimerRateAxis1=thisTimerRateAxis1;
   }
   if (thisTimerRateAxis2!=isrTimerRateAxis2) {
-    timer4SetInterval(thisTimerRateAxis2/PPSrateRatio);
+    PresetTimerInterval(thisTimerRateAxis2/PPSrateRatio, TIMER_PULSE_STEP_MULTIPLIER, &nextAxis2Rate, &slowAxis2Rep);
     isrTimerRateAxis2=thisTimerRateAxis2;
   }
 }
@@ -274,7 +239,7 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
   HAL_TIMER3_PREFIX;
 #endif
 
-  if (!fastAxis1) { t3cnt++; if (t3cnt%t3rep!=0) goto done; }
+  if (slowAxis1Rep>1) { slowAxis1Cnt++; if (slowAxis1Cnt%slowAxis1Rep!=0) goto done; }
 
 #if STEP_WAVE_FORM!=DEDGE
   StepPinAxis1_LOW;
@@ -355,7 +320,7 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
   HAL_TIMER4_PREFIX;
 #endif
 
-  if (!fastAxis2) { t4cnt++; if (t4cnt%t4rep!=0) goto done; }
+  if (slowAxis2Rep>1) { slowAxis2Cnt++; if (slowAxis2Cnt%slowAxis2Rep!=0) goto done; }
 
 #if STEP_WAVE_FORM!=DEDGE
   StepPinAxis2_LOW;

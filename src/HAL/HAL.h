@@ -40,6 +40,10 @@
   // We use the same HAL for Teensy 3.2, but add this define
   #define SER4_AVAILABLE
 
+#elif defined(__IMXRT1052__) || defined(__IMXRT1062__)
+  // Teensy 4.0
+  #include "HAL_Teensy_4/HAL_Teensy_4.h"
+
 #elif defined(__TM4C123GH6PM__) || defined(__LM4F120H5QR__) || defined(__TM4C1294NCPDT__) || defined(__TM4C1294XNCZAD__)
   // TI Tiva C
   #include "HAL_Tiva_C/HAL_Tiva_C.h"
@@ -68,4 +72,3 @@
 #endif
 
 #endif // _HAL_H
-
