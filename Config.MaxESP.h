@@ -23,7 +23,7 @@
 // The stock BluetoothSerial.h library doesn't, I know of no solution for this
 // The stock Wire.h library appears to work properly
 
-#ifdef MaxESP2_ON
+#ifdef MaxESP2_OFF
 // -------------------------------------------------------------------------------------------------------------------------
 // ADJUST THE FOLLOWING TO CONFIGURE YOUR CONTROLLER FEATURES --------------------------------------------------------------
 
