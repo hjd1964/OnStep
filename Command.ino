@@ -273,15 +273,20 @@ void processCommands() {
         if ((command[1]=='S') && (parameter[0]=='P') && (parameter[1]=='F') && (parameter[2]=='L') && (parameter[3]=='A') && (parameter[4]=='S') && (parameter[5]=='H')) {
           if ((atHome) && (trackingState==TrackingNone)) {
             // initialize both serial ports
-            SerialA.println("The ESP-01 should now be in flash upload mode (at 115200 Baud.)");
+            SerialA.println("The ESP8266 will now be placed in flash upload mode (at 115200 Baud.)");
             SerialA.println("Waiting for data.");
             delay(500);
             SerialA.begin(115200);
+#ifdef ESP32
+  #if SERIAL_B_BAUD_DEFAULT != 115200
+            #error "On the ESP32, when ESP8266_CONTROL_ON is used SERIAL_B_BAUD_DEFAULT must be 115200"
+  #endif
+#else
             SerialB.begin(115200);
+#endif
             digitalWrite(ESP8266Gpio0Pin,LOW); delay(20); // Pgm mode LOW
-            
             digitalWrite(ESP8266RstPin,LOW);  delay(20);  // Reset, if LOW
-            digitalWrite(ESP8266RstPin,HIGH);             // Reset, inactive HIGH
+            digitalWrite(ESP8266RstPin,HIGH); delay(20);  // Reset, inactive HIGH
 
             while (true) {
               // read from port 1, send to port 0:
@@ -297,6 +302,7 @@ void processCommands() {
                 delayMicroseconds(10);
                 SerialB.write(inByte);
               }
+              yield();
             }
           } else commandError=true;
         } else commandError=true;
