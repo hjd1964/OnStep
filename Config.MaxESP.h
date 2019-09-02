@@ -9,7 +9,7 @@
  *
 */
 
-#define MaxESP2_ON  //  <- Turn _ON to use this configuration *** NOT for other MaxESP versions *** (see "~\OnStep\other-configurations")
+#define MaxESP3_OFF  //  <- Turn _ON to use this configuration *** NOT for the MaxESP version 1.x (see "~\OnStep\other-configurations") ***
 
 // ESP32 Release 1.0.0 Notes:
 // The stock BluetoothSerial.h library doesn't work:
