@@ -834,6 +834,7 @@ void processCommands() {
             switch (parameter[1]) {
               case '0': f=timeRange(UT1); doubleToHms(reply,&f,true); quietReply=true; break;  // UTC time
               case '1': f1=JD; f=UT1; while (f>=24.0) { f-=24.0; f1+=1; } while (f<0.0) { f+=24.0; f1-=1; } greg(f1,&i2,&i,&i1); i2=(i2/99.99999-floor(i2/99.99999))*100; sprintf(reply,"%02d/%02d/%02d",i,i1,i2); quietReply=true; break; // UTC date
+              case '9': if (dateWasSet && timeWasSet) commandError=true; break; // Get Date/Time status, returns 0=known or 1=unknown
               default:  commandError=true;
             }
           } else
@@ -1521,7 +1522,7 @@ void processCommands() {
 //          Change Date to MM/DD/YY
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1]=='C')  { if (dateToDouble(&JD,parameter)) { nv.writeFloat(EE_JD,JD); updateLST(jd2last(JD,UT1,true)); } else commandError=true; } else 
+      if (command[1]=='C')  { if (dateToDouble(&JD,parameter)) { nv.writeFloat(EE_JD,JD); updateLST(jd2last(JD,UT1,true)); dateWasSet=true; } else commandError=true; } else 
 //  :SdsDD*MM#
 //          Set target object declination to sDD*MM or sDD*MM:SS depending on the current precision setting, automatically detects low/high precision
 //          Return: 0 on failure
@@ -1595,6 +1596,7 @@ void processCommands() {
 #endif
           UT1=LMT+timeZone;
           updateLST(jd2last(JD,UT1,true));
+          timeWasSet=true;
         }
         highPrecision=i;
       } else 

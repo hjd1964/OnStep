@@ -263,10 +263,14 @@ void initReadNvValues() {
   JD=nv.readFloat(EE_JD);
   LMT=nv.readFloat(EE_LMT);
 
-  // get the RTC (if present) ready
+  // get the RTC ready (if present)
   urtc.init();
+
   // read the date/time from RTC (if present)
-  urtc.get(JD,LMT);
+  if (urtc.active) {
+    urtc.get(JD,LMT);
+    dateWasSet=true; timeWasSet=true;
+  }
 
   UT1=LMT+timeZone;
   updateLST(jd2last(JD,UT1,false));

@@ -7,6 +7,8 @@
 long siderealTimer    = 0;           // counter to issue steps during tracking
 long PecSiderealTimer = 0;           // time since worm wheel zero index for PEC
 long guideSiderealTimer=0;           // counter to issue steps during guiding
+boolean dateWasSet=false;            // keep track of date/time validity
+boolean timeWasSet=false;
 
 double UT1       = 0.0;              // the current universal time
 double UT1_start = 0.0;              // the start of UT1
