@@ -81,6 +81,10 @@ void SmartHandController::menuAlignment()
       if (SetLX200(":hF#") == LX200VALUESET) DisplayMessage("Reset", "Move to Home", -1);
     } else
     if (starsForAlign>0) {
+      // check if date/time is set, if not set it
+      if (!telInfo.hasDateTime()) { DisplayMessage("Date/Time", "Not Set!", 2000); menuLocalDateTime(); }
+
+      // start the align
       char s[20]; sprintf(s,":A%d#",starsForAlign);
       if (SetLX200(s) == LX200VALUESET) telInfo.aliMode = (Telescope::AlignMode)starsForAlign; else DisplayMessage("Alignment", "Failed!", -1);
       if (SetLX200(":R7#") == LX200VALUESET) { DisplayMessage("Guide Rate", "48X Set", 1000);  activeGuideRate=8; }

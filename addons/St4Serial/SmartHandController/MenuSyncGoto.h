@@ -119,7 +119,7 @@ MENU_RESULT SmartHandController::subMenuSyncGoto(char sync, int subMenuNum)
 
 MENU_RESULT SmartHandController::menuCatalog(bool sync, int number)
 {
-  if (!cat_mgr.isInitialized()) { cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0()); }
+  cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0());
   cat_mgr.select(number);
 
   char title[20]; if (sync) strcpy(title,"Sync "); else strcpy(title,"Goto "); strcat(title,cat_mgr.catalogTitle());

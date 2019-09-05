@@ -235,6 +235,17 @@ bool Telescope::hasReticle()
   return true;  
 }
 
+bool Telescope::hasDateTime()
+{
+  static bool dateTimeKnownValid=false;
+  if (dateTimeKnownValid) return true; // once OnStep says the date/time has been set no need to keep asking
+  bool dateTime=false; // default is to assume the date/time has been set unless OnStep tells us otherwise
+  char out[20];
+  if ((GetLX200(":GX89#", out) == LX200VALUEGET)) dateTime=(out[0]=='0');
+  if (dateTime==true) dateTimeKnownValid=true;
+  return dateTime;
+}
+
 bool Telescope::addStar()
 {
   if (align == ALI_RECENTER_1 || align == ALI_RECENTER_2 || align == ALI_RECENTER_3 || align == ALI_RECENTER_4 || align == ALI_RECENTER_5 || align == ALI_RECENTER_6 || align == ALI_RECENTER_7 || align == ALI_RECENTER_8 || align == ALI_RECENTER_9) {

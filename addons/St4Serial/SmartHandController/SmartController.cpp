@@ -818,7 +818,7 @@ void SmartHandController::drawIntro()
 
 bool SmartHandController::SelectStarAlign()
 {
-  if (!cat_mgr.isInitialized()) { cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0()); }
+  cat_mgr.setLat(telInfo.getLat()); cat_mgr.setLstT0(telInfo.getLstT0());
   cat_mgr.select(0);
 
   cat_mgr.filtersClear();

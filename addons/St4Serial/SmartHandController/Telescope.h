@@ -89,6 +89,7 @@ public:
   bool hasRotator();
   bool hasDeRotator();
   bool hasReticle();
+  bool hasDateTime();
   bool addStar();
 
 private:
