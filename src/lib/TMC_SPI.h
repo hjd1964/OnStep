@@ -1,13 +1,13 @@
 // -----------------------------------------------------------------------------------
-// TMC2130 stepper drivers
+// Control Trinamic SPI mode stepper drivers
 
 #pragma once
 
-class tmc2130 {
+class tmcSpiDriver {
   public:
     long sgResult;
     
-    tmc2130(int cs, int sck, int miso, int mosi) {
+    tmcSpiDriver(int cs, int sck, int miso, int mosi) {
       _cs=cs; _sck=sck; _miso=miso; _mosi=mosi;
     }
     
@@ -55,10 +55,9 @@ class tmc2130 {
     // stealth chop on/off: stealth_chop
     // microstepping mode:  micro_step_mode (0=256x, 1=128x, 2=64x, 3=32x, 4=16x, 5=8x, 6=4x, 7=2x, 8=1x)
     // power level       :  low_power (true for low power: 50%, 100% otherwise)
-    void setup(bool intpol, bool stealth_chop, byte micro_step_mode, bool low_power) {
+    void setup(bool intpol, bool stealth_chop, byte micro_step_mode, int irun, int ihold, float rsense) {
       BBSpi.begin(_cs,_sck,_miso,_mosi);
       uint32_t data_out=0;
-      uint32_t data_out_low=0;
     
       // voltage on AIN is current reference
       data_out=0x00000001UL;
@@ -66,7 +65,7 @@ class tmc2130 {
       if (stealth_chop) data_out|=0x00000004UL;
       write(REG_GCONF,data_out);
       BBSpi.pause();
-    
+
       // *** My notes are limited, see the TMC2130 datasheet for more info. ***
     
       // IHOLDDELAY=0x00, IRUN=0x1F, IHOLD=0x1F (  0,   31,   31   ) or 50% (0,16,16)
@@ -74,10 +73,16 @@ class tmc2130 {
       // IHOLD,      default=16, range 0 to 31 (Standstill current 0=1/32... 31=32/32)
       // IRUN,       default=31, range 0 to 31 (Run current 0=1/32... 31=32/32)
       // IHOLDDELAY, default=4,  range 0 to 15 (Delay per current reduction step in x 2^18 clocks)
-      //            IHOLD   + IRUN    + IHOLDDELAY
-      data_out_low=(12UL<<0)+(16UL<<8)+(4UL<<16);
-      data_out    =(16UL<<0)+(31UL<<8)+(4UL<<16);
-      if (!low_power) write(REG_IHOLD_IRUN,data_out); else write(REG_IHOLD_IRUN,data_out_low);
+      
+      float Ifs = 0.325/rsense;
+      unsigned long IHOLD=round(( ((float)ihold/1000.0)/Ifs)*32.0)-1;
+      unsigned long IRUN =round(( ((float)irun/1000.0)/Ifs)*32.0)-1;
+      if (IHOLD<0) IHOLD=0; if (IHOLD>31) IHOLD=31;
+      if (IRUN<0)  IRUN=0;  if (IRUN>31)  IRUN=31;
+
+      //        IHOLD    + IRUN    + IHOLDDELAY
+      data_out=(IHOLD<<0)+(IRUN<<8)+(4UL<<16);
+      write(REG_IHOLD_IRUN,data_out);
       BBSpi.pause();
     
       // TPOWERDOWN, default=127, range 0 to 255 (Delay after standstill for motor current power down, about 0 to 4 seconds)

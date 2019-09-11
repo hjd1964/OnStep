@@ -872,7 +872,7 @@ void processCommands() {
               default:  commandError=true;
             }
           } else
-#if (AXIS1_FAULT==TMC2130) && (AXIS2_FAULT==TMC2130)
+#if (AXIS1_FAULT==TMC_SPI) && (AXIS2_FAULT==TMC_SPI)
           if (parameter[0]=='U') { // Un: Get stepper driver statUs
 
             switch (parameter[1]) {

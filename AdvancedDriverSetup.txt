@@ -21,19 +21,34 @@
 // SilentStepStick TMC2130 SPI configurations:
 // use MODE_SWITCH_BEFORE_SLEW_SPI.  Default operation in spreadCycle and with 256x interpolation on:
 // AXISn_MODE and AXISn_MODE_GOTO can be set to 0-8 where 0=256x, 1=128x, 2=64x, 3=32x, 4=16x, 5=8x, 6=4x, 7=2x, 8=1x
-// You can also turn stealthChop on (TMC_STEALTHCHOP) and/or disable 256x interpolation (TMC_NINTPOL.) For example 32x mode with stealthChop:
-// AXIS1_MODE (3|TMC_STEALTHCHOP)
-// Another option allows setting 50% power while tracking (TMC_LOWPWR.)  As above, with this option on too:
-// AXIS1_MODE (3|TMC_STEALTHCHOP|TMC_LOWPWR)
 //
 #define AXIS1_MODE_OFF               // programs the RA/Az uStep mode M0/M1/M2, optional and default _OFF.
 #define AXIS1_MODE_GOTO_OFF          // programs the RA/Az uStep mode M0/M1/M2, used during gotos, optional and default _OFF.
 #define AXIS1_STEP_GOTO 1            // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
+
 #define AXIS2_MODE_OFF               // programs the Dec/Alt uStep mode M0/M1/M2, optional and default _OFF.
 #define AXIS2_MODE_GOTO_OFF          // programs the Dec/Alt uStep mode M0/M1/M2, used during gotos, optional and default _OFF.
 #define AXIS2_STEP_GOTO 1            // 1=goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
+
 #define MODE_SWITCH_BEFORE_SLEW_OFF  // _ON (or _SPI) for _MODE and _MODE_GOTO settings to start/stop just before/after the slew, otherwise goto mode becomes active
                                      // during the slew at >128uS/step speeds. _SPI as above but uses SPI (on M0/M1/M2/(and optionally Aux)) to do the switching (TMC2130.)  
+
+// Advanced settings for TMC2130 and 5160 (etc?) stepper drivers when in SPI mode, if present
+#define AXIS1_TMC_MODE STEALTHCHOP      // use SPREADCYCLE or STEALTHCHOP mode when tracking
+#define AXIS1_TMC_MODE_GOTO SPREADCYCLE // use SPREADCYCLE or STEALTHCHOP mode during slews
+#define AXIS1_TMC_INTPOL true           // true to use 256x interpolation
+#define AXIS1_TMC_IHOLD 1250            // current during standstill;  in milli-amps, use these values for current limiting Vref setting via the trim-pot on driver
+#define AXIS1_TMC_IRUN 2500             // current during tracking;    alternatively set Vref = 2.5V (TMC2130) and enter the currents you would like in mA here
+#define AXIS1_TMC_IGOTO 2500            // current during slews
+#define AXIS1_TMC_RSENSE 0.11+0.02      // standard Rsense for TMC2130, other devices may be different
+
+#define AXIS2_TMC_MODE STEALTHCHOP      // use SPREADCYCLE or STEALTHCHOP mode when tracking
+#define AXIS2_TMC_MODE_GOTO SPREADCYCLE // use SPREADCYCLE or STEALTHCHOP mode during slews
+#define AXIS2_TMC_INTPOL true           // true to use 256x interpolation
+#define AXIS2_TMC_IHOLD 1250            // current during standstill;  in milli-amps, use these values for current limiting Vref setting via the trim-pot on driver
+#define AXIS2_TMC_IRUN 2500             // current during tracking;    alternatively set Vref = 2.5V (TMC2130) and enter the currents you would like in mA here
+#define AXIS2_TMC_IGOTO 2500            // current during slews
+#define AXIS2_TMC_RSENSE 0.11+0.02      // standard Rsense for TMC2130, other devices may be different
 
 // Secondary stepper driver decay control (for both Axis, the _DECAY_MODE and _DECAY_MODE_GOTO settings always start/stop just before/after the slew)
 // typically used for the DRV8825 or A9488 where decay control is separate from the micro-step mode control.  The driver modules usually need to be modified to accomplish this.

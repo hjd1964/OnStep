@@ -91,20 +91,18 @@ volatile double StepsForRateChangeAxis2= (sqrt((double)DegreesForAcceleration*(d
 #ifdef AXIS1_DRIVER_MODEL
 
   // Microsteps for each axis
-  volatile uint8_t Axis1_Microsteps;
-  #define AXIS1_MODE Axis1_Microsteps
+  volatile uint8_t _AXIS1_MODE;
+  #define AXIS1_MODE _AXIS1_MODE
+  volatile uint8_t _AXIS2_MODE;
+  #define AXIS2_MODE _AXIS2_MODE
 
-  volatile uint8_t Axis2_Microsteps;
-  #define AXIS2_MODE Axis2_Microsteps
-  
   #ifdef AXIS1_MICROSTEPS_GOTO
-    volatile uint8_t Axis1_MicrostepsGoto;
-    #define AXIS1_MODE_GOTO Axis1_MicrostepsGoto
+    volatile uint8_t _AXIS1_MODE_GOTO;
+    #define AXIS1_MODE_GOTO _AXIS1_MODE_GOTO
   #endif
-  
   #ifdef AXIS2_MICROSTEPS_GOTO
-    volatile uint8_t Axis2_MicrostepsGoto;
-    #define AXIS2_MODE_GOTO Axis2_MicrostepsGoto
+    volatile uint8_t _AXIS2_MODE_GOTO;
+    #define AXIS2_MODE_GOTO _AXIS2_MODE_GOTO
   #endif
 
 #endif

@@ -9,10 +9,9 @@
 #define ASTROMETRIC_J2000 3
 #define TELESCOPE_COORDINATES TOPOCENTRIC
 
-// some defines to help with TMC2130 configuration
-#define TMC_LOWPWR      64
-#define TMC_STEALTHCHOP 32
-#define TMC_NINTPOL     16
+// some defines to help with TMC SPI configuration
+#define STEALTHCHOP 32
+#define SPREADCYCLE 0
 
 // Stepper driver models
 #define A4988   1
@@ -24,12 +23,14 @@
 #define TMC2208 7
 #define ST820   8
 
+#define TMC_SPI 50
 #define TMC2130 100
 #define TMC2130_QUIET 101  // these variations don't appear at run-time and are changed to "TMC2130"
 #define TMC2130_VQUIET 102
 #define TMC2130_LOWPWR 103
 #define TMC2130_QUIET_LOWPWR 104
 #define TMC2130_VQUIET_LOWPWR 105
+#define TMC5160 150
 
 // Stepper driver minimum pulse width
 #define A4988_PULSE_WIDTH   1000
@@ -58,7 +59,7 @@
 #define LEN_ST820   8
 #define LEN_TMC2100 4
 #define LEN_TMC2208 4
-#define LEN_TMC2130 9
+#define LEN_TMC_SPI 9
    
 // The various microsteps for different driver models, with the bit modes for each
 unsigned int StepsA4988  [LEN_A4988]  [2] = { {1,0}, {2,1}, {4,2}, {8,3}, {16,7} };
@@ -68,7 +69,7 @@ unsigned int StepsLV8729 [LEN_LV8729] [2] = { {1,0}, {2,1}, {4,2}, {8,3}, {16,4}
 unsigned int StepsST820  [LEN_ST820]  [2] = { {1,0}, {2,1}, {4,2}, {8,3}, {16,4}, {32,5}, {128,6}, {256,7} };
 unsigned int StepsTMC2208[LEN_TMC2208][2] = {        {2,1}, {4,2}, {8,0}, {16,3} };
 unsigned int StepsTMC2100[LEN_TMC2100][2] = { {1,0}, {2,1}, {4,2}, {16,3} };
-unsigned int StepsTMC2130[LEN_TMC2130][2] = { {1,8}, {2,7}, {4,6}, {8,5}, {16,4}, {32,3}, {64,2}, {128,1}, {256,0} };
+unsigned int StepsTMC_SPI[LEN_TMC_SPI][2] = { {1,8}, {2,7}, {4,6}, {8,5}, {16,4}, {32,3}, {64,2}, {128,1}, {256,0} };
 
 // EEPROM Info --------------------------------------------------------------------------------------------------------------
 // General purpose storage A (100 bytes), 0..99

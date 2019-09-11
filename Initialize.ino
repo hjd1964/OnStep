@@ -9,24 +9,14 @@ void initStartupValues() {
 // if we made through validation and AXIS1_DRIVER_MODEL exists; AXIS2_DRIVER_MODEL, AXIS1_MICROSTEPS, and AXIS2_MICROSTEPS also exist and passed validation in the pre-processor
 #ifdef AXIS1_DRIVER_MODEL
   // translate microsteps to mode bits
-  Axis1_Microsteps = translateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_MICROSTEPS)|TMC_AXIS1_MODE; // if this isn't a TMC2130 stepper driver TMC_AXISn_MODE, etc. = 0
-  Axis2_Microsteps = translateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_MICROSTEPS)|TMC_AXIS2_MODE;
+  AXIS1_MODE = translateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_MICROSTEPS);
+  AXIS2_MODE = translateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_MICROSTEPS);
   #ifdef AXIS1_MICROSTEPS_GOTO
-    Axis1_MicrostepsGoto = translateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_MICROSTEPS_GOTO)|TMC_AXIS1_MODE_GOTO;
+    AXIS1_MODE_GOTO = translateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_MICROSTEPS_GOTO);
   #endif
   #ifdef AXIS2_MICROSTEPS_GOTO
-    Axis2_MicrostepsGoto = translateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_MICROSTEPS_GOTO)|TMC_AXIS2_MODE_GOTO;
+    AXIS2_MODE_GOTO = translateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_MICROSTEPS_GOTO);
   #endif
-#endif
-
-#ifdef DEBUG_AXIS_MODES_ON
-  DL("A reminder: TMC_LOWPWR=64, TMC_STEALTHCHOP=32");
-  D("AXIS1_MODE="); D(AXIS1_MODE);
-  D(", AXIS1_MODE_GOTO="); D(AXIS1_MODE_GOTO);
-  D(", AXIS1_STEP_GOTO="); DL(AXIS1_STEP_GOTO);
-  D("AXIS2_MODE="); D(AXIS2_MODE);
-  D(", AXIS2_MODE_GOTO="); D(AXIS2_MODE_GOTO);
-  D(", AXIS2_STEP_GOTO="); DL(AXIS2_STEP_GOTO);
 #endif
 
   // initialize some fixed-point values
@@ -507,8 +497,8 @@ unsigned int translateMicrosteps(int axis, int DriverModel, unsigned int Microst
     case TMC2208:
       Mode = searchTable(StepsTMC2208, LEN_TMC2208, Microsteps);
       break;
-    case TMC2130:
-      Mode = searchTable(StepsTMC2130, LEN_TMC2130, Microsteps);
+    case TMC_SPI:
+      Mode = searchTable(StepsTMC_SPI, LEN_TMC_SPI, Microsteps);
       break;
     default:
       Mode=1;

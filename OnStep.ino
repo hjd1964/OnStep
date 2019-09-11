@@ -40,8 +40,8 @@
 // firmware info, these are returned by the ":GV?#" commands
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  2
-#define FirmwareVersionMinor  23      // minor version 0 to 99
-#define FirmwareVersionPatch  "b"     // for example major.minor patch: 1.3c
+#define FirmwareVersionMinor  24      // minor version 0 to 99
+#define FirmwareVersionPatch  "a"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 2       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
@@ -84,10 +84,10 @@
 #include "src/lib/Sound.h"
 
 #ifdef MODE_SWITCH_BEFORE_SLEW_SPI
-#include "src/lib/TMC2130.h"
+#include "src/lib/TMC_SPI.h"
 //               SS      ,SCK     ,MISO     ,MOSI
-tmc2130 tmcAxis1(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0);
-tmc2130 tmcAxis2(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
+tmcSpiDriver tmcAxis1(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0);
+tmcSpiDriver tmcAxis2(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
 #endif
 
 #include "src/lib/Coord.h"
@@ -395,7 +395,7 @@ void loop2() {
   #if AXIS1_FAULT==HIGH
     faultAxis1=(digitalRead(Axis1_FAULT)==HIGH);
   #endif
-  #if AXIS1_FAULT==TMC2130
+  #if AXIS1_FAULT==TMC_SPI
     if (lst%2==0) faultAxis1=tmcAxis1.error();
   #endif
 #endif
@@ -406,7 +406,7 @@ void loop2() {
   #if AXIS2_FAULT==HIGH
     faultAxis2=(digitalRead(Axis2_FAULT)==HIGH);
   #endif
-  #if AXIS2_FAULT==TMC2130
+  #if AXIS2_FAULT==TMC_SPI
     if (lst%2==1) faultAxis2=tmcAxis2.error();
   #endif
 #endif

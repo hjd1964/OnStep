@@ -92,44 +92,52 @@
 #ifdef DISABLE_AXIS5
   #define AXIS3_DISABLE DISABLE_AXIS5
 #endif
-#ifdef AXIS1_FAULT_SPI
-#define AXIS1_FAULT TMC2130
-#endif
 #ifdef AXIS1_FAULT_LOW
-#define AXIS1_FAULT LOW
+  #define AXIS1_FAULT LOW
 #endif
 #ifdef AXIS1_FAULT_HIGH
-#define AXIS1_FAULT HIGH
+  #define AXIS1_FAULT HIGH
 #endif
-#ifdef AXIS2_FAULT_SPI
-#define AXIS2_FAULT TMC2130
+#ifdef AXIS1_FAULT_SPI
+  #define AXIS1_FAULT TMC_SPI
+#endif
+#if AXIS1_FAULT==TMC2130
+  #undef AXIS1_FAULT
+  #define AXIS1_FAULT TMC_SPI
 #endif
 #ifdef AXIS2_FAULT_LOW
-#define AXIS2_FAULT LOW
+  #define AXIS2_FAULT LOW
 #endif
 #ifdef AXIS2_FAULT_HIGH
-#define AXIS2_FAULT HIGH
+  #define AXIS2_FAULT HIGH
+#endif
+#ifdef AXIS2_FAULT_SPI
+  #define AXIS2_FAULT TMC_SPI
+#endif
+#if AXIS2_FAULT==TMC2130
+  #undef AXIS2_FAULT
+  #define AXIS2_FAULT TMC_SPI
 #endif
 #ifdef AUTO_POWER_DOWN_AXIS2_ON
-#define AXIS2_AUTO_POWER_DOWN_ON
+  #define AXIS2_AUTO_POWER_DOWN_ON
 #endif
 #ifdef DECAY_MODE_LOW
-#define DECAY_MODE LOW
+  #define DECAY_MODE LOW
 #endif
 #ifdef DECAY_MODE_HIGH
-#define DECAY_MODE HIGH
+  #define DECAY_MODE HIGH
 #endif
 #ifdef DECAY_MODE_OPEN
-#define DECAY_MODE OPEN
+  #define DECAY_MODE OPEN
 #endif
 #ifdef DECAY_MODE_GOTO_LOW
-#define DECAY_MODE_GOTO LOW
+  #define DECAY_MODE_GOTO LOW
 #endif
 #ifdef DECAY_MODE_GOTO_HIGH
-#define DECAY_MODE_GOTO HIGH
+  #define DECAY_MODE_GOTO HIGH
 #endif
 #ifdef DECAY_MODE_GOTO_OPEN
-#define DECAY_MODE_GOTO OPEN
+  #define DECAY_MODE_GOTO OPEN
 #endif
 
 // -----------------------------------------------------------------------------------
@@ -201,75 +209,157 @@
 #if defined(AXIS1_DRIVER_MODEL)
   // attempting to use the simplified stepper driver setup
 
-  // special SPI decay modes etc. for TMC2130 AXIS1
-  #if AXIS1_DRIVER_MODEL == TMC2130_LOWPWR
+  // special SPI decay modes etc. for TMC SPI driver on AXIS1
+  #if AXIS1_DRIVER_MODEL == TMC2130
     #undef AXIS1_DRIVER_MODEL
-    #define AXIS1_DRIVER_MODEL TMC2130
-    #define TMC_AXIS1_MODE TMC_LOWPWR
-    #define TMC_AXIS1_MODE_GOTO 0
+    #define AXIS1_DRIVER_MODEL TMC_SPI
+  #elif AXIS1_DRIVER_MODEL == TMC5160
+    #undef AXIS1_DRIVER_MODEL
+    #define AXIS1_DRIVER_MODEL TMC_SPI
+    #ifndef AXIS1_TMC_IHOLD
+      #define AXIS1_TMC_IHOLD 300 // peak current in mA (0.3A)
+    #endif
+    #ifndef AXIS1_TMC_IRUN
+      #define AXIS1_TMC_IRUN 600 // peak current in mA (0.6A)
+    #endif
+    #ifndef AXIS1_TMC_RSENSE
+      #define AXIS1_TMC_RSENSE 0.075
+    #endif
+  #elif AXIS1_DRIVER_MODEL == TMC2130_LOWPWR
+    #undef AXIS1_DRIVER_MODEL
+    #define AXIS1_DRIVER_MODEL TMC_SPI
+    #define AXIS1_TMC_IHOLD 1000 // 40% of Vref setting on trim-pot
+    #define AXIS1_TMC_IRUN 1250  // 50%
+    #define AXIS1_TMC_IGOTO 2500 // 100%
   #elif AXIS1_DRIVER_MODEL == TMC2130_QUIET
     #undef AXIS1_DRIVER_MODEL
-    #define AXIS1_DRIVER_MODEL TMC2130
-    #define TMC_AXIS1_MODE TMC_STEALTHCHOP
-    #define TMC_AXIS1_MODE_GOTO 0
+    #define AXIS1_DRIVER_MODEL TMC_SPI
+    #define AXIS1_TMC_MODE STEALTHCHOP
   #elif AXIS1_DRIVER_MODEL == TMC2130_QUIET_LOWPWR
     #undef AXIS1_DRIVER_MODEL
-    #define AXIS1_DRIVER_MODEL TMC2130
-    #define TMC_AXIS1_MODE TMC_STEALTHCHOP|TMC_LOWPWR
-    #define TMC_AXIS1_MODE_GOTO 0
+    #define AXIS1_DRIVER_MODEL TMC_SPI
+    #define AXIS1_TMC_MODE STEALTHCHOP
+    #define AXIS1_TMC_IHOLD 1000
+    #define AXIS1_TMC_IRUN 1250
+    #define AXIS1_TMC_IGOTO 2500
   #elif AXIS1_DRIVER_MODEL == TMC2130_VQUIET
     #undef AXIS1_DRIVER_MODEL
-    #define AXIS1_DRIVER_MODEL TMC2130
-    #define TMC_AXIS1_MODE TMC_STEALTHCHOP
-    #define TMC_AXIS1_MODE_GOTO TMC_STEALTHCHOP
+    #define AXIS1_DRIVER_MODEL TMC_SPI
+    #define AXIS1_TMC_MODE STEALTHCHOP
+    #define AXIS1_TMC_MODE_GOTO STEALTHCHOP
   #elif AXIS1_DRIVER_MODEL == TMC2130_VQUIET_LOWPWR
     #undef AXIS1_DRIVER_MODEL
-    #define AXIS1_DRIVER_MODEL TMC2130
-    #define TMC_AXIS1_MODE TMC_STEALTHCHOP|TMC_LOWPWR
-    #define TMC_AXIS1_MODE_GOTO TMC_STEALTHCHOP
-  #else
-    #define TMC_AXIS1_MODE 0
-    #define TMC_AXIS1_MODE_GOTO 0
+    #define AXIS1_DRIVER_MODEL TMC_SPI
+    #define AXIS1_TMC_MODE STEALTHCHOP
+    #define AXIS1_TMC_MODE_GOTO STEALTHCHOP
+    #define AXIS1_TMC_IHOLD 1000
+    #define AXIS1_TMC_IRUN 1250
+    #define AXIS1_TMC_IGOTO 2500
+  #endif
+
+  #if AXIS1_DRIVER_MODEL == TMC_SPI
+    #ifndef AXIS1_TMC_MODE
+      #define AXIS1_TMC_MODE SPREADCYCLE
+    #endif
+    #ifndef AXIS1_TMC_MODE_GOTO
+      #define AXIS1_TMC_MODE_GOTO SPREADCYCLE
+    #endif
+    #ifndef AXIS1_TMC_INTPOL
+      #define AXIS1_TMC_INTPOL true
+    #endif
+    #ifndef AXIS1_TMC_IHOLD
+      #define AXIS1_TMC_IHOLD 1250
+    #endif
+    #ifndef AXIS1_TMC_IRUN
+      #define AXIS1_TMC_IRUN 2500
+    #endif
+    #ifndef AXIS1_TMC_IGOTO
+      #define AXIS1_TMC_IGOTO AXIS1_TMC_IRUN
+    #endif
+    #ifndef AXIS1_TMC_RSENSE
+      #define AXIS1_TMC_RSENSE 0.11+0.02
+    #endif
   #endif
 
   // basic check to see if a valid stepper driver code exists
-  #if ((AXIS1_DRIVER_MODEL < A4988) || (AXIS1_DRIVER_MODEL > ST820)) && (AXIS1_DRIVER_MODEL != TMC2130)
+  #if ((AXIS1_DRIVER_MODEL < A4988) || (AXIS1_DRIVER_MODEL > ST820)) && (AXIS1_DRIVER_MODEL != TMC_SPI)
     #error "AXIS1_DRIVER_MODEL; Unknown stepper driver specified, check your configuration file."
   #endif
 
-  // special SPI decay modes etc. for TMC2130 AXIS2
-  #if AXIS2_DRIVER_MODEL == TMC2130_LOWPWR
+  // special SPI decay modes etc. for TMC SPI driver AXIS2
+  #if AXIS2_DRIVER_MODEL == TMC2130
     #undef AXIS2_DRIVER_MODEL
-    #define AXIS2_DRIVER_MODEL TMC2130
-    #define TMC_AXIS2_MODE TMC_LOWPWR
-    #define TMC_AXIS2_MODE_GOTO 0
+    #define AXIS2_DRIVER_MODEL TMC_SPI
+  #elif AXIS2_DRIVER_MODEL == TMC5160
+    #undef AXIS2_DRIVER_MODEL
+    #define AXIS2_DRIVER_MODEL TMC_SPI
+    #ifndef AXIS2_TMC_IHOLD
+      #define AXIS2_TMC_IHOLD 300
+    #endif
+    #ifndef AXIS2_TMC_IRUN
+      #define AXIS2_TMC_IRUN 600
+    #endif
+    #ifndef AXIS2_TMC_RSENSE
+      #define AXIS2_TMC_RSENSE 0.075
+    #endif
+  #elif AXIS2_DRIVER_MODEL == TMC2130_LOWPWR
+    #undef AXIS2_DRIVER_MODEL
+    #define AXIS2_DRIVER_MODEL TMC_SPI
+    #define AXIS2_TMC_IHOLD 1000
+    #define AXIS2_TMC_IRUN 1250
+    #define AXIS2_TMC_IGOTO 2500
   #elif AXIS2_DRIVER_MODEL == TMC2130_QUIET
     #undef AXIS2_DRIVER_MODEL
-    #define AXIS2_DRIVER_MODEL TMC2130
-    #define TMC_AXIS2_MODE TMC_STEALTHCHOP
-    #define TMC_AXIS2_MODE_GOTO 0
+    #define AXIS2_DRIVER_MODEL TMC_SPI
+    #define AXIS2_TMC_MODE STEALTHCHOP
   #elif AXIS2_DRIVER_MODEL == TMC2130_QUIET_LOWPWR
     #undef AXIS2_DRIVER_MODEL
-    #define AXIS2_DRIVER_MODEL TMC2130
-    #define TMC_AXIS2_MODE TMC_STEALTHCHOP|TMC_LOWPWR
-    #define TMC_AXIS2_MODE_GOTO 0
+    #define AXIS2_DRIVER_MODEL TMC_SPI
+    #define AXIS2_TMC_MODE STEALTHCHOP
+    #define AXIS2_TMC_IHOLD 1000
+    #define AXIS2_TMC_IRUN 1250
+    #define AXIS2_TMC_IGOTO 2500
   #elif AXIS2_DRIVER_MODEL == TMC2130_VQUIET
     #undef AXIS2_DRIVER_MODEL
-    #define AXIS2_DRIVER_MODEL TMC2130
-    #define TMC_AXIS2_MODE TMC_STEALTHCHOP
-    #define TMC_AXIS2_MODE_GOTO TMC_STEALTHCHOP
+    #define AXIS2_DRIVER_MODEL TMC_SPI
+    #define AXIS2_TMC_MODE STEALTHCHOP
+    #define AXIS2_TMC_MODE_GOTO STEALTHCHOP
   #elif AXIS2_DRIVER_MODEL == TMC2130_VQUIET_LOWPWR
     #undef AXIS2_DRIVER_MODEL
-    #define AXIS2_DRIVER_MODEL TMC2130
-    #define TMC_AXIS2_MODE TMC_STEALTHCHOP|TMC_LOWPWR
-    #define TMC_AXIS2_MODE_GOTO TMC_STEALTHCHOP
-  #else
-    #define TMC_AXIS2_MODE 0
-    #define TMC_AXIS2_MODE_GOTO 0
+    #define AXIS2_DRIVER_MODEL TMC_SPI
+    #define AXIS2_TMC_MODE STEALTHCHOP
+    #define AXIS2_TMC_MODE_GOTO STEALTHCHOP
+    #define AXIS2_TMC_IHOLD 1000
+    #define AXIS2_TMC_IRUN 1250
+    #define AXIS2_TMC_IGOTO 2500
   #endif
 
+  #if AXIS2_DRIVER_MODEL == TMC_SPI
+    #ifndef AXIS2_TMC_MODE
+      #define AXIS2_TMC_MODE SPREADCYCLE
+    #endif
+    #ifndef AXIS2_TMC_MODE_GOTO
+      #define AXIS2_TMC_MODE_GOTO SPREADCYCLE
+    #endif
+    #ifndef AXIS2_TMC_INTPOL
+      #define AXIS2_TMC_INTPOL true
+    #endif
+    #ifndef AXIS2_TMC_IHOLD
+      #define AXIS2_TMC_IHOLD 1250
+    #endif
+    #ifndef AXIS2_TMC_IRUN
+      #define AXIS2_TMC_IRUN 2500
+    #endif
+    #ifndef AXIS2_TMC_IGOTO
+      #define AXIS2_TMC_IGOTO AXIS2_TMC_IRUN
+    #endif
+    #ifndef AXIS2_TMC_RSENSE
+      #define AXIS2_TMC_RSENSE 0.11+0.02
+    #endif
+  #endif
+    
   // basic check to see if a valid stepper driver code exists
-  #if ((AXIS2_DRIVER_MODEL < A4988) || (AXIS2_DRIVER_MODEL > ST820)) && (AXIS2_DRIVER_MODEL != TMC2130)
+  #if ((AXIS2_DRIVER_MODEL < A4988) || (AXIS2_DRIVER_MODEL > ST820)) && (AXIS2_DRIVER_MODEL != TMC_SPI)
     #error "AXIS2_DRIVER_MODEL; Unknown stepper driver specified, check your configuration file."
   #endif
 
@@ -330,16 +420,16 @@
     #if HAL_PULSE_WIDTH < TMC2100_PULSE_WIDTH
       #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the TMC2100 stepper driver specifications."
     #endif
-  #elif AXIS1_DRIVER_MODEL == TMC2130
+  #elif AXIS1_DRIVER_MODEL == TMC_SPI
     #define MODE_SWITCH_BEFORE_SLEW_SPI
     #if AXIS1_MICROSTEPS!=1 && AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16 && AXIS1_MICROSTEPS!=32 && AXIS1_MICROSTEPS!=64 && AXIS1_MICROSTEPS!=128 && AXIS1_MICROSTEPS!=256
-      #error "Configuration: AXIS1_MICROSTEPS; TMC2130 invalid micro-step mode, use: 256,128,64,32,16,8,4,2,or 1"
+      #error "Configuration: AXIS1_MICROSTEPS; TMC SPI stepper driver invalid micro-step mode, use: 256,128,64,32,16,8,4,2,or 1"
     #endif
-    #if AXIS2_DRIVER_MODEL != TMC2130
-      #error "Configuration: TMC2130 stepper drivers must be used in pairs (both Axis1 and Axis2.)"
+    #if AXIS2_DRIVER_MODEL != TMC_SPI
+      #error "Configuration: TMC SPI stepper drivers must be used in pairs (both Axis1 and Axis2.)"
     #endif
-    #if HAL_PULSE_WIDTH < TMC2130_PULSE_WIDTH
-      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the TMC2130 stepper driver specifications."
+    #if HAL_PULSE_WIDTH < TMC_SPI_PULSE_WIDTH
+      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the TMC SPI stepper driver specifications."
     #endif
   #elif AXIS1_DRIVER_MODEL == TMC2208
     #if AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16
@@ -407,12 +497,12 @@
     #if HAL_PULSE_WIDTH < TMC2100_PULSE_WIDTH
       #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width exceeds the TMC2100 stepper driver specifications."
     #endif
-  #elif AXIS2_DRIVER_MODEL == TMC2130
+  #elif AXIS2_DRIVER_MODEL == TMC_SPI
     #if AXIS2_MICROSTEPS!=1 && AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=8 && AXIS2_MICROSTEPS!=16 && AXIS2_MICROSTEPS!=32 && AXIS2_MICROSTEPS!=64 && AXIS2_MICROSTEPS!=128 && AXIS2_MICROSTEPS!=256
-      #error "Configuration: AXIS2_MICROSTEPS; TMC2130 invalid micro-step mode, use: 256,128,64,32,16,8,4,2,or 1"
+      #error "Configuration: AXIS2_MICROSTEPS; TMC SPI stepper driver invalid micro-step mode, use: 256,128,64,32,16,8,4,2,or 1"
     #endif
-    #if HAL_PULSE_WIDTH < TMC2130_PULSE_WIDTH
-      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the TMC2130 stepper driver specifications."
+    #if HAL_PULSE_WIDTH < TMC_SPI_PULSE_WIDTH
+      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the TMC SPI stepper driver specifications."
     #endif
   #elif AXIS2_DRIVER_MODEL == TMC2208
     #if AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=8 && AXIS2_MICROSTEPS!=16
@@ -448,12 +538,12 @@
       #if AXIS1_MICROSTEPS != AXIS1_MICROSTEPS_GOTO
         #error "Configuration: AXIS1_MICROSTEPS_GOTO; must be set to the same value as AXIS1_MICROSTEPS,or _OFF"
       #endif
-    #elif AXIS1_DRIVER_MODEL == TMC2130
+    #elif AXIS1_DRIVER_MODEL == TMC_SPI
       #if AXIS1_MICROSTEPS_GOTO!=1 && AXIS1_MICROSTEPS_GOTO!=2 && AXIS1_MICROSTEPS_GOTO!=4 && AXIS1_MICROSTEPS_GOTO!=8 && AXIS1_MICROSTEPS_GOTO!=16 && AXIS1_MICROSTEPS_GOTO!=32 && AXIS1_MICROSTEPS_GOTO!=64 && AXIS1_MICROSTEPS_GOTO!=128 && AXIS1_MICROSTEPS_GOTO!=256
-        #error "Configuration: AXIS1_MICROSTEPS_GOTO; TMC2130 invalid micro-step mode, use: 256,128,64,32,16,8,4,2,or 1"
+        #error "Configuration: AXIS1_MICROSTEPS_GOTO; TMC SPI stepper driver invalid micro-step mode, use: 256,128,64,32,16,8,4,2,or 1"
       #endif
       #if AXIS1_MICROSTEPS != AXIS1_MICROSTEPS_GOTO
-        #warning "Configuration: AXIS2_MICROSTEPS_GOTO; is NOT _OFF.  This can effect pointing accuracy slightly (and PEC if index sensing isn't used.)"
+        #warning "Configuration: AXIS2_MICROSTEPS_GOTO; is NOT _OFF.  This can effect pointing accuracy and PEC if index sensing isn't used."
       #endif
     #elif AXIS1_DRIVER_MODEL == TMC2208
       #if AXIS1_MICROSTEPS_GOTO!=2 && AXIS1_MICROSTEPS_GOTO!=4 && AXIS1_MICROSTEPS_GOTO!=8 && AXIS1_MICROSTEPS_GOTO!=16
@@ -493,12 +583,12 @@
       #if AXIS2_MICROSTEPS != AXIS2_MICROSTEPS_GOTO
         #error "Configuration: AXIS2_MICROSTEPS_GOTO; must be set to the same value as AXIS2_MICROSTEPS,or _OFF"
       #endif
-    #elif AXIS2_DRIVER_MODEL == TMC2130
+    #elif AXIS2_DRIVER_MODEL == TMC_SPI
       #if AXIS2_MICROSTEPS_GOTO!=1 && AXIS2_MICROSTEPS_GOTO!=2 && AXIS2_MICROSTEPS_GOTO!=4 && AXIS2_MICROSTEPS_GOTO!=8 && AXIS2_MICROSTEPS_GOTO!=16 && AXIS2_MICROSTEPS_GOTO!=32 && AXIS2_MICROSTEPS_GOTO!=64 && AXIS2_MICROSTEPS_GOTO!=128 && AXIS2_MICROSTEPS_GOTO!=256
-        #error "Configuration: AXIS2_MICROSTEPS_GOTO; TMC2130 invalid micro-step mode, use: 256,128,64,32,16,8,4,2,or 1"
+        #error "Configuration: AXIS2_MICROSTEPS_GOTO; TMC SPI stepper driver invalid micro-step mode, use: 256,128,64,32,16,8,4,2,or 1"
       #endif
       #if AXIS2_MICROSTEPS != AXIS2_MICROSTEPS_GOTO
-        #warning "Configuration: AXIS2_MICROSTEPS_GOTO; is NOT _OFF.  This can effect pointing accuracy slightly."
+        #warning "Configuration: AXIS2_MICROSTEPS_GOTO; is NOT _OFF.  This can effect pointing accuracy."
       #endif
     #elif AXIS2_DRIVER_MODEL == TMC2208
       #if AXIS2_MICROSTEPS_GOTO!=2 && AXIS2_MICROSTEPS_GOTO!=4 && AXIS2_MICROSTEPS_GOTO!=8 && AXIS2_MICROSTEPS_GOTO!=16
@@ -516,7 +606,7 @@
   #endif
 
   #if defined(MODE_SWITCH_BEFORE_SLEW_ON) || defined(MODE_SWITCH_BEFORE_SLEW_SPI)
-    // help for TMC2100 and TMC2130 where AXISn_MICROSTEPS_GOTO must be defined
+    // help for stepper drivers where AXISn_MICROSTEPS_GOTO must be defined
     #if defined(AXIS1_MICROSTEPS) && !defined(AXIS1_MICROSTEPS_GOTO)
       #define AXIS1_MICROSTEPS_GOTO AXIS1_MICROSTEPS
     #endif
@@ -562,8 +652,8 @@
 
 // validate: warn the user not to have MISO wired up and try to use ESP8266 control too
 #if defined(ESP8266_CONTROL_ON) && defined(MODE_SWITCH_BEFORE_SLEW_SPI)
-  #warning "Configuration: be sure the Aux1 and Aux2 pins are wired into the ESP8266 GPIO0 and RST pins and **NOT** the SSS TMC2130 SDO pins"
-  #if (AXIS1_FAULT==TMC2130) || (AXIS2_FAULT==TMC2130)
+  #warning "Configuration: be sure the Aux1 and Aux2 pins are wired into the ESP8266 GPIO0 and RST pins and **NOT** the TMC SPI stepper driver SDO pins"
+  #if (AXIS1_FAULT==TMC_SPI) || (AXIS2_FAULT==TMC_SPI)
     #error "Configuration: Fault detection across SPI conflicts with ESP8266 control, choose one feature and wire for it correctly"
   #endif
 #endif

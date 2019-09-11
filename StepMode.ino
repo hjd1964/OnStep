@@ -63,22 +63,13 @@ void stepperModeTracking() {
     if ((AXIS2_MODE & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE>>2 & 1)); } else { pinMode(Axis2_M2,INPUT); }
   #endif
 #elif defined(MODE_SWITCH_BEFORE_SLEW_SPI)
-  // default 256x interpolation ON, stealthChop OFF (spreadCycle), micro-steps
   stepAxis1=1;
-  bool nintpol=((AXIS1_MODE & 0b0010000)!=0);
-  bool stealth=((AXIS1_MODE & 0b0100000)!=0);
-  bool lowpwr =((AXIS1_MODE & 0b1000000)!=0);
-  tmcAxis1.setup(!nintpol,stealth,AXIS1_MODE&0b001111,lowpwr);
-
-  // default 256x interpolation ON, stealthChop OFF (spreadCycle), micro-steps
+  tmcAxis1.setup(AXIS1_TMC_INTPOL,AXIS1_TMC_MODE,AXIS1_MODE&0b001111,AXIS1_TMC_IRUN,AXIS1_TMC_IHOLD,AXIS1_TMC_RSENSE);
   stepAxis2=1;
-  nintpol=((AXIS2_MODE & 0b0010000)!=0);
-  stealth=((AXIS2_MODE & 0b0100000)!=0);
-  lowpwr =((AXIS2_MODE & 0b1000000)!=0);
-  tmcAxis2.setup(!nintpol,stealth,AXIS2_MODE&0b001111,lowpwr);
+  tmcAxis2.setup(AXIS2_TMC_INTPOL,AXIS2_TMC_MODE,AXIS2_MODE&0b001111,AXIS2_TMC_IRUN,AXIS2_TMC_IHOLD,AXIS2_TMC_RSENSE);
 
   // allow stealth chop current regulation to ramp up to the initial motor current before moving
-  if ((((AXIS1_MODE & 0b0100000)!=0) || ((AXIS2_MODE & 0b0100000)!=0)) && (atHome)) delay(20);
+  if (((AXIS1_TMC_MODE==STEALTHCHOP) || (AXIS2_TMC_MODE==STEALTHCHOP)) && (atHome)) delay(20);
 #endif
 
 #ifdef MODE_SWITCH_SLEEP_ON
@@ -115,19 +106,10 @@ void stepperModeGoto() {
     if ((AXIS2_MODE_GOTO & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE_GOTO>>2 & 1)); } else { pinMode(Axis2_M2,INPUT); }
   #endif
 #elif defined(MODE_SWITCH_BEFORE_SLEW_SPI)
-  // default 256x interpolation ON, stealthChop OFF (spreadCycle), micro-steps
   stepAxis1=AXIS1_STEP_GOTO;
-  bool nintpol=((AXIS1_MODE_GOTO & 0b0010000)!=0);
-  bool stealth=((AXIS1_MODE_GOTO & 0b0100000)!=0);
-  bool lowpwr =((AXIS1_MODE_GOTO & 0b1000000)!=0);
-  tmcAxis1.setup(!nintpol,stealth,AXIS1_MODE_GOTO&0b001111,lowpwr);
-
-  // default 256x interpolation ON, stealthChop OFF (spreadCycle), micro-steps
+  tmcAxis1.setup(AXIS1_TMC_INTPOL,AXIS1_TMC_MODE,AXIS1_MODE_GOTO&0b001111,AXIS1_TMC_IGOTO,AXIS1_TMC_IHOLD,AXIS1_TMC_RSENSE);
   stepAxis2=AXIS2_STEP_GOTO;
-  nintpol=((AXIS2_MODE_GOTO & 0b0010000)!=0);
-  stealth=((AXIS2_MODE_GOTO & 0b0100000)!=0);
-  lowpwr =((AXIS2_MODE_GOTO & 0b1000000)!=0);
-  tmcAxis2.setup(!nintpol,stealth,AXIS2_MODE_GOTO&0b001111,lowpwr);
+  tmcAxis2.setup(AXIS2_TMC_INTPOL,AXIS2_TMC_MODE,AXIS2_MODE_GOTO&0b001111,AXIS2_TMC_IGOTO,AXIS2_TMC_IHOLD,AXIS2_TMC_RSENSE);
 #endif
 
 #ifdef MODE_SWITCH_SLEEP_ON
