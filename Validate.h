@@ -7,6 +7,16 @@
 // -----------------------------------------------------------------------------------
 // correct for configuration backwards compatability
 
+// support for old decay mode settings
+#ifdef DECAY_MODE
+  #define AXIS1_DECAY_MODE DECAY_MODE
+  #define AXIS2_DECAY_MODE DECAY_MODE
+#endif
+#ifdef DECAY_MODE_GOTO
+  #define AXIS1_DECAY_MODE_GOTO DECAY_MODE_GOTO
+  #define AXIS2_DECAY_MODE_GOTO DECAY_MODE_GOTO
+#endif
+
 // automatically set minimum move rates for focusers if they aren't defined
 #ifndef AXIS4_MIN_MOVE_RATE
   #define AXIS4_MIN_MOVE_RATE 10
