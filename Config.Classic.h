@@ -177,8 +177,8 @@
 #define AXIS2_MICROSTEPS_GOTO_OFF   // Axis2 (Dec/Alt): Default _OFF, Optional microstep mode used during gotos
 // Note: you can replace this section with the contents of "AdvancedStepperSetup.txt" . . . . . . . . . . . . . . . . . . . 
 
-// Stepper driver Fault detection
-// just wire driver Fault signal to Pins 26 (Axis1) and 31 (Axis2), default=_OFF (Teensy3.x Pins 17,22) other settings are LOW and HIGH (if available applies internal pullup if LOW and pulldown if HIGH.)
+// Stepper driver Fault detection on Pins 26 (Aux1) and 31 (Aux2,) choose only one feature to use on Aux1/2.  The SPI interface (on M0/M1/M2/Aux) returns status/error info. from TMC2130, TMC5160, etc.
+// other settings are LOW, HIGH, TMC_SPI (if available applies internal pullup if LOW and pulldown if HIGH.)  Default=_OFF.
 #define AXIS1_FAULT_OFF
 #define AXIS2_FAULT_OFF
 

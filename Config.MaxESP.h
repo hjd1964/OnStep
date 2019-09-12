@@ -191,7 +191,8 @@
 #define AXIS2_MICROSTEPS_GOTO_OFF   // Axis2 (Dec/Alt): Default _OFF, Optional microstep mode used during gotos
 // Note: you can replace this section with the contents of "AdvancedStepperSetup.txt" . . . . . . . . . . . . . . . . . . . 
 
-// Stepper driver Fault detection.  The SPI interface to the stepper drivers can be used to detect errors on the TMC2130 (use AXISn_FAULT TMC2130)
+// Stepper driver Fault detection on Pin 12 (Aux1 and Aux2,) choose only one feature to use on Aux1/2.  The SPI interface (on M0/M1/M2/Aux) returns status/error info. from TMC2130, TMC5160, etc.
+// settings are TMC_SPI or Default=_OFF.
 #define AXIS1_FAULT_OFF
 #define AXIS2_FAULT_OFF
 
