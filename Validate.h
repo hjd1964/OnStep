@@ -211,6 +211,7 @@
 
   // special decay modes etc. for driver on AXIS1
   #if AXIS1_DRIVER_MODEL == TMC2209
+    #define AXIS1_DISABLE_M2
     #ifdef AXIS1_TMC_MODE
       #if AXIS1_TMC_MODE == STEALTHCHOP
         #define AXIS1_DECAY_MODE LOW // stealthChop
@@ -309,6 +310,7 @@
 
   // special decay modes etc. for driver on AXIS2
   #if AXIS2_DRIVER_MODEL == TMC2209
+    #define AXIS2_DISABLE_M2
     #ifdef AXIS2_TMC_MODE
       #if AXIS2_TMC_MODE == STEALTHCHOP
         #define AXIS2_DECAY_MODE LOW // stealthChop

@@ -259,7 +259,9 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
       if (gotoModeAxis1) { stepAxis1=1; AXIS1_MODE_NEXT=AXIS1_MODE; gotoModeAxis1=false; } else { stepAxis1=AXIS1_STEP_GOTO; AXIS1_MODE_NEXT=AXIS1_MODE_GOTO; gotoModeAxis1=true; }
       digitalWrite(Axis1_M0,(AXIS1_MODE_NEXT & 1));
       digitalWrite(Axis1_M1,(AXIS1_MODE_NEXT>>1 & 1));
-      digitalWrite(Axis1_M2,(AXIS1_MODE_NEXT>>2 & 1));
+      #ifndef AXIS1_DISABLE_M2
+        digitalWrite(Axis1_M2,(AXIS1_MODE_NEXT>>2 & 1));
+      #endif
     }
   }
 #endif
@@ -340,7 +342,9 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
       if (gotoModeAxis2) { stepAxis2=1; AXIS2_MODE_NEXT=AXIS2_MODE; gotoModeAxis2=false; } else { stepAxis2=AXIS2_STEP_GOTO; AXIS2_MODE_NEXT=AXIS2_MODE_GOTO; gotoModeAxis2=true; }
       digitalWrite(Axis2_M0,(AXIS2_MODE_NEXT & 1));
       digitalWrite(Axis2_M1,(AXIS2_MODE_NEXT>>1 & 1));
-      digitalWrite(Axis2_M2,(AXIS2_MODE_NEXT>>2 & 1));
+      #ifndef AXIS2_DISABLE_M2
+        digitalWrite(Axis2_M2,(AXIS2_MODE_NEXT>>2 & 1));
+      #endif
     }
   }
 #endif
