@@ -21,8 +21,8 @@
 #define RAPS128 5
 #define TMC2100 6
 #define TMC2208 7
-#define ST820   8
-#define TMC2209 9
+#define TMC2209 8
+#define ST820   9
 
 #define TMC_SPI 50
 #define TMC2130 100

@@ -209,8 +209,27 @@
 #if defined(AXIS1_DRIVER_MODEL)
   // attempting to use the simplified stepper driver setup
 
-  // special SPI decay modes etc. for TMC SPI driver on AXIS1
-  #if AXIS1_DRIVER_MODEL == TMC2130
+  // special decay modes etc. for driver on AXIS1
+  #if AXIS1_DRIVER_MODEL == TMC2209
+    #ifdef AXIS1_TMC_MODE
+      #if AXIS1_TMC_MODE == STEALTHCHOP
+        #define AXIS1_DECAY_MODE LOW
+      #endif
+      #if AXIS1_TMC_MODE == SPREADCYCLE
+        #define AXIS1_DECAY_MODE HIGH
+      #endif
+    #else
+      #define AXIS1_DECAY_MODE HIGH // spreadCycle mode default
+    #endif
+    #ifdef AXIS1_TMC_MODE_GOTO
+      #if AXIS1_TMC_MODE_GOTO == STEALTHCHOP
+        #define AXIS1_DECAY_MODE_GOTO LOW
+      #endif
+      #if AXIS1_TMC_MODE_GOTO == SPREADCYCLE
+        #define AXIS1_DECAY_MODE_GOTO HIGH
+      #endif
+    #endif
+  #elif AXIS1_DRIVER_MODEL == TMC2130
     #undef AXIS1_DRIVER_MODEL
     #define AXIS1_DRIVER_MODEL TMC_SPI
   #elif AXIS1_DRIVER_MODEL == TMC5160
@@ -286,8 +305,27 @@
     #error "AXIS1_DRIVER_MODEL; Unknown stepper driver specified, check your configuration file."
   #endif
 
-  // special SPI decay modes etc. for TMC SPI driver AXIS2
-  #if AXIS2_DRIVER_MODEL == TMC2130
+  // special decay modes etc. for driver on AXIS2
+  #if AXIS2_DRIVER_MODEL == TMC2209
+    #ifdef AXIS2_TMC_MODE
+      #if AXIS2_TMC_MODE == STEALTHCHOP
+        #define AXIS2_DECAY_MODE LOW
+      #endif
+      #if AXIS2_TMC_MODE == SPREADCYCLE
+        #define AXIS2_DECAY_MODE HIGH
+      #endif
+    #else
+      #define AXIS2_DECAY_MODE HIGH // spreadCycle mode default
+    #endif
+    #ifdef AXIS2_TMC_MODE_GOTO
+      #if AXIS2_TMC_MODE_GOTO == STEALTHCHOP
+        #define AXIS2_DECAY_MODE_GOTO LOW
+      #endif
+      #if AXIS2_TMC_MODE_GOTO == SPREADCYCLE
+        #define AXIS2_DECAY_MODE_GOTO HIGH
+      #endif
+    #endif
+  #elif AXIS2_DRIVER_MODEL == TMC2130
     #undef AXIS2_DRIVER_MODEL
     #define AXIS2_DRIVER_MODEL TMC_SPI
   #elif AXIS2_DRIVER_MODEL == TMC5160
