@@ -48,6 +48,7 @@ char* getVPins5to8() { static char s[20]; sprintf(s,"%d,%d,%d,%d",vpin_array[4],
 #define Axis1_M1      14    // Pin 14 (Microstep Mode 1  or SPI SCK)
 #define Axis1_M0      13    // Pin 13 (Microstep Mode 0  or SPI MOSI)
 #define Axis1_EN      4     // Pin  4 (Enable)
+#define Axis1_Mode Axis1_M2 //        (Decay mode switch)
 
 #define Axis2_HOME    Aux4  // Pin 39 (Home sw)
 #define Axis2DirPin   26    // Pin 26 (Dir)
@@ -57,6 +58,7 @@ char* getVPins5to8() { static char s[20]; sprintf(s,"%d,%d,%d,%d",vpin_array[4],
 #define Axis2_M1      14    // Pin 14 (Microstep Mode 1  or SPI SCK)
 #define Axis2_M0      13    // Pin 13 (Microstep Mode 0  or SPI MOSI)
 #define Axis2_EN      4     // Pin  4 (Enable)
+#define Axis2_Mode Axis2_M2 //        (Decay mode switch)
 
 // For rotator stepper driver
 #define Axis3DirPin   15    // Pin 15 (Dir)

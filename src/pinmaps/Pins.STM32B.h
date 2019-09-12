@@ -127,6 +127,7 @@
 #define Axis1DirPin     A1DR   // Motor Direction
 #define Axis1_Aux       Aux1   // Aux1 - ESP8266 GPIO0 or SPI MISO or Fault
 #define Axis1_FAULT     Aux1   // Aux1 - ESP8266 GPIO0 or SPI MISO or Fault
+#define Axis1_Mode Axis1_M2 //        (Decay mode switch)
 
 #define Axis2_EN        A2EN   // Enable
 #define Axis2_M0        A2M0   // Microstep Mode 0
@@ -136,6 +137,7 @@
 #define Axis2DirPin     A2DR   // Motor Direction
 #define Axis2_Aux       Aux2   // Aux2 - ESP8266 RST or SPI MISO or Fault
 #define Axis2_FAULT     Aux2   // Aux2 - ESP8266 RST or SPI MISO or Fault
+#define Axis2_Mode Axis2_M2 //        (Decay mode switch)
 
 // ST4 interface
 #define ST4DEn          S4N    // ST4 DE+ North

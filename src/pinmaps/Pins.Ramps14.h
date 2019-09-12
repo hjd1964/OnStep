@@ -65,6 +65,7 @@
 #define Axis1_M1      25    // Pin 25 (Microstep Mode 1 or SPI SCK)
 #define Axis1_M0      23    // Pin 23 (Microstep Mode 0 or SPI MOSI)
 #define Axis1_EN      38    // Pin 38 (Enable)
+#define Axis1_Mode Axis1_M2 //        (Decay mode switch)
 
 // Pins to Axis2 Dec/Alt on RAMPS Y
 #define Axis2DirPin   61    // Pin A7 (Dir)
@@ -80,6 +81,7 @@
 #define Axis2_M1      33    // Pin 33 (Microstep Mode 1 or SPI SCK)
 #define Axis2_M0      31    // Pin 31 (Microstep Mode 0 or SPI MOSI)
 #define Axis2_EN      56    // Pin A2 (Enable)
+#define Axis2_Mode Axis2_M2 //        (Decay mode switch)
 
 // For rotator stepper driver on RAMPS Z
 #define Axis3DirPin   48    // Pin 48 (Dir)

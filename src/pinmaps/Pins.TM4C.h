@@ -52,12 +52,14 @@
 #define Axis2StepBit  GPIO_PIN_2       // Pin 25
 #define Axis2StepPORT GPIO_PORTD_BASE  //
 #define Axis2GndPin   26               // Pin D3 (GND)
+#define Axis1_Mode Axis1_M2            //        (Decay mode switch)
 
 #define Axis2_M0      13               // Pin A4 (Microstep Mode 0)
 #define Axis2_M1      14               // Pin B6 (Microstep Mode 1) IF USED MAKE SURE YOU DESOLDER A BRIDGE or change pins around, otherwise pin 14 is connected to pin 23
 #define Axis2_M2      15               // Pin B7 (Microstep Mode 2) IF USED MAKE SURE YOU DESOLDER A BRIDGE or change pins around, otherwise pin 15 is connected to pin 24
 #define Axis2_EN      18               // Pin E0 (Enable)
 #define Axis2_FAULT   17               // Pin F0 (Fault) NOTE, this is connected to pushbutton switch 2
+#define Axis2_Mode Axis2_M2            //        (Decay mode switch)
 
 // Pins to rotator stepper driver
 #define Axis3DirPin   38               // Pin 38 (Dir)
@@ -146,4 +148,3 @@
 #error "Wrong processor for this configuration!"
 
 #endif
-

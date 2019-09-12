@@ -38,6 +38,7 @@
 #define Axis1DirPin     PE2    // Motor Direction
 #define Axis1_Aux       Aux1   // Aux1 - ESP8266 GPIO0 or SPI MISO or Tone or Fault
 #define Axis1_FAULT     Aux1   // Aux1 - ESP8266 GPIO0 or SPI MISO or Tone or Fault
+#define Axis1_Mode Axis1_M2 //        (Decay mode switch)
 
 #define Axis2_EN        PB5    // Enable
 #define Axis2_M0        PB4    // Microstep Mode 0
@@ -47,6 +48,7 @@
 #define Axis2DirPin     PD5    // Motor Direction
 #define Axis2_Aux       Aux2   // Aux2 - ESP8266 RST or SPI MISO or PPS or Fault
 #define Axis2_FAULT     Aux2   // Aux2 - ESP8266 RST or SPI MISO or PPS or Fault
+#define Axis2_Mode Axis2_M2 //        (Decay mode switch)
 
 // This is the built in LED for the Black Pill board. There is a pin
 // available from it too, in case you want to power another LED with a wire

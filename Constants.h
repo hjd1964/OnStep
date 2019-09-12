@@ -22,6 +22,7 @@
 #define TMC2100 6
 #define TMC2208 7
 #define ST820   8
+#define TMC2209 9
 
 #define TMC_SPI 50
 #define TMC2130 100
@@ -41,6 +42,7 @@
 #define TMC2100_PULSE_WIDTH 103
 #define TMC2130_PULSE_WIDTH 103
 #define TMC2208_PULSE_WIDTH 103
+#define TMC2209_PULSE_WIDTH 103
 #define ST820_PULSE_WIDTH   20
 
 // Stepper driver wave forms
@@ -59,6 +61,7 @@
 #define LEN_ST820   8
 #define LEN_TMC2100 4
 #define LEN_TMC2208 4
+#define LEN_TMC2209 4
 #define LEN_TMC_SPI 9
    
 // The various microsteps for different driver models, with the bit modes for each
@@ -66,8 +69,9 @@ unsigned int StepsA4988  [LEN_A4988]  [2] = { {1,0}, {2,1}, {4,2}, {8,3}, {16,7}
 unsigned int StepsDRV8825[LEN_DRV8825][2] = { {1,0}, {2,1}, {4,2}, {8,3}, {16,4}, {32,5} };
 unsigned int StepsS109   [LEN_S109]   [2] = { {1,4}, {2,2}, {4,6}, {8,5}, {16,3}, {32,7} };
 unsigned int StepsLV8729 [LEN_LV8729] [2] = { {1,0}, {2,1}, {4,2}, {8,3}, {16,4}, {32,5}, {64,6},  {128,7} };
-unsigned int StepsST820  [LEN_ST820]  [2] = { {1,0}, {2,1}, {4,2}, {8,3}, {16,4}, {32,5}, {128,6}, {256,7} };
+unsigned int StepsST820  [LEN_ST820]  [2] = { {1,0}, {2,1}, {4,2}, {8,3}, {16,4}, {32,5},          {128,6}, {256,7} };
 unsigned int StepsTMC2208[LEN_TMC2208][2] = {        {2,1}, {4,2}, {8,0}, {16,3} };
+unsigned int StepsTMC2209[LEN_TMC2209][2] = {                      {8,0}, {16,3}, {32,1}, {64,2} };
 unsigned int StepsTMC2100[LEN_TMC2100][2] = { {1,0}, {2,1}, {4,2}, {16,3} };
 unsigned int StepsTMC_SPI[LEN_TMC_SPI][2] = { {1,8}, {2,7}, {4,6}, {8,5}, {16,4}, {32,3}, {64,2}, {128,1}, {256,0} };
 
