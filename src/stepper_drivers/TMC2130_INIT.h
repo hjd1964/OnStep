@@ -47,14 +47,6 @@
   #define AXIS1_TMC_VREF
 #endif
 
-#if !defined(AXIS1_TMC_VREF) && (defined(AXIS1_TMC_IRUN) && !defined(AXIS1_TMC_IGOTO) && !defined(AXIS1_TMC_IHOLD))
-  #warning "Configuration: AXIS1 TMC2130, use Vref=2.5V and be sure AXIS1_TMC_IRUN matches your stepper motor's current rating"
-#elif !defined(AXIS1_TMC_VREF) && (defined(AXIS1_TMC_IRUN) || defined(AXIS1_TMC_IGOTO) || defined(AXIS1_TMC_IHOLD))
-  #warning "Configuration: AXIS1 TMC2130, use Vref=2.5V and be sure AXIS1_TMC_IRUN, AXIS1_TMC_IGOTO, and AXIS1_TMC_IHOLD are all set properly for your stepper motor."
-#else
-  #warning "Configuration: AXIS1 TMC2130, set Vref to match your stepper motor's current rating."
-#endif
-
 #if AXIS2_DRIVER_MODEL == TMC2130
   #undef AXIS2_DRIVER_MODEL
   #define AXIS2_DRIVER_MODEL TMC_SPI
@@ -102,10 +94,20 @@
   #define AXIS2_TMC_VREF
 #endif
 
-#if !defined(AXIS2_TMC_VREF) && (defined(AXIS2_TMC_IRUN) && !defined(AXIS2_TMC_IGOTO) && !defined(AXIS2_TMC_IHOLD))
-  #warning "Configuration: AXIS2 TMC2130, use Vref=2.5V and be sure AXIS2_TMC_IRUN matches your stepper motor's current rating."
-#elif !defined(AXIS2_TMC_VREF) && (defined(AXIS2_TMC_IRUN) || defined(AXIS2_TMC_IGOTO) || defined(AXIS2_TMC_IHOLD))
-  #warning "Configuration: AXIS2 TMC2130, use Vref=2.5V and be sure AXIS2_TMC_IRUN, AXIS2_TMC_IGOTO, and AXIS2_TMC_IHOLD are all set properly for your stepper motor."
-#else
-  #warning "Configuration: AXIS2 TMC2130, set Vref to match your stepper motor's current rating."
+#if AXIS2_DRIVER_MODEL == TMC_SPI
+  #if !defined(AXIS1_TMC_VREF) && (defined(AXIS1_TMC_IRUN) && !defined(AXIS1_TMC_IGOTO) && !defined(AXIS1_TMC_IHOLD))
+    #warning "Configuration: AXIS1 TMC2130, use Vref=2.5V and be sure AXIS1_TMC_IRUN matches your stepper motor's current rating"
+  #elif !defined(AXIS1_TMC_VREF) && (defined(AXIS1_TMC_IRUN) || defined(AXIS1_TMC_IGOTO) || defined(AXIS1_TMC_IHOLD))
+    #warning "Configuration: AXIS1 TMC2130, use Vref=2.5V and be sure AXIS1_TMC_IRUN, AXIS1_TMC_IGOTO, and AXIS1_TMC_IHOLD are all set properly for your stepper motor."
+  #else
+    #warning "Configuration: AXIS1 TMC2130, set Vref to match your stepper motor's current rating."
+  #endif
+  
+  #if !defined(AXIS2_TMC_VREF) && (defined(AXIS2_TMC_IRUN) && !defined(AXIS2_TMC_IGOTO) && !defined(AXIS2_TMC_IHOLD))
+    #warning "Configuration: AXIS2 TMC2130, use Vref=2.5V and be sure AXIS2_TMC_IRUN matches your stepper motor's current rating."
+  #elif !defined(AXIS2_TMC_VREF) && (defined(AXIS2_TMC_IRUN) || defined(AXIS2_TMC_IGOTO) || defined(AXIS2_TMC_IHOLD))
+    #warning "Configuration: AXIS2 TMC2130, use Vref=2.5V and be sure AXIS2_TMC_IRUN, AXIS2_TMC_IGOTO, and AXIS2_TMC_IHOLD are all set properly for your stepper motor."
+  #else
+    #warning "Configuration: AXIS2 TMC2130, set Vref to match your stepper motor's current rating."
+  #endif
 #endif

@@ -9,12 +9,8 @@
   #define AXIS1_DRIVER_MODEL TMC2209
   #define AXIS1_TMC_MODE STEALTHCHOP
   #define AXIS1_TMC_MODE_GOTO STEALTHCHOP
-#elif AXIS1_DRIVER_MODEL == TMC5160_LOWPWR
-  #error "Configuration: _LOWPWR option isn't supported for TMC2209 stepper drivers."
-#elif AXIS1_DRIVER_MODEL == TMC5160_QUIET_LOWPWR
-  #error "Configuration: _LOWPWR option isn't supported for TMC2209 stepper drivers."
-#elif AXIS1_DRIVER_MODEL == TMC5160_VQUIET_LOWPWR
-  #error "Configuration: _LOWPWR option isn't supported for TMC2209 stepper drivers."
+#elif (AXIS1_DRIVER_MODEL == TMC2209_LOWPWR) || (AXIS1_DRIVER_MODEL == TMC2209_QUIET_LOWPWR) || (AXIS1_DRIVER_MODEL == TMC2209_VQUIET_LOWPWR)
+  #error "Configuration: AXIS1 _LOWPWR option isn't supported for TMC2209 stepper drivers."
 #endif
 
 #if AXIS2_DRIVER_MODEL == TMC2209_QUIET
@@ -26,12 +22,8 @@
   #define AXIS2_DRIVER_MODEL TMC2209
   #define AXIS2_TMC_MODE STEALTHCHOP
   #define AXIS2_TMC_MODE_GOTO STEALTHCHOP
-#elif AXIS2_DRIVER_MODEL == TMC5160_LOWPWR
-  #error "Configuration: _LOWPWR option isn't supported for TMC2209 stepper drivers."
-#elif AXIS2_DRIVER_MODEL == TMC5160_QUIET_LOWPWR
-  #error "Configuration: _LOWPWR option isn't supported for TMC2209 stepper drivers."
-#elif AXIS2_DRIVER_MODEL == TMC5160_VQUIET_LOWPWR
-  #error "Configuration: _LOWPWR option isn't supported for TMC2209 stepper drivers."
+#elif (AXIS2_DRIVER_MODEL == TMC2209_LOWPWR) || (AXIS2_DRIVER_MODEL == TMC2209_QUIET_LOWPWR) || (AXIS2_DRIVER_MODEL == TMC2209_VQUIET_LOWPWR)
+  #error "Configuration: AXIS2 _LOWPWR option isn't supported for TMC2209 stepper drivers."
 #endif
 
 #if AXIS1_DRIVER_MODEL == TMC2209
