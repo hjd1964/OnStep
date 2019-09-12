@@ -9,7 +9,7 @@
  *
 */
 
-#define MaxPCB_ON   //  <- Turn _ON to use this configuration
+#define MaxPCB_OFF   //  <- Turn _ON to use this configuration
 
 #ifdef MaxPCB_ON
 // -------------------------------------------------------------------------------------------------------------------------
