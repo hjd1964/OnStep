@@ -14,11 +14,11 @@
   #ifndef AXIS1_TMC_INTPOL
     #define AXIS1_TMC_INTPOL true
   #endif
-  #ifndef AXIS1_TMC_IHOLD
-    #define AXIS1_TMC_IHOLD 1250
-  #endif
   #ifndef AXIS1_TMC_IRUN
     #define AXIS1_TMC_IRUN 2500
+  #endif
+  #ifndef AXIS1_TMC_IHOLD
+    #define AXIS1_TMC_IHOLD (AXIS1_TMC_IRUN/2)
   #endif
   #ifndef AXIS1_TMC_IGOTO
     #define AXIS1_TMC_IGOTO AXIS1_TMC_IRUN
@@ -38,11 +38,11 @@
   #ifndef AXIS2_TMC_INTPOL
     #define AXIS2_TMC_INTPOL true
   #endif
-  #ifndef AXIS2_TMC_IHOLD
-    #define AXIS2_TMC_IHOLD 1250
-  #endif
   #ifndef AXIS2_TMC_IRUN
     #define AXIS2_TMC_IRUN 2500
+  #endif
+  #ifndef AXIS2_TMC_IHOLD
+    #define AXIS2_TMC_IHOLD (AXIS2_TMC_IRUN/2)
   #endif
   #ifndef AXIS2_TMC_IGOTO
     #define AXIS2_TMC_IGOTO AXIS2_TMC_IRUN

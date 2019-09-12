@@ -168,8 +168,9 @@
 
 // Basic stepper driver mode setup . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 // If used, this requires connections M0, M1, and M2 on three pins for Axis1 (RA/Azm) and three pins Axis2 (Dec/Alt.)
-// Stepper driver models are as follows: (for example AXIS1_DRIVER_MODEL DRV8825,) A4988, LV8729, RAPS128, S109, ST820, TMC2208, TMC2130 (spreadCycle,) 
-// TMC2130_QUIET (stealthChop tracking,) TMC2130_VQUIET (stealthChop tracking & slew,) add _LOWPWR for 50% power during tracking (for example: TMC2130_QUIET_LOWPWR)
+// Stepper driver models are as follows: (for example AXIS1_DRIVER_MODEL DRV8825,) A4988, LV8729, RAPS128, S109, ST820, TMC2100, TMC2208, TMC2209*, TMC2130* **, TMC5160* **
+// * = add _QUIET (stealthChop tracking,) _VQUIET (stealthChop tracking & slew,) _LOWPWR for reduced power during tracking (for example: TMC2130_QUIET_LOWPWR)
+// ** = for TMC5160 (and optionally TMC2130) program the stepper driver current with #define AXISn_TMC_IRUN current_in_milli-amps (for additional settings see AdvancedDriverSetup.txt)
 #define AXIS1_DRIVER_MODEL_OFF      // Axis1 (RA/Azm):  Default _OFF, Stepper driver model (see above)
 #define AXIS1_MICROSTEPS_OFF        // Axis1 (RA/Azm):  Default _OFF, Microstep mode when the scope is doing sidereal tracking (for example: AXIS1_MICROSTEPS 32)
 #define AXIS1_MICROSTEPS_GOTO_OFF   // Axis1 (RA/Azm):  Default _OFF, Optional microstep mode used during gotos (for example: AXIS1_MICROSTEPS_GOTO 2)
