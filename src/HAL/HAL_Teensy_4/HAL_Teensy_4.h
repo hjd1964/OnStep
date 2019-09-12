@@ -2,7 +2,7 @@
 
 // Lower limit (fastest) step rate in uS for this platform, width of step pulse, and set HAL_FAST_PROCESSOR is needed
 #if defined(__IMXRT1052__) || defined(__IMXRT1062__) 
-  #define HAL_MAXRATE_LOWER_LIMIT 1
+  #define HAL_MAXRATE_LOWER_LIMIT 1.5
   #define HAL_PULSE_WIDTH 0 // effectively disable pulse mode since the pulse width is unknown at this time
   #define HAL_FAST_PROCESSOR
 #endif
