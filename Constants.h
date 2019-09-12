@@ -10,10 +10,21 @@
 #define TELESCOPE_COORDINATES TOPOCENTRIC
 
 // some defines to help with TMC SPI configuration
-#define STEALTHCHOP 32
+#define STEALTHCHOP 1
 #define SPREADCYCLE 0
 
 // Stepper driver models
+
+// these variations don't appear at run-time and are changed to "TMC_SPI"
+#define TMC2130 100
+#define TMC2130_QUIET 101
+#define TMC2130_VQUIET 102
+#define TMC2130_LOWPWR 103
+#define TMC2130_QUIET_LOWPWR 104
+#define TMC2130_VQUIET_LOWPWR 105
+#define TMC5160 150
+
+#define DRIVER_MODEL_FIRST 1
 #define A4988   1
 #define DRV8825 2
 #define S109    3
@@ -23,15 +34,8 @@
 #define TMC2208 7
 #define TMC2209 8
 #define ST820   9
-
-#define TMC_SPI 50
-#define TMC2130 100
-#define TMC2130_QUIET 101  // these variations don't appear at run-time and are changed to "TMC2130"
-#define TMC2130_VQUIET 102
-#define TMC2130_LOWPWR 103
-#define TMC2130_QUIET_LOWPWR 104
-#define TMC2130_VQUIET_LOWPWR 105
-#define TMC5160 150
+#define TMC_SPI 10
+#define DRIVER_MODEL_LAST 10
 
 // Stepper driver minimum pulse width
 #define A4988_PULSE_WIDTH   1000
@@ -63,7 +67,7 @@
 #define LEN_TMC2208 4
 #define LEN_TMC2209 4
 #define LEN_TMC_SPI 9
-   
+
 // The various microsteps for different driver models, with the bit modes for each
 unsigned int StepsA4988  [LEN_A4988]  [2] = { {1,0}, {2,1}, {4,2}, {8,3}, {16,7} };
 unsigned int StepsDRV8825[LEN_DRV8825][2] = { {1,0}, {2,1}, {4,2}, {8,3}, {16,4}, {32,5} };

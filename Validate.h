@@ -182,9 +182,9 @@
 // figure out how many align star are allowed for the configuration
 #if defined(MAX_NUM_ALIGN_STARS)
   #if MAX_NUM_ALIGN_STARS > '9' || MAX_NUM_ALIGN_STARS < '6'
-    #error MAX_NUM_ALIGN_STARS must be 6 to 9
+    #error "MAX_NUM_ALIGN_STARS must be 6 to 9"
   #else
-    #warning MAX_NUM_ALIGN_STARS explicitly defined in Config file. Controller may be slow for a few minutes after last star align.
+    #warning "MAX_NUM_ALIGN_STARS explicitly defined in Config file. Controller may be slow for a few minutes after last star align."
   #endif
 #else
   #if defined(HAL_FAST_PROCESSOR)
@@ -211,478 +211,62 @@
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
 // stepper driver mode setup validation
-
 #if (defined(AXIS1_DRIVER_MODEL) && !defined(AXIS2_DRIVER_MODEL)) || (defined(AXIS2_DRIVER_MODEL) && !defined(AXIS1_DRIVER_MODEL))
-  #error "AXISn_DRIVER_MODEL; If using the simplified driver mode setup you must use it for both AXIS1 and AXIS2."
+  #error "AXISn_DRIVER_MODEL; If using the basic driver mode setup you must use it for both AXIS1 and AXIS2."
 #endif
 
 #if defined(AXIS1_DRIVER_MODEL)
-  // attempting to use the simplified stepper driver setup
+  // attempting to use the basic (simplified) stepper driver mode setup
 
-  // special decay modes etc. for driver on AXIS1
-  #if AXIS1_DRIVER_MODEL == TMC2209
-    #define AXIS1_DISABLE_M2
-    #ifdef AXIS1_TMC_MODE
-      #if AXIS1_TMC_MODE == STEALTHCHOP
-        #define AXIS1_DECAY_MODE LOW // stealthChop
-      #endif
-      #if AXIS1_TMC_MODE == SPREADCYCLE
-        #define AXIS1_DECAY_MODE HIGH // spreadCycle
-      #endif
-    #else
-      #define AXIS1_DECAY_MODE HIGH
-    #endif
-    #ifdef AXIS1_TMC_MODE_GOTO
-      #if AXIS1_TMC_MODE_GOTO == STEALTHCHOP
-        #define AXIS1_DECAY_MODE_GOTO LOW
-      #endif
-      #if AXIS1_TMC_MODE_GOTO == SPREADCYCLE
-        #define AXIS1_DECAY_MODE_GOTO HIGH
-      #endif
-    #else
-      #define AXIS1_DECAY_MODE_GOTO HIGH
-    #endif
-  #elif AXIS1_DRIVER_MODEL == TMC2130
-    #undef AXIS1_DRIVER_MODEL
-    #define AXIS1_DRIVER_MODEL TMC_SPI
-  #elif AXIS1_DRIVER_MODEL == TMC5160
-    #undef AXIS1_DRIVER_MODEL
-    #define AXIS1_DRIVER_MODEL TMC_SPI
-    #ifndef AXIS1_TMC_IHOLD
-      #define AXIS1_TMC_IHOLD 300 // peak current in mA (0.3A)
-    #endif
-    #ifndef AXIS1_TMC_IRUN
-      #define AXIS1_TMC_IRUN 600 // peak current in mA (0.6A)
-    #endif
-    #ifndef AXIS1_TMC_RSENSE
-      #define AXIS1_TMC_RSENSE 0.075
-    #endif
-  #elif AXIS1_DRIVER_MODEL == TMC2130_LOWPWR
-    #undef AXIS1_DRIVER_MODEL
-    #define AXIS1_DRIVER_MODEL TMC_SPI
-    #define AXIS1_TMC_IHOLD 1000 // 40% of Vref setting on trim-pot
-    #define AXIS1_TMC_IRUN 1250  // 50%
-    #define AXIS1_TMC_IGOTO 2500 // 100%
-  #elif AXIS1_DRIVER_MODEL == TMC2130_QUIET
-    #undef AXIS1_DRIVER_MODEL
-    #define AXIS1_DRIVER_MODEL TMC_SPI
-    #define AXIS1_TMC_MODE STEALTHCHOP
-  #elif AXIS1_DRIVER_MODEL == TMC2130_QUIET_LOWPWR
-    #undef AXIS1_DRIVER_MODEL
-    #define AXIS1_DRIVER_MODEL TMC_SPI
-    #define AXIS1_TMC_MODE STEALTHCHOP
-    #define AXIS1_TMC_IHOLD 1000
-    #define AXIS1_TMC_IRUN 1250
-    #define AXIS1_TMC_IGOTO 2500
-  #elif AXIS1_DRIVER_MODEL == TMC2130_VQUIET
-    #undef AXIS1_DRIVER_MODEL
-    #define AXIS1_DRIVER_MODEL TMC_SPI
-    #define AXIS1_TMC_MODE STEALTHCHOP
-    #define AXIS1_TMC_MODE_GOTO STEALTHCHOP
-  #elif AXIS1_DRIVER_MODEL == TMC2130_VQUIET_LOWPWR
-    #undef AXIS1_DRIVER_MODEL
-    #define AXIS1_DRIVER_MODEL TMC_SPI
-    #define AXIS1_TMC_MODE STEALTHCHOP
-    #define AXIS1_TMC_MODE_GOTO STEALTHCHOP
-    #define AXIS1_TMC_IHOLD 1000
-    #define AXIS1_TMC_IRUN 1250
-    #define AXIS1_TMC_IGOTO 2500
-  #endif
-
-  #if AXIS1_DRIVER_MODEL == TMC_SPI
-    #ifndef AXIS1_TMC_MODE
-      #define AXIS1_TMC_MODE SPREADCYCLE
-    #endif
-    #ifndef AXIS1_TMC_MODE_GOTO
-      #define AXIS1_TMC_MODE_GOTO SPREADCYCLE
-    #endif
-    #ifndef AXIS1_TMC_INTPOL
-      #define AXIS1_TMC_INTPOL true
-    #endif
-    #ifndef AXIS1_TMC_IHOLD
-      #define AXIS1_TMC_IHOLD 1250
-    #endif
-    #ifndef AXIS1_TMC_IRUN
-      #define AXIS1_TMC_IRUN 2500
-    #endif
-    #ifndef AXIS1_TMC_IGOTO
-      #define AXIS1_TMC_IGOTO AXIS1_TMC_IRUN
-    #endif
-    #ifndef AXIS1_TMC_RSENSE
-      #define AXIS1_TMC_RSENSE 0.11+0.02
-    #endif
-  #endif
-
-  // basic check to see if a valid stepper driver code exists
-  #if ((AXIS1_DRIVER_MODEL < A4988) || (AXIS1_DRIVER_MODEL > ST820)) && (AXIS1_DRIVER_MODEL != TMC_SPI)
-    #error "AXIS1_DRIVER_MODEL; Unknown stepper driver specified, check your configuration file."
-  #endif
-
-  // special decay modes etc. for driver on AXIS2
-  #if AXIS2_DRIVER_MODEL == TMC2209
-    #define AXIS2_DISABLE_M2
-    #ifdef AXIS2_TMC_MODE
-      #if AXIS2_TMC_MODE == STEALTHCHOP
-        #define AXIS2_DECAY_MODE LOW // stealthChop
-      #endif
-      #if AXIS2_TMC_MODE == SPREADCYCLE
-        #define AXIS2_DECAY_MODE HIGH // spreadCycle
-      #endif
-    #else
-      #define AXIS2_DECAY_MODE HIGH
-    #endif
-    #ifdef AXIS2_TMC_MODE_GOTO
-      #if AXIS2_TMC_MODE_GOTO == STEALTHCHOP
-        #define AXIS2_DECAY_MODE_GOTO LOW
-      #endif
-      #if AXIS2_TMC_MODE_GOTO == SPREADCYCLE
-        #define AXIS2_DECAY_MODE_GOTO HIGH
-      #endif
-    #else
-      #define AXIS2_DECAY_MODE_GOTO HIGH
-    #endif
-  #elif AXIS2_DRIVER_MODEL == TMC2130
-    #undef AXIS2_DRIVER_MODEL
-    #define AXIS2_DRIVER_MODEL TMC_SPI
-  #elif AXIS2_DRIVER_MODEL == TMC5160
-    #undef AXIS2_DRIVER_MODEL
-    #define AXIS2_DRIVER_MODEL TMC_SPI
-    #ifndef AXIS2_TMC_IHOLD
-      #define AXIS2_TMC_IHOLD 300
-    #endif
-    #ifndef AXIS2_TMC_IRUN
-      #define AXIS2_TMC_IRUN 600
-    #endif
-    #ifndef AXIS2_TMC_RSENSE
-      #define AXIS2_TMC_RSENSE 0.075
-    #endif
-  #elif AXIS2_DRIVER_MODEL == TMC2130_LOWPWR
-    #undef AXIS2_DRIVER_MODEL
-    #define AXIS2_DRIVER_MODEL TMC_SPI
-    #define AXIS2_TMC_IHOLD 1000
-    #define AXIS2_TMC_IRUN 1250
-    #define AXIS2_TMC_IGOTO 2500
-  #elif AXIS2_DRIVER_MODEL == TMC2130_QUIET
-    #undef AXIS2_DRIVER_MODEL
-    #define AXIS2_DRIVER_MODEL TMC_SPI
-    #define AXIS2_TMC_MODE STEALTHCHOP
-  #elif AXIS2_DRIVER_MODEL == TMC2130_QUIET_LOWPWR
-    #undef AXIS2_DRIVER_MODEL
-    #define AXIS2_DRIVER_MODEL TMC_SPI
-    #define AXIS2_TMC_MODE STEALTHCHOP
-    #define AXIS2_TMC_IHOLD 1000
-    #define AXIS2_TMC_IRUN 1250
-    #define AXIS2_TMC_IGOTO 2500
-  #elif AXIS2_DRIVER_MODEL == TMC2130_VQUIET
-    #undef AXIS2_DRIVER_MODEL
-    #define AXIS2_DRIVER_MODEL TMC_SPI
-    #define AXIS2_TMC_MODE STEALTHCHOP
-    #define AXIS2_TMC_MODE_GOTO STEALTHCHOP
-  #elif AXIS2_DRIVER_MODEL == TMC2130_VQUIET_LOWPWR
-    #undef AXIS2_DRIVER_MODEL
-    #define AXIS2_DRIVER_MODEL TMC_SPI
-    #define AXIS2_TMC_MODE STEALTHCHOP
-    #define AXIS2_TMC_MODE_GOTO STEALTHCHOP
-    #define AXIS2_TMC_IHOLD 1000
-    #define AXIS2_TMC_IRUN 1250
-    #define AXIS2_TMC_IGOTO 2500
-  #endif
-
-  #if AXIS2_DRIVER_MODEL == TMC_SPI
-    #ifndef AXIS2_TMC_MODE
-      #define AXIS2_TMC_MODE SPREADCYCLE
-    #endif
-    #ifndef AXIS2_TMC_MODE_GOTO
-      #define AXIS2_TMC_MODE_GOTO SPREADCYCLE
-    #endif
-    #ifndef AXIS2_TMC_INTPOL
-      #define AXIS2_TMC_INTPOL true
-    #endif
-    #ifndef AXIS2_TMC_IHOLD
-      #define AXIS2_TMC_IHOLD 1250
-    #endif
-    #ifndef AXIS2_TMC_IRUN
-      #define AXIS2_TMC_IRUN 2500
-    #endif
-    #ifndef AXIS2_TMC_IGOTO
-      #define AXIS2_TMC_IGOTO AXIS2_TMC_IRUN
-    #endif
-    #ifndef AXIS2_TMC_RSENSE
-      #define AXIS2_TMC_RSENSE 0.11+0.02
-    #endif
-  #endif
-    
-  // basic check to see if a valid stepper driver code exists
-  #if ((AXIS2_DRIVER_MODEL < A4988) || (AXIS2_DRIVER_MODEL > ST820)) && (AXIS2_DRIVER_MODEL != TMC_SPI)
-    #error "AXIS2_DRIVER_MODEL; Unknown stepper driver specified, check your configuration file."
-  #endif
-
-  // tracking micro-step mode AXIS1
+  // validate tracking and goto micro-step modes
   #ifndef AXIS1_MICROSTEPS
-    #error "Configuration: AXIS1_MICROSTEPS must be defined in your Config.xxx.h file if using AXIS1_DRIVER_MODEL!"
+    #error "AXIS1_MICROSTEPS must be defined in your Config.xxx.h file if using AXIS1_DRIVER_MODEL!"
   #endif
-
-  #if AXIS1_DRIVER_MODEL == A4988
-    #if AXIS1_MICROSTEPS!=1 && AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16
-      #error "Configuration: AXIS1_MICROSTEPS; A4988 invalid micro-step mode, use: 16,8,4,2,or 1"
-    #endif
-    #if HAL_PULSE_WIDTH < A4988_PULSE_WIDTH
-      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the A4988 stepper driver specifications."
-    #endif
-  #elif AXIS1_DRIVER_MODEL == DRV8825
-    #if AXIS1_MICROSTEPS!=1 && AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16 && AXIS1_MICROSTEPS!=32
-      #error "Configuration: AXIS1_MICROSTEPS; DRV8825 invalid micro-step mode, use: 32,16,8,4,2,or 1"
-    #endif
-    #if HAL_PULSE_WIDTH < DRV8825_PULSE_WIDTH
-      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the DRV8825 stepper driver specifications."
-    #endif
-  #elif AXIS1_DRIVER_MODEL == S109
-    #if AXIS1_MICROSTEPS!=1 && AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16 && AXIS1_MICROSTEPS!=32
-      #error "Configuration: AXIS1_MICROSTEPS; S109 invalid micro-step mode, use: 32,16,8,4,2,or 1"
-    #endif
-    #if HAL_PULSE_WIDTH < S109_PULSE_WIDTH
-      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the S109 stepper driver specifications."
-    #endif
-  #elif AXIS1_DRIVER_MODEL == RAPS128
-    #if AXIS1_MICROSTEPS!=1 && AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16 && AXIS1_MICROSTEPS!=32 && AXIS1_MICROSTEPS!=64 && AXIS1_MICROSTEPS!=128
-      #error "Configuration: AXIS1_MICROSTEPS; RAPS128 invalid micro-step mode, use: 128,64,32,16,8,4,2,or 1"
-    #endif
-    #if HAL_PULSE_WIDTH < RAPS128_PULSE_WIDTH
-      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the RAPS128 stepper driver specifications."
-    #endif
-  #elif AXIS1_DRIVER_MODEL == LV8729
-    #if AXIS1_MICROSTEPS!=1 && AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16 && AXIS1_MICROSTEPS!=32 && AXIS1_MICROSTEPS!=64 && AXIS1_MICROSTEPS!=128
-      #error "Configuration: AXIS1_MICROSTEPS; LV8729 invalid micro-step mode, use: 128,64,32,16,8,4,2,or 1"
-    #endif
-    #if HAL_PULSE_WIDTH < LV8729_PULSE_WIDTH
-      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the LV8729 stepper driver specifications."
-    #endif
-  #elif AXIS1_DRIVER_MODEL == ST820
-    #if AXIS1_MICROSTEPS!=1 && AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16 && AXIS1_MICROSTEPS!=32 && AXIS1_MICROSTEPS!=128 && AXIS1_MICROSTEPS!=256
-      #error "Configuration: AXIS1_MICROSTEPS; ST820 invalid micro-step mode, use: 256,128,32,16,8,4,2,or 1"
-    #endif
-    #if HAL_PULSE_WIDTH < ST820_PULSE_WIDTH
-      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the ST820 stepper driver specifications."
-    #endif
-  #elif AXIS1_DRIVER_MODEL == TMC2100
-    #define MODE_SWITCH_BEFORE_SLEW_ON
-    #define MODE_SWITCH_SLEEP_ON
-    #if AXIS1_MICROSTEPS!=1 && AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=16
-      #error "Configuration: AXIS1_MICROSTEPS; TMC2100 invalid micro-step mode, use: 16,4,2,or 1"
-    #endif
-    #warning "Configuration: AXIS1_MICROSTEPS; This mode is supported in spreadCycle but without 256x interpolation: it's usually best to hard-wire the TMC2100 and use: _OFF here"
-    #if HAL_PULSE_WIDTH < TMC2100_PULSE_WIDTH
-      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the TMC2100 stepper driver specifications."
-    #endif
-  #elif AXIS1_DRIVER_MODEL == TMC_SPI
-    #define MODE_SWITCH_BEFORE_SLEW_SPI
-    #if AXIS1_MICROSTEPS!=1 && AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16 && AXIS1_MICROSTEPS!=32 && AXIS1_MICROSTEPS!=64 && AXIS1_MICROSTEPS!=128 && AXIS1_MICROSTEPS!=256
-      #error "Configuration: AXIS1_MICROSTEPS; TMC SPI stepper driver invalid micro-step mode, use: 256,128,64,32,16,8,4,2,or 1"
-    #endif
-    #if AXIS2_DRIVER_MODEL != TMC_SPI
-      #error "Configuration: TMC SPI stepper drivers must be used in pairs (both Axis1 and Axis2.)"
-    #endif
-    #if HAL_PULSE_WIDTH < TMC_SPI_PULSE_WIDTH
-      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the TMC SPI stepper driver specifications."
-    #endif
-  #elif AXIS1_DRIVER_MODEL == TMC2208
-    #if AXIS1_MICROSTEPS!=2 && AXIS1_MICROSTEPS!=4 && AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16
-      #error "Configuration: AXIS1_MICROSTEPS; TMC2208 invalid micro-step mode, use: 16,8,4,or 2"
-    #endif
-    #if HAL_PULSE_WIDTH < TMC2208_PULSE_WIDTH
-      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the TMC2208 stepper driver specifications."
-    #endif
-  #elif AXIS1_DRIVER_MODEL == TMC2209
-    #if AXIS1_MICROSTEPS!=8 && AXIS1_MICROSTEPS!=16 && AXIS1_MICROSTEPS!=32 && AXIS1_MICROSTEPS!=64
-      #error "Configuration: AXIS1_MICROSTEPS; TMC2208 invalid micro-step mode, use: 64,32,16,or 8"
-    #endif
-    #if HAL_PULSE_WIDTH < TMC2209_PULSE_WIDTH
-      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the TMC2209 stepper driver specifications."
-    #endif
-  #else
-    #error "Configuration: Unrecognized stepper driver model for Axis1 !"
-  #endif
-
-  // tracking micro-step mode AXIS2
   #ifndef AXIS2_MICROSTEPS
     #error "AXIS2_MICROSTEPS must be defined in your Config.xxx.h file if using AXIS2_DRIVER_MODEL!"
   #endif
-  
-  #if AXIS2_DRIVER_MODEL == A4988
-    #if AXIS2_MICROSTEPS!=1 && AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=8 && AXIS2_MICROSTEPS!=16
-      #error "Configuration: AXIS2_MICROSTEPS; A4988 invalid micro-step mode, use: 16,8,4,2,or 1"
-    #endif
-    #if HAL_PULSE_WIDTH < A4988_PULSE_WIDTH
-      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the A4988 stepper driver specifications."
-    #endif
-  #elif AXIS2_DRIVER_MODEL == DRV8825
-    #if AXIS2_MICROSTEPS!=1 && AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=8 && AXIS2_MICROSTEPS!=16 && AXIS2_MICROSTEPS!=32
-      #error "Configuration: AXIS2_MICROSTEPS; DRV8825 invalid micro-step mode, use: 32,16,8,4,2,or 1"
-    #endif
-    #if HAL_PULSE_WIDTH < DRV8825_PULSE_WIDTH
-      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the DRV8825 stepper driver specifications."
-    #endif
-  #elif AXIS2_DRIVER_MODEL == S109
-    #if AXIS2_MICROSTEPS!=1 && AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=8 && AXIS2_MICROSTEPS!=16 && AXIS2_MICROSTEPS!=32
-      #error "Configuration: AXIS2_MICROSTEPS; S109 invalid micro-step mode, use: 32,16,8,4,2,or 1"
-    #endif
-    #if HAL_PULSE_WIDTH < S109_PULSE_WIDTH
-      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the S109 stepper driver specifications."
-    #endif
-  #elif AXIS2_DRIVER_MODEL == RAPS128
-    #if AXIS2_MICROSTEPS!=1 && AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=8 && AXIS2_MICROSTEPS!=16 && AXIS2_MICROSTEPS!=32 && AXIS2_MICROSTEPS!=64 && AXIS2_MICROSTEPS!=128
-      #error "Configuration: AXIS2_MICROSTEPS; RAPS128 invalid micro-step mode, use: 128,64,32,16,8,4,2,or 1"
-    #endif
-    #if HAL_PULSE_WIDTH < RAPS128_PULSE_WIDTH
-      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the RAPS128 stepper driver specifications."
-    #endif
-  #elif AXIS2_DRIVER_MODEL == LV8729
-    #if AXIS2_MICROSTEPS!=1 && AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=8 && AXIS2_MICROSTEPS!=16 && AXIS2_MICROSTEPS!=32 && AXIS2_MICROSTEPS!=64 && AXIS2_MICROSTEPS!=128
-      #error "Configuration: AXIS2_MICROSTEPS; LV8729 invalid micro-step mode, use: 128,64,32,16,8,4,2,or 1"
-    #endif
-    #if HAL_PULSE_WIDTH < LV8729_PULSE_WIDTH
-      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the LV8729 stepper driver specifications."
-    #endif
-  #elif AXIS2_DRIVER_MODEL == ST820
-    #if AXIS2_MICROSTEPS!=1 && AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=8 && AXIS2_MICROSTEPS!=16 && AXIS2_MICROSTEPS!=32 && AXIS2_MICROSTEPS!=128 && AXIS2_MICROSTEPS!=256
-      #error "Configuration: AXIS2_MICROSTEPS; ST820 invalid micro-step mode, use: 256,128,32,16,8,4,2,or 1"
-    #endif
-    #if HAL_PULSE_WIDTH < ST820_PULSE_WIDTH
-      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the ST820 stepper driver specifications."
-    #endif
-  #elif AXIS2_DRIVER_MODEL == TMC2100
-    #if AXIS2_MICROSTEPS!=1 && AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=16
-      #error "Configuration: AXIS2_MICROSTEPS; TMC2100 invalid micro-step mode, use: 16,4,2,or 1"
-    #endif
-    #warning "Configuration: AXIS2_MICROSTEPS; This mode is supported in spreadCycle but without 256x interpolation: it's usually best to hard-wire the TMC2100 and use: _OFF here"
-    #if HAL_PULSE_WIDTH < TMC2100_PULSE_WIDTH
-      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width exceeds the TMC2100 stepper driver specifications."
-    #endif
-  #elif AXIS2_DRIVER_MODEL == TMC_SPI
-    #if AXIS2_MICROSTEPS!=1 && AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=8 && AXIS2_MICROSTEPS!=16 && AXIS2_MICROSTEPS!=32 && AXIS2_MICROSTEPS!=64 && AXIS2_MICROSTEPS!=128 && AXIS2_MICROSTEPS!=256
-      #error "Configuration: AXIS2_MICROSTEPS; TMC SPI stepper driver invalid micro-step mode, use: 256,128,64,32,16,8,4,2,or 1"
-    #endif
-    #if HAL_PULSE_WIDTH < TMC_SPI_PULSE_WIDTH
-      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the TMC SPI stepper driver specifications."
-    #endif
-  #elif AXIS2_DRIVER_MODEL == TMC2208
-    #if AXIS2_MICROSTEPS!=2 && AXIS2_MICROSTEPS!=4 && AXIS2_MICROSTEPS!=8 && AXIS2_MICROSTEPS!=16
-      #error "Configuration: AXIS2_MICROSTEPS; TMC2208 invalid micro-step mode, use: 16,8,4,or 2"
-    #endif
-    #if HAL_PULSE_WIDTH < TMC2208_PULSE_WIDTH
-      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the TMC2208 stepper driver specifications."
-    #endif
-  #elif AXIS2_DRIVER_MODEL == TMC2209
-    #if AXIS2_MICROSTEPS!=8 && AXIS2_MICROSTEPS!=16 && AXIS2_MICROSTEPS!=32 && AXIS2_MICROSTEPS!=64
-      #error "Configuration: AXIS2_MICROSTEPS; TMC2209 invalid micro-step mode, use: 64,32,16,or 8"
-    #endif
-    #if HAL_PULSE_WIDTH < TMC2209_PULSE_WIDTH
-      #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the TMC2209 stepper driver specifications."
-    #endif
-  #else
-    #error "Configuration error: Unrecognized stepper driver model for Axis2 !"
-  #endif
-
-  // goto micro-step mode AXIS1
   #ifdef AXIS1_MICROSTEPS_GOTO
-
-    #if AXIS1_DRIVER_MODEL == A4988
-      #if AXIS1_MICROSTEPS_GOTO!=1 && AXIS1_MICROSTEPS_GOTO!=2 && AXIS1_MICROSTEPS_GOTO!=4 && AXIS1_MICROSTEPS_GOTO!=8 && AXIS1_MICROSTEPS_GOTO!=16
-        #error "Configuration: AXIS1_MICROSTEPS_GOTO; A4988 invalid micro-step mode, use: 16,8,4,2,1,or _OFF"
-      #endif
-    #elif AXIS1_DRIVER_MODEL == DRV8825
-      #if AXIS1_MICROSTEPS_GOTO!=1 && AXIS1_MICROSTEPS_GOTO!=2 && AXIS1_MICROSTEPS_GOTO!=4 && AXIS1_MICROSTEPS_GOTO!=8 && AXIS1_MICROSTEPS_GOTO!=16 && AXIS1_MICROSTEPS_GOTO!=32
-        #error "Configuration: AXIS1_MICROSTEPS_GOTO; DRV8825 invalid micro-step mode, use: 32,16,8,4,2,1,or _OFF"
-      #endif
-    #elif AXIS1_DRIVER_MODEL == S109
-      #if AXIS1_MICROSTEPS_GOTO!=1 && AXIS1_MICROSTEPS_GOTO!=2 && AXIS1_MICROSTEPS_GOTO!=4 && AXIS1_MICROSTEPS_GOTO!=8 && AXIS1_MICROSTEPS_GOTO!=16 && AXIS1_MICROSTEPS_GOTO!=32
-        #error "Configuration: AXIS1_MICROSTEPS_GOTO; S109 invalid micro-step mode, use: 32,16,8,4,2,1,or _OFF"
-      #endif
-    #elif AXIS1_DRIVER_MODEL == LV8729 || AXIS1_DRIVER_MODEL == RAPS128
-      #if AXIS1_MICROSTEPS_GOTO!=1 && AXIS1_MICROSTEPS_GOTO!=2 && AXIS1_MICROSTEPS_GOTO!=4 && AXIS1_MICROSTEPS_GOTO!=8 && AXIS1_MICROSTEPS_GOTO!=16 && AXIS1_MICROSTEPS_GOTO!=32 && AXIS1_MICROSTEPS_GOTO!=64 && AXIS1_MICROSTEPS_GOTO!=128
-        #error "Configuration: AXIS1_MICROSTEPS_GOTO; LV8729/RAPS128 invalid micro-step mode, use: 128,64,32,16,8,4,2,1,or _OFF"
-      #endif
-    #elif AXIS1_DRIVER_MODEL == TMC2100
-      #if AXIS1_MICROSTEPS != AXIS1_MICROSTEPS_GOTO
-        #error "Configuration: AXIS1_MICROSTEPS_GOTO; must be set to the same value as AXIS1_MICROSTEPS,or _OFF"
-      #endif
-    #elif AXIS1_DRIVER_MODEL == TMC_SPI
-      #if AXIS1_MICROSTEPS_GOTO!=1 && AXIS1_MICROSTEPS_GOTO!=2 && AXIS1_MICROSTEPS_GOTO!=4 && AXIS1_MICROSTEPS_GOTO!=8 && AXIS1_MICROSTEPS_GOTO!=16 && AXIS1_MICROSTEPS_GOTO!=32 && AXIS1_MICROSTEPS_GOTO!=64 && AXIS1_MICROSTEPS_GOTO!=128 && AXIS1_MICROSTEPS_GOTO!=256
-        #error "Configuration: AXIS1_MICROSTEPS_GOTO; TMC SPI stepper driver invalid micro-step mode, use: 256,128,64,32,16,8,4,2,or 1"
-      #endif
-      #if AXIS1_MICROSTEPS != AXIS1_MICROSTEPS_GOTO
-        #warning "Configuration: AXIS2_MICROSTEPS_GOTO; is NOT _OFF.  This can effect pointing accuracy and PEC if index sensing isn't used."
-      #endif
-    #elif AXIS1_DRIVER_MODEL == TMC2208
-      #if AXIS1_MICROSTEPS_GOTO!=2 && AXIS1_MICROSTEPS_GOTO!=4 && AXIS1_MICROSTEPS_GOTO!=8 && AXIS1_MICROSTEPS_GOTO!=16
-        #error "Configuration: AXIS1_MICROSTEPS_GOTO; TMC2208 invalid micro-step mode, use: 16,8,4,2,or _OFF"
-      #endif
-    #elif AXIS1_DRIVER_MODEL == TMC2209
-      #if AXIS1_MICROSTEPS_GOTO!=8 && AXIS1_MICROSTEPS_GOTO!=16 && AXIS1_MICROSTEPS_GOTO!=32 && AXIS1_MICROSTEPS_GOTO!=64
-        #error "Configuration: AXIS1_MICROSTEPS_GOTO; TMC2209 invalid micro-step mode, use: 64,32,16,8,or _OFF"
-      #endif
-    #endif
-
     #if (AXIS1_MICROSTEPS <= AXIS1_MICROSTEPS_GOTO) && (!((defined(MODE_SWITCH_BEFORE_SLEW_ON) || defined(MODE_SWITCH_BEFORE_SLEW_SPI)) && (AXIS1_MICROSTEPS == AXIS1_MICROSTEPS_GOTO)))
         #error "Configuration: AXIS1_MICROSTEPS_GOTO should be less than AXIS1_MICROSTEPS or _OFF"
     #endif
-
-    // if we get here we have valid AXIS1_MICROSTEPS and AXIS1_MICROSTEPS_GOTO
     #define AXIS1_STEP_GOTO (AXIS1_MICROSTEPS/AXIS1_MICROSTEPS_GOTO)
-  
   #endif
-
-  // goto micro-step mode AXIS2
   #ifdef AXIS2_MICROSTEPS_GOTO
-  
-    #if AXIS2_DRIVER_MODEL == A4988
-      #if AXIS2_MICROSTEPS_GOTO!=1 && AXIS2_MICROSTEPS_GOTO!=2 && AXIS2_MICROSTEPS_GOTO!=4 && AXIS2_MICROSTEPS_GOTO!=8 && AXIS2_MICROSTEPS_GOTO!=16
-        #error "Configuration: AXIS2_MICROSTEPS_GOTO; A4988 invalid micro-step mode, use: 16,8,4,2,1,or _OFF"
-      #endif
-    #elif AXIS2_DRIVER_MODEL == DRV8825
-      #if AXIS2_MICROSTEPS_GOTO!=1 && AXIS2_MICROSTEPS_GOTO!=2 && AXIS2_MICROSTEPS_GOTO!=4 && AXIS2_MICROSTEPS_GOTO!=8 && AXIS2_MICROSTEPS_GOTO!=16 && AXIS2_MICROSTEPS_GOTO!=32
-        #error "Configuration: AXIS2_MICROSTEPS_GOTO; DRV8825 invalid micro-step mode, use: 32,16,8,4,2,1,or _OFF"
-      #endif
-    #elif AXIS2_DRIVER_MODEL == S109
-      #if AXIS2_MICROSTEPS_GOTO!=1 && AXIS2_MICROSTEPS_GOTO!=2 && AXIS2_MICROSTEPS_GOTO!=4 && AXIS2_MICROSTEPS_GOTO!=8 && AXIS2_MICROSTEPS_GOTO!=16 && AXIS2_MICROSTEPS_GOTO!=32
-        #error "Configuration: AXIS2_MICROSTEPS_GOTO; S109 invalid micro-step mode, use: 32,16,8,4,2,1,or _OFF"
-      #endif
-    #elif AXIS2_DRIVER_MODEL == LV8729 || AXIS2_DRIVER_MODEL == RAPS128
-      #if AXIS2_MICROSTEPS_GOTO!=1 && AXIS2_MICROSTEPS_GOTO!=2 && AXIS2_MICROSTEPS_GOTO!=4 && AXIS2_MICROSTEPS_GOTO!=8 && AXIS2_MICROSTEPS_GOTO!=16 && AXIS2_MICROSTEPS_GOTO!=32 && AXIS2_MICROSTEPS_GOTO!=64 && AXIS2_MICROSTEPS_GOTO!=128
-        #error "Configuration: AXIS2_MICROSTEPS_GOTO; LV8729/RAPS128 invalid micro-step mode, use: 128,64,32,16,8,4,2,1,or _OFF"
-      #endif
-    #elif AXIS2_DRIVER_MODEL == TMC2100
-      #if AXIS2_MICROSTEPS != AXIS2_MICROSTEPS_GOTO
-        #error "Configuration: AXIS2_MICROSTEPS_GOTO; must be set to the same value as AXIS2_MICROSTEPS,or _OFF"
-      #endif
-    #elif AXIS2_DRIVER_MODEL == TMC_SPI
-      #if AXIS2_MICROSTEPS_GOTO!=1 && AXIS2_MICROSTEPS_GOTO!=2 && AXIS2_MICROSTEPS_GOTO!=4 && AXIS2_MICROSTEPS_GOTO!=8 && AXIS2_MICROSTEPS_GOTO!=16 && AXIS2_MICROSTEPS_GOTO!=32 && AXIS2_MICROSTEPS_GOTO!=64 && AXIS2_MICROSTEPS_GOTO!=128 && AXIS2_MICROSTEPS_GOTO!=256
-        #error "Configuration: AXIS2_MICROSTEPS_GOTO; TMC SPI stepper driver invalid micro-step mode, use: 256,128,64,32,16,8,4,2,or 1"
-      #endif
-      #if AXIS2_MICROSTEPS != AXIS2_MICROSTEPS_GOTO
-        #warning "Configuration: AXIS2_MICROSTEPS_GOTO; is NOT _OFF.  This can effect pointing accuracy."
-      #endif
-    #elif AXIS2_DRIVER_MODEL == TMC2208
-      #if AXIS2_MICROSTEPS_GOTO!=2 && AXIS2_MICROSTEPS_GOTO!=4 && AXIS2_MICROSTEPS_GOTO!=8 && AXIS2_MICROSTEPS_GOTO!=16
-        #error "Configuration: AXIS2_MICROSTEPS_GOTO; TMC2208 invalid micro-step mode, use: 16,8,4,2,or _OFF"
-      #endif
-    #elif AXIS2_DRIVER_MODEL == TMC2209
-      #if AXIS2_MICROSTEPS_GOTO!=8 && AXIS2_MICROSTEPS_GOTO!=16 && AXIS2_MICROSTEPS_GOTO!=32 && AXIS2_MICROSTEPS_GOTO!=64
-        #error "Configuration: AXIS2_MICROSTEPS_GOTO; TMC2209 invalid micro-step mode, use: 64,32,16,8,or _OFF"
-      #endif
-    #endif
-
     #if (AXIS2_MICROSTEPS <= AXIS2_MICROSTEPS_GOTO) && (!((defined(MODE_SWITCH_BEFORE_SLEW_ON) || defined(MODE_SWITCH_BEFORE_SLEW_SPI)) && (AXIS2_MICROSTEPS == AXIS2_MICROSTEPS_GOTO)))
         #error "Configuration: AXIS2_MICROSTEPS_GOTO should be less than AXIS2_MICROSTEPS or _OFF"
     #endif
-
-    // if we get here we have valid AXIS2_MICROSTEPS and AXIS2_MICROSTEPS_GOTO
     #define AXIS2_STEP_GOTO (AXIS2_MICROSTEPS/AXIS2_MICROSTEPS_GOTO)
-
   #endif
 
+  // initialize custom stepper driver values
+  #include "src/stepper_drivers/TMC2100_INIT.h"
+  #include "src/stepper_drivers/TMC2130_INIT.h"
+  #include "src/stepper_drivers/TMC2209_INIT.h"
+  #include "src/stepper_drivers/TMC5160_INIT.h"
+  #include "src/stepper_drivers/TMC_SPI_INIT.h"
+
+  // check to see if a valid stepper driver code exists
+  #if (AXIS1_DRIVER_MODEL < DRIVER_MODEL_FIRST) || (AXIS1_DRIVER_MODEL > DRIVER_MODEL_LAST)
+    #error "AXIS1_DRIVER_MODEL; Unknown stepper driver specified, check your configuration file."
+  #endif
+  #if (AXIS2_DRIVER_MODEL < DRIVER_MODEL_FIRST) || (AXIS2_DRIVER_MODEL > DRIVER_MODEL_LAST)
+    #error "AXIS2_DRIVER_MODEL; Unknown stepper driver specified, check your configuration file."
+  #endif
+
+  // validate stepper driver setup
+  #include "src/stepper_drivers/A4988_VALIDATE.h"
+  #include "src/stepper_drivers/DRV8825_VALIDATE.h"
+  #include "src/stepper_drivers/RAPS128_VALIDATE.h"
+  #include "src/stepper_drivers/LV8729_VALIDATE.h"
+  #include "src/stepper_drivers/S109_VALIDATE.h"
+  #include "src/stepper_drivers/ST820_VALIDATE.h"
+  #include "src/stepper_drivers/TMC2100_VALIDATE.h"
+  #include "src/stepper_drivers/TMC2208_VALIDATE.h"
+  #include "src/stepper_drivers/TMC2209_VALIDATE.h"
+  #include "src/stepper_drivers/TMC_SPI_VALIDATE.h"
+
+  // for stepper drivers where AXISn_MICROSTEPS_GOTO must be defined
   #if defined(MODE_SWITCH_BEFORE_SLEW_ON) || defined(MODE_SWITCH_BEFORE_SLEW_SPI)
-    // help for stepper drivers where AXISn_MICROSTEPS_GOTO must be defined
     #if defined(AXIS1_MICROSTEPS) && !defined(AXIS1_MICROSTEPS_GOTO)
       #define AXIS1_MICROSTEPS_GOTO AXIS1_MICROSTEPS
     #endif
@@ -693,6 +277,7 @@
 
 #else
   // attempting to use the advanced stepper driver mode setup
+
   #if defined(MODE_SWITCH_BEFORE_SLEW_ON) || defined(MODE_SWITCH_BEFORE_SLEW_SPI)
     #if !defined(AXIS1_MODE) || !defined(AXIS1_MODE_GOTO)
       #error "Configuration: AXIS1_MODE and AXIS1_MODE_GOTO must be set to a valid value."
@@ -710,16 +295,6 @@
 #endif
 #ifndef AXIS2_STEP_GOTO
   #define AXIS2_STEP_GOTO 1
-#endif
-
-// Limit sense state
-#ifdef LIMIT_SENSE_STATE
-  #if LIMIT_SENSE_STATE != LOW && LIMIT_SENSE_STATE != HIGH
-    #error "LIMIT_SENSE_STATE must be either HIGH or LOW"
-  #endif
-#else
-  // Default to low
-  #define LIMIT_SENSE_STATE LOW
 #endif
 
 // -----------------------------------------------------------------------------------
@@ -754,4 +329,13 @@
   #if defined(RETICULE_LED_PINS) && defined(STATUS_LED_PINS2_ON)
     #error "You can't have the Illuminated Reticule and Status2 LEDs both enabled in this configuration."
   #endif
+#endif
+
+// validate: limit sense state
+#ifdef LIMIT_SENSE_STATE
+  #if LIMIT_SENSE_STATE != LOW && LIMIT_SENSE_STATE != HIGH
+    #error "LIMIT_SENSE_STATE must be either HIGH or LOW"
+  #endif
+#else
+  #define LIMIT_SENSE_STATE LOW // Default to low
 #endif
