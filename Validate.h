@@ -239,11 +239,11 @@
   #endif
 
   // initialize custom stepper driver values
-  #include "src/stepper_drivers/TMC2100_INIT.h"
-  #include "src/stepper_drivers/TMC2130_INIT.h"
-  #include "src/stepper_drivers/TMC2209_INIT.h"
-  #include "src/stepper_drivers/TMC5160_INIT.h"
-  #include "src/stepper_drivers/TMC_SPI_INIT.h"
+  #include "src/stepper_drivers/TMC2100_Init.h"
+  #include "src/stepper_drivers/TMC2130_Init.h"
+  #include "src/stepper_drivers/TMC2209_Init.h"
+  #include "src/stepper_drivers/TMC5160_Init.h"
+  #include "src/stepper_drivers/TMC_SPI_Init.h"
 
   // check to see if a valid stepper driver code exists
   #if (AXIS1_DRIVER_MODEL < DRIVER_MODEL_FIRST) || (AXIS1_DRIVER_MODEL > DRIVER_MODEL_LAST)
@@ -254,16 +254,16 @@
   #endif
 
   // validate stepper driver setup
-  #include "src/stepper_drivers/A4988_VALIDATE.h"
-  #include "src/stepper_drivers/DRV8825_VALIDATE.h"
-  #include "src/stepper_drivers/RAPS128_VALIDATE.h"
-  #include "src/stepper_drivers/LV8729_VALIDATE.h"
-  #include "src/stepper_drivers/S109_VALIDATE.h"
-  #include "src/stepper_drivers/ST820_VALIDATE.h"
-  #include "src/stepper_drivers/TMC2100_VALIDATE.h"
-  #include "src/stepper_drivers/TMC2208_VALIDATE.h"
-  #include "src/stepper_drivers/TMC2209_VALIDATE.h"
-  #include "src/stepper_drivers/TMC_SPI_VALIDATE.h"
+  #include "src/stepper_drivers/A4988_Validate.h"
+  #include "src/stepper_drivers/DRV8825_Validate.h"
+  #include "src/stepper_drivers/RAPS128_Validate.h"
+  #include "src/stepper_drivers/LV8729_Validate.h"
+  #include "src/stepper_drivers/S109_Validate.h"
+  #include "src/stepper_drivers/ST820_Validate.h"
+  #include "src/stepper_drivers/TMC2100_Validate.h"
+  #include "src/stepper_drivers/TMC2208_Validate.h"
+  #include "src/stepper_drivers/TMC2209_Validate.h"
+  #include "src/stepper_drivers/TMC_SPI_Validate.h"
 
   // for stepper drivers where AXISn_MICROSTEPS_GOTO must be defined
   #if defined(MODE_SWITCH_BEFORE_SLEW_ON) || defined(MODE_SWITCH_BEFORE_SLEW_SPI)
