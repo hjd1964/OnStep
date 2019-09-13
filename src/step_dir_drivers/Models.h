@@ -1,4 +1,4 @@
-// Stepper driver models
+// Driver models
 
 // Macros, these variations don't appear at run-time and are changed to "TMC_SPI"
 #define TMC2130 100
