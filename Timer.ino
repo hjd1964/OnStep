@@ -18,13 +18,13 @@
 #endif
   volatile boolean takeStepAxis2 = false;
 
-#if defined(AXIS1_MODE) && defined(AXIS1_MODE_GOTO)
-  volatile long AXIS1_MODE_NEXT=AXIS1_MODE;
+#if defined(AXIS1_MICROSTEP_CODE) && defined(AXIS1_MICROSTEP_CODE_GOTO)
+  volatile long AXIS1_MICROSTEP_CODE_NEXT=AXIS1_MICROSTEP_CODE;
   volatile boolean gotoModeAxis1=false;
 #endif
 
-#if defined(AXIS2_MODE) && defined(AXIS2_MODE_GOTO)
-  volatile long AXIS2_MODE_NEXT=AXIS2_MODE;
+#if defined(AXIS2_MICROSTEP_CODE) && defined(AXIS2_MICROSTEP_CODE_GOTO)
+  volatile long AXIS2_MICROSTEP_CODE_NEXT=AXIS2_MICROSTEP_CODE;
   volatile boolean gotoModeAxis2=false;
 #endif
 
@@ -215,10 +215,10 @@ void timerSupervisor(bool isCentiSecond) {
   // trigger Goto step mode, rapid acceleration (low DegreesForAcceleration) can leave too little time
   // until the home position arrives to actually switch to tracking micro-step mode. the larger step size
   // then causes backlash compensation to activate which in-turn keeps goto micro-step mode from turning off
-  #if defined(AXIS1_MODE) && defined(AXIS1_MODE_GOTO) && !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
+  #if defined(AXIS1_MICROSTEP_CODE) && defined(AXIS1_MICROSTEP_CODE_GOTO) && !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
   gotoRateAxis1=(thisTimerRateAxis1<128*16L);   // activate <128us rate
   #endif
-  #if defined(AXIS2_MODE) && defined(AXIS2_MODE_GOTO) && !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
+  #if defined(AXIS2_MICROSTEP_CODE) && defined(AXIS2_MICROSTEP_CODE_GOTO) && !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
   gotoRateAxis2=(thisTimerRateAxis2<128*16L);   // activate <128us rate
   #endif
 
@@ -250,17 +250,17 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
     takeStepAxis1=false;
 #endif
 
-#if defined(AXIS1_MODE) && defined(AXIS1_MODE_GOTO) && !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
+#if defined(AXIS1_MICROSTEP_CODE) && defined(AXIS1_MICROSTEP_CODE_GOTO) && !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
   // switch micro-step mode
   if (gotoModeAxis1!=gotoRateAxis1) {
     // only when at an allowed position
     if ((gotoModeAxis1) || ((posAxis1+blAxis1)%AXIS1_STEP_GOTO==0)) {
       // switch mode
-      if (gotoModeAxis1) { stepAxis1=1; AXIS1_MODE_NEXT=AXIS1_MODE; gotoModeAxis1=false; } else { stepAxis1=AXIS1_STEP_GOTO; AXIS1_MODE_NEXT=AXIS1_MODE_GOTO; gotoModeAxis1=true; }
-      digitalWrite(Axis1_M0,(AXIS1_MODE_NEXT & 1));
-      digitalWrite(Axis1_M1,(AXIS1_MODE_NEXT>>1 & 1));
+      if (gotoModeAxis1) { stepAxis1=1; AXIS1_MICROSTEP_CODE_NEXT=AXIS1_MICROSTEP_CODE; gotoModeAxis1=false; } else { stepAxis1=AXIS1_STEP_GOTO; AXIS1_MICROSTEP_CODE_NEXT=AXIS1_MICROSTEP_CODE_GOTO; gotoModeAxis1=true; }
+      digitalWrite(Axis1_M0,(AXIS1_MICROSTEP_CODE_NEXT & 1));
+      digitalWrite(Axis1_M1,(AXIS1_MICROSTEP_CODE_NEXT>>1 & 1));
       #ifndef AXIS1_DISABLE_M2
-        digitalWrite(Axis1_M2,(AXIS1_MODE_NEXT>>2 & 1));
+        digitalWrite(Axis1_M2,(AXIS1_MICROSTEP_CODE_NEXT>>2 & 1));
       #endif
     }
   }
@@ -333,17 +333,17 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
     takeStepAxis2=false;
 #endif
 
-#if defined(AXIS2_MODE) && defined(AXIS2_MODE_GOTO) && !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
+#if defined(AXIS2_MICROSTEP_CODE) && defined(AXIS2_MICROSTEP_CODE_GOTO) && !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
   // switch micro-step mode
   if (gotoModeAxis2!=gotoRateAxis2) {
     // only when at an allowed position
     if ((gotoModeAxis2) || ((posAxis2+blAxis2)%AXIS2_STEP_GOTO==0)) {
       // switch mode
-      if (gotoModeAxis2) { stepAxis2=1; AXIS2_MODE_NEXT=AXIS2_MODE; gotoModeAxis2=false; } else { stepAxis2=AXIS2_STEP_GOTO; AXIS2_MODE_NEXT=AXIS2_MODE_GOTO; gotoModeAxis2=true; }
-      digitalWrite(Axis2_M0,(AXIS2_MODE_NEXT & 1));
-      digitalWrite(Axis2_M1,(AXIS2_MODE_NEXT>>1 & 1));
+      if (gotoModeAxis2) { stepAxis2=1; AXIS2_MICROSTEP_CODE_NEXT=AXIS2_MICROSTEP_CODE; gotoModeAxis2=false; } else { stepAxis2=AXIS2_STEP_GOTO; AXIS2_MICROSTEP_CODE_NEXT=AXIS2_MICROSTEP_CODE_GOTO; gotoModeAxis2=true; }
+      digitalWrite(Axis2_M0,(AXIS2_MICROSTEP_CODE_NEXT & 1));
+      digitalWrite(Axis2_M1,(AXIS2_MICROSTEP_CODE_NEXT>>1 & 1));
       #ifndef AXIS2_DISABLE_M2
-        digitalWrite(Axis2_M2,(AXIS2_MODE_NEXT>>2 & 1));
+        digitalWrite(Axis2_M2,(AXIS2_MICROSTEP_CODE_NEXT>>2 & 1));
       #endif
     }
   }

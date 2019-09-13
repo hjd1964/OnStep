@@ -5,17 +5,17 @@
 
 void initStartupValues() {
   
-// Basic stepper driver mode setup
-// if we made through validation and AXIS1_DRIVER_MODEL exists; AXIS2_DRIVER_MODEL, AXIS1_MICROSTEPS, and AXIS2_MICROSTEPS also exist and passed validation in the pre-processor
+  // Basic stepper driver mode setup
+  // if we made through validation and AXIS1_DRIVER_MODEL exists; AXIS2_DRIVER_MODEL, AXIS1_MICROSTEPS, and AXIS2_MICROSTEPS also exist and passed validation in the pre-processor
 #ifdef AXIS1_DRIVER_MODEL
-  // translate microsteps to mode bits
-  AXIS1_MODE = translateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_MICROSTEPS);
-  AXIS2_MODE = translateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_MICROSTEPS);
+  // translate microsteps to microstep bit code
+  AXIS1_MICROSTEP_CODE = translateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_MICROSTEPS);
+  AXIS2_MICROSTEP_CODE = translateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_MICROSTEPS);
   #ifdef AXIS1_MICROSTEPS_GOTO
-    AXIS1_MODE_GOTO = translateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_MICROSTEPS_GOTO);
+    AXIS1_MICROSTEP_CODE_GOTO = translateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_MICROSTEPS_GOTO);
   #endif
   #ifdef AXIS2_MICROSTEPS_GOTO
-    AXIS2_MODE_GOTO = translateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_MICROSTEPS_GOTO);
+    AXIS2_MICROSTEP_CODE_GOTO = translateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_MICROSTEPS_GOTO);
   #endif
 #endif
 

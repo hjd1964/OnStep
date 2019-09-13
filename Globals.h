@@ -91,18 +91,18 @@ volatile double StepsForRateChangeAxis2= (sqrt((double)DegreesForAcceleration*(d
 #ifdef AXIS1_DRIVER_MODEL
 
   // Microsteps for each axis
-  volatile uint8_t _AXIS1_MODE;
-  #define AXIS1_MODE _AXIS1_MODE
-  volatile uint8_t _AXIS2_MODE;
-  #define AXIS2_MODE _AXIS2_MODE
+  volatile uint8_t _axis1_microstep_code;
+  #define AXIS1_MICROSTEP_CODE _axis1_microstep_code
+  volatile uint8_t _axis2_microstep_code;
+  #define AXIS2_MICROSTEP_CODE _axis2_microstep_code
 
   #ifdef AXIS1_MICROSTEPS_GOTO
-    volatile uint8_t _AXIS1_MODE_GOTO;
-    #define AXIS1_MODE_GOTO _AXIS1_MODE_GOTO
+    volatile uint8_t _axis1_microstep_code_goto;
+    #define AXIS1_MICROSTEP_CODE_GOTO _axis1_microstep_code_goto
   #endif
   #ifdef AXIS2_MICROSTEPS_GOTO
-    volatile uint8_t _AXIS2_MODE_GOTO;
-    #define AXIS2_MODE_GOTO _AXIS2_MODE_GOTO
+    volatile uint8_t _axis2_microstep_code_goto;
+    #define AXIS2_MICROSTEP_CODE_GOTO _axis2_microstep_code_goto
   #endif
 
 #endif
@@ -137,7 +137,7 @@ volatile byte dirAxis1   = 1;                            // stepping direction +
 double origTargetRA      = 0.0;                          // holds the RA for gotos before possible conversion to observed place
 double newTargetRA       = 0.0;                          // holds the RA for gotos after conversion to observed place
 fixed_t origTargetAxis1;
-#if defined(AXIS1_MODE) && defined(AXIS1_MODE_GOTO)
+#if defined(AXIS1_MICROSTEP_CODE) && defined(AXIS1_MICROSTEP_CODE_GOTO)
 volatile long stepAxis1=1;
 #else
 #define stepAxis1 1
@@ -150,7 +150,7 @@ volatile byte dirAxis2   = 1;                            // stepping direction +
 double origTargetDec     = 0.0;                          // holds the Dec for gotos before possible conversion to observed place
 double newTargetDec      = 0.0;                          // holds the Dec for gotos after conversion to observed place
 long origTargetAxis2     = 0;
-#if defined(AXIS2_MODE) && defined(AXIS2_MODE_GOTO)
+#if defined(AXIS2_MICROSTEP_CODE) && defined(AXIS2_MICROSTEP_CODE_GOTO)
 volatile long stepAxis2=1;
 #else
 #define stepAxis2 1

@@ -287,6 +287,19 @@
     #endif
   #endif
 
+  #ifdef AXIS1_MODE
+    #define AXIS1_MICROSTEP_CODE AXIS1_MODE
+  #endif
+  #ifdef AXIS2_MODE
+    #define AXIS2_MICROSTEP_CODE AXIS2_MODE
+  #endif
+  #ifdef AXIS1_MODE_GOTO
+    #define AXIS1_MICROSTEP_CODE_GOTO AXIS1_MODE_GOTO
+  #endif
+  #ifdef AXIS2_MODE_GOTO
+    #define AXIS2_MICROSTEP_CODE_GOTO AXIS2_MODE_GOTO
+  #endif
+
 #endif
 
 // if AXISn_STEP_GOTO isn't defined, do so

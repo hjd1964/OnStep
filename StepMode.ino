@@ -17,16 +17,16 @@ void StepperModeTrackingInit() {
 // if the stepper driver mode select pins are wired in, program any requested micro-step mode
 #if !defined(MODE_SWITCH_BEFORE_SLEW_ON) && !defined(MODE_SWITCH_BEFORE_SLEW_SPI)
   // automatic mode switching during slews, initialize micro-step mode
-  #ifdef AXIS1_MODE
-    if ((AXIS1_MODE & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE    & 1)); } else { pinMode(Axis1_M0,INPUT); }
-    if ((AXIS1_MODE & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE>>1 & 1)); } else { pinMode(Axis1_M1,INPUT); }
-    if ((AXIS1_MODE & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE>>2 & 1)); } else { pinMode(Axis1_M2,INPUT); }
+  #ifdef AXIS1_MICROSTEP_CODE
+    if ((AXIS1_MICROSTEP_CODE & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MICROSTEP_CODE    & 1)); } else { pinMode(Axis1_M0,INPUT); }
+    if ((AXIS1_MICROSTEP_CODE & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MICROSTEP_CODE>>1 & 1)); } else { pinMode(Axis1_M1,INPUT); }
+    if ((AXIS1_MICROSTEP_CODE & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MICROSTEP_CODE>>2 & 1)); } else { pinMode(Axis1_M2,INPUT); }
   #endif
   
-  #ifdef AXIS2_MODE
-    if ((AXIS2_MODE & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE    & 1)); } else { pinMode(Axis2_M0,INPUT); }
-    if ((AXIS2_MODE & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE>>1 & 1)); } else { pinMode(Axis2_M1,INPUT); }
-    if ((AXIS2_MODE & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE>>2 & 1)); } else { pinMode(Axis2_M2,INPUT); }
+  #ifdef AXIS2_MICROSTEP_CODE
+    if ((AXIS2_MICROSTEP_CODE & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MICROSTEP_CODE    & 1)); } else { pinMode(Axis2_M0,INPUT); }
+    if ((AXIS2_MICROSTEP_CODE & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MICROSTEP_CODE>>1 & 1)); } else { pinMode(Axis2_M1,INPUT); }
+    if ((AXIS2_MICROSTEP_CODE & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MICROSTEP_CODE>>2 & 1)); } else { pinMode(Axis2_M2,INPUT); }
   #endif
 #endif
 }
@@ -58,27 +58,27 @@ void stepperModeTracking() {
 #endif
 
 #if defined(MODE_SWITCH_BEFORE_SLEW_ON)
-  #ifdef AXIS1_MODE
-    #ifdef AXIS1_MODE_GOTO 
+  #ifdef AXIS1_MICROSTEP_CODE
+    #ifdef AXIS1_MICROSTEP_CODE_GOTO 
     stepAxis1=1;
     #endif
-    if ((AXIS1_MODE & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE    & 1)); } else { pinMode(Axis1_M0,INPUT); }
-    if ((AXIS1_MODE & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE>>1 & 1)); } else { pinMode(Axis1_M1,INPUT); }
-    if ((AXIS1_MODE & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE>>2 & 1)); } else { pinMode(Axis1_M2,INPUT); }
+    if ((AXIS1_MICROSTEP_CODE & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MICROSTEP_CODE    & 1)); } else { pinMode(Axis1_M0,INPUT); }
+    if ((AXIS1_MICROSTEP_CODE & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MICROSTEP_CODE>>1 & 1)); } else { pinMode(Axis1_M1,INPUT); }
+    if ((AXIS1_MICROSTEP_CODE & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MICROSTEP_CODE>>2 & 1)); } else { pinMode(Axis1_M2,INPUT); }
   #endif
-  #ifdef AXIS2_MODE
-    #ifdef AXIS2_MODE_GOTO 
+  #ifdef AXIS2_MICROSTEP_CODE
+    #ifdef AXIS2_MICROSTEP_CODE_GOTO 
     stepAxis2=1;
     #endif
-    if ((AXIS2_MODE & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE    & 1)); } else { pinMode(Axis2_M0,INPUT); }
-    if ((AXIS2_MODE & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE>>1 & 1)); } else { pinMode(Axis2_M1,INPUT); }
-    if ((AXIS2_MODE & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE>>2 & 1)); } else { pinMode(Axis2_M2,INPUT); }
+    if ((AXIS2_MICROSTEP_CODE & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MICROSTEP_CODE    & 1)); } else { pinMode(Axis2_M0,INPUT); }
+    if ((AXIS2_MICROSTEP_CODE & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MICROSTEP_CODE>>1 & 1)); } else { pinMode(Axis2_M1,INPUT); }
+    if ((AXIS2_MICROSTEP_CODE & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MICROSTEP_CODE>>2 & 1)); } else { pinMode(Axis2_M2,INPUT); }
   #endif
 #elif defined(MODE_SWITCH_BEFORE_SLEW_SPI)
   stepAxis1=1;
-  tmcAxis1.setup(AXIS1_TMC_INTPOL,AXIS1_TMC_MODE,AXIS1_MODE&0b001111,AXIS1_TMC_IRUN,AXIS1_TMC_IHOLD,AXIS1_TMC_RSENSE);
+  tmcAxis1.setup(AXIS1_TMC_INTPOL,AXIS1_TMC_MODE,AXIS1_MICROSTEP_CODE&0b001111,AXIS1_TMC_IRUN,AXIS1_TMC_IHOLD,AXIS1_TMC_RSENSE);
   stepAxis2=1;
-  tmcAxis2.setup(AXIS2_TMC_INTPOL,AXIS2_TMC_MODE,AXIS2_MODE&0b001111,AXIS2_TMC_IRUN,AXIS2_TMC_IHOLD,AXIS2_TMC_RSENSE);
+  tmcAxis2.setup(AXIS2_TMC_INTPOL,AXIS2_TMC_MODE,AXIS2_MICROSTEP_CODE&0b001111,AXIS2_TMC_IRUN,AXIS2_TMC_IHOLD,AXIS2_TMC_RSENSE);
 
   // allow stealth chop current regulation to ramp up to the initial motor current before moving
   if (((AXIS1_TMC_MODE==STEALTHCHOP) || (AXIS2_TMC_MODE==STEALTHCHOP)) && (atHome)) delay(20);
@@ -105,23 +105,23 @@ void stepperModeGoto() {
   pinMode(Axis1_Mode,OUTPUT); digitalWrite(Axis1_Mode,HIGH);
   pinMode(Axis2_Mode,OUTPUT); digitalWrite(Axis2_Mode,HIGH);
 #elif defined(MODE_SWITCH_BEFORE_SLEW_ON)
-  #ifdef AXIS1_MODE_GOTO
+  #ifdef AXIS1_MICROSTEP_CODE_GOTO
     stepAxis1=AXIS1_STEP_GOTO;
-    if ((AXIS1_MODE_GOTO & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MODE_GOTO    & 1)); } else { pinMode(Axis1_M0,INPUT); }
-    if ((AXIS1_MODE_GOTO & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MODE_GOTO>>1 & 1)); } else { pinMode(Axis1_M1,INPUT); }
-    if ((AXIS1_MODE_GOTO & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MODE_GOTO>>2 & 1)); } else { pinMode(Axis1_M2,INPUT); }
+    if ((AXIS1_MICROSTEP_CODE_GOTO & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MICROSTEP_CODE_GOTO    & 1)); } else { pinMode(Axis1_M0,INPUT); }
+    if ((AXIS1_MICROSTEP_CODE_GOTO & 0b010000)==0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,(AXIS1_MICROSTEP_CODE_GOTO>>1 & 1)); } else { pinMode(Axis1_M1,INPUT); }
+    if ((AXIS1_MICROSTEP_CODE_GOTO & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MICROSTEP_CODE_GOTO>>2 & 1)); } else { pinMode(Axis1_M2,INPUT); }
   #endif
-  #ifdef AXIS2_MODE_GOTO
+  #ifdef AXIS2_MICROSTEP_CODE_GOTO
     stepAxis2=AXIS2_STEP_GOTO;
-    if ((AXIS2_MODE_GOTO & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MODE_GOTO    & 1)); } else { pinMode(Axis2_M0,INPUT); }
-    if ((AXIS2_MODE_GOTO & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MODE_GOTO>>1 & 1)); } else { pinMode(Axis2_M1,INPUT); }
-    if ((AXIS2_MODE_GOTO & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MODE_GOTO>>2 & 1)); } else { pinMode(Axis2_M2,INPUT); }
+    if ((AXIS2_MICROSTEP_CODE_GOTO & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MICROSTEP_CODE_GOTO    & 1)); } else { pinMode(Axis2_M0,INPUT); }
+    if ((AXIS2_MICROSTEP_CODE_GOTO & 0b010000)==0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,(AXIS2_MICROSTEP_CODE_GOTO>>1 & 1)); } else { pinMode(Axis2_M1,INPUT); }
+    if ((AXIS2_MICROSTEP_CODE_GOTO & 0b100000)==0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,(AXIS2_MICROSTEP_CODE_GOTO>>2 & 1)); } else { pinMode(Axis2_M2,INPUT); }
   #endif
 #elif defined(MODE_SWITCH_BEFORE_SLEW_SPI)
   stepAxis1=AXIS1_STEP_GOTO;
-  tmcAxis1.setup(AXIS1_TMC_INTPOL,AXIS1_TMC_MODE,AXIS1_MODE_GOTO&0b001111,AXIS1_TMC_IGOTO,AXIS1_TMC_IHOLD,AXIS1_TMC_RSENSE);
+  tmcAxis1.setup(AXIS1_TMC_INTPOL,AXIS1_TMC_MODE,AXIS1_MICROSTEP_CODE_GOTO&0b001111,AXIS1_TMC_IGOTO,AXIS1_TMC_IHOLD,AXIS1_TMC_RSENSE);
   stepAxis2=AXIS2_STEP_GOTO;
-  tmcAxis2.setup(AXIS2_TMC_INTPOL,AXIS2_TMC_MODE,AXIS2_MODE_GOTO&0b001111,AXIS2_TMC_IGOTO,AXIS2_TMC_IHOLD,AXIS2_TMC_RSENSE);
+  tmcAxis2.setup(AXIS2_TMC_INTPOL,AXIS2_TMC_MODE,AXIS2_MICROSTEP_CODE_GOTO&0b001111,AXIS2_TMC_IGOTO,AXIS2_TMC_IHOLD,AXIS2_TMC_RSENSE);
 #endif
 
 #ifdef MODE_SWITCH_SLEEP_ON
