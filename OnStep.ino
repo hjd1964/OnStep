@@ -50,6 +50,7 @@
 #include <math.h>
 
 #include "Constants.h"
+#include "src/stepper_drivers/Models.h"
 #include "Config.h"
 #include "src/HAL/HAL.h"
 #include "Validate.h"
