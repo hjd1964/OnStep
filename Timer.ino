@@ -144,7 +144,7 @@ void timerSupervisor(bool isCentiSecond) {
   
           // stop guiding
           if (guideDirAxis1=='b') {
-            if (abs(guideTimerRateAxis1A)<0.001) { guideDirAxis1=0; lastGuideDirAxis1=0; guideTimerRateAxis1=0.0; guideTimerRateAxis1A=0.0; guideDirChangeTimerAxis1=0; if (!guideDirAxis2) stepperModeTracking(); }
+            if (abs(guideTimerRateAxis1A)<0.001) { guideDirAxis1=0; lastGuideDirAxis1=0; guideTimerRateAxis1=0.0; guideTimerRateAxis1A=0.0; guideDirChangeTimerAxis1=0; if (!guideDirAxis2) stepperModeTracking(false); }
           }
         }
       }
@@ -189,7 +189,7 @@ void timerSupervisor(bool isCentiSecond) {
   
           // stop guiding
           if (guideDirAxis2=='b') {
-            if (abs(guideTimerRateAxis2A)<0.001) { guideDirAxis2=0; lastGuideDirAxis2=0; guideTimerRateAxis2=0.0; guideTimerRateAxis2A=0.0; guideDirChangeTimerAxis2=0; if (!guideDirAxis1) stepperModeTracking(); }
+            if (abs(guideTimerRateAxis2A)<0.001) { guideDirAxis2=0; lastGuideDirAxis2=0; guideTimerRateAxis2=0.0; guideTimerRateAxis2A=0.0; guideDirChangeTimerAxis2=0; if (!guideDirAxis1) stepperModeTracking(false); }
           }
         }
       }

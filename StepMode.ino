@@ -9,8 +9,8 @@ void StepperModeTrackingInit() {
 
   // enable stepper drivers
   enableStepperDrivers();
-  // program the mode
-  stepperModeTracking();
+  // program the mode and enable initialization, should it be required
+  stepperModeTracking((AXIS1_TMC_MODE==STEALTHCHOP) || (AXIS2_TMC_MODE==STEALTHCHOP));
   // then disable again
   disableStepperDrivers();
 
@@ -32,7 +32,7 @@ void StepperModeTrackingInit() {
 }
 
 // if stepper drive can switch decay mode, set it here
-void stepperModeTracking() {
+void stepperModeTracking(boolean init_tmc) {
   if (_stepperModeTrack) return;
   _stepperModeTrack=true;
   cli();
@@ -59,7 +59,7 @@ void stepperModeTracking() {
 
 #if defined(MODE_SWITCH_BEFORE_SLEW_ON)
   #ifdef AXIS1_MICROSTEP_CODE
-    #ifdef AXIS1_MICROSTEP_CODE_GOTO 
+    #ifdef AXIS1_MICROSTEP_CODE_GOTO
     stepAxis1=1;
     #endif
     if ((AXIS1_MICROSTEP_CODE & 0b001000)==0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,(AXIS1_MICROSTEP_CODE    & 1)); } else { pinMode(Axis1_M0,INPUT); }
@@ -67,7 +67,7 @@ void stepperModeTracking() {
     if ((AXIS1_MICROSTEP_CODE & 0b100000)==0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,(AXIS1_MICROSTEP_CODE>>2 & 1)); } else { pinMode(Axis1_M2,INPUT); }
   #endif
   #ifdef AXIS2_MICROSTEP_CODE
-    #ifdef AXIS2_MICROSTEP_CODE_GOTO 
+    #ifdef AXIS2_MICROSTEP_CODE_GOTO
     stepAxis2=1;
     #endif
     if ((AXIS2_MICROSTEP_CODE & 0b001000)==0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,(AXIS2_MICROSTEP_CODE    & 1)); } else { pinMode(Axis2_M0,INPUT); }
@@ -76,12 +76,15 @@ void stepperModeTracking() {
   #endif
 #elif defined(MODE_SWITCH_BEFORE_SLEW_SPI)
   stepAxis1=1;
-  tmcAxis1.setup(AXIS1_TMC_INTPOL,AXIS1_TMC_MODE,AXIS1_MICROSTEP_CODE&0b001111,AXIS1_TMC_IRUN,AXIS1_TMC_IHOLD,AXIS1_TMC_RSENSE);
   stepAxis2=1;
-  tmcAxis2.setup(AXIS2_TMC_INTPOL,AXIS2_TMC_MODE,AXIS2_MICROSTEP_CODE&0b001111,AXIS2_TMC_IRUN,AXIS2_TMC_IHOLD,AXIS2_TMC_RSENSE);
-
-  // allow stealth chop current regulation to ramp up to the initial motor current before moving
-  if (((AXIS1_TMC_MODE==STEALTHCHOP) || (AXIS2_TMC_MODE==STEALTHCHOP)) && (atHome)) delay(20);
+  if (!init_tmc) {
+    tmcAxis1.setup(AXIS1_TMC_INTPOL,AXIS1_TMC_MODE,AXIS1_MICROSTEP_CODE&0b001111,AXIS1_TMC_IRUN,AXIS1_TMC_IHOLD,AXIS1_TMC_RSENSE);
+    tmcAxis2.setup(AXIS2_TMC_INTPOL,AXIS2_TMC_MODE,AXIS2_MICROSTEP_CODE&0b001111,AXIS2_TMC_IRUN,AXIS2_TMC_IHOLD,AXIS2_TMC_RSENSE);
+  } else {
+    tmcAxis1.setup(AXIS1_TMC_INTPOL,AXIS1_TMC_MODE,AXIS1_MICROSTEP_CODE&0b001111,AXIS1_TMC_IRUN,AXIS2_TMC_IRUN,AXIS1_TMC_RSENSE);
+    tmcAxis2.setup(AXIS2_TMC_INTPOL,AXIS2_TMC_MODE,AXIS2_MICROSTEP_CODE&0b001111,AXIS2_TMC_IRUN,AXIS2_TMC_IRUN,AXIS2_TMC_RSENSE);
+    delay(150);
+  }
 #endif
 
 #ifdef MODE_SWITCH_SLEEP_ON

@@ -175,7 +175,7 @@ void moveTo() {
   cli(); timerRateAxis2=temp; sei();
 
   // make sure we're using the tracking mode microstep setting near the end of slew
-  if ((distDestAxis1<=getStepsPerSecondAxis1()) && (distDestAxis2<=getStepsPerSecondAxis2()) ) stepperModeTracking();
+  if ((distDestAxis1<=getStepsPerSecondAxis1()) && (distDestAxis2<=getStepsPerSecondAxis2()) ) stepperModeTracking(false);
 
   // the end of slew doesn't get close enough within 4 seconds force the slew to end
   static unsigned long slewStopTime=0;
@@ -194,7 +194,7 @@ void moveTo() {
     abortSlew=0;
 
     // assurance that we're really in tracking mode
-    stepperModeTracking();
+    stepperModeTracking(false);
 
     if ((pierSideControl==PierSideFlipEW2) || (pierSideControl==PierSideFlipWE2)) {
       // just wait stop here until we get notification to continue
