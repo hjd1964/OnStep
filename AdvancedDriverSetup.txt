@@ -2,13 +2,9 @@
 // Use this in your config.xxx.h file in place of the "Basic stepper driver mode setup" section
 //
 // M0, M1, and M2 for Axis1/2 (RA/Azm) and are listed in Config.xxx.h's matching Pins.xxx.h file.
-// values (0bxxx000 to xxx111): for example "#define AXIS1_MODE  4" is the same as "#define AXIS1_MODE 0b000100" which sets M2 to HIGH, M1 to LOW, and M0 to LOW
-//                                                                                                         / | \                  (1)         (0)            (0)
-//                                                                                                       M2  M1 M0
-//
-// values (0b000xxx to 111xxx): for example "#define AXIS1_MODE 28" is the same as "#define AXIS1_MODE 0b011100" which sets M2 to HIGH, M1 to OPEN, and M0 to OPEN
-//                                                                                                      / | \                     (1)          (-)            (-)
-//                                                                                                    M2  M1 M0
+// values (0b000 to 111): for example "#define AXIS1_MODE  4" is the same as "#define AXIS1_MODE 0b100" which sets M2 to HIGH, M1 to LOW, and M0 to LOW
+//                                                                                                / | \                  (1)         (0)            (0)
+//                                                                                              M2  M1 M0
 //
 
 #define AXIS1_MODE_OFF                    // programs the RA/Az uStep mode M0/M1/M2, optional and default _OFF.
