@@ -9,7 +9,7 @@
 class focuser {
   public:
     // init(Axis5StepPin,Axis5DirPin,Axis4_EN,EE_posAxis5,MaxRateAxis5,StepsPerMicrometerAxis5);
-    void init(int stepPin, int dirPin, int enPin, int nvAddress, long maxRate, double stepsPerMicro) {
+    void init(int stepPin, int dirPin, int enPin, int nvAddress, float maxRate, double stepsPerMicro) {
       this->stepPin=stepPin;
       this->dirPin=dirPin;
       this->enPin=enPin;
@@ -34,7 +34,7 @@ class focuser {
       setMin(umin);
       setMax(umax);
 
-      nextPhysicalMove=millis()+(unsigned long)maxRate;
+      nextPhysicalMove=micros()+(unsigned long)(maxRate*1000.0);
       lastPhysicalMove=nextPhysicalMove;
     }
 
@@ -138,7 +138,7 @@ class focuser {
     void follow(boolean slewing) {
 
       // if enabled and the timeout has elapsed, disable the stepper driver
-      if (pda && !currentlyDisabled && ((millis()-lastPhysicalMove)>10000L)) { disableDriver(); currentlyDisabled=true; }
+      if (pda && !currentlyDisabled && ((micros()-lastPhysicalMove)>10000000L)) { disableDriver(); currentlyDisabled=true; }
     
       // write position to non-volatile storage if not moving for FOCUSER_WRITE_DELAY milliseconds
       if ((spos!=lastPos)) { lastMove=millis(); lastPos=spos; }
@@ -147,9 +147,9 @@ class focuser {
         if ((long)(millis()-lastMove)>FOCUSER_WRITE_DELAY) writePos(spos);
       }
 
-      unsigned long tempMs=millis();
-      if ((long)(tempMs-nextPhysicalMove)>0) {
-        nextPhysicalMove=tempMs+(unsigned long)maxRate;
+      unsigned long microsNow=micros();
+      if ((long)(microsNow-nextPhysicalMove)>0) {
+        nextPhysicalMove=microsNow+(unsigned long)(maxRate*1000.0);
     
         if ((spos<(long)target.part.m) && (spos<smax)) {
           if (pda && currentlyDisabled) { enableDriver(); currentlyDisabled=false; delayMicroseconds(5); }
@@ -199,7 +199,7 @@ class focuser {
     int dirPin=-1;
     int enPin=-1;
     int nvAddress=-1;
-    long maxRate=-1;
+    float maxRate=-1;
     long spsMax=-1;
     long umin=-6L*25400L;
     long smin=-1;

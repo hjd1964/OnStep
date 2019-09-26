@@ -7,7 +7,7 @@
 
 class rotator {
   public:
-    void init(int stepPin, int dirPin, int enPin, long maxRate, double stepsPerDeg) {
+    void init(int stepPin, int dirPin, int enPin, float maxRate, double stepsPerDeg) {
       this->stepPin=stepPin;
       this->dirPin=dirPin;
       this->enPin=enPin;
@@ -32,7 +32,7 @@ class rotator {
       setMin(umin);
       setMax(umax);
 
-      nextPhysicalMove=millis()+(unsigned long)maxRate;
+      nextPhysicalMove=micros()+(unsigned long)(maxRate*1000.0);
       lastPhysicalMove=nextPhysicalMove;
     }
 
@@ -196,23 +196,23 @@ class rotator {
 #endif
     
     void follow() {
-      if (pda && !currentlyDisabled && ((millis()-lastPhysicalMove)>10000L)) { currentlyDisabled=true; disableDriver(); }
+      if (pda && !currentlyDisabled && ((micros()-lastPhysicalMove)>10000000L)) { currentlyDisabled=true; disableDriver(); }
       
-      unsigned long tempMs=millis();
-      if ((long)(tempMs-nextPhysicalMove)>0) {
-        nextPhysicalMove=tempMs+(unsigned long)maxRate;
+      unsigned long microsNow=micros();
+      if ((long)(microsNow-nextPhysicalMove)>0) {
+        nextPhysicalMove=microsNow+(unsigned long)(maxRate*1000.0);
       
         if ((spos<(long)target.part.m) && (spos<smax)) {
-          if (pda && currentlyDisabled) { currentlyDisabled=false; enableDriver(); delayMicroseconds(10); }
-          digitalWrite(stepPin,LOW); delayMicroseconds(10);
-          digitalWrite(dirPin,forwardState); delayMicroseconds(10);
+          if (pda && currentlyDisabled) { currentlyDisabled=false; enableDriver(); delayMicroseconds(5); }
+          digitalWrite(stepPin,LOW); delayMicroseconds(5);
+          digitalWrite(dirPin,forwardState); delayMicroseconds(5);
           digitalWrite(stepPin,HIGH); spos++;
           lastPhysicalMove=millis();
         } else
         if ((spos>(long)target.part.m) && (spos>smin)) {
-          if (pda && currentlyDisabled) { currentlyDisabled=false; enableDriver(); delayMicroseconds(10); }
-          digitalWrite(stepPin,LOW); delayMicroseconds(10);
-          digitalWrite(dirPin,reverseState); delayMicroseconds(10);
+          if (pda && currentlyDisabled) { currentlyDisabled=false; enableDriver(); delayMicroseconds(5); }
+          digitalWrite(stepPin,LOW); delayMicroseconds(5);
+          digitalWrite(dirPin,reverseState); delayMicroseconds(5);
           digitalWrite(stepPin,HIGH); spos--;
           lastPhysicalMove=millis();
         }
@@ -267,7 +267,7 @@ class rotator {
     int dirPin=-1;
     int enPin=-1;
     int nvAddress=-1;
-    long maxRate=-1;
+    float maxRate=-1;
     long spsMax=-1;
     long umin=-180;
     long smin=-1;
@@ -278,6 +278,7 @@ class rotator {
     boolean mc=false;
     int reverseState=LOW;
     int forwardState=HIGH;
+    static int lastDirState=-1;
     boolean pda=false;
     int disableState=LOW;
     int enableState=HIGH;
@@ -306,4 +307,3 @@ class rotator {
     unsigned long lastPhysicalMove=0;
     unsigned long nextPhysicalMove=0;
 };
-
