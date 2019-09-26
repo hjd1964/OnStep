@@ -877,25 +877,25 @@ void processCommands() {
 
             switch (parameter[1]) {
               case '1':
-                tmcAxis1.getStatus();
-                strcat(reply,tmcAxis1.statusSTST() ? "ST," : ","); // Standstill
-                strcat(reply,tmcAxis1.statusOLa() ? "OA," : ",");  // Open Load A
-                strcat(reply,tmcAxis1.statusOLb() ? "OB," : ",");  // Open Load B
-                strcat(reply,tmcAxis1.statusS2Ga() ? "GA," : ","); // Short to Ground A
-                strcat(reply,tmcAxis1.statusS2Gb() ? "GB," : ","); // Short to Ground B
-                strcat(reply,tmcAxis1.statusOT() ? "OT," : ",");   // Overtemperature Shutdown 150C
-                strcat(reply,tmcAxis1.statusOTPW() ? "PW" : "");   // Overtemperature Pre-warning 120C
+                tmcAxis1.refresh_DRVSTATUS();
+                strcat(reply,tmcAxis1.get_DRVSTATUS_STST() ? "ST," : ","); // Standstill
+                strcat(reply,tmcAxis1.get_DRVSTATUS_OLa() ? "OA," : ",");  // Open Load A
+                strcat(reply,tmcAxis1.get_DRVSTATUS_OLb() ? "OB," : ",");  // Open Load B
+                strcat(reply,tmcAxis1.get_DRVSTATUS_S2Ga() ? "GA," : ","); // Short to Ground A
+                strcat(reply,tmcAxis1.get_DRVSTATUS_S2Gb() ? "GB," : ","); // Short to Ground B
+                strcat(reply,tmcAxis1.get_DRVSTATUS_OT() ? "OT," : ",");   // Overtemperature Shutdown 150C
+                strcat(reply,tmcAxis1.get_DRVSTATUS_OTPW() ? "PW" : "");   // Overtemperature Pre-warning 120C
                 quietReply=true;
               break;
               case '2':
-                tmcAxis2.getStatus();
-                strcat(reply,tmcAxis2.statusSTST() ? "ST," : ","); // Standstill
-                strcat(reply,tmcAxis2.statusOLa() ? "OA," : ",");  // Open Load A
-                strcat(reply,tmcAxis2.statusOLb() ? "OB," : ",");  // Open Load B
-                strcat(reply,tmcAxis2.statusS2Ga() ? "GA," : ","); // Short to Ground A
-                strcat(reply,tmcAxis2.statusS2Gb() ? "GB," : ","); // Short to Ground B
-                strcat(reply,tmcAxis2.statusOT() ? "OT," : ",");   // Overtemperature Shutdown 150C
-                strcat(reply,tmcAxis2.statusOTPW() ? "PW" : "");   // Overtemperature Pre-warning 120C
+                tmcAxis2.refresh_DRVSTATUS();
+                strcat(reply,tmcAxis2.get_DRVSTATUS_STST() ? "ST," : ","); // Standstill
+                strcat(reply,tmcAxis2.get_DRVSTATUS_OLa() ? "OA," : ",");  // Open Load A
+                strcat(reply,tmcAxis2.get_DRVSTATUS_OLb() ? "OB," : ",");  // Open Load B
+                strcat(reply,tmcAxis2.get_DRVSTATUS_S2Ga() ? "GA," : ","); // Short to Ground A
+                strcat(reply,tmcAxis2.get_DRVSTATUS_S2Gb() ? "GB," : ","); // Short to Ground B
+                strcat(reply,tmcAxis2.get_DRVSTATUS_OT() ? "OT," : ",");   // Overtemperature Shutdown 150C
+                strcat(reply,tmcAxis2.get_DRVSTATUS_OTPW() ? "PW" : "");   // Overtemperature Pre-warning 120C
                 quietReply=true;
               break;
               default:  commandError=true;
