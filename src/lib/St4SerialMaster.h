@@ -80,7 +80,7 @@ class Mst4 : public Stream
         if ((micros()-lastMicros)<10000L) return false;
       #else
         #define XMIT_TIME 40
-        if ((micros()-lastMicros)<2000L) return false;
+        if ((micros()-lastMicros)<3000L) return false;
       #endif
 
       uint8_t s_parity=0;
@@ -202,4 +202,3 @@ void Mst4::flush(void) {
 }
 
 Mst4 SerialST4;
-
