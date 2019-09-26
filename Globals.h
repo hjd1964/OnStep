@@ -35,6 +35,7 @@ long last_loop_micros=0;             // workload monitoring
 long this_loop_time=0;
 long loop_time=0;
 long worst_loop_time=0;
+long average_loop_time=0;
 
 // PPS (GPS) ---------------------------------------------------------------------------------------------------------------
 volatile unsigned long PPSlastMicroS = 1000000UL;

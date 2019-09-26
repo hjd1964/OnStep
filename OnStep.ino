@@ -447,10 +447,11 @@ void loop2() {
   if (!isSlewing()) nv.poll();
  
   // WORKLOAD MONITORING -------------------------------------------------------------------------------
-  long this_loop_micros=micros(); 
+  long this_loop_micros=micros();
   loop_time=this_loop_micros-last_loop_micros;
   if (loop_time>worst_loop_time) worst_loop_time=loop_time;
   last_loop_micros=this_loop_micros;
+  average_loop_time=(average_loop_time*49.0+loop_time)/50.0;
 
   unsigned long tempMs=millis();
 
