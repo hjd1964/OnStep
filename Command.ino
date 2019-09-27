@@ -274,7 +274,7 @@ void processCommands() {
           if ((atHome) && (trackingState==TrackingNone)) {
             // initialize both serial ports
             SerialA.println("The ESP8266 will now be placed in flash upload mode (at 115200 Baud.)");
-            SerialA.println("Waiting for data.");
+            SerialA.println("Waiting for data, you have one minute to start the upload.");
             delay(500);
             SerialA.begin(115200);
 #ifdef ESP32
@@ -288,22 +288,39 @@ void processCommands() {
             digitalWrite(ESP8266RstPin,LOW);  delay(20);  // Reset, if LOW
             digitalWrite(ESP8266RstPin,HIGH); delay(20);  // Reset, inactive HIGH
 
+            unsigned long lastRead=millis()+55000; // so we have a total of 1 minute to start the upload
             while (true) {
               // read from port 1, send to port 0:
               if (SerialB.available()) {
-                int inByte = SerialB.read();
-                delayMicroseconds(10);
-                SerialA.write(inByte);
+                int inByte = SerialB.read(); delayMicroseconds(5);
+                SerialA.write(inByte); delayMicroseconds(5);
               }
-              delayMicroseconds(10);
               // read from port 0, send to port 1:
               if (SerialA.available()) {
-                int inByte = SerialA.read();
-                delayMicroseconds(10);
-                SerialB.write(inByte);
+                int inByte = SerialA.read(); delayMicroseconds(5);
+                SerialB.write(inByte); delayMicroseconds(5);
+                if (millis()>lastRead) lastRead=millis();
               }
               yield();
+              if ((long)(millis()-lastRead)>5000) break; // wait 5 seconds w/no traffic before resuming normal operation
             }
+
+            SerialA.print("Resetting ESP8266, ");
+            delay(500);
+
+            digitalWrite(ESP8266Gpio0Pin,HIGH); delay(20); // Run mode HIGH
+            digitalWrite(ESP8266RstPin,LOW);  delay(20);   // Reset, if LOW
+            digitalWrite(ESP8266RstPin,HIGH); delay(20);   // Reset, inactive HIGH
+
+            SerialA.println("returning to default Baud rates, and resuming OnStep operation...");
+            delay(500);
+
+#ifndef ESP32
+            SerialB.begin(SERIAL_B_BAUD_DEFAULT); delay(500);
+#endif
+            SerialA.begin(9600);
+            delay(500);
+
           } else commandError=true;
         } else commandError=true;
       } else
