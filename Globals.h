@@ -114,7 +114,7 @@ double longitude = 0.0;
 // fix AXIS1_LIMIT_UNDER_POLE for fork mounts
 #if MOUNT_TYPE == FORK
   #undef AXIS1_LIMIT_UNDER_POLE
-  #define AXIS1_LIMIT_UNDER_POLE 12
+  #define AXIS1_LIMIT_UNDER_POLE 180.0
 #endif
 
 // Coordinates -------------------------------------------------------------------------------------------------------------
