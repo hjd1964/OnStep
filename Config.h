@@ -120,8 +120,8 @@
 #define AXIS2_DRIVER_REVERSE          OFF // Default    OFF,    Reverses the direction of movement.  Reversing wiring instead can also correct this.              Optional.
 #define AXIS2_DRIVER_STATUS           OFF // Default    OFF,    Polling for stepper driver status info/fault detection. Options are TMC_SPI, HIGH, or LOW.        Optional.
 
-#define AXIS2_LIMIT_MIN               -91 // Default  -91.0,    Minimum allowed declination in degrees.                                                           Usually not changed.
-#define AXIS2_LIMIT_MAX               +91 // Default   91.0,    Maximum allowed declination in degrees.                                                           Usually not changed.
+#define AXIS2_LIMIT_MIN               -91 // Default    -91,    Minimum allowed declination in degrees.                                                           Usually not changed.
+#define AXIS2_LIMIT_MAX               +91 // Default     91,    Maximum allowed declination in degrees.                                                           Usually not changed.
 
 // AXIS3 ROTATOR -------------------------
 #define ROTATOR                       OFF // Default    OFF,    Use ON to enable the rotator (or de-rotator for ALTAZM mounts.)                                   Optional.
