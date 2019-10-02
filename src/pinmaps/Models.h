@@ -37,6 +37,9 @@
 #if PINMAP == Ramps14
   #include "Pins.Ramps14.h"
 #endif
+#if PINMAP == MksGenL2
+  #include "Pins.Ramps14.h"
+#endif
 #if PINMAP == STM32Blue
   #include "Pins.STM32B.h"
 #endif

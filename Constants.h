@@ -15,6 +15,8 @@
 #define Classic     1
 #define AltMega2560 2
 #define Ramps14     3
+#define MksGenL     3
+#define MksGenL2    4
 #define MiniPCB     10
 #define MiniEMB     11
 #define MiniPCB2    12

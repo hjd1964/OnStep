@@ -12,9 +12,9 @@
 // ADJUST THE FOLLOWING TO CONFIGURE YOUR CONTROLLER FEATURES --------------------------------------------------------------
 
 // PINMAP ------------------------------------------------------------------------------------------------------------------
-// *** See the matching Pins.xxx.h file for your setup (in src/pinmaps/) with detailed information on the pin map to be sure it matches your wiring *** USE AT YOUR OWN RISK *** ***
+// *** See the matching Pins.xxx.h file for your setup (found by looking in src/pinmaps/Models.h) with detailed information to be sure it matches your wiring *** USE AT YOUR OWN RISK *** ***
 
-#define PINMAP                        OFF // Default    OFF,     Choose from: MiniPCB, MiniEMB, MiniPCB2, MaxPCB, MaxPCB2, MaxTMC, STM32Blue,                     <- Required.
+#define PINMAP                        OFF // Default    OFF,     Choose from: MiniPCB, MiniPCB2, MaxPCB, MaxPCB2, STM32Blue,                                      <- Required.
                                           //                                  Ramps14, MaxESP2, MaxESP3, Classic, Mega2560Alt
 
 // SERIAL PORTS ------------------------------------------------------------------------------------------------------------
