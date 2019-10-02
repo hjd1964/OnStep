@@ -242,7 +242,7 @@ GotoErrors goToEqu(double RA, double Dec) {
   Align.horToInstr(a,z,&a,&z,getInstrPierSide());
   z=haRange(z);
 
-  if ((AXIS1_LIMIT_MAXAZM > 180) && (AXIS1_LIMIT_MAXAZM <= 360)) {
+  if ((AXIS1_LIMIT_MAXAZM > 180.0) && (AXIS1_LIMIT_MAXAZM <= 360.0)) {
     // adjust coordinate range to allow going past 180 deg.
     // position a1 is 0..180
     double a1=getInstrAxis1();

@@ -104,8 +104,8 @@
 #define AXIS1_DRIVER_REVERSE          OFF // Default    OFF,    Reverses the direction of movement.  Reversing wiring instead can also correct this.              Optional.
 #define AXIS1_DRIVER_STATUS           OFF // Default    OFF,    Polling for stepper driver status info/fault detection. Options are TMC_SPI, HIGH, or LOW.        Optional.
 
-#define AXIS1_LIMIT_UNDER_POLE        180 // Default    180,    Degrees +/-, maximum allowed Hour Angle.  Allowed range is 150 to 180.                            Adjust as needed, ignored in Alt/Azm mode.
-#define AXIS1_LIMIT_MAXAZM            360 // Default    360,    Degrees +/-, maximum allowed Azimuth.  Allowed range is 180 to 360. Ignored in Eq modes.          Adjust as needed, ignored on Eq mounts.
+#define AXIS1_LIMIT_UNDER_POLE      180.0 // Default  180.0,    Degrees +/-, maximum allowed Hour Angle.  Allowed range is 150 to 180.                            Adjust as needed, ignored in Alt/Azm mode.
+#define AXIS1_LIMIT_MAXAZM          360.0 // Default  360.0,    Degrees +/-, maximum allowed Azimuth.  Allowed range is 180 to 360. Ignored in Eq modes.          Adjust as needed, ignored on Eq mounts.
 
 // AXIS2 DEC/ALT -------------------------
 #define AXIS2_STEPS_PER_DEGREE    12800.0 // Default  12800,    Calculated as: (stepper_steps * micro_steps * gear_reduction1 *  gear_reduction2)/360.0           <- Required, adjust as needed.
@@ -120,8 +120,8 @@
 #define AXIS2_DRIVER_REVERSE          OFF // Default    OFF,    Reverses the direction of movement.  Reversing wiring instead can also correct this.              Optional.
 #define AXIS2_DRIVER_STATUS           OFF // Default    OFF,    Polling for stepper driver status info/fault detection. Options are TMC_SPI, HIGH, or LOW.        Optional.
 
-#define AXIS2_LIMIT_MIN               -91 // Default    -91,    Minimum allowed declination in degrees.                                                           Usually not changed.
-#define AXIS2_LIMIT_MAX               +91 // Default     91,    Maximum allowed declination in degrees.                                                           Usually not changed.
+#define AXIS2_LIMIT_MIN             -91.0 // Default  -91.0,    Minimum allowed declination in degrees.                                                           Usually not changed.
+#define AXIS2_LIMIT_MAX             +91.0 // Default   91.0,    Maximum allowed declination in degrees.                                                           Usually not changed.
 
 // AXIS3 ROTATOR -------------------------
 #define ROTATOR                       OFF // Default    OFF,    Use ON to enable the rotator (or de-rotator for ALTAZM mounts.)                                   Optional.
