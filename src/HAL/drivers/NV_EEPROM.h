@@ -97,7 +97,7 @@ class nvs {
 
     // read count bytes from EEPROM starting at position i
     void readBytes(uint16_t i, byte *v, uint8_t count) {
-      for (int j=0; j<count; j++) { *v = read(i + j); v++; }
+      for (int j=0; j < count; j++) { *v = read(i + j); v++; }
     }
 };
 

@@ -22,9 +22,9 @@ class nvs {
       _eeprom_addr = I2C_EEPROM_ADDRESS;
 
       // mark entire read cache as dirty
-      for (int i=0; i<512; i++) cacheReadState[i]=255;
+      for (int i=0; i < 512; i++) cacheReadState[i]=255;
       // mark entire write cache as clean
-      for (int i=0; i<512; i++) cacheWriteState[i]=0;
+      for (int i=0; i < 512; i++) cacheWriteState[i]=0;
     }
 
     // move data to/from the cache
@@ -34,11 +34,11 @@ class nvs {
       int dirtyW, dirtyR;
 
       // just exit if waiting for an EEPROM write to finish
-      if ((int32_t)(millis()-nextOpMs)<0) return;
+      if ((int32_t)(millis()-nextOpMs) < 0) return;
 
       // check 20 byte chunks of cache for data that needs processing so < about 2s to check the entire cache
-      for (int j=0; j<20; j++) {
-        i++; if (i>4095) i=0;
+      for (int j=0; j < 20; j++) {
+        i++; if (i > 4095) i=0;
         dirtyW=bitRead(cacheWriteState[i/8],i%8);
         dirtyR=bitRead(cacheReadState[i/8],i%8);
         if (dirtyW || dirtyR) break;
@@ -76,7 +76,7 @@ class nvs {
     void update(int i, byte j) {
       uint8_t k;
       k=read(i);
-      if (j!=k) {
+      if (j != k) {
         // store
         cache[i]=j;
 
@@ -164,7 +164,7 @@ class nvs {
 
     // read count bytes from EEPROM starting at position i
     void readBytes(uint16_t i, byte *v, uint8_t count) {
-      for (int j=0; j<count; j++) { *v = read(i + j); v++; }
+      for (int j=0; j < count; j++) { *v = read(i + j); v++; }
     }
 
 private:
@@ -176,7 +176,7 @@ private:
   uint8_t cacheWriteState[512];
 
   void ee_write(int offset, byte data) {
-    while ((int32_t)(millis()-nextOpMs)<0) {}
+    while ((int32_t)(millis()-nextOpMs) < 0) {}
 
     HAL_Wire.beginTransmission(_eeprom_addr);
     HAL_Wire.write(MSB(offset));
@@ -187,7 +187,7 @@ private:
   }
 
   void ee_read(int offset, byte *data, byte count) {
-    while ((int32_t)(millis()-nextOpMs)<0) {}
+    while ((int32_t)(millis()-nextOpMs) < 0) {}
 
     HAL_Wire.beginTransmission(_eeprom_addr);
     HAL_Wire.write(MSB(offset));

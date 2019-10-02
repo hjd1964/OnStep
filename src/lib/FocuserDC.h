@@ -69,7 +69,7 @@ class focuserDC {
 
     // sets logic state for reverse motion
     void setReverseState(int reverseState) {
-      if (reverseState==HIGH) reverse=true; else reverse=false;
+      if (reverseState == HIGH) reverse=true; else reverse=false;
     }
 
     // sets logic state for disabling stepper driver
@@ -85,7 +85,7 @@ class focuserDC {
     void setMoveRate(double rate) {
       // a rate of 1000 gives 1mm/second (fastest)
       moveRate=rate*spm;                                  // in steps per second, for a DC motor a step is 1 micron.
-      if (moveRate>spsMax) moveRate=spsMax;               // limit to maxRate
+      if (moveRate > spsMax) moveRate=spsMax;               // limit to maxRate
     }
 
     // check if moving
@@ -120,7 +120,7 @@ class focuserDC {
     // sets current position in microns
     void setPosition(double pos) {
       spos=round(pos*spm);
-      if (spos<smin) spos=smin; if (spos>smax) spos=smax;
+      if (spos < smin) spos=smin; if (spos > smax) spos=smax;
       target.part.m=spos; target.part.f=0;
     }
 
@@ -128,43 +128,43 @@ class focuserDC {
     void setTarget(double pos) {
       dcMotor.setPower((moveRate/1000.0)*powerFor1mmSec);
       target.part.m=round(pos*spm); target.part.f=0;
-      if ((long)target.part.m<smin) target.part.m=smin; if ((long)target.part.m>smax) target.part.m=smax;
+      if ((long)target.part.m < smin) target.part.m=smin; if ((long)target.part.m > smax) target.part.m=smax;
     }
 
     // sets target relative position in microns
     void relativeTarget(double pos) {
       dcMotor.setPower((moveRate/1000.0)*powerFor1mmSec);
       target.part.m+=round(pos*spm); target.part.f=0;
-      if ((long)target.part.m<smin) target.part.m=smin; if ((long)target.part.m>smax) target.part.m=smax;
+      if ((long)target.part.m < smin) target.part.m=smin; if ((long)target.part.m > smax) target.part.m=smax;
     }
 
     // do automatic movement
     void move() {
       target.fixed+=delta.fixed;
       // stop at limits
-      if (((long)target.part.m<smin) || ((long)target.part.m>smax)) delta.fixed=0;
+      if (((long)target.part.m < smin) || ((long)target.part.m > smax)) delta.fixed=0;
     }
 
-    // follow( (trackingState==TrackingMoveTo) || guideDirAxis1 || guideDirAxis2) );
+    // follow( (trackingState == TrackingMoveTo) || guideDirAxis1 || guideDirAxis2) );
     void follow(boolean slewing) {
           
       // write position to non-volatile storage if not moving for FOCUSER_WRITE_DELAY milliseconds
       if ((spos!=lastPos)) { lastMove=millis(); lastPos=spos; }
       if (!slewing && (spos!=readPos())) {
         // needs updating and enough time has passed?
-        if ((long)(millis()-lastMove)>FOCUSER_WRITE_DELAY) writePos(spos);
+        if ((long)(millis()-lastMove) > FOCUSER_WRITE_DELAY) writePos(spos);
       }
 
       unsigned long tempMs=millis();
-      if ((long)(tempMs-nextPhysicalMove)>0) {
+      if ((long)(tempMs-nextPhysicalMove) > 0) {
         nextPhysicalMove=tempMs+(unsigned long)maxRate;
         if (moving()) {
-          if ((spos<(long)target.part.m) && (spos<smax)) {
+          if ((spos < (long)target.part.m) && (spos < smax)) {
             if (reverse) dcMotor.setDirectionIn(); else dcMotor.setDirectionOut();
             spos++;
             lastPhysicalMove=millis();
           } else
-          if ((spos>(long)target.part.m) && (spos>smin)) {
+          if ((spos > (long)target.part.m) && (spos > smin)) {
             if (reverse) dcMotor.setDirectionOut(); else dcMotor.setDirectionIn();
             spos--;
             lastPhysicalMove=millis();

@@ -4,10 +4,10 @@
 // sound/buzzer
 void soundAlert() {
   if (soundEnabled) {
-    #ifdef BUZZER_ON
+    #if BUZZER == ON
       digitalWrite(TonePin,HIGH); buzzerDuration=100;
     #endif
-    #ifdef BUZZER
+    #if BUZZER >= 0
       tone(TonePin,BUZZER,1000);
     #endif
   }
@@ -16,10 +16,10 @@ void soundAlert() {
 // sound/beep
 void soundBeep() {
   if (soundEnabled) {
-    #ifdef BUZZER_ON
+    #if BUZZER == ON
       digitalWrite(TonePin,HIGH); buzzerDuration=25;
     #endif
-    #ifdef BUZZER
+    #if BUZZER >= 0
       tone(TonePin,BUZZER,250);
     #endif
   }
@@ -28,10 +28,10 @@ void soundBeep() {
 // sound/click
 void soundClick() {
   if (soundEnabled) {
-    #ifdef BUZZER_ON
+    #if BUZZER == ON
       digitalWrite(TonePin,HIGH); buzzerDuration=5;
     #endif
-    #ifdef BUZZER
+    #if BUZZER >= 0
       tone(TonePin,BUZZER,50);
     #endif
   }

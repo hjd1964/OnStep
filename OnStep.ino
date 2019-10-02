@@ -39,10 +39,10 @@
 
 // firmware info, these are returned by the ":GV?#" commands
 #define FirmwareDate          __DATE__
-#define FirmwareVersionMajor  2
-#define FirmwareVersionMinor  24      // minor version 0 to 99
-#define FirmwareVersionPatch  "g"     // for example major.minor patch: 1.3c
-#define FirmwareVersionConfig 2       // internal, for tracking configuration file changes
+#define FirmwareVersionMajor  3
+#define FirmwareVersionMinor  0       // minor version 0 to 99
+#define FirmwareVersionPatch  "a"     // for example major.minor patch: 1.3c
+#define FirmwareVersionConfig 3       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
 
@@ -52,6 +52,7 @@
 #include "Constants.h"
 #include "src/step_dir_drivers/Models.h"
 #include "Config.h"
+#include "src/pinmaps/Models.h"
 #include "src/HAL/HAL.h"
 #include "Validate.h"
 
@@ -84,11 +85,28 @@
 #include "src/lib/Misc.h"
 #include "src/lib/Sound.h"
 
-#ifdef MODE_SWITCH_BEFORE_SLEW_SPI
-#include "src/lib/TMC_SPI.h"
-//               SS      ,SCK     ,MISO     ,MOSI
-tmcSpiDriver tmcAxis1(Axis1_M2,Axis1_M1,Axis1_Aux,Axis1_M0);
-tmcSpiDriver tmcAxis2(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
+#if MODE_SWITCH_BEFORE_SLEW == TMC_SPI
+  #include "src/lib/TMC_SPI.h"
+  #if AXIS1_DRIVER_STATUS == TMC_SPI
+//                        SS      ,SCK     ,MISO    ,MOSI
+    tmcSpiDriver tmcAxis1(Axis1_M2,Axis1_M1,Axis1_M3,Axis1_M0);
+  #else
+    tmcSpiDriver tmcAxis1(Axis1_M2,Axis1_M1,      -1,Axis1_M0);
+  #endif
+  #if AXIS2_DRIVER_STATUS == TMC_SPI
+    tmcSpiDriver tmcAxis2(Axis2_M2,Axis2_M1,Axis2_M3,Axis2_M0);
+  #else
+    tmcSpiDriver tmcAxis2(Axis2_M2,Axis2_M1,      -1,Axis2_M0);
+  #endif
+  #if ROTATOR == ON && AXIS3_DRIVER_MODEL == TMC_SPI
+    tmcSpiDriver tmcAxis3(Axis3_M2,Axis3_M1,      -1,Axis3_M0);
+  #endif
+  #if FOCUSER1 == ON && AXIS4_DRIVER_MODEL == TMC_SPI
+    tmcSpiDriver tmcAxis4(Axis4_M2,Axis4_M1,      -1,Axis4_M0);
+  #endif
+  #if FOCUSER2 == ON && AXIS5_DRIVER_MODEL == TMC_SPI
+    tmcSpiDriver tmcAxis5(Axis5_M2,Axis5_M1,      -1,Axis5_M0);
+  #endif
 #endif
 
 #include "src/lib/Coord.h"
@@ -97,14 +115,14 @@ tmcSpiDriver tmcAxis2(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
 #include "src/lib/Command.h"
 #include "Align.h"
 
-#ifdef ROTATOR_ON
+#if ROTATOR == ON
   #include "src/lib/Rotator.h"
   rotator rot;
 #endif
 
-#if defined(FOCUSER1_ON) || defined(FOCUSER2_ON)
-  #ifdef FOCUSER1_ON
-    #ifdef AXIS4_DC_MODE_ON
+#if FOCUSER1 == ON || FOCUSER2 == ON
+  #if FOCUSER1 == ON
+    #if AXIS4_DRIVER_DC_MODE != OFF
       #include "src/lib/FocuserDC.h"
       focuserDC foc1;
     #else
@@ -112,8 +130,8 @@ tmcSpiDriver tmcAxis2(Axis2_M2,Axis2_M1,Axis2_Aux,Axis2_M0);
       focuser foc1;
     #endif
   #endif
-  #ifdef FOCUSER2_ON
-    #ifdef AXIS5_DC_MODE_ON
+  #if FOCUSER2 == ON
+    #if AXIS5_DRIVER_DC_MODE != OFF
       #include "src/lib/FocuserDC.h"
       focuserDC foc2;
     #else
@@ -155,6 +173,11 @@ void setup() {
   
   // get weather monitoring ready to go
   ambient.init();
+
+  // prepare PEC buffer
+#if MOUNT_TYPE != ALTAZM
+  createPecBuffer();
+#endif
   
   // set initial values for some variables
   initStartupValues();
@@ -175,9 +198,9 @@ void setup() {
   timerRateAxis2=SiderealRate;
 
   // backlash takeup rates
-  TakeupRate=SiderealRate/BacklashTakeupRate;
-  timerRateBacklashAxis1=SiderealRate/BacklashTakeupRate;
-  timerRateBacklashAxis2=(SiderealRate/BacklashTakeupRate)*timerRateRatio;
+  TakeupRate=SiderealRate/BACKLASH_RATE;
+  timerRateBacklashAxis1=SiderealRate/BACKLASH_RATE;
+  timerRateBacklashAxis2=(SiderealRate/BACKLASH_RATE)*timerRateRatio;
 
   // now read any saved values from EEPROM into varaibles to restore our last state
   initReadNvValues();
@@ -187,97 +210,113 @@ void setup() {
   setDeltaTrackingRate();
   initStartTimers();
 
-  SerialA.begin(9600);
+  SerialA.begin(SERIAL_A_BAUD_DEFAULT);
 #ifdef HAL_SERIAL_B_ENABLED
   SerialB.begin(SERIAL_B_BAUD_DEFAULT);
 #endif
 #ifdef HAL_SERIAL_C_ENABLED
   SerialC.begin(SERIAL_C_BAUD_DEFAULT);
 #endif
-#ifdef ST4_HAND_CONTROL_ON
+#if ST4_HAND_CONTROL == ON
   SerialST4.begin();
 #endif
  
-  // autostart tracking
-#if defined(AUTOSTART_TRACKING_ON)
-  #if !defined(MOUNT_TYPE_ALTAZM)
+  // tracking autostart
+#if TRACK_AUTOSTART == ON
+  #if MOUNT_TYPE != ALTAZM
 
     // tailor behaviour depending on RTC presence
     if (!urtc.active) {
       setHome();
       safetyLimitsOn=false;
     } else {
-      if (parkStatus==Parked) unPark(true); else setHome();
+      if (parkStatus == Parked) unPark(true); else setHome();
     }
     
     // start tracking
     trackingState=TrackingSidereal;
     enableStepperDrivers();
   #else
-    #warning "AUTOSTART_TRACKING_ON ignored for MOUNT_TYPE_ALTAZM"
+    #warning "Tracking autostart ignored for MOUNT_TYPE ALTAZM"
   #endif
 #else
   // unpark without tracking, if parked
-  if (parkStatus==Parked) unPark(false);
+  if (parkStatus == Parked) unPark(false);
 #endif
 
   // start rotator if present
-#ifdef ROTATOR_ON
-  rot.init(Axis3StepPin,Axis3DirPin,Axis3_EN,MaxRateAxis3,StepsPerDegreeAxis3);
-  rot.setMin(MinAxis3);
-  rot.setMax(MaxAxis3);
-  #ifdef AXIS3_REVERSE_ON
+#if ROTATOR == ON
+  rot.init(Axis3StepPin,Axis3DirPin,Axis3_EN,AXIS3_STEP_RATE_MAX,AXIS3_STEPS_PER_DEGREE);
+  rot.setMin(AXIS3_LIMIT_MIN);
+  rot.setMax(AXIS3_LIMIT_MAX);
+  #if AXIS3_DRIVER_REVERSE == ON
     rot.setReverseState(HIGH);
   #endif
-  #ifdef AXIS3_DISABLE
-    rot.setDisableState(AXIS3_DISABLE);
-    #ifdef AXIS3_AUTO_POWER_DOWN_ON
-      rot.powerDownActive(true);
-    #else
-      rot.powerDownActive(false);
-    #endif
+  rot.setDisableState(AXIS3_DRIVER_DISABLE);
+  
+  #if MODE_SWITCH_BEFORE_SLEW == TMC_SPI && AXIS3_DRIVER_MODEL == TMC_SPI
+    tmcAxis3.setup(AXIS3_DRIVER_INTPOL,AXIS3_DRIVER_DECAY_MODE,AXIS3_MICROSTEP_CODE&0b001111,AXIS3_DRIVER_IRUN,AXIS3_DRIVER_IRUN,AXIS3_DRIVER_RSENSE);
+    delay(150);
+    tmcAxis3.setup(AXIS3_DRIVER_INTPOL,AXIS3_DRIVER_DECAY_MODE,AXIS3_MICROSTEP_CODE&0b001111,AXIS3_DRIVER_IRUN,AXIS3_DRIVER_IHOLD,AXIS3_DRIVER_RSENSE);
+  #endif
+  
+  #if AXIS3_DRIVER_POWER_DOWN == ON
+    rot.powerDownActive(true);
+  #else
+    rot.powerDownActive(false);
   #endif
 #endif
 
   // start focusers if present
-#ifdef FOCUSER1_ON
-  foc1.init(Axis4StepPin,Axis4DirPin,Axis4_EN,EE_posAxis4,MaxRateAxis4,StepsPerMicrometerAxis4);
-  foc1.setMin(MinAxis4*1000.0);
-  foc1.setMax(MaxAxis4*1000.0);
-  #ifdef AXIS4_DC_MODE_ON
+#if FOCUSER1 == ON
+  foc1.init(Axis4StepPin,Axis4DirPin,Axis4_EN,EE_posAxis4,AXIS4_STEP_RATE_MAX,AXIS4_STEPS_PER_MICRON);
+  foc1.setMin(AXIS4_LIMIT_MIN*1000.0);
+  foc1.setMax(AXIS4_LIMIT_MAX*1000.0);
+  #if AXIS4_DRIVER_DC_MODE != OFF
     foc1.setDcPower(dcPwrAxis4);
-    foc1.setPhase2();
+    foc1.setPhase1();
   #endif
-  #ifdef AXIS4_REVERSE_ON
+  #if AXIS4_DRIVER_REVERSE == ON
     foc1.setReverseState(HIGH);
   #endif
-  #ifdef AXIS4_DISABLE
-    foc1.setDisableState(AXIS4_DISABLE);
-    #ifdef AXIS4_AUTO_POWER_DOWN_ON
-      foc1.powerDownActive(true);
-    #else
-      foc1.powerDownActive(false);
-    #endif
+  foc1.setDisableState(AXIS4_DRIVER_DISABLE);
+  
+  #if MODE_SWITCH_BEFORE_SLEW == TMC_SPI && AXIS3_DRIVER_MODEL == TMC_SPI
+    tmcAxis4.setup(AXIS4_DRIVER_INTPOL,AXIS4_DRIVER_DECAY_MODE,AXIS4_MICROSTEP_CODE&0b001111,AXIS4_DRIVER_IRUN,AXIS4_DRIVER_IRUN,AXIS4_DRIVER_RSENSE);
+    delay(150);
+    tmcAxis4.setup(AXIS4_DRIVER_INTPOL,AXIS4_DRIVER_DECAY_MODE,AXIS4_MICROSTEP_CODE&0b001111,AXIS4_DRIVER_IRUN,AXIS4_DRIVER_IHOLD,AXIS4_DRIVER_RSENSE);
+  #endif
+
+  #if AXIS4_DRIVER_POWER_DOWN == ON
+    foc1.powerDownActive(true);
+  #else
+    foc1.powerDownActive(false);
   #endif
 #endif
-#ifdef FOCUSER2_ON
-  foc2.init(Axis5StepPin,Axis5DirPin,Axis5_EN,EE_posAxis5,MaxRateAxis5,StepsPerMicrometerAxis5);
-  foc2.setMin(MinAxis5*1000.0);
-  foc2.setMax(MaxAxis5*1000.0);
-  #ifdef AXIS5_DC_MODE_ON
+
+#if FOCUSER2 == ON
+  foc2.init(Axis5StepPin,Axis5DirPin,Axis5_EN,EE_posAxis5,AXIS5_STEP_RATE_MAX,AXIS5_STEPS_PER_MICRON);
+  foc2.setMin(AXIS5_LIMIT_MIN*1000.0);
+  foc2.setMax(AXIS5_LIMIT_MAX*1000.0);
+  #if AXIS5_DRIVER_DC_MODE == DRV8825
     foc2.setDcPower(dcPwrAxis5);
-    foc2.setPhase1();
+    foc2.setPhase2();
   #endif
-  #ifdef AXIS5_REVERSE_ON
+  #if AXIS5_DRIVER_REVERSE == ON
     foc2.setReverseState(HIGH);
   #endif
-  #ifdef AXIS5_DISABLE
-    foc2.setDisableState(AXIS5_DISABLE);
-    #ifdef AXIS5_AUTO_POWER_DOWN_ON
-      foc2.powerDownActive(true);
-    #else
-      foc2.powerDownActive(false);
-    #endif
+  foc2.setDisableState(AXIS5_DRIVER_DISABLE);
+
+  #if MODE_SWITCH_BEFORE_SLEW == TMC_SPI && AXIS3_DRIVER_MODEL == TMC_SPI
+    tmcAxis5.setup(AXIS5_DRIVER_INTPOL,AXIS5_DRIVER_DECAY_MODE,AXIS5_MICROSTEP_CODE&0b001111,AXIS5_DRIVER_IRUN,AXIS5_DRIVER_IRUN,AXIS5_DRIVER_RSENSE);
+    delay(150);
+    tmcAxis5.setup(AXIS5_DRIVER_INTPOL,AXIS5_DRIVER_DECAY_MODE,AXIS5_MICROSTEP_CODE&0b001111,AXIS5_DRIVER_IRUN,AXIS5_DRIVER_IHOLD,AXIS5_DRIVER_RSENSE);
+  #endif
+
+  #if AXIS5_DRIVER_POWER_DOWN == ON
+    foc2.powerDownActive(true);
+  #else
+    foc2.powerDownActive(false);
   #endif
 #endif
 
@@ -294,33 +333,33 @@ void loop() {
 void loop2() {
   // GUIDING -------------------------------------------------------------------------------------------
   ST4();
-  if ((trackingState!=TrackingMoveTo) && (parkStatus==NotParked)) guide();
+  if ((trackingState != TrackingMoveTo) && (parkStatus == NotParked)) guide();
 
-#ifndef MOUNT_TYPE_ALTAZM
+#if MOUNT_TYPE != ALTAZM
   // PERIODIC ERROR CORRECTION -------------------------------------------------------------------------
-  if ((trackingState==TrackingSidereal) && (parkStatus==NotParked) && (!((guideDirAxis1 || guideDirAxis2) && (activeGuideRate>GuideRate1x)))) { 
+  if ((trackingState == TrackingSidereal) && (parkStatus == NotParked) && (!((guideDirAxis1 || guideDirAxis2) && (activeGuideRate > GuideRate1x)))) { 
     // only active while sidereal tracking with a guide rate that makes sense
     pec();
   } else disablePec();
 #endif
 
-#ifdef HOME_SENSE_ON
+#if HOME_SENSE == ON
   // AUTOMATIC HOMING ----------------------------------------------------------------------------------
   checkHome();
 #endif
 
   // 1/100 SECOND TIMED --------------------------------------------------------------------------------
   cli(); long tempLst=lst; sei();
-  if (tempLst!=siderealTimer) {
+  if (tempLst != siderealTimer) {
     siderealTimer=tempLst;
 
 #ifdef ESP32
     timerSupervisor(true);
 #endif
     
-#ifndef MOUNT_TYPE_ALTAZM
+#if MOUNT_TYPE != ALTAZM
     // WRITE PERIODIC ERROR CORRECTION TO EEPROM
-    if (pecAutoRecord>0) {
+    if (pecAutoRecord > 0) {
       // write PEC table to EEPROM, should do several hundred bytes/second
       pecAutoRecord--;
       nv.update(EE_pecTable+pecAutoRecord,pecBuffer[pecAutoRecord]);
@@ -328,21 +367,21 @@ void loop2() {
 #endif
 
     // FLASH LED DURING SIDEREAL TRACKING
-    if (trackingState==TrackingSidereal) {
-#ifdef STATUS_LED_PINS_ON
-      if (siderealTimer%20L==0L) { if (LED_ON) { digitalWrite(LEDnegPin,HIGH); LED_ON=false; } else { digitalWrite(LEDnegPin,LOW); LED_ON=true; } }
+    if (trackingState == TrackingSidereal) {
+#if LED_STATUS_PIN == ON
+      if (siderealTimer%20L == 0L) { if (ledOn) { digitalWrite(LEDnegPin,HIGH); ledOn=false; } else { digitalWrite(LEDnegPin,LOW); ledOn=true; } }
 #endif
     }
 
     // SIDEREAL TRACKING DURING GOTOS
     // keeps the target where it's supposed to be while doing gotos
-    if (trackingState==TrackingMoveTo) {
+    if (trackingState == TrackingMoveTo) {
       moveTo();
-      if (lastTrackingState==TrackingSidereal) {
+      if (lastTrackingState == TrackingSidereal) {
         // origTargetAxisn isn't used in Alt/Azm mode since meridian flips never happen
         origTargetAxis1.fixed+=fstepAxis1.fixed;
         // don't advance the target during meridian flips
-        if ((getInstrPierSide()==PierSideEast) || (getInstrPierSide()==PierSideWest)) {
+        if ((getInstrPierSide() == PierSideEast) || (getInstrPierSide() == PierSideWest)) {
           cli();
           targetAxis1.fixed+=fstepAxis1.fixed;
           targetAxis2.fixed+=fstepAxis2.fixed;
@@ -352,29 +391,29 @@ void loop2() {
     }
 
     // ROTATOR/FOCUSERS, MOVE THE TARGET
-#if defined(ROTATOR_ON)
-    rot.move(trackingState==TrackingSidereal);
+#if ROTATOR == ON
+    rot.move(trackingState == TrackingSidereal);
 #endif
-#if defined(FOCUSER1_ON)
+#if FOCUSER1 == ON
     foc1.move();
 #endif
-#if defined(FOCUSER2_ON)
+#if FOCUSER2 == ON
     foc2.move();
 #endif
 
     // CALCULATE SOME TRACKING RATES, ETC.
-    if (lst%3==0) doFastAltCalc(false);
-#ifdef MOUNT_TYPE_ALTAZM
+    if (lst%3 == 0) doFastAltCalc(false);
+#if MOUNT_TYPE == ALTAZM
     // figure out the current Alt/Azm tracking rates
-    if (lst%3!=0) doHorRateCalc();
+    if (lst%3 != 0) doHorRateCalc();
 #else
     // figure out the current refraction compensated tracking rate
-    if ((rateCompensation!=RC_NONE) && (lst%3!=0)) doRefractionRateCalc();
+    if ((rateCompensation != RC_NONE) && (lst%3 != 0)) doRefractionRateCalc();
 #endif
 
     // SAFETY CHECKS
+#if LIMIT_SENSE == ON
     // support for limit switch(es)
-#ifdef LIMIT_SENSE_ON
     byte limit_1st = digitalRead(LimitPin);
     if (limit_1st == LIMIT_SENSE_STATE) {
       // Wait for a short while, then read again
@@ -389,39 +428,27 @@ void loop2() {
 #endif
 
     // check for fault signal, stop any slew or guide and turn tracking off
-#ifdef AXIS1_FAULT
-  #if AXIS1_FAULT==LOW
-    faultAxis1=(digitalRead(Axis1_FAULT)==LOW);
-  #endif
-  #if AXIS1_FAULT==HIGH
-    faultAxis1=(digitalRead(Axis1_FAULT)==HIGH);
-  #endif
-  #if AXIS1_FAULT==TMC_SPI
-    if (lst%2==0) faultAxis1=tmcAxis1.error();
-  #endif
+#if AXIS1_DRIVER_STATUS == LOW || AXIS1_DRIVER_STATUS == HIGH
+    faultAxis1=(digitalRead(Axis1FaultPin) == AXIS1_DRIVER_STATUS);
+#elif AXIS1_DRIVER_STATUS == TMC_SPI
+    if (lst%2 == 0) faultAxis1=tmcAxis1.error();
 #endif
-#ifdef AXIS2_FAULT
-  #if AXIS2_FAULT==LOW
-    faultAxis2=(digitalRead(Axis2_FAULT)==LOW);
-  #endif
-  #if AXIS2_FAULT==HIGH
-    faultAxis2=(digitalRead(Axis2_FAULT)==HIGH);
-  #endif
-  #if AXIS2_FAULT==TMC_SPI
-    if (lst%2==1) faultAxis2=tmcAxis2.error();
-  #endif
+#if AXIS2_DRIVER_STATUS == LOW || AXIS2_DRIVER_STATUS == HIGH
+    faultAxis2=(digitalRead(Axis2FaultPin) == AXIS2_DRIVER_STATUS);
+#elif AXIS2_DRIVER_STATUS == TMC_SPI
+    if (lst%2 == 1) faultAxis2=tmcAxis2.error();
 #endif
 
-    if (faultAxis1 || faultAxis2) { lastError=ERR_MOTOR_FAULT; if (trackingState==TrackingMoveTo) { if (!abortSlew) abortSlew=StartAbortSlew; } else { trackingState=TrackingNone; if (guideDirAxis1) guideDirAxis1='b'; if (guideDirAxis2) guideDirAxis2='b'; } }
+    if (faultAxis1 || faultAxis2) { lastError=ERR_MOTOR_FAULT; if (trackingState == TrackingMoveTo) { if (!abortSlew) abortSlew=StartAbortSlew; } else { trackingState=TrackingNone; if (guideDirAxis1) guideDirAxis1='b'; if (guideDirAxis2) guideDirAxis2='b'; } }
 
     if (safetyLimitsOn) {
       // check altitude overhead limit and horizon limit
-      if (currentAlt<minAlt) { lastError=ERR_ALT_MIN; stopLimit(); }
-      if (currentAlt>maxAlt) { lastError=ERR_ALT_MAX; stopLimit(); }
+      if (currentAlt < minAlt) { lastError=ERR_ALT_MIN; stopLimit(); }
+      if (currentAlt > maxAlt) { lastError=ERR_ALT_MAX; stopLimit(); }
     }
 
     // OPTION TO POWER DOWN AXIS2 IF NOT MOVING
-#if defined(AXIS2_AUTO_POWER_DOWN_ON) && !defined(MOUNT_TYPE_ALTAZM)
+#if AXIS2_DRIVER_POWER_DOWN == ON && MOUNT_TYPE != ALTAZM
     autoPowerDownAxis2();
 #endif
 
@@ -433,13 +460,13 @@ void loop2() {
   }
 
   // ROTATOR/DEROTATOR/FOCUSERS ------------------------------------------------------------------------
-#ifdef ROTATOR_ON
+#if ROTATOR == ON
   rot.follow();
 #endif
-#ifdef FOCUSER1_ON
+#if FOCUSER1 == ON
   foc1.follow(isSlewing());
 #endif
-#ifdef FOCUSER2_ON
+#if FOCUSER2 == ON
   foc2.follow(isSlewing());
 #endif
 
@@ -449,7 +476,7 @@ void loop2() {
   // WORKLOAD MONITORING -------------------------------------------------------------------------------
   long this_loop_micros=micros();
   loop_time=this_loop_micros-last_loop_micros;
-  if (loop_time>worst_loop_time) worst_loop_time=loop_time;
+  if (loop_time > worst_loop_time) worst_loop_time=loop_time;
   last_loop_micros=this_loop_micros;
   average_loop_time=(average_loop_time*49.0+loop_time)/50.0;
 
@@ -457,7 +484,7 @@ void loop2() {
 
   // 0.5 SECOND TIMED ----------------------------------------------------------------------------------
   static unsigned long debugTimer=0;
-  if (((long)(tempMs-debugTimer)>0) && (millis()<1200)) {
+  if (((long)(tempMs-debugTimer) > 0) && (millis() < 1200)) {
     debugTimer=tempMs+500UL;
 //    DL(((double)SiderealRate/(double)timerRateAxis1));
   }
@@ -468,13 +495,13 @@ void loop2() {
     housekeepingTimer = millis();
   }
 
-  if ((long)(tempMs-housekeepingTimer)>0) {
+  if ((long)(tempMs-housekeepingTimer) > 0) {
     housekeepingTimer=tempMs+1000UL;
 
-#if defined(ROTATOR_ON) && defined(MOUNT_TYPE_ALTAZM)
+#if ROTATOR == ON && MOUNT_TYPE == ALTAZM
     // calculate and set the derotation rate as required
     double h,d; getApproxEqu(&h,&d,true);
-    if (trackingState==TrackingSidereal) rot.derotate(h,d);
+    if (trackingState == TrackingSidereal) rot.derotate(h,d);
 #endif
 
     // adjust tracking rate for Alt/Azm mounts
@@ -482,47 +509,46 @@ void loop2() {
     setDeltaTrackingRate();
 
     // basic check to see if we're not at home
-    if (trackingState!=TrackingNone) atHome=false;
+    if (trackingState != TrackingNone) atHome=false;
 
-#ifdef PEC_SENSE
-    // see if we're on the PEC index
-    if (trackingState==TrackingSidereal) 
-    pecAnalogValue = analogRead(AnalogPecPin);
+#if PEC_SENSE >= 0
+    // analog mode, see if we're on the PEC index
+    if (trackingState == TrackingSidereal) pecAnalogValue = analogRead(AnalogPecPin);
 #endif
     
-#if defined(PPS_SENSE_ON) || defined(PPS_SENSE_PULLUP)
+#if PPS_SENSE != OFF
     // update clock via PPS
-    if (trackingState==TrackingSidereal) {
+    if (trackingState == TrackingSidereal) {
       cli();
       PPSrateRatio=((double)1000000.0/(double)(PPSavgMicroS));
-      if ((long)(micros()-(PPSlastMicroS+2000000UL))>0) PPSsynced=false; // if more than two seconds has ellapsed without a pulse we've lost sync
+      if ((long)(micros()-(PPSlastMicroS+2000000UL)) > 0) PPSsynced=false; // if more than two seconds has ellapsed without a pulse we've lost sync
       sei();
-  #ifdef STATUS_LED2_PINS_ON
-      if (PPSsynced) { if (LED2_ON) { digitalWrite(LEDneg2Pin,HIGH); LED2_ON=false; } else { digitalWrite(LEDneg2Pin,LOW); LED2_ON=true; } } else { digitalWrite(LEDneg2Pin,HIGH); LED2_ON=false; } // indicate PPS
+  #if LED_STATUS2_PIN == ON
+      if (PPSsynced) { if (led2On) { digitalWrite(LEDneg2Pin,HIGH); led2On=false; } else { digitalWrite(LEDneg2Pin,LOW); led2On=true; } } else { digitalWrite(LEDneg2Pin,HIGH); led2On=false; } // indicate PPS
   #endif
-      if (LastPPSrateRatio!=PPSrateRatio) { SiderealClockSetInterval(siderealInterval); LastPPSrateRatio=PPSrateRatio; }
+      if (LastPPSrateRatio != PPSrateRatio) { SiderealClockSetInterval(siderealInterval); LastPPSrateRatio=PPSrateRatio; }
     }
 #endif
 
-#ifdef STATUS_LED_PINS_ON
+#if LED_STATUS_PIN == ON
     // LED indicate PWR on 
-    if (trackingState!=TrackingSidereal) if (!LED_ON) { digitalWrite(LEDnegPin,LOW); LED_ON=true; }
+    if (trackingState != TrackingSidereal) if (!ledOn) { digitalWrite(LEDnegPin,LOW); ledOn=true; }
 #endif
-#ifdef STATUS_LED2_PINS_ON
+#if LED_STATUS2_PIN == ON
     // LED indicate STOP and GOTO
-    if (trackingState==TrackingMoveTo) if (!LED2_ON) { digitalWrite(LEDneg2Pin,LOW); LED2_ON=true; }
-#if defined(PPS_SENSE_ON) || defined(PPS_SENSE_PULLUP)
-    if (trackingState==TrackingNone) if (LED2_ON) { digitalWrite(LEDneg2Pin,HIGH); LED2_ON=false; }
-#else
-    if (trackingState!=TrackingMoveTo) if (LED2_ON) { digitalWrite(LEDneg2Pin,HIGH); LED2_ON=false; }
-#endif
+    if (trackingState == TrackingMoveTo) if (!led2On) { digitalWrite(LEDneg2Pin,LOW); led2On=true; }
+  #if PPS_SENSE != OFF
+    if (trackingState == TrackingNone) if (led2On) { digitalWrite(LEDneg2Pin,HIGH); led2On=false; }
+  #else
+    if (trackingState != TrackingMoveTo) if (led2On) { digitalWrite(LEDneg2Pin,HIGH); led2On=false; }
+  #endif
 #endif
 
-    // SAFETY CHECKS, keeps mount from tracking past the meridian limit, past the UnderPoleLimit, or past the Dec limits
+    // SAFETY CHECKS, keeps mount from tracking past the meridian limit, past the AXIS1_LIMIT_UNDER_POLE, or past the Dec limits
     if (safetyLimitsOn) {
-      if (meridianFlip!=MeridianFlipNever) {
-        if (getInstrPierSide()==PierSideWest) {
-          if (getInstrAxis1()>minutesPastMeridianW/4.0) {
+      if (meridianFlip != MeridianFlipNever) {
+        if (getInstrPierSide() == PierSideWest) {
+          if (getInstrAxis1() > degreesPastMeridianW) {
             if (autoMeridianFlip) {
               if (goToHere(true)) { lastError=ERR_MERIDIAN; trackingState=TrackingNone; }
             } else {
@@ -530,23 +556,23 @@ void loop2() {
             }
           }
         } else
-        if (getInstrPierSide()==PierSideEast) {
-          if (getInstrAxis1()<-minutesPastMeridianE/4.0) { lastError=ERR_MERIDIAN; stopLimit(); }
-          if (getInstrAxis1()>UnderPoleLimit*15.0) { lastError=ERR_UNDER_POLE; stopLimit(); }
+        if (getInstrPierSide() == PierSideEast) {
+          if (getInstrAxis1() < -degreesPastMeridianE) { lastError=ERR_MERIDIAN; stopLimit(); }
+          if (getInstrAxis1() > AXIS1_LIMIT_UNDER_POLE) { lastError=ERR_UNDER_POLE; stopLimit(); }
         }
       } else {
-#ifndef MOUNT_TYPE_ALTAZM
+#if MOUNT_TYPE != ALTAZM
         // when Fork mounted, ignore pierSide and just stop the mount if it passes the UnderPoleLimit
-        if (getInstrAxis1()>UnderPoleLimit*15.0) { lastError=ERR_UNDER_POLE; stopLimit(); }
+        if (getInstrAxis1() > AXIS1_LIMIT_UNDER_POLE) { lastError=ERR_UNDER_POLE; stopLimit(); }
 #else
-        // when Alt/Azm mounted, just stop the mount if it passes MaxAzm
-        if (getInstrAxis1()>MaxAzm) { lastError=ERR_AZM; stopLimit(); }
+        // when Alt/Azm mounted, just stop the mount if it passes AXIS1_LIMIT_MAXAZM
+        if (getInstrAxis1() > AXIS1_LIMIT_MAXAZM) { lastError=ERR_AZM; stopLimit(); }
 #endif
       }
     }
-    // check for exceeding MinDec or MaxDec
-#ifndef MOUNT_TYPE_ALTAZM
-    if ((currentDec<MinDec) || (currentDec>MaxDec)) { lastError=ERR_DEC; stopLimit(); }
+    // check for exceeding AXIS2_LIMIT_MIN or AXIS2_LIMIT_MAX
+#if MOUNT_TYPE != ALTAZM
+    if ((currentDec < AXIS2_LIMIT_MIN) || (currentDec > AXIS2_LIMIT_MAX)) { lastError=ERR_DEC; stopLimit(); }
 #endif
 
     // update weather info

@@ -17,11 +17,11 @@ class button {
       _state=digitalRead(_pin);
       if (lastState!=_state) { _avgPulseDuration=((_avgPulseDuration*49.0)+(double)(millis()-_stableStartMs))/50.0; _stableStartMs=millis(); }
       _stableMs=(long)(millis()-_stableStartMs);
-      if (_stableMs>3000UL) { _avgPulseDuration=((_avgPulseDuration*4.0)+2000.0)/5.0; }
-      if (_stableMs>_debounceMs) {
-        if ((_lastStableState==_UP) && (_state==_DOWN)) { 
+      if (_stableMs > 3000UL) { _avgPulseDuration=((_avgPulseDuration*4.0)+2000.0)/5.0; }
+      if (_stableMs > _debounceMs) {
+        if ((_lastStableState == _UP) && (_state == _DOWN)) { 
           static unsigned long lastPressTime=0;
-          if ((_wasPressed) && (millis()-lastPressTime<500)) _wasDoublePressed=true; 
+          if ((_wasPressed) && (millis()-lastPressTime < 500)) _wasDoublePressed=true; 
           _wasPressed=true; 
           lastPressTime=millis();
         }
@@ -29,7 +29,7 @@ class button {
       }
     }
     // is the button down
-    bool isDown() { if ((_stableMs>_debounceMs) && (_state==_DOWN)) return true; else return false; }
+    bool isDown() { if ((_stableMs > _debounceMs) && (_state == _DOWN)) return true; else return false; }
     // was the button down since last checked
     bool wasPressed(boolean peek=false) { if (_wasPressed) { if (!peek) _wasPressed=false; return true; } else return false; }
     // was the button down since last checked
@@ -39,13 +39,13 @@ class button {
     // clear pressed state
     void clearPress() {_wasPressed=false; }
     // is the button up
-    bool isUp() { if ((_stableMs>_debounceMs) && (_state==_UP)) return true; else return false; }
+    bool isUp() { if ((_stableMs > _debounceMs) && (_state == _UP)) return true; else return false; }
     // number of ms down
-    long timeDown() { if ((_stableMs>_debounceMs) && (_state==_DOWN)) return _stableMs; else return 0; }
+    long timeDown() { if ((_stableMs > _debounceMs) && (_state == _DOWN)) return _stableMs; else return 0; }
     // number of ms up
-    long timeUp() { if ((_stableMs>_debounceMs) && (_state==_UP)) return _stableMs; else return 0; }
+    long timeUp() { if ((_stableMs > _debounceMs) && (_state == _UP)) return _stableMs; else return 0; }
     // check to see if this button has the SHC tone
-    boolean hasTone() { if (fabs(_avgPulseDuration-40.0)<5.0) return true; else return false; }
+    boolean hasTone() { if (fabs(_avgPulseDuration-40.0) < 5.0) return true; else return false; }
     double toneFreq() { return _avgPulseDuration; }
   private:
     int _pin;
@@ -60,4 +60,3 @@ class button {
     int _UP = HIGH;
     int _DOWN = LOW;
 };
-

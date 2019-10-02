@@ -59,19 +59,19 @@ class focuser {
     // sets logic state for reverse motion
     void setReverseState(int reverseState) {
       this->reverseState=reverseState;
-      if (reverseState==LOW) forwardState=HIGH; else forwardState=LOW;
+      if (reverseState == LOW) forwardState=HIGH; else forwardState=LOW;
     }
 
     // sets logic state for disabling stepper driver
     void setDisableState(boolean disableState) {
       this->disableState=disableState;
-      if (disableState==LOW) enableState=HIGH; else enableState=LOW;
+      if (disableState == LOW) enableState=HIGH; else enableState=LOW;
       if (enPin!=-1) { pinMode(enPin,OUTPUT); enableDriver(); currentlyDisabled=false; }
     }
 
     // allows enabling/disabling stepper driver
     void powerDownActive(boolean active) {
-      if (enPin==-1) { pda=false; return; }
+      if (enPin == -1) { pda=false; return; }
       pda=active;
       if (pda) { pinMode(enPin,OUTPUT); disableDriver(); currentlyDisabled=true; }
     }
@@ -79,7 +79,7 @@ class focuser {
     // set movement rate in microns/second
     void setMoveRate(double rate) {
       moveRate=rate*spm;                          // in steps per second
-      if (moveRate>spsMax) moveRate=spsMax;       // limit to maxRate
+      if (moveRate > spsMax) moveRate=spsMax;       // limit to maxRate
     }
 
     // check if moving
@@ -111,54 +111,54 @@ class focuser {
     // sets current position in microns
     void setPosition(double pos) {
       spos=round(pos*spm);
-      if (spos<smin) spos=smin; if (spos>smax) spos=smax;
+      if (spos < smin) spos=smin; if (spos > smax) spos=smax;
       target.part.m=spos; target.part.f=0;
     }
 
     // sets target position in microns
     void setTarget(double pos) {
       target.part.m=round(pos*spm); target.part.f=0;
-      if ((long)target.part.m<smin) target.part.m=smin; if ((long)target.part.m>smax) target.part.m=smax;
+      if ((long)target.part.m < smin) target.part.m=smin; if ((long)target.part.m > smax) target.part.m=smax;
     }
 
     // sets target relative position in microns
     void relativeTarget(double pos) {
       target.part.m+=round(pos*spm); target.part.f=0;
-      if ((long)target.part.m<smin) target.part.m=smin; if ((long)target.part.m>smax) target.part.m=smax;
+      if ((long)target.part.m < smin) target.part.m=smin; if ((long)target.part.m > smax) target.part.m=smax;
     }
 
     // do automatic movement
     void move() {
       target.fixed+=delta.fixed;
       // stop at limits
-      if (((long)target.part.m<smin) || ((long)target.part.m>smax)) delta.fixed=0;
+      if (((long)target.part.m < smin) || ((long)target.part.m > smax)) delta.fixed=0;
     }
 
-    // follow( (trackingState==TrackingMoveTo) || guideDirAxis1 || guideDirAxis2) );
+    // follow( (trackingState == TrackingMoveTo) || guideDirAxis1 || guideDirAxis2) );
     void follow(boolean slewing) {
 
       // if enabled and the timeout has elapsed, disable the stepper driver
-      if (pda && !currentlyDisabled && ((micros()-lastPhysicalMove)>10000000L)) { disableDriver(); currentlyDisabled=true; }
+      if (pda && !currentlyDisabled && ((micros()-lastPhysicalMove) > 10000000L)) { disableDriver(); currentlyDisabled=true; }
     
       // write position to non-volatile storage if not moving for FOCUSER_WRITE_DELAY milliseconds
       if ((spos!=lastPos)) { lastMove=millis(); lastPos=spos; }
       if (!slewing && (spos!=readPos())) {
         // needs updating and enough time has passed?
-        if ((long)(millis()-lastMove)>FOCUSER_WRITE_DELAY) writePos(spos);
+        if ((long)(millis()-lastMove) > FOCUSER_WRITE_DELAY) writePos(spos);
       }
 
       unsigned long microsNow=micros();
-      if ((long)(microsNow-nextPhysicalMove)>0) {
+      if ((long)(microsNow-nextPhysicalMove) > 0) {
         nextPhysicalMove=microsNow+(unsigned long)(maxRate*1000.0);
     
-        if ((spos<(long)target.part.m) && (spos<smax)) {
+        if ((spos < (long)target.part.m) && (spos < smax)) {
           if (pda && currentlyDisabled) { enableDriver(); currentlyDisabled=false; delayMicroseconds(5); }
           digitalWrite(stepPin,LOW); delayMicroseconds(5);
           digitalWrite(dirPin,forwardState); delayMicroseconds(5);
           digitalWrite(stepPin,HIGH); spos++;
           lastPhysicalMove=millis();
         } else
-        if ((spos>(long)target.part.m) && (spos>smin)) {
+        if ((spos > (long)target.part.m) && (spos > smin)) {
           if (pda && currentlyDisabled) { enableDriver(); currentlyDisabled=false; delayMicroseconds(5); }
           digitalWrite(stepPin,LOW); delayMicroseconds(5);
           digitalWrite(dirPin,reverseState); delayMicroseconds(5);
@@ -182,15 +182,15 @@ class focuser {
     }
 
     void enableDriver() {
-      if (enPin==-1) return;
+      if (enPin == -1) return;
       // for Aux5/Aux6 (DAC) support for stepper driver EN control on MaxPCB Aux5=A21=66 Aux6=A22=67
-      if ((enPin==66) || (enPin==67)) { if (enableState==HIGH) analogWrite(enPin,255); else analogWrite(enPin,0); delayMicroseconds(30); } else 
+      if ((enPin == 66) || (enPin == 67)) { if (enableState == HIGH) analogWrite(enPin,255); else analogWrite(enPin,0); delayMicroseconds(30); } else 
       { digitalWrite(enPin,enableState); delayMicroseconds(5); }
     }
 
     void disableDriver() {
-      if (enPin==-1) return;
-      if ((enPin==66) || (enPin==67)) { if (disableState==HIGH) analogWrite(enPin,255); else analogWrite(enPin,0); delayMicroseconds(30); } else 
+      if (enPin == -1) return;
+      if ((enPin == 66) || (enPin == 67)) { if (disableState == HIGH) analogWrite(enPin,255); else analogWrite(enPin,0); delayMicroseconds(30); } else 
       { digitalWrite(enPin,disableState); delayMicroseconds(5); }
     }
 

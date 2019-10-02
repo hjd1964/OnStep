@@ -11,7 +11,7 @@
 // -----------------------------------------------------------------------------------
 // ADVANCED GEOMETRIC ALIGN FOR ALT/AZM MOUNTS (GOTO ASSIST)
 
-#ifdef MOUNT_TYPE_ALTAZM
+#if MOUNT_TYPE == ALTAZM
 
 typedef struct {
   double ha;
@@ -74,7 +74,7 @@ TGeoAlignH Align;
 // -----------------------------------------------------------------------------------
 // ADVANCED GEOMETRIC ALIGN FOR EQUATORIAL MOUNTS (GOTO ASSIST)
 
-#ifndef MOUNT_TYPE_ALTAZM
+#if MOUNT_TYPE != ALTAZM
 
 typedef struct {
   double ha;
@@ -137,7 +137,7 @@ byte alignThisStar = 0;
 
 // checks to see if an alignment is active
 boolean alignActive() {
-  return (alignNumStars>0) && (alignThisStar <= alignNumStars);
+  return (alignNumStars > 0) && (alignThisStar <= alignNumStars);
 }
 
 // adds an alignment star, returns true on success

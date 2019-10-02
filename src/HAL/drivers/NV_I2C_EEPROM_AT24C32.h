@@ -33,7 +33,7 @@ class nvs {
     void update(int i, byte j) {
       uint8_t k;
       ee_read(i,&k,1);
-      if (j!=k) ee_write(i,j);
+      if (j != k) ee_write(i,j);
     }
 
     void write(int i, byte j) {
@@ -94,7 +94,7 @@ class nvs {
     // write String into EEPROM at position i (16 bytes)
     void writeString(int i, char l[]) {
       int l1;
-      for (l1=0; l1<16; l1++) {
+      for (l1=0; l1 < 16; l1++) {
         update(i+l1,*l); l++;
       }
     }
@@ -115,7 +115,7 @@ private:
   uint32_t nextOpMs=millis()+10UL;
 
   void ee_write(int offset, byte data) {
-    while ((int32_t)(millis()-nextOpMs)<0) {}
+    while ((int32_t)(millis()-nextOpMs) < 0) {}
 
     HAL_Wire.beginTransmission(_eeprom_addr);
     HAL_Wire.write(MSB(offset));
@@ -126,7 +126,7 @@ private:
   }
 
   void ee_read(int offset, byte *data, byte count) {
-    while ((int32_t)(millis()-nextOpMs)<0) {}
+    while ((int32_t)(millis()-nextOpMs) < 0) {}
 
     HAL_Wire.beginTransmission(_eeprom_addr);
     HAL_Wire.write(MSB(offset));
@@ -141,4 +141,3 @@ private:
 };
 
 nvs nv;
-

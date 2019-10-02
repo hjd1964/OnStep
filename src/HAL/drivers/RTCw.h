@@ -4,7 +4,7 @@
 #pragma once
 #include "../../lib/Julian.h"
 
-#if defined(RTC_DS3234)
+#if RTC == DS3234
 // -----------------------------------------------------------------------------------
 // DS3234 RTC support 
 // uses the default SPI port and CS (DS3234_CS_PIN from Pins.xxx.h)
@@ -25,7 +25,7 @@ class rtcw {
       int y,mo,d,h;
       double m,s;
 
-      greg(JD,&y,&mo,&d); y-=2000; if (y>=100) y-=100;
+      greg(JD,&y,&mo,&d); y-=2000; if (y >= 100) y-=100;
     
       double f1=fabs(LMT)+0.000139;
       h=floor(f1);
@@ -38,8 +38,8 @@ class rtcw {
     
     // get the RTC's time (local standard time)
     void get(double &JD, double &LMT) {
-      if ((rtc.year()>=0) && (rtc.year()<=99) && (rtc.month()>=1) && (rtc.month()<=12) && (rtc.date()>=1) && (rtc.date()<=31) &&
-          (rtc.hour()>=0) && (rtc.hour()<=23) && (rtc.minute()>=0) && (rtc.minute()<=59) && (rtc.second()>=0) && (rtc.second()<=59)) {
+      if ((rtc.year() >= 0) && (rtc.year() <= 99) && (rtc.month() >= 1) && (rtc.month() <= 12) && (rtc.date() >= 1) && (rtc.date() <= 31) &&
+          (rtc.hour() >= 0) && (rtc.hour() <= 23) && (rtc.minute() >= 0) && (rtc.minute() <= 59) && (rtc.second() >= 0) && (rtc.second() <= 59)) {
         int y1=rtc.year(); if (y1>11) y1=y1+2000; else y1=y1+2100;
         JD=julian(y1,rtc.month(),rtc.date());
         LMT=(rtc.hour()+(rtc.minute()/60.0)+(rtc.second()/3600.0));
@@ -49,7 +49,7 @@ class rtcw {
     bool active=false;
 };
 
-#elif defined(RTC_DS3231)
+#elif RTC == DS3231
 // -----------------------------------------------------------------------------------
 // DS3231 RTC support 
 // uses the default I2C port in most cases; though HAL_Wire can redirect to another port (as is done for the Teensy3.5/3.6)
@@ -84,7 +84,7 @@ class rtcw {
       int yy,y,mo,d,h;
       double m,s;
     
-      greg(JD,&y,&mo,&d); yy=y; y-=2000; if (y>=100) y-=100;
+      greg(JD,&y,&mo,&d); yy=y; y-=2000; if (y >= 100) y-=100;
     
       double f1=fabs(LMT)+0.000139;
       h=floor(f1);
@@ -107,8 +107,8 @@ class rtcw {
 #endif
 
       RtcDateTime now = _Rtc.GetDateTime();
-      if ((now.Year()>=2018) && (now.Year()<=3000) && (now.Month()>=1) && (now.Month()<=12) && (now.Day()>=1) && (now.Day()<=31) &&
-          (now.Hour()>=0) && (now.Hour()<=23) && (now.Minute()>=0) && (now.Minute()<=59) && (now.Second()>=0) && (now.Second()<=59)) {
+      if ((now.Year() >= 2018) && (now.Year() <= 3000) && (now.Month() >= 1) && (now.Month() <= 12) && (now.Day() >= 1) && (now.Day() <= 31) &&
+          (now.Hour() >= 0) && (now.Hour() <= 23) && (now.Minute() >= 0) && (now.Minute() <= 59) && (now.Second() >= 0) && (now.Second() <= 59)) {
         JD=julian(now.Year(),now.Month(),now.Day());
         LMT=(now.Hour()+(now.Minute()/60.0)+(now.Second()/3600.0));
       }
@@ -119,7 +119,7 @@ class rtcw {
     }
 };
 
-#elif defined(RTC_TEENSY)
+#elif RTC == TEENSY
 // -----------------------------------------------------------------------------------
 // TEENSY 3.2 RTC support 
  
@@ -140,7 +140,7 @@ class rtcw {
         int y,mo,d,h;
         double m,s;
         
-        greg(JD,&y,&mo,&d); y-=2000; if (y>=100) y-=100;
+        greg(JD,&y,&mo,&d); y-=2000; if (y >= 100) y-=100;
  
         double f1=fabs(LMT)+0.000139;
         h=floor(f1);
@@ -162,8 +162,8 @@ class rtcw {
         TeensyTime = Teensy3Clock.get();            //get time from Teensy RTC
         setTime(TeensyTime);                        //set system time
   
-        if ((year()>=0) && (year()<=3000) && (month()>=1) && (month()<=12) && (day()>=1) && (day()<=31) &&
-            (hour()>=0) && (hour()<=23) && (minute()>=0) && (minute()<=59) && (second()>=0) && (second()<=59)) 
+        if ((year() >= 0) && (year() <= 3000) && (month() >= 1) && (month() <= 12) && (day() >= 1) && (day() <= 31) &&
+            (hour() >= 0) && (hour() <= 23) && (minute() >= 0) && (minute() <= 59) && (second() >= 0) && (second() <= 59)) 
         {
             int y1=year();
             JD=julian(y1,month(),day());

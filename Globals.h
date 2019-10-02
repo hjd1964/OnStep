@@ -4,34 +4,34 @@
 #pragma once
 
 // Time keeping ------------------------------------------------------------------------------------------------------------
-long siderealTimer    = 0;           // counter to issue steps during tracking
-long PecSiderealTimer = 0;           // time since worm wheel zero index for PEC
-long guideSiderealTimer=0;           // counter to issue steps during guiding
-boolean dateWasSet=false;            // keep track of date/time validity
+long siderealTimer    = 0;                         // counter to issue steps during tracking
+long PecSiderealTimer = 0;                         // time since worm wheel zero index for PEC
+long guideSiderealTimer=0;                         // counter to issue steps during guiding
+boolean dateWasSet=false;                          // keep track of date/time validity
 boolean timeWasSet=false;
 
-double UT1       = 0.0;              // the current universal time
-double UT1_start = 0.0;              // the start of UT1
-double JD  = 0.0;                    // and date, used for computing LST
-double LMT = 0.0;                    //
-double timeZone = 0.0;               //
+double UT1       = 0.0;                            // the current universal time
+double UT1_start = 0.0;                            // the start of UT1
+double JD  = 0.0;                                  // and date, used for computing LST
+double LMT = 0.0;                                  //
+double timeZone = 0.0;                             //
 
-long   lst_start = 0;                // this marks the start lst when UT1 is set 
-volatile long lst = 0;               // this is the local (apparent) sidereal time in 1/100 seconds (23h 56m 4.1s per day = 86400 clock seconds/
-                                     // 86164.09 sidereal seconds = 1.00273 clock seconds per sidereal second.)  Takes 249 days to roll over.
+long   lst_start = 0;                              // this marks the start lst when UT1 is set 
+volatile long lst = 0;                             // this is the local (apparent) sidereal time in 1/100 seconds (23h 56m 4.1s per day = 86400 clock seconds/
+                                                   // 86164.09 sidereal seconds = 1.00273 clock seconds per sidereal second.)  Takes 249 days to roll over.
 
 long siderealInterval       = 15956313L;
 long masterSiderealInterval = siderealInterval;
-                                     // default = 15956313 ticks per sidereal second, where a tick is 1/16 uS
-                                     // this is stored in EEPROM which is updated/adjusted with the ":T+#" and ":T-#" commands
-                                     // a higher number here means a longer count which slows down the sidereal clock
+                                                   // default = 15956313 ticks per sidereal second, where a tick is 1/16 uS
+                                                   // this is stored in EEPROM which is updated/adjusted with the ":T+#" and ":T-#" commands
+                                                   // a higher number here means a longer count which slows down the sidereal clock
 
-double HzCf = 16000000.0/60.0;       // conversion factor to go to/from Hz for sidereal interval
+double HzCf = 16000000.0/60.0;                     // conversion factor to go to/from Hz for sidereal interval
 
-volatile long SiderealRate;          // based on the siderealInterval, this is the time between steps for sidereal tracking
-volatile long TakeupRate;            // this is the takeup rate for synchronizing the target and actual positions when needed
+volatile long SiderealRate;                        // based on the siderealInterval, this is the time between steps for sidereal tracking
+volatile long TakeupRate;                          // this is the takeup rate for synchronizing the target and actual positions when needed
 
-long last_loop_micros=0;             // workload monitoring
+long last_loop_micros=0;                           // workload monitoring
 long this_loop_time=0;
 long loop_time=0;
 long worst_loop_time=0;
@@ -45,9 +45,9 @@ volatile double LastPPSrateRatio = 1.0;
 volatile boolean PPSsynced = false;
 
 // Tracking and rate control -----------------------------------------------------------------------------------------------
-#ifndef MOUNT_TYPE_ALTAZM
+#if MOUNT_TYPE != ALTAZM
   enum RateCompensation {RC_NONE, RC_REFR_RA, RC_REFR_BOTH, RC_FULL_RA, RC_FULL_BOTH};
-  #ifdef TRACK_REFRACTION_RATE_DEFAULT_ON
+  #if TRACK_REFRACTION_RATE_DEFAULT == ON
     RateCompensation rateCompensation=RC_REFR_RA;
   #else
     RateCompensation rateCompensation=RC_NONE;
@@ -73,37 +73,34 @@ boolean faultAxis2 = false;
 #define default_tracking_rate 1
 volatile double  trackingTimerRateAxis1= default_tracking_rate;
 volatile double  trackingTimerRateAxis2= default_tracking_rate;
-volatile double  timerRateRatio        = ((double)StepsPerDegreeAxis1/(double)StepsPerDegreeAxis2);
-volatile boolean useTimerRateRatio     = (StepsPerDegreeAxis1!=StepsPerDegreeAxis2);
-#define StepsPerSecondAxis1              ((double)StepsPerDegreeAxis1/240.0)
-#define ArcSecPerStepAxis1               (3600.0/StepsPerDegreeAxis1)
-#define StepsPerSecondAxis2              ((double)StepsPerDegreeAxis2/240.0)
-#define ArcSecPerStepAxis2               (3600.0/StepsPerDegreeAxis2)
+volatile double  timerRateRatio        = ((double)AXIS1_STEPS_PER_DEGREE/(double)AXIS2_STEPS_PER_DEGREE);
+volatile boolean useTimerRateRatio     = (AXIS1_STEPS_PER_DEGREE != AXIS2_STEPS_PER_DEGREE);
+#define StepsPerSecondAxis1              ((double)AXIS1_STEPS_PER_DEGREE/240.0)
+#define ArcSecPerStepAxis1               (3600.0/AXIS1_STEPS_PER_DEGREE)
+#define StepsPerSecondAxis2              ((double)AXIS2_STEPS_PER_DEGREE/240.0)
+#define ArcSecPerStepAxis2               (3600.0/AXIS2_STEPS_PER_DEGREE)
 #define BreakDistAxis1                   (2L)
 #define BreakDistAxis2                   (2L)
-long SecondsPerWormRotationAxis1       = ((long)(StepsPerWormRotationAxis1/StepsPerSecondAxis1));
-volatile double StepsForRateChangeAxis1= (sqrt((double)DegreesForAcceleration*(double)StepsPerDegreeAxis1))*(double)MaxRate*16.0;
-volatile double StepsForRateChangeAxis2= (sqrt((double)DegreesForAcceleration*(double)StepsPerDegreeAxis2))*(double)MaxRate*16.0;
-#ifndef DegreesForRapidStop
-#define DegreesForRapidStop 1.0
-#endif
+long SecondsPerWormRotationAxis1       = ((double)AXIS1_STEPS_PER_WORMROT/StepsPerSecondAxis1);
+volatile double StepsForRateChangeAxis1= (sqrt((double)SLEW_ACCELERATION_DIST*(double)AXIS1_STEPS_PER_DEGREE))*(double)MaxRate*16.0;
+volatile double StepsForRateChangeAxis2= (sqrt((double)SLEW_ACCELERATION_DIST*(double)AXIS2_STEPS_PER_DEGREE))*(double)MaxRate*16.0;
 
 // Basic stepper driver mode setup ------------------------------------------------------------------------------------
-#ifdef AXIS1_DRIVER_MODEL
+#if AXIS1_DRIVER_MODEL != OFF
 
   // Microsteps for each axis
   volatile uint8_t _axis1_microstep_code;
-  #define AXIS1_MICROSTEP_CODE _axis1_microstep_code
+  #define AXIS1_DRIVER_MICROSTEP_CODE _axis1_microstep_code
   volatile uint8_t _axis2_microstep_code;
-  #define AXIS2_MICROSTEP_CODE _axis2_microstep_code
+  #define AXIS2_DRIVER_MICROSTEP_CODE _axis2_microstep_code
 
-  #ifdef AXIS1_MICROSTEPS_GOTO
+  #if AXIS1_DRIVER_MICROSTEPS_GOTO != OFF
     volatile uint8_t _axis1_microstep_code_goto;
-    #define AXIS1_MICROSTEP_CODE_GOTO _axis1_microstep_code_goto
+    #define AXIS1_DRIVER_MICROSTEP_CODE_GOTO _axis1_microstep_code_goto
   #endif
-  #ifdef AXIS2_MICROSTEPS_GOTO
+  #if AXIS2_DRIVER_MICROSTEPS_GOTO != OFF
     volatile uint8_t _axis2_microstep_code_goto;
-    #define AXIS2_MICROSTEP_CODE_GOTO _axis2_microstep_code_goto
+    #define AXIS2_DRIVER_MICROSTEP_CODE_GOTO _axis2_microstep_code_goto
   #endif
 
 #endif
@@ -114,57 +111,54 @@ double cosLat = 1.0;
 double sinLat = 0.0;
 double longitude = 0.0;
 
-// fix UnderPoleLimit for fork mounts
-#ifdef MOUNT_TYPE_FORK
-#undef UnderPoleLimit
-#define UnderPoleLimit 12
+// fix AXIS1_LIMIT_UNDER_POLE for fork mounts
+#if MOUNT_TYPE == FORK
+  #undef AXIS1_LIMIT_UNDER_POLE
+  #define AXIS1_LIMIT_UNDER_POLE 12
 #endif
 
 // Coordinates -------------------------------------------------------------------------------------------------------------
-#ifdef MOUNT_TYPE_GEM
-double homePositionAxis1  = 90.0;
-#endif
-#if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_ALTAZM)
-double homePositionAxis1  = 0.0;
+#if MOUNT_TYPE == GEM
+  double homePositionAxis1  = 90.0;
+#else
+  double homePositionAxis1  = 0.0;
 #endif
 double homePositionAxis2 = 90.0;
 // either 0 or (fabs(latitude))
 #define AltAzmDecStartPos (fabs(latitude))
 
-volatile long posAxis1   = 0;                            // hour angle position in steps
-volatile long startAxis1 = 0;                            // hour angle of goto start position in steps
-volatile fixed_t targetAxis1;                            // hour angle of goto end   position in steps
-volatile byte dirAxis1   = 1;                            // stepping direction + or -
-double origTargetRA      = 0.0;                          // holds the RA for gotos before possible conversion to observed place
-double newTargetRA       = 0.0;                          // holds the RA for gotos after conversion to observed place
+volatile long posAxis1   = 0;                      // hour angle position in steps
+volatile long startAxis1 = 0;                      // hour angle of goto start position in steps
+volatile fixed_t targetAxis1;                      // hour angle of goto end   position in steps
+volatile byte dirAxis1   = 1;                      // stepping direction + or -
+double origTargetRA      = 0.0;                    // holds the RA for gotos before possible conversion to observed place
+double newTargetRA       = 0.0;                    // holds the RA for gotos after conversion to observed place
 fixed_t origTargetAxis1;
-#if defined(AXIS1_MICROSTEP_CODE) && defined(AXIS1_MICROSTEP_CODE_GOTO)
-volatile long stepAxis1=1;
+#if defined(AXIS1_DRIVER_MICROSTEP_CODE) && defined(AXIS1_DRIVER_MICROSTEP_CODE_GOTO)
+  volatile long stepAxis1=1;
 #else
-#define stepAxis1 1
+  #define stepAxis1 1
 #endif
 
-volatile long posAxis2   = 0;                            // declination position in steps
-volatile long startAxis2 = 0;                            // declination of goto start position in steps
-volatile fixed_t targetAxis2;                            // declination of goto end   position in steps
-volatile byte dirAxis2   = 1;                            // stepping direction + or -
-double origTargetDec     = 0.0;                          // holds the Dec for gotos before possible conversion to observed place
-double newTargetDec      = 0.0;                          // holds the Dec for gotos after conversion to observed place
+volatile long posAxis2   = 0;                      // declination position in steps
+volatile long startAxis2 = 0;                      // declination of goto start position in steps
+volatile fixed_t targetAxis2;                      // declination of goto end   position in steps
+volatile byte dirAxis2   = 1;                      // stepping direction + or -
+double origTargetDec     = 0.0;                    // holds the Dec for gotos before possible conversion to observed place
+double newTargetDec      = 0.0;                    // holds the Dec for gotos after conversion to observed place
 long origTargetAxis2     = 0;
-#if defined(AXIS2_MICROSTEP_CODE) && defined(AXIS2_MICROSTEP_CODE_GOTO)
-volatile long stepAxis2=1;
+#if defined(AXIS2_DRIVER_MICROSTEP_CODE) && defined(AXIS2_DRIVER_MICROSTEP_CODE_GOTO)
+  volatile long stepAxis2=1;
 #else
-#define stepAxis2 1
+  #define stepAxis2 1
 #endif
 
 double newTargetAlt=0.0, newTargetAzm=0.0;         // holds the altitude and azmiuth for slews
-// for goto's, how far past the meridian to allow before we do a flip (if on the East side of the pier) - one hour of RA is the default = 60.  Sometimes used for Fork mounts in Align mode.  Ignored on Alt/Azm mounts.
-long minutesPastMeridianE = 60L;
-// as above, if on the West side of the pier.  If left alone, the mount will stop tracking when it hits the this limit.  Sometimes used for Fork mounts in Align mode.  Ignored on Alt/Azm mounts.
-long minutesPastMeridianW = 60L;
+long   degreesPastMeridianE = 15;                  // for goto's, East side of the pier.  How far past the meridian to allow before we do a flip.  Ignored on Alt/Azm mounts.
+long   degreesPastMeridianW = 15;                  // as above, West side of the pier.  If left alone, the mount will stop tracking when it hits the this limit.  Ignored on Alt/Azm mounts.
 int    minAlt;                                     // the minimum altitude, in degrees, for goTo's (so we don't try to point too low)
 int    maxAlt;                                     // the maximum altitude, in degrees, for goTo's (to keep the telescope tube away from the mount/tripod)
-bool   autoMeridianFlip = false;                   // automatically do a meridian flip and continue when we hit the MinutesPastMeridianW
+bool   autoMeridianFlip = false;                   // automatically do a meridian flip and continue when we hit the AXIS1_LIMIT_MERIDIAN_W
 
 double currentAlt = 45.0;                          // the current altitude
 double currentDec = 0.0;                           // the current declination
@@ -201,14 +195,14 @@ boolean axis2Enabled             = false;
 #define MeridianFlipNever  0
 #define MeridianFlipAlign  1
 #define MeridianFlipAlways 2
-#ifdef MOUNT_TYPE_GEM
-byte meridianFlip = MeridianFlipAlways;
+#if MOUNT_TYPE == GEM
+  byte meridianFlip = MeridianFlipAlways;
 #endif
-#ifdef MOUNT_TYPE_FORK
-byte meridianFlip = MeridianFlipNever;
+#if MOUNT_TYPE == FORK
+  byte meridianFlip = MeridianFlipNever;
 #endif
-#ifdef MOUNT_TYPE_ALTAZM
-byte meridianFlip = MeridianFlipNever;
+#if MOUNT_TYPE == ALTAZM
+  byte meridianFlip = MeridianFlipNever;
 #endif
 
 byte pierSideControl = PierSideNone;
@@ -233,14 +227,14 @@ unsigned long baudRate[10] = {115200,56700,38400,28800,19200,14400,9600,4800,240
 // Guide command ------------------------------------------------------------------------------------------------------------
 #define GuideRate1x        2
 #ifndef GuideRateDefault
-#define GuideRateDefault   6  // 20x
+  #define GuideRateDefault   6  // 20x
 #endif
 #define GuideRateNone      255
-#define RateToDegPerSec  (1000000.0/(double)StepsPerDegreeAxis1)
+#define RateToDegPerSec  (1000000.0/(double)AXIS1_STEPS_PER_DEGREE)
 #define RateToASPerSec   (RateToDegPerSec*3600.0)
 #define RateToXPerSec    (RateToASPerSec/15.0)
 double  slewRateX     =  (RateToXPerSec/MaxRate)*2.5; // 5x for exponential factor average rate and / 2x for default MaxRate
-double  accXPerSec    =  (slewRateX/DegreesForAcceleration);
+double  accXPerSec    =  (slewRateX/SLEW_ACCELERATION_DIST);
 double  guideRates[10]={3.75,7.5,15,30,60,120,300,720,(RateToASPerSec/MaxRate)/2.0,RateToASPerSec/MaxRate};
 //                      .25X .5x 1x 2x 4x  8x 20x 48x       half-MaxRate                   MaxRate
 //                         0   1  2  3  4   5   6   7                  8                         9
@@ -275,20 +269,18 @@ byte    pecStatus         = IgnorePEC;
 boolean pecRecorded       = false;
 boolean pecFirstRecord    = false;
 long    lastPecIndex      = -1;
+int     pecBufferSize     = PEC_BUFFER_SIZE;
 long    pecIndex          = 0;
 long    pecIndex1         = 0;
 int     pecAnalogValue    = 0;
-int     pecAutoRecord     = 0;      // for writing to PEC table to EEPROM
-long    wormSensePos      = 0;      // in steps
-boolean wormSensedAgain   = false;  // indicates PEC index was found
+int     pecAutoRecord     = 0;                     // for writing to PEC table to EEPROM
+long    wormSensePos      = 0;                     // in steps
+boolean wormSensedAgain   = false;                 // indicates PEC index was found
 int     LastPecPinState   = PEC_SENSE_STATE;
 boolean pecBufferStart    = false;
-fixed_t accPecGuideHA;              // for PEC, buffers steps to be recorded
+fixed_t accPecGuideHA;                             // for PEC, buffers steps to be recorded
 volatile double pecTimerRateAxis1 = 0.0;
-// it takes 3.3ms to record a value to EEPROM, this can effect tracking performance since interrupts are disabled during the operation.
-// so we store PEC data in RAM while recording.  When done, sidereal tracking is turned off and the data is written to EEPROM.
-// writing the data can take up to 3 seconds.
-byte pecBuffer[PECBufferSize];
+static byte *pecBuffer;
 
 // Misc ---------------------------------------------------------------------------------------------------------------------
 #define Rad 57.29577951
@@ -308,25 +300,25 @@ fixed_t fstepAxis1;
 fixed_t fstepAxis2;
 
 // status state
-boolean LED_ON = false;
-boolean LED2_ON = false;
+boolean ledOn = false;
+boolean led2On = false;
 
 // sound/buzzer
-#ifdef DEFAULT_SOUND_ON
-boolean soundEnabled = true;
+#if BUZZER_STATE_DEFAULT == ON
+  boolean soundEnabled = true;
 #else
-boolean soundEnabled = false;
+  boolean soundEnabled = false;
 #endif
 volatile int buzzerDuration = 0;
 
 // pause at home on meridian flip
-boolean pauseHome = false;            // allow pause at home?
-boolean waitingHomeContinue = false;  // set to true to stop pause
-boolean waitingHome = false;          // true if waiting at home
+boolean pauseHome = false;                           // allow pause at home?
+boolean waitingHomeContinue = false;                 // set to true to stop pause
+boolean waitingHome = false;                         // true if waiting at home
 
 // reticule control
-#ifdef RETICULE_LED_PINS
-int reticuleBrightness=RETICULE_LED_PINS;
+#if LED_RETICLE_PIN >= 0
+  int reticuleBrightness=LED_RETICLE_PIN;
 #endif
 
 // backlash control
@@ -336,59 +328,59 @@ volatile int blAxis1        = 0;
 volatile int blAxis2        = 0;
 
 // focuser control
-#ifdef AXIS4_DC_MODE_ON
-byte dcPwrAxis4 = 50;
+#if AXIS4_DRIVER_DC_MODE != OFF
+  byte dcPwrAxis4 = 50;
 #endif
-#ifdef AXIS5_DC_MODE_ON
-byte dcPwrAxis5 = 50;
+#if AXIS5_DRIVER_DC_MODE != OFF
+  byte dcPwrAxis5 = 50;
 #endif
 
 // aux pin control
 #ifdef Aux0
-byte valueAux0 = 0;
+  byte valueAux0 = 0;
 #endif
 #ifdef Aux1
-byte valueAux1 = 0;
+  byte valueAux1 = 0;
 #endif
 #ifdef Aux2
-byte valueAux2 = 0;
+  byte valueAux2 = 0;
 #endif
 #ifdef Aux3
-byte valueAux3 = 0;
+  byte valueAux3 = 0;
 #endif
 #ifdef Aux4
-byte valueAux4 = 0;
+  byte valueAux4 = 0;
 #endif
 #ifdef Aux5
-byte valueAux5 = 0;
+  byte valueAux5 = 0;
 #endif
 #ifdef Aux6
-byte valueAux6 = 0;
+  byte valueAux6 = 0;
 #endif
 #ifdef Aux7
-byte valueAux7 = 0;
+  byte valueAux7 = 0;
 #endif
 #ifdef Aux8
-byte valueAux8 = 0;
+  byte valueAux8 = 0;
 #endif
 #ifdef Aux9
-byte valueAux9 = 0;
+  byte valueAux9 = 0;
 #endif
 #ifdef Aux10
-byte valueAux10 = 0;
+  byte valueAux10 = 0;
 #endif
 #ifdef Aux11
-byte valueAux11 = 0;
+  byte valueAux11 = 0;
 #endif
 #ifdef Aux12
-byte valueAux12 = 0;
+  byte valueAux12 = 0;
 #endif
 #ifdef Aux13
-byte valueAux13 = 0;
+  byte valueAux13 = 0;
 #endif
 #ifdef Aux14
-byte valueAux14 = 0;
+  byte valueAux14 = 0;
 #endif
 #ifdef Aux15
-byte valueAux15 = 0;
+  byte valueAux15 = 0;
 #endif

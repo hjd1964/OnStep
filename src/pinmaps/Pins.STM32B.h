@@ -32,7 +32,7 @@
 // STM32 pin PB6 -> SCL on DS3231
 // STM32 pin PB7 -> SDA on DS3231
 
-#if defined(STM32Blue_ON)
+#if PINMAP == STM32Blue
 
   #define A1EN          PA12
   #define A1M0          PA11  
@@ -70,7 +70,7 @@
   #define LIMIT         PA14
   #define SPARE_PA13    PA13
 
-#elif defined(STM32Black_ON) 
+#elif PINMAP == STM32Black 
 
   #define A1EN          PA3
   #define A1M0          PA2
@@ -95,6 +95,7 @@
 
   #define LED           PB12
   #define TONE          PB1 
+  #define RETICLE       -1
   #define SQW           PB5 
 
   #define PECIDX        PB0
@@ -111,78 +112,81 @@
 // The pins here are not tested yet, and need to change 
 
 // The multi-purpose pins (Aux3..Aux8 can be analog pwm/dac if supported)
-#define Aux0            LED
-#define Aux1            A1MISO
-#define Aux2            A2MISO
+#define Aux0                 LED
+#define Aux1              A1MISO
+#define Aux2              A2MISO
 
 // For ESP8266 control
-#define ESP8266Gpio0Pin  Aux1  // Aux1 - ESP8266 GPIO0 or SPI MISO
-#define ESP8266RstPin    Aux2  // Aux2 - ESP8266 RST or SPI MISO or Fault
+#define ESP8266Gpio0Pin     Aux1    // ESP8266 GPIO0 or SPI MISO/Fault
+#define ESP8266RstPin       Aux2    // ESP8266 RST or SPI MISO/Fault
 
-#define Axis1_EN        A1EN   // Enable
-#define Axis1_M0        A1M0   // Microstep Mode 0
-#define Axis1_M1        A1M1   // Microstep Mode 1
-#define Axis1_M2        A1M2   // Microstep Mode 2
-#define Axis1StepPin    A1ST   // Step
-#define Axis1DirPin     A1DR   // Motor Direction
-#define Axis1_Aux       Aux1   // Aux1 - ESP8266 GPIO0 or SPI MISO or Fault
-#define Axis1_FAULT     Aux1   // Aux1 - ESP8266 GPIO0 or SPI MISO or Fault
-#define Axis1_Mode Axis1_M2 //        (Decay mode switch)
+// Axis1 RA/Azm step/dir driver
+#define Axis1StepPin        A1ST    // Step
+#define Axis1DirPin         A1DR    // Motor Direction
 
-#define Axis2_EN        A2EN   // Enable
-#define Axis2_M0        A2M0   // Microstep Mode 0
-#define Axis2_M1        A2M1   // Microstep Mode 1
-#define Axis2_M2        A2M2   // Microstep Mode 2
-#define Axis2StepPin    A2ST   // Step
-#define Axis2DirPin     A2DR   // Motor Direction
-#define Axis2_Aux       Aux2   // Aux2 - ESP8266 RST or SPI MISO or Fault
-#define Axis2_FAULT     Aux2   // Aux2 - ESP8266 RST or SPI MISO or Fault
-#define Axis2_Mode Axis2_M2 //        (Decay mode switch)
+#define Axis1_EN            A1EN    // Enable
+#define Axis1_M0            A1M0    // Microstep Mode 0
+#define Axis1_M1            A1M1    // Microstep Mode 1
+#define Axis1_M2            A1M2    // Microstep Mode 2
+#define Axis1_M3            Aux1    // ESP8266 GPIO0 or SPI MISO/Fault
+#define Axis1FaultPin       Aux1    // ESP8266 GPIO0 or SPI MISO/Fault
+#define Axis1ModePin    Axis1_M2    // Decay mode
+
+// Axis2 Dec/Alt step/dir driver
+#define Axis2StepPin        A2ST    // Step
+#define Axis2DirPin         A2DR    // Motor Direction
+
+#define Axis2_EN            A2EN    // Enable
+#define Axis2_M0            A2M0    // Microstep Mode 0
+#define Axis2_M1            A2M1    // Microstep Mode 1
+#define Axis2_M2            A2M2    // Microstep Mode 2
+#define Axis2_M3            Aux2    // ESP8266 RST or SPI MISO/Fault
+#define Axis2FaultPin       Aux2    // ESP8266 RST or SPI MISO/Fault
+#define Axis2ModePin    Axis2_M2    // Decay mode
 
 // ST4 interface
-#define ST4DEn          S4N    // ST4 DE+ North
-#define ST4DEs          S4S    // ST4 DE- South
-#define ST4RAw          S4W    // ST4 RA- West
-#define ST4RAe          S4E    // ST4 RA+ East
+#define ST4DEn              S4N     // ST4 DE+ North
+#define ST4DEs              S4S     // ST4 DE- South
+#define ST4RAw              S4W     // ST4 RA- West
+#define ST4RAe              S4E     // ST4 RA+ East
 
 // This is the built in LED for the Black Pill board. There is a pin
 // available from it too, in case you want to power another LED with a wire
-#define LEDnegPin       Aux0   // Drain
+#define LEDnegPin          Aux0     // Drain
+#define LEDneg2Pin           -1     // Drain
 
 // For a piezo buzzer
-#define TonePin         TONE   // Tone
+#define TonePin            TONE     // Tone
 
 // The PPS pin is a 3.3V logic input, OnStep measures time between rising edges and
 // adjusts the internal sidereal clock frequency
-#define PpsPin          SQW    // Pulse Per Second time source, e.g. GPS, RTC
+#define PpsPin              SQW     // Pulse Per Second time source, e.g. GPS, RTC
 
 // For rotator stepper driver
-#define Axis3DirPin     F1DR   // Dir
-#define Axis3StepPin    F1ST   // Step
-#define Axis3_EN        F1EN   // Enable
+#define Axis3_EN           F1EN     // Enable
+#define Axis3StepPin       F1ST     // Step
+#define Axis3DirPin        F1DR     // Dir
 
 // Pins to focuser1 stepper driver
-#define Axis4DirPin     F1DR   // Dir
-#define Axis4StepPin    F1ST   // Step
-#define Axis4_EN        F1EN   // Enable
+#define Axis4_EN           F1EN     // Enable
+#define Axis4StepPin       F1ST     // Step
+#define Axis4DirPin        F1DR     // Dir
 
 // For focuser2 stepper driver
-#define Axis5DirPin     F1DR   // Dir
-#define Axis5StepPin    F1ST   // Step
-#define Axis5_EN        F1EN   // Enable
+#define Axis5_EN             -1     // Enable
+#define Axis5StepPin         -1     // Step
+#define Axis5DirPin          -1     // Dir
 
 // The limit switch sense is a logic level input which uses the internal pull up,
 // shorted to ground it stops gotos/tracking
-#define LimitPin        LIMIT
+#define LimitPin          LIMIT
 
 // The PEC index sense is a logic level input, resets the PEC index on rising
 // edge then waits for 60 seconds before allowing another reset
-#define PecPin          PECIDX
-//#define AnalogPecPin  Undefined    // PEC Sense, analog or digital
+#define PecPin           PECIDX
+#define AnalogPecPin         -1     // PEC Sense, analog or digital
 
-//#define LEDneg2Pin    Undefined    // Drain
-
-#define ReticulePin     RETICLE    // Drain
+#define ReticlePin      RETICLE     // Drain
 
 #else
 #error "Wrong processor for this configuration!"

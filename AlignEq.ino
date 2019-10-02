@@ -9,8 +9,7 @@
 // -----------------------------------------------------------------------------------
 // ADVANCED GEOMETRIC ALIGN FOR EQUATORIAL MOUNTS (GOTO ASSIST)
 
-#ifndef MOUNT_TYPE_ALTAZM
-#define GOTO_ASSIST_DEBUG_OFF
+#if MOUNT_TYPE != ALTAZM
 
 // Initialize
 void TGeoAlign::init() {
@@ -63,17 +62,17 @@ bool TGeoAlign::isReady() {
 bool TGeoAlign::addStar(int I, int N, double RA, double Dec) {
 
   // First star, just sync
-  if (I==1) { if (syncEqu(RA,Dec)!=GOTO_ERR_NONE) return false; }
+  if (I == 1) { if (syncEqu(RA,Dec) != GOTO_ERR_NONE) return false; }
 
   mount[I-1].ha=getInstrAxis1()/Rad;
   mount[I-1].dec=getInstrAxis2()/Rad;
   actual[I-1].ha=haRange(LST()*15.0-RA)/Rad;
   actual[I-1].dec=Dec/Rad;
-  if (getInstrPierSide()==PierSideWest) { actual[I-1].side=-1; mount[I-1].side=-1; } else
-  if (getInstrPierSide()==PierSideEast) { actual[I-1].side=1; mount[I-1].side=1; } else { actual[I-1].side=0; mount[I-1].side=0; }
+  if (getInstrPierSide() == PierSideWest) { actual[I-1].side=-1; mount[I-1].side=-1; } else
+  if (getInstrPierSide() == PierSideEast) { actual[I-1].side=1; mount[I-1].side=1; } else { actual[I-1].side=0; mount[I-1].side=0; }
 
   // two or more stars and finished
-  if ((I>=2) && (I==N)) model(N);
+  if ((I >= 2) && (I == N)) model(N);
 
   return true;
 }
@@ -82,9 +81,9 @@ bool TGeoAlign::addStar(int I, int N, double RA, double Dec) {
 void TGeoAlign::model(int n) {
   static bool busy=false;
   static int numStars=0;
-  if (busy) return;                                                           // busy
-  if (n>0) { numStars=n; return; }                                            // command
-  if (numStars>0) { busy=true; autoModel(numStars); busy=false; numStars=0; } // waiting to solve
+  if (busy) return;                                                             // busy
+  if (n > 0) { numStars=n; return; }                                            // command
+  if (numStars > 0) { busy=true; autoModel(numStars); busy=false; numStars=0; } // waiting to solve
 }
 
 // returns the correction to be added to the requested RA,Dec to yield the actual RA,Dec that we will arrive at
@@ -180,31 +179,31 @@ void TGeoAlign::do_search(double sf, int p1, int p2, int p3, int p4, int p5, int
   _oh_m =-p9+round(best_ohe/sf); _oh_p=p9+round(best_ohe/sf);
 
   double md,mh;
-  for (_deo=_deo_m; _deo<=_deo_p; _deo++)
-  for (_pd=_pd_m; _pd<=_pd_p; _pd++)
-  for (_pz=_pz_m; _pz<=_pz_p; _pz++)
-  for (_pe=_pe_m; _pe<=_pe_p; _pe++)
-  for (_df=_df_m; _df<=_df_p; _df++)
-  for (_ff=_ff_m; _ff<=_ff_p; _ff++)
-  for (_tf=_tf_m; _tf<=_tf_p; _tf++)
-  for (_ohe=_oh_m; _ohe<=_oh_p; _ohe++)
-  for (_ode=_od_m; _ode<=_od_p; _ode++) {
+  for (_deo=_deo_m; _deo <= _deo_p; _deo++)
+  for (_pd=_pd_m; _pd <= _pd_p; _pd++)
+  for (_pz=_pz_m; _pz <= _pz_p; _pz++)
+  for (_pe=_pe_m; _pe <= _pe_p; _pe++)
+  for (_df=_df_m; _df <= _df_p; _df++)
+  for (_ff=_ff_m; _ff <= _ff_p; _ff++)
+  for (_tf=_tf_m; _tf <= _tf_p; _tf++)
+  for (_ohe=_oh_m; _ohe <= _oh_p; _ohe++)
+  for (_ode=_od_m; _ode <= _od_p; _ode++) {
     ode=((double)_ode)*sf1;
     odw=-ode;
     ohe=((double)_ohe)*sf1;
     ohw=ohe;
     
     // check the combinations for all samples
-    for (l=0; l<num; l++) {
+    for (l=0; l < num; l++) {
       mh=mount[l].ha;
       md=mount[l].dec;
       
-      if (mount[l].side==-1) // west of the mount
+      if (mount[l].side == -1) // west of the mount
       {
         mh=mh+ohw;
         md=md+odw;
       } else
-      if (mount[l].side==1) // east of the mount, default (fork mounts)
+      if (mount[l].side == 1) // east of the mount, default (fork mounts)
       {
         mh=mh+ohe;
         md=md+ode;
@@ -212,19 +211,19 @@ void TGeoAlign::do_search(double sf, int p1, int p2, int p3, int p4, int p5, int
       correct(mh,md,mount[l].side,sf1,_deo,_pd,_pz,_pe,_df,_ff,_tf,&h1,&d1);
 
       delta[l].ha=actual[l].ha-(mh-h1);
-      if (delta[l].ha>PI) delta[l].ha=delta[l].ha-PI*2.0; else
-      if (delta[l].ha<-PI) delta[l].ha=delta[l].ha+PI*2.0;
+      if (delta[l].ha > PI) delta[l].ha=delta[l].ha-PI*2.0; else
+      if (delta[l].ha < -PI) delta[l].ha=delta[l].ha+PI*2.0;
       delta[l].dec=actual[l].dec-(md-d1);
       delta[l].side=mount[l].side;
     }
 
     // calculate the standard deviations
-    sum1=0.0; for (l=0; l<num; l++) sum1=sum1+sq(delta[l].ha*cos(actual[l].dec)); sh=sqrt(sum1/(num-1));
-    sum1=0.0; for (l=0; l<num; l++) sum1=sum1+sq(delta[l].dec); sd=sqrt(sum1/(num-1));
+    sum1=0.0; for (l=0; l < num; l++) sum1=sum1+sq(delta[l].ha*cos(actual[l].dec)); sh=sqrt(sum1/(num-1));
+    sum1=0.0; for (l=0; l < num; l++) sum1=sum1+sq(delta[l].dec); sd=sqrt(sum1/(num-1));
     max_dist=sqrt(sq(sh)+sq(sd));
 
     // remember the best fit
-    if (max_dist<best_dist) {
+    if (max_dist < best_dist) {
       best_dist   =max_dist;
       best_deo    =((double)_deo)*sf;
       best_pd     =((double)_pd)*sf;
@@ -235,10 +234,10 @@ void TGeoAlign::do_search(double sf, int p1, int p2, int p3, int p4, int p5, int
       best_df     =((double)_df)*sf;
       best_ff     =((double)_ff)*sf;
       
-      if (p8!=0) best_odw=odw*Rad*3600.0; else best_odw=best_pe/2.0;
-      if (p8!=0) best_ode=ode*Rad*3600.0; else best_ode=-best_pe/2.0;
-      if (p9!=0) best_ohw=ohw*Rad*3600.0;
-      if (p9!=0) best_ohe=ohe*Rad*3600.0;
+      if (p8 != 0) best_odw=odw*Rad*3600.0; else best_odw=best_pe/2.0;
+      if (p8 != 0) best_ode=ode*Rad*3600.0; else best_ode=-best_pe/2.0;
+      if (p9 != 0) best_ohw=ohw*Rad*3600.0;
+      if (p9 != 0) best_ohe=ohe*Rad*3600.0;
 
     }
 
@@ -268,22 +267,22 @@ void TGeoAlign::autoModel(int n) {
 
   // figure out the average HA offset as a starting point
   ohe=0;
-  for (l=0; l<num; l++) {
+  for (l=0; l < num; l++) {
     h1=actual[l].ha-mount[l].ha;
-    if (h1>PI)  h1=h1-PI*2.0;
-    if (h1<-PI) h1=h1+PI*2.0;
+    if (h1 > PI)  h1=h1-PI*2.0;
+    if (h1 < -PI) h1=h1+PI*2.0;
     ohe=ohe+h1;
   }
   ohe=ohe/num; best_ohe=round(ohe*Rad*3600.0); best_ohw=best_ohe;
 
-#ifdef MOUNT_TYPE_FORK
+#if MOUNT_TYPE == FORK
   Ff=1; Df=0;
 #else
   Ff=0; Df=1;
 #endif
 
   // only search for cone error if > 2 stars
-  int Do=0; if (num>2) Do=1;
+  int Do=0; if (num > 2) Do=1;
 
   // search, this can handle about 9 degrees of polar misalignment, and 4 degrees of cone error
   //              DoPdPzPeTfFf Df OdOh
@@ -298,7 +297,7 @@ void TGeoAlign::autoModel(int n) {
   do_search(  256,Do,0,1,1,0, 0, 0,1,1);
   do_search(  128,Do,0,1,1,0, 0, 0,1,1);
 #else
-  if (num>4) {
+  if (num > 4) {
     //              DoPdPzPeTfFf Df OdOh
     do_search(  256,Do,1,1,1,0,Ff,Df,1,1);
     do_search(  128,Do,1,1,1,1,Ff,Df,1,1);
@@ -325,7 +324,7 @@ void TGeoAlign::autoModel(int n) {
   altCor=best_pe/3600.0;
 
   tfCor=best_tf/3600.0;
-#if defined(MOUNT_TYPE_FORK) || defined(MOUNT_TYPE_ALTAZM)
+#if MOUNT_TYPE == FORK || MOUNT_TYPE == ALTAZM
   dfCor=best_ff/3600.0;
 #else
   dfCor=best_df/3600.0;
@@ -339,19 +338,19 @@ void TGeoAlign::autoModel(int n) {
 
 // takes the topocentric refracted coordinates and applies corrections to arrive at instrument equatorial coordinates 
 void TGeoAlign::equToInstr(double HA, double Dec, double *HA1, double *Dec1, int PierSide) {
-  double p=1.0; if (PierSide==PierSideWest) p=-1.0;
+  double p=1.0; if (PierSide == PierSideWest) p=-1.0;
 
-  if (Dec>90.0) Dec=90.0;
-  if (Dec<-90.0) Dec=-90.0;
+  if (Dec > 90.0) Dec=90.0;
+  if (Dec < -90.0) Dec=-90.0;
 
-  // breaks-down near the pole (limited to >1' from pole)
-  if (abs(Dec)<89.9833) {
+  // breaks-down near the pole (limited to > 1' from pole)
+  if (abs(Dec) < 89.9833) {
 
     // initial rough guess at instrument HA,Dec
     double h=HA/Rad;
     double d=Dec/Rad;
     
-    for (int pass=0; pass<3; pass++) {
+    for (int pass=0; pass < 3; pass++) {
       double sinDec=sin(d);
       double cosDec=cos(d);
       double sinHA =sin(h);
@@ -369,7 +368,7 @@ void TGeoAlign::equToInstr(double HA, double Dec, double *HA1, double *Dec1, int
       // misalignment due to Dec axis being perp. to RA axis
       double PDh=-pdCor*(sinDec/cosDec)*p;
   
-  #ifdef MOUNT_TYPE_FORK
+  #if MOUNT_TYPE == FORK
       // Fork flex
       double DFd=dfCor*cosHA;
   #else
@@ -404,15 +403,15 @@ void TGeoAlign::equToInstr(double HA, double Dec, double *HA1, double *Dec1, int
 
 // takes the instrument equatorial coordinates and applies corrections to arrive at topocentric refracted coordinates
 void TGeoAlign::instrToEqu(double HA, double Dec, double *HA1, double *Dec1, int PierSide) { 
-  double p=1.0; if (PierSide==PierSideWest) p=-1.0;
+  double p=1.0; if (PierSide == PierSideWest) p=-1.0;
   
   HA =HA +ax1Cor;
   Dec=Dec+ax2Cor*-p;
-  if (Dec>90.0) Dec=90.0;
-  if (Dec<-90.0) Dec=-90.0;
+  if (Dec > 90.0) Dec=90.0;
+  if (Dec < -90.0) Dec=-90.0;
 
-  // breaks-down near the pole (limited to >1' from pole)
-  if (abs(Dec)<89.98333333) {
+  // breaks-down near the pole (limited to > 1' from pole)
+  if (abs(Dec) < 89.98333333) {
     double h=HA/Rad;
     double d=Dec/Rad;
     double sinDec=sin(d);
@@ -432,7 +431,7 @@ void TGeoAlign::instrToEqu(double HA, double Dec, double *HA1, double *Dec1, int
     // works on HA instead.  meridian flips affect this in HA
     double PDh=-pdCor*(sinDec/cosDec)*p;
 
-#ifdef MOUNT_TYPE_FORK
+#if MOUNT_TYPE == FORK
     // Fork flex
     double DFd=dfCor*cosHA;
 #else
@@ -457,10 +456,10 @@ void TGeoAlign::instrToEqu(double HA, double Dec, double *HA1, double *Dec1, int
     *Dec1=Dec;
   }
 
-  while (*HA1>180.0) *HA1-=360.0;
-  while (*HA1<-180.0) *HA1+=360.0;
-  if (*Dec1>90.0) *Dec1=90.0;
-  if (*Dec1<-90.0) *Dec1=-90.0;
+  while (*HA1 > 180.0) *HA1-=360.0;
+  while (*HA1 < -180.0) *HA1+=360.0;
+  if (*Dec1 > 90.0) *Dec1=90.0;
+  if (*Dec1 < -90.0) *Dec1=-90.0;
 }
 
 #endif

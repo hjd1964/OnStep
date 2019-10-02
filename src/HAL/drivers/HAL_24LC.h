@@ -22,7 +22,7 @@ public:
   {
     if (!__firstCall) {
       // wait for any prior write to complete
-      while ((int32_t)(millis()-lastWrite)<5) {};
+      while ((int32_t)(millis()-lastWrite) < 5) {};
     } else {
       __firstCall=false;
     }
@@ -38,7 +38,7 @@ public:
 
   void update(uint16_t address, uint8_t data)
   {
-    if (data!=read(address)) write(address,data);
+    if (data != read(address)) write(address,data);
   }
    
   uint8_t read(uint16_t address) 
@@ -47,7 +47,7 @@ public:
 
     if (!__firstCall) {
       // wait for any prior write to complete
-      while ((int32_t)(millis()-lastWrite)<5) {};
+      while ((int32_t)(millis()-lastWrite) < 5) {};
     } else {
       __firstCall=false;
     }
@@ -68,5 +68,3 @@ private:
 };
 
 _eeprom EEPROM;
-
-

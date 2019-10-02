@@ -42,8 +42,8 @@ class tmcSpiDriver {
       float Ifs = 0.325/rsense;
       unsigned long IHOLD=round(( ((float)ihold/1000.0)/Ifs)*32.0)-1;
       unsigned long IRUN =round(( ((float)irun/1000.0)/Ifs)*32.0)-1;
-      if (IHOLD<0) IHOLD=0; if (IHOLD>31) IHOLD=31;
-      if (IRUN<0)  IRUN=0;  if (IRUN>31)  IRUN=31;
+      if (IHOLD < 0) IHOLD=0; if (IHOLD > 31) IHOLD=31;
+      if (IRUN < 0)  IRUN=0;  if (IRUN > 31)  IRUN=31;
 
       //        IHOLD    + IRUN    + IHOLDDELAY
       data_out=(IHOLD<<0)+(IRUN<<8)+(4UL<<16);
@@ -112,36 +112,36 @@ class tmcSpiDriver {
 // -------------------------------
 // CHOPCONF settings
 
-    bool set_CHOPCONF_toff(int v)     { if ((v>=2) && (v<=15)) { _cc_toff=v; return true; } return false; }
-    bool set_CHOPCONF_hstart(int v)   { if ((v>=0) && (v<=7))  { _cc_hstart=v; return true; } return false; }
-    bool set_CHOPCONF_hend(int v)     { if ((v>=0) && (v<=15)) { _cc_hend=v; return true; } return false; }
-    bool set_CHOPCONF_rndtf(int v)    { if ((v>=0) && (v<=1))  { _cc_rndtf=v; return true; } return false; }
-    bool set_CHOPCONF_tbl(int v)      { if ((v>=0) && (v<=3))  { _cc_tbl=v; return true; } return false; }
-    bool set_CHOPCONF_vsense(int v)   { if ((v>=0) && (v<=1))  { _cc_vsense=v; return true; } return false; }
-    bool set_CHOPCONF_vhighfs(int v)  { if ((v>=0) && (v<=1))  { _cc_vhighfs=v; return true; } return false; }
-    bool set_CHOPCONF_vhignchm(int v) { if ((v>=0) && (v<=1))  { _cc_vhighchm=v; return true; } return false; }
+    bool set_CHOPCONF_toff(int v)     { if ((v >= 2) && (v <= 15)) { _cc_toff=v; return true; } return false; }
+    bool set_CHOPCONF_hstart(int v)   { if ((v >= 0) && (v <= 7))  { _cc_hstart=v; return true; } return false; }
+    bool set_CHOPCONF_hend(int v)     { if ((v >= 0) && (v <= 15)) { _cc_hend=v; return true; } return false; }
+    bool set_CHOPCONF_rndtf(int v)    { if ((v >= 0) && (v <= 1))  { _cc_rndtf=v; return true; } return false; }
+    bool set_CHOPCONF_tbl(int v)      { if ((v >= 0) && (v <= 3))  { _cc_tbl=v; return true; } return false; }
+    bool set_CHOPCONF_vsense(int v)   { if ((v >= 0) && (v <= 1))  { _cc_vsense=v; return true; } return false; }
+    bool set_CHOPCONF_vhighfs(int v)  { if ((v >= 0) && (v <= 1))  { _cc_vhighfs=v; return true; } return false; }
+    bool set_CHOPCONF_vhignchm(int v) { if ((v >= 0) && (v <= 1))  { _cc_vhighchm=v; return true; } return false; }
 
 // -------------------------------
 // TPOWERDOWN setting
-    bool set_TPOWERDOWN_value(int v)  { if ((v>=0) && (v<=255)) { _tpd_value=v; return true; } return false; }
+    bool set_TPOWERDOWN_value(int v)  { if ((v >= 0) && (v <= 255)) { _tpd_value=v; return true; } return false; }
 
 // -------------------------------
 // TPWMTHRS setting
-    bool set_TPWMTHRS_value(int v)    { if ((v>=0) && (v<=1048575)) { _tpt_value=v; return true; } return false; }
+    bool set_TPWMTHRS_value(int v)    { if ((v >= 0) && (v <= 1048575)) { _tpt_value=v; return true; } return false; }
 
 // -------------------------------
 // THIGH setting
-    bool set_THIGH_value(int v)       { if ((v>=0) && (v<=1048575)) { _thigh_value=v; return true; } return false; }
+    bool set_THIGH_value(int v)       { if ((v >= 0) && (v <= 1048575)) { _thigh_value=v; return true; } return false; }
 
 // -------------------------------
 // PWMCONF settings
 
-    bool set_PWMCONF_PWM_AMPL(int v) { if ((v>=0) && (v<=255)) { _pc_PWM_AMPL=v; return true; } return false; }
-    bool set_PWMCONF_PWM_GRAD(int v) { if ((v>=0) && (v<=255)) { _pc_PWM_GRAD=v; return true; } return false; }
-    bool set_PWMCONF_pwm_freq(int v) { if ((v>=0) && (v<=3))   { _pc_pwm_freq=v; return true; } return false; }
-    bool set_PWMCONF_pwm_auto(int v) { if ((v>=0) && (v<=1))   { _pc_pwm_auto=v; return true; } return false; }
-    bool set_PWMCONF_pwm_sym(int v)  { if ((v>=0) && (v<=1))   { _pc_pwm_sym=v; return true; } return false; }
-    bool set_PWMCONF_pwm_freewheel(int v) { if ((v>=0) && (v<=1)) { _pc_pwm_freewheel=v; return true; } return false; }
+    bool set_PWMCONF_PWM_AMPL(int v) { if ((v >= 0) && (v <= 255)) { _pc_PWM_AMPL=v; return true; } return false; }
+    bool set_PWMCONF_PWM_GRAD(int v) { if ((v >= 0) && (v <= 255)) { _pc_PWM_GRAD=v; return true; } return false; }
+    bool set_PWMCONF_pwm_freq(int v) { if ((v >= 0) && (v <= 3))   { _pc_pwm_freq=v; return true; } return false; }
+    bool set_PWMCONF_pwm_auto(int v) { if ((v >= 0) && (v <= 1))   { _pc_pwm_auto=v; return true; } return false; }
+    bool set_PWMCONF_pwm_sym(int v)  { if ((v >= 0) && (v <= 1))   { _pc_pwm_sym=v; return true; } return false; }
+    bool set_PWMCONF_pwm_freewheel(int v) { if ((v >= 0) && (v <= 1)) { _pc_pwm_freewheel=v; return true; } return false; }
     
 // ----------------------------------------------------------------------------------------------------------------------
 // DRVSTATUS
@@ -198,13 +198,13 @@ class tmcSpiDriver {
       return true;
     }
 
-    bool set_COOLCONF_semin(int v)  { if ((v>=0) && (v<=15))   { _ccf_semin=v; return true; } return false; }
-    bool set_COOLCONF_seup(int v)   { if ((v>=0) && (v<=3))    { _ccf_seup=v; return true; } return false; }
-    bool set_COOLCONF_semax(int v)  { if ((v>=0) && (v<=15))   { _ccf_semax=v; return true; } return false; }
-    bool set_COOLCONF_sedn(int v)   { if ((v>=0) && (v<=3))    { _ccf_sedn=v; return true; } return false; }
-    bool set_COOLCONF_seimin(int v) { if ((v>=0) && (v<=1))    { _ccf_seimin=v; return true; } return false; }
-    bool set_COOLCONF_sgt(int v)    { if ((v>=-64) && (v<=63)) { _ccf_sgt=v+64; return true; } return false; }
-    bool set_COOLCONF_sfilt(int v)  { if ((v>=0) && (v<=1))    { _ccf_sfilt=v; return true; } return false; }
+    bool set_COOLCONF_semin(int v)  { if ((v >= 0) && (v <= 15))   { _ccf_semin=v; return true; } return false; }
+    bool set_COOLCONF_seup(int v)   { if ((v >= 0) && (v <= 3))    { _ccf_seup=v; return true; } return false; }
+    bool set_COOLCONF_semax(int v)  { if ((v >= 0) && (v <= 15))   { _ccf_semax=v; return true; } return false; }
+    bool set_COOLCONF_sedn(int v)   { if ((v >= 0) && (v <= 3))    { _ccf_sedn=v; return true; } return false; }
+    bool set_COOLCONF_seimin(int v) { if ((v >= 0) && (v <= 1))    { _ccf_seimin=v; return true; } return false; }
+    bool set_COOLCONF_sgt(int v)    { if ((v >= -64) && (v <= 63)) { _ccf_sgt=v+64; return true; } return false; }
+    bool set_COOLCONF_sfilt(int v)  { if ((v >= 0) && (v <= 1))    { _ccf_sfilt=v; return true; } return false; }
 
   private:
     uint8_t write(byte Address, uint32_t data_out)

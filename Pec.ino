@@ -2,10 +2,10 @@
 // Functions to handle periodic error correction
 
 // enables code to clean-up PEC readings after record (use PECprep or a spreadsheet to fix readings otherwise)
-// this cleans up any tracking rate variations that would be introduced by recording more guiding corrections to either the east or west, default=_ON
-#define PEC_CLEANUP_ON
+// this cleans up any tracking rate variations that would be introduced by recording more guiding corrections to either the east or west, default ON
+#define PEC_CLEANUP ON
 
-#ifdef PEC_SENSE_OFF
+#if PEC_SENSE == OFF
   boolean wormSensedFirst=true;
 #else
   boolean wormSensedFirst=false;
@@ -21,23 +21,23 @@ void pec() {
   // keep track of our current step position, and when the step position on the worm wraps during playback
   cli(); long pecPos=(long)targetAxis1.part.m; sei();
   
-  #ifdef PEC_SENSE_OFF
+  #if PEC_SENSE == OFF
     wormSensedFirst=true;
   #endif
-  #ifdef PEC_SENSE
+  #if PEC_SENSE >= 0
     // for analog sense, with 60 second delay before redetect
-    long dist; if (wormSensePos>pecPos) dist=wormSensePos-pecPos; else dist=pecPos-wormSensePos;
-    if ((dist>StepsPerSecondAxis1*60.0) && (pecAnalogValue>PEC_SENSE)) {
+    long dist; if (wormSensePos > pecPos) dist=wormSensePos-pecPos; else dist=pecPos-wormSensePos;
+    if ((dist > StepsPerSecondAxis1*60.0) && (pecAnalogValue > PEC_SENSE)) {
       wormSensePos=pecPos;
       wormSensedAgain=true;
       wormSensedFirst=true;
       pecBufferStart=true;
     } else pecBufferStart=false;
   #endif
-  #if defined(PEC_SENSE_ON) || defined(PEC_SENSE_PULLUP)
+  #if PEC_SENSE == ON || PEC_SENSE == ON_PULLUP || PEC_SENSE == ON_PULLDOWN
     // for digital sense, with 60 second delay before redetect
-    long dist; if (wormSensePos>pecPos) dist=wormSensePos-pecPos; else dist=pecPos-wormSensePos;
-    if ((dist>StepsPerSecondAxis1*60.0) && (digitalRead(PecPin)==PEC_SENSE_STATE)) {
+    long dist; if (wormSensePos > pecPos) dist=wormSensePos-pecPos; else dist=pecPos-wormSensePos;
+    if ((dist > StepsPerSecondAxis1*60.0) && (digitalRead(PecPin) == PEC_SENSE_STATE)) {
       wormSensePos=pecPos;
       wormSensedAgain=true;
       wormSensedFirst=true;
@@ -45,26 +45,26 @@ void pec() {
     } else pecBufferStart=false;
   #endif
 
-  if (pecStatus==IgnorePEC) { pecTimerRateAxis1=0.0; return; }
+  if (pecStatus == IgnorePEC) { pecTimerRateAxis1=0.0; return; }
   if (!wormSensedFirst) return;
 
   // worm step position corrected for any index found
   lastWormRotationPos=wormRotationPos;
   wormRotationPos=(pecPos-wormSensePos);
-  while (wormRotationPos>=(long)StepsPerWormRotationAxis1) wormRotationPos-=(long)StepsPerWormRotationAxis1;
-  while (wormRotationPos<0) wormRotationPos+=(long)StepsPerWormRotationAxis1;
+  while (wormRotationPos >= (long)AXIS1_STEPS_PER_WORMROT) wormRotationPos-=(long)AXIS1_STEPS_PER_WORMROT;
+  while (wormRotationPos < 0) wormRotationPos+=(long)AXIS1_STEPS_PER_WORMROT;
   // "soft" PEC index sense
-  #ifdef PEC_SENSE_OFF
-  if ((wormRotationPos-lastWormRotationPos)<0) pecBufferStart=true; else pecBufferStart=false;
+  #if PEC_SENSE == OFF
+  if ((wormRotationPos-lastWormRotationPos) < 0) pecBufferStart=true; else pecBufferStart=false;
   #endif
     
   // handle playing back and recording PEC
   cli(); long t=lst; sei();
 
   // start playing PEC
-  if (pecStatus==ReadyPlayPEC) {
+  if (pecStatus == ReadyPlayPEC) {
     // makes sure the index is at the start of a second before resuming play
-    if ((long)fmod(wormRotationPos,StepsPerSecondAxis1)==0) {
+    if ((long)fmod(wormRotationPos,StepsPerSecondAxis1) == 0) {
       pecStatus=PlayPEC;
       pecIndex=wormRotationPos/StepsPerSecondAxis1;
 
@@ -73,8 +73,8 @@ void pec() {
     }
   } else
   // start recording PEC
-  if (pecStatus==ReadyRecordPEC) {
-    if ((long)fmod(wormRotationPos,StepsPerSecondAxis1)==0) {
+  if (pecStatus == ReadyRecordPEC) {
+    if ((long)fmod(wormRotationPos,StepsPerSecondAxis1) == 0) {
       pecStatus=RecordPEC;
       pecIndex=wormRotationPos/StepsPerSecondAxis1;
       pecRecorded=false;
@@ -86,49 +86,49 @@ void pec() {
     }
   } else
   // and once the PEC data is all stored, indicate that it's valid and start using it
-  if ((pecStatus==RecordPEC) && (t-pecRecordStopTime>0)) {
+  if ((pecStatus == RecordPEC) && (t-pecRecordStopTime > 0)) {
     pecStatus=PlayPEC;
     pecRecorded=true;
     pecFirstRecord=false;
-#ifdef PEC_CLEANUP_ON
+#if PEC_CLEANUP == ON
     cleanupPec();
 #endif
   }
 
   // reset the buffer index to match the worm index
-  if (pecBufferStart && (pecStatus!=RecordPEC)) { pecIndex=0; PecSiderealTimer=t; }
+  if (pecBufferStart && (pecStatus != RecordPEC)) { pecIndex=0; PecSiderealTimer=t; }
   // Increment the PEC index once a second and make it go back to zero when the worm finishes a rotation
-  if (t-PecSiderealTimer>99) {
+  if (t-PecSiderealTimer > 99) {
     PecSiderealTimer=t; pecIndex=(pecIndex+1)%SecondsPerWormRotationAxis1;
   }
-  pecIndex1=pecIndex; if (pecIndex1<0) pecIndex1+=SecondsPerWormRotationAxis1; if (pecIndex1>=SecondsPerWormRotationAxis1) pecIndex1-=SecondsPerWormRotationAxis1;
+  pecIndex1=pecIndex; if (pecIndex1 < 0) pecIndex1+=SecondsPerWormRotationAxis1; if (pecIndex1 >= SecondsPerWormRotationAxis1) pecIndex1-=SecondsPerWormRotationAxis1;
 
   accPecGuideHA.fixed+=guideAxis1.fixed;
   
   // falls in whenever the pecIndex changes, which is once a sidereal second
-  if (pecIndex1!=lastPecIndex) {
+  if (pecIndex1 != lastPecIndex) {
     lastPecIndex=pecIndex1;
 
     // assume no change to tracking rate
     pecTimerRateAxis1=0.0;
 
-    if (pecStatus==RecordPEC) {
+    if (pecStatus == RecordPEC) {
       // save the correction as 1 of 3 weighted average
       int l=round(fixedToDouble(accPecGuideHA));
-      if (l<-StepsPerSecondAxis1) l=-StepsPerSecondAxis1; if (l>StepsPerSecondAxis1) l=StepsPerSecondAxis1;   // +/-1 sidereal rate range for corrections
-      if (l<-127) l=-127; if (l>127) l=127;                                                                   // prevent overflow if StepsPerSecondAxis1>127
+      if (l < -StepsPerSecondAxis1) l=-StepsPerSecondAxis1; if (l > StepsPerSecondAxis1) l=StepsPerSecondAxis1;   // +/-1 sidereal rate range for corrections
+      if (l < -127) l=-127; if (l > 127) l=127;                                                                   // prevent overflow if StepsPerSecondAxis1 > 127
       if (!pecFirstRecord) l=(l+((int)pecBuffer[pecIndex1]-128)*2)/3; 
       pecBuffer[pecIndex1]=l+128;  // save the correction
       accPecGuideHA.part.m-=l;     // remove from the accumulator
     }
 
-    if (pecStatus==PlayPEC) {
+    if (pecStatus == PlayPEC) {
       // pecIndex2 adjusts one second before the value was recorded, an estimate of the latency between image acquisition and response
       // if sending values directly to OnStep from PECprep, etc. be sure to account for this
-      int pecIndex2=pecIndex1-1; if (pecIndex2<0) pecIndex2+=SecondsPerWormRotationAxis1;
+      int pecIndex2=pecIndex1-1; if (pecIndex2 < 0) pecIndex2+=SecondsPerWormRotationAxis1;
       // number of steps ahead or behind for this 1 second slot, up to +/-127
       int l=pecBuffer[pecIndex2]-128;
-      if (l>StepsPerSecondAxis1) l=StepsPerSecondAxis1; if (l<-StepsPerSecondAxis1) l=-StepsPerSecondAxis1;
+      if (l > StepsPerSecondAxis1) l=StepsPerSecondAxis1; if (l < -StepsPerSecondAxis1) l=-StepsPerSecondAxis1;
       pecTimerRateAxis1=((double)l/StepsPerSecondAxis1);
     }
   }
@@ -136,15 +136,15 @@ void pec() {
  
 void disablePec() {
   // give up recording if we stop tracking at the sidereal rate
-  if (pecStatus==RecordPEC)  { pecStatus=IgnorePEC; pecTimerRateAxis1=0.0; } // don't zero the PEC offset, we don't want things moving and it really doesn't matter 
+  if (pecStatus == RecordPEC)  { pecStatus=IgnorePEC; pecTimerRateAxis1=0.0; } // don't zero the PEC offset, we don't want things moving and it really doesn't matter 
   // get ready to re-index when tracking comes back
-  if (pecStatus==PlayPEC)  { pecStatus=ReadyPlayPEC; pecTimerRateAxis1=0.0; } 
+  if (pecStatus == PlayPEC)  { pecStatus=ReadyPlayPEC; pecTimerRateAxis1=0.0; } 
 }
 
 void cleanupPec() {
   // low pass filter ----------------------------------------------------------
   int j,J1,J4,J9,J17;
-  for (int scc=0+3; scc<SecondsPerWormRotationAxis1+3; scc++) {
+  for (int scc=0+3; scc < SecondsPerWormRotationAxis1+3; scc++) {
     j=pecBuffer[((scc)%SecondsPerWormRotationAxis1)]-128;
 
     J1=(int)round((float)j*0.01);
@@ -165,7 +165,7 @@ void cleanupPec() {
   // linear regression ----------------------------------------------------------
   // the number of steps added should equal the number of steps subtracted (from the cycle)
   // first, determine how far we've moved ahead or backward in steps
-  long sum_pec=0; for (int scc=0; scc<SecondsPerWormRotationAxis1; scc++) { sum_pec+=(int)pecBuffer[scc]-128; }
+  long sum_pec=0; for (int scc=0; scc < SecondsPerWormRotationAxis1; scc++) { sum_pec+=(int)pecBuffer[scc]-128; }
 
   // this is the correction coefficient for a given location in the sequence
   double Ccf = (double)sum_pec/(double)SecondsPerWormRotationAxis1;
@@ -173,7 +173,7 @@ void cleanupPec() {
   // now, apply the correction to the sequence to make the PEC adjustments null out
   // this process was simulated in a spreadsheet and the roundoff error might leave us at +/- a step which is tacked on at the beginning
   long lp2=0; sum_pec=0; 
-  for (int scc=0; scc<SecondsPerWormRotationAxis1; scc++) {
+  for (int scc=0; scc < SecondsPerWormRotationAxis1; scc++) {
     // the correction, "now"
     long lp1=lround(-(double)scc*Ccf);
     
@@ -187,6 +187,12 @@ void cleanupPec() {
   pecBuffer[0]-=sum_pec;
 
   // a reality check, make sure the buffer data looks good, if not forget it
-  if ((sum_pec>2) || (sum_pec<-2)) { pecRecorded=false; pecStatus=IgnorePEC; }
+  if ((sum_pec > 2) || (sum_pec < -2)) { pecRecorded=false; pecStatus=IgnorePEC; }
 }
 
+// it often takes a couple of ms to record a value to EEPROM, this can effect tracking performance since interrupts are disabled during the operation.
+// so we store PEC data in RAM while recording.  When done, sidereal tracking is turned off and the data is written to EEPROM.
+void createPecBuffer() {
+  pecBuffer = (byte*)malloc(pecBufferSize * sizeof(*pecBuffer));
+  if (!pecBuffer) pecBufferSize=0;
+}

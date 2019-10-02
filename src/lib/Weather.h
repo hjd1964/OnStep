@@ -3,20 +3,17 @@
 
 #pragma once
 
-#if defined(WEATHER_BME280_ON) || defined(WEATHER_BME280) || defined(WEATHER_BME280SPI_ON) || defined(WEATHER_BME280SPI)
-  #include <Adafruit_BME280.h> // https://github.com/adafruit/Adafruit_BME280_Library and https://github.com/adafruit/Adafruit_Sensor
-  #if defined(WEATHER_BME280SPI_ON)
-    Adafruit_BME280 bme(BME280_CS_PIN); // hardware SPI
-//  Adafruit_BME280 bme(BME280_CS_PIN, SSPI_MOSI, SSPI_MISO, SSPI_SCK); // software SPI
-  #elif defined(WEATHER_BME280SPI)
-    Adafruit_BME280 bme(WEATHER_BME280SPI); // hardware SPI (user defined CS)
-//  Adafruit_BME280 bme(WEATHER_BME280SPI, SSPI_MOSI, SSPI_MISO, SSPI_SCK); // software SPI (user defined CS)
-  #else
+#if WEATHER == BME280 || WEATHER == BME280SPI
+  #include <Adafruit_BME280.h>            // https://github.com/adafruit/Adafruit_BME280_Library and https://github.com/adafruit/Adafruit_Sensor
+  #if WEATHER == BME280
     Adafruit_BME280 bme;
+  #elif WEATHER == BME280SPI
+    Adafruit_BME280 bme(BME280_CS_PIN);                                   // hardware SPI
+    //Adafruit_BME280 bme(BME280_CS_PIN, SSPI_MOSI, SSPI_MISO, SSPI_SCK); // software SPI
   #endif
 #endif
 
-#ifdef TEMPERATURE_DS1820_ON
+#if TELESCOPE_TEMPERATURE == DS1820
   #include <OneWire.h>                    // added via built in Arduino IDE library manager
   #include <DallasTemperature.h>          // added via built in Arduino IDE library manager
   OneWire oneWire(OneWirePin);
@@ -26,56 +23,55 @@
 class weather {
   public:
     void init() {
-#if defined(WEATHER_BME280_ON) || defined(WEATHER_BME280) || defined(WEATHER_BME280SPI_ON) || defined(WEATHER_BME280SPI)
-      #if defined(WEATHER_BME280)
-        if (bme.begin(WEATHER_BME280,&HAL_Wire)) _disabled=false;
-      #elif defined(WEATHER_BME280_ON)
+#if TELESCOPE_TEMPERATURE == DS1820
+      _disabled=false;
+#endif
+#if WEATHER == BME280 || WEATHER == BME280SPI
+      #if WEATHER == BME280
         if (bme.begin(&HAL_Wire)) _disabled=false;
       #else
         if (bme.begin()) _disabled=false;
       #endif
-      if (!_disabled) {
-        _t=bme.readTemperature();
-        _p=bme.readPressure()/100.0;
-        _h=bme.readHumidity();
-      }
   #ifdef ESP32
       HAL_Wire.end();
   #endif
-#endif
-#ifdef TEMPERATURE_DS1820_ON
-      _disabled=false;
-      if (!_disabled) {
-        DS18B20.requestTemperatures(); 
-        _t=DS18B20.getTempCByIndex(0);
-      }
 #endif
     }
 
     // designed for a 1s polling interval to refresh readings once a minute
     void poll() {
-#if defined(WEATHER_BME280_ON) || defined(WEATHER_BME280) || defined(WEATHER_BME280SPI_ON) || defined(WEATHER_BME280SPI)
+
+#if WEATHER == BME280 || WEATHER == BME280SPI || TELESCOPE_TEMPERATURE == DS1820
       if (!_disabled) {
         static int phase=0;
-  #ifdef ESP32
-        if ((phase==10) || (phase==30) || (phase==50)) HAL_Wire.begin();
+
+  #if WEATHER == BME280 || WEATHER == BME280SPI
+    #ifdef ESP32
+        if ((phase == 10) || (phase == 30) || (phase == 50)) HAL_Wire.begin();
+    #endif
+        if (phase == 10) {
+          _t=bme.readTemperature();
+    #if TELESCOPE_TEMPERATURE != DS1820
+          _tt=_t;
+    #endif
+        }
+        if (phase == 30) _p=bme.readPressure()/100.0;
+        if (phase == 50) _h=bme.readHumidity();
+    #ifdef ESP32
+        if ((phase == 10) || (phase == 30) || (phase == 50)) HAL_Wire.end();  
+    #endif
   #endif
-        if (phase==10) _t=bme.readTemperature();
-        if (phase==30) _p=bme.readPressure()/100.0;
-        if (phase==50) _h=bme.readHumidity();
-  #ifdef ESP32
-        if ((phase==10) || (phase==30) || (phase==50)) HAL_Wire.end();  
+
+  #if TELESCOPE_TEMPERATURE == DS1820
+        if (phase == 70) {
+          DS18B20.requestTemperatures();
+          _tt=DS18B20.getTempCByIndex(0);
+    #if WEATHER != BME280 && WEATHER != BME280SPI
+          _t=_tt;
+    #endif
+        }
   #endif
-        phase++; if (phase==60) phase=0;
-      }
-#endif
-#ifdef TEMPERATURE_DS1820_ON
-      if (!_disabled) {
-        static int phase=0;
-        if (phase==10) { DS18B20.requestTemperatures(); _t=DS18B20.getTempCByIndex(0); } 
-        if (phase==30) ;    //nothing to do here
-        if (phase==50) ;    //nothing to do here
-        phase++; if (phase==60) phase=0;
+        phase++; if (phase == 90) phase=0;
       }
 #endif
     }
@@ -83,6 +79,11 @@ class weather {
     // get temperature in deg. C
     double getTemperature() {
       return _t;
+    }
+
+    // get telescope temperature in deg. C
+    double getTelescopeTemperature() {
+      return _tt;
     }
 
     // set temperature in deg. C
@@ -131,6 +132,7 @@ class weather {
   private:
     bool _disabled = true;
     double _t = 10.0;
+    double _tt = 10.0;
     double _p = 1010.0;
     double _h = 70.0;
     double _a = 200.0;

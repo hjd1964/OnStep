@@ -1,53 +1,110 @@
 // TMC SPI stepper driver init
 
 #if (AXIS1_DRIVER_MODEL == TMC_SPI) || (AXIS2_DRIVER_MODEL == TMC_SPI)
-  #define MODE_SWITCH_BEFORE_SLEW_SPI
+  #undef MODE_SWITCH_BEFORE_SLEW
+  #define MODE_SWITCH_BEFORE_SLEW TMC_SPI
 #endif
 
 #if AXIS1_DRIVER_MODEL == TMC_SPI
-  #ifndef AXIS1_TMC_MODE
-    #define AXIS1_TMC_MODE SPREADCYCLE
+  #ifndef AXIS1_DRIVER_DECAY_MODE
+    #define AXIS1_DRIVER_DECAY_MODE SPREADCYCLE
   #endif
-  #ifndef AXIS1_TMC_MODE_GOTO
-    #define AXIS1_TMC_MODE_GOTO SPREADCYCLE
+  #ifndef AXIS1_DRIVER_DECAY_MODE_GOTO
+    #define AXIS1_DRIVER_DECAY_MODE_GOTO SPREADCYCLE
   #endif
-  #ifndef AXIS1_TMC_INTPOL
-    #define AXIS1_TMC_INTPOL true
+  #ifndef AXIS1_DRIVER_INTPOL
+    #define AXIS1_DRIVER_INTPOL true
   #endif
-  #ifndef AXIS1_TMC_IRUN
-    #define AXIS1_TMC_IRUN 2500
+  #ifndef AXIS1_DRIVER_IRUN
+    #define AXIS1_DRIVER_IRUN 2500
   #endif
-  #ifndef AXIS1_TMC_IHOLD
-    #define AXIS1_TMC_IHOLD (AXIS1_TMC_IRUN/2)
+  #ifndef AXIS1_DRIVER_IHOLD
+    #define AXIS1_DRIVER_IHOLD (AXIS1_DRIVER_IRUN/2)
   #endif
-  #ifndef AXIS1_TMC_IGOTO
-    #define AXIS1_TMC_IGOTO AXIS1_TMC_IRUN
+  #ifndef AXIS1_DRIVER_IGOTO
+    #define AXIS1_DRIVER_IGOTO AXIS1_DRIVER_IRUN
   #endif
-  #ifndef AXIS1_TMC_RSENSE
-    #define AXIS1_TMC_RSENSE 0.11+0.02
+  #ifndef AXIS1_DRIVER_RSENSE
+    #define AXIS1_DRIVER_RSENSE 0.11+0.02
   #endif
 #endif
 
 #if AXIS2_DRIVER_MODEL == TMC_SPI
-  #ifndef AXIS2_TMC_MODE
-    #define AXIS2_TMC_MODE SPREADCYCLE
+  #ifndef AXIS2_DRIVER_DECAY_MODE
+    #define AXIS2_DRIVER_DECAY_MODE SPREADCYCLE
   #endif
-  #ifndef AXIS2_TMC_MODE_GOTO
-    #define AXIS2_TMC_MODE_GOTO SPREADCYCLE
+  #ifndef AXIS2_DRIVER_DECAY_MODE_GOTO
+    #define AXIS2_DRIVER_DECAY_MODE_GOTO SPREADCYCLE
   #endif
-  #ifndef AXIS2_TMC_INTPOL
-    #define AXIS2_TMC_INTPOL true
+  #ifndef AXIS2_DRIVER_INTPOL
+    #define AXIS2_DRIVER_INTPOL true
   #endif
-  #ifndef AXIS2_TMC_IRUN
-    #define AXIS2_TMC_IRUN 2500
+  #ifndef AXIS2_DRIVER_IRUN
+    #define AXIS2_DRIVER_IRUN 2500
   #endif
-  #ifndef AXIS2_TMC_IHOLD
-    #define AXIS2_TMC_IHOLD (AXIS2_TMC_IRUN/2)
+  #ifndef AXIS2_DRIVER_IHOLD
+    #define AXIS2_DRIVER_IHOLD (AXIS2_DRIVER_IRUN/2)
   #endif
-  #ifndef AXIS2_TMC_IGOTO
-    #define AXIS2_TMC_IGOTO AXIS2_TMC_IRUN
+  #ifndef AXIS2_DRIVER_IGOTO
+    #define AXIS2_DRIVER_IGOTO AXIS2_DRIVER_IRUN
   #endif
-  #ifndef AXIS2_TMC_RSENSE
-    #define AXIS2_TMC_RSENSE 0.11+0.02
+  #ifndef AXIS2_DRIVER_RSENSE
+    #define AXIS2_DRIVER_RSENSE 0.11+0.02
+  #endif
+#endif
+
+// Focuser/rotator
+
+#if ROTATOR == ON && AXIS3_DRIVER_MODEL == TMC_SPI
+  #ifndef AXIS3_DRIVER_DECAY_MODE
+    #define AXIS3_DRIVER_DECAY_MODE SPREADCYCLE
+  #endif
+  #ifndef AXIS3_DRIVER_INTPOL
+    #define AXIS3_DRIVER_INTPOL true
+  #endif
+  #ifndef AXIS3_DRIVER_IRUN
+    #define AXIS3_DRIVER_IRUN 2500
+  #endif
+  #ifndef AXIS3_DRIVER_IHOLD
+    #define AXIS3_DRIVER_IHOLD (AXIS3_DRIVER_IRUN/2)
+  #endif
+  #ifndef AXIS3_DRIVER_RSENSE
+    #define AXIS3_DRIVER_RSENSE 0.11+0.02
+  #endif
+#endif
+
+#if FOCUSER1 == ON && AXIS4_DRIVER_MODEL == TMC_SPI
+  #ifndef AXIS4_DRIVER_DECAY_MODE
+    #define AXIS4_DRIVER_DECAY_MODE SPREADCYCLE
+  #endif
+  #ifndef AXIS4_DRIVER_INTPOL
+    #define AXIS4_DRIVER_INTPOL true
+  #endif
+  #ifndef AXIS4_DRIVER_IRUN
+    #define AXIS4_DRIVER_IRUN 2500
+  #endif
+  #ifndef AXIS4_DRIVER_IHOLD
+    #define AXIS4_DRIVER_IHOLD (AXIS4_DRIVER_IRUN/2)
+  #endif
+  #ifndef AXIS4_DRIVER_RSENSE
+    #define AXIS4_DRIVER_RSENSE 0.11+0.02
+  #endif
+#endif
+
+#if FOCUSER2 == ON && AXIS5_DRIVER_MODEL == TMC_SPI
+  #ifndef AXIS5_DRIVER_DECAY_MODE
+    #define AXIS5_DRIVER_DECAY_MODE SPREADCYCLE
+  #endif
+  #ifndef AXIS5_DRIVER_INTPOL
+    #define AXIS5_DRIVER_INTPOL true
+  #endif
+  #ifndef AXIS5_DRIVER_IRUN
+    #define AXIS5_DRIVER_IRUN 2500
+  #endif
+  #ifndef AXIS5_DRIVER_IHOLD
+    #define AXIS5_DRIVER_IHOLD (AXIS5_DRIVER_IRUN/2)
+  #endif
+  #ifndef AXIS5_DRIVER_RSENSE
+    #define AXIS5_DRIVER_RSENSE 0.11+0.02
   #endif
 #endif

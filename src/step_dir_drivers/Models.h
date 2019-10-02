@@ -4,23 +4,14 @@
 #define TMC2130 100
 #define TMC2130_QUIET 101
 #define TMC2130_VQUIET 102
-#define TMC2130_LOWPWR 103
-#define TMC2130_QUIET_LOWPWR 104
-#define TMC2130_VQUIET_LOWPWR 105
 
 #define TMC5160 110
 #define TMC5160_QUIET 111
 #define TMC5160_VQUIET 112
-#define TMC5160_LOWPWR 113
-#define TMC5160_QUIET_LOWPWR 114
-#define TMC5160_VQUIET_LOWPWR 115
 
 // Macros, these variations don't appear at run-time and are changed to "TMC2209"
 #define TMC2209_QUIET 121
 #define TMC2209_VQUIET 122
-#define TMC2209_LOWPWR 123
-#define TMC2209_QUIET_LOWPWR 124
-#define TMC2209_VQUIET_LOWPWR 125
 
 // Models
 #define DRIVER_MODEL_FIRST 1
@@ -57,6 +48,17 @@
 #define STEALTHCHOP 1
 #define SPREADCYCLE 0
 #define OPEN 2
+
+// EN signal state defaults LOW
+#define AXIS1_DRIVER_ENABLE LOW
+#define AXIS2_DRIVER_ENABLE LOW
+#define AXIS3_DRIVER_ENABLE LOW
+#define AXIS4_DRIVER_ENABLE LOW
+#define AXIS5_DRIVER_ENABLE LOW
+
+// default mode switch state and sleep is disabled
+#define MODE_SWITCH_BEFORE_SLEW OFF
+#define MODE_SWITCH_SLEEP OFF
 
 // ------------------------------------------------------------------------------------------------------------------------
 // search function

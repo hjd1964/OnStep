@@ -32,7 +32,7 @@ class Mst4 : public Stream
     
     void end();
 
-    // recvs one char and transmits one char to/from buffers; recvd chars <32 are returned directly and bypass the buffer
+    // recvs one char and transmits one char to/from buffers; recvd chars < 32 are returned directly and bypass the buffer
     inline char poll() {
       char c=0;
       if (trans(&c,_xmit_buffer[_xmit_head])) {
@@ -42,7 +42,7 @@ class Mst4 : public Stream
         }
         // data coming in was good?
         if (!_recv_error) {
-          if (c>=(char)32) { _recv_buffer[_recv_tail]=c; _recv_tail++; _recv_buffer[_recv_tail]=(char)0; return (char)0; } else return c;
+          if (c >= (char)32) { _recv_buffer[_recv_tail]=c; _recv_tail++; _recv_buffer[_recv_tail]=(char)0; return (char)0; } else return c;
         } else return (char)0;
       } else return (char)0;
     }
@@ -77,10 +77,10 @@ class Mst4 : public Stream
       // SHC_CLOCK HIGH for more than 1500 us means that a pair of data bytes is done being exchanged
       #ifdef HAL_SLOW_PROCESSOR
         #define XMIT_TIME 20
-        if ((micros()-lastMicros)<10000L) return false;
+        if ((micros()-lastMicros) < 10000L) return false;
       #else
         #define XMIT_TIME 40
-        if ((micros()-lastMicros)<3000L) return false;
+        if ((micros()-lastMicros) < 3000L) return false;
       #endif
 
       uint8_t s_parity=0;
@@ -100,7 +100,7 @@ class Mst4 : public Stream
       delayMicroseconds(XMIT_TIME);
       if (_frame_error) { lastMicros=micros(); return false; }
 
-      for (int i=7; i>=0; i--)
+      for (int i=7; i >= 0; i--)
       {
         uint8_t state=bitRead(data_out,i); s_parity+=state;
         digitalWrite(ST4DEs,LOW);                      // clock
@@ -125,7 +125,7 @@ class Mst4 : public Stream
       digitalWrite(ST4DEn,_recv_error);                // send local parity check
       delayMicroseconds(XMIT_TIME);
       digitalWrite(ST4DEs,HIGH);                       // clock
-      if (digitalRead(ST4RAw)==HIGH) _send_error=true; // recv remote parity, ok?
+      if (digitalRead(ST4RAw) == HIGH) _send_error=true; // recv remote parity, ok?
       delayMicroseconds(XMIT_TIME);
 
       // stop bit
@@ -159,7 +159,7 @@ void Mst4::end() {
 
 size_t Mst4::write(uint8_t data) {
   unsigned long t_start=millis();
-  byte xh=_xmit_head; xh--; while (_xmit_tail == xh) { poll(); if ((millis()-t_start)>_timeout) return 0; }
+  byte xh=_xmit_head; xh--; while (_xmit_tail == xh) { poll(); if ((millis()-t_start) > _timeout) return 0; }
   _xmit_buffer[_xmit_tail]=data; _xmit_tail++;
   _xmit_buffer[_xmit_tail]=0;
   return 1;
@@ -167,9 +167,9 @@ size_t Mst4::write(uint8_t data) {
 
 size_t Mst4::write(const uint8_t *data, size_t quantity) {
   // fail if trying to write more than the buffer can hold
-  if ((int)quantity>254) return 0;
+  if ((int)quantity > 254) return 0;
 
-  for (int i=0; i<(int)quantity; i++) { if (!write(data[i])) return 0; }
+  for (int i=0; i < (int)quantity; i++) { if (!write(data[i])) return 0; }
   return 1;
 }
 
@@ -181,13 +181,13 @@ int Mst4::available(void) {
 
 int Mst4::read(void) {
   char c=_recv_buffer[_recv_head]; if (c!=0) _recv_head++;
-  if (c==0) c=-1;
+  if (c == 0) c=-1;
   return c;
 }
 
 int Mst4::peek(void) {
   int c=_recv_buffer[_recv_head];
-  if (c==0) c=-1;
+  if (c == 0) c=-1;
 
   return c;
 }
@@ -198,7 +198,7 @@ void Mst4::flush(void) {
   do {
     poll();
     c=_xmit_buffer[_xmit_head];
-  } while ((c!=0) || ((millis()-startMs)<_timeout));
+  } while ((c!=0) || ((millis()-startMs) < _timeout));
 }
 
 Mst4 SerialST4;

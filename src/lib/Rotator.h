@@ -55,19 +55,19 @@ class rotator {
     // sets logic state for reverse motion
     void setReverseState(int reverseState) {
       this->reverseState=reverseState;
-      if (reverseState==LOW) forwardState=HIGH; else forwardState=LOW;
+      if (reverseState == LOW) forwardState=HIGH; else forwardState=LOW;
     }
 
     // sets logic state for disabling stepper driver
     void setDisableState(boolean disableState) {
       this->disableState=disableState;
-      if (disableState==LOW) enableState=HIGH; else enableState=LOW;
+      if (disableState == LOW) enableState=HIGH; else enableState=LOW;
       if (enPin!=-1) { pinMode(enPin,OUTPUT); enableDriver(); currentlyDisabled=false; }
     }
 
     // allows enabling/disabling stepper driver
     void powerDownActive(boolean active) {
-      if (enPin==-1) { pda=false; return; }
+      if (enPin == -1) { pda=false; return; }
       pda=active;
       if (pda) { pinMode(enPin,OUTPUT); disableDriver(); currentlyDisabled=true; }
     }
@@ -116,7 +116,7 @@ class rotator {
     // set movement rate in deg/second (continuous mode)
     void setMoveRate(double rate) {
       moveRate=rate*spd;                          // in steps per second
-      if (moveRate>spsMax) moveRate=spsMax;       // limit to maxRate
+      if (moveRate > spsMax) moveRate=spsMax;       // limit to maxRate
     }
     
     // check if moving
@@ -137,7 +137,7 @@ class rotator {
         fixed_t xl;
         xl.part.m=(long)(increment*spd*1000.0); xl.fixed/=1000;
         target.fixed+=xl.fixed;
-        if ((long)target.part.m>smax) { target.part.m=smax; target.part.f=0; }
+        if ((long)target.part.m > smax) { target.part.m=smax; target.part.f=0; }
       }
     }
 
@@ -149,7 +149,7 @@ class rotator {
         fixed_t xl;
         xl.part.m=(long)(increment*spd*1000.0); xl.fixed/=1000;
         target.fixed-=xl.fixed;
-        if ((long)target.part.m<smin) { target.part.m=smin; target.part.f=0; }
+        if ((long)target.part.m < smin) { target.part.m=smin; target.part.f=0; }
       }
     }
 
@@ -167,21 +167,21 @@ class rotator {
     // sets current position in degrees
     void setPosition(double deg) {
       spos=round(deg*spd);
-      if (spos<smin) spos=smin; if (spos>smax) spos=smax;
+      if (spos < smin) spos=smin; if (spos > smax) spos=smax;
       target.part.m=spos; target.part.f=0;
     }
 
     // set target
     void setTarget(double deg) {
       target.part.m=deg*spd; target.part.f=0;
-      if ((long)target.part.m<smin) target.part.m=smin; if ((long)target.part.m>smax) target.part.m=smax;
+      if ((long)target.part.m < smin) target.part.m=smin; if ((long)target.part.m > smax) target.part.m=smax;
     }
 
     // do de-rotate movement
     void move(boolean tracking) {
       if (DR && tracking) target.fixed+=deltaDR.fixed;
       target.fixed+=delta.fixed;
-      if (((long)target.part.m<smin) || ((long)target.part.m>smax)) { DR=false; delta.fixed=0; deltaDR.fixed=0; }
+      if (((long)target.part.m < smin) || ((long)target.part.m > smax)) { DR=false; delta.fixed=0; deltaDR.fixed=0; }
     }
 
 #ifdef MOUNT_TYPE_ALTAZM
@@ -196,20 +196,20 @@ class rotator {
 #endif
     
     void follow() {
-      if (pda && !currentlyDisabled && ((micros()-lastPhysicalMove)>10000000L)) { currentlyDisabled=true; disableDriver(); }
+      if (pda && !currentlyDisabled && ((micros()-lastPhysicalMove) > 10000000L)) { currentlyDisabled=true; disableDriver(); }
       
       unsigned long microsNow=micros();
-      if ((long)(microsNow-nextPhysicalMove)>0) {
+      if ((long)(microsNow-nextPhysicalMove) > 0) {
         nextPhysicalMove=microsNow+(unsigned long)(maxRate*1000.0);
       
-        if ((spos<(long)target.part.m) && (spos<smax)) {
+        if ((spos < (long)target.part.m) && (spos < smax)) {
           if (pda && currentlyDisabled) { currentlyDisabled=false; enableDriver(); delayMicroseconds(5); }
           digitalWrite(stepPin,LOW); delayMicroseconds(5);
           digitalWrite(dirPin,forwardState); delayMicroseconds(5);
           digitalWrite(stepPin,HIGH); spos++;
           lastPhysicalMove=millis();
         } else
-        if ((spos>(long)target.part.m) && (spos>smin)) {
+        if ((spos > (long)target.part.m) && (spos > smin)) {
           if (pda && currentlyDisabled) { currentlyDisabled=false; enableDriver(); delayMicroseconds(5); }
           digitalWrite(stepPin,LOW); delayMicroseconds(5);
           digitalWrite(dirPin,reverseState); delayMicroseconds(5);
@@ -222,20 +222,20 @@ class rotator {
   private:
 
     void enableDriver() {
-      if (enPin==-1) return;
+      if (enPin == -1) return;
       // for Aux5/Aux6 (DAC) support for stepper driver EN control on MaxPCB
 #if defined(A21) && defined(A22)
-      if (enPin==A21) { if (enableState==HIGH) analogWrite(A21,1024); else analogWrite(A21,0); return; }
-      if (enPin==A22) { if (enableState==HIGH) analogWrite(A22,1024); else analogWrite(A22,0); return; }
+      if (enPin == A21) { if (enableState == HIGH) analogWrite(A21,1024); else analogWrite(A21,0); return; }
+      if (enPin == A22) { if (enableState == HIGH) analogWrite(A22,1024); else analogWrite(A22,0); return; }
 #endif
       digitalWrite(enPin,enableState);
     }
 
     void disableDriver() {
-      if (enPin==-1) return;
+      if (enPin == -1) return;
 #if defined(A21) && defined(A22)
-      if (enPin==A21) { if (disableState==HIGH) analogWrite(A21,1024); else analogWrite(A21,0); return; }
-      if (enPin==A22) { if (disableState==HIGH) analogWrite(A22,1024); else analogWrite(A22,0); return; }
+      if (enPin == A21) { if (disableState == HIGH) analogWrite(A21,1024); else analogWrite(A21,0); return; }
+      if (enPin == A22) { if (disableState == HIGH) analogWrite(A22,1024); else analogWrite(A22,0); return; }
 #endif
       digitalWrite(enPin,disableState);
     }
@@ -251,8 +251,8 @@ class rotator {
       // one minute of HA in degrees=15/60=0.25
       double a1=ParallacticAngle(HA-0.125,Dec);
       double a2=ParallacticAngle(HA+0.125,Dec);
-      if ((a1>+90.0) && (a2<-90.0)) a2+=360.0;
-      if ((a1<-90.0) && (a2>+90.0)) a1+=360.0;
+      if ((a1 > +90.0) && (a2 < -90.0)) a2+=360.0;
+      if ((a1 < -90.0) && (a2 > +90.0)) a1+=360.0;
       return (a2-a1)/60.0;
     /*
       double x=cos(Dec*Rad)*tan(latitude*Rad)-sin(Dec*Rad)*cos(HA*Rad);

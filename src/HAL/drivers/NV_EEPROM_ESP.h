@@ -16,7 +16,7 @@ class nvs {
     }
 
     void poll() {
-      if (_dirtyPool && ((long)(millis()-_lastWrite)>5000)) {
+      if (_dirtyPool && ((long)(millis()-_lastWrite) > 5000)) {
         timerAlarmsDisable();
         EEPROM.commit();
         timerAlarmsEnable();
@@ -29,7 +29,7 @@ class nvs {
     }
 
     void update(int i, byte j) {
-      if (EEPROM.read(i)!=j) {
+      if (EEPROM.read(i) != j) {
         EEPROM.write(i, j);
         _lastWrite=millis();
         _dirtyPool=true;
@@ -112,7 +112,7 @@ class nvs {
 
     // read count bytes from EEPROM starting at position i
     void readBytes(uint16_t i, byte *v, uint8_t count) {
-      for (int j=0; j<count; j++) { *v = read(i + j); v++; }
+      for (int j=0; j < count; j++) { *v = read(i + j); v++; }
     }
   private:
     unsigned long _lastWrite;
