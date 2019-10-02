@@ -18,6 +18,15 @@ void initStartupValues() {
     AXIS2_DRIVER_MICROSTEP_CODE_GOTO = translateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_DRIVER_MICROSTEPS_GOTO);
   #endif
 #endif
+#if AXIS3_DRIVER_MODEL != OFF
+  AXIS3_DRIVER_MICROSTEP_CODE = translateMicrosteps(3, AXIS3_DRIVER_MODEL, AXIS3_DRIVER_MICROSTEPS);
+#endif
+#if AXIS4_DRIVER_MODEL != OFF
+  AXIS4_DRIVER_MICROSTEP_CODE = translateMicrosteps(4, AXIS4_DRIVER_MODEL, AXIS4_DRIVER_MICROSTEPS);
+#endif
+#if AXIS5_DRIVER_MODEL != OFF
+  AXIS5_DRIVER_MICROSTEP_CODE = translateMicrosteps(5, AXIS5_DRIVER_MODEL, AXIS5_DRIVER_MICROSTEPS);
+#endif
 
   // initialize some fixed-point values
   amountGuideAxis1.fixed=0;
