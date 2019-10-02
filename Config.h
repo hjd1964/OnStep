@@ -57,8 +57,8 @@
 // ST4 INTERFACE -----------------------------------------------------------------------------------------------------------
 // *** It is up to you to verify the interface meets the electrical specifications of any connected device, use at your own risk ***
 #define ST4_INTERFACE                 OFF // Default    OFF,    ON or ON_PULLUP enables the ST4 interface.                                                        Optional.
-#define ST4_HAND_CONTROL              OFF // Default    OFF,    Enable special features w/basic hand ctrl combo button press & smart hand control (SHC) support.  Optional, OFF allows only <= 1X rates on the ST4 port.
-#define ST4_HAND_CONTROL_FOCUSER      OFF // Default    OFF,    Use hand control combo button press for focuser control in place of catalog gotos/sync/sound.     Optional.
+#define ST4_HAND_CONTROL              OFF // Default    OFF,    Enable hand controller special features, SHC support, combo button presses on simple button pad.  Optional, OFF allows only <= 1X rates on the ST4 port.
+#define ST4_HAND_CONTROL_FOCUSER      OFF // Default    OFF,    Use button pad combo presses for focuser control instead of catalog select/goto, buzzer control.  Optional.
 
 // GUIDING BEHAVIOUR -------------------------------------------------------------------------------------------------------
 #define GUIDE_TIME_LIMIT                0 // Default      0,    For no time limit, or specify guide time limit in seconds.  Safety feature.                       Adjust as needed.
