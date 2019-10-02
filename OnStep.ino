@@ -198,9 +198,9 @@ void setup() {
   timerRateAxis2=SiderealRate;
 
   // backlash takeup rates
-  TakeupRate=SiderealRate/BACKLASH_RATE;
-  timerRateBacklashAxis1=SiderealRate/BACKLASH_RATE;
-  timerRateBacklashAxis2=(SiderealRate/BACKLASH_RATE)*timerRateRatio;
+  TakeupRate=SiderealRate/TRACK_BACKLASH_RATE;
+  timerRateBacklashAxis1=SiderealRate/TRACK_BACKLASH_RATE;
+  timerRateBacklashAxis2=(SiderealRate/TRACK_BACKLASH_RATE)*timerRateRatio;
 
   // now read any saved values from EEPROM into varaibles to restore our last state
   initReadNvValues();

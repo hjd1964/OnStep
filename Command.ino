@@ -923,7 +923,7 @@ void processCommands() {
             switch (parameter[1]) {
               case '1': dtostrf((double)MaxRateDef,3,3,reply); quietReply=true; break;
               case '2': dtostrf(SLEW_ACCELERATION_DIST,2,1,reply); quietReply=true; break;
-              case '3': sprintf(reply,"%ld",(long)round(BACKLASH_RATE)); quietReply=true; break;
+              case '3': sprintf(reply,"%ld",(long)round(TRACK_BACKLASH_RATE)); quietReply=true; break;
               case '4': sprintf(reply,"%ld",(long)round(AXIS1_STEPS_PER_DEGREE)); quietReply=true; break;
               case '5': sprintf(reply,"%ld",(long)round(AXIS2_STEPS_PER_DEGREE)); quietReply=true; break;
               case '6': dtostrf(StepsPerSecondAxis1,3,6,reply); quietReply=true; break;

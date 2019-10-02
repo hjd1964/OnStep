@@ -66,6 +66,7 @@
 // TRACKING BEHAVIOUR ------------------------------------------------------------------------------------------------------
 #define TRACK_AUTOSTART               OFF // Default    OFF,    Start with tracking enabled.                                                                      Optional.
 #define TRACK_REFRACTION_RATE_DEFAULT OFF // Default    OFF,    Start with atmospheric refraction compensation enabled (RA axis only.)                            Optional, ignored on Alt/Azm mounts.
+#define TRACK_BACKLASH_RATE            25 // Default     25,    Speed in x sidereal rate, too fast and motors stall, too slow and sluggish moving in backlash.    Usually not changed.
 
 // SYNCING BEHAVIOUR -------------------------------------------------------------------------------------------------------
 #define SYNC_CURRENT_PIER_SIDE_ONLY    ON // Default     ON,    Disables ability of Sync to change pier side, for GEM mounts.                                     Optional.
@@ -75,7 +76,6 @@
 #define SLEW_RATE_MEMORY              OFF // Default    OFF,    Remember rates set across power cycles.                                                           Optional.
 #define SLEW_ACCELERATION_DIST        5.0 // Default    5.0,    Approx. distance in degrees during which acceleration and deceleration takes place.               Adjust as needed.
 #define SLEW_RAPID_STOP_DIST          2.0 // Default    2.0,    Approx. distance in degrees required to stop when a slew is aborted or limit is exceeded.         Adjust as needed.
-#define BACKLASH_RATE                  25 // Default     25,    Speed in x sidereal rate, too fast and motors stall, too slow and sluggish moving in backlash.    Usually not changed.
 #define MFLIP_SKIP_HOME               OFF // Default    OFF,    Goto directly to the destination without visiting the home position.                              Optional.
 #define MFLIP_PAUSE_HOME_MEMORY       OFF // Default    OFF,    Remember the last meridian flip pause at home setting across power cycles.                        Optional.
 #define MFLIP_AUTOMATIC_MEMORY        OFF // Default    OFF,    Remember the last automatic meridian flip setting.                                                Optional.
