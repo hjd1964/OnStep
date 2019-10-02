@@ -39,9 +39,10 @@
 #define TEENSY 3                // TEENSY3.2 RTC (Built-in)
 
 // various Weather sensors supported
-#define BME280    1             // BME280 on I2C
-#define BME280SPI 2             // BME280 on SPI (default CS)
-#define DS1820    3             // DS18B20 on OneWire
+#define BME280       1          // BME280 on I2C (at default address 0x77)
+#define BME280_0x76  2          // BME280 on I2C (at address 0x76)
+#define BME280SPI    3          // BME280 on SPI (default CS)
+#define DS1820       4          // DS18B20 on OneWire
 
 // coordinate mode for getting and setting RA/Dec
 #define OBSERVED_PLACE 1
