@@ -19,7 +19,7 @@ GotoErrors validateGotoCoords(double HA, double Dec, double Alt) {
   if (Alt > maxAlt)                            return GOTO_ERR_ABOVE_OVERHEAD;
   if (Dec < AXIS2_LIMIT_MIN)                   return GOTO_ERR_OUTSIDE_LIMITS;
   if (Dec > AXIS2_LIMIT_MAX)                   return GOTO_ERR_OUTSIDE_LIMITS;
-  if ((fabs(HA) > (double)AXIS1_LIMIT_UNDER_POLE*15.0) ) return GOTO_ERR_OUTSIDE_LIMITS;
+  if ((fabs(HA) > AXIS1_LIMIT_UNDER_POLE))     return GOTO_ERR_OUTSIDE_LIMITS;
   return GOTO_ERR_NONE;
 }
 
