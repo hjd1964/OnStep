@@ -43,14 +43,14 @@
 #define TELESCOPE_TEMPERATURE         OFF // Default    OFF,    DS1820 for telescope temperature on ONE WIRE interface.                                           Optional.
 
 #define HOME_SENSE                    OFF // Default    OFF,    ON*.  Automatically detect and use home switches.                                                 Optional, for GEM mounts only.
-#define HOME_SENSE_STATE_AXIS1       HIGH // Default   HIGH,    HIGH signal when clockwise of home position LOW otherwise (as seen from front.)                   Optional, adjust as needed.
-#define HOME_SENSE_STATE_AXIS2       HIGH // Default   HIGH,    HIGH signal when clockwise of home position LOW otherwise (as seen from front.)                   Optional, adjust as needed.
+#define HOME_SENSE_STATE_AXIS1       HIGH // Default   HIGH,    HIGH signal when clockwise of home position LOW otherwise (as seen from front.)                   Adjust as needed.
+#define HOME_SENSE_STATE_AXIS2       HIGH // Default   HIGH,    HIGH signal when clockwise of home position LOW otherwise (as seen from front.)                   Adjust as needed.
 
 #define LIMIT_SENSE                   OFF // Default    OFF,    ON*.  Switch close (to ground) for optional limit sense (stops gotos and/or tracking.)            Optional.
-#define LIMIT_SENSE_STATE             LOW // Default    LOW,    LOW for NO (normally open) switches close w/trigger, use HIGH for NC (normally closed.)           Optional, adjust as needed.
+#define LIMIT_SENSE_STATE             LOW // Default    LOW,    LOW for NO (normally open) switches close w/trigger, use HIGH for NC (normally closed.)           Adjust as needed.
 
 #define PEC_SENSE                     OFF // Default    OFF,    ON*, n.  Sense digital OR n=0 to 1023 (0 to 3.3 VDC) for analog threshold.                        Optional, ignored on Alt/Azm mounts.
-#define PEC_SENSE_STATE              HIGH // Default   HIGH,    HIGH senses the PEC signal rising edge or use LOW for falling edge.                               Optional, adjust as needed.
+#define PEC_SENSE_STATE              HIGH // Default   HIGH,    HIGH senses the PEC signal rising edge or use LOW for falling edge.                               Adjust as needed.
 
 #define PPS_SENSE                     OFF // Default    OFF,    ON*.  Enables PPS (pulse per second.)                                                             Optional.
 
@@ -60,7 +60,7 @@
 #define ST4_HAND_CONTROL              OFF // Default    OFF,    Enables special features w/combo button presses & smart hand control (SHC) support.               Optional, OFF allows only <= 1X rates on the ST4 port.
 
 // GUIDING BEHAVIOUR -------------------------------------------------------------------------------------------------------
-#define GUIDE_TIME_LIMIT                0 // Default      0,    For no time limit, or specify guide time limit in seconds.  Safety feature.                       Optional, adjust as needed.
+#define GUIDE_TIME_LIMIT                0 // Default      0,    For no time limit, or specify guide time limit in seconds.  Safety feature.                       Adjust as needed.
 #define GUIDE_DISABLE_BACKLASH        OFF // Default    OFF,    Disable backlash takeup during guiding at <= 1X                                                   Optional.
 
 // TRACKING BEHAVIOUR ------------------------------------------------------------------------------------------------------
