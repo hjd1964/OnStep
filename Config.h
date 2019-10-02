@@ -135,8 +135,8 @@
 #define AXIS3_DRIVER_POWER_DOWN       OFF // Default    OFF,    Powers off the motor at stand-still.                                                              Optional.
 #define AXIS3_DRIVER_REVERSE          OFF // Default    OFF,    Reverses the direction of movement.  Reversing wiring instead can also correct this.              Optional.
 
-#define AXIS3_LIMIT_MIN              -180 // Default -180.0,    Minimum allowed rotator angle in degrees.                                                         Usually not changed.
-#define AXIS3_LIMIT_MAX               180 // Default  180.0,    Maximum allowed rotator angle in degrees.                                                         Usually not changed.
+#define AXIS3_LIMIT_MIN            -180.0 // Default -180.0,    Minimum allowed rotator angle in degrees.                                                         Usually not changed.
+#define AXIS3_LIMIT_MAX             180.0 // Default  180.0,    Maximum allowed rotator angle in degrees.                                                         Usually not changed.
 
 // AXIS4 FOCUSER 1 ----------------------
 #define FOCUSER1                      OFF // Default    OFF,    Use ON to enable this focuser.                                                                    Optional.
