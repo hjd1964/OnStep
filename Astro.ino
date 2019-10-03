@@ -737,7 +737,7 @@ boolean doHorRateCalc() {
       _deltaAxis2=((az_Alt1-az_Alt2)*(15.0/(AltAzTrackingRange/60.0))/2.0)*_currentRate; 
       
       // override for special case of near a celestial pole
-      if (90.0-fabs(az_Dec) < =0.5) { _deltaAxis1=0.0; _deltaAxis2=0.0; }
+      if (90.0-fabs(az_Dec) <= 0.5) { _deltaAxis1=0.0; _deltaAxis2=0.0; }
     }
   } else
 
