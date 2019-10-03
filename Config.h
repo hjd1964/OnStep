@@ -21,7 +21,8 @@
 #define SERIAL_A_BAUD_DEFAULT        9600 // Default   9600,    Common rates are 9600,19200,57600,115200.  See (src/HAL/) for your MCU Serial port #...           Usually not changed.
 #define SERIAL_B_BAUD_DEFAULT        9600 // Default   9600,    Common rates are 9600,19200,57600,115200.                                                         Optional.
 #define SERIAL_B_ESP_FLASHING         OFF // Default    OFF,    Enable uploading firmware to ESP8266 WiFi through SERIAL_B port using the :ESPFLASH# command.     Optional.
-#define SERIAL_C_BAUD_DEFAULT         OFF // Default    OFF,    Common rates are 9600,19200,57600,115200.  Bluetooth on ESP32 use "name" instead of rate.         Optional.
+#define SERIAL_C_BAUD_DEFAULT         OFF // Default    OFF,    Common rates are 9600,19200,57600,115200.  For ESP32 Bluetooth set to ON.                         Optional.
+#define SERIAL_C_BLUETOOTH_NAME  "OnStep" // Default "On..",    Bluetooth device name on ESP32.                                                                   Adjust as required.
 
 // MOUNT TYPE --------------------------------------------------------------------------------------------------------------
 #define MOUNT_TYPE                    GEM // Default    GEM,    GEM for German Equatorial, FORK for Equatorial Fork, or ALTAZM for Dobsonian etc. mounts.         <- Required.  GEM supports meridian flips.
