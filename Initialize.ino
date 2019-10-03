@@ -119,7 +119,7 @@ void initPins() {
 // ------------------------------------------------------------------
 // User feedback
 
-#if LED_STATUS_PIN == ON
+#if LED_STATUS == ON
   pinMode(LEDnegPin,OUTPUT); digitalWrite(LEDnegPin,LOW);  // light status LED (provides GND)
   #ifdef LEDposPin
     pinMode(LEDposPin,OUTPUT); digitalWrite(LEDposPin,HIGH); // sometimes +5v is provided on a pin
@@ -127,25 +127,25 @@ void initPins() {
   ledOn=true;
 #endif
 
-#if LED_STATUS_PIN >= 0
+#if LED_STATUS >= 0
   pinMode(LEDnegPin,OUTPUT); digitalWrite(LEDnegPin,LOW);  // light status LED (provides pwm'd GND for polar reticule)
   #ifdef LEDposPin
     pinMode(LEDposPin,OUTPUT); digitalWrite(LEDposPin,HIGH); // sometimes +5v is provided on a pin
   #endif
-  analogWrite(LEDnegPin,LED_STATUS_PIN);
+  analogWrite(LEDnegPin,LED_STATUS);
   ledOn=true;
 #endif
 
-#if LED_RETICLE_PIN >= 0
+#if LED_RETICLE >= 0
   pinMode(ReticlePin,OUTPUT); analogWrite(ReticlePin,reticuleBrightness); // light reticule LED
 #endif
 
-#if LED_STATUS2_PIN == ON
+#if LED_STATUS2 == ON
   pinMode(LEDneg2Pin,OUTPUT); digitalWrite(LEDneg2Pin,HIGH); // light second status LED (provides just GND)
   led2On=false;
-#elif LED_STATUS2_PIN >= 0
+#elif LED_STATUS2 >= 0
   pinMode(LEDneg2Pin,OUTPUT); digitalWrite(LEDneg2Pin,LOW); // light second status LED (provides pwm'd GND for polar reticule)
-  analogWrite(LEDneg2Pin,LED_STATUS2_PIN);
+  analogWrite(LEDneg2Pin,LED_STATUS2);
 #endif
 
 // ready the sound/buzzer pin

@@ -41,7 +41,7 @@
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  3
 #define FirmwareVersionMinor  0       // minor version 0 to 99
-#define FirmwareVersionPatch  "d"     // for example major.minor patch: 1.3c
+#define FirmwareVersionPatch  "e"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 3       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
@@ -368,7 +368,7 @@ void loop2() {
 
     // FLASH LED DURING SIDEREAL TRACKING
     if (trackingState == TrackingSidereal) {
-#if LED_STATUS_PIN == ON
+#if LED_STATUS == ON
       if (siderealTimer%20L == 0L) { if (ledOn) { digitalWrite(LEDnegPin,HIGH); ledOn=false; } else { digitalWrite(LEDnegPin,LOW); ledOn=true; } }
 #endif
     }
@@ -523,18 +523,18 @@ void loop2() {
       PPSrateRatio=((double)1000000.0/(double)(PPSavgMicroS));
       if ((long)(micros()-(PPSlastMicroS+2000000UL)) > 0) PPSsynced=false; // if more than two seconds has ellapsed without a pulse we've lost sync
       sei();
-  #if LED_STATUS2_PIN == ON
+  #if LED_STATUS2 == ON
       if (PPSsynced) { if (led2On) { digitalWrite(LEDneg2Pin,HIGH); led2On=false; } else { digitalWrite(LEDneg2Pin,LOW); led2On=true; } } else { digitalWrite(LEDneg2Pin,HIGH); led2On=false; } // indicate PPS
   #endif
       if (LastPPSrateRatio != PPSrateRatio) { SiderealClockSetInterval(siderealInterval); LastPPSrateRatio=PPSrateRatio; }
     }
 #endif
 
-#if LED_STATUS_PIN == ON
+#if LED_STATUS == ON
     // LED indicate PWR on 
     if (trackingState != TrackingSidereal) if (!ledOn) { digitalWrite(LEDnegPin,LOW); ledOn=true; }
 #endif
-#if LED_STATUS2_PIN == ON
+#if LED_STATUS2 == ON
     // LED indicate STOP and GOTO
     if (trackingState == TrackingMoveTo) if (!led2On) { digitalWrite(LEDneg2Pin,LOW); led2On=true; }
   #if PPS_SENSE != OFF

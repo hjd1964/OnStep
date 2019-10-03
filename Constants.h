@@ -31,20 +31,29 @@
 #define PINMAP_LAST 41
 
 // mount types
+#define MOUNT_TYPE_FIRST 1
 #define GEM    1                // German Equatorial Mount.  Meridian flips enabled.
 #define FORK   2                // Fork Mount.  Meridian flips disabled.
 #define ALTAZM 3                // Altitude Azimuth Mount.  Dobsonians, etc.
+#define MOUNT_TYPE_LAST 3
 
 // various RTC's supported
+#define RTC_FIRST 1
 #define DS3231 1                // DS3231 RTC on I2C
 #define DS3234 2                // DS3234 RTC on SPI (default CS)
 #define TEENSY 3                // TEENSY3.2 RTC (Built-in)
+#define RTC_LAST 3
 
 // various Weather sensors supported
+#define WEATHER_FIRST 1
 #define BME280       1          // BME280 on I2C (at default address 0x77)
 #define BME280_0x76  2          // BME280 on I2C (at address 0x76)
 #define BME280SPI    3          // BME280 on SPI (default CS)
-#define DS1820       4          // DS18B20 on OneWire
+#define WEATHER_LAST 4
+
+#define TELESCOPE_TEMPERATURE_FIRST 1
+#define DS1820       1          // DS18B20 on OneWire
+#define TELESCOPE_TEMPERATURE_LAST 1
 
 // coordinate mode for getting and setting RA/Dec
 #define OBSERVED_PLACE 1

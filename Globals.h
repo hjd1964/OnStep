@@ -328,8 +328,8 @@ boolean waitingHomeContinue             = false;                          // set
 boolean waitingHome                     = false;                          // true if waiting at home
 
 // reticule control
-#if LED_RETICLE_PIN >= 0
-  int reticuleBrightness=LED_RETICLE_PIN;
+#if LED_RETICLE >= 0
+  int reticuleBrightness=LED_RETICLE;
 #endif
 
 // backlash control

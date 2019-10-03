@@ -219,7 +219,7 @@ void processCommands() {
 //  :B-#   Decrease Reticule Brightness
 //         Returns: Nothing
       if ((command[0] == 'B') && ((command[1] == '+') || (command[1] == '-')))  {
-#if LED_RETICLE_PIN >= 0
+#if LED_RETICLE >= 0
         int scale;
         if (reticuleBrightness > 255-8) scale=1; else
         if (reticuleBrightness > 255-32) scale=4; else

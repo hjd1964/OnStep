@@ -28,9 +28,9 @@
 #define MOUNT_TYPE                    GEM // Default    GEM,    GEM for German Equatorial, FORK for Equatorial Fork, or ALTAZM for Dobsonian etc. mounts.         <- Required.  GEM meridian flips.
 
 // USER FEEDBACK -----------------------------------------------------------------------------------------------------------
-#define LED_STATUS_PIN                 ON // Default     ON,    Blinks when sidereal tracking otherwise steady on to indicate that the controller is active.      Optional.
-#define LED_STATUS2_PIN               OFF // Default    OFF,    Blinks at 1 sec intervals when PPS is synced, steady on during gotos, off when tracking stopped.  Optional.
-#define LED_RETICLE_PIN               OFF // Default    OFF,    n.  Where n=0 to 255 (0 to 100%) activates this feature and sets default brightness.              Optional.
+#define LED_STATUS                     ON // Default     ON,    Blinks when sidereal tracking otherwise steady on to indicate that the controller is active.      Optional.
+#define LED_STATUS2                   OFF // Default    OFF,    Blinks at 1 sec intervals when PPS is synced, steady on during gotos, off when tracking stopped.  Optional.
+#define LED_RETICLE                   OFF // Default    OFF,    n.  Where n=0 to 255 (0 to 100%) activates this feature and sets default brightness.              Optional.
 #define BUZZER                        OFF // Default    OFF,    ON for piezo buzzer or specify frequency for a speaker (for example "BUZZER 2000".)               Optional.
 #define BUZZER_STATE_DEFAULT          OFF // Default    OFF,    Start with piezo buzzer/speaker enabled.                                                          Optional.
 
@@ -53,7 +53,7 @@
 #define PEC_SENSE                     OFF // Default    OFF,    ON*, n.  Sense digital OR n=0 to 1023 (0 to 3.3 VDC) for analog threshold.                        Optional, ignored in ALTAZM mode.
 #define PEC_SENSE_STATE              HIGH // Default   HIGH,    HIGH senses the PEC signal rising edge or use LOW for falling edge.                               Adjust as needed.
 
-#define PPS_SENSE                     OFF // Default    OFF,    ON*.  Enables PPS (pulse per second.)                                                             Optional.
+#define PPS_SENSE                     OFF // Default    OFF,    ON*.  Enables PPS (pulse per second.)  Senses the PEC signal rising edge only.                    Optional.
 
 // ST4 INTERFACE -----------------------------------------------------------------------------------------------------------
 // *** It is up to you to verify the interface meets the electrical specifications of any connected device, use at your own risk ***
@@ -106,8 +106,8 @@
 #define AXIS1_DRIVER_REVERSE          OFF // Default    OFF,    Reverses the direction of movement.  Reversing wiring instead can also correct this.              Optional.
 #define AXIS1_DRIVER_STATUS           OFF // Default    OFF,    Polling for stepper driver status info/fault detection. Options are TMC_SPI, HIGH, or LOW.        Optional.
 
-#define AXIS1_LIMIT_UNDER_POLE      180.0 // Default  180.0,    Degrees +/-, maximum allowed Hour Angle.  Allowed range is 150 to 180.                            Adjust as needed, ignored in ALTAZM mode.
-#define AXIS1_LIMIT_MAXAZM          360.0 // Default  360.0,    Degrees +/-, maximum allowed Azimuth.  Allowed range is 180 to 360. Ignored in Eq modes.          Adjust as needed, for ALTAZM mode only.
+#define AXIS1_LIMIT_UNDER_POLE        180 // Default    180,    Degrees +/-, maximum allowed Hour Angle.  Allowed range is 150 to 180.                            Adjust as needed, ignored in ALTAZM mode.
+#define AXIS1_LIMIT_MAXAZM            360 // Default    360,    Degrees +/-, maximum allowed Azimuth.  Allowed range is 180 to 360. Ignored in Eq modes.          Adjust as needed, for ALTAZM mode only.
 
 // AXIS2 DEC/ALT -------------------------
 #define AXIS2_STEPS_PER_DEGREE    12800.0 // Default  12800,    Calculated as: (stepper_steps * micro_steps * gear_reduction1 *  gear_reduction2)/360.0           <- Required, adjust as needed.
@@ -122,8 +122,8 @@
 #define AXIS2_DRIVER_REVERSE          OFF // Default    OFF,    Reverses the direction of movement.  Reversing wiring instead can also correct this.              Optional.
 #define AXIS2_DRIVER_STATUS           OFF // Default    OFF,    Polling for stepper driver status info/fault detection. Options are TMC_SPI, HIGH, or LOW.        Optional.
 
-#define AXIS2_LIMIT_MIN             -91.0 // Default  -91.0,    Minimum allowed declination in degrees.                                                           Usually not changed.
-#define AXIS2_LIMIT_MAX             +91.0 // Default   91.0,    Maximum allowed declination in degrees.                                                           Usually not changed.
+#define AXIS2_LIMIT_MIN               -91 // Default    -91,    Minimum allowed declination in degrees.                                                           Usually not changed.
+#define AXIS2_LIMIT_MAX               +91 // Default     91,    Maximum allowed declination in degrees.                                                           Usually not changed.
 
 // AXIS3 ROTATOR -------------------------
 #define ROTATOR                       OFF // Default    OFF,    Use ON to enable the rotator (or de-rotator for ALTAZM mounts.)                                   Optional.
@@ -137,8 +137,8 @@
 #define AXIS3_DRIVER_POWER_DOWN       OFF // Default    OFF,    Powers off the motor at stand-still.                                                              Optional.
 #define AXIS3_DRIVER_REVERSE          OFF // Default    OFF,    Reverses the direction of movement.  Reversing wiring instead can also correct this.              Optional.
 
-#define AXIS3_LIMIT_MIN            -180.0 // Default -180.0,    Minimum allowed rotator angle in degrees.                                                         Usually not changed.
-#define AXIS3_LIMIT_MAX             180.0 // Default  180.0,    Maximum allowed rotator angle in degrees.                                                         Usually not changed.
+#define AXIS3_LIMIT_MIN              -180 // Default   -180,    Minimum allowed rotator angle in degrees.                                                         Usually not changed.
+#define AXIS3_LIMIT_MAX               180 // Default    180,    Maximum allowed rotator angle in degrees.                                                         Usually not changed.
 
 // AXIS4 FOCUSER 1 ----------------------
 #define FOCUSER1                      OFF // Default    OFF,    Use ON to enable this focuser.                                                                    Optional.
@@ -154,8 +154,8 @@
 #define AXIS4_DRIVER_DC_MODE          OFF // Default    OFF,    Use DRV8825 for pwm dc motor control on stepper driver outputs.                                   Optional.
 
 #define AXIS4_LIMIT_MIN_RATE           10 // Default     10,    Minimum micrometers per second, default=10.  In DC mode power for slowest move (1-1000 range.)    Adjust as needed.
-#define AXIS4_LIMIT_MIN             -25.0 // Default  -25.0,    Minimum allowed position in millimeters.                                                          Adjust as needed.
-#define AXIS4_LIMIT_MAX              25.0 // Default   25.0,    Maximum allowed position in millimeters.                                                          Adjust as needed.
+#define AXIS4_LIMIT_MIN               -25 // Default    -25,    Minimum allowed position in millimeters.                                                          Adjust as needed.
+#define AXIS4_LIMIT_MAX                25 // Default     25,    Maximum allowed position in millimeters.                                                          Adjust as needed.
 
 // AXIS5 FOCUSER 2 ----------------------
 #define FOCUSER2                      OFF // Default    OFF,    Use ON to enable this focuser.                                                                    Optional.
@@ -171,8 +171,8 @@
 #define AXIS5_DRIVER_DC_MODE          OFF // Default    OFF,    Use DRV8825 for PWM DC motor control on stepper driver outputs.                                   Optional.
 
 #define AXIS5_LIMIT_MIN_RATE           10 // Default     10,    Minimum micrometers per second, default=10.  In DC mode power for slowest move (1-1000 range.)    Adjust as needed.
-#define AXIS5_LIMIT_MIN             -25.0 // Default  -25.0,    Minimum allowed position in millimeters.                                                          Adjust as needed.
-#define AXIS5_LIMIT_MAX              25.0 // Default   25.0,    Maximum allowed position in millimeters.                                                          Adjust as needed.
+#define AXIS5_LIMIT_MIN               -25 // Default    -25,    Minimum allowed position in millimeters.                                                          Adjust as needed.
+#define AXIS5_LIMIT_MAX                25 // Default     25,    Maximum allowed position in millimeters.                                                          Adjust as needed.
 
 // THAT'S IT FOR USER CONFIGURATION!
 
