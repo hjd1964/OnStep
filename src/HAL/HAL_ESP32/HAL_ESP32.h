@@ -21,7 +21,7 @@
 // The stock ESP32 Release 1.0.0 BluetoothSerial.h library doesn't work
 // Copy the latest BluetoothSerial library (just its folder) from https://github.com/espressif/arduino-esp32 into
 // C:\Users\xxxxxx\AppData\Local\Arduino15\packages\esp32\hardware\esp32\1.0.0\libraries
-#ifdef SERIAL_C_BAUD_DEFAULT != OFF
+#if SERIAL_C_BAUD_DEFAULT != OFF
   #if SERIAL_C_BAUD_DEFAULT > 0
     #error "Bluetooth on ESP32 SERIAL_C_BAUD_DEFAULT gets set to ON or OFF only."
   #endif
