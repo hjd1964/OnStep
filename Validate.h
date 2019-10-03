@@ -86,6 +86,72 @@
   #define AXIS5_DRIVER_DISABLE LOW
 #endif
 
+// make sure all stepper driver advanced options are present even if not defined
+#ifndef AXIS1_DRIVER_DECAY_MODE
+  #define AXIS1_DRIVER_DECAY_MODE OFF
+#endif
+#ifndef AXIS1_DRIVER_DECAY_MODE_GOTO
+  #define AXIS1_DRIVER_DECAY_MODE_GOTO OFF
+#endif
+#ifndef AXIS1_DRIVER_INTPOL
+  #define AXIS1_DRIVER_INTPOL OFF
+#endif
+#ifndef AXIS1_DRIVER_IRUN
+  #define AXIS1_DRIVER_IRUN OFF
+#endif
+#ifndef AXIS1_DRIVER_IGOTO
+  #define AXIS1_DRIVER_IGOTO OFF
+#endif
+#ifndef AXIS2_DRIVER_DECAY_MODE
+  #define AXIS2_DRIVER_DECAY_MODE OFF
+#endif
+
+#ifndef AXIS2_DRIVER_DECAY_MODE
+  #define AXIS2_DRIVER_DECAY_MODE OFF
+#endif
+#ifndef AXIS2_DRIVER_DECAY_MODE_GOTO
+  #define AXIS2_DRIVER_DECAY_MODE_GOTO OFF
+#endif
+#ifndef AXIS2_DRIVER_INTPOL
+  #define AXIS2_DRIVER_INTPOL OFF
+#endif
+#ifndef AXIS2_DRIVER_IRUN
+  #define AXIS2_DRIVER_IRUN OFF
+#endif
+#ifndef AXIS2_DRIVER_IGOTO
+  #define AXIS2_DRIVER_IGOTO OFF
+#endif
+
+#ifndef AXIS3_DRIVER_DECAY_MODE
+  #define AXIS3_DRIVER_DECAY_MODE OFF
+#endif
+#ifndef AXIS3_DRIVER_INTPOL
+  #define AXIS3_DRIVER_INTPOL OFF
+#endif
+#ifndef AXIS3_DRIVER_IRUN
+  #define AXIS3_DRIVER_IRUN OFF
+#endif
+
+#ifndef AXIS4_DRIVER_DECAY_MODE
+  #define AXIS4_DRIVER_DECAY_MODE OFF
+#endif
+#ifndef AXIS4_DRIVER_INTPOL
+  #define AXIS4_DRIVER_INTPOL OFF
+#endif
+#ifndef AXIS4_DRIVER_IRUN
+  #define AXIS4_DRIVER_IRUN OFF
+#endif
+
+#ifndef AXIS5_DRIVER_DECAY_MODE
+  #define AXIS5_DRIVER_DECAY_MODE OFF
+#endif
+#ifndef AXIS5_DRIVER_INTPOL
+  #define AXIS5_DRIVER_INTPOL OFF
+#endif
+#ifndef AXIS5_DRIVER_IRUN
+  #define AXIS5_DRIVER_IRUN OFF
+#endif
+
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
 // stepper driver mode setup validation
