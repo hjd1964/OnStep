@@ -389,7 +389,9 @@ GotoErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTarget
   } else pierSideControl=thisPierSide;
 
   reactivateBacklashComp();
+#if MOUNT_TYPE != ALTAZM
   disablePec();
+#endif
   soundAlert();
   stepperModeGoto();
 

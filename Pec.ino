@@ -1,6 +1,8 @@
 // -------------------------------------------------------------------------------------------------
 // Functions to handle periodic error correction
 
+#if MOUNT_TYPE != ALTAZM
+
 // enables code to clean-up PEC readings after record (use PECprep or a spreadsheet to fix readings otherwise)
 // this cleans up any tracking rate variations that would be introduced by recording more guiding corrections to either the east or west, default ON
 #define PEC_CLEANUP ON
@@ -196,3 +198,5 @@ void createPecBuffer() {
   pecBuffer = (byte*)malloc(pecBufferSize * sizeof(*pecBuffer));
   if (!pecBuffer) pecBufferSize=0;
 }
+
+#endif

@@ -72,7 +72,7 @@ class rotator {
       if (pda) { pinMode(enPin,OUTPUT); disableDriver(); currentlyDisabled=true; }
     }
 
-#ifdef MOUNT_TYPE_ALTAZM
+#if MOUNT_TYPE == ALTAZM
     // enable/disable the de-rotator
     void enableDR(bool state) {
       DR=state;
@@ -184,7 +184,7 @@ class rotator {
       if (((long)target.part.m < smin) || ((long)target.part.m > smax)) { DR=false; delta.fixed=0; deltaDR.fixed=0; }
     }
 
-#ifdef MOUNT_TYPE_ALTAZM
+#if MOUNT_TYPE == ALTAZM
     // calculate new de-rotation rate if needed
     void derotate(double h, double d) {
       if (DR) {
@@ -240,7 +240,7 @@ class rotator {
       digitalWrite(enPin,disableState);
     }
 
-#ifdef MOUNT_TYPE_ALTAZM
+#if MOUNT_TYPE == ALTAZM
     // returns parallactic angle in degrees
     double ParallacticAngle(double HA, double Dec) {
       return atan2(sin(HA/Rad),cos(Dec/Rad)*tan(latitude/Rad)-sin(Dec/Rad)*cos(HA/Rad))*Rad;

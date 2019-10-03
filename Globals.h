@@ -289,7 +289,9 @@ int     LastPecPinState                 = PEC_SENSE_STATE;
 boolean pecBufferStart                  = false;                                   
 fixed_t accPecGuideHA;                                                    // for PEC, buffers steps to be recorded
 volatile double pecTimerRateAxis1 = 0.0;
-static byte *pecBuffer;
+#if MOUNT_TYPE != ALTAZM
+  static byte *pecBuffer;
+#endif
 
 // Misc ---------------------------------------------------------------------------------------------------------------------
 #define Rad 57.29577951

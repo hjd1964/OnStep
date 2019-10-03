@@ -36,9 +36,12 @@ byte park() {
     lastTrackingState=TrackingNone;
     trackingState=TrackingNone;
 
+#if MOUNT_TYPE != ALTAZM
     // turn off the PEC while we park
     disablePec();
     pecStatus=IgnorePEC;
+#endif
+
     // save the worm sense position
     nv.writeLong(EE_wormSensePos,wormSensePos);
 

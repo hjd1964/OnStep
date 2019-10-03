@@ -300,16 +300,18 @@ void initReadNvValues() {
   backlashAxis2=nv.readInt(EE_backlashAxis2);
   backlashAxis1=nv.readInt(EE_backlashAxis1);
   
+#if MOUNT_TYPE != ALTAZM
   // get the PEC status
   pecStatus  =nv.read(EE_pecStatus);
   pecRecorded=nv.read(EE_pecRecorded); if (!pecRecorded) pecStatus=IgnorePEC;
   for (int i=0; i < pecBufferSize; i++) pecBuffer[i]=nv.read(EE_pecTable+i);
   wormSensePos=nv.readLong(EE_wormSensePos);
-#if PEC_SENSE == OFF
-  wormSensePos=0;
-  pecStatus=IgnorePEC;
+  #if PEC_SENSE == OFF
+    wormSensePos=0;
+    pecStatus=IgnorePEC;
+  #endif
 #endif
-  
+
   // get the Park status
   parkSaved=nv.read(EE_parkSaved);
   parkStatus=nv.read(EE_parkStatus);
