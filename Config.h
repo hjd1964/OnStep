@@ -25,7 +25,7 @@
 #define SERIAL_C_BLUETOOTH_NAME  "OnStep" // Default "On..",    Bluetooth device name on ESP32.                                                                   Adjust as required.
 
 // MOUNT TYPE --------------------------------------------------------------------------------------------------------------
-#define MOUNT_TYPE                    GEM // Default    GEM,    GEM for German Equatorial, FORK for Equatorial Fork, or ALTAZM for Dobsonian etc. mounts.         <- Required.  GEM supports meridian flips.
+#define MOUNT_TYPE                    GEM // Default    GEM,    GEM for German Equatorial, FORK for Equatorial Fork, or ALTAZM for Dobsonian etc. mounts.         <- Required.  GEM meridian flips.
 
 // USER FEEDBACK -----------------------------------------------------------------------------------------------------------
 #define LED_STATUS_PIN                 ON // Default     ON,    Blinks when sidereal tracking otherwise steady on to indicate that the controller is active.      Optional.
@@ -43,22 +43,22 @@
 
 #define TELESCOPE_TEMPERATURE         OFF // Default    OFF,    DS1820 for telescope temperature on ONE WIRE interface.                                           Optional.
 
-#define HOME_SENSE                    OFF // Default    OFF,    ON*.  Automatically detect and use home switches.                                                 Optional, for GEM mounts only.
+#define HOME_SENSE                    OFF // Default    OFF,    ON*.  Automatically detect and use home switches.                                                 Optional, for GEM mode only.
 #define HOME_SENSE_STATE_AXIS1       HIGH // Default   HIGH,    HIGH signal when clockwise of home position LOW otherwise (as seen from front.)                   Adjust as needed.
 #define HOME_SENSE_STATE_AXIS2       HIGH // Default   HIGH,    HIGH signal when clockwise of home position LOW otherwise (as seen from front.)                   Adjust as needed.
 
 #define LIMIT_SENSE                   OFF // Default    OFF,    ON*.  Switch close (to ground) for optional limit sense (stops gotos and/or tracking.)            Optional.
 #define LIMIT_SENSE_STATE             LOW // Default    LOW,    LOW for NO (normally open) switches close w/trigger, use HIGH for NC (normally closed.)           Adjust as needed.
 
-#define PEC_SENSE                     OFF // Default    OFF,    ON*, n.  Sense digital OR n=0 to 1023 (0 to 3.3 VDC) for analog threshold.                        Optional, ignored on Alt/Azm mounts.
+#define PEC_SENSE                     OFF // Default    OFF,    ON*, n.  Sense digital OR n=0 to 1023 (0 to 3.3 VDC) for analog threshold.                        Optional, ignored in ALTAZM mode.
 #define PEC_SENSE_STATE              HIGH // Default   HIGH,    HIGH senses the PEC signal rising edge or use LOW for falling edge.                               Adjust as needed.
 
 #define PPS_SENSE                     OFF // Default    OFF,    ON*.  Enables PPS (pulse per second.)                                                             Optional.
 
 // ST4 INTERFACE -----------------------------------------------------------------------------------------------------------
 // *** It is up to you to verify the interface meets the electrical specifications of any connected device, use at your own risk ***
-#define ST4_INTERFACE                 OFF // Default    OFF,    ON or ON_PULLUP enables the ST4 interface.                                                        Optional.
-#define ST4_HAND_CONTROL              OFF // Default    OFF,    Enable hand controller special features, SHC support, combo button presses on simple button pad.  Optional, OFF allows only <= 1X rates on the ST4 port.
+#define ST4_INTERFACE                 OFF // Default    OFF,    ON or ON_PULLUP enables ST4 interface.  Allows <= 1X guide rates unless hand control mode is ON.  Optional.
+#define ST4_HAND_CONTROL              OFF // Default    OFF,    Hand controller special features, SHC support, combo button presses on simple button pad.         Optional.
 #define ST4_HAND_CONTROL_FOCUSER      OFF // Default    OFF,    Use button pad combo presses for focuser control instead of catalog select/goto, buzzer control.  Optional.
 
 // GUIDING BEHAVIOUR -------------------------------------------------------------------------------------------------------
@@ -67,14 +67,14 @@
 
 // TRACKING BEHAVIOUR ------------------------------------------------------------------------------------------------------
 #define TRACK_AUTOSTART               OFF // Default    OFF,    Start with tracking enabled.                                                                      Optional.
-#define TRACK_REFRACTION_RATE_DEFAULT OFF // Default    OFF,    Start with atmospheric refraction compensation enabled (RA axis only.)                            Optional, ignored on Alt/Azm mounts.
+#define TRACK_REFRACTION_RATE_DEFAULT OFF // Default    OFF,    Start with atmospheric refraction compensation enabled (RA axis only.)                            Optional, ignored in ALTAZM mode.
 #define TRACK_BACKLASH_RATE            25 // Default     25,    Speed in x sidereal rate, too fast and motors stall, too slow and sluggish moving in backlash.    Usually not changed.
 
 // SYNCING BEHAVIOUR -------------------------------------------------------------------------------------------------------
 #define SYNC_CURRENT_PIER_SIDE_ONLY    ON // Default     ON,    Disables ability of Sync to change pier side, for GEM mounts.                                     Optional.
 
 // SLEWING BEHAVIOUR -------------------------------------------------------------------------------------------------------
-#define SLEW_RATE_BASE_DESIRED        1.0 // Default    1.0,    Desired slew (goto) rate in degrees/second, adjustable run-time from 1/2 to 2x this rate.         <- Required, adjust as needed.  Tries to use this rate, if possible.
+#define SLEW_RATE_BASE_DESIRED        1.0 // Default    1.0,    Desired slew rate (if performace allows) in deg/sec, adjustable run-time 1/2 to 2x this.          <- Required, adjust as needed.
 #define SLEW_RATE_MEMORY              OFF // Default    OFF,    Remember rates set across power cycles.                                                           Optional.
 #define SLEW_ACCELERATION_DIST        5.0 // Default    5.0,    Approx. distance in degrees during which acceleration and deceleration takes place.               Adjust as needed.
 #define SLEW_RAPID_STOP_DIST          2.0 // Default    2.0,    Approx. distance in degrees required to stop when a slew is aborted or limit is exceeded.         Adjust as needed.
@@ -90,12 +90,12 @@
 
 // Stepper driver models are as follows: (for example AXIS1_DRIVER_MODEL DRV8825,) A4988, LV8729, RAPS128, S109, ST820, TMC2100, TMC2208, TMC2209*, TMC2130**, TMC5160***
 // * = add _QUIET (stealthChop tracking) or _VQUIET (stealthChop tracking & slew.)
-// ** = for the SSS TMC2130 you can set the stepper driver current (in milliamps) with #define AXISn_TMC_IRUN (IHOLD, etc.)  If you choose to do so set the Vref pot. to 2.5V instead of by motor current as usual.
-// *** = for the SSS TMC5160 you must set the stepper driver current (in milliamps) with #define AXISn_TMC_IRUN (IHOLD, etc.)
+// ** = for the SSS TMC2130 you can set stepper driver current (in milliamps) w/ #define AXISn_TMC_IRUN (IHOLD, etc.)  If you choose to do so set Vref pot. to 2.5V instead of by motor current as usual.
+// *** = for the SSS TMC5160 you must set stepper driver current (in milliamps) w/ #define AXISn_TMC_IRUN (IHOLD, etc.)
 
 // AXIS1 RA/AZM --------------------------
 #define AXIS1_STEPS_PER_DEGREE    12800.0 // Default  12800,    Calculated as: (stepper_steps * micro_steps * gear_reduction1 * gear_reduction2)/360.0            <- Required, adjust as needed.
-#define AXIS1_STEPS_PER_WORMROT     12800 // Default  12800,    Number of steps per worm rotation (PEC,) (AXIS1_STEPS_PER_DEGREE*360)/gear_reduction_final_stage. <- Required, adjust as needed, ignored in Alt/Azm mode.
+#define AXIS1_STEPS_PER_WORMROT     12800 // Default  12800,    Number of steps per worm rotation (PEC,) (AXIS1_STEPS_PER_DEGREE*360)/gear_reduction_final_stage. <- Required, ignored in ALTAZM mode.
 
 #define AXIS1_DRIVER_MODEL            OFF // Default    OFF,    Stepper driver model (see above.)                                                                 <- Often configured.
 #define AXIS1_DRIVER_MICROSTEPS       OFF // Default    OFF,    Microstep mode when tracking (for example: AXIS1_DRIVER_MICROSTEPS 32)                            <- Often configured.
@@ -106,8 +106,8 @@
 #define AXIS1_DRIVER_REVERSE          OFF // Default    OFF,    Reverses the direction of movement.  Reversing wiring instead can also correct this.              Optional.
 #define AXIS1_DRIVER_STATUS           OFF // Default    OFF,    Polling for stepper driver status info/fault detection. Options are TMC_SPI, HIGH, or LOW.        Optional.
 
-#define AXIS1_LIMIT_UNDER_POLE      180.0 // Default  180.0,    Degrees +/-, maximum allowed Hour Angle.  Allowed range is 150 to 180.                            Adjust as needed, ignored in Alt/Azm mode.
-#define AXIS1_LIMIT_MAXAZM          360.0 // Default  360.0,    Degrees +/-, maximum allowed Azimuth.  Allowed range is 180 to 360. Ignored in Eq modes.          Adjust as needed, ignored on Eq mounts.
+#define AXIS1_LIMIT_UNDER_POLE      180.0 // Default  180.0,    Degrees +/-, maximum allowed Hour Angle.  Allowed range is 150 to 180.                            Adjust as needed, ignored in ALTAZM mode.
+#define AXIS1_LIMIT_MAXAZM          360.0 // Default  360.0,    Degrees +/-, maximum allowed Azimuth.  Allowed range is 180 to 360. Ignored in Eq modes.          Adjust as needed, for ALTAZM mode only.
 
 // AXIS2 DEC/ALT -------------------------
 #define AXIS2_STEPS_PER_DEGREE    12800.0 // Default  12800,    Calculated as: (stepper_steps * micro_steps * gear_reduction1 *  gear_reduction2)/360.0           <- Required, adjust as needed.
@@ -118,7 +118,7 @@
 #define AXIS2_DRIVER_IHOLD            OFF // Default    OFF,    OFF for IRUN/2.0, current in milli-amps used during standstill.                                   Optional, TMC2130 & TMC5160 only.
 #define AXIS2_DRIVER_IRUN             OFF // Default    OFF,    Current in milli-amps when tracking, set to value appropriate for your stepper/driver rating.     Optional, TMC2130 & TMC5160 only.
 #define AXIS2_DRIVER_IGOTO            OFF // Default    OFF,    OFF for same as IRUN, current in milli-amps used during gotos.                                    Optional, TMC2130 & TMC5160 only.
-#define AXIS2_DRIVER_POWER_DOWN       OFF // Default    OFF,    Powers off axis 10 sec. after movement stops or 10 min. after last <= 1x guide.                   Optional, ignored on Alt/Azm mounts.
+#define AXIS2_DRIVER_POWER_DOWN       OFF // Default    OFF,    Powers off axis 10 sec. after movement stops or 10 min. after last <= 1x guide.                   Optional, ignored in ALTAZM mode.
 #define AXIS2_DRIVER_REVERSE          OFF // Default    OFF,    Reverses the direction of movement.  Reversing wiring instead can also correct this.              Optional.
 #define AXIS2_DRIVER_STATUS           OFF // Default    OFF,    Polling for stepper driver status info/fault detection. Options are TMC_SPI, HIGH, or LOW.        Optional.
 
