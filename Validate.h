@@ -520,12 +520,6 @@
 
 // PINMAP SPECIFIC VALIDATION ----------------------
 
-#if PINMAP == Ramps14
-  #if SERIAL_B_ESP_FLASHING == ON
-    #error "Configuration: SERIAL_B_ESP_FLASHING not supported for this PINMAP"
-  #endif
-#endif
-
 #if PINMAP == MaxTMC || PINMAP ==MksGenL2
   // special checks for SPI buss pin maps to ensure all enabled stepper drivers are TMC2130 or TMC5160 in SPI mode
   #if AXIS1_DRIVER_MODEL != TMC_SPI
@@ -563,6 +557,10 @@
 #endif
 
 // GENERAL PURPOSE VALIDATION ----------------------
+
+#if SERIAL_B_ESP_FLASHING == ON  && (!defined(ESP8266Gpio0Pin) || !defined(ESP8266RstPin))
+  #error "Configuration: SERIAL_B_ESP_FLASHING not supported for this PINMAP"
+#endif
 
 #if LED_STATUS_PIN != OFF && LEDnegPin == -1
   #error "Configuration: LED_STATUS_PIN not supported for this PINMAP, must be OFF"
