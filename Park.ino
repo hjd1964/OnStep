@@ -26,7 +26,7 @@ boolean setPark() {
 
 // moves the telescope to the park position
 byte park() {
-  if (parkStatus == Parked) return 0;                        // already parked
+  if (parkStatus == Parked) return 0;                          // already parked
   int f=validateGoto(); if (f == 5) f=8; if (f != 0) return f; // goto allowed?
   
   parkSaved=nv.read(EE_parkSaved);
@@ -147,7 +147,6 @@ bool doParkClearBacklash(int phase) {
 
 int parkClearBacklash() {
   static int phase=1;
-
   if (phase == 1) { if (doParkClearBacklash(1)) phase++; } else
   if (phase == 2) { if (doParkClearBacklash(2)) phase++; } else
   if (phase == 3) { if (doParkClearBacklash(3)) phase++; } else
