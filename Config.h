@@ -21,7 +21,7 @@
                                           //         Ramps14, MaxESP2, MaxESP3. Others in Models.h are depreciated.
 
 // SERIAL PORTS --------------------------------------------------------------------------------------------------------------------
-#define SERIAL_A_BAUD_DEFAULT        9600 //   9600, Common baud rates for these parameters are 9600,19200,57600,115200.     In-freq
+#define SERIAL_A_BAUD_DEFAULT        9600 //   9600, Common baud rates for these parameters are 9600,19200,57600,115200.      Infreq
 #define SERIAL_B_BAUD_DEFAULT        9600 //   9600, See (src/HAL/) for your MCU Serial port # etc.                           Option
 #define SERIAL_B_ESP_FLASHING         OFF //    OFF, ON Upload ESP8266 WiFi firmware through SERIAL_B with :ESPFLASH# cmd.    Option
 #define SERIAL_C_BAUD_DEFAULT         OFF //    OFF, ON for ESP32 Bluetooth.                                                  Option
@@ -122,8 +122,8 @@
 #define AXIS1_DRIVER_REVERSE          OFF //    OFF, ON Reverses direction of movement, or reverse wiring instead to correct. Option
 #define AXIS1_DRIVER_STATUS           OFF //    OFF, TMC_SPI, HIGH, or LOW.  Polling for driver status info/fault detection.  Option
 
-#define AXIS1_LIMIT_UNDER_POLE        180 //    180, n. Where n=150..180 (degrees.) Max HA hour angle + or - for Eq modes.   In-freq
-#define AXIS1_LIMIT_MAXAZM            360 //    360, n. Where n=180..360 (degrees.) Max Azimuth + or - for AltAzm mode only. In-freq
+#define AXIS1_LIMIT_UNDER_POLE        180 //    180, n. Where n=150..180 (degrees.) Max HA hour angle + or - for Eq modes.    Infreq
+#define AXIS1_LIMIT_MAXAZM            360 //    360, n. Where n=180..360 (degrees.) Max Azimuth + or - for AltAzm mode only.  Infreq
 
 // AXIS2 DEC/ALT -------------------------
 #define AXIS2_STEPS_PER_DEGREE    12800.0 //  12800, n. Number of steps per degree:                                          <-Req'd
@@ -139,8 +139,8 @@
 #define AXIS2_DRIVER_REVERSE          OFF //    OFF, ON Reverses direction of movement, or reverse wiring instead to correct. Option
 #define AXIS2_DRIVER_STATUS           OFF //    OFF, TMC_SPI, HIGH, or LOW.  Polling for driver status info/fault detection.  Option
 
-#define AXIS2_LIMIT_MIN               -91 //    -91, n. Where n=-91..0 (degrees.) Minimum allowed declination.               In-freq
-#define AXIS2_LIMIT_MAX                91 //     91, n. Where n=0..91 (degrees.) Maximum allowed declination.                In-freq
+#define AXIS2_LIMIT_MIN               -91 //    -91, n. Where n=-91..0 (degrees.) Minimum allowed declination.                Infreq
+#define AXIS2_LIMIT_MAX                91 //     91, n. Where n=0..91 (degrees.) Maximum allowed declination.                 Infreq
 
 // AXIS3 ROTATOR -------------------------
 #define ROTATOR                       OFF //    OFF, ON to enable the rotator (or de-rotator for ALTAZM mounts.)              Option
@@ -172,8 +172,8 @@
 #define AXIS4_DRIVER_DC_MODE          OFF //    OFF, ON for pwm dc motor control on DRV8825 stepper driver outputs.           Option
 
 #define AXIS4_LIMIT_MIN_RATE           10 //     10, n. Where n=1..1000 (um/s.) Minimum microns/second. In DC mode, min pwr.  Adjust
-#define AXIS4_LIMIT_MIN               -25 //    -25, n. Where n=-300..300 (millimeters.) Minimum allowed position.           In-freq
-#define AXIS4_LIMIT_MAX                25 //     25, n. Where n=-300..300 (millimeters.) Maximum allowed position.           In-freq
+#define AXIS4_LIMIT_MIN               -25 //    -25, n. Where n=-300..300 (millimeters.) Minimum allowed position.            Infreq
+#define AXIS4_LIMIT_MAX                25 //     25, n. Where n=-300..300 (millimeters.) Maximum allowed position.            Infreq
 
 // AXIS5 FOCUSER 2 ----------------------
 #define FOCUSER2                      OFF //    OFF, ON to enable this focuser.                                               Option
@@ -189,8 +189,8 @@
 #define AXIS5_DRIVER_DC_MODE          OFF //    OFF, ON for pwm dc motor control on DRV8825 stepper driver outputs.           Option
 
 #define AXIS5_LIMIT_MIN_RATE           10 //     10, n. Where n=1..1000 (um/s.) Minimum microns/second. In DC mode, min pwr.  Adjust
-#define AXIS5_LIMIT_MIN               -25 //    -25, n. Where n=-300..300 (millimeters.) Minimum allowed position.           In-freq
-#define AXIS5_LIMIT_MAX                25 //     25, n. Where n=-300..300 (millimeters.) Maximum allowed position.           In-freq
+#define AXIS5_LIMIT_MIN               -25 //    -25, n. Where n=-300..300 (millimeters.) Minimum allowed position.            Infreq
+#define AXIS5_LIMIT_MAX                25 //     25, n. Where n=-300..300 (millimeters.) Maximum allowed position.            Infreq
 
 // THAT'S IT FOR USER CONFIGURATION!
 
