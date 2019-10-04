@@ -28,8 +28,8 @@
 #define MOUNT_TYPE                    GEM // Default    GEM,    GEM for German Equatorial, FORK for Equatorial Fork, or ALTAZM for Dobsonian etc. mounts.         <- Required.  GEM meridian flips.
 
 // USER FEEDBACK -----------------------------------------------------------------------------------------------------------
-#define LED_STATUS                     ON // Default     ON,    Blinks when sidereal tracking otherwise steady on to indicate that the controller is active.      Optional.
-#define LED_STATUS2                   OFF // Default    OFF,    Blinks at 1 sec intervals when PPS is synced, steady on during gotos, off when tracking stopped.  Optional.
+#define LED_STATUS                     ON // Default     ON,    Blinks when sidereal tracking otherwise steady on indicates that the controller is active.        Optional.
+#define LED_STATUS2                   OFF // Default    OFF,    Blinks at 1s intervals w/PPS sync, steady on during gotos, off when tracking stopped.             Optional.
 #define LED_RETICLE                   OFF // Default    OFF,    n.  Where n=0 to 255 (0 to 100%) activates this feature and sets default brightness.              Optional.
 #define BUZZER                        OFF // Default    OFF,    ON for piezo buzzer or specify frequency for a speaker (for example "BUZZER 2000".)               Optional.
 #define BUZZER_STATE_DEFAULT          OFF // Default    OFF,    Start with piezo buzzer/speaker enabled.                                                          Optional.
@@ -95,7 +95,7 @@
 
 // AXIS1 RA/AZM --------------------------
 #define AXIS1_STEPS_PER_DEGREE    12800.0 // Default  12800,    Calculated as: (stepper_steps * micro_steps * gear_reduction1 * gear_reduction2)/360.0            <- Required, adjust as needed.
-#define AXIS1_STEPS_PER_WORMROT     12800 // Default  12800,    Number of steps per worm rotation (PEC,) (AXIS1_STEPS_PER_DEGREE*360)/gear_reduction_final_stage. <- Required, ignored in ALTAZM mode.
+#define AXIS1_STEPS_PER_WORMROT     12800 // Default  12800,    Number of steps per worm rotation PEC, (AXIS1_STEPS_PER_DEGREE*360)/reduction_final_stage.        <- Required, ignored in ALTAZM mode.
 
 #define AXIS1_DRIVER_MODEL            OFF // Default    OFF,    Stepper driver model (see above.)                                                                 <- Often configured.
 #define AXIS1_DRIVER_MICROSTEPS       OFF // Default    OFF,    Microstep mode when tracking (for example: AXIS1_DRIVER_MICROSTEPS 32)                            <- Often configured.
