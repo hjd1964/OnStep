@@ -99,7 +99,7 @@
 #define STRICT_PARKING                OFF //    OFF, ON Un-parking is only allowed if successfully parked.                    Option
 
 // MOTION CONTROL ----------------------------------------------------------------------------------------------------------
-#define STEP_WAVE_FORM             SQUARE // SQUARE, Step signal wave form, SQUARE best compatibility, PULSE for faster rate. Adjust
+#define STEP_WAVE_FORM             SQUARE // SQUARE, PULSE Step signal wave form for faster rate. SQUARE best compatibility.  Adjust
 
 // Stepper driver models are as follows: A4988, DRV8825, LV8729, RAPS128, S109, ST820,
 //                                       SSS TMC2100, TMC2208, TMC2209*, TMC2130**, and TMC5160***
