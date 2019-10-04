@@ -13,7 +13,7 @@
 
 // On first successful startup an AP will appear with an SSID of "ONSTEP", after connecting: the web-site is at "192.168.0.1" and
 // the cmd channel is at "192.168.0.1:9999". If locked out selecting "Erase Flash: All Flash Contents" from the Arduino Tools menu 
-// before uploading/flashing again can help restore access to the ESP8266
+// before uploading/flashing again can help restore access to the ESP8266.
 
 //      Parameter Name              Value   Default  Notes                                                                      Hint
 // SERIAL PORTS --------------------------------------------------------------------------------------------------------------------
