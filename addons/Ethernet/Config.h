@@ -47,7 +47,7 @@
 #define AXIS1_ENC_INTPOL_COS          OFF //    OFF, ON enables cosine compensation feature.                                  Infreq
 #define AXIS1_ENC_RATE_AUTO           OFF //    OFF, n, (Worm period in seconds.) Adjusts avg encoder pulse rate to account   Option
                                           //         for skew in the average guide rate over the last worm period.            Option
-#define AXIS1_ENC_BIN_AVG             OFF //    OFF, n, (Number of bins.)  Enables binned rolling average feature.
+#define AXIS1_ENC_BIN_AVG             OFF //    OFF, n, (Number of bins.)  Enables binned rolling average feature.            Option
 
 // AUXILLARY SWITCH/FEATURE CONTROL ------------------------------------------------------------------------------------------------
 // *** Warning: only OnStep Aux pins that are unused for other purposes should be assigned! ***
