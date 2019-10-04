@@ -6,7 +6,6 @@
  *                      and join the OnStep Groups.io at https://groups.io/g/onstep
  * 
  *           *** Read the compiler warnings and errors, they are there to help guard against invalid configurations ***
- * 
 */
 
 // ---------------------------------------------------------------------------------------------------------------------------------
