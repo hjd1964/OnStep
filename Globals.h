@@ -3,7 +3,7 @@
 
 #pragma once
 
-// Time keeping ------------------------------------------------------------------------------------------------------------
+// Time keeping --------------------------------------------------------------------------------------------------------------------
 long siderealTimer                      = 0;                 // counter to issue steps during tracking
 long PecSiderealTimer                   = 0;                 // time since worm wheel zero index for PEC
 long guideSiderealTimer                 = 0;                 // counter to issue steps during guiding
@@ -17,19 +17,21 @@ double LMT                              = 0.0;
 double timeZone                         = 0.0;
                                                                           
 long lst_start                          = 0;                 // marks the start lst when UT1 is set 
-volatile long lst                       = 0;                 // local (apparent) sidereal time in 0.01 second ticks, takes 249 days
-                                                             // to roll over.  1.00273 wall clock seconds per sidereal second
+volatile long lst                       = 0;                 // local (apparent) sidereal time in 0.01 second ticks,
+                                                             // takes 249 days to roll over.
+															 // 1.00273 wall clock seconds per sidereal second
                                                                           
 long siderealInterval                   = 15956313L;                      
 long masterSiderealInterval             = siderealInterval;               
-                                                             // default = 15956313 ticks per sidereal second, where a tick is 1/16 uS this is
-                                                             // stored in EEPROM which is updated/adjusted with the ":T+#" and ":T-#" commands
-                                                             // a higher number here means a longer count which slows down the sidereal clock
+                                                             // default = 15956313 ticks per sidereal second, where a tick
+															 // is 1/16 uS this is stored in EEPROM which is updated/adjusted
+															 // with the ":T+#" and ":T-#" commands a higher number here means
+															 // a longer count which slows down the sidereal clock
                                                                           
 double HzCf                             = 16000000.0/60.0;   // conversion factor to go to/from Hz for sidereal interval
                                                                           
-volatile long SiderealRate;                                  // based on the siderealInterval, time between steps for sidereal tracking
-volatile long TakeupRate;                                    // takeup rate for synchronizing target and actual positions when needed
+volatile long SiderealRate;                                  // based on the siderealInterval, time between steps sidereal tracking
+volatile long TakeupRate;                                    // takeup rate for synchronizing target and actual positions
                                                                           
 long last_loop_micros                   = 0;                 // workload monitoring
 long this_loop_time                     = 0;
@@ -37,14 +39,14 @@ long loop_time                          = 0;
 long worst_loop_time                    = 0;
 long average_loop_time                  = 0;
 
-// PPS (GPS) ---------------------------------------------------------------------------------------------------------------
+// PPS (GPS) -----------------------------------------------------------------------------------------------------------------------
 volatile unsigned long PPSlastMicroS    = 1000000UL;
 volatile unsigned long PPSavgMicroS     = 1000000UL;
 volatile double PPSrateRatio            = 1.0;
 volatile double LastPPSrateRatio        = 1.0;
 volatile boolean PPSsynced              = false;
 
-// Tracking and rate control -----------------------------------------------------------------------------------------------
+// Tracking and rate control -------------------------------------------------------------------------------------------------------
 #if MOUNT_TYPE != ALTAZM
   enum RateCompensation {RC_NONE, RC_REFR_RA, RC_REFR_BOTH, RC_FULL_RA, RC_FULL_BOTH};
   #if TRACK_REFRACTION_RATE_DEFAULT == ON
@@ -85,7 +87,7 @@ long SecondsPerWormRotationAxis1        = ((double)AXIS1_STEPS_PER_WORMROT/Steps
 volatile double StepsForRateChangeAxis1 = (sqrt((double)SLEW_ACCELERATION_DIST*(double)AXIS1_STEPS_PER_DEGREE))*(double)MaxRate*16.0;
 volatile double StepsForRateChangeAxis2 = (sqrt((double)SLEW_ACCELERATION_DIST*(double)AXIS2_STEPS_PER_DEGREE))*(double)MaxRate*16.0;
 
-// Basic stepper driver mode setup ------------------------------------------------------------------------------------
+// Basic stepper driver mode setup -------------------------------------------------------------------------------------------------
 #if AXIS1_DRIVER_MODEL != OFF
   // Holds translated code for driver microstep setting
   volatile uint8_t _axis1_microstep_code;
