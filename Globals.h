@@ -19,14 +19,14 @@ double timeZone                         = 0.0;
 long lst_start                          = 0;                 // marks the start lst when UT1 is set 
 volatile long lst                       = 0;                 // local (apparent) sidereal time in 0.01 second ticks,
                                                              // takes 249 days to roll over.
-															 // 1.00273 wall clock seconds per sidereal second
+                                                             // 1.00273 wall clock seconds per sidereal second
                                                                           
 long siderealInterval                   = 15956313L;                      
 long masterSiderealInterval             = siderealInterval;               
                                                              // default = 15956313 ticks per sidereal second, where a tick
-															 // is 1/16 uS this is stored in EEPROM which is updated/adjusted
-															 // with the ":T+#" and ":T-#" commands a higher number here means
-															 // a longer count which slows down the sidereal clock
+                                                             // is 1/16 uS this is stored in EEPROM which is updated/adjusted
+                                                             // with the ":T+#" and ":T-#" commands a higher number here means
+                                                             // a longer count which slows down the sidereal clock
                                                                           
 double HzCf                             = 16000000.0/60.0;   // conversion factor to go to/from Hz for sidereal interval
                                                                           
