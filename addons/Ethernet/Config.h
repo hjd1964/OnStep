@@ -17,7 +17,7 @@
                                           //         CS on Pin10. OFF for W5100 adapter. Uses standard Arduino libraries.
 
 // SERIAL PORTS --------------------------------------------------------------------------------------------------------------------
-#define SERIAL_BAUD_DEFAULT          9600 //   9600, Common baud rates for these parameters are 9600,19200,57600,115200.      Option
+#define SERIAL_BAUD_DEFAULT          9600 //   9600, Common baud rates for these parameters are 9600,19200,57600,115200.      Infreq
 #define SERIAL_BAUD                 57600 //  57600, Use 19200 if talking to a Mega2560 OnStep                                Option
                                           //         At startup this firmware will attempt to switch OnStep's baud rate to this
                                           //         faster speed (vs. SERIAL_BAUD_DEFAULT) and AFTER success, start WiFi, etc.
@@ -43,8 +43,8 @@
 #define ENCODERS_AUTO_SYNC            OFF //    OFF, ON, Enable support for auto sync of OnStep to encoder values.            Adjust
 
 // ENCODER RATE CONTROL
-#define AXIS1_ENC_RATE_CONTROL        OFF //    OFF, ON Rate control for RA high resolution encoder. EQ mounts only.          Option
-#define AXIS1_ENC_INTPOL_COS          OFF //    OFF, ON enables cosine compensation feature.                                  Option
+#define AXIS1_ENC_RATE_CONTROL        OFF //    OFF, ON Rate control for RA high resolution encoder. EQ mounts only.          Infreq
+#define AXIS1_ENC_INTPOL_COS          OFF //    OFF, ON enables cosine compensation feature.                                  Infreq
 #define AXIS1_ENC_RATE_AUTO           OFF //    OFF, n, (Worm period in seconds.) Adjusts avg encoder pulse rate to account   Option
                                           //         for skew in the average guide rate over the last worm period.            Option
 #define AXIS1_ENC_BIN_AVG             OFF //    OFF, n, (Number of bins.)  Enables binned rolling average feature.
