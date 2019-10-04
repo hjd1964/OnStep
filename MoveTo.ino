@@ -132,8 +132,8 @@ void moveTo() {
   } else {
     temp=(StepsForRateChangeAxis1/isqrt32(distStartAxis1));  // speed up (temp gets smaller)
   }
-  if (temp < maxRate) temp=maxRate;                            // fastest rate 
-  if (temp > TakeupRate) temp=TakeupRate;                      // slowest rate
+  if (temp < maxRate) temp=maxRate;                          // fastest rate 
+  if (temp > TakeupRate) temp=TakeupRate;                    // slowest rate
   if (abortSlew != 0) {
     if (abortSlew == 2) { a1r=(double)SiderealRate/(double)temp; } else
     if (abortSlew == 3) {
@@ -151,8 +151,8 @@ void moveTo() {
   } else {
     temp=(StepsForRateChangeAxis2/isqrt32(distStartAxis2));  // speed up
   }
-  if (temp < maxRate) temp=maxRate;                            // fastest rate
-  if (temp > TakeupRate) temp=TakeupRate;                      // slowest rate
+  if (temp < maxRate) temp=maxRate;                          // fastest rate
+  if (temp > TakeupRate) temp=TakeupRate;                    // slowest rate
   if (abortSlew != 0) {
     if (abortSlew == 2) { a2r=(double)SiderealRate/(double)temp; abortSlew++; } else
     if (abortSlew == 3) { 

@@ -6,7 +6,8 @@
 void initStartupValues() {
   
   // Basic stepper driver mode setup
-  // if we made through validation and AXIS1_DRIVER_MODEL exists; AXIS2_DRIVER_MODEL, AXIS1_DRIVER_MICROSTEPS, and AXIS2_DRIVER_MICROSTEPS also exist and passed validation in the pre-processor
+  // if we made through validation and AXIS1_DRIVER_MODEL exists; AXIS2_DRIVER_MODEL, AXIS1_DRIVER_MICROSTEPS,
+  // and AXIS2_DRIVER_MICROSTEPS also exist and passed validation in the pre-processor
 #if AXIS1_DRIVER_MODEL != OFF
   // translate microsteps to microstep bit code
   AXIS1_DRIVER_MICROSTEP_CODE = translateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_DRIVER_MICROSTEPS);

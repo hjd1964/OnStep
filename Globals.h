@@ -4,34 +4,34 @@
 #pragma once
 
 // Time keeping ------------------------------------------------------------------------------------------------------------
-long siderealTimer                      = 0;                              // counter to issue steps during tracking
-long PecSiderealTimer                   = 0;                              // time since worm wheel zero index for PEC
-long guideSiderealTimer                 = 0;                              // counter to issue steps during guiding
-boolean dateWasSet                      = false;                          // keep track of date/time validity
+long siderealTimer                      = 0;                 // counter to issue steps during tracking
+long PecSiderealTimer                   = 0;                 // time since worm wheel zero index for PEC
+long guideSiderealTimer                 = 0;                 // counter to issue steps during guiding
+boolean dateWasSet                      = false;             // keep track of date/time validity
 boolean timeWasSet                      = false;                          
                                                                           
-double UT1                              = 0.0;                            // the current universal time
-double UT1_start                        = 0.0;                            // the start of UT1
-double JD                               = 0.0;                            // and date, used for computing LST
-double LMT                              = 0.0;                            //
-double timeZone                         = 0.0;                            //
+double UT1                              = 0.0;               // the current universal time
+double UT1_start                        = 0.0;               // the start of UT1
+double JD                               = 0.0;               // and date, used for computing LST
+double LMT                              = 0.0;
+double timeZone                         = 0.0;
                                                                           
-long lst_start                          = 0;                              // this marks the start lst when UT1 is set 
-volatile long lst                       = 0;                              // this is the local (apparent) sidereal time in 1/100 seconds (23h 56m 4.1s per day = 86400 clock seconds/
-                                                                          // 86164.09 sidereal seconds = 1.00273 clock seconds per sidereal second.)  Takes 249 days to roll over.
+long lst_start                          = 0;                 // marks the start lst when UT1 is set 
+volatile long lst                       = 0;                 // local (apparent) sidereal time in 0.01 second ticks, takes 249 days
+                                                             // to roll over.  1.00273 wall clock seconds per sidereal second
                                                                           
 long siderealInterval                   = 15956313L;                      
 long masterSiderealInterval             = siderealInterval;               
-                                                                          // default = 15956313 ticks per sidereal second, where a tick is 1/16 uS
-                                                                          // this is stored in EEPROM which is updated/adjusted with the ":T+#" and ":T-#" commands
-                                                                          // a higher number here means a longer count which slows down the sidereal clock
+                                                             // default = 15956313 ticks per sidereal second, where a tick is 1/16 uS this is
+                                                             // stored in EEPROM which is updated/adjusted with the ":T+#" and ":T-#" commands
+                                                             // a higher number here means a longer count which slows down the sidereal clock
                                                                           
-double HzCf                             = 16000000.0/60.0;                // conversion factor to go to/from Hz for sidereal interval
+double HzCf                             = 16000000.0/60.0;   // conversion factor to go to/from Hz for sidereal interval
                                                                           
-volatile long SiderealRate;                                               // based on the siderealInterval, this is the time between steps for sidereal tracking
-volatile long TakeupRate;                                                 // this is the takeup rate for synchronizing the target and actual positions when needed
+volatile long SiderealRate;                                  // based on the siderealInterval, time between steps for sidereal tracking
+volatile long TakeupRate;                                    // takeup rate for synchronizing target and actual positions when needed
                                                                           
-long last_loop_micros                   = 0;                              // workload monitoring
+long last_loop_micros                   = 0;                 // workload monitoring
 long this_loop_time                     = 0;
 long loop_time                          = 0;
 long worst_loop_time                    = 0;
@@ -114,7 +114,7 @@ volatile double StepsForRateChangeAxis2 = (sqrt((double)SLEW_ACCELERATION_DIST*(
   #endif
 #endif
 
-// Location ----------------------------------------------------------------------------------------------------------------
+// Location ------------------------------------------------------------------------------------------------------------------------
 double latitude                         = 0.0;
 double cosLat                           = 1.0;
 double sinLat                           = 0.0;
@@ -126,7 +126,7 @@ double longitude                        = 0.0;
   #define AXIS1_LIMIT_UNDER_POLE 180.0
 #endif
 
-// Coordinates -------------------------------------------------------------------------------------------------------------
+// Coordinates ---------------------------------------------------------------------------------------------------------------------
 #if MOUNT_TYPE == GEM
   double homePositionAxis1              = 90.0;
 #else
@@ -136,12 +136,12 @@ double homePositionAxis2                = 90.0;
 // either 0 or (fabs(latitude))
 #define AltAzmDecStartPos (fabs(latitude))
 
-volatile long posAxis1                  = 0;                              // hour angle position in steps
-volatile long startAxis1                = 0;                              // hour angle of goto start position in steps
-volatile fixed_t targetAxis1;                                             // hour angle of goto end   position in steps
-volatile byte dirAxis1                  = 1;                              // stepping direction + or -
-double origTargetRA                     = 0.0;                            // holds the RA for gotos before possible conversion to observed place
-double newTargetRA                      = 0.0;                            // holds the RA for gotos after conversion to observed place
+volatile long posAxis1                  = 0;                 // hour angle position in steps
+volatile long startAxis1                = 0;                 // hour angle of goto start position in steps
+volatile fixed_t targetAxis1;                                // hour angle of goto end   position in steps
+volatile byte dirAxis1                  = 1;                 // stepping direction + or -
+double origTargetRA                     = 0.0;               // holds the RA for gotos before possible conversion to observed place
+double newTargetRA                      = 0.0;               // holds the RA for gotos after conversion to observed place
 fixed_t origTargetAxis1;
 #if defined(AXIS1_DRIVER_MICROSTEP_CODE) && defined(AXIS1_DRIVER_MICROSTEP_CODE_GOTO)
   volatile long stepAxis1=1;
@@ -149,12 +149,12 @@ fixed_t origTargetAxis1;
   #define stepAxis1 1
 #endif
 
-volatile long posAxis2                  = 0;                              // declination position in steps
-volatile long startAxis2                = 0;                              // declination of goto start position in steps
-volatile fixed_t targetAxis2;                                             // declination of goto end   position in steps
-volatile byte dirAxis2                  = 1;                              // stepping direction + or -
-double origTargetDec                    = 0.0;                            // holds the Dec for gotos before possible conversion to observed place
-double newTargetDec                     = 0.0;                            // holds the Dec for gotos after conversion to observed place
+volatile long posAxis2                  = 0;                 // declination position in steps
+volatile long startAxis2                = 0;                 // declination of goto start position in steps
+volatile fixed_t targetAxis2;                                // declination of goto end   position in steps
+volatile byte dirAxis2                  = 1;                 // stepping direction + or -
+double origTargetDec                    = 0.0;               // holds the Dec for gotos before possible conversion to observed place
+double newTargetDec                     = 0.0;               // holds the Dec for gotos after conversion to observed place
 long origTargetAxis2                    = 0;
 #if defined(AXIS2_DRIVER_MICROSTEP_CODE) && defined(AXIS2_DRIVER_MICROSTEP_CODE_GOTO)
   volatile long stepAxis2=1;
@@ -162,17 +162,17 @@ long origTargetAxis2                    = 0;
   #define stepAxis2 1
 #endif
 
-double newTargetAlt=0.0, newTargetAzm   = 0.0;                            // holds the altitude and azmiuth for slews
-long   degreesPastMeridianE             = 15;                             // for goto's, East side of the pier.  How far past the meridian to allow before we do a flip.
-long   degreesPastMeridianW             = 15;                             // as above, West side of the pier.  If left alone, the mount will stop tracking when it hits the this limit.
-int    minAlt;                                                            // the minimum altitude, in degrees, for goTo's (so we don't try to point too low)
-int    maxAlt;                                                            // the maximum altitude, in degrees, for goTo's (to keep the telescope tube away from the mount/tripod)
-bool   autoMeridianFlip                 = false;                          // automatically do a meridian flip and continue when we hit the AXIS1_LIMIT_MERIDIAN_W
+double newTargetAlt=0.0, newTargetAzm   = 0.0;               // holds the altitude and azmiuth for slews
+long   degreesPastMeridianE             = 15;                // east of pier.  How far past the meridian before we do a flip.
+long   degreesPastMeridianW             = 15;                // west of pier.  Mount stops tracking when it hits the this limit.
+int    minAlt;                                               // the min altitude, in deg, so we don't try to point too low
+int    maxAlt;                                               // the max altitude, in deg, keeps telescope away from mount/tripod
+bool   autoMeridianFlip                 = false;             // auto meridian flip/continue as tracking hits AXIS1_LIMIT_MERIDIAN_W
                                                                           
-double currentAlt                       = 45.0;                           // the current altitude
-double currentDec                       = 0.0;                            // the current declination
+double currentAlt                       = 45.0;              // the current altitude
+double currentDec                       = 0.0;               // the current declination
 
-// Stepper driver enable/disable and direction -----------------------------------------------------------------------------
+// Stepper driver enable/disable and direction -------------------------------------------------------------------------------------
 
 #define defaultDirAxis2EInit              1
 #define defaultDirAxis2WInit              0
@@ -181,10 +181,17 @@ volatile byte defaultDirAxis2           = defaultDirAxis2EInit;
 #define defaultDirAxis1SCPInit            1
 volatile byte defaultDirAxis1           = defaultDirAxis1NCPInit;
 
-// Status ------------------------------------------------------------------------------------------------------------------
-enum Errors {ERR_NONE, ERR_MOTOR_FAULT, ERR_ALT_MIN, ERR_LIMIT_SENSE, ERR_DEC, ERR_AZM, ERR_UNDER_POLE, ERR_MERIDIAN, ERR_SYNC, ERR_PARK, ERR_GOTO_SYNC, ERR_UNSPECIFIED, ERR_ALT_MAX, ERR_GOTO_ERR_NONE, ERR_GOTO_ERR_BELOW_HORIZON, ERR_GOTO_ERR_ABOVE_OVERHEAD, ERR_GOTO_ERR_STANDBY, ERR_GOTO_ERR_PARK, ERR_GOTO_ERR_GOTO, ERR_GOTO_ERR_OUTSIDE_LIMITS, ERR_GOTO_ERR_HARDWARE_FAULT, ERR_GOTO_ERR_IN_MOTION, ERR_GOTO_ERR_UNSPECIFIED};
+// Status --------------------------------------------------------------------------------------------------------------------------
+enum Errors {
+  ERR_NONE, ERR_MOTOR_FAULT, ERR_ALT_MIN, ERR_LIMIT_SENSE, ERR_DEC, ERR_AZM,
+  ERR_UNDER_POLE, ERR_MERIDIAN, ERR_SYNC, ERR_PARK, ERR_GOTO_SYNC, ERR_UNSPECIFIED,
+  ERR_ALT_MAX, ERR_GOTO_ERR_NONE, ERR_GOTO_ERR_BELOW_HORIZON, ERR_GOTO_ERR_ABOVE_OVERHEAD,
+  ERR_GOTO_ERR_STANDBY, ERR_GOTO_ERR_PARK, ERR_GOTO_ERR_GOTO, ERR_GOTO_ERR_OUTSIDE_LIMITS,
+  ERR_GOTO_ERR_HARDWARE_FAULT, ERR_GOTO_ERR_IN_MOTION, ERR_GOTO_ERR_UNSPECIFIED};
 Errors lastError = ERR_NONE;
-enum GotoErrors {GOTO_ERR_NONE, GOTO_ERR_BELOW_HORIZON, GOTO_ERR_ABOVE_OVERHEAD, GOTO_ERR_STANDBY, GOTO_ERR_PARK, GOTO_ERR_GOTO, GOTO_ERR_OUTSIDE_LIMITS, GOTO_ERR_HARDWARE_FAULT, GOTO_ERR_IN_MOTION, GOTO_ERR_UNSPECIFIED};
+enum GotoErrors {
+  GOTO_ERR_NONE, GOTO_ERR_BELOW_HORIZON, GOTO_ERR_ABOVE_OVERHEAD, GOTO_ERR_STANDBY, GOTO_ERR_PARK,
+  GOTO_ERR_GOTO, GOTO_ERR_OUTSIDE_LIMITS, GOTO_ERR_HARDWARE_FAULT, GOTO_ERR_IN_MOTION, GOTO_ERR_UNSPECIFIED};
 
 boolean highPrecision = true;
 
@@ -228,12 +235,12 @@ boolean parkSaved                       = false;
 boolean atHome                          = true;
 boolean homeMount                       = false;
 
-// Command processing -------------------------------------------------------------------------------------------------------
+// Command processing --------------------------------------------------------------------------------------------------------------
 #define BAUD 9600
 // serial speed
 unsigned long baudRate[10] = {115200,56700,38400,28800,19200,14400,9600,4800,2400,1200};
 
-// Guide command ------------------------------------------------------------------------------------------------------------
+// Guide command -------------------------------------------------------------------------------------------------------------------
 #define GuideRate1x 2
 #ifndef GuideRateDefault
   #define GuideRateDefault 6 // 20x
@@ -242,7 +249,7 @@ unsigned long baudRate[10] = {115200,56700,38400,28800,19200,14400,9600,4800,240
 #define RateToDegPerSec                   (1000000.0/(double)AXIS1_STEPS_PER_DEGREE)
 #define RateToASPerSec                    (RateToDegPerSec*3600.0)
 #define RateToXPerSec                     (RateToASPerSec/15.0)
-double  slewRateX                       = (RateToXPerSec/MaxRate)*2.5;    // 5x for exponential factor average rate and / 2x for default MaxRate
+double  slewRateX                       = (RateToXPerSec/MaxRate)*2.5;
 double  accXPerSec                      = (slewRateX/SLEW_ACCELERATION_DIST);
 double  guideRates[10]={3.75,7.5,15,30,60,120,300,720,(RateToASPerSec/MaxRate)/2.0,RateToASPerSec/MaxRate};
 //                      .25X .5x 1x 2x 4x  8x 20x 48x       half-MaxRate                   MaxRate
@@ -266,7 +273,7 @@ fixed_t guideAxis1;
 fixed_t amountGuideAxis2;
 fixed_t guideAxis2;
 
-// PEC control --------------------------------------------------------------------------------------------------------------
+// PEC control ---------------------------------------------------------------------------------------------------------------------
 #define PECStatusString                   "IpPrR"
 #define PECStatusStringAlt                "/,~;^"
 #define IgnorePEC                         0
@@ -282,18 +289,18 @@ int     pecBufferSize                   = PEC_BUFFER_SIZE;
 long    pecIndex                        = 0;
 long    pecIndex1                       = 0;
 int     pecAnalogValue                  = 0;
-int     pecAutoRecord                   = 0;                              // for writing to PEC table to EEPROM
-long    wormSensePos                    = 0;                              // in steps
-boolean wormSensedAgain                 = false;                          // indicates PEC index was found
+int     pecAutoRecord                   = 0;                 // for writing to PEC table to EEPROM
+long    wormSensePos                    = 0;                 // in steps
+boolean wormSensedAgain                 = false;             // indicates PEC index was found
 int     LastPecPinState                 = PEC_SENSE_STATE;                         
 boolean pecBufferStart                  = false;                                   
-fixed_t accPecGuideHA;                                                    // for PEC, buffers steps to be recorded
+fixed_t accPecGuideHA;                                       // for PEC, buffers steps to be recorded
 volatile double pecTimerRateAxis1 = 0.0;
 #if MOUNT_TYPE != ALTAZM
   static byte *pecBuffer;
 #endif
 
-// Misc ---------------------------------------------------------------------------------------------------------------------
+// Misc ----------------------------------------------------------------------------------------------------------------------------
 #define Rad 57.29577951
 
 // current site index and name
@@ -323,9 +330,9 @@ boolean led2On                          = false;
 volatile int buzzerDuration = 0;
 
 // pause at home on meridian flip
-boolean pauseHome                       = false;                          // allow pause at home?
-boolean waitingHomeContinue             = false;                          // set to true to stop pause
-boolean waitingHome                     = false;                          // true if waiting at home
+boolean pauseHome                       = false;             // allow pause at home?
+boolean waitingHomeContinue             = false;             // set to true to stop pause
+boolean waitingHome                     = false;             // true if waiting at home
 
 // reticule control
 #if LED_RETICLE >= 0
