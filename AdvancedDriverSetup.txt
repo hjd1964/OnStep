@@ -2,27 +2,27 @@
 // Use this in your Config.h file's MOTION CONTROL section
 //
 // M0, M1, M2, and M3 for Axis1/2 (RA/Azm) and are listed in Config.h's PINMAP matching Pins.xxx.h file.
-// values (0b000 to 111): for example "#define ..IVER_MODE 4" is the same as "#define ..IVER_MODE 0b100" which sets M2 to HIGH, M1 to LOW, and M0 to LOW
+// values (0b000 to 111): for example "#define ..STEP_CODE 4" is the same as "#define ..STEP_CODE 0b100" which sets M2 to HIGH, M1 to LOW, and M0 to LOW
 //                                                                                                 / | \                  (1)         (0)            (0)
 //                                                                                               M2  M1 M0
 //
 
 // Substitute the Axis# (1 to 5) for "n" in the example below
 
-#define AXISn_DRIVER_MODE OFF             // Programs the RA/Az uStep mode M0/M1/M2, optional and default _OFF.
-#define AXISn_DRIVER_MODE_GOTO OFF        // For Axis1 and Axis2 only.  Programs the RA/Az uStep mode M0/M1/M2, used during gotos, optional and default _OFF.
-#define AXISn_DRIVER_STEP_GOTO 1          // 1 = goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
+#define AXISn_DRIVER_MICROSTEP_CODE_OFF      // Programs the RA/Az uStep mode M0/M1/M2 as above, optional and default _OFF.
+#define AXISn_DRIVER_MICROSTEP_CODE_GOTO_OFF // For Axis1 and Axis2 only.  Programs the RA/Az uStep mode M0/M1/M2, used during gotos, optional and default _OFF.
+#define AXISn_DRIVER_STEP_GOTO 1             // 1 = goto mode is same as normal mode: for example if normal tracking mode is 32x and goto is 8x this would be 4
 
-// Settings for TMC2130, TMC5160, etc? stepper drivers when in SPI mode.  In this mode AXISn_MODE (and AXISn_MODE_GOTO) is the micro-step setting code as given in the TMC2130, etc. datasheet.
-#define AXISn_DRIVER_INTPOL true          // true to use 256x interpolation
-#define AXISn_DRIVER_IHOLD  1250          // Current during standstill;  in milli-amps, use these values for current limiting Vref setting via the trim-pot on driver
-#define AXISn_DRIVER_IRUN   2500          // Current during tracking;    alternatively set Vref = 2.5V (TMC2130) and enter the currents you would like in mA here
-#define AXISn_DRIVER_IGOTO  2500          // Current during slews
-#define AXISn_DRIVER_RSENSE 0.11+0.02     // Standard Rsense for TMC2130, for the TMC5160 use 0.075, other devices may be different
+// Settings for TMC2130, TMC5160, etc? stepper drivers when in SPI mode.  In this mode use the micro-step setting code given in the TMC2130, etc. datasheet.
+#define AXISn_DRIVER_INTPOL true             // true to use 256x interpolation
+#define AXISn_DRIVER_IHOLD  1250             // Current during standstill;  in milli-amps, use these values for current limiting Vref setting via the trim-pot on driver
+#define AXISn_DRIVER_IRUN   2500             // Current during tracking;    alternatively set Vref = 2.5V (TMC2130) and enter the currents you would like in mA here
+#define AXISn_DRIVER_IGOTO  2500             // Current during slews
+#define AXISn_DRIVER_RSENSE 0.11+0.02        // Standard Rsense for TMC2130, for the TMC5160 use 0.075, other devices may be different
 
-#define MODE_SWITCH_BEFORE_SLEW OFF       // ON (or TMC_SPI) for _MODE and _MODE_GOTO settings to start/stop just before/after the slew, otherwise goto mode becomes active
-                                          // During the slew at >128uS/step speeds.  SilentStepStick TMC2130/5160 SPI configurations: use MODE_SWITCH_BEFORE_SLEW TMC_SPI.
-                                          // Defaults to spreadCycle w/256x interpolation.
+#define MODE_SWITCH_BEFORE_SLEW OFF          // ON (or TMC_SPI) for _MODE and _MODE_GOTO settings to start/stop just before/after the slew, otherwise goto mode becomes active
+                                             // During the slew at >128uS/step speeds.  SilentStepStick TMC2130/5160 SPI configurations: use MODE_SWITCH_BEFORE_SLEW TMC_SPI.
+                                             // Defaults to spreadCycle w/256x interpolation.
 
 // Secondary stepper driver decay control (for both Axes, the _DECAY_MODE and _DECAY_MODE_GOTO settings always start/stop just before/after the slew)
 // typically used for the DRV8825, A9488, TMC2209, TMC2130, TMC5160.  DRV8825 and A4988 modules usually need to be modified to accomplish this.
