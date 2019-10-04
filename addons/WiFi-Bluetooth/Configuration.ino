@@ -129,7 +129,7 @@ void handleConfiguration() {
   data += FPSTR(html_links1N);
   data += FPSTR(html_links2N);
   data += FPSTR(html_links3N);
-#ifdef ENCODERS_ON
+#if ENCODERS == ON
   data += FPSTR(html_linksEncN);
 #endif
   sendHtml(data);

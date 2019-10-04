@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------------
 // Telescope control related functions 
 
-#ifdef SPECIAL_CHARS_ON
+#if DISPLAY_SPECIAL_CHARS == ON
   #define HOME_CH "&#x1F3E0;"
   #define ARROW_DR "&#x27A5;"
   #define ARROW_UR "&#x27A6;"
@@ -179,7 +179,7 @@ const char html_controlDeRotate2[] PROGMEM =
 const char html_controlRotate4[] PROGMEM =
 "</div><br class='clear' />\r\n";
 
-#if defined(SW0) || defined(SW1) || defined(SW2) || defined(SW3) || defined(SW4) || defined(SW5) || defined(SW6) || defined(SW7) || defined(SW8) || defined(SW9) || defined(SW10) || defined(SW11) || defined(SW12) || defined(SW13) || defined(SW14) || defined(SW15) || defined(AN3) || defined(AN4) || defined(AN5) || defined(AN6) || defined(AN7) || defined(AN8)
+#if defined(SW0) || defined(SW1) || defined(SW2) || defined(SW3) || defined(SW4) || defined(SW5) || defined(SW6) || defined(SW7) || defined(SW8) || defined(AN3) || defined(AN4) || defined(AN5) || defined(AN6) || defined(AN7) || defined(AN8)
 const char html_controlAuxB[] PROGMEM = "<div class='b1' style='width: 27em'><div align='left'>Aux:</div>";
 #ifdef SW0
 const char html_controlSwitch0[] PROGMEM = SW0 "<br /><button type='button' onpointerdown=\"s('sw0','255')\" >On</button><button type='button' onpointerdown=\"s('sw0','0')\" >Off</button><br />";
@@ -207,27 +207,6 @@ const char html_controlSwitch7[] PROGMEM = SW7 "<br /><button type='button' onpo
 #endif
 #ifdef SW8
 const char html_controlSwitch8[] PROGMEM = SW8 "<br /><button type='button' onpointerdown=\"s('sw8','255')\" >On</button><button type='button' onpointerdown=\"s('sw8','0')\" >Off</button><br />";
-#endif
-#ifdef SW9
-const char html_controlSwitch9[] PROGMEM = SW9 "<br /><button type='button' onpointerdown=\"s('sw9','255')\" >On</button><button type='button' onpointerdown=\"s('sw9','0')\" >Off</button><br />";
-#endif
-#ifdef SW10
-const char html_controlSwitch10[] PROGMEM = SW10 "<br /><button type='button' onpointerdown=\"s('swA','255')\" >On</button><button type='button' onpointerdown=\"s('swA','0')\" >Off</button><br />";
-#endif
-#ifdef SW11
-const char html_controlSwitch11[] PROGMEM = SW11 "<br /><button type='button' onpointerdown=\"s('swB','255')\" >On</button><button type='button' onpointerdown=\"s('swB','0')\" >Off</button><br />";
-#endif
-#ifdef SW12
-const char html_controlSwitch12[] PROGMEM = SW12 "<br /><button type='button' onpointerdown=\"s('swC','255')\" >On</button><button type='button' onpointerdown=\"s('swC','0')\" >Off</button><br />";
-#endif
-#ifdef SW13
-const char html_controlSwitch13[] PROGMEM = SW13 "<br /><button type='button' onpointerdown=\"s('swD','255')\" >On</button><button type='button' onpointerdown=\"s('swD','0')\" >Off</button><br />";
-#endif
-#ifdef SW14
-const char html_controlSwitch14[] PROGMEM = SW14 "<br /><button type='button' onpointerdown=\"s('swE','255')\" >On</button><button type='button' onpointerdown=\"s('swE','0')\" >Off</button><br />";
-#endif
-#ifdef SW15
-const char html_controlSwitch15[] PROGMEM = SW15 "<br /><button type='button' onpointerdown=\"s('swF','255')\" >On</button><button type='button' onpointerdown=\"s('swF','0')\" >Off</button><br />";
 #endif
 #ifdef AN3
 const char html_controlAnalog3A[] PROGMEM = AN3 " <span id='an3v'>";
@@ -315,7 +294,7 @@ void handleControl() {
   data += FPSTR(html_links1N);
   data += FPSTR(html_links2S);
   data += FPSTR(html_links3N);
-#ifdef ENCODERS_ON
+#if ENCODERS == ON
   data += FPSTR(html_linksEncN);
 #endif
   sendHtml(data);
@@ -421,7 +400,7 @@ void handleControl() {
   }
 
   // Aux -----------------------------------------------------
-  #if defined(SW0) || defined(SW1) || defined(SW2) || defined(SW3) || defined(SW4) || defined(SW5) || defined(SW6) || defined(SW7) || defined(SW8) || defined(SW9) || defined(SW10) || defined(SW11) || defined(SW12) || defined(SW13) || defined(SW14) || defined(SW15) || defined(AN3) || defined(AN4) || defined(AN5) || defined(AN6) || defined(AN7) || defined(AN8)
+  #if defined(SW0) || defined(SW1) || defined(SW2) || defined(SW3) || defined(SW4) || defined(SW5) || defined(SW6) || defined(SW7) || defined(SW8) || defined(AN3) || defined(AN4) || defined(AN5) || defined(AN6) || defined(AN7) || defined(AN8)
     data += FPSTR(html_controlAuxB);
     // Digital Control
     int c=0;
@@ -452,27 +431,6 @@ void handleControl() {
     #ifdef SW8
     data += FPSTR(html_controlSwitch8); c++;
     #endif
-    #ifdef SW9
-    data += FPSTR(html_controlSwitch9); c++;
-    #endif
-    #ifdef SW10
-    data += FPSTR(html_controlSwitch10); c++;
-    #endif
-    #ifdef SW11
-    data += FPSTR(html_controlSwitch11); c++;
-    #endif
-    #ifdef SW12
-    data += FPSTR(html_controlSwitch12); c++;
-    #endif
-    #ifdef SW13
-    data += FPSTR(html_controlSwitch13); c++;
-    #endif
-    #ifdef SW14
-    data += FPSTR(html_controlSwitch14); c++;
-    #endif
-    #ifdef SW15
-    data += FPSTR(html_controlSwitch15); c++;
-    #endif
     if (c>0) { data+="<br />"; sendHtml(data); }
 
     // Analog Control
@@ -493,7 +451,7 @@ void handleControl() {
     if (sendCommand(":GXG7#",temp1)) { data += FPSTR(html_controlAnalog7A); data += temp1; data += FPSTR(html_controlAnalog7B); data += temp1; data += FPSTR(html_controlAnalog7C); c++; }
     #endif
     #ifdef AN8
-      if (sendCommand(":GXG8#",temp1)) { data += FPSTR(html_controlAnalog8A); data += temp1; data += FPSTR(html_controlAnalog8B); data += temp1; data += FPSTR(html_controlAnalog8C); c++; } 
+    if (sendCommand(":GXG8#",temp1)) { data += FPSTR(html_controlAnalog8A); data += temp1; data += FPSTR(html_controlAnalog8B); data += temp1; data += FPSTR(html_controlAnalog8C); c++; } 
     #endif
     if (c>0) sendHtml(data);
 
@@ -738,27 +696,6 @@ void processControlGet() {
   #endif
   #ifdef SW8
   v=server.arg("sw8"); if (v!="") { Ser.print(":SXG8,"+v+"#"); cl(); }
-  #endif
-  #ifdef SW9
-  v=server.arg("sw9"); if (v!="") { Ser.print(":SXG9,"+v+"#"); cl(); }
-  #endif
-  #ifdef SW10
-  v=server.arg("swA"); if (v!="") { Ser.print(":SXGA,"+v+"#"); cl(); }
-  #endif
-  #ifdef SW11
-  v=server.arg("swB"); if (v!="") { Ser.print(":SXGB,"+v+"#"); cl(); }
-  #endif
-  #ifdef SW12
-  v=server.arg("swC"); if (v!="") { Ser.print(":SXGC,"+v+"#"); cl(); }
-  #endif
-  #ifdef SW13
-  v=server.arg("swD"); if (v!="") { Ser.print(":SXGD,"+v+"#"); cl(); }
-  #endif
-  #ifdef SW14
-  v=server.arg("swE"); if (v!="") { Ser.print(":SXGE,"+v+"#"); cl(); }
-  #endif
-  #ifdef SW15
-  v=server.arg("swF"); if (v!="") { Ser.print(":SXGF,"+v+"#"); cl(); }
   #endif
 
   // General purpose analog

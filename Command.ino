@@ -994,27 +994,6 @@ void processCommands() {
 #ifdef Aux8
           if ((parameter[0] == 'G') && (parameter[1] == '8')) { sprintf(reply,"%d",(int)round((float)valueAux8/2.55)); quietReply=true; } else
 #endif
-#ifdef Aux9
-          if ((parameter[0] == 'G') && (parameter[1] == '9')) { sprintf(reply,"%d",(int)round((float)valueAux9/2.55)); quietReply=true; } else
-#endif
-#ifdef Aux10
-          if ((parameter[0] == 'G') && (parameter[1] == 'A')) { sprintf(reply,"%d",(int)round((float)valueAux10/2.55)); quietReply=true; } else
-#endif
-#ifdef Aux11
-          if ((parameter[0] == 'G') && (parameter[1] == 'B')) { sprintf(reply,"%d",(int)round((float)valueAux11/2.55)); quietReply=true; } else
-#endif
-#ifdef Aux12
-          if ((parameter[0] == 'G') && (parameter[1] == 'C')) { sprintf(reply,"%d",(int)round((float)valueAux12/2.55)); quietReply=true; } else
-#endif
-#ifdef Aux13
-          if ((parameter[0] == 'G') && (parameter[1] == 'D')) { sprintf(reply,"%d",(int)round((float)valueAux13/2.55)); quietReply=true; } else
-#endif
-#ifdef Aux14
-          if ((parameter[0] == 'G') && (parameter[1] == 'E')) { sprintf(reply,"%d",(int)round((float)valueAux14/2.55)); quietReply=true; } else
-#endif
-#ifdef Aux15
-          if ((parameter[0] == 'G') && (parameter[1] == 'F')) { sprintf(reply,"%d",(int)round((float)valueAux15/2.55)); quietReply=true; } else
-#endif
             commandError=true;
         } else commandError=true;
       } else
@@ -1898,27 +1877,6 @@ void processCommands() {
   #else
               if (v == 0) digitalWrite(Aux8,LOW); else digitalWrite(Aux8,HIGH); } else
   #endif
-#endif
-#ifdef Aux9
-            if (parameter[1] == '9') { valueAux9=v; static bool init=false; if (!init) { pinMode(Aux9,OUTPUT); init=true; } if (v == 0) digitalWrite(Aux9,LOW); else digitalWrite(Aux9,HIGH); } else
-#endif
-#ifdef Aux10
-            if (parameter[1] == 'A') { valueAux10=v; static bool init=false; if (!init) { pinMode(Aux10,OUTPUT); init=true; } if (v == 0) digitalWrite(Aux10,LOW); else digitalWrite(Aux10,HIGH); } else
-#endif
-#ifdef Aux11
-            if (parameter[1] == 'B') { valueAux11=v; static bool init=false; if (!init) { pinMode(Aux11,OUTPUT); init=true; } if (v == 0) digitalWrite(Aux11,LOW); else digitalWrite(Aux11,HIGH); } else
-#endif
-#ifdef Aux12
-            if (parameter[1] == 'C') { valueAux12=v; static bool init=false; if (!init) { pinMode(Aux12,OUTPUT); init=true; } if (v == 0) digitalWrite(Aux12,LOW); else digitalWrite(Aux12,HIGH); } else
-#endif
-#ifdef Aux13
-            if (parameter[1] == 'D') { valueAux13=v; static bool init=false; if (!init) { pinMode(Aux13,OUTPUT); init=true; } if (v == 0) digitalWrite(Aux13,LOW); else digitalWrite(Aux13,HIGH); } else
-#endif
-#ifdef Aux14
-            if (parameter[1] == 'E') { valueAux14=v; static bool init=false; if (!init) { pinMode(Aux14,OUTPUT); init=true; } if (v == 0) digitalWrite(Aux14,LOW); else digitalWrite(Aux14,HIGH); } else
-#endif
-#ifdef Aux15
-            if (parameter[1] == 'F') { valueAux15=v; static bool init=false; if (!init) { pinMode(Aux15,OUTPUT); init=true; } if (v == 0) digitalWrite(Aux15,LOW); else digitalWrite(Aux15,HIGH); } else
 #endif
             commandError=true;
           } else commandError=true;

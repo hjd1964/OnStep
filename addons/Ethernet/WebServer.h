@@ -11,7 +11,7 @@ class WebServer {
     void handleClient();
     void setResponseHeader(const char *str);
     void on(String fn, webFunction handler);
-#ifdef SD_CARD_ON
+#if SD_CARD == ON
     void on(String fn);
 #endif
     void onNotFound(webFunction handler);
@@ -19,13 +19,13 @@ class WebServer {
 
     bool SDfound=false;
   private:
-#ifdef SD_CARD_ON
+#if SD_CARD == ON
     void sdPage(String fn, EthernetClient *client);
 #endif
 
     String inputBuffer;
     char responseHeader[200]="";
-#ifdef SD_CARD_ON
+#if SD_CARD == ON
     bool modifiedSinceFound=false;
 #endif
 
@@ -40,4 +40,3 @@ class WebServer {
 };
 
 const char http_defaultHeader[] PROGMEM = "HTTP/1.1 200 OK\r\n" "Content-Type: text/html\r\n" "Connection: close\r\n" "\r\n";
-

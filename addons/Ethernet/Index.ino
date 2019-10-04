@@ -1,14 +1,14 @@
 // -----------------------------------------------------------------------------------
 // The home page, status information
 
-#define HIGH_PRECISION_COORDS_ON
+#define DISPLAY_HIGH_PRECISION_COORDS_ON
 
 #define leftTri  "&#x25c4;"
 #define rightTri "&#x25ba;"
 #define upTri    "&#x25b2;"
 #define downTri  "&#x25bc;"
 
-#ifdef ADVANCED_CHARS_ON
+#if DISPLAY_ADVANCED_CHARS == ON
   #define Axis1 "&alpha;"
   #define Axis1A "&alpha;"
   #define Axis2 "&delta;"
@@ -34,7 +34,7 @@ const char html_indexSite[] PROGMEM = "&nbsp;&nbsp;Long. = <font class='c'>%s</f
 
 const char html_indexPosition[] PROGMEM = "&nbsp;&nbsp;Current: " Axis1 "=<font class='c'>%s</font>, " Axis2 "=<font class='c'>%s</font><br />";
 const char html_indexTarget[] PROGMEM = "&nbsp;&nbsp;Target:&nbsp;&nbsp; " Axis1 "=<font class='c'>%s</font>, " Axis2 "=<font class='c'>%s</font><br />";
-#ifdef ENCODERS_ON
+#if ENCODERS == ON
 const char html_indexEncoder1[] PROGMEM = "&nbsp;&nbsp;OnStep: Ax1=<font class='c'>%s</font>, Ax2=<font class='c'>%s</font><br />";
 const char html_indexEncoder2[] PROGMEM = "&nbsp;&nbsp;Encodr: Ax1=<font class='c'>%s</font>, Ax2=<font class='c'>%s</font><br />";
 #endif
@@ -52,7 +52,7 @@ const char html_indexTPHD[] PROGMEM = "&nbsp;&nbsp;%s <font class='c'>%s</font>%
 const char html_indexDriverStatus[] PROGMEM = " Driver: <font class='c'>%s</font><br />";
 const char html_indexLastError[] PROGMEM = "&nbsp;&nbsp;Last Error: <font class='c'>%s</font><br />";
 const char html_indexWorkload[] PROGMEM = "&nbsp;&nbsp;Workload: <font class='c'>%s</font><br />";
-#ifdef WIFI_SIGNAL_STRENGTH_ON
+#if DISPLAY_WIFI_SIGNAL_STRENGTH == ON
 const char html_indexSignalStrength[] PROGMEM = "&nbsp;&nbsp;Wireless signal strength: <font class=\"c\">%s</font><br />";
 #endif
 
@@ -103,7 +103,7 @@ void handleRoot() {
   data += FPSTR(html_links2N);
   data += FPSTR(html_links3N);
   sendHtml(data);
-#ifdef ENCODERS_ON
+#if ENCODERS == ON
   data += FPSTR(html_linksEncN);
 #endif
   data += FPSTR(html_links4N);
@@ -142,7 +142,7 @@ void handleRoot() {
   data += temp;
   sendHtml(data);
 
-#ifdef AMBIENT_CONDITIONS_ON
+#if DISPLAY_WEATHER == ON
   if (!sendCommand(":GX9A#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,"Temperature:",temp1,"&deg;C"); data+=temp;
   if (!sendCommand(":GX9B#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,"Barometric Pressure:",temp1,"mb"); data+=temp;
   if (!sendCommand(":GX9C#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,"Relative Humidity:",temp1,"%"); data+=temp;
@@ -151,7 +151,7 @@ void handleRoot() {
 
   data+="<br /><b>Coordinates:</b><br />";
 
-#ifdef HIGH_PRECISION_COORDS_ON
+#if HIGH_PRECISION_COORDS == ON
   // RA,Dec current
   if (!sendCommand(":GRa#",temp1)) strcpy(temp1,"?");
   if (!sendCommand(":GDe#",temp2)) strcpy(temp2,"?");
@@ -177,7 +177,7 @@ void handleRoot() {
   data += temp;
 #endif
 
-#ifdef ENCODERS_ON
+#if ENCODERS == ON
   // RA,Dec OnStep position
   double f;
   f=encoders.getOnStepAxis1(); doubleToDms(temp1,&f,true,true);
@@ -343,7 +343,7 @@ void handleRoot() {
     data += temp;
   }
 
-#ifdef INTERNAL_TEMPERATURE_ON
+#if DISPLAY_INTERNAL_TEMPERATURE == ON
   if (!sendCommand(":GX9F#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,"Controller Internal Temperature:",temp1,"&deg;C"); data+=temp;
 #endif
 
@@ -360,7 +360,7 @@ void handleRoot() {
   sprintf_P(temp,html_indexWorkload,temp1);
   data += temp;
 
-#ifdef WIFI_SIGNAL_STRENGTH_ON
+#if DISPLAY_WIFI_SIGNAL_STRENGTH == ON
   long signal_strength_dbm=WiFi.RSSI();
   int signal_strength_qty=2*(signal_strength_dbm+100);
   if (signal_strength_qty>100) signal_strength_qty=100; 

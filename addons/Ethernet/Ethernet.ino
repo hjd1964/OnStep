@@ -28,7 +28,7 @@
  *
  * Description
  *
- * ESP8266-01 OnStep control
+ * W5100 and W5500 Ethernet for OnStep
  *
  */
  
@@ -46,23 +46,41 @@
 #define FPSTR
 
 #include <limits.h>
-#ifdef W5500_ON
-  #include <Ethernet3.h>  // https://github.com/PaulStoffregen/Ethernet
-#else
-  #include <Ethernet.h>
-#endif
+
+// pretty sure this wasn't being compiled in even if W5500 was ON (ahead of #include Config.h) so commented out for now.
+//#ifdef W5500_ON
+//  #include <Ethernet3.h>  // https://github.com/PaulStoffregen/Ethernet
+//#else
+//  #include <Ethernet.h>
+//#endif
+
+#define DEBUG_OFF   // Turn _ON to allow Ethernet startup without OnStep (Serial port for debug at 9600 baud)
+
+#include <Ethernet.h>
 #include "CmdServer.h"
+
+#include "Constants.h"
+#include "Config.h"
+
 #include "WebServer.h"
 
-#include "Config.h"
-#include "Constants.h"
+// The settings below are for initialization only, afterward they are stored and recalled from EEPROM and must
+// be changed in the web interface OR with a reset (for initialization again) as described in the Config.h comments
+#if SERIAL_BAUD<=28800
+  #define TIMEOUT_WEB 60
+  #define TIMEOUT_CMD 60
+#else
+  #define TIMEOUT_WEB 15
+  #define TIMEOUT_CMD 30
+#endif
+
 #define ICACHE_RAM_ATTR
 #define AXIS1_ENC_A_PIN 5  // pin# for Axis1 encoder, for A or CW
 #define AXIS1_ENC_B_PIN 6  // pin# for Axis1 encoder, for B or CCW
 #define AXIS2_ENC_A_PIN 7  // pin# for Axis2 encoder, for A or CW
 #define AXIS2_ENC_B_PIN 8  // pin# for Axis2 encoder, for B or CCW
 #include "Encoders.h"
-#ifdef ENCODERS_ON
+#if ENCODERS == ON
 Encoders encoders;
 #endif
 
@@ -101,7 +119,7 @@ void setup(void){
   if ((EEPROM_readInt(0)!=8267) || (EEPROM_readInt(2)!=0)) {
     EEPROM_writeInt(0,8267);
     EEPROM_writeInt(2,0);
-#ifdef ENCODERS_ON
+#if ENCODERS == ON
     EEPROM_writeLong(600,Axis1EncDiffLimit);
     EEPROM_writeLong(604,Axis2EncDiffLimit);
     EEPROM_writeLong(608,20);  // enc short term average samples
@@ -112,10 +130,10 @@ void setup(void){
     EEPROM_writeLong(632,10);  // prop
 #endif
   } else {  
-#ifdef ENCODERS_ON
+#if ENCODERS == ON
     Axis1EncDiffLimit=EEPROM_readLong(600);
     Axis2EncDiffLimit=EEPROM_readLong(604);
-#ifdef AXIS1_ENC_RATE_CONTROL_ON
+#if AXIS1_ENC_RATE_CONTROL == ON
     Axis1EncStaSamples=EEPROM_readLong(608);
     Axis1EncLtaSamples=EEPROM_readLong(612);
     long l=EEPROM_readLong(616); Axis1EncRateComp=(float)l/1000000.0;
@@ -172,7 +190,7 @@ Again:
     }
   }
 
-#ifdef W5500_ON
+#if W5500 == ON
   // reset a W5500
   pinMode(9, OUTPUT); 
   digitalWrite(9, LOW);
@@ -190,7 +208,7 @@ Again:
   server.on("settings.txt", settingsAjax);
   server.on("control.htm", handleControl);
   server.on("control.txt", controlAjax);
-#ifdef ENCODERS_ON
+#if ENCODERS == ON
   server.on("/enc.htm", handleEncoders);
   server.on("/encA.txt", encAjaxGet);
   server.on("/enc.txt", encAjax);
@@ -206,7 +224,7 @@ Again:
   // Initialize the cmd server, timeout after 500ms
   cmdSvr.init(9999,500);
 
-#ifdef ENCODERS_ON
+#if ENCODERS == ON
   encoders.init();
 #endif
 }
@@ -214,7 +232,7 @@ Again:
 void loop(void){
   server.handleClient();
   cmdSvr.handleClient();
-#ifdef ENCODERS_ON
+#if ENCODERS == ON
   encoders.poll();
 #endif
 
@@ -239,7 +257,7 @@ void loop(void){
 
     } else {
       server.handleClient();
-#ifdef ENCODERS_ON
+#if ENCODERS == ON
       encoders.poll();
 #endif
     }

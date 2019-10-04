@@ -48,14 +48,27 @@
 #include <ESP8266WiFiAP.h>
 #include <EEPROM.h>
 
-#include "Config.h"
+#define DEBUG_OFF   // Turn _ON to allow Ethernet startup without OnStep (Serial port for debug at 9600 baud)
+
 #include "Constants.h"
+#include "Config.h"
+
+// The settings below are for initialization only, afterward they are stored and recalled from EEPROM and must
+// be changed in the web interface OR with a reset (for initialization again) as described in the Config.h comments
+#if SERIAL_BAUD<=28800
+  #define TIMEOUT_WEB 60
+  #define TIMEOUT_CMD 60
+#else
+  #define TIMEOUT_WEB 15
+  #define TIMEOUT_CMD 30
+#endif
+
 #define AXIS1_ENC_A_PIN 14 // pin# for Axis1 encoder, for A or CW
 #define AXIS1_ENC_B_PIN 12 // pin# for Axis1 encoder, for B or CCW
 #define AXIS2_ENC_A_PIN 5  // pin# for Axis1 encoder, for A or CW
 #define AXIS2_ENC_B_PIN 4  // pin# for Axis1 encoder, for B or CCW
 #include "Encoders.h"
-#ifdef ENCODERS_ON
+#if ENCODERS == ON
 Encoders encoders;
 #endif
 
@@ -119,8 +132,8 @@ void handleNotFound(){
 }
 
 void setup(void){
-#ifdef LED_PIN
-  pinMode(LED_PIN,OUTPUT);
+#if LED_STATUS != OFF
+  pinMode(LED_STATUS,OUTPUT);
 #endif
   EEPROM.begin(1024);
 
@@ -136,7 +149,7 @@ void setup(void){
     EEPROM_writeInt(10,(int)WebTimeout);
     EEPROM_writeInt(12,(int)CmdTimeout);
 
-#ifdef ENCODERS_ON
+#if ENCODERS == ON
     EEPROM_writeLong(600,Axis1EncDiffLimit);
     EEPROM_writeLong(604,Axis2EncDiffLimit);
     EEPROM_writeLong(608,20);  // enc short term average samples
@@ -169,14 +182,14 @@ void setup(void){
     WebTimeout=EEPROM_readInt(10);
     CmdTimeout=EEPROM_readInt(12);
 
-#ifdef ENCODERS_ON
+#if ENCODERS == ON
     Axis1EncDiffLimit=EEPROM_readLong(600);
     Axis2EncDiffLimit=EEPROM_readLong(604);
-#ifdef AXIS1_ENC_RATE_CONTROL_ON
+#if AXIS1_ENC_RATE_CONTROL == ON
     Axis1EncStaSamples=EEPROM_readLong(608);
     Axis1EncLtaSamples=EEPROM_readLong(612);
     long l=EEPROM_readLong(616); axis1EncRateComp=(float)l/1000000.0;
-#ifdef AXIS1_ENC_INTPOL_COS_ON
+#if AXIS1_ENC_INTPOL_COS == ON
     Axis1EncIntPolPhase =EEPROM_readLong(624);
     Axis1EncIntPolMag   =EEPROM_readLong(628);
 #endif
@@ -202,28 +215,28 @@ void setup(void){
 
 #ifndef DEBUG_ON
   Ser.begin(SERIAL_BAUD_DEFAULT);
-#ifdef SERIAL_SWAP_ON
+#if SERIAL_SWAP == ON
   Ser.swap();
 #endif
 
   byte tb=0;
 Again:
-#ifdef LED_PIN
-  digitalWrite(LED_PIN,LOW);
+#if LED_STATUS != OFF
+  digitalWrite(LED_STATUS,LOW);
 #endif
   char c=0;
 
   // clear the buffers and any noise on the serial lines
   for (int i=0; i<3; i++) {
     Ser.print(":#");
-#ifdef LED_PIN
-    digitalWrite(LED_PIN,HIGH);
+#if LED_STATUS != OFF
+    digitalWrite(LED_STATUS,HIGH);
 #endif
     delay(500);
     Ser.flush();
     c=serialRecvFlush();
-#ifdef LED_PIN
-    digitalWrite(LED_PIN,LOW);
+#if LED_STATUS != OFF
+    digitalWrite(LED_STATUS,LOW);
 #endif
     delay(500);
   }
@@ -239,7 +252,7 @@ Again:
     Ser.println();
   }
  
-  if (SERIAL_BAUD!=SERIAL_BAUD_DEFAULT) {
+  if (SERIAL_BAUD != SERIAL_BAUD_DEFAULT) {
 
     // switch OnStep Serial1 up to ? baud
     Ser.print(HighSpeedCommsStr(SERIAL_BAUD));
@@ -248,12 +261,12 @@ Again:
     while (Ser.available()>0) { count++; if (count==1) c=Ser.read(); }
     if (c=='1') {
         Ser.begin(SERIAL_BAUD);
-    #ifdef SERIAL_SWAP_ON
+    #if SERIAL_SWAP == ON
         Ser.swap();
     #endif
     } else {
-#ifdef LED_PIN
-      digitalWrite(LED_PIN,HIGH);
+#if LED_STATUS != OFF
+      digitalWrite(LED_STATUS,HIGH);
 #endif
       // got nothing back, toggle baud rate and try again
       tb++;
@@ -261,7 +274,7 @@ Again:
       if (tb==1) Ser.begin(SERIAL_BAUD_DEFAULT);
       if (tb==4) Ser.begin(SERIAL_BAUD);
       
-#ifdef SERIAL_SWAP_ON
+#if SERIAL_SWAP == ON
       Ser.swap();
 #endif
       delay(1000);
@@ -337,7 +350,7 @@ TryAgain:
   server.on("/settings.htm", handleSettings);
   server.on("/settings.txt", settingsAjax);
   server.on("/control.htm", handleControl);
-#ifdef ENCODERS_ON
+#if ENCODERS == ON
   server.on("/enc.htm", handleEncoders);
   server.on("/encA.txt", encAjaxGet);
   server.on("/enc.txt", encAjax);
@@ -358,14 +371,14 @@ TryAgain:
   Ser.println("HTTP server started");
 #endif
 
-#ifdef ENCODERS_ON
+#if ENCODERS == ON
   encoders.init();
 #endif
 }
 
 void loop(void){
   server.handleClient();
-#ifdef ENCODERS_ON
+#if ENCODERS == ON
   encoders.poll();
 #endif
 
@@ -405,7 +418,7 @@ void loop(void){
 
     } else {
       server.handleClient(); 
-#ifdef ENCODERS_ON
+#if ENCODERS == ON
       encoders.poll();
 #endif
     }

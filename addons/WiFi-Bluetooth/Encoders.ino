@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------------
 // Encoders
 
-#ifdef ENCODERS_ON
+#if ENCODERS == ON
 
 const char html_encBeg[] PROGMEM = 
 "";
@@ -100,7 +100,7 @@ const char html_encRateEn2[] PROGMEM =
 "<br /><br />";
 
 const char html_encStaAxis1[] PROGMEM =
-#ifdef AXIS1_ENC_BIN_AVG
+#if AXIS1_ENC_BIN_AVG > 0
 "Encoder rate averaging, binned samples: <br />"
 #else
 "Encoder rate averaging, samples: <br />"
@@ -133,7 +133,7 @@ const char html_encMinGuideAxis1[] PROGMEM =
 " (25 to 1000mS)"
 "</form><br />";
 
-#ifndef AXIS1_ENC_RATE_AUTO
+#if AXIS1_ENC_RATE_AUTO == OFF
 const char html_encErc2Axis1[] PROGMEM = 
 "Encoder rate comp: <br />"
 "<form method='get' action='/enc.htm'>"
@@ -143,7 +143,7 @@ const char html_encErc2Axis1[] PROGMEM =
 "</form><br />";
 #endif
 
-#ifdef AXIS1_ENC_INTPOL_COS_ON
+#if AXIS1_ENC_INTPOL_COS == ON
 const char html_encIntPolPhaseAxis1[] PROGMEM = 
 "<form method='get' action='/enc.htm'>"
 " <input value='%ld' type='number' name='ip' min='0' max='255'>"
@@ -194,7 +194,7 @@ void handleEncoders() {
   data += html_encScript1;
   sendHtml(data);
 
-#ifdef AXIS1_ENC_RATE_CONTROL_ON
+#if AXIS1_ENC_RATE_CONTROL == ON
   data += html_encScript2;
   sendHtml(data);
 #endif
@@ -230,7 +230,7 @@ void handleEncoders() {
   data += FPSTR(html_links1N);
   data += FPSTR(html_links2N);
   data += FPSTR(html_links3N);
-#ifdef ENCODERS_ON
+#if ENCODERS == ON
   data += FPSTR(html_linksEncS);
 #endif
   data += FPSTR(html_links4N);
@@ -261,7 +261,7 @@ void handleEncoders() {
   data += temp;
   sendHtml(data);
   
-#ifdef AXIS1_ENC_RATE_CONTROL_ON
+#if AXIS1_ENC_RATE_CONTROL == ON
   // OnStep rate control
   data+="<br />";
   data += FPSTR(html_encRateEn1);
@@ -283,13 +283,13 @@ void handleEncoders() {
   data += temp;
 
   // Encoder rate compensation
-#ifndef AXIS1_ENC_RATE_AUTO
+#if AXIS1_ENC_RATE_AUTO == OFF
   long l=round(axis1EncRateComp*1000000.0);
   sprintf_P(temp,html_encErc2Axis1,l);
   data += temp;
 #endif
 
-#ifdef AXIS1_ENC_INTPOL_COS_ON
+#if AXIS1_ENC_INTPOL_COS == ON
   // Encoder interpolation compensation
   sprintf_P(temp,html_encIntPolPhaseAxis1,Axis1EncIntPolPhase);
   data += temp;
@@ -304,13 +304,13 @@ void handleEncoders() {
   data += temp;
   sprintf(temp,"&nbsp; OnStep = <span id='stO'>?</span><br />");
   data += temp;
-#ifdef AXIS1_ENC_INTPOL_COS_ON
+#if AXIS1_ENC_INTPOL_COS == ON
   sprintf(temp,"&nbsp; Intpol Comp = <span id='ipC'>?</span><br />");
   data += temp;
   sprintf(temp,"&nbsp; Intpol Phase = <span id='ipP'>?</span><br />");
   data += temp;
 #endif
-#ifdef AXIS1_ENC_RATE_AUTO
+#if AXIS1_ENC_RATE_AUTO > 0
   sprintf(temp,"&nbsp; Encoder ARC = <span id='erA'>?</span><br />");
   data += temp;
 #endif
@@ -353,17 +353,17 @@ void encAjax() {
 #endif
   String data="";
   
-#ifdef AXIS1_ENC_RATE_CONTROL_ON
+#if AXIS1_ENC_RATE_CONTROL == ON
   char temp[20]="";
   data += "stO|"; sprintf(temp,"%+1.4f\n",axis1Rate); data += temp;
   data += "stD|"; sprintf(temp,"%+1.4f\n",axis1Rate-axis1EncRateSta); data += temp;
   data += "stS|"; sprintf(temp,"%+1.4f\n",axis1EncRateSta); data += temp;
   data += "stL|"; sprintf(temp,"%+1.4f\n",axis1EncRateLta); data += temp;
-#ifdef AXIS1_ENC_INTPOL_COS_ON
+#if AXIS1_ENC_INTPOL_COS == ON
   data += "ipC|"; sprintf(temp,"%+1.4f\n",intpolComp); data += temp;
   data += "ipP|"; sprintf(temp,"%d\n",(int)intpolPhase); data += temp;
 #endif
-#ifdef AXIS1_ENC_RATE_AUTO
+#if AXIS1_ENC_RATE_AUTO > 0
   data += "erA|"; sprintf(temp,"%+1.5f\n",axis1EncRateComp); data += temp;
 #endif
 
@@ -444,7 +444,7 @@ void processEncodersGet() {
     }
   }
 
-#ifdef AXIS1_ENC_RATE_CONTROL_ON
+#if AXIS1_ENC_RATE_CONTROL == ON
   // OnStep rate control
   v=server.arg("rc");
   if (v!="") {
@@ -516,7 +516,7 @@ void processEncodersGet() {
     }
   }
 
-#ifdef AXIS1_ENC_INTPOL_COS_ON
+#if AXIS1_ENC_INTPOL_COS == ON
   // Encoder interpolation compensation
   v=server.arg("ip"); // phase
   if (v!="") {
@@ -540,7 +540,7 @@ void processEncodersGet() {
       EEwrite=true;
     }
   }
-#endif // AXIS1_ENC_INTPOL_COS_ON
+#endif // AXIS1_ENC_INTPOL_COS == ON
 
   // Sweep control
   v=server.arg("sw");
@@ -549,7 +549,7 @@ void processEncodersGet() {
     if (v=="off") encSweep=false;
   }
 
-#endif // AXIS1_ENC_RATE_CONTROL_ON
+#endif // AXIS1_ENC_RATE_CONTROL == ON
 
 #ifndef EEPROM_COMMIT_DISABLED
   if (EEwrite) EEPROM.commit();

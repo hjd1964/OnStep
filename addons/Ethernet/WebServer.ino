@@ -3,9 +3,10 @@
 
 // Turn _ON to allow webserver debug messages
 #define WEBSERVER_DEBUG_OFF
+#define SD_CARD OFF
 
 // SD CARD support, simply enable and provide a webserver.on("filename.htm") to serve each file
-#ifdef SD_CARD_ON
+#if SD_CARD == ON
 #include <SD.h>
 #endif
 
@@ -22,7 +23,7 @@ void WebServer::init() {
   Ser.println(Ethernet.localIP());
 #endif
 
-#ifdef SD_CARD_ON
+#if SD_CARD == ON
   SDfound=SD.begin(4);
 #else
   // disable the SDCARD if not using
@@ -61,7 +62,7 @@ void WebServer::handleClient() {
           if ((url_start!=-1) && (url_end!=-1)) {
             String command=inputBuffer.substring(url_start,url_end);
 
-#ifdef SD_CARD_ON
+#if SD_CARD == ON
             // watch for cache requests
             if ((!modifiedSinceFound) && (command.indexOf("If-Modified-Since:")>=0)) modifiedSinceFound=true;
 #endif
@@ -99,7 +100,7 @@ void WebServer::handleClient() {
                   handlerFound=true;
                   break;
                 } else {
-#ifdef SD_CARD_ON
+#if SD_CARD == ON
                   // send a 304 header
                   if ((modifiedSinceFound) && true ) {
                     char temp[255]; strcpy_P(temp,http_js304Header); _client.print(temp);
@@ -143,7 +144,7 @@ void WebServer::handleClient() {
     _client.stop();
     // clear the input buffer
     inputBuffer="";
-#ifdef SD_CARD_ON
+#if SD_CARD == ON
     modifiedSinceFound=false;
 #endif
 #ifdef WEBSERVER_DEBUG_ON
@@ -174,7 +175,7 @@ String WebServer::arg(String id) {
   return "";
 }
 
-#ifdef SD_CARD_ON
+#if SD_CARD == ON
 void WebServer::on(String fn) {
   handler_count++; if (handler_count>20) { handler_count=20; return; }
   handlers[handler_count-1]=NULL;
@@ -198,4 +199,3 @@ void WebServer::sdPage(String fn, EthernetClient *client) {
   }
 }
 #endif
-

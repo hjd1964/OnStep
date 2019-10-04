@@ -3,11 +3,11 @@
 
 #include "MountStatus.h"
 
-#if (!defined(AXIS1_ENC_OFF) && !defined(AXIS2_ENC_OFF))
-  #define ENCODERS_ON
+#if AXIS1_ENC > 0 && AXIS2_ENC > 0
+  #define ENCODERS ON
 #endif
 
-#ifdef ENCODERS_ON
+#if ENCODERS == ON
 
 #ifdef ESP8266
 #include <Esp.h>
@@ -24,7 +24,7 @@ volatile int32_t __p1,__p2;
 #define POLLING_RATE 2.0
 
 // encoder rate control
-#ifdef AXIS1_ENC_RATE_CONTROL_ON
+#if AXIS1_ENC_RATE_CONTROL == ON
 
   // user interface and settings
   bool encSweep=true;
@@ -43,7 +43,7 @@ volatile int32_t __p1,__p2;
   float usPerTick=(arcSecondsPerTick/15.041)*1000000.0;     // 6.48/15.041 = 0.4308 seconds per tick
 
   unsigned long msPerTickMax =(arcSecondsPerTick/15.041)*1000.0*MAX_ENC_PERIOD;
-#ifdef AXIS1_ENC_BIN_AVG
+#if AXIS1_ENC_BIN_AVG > 0
   volatile uint32_t usPerBinTickMin =(double)usPerTick*(double)AXIS1_ENC_BIN_AVG*MIN_ENC_PERIOD;
   volatile uint32_t usPerBinTickMax =(double)usPerTick*(double)AXIS1_ENC_BIN_AVG*MAX_ENC_PERIOD;
 #endif
@@ -73,7 +73,7 @@ volatile int32_t __p1,__p2;
   volatile long Axis1EncLtaSamples=200;
   volatile int32_t Tsta=0;
   volatile int32_t Tlta=0;
-#ifdef AXIS1_ENC_BIN_AVG
+#if AXIS1_ENC_BIN_AVG > 0
   volatile uint32_t StaBins[AXIS1_ENC_BIN_AVG];
   volatile uint32_t LtaBins[AXIS1_ENC_BIN_AVG];
   volatile uint32_t T1Bins[AXIS1_ENC_BIN_AVG];
@@ -83,7 +83,7 @@ volatile int32_t __p1,__p2;
   float axis1EncRateComp=0.0;
   float axis1Rate=1.0;
 
-#ifdef AXIS1_ENC_INTPOL_COS_ON
+#if AXIS1_ENC_INTPOL_COS == ON
   long Axis1EncIntPolPeriod=AXIS1_ENC_BIN_AVG;
   long Axis1EncIntPolPhase=1;
   long Axis1EncIntPolMag=0;
@@ -91,7 +91,7 @@ volatile int32_t __p1,__p2;
   float intpolPhase=0;
 #endif
 
-#ifdef AXIS1_ENC_RATE_AUTO
+#if AXIS1_ENC_RATE_AUTO > 0
   static unsigned long nextWormPeriod=0;
   static float axis1RateDelta=0;
 #endif
@@ -104,12 +104,12 @@ volatile int32_t __p1,__p2;
 
 // ----------------------------------------------------------------------------------------------------------------
 // this is for Quadrature A/B type encoders (library based)
-#if !defined(AXIS1_ENC_RATE_CONTROL_ON) && (defined(AXIS1_ENC_AB) || defined(AXIS2_ENC_AB))
+#if AXIS1_ENC_RATE_CONTROL != ON && (AXIS1_ENC == AB || AXIS2_ENC == AB)
   #include <Encoder.h> // from https://github.com/PaulStoffregen/Encoder 
-#ifdef AXIS1_ENC_AB
+#if AXIS1_ENC == AB
   Encoder axis1Pos(AXIS1_ENC_A_PIN,AXIS1_ENC_B_PIN);
 #endif
-#ifdef AXIS2_ENC_AB
+#if AXIS2_ENC == AB
   Encoder axis2Pos(AXIS2_ENC_A_PIN,AXIS2_ENC_B_PIN);
 #endif
 #endif
@@ -117,7 +117,7 @@ volatile int32_t __p1,__p2;
 
 // ----------------------------------------------------------------------------------------------------------------
 // support for local encoder ISR routines
-#ifdef AXIS1_ENC_RATE_CONTROL_ON
+#if AXIS1_ENC_RATE_CONTROL == ON
 static unsigned long lastLogRate=0;
 bool fastMotion() { return Telapsed<clocksPerTickMin; }
 bool slowMotion() { return (millis()-lastLogRate)>msPerTickMax; }
@@ -125,7 +125,7 @@ bool slowMotion() { return (millis()-lastLogRate)>msPerTickMax; }
 // this ISR function times the arrival of pulses from the RA axis encoder
 void ICACHE_RAM_ATTR __logRate() {
   lastLogRate=millis();
-#ifdef AXIS1_ENC_BIN_AVG
+#if AXIS1_ENC_BIN_AVG > 0
   int i=abs(__p1)%AXIS1_ENC_BIN_AVG;
   uint32_t T0us=T0/ClockCountToMicros;
   uint32_t Te=T0us-T1Bins[i]; T1Bins[i]=T0us;
@@ -150,7 +150,7 @@ void ICACHE_RAM_ATTR __logRate() {
 // neg <--      ______        ______        __    --> pos
 //         B __|      |______|      |______|   B
 
-#if defined(AXIS1_ENC_RATE_CONTROL_ON) && (defined(AXIS1_ENC_AB) || defined(AXIS2_ENC_AB))
+#if AXIS1_ENC_RATE_CONTROL == ON && (AXIS1_ENC == AB || AXIS2_ENC == AB)
   volatile int16_t __aPin1,__bPin1;
   volatile bool __a_set1=false;
   volatile bool __b_set1=false;
@@ -161,7 +161,7 @@ void ICACHE_RAM_ATTR __logRate() {
     __a_set1 = digitalRead(__aPin1) == HIGH;
 #endif
     if (__a_set1 != __b_set1) __p1--; else __p1++;
-#ifdef AXIS1_ENC_RATE_CONTROL_ON
+#if AXIS1_ENC_RATE_CONTROL == ON
     T0=GetClockCount; Telapsed=(T0-T1); T1=T0;
     if (Telapsed>clocksPerTickMin) __logRate();
 #endif
@@ -173,7 +173,7 @@ void ICACHE_RAM_ATTR __logRate() {
     __b_set1 = digitalRead(__bPin1) == HIGH;
 #endif
     if (__a_set1 == __b_set1) __p1--; else __p1++;
-#ifdef AXIS1_ENC_RATE_CONTROL_ON
+#if AXIS1_ENC_RATE_CONTROL == ON
     T0=GetClockCount; Telapsed=(T0-T1); T1=T0;
     if (Telapsed>clocksPerTickMin) __logRate();
 #endif
@@ -221,10 +221,10 @@ void ICACHE_RAM_ATTR __logRate() {
     private:
       int16_t _axis;
   };
-#ifdef AXIS1_ENC_AB
+#if AXIS1_ENC == AB
   ABEncoder axis1Pos(AXIS1_ENC_A_PIN,AXIS1_ENC_B_PIN,1);
 #endif
-#ifdef AXIS2_ENC_AB
+#if AXIS2_ENC == AB
   ABEncoder axis2Pos(AXIS2_ENC_A_PIN,AXIS2_ENC_B_PIN,2);
 #endif
 #endif
@@ -232,17 +232,17 @@ void ICACHE_RAM_ATTR __logRate() {
 
 // ----------------------------------------------------------------------------------------------------------------
 // ISR to read CW/CCW type encoders
-#if defined(AXIS1_ENC_CWCCW) || defined(AXIS2_ENC_CWCCW)
+#if AXIS1_ENC == CWCCW || AXIS2_ENC == CWCCW
   void ICACHE_RAM_ATTR __cw1() {
     __p1++;
-#ifdef AXIS1_ENC_RATE_CONTROL_ON
+#if AXIS1_ENC_RATE_CONTROL == ON
     T0=GetClockCount; Telapsed=(T0-T1); T1=T0;
     if (Telapsed>clocksPerTickMin) __logRate();
 #endif
   }
   void ICACHE_RAM_ATTR __ccw1() {
     __p1--;
-#ifdef AXIS1_ENC_RATE_CONTROL_ON
+#if AXIS1_ENC_RATE_CONTROL == ON
     T0=GetClockCount; Telapsed=(T0-T1); T1=T0;
     if (Telapsed>clocksPerTickMin) __logRate();
 #endif
@@ -283,10 +283,10 @@ void ICACHE_RAM_ATTR __logRate() {
       int16_t _ccwPin;
       int16_t _axis;
   };
-#ifdef AXIS1_ENC_CWCCW
+#if AXIS1_ENC == CWCCW
   CwCcwEncoder axis1Pos(AXIS1_ENC_A_PIN,AXIS1_ENC_B_PIN,1);
 #endif
-#ifdef AXIS2_ENC_CWCCW
+#if AXIS2_ENC == CWCCW
   CwCcwEncoder axis2Pos(AXIS2_ENC_A_PIN,AXIS2_ENC_B_PIN,2);
 #endif
 #endif
@@ -300,12 +300,12 @@ class Encoders {
     }
     void syncFromOnStep() {
       // automatically sync the encoders to OnStep's position when at home or parked
-#ifdef AXIS1_ENC_REVERSE_ON
+#if AXIS1_ENC_REVERSE == ON
         axis1Pos.write(-_osAxis1*(double)AXIS1_ENC_TICKS_DEG);
 #else
         axis1Pos.write(_osAxis1*(double)AXIS1_ENC_TICKS_DEG);
 #endif
-#ifdef AXIS2_ENC_REVERSE_ON
+#if AXIS2_ENC_REVERSE == ON
         axis2Pos.write(-_osAxis2*(double)AXIS2_ENC_TICKS_DEG);
 #else
         axis2Pos.write(_osAxis2*(double)AXIS2_ENC_TICKS_DEG);
@@ -337,15 +337,15 @@ class Encoders {
           if ( (&s[0]!=conv_end) && (f>=-999.9) && (f<=999.9)) _osAxis2=f;
         }
         _enAxis1=(double)axis1Pos.read()/(double)AXIS1_ENC_TICKS_DEG;
-#ifdef AXIS1_ENC_REVERSE_ON
+#if AXIS1_ENC_REVERSE == ON
         _enAxis1=-_enAxis1;
 #endif
         _enAxis2=(double)axis2Pos.read()/(double)AXIS2_ENC_TICKS_DEG;
-#ifdef AXIS2_ENC_REVERSE_ON
+#if AXIS2_ENC_REVERSE == ON
         _enAxis2=-_enAxis2;
 #endif
 
-#ifdef ENCODERS_AUTO_SYNC_ON
+#if ENCODERS_AUTO_SYNC == ON
         mountStatus.update();
         if (mountStatus.valid()) {
           if (mountStatus.atHome() || mountStatus.parked()) syncFromOnStep();
@@ -357,10 +357,10 @@ class Encoders {
 #endif
 
         // automatic rate compensation
-#ifdef AXIS1_ENC_RATE_CONTROL_ON
+#if AXIS1_ENC_RATE_CONTROL == ON
 
         // get the averages
-#ifdef AXIS1_ENC_BIN_AVG
+#if AXIS1_ENC_BIN_AVG > 0
         Tsta=0; Tlta=0;
         for (int i=0; i<AXIS1_ENC_BIN_AVG; i++) { Tsta+=StaBins[i]; Tlta+=LtaBins[i]; }
         Tsta/=AXIS1_ENC_BIN_AVG; // average
@@ -389,7 +389,7 @@ class Encoders {
         // encoder rate control disabled
         if (!encRateControl) return;
           
-#ifdef AXIS1_ENC_INTPOL_COS_ON
+#if AXIS1_ENC_INTPOL_COS == ON
         long a1=axis1Pos.read();
         intpolPhase=(a1+Axis1EncIntPolPhase) % Axis1EncIntPolPeriod;
         float a3=(intpolPhase/(float)Axis1EncIntPolPeriod)*3.1415*2.0;
@@ -397,7 +397,7 @@ class Encoders {
         axis1EncRateSta=axis1EncRateSta+intpolComp;
 #endif
 
-#ifdef AXIS1_ENC_RATE_AUTO
+#if AXIS1_ENC_RATE_AUTO > 0
         if ((long)(millis()-nextWormPeriod)>=0) {
           nextWormPeriod=millis()+(unsigned long)(AXIS1_ENC_RATE_AUTO)*997UL;
           axis1EncRateComp+=axis1RateDelta/(double)(AXIS1_ENC_RATE_AUTO);
@@ -428,10 +428,10 @@ class Encoders {
       }
     }
 
-#ifdef AXIS1_ENC_RATE_CONTROL_ON
+#if AXIS1_ENC_RATE_CONTROL == ON
     void clearAverages() {
       double d=usPerTick*axis1Rate;
-#ifdef AXIS1_ENC_BIN_AVG
+#if AXIS1_ENC_BIN_AVG > 0
       for (int i=0; i<AXIS1_ENC_BIN_AVG; i++) { StaBins[i]=d*AXIS1_ENC_BIN_AVG; LtaBins[i]=d*AXIS1_ENC_BIN_AVG; }
 #endif
       Tsta=d;
@@ -440,7 +440,7 @@ class Encoders {
       axis1EncRateLta=usPerTick/d;
       guideCorrection=0.0;
       guideCorrectionMillis=0;
-#ifdef AXIS1_ENC_RATE_AUTO
+#if AXIS1_ENC_RATE_AUTO > 0
       axis1EncRateComp=0.0;
       axis1RateDelta=0;
       nextWormPeriod=millis()+(unsigned long)(AXIS1_ENC_RATE_AUTO)*997UL;;
