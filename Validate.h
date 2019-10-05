@@ -541,14 +541,14 @@
 
 // SERIAL PORTS ------------------------------------------------------------------------------------------------------------
 #if SERIAL_B_ESP_FLASHING == ON
-  #if PINMAP == MiniPCB || PINMAP == MiniPCB2 || PINMAP == MaxPCB || PINMAP == Ramps14 || PINMAP == STM32B
+  #if PINMAP == MiniPCB || PINMAP == MiniPCB2 || PINMAP == MaxPCB || PINMAP == Ramps14 || PINMAP == STM32Blue
     #ifndef USES_AUX1
       #define USES_AUX1 false
     #else
       #error "Configuration (Config.h): SERIAL_B_ESP_FLASHING enabled but Aux1 is already in use, choose one feature on Aux1."
     #endif
   #endif
-  #if PINMAP == MiniPCB || PINMAP == MiniEMB || PINMAP == MiniPCB2 || PINMAP == MaxPCB || PINMAP == MaxTMC || PINMAP == Ramps14 || PINMAP == STM32B
+  #if PINMAP == MiniPCB || PINMAP == MiniEMB || PINMAP == MiniPCB2 || PINMAP == MaxPCB || PINMAP == MaxTMC || PINMAP == Ramps14 || PINMAP == STM32Blue
     #ifndef USES_AUX2
       #define USES_AUX2
     #else
@@ -562,7 +562,7 @@
 
 // USER FEEDBACK ----------------------------
 #if LED_STATUS == ON
-  #if PINMAP == MaxESP || PINMAP == MaxPCB || PINMAP == MaxPCB2|| PINMAP == MaxTMC || PINMAP == MiniPCB || PINMAP == MiniEMB || PINMAP == MiniPCB2 || PINMAP == Ramps14 || PINMAP == STM32B
+  #if PINMAP == MaxESP || PINMAP == MaxPCB || PINMAP == MaxPCB2|| PINMAP == MaxTMC || PINMAP == MiniPCB || PINMAP == MiniEMB || PINMAP == MiniPCB2 || PINMAP == Ramps14 || PINMAP == STM32Blue
     #ifndef USES_AUX0
       #define USES_AUX0 false  // false means the AUX0 doesn't have I2C sharing
     #else
