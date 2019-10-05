@@ -69,7 +69,7 @@
 #define Axis2_M0              8     // Microstep Mode 0 or SPI MOSI
 #define Axis2_M1              7     // Microstep Mode 1 or SPI SCK
 #define Axis2_M2              6     // Microstep Mode 2 or SPI CS or Decay Mode
-#ifdef MaxTMC
+#if PINMAP == MaxTMC
   #define Axis2_M3         Aux1     // SPI MISO
 #else
   #define Axis2_M3         Aux2     // ESP8266 RST or SPI MISO/Fault

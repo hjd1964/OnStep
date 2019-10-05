@@ -18,7 +18,7 @@
 #ifndef OneWirePin
   #define OneWirePin         24     // Default Pin for one wire bus
 #endif
-#ifdef MiniEMB
+#if PINMAP == MiniEMB
   #define ESP8266Gpio0Pin     2     // ESP8266 GPIO0 (Dir2)
   #define ESP8266RstPin    Aux2     // ESP8266 RST
 #else
@@ -64,7 +64,7 @@
 #define Axis2_M0              8     // Microstep Mode 0 or SPI MOSI
 #define Axis2_M1              7     // Microstep Mode 1 or SPI SCK
 #define Axis2_M2              6     // Microstep Mode 2 or SPI CS or Decay Mode
-#ifdef MiniEMB
+#if PINMAP == MiniEMB
   #define Axis2_M3         Aux1     // SPI MISO/Fault or I2C SDA
 #else
   #define Axis2_M3         Aux2     // ESP8266 RST or SPI MISO/Fault
