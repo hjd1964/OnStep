@@ -86,6 +86,6 @@ __attribute__ ((weak)) void analogWrite(uint8_t pin, int value) {
     // just disconnect and go digital if value is 0 or 255
     if (value==0) { noTone(pin); digitalWrite(pin,LOW); }
     if (value==255) { noTone(pin); digitalWrite(pin,HIGH); }
-  }
+  } else log_e("analogWrite, PWM channel in use or unavailable.");
   portEXIT_CRITICAL(&__analogOutMux);
 }
