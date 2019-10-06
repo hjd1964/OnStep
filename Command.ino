@@ -274,20 +274,20 @@ void processCommands() {
           if ((atHome) && (trackingState == TrackingNone)) {
             // initialize both serial ports
             SerialA.println("The ESP8266 will now be placed in flash upload mode (at 115200 Baud.)");
-            SerialA.println("Waiting for data, you have one minute to start the upload.");
-            delay(500);
-            SerialA.begin(115200);
 #ifdef ESP32
-  #if SERIAL_B_BAUD_DEFAULT != 115200
-            #error "On the ESP32, when SERIAL_B_ESP_FLASHING is used SERIAL_B_BAUD_DEFAULT must be 115200"
-  #endif
-#else
-            SerialB.begin(115200);
+            SerialA.println("Arduino's 'Tools -> Upload Speed' must be set to 115200 Baud.");
 #endif
-            digitalWrite(ESP8266Gpio0Pin,LOW); delay(20); // Pgm mode LOW
-            digitalWrite(ESP8266RstPin,LOW);  delay(20);  // Reset, if LOW
-            digitalWrite(ESP8266RstPin,HIGH); delay(20);  // Reset, inactive HIGH
+            SerialA.println("Waiting for data, you have one minute to start the upload.");
+            delay(1000);
 
+            SerialB.begin(115200);
+            SerialA.begin(115200);
+            delay(1000);
+
+            digitalWrite(ESP8266Gpio0Pin,LOW); delay(20);  // Pgm mode LOW
+            digitalWrite(ESP8266RstPin,LOW);   delay(20);  // Reset, if LOW
+            digitalWrite(ESP8266RstPin,HIGH);  delay(20);  // Reset, inactive HIGH
+            
             unsigned long lastRead=millis()+55000; // so we have a total of 1 minute to start the upload
             while (true) {
               // read from port 1, send to port 0:
@@ -315,11 +315,9 @@ void processCommands() {
             SerialA.println("returning to default Baud rates, and resuming OnStep operation...");
             delay(500);
 
-#ifndef ESP32
-            SerialB.begin(SERIAL_B_BAUD_DEFAULT); delay(500);
-#endif
-            SerialA.begin(9600);
-            delay(500);
+            SerialB.begin(SERIAL_B_BAUD_DEFAULT);
+            SerialA.begin(SERIAL_A_BAUD_DEFAULT);
+            delay(1000);
 
           } else commandError=true;
         } else commandError=true;
