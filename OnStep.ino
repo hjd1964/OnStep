@@ -165,6 +165,20 @@ void setup() {
   // Call hardware specific initialization
   HAL_Init();
 
+  SerialA.begin(SERIAL_A_BAUD_DEFAULT);
+#ifdef HAL_SERIAL_B_ENABLED
+  SerialB.begin(SERIAL_B_BAUD_DEFAULT);
+#endif
+#ifdef HAL_SERIAL_C_ENABLED
+  SerialC.begin(SERIAL_C_BAUD_DEFAULT);
+#endif
+#if ST4_HAND_CONTROL == ON
+  SerialST4.begin();
+#endif
+
+  // Take another second to be sure Serial ports are online
+  delay(1000);
+
   // initialize the Non-Volatile Memory
   nv.init();
 
@@ -209,17 +223,6 @@ void setup() {
   setTrackingRate(default_tracking_rate);
   setDeltaTrackingRate();
   initStartTimers();
-
-  SerialA.begin(SERIAL_A_BAUD_DEFAULT);
-#ifdef HAL_SERIAL_B_ENABLED
-  SerialB.begin(SERIAL_B_BAUD_DEFAULT);
-#endif
-#ifdef HAL_SERIAL_C_ENABLED
-  SerialC.begin(SERIAL_C_BAUD_DEFAULT);
-#endif
-#if ST4_HAND_CONTROL == ON
-  SerialST4.begin();
-#endif
  
   // tracking autostart
 #if TRACK_AUTOSTART == ON
