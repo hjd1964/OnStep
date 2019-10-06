@@ -51,7 +51,7 @@ void __toneStop(void * pvParameters)
   vTaskDelete(NULL);
 }
 
-void tone(uint8_t pin, unsigned int frequency, unsigned long duration = 0)
+__attribute__ ((weak)) void tone(uint8_t pin, unsigned int frequency, unsigned long duration = 0)
 {
   portENTER_CRITICAL(&__analogOutMux);
   int channel=__pwmAllocateChannel(pin);
@@ -64,7 +64,7 @@ void tone(uint8_t pin, unsigned int frequency, unsigned long duration = 0)
   portEXIT_CRITICAL(&__analogOutMux);
 }
 
-void noTone(uint8_t pin)
+__attribute__ ((weak)) void noTone(uint8_t pin)
 {
   portENTER_CRITICAL(&__analogOutMux);
   int channel=__pwmGetChannel(pin);
