@@ -274,9 +274,7 @@ void processCommands() {
           if ((atHome) && (trackingState == TrackingNone)) {
             // initialize both serial ports
             SerialA.println("The ESP8266 will now be placed in flash upload mode (at 115200 Baud.)");
-#ifdef ESP32
-            SerialA.println("Arduino's 'Tools -> Upload Speed' must be set to 115200 Baud.");
-#endif
+            SerialA.println("Arduino's 'Tools -> Upload Speed' should be set to 115200 Baud.");
             SerialA.println("Waiting for data, you have one minute to start the upload.");
             delay(1000);
 
