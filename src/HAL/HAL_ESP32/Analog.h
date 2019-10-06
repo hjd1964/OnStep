@@ -77,7 +77,6 @@ __attribute__ ((weak)) void noTone(uint8_t pin)
 }
 
 __attribute__ ((weak)) void analogWrite(uint8_t pin, int value) {
-  Serial.println("Setting the reticule");
   portENTER_CRITICAL(&__analogOutMux);
   int channel=__pwmAllocateChannel(pin,true);  // using option to clear/detach any existing channel for this pin
   if (channel>=0) {
