@@ -14,18 +14,18 @@
 #define TMC2209_VQUIET 122
 
 // Models
-#define DRIVER_MODEL_FIRST 1
-#define A4988   1
-#define DRV8825 2
-#define S109    3
-#define LV8729  4
-#define RAPS128 5
-#define TMC2100 6
-#define TMC2208 7
-#define TMC2209 8
-#define ST820   9
-#define TMC_SPI 10
-#define DRIVER_MODEL_LAST 10
+#define DRIVER_MODEL_FIRST 2
+#define A4988   2
+#define DRV8825 3
+#define S109    4
+#define LV8729  5
+#define RAPS128 6
+#define TMC2100 7
+#define TMC2208 8
+#define TMC2209 9
+#define ST820   10
+#define TMC_SPI 11
+#define DRIVER_MODEL_LAST 11
 
 // Minimum pulse width
 #define A4988_PULSE_WIDTH   1000
@@ -40,14 +40,14 @@
 #define ST820_PULSE_WIDTH   20
 
 // Wave forms
-#define SQUARE 1
-#define PULSE 2
-#define DEDGE 3
+#define SQUARE 2
+#define PULSE 3
+#define DEDGE 4
 
 // Decay Modes
-#define STEALTHCHOP 1
-#define SPREADCYCLE 0
 #define OPEN 2
+#define STEALTHCHOP 3
+#define SPREADCYCLE 4
 
 // EN signal state defaults LOW
 #define AXIS1_DRIVER_ENABLE LOW
