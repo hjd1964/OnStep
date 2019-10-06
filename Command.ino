@@ -69,12 +69,12 @@ void processCommands() {
 
     // if a command is ready, process it
     Command process_command = COMMAND_NONE;
-    if (cmdA.ready()) { strcpy(command,cmdA.getCmd()); strcpy(parameter,cmdA.getParameter()); cmdA.flush(); SerialA.flush(); process_command=COMMAND_SERIAL_A; }
+    if (cmdA.ready()) { strcpy(command,cmdA.getCmd()); strcpy(parameter,cmdA.getParameter()); cmdA.flush(); process_command=COMMAND_SERIAL_A; }
 #ifdef HAL_SERIAL_B_ENABLED
-    else if (cmdB.ready()) { strcpy(command,cmdB.getCmd()); strcpy(parameter,cmdB.getParameter()); cmdB.flush(); SerialB.flush();  process_command=COMMAND_SERIAL_B; }
+    else if (cmdB.ready()) { strcpy(command,cmdB.getCmd()); strcpy(parameter,cmdB.getParameter()); cmdB.flush(); process_command=COMMAND_SERIAL_B; }
 #endif
 #ifdef HAL_SERIAL_C_ENABLED
-    else if (cmdC.ready()) { strcpy(command,cmdC.getCmd()); strcpy(parameter,cmdC.getParameter()); cmdC.flush(); SerialC.flush(); process_command=COMMAND_SERIAL_C; }
+    else if (cmdC.ready()) { strcpy(command,cmdC.getCmd()); strcpy(parameter,cmdC.getParameter()); cmdC.flush(); process_command=COMMAND_SERIAL_C; }
 #endif
 #if ST4_HAND_CONTROL == ON
     else if (cmdST4.ready()) { strcpy(command,cmdST4.getCmd()); strcpy(parameter,cmdST4.getParameter()); cmdST4.flush(); process_command=COMMAND_SERIAL_ST4; }
