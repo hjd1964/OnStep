@@ -34,7 +34,7 @@ class weather {
       #else
         if (bme.begin()) _disabled=false;
       #endif
-  #ifdef ESP32
+  #if defined(ESP32) & defined(WIRE_END_SUPPORT)
       HAL_Wire.end();
   #endif
 #endif
@@ -59,8 +59,8 @@ class weather {
         }
         if (phase == 30) _p=bme.readPressure()/100.0;
         if (phase == 50) _h=bme.readHumidity();
-    #ifdef ESP32
-        if ((phase == 10) || (phase == 30) || (phase == 50)) HAL_Wire.end();  
+    #if defined(ESP32) & defined(WIRE_END_SUPPORT)
+      if ((phase == 10) || (phase == 30) || (phase == 50)) HAL_Wire.end();  
     #endif
   #endif
 
