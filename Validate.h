@@ -548,9 +548,14 @@
       #error "Configuration (Config.h): SERIAL_B_ESP_FLASHING enabled but Aux1 is already in use, choose one feature on Aux1."
     #endif
   #endif
-  #if PINMAP == MiniPCB || PINMAP == MiniEMB || PINMAP == MiniPCB2 || PINMAP == MaxPCB || PINMAP == MaxTMC || PINMAP == Ramps14 || PINMAP == STM32Blue
+  #if PINMAP == MiniPCB || PINMAP == MiniEMB || PINMAP == MiniPCB2 || PINMAP == MaxPCB || PINMAP == MaxESP3 || PINMAP == MaxTMC || PINMAP == Ramps14 || PINMAP == STM32Blue
     #ifndef USES_AUX2
       #define USES_AUX2
+      // for the MaxESP3 undefine the focuser control EN pin since it is in use for other purposes
+      #if PINMAP == MaxESP3
+        #undef Axis4_EN
+        #define Axis4_EN -1
+      #endif
     #else
       #error "Configuration (Config.h): SERIAL_B_ESP_FLASHING enabled but Aux2 is already in use, choose one feature on Aux2."
     #endif
@@ -808,7 +813,7 @@
     #error "Configuration (Config.h): AXIS4_DRIVER_POWER_DOWN and AXIS4_DRIVER_DC_MODE can't be used at the same time"
   #endif
   #if Axis4_EN == -1
-    #error "Configuration (Config.h): AXIS4_DRIVER_POWER_DOWN and AXIS4_DRIVER_DC_MODE require ENable signal support which this PINMAP doesn't have"
+    #error "Configuration (Config.h): AXIS4_DRIVER_POWER_DOWN and AXIS4_DRIVER_DC_MODE require ENable signal support which this PINMAP doesn't have or is in use for other purposes"
   #endif
   #if PINMAP == MaxESP3
     #ifndef USES_AUX2
