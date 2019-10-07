@@ -37,7 +37,7 @@
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
 #define FirmwareVersionMinor  "8"
-#define FirmwareVersionPatch  "a"
+#define FirmwareVersionPatch  "b"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
@@ -115,6 +115,9 @@ ESP8266WebServer server(80);
 
 WiFiServer cmdSvr(9999);
 WiFiClient cmdSvrClient;
+
+WiFiServer persistantCmdSvr(9998);
+WiFiClient persistantCmdSvrClient;
 
 void handleNotFound(){
   String message = "File Not Found\n\n";
@@ -365,6 +368,10 @@ TryAgain:
 
   cmdSvr.begin();
   cmdSvr.setNoDelay(true);
+
+  persistantCmdSvr.begin();
+  persistantCmdSvr.setNoDelay(true);
+
   server.begin();
 
 #ifdef DEBUG_ON
@@ -376,11 +383,14 @@ TryAgain:
 #endif
 }
 
-void loop(void){
+void loop(void) {
   server.handleClient();
 #if ENCODERS == ON
   encoders.poll();
 #endif
+
+  // -------------------------------------------------------------------------------------------------------------------------------
+  // Standard IP connections on port 9999
 
   // disconnect client
   static unsigned long clientTime = 0;
@@ -394,10 +404,11 @@ void loop(void){
     clientTime=millis()+2000UL;
   }
 
-  static char writeBuffer[40]="";
-  static int writeBufferPos=0;
-  // check clients for data, if found get the command, send cmd and pickup the response, then return the response
+  // check clients for data, if found get the command, pass to OnStep and pickup the response, then return the response to client
   while (cmdSvrClient && cmdSvrClient.connected() && (cmdSvrClient.available()>0)) {
+    static char writeBuffer[40]="";
+    static int writeBufferPos=0;
+
     // get the data
     byte b=cmdSvrClient.read();
 
@@ -423,6 +434,58 @@ void loop(void){
 #endif
     }
   }
+  // -------------------------------------------------------------------------------------------------------------------------------
+
+  // -------------------------------------------------------------------------------------------------------------------------------
+  // Persistant IP connections on port 9998
+
+  // disconnect client
+  static unsigned long persistantClientTime = 0;
+  if (persistantCmdSvrClient && (!persistantCmdSvrClient.connected())) persistantCmdSvrClient.stop();
+  if (persistantCmdSvrClient && ((long)(persistantClientTime-millis())<0)) persistantCmdSvrClient.stop();
+
+  // new client
+  if (!persistantCmdSvrClient && (persistantCmdSvr.hasClient())) {
+    // find free/disconnected spot
+    persistantCmdSvrClient = persistantCmdSvr.available();
+    persistantClientTime=millis()+120000UL;
+  }
+
+  // check clients for data, if found get the command, pass to OnStep and pickup the response, then return the response to client
+  while (persistantCmdSvrClient && persistantCmdSvrClient.connected() && (persistantCmdSvrClient.available()>0)) {
+    static char writeBuffer[40]="";
+    static int writeBufferPos=0;
+
+    // still active? push back disconnect by 2 minutes
+    persistantClientTime=millis()+120000UL;
+
+    // get the data
+    byte b=persistantCmdSvrClient.read();
+
+    writeBuffer[writeBufferPos]=b; writeBufferPos++; if (writeBufferPos>39) writeBufferPos=39; writeBuffer[writeBufferPos]=0;
+
+    // send cmd and pickup the response
+    if ((b=='#') || ((strlen(writeBuffer)==1) && (b==(char)6))) {
+      char readBuffer[40]="";
+      readLX200Bytes(writeBuffer,readBuffer,CmdTimeout); writeBuffer[0]=0; writeBufferPos=0;
+
+      // return the response, if we have one
+      if (strlen(readBuffer)>0) {
+        if (persistantCmdSvrClient && persistantCmdSvrClient.connected()) {
+          persistantCmdSvrClient.print(readBuffer);
+          delay(2);
+        }
+      }
+
+    } else {
+      server.handleClient(); 
+#if ENCODERS == ON
+      encoders.poll();
+#endif
+    }
+  }
+  // -------------------------------------------------------------------------------------------------------------------------------
+
 }
 
 const char* HighSpeedCommsStr(long baud) {
