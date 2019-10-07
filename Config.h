@@ -10,7 +10,7 @@
 
 // ---------------------------------------------------------------------------------------------------------------------------------
 // ADJUST THE FOLLOWING TO CONFIGURE YOUR CONTROLLER FEATURES ----------------------------------------------------------------------
-// <-Req'd = always must set, <-Often = usually must set, Option = optional, Adjust = Adjust as req'd, Infreq = Infrequently changed
+// <-Req'd = always must set, <-Often = usually must set, Option = optional, Adjust = adjust as req'd, Infreq = infrequently changed
 
 // PINMAP --------------------------------------------------------------------------------------------------------------------------
 //   *** See the matching Pins.xxx.h file for your setup (found by looking in src/pinmaps/Models.h) with detailed information ***
