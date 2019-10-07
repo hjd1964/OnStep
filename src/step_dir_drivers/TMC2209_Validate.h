@@ -2,7 +2,7 @@
 
 #if AXIS1_DRIVER_MODEL == TMC2209
   #if AXIS1_DRIVER_MICROSTEPS != 8 && AXIS1_DRIVER_MICROSTEPS != 16 && AXIS1_DRIVER_MICROSTEPS != 32 && AXIS1_DRIVER_MICROSTEPS != 64
-    #error "Configuration: AXIS1_DRIVER_MICROSTEPS; TMC2208 invalid micro-step mode, use: 64,32,16,or 8"
+    #error "Configuration: AXIS1_DRIVER_MICROSTEPS; TMC2209 invalid micro-step mode, use: 64,32,16,or 8"
   #endif
   #if HAL_PULSE_WIDTH < TMC2209_PULSE_WIDTH
     #error "Configuration: STEP_WAVE_FORM PULSE; Pulse width is below the TMC2209 stepper driver specifications."
