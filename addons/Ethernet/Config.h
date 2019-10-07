@@ -10,6 +10,7 @@
 
 // ---------------------------------------------------------------------------------------------------------------------------------
 // ADJUST THE FOLLOWING TO CONFIGURE YOUR ADD-ON'S FEATURES ------------------------------------------------------------------------
+// <-Req'd = always must set, <-Often = usually must set, Option = optional, Adjust = adjust as req'd, Infreq = infrequently changed
 
 //      Parameter Name              Value   Default  Notes                                                                      Hint
 // ETHERNET HARDWARE ---------------------------------------------------------------------------------------------------------------
