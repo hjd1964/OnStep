@@ -144,7 +144,7 @@
 
 // AXIS3 ROTATOR -------------------------
 #define ROTATOR                       OFF //    OFF, ON to enable the rotator (or de-rotator for ALTAZM mounts.)              Option
-#define AXIS3_STEPS_PER_DEGREE       64.0 //   64.0, n. Number of steps per degree for rotator/de-rotator.                   <-Req'd
+#define AXIS3_STEPS_PER_DEGREE       64.0 //   64.0, n. Number of steps per degree for rotator/de-rotator.                    Adjust
                                           //         Alt/Az de-rotation: n = (num_circumference_pixels * 2)/360, minimum
 #define AXIS3_STEP_RATE_MAX           8.0 //    8.0, n, (milli-sec.) Minimum ms/step depends on processor.                    Adjust
 
