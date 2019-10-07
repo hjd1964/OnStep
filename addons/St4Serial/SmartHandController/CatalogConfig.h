@@ -47,6 +47,7 @@ catalog_t catalog[] = {
   {"Stars>"     Cat_STT_Title,      Cat_STT_Prefix,      NUM_STT,      Cat_STT,      Cat_STT_Names,       Cat_STT_SubId,        Cat_STT_Type,       2000, 0},
   {"Stars>"     Cat_GCVS_Title,     Cat_GCVS_Prefix,     NUM_GCVS,     Cat_GCVS,     Cat_GCVS_Names,      Cat_GCVS_SubId,       Cat_GCVS_Type,      2000, 0},
 //{"Stars>"     Cat_Carbon_Title,   Cat_Carbon_Prefix,   NUM_CARBON,   Cat_Carbon,   Cat_Carbon_Names,    Cat_Carbon_SubId,     Cat_Carbon_Type,    2000, 0},
+  {"Stars>"     Cat_Carbon_Title,   Cat_Carbon_Prefix,   NUM_CARBON,   Cat_Carbon,   Cat_Carbon_Names,    Cat_Carbon_SubId,     Cat_Carbon_Type,    2000, 0},
   {"Deep Sky>"  Cat_Messier_Title,  Cat_Messier_Prefix,  NUM_MESSIER,  Cat_Messier,  Cat_Messier_Names,   Cat_Messier_SubId,    Cat_Messier_Type,   2000, 0},
   {"Deep Sky>"  Cat_Caldwell_Title, Cat_Caldwell_Prefix, NUM_CALDWELL, Cat_Caldwell, Cat_Caldwell_Names,  Cat_Caldwell_SubId,   Cat_Caldwell_Type,  2000, 0},
   {"Deep Sky>"  Cat_Herschel_Title, Cat_Herschel_Prefix, NUM_HERSCHEL, Cat_Herschel, Cat_Herschel_Names,  Cat_Herschel_SubId,   Cat_Herschel_Type,  2000, 0},
