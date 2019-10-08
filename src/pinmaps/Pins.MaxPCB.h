@@ -23,7 +23,7 @@
 #ifndef OneWirePin
   #define OneWirePin       Aux4     // Default Pin for one wire bus
 #endif
-#if PINMAP == MaxTMC
+#if PINMAP == MaxPCB3
   #define ESP8266Gpio0Pin     2     // ESP8266 GPIO0 (Dir2)
   #define ESP8266RstPin    Aux2     // ESP8266 RST
 #elif PINMAP == MaxPCB
@@ -62,14 +62,14 @@
 #define Axis1HomePin       Aux3     // Sense home position Axis1
 
 // Axis2 Dec/Alt step/dir driver
-#define Axis2DirPin           2     // Dir (ESP8266 GPIO0 on MaxTMC)
+#define Axis2DirPin           2     // Dir (ESP8266 GPIO0 on MaxPCB3)
 #define Axis2StepPin          3     // Step
 
 #define Axis2_EN              9     // Enable
 #define Axis2_M0              8     // Microstep Mode 0 or SPI MOSI
 #define Axis2_M1              7     // Microstep Mode 1 or SPI SCK
 #define Axis2_M2              6     // Microstep Mode 2 or SPI CS or Decay Mode
-#if PINMAP == MaxTMC
+#if PINMAP == MaxPCB3
   #define Axis2_M3         Aux1     // SPI MISO
 #else
   #define Axis2_M3         Aux2     // ESP8266 RST or SPI MISO/Fault
@@ -80,7 +80,7 @@
 
 // For rotator stepper driver
 #define Axis3_EN           Aux5     // Enable
-#if PINMAP == MaxTMC
+#if PINMAP == MaxPCB3
   #define Axis3_M0           15     // SPI MOSI
   #define Axis3_M1           16     // SPI SCK
   #define Axis3_M2            7     // SPI CS or Decay Mode
@@ -91,7 +91,7 @@
 
 // For focuser1 stepper driver
 #define Axis4_EN           Aux6     // Enable
-#if PINMAP == MaxTMC
+#if PINMAP == MaxPCB3
   #define Axis4_M0           15     // SPI MOSI
   #define Axis4_M1           16     // SPI SCK
   #define Axis4_M2            8     // SPI CS or Decay Mode
@@ -102,7 +102,7 @@
 
 // For focuser2 stepper driver
 #define Axis5_EN           Aux5     // Enable
-#if PINMAP == MaxTMC
+#if PINMAP == MaxPCB3
   #define Axis5_M0           15     // SPI MOSI
   #define Axis5_M1           16     // SPI SCK
   #define Axis5_M2            7     // SPI CS or Decay Mode

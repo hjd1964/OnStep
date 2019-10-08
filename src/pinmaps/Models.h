@@ -10,7 +10,7 @@
 #if PINMAP == MiniPCB
   #include "Pins.MiniPCB.h"
 #endif
-#if PINMAP == MiniEMB
+#if PINMAP == MiniPCB13
   #include "Pins.MiniPCB.h"
 #endif
 #if PINMAP == MiniPCB2
@@ -22,7 +22,7 @@
 #if PINMAP == MaxPCB2
   #include "Pins.MaxPCB.h"
 #endif
-#if PINMAP == MaxTMC
+#if PINMAP == MaxPCB3
   #include "Pins.MaxPCB.h"
 #endif
 #if PINMAP == MaxESP

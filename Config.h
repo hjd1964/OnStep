@@ -17,8 +17,8 @@
 //   *** to be sure it matches your wiring.            *** USE AT YOUR OWN RISK ***                                           ***
 
 //      Parameter Name              Value   Default  Notes                                                                      Hint
-#define PINMAP                        OFF //    OFF, Choose from: MiniPCB, MiniPCB2, MaxPCB, MaxPCB2, STM32Blue,             <-Req'd
-                                          //         Ramps14, MaxESP2, MaxESP3. Others in Models.h are depreciated.
+#define PINMAP                        OFF //    OFF, Choose from: MiniPCBn, MaxPCBn, MaxESPn, STM32Bluen, MKSGenLn, etc.     <-Req'd
+                                          //         Where version n may follow each, see Constants.h tab for complete list.
 
 // SERIAL PORTS --------------------------------------------------------------------------------------------------------------------
 #define SERIAL_A_BAUD_DEFAULT        9600 //   9600, n. Where n=9600,19200,57600,115200 (common baud rates.)                  Infreq

@@ -2,9 +2,45 @@
 // Constants
 
 #pragma once
+// Configuration options -----------------------------------------------------------------------------------------------------------
 
-// Configuration options ----------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------------------
+// Pinmaps -------------------------------------------------------------------------------------------------------------------------
 
+#define PINMAP_FIRST                 1
+#define Classic                      1 // For Steve's shield, etc.
+#define AltMega2560                  2 // Obsolete
+
+// RAMPS - 3D printer sheilds/boards that work with OnStep, all are 5-axis designs
+#define Ramps14                     10 // Ramps v1.4 shield for Mega2560
+#define Ramps15                     10 // Ramps v1.5
+#define MksGenL                     10 // Like Ramps above but better, Mega2560 built-in and real crystal oscillator, 24V support
+#define MksGenL2                    11 // Adds SPI buss to all stepper drivers (TMC only)
+
+// Mini - Small 2-axis design suitable for embedded or mounting behind a panel can even be built with connectors up
+#define MiniPCB                     20 // All for Teensy3.2 (experimental w/Teensy4)
+#define MiniPCB13                   21 // MiniPCB v1.3 adds better support for ESP-01 flashing and optional I2C
+
+// Mini2 - Small 2-axis design for aluminum mini-case
+#define MiniPCB2                    30 // Teensy3.2 (experimental w/Teensy4)
+
+// Max - Larger 4-axis design suitable for embedded or mounting behind a panel
+#define MaxPCB                      40 // First custom "full feature" board. Teensy3.5/Teensy3.6
+
+// Max2 & Max3 - Larger 4-axis design for aluminum case
+#define MaxPCB2                     41 // Improved "full feature" board, Teensy3.5/Teensy3.6
+#define MaxPCB3                     42 // Adds SPI buss to all stepper drivers (TMC only,) flashes WeMos D1 Mini through OnStep
+
+#define MaxESP2                     50 // Similar to MaxPCB2 except 3 axes and uses cheaper/more available ESP32 MCU
+#define MaxESP3                     51 // Adds 4th axis and option to flash the WeMos D1 Mini WiFi through OnStep
+
+// Khalid and Dave's PCB for STM32 Blue pill
+#define STM32Blue                   60
+#define STM32Black                  61
+#define PINMAP_LAST                 61
+// ---------------------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------------------
+                                   
 // On/Off, etc.
 #define OFF                        -1
 #define ON                         -2
@@ -12,30 +48,10 @@
 #define ON_PULLDOWN                -4
 #define XDIRECT                    -5
                                    
-// Pinmaps                         
-#define PINMAP_FIRST                1
-#define Classic                     1
-#define AltMega2560                 2
-#define Ramps14                     3
-#define MksGenL                     3
-#define MksGenL2                    4
-#define MiniPCB                     10
-#define MiniEMB                     11
-#define MiniPCB2                    12
-#define MaxPCB                      20
-#define MaxPCB2                     21
-#define MaxTMC                      22
-#define MaxESP                      30
-#define MaxESP2                     31
-#define MaxESP3                     32
-#define STM32Blue                   40
-#define STM32Black                  41
-#define PINMAP_LAST                 41
-                                   
 // mount types                     
 #define MOUNT_TYPE_FIRST            1
-#define GEM                         1 // German Equatorial Mount, meridian flips enabled.
-#define FORK                        2 // Fork Mount, meridian flips disabled.
+#define GEM                         1 // German Equatorial Mount, meridian flips enabled
+#define FORK                        2 // Fork Mount, meridian flips disabled
 #define ALTAZM                      3 // Altitude Azimuth Mounts, Dobsonians, etc.
 #define MOUNT_TYPE_LAST             3
 
@@ -63,7 +79,7 @@
 #define ASTROMETRIC_J2000           3
 #define TELESCOPE_COORDINATES       TOPOCENTRIC
 
-// EEPROM Info --------------------------------------------------------------------------------------------------------------
+// EEPROM Info ---------------------------------------------------------------------------------------------------------------------
 // General purpose storage A (100 bytes), 0..99
 
 #define EE_posAxis1                 0   // 4
@@ -152,7 +168,7 @@
 #define EE_dcPwrAxis5              GSB+1   // 1
 #define EE_maxRateL                GSB+2   // 4
 
-// --------------------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------------------------
 // Unique identifier for the current initialization format for NV, do not change
 #define initKey 915307548
 

@@ -548,7 +548,7 @@
       #error "Configuration (Config.h): SERIAL_B_ESP_FLASHING enabled but Aux1 is already in use, choose one feature on Aux1."
     #endif
   #endif
-  #if PINMAP == MiniPCB || PINMAP == MiniEMB || PINMAP == MiniPCB2 || PINMAP == MaxPCB || PINMAP == MaxESP3 || PINMAP == MaxTMC || PINMAP == Ramps14 || PINMAP == STM32Blue
+  #if PINMAP == MiniPCB || PINMAP == MiniPCB13 || PINMAP == MiniPCB2 || PINMAP == MaxPCB || PINMAP == MaxESP3 || PINMAP == MaxPCB3 || PINMAP == Ramps14 || PINMAP == STM32Blue
     #ifndef USES_AUX2
       #define USES_AUX2
       // for the MaxESP3 undefine the focuser control EN pin since it is in use for other purposes
@@ -567,7 +567,7 @@
 
 // USER FEEDBACK ----------------------------
 #if LED_STATUS == ON
-  #if PINMAP == MaxESP || PINMAP == MaxPCB || PINMAP == MaxPCB2|| PINMAP == MaxTMC || PINMAP == MiniPCB || PINMAP == MiniEMB || PINMAP == MiniPCB2 || PINMAP == Ramps14 || PINMAP == STM32Blue
+  #if PINMAP == MaxESP || PINMAP == MaxPCB || PINMAP == MaxPCB2|| PINMAP == MaxPCB3 || PINMAP == MiniPCB || PINMAP == MiniPCB13 || PINMAP == MiniPCB2 || PINMAP == Ramps14 || PINMAP == STM32Blue
     #ifndef USES_AUX0
       #define USES_AUX0 false  // false means the AUX0 doesn't have I2C sharing
     #else
@@ -583,14 +583,14 @@
   #endif
 #endif
 #if LED_STATUS2 == ON
-  #if PINMAP == MaxESP || PINMAP == MaxESP2 || PINMAP == MaxESP3 || PINMAP == MaxPCB || PINMAP == MaxPCB2|| PINMAP == MaxTMC
+  #if PINMAP == MaxESP || PINMAP == MaxESP2 || PINMAP == MaxESP3 || PINMAP == MaxPCB || PINMAP == MaxPCB2|| PINMAP == MaxPCB3
     #ifndef USES_AUX8
       #define USES_AUX8
     #else
       #error "Configuration (Config.h): LED_STATUS2 enabled but Aux8 is already in use, choose one feature on Aux8"
     #endif
   #endif
-  #if PINMAP == MiniPCB || PINMAP == MiniEMB || PINMAP == MiniPCB2
+  #if PINMAP == MiniPCB || PINMAP == MiniPCB13 || PINMAP == MiniPCB2
     #ifndef USES_AUX4
       #define USES_AUX4
     #else
@@ -599,14 +599,14 @@
   #endif
 #endif
 #if LED_RETICLE == ON
-  #if PINMAP == MaxESP || PINMAP == MaxESP2 || PINMAP == MaxESP3 || PINMAP == MaxPCB || PINMAP == MaxPCB2|| PINMAP == MaxTMC
+  #if PINMAP == MaxESP || PINMAP == MaxESP2 || PINMAP == MaxESP3 || PINMAP == MaxPCB || PINMAP == MaxPCB2|| PINMAP == MaxPCB3
     #ifndef USES_AUX8
       #define USES_AUX8
     #else
       #error "Configuration (Config.h): LED_RETICLE enabled but Aux8 is already in use, choose one feature on Aux8"
     #endif
   #endif
-  #if PINMAP == MiniPCB || PINMAP == MiniEMB || PINMAP == MiniPCB2
+  #if PINMAP == MiniPCB || PINMAP == MiniPCB13 || PINMAP == MiniPCB2
     #ifndef USES_AUX4
       #define USES_AUX4 
     #else
@@ -626,7 +626,7 @@
 
 // TIME -------------------------------------
 #if RTC == DS3231
-  #if PINMAP == MiniPCB || PINMAP == MiniEMB || PINMAP == MiniPCB2
+  #if PINMAP == MiniPCB || PINMAP == MiniPCB13 || PINMAP == MiniPCB2
     #ifndef USES_AUX0
       #define USES_AUX0 true  // true means the AUX0 has I2C sharing
     #else
@@ -662,7 +662,7 @@
 
 // SENSORS ----------------------------------
 #if WEATHER == BME280
-  #if PINMAP == MiniPCB || PINMAP == MiniEMB || PINMAP == MiniPCB2
+  #if PINMAP == MiniPCB || PINMAP == MiniPCB13 || PINMAP == MiniPCB2
     #ifndef USES_AUX0
       #define USES_AUX0 true  // true means the AUX0 has I2C sharing
     #else
@@ -687,7 +687,7 @@
       #error "Configuration (Config.h): RTC DS1820 OneWire interface enabled but Aux8 is already in use, choose one feature on Aux8"
     #endif
   #endif
-  #if PINMAP == MaxPCB || PINMAP == MaxTMC
+  #if PINMAP == MaxPCB || PINMAP == MaxPCB3
     #ifndef USES_AUX4
       #define USES_AUX4
     #else
@@ -698,14 +698,14 @@
 #if PEC_SENSE == ON || PEC_SENSE == ON_PULLUP || PEC_SENSE == ON_PULLDOWN
 #endif
 #if LIMIT_SENSE != OFF
-  #if PINMAP == MaxESP2 || PINMAP == MaxESP3 || PINMAP == MaxPCB || PINMAP == MaxPCB2|| PINMAP == MaxTMC
+  #if PINMAP == MaxESP2 || PINMAP == MaxESP3 || PINMAP == MaxPCB || PINMAP == MaxPCB2|| PINMAP == MaxPCB3
     #ifndef USES_AUX7
       #define USES_AUX7
     #else
       #error "Configuration (Config.h): LIMIT_SENSE enabled but Aux7 is already in use, choose one feature on Aux7"
     #endif
   #endif
-  #if PINMAP == MiniPCB || PINMAP == MiniEMB || PINMAP == MiniPCB2
+  #if PINMAP == MiniPCB || PINMAP == MiniPCB13 || PINMAP == MiniPCB2
     #ifndef USES_AUX3
       #define USES_AUX3
     #else
@@ -714,7 +714,7 @@
   #endif
 #endif
 #if HOME_SENSE != OFF
-  #if PINMAP == MaxESP2 || PINMAP == MaxESP3 || PINMAP == MaxPCB || PINMAP == MaxPCB2|| PINMAP == MaxTMC || PINMAP == MiniPCB || PINMAP == MiniEMB || PINMAP == MiniPCB2 || PINMAP == Ramps14
+  #if PINMAP == MaxESP2 || PINMAP == MaxESP3 || PINMAP == MaxPCB || PINMAP == MaxPCB2|| PINMAP == MaxPCB3 || PINMAP == MiniPCB || PINMAP == MiniPCB13 || PINMAP == MiniPCB2 || PINMAP == Ramps14
     #ifndef USES_AUX3
       #define USES_AUX3
     #else
@@ -730,14 +730,14 @@
 
 // MOTION CONTROL AXIS1/2 -----------------
 #if AXIS1_DRIVER_STATUS != OFF
-  #if PINMAP == MaxESP2 || PINMAP == MaxPCB || PINMAP == MaxPCB2 || PINMAP == MaxTMC || PINMAP == MiniPCB || PINMAP == MiniEMB || PINMAP == MiniPCB2 || PINMAP == STM32Blue
+  #if PINMAP == MaxESP2 || PINMAP == MaxPCB || PINMAP == MaxPCB2 || PINMAP == MaxPCB3 || PINMAP == MiniPCB || PINMAP == MiniPCB13 || PINMAP == MiniPCB2 || PINMAP == STM32Blue
     #ifndef USES_AUX1
       #define USES_AUX1
     #else
       #error "Configuration (Config.h): AXIS1_DRIVER_STATUS enabled but Aux1 is already in use, choose one feature on Aux1"
     #endif
   #endif
-  #if PINMAP == MaxTMC || PINMAP == MiniEMB
+  #if PINMAP == MaxPCB3 || PINMAP == MiniPCB13
     #if AXIS1_DRIVER_STATUS == HIGH || AXIS1_DRIVER_STATUS == LOW
       #error "Configuration (Config.h): AXIS2_DRIVER_STATUS allows Aux1 use in TMC_SPI mode only"
     #endif
@@ -755,7 +755,7 @@
 #endif
 
 #if AXIS2_DRIVER_POWER_DOWN == ON
-  #if PINMAP == MaxESP3 || PINMAP == MaxESP2 || PINMAP == MaxTMC
+  #if PINMAP == MaxESP3 || PINMAP == MaxESP2 || PINMAP == MaxPCB3
       #error "Configuration (Config.h): AXIS2_DRIVER_POWER_DOWN not supported on this PINMAP"
   #endif
 #endif
@@ -786,7 +786,7 @@
   #endif
 #endif
 #if FOCUSER2 == ON && ROTATOR == ON
-  #if PINMAP == Classic || PINMAP == MaxESP3 || PINMAP == MaxPCB || PINMAP == MaxPCB2 || PINMAP == MaxTMC || PINMAP == MiniPCB || PINMAP == MiniEMB || PINMAP == MiniPCB2
+  #if PINMAP == Classic || PINMAP == MaxESP3 || PINMAP == MaxPCB || PINMAP == MaxPCB2 || PINMAP == MaxPCB3 || PINMAP == MiniPCB || PINMAP == MiniPCB13 || PINMAP == MiniPCB2
     #error "Configuration (Config.h): AXIS3 and AXIS5 step/dir interface is shared, so enabling both is not supported on this PINMAP"
   #endif
 #endif
@@ -866,7 +866,7 @@
 
 // PINMAP SPECIFIC VALIDATION ----------------------
 
-#if PINMAP == MaxTMC || PINMAP ==MksGenL2
+#if PINMAP == MaxPCB3 || PINMAP ==MksGenL2
   // special checks for SPI buss pin maps to ensure all enabled stepper drivers are TMC2130 or TMC5160 in SPI mode
   #if AXIS1_DRIVER_MODEL != TMC_SPI
     #error "Configuration (Config.h): AXIS1_DRIVER_MODEL must be a TMC2130 or TMC5160 for this PINMAP"
@@ -890,7 +890,7 @@
     #endif
   #endif
 #else
-  // and when not MaxTMC to ensure all focuser/rotator stepper drivers off (manual configuration only.)
+  // and when not MaxPCB3 to ensure all focuser/rotator stepper drivers off (manual configuration only.)
   #if ROTATOR == ON && AXIS3_DRIVER_MODEL != OFF
     #error "Configuration (Config.h): AXIS3_DRIVER_MODEL must be OFF for this PINMAP"
   #endif
