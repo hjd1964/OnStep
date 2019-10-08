@@ -867,7 +867,7 @@
 // PINMAP SPECIFIC VALIDATION ----------------------
 
 #if PINMAP == MaxPCB3 || PINMAP ==MksGenL2
-  // special checks for SPI buss pin maps to ensure all enabled stepper drivers are TMC2130 or TMC5160 in SPI mode
+  // special checks for SPI bus pin maps to ensure all enabled stepper drivers are TMC2130 or TMC5160 in SPI mode
   #if AXIS1_DRIVER_MODEL != TMC_SPI
     #error "Configuration (Config.h): AXIS1_DRIVER_MODEL must be a TMC2130 or TMC5160 for this PINMAP"
   #endif

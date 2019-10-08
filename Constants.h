@@ -15,7 +15,7 @@
 #define Ramps14                     10 // Ramps v1.4 shield for Mega2560
 #define Ramps15                     10 // Ramps v1.5
 #define MksGenL                     10 // Like Ramps above but better, Mega2560 built-in, crystal oscillator, 24V support
-#define MksGenL2                    11 // Adds SPI buss to all stepper drivers (TMC only)
+#define MksGenL2                    11 // Adds SPI bus to all stepper drivers (TMC only)
 
 // Mini - Small 2-axis design suitable for embedded or mounting behind a panel can even be built with connectors up
 #define MiniPCB                     20 // All for Teensy3.2
@@ -29,7 +29,7 @@
 
 // Max2 & Max3 - Larger 4-axis design for aluminum case
 #define MaxPCB2                     41 // Improved "full feature" board, Teensy3.5/Teensy3.6
-#define MaxPCB3                     42 // Adds SPI buss to all stepper drivers (TMC only,) flashes WeMos D1 Mini through OnStep
+#define MaxPCB3                     42 // Adds SPI bus to all stepper drivers (TMC only,) flashes WeMos D1 Mini through OnStep
 
 #define MaxESP2                     50 // Similar to MaxPCB2 except 3 axes and uses cheaper/more available ESP32 MCU
 #define MaxESP3                     51 // Adds 4th axis and option to flash the WeMos D1 Mini WiFi through OnStep
