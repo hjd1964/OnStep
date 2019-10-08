@@ -11,7 +11,7 @@
 #define Classic                      1 // For Steve's shield, etc.
 #define AltMega2560                  2 // Obsolete
 
-// RAMPS - 3D printer sheilds/boards that work with OnStep, all are 5-axis designs
+// RAMPS - 3D printer shields/boards that work with OnStep, all are 5-axis designs
 #define Ramps14                     10 // Ramps v1.4 shield for Mega2560
 #define Ramps15                     10 // Ramps v1.5
 #define MksGenL                     10 // Like Ramps above but better, Mega2560 built-in and real crystal oscillator, 24V support
