@@ -14,15 +14,15 @@
 // RAMPS - 3D printer shields/boards that work with OnStep, all are 5-axis designs
 #define Ramps14                     10 // Ramps v1.4 shield for Mega2560
 #define Ramps15                     10 // Ramps v1.5
-#define MksGenL                     10 // Like Ramps above but better, Mega2560 built-in and real crystal oscillator, 24V support
+#define MksGenL                     10 // Like Ramps above but better, Mega2560 built-in, crystal oscillator, 24V support
 #define MksGenL2                    11 // Adds SPI buss to all stepper drivers (TMC only)
 
 // Mini - Small 2-axis design suitable for embedded or mounting behind a panel can even be built with connectors up
-#define MiniPCB                     20 // All for Teensy3.2 (experimental w/Teensy4)
+#define MiniPCB                     20 // All for Teensy3.2
 #define MiniPCB13                   21 // MiniPCB v1.3 adds better support for ESP-01 flashing and optional I2C
 
 // Mini2 - Small 2-axis design for aluminum mini-case
-#define MiniPCB2                    30 // Teensy3.2 (experimental w/Teensy4)
+#define MiniPCB2                    30 // Teensy3.2
 
 // Max - Larger 4-axis design suitable for embedded or mounting behind a panel
 #define MaxPCB                      40 // First custom "full feature" board. Teensy3.5/Teensy3.6
