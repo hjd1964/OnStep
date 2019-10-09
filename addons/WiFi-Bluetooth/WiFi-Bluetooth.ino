@@ -113,11 +113,15 @@ IPAddress wifi_ap_sn = IPAddress(255,255,255,0);
 
 ESP8266WebServer server(80);
 
-WiFiServer cmdSvr(9999);
-WiFiClient cmdSvrClient;
+#if STANDARD_COMMAND_CHANNEL == ON
+  WiFiServer cmdSvr(9999);
+  WiFiClient cmdSvrClient;
+#endif
 
-WiFiServer persistantCmdSvr(9998);
-WiFiClient persistantCmdSvrClient;
+#if PERSISTANT_COMMAND_CHANNEL == ON
+  WiFiServer persistantCmdSvr(9998);
+  WiFiClient persistantCmdSvrClient;
+#endif
 
 void handleNotFound(){
   String message = "File Not Found\n\n";
@@ -366,11 +370,15 @@ TryAgain:
   
   server.onNotFound(handleNotFound);
 
+#if STANDARD_COMMAND_CHANNEL == ON
   cmdSvr.begin();
   cmdSvr.setNoDelay(true);
+#endif
 
+#if PERSISTANT_COMMAND_CHANNEL == ON
   persistantCmdSvr.begin();
   persistantCmdSvr.setNoDelay(true);
+#endif
 
   server.begin();
 
@@ -389,6 +397,7 @@ void loop(void) {
   encoders.poll();
 #endif
 
+#if STANDARD_COMMAND_CHANNEL == ON
   // -------------------------------------------------------------------------------------------------------------------------------
   // Standard IP connections on port 9999
 
@@ -429,13 +438,15 @@ void loop(void) {
 
     } else {
       server.handleClient(); 
-#if ENCODERS == ON
+  #if ENCODERS == ON
       encoders.poll();
-#endif
+  #endif
     }
   }
   // -------------------------------------------------------------------------------------------------------------------------------
+#endif
 
+#if PERSISTANT_COMMAND_CHANNEL == ON
   // -------------------------------------------------------------------------------------------------------------------------------
   // Persistant IP connections on port 9998
 
@@ -479,12 +490,13 @@ void loop(void) {
 
     } else {
       server.handleClient(); 
-#if ENCODERS == ON
+  #if ENCODERS == ON
       encoders.poll();
-#endif
+  #endif
     }
   }
   // -------------------------------------------------------------------------------------------------------------------------------
+#endif
 
 }
 

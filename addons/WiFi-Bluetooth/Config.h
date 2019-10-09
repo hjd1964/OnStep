@@ -39,6 +39,11 @@
 #define DISPLAY_SPECIAL_CHARS          ON //     ON, For standard ASCII special symbols (compatibility.)                      Infreq
 #define DISPLAY_ADVANCED_CHARS         ON //     ON, For standard "RA/Dec" instead of symbols.                                Infreq
 
+// COMMAND CHANNELS ----------------------------------------------------------------------------------------------------------------
+#define STANDARD_COMMAND_CHANNEL       ON //     ON, Enable standard cmd channel port 9999 use w/Android App & ASCOM driver.  Infreq
+#define PERSISTANT_COMMAND_CHANNEL    OFF //    OFF, Enable persistant cmd channel port 9998 use w/INDI? & Stellarium Mobile. Infreq
+                                          //         Experimental, possibly causes problems w/standard cmd channel if enabled.
+
 // ENCODER SUPPORT -----------------------------------------------------------------------------------------------------------------
 #define AXIS1_ENC                     OFF //    OFF, CWCCW, AB. RA/Azm Axis on Pin 5 (A or CW) and Pin 6 (B or CCW,)          Option
 #define AXIS1_ENC_REVERSE             OFF //    OFF, ON to reverse the count direction.                                       Adjust
