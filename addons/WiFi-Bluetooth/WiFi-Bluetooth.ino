@@ -118,9 +118,9 @@ ESP8266WebServer server(80);
   WiFiClient cmdSvrClient;
 #endif
 
-#if PERSISTANT_COMMAND_CHANNEL == ON
-  WiFiServer persistantCmdSvr(9998);
-  WiFiClient persistantCmdSvrClient;
+#if PERSISTENT_COMMAND_CHANNEL == ON
+  WiFiServer persistentCmdSvr(9998);
+  WiFiClient persistentCmdSvrClient;
 #endif
 
 void handleNotFound(){
@@ -375,9 +375,9 @@ TryAgain:
   cmdSvr.setNoDelay(true);
 #endif
 
-#if PERSISTANT_COMMAND_CHANNEL == ON
-  persistantCmdSvr.begin();
-  persistantCmdSvr.setNoDelay(true);
+#if PERSISTENT_COMMAND_CHANNEL == ON
+  persistentCmdSvr.begin();
+  persistentCmdSvr.setNoDelay(true);
 #endif
 
   server.begin();
@@ -446,32 +446,32 @@ void loop(void) {
   // -------------------------------------------------------------------------------------------------------------------------------
 #endif
 
-#if PERSISTANT_COMMAND_CHANNEL == ON
+#if PERSISTENT_COMMAND_CHANNEL == ON
   // -------------------------------------------------------------------------------------------------------------------------------
-  // Persistant IP connections on port 9998
+  // Persistent IP connections on port 9998
 
   // disconnect client
-  static unsigned long persistantClientTime = 0;
-  if (persistantCmdSvrClient && (!persistantCmdSvrClient.connected())) persistantCmdSvrClient.stop();
-  if (persistantCmdSvrClient && ((long)(persistantClientTime-millis())<0)) persistantCmdSvrClient.stop();
+  static unsigned long persistentClientTime = 0;
+  if (persistentCmdSvrClient && (!persistentCmdSvrClient.connected())) persistentCmdSvrClient.stop();
+  if (persistentCmdSvrClient && ((long)(persistentClientTime-millis())<0)) persistentCmdSvrClient.stop();
 
   // new client
-  if (!persistantCmdSvrClient && (persistantCmdSvr.hasClient())) {
+  if (!persistentCmdSvrClient && (persistentCmdSvr.hasClient())) {
     // find free/disconnected spot
-    persistantCmdSvrClient = persistantCmdSvr.available();
-    persistantClientTime=millis()+120000UL;
+    persistentCmdSvrClient = persistentCmdSvr.available();
+    persistentClientTime=millis()+120000UL;
   }
 
   // check clients for data, if found get the command, pass to OnStep and pickup the response, then return the response to client
-  while (persistantCmdSvrClient && persistantCmdSvrClient.connected() && (persistantCmdSvrClient.available()>0)) {
+  while (persistentCmdSvrClient && persistentCmdSvrClient.connected() && (persistentCmdSvrClient.available()>0)) {
     static char writeBuffer[40]="";
     static int writeBufferPos=0;
 
     // still active? push back disconnect by 2 minutes
-    persistantClientTime=millis()+120000UL;
+    persistentClientTime=millis()+120000UL;
 
     // get the data
-    byte b=persistantCmdSvrClient.read();
+    byte b=persistentCmdSvrClient.read();
 
     writeBuffer[writeBufferPos]=b; writeBufferPos++; if (writeBufferPos>39) writeBufferPos=39; writeBuffer[writeBufferPos]=0;
 
@@ -482,8 +482,8 @@ void loop(void) {
 
       // return the response, if we have one
       if (strlen(readBuffer)>0) {
-        if (persistantCmdSvrClient && persistantCmdSvrClient.connected()) {
-          persistantCmdSvrClient.print(readBuffer);
+        if (persistentCmdSvrClient && persistentCmdSvrClient.connected()) {
+          persistentCmdSvrClient.print(readBuffer);
           delay(2);
         }
       }
