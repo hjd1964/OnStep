@@ -30,7 +30,7 @@
                                           //         Use ON for MiniPCB2, MaxPCB2, MaxESP2.  OFF for STM32, MiniPCB (ESP-01.)
 
 // USER FEEDBACK -------------------------------------------------------------------------------------------------------------------
-#define LED_STATUS                    OFF //    OFF, D4 for WeMos D1 Mini. Flashes LED when trying to connect to OnStep.      Option
+#define LED_STATUS                    OFF //    OFF, 2 for WeMos D1 Mini. Flashes LED when trying to connect to OnStep.       Option
 
 // DISPLAY -------------------------------------------------------------------------------------------------------------------------
 #define DISPLAY_WEATHER               OFF //    OFF, ON Shows weather/ambient conditions (from OnStep) on status page.        Option
