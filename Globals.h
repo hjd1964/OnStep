@@ -383,24 +383,3 @@ volatile int blAxis2                    = 0;
 #ifdef Aux8
   byte valueAux8 = 0;
 #endif
-#ifdef Aux9
-  byte valueAux9 = 0;
-#endif
-#ifdef Aux10
-  byte valueAux10 = 0;
-#endif
-#ifdef Aux11
-  byte valueAux11 = 0;
-#endif
-#ifdef Aux12
-  byte valueAux12 = 0;
-#endif
-#ifdef Aux13
-  byte valueAux13 = 0;
-#endif
-#ifdef Aux14
-  byte valueAux14 = 0;
-#endif
-#ifdef Aux15
-  byte valueAux15 = 0;
-#endif
