@@ -1,6 +1,17 @@
 // -------------------------------------------------------------------------------------------------
 // Validates pinmap model for current configuration
 
+// helps keep track of Aux pin assignments
+#define AssignAux0 0
+#define AssignAux1 0
+#define AssignAux2 0
+#define AssignAux3 0
+#define AssignAux4 0
+#define AssignAux5 0
+#define AssignAux6 0
+#define AssignAux7 0
+#define AssignAux8 0
+
 #if PINMAP == Classic
   #include "Validate.Classic.h"
 #endif
