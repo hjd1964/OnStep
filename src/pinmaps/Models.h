@@ -4,6 +4,9 @@
 #if PINMAP == Classic
   #include "Pins.Classic.h"
 #endif
+#if PINMAP == ClassicShield
+  #include "Pins.Classic.h"
+#endif
 #if PINMAP == Mega2560Alt
   #include "Pins.Mega2560Alt.h"
 #endif

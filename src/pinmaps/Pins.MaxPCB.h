@@ -66,12 +66,15 @@
 #define Axis2StepPin          3     // Step
 
 #define Axis2_EN              9     // Enable
-#define Axis2_M0              8     // Microstep Mode 0 or SPI MOSI
-#define Axis2_M1              7     // Microstep Mode 1 or SPI SCK
-#define Axis2_M2              6     // Microstep Mode 2 or SPI CS or Decay Mode
 #if PINMAP == MaxPCB3
+  #define Axis2_M0           15     // Microstep Mode 0 or SPI MOSI
+  #define Axis2_M1           16     // Microstep Mode 1 or SPI SCK
+  #define Axis2_M2            6     // Microstep Mode 2 or SPI CS or Decay Mode
   #define Axis2_M3         Aux1     // SPI MISO
 #else
+  #define Axis2_M0            8     // Microstep Mode 0 or SPI MOSI
+  #define Axis2_M1            7     // Microstep Mode 1 or SPI SCK
+  #define Axis2_M2            6     // Microstep Mode 2 or SPI CS or Decay Mode
   #define Axis2_M3         Aux2     // ESP8266 RST or SPI MISO/Fault
 #endif
 #define Axis2ModePin   Axis2_M2     // Decay mode

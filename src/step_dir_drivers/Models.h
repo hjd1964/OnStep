@@ -49,13 +49,6 @@
 #define STEALTHCHOP 3
 #define SPREADCYCLE 4
 
-// EN signal state defaults LOW
-#define AXIS1_DRIVER_ENABLE LOW
-#define AXIS2_DRIVER_ENABLE LOW
-#define AXIS3_DRIVER_ENABLE LOW
-#define AXIS4_DRIVER_ENABLE LOW
-#define AXIS5_DRIVER_ENABLE LOW
-
 // default mode switch state and sleep is disabled
 #define MODE_SWITCH_BEFORE_SLEW OFF
 #define MODE_SWITCH_SLEEP OFF

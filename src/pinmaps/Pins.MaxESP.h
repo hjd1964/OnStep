@@ -7,8 +7,12 @@
 #define Aux0                 25     // Status LED
 #define Aux3                 5      // Home sw for Axis1 
 #define Aux4                 14     // Home sw for Axis2
-#define Aux5                 0      // EN for Axis3
 #define Aux8                 23     // LED2 or Reticle
+
+// Misc. pins
+#ifndef OneWirePin
+  #define OneWirePin       Aux8     // Default Pin for one wire bus
+#endif
 
 // The PEC index sense is a logic level input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
 #define PecPin               36
@@ -38,12 +42,12 @@
 #define Axis2DirPin          26     // Dir
 
 // For rotator stepper driver
-#define Axis3_EN           Aux5     // Enable
+#define Axis3_EN              0     // Enable
 #define Axis3StepPin          2     // Step
 #define Axis3DirPin          15     // Dir
 
 // For focuser1 stepper driver
-#define Axis4_EN           Aux5     // Enable
+#define Axis4_EN              0     // Enable
 #define Axis4StepPin          2     // Step
 #define Axis4DirPin          15     // Dir
 

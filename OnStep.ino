@@ -176,8 +176,8 @@ void setup() {
   SerialST4.begin();
 #endif
 
-  // Take another second to be sure Serial ports are online
-  delay(1000);
+  // Take another two seconds to be sure Serial ports are online
+  delay(2000);
 
   // initialize the Non-Volatile Memory
   nv.init();
