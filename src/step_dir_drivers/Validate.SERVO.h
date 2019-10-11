@@ -13,7 +13,7 @@
     #if AXIS1_DRIVER_MICROSTEPS_GOTO != 1 && AXIS1_DRIVER_MICROSTEPS_GOTO != 2 && AXIS1_DRIVER_MICROSTEPS_GOTO != 4 && AXIS1_DRIVER_MICROSTEPS_GOTO != 8 && AXIS1_DRIVER_MICROSTEPS_GOTO != 16 && AXIS1_DRIVER_MICROSTEPS_GOTO != 32 && AXIS1_DRIVER_MICROSTEPS_GOTO != 64 && AXIS1_DRIVER_MICROSTEPS_GOTO != 128
       #error "Configuration (Config.h): AXIS1_DRIVER_MICROSTEPS_GOTO; SERVO invalid digital gearing mode, use: 128,64,32,16,8,4,2,1,or OFF"
     #endif
-    #warning "Configuration (Config.h): AXIS1_DRIVER_MICROSTEPS_GOTO; SERVO digital gearing increases step size by this amount"
+    #warning "Configuration (Config.h): AXIS1_DRIVER_MICROSTEPS_GOTO; SERVO digital gearing multiplies step size by this amount"
   #endif
 #endif
 
@@ -30,6 +30,6 @@
     #if AXIS2_DRIVER_MICROSTEPS_GOTO != 1 && AXIS2_DRIVER_MICROSTEPS_GOTO != 2 && AXIS2_DRIVER_MICROSTEPS_GOTO != 4 && AXIS2_DRIVER_MICROSTEPS_GOTO != 8 && AXIS2_DRIVER_MICROSTEPS_GOTO != 16 && AXIS2_DRIVER_MICROSTEPS_GOTO != 32 && AXIS2_DRIVER_MICROSTEPS_GOTO != 64 && AXIS2_DRIVER_MICROSTEPS_GOTO != 128
       #error "Configuration (Config.h): AXIS2_DRIVER_MICROSTEPS_GOTO; SERVO invalid digital gearing mode, use: 128,64,32,16,8,4,2,1,or OFF"
     #endif
-    #warning "Configuration (Config.h): AXIS2_DRIVER_MICROSTEPS_GOTO; SERVO digital gearing increases step size by this amount"
+    #warning "Configuration (Config.h): AXIS2_DRIVER_MICROSTEPS_GOTO; SERVO digital gearing multiplies step size by this amount"
   #endif
 #endif

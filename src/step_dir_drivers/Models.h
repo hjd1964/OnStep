@@ -15,19 +15,19 @@
 
 // Models
 #define DRIVER_MODEL_FIRST 2
-#define A4988   2
-#define DRV8825 3
-#define S109    4
-#define LV8729  5
-#define RAPS128 6
-#define TMC2100 7
-#define TMC2208 8
-#define TMC2209 9
-#define ST820   10
-#define TMC_SPI 11 // universal TMC SPI comms for TMC2130 and TMC5160
-#define SERVO   12 // step/dir servo with EN LOW, digital gearing on M0 pin where LOW = 1x & goto HIGH = 2,4,8,16,32,64, or 128x
-#define SERVO1  12
-#define SERVO2  13 // step/dir servo with EN HIGH
+#define A4988    2
+#define DRV8825  3
+#define S109     4
+#define LV8729   5
+#define RAPS128  6
+#define TMC2100  7
+#define TMC2208  8
+#define TMC2209  9
+#define ST820    10
+#define TMC_SPI  11 // universal TMC SPI comms for TMC2130 and TMC5160
+#define SERVO    12 // step/dir servo with EN LOW, digital gearing on M0 pin where LOW = 1x & goto HIGH = 2,4,8,16,32,64, or 128x
+#define SERVO1   12 // with EN LOW,  mode switch before/after slew
+#define SERVO2   13 // with EN HIGH, mode switch before/after slew
 #define DRIVER_MODEL_LAST 13
 
 // Minimum pulse width in nS
@@ -41,7 +41,8 @@
 #define TMC2209_PULSE_WIDTH 103
 #define ST820_PULSE_WIDTH   20
 #define TMC_SPI_PULSE_WIDTH 103
-#define SERVO_PULSE_WIDTH   1000 // enough for 500KHz stepping
+#define GENERIC_PULSE_WIDTH 500  // enough for 1MHz stepping
+#define SERVO_PULSE_WIDTH   500  // enough for 1MHz stepping
 
 // Wave forms
 #define SQUARE 2
