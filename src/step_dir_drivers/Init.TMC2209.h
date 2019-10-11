@@ -37,7 +37,7 @@
       #undef AXIS1_DRIVER_DECAY_MODE
       #define AXIS1_DRIVER_DECAY_MODE HIGH
     #else
-      #error "Configuration: AXIS1_DRIVER_DECAY_MODE; Invalid option for TMC2209 stepper driver."
+      #error "Configuration (Config.h): AXIS1_DRIVER_DECAY_MODE; Invalid option for TMC2209 stepper driver."
     #endif
   #else
     #undef AXIS1_DRIVER_DECAY_MODE
@@ -51,7 +51,7 @@
       #undef AXIS1_DRIVER_DECAY_MODE_GOTO
       #define AXIS1_DRIVER_DECAY_MODE_GOTO HIGH
     #else
-      #error "Configuration: AXIS1_DRIVER_DECAY_MODE_GOTO; Invalid option for TMC2209 stepper driver."
+      #error "Configuration (Config.h): AXIS1_DRIVER_DECAY_MODE_GOTO; Invalid option for TMC2209 stepper driver."
     #endif
   #else
     #undef AXIS1_DRIVER_DECAY_MODE_GOTO
@@ -69,7 +69,7 @@
       #undef AXIS2_DRIVER_DECAY_MODE
       #define AXIS2_DRIVER_DECAY_MODE HIGH
     #else
-      #error "Configuration: AXIS2_DRIVER_DECAY_MODE; Invalid option for TMC2209 stepper driver."
+      #error "Configuration (Config.h): AXIS2_DRIVER_DECAY_MODE; Invalid option for TMC2209 stepper driver."
     #endif
   #else
     #undef AXIS2_DRIVER_DECAY_MODE
@@ -83,7 +83,7 @@
       #undef AXIS2_DRIVER_DECAY_MODE_GOTO
       #define AXIS2_DRIVER_DECAY_MODE_GOTO HIGH
     #else
-      #error "Configuration: AXIS2_DRIVER_DECAY_MODE_GOTO; Invalid option for TMC2209 stepper driver."
+      #error "Configuration (Config.h): AXIS2_DRIVER_DECAY_MODE_GOTO; Invalid option for TMC2209 stepper driver."
     #endif
   #else
     #undef AXIS2_DRIVER_DECAY_MODE_GOTO

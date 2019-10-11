@@ -17,7 +17,7 @@
   #undef AXIS1_DRIVER_MODEL
   #define AXIS1_DRIVER_MODEL TMC_SPI
   #if AXIS1_DRIVER_IRUN == OFF
-    #warning "Configuration: AXIS1_DRIVER_IRUN current isn't specified, falling back to 600 (mA.)"
+    #warning "Configuration (Config.h): AXIS1_DRIVER_IRUN current isn't specified, falling back to 600 (mA.)"
     #undef AXIS1_DRIVER_IRUN
     #define AXIS1_DRIVER_IRUN 600 // peak current in mA (0.6A)
   #endif
@@ -43,7 +43,7 @@
   #undef AXIS2_DRIVER_MODEL
   #define AXIS2_DRIVER_MODEL TMC_SPI
   #if AXIS2_DRIVER_IRUN == OFF
-    #warning "Configuration: AXIS2_DRIVER_IRUN current isn't specified, falling back to 600 (mA.)"
+    #warning "Configuration (Config.h): AXIS2_DRIVER_IRUN current isn't specified, falling back to 600 (mA.)"
     #undef AXIS2_DRIVER_IRUN
     #define AXIS2_DRIVER_IRUN 600
   #endif
@@ -68,7 +68,7 @@
     #undef AXIS3_DRIVER_MODEL
     #define AXIS3_DRIVER_MODEL TMC_SPI
     #if AXIS3_DRIVER_IRUN == OFF
-      #warning "Configuration: AXIS3_DRIVER_IRUN current isn't specified, falling back to 200 (mA.)"
+      #warning "Configuration (Config.h): AXIS3_DRIVER_IRUN current isn't specified, falling back to 200 (mA.)"
       #undef AXIS3_DRIVER_IRUN
       #define AXIS3_DRIVER_IRUN 200
     #endif
@@ -94,7 +94,7 @@
     #undef AXIS4_DRIVER_MODEL
     #define AXIS4_DRIVER_MODEL TMC_SPI
     #ifndef AXIS4_DRIVER_IRUN
-      #warning "Configuration: AXIS4_DRIVER_IRUN current isn't specified, falling back to 200 (mA.)"
+      #warning "Configuration (Config.h): AXIS4_DRIVER_IRUN current isn't specified, falling back to 200 (mA.)"
       #undef AXIS5_DRIVER_IRUN
       #define AXIS4_DRIVER_IRUN 200
     #endif
@@ -120,7 +120,7 @@
     #undef AXIS5_DRIVER_MODEL
     #define AXIS5_DRIVER_MODEL TMC_SPI
     #if AXIS5_DRIVER_IRUN == OFF
-      #warning "Configuration: AXIS5_DRIVER_IRUN current isn't specified, falling back to 200 (mA.)"
+      #warning "Configuration (Config.h): AXIS5_DRIVER_IRUN current isn't specified, falling back to 200 (mA.)"
       #undef AXIS5_DRIVER_IRUN
       #define AXIS5_DRIVER_IRUN 200
     #endif
