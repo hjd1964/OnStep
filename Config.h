@@ -101,7 +101,7 @@
 // MOTION CONTROL ----------------------------------------------------------------------------------------------------------
 #define STEP_WAVE_FORM             SQUARE // SQUARE, PULSE Step signal wave form faster rates. SQUARE best signal integrity.  Adjust
 
-// Stepper driver models are as follows: A4988, DRV8825, LV8729, RAPS128, S109, ST820,
+// Stepper driver models are as follows: A4988, DRV8825, LV8729, RAPS128, S109, ST820, SERVO, SERVO2 (ENable HIGH,)
 //                                       SSS TMC2100, TMC2208, TMC2209*, TMC2130**, and TMC5160***
 // * = add _QUIET (stealthChop tracking) or _VQUIET (stealthChop tracking & slew,) for example "TMC2130_VQUIET"
 // ** = SSS TMC2130 if you choose to set stepper driver current (in mA) set Vref pot. 2.5V instead of by motor current as usual.

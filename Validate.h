@@ -496,6 +496,7 @@
   #include "src/step_dir_drivers/Init.TMC2209.h"
   #include "src/step_dir_drivers/Init.TMC5160.h"
   #include "src/step_dir_drivers/Init.TMC_SPI.h"
+  #include "src/step_dir_drivers/Init.SERVO.h"
 
   // check to see if a valid stepper driver code exists
   #if (AXIS1_DRIVER_MODEL < DRIVER_MODEL_FIRST) || (AXIS1_DRIVER_MODEL > DRIVER_MODEL_LAST)
@@ -525,6 +526,7 @@
   #include "src/step_dir_drivers/Validate.TMC2208.h"
   #include "src/step_dir_drivers/Validate.TMC2209.h"
   #include "src/step_dir_drivers/Validate.TMC_SPI.h"
+  #include "src/step_dir_drivers/Validate.SERVO.h"
 
   // for stepper drivers where AXISn_MICROSTEPS_GOTO must be defined
   #if MODE_SWITCH_BEFORE_SLEW != OFF

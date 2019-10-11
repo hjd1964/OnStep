@@ -24,10 +24,12 @@
 #define TMC2208 8
 #define TMC2209 9
 #define ST820   10
-#define TMC_SPI 11
-#define DRIVER_MODEL_LAST 11
+#define TMC_SPI 11 // universal TMC SPI comms for TMC2130 and TMC5160
+#define SERVO   12 // step/dir servo with EN LOW, digital gearing on M0 pin where LOW = 1x & goto HIGH = 2,4,8,16,32,64, or 128x
+#define SERVO2  13 // step/dir servo with EN HIGH
+#define DRIVER_MODEL_LAST 13
 
-// Minimum pulse width
+// Minimum pulse width in nS
 #define A4988_PULSE_WIDTH   1000
 #define DRV8825_PULSE_WIDTH 2000
 #define S109_PULSE_WIDTH    300
@@ -36,8 +38,9 @@
 #define TMC2100_PULSE_WIDTH 103
 #define TMC2208_PULSE_WIDTH 103
 #define TMC2209_PULSE_WIDTH 103
-#define TMC_SPI_PULSE_WIDTH 103
 #define ST820_PULSE_WIDTH   20
+#define TMC_SPI_PULSE_WIDTH 103
+#define SERVO_PULSE_WIDTH   1000 // enough for 500KHz stepping
 
 // Wave forms
 #define SQUARE 2
@@ -66,6 +69,7 @@
 #define LEN_TMC2208 4
 #define LEN_TMC2209 4
 #define LEN_TMC_SPI 9
+#define LEN_SERVO   8
 
 // The various microsteps for different driver models, with the bit modes for each
 unsigned int StepsA4988  [LEN_A4988]  [2] = { {1,0}, {2,1}, {4,2}, {8,3}, {16,7} };
@@ -77,6 +81,7 @@ unsigned int StepsTMC2208[LEN_TMC2208][2] = {        {2,1}, {4,2}, {8,0}, {16,3}
 unsigned int StepsTMC2209[LEN_TMC2209][2] = {                      {8,0}, {16,3}, {32,1}, {64,2} };
 unsigned int StepsTMC2100[LEN_TMC2100][2] = { {1,0}, {2,1}, {4,2},        {16,3} };
 unsigned int StepsTMC_SPI[LEN_TMC_SPI][2] = { {1,8}, {2,7}, {4,6}, {8,5}, {16,4}, {32,3}, {64,2}, {128,1}, {256,0} };
+unsigned int StepsSERVO  [LEN_SERVO][2]   = { {1,0}, {2,1}, {4,1}, {8,1}, {16,1}, {32,1}, {64,1}, {128,1} };
 
 unsigned int searchTable(unsigned int Table[][2], int TableLen, unsigned int Microsteps) {
   int i;
@@ -123,6 +128,9 @@ unsigned int translateMicrosteps(int axis, int DriverModel, unsigned int Microst
       break;
     case TMC_SPI:
       Mode = searchTable(StepsTMC_SPI, LEN_TMC_SPI, Microsteps);
+      break;
+    case SERVO:
+      Mode = searchTable(StepsSERVO, LEN_SERVO, Microsteps);
       break;
     default:
       Mode=1;
