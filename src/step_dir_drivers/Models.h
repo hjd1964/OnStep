@@ -26,6 +26,7 @@
 #define ST820   10
 #define TMC_SPI 11 // universal TMC SPI comms for TMC2130 and TMC5160
 #define SERVO   12 // step/dir servo with EN LOW, digital gearing on M0 pin where LOW = 1x & goto HIGH = 2,4,8,16,32,64, or 128x
+#define SERVO1  12
 #define SERVO2  13 // step/dir servo with EN HIGH
 #define DRIVER_MODEL_LAST 13
 
