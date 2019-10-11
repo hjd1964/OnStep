@@ -2,15 +2,18 @@
 // Validates pinmap model for current configuration
 
 // helps keep track of Aux pin assignments
-#define AssignAux0 0
-#define AssignAux1 0
-#define AssignAux2 0
-#define AssignAux3 0
-#define AssignAux4 0
-#define AssignAux5 0
-#define AssignAux6 0
-#define AssignAux7 0
-#define AssignAux8 0
+#define PIN_NOT_ASSIGNED 0
+#define PIN_SHARED_I2C 1
+#define PIN_DEDICATED 2
+#define ASSIGNED_AUX0 PIN_NOT_ASSIGNED
+#define ASSIGNED_AUX1 PIN_NOT_ASSIGNED
+#define ASSIGNED_AUX2 PIN_NOT_ASSIGNED
+#define ASSIGNED_AUX3 PIN_NOT_ASSIGNED
+#define ASSIGNED_AUX4 PIN_NOT_ASSIGNED
+#define ASSIGNED_AUX5 PIN_NOT_ASSIGNED
+#define ASSIGNED_AUX6 PIN_NOT_ASSIGNED
+#define ASSIGNED_AUX7 PIN_NOT_ASSIGNED
+#define ASSIGNED_AUX8 PIN_NOT_ASSIGNED
 
 #if PINMAP == Classic
   #include "Validate.Classic.h"

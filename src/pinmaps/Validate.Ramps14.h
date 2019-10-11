@@ -7,11 +7,11 @@
 
 // USER FEEDBACK ----------------------------
 #if LED_STATUS == ON
-  #if AssignAux0 < 0
+  #if ASSIGNED_AUX0 != PIN_NOT_ASSIGNED
     #error "Configuration (Config.h): LED_STATUS enabled but Aux0 is already in use, choose one feature on Aux0"
   #else
-    #undef AssignAux0
-    #define AssignAux0 -2
+    #undef ASSIGNED_AUX0
+    #define ASSIGNED_AUX0 PIN_DEDICATED
   #endif
 #endif
 
@@ -59,20 +59,20 @@
 
 // MOTION CONTROL AXIS1/2 -----------------
 #if AXIS1_DRIVER_STATUS != OFF
-  #if AssignAux1 < 0
+  #if ASSIGNED_AUX1 != PIN_NOT_ASSIGNED
     #error "Configuration (Config.h): AXIS1_DRIVER_STATUS enabled but Aux1 is already in use, choose one feature on Aux1"
   #else
-    #undef AssignAux1
-    #define AssignAux1 -2
+    #undef ASSIGNED_AUX1
+    #define ASSIGNED_AUX1 PIN_DEDICATED
   #endif
 #endif
 
 #if AXIS2_DRIVER_STATUS != OFF
-  #if AssignAux2 < 0
+  #if ASSIGNED_AUX2 != PIN_NOT_ASSIGNED
     #error "Configuration (Config.h): AXIS2_DRIVER_STATUS enabled but Aux2 is already in use, choose one feature on Aux2"
   #else
-    #undef AssignAux2
-    #define AssignAux2 -2
+    #undef ASSIGNED_AUX2
+    #define ASSIGNED_AUX2 PIN_DEDICATED
   #endif
 #endif
 

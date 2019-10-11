@@ -2,39 +2,39 @@
 
 // SERIAL PORTS ------------------------------------------------------------------------------------------------------------
 #if SERIAL_B_ESP_FLASHING == ON
-  #if AssignAux2 < 0
+  #if ASSIGNED_AUX2 != PIN_NOT_ASSIGNED
     #error "Configuration (Config.h): SERIAL_B_ESP_FLASHING enabled but Aux2 is already in use, choose one feature on Aux2."
   #else
-    #undef AssignAux2
-    #define AssignAux2 -2
+    #undef ASSIGNED_AUX2
+    #define ASSIGNED_AUX2 PIN_DEDICATED
   #endif
 #endif
 
 // USER FEEDBACK ----------------------------
 #if LED_STATUS == ON
-  #if AssignAux0 < 0
+  #if ASSIGNED_AUX0 != PIN_NOT_ASSIGNED
     #error "Configuration (Config.h): LED_STATUS enabled but Aux0 is already in use, choose one feature on Aux0"
   #else
-    #undef AssignAux0
-    #define AssignAux0 -2
+    #undef ASSIGNED_AUX0
+    #define ASSIGNED_AUX0 PIN_DEDICATED
   #endif
 #endif
 
 #if LED_STATUS2 == ON
-  #if AssignAux8 < 0
+  #if ASSIGNED_AUX8 != PIN_NOT_ASSIGNED
     #error "Configuration (Config.h): LED_STATUS enabled but Aux8 is already in use, choose one feature on Aux8"
   #else
-    #undef AssignAux8
-    #define AssignAux8 -2
+    #undef ASSIGNED_AUX8
+    #define ASSIGNED_AUX8 PIN_DEDICATED
   #endif
 #endif
 
 #if LED_RETICLE == ON
-  #if AssignAux8 < 0
+  #if ASSIGNED_AUX8 != PIN_NOT_ASSIGNED
     #error "Configuration (Config.h): LED_RETICLE enabled but Aux8 is already in use, choose one feature on Aux8"
   #else
-    #undef AssignAux8
-    #define AssignAux8 -2
+    #undef ASSIGNED_AUX8
+    #define ASSIGNED_AUX8 PIN_DEDICATED
   #endif
 #endif
 
@@ -57,11 +57,11 @@
 #endif
 
 #if TELESCOPE_TEMPERATURE == DS1820
-  #if AssignAux4 < 0
+  #if ASSIGNED_AUX4 != PIN_NOT_ASSIGNED
     #error "Configuration (Config.h): RTC DS1820 OneWire interface enabled but Aux4 is already in use, choose one feature on Aux4"
   #else
-    #undef AssignAux4
-    #define AssignAux4 -2
+    #undef ASSIGNED_AUX4
+    #define ASSIGNED_AUX4 PIN_DEDICATED
   #endif
 #endif
 
@@ -70,36 +70,36 @@
 #endif
 
 #if LIMIT_SENSE != OFF
-  #if AssignAux7 < 0
+  #if ASSIGNED_AUX7 != PIN_NOT_ASSIGNED
     #error "Configuration (Config.h): LIMIT_SENSE enabled but Aux7 is already in use, choose one feature on Aux7"
   #else
-    #undef AssignAux7
-    #define AssignAux7 -2
+    #undef ASSIGNED_AUX7
+    #define ASSIGNED_AUX7 PIN_DEDICATED
   #endif
 #endif
 
 #if HOME_SENSE != OFF
-  #if AssignAux3 < 0
+  #if ASSIGNED_AUX3 != PIN_NOT_ASSIGNED
     #error "Configuration (Config.h): HOME_SENSE enabled but Aux3 is already in use, choose one feature on Aux3"
   #else
-    #undef AssignAux3
-    #define AssignAux3 -2
+    #undef ASSIGNED_AUX3
+    #define ASSIGNED_AUX3 PIN_DEDICATED
   #endif
-  #if AssignAux4 < 0
+  #if ASSIGNED_AUX4 != PIN_NOT_ASSIGNED
     #error "Configuration (Config.h): HOME_SENSE enabled but Aux4 is already in use, choose one feature on Aux4"
   #else
-    #undef AssignAux4
-    #define AssignAux4 -2
+    #undef ASSIGNED_AUX4
+    #define ASSIGNED_AUX4 PIN_DEDICATED
   #endif
 #endif
 
 // MOTION CONTROL AXIS1/2 -----------------
 #if AXIS1_DRIVER_STATUS != OFF
-  #if AssignAux1 < -1
+  #if ASSIGNED_AUX1 == PIN_DEDICATED
     #error "Configuration (Config.h): AXIS1_DRIVER_STATUS enabled but Aux1 is already in use, choose one feature on Aux1"
   #else
-    #undef AssignAux1
-    #define AssignAux1 -1
+    #undef ASSIGNED_AUX1
+    #define ASSIGNED_AUX1 PIN_SHARED_I2C
   #endif
   #if AXIS1_DRIVER_STATUS == HIGH || AXIS1_DRIVER_STATUS == LOW
     #error "Configuration (Config.h): AXIS1_DRIVER_STATUS allows Aux1 use in TMC_SPI mode only"
@@ -107,11 +107,11 @@
 #endif
 
 #if AXIS2_DRIVER_STATUS != OFF
-  #if AssignAux1 < -1
+  #if ASSIGNED_AUX1 == PIN_DEDICATED
     #error "Configuration (Config.h): AXIS2_DRIVER_STATUS enabled but Aux1 is already in use, choose one feature on Aux1"
   #else
-    #undef AssignAux1
-    #define AssignAux1 -1
+    #undef ASSIGNED_AUX1
+    #define ASSIGNED_AUX1 PIN_SHARED_I2C
   #endif
   #if AXIS2_DRIVER_STATUS == HIGH || AXIS2_DRIVER_STATUS == LOW
     #error "Configuration (Config.h): AXIS2_DRIVER_STATUS allows Aux1 use in TMC_SPI mode only"
@@ -124,26 +124,26 @@
 
 // MOTION CONTROL FOCUSERS/ROTATOR --------
 #if ROTATOR == ON && AXIS3_DRIVER_POWER_DOWN == ON
-  #if AssignAux5 < 0
+  #if ASSIGNED_AUX5 != PIN_NOT_ASSIGNED
     #error "Configuration (Config.h): AXIS3_DRIVER_POWER_DOWN requires ENable signal support but Aux5 is already in use, choose one feature on Aux5"
   #else
-    #undef AssignAux5
-    #define AssignAux5 -2
+    #undef ASSIGNED_AUX5
+    #define ASSIGNED_AUX5 PIN_DEDICATED
   #endif
 #endif
 #if FOCUSER1 == ON && (AXIS4_DRIVER_POWER_DOWN == ON || AXIS4_DRIVER_DC_MODE != OFF)
-  #if AssignAux6 < 0
+  #if ASSIGNED_AUX6 != PIN_NOT_ASSIGNED
     #error "Configuration (Config.h): AXIS4_DRIVER_POWER_DOWN and AXIS4_DRIVER_DC_MODE require ENable signal support but Aux6 is already in use, choose one feature on Aux6"
   #else
-    #undef AssignAux6
-    #define AssignAux6 -2
+    #undef ASSIGNED_AUX6
+    #define ASSIGNED_AUX6 PIN_DEDICATED
   #endif
 #endif
 #if FOCUSER2 == ON && AXIS5_DRIVER_POWER_DOWN == ON && AXIS4_DRIVER_DC_MODE == OFF
-  #if AssignAux5 < 0
+  #if ASSIGNED_AUX5 != PIN_NOT_ASSIGNED
     #error "Configuration (Config.h): AXIS5_DRIVER_POWER_DOWN requires ENable signal support but Aux5 is already in use, choose one feature on Aux5"
   #else
-    #undef AssignAux5
-    #define AssignAux5 -2
+    #undef ASSIGNED_AUX5
+    #define ASSIGNED_AUX5 PIN_DEDICATED
   #endif
 #endif
