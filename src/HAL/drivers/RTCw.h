@@ -13,7 +13,9 @@
 
 class rtcw {
   public:
-    // initialize (also enables the RTC PPS if available)
+    bool active=false;
+
+  // initialize (also enables the RTC PPS if available)
     void init() {
       rtc.begin(DS3234_CS_PIN); rtc.update();
       rtc.writeSQW(SQW_SQUARE_1);
@@ -45,8 +47,6 @@ class rtcw {
         LMT=(rtc.hour()+(rtc.minute()/60.0)+(rtc.second()/3600.0));
       }
     }
-  private:
-    bool active=false;
 };
 
 #elif defined(RTC_DS3231)
