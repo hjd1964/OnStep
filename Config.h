@@ -39,7 +39,7 @@
 #define BUZZER_STATE_DEFAULT          OFF //    OFF, ON Start with piezo buzzer/speaker enabled.                              Option
 
 // TIME --------------------------------------------------------------------------------------------------------------------
-#define RTC                           OFF //    OFF, DS3231 (I2c,) DS3234 (Spi,) TEENSY (Teensy3.2 internal) enables rtc.     Option
+#define RTC                           OFF //    OFF, DS3231 (I2c,) DS3234S (SPI see pinmap for CS,) TEENSY (T3.2 internal.)   Option
                                           //         Provides Date/Time and pulse per second signal (if available.)
 
 // SENSORS -----------------------------------------------------------------------------------------------------------------

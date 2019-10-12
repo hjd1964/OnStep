@@ -107,6 +107,20 @@
   #error "Configuration (Config.h): PEC_SENSE in ANALOG mode not supported for this PINMAP, use ON, etc. NOT a threshold value"
 #endif
 
+// RTC DS3234 SPI allowed?
+#if (RTC == DS3234S || RTC == DS3234M) && !defined(DS3234_CS_PIN)
+  #if PINMAP == Classic
+      #error "Configuration (Config.h): DS3234 RTC using SPI is not supported, use PINMAP ClassicShield or add '#define ST4_ALTERNATE_PINS_ON' to move the ST4 port pins"
+    #else
+      #error "Configuration (Config.h): DS3234 RTC using SPI is not supported for this PINMAP"
+  #endif
+#endif
+
+// WEATHER BME280 SPI allowed?
+#if WEATHER == BME280_SPI && !defined(BME280_CS_PIN)
+  #error "Configuration (Config.h): BME280 weather using SPI is not supported for this PINMAP"
+#endif
+
 // focuser/rotators any invalid combinations?
 #if ROTATOR == ON && FOCUSER1 == ON
   #if Axis3StepPin == Axis4StepPin

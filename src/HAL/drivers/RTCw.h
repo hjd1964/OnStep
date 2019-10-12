@@ -4,7 +4,7 @@
 #pragma once
 #include "../../lib/Julian.h"
 
-#if RTC == DS3234
+#if RTC == DS3234S
 // -----------------------------------------------------------------------------------
 // DS3234 RTC support 
 // uses the default SPI port and CS (DS3234_CS_PIN from Pins.xxx.h)
@@ -13,6 +13,8 @@
 
 class rtcw {
   public:
+    bool active=false;
+
     // initialize (also enables the RTC PPS if available)
     void init() {
       rtc.begin(DS3234_CS_PIN); rtc.update();
@@ -45,8 +47,6 @@ class rtcw {
         LMT=(rtc.hour()+(rtc.minute()/60.0)+(rtc.second()/3600.0));
       }
     }
-  private:
-    bool active=false;
 };
 
 #elif RTC == DS3231
@@ -116,6 +116,59 @@ class rtcw {
 #if defined(ESP32) & defined(WIRE_END_SUPPORT)
       HAL_Wire.end();
 #endif
+    }
+};
+
+#elif RTC == DS3234M
+// -----------------------------------------------------------------------------------
+// DS3234 RTC support 
+// uses the default SPI port
+
+#include <SPI.h>
+#include <RtcDS3234.h>          // https://github.com/Makuna/Rtc/archive/master.zip
+RtcDS3234<SPIClass> _Rtc(SPI, DS3234_CS_PIN);
+
+class rtcw {
+  public:
+    bool active=false;
+
+    // initialize (also enables the RTC PPS if available)
+    void init() {
+      _Rtc.Begin(); if (!_Rtc.GetIsRunning()) _Rtc.SetIsRunning(true);
+      // frequency 0 (1Hz) on the SQW pin
+      _Rtc.SetSquareWavePin(DS3234SquareWavePin_ModeClock);
+      _Rtc.SetSquareWavePinClockFrequency(DS3234SquareWaveClock_1Hz);
+      active=true;
+    }
+
+    // set the RTC's time (local standard time)
+    void set(double JD, double LMT) {
+      if (!active) return;
+
+      int yy,y,mo,d,h;
+      double m,s;
+    
+      greg(JD,&y,&mo,&d); yy=y; y-=2000; if (y >= 100) y-=100;
+    
+      double f1=fabs(LMT)+0.000139;
+      h=floor(f1);
+      m=(f1-h)*60.0;
+      s=(m-floor(m))*60.0;
+      
+      RtcDateTime updateTime = RtcDateTime(yy, mo, d, h, floor(m), floor(s));
+      _Rtc.SetDateTime(updateTime);
+    }
+    
+    // get the RTC's time (local standard time)
+    void get(double &JD, double &LMT) {
+      if (!active) return;
+
+      RtcDateTime now = _Rtc.GetDateTime();
+      if ((now.Year() >= 2018) && (now.Year() <= 3000) && (now.Month() >= 1) && (now.Month() <= 12) && (now.Day() >= 1) && (now.Day() <= 31) &&
+          (now.Hour() >= 0) && (now.Hour() <= 23) && (now.Minute() >= 0) && (now.Minute() <= 59) && (now.Second() >= 0) && (now.Second() <= 59)) {
+        JD=julian(now.Year(),now.Month(),now.Day());
+        LMT=(now.Hour()+(now.Minute()/60.0)+(now.Second()/3600.0));
+      }
     }
 };
 

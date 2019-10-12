@@ -59,15 +59,17 @@
 // various RTC's supported
 #define RTC_FIRST                   1
 #define DS3231                      1 // DS3231 RTC on I2C
-#define DS3234                      2 // DS3234 RTC on SPI (default CS)
-#define TEENSY                      3 // TEENSY3.2 RTC (Built-in)
-#define RTC_LAST                    3
+#define DS3234S                     2 // DS3234 RTC on SPI (DS3234_CS_PIN) Sparkfun Library
+#define DS3234M                     3 // DS3234 RTC on SPI (DS3234_CS_PIN) Makuna library
+#define TEENSY                      4 // TEENSY3.2 RTC (Built-in)
+#define RTC_LAST                    4
 
 // various Weather sensors supported
 #define WEATHER_FIRST               1
 #define BME280                      1 // BME280 on I2C (at default address 0x77)
+#define BME280_0x77                 1 // BME280 on I2C (at address 0x77)
 #define BME280_0x76                 2 // BME280 on I2C (at address 0x76)
-#define BME280SPI                   3 // BME280 on SPI (default CS)
+#define BME280_SPI                  3 // BME280 on SPI (default CS)
 #define WEATHER_LAST                4
 
 #define TELESCOPE_TEMPERATURE_FIRST 1

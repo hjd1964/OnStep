@@ -3,6 +3,16 @@
 
 #if defined(__AVR_ATmega2560__)
 
+// Misc. pins
+#if defined(ST4_ALTERNATE_PINS_ON) || (PINMAP == ClassicShield)
+  #ifndef DS3234_CS_PIN
+    #define DS3234_CS_PIN      53     // Default CS Pin for DS3234 on SPI
+  #endif
+  #ifndef BME280_CS_PIN
+    #define BME280_CS_PIN      48     // Default CS Pin for BME280 on SPI
+  #endif
+#endif
+
 // The PEC index sense is a 5V logic input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
 #define PecPin                2
 #define AnalogPecPin          1
