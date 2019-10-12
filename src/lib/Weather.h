@@ -3,11 +3,11 @@
 
 #pragma once
 
-#if WEATHER == BME280 || WEATHER == BME280SPI || WEATHER == BME280_0x76
+#if WEATHER == BME280 || WEATHER == BME280_SPI || WEATHER == BME280_0x76
   #include <Adafruit_BME280.h>            // https://github.com/adafruit/Adafruit_BME280_Library and https://github.com/adafruit/Adafruit_Sensor
   #if WEATHER == BME280 || WEATHER == BME280_0x76
     Adafruit_BME280 bme;
-  #elif WEATHER == BME280SPI
+  #elif WEATHER == BME280_SPI
     Adafruit_BME280 bme(BME280_CS_PIN);                                   // hardware SPI
     //Adafruit_BME280 bme(BME280_CS_PIN, SSPI_MOSI, SSPI_MISO, SSPI_SCK); // software SPI
   #endif
@@ -26,7 +26,7 @@ class weather {
 #if TELESCOPE_TEMPERATURE == DS1820
       _disabled=false;
 #endif
-#if WEATHER == BME280 || WEATHER == BME280SPI || WEATHER == BME280_0x76
+#if WEATHER == BME280 || WEATHER == BME280_SPI || WEATHER == BME280_0x76
       #if WEATHER == BME280
         if (bme.begin(&HAL_Wire)) _disabled=false;
       #elif WEATHER == BME280_0x76
@@ -43,11 +43,11 @@ class weather {
     // designed for a 1s polling interval to refresh readings once a minute
     void poll() {
 
-#if WEATHER == BME280 || WEATHER == BME280SPI || WEATHER == BME280_0x76 || TELESCOPE_TEMPERATURE == DS1820
+#if WEATHER == BME280 || WEATHER == BME280_SPI || WEATHER == BME280_0x76 || TELESCOPE_TEMPERATURE == DS1820
       if (!_disabled) {
         static int phase=0;
 
-  #if WEATHER == BME280 || WEATHER == BME280SPI || WEATHER == BME280_0x76
+  #if WEATHER == BME280 || WEATHER == BME280_SPI || WEATHER == BME280_0x76
     #ifdef ESP32
         if ((phase == 10) || (phase == 30) || (phase == 50)) HAL_Wire.begin();
     #endif
@@ -68,7 +68,7 @@ class weather {
         if (phase == 70) {
           DS18B20.requestTemperatures();
           _tt=DS18B20.getTempCByIndex(0);
-    #if WEATHER != BME280 && WEATHER != BME280SPI && WEATHER != BME280_0x76
+    #if WEATHER != BME280 && WEATHER != BME280_SPI && WEATHER != BME280_0x76
           _t=_tt;
     #endif
         }

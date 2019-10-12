@@ -44,7 +44,8 @@
 
 // SENSORS -----------------------------------------------------------------------------------------------------------------
 // * = also supports ON_PULLUP or ON_PULLDOWN to activate MCU internal resistors if present.
-#define WEATHER                       OFF //    OFF, BME280 for temperature, pressure, humidity on I2C interface (0x77.)      Option
+#define WEATHER                       OFF //    OFF, BME280 (I2C 0x77,) BME280_0x78, BME280_SPI (see pinmap for CS.)          Option
+                                          //         Provides temperature, pressure, humidity.
 
 #define TELESCOPE_TEMPERATURE         OFF //    OFF, DS1820 for telescope temperature on one wire interface.                  Option
 
