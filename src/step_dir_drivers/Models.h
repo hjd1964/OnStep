@@ -25,10 +25,13 @@
 #define TMC2209  9
 #define ST820    10
 #define TMC_SPI  11 // universal TMC SPI comms for TMC2130 and TMC5160
-#define SERVO    12 // step/dir servo with EN LOW, digital gearing on M0 pin where LOW = 1x & goto HIGH = 2,4,8,16,32,64, or 128x
-#define SERVO1   12 // with EN LOW,  mode switch before/after slew
-#define SERVO2   13 // with EN HIGH, mode switch before/after slew
-#define DRIVER_MODEL_LAST 13
+#define GENERIC  12 // step/dir stepper driver, alias for GENERIC1
+#define GENERIC1 12 // step/dir stepper driver with EN LOW,  allows                        for 1x,2x,4x,8x,16x,32x,64x,128x,256x (no mode switching)
+#define GENERIC2 13 // step/dir stepper driver with EN HIGH, otherwise as above
+#define SERVO    14 // step/dir servo   driver, alias for SERVO1
+#define SERVO1   14 // step/dir servo   driver with EN LOW,  allows M0 bit pattern for LOW = native mode & goto HIGH = 2x,4x,8x,16x,32x,64x, or 128x *larger* steps
+#define SERVO2   15 // step/dir servo   driver with EN HIGH, otherwise as above
+#define DRIVER_MODEL_LAST 15
 
 // Minimum pulse width in nS
 #define A4988_PULSE_WIDTH   1000
@@ -71,6 +74,7 @@
 #define LEN_TMC2208 4
 #define LEN_TMC2209 4
 #define LEN_TMC_SPI 9
+#define LEN_GENERIC 9
 #define LEN_SERVO   8
 
 // The various microsteps for different driver models, with the bit modes for each
@@ -83,6 +87,7 @@ unsigned int StepsTMC2208[LEN_TMC2208][2] = {        {2,1}, {4,2}, {8,0}, {16,3}
 unsigned int StepsTMC2209[LEN_TMC2209][2] = {                      {8,0}, {16,3}, {32,1}, {64,2} };
 unsigned int StepsTMC2100[LEN_TMC2100][2] = { {1,0}, {2,1}, {4,2},        {16,3} };
 unsigned int StepsTMC_SPI[LEN_TMC_SPI][2] = { {1,8}, {2,7}, {4,6}, {8,5}, {16,4}, {32,3}, {64,2}, {128,1}, {256,0} };
+unsigned int StepsGENERIC[LEN_GENERIC][2] = { {1,0}, {2,0}, {4,0}, {8,0}, {16,0}, {32,0}, {64,0}, {128,0}, {256,0} };
 unsigned int StepsSERVO  [LEN_SERVO][2]   = { {1,0}, {2,1}, {4,1}, {8,1}, {16,1}, {32,1}, {64,1}, {128,1} };
 
 unsigned int searchTable(unsigned int Table[][2], int TableLen, unsigned int Microsteps) {
@@ -130,6 +135,9 @@ unsigned int translateMicrosteps(int axis, int DriverModel, unsigned int Microst
       break;
     case TMC_SPI:
       Mode = searchTable(StepsTMC_SPI, LEN_TMC_SPI, Microsteps);
+      break;
+    case GENERIC:
+      Mode = searchTable(StepsGENERIC, LEN_GENERIC, Microsteps);
       break;
     case SERVO:
       Mode = searchTable(StepsSERVO, LEN_SERVO, Microsteps);
