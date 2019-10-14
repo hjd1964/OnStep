@@ -379,6 +379,9 @@
 #elif STEP_WAVE_FORM != PULSE && STEP_WAVE_FORM != SQUARE && STEP_WAVE_FORM != DEDGE
   #error "Configuration (Config.h): Setting STEP_WAVE_FORM invalid, use PULSE, SQUARE, or DEDGE only."
 #endif
+#if defined(__AVR_ATmega2560__) && STEP_WAVE_FORM == SQUARE
+  #warning "Configuration (Config.h): When compiling for Mega2560, STEP_WAVE_FORM PULSE is recommended for best perforamce."
+#endif
 
 #ifndef AXIS1_LIMIT_UNDER_POLE
   #error "Configuration (Config.h): Setting AXIS1_LIMIT_UNDER_POLE must be present!"
