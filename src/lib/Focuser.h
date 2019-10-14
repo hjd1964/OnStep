@@ -17,8 +17,8 @@ class focuser {
       this->maxRate=maxRate;
       this->spm=stepsPerMicro;
 
-      if (stepPin!=-1) pinMode(stepPin,OUTPUT);
-      if (dirPin!=-1) pinMode(dirPin,OUTPUT);
+      if (stepPin != -1) pinMode(stepPin,OUTPUT);
+      if (dirPin != -1) pinMode(dirPin,OUTPUT);
     
       spos=readPos();
       target.part.m=spos; target.part.f=0;
@@ -66,7 +66,7 @@ class focuser {
     void setDisableState(boolean disableState) {
       this->disableState=disableState;
       if (disableState == LOW) enableState=HIGH; else enableState=LOW;
-      if (enPin!=-1) { pinMode(enPin,OUTPUT); enableDriver(); currentlyDisabled=false; }
+      if (enPin != -1) { pinMode(enPin,OUTPUT); enableDriver(); currentlyDisabled=false; }
     }
 
     // allows enabling/disabling stepper driver
@@ -84,7 +84,7 @@ class focuser {
 
     // check if moving
     bool moving() {
-      if ((delta.fixed!=0) || ((long)target.part.m!=spos)) return true; else return false;
+      if ((delta.fixed != 0) || ((long)target.part.m != spos)) return true; else return false;
     }
 
     // move in
@@ -105,7 +105,7 @@ class focuser {
 
     // get position
     double getPosition() {
-      return ((double)spos)/spm;
+      if ((target.part.m == spos) && (abs(spos - round(requestedPosition/spm)) <= spm)) return requestedPosition; else return ((double)spos)/spm;
     }
 
     // sets current position in microns
@@ -113,23 +113,28 @@ class focuser {
       spos=round(pos*spm);
       if (spos < smin) spos=smin; if (spos > smax) spos=smax;
       target.part.m=spos; target.part.f=0;
+      requestedPosition=((double)target.part.m)/spm;
     }
 
     // sets target position in microns
     void setTarget(double pos) {
       target.part.m=round(pos*spm); target.part.f=0;
       if ((long)target.part.m < smin) target.part.m=smin; if ((long)target.part.m > smax) target.part.m=smax;
+      requestedPosition=pos;
     }
 
     // sets target relative position in microns
     void relativeTarget(double pos) {
       target.part.m+=round(pos*spm); target.part.f=0;
       if ((long)target.part.m < smin) target.part.m=smin; if ((long)target.part.m > smax) target.part.m=smax;
+      requestedPosition=((double)target.part.m)/spm;
     }
 
     // do automatic movement
     void move() {
       target.fixed+=delta.fixed;
+      // update requested position
+      if (delta.fixed != 0) requestedPosition=((double)target.part.m)/spm;
       // stop at limits
       if (((long)target.part.m < smin) || ((long)target.part.m > smax)) delta.fixed=0;
     }
@@ -141,8 +146,8 @@ class focuser {
       if (pda && !currentlyDisabled && ((micros()-lastPhysicalMove) > 10000000L)) { disableDriver(); currentlyDisabled=true; }
     
       // write position to non-volatile storage if not moving for FOCUSER_WRITE_DELAY milliseconds
-      if ((spos!=lastPos)) { lastMove=millis(); lastPos=spos; }
-      if (!slewing && (spos!=readPos())) {
+      if ((spos != lastPos)) { lastMove=millis(); lastPos=spos; }
+      if (!slewing && (spos != readPos())) {
         // needs updating and enough time has passed?
         if ((long)(millis()-lastMove) > FOCUSER_WRITE_DELAY) writePos(spos);
       }
@@ -156,14 +161,14 @@ class focuser {
           digitalWrite(stepPin,LOW); delayMicroseconds(5);
           digitalWrite(dirPin,forwardState); delayMicroseconds(5);
           digitalWrite(stepPin,HIGH); spos++;
-          lastPhysicalMove=millis();
+          lastPhysicalMove=micros();
         } else
         if ((spos > (long)target.part.m) && (spos > smin)) {
           if (pda && currentlyDisabled) { enableDriver(); currentlyDisabled=false; delayMicroseconds(5); }
           digitalWrite(stepPin,LOW); delayMicroseconds(5);
           digitalWrite(dirPin,reverseState); delayMicroseconds(5);
           digitalWrite(stepPin,HIGH); spos--;
-          lastPhysicalMove=millis();
+          lastPhysicalMove=micros();
         }
       }
     }
@@ -221,6 +226,7 @@ class focuser {
     fixed_t target;
     long spos=0;
     long lastPos=0;
+    double requestedPosition=0.0;
 
     // automatic movement
     double moveRate=0.0;

@@ -84,13 +84,13 @@ class focuserDC {
     // set movement rate in microns/second
     void setMoveRate(double rate) {
       // a rate of 1000 gives 1mm/second (fastest)
-      moveRate=rate*spm;                                  // in steps per second, for a DC motor a step is 1 micron.
+      moveRate=rate*spm;                                    // in steps per second, for a DC motor a step is 1 micron.
       if (moveRate > spsMax) moveRate=spsMax;               // limit to maxRate
     }
 
     // check if moving
     bool moving() {
-      if ((delta.fixed!=0) || ((long)target.part.m!=spos)) return true; else return false;
+      if ((delta.fixed != 0) || ((long)target.part.m != spos)) return true; else return false;
     }
 
     // move in
@@ -114,7 +114,7 @@ class focuserDC {
 
     // get position
     double getPosition() {
-      return ((double)spos)/spm;
+      if ((target.part.m == spos) && (abs(spos - round(requestedPosition/spm)) <= spm)) return requestedPosition; else return ((double)spos)/spm;
     }
 
     // sets current position in microns
@@ -122,6 +122,7 @@ class focuserDC {
       spos=round(pos*spm);
       if (spos < smin) spos=smin; if (spos > smax) spos=smax;
       target.part.m=spos; target.part.f=0;
+      requestedPosition=((double)target.part.m)/spm;
     }
 
     // sets target position in microns
@@ -129,6 +130,7 @@ class focuserDC {
       dcMotor.setPower((moveRate/1000.0)*powerFor1mmSec);
       target.part.m=round(pos*spm); target.part.f=0;
       if ((long)target.part.m < smin) target.part.m=smin; if ((long)target.part.m > smax) target.part.m=smax;
+      requestedPosition=pos;
     }
 
     // sets target relative position in microns
@@ -136,11 +138,14 @@ class focuserDC {
       dcMotor.setPower((moveRate/1000.0)*powerFor1mmSec);
       target.part.m+=round(pos*spm); target.part.f=0;
       if ((long)target.part.m < smin) target.part.m=smin; if ((long)target.part.m > smax) target.part.m=smax;
+      requestedPosition=((double)target.part.m)/spm;
     }
 
     // do automatic movement
     void move() {
       target.fixed+=delta.fixed;
+      // update requested position
+      if (delta.fixed != 0) requestedPosition=((double)target.part.m)/spm;
       // stop at limits
       if (((long)target.part.m < smin) || ((long)target.part.m > smax)) delta.fixed=0;
     }
@@ -149,8 +154,8 @@ class focuserDC {
     void follow(boolean slewing) {
           
       // write position to non-volatile storage if not moving for FOCUSER_WRITE_DELAY milliseconds
-      if ((spos!=lastPos)) { lastMove=millis(); lastPos=spos; }
-      if (!slewing && (spos!=readPos())) {
+      if ((spos != lastPos)) { lastMove=millis(); lastPos=spos; }
+      if (!slewing && (spos != readPos())) {
         // needs updating and enough time has passed?
         if ((long)(millis()-lastMove) > FOCUSER_WRITE_DELAY) writePos(spos);
       }
@@ -213,6 +218,7 @@ class focuserDC {
     fixed_t target;
     long spos=0;
     long lastPos=0;
+    double requestedPosition=0.0;
 
     // automatic movement
     double moveRate=0.0;
