@@ -17,7 +17,7 @@ class cb {
       }
 
       // ignore spaces/lf/cr
-      if ((c!=(char)32) && (c!=(char)10) && (c!=(char)13) && (c!=(char)6)) {
+      if ((c != (char)32) && (c != (char)10) && (c != (char)13) && (c != (char)6)) {
         if (cbp > bufferSize-2) cbp=bufferSize-2;
         cb[cbp]=c; cbp++; cb[cbp]=(char)0;
       }

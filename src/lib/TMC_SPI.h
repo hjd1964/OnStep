@@ -25,7 +25,7 @@ class tmcSpiDriver {
       data_out=0x00000001UL;
       // set stealthChop bit
       if (stealth_chop) data_out|=0x00000004UL;
-      if (last_GCONF!=data_out) {
+      if (last_GCONF != data_out) {
         last_GCONF=data_out;
         write(REG_GCONF,data_out);
         BBSpi.pause();
@@ -47,7 +47,7 @@ class tmcSpiDriver {
 
       //        IHOLD    + IRUN    + IHOLDDELAY
       data_out=(IHOLD<<0)+(IRUN<<8)+(4UL<<16);
-      if (last_IHOLD_IRUN!=data_out) {
+      if (last_IHOLD_IRUN != data_out) {
         last_IHOLD_IRUN=data_out;
         write(REG_IHOLD_IRUN,data_out);
         BBSpi.pause();
@@ -55,7 +55,7 @@ class tmcSpiDriver {
 
       // TPOWERDOWN, default=127, range 0 to 255 (Delay after standstill for motor current power down, about 0 to 4 seconds)
       data_out=(_tpd_value<<0);
-      if (last_TPOWERDOWN!=data_out) {
+      if (last_TPOWERDOWN != data_out) {
         last_TPOWERDOWN=data_out;
         write(REG_TPOWERDOWN,data_out);
         BBSpi.pause();
@@ -63,7 +63,7 @@ class tmcSpiDriver {
 
       // TPWMTHRS, default=0, range 0 to 2^20 (switchover upper velocity for stealthChop voltage PWM mode)
       data_out=(_tpt_value<<0);
-      if (last_TPWMTHRS!=data_out) {
+      if (last_TPWMTHRS != data_out) {
         last_TPWMTHRS=data_out;
         write(REG_TPWMTHRS,data_out);
         BBSpi.pause();
@@ -71,7 +71,7 @@ class tmcSpiDriver {
 
       // THIGH, default=0, range 0 to 2^20 (switchover rate for vhighfs/vhighchm)
       data_out=(_thigh_value<<0);
-      if (last_THIGH!=data_out) {
+      if (last_THIGH != data_out) {
         last_THIGH=data_out;
         write(REG_THIGH,data_out);
         BBSpi.pause();
@@ -80,7 +80,7 @@ class tmcSpiDriver {
       // PWMCONF
       // default=0x00050480UL;
       data_out    =(_pc_PWM_AMPL<<0)+(_pc_PWM_GRAD<<8)+(_pc_pwm_freq<<16)+(_pc_pwm_auto<<18)+(_pc_pwm_sym<<19)+(_pc_pwm_freewheel<<20);
-      if (last_PWMCONF!=data_out) {
+      if (last_PWMCONF != data_out) {
         last_PWMCONF=data_out;
         write(REG_PWMCONF,data_out);
         BBSpi.pause();
@@ -106,7 +106,7 @@ class tmcSpiDriver {
       uint8_t result=read(REG_GSTAT,&data_out);
 
       BBSpi.end();
-      if ((result&2)!=0) return true; else return false;
+      if ((result&2) != 0) return true; else return false;
     }
 
 // -------------------------------

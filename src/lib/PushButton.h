@@ -15,7 +15,7 @@ class button {
     void poll() {
       int lastState=_state;
       _state=digitalRead(_pin);
-      if (lastState!=_state) { _avgPulseDuration=((_avgPulseDuration*49.0)+(double)(millis()-_stableStartMs))/50.0; _stableStartMs=millis(); }
+      if (lastState != _state) { _avgPulseDuration=((_avgPulseDuration*49.0)+(double)(millis()-_stableStartMs))/50.0; _stableStartMs=millis(); }
       _stableMs=(long)(millis()-_stableStartMs);
       if (_stableMs > 3000UL) { _avgPulseDuration=((_avgPulseDuration*4.0)+2000.0)/5.0; }
       if (_stableMs > _debounceMs) {

@@ -131,7 +131,7 @@ void Library::readVars(char* name, int* code, double* RA, double* Dec)
   int cat = work.libRec.code>>4;
 
   // empty? or not found
-  if ((cat == 15) || (cat!=catalog)) { name[0]=0; *code=0; *RA=0.0; *Dec=0.0; return; }
+  if ((cat == 15) || (cat != catalog)) { name[0]=0; *code=0; *RA=0.0; *Dec=0.0; return; }
 
   for (int l=0; l < 11; l++) name[l]=work.libRec.name[l]; name[11]=0;
   
@@ -179,7 +179,7 @@ boolean Library::firstRec()
   recPos=0;
   work=readRec(recPos);
   int cat=(int)work.libRec.code>>4;
-  if ((work.libRec.name[0]!='$') && (cat == catalog)) return true;
+  if ((work.libRec.name[0] != '$') && (cat == catalog)) return true;
 
   // otherwise find the first one, if it exists
   return nextRec();
@@ -242,7 +242,7 @@ boolean Library::prevRec()
     work=readRec(recPos);
 
     cat=(int)work.libRec.code>>4;
-    if ((work.libRec.name[0]!='$') && (cat == catalog)) break;
+    if ((work.libRec.name[0] != '$') && (cat == catalog)) break;
   } while (recPos >= 0);
   if (recPos < 0) { recPos=0; return false; }
 
@@ -262,7 +262,7 @@ boolean Library::nextRec()
     work=readRec(recPos);
 
     cat=(int)work.libRec.code>>4;
-    if ((work.libRec.name[0]!='$') && (cat == catalog)) break;
+    if ((work.libRec.name[0] != '$') && (cat == catalog)) break;
   } while (recPos < recMax);
   if (recPos >= recMax) { recPos=recMax-1; return false; }
 
@@ -282,7 +282,7 @@ boolean Library::gotoRec(int num)
     work=readRec(l); r=l;
 
     cat=(int)work.libRec.code>>4;
-    if ((work.libRec.name[0]!='$') && (cat == catalog)) c++;
+    if ((work.libRec.name[0] != '$') && (cat == catalog)) c++;
     if (c == num) break;
   }
   if (c == num) { recPos=r; return true; } else return false;
@@ -300,7 +300,7 @@ int Library::recCount()
     work=readRec(l);
 
     cat=(int)work.libRec.code>>4;
-    if ((work.libRec.name[0]!='$') && (cat == catalog)) c++;
+    if ((work.libRec.name[0] != '$') && (cat == catalog)) c++;
   }
   
   return c;

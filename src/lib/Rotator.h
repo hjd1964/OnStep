@@ -14,8 +14,8 @@ class rotator {
       this->maxRate=maxRate;
       this->spd=stepsPerDeg;
 
-      if (stepPin!=-1) pinMode(stepPin,OUTPUT);
-      if (dirPin!=-1) pinMode(dirPin,OUTPUT);
+      if (stepPin != -1) pinMode(stepPin,OUTPUT);
+      if (dirPin != -1) pinMode(dirPin,OUTPUT);
 
       // positions
       target.fixed=0;
@@ -62,7 +62,7 @@ class rotator {
     void setDisableState(boolean disableState) {
       this->disableState=disableState;
       if (disableState == LOW) enableState=HIGH; else enableState=LOW;
-      if (enPin!=-1) { pinMode(enPin,OUTPUT); enableDriver(); currentlyDisabled=false; }
+      if (enPin != -1) { pinMode(enPin,OUTPUT); enableDriver(); currentlyDisabled=false; }
     }
 
     // allows enabling/disabling stepper driver
@@ -121,7 +121,7 @@ class rotator {
     
     // check if moving
     bool moving() {
-      if ((delta.fixed!=0) || ((long)target.part.m!=spos)) return true; else return false;
+      if ((delta.fixed != 0) || ((long)target.part.m != spos)) return true; else return false;
     }
 
     // enable/disable new continuous move mode
@@ -161,7 +161,7 @@ class rotator {
 
     // get position
     double getPosition() {
-      return ((double)spos+0.5)/spd;
+      if ((target.part.m == spos) && (abs(spos - round(requestedPosition*spd)) <= spd)) return requestedPosition; else return ((double)spos)/spd;
     }
 
     // sets current position in degrees
@@ -169,18 +169,22 @@ class rotator {
       spos=round(deg*spd);
       if (spos < smin) spos=smin; if (spos > smax) spos=smax;
       target.part.m=spos; target.part.f=0;
+      requestedPosition=((double)target.part.m)/spd;
     }
 
     // set target
     void setTarget(double deg) {
       target.part.m=deg*spd; target.part.f=0;
       if ((long)target.part.m < smin) target.part.m=smin; if ((long)target.part.m > smax) target.part.m=smax;
+      requestedPosition=deg;
     }
 
     // do de-rotate movement
     void move(boolean tracking) {
       if (DR && tracking) target.fixed+=deltaDR.fixed;
       target.fixed+=delta.fixed;
+      // update requested position
+      if (delta.fixed != 0) requestedPosition=((double)target.part.m)/spd;
       if (((long)target.part.m < smin) || ((long)target.part.m > smax)) { DR=false; delta.fixed=0; deltaDR.fixed=0; }
     }
 
@@ -207,14 +211,14 @@ class rotator {
           digitalWrite(stepPin,LOW); delayMicroseconds(5);
           digitalWrite(dirPin,forwardState); delayMicroseconds(5);
           digitalWrite(stepPin,HIGH); spos++;
-          lastPhysicalMove=millis();
+          lastPhysicalMove=micros();
         } else
         if ((spos > (long)target.part.m) && (spos > smin)) {
           if (pda && currentlyDisabled) { currentlyDisabled=false; enableDriver(); delayMicroseconds(5); }
           digitalWrite(stepPin,LOW); delayMicroseconds(5);
           digitalWrite(dirPin,reverseState); delayMicroseconds(5);
           digitalWrite(stepPin,HIGH); spos--;
-          lastPhysicalMove=millis();
+          lastPhysicalMove=micros();
         }
       }
     }
@@ -294,6 +298,7 @@ class rotator {
     fixed_t target;
     long spos=0;
     long lastPos=0;
+    double requestedPosition=0.0;
 
     // automatic movement
     double moveRate=0.0;

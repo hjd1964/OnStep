@@ -38,7 +38,7 @@ class Mst4 : public Stream
       if (trans(&c,_xmit_buffer[_xmit_head])) {
         // data going out was good?
         if (!_send_error) {
-          if (_xmit_buffer[_xmit_head]!=(char)0) _xmit_head++;
+          if (_xmit_buffer[_xmit_head] != (char)0) _xmit_head++;
         }
         // data coming in was good?
         if (!_recv_error) {
@@ -96,7 +96,7 @@ class Mst4 : public Stream
       digitalWrite(ST4DEn,LOW);                        // send start bit
       delayMicroseconds(XMIT_TIME);
       digitalWrite(ST4DEs,HIGH);                       // clock
-      if (digitalRead(ST4RAw)!=LOW) _frame_error=true; // recv start bit
+      if (digitalRead(ST4RAw) != LOW) _frame_error=true; // recv start bit
       delayMicroseconds(XMIT_TIME);
       if (_frame_error) { lastMicros=micros(); return false; }
 
@@ -117,7 +117,7 @@ class Mst4 : public Stream
       digitalWrite(ST4DEn,s_parity&1);                 // send parity bit
       delayMicroseconds(XMIT_TIME);
       digitalWrite(ST4DEs,HIGH);                       // clock
-      if ((r_parity&1)!=digitalRead(ST4RAw)) _recv_error=true; // recv parity bit
+      if ((r_parity&1) != digitalRead(ST4RAw)) _recv_error=true; // recv parity bit
       delayMicroseconds(XMIT_TIME);
 
       // parity ck bit
@@ -133,7 +133,7 @@ class Mst4 : public Stream
       digitalWrite(ST4DEn,LOW);                        // send
       delayMicroseconds(XMIT_TIME);
       digitalWrite(ST4DEs,HIGH);                       // clock
-      if (digitalRead(ST4RAw)!=LOW) _frame_error=true; // recv stop bit
+      if (digitalRead(ST4RAw) != LOW) _frame_error=true; // recv stop bit
       delayMicroseconds(XMIT_TIME);
 
       lastMicros=micros();
@@ -175,12 +175,12 @@ size_t Mst4::write(const uint8_t *data, size_t quantity) {
 
 int Mst4::available(void) {
   int a=0;
-  for (byte b=_recv_head; _recv_buffer[b]!=(char)0; b++) a++;
+  for (byte b=_recv_head; _recv_buffer[b] != (char)0; b++) a++;
   return a;
 }
 
 int Mst4::read(void) {
-  char c=_recv_buffer[_recv_head]; if (c!=0) _recv_head++;
+  char c=_recv_buffer[_recv_head]; if (c != 0) _recv_head++;
   if (c == 0) c=-1;
   return c;
 }
@@ -198,7 +198,7 @@ void Mst4::flush(void) {
   do {
     poll();
     c=_xmit_buffer[_xmit_head];
-  } while ((c!=0) || ((millis()-startMs) < _timeout));
+  } while ((c != 0) || ((millis()-startMs) < _timeout));
 }
 
 Mst4 SerialST4;
