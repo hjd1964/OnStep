@@ -161,7 +161,7 @@ class rotator {
 
     // get position
     double getPosition() {
-      if ((target.part.m == spos) && (abs(spos - round(requestedPosition*spd)) <= spd)) return requestedPosition; else return ((double)spos)/spd;
+      if (((long)target.part.m == spos) && (abs(spos - round(requestedPosition*spd)) <= spd)) return requestedPosition; else return ((double)spos)/spd;
     }
 
     // sets current position in degrees
@@ -169,12 +169,13 @@ class rotator {
       spos=round(deg*spd);
       if (spos < smin) spos=smin; if (spos > smax) spos=smax;
       target.part.m=spos; target.part.f=0;
-      requestedPosition=((double)target.part.m)/spd;
+      requestedPosition=((long)target.part.m)/spd;
+      lastMove=millis();
     }
 
     // set target
     void setTarget(double deg) {
-      target.part.m=deg*spd; target.part.f=0;
+      target.part.m=(long)(deg*spd); target.part.f=0;
       if ((long)target.part.m < smin) target.part.m=smin; if ((long)target.part.m > smax) target.part.m=smax;
       requestedPosition=deg;
     }
@@ -184,7 +185,7 @@ class rotator {
       if (DR && tracking) target.fixed+=deltaDR.fixed;
       target.fixed+=delta.fixed;
       // update requested position
-      if (delta.fixed != 0) requestedPosition=((double)target.part.m)/spd;
+      if (delta.fixed != 0) requestedPosition=((long)target.part.m)/spd;
       if (((long)target.part.m < smin) || ((long)target.part.m > smax)) { DR=false; delta.fixed=0; deltaDR.fixed=0; }
     }
 

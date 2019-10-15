@@ -22,6 +22,7 @@ class focuser {
     
       spos=readPos();
       target.part.m=spos; target.part.f=0;
+      Serial.print("init target="); Serial.println((long)target.part.m);
       lastPos=spos;
       delta.fixed=0;
 
@@ -105,7 +106,7 @@ class focuser {
 
     // get position
     double getPosition() {
-      if ((target.part.m == spos) && (abs(spos - round(requestedPosition/spm)) <= spm)) return requestedPosition; else return ((double)spos)/spm;
+      if (((long)target.part.m == spos) && (abs(spos - round(requestedPosition*spm)) <= spm)) return requestedPosition; else return ((double)spos)/spm;
     }
 
     // sets current position in microns
@@ -113,28 +114,29 @@ class focuser {
       spos=round(pos*spm);
       if (spos < smin) spos=smin; if (spos > smax) spos=smax;
       target.part.m=spos; target.part.f=0;
-      requestedPosition=((double)target.part.m)/spm;
+      requestedPosition=((long)target.part.m)/spm;
+      lastMove=millis();
     }
 
     // sets target position in microns
     void setTarget(double pos) {
-      target.part.m=round(pos*spm); target.part.f=0;
+      target.part.m=(long)round(pos*spm); target.part.f=0;
       if ((long)target.part.m < smin) target.part.m=smin; if ((long)target.part.m > smax) target.part.m=smax;
       requestedPosition=pos;
     }
 
     // sets target relative position in microns
     void relativeTarget(double pos) {
-      target.part.m+=round(pos*spm); target.part.f=0;
+      target.part.m+=(long)round(pos*spm); target.part.f=0;
       if ((long)target.part.m < smin) target.part.m=smin; if ((long)target.part.m > smax) target.part.m=smax;
-      requestedPosition=((double)target.part.m)/spm;
+      requestedPosition=round(((long)target.part.m)/spm);
     }
 
     // do automatic movement
     void move() {
       target.fixed+=delta.fixed;
       // update requested position
-      if (delta.fixed != 0) requestedPosition=((double)target.part.m)/spm;
+      if (delta.fixed != 0) requestedPosition=((long)target.part.m)/spm;
       // stop at limits
       if (((long)target.part.m < smin) || ((long)target.part.m > smax)) delta.fixed=0;
     }
