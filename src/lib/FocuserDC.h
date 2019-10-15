@@ -123,6 +123,7 @@ class focuserDC {
       if (spos < smin) spos=smin; if (spos > smax) spos=smax;
       target.part.m=spos; target.part.f=0;
       requestedPosition=((long)target.part.m)/spm;
+      lastMove=millis();
     }
 
     // sets target position in microns
