@@ -18,9 +18,6 @@
 #define HAL_SERIAL_B_ENABLED
 
 // SerialC
-// The stock ESP32 Release 1.0.0 BluetoothSerial.h library doesn't work
-// Copy the latest BluetoothSerial library (just its folder) from https://github.com/espressif/arduino-esp32 into
-// C:\Users\xxxxxx\AppData\Local\Arduino15\packages\esp32\hardware\esp32\1.0.0\libraries
 #if SERIAL_C_BAUD_DEFAULT != OFF
   #if SERIAL_C_BAUD_DEFAULT > 0
     #error "Bluetooth on ESP32 SERIAL_C_BAUD_DEFAULT gets set to ON or OFF only."
@@ -31,24 +28,11 @@
   #define HAL_SERIAL_C_BLUETOOTH
   #undef SERIAL_C_BAUD_DEFAULT
   #define SERIAL_C_BAUD_DEFAULT SERIAL_C_BLUETOOTH_NAME
-//  #warning "Bluetooth only works on ESP32 Release 1.0.0 and then only with a corrected BluetoothSerial.h library, see Config.MaxESP2.h!"
 #endif
 
 // New symbol for the default I2C port ---------------------------------------------------------------
-// The stock ESP32 Release 1.0.0 Wire.h library doesn't work
-// Copy the latest Wire.h library file (only) from this directory into
-// C:\Users\xxxxxx\AppData\Local\Arduino15\packages\esp32\hardware\esp32\1.0.0\libraries\Wire\src
 #include <Wire.h>
 #define HAL_Wire Wire
-//#ifndef WIRE_END_SUPPORT
-//#warning "The stock ESP32 Release 1.0.0 Wire.h library doesn't work.  See the above HAL_ESP32.h file for instructions to correct this!"
-//#endif
-
-// Pretend AnalogWrite
-//void analogWrite(int pin, int value) {
-//  if (value==0) digitalWrite(pin,LOW);
-//  if (value==255) digitalWrite(pin,HIGH);
-//}
 
 //--------------------------------------------------------------------------------------------------
 // General purpose initialize for HAL

@@ -59,10 +59,6 @@
 
   #include "HAL_STM32F1/HAL_STM32F1.h"
 
-#elif defined(__SAM3X8E__)
-  // Arduino Due
-  #include "HAL_Due/HAL_Due.h"
-
 #elif defined(ESP32)
   // ESP32
   #include "HAL_ESP32/HAL_ESP32.h"
