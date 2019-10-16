@@ -9,7 +9,7 @@
 class focuser {
   public:
     // init(Axis5StepPin,Axis5DirPin,Axis4_EN,EE_posAxis5,MaxRateAxis5,StepsPerMicrometerAxis5);
-    void init(int stepPin, int dirPin, int enPin, int nvAddress, float maxRate, double stepsPerMicro) {
+    void init(int stepPin, int dirPin, int enPin, int nvAddress, float maxRate, double stepsPerMicro, double min, double max) {
       this->stepPin=stepPin;
       this->dirPin=dirPin;
       this->enPin=enPin;
@@ -21,6 +21,9 @@ class focuser {
       if (dirPin != -1) pinMode(dirPin,OUTPUT);
     
       spos=readPos();
+      // constrain step position
+      long lmin=(long)(min*spm); if (spos<lmin) { spos=lmin; target.part.m=spos; target.part.f=0; }
+      long lmax=(long)(max*spm); if (spos>lmax) { spos=lmax; target.part.m=spos; target.part.f=0; }
       target.part.m=spos; target.part.f=0;
       lastPos=spos;
       delta.fixed=0;
@@ -31,41 +34,23 @@ class focuser {
       setMoveRate(100);
 
       // default min/max
-      setMin(umin);
-      setMax(umax);
+      setMin(lmin);
+      setMax(lmax);
 
       nextPhysicalMove=micros()+(unsigned long)(maxRate*1000.0);
       lastPhysicalMove=nextPhysicalMove;
     }
 
     // get step size in microns
-    double getStepsPerMicro() {
-      return spm;
-    }
+    double getStepsPerMicro() { return spm; }
 
     // minimum position in steps
-    void setMin(long min) {
-      smin=min;
-      if (spos<smin) { spos=smin; target.part.m=spos; target.part.f=0; }
-    }
-    void setMinMicrons(double min) {
-      setMin((long)(min*spm));
-    }
-    long getMin() {
-      return smin;
-    }
+    void setMin(long min) { smin=min; }
+    long getMin() { return smin; }
 
     // maximum position in steps
-    void setMax(long max) {
-      smax=max;
-      if (spos>smax) { spos=smax; target.part.m=spos; target.part.f=0; }
-    }
-    void setMaxMicrons(double max) {
-      setMax((long)(max*spm));
-    }
-    long getMax() {
-      return smax;
-    }
+    void setMax(long max) { smax=max; }
+    long getMax() { return smax; }
 
     // sets logic state for reverse motion
     void setReverseState(int reverseState) {
@@ -248,9 +233,7 @@ class focuser {
     int nvAddress=-1;
     float maxRate=-1;
     long spsMax=-1;
-    long umin=0;
     long smin=0;
-    long umax=1000;
     long smax=1000;
 
     // state

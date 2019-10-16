@@ -245,9 +245,7 @@ void setup() {
 
   // start rotator if present
 #if ROTATOR == ON
-  rot.init(Axis3StepPin,Axis3DirPin,Axis3_EN,AXIS3_STEP_RATE_MAX,AXIS3_STEPS_PER_DEGREE);
-  rot.setMin(AXIS3_LIMIT_MIN);
-  rot.setMax(AXIS3_LIMIT_MAX);
+  rot.init(Axis3StepPin,Axis3DirPin,Axis3_EN,AXIS3_STEP_RATE_MAX,AXIS3_STEPS_PER_DEGREE,AXIS3_LIMIT_MIN,AXIS3_LIMIT_MAX);
   #if AXIS3_DRIVER_REVERSE == ON
     rot.setReverseState(HIGH);
   #endif
@@ -268,10 +266,8 @@ void setup() {
 
   // start focusers if present
 #if FOCUSER1 == ON
-  foc1.init(Axis4StepPin,Axis4DirPin,Axis4_EN,EE_posAxis4,AXIS4_STEP_RATE_MAX,AXIS4_STEPS_PER_MICRON);
+  foc1.init(Axis4StepPin,Axis4DirPin,Axis4_EN,EE_posAxis4,AXIS4_STEP_RATE_MAX,AXIS4_STEPS_PER_MICRON,AXIS4_LIMIT_MIN*1000.0,AXIS4_LIMIT_MAX*1000.0);
   { double f = nv.readFloat(EE_tcfCoef1); if (abs(f) >= 10000.0) f = 0.0; foc1.setTcfCoef(f); }
-  foc1.setMinMicrons(AXIS4_LIMIT_MIN*1000.0);
-  foc1.setMaxMicrons(AXIS4_LIMIT_MAX*1000.0);
   #if AXIS4_DRIVER_DC_MODE != OFF
     foc1.setDcPower(dcPwrAxis4);
     foc1.setPhase1();
@@ -295,10 +291,8 @@ void setup() {
 #endif
 
 #if FOCUSER2 == ON
-  foc2.init(Axis5StepPin,Axis5DirPin,Axis5_EN,EE_posAxis5,AXIS5_STEP_RATE_MAX,AXIS5_STEPS_PER_MICRON);
+  foc2.init(Axis5StepPin,Axis5DirPin,Axis5_EN,EE_posAxis5,AXIS5_STEP_RATE_MAX,AXIS5_STEPS_PER_MICRON,AXIS5_LIMIT_MIN*1000.0,AXIS5_LIMIT_MAX*1000.0);
   { double f = nv.readFloat(EE_tcfCoef2); if (abs(f) >= 10000.0) f = 0.0; foc2.setTcfCoef(f); }
-  foc2.setMinMicrons(AXIS5_LIMIT_MIN*1000.0);
-  foc2.setMaxMicrons(AXIS5_LIMIT_MAX*1000.0);
   #if AXIS5_DRIVER_DC_MODE == DRV8825
     foc2.setDcPower(dcPwrAxis5);
     foc2.setPhase2();

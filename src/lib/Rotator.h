@@ -7,7 +7,7 @@
 
 class rotator {
   public:
-    void init(int stepPin, int dirPin, int enPin, float maxRate, double stepsPerDeg) {
+    void init(int stepPin, int dirPin, int enPin, float maxRate, double stepsPerDeg, double min, double max) {
       this->stepPin=stepPin;
       this->dirPin=dirPin;
       this->enPin=enPin;
@@ -29,28 +29,20 @@ class rotator {
       setMoveRate(1.0);
 
       // default min/max
-      setMin(umin);
-      setMax(umax);
+      setMin(min);
+      setMax(max);
 
       nextPhysicalMove=micros()+(unsigned long)(maxRate*1000.0);
       lastPhysicalMove=nextPhysicalMove;
     }
 
     // minimum position in degrees
-    void setMin(double min) {
-      smin=(min*spd);
-    }
-    double getMin() {
-      return smin/spd;
-    }
+    void setMin(double min) { smin=(min*spd); }
+    double getMin() { return smin/spd; }
 
     // maximum position in degrees
-    void setMax(double max) {
-      smax=(max*spd);
-    }
-    double getMax() {
-      return smax/spd;
-    }
+    void setMax(double max) { smax=(max*spd); }
+    double getMax() { return smax/spd; }
 
     // sets logic state for reverse motion
     void setReverseState(int reverseState) {
@@ -270,9 +262,7 @@ class rotator {
     int nvAddress=-1;
     float maxRate=-1;
     long spsMax=-1;
-    long umin=-180;
     long smin=-1;
-    long umax=+180;
     long smax=-1;
 
     // state

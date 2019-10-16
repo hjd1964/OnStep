@@ -11,7 +11,7 @@
 class focuserDC {
   public:
     // init(Axis5StepPin,Axis5DirPin,Axis4_EN,EE_posAxis5,MaxRateAxis5,StepsPerMicrometerAxis5);
-    void init(int stepPin, int dirPin, int enPin, int nvAddress, long maxRate, double stepsPerMicro) {
+    void init(int stepPin, int dirPin, int enPin, int nvAddress, long maxRate, double stepsPerMicro, double min, double max) {
 
       // init only happens once, on the first call and is ignored otherwise
       dcMotor.init(stepPin,dirPin,enPin,maxRate);
@@ -21,6 +21,9 @@ class focuserDC {
       this->spm=stepsPerMicro;
     
       spos=readPos();
+      // constrain step position
+      long lmin=(long)(min*spm); if (spos<lmin) { spos=lmin; target.part.m=spos; target.part.f=0; }
+      long lmax=(long)(max*spm); if (spos>lmax) { spos=lmax; target.part.m=spos; target.part.f=0; }
       target.part.m=spos; target.part.f=0;
       lastPos=spos;
       delta.fixed=0;
@@ -31,8 +34,8 @@ class focuserDC {
       setMoveRate(500);
 
       // default min/max
-      setMin(umin);
-      setMax(umax);
+      setMin(lmin);
+      setMax(lmax);
 
       nextPhysicalMove=millis()+(unsigned long)maxRate;
       lastPhysicalMove=nextPhysicalMove;
@@ -50,33 +53,15 @@ class focuserDC {
     }
 
     // get step size in microns
-    double getStepsPerMicro() {
-      return spm;
-    }
+    double getStepsPerMicro() { return spm; }
 
     // minimum position in steps
-    void setMin(long min) {
-      smin=min;
-      if (spos<smin) { spos=smin; target.part.m=spos; target.part.f=0; }
-    }
-    void setMinMicrons(double min) {
-      setMin((long)(min*spm));
-    }
-    long getMin() {
-      return smin;
-    }
+    void setMin(long min) { smin=min; }
+    long getMin() { return smin; }
 
     // maximum position in steps
-    void setMax(long max) {
-      smax=max;
-      if (spos>smax) { spos=smax; target.part.m=spos; target.part.f=0; }
-    }
-    void setMaxMicrons(double max) {
-      setMax((long)(max*spm));
-    }
-    long getMax() {
-      return smax;
-    }
+    void setMax(long max) { smax=max; }
+    long getMax() { return smax; }
 
     // sets logic state for reverse motion
     void setReverseState(int reverseState) {
