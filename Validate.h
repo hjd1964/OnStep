@@ -502,13 +502,13 @@
   #endif
 
   // initialize custom stepper driver values
-  #include "src/step_dir_drivers/Init.TMC2100.h"
-  #include "src/step_dir_drivers/Init.TMC2130.h"
-  #include "src/step_dir_drivers/Init.TMC2209.h"
-  #include "src/step_dir_drivers/Init.TMC5160.h"
-  #include "src/step_dir_drivers/Init.TMC_SPI.h"
-  #include "src/step_dir_drivers/Init.GENERIC.h"
-  #include "src/step_dir_drivers/Init.SERVO.h"
+  #include "src/sd_drivers/Init.TMC2100.h"
+  #include "src/sd_drivers/Init.TMC2130.h"
+  #include "src/sd_drivers/Init.TMC2209.h"
+  #include "src/sd_drivers/Init.TMC5160.h"
+  #include "src/sd_drivers/Init.TMC_SPI.h"
+  #include "src/sd_drivers/Init.GENERIC.h"
+  #include "src/sd_drivers/Init.SERVO.h"
 
   // check to see if a valid stepper driver code exists
   #if (AXIS1_DRIVER_MODEL < DRIVER_MODEL_FIRST) || (AXIS1_DRIVER_MODEL > DRIVER_MODEL_LAST)
@@ -528,18 +528,18 @@
   #endif
 
   // validate stepper driver setup
-  #include "src/step_dir_drivers/Validate.A4988.h"
-  #include "src/step_dir_drivers/Validate.DRV8825.h"
-  #include "src/step_dir_drivers/Validate.RAPS128.h"
-  #include "src/step_dir_drivers/Validate.LV8729.h"
-  #include "src/step_dir_drivers/Validate.S109.h"
-  #include "src/step_dir_drivers/Validate.ST820.h"
-  #include "src/step_dir_drivers/Validate.TMC2100.h"
-  #include "src/step_dir_drivers/Validate.TMC2208.h"
-  #include "src/step_dir_drivers/Validate.TMC2209.h"
-  #include "src/step_dir_drivers/Validate.TMC_SPI.h"
-  #include "src/step_dir_drivers/Validate.GENERIC.h"
-  #include "src/step_dir_drivers/Validate.SERVO.h"
+  #include "src/sd_drivers/Validate.A4988.h"
+  #include "src/sd_drivers/Validate.DRV8825.h"
+  #include "src/sd_drivers/Validate.RAPS128.h"
+  #include "src/sd_drivers/Validate.LV8729.h"
+  #include "src/sd_drivers/Validate.S109.h"
+  #include "src/sd_drivers/Validate.ST820.h"
+  #include "src/sd_drivers/Validate.TMC2100.h"
+  #include "src/sd_drivers/Validate.TMC2208.h"
+  #include "src/sd_drivers/Validate.TMC2209.h"
+  #include "src/sd_drivers/Validate.TMC_SPI.h"
+  #include "src/sd_drivers/Validate.GENERIC.h"
+  #include "src/sd_drivers/Validate.SERVO.h"
 
   // for stepper drivers where AXISn_MICROSTEPS_GOTO must be defined
   #if MODE_SWITCH_BEFORE_SLEW != OFF
