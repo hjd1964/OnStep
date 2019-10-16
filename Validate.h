@@ -501,7 +501,7 @@
     #endif
   #endif
 
-  // initialize custom stepper driver values
+  // initialize custom step dir driver values
   #include "src/sd_drivers/Init.TMC2100.h"
   #include "src/sd_drivers/Init.TMC2130.h"
   #include "src/sd_drivers/Init.TMC2209.h"
@@ -510,7 +510,7 @@
   #include "src/sd_drivers/Init.GENERIC.h"
   #include "src/sd_drivers/Init.SERVO.h"
 
-  // check to see if a valid stepper driver code exists
+  // check to see if a valid step dir driver code exists
   #if (AXIS1_DRIVER_MODEL < DRIVER_MODEL_FIRST) || (AXIS1_DRIVER_MODEL > DRIVER_MODEL_LAST)
     #error "Configuration (Config.h): AXIS1_DRIVER_MODEL unknown stepper driver specified."
   #endif
@@ -527,7 +527,7 @@
     #error "Configuration (Config.h): AXIS5_DRIVER_MODEL unknown stepper driver specified."
   #endif
 
-  // validate stepper driver setup
+  // validate step dir driver setup
   #include "src/sd_drivers/Validate.A4988.h"
   #include "src/sd_drivers/Validate.DRV8825.h"
   #include "src/sd_drivers/Validate.RAPS128.h"
