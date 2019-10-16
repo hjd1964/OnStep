@@ -307,12 +307,12 @@ void SmartHandController::menuFocuser1()
     switch (current_selection_L2)
     {
     case 1:
-      DisplayMessageLX200(SetLX200(":FA1#:FS0#"),false);
+      DisplayMessageLX200(SetLX200(":FA1#:Fh#"),false);
       break;
     case 2:
       bool isOk=false;
-      if (display->UserInterfaceInputValueBoolean(&buttonPad, "At Home/Zero?", &isOk)) {
-        if (isOk) { DisplayMessageLX200(SetLX200(":FA1#:FZ#"),false); }
+      if (display->UserInterfaceInputValueBoolean(&buttonPad, "At Half Trvl?", &isOk)) {
+        if (isOk) { DisplayMessageLX200(SetLX200(":FA1#:FH#"),false); }
       }
       break;
     }
@@ -329,12 +329,12 @@ void SmartHandController::menuFocuser2()
     switch (current_selection_L2)
     {
     case 1:
-      DisplayMessageLX200(SetLX200(":FA2#:FS0#"),false);
+      DisplayMessageLX200(SetLX200(":FA2#:Fh#"),false);
     break;
     case 2:
       bool isOk=false;
-      if (display->UserInterfaceInputValueBoolean(&buttonPad, "At Home/Zero?", &isOk)) {
-        if (isOk) { DisplayMessageLX200(SetLX200(":FA2#:FZ#"),false); }
+      if (display->UserInterfaceInputValueBoolean(&buttonPad, "At Half Trvl?", &isOk)) {
+        if (isOk) { DisplayMessageLX200(SetLX200(":FA2#:FH#"),false); }
       }
     break;
     }

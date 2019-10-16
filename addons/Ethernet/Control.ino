@@ -149,7 +149,7 @@ const char html_controlFocus2[] PROGMEM =
 "<button class='bbh' type='button' onpointerdown=\"gf('F2')\" title='Select Focuser 2'>2</button>&nbsp;&nbsp;&nbsp;&nbsp;";
 const char html_controlFocus3[] PROGMEM =
 "<button class='bbh' type='button' onpointerdown=\"gf('Fh')\" title='Find Focuser Home'>" ARROW_DR HOME_CH "</button>"
-"<button class='bbh' type='button' onpointerdown=\"gf('Fz')\" title='Home (Reset) Focuser'>" CAUTION_CH HOME_CH "</button>&nbsp;&nbsp;&nbsp;&nbsp;";
+"<button class='bbh' type='button' onpointerdown=\"gf('FH')\" title='Home (Reset) Focuser'>" CAUTION_CH HOME_CH "</button>&nbsp;&nbsp;&nbsp;&nbsp;";
 const char html_controlFocus4[] PROGMEM =
 "<button class='bbh' type='button' onpointerdown=\"gf('FI')\" onpointerup=\"g('Fq');\" >" ARROW_DD "</button>"
 "<button class='bbh' type='button' style='width: 2em' onpointerdown=\"gf('Fi')\" onpointerup=\"g('Fq')\" >" ARROW_D "</button>";
@@ -648,8 +648,8 @@ void processControlGet() {
     // Focuser
     if (v=="F1") { Ser.print(":FA1#"); temp[Ser.readBytesUntil('#',temp,20)]=0; }
     if (v=="F2") { Ser.print(":FA2#"); temp[Ser.readBytesUntil('#',temp,20)]=0; }
-    if (v=="Fz") Ser.print(":FZ#");
-    if (v=="Fh") Ser.print(":FS0#");
+    if (v=="FH") Ser.print(":FH#");
+    if (v=="Fh") Ser.print(":Fh#");
     if (v=="FI") Ser.print(":FF#:F-#");
     if (v=="Fi") Ser.print(":FS#:F-#");
     if (v=="Fo") Ser.print(":FS#:F+#");
