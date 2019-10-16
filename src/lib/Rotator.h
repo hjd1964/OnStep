@@ -283,7 +283,6 @@ class rotator {
     boolean mc=false;
     int reverseState=LOW;
     int forwardState=HIGH;
-    static int lastDirState=-1;
     boolean pda=false;
     int disableState=LOW;
     int enableState=HIGH;

@@ -22,7 +22,6 @@ class focuser {
     
       spos=readPos();
       target.part.m=spos; target.part.f=0;
-      Serial.print("init target="); Serial.println((long)target.part.m);
       lastPos=spos;
       delta.fixed=0;
 
