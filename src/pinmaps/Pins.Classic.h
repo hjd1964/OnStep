@@ -73,6 +73,10 @@
 #define Axis5DirPin   A12   // Pin A12 (Dir)
 #define Axis5StepPin  A13   // Pin A13 (Step)
 
+#define Axis3_EN      -1
+#define Axis4_EN      -1
+#define Axis5_EN      -1
+
 // ST4 interface
 #ifdef ST4_ALTERNATE_PINS_ON
 #define ST4RAw        47    // Pin 47 ST4 RA- West
@@ -151,6 +155,10 @@
 // For focuser2 stepper driver
 #define Axis5DirPin   33    // Pin 33 (Dir)
 #define Axis5StepPin  30    // Pin 30 (Step)
+
+#define Axis3_EN      -1
+#define Axis4_EN      -1
+#define Axis5_EN      -1
 
 // ST4 interface
 #define ST4RAw        24    // Pin 24 ST4 RA- West
