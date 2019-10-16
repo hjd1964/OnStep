@@ -349,22 +349,34 @@ void processCommands() {
       if (command[1] == 'Q') { foc1.stopMove(); quietReply=true; } else
 //  :FG#   Get focuser current position (in microns)
 //         Returns: snnn#
-      if (command[1] == 'G') { sprintf(reply,"%ld",(long)round(foc1.getPosition())); quietReply=true; } else
-//  :FI#  Get full in position (in microns)
+      if (command[1] == 'G') { sprintf(reply,"%ld",(long)round(foc1.getPositionMicrons())); quietReply=true; } else
+//  :Fg#   Get focuser current position (in steps)
+//         Returns: snnn#
+      if (command[1] == 'g') { sprintf(reply,"%ld",foc1.getPosition()); quietReply=true; } else
+//  :FI#   Get full in position (in steps)
 //         Returns: n#
-        if (command[1] == 'I') { sprintf(reply,"%ld",(long)round(foc1.getMin())); quietReply=true; } else
-//  :FM#  Get max position (in microns)
+        if (command[1] == 'I') { sprintf(reply,"%ld",foc1.getMin()); quietReply=true; } else
+//  :FM#   Get max position (in steps)
 //         Returns: n#
-        if (command[1] == 'M') { sprintf(reply,"%ld",(long)round(foc1.getMax())); quietReply=true; } else
-//  :FT#  get status
+        if (command[1] == 'M') { sprintf(reply,"%ld",foc1.getMax()); quietReply=true; } else
+//  :Fm#   Get focuser microns per step
+//         Returns: n.n#
+      if (command[1] == 'm') { dtostrf(1.0/foc1.getStepsPerMicro(),7,5,reply); quietReply=true;  } else
+//  :FT#   Get status
 //         Returns: M# (for moving) or S# (for stopped)
         if (command[1] == 'T') { if (foc1.moving()) strcpy(reply,"M"); else strcpy(reply,"S"); quietReply=true; } else
+//  :Ft#   Get focuser temperature
+//         Returns: n# temperature in deg. C
+        if (command[1] == 't') { dtostrf(ambient.getTelescopeTemperature(),3,1,reply); quietReply=true; } else
 //  :FZ#   Set focuser position as zero
 //         Returns: Nothing
       if (command[1] == 'Z') { foc1.setPosition(0); quietReply=true; } else
 //  :FH#   Set focuser position as half-travel
 //         Returns: Nothing
-      if (command[1] == 'H') { foc1.setPosition(((AXIS4_LIMIT_MAX+AXIS4_LIMIT_MIN)/2.0)*1000.0); quietReply=true; } else
+      if (command[1] == 'H') { foc1.setPositionMicrons(((AXIS4_LIMIT_MAX+AXIS4_LIMIT_MIN)/2.0)*1000.0); quietReply=true; } else
+//  :Fh#   Set focuser target position at half-travel
+//         Returns: Nothing
+      if (command[1] == 'h') { foc1.setTargetMicrons(((AXIS4_LIMIT_MAX+AXIS4_LIMIT_MIN)/2.0)*1000.0); quietReply=true; } else
 //  :FF#   Set focuser for fast motion (1mm/s)
 //         Returns: Nothing
       if (command[1] == 'F') { foc1.setMoveRate(1000); quietReply=true; } else
@@ -391,12 +403,12 @@ void processCommands() {
       commandError=true;
 #endif
       } else 
-//  :FRsnnn#  Set focuser target position relative (in microns)
+//  :FRsnnn#  Set focuser target position relative (in steps)
 //            Returns: Nothing
       if (command[1] == 'R') { foc1.relativeTarget(atol(parameter)); quietReply=true; } else
 //  :FS#      Set focuser for slow motion (0.01mm/s)
 //            Returns: Nothing
-//  :FSsnnn#  Set focuser target position (in microns)
+//  :FSnnn#   Set focuser target position (in steps)
 //            Return: 0 on failure
 //                    1 on success
       if (command[1] == 'S') { if (parameter[0] == 0) { foc1.setMoveRate(constrain(1,AXIS4_LIMIT_MIN_RATE,1000)); quietReply=true; } else foc1.setTarget(atol(parameter)); } else
@@ -431,22 +443,34 @@ void processCommands() {
       if (command[1] == 'Q') { foc2.stopMove(); quietReply=true; } else
 //  :fG#   Get focuser current position (in microns)
 //         Returns: snnn#
-      if (command[1] == 'G') { sprintf(reply,"%ld",(long)round(foc2.getPosition())); quietReply=true; } else
-//  :fI#  Get full in position (in microns)
+      if (command[1] == 'G') { sprintf(reply,"%ld",(long)round(foc2.getPositionMicrons())); quietReply=true; } else
+//  :fg#   Get focuser current position (in steps)
+//         Returns: snnn#
+      if (command[1] == 'g') { sprintf(reply,"%ld",foc2.getPosition()); quietReply=true; } else
+//  :fI#   Get full in position (in steps)
 //         Returns: n#
-        if (command[1] == 'I') { sprintf(reply,"%ld",(long)round(foc2.getMin())); quietReply=true; } else
-//  :fM#  Get max position (in microns)
+        if (command[1] == 'I') { sprintf(reply,"%ld",foc2.getMin()); quietReply=true; } else
+//  :fM#   Get max position (in steps)
 //         Returns: n#
-        if (command[1] == 'M') { sprintf(reply,"%ld",(long)round(foc2.getMax())); quietReply=true; } else
-//  :fT#  get status
+        if (command[1] == 'M') { sprintf(reply,"%ld",foc2.getMax()); quietReply=true; } else
+//  :fm#   Get focuser microns per step
+//         Returns: n.n#
+      if (command[1] == 'm') { dtostrf(1.0/foc2.getStepsPerMicro(),7,5,reply); quietReply=true;  } else
+//  :fT#   Get status
 //         Returns: M# (for moving) or S# (for stopped)
         if (command[1] == 'T') { if (foc2.moving()) strcpy(reply,"M"); else strcpy(reply,"S"); quietReply=true; } else
+//  :ft#   Get focuser temperature
+//         Returns: n# temperature in deg. C
+        if (command[1] == 't') { dtostrf(ambient.getTelescopeTemperature(),3,1,reply); quietReply=true; } else
 //  :fZ#   Set focuser position as zero
 //         Returns: Nothing
       if (command[1] == 'Z') { foc2.setPosition(0); quietReply=true; } else
 //  :fH#   Set focuser position as half-travel
 //         Returns: Nothing
-      if (command[1] == 'H') { foc2.setPosition(((AXIS5_LIMIT_MAX+AXIS5_LIMIT_MIN)/2.0)*1000.0); quietReply=true; } else
+      if (command[1] == 'H') { foc2.setPositionMicrons(((AXIS5_LIMIT_MAX+AXIS5_LIMIT_MIN)/2.0)*1000.0); quietReply=true; } else
+//  :Fh#   Set focuser target position at half-travel
+//         Returns: Nothing
+      if (command[1] == 'h') { foc2.setTargetMicrons(((AXIS5_LIMIT_MAX+AXIS5_LIMIT_MIN)/2.0)*1000.0); quietReply=true; } else
 //  :fF#   Set focuser for fast motion (1mm/s)
 //         Returns: Nothing
       if (command[1] == 'F') { foc2.setMoveRate(1000); quietReply=true; } else
@@ -478,7 +502,7 @@ void processCommands() {
       if (command[1] == 'R') { foc2.relativeTarget(atol(parameter)); quietReply=true; } else
 //  :fS#      Set focuser for slow motion (0.01mm/s)
 //            Returns: Nothing
-//  :fSsnnn#  Set focuser target position (in microns)
+//  :fSsnnn#  Set focuser target position (in steps)
 //            Return: 0 on failure
 //                    1 on success
       if (command[1] == 'S') { if (parameter[0] == 0) { foc2.setMoveRate(constrain(1,AXIS5_LIMIT_MIN_RATE,1000)); quietReply=true; } else foc2.setTarget(atol(parameter)); } else

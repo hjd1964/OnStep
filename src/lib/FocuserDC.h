@@ -49,22 +49,31 @@ class focuserDC {
       phase1=false;
     }
 
-    // setMin(MinAxis5)
-    // minimum position in microns
-    void setMin(double min) {
-      smin=(min*spm);
-    }
-    double getMin() {
-      return smin/spm;
+    // get step size in microns
+    double getStepsPerMicro() {
+      return spm;
     }
 
-    // setMax(MaxAxis5)
-    // maximum position in microns
-    void setMax(double max) {
-      smax=(max*spm);
+    // minimum position in steps
+    void setMin(long min) {
+      smin=min;
     }
-    double getMax() {
-      return smax/spm;
+    void setMinMicrons(double min) {
+      smin=(long)(min*spm);
+    }
+    long getMin() {
+      return smin;
+    }
+
+    // maximum position in steps
+    void setMax(long max) {
+      smax=max;
+    }
+    void setMaxMicrons(double max) {
+      smax=(long)(max*spm);
+    }
+    long getMax() {
+      return smax;
     }
 
     // sets logic state for reverse motion
@@ -112,41 +121,51 @@ class focuserDC {
       target.part.m=spos; target.part.f=0;
     }
 
-    // get position
-    double getPosition() {
-      if (((long)target.part.m == spos) && (abs(spos - round(requestedPosition/spm)) <= spm)) return requestedPosition; else return ((double)spos)/spm;
+    // get position in steps
+    long getPosition() {
+      return spos;
     }
 
-    // sets current position in microns
-    void setPosition(double pos) {
-      spos=round(pos*spm);
+    // get position in microns
+    double getPositionMicrons() {
+      return ((double)getPosition())/spm;
+    }
+
+    // sets current position in steps
+    void setPosition(long pos) {
+      spos=pos;
       if (spos < smin) spos=smin; if (spos > smax) spos=smax;
       target.part.m=spos; target.part.f=0;
-      requestedPosition=((long)target.part.m)/spm;
       lastMove=millis();
     }
 
-    // sets target position in microns
-    void setTarget(double pos) {
-      dcMotor.setPower((moveRate/1000.0)*powerFor1mmSec);
-      target.part.m=(long)round(pos*spm); target.part.f=0;
-      if ((long)target.part.m < smin) target.part.m=smin; if ((long)target.part.m > smax) target.part.m=smax;
-      requestedPosition=pos;
+    // sets current position in microns
+    void setPositionMicrons(double pos) {
+      setPosition(pos*spm);
     }
 
-    // sets target relative position in microns
-    void relativeTarget(double pos) {
+    // sets target position in steps
+    void setTarget(long pos) {
       dcMotor.setPower((moveRate/1000.0)*powerFor1mmSec);
-      target.part.m+=(long)round(pos*spm); target.part.f=0;
+      target.part.m=pos; target.part.f=0;
       if ((long)target.part.m < smin) target.part.m=smin; if ((long)target.part.m > smax) target.part.m=smax;
-      requestedPosition=((long)target.part.m)/spm;
+    }
+
+    // sets target position in microns
+    void setTargetMicrons(double pos) {
+      setPosition(pos*spm);
+    }
+
+    // sets target relative position in steps
+    void relativeTarget(long pos) {
+      dcMotor.setPower((moveRate/1000.0)*powerFor1mmSec);
+      target.part.m+=pos; target.part.f=0;
+      if ((long)target.part.m < smin) target.part.m=smin; if ((long)target.part.m > smax) target.part.m=smax;
     }
 
     // do automatic movement
     void move() {
       target.fixed+=delta.fixed;
-      // update requested position
-      if (delta.fixed != 0) requestedPosition=((long)target.part.m)/spm;
       // stop at limits
       if (((long)target.part.m < smin) || ((long)target.part.m > smax)) delta.fixed=0;
     }
@@ -219,7 +238,6 @@ class focuserDC {
     fixed_t target;
     long spos=0;
     long lastPos=0;
-    double requestedPosition=0.0;
 
     // automatic movement
     double moveRate=0.0;

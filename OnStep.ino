@@ -269,8 +269,8 @@ void setup() {
   // start focusers if present
 #if FOCUSER1 == ON
   foc1.init(Axis4StepPin,Axis4DirPin,Axis4_EN,EE_posAxis4,AXIS4_STEP_RATE_MAX,AXIS4_STEPS_PER_MICRON);
-  foc1.setMin(AXIS4_LIMIT_MIN*1000.0);
-  foc1.setMax(AXIS4_LIMIT_MAX*1000.0);
+  foc1.setMinMicrons(AXIS4_LIMIT_MIN*1000.0);
+  foc1.setMaxMicrons(AXIS4_LIMIT_MAX*1000.0);
   #if AXIS4_DRIVER_DC_MODE != OFF
     foc1.setDcPower(dcPwrAxis4);
     foc1.setPhase1();
@@ -295,8 +295,8 @@ void setup() {
 
 #if FOCUSER2 == ON
   foc2.init(Axis5StepPin,Axis5DirPin,Axis5_EN,EE_posAxis5,AXIS5_STEP_RATE_MAX,AXIS5_STEPS_PER_MICRON);
-  foc2.setMin(AXIS5_LIMIT_MIN*1000.0);
-  foc2.setMax(AXIS5_LIMIT_MAX*1000.0);
+  foc2.setMinMicrons(AXIS5_LIMIT_MIN*1000.0);
+  foc2.setMaxMicrons(AXIS5_LIMIT_MAX*1000.0);
   #if AXIS5_DRIVER_DC_MODE == DRV8825
     foc2.setDcPower(dcPwrAxis5);
     foc2.setPhase2();

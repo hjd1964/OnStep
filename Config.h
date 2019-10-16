@@ -173,8 +173,8 @@
 #define AXIS4_DRIVER_DC_MODE          OFF //    OFF, ON for pwm dc motor control on DRV8825 stepper driver outputs.           Option
 
 #define AXIS4_LIMIT_MIN_RATE           10 //     10, n. Where n=1..1000 (um/s.) Minimum microns/second. In DC mode, min pwr.  Adjust
-#define AXIS4_LIMIT_MIN               -25 //    -25, n. Where n=-300..300 (millimeters.) Minimum allowed position.            Infreq
-#define AXIS4_LIMIT_MAX                25 //     25, n. Where n=-300..300 (millimeters.) Maximum allowed position.            Infreq
+#define AXIS4_LIMIT_MIN                 0 //      0, n. Where n=0..500 (millimeters.) Minimum allowed position.               Adjust
+#define AXIS4_LIMIT_MAX                50 //     50, n. Where n=0..500 (millimeters.) Maximum allowed position.               Adjust
 
 // AXIS5 FOCUSER 2 ----------------------
 #define FOCUSER2                      OFF //    OFF, ON to enable this focuser.                                               Option
@@ -190,8 +190,8 @@
 #define AXIS5_DRIVER_DC_MODE          OFF //    OFF, ON for pwm dc motor control on DRV8825 stepper driver outputs.           Option
 
 #define AXIS5_LIMIT_MIN_RATE           10 //     10, n. Where n=1..1000 (um/s.) Minimum microns/second. In DC mode, min pwr.  Adjust
-#define AXIS5_LIMIT_MIN               -25 //    -25, n. Where n=-300..300 (millimeters.) Minimum allowed position.            Infreq
-#define AXIS5_LIMIT_MAX                25 //     25, n. Where n=-300..300 (millimeters.) Maximum allowed position.            Infreq
+#define AXIS5_LIMIT_MIN                 0 //      0, n. Where n=0..500 (millimeters.) Minimum allowed position.               Adjust
+#define AXIS5_LIMIT_MAX                50 //     50, n. Where n=0..500 (millimeters.) Maximum allowed position.               Adjust
 
 // THAT'S IT FOR USER CONFIGURATION!
 
