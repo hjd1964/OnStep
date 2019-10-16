@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------------
-// Support for real time clocks (RTC wrapper)
+// Real time clock support
 
 #pragma once
 #include "Julian.h"
