@@ -397,7 +397,8 @@ void processCommands() {
 //  :FS#      Set focuser for slow motion (0.01mm/s)
 //            Returns: Nothing
 //  :FSsnnn#  Set focuser target position (in microns)
-//            Returns: Nothing
+//            Return: 0 on failure
+//                    1 on success
       if (command[1] == 'S') { if (parameter[0] == 0) { foc1.setMoveRate(constrain(1,AXIS4_LIMIT_MIN_RATE,1000)); quietReply=true; } else foc1.setTarget(atol(parameter)); } else
 //  :Fn#   Movement rate, 1=finest, 2=0.01mm/second, 3=0.1mm/second, 4=1mm/second
 //         Returns: Nothing
@@ -478,7 +479,8 @@ void processCommands() {
 //  :fS#      Set focuser for slow motion (0.01mm/s)
 //            Returns: Nothing
 //  :fSsnnn#  Set focuser target position (in microns)
-//            Returns: Nothing
+//            Return: 0 on failure
+//                    1 on success
       if (command[1] == 'S') { if (parameter[0] == 0) { foc2.setMoveRate(constrain(1,AXIS5_LIMIT_MIN_RATE,1000)); quietReply=true; } else foc2.setTarget(atol(parameter)); } else
 //  :fn#   Movement rate, 1=finest, 2=0.01mm/second, 3=0.1mm/second, 4=1mm/second
 //         Returns: Nothing
