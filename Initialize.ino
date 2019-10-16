@@ -457,6 +457,9 @@ void initWriteNvValues() {
 #if AXIS5_DRIVER_DC_MODE != OFF
     nv.write(EE_dcPwrAxis5,50);
 #endif
+    // clear focuser TCF values
+    nv.writeFloat(EE_tcfCoef1,0.0);
+    nv.writeFloat(EE_tcfCoef2,0.0);
 
     // clear the library/catalogs
     Lib.clearAll();

@@ -86,6 +86,16 @@ class focuserDC {
       dcMotor.setDisableState(disableState);
     }
 
+    // sets/enables temperature compensation
+    void setTcfCoef(double coef) {
+      // not supported
+    }
+
+    // gets temperature compensation coefficient
+    double getTcfCoef() {
+      return 0;
+    }
+
     // allows enabling/disabling stepper driver
     void powerDownActive(boolean active) {
     }
@@ -223,10 +233,10 @@ class focuserDC {
     int nvAddress=-1;
     long maxRate=-1;
     long spsMax=-1;
-    long umin=-6L*25400L;
-    long smin=-1;
-    long umax=+6L*25400L;
-    long smax=-1;
+    long umin=0;
+    long smin=0;
+    long umax=1000;
+    long smax=1000;
     bool reverse=false;
     bool phase1=true;
 

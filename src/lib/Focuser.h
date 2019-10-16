@@ -78,6 +78,18 @@ class focuser {
       if (enPin != -1) { pinMode(enPin,OUTPUT); enableDriver(); currentlyDisabled=false; }
     }
 
+    // sets/enables temperature compensation
+    void setTcfCoef(double coef) {
+      tcf = !(abs(coef) < 0.0000001);
+      if (!tcf) coef = 0.0;
+      tcf_coef = coef;
+    }
+
+    // gets temperature compensation coefficient
+    double getTcfCoef() {
+      return tcf_coef;
+    }
+
     // allows enabling/disabling stepper driver
     void powerDownActive(boolean active) {
       if (enPin == -1) { pda=false; return; }
@@ -172,18 +184,26 @@ class focuser {
         if ((long)(millis()-lastMove) > FOCUSER_WRITE_DELAY) writePos(spos);
       }
 
+      // temperature compensation
+      long tcfSteps;
+      if (tcf) {
+        tcfSteps = -round((tcf_coef * (ambient.getTelescopeTemperature() - 10.0)) * spm);
+      } else {
+        tcfSteps = 0;
+      }
+
       unsigned long microsNow=micros();
       if ((long)(microsNow-nextPhysicalMove) > 0) {
         nextPhysicalMove=microsNow+(unsigned long)(maxRate*1000.0);
     
-        if ((spos < (long)target.part.m) && (spos < smax)) {
+        if ((spos < (long)target.part.m + tcfSteps) && (spos < smax)) {
           if (pda && currentlyDisabled) { enableDriver(); currentlyDisabled=false; delayMicroseconds(5); }
           digitalWrite(stepPin,LOW); delayMicroseconds(5);
           digitalWrite(dirPin,forwardState); delayMicroseconds(5);
           digitalWrite(stepPin,HIGH); spos++;
           lastPhysicalMove=micros();
         } else
-        if ((spos > (long)target.part.m) && (spos > smin)) {
+        if ((spos > (long)target.part.m + tcfSteps) && (spos > smin)) {
           if (pda && currentlyDisabled) { enableDriver(); currentlyDisabled=false; delayMicroseconds(5); }
           digitalWrite(stepPin,LOW); delayMicroseconds(5);
           digitalWrite(dirPin,reverseState); delayMicroseconds(5);
@@ -226,21 +246,23 @@ class focuser {
     int nvAddress=-1;
     float maxRate=-1;
     long spsMax=-1;
-    long umin=-6L*25400L;
-    long smin=-1;
-    long umax=+6L*25400L;
-    long smax=-1;
+    long umin=0;
+    long smin=0;
+    long umax=1000;
+    long smax=1000;
 
     // state
     int reverseState=LOW;
     int forwardState=HIGH;
-    boolean pda=false;
+    bool pda=false;
+    bool tcf=false;
     int disableState=LOW;
     int enableState=HIGH;
     bool currentlyDisabled=true;
 
     // conversion
     double spm=1.0;
+    double tcf_coef=0.0;
 
     // position
     fixed_t target;

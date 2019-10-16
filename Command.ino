@@ -368,6 +368,13 @@ void processCommands() {
 //  :Ft#   Get focuser temperature
 //         Returns: n# temperature in deg. C
         if (command[1] == 't') { dtostrf(ambient.getTelescopeTemperature(),3,1,reply); quietReply=true; } else
+//  :FCn.n#  Set focuser temperature compensation coefficient in um per deg. C (+ moves out as temperature falls,) use 0.0 to disable.
+//            Return: 0 on failure
+//                    1 on success
+        if (command[1] == 'C') { f = atof(parameter); if (abs(f) < 10000.0) foc1.setTcfCoef(f); else { f = 0.0; foc1.setTcfCoef(f); commandError=true; } nv.writeFloat(EE_tcfCoef1,f); } else
+//  :Fc#  Get focuser temperature compensation coefficient
+//            Return: n.n#
+        if (command[1] == 'c') { dtostrf(foc1.getTcfCoef(),7,5,reply); quietReply=true; } else
 //  :FZ#   Set focuser position as zero
 //         Returns: Nothing
       if (command[1] == 'Z') { foc1.setPosition(0); quietReply=true; } else
@@ -462,6 +469,13 @@ void processCommands() {
 //  :ft#   Get focuser temperature
 //         Returns: n# temperature in deg. C
         if (command[1] == 't') { dtostrf(ambient.getTelescopeTemperature(),3,1,reply); quietReply=true; } else
+//  :fCn.n#  Set focuser temperature compensation coefficient in um per deg. C (+ moves out as temperature falls,) use 0.0 to disable.
+//            Return: 0 on failure
+//                    1 on success
+        if (command[1] == 'C') { f = atof(parameter); if (abs(f) < 10000.0) foc2.setTcfCoef(f); else { f = 0.0; foc2.setTcfCoef(f); commandError=true; } nv.writeFloat(EE_tcfCoef2,f); } else
+//  :fc#  Get focuser temperature compensation coefficient
+//            Return: n.n#
+        if (command[1] == 'c') { dtostrf(foc2.getTcfCoef(),7,5,reply); quietReply=true; } else
 //  :fZ#   Set focuser position as zero
 //         Returns: Nothing
       if (command[1] == 'Z') { foc2.setPosition(0); quietReply=true; } else

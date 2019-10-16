@@ -269,6 +269,7 @@ void setup() {
   // start focusers if present
 #if FOCUSER1 == ON
   foc1.init(Axis4StepPin,Axis4DirPin,Axis4_EN,EE_posAxis4,AXIS4_STEP_RATE_MAX,AXIS4_STEPS_PER_MICRON);
+  { double f = nv.readFloat(EE_tcfCoef1); if (abs(f) >= 10000.0) f = 0.0; foc1.setTcfCoef(f); }
   foc1.setMinMicrons(AXIS4_LIMIT_MIN*1000.0);
   foc1.setMaxMicrons(AXIS4_LIMIT_MAX*1000.0);
   #if AXIS4_DRIVER_DC_MODE != OFF
@@ -295,6 +296,7 @@ void setup() {
 
 #if FOCUSER2 == ON
   foc2.init(Axis5StepPin,Axis5DirPin,Axis5_EN,EE_posAxis5,AXIS5_STEP_RATE_MAX,AXIS5_STEPS_PER_MICRON);
+  { double f = nv.readFloat(EE_tcfCoef2); if (abs(f) >= 10000.0) f = 0.0; foc2.setTcfCoef(f); }
   foc2.setMinMicrons(AXIS5_LIMIT_MIN*1000.0);
   foc2.setMaxMicrons(AXIS5_LIMIT_MAX*1000.0);
   #if AXIS5_DRIVER_DC_MODE == DRV8825
