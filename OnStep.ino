@@ -56,8 +56,6 @@
 #include "src/HAL/HAL.h"
 #include "Validate.h"
 
-#include "src/lib/St4SerialMaster.h"
-
 // Enable debugging messages on DebugSer -------------------------------------------------------------
 #define DEBUG_OFF             // default=_OFF, use "DEBUG_ON" to activate
 #define DebugSer SerialA      // default=SerialA, or SerialB for example (always 9600 baud)
@@ -77,43 +75,19 @@
 
 // ---------------------------------------------------------------------------------------------------
 
+#include "src/lib/St4SerialMaster.h"
 #include "src/lib/FPoint.h"
 #include "Globals.h"
-
-#include "src/lib/SoftSPI.h"
 #include "src/lib/Julian.h"
 #include "src/lib/Misc.h"
 #include "src/lib/Sound.h"
-
-#if MODE_SWITCH_BEFORE_SLEW == TMC_SPI
-  #include "src/lib/TMC_SPI.h"
-  #if AXIS1_DRIVER_STATUS == TMC_SPI
-//                        SS      ,SCK     ,MISO    ,MOSI
-    tmcSpiDriver tmcAxis1(Axis1_M2,Axis1_M1,Axis1_M3,Axis1_M0);
-  #else
-    tmcSpiDriver tmcAxis1(Axis1_M2,Axis1_M1,      -1,Axis1_M0);
-  #endif
-  #if AXIS2_DRIVER_STATUS == TMC_SPI
-    tmcSpiDriver tmcAxis2(Axis2_M2,Axis2_M1,Axis2_M3,Axis2_M0);
-  #else
-    tmcSpiDriver tmcAxis2(Axis2_M2,Axis2_M1,      -1,Axis2_M0);
-  #endif
-  #if ROTATOR == ON && AXIS3_DRIVER_MODEL == TMC_SPI
-    tmcSpiDriver tmcAxis3(Axis3_M2,Axis3_M1,      -1,Axis3_M0);
-  #endif
-  #if FOCUSER1 == ON && AXIS4_DRIVER_MODEL == TMC_SPI
-    tmcSpiDriver tmcAxis4(Axis4_M2,Axis4_M1,      -1,Axis4_M0);
-  #endif
-  #if FOCUSER2 == ON && AXIS5_DRIVER_MODEL == TMC_SPI
-    tmcSpiDriver tmcAxis5(Axis5_M2,Axis5_M1,      -1,Axis5_M0);
-  #endif
-#endif
-
 #include "src/lib/Coord.h"
-
+#include "Align.h"
 #include "src/lib/Library.h"
 #include "src/lib/Command.h"
-#include "Align.h"
+#include "src/lib/RTC.h"
+#include "src/lib/Weather.h"
+weather ambient;
 
 #if ROTATOR == ON
   #include "src/lib/Rotator.h"
@@ -141,9 +115,31 @@
   #endif
 #endif
 
-// use weather sensors (temperature, pressure, humidity) if present
-#include "src/lib/Weather.h"
-weather ambient;
+// support for TMC2130, TMC5160, etc. stepper drivers in SPI mode
+#if MODE_SWITCH_BEFORE_SLEW == TMC_SPI
+  #include "src/lib/SoftSPI.h"
+  #include "src/lib/TMC_SPI.h"
+  #if AXIS1_DRIVER_STATUS == TMC_SPI
+//                        SS      ,SCK     ,MISO    ,MOSI
+    tmcSpiDriver tmcAxis1(Axis1_M2,Axis1_M1,Axis1_M3,Axis1_M0);
+  #else
+    tmcSpiDriver tmcAxis1(Axis1_M2,Axis1_M1,      -1,Axis1_M0);
+  #endif
+  #if AXIS2_DRIVER_STATUS == TMC_SPI
+    tmcSpiDriver tmcAxis2(Axis2_M2,Axis2_M1,Axis2_M3,Axis2_M0);
+  #else
+    tmcSpiDriver tmcAxis2(Axis2_M2,Axis2_M1,      -1,Axis2_M0);
+  #endif
+  #if ROTATOR == ON && AXIS3_DRIVER_MODEL == TMC_SPI
+    tmcSpiDriver tmcAxis3(Axis3_M2,Axis3_M1,      -1,Axis3_M0);
+  #endif
+  #if FOCUSER1 == ON && AXIS4_DRIVER_MODEL == TMC_SPI
+    tmcSpiDriver tmcAxis4(Axis4_M2,Axis4_M1,      -1,Axis4_M0);
+  #endif
+  #if FOCUSER2 == ON && AXIS5_DRIVER_MODEL == TMC_SPI
+    tmcSpiDriver tmcAxis5(Axis5_M2,Axis5_M1,      -1,Axis5_M0);
+  #endif
+#endif
 
 // Forces initialialization of a host of settings in nv. OnStep does this automatically,
 // most likely, you will want to leave this alone
