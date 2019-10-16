@@ -46,9 +46,10 @@ class focuser {
     // minimum position in steps
     void setMin(long min) {
       smin=min;
+      if (spos<smin) { spos=smin; target.part.m=spos; target.part.f=0; }
     }
     void setMinMicrons(double min) {
-      smin=(long)(min*spm);
+      setMin((long)(min*spm));
     }
     long getMin() {
       return smin;
@@ -57,9 +58,10 @@ class focuser {
     // maximum position in steps
     void setMax(long max) {
       smax=max;
+      if (spos>smax) { spos=smax; target.part.m=spos; target.part.f=0; }
     }
     void setMaxMicrons(double max) {
-      smax=(long)(max*spm);
+      setMax((long)(max*spm));
     }
     long getMax() {
       return smax;
