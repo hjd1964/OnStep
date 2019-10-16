@@ -14,17 +14,17 @@ class tmcSpiDriver {
     // ----------------------------------------------------------------------------------------------------------------------
     // TMC setup most common settings
     // 256x interpolation:   intpol
-    // stealth chop on/off:  stealth_chop
+    // decay mode:           decay_mode (STEALTHCHOP or SPREADCYCLE)
     // microstepping mode:   micro_step_mode (0=256x, 1=128x, 2=64x, 3=32x, 4=16x, 5=8x, 6=4x, 7=2x, 8=1x)
     // irun, ihold, rsense:  current in mA and sense resistor value
-    void setup(bool intpol, bool stealth_chop, byte micro_step_mode, int irun, int ihold, float rsense) {
+    void setup(bool intpol, int decay_mode, byte micro_step_mode, int irun, int ihold, float rsense) {
       BBSpi.begin(_cs,_sck,_miso,_mosi);
       uint32_t data_out=0;
-    
+
       // voltage on AIN is current reference
       data_out=0x00000001UL;
       // set stealthChop bit
-      if (stealth_chop) data_out|=0x00000004UL;
+      if (decay_mode == STEALTHCHOP) data_out |= 0x00000004UL;
       if (last_GCONF != data_out) {
         last_GCONF=data_out;
         write(REG_GCONF,data_out);
@@ -56,7 +56,7 @@ class tmcSpiDriver {
       // TPOWERDOWN, default=127, range 0 to 255 (Delay after standstill for motor current power down, about 0 to 4 seconds)
       data_out=(_tpd_value<<0);
       if (last_TPOWERDOWN != data_out) {
-        last_TPOWERDOWN=data_out;
+        last_TPOWERDOWN = data_out;
         write(REG_TPOWERDOWN,data_out);
         BBSpi.pause();
       }
@@ -64,7 +64,7 @@ class tmcSpiDriver {
       // TPWMTHRS, default=0, range 0 to 2^20 (switchover upper velocity for stealthChop voltage PWM mode)
       data_out=(_tpt_value<<0);
       if (last_TPWMTHRS != data_out) {
-        last_TPWMTHRS=data_out;
+        last_TPWMTHRS = data_out;
         write(REG_TPWMTHRS,data_out);
         BBSpi.pause();
       }
@@ -72,7 +72,7 @@ class tmcSpiDriver {
       // THIGH, default=0, range 0 to 2^20 (switchover rate for vhighfs/vhighchm)
       data_out=(_thigh_value<<0);
       if (last_THIGH != data_out) {
-        last_THIGH=data_out;
+        last_THIGH = data_out;
         write(REG_THIGH,data_out);
         BBSpi.pause();
       }
@@ -81,7 +81,7 @@ class tmcSpiDriver {
       // default=0x00050480UL;
       data_out    =(_pc_PWM_AMPL<<0)+(_pc_PWM_GRAD<<8)+(_pc_pwm_freq<<16)+(_pc_pwm_auto<<18)+(_pc_pwm_sym<<19)+(_pc_pwm_freewheel<<20);
       if (last_PWMCONF != data_out) {
-        last_PWMCONF=data_out;
+        last_PWMCONF = data_out;
         write(REG_PWMCONF,data_out);
         BBSpi.pause();
       }
@@ -90,9 +90,9 @@ class tmcSpiDriver {
       // native 256 microsteps, mres=0, tbl=1=24, toff=8 ( data_out=0x00008008UL; )
       data_out=(_cc_toff<<0)+(_cc_hstart<<4)+(_cc_hend<<7)+(_cc_rndtf<<13)+(_cc_tbl<<15)+(_cc_vsense<<17)+(_cc_vhighfs<<18)+(_cc_vhighchm<<19);
       // set the interpolation bit
-      if (intpol) data_out|=1UL<<28;
+      if (intpol) data_out |= 1UL<<28;
       // set the micro-step mode bits
-      data_out|=((uint32_t)micro_step_mode)<<24;
+      data_out |= ((uint32_t)micro_step_mode)<<24;
       write(REG_CHOPCONF,data_out);
 
       BBSpi.end();
@@ -112,36 +112,36 @@ class tmcSpiDriver {
 // -------------------------------
 // CHOPCONF settings
 
-    bool set_CHOPCONF_toff(int v)     { if ((v >= 2) && (v <= 15)) { _cc_toff=v; return true; } return false; }
-    bool set_CHOPCONF_hstart(int v)   { if ((v >= 0) && (v <= 7))  { _cc_hstart=v; return true; } return false; }
-    bool set_CHOPCONF_hend(int v)     { if ((v >= 0) && (v <= 15)) { _cc_hend=v; return true; } return false; }
-    bool set_CHOPCONF_rndtf(int v)    { if ((v >= 0) && (v <= 1))  { _cc_rndtf=v; return true; } return false; }
-    bool set_CHOPCONF_tbl(int v)      { if ((v >= 0) && (v <= 3))  { _cc_tbl=v; return true; } return false; }
-    bool set_CHOPCONF_vsense(int v)   { if ((v >= 0) && (v <= 1))  { _cc_vsense=v; return true; } return false; }
-    bool set_CHOPCONF_vhighfs(int v)  { if ((v >= 0) && (v <= 1))  { _cc_vhighfs=v; return true; } return false; }
-    bool set_CHOPCONF_vhignchm(int v) { if ((v >= 0) && (v <= 1))  { _cc_vhighchm=v; return true; } return false; }
+    bool set_CHOPCONF_toff(int v)     { if ((v >= 2) && (v <= 15)) { _cc_toff    = v; return true; } return false; }
+    bool set_CHOPCONF_hstart(int v)   { if ((v >= 0) && (v <= 7))  { _cc_hstart  = v; return true; } return false; }
+    bool set_CHOPCONF_hend(int v)     { if ((v >= 0) && (v <= 15)) { _cc_hend    = v; return true; } return false; }
+    bool set_CHOPCONF_rndtf(int v)    { if ((v >= 0) && (v <= 1))  { _cc_rndtf   = v; return true; } return false; }
+    bool set_CHOPCONF_tbl(int v)      { if ((v >= 0) && (v <= 3))  { _cc_tbl     = v; return true; } return false; }
+    bool set_CHOPCONF_vsense(int v)   { if ((v >= 0) && (v <= 1))  { _cc_vsense  = v; return true; } return false; }
+    bool set_CHOPCONF_vhighfs(int v)  { if ((v >= 0) && (v <= 1))  { _cc_vhighfs = v; return true; } return false; }
+    bool set_CHOPCONF_vhignchm(int v) { if ((v >= 0) && (v <= 1))  { _cc_vhighchm= v; return true; } return false; }
 
 // -------------------------------
 // TPOWERDOWN setting
-    bool set_TPOWERDOWN_value(int v)  { if ((v >= 0) && (v <= 255)) { _tpd_value=v; return true; } return false; }
+    bool set_TPOWERDOWN_value(int v)  { if ((v >= 0) && (v <= 255)) { _tpd_value = v; return true; } return false; }
 
 // -------------------------------
 // TPWMTHRS setting
-    bool set_TPWMTHRS_value(int v)    { if ((v >= 0) && (v <= 1048575)) { _tpt_value=v; return true; } return false; }
+    bool set_TPWMTHRS_value(int v)    { if ((v >= 0) && (v <= 1048575)) { _tpt_value = v; return true; } return false; }
 
 // -------------------------------
 // THIGH setting
-    bool set_THIGH_value(int v)       { if ((v >= 0) && (v <= 1048575)) { _thigh_value=v; return true; } return false; }
+    bool set_THIGH_value(int v)       { if ((v >= 0) && (v <= 1048575)) { _thigh_value = v; return true; } return false; }
 
 // -------------------------------
 // PWMCONF settings
 
-    bool set_PWMCONF_PWM_AMPL(int v) { if ((v >= 0) && (v <= 255)) { _pc_PWM_AMPL=v; return true; } return false; }
-    bool set_PWMCONF_PWM_GRAD(int v) { if ((v >= 0) && (v <= 255)) { _pc_PWM_GRAD=v; return true; } return false; }
-    bool set_PWMCONF_pwm_freq(int v) { if ((v >= 0) && (v <= 3))   { _pc_pwm_freq=v; return true; } return false; }
-    bool set_PWMCONF_pwm_auto(int v) { if ((v >= 0) && (v <= 1))   { _pc_pwm_auto=v; return true; } return false; }
-    bool set_PWMCONF_pwm_sym(int v)  { if ((v >= 0) && (v <= 1))   { _pc_pwm_sym=v; return true; } return false; }
-    bool set_PWMCONF_pwm_freewheel(int v) { if ((v >= 0) && (v <= 1)) { _pc_pwm_freewheel=v; return true; } return false; }
+    bool set_PWMCONF_PWM_AMPL(int v) { if ((v >= 0) && (v <= 255))    { _pc_PWM_AMPL     = v; return true; } return false; }
+    bool set_PWMCONF_PWM_GRAD(int v) { if ((v >= 0) && (v <= 255))    { _pc_PWM_GRAD     = v; return true; } return false; }
+    bool set_PWMCONF_pwm_freq(int v) { if ((v >= 0) && (v <= 3))      { _pc_pwm_freq     = v; return true; } return false; }
+    bool set_PWMCONF_pwm_auto(int v) { if ((v >= 0) && (v <= 1))      { _pc_pwm_auto     = v; return true; } return false; }
+    bool set_PWMCONF_pwm_sym(int v)  { if ((v >= 0) && (v <= 1))      { _pc_pwm_sym      = v; return true; } return false; }
+    bool set_PWMCONF_pwm_freewheel(int v) { if ((v >= 0) && (v <= 1)) { _pc_pwm_freewheel= v; return true; } return false; }
     
 // ----------------------------------------------------------------------------------------------------------------------
 // DRVSTATUS
@@ -198,13 +198,13 @@ class tmcSpiDriver {
       return true;
     }
 
-    bool set_COOLCONF_semin(int v)  { if ((v >= 0) && (v <= 15))   { _ccf_semin=v; return true; } return false; }
-    bool set_COOLCONF_seup(int v)   { if ((v >= 0) && (v <= 3))    { _ccf_seup=v; return true; } return false; }
-    bool set_COOLCONF_semax(int v)  { if ((v >= 0) && (v <= 15))   { _ccf_semax=v; return true; } return false; }
-    bool set_COOLCONF_sedn(int v)   { if ((v >= 0) && (v <= 3))    { _ccf_sedn=v; return true; } return false; }
+    bool set_COOLCONF_semin(int v)  { if ((v >= 0) && (v <= 15))   { _ccf_semin =v; return true; } return false; }
+    bool set_COOLCONF_seup(int v)   { if ((v >= 0) && (v <= 3))    { _ccf_seup  =v; return true; } return false; }
+    bool set_COOLCONF_semax(int v)  { if ((v >= 0) && (v <= 15))   { _ccf_semax =v; return true; } return false; }
+    bool set_COOLCONF_sedn(int v)   { if ((v >= 0) && (v <= 3))    { _ccf_sedn  =v; return true; } return false; }
     bool set_COOLCONF_seimin(int v) { if ((v >= 0) && (v <= 1))    { _ccf_seimin=v; return true; } return false; }
     bool set_COOLCONF_sgt(int v)    { if ((v >= -64) && (v <= 63)) { _ccf_sgt=v+64; return true; } return false; }
-    bool set_COOLCONF_sfilt(int v)  { if ((v >= 0) && (v <= 1))    { _ccf_sfilt=v; return true; } return false; }
+    bool set_COOLCONF_sfilt(int v)  { if ((v >= 0) && (v <= 1))    { _ccf_sfilt =v; return true; } return false; }
 
   private:
     uint8_t write(byte Address, uint32_t data_out)
@@ -244,38 +244,38 @@ class tmcSpiDriver {
     const static uint8_t REG_PWMCONF    = 0x70;
 
 // keep track of what registers need to be updated
-    unsigned long last_GCONF = 0;
+    unsigned long last_GCONF      = 0;
     unsigned long last_IHOLD_IRUN = 0;
     unsigned long last_TPOWERDOWN = 0;
-    unsigned long last_TPWMTHRS = 0;
-    unsigned long last_THIGH = 0;
-    unsigned long last_PWMCONF = 0;
+    unsigned long last_TPWMTHRS   = 0;
+    unsigned long last_THIGH      = 0;
+    unsigned long last_PWMCONF    = 0;
 
 // CHOPCONF settings
-    unsigned long _cc_toff=4UL;        // default=4,  range 2 to 15 (Off time setting, slow decay phase)
-    unsigned long _cc_hstart=0UL;      // default=0,  range 0 to 7  (Hysteresis start 1, 2, ..., 8)
-    unsigned long _cc_hend=0UL;        // default=0,  range 0 to 15 (Hysteresis -3, -2, -1, 0, 1 ..., 12)
-    unsigned long _cc_rndtf=0UL;       // default=0,  range 0 to 1  (Enables small random value to be added to TOFF)
-    unsigned long _cc_tbl=1UL;         // default=1,  range 0 to 3  (for 6, 24, 36 or 54 clocks)
-    unsigned long _cc_vsense=0UL;      // default=0,  range 0 to 1  (0 for high sensitivity, 1 for low sensitivity @ 50% current setting)
-    unsigned long _cc_vhighfs=0UL;     // default=0,  range 0 to 1  (Enables switch to full-step when VHIGH (THIGH?) is exceeded)
-    unsigned long _cc_vhighchm=0UL;    // default=0,  range 0 to 1  (Enables switch to fast-decay mode VHIGH (THIGH?) is exceeded)
+    unsigned long _cc_toff      = 4UL; // default=4,  range 2 to 15 (Off time setting, slow decay phase)
+    unsigned long _cc_hstart    = 0UL; // default=0,  range 0 to 7  (Hysteresis start 1, 2, ..., 8)
+    unsigned long _cc_hend      = 0UL; // default=0,  range 0 to 15 (Hysteresis -3, -2, -1, 0, 1 ..., 12)
+    unsigned long _cc_rndtf     = 0UL; // default=0,  range 0 to 1  (Enables small random value to be added to TOFF)
+    unsigned long _cc_tbl       = 1UL; // default=1,  range 0 to 3  (for 6, 24, 36 or 54 clocks)
+    unsigned long _cc_vsense    = 0UL; // default=0,  range 0 to 1  (0 for high sensitivity, 1 for low sensitivity @ 50% current setting)
+    unsigned long _cc_vhighfs   = 0UL; // default=0,  range 0 to 1  (Enables switch to full-step when VHIGH (THIGH?) is exceeded)
+    unsigned long _cc_vhighchm  = 0UL; // default=0,  range 0 to 1  (Enables switch to fast-decay mode VHIGH (THIGH?) is exceeded)
 
 // TPOWERDOWN settings
-    unsigned long _tpd_value=128;      // default=127,range 0 to 255 (Delay after standstill for motor current power down, about 0 to 4 seconds)
+    unsigned long _tpd_value    = 128; // default=127,range 0 to 255 (Delay after standstill for motor current power down, about 0 to 4 seconds)
 
 // TPWMTHRS settings
-    unsigned long _tpt_value=0;        // default=0,  range 0 to 2^20 (Switchover upper velocity for stealthChop voltage PWM mode)
+    unsigned long _tpt_value      = 0; // default=0,  range 0 to 2^20 (Switchover upper velocity for stealthChop voltage PWM mode)
 
 // THIGH settings
-    unsigned long _thigh_value=0;      // default=0,  range 0 to 2^20 (Switchover rate for vhighfs/vhighchm)
+    unsigned long _thigh_value    = 0; // default=0,  range 0 to 2^20 (Switchover rate for vhighfs/vhighchm)
 
 // PWMCONF settings
-    unsigned long _pc_PWM_AMPL=0;      // default=0,  range 0 to 255 (PWM amplitude or switch back amplitude if pwm_auto=1)
-    unsigned long _pc_PWM_GRAD=0;      // default=0,  range 0 to 255 (PWM gradient)
-    unsigned long _pc_pwm_freq=0;      // default=0,  range 0 to 3   (PWM frequency 0: fpwm=2/1024 fclk, 1: fpwm=2/683 fclk, 2: fpwm=2/512 fclk, 3: fpwm=2/410 fclk)
-    unsigned long _pc_pwm_auto=0;      // default=0,  range 0 to 1   (PWM automatic current control)
-    unsigned long _pc_pwm_sym=0;       // default=0,  range 0 to 1   (PWM symmetric 0: value may change during cycle, 1: enforce)
+    unsigned long _pc_PWM_AMPL    = 0; // default=0,  range 0 to 255 (PWM amplitude or switch back amplitude if pwm_auto=1)
+    unsigned long _pc_PWM_GRAD    = 0; // default=0,  range 0 to 255 (PWM gradient)
+    unsigned long _pc_pwm_freq    = 0; // default=0,  range 0 to 3   (PWM frequency 0: fpwm=2/1024 fclk, 1: fpwm=2/683 fclk, 2: fpwm=2/512 fclk, 3: fpwm=2/410 fclk)
+    unsigned long _pc_pwm_auto    = 0; // default=0,  range 0 to 1   (PWM automatic current control)
+    unsigned long _pc_pwm_sym     = 0; // default=0,  range 0 to 1   (PWM symmetric 0: value may change during cycle, 1: enforce)
     unsigned long _pc_pwm_freewheel=0; // default=0,  range 0 to 1   (PWM freewheel 0: normal, 1: freewheel, 2:LS short, 3: HS short)
 
 // DRVSTATUS settings
@@ -293,11 +293,11 @@ class tmcSpiDriver {
     int _SG_RESULT = 0;
 
 // COOLCONF settings
-    unsigned long _ccf_semin=0UL;      // default=0, range 0 to 15  (Minimum stallGuard2 value for smart current control and smart current enable)
-    unsigned long _ccf_seup=0UL;       // default=0, range 0 to 3   (Current up step width)
-    unsigned long _ccf_semax=0UL;      // default=0, range 0 to 15  (stallGuard2 hysteresis value for smart current control)
-    unsigned long _ccf_sedn=0UL;       // default=0, range 0 to 3   (Current down step speed)
-    unsigned long _ccf_seimin=0UL;     // default=0, range 0 to 1   (Minimum current for scc)
-    unsigned long _ccf_sgt=0UL;        // default=0, range 0 to 127 (stallGuard2 hysteresis value -64 to 63)
-    unsigned long _ccf_sfilt=0UL;      // default=0, range 0 to 1   (stallGuard2 filter enable)
+    unsigned long _ccf_semin    = 0UL; // default=0, range 0 to 15  (Minimum stallGuard2 value for smart current control and smart current enable)
+    unsigned long _ccf_seup     = 0UL; // default=0, range 0 to 3   (Current up step width)
+    unsigned long _ccf_semax    = 0UL; // default=0, range 0 to 15  (stallGuard2 hysteresis value for smart current control)
+    unsigned long _ccf_sedn     = 0UL; // default=0, range 0 to 3   (Current down step speed)
+    unsigned long _ccf_seimin   = 0UL; // default=0, range 0 to 1   (Minimum current for scc)
+    unsigned long _ccf_sgt      = 0UL; // default=0, range 0 to 127 (stallGuard2 hysteresis value -64 to 63)
+    unsigned long _ccf_sfilt    = 0UL; // default=0, range 0 to 1   (stallGuard2 filter enable)
 };
