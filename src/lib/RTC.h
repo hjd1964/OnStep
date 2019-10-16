@@ -2,7 +2,7 @@
 // Support for real time clocks (RTC wrapper)
 
 #pragma once
-#include "../../lib/Julian.h"
+#include "Julian.h"
 
 #if RTC == DS3234S
 // -----------------------------------------------------------------------------------

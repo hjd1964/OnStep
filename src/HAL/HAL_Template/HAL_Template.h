@@ -26,9 +26,6 @@
   #include "../drivers/NV_EEPROM.h"
 #endif
 
-// Use an RTC (Real Time Clock) if present -----------------------------------------------------------
-#include "../drivers/RTCw.h"
-
 //--------------------------------------------------------------------------------------------------
 // General purpose initialize for HAL
 void HAL_Init(void) {

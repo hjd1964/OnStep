@@ -65,9 +65,6 @@
   #include "../drivers/NV_I2C_EEPROM_AT24C32_C.h"
 #endif
 
-// Use an RTC (Real Time Clock) if present -----------------------------------------------------------
-#include "../drivers/RTCw.h"
-
 //--------------------------------------------------------------------------------------------------
 // General purpose initialize for HAL
 

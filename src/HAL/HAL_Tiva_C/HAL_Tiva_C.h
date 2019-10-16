@@ -39,9 +39,6 @@
   #endif
 #endif
 
-// Use an RTC (Real Time Clock) if present -----------------------------------------------------------
-#include "../drivers/RTCw.h"
-
 // Interrupts
 #define cli() noInterrupts()
 #define sei() interrupts()

@@ -107,9 +107,6 @@ void timerAlarmsDisable() { timerAlarmDisable(itimer1); timerAlarmDisable(itimer
   #include "../drivers/NV_EEPROM_ESP.h"
 #endif
 
-// Use an RTC (Real Time Clock) if present -----------------------------------------------------------
-#include "../drivers/RTCw.h"
-
 //--------------------------------------------------------------------------------------------------
 // Initialize timers
 
