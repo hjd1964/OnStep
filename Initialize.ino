@@ -357,14 +357,6 @@ void initReadNvValues() {
   setGuideRate(GuideRateDefault);
   enableGuideRate(GuideRateDefault);
 
-  // for DC focusers read in the % power
-#if AXIS4_DRIVER_DC_MODE != OFF
-  dcPwrAxis4=nv.read(EE_dcPwrAxis4);
-#endif
-#if AXIS5_DRIVER_DC_MODE != OFF
-  dcPwrAxis5=nv.read(EE_dcPwrAxis5);
-#endif
-
 }
 
 // the polar home position
@@ -451,15 +443,13 @@ void initWriteNvValues() {
     nv.writeLong(EE_posAxis4,0L);
     nv.writeLong(EE_posAxis5,0L);
     // for DC focusers read in the % power
-#if AXIS4_DRIVER_DC_MODE != OFF
     nv.write(EE_dcPwrAxis4,50);
-#endif
-#if AXIS5_DRIVER_DC_MODE != OFF
     nv.write(EE_dcPwrAxis5,50);
-#endif
     // clear focuser TCF values
-    nv.writeFloat(EE_tcfCoef1,0.0);
-    nv.writeFloat(EE_tcfCoef2,0.0);
+    nv.writeFloat(EE_tcfCoefAxis4,0.0);
+    nv.writeFloat(EE_tcfCoefAxis5,0.0);
+    nv.write(EE_tcfEnAxis4,0);
+    nv.write(EE_tcfEnAxis5,0);
 
     // clear the library/catalogs
     Lib.clearAll();

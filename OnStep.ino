@@ -266,10 +266,9 @@ void setup() {
 
   // start focusers if present
 #if FOCUSER1 == ON
-  foc1.init(Axis4StepPin,Axis4DirPin,Axis4_EN,EE_posAxis4,AXIS4_STEP_RATE_MAX,AXIS4_STEPS_PER_MICRON,AXIS4_LIMIT_MIN*1000.0,AXIS4_LIMIT_MAX*1000.0);
-  { double f = nv.readFloat(EE_tcfCoef1); if (abs(f) >= 10000.0) f = 0.0; foc1.setTcfCoef(f); }
+  foc1.init(Axis4StepPin,Axis4DirPin,Axis4_EN,EE_posAxis4,EE_tcfCoefAxis4,EE_tcfEnAxis4,AXIS4_STEP_RATE_MAX,AXIS4_STEPS_PER_MICRON,AXIS4_LIMIT_MIN*1000.0,AXIS4_LIMIT_MAX*1000.0,AXIS4_LIMIT_MIN_RATE);
   #if AXIS4_DRIVER_DC_MODE != OFF
-    foc1.setDcPower(dcPwrAxis4);
+    foc1.initDcPower(EE_dcPwrAxis4);
     foc1.setPhase1();
   #endif
   #if AXIS4_DRIVER_REVERSE == ON
@@ -291,10 +290,9 @@ void setup() {
 #endif
 
 #if FOCUSER2 == ON
-  foc2.init(Axis5StepPin,Axis5DirPin,Axis5_EN,EE_posAxis5,AXIS5_STEP_RATE_MAX,AXIS5_STEPS_PER_MICRON,AXIS5_LIMIT_MIN*1000.0,AXIS5_LIMIT_MAX*1000.0);
-  { double f = nv.readFloat(EE_tcfCoef2); if (abs(f) >= 10000.0) f = 0.0; foc2.setTcfCoef(f); }
+  foc2.init(Axis5StepPin,Axis5DirPin,Axis5_EN,EE_posAxis5,EE_tcfCoefAxis5,EE_tcfEnAxis5,AXIS5_STEP_RATE_MAX,AXIS5_STEPS_PER_MICRON,AXIS5_LIMIT_MIN*1000.0,AXIS5_LIMIT_MAX*1000.0,AXIS5_LIMIT_MIN_RATE);
   #if AXIS5_DRIVER_DC_MODE == DRV8825
-    foc2.setDcPower(dcPwrAxis5);
+    foc2.initDcPower(EE_dcPwrAxis5);
     foc2.setPhase2();
   #endif
   #if AXIS5_DRIVER_REVERSE == ON

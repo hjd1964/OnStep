@@ -170,8 +170,10 @@
 #define EE_dcPwrAxis4              GSB+0   // 1
 #define EE_dcPwrAxis5              GSB+1   // 1
 #define EE_maxRateL                GSB+2   // 4
-#define EE_tcfCoef1                GSB+6   // 4
-#define EE_tcfCoef2                GSB+10  // 4
+#define EE_tcfCoefAxis4            GSB+6   // 4
+#define EE_tcfCoefAxis5            GSB+10  // 4
+#define EE_tcfEnAxis4              GSB+14  // 1
+#define EE_tcfEnAxis5              GSB+15  // 1
 
 // ---------------------------------------------------------------------------------------------------------------------------------
 // Unique identifier for the current initialization format for NV, do not change

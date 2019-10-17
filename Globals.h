@@ -347,14 +347,6 @@ volatile int backlashAxis2              = 0;
 volatile int blAxis1                    = 0;
 volatile int blAxis2                    = 0;
 
-// focuser control
-#if AXIS4_DRIVER_DC_MODE != OFF
-  byte dcPwrAxis4                       = 50;
-#endif
-#if AXIS5_DRIVER_DC_MODE != OFF
-  byte dcPwrAxis5                       = 50;
-#endif
-
 // aux pin control
 #ifdef Aux0
   byte valueAux0 = 0;

@@ -10,13 +10,13 @@
 
 class focuserDC {
   public:
-    // init(Axis5StepPin,Axis5DirPin,Axis4_EN,EE_posAxis5,MaxRateAxis5,StepsPerMicrometerAxis5);
-    void init(int stepPin, int dirPin, int enPin, int nvAddress, long maxRate, double stepsPerMicro, double min, double max) {
+    void init(int stepPin, int dirPin, int enPin, int nvAddress, int nvTcfCoef, int nvTcfEn, float maxRate, double stepsPerMicro, double min, double max, double minRate) {
 
       // init only happens once, on the first call and is ignored otherwise
       dcMotor.init(stepPin,dirPin,enPin,maxRate);
       
       this->nvAddress=nvAddress;
+      this->minRate=minRate;
       this->maxRate=maxRate;
       this->spm=stepsPerMicro;
     
@@ -41,16 +41,13 @@ class focuserDC {
       lastPhysicalMove=nextPhysicalMove;
     }
 
-    void setDcPower(byte power) {
-      this->powerFor1mmSec=power;
-    }
-
-    void setPhase1() {
-      phase1=true;
-    }
-    void setPhase2() {
-      phase1=false;
-    }
+    // DC motor control
+    boolean isDcFocuser() { return true; }
+    void initDcPower(int nvDcPower) { this->nvDcPower=nvDcPower; powerFor1mmSec=nv.read(nvPwrAxis); }
+    void setDcPower(byte power) { this->powerFor1mmSec=power; nv.write(nvDcPwrAxis,powerFor1mmSec); }
+    byte getDcPower() { return powerFor1mmSec; }
+    void setPhase1() { phase1=true; }
+    void setPhase2() { phase1=false; }
 
     // get step size in microns
     double getStepsPerMicro() { return spm; }
@@ -73,23 +70,27 @@ class focuserDC {
       dcMotor.setDisableState(disableState);
     }
 
-    // sets/enables temperature compensation
+    // temperature compensation
     void setTcfCoef(double coef) {
       // not supported
     }
-
-    // gets temperature compensation coefficient
     double getTcfCoef() {
       return 0;
+    }
+    void setTcfEnable(boolean enable) {
+      // not supported
+    }
+    boolean getTcfEnable() {
+      return false;
     }
 
     // allows enabling/disabling stepper driver
     void powerDownActive(boolean active) {
     }
 
-    // set movement rate in microns/second
+    // set movement rate in microns/second, from minRate to 1000
     void setMoveRate(double rate) {
-      // a rate of 1000 gives 1mm/second (fastest)
+      constrain(rate,minRate,1000);
       moveRate=rate*spm;                                    // in steps per second, for a DC motor a step is 1 micron.
       if (moveRate > spsMax) moveRate=spsMax;               // limit to maxRate
     }
@@ -123,11 +124,6 @@ class focuserDC {
       return spos;
     }
 
-    // get position in microns
-    double getPositionMicrons() {
-      return ((double)getPosition())/spm;
-    }
-
     // sets current position in steps
     void setPosition(long pos) {
       spos=pos;
@@ -136,21 +132,11 @@ class focuserDC {
       lastMove=millis();
     }
 
-    // sets current position in microns
-    void setPositionMicrons(double pos) {
-      setPosition(pos*spm);
-    }
-
     // sets target position in steps
     void setTarget(long pos) {
       dcMotor.setPower((moveRate/1000.0)*powerFor1mmSec);
       target.part.m=pos; target.part.f=0;
       if ((long)target.part.m < smin) target.part.m=smin; if ((long)target.part.m > smax) target.part.m=smax;
-    }
-
-    // sets target position in microns
-    void setTargetMicrons(double pos) {
-      setPosition(pos*spm);
     }
 
     // sets target relative position in steps
@@ -218,6 +204,7 @@ class focuserDC {
 
     // parameters
     int nvAddress=-1;
+    long minRate=-1;
     long maxRate=-1;
     long spsMax=-1;
     long umin=0;
@@ -226,6 +213,7 @@ class focuserDC {
     long smax=1000;
     bool reverse=false;
     bool phase1=true;
+    long nvDcPower=-1;
 
     // conversion
     double spm=1.0;

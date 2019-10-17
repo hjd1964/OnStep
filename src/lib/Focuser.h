@@ -8,38 +8,52 @@
 
 class focuser {
   public:
-    // init(Axis5StepPin,Axis5DirPin,Axis4_EN,EE_posAxis5,MaxRateAxis5,StepsPerMicrometerAxis5);
-    void init(int stepPin, int dirPin, int enPin, int nvAddress, float maxRate, double stepsPerMicro, double min, double max) {
+    void init(int stepPin, int dirPin, int enPin, int nvAddress, int nvTcfCoef, int nvTcfEn, float maxRate, double stepsPerMicro, double min, double max, double minRate) {
       this->stepPin=stepPin;
       this->dirPin=dirPin;
       this->enPin=enPin;
       this->nvAddress=nvAddress;
+      this->nvTcfCoef=nvTcfCoef;
+      this->nvTcfEn=nvTcfEn;
+      this->minRate=minRate;
       this->maxRate=maxRate;
       this->spm=stepsPerMicro;
 
       if (stepPin != -1) pinMode(stepPin,OUTPUT);
       if (dirPin != -1) pinMode(dirPin,OUTPUT);
-    
+
+      // get the temperature compensated focusing settings
+      setTcfCoef(nv.readFloat(nvTcfCoef));
+      setTcfEnable(nv.read(nvTcfEn));
+      
+      // get step position
       spos=readPos();
-      // constrain step position
       long lmin=(long)(min*spm); if (spos<lmin) { spos=lmin; target.part.m=spos; target.part.f=0; }
       long lmax=(long)(max*spm); if (spos>lmax) { spos=lmax; target.part.m=spos; target.part.f=0; }
       target.part.m=spos; target.part.f=0;
       lastPos=spos;
       delta.fixed=0;
 
+      // set min/max
+      setMin(lmin);
+      setMax(lmax);
+
       // steps per second, maximum
       spsMax=(1.0/maxRate)*1000.0;
       // microns per second default
       setMoveRate(100);
 
-      // default min/max
-      setMin(lmin);
-      setMax(lmax);
-
       nextPhysicalMove=micros()+(unsigned long)(maxRate*1000.0);
       lastPhysicalMove=nextPhysicalMove;
     }
+
+    // DC motor control
+    boolean isDcFocuser() { return false; }
+    void initDcPower(int nvDcPower) { }
+    void setDcPower(byte power) { }
+    byte getDcPower() { return 0; }
+    void setPhase1() { }
+    void setPhase2() { }
 
     // get step size in microns
     double getStepsPerMicro() { return spm; }
@@ -65,16 +79,21 @@ class focuser {
       if (enPin != -1) { pinMode(enPin,OUTPUT); enableDriver(); currentlyDisabled=false; }
     }
 
-    // sets/enables temperature compensation
+    // temperature compensation
     void setTcfCoef(double coef) {
-      tcf = !(abs(coef) < 0.0000001);
-      if (!tcf) coef = 0.0;
+      if (abs(coef) >= 10000.0) coef = 0.0;
       tcf_coef = coef;
+      nv.writeFloat(nvTcfCoef,tcf_coef);
     }
-
-    // gets temperature compensation coefficient
     double getTcfCoef() {
       return tcf_coef;
+    }
+    void setTcfEnable(boolean enabled) {
+      tcf = enabled;
+      nv.write(nvTcfEn,tcf);
+    }
+    boolean getTcfEnable() {
+      return tcf;
     }
 
     // allows enabling/disabling stepper driver
@@ -84,9 +103,10 @@ class focuser {
       if (pda) { pinMode(enPin,OUTPUT); disableDriver(); currentlyDisabled=true; }
     }
 
-    // set movement rate in microns/second
+    // set movement rate in microns/second, from minRate to 1000
     void setMoveRate(double rate) {
-      moveRate=rate*spm;                          // in steps per second
+      constrain(rate,minRate,1000);
+      moveRate=rate*spm;                            // in steps per second
       if (moveRate > spsMax) moveRate=spsMax;       // limit to maxRate
     }
 
@@ -116,11 +136,6 @@ class focuser {
       return spos;
     }
 
-    // get position in microns
-    double getPositionMicrons() {
-      return ((double)getPosition())/spm;
-    }
-
     // sets current position in steps
     void setPosition(long pos) {
       spos=pos;
@@ -129,20 +144,10 @@ class focuser {
       lastMove=millis();
     }
 
-    // sets current position in microns
-    void setPositionMicrons(double pos) {
-      setPosition(pos*spm);
-    }
-
     // sets target position in steps
     void setTarget(long pos) {
       target.part.m=pos; target.part.f=0;
       if ((long)target.part.m < smin) target.part.m=smin; if ((long)target.part.m > smax) target.part.m=smax;
-    }
-
-    // sets target position in microns
-    void setTargetMicrons(double pos) {
-      setPosition(pos*spm);
     }
 
     // sets target relative position in steps
@@ -230,11 +235,14 @@ class focuser {
     int stepPin=-1;
     int dirPin=-1;
     int enPin=-1;
-    int nvAddress=-1;
+    float minRate=-1;
     float maxRate=-1;
     long spsMax=-1;
     long smin=0;
     long smax=1000;
+    int nvAddress=-1;
+    int nvTcfCoef=-1;
+    int nvTcfEn=-1;
 
     // state
     int reverseState=LOW;
