@@ -69,7 +69,7 @@
     #error "Configuration (Config.h): AXIS1_DRIVER_STATUS LOW/HIGH doesn't make sense when using TMC_SPI stepper drivers"
   #elif !defined(Axis1FaultPin)
     #error "Configuration (Config.h): AXIS1_DRIVER_STATUS LOW/HIGH feature isn't supported on this PINMAP"
-  #elif AXIS1_DRIVER_MODEL != GENERAL && AXIS1_DRIVER_MODEL != SERVO
+  #elif AXIS1_DRIVER_MODEL != GENERIC && AXIS1_DRIVER_MODEL != SERVO
     #warning "Configuration (Config.h): AXIS1_DRIVER_STATUS LOW/HIGH use often requires modification of stepper drivers"
   #endif
 #endif
@@ -78,7 +78,7 @@
     #error "Configuration (Config.h): AXIS2_DRIVER_STATUS LOW/HIGH doesn't make sense when using TMC_SPI stepper drivers"
   #elif !defined(Axis2FaultPin)
     #error "Configuration (Config.h): AXIS2_DRIVER_STATUS LOW/HIGH feature isn't supported on this PINMAP"
-  #elif AXIS2_DRIVER_MODEL != GENERAL && AXIS2_DRIVER_MODEL != SERVO
+  #elif AXIS2_DRIVER_MODEL != GENERIC && AXIS2_DRIVER_MODEL != SERVO
     #warning "Configuration (Config.h): AXIS2_DRIVER_STATUS LOW/HIGH use often requires modification of stepper drivers"
   #endif
 #endif
