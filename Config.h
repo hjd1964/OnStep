@@ -149,7 +149,7 @@
                                           //         Alt/Az de-rotation: n = (num_circumference_pixels * 2)/360, minimum
 #define AXIS3_STEP_RATE_MAX           8.0 //    8.0, n, (milli-sec.) Minimum ms/step depends on processor.                    Adjust
 
-#define AXIS3_DRIVER_MODEL            OFF //    OFF, TMC2130, TMC5160. Stepper driver model.                                  Option
+#define AXIS3_DRIVER_MODEL            OFF //    OFF, TMC2130, TMC5160. Leave OFF for all drivers models except these.         Option
 #define AXIS3_DRIVER_MICROSTEPS       OFF //    OFF, n. Microstep mode when tracking.                   For TMC2130, TMC5160. Option
 #define AXIS3_DRIVER_IHOLD            OFF //    OFF, n, (mA.) Current standstill. OFF uses IRUN/2.0.                  "       Option
 #define AXIS3_DRIVER_IRUN             OFF //    OFF, n, (mA.) Current tracking, appropriate for stepper/driver/etc.   "       Option
@@ -164,7 +164,7 @@
 #define AXIS4_STEPS_PER_MICRON        0.5 //    0.5, n. Steps per micro-meter. Figure this out by testing or other means.     Adjust
 #define AXIS4_STEP_RATE_MAX           8.0 //    8.0, n, (milli-sec.) Min. ms/step depends on processor. In DC mode, PWM freq. Adjust
 
-#define AXIS4_DRIVER_MODEL            OFF //    OFF, TMC2130, TMC5160. Stepper driver model.                                  Option
+#define AXIS4_DRIVER_MODEL            OFF //    OFF, TMC2130, TMC5160. Leave OFF for all drivers models except these.         Option
 #define AXIS4_DRIVER_MICROSTEPS       OFF //    OFF, n. Microstep mode when tracking.                   For TMC2130, TMC5160. Option
 #define AXIS4_DRIVER_IHOLD            OFF //    OFF, n, (mA.) Current standstill. OFF uses IRUN/2.0.                  "       Option
 #define AXIS4_DRIVER_IRUN             OFF //    OFF, n, (mA.) Current tracking, appropriate for stepper/driver/etc.   "       Option
@@ -181,7 +181,7 @@
 #define AXIS5_STEPS_PER_MICRON        0.5 //    0.5, n. Steps per micro-meter. Figure this out by testing or other means.     Adjust
 #define AXIS5_STEP_RATE_MAX           8.0 //    8.0, n, (milli-sec.) Min. ms/step depends on processor. In DC mode, PWM freq. Adjust
 
-#define AXIS5_DRIVER_MODEL            OFF //    OFF, TMC2130, TMC5160. Stepper driver model.                                  Option
+#define AXIS5_DRIVER_MODEL            OFF //    OFF, TMC2130, TMC5160. Leave OFF for all drivers models except these.         Option
 #define AXIS5_DRIVER_MICROSTEPS       OFF //    OFF, n. Microstep mode when tracking.                   For TMC2130, TMC5160. Option
 #define AXIS5_DRIVER_IHOLD            OFF //    OFF, n, (mA.) Current standstill. OFF uses IRUN/2.0.                  "       Option
 #define AXIS5_DRIVER_IRUN             OFF //    OFF, n, (mA.) Current tracking, appropriate for stepper/driver/etc.   "       Option
