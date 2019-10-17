@@ -39,8 +39,6 @@ void processCommands() {
     char *conv_end;
 #if FOCUSER1 == ON
     static char primaryFocuser = 'F';
-#endif
-#if FOCUSER2 == ON
     static char secondaryFocuser = 'f';
 #endif
 
@@ -323,7 +321,7 @@ void processCommands() {
 #endif
 
 #if FOCUSER1 == ON
-//   F - Focuser1 Commands
+//   F,f - Focuser1 and Focuser2 Commands
       if (command[0] == 'F' || command[0]=='f') {
 
         focuser *foc = NULL;
@@ -332,13 +330,14 @@ void processCommands() {
         else if (command[0] == secondaryFocuser) foc = &foc2;
 #endif
 
-        // get ready for commands that convert to microns or steps (these commands are upper-case for microns OR lower-case for steps)
-        double spm = foc->getStepsPerMicro(); if (strchr("gimrs",command[1])) spm = 1.0;
-        
         // check for commands that shouldn't have a parameter
         boolean badcmd = false; if (strchr("TpIMtuQFS1234+-GZHh",command[1]) && parameter[0] != 0) badcmd = true;
 
         if (foc != NULL && !badcmd) {
+
+        // get ready for commands that convert to microns or steps (these commands are upper-case for microns OR lower-case for steps)
+        double spm = foc->getStepsPerMicro(); if (strchr("gimrs",command[1])) spm = 1.0;
+
 //  :FA#  Active?
 //          Return: 0 on failure
 //                  1 on success

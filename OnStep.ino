@@ -95,13 +95,14 @@ weather ambient;
 #endif
 
 #if FOCUSER1 == ON || FOCUSER2 == ON
+  #include "src/lib/Focuser.h"
   #if FOCUSER1 == ON
     #if AXIS4_DRIVER_DC_MODE != OFF
       #include "src/lib/FocuserDC.h"
       focuserDC foc1;
     #else
-      #include "src/lib/Focuser.h"
-      focuser foc1;
+      #include "src/lib/FocuserStepper.h"
+      focuserStepper foc1;
     #endif
   #endif
   #if FOCUSER2 == ON
@@ -109,8 +110,8 @@ weather ambient;
       #include "src/lib/FocuserDC.h"
       focuserDC foc2;
     #else
-      #include "src/lib/Focuser.h"
-      focuser foc2;
+      #include "src/lib/FocuserStepper.h"
+      focuserStepper foc2;
     #endif
   #endif
 #endif
