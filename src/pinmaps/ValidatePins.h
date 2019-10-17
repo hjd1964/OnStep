@@ -63,6 +63,26 @@
 #endif
 
 // GENERAL PURPOSE PINMAP VALIDATION ---------------
+
+#if AXIS1_DRIVER_STATUS == HIGH || AXIS1_DRIVER_STATUS == LOW
+  #if AXIS1_DRIVER_MODEL == TMC_SPI
+    #error "Configuration (Config.h): AXIS1_DRIVER_STATUS LOW/HIGH doesn't make sense when using TMC_SPI stepper drivers"
+  #elif !defined(Axis1FaultPin)
+    #error "Configuration (Config.h): AXIS1_DRIVER_STATUS LOW/HIGH feature isn't supported on this PINMAP"
+  #elif AXIS1_DRIVER_MODEL != GENERAL && AXIS1_DRIVER_MODEL != SERVO
+    #warning "Configuration (Config.h): AXIS1_DRIVER_STATUS LOW/HIGH use often requires modification of stepper drivers"
+  #endif
+#endif
+#if AXIS2_DRIVER_STATUS == HIGH || AXIS2_DRIVER_STATUS == LOW
+  #if AXIS2_DRIVER_MODEL == TMC_SPI
+    #error "Configuration (Config.h): AXIS2_DRIVER_STATUS LOW/HIGH doesn't make sense when using TMC_SPI stepper drivers"
+  #elif !defined(Axis2FaultPin)
+    #error "Configuration (Config.h): AXIS2_DRIVER_STATUS LOW/HIGH feature isn't supported on this PINMAP"
+  #elif AXIS2_DRIVER_MODEL != GENERAL && AXIS2_DRIVER_MODEL != SERVO
+    #warning "Configuration (Config.h): AXIS2_DRIVER_STATUS LOW/HIGH use often requires modification of stepper drivers"
+  #endif
+#endif
+
 #if SERIAL_B_ESP_FLASHING == ON  && (!defined(ESP8266Gpio0Pin) || !defined(ESP8266RstPin))
   #error "Configuration (Config.h): SERIAL_B_ESP_FLASHING not supported for this PINMAP"
 #endif
