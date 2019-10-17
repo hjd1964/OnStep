@@ -73,8 +73,8 @@ bool readLX200Bytes(char* command, char* recvBuffer, unsigned long timeOutMs) {
       if (strchr("W123456789+", command[2])) { shortResponse = true; Ser.setTimeout(1000); }
     }
     if ((command[1]=='F') || (command[1]=='f')) {
-      if (strchr("+-QZHhFS1234",command[2])) noResponse=true;
-      if (strchr("A",command[2])) shortResponse=true;
+      if (strchr("+-QZHhF1234",command[2])) noResponse=true;
+      if (strchr("Ap",command[2])) shortResponse=true;
     }
     if (command[1] == 'M') {
       if (strchr("ewnsg", command[2])) noResponse = true;

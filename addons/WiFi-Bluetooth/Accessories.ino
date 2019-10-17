@@ -55,8 +55,8 @@ boolean readLX200Bytes(char* command,char* recvBuffer,long timeOutMs) {
       if (strchr("W123456789+",command[2])) { shortResponse=true; timeOutMs=1000; }
     } else
     if ((command[1]=='F') || (command[1]=='f')) {
-      if (strchr("+-QZHhFS1234",command[2])) noResponse=true;
-      if (strchr("A",command[2])) shortResponse=true;
+      if (strchr("+-QZHhF1234",command[2])) noResponse=true;
+      if (strchr("Ap",command[2])) shortResponse=true;
     } else
     if (command[1]=='r') {
       if (strchr("+-PRFC<>Q1234",command[2])) noResponse=true;
