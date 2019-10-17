@@ -16,6 +16,7 @@
 #define Ramps14                     10 // Ramps v1.4 shield for Mega2560
 #define Ramps15                     10 // Ramps v1.5
 #define MksGenL                     10 // Like Ramps above but better, Mega2560 built-in, crystal oscillator, 24V support
+#define MksGenL1                    10
 #define MksGenL2                    11 // Adds SPI bus to all stepper drivers (TMC only)
 
 // Mini - Small 2-axis design suitable for embedded or mounting behind a panel can even be built with connectors up
