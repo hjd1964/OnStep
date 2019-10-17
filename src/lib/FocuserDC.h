@@ -135,5 +135,4 @@ class focuserDC : public focuser  {
         wasMoving=true;
       } else if (wasMoving) if ((long)(tempMs-lastPollingTime) > maxRate+1) { dcMotor.enabled(false); wasMoving=false; }
     }
-
 };

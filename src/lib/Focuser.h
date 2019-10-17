@@ -3,9 +3,6 @@
 
 #pragma once
 
-// time to write position to nv after last movement of Focuser 1/2, default = 5 minutes
-#define FOCUSER_WRITE_DELAY 1000L*60L*5L
-
 class focuser {
   public:
     virtual void init(int stepPin, int dirPin, int enPin, int nvAddress, int nvTcfCoef, int nvTcfEn, float maxRate, double stepsPerMicro, double min, double max, double minRate) { }
