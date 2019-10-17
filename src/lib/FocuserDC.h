@@ -9,7 +9,7 @@
 #include "focuser.h"
 #include "StepperDC.h"
 
-class focuserDC:public focuser  {
+class focuserDC : public focuser  {
   public:
     void init(int stepPin, int dirPin, int enPin, int nvAddress, int nvTcfCoef, int nvTcfEn, float maxRate, double stepsPerMicro, double min, double max, double minRate) {
 
@@ -63,21 +63,21 @@ class focuserDC:public focuser  {
     // set movement rate in microns/second, from minRate to 1000
     void setMoveRate(double rate) {
       constrain(rate,minRate,1000);
-      moveRate=rate*spm;                                    // in steps per second, for a DC motor a step is 1 micron.
-      if (moveRate > spsMax) moveRate=spsMax;               // limit to maxRate
+      moveRate=rate*spm;                            // in steps per second, for a DC motor a step is 1 micron.
+      if (moveRate > spsMax) moveRate=spsMax;       // limit to maxRate
     }
 
     // move in
     void startMoveIn() {
       // rate is some fraction of 1 millimeter per second so this is the % power for 1 millimeter per second motion
       dcMotor.setPower((moveRate/1000.0)*powerFor1mmSec);
-      delta.fixed=doubleToFixed(+moveRate/100.0); // in steps per centi-second
+      delta.fixed=doubleToFixed(+moveRate/100.0);   // in steps per centi-second
     }
     
     // move out
     void startMoveOut() {
       dcMotor.setPower((moveRate/1000.0)*powerFor1mmSec);
-      delta.fixed=doubleToFixed(-moveRate/100.0); // in steps per centi-second
+      delta.fixed=doubleToFixed(-moveRate/100.0);   // in steps per centi-second
     }
 
     // sets target position in steps

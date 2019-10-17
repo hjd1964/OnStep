@@ -8,7 +8,7 @@
 
 #include "focuser.h"
 
-class focuserStepper:public focuser {
+class focuserStepper : public focuser {
   public:
     void init(int stepPin, int dirPin, int enPin, int nvAddress, int nvTcfCoef, int nvTcfEn, float maxRate, double stepsPerMicro, double min, double max, double minRate) {
       this->stepPin=stepPin;
@@ -84,12 +84,12 @@ class focuserStepper:public focuser {
 
     // move in
     void startMoveIn() {
-      delta.fixed=doubleToFixed(+moveRate/100.0); // in steps per centi-second
+      delta.fixed=doubleToFixed(+moveRate/100.0);   // in steps per centi-second
     }
 
     // move out
     void startMoveOut() {
-      delta.fixed=doubleToFixed(-moveRate/100.0); // in steps per centi-second
+      delta.fixed=doubleToFixed(-moveRate/100.0);   // in steps per centi-second
     }
 
     // sets target position in steps

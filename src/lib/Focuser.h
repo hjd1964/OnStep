@@ -135,5 +135,4 @@ class focuser {
     unsigned long lastPhysicalMove=0;
     unsigned long nextPhysicalMove=0;
     unsigned long lastPollingTime=0;
-
 };
