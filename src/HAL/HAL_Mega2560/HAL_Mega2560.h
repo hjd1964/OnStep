@@ -20,11 +20,11 @@
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
 #ifndef MEGA2560_ARDUINO_SERIAL_ON
   // SerialA is always enabled, SerialB and SerialC are optional
-  #define HAL_SERIAL_B_ENABLED     // Enable support for RX1/TX1
+  #define HAL_SERIAL_B_ENABLED       // Enable support for RX1/TX1
 
-  // on a Ramps1.4 board always enable SerialC and default to using Serial2 for it
-  #ifdef Ramps14_ON
-    #define HAL_SERIAL_C_ENABLED     // Enable support for third serial channel
+  // don't enable serial C on a Classic board since pins are used
+  #if PINMAP != Classic
+    #define HAL_SERIAL_C_ENABLED
     #define HAL_SERIAL_C_SERIAL2     // Use RX2/TX2 for channel C (defaults to RX3/TX3 otherwise.)
   #endif
 
@@ -39,8 +39,9 @@
   // SerialA is always enabled, SerialB and SerialC are optional
   #define HAL_SERIAL_B_ENABLED
   #define SerialB Serial1
-  #ifdef Ramps14_ON
-    #define HAL_SERIAL_C_ENABLED     // Enable support for third serial channel
+  // don't enable serial C on a Classic board since pins are used
+  #if PINMAP != Classic
+    #define HAL_SERIAL_C_ENABLED
     #define SerialC Serial2
   #endif
 #endif
