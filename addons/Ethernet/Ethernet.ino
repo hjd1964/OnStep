@@ -112,7 +112,7 @@ void handleNotFound(EthernetClient *client) {
 
 void setup(void){
   Ser.begin(SERIAL_BAUD_DEFAULT);
-  delay(3000);
+  delay(2000);
 
 // EEPROM Init
 #ifndef EEPROM_DISABLED
@@ -162,19 +162,19 @@ Again:
 
     // switch OnStep Serial up to ? baud
     Ser.print(HighSpeedCommsStr(SERIAL_BAUD));
-    delay(100);
-    int count=0; c=0;
-    while (Ser.available()>0) { count++; if (count==1) c=Ser.read(); }
+    delay(200);
+    int count=0; c=0; while (Ser.available() > 0) { count++; if (count == 1) c=Ser.read(); }
     if (c=='1') {
       Ser.begin(SERIAL_BAUD);
+      delay(3000);
     } else {
       // got nothing back, toggle baud rate and try again
       tb++;
-      if (tb==7) tb=1;
-      if (tb==1) Ser.begin(SERIAL_BAUD_DEFAULT);
-      if (tb==4) Ser.begin(SERIAL_BAUD);
+      if (tb == 11) tb=1;
+      if (tb == 1) Ser.begin(SERIAL_BAUD_DEFAULT);
+      if (tb == 6) Ser.begin(SERIAL_BAUD);
   
-      delay(1000);
+      if (tb == 1 || tb == 6) delay(2000);
 #ifndef DEBUG_ON
       goto Again;
 #else
