@@ -331,7 +331,7 @@ void processCommands() {
 #endif
 
         // check for commands that shouldn't have a parameter
-        boolean badcmd = false; if (strchr("TpIMtuQFS1234+-GZHh",command[1]) && parameter[0] != 0) badcmd = true;
+        boolean badcmd = false; if (strchr("TpIMtuQF1234+-GZHh",command[1]) && parameter[0] != 0) badcmd = true;
 
         if (foc != NULL && !badcmd) {
 
