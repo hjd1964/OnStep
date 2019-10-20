@@ -2,70 +2,74 @@
 // Functions related to Parking the mount
 
 // sets the park postion as the current position
-boolean setPark() {
-  if ((parkStatus == NotParked) && (trackingState != TrackingMoveTo) && ((getInstrPierSide() == PierSideNone) || (getInstrPierSide() == PierSideEast) || (getInstrPierSide() == PierSideWest))) {
-    lastTrackingState=trackingState;
-    trackingState=TrackingNone;
+CommandErrors setPark() {
+  if (faultAxis1 || faultAxis2)         return CE_SLEW_ERR_HARDWARE_FAULT;
+  if (parkStatus == ParkFailed)         return CE_PARK_FAILED;
+  if (parkStatus == Parked)             return CE_PARKED;
+  if (!isSlewing())                     return CE_MOUNT_IN_MOTION;
 
-    // store our position
-    nv.writeFloat(EE_posAxis1,getInstrAxis1());
-    nv.writeFloat(EE_posAxis2,getInstrAxis2());
-    int p=getInstrPierSide(); if (p == PierSideNone) nv.write(EE_pierSide,PierSideEast); else nv.write(EE_pierSide,p);
+  lastTrackingState=trackingState;
+  trackingState=TrackingNone;
 
-    // record our park status
-    parkSaved=true; nv.write(EE_parkSaved,parkSaved);
+  // store our position
+  nv.writeFloat(EE_posAxis1,getInstrAxis1());
+  nv.writeFloat(EE_posAxis2,getInstrAxis2());
+  int p=getInstrPierSide(); if (p == PierSideNone) nv.write(EE_pierSide,PierSideEast); else nv.write(EE_pierSide,p);
 
-    // and remember what the index corrections are too (etc.)
-    saveAlignModel();
+  // record our park status
+  parkSaved=true; nv.write(EE_parkSaved,parkSaved);
 
-    trackingState=lastTrackingState;
-    return true;
-  }
-  return false;
+  // and remember what the index corrections are too (etc.)
+  saveAlignModel();
+
+  trackingState=lastTrackingState;
+  
+  return CE_NONE;
 }
 
 // moves the telescope to the park position
-byte park() {
-  if (parkStatus == Parked) return 0;                          // already parked
-  int f=validateGoto(); if (f == 5) f=8; if (f != 0) return f; // goto allowed?
-  
+CommandErrors park() {
+  if (faultAxis1 || faultAxis2)         return CE_SLEW_ERR_HARDWARE_FAULT;
+  if (!axis1Enabled)                    return CE_SLEW_ERR_IN_STANDBY;
+  if (parkStatus == Parked)             return CE_PARKED;
+  if (!isSlewing())                     return CE_MOUNT_IN_MOTION;
   parkSaved=nv.read(EE_parkSaved);
-  if (parkSaved) {
-    // stop tracking
-    abortTrackingState=trackingState;
-    lastTrackingState=TrackingNone;
-    trackingState=TrackingNone;
+  if (!parkSaved)                       return CE_NO_PARK_POSITION_SET;
+  CommandErrors e=validateGoto();
+  if (e != CE_NONE)                     return e;
+  
+  // stop tracking
+  abortTrackingState=trackingState;
+  lastTrackingState=TrackingNone;
+  trackingState=TrackingNone;
 
 #if MOUNT_TYPE != ALTAZM
-    // turn off the PEC while we park
-    disablePec();
-    pecStatus=IgnorePEC;
+  // turn off the PEC while we park
+  disablePec();
+  pecStatus=IgnorePEC;
 #endif
 
-    // save the worm sense position
-    nv.writeLong(EE_wormSensePos,wormSensePos);
+  // save the worm sense position
+  nv.writeLong(EE_wormSensePos,wormSensePos);
 
-    // record our park status
-    int lastParkStatus=parkStatus; 
-    parkStatus=Parking; nv.write(EE_parkStatus,parkStatus);
-    
-    // get suggested park position
-    double parkTargetAxis1=nv.readFloat(EE_posAxis1);
-    double parkTargetAxis2=nv.readFloat(EE_posAxis2);
-    int parkPierSide=nv.read(EE_pierSide);
+  // record our park status
+  int lastParkStatus=parkStatus; 
+  parkStatus=Parking; nv.write(EE_parkStatus,parkStatus);
+  
+  // get suggested park position
+  double parkTargetAxis1=nv.readFloat(EE_posAxis1);
+  double parkTargetAxis2=nv.readFloat(EE_posAxis2);
+  int parkPierSide=nv.read(EE_pierSide);
 
-    // now, goto this target coordinate
-    int gotoStatus=goTo(parkTargetAxis1,parkTargetAxis2,parkTargetAxis1,parkTargetAxis2,parkPierSide);
-
-    // if failure
-    if (gotoStatus != 0) {
-      trackingState=abortTrackingState; // resume tracking state
-      parkStatus=lastParkStatus;        // revert the park status
-      nv.write(EE_parkStatus,parkStatus);
-    }
-
-    return gotoStatus;
-  } else return 10; // no park position saved
+  // now, goto this target coordinate
+  e=goTo(parkTargetAxis1,parkTargetAxis2,parkTargetAxis1,parkTargetAxis2,parkPierSide);
+  if (e != CE_NONE) {
+    trackingState=abortTrackingState; // resume tracking state
+    parkStatus=lastParkStatus;        // revert the park status
+    nv.write(EE_parkStatus,parkStatus);
+    return e;
+  }
+  return CE_NONE;
 }
 
 // records the park position, updates status, shuts down the stepper motors
@@ -159,79 +163,73 @@ int parkClearBacklash() {
 
 // returns a parked telescope to operation, you must set date and time before calling this.  it also
 // depends on the latitude, longitude, and timeZone; but those are stored and recalled automatically
-boolean unPark(bool withTrackingOn) {
-#if STRICT_PARKING == ON
-  if (parkStatus == Parked) {
-#else
-  if ((parkStatus == Parked) || ((atHome) && (parkStatus == NotParked))) {
+CommandErrors unPark(bool withTrackingOn) {
+  if (faultAxis1 || faultAxis2)         return CE_SLEW_ERR_HARDWARE_FAULT;
+  if (!isSlewing())                     return CE_MOUNT_IN_MOTION;
+#if STRICT_PARKING == OFF
+  if (parkStatus == NotParked && atHome) parkStatus=Parked;
 #endif
-    parkStatus=nv.read(EE_parkStatus);
-    parkSaved =nv.read(EE_parkSaved);
-    parkStatus=Parked;
-    if (parkStatus == Parked) {
-      if (parkSaved) {
-        initStartupValues();
-      
-        // make sure limits are on
-        safetyLimitsOn=true;
-      
-        // no errors
-        currentAlt=45.0;
-        doFastAltCalc(true);
-        lastError=ERR_NONE;
-      
-        // initialize and disable the stepper drivers
-        StepperModeTrackingInit();
-         
-        // the polar home position
-        InitStartPosition();
+  if (parkStatus != Parked)             return CE_NOT_PARKED;
+  parkSaved =nv.read(EE_parkSaved);
+  if (!parkSaved)                       return CE_NO_PARK_POSITION_SET;
+
+  initStartupValues();
+
+  // make sure limits are on
+  safetyLimitsOn=true;
+
+  // no errors
+  currentAlt=45.0;
+  doFastAltCalc(true);
+  generalError=ERR_NONE;
+
+  // initialize and disable the stepper drivers
+  StepperModeTrackingInit();
+   
+  // the polar home position
+  InitStartPosition();
+
+  // stop the motor timers (except guiding)
+  cli(); trackingTimerRateAxis1=0.0; trackingTimerRateAxis2=0.0; sei(); delay(11);
+
+  // load the pointing model
+  loadAlignModel();
+
+  // get suggested park position
+  int parkPierSide=nv.read(EE_pierSide);
+  setTargetAxis1(nv.readFloat(EE_posAxis1),parkPierSide);
+  setTargetAxis2(nv.readFloat(EE_posAxis2),parkPierSide);
+
+  // adjust target to the actual park position (just like we did when we parked)
+  targetNearestParkPosition();
+
+  // and set the instrument position to agree
+  cli();
+  posAxis1=targetAxis1.part.m;
+  posAxis2=targetAxis2.part.m;
+  sei();
   
-        // stop the motor timers (except guiding)
-        cli(); trackingTimerRateAxis1=0.0; trackingTimerRateAxis2=0.0; sei(); delay(11);
+  // set Meridian Flip behaviour to match mount type
+  #if MOUNT_TYPE == GEM
+    meridianFlip=MeridianFlipAlways;
+  #else
+    meridianFlip=MeridianFlipNever;
+  #endif
 
-        // load the pointing model
-        loadAlignModel();
+  if (withTrackingOn) {
+    // update our status, we're not parked anymore
+    parkStatus=NotParked;
+    nv.write(EE_parkStatus,parkStatus);
 
-        // get suggested park position
-        int parkPierSide=nv.read(EE_pierSide);
-        setTargetAxis1(nv.readFloat(EE_posAxis1),parkPierSide);
-        setTargetAxis2(nv.readFloat(EE_posAxis2),parkPierSide);
+    // start tracking
+    trackingState=TrackingSidereal;
+    enableStepperDrivers();
 
-        // adjust target to the actual park position (just like we did when we parked)
-        targetNearestParkPosition();
-
-        // and set the instrument position to agree
-        cli();
-        posAxis1=targetAxis1.part.m;
-        posAxis2=targetAxis2.part.m;
-        sei();
-        
-        // set Meridian Flip behaviour to match mount type
-        #if MOUNT_TYPE == GEM
-          meridianFlip=MeridianFlipAlways;
-        #else
-          meridianFlip=MeridianFlipNever;
-        #endif
-
-        if (withTrackingOn) {
-          // update our status, we're not parked anymore
-          parkStatus=NotParked;
-          nv.write(EE_parkStatus,parkStatus);
-  
-          // start tracking
-          trackingState=TrackingSidereal;
-          enableStepperDrivers();
-  
-          // get PEC status
-          pecStatus  =nv.read(EE_pecStatus);
-          pecRecorded=nv.read(EE_pecRecorded); if (!pecRecorded) pecStatus=IgnorePEC;
-        }
-
-        return true;
-      };
-    };
-  };
-  return false;
+    // get PEC status
+    pecStatus  =nv.read(EE_pecStatus);
+    pecRecorded=nv.read(EE_pecRecorded); if (!pecRecorded) pecStatus=IgnorePEC;
+  }
+  return CE_NONE;
 }
 
 boolean isParked() {

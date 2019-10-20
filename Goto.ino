@@ -2,45 +2,38 @@
 // Goto, commands to move the telescope to an location or to report the current location
 
 // check if goto/sync is valid
-GotoErrors validateGoto() {
+CommandErrors validateGoto() {
   // Check state
-  if (faultAxis1 || faultAxis2)                return GOTO_ERR_HARDWARE_FAULT;
-  if (!axis1Enabled)                           return GOTO_ERR_STANDBY;
-  if (parkStatus != NotParked)                 return GOTO_ERR_PARK;
-  if (guideDirAxis1 || guideDirAxis2)          return GOTO_ERR_IN_MOTION;
-  if (trackingSyncInProgress())                return GOTO_ERR_GOTO;
-  if (trackingState == TrackingMoveTo)         return GOTO_ERR_GOTO;
-  return GOTO_ERR_NONE;
+  if (faultAxis1 || faultAxis2)                return CE_SLEW_ERR_HARDWARE_FAULT;
+  if (!axis1Enabled)                           return CE_SLEW_ERR_IN_STANDBY;
+  if (parkStatus != NotParked)                 return CE_SLEW_ERR_IN_PARK;
+  if (guideDirAxis1 || guideDirAxis2)          return CE_MOUNT_IN_MOTION;
+  if (trackingSyncInProgress())                return CE_GOTO_ERR_GOTO;
+  if (trackingState == TrackingMoveTo)         return CE_GOTO_ERR_GOTO;
+  return CE_NONE;
 }
 
-GotoErrors validateGotoCoords(double HA, double Dec, double Alt) {
+CommandErrors validateGotoCoords(double HA, double Dec, double Alt) {
   // Check coordinates
-  if (Alt < minAlt)                            return GOTO_ERR_BELOW_HORIZON;
-  if (Alt > maxAlt)                            return GOTO_ERR_ABOVE_OVERHEAD;
-  if (Dec < AXIS2_LIMIT_MIN)                   return GOTO_ERR_OUTSIDE_LIMITS;
-  if (Dec > AXIS2_LIMIT_MAX)                   return GOTO_ERR_OUTSIDE_LIMITS;
-  if ((fabs(HA) > AXIS1_LIMIT_UNDER_POLE))     return GOTO_ERR_OUTSIDE_LIMITS;
-  return GOTO_ERR_NONE;
+  if (Alt < minAlt)                            return CE_GOTO_ERR_BELOW_HORIZON;
+  if (Alt > maxAlt)                            return CE_GOTO_ERR_ABOVE_OVERHEAD;
+  if (Dec < AXIS2_LIMIT_MIN)                   return CE_GOTO_ERR_OUTSIDE_LIMITS;
+  if (Dec > AXIS2_LIMIT_MAX)                   return CE_GOTO_ERR_OUTSIDE_LIMITS;
+  if ((fabs(HA) > AXIS1_LIMIT_UNDER_POLE))     return CE_GOTO_ERR_OUTSIDE_LIMITS;
+  return CE_NONE;
 }
 
-GotoErrors validateGoToEqu(double RA, double Dec) {
+CommandErrors validateGoToEqu(double RA, double Dec) {
   double a,z;
   double HA=haRange(LST()*15.0-RA);
   equToHor(HA,Dec,&a,&z);
-  GotoErrors r=validateGoto(); if (r != GOTO_ERR_NONE) return r;
+  CommandErrors r=validateGoto(); if (r != CE_NONE) return r;
   r=validateGotoCoords(HA,Dec,a);
   return r;
 }
 
-void setLastErrorForGoto(GotoErrors r) {
-  // check to see if lastError was a goto error and clear it if so
-  if ((lastError > ERR_GOTO_ERR_NONE) && (lastError <= ERR_GOTO_ERR_UNSPECIFIED)) lastError=ERR_NONE;
-  // if an goto error exists log it
-  if (r != GOTO_ERR_NONE) lastError=(Errors)((int)ERR_GOTO_ERR_NONE+(int)r);
-}
-
 // syncs the telescope/mount to the sky
-GotoErrors syncEqu(double RA, double Dec) {
+CommandErrors syncEqu(double RA, double Dec) {
   double a,z;
 
   // Convert RA into hour angle, get altitude
@@ -49,10 +42,10 @@ GotoErrors syncEqu(double RA, double Dec) {
   equToHor(HA,Dec,&a,&z);
 
   // validate
-  GotoErrors r=validateGoto(); setLastErrorForGoto(r);
-  if ((r != GOTO_ERR_NONE) && (r != GOTO_ERR_STANDBY)) return r;
-  r=validateGotoCoords(HA,Dec,a); setLastErrorForGoto(r);
-  if (r != GOTO_ERR_NONE) return r;
+  CommandErrors e=validateGoto();
+  if (e != CE_NONE && e != CE_SLEW_ERR_IN_STANDBY) return e;
+  e=validateGotoCoords(HA,Dec,a);
+  if (e != CE_NONE) return e;
 
   double Axis1,Axis2;
 #if MOUNT_TYPE == ALTAZM
@@ -81,7 +74,7 @@ GotoErrors syncEqu(double RA, double Dec) {
     }
 
 #if SYNC_CURRENT_PIER_SIDE_ONLY == ON
-    if ((!atHome) && (newPierSide != getInstrPierSide())) return GOTO_ERR_OUTSIDE_LIMITS;
+    if ((!atHome) && (newPierSide != getInstrPierSide())) return CE_GOTO_ERR_OUTSIDE_LIMITS;
 #endif
 
   } else {
@@ -93,16 +86,16 @@ GotoErrors syncEqu(double RA, double Dec) {
   setIndexAxis1(Axis1,newPierSide);
   setIndexAxis2(Axis2,newPierSide);
 
-  return GOTO_ERR_NONE;
+  return CE_NONE;
 }
 
 // syncs internal counts to shaft encoder position (in degrees)
-GotoErrors syncEnc(double EncAxis1, double EncAxis2) {
+CommandErrors syncEnc(double EncAxis1, double EncAxis2) {
   // validate
-  GotoErrors f=validateGoto(); if (f != GOTO_ERR_NONE) return f;
+  CommandErrors f=validateGoto(); if (f != CE_NONE) return f;
 
   // no sync from encoders during an alignment!
-  if (alignActive()) return GOTO_ERR_NONE;
+  if (alignActive()) return CE_NONE;
 
   long e1=EncAxis1*(double)AXIS1_STEPS_PER_DEGREE;
   long e2=EncAxis2*(double)AXIS2_STEPS_PER_DEGREE;
@@ -123,11 +116,11 @@ GotoErrors syncEnc(double EncAxis1, double EncAxis2) {
   indexAxis2Steps-=delta2;
   indexAxis2=(double)indexAxis2Steps/(double)AXIS2_STEPS_PER_DEGREE;
 
-  return GOTO_ERR_NONE;
+  return CE_NONE;
 }
 
 // get internal counts as shaft encoder position (in degrees)
-int getEnc(double *EncAxis1, double *EncAxis2) {
+void getEnc(double *EncAxis1, double *EncAxis2) {
   long a1,a2;
   cli();
   a1=posAxis1;
@@ -138,8 +131,6 @@ int getEnc(double *EncAxis1, double *EncAxis2) {
   
   *EncAxis1=(double)a1/(double)AXIS1_STEPS_PER_DEGREE;
   *EncAxis2=(double)a2/(double)AXIS2_STEPS_PER_DEGREE;
-
-  return 0;
 }
 
 // gets the telescopes current RA and Dec, set returnHA to true for Horizon Angle instead of RA
@@ -202,24 +193,24 @@ boolean getHor(double *Alt, double *Azm) {
 }
 
 // causes a goto to the same RA/Dec on the opposite pier side if possible
-GotoErrors goToHere(bool toEastOnly) {
+CommandErrors goToHere(bool toEastOnly) {
   bool verified=false;
   PreferredPierSide p=preferredPierSide;
-  if (meridianFlip == MeridianFlipNever) return GOTO_ERR_OUTSIDE_LIMITS;
+  if (meridianFlip == MeridianFlipNever) return CE_GOTO_ERR_OUTSIDE_LIMITS;
   cli(); long h=posAxis1+indexAxis1Steps; sei();
   if ((!toEastOnly) && (getInstrPierSide() == PierSideEast) && (h < (degreesPastMeridianW*(long)AXIS1_STEPS_PER_DEGREE))) { verified=true; preferredPierSide=PPS_WEST; }
   if ((getInstrPierSide() == PierSideWest) && (h > (-degreesPastMeridianE*(long)AXIS1_STEPS_PER_DEGREE))) { verified=true; preferredPierSide=PPS_EAST; }
   if (verified) {
     double newRA,newDec;
     getEqu(&newRA,&newDec,false);
-    GotoErrors r=goToEqu(newRA,newDec);
+    CommandErrors e=goToEqu(newRA,newDec);
     preferredPierSide=p;
-    return r;
-  } else return GOTO_ERR_OUTSIDE_LIMITS;
+    return e;
+  } else return CE_GOTO_ERR_OUTSIDE_LIMITS;
 }
 
 // moves the mount to a new Right Ascension and Declination (RA,Dec) in degrees
-GotoErrors goToEqu(double RA, double Dec) {
+CommandErrors goToEqu(double RA, double Dec) {
   double a,z;
   double Axis1,Axis2;
   double Axis1Alt,Axis2Alt;
@@ -229,13 +220,13 @@ GotoErrors goToEqu(double RA, double Dec) {
   equToHor(HA,Dec,&a,&z);
 
   // validate
-  GotoErrors r=validateGoto(); setLastErrorForGoto(r);
-#ifndef GOTO_ERR_GOTO_OFF
-  if (r == GOTO_ERR_GOTO) { if (!abortSlew) abortSlew=StartAbortSlew; } 
+  CommandErrors e=validateGoto();
+#ifndef CE_GOTO_ERR_GOTO_OFF
+  if (e == CE_GOTO_ERR_GOTO) { if (!abortSlew) abortSlew=StartAbortSlew; } 
 #endif
-  if (r != GOTO_ERR_NONE) return r;
-  r=validateGotoCoords(HA,Dec,a); setLastErrorForGoto(r);
-  if (r != GOTO_ERR_NONE) return r;
+  if (e != CE_NONE) return e;
+  e=validateGotoCoords(HA,Dec,a);
+  if (e != CE_NONE) return e;
 
 #if MOUNT_TYPE == ALTAZM
   equToHor(HA,Dec,&a,&z);
@@ -290,7 +281,7 @@ GotoErrors goToEqu(double RA, double Dec) {
 }
 
 // moves the mount to a new Altitude and Azmiuth (Alt,Azm) in degrees
-GotoErrors goToHor(double *Alt, double *Azm) {
+CommandErrors goToHor(double *Alt, double *Azm) {
   double HA,Dec;
   
   horToEqu(*Alt,*Azm,&HA,&Dec);
@@ -300,7 +291,7 @@ GotoErrors goToHor(double *Alt, double *Azm) {
 }
 
 // moves the mount to a new Hour Angle and Declination - both are in steps.  Alternate targets are used when a meridian flip occurs
-GotoErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTargetAxis1, double altTargetAxis2, int gotoPierSide) {
+CommandErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTargetAxis1, double altTargetAxis2, int gotoPierSide) {
   atHome=false;
   int thisPierSide=getInstrPierSide();
 
@@ -322,7 +313,7 @@ GotoErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTarget
       if ((thisTargetAxis1 > eastOfPierMaxHA) || (thisTargetAxis1 < eastOfPierMinHA)) {
         thisPierSide=PierSideFlipEW1;
         thisTargetAxis1 =altTargetAxis1;
-        if (thisTargetAxis1 > westOfPierMaxHA) return GOTO_ERR_OUTSIDE_LIMITS;
+        if (thisTargetAxis1 > westOfPierMaxHA) return CE_GOTO_ERR_OUTSIDE_LIMITS;
         thisTargetAxis2=altTargetAxis2;
       }
     } else
@@ -330,7 +321,7 @@ GotoErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTarget
       if ((thisTargetAxis1 > westOfPierMaxHA) || (thisTargetAxis1 < westOfPierMinHA)) {
         thisPierSide=PierSideFlipWE1;
         thisTargetAxis1 =altTargetAxis1;
-        if (thisTargetAxis1 < eastOfPierMinHA) return GOTO_ERR_OUTSIDE_LIMITS;
+        if (thisTargetAxis1 < eastOfPierMinHA) return CE_GOTO_ERR_OUTSIDE_LIMITS;
         thisTargetAxis2=altTargetAxis2;
       }
     } else
@@ -356,9 +347,9 @@ GotoErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTarget
   // final validation
 #if MOUNT_TYPE == ALTAZM
   // allow +/- 360 in Az
-  if (((thisTargetAxis1 > AXIS1_LIMIT_MAXAZM) || (thisTargetAxis1 < -AXIS1_LIMIT_MAXAZM)) || ((thisTargetAxis2 > 180.0) || (thisTargetAxis2 < -180.0))) return GOTO_ERR_UNSPECIFIED;
+  if (((thisTargetAxis1 > AXIS1_LIMIT_MAXAZM) || (thisTargetAxis1 < -AXIS1_LIMIT_MAXAZM)) || ((thisTargetAxis2 > 180.0) || (thisTargetAxis2 < -180.0))) return CE_GOTO_ERR_UNSPECIFIED;
 #else
-  if (((thisTargetAxis1 > 180.0) || (thisTargetAxis1 < -180.0)) || ((thisTargetAxis2 > 180.0) || (thisTargetAxis2 < -180.0))) return GOTO_ERR_UNSPECIFIED;
+  if (((thisTargetAxis1 > 180.0) || (thisTargetAxis1 < -180.0)) || ((thisTargetAxis2 > 180.0) || (thisTargetAxis2 < -180.0))) return CE_GOTO_ERR_UNSPECIFIED;
 #endif
   lastTrackingState=trackingState;
 
@@ -395,5 +386,5 @@ GotoErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTarget
   soundAlert();
   stepperModeGoto();
 
-  return GOTO_ERR_NONE;
+  return CE_NONE;
 }

@@ -59,10 +59,13 @@ bool TGeoAlign::isReady() {
 // I=1 for 1st star, I=2 for 2nd star, I=3 for 3rd star
 // N=total number of stars for this align (1 to 9)
 // RA, Dec (all in degrees)
-bool TGeoAlign::addStar(int I, int N, double RA, double Dec) {
+CommandErrors TGeoAlign::addStar(int I, int N, double RA, double Dec) {
 
   // First star, just sync
-  if (I == 1) { if (syncEqu(RA,Dec) != GOTO_ERR_NONE) return false; }
+  if (I == 1) {
+    CommandErrors e=syncEqu(RA,Dec);
+    if (e != CE_NONE) return e;
+  }
 
   mount[I-1].ha=getInstrAxis1()/Rad;
   mount[I-1].dec=getInstrAxis2()/Rad;
@@ -74,7 +77,7 @@ bool TGeoAlign::addStar(int I, int N, double RA, double Dec) {
   // two or more stars and finished
   if ((I >= 2) && (I == N)) model(N);
 
-  return true;
+  return CE_NONE;
 }
 
 // kick off modeling

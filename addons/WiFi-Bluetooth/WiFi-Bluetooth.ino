@@ -86,6 +86,13 @@ Encoders encoders;
   #define sendHtmlDone(x) server.send(200, "text/html", x)
 #endif
 
+bool errorMonitorOn=false;
+struct errors {
+  char cmd[40];
+  byte err;
+};
+struct errors cmdErrorList[10] = { {"-",0},{"-",0},{"-",0},{"-",0},{"-",0},{"-",0},{"-",0},{"-",0},{"-",0},{"-",0} };
+
 int WebTimeout=TIMEOUT_WEB;
 int CmdTimeout=TIMEOUT_CMD;
 
@@ -429,7 +436,7 @@ void loop(void) {
     // send cmd and pickup the response
     if ((b=='#') || ((strlen(writeBuffer)==1) && (b==(char)6))) {
       char readBuffer[40]="";
-      readLX200Bytes(writeBuffer,readBuffer,CmdTimeout); writeBuffer[0]=0; writeBufferPos=0;
+      readLX200Bytes(writeBuffer,readBuffer,CmdTimeout);
 
       // return the response, if we have one
       if (strlen(readBuffer)>0) {
@@ -438,6 +445,20 @@ void loop(void) {
           delay(2);
         }
       }
+
+      if (errorMonitorOn) {
+        char cmd[]=":GE#";
+        readLX200Bytes(cmd,readBuffer,CmdTimeout);
+        if (strlen(readBuffer) == 3) {
+          int e=atoi(readBuffer);
+          if (e>1) {
+            for (int i=8; i>=0; i--) { strcpy(cmdErrorList[i+1].cmd,cmdErrorList[i].cmd); cmdErrorList[i+1].err=cmdErrorList[i].err; }
+            strcpy(cmdErrorList[0].cmd,writeBuffer); cmdErrorList[0].err=e;
+          }
+        } else { strcpy(cmdErrorList[0].cmd,":Ge#"); cmdErrorList[0].err=CE_REPLY_UNKNOWN; }
+      }
+
+      writeBuffer[0]=0; writeBufferPos=0;
 
     } else {
       server.handleClient(); 
@@ -481,7 +502,7 @@ void loop(void) {
     // send cmd and pickup the response
     if ((b=='#') || ((strlen(writeBuffer)==1) && (b==(char)6))) {
       char readBuffer[40]="";
-      readLX200Bytes(writeBuffer,readBuffer,CmdTimeout); writeBuffer[0]=0; writeBufferPos=0;
+      readLX200Bytes(writeBuffer,readBuffer,CmdTimeout);
 
       // return the response, if we have one
       if (strlen(readBuffer)>0) {
@@ -491,6 +512,19 @@ void loop(void) {
         }
       }
 
+      if (errorMonitorOn) {
+        char cmd[]=":GE#";
+        readLX200Bytes(cmd,readBuffer,CmdTimeout);
+        if (strlen(readBuffer) == 3) {
+          int e=atoi(readBuffer);
+          if (e>1) {
+            for (int i=8; i>=0; i--) { strcpy(cmdErrorList[i+1].cmd,cmdErrorList[i].cmd); cmdErrorList[i+1].err=cmdErrorList[i].err; }
+            strcpy(cmdErrorList[0].cmd,writeBuffer); cmdErrorList[0].err=e;
+          }
+        } else { strcpy(cmdErrorList[0].cmd,":Ge#"); cmdErrorList[0].err=CE_REPLY_UNKNOWN; }
+      }
+
+      writeBuffer[0]=0; writeBufferPos=0;
     } else {
       server.handleClient(); 
   #if ENCODERS == ON

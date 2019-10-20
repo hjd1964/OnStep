@@ -81,7 +81,7 @@ void initStartupValues() {
   // where we are
   homeMount           = false;
   atHome              = true;
-  lastError           = ERR_NONE;
+  generalError        = ERR_NONE;
   waitingHome         = false;
   waitingHomeContinue = false;
 

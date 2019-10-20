@@ -40,7 +40,7 @@ class TGeoAlignH
     void readCoe();
     void writeCoe();
     bool isReady();
-    bool addStar(int I, int N, double RA, double Dec);
+    CommandErrors addStar(int I, int N, double RA, double Dec);
     void horToInstr(double Alt, double Azm, double *Alt1, double *Azm1, int PierSide);
     void instrToHor(double Alt, double Azm, double *Alt1, double *Azm1, int PierSide);
     void autoModel(int n);
@@ -101,7 +101,7 @@ class TGeoAlign
     void readCoe();
     void writeCoe();
     bool isReady();
-    bool addStar(int I, int N, double RA, double Dec);
+    CommandErrors addStar(int I, int N, double RA, double Dec);
     void equToInstr(double HA, double Dec, double *HA1, double *Dec1, int PierSide);
     void instrToEqu(double HA, double Dec, double *HA1, double *Dec1, int PierSide);
     void autoModel(int n);
@@ -141,13 +141,14 @@ boolean alignActive() {
 }
 
 // adds an alignment star, returns true on success
-boolean alignStar() {
+CommandErrors alignStar() {
   // after last star turn meridian flips off when align is done
   if ((alignNumStars == alignThisStar) && (meridianFlip == MeridianFlipAlign)) meridianFlip=MeridianFlipNever;
 
   if (alignThisStar <= alignNumStars) {
-    if (Align.addStar(alignThisStar,alignNumStars,newTargetRA,newTargetDec)) alignThisStar++; else return false;
-  } else return false;
+    CommandErrors e=Align.addStar(alignThisStar,alignNumStars,newTargetRA,newTargetDec);
+    if (e == CE_NONE) alignThisStar++; else return e;
+  } else return CE_PARAM_RANGE;
 
-  return true;
+  return CE_NONE;
 }

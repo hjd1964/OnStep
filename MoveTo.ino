@@ -177,7 +177,7 @@ void moveTo() {
   if (!slewEnding && (distDestAxis1 <= getStepsPerSecondAxis1()*4.0) && (distDestAxis2 <= getStepsPerSecondAxis2()*4.0) ) { slewStopTime=millis()+4000L; slewEnding=true; }
   if (slewEnding && ((long)(millis()-slewStopTime) > 0)) {
     if (abortSlew != 0) { cli(); targetAxis1.part.m=posAxis1; targetAxis2.part.m=posAxis2; sei(); }
-    lastError=ERR_GOTO_SYNC;
+    generalError=ERR_GOTO_SYNC;
     slewForceEnd=true;
   }
 
@@ -302,10 +302,6 @@ uint32_t isqrt32 (uint32_t n) {
         place = place >> 2;
     }
     return root;
-}
-
-void stopLimit() {
-  if (trackingState == TrackingMoveTo) { if (!abortSlew) abortSlew=StartAbortSlew; } else trackingState=TrackingNone;
 }
 
 // check for platform rate limit (lowest maxRate) in 1/16us units

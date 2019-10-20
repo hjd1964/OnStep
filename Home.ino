@@ -15,7 +15,7 @@ void checkHome() {
       if ((guideDirAxis1 == 'e') || (guideDirAxis1 == 'w')) guideDirAxis1='b';
       if ((guideDirAxis2 == 'n') || (guideDirAxis2 == 's')) guideDirAxis2='b';
       safetyLimitsOn=true;
-      lastError=ERR_LIMIT_SENSE;
+      generalError=ERR_LIMIT_SENSE;
       findHomeMode=FH_OFF;
     } else {
       if ((digitalRead(Axis1HomePin) != PierSideStateAxis1) && ((guideDirAxis1 == 'e') || (guideDirAxis1 == 'w'))) StopAxis1();
@@ -46,16 +46,13 @@ void StopAxis2() {
 #endif
 
 // moves telescope to the home position, then stops tracking
-GotoErrors goHome(boolean fast) {
-
-  GotoErrors f=validateGoto();
+CommandErrors goHome(boolean fast) {
+  CommandErrors e=validateGoto();
   
 #if HOME_SENSE == ON
+  if ((e != CE_NONE) && (e != CE_SLEW_ERR_IN_STANDBY)) return e;
 
-  // goto allowed?
-  if ((f != GOTO_ERR_NONE) && (f != GOTO_ERR_STANDBY)) return f; 
-
-  if (findHomeMode != FH_OFF) return GOTO_ERR_IN_MOTION; // guide allowed?
+  if (findHomeMode != FH_OFF) return CE_MOUNT_IN_MOTION;
 
   // stop tracking
   trackingState=TrackingNone;
@@ -64,8 +61,6 @@ GotoErrors goHome(boolean fast) {
   char a1; if (digitalRead(Axis1HomePin) == HOME_SENSE_STATE_AXIS2) a1='w'; else a1='e';
   char a2; if (digitalRead(Axis2HomePin) == HOME_SENSE_STATE_AXIS2) a2='n'; else a2='s';
 
- // if (getInstrPierSide() == PierSideWest) { if (a2 == 'n') a2='s'; else a2='n'; }
-  
   // attach interrupts to stop guide
   PierSideStateAxis1=digitalRead(Axis1HomePin);
   PierSideStateAxis2=digitalRead(Axis2HomePin);
@@ -82,27 +77,29 @@ GotoErrors goHome(boolean fast) {
     enableStepperDrivers();
 
     findHomeMode=FH_FAST;
-    // 8=HalfMaxRate
     double secPerDeg=3600.0/(double)guideRates[8];
     findHomeTimeout=millis()+(unsigned long)(secPerDeg*180.0*1000.0);
-    startGuideAxis1(a1,8,0);
-    startGuideAxis2(a2,8,0,true);
+    
+    // 8=HalfMaxRate
+    e=startGuideAxis1(a1,8,0);
+    if (e == CE_NONE) e=startGuideAxis2(a2,8,0,true);
   } else {
     findHomeMode=FH_SLOW;
     findHomeTimeout=millis()+30000UL;
-    startGuideAxis1(a1,7,0);       // 7=48x sidereal
-    startGuideAxis2(a2,7,0,true);
+    
+    // 7=48x sidereal
+    e=startGuideAxis1(a1,7,0);
+    if (e == CE_NONE) e=startGuideAxis2(a2,7,0,true);
   }
-
+  if (e != CE_NONE) stopSlewing();
+  return e;
 #else
-  // goto allowed?
-  if (f != GOTO_ERR_NONE) return f; 
+  if (e != CE_NONE) return e; 
 
-  goTo(homePositionAxis1,homePositionAxis2,homePositionAxis1,homePositionAxis2,PierSideEast);
+  e=goTo(homePositionAxis1,homePositionAxis2,homePositionAxis1,homePositionAxis2,PierSideEast);
   homeMount=true;
+  return e;
 #endif
-  
-  return GOTO_ERR_NONE;
 }
 
 boolean isHoming() {
@@ -115,21 +112,18 @@ boolean isHoming() {
 
 // sets telescope home position; user manually moves to Hour Angle 90 and Declination 90 (CWD position),
 // then the first gotoEqu will set the pier side and turn on tracking
-GotoErrors setHome() {
-  if (guideDirAxis1 || guideDirAxis2) return GOTO_ERR_IN_MOTION;
+CommandErrors setHome() {
+  if (isSlewing()) return CE_MOUNT_IN_MOTION;
+
+  // back to startup state
   reactivateBacklashComp();
-
-  if (trackingState == TrackingMoveTo)  return GOTO_ERR_GOTO;
-
   initStartupValues();
-
-  // make sure limits are on
+  currentAlt=45.0;
+  doFastAltCalc(true);
   safetyLimitsOn=true;
 
   // no errors
-  currentAlt=45.0;
-  doFastAltCalc(true);
-  lastError=ERR_NONE;
+  generalError=ERR_NONE;
 
   // initialize and disable the stepper drivers
   StepperModeTrackingInit();
@@ -151,5 +145,5 @@ GotoErrors setHome() {
   // the polar home position
   InitStartPosition();
   
-  return GOTO_ERR_NONE;
+  return CE_NONE;
 }

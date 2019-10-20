@@ -117,18 +117,25 @@ void deactivateBacklashComp() {
 }
 
 // start a guide in RA or Azm, direction must be 'e', 'w', or 'b', guideRate is the rate selection (0 to 9), guideDuration is in ms (0 to ignore) 
-bool startGuideAxis1(char direction, int guideRate, long guideDuration) {
-  if ((parkStatus == NotParked) && (trackingState != TrackingMoveTo) && (!trackingSyncInProgress()) && (direction != guideDirAxis1) && (axis1Enabled)) {
-    if (guideRate < 3) deactivateBacklashComp(); else reactivateBacklashComp();
-    enableGuideRate(guideRate);
-    guideDirAxis1=direction;
-    guideTimeThisIntervalAxis1=micros();
-    guideTimeRemainingAxis1=guideDuration*1000L;
-    cli();
-    if (guideDirAxis1 == 'e') guideTimerRateAxis1=-guideTimerBaseRateAxis1; else guideTimerRateAxis1=guideTimerBaseRateAxis1; 
-    sei();
-  } else return false;
-  return true;
+CommandErrors startGuideAxis1(char direction, int guideRate, long guideDuration) {
+  // Check state
+  if (faultAxis1)                       return CE_SLEW_ERR_HARDWARE_FAULT;
+  if (!axis1Enabled)                    return CE_SLEW_ERR_IN_STANDBY;
+  if (parkStatus == Parked)             return CE_SLEW_ERR_IN_PARK;
+  if (trackingSyncInProgress())         return CE_MOUNT_IN_MOTION;
+  if (trackingState == TrackingMoveTo)  return CE_MOUNT_IN_MOTION;
+  if (direction == guideDirAxis1)       return CE_NONE;
+  
+  if (guideRate < 3) deactivateBacklashComp(); else reactivateBacklashComp();
+  enableGuideRate(guideRate);
+  guideDirAxis1=direction;
+  guideTimeThisIntervalAxis1=micros();
+  guideTimeRemainingAxis1=guideDuration*1000L;
+  cli();
+  if (guideDirAxis1 == 'e') guideTimerRateAxis1=-guideTimerBaseRateAxis1; else guideTimerRateAxis1=guideTimerBaseRateAxis1; 
+  sei();
+  
+  return CE_NONE;
 }
 
 // stops guide in RA or Azm
@@ -139,21 +146,27 @@ void stopGuideAxis1() {
 }
 
 // start a guide in Dec or Alt, direction must be 'n', 's', or 'b', guideRate is the rate selection (0 to 9), guideDuration is in ms (0 to ignore) 
-bool startGuideAxis2(char direction, int guideRate, long guideDuration, bool absolute) {
-  if (((parkStatus == NotParked) && (trackingState != TrackingMoveTo)) && (!trackingSyncInProgress()) && (direction != guideDirAxis2) && (axis1Enabled)) {
-    enableGuideRate(guideRate);
-    if (guideRate < 3) deactivateBacklashComp(); else reactivateBacklashComp();
-    guideDirAxis2=direction;
-    guideTimeThisIntervalAxis2=micros();
-    guideTimeRemainingAxis2=guideDuration*1000L;
-    if (guideDirAxis2 == 's') { cli(); guideTimerRateAxis2=-guideTimerBaseRateAxis2; sei(); } 
-    if (guideDirAxis2 == 'n') { cli(); guideTimerRateAxis2= guideTimerBaseRateAxis2; sei(); }
-    if (!absolute && (getInstrPierSide() == PierSideWest)) { cli(); guideTimerRateAxis2=-guideTimerRateAxis2; sei(); }
-  } else return false;
-  return true;
+CommandErrors startGuideAxis2(char direction, int guideRate, long guideDuration, bool absolute) {
+  if (faultAxis2)                       return CE_SLEW_ERR_HARDWARE_FAULT;
+  if (!axis1Enabled)                    return CE_SLEW_ERR_IN_STANDBY;
+  if (parkStatus == Parked)             return CE_SLEW_ERR_IN_PARK;
+  if (trackingSyncInProgress())         return CE_MOUNT_IN_MOTION;
+  if (trackingState == TrackingMoveTo)  return CE_MOUNT_IN_MOTION;
+  if (direction == guideDirAxis2)       return CE_NONE;
+
+  enableGuideRate(guideRate);
+  if (guideRate < 3) deactivateBacklashComp(); else reactivateBacklashComp();
+  guideDirAxis2=direction;
+  guideTimeThisIntervalAxis2=micros();
+  guideTimeRemainingAxis2=guideDuration*1000L;
+  if (guideDirAxis2 == 's') { cli(); guideTimerRateAxis2=-guideTimerBaseRateAxis2; sei(); } 
+  if (guideDirAxis2 == 'n') { cli(); guideTimerRateAxis2= guideTimerBaseRateAxis2; sei(); }
+  if (!absolute && (getInstrPierSide() == PierSideWest)) { cli(); guideTimerRateAxis2=-guideTimerRateAxis2; sei(); }
+
+  return CE_NONE;
 }
 
-bool startGuideAxis2(char direction, int guideRate, long guideDuration) {
+CommandErrors startGuideAxis2(char direction, int guideRate, long guideDuration) {
   return startGuideAxis2(direction, guideRate, guideDuration, false);
 }
 
@@ -383,7 +396,7 @@ void ST4() {
 #endif
             {
 #if SEPARATE_PULSE_GUIDE_RATE == ON && ST4_HAND_CONTROL != ON
-            if (trackingState == TrackingSidereal) startGuideAxis1(newDirAxis1,currentPulseGuideRate,GUIDE_TIME_LIMIT*1000);
+            startGuideAxis1(newDirAxis1,currentPulseGuideRate,GUIDE_TIME_LIMIT*1000);
 #else
             startGuideAxis1(newDirAxis1,currentGuideRate,GUIDE_TIME_LIMIT*1000);
 #endif
@@ -406,7 +419,7 @@ void ST4() {
 #endif
           {
 #if SEPARATE_PULSE_GUIDE_RATE == ON && ST4_HAND_CONTROL != ON
-            if (trackingState == TrackingSidereal) startGuideAxis2(newDirAxis2,currentPulseGuideRate,GUIDE_TIME_LIMIT*1000);
+            startGuideAxis2(newDirAxis2,currentPulseGuideRate,GUIDE_TIME_LIMIT*1000);
 #else
             startGuideAxis2(newDirAxis2,currentGuideRate,GUIDE_TIME_LIMIT*1000);
 #endif

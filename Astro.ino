@@ -50,7 +50,7 @@ boolean hmsToDouble(double *f, char *hms) {
 }
 
 // convert double to string in a variety of formats (as above) 
-boolean doubleToHms(char *reply, double *f, boolean hp) {
+void doubleToHms(char *reply, double *f, boolean hp) {
   double h1,m1,f1,s1;
 
   f1=fabs(*f)+0.000139; // round to 0.5 sec
@@ -69,12 +69,10 @@ boolean doubleToHms(char *reply, double *f, boolean hp) {
   char sign[2]="";
   if (((s1 != 0) || (m1 != 0) || (h1 != 0)) && (*f < 0.0)) strcpy(sign,"-");
   sprintf(reply,s,sign,(int)h1,(int)m1,(int)s1);
-
-  return true;
 }
 
 // convert double to string in format HH:MM:SS.SSSS
-boolean doubleToHmsd(char *reply, double *f) {
+void doubleToHmsd(char *reply, double *f) {
   double h1,m1,f1,s1,sd;
 
   f1=fabs(*f)+0.0000000139; // round to 0.00005 sec
@@ -87,8 +85,6 @@ boolean doubleToHmsd(char *reply, double *f) {
   char sign[2]="";
   if (((sd != 0) || (s1 != 0) || (m1 != 0) || (h1 != 0)) && (*f < 0.0)) strcpy(sign,"-");
   sprintf(reply,s,sign,(int)h1,(int)m1,(int)s1,(int)sd);
-
-  return true;
 }
 
 // convert string in format sDD:MM:SS to double
@@ -153,7 +149,7 @@ boolean dmsToDouble(double *f, char *dms, boolean sign_present) {
 }
 
 // convert double to string in a variety of formats (as above) 
-boolean doubleToDms(char *reply, double *f, boolean fullRange, boolean signPresent) {
+void doubleToDms(char *reply, double *f, boolean fullRange, boolean signPresent) {
   char sign[]="+";
   int  o=0,d1,s1=0;
   double m1,f1;
@@ -182,11 +178,10 @@ boolean doubleToDms(char *reply, double *f, boolean fullRange, boolean signPrese
     s[9+o]=0;
     sprintf(reply,s,d1,(int)m1);
   }
-  return true;
 }
 
 // convert double to string in format sDD:MM:SS.SSS
-boolean doubleToDmsd(char *reply, double *f) {
+void doubleToDmsd(char *reply, double *f) {
   char sign[]="+";
   double d1,m1,s1,s2,f1;
   f1=*f;
@@ -203,8 +198,6 @@ boolean doubleToDmsd(char *reply, double *f) {
   char s[]="+%02d*%02d:%02d.%03d";
   if (sign[0] == '-') { s[0]='-'; }
   sprintf(reply,s,(int)d1,(int)m1,(int)s1,(int)s2);
-
-  return true;
 }
 
 // convert timezone to string in format sHHH:MM[:SS]

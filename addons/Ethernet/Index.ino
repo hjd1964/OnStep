@@ -50,7 +50,8 @@ const char html_indexMaxSpeed[] PROGMEM = "&nbsp;&nbsp;Maximum slew speed: <font
 const char html_indexTPHD[] PROGMEM = "&nbsp;&nbsp;%s <font class='c'>%s</font>%s<br />";
 
 const char html_indexDriverStatus[] PROGMEM = " Driver: <font class='c'>%s</font><br />";
-const char html_indexLastError[] PROGMEM = "&nbsp;&nbsp;Last Error: <font class='c'>%s</font><br />";
+const char html_indexGeneralError[] PROGMEM = "&nbsp;&nbsp;Last General (Background) Error: <font class='c'>%s</font><br />";
+const char html_indexCmdErrorLog[] PROGMEM = "&nbsp;&nbsp;&nbsp;&nbsp;%s %s<br />";
 const char html_indexWorkload[] PROGMEM = "&nbsp;&nbsp;Workload: <font class='c'>%s</font><br />";
 #if DISPLAY_WIFI_SIGNAL_STRENGTH == ON
 const char html_indexSignalStrength[] PROGMEM = "&nbsp;&nbsp;Wireless signal strength: <font class=\"c\">%s</font><br />";
@@ -347,13 +348,23 @@ void handleRoot() {
   if (!sendCommand(":GX9F#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,"Controller Internal Temperature:",temp1,"&deg;C"); data+=temp;
 #endif
 
-  // Last Error
+  // General Error
   if (mountStatus.lastError()!=ERR_NONE) strcpy(temp1,"</font><font class=\"y\">"); else strcpy(temp1,"");
   mountStatus.getLastErrorMessage(temp2);
   strcat(temp1,temp2);
   if (!mountStatus.valid()) strcpy(temp1,"?");
-  sprintf_P(temp,html_indexLastError,temp1);
+  sprintf_P(temp,html_indexGeneralError,temp1);
   data += temp;
+
+  // Error monitor
+  if (errorMonitorOn) {
+    data += "&nbsp;&nbsp;Command Error Log:<br /><font class='c'>";
+    for (int i=0; i<10; i++) {
+      sprintf_P(temp,html_indexCmdErrorLog,cmdErrorList[i].cmd,commandErrorToStr(cmdErrorList[i].err));
+      data += temp;
+    }
+    data += "</font><br />";
+  }
 
   // Loop time
   if (!sendCommand(":GXFA#",temp1)) strcpy(temp1,"?%");

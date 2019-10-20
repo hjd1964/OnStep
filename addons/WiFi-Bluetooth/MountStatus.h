@@ -2,7 +2,11 @@
 
 enum RateCompensation {RC_NONE, RC_REFR_RA, RC_REFR_BOTH, RC_FULL_RA, RC_FULL_BOTH};
 enum MountTypes {MT_UNKNOWN, MT_GEM, MT_FORK, MT_FORKALT, MT_ALTAZM};
-enum Errors {ERR_NONE, ERR_MOTOR_FAULT, ERR_ALT_MIN, ERR_LIMIT_SENSE, ERR_DEC, ERR_AZM, ERR_UNDER_POLE, ERR_MERIDIAN, ERR_SYNC, ERR_PARK, ERR_GOTO_SYNC, ERR_UNSPECIFIED, ERR_ALT_MAX, ERR_GOTO_ERR_NONE, ERR_GOTO_ERR_BELOW_HORIZON, ERR_GOTO_ERR_ABOVE_OVERHEAD, ERR_GOTO_ERR_STANDBY, ERR_GOTO_ERR_PARK, ERR_GOTO_ERR_GOTO, ERR_GOTO_ERR_OUTSIDE_LIMITS, ERR_GOTO_ERR_HARDWARE_FAULT, ERR_GOTO_ERR_IN_MOTION, ERR_GOTO_ERR_UNSPECIFIED};
+enum Errors {
+  ERR_NONE, ERR_MOTOR_FAULT, ERR_ALT_MIN, ERR_LIMIT_SENSE, ERR_DEC, ERR_AZM, 
+  ERR_UNDER_POLE, ERR_MERIDIAN, ERR_SYNC, ERR_PARK, ERR_GOTO_SYNC, ERR_UNSPECIFIED,
+  ERR_ALT_MAX};
+
 #define PierSideNone     0
 #define PierSideEast     1
 #define PierSideWest     2
@@ -160,28 +164,18 @@ class MountStatus {
     bool getLastErrorMessage(char message[]) {
       strcpy(message,"");
       if (_lastError==ERR_NONE) strcpy(message,"None"); else
-      if (_lastError==ERR_MOTOR_FAULT) strcpy(message,"Motor/Driver Fault"); else
-      if (_lastError==ERR_ALT_MIN) strcpy(message,"Below Horizon Limit"); else
-      if (_lastError==ERR_LIMIT_SENSE) strcpy(message,"Limit Sense"); else
-      if (_lastError==ERR_DEC) strcpy(message,"Dec Limit Exceeded"); else
-      if (_lastError==ERR_AZM) strcpy(message,"Azm Limit Exceeded"); else
-      if (_lastError==ERR_UNDER_POLE) strcpy(message,"Under Pole Limit Exceeded"); else
-      if (_lastError==ERR_MERIDIAN) strcpy(message,"Meridian Limit (W) Exceeded"); else
-      if (_lastError==ERR_SYNC) strcpy(message,"Sync Safety Limit Exceeded"); else
-      if (_lastError==ERR_PARK) strcpy(message,"Park Failed"); else
-      if (_lastError==ERR_GOTO_SYNC) strcpy(message,"Goto Sync Failed"); else
-      if (_lastError==ERR_UNSPECIFIED) strcpy(message,"Unknown Error"); else
-      if (_lastError==ERR_ALT_MAX) strcpy(message,"Above Overhead Limit"); else
-      if (_lastError==ERR_GOTO_ERR_NONE) strcpy(message,"Goto No Error"); else
-      if (_lastError==ERR_GOTO_ERR_BELOW_HORIZON) strcpy(message, "Goto Below Horizon"); else
-      if (_lastError==ERR_GOTO_ERR_ABOVE_OVERHEAD) strcpy(message,"Goto Abv Overhead"); else
-      if (_lastError==ERR_GOTO_ERR_STANDBY) strcpy(message,"Goto Err Standby"); else
-      if (_lastError==ERR_GOTO_ERR_PARK) strcpy(message,"Goto Err Park"); else
-      if (_lastError==ERR_GOTO_ERR_GOTO) strcpy(message,"Goto Err Goto"); else
-      if (_lastError==ERR_GOTO_ERR_OUTSIDE_LIMITS) strcpy(message,"Goto Outside Limits"); else
-      if (_lastError==ERR_GOTO_ERR_HARDWARE_FAULT) strcpy(message,"Goto H/W Fault"); else
-      if (_lastError==ERR_GOTO_ERR_IN_MOTION) strcpy(message,"Goto Err Motion"); else
-      if (_lastError==ERR_GOTO_ERR_UNSPECIFIED) strcpy(message,"Goto Unknown Error"); else
+      if (_lastError==ERR_MOTOR_FAULT) strcpy(message,"Motor/driver fault"); else
+      if (_lastError==ERR_ALT_MIN) strcpy(message,"Below horizon limit"); else
+      if (_lastError==ERR_LIMIT_SENSE) strcpy(message,"Limit sense"); else
+      if (_lastError==ERR_DEC) strcpy(message,"Dec limit exceeded"); else
+      if (_lastError==ERR_AZM) strcpy(message,"Azm limit exceeded"); else
+      if (_lastError==ERR_UNDER_POLE) strcpy(message,"Under pole limit exceeded"); else
+      if (_lastError==ERR_MERIDIAN) strcpy(message,"Meridian limit (W) exceeded"); else
+      if (_lastError==ERR_SYNC) strcpy(message,"Sync safety limit exceeded"); else
+      if (_lastError==ERR_PARK) strcpy(message,"Park failed"); else
+      if (_lastError==ERR_GOTO_SYNC) strcpy(message,"Goto sync failed"); else
+      if (_lastError==ERR_UNSPECIFIED) strcpy(message,"Unknown error"); else
+      if (_lastError==ERR_ALT_MAX) strcpy(message,"Above overhead limit"); else
         sprintf(message,"Unknown Error, code %d",(int)_lastError);
       return message[0];
     }
@@ -235,3 +229,46 @@ class MountStatus {
 };
 
 MountStatus mountStatus;
+
+enum CommandErrors {
+  CE_NONE, CE_0, CE_CMD_UNKNOWN, CE_REPLY_UNKNOWN, CE_PARAM_RANGE, CE_PARAM_FORM,
+  CE_ALIGN_FAIL, CE_ALIGN_NOT_ACTIVE, CE_NOT_PARKED_OR_AT_HOME, CE_PARKED,
+  CE_PARK_FAILED, CE_NOT_PARKED, CE_NO_PARK_POSITION_SET, CE_GOTO_FAIL, CE_LIBRARY_FULL,
+  CE_GOTO_ERR_BELOW_HORIZON, CE_GOTO_ERR_ABOVE_OVERHEAD, CE_SLEW_ERR_IN_STANDBY, 
+  CE_SLEW_ERR_IN_PARK, CE_GOTO_ERR_GOTO, CE_GOTO_ERR_OUTSIDE_LIMITS, CE_SLEW_ERR_HARDWARE_FAULT,
+  CE_MOUNT_IN_MOTION, CE_GOTO_ERR_UNSPECIFIED, CE_NULL};
+
+char* commandErrorToStr(int e) {
+  static char reply[40];
+  strcpy(reply,"Error - ");
+  
+  switch (e) {
+    case CE_NONE: strcpy(reply,"-"); break;
+    case CE_0: strcpy(reply,"-"); break;
+    case CE_CMD_UNKNOWN: strcat(reply,"Command unknown"); break;
+    case CE_REPLY_UNKNOWN: strcat(reply,"Invalid reply"); break;
+    case CE_PARAM_RANGE: strcat(reply,"Parameter out of range"); break;
+    case CE_PARAM_FORM: strcat(reply,"Parameter form"); break;
+    case CE_ALIGN_FAIL: strcat(reply,"Align Failed"); break;
+    case CE_ALIGN_NOT_ACTIVE: strcat(reply,"Align not active"); break;
+    case CE_NOT_PARKED_OR_AT_HOME: strcat(reply,"Not parked or at home"); break;
+    case CE_PARKED: strcat(reply,"Already parked"); break;
+    case CE_PARK_FAILED: strcat(reply,"Park failed"); break;
+    case CE_NOT_PARKED: strcat(reply,"Not parked"); break;
+    case CE_NO_PARK_POSITION_SET: strcat(reply,"No park position set"); break;
+    case CE_GOTO_FAIL: strcat(reply,"Goto failed"); break;
+    case CE_LIBRARY_FULL: strcat(reply,"Library full"); break;
+    case CE_GOTO_ERR_BELOW_HORIZON: strcat(reply,"Goto below horizon"); break;
+    case CE_GOTO_ERR_ABOVE_OVERHEAD: strcat(reply,"Goto above overhead"); break;
+    case CE_SLEW_ERR_IN_STANDBY: strcat(reply,"Slew in standby"); break;
+    case CE_SLEW_ERR_IN_PARK: strcat(reply,"Slew in park"); break;
+    case CE_GOTO_ERR_GOTO: strcat(reply,"Already in goto"); break;
+    case CE_GOTO_ERR_OUTSIDE_LIMITS: strcat(reply,"Goto outside limits"); break;
+    case CE_SLEW_ERR_HARDWARE_FAULT: strcat(reply,"Hardware fault"); break;
+    case CE_MOUNT_IN_MOTION: strcat(reply,"Mount in motion"); break;
+    case CE_GOTO_ERR_UNSPECIFIED: strcat(reply,"Other"); break;
+    default: strcat(reply,"Unknown");
+  }
+
+  return reply;
+}

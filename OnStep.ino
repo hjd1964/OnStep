@@ -317,6 +317,17 @@ void setup() {
   // prep counters (for keeping time in main loop)
   cli(); siderealTimer=lst; guideSiderealTimer=lst; PecSiderealTimer=lst; sei();
   last_loop_micros=micros();
+
+  // finally clear the comms channels
+  delay(500);
+  SerialA.flush();
+#ifdef HAL_SERIAL_B_ENABLED
+  SerialB.flush();
+#endif
+#ifdef HAL_SERIAL_C_ENABLED
+  SerialC.flush();
+#endif
+  delay(500);
 }
 
 void loop() {
@@ -415,7 +426,7 @@ void loop2() {
       byte limit_2nd = digitalRead(LimitPin);
       if (limit_2nd == LIMIT_SENSE_STATE) {
         // It is still low, there must be a problem
-        lastError=ERR_LIMIT_SENSE;
+        generalError=ERR_LIMIT_SENSE;
         stopLimit();
       }
     }
@@ -433,12 +444,12 @@ void loop2() {
     if (lst%2 == 1) faultAxis2=tmcAxis2.error();
 #endif
 
-    if (faultAxis1 || faultAxis2) { lastError=ERR_MOTOR_FAULT; if (trackingState == TrackingMoveTo) { if (!abortSlew) abortSlew=StartAbortSlew; } else { trackingState=TrackingNone; if (guideDirAxis1) guideDirAxis1='b'; if (guideDirAxis2) guideDirAxis2='b'; } }
+    if (faultAxis1 || faultAxis2) { generalError=ERR_MOTOR_FAULT; if (trackingState == TrackingMoveTo) { if (!abortSlew) abortSlew=StartAbortSlew; } else { trackingState=TrackingNone; if (guideDirAxis1) guideDirAxis1='b'; if (guideDirAxis2) guideDirAxis2='b'; } }
 
     if (safetyLimitsOn) {
       // check altitude overhead limit and horizon limit
-      if (currentAlt < minAlt) { lastError=ERR_ALT_MIN; stopLimit(); }
-      if (currentAlt > maxAlt) { lastError=ERR_ALT_MAX; stopLimit(); }
+      if (currentAlt < minAlt) { generalError=ERR_ALT_MIN; stopLimit(); }
+      if (currentAlt > maxAlt) { generalError=ERR_ALT_MAX; stopLimit(); }
     }
 
     // OPTION TO POWER DOWN AXIS2 IF NOT MOVING
@@ -544,29 +555,29 @@ void loop2() {
         if (getInstrPierSide() == PierSideWest) {
           if (getInstrAxis1() > degreesPastMeridianW) {
             if (autoMeridianFlip) {
-              if (goToHere(true)) { lastError=ERR_MERIDIAN; trackingState=TrackingNone; }
+              if (goToHere(true) != CE_NONE) { generalError=ERR_MERIDIAN; trackingState=TrackingNone; }
             } else {
-              lastError=ERR_MERIDIAN; stopLimit();
+              generalError=ERR_MERIDIAN; stopLimit();
             }
           }
         } else
         if (getInstrPierSide() == PierSideEast) {
-          if (getInstrAxis1() < -degreesPastMeridianE) { lastError=ERR_MERIDIAN; stopLimit(); }
-          if (getInstrAxis1() > AXIS1_LIMIT_UNDER_POLE) { lastError=ERR_UNDER_POLE; stopLimit(); }
+          if (getInstrAxis1() < -degreesPastMeridianE) { generalError=ERR_MERIDIAN; stopLimit(); }
+          if (getInstrAxis1() > AXIS1_LIMIT_UNDER_POLE) { generalError=ERR_UNDER_POLE; stopLimit(); }
         }
       } else {
 #if MOUNT_TYPE != ALTAZM
         // when Fork mounted, ignore pierSide and just stop the mount if it passes the UnderPoleLimit
-        if (getInstrAxis1() > AXIS1_LIMIT_UNDER_POLE) { lastError=ERR_UNDER_POLE; stopLimit(); }
+        if (getInstrAxis1() > AXIS1_LIMIT_UNDER_POLE) { generalError=ERR_UNDER_POLE; stopLimit(); }
 #else
         // when Alt/Azm mounted, just stop the mount if it passes AXIS1_LIMIT_MAXAZM
-        if (getInstrAxis1() > AXIS1_LIMIT_MAXAZM) { lastError=ERR_AZM; stopLimit(); }
+        if (getInstrAxis1() > AXIS1_LIMIT_MAXAZM) { generalError=ERR_AZM; stopLimit(); }
 #endif
       }
     }
     // check for exceeding AXIS2_LIMIT_MIN or AXIS2_LIMIT_MAX
 #if MOUNT_TYPE != ALTAZM
-    if ((currentDec < AXIS2_LIMIT_MIN) || (currentDec > AXIS2_LIMIT_MAX)) { lastError=ERR_DEC; stopLimit(); }
+    if ((currentDec < AXIS2_LIMIT_MIN) || (currentDec > AXIS2_LIMIT_MAX)) { generalError=ERR_DEC; stopLimit(); }
 #endif
 
     // update weather info

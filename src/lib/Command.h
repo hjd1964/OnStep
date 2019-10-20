@@ -6,6 +6,7 @@
 class cb {
   public:
     bool checksum = false;
+    CommandErrors lastError = CE_NONE;
     bool add(char c) {
       // (chr)6 is a special status command for the LX200 protocol
       if ((c == (char)6) && (cbp == 0)) {

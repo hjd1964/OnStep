@@ -57,6 +57,13 @@ const char html_settingsMFPause2[] PROGMEM =
 "<button name='mp' value='on' type='submit'>On</button>"
 "<button name='mp' value='off' type='submit'>Off</button>\r\n";
 
+const char html_settingsCmdErrLog1[] PROGMEM =
+"<br /><br />Command Error Log (";
+const char html_settingsCmdErrLog2[] PROGMEM =
+"): <br />"
+"<button name='cel' value='on' type='submit'>On</button>"
+"<button name='cel' value='off' type='submit'>Off</button>\r\n";
+
 const char html_settingsEnd[] PROGMEM =
 "</form>\r\n";
 
@@ -137,6 +144,7 @@ void handleSettings() {
     data += FPSTR(html_settingsTrackComp2);
   }
   sendHtml(data);
+
   data += FPSTR(html_settingsBuzzer1);
   if (mountStatus.valid()) { if (mountStatus.buzzerEnabled()) data+="On"; else data+="Off"; } else data+="?";
   data += FPSTR(html_settingsBuzzer2);
@@ -149,6 +157,10 @@ void handleSettings() {
     if (mountStatus.valid()) { if (mountStatus.pauseAtHome()) data+="On"; else data+="Off"; } else data+="?";
     data += FPSTR(html_settingsMFPause2);
   }
+
+  data += FPSTR(html_settingsCmdErrLog1);
+  if (errorMonitorOn) data+="On"; else data+="Off";
+  data += FPSTR(html_settingsCmdErrLog2);
 
   data += FPSTR(html_settingsEnd);
 
@@ -231,6 +243,12 @@ void processSettingsGet() {
   if (v!="") {
     if (v=="on") Ser.print(":SX98,1#");
     if (v=="off") Ser.print(":SX98,0#");
+  }
+  // Command error logging
+  v=server.arg("cel");
+  if (v!="") {
+    if (v=="on") errorMonitorOn=true;
+    if (v=="off") errorMonitorOn=false;
   }
 
   // clear any possible response

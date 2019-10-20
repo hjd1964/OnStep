@@ -60,8 +60,9 @@
 // various RTC's supported
 #define RTC_FIRST                   1
 #define DS3231                      1 // DS3231 RTC on I2C
-#define DS3234S                     2 // DS3234 RTC on SPI (DS3234_CS_PIN) Sparkfun Library
-#define DS3234M                     3 // DS3234 RTC on SPI (DS3234_CS_PIN) Makuna library
+#define DS3234                      2 // Alias for DS3234M
+#define DS3234M                     2 // DS3234 RTC on SPI (DS3234_CS_PIN) Makuna library
+#define DS3234S                     3 // DS3234 RTC on SPI (DS3234_CS_PIN) Sparkfun Library
 #define TEENSY                      4 // TEENSY3.2 RTC (Built-in)
 #define RTC_LAST                    4
 
