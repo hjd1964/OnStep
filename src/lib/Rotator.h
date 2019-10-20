@@ -286,10 +286,10 @@ class rotator {
     long lastPos=0;
 
     // automatic movement
-    double moveRate=0.0;
+    double moveRate=0.1;
     fixed_t delta;
     fixed_t deltaDR;
-    double increment=0.0;
+    double increment=1.0;
     
     // timing
     unsigned long lastMs=0;
