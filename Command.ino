@@ -258,7 +258,7 @@ void processCommands() {
 #if SERIAL_B_ESP_FLASHING == ON
 //   E - Enter special mode
 //  :ESPFLASH# ESP8266 device flash mode
-//         Returns: Never (infinite loop)
+//         Return: 1 on completion (after up to one minute from start of command.)
 //       OnStep must be at home and tracking turned off for this command to work.  A power cycle is required to resume normal operation.
       if (command[0] == 'E') {
         if (command[1] == 'S' && parameter[0] == 'P' && parameter[1] == 'F' && parameter[2] == 'L' && parameter[3] == 'A' && parameter[4] == 'S' && parameter[5] == 'H' && parameter[6] == 0) {
