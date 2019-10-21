@@ -449,13 +449,12 @@ void loop(void) {
       if (errorMonitorOn) {
         char cmd[]=":GE#";
         readLX200Bytes(cmd,readBuffer,CmdTimeout);
-        if (strlen(readBuffer) == 3) {
-          int e=atoi(readBuffer);
-          if (e>1) {
-            for (int i=8; i>=0; i--) { strcpy(cmdErrorList[i+1].cmd,cmdErrorList[i].cmd); cmdErrorList[i+1].err=cmdErrorList[i].err; }
-            strcpy(cmdErrorList[0].cmd,writeBuffer); cmdErrorList[0].err=e;
-          }
-        } else { strcpy(cmdErrorList[0].cmd,":Ge#"); cmdErrorList[0].err=CE_REPLY_UNKNOWN; }
+        int e=CE_REPLY_UNKNOWN;
+        if (strlen(readBuffer) == 3) e=atoi(readBuffer); else strcpy(writeBuffer,":GE#");
+        if (e>1) {
+          for (int i=8; i>=0; i--) { strcpy(cmdErrorList[i+1].cmd,cmdErrorList[i].cmd); cmdErrorList[i+1].err=cmdErrorList[i].err; }
+          strcpy(cmdErrorList[0].cmd,writeBuffer); cmdErrorList[0].err=e;
+        }
       }
 
       writeBuffer[0]=0; writeBufferPos=0;
@@ -515,13 +514,12 @@ void loop(void) {
       if (errorMonitorOn) {
         char cmd[]=":GE#";
         readLX200Bytes(cmd,readBuffer,CmdTimeout);
-        if (strlen(readBuffer) == 3) {
-          int e=atoi(readBuffer);
-          if (e>1) {
-            for (int i=8; i>=0; i--) { strcpy(cmdErrorList[i+1].cmd,cmdErrorList[i].cmd); cmdErrorList[i+1].err=cmdErrorList[i].err; }
-            strcpy(cmdErrorList[0].cmd,writeBuffer); cmdErrorList[0].err=e;
-          }
-        } else { strcpy(cmdErrorList[0].cmd,":Ge#"); cmdErrorList[0].err=CE_REPLY_UNKNOWN; }
+        int e=CE_REPLY_UNKNOWN;
+        if (strlen(readBuffer) == 3) e=atoi(readBuffer); else strcpy(writeBuffer,":GE#");
+        if (e>1) {
+          for (int i=8; i>=0; i--) { strcpy(cmdErrorList[i+1].cmd,cmdErrorList[i].cmd); cmdErrorList[i+1].err=cmdErrorList[i].err; }
+          strcpy(cmdErrorList[0].cmd,writeBuffer); cmdErrorList[0].err=e;
+        }
       }
 
       writeBuffer[0]=0; writeBufferPos=0;
