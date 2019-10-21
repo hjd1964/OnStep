@@ -361,7 +361,8 @@ void handleRoot() {
     data += "&nbsp;&nbsp;Command Error Log:<br /><font class='c'>";
     for (int i=0; i<10; i++) {
       sprintf_P(temp,html_indexCmdErrorLog,cmdErrorList[i].cmd,commandErrorToStr(cmdErrorList[i].err));
-      data += temp;
+      if (cmdErrorList[i].err != 0 || i == 0) data += temp;
+      if (cmdErrorList[i].err == 0) break;
     }
     data += "</font><br />";
   }

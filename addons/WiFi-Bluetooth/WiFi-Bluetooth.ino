@@ -91,7 +91,7 @@ struct errors {
   char cmd[40];
   byte err;
 };
-struct errors cmdErrorList[10] = { {"-",0},{"-",0},{"-",0},{"-",0},{"-",0},{"-",0},{"-",0},{"-",0},{"-",0},{"-",0} };
+struct errors cmdErrorList[10] = { {"",0},{"",0},{"",0},{"",0},{"",0},{"",0},{"",0},{"",0},{"",0},{"",0} };
 
 int WebTimeout=TIMEOUT_WEB;
 int CmdTimeout=TIMEOUT_CMD;

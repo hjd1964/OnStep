@@ -237,19 +237,19 @@ enum CommandErrors {
   CE_GOTO_ERR_BELOW_HORIZON, CE_GOTO_ERR_ABOVE_OVERHEAD, CE_SLEW_ERR_IN_STANDBY, 
   CE_SLEW_ERR_IN_PARK, CE_GOTO_ERR_GOTO, CE_GOTO_ERR_OUTSIDE_LIMITS, CE_SLEW_ERR_HARDWARE_FAULT,
   CE_MOUNT_IN_MOTION, CE_GOTO_ERR_UNSPECIFIED, CE_NULL};
-  
+
 char* commandErrorToStr(int e) {
   static char reply[40];
-  strcpy(reply,"Error - ");
+  strcpy(reply,"Error, ");
   
   switch (e) {
-    case CE_NONE: strcpy(reply,"-"); break;
-    case CE_0: strcpy(reply,"-"); break;
+    case CE_NONE: strcpy(reply,"No Errors"); break;
+    case CE_0: strcpy(reply,"Reply 0"); break;
     case CE_CMD_UNKNOWN: strcat(reply,"Command unknown"); break;
     case CE_REPLY_UNKNOWN: strcat(reply,"Invalid reply"); break;
     case CE_PARAM_RANGE: strcat(reply,"Parameter out of range"); break;
-    case CE_PARAM_FORM: strcat(reply,"Parameter form"); break;
-    case CE_ALIGN_FAIL: strcat(reply,"Align Failed"); break;
+    case CE_PARAM_FORM: strcat(reply,"Bad parameter format"); break;
+    case CE_ALIGN_FAIL: strcat(reply,"Align failed"); break;
     case CE_ALIGN_NOT_ACTIVE: strcat(reply,"Align not active"); break;
     case CE_NOT_PARKED_OR_AT_HOME: strcat(reply,"Not parked or at home"); break;
     case CE_PARKED: strcat(reply,"Already parked"); break;
@@ -263,9 +263,9 @@ char* commandErrorToStr(int e) {
     case CE_SLEW_ERR_IN_STANDBY: strcat(reply,"Slew in standby"); break;
     case CE_SLEW_ERR_IN_PARK: strcat(reply,"Slew in park"); break;
     case CE_GOTO_ERR_GOTO: strcat(reply,"Already in goto"); break;
-    case CE_GOTO_ERR_OUTSIDE_LIMITS: strcat(reply,"Outside limits"); break;
+    case CE_GOTO_ERR_OUTSIDE_LIMITS: strcat(reply,"Goto outside limits"); break;
     case CE_SLEW_ERR_HARDWARE_FAULT: strcat(reply,"Hardware fault"); break;
-    case CE_MOUNT_IN_MOTION: strcat(reply,"Mount in Motion"); break;
+    case CE_MOUNT_IN_MOTION: strcat(reply,"Mount in motion"); break;
     case CE_GOTO_ERR_UNSPECIFIED: strcat(reply,"Other"); break;
     default: strcat(reply,"Unknown");
   }

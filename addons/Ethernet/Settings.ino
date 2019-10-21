@@ -58,7 +58,7 @@ const char html_settingsMFPause2[] PROGMEM =
 "<button name='mp' value='off' type='submit'>Off</button>\r\n";
 
 const char html_settingsCmdErrLog1[] PROGMEM =
-"<br /><br />Command Error Log (";
+"<br /><br />Command Error Logging (";
 const char html_settingsCmdErrLog2[] PROGMEM =
 "): <br />"
 "<button name='cel' value='on' type='submit'>On</button>"

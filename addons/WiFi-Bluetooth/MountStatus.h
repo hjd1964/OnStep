@@ -240,16 +240,16 @@ enum CommandErrors {
 
 char* commandErrorToStr(int e) {
   static char reply[40];
-  strcpy(reply,"Error - ");
+  strcpy(reply,"Error, ");
   
   switch (e) {
-    case CE_NONE: strcpy(reply,"-"); break;
-    case CE_0: strcpy(reply,"-"); break;
+    case CE_NONE: strcpy(reply,"No Errors"); break;
+    case CE_0: strcpy(reply,"Reply 0"); break;
     case CE_CMD_UNKNOWN: strcat(reply,"Command unknown"); break;
     case CE_REPLY_UNKNOWN: strcat(reply,"Invalid reply"); break;
     case CE_PARAM_RANGE: strcat(reply,"Parameter out of range"); break;
-    case CE_PARAM_FORM: strcat(reply,"Parameter form"); break;
-    case CE_ALIGN_FAIL: strcat(reply,"Align Failed"); break;
+    case CE_PARAM_FORM: strcat(reply,"Bad parameter format"); break;
+    case CE_ALIGN_FAIL: strcat(reply,"Align failed"); break;
     case CE_ALIGN_NOT_ACTIVE: strcat(reply,"Align not active"); break;
     case CE_NOT_PARKED_OR_AT_HOME: strcat(reply,"Not parked or at home"); break;
     case CE_PARKED: strcat(reply,"Already parked"); break;
