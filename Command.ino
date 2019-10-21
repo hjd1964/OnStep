@@ -42,15 +42,15 @@ void processCommands() {
 #endif
 
     // accumulate the command
-    if ((SerialA.available() > 0) && (!cmdA.ready())) cmdA.add(SerialA.read());
+    if (SerialA.available() > 0 && !cmdA.ready()) cmdA.add(SerialA.read());
 #ifdef HAL_SERIAL_B_ENABLED
-    if ((SerialB.available() > 0) && (!cmdB.ready())) cmdB.add(SerialB.read());
+    if (SerialB.available() > 0 && !cmdB.ready()) cmdB.add(SerialB.read());
 #endif
 #ifdef HAL_SERIAL_C_ENABLED
-    if ((SerialC.available() > 0) && (!cmdC.ready())) cmdC.add(SerialC.read());
+    if (SerialC.available() > 0 && !cmdC.ready()) cmdC.add(SerialC.read());
 #endif
 #if ST4_HAND_CONTROL == ON
-    if ((SerialST4.available() > 0) && (!cmdST4.ready())) cmdST4.add(SerialST4.read());
+    if (SerialST4.available() > 0 && !cmdST4.ready()) cmdST4.add(SerialST4.read());
 #endif
 
     // send any reply
@@ -100,7 +100,7 @@ void processCommands() {
       if (command[0] == 'A') {
 //  :AW#  Align Write to EEPROM
 //         Returns: 1 on success
-        if (command[1] == 'W') {
+        if (command[1] == 'W' && parameter[0] == 0) {
           saveAlignModel();
         } else
 //  :A?#  Align status
@@ -108,7 +108,7 @@ void processCommands() {
 //         where m is the maximum number of alignment stars
 //               n is the current alignment star (0 otherwise)
 //               o is the last required alignment star when an alignment is in progress (0 otherwise)
-        if (command[1] == '?' && (parameter[0] == 0)) {
+        if (command[1] == '?' && parameter[0] == 0) {
           reply[0]=MAX_NUM_ALIGN_STARS;
           reply[1]='0'+alignThisStar;
           reply[2]='0'+alignNumStars;
@@ -188,15 +188,15 @@ void processCommands() {
 //  :%BR# Get RA Antibacklash
 //          Return: d#
 //          Get the Backlash values.  Units are arc-seconds
-      if ((command[0] == '%') && (command[1] == 'B')) {
-        if (parameter[0] == 'D') {
+      if (command[0] == '%' && command[1] == 'B') {
+        if (parameter[0] == 'D' && parameter[1] == 0) {
             reactivateBacklashComp();
             i=(int)round(((double)backlashAxis2*3600.0)/(double)AXIS2_STEPS_PER_DEGREE);
             if (i<0) i=0; if (i > 999) i=999;
             sprintf(reply,"%d",i);
             booleanReply=false;
         } else
-        if (parameter[0] == 'R') {
+        if (parameter[0] == 'R' && parameter[1] == 0) {
             reactivateBacklashComp();
             i=(int)round(((double)backlashAxis1*3600.0)/(double)AXIS1_STEPS_PER_DEGREE);
             if (i<0) i=0; if (i > 999) i=999;
@@ -210,7 +210,7 @@ void processCommands() {
 //         Returns: Nothing
 //  :B-#   Decrease Reticule Brightness
 //         Returns: Nothing
-      if ((command[0] == 'B') && ((command[1] == '+') || (command[1] == '-')))  {
+      if (command[0] == 'B' && (command[1] == '+' || command[1] == '-') && parameter[0] == 0)  {
 #if LED_RETICLE >= 0
         int scale;
         if (reticuleBrightness > 255-8) scale=1; else
@@ -229,7 +229,7 @@ void processCommands() {
 //         Returns: Nothing (Sync's fail silently)
 //  :CM#   Synchonize the telescope with the current database object (as above)
 //         Returns: "N/A#" on success, "En#" on failure where n is the error code per the :MS# command
-      if ((command[0] == 'C') && ((command[1] == 'S') || command[1] == 'M'))  {
+      if (command[0] == 'C' && (command[1] == 'S' || command[1] == 'M') && parameter[0] == 0)  {
         if ((parkStatus == NotParked) && (trackingState != TrackingMoveTo)) {
 
           newTargetRA=origTargetRA; newTargetDec=origTargetDec;
@@ -264,8 +264,8 @@ void processCommands() {
 //         Returns: Never (infinite loop)
 //       OnStep must be at home and tracking turned off for this command to work.  A power cycle is required to resume normal operation.
       if (command[0] == 'E') {
-        if ((command[1] == 'S') && (parameter[0] == 'P') && (parameter[1] == 'F') && (parameter[2] == 'L') && (parameter[3] == 'A') && (parameter[4] == 'S') && (parameter[5] == 'H') && (parameter[6] == 0)) {
-          if ((atHome) || (parkStatus == Parked)) {
+        if (command[1] == 'S' && parameter[0] == 'P' && parameter[1] == 'F' && parameter[2] == 'L' && parameter[3] == 'A' && parameter[4] == 'S' && parameter[5] == 'H' && parameter[6] == 0) {
+          if (atHome || parkStatus == Parked) {
             // initialize both serial ports
             SerialA.println("The ESP8266 will now be placed in flash upload mode (at 115200 Baud.)");
             SerialA.println("Arduino's 'Tools -> Upload Speed' should be set to 115200 Baud.");
@@ -341,9 +341,9 @@ void processCommands() {
 //          Return: 0 on failure
 //                  1 on success
         if (command[1] == 'A') {
-          if ((parameter[0] == '1') && (parameter[1] == 0)) { primaryFocuser='F'; secondaryFocuser='f'; } else
+          if (parameter[0] == '1' && parameter[1] == 0) { primaryFocuser='F'; secondaryFocuser='f'; } else
 #if FOCUSER2 == ON
-          if ((parameter[0] == '2') && (parameter[1] == 0)) { primaryFocuser='f'; secondaryFocuser='F'; } else
+          if (parameter[0] == '2' && parameter[1] == 0) { primaryFocuser='f'; secondaryFocuser='F'; } else
 #endif
           if (parameter[0] != 0) commandError=CE_0;
         } else
@@ -451,14 +451,14 @@ void processCommands() {
 //  :GA#   Get Telescope Altitude
 //         Returns: sDD*MM# or sDD*MM'SS# (based on precision setting)
 //         The current scope altitude
-      if (command[1] == 'A')  { getHor(&f,&f1); doubleToDms(reply,&f,false,true); booleanReply=false; } else
+      if (command[1] == 'A' && parameter[0] == 0)  { getHor(&f,&f1); doubleToDms(reply,&f,false,true); booleanReply=false; } else
 //  :Ga#   Get Local Time in 12 hour format
 //         Returns: HH:MM:SS#
-      if (command[1] == 'a')  { LMT=timeRange(UT1-timeZone); if (LMT > 12.0) LMT-=12.0; doubleToHms(reply,&LMT,true); booleanReply=false; } else 
+      if (command[1] == 'a' && parameter[0] == 0)  { LMT=timeRange(UT1-timeZone); if (LMT > 12.0) LMT-=12.0; doubleToHms(reply,&LMT,true); booleanReply=false; } else 
 //  :GC#   Get the current date
 //         Returns: MM/DD/YY#
 //         The current local calendar date
-      if (command[1] == 'C') { 
+      if (command[1] == 'C' && parameter[0] == 0) { 
         LMT=UT1-timeZone;
         // correct for day moving forward/backward... this works for multipule days of up-time
         double J=JD;
@@ -472,7 +472,7 @@ void processCommands() {
 //  :Gc#   Get the current time format
 //         Returns: 24#
 //         The current local time format
-      if (command[1] == 'c') {
+      if (command[1] == 'c' && parameter[0] == 0) {
         strcpy(reply,"24");
         booleanReply=false; 
        } else
@@ -480,7 +480,7 @@ void processCommands() {
 //         Returns: sDD*MM# or sDD*MM'SS# (based on precision setting)
 //  :GDe#   Get Telescope Declination
 //         Returns: sDD*MM'SS.s#
-      if (command[1] == 'D')  { 
+      if (command[1] == 'D')  {
 #ifdef HAL_SLOW_PROCESSOR
         if (millis()-_coord_t > 500)
 #else
@@ -534,30 +534,30 @@ void processCommands() {
 //  :GG#   Get UTC offset time
 //         Returns: sHH#
 //         The number of decimal hours to add to local time to convert it to UTC
-      if (command[1] == 'G')  { 
+      if (command[1] == 'G' && parameter[0] == 0)  { 
         timeZoneToHM(reply,timeZone);
         booleanReply=false; 
       } else 
 //  :Gg#   Get Current Site Longitude
 //         Returns: sDDD*MM#
 //         The current site Longitude. East Longitudes are negative
-      if (command[1] == 'g')  { i=highPrecision; highPrecision=false; doubleToDms(reply,&longitude,true,true); booleanReply=false; highPrecision=i; } else 
+      if (command[1] == 'g' && parameter[0] == 0)  { i=highPrecision; highPrecision=false; doubleToDms(reply,&longitude,true,true); booleanReply=false; highPrecision=i; } else 
 //  :Gh#   Get Horizon Limit
 //         Returns: sDD*#
 //         The minimum elevation of an object above the horizon required for a mount goto
-      if (command[1] == 'h')  { sprintf(reply,"%+02d*",minAlt); booleanReply=false; } else
+      if (command[1] == 'h' && parameter[0] == 0)  { sprintf(reply,"%+02d*",minAlt); booleanReply=false; } else
 //  :GL#   Get Local Time in 24 hour format
 //         Returns: HH:MM:SS#
 //         On devices with single precision fp several days up-time will cause loss of precision as additional mantissa digits are needed to represent hours
 //         Devices with double precision fp are limitated by sidereal clock overflow which takes 249 days
-      if (command[1] == 'L')  { LMT=timeRange(UT1-timeZone); doubleToHms(reply,&LMT,true); booleanReply=false; } else 
+      if (command[1] == 'L' && parameter[0] == 0)  { LMT=timeRange(UT1-timeZone); doubleToHms(reply,&LMT,true); booleanReply=false; } else 
 //  :GM#   Get Site 1 Name
 //  :GN#   Get Site 2 Name
 //  :GO#   Get Site 3 Name
 //  :GP#   Get Site 4 Name
 //         Returns: <string>#
 //         A # terminated string with the name of the requested site.
-      if ((command[1] == 'M') || (command[1] == 'N') || (command[1] == 'O') || (command[1] == 'P'))  {
+      if ((command[1] == 'M' || command[1] == 'N' || command[1] == 'O' || command[1] == 'P') && parameter[0] == 0)  {
         i=command[1]-'M';
         nv.readString(EE_sites+i*25+9,reply); 
         if (reply[0] == 0) { strcat(reply,"None"); }
@@ -566,7 +566,7 @@ void processCommands() {
 //  :Gm#   Gets the meridian pier-side
 //         Returns: E#, W#, N# (none/parked), ?# (Meridian flip in progress) 
 //         A # terminated string with the pier side.
-      if (command[1] == 'm')  {
+      if (command[1] == 'm' && parameter[0] == 0)  {
         reply[0]='?'; reply[1]=0;
         if (getInstrPierSide() == PierSideNone) reply[0]='N';
         if (getInstrPierSide() == PierSideEast) reply[0]='E';
@@ -575,7 +575,7 @@ void processCommands() {
 //  :Go#   Get Overhead Limit
 //         Returns: DD*#
 //         The highest elevation above the horizon that the telescope will goto
-      if (command[1] == 'o')  { sprintf(reply,"%02d*",maxAlt); booleanReply=false; } else
+      if (command[1] == 'o' && parameter[0] == 0)  { sprintf(reply,"%02d*",maxAlt); booleanReply=false; } else
 //  :GR#   Get Telescope RA
 //         Returns: HH:MM.T# or HH:MM:SS# (based on precision setting)
 //  :GRa#  Get Telescope RA
@@ -616,11 +616,11 @@ void processCommands() {
 //  :GS#   Get the Sidereal Time
 //         Returns: HH:MM:SS#
 //         The Sidereal Time as an ASCII Sexidecimal value in 24 hour format
-      if (command[1] == 'S')  { f=LST(); doubleToHms(reply,&f,true); booleanReply=false; } else 
+      if (command[1] == 'S' && parameter[0] == 0)  { f=LST(); doubleToHms(reply,&f,true); booleanReply=false; } else 
 //  :GT#   Get tracking rate
 //         Returns: dd.ddddd# (OnStep returns more decimal places than LX200 standard)
 //         Returns the tracking rate if siderealTracking, 0.0 otherwise
-      if (command[1] == 'T')  {
+      if (command[1] == 'T' && parameter[0] == 0)  {
         char temp[10];
         if ((trackingState == TrackingSidereal) && !trackingSyncInProgress()) f=getTrackingRate60Hz(); else f=0.0;
         dtostrf(f,0,5,temp);
@@ -630,10 +630,10 @@ void processCommands() {
 //  :Gt#   Get Current Site Latitude
 //         Returns: sDD*MM#
 //         The latitude of the current site. Positive for North latitudes
-      if (command[1] == 't')  { i=highPrecision; highPrecision=false; doubleToDms(reply,&latitude,false,true); booleanReply=false; highPrecision=i; } else 
+      if (command[1] == 't' && parameter[0] == 0)  { i=highPrecision; highPrecision=false; doubleToDms(reply,&latitude,false,true); booleanReply=false; highPrecision=i; } else 
 //  :GU#   Get telescope Status
 //         Returns: SS#
-      if (command[1] == 'U')  {
+      if (command[1] == 'U' && parameter[0] == 0)  {
         i=0;
         if ((trackingState != TrackingSidereal) || trackingSyncInProgress()) reply[i++]='n'; // [n]ot tracking
         if ((trackingState != TrackingMoveTo) && !trackingSyncInProgress())  reply[i++]='N'; // [N]o goto
@@ -686,7 +686,7 @@ void processCommands() {
       } else
 //  :Gu#   Get bit packed telescope status
 //         Returns: SS#
-      if (command[1] == 'u')  {
+      if (command[1] == 'u' && parameter[0] == 0)  {
         memset(reply,(char)0b10000000,9);
         if ((trackingState != TrackingSidereal) || trackingSyncInProgress()) reply[0]|=0b10000001; // Not tracking
         if ((trackingState != TrackingMoveTo) && !trackingSyncInProgress())  reply[0]|=0b10000010; // No goto
@@ -763,7 +763,7 @@ void processCommands() {
 //            where mount: A-AltAzm, P-Fork, G-GEM
 //                  tracking: T-tracking, N-not tracking
 //                  alignment: 0-needs alignment, 1-one star aligned, 2-two star aligned, >= 3-three star aligned
-       if ((command[1] == 'W') && (parameter[0] == 0)) {
+       if (command[1] == 'W' && parameter[0] == 0) {
         // mount type
 #if MOUNT_TYPE == GEM
         reply[0]='G';
@@ -942,31 +942,31 @@ void processCommands() {
             }
           } else
 #ifdef Aux0
-          if ((parameter[0] == 'G') && (parameter[1] == '0')) { sprintf(reply,"%d",(int)round((float)valueAux0/2.55)); booleanReply=false; } else
+          if (parameter[0] == 'G' && parameter[1] == '0') { sprintf(reply,"%d",(int)round((float)valueAux0/2.55)); booleanReply=false; } else
 #endif
 #ifdef Aux1
-          if ((parameter[0] == 'G') && (parameter[1] == '1')) { sprintf(reply,"%d",(int)round((float)valueAux1/2.55)); booleanReply=false; } else
+          if (parameter[0] == 'G' && parameter[1] == '1') { sprintf(reply,"%d",(int)round((float)valueAux1/2.55)); booleanReply=false; } else
 #endif
 #ifdef Aux2
-          if ((parameter[0] == 'G') && (parameter[1] == '2')) { sprintf(reply,"%d",(int)round((float)valueAux2/2.55)); booleanReply=false; } else
+          if (parameter[0] == 'G' && parameter[1] == '2') { sprintf(reply,"%d",(int)round((float)valueAux2/2.55)); booleanReply=false; } else
 #endif
 #ifdef Aux3
-          if ((parameter[0] == 'G') && (parameter[1] == '3')) { sprintf(reply,"%d",(int)round((float)valueAux3/2.55)); booleanReply=false; } else
+          if (parameter[0] == 'G' && parameter[1] == '3') { sprintf(reply,"%d",(int)round((float)valueAux3/2.55)); booleanReply=false; } else
 #endif
 #ifdef Aux4
-          if ((parameter[0] == 'G') && (parameter[1] == '4')) { sprintf(reply,"%d",(int)round((float)valueAux4/2.55)); booleanReply=false; } else
+          if (parameter[0] == 'G' && parameter[1] == '4') { sprintf(reply,"%d",(int)round((float)valueAux4/2.55)); booleanReply=false; } else
 #endif
 #ifdef Aux5
-          if ((parameter[0] == 'G') && (parameter[1] == '5')) { sprintf(reply,"%d",(int)round((float)valueAux5/2.55)); booleanReply=false; } else
+          if (parameter[0] == 'G' && parameter[1] == '5') { sprintf(reply,"%d",(int)round((float)valueAux5/2.55)); booleanReply=false; } else
 #endif
 #ifdef Aux6
-          if ((parameter[0] == 'G') && (parameter[1] == '6')) { sprintf(reply,"%d",(int)round((float)valueAux6/2.55)); booleanReply=false; } else
+          if (parameter[0] == 'G' && parameter[1] == '6') { sprintf(reply,"%d",(int)round((float)valueAux6/2.55)); booleanReply=false; } else
 #endif
 #ifdef Aux7
-          if ((parameter[0] == 'G') && (parameter[1] == '7')) { sprintf(reply,"%d",(int)round((float)valueAux7/2.55)); booleanReply=false; } else
+          if (parameter[0] == 'G' && parameter[1] == '7') { sprintf(reply,"%d",(int)round((float)valueAux7/2.55)); booleanReply=false; } else
 #endif
 #ifdef Aux8
-          if ((parameter[0] == 'G') && (parameter[1] == '8')) { sprintf(reply,"%d",(int)round((float)valueAux8/2.55)); booleanReply=false; } else
+          if (parameter[0] == 'G' && parameter[1] == '8') { sprintf(reply,"%d",(int)round((float)valueAux8/2.55)); booleanReply=false; } else
 #endif
             commandError=CE_CMD_UNKNOWN;
         } else commandError=CE_CMD_UNKNOWN;
@@ -981,7 +981,7 @@ void processCommands() {
 //  :hF#   Reset telescope at the home position.  This position is required for a cold Start.
 //         Point to the celestial pole.  GEM w/counterweights pointing downwards (CWD position).  Equatorial fork mounts at HA = 0.
 //         Returns: Nothing
-      if (command[1] == 'F')  { 
+      if (command[1] == 'F' && parameter[0] == 0)  { 
 #if FOCUSER1 == ON
         foc1.savePosition();
 #endif
@@ -993,7 +993,7 @@ void processCommands() {
       } else 
 //  :hC#   Moves telescope to the home position
 //         Returns: Nothing
-      if (command[1] == 'C')  { 
+      if (command[1] == 'C' && parameter[0] == 0)  {
 #if FOCUSER1 == ON
         foc1.savePosition();
 #endif
@@ -1006,7 +1006,7 @@ void processCommands() {
 //  :hP#   Goto the Park Position
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1] == 'P')  {
+      if (command[1] == 'P' && parameter[0] == 0)  {
 #if FOCUSER1 == ON
         foc1.savePosition();
 #endif
@@ -1018,11 +1018,11 @@ void processCommands() {
 //  :hQ#   Set the park position
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1] == 'Q')  commandError=setPark(); else 
+      if (command[1] == 'Q' && parameter[0] == 0)  commandError=setPark(); else 
 //  :hR#   Restore parked telescope to operation
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1] == 'R')  commandError=unPark(true); else
+      if (command[1] == 'R' && parameter[0] == 0)  commandError=unPark(true); else
 
         commandError=CE_CMD_UNKNOWN;
       } else
@@ -1131,42 +1131,42 @@ void processCommands() {
 
 // :LN#    Find next deep sky target object subject to the current constraints.
 //          Returns: Nothing
-      if ((command[1] == 'N') && (parameter[0] == 0)) { 
+      if (command[1] == 'N' && parameter[0] == 0) { 
           Lib.nextRec();
           booleanReply=false;
       } else 
 
 // :L$#    Move to catalog name record
 //          Returns: 1
-      if ((command[1] == '$') && (parameter[0] == 0)) { 
+      if (command[1] == '$' && parameter[0] == 0) { 
           Lib.nameRec();
           booleanReply=true;
       } else 
 
 // :LD#    Clear current record
 //          Returns: Nothing
-      if ((command[1] == 'D') && (parameter[0] == 0)) { 
+      if (command[1] == 'D' && parameter[0] == 0) { 
           Lib.clearCurrentRec();
           booleanReply=false;
       } else 
 
 // :LL#    Clear current catalog
 //          Returns: Nothing
-      if ((command[1] == 'L') && (parameter[0] == 0)) { 
+      if (command[1] == 'L' && parameter[0] == 0) { 
           Lib.clearLib();
           booleanReply=false;
       } else 
 
 // :L!#    Clear library (all catalogs)
 //          Returns: Nothing
-      if ((command[1] == '!') && (parameter[0] == 0)) { 
+      if (command[1] == '!' && parameter[0] == 0) { 
           Lib.clearAll();
           booleanReply=false;
       } else 
 
 // :L?#    Get library free records (all catalogs)
 //          Returns: n#
-      if ((command[1] == '?') && (parameter[0] == 0)) { 
+      if (command[1] == '?' && parameter[0] == 0) { 
           sprintf(reply,"%d",Lib.recFreeAll());
           booleanReply=false;
       } else 
@@ -1187,7 +1187,7 @@ void processCommands() {
       if (command[0] == 'M') {
 //  :MA#   Goto the target Alt and Az
 //         Returns: 0..9, see :MS#
-      if (command[1] == 'A') {
+      if (command[1] == 'A' && parameter[0] == 0) {
         if (axis1Enabled) {
           CommandErrors e=goToHor(&newTargetAlt, &newTargetAzm);
           if (e >= CE_GOTO_ERR_BELOW_HORIZON && e <= CE_GOTO_ERR_UNSPECIFIED) reply[0]=(char)(e-CE_GOTO_ERR_BELOW_HORIZON)+'1';
@@ -1201,8 +1201,8 @@ void processCommands() {
 //  :Mgdnnnn# Pulse guide command
 //          Returns: Nothing
       if (command[1] == 'g') {
-        if ( (atoi2((char *)&parameter[1],&i)) && ((i >= 0) && (i <= 16399)) ) {
-          if (((parameter[0] == 'e') || (parameter[0] == 'w')) && (guideDirAxis1 == 0)) {
+        if (atoi2((char *)&parameter[1],&i) && (i >= 0 && i <= 16399)) {
+          if ((parameter[0] == 'e' || parameter[0] == 'w') && guideDirAxis1 == 0) {
 #if SEPARATE_PULSE_GUIDE_RATE == ON
             commandError=startGuideAxis1(parameter[0],currentPulseGuideRate,i);
 #else
@@ -1210,7 +1210,7 @@ void processCommands() {
 #endif
             booleanReply=false;
           } else
-          if (((parameter[0] == 'n') || (parameter[0] == 's')) && (guideDirAxis2 == 0)) { 
+          if ((parameter[0] == 'n' || parameter[0] == 's') && guideDirAxis2 == 0) { 
 #if SEPARATE_PULSE_GUIDE_RATE == ON
             commandError=startGuideAxis2(parameter[0],currentPulseGuideRate,i);
 #else
@@ -1222,20 +1222,20 @@ void processCommands() {
       } else
 //  :Me# & :Mw#      Move Telescope East or West at current slew rate
 //         Returns: Nothing
-      if ( ( (command[1] == 'e') || (command[1] == 'w') ) && (parameter[0] == 0) ) {
+      if ((command[1] == 'e' || command[1] == 'w') && parameter[0] == 0) {
         commandError=startGuideAxis1(command[1],currentGuideRate,GUIDE_TIME_LIMIT*1000);
         booleanReply=false;
       } else
 //  :Mn# & :Ms#      Move Telescope North or South at current slew rate
 //         Returns: Nothing
-      if ( ( (command[1] == 'n') || (command[1] == 's') ) && (parameter[0] == 0) ) {
+      if ((command[1] == 'n' || command[1] == 's') && parameter[0] == 0) {
         commandError=startGuideAxis2(command[1],currentGuideRate,GUIDE_TIME_LIMIT*1000);
         booleanReply=false;
       } else
 
 //  :MP#   Goto the Current Position for Polar Align
 //         Returns: 0..9, see :MS#
-      if (command[1] == 'P')  {
+      if (command[1] == 'P' && parameter[0] == 0)  {
         double r,d;
         getEqu(&r,&d,false);
         CommandErrors e=validateGoToEqu(r,d);
@@ -1264,7 +1264,7 @@ void processCommands() {
 //         7=hardware fault
 //         8=already in motion
 //         9=unspecified error
-      if (command[1] == 'S')  {
+      if (command[1] == 'S' && parameter[0] == 0)  {
         newTargetRA=origTargetRA; newTargetDec=origTargetDec;
 #if TELESCOPE_COORDINATES == TOPOCENTRIC
         topocentricToObservedPlace(&newTargetRA,&newTargetDec);
@@ -1280,7 +1280,7 @@ void processCommands() {
 
 //  :MN#   Goto current RA/Dec but East of the Pier (within meridian limit overlap for GEM mounts)
 //         Returns: 0..9, see :MS#
-      if (command[1] == 'N')  {
+      if (command[1] == 'N' && parameter[0] == 0)  {
         CommandErrors e=goToHere(true);
         if (e >= CE_GOTO_ERR_BELOW_HORIZON && e <= CE_GOTO_ERR_UNSPECIFIED) reply[0]=(char)(e-CE_GOTO_ERR_BELOW_HORIZON)+'1';
         if (e == CE_NONE) reply[0]='0';
@@ -1303,8 +1303,8 @@ void processCommands() {
 //         Returns: nothing
 //  :$QZ?  Get PEC status
 //         Returns: S#
-      if ((command[0] == '$') && (command[1] == 'Q')) {
-        if ((parameter[2] == 0) && (parameter[0] == 'Z')) {
+      if (command[0] == '$' && command[1] == 'Q') {
+        if (parameter[0] == 'Z' && parameter[2] == 0) {
           booleanReply=false;
 #if MOUNT_TYPE != ALTAZM
           if (parameter[1] == '+') { if (pecRecorded) pecStatus=ReadyPlayPEC; nv.update(EE_pecStatus,pecStatus); } else
@@ -1349,13 +1349,13 @@ void processCommands() {
         } else
 //  :Qe# & Qw#   Halt east/westward Slews
 //         Returns: Nothing
-        if ( ( (command[1] == 'e') || (command[1] == 'w') ) && (parameter[0] == 0) ) {
+        if ((command[1] == 'e' || command[1] == 'w') && parameter[0] == 0) {
           stopGuideAxis1();
           booleanReply=false;
         } else
 //  :Qn# & Qs#   Halt north/southward Slews
 //         Returns: Nothing
-        if ( ( (command[1] == 'n') || (command[1] == 's') ) && (parameter[0] == 0) ) {
+        if ((command[1] == 'n' || command[1] == 's') && parameter[0] == 0) {
           stopGuideAxis2();
           booleanReply=false;
         } else commandError=CE_CMD_UNKNOWN;
@@ -1396,7 +1396,7 @@ void processCommands() {
 //  :RS#   Set Slew rate to Half Max (VF)  ?X (1/2 of maxRate)
 //  :Rn#   Set Slew rate to n, where n=0..9
 //         Returns: Nothing
-      if ((command[1] == 'G') || (command[1] == 'C') || (command[1] == 'M') || (command[1] == 'S') || ((command[1] >= '0') && (command[1] <= '9'))) {
+      if ((command[1] == 'G' || command[1] == 'C' || command[1] == 'M' || command[1] == 'S' || (command[1] >= '0' && command[1] <= '9')) && parameter[0] == 0) {
         if (command[1] == 'G') i=2; else // 1x
         if (command[1] == 'C') i=5; else // 8x
         if (command[1] == 'M') i=6; else // 20x
@@ -1413,26 +1413,26 @@ void processCommands() {
 #if MOUNT_TYPE == ALTAZM
 //  :r+#   Enable derotator
 //         Returns: Nothing
-      if (command[1] == '+') { rot.enableDR(true); booleanReply=false; } else
+      if (command[1] == '+' && parameter[0] == 0) { rot.enableDR(true); booleanReply=false; } else
 //  :r-#   Disable derotator
 //         Returns: Nothing
-      if (command[1] == '-') { rot.enableDR(false); booleanReply=false; } else
+      if (command[1] == '-' && parameter[0] == 0) { rot.enableDR(false); booleanReply=false; } else
 //  :rP#   Move rotator to the parallactic angle
 //         Returns: Nothing
-      if (command[1] == 'P') { double h,d; getApproxEqu(&h,&d,true); rot.setPA(h,d); booleanReply=false; } else
+      if (command[1] == 'P' && parameter[0] == 0) { double h,d; getApproxEqu(&h,&d,true); rot.setPA(h,d); booleanReply=false; } else
 //  :rR#   Reverse derotator direction
 //         Returns: Nothing
-      if (command[1] == 'R') { rot.reverseDR(); booleanReply=false; } else
+      if (command[1] == 'R' && parameter[0] == 0) { rot.reverseDR(); booleanReply=false; } else
 #endif
 //  :rF#   Reset rotator at the home position
 //         Returns: Nothing
-      if (command[1] == 'F') { rot.reset(); booleanReply=false; } else
+      if (command[1] == 'F' && parameter[0] == 0) { rot.reset(); booleanReply=false; } else
 //  :rC#   Moves rotator to the home position
 //         Returns: Nothing
-      if (command[1] == 'C') { rot.home(); booleanReply=false; } else
+      if (command[1] == 'C' && parameter[0] == 0) { rot.home(); booleanReply=false; } else
 //  :rG#   Get rotator current position in degrees
 //         Returns: sDDD*MM#
-      if (command[1] == 'G') {
+      if (command[1] == 'G' && parameter[0] == 0) {
         f1=rot.getPosition();
         i=highPrecision; highPrecision=false;
         if (!doubleToDms(reply,&f1,true,true)) commandError=true; else booleanReply=false;
@@ -1440,20 +1440,24 @@ void processCommands() {
       } else
 //  :rc#   Set continuous move mode (for next move command)
 //         Returns: Nothing
-      if (command[1] == 'c') { rot.moveContinuous(true); booleanReply=false; } else
+      if (command[1] == 'c' && parameter[0] == 0) { rot.moveContinuous(true); booleanReply=false; } else
 //  :r>#   Move clockwise as set by :rn# command, default = 1 deg (or 0.1 deg/s in continuous mode)
 //         Returns: Nothing
-      if (command[1] == '>') { rot.startMoveCW(); booleanReply=false; } else
+      if (command[1] == '>' && parameter[0] == 0) { rot.startMoveCW(); booleanReply=false; } else
 //  :r<#   Move counter clockwise as set by :rn# command
 //         Returns: Nothing
-      if (command[1] == '<') { rot.startMoveCCW(); booleanReply=false; } else
+      if (command[1] == '<' && parameter[0] == 0) { rot.startMoveCCW(); booleanReply=false; } else
 //  :rQ#   Stops movement (except derotator)
 //         Returns: Nothing
-      if (command[1] == 'Q') { rot.stopMove(); rot.moveContinuous(false); booleanReply=false; } else
+      if (command[1] == 'Q' && parameter[0] == 0) { rot.stopMove(); rot.moveContinuous(false); booleanReply=false; } else
 //  :rn#   Move increment, 1=1 degrees, 2=2 degrees, 3=5 degrees, 4=10 degrees
 //         Move rate     , 1=.01 deg/s, 2=0.1 deg/s, 3=1.0 deg/s, 4=5.0 deg/s
 //         Returns: Nothing
-      if ((command[1] >= '1') && (command[1] <= '4')) { i=command[1]-'1'; int t[]={1,2,5,10}; double t1[]={0.01,0.1,1.0,5.0}; rot.setIncrement(t[i]); rot.setMoveRate(t1[i]); booleanReply=false; } else
+      if ((command[1] >= '1' && command[1] <= '4') && parameter[0] == 0) {
+        i=command[1]-'1';
+        int t[]={1,2,5,10}; double t1[]={0.01,0.1,1.0,5.0};
+        rot.setIncrement(t[i]); rot.setMoveRate(t1[i]); booleanReply=false;
+      } else
 //  :rSsDDD*MM'SS#  Set position
 //         Return: 0 on failure
 //                 1 on success
@@ -1479,7 +1483,7 @@ void processCommands() {
 //         Returns: "1" At the current baud rate and then changes to the new rate for further communication
       if (command[1] == 'B') {
         i=(int)(parameter[0]-'0');
-        if ((i >= 0) && (i < 10)) {
+        if (i >= 0 && i < 10) {
           if (process_command == COMMAND_SERIAL_A) {
             SerialA.print("1"); 
             #ifdef HAL_SERIAL_TRANSMIT
@@ -1536,7 +1540,7 @@ void processCommands() {
         if ((parameter[0] == '-') || (parameter[0] == '+')) i1=1; else i1=0;
         if (dmsToDouble(&longitude,(char *)&parameter[i1],false)) {
           if (parameter[0] == '-') longitude=-longitude;
-          if ((longitude >= -180.0) && (longitude <= 360.0)) {
+          if (longitude >= -180.0 && longitude <= 360.0) {
             if (longitude >= 180.0) longitude-=360.0;
             nv.writeFloat(EE_sites+(currentSite)*25+4,longitude);
           } else commandError=CE_PARAM_RANGE;
@@ -1554,12 +1558,12 @@ void processCommands() {
           double f=0.0;
           char *temp=strchr(parameter,':');
           if (temp) {
-            if ((temp[0] == ':') && (temp[1] == '4') && temp[2] == '5') { temp[0]=0; f=0.75; } else
-            if ((temp[0] == ':') && (temp[1] == '3') && temp[2] == '0') { temp[0]=0; f=0.5; } else 
-            if ((temp[0] == ':') && (temp[1] == '0') && temp[2] == '0') { temp[0]=0; f=0.0; } else { i=-999; } // force error if not :00 or :30 or :45
+            if (temp[0] == ':' && temp[1] == '4' && temp[2] == '5') { temp[0]=0; f=0.75; } else
+            if (temp[0] == ':' && temp[1] == '3' && temp[2] == '0') { temp[0]=0; f=0.5; } else 
+            if (temp[0] == ':' && temp[1] == '0' && temp[2] == '0') { temp[0]=0; f=0.0; } else { i=-999; } // force error if not :00 or :30 or :45
           }
 
-          if ( (atoi2(parameter,&i)) && ((i >= -24) && (i <= 24))) {
+          if (atoi2(parameter,&i) && (i >= -24 && i <= 24)) {
             if (i<0) timeZone=i-f; else timeZone=i+f;
             b=encodeTimeZone(timeZone)+128;
             nv.update(EE_sites+(currentSite)*25+8,b);
@@ -1573,7 +1577,7 @@ void processCommands() {
 //                  1 on success
       if (command[1] == 'h')  {
         if (parameter[0] != 0) {
-          if ( (strlen(parameter) < 4) && (atoi2(parameter,&i)) && ((i >= -30) && (i <= 30))) { minAlt=i; nv.update(EE_minAlt,minAlt+128); } else commandError=CE_PARAM_RANGE; 
+          if (strlen(parameter) < 4 && atoi2(parameter,&i) && (i >= -30 && i <= 30)) { minAlt=i; nv.update(EE_minAlt,minAlt+128); } else commandError=CE_PARAM_RANGE; 
         } else commandError=CE_CMD_UNKNOWN; 
       } else
 //  :SLHH:MM:SS#
@@ -1599,7 +1603,7 @@ void processCommands() {
 //          Set site name to be <string>, up to 15 characters.
 //          Return: 0 on failure
 //                  1 on success
-      if ((command[1] == 'M') || (command[1] == 'N') || (command[1] == 'O') || (command[1] == 'P')) {
+      if (command[1] == 'M' || command[1] == 'N' || command[1] == 'O' || command[1] == 'P') {
         i=command[1]-'M';
         if (strlen(parameter) > 15) commandError=CE_PARAM_RANGE; else nv.writeString(EE_sites+i*25+9,parameter);
       } else
@@ -1608,8 +1612,8 @@ void processCommands() {
 //          Return: 0 on failure
 //                  1 on success
       if (command[1] == 'o')  {
-        if ((parameter[0] != 0) && (strlen(parameter)<3)) {
-          if ( (atoi2(parameter,&i)) && ((i >= 60) && (i <= 90))) {
+        if (parameter[0] != 0 && strlen(parameter) < 3) {
+          if (atoi2(parameter,&i) && (i >= 60 && i <= 90)) {
             maxAlt=i;
 #if MOUNT_TYPE == ALTAZM
             if (maxAlt > 87) maxAlt=87;
@@ -1645,9 +1649,9 @@ void processCommands() {
           nv.writeFloat(100+(currentSite)*25+0,latitude);
 #if MOUNT_TYPE == ALTAZM
           homePositionAxis2=AltAzmDecStartPos;
-          if (latitude<0) homePositionAxis1=180.0; else homePositionAxis1=0.0;
+          if (latitude < 0) homePositionAxis1=180.0; else homePositionAxis1=0.0;
 #else
-          if (latitude<0) homePositionAxis2=-90.0; else homePositionAxis2=90.0;
+          if (latitude < 0) homePositionAxis2=-90.0; else homePositionAxis2=90.0;
 #endif
           cosLat=cos(latitude/Rad);
           sinLat=sin(latitude/Rad);
@@ -1661,7 +1665,7 @@ void processCommands() {
       if (command[1] == 'T')  { 
         if (!isSlewing()) {
           f=strtod(parameter,&conv_end);
-          if ( (&parameter[0] != conv_end) && (((f >= 30.0) && (f < 90.0)) || (fabs(f) < 0.1))) {
+          if (&parameter[0] != conv_end && ((f >= 30.0 && f < 90.0) || fabs(f) < 0.1)) {
             if (fabs(f) < 0.1) {
               trackingState=TrackingNone;
             } else {
@@ -1773,23 +1777,23 @@ void processCommands() {
             break;
             case 'A': // temperature in deg. C
               f=strtod(parameter,&conv_end);
-              if ( (&parameter[0] != conv_end) && (f >= -100.0) && (f < 100.0)) {
+              if (&parameter[0] != conv_end && f >= -100.0 && f < 100.0) {
                 ambient.setTemperature(f);
               } else commandError=CE_PARAM_RANGE;
             break;
             case 'B': // pressure in mb
               f=strtod(parameter,&conv_end);
-              if ( (&parameter[0] != conv_end) && (f >= 500.0) && (f < 1500.0)) {
+              if (&parameter[0] != conv_end && f >= 500.0 && f < 1500.0) {
                 ambient.setPressure(f);
               } else commandError=CE_PARAM_RANGE;
             break;
             case 'C': // relative humidity in % 
-              if ( (&parameter[0] != conv_end) && (f >= 0.0) && (f < 100.0)) {
+              if (&parameter[0] != conv_end && f >= 0.0 && f < 100.0) {
                 ambient.setHumidity(f);
               } else commandError=CE_PARAM_RANGE;
             break;
             case 'D': // altitude 
-              if ( (&parameter[0] != conv_end) && (f >= 0.0) && (f < 100.0)) {
+              if (&parameter[0] != conv_end && f >= 0.0 && f < 100.0) {
                 ambient.setAltitude(f);
               } else commandError=CE_PARAM_RANGE;
             break;
@@ -1817,7 +1821,7 @@ void processCommands() {
 #endif
         if (parameter[0] == 'G') { // Gn: General purpose output
           long v=(double)strtol(&parameter[3],NULL,10);
-          if ((v >= 0) && (v <= 255)) {
+          if (v >= 0 && v <= 255) {
 #ifdef Aux0
             if (parameter[1] == '0') { valueAux0=v; static bool init=false; if (!init) { pinMode(Aux0,OUTPUT); init=true; } if (v == 0) digitalWrite(Aux0,LOW); else digitalWrite(Aux0,HIGH); } else
 #endif
@@ -1943,15 +1947,13 @@ void processCommands() {
         setDeltaTrackingRate();
 
       } else
-      if (command[0] == 'T') {
-      } else
      
 //   U - Precision Toggle
 //  :U#    Toggle between low/hi precision positions
 //         Low -  RA/Dec/etc. displays and accepts HH:MM.M sDD*MM
 //         High - RA/Dec/etc. displays and accepts HH:MM:SS sDD*MM:SS
 //         Returns Nothing
-      if ((command[0] == 'U') && (command[1] == 0)) { highPrecision=!highPrecision; booleanReply=false; } else
+      if (command[0] == 'U' && command[1] == 0) { highPrecision=!highPrecision; booleanReply=false; } else
 
 #if MOUNT_TYPE != ALTAZM
 //   V - PEC Readout
@@ -1960,7 +1962,7 @@ void processCommands() {
 //         Returns: sDDD#
 //         Rate Adjustment factor for worm segment NNNN. PecRate = Steps +/- for this 1 second segment
 //         If NNNN is omitted, returns the currently playing segment
-      if ((command[0] == 'V') && (command[1] == 'R')) {
+      if (command[0] == 'V' && command[1] == 'R') {
         boolean conv_result=true;
         if (parameter[0] == 0) { i=pecIndex1; } else conv_result=atoi2(parameter,&i);
         if ((conv_result) && ((i >= 0) && (i < pecBufferSize))) {
@@ -1978,8 +1980,8 @@ void processCommands() {
 //         Returns: x0x1x2x3x4x5x6x7x8x9#
 //         Rate Adjustment factor for worm segments. PecRate = Steps +/- for each 1 second segment, hex one byte integer (PecRate=b-128)
 //         leave a delay of about 10ms between calls
-      if ((command[0] == 'V') && (command[1] == 'r')) {
-        if ( (atoi2(parameter,&i)) && ((i >= 0) && (i < pecBufferSize))) {
+      if (command[0] == 'V' && command[1] == 'r') {
+        if (atoi2(parameter,&i) && (i >= 0 && i < pecBufferSize)) {
           int j=0;
           byte b;
           char x[3]="  ";
@@ -2003,7 +2005,7 @@ void processCommands() {
 //   V - PEC Readout StepsPerSecondAxis1
 //  :VS#
 //         Returns: DDD.DDDDDD#
-      if ((command[0] == 'V') && (command[1] == 'S') && (parameter[0] == 0)) {
+      if (command[0] == 'V' && command[1] == 'S' && parameter[0] == 0) {
         char temp[12];
         dtostrf(StepsPerSecondAxis1,0,6,temp);
         strcpy(reply,temp);
@@ -2013,7 +2015,7 @@ void processCommands() {
 //  :VH#
 //         Read RA PEC sense index (seconds)
 //         Returns: DDDDD#
-      if ((command[0] == 'V') && (command[1] == 'H') && (parameter[0] == 0)) {
+      if (command[0] == 'V' && command[1] == 'H' && parameter[0] == 0) {
         long s=(long)((double)wormSensePos/(double)StepsPerSecondAxis1);
         while (s > SecondsPerWormRotationAxis1) s-=SecondsPerWormRotationAxis1;
         while (s < 0) s+=SecondsPerWormRotationAxis1;
@@ -2023,14 +2025,14 @@ void processCommands() {
 //  :VI#
 //         Read RA PEC record index start (steps)
 //         Returns: DDDDDD#
-      if ((command[0] == 'V') && (command[1] == 'I') && (parameter[0] == 0)) {
+      if (command[0] == 'V' && command[1] == 'I' && parameter[0] == 0) {
         sprintf(reply,"%06ld",0L);  // indexWorm_record
         booleanReply=false;
       } else
 
 //  :WIDDDDDD#
 //         Write RA PEC index start (steps)
-      if ((command[0] == 'W') && (command[1] == 'I')) {
+      if (command[0] == 'W' && command[1] == 'I') {
         long l=strtol(parameter,&conv_end,10);
         // see if it converted and is in range
         if ( (&parameter[0] != conv_end) && ((l >= 0) && (l < (long)AXIS1_STEPS_PER_WORMROT))) { } else commandError=CE_PARAM_RANGE;
@@ -2045,7 +2047,7 @@ void processCommands() {
 //         Write RA PEC Table Entry
 //         Returns: Nothing
 //         Rate Adjustment factor for worm segment NNNN. PecRate = Steps +/- for this 1 second segment
-      if ((command[0] == 'W') && (command[1] == 'R')) { 
+      if (command[0] == 'W' && command[1] == 'R') { 
         if (parameter[1] == 0) {
           if (parameter[0] == '+') {
             i=pecBuffer[SecondsPerWormRotationAxis1-1];
@@ -2065,7 +2067,7 @@ void processCommands() {
             // should be another int here
             // see if it converted and is in range
             i2=atoi((char*)&parameter[5]);
-            if ((i2 >= -128) && (i2 <= 127)) {
+            if (i2 >= -128 && i2 <= 127) {
               pecBuffer[i]=i2+128;
               pecRecorded =true;
             } else commandError=CE_PARAM_RANGE;
@@ -2080,7 +2082,7 @@ void processCommands() {
 //         Sets current site to n, 0..3 or queries site with ?
 //         Returns: Nothing or current site ?#
       if (command[0] == 'W') {
-        if ((command[1] >= '0') && (command[1] <= '3') && (parameter[0] == 0)) {
+        if (command[1] >= '0' && command[1] <= '3' && parameter[0] == 0) {
           currentSite=command[1]-'0'; nv.update(EE_currentSite,currentSite); booleanReply=false;
           latitude=nv.readFloat(EE_sites+(currentSite*25+0));
 #if MOUNT_TYPE == ALTAZM
