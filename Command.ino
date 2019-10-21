@@ -978,8 +978,8 @@ void processCommands() {
 
 //  h - Home Position Commands
       if (command[0] == 'h') {
-//  :hF#   Reset telescope at the home position.  This position is required for a Cold Start.
-//         Point to the celestial pole with the counterweight pointing downwards (CWD position).
+//  :hF#   Reset telescope at the home position.  This position is required for a cold Start.
+//         Point to the celestial pole.  GEM w/counterweights pointing downwards (CWD position).  Equatorial fork mounts at HA = 0.
 //         Returns: Nothing
       if (command[1] == 'F')  { 
 #if FOCUSER1 == ON
@@ -1022,9 +1022,9 @@ void processCommands() {
 //  :hR#   Restore parked telescope to operation
 //          Return: 0 on failure
 //                  1 on success
-      if (command[1] == 'R')  commandError=unPark(true);
-      else commandError=CE_CMD_UNKNOWN;
+      if (command[1] == 'R')  commandError=unPark(true); else
 
+        commandError=CE_CMD_UNKNOWN;
       } else
 
 //   L - Object Library Commands
