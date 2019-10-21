@@ -11,24 +11,24 @@ unsigned long findHomeTimeout=0L;
 void checkHome() {
   // check if find home timed out or stopped
   if ((findHomeMode == FH_FAST) || (findHomeMode == FH_SLOW)) {
-    if (((long)(millis()-findHomeTimeout) > 0L) || ((guideDirAxis1 == 0) && (guideDirAxis2 == 0))) {
-      if ((guideDirAxis1 == 'e') || (guideDirAxis1 == 'w')) guideDirAxis1='b';
-      if ((guideDirAxis2 == 'n') || (guideDirAxis2 == 's')) guideDirAxis2='b';
+    if ((long)(millis()-findHomeTimeout) > 0L || (guideDirAxis1 == 0 && guideDirAxis2 == 0)) {
+      if (guideDirAxis1 == 'e' || guideDirAxis1 == 'w') guideDirAxis1='b';
+      if (guideDirAxis2 == 'n' || guideDirAxis2 == 's') guideDirAxis2='b';
       safetyLimitsOn=true;
       generalError=ERR_LIMIT_SENSE;
       findHomeMode=FH_OFF;
     } else {
-      if ((digitalRead(Axis1HomePin) != PierSideStateAxis1) && ((guideDirAxis1 == 'e') || (guideDirAxis1 == 'w'))) StopAxis1();
-      if ((digitalRead(Axis2HomePin) != PierSideStateAxis2) && ((guideDirAxis2 == 'n') || (guideDirAxis2 == 's'))) StopAxis2();
+      if (digitalRead(Axis1HomePin) != PierSideStateAxis1 && (guideDirAxis1 == 'e' || guideDirAxis1 == 'w')) StopAxis1();
+      if (digitalRead(Axis2HomePin) != PierSideStateAxis2 && (guideDirAxis2 == 'n' || guideDirAxis2 == 's')) StopAxis2();
     }
   }
   // we are idle and waiting for a fast guide to stop before the final slow guide to refine the home position
-  if ((findHomeMode == FH_IDLE) && (guideDirAxis1 == 0) && (guideDirAxis2 == 0)) {
+  if (findHomeMode == FH_IDLE && guideDirAxis1 == 0 && guideDirAxis2 == 0) {
     findHomeMode=FH_OFF;
     goHome(false);
   }
   // we are finishing off the find home
-  if ((findHomeMode == FH_DONE) && (guideDirAxis1 == 0) && (guideDirAxis2 == 0)) {
+  if (findHomeMode == FH_DONE && guideDirAxis1 == 0 && guideDirAxis2 == 0) {
     findHomeMode=FH_OFF;
     setHome();
   }
@@ -36,12 +36,12 @@ void checkHome() {
 
 void StopAxis1() {
   guideDirAxis1='b';
-  if ((guideDirAxis2 != 'n') && (guideDirAxis2 != 's')) { if (findHomeMode == FH_SLOW) findHomeMode=FH_DONE; if (findHomeMode == FH_FAST) findHomeMode=FH_IDLE; }
+  if (guideDirAxis2 != 'n' && guideDirAxis2 != 's') { if (findHomeMode == FH_SLOW) findHomeMode=FH_DONE; if (findHomeMode == FH_FAST) findHomeMode=FH_IDLE; }
 }
 
 void StopAxis2() {
   guideDirAxis2='b';
-  if ((guideDirAxis1 != 'e') && (guideDirAxis1 != 'w')) { if (findHomeMode == FH_SLOW) findHomeMode=FH_DONE; if (findHomeMode == FH_FAST) findHomeMode=FH_IDLE; }
+  if (guideDirAxis1 != 'e' && guideDirAxis1 != 'w') { if (findHomeMode == FH_SLOW) findHomeMode=FH_DONE; if (findHomeMode == FH_FAST) findHomeMode=FH_IDLE; }
 }
 #endif
 
@@ -50,7 +50,7 @@ CommandErrors goHome(boolean fast) {
   CommandErrors e=validateGoto();
   
 #if HOME_SENSE == ON
-  if ((e != CE_NONE) && (e != CE_SLEW_ERR_IN_STANDBY)) return e;
+  if (e != CE_NONE && e != CE_SLEW_ERR_IN_STANDBY) return e;
 
   if (findHomeMode != FH_OFF) return CE_MOUNT_IN_MOTION;
 
