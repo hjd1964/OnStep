@@ -2160,7 +2160,7 @@ void processCommands() {
 #endif
 
       if (process_command == COMMAND_SERIAL_X) {
-        if (commandError != CE_NULL) cmdX.lastError==commandError;
+        if (commandError != CE_NULL) cmdX.lastError=commandError;
         if ((strlen(reply) > 0) || (cmdX.checksum)) {
           if (cmdX.checksum)  { checksum(reply); strcat(reply,cmdX.getSeq()); supress_frame=false; }
           if (!supress_frame) strcat(reply,"#");
