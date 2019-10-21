@@ -515,7 +515,7 @@ void processCommands() {
 //  :GE#   Get last command error
 //         Returns: nn#
       if (command[1] == 'E' && parameter[0] == 0) {
-        CommandErrors e;
+        CommandErrors e=CE_REPLY_UNKNOWN;
         if (process_command == COMMAND_SERIAL_A) e=cmdA.lastError; else
 #ifdef HAL_SERIAL_B_ENABLED
         if (process_command == COMMAND_SERIAL_B) e=cmdB.lastError; else
@@ -528,6 +528,7 @@ void processCommands() {
 #endif
         if (process_command == COMMAND_SERIAL_X) e=cmdX.lastError;
         sprintf(reply,"%02d",e);
+        commandError=CE_NULL;
         booleanReply=false; 
       } else
 //  :GG#   Get UTC offset time
