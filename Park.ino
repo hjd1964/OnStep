@@ -3,10 +3,10 @@
 
 // sets the park postion as the current position
 CommandErrors setPark() {
-  if (faultAxis1 || faultAxis2)         return CE_SLEW_ERR_HARDWARE_FAULT;
   if (parkStatus == ParkFailed)         return CE_PARK_FAILED;
   if (parkStatus == Parked)             return CE_PARKED;
-  if (!isSlewing())                     return CE_MOUNT_IN_MOTION;
+  if (isSlewing())                      return CE_MOUNT_IN_MOTION;
+  if (faultAxis1 || faultAxis2)         return CE_SLEW_ERR_HARDWARE_FAULT;
 
   lastTrackingState=trackingState;
   trackingState=TrackingNone;
@@ -29,12 +29,12 @@ CommandErrors setPark() {
 
 // moves the telescope to the park position
 CommandErrors park() {
-  if (faultAxis1 || faultAxis2)         return CE_SLEW_ERR_HARDWARE_FAULT;
-  if (!axis1Enabled)                    return CE_SLEW_ERR_IN_STANDBY;
-  if (parkStatus == Parked)             return CE_PARKED;
-  if (!isSlewing())                     return CE_MOUNT_IN_MOTION;
-  parkSaved=nv.read(EE_parkSaved);
   if (!parkSaved)                       return CE_NO_PARK_POSITION_SET;
+  if (parkStatus == Parked)             return CE_PARKED;
+  if (!axis1Enabled)                    return CE_SLEW_ERR_IN_STANDBY;
+  if (isSlewing())                      return CE_MOUNT_IN_MOTION;
+  if (faultAxis1 || faultAxis2)         return CE_SLEW_ERR_HARDWARE_FAULT;
+
   CommandErrors e=validateGoto();
   if (e != CE_NONE)                     return e;
   
@@ -164,14 +164,13 @@ int parkClearBacklash() {
 // returns a parked telescope to operation, you must set date and time before calling this.  it also
 // depends on the latitude, longitude, and timeZone; but those are stored and recalled automatically
 CommandErrors unPark(bool withTrackingOn) {
-  if (faultAxis1 || faultAxis2)         return CE_SLEW_ERR_HARDWARE_FAULT;
-  if (!isSlewing())                     return CE_MOUNT_IN_MOTION;
-#if STRICT_PARKING == OFF
-  if (parkStatus == NotParked && atHome) parkStatus=Parked;
-#endif
-  if (parkStatus != Parked)             return CE_NOT_PARKED;
-  parkSaved =nv.read(EE_parkSaved);
   if (!parkSaved)                       return CE_NO_PARK_POSITION_SET;
+  if (parkStatus != Parked && !atHome)  return CE_NOT_PARKED;
+#if STRICT_PARKING == ON
+  if (parkStatus != Parked)             return CE_NOT_PARKED;
+#endif
+  if (isSlewing())                      return CE_MOUNT_IN_MOTION;
+  if (faultAxis1 || faultAxis2)         return CE_SLEW_ERR_HARDWARE_FAULT;
 
   initStartupValues();
 
