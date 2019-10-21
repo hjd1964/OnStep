@@ -248,7 +248,7 @@ void processSettingsGet() {
   v=server.arg("cel");
   if (v!="") {
     if (v=="on") errorMonitorOn=true;
-    if (v=="off") errorMonitorOn=false;
+    if (v=="off") { errorMonitorOn=false; for (int i=0; i<10; i++) { strcpy(cmdErrorList[i].cmd,""); cmdErrorList[i].err=0; } }
   }
 
   // clear any possible response
