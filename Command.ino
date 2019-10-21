@@ -393,7 +393,7 @@ void processCommands() {
               sprintf(reply,"%d",(int)foc->getDcPower()); booleanReply=false; 
             } else {
               i=atol(parameter);
-              if ((i >= 0) && (i <= 100)) foc->setDcPower(i); else commandError=CE_PARAM_RANGE; 
+              if (i >= 0 && i <= 100) foc->setDcPower(i); else commandError=CE_PARAM_RANGE; 
             }
           } else commandError=CE_CMD_UNKNOWN;
         } else
@@ -690,10 +690,10 @@ void processCommands() {
         if (PPSsynced)                               reply[0]|=0b10000100;                                   // PPS sync
         if ((guideDirAxis1) || (guideDirAxis2))      reply[0]|=0b10001000;                                   // Guide active
 #if MOUNT_TYPE != ALTAZM
-        if (rateCompensation == RC_REFR_RA)            reply[0]|=0b11010000;                                 // Refr enabled Single axis
-        if (rateCompensation == RC_REFR_BOTH)          reply[0]|=0b10010000;                                 // Refr enabled
-        if (rateCompensation == RC_FULL_RA)            reply[0]|=0b11100000;                                 // OnTrack enabled Single axis
-        if (rateCompensation == RC_FULL_BOTH)          reply[0]|=0b10100000;                                 // OnTrack enabled
+        if (rateCompensation == RC_REFR_RA)          reply[0]|=0b11010000;                                   // Refr enabled Single axis
+        if (rateCompensation == RC_REFR_BOTH)        reply[0]|=0b10010000;                                   // Refr enabled
+        if (rateCompensation == RC_FULL_RA)          reply[0]|=0b11100000;                                   // OnTrack enabled Single axis
+        if (rateCompensation == RC_FULL_BOTH)        reply[0]|=0b10100000;                                   // OnTrack enabled
 #endif
         if (rateCompensation == RC_NONE) {
           double tr=getTrackingRate60Hz();
@@ -721,9 +721,9 @@ void processCommands() {
 #endif
 
         // provide pier side info.
-        if (getInstrPierSide() == PierSideNone)        reply[3]|=0b10010000; else                            // Pier side none
-        if (getInstrPierSide() == PierSideEast)        reply[3]|=0b10100000; else                            // Pier side east
-        if (getInstrPierSide() == PierSideWest)        reply[3]|=0b11000000;                                 // Pier side west
+        if (getInstrPierSide() == PierSideNone)      reply[3]|=0b10010000; else                              // Pier side none
+        if (getInstrPierSide() == PierSideEast)      reply[3]|=0b10100000; else                              // Pier side east
+        if (getInstrPierSide() == PierSideWest)      reply[3]|=0b11000000;                                   // Pier side west
 
 #if MOUNT_TYPE != ALTAZM
         reply[4]=pecStatus|0b10000000;                                                                       // PEC status: 0 ignore, 1 ready play, 2 playing, 3 ready record, 4 recording
