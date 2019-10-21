@@ -10,12 +10,12 @@ unsigned long findHomeTimeout=0L;
 
 void checkHome() {
   // check if find home timed out or stopped
-  if ((findHomeMode == FH_FAST) || (findHomeMode == FH_SLOW)) {
+  if (findHomeMode == FH_FAST || findHomeMode == FH_SLOW) {
     if ((long)(millis()-findHomeTimeout) > 0L || (guideDirAxis1 == 0 && guideDirAxis2 == 0)) {
+      if ((long)(millis()-findHomeTimeout) > 0L) generalError=ERR_LIMIT_SENSE;
       if (guideDirAxis1 == 'e' || guideDirAxis1 == 'w') guideDirAxis1='b';
       if (guideDirAxis2 == 'n' || guideDirAxis2 == 's') guideDirAxis2='b';
       safetyLimitsOn=true;
-      generalError=ERR_LIMIT_SENSE;
       findHomeMode=FH_OFF;
     } else {
       if (digitalRead(Axis1HomePin) != PierSideStateAxis1 && (guideDirAxis1 == 'e' || guideDirAxis1 == 'w')) StopAxis1();
