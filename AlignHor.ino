@@ -66,7 +66,7 @@ CommandErrors TGeoAlignH::addStar(int I, int N, double RA, double Dec) {
   // First star, just sync
   if (I == 1) {
     CommandErrors e=syncEqu(RA,Dec);
-    if (e != GOTO_ERR_NONE) return e;
+    if (e != CE_NONE) return e;
   }
 
   mount[I-1].azm=getInstrAxis1();
@@ -91,14 +91,14 @@ CommandErrors TGeoAlignH::addStar(int I, int N, double RA, double Dec) {
   // two or more stars and finished
   if ((I >= 2) && (I == N)) model(N);
 
-  return GOTO_ERR_NONE;
+  return CE_NONE;
 }
 
 // kick off modeling
 void TGeoAlignH::model(int n) {
   static bool busy=false;
   static int numStars=0;
-  if (busy) return;                                                           // busy
+  if (busy) return;                                                             // busy
   if (n > 0) { numStars=n; return; }                                            // command
   if (numStars > 0) { busy=true; autoModel(numStars); busy=false; numStars=0; } // waiting to solve
 }
