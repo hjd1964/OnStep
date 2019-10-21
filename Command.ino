@@ -2077,11 +2077,12 @@ void processCommands() {
             if (i >= 0 && i < pecBufferSize) {
               // should be another int here
               // see if it converted and is in range
-              i2=atoi((char*)&parameter[5]);
-              if (i2 >= -128 && i2 <= 127) {
-                pecBuffer[i]=i2+128;
-                pecRecorded =true;
-              } else commandError=CE_PARAM_RANGE;
+              if (atoi2((char*)&parameter[5],i2)) {
+                if (i2 >= -128 && i2 <= 127) {
+                  pecBuffer[i]=i2+128;
+                  pecRecorded =true;
+                } else commandError=CE_PARAM_RANGE;
+              } else commandError=CE_PARAM_FORM;
             } else commandError=CE_PARAM_RANGE;
           } else commandError=CE_PARAM_FORM;
           booleanReply=false;
