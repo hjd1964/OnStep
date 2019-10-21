@@ -227,7 +227,7 @@ void processCommands() {
 //  :CM#   Synchonize the telescope with the current database object (as above)
 //         Returns: "N/A#" on success, "En#" on failure where n is the error code per the :MS# command
       if (command[0] == 'C' && (command[1] == 'S' || command[1] == 'M') && parameter[0] == 0)  {
-        if ((parkStatus == NotParked) && (trackingState != TrackingMoveTo)) {
+        if (parkStatus == NotParked && trackingState != TrackingMoveTo) {
 
           newTargetRA=origTargetRA; newTargetDec=origTargetDec;
 #if TELESCOPE_COORDINATES == TOPOCENTRIC
@@ -253,7 +253,7 @@ void processCommands() {
 
 //   D - Distance Bars
 //  :D#    returns an "\0x7f#" if the mount is moving, otherwise returns "#".
-      if ((command[0] == 'D') && (command[1] == 0))  { if (trackingState == TrackingMoveTo) { reply[0]=(char)127; reply[1]=0; } else { reply[0]='#'; reply[1]=0; supress_frame=true; } booleanReply=false; } else 
+      if (command[0] == 'D' && command[1] == 0)  { if (trackingState == TrackingMoveTo) { reply[0]=(char)127; reply[1]=0; } else { reply[0]='#'; reply[1]=0; supress_frame=true; } booleanReply=false; } else 
 
 #if SERIAL_B_ESP_FLASHING == ON
 //   E - Enter special mode
@@ -493,7 +493,7 @@ void processCommands() {
         if (parameter[0] == 0) {
           doubleToDms(reply,&_dec,false,true); booleanReply=false; 
         } else
-        if ((parameter[0] == 'e') && (parameter[1] == 0)) {
+        if (parameter[0] == 'e' && parameter[1] == 0) {
           doubleToDmsd(reply,&_dec); booleanReply=false; 
         } else commandError=CE_CMD_UNKNOWN;
       } else 
@@ -505,7 +505,7 @@ void processCommands() {
         if (parameter[0] == 0) {
           doubleToDms(reply,&origTargetDec,false,true); booleanReply=false; 
         } else
-        if ((parameter[0] == 'e') && (parameter[1] == 0)) {
+        if (parameter[0] == 'e' && parameter[1] == 0) {
           doubleToDmsd(reply,&origTargetDec); booleanReply=false; 
         } else commandError=CE_CMD_UNKNOWN;
       } else
@@ -593,7 +593,7 @@ void processCommands() {
         if (parameter[0] == 0) {
            doubleToHms(reply,&_ra,highPrecision); booleanReply=false;  
         } else
-        if ((parameter[0] == 'a') && (parameter[1] == 0)) {
+        if (parameter[0] == 'a' && parameter[1] == 0) {
           doubleToHmsd(reply,&_ra); booleanReply=false;
         } else commandError=CE_CMD_UNKNOWN;
       } else 
@@ -606,7 +606,7 @@ void processCommands() {
         if (parameter[0] == 0) {
            doubleToHms(reply,&f,highPrecision); booleanReply=false;
         } else
-        if ((parameter[0] == 'a') && (parameter[1] == 0)) {
+        if (parameter[0] == 'a' && parameter[1] == 0) {
           doubleToHmsd(reply,&f); booleanReply=false;
         } else commandError=CE_CMD_UNKNOWN;
       } else 
@@ -619,7 +619,7 @@ void processCommands() {
 //         Returns the tracking rate if siderealTracking, 0.0 otherwise
       if (command[1] == 'T' && parameter[0] == 0)  {
         char temp[10];
-        if ((trackingState == TrackingSidereal) && !trackingSyncInProgress()) f=getTrackingRate60Hz(); else f=0.0;
+        if (trackingState == TrackingSidereal && !trackingSyncInProgress()) f=getTrackingRate60Hz(); else f=0.0;
         dtostrf(f,0,5,temp);
         strcpy(reply,temp);
         booleanReply=false;
@@ -632,13 +632,13 @@ void processCommands() {
 //         Returns: SS#
       if (command[1] == 'U' && parameter[0] == 0)  {
         i=0;
-        if ((trackingState != TrackingSidereal) || trackingSyncInProgress()) reply[i++]='n';                 // [n]ot tracking
-        if ((trackingState != TrackingMoveTo) && !trackingSyncInProgress())  reply[i++]='N';                 // [N]o goto
+        if (trackingState != TrackingSidereal || trackingSyncInProgress()) reply[i++]='n';                   // [n]ot tracking
+        if (trackingState != TrackingMoveTo && !trackingSyncInProgress())  reply[i++]='N';                   // [N]o goto
         const char *parkStatusCh = "pIPF";       reply[i++]=parkStatusCh[parkStatus];                        // not [p]arked, parking [I]n-progress, [P]arked, Park [F]ailed
         if (pecRecorded)                         reply[i++]='R';                                             // PEC data has been [R]ecorded
         if (atHome)                              reply[i++]='H';                                             // at [H]ome
         if (PPSsynced)                           reply[i++]='S';                                             // PPS [S]ync
-        if ((guideDirAxis1) || (guideDirAxis2))  reply[i++]='G';                                             // [G]uide active
+        if (guideDirAxis1 || guideDirAxis2)  reply[i++]='G';                                                 // [G]uide active
 #if MOUNT_TYPE != ALTAZM
         if (rateCompensation == RC_REFR_RA)      { reply[i++]='r'; reply[i++]='s'; }                         // [r]efr enabled [s]ingle axis
         if (rateCompensation == RC_REFR_BOTH)    { reply[i++]='r'; }                                         // [r]efr enabled
@@ -685,10 +685,10 @@ void processCommands() {
 //         Returns: SS#
       if (command[1] == 'u' && parameter[0] == 0)  {
         memset(reply,(char)0b10000000,9);
-        if ((trackingState != TrackingSidereal) || trackingSyncInProgress()) reply[0]|=0b10000001;           // Not tracking
-        if ((trackingState != TrackingMoveTo) && !trackingSyncInProgress())  reply[0]|=0b10000010;           // No goto
+        if (trackingState != TrackingSidereal || trackingSyncInProgress()) reply[0]|=0b10000001;             // Not tracking
+        if (trackingState != TrackingMoveTo && !trackingSyncInProgress())  reply[0]|=0b10000010;             // No goto
         if (PPSsynced)                               reply[0]|=0b10000100;                                   // PPS sync
-        if ((guideDirAxis1) || (guideDirAxis2))      reply[0]|=0b10001000;                                   // Guide active
+        if (guideDirAxis1 || guideDirAxis2)          reply[0]|=0b10001000;                                   // Guide active
 #if MOUNT_TYPE != ALTAZM
         if (rateCompensation == RC_REFR_RA)          reply[0]|=0b11010000;                                   // Refr enabled Single axis
         if (rateCompensation == RC_REFR_BOTH)        reply[0]|=0b10010000;                                   // Refr enabled
@@ -770,7 +770,7 @@ void processCommands() {
         reply[0]='A';
 #endif
         // tracking
-        if ((trackingState != TrackingSidereal) || trackingSyncInProgress()) reply[1]='N'; else reply[1]='T';
+        if (trackingState != TrackingSidereal || trackingSyncInProgress()) reply[1]='N'; else reply[1]='T';
         // align status
         i=alignThisStar-1; if (i<0) i=0; if (i > 3) i=3; reply[2]='0'+i;
         reply[3]=0;
@@ -1029,7 +1029,7 @@ void processCommands() {
 
 // :LB#    Find previous object and set it as the current target object.
 //          Returns: Nothing
-      if ((command[1] == 'B') && (parameter[0] == 0)) { 
+      if (command[1] == 'B' && parameter[0] == 0) { 
           Lib.prevRec(); booleanReply=false;
       } else 
 
@@ -1047,7 +1047,7 @@ void processCommands() {
 // :LI#    Get Object Information
 //          Returns: <string>#
 //          Returns a string containing the current target object’s name and object type.
-      if ((command[1] == 'I') && (parameter[0] == 0)) {
+      if (command[1] == 'I' && parameter[0] == 0) {
         Lib.readVars(reply,&i,&origTargetRA,&origTargetDec);
 
         char const * objType=objectStr[i];
@@ -1058,7 +1058,7 @@ void processCommands() {
 
 // :LIG#   Get Object Information and goto
 //         Returns: Nothing
-      if ((command[1] == 'I') && (parameter[0] == 'G') && (parameter[1] == 0)) {
+      if (command[1] == 'I' && parameter[0] == 'G' && parameter[1] == 0) {
         Lib.readVars(reply,&i,&origTargetRA,&origTargetDec);
 
         newTargetRA=origTargetRA; newTargetDec=origTargetDec;
@@ -1073,7 +1073,7 @@ void processCommands() {
 // :LR#    Get Object Information including RA and Dec, with advance to next Record
 //          Returns: <string>#
 //          Returns a string containing the current target object’s name, type, RA, and Dec.
-      if ((command[1] == 'R') && (parameter[0] == 0)) {
+      if (command[1] == 'R' && parameter[0] == 0) {
         Lib.readVars(reply,&i,&origTargetRA,&origTargetDec);
 
         char const * objType=objectStr[i];
@@ -1312,7 +1312,7 @@ void processCommands() {
 #if MOUNT_TYPE != ALTAZM
           if (parameter[1] == '+') { if (pecRecorded) pecStatus=ReadyPlayPEC; nv.update(EE_pecStatus,pecStatus); } else
           if (parameter[1] == '-') { pecStatus=IgnorePEC; nv.update(EE_pecStatus,pecStatus); } else
-          if ((parameter[1] == '/') && (trackingState == TrackingSidereal)) { pecStatus=ReadyRecordPEC; nv.update(EE_pecStatus,IgnorePEC); } else
+          if (parameter[1] == '/' && trackingState == TrackingSidereal) { pecStatus=ReadyRecordPEC; nv.update(EE_pecStatus,IgnorePEC); } else
           if (parameter[1] == 'Z') { 
             for (i=0; i<pecBufferSize; i++) pecBuffer[i]=128;
             pecFirstRecord = true;
@@ -1467,7 +1467,7 @@ void processCommands() {
       if (command[1] == 'S') {
         i=highPrecision; highPrecision=true;
         if (parameter[0] == '-') f=-1.0; else f=1.0;
-        if ((parameter[0] == '+') || (parameter[0] == '-')) i1=1; else i1=0;
+        if (parameter[0] == '+' || parameter[0] == '-') i1=1; else i1=0;
         if (dmsToDouble(&f1,&parameter[i1],true)) rot.setTarget(f*f1); else commandError=CE_PARAM_FORM;
         highPrecision=i;
       } else commandError=CE_CMD_UNKNOWN;
@@ -1945,7 +1945,7 @@ void processCommands() {
 #endif
 
         // Only burn the new rate if changing the sidereal interval
-        if ((commandError == CE_NONE) && ((command[1] == '+') || (command[1] == '-') || (command[1] == 'R'))) {
+        if (commandError == CE_NONE && (command[1] == '+' || command[1] == '-' || command[1] == 'R')) {
           nv.writeLong(EE_siderealInterval,siderealInterval);
           SiderealClockSetInterval(siderealInterval);
           cli(); SiderealRate=siderealInterval/StepsPerSecondAxis1; sei();
