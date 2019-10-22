@@ -27,7 +27,7 @@ byte readBytesUntil2(char character, char buffer[], int length, boolean* charact
 }
 
 // smart LX200 aware command and response over serial
-boolean readLX200Bytes(char* command,char* recvBuffer,long timeOutMs) {
+boolean processCommand(char* command,char* recvBuffer,long timeOutMs) {
   Ser.setTimeout(timeOutMs);
   
   // clear the read/write buffers
@@ -131,7 +131,7 @@ bool sendCommand(const char command[], char response[], Responding responding=R_
   if (responding==R_NONE) return true;
   if (responding==R_ONE) response[Ser.readBytes(response,1)]=0;
   if (responding==R_BOOL) { response[Ser.readBytes(response,1)]=0; if (strlen(response)>0) { if (response[0]=='0') return false; else return true; } }
-  if (responding==R_STRING) { boolean found=true; response[readBytesUntil2('#',response,20,&found,WebTimeout)]=0; if (!found) return false; }
+  if (responding==R_STRING) { boolean found=true; response[readBytesUntil2('#',response,20,&found,webTimeout)]=0; if (!found) return false; }
   return response[0];
 }
 

@@ -254,7 +254,7 @@ void handleControl(EthernetClient *client) {
 #else
 void handleControl() {
 #endif
-  Ser.setTimeout(WebTimeout);
+  Ser.setTimeout(webTimeout);
   serialRecvFlush();
     
   char temp1[24]="";
@@ -543,7 +543,7 @@ void processControlGet() {
     if (v=="hc") Ser.print(":hC#");     // home, find
     if (v=="pk") Ser.print(":hP#");     // park
     if (v=="pu") Ser.print(":hR#");     // un-park
-    Ser.setTimeout(WebTimeout*8);
+    Ser.setTimeout(webTimeout*8);
 
     // clear any possible response
     temp[Ser.readBytesUntil('#',temp,20)]=0;
@@ -723,6 +723,6 @@ void processControlGet() {
 // clear any possible response
 void cl() {
   char temp[20]="";
-  Ser.setTimeout(WebTimeout*8);
+  Ser.setTimeout(webTimeout*8);
   temp[Ser.readBytesUntil('#',temp,20)]=0;
 }

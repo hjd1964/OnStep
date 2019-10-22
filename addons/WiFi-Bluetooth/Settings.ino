@@ -72,7 +72,7 @@ void handleSettings(EthernetClient *client) {
 #else
 void handleSettings() {
 #endif
-  Ser.setTimeout(WebTimeout);
+  Ser.setTimeout(webTimeout);
   serialRecvFlush();
 
   char temp1[80]="";
@@ -205,7 +205,7 @@ void processSettingsGet() {
   v=server.arg("pk");
   if (v!="") {
     if (v=="s") Ser.print(":hQ#");
-    Ser.setTimeout(WebTimeout*4);
+    Ser.setTimeout(webTimeout*4);
   }
   // Tracking control
   v=server.arg("tk");

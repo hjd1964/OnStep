@@ -26,7 +26,7 @@ void handlePec(EthernetClient *client) {
 #else
 void handlePec() {
 #endif
-  Ser.setTimeout(WebTimeout);
+  Ser.setTimeout(webTimeout);
   serialRecvFlush();
       
   char temp1[80] = "";

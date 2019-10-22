@@ -62,7 +62,7 @@ void handleRoot(EthernetClient *client) {
 #else
 void handleRoot() {
 #endif
-  Ser.setTimeout(WebTimeout);
+  Ser.setTimeout(webTimeout);
   serialRecvFlush();
 
   char temp[320]="";

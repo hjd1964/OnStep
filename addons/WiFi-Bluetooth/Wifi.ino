@@ -105,7 +105,7 @@ bool restartRequired=false;
 bool loginRequired=true;
 
 void handleWifi() {
-  Ser.setTimeout(WebTimeout);
+  Ser.setTimeout(webTimeout);
   serialRecvFlush();
   
   char temp[320]="";
@@ -166,7 +166,7 @@ void handleWifi() {
     EEPROM_readString(100,wifi_sta_ssid);
     EEPROM_readString(150,wifi_sta_pwd);
       
-    sprintf_P(temp,html_wifiSerial,CmdTimeout,WebTimeout); data += temp;
+    sprintf_P(temp,html_wifiSerial,cmdTimeout,webTimeout); data += temp;
     sprintf_P(temp,html_wifiSSID1,wifi_sta_ssid,""); data += temp;
     
     uint8_t mac[6] = {0,0,0,0,0,0}; WiFi.macAddress(mac);
@@ -224,16 +224,16 @@ void processWifiGet() {
   // Cmd channel timeout
   v=server.arg("ccto");
   if (v!="") {
-    CmdTimeout=v.toInt();
-    EEPROM_writeInt(12,(int)CmdTimeout);
+    cmdTimeout=v.toInt();
+    EEPROM_writeInt(12,(int)cmdTimeout);
     EEwrite=true;
   }
 
   // Web channel timeout
   v=server.arg("wcto");
   if (v!="") {
-    WebTimeout=v.toInt();
-    EEPROM_writeInt(10,(int)WebTimeout);
+    webTimeout=v.toInt();
+    EEPROM_writeInt(10,(int)webTimeout);
     EEwrite=true;
   }
 

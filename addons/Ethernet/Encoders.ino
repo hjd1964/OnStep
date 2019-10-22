@@ -174,7 +174,7 @@ void handleEncoders(EthernetClient *client) {
 #else
 void handleEncoders() {
 #endif
-  Ser.setTimeout(WebTimeout);
+  Ser.setTimeout(webTimeout);
   serialRecvFlush();
   
   char temp[300]="";

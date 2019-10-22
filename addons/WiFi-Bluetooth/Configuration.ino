@@ -89,7 +89,7 @@ void handleConfiguration(EthernetClient *client) {
 #else
 void handleConfiguration() {
 #endif
-  Ser.setTimeout(WebTimeout);
+  Ser.setTimeout(webTimeout);
   serialRecvFlush();
   
   char temp[320]="";

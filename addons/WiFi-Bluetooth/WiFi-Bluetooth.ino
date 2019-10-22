@@ -93,8 +93,8 @@ struct errors {
 };
 struct errors cmdErrorList[10] = { {"",0},{"",0},{"",0},{"",0},{"",0},{"",0},{"",0},{"",0},{"",0},{"",0} };
 
-int WebTimeout=TIMEOUT_WEB;
-int CmdTimeout=TIMEOUT_CMD;
+int webTimeout=TIMEOUT_WEB;
+int cmdTimeout=TIMEOUT_CMD;
 
 #define Default_Password "password"
 char masterPassword[40]=Default_Password;
@@ -160,8 +160,8 @@ void setup(void){
     EEPROM_writeInt(6,(int)stationEnabled);
     EEPROM_writeInt(8,(int)stationDhcpEnabled);
 
-    EEPROM_writeInt(10,(int)WebTimeout);
-    EEPROM_writeInt(12,(int)CmdTimeout);
+    EEPROM_writeInt(10,(int)webTimeout);
+    EEPROM_writeInt(12,(int)cmdTimeout);
 
 #if ENCODERS == ON
     EEPROM_writeLong(600,Axis1EncDiffLimit);
@@ -193,8 +193,8 @@ void setup(void){
     stationEnabled=EEPROM_readInt(6);
     stationDhcpEnabled=EEPROM_readInt(8);
 
-    WebTimeout=EEPROM_readInt(10);
-    CmdTimeout=EEPROM_readInt(12);
+    webTimeout=EEPROM_readInt(10);
+    cmdTimeout=EEPROM_readInt(12);
 
 #if ENCODERS == ON
     Axis1EncDiffLimit=EEPROM_readLong(600);
@@ -306,8 +306,8 @@ Again:
   Ser.println(stationEnabled);
   Ser.println(stationDhcpEnabled);
 
-  Ser.println(WebTimeout);
-  Ser.println(CmdTimeout);
+  Ser.println(webTimeout);
+  Ser.println(cmdTimeout);
 
   Ser.println(wifi_sta_ssid);
   Ser.println(wifi_sta_pwd);
@@ -425,39 +425,39 @@ void loop(void) {
 
   // check clients for data, if found get the command, pass to OnStep and pickup the response, then return the response to client
   while (cmdSvrClient && cmdSvrClient.connected() && (cmdSvrClient.available()>0)) {
-    static char writeBuffer[40]="";
-    static int writeBufferPos=0;
+    static char cmdBuffer[40]="";
+    static int cmdBufferPos=0;
 
     // get the data
     byte b=cmdSvrClient.read();
 
-    writeBuffer[writeBufferPos]=b; writeBufferPos++; if (writeBufferPos>39) writeBufferPos=39; writeBuffer[writeBufferPos]=0;
+    cmdBuffer[cmdBufferPos]=b; cmdBufferPos++; if (cmdBufferPos>39) cmdBufferPos=39; cmdBuffer[cmdBufferPos]=0;
 
     // send cmd and pickup the response
-    if ((b=='#') || ((strlen(writeBuffer)==1) && (b==(char)6))) {
-      char readBuffer[40]="";
-      readLX200Bytes(writeBuffer,readBuffer,CmdTimeout);
+    if ((b=='#') || ((strlen(cmdBuffer)==1) && (b==(char)6))) {
+      char result[40]="";
+      processCommand(cmdBuffer,result,cmdTimeout);
 
       // return the response, if we have one
-      if (strlen(readBuffer)>0) {
+      if (strlen(result)>0) {
         if (cmdSvrClient && cmdSvrClient.connected()) {
-          cmdSvrClient.print(readBuffer);
+          cmdSvrClient.print(result);
           delay(2);
         }
       }
 
       if (errorMonitorOn) {
         char cmd[]=":GE#";
-        readLX200Bytes(cmd,readBuffer,CmdTimeout);
+        processCommand(cmd,result,cmdTimeout);
         int e=CE_REPLY_UNKNOWN;
-        if (strlen(readBuffer) == 3) e=atoi(readBuffer); else strcpy(writeBuffer,":GE#");
+        if (strlen(result) == 3) e=atoi(result); else strcpy(cmdBuffer,":GE#");
         if (e>1) {
           for (int i=8; i>=0; i--) { strcpy(cmdErrorList[i+1].cmd,cmdErrorList[i].cmd); cmdErrorList[i+1].err=cmdErrorList[i].err; }
-          strcpy(cmdErrorList[0].cmd,writeBuffer); cmdErrorList[0].err=e;
+          strcpy(cmdErrorList[0].cmd,cmdBuffer); cmdErrorList[0].err=e;
         }
       }
 
-      writeBuffer[0]=0; writeBufferPos=0;
+      cmdBuffer[0]=0; cmdBufferPos=0;
 
     } else {
       server.handleClient(); 
@@ -487,8 +487,8 @@ void loop(void) {
 
   // check clients for data, if found get the command, pass to OnStep and pickup the response, then return the response to client
   while (persistentCmdSvrClient && persistentCmdSvrClient.connected() && (persistentCmdSvrClient.available()>0)) {
-    static char writeBuffer[40]="";
-    static int writeBufferPos=0;
+    static char cmdBuffer[40]="";
+    static int cmdBufferPos=0;
 
     // still active? push back disconnect by 2 minutes
     persistentClientTime=millis()+120000UL;
@@ -496,33 +496,33 @@ void loop(void) {
     // get the data
     byte b=persistentCmdSvrClient.read();
 
-    writeBuffer[writeBufferPos]=b; writeBufferPos++; if (writeBufferPos>39) writeBufferPos=39; writeBuffer[writeBufferPos]=0;
+    cmdBuffer[cmdBufferPos]=b; cmdBufferPos++; if (cmdBufferPos>39) cmdBufferPos=39; cmdBuffer[cmdBufferPos]=0;
 
     // send cmd and pickup the response
-    if ((b=='#') || ((strlen(writeBuffer)==1) && (b==(char)6))) {
-      char readBuffer[40]="";
-      readLX200Bytes(writeBuffer,readBuffer,CmdTimeout);
+    if ((b=='#') || ((strlen(cmdBuffer)==1) && (b==(char)6))) {
+      char result[40]="";
+      processCommand(cmdBuffer,result,cmdTimeout);
 
       // return the response, if we have one
-      if (strlen(readBuffer)>0) {
+      if (strlen(result)>0) {
         if (persistentCmdSvrClient && persistentCmdSvrClient.connected()) {
-          persistentCmdSvrClient.print(readBuffer);
+          persistentCmdSvrClient.print(result);
           delay(2);
         }
       }
 
       if (errorMonitorOn) {
         char cmd[]=":GE#";
-        readLX200Bytes(cmd,readBuffer,CmdTimeout);
+        processCommand(cmd,result,cmdTimeout);
         int e=CE_REPLY_UNKNOWN;
-        if (strlen(readBuffer) == 3) e=atoi(readBuffer); else strcpy(writeBuffer,":GE#");
+        if (strlen(result) == 3) e=atoi(result); else strcpy(cmdBuffer,":GE#");
         if (e>1) {
           for (int i=8; i>=0; i--) { strcpy(cmdErrorList[i+1].cmd,cmdErrorList[i].cmd); cmdErrorList[i+1].err=cmdErrorList[i].err; }
-          strcpy(cmdErrorList[0].cmd,writeBuffer); cmdErrorList[0].err=e;
+          strcpy(cmdErrorList[0].cmd,cmdBuffer); cmdErrorList[0].err=e;
         }
       }
 
-      writeBuffer[0]=0; writeBufferPos=0;
+      cmdBuffer[0]=0; cmdBufferPos=0;
     } else {
       server.handleClient(); 
   #if ENCODERS == ON
