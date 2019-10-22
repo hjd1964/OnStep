@@ -68,10 +68,10 @@
 // be changed in the web interface OR with a reset (for initialization again) as described in the Config.h comments
 #if SERIAL_BAUD<=28800
   #define TIMEOUT_WEB 60
-  #define TIMEOUT_CMD 60
+  #define TIMEOUT_CMD 1000
 #else
   #define TIMEOUT_WEB 15
-  #define TIMEOUT_CMD 30
+  #define TIMEOUT_CMD 1000
 #endif
 
 #define ICACHE_RAM_ATTR

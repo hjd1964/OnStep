@@ -57,10 +57,10 @@
 // be changed in the web interface OR with a reset (for initialization again) as described in the Config.h comments
 #if SERIAL_BAUD<=28800
   #define TIMEOUT_WEB 60
-  #define TIMEOUT_CMD 60
+  #define TIMEOUT_CMD 1000
 #else
   #define TIMEOUT_WEB 15
-  #define TIMEOUT_CMD 30
+  #define TIMEOUT_CMD 1000
 #endif
 
 #define AXIS1_ENC_A_PIN 14 // pin# for Axis1 encoder, for A or CW
@@ -195,6 +195,7 @@ void setup(void){
 
     webTimeout=EEPROM_readInt(10);
     cmdTimeout=EEPROM_readInt(12);
+    if (cmdTimeout < 1000) cmdTimeout=1000;
 
 #if ENCODERS == ON
     Axis1EncDiffLimit=EEPROM_readLong(600);
