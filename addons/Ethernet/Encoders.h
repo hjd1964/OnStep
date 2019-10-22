@@ -326,15 +326,13 @@ class Encoders {
       if ((long)(temp-nextEncCheckMs)>0) {
         nextEncCheckMs=temp+(unsigned long)(POLLING_RATE*1000.0);
         char s[22];
-        Ser.print(":GX42#"); s[Ser.readBytesUntil('#',s,20)]=0;
-        if (strlen(s)>1) { // can return error code "0" also, which is ignored
+        if (command(":GX42#",s) && strlen(s) > 1) {
           double f=strtod(s,&conv_end);
-          if ( (&s[0]!=conv_end) && (f>=-999.9) && (f<=999.9)) _osAxis1=f;
+          if (&s[0] != conv_end && f >= -999.9 && f <= 999.9) _osAxis1=f;
         }
-        Ser.print(":GX43#"); s[Ser.readBytesUntil('#',s,20)]=0;
-        if (strlen(s)>1) { // can return error code "0" also, which is ignored
+        if (command(":GX42#",s) && strlen(s) > 1) {
           double f=strtod(s,&conv_end);
-          if ( (&s[0]!=conv_end) && (f>=-999.9) && (f<=999.9)) _osAxis2=f;
+          if (&s[0] != conv_end && f >= -999.9 && f <= 999.9) _osAxis2=f;
         }
         _enAxis1=(double)axis1Pos.read()/(double)AXIS1_ENC_TICKS_DEG;
 #if AXIS1_ENC_REVERSE == ON
@@ -460,5 +458,3 @@ class Encoders {
     double _enAxis2=0;
 };
 #endif
-
-// ----------------------------------------------------------------------------------------------------------------

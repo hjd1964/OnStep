@@ -105,8 +105,7 @@ void handleSettings() {
   mountStatus.update(true);
 
   // finish the standard http response header
-  data += FPSTR(html_onstep_header1);
-  if (mountStatus.getId(temp1)) data += temp1; else data += "?";
+  data += FPSTR(html_onstep_header1); data += "OnStep";
   data += FPSTR(html_onstep_header2);
   if (mountStatus.getVer(temp1)) data += temp1; else data += "?";
   data += FPSTR(html_onstep_header3);
@@ -178,11 +177,11 @@ void settingsAjax() {
 #endif
   String data="";
   mountStatus.update();
-  data += "tracking|"; if (mountStatus.valid()) { if (mountStatus.tracking()) data+="On"; else data+="Off"; } else data+="?"; data+="\n";
-  data += "buzzer|"; if (mountStatus.valid()) { if (mountStatus.buzzerEnabled()) data+="On"; else data+="Off"; } else data+="?"; data+="\n";
+  data += "tracking|";   if (mountStatus.valid()) { if (mountStatus.tracking())          data+="On"; else data+="Off"; } else data+="?"; data+="\n";
+  data += "buzzer|";     if (mountStatus.valid()) { if (mountStatus.buzzerEnabled())     data+="On"; else data+="Off"; } else data+="?"; data+="\n";
   if (mountStatus.mountType()==MT_GEM) {
-    data += "autoFlip|";  if (mountStatus.valid()) { if (mountStatus.autoMeridianFlips()) data+="On"; else data+="Off"; } else data+="?"; data+="\n";
-    data += "pause|";  if (mountStatus.valid()) { if (mountStatus.pauseAtHome()) data+="On"; else data+="Off"; } else data+="?"; data+="\n";
+    data += "autoFlip|"; if (mountStatus.valid()) { if (mountStatus.autoMeridianFlips()) data+="On"; else data+="Off"; } else data+="?"; data+="\n";
+    data += "pause|";    if (mountStatus.valid()) { if (mountStatus.pauseAtHome())       data+="On"; else data+="Off"; } else data+="?"; data+="\n";
   }
 #ifdef OETHS
   client->print(data);
@@ -194,63 +193,58 @@ void settingsAjax() {
 void processSettingsGet() {
   // from the Settings.htm page -------------------------------------------------------------------
   String v;
-  char temp[20]="";
 
   // refine polar align
   v=server.arg("rp");
   if (v!="") {
-    if (v=="a") Ser.print(":MP#");
+    if (v=="a") commandBool(":MP#");
   }
   // set-park
   v=server.arg("pk");
   if (v!="") {
-    if (v=="s") Ser.print(":hQ#");
-    Ser.setTimeout(webTimeout*4);
+    if (v=="s") commandBool(":hQ#");
   }
   // Tracking control
   v=server.arg("tk");
   if (v!="") {
-    if (v=="on") Ser.print(":Te#");
-    if (v=="off") Ser.print(":Td#");
-    if (v=="f") Ser.print(":T+#"); // 0.02hz faster
-    if (v=="-") Ser.print(":T-#"); // 0.02hz slower
-    if (v=="r") Ser.print(":TR#"); // reset
+    if (v=="on")   commandBool(":Te#");  // enable tracking
+    if (v=="off")  commandBool(":Td#");  // disable tracking
+    if (v=="f")    commandBlind(":T+#"); // 0.02hz faster
+    if (v=="-")    commandBlind(":T-#"); // 0.02hz slower
+    if (v=="r")    commandBlind(":TR#"); // reset
   }
   // Refraction Rate Tracking control
   v=server.arg("rr");
   if (v!="") {
-    if (v=="otk") Ser.print(":To#");
-    if (v=="on") Ser.print(":Tr#");
-    if (v=="off") Ser.print(":Tn#");
-    if (v=="don") Ser.print(":T2#");
-    if (v=="doff") Ser.print(":T1#");
+    if (v=="otk")  commandBool(":To#"); // pointing model compensated
+    if (v=="on")   commandBool(":Tr#"); // compensated on
+    if (v=="off")  commandBool(":Tn#"); // compensated off
+    if (v=="don")  commandBool(":T2#"); // compensated 2 axis
+    if (v=="doff") commandBool(":T1#"); // compensated 1 axis
   }
   // Alert buzzer
   v=server.arg("ab");
   if (v!="") {
-    if (v=="on") Ser.print(":SX97,1#");
-    if (v=="off") Ser.print(":SX97,0#");
+    if (v=="on")   commandBool(":SX97,1#");
+    if (v=="off")  commandBool(":SX97,0#");
   }
   // Auto-continue
   v=server.arg("ma");
   if (v!="") {
-    if (v=="now") Ser.print(":MN#");
-    if (v=="on") Ser.print(":SX95,1#");
-    if (v=="off") Ser.print(":SX95,0#");
+    if (v=="now")  commandBool(":MN#");
+    if (v=="on")   commandBool(":SX95,1#");
+    if (v=="off")  commandBool(":SX95,0#");
   }
   // Pause at meridian flip
   v=server.arg("mp");
   if (v!="") {
-    if (v=="on") Ser.print(":SX98,1#");
-    if (v=="off") Ser.print(":SX98,0#");
+    if (v=="on")   commandBool(":SX98,1#");
+    if (v=="off")  commandBool(":SX98,0#");
   }
   // Command error logging
   v=server.arg("cel");
   if (v!="") {
-    if (v=="on") errorMonitorOn=true;
+    if (v=="on")   errorMonitorOn=true;
     if (v=="off") { errorMonitorOn=false; for (int i=0; i<10; i++) { strcpy(cmdErrorList[i].cmd,""); cmdErrorList[i].err=0; } }
   }
-
-  // clear any possible response
-  temp[Ser.readBytesUntil('#',temp,20)]=0;
 }

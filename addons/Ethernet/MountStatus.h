@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Accessories.h"
+
 enum RateCompensation {RC_NONE, RC_REFR_RA, RC_REFR_BOTH, RC_FULL_RA, RC_FULL_BOTH};
 enum MountTypes {MT_UNKNOWN, MT_GEM, MT_FORK, MT_FORKALT, MT_ALTAZM};
 enum Errors {
@@ -24,20 +26,13 @@ class MountStatus {
 
       char s[20] = "";
       if (!_valid) {
-        Ser.print(":GVP#");
-        s[Ser.readBytesUntil('#',s,20)]=0;
-        if ((s[0]==0) || (!strstr(s,"On-Step"))) { _valid=false; return false; }
-
-        Ser.print(":GVN#");
-        s[Ser.readBytesUntil('#',s,20)]=0;
-        if (s[0]==0) { _valid=false; return false; }
+        if (!command(":GVP#",s) || s[0] == 0 || !strstr(s,"On-Step")) { _valid=false; return false; }
+        if (!command(":GVN#",s) || s[0] == 0 ) { _valid=false; return false; }
         strcpy(_id,"OnStep");
         strcpy(_ver,s);
       }
 
-      Ser.print(":GU#");
-      s[Ser.readBytesUntil('#',s,20)]=0;
-      if (s[0]==0) { _valid=false; return false; }
+      if (!command(":GU#",s) || s[0] == 0) { _valid=false; return false; }
 
       _tracking=false; _slewing=false;
       if (!strstr(s,"N")) _slewing=true; else _tracking=(!strstr(s,"n"));
@@ -76,7 +71,7 @@ class MountStatus {
       _lastError=(Errors)(s[strlen(s)-1]-'0');
 
       if (all) {
-        Ser.print(":GX94#"); s[Ser.readBytesUntil('#',s,20)]=0; if (s[0]==0) { _valid=false; return false; }
+        if (!command(":GX94#",s) || s[0]==0) { _valid=false; return false; }
         _meridianFlips=!strstr(s, "N");
         _pierSide=strtol(&s[0],NULL,10);
 
@@ -84,8 +79,7 @@ class MountStatus {
         _validStepperDriverStatus = false;
         _stst1 = false; _olb1 = false; _ola1 = false; _s2ga1 = false; _s2gb1 = false; _ot1 = false; _otpw1 = false;
         _stst2 = false; _olb2 = false; _ola2 = false; _s2ga2 = false; _s2gb2 = false; _ot2 = false; _otpw2 = false;
-        Ser.print(":GXU1#"); s[Ser.readBytesUntil('#',s,20)]=0;
-        if (s[0] != 0 && s[0] != '0' && driverStatusTries<3) {
+        if (!command(":GXU1#",s) || (s[0] != 0 && s[0] != '0' && driverStatusTries<3)) {
           driverStatusTries=0;
           if (strstr(s,"ST")) _stst1=true;
           if (strstr(s,"OA")) _ola1=true;
@@ -94,8 +88,8 @@ class MountStatus {
           if (strstr(s,"GB")) _s2gb1=true;
           if (strstr(s,"OT")) _ot1=true;
           if (strstr(s,"PW")) _otpw1=true;
-          Ser.print(":GXU2#"); s[Ser.readBytesUntil('#',s,20)]=0;
-          if (s[0] != 0 && s[0] != '0') {
+
+          if (!command(":GXU2#",s) || (s[0] != 0 && s[0] != '0')) {
             _validStepperDriverStatus = true;
             if (strstr(s,"ST")) _stst2=true;
             if (strstr(s,"OA")) _ola2=true;
@@ -108,10 +102,8 @@ class MountStatus {
         } else { driverStatusTries++; if (driverStatusTries>3) driverStatusTries=3; }
 
         if (_alignMaxStars==-1) {
-          Ser.print(":A?#");
-          s[Ser.readBytesUntil('#',s,20)]=0;
           _alignMaxStars=3;
-          if (s[0]!=0) { if ((s[0]>'0') && (s[0]<='9')) _alignMaxStars=s[0]-'0'; }
+          if (!command(":A?#",s) || s[0] != 0) { if (s[0] > '0' && s[0] <= '9') _alignMaxStars=s[0]-'0'; }
         }
       }
       

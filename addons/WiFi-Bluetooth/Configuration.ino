@@ -121,8 +121,7 @@ void handleConfiguration() {
   mountStatus.update();
 
   // finish the standard http response header
-  data += FPSTR(html_onstep_header1);
-  if (mountStatus.getId(temp1)) data += temp1; else data += "?";
+  data += FPSTR(html_onstep_header1); data += "OnStep";
   data += FPSTR(html_onstep_header2);
   if (mountStatus.getVer(temp1)) data += temp1; else data += "?";
   data += FPSTR(html_onstep_header3);
@@ -139,6 +138,7 @@ void handleConfiguration() {
   data += FPSTR(html_links6N);
 #endif
   data += FPSTR(html_onstep_header4);
+
   data += FPSTR(html_config1);
 
   data+="<div style='width: 35em;'>";
@@ -148,24 +148,24 @@ void handleConfiguration() {
   sendHtml(data);
 
   // Backlash
-  if (!sendCommand(":%BR#",temp1)) strcpy(temp1,"0"); int backlashAxis1=(int)strtol(&temp1[0],NULL,10);
+  if (!command(":%BR#",temp1)) strcpy(temp1,"0"); int backlashAxis1=(int)strtol(&temp1[0],NULL,10);
   sprintf_P(temp,html_configBlAxis1,backlashAxis1);
   data += temp;
-  if (!sendCommand(":%BD#",temp1)) strcpy(temp1,"0"); int backlashAxis2=(int)strtol(&temp1[0],NULL,10);
+  if (!command(":%BD#",temp1)) strcpy(temp1,"0"); int backlashAxis2=(int)strtol(&temp1[0],NULL,10);
   sprintf_P(temp,html_configBlAxis2,backlashAxis2);
   data += temp;
   sendHtml(data);
 
   // Overhead and Horizon Limits
-  if (!sendCommand(":Gh#",temp1)) strcpy(temp1,"0"); int minAlt=(int)strtol(&temp1[0],NULL,10);
+  if (!command(":Gh#",temp1)) strcpy(temp1,"0"); int minAlt=(int)strtol(&temp1[0],NULL,10);
   sprintf_P(temp,html_configMinAlt,minAlt);
   data += temp;
-  if (!sendCommand(":Go#",temp1)) strcpy(temp1,"0"); int maxAlt=(int)strtol(&temp1[0],NULL,10);
+  if (!command(":Go#",temp1)) strcpy(temp1,"0"); int maxAlt=(int)strtol(&temp1[0],NULL,10);
   sprintf_P(temp,html_configMaxAlt,maxAlt);
   data += temp;
 
   // Meridian Limits
-  if ((sendCommand(":GXE9#",temp1)) && (sendCommand(":GXEA#",temp2))) {
+  if ((command(":GXE9#",temp1)) && (command(":GXEA#",temp2))) {
     int degPastMerE=(int)strtol(&temp1[0],NULL,10);
     degPastMerE=round((degPastMerE*15.0)/60.0);
     sprintf_P(temp,html_configPastMerE,degPastMerE);
@@ -178,7 +178,7 @@ void handleConfiguration() {
   sendHtml(data);
 
   // Longitude
-  if (!sendCommand(":Gg#",temp1)) strcpy(temp1,"+000*00");
+  if (!command(":Gg#",temp1)) strcpy(temp1,"+000*00");
   temp1[4]=0; // deg. part only
   if (temp1[0]=='+') temp1[0]='0'; // remove +
   sprintf_P(temp,html_configLongDeg,temp1);
@@ -188,7 +188,7 @@ void handleConfiguration() {
   sendHtml(data);
 
   // Latitude
-  if (!sendCommand(":Gt#",temp1)) strcpy(temp1,"+00*00");
+  if (!command(":Gt#",temp1)) strcpy(temp1,"+00*00");
   temp1[3]=0; // deg. part only
   if (temp1[0]=='+') temp1[0]='0'; // remove +
   sprintf_P(temp,html_configLatDeg,temp1);
@@ -198,7 +198,7 @@ void handleConfiguration() {
   sendHtml(data);
 
   // UTC Offset
-  if (!sendCommand(":GG#",temp1)) strcpy(temp1,"+00");
+  if (!command(":GG#",temp1)) strcpy(temp1,"+00");
   strcpy(temp2,temp1);
   temp2[3]=0; // deg. part only
   if (temp2[0]=='+') temp2[0]='0'; // remove +
@@ -226,60 +226,60 @@ void processConfigurationGet() {
   // Slew Speed
   v=server.arg("ss");
   if (v!="") {
-    if (v=="vs") Ser.print(":SX93,5#");
-    if (v=="s") Ser.print(":SX93,4#");
-    if (v=="n") Ser.print(":SX93,3#");
-    if (v=="f") Ser.print(":SX93,2#");
-    if (v=="vf") Ser.print(":SX93,1#");
+    if (v=="vs") commandBool(":SX93,5#"); // very slow, 0.5 x
+    if (v=="s")  commandBool(":SX93,4#"); // slow,      0.75x
+    if (v=="n")  commandBool(":SX93,3#"); // normal,    1.0 x
+    if (v=="f")  commandBool(":SX93,2#"); // fast,      1.5 x
+    if (v=="vf") commandBool(":SX93,1#"); // very fast, 2.0 x
   }
   
   // Overhead and Horizon Limits
   v=server.arg("ol");
   if (v!="") {
-    if ( (atoi2((char*)v.c_str(),&i)) && ((i>=60) && (i<=90))) { 
+    if (atoi2((char*)v.c_str(),&i) && (i >= 60 && i <= 90)) { 
       sprintf(temp,":So%d#",i);
-      Ser.print(temp);
+      commandBool(temp);
     }
   }
   v=server.arg("hl");
   if (v!="") {
-    if ( (atoi2((char*)v.c_str(),&i)) && ((i>=-30) && (i<=30))) { 
+    if (atoi2((char*)v.c_str(),&i) && (i >= -30 && i <= 30)) { 
       sprintf(temp,":Sh%d#",i);
-      Ser.print(temp);
+      commandBool(temp);
     }
   }
 
   // Meridian Limits
   v=server.arg("el");
   if (v!="") {
-    if ( (atoi2((char*)v.c_str(),&i)) && ((i>=-45) && (i<=45))) { 
+    if (atoi2((char*)v.c_str(),&i) && (i >= -45 && i <= 45)) { 
       i=round((i*60.0)/15.0);
       sprintf(temp,":SXE9,%d#",i);
-      Ser.print(temp);
+      commandBool(temp);
     }
   }
   v=server.arg("wl");
   if (v!="") {
-    if ( (atoi2((char*)v.c_str(),&i)) && ((i>=-45) && (i<=45))) { 
+    if (atoi2((char*)v.c_str(),&i) && (i >= -45 && i <= 45)) { 
       i=round((i*60.0)/15.0);
       sprintf(temp,":SXEA,%d#",i);
-      Ser.print(temp);
+      commandBool(temp);
     }
   }
 
   // Backlash Limits
   v=server.arg("b1");
   if (v!="") {
-    if ( (atoi2((char*)v.c_str(),&i)) && ((i>=0) && (i<=999))) { 
+    if (atoi2((char*)v.c_str(),&i) && (i >= 0 && i <= 999)) { 
       sprintf(temp,":$BR%d#",i);
-      Ser.print(temp);
+      commandBool(temp);
     }
   }
   v=server.arg("b2");
   if (v!="") {
-    if ( (atoi2((char*)v.c_str(),&i)) && ((i>=0) && (i<=999))) { 
+    if (atoi2((char*)v.c_str(),&i) && (i >= 0 && i <= 999)) { 
       sprintf(temp,":$BD%d#",i);
-      Ser.print(temp);
+      commandBool(temp);
     }
   }
 
@@ -287,46 +287,43 @@ void processConfigurationGet() {
   int long_deg=-999;
   v=server.arg("g1");
   if (v!="") {
-    if ( (atoi2((char*)v.c_str(),&i)) && ((i>=-180) && (i<=180))) { long_deg=i; }
+    if (atoi2((char*)v.c_str(),&i) && (i >= -180 && i <= 180)) long_deg = i;
   }
   v=server.arg("g2");
   if (v!="") {
-    if ( (atoi2((char*)v.c_str(),&i)) && ((i>=0) && (i<=60))) { 
-      if ((long_deg>=-180) && (long_deg<=180)) {
+    if (atoi2((char*)v.c_str(),&i) && (i >= 0 && i <= 60)) { 
+      if (long_deg >= -180 && long_deg <= 180) {
         sprintf(temp,":Sg%+04d*%02d#",long_deg,i);
-        Ser.print(temp);
+        commandBool(temp);
       }
     }
   }
   int lat_deg=-999;
   v=server.arg("t1");
   if (v!="") {
-    if ( (atoi2((char*)v.c_str(),&i)) && ((i>=-90) && (i<=90))) { lat_deg=i; }
+    if (atoi2((char*)v.c_str(),&i) && (i >= -90 && i <= 90)) lat_deg = i;
   }
   v=server.arg("t2");
   if (v!="") {
-    if ( (atoi2((char*)v.c_str(),&i)) && ((i>=0) && (i<=60))) {
-      if ((lat_deg>=-90) && (lat_deg<=90)) {
+    if (atoi2((char*)v.c_str(),&i) && (i >= 0 && i <= 60)) {
+      if (lat_deg >= -90 && lat_deg <= 90) {
         sprintf(temp,":St%+03d*%02d#",lat_deg,i);
-        Ser.print(temp);
+        commandBool(temp);
       }
     }
   }
   int ut_hrs=-999;
   v=server.arg("u1");
   if (v!="") {
-    if ( (atoi2((char*)v.c_str(),&i)) && ((i>=-13) && (i<=13))) { ut_hrs=i; }
+    if (atoi2((char*)v.c_str(),&i) && (i >= -13 && i <= 13)) ut_hrs = i;
   }
   v=server.arg("u2");
   if (v!="") {
-    if ( (atoi2((char*)v.c_str(),&i)) && ((i==00) || (i==30) || (i==45))) {
-      if ((ut_hrs>=-13) && (ut_hrs<=13)) {
+    if (atoi2((char*)v.c_str(),&i) && (i == 0 || i == 30 || i == 45)) {
+      if (ut_hrs >= -13 && ut_hrs <= 13) {
         sprintf(temp,":SG%+03d:%02d#",ut_hrs,i);
-        Ser.print(temp);
+        commandBool(temp);
       }
     }
   }
-
-  // clear any possible response
-  temp[Ser.readBytesUntil('#',temp,20)]=0;
 }

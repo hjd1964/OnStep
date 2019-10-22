@@ -286,8 +286,7 @@ void handleControl() {
   mountStatus.update();
 
   // finish the standard http response header
-  data += FPSTR(html_onstep_header1);
-  if (mountStatus.getId(temp1)) data += temp1; else data += "?";
+  data += FPSTR(html_onstep_header1); data += "OnStep";
   data += FPSTR(html_onstep_header2);
   if (mountStatus.getVer(temp1)) data += temp1; else data += "?";
   data += FPSTR(html_onstep_header3);
@@ -361,8 +360,8 @@ void handleControl() {
   sendHtml(data);
 
   // Focusing ------------------------------------------------
-  if (sendCommand(":FA#",temp1,R_BOOL)) Focuser1=true; else Focuser1=false;
-  if (sendCommand(":fA#",temp1,R_BOOL)) Focuser2=true; else Focuser2=false;
+  if (commandBool(":FA#")) Focuser1=true; else Focuser1=false;
+  if (commandBool(":fA#")) Focuser2=true; else Focuser2=false;
   if (Focuser1) {
     data += FPSTR(html_controlFocus1);
     data += "<div style='float: left;'>Focuser:</div><div style='float: right; text-align: right;' id='focuserpos'>?</div><br />";
@@ -377,7 +376,7 @@ void handleControl() {
   // Rotate/De-Rotate ----------------------------------------
   Rotate=false;
   DeRotate=false;
-  if (sendCommand(":GX98#",temp1)) {
+  if (command(":GX98#",temp1)) {
     if (temp1[0]=='R') Rotate=true;
     if (temp1[0]=='D') { Rotate=true; DeRotate=true; }
   }
@@ -436,22 +435,22 @@ void handleControl() {
     // Analog Control
     c=0;
     #ifdef AN3
-    if (sendCommand(":GXG3#",temp1)) { data += FPSTR(html_controlAnalog3A); data += temp1; data += FPSTR(html_controlAnalog3B); data += temp1; data += FPSTR(html_controlAnalog3C); c++; }
+    if (command(":GXG3#",temp1)) { data += FPSTR(html_controlAnalog3A); data += temp1; data += FPSTR(html_controlAnalog3B); data += temp1; data += FPSTR(html_controlAnalog3C); c++; }
     #endif
     #ifdef AN4
-    if (sendCommand(":GXG4#",temp1)) { data += FPSTR(html_controlAnalog4A); data += temp1; data += FPSTR(html_controlAnalog4B); data += temp1; data += FPSTR(html_controlAnalog4C); c++; }
+    if (command(":GXG4#",temp1)) { data += FPSTR(html_controlAnalog4A); data += temp1; data += FPSTR(html_controlAnalog4B); data += temp1; data += FPSTR(html_controlAnalog4C); c++; }
     #endif
     #ifdef AN5
-    if (sendCommand(":GXG5#",temp1)) { data += FPSTR(html_controlAnalog5A); data += temp1; data += FPSTR(html_controlAnalog5B); data += temp1; data += FPSTR(html_controlAnalog5C); c++; }
+    if (command(":GXG5#",temp1)) { data += FPSTR(html_controlAnalog5A); data += temp1; data += FPSTR(html_controlAnalog5B); data += temp1; data += FPSTR(html_controlAnalog5C); c++; }
     #endif
     #ifdef AN6
-    if (sendCommand(":GXG6#",temp1)) { data += FPSTR(html_controlAnalog6A); data += temp1; data += FPSTR(html_controlAnalog6B); data += temp1; data += FPSTR(html_controlAnalog6C); c++; }
+    if (command(":GXG6#",temp1)) { data += FPSTR(html_controlAnalog6A); data += temp1; data += FPSTR(html_controlAnalog6B); data += temp1; data += FPSTR(html_controlAnalog6C); c++; }
     #endif
     #ifdef AN7
-    if (sendCommand(":GXG7#",temp1)) { data += FPSTR(html_controlAnalog7A); data += temp1; data += FPSTR(html_controlAnalog7B); data += temp1; data += FPSTR(html_controlAnalog7C); c++; }
+    if (command(":GXG7#",temp1)) { data += FPSTR(html_controlAnalog7A); data += temp1; data += FPSTR(html_controlAnalog7B); data += temp1; data += FPSTR(html_controlAnalog7C); c++; }
     #endif
     #ifdef AN8
-    if (sendCommand(":GXG8#",temp1)) { data += FPSTR(html_controlAnalog8A); data += temp1; data += FPSTR(html_controlAnalog8B); data += temp1; data += FPSTR(html_controlAnalog8C); c++; } 
+    if (command(":GXG8#",temp1)) { data += FPSTR(html_controlAnalog8A); data += temp1; data += FPSTR(html_controlAnalog8B); data += temp1; data += FPSTR(html_controlAnalog8C); c++; } 
     #endif
     if (c>0) sendHtml(data);
 
@@ -489,31 +488,31 @@ void controlAjax() {
 
   if (Focuser1) {
     data += "focuserpos|";
-    if (sendCommand(":FG#",temp)) { data += temp; data += " microns\n"; } else { data += "?\n"; }
+    if (command(":FG#",temp)) { data += temp; data += " microns\n"; } else { data += "?\n"; }
   }
 
   if (Rotate) {
     data += "rotatorpos|";
-    if (sendCommand(":rG#",temp)) { temp[9]=temp[5]; temp[10]=temp[6]; temp[11]=0; temp[4]='&'; temp[5]='d'; temp[6]='e'; temp[7]='g'; temp[8]=';'; data += temp; data += "&#39;\n"; } else { data += "?\n"; }
+    if (command(":rG#",temp)) { temp[9]=temp[5]; temp[10]=temp[6]; temp[11]=0; temp[4]='&'; temp[5]='d'; temp[6]='e'; temp[7]='g'; temp[8]=';'; data += temp; data += "&#39;\n"; } else { data += "?\n"; }
   }
 
   #ifdef AN3
-    data += "an3v|"; if (sendCommand(":GXG3#",temp)) { data += temp; data += "\n"; } else { data += "?\n"; }
+    data += "an3v|"; if (command(":GXG3#",temp)) { data += temp; data += "\n"; } else { data += "?\n"; }
   #endif
   #ifdef AN4
-    data += "an4v|"; if (sendCommand(":GXG4#",temp)) { data += temp; data += "\n"; } else { data += "?\n"; }
+    data += "an4v|"; if (command(":GXG4#",temp)) { data += temp; data += "\n"; } else { data += "?\n"; }
   #endif
   #ifdef AN5
-    data += "an5v|"; if (sendCommand(":GXG5#",temp)) { data += temp; data += "\n"; } else { data += "?\n"; }
+    data += "an5v|"; if (command(":GXG5#",temp)) { data += temp; data += "\n"; } else { data += "?\n"; }
   #endif
   #ifdef AN6
-    data += "an6v|"; if (sendCommand(":GXG6#",temp)) { data += temp; data += "\n"; } else { data += "?\n"; }
+    data += "an6v|"; if (command(":GXG6#",temp)) { data += temp; data += "\n"; } else { data += "?\n"; }
   #endif
   #ifdef AN7
-    data += "an7v|"; if (sendCommand(":GXG7#",temp)) { data += temp; data += "\n"; } else { data += "?\n"; }
+    data += "an7v|"; if (command(":GXG7#",temp)) { data += temp; data += "\n"; } else { data += "?\n"; }
   #endif
   #ifdef AN8
-    data += "an8v|"; if (sendCommand(":GXG8#",temp)) { data += temp; data += "\n"; } else { data += "?\n"; }
+    data += "an8v|"; if (command(":GXG8#",temp)) { data += temp; data += "\n"; } else { data += "?\n"; }
   #endif
 #ifdef OETHS
   client->print(data);
@@ -537,36 +536,28 @@ void processControlGet() {
   // Quick bar
   v=server.arg("qb");
   if (v!="") {
-    if (v=="q") Ser.print(":Q#");       // stop goto/guide
-    if (v=="co") Ser.print(":SX99,1#"); // meridian flip, pause->continue
-    if (v=="hf") Ser.print(":hF#");     // home, reset
-    if (v=="hc") Ser.print(":hC#");     // home, find
-    if (v=="pk") Ser.print(":hP#");     // park
-    if (v=="pu") Ser.print(":hR#");     // un-park
-    Ser.setTimeout(webTimeout*8);
-
-    // clear any possible response
-    temp[Ser.readBytesUntil('#',temp,20)]=0;
+    if (v=="q") commandBlind(":Q#");       // stop goto/guide
+    if (v=="co") commandBool(":SX99,1#");  // meridian flip, pause->continue
+    if (v=="hf") commandBlind(":hF#");     // home, reset
+    if (v=="hc") commandBlind(":hC#");     // home, find
+    if (v=="pk") commandBool(":hP#");      // park
+    if (v=="pu") commandBool(":hR#");      // un-park
   }
 
   // Align
   v=server.arg("al");
   if (v!="") {
-    if (v=="1") Ser.print(":A1#");
-    if (v=="2") Ser.print(":A2#");
-    if (v=="3") Ser.print(":A3#");
-    if (v=="4") Ser.print(":A4#");
-    if (v=="5") Ser.print(":A5#");
-    if (v=="6") Ser.print(":A6#");
-    if (v=="7") Ser.print(":A7#");
-    if (v=="8") Ser.print(":A8#");
-    if (v=="9") Ser.print(":A9#");
-    if (v=="n") Ser.print(":A+#");
-    if (v=="q") Ser.print(":Q#");
-    Ser.setTimeout(1000);
-
-    // clear any possible response
-    temp[Ser.readBytesUntil('#',temp,20)]=0;
+    if (v=="1") commandBool(":A1#");
+    if (v=="2") commandBool(":A2#");
+    if (v=="3") commandBool(":A3#");
+    if (v=="4") commandBool(":A4#");
+    if (v=="5") commandBool(":A5#");
+    if (v=="6") commandBool(":A6#");
+    if (v=="7") commandBool(":A7#");
+    if (v=="8") commandBool(":A8#");
+    if (v=="9") commandBool(":A9#");
+    if (v=="n") commandBool(":A+#");
+    if (v=="q") commandBlind(":Q#");
   }
 
   // Set DATE/TIME
@@ -584,7 +575,7 @@ void processControlGet() {
       get_temp_year=i-2000;
       char temp[10];
       sprintf(temp,":SC%02d/%02d/%02d#",get_temp_month,get_temp_day,get_temp_year);
-      Ser.print(temp);
+      commandBool(temp);
     }
   }
   v=server.arg("th");
@@ -601,128 +592,122 @@ void processControlGet() {
       get_temp_second=i;
       char temp[10];
       sprintf(temp,":SL%02d:%02d:%02d#",get_temp_hour,get_temp_minute,get_temp_second);
-      Ser.print(temp);
+      commandBool(temp);
     }
   }
 
   v=server.arg("dr");
   if (v!="") {
     // Tracking control
-    if (v=="Ts") Ser.print(":TQ#"); // sidereal
-    if (v=="Tl") Ser.print(":TL#"); // lunar
-    if (v=="Th") Ser.print(":TS#"); // solar
+    if (v=="Ts") commandBlind(":TQ#");    // sidereal
+    if (v=="Tl") commandBlind(":TL#");    // lunar
+    if (v=="Th") commandBlind(":TS#");    // solar
 
     // quick
-    if (v=="qq") { Ser.print(":Q#");  cl(); }     // stop goto/guide
-    if (v=="qc") { Ser.print(":SX99,1#"); cl(); } // meridian flip, pause->continue
-    if (v=="qr") { Ser.print(":hF#"); cl(); }     // home, reset
-    if (v=="qh") { Ser.print(":hC#"); cl(); }     // home, find
-    if (v=="pk") { Ser.print(":hP#"); cl(); }     // park
-    if (v=="pu") { Ser.print(":hR#"); cl(); }     // un-park
+    if (v=="qq") commandBlind(":Q#");     // stop goto/guide
+    if (v=="qc") commandBool(":SX99,1#"); // meridian flip, pause->continue
+    if (v=="qr") commandBlind(":hF#");    // home, reset
+    if (v=="qh") commandBlind(":hC#");    // home, find
+    if (v=="pk") commandBool(":hP#");     // park
+    if (v=="pu") commandBool(":hR#");     // un-park
 
     // GUIDE control direction
-    if (v=="n1") Ser.print(":Mn#");
-    if (v=="s1") Ser.print(":Ms#");
-    if (v=="e1") Ser.print(":Me#");
-    if (v=="w1") Ser.print(":Mw#");
+    if (v=="n1") commandBlind(":Mn#");    // move n... s,e,w
+    if (v=="s1") commandBlind(":Ms#");
+    if (v=="e1") commandBlind(":Me#");
+    if (v=="w1") commandBlind(":Mw#");
 
-    if (v=="n0") Ser.print(":Qn#");
-    if (v=="s0") Ser.print(":Qs#");
-    if (v=="e0") Ser.print(":Qe#");
-    if (v=="w0") Ser.print(":Qw#");
+    if (v=="n0") commandBlind(":Qn#");    // quit n... s,e,w
+    if (v=="s0") commandBlind(":Qs#");
+    if (v=="e0") commandBlind(":Qe#");
+    if (v=="w0") commandBlind(":Qw#");
 
-    if (v=="sy") Ser.print(":CS#");
+    if (v=="sy") commandBool(":CS#");     // sync
 
     // GUIDE control rate
-    if (v=="R0") Ser.print(":R0#");
-    if (v=="R1") Ser.print(":R1#");
-    if (v=="R2") Ser.print(":R2#");
-    if (v=="R3") Ser.print(":R3#");
-    if (v=="R4") Ser.print(":R4#");
-    if (v=="R5") Ser.print(":R5#");
-    if (v=="R6") Ser.print(":R6#");
-    if (v=="R7") Ser.print(":R7#");
-    if (v=="R8") Ser.print(":R8#");
-    if (v=="R9") Ser.print(":R9#");
+    if (v=="R0") commandBlind(":R0#");    // guide rate 0..9
+    if (v=="R1") commandBlind(":R1#");
+    if (v=="R2") commandBlind(":R2#");
+    if (v=="R3") commandBlind(":R3#");
+    if (v=="R4") commandBlind(":R4#");
+    if (v=="R5") commandBlind(":R5#");
+    if (v=="R6") commandBlind(":R6#");
+    if (v=="R7") commandBlind(":R7#");
+    if (v=="R8") commandBlind(":R8#");
+    if (v=="R9") commandBlind(":R9#");
 
     // Focuser
-    if (v=="F1") { Ser.print(":FA1#"); temp[Ser.readBytesUntil('#',temp,20)]=0; }
-    if (v=="F2") { Ser.print(":FA2#"); temp[Ser.readBytesUntil('#',temp,20)]=0; }
-    if (v=="FH") Ser.print(":FH#");
-    if (v=="Fh") Ser.print(":Fh#");
-    if (v=="FI") Ser.print(":FF#:F-#");
-    if (v=="Fi") Ser.print(":FS#:F-#");
-    if (v=="Fo") Ser.print(":FS#:F+#");
-    if (v=="FO") Ser.print(":FF#:F+#");
-    if (v=="Fq") Ser.print(":FQ#");
+    if (v=="F1") commandBool(":FA1#");      // select focuser 1
+    if (v=="F2") commandBool(":FA2#");      // select focuser 2
+    if (v=="FH") commandBlind(":FH#");      // reset focuser at home (half travel)
+    if (v=="Fh") commandBlind(":Fh#");      // move focuser to home (half travel)
+    if (v=="FI") commandBlind(":FF#:F-#");  // rate fast, move in
+    if (v=="Fi") commandBlind(":FS#:F-#");  // rate slow, move in
+    if (v=="Fo") commandBlind(":FS#:F+#");  // rate fast, move out
+    if (v=="FO") commandBlind(":FF#:F+#");  // rate slow, move out
+    if (v=="Fq") commandBlind(":FQ#");
    
     // Rotate/De-Rotate
-    if (v=="b2") Ser.print(":r3#:r<#");
-    if (v=="b1") Ser.print(":r1#:r<#");
-    if (v=="f1") Ser.print(":r1#:r>#");
-    if (v=="f2") Ser.print(":r3#:r>#");
-    if (v=="ho") Ser.print(":rC#");
-    if (v=="re") Ser.print(":rF#");
-    if (v=="d0") Ser.print(":r-#");
-    if (v=="d1") Ser.print(":r+#");
-    if (v=="dr") Ser.print(":rR#");
-    if (v=="dp") Ser.print(":rP#");
+    if (v=="b2") commandBlind(":r3#:r<#");  // rate 3, move ccw
+    if (v=="b1") commandBlind(":r1#:r<#");  // rate 1, move ccw
+    if (v=="f1") commandBlind(":r1#:r>#");  // rate 3, move cw
+    if (v=="f2") commandBlind(":r3#:r>#");  // rate 1, move cw
+    if (v=="re") commandBlind(":rF#");      // reset rotator at home
+    if (v=="ho") commandBlind(":rC#");      // move rotator to home
+    if (v=="d0") commandBlind(":r-#");      // disable de-rotator
+    if (v=="d1") commandBlind(":r+#");      // enable de-rotator
+    if (v=="dr") commandBlind(":rR#");      // reverse rotator
+    if (v=="dp") commandBlind(":rP#");      // move rotator to parallactic angle
   }
 
   // General purpose switches
   #ifdef SW0
-  v=server.arg("sw0"); if (v!="") { Ser.print(":SXG0,"+v+"#"); cl(); }
+  v=server.arg("sw0"); if (v != "") commandBool(":SXG0,"+v+"#");
   #endif
   #ifdef SW1
-  v=server.arg("sw1"); if (v!="") { Ser.print(":SXG1,"+v+"#"); cl(); }
+  v=server.arg("sw1"); if (v != "") commandBool(":SXG1,"+v+"#");
   #endif
   #ifdef SW2
-  v=server.arg("sw2"); if (v!="") { Ser.print(":SXG2,"+v+"#"); cl(); }
+  v=server.arg("sw2"); if (v != "") commandBool(":SXG2,"+v+"#");
   #endif
   #ifdef SW3
-  v=server.arg("sw3"); if (v!="") { Ser.print(":SXG3,"+v+"#"); cl(); }
+  v=server.arg("sw3"); if (v != "") commandBool(":SXG3,"+v+"#");
   #endif
   #ifdef SW4
-  v=server.arg("sw4"); if (v!="") { Ser.print(":SXG4,"+v+"#"); cl(); }
+  v=server.arg("sw4"); if (v != "") commandBool(":SXG4,"+v+"#");
   #endif
   #ifdef SW5
-  v=server.arg("sw5"); if (v!="") { Ser.print(":SXG5,"+v+"#"); cl(); }
+  v=server.arg("sw5"); if (v != "") commandBool(":SXG5,"+v+"#");
   #endif
   #ifdef SW6
-  v=server.arg("sw6"); if (v!="") { Ser.print(":SXG6,"+v+"#"); cl(); }
+  v=server.arg("sw6"); if (v != "") commandBool(":SXG6,"+v+"#");
   #endif
   #ifdef SW7
-  v=server.arg("sw7"); if (v!="") { Ser.print(":SXG7,"+v+"#"); cl(); }
+  v=server.arg("sw7"); if (v != "") commandBool(":SXG7,"+v+"#");
   #endif
   #ifdef SW8
-  v=server.arg("sw8"); if (v!="") { Ser.print(":SXG8,"+v+"#"); cl(); }
+  v=server.arg("sw8"); if (v != "") commandBool(":SXG8,"+v+"#");
   #endif
 
   // General purpose analog
+  strcpy(temp,"");
   #ifdef AN3
-  v=server.arg("an3"); if (v!="") { Ser.printf(":SXG3,%ld#",(v.toInt()*255L)/100L); cl(); }
+  v=server.arg("an3"); if (v != "") sprintf(temp,":SXG3,%ld#",(v.toInt()*255L)/100L);
   #endif
   #ifdef AN4
-  v=server.arg("an4"); if (v!="") { Ser.printf(":SXG4,%ld#",(v.toInt()*255L)/100L); cl(); }
+  v=server.arg("an4"); if (v != "") sprintf(temp,":SXG4,%ld#",(v.toInt()*255L)/100L);
   #endif
   #ifdef AN5
-  v=server.arg("an5"); if (v!="") { Ser.printf(":SXG5,%ld#",(v.toInt()*255L)/100L); cl(); }
+  v=server.arg("an5"); if (v != "") sprintf(temp,":SXG5,%ld#",(v.toInt()*255L)/100L);
   #endif
   #ifdef AN6
-  v=server.arg("an6"); if (v!="") { Ser.printf(":SXG6,%ld#",(v.toInt()*255L)/100L); cl(); }
+  v=server.arg("an6"); if (v != "") sprintf(temp,":SXG6,%ld#",(v.toInt()*255L)/100L);
   #endif
   #ifdef AN7
-  v=server.arg("an7"); if (v!="") { Ser.printf(":SXG7,%ld#",(v.toInt()*255L)/100L); cl(); }
+  v=server.arg("an7"); if (v != "") sprintf(temp,":SXG7,%ld#",(v.toInt()*255L)/100L);
   #endif
   #ifdef AN8
-  v=server.arg("an8"); if (v!="") { Ser.printf(":SXG8,%ld#",(v.toInt()*255L)/100L); cl(); }
+  v=server.arg("an8"); if (v != "") sprintf(temp,":SXG8,%ld#",(v.toInt()*255L)/100L);
   #endif
-
-}
-
-// clear any possible response
-void cl() {
-  char temp[20]="";
-  Ser.setTimeout(webTimeout*8);
-  temp[Ser.readBytesUntil('#',temp,20)]=0;
+  if (strlen(temp) > 0) commandBool(temp);
 }

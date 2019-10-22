@@ -95,8 +95,7 @@ void handleRoot() {
   mountStatus.update(true);
 
   // finish the standard http response header
-  data += FPSTR(html_onstep_header1);
-  if (mountStatus.getId(temp1)) data += temp1; else data += "?";
+  data += FPSTR(html_onstep_header1); data += "OnStep";
   data += FPSTR(html_onstep_header2);
   if (mountStatus.getVer(temp1)) data += temp1; else data += "?";
   data += FPSTR(html_onstep_header3);
@@ -122,58 +121,58 @@ void handleRoot() {
   data += FPSTR(html_settingsBrowserTime);
 
   // UTC Date
-  if (!sendCommand(":GX81#",temp1)) strcpy(temp1,"?");
+  if (!command(":GX81#",temp1)) strcpy(temp1,"?");
   sprintf_P(temp,html_indexDate,temp1);
   data += temp;
 
   // UTC Time
-  if (!sendCommand(":GX80#",temp1)) strcpy(temp1,"?");
+  if (!command(":GX80#",temp1)) strcpy(temp1,"?");
   sprintf_P(temp,html_indexTime,temp1);
   data += temp;
 
   // LST
-  if (!sendCommand(":GS#",temp1)) strcpy(temp1,"?");
+  if (!command(":GS#",temp1)) strcpy(temp1,"?");
   sprintf_P(temp,html_indexSidereal,temp1);
   data += temp;
 
   // Longitude and Latitude
-  if (!sendCommand(":Gg#",temp1)) strcpy(temp1,"?");
-  if (!sendCommand(":Gt#",temp2)) strcpy(temp2,"?");
+  if (!command(":Gg#",temp1)) strcpy(temp1,"?");
+  if (!command(":Gt#",temp2)) strcpy(temp2,"?");
   sprintf_P(temp,html_indexSite,temp1,temp2);
   data += temp;
   sendHtml(data);
 
 #if DISPLAY_WEATHER == ON
-  if (!sendCommand(":GX9A#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,"Temperature:",temp1,"&deg;C"); data+=temp;
-  if (!sendCommand(":GX9B#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,"Barometric Pressure:",temp1,"mb"); data+=temp;
-  if (!sendCommand(":GX9C#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,"Relative Humidity:",temp1,"%"); data+=temp;
-  if (!sendCommand(":GX9E#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,"Dew Point Temperature:",temp1,"&deg;C"); data+=temp;
+  if (!command(":GX9A#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,"Temperature:",temp1,"&deg;C"); data+=temp;
+  if (!command(":GX9B#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,"Barometric Pressure:",temp1,"mb"); data+=temp;
+  if (!command(":GX9C#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,"Relative Humidity:",temp1,"%"); data+=temp;
+  if (!command(":GX9E#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,"Dew Point Temperature:",temp1,"&deg;C"); data+=temp;
 #endif
 
   data+="<br /><b>Coordinates:</b><br />";
 
 #if HIGH_PRECISION_COORDS == ON
   // RA,Dec current
-  if (!sendCommand(":GRa#",temp1)) strcpy(temp1,"?");
-  if (!sendCommand(":GDe#",temp2)) strcpy(temp2,"?");
+  if (!command(":GRa#",temp1)) strcpy(temp1,"?");
+  if (!command(":GDe#",temp2)) strcpy(temp2,"?");
   sprintf_P(temp,html_indexPosition,temp1,temp2); 
   data += temp;
 
   // RA,Dec target
-  if (!sendCommand(":Gra#",temp1)) strcpy(temp1,"?");
-  if (!sendCommand(":Gde#",temp2)) strcpy(temp2,"?");
+  if (!command(":Gra#",temp1)) strcpy(temp1,"?");
+  if (!command(":Gde#",temp2)) strcpy(temp2,"?");
   sprintf_P(temp,html_indexTarget,temp1,temp2); 
   data += temp;
 #else
   // RA,Dec current
-  if (!sendCommand(":GR#",temp1)) strcpy(temp1,"?");
-  if (!sendCommand(":GD#",temp2)) strcpy(temp2,"?");
+  if (!command(":GR#",temp1)) strcpy(temp1,"?");
+  if (!command(":GD#",temp2)) strcpy(temp2,"?");
   sprintf_P(temp,html_indexPosition,temp1,temp2); 
   data += temp;
 
   // RA,Dec target
-  if (!sendCommand(":Gr#",temp1)) strcpy(temp1,"?");
-  if (!sendCommand(":Gd#",temp2)) strcpy(temp2,"?");
+  if (!command(":Gr#",temp1)) strcpy(temp1,"?");
+  if (!command(":Gd#",temp2)) strcpy(temp2,"?");
   sprintf_P(temp,html_indexTarget,temp1,temp2); 
   data += temp;
 #endif
@@ -209,10 +208,10 @@ void handleRoot() {
   data += temp;
   sendHtml(data);
 
-  long lat=LONG_MIN; if (sendCommand(":Gt#",temp1)) { temp1[3]=0; if (temp1[0]=='+') temp1[0]='0'; lat=strtol(temp1,NULL,10); }
+  long lat=LONG_MIN; if (command(":Gt#",temp1)) { temp1[3]=0; if (temp1[0]=='+') temp1[0]='0'; lat=strtol(temp1,NULL,10); }
   if (abs(lat)<=89) {
-    long ud=LONG_MIN; if (sendCommand(":GX02#",temp1)) { ud=strtol(&temp1[0],NULL,10); if (lat<0) ud=-ud; }
-    long lr=LONG_MIN; if (sendCommand(":GX03#",temp1)) { lr=strtol(&temp1[0],NULL,10); lr=lr/cos(lat/57.295); }
+    long ud=LONG_MIN; if (command(":GX02#",temp1)) { ud=strtol(&temp1[0],NULL,10); if (lat<0) ud=-ud; }
+    long lr=LONG_MIN; if (command(":GX03#",temp1)) { lr=strtol(&temp1[0],NULL,10); lr=lr/cos(lat/57.295); }
 
     if ((lat!=LONG_MIN) && (ud!=LONG_MIN) && (lr!=LONG_MIN)) {
       data+="<br /><b>Polar Alignment:</b><br />";
@@ -270,7 +269,7 @@ void handleRoot() {
   sendHtml(data);
 
   // Tracking rate
-  if ((sendCommand(":GT#",temp1)) && (strlen(temp1)>6)) {
+  if ((command(":GT#",temp1)) && (strlen(temp1)>6)) {
     double tr=atof(temp1);
     dtostrf(tr,5,3,temp1);
     sprintf(temp,"&nbsp;&nbsp;Tracking Rate: <font class=\"c\">%s</font>Hz<br />",temp1);
@@ -278,12 +277,12 @@ void handleRoot() {
   }
 
   // Slew speed
-  if ((sendCommand(":GX97#",temp1)) && (strlen(temp1)>2)) {
+  if ((command(":GX97#",temp1)) && (strlen(temp1)>2)) {
     sprintf_P(temp,html_indexMaxSpeed,temp1);
     data += temp;
   } else {
     // fall back to MaxRate display if not supported
-    if ((sendCommand(":GX92#",temp1)) && (sendCommand(":GX93#",temp2))) { 
+    if ((command(":GX92#",temp1)) && (command(":GX93#",temp2))) { 
       long maxRate=strtol(&temp1[0],NULL,10);
       long MaxRate=strtol(&temp2[0],NULL,10);
       sprintf_P(temp,html_indexMaxRate,maxRate,MaxRate);
@@ -345,7 +344,7 @@ void handleRoot() {
   }
 
 #if DISPLAY_INTERNAL_TEMPERATURE == ON
-  if (!sendCommand(":GX9F#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,"Controller Internal Temperature:",temp1,"&deg;C"); data+=temp;
+  if (!command(":GX9F#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,"Controller Internal Temperature:",temp1,"&deg;C"); data+=temp;
 #endif
 
   // General Error
@@ -368,7 +367,7 @@ void handleRoot() {
   }
 
   // Loop time
-  if (!sendCommand(":GXFA#",temp1)) strcpy(temp1,"?%");
+  if (!command(":GXFA#",temp1)) strcpy(temp1,"?%");
   sprintf_P(temp,html_indexWorkload,temp1);
   data += temp;
 

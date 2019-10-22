@@ -3,12 +3,6 @@
 
 #if ENCODERS == ON
 
-const char html_encBeg[] PROGMEM = 
-"";
-
-const char html_encStart[] PROGMEM =
-"";
-
 const char html_encScript1[] PROGMEM =
 "<script>"
 "function s(key,v1) {"
@@ -221,8 +215,7 @@ void handleEncoders() {
   // finish the standard http response header
   {
     char temp1[40]="";
-    data += FPSTR(html_onstep_header1);
-    if (mountStatus.getId(temp1)) data += temp1; else data += "?";
+    data += FPSTR(html_onstep_header1); data += "OnStep";
     data += FPSTR(html_onstep_header2);
     if (mountStatus.getVer(temp1)) data += temp1; else data += "?";
     data += FPSTR(html_onstep_header3);
@@ -240,7 +233,6 @@ void handleEncoders() {
   data += FPSTR(html_links6N);
 #endif
   data += FPSTR(html_onstep_header4);
-  data += FPSTR(html_encBeg);
 
   data+="<div style='width: 35em;'>";
 
@@ -335,7 +327,6 @@ void handleEncoders() {
 #endif
 
   // end of page
-  sprintf_P(temp,html_encEnd);
   data += temp;
   data+="<br />";
 
@@ -554,9 +545,6 @@ void processEncodersGet() {
 #ifndef EEPROM_COMMIT_DISABLED
   if (EEwrite) EEPROM.commit();
 #endif
-
-  // clear any possible response
-  temp[Ser.readBytesUntil('#',temp,20)]=0;
 }
 
 #endif

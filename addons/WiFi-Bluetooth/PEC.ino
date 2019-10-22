@@ -65,8 +65,7 @@ void handlePec() {
   }
 
   // finish the standard http response header
-  data += FPSTR(html_onstep_header1);
-  if (mountStatus.getId(temp1)) data += temp1; else data += "?";
+  data += FPSTR(html_onstep_header1); data += "OnStep";
   data += FPSTR(html_onstep_header2);
   if (mountStatus.getVer(temp1)) data += temp1; else data += "?";
   data += FPSTR(html_onstep_header3);
@@ -82,8 +81,9 @@ void handlePec() {
   data += FPSTR(html_links6N);
 #endif
   data += FPSTR(html_onstep_header4);
-  data += FPSTR(html_pec1);
   sendHtml(data);
+
+  data += FPSTR(html_pec1);
 
   if (mountStatus.mountType()!=MT_ALTAZM) {
     data += FPSTR(html_pec2);
@@ -112,7 +112,7 @@ void pecAjax() {
   char temp[80]="";
   
   data += "status|";
-  if ((mountStatus.mountType()!=MT_ALTAZM) && (mountStatus.update()) && (sendCommand(":$QZ?#",temp))) {
+  if ((mountStatus.mountType()!=MT_ALTAZM) && (mountStatus.update()) && (command(":$QZ?#",temp))) {
     if (temp[0]=='I') data +="Idle"; else
     if (temp[0]=='p') data +="Play waiting to start"; else
     if (temp[0]=='P') data +="Playing"; else
@@ -134,21 +134,11 @@ void processPecGet() {
 
   // PEC control
   v=server.arg("pe");
-  if (v!="") {
-    if (v=="pl") { // play
-      Ser.print(":$QZ+#");
-    }
-    if (v=="st") { // stop
-      Ser.print(":$QZ-#");
-    }
-    if (v=="re") { // record
-      Ser.print(":$QZ/#");
-    }
-    if (v=="cl") { // clear
-      Ser.print(":$QZZ#");
-    };
-    if (v=="wr") { // write to eeprom
-      Ser.print(":$QZ!#");
-    }
+  if (v != "") {
+    if (v == "pl") commandBlind(":$QZ+#"); // play
+    if (v == "st") commandBlind(":$QZ-#"); // stop
+    if (v == "re") commandBlind(":$QZ/#"); // record
+    if (v == "cl") commandBlind(":$QZZ#"); // clear
+    if (v == "wr") commandBlind(":$QZ!#"); // write to eeprom
   }
 }

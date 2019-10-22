@@ -63,6 +63,9 @@
   #define TIMEOUT_CMD 1000
 #endif
 
+int webTimeout=TIMEOUT_WEB;
+int cmdTimeout=TIMEOUT_CMD;
+
 #define AXIS1_ENC_A_PIN 14 // pin# for Axis1 encoder, for A or CW
 #define AXIS1_ENC_B_PIN 12 // pin# for Axis1 encoder, for B or CCW
 #define AXIS2_ENC_A_PIN 5  // pin# for Axis1 encoder, for A or CW
@@ -71,8 +74,6 @@
 #if ENCODERS == ON
 Encoders encoders;
 #endif
-
-#include "MountStatus.h"
 
 #ifndef LEGACY_TRANSMIT_ON
   // macros to help with sending webpage data, chunked
@@ -92,9 +93,6 @@ struct errors {
   byte err;
 };
 struct errors cmdErrorList[10] = { {"",0},{"",0},{"",0},{"",0},{"",0},{"",0},{"",0},{"",0},{"",0},{"",0} };
-
-int webTimeout=TIMEOUT_WEB;
-int cmdTimeout=TIMEOUT_CMD;
 
 #define Default_Password "password"
 char masterPassword[40]=Default_Password;
@@ -144,6 +142,9 @@ void handleNotFound(){
   }
   server.send(404, "text/plain", message);
 }
+
+#include "Accessories.h"
+#include "MountStatus.h"
 
 void setup(void){
 #if LED_STATUS != OFF
@@ -195,7 +196,7 @@ void setup(void){
 
     webTimeout=EEPROM_readInt(10);
     cmdTimeout=EEPROM_readInt(12);
-    if (cmdTimeout < 1000) cmdTimeout=1000;
+    if (cmdTimeout < 500) cmdTimeout=1000;
 
 #if ENCODERS == ON
     Axis1EncDiffLimit=EEPROM_readLong(600);
@@ -431,22 +432,16 @@ void loop(void) {
 
     // get the data
     byte b=cmdSvrClient.read();
-
     cmdBuffer[cmdBufferPos]=b; cmdBufferPos++; if (cmdBufferPos>39) cmdBufferPos=39; cmdBuffer[cmdBufferPos]=0;
 
     // send cmd and pickup the response
-    if ((b=='#') || ((strlen(cmdBuffer)==1) && (b==(char)6))) {
+    if (b == '#' || (strlen(cmdBuffer) == 1 && b == (char)6)) {
       char result[40]="";
       processCommand(cmdBuffer,result,cmdTimeout);               // send cmd to OnStep, pickup response
-      if (strlen(result)>0) { if (cmdSvrClient && cmdSvrClient.connected()) { cmdSvrClient.print(result); delay(2); } } // client response
+      if (strlen(result) > 0) { if (cmdSvrClient && cmdSvrClient.connected()) { cmdSvrClient.print(result); delay(2); } } // client response
       if (errorMonitorOn) logCommandErrors(cmdBuffer,result);    // log any errors
       cmdBuffer[0]=0; cmdBufferPos=0;
-    } else {
-      server.handleClient(); 
-  #if ENCODERS == ON
-      encoders.poll();
-  #endif
-    }
+    } else idle();
   }
   // -------------------------------------------------------------------------------------------------------------------------------
 #endif
@@ -477,22 +472,16 @@ void loop(void) {
 
     // get the data
     byte b=persistentCmdSvrClient.read();
-
     cmdBuffer[cmdBufferPos]=b; cmdBufferPos++; if (cmdBufferPos>39) cmdBufferPos=39; cmdBuffer[cmdBufferPos]=0;
 
     // send cmd and pickup the response
-    if ((b=='#') || ((strlen(cmdBuffer)==1) && (b==(char)6))) {
+    if (b == '#' || (strlen(cmdBuffer) == 1 && b == (char)6)) {
       char result[40]="";
       processCommand(cmdBuffer,result,cmdTimeout);               // send cmd to OnStep, pickup response
-      if (strlen(result)>0) { if (persistentCmdSvrClient && persistentCmdSvrClient.connected()) { persistentCmdSvrClient.print(result); delay(2); } } // client response
+      if (strlen(result) > 0) { if (persistentCmdSvrClient && persistentCmdSvrClient.connected()) { persistentCmdSvrClient.print(result); delay(2); } } // client response
       if (errorMonitorOn) logCommandErrors(cmdBuffer,result);    // log any errors
       cmdBuffer[0]=0; cmdBufferPos=0;
-    } else {
-      server.handleClient(); 
-  #if ENCODERS == ON
-      encoders.poll();
-  #endif
-    }
+    } else idle();
   }
   // -------------------------------------------------------------------------------------------------------------------------------
 #endif
@@ -505,4 +494,31 @@ const char* HighSpeedCommsStr(long baud) {
   if (baud==38400) { return ":SB2#"; }
   if (baud==28800) { return ":SB3#"; }
   if (baud==19200) { return ":SB4#"; } else { return ":SB5#"; }
+}
+
+void logCommandErrors(char *cmdBuffer, char *result) {
+#if MONITOR_GUIDE_COMMANDS == ON
+  if (strstr(cmdBuffer,":Me") || strstr(cmdBuffer,":Mw") || strstr(cmdBuffer,":Mn") || strstr(cmdBuffer,":Ms") || strstr(cmdBuffer,":Mg") ||
+      strstr(cmdBuffer,":Qe") || strstr(cmdBuffer,":Qw") || strstr(cmdBuffer,":Qn") || strstr(cmdBuffer,":Qs") || strstr(cmdBuffer,":Q") ||
+      strstr(cmdBuffer,";Me") || strstr(cmdBuffer,";Mw") || strstr(cmdBuffer,";Mn") || strstr(cmdBuffer,";Ms") || strstr(cmdBuffer,";Mg") ||
+      strstr(cmdBuffer,";Qe") || strstr(cmdBuffer,";Qw") || strstr(cmdBuffer,";Qn") || strstr(cmdBuffer,";Qs") || strstr(cmdBuffer,";Q")) {
+    for (int i=8; i>=0; i--) { strcpy(cmdErrorList[i+1].cmd,cmdErrorList[i].cmd); cmdErrorList[i+1].err=cmdErrorList[i].err; }
+    strcpy(cmdErrorList[0].cmd,cmdBuffer); cmdErrorList[0].err=CE_NULL;
+  }
+#endif
+  char cmd[]=":GE#";
+  processCommand(cmd,result,cmdTimeout,true);
+  int e=CE_REPLY_UNKNOWN;
+  if (strlen(result) == 3) e=atoi(result); else strcat(cmdBuffer,"(:GE#)");
+  if (e>1) {
+    for (int i=8; i>=0; i--) { strcpy(cmdErrorList[i+1].cmd,cmdErrorList[i].cmd); cmdErrorList[i+1].err=cmdErrorList[i].err; }
+    strcpy(cmdErrorList[0].cmd,cmdBuffer); cmdErrorList[0].err=e;
+  }
+}
+
+void idle() {
+  server.handleClient(); 
+#if ENCODERS == ON
+  encoders.poll();
+#endif
 }

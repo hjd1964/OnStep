@@ -4,7 +4,7 @@
 const char html_wifiSerial[] PROGMEM =
 "<b>Performance and compatibility:</b><br/>"
 "<form method='post' action='/wifi.htm'>"
-"Command channel serial read time-out: <input style='width:4em' name='ccto' value='%d' type='number' min='1000' max='3000'> ms<br/>"
+"Command channel serial read time-out: <input style='width:4em' name='ccto' value='%d' type='number' min='500' max='3000'> ms<br/>"
 "Web channel serial read time-out: <input style='width:4em' name='wcto' value='%d' type='number' min='15' max='1000'> ms<br/>"
 "<button type='submit'>Upload</button></form><br />\r\n";
 const char html_wifiSSID1[] PROGMEM =
@@ -135,8 +135,7 @@ void handleWifi() {
   mountStatus.update(true);
 
   // finish the standard http response header
-  data += FPSTR(html_onstep_header1);
-  if (mountStatus.getId(temp1)) data += temp1; else data += "?";
+  data += FPSTR(html_onstep_header1); data += "OnStep";
   data += FPSTR(html_onstep_header2);
   if (mountStatus.getVer(temp1)) data += temp1; else data += "?";
   data += FPSTR(html_onstep_header3);
