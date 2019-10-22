@@ -369,7 +369,7 @@ void processCommands() {
 //  :FC#   Get focuser temperature compensation coefficient
 //         Return: n.n#
         if (command[1] == 'C' && parameter[0] == 0) { dtostrf(foc->getTcfCoef(),7,5,reply); booleanReply=false; } else
-//  :FCn.n# Set focuser temperature compensation coefficient in um per deg. C (+ moves out as temperature falls,) use 0.0 to disable.
+//  :FCsn.n# Set focuser temperature compensation coefficient in um per deg. C (+ moves out as temperature falls,) use 0.0 to disable.
 //         Return: 0 on failure
 //                 1 on success
         if (command[1] == 'C') { f = atof(parameter); if (abs(f) < 10000.0) foc->setTcfCoef(f); else commandError=CE_PARAM_RANGE; } else
@@ -383,7 +383,7 @@ void processCommands() {
         if (command[1] == 'c' && parameter[1] == 0) { foc->setTcfEnable(parameter[0] != '0'); } else
 
 //  :FP#   Get focuser DC Motor Power Level (in %)
-//         Returns: nnn#
+//         Returns: n#
 //  :FPn#  Set focuser DC Motor Power Level (in %)
 //         Return: 0 on failure
 //                 1 on success
@@ -736,11 +736,11 @@ void processCommands() {
         booleanReply=false;
       } else
 //  :GVD# Get Telescope Firmware Date
-//         Returns: mmm dd yyyy#
+//         Returns: MTH DD YYYY#
 //  :GVM# General Message
 //         returns: s# (where s is a string up to 16 chars)
 //  :GVN# Get Telescope Firmware Number
-//         Returns: d.dc#
+//         Returns: M.mp#
 //  :GVP# Get Telescope Product Name
 //         Returns: <string>#
 //  :GVT# Get Telescope Firmware Time
@@ -1305,7 +1305,7 @@ void processCommands() {
 //  :$QZ!  Write PEC data to EEPROM
 //         Returns: nothing
 //  :$QZ?  Get PEC status
-//         Returns: S#
+//         Returns: s#
       if (command[0] == '$' && command[1] == 'Q') {
         if (parameter[0] == 'Z' && parameter[2] == 0) {
           booleanReply=false;
