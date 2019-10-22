@@ -323,10 +323,8 @@ void processCommands() {
         else if (command[0] == secondaryFocuser) foc = &foc2;
 #endif
 
-        // check for commands that shouldn't have a parameter
-        boolean badcmd = false; if (strchr("TpIMtuQF1234+-GZHh",command[1]) && parameter[0] != 0) badcmd = true;
-
-        if (foc != NULL && !badcmd) {
+        // check that we have a focuser selected and for commands that shouldn't have a parameter
+        if (foc != NULL && !(strchr("TpIMtuQF1234+-GZHh",command[1]) && parameter[0] != 0)) {
 
         // get ready for commands that convert to microns or steps (these commands are upper-case for microns OR lower-case for steps)
         double spm = foc->getStepsPerMicro(); if (strchr("gimrs",command[1])) spm = 1.0;
