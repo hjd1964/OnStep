@@ -80,11 +80,13 @@ class MountStatus {
         _meridianFlips=!strstr(s, "N");
         _pierSide=strtol(&s[0],NULL,10);
 
+        static int driverStatusTries = 0;
         _validStepperDriverStatus = false;
         _stst1 = false; _olb1 = false; _ola1 = false; _s2ga1 = false; _s2gb1 = false; _ot1 = false; _otpw1 = false;
         _stst2 = false; _olb2 = false; _ola2 = false; _s2ga2 = false; _s2gb2 = false; _ot2 = false; _otpw2 = false;
         Ser.print(":GXU1#"); s[Ser.readBytesUntil('#',s,20)]=0;
-        if ((s[0]!=0) && (s[0]!='0')) {
+        if (s[0] != 0 && s[0] != '0' && driverStatusTries<3) {
+          driverStatusTries=0;
           if (strstr(s,"ST")) _stst1=true;
           if (strstr(s,"OA")) _ola1=true;
           if (strstr(s,"OB")) _olb1=true;
@@ -93,7 +95,7 @@ class MountStatus {
           if (strstr(s,"OT")) _ot1=true;
           if (strstr(s,"PW")) _otpw1=true;
           Ser.print(":GXU2#"); s[Ser.readBytesUntil('#',s,20)]=0;
-          if ((s[0]!=0) && (s[0]!='0')) {
+          if (s[0] != 0 && s[0] != '0') {
             _validStepperDriverStatus = true;
             if (strstr(s,"ST")) _stst2=true;
             if (strstr(s,"OA")) _ola2=true;
@@ -103,7 +105,7 @@ class MountStatus {
             if (strstr(s,"OT")) _ot2=true;
             if (strstr(s,"PW")) _otpw2=true;
           }
-        }
+        } else { driverStatusTries++; if (driverStatusTries>3) driverStatusTries=3; }
 
         if (_alignMaxStars==-1) {
           Ser.print(":A?#");
@@ -267,6 +269,7 @@ char* commandErrorToStr(int e) {
     case CE_SLEW_ERR_HARDWARE_FAULT: strcat(reply,"hardware fault"); break;
     case CE_MOUNT_IN_MOTION: strcat(reply,"mount in motion"); break;
     case CE_GOTO_ERR_UNSPECIFIED: strcat(reply,"other"); break;
+    case CE_NULL: strcpy(reply,""); break;
     default: strcat(reply,"unknown");
   }
 

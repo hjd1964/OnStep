@@ -43,6 +43,7 @@
 #define STANDARD_COMMAND_CHANNEL       ON //     ON, Enable standard cmd channel port 9999 use w/Android App & ASCOM driver.  Infreq
 #define PERSISTENT_COMMAND_CHANNEL    OFF //    OFF, Enable persistent cmd channel port 9998 use w/INDI? & Stellarium Mobile. Infreq
                                           //         Experimental, possibly causes problems w/standard cmd channel if enabled.
+#define MONITOR_GUIDE_COMMANDS        OFF //    OFF, Allow error reporting to also monitor guide commands.                    Infreq
 
 // ENCODER SUPPORT -----------------------------------------------------------------------------------------------------------------
 #define AXIS1_ENC                     OFF //    OFF, CWCCW, AB. RA/Azm Axis on Pin 5 (A or CW) and Pin 6 (B or CCW,)          Option

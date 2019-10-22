@@ -26,6 +26,12 @@ byte readBytesUntil2(char character, char buffer[], int length, boolean* charact
   return pos;
 }
 
+char serialRecvFlush() {
+  char c=0;
+  while (Ser.available()>0) c=Ser.read();
+  return c;
+}
+
 // smart LX200 aware command and response over serial
 boolean processCommand(char* command,char* recvBuffer,long timeOutMs) {
   Ser.setTimeout(timeOutMs);
@@ -41,9 +47,6 @@ boolean processCommand(char* command,char* recvBuffer,long timeOutMs) {
   boolean shortResponse=false;
   if ((command[0]==(char)6) && (command[1]==0)) shortResponse=true;
   if ((command[0]==':') || (command[0]==';')) {
-    if (command[1]=='G') {
-      if (strchr("RD",command[2])) { timeOutMs*=2; }
-    } else
     if (command[1]=='M') {
       if (strchr("ewnsg",command[2])) noResponse=true;
       if (strchr("SAP",command[2])) shortResponse=true;
@@ -52,7 +55,7 @@ boolean processCommand(char* command,char* recvBuffer,long timeOutMs) {
       if (strchr("#ewns",command[2])) noResponse=true;
     } else
     if (command[1]=='A') {
-      if (strchr("W123456789+",command[2])) { shortResponse=true; timeOutMs=1000; }
+      if (strchr("W123456789+",command[2])) shortResponse=true;
     } else
     if ((command[1]=='F') || (command[1]=='f')) {
       if (strchr("+-QZHhF1234",command[2])) noResponse=true;
@@ -79,8 +82,8 @@ boolean processCommand(char* command,char* recvBuffer,long timeOutMs) {
       if (strchr("S",command[2])) noResponse=true;
     } else
     if (command[1]=='h') {
-      if (strchr("FC",command[2])) { noResponse=true; timeOutMs=1000; }
-      if (strchr("QPR",command[2])) { shortResponse=true; timeOutMs*=2; }
+      if (strchr("FC",command[2])) noResponse=true;
+      if (strchr("QPR",command[2])) shortResponse=true;
     } else
     if (command[1]=='T') {
       if (strchr("QR+-SLK",command[2])) noResponse=true;
@@ -135,10 +138,24 @@ bool sendCommand(const char command[], char response[], Responding responding=R_
   return response[0];
 }
 
-char serialRecvFlush() {
-  char c=0;
-  while (Ser.available()>0) c=Ser.read();
-  return c;
+void logCommandErrors(char *cmdBuffer, char *result) {
+#if MONITOR_GUIDE_COMMANDS == ON
+  if (strstr(cmdBuffer,":Me") || strstr(cmdBuffer,":Mw") || strstr(cmdBuffer,":Mn") || strstr(cmdBuffer,":Ms") || strstr(cmdBuffer,":Mg") ||
+      strstr(cmdBuffer,":Qe") || strstr(cmdBuffer,":Qw") || strstr(cmdBuffer,":Qn") || strstr(cmdBuffer,":Qs") || strstr(cmdBuffer,":Q") ||
+      strstr(cmdBuffer,";Me") || strstr(cmdBuffer,";Mw") || strstr(cmdBuffer,";Mn") || strstr(cmdBuffer,";Ms") || strstr(cmdBuffer,";Mg") ||
+      strstr(cmdBuffer,";Qe") || strstr(cmdBuffer,";Qw") || strstr(cmdBuffer,";Qn") || strstr(cmdBuffer,";Qs") || strstr(cmdBuffer,";Q")) {
+    for (int i=8; i>=0; i--) { strcpy(cmdErrorList[i+1].cmd,cmdErrorList[i].cmd); cmdErrorList[i+1].err=cmdErrorList[i].err; }
+    strcpy(cmdErrorList[0].cmd,cmdBuffer); cmdErrorList[0].err=CE_NULL;
+  }
+#endif
+  char cmd[]=":GE#";
+  processCommand(cmd,result,cmdTimeout);
+  int e=CE_REPLY_UNKNOWN;
+  if (strlen(result) == 3) e=atoi(result); else strcpy(cmdBuffer,":GE#");
+  if (e>1) {
+    for (int i=8; i>=0; i--) { strcpy(cmdErrorList[i+1].cmd,cmdErrorList[i].cmd); cmdErrorList[i+1].err=cmdErrorList[i].err; }
+    strcpy(cmdErrorList[0].cmd,cmdBuffer); cmdErrorList[0].err=e;
+  }
 }
 
 boolean doubleToDms(char *reply, double *f, boolean fullRange, boolean signPresent) {

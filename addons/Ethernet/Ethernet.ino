@@ -251,28 +251,11 @@ void loop(void){
     byte b=cmdSvr.read();
     cmdBuffer[cmdBufferPos]=b; cmdBufferPos++; if (cmdBufferPos>39) cmdBufferPos=39; cmdBuffer[cmdBufferPos]=0;
 
-    // send cmd and pickup the response
     if (b=='#' || ((strlen(cmdBuffer)==1) && (b==(char)6))) {
       char result[40]="";
-      processCommand(cmdBuffer,result,cmdTimeout);
-
-      // return the response, if we have one
-      if (strlen(result)>0) {
-        cmdSvr.print(result);
-        delay(2);
-      }
-
-      if (errorMonitorOn) {
-        char cmd[]=":GE#";
-        processCommand(cmd,result,cmdTimeout);
-        int e=CE_REPLY_UNKNOWN;
-        if (strlen(result) == 3) e=atoi(result); else strcpy(cmdBuffer,":GE#");
-        if (e>1) {
-          for (int i=8; i>=0; i--) { strcpy(cmdErrorList[i+1].cmd,cmdErrorList[i].cmd); cmdErrorList[i+1].err=cmdErrorList[i].err; }
-          strcpy(cmdErrorList[0].cmd,cmdBuffer); cmdErrorList[0].err=e;
-        }
-      }
-
+      processCommand(cmdBuffer,result,cmdTimeout);               // send cmd to OnStep, pickup response
+      if (strlen(result)>0) { cmdSvr.print(result); delay(2); }  // return any response to client
+      if (errorMonitorOn) logCommandErrors(cmdBuffer,result);    // log any errors
       cmdBuffer[0]=0; cmdBufferPos=0;
     } else {
       server.handleClient();
