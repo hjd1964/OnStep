@@ -83,6 +83,10 @@ void handlePec() {
   data += FPSTR(html_onstep_header4);
   sendHtml(data);
 
+  // OnStep wasn't found, show warning and info.
+  if (!mountStatus.valid()) { data+= FPSTR(html_bad_comms_message); sendHtml(data); sendHtmlDone(data); return; }
+
+  data += FPSTR(html_pec1);
 
   if (mountStatus.mountType()!=MT_ALTAZM) {
     data += FPSTR(html_pec2);

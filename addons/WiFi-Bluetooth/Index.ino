@@ -114,6 +114,9 @@ void handleRoot() {
   data += FPSTR(html_onstep_header4);
   sendHtml(data);
 
+  // OnStep wasn't found, show warning and info.
+  if (!mountStatus.valid()) { data+= FPSTR(html_bad_comms_message); sendHtml(data); sendHtmlDone(data); return; }
+
   data+="<div style='width: 27em;'>";
 
   data+="<b>Site:</b><br />";

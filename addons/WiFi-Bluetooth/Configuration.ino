@@ -138,6 +138,10 @@ void handleConfiguration() {
   data += FPSTR(html_links6N);
 #endif
   data += FPSTR(html_onstep_header4);
+  sendHtml(data);
+
+  // OnStep wasn't found, show warning and info.
+  if (!mountStatus.valid()) { data+= FPSTR(html_bad_comms_message); sendHtml(data); sendHtmlDone(data); return; }
 
   data += FPSTR(html_config1);
 
