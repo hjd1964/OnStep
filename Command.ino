@@ -2071,12 +2071,10 @@ void processCommands() {
             pecBuffer[SecondsPerWormRotationAxis1-1]=i;
           } commandError=CE_CMD_UNKNOWN;
         } else {
-          // it should be an int
-          // see if it converted and is in range
+          // it should be an int, see if it converts and is in range
           if (atoi2(parameter,&i)) {
             if (i >= 0 && i < pecBufferSize) {
-              // should be another int here
-              // see if it converted and is in range
+              // should be another int here, see if it converts and is in range
               if (atoi2((char*)&parameter[5],&i2)) {
                 if (i2 >= -128 && i2 <= 127) {
                   pecBuffer[i]=i2+128;
