@@ -38,7 +38,7 @@ const char html_main_cssE[] PROGMEM = "</STYLE>";
 const char html_bad_comms_message[] PROGMEM =
   "<br /><bigger><font class=\"y\">Serial Interface to OnStep is Down!</font></bigger><br /><br />"
   "Powering off/on again can help if there is a baud rate mis-match (caused by OnStep restarting.)<br /><br />"
-  "Possible causes:<br /><ul>"
+  "Other possible causes:<br /><ul>"
   " <li>Incorrectly configured OnStep baud rate.</li><br />"
   " <li>Incorrectly configured ESP8266 or Teensy3.2 baud rates.</li><br />"
   " <li>Incorrectly configured ESP8266 SERIAL_SWAP.</li><br />"
