@@ -258,11 +258,11 @@ void moveTo() {
         sei();
   
         if (homeMount) {
-          // sound goto done
-          soundAlert();
-          
           // clear the backlash
           if (parkClearBacklash() == -1) return;  // working, no error flagging
+
+          // sound goto done
+          soundAlert();
 
           // restore trackingState
           trackingState=lastTrackingState; lastTrackingState=TrackingNone;
