@@ -314,10 +314,6 @@ void setup() {
   #endif
 #endif
 
-  // prep counters (for keeping time in main loop)
-  cli(); siderealTimer=lst; guideSiderealTimer=lst; PecSiderealTimer=lst; sei();
-  last_loop_micros=micros();
-
   // finally clear the comms channels
   delay(500);
   SerialA.flush();
@@ -328,6 +324,10 @@ void setup() {
   SerialC.flush();
 #endif
   delay(500);
+
+  // prep counters (for keeping time in main loop)
+  cli(); siderealTimer=lst; guideSiderealTimer=lst; PecSiderealTimer=lst; sei();
+  last_loop_micros=micros();
 }
 
 void loop() {
