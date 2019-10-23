@@ -347,10 +347,10 @@ class Encoders {
         mountStatus.update();
         if (mountStatus.valid()) {
           if (mountStatus.atHome() || mountStatus.parked()) syncFromOnStep();
-        if (!mountStatus.slewing() && !mountStatus.guiding() && encAutoSync) {
-          if ((fabs(_osAxis1-_enAxis1)>(double)(Axis1EncDiffLimit/3600.0)) ||
-              (fabs(_osAxis2-_enAxis2)>(double)(Axis2EncDiffLimit/3600.0))) syncToOnStep();
-        }
+          if (!mountStatus.slewing() && !mountStatus.guiding() && encAutoSync) {
+            if ((fabs(_osAxis1-_enAxis1)>(double)(Axis1EncDiffLimit/3600.0)) ||
+                (fabs(_osAxis2-_enAxis2)>(double)(Axis2EncDiffLimit/3600.0))) syncToOnStep();
+          }
       }
 #endif
 
