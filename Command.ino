@@ -403,7 +403,7 @@ void processCommands() {
 // :FS#       Set focuser for slow motion (0.01mm/s)
 //            Returns: Nothing
         if (command[1] == 'S' && parameter[0] == 0) { foc->setMoveRate(1); booleanReply=false; } else
-// :Fn#       Set focuser move rate, 1=finest, 2=0.01mm/second, 3=0.1mm/second, 4=1mm/second
+// :F[n]#     Set focuser move rate, where n = 1 for finest, 2 for 0.01mm/second, 3 for 0.1mm/second, 4 for 1mm/second
 //            Returns: Nothing
         if (command[1] >= '1' && command[1] <= '4') { int p[] = {1,10,100,1000}; foc->setMoveRate(p[command[1] - '1']); booleanReply=false; } else
 // :F+#       Move focuser in (toward objective)
@@ -1378,7 +1378,7 @@ void processCommands() {
 // :RM#       Set slew rate to Find Rate     20X
 // :RF#       Set slew rate to Fast Rate     48X
 // :RS#       Set slew rate to Half Max (VF)  ?X (1/2 of maxRate)
-// :Rn#       Set slew rate to n, where n=0..9
+// :Rn#       Set slew rate to n, where n = 0..9
 //            Returns: Nothing
       if ((command[1] == 'G' || command[1] == 'C' || command[1] == 'M' || command[1] == 'S' || (command[1] >= '0' && command[1] <= '9')) && parameter[0] == 0) {
         if (command[1] == 'G') i=2; else // 1x
@@ -1434,15 +1434,16 @@ void processCommands() {
 // :rQ#       Stops movement (except derotator)
 //            Returns: Nothing
       if (command[1] == 'Q' && parameter[0] == 0) { rot.stopMove(); rot.moveContinuous(false); booleanReply=false; } else
-// :rn#       Move increment, 1=1 degrees, 2=2 degrees, 3=5 degrees, 4=10 degrees
-//            Move rate (n=), 1=.01 deg/s, 2=0.1 deg/s, 3=1.0 deg/s, 4=5.0 deg/s
+// :r[n]#     Move increment where n = 1 for 1 degrees, 2 for 2 degrees, 3 for 5 degrees, 4 for 10 degrees
+//            Move rate where n = 1 for .01 deg/s, 2 for 0.1 deg/s, 3 for 1.0 deg/s, 4 for 5.0 deg/s
 //            Returns: Nothing
       if ((command[1] >= '1' && command[1] <= '4') && parameter[0] == 0) {
         i=command[1]-'1';
         int t[]={1,2,5,10}; double t1[]={0.01,0.1,1.0,5.0};
         rot.setIncrement(t[i]); rot.setMoveRate(t1[i]); booleanReply=false;
       } else
-// :rSsDDD*MM'SS#  Set position
+// :rS[sDDD*MM'SS]#
+//            Set position
 //            Returns: 0 on failure
 //                     1 on success
       if (command[1] == 'S') {
@@ -2041,7 +2042,7 @@ void processCommands() {
 #endif
 
 // W - Site select/get
-// :W[n]#     Sets current site to n, where n=0..3
+// :W[n]#     Sets current site to n, where n = 0..3
 //            Returns: Nothing
 // :W?#       Queries current site
 //            Returns: n#
