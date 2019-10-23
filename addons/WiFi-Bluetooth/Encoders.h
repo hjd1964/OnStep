@@ -10,10 +10,14 @@
 #if ENCODERS == ON
 
 #ifdef ESP8266
-#include <Esp.h>
+  #include <Esp.h>
 #endif
 
-bool encAutoSync=true;
+#if ENCODERS_AUTO_SYNC_DEFAULT == ON
+  bool encAutoSync=true;
+#else
+  bool encAutoSync=false;
+#endif
 long Axis1EncDiffLimit=AXIS1_ENC_DIFF_LIMIT;
 long Axis2EncDiffLimit=AXIS2_ENC_DIFF_LIMIT;
 
@@ -343,7 +347,6 @@ class Encoders {
         _enAxis2=-_enAxis2;
 #endif
 
-#if ENCODERS_AUTO_SYNC == ON
         mountStatus.update();
         if (mountStatus.valid()) {
           if (mountStatus.atHome() || mountStatus.parked()) syncFromOnStep();
@@ -352,7 +355,6 @@ class Encoders {
                 (fabs(_osAxis2-_enAxis2)>(double)(Axis2EncDiffLimit/3600.0))) syncToOnStep();
           }
       }
-#endif
 
         // automatic rate compensation
 #if AXIS1_ENC_RATE_CONTROL == ON

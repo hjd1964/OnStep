@@ -331,7 +331,6 @@ void handleEncoders() {
 #endif
 
   // end of page
-  data += temp;
   data+="<br />";
 
   strcpy(temp,"</div></div></body></html>");

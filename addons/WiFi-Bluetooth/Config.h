@@ -56,7 +56,7 @@
 #define AXIS2_ENC_TICKS_DEG      13.33333 // 13.333, n, (ticks/degree.) Encoder ticks per degree.                             Adjust
 #define AXIS2_ENC_DIFF_LIMIT          900 //    900, n, (arcsec.) Maximum difference between encoder and OnStep before sync.  Adjust
                                                      
-#define ENCODERS_AUTO_SYNC            OFF //    OFF, ON, Enable support for auto sync of OnStep to encoder values.            Adjust
+#define ENCODERS_AUTO_SYNC_DEFAULT    OFF //    OFF, ON To start with auto sync of OnStep to encoder values enabled.          Adjust
 
 // ENCODER RATE CONTROL
 #define AXIS1_ENC_RATE_CONTROL        OFF //    OFF, ON Rate control for RA high resolution encoder. EQ mounts only.          Infreq
