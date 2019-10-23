@@ -638,7 +638,6 @@ void processCommands() {
 #endif
 #if MOUNT_TYPE != ALTAZM     
         const char *pch = PECStatusStringAlt; reply[i++]=pch[pecStatus];                                     // PEC Status one of "/,~;^" (/)gnore, ready to (,)lay, (~)laying, ready to (;)ecord, (^)ecording
-        // if (wormSensedAgain) { reply[i++]='.'; wormSensedAgain=false; }                                   // PEC optional (.) to indicate an index detect since last call
 #endif
         // provide mount type
 #if MOUNT_TYPE == GEM
@@ -916,7 +915,7 @@ void processCommands() {
               case '7': cli(); temp=(long)(targetAxis2.part.m); sei(); sprintf(reply,"%ld",temp); booleanReply=false; break;                  // Debug7, Dec target position
               case '8': cli(); temp=(long)(posAxis1); sei(); sprintf(reply,"%ld",temp); booleanReply=false; break;                            // Debug8, HA motor position
               case '9': cli(); temp=(long)(posAxis2); sei(); sprintf(reply,"%ld",temp); booleanReply=false; break;                            // Debug9, Dec motor position
-              case 'A': sprintf(reply,"%ld%%",(worst_loop_time*100L)/9970L); worst_loop_time=0; booleanReply=false; break;                    // DebugA, Workload
+              case 'A': sprintf(reply,"%ld%%",((long)worst_loop_time*100L)/9970L); worst_loop_time=0; booleanReply=false; break;              // DebugA, Workload
               case 'B': cli(); temp=(long)(trackingTimerRateAxis1*1000.0); sei(); sprintf(reply,"%ld",temp); booleanReply=false; break;       // DebugB, trackingTimerRateAxis1
               case 'C': sprintf(reply,"%ldus",average_loop_time); booleanReply=false; break;                                                  // DebugC, Workload average
               case 'E': double ra, de; cli(); getEqu(&ra,&de,false); sei(); sprintf(reply,"%f,%f",ra,de); booleanReply=false; break;          // DebugE, equatorial coordinates degrees (no division by 15)
