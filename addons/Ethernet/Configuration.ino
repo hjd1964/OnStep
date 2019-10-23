@@ -14,16 +14,16 @@ const char html_configMaxRate[] PROGMEM =
 const char html_configBlAxis1[] PROGMEM =
 "Backlash: <br />"
 "<form method='get' action='/configuration.htm'>"
-" <input value='%d' type='number' name='b1' min='0' max='999'>"
+" <input value='%d' type='number' name='b1' min='0' max='3600'>"
 "<button type='submit'>Upload</button>"
-" (Axis1, in arc-seconds 0 to 999)"
+" (Axis1, in arc-seconds 0 to 3600)"
 "</form>"
 "\r\n";
 const char html_configBlAxis2[] PROGMEM =
 "<form method='get' action='/configuration.htm'>"
-" <input value='%d' type='number' name='b2' min='0' max='999'>"
+" <input value='%d' type='number' name='b2' min='0' max='3600'>"
 "<button type='submit'>Upload</button>"
-" (Axis2, in arc-seconds 0 to 999)"
+" (Axis2, in arc-seconds 0 to 3600)"
 "</form>"
 "<br />\r\n";
 const char html_configMinAlt[] PROGMEM =
@@ -274,14 +274,14 @@ void processConfigurationGet() {
   // Backlash Limits
   v=server.arg("b1");
   if (v!="") {
-    if (atoi2((char*)v.c_str(),&i) && (i >= 0 && i <= 999)) { 
+    if (atoi2((char*)v.c_str(),&i) && (i >= 0 && i <= 3600)) { 
       sprintf(temp,":$BR%d#",i);
       commandBool(temp);
     }
   }
   v=server.arg("b2");
   if (v!="") {
-    if (atoi2((char*)v.c_str(),&i) && (i >= 0 && i <= 999)) { 
+    if (atoi2((char*)v.c_str(),&i) && (i >= 0 && i <= 3600)) { 
       sprintf(temp,":$BD%d#",i);
       commandBool(temp);
     }

@@ -163,7 +163,7 @@ void processCommands() {
 //        Set the Backlash values.  Units are arc-seconds
       if (command[0] == '$' && command[1] == 'B') {
         if (atoi2((char*)&parameter[1],&i)) {
-          if (i >= 0 && i <= 1999) {
+          if (i >= 0 && i <= 3600) {
             if (parameter[0] == 'D') {
               reactivateBacklashComp();
               cli(); backlashAxis2=(int)round(((double)i*(double)AXIS2_STEPS_PER_DEGREE)/3600.0); sei();
@@ -187,14 +187,14 @@ void processCommands() {
         if (parameter[0] == 'D' && parameter[1] == 0) {
             reactivateBacklashComp();
             i=(int)round(((double)backlashAxis2*3600.0)/(double)AXIS2_STEPS_PER_DEGREE);
-            if (i<0) i=0; if (i > 1999) i=1999;
+            if (i<0) i=0; if (i > 3600) i=3600;
             sprintf(reply,"%d",i);
             booleanReply=false;
         } else
         if (parameter[0] == 'R' && parameter[1] == 0) {
             reactivateBacklashComp();
             i=(int)round(((double)backlashAxis1*3600.0)/(double)AXIS1_STEPS_PER_DEGREE);
-            if (i<0) i=0; if (i > 1999) i=1999;
+            if (i<0) i=0; if (i > 3600) i=3600;
             sprintf(reply,"%d",i);
             booleanReply=false;
         } else commandError=CE_CMD_UNKNOWN;
