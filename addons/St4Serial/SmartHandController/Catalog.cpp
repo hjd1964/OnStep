@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <math.h>
+#include "Constants.h"
 #include "Config.h"
 #include "Catalog.h"
 #include "CatalogTypes.h"

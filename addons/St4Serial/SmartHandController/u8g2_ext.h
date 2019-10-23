@@ -1,6 +1,7 @@
 #pragma once
 #include <U8g2lib.h> // https://github.com/olikraus/u8g2/wiki/u8g2install
 #include "u8g2_ext_event.h"
+#include "Constants.h"
 #include "Config.h"
 
 class U8G2_EXT : public U8G2
@@ -9,7 +10,11 @@ public:
   bool UserInterfaceCatalog(Pad *extPad, const char *title);
   bool UserInterfaceUserCatalog(Pad *extPad, const char *title);
   uint8_t UserInterfaceMessage(Pad *extPad, const char *title1, const char *title2, const char *title3, const char *buttons);
-  uint8_t UserInterfaceSelectionList(Pad *extPad, const char *title, uint8_t start_pos, const char *sl, bool wrap=ALLOW_MENU_WRAP);
+#if DISPLAY_WRAP_MENUS == ON
+  uint8_t UserInterfaceSelectionList(Pad *extPad, const char *title, uint8_t start_pos, const char *sl, bool wrap=true);
+#else
+  uint8_t UserInterfaceSelectionList(Pad *extPad, const char *title, uint8_t start_pos, const char *sl, bool wrap=false);
+#endif
   uint8_t UserInterfaceInputValueBoolean(Pad *extPad, const char *title, boolean *value);
   uint8_t UserInterfaceInputValueInteger(Pad *extPad, const char *title, const char *pre, uint8_t *value, uint8_t lo, uint8_t hi, uint8_t digits, const char *post);
   uint8_t UserInterfaceInputValueFloat(Pad *extPad, const char *title, const char *pre, float *value, float lo, float hi, uint8_t len, uint8_t dec, const char *post);

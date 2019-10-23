@@ -30,8 +30,11 @@ class SmartHandController
 public:
   enum OLED { OLED_SH1106, OLED_SSD1306 };
   int telescopeCoordinates=1;
-  boolean hrs24=USE_24HR_TIME;
-
+#if DISPLAY_24HR_TIME == ON
+  boolean hrs24=true;
+#else
+  boolean hrs24=false;
+#endif
   void update();
   void drawIntro();
   void setup(const char version[], const int pin[7], const bool active[7], const int SerialBaud, const OLED model);
@@ -66,7 +69,7 @@ private:
   uint8_t current_selection_L2 = 1;
   uint8_t current_selection_L3 = 1;
   uint8_t current_selection_L4 = 1;
-#ifdef UTILITY_LIGHT 
+#if UTILITY_LIGHT != OFF
   uint8_t current_selection_utility_light = 5;
 #endif
   bool    current_selection_filter_above = true;

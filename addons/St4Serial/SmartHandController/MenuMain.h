@@ -8,7 +8,7 @@ void SmartHandController::menuFeatureKey()
   char string_feature_Modes[120] = "Guide Rate";
 
   int i=1,j=-1,k=-1,l=-1,m=-1,n=-1;
-  #ifdef UTILITY_LIGHT
+  #if UTILITY_LIGHT != OFF
     { i++; j=i; strcat(string_feature_Modes,"\nUtility Light"); }
   #endif
   if (telInfo.hasReticle()) { i++; k=i; strcat(string_feature_Modes,"\nReticle"); }

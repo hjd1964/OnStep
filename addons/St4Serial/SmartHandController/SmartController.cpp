@@ -3,8 +3,8 @@
 #include "LX200.h"
 #include "Catalog.h"
 
-unsigned long display_blank_time = DISPLAY_BLANK_TIME;
-unsigned long display_dim_time = DISPLAY_DIM_TIME;
+unsigned long display_blank_time = DISPLAY_BLANK_TIMEOUT * 1000;
+unsigned long display_dim_time = DISPLAY_DIM_TIMEOUT * 1000;
 
 #ifdef ESP32
   void timerAlarmsEnable() { SerialST4.paused(false); }
@@ -281,11 +281,11 @@ void SmartHandController::setup(const char version[], const int pin[7],const boo
   
   telInfo.lastState = 0;
   buttonPad.setup( pin, active);
-#ifdef AUX_ST4_ON
+#if ST4_INTERFACE == ON
   auxST4.setup();
 #endif
 
-#ifdef UTILITY_LIGHT
+#if UTILITY_LIGHT != OFF
   #ifdef ESP32
     ledcSetup(0, 5000, 8);
     ledcAttachPin(UTILITY_LIGHT_PIN, 0);
@@ -364,7 +364,7 @@ again:
 void SmartHandController::tickButtons()
 {
   buttonPad.tickButtons();
-#ifdef AUX_ST4_ON
+#if ST4_INTERFACE == ON
   auxST4.tickButtons();
 #endif
 }
@@ -433,7 +433,7 @@ void SmartHandController::update()
   // handle the guiding buttons
   {
     buttonCommand = false;
-#ifdef AUX_ST4_ON
+#if ST4_INTERFACE == ON
     if (!moveEast  && (buttonPad.e.isDown() || auxST4.e.isDown())) { moveEast = true;   Ser.write(ccMe); buttonCommand=true; } else
     if (moveEast   && (buttonPad.e.isUp()   && auxST4.e.isUp()))   { moveEast = false;  Ser.write(ccQe); buttonCommand=true; buttonPad.e.clearPress(); auxST4.e.clearPress(); }
     if (!moveWest  && (buttonPad.w.isDown() || auxST4.w.isDown())) { moveWest = true;   Ser.write(ccMw); buttonCommand=true; } else
@@ -476,7 +476,7 @@ void SmartHandController::update()
       }
     break;
     case 2:   // util. light
-#ifdef UTILITY_LIGHT
+#if UTILITY_LIGHT != OFF
       if (buttonPad.F.wasPressed()) { current_selection_utility_light--; strcpy(briefMessage,"Util Dimmer"); buttonCommand=true; } else
       if (buttonPad.f.wasPressed()) { current_selection_utility_light++; strcpy(briefMessage,"Util Brighter"); buttonCommand=true; }
       if (buttonCommand) {
@@ -545,7 +545,7 @@ void SmartHandController::update()
         if (telInfo.align == Telescope::ALI_OFF) {
           // cycles through disp of Eq, Hor, Time, Ambient OR...
           page++;
-  #ifdef AMBIENT_CONDITIONS_ON
+  #if DISPLAY_AMBIENT_CONDITIONS == ON
           if (page > 3) page = 0;
   #else
           if (page > 2) page = 0;

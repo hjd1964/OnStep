@@ -74,7 +74,7 @@ bool SmartHandController::menuSetBacklash(uint8_t &axis)
   if (!DisplayMessageLX200(readBacklashLX200(axis, backlash))) return false;
   char text[20];
   sprintf(text, "Backlash Axis%u", axis);
-  if (display->UserInterfaceInputValueFloat(&buttonPad, text, "", &backlash, 0, 999, 3, 0, " arc-sec"))
+  if (display->UserInterfaceInputValueFloat(&buttonPad, text, "", &backlash, 0, 3600, 4, 0, " arc-sec"))
   {
     return DisplayMessageLX200(writeBacklashLX200(axis, backlash),false);
   }

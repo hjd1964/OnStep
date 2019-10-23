@@ -22,6 +22,7 @@ all others (Teensy3.x, etc.) at 2mS/byte (500 Bps.)
 
 #include <Arduino.h>
 #include "St4SerialSlave.h"
+#include "Constants.h"
 #include "Config.h"
 
 #define INTERVAL 40000 // microseconds

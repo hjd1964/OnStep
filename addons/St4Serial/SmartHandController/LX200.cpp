@@ -34,23 +34,6 @@ void char2DEC(char* txt, int& deg, unsigned int& min, unsigned int& sec)
   sec = (int)strtol(&txt[7], &pEnd, 10);
 }
 
-
-// this readBytesUntil() lets you know if the "character" was found
-byte readBytesUntil2(char character, char buffer[], int length, boolean* characterFound, long timeout) {
-  unsigned long startTime = millis() + timeout;
-  int pos = 0;
-  *characterFound = false;
-  while (((long)(startTime - millis()) > 0) && (pos < length)) {
-    if (Ser.available()) {
-      buffer[pos] = Ser.read();
-      if (buffer[pos] == character) { *characterFound = true; break; }
-      pos++;
-    }
-    HdCrtlr.tickButtons();
-  }
-  return pos;
-}
-
 // smart LX200 aware command and response over serial
 bool readLX200Bytes(char* command, char* recvBuffer, unsigned long timeOutMs) {
   Ser.setTimeout(timeOutMs);

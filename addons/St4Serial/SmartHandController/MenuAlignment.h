@@ -6,9 +6,8 @@ void SmartHandController::menuAlignment()
   bool alignInProgress=false;
 
   if (!telInfo.getAlignStars(&maxAlignStars, &thisStar, &numStars)) { maxAlignStars=1; thisStar=1; numStars=1; }
-  if (maxAlignStars>9) { maxAlignStars=1; thisStar=1; numStars=1; }
-  if (numStars>9)      { maxAlignStars=1; thisStar=1; numStars=1; }
-  if ((thisStar>0) && (thisStar<=numStars)) alignInProgress=true;
+  if (maxAlignStars > 9 || numStars > 9)  { maxAlignStars=1; thisStar=1; numStars=1; }
+  if (thisStar > 0 && thisStar <= numStars) alignInProgress=true;
 
   telInfo.aliMode = Telescope::ALIM_OFF;
   current_selection_L1 = 1;
