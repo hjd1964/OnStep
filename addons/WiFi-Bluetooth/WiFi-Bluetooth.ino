@@ -57,10 +57,10 @@
 // be changed in the web interface OR with a reset (for initialization again) as described in the Config.h comments
 #if SERIAL_BAUD<=28800
   #define TIMEOUT_WEB 60
-  #define TIMEOUT_CMD 1000
+  #define TIMEOUT_CMD 60
 #else
   #define TIMEOUT_WEB 15
-  #define TIMEOUT_CMD 1000
+  #define TIMEOUT_CMD 30
 #endif
 
 int webTimeout=TIMEOUT_WEB;
@@ -196,7 +196,7 @@ void setup(void){
 
     webTimeout=EEPROM_readInt(10);
     cmdTimeout=EEPROM_readInt(12);
-    if (cmdTimeout < 500) cmdTimeout=1000;
+    if (cmdTimeout > 100) cmdTimeout=30;
 
 #if ENCODERS == ON
     Axis1EncDiffLimit=EEPROM_readLong(600);

@@ -4,8 +4,8 @@
 const char html_wifiSerial[] PROGMEM =
 "<b>Performance and compatibility:</b><br/>"
 "<form method='post' action='/wifi.htm'>"
-"Command channel serial read time-out: <input style='width:4em' name='ccto' value='%d' type='number' min='500' max='3000'> ms<br/>"
-"Web channel serial read time-out: <input style='width:4em' name='wcto' value='%d' type='number' min='15' max='1000'> ms<br/>"
+"Command channel serial read time-out: <input style='width:4em' name='ccto' value='%d' type='number' min='5' max='100'> ms<br/>"
+"Web channel serial read time-out: <input style='width:4em' name='wcto' value='%d' type='number' min='5' max='100'> ms<br/>"
 "<button type='submit'>Upload</button></form><br />\r\n";
 const char html_wifiSSID1[] PROGMEM =
 "<br/><b>Station mode (connect to an Access-Point):</b><br/>"
