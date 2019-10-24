@@ -1,5 +1,8 @@
 #pragma once
 
+#include "St4SerialSlave.h"
+#include "St4Aux.h"
+
 #define Ser SERIAL_INTERFACE
 
 // If we are not on an ESP32, then assume a Teensy 3.2
@@ -66,28 +69,4 @@
   #endif
 
   #define UTILITY_LIGHT_PIN  13    // GPIO13 used as PWM output to drive utility lamp LED
-#endif 
-
-#include "St4SerialSlave.h"
-#include "St4Aux.h"
-
-#define TIMEOUT_CMD         1000  // Default=1000 (1 second)
-#define BACKGROUND_CMD_RATE 300   // Default=300, regulates the background command rate
-
-// Enable debugging messages on DebugSer
-#define DEBUG_OFF                 // default=_OFF, use "DEBUG_ON" to activate
-#define DebugSer Serial           // default=Serial, or Serial1 for example (always 9600 baud)
-#define DEBUGBUTTON_OFF           // defualt=_OFF, use "DEBUGBUTTON" to activate
-
-// helper macros for debugging, with less typing
-#if defined(DEBUG_ON)
-  #define D(x)     DebugSer.print(x)
-  #define DH(x,y)  DebugSer.print(x,HEX)
-  #define DL(x)    DebugSer.println(x)
-  #define DHL(x,y) DebugSer.println(x,HEX)
-#else
-  #define D(x)
-  #define DH(x,y)
-  #define DL(x)
-  #define DHL(x,y)
 #endif
