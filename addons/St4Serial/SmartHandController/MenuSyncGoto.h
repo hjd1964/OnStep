@@ -276,19 +276,26 @@ MENU_RESULT SmartHandController::menuFilters()
 
 void SmartHandController::setCatMgrFilters()
 {
+  static bool lastTeleEquIsSet=false;
   cat_mgr.filtersClear();
   
   if (current_selection_filter_above)   cat_mgr.filterAdd(FM_ABOVE_HORIZON);
   if (current_selection_filter_con>1)   cat_mgr.filterAdd(FM_CONSTELLATION,current_selection_filter_con-2);
   if (current_selection_filter_type>1)  cat_mgr.filterAdd(FM_OBJ_TYPE,current_selection_filter_type-2);
   if (current_selection_filter_byMag>1) cat_mgr.filterAdd(FM_BY_MAG,current_selection_filter_byMag-2);
-  if (current_selection_filter_nearby>1) { 
-    double r,d;
-    if (telInfo.getRA(r) && telInfo.getDec(d)) {
-      cat_mgr.setLastTeleEqu(r,d);
+  if (current_selection_filter_nearby>1) {
+    if (lastTeleEquIsSet) {
       cat_mgr.filterAdd(FM_NEARBY,current_selection_filter_nearby-2);
-    } else current_selection_filter_nearby=1;
-  }
+    } else
+    {
+      double r,d;
+      if (telInfo.getRA(r) && telInfo.getDec(d)) {
+        cat_mgr.setLastTeleEqu(r,d);
+        lastTeleEquIsSet=true;
+        cat_mgr.filterAdd(FM_NEARBY,current_selection_filter_nearby-2);
+      } else current_selection_filter_nearby=1;
+    }
+  } else lastTeleEquIsSet=false;
   if (current_selection_filter_dblmin>1) cat_mgr.filterAdd(FM_DBL_MIN_SEP,current_selection_filter_dblmin-2);
   if (current_selection_filter_dblmax>1) cat_mgr.filterAdd(FM_DBL_MAX_SEP,current_selection_filter_dblmax-2);
   if (current_selection_filter_varmax>1) cat_mgr.filterAdd(FM_VAR_MAX_PER,current_selection_filter_varmax-2);
