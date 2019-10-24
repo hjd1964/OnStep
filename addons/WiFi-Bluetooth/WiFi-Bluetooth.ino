@@ -507,7 +507,7 @@ void logCommandErrors(char *cmdBuffer, char *result) {
   }
 #endif
   char cmd[]=":GE#";
-  processCommand(cmd,result,cmdTimeout,true);
+  processCommand(cmd,result,cmdTimeout);
   int e=CE_REPLY_UNKNOWN;
   if (strlen(result) == 3) e=atoi(result); else strcat(cmdBuffer,"(:GE#)");
   if (e>1) {
