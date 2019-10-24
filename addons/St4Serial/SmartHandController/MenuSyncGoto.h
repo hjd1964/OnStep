@@ -235,8 +235,13 @@ MENU_RESULT SmartHandController::menuFilters()
     switch (current_selection) {
       case 1:
         current_selection_filter_above=true;
-        current_selection_filter_con =1;
+        current_selection_filter_con=1;
         current_selection_filter_type=1;
+        current_selection_filter_byMag=1;
+        current_selection_filter_nearby=1;
+        current_selection_filter_dblmin=1;
+        current_selection_filter_dblmax=1;
+        current_selection_filter_varmax=1;
         DisplayMessage("Filters", "Reset", 1000);
       break;
       case 2:
