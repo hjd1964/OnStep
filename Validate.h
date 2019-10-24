@@ -24,7 +24,11 @@
 #define MaxRate ((1000000.0/SLEW_RATE_BASE_DESIRED)/AXIS1_STEPS_PER_DEGREE)
 
 // automatically calculate the pecBufferSize
-#define PEC_BUFFER_SIZE ceil(AXIS1_STEPS_PER_WORMROT/(AXIS1_STEPS_PER_DEGREE/240.0))
+#if MOUNT_TYPE == ALTAZM
+  #define PEC_BUFFER_SIZE 0
+#else
+  #define PEC_BUFFER_SIZE ceil(AXIS1_STEPS_PER_WORMROT/(AXIS1_STEPS_PER_DEGREE/240.0))
+#endif
 
 // figure out how many align star are allowed for the configuration
 #if defined(MAX_NUM_ALIGN_STARS)

@@ -86,7 +86,7 @@ void initStartupValues() {
   waitingHomeContinue = false;
 
   // PEC sanity check
-  if ((pecBufferSize < 0) || (pecBufferSize > 3384)) pecBufferSize=0;
+  if (pecBufferSize < 0 || pecBufferSize > 3384) pecBufferSize=0;
   if (SecondsPerWormRotationAxis1>pecBufferSize) SecondsPerWormRotationAxis1=pecBufferSize;
 
   // reset tracking and rates
