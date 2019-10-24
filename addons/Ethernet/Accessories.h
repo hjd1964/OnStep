@@ -19,7 +19,7 @@ char serialRecvFlush() {
 }
 
 // smart LX200 aware command and response over serial
-boolean processCommand(const char cmd[], char response[], long timeOutMs, bool idleProcessing=false) {
+boolean processCommand(const char cmd[], char response[], long timeOutMs) {
   Ser.setTimeout(timeOutMs);
   
   // clear the read/write buffers
