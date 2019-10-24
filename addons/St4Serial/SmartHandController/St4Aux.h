@@ -5,6 +5,7 @@
 
 #include "Constants.h"
 #include "Config.h"
+#include "Pinmap.h"
 #include "PushButton.h"
 
 #if defined(ST4AuxRAw) && defined(ST4AuxDEs) && defined(ST4AuxDEn) && defined(ST4AuxRAe)

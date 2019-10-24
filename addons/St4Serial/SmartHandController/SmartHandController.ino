@@ -41,6 +41,7 @@
 
 #include "Constants.h"
 #include "Config.h"
+#include "Pinmap.h"
 #include "SmartController.h"
 
 const char Version[] = "Version " FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch;

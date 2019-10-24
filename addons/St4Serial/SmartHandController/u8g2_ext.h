@@ -3,6 +3,7 @@
 #include "u8g2_ext_event.h"
 #include "Constants.h"
 #include "Config.h"
+#include "Pinmap.h"
 
 class U8G2_EXT : public U8G2
 {

@@ -25,6 +25,7 @@ all others (Teensy3.x, etc.) at 2mS/byte (500 Bps.)
 #include "Stream.h"
 #include "Constants.h"
 #include "Config.h"
+#include "Pinmap.h"
 
 #if !defined(ST4RAw) && !defined(ST4DEs) && !defined(ST4DEn) && !defined(ST4RAe)
   #warning "ST4 interface pins aren't defined, using defaults."
