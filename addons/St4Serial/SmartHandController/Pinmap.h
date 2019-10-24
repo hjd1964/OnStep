@@ -1,8 +1,5 @@
 #pragma once
 
-#include "St4SerialSlave.h"
-#include "St4Aux.h"
-
 #define Ser SERIAL_INTERFACE
 
 // If we are not on an ESP32, then assume a Teensy 3.2
@@ -70,3 +67,6 @@
 
   #define UTILITY_LIGHT_PIN  13    // GPIO13 used as PWM output to drive utility lamp LED
 #endif
+
+#include "St4SerialSlave.h"
+#include "St4Aux.h"
