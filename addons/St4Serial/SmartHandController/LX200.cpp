@@ -35,7 +35,7 @@ void char2DEC(char* txt, int& deg, unsigned int& min, unsigned int& sec)
 }
 
 // smart LX200 aware command and response over serial
-bool readLX200Bytes(char* command, char* recvBuffer, unsigned long timeOutMs) {
+bool processCommand(char* command, char* response, unsigned long timeOutMs) {
   Ser.setTimeout(timeOutMs);
 
   // clear the read/write buffers
@@ -101,27 +101,27 @@ bool readLX200Bytes(char* command, char* recvBuffer, unsigned long timeOutMs) {
   }
 
   if (noResponse) {
-    recvBuffer[0] = 0;
+    response[0] = 0;
     return true;
   }
   else
     if (shortResponse) {
-      recvBuffer[Ser.readBytes(recvBuffer, 1)] = 0;
-      return (recvBuffer[0] != 0);
+      response[Ser.readBytes(response, 1)] = 0;
+      return (response[0] != 0);
     }
     else {
       // get full response, '#' terminated
       unsigned long start = millis();
-      int recvBufferPos = 0;
+      int responsePos = 0;
       char b = 0;
       while ((millis() - start < timeOutMs) && (b != '#')) {
         if (Ser.available()) {
           b = Ser.read();
-          recvBuffer[recvBufferPos] = b; recvBufferPos++; if (recvBufferPos > 19) recvBufferPos = 19; recvBuffer[recvBufferPos] = 0;
+          response[responsePos] = b; responsePos++; if (responsePos > 19) responsePos = 19; response[responsePos] = 0;
         }
         HdCrtlr.tickButtons();
       }
-      return (recvBuffer[0] != 0);
+      return (response[0] != 0);
     }
 }
 
@@ -134,7 +134,7 @@ LX200RETURN SetLX200(char* command)
 {
   char out[20];
   memset(out, 0, sizeof(*out));
-  if (readLX200Bytes(command, out, TIMEOUT_CMD))
+  if (processCommand(command, out, TIMEOUT_CMD))
     return  LX200VALUESET;
   else
     return LX200SETVALUEFAILED;
@@ -148,7 +148,7 @@ LX200RETURN SetLX200(const char* command)
 LX200RETURN GetLX200(char* command, char* output)
 {
   memset(output, 0, sizeof(*output));
-  if (readLX200Bytes(command, output, TIMEOUT_CMD))
+  if (processCommand(command, output, TIMEOUT_CMD))
     return LX200VALUEGET;
   else
     return LX200GETVALUEFAILED;
@@ -162,7 +162,7 @@ LX200RETURN GetLX200(const char* command, char* output)
 LX200RETURN GetLX200Trim(char* command, char* output)
 {
   memset(output, 0, sizeof(*output));
-  if (readLX200Bytes(command, output, TIMEOUT_CMD)) {
+  if (processCommand(command, output, TIMEOUT_CMD)) {
     if ((strlen(output)>0) && (output[strlen(output)-1]=='#')) output[strlen(output)-1]=0;
     return LX200VALUEGET;
   } else
@@ -234,7 +234,7 @@ LX200RETURN Move2TargetLX200()
 {
   char out[20];
   memset(out, 0, sizeof(out));
-  readLX200Bytes((char *)":MS#", out, TIMEOUT_CMD);
+  processCommand((char *)":MS#", out, TIMEOUT_CMD);
   LX200RETURN response;
 
   int result = (out[0]-'0');
