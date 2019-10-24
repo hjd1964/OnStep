@@ -38,7 +38,7 @@
 #define ST4_INTERFACE                 OFF //    OFF, ON, ON_PULLUP enables auxillary "pass-through" ST4 interface.            Option
 
 // CATALOGS ------------------------------------------------------------------------------------------------------------------------
-// Advanced users can also customize which catalogs are included or even add new catalogs using CatalogConfig.h
+// Advanced users can also customize which celestial object catalogs are included or even add new catalogs using CatalogConfig.h
 
 // THAT'S IT FOR USER CONFIGURATION!
 
