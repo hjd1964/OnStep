@@ -105,7 +105,10 @@ GotoErrors goHome(boolean fast) {
 #else
   // goto allowed?
   if (f!=GOTO_ERR_NONE) return f; 
-
+  
+  // stop tracking
+  trackingState=TrackingNone;
+  
   goTo(homePositionAxis1,homePositionAxis2,homePositionAxis1,homePositionAxis2,PierSideEast);
   homeMount=true;
 #endif
