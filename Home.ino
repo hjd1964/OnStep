@@ -107,6 +107,7 @@ GotoErrors goHome(boolean fast) {
   if (f!=GOTO_ERR_NONE) return f; 
   
   // stop tracking
+  abortTrackingState=trackingState;
   trackingState=TrackingNone;
   
   goTo(homePositionAxis1,homePositionAxis2,homePositionAxis1,homePositionAxis2,PierSideEast);
