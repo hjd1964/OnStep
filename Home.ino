@@ -96,6 +96,10 @@ CommandErrors goHome(boolean fast) {
 #else
   if (e != CE_NONE) return e; 
 
+  // stop tracking
+  abortTrackingState=trackingState;
+  trackingState=TrackingNone;
+
   e=goTo(homePositionAxis1,homePositionAxis2,homePositionAxis1,homePositionAxis2,PierSideEast);
   homeMount=true;
   return e;
