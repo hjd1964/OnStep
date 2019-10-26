@@ -253,17 +253,17 @@ void processCommands() {
 // :D#        Return: "\0x7f#" if the mount is moving, otherwise "#".
       if (command[0] == 'D' && command[1] == 0)  { if (trackingState == TrackingMoveTo) { reply[0]=(char)127; reply[1]=0; } else { reply[0]='#'; reply[1]=0; supress_frame=true; } booleanReply=false; } else 
 
-#if SERIAL_B_ESP_FLASHING == ON
 //  E - Enter special mode
       if (command[0] == 'E') {
 #ifdef DEBUG_ON
-// :EC[s]# Echo string [c] on Serial1.
+// :EC[s]# Echo string [c] on SerialA.
 //            Return: Nothing
         if (command[1] == 'C') {
           SerialA.println(parameter);
           booleanReply=false;
         } else
 #endif
+#if SERIAL_B_ESP_FLASHING == ON
 // :ESPFLASH# ESP8266 device flash mode.  OnStep must be at home and tracking turned off for this command to work.
 //            Return: 1 on completion (after up to one minute from start of command.)
         if (command[1] == 'S' && parameter[0] == 'P' && parameter[1] == 'F' && parameter[2] == 'L' && parameter[3] == 'A' && parameter[4] == 'S' && parameter[5] == 'H' && parameter[6] == 0) {
@@ -314,9 +314,10 @@ void processCommands() {
             delay(1000);
 
           } else commandError=CE_NOT_PARKED_OR_AT_HOME;
-        } else commandError=CE_CMD_UNKNOWN;
-      } else
+        } else
 #endif
+        commandError=CE_CMD_UNKNOWN;
+      } else
 
 #if FOCUSER1 == ON
 // F,f - Focuser1 and Focuser2 Commands
