@@ -377,11 +377,11 @@ void InitStartPosition() {
 
 void initWriteNvValues() {
   // EEPROM automatic initialization
-  long autoInitKey = initKey;
-  long thisAutoInitKey;
-  if (INIT_KEY) nv.writeLong(EE_autoInitKey,autoInitKey);
-  thisAutoInitKey=nv.readLong(EE_autoInitKey);
-  if (autoInitKey != thisAutoInitKey) {
+  if (NV_INIT_KEY_RESET) nv.writeLong(EE_autoInitKey,0);
+  if (nv.readLong(EE_autoInitKey) != NV_INIT_KEY) {
+    // init the whole nv memory
+    for (int i=0; i<E2END; i++) nv.write(i,0);
+    
     // init the site information, lat/long/tz/name
     nv.write(EE_currentSite,0);
     latitude=0; longitude=0;
@@ -453,12 +453,12 @@ void initWriteNvValues() {
 
     // clear the library/catalogs
     Lib.clearAll();
-
-    // finally, stop the init from happening again
-    nv.writeLong(EE_autoInitKey,autoInitKey);
     
     // clear the pointing model
     saveAlignModel();
+
+    // finally, stop the init from happening again
+    nv.writeLong(EE_autoInitKey,NV_INIT_KEY);
   }
 }
 

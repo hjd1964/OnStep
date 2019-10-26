@@ -46,6 +46,12 @@
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
 
+// On first upload OnStep automatically initializes a host of settings in nv memory (EEPROM.)
+// This option forces that initialization again.
+// Change to true, upload OnStep and nv will be reset to default. Then immediately set to false and upload again.
+// *** IMPORTANT: This option must not be left set to true or it will cause excessive wear of EEPROM or FLASH ***
+#define NV_INIT_KEY_RESET false
+
 #include <errno.h>
 #include <math.h>
 
@@ -141,13 +147,6 @@ weather ambient;
     tmcSpiDriver tmcAxis5(Axis5_M2,Axis5_M1,      -1,Axis5_M0);
   #endif
 #endif
-
-// Forces initialialization of a host of settings in nv. OnStep does this automatically,
-// most likely, you will want to leave this alone
-// set to true to keep automatic initilization from happening.
-// This is a one-time operation: change to true, upload to the MCU, then set to false
-// and upload again
-#define INIT_KEY false
 
 void setup() {
   // take a half-second to let any connected devices come up before we start setting up pins
