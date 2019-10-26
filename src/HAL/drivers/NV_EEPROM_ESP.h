@@ -3,8 +3,8 @@
 
 #pragma once
 
-#define EEPROM_SIZE 2048
-#define E2END 2048
+#define EEPROM_SIZE 4096
+#define E2END 4095
 
 #include "EEPROM.h"
 #include "Arduino.h"
