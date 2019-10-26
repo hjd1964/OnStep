@@ -256,12 +256,14 @@ void processCommands() {
 #if SERIAL_B_ESP_FLASHING == ON
 //  E - Enter special mode
       if (command[0] == 'E') {
+#ifdef DEBUG_ON
 // :EC[s]# Echo string [c] on Serial1.
 //            Return: Nothing
         if (command[1] == 'C') {
           SerialA.println(parameter);
           booleanReply=false;
         } else
+#endif
 // :ESPFLASH# ESP8266 device flash mode.  OnStep must be at home and tracking turned off for this command to work.
 //            Return: 1 on completion (after up to one minute from start of command.)
         if (command[1] == 'S' && parameter[0] == 'P' && parameter[1] == 'F' && parameter[2] == 'L' && parameter[3] == 'A' && parameter[4] == 'S' && parameter[5] == 'H' && parameter[6] == 0) {
