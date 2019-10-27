@@ -38,9 +38,7 @@ void processCommands() {
     char *conv_end;
 #if FOCUSER1 == ON
     static char primaryFocuser = 'F';
-  #if FOCUSER2 == ON
-      static char secondaryFocuser = 'f';
-  #endif
+    static char secondaryFocuser = 'f';
 #endif
 
     // accumulate the command
@@ -1429,7 +1427,8 @@ void processCommands() {
       if (command[1] == 'G' && parameter[0] == 0) {
         f1=rot.getPosition();
         i=highPrecision; highPrecision=false;
-        if (!doubleToDms(reply,&f1,true,true)) commandError=true; else booleanReply=false;
+        doubleToDms(reply,&f1,true,true);
+        booleanReply=false;
         highPrecision=i;
       } else
 // :rc#       Set continuous move mode (for next move command)
