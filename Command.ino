@@ -879,7 +879,7 @@ void processCommands() {
                 strcat(reply,tmcAxis2.get_DRVSTATUS_OTPW() ? "PW" : "");                                     // Overtemp Pre-warning 120C
                 booleanReply=false;
               break;
-              default:  commandError=true;
+              default: commandError=CE_CMD_UNKNOWN;
             }
           } else
 #endif
