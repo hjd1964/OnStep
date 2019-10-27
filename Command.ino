@@ -38,7 +38,9 @@ void processCommands() {
     char *conv_end;
 #if FOCUSER1 == ON
     static char primaryFocuser = 'F';
-    static char secondaryFocuser = 'f';
+  #if FOCUSER2 == ON
+      static char secondaryFocuser = 'f';
+  #endif
 #endif
 
     // accumulate the command
