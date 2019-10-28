@@ -320,7 +320,7 @@ void processLibraryGet() {
       if (commandBool(temp)) {
         v.replace("_"," ");
         int lineNum = 0;
-        if (v=="DELETE") { v=""; showMessage="Catalog removed."; }
+        if (v=="DELETE") { v=""; showMessage="Catalog data removed."; }
         commandBlind(":LL#");  // clear this catalog
         while (v.length() > 0) { // any data left?
           lineNum++;
@@ -329,6 +329,7 @@ void processLibraryGet() {
 
           // catalog name?
           if (lineNum == 1) {
+            line.trim();
             if (line.charAt(0) == '$') {
               co = line.substring(0);
               co.trim();
