@@ -62,7 +62,7 @@ boolean processCommand(const char cmd[], char response[], long timeOutMs) {
     } else
     if (cmd[1]=='L') {
       if (strchr("BNCDL!",cmd[2])) noResponse=true;
-      if (strchr("o$W",cmd[2])) { shortResponse=true; if (timeOutMs < 300) timeOutMs = 300; }
+      if (strchr("o$W",cmd[2])) { shortResponse=true; if (timeOutMs < 1000) timeOutMs = 1000; }
     } else
     if (cmd[1]=='B') {
       if (strchr("+-",cmd[2])) noResponse=true;
@@ -127,6 +127,13 @@ bool commandBlind(const char command[]) {
   return processCommand(command,response,webTimeout);
 }
 
+bool commandEcho(const char command[]) {
+  char response[40]="";
+  char c[40]="";
+  sprintf(c,":EC%s#",command);
+  return processCommand(c,response,webTimeout);
+}
+
 bool commandBool(const char command[]) {
   char response[40]="";
   bool success = processCommand(command,response,webTimeout);
@@ -140,7 +147,7 @@ char *commandString(const char command[]) {
   static char response[40]="";
   bool success = processCommand(command,response,webTimeout);
   int l=strlen(response)-1; if (l >= 0 && response[l] == '#') response[l]=0;
-  if (!success) strcpy(response,"");
+  if (!success) strcpy(response,"?");
   return response;
 }
 

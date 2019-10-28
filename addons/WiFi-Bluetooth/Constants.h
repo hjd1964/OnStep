@@ -56,10 +56,12 @@ const char html_links1S[] PROGMEM = "<a href='/index.htm' style='background-colo
 const char html_links1N[] PROGMEM = "<a href='/index.htm'>Status</a>";
 const char html_links2S[] PROGMEM = "<a href='/control.htm' style='background-color: #552222;'>Control</a>";
 const char html_links2N[] PROGMEM = "<a href='/control.htm'>Control</a>";
-const char html_links3S[] PROGMEM = "<a href='/pec.htm' style='background-color: #552222;'>PEC</a>";
-const char html_links3N[] PROGMEM = "<a href='/pec.htm'>PEC</a>";
+const char html_linksLibS[] PROGMEM = "<a href='/library.htm' style='background-color: #552222;'>Library</a>";
+const char html_linksLibN[] PROGMEM = "<a href='/library.htm'>Library</a>";
 const char html_linksEncS[] PROGMEM = "<a href='/enc.htm' style='background-color: #552222;'>Encoders</a>";
 const char html_linksEncN[] PROGMEM = "<a href='/enc.htm'>Encoders</a>";
+const char html_links3S[] PROGMEM = "<a href='/pec.htm' style='background-color: #552222;'>PEC</a>";
+const char html_links3N[] PROGMEM = "<a href='/pec.htm'>PEC</a>";
 const char html_links4S[] PROGMEM = "<a href='/settings.htm' style='background-color: #552222;'>Settings</a>";
 const char html_links4N[] PROGMEM = "<a href='/settings.htm'>Settings</a>";
 const char html_links5S[] PROGMEM = "<a href='/configuration.htm' style='background-color: #552222;'>Configuration</a>";
@@ -97,9 +99,16 @@ const char html_ajax_active[] PROGMEM =
     "if ((this.readyState==4)&&(this.status==200)) {\n"
       "lines=this.responseText.split('\\n');\n"
       "for (var i=0; i<lines.length; i++) {\n"
-        "v=lines[i].slice(lines[i].indexOf('|')+1);\n"
-        "k=lines[i].slice(0,lines[i].indexOf('|'));\n"
-        "if (k!='') document.getElementById(k).innerHTML=v;\n"
+        "j=lines[i].indexOf('|');m=0;\n"
+        "if (j==-1) {j=lines[i].indexOf('&');m=1;}\n"
+        "v=lines[i].slice(j+1);\n"
+        "k=lines[i].slice(0,j);\n"
+        "if (k!='') {"
+        " if (m==1) document.getElementById(k).value=v; else "
+        " if (v=='disabled') document.getElementById(k).disabled=true; else"
+        " if (v=='enabled') document.getElementById(k).disabled=false; else"
+        " document.getElementById(k).innerHTML=v;"
+        "}\n"
       "}\n"
     "}"
   "}"

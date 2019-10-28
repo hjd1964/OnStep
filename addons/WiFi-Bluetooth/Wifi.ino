@@ -141,11 +141,12 @@ void handleWifi() {
   data += FPSTR(html_onstep_header3);
   data += FPSTR(html_links1N);
   data += FPSTR(html_links2N);
-  data += FPSTR(html_links3N);
-  sendHtml(data);
+  data += FPSTR(html_linksLibN);
 #if ENCODERS == ON
   data += FPSTR(html_linksEncN);
 #endif
+  sendHtml(data);
+  data += FPSTR(html_links3N);
   data += FPSTR(html_links4N);
   data += FPSTR(html_links5N);
   data += FPSTR(html_links6S);

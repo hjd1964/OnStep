@@ -36,8 +36,8 @@
 #define FirmwareDate          __DATE__
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
-#define FirmwareVersionMinor  "10"
-#define FirmwareVersionPatch  "b"
+#define FirmwareVersionMinor  "11"
+#define FirmwareVersionPatch  "a"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
@@ -368,14 +368,17 @@ TryAgain:
   server.on("/configuration.htm", handleConfiguration);
   server.on("/settings.htm", handleSettings);
   server.on("/settings.txt", settingsAjax);
-  server.on("/control.htm", handleControl);
 #if ENCODERS == ON
   server.on("/enc.htm", handleEncoders);
   server.on("/encA.txt", encAjaxGet);
   server.on("/enc.txt", encAjax);
 #endif
-  server.on("/control.txt", controlAjax);
+  server.on("/library.htm", handleLibrary);
+  server.on("/libraryA.txt", libraryAjaxGet);
+  server.on("/library.txt", libraryAjax);
+  server.on("/control.htm", handleControl);
   server.on("/controlA.txt", controlAjaxGet);
+  server.on("/control.txt", controlAjax);
   server.on("/pec.htm", handlePec);
   server.on("/pec.txt", pecAjax);
   server.on("/wifi.htm", handleWifi);

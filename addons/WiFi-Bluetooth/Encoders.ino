@@ -222,12 +222,13 @@ void handleEncoders() {
   }
   data += FPSTR(html_links1N);
   data += FPSTR(html_links2N);
-  data += FPSTR(html_links3N);
+  data += FPSTR(html_linksLibN);
 #if ENCODERS == ON
   data += FPSTR(html_linksEncS);
 #endif
-  data += FPSTR(html_links4N);
   sendHtml(data);
+  data += FPSTR(html_links3N);
+  data += FPSTR(html_links4N);
   data += FPSTR(html_links5N);
 #ifndef OETHS
   data += FPSTR(html_links6N);
