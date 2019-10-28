@@ -319,8 +319,24 @@ void processCommands() {
         commandError=CE_CMD_UNKNOWN;
       } else
 
-#if FOCUSER1 == ON
+// :FA#       Active?
+//            Return: 0 on failure
+//                    1 on success
+        if (command[0] == 'F' && command[1] == 'A' && parameter[0] == 0) {
+#if FOCUSER1 != ON
+          commandError=CE_0;
+#endif
+        } else
+// :fA#       Active?
+//            Return: 0 on failure
+//                    1 on success
+        if (command[0] == 'f' && command[1] == 'A' && parameter[0] == 0) {
+#if FOCUSER2 != ON
+          commandError=CE_0;
+#endif
+        } else
 // F,f - Focuser1 and Focuser2 Commands
+#if FOCUSER1 == ON
       if (command[0] == 'F' || command[0]=='f') {
 
         focuser *foc = NULL;
@@ -335,18 +351,15 @@ void processCommands() {
         // get ready for commands that convert to microns or steps (these commands are upper-case for microns OR lower-case for steps)
         double spm = foc->getStepsPerMicro(); if (strchr("gimrs",command[1])) spm = 1.0;
 
-// :FA#       Active?
-//            Return: 0 on failure
-//                    1 on success
 // :FA[n]#    Select primary focuser where [n] = 1 or 2
 //            Return: 0 on failure
 //                    1 on success
         if (command[1] == 'A') {
-          if (parameter[0] == '1' && parameter[1] == 0) { primaryFocuser='F'; secondaryFocuser='f'; } else
+          if (parameter[0] == '1' && parameter[1] == 0) { primaryFocuser='F'; secondaryFocuser='f'; }
 #if FOCUSER2 == ON
-          if (parameter[0] == '2' && parameter[1] == 0) { primaryFocuser='f'; secondaryFocuser='F'; } else
+          else if (parameter[0] == '2' && parameter[1] == 0) { primaryFocuser='f'; secondaryFocuser='F'; }
 #endif
-          if (parameter[0] != 0) commandError=CE_0;
+          else commandError=CE_PARAM_RANGE;
         } else
 
 // :FT#       Get status
