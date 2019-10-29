@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------------
 // Functions related to Homing the mount
 
-#if (HOME_SENSE == ON)
+#if (HOME_SENSE != OFF)
 enum findHomeModes { FH_OFF,FH_FAST,FH_IDLE,FH_SLOW,FH_DONE };
 findHomeModes findHomeMode=FH_OFF;
 int PierSideStateAxis1=LOW;
@@ -49,7 +49,7 @@ void StopAxis2() {
 CommandErrors goHome(boolean fast) {
   CommandErrors e=validateGoto();
   
-#if HOME_SENSE == ON
+#if HOME_SENSE != OFF
   if (e != CE_NONE && e != CE_SLEW_ERR_IN_STANDBY) return e;
 
   if (findHomeMode != FH_OFF) return CE_MOUNT_IN_MOTION;
@@ -58,7 +58,7 @@ CommandErrors goHome(boolean fast) {
   trackingState=TrackingNone;
 
   // decide direction to guide
-  char a1; if (digitalRead(Axis1HomePin) == HOME_SENSE_STATE_AXIS2) a1='w'; else a1='e';
+  char a1; if (digitalRead(Axis1HomePin) == HOME_SENSE_STATE_AXIS1) a1='w'; else a1='e';
   char a2; if (digitalRead(Axis2HomePin) == HOME_SENSE_STATE_AXIS2) a2='n'; else a2='s';
 
   // attach interrupts to stop guide
@@ -107,7 +107,7 @@ CommandErrors goHome(boolean fast) {
 }
 
 boolean isHoming() {
-#if HOME_SENSE == ON
+#if HOME_SENSE != OFF
   return (homeMount || (findHomeMode != FH_OFF));
 #else
   return homeMount;

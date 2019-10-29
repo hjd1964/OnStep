@@ -347,7 +347,7 @@ void loop2() {
   } else disablePec();
 #endif
 
-#if HOME_SENSE == ON
+#if HOME_SENSE != OFF
   // AUTOMATIC HOMING ----------------------------------------------------------------------------------
   checkHome();
 #endif
