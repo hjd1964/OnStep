@@ -334,7 +334,7 @@ class Encoders {
           double f=strtod(s,&conv_end);
           if (&s[0] != conv_end && f >= -999.9 && f <= 999.9) _osAxis1=f;
         }
-        if (command(":GX42#",s) && strlen(s) > 1) {
+        if (command(":GX43#",s) && strlen(s) > 1) {
           double f=strtod(s,&conv_end);
           if (&s[0] != conv_end && f >= -999.9 && f <= 999.9) _osAxis2=f;
         }
