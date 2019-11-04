@@ -90,29 +90,29 @@ volatile double StepsForRateChangeAxis2 = (sqrt((double)SLEW_ACCELERATION_DIST*(
 // Basic stepper driver mode setup -------------------------------------------------------------------------------------------------
 #if AXIS1_DRIVER_MODEL != OFF
   // Holds translated code for driver microstep setting
-  volatile uint8_t _axis1_microstep_code;
-  #define AXIS1_DRIVER_MICROSTEP_CODE _axis1_microstep_code
+  volatile uint8_t _axis1_code;
+  #define AXIS1_DRIVER_CODE _axis1_code
   #if AXIS1_DRIVER_MICROSTEPS_GOTO != OFF
-    volatile uint8_t _axis1_microstep_code_goto;
-    #define AXIS1_DRIVER_MICROSTEP_CODE_GOTO _axis1_microstep_code_goto
+    volatile uint8_t _axis1_code_goto;
+    #define AXIS1_DRIVER_CODE_GOTO _axis1_code_goto
   #endif
-  volatile uint8_t _axis2_microstep_code;
-  #define AXIS2_DRIVER_MICROSTEP_CODE _axis2_microstep_code
+  volatile uint8_t _axis2_code;
+  #define AXIS2_DRIVER_CODE _axis2_code
   #if AXIS2_DRIVER_MICROSTEPS_GOTO != OFF
-    volatile uint8_t _axis2_microstep_code_goto;
-    #define AXIS2_DRIVER_MICROSTEP_CODE_GOTO _axis2_microstep_code_goto
+    volatile uint8_t _axis2_code_goto;
+    #define AXIS2_DRIVER_CODE_GOTO _axis2_code_goto
   #endif
   #if AXIS3_DRIVER_MICROSTEPS != OFF
-    volatile uint8_t _axis3_microstep_code;
-    #define AXIS3_DRIVER_MICROSTEP_CODE _axis3_microstep_code
+    volatile uint8_t _axis3_code;
+    #define AXIS3_DRIVER_CODE _axis3_code
   #endif
   #if AXIS4_DRIVER_MICROSTEPS != OFF
-    volatile uint8_t _axis4_microstep_code;
-    #define AXIS4_DRIVER_MICROSTEP_CODE _axis4_microstep_code
+    volatile uint8_t _axis4_code;
+    #define AXIS4_DRIVER_CODE _axis4_code
   #endif
   #if AXIS5_DRIVER_MICROSTEPS != OFF
-    volatile uint8_t _axis5_microstep_code;
-    #define AXIS5_DRIVER_MICROSTEP_CODE _axis5_microstep_code
+    volatile uint8_t _axis5_code;
+    #define AXIS5_DRIVER_CODE _axis5_code
   #endif
 #endif
 
@@ -145,7 +145,7 @@ volatile byte dirAxis1                  = 1;                 // stepping directi
 double origTargetRA                     = 0.0;               // holds the RA for gotos before possible conversion to observed place
 double newTargetRA                      = 0.0;               // holds the RA for gotos after conversion to observed place
 fixed_t origTargetAxis1;
-#if defined(AXIS1_DRIVER_MICROSTEP_CODE) && defined(AXIS1_DRIVER_MICROSTEP_CODE_GOTO)
+#if defined(AXIS1_DRIVER_CODE) && defined(AXIS1_DRIVER_CODE_GOTO)
   volatile long stepAxis1=1;
 #else
   #define stepAxis1 1
@@ -158,7 +158,7 @@ volatile byte dirAxis2                  = 1;                 // stepping directi
 double origTargetDec                    = 0.0;               // holds the Dec for gotos before possible conversion to observed place
 double newTargetDec                     = 0.0;               // holds the Dec for gotos after conversion to observed place
 long origTargetAxis2                    = 0;
-#if defined(AXIS2_DRIVER_MICROSTEP_CODE) && defined(AXIS2_DRIVER_MICROSTEP_CODE_GOTO)
+#if defined(AXIS2_DRIVER_CODE) && defined(AXIS2_DRIVER_CODE_GOTO)
   volatile long stepAxis2=1;
 #else
   #define stepAxis2 1

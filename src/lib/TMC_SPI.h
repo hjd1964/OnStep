@@ -119,7 +119,7 @@ class tmcSpiDriver {
     bool set_CHOPCONF_tbl(int v)      { if ((v >= 0) && (v <= 3))  { _cc_tbl     = v; return true; } return false; }
     bool set_CHOPCONF_vsense(int v)   { if ((v >= 0) && (v <= 1))  { _cc_vsense  = v; return true; } return false; }
     bool set_CHOPCONF_vhighfs(int v)  { if ((v >= 0) && (v <= 1))  { _cc_vhighfs = v; return true; } return false; }
-    bool set_CHOPCONF_vhignchm(int v) { if ((v >= 0) && (v <= 1))  { _cc_vhighchm= v; return true; } return false; }
+    bool set_CHOPCONF_vhighchm(int v) { if ((v >= 0) && (v <= 1))  { _cc_vhighchm= v; return true; } return false; }
 
 // -------------------------------
 // TPOWERDOWN setting
@@ -127,11 +127,11 @@ class tmcSpiDriver {
 
 // -------------------------------
 // TPWMTHRS setting
-    bool set_TPWMTHRS_value(int v)    { if ((v >= 0) && (v <= 1048575)) { _tpt_value = v; return true; } return false; }
+    bool set_TPWMTHRS_value(long v)    { if ((v >= 0) && (v <= 1048575)) { _tpt_value = v; return true; } return false; }
 
 // -------------------------------
 // THIGH setting
-    bool set_THIGH_value(int v)       { if ((v >= 0) && (v <= 1048575)) { _thigh_value = v; return true; } return false; }
+    bool set_THIGH_value(long v)       { if ((v >= 0) && (v <= 1048575)) { _thigh_value = v; return true; } return false; }
 
 // -------------------------------
 // PWMCONF settings

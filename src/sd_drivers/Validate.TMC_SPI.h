@@ -18,6 +18,12 @@
   #if HAL_PULSE_WIDTH < TMC_SPI_PULSE_WIDTH
     #error "Configuration (Config.h): STEP_WAVE_FORM PULSE; Pulse width is below the TMC SPI stepper driver specifications."
   #endif
+  #ifndef AXIS1_DRIVER_FS_VHIGH
+    #define AXIS1_DRIVER_FS_VHIGH OFF
+  #endif
+  #ifndef AXIS1_DRIVER_PWM_VHIGH
+    #define AXIS1_DRIVER_PWM_VHIGH OFF
+  #endif
 #endif
 
 #if AXIS2_DRIVER_MODEL == TMC_SPI
@@ -37,6 +43,12 @@
   #endif
   #if HAL_PULSE_WIDTH < TMC_SPI_PULSE_WIDTH
     #error "Configuration (Config.h): STEP_WAVE_FORM PULSE; Pulse width is below the TMC SPI stepper driver specifications."
+  #endif
+  #ifndef AXIS2_DRIVER_FS_VHIGH
+    #define AXIS2_DRIVER_FS_VHIGH OFF
+  #endif
+  #ifndef AXIS2_DRIVER_PWM_VHIGH
+    #define AXIS2_DRIVER_PWM_VHIGH OFF
   #endif
 #endif
 
