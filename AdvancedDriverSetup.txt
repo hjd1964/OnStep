@@ -22,8 +22,8 @@
 #define AXISn_DRIVER_IHOLD            OFF //    OFF, n, (mA.) Current during standstill. OFF uses IRUN/2.0                    Option
 #define AXISn_DRIVER_IRUN             OFF //    OFF, n, (mA.) Current during tracking, appropriate for stepper/driver/etc.    Option
 #define AXISn_DRIVER_IGOTO            OFF //    OFF, n, (mA.) Current during slews. OFF uses same as IRUN.                    Option,**
-#define AXISn_DRIVER_FS_VHIGH         OFF //    OFF, n, (steps/s.) Velocity for switchover to full step and slow decay mode.  Option,**
-#define AXISn_DRIVER_SC_VHIGH         OFF //    OFF, n, (steps/s.) Velocity for switchover to spreadCycle mode.               Option,**
+#define AXISn_DRIVER_FS_VHIGH         OFF //    OFF, n, (tracking mode steps/s.) Velocity switchover full step & slow decay.  Option,**
+#define AXISn_DRIVER_SC_VHIGH         OFF //    OFF, n, (tracking mode steps/s.) Velocity switchover to spreadCycle mode.     Option,**
 #define AXISn_DRIVER_RSENSE          0.13 //   0.13, n, Rsense for TMC2130, Rsense for SSS TMC5160 is 0.075, can vary.        Adjust,*
 
 #define MODE_SWITCH_BEFORE_SLEW       OFF //    OFF, Applies mode settings during slew at 128uS/step speeds.                  Option,*

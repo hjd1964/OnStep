@@ -45,60 +45,15 @@
   #endif
 #endif
 
-// EN signal state defaults LOW
+// make sure all stepper driver options are present even if not defined
 #ifndef AXIS1_DRIVER_ENABLE
   #define AXIS1_DRIVER_ENABLE LOW
 #endif
-#ifndef AXIS2_DRIVER_ENABLE
-  #define AXIS2_DRIVER_ENABLE LOW
-#endif
-#ifndef AXIS3_DRIVER_ENABLE
-  #define AXIS3_DRIVER_ENABLE LOW
-#endif
-#ifndef AXIS4_DRIVER_ENABLE
-  #define AXIS4_DRIVER_ENABLE LOW
-#endif
-#ifndef AXIS5_DRIVER_ENABLE
-  #define AXIS5_DRIVER_ENABLE LOW
-#endif
-
-// Set disable state from EN state for stepper drivers
 #if AXIS1_DRIVER_ENABLE == LOW
   #define AXIS1_DRIVER_DISABLE HIGH
-#endif
-#if AXIS1_DRIVER_ENABLE == HIGH
+#elif AXIS1_DRIVER_ENABLE == HIGH
   #define AXIS1_DRIVER_DISABLE LOW
 #endif
-
-#if AXIS2_DRIVER_ENABLE == LOW
-  #define AXIS2_DRIVER_DISABLE HIGH
-#endif
-#if AXIS2_DRIVER_ENABLE == HIGH
-  #define AXIS2_DRIVER_DISABLE LOW
-#endif
-
-#if AXIS3_DRIVER_ENABLE == LOW
-  #define AXIS3_DRIVER_DISABLE HIGH
-#endif
-#if AXIS3_DRIVER_ENABLE == HIGH
-  #define AXIS3_DRIVER_DISABLE LOW
-#endif
-
-#if AXIS4_DRIVER_ENABLE == LOW
-  #define AXIS4_DRIVER_DISABLE HIGH
-#endif
-#if AXIS4_DRIVER_ENABLE == HIGH
-  #define AXIS4_DRIVER_DISABLE LOW
-#endif
-
-#if AXIS5_DRIVER_ENABLE == LOW
-  #define AXIS5_DRIVER_DISABLE HIGH
-#endif
-#if AXIS5_DRIVER_ENABLE == HIGH
-  #define AXIS5_DRIVER_DISABLE LOW
-#endif
-
-// make sure all stepper driver advanced options are present even if not defined
 #ifndef AXIS1_DRIVER_DECAY_MODE
   #define AXIS1_DRIVER_DECAY_MODE OFF
 #endif
@@ -114,10 +69,21 @@
 #ifndef AXIS1_DRIVER_IGOTO
   #define AXIS1_DRIVER_IGOTO OFF
 #endif
-#ifndef AXIS2_DRIVER_DECAY_MODE
-  #define AXIS2_DRIVER_DECAY_MODE OFF
+#ifndef AXIS1_DRIVER_FS_VHIGH
+  #define AXIS1_DRIVER_FS_VHIGH OFF
+#endif
+#ifndef AXIS1_DRIVER_SC_VHIGH
+  #define AXIS1_DRIVER_SC_VHIGH OFF
 #endif
 
+#ifndef AXIS2_DRIVER_ENABLE
+  #define AXIS2_DRIVER_ENABLE LOW
+#endif
+#if AXIS2_DRIVER_ENABLE == LOW
+  #define AXIS2_DRIVER_DISABLE HIGH
+#elif AXIS2_DRIVER_ENABLE == HIGH
+  #define AXIS2_DRIVER_DISABLE LOW
+#endif
 #ifndef AXIS2_DRIVER_DECAY_MODE
   #define AXIS2_DRIVER_DECAY_MODE OFF
 #endif
@@ -133,7 +99,21 @@
 #ifndef AXIS2_DRIVER_IGOTO
   #define AXIS2_DRIVER_IGOTO OFF
 #endif
+#ifndef AXIS2_DRIVER_FS_VHIGH
+  #define AXIS2_DRIVER_FS_VHIGH OFF
+#endif
+#ifndef AXIS2_DRIVER_SC_VHIGH
+  #define AXIS2_DRIVER_SC_VHIGH OFF
+#endif
 
+#ifndef AXIS3_DRIVER_ENABLE
+  #define AXIS3_DRIVER_ENABLE LOW
+#endif
+#if AXIS3_DRIVER_ENABLE == LOW
+  #define AXIS3_DRIVER_DISABLE HIGH
+#elif AXIS3_DRIVER_ENABLE == HIGH
+  #define AXIS3_DRIVER_DISABLE LOW
+#endif
 #ifndef AXIS3_DRIVER_DECAY_MODE
   #define AXIS3_DRIVER_DECAY_MODE OFF
 #endif
@@ -144,6 +124,14 @@
   #define AXIS3_DRIVER_IRUN OFF
 #endif
 
+#ifndef AXIS4_DRIVER_ENABLE
+  #define AXIS4_DRIVER_ENABLE LOW
+#endif
+#if AXIS4_DRIVER_ENABLE == LOW
+  #define AXIS4_DRIVER_DISABLE HIGH
+#elif AXIS4_DRIVER_ENABLE == HIGH
+  #define AXIS4_DRIVER_DISABLE LOW
+#endif
 #ifndef AXIS4_DRIVER_DECAY_MODE
   #define AXIS4_DRIVER_DECAY_MODE OFF
 #endif
@@ -154,6 +142,14 @@
   #define AXIS4_DRIVER_IRUN OFF
 #endif
 
+#ifndef AXIS5_DRIVER_ENABLE
+  #define AXIS5_DRIVER_ENABLE LOW
+#endif
+#if AXIS5_DRIVER_ENABLE == LOW
+  #define AXIS5_DRIVER_DISABLE HIGH
+#elif AXIS5_DRIVER_ENABLE == HIGH
+  #define AXIS5_DRIVER_DISABLE LOW
+#endif
 #ifndef AXIS5_DRIVER_DECAY_MODE
   #define AXIS5_DRIVER_DECAY_MODE OFF
 #endif
