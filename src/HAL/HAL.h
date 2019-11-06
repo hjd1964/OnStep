@@ -22,7 +22,7 @@
 #define IRAM_ATTR
 #endif
 
-#if defined(__AVR_ATmega2560__)
+#if defined(__AVR_ATmega2560__) || defined(__AVR_ATmega1280__)
   // Arduino Mega 2560
   #include "HAL_Mega2560/HAL_Mega2560.h"
 
