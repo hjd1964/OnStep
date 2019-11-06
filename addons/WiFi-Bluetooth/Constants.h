@@ -40,7 +40,11 @@ const char html_bad_comms_message[] PROGMEM =
   "Powering off/on again can help if there is a baud rate mis-match (caused by OnStep restarting.)<br /><br />"
   "Other possible causes:<br /><ul>"
   " <li>Incorrectly configured OnStep baud rate.</li><br />"
-  " <li>Incorrectly configured ESP8266 or Teensy3.2 baud rates.</li><br />"
+#ifdef ESP8266
+  " <li>Incorrectly configured ESP8266 baud rate.</li><br />"
+#else
+  " <li>Incorrectly configured Teensy3.2 or Arduino M0 baud rates.</li><br />"
+#endif
   " <li>Incorrectly configured ESP8266 SERIAL_SWAP.</li><br />"
   " <li>Incorrect wiring of the com ports (or damaged h/w if RX/TX were EVER wired incorrectly.)</li><br />"
   " <li>Incorrect wiring of power supply pins.  Gnd must be shared between OnStep's MCU and the Addon's MCU.</li><br />"
