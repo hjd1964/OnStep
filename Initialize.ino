@@ -272,9 +272,6 @@ void initReadNvValues() {
   JD=nv.readFloat(EE_JD);
   LMT=nv.readFloat(EE_LMT);
 
-  // get the RTC ready (if present)
-  urtc.init();
-
   // read the date/time from RTC (if present)
   if (urtc.active) {
     urtc.get(JD,LMT);

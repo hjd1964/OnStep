@@ -16,10 +16,12 @@ class rtcw {
     bool active=false;
 
     // initialize (also enables the RTC PPS if available)
-    void init() {
-      rtc.begin(DS3234_CS_PIN); rtc.update();
+    bool init() {
+      rtc.begin(DS3234_CS_PIN);
+      rtc.update();
       rtc.writeSQW(SQW_SQUARE_1);
       active=true;
+      return active;
     }
 
     // set the RTC's time (local standard time)
@@ -63,24 +65,24 @@ class rtcw {
     bool active=false;
 
     // initialize (also enables the RTC PPS if available)
-    void init() {
-      _Rtc.Begin(); if (!_Rtc.GetIsRunning()) _Rtc.SetIsRunning(true);
-      // frequency 0 (1Hz) on the SQW pin
-      _Rtc.SetSquareWavePin(DS3231SquareWavePin_ModeClock);
-      _Rtc.SetSquareWavePinClockFrequency(DS3231SquareWaveClock_1Hz);
-      active=true;
-#if defined(ESP32) & defined(WIRE_END_SUPPORT)
-      HAL_Wire.end();
-#endif
+    bool init() {
+      _Rtc.Begin();
+      if (!_Rtc.GetIsRunning()) _Rtc.SetIsRunning(true);
+
+      // see if the RTC is present
+      if (_Rtc.GetIsRunning()) {
+        // frequency 0 (1Hz) on the SQW pin
+        _Rtc.SetSquareWavePin(DS3231SquareWavePin_ModeClock);
+        _Rtc.SetSquareWavePinClockFrequency(DS3231SquareWaveClock_1Hz);
+        active=true;
+      }
+
+      return active;
     }
 
     // set the RTC's time (local standard time)
     void set(double JD, double LMT) {
       if (!active) return;
-#if defined(ESP32) & defined(WIRE_END_SUPPORT)
-      HAL_Wire.begin();
-#endif
-
       int yy,y,mo,d,h;
       double m,s;
     
@@ -93,18 +95,11 @@ class rtcw {
       
       RtcDateTime updateTime = RtcDateTime(yy, mo, d, h, floor(m), floor(s));
       _Rtc.SetDateTime(updateTime);
-
-#if defined(ESP32) & defined(WIRE_END_SUPPORT)
-      HAL_Wire.end();
-#endif
     }
     
     // get the RTC's time (local standard time)
     void get(double &JD, double &LMT) {
       if (!active) return;
-#if defined(ESP32) & defined(WIRE_END_SUPPORT)
-      HAL_Wire.begin();
-#endif
 
       RtcDateTime now = _Rtc.GetDateTime();
       if ((now.Year() >= 2018) && (now.Year() <= 3000) && (now.Month() >= 1) && (now.Month() <= 12) && (now.Day() >= 1) && (now.Day() <= 31) &&
@@ -112,10 +107,6 @@ class rtcw {
         JD=julian(now.Year(),now.Month(),now.Day());
         LMT=(now.Hour()+(now.Minute()/60.0)+(now.Second()/3600.0));
       }
-
-#if defined(ESP32) & defined(WIRE_END_SUPPORT)
-      HAL_Wire.end();
-#endif
     }
 };
 
@@ -134,11 +125,18 @@ class rtcw {
 
     // initialize (also enables the RTC PPS if available)
     void init() {
-      _Rtc.Begin(); if (!_Rtc.GetIsRunning()) _Rtc.SetIsRunning(true);
-      // frequency 0 (1Hz) on the SQW pin
-      _Rtc.SetSquareWavePin(DS3234SquareWavePin_ModeClock);
-      _Rtc.SetSquareWavePinClockFrequency(DS3234SquareWaveClock_1Hz);
-      active=true;
+      _Rtc.Begin();
+      if (!_Rtc.GetIsRunning()) _Rtc.SetIsRunning(true);
+
+      // see if the RTC is present
+      if (_Rtc.GetIsRunning()) {
+        // frequency 0 (1Hz) on the SQW pin
+        _Rtc.SetSquareWavePin(DS3234SquareWavePin_ModeClock);
+        _Rtc.SetSquareWavePinClockFrequency(DS3234SquareWaveClock_1Hz);
+        active=true;
+      }
+  
+      return active;
     }
 
     // set the RTC's time (local standard time)
@@ -183,13 +181,13 @@ class rtcw {
     bool active=false;
 
     // initialize (also enables the RTC PPS if available)
-    void init() {
+    bool init() {
       active=true;
+      return active;
     }
  
     // set the RTC's time (local standard time)
     void set(double JD, double LMT) {
-    
         int y,mo,d,h;
         double m,s;
         
@@ -235,8 +233,9 @@ class rtcw {
     bool active=false;
 
     // initialize (also enables the RTC PPS if available)
-    void init() {
+    bool init() {
       active=false;
+      return true;
     }
 
     // set the RTC's time (local standard time)

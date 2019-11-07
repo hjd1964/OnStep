@@ -180,9 +180,6 @@ void setup() {
 
   // initialize the Object Library
   Lib.init();
-  
-  // get weather monitoring ready to go
-  ambient.init();
 
   // prepare PEC buffer
 #if MOUNT_TYPE != ALTAZM
@@ -200,6 +197,12 @@ void setup() {
 
   // if this is the first startup set EEPROM to defaults
   initWriteNvValues();
+  
+  // get weather monitoring ready to go
+  if (!ambient.init()) generalError=ERR_WEATHER_INIT;
+
+  // get the RTC ready (if present)
+  if (!urtc.init()) generalError=ERR_RTC_INIT;
   
   // this sets up the sidereal timer and tracking rates
   siderealInterval=nv.readLong(EE_siderealInterval); // the number of 16MHz clocks in one sidereal second (this is scaled to actual processor speed)

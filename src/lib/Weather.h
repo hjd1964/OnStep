@@ -22,32 +22,35 @@
 
 class weather {
   public:
-    void init() {
+    bool init() {
+      bool success=true;
 #if TELESCOPE_TEMPERATURE == DS1820
-      _disabled=false;
+      _DS1820_found=true;
 #endif
 #if WEATHER == BME280 || WEATHER == BME280_SPI || WEATHER == BME280_0x76
       #if WEATHER == BME280
-        if (bme.begin(&HAL_Wire)) _disabled=false;
+        if (bme.begin(&HAL_Wire)) _BME280_found=true; else success=false;
       #elif WEATHER == BME280_0x76
-        if (bme.begin(0x76,&HAL_Wire)) _disabled=false;
+        if (bme.begin(0x76,&HAL_Wire)) _BME280_found=true; else success=false;
       #else
-        if (bme.begin()) _disabled=false;
+        if (bme.begin()) _BME280_found=true; else success=false;
       #endif
   #if defined(ESP32) & defined(WIRE_END_SUPPORT)
       HAL_Wire.end();
   #endif
 #endif
+      return success;
     }
 
     // designed for a 1s polling interval to refresh readings once a minute
     void poll() {
 
 #if WEATHER == BME280 || WEATHER == BME280_SPI || WEATHER == BME280_0x76 || TELESCOPE_TEMPERATURE == DS1820
-      if (!_disabled) {
+      if (_DS1820_found || _BME280_found) {
         static int phase=0;
 
   #if WEATHER == BME280 || WEATHER == BME280_SPI || WEATHER == BME280_0x76
+      if (_BME280_found) {
     #ifdef ESP32
         if ((phase == 10) || (phase == 30) || (phase == 50)) HAL_Wire.begin();
     #endif
@@ -62,9 +65,11 @@ class weather {
     #if defined(ESP32) & defined(WIRE_END_SUPPORT)
       if ((phase == 10) || (phase == 30) || (phase == 50)) HAL_Wire.end();  
     #endif
+      }
   #endif
-
+  
   #if TELESCOPE_TEMPERATURE == DS1820
+      if (_DS1820_found) {
         if (phase == 70) {
           DS18B20.requestTemperatures();
           _tt=DS18B20.getTempCByIndex(0);
@@ -72,6 +77,7 @@ class weather {
           _t=_tt;
     #endif
         }
+      }
   #endif
         phase++; if (phase == 90) phase=0;
       }
@@ -132,7 +138,8 @@ class weather {
     }
 
   private:
-    bool _disabled = true;
+    bool _DS1820_found = false;
+    bool _BME280_found = false;
     double _t = 10.0;
     double _tt = 10.0;
     double _p = 1010.0;

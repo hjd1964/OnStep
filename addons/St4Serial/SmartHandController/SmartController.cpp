@@ -134,6 +134,9 @@ static unsigned char ErrUp_bits[] U8X8_PROGMEM = {
 static unsigned char ErrMe_bits[] U8X8_PROGMEM = {
   0xff, 0xff, 0x00, 0x80, 0x0e, 0xb0, 0x02, 0xb0, 0x66, 0xb3, 0x22, 0xb1, 0x2e, 0xb1, 0x00, 0xb0, 0x22, 0xb0, 0x36, 0xb0, 0xaa, 0xb3, 0xa2, 0xb2, 0xa2, 0x83, 0xa2, 0xb0, 0xa2, 0xb3, 0x00, 0x80 };
 
+static unsigned char ErrOth_bits[] U8X8_PROGMEM = {
+  0xff, 0xff, 0x00, 0x80, 0x0e, 0xb0, 0x02, 0xb0, 0x66, 0xb3, 0x22, 0xb1, 0x2e, 0xb1, 0x00, 0xb0, 0xe0, 0xb0, 0x10, 0xb1, 0x00, 0xb1, 0x80, 0xb0, 0x40, 0x80, 0x00, 0xb0, 0x40, 0xb0, 0x00, 0x80 };
+
 static const unsigned char onstep_logo_bits[] U8X8_PROGMEM = {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
@@ -674,6 +677,7 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
 
       if (!telInfo.isGuiding()) {
         switch (telInfo.getError()) {
+          case Telescope::ERR_NONE:        break;                                                                                                 // no error
           case Telescope::ERR_MOTOR_FAULT: display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrMf_bits); x -= icon_width + 1; break; // motor fault
           case Telescope::ERR_ALT_MIN:     display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrAlt_bits);x -= icon_width + 1; break; // above below horizon
           case Telescope::ERR_LIMIT_SENSE: display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrLs_bits); x -= icon_width + 1; break; // physical limit switch triggered
@@ -682,7 +686,7 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
           case Telescope::ERR_UNDER_POLE:  display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrUp_bits); x -= icon_width + 1; break; // for Eq mounts, past limit in HA
           case Telescope::ERR_MERIDIAN:    display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrMe_bits); x -= icon_width + 1; break; // for Eq mounts, past meridian limit
           case Telescope::ERR_ALT_MAX:     display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrAlt_bits);x -= icon_width + 1; break; // above overhead
-          default: break;
+          default:                         display->drawXBMP(x - icon_width, 0, icon_width, icon_height, ErrOth_bits);x -= icon_width + 1; break; // other error
         }
       }
     }
