@@ -118,6 +118,12 @@
 // The PPS pin is a logic level input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
 #define PpsPin               23     // PPS time source, GPS for example
 
+// Obsolete pins that would power stepper drivers in the old days
+#define POWER_SUPPLY_PINS_OFF
+#define Axis15vPin    11    // Pin 11 (3.3V)
+#define Axis25vPin     5    // Pin 5 (3.3V)
+#define Axis2GndPin    7    // Pin 7 (GND)
+
 // Axis1 RA/Azm step/dir driver
 #define Axis1_EN             16     // Enable
 #define Axis1_M0             13     // Microstep Mode 0

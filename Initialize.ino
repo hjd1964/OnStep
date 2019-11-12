@@ -208,12 +208,15 @@ void initPins() {
   pinMode(Axis2StepPin,OUTPUT);   // Axis2 
   pinMode(Axis2DirPin,OUTPUT); 
 
-  // provide 5V power to stepper drivers if requested (classic Pin-map)
+  // provide 5V (or 3.3V) power to stepper drivers if requested (classic Pin-map)
 #ifdef POWER_SUPPLY_PINS_ON
   pinMode(Axis15vPin,OUTPUT);
   digitalWrite(Axis15vPin,HIGH);
   pinMode(Axis25vPin,OUTPUT);
   digitalWrite(Axis25vPin,HIGH);
+#endif
+  // provide Gnd on next to the Dec stepper pins if requested (classic Pin-map)
+#ifdef Axis2GndPin
   pinMode(Axis2GndPin,OUTPUT);
   digitalWrite(Axis2GndPin,LOW);
 #endif
