@@ -976,7 +976,7 @@ void processCommands() {
       } else
 // :GZ#       Get telescope azimuth
 //            Returns: DDD*MM# or DDD*MM'SS# (based on precision setting)
-      if (command[1] == 'Z')  { getHor(&f,&f1); f1=degRange(f1); doubleToDms(reply,&f1,true,false); booleanReply=false; } else commandError=CE_CMD_UNKNOWN;
+      if (command[1] == 'Z' && parameter[0] == 0)  { getHor(&f,&f1); f1=degRange(f1); doubleToDms(reply,&f1,true,false); booleanReply=false; } else commandError=CE_CMD_UNKNOWN;
       } else
 
 //  h - Home Position Commands
@@ -1799,7 +1799,7 @@ void processCommands() {
               } else commandError=CE_PARAM_RANGE;
             break;
             case 'D': // altitude 
-              if (&parameter[0] != conv_end && f >= 0.0 && f < 100.0) {
+              if (&parameter[0] != conv_end && f >= -100.0 && f < 20000.0) {
                 ambient.setAltitude(f);
               } else commandError=CE_PARAM_RANGE;
             break;
