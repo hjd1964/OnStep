@@ -7,7 +7,8 @@
 
 class nvs {
   public:
-    void init() {
+    bool init() {
+      return true;
     }
 
     void poll() {

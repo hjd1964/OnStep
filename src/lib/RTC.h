@@ -66,15 +66,20 @@ class rtcw {
 
     // initialize (also enables the RTC PPS if available)
     bool init() {
-      _Rtc.Begin();
-      if (!_Rtc.GetIsRunning()) _Rtc.SetIsRunning(true);
+      HAL_Wire.beginTransmission(0x68);
+      bool error = HAL_Wire.endTransmission();
 
-      // see if the RTC is present
-      if (_Rtc.GetIsRunning()) {
-        // frequency 0 (1Hz) on the SQW pin
-        _Rtc.SetSquareWavePin(DS3231SquareWavePin_ModeClock);
-        _Rtc.SetSquareWavePinClockFrequency(DS3231SquareWaveClock_1Hz);
-        active=true;
+      if (!error) {
+        _Rtc.Begin();
+        if (!_Rtc.GetIsRunning()) _Rtc.SetIsRunning(true);
+  
+        // see if the RTC is present
+        if (_Rtc.GetIsRunning()) {
+          // frequency 0 (1Hz) on the SQW pin
+          _Rtc.SetSquareWavePin(DS3231SquareWavePin_ModeClock);
+          _Rtc.SetSquareWavePinClockFrequency(DS3231SquareWaveClock_1Hz);
+          active=true;
+        }
       }
 
       return active;

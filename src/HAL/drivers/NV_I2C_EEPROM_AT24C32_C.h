@@ -16,7 +16,7 @@
 
 class nvs {
   public:    
-    void init() {
+    bool init() {
       HAL_Wire.begin();
       HAL_Wire.setClock(I2C_CLOCK);
       _eeprom_addr = I2C_EEPROM_ADDRESS;
@@ -25,6 +25,10 @@ class nvs {
       for (int i=0; i < 512; i++) cacheReadState[i]=255;
       // mark entire write cache as clean
       for (int i=0; i < 512; i++) cacheWriteState[i]=0;
+
+      HAL_Wire.beginTransmission(I2C_EEPROM_ADDRESS);
+      bool error = HAL_Wire.endTransmission();
+      return !error;
     }
 
     // move data to/from the cache

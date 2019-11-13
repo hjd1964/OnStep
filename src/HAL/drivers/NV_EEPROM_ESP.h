@@ -11,8 +11,9 @@
 
 class nvs {
   public:
-    void init() {
+    bool init() {
       EEPROM.begin(EEPROM_SIZE);
+      return true;
     }
 
     void poll() {

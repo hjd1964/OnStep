@@ -176,7 +176,17 @@ void setup() {
   delay(2000);
 
   // initialize the Non-Volatile Memory
-  nv.init();
+  if (!nv.init()) {
+    while (true) {
+      SerialA.print("NV (EEPROM) failure!#\r\n");
+      for (int i=0; i<200; i++) { 
+        #ifdef HAL_SERIAL_TRANSMIT
+          SerialA.transmit();
+        #endif
+        delay(10);
+      }
+    }
+  }
 
   // initialize the Object Library
   Lib.init();
