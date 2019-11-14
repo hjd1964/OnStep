@@ -126,9 +126,6 @@ CommandErrors setHome() {
   doFastAltCalc(true);
   safetyLimitsOn=true;
 
-  // clear errors that are no-longer relevant after reset
-  resetGeneralError();
-
   // initialize and disable the stepper drivers
   StepperModeTrackingInit();
  
@@ -150,19 +147,4 @@ CommandErrors setHome() {
   InitStartPosition();
   
   return CE_NONE;
-}
-
-void resetGeneralError() {
-  switch (generalError) {
-    case ERR_ALT_MIN:
-    case ERR_LIMIT_SENSE:
-    case ERR_DEC:
-    case ERR_AZM:
-    case ERR_UNDER_POLE:
-    case ERR_MERIDIAN:
-    case ERR_SYNC:
-    case ERR_ALT_MAX:
-    case ERR_PARK: generalError=ERR_NONE; break;
-    default: break;
-  }
 }

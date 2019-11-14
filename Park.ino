@@ -177,15 +177,12 @@ CommandErrors unPark(bool withTrackingOn) {
   // make sure limits are on
   safetyLimitsOn=true;
 
-  // no errors
-  currentAlt=45.0;
-  doFastAltCalc(true);
-  generalError=ERR_NONE;
-
   // initialize and disable the stepper drivers
   StepperModeTrackingInit();
    
   // the polar home position
+  currentAlt=45.0;
+  doFastAltCalc(true);
   InitStartPosition();
 
   // stop the motor timers (except guiding)
