@@ -129,8 +129,6 @@ CommandErrors setHome() {
   // clear errors that are no-longer relevant after reset
   resetGeneralError();
 
-  generalError=ERR_NONE;
-
   // initialize and disable the stepper drivers
   StepperModeTrackingInit();
  
