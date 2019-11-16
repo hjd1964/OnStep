@@ -42,10 +42,17 @@
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
 #include <limits.h>
-#include <ESP8266WiFi.h>
-#include <WiFiClient.h>
-#include <ESP8266WebServer.h>
-#include <ESP8266WiFiAP.h>
+#ifdef ESP32
+  #include <WiFi.h>
+  #include <WiFiClient.h>
+  #include <WebServer.h>
+  #include <WiFiAP.h>
+#else
+  #include <ESP8266WiFi.h>
+  #include <WiFiClient.h>
+  #include <ESP8266WebServer.h>
+  #include <ESP8266WiFiAP.h>
+#endif
 #include <EEPROM.h>
 
 #define DEBUG_OFF   // Turn _ON to allow Ethernet startup without OnStep (Serial port for debug at 9600 baud)
@@ -116,7 +123,11 @@ IPAddress wifi_ap_ip = IPAddress(192,168,0,1);
 IPAddress wifi_ap_gw = IPAddress(192,168,0,1);
 IPAddress wifi_ap_sn = IPAddress(255,255,255,0);
 
-ESP8266WebServer server(80);
+#ifdef ESP32
+  WebServer server(80);
+#else
+  ESP8266WebServer server(80);
+#endif
 
 #if STANDARD_COMMAND_CHANNEL == ON
   WiFiServer cmdSvr(9999);
