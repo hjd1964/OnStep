@@ -37,7 +37,7 @@
 #define FirmwareDate          __DATE__
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
-#define FirmwareVersionMinor  "10"
+#define FirmwareVersionMinor  "11"
 #define FirmwareVersionPatch  "b"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
@@ -210,21 +210,23 @@ Again:
 
   // Initialize the www server
   server.init();
-  server.on("index.htm", handleRoot);
-  server.on("configuration.htm", handleConfiguration);
-  server.on("settings.htm", handleSettings);
-  server.on("settings.txt", settingsAjax);
-  server.on("control.htm", handleControl);
-  server.on("control.txt", controlAjax);
+  server.on("/index.htm", handleRoot);
+  server.on("/configuration.htm", handleConfiguration);
+  server.on("/settings.htm", handleSettings);
+  server.on("/settings.txt", settingsAjax);
 #if ENCODERS == ON
   server.on("/enc.htm", handleEncoders);
   server.on("/encA.txt", encAjaxGet);
   server.on("/enc.txt", encAjax);
 #endif
+  server.on("/library.htm", handleLibrary);
+  server.on("/libraryA.txt", libraryAjaxGet);
+  server.on("/library.txt", libraryAjax);
+  server.on("/control.htm", handleControl);
   server.on("/control.txt", controlAjax);
   server.on("/controlA.txt", controlAjaxGet);
-  server.on("pec.htm", handlePec);
-  server.on("pec.txt", pecAjax);
+  server.on("/pec.htm", handlePec);
+  server.on("/pec.txt", pecAjax);
   server.on("/", handleRoot);
 
   server.onNotFound(handleNotFound);
@@ -281,7 +283,7 @@ void logCommandErrors(char *cmdBuffer, char *result) {
   }
 #endif
   char cmd[]=":GE#";
-  processCommand(cmd,result,cmdTimeout,true);
+  processCommand(cmd,result,cmdTimeout);
   int e=CE_REPLY_UNKNOWN;
   if (strlen(result) == 3) e=atoi(result); else strcpy(cmdBuffer,":GE#");
   if (e>1) {

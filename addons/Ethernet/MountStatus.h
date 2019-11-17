@@ -7,7 +7,7 @@ enum MountTypes {MT_UNKNOWN, MT_GEM, MT_FORK, MT_FORKALT, MT_ALTAZM};
 enum Errors {
   ERR_NONE, ERR_MOTOR_FAULT, ERR_ALT_MIN, ERR_LIMIT_SENSE, ERR_DEC, ERR_AZM, 
   ERR_UNDER_POLE, ERR_MERIDIAN, ERR_SYNC, ERR_PARK, ERR_GOTO_SYNC, ERR_UNSPECIFIED,
-  ERR_ALT_MAX};
+  ERR_ALT_MAX, ERR_WEATHER_INIT, ERR_RTC_INIT};
 
 #define PierSideNone     0
 #define PierSideEast     1
@@ -170,6 +170,8 @@ class MountStatus {
       if (_lastError==ERR_GOTO_SYNC) strcpy(message,"Goto sync failed"); else
       if (_lastError==ERR_UNSPECIFIED) strcpy(message,"Unknown error"); else
       if (_lastError==ERR_ALT_MAX) strcpy(message,"Above overhead limit"); else
+      if (_lastError==ERR_WEATHER_INIT) strcpy(message,"Weather sensor init failed"); else
+      if (_lastError==ERR_RTC_INIT) strcpy(message,"RTC init failed"); else
         sprintf(message,"Unknown Error, code %d",(int)_lastError);
       return message[0];
     }
