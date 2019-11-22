@@ -38,6 +38,7 @@
 #define DISPLAY_WIFI_SIGNAL_STRENGTH  OFF //    OFF, ON if wireless signal strength is to be reported via web interface       Option
 #define DISPLAY_SPECIAL_CHARS          ON //     ON, For standard ASCII special symbols (compatibility.)                      Infreq
 #define DISPLAY_ADVANCED_CHARS         ON //     ON, For standard "RA/Dec" instead of symbols.                                Infreq
+#define DISPLAY_HIGH_PRECISION_COORDS OFF //    OFF, ON for high precision coordinate display on status page.                 Infreq
 
 // COMMAND CHANNELS ----------------------------------------------------------------------------------------------------------------
 #define STANDARD_COMMAND_CHANNEL       ON //     ON, Enable standard cmd channel port 9999 use w/Android App & ASCOM driver.  Infreq

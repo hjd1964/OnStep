@@ -1,8 +1,6 @@
 // -----------------------------------------------------------------------------------
 // The home page, status information
 
-#define DISPLAY_HIGH_PRECISION_COORDS_ON
-
 #define leftTri  "&#x25c4;"
 #define rightTri "&#x25ba;"
 #define upTri    "&#x25b2;"
@@ -155,7 +153,7 @@ void handleRoot() {
 
   data+="<br /><b>Coordinates:</b><br />";
 
-#if HIGH_PRECISION_COORDS == ON
+#if DISPLAY_HIGH_PRECISION_COORDS == ON
   // RA,Dec current
   if (!command(":GRa#",temp1)) strcpy(temp1,"?");
   if (!command(":GDe#",temp2)) strcpy(temp2,"?");
