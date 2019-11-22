@@ -5,13 +5,13 @@ void SmartHandController::menuFeatureKey()
   static unsigned short current_selection_feature_mode = 1;
   unsigned short last_selection_feature_mode = current_selection_feature_mode;
 
-  char string_feature_Modes[120] = "Guide Rate";
+  char string_feature_Modes[120] = "Guide Rate\nPulse Guide Rate";
 
-  int i=1,j=-1,k=-1,l=-1,m=-1,n=-1;
+  int i=2,j=-1,k=-1,l=-1,m=-1,n=-1;
   #if UTILITY_LIGHT != OFF
     { i++; j=i; strcat(string_feature_Modes,"\nUtility Light"); }
   #endif
-  if (telInfo.hasReticle()) { i++; k=i; strcat(string_feature_Modes,"\nReticle"); }
+  if (telInfo.hasReticle())  { i++; k=i; strcat(string_feature_Modes,"\nReticle");   }
   if (telInfo.hasFocuser1()) { i++; l=i; if (telInfo.hasFocuser2()) strcat(string_feature_Modes,"\nFocuser 1"); else strcat(string_feature_Modes,"\nFocuser"); }
   if (telInfo.hasFocuser2()) { i++; m=i; strcat(string_feature_Modes,"\nFocuser 2"); }
   if (telInfo.hasRotator())  { i++; n=i; strcat(string_feature_Modes,"\nRotator");   }
@@ -20,11 +20,12 @@ void SmartHandController::menuFeatureKey()
 
   if (last_selection_feature_mode>0) {
     if (current_selection_feature_mode==1) featureKeyMode=1; else // guide rate
-    if (current_selection_feature_mode==j) featureKeyMode=2; else // util. light
-    if (current_selection_feature_mode==k) featureKeyMode=3; else // reticule
-    if (current_selection_feature_mode==l) featureKeyMode=4; else // focuser 1
-    if (current_selection_feature_mode==m) featureKeyMode=5; else // focuser 2
-    if (current_selection_feature_mode==n) featureKeyMode=6; else // rotator
+    if (current_selection_feature_mode==2) featureKeyMode=2; else // pulse guide rate
+    if (current_selection_feature_mode==j) featureKeyMode=3; else // util. light
+    if (current_selection_feature_mode==k) featureKeyMode=4; else // reticule
+    if (current_selection_feature_mode==l) featureKeyMode=5; else // focuser 1
+    if (current_selection_feature_mode==m) featureKeyMode=6; else // focuser 2
+    if (current_selection_feature_mode==n) featureKeyMode=7; else // rotator
     { featureKeyMode=1; current_selection_feature_mode=1; } // default to guide rate
   } else current_selection_feature_mode = last_selection_feature_mode;
 }

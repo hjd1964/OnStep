@@ -472,13 +472,23 @@ void SmartHandController::update()
       if (buttonPad.F.wasPressed()) { activeGuideRate--; strcpy(briefMessage,"Guide Slower"); buttonCommand=true; } else
       if (buttonPad.f.wasPressed()) { activeGuideRate++; strcpy(briefMessage,"Guide Faster"); buttonCommand=true; }
       if (buttonCommand) {
-        if (activeGuideRate<1)  activeGuideRate=1;
+        if (activeGuideRate<4)  activeGuideRate=4;
         if (activeGuideRate>10) activeGuideRate=10;
         char cmd[5]= ":Rn#"; cmd[2] = '0' + activeGuideRate - 1;
         DisplayMessageLX200(SetLX200(cmd));
       }
     break;
-    case 2:   // util. light
+    case 2:   // pulse guide rate
+      if (buttonPad.F.wasPressed()) { activeGuideRate--; strcpy(briefMessage,"PGuide Slower"); buttonCommand=true; } else
+      if (buttonPad.f.wasPressed()) { activeGuideRate++; strcpy(briefMessage,"PGuide Faster"); buttonCommand=true; }
+      if (buttonCommand) {
+        if (activeGuideRate<1) activeGuideRate=1;
+        if (activeGuideRate>3) activeGuideRate=3;
+        char cmd[5]= ":Rn#"; cmd[2] = '0' + activeGuideRate - 1;
+        DisplayMessageLX200(SetLX200(cmd));
+      }
+    break;
+    case 3:   // util. light
 #if UTILITY_LIGHT != OFF
       if (buttonPad.F.wasPressed()) { current_selection_utility_light--; strcpy(briefMessage,"Util Dimmer"); buttonCommand=true; } else
       if (buttonPad.f.wasPressed()) { current_selection_utility_light++; strcpy(briefMessage,"Util Brighter"); buttonCommand=true; }
@@ -494,11 +504,11 @@ void SmartHandController::update()
       }
 #endif
     break;
-    case 3:  // reticule
+    case 4:  // reticule
       if (buttonPad.F.wasPressed()) { Ser.print(":B-#"); strcpy(briefMessage,"Reticle Dimmer"); } else
       if (buttonPad.f.wasPressed()) { Ser.print(":B+#"); strcpy(briefMessage,"Reticle Brighter"); }
     break;
-    case 4: case 5:  // focuser1/2
+    case 5: case 6:  // focuser1/2
       if (featureKeyMode==4) strcpy(cmd,":FA1#"); else strcpy(cmd,":FA2#"); 
            if (!focOut && buttonPad.F.isDown()) { focOut = true;  strcat(cmd,":FS#:F+#"); SetLX200(cmd); strcpy(briefMessage,"Focus Out"); buttonCommand=true; }
       else if ( focOut && buttonPad.F.isUp())   { focOut = false; Ser.print(":FQ#"); buttonCommand=true; buttonPad.F.clearPress(); }
@@ -510,7 +520,7 @@ void SmartHandController::update()
       else if ((focIn  && buttonPad.f.isDown() && (buttonPad.f.timeDown()>5000))) { Ser.print(":FF#:F-#"); strcpy(briefMessage,"Focus Fast"); }
 #endif
     break;
-    case 6:  // rotator
+    case 7:  // rotator
            if (!rotCcw && buttonPad.F.isDown()) { rotCcw = true;  Ser.print(":r2#:rc#:r<#"); strcpy(briefMessage,"Rotate Ccw"); buttonCommand=true; }
       else if ( rotCcw && buttonPad.F.isUp())   { rotCcw = false; Ser.print(":rQ#"); buttonCommand=true; buttonPad.F.clearPress(); }
       else if (!rotCw  && buttonPad.f.isDown()) { rotCw = true;   Ser.print(":r2#:rc#:r>#"); strcpy(briefMessage,"Rotate Cw"); buttonCommand=true; }
