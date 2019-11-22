@@ -465,10 +465,10 @@ void processCommands() {
 // :GA#       Get Telescope Altitude
 //            Returns: sDD*MM# or sDD*MM'SS# (based on precision setting)
 //            The current scope altitude
-      if (command[1] == 'A' && parameter[0] == 0)  { getHor(&f,&f1); doubleToDms(reply,&f,false,true); booleanReply=false; } else
+      if (command[1] == 'A' && parameter[0] == 0)  { getHor(&f,&f1); doubleToDms(reply,&f,false,true,precision); booleanReply=false; } else
 // :Ga#       Get Local Time in 12 hour format
 //            Returns: HH:MM:SS#
-      if (command[1] == 'a' && parameter[0] == 0)  { LMT=timeRange(UT1-timeZone); if (LMT > 12.0) LMT-=12.0; doubleToHms(reply,&LMT,true); booleanReply=false; } else 
+      if (command[1] == 'a' && parameter[0] == 0)  { LMT=timeRange(UT1-timeZone); if (LMT > 12.0) LMT-=12.0; doubleToHms(reply,&LMT,PM_HIGH); booleanReply=false; } else 
 // :GC#       Get the current local calendar date
 //            Returns: MM/DD/YY#
       if (command[1] == 'C' && parameter[0] == 0) { 
@@ -506,10 +506,10 @@ void processCommands() {
           _ra=f/15.0; _dec=f1; _coord_t=millis(); 
         }
         if (parameter[0] == 0) {
-          doubleToDms(reply,&_dec,false,true); booleanReply=false; 
+          doubleToDms(reply,&_dec,false,true,precision); booleanReply=false; 
         } else
         if (parameter[0] == 'e' && parameter[1] == 0) {
-          doubleToDmsd(reply,&_dec); booleanReply=false; 
+          doubleToDms(reply,&_dec,false,true,PM_HIGHEST); booleanReply=false; 
         } else commandError=CE_CMD_UNKNOWN;
       } else 
 // :Gd#       Get Currently Selected Target Declination
@@ -518,10 +518,10 @@ void processCommands() {
 //            Returns: sDD*MM'SS.s#
       if (command[1] == 'd')  { 
         if (parameter[0] == 0) {
-          doubleToDms(reply,&origTargetDec,false,true); booleanReply=false; 
+          doubleToDms(reply,&origTargetDec,false,true,precision); booleanReply=false; 
         } else
         if (parameter[0] == 'e' && parameter[1] == 0) {
-          doubleToDmsd(reply,&origTargetDec); booleanReply=false; 
+          doubleToDms(reply,&origTargetDec,false,true,PM_HIGHEST); booleanReply=false; 
         } else commandError=CE_CMD_UNKNOWN;
       } else
 // :GE#       Get last command error numeric code
@@ -551,7 +551,7 @@ void processCommands() {
       } else 
 // :Gg#       Get Current Site Longitude, east is negative
 //            Returns: sDDD*MM#
-      if (command[1] == 'g' && parameter[0] == 0)  { i=highPrecision; highPrecision=false; doubleToDms(reply,&longitude,true,true); booleanReply=false; highPrecision=i; } else 
+      if (command[1] == 'g' && parameter[0] == 0)  { doubleToDms(reply,&longitude,true,true,PM_LOW); booleanReply=false; } else 
 // :Gh#       Get Horizon Limit, the minimum elevation of the mount relative to the horizon
 //            Returns: sDD*#
       if (command[1] == 'h' && parameter[0] == 0)  { sprintf(reply,"%+02d*",minAlt); booleanReply=false; } else
@@ -559,7 +559,7 @@ void processCommands() {
 //            Returns: HH:MM:SS#
 //            On devices with single precision fp several days up-time will cause loss of precision as additional mantissa digits are needed to represent hours
 //            Devices with double precision fp are limitated by sidereal clock overflow which takes 249 days
-      if (command[1] == 'L' && parameter[0] == 0)  { LMT=timeRange(UT1-timeZone); doubleToHms(reply,&LMT,true); booleanReply=false; } else 
+      if (command[1] == 'L' && parameter[0] == 0)  { LMT=timeRange(UT1-timeZone); doubleToHms(reply,&LMT,PM_HIGH); booleanReply=false; } else 
 // :GM#       Get site 1 name
 // :GN#       Get site 2 name
 // :GO#       Get site 3 name
@@ -601,10 +601,10 @@ void processCommands() {
           _ra=f/15.0; _dec=f1; _coord_t=millis(); 
         }
         if (parameter[0] == 0) {
-           doubleToHms(reply,&_ra,highPrecision); booleanReply=false;  
+           doubleToHms(reply,&_ra,precision); booleanReply=false;  
         } else
         if (parameter[0] == 'a' && parameter[1] == 0) {
-          doubleToHmsd(reply,&_ra); booleanReply=false;
+          doubleToHms(reply,&_ra,PM_HIGHEST); booleanReply=false;
         } else commandError=CE_CMD_UNKNOWN;
       } else 
 // :Gr#       Get current/target object RA
@@ -614,15 +614,15 @@ void processCommands() {
       if (command[1] == 'r')  {
         f=origTargetRA; f/=15.0;
         if (parameter[0] == 0) {
-           doubleToHms(reply,&f,highPrecision); booleanReply=false;
+           doubleToHms(reply,&f,precision); booleanReply=false;
         } else
         if (parameter[0] == 'a' && parameter[1] == 0) {
-          doubleToHmsd(reply,&f); booleanReply=false;
+          doubleToHms(reply,&f,PM_HIGHEST); booleanReply=false;
         } else commandError=CE_CMD_UNKNOWN;
       } else 
 // :GS#       Get the Sidereal Time as sexagesimal value in 24 hour format
 //            Returns: HH:MM:SS#
-      if (command[1] == 'S' && parameter[0] == 0)  { f=LST(); doubleToHms(reply,&f,true); booleanReply=false; } else 
+      if (command[1] == 'S' && parameter[0] == 0)  { f=LST(); doubleToHms(reply,&f,PM_HIGH); booleanReply=false; } else 
 // :GT#       Get tracking rate, 0.0 unless TrackingSidereal
 //            Returns: n.n# (OnStep returns more decimal places than LX200 standard)
       if (command[1] == 'T' && parameter[0] == 0)  {
@@ -634,7 +634,7 @@ void processCommands() {
       } else 
 // :Gt#       Get current site Latitude, positive for North latitudes
 //            Returns: sDD*MM#
-      if (command[1] == 't' && parameter[0] == 0)  { i=highPrecision; highPrecision=false; doubleToDms(reply,&latitude,false,true); booleanReply=false; highPrecision=i; } else 
+      if (command[1] == 't' && parameter[0] == 0)  { doubleToDms(reply,&latitude,false,true,PM_LOW); booleanReply=false; } else 
 // :GU#       Get telescope Status
 //            Returns: s#
       if (command[1] == 'U' && parameter[0] == 0)  {
@@ -806,27 +806,27 @@ void processCommands() {
 
               // Number of stars, reset to first star
               case '9': { int n=0; if (alignThisStar > alignNumStars) n=alignNumStars; sprintf(reply,"%ld",(long)(n)); star=0; booleanReply=false; } break;
-              case 'A': { double f=(Align.actual[star].ha*Rad)/15.0; doubleToHms(reply,&f,true);   booleanReply=false; } break; // Star  #n HA
-              case 'B': { double f=(Align.actual[star].dec*Rad); doubleToDms(reply,&f,false,true); booleanReply=false; } break; // Star  #n Dec
-              case 'C': { double f=(Align.mount[star].ha*Rad)/15.0;  doubleToHms(reply,&f,true);   booleanReply=false; } break; // Mount #n HA
-              case 'D': { double f=(Align.mount[star].dec*Rad);  doubleToDms(reply,&f,false,true); booleanReply=false; } break; // Mount #n Dec
-              case 'E': sprintf(reply,"%ld",(long)(Align.mount[star].side)); star++; booleanReply=false; break;                 // Mount PierSide (and increment n)
+              case 'A': { double f=(Align.actual[star].ha*Rad)/15.0; doubleToHms(reply,&f,PM_HIGH); booleanReply=false; } break;           // Star  #n HA
+              case 'B': { double f=(Align.actual[star].dec*Rad); doubleToDms(reply,&f,false,true,precision);  booleanReply=false; } break; // Star  #n Dec
+              case 'C': { double f=(Align.mount[star].ha*Rad)/15.0;  doubleToHms(reply,&f,PM_HIGH); booleanReply=false; } break;           // Mount #n HA
+              case 'D': { double f=(Align.mount[star].dec*Rad);  doubleToDms(reply,&f,false,true,precision);  booleanReply=false; } break; // Mount #n Dec
+              case 'E': sprintf(reply,"%ld",(long)(Align.mount[star].side)); star++; booleanReply=false; break;                            // Mount PierSide (and increment n)
               default: commandError=CE_CMD_UNKNOWN;
             }
           } else
           if (parameter[0] == '4') { // 4n: Encoder
             switch (parameter[1]) {
-              case '0': getEnc(&f,&f1); doubleToDms(reply,&f,true,true); booleanReply=false; break;          // Get formatted absolute Axis1 angle
-              case '1': getEnc(&f,&f1); doubleToDms(reply,&f1,true,true); booleanReply=false; break;         // Get formatted absolute Axis2 angle 
-              case '2': getEnc(&f,&f1); dtostrf(f,0,6,reply); booleanReply=false; break;                     // Get absolute Axis1 angle in degrees
-              case '3': getEnc(&f,&f1); dtostrf(f1,0,6,reply); booleanReply=false; break;                    // Get absolute Axis2 angle in degrees
-              case '9': cli(); dtostrf(trackingTimerRateAxis1,1,8,reply); sei(); booleanReply=false; break;  // Get current tracking rate
+              case '0': getEnc(&f,&f1); doubleToDms(reply,&f,true,true,precision); booleanReply=false; break;  // Get formatted absolute Axis1 angle
+              case '1': getEnc(&f,&f1); doubleToDms(reply,&f1,true,true,precision); booleanReply=false; break; // Get formatted absolute Axis2 angle 
+              case '2': getEnc(&f,&f1); dtostrf(f,0,6,reply); booleanReply=false; break;                       // Get absolute Axis1 angle in degrees
+              case '3': getEnc(&f,&f1); dtostrf(f1,0,6,reply); booleanReply=false; break;                      // Get absolute Axis2 angle in degrees
+              case '9': cli(); dtostrf(trackingTimerRateAxis1,1,8,reply); sei(); booleanReply=false; break;    // Get current tracking rate
               default:  commandError=CE_CMD_UNKNOWN;
             }
           } else
           if (parameter[0] == '8') { // 8n: Date/Time
             switch (parameter[1]) {
-              case '0': f=timeRange(UT1); doubleToHms(reply,&f,true); booleanReply=false; break;             // UTC time
+              case '0': f=timeRange(UT1); doubleToHms(reply,&f,PM_HIGH); booleanReply=false; break;          // UTC time
               case '1': f1=JD; f=UT1; while (f >= 24.0) { f-=24.0; f1+=1; } while (f < 0.0) { f+=24.0; f1-=1; } greg(f1,&i2,&i,&i1); i2=(i2/99.99999-floor(i2/99.99999))*100; sprintf(reply,"%02d/%02d/%02d",i,i1,i2); booleanReply=false; break; // UTC date
               case '9': if (dateWasSet && timeWasSet) commandError=CE_0; break;                              // Get Date/Time status, returns 0=known or 1=unknown
               default:  commandError=CE_CMD_UNKNOWN;
@@ -976,7 +976,7 @@ void processCommands() {
       } else
 // :GZ#       Get telescope azimuth
 //            Returns: DDD*MM# or DDD*MM'SS# (based on precision setting)
-      if (command[1] == 'Z' && parameter[0] == 0)  { getHor(&f,&f1); f1=degRange(f1); doubleToDms(reply,&f1,true,false); booleanReply=false; } else commandError=CE_CMD_UNKNOWN;
+      if (command[1] == 'Z' && parameter[0] == 0)  { getHor(&f,&f1); f1=degRange(f1); doubleToDms(reply,&f1,true,false,precision); booleanReply=false; } else commandError=CE_CMD_UNKNOWN;
       } else
 
 //  h - Home Position Commands
@@ -1085,8 +1085,8 @@ void processCommands() {
         strcat(reply,",");
         strcat(reply,objType);
         if (strcmp(reply,",UNK") != 0) {
-          f=origTargetRA; f/=15.0; doubleToHms(ws,&f,highPrecision); strcat(reply,","); strcat(reply,ws);
-          doubleToDms(ws,&origTargetDec,false,true); strcat(reply,","); strcat(reply,ws);
+          f=origTargetRA; f/=15.0; doubleToHms(ws,&f,precision); strcat(reply,","); strcat(reply,ws);
+          doubleToDms(ws,&origTargetDec,false,true,precision); strcat(reply,","); strcat(reply,ws);
         }
         
         Lib.nextRec();
@@ -1484,7 +1484,7 @@ void processCommands() {
 //            Set target object altitude to sDD*MM# or sDD*MM'SS# (based on precision setting)
 //            Returns:
 //            0 if Object is within slew range, 1 otherwise
-      if (command[1] == 'a')  { if (!dmsToDouble(&newTargetAlt,parameter,true)) commandError=CE_PARAM_FORM; } else 
+      if (command[1] == 'a')  { if (!dmsToDouble(&newTargetAlt,parameter,true,precision)) commandError=CE_PARAM_FORM; } else 
 // :SB[n]#    Set Baud Rate where n is an ASCII digit (1..9) with the following interpertation
 //            0=115.2K, 1=56.7K, 2=38.4K, 3=28.8K, 4=19.2K, 5=14.4K, 6=9600, 7=4800, 8=2400, 9=1200
 //            Returns: 1 (at the current baud rate and then changes to the new rate for further communication)
@@ -1527,25 +1527,20 @@ void processCommands() {
 //                    1 on success
       if (command[1] == 'C')  { if (dateToDouble(&JD,parameter)) { nv.writeFloat(EE_JD,JD); updateLST(jd2last(JD,UT1,true)); dateWasSet=true; } else commandError=CE_PARAM_FORM; } else 
 //  :Sd[sDD*MM]#
-//            Set target object declination to sDD*MM or sDD*MM:SS depending on the current precision setting, automatically detects low/high precision
+//            Set target object declination to sDD*MM or sDD*MM:SS assumes high precision but falls back to low precision
 //            Return: 0 on failure
 //                    1 on success
-      if (command[1] == 'd')  { 
-        if (!dmsToDouble(&origTargetDec,parameter,true)) {
-          i=highPrecision; highPrecision=!highPrecision;
-          if (!dmsToDouble(&origTargetDec,parameter,true)) commandError=CE_PARAM_FORM; 
-          highPrecision=i;
-        }
-      } else 
+      if (command[1] == 'd')  {
+        if (!dmsToDouble(&origTargetDec,parameter,true,PM_HIGH))
+          if (!dmsToDouble(&origTargetDec,parameter,true,PM_LOW)) commandError=CE_PARAM_FORM;
+      } else
 //  :Sg[sDDD*MM]# or :Sg[DDD*MM]#
 //            Set current sites longitude to sDDD*MM an ASCII position string, East longitudes can be as negative or > 180 degrees
 //            Return: 0 on failure
 //                    1 on success
       if (command[1] == 'g')  {
-        i=highPrecision;
-        highPrecision=false;
         if (parameter[0] == '-' || parameter[0] == '+') i1=1; else i1=0;
-        if (dmsToDouble(&longitude,(char *)&parameter[i1],false)) {
+        if (dmsToDouble(&longitude,(char *)&parameter[i1],false,PM_LOW)) {
           if (parameter[0] == '-') longitude=-longitude;
           if (longitude >= -180.0 && longitude <= 360.0) {
             if (longitude >= 180.0) longitude-=360.0;
@@ -1553,7 +1548,6 @@ void processCommands() {
           } else commandError=CE_PARAM_RANGE;
         } else commandError=CE_PARAM_FORM;
         updateLST(jd2last(JD,UT1,false));
-        highPrecision=i;
         } else
 //  :SG[sHH]# or :SG[sHH:MM]# (where MM is 30 or 45)
 //            Set the number of hours added to local time to yield UTC
@@ -1595,8 +1589,7 @@ void processCommands() {
 //            Return: 0 on failure
 //                    1 on success
       if (command[1] == 'L')  {  
-        i=highPrecision; highPrecision=true; 
-        if (!hmsToDouble(&LMT,parameter)) commandError=CE_PARAM_FORM; else {
+        if (!hmsToDouble(&LMT,parameter,PM_HIGH)) commandError=CE_PARAM_FORM; else {
 #ifndef ESP32
           nv.writeFloat(EE_LMT,LMT);
 #endif
@@ -1604,7 +1597,6 @@ void processCommands() {
           updateLST(jd2last(JD,UT1,true));
           timeWasSet=true;
         }
-        highPrecision=i;
       } else 
 //  :SM[s]# or :SN[s]# or :SO[s]# or :SP[s]#
 //            Set site name, string may be up to 15 characters
@@ -1630,28 +1622,25 @@ void processCommands() {
         } else commandError=CE_PARAM_FORM;
       } else
 //  :Sr[HH:MM.T]# or :Sr[HH:MM:SS]#
-//            Set target object RA to HH:MM.T or HH:MM:SS based on precision setting, automatically detects low/high precision
+//            Set target object RA to HH:MM.T or HH:MM:SS assumes high precision but falls back to low precision
 //            Return: 0 on failure
 //                    1 on success
       if (command[1] == 'r')  {
-        if (!hmsToDouble(&origTargetRA,parameter)) {
-          i=highPrecision; highPrecision=!highPrecision;
-          if (!hmsToDouble(&origTargetRA,parameter)) commandError=CE_PARAM_RANGE; else origTargetRA*=15.0;
-          highPrecision=i;
-        } else origTargetRA*=15.0;
+        if (!hmsToDouble(&origTargetRA,parameter,PM_HIGH))
+          if (!hmsToDouble(&origTargetRA,parameter,PM_LOW)) commandError=CE_PARAM_RANGE;
+        if (commandError == CE_NONE) origTargetRA*=15.0;
       } else 
 //  :SS[HH:MM:SS]#
 //            Sets the local (apparent) sideral time to HH:MM:SS
 //            Return: 0 on failure
 //                    1 on success
-      if (command[1] == 'S')  { i=highPrecision; highPrecision=true; if (!hmsToDouble(&f,parameter)) commandError=CE_PARAM_FORM; else updateLST(f); highPrecision=i; } else 
+      if (command[1] == 'S')  { if (!hmsToDouble(&f,parameter,PM_HIGH)) commandError=CE_PARAM_FORM; else updateLST(f); } else 
 //  :St[sDD*MM]#
 //            Sets the current site latitude to sDD*MM#
 //            Return: 0 on failure
 //                    1 on success
       if (command[1] == 't')  { 
-        i=highPrecision; highPrecision=false; 
-        if (dmsToDouble(&latitude,parameter,true)) {
+        if (dmsToDouble(&latitude,parameter,true,PM_LOW)) {
           nv.writeFloat(100+(currentSite)*25+0,latitude);
 #if MOUNT_TYPE == ALTAZM
           homePositionAxis2=AltAzmDecStartPos;
@@ -1663,7 +1652,6 @@ void processCommands() {
           sinLat=sin(latitude/Rad);
           if (latitude > 0.0) defaultDirAxis1 = defaultDirAxis1NCPInit; else defaultDirAxis1 = defaultDirAxis1SCPInit;
         } else commandError=CE_PARAM_FORM;
-        highPrecision=i;
       } else 
 //  :ST[H.H]# Set Tracking Rate in Hz where 60.0 is solar rate
 //            Return: 0 on failure
@@ -1704,10 +1692,10 @@ void processCommands() {
 #endif
             case '8': Align.tfCor=(double)strtol(&parameter[3],NULL,10)/3600.0; break;                       // tfCor
             case '9': { i=strtol(&parameter[3],NULL,10); if (i == 1) { alignNumStars=star; alignThisStar=star+1; Align.model(star); } else star=0; } break;  // use 0 to start upload of stars for align, use 1 to trigger align
-            case 'A': { i=highPrecision; highPrecision=true; if (!hmsToDouble(&Align.actual[star].ha,&parameter[3])) commandError=CE_PARAM_FORM; else Align.actual[star].ha=(Align.actual[star].ha*15.0)/Rad; highPrecision=i; } break;  // Star  #n HA
-            case 'B': { i=highPrecision; highPrecision=true; if (!dmsToDouble(&Align.actual[star].dec,&parameter[3],true)) commandError=CE_PARAM_FORM; else Align.actual[star].dec=Align.actual[star].dec/Rad; highPrecision=i; } break; // Star  #n Dec
-            case 'C': { i=highPrecision; highPrecision=true; if (!hmsToDouble(&Align.mount[star].ha,&parameter[3])) commandError=CE_PARAM_FORM; else Align.mount[star].ha=(Align.mount[star].ha*15.0)/Rad; highPrecision=i; } break;     // Mount  #n HA
-            case 'D': { i=highPrecision; highPrecision=true; if (!dmsToDouble(&Align.mount[star].dec,&parameter[3],true)) commandError=CE_PARAM_FORM; else Align.mount[star].dec=Align.mount[star].dec/Rad; highPrecision=i; } break;    // Star  #n Dec
+            case 'A': { if (!hmsToDouble(&Align.actual[star].ha,&parameter[3],PM_HIGH))       commandError=CE_PARAM_FORM; else Align.actual[star].ha =(Align.actual[star].ha*15.0)/Rad; } break; // Star  #n HA
+            case 'B': { if (!dmsToDouble(&Align.actual[star].dec,&parameter[3],true,PM_HIGH)) commandError=CE_PARAM_FORM; else Align.actual[star].dec=Align.actual[star].dec/Rad;       } break; // Star  #n Dec
+            case 'C': { if (!hmsToDouble(&Align.mount[star].ha,&parameter[3],PM_HIGH))        commandError=CE_PARAM_FORM; else Align.mount[star].ha  =(Align.mount[star].ha*15.0)/Rad;  } break; // Mount #n HA
+            case 'D': { if (!dmsToDouble(&Align.mount[star].dec,&parameter[3],true,PM_HIGH))  commandError=CE_PARAM_FORM; else Align.mount[star].dec =Align.mount[star].dec/Rad;        } break; // Star  #n Dec
             case 'E': Align.actual[star].side=Align.mount[star].side=strtol(&parameter[3],NULL,10); star++; break; // Mount PierSide (and increment n)
             default:  commandError=CE_CMD_UNKNOWN;
           }
@@ -1893,7 +1881,7 @@ void processCommands() {
 //            Sets the target Object Azimuth
 //            Return: 0 on failure
 //                    1 on success
-      if (command[1] == 'z')  { if (!dmsToDouble(&newTargetAzm,parameter,false)) commandError=CE_PARAM_FORM; } else commandError=CE_CMD_UNKNOWN;
+      if (command[1] == 'z')  { if (!dmsToDouble(&newTargetAzm,parameter,false,precision)) commandError=CE_PARAM_FORM; } else commandError=CE_CMD_UNKNOWN;
       } else 
 // T - Tracking Commands
 //
@@ -1959,7 +1947,7 @@ void processCommands() {
 //            Low -  RA/Dec/etc. displays and accepts HH:MM.M sDD*MM
 //            High - RA/Dec/etc. displays and accepts HH:MM:SS sDD*MM:SS
 //            Returns: Nothing
-      if (command[0] == 'U' && command[1] == 0) { highPrecision=!highPrecision; booleanReply=false; } else
+      if (command[0] == 'U' && command[1] == 0) { if (precision == PM_LOW) precision=PM_HIGH; else precision=PM_LOW; booleanReply=false; } else
 
 #if MOUNT_TYPE != ALTAZM
 // V - PEC Readout

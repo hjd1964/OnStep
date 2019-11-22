@@ -22,69 +22,75 @@ boolean dateToDouble(double *JulianDay, char *date) {
 // (also handles)           HH:MM.M
 // (also handles)           HH:MM:SS
 // (also handles)           HH:MM:SS.SSSS
-boolean hmsToDouble(double *f, char *hms) {
+boolean hmsToDouble(double *f, char *hms, PrecisionMode p) {
   char h[3],m[5];
   int  h1,m1,m2=0;
   double s1=0;
 
   while (*hms == ' ') hms++; // strip prefix white-space
 
-  int actualLen=strlen(hms);
-  if (actualLen > 13) hms[13]=0; // maximum length
+  if (strlen(hms) > 13) hms[13]=0; // limit maximum length
+  int len=strlen(hms);
   
-  if (highPrecision) { if ((strlen(hms) != 8) && (strlen(hms) < 10)) return false; } else if (strlen(hms) != 7) return false;
+  if (p == PM_HIGHEST || p == PM_HIGH) { // validate length
+    if (len != 8 && len < 10) return false;
+  } else
+  if (p == PM_LOW) {
+    if (len != 7) return false;
+  }
 
+  // convert the hours part
   h[0]=*hms++; h[1]=*hms++; h[2]=0; if (!atoi2(h,&h1,false)) return false;
-  if (highPrecision) {
-    if (*hms++ != ':') return false; m[0]=*hms++; m[1]=*hms++; m[2]=0; if (!atoi2(m,&m1,false)) return false;
+
+  // make sure the seperator is an allowed character, then convert the minutes part
+  if (*hms++ != ':') return false;
+  m[0]=*hms++; m[1]=*hms++; m[2]=0; if (!atoi2(m,&m1,false)) return false;
+
+  if (p == PM_HIGHEST || p == PM_HIGH) {
+    // make sure the seperator is an allowed character, then convert the seconds part
     if (*hms++ != ':') return false;
     if (!atof2(hms,&s1,false)) return false;
-  } else {
-    if (*hms++ != ':') return false; m[0]=*hms++; m[1]=*hms++; m[2]=0; if (!atoi2(m,&m1,false)) return false;
-    if (*hms++ != '.') return false; m2=(*hms++)-'0';
+  } else
+  if (p == PM_LOW) {
+    // make sure the seperator is an allowed character, then convert the decimal minutes part
+    if (*hms++ != '.') return false;
+    m2=(*hms++)-'0';
   }
-  if ((h1<0) || (h1 > 23) || (m1 < 0) || (m1 > 59) || (m2 < 0) || (m2 > 9) || (s1 < 0) || (s1 > 59.9999)) return false;
+  
+  if (h1 < 0 || h1 > 23 || m1 < 0 || m1 > 59 || m2 < 0 || m2 > 9 || s1 < 0 || s1 > 59.9999) return false;
 
   *f=h1+m1/60.0+m2/600.0+s1/3600.0;
   return true;
 }
 
 // convert double to string in a variety of formats (as above) 
-void doubleToHms(char *reply, double *f, boolean hp) {
-  double h1,m1,f1,s1;
+void doubleToHms(char *reply, double *f, PrecisionMode p) {
+  double h1,m1,f1,s1,sd=0;
 
-  f1=fabs(*f)+0.000139; // round to 0.5 sec
-
-  h1=floor(f1);
-  m1=(f1-h1)*60;
-  s1=(m1-floor(m1));
-
-  char s[]="%s%02d:%02d:%02d";
-  if (hp) {
-    s1=s1*60.0;
-  } else {
-    s1=s1*10.0;
-    s[11]='.'; s[14]='1';
-  }
-  char sign[2]="";
-  if (((s1 != 0) || (m1 != 0) || (h1 != 0)) && (*f < 0.0)) strcpy(sign,"-");
-  sprintf(reply,s,sign,(int)h1,(int)m1,(int)s1);
-}
-
-// convert double to string in format HH:MM:SS.SSSS
-void doubleToHmsd(char *reply, double *f) {
-  double h1,m1,f1,s1,sd;
-
-  f1=fabs(*f)+0.0000000139; // round to 0.00005 sec
+  // round to 0.00005 second or 0.5 second, depending on precision mode
+  if (p == PM_HIGHEST) f1=fabs(*f)+0.0000000139; else f1=fabs(*f)+0.000139;
 
   h1=floor(f1);
-  m1=(f1-h1)*60;
-  s1=(m1-floor(m1))*60;
-  sd=(s1-floor(s1))*10000;
+  m1=(f1-h1)*60.0;
+  s1=(m1-floor(m1))*60.0;
+
+  // finish off calculations for hms and form string template
   char s[]="%s%02d:%02d:%02d.%04d";
+  if (p == PM_HIGHEST) {
+    sd=(s1-floor(s1))*10000.0;
+  } else
+  if (p == PM_HIGH) {
+    s[16]=0;
+  } else
+  if (p == PM_LOW) {
+    s1=s1/6.0;
+    s[11]='.'; s[14]='1'; s[16]=0;
+  }
+
+  // set sign and return result string
   char sign[2]="";
-  if (((sd != 0) || (s1 != 0) || (m1 != 0) || (h1 != 0)) && (*f < 0.0)) strcpy(sign,"-");
-  sprintf(reply,s,sign,(int)h1,(int)m1,(int)s1,(int)sd);
+  if ((sd != 0 || s1 != 0 || m1 != 0 || h1 != 0) && *f < 0.0) strcpy(sign,"-");
+  if (p == PM_HIGHEST) sprintf(reply,s,sign,(int)h1,(int)m1,(int)s1,(int)sd); else sprintf(reply,s,sign,(int)h1,(int)m1,(int)s1);
 }
 
 // convert string in format sDD:MM:SS to double
@@ -94,35 +100,27 @@ void doubleToHmsd(char *reply, double *f) {
 //                          DDD:MM
 //                          sDD*MM
 //                          DDD*MM
-boolean dmsToDouble(double *f, char *dms, boolean sign_present) {
-  char d[4], m[5];
-  int d1, m1;
-  double s1=0;
-  int lowLimit=0, highLimit=360;
-  int checkLen,actualLen;
-  double sign = 1.0;
-  boolean secondsOff = false;
+boolean dmsToDouble(double *f, char *dms, boolean sign_present, PrecisionMode p) {
+  char d[4],m[5];
+  int d1,m1,lowLimit=0,highLimit=360,len;
+  double s1=0,sign=1;
+  boolean secondsOff=false;
 
   while (*dms == ' ') dms++; // strip prefix white-space
   if (strlen(dms) > 13) dms[13]=0; // maximum length
+  len=strlen(dms);
 
-  actualLen=strlen(dms);
-
-  // determine if the seconds field was used and accept it if so
-  if (highPrecision) { 
-    checkLen=9;
-    if (actualLen != checkLen) {
-      checkLen=11;
-      if (!(actualLen >= checkLen)) return false;
-    }
-  } else {
-    checkLen=6;
-    if (actualLen != checkLen) {
-      if (actualLen == 9) { secondsOff=false; checkLen=9; } else return false;
+  if (p == PM_HIGHEST || p == PM_HIGH) { // validate length
+    if (len != 9 && len < 11) return false;
+  } else
+  if (p == PM_LOW) {
+    if (len != 6) {
+      if (len != 9) return false;
+      secondsOff=false;
     } else secondsOff = true;
   }
 
-  // determine if the sign was used and accept it if so
+  // determine if the sign was used and accept it if so, then convert the degrees part
   if (sign_present) {
     if (*dms == '-') sign=-1.0; else if (*dms == '+') sign=1.0; else return false; 
     dms++; d[0]=*dms++; d[1]=*dms++; d[2]=0; if (!atoi2(d,&d1,false)) return false;
@@ -130,14 +128,13 @@ boolean dmsToDouble(double *f, char *dms, boolean sign_present) {
     d[0]=*dms++; d[1]=*dms++; d[2]=*dms++; d[3]=0; if (!atoi2(d,&d1,false)) return false;
   }
 
-  // make sure the seperator is an allowed character
-  if ((*dms != ':') && (*dms != '*') && (*dms != char(223))) return false; else dms++;
-
+  // make sure the seperator is an allowed character, then convert the minutes part
+  if (*dms != ':' && *dms != '*' && *dms != char(223)) return false; else dms++;
   m[0]=*dms++; m[1]=*dms++; m[2]=0; if (!atoi2(m,&m1,false)) return false;
 
-  if ((highPrecision) && (!secondsOff)) {
-    // make sure the seperator is an allowed character
-    if (*dms++ != ':') return false; 
+  if ((p == PM_HIGHEST || p == PM_HIGH) && !secondsOff) {
+    // make sure the seperator is an allowed character, then convert the seconds part
+    if (*dms++ != ':' && *dms++ != '\'') return false;
     if (!atof2(dms,&s1,false)) return false;
   }
 
@@ -149,55 +146,46 @@ boolean dmsToDouble(double *f, char *dms, boolean sign_present) {
 }
 
 // convert double to string in a variety of formats (as above) 
-void doubleToDms(char *reply, double *f, boolean fullRange, boolean signPresent) {
+void doubleToDms(char *reply, double *f, boolean fullRange, boolean signPresent, PrecisionMode p) {
   char sign[]="+";
-  int  o=0,d1,s1=0;
-  double m1,f1;
-  f1=*f;
+  int  o=0;
+  double d1,m1,s1=0,s2,f1;
 
   // setup formatting, handle adding the sign
+  f1=*f;
   if (f1 < 0) { f1=-f1; sign[0]='-'; }
 
-  f1=f1+0.000139; // round to 1/2 arc-second
+  // round to 0.0005 arc-second or 0.5 arc-second, depending on precision mode
+  if (p == PM_HIGHEST) f1=f1+0.000000139; else f1=f1+0.000139; 
+
   d1=floor(f1);
   m1=(f1-d1)*60.0;
   s1=(m1-floor(m1))*60.0;
-  
-  char s[]="+%02d*%02d:%02d";
-  if (signPresent) { 
-    if (sign[0] == '-') { s[0]='-'; } o=1;
-  } else {
-    strcpy(s,"%02d*%02d:%02d");
-  }
+
+  // finish off calculations for dms and form string template
+  char s[]="+%02d*%02d:%02d.%03d";
+  if (p == PM_HIGHEST) {
+    s2=(s1-floor(s1))*1000.0;
+  } else s[15]=0;
+
+  if (signPresent) {
+    if (sign[0] == '-') s[0]='-';
+    o=1;
+  } else memmove(&s[0],&s[1],strlen(s));
+
   if (fullRange) s[2+o]='3';
  
-
-  if (highPrecision) {
-    sprintf(reply,s,d1,(int)m1,s1);
-  } else {
+  // return result string
+  if (p == PM_HIGHEST) {
+    sprintf(reply,s,(int)d1,(int)m1,(int)s1,(int)s2);
+  } else
+  if (p == PM_HIGH) {
+    sprintf(reply,s,(int)d1,(int)m1,(int)s1);
+  } else
+  if (p == PM_LOW) {
     s[9+o]=0;
-    sprintf(reply,s,d1,(int)m1);
+    sprintf(reply,s,(int)d1,(int)m1);
   }
-}
-
-// convert double to string in format sDD:MM:SS.SSS
-void doubleToDmsd(char *reply, double *f) {
-  char sign[]="+";
-  double d1,m1,s1,s2,f1;
-  f1=*f;
-
-  // setup formatting, handle adding the sign
-  if (f1 < 0) { f1=-f1; sign[0]='-'; }
-
-  f1=f1+0.000000139; // round to 0.0005 arc-second
-  d1=floor(f1);
-  m1=(f1-d1)*60.0;
-  s1=(m1-floor(m1))*60.0;
-  s2=(s1-floor(s1))*1000.0;
-  
-  char s[]="+%02d*%02d:%02d.%03d";
-  if (sign[0] == '-') { s[0]='-'; }
-  sprintf(reply,s,(int)d1,(int)m1,(int)s1,(int)s2);
 }
 
 // convert timezone to string in format sHHH:MM[:SS]
