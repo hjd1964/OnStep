@@ -434,13 +434,13 @@
 #ifndef AXIS4_LIMIT_MIN
   #error "Configuration (Config.h): Setting AXIS4_LIMIT_MIN must be present!"
 #elif (AXIS4_LIMIT_MIN < 0 || AXIS4_LIMIT_MIN > 500) && AXIS4_LIMIT_MIN < AXIS4_LIMIT_MAX
-  #error "Configuration (Config.h): Setting AXIS4_LIMIT_MIN invalid, use a number between -300 and 300 (mm) but < AXIS4_LIMIT_MAX."
+  #error "Configuration (Config.h): Setting AXIS4_LIMIT_MIN invalid, use a number between 0 and 500 (mm) but < AXIS4_LIMIT_MAX."
 #endif
 
 #ifndef AXIS4_LIMIT_MAX
   #error "Configuration (Config.h): Setting AXIS4_LIMIT_MAX must be present!"
 #elif (AXIS4_LIMIT_MAX < 0 || AXIS4_LIMIT_MAX > 500) && AXIS4_LIMIT_MAX > AXIS4_LIMIT_MIN
-  #error "Configuration (Config.h): Setting AXIS4_LIMIT_MAX invalid, use a number between -300 and 300 (mm) but > AXIS4_LIMIT_MIN."
+  #error "Configuration (Config.h): Setting AXIS4_LIMIT_MAX invalid, use a number between 0 and 500 (mm) but > AXIS4_LIMIT_MIN."
 #endif
 
 #ifndef AXIS5_LIMIT_MIN_RATE
@@ -452,13 +452,13 @@
 #ifndef AXIS5_LIMIT_MIN
   #error "Configuration (Config.h): Setting AXIS5_LIMIT_MIN must be present!"
 #elif (AXIS5_LIMIT_MIN < 0 || AXIS5_LIMIT_MIN > 500) && AXIS5_LIMIT_MIN < AXIS5_LIMIT_MAX
-  #error "Configuration (Config.h): Setting AXIS5_LIMIT_MIN invalid, use a number between -300 and 300 (mm) but < AXIS5_LIMIT_MAX."
+  #error "Configuration (Config.h): Setting AXIS5_LIMIT_MIN invalid, use a number between 0 and 500 (mm) but < AXIS5_LIMIT_MAX."
 #endif
 
 #ifndef AXIS5_LIMIT_MAX
   #error "Configuration (Config.h): Setting AXIS5_LIMIT_MAX must be present!"
 #elif (AXIS5_LIMIT_MAX < 0 || AXIS5_LIMIT_MAX > 500) && AXIS5_LIMIT_MAX > AXIS5_LIMIT_MIN
-  #error "Configuration (Config.h): Setting AXIS5_LIMIT_MAX invalid, use a number between -300 and 300 (mm) but > AXIS5_LIMIT_MIN."
+  #error "Configuration (Config.h): Setting AXIS5_LIMIT_MAX invalid, use a number between 0 and 500 (mm) but > AXIS5_LIMIT_MIN."
 #endif
 
 // -----------------------------------------------------------------------------------
