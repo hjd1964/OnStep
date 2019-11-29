@@ -229,7 +229,7 @@ void setup() {
   initReadNvValues();
 
   // starts the hardware timers that keep sidereal time, move the motors, etc.
-  setTrackingRate(default_tracking_rate);
+  setTrackingRate(default_tracking_rate,0);
   setDeltaTrackingRate();
   initStartTimers();
  
