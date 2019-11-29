@@ -1369,7 +1369,7 @@ void processCommands() {
 // R - Slew Rate Commands
       if (command[0] == 'R') {
 
-// :RA[n.n]#  Set Axis1 Guide rate to n.n degrees per second
+// :RA[n.n]#  Set Axis1 Guide rate to n.n degrees per sidereal second
 //            Returns: Nothing
       if (command[1] == 'A') {
         f=strtod(parameter,&conv_end);
@@ -1381,7 +1381,7 @@ void processCommands() {
         }
         booleanReply=false; 
       } else
-// :RE[n.n]#  Set Axis2 Guide rate to n.n degrees per second
+// :RE[n.n]#  Set Axis2 Guide rate to n.n degrees per sidereal second
 //            Returns: Nothing
       if (command[1] == 'E') {
         f=strtod(parameter,&conv_end);
