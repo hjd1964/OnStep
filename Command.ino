@@ -1375,7 +1375,7 @@ void processCommands() {
         f=strtod(parameter,&conv_end);
         double maxStepsPerSecond=1000000.0/(maxRate/16.0);
         if (&parameter[0] != conv_end) {
-          if (f < 1.0/60.0/60.0) f=1.0/60.0/60.0;
+          if (f < 0.001/60.0/60.0) f=0.001/60.0/60.0;
           if (f > maxStepsPerSecond/AXIS1_STEPS_PER_DEGREE) f=maxStepsPerSecond/AXIS1_STEPS_PER_DEGREE;
           customGuideRateAxis1(f*240.0,GUIDE_TIME_LIMIT*1000);
         }
@@ -1387,7 +1387,7 @@ void processCommands() {
         f=strtod(parameter,&conv_end);
         double maxStepsPerSecond=1000000.0/(maxRate/16.0);
         if (&parameter[0] != conv_end) {
-          if (f < 1.0/60.0/60.0) f=1.0/60.0/60.0;
+          if (f < 0.001/60.0/60.0) f=0.001/60.0/60.0;
           if (f > maxStepsPerSecond/AXIS2_STEPS_PER_DEGREE) f=maxStepsPerSecond/AXIS2_STEPS_PER_DEGREE;
           customGuideRateAxis2(f*240.0,GUIDE_TIME_LIMIT*1000);
         }
