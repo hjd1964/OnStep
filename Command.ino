@@ -659,8 +659,8 @@ void processCommands() {
         if (autoMeridianFlip)                    reply[i++]='a';                                             // [a]uto meridian flip
 #endif
 #if MOUNT_TYPE != ALTAZM     
-        const char *pch = PECStatusStringAlt; reply[i++]=pch[pecStatus];                                     // PEC Status one of "/,~;^" (/)gnore, ready to (,)lay,
-#endif                                                                                                       // (~)laying, ready to (;)ecord, (^)ecording
+        const char *pch = PECStatusStringAlt; reply[i++]=pch[pecStatus];                                     // PEC Status one of "/,~;^" (/)gnore, ready to (,)lay, (~)laying, ready to (;)ecord, (^)ecording
+#endif
         // provide mount type
 #if MOUNT_TYPE == GEM
         reply[i++]='E';
@@ -1653,24 +1653,19 @@ void processCommands() {
           if (latitude > 0.0) defaultDirAxis1 = defaultDirAxis1NCPInit; else defaultDirAxis1 = defaultDirAxis1SCPInit;
         } else commandError=CE_PARAM_FORM;
       } else 
-//  :ST[H.H]# Set Axis1 Tracking Rate in Hz where 60.0 is the solar rate
+//  :ST[H.H]# Set Tracking Rate in Hz where 60.0 is solar rate
 //            Return: 0 on failure
 //                    1 on success
-//  :ST[n.n,n.n]# Set Axis1 Tracking Rate in Arc-sec/second (where 15.0 is the solar rate) and Axis2 Tracking Rate in Arc-sec/second
-//                Note: East of Pier + is N, West of Pier + is S
-//            Return: 0 on failure
-//                    1 on success
-      if (command[1] == 'T')  {
+      if (command[1] == 'T')  { 
         if (!isSlewing()) {
           f=strtod(parameter,&conv_end);
-#if MOUNT_TYPE != ALTAZM
-          char* parameter1 = strchr(parameter,',');
-          if (parameter1 != NULL) f1=strtod(++parameter1,&conv_end); else { f=(f/60.0)*15.0; f1=0.0; }
-#else
-          f=(f/60.0)*15.0; f1=0.0;
-#endif
-          if (f >= 0.0 && f <= 30.0 && fabs(f1) <= 15.0) {
-            setTrackingRate((f/15.0)/1.00273790935,f1);
+          if (&parameter[0] != conv_end && ((f >= 30.0 && f < 90.0) || fabs(f) < 0.1)) {
+            if (fabs(f) < 0.1) {
+              trackingState=TrackingNone;
+            } else {
+              if (trackingState == TrackingNone) { trackingState=TrackingSidereal; enableStepperDrivers(); }
+              setTrackingRate((f/60.0)/1.00273790935);
+            }
           } else commandError=CE_PARAM_RANGE;
         } else commandError=CE_MOUNT_IN_MOTION;
       } else
@@ -1912,19 +1907,19 @@ void processCommands() {
       if (command[0] == 'T' && parameter[0] == 0) {
 #if MOUNT_TYPE != ALTAZM
         static bool dualAxis=false;
-        if (command[1] == 'o') { rateCompensation=RC_FULL_RA; setTrackingRate(default_tracking_rate,0); } else // turn full compensation on, defaults to base sidereal tracking rate
-        if (command[1] == 'r') { rateCompensation=RC_REFR_RA; setTrackingRate(default_tracking_rate,0); } else // turn refraction compensation on, defaults to base sidereal tracking rate
-        if (command[1] == 'n') { rateCompensation=RC_NONE; setTrackingRate(default_tracking_rate,0); } else    // turn refraction off, sidereal tracking rate resumes
-        if (command[1] == '1') { dualAxis=false; } else                                                        // turn off dual axis tracking
-        if (command[1] == '2') { dualAxis=true;  } else                                                        // turn on dual axis tracking
+        if (command[1] == 'o') { rateCompensation=RC_FULL_RA; setTrackingRate(default_tracking_rate); } else // turn full compensation on, defaults to base sidereal tracking rate
+        if (command[1] == 'r') { rateCompensation=RC_REFR_RA; setTrackingRate(default_tracking_rate); } else // turn refraction compensation on, defaults to base sidereal tracking rate
+        if (command[1] == 'n') { rateCompensation=RC_NONE; setTrackingRate(default_tracking_rate); } else    // turn refraction off, sidereal tracking rate resumes
+        if (command[1] == '1') { dualAxis=false; } else                                                      // turn off dual axis tracking
+        if (command[1] == '2') { dualAxis=true;  } else                                                      // turn on dual axis tracking
 #endif
         if (command[1] == '+') { siderealInterval-=HzCf*(0.02); booleanReply=false; } else
         if (command[1] == '-') { siderealInterval+=HzCf*(0.02); booleanReply=false; } else
-        if (command[1] == 'S') { setTrackingRate(0.99726956632,0); rateCompensation=RC_NONE; booleanReply=false; } else // solar tracking rate 60Hz
-        if (command[1] == 'L') { setTrackingRate(0.96236513150,0); rateCompensation=RC_NONE; booleanReply=false; } else // lunar tracking rate 57.9Hz
-        if (command[1] == 'Q') { setTrackingRate(default_tracking_rate,0); booleanReply=false; } else                   // sidereal tracking rate
-        if (command[1] == 'R') { siderealInterval=15956313L; booleanReply=false; } else                                 // reset master sidereal clock interval
-        if (command[1] == 'K') { setTrackingRate(0.99953004401,0); rateCompensation=RC_NONE; booleanReply=false; } else // king tracking rate 60.136Hz
+        if (command[1] == 'S') { setTrackingRate(0.99726956632); rateCompensation=RC_NONE; booleanReply=false; } else // solar tracking rate 60Hz
+        if (command[1] == 'L') { setTrackingRate(0.96236513150); rateCompensation=RC_NONE; booleanReply=false; } else // lunar tracking rate 57.9Hz
+        if (command[1] == 'Q') { setTrackingRate(default_tracking_rate); booleanReply=false; } else                   // sidereal tracking rate
+        if (command[1] == 'R') { siderealInterval=15956313L; booleanReply=false; } else                               // reset master sidereal clock interval
+        if (command[1] == 'K') { setTrackingRate(0.99953004401); rateCompensation=RC_NONE; booleanReply=false; } else // king tracking rate 60.136Hz
         if (command[1] == 'e' && !isSlewing() && !isHoming() && !isParked() ) { initGeneralError(); trackingState=TrackingSidereal; enableStepperDrivers(); } else
         if (command[1] == 'd' && !isSlewing() && !isHoming() ) trackingState=TrackingNone; else
           commandError=CE_CMD_UNKNOWN;

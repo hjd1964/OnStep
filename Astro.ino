@@ -378,7 +378,6 @@ void observedPlaceToTopocentric(double *RA, double *Dec) {
 
 // _deltaAxis1/2 are in arc-seconds/second
 double _deltaAxis1=15.0,_deltaAxis2=0.0;
-double _currentRateAxis1=1.0, _currentRateAxis2=0.0;
 
 boolean trackingSyncInProgress() {
   static int lastTrackingSyncSeconds=0;
@@ -424,7 +423,7 @@ void setDeltaTrackingRate() {
   }
 
 #if MOUNT_TYPE != ALTAZM
-  if ((rateCompensation != RC_REFR_BOTH) && (rateCompensation != RC_FULL_BOTH)) _deltaAxis2=_currentRateAxis2;
+  if ((rateCompensation != RC_REFR_BOTH) && (rateCompensation != RC_FULL_BOTH)) _deltaAxis2=0.0;
 #endif
   cli();
   // trackingTimerRateAxis1/2 are x the sidereal rate
@@ -435,17 +434,17 @@ void setDeltaTrackingRate() {
   fstepAxis2.fixed=doubleToFixed( (((double)AXIS2_STEPS_PER_DEGREE/240.0)*(_deltaAxis2/15.0))/100.0 );
 }
 
-void setTrackingRate(double r1, double r2) {
-  _currentRateAxis1=r1;
-  _currentRateAxis2=r2;
+double _currentRate=1.0;
+void setTrackingRate(double r) {
+  _currentRate=r;
 #if MOUNT_TYPE != ALTAZM
-  _deltaAxis1=r1*15.0;
-  _deltaAxis2=r2*15.0;
+  _deltaAxis1=r*15.0;
+  _deltaAxis2=0.0;
 #endif
 }
 
 double getTrackingRate() {
-  return _currentRateAxis1;
+  return _currentRate;
 }
 
 double getTrackingRate60Hz() {
@@ -559,7 +558,7 @@ boolean doRefractionRateCalc() {
   static double rr_Alt,rr_Azm;
 
   // turn off if not tracking at sidereal rate
-  if (trackingState != TrackingSidereal) { _deltaAxis1=_currentRateAxis1*15.0; _deltaAxis2=0.0; return true; }
+  if (trackingState != TrackingSidereal) { _deltaAxis1=_currentRate*15.0; _deltaAxis2=0.0; return true; }
   
   rr_step++;
   // load HA/Dec
@@ -621,7 +620,7 @@ boolean doRefractionRateCalc() {
       if (fabs(_deltaAxis2-dax2) > 0.005) _deltaAxis2=dax2; else _deltaAxis2=(_deltaAxis2*9.0+dax2)/10.0;
       
       // override for special case of near a celestial pole
-      if (90.0-fabs(rr_Dec) < (1.0/3600.0)) { _deltaAxis1=_currentRateAxis1*15.0; _deltaAxis2=0.0; }
+      if (90.0-fabs(rr_Dec) < (1.0/3600.0)) { _deltaAxis1=_currentRate*15.0; _deltaAxis2=0.0; }
 
       // override for special case of near the zenith
       if (currentAlt > 85.0) { _deltaAxis1=ztr(currentAlt); _deltaAxis2=0.0; }
@@ -715,8 +714,8 @@ boolean doHorRateCalc() {
       if ((az_Azm2 < -90.0) && (az_Azm1 > 90.0)) az_Azm2+=360.0;
       
       // set rates
-      _deltaAxis1=((az_Azm1-az_Azm2)*(15.0/(AltAzTrackingRange/60.0))/2.0)*_currentRateAxis1;
-      _deltaAxis2=((az_Alt1-az_Alt2)*(15.0/(AltAzTrackingRange/60.0))/2.0)*_currentRateAxis1; 
+      _deltaAxis1=((az_Azm1-az_Azm2)*(15.0/(AltAzTrackingRange/60.0))/2.0)*_currentRate;
+      _deltaAxis2=((az_Alt1-az_Alt2)*(15.0/(AltAzTrackingRange/60.0))/2.0)*_currentRate; 
       
       // override for special case of near a celestial pole
       if (90.0-fabs(az_Dec) <= 0.5) { _deltaAxis1=0.0; _deltaAxis2=0.0; }
