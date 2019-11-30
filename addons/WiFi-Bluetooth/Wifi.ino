@@ -94,12 +94,14 @@ const char html_login[] PROGMEM =
 "<button type='submit'>Ok</button>"
 "</form><br/><br/><br/>"
 "Setup:<br/><br/>"
-"Enable either Station <b>OR</b> Access Point mode, enabling both can cause performance issues. "
-"If you want OnStep to connect to your home WiFi network, enable only Station mode and disable Access Point mode. "
-"If OnStep cannot connect to your home WiFi network it will automatically re-enable Station mode; this is useful when you are away at a dark site and/or to guard against becoming locked out.<br/><br/>"
-"If locked out of WiFi you can use the Arduino IDE to reset the ESP8266 flash memory (and hence go back to defaults.) "
-"From the Arduino Tools menu, change Erase Flash 'Only Sketch' to Erase Flash 'All Flash Contents' and upload the WiFi-Bluetooth sketch again.<br/><br/>"
-"\r\n";
+"Enable either Station <b>OR</b> Access Point mode, enabling both can cause performance issues.<br/><br/>"
+"If you want OnStep to connect to your home WiFi network, enable only Station mode and "
+"disable Access Point mode. If OnStep cannot connect to your home WiFi network it will "
+"automatically re-enable Station mode; this is useful when you are away at a dark site and/or "
+"to guard against becoming locked out.<br/><br/>"
+"If locked out of WiFi you can use the Arduino IDE to reset the ESP8266 flash memory (and "
+"hence go back to defaults.) From the Arduino Tools menu, change Erase Flash 'Only Sketch' "
+"to Erase Flash 'All Flash Contents' and upload the WiFi-Bluetooth sketch again.<br/><br/>\r\n";
 
 bool restartRequired=false;
 bool loginRequired=true;
@@ -156,7 +158,7 @@ void handleWifi() {
   // OnStep wasn't found, show warning and info.
   if (!mountStatus.valid()) { data+= FPSTR(html_bad_comms_message); sendHtml(data); sendHtmlDone(data); return; }
 
-  data+="<div style='width: 40em;'>";
+  data+="<div>";
 
   if (restartRequired) {
     restartRequired=false;
