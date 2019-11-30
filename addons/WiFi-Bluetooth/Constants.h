@@ -15,7 +15,7 @@
 #define DEFAULT_FAST_AJAX_RATE "1"   // fast update is 1 second/update
 #define DEFAULT_AJAX_SHED_TIME "15"  // time before return to normal update rate
 
-const char html_headB[] PROGMEM = "<!DOCTYPE HTML>\r\n<html>\r\n<head>\r\n";
+const char html_headB[] PROGMEM = "<!DOCTYPE HTML>\r\n<html>\r\n<head>\r\n<meta charset='utf-8'/>\r\n";
 const char html_headerPec[] PROGMEM = "<meta http-equiv=\"refresh\" content=\"5; URL=/pec.htm\">\r\n";
 const char html_headerIdx[] PROGMEM = "<meta http-equiv=\"refresh\" content=\"5; URL=/index.htm\">\r\n";
 const char html_headE[] PROGMEM = "</head>\r\n";
