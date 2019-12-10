@@ -645,7 +645,7 @@ void processCommands() {
         if (pecRecorded)                         reply[i++]='R';                                             // PEC data has been [R]ecorded
         if (atHome)                              reply[i++]='H';                                             // at [H]ome
         if (PPSsynced)                           reply[i++]='S';                                             // PPS [S]ync
-        if (guideDirAxis1 || guideDirAxis2)  reply[i++]='G';                                                 // [G]uide active
+        if (guideDirAxis1 || guideDirAxis2)      reply[i++]='G';                                             // [G]uide active
 #if MOUNT_TYPE != ALTAZM
         if (rateCompensation == RC_REFR_RA)      { reply[i++]='r'; reply[i++]='s'; }                         // [r]efr enabled [s]ingle axis
         if (rateCompensation == RC_REFR_BOTH)    { reply[i++]='r'; }                                         // [r]efr enabled
