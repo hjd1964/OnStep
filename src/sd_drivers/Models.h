@@ -14,15 +14,15 @@
 
 // Models
 #define DRIVER_MODEL_FIRST 2
-#define A4988    2  // step/dir stepper driver with EN LOW.  allows M0,M1,M2 bit patterens for 1x,2x,4x,8x,16x
-#define DRV8825  3  // step/dir stepper driver with EN LOW.  allows M0,M1,M2 bit patterens for 1x,2x,4x,8x,16x,32x
-#define S109     4  // step/dir stepper driver with EN LOW.  allows M0,M1,M2 bit patterens for 1x,2x,4x,8x,16x,32x
-#define LV8729   5  // step/dir stepper driver with EN LOW.  allows M0,M1,M2 bit patterens for 1x,2x,4x,8x,16x,32x,64x,128x
-#define RAPS128  6  // step/dir stepper driver with EN LOW.  allows M0,M1,M2 bit patterens for 1x,2x,4x,8x,16x,32x,64x,128x
-#define TMC2100  7  // step/dir stepper driver with EN LOW.  allows M0,M1    bit patterens for 1x,2x,4x,16x   (spreadCycle only, no 256x intpol)
-#define TMC2208  8  // step/dir stepper driver with EN LOW.  allows M0,M1    bit patterens for 2x,4x,8x,16x   (stealthChop default, uses 256x intpol)
-#define TMC2209  9  // step/dir stepper driver with EN LOW.  allows M0,M1    bit patterens for 8x,16x,32x,64x (M2 sets spreadCycle/stealthChop, uses 256x intpol)
-#define ST820    10 // step/dir stepper driver with EN LOW.  allows M0,M1,M2 bit patterens for 1x,2x,4x,8x,16x,32x,128x,256x
+#define A4988    2  // step/dir stepper driver with EN LOW,  allows M0,M1,M2 bit patterens for 1x,2x,4x,8x,16x
+#define DRV8825  3  // step/dir stepper driver with EN LOW,  allows M0,M1,M2 bit patterens for 1x,2x,4x,8x,16x,32x
+#define S109     4  // step/dir stepper driver with EN LOW,  allows M0,M1,M2 bit patterens for 1x,2x,4x,8x,16x,32x
+#define LV8729   5  // step/dir stepper driver with EN LOW,  allows M0,M1,M2 bit patterens for 1x,2x,4x,8x,16x,32x,64x,128x
+#define RAPS128  6  // step/dir stepper driver with EN LOW,  allows M0,M1,M2 bit patterens for 1x,2x,4x,8x,16x,32x,64x,128x
+#define TMC2100  7  // step/dir stepper driver with EN LOW,  allows M0,M1    bit patterens for 1x,2x,4x,16x   (spreadCycle only, no 256x intpol)
+#define TMC2208  8  // step/dir stepper driver with EN LOW,  allows M0,M1    bit patterens for 2x,4x,8x,16x   (stealthChop default, uses 256x intpol)
+#define TMC2209  9  // step/dir stepper driver with EN LOW,  allows M0,M1    bit patterens for 8x,16x,32x,64x (M2 sets spreadCycle/stealthChop, uses 256x intpol)
+#define ST820    10 // step/dir stepper driver with EN LOW,  allows M0,M1,M2 bit patterens for 1x,2x,4x,8x,16x,32x,128x,256x
 #define TMC_SPI  11 // step/dir stepper driver with EN LOW,  uses TMC protocol SPI comms   for 1x,2x...,256x  (SPI sets spreadCycle/stealthChop etc. for TMC2130 & TMC5160)
 #define GENERIC  12 // alias for GENERIC1
 #define GENERIC1 12 // step/dir stepper driver with EN LOW,  allows                        for 1x,2x,4x,8x,16x,32x,64x,128x,256x (no mode switching)
