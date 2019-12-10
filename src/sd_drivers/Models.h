@@ -45,8 +45,8 @@
 #define TMC2209_PULSE_WIDTH 103
 #define ST820_PULSE_WIDTH   20
 #define TMC_SPI_PULSE_WIDTH 103
-#define GENERIC_PULSE_WIDTH 500  // enough for 1MHz stepping
-#define SERVO_PULSE_WIDTH   500  // enough for 1MHz stepping
+#define GENERIC_PULSE_WIDTH 5000  // enough for 100KHz stepping
+#define SERVO_PULSE_WIDTH   1000  // enough for 500KHz stepping
 
 // Wave forms
 #define SQUARE 2

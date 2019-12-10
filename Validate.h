@@ -465,13 +465,6 @@
 // -----------------------------------------------------------------------------------
 // stepper driver mode setup validation
 
-// step wave form
-#if STEP_WAVE_FORM != PULSE
-  #undef HAL_PULSE_WIDTH
-  // set pulse width in SQW and DEDGE mode well above triggering PULSE check code
-  #define HAL_PULSE_WIDTH 10000
-#endif
-
 // check model
 #if (AXIS1_DRIVER_MODEL != OFF && AXIS2_DRIVER_MODEL == OFF) || (AXIS2_DRIVER_MODEL != OFF && AXIS1_DRIVER_MODEL == OFF)
   #error "Configuration (Config.h): AXISn_DRIVER_MODEL; If using the driver mode control you must use it for both AXIS1 and AXIS2."

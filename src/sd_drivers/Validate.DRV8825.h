@@ -9,7 +9,7 @@
       #error "Configuration (Config.h): AXIS1_DRIVER_MICROSTEPS_GOTO; DRV8825 invalid micro-step mode, use: 32,16,8,4,2,1,or OFF"
     #endif
   #endif
-  #if HAL_PULSE_WIDTH < DRV8825_PULSE_WIDTH
+  #if STEP_WAVE_FORM == PULSE && HAL_PULSE_WIDTH < DRV8825_PULSE_WIDTH
     #error "Configuration (Config.h): STEP_WAVE_FORM PULSE; Pulse width is below the DRV8825 stepper driver specifications."
   #endif
 #endif
@@ -23,7 +23,7 @@
       #error "Configuration (Config.h): AXIS2_DRIVER_MICROSTEPS_GOTO; DRV8825 invalid micro-step mode, use: 32,16,8,4,2,1,or OFF"
     #endif
   #endif
-  #if HAL_PULSE_WIDTH < DRV8825_PULSE_WIDTH
+  #if STEP_WAVE_FORM == PULSE && HAL_PULSE_WIDTH < DRV8825_PULSE_WIDTH
     #error "Configuration (Config.h): STEP_WAVE_FORM PULSE; Pulse width is below the DRV8825 stepper driver specifications."
   #endif
 #endif

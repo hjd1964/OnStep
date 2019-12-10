@@ -15,7 +15,7 @@
       #warning "Configuration (Config.h): AXIS2_DRIVER_MICROSTEPS_GOTO; is not OFF.  This can effect pointing accuracy and PEC if index sensing isn't used."
     #endif
   #endif
-  #if HAL_PULSE_WIDTH < TMC_SPI_PULSE_WIDTH
+  #if STEP_WAVE_FORM == PULSE && HAL_PULSE_WIDTH < TMC_SPI_PULSE_WIDTH
     #error "Configuration (Config.h): STEP_WAVE_FORM PULSE; Pulse width is below the TMC SPI stepper driver specifications."
   #endif
   #ifndef AXIS1_DRIVER_FS_VHIGH
@@ -41,7 +41,7 @@
       #warning "Configuration (Config.h): AXIS2_DRIVER_MICROSTEPS_GOTO; is not OFF.  This can effect pointing accuracy."
     #endif
   #endif
-  #if HAL_PULSE_WIDTH < TMC_SPI_PULSE_WIDTH
+  #if STEP_WAVE_FORM == PULSE && HAL_PULSE_WIDTH < TMC_SPI_PULSE_WIDTH
     #error "Configuration (Config.h): STEP_WAVE_FORM PULSE; Pulse width is below the TMC SPI stepper driver specifications."
   #endif
   #ifndef AXIS2_DRIVER_FS_VHIGH

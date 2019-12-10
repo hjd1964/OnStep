@@ -10,7 +10,7 @@
       #error "Configuration (Config.h): AXIS1_DRIVER_MICROSTEPS_GOTO; must be set to the same value as AXIS1_DRIVER_MICROSTEPS or OFF"
     #endif
   #endif
-  #if HAL_PULSE_WIDTH < TMC2100_PULSE_WIDTH
+  #if STEP_WAVE_FORM == PULSE && HAL_PULSE_WIDTH < TMC2100_PULSE_WIDTH
     #error "Configuration (Config.h): STEP_WAVE_FORM PULSE; Pulse width is below the TMC2100 stepper driver specifications."
   #endif
 #endif
@@ -25,7 +25,7 @@
       #error "Configuration (Config.h): AXIS2_DRIVER_MICROSTEPS_GOTO; must be set to the same value as AXIS2_DRIVER_MICROSTEPS or OFF"
     #endif
   #endif
-  #if HAL_PULSE_WIDTH < TMC2100_PULSE_WIDTH
+  #if STEP_WAVE_FORM == PULSE && HAL_PULSE_WIDTH < TMC2100_PULSE_WIDTH
     #error "Configuration (Config.h): STEP_WAVE_FORM PULSE; Pulse width exceeds the TMC2100 stepper driver specifications."
   #endif
 #endif

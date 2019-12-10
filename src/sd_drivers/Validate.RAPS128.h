@@ -9,7 +9,7 @@
       #error "Configuration (Config.h): AXIS1_DRIVER_MICROSTEPS_GOTO; RAPS128 invalid micro-step mode, use: 128,64,32,16,8,4,2,1,or OFF"
     #endif
   #endif
-  #if HAL_PULSE_WIDTH < RAPS128_PULSE_WIDTH
+  #if STEP_WAVE_FORM == PULSE && HAL_PULSE_WIDTH < RAPS128_PULSE_WIDTH
     #error "Configuration (Config.h): STEP_WAVE_FORM PULSE; Pulse width is below the RAPS128 stepper driver specifications."
   #endif
 #endif
@@ -23,7 +23,7 @@
       #error "Configuration (Config.h): AXIS2_DRIVER_MICROSTEPS_GOTO; RAPS128 invalid micro-step mode, use: 128,64,32,16,8,4,2,1,or OFF"
     #endif
   #endif
-  #if HAL_PULSE_WIDTH < RAPS128_PULSE_WIDTH
+  #if STEP_WAVE_FORM == PULSE && HAL_PULSE_WIDTH < RAPS128_PULSE_WIDTH
     #error "Configuration (Config.h): STEP_WAVE_FORM PULSE; Pulse width is below the RAPS128 stepper driver specifications."
   #endif
 #endif
