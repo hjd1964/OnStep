@@ -11,7 +11,7 @@
     #warning "Configuration (Config.h): AXIS1_DRIVER_MICROSTEPS_GOTO; SERVO digital gearing multiplies step size by this amount"
   #endif
   #if STEP_WAVE_FORM == PULSE
-    #warning "Configuration (Config.h): STEP_WAVE_FORM PULSE; Pulse mode can degrade step signal integreity (due to signal distance traveled) and/or exceed signal timing requirements in some cases."
+    #warning "Configuration (Config.h): STEP_WAVE_FORM PULSE; Pulse mode can degrade step signal integrity (due to signal distance traveled) and/or exceed signal timing requirements in some cases."
     #if HAL_PULSE_WIDTH < GENERIC_PULSE_WIDTH
       #warning "Configuration (Config.h): STEP_WAVE_FORM PULSE; Pulse width is below 1uS, the SERVO driver may or may not support these speeds."
     #endif
@@ -29,7 +29,7 @@
     #warning "Configuration (Config.h): AXIS2_DRIVER_MICROSTEPS_GOTO; SERVO digital gearing multiplies step size by this amount"
   #endif
   #if STEP_WAVE_FORM == PULSE
-    #warning "Configuration (Config.h): STEP_WAVE_FORM PULSE; Pulse mode can degrade step signal integreity (due to signal distance traveled) and/or exceed signal timing requirements in some cases."
+    #warning "Configuration (Config.h): STEP_WAVE_FORM PULSE; Pulse mode can degrade step signal integrity (due to signal distance traveled) and/or exceed signal timing requirements in some cases."
     #if HAL_PULSE_WIDTH < GENERIC_PULSE_WIDTH
       #warning "Configuration (Config.h): STEP_WAVE_FORM PULSE; Pulse width is below 1uS, the SERVO driver may or may not support these speeds."
     #endif
