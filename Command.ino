@@ -1481,10 +1481,13 @@ void processCommands() {
 // S - Telescope Set Commands
       if (command[0] == 'S') {
 // :Sa[sDD*MM]#
-//            Set target object altitude to sDD*MM# or sDD*MM'SS# (based on precision setting)
+//            Set target object Altitude to sDD*MM# or sDD*MM:SS# assumes high precision but falls back to low precision
 //            Returns:
 //            0 if Object is within slew range, 1 otherwise
-      if (command[1] == 'a')  { if (!dmsToDouble(&newTargetAlt,parameter,true,precision)) commandError=CE_PARAM_FORM; } else 
+      if (command[1] == 'a')  {
+         if (!dmsToDouble(&newTargetAlt,parameter,true,PM_HIGH))
+           if (!dmsToDouble(&newTargetAlt,parameter,true,PM_LOW)) commandError=CE_PARAM_FORM;
+      } else
 // :SB[n]#    Set Baud Rate where n is an ASCII digit (1..9) with the following interpertation
 //            0=115.2K, 1=56.7K, 2=38.4K, 3=28.8K, 4=19.2K, 5=14.4K, 6=9600, 7=4800, 8=2400, 9=1200
 //            Returns: 1 (at the current baud rate and then changes to the new rate for further communication)
@@ -1878,10 +1881,13 @@ void processCommands() {
         } else commandError=CE_CMD_UNKNOWN;
       } else
 // :Sz[DDD*MM]#
-//            Sets the target Object Azimuth
+//            Set target object Azimuth to DDD*MM or DDD*MM:SS assumes high precision but falls back to low precision
 //            Return: 0 on failure
 //                    1 on success
-      if (command[1] == 'z')  { if (!dmsToDouble(&newTargetAzm,parameter,false,precision)) commandError=CE_PARAM_FORM; } else commandError=CE_CMD_UNKNOWN;
+      if (command[1] == 'z')  {
+        if (!dmsToDouble(&newTargetAzm,parameter,false,PM_HIGH))
+          if (!dmsToDouble(&newTargetAzm,parameter,false,PM_LOW)) commandError=CE_PARAM_FORM;
+        } else commandError=CE_CMD_UNKNOWN;
       } else 
 // T - Tracking Commands
 //
