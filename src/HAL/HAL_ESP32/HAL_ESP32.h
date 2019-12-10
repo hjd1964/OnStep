@@ -158,12 +158,12 @@ IRAM_ATTR void QuickSetIntervalAxis2(uint32_t r) {
 #define TGL(x,y) (x^=(1<<y))
 
 // We use standard #define's to do **fast** digitalWrite's to the step and dir pins for the Axis1/2 stepper drivers
-#define StepPinAxis1_HIGH digitalWrite(Axis1StepPin, HIGH)
-#define StepPinAxis1_LOW digitalWrite(Axis1StepPin, LOW)
-#define DirPinAxis1_HIGH digitalWrite(Axis1DirPin, HIGH)
-#define DirPinAxis1_LOW digitalWrite(Axis1DirPin, LOW)
+#define Axis1StepPinHIGH digitalWrite(Axis1StepPin, HIGH)
+#define Axis1StepPinLOW digitalWrite(Axis1StepPin, LOW)
+#define Axis1DirPinHIGH digitalWrite(Axis1DirPin, HIGH)
+#define Axis1DirPinLOW digitalWrite(Axis1DirPin, LOW)
 
-#define StepPinAxis2_HIGH digitalWrite(Axis2StepPin, HIGH)
-#define StepPinAxis2_LOW digitalWrite(Axis2StepPin, LOW)
-#define DirPinAxis2_HIGH digitalWrite(Axis2DirPin, HIGH)
-#define DirPinAxis2_LOW digitalWrite(Axis2DirPin, LOW)
+#define Axis2StepPinHIGH digitalWrite(Axis2StepPin, HIGH)
+#define Axis2StepPinLOW digitalWrite(Axis2StepPin, LOW)
+#define Axis2DirPinHIGH digitalWrite(Axis2DirPin, HIGH)
+#define Axis2DirPinLOW digitalWrite(Axis2DirPin, LOW)

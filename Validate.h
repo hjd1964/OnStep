@@ -563,6 +563,20 @@
   #warning "Configuration (Config.h): Stepper drivers for Axis1 and Axis2 are not defined.  Be sure to properly configure micro-step mode, Vref/current, etc. manually with shunts, dip-switches, as required."
 #endif
 
+// if fast Axis1/2 step signal routines aren't defined, do so
+#ifndef Axis1StepPinStep
+  #define Axis1StepPinStep Axis1StepPinHIGH
+#endif
+#ifndef Axis1StepPinReset
+  #define Axis1StepPinReset Axis1StepPinLOW
+#endif
+#ifndef Axis2StepPinStep
+  #define Axis2StepPinStep Axis2StepPinHIGH
+#endif
+#ifndef Axis2StepPinReset
+  #define Axis2StepPinReset Axis2StepPinLOW
+#endif
+
 // if AXISn_DRIVER_STEP_GOTO isn't defined, do so
 #ifndef AXIS1_DRIVER_STEP_GOTO
   #define AXIS1_DRIVER_STEP_GOTO 1

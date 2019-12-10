@@ -1,17 +1,16 @@
 // Driver models
 
-// Macros, these variations don't appear at run-time and are changed to "TMC_SPI"
-#define TMC2130 100
-#define TMC2130_QUIET 101
-#define TMC2130_VQUIET 102
+// Macros, these variations are converted into "Models" (below) during compilation
+#define TMC2130 100        // converted into TMC_SPI w/spreadCycle always enabled
+#define TMC2130_QUIET 101  // converted into TMC_SPI w/stealthChop tracking and spreadCycle slews
+#define TMC2130_VQUIET 102 // converted into TMC_SPI w/stealthChop always enabled
 
-#define TMC5160 110
-#define TMC5160_QUIET 111
-#define TMC5160_VQUIET 112
+#define TMC5160 110        // converted into TMC_SPI w/spreadCycle always enabled
+#define TMC5160_QUIET 111  // converted into TMC_SPI w/stealthChop tracking and spreadCycle slews
+#define TMC5160_VQUIET 112 // converted into TMC_SPI w/stealthChop always enabled
 
-// Macros, these variations don't appear at run-time and are changed to "TMC2209"
-#define TMC2209_QUIET 121
-#define TMC2209_VQUIET 122
+#define TMC2209_QUIET 121  // converted into TMC2209 w/stealthChop tracking and spreadCycle slews
+#define TMC2209_VQUIET 122 // converted into TMC2209 w/stealthChop always enabled
 
 // Models
 #define DRIVER_MODEL_FIRST 2
@@ -24,14 +23,16 @@
 #define TMC2208  8  // step/dir stepper driver with EN LOW.  allows M0,M1    bit patterens for 2x,4x,8x,16x   (stealthChop default, uses 256x intpol)
 #define TMC2209  9  // step/dir stepper driver with EN LOW.  allows M0,M1    bit patterens for 8x,16x,32x,64x (M2 sets spreadCycle/stealthChop, uses 256x intpol)
 #define ST820    10 // step/dir stepper driver with EN LOW.  allows M0,M1,M2 bit patterens for 1x,2x,4x,8x,16x,32x,128x,256x
-#define TMC_SPI  11 // step/dir stepper driver with EN LOW,  uses TMC protocol SPI comms   for 1x,2x...,256x (SPI sets spreadCycle/stealthChop etc. for TMC2130 & TMC5160)
-#define GENERIC  12 // step/dir stepper driver, alias for GENERIC1
+#define TMC_SPI  11 // step/dir stepper driver with EN LOW,  uses TMC protocol SPI comms   for 1x,2x...,256x  (SPI sets spreadCycle/stealthChop etc. for TMC2130 & TMC5160)
+#define GENERIC  12 // alias for GENERIC1
 #define GENERIC1 12 // step/dir stepper driver with EN LOW,  allows                        for 1x,2x,4x,8x,16x,32x,64x,128x,256x (no mode switching)
 #define GENERIC2 13 // step/dir stepper driver with EN HIGH, otherwise as above
-#define SERVO    14 // step/dir servo   driver, alias for SERVO1
-#define SERVO1   14 // step/dir servo   driver with EN LOW,  allows M0 bit pattern for LOW = native mode & goto HIGH = 2x,4x,8x,16x,32x,64x, or 128x *larger* steps
-#define SERVO2   15 // step/dir servo   driver with EN HIGH, otherwise as above
-#define DRIVER_MODEL_LAST 15
+#define GENERIC3 14 // step/dir stepper driver with EN LOW,  inverted step signal (steps on LOW), otherwise as above
+#define GENERIC4 15 // step/dir stepper driver with EN HIGH, inverted step signal (steps on LOW), otherwise as above
+#define SERVO    16 // alias for SERVO1
+#define SERVO1   17 // step/dir servo   driver with EN LOW,  allows M0 bit pattern for LOW = native mode & goto HIGH = 2x,4x,8x,16x,32x,64x, or 128x *larger* steps
+#define SERVO2   18 // step/dir servo   driver with EN HIGH, otherwise as above
+#define DRIVER_MODEL_LAST 18
 
 // Minimum pulse width in nS
 #define A4988_PULSE_WIDTH   1000

@@ -161,12 +161,12 @@ void PresetTimerInterval(long iv, float TPSM, volatile uint32_t *nextRate, volat
 #define TGL(x,y) (x^=(1<<y))
 
 // We use standard #define's to do **fast** digitalWrite's to the step and dir pins for the Axis1/2 stepper drivers
-#define StepPinAxis1_HIGH SET(Axis1StepPORT, Axis1StepBit)
-#define StepPinAxis1_LOW CLR(Axis1StepPORT, Axis1StepBit)
-#define DirPinAxis1_HIGH SET(Axis1DirPORT, Axis1DirBit)
-#define DirPinAxis1_LOW CLR(Axis1DirPORT, Axis1DirBit)
+#define Axis1StepPinHIGH SET(Axis1StepPORT, Axis1StepBit)
+#define Axis1StepPinLOW CLR(Axis1StepPORT, Axis1StepBit)
+#define Axis1DirPinHIGH SET(Axis1DirPORT, Axis1DirBit)
+#define Axis1DirPinLOW CLR(Axis1DirPORT, Axis1DirBit)
 
-#define StepPinAxis2_HIGH SET(Axis2StepPORT, Axis2StepBit)
-#define StepPinAxis2_LOW CLR(Axis2StepPORT, Axis2StepBit)
-#define DirPinAxis2_HIGH SET(Axis2DirPORT, Axis2DirBit)
-#define DirPinAxis2_LOW CLR(Axis2DirPORT, Axis2DirBit)
+#define Axis2StepPinHIGH SET(Axis2StepPORT, Axis2StepBit)
+#define Axis2StepPinLOW CLR(Axis2StepPORT, Axis2StepBit)
+#define Axis2DirPinHIGH SET(Axis2DirPORT, Axis2DirBit)
+#define Axis2DirPinLOW CLR(Axis2DirPORT, Axis2DirBit)

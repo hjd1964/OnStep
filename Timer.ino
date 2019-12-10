@@ -242,7 +242,7 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
   if (slowAxis1Rep > 1) { slowAxis1Cnt++; if (slowAxis1Cnt%slowAxis1Rep != 0) goto done; }
 
 #if STEP_WAVE_FORM != DEDGE
-  StepPinAxis1_LOW;
+  Axis1StepPinReset;
 #endif
 
 #if STEP_WAVE_FORM == SQUARE
@@ -278,9 +278,9 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
     // set direction
     if (posAxis1 < (long)targetAxis1.part.m) dirAxis1=1; else dirAxis1=0;
     #if AXIS1_DRIVER_REVERSE == ON
-      if (defaultDirAxis1 == dirAxis1) DirPinAxis1_LOW; else DirPinAxis1_HIGH;
+      if (defaultDirAxis1 == dirAxis1) Axis1DirPinLOW; else Axis1DirPinHIGH;
     #else
-      if (defaultDirAxis1 == dirAxis1) DirPinAxis1_HIGH; else DirPinAxis1_LOW;
+      if (defaultDirAxis1 == dirAxis1) Axis1DirPinHIGH; else Axis1DirPinLOW;
     #endif
   
     // telescope moves WEST with the sky, blAxis1 is the amount of EAST backlash
@@ -295,7 +295,7 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
     }
     clearAxis1=false;
   } else { 
-    if (takeStepAxis1) StepPinAxis1_HIGH;
+    if (takeStepAxis1) Axis1StepPinStep;
     clearAxis1=true;
 
     QuickSetIntervalAxis1(nextAxis1Rate*stepAxis1);
@@ -303,9 +303,9 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
 #else
 #if STEP_WAVE_FORM == DEDGE
     toggleStateAxis1++;
-    if (toggleStateAxis1%2 == 0) StepPinAxis1_LOW; else StepPinAxis1_HIGH;
+    if (toggleStateAxis1%2 == 0) Axis1StepPinReset; else Axis1StepPinStep;
 #else
-    StepPinAxis1_HIGH;
+    Axis1StepPinStep;
 #endif
   }
 #endif
@@ -325,7 +325,7 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
   if (slowAxis2Rep > 1) { slowAxis2Cnt++; if (slowAxis2Cnt%slowAxis2Rep != 0) goto done; }
 
 #if STEP_WAVE_FORM != DEDGE
-  StepPinAxis2_LOW;
+  Axis2StepPinReset;
 #endif
 
 #if STEP_WAVE_FORM == SQUARE
@@ -361,9 +361,9 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
     // set direction
     if (posAxis2 < (long)targetAxis2.part.m) dirAxis2=1; else dirAxis2=0;
     #if AXIS2_DRIVER_REVERSE == ON
-      if (defaultDirAxis2 == dirAxis2) DirPinAxis2_LOW; else DirPinAxis2_HIGH;
+      if (defaultDirAxis2 == dirAxis2) Axis2DirPinLOW; else Axis2DirPinHIGH;
     #else
-      if (defaultDirAxis2 == dirAxis2) DirPinAxis2_HIGH; else DirPinAxis2_LOW;
+      if (defaultDirAxis2 == dirAxis2) Axis2DirPinHIGH; else Axis2DirPinLOW;
     #endif
    
     // telescope moving toward celestial pole in the sky, blAxis2 is the amount of opposite backlash
@@ -378,7 +378,7 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
     }
     clearAxis2=false;
   } else { 
-    if (takeStepAxis2) StepPinAxis2_HIGH;
+    if (takeStepAxis2) Axis2StepPinStep;
     clearAxis2=true;
 
     QuickSetIntervalAxis2(nextAxis2Rate*stepAxis2);
@@ -386,9 +386,9 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
 #else
 #if STEP_WAVE_FORM == DEDGE
     toggleStateAxis2++;
-    if (toggleStateAxis2%2 == 0) StepPinAxis2_LOW; else StepPinAxis2_HIGH;
+    if (toggleStateAxis2%2 == 0) Axis2StepPinReset; else Axis2StepPinStep;
 #else
-    StepPinAxis2_HIGH;
+    Axis2StepPinStep;
 #endif
   }
 #endif

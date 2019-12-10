@@ -215,12 +215,12 @@ void QuickSetIntervalAxis2(uint32_t r) {
 #define TGL(x,y) (x^=(1<<y))
 
 // We use standard #define's to do **fast** digitalWrite's to the step and dir pins for the Axis1/2 stepper drivers
-#define StepPinAxis1_HIGH digitalWriteFast(Axis1StepPin, HIGH)
-#define StepPinAxis1_LOW digitalWriteFast(Axis1StepPin, LOW)
-#define DirPinAxis1_HIGH digitalWriteFast(Axis1DirPin, HIGH)
-#define DirPinAxis1_LOW digitalWriteFast(Axis1DirPin, LOW)
+#define Axis1StepPinHIGH digitalWriteFast(Axis1StepPin, HIGH)
+#define Axis1StepPinLOW digitalWriteFast(Axis1StepPin, LOW)
+#define Axis1DirPinHIGH digitalWriteFast(Axis1DirPin, HIGH)
+#define Axis1DirPinLOW digitalWriteFast(Axis1DirPin, LOW)
 
-#define StepPinAxis2_HIGH digitalWriteFast(Axis2StepPin, HIGH)
-#define StepPinAxis2_LOW digitalWriteFast(Axis2StepPin, LOW)
-#define DirPinAxis2_HIGH digitalWriteFast(Axis2DirPin, HIGH)
-#define DirPinAxis2_LOW digitalWriteFast(Axis2DirPin, LOW)
+#define Axis2StepPinHIGH digitalWriteFast(Axis2StepPin, HIGH)
+#define Axis2StepPinLOW digitalWriteFast(Axis2StepPin, LOW)
+#define Axis2DirPinHIGH digitalWriteFast(Axis2DirPin, HIGH)
+#define Axis2DirPinLOW digitalWriteFast(Axis2DirPin, LOW)
