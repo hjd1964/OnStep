@@ -30,8 +30,7 @@ CommandErrors setPark() {
 // moves the telescope to the park position
 CommandErrors park() {
   if (!parkSaved)                       return CE_NO_PARK_POSITION_SET;
-  if (parkStatus == Parked)             return CE_NONE;
-  if (parkStatus == Parking)            return CE_NONE;
+  if (parkStatus == Parked)             return CE_PARKED;
   if (!axis1Enabled)                    return CE_SLEW_ERR_IN_STANDBY;
   if (isSlewing())                      return CE_MOUNT_IN_MOTION;
   if (faultAxis1 || faultAxis2)         return CE_SLEW_ERR_HARDWARE_FAULT;
