@@ -1203,7 +1203,10 @@ void processCommands() {
       } else
 // :Mgd[n]#   Pulse guide command where n is the guide time in milliseconds
 //            Returns: Nothing
-      if (command[1] == 'g') {
+// :MGd[n]#   Pulse guide command where n is the guide time in milliseconds
+//            Return: 0 on failure
+//                    1 on success
+      if (command[1] == 'g' || command[1] == 'G') {
         if (atoi2((char *)&parameter[1],&i)) {
           if (i >= 0 && i <= 16399) {
             if ((parameter[0] == 'e' || parameter[0] == 'w') && guideDirAxis1 == 0) {
@@ -1212,7 +1215,7 @@ void processCommands() {
 #else
               commandError=startGuideAxis1(parameter[0],currentGuideRate,i);
 #endif
-              booleanReply=false;
+              if (command[1] == 'g') booleanReply=false;
             } else
             if ((parameter[0] == 'n' || parameter[0] == 's') && guideDirAxis2 == 0) { 
 #if SEPARATE_PULSE_GUIDE_RATE == ON
@@ -1220,7 +1223,7 @@ void processCommands() {
 #else
               commandError=startGuideAxis2(parameter[0],currentGuideRate,i);
 #endif
-              booleanReply=false;
+              if (command[1] == 'g') booleanReply=false;
             } else commandError=CE_CMD_UNKNOWN;
           } else commandError=CE_PARAM_RANGE;
         } else commandError=CE_PARAM_FORM;
