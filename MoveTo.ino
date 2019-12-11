@@ -268,11 +268,12 @@ void moveTo() {
           trackingState=lastTrackingState; lastTrackingState=TrackingNone;
           SiderealClockSetInterval(siderealInterval);
 
-          setHome();
-          homeMount=false; 
+//          setHome();
+          // at the polar home position
+          homeMount=false;
           atHome=true;
 
-          disableStepperDrivers();
+//          disableStepperDrivers();
         } else {
           // restore trackingState
           trackingState=lastTrackingState; lastTrackingState=TrackingNone;

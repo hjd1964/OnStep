@@ -30,7 +30,9 @@ void checkHome() {
   // we are finishing off the find home
   if (findHomeMode == FH_DONE && guideDirAxis1 == 0 && guideDirAxis2 == 0) {
     findHomeMode=FH_OFF;
-    setHome();
+    // at the polar home position
+    InitStartPosition();
+    atHome=true;
   }
 }
 
@@ -70,10 +72,11 @@ CommandErrors goHome(boolean fast) {
   
   // start guides
   if (fast) {
-    setHome();
+    //setHome();
 
-    // make sure tracking is enabled
-    trackingState=TrackingSidereal;
+    // make sure tracking is disabled
+    trackingState=TrackingNone;
+    // make sure motors are powered on
     enableStepperDrivers();
 
     findHomeMode=FH_FAST;
