@@ -23,8 +23,8 @@ class focuserDC : public focuser  {
     
       spos=readPos();
       // constrain step position
-      long lmin=(long)(min*spm); if (spos<lmin) { spos=lmin; target.part.m=spos; target.part.f=0; }
-      long lmax=(long)(max*spm); if (spos>lmax) { spos=lmax; target.part.m=spos; target.part.f=0; }
+      long lmin=(long)(min*spm); if (spos < lmin) spos=lmin;
+      long lmax=(long)(max*spm); if (spos > lmax) spos=lmax;
       target.part.m=spos; target.part.f=0;
       lastPos=spos;
       delta.fixed=0;
