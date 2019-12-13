@@ -348,13 +348,15 @@ class Encoders {
 #endif
 
         mountStatus.update();
-        if (mountStatus.valid()) {
-          if (mountStatus.atHome() || mountStatus.parked()) syncFromOnStep();
-          if (!mountStatus.slewing() && !mountStatus.guiding() && encAutoSync) {
-            if ((fabs(_osAxis1-_enAxis1)>(double)(Axis1EncDiffLimit/3600.0)) ||
-                (fabs(_osAxis2-_enAxis2)>(double)(Axis2EncDiffLimit/3600.0))) syncToOnStep();
-          }
-      }
+        if (encAutoSync && mountStatus.valid()) {
+          if (mountStatus.atHome() || mountStatus.parked() || mountStatus.aligning())
+            syncFromOnStep();
+          else
+            if (!mountStatus.slewing() && !mountStatus.guiding()) {
+              if ((fabs(_osAxis1-_enAxis1)>(double)(Axis1EncDiffLimit/3600.0)) ||
+                  (fabs(_osAxis2-_enAxis2)>(double)(Axis2EncDiffLimit/3600.0))) syncToOnStep();
+            }
+        }
 
         // automatic rate compensation
 #if AXIS1_ENC_RATE_CONTROL == ON

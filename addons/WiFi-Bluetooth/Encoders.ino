@@ -322,7 +322,7 @@ void handleEncoders() {
 
   sendHtml(data);
 
-  data += "<br /><canvas id='myCanvas' width='600' height='300' style='margin-left: 8px; border:2px solid #999999;'></canvas>";
+  data += "<br /><canvas id='myCanvas' width='600' height='300' style='margin-left: -2px; border:2px solid #999999;'></canvas>";
   data += "&nbsp; Center: OnStep rate, Blue: STA (range &#xb1;0.1), Green: LTA (range &#xb1;0.01)<br />";
 
   data += FPSTR(html_encSweepEn1);
