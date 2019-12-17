@@ -66,9 +66,9 @@ class rtcw {
 
     // initialize (also enables the RTC PPS if available)
     bool init() {
+      HAL_Wire.begin();
       HAL_Wire.beginTransmission(0x68);
-      bool error = HAL_Wire.endTransmission();
-
+      bool error = HAL_Wire.endTransmission() != 0;
       if (!error) {
         _Rtc.Begin();
         if (!_Rtc.GetIsRunning()) _Rtc.SetIsRunning(true);
