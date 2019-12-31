@@ -293,7 +293,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
 
     // Declination
     cat_mgr.decDMS(vd1,vd2, vd3);
-    sprintf(line,"%s%02d\xb0%02d'%02d",vd1 < 0 ? "-" : "+",abs(vd1),vd2,vd3);
+    sprintf(line,"%+02d\xb0%02d'%02d",vd1,vd2,vd3);
     y += line_height;
     x = u8g2_DrawUTF8(u8g2, 0, y, "DE"); u8g2_SetFont(u8g2, u8g2_font_6x13_tf); u8g2_DrawUTF8(u8g2, x, y, epoch); u8g2_SetFont(u8g2, myfont);
     ext_DrawFwNumeric(u8g2, dx-ext_GetFwNumericWidth(u8g2, line), y, line);
