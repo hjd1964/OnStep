@@ -16,7 +16,7 @@
 #define B_PIN_UP_5 true
 #define B_PIN_UP_6 true
 
-// The hand controller buttons
+// The hand controller buttons, etc.
 #ifdef  __ARM_Teensy3__ 
   #define B_PIN0 21   // Shift
   #define B_PIN1 15   // N
@@ -39,6 +39,8 @@
   #endif
 
   #define UTILITY_LIGHT_PIN  10    // Pin10 used as PWM output to drive utility lamp LED
+
+  #define DISPLAY_RESET_PIN  14    // Pin14 used to reset some displays, i.e. the SSD1309
 #endif
 
 #ifdef ESP32
@@ -66,6 +68,8 @@
   #endif
 
   #define UTILITY_LIGHT_PIN  13    // GPIO13 used as PWM output to drive utility lamp LED
+
+  #define DISPLAY_RESET_PIN  23    // GPIO23 used to reset some displays, i.e. the SSD1309
 #endif
 
 #include "St4SerialSlave.h"
