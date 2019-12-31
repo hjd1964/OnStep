@@ -17,19 +17,9 @@ class tmcSpiDriver {
     // decay mode:           decay_mode (STEALTHCHOP or SPREADCYCLE)
     // microstepping mode:   micro_step_mode (0=256x, 1=128x, 2=64x, 3=32x, 4=16x, 5=8x, 6=4x, 7=2x, 8=1x)
     // irun, ihold, rsense:  current in mA and sense resistor value
-    void setup(bool intpol, int decay_mode, byte micro_step_mode, int irun, int ihold, float rsense) {
+    void setup(bool intpol, int decay_mode, byte micro_step_mode, int irun, int ihold, float rsense, int driver_model) {
       BBSpi.begin(_cs,_sck,_miso,_mosi);
       uint32_t data_out=0;
-
-      // voltage on AIN is current reference
-      data_out=0x00000001UL;
-      // set stealthChop bit
-      if (decay_mode == STEALTHCHOP) data_out |= 0x00000004UL;
-      if (last_GCONF != data_out) {
-        last_GCONF=data_out;
-        write(REG_GCONF,data_out);
-        BBSpi.pause();
-      }
 
       // *** My notes are limited, see the TMC2130 datasheet for more info. ***
     
@@ -78,24 +68,53 @@ class tmcSpiDriver {
       }
 
       // PWMCONF
-      // default=0x00050480UL;
-      data_out    =(_pc_PWM_AMPL<<0)+(_pc_PWM_GRAD<<8)+(_pc_pwm_freq<<16)+(_pc_pwm_auto<<18)+(_pc_pwm_sym<<19)+(_pc_pwm_freewheel<<20);
-      if (last_PWMCONF != data_out) {
-        last_PWMCONF = data_out;
-        write(REG_PWMCONF,data_out);
-        BBSpi.pause();
+      if (driver_model == TMC2130) {
+        // default=0x00050480UL
+        data_out = (_pc_PWM_AMPL<<0)+(_pc_PWM_GRAD<<8)+(_pc_pwm_freq<<16)+(_pc_pwm_auto<<18)+(_pc_pwm_sym<<19)+(_pc_pwm_freewheel<<20);
+        if (last_PWMCONF != data_out) {
+          last_PWMCONF = data_out;
+          write(REG_PWMCONF,data_out);
+          BBSpi.pause();
+        }
+      } else
+      if (driver_model == TMC5160) {
+        // default=0xC40C001EUL
+        data_out = (_pc_PWM_OFS<<0)+(_pc_PWM_GRAD<<8)+(_pc_pwm_freq<<16)+(_pc_pwm_auto<<18)+(_pc_pwm_autograd<<19)+(_pc_pwm_freewheel<<20)+(_pc_PWM_REG<<24)+(_pc_PWM_LIM<<28);
+        if (last_PWMCONF != data_out) {
+          last_PWMCONF = data_out;
+          write(REG_PWMCONF,data_out);
+          BBSpi.pause();
+        }
       }
 
       // CHOPCONF
-      // native 256 microsteps, mres=0, tbl=1=24, toff=8 ( data_out=0x00008008UL; )
-      data_out=(_cc_toff<<0)+(_cc_hstart<<4)+(_cc_hend<<7)+(_cc_rndtf<<13)+(_cc_tbl<<15)+(_cc_vsense<<17)+(_cc_vhighfs<<18)+(_cc_vhighchm<<19);
-      // set the interpolation bit
-      if (intpol) data_out |= 1UL<<28;
-      // set the micro-step mode bits
-      data_out |= ((uint32_t)micro_step_mode)<<24;
-      write(REG_CHOPCONF,data_out);
+      if (driver_model == TMC2130) {
+        // default=0x00008008UL
+        data_out=(_cc_toff<<0)+(_cc_hstart<<4)+(_cc_hend<<7)+(_cc_rndtf<<13)+(_cc_tbl<<15)+(_cc_vsense<<17)+(_cc_vhighfs<<18)+(_cc_vhighchm<<19)+(((uint32_t)micro_step_mode)<<24);
+        if (intpol) data_out |= 1UL<<28; // set the interpolation bit
+        write(REG_CHOPCONF,data_out);
+        BBSpi.pause();
+      } else
+      if (driver_model == TMC5160) {
+        // default=0x10410150UL
+        data_out=(_cc_toff<<0)+(_cc_hstart<<4)+(_cc_hend<<7)+(_cc_tbl<<15)+(_cc_vhighfs<<18)+(_cc_vhighchm<<19)+(_cc_tpfd<<20)+(((uint32_t)micro_step_mode)<<24);
+        if (intpol) data_out |= 1UL<<28; // set the interpolation bit
+        write(REG_CHOPCONF,data_out);
+        BBSpi.pause();
+      }
+
+      // GCONF
+      // voltage on AIN is current reference
+      data_out=0x00000001UL;
+      // set stealthChop bit
+      if (decay_mode == STEALTHCHOP) data_out |= 0x00000004UL;
+      if (last_GCONF != data_out) {
+        last_GCONF=data_out;
+        write(REG_GCONF,data_out);
+      }
 
       BBSpi.end();
+
     }
 
     bool error() {
@@ -120,6 +139,8 @@ class tmcSpiDriver {
     bool set_CHOPCONF_vsense(int v)   { if ((v >= 0) && (v <= 1))  { _cc_vsense  = v; return true; } return false; }
     bool set_CHOPCONF_vhighfs(int v)  { if ((v >= 0) && (v <= 1))  { _cc_vhighfs = v; return true; } return false; }
     bool set_CHOPCONF_vhighchm(int v) { if ((v >= 0) && (v <= 1))  { _cc_vhighchm= v; return true; } return false; }
+    // TMC5160 specific
+    bool set_CHOPCONF_tpfd(int v)     { if ((v >= 0) && (v <= 15)) { _cc_tpfd    = v; return true; } return false; }
 
 // -------------------------------
 // TPOWERDOWN setting
@@ -136,12 +157,18 @@ class tmcSpiDriver {
 // -------------------------------
 // PWMCONF settings
 
-    bool set_PWMCONF_PWM_AMPL(int v) { if ((v >= 0) && (v <= 255))    { _pc_PWM_AMPL     = v; return true; } return false; }
     bool set_PWMCONF_PWM_GRAD(int v) { if ((v >= 0) && (v <= 255))    { _pc_PWM_GRAD     = v; return true; } return false; }
     bool set_PWMCONF_pwm_freq(int v) { if ((v >= 0) && (v <= 3))      { _pc_pwm_freq     = v; return true; } return false; }
     bool set_PWMCONF_pwm_auto(int v) { if ((v >= 0) && (v <= 1))      { _pc_pwm_auto     = v; return true; } return false; }
-    bool set_PWMCONF_pwm_sym(int v)  { if ((v >= 0) && (v <= 1))      { _pc_pwm_sym      = v; return true; } return false; }
     bool set_PWMCONF_pwm_freewheel(int v) { if ((v >= 0) && (v <= 1)) { _pc_pwm_freewheel= v; return true; } return false; }
+    // TMC2130 specific
+    bool set_PWMCONF_PWM_AMPL(int v) { if ((v >= 0) && (v <= 255))    { _pc_PWM_AMPL     = v; return true; } return false; }
+    bool set_PWMCONF_pwm_sym(int v)  { if ((v >= 0) && (v <= 1))      { _pc_pwm_sym      = v; return true; } return false; }
+    // TMC5160/5161 specific
+    bool set_PWMCONF_PWM_OFS(int v)      { if ((v >= 0) && (v <= 255)){ _pc_PWM_OFS      = v; return true; } return false; }
+    bool set_PWMCONF_pwm_autograd(int v) { if ((v >= 0) && (v <= 1))  { _pc_pwm_autograd = v; return true; } return false; }
+    bool set_PWMCONF_PWM_REG(int v)      { if ((v >= 0) && (v <= 15)) { _pc_PWM_REG      = v; return true; } return false; }
+    bool set_PWMCONF_PWM_LIM(int v)      { if ((v >= 0) && (v <= 15)) { _pc_PWM_LIM      = v; return true; } return false; }
     
 // ----------------------------------------------------------------------------------------------------------------------
 // DRVSTATUS
@@ -252,31 +279,39 @@ class tmcSpiDriver {
     unsigned long last_PWMCONF    = 0;
 
 // CHOPCONF settings
-    unsigned long _cc_toff      = 4UL; // default=4,  range 2 to 15 (Off time setting, slow decay phase)
-    unsigned long _cc_hstart    = 0UL; // default=0,  range 0 to 7  (Hysteresis start 1, 2, ..., 8)
-    unsigned long _cc_hend      = 0UL; // default=0,  range 0 to 15 (Hysteresis -3, -2, -1, 0, 1 ..., 12)
-    unsigned long _cc_rndtf     = 0UL; // default=0,  range 0 to 1  (Enables small random value to be added to TOFF)
-    unsigned long _cc_tbl       = 1UL; // default=1,  range 0 to 3  (for 6, 24, 36 or 54 clocks)
-    unsigned long _cc_vsense    = 0UL; // default=0,  range 0 to 1  (0 for high sensitivity, 1 for low sensitivity @ 50% current setting)
-    unsigned long _cc_vhighfs   = 0UL; // default=0,  range 0 to 1  (Enables switch to full-step when VHIGH (THIGH?) is exceeded)
-    unsigned long _cc_vhighchm  = 0UL; // default=0,  range 0 to 1  (Enables switch to fast-decay mode VHIGH (THIGH?) is exceeded)
+    unsigned long _cc_toff      = 4UL; // default=4,   range 2 to 15 (Off time setting, slow decay phase)
+    unsigned long _cc_hstart    = 0UL; // default=0,   range 0 to 7  (Hysteresis start 1, 2, ..., 8)
+    unsigned long _cc_hend      = 0UL; // default=0,   range 0 to 15 (Hysteresis -3, -2, -1, 0, 1 ..., 12)
+    unsigned long _cc_rndtf     = 0UL; // default=0,   range 0 to 1  (Enables small random value to be added to TOFF)
+    unsigned long _cc_tbl       = 1UL; // default=1,   range 0 to 3  (for 6, 24, 36 or 54 clocks)
+    unsigned long _cc_vsense    = 0UL; // default=0,   range 0 to 1  (0 for high sensitivity, 1 for low sensitivity @ 50% current setting)
+    unsigned long _cc_vhighfs   = 0UL; // default=0,   range 0 to 1  (Enables switch to full-step when VHIGH (THIGH?) is exceeded)
+    unsigned long _cc_vhighchm  = 0UL; // default=0,   range 0 to 1  (Enables switch to fast-decay mode VHIGH (THIGH?) is exceeded)
+    // TMC5160 specific
+    unsigned long _cc_tpfd      = 4UL; // default=4,   range 0 to 15 (Passive fast decay time mid-range resonance dampening)
 
 // TPOWERDOWN settings
-    unsigned long _tpd_value    = 128; // default=127,range 0 to 255 (Delay after standstill for motor current power down, about 0 to 4 seconds)
+    unsigned long _tpd_value    = 128; // default=127, range 0 to 255  (Delay after standstill for motor current power down, about 0 to 4 seconds)
 
 // TPWMTHRS settings
-    unsigned long _tpt_value      = 0; // default=0,  range 0 to 2^20 (Switchover upper velocity for stealthChop voltage PWM mode)
+    unsigned long _tpt_value    = 0;   // default=0,   range 0 to 2^20 (Switchover upper velocity for stealthChop voltage PWM mode)
 
 // THIGH settings
-    unsigned long _thigh_value    = 0; // default=0,  range 0 to 2^20 (Switchover rate for vhighfs/vhighchm)
+    unsigned long _thigh_value  = 0;   // default=0,   range 0 to 2^20 (Switchover rate for vhighfs/vhighchm)
 
 // PWMCONF settings
-    unsigned long _pc_PWM_AMPL    = 0; // default=0,  range 0 to 255 (PWM amplitude or switch back amplitude if pwm_auto=1)
-    unsigned long _pc_PWM_GRAD    = 0; // default=0,  range 0 to 255 (PWM gradient)
-    unsigned long _pc_pwm_freq    = 0; // default=0,  range 0 to 3   (PWM frequency 0: fpwm=2/1024 fclk, 1: fpwm=2/683 fclk, 2: fpwm=2/512 fclk, 3: fpwm=2/410 fclk)
-    unsigned long _pc_pwm_auto    = 0; // default=0,  range 0 to 1   (PWM automatic current control)
-    unsigned long _pc_pwm_sym     = 0; // default=0,  range 0 to 1   (PWM symmetric 0: value may change during cycle, 1: enforce)
-    unsigned long _pc_pwm_freewheel=0; // default=0,  range 0 to 1   (PWM freewheel 0: normal, 1: freewheel, 2:LS short, 3: HS short)
+    unsigned long _pc_PWM_GRAD = 0x04; // default=4,   range 0 to 14  (PWM gradient scale using automatic current control)
+    unsigned long _pc_pwm_freq = 0x01; // default=1,   range 0 to 3   (PWM frequency 0: fpwm=2/1024 fclk, 1: fpwm=2/683 fclk, 2: fpwm=2/512 fclk, 3: fpwm=2/410 fclk)
+    unsigned long _pc_pwm_auto = 0x01; // default=1,   range 0 to 1   (PWM automatic current control 0: off, 1: on)
+    unsigned long _pc_pwm_freewheel=0x00; //default=0, range 0 to 1   (PWM freewheel 0: normal, 1: freewheel, 2:LS short, 3: HS short)
+    // TMC2130 specific
+    unsigned long _pc_PWM_AMPL = 0x80; // default=128, range 0 to 255 (PWM amplitude or switch back amplitude if pwm_auto=1)
+    unsigned long _pc_pwm_sym  = 0x00; // default=0,   range 0 to 1   (PWM symmetric 0: value may change during cycle, 1: enforce; 0: disable autograd on TMC5160/5161)
+    // TMC5160 specific
+    unsigned long _pc_PWM_OFS  = 0x1e; // default=30,  range 0 to 255 (PWM user defined amplitude offset related to full motor current)
+    unsigned long _pc_pwm_autograd= 0x00; //default=0, range 0 to 1   (PWM automatic grad control 0: off, 1: on)
+    unsigned long _pc_PWM_REG  = 0x04; // default=4,   range 0 to 15  (PWM maximum amplitude change per half-wave when using pwm autoscale)
+    unsigned long _pc_PWM_LIM  = 0x0c; // default=12,  range 0 to 15  (PWM limit for PWM_SCALE_AUTO when switching back from spreadCycle to stealthChop)
 
 // DRVSTATUS settings
     int _sg_result = 0;

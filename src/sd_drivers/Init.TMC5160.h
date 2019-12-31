@@ -16,6 +16,7 @@
 #if AXIS1_DRIVER_MODEL == TMC5160
   #undef AXIS1_DRIVER_MODEL
   #define AXIS1_DRIVER_MODEL TMC_SPI
+  #define AXIS1_DRIVER_SUBMODEL TMC5160
   #if AXIS1_DRIVER_IRUN == OFF
     #warning "Configuration (Config.h): AXIS1_DRIVER_IRUN current isn't specified, falling back to 600 (mA.)"
     #undef AXIS1_DRIVER_IRUN
@@ -42,6 +43,7 @@
 #if AXIS2_DRIVER_MODEL == TMC5160
   #undef AXIS2_DRIVER_MODEL
   #define AXIS2_DRIVER_MODEL TMC_SPI
+  #define AXIS2_DRIVER_SUBMODEL TMC5160
   #if AXIS2_DRIVER_IRUN == OFF
     #warning "Configuration (Config.h): AXIS2_DRIVER_IRUN current isn't specified, falling back to 600 (mA.)"
     #undef AXIS2_DRIVER_IRUN
@@ -67,6 +69,7 @@
   #if AXIS3_DRIVER_MODEL == TMC5160
     #undef AXIS3_DRIVER_MODEL
     #define AXIS3_DRIVER_MODEL TMC_SPI
+    #define AXIS3_DRIVER_SUBMODEL TMC5160
     #if AXIS3_DRIVER_IRUN == OFF
       #warning "Configuration (Config.h): AXIS3_DRIVER_IRUN current isn't specified, falling back to 200 (mA.)"
       #undef AXIS3_DRIVER_IRUN
@@ -93,6 +96,7 @@
   #if AXIS4_DRIVER_MODEL == TMC5160
     #undef AXIS4_DRIVER_MODEL
     #define AXIS4_DRIVER_MODEL TMC_SPI
+    #define AXIS4_DRIVER_SUBMODEL TMC5160
     #ifndef AXIS4_DRIVER_IRUN
       #warning "Configuration (Config.h): AXIS4_DRIVER_IRUN current isn't specified, falling back to 200 (mA.)"
       #undef AXIS5_DRIVER_IRUN
@@ -119,6 +123,7 @@
   #if AXIS5_DRIVER_MODEL == TMC5160
     #undef AXIS5_DRIVER_MODEL
     #define AXIS5_DRIVER_MODEL TMC_SPI
+    #define AXIS5_DRIVER_SUBMODEL TMC5160
     #if AXIS5_DRIVER_IRUN == OFF
       #warning "Configuration (Config.h): AXIS5_DRIVER_IRUN current isn't specified, falling back to 200 (mA.)"
       #undef AXIS5_DRIVER_IRUN

@@ -69,6 +69,9 @@
 #ifndef AXIS1_DRIVER_IGOTO
   #define AXIS1_DRIVER_IGOTO OFF
 #endif
+#ifndef AXIS1_DRIVER_PWM_GRAD
+  #define AXIS1_DRIVER_PWM_GRAD OFF
+#endif
 #ifndef AXIS1_DRIVER_FS_VHIGH
   #define AXIS1_DRIVER_FS_VHIGH OFF
 #endif
@@ -98,6 +101,9 @@
 #endif
 #ifndef AXIS2_DRIVER_IGOTO
   #define AXIS2_DRIVER_IGOTO OFF
+#endif
+#ifndef AXIS2_DRIVER_PWM_GRAD
+  #define AXIS2_DRIVER_PWM_GRAD OFF
 #endif
 #ifndef AXIS2_DRIVER_FS_VHIGH
   #define AXIS2_DRIVER_FS_VHIGH OFF
