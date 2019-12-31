@@ -15,6 +15,7 @@
 //      Parameter Name              Value   Default  Notes                                                                      Hint
 // DISPLAY -------------------------------------------------------------------------------------------------------------------------
 #define OLED_DISPLAY               SH1106 // SH1106, OLED 1.3" I2C display commonly used. SSD1306 is a 0.96" OLED display.    Infreq
+                                          //         SSD1309 is a 2.3" I2C display (w/Reset on ESP32 Pin23 or Teensy Pin14.)
 
 // SERIAL PORTS --------------------------------------------------------------------------------------------------------------------
 #define SERIAL_INTERFACE        SerialST4 // Se..T4, SerialST4 for ST4 port sync comms, you can also use any other available  Infreq
