@@ -7,6 +7,7 @@
 
 #define SH1106 0
 #define SSD1306 1
+#define SSD1309 2
 
 // coordinate mode for getting and setting RA/Dec
 #define OBSERVED_PLACE 1
@@ -28,7 +29,7 @@ enum MENU_RESULT { MR_OK, MR_CANCEL, MR_QUIT };
 class SmartHandController
 {
 public:
-  enum OLED { OLED_SH1106, OLED_SSD1306 };
+  enum OLED { OLED_SH1106, OLED_SSD1306, OLED_SSD1309 };
   int telescopeCoordinates=1;
 #if DISPLAY_24HR_TIME == ON
   boolean hrs24=true;
