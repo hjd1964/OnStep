@@ -31,7 +31,8 @@ MENU_RESULT SmartHandController::menuSyncGoto(bool sync)
       }
     }
     // add the normal filtering, solarsys, etc. items
-    strcat(string_list_gotoL1,"User>\nSolar System>\nFilters \xa5\nCoordinates\nHome");
+    strcat(string_list_gotoL1,"Solar System>\n");
+    if (sync) strcat(string_list_gotoL1,"Here>"); else strcat(string_list_gotoL1,"User>\nFilters \xa5\nCoordinates\nHome");
 
     int selection = display->UserInterfaceSelectionList(&buttonPad, sync ? "Sync" : "Goto", current_selection, string_list_gotoL1);
     if (selection == 0) return MR_CANCEL;
@@ -43,10 +44,15 @@ MENU_RESULT SmartHandController::menuSyncGoto(bool sync)
     } else
     switch (current_selection-catalog_index_count) {
       case 1:
-        if (menuUser(sync)==MR_QUIT) return MR_QUIT;
+        if (menuSolarSys(sync)==MR_QUIT) return MR_QUIT;
         break;
       case 2:
-        if (menuSolarSys(sync)==MR_QUIT) return MR_QUIT;
+        if (sync) {
+          bool isYes=true;
+          if (display->UserInterfaceInputValueBoolean(&buttonPad, "Here?", &isYes)) if (isYes) { DisplayMessageLX200(SetLX200(":CS#"),false); return MR_QUIT; }
+        } else {
+          if (menuUser(sync)==MR_QUIT) return MR_QUIT;
+        }
         break;
       case 3:
         menuFilters();

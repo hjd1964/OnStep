@@ -36,31 +36,28 @@ void SmartHandController::menuMain()
   current_selection_L0 = 1;
   while (current_selection_L0 != 0)
   {
-    boolean sync=false;
     if (!telInfo.isMountAltAz()) {
-      const char *string_list_main_UnParkedL0 = "Goto\n""Sync\n""Sync Here\n""Align\n""Parking\n""Tracking\n""PEC\n""Settings";
+      const char *string_list_main_UnParkedL0 = "Goto\n""Sync\n""Align\n""Parking\n""Tracking\n""PEC\n""Settings";
       current_selection_L0 = display->UserInterfaceSelectionList(&buttonPad, "Main Menu", current_selection_L0, string_list_main_UnParkedL0);
       switch (current_selection_L0) {
         case 1: if (menuSyncGoto(false)==MR_QUIT) return; break;
         case 2: if (menuSyncGoto(true)==MR_QUIT) return; break;
-        case 3: if (display->UserInterfaceInputValueBoolean(&buttonPad, "Sync Here?", &sync)) if (sync) DisplayMessageLX200(SetLX200(":CS#"),false); break;
-        case 4: menuAlignment(); break;
-        case 5: menuParking(); break;
-        case 6: menuTracking(); break;
-        case 7: menuPEC(); break;
-        case 8: menuSettings(); break;
+        case 3: menuAlignment(); break;
+        case 4: menuParking(); break;
+        case 5: menuTracking(); break;
+        case 6: menuPEC(); break;
+        case 7: menuSettings(); break;
       }
     } else {
-      const char *string_list_main_UnParkedL0 = "Goto\n""Sync\n""Sync Here\n""Align\n""Parking\n""Tracking\n""Settings";
+      const char *string_list_main_UnParkedL0 = "Goto\n""Sync\n""Align\n""Parking\n""Tracking\n""Settings";
       current_selection_L0 = display->UserInterfaceSelectionList(&buttonPad, "Main Menu", current_selection_L0, string_list_main_UnParkedL0);
       switch (current_selection_L0) {
         case 1: if (menuSyncGoto(false)==MR_QUIT) return; break;
         case 2: if (menuSyncGoto(true)==MR_QUIT) return; break;
-        case 3: if (display->UserInterfaceInputValueBoolean(&buttonPad, "Sync Here?", &sync)) if (sync) DisplayMessageLX200(SetLX200(":CS#"),false); break;
-        case 4: menuAlignment(); break;
-        case 5: menuParking(); break;
-        case 6: menuTracking(); break;
-        case 7: menuSettings(); break;
+        case 3: menuAlignment(); break;
+        case 4: menuParking(); break;
+        case 5: menuTracking(); break;
+        case 6: menuSettings(); break;
       }
     }
   }
