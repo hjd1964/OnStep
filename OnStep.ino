@@ -149,6 +149,9 @@ weather ambient;
 #endif
 
 void setup() {
+  // early pin initialization
+  initPre();
+  
   // take a half-second to let any connected devices come up before we start setting up pins
   delay(500);
 

@@ -18,6 +18,12 @@ void initGeneralError() {
   }
 }
 
+void initPre() {
+  // initialize and disable the main axes stepper drivers
+  pinMode(Axis1_EN,OUTPUT); digitalWrite(Axis1_EN,AXIS1_DRIVER_DISABLE);
+  pinMode(Axis2_EN,OUTPUT); digitalWrite(Axis1_EN,AXIS1_DRIVER_DISABLE);
+}
+
 void initStartupValues() {
   // Basic stepper driver mode setup
   // if we made through validation and AXIS1_DRIVER_MODEL exists; AXIS2_DRIVER_MODEL, AXIS1_DRIVER_MICROSTEPS,
@@ -257,10 +263,6 @@ void initPins() {
     pinMode(Axis2FaultPin,INPUT);
   #endif
 #endif
-
-  // initialize and disable the main axes stepper drivers
-  pinMode(Axis1_EN,OUTPUT); 
-  pinMode(Axis2_EN,OUTPUT);
 
   StepperModeTrackingInit();
 }
