@@ -30,9 +30,9 @@
 #define GENERIC3 14 // step/dir stepper driver with EN LOW,  inverted step signal (steps on LOW), otherwise as above
 #define GENERIC4 15 // step/dir stepper driver with EN HIGH, inverted step signal (steps on LOW), otherwise as above
 #define SERVO    16 // alias for SERVO1
-#define SERVO1   17 // step/dir servo   driver with EN LOW,  allows M0 bit pattern for LOW = native mode & goto HIGH = 2x,4x,8x,16x,32x,64x, or 128x *larger* steps
-#define SERVO2   18 // step/dir servo   driver with EN HIGH, otherwise as above
-#define DRIVER_MODEL_LAST 18
+#define SERVO1   16 // step/dir servo   driver with EN LOW,  allows M0 bit pattern for LOW = native mode & goto HIGH = 2x,4x,8x,16x,32x,64x, or 128x *larger* steps
+#define SERVO2   17 // step/dir servo   driver with EN HIGH, otherwise as above
+#define DRIVER_MODEL_LAST 17
 
 // Minimum pulse width in nS
 #define A4988_PULSE_WIDTH   1000
