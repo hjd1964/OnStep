@@ -41,6 +41,7 @@
 #define Axis1_M1             14     // Microstep Mode 1 or SPI SCK
 #define Axis1_M2             23     // Microstep Mode 2 or SPI CS
 #define Axis1_M3              4     // SPI MISO/Fault
+#define Axis1ModePin   Axis1_M2     // Decay mode
 #define Axis1StepPin         18     // Step
 #define Axis1DirPin           0     // Dir
 #define Axis1HomePin       Aux3     // Sense home position
@@ -51,6 +52,7 @@
 #define Axis2_M1             14     // Microstep Mode 1 or SPI SCK
 #define Axis2_M2              5     // Microstep Mode 2 or SPI CS
 #define Axis2_M3              4     // SPI MISO/Fault
+#define Axis2ModePin   Axis2_M2     // Decay mode
 #define Axis2StepPin         27     // Step
 #define Axis2DirPin          26     // Dir
 #define Axis2HomePin       Aux4     // Sense home position
