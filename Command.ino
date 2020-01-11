@@ -1442,10 +1442,8 @@ void processCommands() {
 //            Returns: sDDD*MM#
       if (command[1] == 'G' && parameter[0] == 0) {
         f1=rot.getPosition();
-        i=highPrecision; highPrecision=false;
-        doubleToDms(reply,&f1,true,true);
+        doubleToDms(reply,&f1,true,true,PM_LOW);
         booleanReply=false;
-        highPrecision=i;
       } else
 // :rc#       Set continuous move mode (for next move command)
 //            Returns: Nothing
@@ -1472,11 +1470,9 @@ void processCommands() {
 //            Returns: 0 on failure
 //                     1 on success
       if (command[1] == 'S') {
-        i=highPrecision; highPrecision=true;
         if (parameter[0] == '-') f=-1.0; else f=1.0;
         if (parameter[0] == '+' || parameter[0] == '-') i1=1; else i1=0;
-        if (dmsToDouble(&f1,&parameter[i1],true)) rot.setTarget(f*f1); else commandError=CE_PARAM_FORM;
-        highPrecision=i;
+        if (dmsToDouble(&f1,&parameter[i1],true,PM_HIGH)) rot.setTarget(f*f1); else commandError=CE_PARAM_FORM;
       } else commandError=CE_CMD_UNKNOWN;
      } else
 #endif
