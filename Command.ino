@@ -643,6 +643,7 @@ void processCommands() {
         if (trackingState != TrackingMoveTo && !trackingSyncInProgress())  reply[i++]='N';                   // [N]o goto
         const char *parkStatusCh = "pIPF";       reply[i++]=parkStatusCh[parkStatus];                        // not [p]arked, parking [I]n-progress, [P]arked, Park [F]ailed
         if (pecRecorded)                         reply[i++]='R';                                             // PEC data has been [R]ecorded
+        if (syncToEncodersOnly)                  reply[i++]='E';                                             // sync to [E]ncoders only
         if (atHome)                              reply[i++]='H';                                             // at [H]ome
         if (PPSsynced)                           reply[i++]='S';                                             // PPS [S]ync
         if (guideDirAxis1 || guideDirAxis2)      reply[i++]='G';                                             // [G]uide active
@@ -708,6 +709,7 @@ void processCommands() {
           if (abs(tr-60.136)<0.001)                  reply[1]|=0b10000011;                                   // King rate selected
         }
         
+        if (syncToEncodersOnly)                      reply[1]|=0b10000100;                                   // sync to encoders only
         if (atHome)                                  reply[2]|=0b10000001;                                   // At home
         if (waitingHome)                             reply[2]|=0b10000010;                                   // Waiting at home
         if (pauseHome)                               reply[2]|=0b10000100;                                   // Pause at home enabled?

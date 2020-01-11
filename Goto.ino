@@ -85,6 +85,7 @@ CommandErrors syncEqu(double RA, double Dec) {
 
   setIndexAxis1(Axis1,newPierSide);
   setIndexAxis2(Axis2,newPierSide);
+  syncToEncodersOnly=true;
 
   return CE_NONE;
 }
@@ -96,6 +97,9 @@ CommandErrors syncEnc(double EncAxis1, double EncAxis2) {
 
   // no sync from encoders during an alignment!
   if (alignActive()) return CE_NONE;
+  
+  // force syncing to encoders only
+  if (syncToEncodersOnly) return CE_NONE;
 
   long e1=EncAxis1*(double)AXIS1_STEPS_PER_DEGREE;
   long e2=EncAxis2*(double)AXIS2_STEPS_PER_DEGREE;
@@ -131,6 +135,8 @@ void getEnc(double *EncAxis1, double *EncAxis2) {
   
   *EncAxis1=(double)a1/(double)AXIS1_STEPS_PER_DEGREE;
   *EncAxis2=(double)a2/(double)AXIS2_STEPS_PER_DEGREE;
+  
+  syncToEncodersOnly=false;
 }
 
 // gets the telescopes current RA and Dec, set returnHA to true for Horizon Angle instead of RA

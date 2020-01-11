@@ -214,6 +214,8 @@ byte abortSlew                          = 0;
 volatile boolean safetyLimitsOn         = true;
 boolean axis1Enabled                    = false;
 boolean axis2Enabled                    = false;
+
+boolean syncToEncodersOnly              = false;
                                         
 #define MeridianFlipNever                 0
 #define MeridianFlipAlign                 1

@@ -49,6 +49,7 @@ class MountStatus {
       _pecReadyRec = strstr(s,";");
       _pecRecording= strstr(s,"^");
     
+      _toEncOnly   = strstr(s,"E");
       _atHome      = strstr(s,"H");
       _ppsSync     = strstr(s,"S");
       _guiding     = strstr(s,"G");
@@ -113,7 +114,7 @@ class MountStatus {
     bool getId(char id[]) { if (!_valid) return false; else { strcpy(id,_id); return true; } }
     bool getVer(char ver[]) { if (!_valid) return false; else { strcpy(ver,_ver); return true; } }
     bool valid() { return _valid; }
-    bool aligning() { char s[20]=""; if (command(":A?#",s) && strlen(s) == 3 && s[1] > s[2] ) return true; else return false; }
+    bool aligning() { char s[20]=""; if (command(":A?#",s) && strlen(s) == 3 && s[1] <= s[2] && s[1] != '0') return true; else return false; }
     bool tracking() { return _tracking; }
     bool slewing() { return _slewing; }
     bool parked() { return _parked; }
@@ -125,6 +126,7 @@ class MountStatus {
     bool pecReadyRec() { return _pecReadyRec; }
     bool pecRecorded() { return _pecRecorded; }
     bool pecRecording() { return _pecRecording; }
+    bool syncToEncodersOnly() { return _toEncOnly; }
     bool atHome() { return _atHome; }
     bool ppsSync() { return _ppsSync; }
     bool guiding() { return _guiding; }
@@ -191,6 +193,7 @@ class MountStatus {
     bool _pecReadyRec=false;
     bool _pecRecorded=false;
     bool _pecRecording=false;
+    bool _toEncOnly=false;
     bool _atHome=false;
     bool _ppsSync=false;
     bool _guiding=false;

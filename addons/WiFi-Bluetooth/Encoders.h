@@ -349,7 +349,7 @@ class Encoders {
 
         mountStatus.update();
         if (encAutoSync && mountStatus.valid()) {
-          if (mountStatus.atHome() || mountStatus.parked() || mountStatus.aligning())
+          if (mountStatus.atHome() || mountStatus.parked() || mountStatus.aligning() || mountStatus.syncToEncodersOnly())
             syncFromOnStep();
           else
             if (!mountStatus.slewing() && !mountStatus.guiding()) {

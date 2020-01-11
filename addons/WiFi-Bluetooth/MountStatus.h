@@ -49,6 +49,7 @@ class MountStatus {
       _pecReadyRec = strstr(s,";");
       _pecRecording= strstr(s,"^");
     
+      _toEncOnly   = strstr(s,"E");
       _atHome      = strstr(s,"H");
       _ppsSync     = strstr(s,"S");
       _guiding     = strstr(s,"G");
@@ -125,6 +126,7 @@ class MountStatus {
     bool pecReadyRec() { return _pecReadyRec; }
     bool pecRecorded() { return _pecRecorded; }
     bool pecRecording() { return _pecRecording; }
+    bool syncToEncodersOnly() { return _toEncOnly; }
     bool atHome() { return _atHome; }
     bool ppsSync() { return _ppsSync; }
     bool guiding() { return _guiding; }
@@ -191,6 +193,7 @@ class MountStatus {
     bool _pecReadyRec=false;
     bool _pecRecorded=false;
     bool _pecRecording=false;
+    bool _toEncOnly=false;
     bool _atHome=false;
     bool _ppsSync=false;
     bool _guiding=false;
