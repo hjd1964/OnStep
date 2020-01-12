@@ -1719,6 +1719,9 @@ void processCommands() {
             case '2': // sync encoder to last values
               if ( (parameter[3] == '1') && (parameter[4] == 0)) if (syncEnc(encoderAxis1,encoderAxis2)) commandError=CE_PARAM_RANGE;
               break;
+            case '3': // re-enable setting OnStep to Encoders after a Sync 
+              syncToEncodersOnly=false;
+              break;
             default: commandError=CE_CMD_UNKNOWN;
           }
         } else

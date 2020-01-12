@@ -135,8 +135,6 @@ void getEnc(double *EncAxis1, double *EncAxis2) {
   
   *EncAxis1=(double)a1/(double)AXIS1_STEPS_PER_DEGREE;
   *EncAxis2=(double)a2/(double)AXIS2_STEPS_PER_DEGREE;
-  
-  syncToEncodersOnly=false;
 }
 
 // gets the telescopes current RA and Dec, set returnHA to true for Horizon Angle instead of RA

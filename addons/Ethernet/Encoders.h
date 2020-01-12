@@ -349,9 +349,11 @@ class Encoders {
 
         mountStatus.update();
         if (encAutoSync && mountStatus.valid()) {
-          if (mountStatus.atHome() || mountStatus.parked() || mountStatus.aligning() || mountStatus.syncToEncodersOnly())
+          if (mountStatus.atHome() || mountStatus.parked() || mountStatus.aligning() || mountStatus.syncToEncodersOnly()) {
             syncFromOnStep();
-          else
+            // re-enable normal operation once we're updated here
+            if (mountStatus.syncToEncodersOnly()) { Ser.print(":SX43,1#"); Ser.readBytes(s,1); }
+          } else
             if (!mountStatus.slewing() && !mountStatus.guiding()) {
               if ((fabs(_osAxis1-_enAxis1)>(double)(Axis1EncDiffLimit/3600.0)) ||
                   (fabs(_osAxis2-_enAxis2)>(double)(Axis2EncDiffLimit/3600.0))) syncToOnStep();
