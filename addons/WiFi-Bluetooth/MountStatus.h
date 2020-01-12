@@ -49,7 +49,7 @@ class MountStatus {
       _pecReadyRec = strstr(s,";");
       _pecRecording= strstr(s,"^");
     
-      _toEncOnly   = strstr(s,"E");
+      _toEncOnly   = strstr(s,"e");
       _atHome      = strstr(s,"H");
       _ppsSync     = strstr(s,"S");
       _guiding     = strstr(s,"G");

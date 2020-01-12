@@ -643,7 +643,7 @@ void processCommands() {
         if (trackingState != TrackingMoveTo && !trackingSyncInProgress())  reply[i++]='N';                   // [N]o goto
         const char *parkStatusCh = "pIPF";       reply[i++]=parkStatusCh[parkStatus];                        // not [p]arked, parking [I]n-progress, [P]arked, Park [F]ailed
         if (pecRecorded)                         reply[i++]='R';                                             // PEC data has been [R]ecorded
-        if (syncToEncodersOnly)                  reply[i++]='E';                                             // sync to [E]ncoders only
+        if (syncToEncodersOnly)                  reply[i++]='e';                                             // sync to [e]ncoders only
         if (atHome)                              reply[i++]='H';                                             // at [H]ome
         if (PPSsynced)                           reply[i++]='S';                                             // PPS [S]ync
         if (guideDirAxis1 || guideDirAxis2)      reply[i++]='G';                                             // [G]uide active
