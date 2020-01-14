@@ -302,10 +302,15 @@ void initReadNvValues() {
   UT1=LMT+timeZone;
   updateLST(jd2last(JD,UT1,false));
 
-  // get the minutes past meridian east/west
+  // get the degrees past meridian east/west
 #if MOUNT_TYPE == GEM
-  degreesPastMeridianE=round(nv.read(EE_dpmE)-128); if (abs(degreesPastMeridianE) > 180) degreesPastMeridianE=15;
-  degreesPastMeridianW=round(nv.read(EE_dpmW)-128); if (abs(degreesPastMeridianW) > 180) degreesPastMeridianW=15;
+  int i=round(nv.read(EE_dpmE)-128);
+  if (i > 60) i=((i-90)*2)+60; else if (i < -60) i=((i+90)*2)-60;
+  degreesPastMeridianE=i;
+
+  i=round(nv.read(EE_dpmW)-128);
+  if (i > 60) i=((i-60)*2)+60; else if (i < -60) i=((i+60)*2)-60;
+  degreesPastMeridianW=i;
 #endif
   
   // get the min. and max altitude

@@ -148,7 +148,7 @@ void SmartHandController::menuMeridianE()
   {
     float angle = (float)strtol(&out[0], NULL, 10);
     angle = round((angle * 15.0) / 60.0);
-    if (display->UserInterfaceInputValueFloat(&buttonPad, "Meridn Limit E", "", &angle, -45, 45, 2, 0, " degree"))
+    if (display->UserInterfaceInputValueFloat(&buttonPad, "Meridn Limit E", "", &angle, -180, 180, 3, 0, " degree"))
     {
       angle = round((angle * 60.0) / 15.0);
       sprintf(out, ":SXE9,%+02d#", (int)angle);
@@ -164,7 +164,7 @@ void SmartHandController::menuMeridianW()
   {
     float angle = (float)strtol(&out[0], NULL, 10);
     angle = round((angle * 15.0) / 60.0);
-    if (display->UserInterfaceInputValueFloat(&buttonPad, "Meridn Limit W", "", &angle, -45, 45, 2, 0, " degree"))
+    if (display->UserInterfaceInputValueFloat(&buttonPad, "Meridn Limit W", "", &angle, -180, 180, 3, 0, " degree"))
     {
       angle = round((angle * 60.0) / 15.0);
       sprintf(out, ":SXEA,%+02d#", (int)angle);

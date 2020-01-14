@@ -1806,15 +1806,17 @@ void processCommands() {
           switch (parameter[1]) {
             case '9': // minutes past meridianE
               degreesPastMeridianE=(double)strtol(&parameter[3],NULL,10)/4.0;
-              if (degreesPastMeridianE > 180) degreesPastMeridianE=180;
-              if (degreesPastMeridianE < -180) degreesPastMeridianE=-180;
-              nv.write(EE_dpmE,round(degreesPastMeridianE+128));
+              if (abs(degreesPastMeridianE) <= 180) {
+                i=round(degreesPastMeridianE); if (degreesPastMeridianE > 60) i= 60+round((i-60)/2); else if (degreesPastMeridianE < -60) i=-60+round((i+60)/2);
+                nv.write(EE_dpmE,round(i+128));
+              } else commandError=CE_PARAM_RANGE;
               break;
             case 'A': // minutes past meridianW
               degreesPastMeridianW=(double)strtol(&parameter[3],NULL,10)/4.0;
-              if (degreesPastMeridianW > 180) degreesPastMeridianW=180;
-              if (degreesPastMeridianW < -180) degreesPastMeridianW=-180;
-              nv.write(EE_dpmW,round(degreesPastMeridianW+128));
+              if (abs(degreesPastMeridianW) <= 180) {
+                i=round(degreesPastMeridianW); if (degreesPastMeridianW > 60) i= 60+round((i-60)/2); else if (degreesPastMeridianW < -60) i=-60+round((i+60)/2);
+                nv.write(EE_dpmW,round(i+128));
+              } else commandError=CE_PARAM_RANGE;
               break;
             default: commandError=CE_CMD_UNKNOWN;
           }

@@ -43,16 +43,16 @@ const char html_configMaxAlt[] PROGMEM =
 "\r\n";
 const char html_configPastMerE[] PROGMEM =
 "<form method='get' action='/configuration.htm'>"
-" <input value='%d' type='number' name='el' min='-45' max='45'>"
+" <input value='%d' type='number' name='el' min='-180' max='180'>"
 "<button type='submit'>Upload</button>"
-" (Past Meridian when East of the pier, in degrees +/-45)"
+" (Past Meridian when East of the pier, in degrees +/- 180)"
 "</form>"
 "\r\n";
 const char html_configPastMerW[] PROGMEM =
 "<form method='get' action='/configuration.htm'>"
-" <input value='%d' type='number' name='wl' min='-45' max='45'>"
+" <input value='%d' type='number' name='wl' min='-180' max='180'>"
 "<button type='submit'>Upload</button>"
-" (Past Meridian when West of the pier, in degrees +/-45)"
+" (Past Meridian when West of the pier, in degrees +/- 180)"
 "</form>"
 "<br />\r\n";
 const char html_configLongDeg[] PROGMEM =
@@ -257,7 +257,7 @@ void processConfigurationGet() {
   // Meridian Limits
   v=server.arg("el");
   if (v!="") {
-    if (atoi2((char*)v.c_str(),&i) && (i >= -45 && i <= 45)) { 
+    if (atoi2((char*)v.c_str(),&i) && (i >= -180 && i <= 180)) { 
       i=round((i*60.0)/15.0);
       sprintf(temp,":SXE9,%d#",i);
       commandBool(temp);
@@ -265,7 +265,7 @@ void processConfigurationGet() {
   }
   v=server.arg("wl");
   if (v!="") {
-    if (atoi2((char*)v.c_str(),&i) && (i >= -45 && i <= 45)) { 
+    if (atoi2((char*)v.c_str(),&i) && (i >= -180 && i <= 180)) { 
       i=round((i*60.0)/15.0);
       sprintf(temp,":SXEA,%d#",i);
       commandBool(temp);
