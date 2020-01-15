@@ -402,7 +402,6 @@ void initWriteNvValues() {
   // EEPROM automatic initialization
   if (NV_INIT_KEY_RESET) nv.writeLong(EE_autoInitKey,0);
   if (nv.readLong(EE_autoInitKey) != NV_INIT_KEY) {
-    SerialA.print("NV (EEPROM) Invalid!#\r\nWriting NV signature.#\r\n");
     for (int i=0; i<200; i++) { 
       #ifdef HAL_SERIAL_TRANSMIT
         SerialA.transmit();
