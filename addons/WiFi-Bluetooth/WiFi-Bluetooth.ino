@@ -244,8 +244,8 @@ void setup(void){
 #ifndef DEBUG_ON
   long serial_baud = SERIAL_BAUD;
   Ser.begin(SERIAL_BAUD_DEFAULT); if (serialSwap) Ser.swap(); delay(2000);
+  byte tb=1;
 
-  byte tb=0;
 Again:
 #if LED_STATUS != OFF
   digitalWrite(LED_STATUS,LOW);
