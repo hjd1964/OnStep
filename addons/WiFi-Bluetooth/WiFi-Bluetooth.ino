@@ -36,8 +36,8 @@
 #define FirmwareDate          __DATE__
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
-#define FirmwareVersionMinor  "11"
-#define FirmwareVersionPatch  "l"
+#define FirmwareVersionMinor  "12"
+#define FirmwareVersionPatch  "a"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
@@ -69,6 +69,7 @@
   #define TIMEOUT_WEB 15
   #define TIMEOUT_CMD 30
 #endif
+bool serialSwap=false;
 
 int webTimeout=TIMEOUT_WEB;
 int cmdTimeout=TIMEOUT_CMD;
@@ -241,11 +242,7 @@ void setup(void){
   }
 
 #ifndef DEBUG_ON
-  Ser.begin(SERIAL_BAUD_DEFAULT);
-#if SERIAL_SWAP == ON
-  Ser.swap();
-#endif
-  delay(2000);
+  Ser.begin(SERIAL_BAUD_DEFAULT); if (serialSwap) Ser.swap(); delay(2000);
 
   byte tb=0;
 Again:
@@ -260,56 +257,35 @@ Again:
 #if LED_STATUS != OFF
     digitalWrite(LED_STATUS,HIGH);
 #endif
-    delay(500);
-    Ser.flush();
-    c=serialRecvFlush();
+    delay(300);
+    Ser.flush(); c=serialRecvFlush();
 #if LED_STATUS != OFF
     digitalWrite(LED_STATUS,LOW);
 #endif
-    delay(500);
+    delay(300);
   }
 
-  // safety net
-  if ((c=='R') || (!accessPointEnabled && !stationEnabled)) {
-    // reset EEPROM values, triggers an init
-    EEPROM_writeInt(0,0); EEPROM_writeInt(2,0);
-    accessPointEnabled=true;
-    EEPROM.commit();
-    Ser.println();
-    Ser.println("Cycle power for reset to defaults.");
-    Ser.println();
-  }
- 
-  if (SERIAL_BAUD != SERIAL_BAUD_DEFAULT) {
-
-    // switch OnStep Serial1 up to ? baud
-    Ser.print(HighSpeedCommsStr(SERIAL_BAUD));
-    delay(200);
-    int count=0; c=0; while (Ser.available() > 0) { count++; if (count == 1) c=Ser.read(); }
-    if (c == '1') {
-        Ser.begin(SERIAL_BAUD);
-#if SERIAL_SWAP == ON
-        Ser.swap();
-#endif
-        delay(2000);
-    } else {
+  // Look for On-Step
+  Ser.print(":GVP#"); delay(100);
+  // make sure response is good
+  if (Ser.available() == 8 && 
+      Ser.read() == 'O' && Ser.read() == 'n' && Ser.read() == '-' && Ser.read() == 'S' &&
+      Ser.read() == 't' && Ser.read() == 'e' && Ser.read() == 'p' && Ser.read() == '#') {
+    // Set fast serial baud rate
+    Ser.print(HighSpeedCommsStr(SERIAL_BAUD)); delay(100);
+    // make sure response is good
+    if (Ser.available() == 1) c=Ser.read(); else while (Ser.available() > 0) c=Ser.read();
+    if (c == '1') { Ser.begin(SERIAL_BAUD); if (serialSwap) Ser.swap(); delay(2000); }
+  } else {
 #if LED_STATUS != OFF
-      digitalWrite(LED_STATUS,HIGH);
+    digitalWrite(LED_STATUS,HIGH);
 #endif
-      // got nothing back, toggle baud rate and try again
-      tb++;
-      if (tb == 11) tb=1;
-      if (tb == 1) Ser.begin(SERIAL_BAUD_DEFAULT);
-      if (tb == 6) Ser.begin(SERIAL_BAUD);
-      
-      if (tb == 1 || tb == 6) {
-#if SERIAL_SWAP == ON
-        Ser.swap();
-#endif
-        delay(2000);
-      }
-      goto Again;
-    }
+    // got nothing back, toggle baud rate and/or swap ports
+    tb++;
+    if (tb == 11) { tb=1; serialSwap=!serialSwap; }
+    if (tb == 1) { Ser.begin(SERIAL_BAUD_DEFAULT); if (serialSwap) Ser.swap(); delay(2000); }
+    if (tb == 6) { Ser.begin(SERIAL_BAUD); if (serialSwap) Ser.swap(); delay(2000); }
+    goto Again;
   }
 #else
   Ser.begin(115200);

@@ -25,17 +25,13 @@
                                           //         If establishing a link to OnStep was ***unsuccessful*** the ESP8266 may
                                           //         retain prior settings perhaps an SSID from factory defaults, for example.
 
-#define SERIAL_SWAP                   OFF //    OFF, ON to swap ESP8266 Serial default location from GPIO 1(TX)/3(RX) to     <-Req'd
-                                          //         15(TX2)/13(RX2.) These are labeled D8(TXD2)/D7(RXD2) on a WeMos D1 Mini.
-                                          //         Use ON for MiniPCB2, MaxPCB2, MaxESP2.  OFF for STM32, MiniPCB (ESP-01.)
-
 // USER FEEDBACK -------------------------------------------------------------------------------------------------------------------
-#define LED_STATUS                    OFF //    OFF, 2 for WeMos D1 Mini. Flashes LED when trying to connect to OnStep.       Option
+#define LED_STATUS                      2 //      2, GPIO LED pin WeMos D1 Mini. Flashes connecting then steady on connected. Infreq
 
 // DISPLAY -------------------------------------------------------------------------------------------------------------------------
 #define DISPLAY_WEATHER               OFF //    OFF, ON Shows weather/ambient conditions (from OnStep) on status page.        Option
 #define DISPLAY_INTERNAL_TEMPERATURE  OFF //    OFF, ON for internal MCU temperature display.                                 Option
-#define DISPLAY_WIFI_SIGNAL_STRENGTH  OFF //    OFF, ON if wireless signal strength is to be reported via web interface       Option
+#define DISPLAY_WIFI_SIGNAL_STRENGTH   ON //     ON, Wireless signal strength reported via web interface. OFF otherwise.      Option
 #define DISPLAY_SPECIAL_CHARS          ON //     ON, For standard ASCII special symbols (compatibility.)                      Infreq
 #define DISPLAY_ADVANCED_CHARS         ON //     ON, For standard "RA/Dec" instead of symbols.                                Infreq
 #define DISPLAY_HIGH_PRECISION_COORDS OFF //    OFF, ON for high precision coordinate display on status page.                 Infreq
