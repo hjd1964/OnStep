@@ -466,6 +466,18 @@ void processCommands() {
 //            Returns: sDD*MM# or sDD*MM'SS# (based on precision setting)
 //            The current scope altitude
       if (command[1] == 'A' && parameter[0] == 0)  { getHor(&f,&f1); doubleToDms(reply,&f,false,true,precision); booleanReply=false; } else
+// :GB#       Get Fastest Recommended Baud rate
+//            Returns: n
+//            The baud rate code
+      if (command[1] == 'B' && parameter[0] == 0)  { 
+#ifdef HAL_SLOW_PROCESSOR
+        strcpy(reply,"4");
+#else
+        strcpy(reply,"0");
+#endif
+        booleanReply=false;
+        supress_frame=true;
+      } else
 // :Ga#       Get Local Time in 12 hour format
 //            Returns: HH:MM:SS#
       if (command[1] == 'a' && parameter[0] == 0)  { LMT=timeRange(UT1-timeZone); if (LMT > 12.0) LMT-=12.0; doubleToHms(reply,&LMT,PM_HIGH); booleanReply=false; } else 

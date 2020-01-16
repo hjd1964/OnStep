@@ -242,6 +242,7 @@ void setup(void){
   }
 
 #ifndef DEBUG_ON
+  long serial_baud = SERIAL_BAUD;
   Ser.begin(SERIAL_BAUD_DEFAULT); if (serialSwap) Ser.swap(); delay(2000);
 
   byte tb=0;
@@ -265,19 +266,25 @@ Again:
     delay(300);
   }
 
-  // Look for On-Step
+  // look for On-Step
   Ser.print(":GVP#"); delay(100);
   // make sure response is good
   if (Ser.available() == 8 && 
       Ser.read() == 'O' && Ser.read() == 'n' && Ser.read() == '-' && Ser.read() == 'S' &&
       Ser.read() == 't' && Ser.read() == 'e' && Ser.read() == 'p' && Ser.read() == '#') {
-    // Set fast serial baud rate
-    Ser.print(HighSpeedCommsStr(SERIAL_BAUD)); delay(100);
-    // make sure response is good
+
+    // check fastest baud rate
+    Ser.print(":GB#"); delay(100);
+    if (Ser.available() != 1) { serialRecvFlush(); goto Again; }
+    if (Ser.read() == '4' && serial_baud > 19200) serial_baud = 19200; // Mega2560 returns '4' for 19200 baud recommended
+
+    // set fastest baud rate
+    Ser.print(HighSpeedCommsStr(serial_baud)); delay(100);
     if (Ser.available() != 1) { serialRecvFlush(); goto Again; }
     if (Ser.read() != '1') goto Again;
+    
     // we're all set, just change the baud rate to match OnStep
-    Ser.begin(SERIAL_BAUD); if (serialSwap) Ser.swap(); delay(2000);
+    Ser.begin(serial_baud); if (serialSwap) Ser.swap(); delay(2000);
   } else {
 #if LED_STATUS != OFF
     digitalWrite(LED_STATUS,HIGH);
@@ -285,9 +292,10 @@ Again:
     // got nothing back, toggle baud rate and/or swap ports
     serialRecvFlush();
     tb++;
-    if (tb == 11) { tb=1; serialSwap=!serialSwap; }
+    if (tb == 16) { tb=1; serialSwap=!serialSwap; }
     if (tb == 1) { Ser.begin(SERIAL_BAUD_DEFAULT); if (serialSwap) Ser.swap(); delay(2000); }
-    if (tb == 6) { Ser.begin(SERIAL_BAUD); if (serialSwap) Ser.swap(); delay(2000); }
+    if (tb == 6) { Ser.begin(serial_baud); if (serialSwap) Ser.swap(); delay(2000); }
+    if (tb == 11) { Ser.begin(19200); if (serialSwap) Ser.swap(); delay(2000); }
     goto Again;
   }
 #else
