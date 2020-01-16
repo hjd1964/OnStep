@@ -17,17 +17,6 @@
 // before uploading/flashing again can help restore access to the ESP8266.
 
 //      Parameter Name              Value   Default  Notes                                                                      Hint
-// SERIAL PORTS --------------------------------------------------------------------------------------------------------------------
-#define SERIAL_BAUD_DEFAULT          9600 //   9600, Common baud rates for these parameters are 9600,19200,57600,115200.      Infreq
-#define SERIAL_BAUD                 57600 //  57600, Use 19200 if talking to a Mega2560 OnStep                               <-Req'd
-                                          //         At startup this firmware will attempt to switch OnStep's baud rate to this
-                                          //         faster speed (vs. SERIAL_BAUD_DEFAULT) and AFTER success, start WiFi, etc.
-                                          //         If establishing a link to OnStep was ***unsuccessful*** the ESP8266 may
-                                          //         retain prior settings perhaps an SSID from factory defaults, for example.
-
-// USER FEEDBACK -------------------------------------------------------------------------------------------------------------------
-#define LED_STATUS                      2 //      2, GPIO LED pin WeMos D1 Mini. Flashes connecting then steady on connected. Infreq
-
 // DISPLAY -------------------------------------------------------------------------------------------------------------------------
 #define DISPLAY_WEATHER               OFF //    OFF, ON Shows weather/ambient conditions (from OnStep) on status page.        Option
 #define DISPLAY_INTERNAL_TEMPERATURE  OFF //    OFF, ON for internal MCU temperature display.                                 Option
@@ -82,6 +71,15 @@
 #define AN6_OFF                           //   _OFF, "Name" for Aux6 feature on Control webpage, provides 0..100% PWM.        Adjust
 #define AN7_OFF                           //   _OFF, "Name" for Aux7 feature on Control webpage, provides 0..100% PWM.        Adjust
 #define AN8_OFF                           //   _OFF, "Name" for Aux8 feature on Control webpage, provides 0..100% PWM.        Adjust
+
+// USER FEEDBACK -------------------------------------------------------------------------------------------------------------------
+#define LED_STATUS                      2 //      2, GPIO LED pin WeMos D1 Mini. Flashes connecting then steady on connected. Infreq
+
+// SERIAL PORTS --------------------------------------------------------------------------------------------------------------------
+#define SERIAL_BAUD_DEFAULT          9600 //   9600, Common baud rates for these parameters are 9600,19200,57600,115200.      Infreq
+#define SERIAL_BAUD                 57600 //  57600, Suggested comms baud rate, a lower baud rate may be used if appropriate. Infreq
+                                          //         If establishing a link to OnStep was ***unsuccessful*** the ESP8266 may
+                                          //         retain prior settings perhaps an SSID from factory defaults, for example.
 
 // THAT'S IT FOR USER CONFIGURATION!
 
