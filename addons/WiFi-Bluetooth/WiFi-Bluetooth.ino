@@ -243,8 +243,8 @@ void setup(void){
 
 #ifndef DEBUG_ON
   Ser.begin(SERIAL_BAUD_DEFAULT); if (serialSwap) Ser.swap(); delay(2000);
-  byte tb=1;
 
+  byte tb=0;
 Again:
 #if LED_STATUS != OFF
   digitalWrite(LED_STATUS,LOW);
@@ -271,15 +271,13 @@ Again:
   if (Ser.available() == 8 && 
       Ser.read() == 'O' && Ser.read() == 'n' && Ser.read() == '-' && Ser.read() == 'S' &&
       Ser.read() == 't' && Ser.read() == 'e' && Ser.read() == 'p' && Ser.read() == '#') {
-    // if connected at SERIAL_BAUD_DEFAULT set the fast serial baud rate instead, otherwise we are already at the right speed and ready to go
-    if (tb == 1) {
-      Ser.print(HighSpeedCommsStr(SERIAL_BAUD)); delay(100);
-      // make sure response is good
-      if (Ser.available() != 1) { serialRecvFlush(); goto Again; }
-      if (Ser.read() != '1') goto Again;
-      // we're all set, just change the baud rate to match OnStep
-      Ser.begin(SERIAL_BAUD); if (serialSwap) Ser.swap(); delay(2000);
-    }
+    // Set fast serial baud rate
+    Ser.print(HighSpeedCommsStr(SERIAL_BAUD)); delay(100);
+    // make sure response is good
+    if (Ser.available() != 1) { serialRecvFlush(); goto Again; }
+    if (Ser.read() != '1') goto Again;
+    // we're all set, just change the baud rate to match OnStep
+    Ser.begin(SERIAL_BAUD); if (serialSwap) Ser.swap(); delay(2000);
   } else {
 #if LED_STATUS != OFF
     digitalWrite(LED_STATUS,HIGH);
@@ -287,10 +285,9 @@ Again:
     // got nothing back, toggle baud rate and/or swap ports
     serialRecvFlush();
     tb++;
-    if (tb == 16) { tb=1; serialSwap=!serialSwap; }
+    if (tb == 11) { tb=1; serialSwap=!serialSwap; }
     if (tb == 1) { Ser.begin(SERIAL_BAUD_DEFAULT); if (serialSwap) Ser.swap(); delay(2000); }
     if (tb == 6) { Ser.begin(SERIAL_BAUD); if (serialSwap) Ser.swap(); delay(2000); }
-    if (tb == 11) { Ser.begin(19200); if (serialSwap) Ser.swap(); delay(2000); }
     goto Again;
   }
 #else
