@@ -267,7 +267,7 @@
 #define L_REFINE_MESSAGE2 "Press [Refine PA] button.  Use mount's PA adjust controls to center the star again."
 #define L_REFINE_MESSAGE3 "Optionally align the mount again."
 
-#define L_PARK
+#define L_PARK "Park"
 #define L_SET_PARK "Set-Park"
 
 #define L_TRACKING "Tracking"
