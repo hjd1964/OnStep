@@ -4,65 +4,65 @@
 const char html_config1[] PROGMEM =
 "Maximum Slew Speed: "
 "<form method='get' action='/configuration.htm'>"
-"<button name='ss' value='vs' type='submit'>Very Slow (0.5x)</button>"
-"<button name='ss' value='s' type='submit'>Slow (0.75x)</button>";
+"<button name='ss' value='vs' type='submit'>" L_VSLOW "</button>"
+"<button name='ss' value='s' type='submit'>" L_SLOW "</button>";
 const char html_configMaxRate[] PROGMEM =
-"<button name='ss' value=\"n\" type='submit'>Normal (1x)</button>"
-"<button name='ss' value=\"f\" type='submit'>Fast (1.5x)</button>"
-"<button name='ss' value=\"vf\" type='submit'>Very Fast (2x)</button>"
+"<button name='ss' value=\"n\" type='submit'>" L_NORMAL "</button>"
+"<button name='ss' value=\"f\" type='submit'>" L_FAST "</button>"
+"<button name='ss' value=\"vf\" type='submit'>" L_VFAST "</button>"
 "</form><br /><br />\r\n";
 const char html_configBlAxis1[] PROGMEM =
-"Backlash: <br />"
+L_BACKLASH_TITLE ": <br />"
 "<form method='get' action='/configuration.htm'>"
 " <input value='%d' type='number' name='b1' min='0' max='3600'>"
-"<button type='submit'>Upload</button>"
-" (Axis1, in arc-seconds 0 to 3600)"
+"<button type='submit'>" L_UPLOAD "</button>"
+" (" L_BACKLASH_RANGE_AXIS1 ")"
 "</form>"
 "\r\n";
 const char html_configBlAxis2[] PROGMEM =
 "<form method='get' action='/configuration.htm'>"
 " <input value='%d' type='number' name='b2' min='0' max='3600'>"
-"<button type='submit'>Upload</button>"
-" (Axis2, in arc-seconds 0 to 3600)"
+"<button type='submit'>" L_UPLOAD "</button>"
+" (" L_BACKLASH_RANGE_AXIS2 ")"
 "</form>"
 "<br />\r\n";
 const char html_configMinAlt[] PROGMEM =
-"Limits: <br />"
+L_LIMITS_TITLE " <br />"
 "<form method='get' action='/configuration.htm'>"
 " <input value='%d' type='number' name='hl' min='-30' max='30'>"
-"<button type='submit'>Upload</button>"
-" (Horizon, in degrees +/- 30)"
+"<button type='submit'>" L_UPLOAD "</button>"
+" (" L_LIMITS_RANGE_HORIZON ")"
 "</form>"
 "\r\n";
 const char html_configMaxAlt[] PROGMEM =
 "<form method='get' action='/configuration.htm'>"
 " <input value='%d' type='number' name='ol' min='60' max='90'>"
-"<button type='submit'>Upload</button>"
-" (Overhead, in degrees 60 to 90)"
+"<button type='submit'>" L_UPLOAD "</button>"
+" (" L_LIMITS_RANGE_OVERHEAD ")"
 "</form>"
 "\r\n";
 const char html_configPastMerE[] PROGMEM =
 "<form method='get' action='/configuration.htm'>"
 " <input value='%d' type='number' name='el' min='-180' max='180'>"
-"<button type='submit'>Upload</button>"
-" (Past Meridian when East of the pier, in degrees +/- 180)"
+"<button type='submit'>" L_UPLOAD "</button>"
+" (" L_LIMITS_RANGE_MERIDIAN_E ")"
 "</form>"
 "\r\n";
 const char html_configPastMerW[] PROGMEM =
 "<form method='get' action='/configuration.htm'>"
 " <input value='%d' type='number' name='wl' min='-180' max='180'>"
-"<button type='submit'>Upload</button>"
-" (Past Meridian when West of the pier, in degrees +/- 180)"
+"<button type='submit'>" L_UPLOAD "</button>"
+" (" L_LIMITS_RANGE_MERIDIAN_W ")"
 "</form>"
 "<br />\r\n";
 const char html_configLongDeg[] PROGMEM =
-"Location: <br />"
+L_LOCATION_TITLE " <br />"
 "<form method='get' action='/configuration.htm'>"
 " <input value='%s' type='number' name='g1' min='-180' max='180'>&nbsp;&deg;&nbsp;";
 const char html_configLongMin[] PROGMEM =
 " <input value='%s' type='number' name='g2' min='0' max='60'>&nbsp;'&nbsp;&nbsp;"
-"<button type='submit'>Upload</button>"
-" (Longitude, in deg. and min. +/- 180, W is +)"
+"<button type='submit'>" L_UPLOAD "</button>"
+" (" L_LOCATION_LONG ")"
 "</form>"
 "\r\n";
 const char html_configLatDeg[] PROGMEM =
@@ -70,8 +70,8 @@ const char html_configLatDeg[] PROGMEM =
 " <input value='%s' type='number' name='t1' min='-90' max='90'>&nbsp;&deg;&nbsp;";
 const char html_configLatMin[] PROGMEM =
 " <input value='%s' type='number' name='t2' min='0' max='60'>&nbsp;'&nbsp;&nbsp;"
-"<button type='submit'>Upload</button>"
-" (Latitude, in deg. and min. +/- 90, N is +)"
+"<button type='submit'>" L_UPLOAD "</button>"
+" (" L_LOCATION_LAT ")"
 "</form>"
 "\r\n";
 const char html_configOffsetDeg[] PROGMEM =
@@ -79,9 +79,9 @@ const char html_configOffsetDeg[] PROGMEM =
 " <input value='%s' type='number' name='u1' min='-12' max='14'>&nbsp;hrs&nbsp;";
 const char html_configOffsetMin[] PROGMEM =
 " <select name='u2'><option value='0' %s>00</option><option value='30' %s>30</option><option value='45' %s>45</option></select>&nbsp;min.&nbsp;"
-"<button type='submit'>Upload</button>"
-" (UTC Offset, in hours -12 to +14)<br />"
-"Opposite of a time-zone value, this is for Standard Time (not Daylight Time.)<br /><br />"
+"<button type='submit'>" L_UPLOAD "</button>"
+" (" L_LOCATION_RANGE_UTC_OFFSET ")<br />"
+L_LOCATION_MESSAGE_UTC_OFFSET "<br /><br />"
 "</form>"
 "\r\n";
 #ifdef OETHS

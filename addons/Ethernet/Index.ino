@@ -17,7 +17,7 @@
 #endif
 
 const char html_settingsBrowserTime[] PROGMEM =
-"&nbsp;&nbsp;<span id=\"datetime\"></span> UT (web browser)"
+"&nbsp;&nbsp;<span id=\"datetime\"></span> " L_TIME_BROWSER_UT
 "<script> "
 "function pad(num, size) { var s = '000000000' + num; return s.substr(s.length-size); }"
 "var now = new Date(); document.getElementById('datetime').innerHTML = (now.getUTCMonth()+1)+'/'+"
@@ -26,33 +26,33 @@ const char html_settingsBrowserTime[] PROGMEM =
 "</script><br />\r\n";
 
 const char html_indexDate[] PROGMEM = "&nbsp;&nbsp;<font class='c'>%s</font>";
-const char html_indexTime[] PROGMEM = "&nbsp;<font class='c'>%s</font>&nbsp;UT";
-const char html_indexSidereal[] PROGMEM = "&nbsp;(<font class='c'>%s</font>&nbsp; LST)<br />";
-const char html_indexSite[] PROGMEM = "&nbsp;&nbsp;Long. = <font class='c'>%s</font>, Lat. = <font class='c'>%s</font><br />";
+const char html_indexTime[] PROGMEM = "&nbsp;<font class='c'>%s</font>&nbsp;" L_UT;
+const char html_indexSidereal[] PROGMEM = "&nbsp;(<font class='c'>%s</font>&nbsp; " L_LST ")<br />";
+const char html_indexSite[] PROGMEM = "&nbsp;&nbsp;" L_LONG " = <font class='c'>%s</font>, " L_LAT " = <font class='c'>%s</font><br />";
 
-const char html_indexPosition[] PROGMEM = "&nbsp;&nbsp;Current: " Axis1 "=<font class='c'>%s</font>, " Axis2 "=<font class='c'>%s</font><br />";
-const char html_indexTarget[] PROGMEM = "&nbsp;&nbsp;Target:&nbsp;&nbsp; " Axis1 "=<font class='c'>%s</font>, " Axis2 "=<font class='c'>%s</font><br />";
+const char html_indexPosition[] PROGMEM = "&nbsp;&nbsp;" L_CURRENT ": " Axis1 "=<font class='c'>%s</font>, " Axis2 "=<font class='c'>%s</font><br />";
+const char html_indexTarget[] PROGMEM = "&nbsp;&nbsp;" L_TARGET ":&nbsp;&nbsp; " Axis1 "=<font class='c'>%s</font>, " Axis2 "=<font class='c'>%s</font><br />";
 #if ENCODERS == ON
 const char html_indexEncoder1[] PROGMEM = "&nbsp;&nbsp;OnStep: Ax1=<font class='c'>%s</font>, Ax2=<font class='c'>%s</font><br />";
-const char html_indexEncoder2[] PROGMEM = "&nbsp;&nbsp;Encodr: Ax1=<font class='c'>%s</font>, Ax2=<font class='c'>%s</font><br />";
+const char html_indexEncoder2[] PROGMEM = "&nbsp;&nbsp;" L_ENCODER ": Ax1=<font class='c'>%s</font>, Ax2=<font class='c'>%s</font><br />";
 #endif
-const char html_indexPier[] PROGMEM = "&nbsp;&nbsp;Pier Side=<font class='c'>%s</font> (meridian flips <font class='c'>%s</font>)<br />";
+const char html_indexPier[] PROGMEM = "&nbsp;&nbsp;" L_PIER_SIDE "=<font class='c'>%s</font> (" L_MERIDIAN_FLIPS " <font class='c'>%s</font>)<br />";
 
-const char html_indexCorPolar[] PROGMEM = "&nbsp;&nbsp;%s <font class='c'>%ld</font>%c &nbsp; %s <font class='c'>%ld</font>%c &nbsp;(Mount relative to %s)<br />";
+const char html_indexCorPolar[] PROGMEM = "&nbsp;&nbsp;%s <font class='c'>%ld</font>%c &nbsp; %s <font class='c'>%ld</font>%c &nbsp;(" L_ALIGN_MESSAGE " %s)<br />";
 
-const char html_indexPark[] PROGMEM = "&nbsp;&nbsp;Parking: <font class='c'>%s</font><br />";
-const char html_indexTracking[] PROGMEM = "&nbsp;&nbsp;Tracking: <font class='c'>%s %s</font><br />";
-const char html_indexMaxRate[] PROGMEM = "&nbsp;&nbsp;Current MaxRate: <font class='c'>%ld</font> (Default MaxRate: <font class='c'>%ld</font>)<br />";
-const char html_indexMaxSpeed[] PROGMEM = "&nbsp;&nbsp;Maximum slew speed: <font class='c'>%s</font>&deg;/s<br />";
+const char html_indexPark[] PROGMEM = "&nbsp;&nbsp;" L_PARKING ": <font class='c'>%s</font><br />";
+const char html_indexTracking[] PROGMEM = "&nbsp;&nbsp;" L_TRACKING ": <font class='c'>%s %s</font><br />";
+const char html_indexMaxRate[] PROGMEM = "&nbsp;&nbsp;" L_CURRENT_MAXRATE ": <font class='c'>%ld</font> (" L_DEFAULT_MAXRATE ": <font class='c'>%ld</font>)<br />";
+const char html_indexMaxSpeed[] PROGMEM = "&nbsp;&nbsp;" L_CURRENT_MAXSLEW ": <font class='c'>%s</font>&deg;/s<br />";
 
 const char html_indexTPHD[] PROGMEM = "&nbsp;&nbsp;%s <font class='c'>%s</font>%s<br />";
 
-const char html_indexDriverStatus[] PROGMEM = " Driver: <font class='c'>%s</font><br />";
-const char html_indexGeneralError[] PROGMEM = "&nbsp;&nbsp;Last General (Background) Error: <font class='c'>%s</font><br />";
+const char html_indexDriverStatus[] PROGMEM = " " L_DRIVER_STATUS ": <font class='c'>%s</font><br />";
+const char html_indexGeneralError[] PROGMEM = "&nbsp;&nbsp;" L_LAST_GENERAL_ERROR ": <font class='c'>%s</font><br />";
 const char html_indexCmdErrorLog[] PROGMEM = "&nbsp;&nbsp;&nbsp;&nbsp;%s %s<br />";
-const char html_indexWorkload[] PROGMEM = "&nbsp;&nbsp;Workload: <font class='c'>%s</font><br />";
+const char html_indexWorkload[] PROGMEM = "&nbsp;&nbsp;" L_WORKLOAD ": <font class='c'>%s</font><br />";
 #if DISPLAY_WIFI_SIGNAL_STRENGTH == ON
-const char html_indexSignalStrength[] PROGMEM = "&nbsp;&nbsp;Wireless signal strength: <font class=\"c\">%s</font><br />";
+const char html_indexSignalStrength[] PROGMEM = "&nbsp;&nbsp;" L_WIRELESS_SIGNAL_STRENGTH ": <font class=\"c\">%s</font><br />";
 #endif
 
 #ifdef OETHS
@@ -145,13 +145,13 @@ void handleRoot() {
   sendHtml(data);
 
 #if DISPLAY_WEATHER == ON
-  if (!command(":GX9A#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,"Temperature:",temp1,"&deg;C"); data+=temp;
-  if (!command(":GX9B#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,"Barometric Pressure:",temp1,"mb"); data+=temp;
-  if (!command(":GX9C#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,"Relative Humidity:",temp1,"%"); data+=temp;
-  if (!command(":GX9E#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,"Dew Point Temperature:",temp1,"&deg;C"); data+=temp;
+  if (!command(":GX9A#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,L_TEMPERATURE ":",temp1,"&deg;C"); data+=temp;
+  if (!command(":GX9B#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,L_PRESSURE ":",temp1,"mb"); data+=temp;
+  if (!command(":GX9C#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,L_HUMIDITY ":",temp1,"%"); data+=temp;
+  if (!command(":GX9E#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,L_DEW_POINT ":",temp1,"&deg;C"); data+=temp;
 #endif
 
-  data+="<br /><b>Coordinates:</b><br />";
+  data+="<br /><b>" L_COORDINATES ":</b><br />";
 
 #if DISPLAY_HIGH_PRECISION_COORDS == ON
   // RA,Dec current
@@ -195,15 +195,15 @@ void handleRoot() {
 #endif
 
   // pier side and meridian flips
-  if ((mountStatus.pierSide()==PierSideFlipWE1) || (mountStatus.pierSide()==PierSideFlipWE2) || (mountStatus.pierSide()==PierSideFlipWE3)) strcpy(temp1,"Meridian Flip, West to East"); else
-  if ((mountStatus.pierSide()==PierSideFlipEW1) || (mountStatus.pierSide()==PierSideFlipEW2) || (mountStatus.pierSide()==PierSideFlipEW3)) strcpy(temp1,"Meridian Flip, East to West"); else
-  if (mountStatus.pierSide()==PierSideWest) strcpy(temp1,"West"); else
-  if (mountStatus.pierSide()==PierSideEast) strcpy(temp1,"East"); else
-  if (mountStatus.pierSide()==PierSideNone) strcpy(temp1,"None"); else strcpy(temp1,"Unknown");
+  if ((mountStatus.pierSide()==PierSideFlipWE1) || (mountStatus.pierSide()==PierSideFlipWE2) || (mountStatus.pierSide()==PierSideFlipWE3)) strcpy(temp1,L_MERIDIAN_FLIP_W_TO_E); else
+  if ((mountStatus.pierSide()==PierSideFlipEW1) || (mountStatus.pierSide()==PierSideFlipEW2) || (mountStatus.pierSide()==PierSideFlipEW3)) strcpy(temp1,L_MERIDIAN_FLIP_E_TO_W); else
+  if (mountStatus.pierSide()==PierSideWest) strcpy(temp1,L_WEST); else
+  if (mountStatus.pierSide()==PierSideEast) strcpy(temp1,L_EAST); else
+  if (mountStatus.pierSide()==PierSideNone) strcpy(temp1,L_NONE); else strcpy(temp1,L_UNKNOWN);
   if (!mountStatus.valid()) strcpy(temp1,"?");
   if (mountStatus.meridianFlips()) {
     strcpy(temp2,"On");
-    if (mountStatus.autoMeridianFlips()) strcat(temp2,"</font>, <font class=\"c\">Auto");
+    if (mountStatus.autoMeridianFlips()) strcat(temp2,"</font>, <font class=\"c\">" L_AUTO);
   } else strcpy(temp2,"Off");
   if (!mountStatus.valid()) strcpy(temp2,"?");
   sprintf_P(temp,html_indexPier,temp1,temp2);
@@ -216,7 +216,7 @@ void handleRoot() {
     long lr=LONG_MIN; if (command(":GX03#",temp1)) { lr=strtol(&temp1[0],NULL,10); lr=lr/cos(lat/57.295); }
 
     if ((lat!=LONG_MIN) && (ud!=LONG_MIN) && (lr!=LONG_MIN)) {
-      data+="<br /><b>Polar Alignment:</b><br />";
+      data+="<br /><b>" L_POLAR_ALIGN ":</b><br />";
 
       // default to arc-minutes unless we get close, then arc-seconds
       char units='"';
@@ -226,9 +226,9 @@ void handleRoot() {
       }
 
       if (mountStatus.mountType()==MT_ALTAZM) {
-        strcpy(temp1,"Zenith");
+        strcpy(temp1,L_ZENITH);
       } else {
-        if (lat<0) strcpy(temp1,"SCP"); else strcpy(temp1,"NCP");
+        if (lat<0) strcpy(temp1,L_SCP); else strcpy(temp1,L_NCP);
       }
 
       // show direction
@@ -242,28 +242,28 @@ void handleRoot() {
   }
   sendHtml(data);
 
-  data+="<br /><b>Operations:</b><br />";
+  data+="<br /><b>" L_OPERATIONS ":</b><br />";
 
   // Park
-  if (mountStatus.parked()) strcpy(temp1,"Parked"); else strcpy(temp1,"Not Parked");
-  if (mountStatus.parking()) strcpy(temp1,"Parking"); else
-  if (mountStatus.parkFail()) strcpy(temp1,"Park Failed");
-  if (mountStatus.atHome()) strcat(temp1," </font>(<font class=\"c\">At Home</font>)<font class=\"c\">");
+  if (mountStatus.parked()) strcpy(temp1,L_PARKED); else strcpy(temp1,L_NOT_PARKED);
+  if (mountStatus.parking()) strcpy(temp1,L_PARKING); else
+  if (mountStatus.parkFail()) strcpy(temp1,L_PARK_FAILED);
+  if (mountStatus.atHome()) strcat(temp1," </font>(<font class=\"c\">" L_AT_HOME "</font>)<font class=\"c\">");
   if (!mountStatus.valid()) strcpy(temp1,"?");
   sprintf_P(temp,html_indexPark,temp1);
   data += temp;
 
   // Tracking
-  if (mountStatus.tracking()) strcpy(temp1,"On"); else strcpy(temp1,"Off");
-  if (mountStatus.slewing()) strcpy(temp1,"Slewing");
+  if (mountStatus.tracking()) strcpy(temp1,L_ON); else strcpy(temp1,L_OFF);
+  if (mountStatus.slewing()) strcpy(temp1,L_SLEWING);
   if (!mountStatus.valid()) strcpy(temp1,"?");
   
   strcpy(temp2,"</font>(<font class=\"c\">");
-  if (mountStatus.ppsSync()) strcat(temp2,"PPS Sync, ");
-  if (mountStatus.rateCompensation()==RC_REFR_RA)   strcat(temp2,"Refr Comp RA Axis, ");
-  if (mountStatus.rateCompensation()==RC_REFR_BOTH) strcat(temp2,"Refr Comp Both Axis, ");
-  if (mountStatus.rateCompensation()==RC_FULL_RA)   strcat(temp2,"Full Comp RA Axis, ");
-  if (mountStatus.rateCompensation()==RC_FULL_BOTH) strcat(temp2,"Full Comp Both Axis, ");
+  if (mountStatus.ppsSync()) strcat(temp2,L_PPS_SYNC ", ");
+  if (mountStatus.rateCompensation()==RC_REFR_RA)   strcat(temp2,L_REFR_COMP_RA ", ");
+  if (mountStatus.rateCompensation()==RC_REFR_BOTH) strcat(temp2,L_REFR_COMP_BOTH ", ");
+  if (mountStatus.rateCompensation()==RC_FULL_RA)   strcat(temp2,L_FULL_COMP_RA ", ");
+  if (mountStatus.rateCompensation()==RC_FULL_BOTH) strcat(temp2,L_FULL_COMP_BOTH ", ");
   if (!mountStatus.valid()) strcpy(temp2,"?");
   if (temp2[strlen(temp2)-2]==',') { temp2[strlen(temp2)-2]=0; strcat(temp2,"</font>)<font class=\"c\">"); } else strcpy(temp2,"");
   sprintf_P(temp,html_indexTracking,temp1,temp2);
@@ -274,7 +274,7 @@ void handleRoot() {
   if ((command(":GT#",temp1)) && (strlen(temp1)>6)) {
     double tr=atof(temp1);
     dtostrf(tr,5,3,temp1);
-    sprintf(temp,"&nbsp;&nbsp;Tracking Rate: <font class=\"c\">%s</font>Hz<br />",temp1);
+    sprintf(temp,"&nbsp;&nbsp;" L_TRACKING_RATE ": <font class=\"c\">%s</font>Hz<br />",temp1);
     data += temp;
   }
 
@@ -293,27 +293,27 @@ void handleRoot() {
   }
   sendHtml(data);
 
-  data+="<br /><b>State:</b><br />";
+  data+="<br /><b>" L_STATE ":</b><br />";
 
   if (mountStatus.axisStatusValid()) {
     // Stepper driver status Axis1
     strcpy(temp1,"");
-    if (mountStatus.axis1StSt()) strcat(temp1,"Standstill, "); else {
+    if (mountStatus.axis1StSt()) strcat(temp1,L_STANDSTILL ", "); else {
       if (mountStatus.axis1OLa() || mountStatus.axis1OLb()) {
-        strcat(temp1,"Open Load ");
+        strcat(temp1,L_OPEN_LOAD " ");
         if (mountStatus.axis1OLa()) strcat(temp1,"A");
         if (mountStatus.axis1OLb()) strcat(temp1,"B");
         strcat(temp1,", ");
       }
     }
     if (mountStatus.axis1S2Ga() || mountStatus.axis1S2Ga()) {
-      strcat(temp1,"Short Gnd ");
+      strcat(temp1,L_SHORT_GND " ");
       if (mountStatus.axis1S2Ga()) strcat(temp1,"A");
       if (mountStatus.axis1S2Gb()) strcat(temp1,"B");
       strcat(temp1,", ");
     }
-    if (mountStatus.axis1OT()) strcat(temp1,"Shutdown Over 150C, ");
-    if (mountStatus.axis1OTPW()) strcat(temp1,"Pre-warning &gt;120C, ");
+    if (mountStatus.axis1OT()) strcat(temp1,L_SHUTDOWN_OVER " 150C, ");
+    if (mountStatus.axis1OTPW()) strcat(temp1,L_PRE_WARNING " &gt;120C, ");
     if (strlen(temp1)>2) temp1[strlen(temp1)-2]=0;
     if (strlen(temp1)==0) strcpy(temp1,"Ok");
     sprintf_P(temp,html_indexDriverStatus,temp1);
@@ -322,22 +322,22 @@ void handleRoot() {
   
     // Stepper driver status Axis2
     strcpy(temp1,"");
-    if (mountStatus.axis2StSt()) strcat(temp1,"Standstill, "); else {
+    if (mountStatus.axis2StSt()) strcat(temp1,L_STANDSTILL ", "); else {
       if (mountStatus.axis2OLa() || mountStatus.axis2OLb()) {
-        strcat(temp1,"Open Load ");
+        strcat(temp1,L_OPEN_LOAD " ");
         if (mountStatus.axis2OLa()) strcat(temp1,"A");
         if (mountStatus.axis2OLb()) strcat(temp1,"B");
         strcat(temp1,", ");
       }
     }
     if (mountStatus.axis2S2Ga() || mountStatus.axis2S2Ga()) {
-      strcat(temp1,"Short Gnd ");
+      strcat(temp1,L_SHORT_GND " ");
       if (mountStatus.axis2S2Ga()) strcat(temp1,"A");
       if (mountStatus.axis2S2Gb()) strcat(temp1,"B");
       strcat(temp1,", ");
     }
-    if (mountStatus.axis2OT()) strcat(temp1,"Shutdown Over 150C, ");
-    if (mountStatus.axis2OTPW()) strcat(temp1,"Pre-warning &gt;120C, ");
+    if (mountStatus.axis2OT()) strcat(temp1,L_SHUTDOWN_OVER " 150C, ");
+    if (mountStatus.axis2OTPW()) strcat(temp1,L_PRE_WARNING " &gt;120C, ");
     if (strlen(temp1)>2) temp1[strlen(temp1)-2]=0;
     if (strlen(temp1)==0) strcpy(temp1,"Ok");
     sprintf_P(temp,html_indexDriverStatus,temp1);
@@ -346,7 +346,7 @@ void handleRoot() {
   }
 
 #if DISPLAY_INTERNAL_TEMPERATURE == ON
-  if (!command(":GX9F#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,"Controller Internal Temperature:",temp1,"&deg;C"); data+=temp;
+  if (!command(":GX9F#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,L_INTERNAL_TEMP ":",temp1,"&deg;C"); data+=temp;
 #endif
 
   // General Error
@@ -359,7 +359,7 @@ void handleRoot() {
 
   // Error monitor
   if (errorMonitorOn) {
-    data += "&nbsp;&nbsp;Command Error Log:<br /><font class='c'>";
+    data += "&nbsp;&nbsp;" L_CMD_ERROR_LOG ":<br /><font class='c'>";
     for (int i=0; i<10; i++) {
       sprintf_P(temp,html_indexCmdErrorLog,cmdErrorList[i].cmd,commandErrorToStr(cmdErrorList[i].err));
       if (cmdErrorList[i].err != 0 || i == 0) data += temp;

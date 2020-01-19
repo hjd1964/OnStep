@@ -158,24 +158,25 @@ class MountStatus {
     byte pierSide() { return _pierSide; }
     int alignMaxStars() { return _alignMaxStars; }
     Errors lastError() { return _lastError; }
+    
     bool getLastErrorMessage(char message[]) {
       strcpy(message,"");
-      if (_lastError==ERR_NONE) strcpy(message,"None"); else
-      if (_lastError==ERR_MOTOR_FAULT) strcpy(message,"Motor/driver fault"); else
-      if (_lastError==ERR_ALT_MIN) strcpy(message,"Below horizon limit"); else
-      if (_lastError==ERR_LIMIT_SENSE) strcpy(message,"Limit sense"); else
-      if (_lastError==ERR_DEC) strcpy(message,"Dec limit exceeded"); else
-      if (_lastError==ERR_AZM) strcpy(message,"Azm limit exceeded"); else
-      if (_lastError==ERR_UNDER_POLE) strcpy(message,"Under pole limit exceeded"); else
-      if (_lastError==ERR_MERIDIAN) strcpy(message,"Meridian limit (W) exceeded"); else
-      if (_lastError==ERR_SYNC) strcpy(message,"Sync safety limit exceeded"); else
-      if (_lastError==ERR_PARK) strcpy(message,"Park failed"); else
-      if (_lastError==ERR_GOTO_SYNC) strcpy(message,"Goto sync failed"); else
-      if (_lastError==ERR_UNSPECIFIED) strcpy(message,"Unknown error"); else
-      if (_lastError==ERR_ALT_MAX) strcpy(message,"Above overhead limit"); else
-      if (_lastError==ERR_WEATHER_INIT) strcpy(message,"Weather sensor init failed"); else
-      if (_lastError==ERR_RTC_INIT) strcpy(message,"RTC init failed"); else
-        sprintf(message,"Unknown Error, code %d",(int)_lastError);
+      if (_lastError==ERR_NONE) strcpy(message,L_GE_NONE); else
+      if (_lastError==ERR_MOTOR_FAULT) strcpy(message,L_GE_MOTOR_FAULT); else
+      if (_lastError==ERR_ALT_MIN) strcpy(message,L_GE_ALT_MIN); else
+      if (_lastError==ERR_LIMIT_SENSE) strcpy(message,L_GE_LIMIT_SENSE); else
+      if (_lastError==ERR_DEC) strcpy(message,L_GE_DEC); else
+      if (_lastError==ERR_AZM) strcpy(message,L_GE_AZM); else
+      if (_lastError==ERR_UNDER_POLE) strcpy(message,L_GE_UNDER_POLE); else
+      if (_lastError==ERR_MERIDIAN) strcpy(message,L_GE_MERIDIAN); else
+      if (_lastError==ERR_SYNC) strcpy(message,L_GE_SYNC); else
+      if (_lastError==ERR_PARK) strcpy(message,L_GE_PARK); else
+      if (_lastError==ERR_GOTO_SYNC) strcpy(message,L_GE_GOTO_SYNC); else
+      if (_lastError==ERR_UNSPECIFIED) strcpy(message,L_GE_UNSPECIFIED); else
+      if (_lastError==ERR_ALT_MAX) strcpy(message,L_GE_ALT_MAX); else
+      if (_lastError==ERR_WEATHER_INIT) strcpy(message,L_GE_WEATHER_INIT); else
+      if (_lastError==ERR_RTC_INIT) strcpy(message,L_GE_RTC_INIT); else
+        sprintf(message,L_GE_OTHER " %d",(int)_lastError);
       return message[0];
     }
   private:
@@ -237,38 +238,38 @@ enum CommandErrors {
   CE_GOTO_ERR_BELOW_HORIZON, CE_GOTO_ERR_ABOVE_OVERHEAD, CE_SLEW_ERR_IN_STANDBY, 
   CE_SLEW_ERR_IN_PARK, CE_GOTO_ERR_GOTO, CE_GOTO_ERR_OUTSIDE_LIMITS, CE_SLEW_ERR_HARDWARE_FAULT,
   CE_MOUNT_IN_MOTION, CE_GOTO_ERR_UNSPECIFIED, CE_NULL};
-
+  
 char* commandErrorToStr(int e) {
   static char reply[40];
   strcpy(reply,"Error, ");
   
   switch (e) {
-    case CE_NONE: strcpy(reply,"No Errors"); break;
-    case CE_0: strcpy(reply,"Reply 0"); break;
-    case CE_CMD_UNKNOWN: strcat(reply,"command unknown"); break;
-    case CE_REPLY_UNKNOWN: strcat(reply,"invalid reply"); break;
-    case CE_PARAM_RANGE: strcat(reply,"parameter out of range"); break;
-    case CE_PARAM_FORM: strcat(reply,"bad parameter format"); break;
-    case CE_ALIGN_FAIL: strcat(reply,"align failed"); break;
-    case CE_ALIGN_NOT_ACTIVE: strcat(reply,"align not active"); break;
-    case CE_NOT_PARKED_OR_AT_HOME: strcat(reply,"not parked or at home"); break;
-    case CE_PARKED: strcat(reply,"already parked"); break;
-    case CE_PARK_FAILED: strcat(reply,"park failed"); break;
-    case CE_NOT_PARKED: strcat(reply,"not parked"); break;
-    case CE_NO_PARK_POSITION_SET: strcat(reply,"no park position set"); break;
-    case CE_GOTO_FAIL: strcat(reply,"goto failed"); break;
-    case CE_LIBRARY_FULL: strcat(reply,"library full"); break;
-    case CE_GOTO_ERR_BELOW_HORIZON: strcat(reply,"goto below horizon"); break;
-    case CE_GOTO_ERR_ABOVE_OVERHEAD: strcat(reply,"goto above overhead"); break;
-    case CE_SLEW_ERR_IN_STANDBY: strcat(reply,"slew in standby"); break;
-    case CE_SLEW_ERR_IN_PARK: strcat(reply,"slew in park"); break;
-    case CE_GOTO_ERR_GOTO: strcat(reply,"already in goto"); break;
-    case CE_GOTO_ERR_OUTSIDE_LIMITS: strcat(reply,"goto outside limits"); break;
-    case CE_SLEW_ERR_HARDWARE_FAULT: strcat(reply,"hardware fault"); break;
-    case CE_MOUNT_IN_MOTION: strcat(reply,"mount in motion"); break;
-    case CE_GOTO_ERR_UNSPECIFIED: strcat(reply,"other"); break;
+    case CE_NONE: strcpy(reply,L_CE_NONE); break;
+    case CE_0: strcpy(reply,L_CE_0); break;
+    case CE_CMD_UNKNOWN: strcat(reply,L_CE_CMD_UNKNOWN); break;
+    case CE_REPLY_UNKNOWN: strcat(reply,L_CE_REPLY_UNKNOWN); break;
+    case CE_PARAM_RANGE: strcat(reply,L_CE_PARAM_RANGE); break;
+    case CE_PARAM_FORM: strcat(reply,L_CE_PARAM_FORM); break;
+    case CE_ALIGN_FAIL: strcat(reply,L_CE_ALIGN_FAIL); break;
+    case CE_ALIGN_NOT_ACTIVE: strcat(reply,L_CE_ALIGN_NOT_ACTIVE); break;
+    case CE_NOT_PARKED_OR_AT_HOME: strcat(reply,L_CE_NOT_PARKED_OR_AT_HOME); break;
+    case CE_PARKED: strcat(reply,L_CE_PARKED); break;
+    case CE_PARK_FAILED: strcat(reply,L_CE_PARK_FAILED); break;
+    case CE_NOT_PARKED: strcat(reply,L_CE_NOT_PARKED); break;
+    case CE_NO_PARK_POSITION_SET: strcat(reply,L_CE_NO_PARK_POSITION_SET); break;
+    case CE_GOTO_FAIL: strcat(reply,L_CE_GOTO_FAIL); break;
+    case CE_LIBRARY_FULL: strcat(reply,L_CE_LIBRARY_FULL); break;
+    case CE_GOTO_ERR_BELOW_HORIZON: strcat(reply,L_CE_GOTO_ERR_BELOW_HORIZON); break;
+    case CE_GOTO_ERR_ABOVE_OVERHEAD: strcat(reply,L_CE_GOTO_ERR_ABOVE_OVERHEAD); break;
+    case CE_SLEW_ERR_IN_STANDBY: strcat(reply,L_CE_SLEW_ERR_IN_STANDBY); break;
+    case CE_SLEW_ERR_IN_PARK: strcat(reply,L_CE_SLEW_ERR_IN_PARK); break;
+    case CE_GOTO_ERR_GOTO: strcat(reply,L_CE_GOTO_ERR_GOTO); break;
+    case CE_GOTO_ERR_OUTSIDE_LIMITS: strcat(reply,L_CE_GOTO_ERR_OUTSIDE_LIMITS); break;
+    case CE_SLEW_ERR_HARDWARE_FAULT: strcat(reply,L_CE_SLEW_ERR_HARDWARE_FAULT); break;
+    case CE_MOUNT_IN_MOTION: strcat(reply,L_CE_MOUNT_IN_MOTION); break;
+    case CE_GOTO_ERR_UNSPECIFIED: strcat(reply,L_CE_GOTO_ERR_UNSPECIFIED); break;
     case CE_NULL: strcpy(reply,""); break;
-    default: strcat(reply,"unknown");
+    default: strcat(reply,L_CE_UNK);
   }
 
   return reply;

@@ -31,9 +31,9 @@ const char html_libStart[] PROGMEM =
 "<form method='get' action='/lib.htm'>";
 
 const char html_libCatalogSelect1[] PROGMEM =
-"Catalogs (<span id='libFree'>?";
+L_CATALOGS " (<span id='libFree'>?";
 const char html_libCatalogSelect2[] PROGMEM =
-"</span> records available:)<br /><br />Number <select name='selBox' onchange=\"busy(); s('ci',this.value);\">"
+"</span> " L_RECS_AVAIL ":)<br /><br />Number <select name='selBox' onchange=\"busy(); s('ci',this.value);\">"
 "<option value='0' %s>-</option>"
 "<option value='1' %s>1</option>"
 "<option value='2' %s>2</option>"
@@ -53,14 +53,14 @@ const char html_libCatalogSelect2[] PROGMEM =
 "</select>&nbsp;\n";
 
 const char html_libSubmitCatalog[] PROGMEM =
-"<button id='up' disabled type='submit' onclick=\"busy(); t('cu',document.getElementById('catData').value);\">Upload</button> "
-"<button id='down' disabled type='submit' onclick=\"busy(); s('cd',1);\">Download</button><br /><br />\n";
+"<button id='up' disabled type='submit' onclick=\"busy(); t('cu',document.getElementById('catData').value);\">" L_UPLOAD "</button> "
+"<button id='down' disabled type='submit' onclick=\"busy(); s('cd',1);\">" L_DOWNLOAD "</button><br /><br />\n";
 
 const char html_libShowMessage[] PROGMEM =
-"<div id='message' style='background-color: #222222; color: #aaaaaa; border: 1px solid #551111; width: 400px; padding: 2px;'>No catalog selected.</div><br />\n";
+"<div id='message' style='background-color: #222222; color: #aaaaaa; border: 1px solid #551111; width: 400px; padding: 2px;'>" L_NO_CATALOG ".</div><br />\n";
 
 const char html_libEditCatalog[] PROGMEM =
-"Data (downloaded OR to be uploaded.)<br />"
+L_CAT_DATA "<br />"
 "<textarea id='catData' style='background-color: #222222; color: #ffffff; border: 1px solid #551111;' "
 "rows='10' cols='40' oninput=\"document.getElementById('up').disabled=false;\"></textarea><br /><br />\n";
 
@@ -74,11 +74,7 @@ const char html_libCatalogForm[] PROGMEM =
 "  M97        ,PN ,11:15:53,+54*55:24<br />"
 "  M27        ,PN ,20:00:26,+22*46:29<br />"
 "</p></pre>"
-"Fields:<br /><pre>"
-"  A Catalog Name record is required for row 1, this<br />"
-"  consists of a '$' followed by up to 10 characters.<br /><br />"
-"  Object Name is a sequence of up to 11 characters.<br /><br />"
-"  Cat is a category code as follows:<br />"
+L_CAT_EXAMPLE1 L_CAT_EXAMPLE2 L_CAT_EXAMPLE3 L_CAT_EXAMPLE4 L_CAT_EXAMPLE5
 "    UNK = Unknown<br />"
 "    OC  = Open Cluster<br />"
 "    GC  = Globular Cluster<br />"
@@ -95,8 +91,7 @@ const char html_libCatalogForm[] PROGMEM =
 "    PLA = Planet<br />"
 "    CMT = Comet<br />"
 "    AST = Asteroid<br /><br />"
-"  RA (Jnow) is in Hours, Minutes, and Seconds.<br />"
-"  Dec (Jnow) is in +/- Degrees, Minutes, Seconds.<br />"
+L_CAT_EXAMPLE6 L_CAT_EXAMPLE7
 "<br /></pre>\n";
 
 const char html_libEnd[] PROGMEM =
@@ -113,7 +108,6 @@ void handleLibrary() {
   
   char temp[320]="";
   char temp1[80]="";
-  char temp2[80]="";
   
   processLibraryGet();
 
@@ -225,14 +219,14 @@ void libraryAjax() {
             currentCatName[i-1]=temp[i];
           }
           if (currentCatName[0] == 0) {
-            showMessage = F("Catalog selected, has no name.");
+            showMessage = F(L_CAT_NO_NAME);
           } else {
             data += "down|enabled\n";
-            showMessage = "Catalog "; showMessage += currentCatName; showMessage += " selected.";
+            showMessage = L_CATALOG " "; showMessage += currentCatName; showMessage += " " L_SELECTED ".";
           }
-        } else { data += "down|disabled\n"; showMessage = F("Catalog selected, has no name."); }
-      } else { data += "down|disabled\n"; showMessage = F("Catalog selected, get name failed."); }
-    } else { data += "down|disabled\n"; showMessage = F("No catalog selected."); }
+        } else { data += "down|disabled\n"; showMessage = F(L_CAT_NO_NAME); }
+      } else { data += "down|disabled\n"; showMessage = F(L_CAT_GET_NAME_FAIL); }
+    } else { data += "down|disabled\n"; showMessage = F(L_CAT_NO_CAT); }
     data += "catData&\n";
     catalogIndexChanged=false;
   } else
@@ -276,9 +270,9 @@ void libraryAjax() {
           data+=r;
           data+="\r";
         }
-        if (!success) showMessage = F("Download failed, bad data."); else showMessage = F("Download success.");
-      } else showMessage = F("Download failed, couldn't index to catalog.");
-    } else showMessage = F("Download failed, couldn't index to catalog.");
+        if (!success) showMessage = F(L_CAT_DOWNLOAD_FAIL); else showMessage = F(L_CAT_DOWNLOAD_SUCCESS);
+      } else showMessage = F(L_CAT_DOWNLOAD_INDEX_FAIL);
+    } else showMessage = F(L_CAT_DOWNLOAD_INDEX_FAIL);
     data+="\n";
 
     downloadCatalogData=false;
@@ -320,7 +314,7 @@ void processLibraryGet() {
       if (commandBool(temp)) {
         v.replace("_"," ");
         int lineNum = 0;
-        if (v=="DELETE") { v=""; showMessage="Catalog removed."; }
+        if (v=="DELETE") { v=""; showMessage=L_CAT_DATA_REMOVED "."; }
         commandBlind(":LL#");  // clear this catalog
         while (v.length() > 0) { // any data left?
           lineNum++;
@@ -329,48 +323,49 @@ void processLibraryGet() {
 
           // catalog name?
           if (lineNum == 1) {
+            line.trim();
             if (line.charAt(0) == '$') {
               co = line.substring(0);
               co.trim();
-              if (co.length() < 2 || co.length() > 11) { showMessage=F("Upload failed, bad catalog name."); break; }
-              if (!commandBool(":L$#")) { showMessage=F("Upload failed, indexing catalog name rec."); break; }
-              if (!commandBool(":LD#")) { showMessage=F("Upload failed, deleting catalog name rec."); break; }
-              if (!commandBool((":LW"+co+"#").c_str())) { showMessage=F("Upload failed, writing catalog name rec."); break; }
+              if (co.length() < 2 || co.length() > 11) { showMessage=F(L_CAT_UPLOAD_FAIL); break; }
+              if (!commandBool(":L$#")) { showMessage=F(L_CAT_UPLOAD_INDEX_FAIL); break; }
+              if (!commandBool(":LD#")) { showMessage=F(L_CAT_DELETE_FAIL); break; }
+              if (!commandBool((":LW"+co+"#").c_str())) { showMessage=F(L_CAT_WRITE_NAME_FAIL); break; }
               continue;
-            } else { showMessage="Upload failed, line 1 must contain catalog name."; break; }
+            } else { showMessage=L_CAT_UPLOAD_NO_NAME_FAIL; break; }
           }
           
-          i=line.indexOf(","); if (i >= 0) { co  = line.substring(0,i); line=line.substring(i+1); } else { showMessage=F("Upload failed, bad format in line# "); showMessage+=String(lineNum); break; }
-          i=line.indexOf(","); if (i >= 0) { cat = line.substring(0,i); line=line.substring(i+1); } else { showMessage=F("Upload failed, bad format in line# "); showMessage+=String(lineNum); break; }
-          i=line.indexOf(","); if (i >= 0) { ra  = line.substring(0,i); line=line.substring(i+1); } else { showMessage=F("Upload failed, bad format in line# "); showMessage+=String(lineNum); break; }
+          i=line.indexOf(","); if (i >= 0) { co  = line.substring(0,i); line=line.substring(i+1); } else { showMessage=F(L_CAT_BAD_FORM); showMessage+=String(lineNum); break; }
+          i=line.indexOf(","); if (i >= 0) { cat = line.substring(0,i); line=line.substring(i+1); } else { showMessage=F(L_CAT_BAD_FORM); showMessage+=String(lineNum); break; }
+          i=line.indexOf(","); if (i >= 0) { ra  = line.substring(0,i); line=line.substring(i+1); } else { showMessage=F(L_CAT_BAD_FORM); showMessage+=String(lineNum); break; }
           de = line;
           
           co.trim(); cat.trim(); ra.trim(); de.trim();
-          if (co.length() < 1 || co.length() > 11) { showMessage=F("Upload failed, bad object name in line# "); showMessage+=String(lineNum); break; }
+          if (co.length() < 1 || co.length() > 11) { showMessage=F(L_CAT_UPLOAD_BAD_OBJECT_NAME); showMessage+=String(lineNum); break; }
           if (cat != "UNK" && cat != "OC"  && cat != "GC"  && cat != "PN" && 
               cat != "DN"  && cat != "SG"  && cat != "EG"  && cat != "IG" &&
               cat != "KNT" && cat != "SNR" && cat != "GAL" && cat != "CN" &&
-              cat != "STR" && cat != "PLA" && cat != "CMT" && cat != "AST") { showMessage=F("Upload failed, bad category in line# "); showMessage+=String(lineNum); break; }
+              cat != "STR" && cat != "PLA" && cat != "CMT" && cat != "AST") { showMessage=F(L_CAT_BAD_CATEGORY); showMessage+=String(lineNum); break; }
 
           if (!isDigit(ra.charAt(0)) || !isDigit(ra.charAt(1)) || 
               !isDigit(ra.charAt(3)) || !isDigit(ra.charAt(4)) ||
               !isDigit(ra.charAt(6)) || !isDigit(ra.charAt(7)) ||
-              ra.charAt(2) != ':' || ra.charAt(5) != ':' || ra.length() != 8)  { showMessage=F("Upload failed, bad RA format in line# "); showMessage+=String(lineNum); break; }
+              ra.charAt(2) != ':' || ra.charAt(5) != ':' || ra.length() != 8)  { showMessage=F(L_CAT_BAD_RA); showMessage+=String(lineNum); break; }
               
           if (!isDigit(de.charAt(1)) || !isDigit(de.charAt(2)) || 
               !isDigit(de.charAt(4)) || !isDigit(de.charAt(5)) ||
               !isDigit(de.charAt(7)) || !isDigit(de.charAt(8)) ||
               (de.charAt(0) != '+' && de.charAt(0) != '-') ||
               (de.charAt(3) != '*' && de.charAt(3) != ':') ||
-              de.charAt(6) != ':' || de.length() != 9) { showMessage=F("Upload failed, bad Dec format in line# "); showMessage+=String(lineNum); break; }
+              de.charAt(6) != ':' || de.length() != 9) { showMessage=F(L_CAT_BAD_DEC); showMessage+=String(lineNum); break; }
 
-          if (!commandBool((":Sr"+ra+"#").c_str())) { showMessage=F("Upload failed, sending RA in line# "); showMessage+=String(lineNum); break; }
-          if (!commandBool((":Sd"+de+"#").c_str())) { showMessage=F("Upload failed, sending Dec in line# "); showMessage+=String(lineNum); break; }
-          if (!commandBool((":LW"+co+","+cat+"#").c_str())) { showMessage=F("Upload failed, sending line# "); showMessage+=String(lineNum); break; }
+          if (!commandBool((":Sr"+ra+"#").c_str())) { showMessage=F(L_CAT_UPLOAD_RA_FAIL); showMessage+=String(lineNum); break; }
+          if (!commandBool((":Sd"+de+"#").c_str())) { showMessage=F(L_CAT_UPLOAD_DEC_FAIL); showMessage+=String(lineNum); break; }
+          if (!commandBool((":LW"+co+","+cat+"#").c_str())) { showMessage=F(L_CAT_UPLOAD_LINE_FAIL); showMessage+=String(lineNum); break; }
         }
-        if (showMessage=="") showMessage="Upload success, "+String(lineNum)+" lines written.";
-      } else showMessage=F("Upload failed, unable to select catalog.");
-    } else showMessage=F("Upload failed, no catalog selected.");
+        if (showMessage=="") showMessage=L_CAT_UPLOAD_SUCCESS ", "+String(lineNum)+" " L_CAT_UPLOAD_LINES_WRITTEN ".";
+      } else showMessage=F(L_CAT_UPLOAD_SELECT_FAIL);
+    } else showMessage=F(L_CAT_UPLOAD_NO_CAT);
   }
 
   // Catalog index (1-15)

@@ -62,6 +62,22 @@
 #include "Constants.h"
 #include "Config.h"
 
+// ISO639-1 language codes
+#if DISPLAY_LANGUAGE == L_en
+  #include "Strings_en.h"
+#endif
+#if DISPLAY_LANGUAGE == L_es
+  #include "Strings_es.h"
+#endif
+#if DISPLAY_LANGUAGE == L_fr
+  #include "Strings_fr.h"
+#endif
+#if DISPLAY_LANGUAGE == L_de
+  #include "Strings_de.h"
+#endif
+
+#include "Globals.h"
+
 #include "WebServer.h"
 
 // The settings below are for initialization only, afterward they are stored and recalled from EEPROM and must
@@ -119,8 +135,9 @@ void handleNotFound(EthernetClient *client) {
 #include "MountStatus.h"
 
 void setup(void){
+  long serial_baud = SERIAL_BAUD;
   Ser.begin(SERIAL_BAUD_DEFAULT);
-  delay(2000);
+  byte tb=1;
 
 // EEPROM Init
 #ifndef EEPROM_DISABLED
@@ -155,47 +172,48 @@ void setup(void){
   }
 #endif
 
-  byte tb=0;
 Again:
-  char c=0;
+  // clear the buffers and any noise on the serial lines
+  for (int i=0; i<3; i++) {
+    Ser.print(":#"); delay(500);
+    serialRecvFlush();
+  }
 
+  // look for On-Step
+  Ser.print(":GVP#"); delay(100);
+  // make sure response is good
+  if (Ser.available() == 8 && 
+      Ser.read() == 'O' && Ser.read() == 'n' && Ser.read() == '-' && Ser.read() == 'S' &&
+      Ser.read() == 't' && Ser.read() == 'e' && Ser.read() == 'p' && Ser.read() == '#') {
+
+    // check fastest baud rate
+    Ser.print(":GB#"); delay(100);
+    if (Ser.available() != 1) { serialRecvFlush(); goto Again; }
+    if (Ser.read() == '4' && serial_baud > 19200) serial_baud = 19200; // Mega2560 returns '4' for 19200 baud recommended
+
+    // set fastest baud rate
+    Ser.print(HighSpeedCommsStr(serial_baud)); delay(100);
+    if (Ser.available() != 1) { serialRecvFlush(); goto Again; }
+    if (Ser.read() != '1') goto Again;
+    
+    // we're all set, just change the baud rate to match OnStep
+    Ser.begin(serial_baud); delay(2000);
+  } else {
+    // got nothing back, toggle baud rate and/or swap ports
+    serialRecvFlush();
+    tb++;
+    if (tb == 16) tb=1;
+    if (tb == 1) { Ser.begin(SERIAL_BAUD_DEFAULT); delay(2000); }
+    if (tb == 6) { Ser.begin(serial_baud); delay(2000); }
+    if (tb == 11) { Ser.begin(19200); delay(2000); }
+    goto Again;
+  }
+  
   // clear the buffers and any noise on the serial lines
   for (int i=0; i<3; i++) {
     Ser.print(":#");
-    delay(500);
-    c=serialRecvFlush();
-  }
-
-  if (SERIAL_BAUD!=SERIAL_BAUD_DEFAULT) {
-
-    // switch OnStep Serial up to ? baud
-    Ser.print(HighSpeedCommsStr(SERIAL_BAUD));
-    delay(200);
-    int count=0; c=0; while (Ser.available() > 0) { count++; if (count == 1) c=Ser.read(); }
-    if (c=='1') {
-      Ser.begin(SERIAL_BAUD);
-      delay(3000);
-    } else {
-      // got nothing back, toggle baud rate and try again
-      tb++;
-      if (tb == 11) tb=1;
-      if (tb == 1) Ser.begin(SERIAL_BAUD_DEFAULT);
-      if (tb == 6) Ser.begin(SERIAL_BAUD);
-  
-      if (tb == 1 || tb == 6) delay(2000);
-#ifndef DEBUG_ON
-      goto Again;
-#else
-      Ser.begin(9600);
-#endif
-    }
-    
-    // clear the buffers and any noise on the serial lines
-    for (int i=0; i<3; i++) {
-      Ser.print(":#");
-      delay(50);
-      serialRecvFlush();
-    }
+    delay(50);
+    serialRecvFlush();
   }
 
 #if W5500 == ON

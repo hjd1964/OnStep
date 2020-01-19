@@ -1,50 +1,6 @@
 // -----------------------------------------------------------------------------------
 // Telescope control related functions 
 
-#if DISPLAY_SPECIAL_CHARS == ON
-  #define HOME_CH "&#x1F3E0;"
-  #define ARROW_DR "&#x27A5;"
-  #define ARROW_UR "&#x27A6;"
-  #define ARROW_R2 "&#x27A4;"
-  #define CAUTION_CH "&#9888;"
-  #define CLOCK_CH "&#x1F565;"
-  #define ARROW_LL "&lt;&lt;"
-  #define ARROW_L "&lt;"
-  #define ARROW_R "&gt;"
-  #define ARROW_RR "&gt;&gt;"
-  #define ARROW_DD "&lt;&lt;"
-  #define ARROW_D "&lt;"
-  #define ARROW_U "&gt;"
-  #define ARROW_UU "&gt;&gt;"
-  #define SIDEREAL_CH "&#9733;"
-  #define LUNAR_CH "&#9790;"
-  #define SOLAR_CH "&#9737;"
-#else
-  #define HOME_CH "H"
-  #define ARROW_DR "-&gt;"
-  #define ARROW_UR "-&gt;"
-  #define ARROW_R2 "&gt;"
-  #define CAUTION_CH "!"
-  #define CLOCK_CH "T"
-  #define ARROW_LL "&lt;&lt;"
-  #define ARROW_L "&lt;"
-  #define ARROW_R "&gt;"
-  #define ARROW_RR "&gt;&gt;"
-  #define ARROW_DD "&lt;&lt;"
-  #define ARROW_D "&lt;"
-  #define ARROW_U "&gt;"
-  #define ARROW_UU "&gt;&gt;"
-  #define SIDEREAL_CH "*"
-  #define LUNAR_CH "("
-  #define SOLAR_CH "O"
-#endif
-
-#define BUTTON_N "N"
-#define BUTTON_S "S"
-#define BUTTON_E "E"
-#define BUTTON_W "W"
-#define BUTTON_SYNC "@"
-
 const char html_controlScript1[] PROGMEM =
 "<script>\n"
 "function s(key,v1) {\n"
@@ -77,44 +33,44 @@ const char html_controlScript4[] =
 const char html_controlQuick1[] PROGMEM =
 "<div style='text-align: center; width: 30em'>"
 "<form style='display: inline;' method='get' action='/control.htm'>"
-"<button name='qb' class='bb' value='st' type='submit' onpointerdown='SetDateTime();' title='Set Date/Time'>" CLOCK_CH "</button>"
+"<button name='qb' class='bb' value='st' type='submit' onpointerdown='SetDateTime();' title='" L_HINT_CLOCK "'>" CLOCK_CH "</button>"
 "&nbsp;&nbsp;";
 const char html_controlQuick1a[] PROGMEM =
 "<input id='dm' type='hidden' name='dm'><input id='dd' type='hidden' name='dd'><input id='dy' type='hidden' name='dy'>"
 "<input id='th' type='hidden' name='th'><input id='tm' type='hidden' name='tm'><input id='ts' type='hidden' name='ts'>";
 const char html_controlQuick2[] PROGMEM =
 "</form>"
-"<button type='button' class='bb' onpointerdown=\"g('qc')\" title='Continue Goto (when paused at home)'>" ARROW_R2 HOME_CH ARROW_R2 "</button>";
+"<button type='button' class='bb' onpointerdown=\"g('qc')\" title='" L_HINT_CONTINUE_GOTO "'>" ARROW_R2 HOME_CH ARROW_R2 "</button>";
 const char html_controlQuick3[] PROGMEM =
 "&nbsp;&nbsp;"
-"<button type='button' class='bb' onpointerdown=\"g('qh')\" title='Find Home'>" ARROW_DR HOME_CH "</button>"
-"<button type='button' class='bb' onpointerdown=\"g('qr')\" title='Home (Reset)'>" CAUTION_CH HOME_CH "</button>";
+"<button type='button' class='bb' onpointerdown=\"g('qh')\" title='" L_HINT_FIND_HOME "'>" ARROW_DR HOME_CH "</button>"
+"<button type='button' class='bb' onpointerdown=\"g('qr')\" title='" L_HINT_RESET_HOME "'>" CAUTION_CH HOME_CH "</button>";
 const char html_controlQuick4[] PROGMEM =
 "&nbsp;&nbsp;"
-"<button type='button' class='bb' onpointerdown=\"g('pu')\" title='Un-Park'>P" ARROW_UR "</button>"
-"<button type='button' class='bb' onpointerdown=\"g('pk')\" title='Park'>" ARROW_DR "P</button>";
+"<button type='button' class='bb' onpointerdown=\"g('pu')\" title='" L_HINT_UNPARK "'>P" ARROW_UR "</button>"
+"<button type='button' class='bb' onpointerdown=\"g('pk')\" title='" L_HINT_PARK "'>" ARROW_DR "P</button>";
 const char html_controlQuick5[] PROGMEM =
 "&nbsp;&nbsp;"
-"<button type='button' class='bb' style=\"height: 2.2em; color: White;\" onpointerdown=\"g('qq')\" title='Emergency Stop!'>Stop!</button>"
+"<button type='button' class='bb' style=\"height: 2.2em; color: White;\" onpointerdown=\"g('qq')\" title='" L_HINT_EMERGENCY_STOP "'>Stop!</button>"
 "</div><br class='clear' />\r\n";
 
 const char html_controlTrack1[] PROGMEM = 
 "<div class='b1' style='width: 8em'>"
 "<div align='left'>Tracking:</div>"
-"<button type='button' class='bbh' style='width: 2em' onpointerdown=\"g('Ts')\" type='submit' title='Sidereal Rate'>" SIDEREAL_CH "</button>";
+"<button type='button' class='bbh' style='width: 2em' onpointerdown=\"g('Ts')\" type='submit' title='" L_HINT_RATE_SIDEREAL "'>" SIDEREAL_CH "</button>";
 const char html_controlTrack2[] PROGMEM =
-"<button type='button' class='bbh' style='width: 2em' onpointerdown=\"g('Tl')\" type='submit' title='Lunar Rate'>" LUNAR_CH "</button>";
+"<button type='button' class='bbh' style='width: 2em' onpointerdown=\"g('Tl')\" type='submit' title='" L_HINT_RATE_LUNAR "'>" LUNAR_CH "</button>";
 const char html_controlTrack3[] PROGMEM =
-"<button type='button' class='bbh' style='width: 2em' onpointerdown=\"g('Th')\" type='submit' title='Solar Rate'>" SOLAR_CH "</button>"
+"<button type='button' class='bbh' style='width: 2em' onpointerdown=\"g('Th')\" type='submit' title='" L_HINT_RATE_SOLAR "'>" SOLAR_CH "</button>"
 "</div>";
 const char html_controlAlign1[] PROGMEM = 
 "<div class='b1' style='width: 16.2em'>"
-"<div align='left'>Align:</div>"
+"<div align='left'>" L_ALIGN ":</div>"
 "<form method='get' action='/control.htm'>";
 const char html_controlAlign2[] PROGMEM =
 "<button class='bbh' type='submit' name=\"al\" value='%d'>%d%s</button>";
 const char html_controlAlign3[] PROGMEM =
-"&nbsp;&nbsp;&nbsp;<button class='bbh' type='submit' name=\"al\" value=\"n\">Accept</button></form>";
+"&nbsp;&nbsp;&nbsp;<button class='bbh' type='submit' name=\"al\" value=\"n\">" L_ACCEPT "</button></form>";
 const char html_controlTrack4[] PROGMEM =
 "</div><br class='clear' />\r\n";
 
@@ -135,21 +91,21 @@ const char html_controlGuide5[] PROGMEM =
 "<button class='bbh' type='button' onpointerdown=\"g('R1')\">0.5</button>"
 "<button class='bbh' type='button' onpointerdown=\"g('R2')\">1x</button>";
 const char html_controlGuide6[] PROGMEM =
-"<button class='bbh' type='button' onpointerdown=\"g('R5')\">Cntr</button>"
-"<button class='bbh' type='button' onpointerdown=\"g('R6')\">Find</button>";
+"<button class='bbh' type='button' onpointerdown=\"g('R5')\">" L_CENTER_RATE "</button>"
+"<button class='bbh' type='button' onpointerdown=\"g('R6')\">" L_FIND_RATE "</button>";
 const char html_controlGuide7[] PROGMEM =
-"<button class='bbh' type='button' onpointerdown=\"g('R7')\">Fast</button>"
-"<button class='bbh' type='button' onpointerdown=\"g('R8')\">VF</button>"
+"<button class='bbh' type='button' onpointerdown=\"g('R7')\">" L_FAST_RATE "</button>"
+"<button class='bbh' type='button' onpointerdown=\"g('R8')\">" L_VFAST_RATE "</button>"
 "</div><br class='clear' />\r\n";
 
 const char html_controlFocus1[] PROGMEM =
 "<div class='b1' style='width: 27em'>";
 const char html_controlFocus2[] PROGMEM =
-"<button class='bbh' type='button' onpointerdown=\"gf('F1')\" title='Select Focuser 1'>1</button>"
-"<button class='bbh' type='button' onpointerdown=\"gf('F2')\" title='Select Focuser 2'>2</button>&nbsp;&nbsp;&nbsp;&nbsp;";
+"<button class='bbh' type='button' onpointerdown=\"gf('F1')\" title='" L_HINT_FOC_SEL " 1'>1</button>"
+"<button class='bbh' type='button' onpointerdown=\"gf('F2')\" title='" L_HINT_FOC_SEL " 2'>2</button>&nbsp;&nbsp;&nbsp;&nbsp;";
 const char html_controlFocus3[] PROGMEM =
-"<button class='bbh' type='button' onpointerdown=\"gf('Fh')\" title='Find Focuser Home'>" ARROW_DR HOME_CH "</button>"
-"<button class='bbh' type='button' onpointerdown=\"gf('FH')\" title='Home (Reset) Focuser'>" CAUTION_CH HOME_CH "</button>&nbsp;&nbsp;&nbsp;&nbsp;";
+"<button class='bbh' type='button' onpointerdown=\"gf('Fh')\" title='" L_HINT_FOC_FIND_HOME "'>" ARROW_DR HOME_CH "</button>"
+"<button class='bbh' type='button' onpointerdown=\"gf('FH')\" title='" L_HINT_FOC_RESET_HOME "'>" CAUTION_CH HOME_CH "</button>&nbsp;&nbsp;&nbsp;&nbsp;";
 const char html_controlFocus4[] PROGMEM =
 "<button class='bbh' type='button' onpointerdown=\"gf('FI')\" onpointerup=\"g('Fq');\" >" ARROW_DD "</button>"
 "<button class='bbh' type='button' style='width: 2em' onpointerdown=\"gf('Fi')\" onpointerup=\"g('Fq')\" >" ARROW_D "</button>";
@@ -162,8 +118,8 @@ const char html_controlFocus6[] PROGMEM =
 const char html_controlRotate0[] PROGMEM =
 "<div class='b1' style='width: 27em'>";
 const char html_controlRotate1[] PROGMEM =
-"<button class='bbh' type='button' style='height: 2.1em' onpointerdown=\"gf('ho')\" title='Find Rotator Home'>" ARROW_DR HOME_CH "</button>"
-"<button class='bbh' type='button' style='height: 2.1em' onpointerdown=\"gf('re')\" title='Home (Reset) Rotator'>" CAUTION_CH HOME_CH "</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+"<button class='bbh' type='button' style='height: 2.1em' onpointerdown=\"gf('ho')\" title='" L_HINT_ROT_FIND_HOME "'>" ARROW_DR HOME_CH "</button>"
+"<button class='bbh' type='button' style='height: 2.1em' onpointerdown=\"gf('re')\" title='" L_HINT_ROT_RESET_HOME "'>" CAUTION_CH HOME_CH "</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 const char html_controlRotate2[] PROGMEM =
 "<button class='bbh' type='button' style='height: 2.1em' onpointerdown=\"gf('b2')\" >" ARROW_LL "</button>"
 "<button class='bbh' type='button' style='width: 2em' onpointerdown=\"gf('b1')\" >" ARROW_L "</button>";
@@ -171,42 +127,42 @@ const char html_controlRotate3[] PROGMEM =
 "<button class='bbh' type='button' style='width: 2em' onpointerdown=\"gf('f1')\" >" ARROW_R "</button>"
 "<button class='bbh' type='button' style='height: 2.1em' onpointerdown=\"gf('f2')\" >" ARROW_RR "</button><br />";
 const char html_controlDeRotate1[] PROGMEM =
-"<button type='button' onpointerdown=\"gf('d1')\" >De-Rotate On</button>&nbsp;&nbsp;&nbsp;"
-"<button type='button' onpointerdown=\"gf('dr')\" title='Reverse Rotator Motion'>Rev</button>";
+"<button type='button' onpointerdown=\"gf('d1')\" >" L_HINT_DEROTATE_ON "</button>&nbsp;&nbsp;&nbsp;"
+"<button type='button' onpointerdown=\"gf('dr')\" title='" L_HINT_ROTATOR_REV "'>Rev</button>";
 const char html_controlDeRotate2[] PROGMEM =
-"<button type='button' onpointerdown=\"gf('dp')\" title='Move Rotator to Parallactic angle'>P</button>&nbsp;&nbsp;&nbsp;"
-"<button type='button' onpointerdown=\"gf('d0')\" >De-Rotate Off</button>";
+"<button type='button' onpointerdown=\"gf('dp')\" title='" L_HINT_ROTATOR_PAR "'>P</button>&nbsp;&nbsp;&nbsp;"
+"<button type='button' onpointerdown=\"gf('d0')\" >" L_HINT_DEROTATE_OFF "</button>";
 const char html_controlRotate4[] PROGMEM =
 "</div><br class='clear' />\r\n";
 
 #if defined(SW0) || defined(SW1) || defined(SW2) || defined(SW3) || defined(SW4) || defined(SW5) || defined(SW6) || defined(SW7) || defined(SW8) || defined(AN3) || defined(AN4) || defined(AN5) || defined(AN6) || defined(AN7) || defined(AN8)
 const char html_controlAuxB[] PROGMEM = "<div class='b1' style='width: 27em'><div align='left'>Aux:</div>";
 #ifdef SW0
-const char html_controlSwitch0[] PROGMEM = SW0 "<br /><button type='button' onpointerdown=\"s('sw0','255')\" >On</button><button type='button' onpointerdown=\"s('sw0','0')\" >Off</button><br />";
+const char html_controlSwitch0[] PROGMEM = SW0 "<br /><button type='button' onpointerdown=\"s('sw0','255')\" >" L_ON "</button><button type='button' onpointerdown=\"s('sw0','0')\" >" L_OFF "</button><br />";
 #endif
 #ifdef SW1
-const char html_controlSwitch1[] PROGMEM = SW1 "<br /><button type='button' onpointerdown=\"s('sw1','255')\" >On</button><button type='button' onpointerdown=\"s('sw1','0')\" >Off</button><br />";
+const char html_controlSwitch1[] PROGMEM = SW1 "<br /><button type='button' onpointerdown=\"s('sw1','255')\" >" L_ON "</button><button type='button' onpointerdown=\"s('sw1','0')\" >" L_OFF "</button><br />";
 #endif
 #ifdef SW2
-const char html_controlSwitch2[] PROGMEM = SW2 "<br /><button type='button' onpointerdown=\"s('sw2','255')\" >On</button><button type='button' onpointerdown=\"s('sw2','0')\" >Off</button><br />";
+const char html_controlSwitch2[] PROGMEM = SW2 "<br /><button type='button' onpointerdown=\"s('sw2','255')\" >" L_ON "</button><button type='button' onpointerdown=\"s('sw2','0')\" >" L_OFF "</button><br />";
 #endif
 #ifdef SW3
-const char html_controlSwitch3[] PROGMEM = SW3 "<br /><button type='button' onpointerdown=\"s('sw3','255')\" >On</button><button type='button' onpointerdown=\"s('sw3','0')\" >Off</button><br />";
+const char html_controlSwitch3[] PROGMEM = SW3 "<br /><button type='button' onpointerdown=\"s('sw3','255')\" >" L_ON "</button><button type='button' onpointerdown=\"s('sw3','0')\" >" L_OFF "</button><br />";
 #endif
 #ifdef SW4
-const char html_controlSwitch4[] PROGMEM = SW4 "<br /><button type='button' onpointerdown=\"s('sw4','255')\" >On</button><button type='button' onpointerdown=\"s('sw4','0')\" >Off</button><br />";
+const char html_controlSwitch4[] PROGMEM = SW4 "<br /><button type='button' onpointerdown=\"s('sw4','255')\" >" L_ON "</button><button type='button' onpointerdown=\"s('sw4','0')\" >" L_OFF "</button><br />";
 #endif
 #ifdef SW5
-const char html_controlSwitch5[] PROGMEM = SW5 "<br /><button type='button' onpointerdown=\"s('sw5','255')\" >On</button><button type='button' onpointerdown=\"s('sw5','0')\" >Off</button><br />";
+const char html_controlSwitch5[] PROGMEM = SW5 "<br /><button type='button' onpointerdown=\"s('sw5','255')\" >" L_ON "</button><button type='button' onpointerdown=\"s('sw5','0')\" >" L_OFF "</button><br />";
 #endif
 #ifdef SW6
-const char html_controlSwitch6[] PROGMEM = SW6 "<br /><button type='button' onpointerdown=\"s('sw6','255')\" >On</button><button type='button' onpointerdown=\"s('sw6','0')\" >Off</button><br />";
+const char html_controlSwitch6[] PROGMEM = SW6 "<br /><button type='button' onpointerdown=\"s('sw6','255')\" >" L_ON "</button><button type='button' onpointerdown=\"s('sw6','0')\" >" L_OFF "</button><br />";
 #endif
 #ifdef SW7
-const char html_controlSwitch7[] PROGMEM = SW7 "<br /><button type='button' onpointerdown=\"s('sw7','255')\" >On</button><button type='button' onpointerdown=\"s('sw7','0')\" >Off</button><br />";
+const char html_controlSwitch7[] PROGMEM = SW7 "<br /><button type='button' onpointerdown=\"s('sw7','255')\" >" L_ON "</button><button type='button' onpointerdown=\"s('sw7','0')\" >" L_OFF "</button><br />";
 #endif
 #ifdef SW8
-const char html_controlSwitch8[] PROGMEM = SW8 "<br /><button type='button' onpointerdown=\"s('sw8','255')\" >On</button><button type='button' onpointerdown=\"s('sw8','0')\" >Off</button><br />";
+const char html_controlSwitch8[] PROGMEM = SW8 "<br /><button type='button' onpointerdown=\"s('sw8','255')\" >" L_ON "</button><button type='button' onpointerdown=\"s('sw8','0')\" >" L_OFF "</button><br />";
 #endif
 #ifdef AN3
 const char html_controlAnalog3A[] PROGMEM = AN3 " <span id='an3v'>";
@@ -368,7 +324,7 @@ void handleControl() {
   if (commandBool(":fA#")) Focuser2=true; else Focuser2=false;
   if (Focuser1) {
     data += FPSTR(html_controlFocus1);
-    data += "<div style='float: left;'>Focuser:</div><div style='float: right; text-align: right;' id='focuserpos'>?</div><br />";
+    data += "<div style='float: left;'>" L_FOCUSER ":</div><div style='float: right; text-align: right;' id='focuserpos'>?</div><br />";
     if (Focuser2) data += FPSTR(html_controlFocus2);
     data += FPSTR(html_controlFocus3);
     data += FPSTR(html_controlFocus4);
@@ -386,7 +342,7 @@ void handleControl() {
   }
   if (Rotate) {
     data += FPSTR(html_controlRotate0);
-    data += "<div style='float: left;'>Rotator:</div><div style='float: right; text-align: right;' id='rotatorpos'>?</div><br />";
+    data += "<div style='float: left;'>" L_ROTATOR ":</div><div style='float: right; text-align: right;' id='rotatorpos'>?</div><br />";
     data += FPSTR(html_controlRotate1);
     data += FPSTR(html_controlRotate2);
     data += FPSTR(html_controlRotate3);

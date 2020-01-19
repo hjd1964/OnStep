@@ -4,104 +4,97 @@
 const char html_wifiSerial[] PROGMEM =
 "<b>Performance and compatibility:</b><br/>"
 "<form method='post' action='/wifi.htm'>"
-"Command channel serial read time-out: <input style='width:4em' name='ccto' value='%d' type='number' min='5' max='100'> ms<br/>"
-"Web channel serial read time-out: <input style='width:4em' name='wcto' value='%d' type='number' min='5' max='100'> ms<br/>"
+L_WIFI_CMD_TO ": <input style='width:4em' name='ccto' value='%d' type='number' min='5' max='100'> ms<br/>"
+L_WIFI_WWW_TO ": <input style='width:4em' name='wcto' value='%d' type='number' min='5' max='100'> ms<br/>"
 "<button type='submit'>Upload</button></form><br />\r\n";
 const char html_wifiSSID1[] PROGMEM =
-"<br/><b>Station mode (connect to an Access-Point):</b><br/>"
+"<br/><b>" L_WIFI_STA_TITLE ":</b><br/>"
 "<form method='post' action='/wifi.htm'>"
 "SSID: <input style='width:6em' name='stssid' type='text' value='%s' maxlength='32'>&nbsp;&nbsp;&nbsp;"
-"Password: <input style='width:8em' name='stpwd' type='password' value='%s' maxlength='39'> (8 char min.)<br/>";
+L_WIFI_PWD ": <input style='width:8em' name='stpwd' type='password' value='%s' maxlength='39'> (" L_WIFI_PWD_MSG ")<br/>";
 const char html_wifiSSID2[] PROGMEM =
-"Enable DHCP: <input type='checkbox' name='stadhcp' value='1' %s> (Note: above addresses are ignored if DHCP is enabled)<br/>"
-"Enable Station Mode: <input type='checkbox' name='staen' value='1' %s><br/>"
-"<button type='submit'>Upload</button></form><br />\r\n";
+L_WIFI_EN_DHCP ": <input type='checkbox' name='stadhcp' value='1' %s> (" L_WIFI_EN_DHCP_MSG ")<br/>"
+L_WIFI_EN_STA ": <input type='checkbox' name='staen' value='1' %s><br/>"
+"<button type='submit'>" L_UPLOAD "</button></form><br />\r\n";
 
 const char html_wifiMAC[] PROGMEM =
 "MAC: <input style='width:10em' name='stmac' type='text' value='%s' maxlength='17' disabled><br/>";
 
 const char html_wifiSTAIP[] PROGMEM =
-"<table><tr><td>IP Address: </td><td>"
+"<table><tr><td>" L_IP_ADDRESS ": </td><td>"
 "<input name='staip1' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
 "<input name='staip2' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
 "<input name='staip3' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
 "<input name='staip4' value='%d' type='number' min='0' max='255'></td>";
 const char html_wifiSTAGW[] PROGMEM =
-"<tr><td>Gateway: </td><td>"
+"<tr><td>" L_GATEWAY ": </td><td>"
 "<input name='stagw1' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
 "<input name='stagw2' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
 "<input name='stagw3' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
 "<input name='stagw4' value='%d' type='number' min='0' max='255'></td>";
 const char html_wifiSTASN[] PROGMEM =
-"<tr><td>Subnet: </td><td>"
+"<tr><td>" L_SUBNET ": </td><td>"
 "<input name='stasn1' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
 "<input name='stasn2' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
 "<input name='stasn3' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
 "<input name='stasn4' value='%d' type='number' min='0' max='255'></td></tr></table>";
 
 const char html_wifiSSID3[] PROGMEM =
-"<br/><b>Access-Point mode:</b><br/>"
+"<br/><b>" L_WIFI_AP ":</b><br/>"
 "<form method='post' action='/wifi.htm'>"
 "SSID: <input style='width:6em' name='apssid' type='text' value='%s' maxlength='32'>&nbsp;&nbsp;&nbsp;"
-"Password: <input style='width:8em' name='appwd' type='password' value='%s' maxlength='39'> (8 char min.)&nbsp;&nbsp;&nbsp;"
-"Channel: <input style='width:2em' name='apch' value='%d' type='number' min='1' max='11'><br/>";
+L_WIFI_PWD ": <input style='width:8em' name='appwd' type='password' value='%s' maxlength='39'> " L_WIFI_PWD_MSG "&nbsp;&nbsp;&nbsp;"
+L_WIFI_CHA ": <input style='width:2em' name='apch' value='%d' type='number' min='1' max='11'><br/>";
 
 const char html_wifiApMAC[] PROGMEM =
 "MAC: <input style='width:10em' name='apmac' type='text' value='%s' maxlength='17' disabled><br/>";
 
 const char html_wifiSSID4[] PROGMEM =
-"<table><tr><td>IP Address: </td><td>"
+"<table><tr><td>" L_IP_ADDRESS ": </td><td>"
 "<input name='apip1' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
 "<input name='apip2' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
 "<input name='apip3' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
 "<input name='apip4' value='%d' type='number' min='0' max='255'></td>";
 const char html_wifiSSID5[] PROGMEM =
-"<tr><td>Gateway: </td><td>"
+"<tr><td>" L_GATEWAY ": </td><td>"
 "<input name='apgw1' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
 "<input name='apgw2' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
 "<input name='apgw3' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
 "<input name='apgw4' value='%d' type='number' min='0' max='255'></td>";
 const char html_wifiSSID6[] PROGMEM =
-"<tr><td>Subnet: </td><td>"
+"<tr><td>" L_SUBNET ": </td><td>"
 "<input name='apsn1' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
 "<input name='apsn2' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
 "<input name='apsn3' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
 "<input name='apsn4' value='%d' type='number' min='0' max='255'></td></tr></table>";
 
 const char html_wifiSSID7[] PROGMEM =
-"Enable Access-Point Mode: <input type='checkbox' name='apen' value='1' %s> (Note: auto-enabled if Station Mode fails to connect)<br/>"
-"<button type='submit'>Upload</button></form><br />\r\n";
+L_WIFI_EN_AP_MODE ": <input type='checkbox' name='apen' value='1' %s> (Note: auto-enabled if Station Mode fails to connect)<br/>"
+"<button type='submit'>" L_UPLOAD "</button></form><br />\r\n";
 
 const char html_logout[] PROGMEM =
-"<br/><b>WiFi Configuration Security:</b><br/>"
+"<br/><b>" L_WIFI_CONFIG_SECURITY ":</b><br/>"
 "<form method='post' action='/wifi.htm'>"
-"Password: <input style='width:8em' name='webpwd' type='password' maxlength='39'> "
-"<button type='submit'>Upload</button></form>"
+L_WIFI_PWD ": <input style='width:8em' name='webpwd' type='password' maxlength='39'> "
+"<button type='submit'>" L_UPLOAD "</button></form>"
 "<form method='post' action='/wifi.htm'>"
-"<button type='submit' name='logout' value='1'>Logout</button></form><br />\r\n";
+"<button type='submit' name='logout' value='1'>" L_LOGOUT "</button></form><br />\r\n";
 
 const char html_reboot[] PROGMEM =
 "<br/><br/><br/><br/><br/><form method='get' action='/wifi.htm'>"
-"<b>You must <u>manually</u> restart for changes to take effect.</b><br/><br/>"
-"<button type='submit'>Continue</button>"
+"<b>" L_WIFI_RESTART_MSG "</b><br/><br/>"
+"<button type='submit'>" L_CONTINUE "</button>"
 "</form><br/><br/><br/><br/>"
 "\r\n";
 
 const char html_login[] PROGMEM =
 "<br/><form method='post' action='/wifi.htm'>"
-"<br/>Enter password to change WiFi configuration:<br />"
+"<br/>" L_WIFI_TITLE "<br />"
 "<input style='width:8em' name='login' type='password' maxlength='39'>"
-"<button type='submit'>Ok</button>"
+"<button type='submit'>" L_OK "</button>"
 "</form><br/><br/><br/>"
-"Setup:<br/><br/>"
-"Enable either Station <b>OR</b> Access Point mode, enabling both can cause performance issues.<br/><br/>"
-"If you want OnStep to connect to your home WiFi network, enable only Station mode and "
-"disable Access Point mode. If OnStep cannot connect to your home WiFi network it will "
-"automatically re-enable Station mode; this is useful when you are away at a dark site and/or "
-"to guard against becoming locked out.<br/><br/>"
-"If locked out of WiFi you can use the Arduino IDE to reset the ESP8266 flash memory (and "
-"hence go back to defaults.) From the Arduino Tools menu, change Erase Flash 'Only Sketch' "
-"to Erase Flash 'All Flash Contents' and upload the WiFi-Bluetooth sketch again.<br/><br/>\r\n";
+L_WIFI_ADVICE1 L_WIFI_ADVICE2 L_WIFI_ADVICE3 L_WIFI_ADVICE4 L_WIFI_ADVICE5 L_WIFI_ADVICE6 L_WIFI_ADVICE7 L_WIFI_ADVICE8 L_WIFI_ADVICE9 
+"<br/><br/>\r\n";
 
 bool restartRequired=false;
 bool loginRequired=true;

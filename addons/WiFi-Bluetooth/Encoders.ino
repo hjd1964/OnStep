@@ -54,82 +54,82 @@ const char html_encScript2[] PROGMEM =
 "</script>\n";
 
 const char html_syncOnStepNow[] PROGMEM =
-"Sync OnStep to Encoders: <br />"
+L_ENC_SYNC_TO_ENC ": <br />"
 "<form method='get' action='/enc.htm'>"
 "<button name='ms' value='ons' type='submit'>Now</button>"
 "<br />";
 
 const char html_syncEncodersNow[] PROGMEM =
-"Sync Encoders to OnStep: <br />"
+L_ENC_SYNC_TO_ONS ": <br />"
 "<button name='ms' value='enc' type='submit'>Now</button>"
 "</form><br />";
 
 const char html_encEn1[] PROGMEM =
-"Automatically sync. OnStep to Encoders (<span id='aste'>?</span>):<br />";
+L_ENC_AUTO_SYNC " (<span id='aste'>?</span>):<br />";
 const char html_encEn2[] PROGMEM =
-"<button type='button' onpointerdown=\"s('as','on')\" >On</button>"
-"<button type='button' onpointerdown=\"s('as','off')\" >Off</button>"
+"<button type='button' onpointerdown=\"s('as','on')\" >" L_ON "</button>"
+"<button type='button' onpointerdown=\"s('as','off')\" >" L_OFF "</button>"
 "<br /><br />";
 
 const char html_encMxAxis0[] PROGMEM =
-"Max angular distance (Encoders vs. OnStep): <br />"
+L_ENC_MAX_ANGLE ": <br />"
 "<form method='get' action='/enc.htm'>";
 const char html_encMxAxis1[] PROGMEM =
 " <input value='%ld' type='number' name='d1' min='0' max='9999'>"
-"<button type='submit'>Upload</button>"
-" (Axis1, arc-sec 0 to 9999)"
+"<button type='submit'>" L_UPLOAD "</button>"
+" " L_ENC_MAX_ANGLE_AXIS1
 "</form>";
 const char html_encMxAxis2[] PROGMEM = 
 "<form method='get' action='/enc.htm'>"
 " <input value='%ld' type='number' name='d2' min='0' max='9999'>"
-"<button type='submit'>Upload</button>"
-" (Axis2, arc-sec 0 to 9999)"
+"<button type='submit'>" L_UPLOAD "</button>"
+" " L_ENC_MAX_ANGLE_AXIS2
 "</form><br />";
 
 const char html_encRateEn1[] PROGMEM =
-"OnStep rate control (<span id='orc'>?</span>):<br />";
+L_ENC_AUTO_RATE " (<span id='orc'>?</span>):<br />";
 const char html_encRateEn2[] PROGMEM =
-"<button type='button' onpointerdown=\"s('rc','on')\" >On</button>"
-"<button type='button' onpointerdown=\"s('rc','off')\" >Off</button>"
+"<button type='button' onpointerdown=\"s('rc','on')\" >" L_ON "</button>"
+"<button type='button' onpointerdown=\"s('rc','off')\" >" L_OFF "</button>"
 "<br /><br />";
 
 const char html_encStaAxis1[] PROGMEM =
 #if AXIS1_ENC_BIN_AVG > 0
-"Encoder rate averaging, binned samples: <br />"
+L_ENC_BINNED_SAMPLES ": <br />"
 #else
-"Encoder rate averaging, samples: <br />"
+L_ENC_SAMPLES ": <br />"
 #endif
 "<form method='get' action='/enc.htm'>"
 " <input value='%ld' type='number' name='sa' min='1' max='999'>"
-"<button type='submit'>Upload</button>"
+"<button type='submit'>" L_UPLOAD "</button>"
 " (STA 1 to 999)"
 "</form>";
 const char html_encLtaAxis1[] PROGMEM = 
 "<form method='get' action='/enc.htm'>"
 " <input value='%ld' type='number' name='la' min='1' max='999'>"
-"<button type='submit'>Upload</button>"
+"<button type='submit'>" L_UPLOAD "</button>"
 " (LTA 1 to 999)"
 "</form><br />";
 
 const char html_encPropAxis1[] PROGMEM = 
-"Proportional response: <br />"
+L_ENC_PROPORTIONAL ": <br />"
 "<form method='get' action='/enc.htm'>"
 " <input 'width: 75px' value='%ld' type='number' name='pr' min='50' max='5000'>"
-"<button type='submit'>Upload</button>"
+"<button type='submit'>" L_UPLOAD "</button>"
 " (P 50 to 5000&#x25;)"
 "</form><br />";
 
 const char html_encMinGuideAxis1[] PROGMEM = 
-"Minimum guide: <br />"
+L_ENC_MIN_GUIDE ": <br />"
 "<form method='get' action='/enc.htm'>"
 " <input 'width: 75px' value='%ld' type='number' name='mg' min='25' max='1000'>"
-"<button type='submit'>Upload</button>"
+"<button type='submit'>" L_UPLOAD "</button>"
 " (25 to 1000mS)"
 "</form><br />";
 
 #if AXIS1_ENC_RATE_AUTO == OFF
 const char html_encErc2Axis1[] PROGMEM = 
-"Encoder rate comp: <br />"
+L_ENC_RATE_COMP ": <br />"
 "<form method='get' action='/enc.htm'>"
 " <input style='width: 75px' value='%ld' type='number' name='er' min='-99999' max='99999'>"
 "<button type='submit'>Upload</button>"
@@ -141,23 +141,23 @@ const char html_encErc2Axis1[] PROGMEM =
 const char html_encIntPolPhaseAxis1[] PROGMEM = 
 "<form method='get' action='/enc.htm'>"
 " <input value='%ld' type='number' name='ip' min='0' max='255'>"
-"<button type='submit'>Upload</button>"
-" (Phase 1 to 256 counts)"
+"<button type='submit'>" L_UPLOAD "</button>"
+" (" L_ENC_PHASE " 1 to 256 " L_ENC_COUNTS ")"
 "</form>";
 
 const char html_encIntPolMagAxis1[] PROGMEM = 
 "<form method='get' action='/enc.htm'>"
 " <input style='width: 75px' value='%ld' type='number' name='im' min='0' max='29999'>"
-"<button type='submit'>Upload</button>"
-" (Magnitude 0 to 29999 PPM, 0 to 3&#x25;)"
+"<button type='submit'>" L_UPLOAD "</button>"
+" (" L_ENC_MAGN " 0 to 29999 PPM, 0 to 3&#x25;)"
 "</form><br />";
 #endif
 
 const char html_encSweepEn1[] PROGMEM =
 "<br />&nbsp; Sweep (<span id='osc'>?</span>):<br />";
 const char html_encSweepEn2[] PROGMEM =
-"&nbsp; <button type='button' onpointerdown=\"s('sw','on')\" >On</button>"
-"<button type='button' onpointerdown=\"s('sw','off')\" >Off</button>"
+"&nbsp; <button type='button' onpointerdown=\"s('sw','on')\" >" L_ON "</button>"
+"<button type='button' onpointerdown=\"s('sw','off')\" >" L_OFF "</button>"
 "<br /><br />";
 
 const char html_encEnd[] PROGMEM = 
@@ -297,33 +297,33 @@ void handleEncoders() {
   sendHtml(data);
 
   // Encoder status display
-  sprintf(temp,"Axis1 rates (sidereal):<br />");
+  sprintf(temp,L_ENC_STAT_RATE_AXIS1 ":<br />");
   data += temp;
   sprintf(temp,"&nbsp; OnStep = <span id='stO'>?</span><br />");
   data += temp;
 #if AXIS1_ENC_INTPOL_COS == ON
-  sprintf(temp,"&nbsp; Intpol Comp = <span id='ipC'>?</span><br />");
+  sprintf(temp,"&nbsp; " L_ENC_STAT_INTPOL_COMP " = <span id='ipC'>?</span><br />");
   data += temp;
-  sprintf(temp,"&nbsp; Intpol Phase = <span id='ipP'>?</span><br />");
+  sprintf(temp,"&nbsp; " L_ENC_STAT_INTPOL_PHASE " = <span id='ipP'>?</span><br />");
   data += temp;
 #endif
 #if AXIS1_ENC_RATE_AUTO > 0
-  sprintf(temp,"&nbsp; Encoder ARC = <span id='erA'>?</span><br />");
+  sprintf(temp,"&nbsp; " L_ENCODER " ARC = <span id='erA'>?</span><br />");
   data += temp;
 #endif
-  sprintf(temp,"&nbsp; Encoder STA = <span id='stS'>?</span> x<br />");
+  sprintf(temp,"&nbsp; " L_ENCODER " STA = <span id='stS'>?</span> x<br />");
   data += temp;
-  sprintf(temp,"&nbsp; Encoder LTA = <span id='stL'>?</span> x<br />");
+  sprintf(temp,"&nbsp; " L_ENCODER " LTA = <span id='stL'>?</span> x<br />");
   data += temp;
-  sprintf(temp,"&nbsp; Delta &nbsp;= <span id='stD'>?</span><br />");
+  sprintf(temp,"&nbsp; " L_DELTA " &nbsp;= <span id='stD'>?</span><br />");
   data += temp;
-  sprintf(temp,"&nbsp; Guide &nbsp;= <span id='rtF'>?</span><br />");
+  sprintf(temp,"&nbsp; " L_GUIDE " &nbsp;= <span id='rtF'>?</span><br />");
   data += temp;
 
   sendHtml(data);
 
   data += "<br /><canvas id='myCanvas' width='600' height='300' style='margin-left: -2px; border:2px solid #999999;'></canvas>";
-  data += "&nbsp; Center: OnStep rate, Blue: STA (range &#xb1;0.1), Green: LTA (range &#xb1;0.01)<br />";
+  data += "&nbsp; " L_CENTER ": OnStep " LRATE ", " L_BLUE ": STA (" L_RANGE " &#xb1;0.1), " L_GREEN ": LTA (" L_RANGE " &#xb1;0.01)<br />";
 
   data += FPSTR(html_encSweepEn1);
   data += FPSTR(html_encSweepEn2);
@@ -363,19 +363,19 @@ void encAjax() {
 #endif
 
 if (guideCorrectionMillis==0) {
-  data += "rtF|"; sprintf(temp,"None\n"); data += temp;
+  data += "rtF|"; sprintf(temp,L_NONE "\n"); data += temp;
 } else
 if (guideCorrectionMillis>0) {
-  data += "rtF|"; sprintf(temp,"West %ld ms\n",guideCorrectionMillis); data += temp;
+  data += "rtF|"; sprintf(temp,L_WEST " %ld ms\n",guideCorrectionMillis); data += temp;
 } else
 if (guideCorrectionMillis<0) {
-  data += "rtF|"; sprintf(temp,"East %ld ms\n",-guideCorrectionMillis); data += temp;
+  data += "rtF|"; sprintf(temp,L_EAST " %ld ms\n",-guideCorrectionMillis); data += temp;
 }
 
-  data += "orc|"; if (encRateControl) data+="On\n"; else data+="Off\n";
-  data += "osc|"; if (encSweep) data+="On\n"; else data+="Off\n";
+  data += "orc|"; if (encRateControl) data+=L_ON "\n"; else data+=L_OFF "\n";
+  data += "osc|"; if (encSweep) data+=L_ON "\n"; else data+=L_OFF "\n";
 #endif
-  data += "aste|";  if (encAutoSync) data+="On\n"; else data+="Off\n";
+  data += "aste|";  if (encAutoSync) data+=L_ON "\n"; else data+=L_OFF "\n";
 
 #ifdef OETHS
   client->print(data);

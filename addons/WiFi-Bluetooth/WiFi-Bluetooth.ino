@@ -60,6 +60,22 @@
 #include "Constants.h"
 #include "Config.h"
 
+// ISO639-1 language codes
+#if DISPLAY_LANGUAGE == L_en
+  #include "Strings_en.h"
+#endif
+#if DISPLAY_LANGUAGE == L_es
+  #include "Strings_es.h"
+#endif
+#if DISPLAY_LANGUAGE == L_fr
+  #include "Strings_fr.h"
+#endif
+#if DISPLAY_LANGUAGE == L_de
+  #include "Strings_de.h"
+#endif
+
+#include "Globals.h"
+
 // The settings below are for initialization only, afterward they are stored and recalled from EEPROM and must
 // be changed in the web interface OR with a reset (for initialization again) as described in the Config.h comments
 #if SERIAL_BAUD<=28800
@@ -250,7 +266,6 @@ Again:
 #if LED_STATUS != OFF
   digitalWrite(LED_STATUS,LOW);
 #endif
-  char c=0;
 
   // clear the buffers and any noise on the serial lines
   for (int i=0; i<3; i++) {
@@ -259,7 +274,7 @@ Again:
     digitalWrite(LED_STATUS,HIGH);
 #endif
     delay(300);
-    Ser.flush(); c=serialRecvFlush();
+    Ser.flush(); serialRecvFlush();
 #if LED_STATUS != OFF
     digitalWrite(LED_STATUS,LOW);
 #endif

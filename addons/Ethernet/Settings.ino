@@ -5,64 +5,62 @@ const char html_settingsStart[] PROGMEM =
 "<form method='get' action='/settings.htm'>";
 
 const char html_settingsRefine1[] PROGMEM =
-"Refine Polar Alignment: <br />"
-"<button name='rp' value='a' type='submit'>Refine PA</button><br />\r\n"
-"Setup &amp; 3+ Star Align mount.  Goto bright star near NCP or SCP with Dec in 50 to 80&deg; range (N or S.) "
-"Press [Refine PA] button.  Use mount's PA adjust controls to center the star again."
-"Optionally align the mount again.</br><br />";
+L_REFINE_POLAR_ALIGN ": <br />"
+"<button name='rp' value='a' type='submit'>" L_REFINE_PA "</button><br />\r\n"
+L_REFINE_MESSAGE1 L_REFINE_MESSAGE2 L_REFINE_MESSAGE3 "</br><br />";
 
 const char html_settingsPark1[] PROGMEM =
-"Park: <br />"
-"<button name='pk' value='s' type='submit'>Set-Park</button>\r\n";
+L_PARK ": <br />"
+"<button name='pk' value='s' type='submit'>" L_SET_PARK "</button>\r\n";
 
 const char html_settingsTrack1[] PROGMEM =
-"</br></br>Tracking (<span id='tracking'>";
+"</br></br>" L_TRACKING " (<span id='tracking'>";
 const char html_settingsTrack2[] = 
 "</span>): <br />"
-"<button name='tk' value='on' type='submit'>On</button>"
-"<button name='tk' value='off' type='submit'>Off</button><br />";
+"<button name='tk' value='on' type='submit'>" L_ON "</button>"
+"<button name='tk' value='off' type='submit'>" L_OFF "</button><br />";
 const char html_settingsTrack3[] PROGMEM =
-"<button name='tk' value='f' type='submit'>+ (0.02Hz faster)</button>"
-"<button name='tk' value='-' type='submit'>- (0.02Hz slower)</button>"
-"<button name='tk' value='r' type='submit'>Reset (default)</button>";
+"<button name='tk' value='f' type='submit'>+ (0.02Hz " L_TRK_FASTER ")</button>"
+"<button name='tk' value='-' type='submit'>- (0.02Hz " L_TRK_SLOWER ")</button>"
+"<button name='tk' value='r' type='submit'>" L_TRK_RESET "</button>";
 
 const char html_settingsTrackComp1[] PROGMEM =
-"</br></br>Compensated Tracking Rate (Pointing Model/Refraction): </br>"
-"<button name='rr' value='otk' type='submit'>Full</button>"
-"<button name='rr' value='on' type='submit'>Refraction Only</button>"
-"<button name='rr' value='off' type='submit'>Off</button>";
+"</br></br>" L_TRK_COMP ": </br>"
+"<button name='rr' value='otk' type='submit'>" L_TRK_FULL "</button>"
+"<button name='rr' value='on' type='submit'>" L_TRK_REFR "</button>"
+"<button name='rr' value='off' type='submit'>" L_OFF "</button>";
 const char html_settingsTrackComp2[] PROGMEM =
 "</br>"
-"<button name='rr' value='don' type='submit'>Dual Axis</button>"
-"<button name='rr' value='doff' type='submit'>Single Axis</button>\r\n";
+"<button name='rr' value='don' type='submit'>" L_TRK_DUAL "</button>"
+"<button name='rr' value='doff' type='submit'>" L_TRK_SINGLE "</button>\r\n";
 
 const char html_settingsBuzzer1[] PROGMEM =
-"<br /><br />Goto Alert, Buzzer (<span id='buzzer'>";
+"<br /><br />" L_BUZZER " (<span id='buzzer'>";
 const char html_settingsBuzzer2[] PROGMEM =
 "</span>): <br />"
-"<button name='ab' value='on' type='submit'>On</button>"
-"<button name='ab' value='off' type='submit'>Off</button>\r\n";
+"<button name='ab' value='on' type='submit'>" L_ON "</button>"
+"<button name='ab' value='off' type='submit'>" L_OFF "</button>\r\n";
 
 const char html_settingsMFAuto1[] PROGMEM =
-"</br></br>Automatic Meridian Flip at Limit (<span id='autoFlip'>";
+"</br></br>" L_MERIDIAN_FLIP_AUTO " (<span id='autoFlip'>";
 const char html_settingsMFAuto2[] PROGMEM =
 "</span>):<br />"
-"<button name='ma' value='now' type='submit'>Now</button>&nbsp;&nbsp;"
-"<button name='ma' value='on' type='submit'>On</button>"
-"<button name='ma' value='off' type='submit'>Off</button>";
+"<button name='ma' value='now' type='submit'>" L_MERIDIAN_FLIP_NOW "</button>&nbsp;&nbsp;"
+"<button name='ma' value='on' type='submit'>" L_ON "</button>"
+"<button name='ma' value='off' type='submit'>" L_OFF "</button>";
 const char html_settingsMFPause1[] PROGMEM =
-"</br></br>Meridian Flip, Pause at Home (<span id='pause'>";
+"</br></br>" L_MERIDIAN_FLIP_PAUSE " (<span id='pause'>";
 const char html_settingsMFPause2[] PROGMEM =
 "</span>): <br />"
-"<button name='mp' value='on' type='submit'>On</button>"
-"<button name='mp' value='off' type='submit'>Off</button>\r\n";
+"<button name='mp' value='on' type='submit'>" L_ON "</button>"
+"<button name='mp' value='off' type='submit'>" L_OFF "</button>\r\n";
 
 const char html_settingsCmdErrLog1[] PROGMEM =
-"<br /><br />Command Error Logging (";
+"<br /><br />" L_CMD_ERROR_LOG " (";
 const char html_settingsCmdErrLog2[] PROGMEM =
 "): <br />"
-"<button name='cel' value='on' type='submit'>On</button>"
-"<button name='cel' value='off' type='submit'>Off</button>\r\n";
+"<button name='cel' value='on' type='submit'>" L_ON "</button>"
+"<button name='cel' value='off' type='submit'>" L_OFF "</button>\r\n";
 
 const char html_settingsEnd[] PROGMEM =
 "</form>\r\n";
@@ -139,7 +137,7 @@ void handleSettings() {
   data += FPSTR(html_settingsPark1);
   
   data += FPSTR(html_settingsTrack1);
-  if (mountStatus.valid()) { if (mountStatus.tracking()) data+="On"; else data+="Off"; } else data+="?";
+  if (mountStatus.valid()) { if (mountStatus.tracking()) data+=L_ON; else data+=L_OFF; } else data+="?";
   data += FPSTR(html_settingsTrack2);
   data += FPSTR(html_settingsTrack3);
   if (mountStatus.mountType()!=MT_ALTAZM) {
@@ -149,20 +147,20 @@ void handleSettings() {
   sendHtml(data);
 
   data += FPSTR(html_settingsBuzzer1);
-  if (mountStatus.valid()) { if (mountStatus.buzzerEnabled()) data+="On"; else data+="Off"; } else data+="?";
+  if (mountStatus.valid()) { if (mountStatus.buzzerEnabled()) data+=L_ON; else data+=L_OFF; } else data+="?";
   data += FPSTR(html_settingsBuzzer2);
 
   if (mountStatus.mountType()==MT_GEM) {
     data += FPSTR(html_settingsMFAuto1);
-    if (mountStatus.valid()) { if (mountStatus.autoMeridianFlips()) data+="On"; else data+="Off"; } else data+="?";
+    if (mountStatus.valid()) { if (mountStatus.autoMeridianFlips()) data+=L_ON; else data+=L_OFF; } else data+="?";
     data += FPSTR(html_settingsMFAuto2);
     data += FPSTR(html_settingsMFPause1);
-    if (mountStatus.valid()) { if (mountStatus.pauseAtHome()) data+="On"; else data+="Off"; } else data+="?";
+    if (mountStatus.valid()) { if (mountStatus.pauseAtHome()) data+=L_ON; else data+=L_OFF; } else data+="?";
     data += FPSTR(html_settingsMFPause2);
   }
 
   data += FPSTR(html_settingsCmdErrLog1);
-  if (errorMonitorOn) data+="On"; else data+="Off";
+  if (errorMonitorOn) data+=L_ON; else data+=L_OFF;
   data += FPSTR(html_settingsCmdErrLog2);
 
   data += FPSTR(html_settingsEnd);
@@ -181,11 +179,11 @@ void settingsAjax() {
 #endif
   String data="";
   mountStatus.update();
-  data += "tracking|";   if (mountStatus.valid()) { if (mountStatus.tracking())          data+="On"; else data+="Off"; } else data+="?"; data+="\n";
-  data += "buzzer|";     if (mountStatus.valid()) { if (mountStatus.buzzerEnabled())     data+="On"; else data+="Off"; } else data+="?"; data+="\n";
+  data += "tracking|";   if (mountStatus.valid()) { if (mountStatus.tracking())          data+=L_ON; else data+=L_OFF; } else data+="?"; data+="\n";
+  data += "buzzer|";     if (mountStatus.valid()) { if (mountStatus.buzzerEnabled())     data+=L_ON; else data+=L_OFF; } else data+="?"; data+="\n";
   if (mountStatus.mountType()==MT_GEM) {
-    data += "autoFlip|"; if (mountStatus.valid()) { if (mountStatus.autoMeridianFlips()) data+="On"; else data+="Off"; } else data+="?"; data+="\n";
-    data += "pause|";    if (mountStatus.valid()) { if (mountStatus.pauseAtHome())       data+="On"; else data+="Off"; } else data+="?"; data+="\n";
+    data += "autoFlip|"; if (mountStatus.valid()) { if (mountStatus.autoMeridianFlips()) data+=L_ON; else data+=L_OFF; } else data+="?"; data+="\n";
+    data += "pause|";    if (mountStatus.valid()) { if (mountStatus.pauseAtHome())       data+=L_ON; else data+=L_OFF; } else data+="?"; data+="\n";
   }
 #ifdef OETHS
   client->print(data);

@@ -2,22 +2,21 @@
 // Controls for PEC
 
 const char html_pec1[] PROGMEM = "<div class='b1' style='width: 27em'>";
-const char html_pec2[] PROGMEM = "<div style='float: left'>PEC Status:</div><br/><div id='status'>?</div></div><br class='clear' />";
+const char html_pec2[] PROGMEM = "<div style='float: left'>" L_PEC_STATUS ":</div><br/><div id='status'>?</div></div><br class='clear' />";
 
 const char html_pecControls0[] PROGMEM =
-"<div class='b1' style='width: 27em'><div style='float: left'>PEC Control:</div><br />";
+"<div class='b1' style='width: 27em'><div style='float: left'>" L_PEC_CONTROL ":</div><br />";
 const char html_pecControls1[] PROGMEM =
 "<form method='get' action='/pec.htm'>"
-"<button name='pe' value='pl' type='submit'>Play</button>";
+"<button name='pe' value='pl' type='submit'>" L_PEC_PLAY "</button>";
 const char html_pecControls2[] PROGMEM =
-"<button name='pe' value='st' type='submit'>Stop</button><br /><br />"
-"<button name='pe' value='cl' type='submit'>Clear</button><button name='pe' value='re' type='submit'>Record</button><br />";
+"<button name='pe' value='st' type='submit'>" L_PEC_STOP "</button><br /><br />"
+"<button name='pe' value='cl' type='submit'>" L_PEC_CLEAR "</button>"
+"<button name='pe' value='re' type='submit'>" L_PEC_REC "</button><br />";
 const char html_pecControls3[] PROGMEM =
-"Clear erases the memory buffer not EEPROM.  During recording corrections are averaged 3:1 favoring the buffer unless cleared in which case the full correction is used.<br />";
+L_PEC_CLEAR_MESSAGE "<br />";
 const char html_pecControls4[] PROGMEM =
-"<br /><button name='pe' value='wr' type='submit'>Write to EEPROM</button><br />Writes PEC data to EEPROM so it's remembered if OnStep is restarted.  Writing the data can take a few seconds.<br /><br />";
-const char html_pecControls4a[] PROGMEM =
-"<br /><br />Writing to EEPROM disabled.<br /><br />";
+"<br /><button name='pe' value='wr' type='submit'>" L_PEC_EEWRITE "</button><br />" L_PEC_EEWRITE_MESSAGE "<br /><br />";
 const char html_pecControls5[] PROGMEM =
 "</form></div><br class='clear' /><br />\r\n";
 
@@ -100,7 +99,7 @@ void handlePec() {
     data += FPSTR(html_pecControls5);
     data += "</div></body></html>";
   } else {
-    data += "PEC CONTROLS DISABLED";
+    data += L_PEC_NO_PEC_MESSAGE;
     data += "</div><br class='clear' /></body></html>";
   }
 
@@ -118,12 +117,12 @@ void pecAjax() {
   
   data += "status|";
   if ((mountStatus.mountType()!=MT_ALTAZM) && (mountStatus.update()) && (command(":$QZ?#",temp))) {
-    if (temp[0]=='I') data +="Idle"; else
-    if (temp[0]=='p') data +="Play waiting to start"; else
-    if (temp[0]=='P') data +="Playing"; else
-    if (temp[0]=='r') data +="Record waiting for index to arrive"; else
-    if (temp[0]=='R') data +="Recording"; else data += "Unknown";
-    if (mountStatus.pecRecording()) data += " (writing to EEPROM)";
+    if (temp[0]=='I') data += L_PEC_IDLE; else
+    if (temp[0]=='p') data += L_PEC_WAIT_PLAY; else
+    if (temp[0]=='P') data += L_PEC_PLAYING; else
+    if (temp[0]=='r') data += L_PEC_WAIT_REC; else
+    if (temp[0]=='R') data += L_PEC_RECORDING; else data += L_PEC_UNK;
+    if (mountStatus.pecRecording()) data += " (" L_PEC_EEWRITING ")";
   } else { data += "?"; }
   data += "\n";
 
