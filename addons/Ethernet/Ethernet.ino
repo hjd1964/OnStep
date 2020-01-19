@@ -2,7 +2,7 @@
  * Title       OnStep Ethernet Server
  * by          Howard Dutton
  *
- * Copyright (C) 2016 to 2019 Howard Dutton
+ * Copyright (C) 2016 to 2020 Howard Dutton
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,8 +37,8 @@
 #define FirmwareDate          __DATE__
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
-#define FirmwareVersionMinor  "11"
-#define FirmwareVersionPatch  "j"
+#define FirmwareVersionMinor  "12"
+#define FirmwareVersionPatch  "a"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
