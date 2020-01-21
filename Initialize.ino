@@ -70,7 +70,7 @@ void initStartupValues() {
   dirAxis1            = 1;
   dirAxis2            = 1;
   defaultDirAxis2     = defaultDirAxis2EInit;
-  if (latitude>0) defaultDirAxis1 = defaultDirAxis1NCPInit; else defaultDirAxis1 = defaultDirAxis1SCPInit;
+  if (latitude >= 0) defaultDirAxis1 = defaultDirAxis1NCPInit; else defaultDirAxis1 = defaultDirAxis1SCPInit;
   newTargetRA         = 0;        
   newTargetDec        = 0;
   newTargetAlt        = 0;
@@ -270,19 +270,8 @@ void initPins() {
 void initReadNvValues() {
   // get the site information, if a GPS were attached we would use that here instead
   currentSite=nv.read(EE_currentSite); if (currentSite > 3) currentSite=0; // site index is valid?
-  latitude=nv.readFloat(EE_sites+(currentSite)*25+0);
-  cosLat=cos(latitude/Rad);
-  sinLat=sin(latitude/Rad);
-  if (latitude > 0) defaultDirAxis1 = defaultDirAxis1NCPInit; else defaultDirAxis1 = defaultDirAxis1SCPInit;
+  setLatitude(nv.readFloat(EE_sites+(currentSite)*25+0));
   longitude=nv.readFloat(EE_sites+(currentSite)*25+4);
-
-  // the polar home position
-#if MOUNT_TYPE == ALTAZM
-  homePositionAxis2=AltAzmDecStartPos;
-  if (latitude < 0) homePositionAxis1=180.0; else homePositionAxis1=0.0;
-#else
-  if (latitude < 0) homePositionAxis2=-90.0; else homePositionAxis2=90.0;
-#endif
   InitStartPosition();
 
   timeZone=nv.read(EE_sites+(currentSite)*25+8)-128;

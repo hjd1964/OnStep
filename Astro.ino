@@ -301,6 +301,23 @@ double encodeTimeZone(double tz) {
 // -----------------------------------------------------------------------------------------------------------------------------
 // Coordinate conversion
 
+// sets latitude and associated values
+void setLatitude(double Lat) {
+  latitude=Lat;
+  nv.writeFloat(100+(currentSite)*25+0,latitude);
+  cosLat=cos(latitude/Rad);
+  sinLat=sin(latitude/Rad);
+  if (latitude >= 0) defaultDirAxis1=defaultDirAxis1NCPInit; else defaultDirAxis1=defaultDirAxis1SCPInit;
+
+  // the polar home position
+#if MOUNT_TYPE == ALTAZM
+  homePositionAxis2=fabs(latitude);
+  if (latitude < 0) homePositionAxis1=180.0; else homePositionAxis1=0.0;
+#else
+  if (latitude < 0) homePositionAxis2=-90.0; else homePositionAxis2=90.0;
+#endif
+}
+
 // convert equatorial coordinates to horizon
 // this takes approx. 1.4mS on a 16MHz Mega2560
 void equToHor(double HA, double Dec, double *Alt, double *Azm) {

@@ -1656,17 +1656,8 @@ void processCommands() {
 //            Return: 0 on failure
 //                    1 on success
       if (command[1] == 't')  { 
-        if (dmsToDouble(&latitude,parameter,true,PM_LOW)) {
-          nv.writeFloat(100+(currentSite)*25+0,latitude);
-#if MOUNT_TYPE == ALTAZM
-          homePositionAxis2=AltAzmDecStartPos;
-          if (latitude < 0) homePositionAxis1=180.0; else homePositionAxis1=0.0;
-#else
-          if (latitude < 0) homePositionAxis2=-90.0; else homePositionAxis2=90.0;
-#endif
-          cosLat=cos(latitude/Rad);
-          sinLat=sin(latitude/Rad);
-          if (latitude > 0.0) defaultDirAxis1 = defaultDirAxis1NCPInit; else defaultDirAxis1 = defaultDirAxis1SCPInit;
+        if (dmsToDouble(&f,parameter,true,PM_LOW)) {
+          setLatitude(f);
         } else commandError=CE_PARAM_FORM;
       } else 
 //  :ST[H.H]# Set Tracking Rate in Hz where 60.0 is solar rate
@@ -2083,15 +2074,7 @@ void processCommands() {
       if (command[0] == 'W') {
         if (command[1] >= '0' && command[1] <= '3' && parameter[0] == 0) {
           currentSite=command[1]-'0'; nv.update(EE_currentSite,currentSite); booleanReply=false;
-          latitude=nv.readFloat(EE_sites+(currentSite*25+0));
-#if MOUNT_TYPE == ALTAZM
-          homePositionAxis2=AltAzmDecStartPos;
-#else
-          if (latitude < 0.0) homePositionAxis2=-90.0; else homePositionAxis2=90.0;
-#endif
-          cosLat=cos(latitude/Rad);
-          sinLat=sin(latitude/Rad);
-          if (latitude > 0.0) defaultDirAxis1 = defaultDirAxis1NCPInit; else defaultDirAxis1 = defaultDirAxis1SCPInit;
+          setLatitude(nv.readFloat(EE_sites+(currentSite*25+0)));
           longitude=nv.readFloat(EE_sites+(currentSite*25+4));
           timeZone=nv.read(EE_sites+(currentSite)*25+8)-128;
           timeZone=decodeTimeZone(timeZone);
