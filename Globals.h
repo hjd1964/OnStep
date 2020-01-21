@@ -118,6 +118,7 @@ volatile double StepsForRateChangeAxis2 = (sqrt((double)SLEW_ACCELERATION_DIST*(
 
 // Location ------------------------------------------------------------------------------------------------------------------------
 double latitude                         = 0.0;
+double latitudeSign                     = 1.0;
 double cosLat                           = 1.0;
 double sinLat                           = 0.0;
 double longitude                        = 0.0;
@@ -135,8 +136,6 @@ double longitude                        = 0.0;
   double homePositionAxis1              = 0.0;
 #endif
 double homePositionAxis2                = 90.0;
-// either 0 or (fabs(latitude))
-#define AltAzmDecStartPos (fabs(latitude))
 
 volatile long posAxis1                  = 0;                 // hour angle position in steps
 volatile long startAxis1                = 0;                 // hour angle of goto start position in steps

@@ -74,19 +74,17 @@ void moveTo() {
   
   // adjust rates near the horizon to help keep from exceeding the minAlt limit
   #if MOUNT_TYPE != ALTAZM
-    long a2=abs(getInstrAxis2()*AXIS2_STEPS_PER_DEGREE);
+    long a2=latitudeSign*getInstrAxis2()*AXIS2_STEPS_PER_DEGREE;
     static long lastPosAxis2=0;
-    if (((latitude > 10) || (latitude < -10)) && (distStartAxis1 > ((SLEW_ACCELERATION_DIST*AXIS1_STEPS_PER_DEGREE)/16))) {
-      // if Dec is decreasing, slow down Dec
+    if ((latitude > 10 || latitude < -10) && distStartAxis1 > (SLEW_ACCELERATION_DIST*AXIS1_STEPS_PER_DEGREE)/16) {
+      // if Dec is decreasing slow down the Dec axis, if Dec is increasing slow down the RA axis
       if (a2 < lastPosAxis2) {
         double minAlt2=minAlt+10.0;
-        long a=(currentAlt-minAlt2)*AXIS2_STEPS_PER_DEGREE; if (a < ((SLEW_ACCELERATION_DIST*AXIS2_STEPS_PER_DEGREE)/8)) a=((SLEW_ACCELERATION_DIST*AXIS2_STEPS_PER_DEGREE)/8);
+        long a=(currentAlt-minAlt2)*AXIS2_STEPS_PER_DEGREE; if (a < (SLEW_ACCELERATION_DIST*AXIS2_STEPS_PER_DEGREE)/8) a=(SLEW_ACCELERATION_DIST*AXIS2_STEPS_PER_DEGREE)/8;
         if (a < distDestAxis2) distDestAxis2=a;
-      } else
-      // if Dec is increasing, slow down HA
-      {
+      } else { 
         double minAlt2=minAlt+10.0;
-        long a=(currentAlt-minAlt2)*AXIS1_STEPS_PER_DEGREE; if (a < ((SLEW_ACCELERATION_DIST*AXIS1_STEPS_PER_DEGREE)/8)) a=((SLEW_ACCELERATION_DIST*AXIS1_STEPS_PER_DEGREE)/8);
+        long a=(currentAlt-minAlt2)*AXIS1_STEPS_PER_DEGREE; if (a < (SLEW_ACCELERATION_DIST*AXIS1_STEPS_PER_DEGREE)/8) a=(SLEW_ACCELERATION_DIST*AXIS1_STEPS_PER_DEGREE)/8;
         if (a < distDestAxis1) distDestAxis1=a;
       }
     }
