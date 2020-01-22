@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include "St4Aux.h"
 #include "Constants.h"
+#include "Locales.h"
 #include "Config.h"
 #include "Locale.h"
 #include "Pinmap.h"

@@ -23,6 +23,7 @@ all others (Teensy3.x, etc.) at 2mS/byte (500 Bps.)
 #include <Arduino.h>
 #include "St4SerialSlave.h"
 #include "Constants.h"
+#include "Locales.h"
 #include "Config.h"
 #include "Locale.h"
 #include "Pinmap.h"

@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <math.h>
 #include "Constants.h"
+#include "Locales.h"
 #include "Config.h"
 #include "Locale.h"
 #include "Pinmap.h"

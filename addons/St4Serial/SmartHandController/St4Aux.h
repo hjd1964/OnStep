@@ -4,6 +4,7 @@
 #pragma once
 
 #include "Constants.h"
+#include "Locales.h"
 #include "Config.h"
 #include "Locale.h"
 #include "Pinmap.h"

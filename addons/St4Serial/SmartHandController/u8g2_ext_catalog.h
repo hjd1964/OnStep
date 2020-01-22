@@ -3,6 +3,7 @@
 #include "u8g2_ext_event.h"
 
 #include "Constants.h"
+#include "Locales.h"
 #include "Config.h"
 #include "Locale.h"
 

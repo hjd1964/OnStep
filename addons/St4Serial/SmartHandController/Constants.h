@@ -1,11 +1,5 @@
 #pragma once
 
-// languages
-#define L_en 1
-#define L_es 2
-#define L_fr 3
-#define L_de 4
-
 // on/off, etc.
 #define OFF -1
 #define ON  -2
