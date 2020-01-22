@@ -37,7 +37,7 @@
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
 #define FirmwareVersionMinor  "7"
-#define FirmwareVersionPatch  "c"
+#define FirmwareVersionPatch  "d"
 
 #include "Constants.h"
 #include "Config.h"
