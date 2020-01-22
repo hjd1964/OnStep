@@ -459,7 +459,16 @@ void loop2() {
     if (lst%2 == 1) faultAxis2=tmcAxis2.error();
 #endif
 
-    if (faultAxis1 || faultAxis2) { generalError=ERR_MOTOR_FAULT; if (trackingState == TrackingMoveTo) { if (!abortSlew) abortSlew=StartAbortSlew; } else { trackingState=TrackingNone; if (guideDirAxis1) guideDirAxis1='b'; if (guideDirAxis2) guideDirAxis2='b'; } }
+    if (faultAxis1 || faultAxis2) { 
+      generalError=ERR_MOTOR_FAULT;
+      if (trackingState == TrackingMoveTo) {
+        if (!abortSlew) abortSlew=StartAbortSlew;
+      } else {
+        trackingState=TrackingNone;
+        if (guideDirAxis1) guideDirAxis1='b';
+        if (guideDirAxis2) guideDirAxis2='b';
+      }
+    }
 
     if (safetyLimitsOn) {
       // check altitude overhead limit and horizon limit
