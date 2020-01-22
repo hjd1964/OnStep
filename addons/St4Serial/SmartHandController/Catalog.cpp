@@ -2,6 +2,7 @@
 #include <math.h>
 #include "Constants.h"
 #include "Config.h"
+#include "Locale.h"
 #include "Pinmap.h"
 #include "Catalog.h"
 #include "CatalogTypes.h"

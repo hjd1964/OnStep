@@ -41,6 +41,7 @@
 
 #include "Constants.h"
 #include "Config.h"
+#include "Locale.h"
 #include "Pinmap.h"
 #include "SmartController.h"
 
@@ -52,7 +53,7 @@ SmartHandController HdCrtlr;
 
 void setup(void)
 {
-  HdCrtlr.setup(Version, pin, active, SERIAL_BAUD_DEFAULT, static_cast<SmartHandController::OLED>(OLED_DISPLAY));
+  HdCrtlr.setup(Version, pin, active, SERIAL_BAUD_DEFAULT, static_cast<SmartHandController::OLED>(DISPLAY_OLED));
 }
 
 void loop()

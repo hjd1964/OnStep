@@ -1,13 +1,19 @@
 #pragma once
 
-// On/Off, etc.
+// languages
+#define L_en 1
+#define L_es 2
+#define L_fr 3
+#define L_de 4
+
+// on/off, etc.
 #define OFF -1
 #define ON  -2
 
 #define TIMEOUT_CMD         1000  // Default=1000 (1 second)
 #define BACKGROUND_CMD_RATE 300   // Default=300, regulates the background command rate
 
-// Enable debugging messages on DebugSer
+// enable debugging messages on DebugSer
 #define DEBUG_OFF                 // default=_OFF, use "DEBUG_ON" to activate
 #define DebugSer Serial           // default=Serial, or Serial1 for example (always 9600 baud)
 #define DEBUGBUTTON_OFF           // defualt=_OFF, use "DEBUGBUTTON" to activate

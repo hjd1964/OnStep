@@ -225,10 +225,10 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
         char pers[16];
         float p=cat_mgr.period();
         // Period 0.00 to 9.99 days, period 10.0 to 3186.6 days, -1 = Unknown, -2 = Irregular
-        if (abs(p+1.0)<0.1)           { sprintf(line,"Period Unknown"); } else
-        if (abs(p+2.0)<0.1)           { sprintf(line,"Period Irregular"); } else
-        if ((p>=0.0)  && (p<   10.0)) { dtostrf(p, 7, 2, pers); sprintf(line,"Period%sd",pers); } else
-        if ((p>=10.0) && (p<=3186.6)) { dtostrf(p, 7, 1, pers); sprintf(line,"Period%sd",pers); } else sprintf(line,"Period ?");
+        if (abs(p+1.0)<0.1)           { sprintf(line,L_CAT_PER_UNK); } else
+        if (abs(p+2.0)<0.1)           { sprintf(line,L_CAT_PER_IRR); } else
+        if ((p>=0.0)  && (p<   10.0)) { dtostrf(p, 7, 2, pers); sprintf(line,L_CAT_PER "%sd",pers); } else
+        if ((p>=10.0) && (p<=3186.6)) { dtostrf(p, 7, 1, pers); sprintf(line,L_CAT_PER "%sd",pers); } else sprintf(line,L_CAT_PER " ?");
         ext_DrawFwNumeric(u8g2, x, y, line);
       }
     }
@@ -288,14 +288,14 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     cat_mgr.raHMS(vr1,vr2,vr3);
     sprintf(line," %02d:%02d:%02d",vr1,vr2,vr3);
     y += line_height;
-    x = u8g2_DrawUTF8(u8g2, 0, y, "RA"); u8g2_SetFont(u8g2, u8g2_font_6x13_tf); u8g2_DrawUTF8(u8g2, x, y, epoch); u8g2_SetFont(u8g2, myfont);
+    x = u8g2_DrawUTF8(u8g2, 0, y, L_RA); u8g2_SetFont(u8g2, u8g2_font_6x13_tf); u8g2_DrawUTF8(u8g2, x, y, epoch); u8g2_SetFont(u8g2, myfont);
     ext_DrawFwNumeric(u8g2, dx-ext_GetFwNumericWidth(u8g2, line), y, line);
 
     // Declination
     cat_mgr.decDMS(vd1,vd2, vd3);
     sprintf(line,"%+02d\xb0%02d'%02d",vd1,vd2,vd3);
     y += line_height;
-    x = u8g2_DrawUTF8(u8g2, 0, y, "DE"); u8g2_SetFont(u8g2, u8g2_font_6x13_tf); u8g2_DrawUTF8(u8g2, x, y, epoch); u8g2_SetFont(u8g2, myfont);
+    x = u8g2_DrawUTF8(u8g2, 0, y, L_DE); u8g2_SetFont(u8g2, u8g2_font_6x13_tf); u8g2_DrawUTF8(u8g2, x, y, epoch); u8g2_SetFont(u8g2, myfont);
     ext_DrawFwNumeric(u8g2, dx-ext_GetFwNumericWidth(u8g2, line), y, line);
   }
 
@@ -408,21 +408,21 @@ static uint8_t ext_draw_user_catalog_list_line(u8g2_t *u8g2, uint8_t y)
   }
 
   // "UNK",  "OC",  "GC",  "PN",  "DN",  "SG",  "EG",  "IG", "KNT", "SNR", "GAL",  "CN", "STR", "PLA", "CMT", "AST"
-  if (strstr(line2,"UNK")) strcpy(line2,"Unknown"); else
-  if (strstr(line2,"OC"))  strcpy(line2,"Open Cluster"); else
-  if (strstr(line2,"GC"))  strcpy(line2,"Globular Cluster"); else
-  if (strstr(line2,"PN"))  strcpy(line2,"Planetary Nebula"); else
-  if (strstr(line2,"SG"))  strcpy(line2,"Spirial Galaxy"); else
-  if (strstr(line2,"EG"))  strcpy(line2,"Eliptical Galaxy"); else
-  if (strstr(line2,"IG"))  strcpy(line2,"Irregular Galaxy"); else
-  if (strstr(line2,"KNT")) strcpy(line2,"Knot"); else
-  if (strstr(line2,"SNR")) strcpy(line2,"SuperNova Rmnnt"); else
-  if (strstr(line2,"GAL")) strcpy(line2,"Galaxy"); else
-  if (strstr(line2,"CN"))  strcpy(line2,"Cluster + Nebula"); else
-  if (strstr(line2,"STR")) strcpy(line2,"Star"); else
-  if (strstr(line2,"PLA")) strcpy(line2,"Planet"); else
-  if (strstr(line2,"CMT")) strcpy(line2,"Comet"); else
-  if (strstr(line2,"CMT")) strcpy(line2,"Asteroid");
+  if (strstr(line2,"UNK")) strcpy(line2,L_CAT_UNK "Unknown"); else
+  if (strstr(line2,"OC"))  strcpy(line2,L_CAT_OC "Open Cluster"); else
+  if (strstr(line2,"GC"))  strcpy(line2,L_CAT_GC "Globular Cluster"); else
+  if (strstr(line2,"PN"))  strcpy(line2,L_CAT_PN "Planetary Nebula"); else
+  if (strstr(line2,"SG"))  strcpy(line2,L_CAT_SG "Spirial Galaxy"); else
+  if (strstr(line2,"EG"))  strcpy(line2,L_CAT_EG "Eliptical Galaxy"); else
+  if (strstr(line2,"IG"))  strcpy(line2,L_CAT_IG "Irregular Galaxy"); else
+  if (strstr(line2,"KNT")) strcpy(line2,L_CAT_KNT "Knot"); else
+  if (strstr(line2,"SNR")) strcpy(line2,L_CAT_SNR "SuperNova Rmnnt"); else
+  if (strstr(line2,"GAL")) strcpy(line2,L_CAT_GAL "Galaxy"); else
+  if (strstr(line2,"CN"))  strcpy(line2,L_CAT_CN "Cluster + Nebula"); else
+  if (strstr(line2,"STR")) strcpy(line2,L_CAT_STR "Star"); else
+  if (strstr(line2,"PLA")) strcpy(line2,L_CAT_PLA "Planet"); else
+  if (strstr(line2,"CMT")) strcpy(line2,L_CAT_CMT "Comet"); else
+  if (strstr(line2,"AST")) strcpy(line2,L_CAT_AST "Asteroid");
     
   // null object
   if ((line1[0]==0) || (line1[0]=='$')) return 0;

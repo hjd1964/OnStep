@@ -21,8 +21,8 @@ void SmartHandController::menuAlignment()
   
     char string_list_AlignmentL1[200];
     if (alignInProgress) {
-      strcpy(string_list_AlignmentL1,"Resume Align\n""Show Corr\n""Clear Corr\n""Reset Home");
-      current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Alignment", current_selection_L1, string_list_AlignmentL1);
+      strcpy(string_list_AlignmentL1,L_ALGN_RESUME "\n" L_ALGN_SHOW_CORR "\n" L_ALGN_CLEAR_CORR "\n" L_ALGN_RESET_HOME);
+      current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, L_ALIGNMENT, current_selection_L1, string_list_AlignmentL1);
       switch (current_selection_L1) {
         case 1:
           telInfo.aliMode = (Telescope::AlignMode)numStars;
@@ -38,15 +38,15 @@ void SmartHandController::menuAlignment()
       strcpy(string_list_AlignmentL1,"");
       char s[20];
       for (int i=1; i<=maxAlignStars; i++) {
-        sprintf(s,"%d-Star Align\n",i);
+        sprintf(s,"%d-" L_ALGN_STAR_ALIGN "\n",i);
         strcat(string_list_AlignmentL1,s);
       }
-      strcat(string_list_AlignmentL1,"Show Model\n""Clear Model\n""Reset Home");
+      strcat(string_list_AlignmentL1,L_ALGN_SHOW_MODEL "\n" L_ALGN_CLEAR_MODEL "\n" L_ALGN_RESET_HOME);
       if (!telInfo.isMountAltAz()) {
         sprintf(s,"\nRefine PA");
         strcat(string_list_AlignmentL1,s);
       }
-      current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, "Alignment", current_selection_L1, string_list_AlignmentL1);
+      current_selection_L1 = display->UserInterfaceSelectionList(&buttonPad, L_ALIGNMENT, current_selection_L1, string_list_AlignmentL1);
       if (current_selection_L1<=maxAlignStars) {
         starsForAlign=current_selection_L1;
       } else {
@@ -77,27 +77,27 @@ void SmartHandController::menuAlignment()
     } else
     if (resetAlign) {
       current_selection_L1 = 0; current_selection_L0 = 0; // Quit Menu
-      if (SetLX200(":hF#") == LX200VALUESET) DisplayMessage("Reset", "Move to Home", -1);
+      if (SetLX200(":hF#") == LX200VALUESET) DisplayMessage(L_ALGN_RESUME0, L_ALGN_RESUME1, -1);
     } else
     if (starsForAlign>0) {
       // check if date/time is set, if not set it
-      if (!telInfo.hasDateTime()) { DisplayMessage("Date/Time", "Not Set!", 2000); menuLocalDateTime(); }
+      if (!telInfo.hasDateTime()) { DisplayMessage(L_ALGN_RESUME2, L_ALGN_RESUME3, 2000); menuLocalDateTime(); }
 
       // start the align
       char s[20]; sprintf(s,":A%d#",starsForAlign);
-      if (SetLX200(s) == LX200VALUESET) telInfo.aliMode = (Telescope::AlignMode)starsForAlign; else DisplayMessage("Alignment", "Failed!", -1);
-      if (SetLX200(":R7#") == LX200VALUESET) { DisplayMessage("Guide Rate", "48X Set", 1000);  activeGuideRate=8; }
+      if (SetLX200(s) == LX200VALUESET) telInfo.aliMode = (Telescope::AlignMode)starsForAlign; else DisplayMessage(L_ALIGNMENT, L_FAILED "!", -1);
+      if (SetLX200(":R7#") == LX200VALUESET) { DisplayMessage(L_ALGN_RESUME4, L_ALGN_RESUME5, 1000);  activeGuideRate=8; }
       current_selection_L1 = 0; current_selection_L0 = 0; // Quit Menu
     } else
     if (refinePA) {
-      DisplayMessage("Setup & 3+ star",   "align mount." ,     3500);
-      DisplayMessage("Goto bright star",  "near NCP/SCP w/",   3500);
-      DisplayMessage("Dec in 50 to 80" ,  "deg range N/S.",    3500);
-      DisplayMessage("Answr YES below.",  "Use Polar Align",   3500);
-      DisplayMessage("adjust controls to","center star again.",4500);
-      DisplayMessage("Optionally align",  "the mount again.",  3500);
-      if (display->UserInterfaceInputValueBoolean(&buttonPad, "Refine PA?", &refinePA)) {
-        if ((refinePA) && (SetLX200(":MP#") == LX200VALUESET)) DisplayMessage("Center star again", "using PA controls", -1);
+      DisplayMessage(L_ALGN_REFINE_MSG1, L_ALGN_REFINE_MSG2, 3500);
+      DisplayMessage(L_ALGN_REFINE_MSG3, L_ALGN_REFINE_MSG4, 3500);
+      DisplayMessage(L_ALGN_REFINE_MSG5, L_ALGN_REFINE_MSG6, 3500);
+      DisplayMessage(L_ALGN_REFINE_MSG7, L_ALGN_REFINE_MSG8, 3500);
+      DisplayMessage(L_ALGN_REFINE_MSG9, L_ALGN_REFINE_MSG10,4500);
+      DisplayMessage(L_ALGN_REFINE_MSG11,L_ALGN_REFINE_MSG12,3500);
+      if (display->UserInterfaceInputValueBoolean(&buttonPad, L_ALGN_REFINE_MSG13, &refinePA)) {
+        if ((refinePA) && (SetLX200(":MP#") == LX200VALUESET)) DisplayMessage(L_ALGN_REFINE_MSG14, L_ALGN_REFINE_MSG15, -1);
         if (refinePA) { current_selection_L0 = 0; current_selection_L1 = 0; } // Quit Menu
       }
     }

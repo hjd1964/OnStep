@@ -1,6 +1,11 @@
 #pragma once
 #include <U8g2lib.h>
 #include "u8g2_ext_event.h"
+
+#include "Constants.h"
+#include "Config.h"
+#include "Locale.h"
+
 /*
 
 u8g2_ext.c

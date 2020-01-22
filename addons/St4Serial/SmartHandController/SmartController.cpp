@@ -328,7 +328,7 @@ void SmartHandController::setup(const char version[], const int pin[7],const boo
     delay(100);
   }
 
-  DisplayMessage("Establishing", "Connection", 1000);
+  DisplayMessage(L_ESTABLISHING, L_CONNECTION, 1000);
   
   // OnStep coordinate mode for getting and setting RA/Dec
   // 0 = OBSERVED_PLACE (same as not supported)
@@ -342,22 +342,22 @@ again:
   if (GetLX200(":GXEE#", s) == LX200VALUEGET) {
     if (s[0]=='0') {
       telescopeCoordinates=OBSERVED_PLACE; 
-      DisplayMessage("Connection", "Warning!", 1000);
-      DisplayMessage("Coordinates", "Observed Place.", 2000);
+      DisplayMessage(L_CONNECTION, L_WARNING "!", 1000);
+      DisplayMessage(L_COORDINATES, L_OBSERVED_PLACE ".", 2000);
   } else 
     if (s[0]=='1') {
       telescopeCoordinates=TOPOCENTRIC; 
-      DisplayMessage("Connection", "Ok!", 1000);
+      DisplayMessage(L_CONNECTION, L_OK "!", 1000);
     } else 
     if (s[0]=='2') {
       telescopeCoordinates=ASTROMETRIC_J2000;
-      DisplayMessage("Connection", "Warning!", 1000);
-      DisplayMessage("Coordinates", "J2000 Mode?", 2000);
+      DisplayMessage(L_CONNECTION, L_WARNING "!", 1000);
+      DisplayMessage(L_COORDINATES, "J2000 ?", 2000);
     }
   } else {
     if (++thisTry <= 4) goto again;
     telescopeCoordinates=OBSERVED_PLACE;
-    DisplayMessage("Connection", "Failed!", 1000);
+    DisplayMessage(L_CONNECTION, L_FAILED "!", 1000);
   }
 }
 
@@ -388,32 +388,32 @@ void SmartHandController::update()
   if (display_dim_time && top - time_last_action > display_dim_time && !lowContrast) { display->setContrast(0); lowContrast = true; return; }
 
   // power cycle reqd message
-  if (powerCylceRequired) { display->setFont(u8g2_font_helvR12_tf); DisplayMessage("REBOOT", "DEVICE", 1000); return; }
+  if (powerCylceRequired) { display->setFont(u8g2_font_helvR12_tf); DisplayMessage(L_REBOOT "REBOOT", L_DEVICE "DEVICE", 1000); return; }
   
   if (telInfo.align == Telescope::ALI_SELECT_STAR_1 || telInfo.align == Telescope::ALI_SELECT_STAR_2 || telInfo.align == Telescope::ALI_SELECT_STAR_3 || 
       telInfo.align == Telescope::ALI_SELECT_STAR_4 || telInfo.align == Telescope::ALI_SELECT_STAR_5 || telInfo.align == Telescope::ALI_SELECT_STAR_6 ||
       telInfo.align == Telescope::ALI_SELECT_STAR_7 || telInfo.align == Telescope::ALI_SELECT_STAR_8 || telInfo.align == Telescope::ALI_SELECT_STAR_9) {
-    char message[10]="Star# ?";
-    if (telInfo.align == Telescope::ALI_SELECT_STAR_1) strcpy(message,"Star #1");
-    if (telInfo.align == Telescope::ALI_SELECT_STAR_2) strcpy(message,"Star #2");
-    if (telInfo.align == Telescope::ALI_SELECT_STAR_3) strcpy(message,"Star #3");
-    if (telInfo.align == Telescope::ALI_SELECT_STAR_4) strcpy(message,"Star #4");
-    if (telInfo.align == Telescope::ALI_SELECT_STAR_5) strcpy(message,"Star #5");
-    if (telInfo.align == Telescope::ALI_SELECT_STAR_6) strcpy(message,"Star #6");
-    if (telInfo.align == Telescope::ALI_SELECT_STAR_7) strcpy(message,"Star #7");
-    if (telInfo.align == Telescope::ALI_SELECT_STAR_8) strcpy(message,"Star #8");
-    if (telInfo.align == Telescope::ALI_SELECT_STAR_9) strcpy(message,"Star #9");
-    DisplayLongMessage("Select a Star", "From following list", "", message, -1);
+    char message[10]=L_STAR "# ?";
+    if (telInfo.align == Telescope::ALI_SELECT_STAR_1) strcpy(message,L_STAR " #1");
+    if (telInfo.align == Telescope::ALI_SELECT_STAR_2) strcpy(message,L_STAR " #2");
+    if (telInfo.align == Telescope::ALI_SELECT_STAR_3) strcpy(message,L_STAR " #3");
+    if (telInfo.align == Telescope::ALI_SELECT_STAR_4) strcpy(message,L_STAR " #4");
+    if (telInfo.align == Telescope::ALI_SELECT_STAR_5) strcpy(message,L_STAR " #5");
+    if (telInfo.align == Telescope::ALI_SELECT_STAR_6) strcpy(message,L_STAR " #6");
+    if (telInfo.align == Telescope::ALI_SELECT_STAR_7) strcpy(message,L_STAR " #7");
+    if (telInfo.align == Telescope::ALI_SELECT_STAR_8) strcpy(message,L_STAR " #8");
+    if (telInfo.align == Telescope::ALI_SELECT_STAR_9) strcpy(message,L_STAR " #9");
+    DisplayLongMessage(L_ALIGN_MSG1, L_ALIGN_MSG2, "", message, -1);
 
     // bring up the list of stars so user can goto the alignment star
-    if (!SelectStarAlign()) { DisplayMessage("Alignment", "Aborted", -1); telInfo.align = Telescope::ALI_OFF; return; }
+    if (!SelectStarAlign()) { DisplayMessage(L_ALIGNMENT, L_ABORTED, -1); telInfo.align = Telescope::ALI_OFF; return; }
     
     // mark this as the next alignment star 
     telInfo.align = static_cast<Telescope::AlignState>(telInfo.align + 1);
   } else
   if (top - lastpageupdate > BACKGROUND_CMD_RATE/2) updateMainDisplay(page);
   
-  if (telInfo.connected == false) DisplayMessage("Hand controler", "not connected", -1);
+  if (telInfo.connected == false) DisplayMessage(L_DISCONNECT_MSG1, L_DISCONNECT_MSG2, -1);
 
   // is a goto happening?
   if (telInfo.connected && (telInfo.getTrackingState() == Telescope::TRK_SLEWING || telInfo.getParkState() == Telescope::PRK_PARKING))
@@ -424,7 +424,7 @@ void SmartHandController::update()
       time_last_action = millis();
       display->sleepOff();
       buttonPad.clearAllPressed();
-      DisplayMessage("Slew to target", "canceled!", 1000);
+      DisplayMessage(L_SLEW_MSG1, L_SLEW_MSG2 "!", 1000);
       return;
     }
   } else
@@ -466,8 +466,8 @@ void SmartHandController::update()
   if (telInfo.align != Telescope::ALI_OFF) featureKeyMode = 1;
   switch (featureKeyMode) {
     case 1:   // guide rate
-      if (buttonPad.F.wasPressed()) { activeGuideRate--; strcpy(briefMessage,"Guide Slower"); buttonCommand=true; } else
-      if (buttonPad.f.wasPressed()) { activeGuideRate++; strcpy(briefMessage,"Guide Faster"); buttonCommand=true; }
+      if (buttonPad.F.wasPressed()) { activeGuideRate--; strcpy(briefMessage,L_FKEY_GUIDE_DN); buttonCommand=true; } else
+      if (buttonPad.f.wasPressed()) { activeGuideRate++; strcpy(briefMessage,L_FKEY_GUIDE_UP); buttonCommand=true; }
       if (buttonCommand) {
         if (activeGuideRate<4)  activeGuideRate=4;
         if (activeGuideRate>10) activeGuideRate=10;
@@ -476,8 +476,8 @@ void SmartHandController::update()
       }
     break;
     case 2:   // pulse guide rate
-      if (buttonPad.F.wasPressed()) { activeGuideRate--; strcpy(briefMessage,"PGuide Slower"); buttonCommand=true; } else
-      if (buttonPad.f.wasPressed()) { activeGuideRate++; strcpy(briefMessage,"PGuide Faster"); buttonCommand=true; }
+      if (buttonPad.F.wasPressed()) { activeGuideRate--; strcpy(briefMessage,L_FKEY_PGUIDE_DN); buttonCommand=true; } else
+      if (buttonPad.f.wasPressed()) { activeGuideRate++; strcpy(briefMessage,L_FKEY_PGUIDE_UP); buttonCommand=true; }
       if (buttonCommand) {
         if (activeGuideRate<1) activeGuideRate=1;
         if (activeGuideRate>3) activeGuideRate=3;
@@ -487,8 +487,8 @@ void SmartHandController::update()
     break;
     case 3:   // util. light
 #if UTILITY_LIGHT != OFF
-      if (buttonPad.F.wasPressed()) { current_selection_utility_light--; strcpy(briefMessage,"Util Dimmer"); buttonCommand=true; } else
-      if (buttonPad.f.wasPressed()) { current_selection_utility_light++; strcpy(briefMessage,"Util Brighter"); buttonCommand=true; }
+      if (buttonPad.F.wasPressed()) { current_selection_utility_light--; strcpy(briefMessage,L_FKEY_LAMP_DN); buttonCommand=true; } else
+      if (buttonPad.f.wasPressed()) { current_selection_utility_light++; strcpy(briefMessage,L_FKEY_LAMP_UP); buttonCommand=true; }
       if (buttonCommand) {
         if (current_selection_utility_light<1) current_selection_utility_light=1;
         if (current_selection_utility_light>6) current_selection_utility_light=6;
@@ -502,29 +502,29 @@ void SmartHandController::update()
 #endif
     break;
     case 4:  // reticule
-      if (buttonPad.F.wasPressed()) { Ser.print(":B-#"); strcpy(briefMessage,"Reticle Dimmer"); } else
-      if (buttonPad.f.wasPressed()) { Ser.print(":B+#"); strcpy(briefMessage,"Reticle Brighter"); }
+      if (buttonPad.F.wasPressed()) { Ser.print(":B-#"); strcpy(briefMessage,L_FKEY_RETI_DN); } else
+      if (buttonPad.f.wasPressed()) { Ser.print(":B+#"); strcpy(briefMessage,L_FKEY_RETI_UP); }
     break;
     case 5: case 6:  // focuser1/2
       if (featureKeyMode==4) strcpy(cmd,":FA1#"); else strcpy(cmd,":FA2#"); 
-           if (!focOut && buttonPad.F.isDown()) { focOut = true;  strcat(cmd,":FS#:F+#"); SetLX200(cmd); strcpy(briefMessage,"Focus Out"); buttonCommand=true; }
+           if (!focOut && buttonPad.F.isDown()) { focOut = true;  strcat(cmd,":FS#:F+#"); SetLX200(cmd); strcpy(briefMessage,L_FKEY_FOC_DN); buttonCommand=true; }
       else if ( focOut && buttonPad.F.isUp())   { focOut = false; Ser.print(":FQ#"); buttonCommand=true; buttonPad.F.clearPress(); }
-      else if (!focIn  && buttonPad.f.isDown()) { focIn = true;   strcat(cmd,":FS#:F-#"); SetLX200(cmd); strcpy(briefMessage,"Focus In"); buttonCommand=true; }
+      else if (!focIn  && buttonPad.f.isDown()) { focIn = true;   strcat(cmd,":FS#:F-#"); SetLX200(cmd); strcpy(briefMessage,L_FKEY_FOC_UP); buttonCommand=true; }
       else if ( focIn  && buttonPad.f.isUp())   { focIn = false;  Ser.print(":FQ#"); buttonCommand=true; buttonPad.f.clearPress(); }
 #ifndef FOCUSER_ACCELERATE_DISABLE_ON
       // acceleration control
-      else if ((focOut && buttonPad.F.isDown() && (buttonPad.F.timeDown()>5000))) { Ser.print(":FF#:F+#"); strcpy(briefMessage,"Focus Fast"); }
-      else if ((focIn  && buttonPad.f.isDown() && (buttonPad.f.timeDown()>5000))) { Ser.print(":FF#:F-#"); strcpy(briefMessage,"Focus Fast"); }
+      else if ((focOut && buttonPad.F.isDown() && (buttonPad.F.timeDown()>5000))) { Ser.print(":FF#:F+#"); strcpy(briefMessage,L_FKEY_FOCF_DN); }
+      else if ((focIn  && buttonPad.f.isDown() && (buttonPad.f.timeDown()>5000))) { Ser.print(":FF#:F-#"); strcpy(briefMessage,L_FKEY_FOCF_UP); }
 #endif
     break;
     case 7:  // rotator
-           if (!rotCcw && buttonPad.F.isDown()) { rotCcw = true;  Ser.print(":r2#:rc#:r<#"); strcpy(briefMessage,"Rotate Ccw"); buttonCommand=true; }
+           if (!rotCcw && buttonPad.F.isDown()) { rotCcw = true;  Ser.print(":r2#:rc#:r<#"); strcpy(briefMessage,L_FKEY_ROT_DN); buttonCommand=true; }
       else if ( rotCcw && buttonPad.F.isUp())   { rotCcw = false; Ser.print(":rQ#"); buttonCommand=true; buttonPad.F.clearPress(); }
-      else if (!rotCw  && buttonPad.f.isDown()) { rotCw = true;   Ser.print(":r2#:rc#:r>#"); strcpy(briefMessage,"Rotate Cw"); buttonCommand=true; }
+      else if (!rotCw  && buttonPad.f.isDown()) { rotCw = true;   Ser.print(":r2#:rc#:r>#"); strcpy(briefMessage,L_FKEY_ROT_UP); buttonCommand=true; }
       else if ( rotCw  && buttonPad.f.isUp())   { rotCw = false;  Ser.print(":rQ#"); buttonCommand=true; buttonPad.f.clearPress(); }
       // acceleration control
-      else if ((rotCcw && buttonPad.F.isDown() && (buttonPad.F.timeDown()>5000))) { Ser.print(":r4#:rc#:r<#"); strcpy(briefMessage,"Rotate Fast"); }
-      else if (( rotCw && buttonPad.f.isDown() && (buttonPad.f.timeDown()>5000))) { Ser.print(":r4#:rc#:r>#"); strcpy(briefMessage,"Rotate Fast"); }
+      else if ((rotCcw && buttonPad.F.isDown() && (buttonPad.F.timeDown()>5000))) { Ser.print(":r4#:rc#:r<#"); strcpy(briefMessage,L_FKEY_ROTF_DN); }
+      else if (( rotCw && buttonPad.f.isDown() && (buttonPad.f.timeDown()>5000))) { Ser.print(":r4#:rc#:r>#"); strcpy(briefMessage,L_FKEY_ROTF_UP); }
     break;
   }
   if (buttonCommand) { time_last_action = millis(); return; }
@@ -565,7 +565,7 @@ void SmartHandController::update()
           if ((telInfo.align == Telescope::ALI_RECENTER_1 || telInfo.align == Telescope::ALI_RECENTER_2 || telInfo.align == Telescope::ALI_RECENTER_3 ||
              telInfo.align == Telescope::ALI_RECENTER_4 || telInfo.align == Telescope::ALI_RECENTER_5 || telInfo.align == Telescope::ALI_RECENTER_6 ||
              telInfo.align == Telescope::ALI_RECENTER_7 || telInfo.align == Telescope::ALI_RECENTER_8 || telInfo.align == Telescope::ALI_RECENTER_9)) {
-            if (telInfo.addStar()) { if (telInfo.align == Telescope::ALI_OFF) DisplayMessage("Alignment", "Success!", 2000); else DisplayMessage("Add Star", "Success!", 2000); } else DisplayMessage("Add Star", "Failed!", -1);
+            if (telInfo.addStar()) { if (telInfo.align == Telescope::ALI_OFF) DisplayMessage(L_ALIGNMENT, L_SUCCESS "!", 2000); else DisplayMessage(L_ADD_STAR, L_SUCCESS "!", 2000); } else DisplayMessage(L_ADD_STAR, L_FAILED "!", -1);
           }
         }
         time_last_action = millis();
@@ -718,13 +718,13 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
         u8g2_uint_t x = u8g2_GetDisplayWidth(u8g2)-u8g2_GetUTF8Width(u8g2,"00000000");
         u8g2_uint_t y = 36;
 
-        u8g2_DrawUTF8(u8g2, 0, y, "RA");
+        u8g2_DrawUTF8(u8g2, 0, y, L_RA);
         display->DrawFwNumeric(x, y, rs);
 
         char ds[20]; strcpy(ds,telInfo.TempDec); l=strlen(ds); if (l>1) ds[l-1]=0; if (l>8) { ds[3]='\xb0'; ds[6]='\''; }
         x = u8g2_GetDisplayWidth(u8g2)-u8g2_GetUTF8Width(u8g2,"000000000");
         y += line_height + 4;
-        u8g2_DrawUTF8(u8g2, 0, y, "Dec"); 
+        u8g2_DrawUTF8(u8g2, 0, y, L_DEC); 
         display->DrawFwNumeric(x, y, ds);
       }
     } else
@@ -736,12 +736,12 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
         char zs[20]; strcpy(zs,telInfo.TempAz); int l=strlen(zs); if (l>1) zs[l-1]=0; if (l>8) { zs[3]='\xb0'; zs[6]='\''; }
         x = u8g2_GetDisplayWidth(u8g2)-u8g2_GetUTF8Width(u8g2,"000000000");
         u8g2_uint_t y = 36; 
-        u8g2_DrawUTF8(u8g2, 0, y, "Az");
+        u8g2_DrawUTF8(u8g2, 0, y, L_AZ);
         display->DrawFwNumeric(x,y,zs);
 
         char as[20]; strcpy(as,telInfo.TempAlt); l=strlen(as); if (l>1) as[l-1]=0; if (l>8) { as[3]='\xb0'; as[6]='\''; }
         y += line_height + 4; 
-        u8g2_DrawUTF8(u8g2, 0, y, "Alt");
+        u8g2_DrawUTF8(u8g2, 0, y, L_ALT);
         display->DrawFwNumeric(x,y,as);
       }
     } else
@@ -798,8 +798,8 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
       u8g2_uint_t y = 36;
 
       char txt[20];
-      if ((telInfo.align - 1) % 3 == 1) sprintf(txt, "Slewing to Star %u", (telInfo.align - 1) / 3 + 1); else
-      if ((telInfo.align - 1) % 3 == 2) sprintf(txt, "Recenter Star %u", (telInfo.align - 1) / 3 + 1);
+      if ((telInfo.align - 1) % 3 == 1) sprintf(txt, L_SLEWING_TO_STAR " %u", (telInfo.align - 1) / 3 + 1); else
+      if ((telInfo.align - 1) % 3 == 2) sprintf(txt, L_RECENTER_STAR " %u", (telInfo.align - 1) / 3 + 1);
       u8g2_DrawUTF8(u8g2, 0, y, txt);
 
       y += line_height + 4;
@@ -837,7 +837,7 @@ bool SmartHandController::SelectStarAlign()
 
   cat_mgr.setIndex(0);
   if (cat_mgr.isInitialized()) {
-    if (display->UserInterfaceCatalog(&buttonPad, "Select Star")) {
+    if (display->UserInterfaceCatalog(&buttonPad, L_SELECT_STAR)) {
       bool ok = DisplayMessageLX200(SyncSelectedStarLX200(cat_mgr.getIndex()),false);
       return ok;
     }
@@ -912,31 +912,31 @@ bool SmartHandController::DisplayMessageLX200(LX200RETURN val, bool silentOk)
   int time = -1;
   if (val < LX200OK)
   {
-         if (val == LX200NOTOK)                    { sprintf(text1, "LX200 Command"); sprintf(text2, "has failed!");    }
-    else if (val == LX200SETVALUEFAILED)           { sprintf(text1, "Set Value");     sprintf(text2, "has failed!");    }
-    else if (val == LX200GETVALUEFAILED)           { sprintf(text1, "Get Value");     sprintf(text2, "has failed!");    }
-    else if (val == LX200SETTARGETFAILED)          { sprintf(text1, "Set Target");    sprintf(text2, "has failed!");    }
-    else if (val == LX200NOOBJECTSELECTED)         { sprintf(text1, "No Object");     sprintf(text2, "Selected!");      }
-    else if (val == LX200_GOTO_ERR_BELOW_HORIZON)  { sprintf(text1, "Target is");     sprintf(text2, "Below Horizon!"); }
-    else if (val == LX200_GOTO_ERR_ABOVE_OVERHEAD) { sprintf(text1, "Target is");     sprintf(text2, "Above Limit!");   }
-    else if (val == LX200_GOTO_ERR_STANDBY)        { sprintf(text1, "Telescope");     sprintf(text2, "in standby!");    }
-    else if (val == LX200_GOTO_ERR_PARK)           { sprintf(text1, "Telescope");     sprintf(text2, "is Parked!");     }
-    else if (val == LX200_GOTO_ERR_GOTO)           { sprintf(text1, "Goto already");  sprintf(text2, "in progress!");   }
-    else if (val == LX200_GOTO_ERR_OUTSIDE_LIMITS) { sprintf(text1, "Target");        sprintf(text2, "outside lmts!");  }
-    else if (val == LX200_GOTO_ERR_HARDWARE_FAULT) { sprintf(text1, "Telescope");     sprintf(text2, "h/w fault!");     }
-    else if (val == LX200_GOTO_ERR_IN_MOTION)      { sprintf(text1, "Telescope");     sprintf(text2, "in motion!");     }
-    else if (val == LX200_GOTO_ERR_UNSPECIFIED)    { sprintf(text1, "Goto unknown");  sprintf(text2, "error!");         }
-    else { sprintf(text1, "Error"); sprintf(text2, "-1"); }
+         if (val == LX200NOTOK)                    { sprintf(text1, L_LX200_NOTOK_1); sprintf(text2, L_LX200_NOTOK_2);  }
+    else if (val == LX200SETVALUEFAILED)           { sprintf(text1, L_LX200_SETVF_1); sprintf(text2, L_LX200_SETVF_2);  }
+    else if (val == LX200GETVALUEFAILED)           { sprintf(text1, L_LX200_GETVF_1); sprintf(text2, L_LX200_GETVF_2);  }
+    else if (val == LX200SETTARGETFAILED)          { sprintf(text1, L_LX200_SETTG_1); sprintf(text2, L_LX200_SETTG_2);  }
+    else if (val == LX200NOOBJECTSELECTED)         { sprintf(text1, L_LX200_OBJSE_1); sprintf(text2, L_LX200_OBJSE_2);  }
+    else if (val == LX200_GOTO_ERR_BELOW_HORIZON)  { sprintf(text1, L_LX200_TGHOR_1); sprintf(text2, L_LX200_TGHOR_2);  }
+    else if (val == LX200_GOTO_ERR_ABOVE_OVERHEAD) { sprintf(text1, L_LX200_TGOVH_1); sprintf(text2, L_LX200_TGOVH_2);  }
+    else if (val == LX200_GOTO_ERR_STANDBY)        { sprintf(text1, L_LX200_STNBF_1); sprintf(text2, L_LX200_STNBF_2);  }
+    else if (val == LX200_GOTO_ERR_PARK)           { sprintf(text1, L_LX200_PARKF_1); sprintf(text2, L_LX200_PARKF_2);  }
+    else if (val == LX200_GOTO_ERR_GOTO)           { sprintf(text1, L_LX200_GOGOF_1); sprintf(text2, L_LX200_GOGOF_2);  }
+    else if (val == LX200_GOTO_ERR_OUTSIDE_LIMITS) { sprintf(text1, L_LX200_LIMTF_1); sprintf(text2, L_LX200_LIMTF_2);  }
+    else if (val == LX200_GOTO_ERR_HARDWARE_FAULT) { sprintf(text1, L_LX200_HARDF_1); sprintf(text2, L_LX200_HARDF_2);  }
+    else if (val == LX200_GOTO_ERR_IN_MOTION)      { sprintf(text1, L_LX200_GOMOF_1); sprintf(text2, L_LX200_GOMOF_2);  }
+    else if (val == LX200_GOTO_ERR_UNSPECIFIED)    { sprintf(text1, L_LX200_UNSPF_1); sprintf(text2, L_LX200_UNSPF_2);  }
+    else { sprintf(text1, L_LX200_ERROR); sprintf(text2, "-1"); }
     DisplayMessage(text1, text2, -1);
   }
   else if (!silentOk)
   {
     time = 1000;
-         if (val == LX200OK)            { sprintf(text1, "LX200 Command"); sprintf(text2, "Done!");   }
-    else if (val == LX200VALUESET)      { sprintf(text1, "Value");         sprintf(text2, "Set!");    }
-    else if (val == LX200VALUEGET)      { sprintf(text1, "Value");         sprintf(text2, "Get!");    }
-    else if (val == LX200SYNCED)        { sprintf(text1, "Telescope");     sprintf(text2, "Synced!"); }
-    else if (val == LX200_GOTO_GOINGTO) { sprintf(text1, "Slew to");       sprintf(text2, "Target");  }
+         if (val == LX200OK)            { sprintf(text1, L_LX200_ISAOK_1); sprintf(text2, L_LX200_ISAOK_2);  }
+    else if (val == LX200VALUESET)      { sprintf(text1, L_LX200_SETOK_1); sprintf(text2, L_LX200_SETOK_2);  }
+    else if (val == LX200VALUEGET)      { sprintf(text1, L_LX200_GETOK_1); sprintf(text2, L_LX200_GETOK_2);  }
+    else if (val == LX200SYNCED)        { sprintf(text1, L_LX200_SNCOK_1); sprintf(text2, L_LX200_SNCOK_2);  }
+    else if (val == LX200_GOTO_GOINGTO) { sprintf(text1, L_LX200_GOTOK_1); sprintf(text2, L_LX200_GOTOK_2);  }
     DisplayMessage(text1, text2, time);
   }
   return isOk(val);
