@@ -2,7 +2,7 @@
 // Wifi setup
 
 const char html_wifiSerial[] PROGMEM =
-"<b>Performance and compatibility:</b><br/>"
+"<b>" L_WIFI_PERFORMANCE ":</b><br/>"
 "<form method='post' action='/wifi.htm'>"
 L_WIFI_CMD_TO ": <input style='width:4em' name='ccto' value='%d' type='number' min='5' max='100'> ms<br/>"
 L_WIFI_WWW_TO ": <input style='width:4em' name='wcto' value='%d' type='number' min='5' max='100'> ms<br/>"
@@ -103,8 +103,8 @@ void handleWifi() {
   Ser.setTimeout(webTimeout);
   serialRecvFlush();
   
-  char temp[320]="";
-  char temp1[80]="";
+  char temp[400]="";
+  char temp1[120]="";
   
   processWifiGet();
 

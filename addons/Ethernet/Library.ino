@@ -106,8 +106,8 @@ void handleLibrary() {
   Ser.setTimeout(webTimeout);
   serialRecvFlush();
   
-  char temp[320]="";
-  char temp1[80]="";
+  char temp[400]="";
+  char temp1[120]="";
   
   processLibraryGet();
 

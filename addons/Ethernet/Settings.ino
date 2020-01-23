@@ -73,7 +73,7 @@ void handleSettings() {
   Ser.setTimeout(webTimeout);
   serialRecvFlush();
 
-  char temp1[80]="";
+  char temp1[120]="";
 
   processSettingsGet();
   

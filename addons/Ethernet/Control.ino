@@ -444,7 +444,7 @@ void controlAjax(EthernetClient *client) {
 void controlAjax() {
 #endif
   String data="";
-  char temp[80]="";
+  char temp[120]="";
 
   if (Focuser1) {
     data += "focuserpos|";

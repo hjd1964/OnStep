@@ -270,7 +270,6 @@
 #define L_PARK "Park"
 #define L_SET_PARK "Set-Park"
 
-#define L_TRACKING "Tracking"
 #define L_TRK_FASTER "faster"
 #define L_TRK_SLOWER "slower"
 #define L_TRK_RESET "Reset (default)"
@@ -287,6 +286,8 @@
 #define L_MERIDIAN_FLIP_PAUSE "Meridian Flip, Pause at Home"
 
 // ------------------------ Configuration ------------------------
+
+#define L_MAX_SLEW_SPEED "Maximum Slew Speed"
 
 // goto Rate
 #define L_VSLOW "Very Slow (0.5x)"
@@ -316,6 +317,7 @@
 
 // ----------------------------  WiFi ----------------------------
 
+#define L_WIFI_PERFORMANCE "Performance and compatibility"
 #define L_WIFI_CMD_TO "Command channel serial read time-out"
 #define L_WIFI_WWW_TO "Web channel serial read time-out"
 

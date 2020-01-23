@@ -63,9 +63,9 @@ void handleRoot() {
   Ser.setTimeout(webTimeout);
   serialRecvFlush();
 
-  char temp[320]="";
-  char temp1[80]="";
-  char temp2[80]="";
+  char temp[400]="";
+  char temp1[120]="";
+  char temp2[120]="";
 
   sendHtmlStart();
 

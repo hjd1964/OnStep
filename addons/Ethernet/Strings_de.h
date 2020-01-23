@@ -1,13 +1,13 @@
 // -----------------------------------------------------------------------------------
 // Locale German  ISO ISO639-1 language code "de"
 // special German characters 
-// Ã¤ --> &auml
-// Ã¶ --> &ouml
-// Ã¼ --> &uuml
-// Ã„ --> &Auml
-// Ã– --> &Ouml
-// Ãœ --> &Uuml
-// ÃŸ --> &szlig 
+// Ã¤ --> &auml;
+// Ã¶ --> &ouml;
+// Ã¼ --> &uuml;
+// Ã„ --> &Auml;
+// Ã– --> &Ouml;
+// Ãœ --> &Uuml;
+// ÃŸ --> &szlig; 
 
 // General
 #define L_UPLOAD "Upload"
@@ -18,13 +18,13 @@
 
 #define L_UT "UT"
 #define L_LST "Sternzeit"
-#define L_LONG "L&aumlnge"
+#define L_LONG "L&auml;nge"
 #define L_LAT "Breite"
 #define L_EAST "Ost"
 #define L_WEST "West"
 #define L_ZENITH "Zenit"
 #define L_NCP "Nordpol"
-#define L_SCP "S&uumldpol"
+#define L_SCP "S&uuml;dpol"
 
 #define L_NONE "Kein"
 #define L_AUTO "Auto"
@@ -32,10 +32,10 @@
 #define L_ON "An"
 #define L_OFF "Aus"
 #define L_DELTA "Delta"
-#define L_GUIDE "Nachf&uumlhrung"
+#define L_GUIDE "Nachf&uuml;hrung"
 #define L_CENTER "Zentrieren"
 #define L_BLUE "Blau"
-#define L_GREEN "Gr&uuml"
+#define L_GREEN "Gr&uuml;"
 #define L_RATE "Rate"
 #define L_RANGE "Bereich"
 #define L_UNKNOWN "Unbekannt"
@@ -51,7 +51,7 @@
 #define L_DEW_POINT "Taupunkt-Temperatur"
 
 // operation
-#define L_TRACKING "Nachf%uumlhrung"
+#define L_TRACKING "die Verfolgung"
 #define L_COORDINATES "Koordinaten"
 #define L_CURRENT "Aktuell"
 #define L_TARGET "Ziel"
@@ -84,7 +84,7 @@
 #define L_REFR_COMP_BOTH "Refr. Komp. Beide Achsen"
 #define L_FULL_COMP_RA "Volle Komp. RA Achse"
 #define L_FULL_COMP_BOTH "Volle Komp. Beide Achsen"
-#define L_TRACKING_RATE "Nachf&uumlhrgeschwindigkeit"
+#define L_TRACKING_RATE "Nachf&uuml;hrgeschwindigkeit"
 #define L_CURRENT_MAXRATE "Aktuelle maximale Rate"
 #define L_DEFAULT_MAXRATE "Standard maximale Rate"
 #define L_CURRENT_MAXSLEW "Maximale Schwenkgeschwindigkeit"
@@ -95,7 +95,7 @@
 #define L_STANDSTILL "Stillstand"
 #define L_OPEN_LOAD "Offene Last"
 #define L_SHORT_GND "Masseschluss"
-#define L_SHUTDOWN_OVER "Abschaltung &uumlber"
+#define L_SHUTDOWN_OVER "Abschaltung &uuml;ber"
 #define L_PRE_WARNING "Vorwarnung"
 
 // misc. errors/workload
@@ -103,7 +103,7 @@
 #define L_CMD_ERROR_LOG "Kommando-Fehler Log"
 #define L_LAST_GENERAL_ERROR "Letzter allgemeiner (Hintergrund-) Fehler"
 #define L_WORKLOAD "Auslastung"
-#define L_WIRELESS_SIGNAL_STRENGTH "WiFi-Signalst&aumlrke"
+#define L_WIRELESS_SIGNAL_STRENGTH "WiFi-Signalst&auml;rke"
 
 // --------------------------- Control ---------------------------
 
@@ -166,7 +166,7 @@
 #define L_HINT_RATE_SIDEREAL "Sterngeschwindigkeit"
 #define L_HINT_RATE_LUNAR "Mondgeschwindigkeit"
 #define L_HINT_RATE_SOLAR "Sonnengeschwindigkeit"
-#define L_HINT_FOC_SEL "W&aumlhle Fokussierer"
+#define L_HINT_FOC_SEL "W&auml;hle Fokussierer"
 #define L_HINT_FOC_FIND_HOME "Suche Fokussierer Homeposition"
 #define L_HINT_FOC_RESET_HOME "Home (Reset) Fokussierer"
 #define L_HINT_ROT_FIND_HOME "Suche Rotator Home"
@@ -185,42 +185,42 @@
 
 #define L_CATALOG "Katalog"
 #define L_CATALOGS "Kataloge"
-#define L_RECS_AVAIL "Datens&aumltze verf&uumlgbar"
-#define L_NO_CATALOG "Kein Katalog gew&aumlhlt"
+#define L_RECS_AVAIL "Datens&auml;tze verf&uuml;gbar"
+#define L_NO_CATALOG "Kein Katalog gew&auml;hlt"
 #define L_CAT_DATA "Daten (heruntergeladen ODER zum Hochladen.)"
 
 #define L_CAT_EXAMPLE1 "Felder:<br /><pre>"
-#define L_CAT_EXAMPLE2 "  FÃ¼r Zeile 1 ist ein Katalognamens-Datensatz erforderlich, der<br />"
+#define L_CAT_EXAMPLE2 "  F&uumlr Zeile 1 ist ein Katalognamens-Datensatz erforderlich, der<br />"
 #define L_CAT_EXAMPLE3 "  aus einem '$' gefolgt von bis zu 10 Zeichen besteht.<br /><br />"
 #define L_CAT_EXAMPLE4 "  Der Objektname ist eine Folge von bis zu 11 Zeichen.<br /><br />"
 #define L_CAT_EXAMPLE5 "  Cat ist ein Kategoriecode wie folgt:<br />"
 #define L_CAT_EXAMPLE6 "  RA (Jnow) ist in Stunden, Minuten  und Sekunden.<br />"
 #define L_CAT_EXAMPLE7 "  Dec (Jnow) ist in +/- Grad, Minuten, Secunden.<br />"
 
-#define L_CAT_NO_NAME "Gew&aumlhlter Katalog hat keinen Namen."
-#define L_CAT_GET_NAME_FAIL "Namensselektion f&uumlr gew&aumlhlten Katalog fehlgeschlagen."
-#define L_CAT_NO_CAT "Kein Katalog gew&aumlhlt."
-#define L_SELECTED "gew&aumlhlt"
-#define L_CAT_DOWNLOAD_FAIL "Download fehlgeschlagen. Ung&uumlltige Daten."
+#define L_CAT_NO_NAME "Gew&auml;hlter Katalog hat keinen Namen."
+#define L_CAT_GET_NAME_FAIL "Namensselektion f&uuml;r gew&auml;hlten Katalog fehlgeschlagen."
+#define L_CAT_NO_CAT "Kein Katalog gew&auml;hlt."
+#define L_SELECTED "gew&auml;hlt"
+#define L_CAT_DOWNLOAD_FAIL "Download fehlgeschlagen. Ung&uuml;ltige Daten."
 #define L_CAT_DOWNLOAD_SUCCESS "Download erfolgreich."
 #define L_CAT_DOWNLOAD_INDEX_FAIL "Download fehlgeschlagen, Konnte Katalog nicht indizieren."
 #define L_CAT_DATA_REMOVED "Katalogdaten entfernt"
-#define L_CAT_UPLOAD_FAIL "Upload fehlgeschlagen. Ung&uumlltiger Katalogname."
+#define L_CAT_UPLOAD_FAIL "Upload fehlgeschlagen. Ung&uuml;ltiger Katalogname."
 #define L_CAT_UPLOAD_INDEX_FAIL "Upload fehlgeschlagen beim Indizieren des Katalognamensdatensatzes"
-#define L_CAT_DELETE_FAIL "Upload fehlgeschlagen beim L&oumlschen des Katalognamensdatensatzes"
+#define L_CAT_DELETE_FAIL "Upload fehlgeschlagen beim L&ouml;schen des Katalognamensdatensatzes"
 #define L_CAT_WRITE_NAME_FAIL "Upload fehlgeschlagen beim Schreiben des Katalognamensdatensatzes."
 #define L_CAT_UPLOAD_NO_NAME_FAIL "Upload fehlgeschlagen, Zeile 1 muss den Katalognamen enthalten."
-#define L_CAT_BAD_FORM "Upload fehlgeschlagen, ung&uumlltiges Format in Zeile# "
-#define L_CAT_UPLOAD_BAD_OBJECT_NAME "Upload fehlgeschlagen, ung&uumlltiger Objektname in Zeile# "
-#define L_CAT_BAD_CATEGORY "Upload fehlgeschlagen, ung&uumlltige Kategorie in Zeile# "
-#define L_CAT_BAD_RA "Upload fehlgeschlagen, ung&uumlltiges RA-Format in Zeile# "
-#define L_CAT_BAD_DEC "Upload fehlgeschlagen, ung&uumlltiges Dec-Format in Zeile# "
+#define L_CAT_BAD_FORM "Upload fehlgeschlagen, ung&uuml;ltiges Format in Zeile# "
+#define L_CAT_UPLOAD_BAD_OBJECT_NAME "Upload fehlgeschlagen, ung&uuml;ltiger Objektname in Zeile# "
+#define L_CAT_BAD_CATEGORY "Upload fehlgeschlagen, ung&uuml;ltige Kategorie in Zeile# "
+#define L_CAT_BAD_RA "Upload fehlgeschlagen, ung&uuml;ltiges RA-Format in Zeile# "
+#define L_CAT_BAD_DEC "Upload fehlgeschlagen, ung&uuml;ltiges Dec-Format in Zeile# "
 #define L_CAT_UPLOAD_RA_FAIL "Upload fehlgeschlagen beim Senden von RA in Zeile# "
 #define L_CAT_UPLOAD_DEC_FAIL "Upload fehlgeschlagen beim Senden von Dec in Zeile# "
 #define L_CAT_UPLOAD_LINE_FAIL "Upload fehlgeschlagen beim Senden Zeile# "
 #define L_CAT_UPLOAD_SUCCESS "Upload erfolgreich"
 #define L_CAT_UPLOAD_LINES_WRITTEN "Zeilen geschrieben"
-#define L_CAT_UPLOAD_SELECT_FAIL "Der Upload ist fehlgeschlagen, der Katalog konnte nicht ausgewÃ¤hlt werden."
+#define L_CAT_UPLOAD_SELECT_FAIL "Der Upload ist fehlgeschlagen, der Katalog konnte nicht ausgew&auml;hlt werden."
 #define L_CAT_UPLOAD_NO_CAT "Upload fehlgeschlagen, kein Katalog ausgewÃ¤hlt."
 
 // --------------------------- Encoders --------------------------
@@ -229,7 +229,7 @@
 #define L_ENC_SYNC_TO_ENC "Syncronisiere OnStep zu Encodern"
 #define L_ENC_SYNC_TO_ONS "Syncronisiere Encoder zu OnStep"
 #define L_ENC_AUTO_SYNC "Synchronisiere automatisch OnStep zu Encodern"
-#define L_ENC_MAX_ANGLE "Maximale Winkeldistanz(Encoder verglichen mit OnStep)"
+#define L_ENC_MAX_ANGLE "Maximale Winkeldistanz (Encoder verglichen mit OnStep)"
 #define L_ENC_MAX_ANGLE_AXIS1 "(Axis1, Bogensekunden 0 to 9999)"
 #define L_ENC_MAX_ANGLE_AXIS2 "(Axis2, Bogensekunden 0 to 9999)"
 #define L_ENC_AUTO_RATE "OnStep Raten Steuerung"
@@ -238,7 +238,7 @@
 #define L_ENC_BINNED_SAMPLES "Mittelwertbildung Encoderwerte (binning)"
 #define L_ENC_SAMPLES "Mittelwertbildung Encoderwerte (Werte)"
 #define L_ENC_PROPORTIONAL "Proportionale Reaktion"
-#define L_ENC_MIN_GUIDE "Minimum Nachf&uumlhrung"
+#define L_ENC_MIN_GUIDE "Minimum Nachf&uuml;hrung"
 #define L_ENC_RATE_COMP "Encoder Geschwindigkeitskompensation"
 #define L_ENC_MAGN "Umfang"
 #define L_ENC_PHASE "Phase"
@@ -253,7 +253,7 @@
 #define L_PEC_CONTROL "PEC Steuerung"
 #define L_PEC_PLAY "Abspielen"
 #define L_PEC_STOP "Stop"
-#define L_PEC_CLEAR "L&oumlschen"
+#define L_PEC_CLEAR "L&ouml;schen"
 #define L_PEC_REC "Aufzeichnen"
 #define L_PEC_CLEAR_MESSAGE "L&ouml;schen l&ouml;scht den Speicher aber nicht den EEPROM.  W&auml;hrend der Aufnahme werden die Korrekturen 3:1 gemittelt, wobei der Puffer bevorzugt wird, es sei denn, er wird gel&ouml;scht. In diesem Fall wird die volle Korrektur verwendet."
 #define L_PEC_EEWRITE "Schreibe in EEPROM"
@@ -271,18 +271,17 @@
 
 #define L_REFINE_POLAR_ALIGN "Verfeinere Polausrichtung"
 #define L_REFINE_PA "Verfeinere PA"
-#define L_REFINE_MESSAGE1 "Setup und 3+ Stern-Ausrichtung der Montierung. F&aumlhrt zu einem hellen Stern in der N&auml;he von Himmelsnord- oder -s&uumldpols mit einer Deklination von 50 bis 80 Grad (N oder S). "
+#define L_REFINE_MESSAGE1 "Setup und 3+ Stern-Ausrichtung der Montierung. F&auml;hrt zu einem hellen Stern in der N&auml;he von Himmelsnord- oder -s&uuml;dpols mit einer Deklination von 50 bis 80 Grad (N oder S). "
 #define L_REFINE_MESSAGE2 "Dr&uuml;cken Sie dann die [Verfeinere PA] Taste. Verwenden Sie die Richtungstasten, um den Stern im Okular wieder zu zentrieren."
 #define L_REFINE_MESSAGE3 "Optional richten Sie die  Montierung erneut aus."
 
 #define L_PARK "Parken"
 #define L_SET_PARK "Setze Parkposition"
 
-#define L_TRACKING "Nachf&uumlhrung"
 #define L_TRK_FASTER "schneller"
 #define L_TRK_SLOWER "langsamer"
 #define L_TRK_RESET "Reset (standard)"
-#define L_TRK_COMP "Kompensation der Nachf&uumlhrgeschwindigkeit (Pointing Modell/Refraktion)"
+#define L_TRK_COMP "Kompensation der Nachf&uuml;hrgeschwindigkeit (Pointing Modell/Refraktion)"
 #define L_TRK_FULL "Voll"
 #define L_TRK_REFR "Nur Refraktion"
 #define L_TRK_DUAL "Beide Achsen"
@@ -290,11 +289,13 @@
 
 #define L_BUZZER "Goto Alarm, Buzzer"
 
-#define L_MERIDIAN_FLIP_AUTO "Automatischer Meridianflip bei Grenz&uumlberschreitung"
+#define L_MERIDIAN_FLIP_AUTO "Automatischer Meridianflip bei Grenz&uuml;berschreitung"
 #define L_MERIDIAN_FLIP_NOW "Jetzt"
-#define L_MERIDIAN_FLIP_PAUSE "Pausiere an Homeposition w&aumlhrend Meridian Flip"
+#define L_MERIDIAN_FLIP_PAUSE "Pausiere an Homeposition w&auml;hrend Meridian Flip"
 
 // ------------------------ Configuration ------------------------
+
+#define L_MAX_SLEW_SPEED "Maximale Schwenkgeschwindigkeit"
 
 // goto Rate
 #define L_VSLOW "Sehr langsam (0.5x)"
@@ -317,12 +318,14 @@
 
 // location
 #define L_LOCATION_TITLE "Standort:"
-#define L_LOCATION_LONG "L&aumlngengad, in Grad und Min. +/- 180, W is +"
+#define L_LOCATION_LONG "L&auml;ngengad, in Grad und Min. +/- 180, W is +"
 #define L_LOCATION_LAT "Breitengrad, in Grad und Min. +/- 90, N is +"
 #define L_LOCATION_RANGE_UTC_OFFSET "UTC Offset, in Stunden -12 to +14"
-#define L_LOCATION_MESSAGE_UTC_OFFSET "Entgegengesetzter Zeitzonenwert f&uumlr die Standardzeit (Keine Winterzeit!)"
+#define L_LOCATION_MESSAGE_UTC_OFFSET "Entgegengesetzter Zeitzonenwert f&uuml;r die Standardzeit (Keine Winterzeit!)"
 
 // ----------------------------  WiFi ----------------------------
+
+#define L_WIFI_PERFORMANCE "Leistung und Kompatibilität"
 
 #define L_WIFI_CMD_TO "Timeout f&uuml;r die serielles Auslesung des Befehlskanals:"
 #define L_WIFI_WWW_TO "Timeout f&uuml;r das serielles Auslesen des Webkanals:"
@@ -343,9 +346,9 @@
 
 #define L_WIFI_AP "Access Point Modus"
 
-#define L_WIFI_RESTART_MSG "Sie m&uumlssen <u>manuell</u> neu starten, damit die &Aumlnderungen wirksam werden."
+#define L_WIFI_RESTART_MSG "Sie m&uuml;ssen <u>manuell</u> neu starten, damit die &Auml;nderungen wirksam werden."
 
-#define L_WIFI_TITLE "Geben Sie das Passwort ein um die WiFi-Konfiguration zu &aumlndern:"
+#define L_WIFI_TITLE "Geben Sie das Passwort ein um die WiFi-Konfiguration zu &auml;ndern:"
 
 #define L_WIFI_ADVICE1 "Setup:<br/><br/>"
 #define L_WIFI_ADVICE2 "Aktivieren Sie nur einen der beiden Modi <i>Stationsmodus</i> <b>ODER</b> <i>Access Point Modus</i>. Das gleichzeitige Aktivieren beider Optionen kann zu Performanceproblemen f&uuml;hren!<br/><br/>"
@@ -361,7 +364,7 @@
 
 #define L_DOWN_TITLE "Serielles Interface zur OnStep ist nicht verbunden!"
 #define L_DOWN_MESSAGE1 "Aus- und Wiedereinschalten kann helfen, wenn es eine Unstimmigkeit mit der Baudrate gibt<br /><br />"
-#define L_DOWN_MESSAGE2 "Andere m&oumlgliche Gr&uumlnde:<br /><ul>"
+#define L_DOWN_MESSAGE2 "Andere m&ouml;gliche Gr&uuml;nde:<br /><ul>"
 #define L_DOWN_MESSAGE3 "Inkorrekt konfigurierte OnStep Baudrate."
 #define L_DOWN_MESSAGE4A "Inkorrekt konfigurierte ESP8266 Baudrate."
 #define L_DOWN_MESSAGE4B "Inkorrekt konfigurierte Teensy3.2 oder Arduino M0 Baudrates."
@@ -375,7 +378,7 @@
 #define L_PAGE_ENCODERS "Encoder"
 #define L_PAGE_PEC "PEC"
 #define L_PAGE_SETTINGS "Einstellungen"
-#define L_PAGE_CONFIG "Konfiguration"
+#define L_PAGE_CONFIG "Konfig."
 #define L_PAGE_WIFI "WiFi"
 
 // ------------------------- MountStatus -------------------------
@@ -384,16 +387,16 @@
 #define L_GE_NONE "keiner"
 #define L_GE_MOTOR_FAULT "Motor/Treiber Fehler"
 #define L_GE_ALT_MIN "Unter der Horizontgrenze" 
-#define L_GE_LIMIT_SENSE "Grenzschalter ausgel&oumlst"
-#define L_GE_DEC "Deklinationsgrenze &uumlberschritten"
-#define L_GE_AZM "Azimutgrenze &uumlberschritten"
-#define L_GE_UNDER_POLE "Unterpolgrenze &uumlberschritten"
-#define L_GE_MERIDIAN "Meridiangrenze &uumlberschritten"
-#define L_GE_SYNC "Sync-Sicherheitsgrenze &uumlberschritten"
+#define L_GE_LIMIT_SENSE "Grenzschalter ausgel&ouml;st"
+#define L_GE_DEC "Deklinationsgrenze &uuml;berschritten"
+#define L_GE_AZM "Azimutgrenze &uuml;berschritten"
+#define L_GE_UNDER_POLE "Unterpolgrenze &uuml;berschritten"
+#define L_GE_MERIDIAN "Meridiangrenze &uuml;berschritten"
+#define L_GE_SYNC "Sync-Sicherheitsgrenze &uuml;berschritten"
 #define L_GE_PARK "Parken fehlgeschlagen"
 #define L_GE_GOTO_SYNC "Goto/Sync fehlgeschlagen"
 #define L_GE_UNSPECIFIED "Unbekannter Fehler"
-#define L_GE_ALT_MAX "&uumlber Obergrenze"
+#define L_GE_ALT_MAX "&uuml;ber Obergrenze"
 #define L_GE_WEATHER_INIT "Wettersensor Initialisierung fehlgeschlagen"
 #define L_GE_RTC_INIT "RTC Initialisierung fehlgeschlagen"
 #define L_GE_OTHER "Unbekannter Fehler, Code"
@@ -402,9 +405,9 @@
 #define L_CE_NONE "Keine Fehler"
 #define L_CE_0 "Antwort 0"
 #define L_CE_CMD_UNKNOWN "unbekanntes Kommando"
-#define L_CE_REPLY_UNKNOWN "ung&uumlltige Antwort"
+#define L_CE_REPLY_UNKNOWN "ung&uuml;ltige Antwort"
 #define L_CE_PARAM_RANGE "Parameter ausserhalb des Bereiches"
-#define L_CE_PARAM_FORM "ung&uumlltiges Parameterformat"
+#define L_CE_PARAM_FORM "ung&uuml;ltiges Parameterformat"
 #define L_CE_ALIGN_FAIL "Ausrichtung fehlgeschlagen"
 #define L_CE_ALIGN_NOT_ACTIVE "Ausrichtung nicht ativ"
 #define L_CE_NOT_PARKED_OR_AT_HOME "nicht geparkt oder in Homeposition"
@@ -415,7 +418,7 @@
 #define L_CE_GOTO_FAIL "Goto fehlgeschlagen"
 #define L_CE_LIBRARY_FULL "Bibliothek voll"
 #define L_CE_GOTO_ERR_BELOW_HORIZON "Goto unter Horizont"
-#define L_CE_GOTO_ERR_ABOVE_OVERHEAD "Goto &uumlber Obergrenze"
+#define L_CE_GOTO_ERR_ABOVE_OVERHEAD "Goto &uuml;ber Obergrenze"
 #define L_CE_SLEW_ERR_IN_STANDBY "Schwenken in Standby"
 #define L_CE_SLEW_ERR_IN_PARK "Schwenken in Parkposition"
 #define L_CE_GOTO_ERR_GOTO "bereits im Goto"

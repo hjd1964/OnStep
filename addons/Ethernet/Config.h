@@ -24,7 +24,7 @@
                                           //         faster speed (vs. SERIAL_BAUD_DEFAULT) and AFTER success, start WiFi, etc.
 
 // DISPLAY -------------------------------------------------------------------------------------------------------------------------
-#define DISPLAY_LANGUAGE             L_en //   L_en, English. Specify language with two letter country code, if supported.    Option
+#define DISPLAY_LANGUAGE             L_en //   L_en, English. Specify language with two letter country code, if supported.    Adjust
 #define DISPLAY_WEATHER               OFF //    OFF, ON Shows weather/ambient conditions (from OnStep) on status page.        Option
 #define DISPLAY_INTERNAL_TEMPERATURE  OFF //    OFF, ON for internal MCU temperature display.                                 Option
 #define DISPLAY_HIGH_PRECISION_COORDS OFF //    OFF, ON for pull high precision coordinates from OnStep.                      Option

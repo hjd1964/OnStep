@@ -171,7 +171,7 @@ void handleEncoders() {
   Ser.setTimeout(webTimeout);
   serialRecvFlush();
   
-  char temp[300]="";
+  char temp[400]="";
   
   processEncodersGet();
 

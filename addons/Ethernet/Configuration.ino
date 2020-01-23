@@ -2,7 +2,7 @@
 // Configuration
 
 const char html_config1[] PROGMEM =
-"Maximum Slew Speed: "
+L_MAX_SLEW_SPEED ": "
 "<form method='get' action='/configuration.htm'>"
 "<button name='ss' value='vs' type='submit'>" L_VSLOW "</button>"
 "<button name='ss' value='s' type='submit'>" L_SLOW "</button>";
@@ -92,9 +92,9 @@ void handleConfiguration() {
   Ser.setTimeout(webTimeout);
   serialRecvFlush();
   
-  char temp[320]="";
-  char temp1[80]="";
-  char temp2[80]="";
+  char temp[400]="";
+  char temp1[120]="";
+  char temp2[120]="";
   
   processConfigurationGet();
 
