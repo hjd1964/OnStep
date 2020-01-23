@@ -225,6 +225,7 @@
 #define L_ENC_MAX_ANGLE_AXIS1 "(Axis1, arc-sec 0 to 9999)"
 #define L_ENC_MAX_ANGLE_AXIS2 "(Axis2, arc-sec 0 to 9999)"
 #define L_ENC_AUTO_RATE "OnStep rate control"
+#define L_ENC_SYNC_NOW "Now"
 
 // encoder rate control
 #define L_ENC_BINNED_SAMPLES "Encoder rate averaging, binned samples"

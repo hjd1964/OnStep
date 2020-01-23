@@ -56,12 +56,12 @@ const char html_encScript2[] PROGMEM =
 const char html_syncOnStepNow[] PROGMEM =
 L_ENC_SYNC_TO_ENC ": <br />"
 "<form method='get' action='/enc.htm'>"
-"<button name='ms' value='ons' type='submit'>Now</button>"
+"<button name='ms' value='ons' type='submit'>" L_ENC_SYNC_NOW "</button>"
 "<br />";
 
 const char html_syncEncodersNow[] PROGMEM =
 L_ENC_SYNC_TO_ONS ": <br />"
-"<button name='ms' value='enc' type='submit'>Now</button>"
+"<button name='ms' value='enc' type='submit'>" L_ENC_SYNC_NOW "</button>"
 "</form><br />";
 
 const char html_encEn1[] PROGMEM =
@@ -132,7 +132,7 @@ const char html_encErc2Axis1[] PROGMEM =
 L_ENC_RATE_COMP ": <br />"
 "<form method='get' action='/enc.htm'>"
 " <input style='width: 75px' value='%ld' type='number' name='er' min='-99999' max='99999'>"
-"<button type='submit'>Upload</button>"
+"<button type='submit'>" L_UPLOAD "</button>"
 " (ERC &#xb1;99999 PPM, &#xb1;10&#x25;)"
 "</form><br />";
 #endif

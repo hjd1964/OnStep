@@ -233,6 +233,7 @@
 #define L_ENC_MAX_ANGLE_AXIS1 "(Axis1, Bogensekunden 0 to 9999)"
 #define L_ENC_MAX_ANGLE_AXIS2 "(Axis2, Bogensekunden 0 to 9999)"
 #define L_ENC_AUTO_RATE "OnStep Raten Steuerung"
+#define L_ENC_SYNC_NOW "Jetzt"
 
 // encoder rate control
 #define L_ENC_BINNED_SAMPLES "Mittelwertbildung Encoderwerte (binning)"
