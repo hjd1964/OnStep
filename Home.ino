@@ -30,9 +30,14 @@ void checkHome() {
   // we are finishing off the find home
   if (findHomeMode == FH_DONE && guideDirAxis1 == 0 && guideDirAxis2 == 0) {
     findHomeMode=FH_OFF;
+
+#if AXIS2_TANGENT_ARM == ON
+    trackingState=abortTrackingState;
+#else    
     // at the polar home position
     InitStartPosition();
     atHome=true;
+#endif
   }
 }
 
@@ -57,6 +62,7 @@ CommandErrors goHome(boolean fast) {
   if (findHomeMode != FH_OFF) return CE_MOUNT_IN_MOTION;
 
   // stop tracking
+  abortTrackingState=trackingState;
   trackingState=TrackingNone;
 
   // decide direction to guide
@@ -72,7 +78,6 @@ CommandErrors goHome(boolean fast) {
   
   // start guides
   if (fast) {
-    //setHome();
 
 #if AXIS2_TANGENT_ARM != ON
     // make sure tracking is disabled
