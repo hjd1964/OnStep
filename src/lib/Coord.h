@@ -46,8 +46,8 @@ void setTargetAxis1(double axis1, int newPierSide) {
 void setTargetAxis2(double axis2, int newPierSide) {
   if (latitude >= 0) { if (newPierSide == PierSideWest) axis2=180.0-axis2; } else { if (newPierSide == PierSideWest) axis2=-180.0-axis2; }
   if (axis2 > 360.0) axis2-=360.0; if (axis2 < -360.0) axis2+=360.0;
-  long p2=(double)(axis2-indexAxis2)*(double)AXIS2_STEPS_PER_DEGREE; cli();
-  targetAxis2.part.m=p2; targetAxis2.part.f=0; sei();
+  long p2=(double)(axis2-indexAxis2)*(double)AXIS2_STEPS_PER_DEGREE;
+  cli(); targetAxis2.part.m=p2; targetAxis2.part.f=0; sei();
 }
 
 double getTargetAxis1() {
