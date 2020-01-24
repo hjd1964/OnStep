@@ -33,6 +33,10 @@ void checkHome() {
 
 #if AXIS2_TANGENT_ARM == ON
     trackingState=abortTrackingState;
+    cli();
+    targetAxis2.part.m = 0; targetAxis2.part.f = 0;
+    posAxis2           = 0;
+    sei();
 #else    
     // at the polar home position
     InitStartPosition();
