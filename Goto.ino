@@ -17,8 +17,10 @@ CommandErrors validateGotoCoords(double HA, double Dec, double Alt) {
   // Check coordinates
   if (Alt < minAlt)                            return CE_GOTO_ERR_BELOW_HORIZON;
   if (Alt > maxAlt)                            return CE_GOTO_ERR_ABOVE_OVERHEAD;
-  if (Dec < AXIS2_LIMIT_MIN)                   return CE_GOTO_ERR_OUTSIDE_LIMITS;
-  if (Dec > AXIS2_LIMIT_MAX)                   return CE_GOTO_ERR_OUTSIDE_LIMITS;
+#if AXIS2_TANGENT_ARM != ON
+    if (Dec < AXIS2_LIMIT_MIN)                 return CE_GOTO_ERR_OUTSIDE_LIMITS;
+    if (Dec > AXIS2_LIMIT_MAX)                 return CE_GOTO_ERR_OUTSIDE_LIMITS;
+#endif
   if ((fabs(HA) > AXIS1_LIMIT_UNDER_POLE))     return CE_GOTO_ERR_OUTSIDE_LIMITS;
   return CE_NONE;
 }
@@ -274,7 +276,6 @@ CommandErrors goToEqu(double RA, double Dec) {
 #endif
 
   // goto function takes HA and Dec in steps
-  // when in align mode, force pier side
   byte thisPierSide = PierSideBest;
   if (meridianFlip != MeridianFlipNever) {
     if (preferredPierSide == PPS_WEST) thisPierSide=PierSideWest;
@@ -294,7 +295,7 @@ CommandErrors goToHor(double *Alt, double *Azm) {
   return goToEqu(RA,Dec);
 }
 
-// moves the mount to a new Hour Angle and Declination - both are in steps.  Alternate targets are used when a meridian flip occurs
+// moves the mount to a new Hour Angle and Declination, both in degrees.  Alternate targets are used when a meridian flip occurs
 CommandErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTargetAxis1, double altTargetAxis2, int gotoPierSide) {
   atHome=false;
   int thisPierSide=getInstrPierSide();
@@ -349,11 +350,16 @@ CommandErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTar
   }
   
   // final validation
+  int p=PierSideEast; switch (thisPierSide) { case PierSideWest: case PierSideFlipEW1: p=PierSideWest; break; }
 #if MOUNT_TYPE == ALTAZM
   // allow +/- 360 in Az
   if (((thisTargetAxis1 > AXIS1_LIMIT_MAXAZM) || (thisTargetAxis1 < -AXIS1_LIMIT_MAXAZM)) || ((thisTargetAxis2 > 180.0) || (thisTargetAxis2 < -180.0))) return CE_GOTO_ERR_UNSPECIFIED;
 #else
   if (((thisTargetAxis1 > 180.0) || (thisTargetAxis1 < -180.0)) || ((thisTargetAxis2 > 180.0) || (thisTargetAxis2 < -180.0))) return CE_GOTO_ERR_UNSPECIFIED;
+  #if AXIS2_TANGENT_ARM == ON
+    if (toInstrAxis2(thisTargetAxis2,p) < AXIS2_LIMIT_MIN) return CE_GOTO_ERR_OUTSIDE_LIMITS;
+    if (toInstrAxis2(thisTargetAxis2,p) > AXIS2_LIMIT_MAX) return CE_GOTO_ERR_OUTSIDE_LIMITS;
+  #endif
 #endif
   lastTrackingState=trackingState;
 
@@ -368,7 +374,6 @@ CommandErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTar
   timerRateAxis2=SiderealRate;
   sei();
 
-  int p=PierSideEast; switch (thisPierSide) { case PierSideWest: case PierSideFlipEW1: p=PierSideWest; break; }
   setTargetAxis1(thisTargetAxis1,p);
   setTargetAxis2(thisTargetAxis2,p);
 

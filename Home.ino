@@ -74,8 +74,10 @@ CommandErrors goHome(boolean fast) {
   if (fast) {
     //setHome();
 
+#if AXIS2_TANGENT_ARM != ON
     // make sure tracking is disabled
     trackingState=TrackingNone;
+#endif
     // make sure motors are powered on
     enableStepperDrivers();
 
@@ -84,14 +86,18 @@ CommandErrors goHome(boolean fast) {
     findHomeTimeout=millis()+(unsigned long)(secPerDeg*180.0*1000.0);
     
     // 8=HalfMaxRate
+#if AXIS2_TANGENT_ARM != ON
     e=startGuideAxis1(a1,8,0);
+#endif
     if (e == CE_NONE) e=startGuideAxis2(a2,8,0,true);
   } else {
     findHomeMode=FH_SLOW;
     findHomeTimeout=millis()+30000UL;
     
     // 7=48x sidereal
+#if AXIS2_TANGENT_ARM != ON
     e=startGuideAxis1(a1,7,0);
+#endif
     if (e == CE_NONE) e=startGuideAxis2(a2,7,0,true);
   }
   if (e != CE_NONE) stopSlewing();
@@ -99,12 +105,20 @@ CommandErrors goHome(boolean fast) {
 #else
   if (e != CE_NONE) return e; 
 
-  // stop tracking
   abortTrackingState=trackingState;
-  trackingState=TrackingNone;
 
-  e=goTo(homePositionAxis1,homePositionAxis2,homePositionAxis1,homePositionAxis2,PierSideEast);
-  homeMount=true;
+  #if AXIS2_TANGENT_ARM == ON
+    double h=getInstrAxis1();
+    double i2=indexAxis2;
+    int p=getInstrPierSide();
+    if (latitude >= 0) { if (p == PierSideWest) i2=180.0-i2; } else { if (p == PierSideWest) i2=-180.0-i2; }
+    e=goTo(h,i2,h,i2,p);
+  #else
+    trackingState=TrackingNone;
+    e=goTo(homePositionAxis1,homePositionAxis2,homePositionAxis1,homePositionAxis2,PierSideEast);
+  #endif
+
+  if (e == CE_NONE) homeMount=true; else trackingState=abortTrackingState;
   return e;
 #endif
 }

@@ -266,12 +266,11 @@ void moveTo() {
           trackingState=lastTrackingState; lastTrackingState=TrackingNone;
           SiderealClockSetInterval(siderealInterval);
 
-//          setHome();
           // at the polar home position
           homeMount=false;
+#if AXIS2_TANGENT_ARM != ON
           atHome=true;
-
-//          disableStepperDrivers();
+#endif
         } else {
           // restore trackingState
           trackingState=lastTrackingState; lastTrackingState=TrackingNone;

@@ -7,7 +7,9 @@
 // -----------------------------------------------------------------------------------
 // correct for configuration backwards compatability
 
-// N/A
+#ifndef AXIS2_TANGENT_ARM
+  #define AXIS2_TANGENT_ARM OFF
+#endif
 
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
@@ -417,6 +419,19 @@
   #error "Configuration (Config.h): Setting AXIS2_LIMIT_MAX must be present!"
 #elif (AXIS2_LIMIT_MAX < 0 || AXIS2_LIMIT_MAX > 91)
   #error "Configuration (Config.h): Setting AXIS2_LIMIT_MAX invalid, use a number between 0 and 91 (degrees.)  91 = disabled."
+#endif
+
+#ifndef AXIS2_TANGENT_ARM
+  #error "Configuration (Config.h): Setting AXIS2_TANGENT_ARM must be present!"
+#elif (AXIS2_TANGENT_ARM != ON && AXIS2_TANGENT_ARM != OFF)
+  #error "Configuration (Config.h): Setting AXIS2_TANGENT_ARM invalid, use OFF or ON only."
+#endif
+#ifndef AXIS2_TANGENT_ARM_CORRECTION
+  #if AXIS2_TANGENT_ARM == ON
+    #define AXIS2_TANGENT_ARM_CORRECTION ON
+  #else
+    #define AXIS2_TANGENT_ARM_CORRECTION OFF
+  #endif
 #endif
 
 #ifndef AXIS3_LIMIT_MIN

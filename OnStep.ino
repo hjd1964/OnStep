@@ -601,7 +601,11 @@ void loop2() {
     }
     // check for exceeding AXIS2_LIMIT_MIN or AXIS2_LIMIT_MAX
 #if MOUNT_TYPE != ALTAZM
-    if ((currentDec < AXIS2_LIMIT_MIN) || (currentDec > AXIS2_LIMIT_MAX)) { generalError=ERR_DEC; stopLimit(); }
+  #if AXIS2_TANGENT_ARM == ON
+      if (posAxis2/AXIS2_STEPS_PER_DEGREE < AXIS2_LIMIT_MIN || posAxis2/AXIS2_STEPS_PER_DEGREE > AXIS2_LIMIT_MAX) { generalError=ERR_DEC; stopLimit(); }
+  #else
+      if (currentDec < AXIS2_LIMIT_MIN || currentDec > AXIS2_LIMIT_MAX) { generalError=ERR_DEC; stopLimit(); }
+  #endif
 #endif
 
     // update weather info
