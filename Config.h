@@ -142,7 +142,7 @@
 
 #define AXIS2_LIMIT_MIN               -91 //    -91, n. Where n=-91..0 (degrees.) Minimum allowed declination.                Infreq
 #define AXIS2_LIMIT_MAX                91 //     91, n. Where n=0..91 (degrees.) Maximum allowed declination.                 Infreq
-#define AXIS2_TANGENT_ARM             OFF //    OFF, ON Axis2 above limits inst coordinate range. Return Home cntrs Dec only. Infreq
+#define AXIS2_TANGENT_ARM             OFF //    OFF, ON +above limit range. Set cntr w/[Reset Home] Return cntr w/[Find Home] Infreq
 
 // AXIS3 ROTATOR -------------------------
 #define ROTATOR                       OFF //    OFF, ON to enable the rotator (or de-rotator for ALTAZM mounts.)              Option
