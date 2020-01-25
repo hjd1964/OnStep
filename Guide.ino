@@ -147,12 +147,14 @@ void stopGuideAxis1() {
 
 // start a guide in Dec or Alt, direction must be 'n', 's', or 'b', guideRate is the rate selection (0 to 9), guideDuration is in ms (0 to ignore) 
 CommandErrors startGuideAxis2(char direction, int guideRate, long guideDuration, bool absolute) {
-  if (faultAxis2)                       return CE_SLEW_ERR_HARDWARE_FAULT;
-  if (!axis1Enabled)                    return CE_SLEW_ERR_IN_STANDBY;
-  if (parkStatus == Parked)             return CE_SLEW_ERR_IN_PARK;
-  if (trackingSyncInProgress())         return CE_MOUNT_IN_MOTION;
-  if (trackingState == TrackingMoveTo)  return CE_MOUNT_IN_MOTION;
-  if (direction == guideDirAxis2)       return CE_NONE;
+  if (faultAxis2)                          return CE_SLEW_ERR_HARDWARE_FAULT;
+  if (!axis1Enabled)                       return CE_SLEW_ERR_IN_STANDBY;
+  if (parkStatus == Parked)                return CE_SLEW_ERR_IN_PARK;
+  if (trackingSyncInProgress())            return CE_MOUNT_IN_MOTION;
+  if (trackingState == TrackingMoveTo)     return CE_MOUNT_IN_MOTION;
+  if (direction == guideDirAxis2)          return CE_NONE;
+  if (direction == 'n' && !guideNorthOk()) return CE_SLEW_ERR_OUTSIDE_LIMITS;
+  if (direction == 's' && !guideSouthOk()) return CE_SLEW_ERR_OUTSIDE_LIMITS;
 
   enableGuideRate(guideRate);
   if (guideRate < 3) deactivateBacklashComp(); else reactivateBacklashComp();
@@ -164,6 +166,18 @@ CommandErrors startGuideAxis2(char direction, int guideRate, long guideDuration,
   if (!absolute && (getInstrPierSide() == PierSideWest)) { cli(); guideTimerRateAxis2=-guideTimerRateAxis2; sei(); }
 
   return CE_NONE;
+}
+
+bool guideNorthOk() {
+  if (posAxis2/AXIS2_STEPS_PER_DEGREE < AXIS2_LIMIT_MIN && getInstrPierSide() == PierSideWest) return false;
+  if (posAxis2/AXIS2_STEPS_PER_DEGREE > AXIS2_LIMIT_MAX && getInstrPierSide() == PierSideEast) return false;
+  return true;
+}
+
+bool guideSouthOk() {
+  if (posAxis2/AXIS2_STEPS_PER_DEGREE < AXIS2_LIMIT_MIN && getInstrPierSide() == PierSideEast) return false;
+  if (posAxis2/AXIS2_STEPS_PER_DEGREE > AXIS2_LIMIT_MAX && getInstrPierSide() == PierSideWest) return false;
+  return true;
 }
 
 CommandErrors startGuideAxis2(char direction, int guideRate, long guideDuration) {

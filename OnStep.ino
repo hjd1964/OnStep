@@ -602,9 +602,12 @@ void loop2() {
     // check for exceeding AXIS2_LIMIT_MIN or AXIS2_LIMIT_MAX
 #if MOUNT_TYPE != ALTAZM
   #if AXIS2_TANGENT_ARM == ON
-      if (posAxis2/AXIS2_STEPS_PER_DEGREE < AXIS2_LIMIT_MIN || posAxis2/AXIS2_STEPS_PER_DEGREE > AXIS2_LIMIT_MAX) { generalError=ERR_DEC; stopLimit(); }
+      if (posAxis2/AXIS2_STEPS_PER_DEGREE < AXIS2_LIMIT_MIN) { generalError=ERR_DEC; decMinLimit(); } else
+      if (posAxis2/AXIS2_STEPS_PER_DEGREE > AXIS2_LIMIT_MAX) { generalError=ERR_DEC; decMaxLimit(); } else
+      if (trackingState == TrackingSidereal && generalError == ERR_DEC) generalError=ERR_NONE;
   #else
-      if (currentDec < AXIS2_LIMIT_MIN || currentDec > AXIS2_LIMIT_MAX) { generalError=ERR_DEC; stopLimit(); }
+      if (currentDec < AXIS2_LIMIT_MIN) { generalError=ERR_DEC; decMinLimit(); }
+      if (currentDec > AXIS2_LIMIT_MAX) { generalError=ERR_DEC; decMaxLimit(); }
   #endif
 #endif
 

@@ -18,10 +18,10 @@ CommandErrors validateGotoCoords(double HA, double Dec, double Alt) {
   if (Alt < minAlt)                            return CE_GOTO_ERR_BELOW_HORIZON;
   if (Alt > maxAlt)                            return CE_GOTO_ERR_ABOVE_OVERHEAD;
 #if AXIS2_TANGENT_ARM != ON
-    if (Dec < AXIS2_LIMIT_MIN)                 return CE_GOTO_ERR_OUTSIDE_LIMITS;
-    if (Dec > AXIS2_LIMIT_MAX)                 return CE_GOTO_ERR_OUTSIDE_LIMITS;
+    if (Dec < AXIS2_LIMIT_MIN)                 return CE_SLEW_ERR_OUTSIDE_LIMITS;
+    if (Dec > AXIS2_LIMIT_MAX)                 return CE_SLEW_ERR_OUTSIDE_LIMITS;
 #endif
-  if ((fabs(HA) > AXIS1_LIMIT_UNDER_POLE))     return CE_GOTO_ERR_OUTSIDE_LIMITS;
+  if ((fabs(HA) > AXIS1_LIMIT_UNDER_POLE))     return CE_SLEW_ERR_OUTSIDE_LIMITS;
   return CE_NONE;
 }
 
@@ -76,7 +76,7 @@ CommandErrors syncEqu(double RA, double Dec) {
     }
 
 #if SYNC_CURRENT_PIER_SIDE_ONLY == ON
-    if ((!atHome) && (newPierSide != getInstrPierSide())) return CE_GOTO_ERR_OUTSIDE_LIMITS;
+    if ((!atHome) && (newPierSide != getInstrPierSide())) return CE_SLEW_ERR_OUTSIDE_LIMITS;
 #endif
 
   } else {
@@ -202,7 +202,7 @@ boolean getHor(double *Alt, double *Azm) {
 CommandErrors goToHere(bool toEastOnly) {
   bool verified=false;
   PreferredPierSide p=preferredPierSide;
-  if (meridianFlip == MeridianFlipNever) return CE_GOTO_ERR_OUTSIDE_LIMITS;
+  if (meridianFlip == MeridianFlipNever) return CE_SLEW_ERR_OUTSIDE_LIMITS;
   cli(); long h=posAxis1+indexAxis1Steps; sei();
   if ((!toEastOnly) && (getInstrPierSide() == PierSideEast) && (h < (degreesPastMeridianW*(long)AXIS1_STEPS_PER_DEGREE))) { verified=true; preferredPierSide=PPS_WEST; }
   if ((getInstrPierSide() == PierSideWest) && (h > (-degreesPastMeridianE*(long)AXIS1_STEPS_PER_DEGREE))) { verified=true; preferredPierSide=PPS_EAST; }
@@ -212,7 +212,7 @@ CommandErrors goToHere(bool toEastOnly) {
     CommandErrors e=goToEqu(newRA,newDec);
     preferredPierSide=p;
     return e;
-  } else return CE_GOTO_ERR_OUTSIDE_LIMITS;
+  } else return CE_SLEW_ERR_OUTSIDE_LIMITS;
 }
 
 // moves the mount to a new Right Ascension and Declination (RA,Dec) in degrees
@@ -318,7 +318,7 @@ CommandErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTar
       if ((thisTargetAxis1 > eastOfPierMaxHA) || (thisTargetAxis1 < eastOfPierMinHA)) {
         thisPierSide=PierSideFlipEW1;
         thisTargetAxis1 =altTargetAxis1;
-        if (thisTargetAxis1 > westOfPierMaxHA) return CE_GOTO_ERR_OUTSIDE_LIMITS;
+        if (thisTargetAxis1 > westOfPierMaxHA) return CE_SLEW_ERR_OUTSIDE_LIMITS;
         thisTargetAxis2=altTargetAxis2;
       }
     } else
@@ -326,7 +326,7 @@ CommandErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTar
       if ((thisTargetAxis1 > westOfPierMaxHA) || (thisTargetAxis1 < westOfPierMinHA)) {
         thisPierSide=PierSideFlipWE1;
         thisTargetAxis1 =altTargetAxis1;
-        if (thisTargetAxis1 < eastOfPierMinHA) return CE_GOTO_ERR_OUTSIDE_LIMITS;
+        if (thisTargetAxis1 < eastOfPierMinHA) return CE_SLEW_ERR_OUTSIDE_LIMITS;
         thisTargetAxis2=altTargetAxis2;
       }
     } else
@@ -357,8 +357,8 @@ CommandErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTar
 #else
   if (((thisTargetAxis1 > 180.0) || (thisTargetAxis1 < -180.0)) || ((thisTargetAxis2 > 180.0) || (thisTargetAxis2 < -180.0))) return CE_GOTO_ERR_UNSPECIFIED;
   #if AXIS2_TANGENT_ARM == ON
-    if (toInstrAxis2(thisTargetAxis2,p) < AXIS2_LIMIT_MIN) return CE_GOTO_ERR_OUTSIDE_LIMITS;
-    if (toInstrAxis2(thisTargetAxis2,p) > AXIS2_LIMIT_MAX) return CE_GOTO_ERR_OUTSIDE_LIMITS;
+    if (toInstrAxis2(thisTargetAxis2,p) < AXIS2_LIMIT_MIN) return CE_SLEW_ERR_OUTSIDE_LIMITS;
+    if (toInstrAxis2(thisTargetAxis2,p) > AXIS2_LIMIT_MAX) return CE_SLEW_ERR_OUTSIDE_LIMITS;
   #endif
 #endif
   lastTrackingState=trackingState;
