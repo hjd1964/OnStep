@@ -40,14 +40,10 @@
     #warning "MAX_NUM_ALIGN_STARS explicitly defined in Config file. Controller may be slow for a few minutes after last star align."
   #endif
 #else
-  #if AXIS2_TANGENT_ARM == ON
-    #define MAX_NUM_ALIGN_STARS '1'
+  #if defined(HAL_FAST_PROCESSOR)
+    #define MAX_NUM_ALIGN_STARS '9'
   #else
-    #if defined(HAL_FAST_PROCESSOR)
-      #define MAX_NUM_ALIGN_STARS '9'
-    #else
-      #define MAX_NUM_ALIGN_STARS '6'
-    #endif
+    #define MAX_NUM_ALIGN_STARS '6'
   #endif
 #endif
 
