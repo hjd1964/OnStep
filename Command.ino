@@ -2159,19 +2159,19 @@ void stopSlewing() {
 
 // stops everything if slewing or tracking breaks the limit, just stops Dec axis if guiding breaks the limit
 void decMinLimit() {
-  if (trackingState == TrackingMoveTo) { if (!abortSlew) abortSlew=StartAbortSlew; trackingState == TrackingNone; } else {
+  if (trackingState == TrackingMoveTo) { if (!abortSlew) abortSlew=StartAbortSlew; trackingState = TrackingNone; } else {
     if (getInstrPierSide() == PierSideWest && guideDirAxis2 == 'n' ) guideDirAxis2='b'; else
     if (getInstrPierSide() == PierSideEast && guideDirAxis2 == 's' ) guideDirAxis2='b'; else
-    if (guideDirAxis2 == 0 && generalError != ERR_DEC) trackingState == TrackingNone;
+    if (guideDirAxis2 == 0 && generalError != ERR_DEC) trackingState = TrackingNone;
   }
 }
 
 // stops everything if slewing or tracking breaks the limit, just stops Dec axis if guiding breaks the limit
 void decMaxLimit() {
-  if (trackingState == TrackingMoveTo) { if (!abortSlew) abortSlew=StartAbortSlew; trackingState == TrackingNone; } else {
+  if (trackingState == TrackingMoveTo) { if (!abortSlew) abortSlew=StartAbortSlew; trackingState = TrackingNone; } else {
     if (getInstrPierSide() == PierSideWest && guideDirAxis2 == 's' ) guideDirAxis2='b'; else
     if (getInstrPierSide() == PierSideEast && guideDirAxis2 == 'n' ) guideDirAxis2='b'; else
-    if (guideDirAxis2 == 0 && generalError != ERR_DEC) trackingState == TrackingNone;
+    if (guideDirAxis2 == 0 && generalError != ERR_DEC) trackingState = TrackingNone;
   }
 }
 
