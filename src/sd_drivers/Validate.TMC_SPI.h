@@ -11,9 +11,6 @@
     #if AXIS1_DRIVER_MICROSTEPS_GOTO != 1 && AXIS1_DRIVER_MICROSTEPS_GOTO != 2 && AXIS1_DRIVER_MICROSTEPS_GOTO != 4 && AXIS1_DRIVER_MICROSTEPS_GOTO != 8 && AXIS1_DRIVER_MICROSTEPS_GOTO != 16 && AXIS1_DRIVER_MICROSTEPS_GOTO != 32 && AXIS1_DRIVER_MICROSTEPS_GOTO != 64 && AXIS1_DRIVER_MICROSTEPS_GOTO != 128 && AXIS1_DRIVER_MICROSTEPS_GOTO != 256
       #error "Configuration (Config.h): AXIS1_DRIVER_MICROSTEPS_GOTO; TMC SPI driver invalid micro-step mode, use: 256,128,64,32,16,8,4,2,or 1"
     #endif
-    #if AXIS1_DRIVER_MICROSTEPS != AXIS1_DRIVER_MICROSTEPS_GOTO
-      #warning "Configuration (Config.h): AXIS2_DRIVER_MICROSTEPS_GOTO; is not OFF.  This can effect pointing accuracy and PEC if index sensing isn't used."
-    #endif
   #endif
   #if STEP_WAVE_FORM == PULSE && HAL_PULSE_WIDTH < TMC_SPI_PULSE_WIDTH
     #error "Configuration (Config.h): STEP_WAVE_FORM PULSE; Pulse width is below the TMC SPI stepper driver specifications."
@@ -36,9 +33,6 @@
   #if AXIS2_DRIVER_MICROSTEPS_GOTO != OFF
     #if AXIS2_DRIVER_MICROSTEPS_GOTO != 1 && AXIS2_DRIVER_MICROSTEPS_GOTO != 2 && AXIS2_DRIVER_MICROSTEPS_GOTO != 4 && AXIS2_DRIVER_MICROSTEPS_GOTO != 8 && AXIS2_DRIVER_MICROSTEPS_GOTO != 16 && AXIS2_DRIVER_MICROSTEPS_GOTO != 32 && AXIS2_DRIVER_MICROSTEPS_GOTO != 64 && AXIS2_DRIVER_MICROSTEPS_GOTO != 128 && AXIS2_DRIVER_MICROSTEPS_GOTO != 256
       #error "Configuration (Config.h): AXIS2_DRIVER_MICROSTEPS_GOTO; TMC SPI driver invalid micro-step mode, use: 256,128,64,32,16,8,4,2,or 1"
-    #endif
-    #if AXIS2_DRIVER_MICROSTEPS != AXIS2_DRIVER_MICROSTEPS_GOTO
-      #warning "Configuration (Config.h): AXIS2_DRIVER_MICROSTEPS_GOTO; is not OFF.  This can effect pointing accuracy."
     #endif
   #endif
   #if STEP_WAVE_FORM == PULSE && HAL_PULSE_WIDTH < TMC_SPI_PULSE_WIDTH
