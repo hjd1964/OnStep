@@ -477,13 +477,13 @@ double getTrackingRate60Hz() {
 
 double getStepsPerSecondAxis1() {
  double s=(((double)AXIS1_STEPS_PER_DEGREE/240.0)*(_deltaAxis1/15.0));
- if (s < 8.0) s=8.0;
+ if (s < 32.0) s=32.0;
  return s;
 }
 
 double getStepsPerSecondAxis2() {
  double s=(((double)AXIS2_STEPS_PER_DEGREE/240.0)*(_deltaAxis2/15.0));
- if (s < 8.0) s=8.0;
+ if (s < 32.0) s=32.0;
  return s;
 }
 

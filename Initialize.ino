@@ -76,7 +76,7 @@ void initStartupValues() {
   newTargetAlt        = 0;
   newTargetAzm        = 0;
   origTargetAxis1.fixed = 0;
-  origTargetAxis2       = 0;
+  origTargetAxis2.fixed = 0;
 
   // initialize alignment
   alignNumStars       = 0;

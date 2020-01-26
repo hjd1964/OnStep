@@ -170,6 +170,55 @@ void stepperModeGoto() {
   sei();
 }
 
+// hold for stepper driver microstep indexer synchronization
+boolean modeSwitchSyncHold() {
+  static int step = 0;
+  static long tempBlAxis1,tempBlAxis2;
+  switch (step) {
+    case 0: // zero backlash
+      tempBlAxis1=backlashAxis1;
+      tempBlAxis2=backlashAxis2;
+      cli();
+      backlashAxis1=0;
+      backlashAxis2=0;
+      timerRateAxis1=timerRateBacklashAxis1;
+      timerRateAxis2=timerRateBacklashAxis2;
+      sei();
+      step++;
+      return true;
+      break;
+    case 1: // set targets
+      cli();
+      origTargetAxis1.fixed=targetAxis1.fixed;
+      targetAxis1.part.m=((posAxis1+blAxis1)/AXIS1_DRIVER_STEP_GOTO)*AXIS1_DRIVER_STEP_GOTO;
+      origTargetAxis2.fixed=targetAxis2.fixed;
+      targetAxis2.part.m=((posAxis2+blAxis2)/AXIS2_DRIVER_STEP_GOTO)*AXIS2_DRIVER_STEP_GOTO;
+      sei();
+      step++;
+      return true;
+    break;
+    case 2: // check for arrival Axis1
+      cli(); if (posAxis1 == (long)targetAxis1.part.m && blAxis1 == 0) step++; sei();
+      return true;
+    break;
+    case 3: // check for arrival Axis2
+      cli(); if (posAxis2 == (long)targetAxis2.part.m && blAxis2 == 0) step++; sei();
+      return true;
+    break;
+    case 4: // restore the backlash and targets
+      cli();
+      backlashAxis1=tempBlAxis1;
+      backlashAxis2=tempBlAxis2;
+      targetAxis1.fixed=origTargetAxis1.fixed;
+      targetAxis2.fixed=origTargetAxis2.fixed;
+      sei();
+      stepperModeGoto();
+      step=0;
+    break;
+  }
+  return false;
+}
+
 void enableStepperDrivers() {
   // enable the stepper drivers
   if (axis1Enabled == false) {

@@ -398,10 +398,10 @@ void loop2() {
     if (trackingState == TrackingMoveTo) {
       moveTo();
       if (lastTrackingState == TrackingSidereal) {
-        // origTargetAxisn isn't used in Alt/Azm mode since meridian flips never happen
         origTargetAxis1.fixed+=fstepAxis1.fixed;
-        // don't advance the target during meridian flips
-        if ((getInstrPierSide() == PierSideEast) || (getInstrPierSide() == PierSideWest)) {
+        origTargetAxis2.fixed+=fstepAxis2.fixed;
+        // don't advance the target during meridian flips or sync
+        if ((getInstrPierSide() == PierSideEast || getInstrPierSide() == PierSideWest) && !modeSwitchSync) {
           cli();
           targetAxis1.fixed+=fstepAxis1.fixed;
           targetAxis2.fixed+=fstepAxis2.fixed;

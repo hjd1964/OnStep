@@ -88,6 +88,8 @@ volatile double StepsForRateChangeAxis1 = (sqrt((double)SLEW_ACCELERATION_DIST*(
 volatile double StepsForRateChangeAxis2 = (sqrt((double)SLEW_ACCELERATION_DIST*(double)AXIS2_STEPS_PER_DEGREE))*(double)MaxRate*16.0;
 
 // Basic stepper driver mode setup -------------------------------------------------------------------------------------------------
+boolean modeSwitchSync = false;
+
 #if AXIS1_DRIVER_MODEL != OFF
   // Holds translated code for driver microstep setting
   volatile uint8_t _axis1_code;
@@ -156,7 +158,7 @@ volatile fixed_t targetAxis2;                                // declination of g
 volatile byte dirAxis2                  = 1;                 // stepping direction + or -
 double origTargetDec                    = 0.0;               // holds the Dec for gotos before possible conversion to observed place
 double newTargetDec                     = 0.0;               // holds the Dec for gotos after conversion to observed place
-long origTargetAxis2                    = 0;
+fixed_t origTargetAxis2;
 #if defined(AXIS2_DRIVER_CODE) && defined(AXIS2_DRIVER_CODE_GOTO)
   volatile long stepAxis2=1;
 #else
