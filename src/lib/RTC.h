@@ -12,15 +12,6 @@
 #include <TinyGPS++.h>          // http://arduiniana.org/libraries/tinygpsplus/
 TinyGPSPlus gps;
 
-// assign last serial port for GPS
-#if defined(SerialD)
-  #define SerialGPS SerialD
-#elif defined(SerialC)
-  #define SerialGPS SerialC
-#elif defined(SerialB)
-  #define SerialGPS SerialB
-#endif
-
 class rtcw {
   public:
     bool active=false;
