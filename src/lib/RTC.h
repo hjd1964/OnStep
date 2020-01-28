@@ -4,12 +4,71 @@
 #pragma once
 #include "Julian.h"
 
-#if RTC == DS3234S
+#if RTC == GPS
+// -----------------------------------------------------------------------------------
+// GPS RTC support
+// uses the specified serial port
+
+#include <TinyGPS++.h>          // http://arduiniana.org/libraries/tinygpsplus/
+TinyGPSPlus gps;
+
+// assign last serial port for GPS
+#if defined(SerialD)
+  #define SerialGPS SerialD
+#elif defined(SerialC)
+  #define SerialGPS SerialC
+#elif defined(SerialB)
+  #define SerialGPS SerialB
+#endif
+
+class rtcw {
+  public:
+    bool active=false;
+    bool valid=false;
+
+    // initialize
+    bool init() {
+      active=true;
+      return active;
+    }
+
+    boolean poll() {
+      if (gps.location.isValid() && gps.date.isValid() && gps.time.isValid()) return true;
+      while (SerialGPS.available() > 0) gps.encode(SerialGPS.read());
+      return false;
+    }
+
+    // set the RTC's time (does nothing)
+    void set(double JD, double LMT) {
+    }
+    
+    // get the GPS's time (local standard time)
+    void get(double &JD, double &LMT) {
+      if (!gps.date.isValid() || !gps.time.isValid()) return;
+      if ((gps.date.year() >= 0) && (gps.date.year() <= 3000) && (gps.date.month() >= 1) && (gps.date.month() <= 12) && (gps.date.day() >= 1) && (gps.date.day() <= 31) &&
+          (gps.time.hour() >= 0) && (gps.time.hour() <= 23) && (gps.time.minute() >= 0) && (gps.time.minute() <= 59) && (gps.time.second() >= 0) && (gps.time.second() <= 59)) 
+      {
+          JD=julian(gps.date.year(),gps.date.month(),gps.date.day());
+          LMT=(gps.time.hour()+(gps.time.minute()/60.0)+(gps.time.second()/3600.0))-timeZone;
+          if (LMT < 0)   { LMT+=24.0; JD-=1; }
+          if (LMT >= 24) { LMT-=24.0; JD+=1; }
+      }
+    }
+
+    // get the GPS's location
+    void getSite(double &LAT, double &LONG) {
+      if (!gps.location.isValid()) return;
+      LAT=gps.location.lat();
+      LONG=gps.location.lng();
+    }
+};
+
+#elif RTC == DS3234S
 // -----------------------------------------------------------------------------------
 // DS3234 RTC support 
 // uses the default SPI port and CS (DS3234_CS_PIN from Pins.xxx.h)
 
-#include <SparkFunDS3234RTC.h>  //https://github.com/sparkfun/SparkFun_DS3234_RTC_Arduino_Library/archive/master.zip
+#include <SparkFunDS3234RTC.h>  // https://github.com/sparkfun/SparkFun_DS3234_RTC_Arduino_Library/archive/master.zip
 
 class rtcw {
   public:
@@ -180,7 +239,7 @@ class rtcw {
 // TEENSY 3.2 RTC support 
  
 #include <TimeLib.h>            //https://github.com/PaulStoffregen/Time/archive/master.zip
- 
+
 class rtcw {
   public:
     bool active=false;
@@ -193,39 +252,38 @@ class rtcw {
  
     // set the RTC's time (local standard time)
     void set(double JD, double LMT) {
-        int y,mo,d,h;
-        double m,s;
-        
-        greg(JD,&y,&mo,&d); y-=2000; if (y >= 100) y-=100;
- 
-        double f1=fabs(LMT)+0.000139;
-        h=floor(f1);
-        m=(f1-h)*60.0;
-        s=(m-floor(m))*60.0;
-        //  dow=(round(J)%7)+1;
- 
-        setTime(h, floor(m), floor(s), d, mo, y);   //set current system time
- 
-        unsigned long TeensyTime;
-        TeensyTime = now();                         //get time in epoch
-        Teensy3Clock.set(TeensyTime);               //set Teensy time
+      int y,mo,d,h;
+      double m,s;
+      
+      greg(JD,&y,&mo,&d); y-=2000; if (y >= 100) y-=100;
+
+      double f1=fabs(LMT)+0.000139;
+      h=floor(f1);
+      m=(f1-h)*60.0;
+      s=(m-floor(m))*60.0;
+      //  dow=(round(J)%7)+1;
+
+      setTime(h, floor(m), floor(s), d, mo, y);   //set current system time
+
+      unsigned long TeensyTime;
+      TeensyTime = now();                         //get time in epoch
+      Teensy3Clock.set(TeensyTime);               //set Teensy time
     }
     
     // get the RTC's time (local standard time)
     void get(double &JD, double &LMT) {
-        unsigned long TeensyTime;
-  
-        TeensyTime = Teensy3Clock.get();            //get time from Teensy RTC
-        setTime(TeensyTime);                        //set system time
-  
-        if ((year() >= 0) && (year() <= 3000) && (month() >= 1) && (month() <= 12) && (day() >= 1) && (day() <= 31) &&
-            (hour() >= 0) && (hour() <= 23) && (minute() >= 0) && (minute() <= 59) && (second() >= 0) && (second() <= 59)) 
-        {
-            int y1=year();
-            JD=julian(y1,month(),day());
-            LMT=(hour()+(minute()/60.0)+(second()/3600.0));
-        }
- 
+      unsigned long TeensyTime;
+
+      TeensyTime = Teensy3Clock.get();            //get time from Teensy RTC
+      setTime(TeensyTime);                        //set system time
+
+      if ((year() >= 0) && (year() <= 3000) && (month() >= 1) && (month() <= 12) && (day() >= 1) && (day() <= 31) &&
+          (hour() >= 0) && (hour() <= 23) && (minute() >= 0) && (minute() <= 59) && (second() >= 0) && (second() <= 59)) 
+      {
+          int y1=year();
+          JD=julian(y1,month(),day());
+          LMT=(hour()+(minute()/60.0)+(second()/3600.0));
+      }
     }
 };
 

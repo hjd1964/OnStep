@@ -64,7 +64,8 @@
 #define DS3234M                     2 // DS3234 RTC on SPI (DS3234_CS_PIN) Makuna library
 #define DS3234S                     3 // DS3234 RTC on SPI (DS3234_CS_PIN) Sparkfun Library
 #define TEENSY                      4 // TEENSY3.2 RTC (Built-in)
-#define RTC_LAST                    4
+#define GPS                         5 // GPS device
+#define RTC_LAST                    5
 
 // various Weather sensors supported
 #define WEATHER_FIRST               1

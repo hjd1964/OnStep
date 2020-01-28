@@ -481,6 +481,18 @@ void loop2() {
     autoPowerDownAxis2();
 #endif
 
+    // UPDATE GPS INFO.
+#if RTC == GPS
+    static bool gpsDone=false;
+    if (!gpsDone && urtc.poll()) {
+      urtc.get(JD,LMT);
+      UT1=LMT+timeZone;
+      updateLST(jd2last(JD,UT1,false));
+      urtc.getSite(latitude,longitude);
+      gpsDone=true;
+    }
+#endif
+
     // UPDATE THE UT1 CLOCK
     cli(); long cs=lst; sei();
     double t2=(double)((cs-lst_start)/100.0)/1.00273790935;
