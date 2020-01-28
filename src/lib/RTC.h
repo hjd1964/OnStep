@@ -15,17 +15,16 @@ TinyGPSPlus gps;
 class rtcw {
   public:
     bool active=false;
-    bool valid=false;
 
     // initialize
     bool init() {
       SerialGPS.begin(9600);
-      active=true;
+      active=false;
       return active;
     }
 
     boolean poll() {
-      if (gps.location.isValid() && gps.date.isValid() && gps.time.isValid()) return true;
+      if (gps.location.isValid() && gps.date.isValid() && gps.time.isValid()) { active=true; return true; }
       while (SerialGPS.available() > 0) gps.encode(SerialGPS.read());
       return false;
     }
@@ -36,7 +35,7 @@ class rtcw {
     
     // get the GPS's time (local standard time)
     void get(double &JD, double &LMT) {
-      if (!gps.date.isValid() || !gps.time.isValid()) return;
+      if (!active) return;
       if ((gps.date.year() >= 0) && (gps.date.year() <= 3000) && (gps.date.month() >= 1) && (gps.date.month() <= 12) && (gps.date.day() >= 1) && (gps.date.day() <= 31) &&
           (gps.time.hour() >= 0) && (gps.time.hour() <= 23) && (gps.time.minute() >= 0) && (gps.time.minute() <= 59) && (gps.time.second() >= 0) && (gps.time.second() <= 59)) 
       {
@@ -49,7 +48,7 @@ class rtcw {
 
     // get the GPS's location
     void getSite(double &LAT, double &LONG) {
-      if (!gps.location.isValid()) return;
+      if (!active) return;
       LAT=gps.location.lat();
       LONG=gps.location.lng();
     }
