@@ -28,6 +28,7 @@ class rtcw {
 
     // initialize
     bool init() {
+      SerialGPS.begin(9600);
       active=true;
       return active;
     }
