@@ -3,11 +3,6 @@
 
 // moves the mount
 void moveTo() {
-
-  if (modeSwitchSync) {
-    if (modeSwitchSyncHold()) return; else modeSwitchSync=false;
-  }
-  
   // HA goes from +90...0..-90
   //                W   .   E
   // meridian flip, first phase.  only happens for GEM mounts
@@ -16,7 +11,7 @@ void moveTo() {
     // save destination
     cli(); 
     origTargetAxis1.fixed = targetAxis1.fixed;
-    origTargetAxis2.fixed = targetAxis2.fixed;
+    origTargetAxis2 = (long)targetAxis2.part.m;
  
     timerRateAxis1=SiderealRate;
     timerRateAxis2=SiderealRate;
@@ -171,7 +166,7 @@ void moveTo() {
   cli(); timerRateAxis2=temp; sei();
 
   // make sure we're using the tracking mode microstep setting near the end of slew
-  if (distDestAxis1 <= getStepsPerSecondAxis1()*2 && distDestAxis2 <= getStepsPerSecondAxis2() ) stepperModeTracking(false);
+  if ((distDestAxis1 <= getStepsPerSecondAxis1()) && (distDestAxis2 <= getStepsPerSecondAxis2()) ) stepperModeTracking(false);
 
   // the end of slew doesn't get close enough within 4 seconds force the slew to end
   static unsigned long slewStopTime=0;
@@ -225,7 +220,7 @@ void moveTo() {
       startAxis1=posAxis1;
       targetAxis1.fixed=origTargetAxis1.fixed;
       startAxis2=posAxis2;
-      targetAxis2.fixed=origTargetAxis2.fixed;
+      targetAxis2.part.m=origTargetAxis2; targetAxis2.part.f=0;
       sei();
 
       stepperModeGoto();
