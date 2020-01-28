@@ -485,10 +485,10 @@ void loop2() {
 #if RTC == GPS
     static bool gpsDone=false;
     if (!gpsDone && urtc.poll()) {
+      urtc.getSite(latitude,longitude);
       urtc.get(JD,LMT);
       UT1=LMT+timeZone;
       updateLST(jd2last(JD,UT1,false));
-      urtc.getSite(latitude,longitude);
       gpsDone=true;
     }
 #endif
