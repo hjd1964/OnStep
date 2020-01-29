@@ -490,6 +490,8 @@ void loop2() {
       UT1=LMT+timeZone;
       updateLST(jd2last(JD,UT1,false));
       gpsDone=true;
+      dateWasSet=true; timeWasSet=true;
+      if (generalError == ERR_RTC_INIT) generalError=ERR_NONE;
     }
 #endif
 
