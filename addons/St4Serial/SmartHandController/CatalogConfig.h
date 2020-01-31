@@ -11,7 +11,7 @@
 // ngc_select_c.h // for a selection of the brighter objects from the ngc catalog at somewhat reduced accuracy.
 
 // Note: You can navigate to and open the SmartHandController's catalogs directory in the Arduino IDE to see the available catalogs.
-#ifdef ESP32
+#if defined(ESP32) || defined(__IMXRT1052__) || defined(__IMXRT1062__)
   #include "catalogs/stars.h"           // Catalog of 408 bright stars
   #include "catalogs/stf.h"             // Struve STF catalog, limited to 4313 double stars
   #include "catalogs/stt.h"             // Struve STT catalog, limited to 766 double stars

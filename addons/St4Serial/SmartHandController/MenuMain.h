@@ -11,10 +11,10 @@ void SmartHandController::menuFeatureKey()
   #if UTILITY_LIGHT != OFF
     { i++; j=i; strcat(string_feature_Modes,L_FKEY_UTILITY_LIGHT "\n"); }
   #endif
-  if (telInfo.hasReticle())  { i++; k=i; strcat(string_feature_Modes,"\n" L_FKEY_RETICLE);   }
+  if (telInfo.hasReticle())  { i++; k=i; strcat(string_feature_Modes,"\n" L_FKEY_RETICLE);  }
   if (telInfo.hasFocuser1()) { i++; l=i; if (telInfo.hasFocuser2()) strcat(string_feature_Modes,"\n" L_FKEY_FOCUSER1); else strcat(string_feature_Modes,"\n" L_FKEY_FOCUSER); }
   if (telInfo.hasFocuser2()) { i++; m=i; strcat(string_feature_Modes,"\n" L_FKEY_FOCUSER2); }
-  if (telInfo.hasRotator())  { i++; n=i; strcat(string_feature_Modes,"\n" L_FKEY_ROTATOR);   }
+  if (telInfo.hasRotator())  { i++; n=i; strcat(string_feature_Modes,"\n" L_FKEY_ROTATOR);  }
 
   current_selection_feature_mode = display->UserInterfaceSelectionList(&buttonPad, L_FKEY_FEATURE_KEYS, current_selection_feature_mode, string_feature_Modes);
 

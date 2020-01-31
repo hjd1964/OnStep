@@ -30,7 +30,7 @@ all others (Teensy3.x, etc.) at 2mS/byte (500 Bps.)
 
 #define INTERVAL 40000 // microseconds
 
-#ifdef __ARM_Teensy3__
+#ifdef __ARM_Teensy3_4__
   IntervalTimer Timer1;  // built into Teensyduino
 #elif __AVR__
   #include <TimerOne.h>  // from https://github.com/PaulStoffregen/TimerOne
@@ -50,7 +50,7 @@ void Sst4::begin(long baudRate=9600) {
 
   attachInterrupt(digitalPinToInterrupt(ST4DEs),dataClock,CHANGE);
 
-#ifdef __ARM_Teensy3__
+#ifdef __ARM_Teensy3_4__
   Timer1.begin(shcTone, INTERVAL);
 #elif __AVR__
   Timer1.initialize(INTERVAL);
@@ -69,7 +69,7 @@ void Sst4::end() {
 
   detachInterrupt(digitalPinToInterrupt(ST4DEs));
 
-#ifdef __ARM_Teensy3__
+#ifdef __ARM_Teensy3_4__
   Timer1.end();
 #elif __AVR__
   Timer1.stop();

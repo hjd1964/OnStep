@@ -2,9 +2,11 @@
 
 #define Ser SERIAL_INTERFACE
 
-// If we are not on an ESP32, then assume a Teensy 3.2
-#ifndef ESP32
-  #define __ARM_Teensy3__
+// Check for Teensy 3.2 or Teensy4.0 or ESP32
+#if defined(__MK20DX256__) || defined(__IMXRT1052__) || defined(__IMXRT1062__)
+  #define __ARM_Teensy3_4__
+#elif !defined(ESP32)
+  #error "Unsupported processor!  Use ESP32, Teensy3.2, or Teensy4.0"
 #endif
 
 // Default pin state; true for active LOW, false if active HIGH
@@ -17,7 +19,7 @@
 #define B_PIN_UP_6 true
 
 // The hand controller buttons, etc.
-#ifdef  __ARM_Teensy3__ 
+#ifdef  __ARM_Teensy3_4__
   #define B_PIN0 21   // Shift
   #define B_PIN1 15   // N
   #define B_PIN2 16   // S
