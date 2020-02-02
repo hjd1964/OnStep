@@ -121,28 +121,28 @@
 #define ESP8266RstPin       Aux2    // ESP8266 RST or SPI MISO/Fault
 
 // Axis1 RA/Azm step/dir driver
-#define Axis1StepPin        A1ST    // Step
-#define Axis1DirPin         A1DR    // Motor Direction
+#define Axis1_STEP          A1ST    // Step
+#define Axis1_DIR           A1DR    // Motor Direction
 
 #define Axis1_EN            A1EN    // Enable
 #define Axis1_M0            A1M0    // Microstep Mode 0
 #define Axis1_M1            A1M1    // Microstep Mode 1
 #define Axis1_M2            A1M2    // Microstep Mode 2
 #define Axis1_M3            Aux1    // ESP8266 GPIO0 or SPI MISO/Fault
-#define Axis1FaultPin       Aux1    // ESP8266 GPIO0 or SPI MISO/Fault
-#define Axis1ModePin    Axis1_M2    // Decay mode
+#define Axis1_FAULT         Aux1    // ESP8266 GPIO0 or SPI MISO/Fault
+#define Axis1_MODE      Axis1_M2    // Decay mode
 
 // Axis2 Dec/Alt step/dir driver
-#define Axis2StepPin        A2ST    // Step
-#define Axis2DirPin         A2DR    // Motor Direction
+#define Axis2_STEP          A2ST    // Step
+#define Axis2_DIR           A2DR    // Motor Direction
 
 #define Axis2_EN            A2EN    // Enable
 #define Axis2_M0            A2M0    // Microstep Mode 0
 #define Axis2_M1            A2M1    // Microstep Mode 1
 #define Axis2_M2            A2M2    // Microstep Mode 2
 #define Axis2_M3            Aux2    // ESP8266 RST or SPI MISO/Fault
-#define Axis2FaultPin       Aux2    // ESP8266 RST or SPI MISO/Fault
-#define Axis2ModePin    Axis2_M2    // Decay mode
+#define Axis2_FAULT         Aux2    // ESP8266 RST or SPI MISO/Fault
+#define Axis2_MODE      Axis2_M2    // Decay mode
 
 // ST4 interface
 #define ST4DEn              S4N     // ST4 DE+ North
@@ -164,18 +164,18 @@
 
 // For rotator stepper driver
 #define Axis3_EN           F1EN     // Enable
-#define Axis3StepPin       F1ST     // Step
-#define Axis3DirPin        F1DR     // Dir
+#define Axis3_STEP         F1ST     // Step
+#define Axis3_DIR          F1DR     // Dir
 
 // Pins to focuser1 stepper driver
 #define Axis4_EN           F1EN     // Enable
-#define Axis4StepPin       F1ST     // Step
-#define Axis4DirPin        F1DR     // Dir
+#define Axis4_STEP         F1ST     // Step
+#define Axis4_DIR          F1DR     // Dir
 
 // For focuser2 stepper driver
 #define Axis5_EN             -1     // Enable
-#define Axis5StepPin         -1     // Step
-#define Axis5DirPin          -1     // Dir
+#define Axis5_STEP           -1     // Step
+#define Axis5_DIR            -1     // Dir
 
 // The limit switch sense is a logic level input which uses the internal pull up,
 // shorted to ground it stops gotos/tracking
