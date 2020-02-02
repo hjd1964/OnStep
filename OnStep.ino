@@ -2,7 +2,7 @@
  * Title       OnStep
  * by          Howard Dutton
  *
- * Copyright (C) 2012 to 2019 Howard Dutton
+ * Copyright (C) 2012 to 2020 Howard Dutton
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  2
 #define FirmwareVersionMinor  22      // minor version 0 to 99
-#define FirmwareVersionPatch  "p"     // for example major.minor patch: 1.3c
+#define FirmwareVersionPatch  "q"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 2       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
