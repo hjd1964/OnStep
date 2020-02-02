@@ -38,11 +38,11 @@
 #define Axis1_M1             14     // Microstep Mode 1  or SPI SCK
 #define Axis1_M2             23     // Microstep Mode 2  or SPI CS or Decay Mode
 #define Axis1_M3           Aux1     // Pullup driver RST or SPI MISO/Fault
-#define Axis1_STEP           18     // Step
-#define Axis1_DIR            19     // Dir
-#define Axis1_MODE     Axis1_M2     // Decay mode
-#define Axis1_FAULT        Aux1     // SPI MISO/Fault
-#define Axis1_HOME         Aux3     // Sense home position Axis1
+#define Axis1StepPin         18     // Step
+#define Axis1DirPin          19     // Dir
+#define Axis1ModePin   Axis1_M2     // Decay mode
+#define Axis1FaultPin      Aux1     // SPI MISO/Fault
+#define Axis1HomePin       Aux3     // Sense home position Axis1
 
 // Axis2 Dec/Alt step/dir driver
 #define Axis2_EN              4     // Enable
@@ -50,26 +50,26 @@
 #define Axis2_M1             14     // Microstep Mode 1  or SPI SCK
 #define Axis2_M2              5     // Microstep Mode 2  or SPI CS or Decay Mode
 #define Axis2_M3           Aux1     // Pullup driver RST or SPI MISO/Fault
-#define Axis2_STEP           27     // Step
-#define Axis2_DIR            26     // Dir
-#define Axis2_MODE     Axis2_M2     // Decay mode
-#define Axis2_FAULT        Aux1     // SPI MISO/Fault
-#define Axis2_HOME         Aux4     // Sense home position Axis2
+#define Axis2StepPin         27     // Step
+#define Axis2DirPin          26     // Dir
+#define Axis2ModePin   Axis2_M2     // Decay mode
+#define Axis2FaultPin      Aux1     // SPI MISO/Fault
+#define Axis2HomePin       Aux4     // Sense home position Axis2
 
 // For rotator stepper driver
 #define Axis3_EN              0     // Enable
-#define Axis3_STEP            2     // Step
-#define Axis3_DIR            15     // Dir
+#define Axis3StepPin          2     // Step
+#define Axis3DirPin          15     // Dir
 
 // For focuser1 stepper driver
 #define Axis4_EN              0     // Enable
-#define Axis4_STEP            2     // Step
-#define Axis4_DIR            15     // Dir
+#define Axis4StepPin          2     // Step
+#define Axis4DirPin          15     // Dir
 
 // For focuser2 stepper driver
 #define Axis5_EN             -1     // Enable
-#define Axis5_STEP           -1     // Step
-#define Axis5_DIR            -1     // Dir
+#define Axis5StepPin         -1     // Step
+#define Axis5DirPin          -1     // Dir
 
 // ST4 interface
 #define ST4RAw               34     // ST4 RA- West

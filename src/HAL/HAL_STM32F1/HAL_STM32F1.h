@@ -18,10 +18,35 @@
 #define cli() noInterrupts()
 #define sei() interrupts()
 
-// This defines the serial ports for the Serial upload method. No other method is supported
-// Requires Arduino_STM32 from Dec 26, 2019 or later
-#define SerialA Serial1
-#define SerialB Serial3
+/*
+   New symbols for the Serial ports so they can be remapped if necessary -----------------------------
+
+   Which ports to use for WiFi, and USB?
+
+   The hardware serial ports and pins for STM32F103 are:
+     USART1: TX PA9,  RX PA10
+     USART2: TX PA2,  RX PA3
+     USART3: TX PB10, RX PB11
+
+   Different flashing methods will remap the port numbers differently, as follows.
+
+   For "DFU" (STM32duino), or ST-Link V2, the ports are:
+     Serial1 -> USART 1
+     Serial2 -> USART 2
+     Serial3 -> USART 3
+
+   If "Serial" method, using a UART to TTL converter on pins A9 and A10, the ports are:
+     Serial  -> USART 1
+     Serial1 -> USART 2
+     Serial2 -> USART 3
+ */
+#if defined(SERIAL_USB)
+  #define SerialA Serial1
+  #define SerialB Serial3
+#else
+  #define SerialA Serial
+  #define SerialB Serial2
+#endif
 
 // SerialA is always enabled, SerialB and SerialC are optional
 #define HAL_SERIAL_B_ENABLED
