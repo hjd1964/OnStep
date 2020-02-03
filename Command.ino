@@ -187,14 +187,14 @@ void processCommands() {
         if (parameter[0] == 'D' && parameter[1] == 0) {
             reactivateBacklashComp();
             i=(int)round(((double)backlashAxis2*3600.0)/(double)AXIS2_STEPS_PER_DEGREE);
-            if (i<0) i=0; if (i > 3600) i=3600;
+            if (i < 0) i=0; if (i > 3600) i=3600;
             sprintf(reply,"%d",i);
             booleanReply=false;
         } else
         if (parameter[0] == 'R' && parameter[1] == 0) {
             reactivateBacklashComp();
             i=(int)round(((double)backlashAxis1*3600.0)/(double)AXIS1_STEPS_PER_DEGREE);
-            if (i<0) i=0; if (i > 3600) i=3600;
+            if (i < 0) i=0; if (i > 3600) i=3600;
             sprintf(reply,"%d",i);
             booleanReply=false;
         } else commandError=CE_CMD_UNKNOWN;

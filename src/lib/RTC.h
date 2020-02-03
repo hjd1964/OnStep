@@ -12,6 +12,10 @@
 #include <TinyGPS++.h>          // http://arduiniana.org/libraries/tinygpsplus/
 TinyGPSPlus gps;
 
+#ifndef SerialGPS
+  #error "Configuration (Config.h): Setting RTC GPS, requires adding a line to identify the serial port '#define SerialGPS Serial6' for example."
+#endif
+
 class rtcw {
   public:
     bool active=false;
