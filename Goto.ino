@@ -377,13 +377,7 @@ CommandErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTar
   setTargetAxis1(thisTargetAxis1,p);
   setTargetAxis2(thisTargetAxis2,p);
 
-#if (MFLIP_SKIP_HOME == ON)
-  boolean gotoDirect=true;
-#else
-  boolean gotoDirect=false;
-#endif
-
-  if (!pauseHome && gotoDirect) {
+  if (!pauseHome && MFLIP_SKIP_HOME == ON) {
     if (thisPierSide == PierSideFlipWE1) pierSideControl=PierSideEast; else
     if (thisPierSide == PierSideFlipEW1) pierSideControl=PierSideWest; else pierSideControl=thisPierSide;
   } else pierSideControl=thisPierSide;
