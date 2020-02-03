@@ -241,7 +241,7 @@
 #ifndef RTC
   #error "Configuration (Config.h): Setting RTC must be present!"
 #elif RTC != OFF && (RTC < RTC_FIRST || RTC > RTC_LAST)
-  #error "Configuration (Config.h): Setting RTC invalid, use OFF or DS3231, DS3234, TEENSY only."
+  #error "Configuration (Config.h): Setting RTC invalid, use OFF or DS3231, DS3234, TEENSY, GPS only."
 #endif
 
 #ifndef WEATHER
