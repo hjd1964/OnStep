@@ -394,7 +394,7 @@
   #error "Configuration (Config.h): Setting STEP_WAVE_FORM invalid, use PULSE, SQUARE, or DEDGE only."
 #endif
 #if defined(__AVR_ATmega2560__) && STEP_WAVE_FORM == SQUARE
-  #warning "Configuration (Config.h): When compiling for Mega2560, STEP_WAVE_FORM PULSE is recommended for best perforamce."
+  #warning "Configuration (Config.h): When compiling for Mega2560, STEP_WAVE_FORM PULSE is recommended for best performance."
 #endif
 
 #ifndef AXIS1_LIMIT_UNDER_POLE
