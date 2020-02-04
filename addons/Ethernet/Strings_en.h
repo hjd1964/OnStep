@@ -390,7 +390,7 @@
 #define L_GE_UNSPECIFIED "Unknown error"
 #define L_GE_ALT_MAX "Above overhead limit"
 #define L_GE_WEATHER_INIT "Weather sensor init failed"
-#define L_GE_RTC_INIT "RTC init failed"
+#define L_GE_SITE_INIT "Time or Location not updated"
 #define L_GE_OTHER "Unknown Error, code"
 
 // command errors

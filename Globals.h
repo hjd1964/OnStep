@@ -197,7 +197,7 @@ volatile byte defaultDirAxis1           = defaultDirAxis1NCPInit;
 enum GeneralErrors {
   ERR_NONE, ERR_MOTOR_FAULT, ERR_ALT_MIN, ERR_LIMIT_SENSE, ERR_DEC, ERR_AZM,
   ERR_UNDER_POLE, ERR_MERIDIAN, ERR_SYNC, ERR_PARK, ERR_GOTO_SYNC, ERR_UNSPECIFIED,
-  ERR_ALT_MAX, ERR_WEATHER_INIT, ERR_RTC_INIT};
+  ERR_ALT_MAX, ERR_WEATHER_INIT, ERR_SITE_INIT};
 GeneralErrors generalError = ERR_NONE;
 
 enum CommandErrors {

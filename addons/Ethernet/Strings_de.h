@@ -399,7 +399,7 @@
 #define L_GE_UNSPECIFIED "Unbekannter Fehler"
 #define L_GE_ALT_MAX "&uuml;ber Obergrenze"
 #define L_GE_WEATHER_INIT "Wettersensor Initialisierung fehlgeschlagen"
-#define L_GE_RTC_INIT "RTC Initialisierung fehlgeschlagen"
+#define L_GE_SITE_INIT "Zeit oder Ort nicht aktualisiert"
 #define L_GE_OTHER "Unbekannter Fehler, Code"
 
 // command errors

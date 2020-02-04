@@ -1541,7 +1541,13 @@ void processCommands() {
 //            Change Date to MM/DD/YY
 //            Return: 0 on failure
 //                    1 on success
-      if (command[1] == 'C')  { if (dateToDouble(&JD,parameter)) { nv.writeFloat(EE_JD,JD); updateLST(jd2last(JD,UT1,true)); dateWasSet=true; } else commandError=CE_PARAM_FORM; } else 
+      if (command[1] == 'C')  {
+        if (dateToDouble(&JD,parameter)) {
+          nv.writeFloat(EE_JD,JD);
+          updateLST(jd2last(JD,UT1,true));
+          dateWasSet=true;
+          if (generalError == ERR_SITE_INIT && dateWasSet && timeWasSet) generalError=ERR_NONE;
+        } else commandError=CE_PARAM_FORM; } else 
 //  :Sd[sDD*MM]#
 //            Set target object declination to sDD*MM or sDD*MM:SS assumes high precision but falls back to low precision
 //            Return: 0 on failure
@@ -1612,6 +1618,7 @@ void processCommands() {
           UT1=LMT+timeZone;
           updateLST(jd2last(JD,UT1,true));
           timeWasSet=true;
+          if (generalError == ERR_SITE_INIT && dateWasSet && timeWasSet) generalError=ERR_NONE;
         }
       } else 
 //  :SM[s]# or :SN[s]# or :SO[s]# or :SP[s]#
