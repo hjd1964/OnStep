@@ -91,7 +91,7 @@
 #include "Align.h"
 #include "src/lib/Library.h"
 #include "src/lib/Command.h"
-#include "src/lib/RTC.h"
+#include "src/lib/TLS.h"
 #include "src/lib/Weather.h"
 weather ambient;
 
@@ -214,8 +214,8 @@ void setup() {
   // get weather monitoring ready to go
   if (!ambient.init()) generalError=ERR_WEATHER_INIT;
 
-  // get the RTC ready (if present)
-  if (!urtc.init()) generalError=ERR_SITE_INIT;
+  // get the TLS ready (if present)
+  if (!tls.init()) generalError=ERR_SITE_INIT;
   
   // this sets up the sidereal timer and tracking rates
   siderealInterval=nv.readLong(EE_siderealInterval); // the number of 16MHz clocks in one sidereal second (this is scaled to actual processor speed)
@@ -240,8 +240,8 @@ void setup() {
 #if TRACK_AUTOSTART == ON
   #if MOUNT_TYPE != ALTAZM
 
-    // tailor behaviour depending on RTC presence
-    if (!urtc.active) {
+    // tailor behaviour depending on TLS presence
+    if (!tls.active) {
       setHome();
       safetyLimitsOn=false;
     } else {
@@ -482,15 +482,14 @@ void loop2() {
 #endif
 
     // UPDATE GPS INFO.
-#if RTC == GPS
-    static bool gpsDone=false;
-    if (!gpsDone && urtc.poll()) {
-      urtc.getSite(latitude,longitude);
-      urtc.get(JD,LMT);
+#if TIME_LOCATION_SOURCE == GPS
+    if (!tls.active && tls.poll()) {
+      tls.getSite(latitude,longitude);
+      tls.get(JD,LMT);
       UT1=LMT+timeZone;
       updateLST(jd2last(JD,UT1,false));
-      gpsDone=true;
-      dateWasSet=true; timeWasSet=true;
+      dateWasSet=true;
+      timeWasSet=true;
       if (generalError == ERR_SITE_INIT) generalError=ERR_NONE;
     }
 #endif

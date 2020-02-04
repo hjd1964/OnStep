@@ -1,22 +1,22 @@
 // -----------------------------------------------------------------------------------
-// Real time clock support
+// Time/Location source support
 
 #pragma once
 #include "Julian.h"
 
-#if RTC == GPS
+#if TIME_LOCATION_SOURCE == GPS
 // -----------------------------------------------------------------------------------
-// GPS RTC support
+// GPS TLS support
 // uses the specified serial port
 
 #include <TinyGPS++.h>          // http://arduiniana.org/libraries/tinygpsplus/
 TinyGPSPlus gps;
 
 #ifndef SerialGPS
-  #error "Configuration (Config.h): Setting RTC GPS, requires adding a line to identify the serial port '#define SerialGPS Serial6' for example."
+  #error "Configuration (Config.h): Setting TLS GPS, requires adding a line to identify the serial port '#define SerialGPS Serial6' for example."
 #endif
 
-class rtcw {
+class timeLocationSource {
   public:
     bool active=false;
 
@@ -33,7 +33,7 @@ class rtcw {
       return false;
     }
 
-    // set the RTC's time (does nothing)
+    // set the GPS's time (does nothing)
     void set(double JD, double LMT) {
     }
     
@@ -58,14 +58,14 @@ class rtcw {
     }
 };
 
-#elif RTC == DS3234S
+#elif TIME_LOCATION_SOURCE == DS3234S
 // -----------------------------------------------------------------------------------
 // DS3234 RTC support 
 // uses the default SPI port and CS (DS3234_CS_PIN from Pins.xxx.h)
 
 #include <SparkFunDS3234RTC.h>  // https://github.com/sparkfun/SparkFun_DS3234_RTC_Arduino_Library/archive/master.zip
 
-class rtcw {
+class timeLocationSource {
   public:
     bool active=false;
 
@@ -103,9 +103,14 @@ class rtcw {
         LMT=(rtc.hour()+(rtc.minute()/60.0)+(rtc.second()/3600.0));
       }
     }
+
+    // get the location (does nothing)
+    void getSite(double &LAT, double &LONG) {
+    }
+
 };
 
-#elif RTC == DS3231
+#elif TIME_LOCATION_SOURCE == DS3231
 // -----------------------------------------------------------------------------------
 // DS3231 RTC support 
 // uses the default I2C port in most cases; though HAL_Wire can redirect to another port (as is done for the Teensy3.5/3.6)
@@ -114,7 +119,7 @@ class rtcw {
 #include <RtcDS3231.h>          // https://github.com/Makuna/Rtc/archive/master.zip
 RtcDS3231<TwoWire> _Rtc(HAL_Wire);
 
-class rtcw {
+class timeLocationSource {
   public:
     bool active=false;
 
@@ -167,9 +172,13 @@ class rtcw {
         LMT=(now.Hour()+(now.Minute()/60.0)+(now.Second()/3600.0));
       }
     }
+
+    // get the location (does nothing)
+    void getSite(double &LAT, double &LONG) {
+    }
 };
 
-#elif RTC == DS3234M
+#elif TIME_LOCATION_SOURCE == DS3234M
 // -----------------------------------------------------------------------------------
 // DS3234 RTC support 
 // uses the default SPI port
@@ -178,7 +187,7 @@ class rtcw {
 #include <RtcDS3234.h>          // https://github.com/Makuna/Rtc/archive/master.zip
 RtcDS3234<SPIClass> _Rtc(SPI, DS3234_CS_PIN);
 
-class rtcw {
+class timeLocationSource {
   public:
     bool active=false;
 
@@ -227,15 +236,19 @@ class rtcw {
         LMT=(now.Hour()+(now.Minute()/60.0)+(now.Second()/3600.0));
       }
     }
+
+    // get the location (does nothing)
+    void getSite(double &LAT, double &LONG) {
+    }
 };
 
-#elif RTC == TEENSY
+#elif TIME_LOCATION_SOURCE == TEENSY
 // -----------------------------------------------------------------------------------
 // TEENSY 3.2 RTC support 
  
 #include <TimeLib.h>            //https://github.com/PaulStoffregen/Time/archive/master.zip
 
-class rtcw {
+class timeLocationSource {
   public:
     bool active=false;
 
@@ -280,13 +293,18 @@ class rtcw {
           LMT=(hour()+(minute()/60.0)+(second()/3600.0));
       }
     }
+
+    // get the location (does nothing)
+    void getSite(double &LAT, double &LONG) {
+    }
+
 };
 
 #else
 // -----------------------------------------------------------------------------------
-// empty class if no RTC is present
+// empty class if no TLS is present
 
-class rtcw {
+class timeLocationSource {
   public:
     bool active=false;
 
@@ -309,7 +327,11 @@ class rtcw {
       (void)LMT;
       if (!active) return;
     }
+
+    // get the location (does nothing)
+    void getSite(double &LAT, double &LONG) {
+    }
 };
 #endif
 
-rtcw urtc;
+timeLocationSource tls;

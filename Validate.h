@@ -238,10 +238,10 @@
   #error "Configuration (Config.h): Setting BUZZER_STATE_DEFAULT invalid, use OFF or ON only."
 #endif
 
-#ifndef RTC
-  #error "Configuration (Config.h): Setting RTC must be present!"
-#elif RTC != OFF && (RTC < RTC_FIRST || RTC > RTC_LAST)
-  #error "Configuration (Config.h): Setting RTC invalid, use OFF or DS3231, DS3234, TEENSY, GPS only."
+#ifndef TIME_LOCATION_SOURCE
+  #error "Configuration (Config.h): Setting TIME_LOCATION_SOURCE must be present!"
+#elif TIME_LOCATION_SOURCE != OFF && (TIME_LOCATION_SOURCE < TLS_FIRST || TIME_LOCATION_SOURCE > TLS_LAST)
+  #error "Configuration (Config.h): Setting TIME_LOCATION_SOURCE invalid, use OFF or DS3231, DS3234, TEENSY, GPS only."
 #endif
 
 #ifndef WEATHER

@@ -242,7 +242,7 @@ double jd2last(double JulianDay, double ut1, bool updateRTC) {
     if    (lmt < 0.0)   { lmt=lmt+24.0; J=J+1.0; }
 
     // set the RTC
-    urtc.set(J,lmt);
+    tls.set(J,lmt);
   }
   // JulianDay is the Local date, jd2gast requires a universal time
   // this is a hack that leaves the date alone and lets the UT1 cover

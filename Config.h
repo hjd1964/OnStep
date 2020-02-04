@@ -39,8 +39,8 @@
 #define BUZZER_STATE_DEFAULT          OFF //    OFF, ON Start with piezo buzzer/speaker enabled.                              Option
 
 // TIME AND LOCATION -------------------------------------------------------------------------------------------------------
-#define RTC                           OFF //    OFF, DS3231 (I2c,) DS3234 (Spi,) TEENSY (T3.2 internal,) GPS for RTC source.  Option
-                                          //         Provides Date/Time & PPS (if available.)  GPS provides lat/long also.
+#define TIME_LOCATION_SOURCE          OFF //    OFF, DS3231 (I2c,) DS3234 (Spi,) TEENSY (T3.2 internal,) or GPS source.       Option
+                                          //         Provides Date/Time, and if available, PPS & Lat/Long also.
 
 // SENSORS -----------------------------------------------------------------------------------------------------------------
 // * = also supports ON_PULLUP or ON_PULLDOWN to activate MCU internal resistors if present.

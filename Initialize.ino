@@ -282,9 +282,9 @@ void initReadNvValues() {
   JD=nv.readFloat(EE_JD);
   LMT=nv.readFloat(EE_LMT);
 
-  // read the date/time from RTC (if present)
-  if (urtc.active) {
-    urtc.get(JD,LMT);
+  // read the date/time from TLS (if present)
+  if (tls.active) {
+    tls.get(JD,LMT);
     dateWasSet=true; timeWasSet=true;
   }
 
