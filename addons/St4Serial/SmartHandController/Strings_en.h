@@ -404,7 +404,7 @@
 #define L_CAT_OC "Open Cluster"
 #define L_CAT_GC "Globular Cluster"
 #define L_CAT_PN "Planetary Nebula"
-#define L_CAT_SG "Spirial Galaxy"
+#define L_CAT_SG "Spiral Galaxy"
 #define L_CAT_EG "Eliptical Galaxy"
 #define L_CAT_IG "Irregular Galaxy"
 #define L_CAT_KNT "Knot"
