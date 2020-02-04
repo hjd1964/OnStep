@@ -18,9 +18,15 @@
 #define cli() noInterrupts()
 #define sei() interrupts()
 
-// This defines the serial ports for the Serial upload method. No other method is supported
-// Requires Arduino_STM32 from Dec 26, 2019 or later
-#define SerialA Serial1
+//   The hardware USART serial ports and pins for STM32F103 are:
+//     USART1: TX PA9,  RX PA10 (connected to the CP2102)
+//     USART2: TX PA2,  RX PA3 (unused, the pins are used for Axis 2)
+//     USART3: TX PB10, RX PB11 (connected to the WeMOS D1 Mini WiFi)
+//
+// The only supported upload method for flashing OnStep to the Blue Pill is the Serial method, via the CP2102.
+// No other upload method is supported!
+// Verified to work with Arduino_STM32 repository snapshot as of Dec 26, 2019 or later.
+// Should work with earlier versions too.#define SerialA Serial1
 #define SerialB Serial3
 
 // SerialA is always enabled, SerialB and SerialC are optional
