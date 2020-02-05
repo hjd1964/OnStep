@@ -67,7 +67,7 @@
 #if AXIS1_DRIVER_STATUS == HIGH || AXIS1_DRIVER_STATUS == LOW
   #if AXIS1_DRIVER_MODEL == TMC_SPI
     #error "Configuration (Config.h): AXIS1_DRIVER_STATUS LOW/HIGH doesn't make sense when using TMC_SPI stepper drivers"
-  #elif !defined(Axis1FaultPin)
+  #elif !defined(Axis1_FAULT)
     #error "Configuration (Config.h): AXIS1_DRIVER_STATUS LOW/HIGH feature isn't supported on this PINMAP"
   #elif AXIS1_DRIVER_MODEL != GENERIC && AXIS1_DRIVER_MODEL != SERVO
     #warning "Configuration (Config.h): AXIS1_DRIVER_STATUS LOW/HIGH use often requires modification of stepper drivers"
@@ -76,7 +76,7 @@
 #if AXIS2_DRIVER_STATUS == HIGH || AXIS2_DRIVER_STATUS == LOW
   #if AXIS2_DRIVER_MODEL == TMC_SPI
     #error "Configuration (Config.h): AXIS2_DRIVER_STATUS LOW/HIGH doesn't make sense when using TMC_SPI stepper drivers"
-  #elif !defined(Axis2FaultPin)
+  #elif !defined(Axis2_FAULT)
     #error "Configuration (Config.h): AXIS2_DRIVER_STATUS LOW/HIGH feature isn't supported on this PINMAP"
   #elif AXIS2_DRIVER_MODEL != GENERIC && AXIS2_DRIVER_MODEL != SERVO
     #warning "Configuration (Config.h): AXIS2_DRIVER_STATUS LOW/HIGH use often requires modification of stepper drivers"
@@ -94,17 +94,17 @@
 
 // focusers/rotator allowed?
 #if ROTATOR == ON
-  #if Axis3StepPin == -1 || Axis3DirPin == -1
+  #if Axis3_STEP == -1 || Axis3_DIR == -1
     #error "Configuration (Config.h): AXIS3 step/dir interface is not supported on this PINMAP"
   #endif
 #endif
 #if FOCUSER1 == ON
-  #if Axis4StepPin == -1 || Axis4DirPin == -1
+  #if Axis4_STEP == -1 || Axis4_DIR == -1
     #error "Configuration (Config.h): AXIS4 step/dir interface is not supported on this PINMAP"
   #endif
 #endif
 #if FOCUSER2 == ON
-  #if (Axis5StepPin == -1 || Axis5DirPin == -1) && AXIS5_DRIVER_DC_MODE == OFF
+  #if (Axis5_STEP == -1 || Axis5_DIR == -1) && AXIS5_DRIVER_DC_MODE == OFF
     #error "Configuration (Config.h): AXIS5 step/dir interface is not supported on this PINMAP"
   #endif
 #endif
@@ -143,13 +143,13 @@
 
 // focuser/rotators any invalid combinations?
 #if ROTATOR == ON && FOCUSER1 == ON
-  #if Axis3StepPin == Axis4StepPin
+  #if Axis3_STEP == Axis4_STEP
     #error "Configuration (Config.h): AXIS3 and AXIS4 step/dir interface is shared, so enabling both is not supported on this PINMAP"
   #endif
 #endif
 
 #if ROTATOR == ON && FOCUSER2 == ON
-  #if Axis3StepPin == Axis5StepPin
+  #if Axis3_STEP == Axis5_STEP
     #error "Configuration (Config.h): AXIS3 and AXIS5 step/dir interface is shared, so enabling both is not supported on this PINMAP"
   #endif
 #endif

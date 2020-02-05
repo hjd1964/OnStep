@@ -3,43 +3,54 @@
 
 #pragma once
 
+volatile boolean _spiInUse = false;
+
 class bbspi {
-  public:  
-    void begin(int cs, int sck, int miso, int mosi)
+  public:
+    void init(int cs, int sck, int miso, int mosi) {
+      _cs=cs; _sck=sck; _miso=miso; _mosi=mosi;
+    }
+
+    boolean begin()
     {
-      _cs=cs; pinMode(cs,OUTPUT); digitalWrite(cs,HIGH);
-      delayMicroseconds(1);
-      _sck=sck; pinMode(_sck,OUTPUT); digitalWrite(_sck,HIGH);
-      _miso=miso; if (_miso >= 0) pinMode(_miso,INPUT);
-      _mosi=mosi; pinMode(_mosi,OUTPUT);
-      digitalWrite(cs,LOW);
-      delayMicroseconds(1);
+      if (_spiInUse) return false; _spiInUse=true;
+
+      pinMode(_cs,OUTPUT); digitalWrite(_cs,HIGH);
+      delaySPI;
+      pinMode(_sck,OUTPUT); digitalWrite(_sck,HIGH);
+      if (_miso >= 0) pinMode(_miso,INPUT);
+      pinMode(_mosi,OUTPUT);
+      delaySPI;
+      digitalWrite(_cs,LOW);
+      delaySPI;
+      
+      return true;
     }
     
     void pause() {
       digitalWrite(_cs, HIGH);
-      delayMicroseconds(1);
+      delaySPI;
       digitalWrite(_cs, LOW);
-      delayMicroseconds(1);
+      delaySPI;
     }
     
     void end() {
-      delayMicroseconds(1);
       digitalWrite(_cs, HIGH);
+      delaySPI;
+      _spiInUse=false;
     }
     
     uint8_t transfer(uint8_t data_out)
     {
       uint8_t data_in = 0;
-      
       for(int i=7; i >= 0; i--)
       {
         digitalWrite(_sck,LOW);
         digitalWrite(_mosi,bitRead(data_out,i));
-        delayMicroseconds(1);
+        delaySPI;
         digitalWrite(_sck,HIGH);
         if (_miso >= 0) bitWrite(data_in,i,digitalRead(_miso)); else bitWrite(data_in,i,0);
-        delayMicroseconds(1);
+        delaySPI;
       }
       
       return data_in;
@@ -48,17 +59,16 @@ class bbspi {
     uint32_t transfer32(uint32_t data_out)
     {
       uint32_t data_in = 0;
-      
       for(int i=31; i >= 0; i--)
       {
         digitalWrite(_sck,LOW);
         digitalWrite(_mosi,bitRead(data_out,i));
-        delayMicroseconds(1);
+        delaySPI;
         digitalWrite(_sck,HIGH);
         if (_miso >= 0) bitWrite(data_in,i,digitalRead(_miso)); else bitWrite(data_in,i,0);
-        delayMicroseconds(1);
+        delaySPI;
       }
-    
+
       return data_in;
     }
   private:  

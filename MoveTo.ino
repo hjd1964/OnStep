@@ -11,7 +11,7 @@ void moveTo() {
     // save destination
     cli(); 
     origTargetAxis1.fixed = targetAxis1.fixed;
-    origTargetAxis2 = (long)targetAxis2.part.m;
+    origTargetAxis2.fixed = targetAxis2.fixed;
  
     timerRateAxis1=SiderealRate;
     timerRateAxis2=SiderealRate;
@@ -166,7 +166,8 @@ void moveTo() {
   cli(); timerRateAxis2=temp; sei();
 
   // make sure we're using the tracking mode microstep setting near the end of slew
-  if ((distDestAxis1 <= getStepsPerSecondAxis1()) && (distDestAxis2 <= getStepsPerSecondAxis2()) ) stepperModeTracking(false);
+  if (distDestAxis1 <= getStepsPerSecondAxis1()*2) axis1DriverTrackingMode(false);
+  if (distDestAxis2 <= getStepsPerSecondAxis2()  ) axis2DriverTrackingMode(false);
 
   // the end of slew doesn't get close enough within 4 seconds force the slew to end
   static unsigned long slewStopTime=0;
@@ -185,7 +186,8 @@ void moveTo() {
     abortSlew=0;
 
     // assurance that we're really in tracking mode
-    stepperModeTracking(false);
+    axis1DriverTrackingMode(false);
+    axis2DriverTrackingMode(false);
 
     if ((pierSideControl == PierSideFlipEW2) || (pierSideControl == PierSideFlipWE2)) {
       // just wait stop here until we get notification to continue
@@ -208,7 +210,9 @@ void moveTo() {
       }
       pierSideControl++;
 
-      stepperModeGoto();
+      axis1DriverGotoMode();
+      axis2DriverGotoMode();
+      
       forceRefreshGetEqu();
     } else
     if ((pierSideControl == PierSideFlipEW3) || (pierSideControl == PierSideFlipWE3)) {
@@ -220,10 +224,12 @@ void moveTo() {
       startAxis1=posAxis1;
       targetAxis1.fixed=origTargetAxis1.fixed;
       startAxis2=posAxis2;
-      targetAxis2.part.m=origTargetAxis2; targetAxis2.part.f=0;
+      targetAxis2.fixed=origTargetAxis2.fixed;
       sei();
 
-      stepperModeGoto();
+      axis1DriverGotoMode();
+      axis2DriverGotoMode();
+
       forceRefreshGetEqu();
     } else {
 

@@ -48,6 +48,13 @@
 #endif
 
 // make sure all stepper driver options are present even if not defined
+#ifndef MODE_SWITCH_BEFORE_SLEW
+  #define MODE_SWITCH_BEFORE_SLEW OFF
+#endif
+#ifndef MODE_SWITCH_SLEEP
+  #define MODE_SWITCH_SLEEP OFF
+#endif
+
 #ifndef AXIS1_DRIVER_ENABLE
   #define AXIS1_DRIVER_ENABLE LOW
 #endif
@@ -348,8 +355,10 @@
 
 #ifndef TRACK_BACKLASH_RATE
   #error "Configuration (Config.h): Setting TRACK_BACKLASH_RATE must be present!"
-#elif TRACK_BACKLASH_RATE < 5 || TRACK_BACKLASH_RATE > 100
-  #error "Configuration (Config.h): Setting TRACK_BACKLASH_RATE invalid, use a number between 5 and 100 (x sidereal rate.)"
+#elif TRACK_BACKLASH_RATE < 5 || TRACK_BACKLASH_RATE > 50
+  #error "Configuration (Config.h): Setting TRACK_BACKLASH_RATE invalid, use a number between 5 and 50 (x sidereal rate.)"
+#elif TRACK_BACKLASH_RATE > 25
+  #warning "Configuration (Config.h): Setting TRACK_BACKLASH_RATE, above 25x can cause problems if AXISn_STEPS_PER_DEGREE > 30600 *and* on-the-fly micro-step mode switching is used"
 #endif
 
 #ifndef SYNC_CURRENT_PIER_SIDE_ONLY
@@ -562,15 +571,11 @@
   #include "src/sd_drivers/Validate.SERVO.h"
 
   // for stepper drivers where AXISn_MICROSTEPS_GOTO must be defined
-  #if MODE_SWITCH_BEFORE_SLEW != OFF
-    #if AXIS1_DRIVER_MICROSTEPS != OFF && AXIS1_DRIVER_MICROSTEPS_GOTO == OFF
-      #undef AXIS1_DRIVER_MICROSTEPS_GOTO 
-      #define AXIS1_DRIVER_MICROSTEPS_GOTO AXIS1_DRIVER_MICROSTEPS
-    #endif
-    #if AXIS2_DRIVER_MICROSTEPS != OFF && AXIS2_DRIVER_MICROSTEPS_GOTO == OFF
-      #undef AXIS2_DRIVER_MICROSTEPS_GOTO 
-      #define AXIS2_DRIVER_MICROSTEPS_GOTO AXIS2_DRIVER_MICROSTEPS
-    #endif
+  #if MODE_SWITCH_BEFORE_SLEW == ON && AXIS1_DRIVER_MICROSTEPS != OFF && AXIS1_DRIVER_MICROSTEPS_GOTO == OFF
+    #undef AXIS1_DRIVER_MICROSTEPS_GOTO
+    #define AXIS1_DRIVER_MICROSTEPS_GOTO AXIS1_DRIVER_MICROSTEPS
+    #undef AXIS2_DRIVER_MICROSTEPS_GOTO
+    #define AXIS2_DRIVER_MICROSTEPS_GOTO AXIS2_DRIVER_MICROSTEPS
   #endif
 
 #else
@@ -578,17 +583,17 @@
 #endif
 
 // if fast Axis1/2 step signal routines aren't defined, do so
-#ifndef Axis1StepPinStep
-  #define Axis1StepPinStep Axis1StepPinHIGH
+#ifndef a1STEP
+  #define a1STEP a1STEP_H
 #endif
-#ifndef Axis1StepPinReset
-  #define Axis1StepPinReset Axis1StepPinLOW
+#ifndef a1CLEAR
+  #define a1CLEAR a1STEP_L
 #endif
-#ifndef Axis2StepPinStep
-  #define Axis2StepPinStep Axis2StepPinHIGH
+#ifndef a2STEP
+  #define a2STEP a2STEP_H
 #endif
-#ifndef Axis2StepPinReset
-  #define Axis2StepPinReset Axis2StepPinLOW
+#ifndef a2CLEAR
+  #define a2CLEAR a2STEP_L
 #endif
 
 // if AXISn_DRIVER_STEP_GOTO isn't defined, do so

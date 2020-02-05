@@ -1,10 +1,5 @@
 // TMC SPI stepper driver init
 
-#if (AXIS1_DRIVER_MODEL == TMC_SPI) || (AXIS2_DRIVER_MODEL == TMC_SPI)
-  #undef MODE_SWITCH_BEFORE_SLEW
-  #define MODE_SWITCH_BEFORE_SLEW TMC_SPI
-#endif
-
 #if AXIS1_DRIVER_MODEL == TMC_SPI
   #if AXIS1_DRIVER_DECAY_MODE == OFF
     #undef AXIS1_DRIVER_DECAY_MODE
@@ -85,7 +80,7 @@
     #define AXIS3_DRIVER_IHOLD (AXIS3_DRIVER_IRUN/2)
   #endif
   #ifndef AXIS3_DRIVER_RSENSE
-    #define AXIS3_DRIVER_RSENSE 0.11+0.02
+    #define AXIS3_DRIVER_RSENSE (0.11+0.02)
   #endif
 #endif
 
@@ -107,7 +102,7 @@
     #define AXIS4_DRIVER_IHOLD (AXIS4_DRIVER_IRUN/2)
   #endif
   #ifndef AXIS4_DRIVER_RSENSE
-    #define AXIS4_DRIVER_RSENSE 0.11+0.02
+    #define AXIS4_DRIVER_RSENSE (0.11+0.02)
   #endif
 #endif
 
@@ -129,6 +124,6 @@
     #define AXIS5_DRIVER_IHOLD (AXIS5_DRIVER_IRUN/2)
   #endif
   #ifndef AXIS5_DRIVER_RSENSE
-    #define AXIS5_DRIVER_RSENSE 0.11+0.02
+    #define AXIS5_DRIVER_RSENSE (0.11+0.02)
   #endif
 #endif

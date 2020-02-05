@@ -73,12 +73,12 @@ volatile boolean inbacklashAxis2        = false;
 boolean faultAxis2                      = false;
 
 #if AXIS1_DRIVER_MODEL == TMC_SPI
-  #define AXIS1_DRIVER_SWITCH_RATE timerRateBacklashAxis1
+  #define AXIS1_DRIVER_SWITCH_RATE 150*16L
 #else
   #define AXIS1_DRIVER_SWITCH_RATE 128*16L
 #endif
 #if AXIS2_DRIVER_MODEL == TMC_SPI
-  #define AXIS2_DRIVER_SWITCH_RATE timerRateBacklashAxis2
+  #define AXIS2_DRIVER_SWITCH_RATE 150*16L
 #else
   #define AXIS2_DRIVER_SWITCH_RATE 128*16L
 #endif
@@ -107,20 +107,28 @@ volatile double StepsForRateChangeAxis2 = (sqrt((double)SLEW_ACCELERATION_DIST*(
     volatile uint8_t _axis1_code_goto;
     #define AXIS1_DRIVER_CODE_GOTO _axis1_code_goto
   #endif
+#endif
+#if AXIS2_DRIVER_MODEL != OFF
   volatile uint8_t _axis2_code;
   #define AXIS2_DRIVER_CODE _axis2_code
   #if AXIS2_DRIVER_MICROSTEPS_GOTO != OFF
     volatile uint8_t _axis2_code_goto;
     #define AXIS2_DRIVER_CODE_GOTO _axis2_code_goto
   #endif
+#endif
+#if AXIS3_DRIVER_MODEL != OFF
   #if AXIS3_DRIVER_MICROSTEPS != OFF
     volatile uint8_t _axis3_code;
     #define AXIS3_DRIVER_CODE _axis3_code
   #endif
+#endif
+#if AXIS4_DRIVER_MODEL != OFF
   #if AXIS4_DRIVER_MICROSTEPS != OFF
     volatile uint8_t _axis4_code;
     #define AXIS4_DRIVER_CODE _axis4_code
   #endif
+#endif
+#if AXIS5_DRIVER_MODEL != OFF
   #if AXIS5_DRIVER_MICROSTEPS != OFF
     volatile uint8_t _axis5_code;
     #define AXIS5_DRIVER_CODE _axis5_code
@@ -155,11 +163,7 @@ volatile byte dirAxis1                  = 1;                 // stepping directi
 double origTargetRA                     = 0.0;               // holds the RA for gotos before possible conversion to observed place
 double newTargetRA                      = 0.0;               // holds the RA for gotos after conversion to observed place
 fixed_t origTargetAxis1;
-#if defined(AXIS1_DRIVER_CODE) && defined(AXIS1_DRIVER_CODE_GOTO)
-  volatile long stepAxis1=1;
-#else
-  #define stepAxis1 1
-#endif
+volatile long stepAxis1=1;
 
 volatile long posAxis2                  = 0;                 // declination position in steps
 volatile long startAxis2                = 0;                 // declination of goto start position in steps
@@ -167,12 +171,8 @@ volatile fixed_t targetAxis2;                                // declination of g
 volatile byte dirAxis2                  = 1;                 // stepping direction + or -
 double origTargetDec                    = 0.0;               // holds the Dec for gotos before possible conversion to observed place
 double newTargetDec                     = 0.0;               // holds the Dec for gotos after conversion to observed place
-long origTargetAxis2                    = 0;
-#if defined(AXIS2_DRIVER_CODE) && defined(AXIS2_DRIVER_CODE_GOTO)
-  volatile long stepAxis2=1;
-#else
-  #define stepAxis2 1
-#endif
+fixed_t origTargetAxis2;
+volatile long stepAxis2=1;
 
 double newTargetAlt=0.0, newTargetAzm   = 0.0;               // holds the altitude and azmiuth for slews
 long   degreesPastMeridianE             = 15;                // east of pier.  How far past the meridian before we do a flip.

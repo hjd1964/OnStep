@@ -123,28 +123,28 @@ weather ambient;
 #endif
 
 // support for TMC2130, TMC5160, etc. stepper drivers in SPI mode
-#if MODE_SWITCH_BEFORE_SLEW == TMC_SPI
+#if AXIS1_DRIVER_MODEL == TMC_SPI
   #include "src/lib/SoftSPI.h"
   #include "src/lib/TMC_SPI.h"
   #if AXIS1_DRIVER_STATUS == TMC_SPI
 //                        SS      ,SCK     ,MISO    ,MOSI
-    tmcSpiDriver tmcAxis1(Axis1_M2,Axis1_M1,Axis1_M3,Axis1_M0);
+    tmcSpiDriver tmcAxis1(Axis1_M2,Axis1_M1,Axis1_M3,Axis1_M0,AXIS1_DRIVER_SUBMODEL,AXIS1_DRIVER_RSENSE);
   #else
-    tmcSpiDriver tmcAxis1(Axis1_M2,Axis1_M1,      -1,Axis1_M0);
+    tmcSpiDriver tmcAxis1(Axis1_M2,Axis1_M1,      -1,Axis1_M0,AXIS1_DRIVER_SUBMODEL,AXIS1_DRIVER_RSENSE);
   #endif
   #if AXIS2_DRIVER_STATUS == TMC_SPI
-    tmcSpiDriver tmcAxis2(Axis2_M2,Axis2_M1,Axis2_M3,Axis2_M0);
+    tmcSpiDriver tmcAxis2(Axis2_M2,Axis2_M1,Axis2_M3,Axis2_M0,AXIS2_DRIVER_SUBMODEL,AXIS2_DRIVER_RSENSE);
   #else
-    tmcSpiDriver tmcAxis2(Axis2_M2,Axis2_M1,      -1,Axis2_M0);
+    tmcSpiDriver tmcAxis2(Axis2_M2,Axis2_M1,      -1,Axis2_M0,AXIS2_DRIVER_SUBMODEL,AXIS2_DRIVER_RSENSE);
   #endif
   #if ROTATOR == ON && AXIS3_DRIVER_MODEL == TMC_SPI
-    tmcSpiDriver tmcAxis3(Axis3_M2,Axis3_M1,      -1,Axis3_M0);
+    tmcSpiDriver tmcAxis3(Axis3_M2,Axis3_M1,      -1,Axis3_M0,AXIS3_DRIVER_SUBMODEL,AXIS3_DRIVER_RSENSE);
   #endif
   #if FOCUSER1 == ON && AXIS4_DRIVER_MODEL == TMC_SPI
-    tmcSpiDriver tmcAxis4(Axis4_M2,Axis4_M1,      -1,Axis4_M0);
+    tmcSpiDriver tmcAxis4(Axis4_M2,Axis4_M1,      -1,Axis4_M0,AXIS4_DRIVER_SUBMODEL,AXIS4_DRIVER_RSENSE);
   #endif
   #if FOCUSER2 == ON && AXIS5_DRIVER_MODEL == TMC_SPI
-    tmcSpiDriver tmcAxis5(Axis5_M2,Axis5_M1,      -1,Axis5_M0);
+    tmcSpiDriver tmcAxis5(Axis5_M2,Axis5_M1,      -1,Axis5_M0,AXIS5_DRIVER_SUBMODEL,AXIS5_DRIVER_RSENSE);
   #endif
 #endif
 
@@ -198,7 +198,7 @@ void setup() {
 #if MOUNT_TYPE != ALTAZM
   createPecBuffer();
 #endif
-  
+
   // set initial values for some variables
   initStartupValues();
 
@@ -261,16 +261,16 @@ void setup() {
 
   // start rotator if present
 #if ROTATOR == ON
-  rot.init(Axis3StepPin,Axis3DirPin,Axis3_EN,AXIS3_STEP_RATE_MAX,AXIS3_STEPS_PER_DEGREE,AXIS3_LIMIT_MIN,AXIS3_LIMIT_MAX);
+  rot.init(Axis3_STEP,Axis3_DIR,Axis3_EN,AXIS3_STEP_RATE_MAX,AXIS3_STEPS_PER_DEGREE,AXIS3_LIMIT_MIN,AXIS3_LIMIT_MAX);
   #if AXIS3_DRIVER_REVERSE == ON
     rot.setReverseState(HIGH);
   #endif
   rot.setDisableState(AXIS3_DRIVER_DISABLE);
   
-  #if MODE_SWITCH_BEFORE_SLEW == TMC_SPI && AXIS3_DRIVER_MODEL == TMC_SPI
-    tmcAxis3.setup(AXIS3_DRIVER_INTPOL,AXIS3_DRIVER_DECAY_MODE,AXIS3_DRIVER_CODE&0b001111,AXIS3_DRIVER_IRUN,AXIS3_DRIVER_IRUN,AXIS3_DRIVER_RSENSE,AXIS3_DRIVER_SUBMODEL);
+  #if AXIS3_DRIVER_MODEL == TMC_SPI
+    tmcAxis3.setup(AXIS3_DRIVER_INTPOL,AXIS3_DRIVER_DECAY_MODE,AXIS3_DRIVER_CODE,AXIS3_DRIVER_IRUN,AXIS3_DRIVER_IRUN);
     delay(150);
-    tmcAxis3.setup(AXIS3_DRIVER_INTPOL,AXIS3_DRIVER_DECAY_MODE,AXIS3_DRIVER_CODE&0b001111,AXIS3_DRIVER_IRUN,AXIS3_DRIVER_IHOLD,AXIS3_DRIVER_RSENSE,AXIS3_DRIVER_SUBMODEL);
+    tmcAxis3.setup(AXIS3_DRIVER_INTPOL,AXIS3_DRIVER_DECAY_MODE,AXIS3_DRIVER_CODE,AXIS3_DRIVER_IRUN,AXIS3_DRIVER_IHOLD);
   #endif
   
   #if AXIS3_DRIVER_POWER_DOWN == ON
@@ -282,7 +282,7 @@ void setup() {
 
   // start focusers if present
 #if FOCUSER1 == ON
-  foc1.init(Axis4StepPin,Axis4DirPin,Axis4_EN,EE_posAxis4,EE_tcfCoefAxis4,EE_tcfEnAxis4,AXIS4_STEP_RATE_MAX,AXIS4_STEPS_PER_MICRON,AXIS4_LIMIT_MIN*1000.0,AXIS4_LIMIT_MAX*1000.0,AXIS4_LIMIT_MIN_RATE);
+  foc1.init(Axis4_STEP,Axis4_DIR,Axis4_EN,EE_posAxis4,EE_tcfCoefAxis4,EE_tcfEnAxis4,AXIS4_STEP_RATE_MAX,AXIS4_STEPS_PER_MICRON,AXIS4_LIMIT_MIN*1000.0,AXIS4_LIMIT_MAX*1000.0,AXIS4_LIMIT_MIN_RATE);
   #if AXIS4_DRIVER_DC_MODE != OFF
     foc1.initDcPower(EE_dcPwrAxis4);
     foc1.setPhase1();
@@ -292,10 +292,10 @@ void setup() {
   #endif
   foc1.setDisableState(AXIS4_DRIVER_DISABLE);
 
-  #if MODE_SWITCH_BEFORE_SLEW == TMC_SPI && AXIS4_DRIVER_MODEL == TMC_SPI
-    tmcAxis4.setup(AXIS4_DRIVER_INTPOL,AXIS4_DRIVER_DECAY_MODE,AXIS4_DRIVER_CODE&0b001111,AXIS4_DRIVER_IRUN,AXIS4_DRIVER_IRUN,AXIS4_DRIVER_RSENSE,AXIS4_DRIVER_SUBMODEL);
+  #if AXIS4_DRIVER_MODEL == TMC_SPI
+    tmcAxis4.setup(AXIS4_DRIVER_INTPOL,AXIS4_DRIVER_DECAY_MODE,AXIS4_DRIVER_CODE,AXIS4_DRIVER_IRUN,AXIS4_DRIVER_IRUN);
     delay(150);
-    tmcAxis4.setup(AXIS4_DRIVER_INTPOL,AXIS4_DRIVER_DECAY_MODE,AXIS4_DRIVER_CODE&0b001111,AXIS4_DRIVER_IRUN,AXIS4_DRIVER_IHOLD,AXIS4_DRIVER_RSENSE,AXIS4_DRIVER_SUBMODEL);
+    tmcAxis4.setup(AXIS4_DRIVER_INTPOL,AXIS4_DRIVER_DECAY_MODE,AXIS4_DRIVER_CODE,AXIS4_DRIVER_IRUN,AXIS4_DRIVER_IHOLD);
   #endif
 
   #if AXIS4_DRIVER_POWER_DOWN == ON
@@ -306,7 +306,7 @@ void setup() {
 #endif
 
 #if FOCUSER2 == ON
-  foc2.init(Axis5StepPin,Axis5DirPin,Axis5_EN,EE_posAxis5,EE_tcfCoefAxis5,EE_tcfEnAxis5,AXIS5_STEP_RATE_MAX,AXIS5_STEPS_PER_MICRON,AXIS5_LIMIT_MIN*1000.0,AXIS5_LIMIT_MAX*1000.0,AXIS5_LIMIT_MIN_RATE);
+  foc2.init(Axis5_STEP,Axis5_DIR,Axis5_EN,EE_posAxis5,EE_tcfCoefAxis5,EE_tcfEnAxis5,AXIS5_STEP_RATE_MAX,AXIS5_STEPS_PER_MICRON,AXIS5_LIMIT_MIN*1000.0,AXIS5_LIMIT_MAX*1000.0,AXIS5_LIMIT_MIN_RATE);
   #if AXIS5_DRIVER_DC_MODE == DRV8825
     foc2.initDcPower(EE_dcPwrAxis5);
     foc2.setPhase2();
@@ -316,10 +316,10 @@ void setup() {
   #endif
   foc2.setDisableState(AXIS5_DRIVER_DISABLE);
 
-  #if MODE_SWITCH_BEFORE_SLEW == TMC_SPI && AXIS5_DRIVER_MODEL == TMC_SPI
-    tmcAxis5.setup(AXIS5_DRIVER_INTPOL,AXIS5_DRIVER_DECAY_MODE,AXIS5_DRIVER_CODE&0b001111,AXIS5_DRIVER_IRUN,AXIS5_DRIVER_IRUN,AXIS5_DRIVER_RSENSE,AXIS5_DRIVER_SUBMODEL);
+  #if AXIS5_DRIVER_MODEL == TMC_SPI
+    tmcAxis5.setup(AXIS5_DRIVER_INTPOL,AXIS5_DRIVER_DECAY_MODE,AXIS5_DRIVER_CODE,AXIS5_DRIVER_IRUN,AXIS5_DRIVER_IRUN);
     delay(150);
-    tmcAxis5.setup(AXIS5_DRIVER_INTPOL,AXIS5_DRIVER_DECAY_MODE,AXIS5_DRIVER_CODE&0b001111,AXIS5_DRIVER_IRUN,AXIS5_DRIVER_IHOLD,AXIS5_DRIVER_RSENSE,AXIS5_DRIVER_SUBMODEL);
+    tmcAxis5.setup(AXIS5_DRIVER_INTPOL,AXIS5_DRIVER_DECAY_MODE,AXIS5_DRIVER_CODE,AXIS5_DRIVER_IRUN,AXIS5_DRIVER_IHOLD);
   #endif
 
   #if AXIS5_DRIVER_POWER_DOWN == ON
@@ -398,10 +398,10 @@ void loop2() {
     if (trackingState == TrackingMoveTo) {
       moveTo();
       if (lastTrackingState == TrackingSidereal) {
-        // origTargetAxisn isn't used in Alt/Azm mode since meridian flips never happen
         origTargetAxis1.fixed+=fstepAxis1.fixed;
-        // don't advance the target during meridian flips
-        if ((getInstrPierSide() == PierSideEast) || (getInstrPierSide() == PierSideWest)) {
+        origTargetAxis2.fixed+=fstepAxis2.fixed;
+        // don't advance the target during meridian flips or sync
+        if (getInstrPierSide() == PierSideEast || getInstrPierSide() == PierSideWest) {
           cli();
           targetAxis1.fixed+=fstepAxis1.fixed;
           targetAxis2.fixed+=fstepAxis2.fixed;
@@ -449,12 +449,12 @@ void loop2() {
 
     // check for fault signal, stop any slew or guide and turn tracking off
 #if AXIS1_DRIVER_STATUS == LOW || AXIS1_DRIVER_STATUS == HIGH
-    faultAxis1=(digitalRead(Axis1FaultPin) == AXIS1_DRIVER_STATUS);
+    faultAxis1=(digitalRead(Axis1_FAULT) == AXIS1_DRIVER_STATUS);
 #elif AXIS1_DRIVER_STATUS == TMC_SPI
     if (lst%2 == 0) faultAxis1=tmcAxis1.error();
 #endif
 #if AXIS2_DRIVER_STATUS == LOW || AXIS2_DRIVER_STATUS == HIGH
-    faultAxis2=(digitalRead(Axis2FaultPin) == AXIS2_DRIVER_STATUS);
+    faultAxis2=(digitalRead(Axis2_FAULT) == AXIS2_DRIVER_STATUS);
 #elif AXIS2_DRIVER_STATUS == TMC_SPI
     if (lst%2 == 1) faultAxis2=tmcAxis2.error();
 #endif

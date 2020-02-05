@@ -58,10 +58,6 @@
 #define STEALTHCHOP 3
 #define SPREADCYCLE 4
 
-// default mode switch state and sleep is disabled
-#define MODE_SWITCH_BEFORE_SLEW OFF
-#define MODE_SWITCH_SLEEP OFF
-
 // ------------------------------------------------------------------------------------------------------------------------
 // search function
 

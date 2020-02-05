@@ -33,28 +33,28 @@
 
 // Axis1 RA/Azm step/dir driver
 #define Axis1_EN              4     // Enable
-#define Axis1StepPin         18     // Step
-#define Axis1DirPin          19     // Dir
+#define Axis1_STEP           18     // Step
+#define Axis1_DIR            19     // Dir
 
 // Axis2 Dec/Alt step/dir driver
 #define Axis2_EN             12     // Enable
-#define Axis2StepPin         27     // Step
-#define Axis2DirPin          26     // Dir
+#define Axis2_STEP           27     // Step
+#define Axis2_DIR            26     // Dir
 
 // For rotator stepper driver
 #define Axis3_EN              0     // Enable
-#define Axis3StepPin          2     // Step
-#define Axis3DirPin          15     // Dir
+#define Axis3_STEP            2     // Step
+#define Axis3_DIR            15     // Dir
 
 // For focuser1 stepper driver
 #define Axis4_EN              0     // Enable
-#define Axis4StepPin          2     // Step
-#define Axis4DirPin          15     // Dir
+#define Axis4_STEP            2     // Step
+#define Axis4_DIR            15     // Dir
 
 // For focuser2 stepper driver
 #define Axis4_EN             -1     // Enable
-#define Axis4StepPin         -1     // Step
-#define Axis4DirPin          -1     // Dir
+#define Axis4_STEP           -1     // Step
+#define Axis4_DIR            -1     // Dir
 
 // ST4 interface
 #define ST4RAw               34     // ST4 RA- West

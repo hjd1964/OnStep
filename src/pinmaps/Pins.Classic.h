@@ -42,47 +42,59 @@
 // Axis1 RA/Azm step/dir driver
 #define Axis1_EN             25     // Enable
 #define Axis1_M0             22     // Microstep Mode 0
+#define Axis1_M0PORT      PORTA
+#define Axis1_M0BIT           0
 #define Axis1_M1             23     // Microstep Mode 1
+#define Axis1_M1PORT      PORTA
+#define Axis1_M1BIT           1
 #define Axis1_M2             24     // Microstep Mode 2
+#define Axis1_M2PORT      PORTA
+#define Axis1_M2BIT           2
 #define Axis1_M3             26     // SPI MISO/Fault
-#define Axis1StepPin         13     // Step PB7
-#define Axis1StepBit          7     //
-#define Axis1StepPORT     PORTB     //
-#define Axis1DirPin          11     // Dir  PB5
-#define Axis1DirBit           5     //
-#define Axis1DirPORT      PORTB     //
-#define Axis1FaultPin        26     // SPI MISO/Fault
-#define Axis1ModePin         32     // Mode switch for Axis1
+#define Axis1_STEP           13     // Step PB7
+#define Axis1_StepPORT    PORTB     //
+#define Axis1_StepBIT         7     //
+#define Axis1_DIR            11     // Dir  PB5
+#define Axis1_DirPORT     PORTB     //
+#define Axis1_DirBIT          5     //
+#define Axis1_DECAY          32     // Mode switch for Axis1
+#define Axis1_FAULT          26     // SPI MISO/Fault
 
 // Axis2 Dec/Alt step/dir driver
 #define Axis2_EN             30     // Enable
 #define Axis2_M0             27     // Microstep Mode 0
+#define Axis2_M0PORT      PORTA
+#define Axis2_M0BIT           5
 #define Axis2_M1             28     // Microstep Mode 1
+#define Axis2_M1PORT      PORTA
+#define Axis2_M1BIT           6
 #define Axis2_M2             29     // Microstep Mode 2
+#define Axis2_M2PORT      PORTA
+#define Axis2_M2BIT           7
 #define Axis2_M3             31     // SPI MISO/Fault
-#define Axis2StepPin          6     // Step  PH3
-#define Axis2StepBit          3     //
-#define Axis2StepPORT     PORTH     //
-#define Axis2DirPin           4     // Dir   PG5
-#define Axis2DirBit           5     //
-#define Axis2DirPORT      PORTG     //
-#define Axis2FaultPin        31     // SPI MISO/Fault
-#define Axis2ModePin         33     // Mode switch for Axis2
+#define Axis2_STEP            6     // Step  PH3
+#define Axis2_StepPORT    PORTH     //
+#define Axis2_StepBIT         3     //
+#define Axis2_DIR             4     // Dir   PG5
+#define Axis2_DirPORT     PORTG     //
+#define Axis2_DirBIT          5     //
+#define Axis2_DECAY          33     // Mode switch for Axis2
+#define Axis2_FAULT          31     // SPI MISO/Fault
 
 // Pins to rotator stepper driver
 #define Axis3_EN             -1     // Enable
-#define Axis3StepPin         A9     // Step
-#define Axis3DirPin          A8     // Dir
+#define Axis3_STEP           A9     // Step
+#define Axis3_DIR            A8     // Dir
 
 // Pins to focuser1 stepper driver
 #define Axis3_EN             -1     // Enable
-#define Axis4StepPin        A11     // Step
-#define Axis4DirPin         A10     // Dir
+#define Axis4_STEP          A11     // Step
+#define Axis4_DIR           A10     // Dir
 
 // Pins to focuser2 stepper driver
 #define Axis3_EN             -1     // Enable
-#define Axis5StepPin        A13     // Step
-#define Axis5DirPin         A12     // Dir
+#define Axis5_STEP          A13     // Step
+#define Axis5_DIR           A12     // Dir
 
 // ST4 interface
 #if defined(ST4_ALTERNATE_PINS_ON) || (PINMAP == ClassicShield)
@@ -130,9 +142,9 @@
 #define Axis1_M1             14     // Microstep Mode 1
 #define Axis1_M2             15     // Microstep Mode 2
 #define Axis1_M3             17     // ESP8266 GPIO0 or SPI MISO
-#define Axis1StepPin         12     // Step
-#define Axis1DirPin          10     // Dir
-#define Axis1FaultPin        17     // Fault
+#define Axis1_STEP           12     // Step
+#define Axis1_DIR            10     // Dir
+#define Axis1_FAULT          17     // Fault
 
 // Axis2 Dec/Alt step/dir driver
 #define Axis2_EN             21     // Enable
@@ -140,30 +152,30 @@
 #define Axis2_M1             19     // Microstep Mode 1
 #define Axis2_M2             20     // Microstep Mode 2
 #define Axis2_M3             22     // ESP8266 Rst or SPI MISO
-#define Axis2FaultPin        22     // Fault
-#define Axis2StepPin          6     // Step
-#define Axis2DirPin           4     // Dir
+#define Axis2_FAULT          22     // Fault
+#define Axis2_STEP            6     // Step
+#define Axis2_DIR             4     // Dir
 
 // For rotator stepper driver
 #define Axis3_EN             -1     // Enable
-#define Axis3StepPin         30     // Step
-#define Axis3DirPin          33     // Dir
+#define Axis3_STEP           30     // Step
+#define Axis3_DIR            33     // Dir
 
 // For focuser1 stepper driver  
 #if defined(__MK64FX512__) || defined(__MK66FX1M0__)
   // teensy3.5/3.6
-  #define Axis4StepPin       34     // Step
-  #define Axis4DirPin        35     // Dir
+  #define Axis4_STEP         34     // Step
+  #define Axis4_DIR          35     // Dir
 #else
   // teensy3.2
-  #define Axis4StepPin       31     // Step
-  #define Axis4DirPin        32     // Dir
+  #define Axis4_STEP         31     // Step
+  #define Axis4_DIR          32     // Dir
 #endif
 #define Axis4_EN             -1     // Enable
 
 // For focuser2 stepper driver
-#define Axis5StepPin         30     // Step
-#define Axis5DirPin          33     // Dir
+#define Axis5_STEP           30     // Step
+#define Axis5_DIR            33     // Dir
 #define Axis5_EN             -1     // Enable
 
 // ST4 interface

@@ -36,47 +36,59 @@
 // Axis1 RA/Azm step/dir driver
 #define Axis1_EN             23     // Enable
 #define Axis1_M0             29     // Microstep or Decay Mode 0
+#define Axis1_M0PORT      PORTA
+#define Axis1_M0BIT           7
 #define Axis1_M1             27     // Microstep or Decay Mode 1
+#define Axis1_M1PORT      PORTA
+#define Axis1_M1BIT           5
 #define Axis1_M2             25     // Microstep or Decay Mode 2
+#define Axis1_M2PORT      PORTA
+#define Axis1_M2BIT           3
 #define Axis1_M3             39     // SPI MISO/Fault
-#define Axis1StepPin         35     // Step PC2
-#define Axis1StepBit          2     //
-#define Axis1StepPORT     PORTC     //
-#define Axis1DirPin          37     // Dir  PC0
-#define Axis1DirBit           0     //
-#define Axis1DirPORT      PORTC     //
-#define Axis1FaultPin        39     // SPI MISO/Fault
-#define Axis1ModePin         41     // Decay mode
+#define Axis1_STEP           35     // Step PC2
+#define Axis1_StepPORT    PORTC     //
+#define Axis1_StepBIT         2     //
+#define Axis1_DIR            37     // Dir  PC0
+#define Axis1_DirPORT     PORTC     //
+#define Axis1_DirBIT          0     //
+#define Axis1_FAULT          39     // SPI MISO/Fault
+#define Axis1_DECAY          41     // Decay mode
 
 // Axis2 Dec/Alt step/dir driver
 #define Axis2_EN             36     // Enabled
 #define Axis2_M0             30     // Microstep or Decay Mode 0
+#define Axis2_M0PORT      PORTC
+#define Axis2_M0BIT           7
 #define Axis2_M1             32     // Microstep or Decay Mode 1
+#define Axis2_M1PORT      PORTC
+#define Axis2_M1BIT           5
 #define Axis2_M2             34     // Microstep or Decay Mode 2
+#define Axis2_M2PORT      PORTC
+#define Axis2_M2BIT           3
 #define Axis2_M3             38     // SPI MISO/Fault
-#define Axis2StepPin         24     // Step  PA2
-#define Axis2StepBit          2     //
-#define Axis2StepPORT     PORTA     //
-#define Axis2DirPin          22     // Dir   PA0
-#define Axis2DirBit           0     //
-#define Axis2DirPORT      PORTA     //
-#define Axis2FaultPin        38     // SPI MISO/Fault
-#define Axis2ModePin         40     // Decay mode
+#define Axis2_STEP           24     // Step  PA2
+#define Axis2_StepPORT    PORTA     //
+#define Axis2_StepBIT         2     //
+#define Axis2_DIR            22     // Dir   PA0
+#define Axis2_DirPORT     PORTA     //
+#define Axis2_DirBIT          0     //
+#define Axis2_FAULT          38     // SPI MISO/Fault
+#define Axis2_DECAY          40     // Decay mode
 
 // For rotator stepper driver
 #define Axis3_EN             -1     // Enable
-#define Axis3StepPin         -1     // Step
-#define Axis3DirPin          -1     // Dir
+#define Axis3_STEP           -1     // Step
+#define Axis3_DIR            -1     // Dir
 
 // For focuser1 stepper driver
 #define Axis4_EN             -1     // Enable
-#define Axis4StepPin         -1     // Step
-#define Axis4DirPin          -1     // Dir
+#define Axis4_STEP           -1     // Step
+#define Axis4_DIR            -1     // Dir
 
 // For focuser2 stepper driver
 #define Axis5_EN             -1     // Enable
-#define Axis5StepPin         -1     // Step
-#define Axis5DirPin          -1     // Dir
+#define Axis5_STEP           -1     // Step
+#define Axis5_DIR            -1     // Dir
 
 // ST4 interface
 #define ST4RAw               47     // ST4 RA- West

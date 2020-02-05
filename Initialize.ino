@@ -76,7 +76,7 @@ void initStartupValues() {
   newTargetAlt        = 0;
   newTargetAzm        = 0;
   origTargetAxis1.fixed = 0;
-  origTargetAxis2       = 0;
+  origTargetAxis2.fixed = 0;
 
   // initialize alignment
   alignNumStars       = 0;
@@ -182,14 +182,14 @@ void initPins() {
 
 // Home position sensing
 #if HOME_SENSE == ON
-  pinMode(Axis1HomePin,INPUT);
-  pinMode(Axis2HomePin,INPUT);
+  pinMode(Axis1_HOME,INPUT);
+  pinMode(Axis2_HOME,INPUT);
 #elif HOME_SENSE == ON_PULLUP
-  pinMode(Axis1HomePin,INPUT_PULLUP);
-  pinMode(Axis2HomePin,INPUT_PULLUP);
+  pinMode(Axis1_HOME,INPUT_PULLUP);
+  pinMode(Axis2_HOME,INPUT_PULLUP);
 #elif HOME_SENSE == ON_PULLDOWN
-  pinMode(Axis1HomePin,INPUT_PULLDOWN);
-  pinMode(Axis2HomePin,INPUT_PULLDOWN);
+  pinMode(Axis1_HOME,INPUT_PULLDOWN);
+  pinMode(Axis2_HOME,INPUT_PULLDOWN);
 #endif
 
 // limit switch sense
@@ -225,10 +225,10 @@ void initPins() {
 // ------------------------------------------------------------------
 // Stepper driver control
 
-  pinMode(Axis1StepPin,OUTPUT);   // Axis1
-  pinMode(Axis1DirPin,OUTPUT); 
-  pinMode(Axis2StepPin,OUTPUT);   // Axis2 
-  pinMode(Axis2DirPin,OUTPUT); 
+  pinMode(Axis1_STEP,OUTPUT);   // Axis1
+  pinMode(Axis1_DIR,OUTPUT); 
+  pinMode(Axis2_STEP,OUTPUT);   // Axis2 
+  pinMode(Axis2_DIR,OUTPUT); 
 
   // provide 5V (or 3.3V) power to stepper drivers if requested (classic Pin-map)
 #ifdef POWER_SUPPLY_PINS_ON
@@ -245,22 +245,22 @@ void initPins() {
 
 // inputs for stepper drivers fault signal
 #if AXIS1_DRIVER_STATUS == LOW
-  pinMode(Axis1FaultPin,INPUT_PULLUP);
+  pinMode(Axis1_FAULT,INPUT_PULLUP);
 #elif AXIS1_DRIVER_STATUS == HIGH
   #ifdef INPUT_PULLDOWN
-    pinMode(Axis1FaultPin,INPUT_PULLDOWN);
+    pinMode(Axis1_FAULT,INPUT_PULLDOWN);
   #else
-    pinMode(Axis1FaultPin,INPUT);
+    pinMode(Axis1_FAULT,INPUT);
   #endif
 #endif
 
 #if AXIS2_DRIVER_STATUS == LOW
-  pinMode(Axis2FaultPin,INPUT_PULLUP);
+  pinMode(Axis2_FAULT,INPUT_PULLUP);
 #elif AXIS1_DRIVER_STATUS == HIGH
   #ifdef INPUT_PULLDOWN
-    pinMode(Axis2FaultPin,INPUT_PULLDOWN);
+    pinMode(Axis2_FAULT,INPUT_PULLDOWN);
   #else
-    pinMode(Axis2FaultPin,INPUT);
+    pinMode(Axis2_FAULT,INPUT);
   #endif
 #endif
 

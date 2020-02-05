@@ -49,7 +49,7 @@
 // New symbol for the default I2C port -------------------------------------------------------------
 #define HAL_Wire Wire
 
-// Non-volatile storage ------------------------------------------------------------------------------
+// Non-volatile storage ----------------------------------------------------------------------------
 #if defined(NV_AT24C32)
   #ifdef E2END
     #undef E2END
@@ -154,19 +154,44 @@ void PresetTimerInterval(long iv, float TPSM, volatile uint32_t *nextRate, volat
 #define QuickSetIntervalAxis2(r) (OCR4A=r)
 
 // --------------------------------------------------------------------------------------------------
-// Fast port writing help
+// Fast port writing help, etc.
 
 #define CLR(x,y) (x&=(~(1<<y)))
 #define SET(x,y) (x|=(1<<y))
 #define TGL(x,y) (x^=(1<<y))
 
 // We use standard #define's to do **fast** digitalWrite's to the step and dir pins for the Axis1/2 stepper drivers
-#define Axis1StepPinHIGH SET(Axis1StepPORT, Axis1StepBit)
-#define Axis1StepPinLOW CLR(Axis1StepPORT, Axis1StepBit)
-#define Axis1DirPinHIGH SET(Axis1DirPORT, Axis1DirBit)
-#define Axis1DirPinLOW CLR(Axis1DirPORT, Axis1DirBit)
+#define a1STEP_H SET(Axis1_StepPORT, Axis1_StepBIT)
+#define a1STEP_L CLR(Axis1_StepPORT, Axis1_StepBIT)
+#define a1DIR_H SET(Axis1_DirPORT, Axis1_DirBIT)
+#define a1DIR_L CLR(Axis1_DirPORT, Axis1_DirBIT)
 
-#define Axis2StepPinHIGH SET(Axis2StepPORT, Axis2StepBit)
-#define Axis2StepPinLOW CLR(Axis2StepPORT, Axis2StepBit)
-#define Axis2DirPinHIGH SET(Axis2DirPORT, Axis2DirBit)
-#define Axis2DirPinLOW CLR(Axis2DirPORT, Axis2DirBit)
+#define a2STEP_H SET(Axis2_StepPORT, Axis2_StepBIT)
+#define a2STEP_L CLR(Axis2_StepPORT, Axis2_StepBIT)
+#define a2DIR_H SET(Axis2_DirPORT, Axis2_DirBIT)
+#define a2DIR_L CLR(Axis2_DirPORT, Axis2_DirBIT)
+
+//#define delaySPI __asm__ volatile ("nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t")
+//#define delaySPI_SHORT __asm__ volatile ("nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t")
+#define delaySPI __asm__ volatile ("nop\n\t" "nop\n\t")
+#define delaySPI_SHORT
+
+#define a1CS_H SET(Axis1_M2PORT, Axis1_M2BIT)
+#define a1CS_L CLR(Axis1_M2PORT, Axis1_M2BIT)
+#define a1CLK_H SET(Axis1_M1PORT, Axis1_M1BIT)
+#define a1CLK_L CLR(Axis1_M1PORT, Axis1_M1BIT)
+#define a1SDO_H SET(Axis1_M0PORT, Axis1_M0BIT)
+#define a1SDO_L CLR(Axis1_M0PORT, Axis1_M0BIT)
+#define a1M0(P) if (P) SET(Axis1_M0PORT, Axis1_M0BIT); else CLR(Axis1_M0PORT, Axis1_M0BIT)
+#define a1M1(P) if (P) SET(Axis1_M1PORT, Axis1_M1BIT); else CLR(Axis1_M1PORT, Axis1_M1BIT)
+#define a1M2(P) if (P) SET(Axis1_M2PORT, Axis1_M2BIT); else CLR(Axis1_M2PORT, Axis1_M2BIT)
+
+#define a2CS_H SET(Axis2_M2PORT, Axis2_M2BIT)
+#define a2CS_L CLR(Axis2_M2PORT, Axis2_M2BIT)
+#define a2CLK_H SET(Axis2_M1PORT, Axis2_M1BIT)
+#define a2CLK_L CLR(Axis2_M1PORT, Axis2_M1BIT)
+#define a2SDO_H SET(Axis2_M0PORT, Axis1_M0BIT)
+#define a2SDO_L CLR(Axis2_M0PORT, Axis1_M0BIT)
+#define a2M0(P) if (P) SET(Axis2_M0PORT, Axis2_M0BIT); else CLR(Axis2_M0PORT, Axis2_M0BIT)
+#define a2M1(P) if (P) SET(Axis2_M1PORT, Axis2_M1BIT); else CLR(Axis2_M1PORT, Axis2_M1BIT)
+#define a2M2(P) if (P) SET(Axis2_M2PORT, Axis2_M2BIT); else CLR(Axis2_M2PORT, Axis2_M2BIT)

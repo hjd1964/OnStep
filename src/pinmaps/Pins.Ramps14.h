@@ -51,47 +51,71 @@
 #define Axis1_EN             38     // Enable
 #if PINMAP == MksGenL2
   #define Axis1_M0           51     // SPI MOSI
+  #define Axis1_M0PORT    PORTB
+  #define Axis1_M0BIT         2
   #define Axis1_M1           52     // SPI SCK
+  #define Axis1_M1PORT    PORTB
+  #define Axis1_M1BIT         1
   #define Axis1_M2           A9     // SPI CS
+  #define Axis1_M2PORT    PORTK
+  #define Axis1_M2BIT         1
   #define Axis1_M3           50     // SPI MISO
 #else
   #define Axis1_M0           23     // Microstep Mode 0 or SPI MOSI
+  #define Axis1_M0PORT    PORTA
+  #define Axis1_M0BIT         1
   #define Axis1_M1           25     // Microstep Mode 1 or SPI SCK
+  #define Axis1_M1PORT    PORTA
+  #define Axis1_M1BIT         3
   #define Axis1_M2           27     // Microstep Mode 2 or SPI CS
+  #define Axis1_M2PORT    PORTA
+  #define Axis1_M2BIT         5
   #define Axis1_M3         Aux1     // SPI MISO/Fault
 #endif
-#define Axis1StepPin         54     // Step
-#define Axis1StepBit          0     //
-#define Axis1StepPORT     PORTF     //
-#define Axis1DirPin          55     // Dir
-#define Axis1DirBit           1     //
-#define Axis1DirPORT      PORTF     //
-#define Axis1ModePin   Axis1_M2     // Decay mode
-#define Axis1FaultPin      Aux1
-#define Axis1HomePin       Aux3     // Sense home position
+#define Axis1_STEP           54     // Step
+#define Axis1_StepPORT    PORTF     //
+#define Axis1_StepBIT         0     //
+#define Axis1_DIR            55     // Dir
+#define Axis1_DirPORT     PORTF     //
+#define Axis1_DirBIT          1     //
+#define Axis1_DECAY    Axis1_M2     // Decay mode
+#define Axis1_FAULT        Aux1
+#define Axis1_HOME         Aux3     // Sense home position
 
 // Axis2 Dec/Alt step/dir driver on RMAPS Y
 #define Axis2_EN             56     // Enable (Pin A2)
 #if PINMAP == MksGenL2
   #define Axis2_M0           51     // SPI MOSI
+  #define Axis2_M0PORT    PORTB
+  #define Axis2_M0BIT         2
   #define Axis2_M1           52     // SPI SCK
+  #define Axis2_M1PORT    PORTB
+  #define Axis2_M1BIT         1
   #define Axis2_M2          A10     // SPI CS
+  #define Axis2_M2PORT    PORTK
+  #define Axis2_M2BIT         2
   #define Axis2_M3           50     // SPI MISO
 #else
   #define Axis2_M0           31     // Microstep Mode 0 or SPI MOSI
+  #define Axis2_M0PORT    PORTC
+  #define Axis2_M0BIT         6
   #define Axis2_M1           33     // Microstep Mode 1 or SPI SCK
+  #define Axis2_M1PORT    PORTC
+  #define Axis2_M1BIT         4
   #define Axis2_M2           35     // Microstep Mode 2 or SPI CS
+  #define Axis2_M2PORT    PORTC
+  #define Axis2_M2BIT         2
   #define Axis2_M3         Aux2     // SPI MISO/Fault
 #endif
-#define Axis2StepPin         60     // Step (Pin A6)
-#define Axis2StepBit          6     //
-#define Axis2StepPORT     PORTF     //
-#define Axis2DirPin          61     // Dir (Pin A7)
-#define Axis2DirBit           7     //
-#define Axis2DirPORT      PORTF     //
-#define Axis2ModePin   Axis2_M2     // Decay mode
-#define Axis2FaultPin      Aux2
-#define Axis2HomePin       Aux4     // Sense home position
+#define Axis2_STEP           60     // Step (Pin A6)
+#define Axis2_StepPORT    PORTF     //
+#define Axis2_StepBIT         6     //
+#define Axis2_DIR            61     // Dir (Pin A7)
+#define Axis2_DirPORT     PORTF     //
+#define Axis2_DirBIT          7     //
+#define Axis2_DECAY    Axis2_M2     // Decay mode
+#define Axis2_FAULT        Aux2
+#define Axis2_HOME         Aux4     // Sense home position
 
 // For rotator stepper driver on RAMPS Z
 #define Axis3_EN             62     // Enable (Pin A8)
@@ -101,8 +125,8 @@
   #define Axis3_M2          A11     // SPI CS
   #define Axis3_M3           50     // SPI MISO
 #endif
-#define Axis3StepPin         46     // Step
-#define Axis3DirPin          48     // Dir
+#define Axis3_STEP           46     // Step
+#define Axis3_DIR            48     // Dir
 
 // For focuser1 stepper driver on RAMPS E0
 #define Axis4_EN             24     // Enable
@@ -112,8 +136,8 @@
   #define Axis4_M2          A12     // SPI CS
   #define Axis4_M3           50     // SPI MISO
 #endif
-#define Axis4StepPin         26     // Step
-#define Axis4DirPin          28     // Dir
+#define Axis4_STEP           26     // Step
+#define Axis4_DIR            28     // Dir
 
 // For focuser2 stepper driver on RAMPS E1
 #define Axis5_EN             30     // Enable
@@ -123,8 +147,8 @@
   #define Axis5_M2           21     // SPI CS (HOME SW)
   #define Axis5_M3           50     // SPI MISO
 #endif
-#define Axis5StepPin         36     // Step
-#define Axis5DirPin          34     // Dir
+#define Axis5_STEP           36     // Step
+#define Axis5_DIR            34     // Dir
 
 #if PINMAP == MksGenL2
   // ST4 interface on MksGenL2 EXP-1

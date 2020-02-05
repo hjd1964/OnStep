@@ -6,9 +6,10 @@
 class tmcSpiDriver {
   public:
     long sgResult;
-    
-    tmcSpiDriver(int cs, int sck, int miso, int mosi) {
-      _cs=cs; _sck=sck; _miso=miso; _mosi=mosi;
+    tmcSpiDriver(int cs, int sck, int miso, int mosi, int driver_model, float rsense) {
+      BBSpi.init(cs,sck,miso,mosi);
+      _driver_model=driver_model;
+      _rsense=rsense;
     }
 
     // ----------------------------------------------------------------------------------------------------------------------
@@ -17,8 +18,8 @@ class tmcSpiDriver {
     // decay mode:           decay_mode (STEALTHCHOP or SPREADCYCLE)
     // microstepping mode:   micro_step_mode (0=256x, 1=128x, 2=64x, 3=32x, 4=16x, 5=8x, 6=4x, 7=2x, 8=1x)
     // irun, ihold, rsense:  current in mA and sense resistor value
-    void setup(bool intpol, int decay_mode, byte micro_step_mode, int irun, int ihold, float rsense, int driver_model) {
-      BBSpi.begin(_cs,_sck,_miso,_mosi);
+    boolean setup(bool intpol, int decay_mode, byte micro_step_mode, int irun, int ihold) {
+      if (!BBSpi.begin()) return false;
       uint32_t data_out=0;
 
       // *** My notes are limited, see the TMC2130 datasheet for more info. ***
@@ -29,7 +30,7 @@ class tmcSpiDriver {
       // IRUN,       default=31, range 0 to 31 (Run current 0=1/32... 31=32/32)
       // IHOLDDELAY, default=4,  range 0 to 15 (Delay per current reduction step in x 2^18 clocks)
       
-      float Ifs = 0.325/rsense;
+      float Ifs = 0.325/_rsense;
       unsigned long IHOLD=round(( ((float)ihold/1000.0)/Ifs)*32.0)-1;
       unsigned long IRUN =round(( ((float)irun/1000.0)/Ifs)*32.0)-1;
       if (IHOLD < 0) IHOLD=0; if (IHOLD > 31) IHOLD=31;
@@ -68,7 +69,7 @@ class tmcSpiDriver {
       }
 
       // PWMCONF
-      if (driver_model == TMC2130) {
+      if (_driver_model == TMC2130) {
         // default=0x00050480UL
         data_out = (_pc_PWM_AMPL<<0)+(_pc_PWM_GRAD<<8)+(_pc_pwm_freq<<16)+(_pc_pwm_auto<<18)+(_pc_pwm_sym<<19)+(_pc_pwm_freewheel<<20);
         if (last_PWMCONF != data_out) {
@@ -77,7 +78,7 @@ class tmcSpiDriver {
           BBSpi.pause();
         }
       } else
-      if (driver_model == TMC5160) {
+      if (_driver_model == TMC5160) {
         // default=0xC40C001EUL
         data_out = (_pc_PWM_OFS<<0)+(_pc_PWM_GRAD<<8)+(_pc_pwm_freq<<16)+(_pc_pwm_auto<<18)+(_pc_pwm_autograd<<19)+(_pc_pwm_freewheel<<20)+(_pc_PWM_REG<<24)+(_pc_PWM_LIM<<28);
         if (last_PWMCONF != data_out) {
@@ -88,17 +89,13 @@ class tmcSpiDriver {
       }
 
       // CHOPCONF
-      if (driver_model == TMC2130) {
-        // default=0x00008008UL
-        data_out=(_cc_toff<<0)+(_cc_hstart<<4)+(_cc_hend<<7)+(_cc_rndtf<<13)+(_cc_tbl<<15)+(_cc_vsense<<17)+(_cc_vhighfs<<18)+(_cc_vhighchm<<19)+(((uint32_t)micro_step_mode)<<24);
-        if (intpol) data_out |= 1UL<<28; // set the interpolation bit
-        write(REG_CHOPCONF,data_out);
-        BBSpi.pause();
-      } else
-      if (driver_model == TMC5160) {
-        // default=0x10410150UL
-        data_out=(_cc_toff<<0)+(_cc_hstart<<4)+(_cc_hend<<7)+(_cc_tbl<<15)+(_cc_vhighfs<<18)+(_cc_vhighchm<<19)+(_cc_tpfd<<20)+(((uint32_t)micro_step_mode)<<24);
-        if (intpol) data_out |= 1UL<<28; // set the interpolation bit
+      if (intpol) _cc_intpol=1; else _cc_intpol=0; // set interpolation bit
+      // default=0x00008008UL
+      if (_driver_model == TMC2130) _last_chop_config=(_cc_toff<<0)+(_cc_hstart<<4)+(_cc_hend<<7)+(_cc_rndtf<<13)+(_cc_tbl<<15)+(_cc_vsense<<17)+(_cc_vhighfs<<18)+(_cc_vhighchm<<19)+(_cc_intpol<<28);
+      // default=0x10410150UL
+      if (_driver_model == TMC5160) _last_chop_config=(_cc_toff<<0)+(_cc_hstart<<4)+(_cc_hend<<7)+(_cc_tbl<<15)+(_cc_vhighfs<<18)+(_cc_vhighchm<<19)+(_cc_tpfd<<20)+(_cc_intpol<<28);
+      if (micro_step_mode != 255) {
+        data_out=_last_chop_config + (((uint32_t)micro_step_mode)<<24);
         write(REG_CHOPCONF,data_out);
         BBSpi.pause();
       }
@@ -114,11 +111,11 @@ class tmcSpiDriver {
       }
 
       BBSpi.end();
-
+      return true;
     }
 
-    bool error() {
-      BBSpi.begin(_cs,_sck,_miso,_mosi);
+    boolean error() {
+      if (!BBSpi.begin()) return false;
 
       // get global status register, look for driver error bit
       uint32_t data_out=0;
@@ -126,10 +123,37 @@ class tmcSpiDriver {
 
       BBSpi.end();
       if ((result&2) != 0) return true; else return false;
+      return true;
     }
 
 // -------------------------------
 // CHOPCONF settings
+
+    boolean refresh_CHOPCONF(byte micro_step_mode) {
+      // default=0x00008008UL
+      if (_driver_model == TMC2130) _last_chop_config=(_cc_toff<<0)+(_cc_hstart<<4)+(_cc_hend<<7)+(_cc_rndtf<<13)+(_cc_tbl<<15)+(_cc_vsense<<17)+(_cc_vhighfs<<18)+(_cc_vhighchm<<19)+(_cc_intpol<<28);
+      // default=0x10410150UL
+      if (_driver_model == TMC5160) _last_chop_config=(_cc_toff<<0)+(_cc_hstart<<4)+(_cc_hend<<7)+(_cc_tbl<<15)+(_cc_vhighfs<<18)+(_cc_vhighchm<<19)+(_cc_tpfd<<20)+(_cc_intpol<<28);
+
+      if (!BBSpi.begin()) return false;
+      write(REG_CHOPCONF,_last_chop_config + (((uint32_t)micro_step_mode)<<24));
+      BBSpi.end();
+      return true;
+    }
+
+    uint32_t read_CHOPCONF() {
+      if (!BBSpi.begin()) return false;
+
+      uint32_t data_out=0;
+      read(REG_CHOPCONF,&data_out);
+
+      // first write returns nothing, second the data
+      data_out=0;
+      read(REG_DRVSTATUS,&data_out);
+      
+      BBSpi.end();
+      return data_out;
+    }  
 
     bool set_CHOPCONF_toff(int v)     { if ((v >= 2) && (v <= 15)) { _cc_toff    = v; return true; } return false; }
     bool set_CHOPCONF_hstart(int v)   { if ((v >= 0) && (v <= 7))  { _cc_hstart  = v; return true; } return false; }
@@ -139,8 +163,11 @@ class tmcSpiDriver {
     bool set_CHOPCONF_vsense(int v)   { if ((v >= 0) && (v <= 1))  { _cc_vsense  = v; return true; } return false; }
     bool set_CHOPCONF_vhighfs(int v)  { if ((v >= 0) && (v <= 1))  { _cc_vhighfs = v; return true; } return false; }
     bool set_CHOPCONF_vhighchm(int v) { if ((v >= 0) && (v <= 1))  { _cc_vhighchm= v; return true; } return false; }
+    bool set_CHOPCONF_intpol(int v)   { if ((v >= 0) && (v <= 1))  { _cc_intpol  = v; return true; } return false; }
     // TMC5160 specific
     bool set_CHOPCONF_tpfd(int v)     { if ((v >= 0) && (v <= 15)) { _cc_tpfd    = v; return true; } return false; }
+
+    volatile uint32_t _last_chop_config;
 
 // -------------------------------
 // TPOWERDOWN setting
@@ -174,7 +201,8 @@ class tmcSpiDriver {
 // DRVSTATUS
 
     int refresh_DRVSTATUS() {
-      BBSpi.begin(_cs,_sck,_miso,_mosi);
+      if (!BBSpi.begin()) return false;
+
       // get global status register, look for driver error bit
       uint32_t data_out=0;
       read(REG_DRVSTATUS,&data_out);
@@ -218,9 +246,11 @@ class tmcSpiDriver {
 // COOLCONF
 
     bool refresh_COOLCONF() {
-      BBSpi.begin(_cs,_sck,_miso,_mosi);
+      if (!BBSpi.begin()) return false;
+      
       uint32_t data_out=(_ccf_semin<<0)+(_ccf_seup<5)+(_ccf_semax<<8)+(_ccf_sedn<<13)+(_ccf_seimin<<15)+(_ccf_sgt<<16)+(_ccf_sfilt<<24);
       write(REG_COOLCONF,data_out);
+      
       BBSpi.end();
       return true;
     }
@@ -234,6 +264,7 @@ class tmcSpiDriver {
     bool set_COOLCONF_sfilt(int v)  { if ((v >= 0) && (v <= 1))    { _ccf_sfilt =v; return true; } return false; }
 
   private:
+    
     uint8_t write(byte Address, uint32_t data_out)
     {
       Address=Address|0x80;
@@ -251,11 +282,8 @@ class tmcSpiDriver {
     }
 
     bbspi BBSpi;
-
-    int _cs;
-    int _sck;
-    int _miso;
-    int _mosi;
+    int _driver_model = 0;
+    float _rsense = 0.11+0.02; // default for TMC2130
 
     const static uint8_t WRITE          = 0x80; // write flag
     const static uint8_t REG_GCONF      = 0x00;
@@ -287,6 +315,8 @@ class tmcSpiDriver {
     unsigned long _cc_vsense    = 0UL; // default=0,   range 0 to 1  (0 for high sensitivity, 1 for low sensitivity @ 50% current setting)
     unsigned long _cc_vhighfs   = 0UL; // default=0,   range 0 to 1  (Enables switch to full-step when VHIGH (THIGH?) is exceeded)
     unsigned long _cc_vhighchm  = 0UL; // default=0,   range 0 to 1  (Enables switch to fast-decay mode VHIGH (THIGH?) is exceeded)
+    unsigned long _cc_intpol    = 1UL; // default=1,   range 0 to 1  (Enables 256x interpolation)
+    
     // TMC5160 specific
     unsigned long _cc_tpfd      = 4UL; // default=4,   range 0 to 15 (Passive fast decay time mid-range resonance dampening)
 

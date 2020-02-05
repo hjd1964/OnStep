@@ -48,9 +48,21 @@
 #endif
 
 //--------------------------------------------------------------------------------------------------
-// General purpose initialize for HAL
+// Nanoseconds delay function
+unsigned int _nanosPerPass=1;
+void delayNanoseconds(unsigned int n) {
+  unsigned int np=(n/_nanosPerPass);
+  for (unsigned int i=0; i<np; i++) { __asm__ volatile ("nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t"); }
+}
 
+//--------------------------------------------------------------------------------------------------
+// General purpose initialize for HAL
 void HAL_Init(void) {
+  // calibrate delayNanoseconds()
+  uint32_t startTime,npp;
+  cli(); startTime=micros(); delayNanoseconds(65535); npp=micros(); sei(); npp=((int32_t)(npp-startTime)*1000)/63335;
+  if (npp<1) npp=1; if (npp>2000) npp=2000; _nanosPerPass=npp;
+
   // Make sure that debug pins are not reserved, and therefore usable as GPIO
   disableDebugPorts();
 }
@@ -190,19 +202,42 @@ void QuickSetIntervalAxis2(uint32_t r) {
 }
 
 // --------------------------------------------------------------------------------------------------
-// Fast port writing help
+// Fast port writing help, etc.
 
 #define CLR(x,y) (x&=(~(1<<y)))
 #define SET(x,y) (x|=(1<<y))
 #define TGL(x,y) (x^=(1<<y))
 
 // We use standard #define's to do **fast** digitalWrite's to the step and dir pins for the Axis1/2 stepper drivers
-#define Axis1StepPinHIGH digitalWriteFast(Axis1StepPin, HIGH)
-#define Axis1StepPinLOW digitalWriteFast(Axis1StepPin, LOW)
-#define Axis1DirPinHIGH digitalWriteFast(Axis1DirPin, HIGH)
-#define Axis1DirPinLOW digitalWriteFast(Axis1DirPin, LOW)
+#define a1STEP_H digitalWriteFast(Axis1_STEP, HIGH)
+#define a1STEP_L digitalWriteFast(Axis1_STEP, LOW)
+#define a1DIR_H digitalWriteFast(Axis1_DIR, HIGH)
+#define a1DIR_L digitalWriteFast(Axis1_DIR, LOW)
 
-#define Axis2StepPinHIGH digitalWriteFast(Axis2StepPin, HIGH)
-#define Axis2StepPinLOW digitalWriteFast(Axis2StepPin, LOW)
-#define Axis2DirPinHIGH digitalWriteFast(Axis2DirPin, HIGH)
-#define Axis2DirPinLOW digitalWriteFast(Axis2DirPin, LOW)
+#define a2STEP_H digitalWriteFast(Axis2_STEP, HIGH)
+#define a2STEP_L digitalWriteFast(Axis2_STEP, LOW)
+#define a2DIR_H digitalWriteFast(Axis2_DIR, HIGH)
+#define a2DIR_L digitalWriteFast(Axis2_DIR, LOW)
+
+#define delaySPI delayNanoseconds(500)
+#define delaySPI_SHORT delayNanoseconds(500)
+
+#define a1CS_H digitalWriteFast(Axis1_M2,HIGH)
+#define a1CS_L digitalWriteFast(Axis1_M2,LOW)
+#define a1CLK_H digitalWriteFast(Axis1_M1,HIGH)
+#define a1CLK_L digitalWriteFast(Axis1_M1,LOW)
+#define a1SDO_H digitalWriteFast(Axis1_M0,HIGH)
+#define a1SDO_L digitalWriteFast(Axis1_M0,LOW)
+#define a1M0(P) digitalWriteFast(Axis1_M0,(P))
+#define a1M1(P) digitalWriteFast(Axis1_M1,(P))
+#define a1M2(P) digitalWriteFast(Axis1_M2,(P))
+
+#define a2CS_H digitalWriteFast(Axis2_M2,HIGH)
+#define a2CS_L digitalWriteFast(Axis2_M2,LOW)
+#define a2CLK_H digitalWriteFast(Axis2_M1,HIGH)
+#define a2CLK_L digitalWriteFast(Axis2_M1,LOW)
+#define a2SDO_H digitalWriteFast(Axis2_M0,HIGH)
+#define a2SDO_L digitalWriteFast(Axis2_M0,LOW)
+#define a2M0(P) digitalWriteFast(Axis2_M0,(P))
+#define a2M1(P) digitalWriteFast(Axis2_M1,(P))
+#define a2M2(P) digitalWriteFast(Axis2_M2,(P))

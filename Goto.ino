@@ -387,7 +387,9 @@ CommandErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTar
   disablePec();
 #endif
   soundAlert();
-  stepperModeGoto();
 
+  axis1DriverGotoMode();
+  axis2DriverGotoMode();
+  
   return CE_NONE;
 }

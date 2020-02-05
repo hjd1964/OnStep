@@ -113,20 +113,18 @@ done: {}
 
 void timerSupervisor(bool isCentiSecond) {
   if (trackingState != TrackingMoveTo) {
-    // automatic rate calculation HA
-    long calculatedTimerRateAxis1;
 
     // guide rate acceleration/deceleration and control
     if (guideDirAxis1) {
       if ((fabs(guideTimerRateAxis1) < 10.0) && (fabs(guideTimerRateAxis1A) < 10.0)) {
         // slow speed guiding, no acceleration
-        guideTimerRateAxis1A=guideTimerRateAxis1; 
+        guideTimerRateAxis1A=guideTimerRateAxis1;
         // break
         if (guideDirAxis1 == 'b') { guideDirAxis1=0; guideTimerRateAxis1=0.0; guideTimerRateAxis1A=0.0; }
       } else {
         if ((isCentiSecond) && (!inbacklashAxis1)) {
           // high speed guiding
-          stepperModeGoto();
+          axis1DriverGotoMode();
 
           // at higher step rates where torque is reduced make smaller rate changes
           double r=1.2-sqrt((abs(guideTimerRateAxis1A)/slewRateX));
@@ -144,7 +142,7 @@ void timerSupervisor(bool isCentiSecond) {
   
           // stop guiding
           if (guideDirAxis1 == 'b') {
-            if (abs(guideTimerRateAxis1A) < 0.001) { guideDirAxis1=0; lastGuideDirAxis1=0; guideTimerRateAxis1=0.0; guideTimerRateAxis1A=0.0; guideDirChangeTimerAxis1=0; if (!guideDirAxis2) stepperModeTracking(false); }
+            if (abs(guideTimerRateAxis1A) < 0.001) { guideDirAxis1=0; lastGuideDirAxis1=0; guideTimerRateAxis1=0.0; guideTimerRateAxis1A=0.0; guideDirChangeTimerAxis1=0; axis1DriverTrackingMode(false); }
           }
         }
       }
@@ -154,13 +152,10 @@ void timerSupervisor(bool isCentiSecond) {
     double timerRateAxis1B=guideTimerRateAxis1A+pecTimerRateAxis1+timerRateAxis1A;
     if (timerRateAxis1B < -0.00001) { timerRateAxis1B=fabs(timerRateAxis1B); cli(); timerDirAxis1=-1; sei(); } else 
       if (timerRateAxis1B > 0.00001) { cli(); timerDirAxis1=1; sei(); } else { cli(); timerDirAxis1=0; sei(); timerRateAxis1B=1.0; }
-    calculatedTimerRateAxis1=round((double)SiderealRate/timerRateAxis1B);
+    long calculatedTimerRateAxis1=round((double)SiderealRate/timerRateAxis1B);
     // remember our "running" rate and only update the actual rate when it changes
     if (runTimerRateAxis1 != calculatedTimerRateAxis1) { timerRateAxis1=calculatedTimerRateAxis1; runTimerRateAxis1=calculatedTimerRateAxis1; }
-
-    // automatic rate calculation Dec
-    long calculatedTimerRateAxis2;
-
+ 
     // guide rate acceleration/deceleration
     if (guideDirAxis2) {
       if ((fabs(guideTimerRateAxis2) < 10.0) && (fabs(guideTimerRateAxis2A) < 10.0)) {
@@ -171,7 +166,7 @@ void timerSupervisor(bool isCentiSecond) {
       } else {
         if ((isCentiSecond) && (!inbacklashAxis2)) {
           // use acceleration
-          stepperModeGoto();
+          axis2DriverGotoMode();
   
           // at higher step rates where torque is reduced make smaller rate changes
           double r=1.2-sqrt((abs(guideTimerRateAxis2A)/slewRateX));
@@ -189,7 +184,7 @@ void timerSupervisor(bool isCentiSecond) {
   
           // stop guiding
           if (guideDirAxis2 == 'b') {
-            if (abs(guideTimerRateAxis2A) < 0.001) { guideDirAxis2=0; lastGuideDirAxis2=0; guideTimerRateAxis2=0.0; guideTimerRateAxis2A=0.0; guideDirChangeTimerAxis2=0; if (!guideDirAxis1) stepperModeTracking(false); }
+            if (abs(guideTimerRateAxis2A) < 0.001) { guideDirAxis2=0; lastGuideDirAxis2=0; guideTimerRateAxis2=0.0; guideTimerRateAxis2A=0.0; guideDirChangeTimerAxis2=0; axis2DriverTrackingMode(false); }
           }
         }
       }
@@ -199,7 +194,7 @@ void timerSupervisor(bool isCentiSecond) {
     double timerRateAxis2B=guideTimerRateAxis2A+timerRateAxis2A;
     if (timerRateAxis2B < -0.0001) { timerRateAxis2B=fabs(timerRateAxis2B); cli(); timerDirAxis2=-1; sei(); } else
       if (timerRateAxis2B > 0.0001) { cli(); timerDirAxis2=1; sei(); } else { cli(); timerDirAxis2=0; sei(); timerRateAxis2B=1.0; }
-    calculatedTimerRateAxis2=round((double)SiderealRate/timerRateAxis2B);
+    long calculatedTimerRateAxis2=round((double)SiderealRate/timerRateAxis2B);
     // remember our "running" rate and only update the actual rate when it changes
     if (runTimerRateAxis2 != calculatedTimerRateAxis2) { timerRateAxis2=calculatedTimerRateAxis2; runTimerRateAxis2=calculatedTimerRateAxis2; }
   }
@@ -212,14 +207,12 @@ void timerSupervisor(bool isCentiSecond) {
   // override rate during backlash compensation
   if (inbacklashAxis2) thisTimerRateAxis2=timerRateBacklashAxis2;
 
-  // trigger Goto step mode, rapid acceleration (low SLEW_ACCELERATION_DIST) can leave too little time
-  // until the home position arrives to actually switch to tracking micro-step mode. the larger step size
-  // then causes backlash compensation to activate which in-turn keeps goto micro-step mode from turning off
+  // trigger goto step mode
   #if defined(AXIS1_DRIVER_CODE) && defined(AXIS1_DRIVER_CODE_GOTO) && MODE_SWITCH_BEFORE_SLEW == OFF
-  gotoRateAxis1=(thisTimerRateAxis1 < 128*16L);   // activate < 128us rate
+  gotoRateAxis1=(thisTimerRateAxis1 < AXIS1_DRIVER_SWITCH_RATE);
   #endif
   #if defined(AXIS2_DRIVER_CODE) && defined(AXIS2_DRIVER_CODE_GOTO) && MODE_SWITCH_BEFORE_SLEW == OFF
-  gotoRateAxis2=(thisTimerRateAxis2 < 128*16L);   // activate < 128us rate
+  gotoRateAxis2=(thisTimerRateAxis2 < AXIS2_DRIVER_SWITCH_RATE);
   #endif
 
   // set the rates
@@ -242,7 +235,7 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
   if (slowAxis1Rep > 1) { slowAxis1Cnt++; if (slowAxis1Cnt%slowAxis1Rep != 0) goto done; }
 
 #if STEP_WAVE_FORM != DEDGE
-  Axis1StepPinReset;
+  a1CLEAR;
 #endif
 
 #if STEP_WAVE_FORM == SQUARE
@@ -254,14 +247,11 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
   // switch micro-step mode
   if (gotoModeAxis1 != gotoRateAxis1) {
     // only when at an allowed position
-    if ((gotoModeAxis1) || ((posAxis1+blAxis1)%AXIS1_DRIVER_STEP_GOTO == 0)) {
-      // switch mode
-      if (gotoModeAxis1) { stepAxis1=1; AXIS1_DRIVER_CODE_NEXT=AXIS1_DRIVER_CODE; gotoModeAxis1=false; } else { stepAxis1=AXIS1_DRIVER_STEP_GOTO; AXIS1_DRIVER_CODE_NEXT=AXIS1_DRIVER_CODE_GOTO; gotoModeAxis1=true; }
-      digitalWrite(Axis1_M0,(AXIS1_DRIVER_CODE_NEXT & 1));
-      digitalWrite(Axis1_M1,(AXIS1_DRIVER_CODE_NEXT>>1 & 1));
-      #ifndef AXIS1_DRIVER_DISABLE_M2
-        digitalWrite(Axis1_M2,(AXIS1_DRIVER_CODE_NEXT>>2 & 1));
-      #endif
+    if (gotoModeAxis1 || (posAxis1+blAxis1)%AXIS1_DRIVER_STEP_GOTO == 0) {
+#if AXIS1_DRIVER_MODEL == TMC_SPI
+      if (!_spiInUse)
+#endif
+      { if (gotoModeAxis1) { gotoModeAxis1=false; stepAxis1=1; axis1DriverTrackingFast(); } else { gotoModeAxis1=true; stepAxis1=AXIS1_DRIVER_STEP_GOTO; axis1DriverGotoFast(); } }
     }
   }
 #endif
@@ -278,9 +268,9 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
     // set direction
     if (posAxis1 < (long)targetAxis1.part.m) dirAxis1=1; else dirAxis1=0;
     #if AXIS1_DRIVER_REVERSE == ON
-      if (defaultDirAxis1 == dirAxis1) Axis1DirPinLOW; else Axis1DirPinHIGH;
+      if (defaultDirAxis1 == dirAxis1) a1DIR_L; else a1DIR_H;
     #else
-      if (defaultDirAxis1 == dirAxis1) Axis1DirPinHIGH; else Axis1DirPinLOW;
+      if (defaultDirAxis1 == dirAxis1) a1DIR_H; else a1DIR_L;
     #endif
   
     // telescope moves WEST with the sky, blAxis1 is the amount of EAST backlash
@@ -295,7 +285,7 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
     }
     clearAxis1=false;
   } else { 
-    if (takeStepAxis1) Axis1StepPinStep;
+    if (takeStepAxis1) a1STEP;
     clearAxis1=true;
 
     QuickSetIntervalAxis1(nextAxis1Rate*stepAxis1);
@@ -303,9 +293,9 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
 #else
 #if STEP_WAVE_FORM == DEDGE
     toggleStateAxis1++;
-    if (toggleStateAxis1%2 == 0) Axis1StepPinReset; else Axis1StepPinStep;
+    if (toggleStateAxis1%2 == 0) a1CLEAR; else a1STEP;
 #else
-    Axis1StepPinStep;
+    a1STEP;
 #endif
   }
 #endif
@@ -325,7 +315,7 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
   if (slowAxis2Rep > 1) { slowAxis2Cnt++; if (slowAxis2Cnt%slowAxis2Rep != 0) goto done; }
 
 #if STEP_WAVE_FORM != DEDGE
-  Axis2StepPinReset;
+  a2CLEAR;
 #endif
 
 #if STEP_WAVE_FORM == SQUARE
@@ -338,13 +328,10 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
   if (gotoModeAxis2 != gotoRateAxis2) {
     // only when at an allowed position
     if ((gotoModeAxis2) || ((posAxis2+blAxis2)%AXIS2_DRIVER_STEP_GOTO == 0)) {
-      // switch mode
-      if (gotoModeAxis2) { stepAxis2=1; AXIS2_DRIVER_CODE_NEXT=AXIS2_DRIVER_CODE; gotoModeAxis2=false; } else { stepAxis2=AXIS2_DRIVER_STEP_GOTO; AXIS2_DRIVER_CODE_NEXT=AXIS2_DRIVER_CODE_GOTO; gotoModeAxis2=true; }
-      digitalWrite(Axis2_M0,(AXIS2_DRIVER_CODE_NEXT & 1));
-      digitalWrite(Axis2_M1,(AXIS2_DRIVER_CODE_NEXT>>1 & 1));
-      #ifndef AXIS2_DRIVER_DISABLE_M2
-        digitalWrite(Axis2_M2,(AXIS2_DRIVER_CODE_NEXT>>2 & 1));
-      #endif
+#if AXIS2_DRIVER_MODEL == TMC_SPI
+      if (!_spiInUse)
+#endif
+      { if (gotoModeAxis2) { gotoModeAxis2=false; stepAxis2=1; axis2DriverTrackingFast(); } else { gotoModeAxis2=true; stepAxis2=AXIS2_DRIVER_STEP_GOTO; axis2DriverGotoFast(); } }
     }
   }
 #endif
@@ -361,9 +348,9 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
     // set direction
     if (posAxis2 < (long)targetAxis2.part.m) dirAxis2=1; else dirAxis2=0;
     #if AXIS2_DRIVER_REVERSE == ON
-      if (defaultDirAxis2 == dirAxis2) Axis2DirPinLOW; else Axis2DirPinHIGH;
+      if (defaultDirAxis2 == dirAxis2) a2DIR_L; else a2DIR_H;
     #else
-      if (defaultDirAxis2 == dirAxis2) Axis2DirPinHIGH; else Axis2DirPinLOW;
+      if (defaultDirAxis2 == dirAxis2) a2DIR_H; else a2DIR_L;
     #endif
    
     // telescope moving toward celestial pole in the sky, blAxis2 is the amount of opposite backlash
@@ -378,7 +365,7 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
     }
     clearAxis2=false;
   } else { 
-    if (takeStepAxis2) Axis2StepPinStep;
+    if (takeStepAxis2) a2STEP;
     clearAxis2=true;
 
     QuickSetIntervalAxis2(nextAxis2Rate*stepAxis2);
@@ -386,9 +373,9 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
 #else
 #if STEP_WAVE_FORM == DEDGE
     toggleStateAxis2++;
-    if (toggleStateAxis2%2 == 0) Axis2StepPinReset; else Axis2StepPinStep;
+    if (toggleStateAxis2%2 == 0) a2CLEAR; else a2STEP;
 #else
-    Axis2StepPinStep;
+    a2STEP;
 #endif
   }
 #endif
