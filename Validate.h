@@ -288,8 +288,8 @@
 
 #ifndef PEC_SENSE
   #error "Configuration (Config.h): Setting PEC_SENSE must be present!"
-#elif PEC_SENSE != OFF && PEC_SENSE != ON && PEC_SENSE != ON_PULLUP && PEC_SENSE != ON_PULLDOWN
-  #error "Configuration (Config.h): Setting PEC_SENSE invalid, use OFF, ON, ON_PULLUP, or ON_PULLDOWN only."
+#elif (PEC_SENSE != OFF && PEC_SENSE != ON && PEC_SENSE != ON_PULLUP && PEC_SENSE != ON_PULLDOWN) && PEC_SENSE < 0 && PEC_SENSE > 1023
+  #error "Configuration (Config.h): Setting PEC_SENSE invalid, use OFF, ON, ON_PULLUP, ON_PULLDOWN or a number between 0 and 1023 (0 to 3.3V or 0 to 5V) only."
 #endif
 
 #ifndef PEC_SENSE_STATE
