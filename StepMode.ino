@@ -294,7 +294,7 @@ void axis2DriverGotoMode() {
   #endif
 #endif
 
-#endif // traditional stepper drivers
+#endif
 
 // ---------------------------------------------------------------------------------------------------
 // basic driver control functions
