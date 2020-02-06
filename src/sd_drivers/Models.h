@@ -58,6 +58,10 @@
 #define STEALTHCHOP 3
 #define SPREADCYCLE 4
 
+// Wait Times (milliseconds)
+#define WAIT_DRIVER_ENABLE 5
+#define WAIT_MODE_SWITCH 3
+
 // ------------------------------------------------------------------------------------------------------------------------
 // search function
 

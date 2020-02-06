@@ -291,12 +291,15 @@ void axis2DriverGotoMode() {
 
 #endif // traditional stepper drivers
 
+// ---------------------------------------------------------------------------------------------------
+// basic driver control functions
+
 void enableStepperDrivers() {
   // enable the stepper drivers
   if (axis1Enabled == false) {
     digitalWrite(Axis1_EN,AXIS1_DRIVER_ENABLE); axis1Enabled=true;
     digitalWrite(Axis2_EN,AXIS2_DRIVER_ENABLE); axis2Enabled=true;
-    delay(5); // enable or coming out of sleep on DRV8825 or A4988 is done in < 2ms
+    delay(WAIT_DRIVER_ENABLE);
   }
 }
 
@@ -305,6 +308,6 @@ void disableStepperDrivers() {
   if (axis1Enabled == true) {
     digitalWrite(Axis1_EN,AXIS1_DRIVER_DISABLE); axis1Enabled=false;
     digitalWrite(Axis2_EN,AXIS2_DRIVER_DISABLE); axis2Enabled=false;
-    delay(5); // enable or coming out of sleep on DRV8825 or A4988 is done in < 2ms
+    delay(WAIT_DRIVER_ENABLE);
   }
 }
