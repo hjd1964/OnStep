@@ -171,10 +171,8 @@ void PresetTimerInterval(long iv, float TPSM, volatile uint32_t *nextRate, volat
 #define a2DIR_H SET(Axis2_DirPORT, Axis2_DirBIT)
 #define a2DIR_L CLR(Axis2_DirPORT, Axis2_DirBIT)
 
-//#define delaySPI __asm__ volatile ("nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t")
-//#define delaySPI_SHORT __asm__ volatile ("nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t")
-#define delaySPI __asm__ volatile ("nop\n\t" "nop\n\t")
-#define delaySPI_SHORT
+// fast bit-banged SPI should hit an ~1 MHz bitrate for TMC drivers
+#define delaySPI
 
 #define a1CS_H SET(Axis1_M2PORT, Axis1_M2BIT)
 #define a1CS_L CLR(Axis1_M2PORT, Axis1_M2BIT)

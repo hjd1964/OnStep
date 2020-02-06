@@ -27,7 +27,6 @@ void StepperModeTrackingInit() {
   disableStepperDrivers();
 }
 
-#if AXIS1_DRIVER_MODEL == TMC_SPI // TMC SPI s/d stepper drivers
 #if AXIS1_DRIVER_MODEL == TMC_SPI
 // -----------------------------------------------------------------------------------
 // TMC SPI s/d stepper drivers
@@ -119,22 +118,22 @@ void axis2DriverGotoMode() {
       _a1tg1 = (t      ) & 0xff;
     }
     IRAM_ATTR void axis1DriverTrackingFast() {
-      a1CS_L; delaySPI_SHORT;
-      for(uint8_t i=128; i >= 1; i/=2) { a1CLK_L; if ((0x6C|0x80)&i) a1SDO_H; else a1SDO_L; delaySPI_SHORT; a1CLK_H; delaySPI; }
-      for(uint8_t i=128; i >= 1; i/=2) { a1CLK_L; if ((_a1t4)&i    ) a1SDO_H; else a1SDO_L; delaySPI_SHORT; a1CLK_H; delaySPI; }
-      for(uint8_t i=128; i >= 1; i/=2) { a1CLK_L; if ((_a1tg3)&i   ) a1SDO_H; else a1SDO_L; delaySPI_SHORT; a1CLK_H; delaySPI; }
-      for(uint8_t i=128; i >= 1; i/=2) { a1CLK_L; if ((_a1tg2)&i   ) a1SDO_H; else a1SDO_L; delaySPI_SHORT; a1CLK_H; delaySPI; }
-      for(uint8_t i=128; i >= 1; i/=2) { a1CLK_L; if ((_a1tg1)&i   ) a1SDO_H; else a1SDO_L; delaySPI_SHORT; a1CLK_H; delaySPI; }
-      a1CS_H; delaySPI_SHORT;
+      a1CS_L; delaySPI;
+      for(uint8_t i=128; i >= 1; i/=2) { a1CLK_L; if ((0x6C|0x80)&i) a1SDO_H; else a1SDO_L; delaySPI; a1CLK_H; delaySPI; }
+      for(uint8_t i=128; i >= 1; i/=2) { a1CLK_L; if ((_a1t4)&i    ) a1SDO_H; else a1SDO_L; delaySPI; a1CLK_H; delaySPI; }
+      for(uint8_t i=128; i >= 1; i/=2) { a1CLK_L; if ((_a1tg3)&i   ) a1SDO_H; else a1SDO_L; delaySPI; a1CLK_H; delaySPI; }
+      for(uint8_t i=128; i >= 1; i/=2) { a1CLK_L; if ((_a1tg2)&i   ) a1SDO_H; else a1SDO_L; delaySPI; a1CLK_H; delaySPI; }
+      for(uint8_t i=128; i >= 1; i/=2) { a1CLK_L; if ((_a1tg1)&i   ) a1SDO_H; else a1SDO_L; delaySPI; a1CLK_H; delaySPI; }
+      a1CS_H; delaySPI;
     }
     IRAM_ATTR void axis1DriverGotoFast() {
-      a1CS_L; delaySPI_SHORT;
-      for(uint8_t i=128; i >= 1; i/=2) { a1CLK_L; if ((0x6C|0x80)&i) a1SDO_H; else a1SDO_L; delaySPI_SHORT; a1CLK_H; delaySPI; }
-      for(uint8_t i=128; i >= 1; i/=2) { a1CLK_L; if ((_a1g4)&i    ) a1SDO_H; else a1SDO_L; delaySPI_SHORT; a1CLK_H; delaySPI; }
-      for(uint8_t i=128; i >= 1; i/=2) { a1CLK_L; if ((_a1tg3)&i   ) a1SDO_H; else a1SDO_L; delaySPI_SHORT; a1CLK_H; delaySPI; }
-      for(uint8_t i=128; i >= 1; i/=2) { a1CLK_L; if ((_a1tg2)&i   ) a1SDO_H; else a1SDO_L; delaySPI_SHORT; a1CLK_H; delaySPI; }
-      for(uint8_t i=128; i >= 1; i/=2) { a1CLK_L; if ((_a1tg1)&i   ) a1SDO_H; else a1SDO_L; delaySPI_SHORT; a1CLK_H; delaySPI; }
-      a1CS_H; delaySPI_SHORT;
+      a1CS_L; delaySPI;
+      for(uint8_t i=128; i >= 1; i/=2) { a1CLK_L; if ((0x6C|0x80)&i) a1SDO_H; else a1SDO_L; delaySPI; a1CLK_H; delaySPI; }
+      for(uint8_t i=128; i >= 1; i/=2) { a1CLK_L; if ((_a1g4)&i    ) a1SDO_H; else a1SDO_L; delaySPI; a1CLK_H; delaySPI; }
+      for(uint8_t i=128; i >= 1; i/=2) { a1CLK_L; if ((_a1tg3)&i   ) a1SDO_H; else a1SDO_L; delaySPI; a1CLK_H; delaySPI; }
+      for(uint8_t i=128; i >= 1; i/=2) { a1CLK_L; if ((_a1tg2)&i   ) a1SDO_H; else a1SDO_L; delaySPI; a1CLK_H; delaySPI; }
+      for(uint8_t i=128; i >= 1; i/=2) { a1CLK_L; if ((_a1tg1)&i   ) a1SDO_H; else a1SDO_L; delaySPI; a1CLK_H; delaySPI; }
+      a1CS_H; delaySPI;
     }
   #endif
   #ifdef AXIS2_DRIVER_CODE_GOTO
@@ -149,22 +148,22 @@ void axis2DriverGotoMode() {
       _a2tg1 = (t      ) & 0xff;
     }
     IRAM_ATTR void axis2DriverTrackingFast() {
-      a2CS_L; delaySPI_SHORT;
-      for(uint8_t i=128; i >= 1; i/=2) { a2CLK_L; if ((0x6C|0x80)&i) a2SDO_H; else a2SDO_L; delaySPI_SHORT; a2CLK_H; delaySPI; }
-      for(uint8_t i=128; i >= 1; i/=2) { a2CLK_L; if ((_a2t4)&i    ) a2SDO_H; else a2SDO_L; delaySPI_SHORT; a2CLK_H; delaySPI; }
-      for(uint8_t i=128; i >= 1; i/=2) { a2CLK_L; if ((_a2tg3)&i   ) a2SDO_H; else a2SDO_L; delaySPI_SHORT; a2CLK_H; delaySPI; }
-      for(uint8_t i=128; i >= 1; i/=2) { a2CLK_L; if ((_a2tg2)&i   ) a2SDO_H; else a2SDO_L; delaySPI_SHORT; a2CLK_H; delaySPI; }
-      for(uint8_t i=128; i >= 1; i/=2) { a2CLK_L; if ((_a2tg1)&i   ) a2SDO_H; else a2SDO_L; delaySPI_SHORT; a2CLK_H; delaySPI; }
-      a2CS_H; delaySPI_SHORT;
+      a2CS_L; delaySPI;
+      for(uint8_t i=128; i >= 1; i/=2) { a2CLK_L; if ((0x6C|0x80)&i) a2SDO_H; else a2SDO_L; delaySPI; a2CLK_H; delaySPI; }
+      for(uint8_t i=128; i >= 1; i/=2) { a2CLK_L; if ((_a2t4)&i    ) a2SDO_H; else a2SDO_L; delaySPI; a2CLK_H; delaySPI; }
+      for(uint8_t i=128; i >= 1; i/=2) { a2CLK_L; if ((_a2tg3)&i   ) a2SDO_H; else a2SDO_L; delaySPI; a2CLK_H; delaySPI; }
+      for(uint8_t i=128; i >= 1; i/=2) { a2CLK_L; if ((_a2tg2)&i   ) a2SDO_H; else a2SDO_L; delaySPI; a2CLK_H; delaySPI; }
+      for(uint8_t i=128; i >= 1; i/=2) { a2CLK_L; if ((_a2tg1)&i   ) a2SDO_H; else a2SDO_L; delaySPI; a2CLK_H; delaySPI; }
+      a2CS_H; delaySPI;
     }
     IRAM_ATTR void axis2DriverGotoFast() {
-      a2CS_L; delaySPI_SHORT;
-      for(uint8_t i=128; i >= 1; i/=2) { a2CLK_L; if ((0x6C|0x80)&i) a2SDO_H; else a2SDO_L; delaySPI_SHORT; a2CLK_H; delaySPI; }
-      for(uint8_t i=128; i >= 1; i/=2) { a2CLK_L; if ((_a2g4)&i    ) a2SDO_H; else a2SDO_L; delaySPI_SHORT; a2CLK_H; delaySPI; }
-      for(uint8_t i=128; i >= 1; i/=2) { a2CLK_L; if ((_a2tg3)&i   ) a2SDO_H; else a2SDO_L; delaySPI_SHORT; a2CLK_H; delaySPI; }
-      for(uint8_t i=128; i >= 1; i/=2) { a2CLK_L; if ((_a2tg2)&i   ) a2SDO_H; else a2SDO_L; delaySPI_SHORT; a2CLK_H; delaySPI; }
-      for(uint8_t i=128; i >= 1; i/=2) { a2CLK_L; if ((_a2tg1)&i   ) a2SDO_H; else a2SDO_L; delaySPI_SHORT; a2CLK_H; delaySPI; }
-      a2CS_H; delaySPI_SHORT;
+      a2CS_L; delaySPI;
+      for(uint8_t i=128; i >= 1; i/=2) { a2CLK_L; if ((0x6C|0x80)&i) a2SDO_H; else a2SDO_L; delaySPI; a2CLK_H; delaySPI; }
+      for(uint8_t i=128; i >= 1; i/=2) { a2CLK_L; if ((_a2g4)&i    ) a2SDO_H; else a2SDO_L; delaySPI; a2CLK_H; delaySPI; }
+      for(uint8_t i=128; i >= 1; i/=2) { a2CLK_L; if ((_a2tg3)&i   ) a2SDO_H; else a2SDO_L; delaySPI; a2CLK_H; delaySPI; }
+      for(uint8_t i=128; i >= 1; i/=2) { a2CLK_L; if ((_a2tg2)&i   ) a2SDO_H; else a2SDO_L; delaySPI; a2CLK_H; delaySPI; }
+      for(uint8_t i=128; i >= 1; i/=2) { a2CLK_L; if ((_a2tg1)&i   ) a2SDO_H; else a2SDO_L; delaySPI; a2CLK_H; delaySPI; }
+      a2CS_H; delaySPI;
     }
   #endif
 #endif
@@ -189,7 +188,7 @@ void axis1DriverTrackingMode(boolean init) {
     #ifndef AXIS1_DRIVER_DISABLE_M2
       if ((AXIS1_DRIVER_CODE & 0b100000) == 0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,bitRead(AXIS1_DRIVER_CODE,2)); } else { pinMode(Axis1_M2,INPUT); }
     #endif
-    if (MODE_SWITCH_SLEEP == ON) delay(3);
+    if (MODE_SWITCH_SLEEP == ON) delay(WAIT_MODE_SWITCH);
     sei();
   }
 #endif
@@ -211,7 +210,7 @@ void axis2DriverTrackingMode(boolean init) {
     #ifndef AXIS2_DRIVER_DISABLE_M2
       if ((AXIS2_DRIVER_CODE & 0b100000) == 0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,bitRead(AXIS2_DRIVER_CODE,2)); } else { pinMode(Axis2_M2,INPUT); }
     #endif
-    if (MODE_SWITCH_SLEEP == ON) delay(3);
+    if (MODE_SWITCH_SLEEP == ON) delay(WAIT_MODE_SWITCH);
     sei();
   }
 #endif
@@ -231,7 +230,7 @@ void axis1DriverGotoMode() {
   #ifndef AXIS1_DRIVER_DISABLE_M2
     if ((AXIS1_DRIVER_CODE_GOTO & 0b100000) == 0) { pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,bitRead(AXIS1_DRIVER_CODE_GOTO,2)); } else { pinMode(Axis1_M2,INPUT); }
   #endif
-  if (MODE_SWITCH_SLEEP == ON) delay(3);
+  if (MODE_SWITCH_SLEEP == ON) delay(WAIT_MODE_SWITCH);
   sei();
 #endif
 }
@@ -250,7 +249,7 @@ void axis2DriverGotoMode() {
   #ifndef AXIS2_DRIVER_DISABLE_M2
     if ((AXIS2_DRIVER_CODE_GOTO & 0b100000) == 0) { pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,bitRead(AXIS2_DRIVER_CODE_GOTO,2)); } else { pinMode(Axis2_M2,INPUT); }
   #endif
-  if (MODE_SWITCH_SLEEP == ON) delay(3);
+  if (MODE_SWITCH_SLEEP == ON) delay(WAIT_MODE_SWITCH);
   sei();
 #endif
 }

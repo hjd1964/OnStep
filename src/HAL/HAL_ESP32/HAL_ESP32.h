@@ -180,8 +180,8 @@ IRAM_ATTR void QuickSetIntervalAxis2(uint32_t r) {
 #define a2DIR_H digitalWrite(Axis2_DIR, HIGH)
 #define a2DIR_L digitalWrite(Axis2_DIR, LOW)
 
+// fast bit-banged SPI should hit an ~1 MHz bitrate for TMC drivers
 #define delaySPI delayNanoseconds(500)
-#define delaySPI_SHORT delayNanoseconds(500)
 
 #define a1CS_H digitalWrite(Axis1_M2,HIGH)
 #define a1CS_L digitalWrite(Axis1_M2,LOW)
