@@ -72,17 +72,6 @@ volatile long timerRateBacklashAxis2    = 0;
 volatile boolean inbacklashAxis2        = false;
 boolean faultAxis2                      = false;
 
-#if AXIS1_DRIVER_MODEL == TMC_SPI
-  #define AXIS1_DRIVER_SWITCH_RATE timerRateBacklashAxis1
-#else
-  #define AXIS1_DRIVER_SWITCH_RATE 128*16L
-#endif
-#if AXIS2_DRIVER_MODEL == TMC_SPI
-  #define AXIS2_DRIVER_SWITCH_RATE timerRateBacklashAxis2
-#else
-  #define AXIS2_DRIVER_SWITCH_RATE 128*16L
-#endif
-
 #define default_tracking_rate 1
 volatile double trackingTimerRateAxis1  = default_tracking_rate;
 volatile double trackingTimerRateAxis2  = default_tracking_rate;
