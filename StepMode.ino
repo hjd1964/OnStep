@@ -28,6 +28,9 @@ void StepperModeTrackingInit() {
 }
 
 #if AXIS1_DRIVER_MODEL == TMC_SPI // TMC SPI s/d stepper drivers
+#if AXIS1_DRIVER_MODEL == TMC_SPI
+// -----------------------------------------------------------------------------------
+// TMC SPI s/d stepper drivers
 
 void driversInitTmcStealthChop() {
   cli();
@@ -166,7 +169,9 @@ void axis2DriverGotoMode() {
   #endif
 #endif
 
-#else // traditional s/d stepper drivers
+#else
+// ---------------------------------------------------------------------------------------------------
+// traditional s/d stepper drivers
 
 boolean _a1trk=false;
 void axis1DriverTrackingMode(boolean init) {
