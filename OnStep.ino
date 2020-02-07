@@ -518,18 +518,13 @@ void loop2() {
   loop_time=this_loop_micros-last_loop_micros;
   if (loop_time > worst_loop_time) worst_loop_time=loop_time;
   last_loop_micros=this_loop_micros;
-  average_loop_time=(average_loop_time*49.0+loop_time)/50.0;
-
-  unsigned long tempMs=millis();
+  average_loop_time=(average_loop_time*49+loop_time)/50;
 
   // 1 SECOND TIMED ------------------------------------------------------------------------------------
+  unsigned long tempMs=millis();
   static unsigned long housekeepingTimer=0;
-  if (housekeepingTimer == 0) {
-    housekeepingTimer = millis();
-  }
-
-  if ((long)(tempMs-housekeepingTimer) > 0) {
-    housekeepingTimer=tempMs+1000UL;
+  if ((long)(tempMs-housekeepingTimer) > 1000L) {
+    housekeepingTimer=tempMs;
 
 #if ROTATOR == ON && MOUNT_TYPE == ALTAZM
     // calculate and set the derotation rate as required
