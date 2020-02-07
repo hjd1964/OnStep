@@ -13,7 +13,7 @@ cb cmdB;
 #ifdef HAL_SERIAL_C_ENABLED
 cb cmdC;
 #endif
-#if ST4_HAND_CONTROL == ON
+#if ST4_HAND_CONTROL == ON && ST4_INTERFACE != OFF
 cb cmdST4;
 #endif
 char _replyX[50]=""; cb cmdX;  // virtual command channel for internal use
@@ -49,7 +49,7 @@ void processCommands() {
 #ifdef HAL_SERIAL_C_ENABLED
     if (SerialC.available() > 0 && !cmdC.ready()) cmdC.add(SerialC.read());
 #endif
-#if ST4_HAND_CONTROL == ON
+#if ST4_HAND_CONTROL == ON && ST4_INTERFACE != OFF
     if (SerialST4.available() > 0 && !cmdST4.ready()) cmdST4.add(SerialST4.read());
 #endif
 
@@ -73,7 +73,7 @@ void processCommands() {
 #ifdef HAL_SERIAL_C_ENABLED
     else if (cmdC.ready()) { strcpy(command,cmdC.getCmd()); strcpy(parameter,cmdC.getParameter()); cmdC.flush(); process_command=COMMAND_SERIAL_C; }
 #endif
-#if ST4_HAND_CONTROL == ON
+#if ST4_HAND_CONTROL == ON && ST4_INTERFACE != OFF
     else if (cmdST4.ready()) { strcpy(command,cmdST4.getCmd()); strcpy(parameter,cmdST4.getParameter()); cmdST4.flush(); process_command=COMMAND_SERIAL_ST4; }
 #endif
     else if (cmdX.ready()) { strcpy(command,cmdX.getCmd()); strcpy(parameter,cmdX.getParameter()); cmdX.flush(); process_command=COMMAND_SERIAL_X; }
@@ -547,7 +547,7 @@ void processCommands() {
 #ifdef HAL_SERIAL_C_ENABLED
         if (process_command == COMMAND_SERIAL_C) e=cmdC.lastError; else
 #endif
-#if ST4_HAND_CONTROL == ON
+#if ST4_HAND_CONTROL == ON && ST4_INTERFACE != OFF
         if (process_command == COMMAND_SERIAL_ST4) e=cmdST4.lastError; else
 #endif
         if (process_command == COMMAND_SERIAL_X) e=cmdX.lastError;
@@ -2131,7 +2131,7 @@ void processCommands() {
       } else
 #endif
 
-#if ST4_HAND_CONTROL == ON
+#if ST4_HAND_CONTROL == ON && ST4_INTERFACE != OFF
       if (process_command == COMMAND_SERIAL_ST4) {
         if (commandError != CE_NULL) cmdST4.lastError=commandError;
         if (strlen(reply) > 0 || cmdST4.checksum) {

@@ -171,7 +171,7 @@ void setup() {
 #ifdef HAL_SERIAL_C_ENABLED
   SerialC.begin(SERIAL_C_BAUD_DEFAULT);
 #endif
-#if ST4_HAND_CONTROL == ON
+#if ST4_HAND_CONTROL == ON && ST4_INTERFACE != OFF
   SerialST4.begin();
 #endif
 
