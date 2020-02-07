@@ -369,9 +369,9 @@ void loop2() {
 #endif
 
   // 1/100 SECOND TIMED --------------------------------------------------------------------------------
-  cli(); long tempLst=lst; sei();
-  if (tempLst != siderealTimer) {
-    siderealTimer=tempLst;
+  cli(); long lstNow=lst; sei();
+  if (lstNow != siderealTimer) {
+    siderealTimer=lstNow;
 
 #ifdef ESP32
     timerSupervisor(true);
@@ -422,13 +422,13 @@ void loop2() {
 #endif
 
     // CALCULATE SOME TRACKING RATES, ETC.
-    if (lst%3 == 0) doFastAltCalc(false);
+    if (lstNow%3 == 0) doFastAltCalc(false);
 #if MOUNT_TYPE == ALTAZM
     // figure out the current Alt/Azm tracking rates
-    if (lst%3 != 0) doHorRateCalc();
+    if (lstNow%3 != 0) doHorRateCalc();
 #else
     // figure out the current refraction compensated tracking rate
-    if ((rateCompensation != RC_NONE) && (lst%3 != 0)) doRefractionRateCalc();
+    if (rateCompensation != RC_NONE && lstNow%3 != 0) doRefractionRateCalc();
 #endif
 
     // SAFETY CHECKS
