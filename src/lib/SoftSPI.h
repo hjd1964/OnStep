@@ -49,7 +49,7 @@ class bbspi {
         digitalWrite(_mosi,bitRead(data_out,i));
         delaySPI;
         digitalWrite(_sck,HIGH);
-        if (_miso >= 0) bitWrite(data_in,i,digitalRead(_miso)); else bitWrite(data_in,i,0);
+        if (_miso >= 0) bitWrite(data_in,i,digitalRead(_miso));
         delaySPI;
       }
       
@@ -65,7 +65,7 @@ class bbspi {
         digitalWrite(_mosi,bitRead(data_out,i));
         delaySPI;
         digitalWrite(_sck,HIGH);
-        if (_miso >= 0) bitWrite(data_in,i,digitalRead(_miso)); else bitWrite(data_in,i,0);
+        if (_miso >= 0) bitWrite(data_in,i,digitalRead(_miso));
         delaySPI;
       }
 
