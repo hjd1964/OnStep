@@ -481,7 +481,7 @@ void loop2() {
     autoPowerDownAxis2();
 #endif
 
-    // UPDATE GPS INFO.
+    // 0.01S POLLING -------------------------------------------------------------------------------------
 #if TIME_LOCATION_SOURCE == GPS
     if (!tls.active && tls.poll()) {
       tls.getSite(latitude,longitude);
@@ -501,7 +501,7 @@ void loop2() {
     UT1=UT1_start+(t2/3600.0);
   }
 
-  // ROTATOR/DEROTATOR/FOCUSERS ------------------------------------------------------------------------
+  // FASTEST POLLING -----------------------------------------------------------------------------------
 #if ROTATOR == ON
   rot.follow();
 #endif
@@ -511,8 +511,6 @@ void loop2() {
 #if FOCUSER2 == ON
   foc2.follow(isSlewing());
 #endif
-
-  // FASTEST POLLING -----------------------------------------------------------------------------------
   if (!isSlewing()) nv.poll();
   
   // WORKLOAD MONITORING -------------------------------------------------------------------------------
@@ -624,8 +622,8 @@ void loop2() {
   #endif
 #endif
 
-    // update weather info
-    if (!isSlewing()) ambient.poll();
+    // SLOW POLLING --------------------------------------------------------------------------------------
+    if (!isSlewing()) ambient.poll(); // update weather info
 
   } else {
     // COMMAND PROCESSING --------------------------------------------------------------------------------
