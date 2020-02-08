@@ -14,14 +14,6 @@ void StepperModeTrackingInit() {
 #endif
   axis1DriverTrackingMode(true);
   axis2DriverTrackingMode(true);
-#if MODE_SWITCH_BEFORE_SLEW == OFF
-  #ifdef AXIS1_DRIVER_CODE_GOTO
-    axis1DriverInitFast();
-  #endif
-  #ifdef AXIS2_DRIVER_CODE_GOTO
-    axis2DriverInitFast();
-  #endif
-#endif
 
   // then disable again
   disableStepperDrivers();
