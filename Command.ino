@@ -506,9 +506,9 @@ void processCommands() {
 //            Returns: sDD*MM'SS.s#
       if (command[1] == 'D')  {
 #ifdef HAL_SLOW_PROCESSOR
-        if (millis()-_coord_t > 500)
+        if ((long)(millis()-_coord_t) > 500)
 #else
-        if (millis()-_coord_t > 50)
+        if ((long)(millis()-_coord_t) > 50)
 #endif
         {
           getEqu(&f,&f1,false);
@@ -601,9 +601,9 @@ void processCommands() {
 //            Returns: HH:MM:SS.ss#
       if (command[1] == 'R')  {
 #ifdef HAL_SLOW_PROCESSOR
-        if (millis()-_coord_t > 500)
+        if ((long)(millis()-_coord_t) > 500)
 #else
-        if (millis()-_coord_t > 50)
+        if ((long)(millis()-_coord_t) > 50)
 #endif
         {
           getEqu(&f,&f1,false);
