@@ -79,7 +79,7 @@
 // TRACKING BEHAVIOUR ------------------------------------------------------------------------------------------------------
 #define TRACK_AUTOSTART               OFF //    OFF, ON Start with tracking enabled.                                          Option
 #define TRACK_REFRACTION_RATE_DEFAULT OFF //    OFF, ON Start w/atmospheric refract. compensation (RA axis/Eq mounts only.)   Option
-#define TRACK_BACKLASH_RATE            25 //     25, n. Where n=2..100 (x sidereal rate) during backlash takeup.              Option
+#define TRACK_BACKLASH_RATE            25 //     25, n. Where n=2..50 (x sidereal rate) during backlash takeup.               Option
                                           //         Too fast motors stall/gears slam or too slow and sluggish in backlash.
 
 // SYNCING BEHAVIOUR -------------------------------------------------------------------------------------------------------
