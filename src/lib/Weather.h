@@ -4,7 +4,8 @@
 #pragma once
 
 #if WEATHER == BME280 || WEATHER == BME280_SPI || WEATHER == BME280_0x76
-  #include <Adafruit_BME280.h>            // https://github.com/adafruit/Adafruit_BME280_Library and https://github.com/adafruit/Adafruit_Sensor
+  #include <Adafruit_BME280.h>            // https://github.com/adafruit/Adafruit_BME280_Library/tree/156a0537d6b21aaab1d1f104a7001a38ca1ffce3
+                                          // and https://github.com/adafruit/Adafruit_Sensor
   #if WEATHER == BME280 || WEATHER == BME280_0x76
     Adafruit_BME280 bme;
   #elif WEATHER == BME280_SPI
