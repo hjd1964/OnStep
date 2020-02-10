@@ -4,7 +4,8 @@
 #pragma once
 
 #if defined(WEATHER_BME280_ON) || defined(WEATHER_BME280) || defined(WEATHER_BME280SPI_ON) || defined(WEATHER_BME280SPI)
-  #include <Adafruit_BME280.h> // https://github.com/adafruit/Adafruit_BME280_Library and https://github.com/adafruit/Adafruit_Sensor
+  #include <Adafruit_BME280.h> // https://github.com/adafruit/Adafruit_BME280_Library/tree/156a0537d6b21aaab1d1f104a7001a38ca1ffce3
+                               // and https://github.com/adafruit/Adafruit_Sensor
   #if defined(WEATHER_BME280SPI_ON)
     Adafruit_BME280 bme(BME280_CS_PIN); // hardware SPI
 //  Adafruit_BME280 bme(BME280_CS_PIN, SSPI_MOSI, SSPI_MISO, SSPI_SCK); // software SPI
