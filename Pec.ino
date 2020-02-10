@@ -18,7 +18,11 @@ long wormRotationPos    = 0;
 long lastWormRotationPos=-1;
 
 void pec() {
+  // write PEC data to EEPROM as needed
+  if (pecAutoRecord > 0) { pecAutoRecord--; nv.update(EE_pecTable+pecAutoRecord,pecBuffer[pecAutoRecord]); }
+ 
   // PEC is only active when we're tracking at the sidereal rate with a guide rate that makes sense
+  if (trackingState != TrackingSidereal || parkStatus != NotParked || ((guideDirAxis1 || guideDirAxis2) && activeGuideRate > GuideRate1x)) { disablePec(); return; }
 
   // keep track of our current step position, and when the step position on the worm wraps during playback
   cli(); long pecPos=(long)targetAxis1.part.m; sei();
@@ -27,6 +31,7 @@ void pec() {
     wormSensedFirst=true;
   #elif PEC_SENSE >= 0
     // for analog sense, with 60 second delay before redetect
+    pecAnalogValue = analogRead(AnalogPecPin)
     long dist; if (wormSensePos > pecPos) dist=wormSensePos-pecPos; else dist=pecPos-wormSensePos;
     if ((dist > StepsPerSecondAxis1*60.0) && (pecAnalogValue > PEC_SENSE)) {
       wormSensePos=pecPos;

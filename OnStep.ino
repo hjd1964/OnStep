@@ -355,14 +355,6 @@ void loop2() {
   ST4();
   if ((trackingState != TrackingMoveTo) && (parkStatus == NotParked)) guide();
 
-#if MOUNT_TYPE != ALTAZM
-  // PERIODIC ERROR CORRECTION -------------------------------------------------------------------------
-  if ((trackingState == TrackingSidereal) && (parkStatus == NotParked) && (!((guideDirAxis1 || guideDirAxis2) && (activeGuideRate > GuideRate1x)))) { 
-    // only active while sidereal tracking with a guide rate that makes sense
-    pec();
-  } else disablePec();
-#endif
-
 #if HOME_SENSE != OFF
   // AUTOMATIC HOMING ----------------------------------------------------------------------------------
   checkHome();
@@ -378,12 +370,8 @@ void loop2() {
 #endif
     
 #if MOUNT_TYPE != ALTAZM
-    // WRITE PERIODIC ERROR CORRECTION TO EEPROM
-    if (pecAutoRecord > 0) {
-      // write PEC table to EEPROM, should do several hundred bytes/second
-      pecAutoRecord--;
-      nv.update(EE_pecTable+pecAutoRecord,pecBuffer[pecAutoRecord]);
-    }
+    // PERIODIC ERROR CORRECTION
+    pec();
 #endif
 
     // FLASH LED DURING SIDEREAL TRACKING
@@ -539,11 +527,6 @@ void loop2() {
     // basic check to see if we're not at home
     if (trackingState != TrackingNone) atHome=false;
 
-#if PEC_SENSE >= 0
-    // analog mode, see if we're on the PEC index
-    if (trackingState == TrackingSidereal) pecAnalogValue = analogRead(AnalogPecPin);
-#endif
-    
 #if PPS_SENSE != OFF
     // update clock via PPS
     if (trackingState == TrackingSidereal) {
