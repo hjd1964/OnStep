@@ -375,11 +375,11 @@ void loop2() {
 #endif
 
     // FLASH LED DURING SIDEREAL TRACKING
-    if (trackingState == TrackingSidereal) {
 #if LED_STATUS == ON
+    if (trackingState == TrackingSidereal) {
       if (siderealTimer%20L == 0L) { if (ledOn) { digitalWrite(LEDnegPin,HIGH); ledOn=false; } else { digitalWrite(LEDnegPin,LOW); ledOn=true; } }
-#endif
     }
+#endif
 
     // SIDEREAL TRACKING DURING GOTOS
     // keeps the target where it's supposed to be while doing gotos
