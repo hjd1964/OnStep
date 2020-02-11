@@ -166,8 +166,8 @@ void moveTo() {
   cli(); timerRateAxis2=temp; sei();
 
   // make sure we're using the tracking mode microstep setting near the end of slew
-  if (distDestAxis1 <= getStepsPerSecondAxis1()*2) axis1DriverTrackingMode(false);
-  if (distDestAxis2 <= getStepsPerSecondAxis2()  ) axis2DriverTrackingMode(false);
+  if (distDestAxis1 <= getStepsPerSecondAxis1()) axis1DriverTrackingMode(false);
+  if (distDestAxis2 <= getStepsPerSecondAxis2()) axis2DriverTrackingMode(false);
 
   // the end of slew doesn't get close enough within 4 seconds force the slew to end
   static unsigned long slewStopTime=0;
