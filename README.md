@@ -3,9 +3,9 @@ OnStep Telescope Controller
 # Important Note
 
 THERE ARE SEVERAL GITHUB BRANCHES OF ONSTEP:
-* THE **RELEASE BRANCHES** ARE WELL TESTED AND WHAT MOST SHOULD USE.  USUALLY THE NEWEST (HIGHEST REVISION) RELEASE IS RECOMMENDED.  NO NEW FEATURES AND ONLY BUG FIXES WHERE NECESSARY AND SAFE.
-* THE **BETA BRANCH**, IF PRESENT, IS A "SNAP-SHOT" OF THE MASTER WHERE WE HAVE REACHED A POINT OF APPARENT STABILITY.  THIS PROVIDES ACCESS TO MOST NEW FEATURES FOR ADVENTUROUS USERS.
-* THE **MASTER BRANCH** IS THE MOST UP TO DATE ONSTEP VERSION, WHERE WE ADD NEW FEATURES.  IT IS THE LEAST WELL TESTED BRANCH AND SHOULD ONLY BE USED BY EXPERIENCED USERS WILLING TO TEST FOR BUGS!
+* The **RELEASE BRANCHES** are well tested and what most should use.  Usually the newest (highest revision) RELEASE is recommended.  No new features are added and only bug fixes where necessary and safe.
+* Tne **BETA BRANCH**, if present, is a "snap-shot" of the MASTER where we have reached a point of apparent stability.  This provides access to most new features for adventurous users.
+* The **MASTER BRANCH** is the most up to date OnStep version; where new features are added.  It is the least well tested branch and should only be user by experienced users willing to test for and report bugs.
 
 # What is OnStep?
 OnStep is a computerized telescope goto controller, based on Teensy or
