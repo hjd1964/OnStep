@@ -33,7 +33,7 @@
  */
  
 #define OETHS
-#define Product "OnEth"
+#define Product "Ethernet Server"
 #define FirmwareDate          __DATE__
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"

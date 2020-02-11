@@ -32,7 +32,7 @@
  *
  */
 
-#define Product "OnEsp"
+#define Product "WiFi Server"
 #define FirmwareDate          __DATE__
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"

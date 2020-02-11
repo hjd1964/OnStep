@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------------
-// Wifi setup
+// Wifi Setup
 
 const char html_wifiSerial[] PROGMEM =
 "<b>" L_WIFI_PERFORMANCE ":</b><br/>"
