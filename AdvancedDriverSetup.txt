@@ -29,7 +29,6 @@
 
 #define MODE_SWITCH_BEFORE_SLEW       OFF //    OFF, Applies mode settings during slew at 128uS/step speeds.                  Option,*
                                           //         ON Applies mode settings before/after the slew.
-                                          //         TMC_SPI Applies mode settings for SSS TMC2130/5160 using SPI interface.
 #define MODE_SWITCH_SLEEP             OFF //    OFF, ON. Mode switch before/after slew insert 3ms delay before drivers step.  Option,*
 
 #define AXISn_DRIVER_DECAY_MODE       OFF //    OFF, HIGH, LOW, OPEN, SPREADCYCLE, STEALTHCHOP.                               Option,*
