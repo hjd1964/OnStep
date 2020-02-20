@@ -31,7 +31,12 @@
 #endif
 
 #if LED_RETICLE == ON
-  // dedicated pin
+  #if ASSIGNED_AUX3 != PIN_NOT_ASSIGNED
+    #error "Configuration (Config.h): LED_RETICLE enabled but Aux3 is already in use, choose one feature on Aux3"
+  #else
+    #undef ASSIGNED_AUX3
+    #define ASSIGNED_AUX3 PIN_DEDICATED
+  #endif
 #endif
 
 #if BUZZER == ON
@@ -44,7 +49,12 @@
 #endif
 
 #if PPS_SENSE == ON
-  // dedicated pin
+  #if ASSIGNED_AUX4 != PIN_NOT_ASSIGNED
+    #error "Configuration (Config.h): PPS_SENSE enabled but Aux4 is already in use, choose one feature on Aux4"
+  #else
+    #undef ASSIGNED_AUX4
+    #define ASSIGNED_AUX4 PIN_DEDICATED
+  #endif
 #endif
 
 // SENSORS ----------------------------------
@@ -53,7 +63,12 @@
 #endif
 
 #if TELESCOPE_TEMPERATURE == DS1820
-  // dedicated pin
+  #if ASSIGNED_AUX4 != PIN_NOT_ASSIGNED
+    #error "Configuration (Config.h): RTC DS1820 OneWire interface enabled but Aux4 is already in use, choose one feature on Aux4"
+  #else
+    #undef ASSIGNED_AUX4
+    #define ASSIGNED_AUX4 PIN_DEDICATED
+  #endif
 #endif
 
 #if PEC_SENSE == ON || PEC_SENSE == ON_PULLUP || PEC_SENSE == ON_PULLDOWN
@@ -65,7 +80,18 @@
 #endif
 
 #if HOME_SENSE != OFF
-  #error "Configuration (Config.h): HOME_SENSE is not supported on this PINMAP"
+  #if ASSIGNED_AUX3 != PIN_NOT_ASSIGNED
+    #error "Configuration (Config.h): HOME_SENSE enabled but Aux3 is already in use, choose one feature on Aux3"
+  #else
+    #undef ASSIGNED_AUX3
+    #define ASSIGNED_AUX3 PIN_DEDICATED
+  #endif
+  #if ASSIGNED_AUX4 != PIN_NOT_ASSIGNED
+    #error "Configuration (Config.h): HOME_SENSE enabled but Aux4 is already in use, choose one feature on Aux4"
+  #else
+    #undef ASSIGNED_AUX4
+    #define ASSIGNED_AUX4 PIN_DEDICATED
+  #endif
 #endif
 
 // MOTION CONTROL AXIS1/2 -----------------
