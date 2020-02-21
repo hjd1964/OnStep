@@ -95,6 +95,18 @@
 #include "src/lib/Weather.h"
 weather ambient;
 
+// AUTOMATIC DEW HEATERS
+#include "src/lib/Heater.h"
+#if DEW_HEATER1 == ON
+  dewHeaterControl dewHeater1(DEW_HEATER1_PIN);
+#endif
+#if DEW_HEATER2 == ON
+  dewHeaterControl dewHeater2(DEW_HEATER2_PIN);
+#endif
+#if DEW_HEATER3 == ON
+  dewHeaterControl dewHeater3(DEW_HEATER3_PIN);
+#endif
+
 #if ROTATOR == ON
   #include "src/lib/Rotator.h"
   rotator rot;
@@ -487,6 +499,18 @@ void loop2() {
     double t2=(double)((cs-lst_start)/100.0)/1.00273790935;
     // This just needs to be accurate to the nearest second, it's about 10x better
     UT1=UT1_start+(t2/3600.0);
+
+    // AUTOMATIC DEW HEATERS
+#if DEW_HEATER1 == ON
+    dewHeater1.poll(ambient.getTemperature()-ambient.getDewPoint());
+#endif
+#if DEW_HEATER2 == ON
+    dewHeater1.poll(ambient.getTemperature()-ambient.getDewPoint());
+#endif
+#if DEW_HEATER3 == ON
+    dewHeater1.poll(ambient.getTemperature()-ambient.getDewPoint());
+#endif
+
   }
 
   // FASTEST POLLING -----------------------------------------------------------------------------------
