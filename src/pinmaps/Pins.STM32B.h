@@ -34,14 +34,12 @@
 
 #if PINMAP == STM32Blue
 
-#define SPARE_PA13          PA13
-
 // The multi-purpose pins (Aux3..Aux8 can be analog pwm/dac if supported)
 #define Aux0                PC13
 #define Aux1                PB14
 #define Aux2                 PA1
 #define Aux3                 PB8    // Reticle, or Home SW, or accessory; this should also be ok as pwm analog output (w/#define Aux3_Analog)
-#define Aux4                 PB5    // PPS, or Home SW, or OneWire, or accessory
+#define Aux4                PA13    // Home SW, or OneWire, or accessory
 
 #ifndef OneWirePin
   #define OneWirePin        Aux4    // Default Pin for one wire bus
@@ -91,7 +89,7 @@
 
 // The PPS pin is a 3.3V logic input, OnStep measures time between rising edges and
 // adjusts the internal sidereal clock frequency
-#define PpsPin              Aux4    // Pulse Per Second time source, e.g. GPS, RTC
+#define PpsPin               PB5    // Pulse Per Second time source, e.g. GPS, RTC
 
 // For rotator stepper driver
 #define Axis3_EN             PB4    // Enable

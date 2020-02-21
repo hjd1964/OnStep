@@ -49,12 +49,7 @@
 #endif
 
 #if PPS_SENSE == ON
-  #if ASSIGNED_AUX4 != PIN_NOT_ASSIGNED
-    #error "Configuration (Config.h): PPS_SENSE enabled but Aux4 is already in use, choose one feature on Aux4"
-  #else
-    #undef ASSIGNED_AUX4
-    #define ASSIGNED_AUX4 PIN_DEDICATED
-  #endif
+  // dedicated pins
 #endif
 
 // SENSORS ----------------------------------
