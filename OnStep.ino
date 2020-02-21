@@ -98,13 +98,13 @@ weather ambient;
 // AUTOMATIC DEW HEATERS
 #include "src/lib/Heater.h"
 #if DEW_HEATER1 == ON
-  dewHeaterControl dewHeater1(DEW_HEATER1_PIN);
+  dewHeaterControl dewHeater1;
 #endif
 #if DEW_HEATER2 == ON
-  dewHeaterControl dewHeater2(DEW_HEATER2_PIN);
+  dewHeaterControl dewHeater2;
 #endif
 #if DEW_HEATER3 == ON
-  dewHeaterControl dewHeater3(DEW_HEATER3_PIN);
+  dewHeaterControl dewHeater3;
 #endif
 
 #if ROTATOR == ON
@@ -225,6 +225,17 @@ void setup() {
   
   // get weather monitoring ready to go
   if (!ambient.init()) generalError=ERR_WEATHER_INIT;
+
+  // AUTOMATIC DEW HEATERS
+#if DEW_HEATER1 == ON
+  dewHeater1.init(DEW_HEATER1_PIN);
+#endif
+#if DEW_HEATER2 == ON
+  dewHeater2.init(DEW_HEATER2_PIN);
+#endif
+#if DEW_HEATER3 == ON
+  dewHeater3.init(DEW_HEATER3_PIN);
+#endif
 
   // get the TLS ready (if present)
   if (!tls.init()) generalError=ERR_SITE_INIT;

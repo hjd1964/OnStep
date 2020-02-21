@@ -5,7 +5,7 @@
 
 class dewHeaterControl {
   public:
-    dewHeaterControl(int pin) {
+    void init(int pin) {
       _pin=pin;
       pinMode(_pin,OUTPUT);
     }
