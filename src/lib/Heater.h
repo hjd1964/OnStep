@@ -11,7 +11,7 @@ class dewHeaterControl {
     }
     void poll(int deltaFromDewPointC) {
       #if MIRROR_TEMPERATURE == DS1820
-	    if (deltaFromDewPointC > DeltaC) {
+	    if (deltaFromDewPointC < DeltaC) {
 		    digitalWrite(_pin,HIGH);
 		    heaterOn=true;
 	    }
