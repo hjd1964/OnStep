@@ -25,7 +25,7 @@
   // don't enable serial C on a Classic board since pins are used
   #if PINMAP != Classic
     #define HAL_SERIAL_C_ENABLED
-    //#define HAL_SERIAL_C_SERIAL2     // Use RX2/TX2 for channel C (defaults to RX3/TX3 otherwise.)
+    #define HAL_SERIAL_C_SERIAL2     // Use RX2/TX2 for channel C (defaults to RX3/TX3 otherwise.)
   #endif
 
   // this tells OnStep that a .transmit() method needs to be called to send data
