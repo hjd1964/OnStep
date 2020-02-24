@@ -53,25 +53,25 @@ class weather {
   #if WEATHER == BME280 || WEATHER == BME280_SPI || WEATHER == BME280_0x76
       if (_BME280_found) {
     #ifdef ESP32
-        if ((phase == 10) || (phase == 30) || (phase == 50)) HAL_Wire.begin();
+        if ((phase == 5) || (phase == 15) || (phase == 25)) HAL_Wire.begin();
     #endif
-        if (phase == 10) {
+        if (phase == 5) {
           _t=bme.readTemperature();
     #if TELESCOPE_TEMPERATURE != DS1820
           _tt=_t;
     #endif
         }
-        if (phase == 30) _p=bme.readPressure()/100.0;
-        if (phase == 50) _h=bme.readHumidity();
+        if (phase == 15) _p=bme.readPressure()/100.0;
+        if (phase == 25) _h=bme.readHumidity();
     #if defined(ESP32) & defined(WIRE_END_SUPPORT)
-      if ((phase == 10) || (phase == 30) || (phase == 50)) HAL_Wire.end();  
+      if ((phase == 5) || (phase == 15) || (phase == 25)) HAL_Wire.end();  
     #endif
       }
   #endif
   
   #if TELESCOPE_TEMPERATURE == DS1820 || MIRROR_TEMPERATURE == DS1820
       if (_DS1820_found) {
-        if (phase == 70) {
+        if (phase == 35) {
           DS18B20.requestTemperatures();
 		#if TELESCOPE_TEMPERATURE == DS1820
           		_tt=DS18B20.getTempCByIndex(0);
@@ -85,7 +85,7 @@ class weather {
         }
       }
   #endif
-        phase++; if (phase == 90) phase=0;
+        phase++; if (phase == 45) phase=0;
       }
 #endif
     }
