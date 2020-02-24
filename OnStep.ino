@@ -513,7 +513,11 @@ void loop2() {
 
     // AUTOMATIC DEW HEATERS
 #if DEW_HEATER1 == ON
-    dewHeater1.poll(ambient.getTemperature()-ambient.getDewPoint());
+	#if MIRROR_TEMPERATURE == DS1820
+		dewHeater1.poll(ambient.getMirrorTemperature()-ambient.getDewPoint());
+	#else
+    		dewHeater1.poll(ambient.getTemperature()-ambient.getDewPoint());
+	#endif
 #endif
 #if DEW_HEATER2 == ON
     dewHeater1.poll(ambient.getTemperature()-ambient.getDewPoint());

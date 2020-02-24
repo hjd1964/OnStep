@@ -263,6 +263,11 @@
   #error "Configuration (Config.h): Setting TELESCOPE_TEMPERATURE sensor invalid, use OFF or DS1820 only."
 #endif
 
+#if MIRROR_TEMPERATURE == DS1820 && TELESCOPE_TEMPERATURE == DS1820
+  #error "DS1820 must be used only for one device (Telescope, or mirror)."
+#endif
+
+
 #ifndef HOME_SENSE
   #error "Configuration (Config.h): Setting HOME_SENSE must be present!"
 #elif HOME_SENSE != OFF && HOME_SENSE != ON && HOME_SENSE != ON_PULLUP && HOME_SENSE != ON_PULLDOWN

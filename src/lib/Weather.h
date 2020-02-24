@@ -14,7 +14,7 @@
   #endif
 #endif
 
-#if TELESCOPE_TEMPERATURE == DS1820
+#if TELESCOPE_TEMPERATURE == DS1820 || MIRROR_TEMPERATURE == DS1820
   #include <OneWire.h>                    // added via built in Arduino IDE library manager
   #include <DallasTemperature.h>          // added via built in Arduino IDE library manager
   OneWire oneWire(OneWirePin);
@@ -25,7 +25,7 @@ class weather {
   public:
     bool init() {
       bool success=true;
-#if TELESCOPE_TEMPERATURE == DS1820
+#if TELESCOPE_TEMPERATURE == DS1820 || MIRROR_TEMPERATURE == DS1820
       _DS1820_found=true;
 #endif
 #if WEATHER == BME280 || WEATHER == BME280_SPI || WEATHER == BME280_0x76
@@ -46,7 +46,7 @@ class weather {
     // designed for a 1s polling interval to refresh readings once a minute
     void poll() {
 
-#if WEATHER == BME280 || WEATHER == BME280_SPI || WEATHER == BME280_0x76 || TELESCOPE_TEMPERATURE == DS1820
+#if WEATHER == BME280 || WEATHER == BME280_SPI || WEATHER == BME280_0x76 || TELESCOPE_TEMPERATURE == DS1820 || MIRROR_TEMPERATURE == DS1820
       if (_DS1820_found || _BME280_found) {
         static int phase=0;
 
@@ -69,11 +69,16 @@ class weather {
       }
   #endif
   
-  #if TELESCOPE_TEMPERATURE == DS1820
+  #if TELESCOPE_TEMPERATURE == DS1820 || MIRROR_TEMPERATURE == DS1820
       if (_DS1820_found) {
         if (phase == 70) {
           DS18B20.requestTemperatures();
-          _tt=DS18B20.getTempCByIndex(0);
+		#if TELESCOPE_TEMPERATURE == DS1820
+          		_tt=DS18B20.getTempCByIndex(0);
+		#endif
+		#if MIRROR_TEMPERATURE == DS1820
+	  		_tm=DS18B20.getTempCByIndex(0);
+		#endif
     #if WEATHER != BME280 && WEATHER != BME280_SPI && WEATHER != BME280_0x76
           _t=_tt;
     #endif
@@ -93,6 +98,11 @@ class weather {
     // get telescope temperature in deg. C
     double getTelescopeTemperature() {
       return _tt;
+    }
+
+    // get mirror temperature in deg. C
+    double getMirrorTemperature() {
+	    return _tm;
     }
 
     // set temperature in deg. C
@@ -143,6 +153,7 @@ class weather {
     bool _BME280_found = false;
     double _t = 10.0;
     double _tt = 10.0;
+    double _tm = 10.0;
     double _p = 1010.0;
     double _h = 70.0;
     double _a = 200.0;
