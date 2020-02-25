@@ -9,7 +9,7 @@ void SmartHandController::menuFeatureKey()
 
   int i=2,j=-1,k=-1,l=-1,m=-1,n=-1;
   #if UTILITY_LIGHT != OFF
-    { i++; j=i; strcat(string_feature_Modes,L_FKEY_UTILITY_LIGHT "\n"); }
+    { i++; j=i; strcat(string_feature_Modes,"\n" L_FKEY_UTILITY_LIGHT); }
   #endif
   if (telInfo.hasReticle())  { i++; k=i; strcat(string_feature_Modes,"\n" L_FKEY_RETICLE);  }
   if (telInfo.hasFocuser1()) { i++; l=i; if (telInfo.hasFocuser2()) strcat(string_feature_Modes,"\n" L_FKEY_FOCUSER1); else strcat(string_feature_Modes,"\n" L_FKEY_FOCUSER); }
