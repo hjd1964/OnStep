@@ -77,6 +77,12 @@
   #define Heater3Pin DEW_HEATER3
 #endif
 
+// flag OneWire and DS1820 devices
+#if TELESCOPE_TEMPERATURE != OFF || DEW_HEATER1_TEMPERATURE != OFF || DEW_HEATER2_TEMPERATURE != OFF || DEW_HEATER3_TEMPERATURE != OFF
+  #define ONEWIRE_DEVICES_PRESENT
+  #define DS1820_DEVICES_PRESENT
+#endif
+
 // make sure all stepper driver options are present even if not defined
 #ifndef MODE_SWITCH_BEFORE_SLEW
   #define MODE_SWITCH_BEFORE_SLEW OFF
