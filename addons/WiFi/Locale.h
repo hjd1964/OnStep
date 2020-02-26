@@ -4,6 +4,9 @@
 // see Strings_xx.h for individual locale translations
 
 // ISO639-1 language codes (these control the inclusion of individual Strings_xx.h files as specified in Config.h)
+#if DISPLAY_LANGUAGE == L_cn
+  #include "Strings_cn.h"
+#endif
 #if DISPLAY_LANGUAGE == L_de
   #include "Strings_de.h"
 #endif
