@@ -66,6 +66,17 @@
   #endif
 #endif
 
+// override default pin assignments as necessary
+#if DEW_HEATER1 != ON && DEW_HEATER1 != OFF
+  #define Heater1Pin DEW_HEATER1
+#endif
+#if DEW_HEATER2 != ON && DEW_HEATER2 != OFF
+  #define Heater2Pin DEW_HEATER2
+#endif
+#if DEW_HEATER3 != ON && DEW_HEATER3 != OFF
+  #define Heater3Pin DEW_HEATER3
+#endif
+
 // make sure all stepper driver options are present even if not defined
 #ifndef MODE_SWITCH_BEFORE_SLEW
   #define MODE_SWITCH_BEFORE_SLEW OFF
