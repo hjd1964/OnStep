@@ -9,20 +9,20 @@ class dewHeaterControl {
       _pin=pin;
       pinMode(_pin,OUTPUT);
     }
-    void poll(int deltaFromDewPointC) {
-      #if DEW_HEATER1_TEMPERATURE != OFF || DEW_HEATER2_TEMPERATURE != OFF || DEW_HEATER3_TEMPERATURE != OFF
-	   if (deltaFromDewPointC < DeltaC) {
+    void poll(int deltaAboveDewPointC) {
+#if DEW_HEATER1_TEMPERATURE != OFF || DEW_HEATER2_TEMPERATURE != OFF || DEW_HEATER3_TEMPERATURE != OFF
+	   if (deltaAboveDewPointC < DeltaC) {
 		    digitalWrite(_pin,HIGH);
 		    heaterOn=true;
 	    }
 	    else {
 		    digitalWrite(_pin,LOW);
 		    heaterOn=false;
-	    } 
-      #else	    
+	    }
+#else
       int switchTimeMs=0;
-      deltaFromDewPointC=constrain(deltaFromDewPointC,lowDeltaC,highDeltaC);
-      switchTimeMs=map(deltaFromDewPointC,lowDeltaC,highDeltaC,1000,0);
+      deltaAboveDewPointC=constrain(deltaAboveDewPointC,lowDeltaC,highDeltaC);
+      switchTimeMs=map(deltaAboveDewPointC,lowDeltaC,highDeltaC,1000,0);
       currentTime = millis();
       if (!heaterOn && (long)(currentTime - (lastHeaterCycle + switchTimeMs)) <= 0)
       {
@@ -37,7 +37,7 @@ class dewHeaterControl {
       else if ((long)(currentTime - (lastHeaterCycle + 1000)) > 0) {
         lastHeaterCycle=currentTime;
       }
-      #endif
+#endif
     }
 
     void setLowDeltaC(int t) { lowDeltaC=t; }
