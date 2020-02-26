@@ -27,7 +27,7 @@ const char html_configBlAxis2[] PROGMEM =
 "</form>"
 "<br />\r\n";
 const char html_configMinAlt[] PROGMEM =
-L_LIMITS_TITLE " <br />"
+L_LIMITS_TITLE ": <br />"
 "<form method='get' action='/configuration.htm'>"
 " <input value='%d' type='number' name='hl' min='-30' max='30'>"
 "<button type='submit'>" L_UPLOAD "</button>"
@@ -56,7 +56,7 @@ const char html_configPastMerW[] PROGMEM =
 "</form>"
 "<br />\r\n";
 const char html_configLongDeg[] PROGMEM =
-L_LOCATION_TITLE " <br />"
+L_LOCATION_TITLE ": <br />"
 "<form method='get' action='/configuration.htm'>"
 " <input value='%s' type='number' name='g1' min='-180' max='180'>&nbsp;&deg;&nbsp;";
 const char html_configLongMin[] PROGMEM =

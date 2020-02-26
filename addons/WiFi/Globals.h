@@ -31,7 +31,6 @@ const char html_bad_comms_message[] PROGMEM =
   " <li>" L_DOWN_MESSAGE3 "</li><br />"
 #ifdef ESP8266
   " <li>" L_DOWN_MESSAGE4A "</li><br />"
-  " <li>" L_DOWN_MESSAGE5 "</li><br />"
 #else
   " <li>" L_DOWN_MESSAGE4B "</li><br />"
 #endif

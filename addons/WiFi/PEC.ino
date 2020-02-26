@@ -10,7 +10,7 @@ const char html_pecControls1[] PROGMEM =
 "<form method='get' action='/pec.htm'>"
 "<button name='pe' value='pl' type='submit'>" L_PEC_PLAY "</button>";
 const char html_pecControls2[] PROGMEM =
-"<button name='pe' value='st' type='submit'>" L_PEC_STOP "</button><br /><br />"
+"<button name='pe' value='st' type='submit'>" L_STOP "</button><br /><br />"
 "<button name='pe' value='cl' type='submit'>" L_PEC_CLEAR "</button>"
 "<button name='pe' value='re' type='submit'>" L_PEC_REC "</button><br />";
 const char html_pecControls3[] PROGMEM =

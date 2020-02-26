@@ -118,7 +118,7 @@ void handleRoot() {
 
   data+="<div style='width: 27em;'>";
 
-  data+="<b>Site:</b><br />";
+  data+="<b>" L_SITE ":</b><br />";
   // Browser time
   data += FPSTR(html_settingsBrowserTime);
 

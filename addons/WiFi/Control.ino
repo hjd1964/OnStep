@@ -51,12 +51,12 @@ const char html_controlQuick4[] PROGMEM =
 "<button type='button' class='bb' onpointerdown=\"g('pk')\" title='" L_HINT_PARK "'>" ARROW_DR "P</button>";
 const char html_controlQuick5[] PROGMEM =
 "&nbsp;&nbsp;"
-"<button type='button' class='bb' style=\"height: 2.2em; color: White;\" onpointerdown=\"g('qq')\" title='" L_HINT_EMERGENCY_STOP "'>Stop!</button>"
+"<button type='button' class='bb' style=\"height: 2.2em; color: White;\" onpointerdown=\"g('qq')\" title='" L_HINT_EMERGENCY_STOP "'>" L_STOP "!</button>"
 "</div><br class='clear' />\r\n";
 
 const char html_controlTrack1[] PROGMEM = 
 "<div class='b1' style='width: 8em'>"
-"<div align='left'>Tracking:</div>"
+"<div align='left'>" L_LOCATION_TITLE ":</div>"
 "<button type='button' class='bbh' style='width: 2em' onpointerdown=\"g('Ts')\" type='submit' title='" L_HINT_RATE_SIDEREAL "'>" SIDEREAL_CH "</button>";
 const char html_controlTrack2[] PROGMEM =
 "<button type='button' class='bbh' style='width: 2em' onpointerdown=\"g('Tl')\" type='submit' title='" L_HINT_RATE_LUNAR "'>" LUNAR_CH "</button>";
@@ -76,7 +76,7 @@ const char html_controlTrack4[] PROGMEM =
 
 const char html_controlGuide1[] PROGMEM =
 "<div class='b1' style='width: 27em'>"
-"<div align='left'>Guide:</div>"
+"<div align='left'>" L_GUIDE ":</div>"
 "<button class='gb' type='button' onpointerdown=\"g('n1')\" onpointerup=\"g('n0')\">" BUTTON_N "</button><br />";
 const char html_controlGuide2[] PROGMEM =
 "<button class='gb' type='button' onpointerdown=\"g('e1')\" onpointerup=\"g('e0')\">" BUTTON_E "</button>";

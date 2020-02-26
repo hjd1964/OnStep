@@ -52,6 +52,7 @@
 
 // operation
 #define L_TRACKING "die Verfolgung"
+#define L_SITE "Ort"
 #define L_COORDINATES "Koordinaten"
 #define L_CURRENT "Aktuell"
 #define L_TARGET "Ziel"
@@ -253,7 +254,7 @@
 #define L_PEC_STATUS "PEC Status"
 #define L_PEC_CONTROL "PEC Steuerung"
 #define L_PEC_PLAY "Abspielen"
-#define L_PEC_STOP "Stop"
+#define L_STOP "Stop"
 #define L_PEC_CLEAR "L&ouml;schen"
 #define L_PEC_REC "Aufzeichnen"
 #define L_PEC_CLEAR_MESSAGE "L&ouml;schen l&ouml;scht den Speicher aber nicht den EEPROM.  W&auml;hrend der Aufnahme werden die Korrekturen 3:1 gemittelt, wobei der Puffer bevorzugt wird, es sei denn, er wird gel&ouml;scht. In diesem Fall wird die volle Korrektur verwendet."
@@ -311,14 +312,14 @@
 #define L_BACKLASH_RANGE_AXIS2 "Achse2, in Bogensekunden 0 to 3600"
 
 // limits
-#define L_LIMITS_TITLE "Grenzen:"
+#define L_LIMITS_TITLE "Grenzen"
 #define L_LIMITS_RANGE_HORIZON "Horizont, in Grad +/- 30"
 #define L_LIMITS_RANGE_OVERHEAD "Obergrenze, in Grad 60 to 90"
 #define L_LIMITS_RANGE_MERIDIAN_E "Nach Meridian wenn Teleskop auf Ostseite der Montierung, in Grad +/- 180"
 #define L_LIMITS_RANGE_MERIDIAN_W "Nach Meridian wenn Teleskop auf Westseite der Montierung, in Grad +/- 180"
 
 // location
-#define L_LOCATION_TITLE "Standort:"
+#define L_LOCATION_TITLE "Standort"
 #define L_LOCATION_LONG "L&auml;ngengad, in Grad und Min. +/- 180, W is +"
 #define L_LOCATION_LAT "Breitengrad, in Grad und Min. +/- 90, N is +"
 #define L_LOCATION_RANGE_UTC_OFFSET "UTC Offset, in Stunden -12 to +14"
@@ -368,8 +369,7 @@
 #define L_DOWN_MESSAGE2 "Andere m&ouml;gliche Gr&uuml;nde:<br /><ul>"
 #define L_DOWN_MESSAGE3 "Inkorrekt konfigurierte OnStep Baudrate."
 #define L_DOWN_MESSAGE4A "Inkorrekt konfigurierte ESP8266 Baudrate."
-#define L_DOWN_MESSAGE4B "Inkorrekt konfigurierte Teensy3.2 oder Arduino M0 Baudrates."
-#define L_DOWN_MESSAGE5 "Inkorrekt konfiguriertes ESP8266 SERIAL_SWAP."
+#define L_DOWN_MESSAGE4B "Inkorrekt konfigurierte MCU Baudrate."
 #define L_DOWN_MESSAGE6 "Inkorrekte Verkabelung der  COM-Ports (oder Hardwareschaden wenn RX/TX vertauscht wurden.)"
 #define L_DOWN_MESSAGE7 "Incorrekte Verkabelung der Stromversorgungs-Pins. Masse (GND) muss zwischen OnStep's MCU und der MCU des Addon's verbunden sein."
 

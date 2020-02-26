@@ -6,7 +6,7 @@ const char html_wifiSerial[] PROGMEM =
 "<form method='post' action='/wifi.htm'>"
 L_WIFI_CMD_TO ": <input style='width:4em' name='ccto' value='%d' type='number' min='5' max='100'> ms<br/>"
 L_WIFI_WWW_TO ": <input style='width:4em' name='wcto' value='%d' type='number' min='5' max='100'> ms<br/>"
-"<button type='submit'>Upload</button></form><br />\r\n";
+"<button type='submit'>" L_UPLOAD "</button></form><br />\r\n";
 const char html_wifiSSID1[] PROGMEM =
 "<br/><b>" L_WIFI_STA_TITLE ":</b><br/>"
 "<form method='post' action='/wifi.htm'>"

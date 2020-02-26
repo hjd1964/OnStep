@@ -44,6 +44,7 @@
 
 // operation
 #define L_TRACKING "Tracking"
+#define L_SITE "Site"
 #define L_COORDINATES "Coordinates"
 #define L_CURRENT "Current"
 #define L_TARGET "Target"
@@ -245,7 +246,7 @@
 #define L_PEC_STATUS "PEC Status"
 #define L_PEC_CONTROL "PEC Control"
 #define L_PEC_PLAY "Play"
-#define L_PEC_STOP "Stop"
+#define L_STOP "Stop"
 #define L_PEC_CLEAR "Clear"
 #define L_PEC_REC "Record"
 #define L_PEC_CLEAR_MESSAGE "Clear erases the memory buffer not EEPROM.  During recording corrections are averaged 3:1 favoring the buffer unless cleared in which case the full correction is used."
@@ -303,14 +304,14 @@
 #define L_BACKLASH_RANGE_AXIS2 "Axis2, in arc-seconds 0 to 3600"
 
 // limits
-#define L_LIMITS_TITLE "Limits:"
+#define L_LIMITS_TITLE "Limits"
 #define L_LIMITS_RANGE_HORIZON "Horizon, in degrees +/- 30"
 #define L_LIMITS_RANGE_OVERHEAD "Overhead, in degrees 60 to 90"
 #define L_LIMITS_RANGE_MERIDIAN_E "Past Meridian when East of the pier, in degrees +/- 180"
 #define L_LIMITS_RANGE_MERIDIAN_W "Past Meridian when West of the pier, in degrees +/- 180"
 
 // location
-#define L_LOCATION_TITLE "Location:"
+#define L_LOCATION_TITLE "Location"
 #define L_LOCATION_LONG "Longitude, in deg. and min. +/- 180, W is +"
 #define L_LOCATION_LAT "Latitude, in deg. and min. +/- 90, N is +"
 #define L_LOCATION_RANGE_UTC_OFFSET "UTC Offset, in hours -12 to +14"
@@ -359,8 +360,7 @@
 #define L_DOWN_MESSAGE2 "Other possible causes:<br /><ul>"
 #define L_DOWN_MESSAGE3 "Incorrectly configured OnStep baud rate."
 #define L_DOWN_MESSAGE4A "Incorrectly configured ESP8266 baud rate."
-#define L_DOWN_MESSAGE4B "Incorrectly configured Teensy3.2 or Arduino M0 baud rates."
-#define L_DOWN_MESSAGE5 "Incorrectly configured ESP8266 SERIAL_SWAP."
+#define L_DOWN_MESSAGE4B "Incorrectly configured MCU baud rate."
 #define L_DOWN_MESSAGE6 "Incorrect wiring of the com ports (or damaged h/w if RX/TX were EVER wired incorrectly.)"
 #define L_DOWN_MESSAGE7 "Incorrect wiring of power supply pins.  Gnd must be shared between OnStep's MCU and the Addon's MCU."
 
