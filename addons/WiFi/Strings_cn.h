@@ -376,7 +376,7 @@
 // ------------------------- MountStatus -------------------------
 
 // general (background) errors
-#define L_GE_NONE "NONE"
+#define L_GE_NONE "不是一个"
 #define L_GE_MOTOR_FAULT "电机/驱动器错误"
 #define L_GE_ALT_MIN "地平线以下" 
 #define L_GE_LIMIT_SENSE "限位开关已触发"
