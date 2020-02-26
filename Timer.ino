@@ -148,8 +148,7 @@ void timerSupervisor(bool isCentiSecond) {
       }
     } else guideTimerRateAxis1A=0.0;
 
-    double timerRateAxis1A=trackingTimerRateAxis1;
-    double timerRateAxis1B=guideTimerRateAxis1A+pecTimerRateAxis1+timerRateAxis1A;
+    double timerRateAxis1B=guideTimerRateAxis1A+pecTimerRateAxis1+trackingTimerRateAxis1;
     if (timerRateAxis1B < -0.00001) { timerRateAxis1B=fabs(timerRateAxis1B); cli(); timerDirAxis1=-1; sei(); } else 
       if (timerRateAxis1B > 0.00001) { cli(); timerDirAxis1=1; sei(); } else { cli(); timerDirAxis1=0; sei(); timerRateAxis1B=1.0; }
     long calculatedTimerRateAxis1=round((double)SiderealRate/timerRateAxis1B);
@@ -190,8 +189,7 @@ void timerSupervisor(bool isCentiSecond) {
       }
     } else guideTimerRateAxis2A=0.0;
 
-    double timerRateAxis2A=trackingTimerRateAxis2;
-    double timerRateAxis2B=guideTimerRateAxis2A+timerRateAxis2A;
+    double timerRateAxis2B=guideTimerRateAxis2A+trackingTimerRateAxis2;
     if (timerRateAxis2B < -0.0001) { timerRateAxis2B=fabs(timerRateAxis2B); cli(); timerDirAxis2=-1; sei(); } else
       if (timerRateAxis2B > 0.0001) { cli(); timerDirAxis2=1; sei(); } else { cli(); timerDirAxis2=0; sei(); timerRateAxis2B=1.0; }
     long calculatedTimerRateAxis2=round((double)SiderealRate/timerRateAxis2B);
