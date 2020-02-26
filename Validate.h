@@ -293,28 +293,46 @@
   #error "Configuration (Config.h): Setting WEATHER sensor invalid, use OFF or BME280, BME280_0x76, BME280SPI only."
 #endif
 
+#ifndef DEW_HEATER1
+  #error "Configuration (Config.h): Setting DEW_HEATER1 must be present!"
+#elif DEW_HEATER1 != OFF && DEW_HEATER1 != ON && (DEW_HEATER1 < 0 || DEW_HEATER1 > 1023)
+  #error "Configuration (Config.h): Setting DEW_HEATER1 invalid, use OFF, ON, or a valid pin# (0 to 1023 only.)"
+#endif
+
+#ifndef DEW_HEATER2
+  #error "Configuration (Config.h): Setting DEW_HEATER2 must be present!"
+#elif DEW_HEATER2 != OFF && DEW_HEATER2 != ON && (DEW_HEATER2 < 0 || DEW_HEATER2 > 1023)
+  #error "Configuration (Config.h): Setting DEW_HEATER2 invalid, use OFF, ON, or a valid pin# (0 to 1023 only.)"
+#endif
+
+#ifndef DEW_HEATER3
+  #error "Configuration (Config.h): Setting DEW_HEATER3 must be present!"
+#elif DEW_HEATER3 != OFF && DEW_HEATER3 != ON && (DEW_HEATER3 < 0 || DEW_HEATER3 > 1023)
+  #error "Configuration (Config.h): Setting DEW_HEATER3 invalid, use OFF, ON, or a valid pin# (0 to 1023 only.)"
+#endif
+
 #ifndef TELESCOPE_TEMPERATURE
   #error "Configuration (Config.h): Setting TELESCOPE_TEMPERATURE must be present!"
-#elif TELESCOPE_TEMPERATURE != OFF && TELESCOPE_TEMPERATURE != ON && (TELESCOPE_TEMPERATURE < TELESCOPE_TEMPERATURE_FIRST || TELESCOPE_TEMPERATURE > TELESCOPE_TEMPERATURE_LAST)
-  #error "Configuration (Config.h): Setting TELESCOPE_TEMPERATURE sensor invalid, use OFF or DS1820 only."
+#elif TELESCOPE_TEMPERATURE != OFF && (TELESCOPE_TEMPERATURE < DS1820_TEMPERATURE_FIRST || TELESCOPE_TEMPERATURE > DS1820_TEMPERATURE_LAST)
+  #error "Configuration (Config.h): Setting TELESCOPE_TEMPERATURE sensor invalid, use OFF, DS1820, or number 0 to 3 only."
 #endif
 
 #ifndef DEW_HEATER1_TEMPERATURE
-  #error "Configuration (Config.h): Setting DEW_HEATER1_TEMPERATURE must br present!"
-#elif DEW_HEATER1_TEMPERATURE != OFF && DEW_HEATER1_TEMPERATURE != ON && (DEW_HEATER1_TEMPERATURE < DEW_HEATER_TEMPERATURE_FIRST || DEW_HEATER1_TEMPERATURE > DEW_HEATER_TEMPERATURE_LAST)
-  #error "Configuration (Config.h): Setting DEW_HEATER1_TEMPERATURE sensor invalid, use OFF, ON or number 1 to 4 only."
+  #error "Configuration (Config.h): Setting DEW_HEATER1_TEMPERATURE must be present!"
+#elif DEW_HEATER1_TEMPERATURE != OFF && (DEW_HEATER1_TEMPERATURE < DS1820_TEMPERATURE_FIRST || DEW_HEATER1_TEMPERATURE > DS1820_TEMPERATURE_LAST)
+  #error "Configuration (Config.h): Setting DEW_HEATER1_TEMPERATURE invalid, use OFF, DS1820, or number 0 to 3 only."
 #endif
 
 #ifndef DEW_HEATER2_TEMPERATURE
-  #error "Configuration (Config.h): Setting DEW_HEATER2_TEMPERATURE must br present!"
-#elif DEW_HEATER2_TEMPERATURE != OFF && DEW_HEATER2_TEMPERATURE != ON && (DEW_HEATER2_TEMPERATURE < DEW_HEATER_TEMPERATURE_FIRST || DEW_HEATER2_TEMPERATURE > DEW_HEATER_TEMPERATURE_LAST)
-  #error "Configuration (Config.h): Setting DEW_HEATER2_TEMPERATURE sensor invalid, use OFF, ON or number 1 to 4 only."
+  #error "Configuration (Config.h): Setting DEW_HEATER2_TEMPERATURE must be present!"
+#elif DEW_HEATER2_TEMPERATURE != OFF && (DEW_HEATER2_TEMPERATURE < DS1820_TEMPERATURE_FIRST || DEW_HEATER2_TEMPERATURE > DS1820_TEMPERATURE_LAST)
+  #error "Configuration (Config.h): Setting DEW_HEATER2_TEMPERATURE invalid, use OFF, DS1820, or number 0 to 3 only."
 #endif
 
 #ifndef DEW_HEATER3_TEMPERATURE
-  #error "Configuration (Config.h): Setting DEW_HEATER3_TEMPERATURE must br present!"
-#elif DEW_HEATER3_TEMPERATURE != OFF && DEW_HEATER3_TEMPERATURE != ON && (DEW_HEATER3_TEMPERATURE < DEW_HEATER_TEMPERATURE_FIRST || DEW_HEATER3_TEMPERATURE > DEW_HEATER_TEMPERATURE_LAST)
-  #error "Configuration (Config.h): Setting DEW_HEATER3_TEMPERATURE sensor invalid, use OFF, ON or number 1 to 4 only."
+  #error "Configuration (Config.h): Setting DEW_HEATER3_TEMPERATURE must be present!"
+#elif DEW_HEATER3_TEMPERATURE != OFF && (DEW_HEATER3_TEMPERATURE < DS1820_TEMPERATURE_FIRST || DEW_HEATER3_TEMPERATURE > DS1820_TEMPERATURE_LAST)
+  #error "Configuration (Config.h): Setting DEW_HEATER3_TEMPERATURE invalid, use OFF, DS1820, or number 0 to 3 only."
 #endif
 
 #ifndef HOME_SENSE
