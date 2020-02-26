@@ -3,18 +3,18 @@
 
 #pragma once
 
-#if WEATHER == BME280 || WEATHER == BME280_SPI || WEATHER == BME280_0x76
+#if WEATHER != OFF
   #include <Adafruit_BME280.h>            // https://github.com/adafruit/Adafruit_BME280_Library/tree/156a0537d6b21aaab1d1f104a7001a38ca1ffce3
-  // and https://github.com/adafruit/Adafruit_Sensor
+                                          // and https://github.com/adafruit/Adafruit_Sensor
   #if WEATHER == BME280 || WEATHER == BME280_0x76
     Adafruit_BME280 bme;
   #elif WEATHER == BME280_SPI
     Adafruit_BME280 bme(BME280_CS_PIN);                                   // hardware SPI
-    //Adafruit_BME280 bme(BME280_CS_PIN, SSPI_MOSI, SSPI_MISO, SSPI_SCK); // software SPI
+  //Adafruit_BME280 bme(BME280_CS_PIN, SSPI_MOSI, SSPI_MISO, SSPI_SCK);   // software SPI
   #endif
 #endif
 
-#if TELESCOPE_TEMPERATURE != OFF || DEW_HEATER1_TEMPERATURE != OFF || DEW_HEATER2_TEMPERATURE !=OFF || DEW_HEATER3_TEMPERATURE != OFF
+#ifdef ONEWIRE_DEVICES_PRESENT
   #include <OneWire.h>                    // added via built in Arduino IDE library manager
   #include <DallasTemperature.h>          // added via built in Arduino IDE library manager
   OneWire oneWire(OneWirePin);
@@ -25,7 +25,7 @@ class weather {
   public:
     bool init() {
       bool success = true;
-#if TELESCOPE_TEMPERATURE != OFF || DEW_HEATER1_TEMPERATURE != OFF || DEW_HEATER2_TEMPERATURE != OFF || DEW_HEATER3_TEMPERATURE != OFF
+#ifdef ONEWIRE_DEVICES_PRESENT
       _DS1820_found = true;
 #endif
 #if WEATHER != OFF
@@ -45,8 +45,7 @@ class weather {
 
     // designed for a 1s polling interval to refresh readings once a minute
     void poll() {
-
-#if WEATHER != OFF || TELESCOPE_TEMPERATURE != OFF || DEW_HEATER1_TEMPERATURE != OFF || DEW_HEATER2_TEMPERATURE != OFF || DEW_HEATER3_TEMPERATURE != OFF
+#if WEATHER != OFF || defined(ONEWIRE_DEVICES_PRESENT)
       if (_DS1820_found || _BME280_found) {
         static int phase = 0;
 
@@ -69,12 +68,10 @@ class weather {
         }
   #endif
 
-  #if TELESCOPE_TEMPERATURE != OFF || DEW_HEATER1_TEMPERATURE != OFF || DEW_HEATER2_TEMPERATURE != OFF || DEW_HEATER3_TEMPERATURE != OFF
+  #ifdef ONEWIRE_DEVICES_PRESENT
         if (_DS1820_found) {
           if (phase == 12) _nbDS1820 = DS18B20.getDeviceCount();
-
           if (phase == 15) DS18B20.requestTemperatures();
-          
     #if TELESCOPE_TEMPERATURE != OFF
           if (phase == 18) {
           _tt = DS18B20.getTempCByIndex(TELESCOPE_TEMPERATURE);
@@ -83,15 +80,12 @@ class weather {
       #endif
           }
     #endif
-
     #if DEW_HEATER1_TEMPERATURE != OFF
           if (phase == 21) _tds[0] = DS18B20.getTempCByIndex(DEW_HEATER1_TEMPERATURE);
     #endif
-
     #if DEW_HEATER2_TEMPERATURE != OFF
           if (phase == 24) _tds[1] = DS18B20.getTempCByIndex(DEW_HEATER2_TEMPERATURE);
     #endif
-
     #if DEW_HEATER3_TEMPERATURE != OFF
           if (phase == 27) _tds[2] = DS18B20.getTempCByIndex(DEW_HEATER3_TEMPERATURE);
     #endif
@@ -99,8 +93,8 @@ class weather {
         }
       }
   #endif
-      phase++; if (phase == 30) phase = 0;
-    }
+        phase++; if (phase == 30) phase = 0;
+      }
 #endif
     }
     
