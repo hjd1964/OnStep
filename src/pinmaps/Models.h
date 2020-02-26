@@ -28,9 +28,6 @@
 #if PINMAP == MaxPCB3
   #include "Pins.MaxPCB.h"
 #endif
-#if PINMAP == MaxESP
-  #include "Pins.MaxESP.h"
-#endif
 #if PINMAP == MaxESP2
   #include "Pins.MaxESP2.h"
 #endif
