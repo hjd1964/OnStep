@@ -48,6 +48,9 @@
                                           //         Provides temperature, pressure, humidity.
 
 #define TELESCOPE_TEMPERATURE         OFF //    OFF, DS1820 for telescope temperature on one wire interface.                  Option
+#define DEW_HEATER1_TEMPERATURE       OFF //    Secondary mirror temperature (OFF, ON, 1 to 4)				      Option
+#define DEW_HEATER2_TEMPERATURE       OFF //    Secondary mirror temperature (OFF, ON, 1 to 4)				      Option
+#define DEW_HEATER3_TEMPERATURE       OFF //    Secondary mirror temperature (OFF, ON, 1 to 4)				      Option
 
 #define HOME_SENSE                    OFF //    OFF, ON*. Automatically detect and use home switches. For GEM mode only.      Option
 #define HOME_SENSE_STATE_AXIS1       HIGH //   HIGH, State when clockwise of home position, as seen from front. Rev. w/LOW.   Adjust

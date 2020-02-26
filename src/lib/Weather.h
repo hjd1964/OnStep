@@ -14,7 +14,7 @@
   #endif
 #endif
 
-#if TELESCOPE_TEMPERATURE == DS1820
+#if TELESCOPE_TEMPERATURE != OFF || DEW_HEATER1_TEMPERATURE != OFF || DEW_HEATER2_TEMPERATURE !=OFF || DEW_HEATER3_TEMPERATURE != OFF 
   #include <OneWire.h>                    // added via built in Arduino IDE library manager
   #include <DallasTemperature.h>          // added via built in Arduino IDE library manager
   OneWire oneWire(OneWirePin);
@@ -25,7 +25,7 @@ class weather {
   public:
     bool init() {
       bool success=true;
-#if TELESCOPE_TEMPERATURE == DS1820
+#if TELESCOPE_TEMPERATURE != OFF || DEW_HEATER1_TEMPERATURE != OFF || DEW_HEATER2_TEMPERATURE != OFF || DEW_HEATER3_TEMPERATURE != OFF 
       _DS1820_found=true;
 #endif
 #if WEATHER == BME280 || WEATHER == BME280_SPI || WEATHER == BME280_0x76
@@ -46,41 +46,63 @@ class weather {
     // designed for a 1s polling interval to refresh readings once a minute
     void poll() {
 
-#if WEATHER == BME280 || WEATHER == BME280_SPI || WEATHER == BME280_0x76 || TELESCOPE_TEMPERATURE == DS1820
+#if WEATHER == BME280 || WEATHER == BME280_SPI || WEATHER == BME280_0x76 || TELESCOPE_TEMPERATURE == DS1820 || DEW_HEATER1_TEMPERATURE == 1
       if (_DS1820_found || _BME280_found) {
         static int phase=0;
 
   #if WEATHER == BME280 || WEATHER == BME280_SPI || WEATHER == BME280_0x76
       if (_BME280_found) {
     #ifdef ESP32
-        if ((phase == 10) || (phase == 30) || (phase == 50)) HAL_Wire.begin();
+        if ((phase == 5) || (phase == 15) || (phase == 25)) HAL_Wire.begin();
     #endif
-        if (phase == 10) {
+        if (phase == 5) {
           _t=bme.readTemperature();
-    #if TELESCOPE_TEMPERATURE != DS1820
+    #if TELESCOPE_TEMPERATURE == OFF
           _tt=_t;
     #endif
         }
-        if (phase == 30) _p=bme.readPressure()/100.0;
-        if (phase == 50) _h=bme.readHumidity();
+        if (phase == 15) _p=bme.readPressure()/100.0;
+        if (phase == 25) _h=bme.readHumidity();
     #if defined(ESP32) & defined(WIRE_END_SUPPORT)
-      if ((phase == 10) || (phase == 30) || (phase == 50)) HAL_Wire.end();  
+      if ((phase == 5) || (phase == 15) || (phase == 25)) HAL_Wire.end();  
     #endif
       }
   #endif
   
-  #if TELESCOPE_TEMPERATURE == DS1820
+  #if TELESCOPE_TEMPERATURE != OFF || DEW_HEATER1_TEMPERATURE != OFF || DEW_HEATER2_TEMPERATURE != OFF || DEW_HEATER3_TEMPERATURE != OFF
       if (_DS1820_found) {
-        if (phase == 70) {
+	if (phase == 10) {
+	  _nbDS1820=DS18B20.getDeviceCount();
+	}
+        if (phase == 35) {
           DS18B20.requestTemperatures();
-          _tt=DS18B20.getTempCByIndex(0);
+		#if TELESCOPE_TEMPERATURE == ON || TELESCOPE_TEMPERATURE == TELESCOPE_TEMPERATURE_FIRST
+          		_tt=DS18B20.getTempCByIndex(0);
+		#elif TELESCOPE_TEMPERATURE > TELESCOPE_TEMPERATURE_FIRST && TELESCOPE_TEMPERATURE <= TELESCOPE_TEMPERATURE_LAST
+		       _tt=DS18B20.getTempCByIndex(TELESCOPE_TEMPERATURE);	
+		#endif
+		#if DEW_HEATER1_TEMPERATURE == ON || DEW_HEATER1_TEMPERATURE == DEW_HEATER_TEMPERATURE_FIRST
+	  		_tds[0]=DS18B20.getTempCByIndex(0);
+		#elif DEW_HEATER1_TEMPERATURE > DEW_HEATER_TEMPERATURE_FIRST && DEW_HEATER1_TEMPERATURE <= DEW_HEATER_TEMPERATURE_LAST
+		       _tds[0]=DS18B20.getTempCByIndex(DEW_HEATER1_TEMPERATURE);	
+		#endif
+		#if DEW_HEATER2_TEMPERATURE == ON || DEW_HEATER2_TEMPERATURE == DEW_HEATER_TEMPERATURE_FIRST
+	  		_tds[1]=DS18B20.getTempCByIndex(0);
+		#elif DEW_HEATER2_TEMPERATURE > DEW_HEATER_TEMPERATURE_FIRST && DEW_HEATER2_TEMPERATURE <= DEW_HEATER_TEMPERATURE_LAST
+		       _tds[1]=DS18B20.getTempCByIndex(DEW_HEATER2_TEMPERATURE);	
+		#endif
+		#if DEW_HEATER3_TEMPERATURE == ON || DEW_HEATER3_TEMPERATURE == DEW_HEATER_TEMPERATURE_FIRST
+	  		_tds[2]=DS18B20.getTempCByIndex(0);
+		#elif DEW_HEATER3_TEMPERATURE > DEW_HEATER_TEMPERATURE_FIRST && DEW_HEATER3_TEMPERATURE <= DEW_HEATER_TEMPERATURE_LAST
+		       _tds[2]=DS18B20.getTempCByIndex(DEW_HEATER3_TEMPERATURE);	
+		#endif
     #if WEATHER != BME280 && WEATHER != BME280_SPI && WEATHER != BME280_0x76
           _t=_tt;
     #endif
         }
       }
   #endif
-        phase++; if (phase == 90) phase=0;
+        phase++; if (phase == 45) phase=0;
       }
 #endif
     }
@@ -93,6 +115,11 @@ class weather {
     // get telescope temperature in deg. C
     double getTelescopeTemperature() {
       return _tt;
+    }
+
+    // get DS1820 temperature in deg. C
+    double getDS1820Temperature(int ds) {
+	    return _tds[ds];
     }
 
     // set temperature in deg. C
@@ -142,8 +169,10 @@ class weather {
     bool _DS1820_found = false;
     bool _BME280_found = false;
     double _t = 10.0;
-    double _tt = 10.0;
     double _p = 1010.0;
     double _h = 70.0;
     double _a = 200.0;
+    int    _nbDS1820 = 0;
+    double _tt = 10.0;
+    double _tds[3] = {10.0,10.0,10.0};
 };

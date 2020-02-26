@@ -513,13 +513,25 @@ void loop2() {
 
     // AUTOMATIC DEW HEATERS
 #if DEW_HEATER1 == ON
-    dewHeater1.poll(ambient.getTemperature()-ambient.getDewPoint());
+	#if DEW_HEATER1_TEMPERATURE != OFF
+		dewHeater1.poll(ambient.getDS1820Temperature(0)-ambient.getDewPoint());
+	#else
+    		dewHeater1.poll(ambient.getTemperature()-ambient.getDewPoint());
+	#endif
 #endif
 #if DEW_HEATER2 == ON
-    dewHeater1.poll(ambient.getTemperature()-ambient.getDewPoint());
+	#if DEW_HEATER2_TEMPERATURE != OFF
+		dewHeater2.poll(ambient.getDS1820Temperature(1)-ambient.getDewPoint());
+	#else
+    		dewHeater2.poll(ambient.getTemperature()-ambient.getDewPoint());
+	#endif
 #endif
 #if DEW_HEATER3 == ON
-    dewHeater1.poll(ambient.getTemperature()-ambient.getDewPoint());
+	#if DEW_HEATER2_TEMPERATURE != OFF
+		dewHeater3.poll(ambient.getDS1820Temperature(2)-ambient.getDewPoint());
+	#else
+    		dewHeater3.poll(ambient.getTemperature()-ambient.getDewPoint());
+	#endif
 #endif
 
   }
