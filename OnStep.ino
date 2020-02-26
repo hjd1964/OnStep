@@ -97,13 +97,13 @@ weather ambient;
 
 // AUTOMATIC DEW HEATERS
 #include "src/lib/Heater.h"
-#if DEW_HEATER1 == ON
+#if DEW_HEATER1 != OFF
   dewHeaterControl dewHeater1;
 #endif
-#if DEW_HEATER2 == ON
+#if DEW_HEATER2 != OFF
   dewHeaterControl dewHeater2;
 #endif
-#if DEW_HEATER3 == ON
+#if DEW_HEATER3 != OFF
   dewHeaterControl dewHeater3;
 #endif
 
@@ -227,14 +227,19 @@ void setup() {
   if (!ambient.init()) generalError=ERR_WEATHER_INIT;
 
   // AUTOMATIC DEW HEATERS
-#if DEW_HEATER1 == ON
-  dewHeater1.init(DEW_HEATER1_PIN);
+#if DEW_HEATER1 != OFF
+  // with ambient temperature: lowDeltaC = -5 (dew forming 100% power), highDeltaC = 15 (dew NOT forming 0% power)
+  dewHeater1.init(Heater1Pin);
+  // with individual temperature: lowDeltaC = 1 (dew almost forming 100% power), highDeltaC = 3 (dew NOT forming 0% power)
+  if (DEW_HEATER1_TEMPERATURE != OFF) { dewHeater1.setLowDeltaC(1); dewHeater1.setHighDeltaC(3); }
 #endif
-#if DEW_HEATER2 == ON
-  dewHeater2.init(DEW_HEATER2_PIN);
+#if DEW_HEATER2 != OFF
+  dewHeater2.init(Heater2Pin);
+  if (DEW_HEATER2_TEMPERATURE != OFF) { dewHeater1.setLowDeltaC(1); dewHeater1.setHighDeltaC(3); }
 #endif
-#if DEW_HEATER3 == ON
-  dewHeater3.init(DEW_HEATER3_PIN);
+#if DEW_HEATER3 != OFF
+  dewHeater3.init(Heater3Pin);
+  if (DEW_HEATER3_TEMPERATURE != OFF) { dewHeater1.setLowDeltaC(1); dewHeater1.setHighDeltaC(3); }
 #endif
 
   // get the TLS ready (if present)
@@ -512,23 +517,23 @@ void loop2() {
     UT1=UT1_start+(t2/3600.0);
 
     // AUTOMATIC DEW HEATERS
-#if DEW_HEATER1 == ON
+#if DEW_HEATER1 != OFF
 	#if DEW_HEATER1_TEMPERATURE != OFF
-    dewHeater1.poll(ambient.getDS1820Temperature(0)-ambient.getDewPoint());
+    dewHeater1.poll(ambient.getDS1820Temperature(DEW_HEATER1_TEMPERATURE)-ambient.getDewPoint());
 	#else
     dewHeater1.poll(ambient.getTemperature()-ambient.getDewPoint());
 	#endif
 #endif
-#if DEW_HEATER2 == ON
+#if DEW_HEATER2 != OFF
 	#if DEW_HEATER2_TEMPERATURE != OFF
-    dewHeater2.poll(ambient.getDS1820Temperature(1)-ambient.getDewPoint());
+    dewHeater2.poll(ambient.getDS1820Temperature(DEW_HEATER2_TEMPERATURE)-ambient.getDewPoint());
 	#else
     dewHeater2.poll(ambient.getTemperature()-ambient.getDewPoint());
 	#endif
 #endif
-#if DEW_HEATER3 == ON
+#if DEW_HEATER3 != OFF
 	#if DEW_HEATER2_TEMPERATURE != OFF
-    dewHeater3.poll(ambient.getDS1820Temperature(2)-ambient.getDewPoint());
+    dewHeater3.poll(ambient.getDS1820Temperature(DEW_HEATER3_TEMPERATURE)-ambient.getDewPoint());
 	#else
     dewHeater3.poll(ambient.getTemperature()-ambient.getDewPoint());
 	#endif
