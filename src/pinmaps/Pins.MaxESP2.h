@@ -4,10 +4,10 @@
 #if defined(ESP32)
 
 // The multi-purpose pins (Aux3..Aux8 can be analog pwm/dac if supported)
-#define Aux1                 12     // pullup driver RST or SPI MISO or Fault
-#define Aux3                 21     // Home SW for Axis1 (or I2C SDA)
-#define Aux4                 22     // Home SW for Axis2 (or I2C SCL)
-#define Aux7                 39     // Limit SW, PPS, etc.
+#define Aux1                 12     // pullup driver RST, SPI MISO, or Fault
+#define Aux3                 21     // Home SW for Axis1, or I2C SDA
+#define Aux4                 22     // Home SW for Axis2, or I2C SCL
+#define Aux7                 39     // PPS, Limit SW, etc.
 #define Aux8                 25     // OneWire, Status LED, Status2 LED, Reticle LED, Tone, etc.
 
 // Misc. pins
@@ -37,7 +37,7 @@
 #define Axis1_M0             13     // Microstep Mode 0  or SPI MOSI
 #define Axis1_M1             14     // Microstep Mode 1  or SPI SCK
 #define Axis1_M2             23     // Microstep Mode 2  or SPI CS or Decay Mode
-#define Axis1_M3           Aux1     // Pullup driver RST or SPI MISO/Fault
+#define Axis1_M3           Aux1     // Pullup driver RST or SPI MISO or Fault
 #define Axis1_STEP           18     // Step
 #define Axis1_DIR            19     // Dir
 #define Axis1_DECAY    Axis1_M2     // Decay mode
@@ -49,7 +49,7 @@
 #define Axis2_M0             13     // Microstep Mode 0  or SPI MOSI
 #define Axis2_M1             14     // Microstep Mode 1  or SPI SCK
 #define Axis2_M2              5     // Microstep Mode 2  or SPI CS or Decay Mode
-#define Axis2_M3           Aux1     // Pullup driver RST or SPI MISO/Fault
+#define Axis2_M3           Aux1     // Pullup driver RST or SPI MISO or Fault
 #define Axis2_STEP           27     // Step
 #define Axis2_DIR            26     // Dir
 #define Axis2_DECAY    Axis2_M2     // Decay mode

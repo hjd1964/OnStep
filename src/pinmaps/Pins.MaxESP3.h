@@ -4,16 +4,21 @@
 #if defined(ESP32)
 
 // The multi-purpose pins (Aux3..Aux8 can be analog pwm/dac if supported)
-#define Aux1                 26     // ESP8266 GPIO0 control (Axis2_DIR)
-#define Aux2                  4     // MISO for Axis1&2, or ESP8266 RST control, or Axis4 EN support
-#define Aux3                 21     // Home SW for Axis1 (or I2C SDA)
-#define Aux4                 22     // Home SW for Axis2 (or I2C SCL)
+#define Aux2                  4     // ESP8266 RST control, or MISO for Axis1&2, or Axis4 EN support
+#define Aux3                 21     // Dew Heater 1, Home SW for Axis1, or I2C SDA
+#define Aux4                 22     // Dew Heater 2, Home SW for Axis2, or I2C SCL
 #define Aux7                 39     // Limit SW, PPS, etc.
-#define Aux8                 25     // Status LED, Status2 LED, Reticle LED, Tone, OneWire, etc.
+#define Aux8                 25     // OneWire, Status LED, Status2 LED, Reticle LED, Tone, etc.
 
 // Misc. pins
 #ifndef OneWirePin
   #define OneWirePin       Aux8     // Default Pin for one wire bus
+#endif
+#ifndef Heater1Pin
+  #define Heater1Pin       Aux3     // Default Pin for first dew heater
+#endif
+#ifndef Heater2Pin
+  #define Heater2Pin       Aux4     // Default Pin for second dew heater
 #endif
 #define ESP8266Gpio0Pin      26     // ESP8266 GPIO0 (Dir2)
 #define ESP8266RstPin      Aux2     // ESP8266 RST
@@ -40,7 +45,7 @@
 #define Axis1_M0             13     // Microstep Mode 0 or SPI MOSI
 #define Axis1_M1             14     // Microstep Mode 1 or SPI SCK
 #define Axis1_M2             23     // Microstep Mode 2 or SPI CS
-#define Axis1_M3              4     // SPI MISO/Fault
+#define Axis1_M3           Aux2     // SPI MISO/Fault
 #define Axis1_STEP           18     // Step
 #define Axis1_DIR             0     // Dir
 #define Axis1_DECAY    Axis1_M2     // Decay mode
@@ -51,7 +56,7 @@
 #define Axis2_M0             13     // Microstep Mode 0 or SPI MOSI
 #define Axis2_M1             14     // Microstep Mode 1 or SPI SCK
 #define Axis2_M2              5     // Microstep Mode 2 or SPI CS
-#define Axis2_M3              4     // SPI MISO/Fault
+#define Axis2_M3           Aux2     // SPI MISO/Fault
 #define Axis2_STEP           27     // Step
 #define Axis2_DIR            26     // Dir
 #define Axis2_DECAY    Axis2_M2     // Decay mode
