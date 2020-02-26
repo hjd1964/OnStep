@@ -42,6 +42,11 @@
 #define TIME_LOCATION_SOURCE          OFF //    OFF, DS3231 (I2c,) DS3234 (Spi,) TEENSY (T3.2 internal,) or GPS source.       Option
                                           //         Provides Date/Time, and if available, PPS & Lat/Long also.
 
+// ACCESSORY CONTROL -------------------------------------------- see https://onstep.groups.io/g/main/wiki/6-Configuration#ACCESSORY
+#define DEW_HEATER1                   OFF //    OFF, ON, n. Where n=pin#  Dew heater automatic control based on ambient-temp. Option
+#define DEW_HEATER2                   OFF //    OFF, ON, n. Where n=pin#  (or individual heater temp.) and dew-point.  See    Option
+#define DEW_HEATER3                   OFF //    OFF, ON, n. Where n=pin#  WEATHER and DEW_HEATERn_TEMPERATURE enabled below.  Option
+
 // SENSORS -------------------------------------------------------- see https://onstep.groups.io/g/main/wiki/6-Configuration#SENSORS
 // * = also supports ON_PULLUP or ON_PULLDOWN to activate MCU internal resistors if present.
 #define WEATHER                       OFF //    OFF, BME280 (I2C 0x77,) BME280_0x76, BME280_SPI (see pinmap for CS.)          Option
