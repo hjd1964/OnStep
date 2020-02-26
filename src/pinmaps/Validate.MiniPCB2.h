@@ -57,6 +57,24 @@
   // dedicated pin
 #endif
 
+// ACCESSORIES ------------------------------
+#if Heater1Pin == Aux3
+  #if ASSIGNED_AUX3 != PIN_NOT_ASSIGNED
+    #error "Configuration (Config.h): Dew Heater1 enabled but Aux3 is already in use, choose one feature on Aux3"
+  #else
+    #undef ASSIGNED_AUX3
+    #define ASSIGNED_AUX3 PIN_DEDICATED
+  #endif
+#endif
+#if Heater2Pin == Aux4
+  #if ASSIGNED_AUX4 != PIN_NOT_ASSIGNED
+    #error "Configuration (Config.h): Dew Heater2 enabled but Aux4 is already in use, choose one feature on Aux4"
+  #else
+    #undef ASSIGNED_AUX4
+    #define ASSIGNED_AUX4 PIN_DEDICATED
+  #endif
+#endif
+
 // SENSORS ----------------------------------
 #if WEATHER == BME280
   #if ASSIGNED_AUX0 == PIN_DEDICATED
@@ -73,9 +91,7 @@
   #endif
 #endif
 
-#if TELESCOPE_TEMPERATURE == DS1820
-  // dedicated pin
-#endif
+// dedicated pin for one-wire
 
 #if PEC_SENSE == ON || PEC_SENSE == ON_PULLUP || PEC_SENSE == ON_PULLDOWN
   // dedicated pin

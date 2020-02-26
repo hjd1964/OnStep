@@ -77,6 +77,24 @@
   #endif
 #endif
 
+// ACCESSORIES ------------------------------
+#if Heater1Pin == Aux3 && DEW_HEATER1 != OFF
+  #if ASSIGNED_AUX3 != PIN_NOT_ASSIGNED
+    #error "Configuration (Config.h): Dew Heater1 enabled but Aux3 is already in use, choose one feature on Aux3"
+  #else
+    #undef ASSIGNED_AUX3
+    #define ASSIGNED_AUX3 PIN_DEDICATED
+  #endif
+#endif
+#if Heater2Pin == Aux4 && DEW_HEATER2 != OFF
+  #if ASSIGNED_AUX4 != PIN_NOT_ASSIGNED
+    #error "Configuration (Config.h): Dew Heater2 enabled but Aux4 is already in use, choose one feature on Aux4"
+  #else
+    #undef ASSIGNED_AUX4
+    #define ASSIGNED_AUX4 PIN_DEDICATED
+  #endif
+#endif
+
 // SENSORS ----------------------------------
 #if WEATHER == BME280
   #if ASSIGNED_AUX3 == PIN_DEDICATED
@@ -93,9 +111,9 @@
   #endif
 #endif
 
-#if TELESCOPE_TEMPERATURE == DS1820
+#if OneWirePin == Aux8 && defined(ONEWIRE_DEVICES_PRESENT)
   #if ASSIGNED_AUX8 != PIN_NOT_ASSIGNED
-    #error "Configuration (Config.h): RTC DS1820 OneWire interface enabled but Aux8 is already in use, choose one feature on Aux8"
+    #error "Configuration (Config.h): OneWire interface device(s) enabled but Aux8 is already in use, choose one feature on Aux8"
   #else
     #undef ASSIGNED_AUX8
     #define ASSIGNED_AUX8 PIN_DEDICATED

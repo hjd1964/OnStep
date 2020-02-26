@@ -36,13 +36,44 @@
   // dedicated pin
 #endif
 
+// ACCESSORIES ------------------------------
+#if Heater1Pin == Aux6 && DEW_HEATER1 != OFF
+  #if ASSIGNED_AUX6 != PIN_NOT_ASSIGNED
+    #error "Configuration (Config.h): Dew Heater1 enabled but Aux6 is already in use, choose one feature on Aux6"
+  #else
+    #undef ASSIGNED_AUX6
+    #define ASSIGNED_AUX6 PIN_DEDICATED
+  #endif
+#endif
+#if Heater2Pin == Aux7 && DEW_HEATER2 != OFF
+  #if ASSIGNED_AUX7 != PIN_NOT_ASSIGNED
+    #error "Configuration (Config.h): Dew Heater2 enabled but Aux7 is already in use, choose one feature on Aux7"
+  #else
+    #undef ASSIGNED_AUX7
+    #define ASSIGNED_AUX7 PIN_DEDICATED
+  #endif
+#endif
+#if Heater2Pin == Aux8 && DEW_HEATER3 != OFF
+  #if ASSIGNED_AUX8 != PIN_NOT_ASSIGNED
+    #error "Configuration (Config.h): Dew Heater3 enabled but Aux7 is already in use, choose one feature on Aux8"
+  #else
+    #undef ASSIGNED_AUX8
+    #define ASSIGNED_AUX8 PIN_DEDICATED
+  #endif
+#endif
+
 // SENSORS ----------------------------------
 #if WEATHER == BME280
   // dedicated pins
 #endif
 
-#if TELESCOPE_TEMPERATURE == DS1820
-  // dedicated pin
+#if OneWirePin == Aux4 && defined(ONEWIRE_DEVICES_PRESENT)
+  #if ASSIGNED_AUX4 != PIN_NOT_ASSIGNED
+    #error "Configuration (Config.h): OneWire interface device(s) enabled but Aux4 is already in use, choose one feature on Aux4"
+  #else
+    #undef ASSIGNED_AUX4
+    #define ASSIGNED_AUX4 PIN_DEDICATED
+  #endif
 #endif
 
 #if PEC_SENSE == ON || PEC_SENSE == ON_PULLUP || PEC_SENSE == ON_PULLDOWN

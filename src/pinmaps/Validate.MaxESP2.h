@@ -83,9 +83,9 @@
   #endif
 #endif
 
-#if TELESCOPE_TEMPERATURE == DS1820
+#if OneWirePin == Aux8 && defined(ONEWIRE_DEVICES_PRESENT)
   #if ASSIGNED_AUX8 != PIN_NOT_ASSIGNED
-    #error "Configuration (Config.h): RTC DS1820 OneWire interface enabled but Aux8 is already in use, choose one feature on Aux8"
+    #error "Configuration (Config.h): OneWire interface device(s) enabled but Aux8 is already in use, choose one feature on Aux8"
   #else
     #undef ASSIGNED_AUX8
     #define ASSIGNED_AUX8 PIN_DEDICATED
