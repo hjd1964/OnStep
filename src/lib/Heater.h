@@ -37,7 +37,6 @@ class dewHeaterControl {
     bool heaterOn=false;
     int lowDeltaC=-5;
     int highDeltaC=15;
-    int DeltaC=2;
-
+ 
     int _pin=0;
 };
