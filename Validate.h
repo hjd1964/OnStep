@@ -11,6 +11,25 @@
   #define AXIS2_TANGENT_ARM OFF
 #endif
 
+#ifndef DEW_HEATER1
+  #define DEW_HEATER1 OFF
+#endif
+#ifndef DEW_HEATER2
+  #define DEW_HEATER2 OFF
+#endif
+#ifndef DEW_HEATER3
+  #define DEW_HEATER3 OFF
+#endif
+#ifndef DEW_HEATER1_TEMPERATURE
+  #define DEW_HEATER1_TEMPERATURE OFF
+#endif
+#ifndef DEW_HEATER2_TEMPERATURE
+  #define DEW_HEATER2_TEMPERATURE OFF
+#endif
+#ifndef DEW_HEATER3_TEMPERATURE
+  #define DEW_HEATER3_TEMPERATURE OFF
+#endif
+
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
 // setup defaults
