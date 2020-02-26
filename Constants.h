@@ -77,7 +77,11 @@
 
 #define TELESCOPE_TEMPERATURE_FIRST 1
 #define DS1820                      1 // DS18B20 on OneWire
-#define TELESCOPE_TEMPERATURE_LAST  1
+#define TELESCOPE_TEMPERATURE_LAST  4
+
+#define DEW_HEATER_TEMPERATURE_FIRST 1
+#define DEW_HEATER_TEMPERATURE_LAST  4
+
 
 // coordinate mode for getting and setting RA/Dec
 #define OBSERVED_PLACE              1

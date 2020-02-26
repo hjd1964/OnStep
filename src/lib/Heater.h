@@ -10,20 +10,19 @@ class dewHeaterControl {
       pinMode(_pin,OUTPUT);
     }
     void poll(int deltaFromDewPointC) {
-      #if MIRROR_TEMPERATURE == DS1820
-	    if (deltaFromDewPointC < DeltaC) {
+      #if DEW_HEATER1_TEMPERATURE != OFF || DEW_HEATER2_TEMPERATURE != OFF || DEW_HEATER3_TEMPERATURE != OFF
+	   if (deltaFromDewPointC < DeltaC) {
 		    digitalWrite(_pin,HIGH);
 		    heaterOn=true;
 	    }
 	    else {
 		    digitalWrite(_pin,LOW);
 		    heaterOn=false;
-	    }
+	    } 
       #else	    
       int switchTimeMs=0;
       deltaFromDewPointC=constrain(deltaFromDewPointC,lowDeltaC,highDeltaC);
       switchTimeMs=map(deltaFromDewPointC,lowDeltaC,highDeltaC,1000,0);
-
       currentTime = millis();
       if (!heaterOn && (long)(currentTime - (lastHeaterCycle + switchTimeMs)) <= 0)
       {

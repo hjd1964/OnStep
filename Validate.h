@@ -259,14 +259,27 @@
 
 #ifndef TELESCOPE_TEMPERATURE
   #error "Configuration (Config.h): Setting TELESCOPE_TEMPERATURE must be present!"
-#elif TELESCOPE_TEMPERATURE != OFF && (TELESCOPE_TEMPERATURE < TELESCOPE_TEMPERATURE_FIRST || TELESCOPE_TEMPERATURE > TELESCOPE_TEMPERATURE_LAST)
+#elif TELESCOPE_TEMPERATURE != OFF && TELESCOPE_TEMPERATURE != ON && (TELESCOPE_TEMPERATURE < TELESCOPE_TEMPERATURE_FIRST || TELESCOPE_TEMPERATURE > TELESCOPE_TEMPERATURE_LAST)
   #error "Configuration (Config.h): Setting TELESCOPE_TEMPERATURE sensor invalid, use OFF or DS1820 only."
 #endif
 
-#if MIRROR_TEMPERATURE == DS1820 && TELESCOPE_TEMPERATURE == DS1820
-  #error "DS1820 must be used only for one device (Telescope, or mirror)."
+#ifndef DEW_HEATER1_TEMPERATURE
+  #error "Configuration (Config.h): Setting DEW_HEATER1_TEMPERATURE must br present!"
+#elif DEW_HEATER1_TEMPERATURE != OFF && DEW_HEATER1_TEMPERATURE != ON && (DEW_HEATER1_TEMPERATURE < DEW_HEATER_TEMPERATURE_FIRST || DEW_HEATER1_TEMPERATURE > DEW_HEATER_TEMPERATURE_LAST)
+  #error "Configuration (Config.h): Setting DEW_HEATER1_TEMPERATURE sensor invalid, use OFF, ON or number 1 to 4 only."
 #endif
 
+#ifndef DEW_HEATER2_TEMPERATURE
+  #error "Configuration (Config.h): Setting DEW_HEATER2_TEMPERATURE must br present!"
+#elif DEW_HEATER2_TEMPERATURE != OFF && DEW_HEATER2_TEMPERATURE != ON && (DEW_HEATER2_TEMPERATURE < DEW_HEATER_TEMPERATURE_FIRST || DEW_HEATER2_TEMPERATURE > DEW_HEATER_TEMPERATURE_LAST)
+  #error "Configuration (Config.h): Setting DEW_HEATER2_TEMPERATURE sensor invalid, use OFF, ON or number 1 to 4 only."
+#endif
+
+#ifndef DEW_HEATER3_TEMPERATURE
+  #error "Configuration (Config.h): Setting DEW_HEATER3_TEMPERATURE must br present!"
+#elif DEW_HEATER3_TEMPERATURE != OFF && DEW_HEATER3_TEMPERATURE != ON && (DEW_HEATER3_TEMPERATURE < DEW_HEATER_TEMPERATURE_FIRST || DEW_HEATER3_TEMPERATURE > DEW_HEATER_TEMPERATURE_LAST)
+  #error "Configuration (Config.h): Setting DEW_HEATER3_TEMPERATURE sensor invalid, use OFF, ON or number 1 to 4 only."
+#endif
 
 #ifndef HOME_SENSE
   #error "Configuration (Config.h): Setting HOME_SENSE must be present!"
