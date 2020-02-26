@@ -91,7 +91,6 @@ class weather {
     #endif
     
         }
-      }
   #endif
         phase++; if (phase == 30) phase = 0;
       }
