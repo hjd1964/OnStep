@@ -5,7 +5,7 @@
 
 #if WEATHER == BME280 || WEATHER == BME280_SPI || WEATHER == BME280_0x76
   #include <Adafruit_BME280.h>            // https://github.com/adafruit/Adafruit_BME280_Library/tree/156a0537d6b21aaab1d1f104a7001a38ca1ffce3
-                                          // and https://github.com/adafruit/Adafruit_Sensor
+  // and https://github.com/adafruit/Adafruit_Sensor
   #if WEATHER == BME280 || WEATHER == BME280_0x76
     Adafruit_BME280 bme;
   #elif WEATHER == BME280_SPI
@@ -14,7 +14,7 @@
   #endif
 #endif
 
-#if TELESCOPE_TEMPERATURE != OFF || DEW_HEATER1_TEMPERATURE != OFF || DEW_HEATER2_TEMPERATURE !=OFF || DEW_HEATER3_TEMPERATURE != OFF 
+#if TELESCOPE_TEMPERATURE != OFF || DEW_HEATER1_TEMPERATURE != OFF || DEW_HEATER2_TEMPERATURE !=OFF || DEW_HEATER3_TEMPERATURE != OFF
   #include <OneWire.h>                    // added via built in Arduino IDE library manager
   #include <DallasTemperature.h>          // added via built in Arduino IDE library manager
   OneWire oneWire(OneWirePin);
@@ -24,18 +24,18 @@
 class weather {
   public:
     bool init() {
-      bool success=true;
-#if TELESCOPE_TEMPERATURE != OFF || DEW_HEATER1_TEMPERATURE != OFF || DEW_HEATER2_TEMPERATURE != OFF || DEW_HEATER3_TEMPERATURE != OFF 
-      _DS1820_found=true;
+      bool success = true;
+#if TELESCOPE_TEMPERATURE != OFF || DEW_HEATER1_TEMPERATURE != OFF || DEW_HEATER2_TEMPERATURE != OFF || DEW_HEATER3_TEMPERATURE != OFF
+      _DS1820_found = true;
 #endif
-#if WEATHER == BME280 || WEATHER == BME280_SPI || WEATHER == BME280_0x76
-      #if WEATHER == BME280
-        if (bme.begin(&HAL_Wire)) _BME280_found=true; else success=false;
-      #elif WEATHER == BME280_0x76
-        if (bme.begin(0x76,&HAL_Wire)) _BME280_found=true; else success=false;
-      #else
-        if (bme.begin()) _BME280_found=true; else success=false;
-      #endif
+#if WEATHER != OFF
+  #if WEATHER == BME280
+      if (bme.begin(&HAL_Wire)) _BME280_found = true; else success = false;
+  #elif WEATHER == BME280_0x76
+      if (bme.begin(0x76, &HAL_Wire)) _BME280_found = true; else success = false;
+  #else
+      if (bme.begin()) _BME280_found = true; else success = false;
+  #endif
   #if defined(ESP32) & defined(WIRE_END_SUPPORT)
       HAL_Wire.end();
   #endif
@@ -46,121 +46,118 @@ class weather {
     // designed for a 1s polling interval to refresh readings once a minute
     void poll() {
 
-#if WEATHER == BME280 || WEATHER == BME280_SPI || WEATHER == BME280_0x76 || TELESCOPE_TEMPERATURE == DS1820 || DEW_HEATER1_TEMPERATURE == 1
+#if WEATHER != OFF || TELESCOPE_TEMPERATURE != OFF || DEW_HEATER1_TEMPERATURE != OFF || DEW_HEATER2_TEMPERATURE != OFF || DEW_HEATER3_TEMPERATURE != OFF
       if (_DS1820_found || _BME280_found) {
-        static int phase=0;
+        static int phase = 0;
 
-  #if WEATHER == BME280 || WEATHER == BME280_SPI || WEATHER == BME280_0x76
-      if (_BME280_found) {
+  #if WEATHER != OFF
+        if (_BME280_found) {
     #ifdef ESP32
-        if ((phase == 5) || (phase == 15) || (phase == 25)) HAL_Wire.begin();
+          if (phase == 3 || phase == 6 || phase == 9) HAL_Wire.begin();
     #endif
-        if (phase == 5) {
-          _t=bme.readTemperature();
+          if (phase == 3) {
+            _t = bme.readTemperature();
     #if TELESCOPE_TEMPERATURE == OFF
-          _tt=_t;
+            _tt = _t;
     #endif
-        }
-        if (phase == 15) _p=bme.readPressure()/100.0;
-        if (phase == 25) _h=bme.readHumidity();
+          }
+          if (phase == 6) _p = bme.readPressure() / 100.0;
+          if (phase == 9) _h = bme.readHumidity();
     #if defined(ESP32) & defined(WIRE_END_SUPPORT)
-      if ((phase == 5) || (phase == 15) || (phase == 25)) HAL_Wire.end();  
+          if (phase == 3 || phase == 6 || phase == 9) HAL_Wire.end();
     #endif
-      }
+        }
   #endif
-  
+
   #if TELESCOPE_TEMPERATURE != OFF || DEW_HEATER1_TEMPERATURE != OFF || DEW_HEATER2_TEMPERATURE != OFF || DEW_HEATER3_TEMPERATURE != OFF
-      if (_DS1820_found) {
-	if (phase == 10) {
-	  _nbDS1820=DS18B20.getDeviceCount();
-	}
-        if (phase == 35) {
-          DS18B20.requestTemperatures();
-		#if TELESCOPE_TEMPERATURE == ON || TELESCOPE_TEMPERATURE == TELESCOPE_TEMPERATURE_FIRST
-          		_tt=DS18B20.getTempCByIndex(0);
-		#elif TELESCOPE_TEMPERATURE > TELESCOPE_TEMPERATURE_FIRST && TELESCOPE_TEMPERATURE <= TELESCOPE_TEMPERATURE_LAST
-		       _tt=DS18B20.getTempCByIndex(TELESCOPE_TEMPERATURE);	
-		#endif
-		#if DEW_HEATER1_TEMPERATURE == ON || DEW_HEATER1_TEMPERATURE == DEW_HEATER_TEMPERATURE_FIRST
-	  		_tds[0]=DS18B20.getTempCByIndex(0);
-		#elif DEW_HEATER1_TEMPERATURE > DEW_HEATER_TEMPERATURE_FIRST && DEW_HEATER1_TEMPERATURE <= DEW_HEATER_TEMPERATURE_LAST
-		       _tds[0]=DS18B20.getTempCByIndex(DEW_HEATER1_TEMPERATURE);	
-		#endif
-		#if DEW_HEATER2_TEMPERATURE == ON || DEW_HEATER2_TEMPERATURE == DEW_HEATER_TEMPERATURE_FIRST
-	  		_tds[1]=DS18B20.getTempCByIndex(0);
-		#elif DEW_HEATER2_TEMPERATURE > DEW_HEATER_TEMPERATURE_FIRST && DEW_HEATER2_TEMPERATURE <= DEW_HEATER_TEMPERATURE_LAST
-		       _tds[1]=DS18B20.getTempCByIndex(DEW_HEATER2_TEMPERATURE);	
-		#endif
-		#if DEW_HEATER3_TEMPERATURE == ON || DEW_HEATER3_TEMPERATURE == DEW_HEATER_TEMPERATURE_FIRST
-	  		_tds[2]=DS18B20.getTempCByIndex(0);
-		#elif DEW_HEATER3_TEMPERATURE > DEW_HEATER_TEMPERATURE_FIRST && DEW_HEATER3_TEMPERATURE <= DEW_HEATER_TEMPERATURE_LAST
-		       _tds[2]=DS18B20.getTempCByIndex(DEW_HEATER3_TEMPERATURE);	
-		#endif
-    #if WEATHER != BME280 && WEATHER != BME280_SPI && WEATHER != BME280_0x76
-          _t=_tt;
+        if (_DS1820_found) {
+          if (phase == 12) _nbDS1820 = DS18B20.getDeviceCount();
+
+          if (phase == 15) DS18B20.requestTemperatures();
+          
+    #if TELESCOPE_TEMPERATURE != OFF
+          if (phase == 18) {
+          _tt = DS18B20.getTempCByIndex(TELESCOPE_TEMPERATURE);
+      #if WEATHER == OFF
+          _t = _tt;
+      #endif
+          }
     #endif
+
+    #if DEW_HEATER1_TEMPERATURE != OFF
+          if (phase == 21) _tds[0] = DS18B20.getTempCByIndex(DEW_HEATER1_TEMPERATURE);
+    #endif
+
+    #if DEW_HEATER2_TEMPERATURE != OFF
+          if (phase == 24) _tds[1] = DS18B20.getTempCByIndex(DEW_HEATER2_TEMPERATURE);
+    #endif
+
+    #if DEW_HEATER3_TEMPERATURE != OFF
+          if (phase == 27) _tds[2] = DS18B20.getTempCByIndex(DEW_HEATER3_TEMPERATURE);
+    #endif
+    
         }
       }
   #endif
-        phase++; if (phase == 45) phase=0;
-      }
+      phase++; if (phase == 30) phase = 0;
+    }
 #endif
     }
-
+    
     // get temperature in deg. C
     double getTemperature() {
       return _t;
     }
-
+    
     // get telescope temperature in deg. C
     double getTelescopeTemperature() {
       return _tt;
     }
-
+    
     // get DS1820 temperature in deg. C
     double getDS1820Temperature(int ds) {
-	    return _tds[ds];
+      return _tds[ds];
     }
-
+    
     // set temperature in deg. C
     void setTemperature(double t) {
-      _t=t;
+      _t = t;
     }
     
     // get barometric pressure in hPa/mb
     double getPressure() {
       return _p;
     }
-
+    
     // get barometric pressure in hPa/mb
     void setPressure(double p) {
-      _p=p;
+      _p = p;
     }
-
+    
     // get relative humidity in %
     double getHumidity() {
       return _h;
     }
-
+    
     // set relative humidity in %
     void setHumidity(double h) {
-      _h=h;
+      _h = h;
     }
-
+    
     // get altitude in meters
     double getAltitude() {
       return _a;
     }
-
+    
     // set altitude in meters
     void setAltitude(double a) {
-      _a=a;
+      _a = a;
     }
     
     // get dew point in deg. C
     // accurate to +/- 1 deg. C for RH above 50%
     double getDewPoint() {
-      return _t-((100.0-_h)/5.0);
+      return _t - ((100.0 - _h) / 5.0);
       // a more accurate formula?
       // return 243.04*(log(_h/100.0)+((17.625*_t)/(243.04+_t)))/(17.625-log(_h/100.0)-((17.625*_t)/(243.04+_t)));
     }
@@ -174,5 +171,5 @@ class weather {
     double _a = 200.0;
     int    _nbDS1820 = 0;
     double _tt = 10.0;
-    double _tds[3] = {10.0,10.0,10.0};
+    double _tds[3] = {10.0, 10.0, 10.0};
 };

@@ -75,12 +75,9 @@
 #define BME280_SPI                  3 // BME280 on SPI (default CS)
 #define WEATHER_LAST                4
 
-#define TELESCOPE_TEMPERATURE_FIRST 1
-#define DS1820                      1 // DS18B20 on OneWire
-#define TELESCOPE_TEMPERATURE_LAST  4
-
-#define DEW_HEATER_TEMPERATURE_FIRST 1
-#define DEW_HEATER_TEMPERATURE_LAST  4
+#define DS1820_TEMPERATURE_FIRST    0
+#define DS1820                      0 // First/only DS18B20 on OneWire
+#define DS1820_TEMPERATURE_LAST     3
 
 
 // coordinate mode for getting and setting RA/Dec

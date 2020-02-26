@@ -47,10 +47,10 @@
 #define WEATHER                       OFF //    OFF, BME280 (I2C 0x77,) BME280_0x76, BME280_SPI (see pinmap for CS.)          Option
                                           //         Provides temperature, pressure, humidity.
 
-#define TELESCOPE_TEMPERATURE         OFF //    OFF, DS1820 for telescope temperature on one wire interface.                  Option
-#define DEW_HEATER1_TEMPERATURE       OFF //    Secondary mirror temperature (OFF, ON, 1 to 4)				      Option
-#define DEW_HEATER2_TEMPERATURE       OFF //    Secondary mirror temperature (OFF, ON, 1 to 4)				      Option
-#define DEW_HEATER3_TEMPERATURE       OFF //    Secondary mirror temperature (OFF, ON, 1 to 4)				      Option
+#define TELESCOPE_TEMPERATURE         OFF //    OFF, DS1820, n=0..3 (DS1820 dev. index) telescope temperature on one wire.    Option
+#define DEW_HEATER1_TEMPERATURE       OFF //    OFF, DS1820, n=0..3 (DS1820 dev. index) dew heater1 temperature on one wire.  Option
+#define DEW_HEATER2_TEMPERATURE       OFF //    OFF, DS1820, n=0..3 (DS1820 dev. index) dew heater2 temperature on one wire.  Option
+#define DEW_HEATER3_TEMPERATURE       OFF //    OFF, DS1820, n=0..3 (DS1820 dev. index) dew heater3 temperature on one wire.  Option
 
 #define HOME_SENSE                    OFF //    OFF, ON*. Automatically detect and use home switches. For GEM mode only.      Option
 #define HOME_SENSE_STATE_AXIS1       HIGH //   HIGH, State when clockwise of home position, as seen from front. Rev. w/LOW.   Adjust
