@@ -273,7 +273,11 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
   if ((trackingState != TrackingMoveTo) && (!inbacklashAxis1)) targetAxis1.part.m+=timerDirAxis1*stepAxis1;
 
   // move the RA/Azm stepper to the target
+#if MODE_SWITCH_BEFORE_SLEW == OFF
   if ((posAxis1 != (long)targetAxis1.part.m) || inbacklashAxis1) {
+#else
+  if ((labs(posAxis1 - (long)targetAxis1.part.m) >= stepAxis1) || inbacklashAxis1) {
+#endif
 
     // set direction
     if (posAxis1 < (long)targetAxis1.part.m) dirAxis1=1; else dirAxis1=0;
@@ -356,7 +360,11 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
   if ((trackingState != TrackingMoveTo) && (!inbacklashAxis2)) targetAxis2.part.m+=timerDirAxis2*stepAxis2;
 
   // move the Dec/Alt stepper to the target
+#if MODE_SWITCH_BEFORE_SLEW == OFF
   if (axis2Powered && ((posAxis2 != (long)targetAxis2.part.m) || inbacklashAxis2)) {
+#else
+  if (axis2Powered && ((labs(posAxis2 - (long)targetAxis2.part.m) >= stepAxis2) || inbacklashAxis2)) {
+#endif
     
     // set direction
     if (posAxis2 < (long)targetAxis2.part.m) dirAxis2=1; else dirAxis2=0;
