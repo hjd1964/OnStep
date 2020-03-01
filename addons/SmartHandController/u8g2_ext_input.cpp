@@ -636,7 +636,7 @@ void add_days(uint8_t& year, uint8_t& month, uint8_t& day, int days2add)
 #define LEAP_YEAR(Y)     ( (Y>0) && !(Y%4) && ( (Y%100) || !(Y%400) )) 
   uint16_t months[] = {
     0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-  if (LEAP_YEAR(2000 + (int)year))
+  if (LEAP_YEAR((2000 + (int)year)))
   {
     months[2] = 29;
   }
@@ -676,7 +676,7 @@ void supress_days(uint8_t& year, uint8_t& month, uint8_t& day, int days2supress)
 #define LEAP_YEAR(Y)     ( (Y>0) && !(Y%4) && ( (Y%100) || !(Y%400) )) 
   uint16_t months[] = {
     0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-  if (LEAP_YEAR(2000 + (int)year))
+  if (LEAP_YEAR((2000 + (int)year)))
   {
     months[2] = 29;
   }
