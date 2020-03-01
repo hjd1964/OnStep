@@ -37,7 +37,7 @@
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
 #define FirmwareVersionMinor  "12"
-#define FirmwareVersionPatch  "g"
+#define FirmwareVersionPatch  "h"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
@@ -55,7 +55,7 @@
 #endif
 #include <EEPROM.h>
 
-#define DEBUG_OFF   // Turn _ON to allow Ethernet startup without OnStep (Serial port for debug at 9600 baud)
+#define DEBUG_OFF   // Turn _ON to allow web and cmd channel servers to startup without OnStep (Serial port for debug at 115200 baud)
 
 #include "Constants.h"
 #include "Locales.h"
