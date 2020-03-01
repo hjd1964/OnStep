@@ -389,7 +389,7 @@ void processCommands() {
 // :FC[sn.n]# Set focuser temperature compensation coefficient in um per deg. C (+ moves out as temperature falls)
 //            Return: 0 on failure
 //                    1 on success
-        if (command[1] == 'C') { f = atof(parameter); if (abs(f) < 10000.0) foc->setTcfCoef(f); else commandError=CE_PARAM_RANGE; } else
+        if (command[1] == 'C') { f = atof(parameter); if (fabs(f) < 10000.0) foc->setTcfCoef(f); else commandError=CE_PARAM_RANGE; } else
 // :Fc#       Get focuser temperature compensation enable status
 //            Return: 0 if disabled
 //                    1 if enabled
@@ -716,9 +716,9 @@ void processCommands() {
 #endif
         if (rateCompensation == RC_NONE) {
           double tr=getTrackingRate60Hz();
-          if (abs(tr-57.900)<0.001)                  reply[1]|=0b10000001; else                              // Lunar rate selected
-          if (abs(tr-60.000)<0.001)                  reply[1]|=0b10000010; else                              // Solar rate selected
-          if (abs(tr-60.136)<0.001)                  reply[1]|=0b10000011;                                   // King rate selected
+          if (fabs(tr-57.900)<0.001)                 reply[1]|=0b10000001; else                              // Lunar rate selected
+          if (fabs(tr-60.000)<0.001)                 reply[1]|=0b10000010; else                              // Solar rate selected
+          if (fabs(tr-60.136)<0.001)                 reply[1]|=0b10000011;                                   // King rate selected
         }
         
         if (syncToEncodersOnly)                      reply[1]|=0b10000100;                                   // sync to encoders only
@@ -1816,14 +1816,14 @@ void processCommands() {
           switch (parameter[1]) {
             case '9': // minutes past meridianE
               degreesPastMeridianE=(double)strtol(&parameter[3],NULL,10)/4.0;
-              if (abs(degreesPastMeridianE) <= 180) {
+              if (labs(degreesPastMeridianE) <= 180) {
                 i=round(degreesPastMeridianE); if (degreesPastMeridianE > 60) i= 60+round((i-60)/2); else if (degreesPastMeridianE < -60) i=-60+round((i+60)/2);
                 nv.write(EE_dpmE,round(i+128));
               } else commandError=CE_PARAM_RANGE;
               break;
             case 'A': // minutes past meridianW
               degreesPastMeridianW=(double)strtol(&parameter[3],NULL,10)/4.0;
-              if (abs(degreesPastMeridianW) <= 180) {
+              if (labs(degreesPastMeridianW) <= 180) {
                 i=round(degreesPastMeridianW); if (degreesPastMeridianW > 60) i= 60+round((i-60)/2); else if (degreesPastMeridianW < -60) i=-60+round((i+60)/2);
                 nv.write(EE_dpmW,round(i+128));
               } else commandError=CE_PARAM_RANGE;

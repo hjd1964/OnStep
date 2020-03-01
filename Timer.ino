@@ -127,7 +127,7 @@ void timerSupervisor(bool isCentiSecond) {
           axis1DriverGotoMode();
 
           // at higher step rates where torque is reduced make smaller rate changes
-          double r=1.2-sqrt((abs(guideTimerRateAxis1A)/slewRateX));
+          double r=1.2-sqrt((fabs(guideTimerRateAxis1A)/slewRateX));
           if (r < 0.2) r=0.2; if (r > 1.2) r=1.2;
   
           // acceleration/deceleration control
@@ -142,7 +142,7 @@ void timerSupervisor(bool isCentiSecond) {
   
           // stop guiding
           if (guideDirAxis1 == 'b') {
-            if (abs(guideTimerRateAxis1A) < 0.001) { guideDirAxis1=0; lastGuideDirAxis1=0; guideTimerRateAxis1=0.0; guideTimerRateAxis1A=0.0; guideDirChangeTimerAxis1=0; axis1DriverTrackingMode(false); }
+            if (fabs(guideTimerRateAxis1A) < 0.001) { guideDirAxis1=0; lastGuideDirAxis1=0; guideTimerRateAxis1=0.0; guideTimerRateAxis1A=0.0; guideDirChangeTimerAxis1=0; axis1DriverTrackingMode(false); }
           }
         }
       }
@@ -168,7 +168,7 @@ void timerSupervisor(bool isCentiSecond) {
           axis2DriverGotoMode();
   
           // at higher step rates where torque is reduced make smaller rate changes
-          double r=1.2-sqrt((abs(guideTimerRateAxis2A)/slewRateX));
+          double r=1.2-sqrt((fabs(guideTimerRateAxis2A)/slewRateX));
           if (r < 0.2) r=0.2; if (r > 1.2) r=1.2;
   
           // acceleration/deceleration control
@@ -183,7 +183,7 @@ void timerSupervisor(bool isCentiSecond) {
   
           // stop guiding
           if (guideDirAxis2 == 'b') {
-            if (abs(guideTimerRateAxis2A) < 0.001) { guideDirAxis2=0; lastGuideDirAxis2=0; guideTimerRateAxis2=0.0; guideTimerRateAxis2A=0.0; guideDirChangeTimerAxis2=0; axis2DriverTrackingMode(false); }
+            if (fabs(guideTimerRateAxis2A) < 0.001) { guideDirAxis2=0; lastGuideDirAxis2=0; guideTimerRateAxis2=0.0; guideTimerRateAxis2A=0.0; guideDirChangeTimerAxis2=0; axis2DriverTrackingMode(false); }
           }
         }
       }

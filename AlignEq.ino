@@ -347,7 +347,7 @@ void TGeoAlign::equToInstr(double HA, double Dec, double *HA1, double *Dec1, int
   if (Dec < -90.0) Dec=-90.0;
 
   // breaks-down near the pole (limited to > 1' from pole)
-  if (abs(Dec) < 89.9833) {
+  if (fabs(Dec) < 89.9833) {
 
     // initial rough guess at instrument HA,Dec
     double h=HA/Rad;
@@ -414,7 +414,7 @@ void TGeoAlign::instrToEqu(double HA, double Dec, double *HA1, double *Dec1, int
   if (Dec < -90.0) Dec=-90.0;
 
   // breaks-down near the pole (limited to > 1' from pole)
-  if (abs(Dec) < 89.98333333) {
+  if (fabs(Dec) < 89.98333333) {
     double h=HA/Rad;
     double d=Dec/Rad;
     double sinDec=sin(d);

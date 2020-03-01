@@ -38,7 +38,7 @@ void moveTo() {
       } else {
         // if we're at a low latitude and in the opposite sky, |HA|=6 is very low on the horizon in this orientation and we need to delay arriving there during a meridian flip
         // in the extreme case, where the user is very near the (Earths!) equator an Horizon limit of -10 or -15 may be necessary for proper operation.
-        if ((currentAlt < 20.0) && (abs(latitude) < 45.0) && (getInstrAxis2() < 0.0)) {
+        if ((currentAlt < 20.0) && (fabs(latitude) < 45.0) && (getInstrAxis2() < 0.0)) {
           if (pierSideControl == PierSideFlipWE1) setTargetAxis1(-45.0,PierSideWest); else setTargetAxis1(45.0,PierSideEast);
         }
       }
@@ -48,7 +48,7 @@ void moveTo() {
         if (pierSideControl == PierSideFlipWE1) setTargetAxis1(-homePositionAxis1,PierSideWest); else setTargetAxis1(homePositionAxis1,PierSideEast);
       } else { 
         // if we're at a low latitude and in the opposite sky, |HA|=6 is very low on the horizon in this orientation and we need to delay arriving there during a meridian flip
-        if ((currentAlt < 20.0) && (abs(latitude) < 45.0) && (getInstrAxis2() > 0.0)) {
+        if ((currentAlt < 20.0) && (fabs(latitude) < 45.0) && (getInstrAxis2() > 0.0)) {
           if (pierSideControl == PierSideFlipWE1) setTargetAxis1(-45.0,PierSideWest); else setTargetAxis1(45.0,PierSideEast);
         }
       }
@@ -61,15 +61,15 @@ void moveTo() {
   long distStartAxis1,distStartAxis2,distDestAxis1,distDestAxis2;
 
   cli();
-  distStartAxis1=abs(posAxis1-startAxis1);  // distance from start Axis1
-  distStartAxis2=abs(posAxis2-startAxis2);  // distance from start Axis2
+  distStartAxis1=labs(posAxis1-startAxis1);  // distance from start Axis1
+  distStartAxis2=labs(posAxis2-startAxis2);  // distance from start Axis2
   sei();
   if (distStartAxis1 < 1) distStartAxis1=1;
   if (distStartAxis2 < 1) distStartAxis2=1;
 
   cli();
-  distDestAxis1=abs(posAxis1-(long)targetAxis1.part.m);  // distance from dest Axis1
-  distDestAxis2=abs(posAxis2-(long)targetAxis2.part.m);  // distance from dest Axis2
+  distDestAxis1=labs(posAxis1-(long)targetAxis1.part.m);  // distance from dest Axis1
+  distDestAxis2=labs(posAxis2-(long)targetAxis2.part.m);  // distance from dest Axis2
   sei();
   
   // adjust rates near the horizon to help keep from exceeding the minAlt limit
@@ -135,7 +135,7 @@ void moveTo() {
   if (abortSlew != 0) {
     if (abortSlew == 2) { a1r=(double)SiderealRate/(double)temp; } else
     if (abortSlew == 3) {
-      double r=1.2-sqrt((abs(a1r)/slewRateX));
+      double r=1.2-sqrt((fabs(a1r)/slewRateX));
       if (r < 0.2) r=0.2; if (r > 1.2) r=1.2;
       a1r-=(deaccXPerSec/100.0)*r; if (a1r < 2.0) a1r=2.0;
     }
@@ -154,7 +154,7 @@ void moveTo() {
   if (abortSlew != 0) {
     if (abortSlew == 2) { a2r=(double)SiderealRate/(double)temp; abortSlew++; } else
     if (abortSlew == 3) { 
-      double r=1.2-sqrt((abs(a2r)/slewRateX));
+      double r=1.2-sqrt((fabs(a2r)/slewRateX));
       if (r < 0.2) r=0.2; if (r > 1.2) r=1.2;
       a2r-=(deaccXPerSec/100.0)*r;
       if (a2r < 2.00) a2r=2.0;
@@ -180,7 +180,7 @@ void moveTo() {
     slewForceEnd=true;
   }
 
-  if ( ((distDestAxis1 <= ceil(abs(fixedToDouble(fstepAxis1)))+1) && (distDestAxis2 <= ceil(abs(fixedToDouble(fstepAxis2)))+1) ) || slewForceEnd ) {
+  if ( ((distDestAxis1 <= ceil(fabs(fixedToDouble(fstepAxis1)))+1) && (distDestAxis2 <= ceil(fabs(fixedToDouble(fstepAxis2)))+1) ) || slewForceEnd ) {
     slewEnding=false;
     slewForceEnd=false;
     abortSlew=0;

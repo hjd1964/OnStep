@@ -358,7 +358,7 @@ void TGeoAlignH::horToInstr(double Alt, double Azm, double *Alt1, double *Azm1, 
   if (Alt < -90.0) Alt=-90.0;
 
   // breaks-down near the Zenith (limited to > 1' from Zenith)
-  if (abs(Alt) < 89.98333333) {
+  if (fabs(Alt) < 89.98333333) {
 
     // initial rough guess at instrument HA,Dec
     double z=Azm/Rad;
@@ -428,7 +428,7 @@ void TGeoAlignH::instrToHor(double Alt, double Azm, double *Alt1, double *Azm1, 
   if (Alt < -90.0) Alt=-90.0;
 
   // breaks-down near the Zenith (limited to > 1' from Zenith)
-  if (abs(Alt) < 89.98333333) {
+  if (fabs(Alt) < 89.98333333) {
     double z=Azm/Rad;
     double a=Alt/Rad;
     double sinAlt=sin(a);
