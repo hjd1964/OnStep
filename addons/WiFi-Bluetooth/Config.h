@@ -87,7 +87,6 @@
 // -------------------------------------------------------------------------------------------------------------------------
 
 // misc. options that are usually not changed
-#define DEBUG_OFF  // Turn _ON to allow WiFi startup without OnStep attached (Serial port for debug at 115200 baud)
 #define Ser Serial // Default=Serial, This is the hardware serial port where OnStep is attached
 
 // -------------------------------------------------------------------------------
