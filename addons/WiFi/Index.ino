@@ -31,7 +31,7 @@ const char html_indexSidereal[] PROGMEM = "&nbsp;(<font class='c'>%s</font>&nbsp
 const char html_indexSite[] PROGMEM = "&nbsp;&nbsp;" L_LONG " = <font class='c'>%s</font>, " L_LAT " = <font class='c'>%s</font><br />";
 
 const char html_indexPosition[] PROGMEM = "&nbsp;&nbsp;" L_CURRENT ": " Axis1 "=<font class='c'>%s</font>, " Axis2 "=<font class='c'>%s</font><br />";
-const char html_indexTarget[] PROGMEM = "&nbsp;&nbsp;" L_TARGET ":&nbsp;&nbsp; " Axis1 "=<font class='c'>%s</font>, " Axis2 "=<font class='c'>%s</font><br />";
+const char html_indexTarget[] PROGMEM = "&nbsp;&nbsp;" L_TARGET ": " Axis1 "=<font class='c'>%s</font>, " Axis2 "=<font class='c'>%s</font><br />";
 #if ENCODERS == ON
 const char html_indexEncoder1[] PROGMEM = "&nbsp;&nbsp;OnStep: Ax1=<font class='c'>%s</font>, Ax2=<font class='c'>%s</font><br />";
 const char html_indexEncoder2[] PROGMEM = "&nbsp;&nbsp;" L_ENCODER ": Ax1=<font class='c'>%s</font>, Ax2=<font class='c'>%s</font><br />";

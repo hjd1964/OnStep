@@ -47,7 +47,7 @@
 #define L_SITE "Site"
 #define L_COORDINATES "Coordinates"
 #define L_CURRENT "Current"
-#define L_TARGET "Target"
+#define L_TARGET "Target&nbsp;&nbsp;"
 #define L_ENCODER "Encodr"
 #define L_POLAR_ALIGN "Polar Alignment"
 
