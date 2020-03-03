@@ -123,12 +123,12 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
       // nothing
     } else
     if (strstr(line,"STF")) {
-      u8g2_SetFont(u8g2, u8g2_font_unifont_t_greek);
+      u8g2_SetFont(u8g2, LF_GREEK);
       x+=u8g2_DrawGlyph(u8g2, x, y, 931); // sigma
       u8g2_SetFont(u8g2, myfont);
     } else
     if (strstr(line,"STT")) {
-      u8g2_SetFont(u8g2, u8g2_font_unifont_t_greek);
+      u8g2_SetFont(u8g2, LF_GREEK);
       x+=u8g2_DrawGlyph(u8g2, x, y, 927); // omicron
       x+=u8g2_DrawGlyph(u8g2, x, y, 931); // sigma
       u8g2_SetFont(u8g2, myfont);
@@ -144,7 +144,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
 
     // Star SubId
     sprintf(line, "%s", cat_mgr.subIdStr());
-    u8g2_SetFont(u8g2, u8g2_font_6x13_tf);
+    u8g2_SetFont(u8g2, LF_CATALOGS);
     x+=u8g2_DrawUTF8(u8g2, x, y, line);
     u8g2_SetFont(u8g2, myfont);
 
@@ -157,13 +157,13 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     // Bayer designation of the star (Greek letter) or Fleemstead designation of star (number) just before Con Abv.
     int p=cat_mgr.bayerFlam();
     if ((p>=0) && (p<24)) {
-      u8g2_SetFont(u8g2, u8g2_font_unifont_t_greek);
+      u8g2_SetFont(u8g2, LF_GREEK);
       x+=u8g2_DrawGlyph(u8g2, x, y, 945 + p);
       u8g2_SetFont(u8g2, myfont);
     } else {
       if (p>24) {
         sprintf(line,"%d",p-24);
-        u8g2_SetFont(u8g2, u8g2_font_6x13_tf);
+        u8g2_SetFont(u8g2, LF_CATALOGS);
         x+=u8g2_DrawUTF8(u8g2, x, y, line);
         u8g2_SetFont(u8g2, myfont);
       } 
@@ -186,7 +186,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
           char mfs[8], mf2s[8];
           dtostrf(mf, 4, 1, mfs);
           dtostrf(mf2, 4, 1, mf2s);
-          u8g2_SetFont(u8g2, u8g2_font_6x13_tf);
+          u8g2_SetFont(u8g2, LF_CATALOGS);
           sprintf(line,"%s",mf2s);
           x=ext_DrawFwNumeric(u8g2, dx-ext_GetFwNumericWidth(u8g2, line), y+line_height, line);
           sprintf(line,"%s",mfs);
@@ -247,7 +247,7 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     x += u8g2_DrawUTF8(u8g2, x, y, line);
      
     // Object SubId
-    u8g2_SetFont(u8g2, u8g2_font_6x13_tf);
+    u8g2_SetFont(u8g2, LF_CATALOGS);
     sprintf(line, "%s", cat_mgr.subIdStr());
     x += u8g2_DrawUTF8(u8g2, x, y, line);
     u8g2_SetFont(u8g2, myfont);
@@ -288,14 +288,14 @@ static uint8_t ext_draw_catalog_list_line(u8g2_t *u8g2, uint8_t y, CATALOG_DISPL
     cat_mgr.raHMS(vr1,vr2,vr3);
     sprintf(line," %02d:%02d:%02d",vr1,vr2,vr3);
     y += line_height;
-    x = u8g2_DrawUTF8(u8g2, 0, y, L_RA); u8g2_SetFont(u8g2, u8g2_font_6x13_tf); u8g2_DrawUTF8(u8g2, x, y, epoch); u8g2_SetFont(u8g2, myfont);
+    x = u8g2_DrawUTF8(u8g2, 0, y, L_RA); u8g2_SetFont(u8g2, LF_CATALOGS); u8g2_DrawUTF8(u8g2, x, y, epoch); u8g2_SetFont(u8g2, myfont);
     ext_DrawFwNumeric(u8g2, dx-ext_GetFwNumericWidth(u8g2, line), y, line);
 
     // Declination
     cat_mgr.decDMS(vd1,vd2, vd3);
     sprintf(line,"%+02d\xb0%02d'%02d",vd1,vd2,vd3);
     y += line_height;
-    x = u8g2_DrawUTF8(u8g2, 0, y, L_DE); u8g2_SetFont(u8g2, u8g2_font_6x13_tf); u8g2_DrawUTF8(u8g2, x, y, epoch); u8g2_SetFont(u8g2, myfont);
+    x = u8g2_DrawUTF8(u8g2, 0, y, L_DE); u8g2_SetFont(u8g2, LF_CATALOGS); u8g2_DrawUTF8(u8g2, x, y, epoch); u8g2_SetFont(u8g2, myfont);
     ext_DrawFwNumeric(u8g2, dx-ext_GetFwNumericWidth(u8g2, line), y, line);
   }
 
@@ -333,7 +333,7 @@ u8g2_SetFontPosBaseline(u8g2);
 */
 bool ext_UserInterfaceCatalog(u8g2_t *u8g2, Pad* extPad, const char *title)
 {
-  u8g2_SetFont(u8g2, u8g2_font_helvR10_tf);
+  u8g2_SetFont(u8g2, LF_STANDARD);
   u8g2_uint_t yy;
 
   uint8_t event;
@@ -449,7 +449,7 @@ u8g2_SetFontPosBaseline(u8g2);
 */
 bool ext_UserInterfaceUserCatalog(u8g2_t *u8g2, Pad* extPad, const char *title)
 {
-  u8g2_SetFont(u8g2, u8g2_font_helvR10_tf);
+  u8g2_SetFont(u8g2, LF_STANDARD);
   u8g2_uint_t yy;
 
   uint8_t event;

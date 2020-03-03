@@ -40,7 +40,7 @@ return:
 
 uint8_t ext_UserInterfaceInputValueBoolean(u8g2_t *u8g2, Pad* extPad, const char *title, boolean *value)
 {
-  u8g2_SetFont(u8g2, u8g2_font_helvR12_tf);
+  u8g2_SetFont(u8g2, LF_LARGE);
   uint8_t line_height;
   uint8_t height;
   u8g2_uint_t pixel_height;
@@ -118,7 +118,7 @@ uint8_t ext_UserInterfaceInputValueBoolean(u8g2_t *u8g2, Pad* extPad, const char
 
 uint8_t ext_UserInterfaceInputValueInteger(u8g2_t *u8g2, Pad* extPad, const char *title, const char *pre, uint8_t *value, uint8_t lo, uint8_t hi, uint8_t digits, const char *post)
 {
-  u8g2_SetFont(u8g2, u8g2_font_helvR12_tf);
+  u8g2_SetFont(u8g2, LF_LARGE);
   uint8_t line_height;
   uint8_t height;
   u8g2_uint_t pixel_height;
@@ -204,7 +204,7 @@ return:
 
 uint8_t ext_UserInterfaceInputValueFloat(u8g2_t *u8g2, Pad* extPad, const char *title, const char *pre, float *value, float lo, float hi, uint8_t len, uint8_t dec, const char *post)
 {
-  u8g2_SetFont(u8g2, u8g2_font_helvR12_tf);
+  u8g2_SetFont(u8g2, LF_LARGE);
   static char outstr[15];
   uint8_t line_height;
   uint8_t height;
@@ -342,7 +342,7 @@ uint8_t ext_UserInterfaceInputValueDMS(u8g2_t *u8g2, Pad* extPad, const char *ti
                                        uint8_t digits1,
                                        char* symb1, char* symb2, char* symb3, 
                                        char* symb_plus, char* symb_minus, bool display_seconds) {
-  u8g2_SetFont(u8g2, u8g2_font_helvR12_tf);
+  u8g2_SetFont(u8g2, LF_LARGE);
   uint8_t line_height;
   uint8_t height;
   u8g2_uint_t pixel_height;
@@ -480,7 +480,7 @@ uint8_t ext_UserInterfaceInputValueDMS(u8g2_t *u8g2, Pad* extPad, const char *ti
 uint8_t ext_UserInterfaceInputValueDate(u8g2_t *u8g2, Pad* extPad, const char *title, uint8_t& year, uint8_t& month, uint8_t& day)
 {
   char symb[] = "/";
-  u8g2_SetFont(u8g2, u8g2_font_helvR12_tf);
+  u8g2_SetFont(u8g2, LF_LARGE);
   //display.enableUTF8Print();
   uint8_t line_height;
   uint8_t height;

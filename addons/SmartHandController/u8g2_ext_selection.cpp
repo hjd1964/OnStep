@@ -35,10 +35,12 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 */
 
-
 #define MY_BORDER_SIZE 1
 #include "u8g2_ext_selection.h"
-
+#include "Constants.h"
+#include "Locales.h"
+#include "Config.h"
+#include "Locale.h"
 
 /*
 Draw a string at x,y
@@ -202,7 +204,7 @@ u8g2_SetFontPosBaseline(u8g2);
 */
 uint8_t ext_UserInterfaceSelectionList(u8g2_t *u8g2, Pad *extPad, const char *title, uint8_t start_pos, const char *sl, bool wrap)
 {
-  u8g2_SetFont(u8g2, u8g2_font_helvR10_tf);
+  u8g2_SetFont(u8g2, LF_STANDARD);
   u8sl_t u8sl;
   u8g2_uint_t yy;
 

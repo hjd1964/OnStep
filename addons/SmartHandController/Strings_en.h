@@ -1,6 +1,13 @@
 // -----------------------------------------------------------------------------------
 // Locale English (default,) ISO ISO639-1 language code "en"
 
+// Fonts
+// see https://github.com/olikraus/u8g2/wiki/fntlistall for the complete list of fonts
+#define LF_CATALOGS u8g2_font_6x13_tf       //  9 pixel height
+#define LF_GREEK u8g2_font_unifont_t_greek  // 10 pixel height
+#define LF_STANDARD u8g2_font_helvR10_tf    // 11 pixel height
+#define LF_LARGE u8g2_font_helvR12_tf       // 12 pixel height
+
 // General
 #define L_OK "OK"
 #define L_ON "ON"
