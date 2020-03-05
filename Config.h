@@ -43,19 +43,21 @@
                                           //         Provides Date/Time, and if available, PPS & Lat/Long also.
 
 // ACCESSORY CONTROL -------------------------------------------- see https://onstep.groups.io/g/main/wiki/6-Configuration#ACCESSORY
-#define DEW_HEATER1                   OFF //    OFF, ON, n. Where n=pin#  Dew heater automatic control based on ambient-temp. Option
-#define DEW_HEATER2                   OFF //    OFF, ON, n. Where n=pin#  (or individual heater temp.) and dew-point.  See    Option
-#define DEW_HEATER3                   OFF //    OFF, ON, n. Where n=pin#  WEATHER and DEW_HEATERn_TEMPERATURE enabled below.  Option
+#define DEW_HEATER1                   OFF //    OFF, ON, DS2413, n. Where n=pin#  Dew heater automatic control based on       Option
+#define DEW_HEATER2                   OFF //    OFF, ON, DS2413, n. Where n=pin#  ambient-temp (or individual heater temp)    Option
+#define DEW_HEATER3                   OFF //    OFF, ON, DS2413, n. Where n=pin#  and dew-point. Use ON for default Pin#.     Option
+#define DEW_HEATER4                   OFF //    OFF, ON, DS2413, n. Where n=pin#  Uses WEATHER/DEW_HEATERn_TEMPERATURE below. Option
 
 // SENSORS -------------------------------------------------------- see https://onstep.groups.io/g/main/wiki/6-Configuration#SENSORS
 // * = also supports ON_PULLUP or ON_PULLDOWN to activate MCU internal resistors if present.
 #define WEATHER                       OFF //    OFF, BME280 (I2C 0x77,) BME280_0x76, BME280_SPI (see pinmap for CS.)          Option
                                           //         Provides temperature, pressure, humidity.
 
-#define TELESCOPE_TEMPERATURE         OFF //    OFF, DS1820, n=0..3 (DS1820 dev. index) telescope temperature on OneWire.     Option
-#define DEW_HEATER1_TEMPERATURE       OFF //    OFF, DS1820, n=0..3 (DS1820 dev. index) dew heater1 temperature on OneWire.   Option
-#define DEW_HEATER2_TEMPERATURE       OFF //    OFF, DS1820, n=0..3 (DS1820 dev. index) dew heater2 temperature on OneWire.   Option
-#define DEW_HEATER3_TEMPERATURE       OFF //    OFF, DS1820, n=0..3 (DS1820 dev. index) dew heater3 temperature on OneWire.   Option
+#define TELESCOPE_TEMPERATURE         OFF //    OFF, DS1820. For telescope temperature on OneWire.                            Option
+#define DEW_HEATER1_TEMPERATURE       OFF //    OFF, DS1820. For dew heater1 temperature on OneWire.                          Option
+#define DEW_HEATER2_TEMPERATURE       OFF //    OFF, DS1820. For dew heater2 temperature on OneWire.                          Option
+#define DEW_HEATER3_TEMPERATURE       OFF //    OFF, DS1820. For dew heater3 temperature on OneWire.                          Option
+#define DEW_HEATER4_TEMPERATURE       OFF //    OFF, DS1820. For dew heater4 temperature on OneWire.                          Option
 
 #define HOME_SENSE                    OFF //    OFF, ON*. Automatically detect and use home switches. For GEM mode only.      Option
 #define HOME_SENSE_STATE_AXIS1       HIGH //   HIGH, State when clockwise of home position, as seen from front. Rev. w/LOW.   Adjust

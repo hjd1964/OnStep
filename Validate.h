@@ -20,6 +20,9 @@
 #ifndef DEW_HEATER3
   #define DEW_HEATER3 OFF
 #endif
+#ifndef DEW_HEATER4
+  #define DEW_HEATER4 OFF
+#endif
 #ifndef DEW_HEATER1_TEMPERATURE
   #define DEW_HEATER1_TEMPERATURE OFF
 #endif
@@ -28,6 +31,9 @@
 #endif
 #ifndef DEW_HEATER3_TEMPERATURE
   #define DEW_HEATER3_TEMPERATURE OFF
+#endif
+#ifndef DEW_HEATER4_TEMPERATURE
+  #define DEW_HEATER4_TEMPERATURE OFF
 #endif
 
 // -----------------------------------------------------------------------------------
@@ -67,20 +73,38 @@
 #endif
 
 // override default pin assignments as necessary
-#if DEW_HEATER1 != ON && DEW_HEATER1 != OFF
+#if DEW_HEATER1 >= 0
+  #ifdef Heater1Pin
+    #undef Heater1Pin
+  #endif
   #define Heater1Pin DEW_HEATER1
 #endif
-#if DEW_HEATER2 != ON && DEW_HEATER2 != OFF
+#if DEW_HEATER2 >= 0
+  #ifdef Heater2Pin
+    #undef Heater2Pin
+  #endif
   #define Heater2Pin DEW_HEATER2
 #endif
-#if DEW_HEATER3 != ON && DEW_HEATER3 != OFF
+#if DEW_HEATER3 >= 0
+  #ifdef Heater3Pin
+    #undef Heater3Pin
+  #endif
   #define Heater3Pin DEW_HEATER3
+#endif
+#if DEW_HEATER4 >= 0
+  #ifdef Heater4Pin
+    #undef Heater4Pin
+  #endif
+  #define Heater4Pin DEW_HEATER4
 #endif
 
 // flag OneWire and DS1820 devices
 #if TELESCOPE_TEMPERATURE != OFF || DEW_HEATER1_TEMPERATURE != OFF || DEW_HEATER2_TEMPERATURE != OFF || DEW_HEATER3_TEMPERATURE != OFF
   #define ONEWIRE_DEVICES_PRESENT
   #define DS1820_DEVICES_PRESENT
+  #if DEW_HEATER1 == DS2413 || DEW_HEATER2 == DS2413 || DEW_HEATER3 == DS2413 || DEW_HEATER4 == DS2413
+    #define DS2413_DEVICES_PRESENT
+  #endif
 #endif
 
 // make sure all stepper driver options are present even if not defined
@@ -295,44 +319,56 @@
 
 #ifndef DEW_HEATER1
   #error "Configuration (Config.h): Setting DEW_HEATER1 must be present!"
-#elif DEW_HEATER1 != OFF && DEW_HEATER1 != ON && (DEW_HEATER1 < 0 || DEW_HEATER1 > 1023)
-  #error "Configuration (Config.h): Setting DEW_HEATER1 invalid, use OFF, ON, or a valid pin# (0 to 1023 only.)"
+#elif DEW_HEATER1 != OFF && DEW_HEATER1 != ON && (DEW_HEATER1 < 0 || DEW_HEATER1 > 1024)
+  #error "Configuration (Config.h): Setting DEW_HEATER1 invalid, use OFF, ON, DS2413, or a valid pin# (0 to 1023 only.)"
 #endif
 
 #ifndef DEW_HEATER2
   #error "Configuration (Config.h): Setting DEW_HEATER2 must be present!"
-#elif DEW_HEATER2 != OFF && DEW_HEATER2 != ON && (DEW_HEATER2 < 0 || DEW_HEATER2 > 1023)
-  #error "Configuration (Config.h): Setting DEW_HEATER2 invalid, use OFF, ON, or a valid pin# (0 to 1023 only.)"
+#elif DEW_HEATER2 != OFF && DEW_HEATER2 != ON && (DEW_HEATER2 < 0 || DEW_HEATER2 > 1024)
+  #error "Configuration (Config.h): Setting DEW_HEATER2 invalid, use OFF, ON, DS2413, or a valid pin# (0 to 1023 only.)"
 #endif
 
 #ifndef DEW_HEATER3
   #error "Configuration (Config.h): Setting DEW_HEATER3 must be present!"
-#elif DEW_HEATER3 != OFF && DEW_HEATER3 != ON && (DEW_HEATER3 < 0 || DEW_HEATER3 > 1023)
-  #error "Configuration (Config.h): Setting DEW_HEATER3 invalid, use OFF, ON, or a valid pin# (0 to 1023 only.)"
+#elif DEW_HEATER3 != OFF && DEW_HEATER3 != ON && (DEW_HEATER3 < 0 || DEW_HEATER3 > 1024)
+  #error "Configuration (Config.h): Setting DEW_HEATER3 invalid, use OFF, ON, DS2413, or a valid pin# (0 to 1023 only.)"
+#endif
+
+#ifndef DEW_HEATER4
+  #error "Configuration (Config.h): Setting DEW_HEATER4 must be present!"
+#elif DEW_HEATER4 != OFF && DEW_HEATER4 != ON && (DEW_HEATER4 < 0 || DEW_HEATER4 > 1024)
+  #error "Configuration (Config.h): Setting DEW_HEATER4 invalid, use OFF, ON, DS2413, or a valid pin# (0 to 1023 only.)"
 #endif
 
 #ifndef TELESCOPE_TEMPERATURE
   #error "Configuration (Config.h): Setting TELESCOPE_TEMPERATURE must be present!"
 #elif TELESCOPE_TEMPERATURE != OFF && (TELESCOPE_TEMPERATURE < DS1820_TEMPERATURE_FIRST || TELESCOPE_TEMPERATURE > DS1820_TEMPERATURE_LAST)
-  #error "Configuration (Config.h): Setting TELESCOPE_TEMPERATURE sensor invalid, use OFF, DS1820, or number 0 to 3 only."
+  #error "Configuration (Config.h): Setting TELESCOPE_TEMPERATURE sensor invalid, use OFF or DS1820 only."
 #endif
 
 #ifndef DEW_HEATER1_TEMPERATURE
   #error "Configuration (Config.h): Setting DEW_HEATER1_TEMPERATURE must be present!"
 #elif DEW_HEATER1_TEMPERATURE != OFF && (DEW_HEATER1_TEMPERATURE < DS1820_TEMPERATURE_FIRST || DEW_HEATER1_TEMPERATURE > DS1820_TEMPERATURE_LAST)
-  #error "Configuration (Config.h): Setting DEW_HEATER1_TEMPERATURE invalid, use OFF, DS1820, or number 0 to 3 only."
+  #error "Configuration (Config.h): Setting DEW_HEATER1_TEMPERATURE invalid, use OFF or DS1820 only."
 #endif
 
 #ifndef DEW_HEATER2_TEMPERATURE
   #error "Configuration (Config.h): Setting DEW_HEATER2_TEMPERATURE must be present!"
 #elif DEW_HEATER2_TEMPERATURE != OFF && (DEW_HEATER2_TEMPERATURE < DS1820_TEMPERATURE_FIRST || DEW_HEATER2_TEMPERATURE > DS1820_TEMPERATURE_LAST)
-  #error "Configuration (Config.h): Setting DEW_HEATER2_TEMPERATURE invalid, use OFF, DS1820, or number 0 to 3 only."
+  #error "Configuration (Config.h): Setting DEW_HEATER2_TEMPERATURE invalid, use OFF or DS1820 only."
 #endif
 
 #ifndef DEW_HEATER3_TEMPERATURE
   #error "Configuration (Config.h): Setting DEW_HEATER3_TEMPERATURE must be present!"
 #elif DEW_HEATER3_TEMPERATURE != OFF && (DEW_HEATER3_TEMPERATURE < DS1820_TEMPERATURE_FIRST || DEW_HEATER3_TEMPERATURE > DS1820_TEMPERATURE_LAST)
-  #error "Configuration (Config.h): Setting DEW_HEATER3_TEMPERATURE invalid, use OFF, DS1820, or number 0 to 3 only."
+  #error "Configuration (Config.h): Setting DEW_HEATER3_TEMPERATURE invalid, use OFF or DS1820 only."
+#endif
+
+#ifndef DEW_HEATER4_TEMPERATURE
+  #error "Configuration (Config.h): Setting DEW_HEATER4_TEMPERATURE must be present!"
+#elif DEW_HEATER4_TEMPERATURE != OFF && (DEW_HEATER4_TEMPERATURE < DS1820_TEMPERATURE_FIRST || DEW_HEATER4_TEMPERATURE > DS1820_TEMPERATURE_LAST)
+  #error "Configuration (Config.h): Setting DEW_HEATER4_TEMPERATURE invalid, use OFF or DS1820 only."
 #endif
 
 #ifndef HOME_SENSE

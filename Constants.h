@@ -75,10 +75,13 @@
 #define BME280_SPI                  3 // BME280 on SPI (default CS)
 #define WEATHER_LAST                4
 
-#define DS1820_TEMPERATURE_FIRST    0
-#define DS1820                      0 // First/only DS18B20 on OneWire
-#define DS1820_TEMPERATURE_LAST     3
+// temperature sensors etc. for focusing and dew heaters
+#define DS1820_TEMPERATURE_FIRST    1
+#define DS1820                      1
+#define DS1820_TEMPERATURE_LAST     1
 
+// special pin# indicating this is one of the DS2413 GPIO pins
+#define DS2413                      1024
 
 // coordinate mode for getting and setting RA/Dec
 #define OBSERVED_PLACE              1

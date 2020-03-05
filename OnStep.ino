@@ -106,6 +106,9 @@ weather ambient;
 #if DEW_HEATER3 != OFF
   dewHeaterControl dewHeater3;
 #endif
+#if DEW_HEATER4 != OFF
+  dewHeaterControl dewHeater4;
+#endif
 
 #if ROTATOR == ON
   #include "src/lib/Rotator.h"
@@ -235,11 +238,15 @@ void setup() {
 #endif
 #if DEW_HEATER2 != OFF
   dewHeater2.init(Heater2Pin);
-  if (DEW_HEATER2_TEMPERATURE != OFF) { dewHeater1.setLowDeltaC(1); dewHeater1.setHighDeltaC(3); }
+  if (DEW_HEATER2_TEMPERATURE != OFF) { dewHeater2.setLowDeltaC(1); dewHeater2.setHighDeltaC(3); }
 #endif
 #if DEW_HEATER3 != OFF
   dewHeater3.init(Heater3Pin);
-  if (DEW_HEATER3_TEMPERATURE != OFF) { dewHeater1.setLowDeltaC(1); dewHeater1.setHighDeltaC(3); }
+  if (DEW_HEATER3_TEMPERATURE != OFF) { dewHeater3.setLowDeltaC(1); dewHeater3.setHighDeltaC(3); }
+#endif
+#if DEW_HEATER4 != OFF
+  dewHeater4.init(Heater4Pin);
+  if (DEW_HEATER4_TEMPERATURE != OFF) { dewHeater4.setLowDeltaC(1); dewHeater4.setHighDeltaC(3); }
 #endif
 
   // get the TLS ready (if present)
@@ -519,26 +526,39 @@ void loop2() {
     // AUTOMATIC DEW HEATERS
 #if DEW_HEATER1 != OFF
 	#if DEW_HEATER1_TEMPERATURE != OFF
-    dewHeater1.poll(ambient.getDS1820Temperature(0)-ambient.getDewPoint());
+    dewHeater1.poll(ambient.getDewHeaterTemperature(0)-ambient.getDewPoint());
 	#else
     dewHeater1.poll(ambient.getTemperature()-ambient.getDewPoint());
 	#endif
+  ambient.setDewHeaterState(1,dewHeater1.isHeaterOn());
 #endif
 #if DEW_HEATER2 != OFF
 	#if DEW_HEATER2_TEMPERATURE != OFF
-    dewHeater2.poll(ambient.getDS1820Temperature(1)-ambient.getDewPoint());
+    dewHeater2.poll(ambient.getDewHeaterTemperature(1)-ambient.getDewPoint());
 	#else
     dewHeater2.poll(ambient.getTemperature()-ambient.getDewPoint());
 	#endif
+  ambient.setDewHeaterState(2,dewHeater2.isHeaterOn());
 #endif
 #if DEW_HEATER3 != OFF
-	#if DEW_HEATER2_TEMPERATURE != OFF
-    dewHeater3.poll(ambient.getDS1820Temperature(2)-ambient.getDewPoint());
-	#else
+  #if DEW_HEATER3_TEMPERATURE != OFF
+    dewHeater3.poll(ambient.getDewHeaterTemperature(2)-ambient.getDewPoint());
+  #else
     dewHeater3.poll(ambient.getTemperature()-ambient.getDewPoint());
-	#endif
+  #endif
+  ambient.setDewHeaterState(3,dewHeater3.isHeaterOn());
+#endif
+#if DEW_HEATER4 != OFF
+  #if DEW_HEATER4_TEMPERATURE != OFF
+    dewHeater4.poll(ambient.getDewHeaterTemperature(3)-ambient.getDewPoint());
+  #else
+    dewHeater4.poll(ambient.getTemperature()-ambient.getDewPoint());
+  #endif
+  ambient.setDewHeaterState(4,dewHeater4.isHeaterOn());
 #endif
 
+    // WEATHER
+    if (!isSlewing()) ambient.poll();
   }
 
   // FASTEST POLLING -----------------------------------------------------------------------------------
@@ -644,9 +664,6 @@ void loop2() {
       if (currentDec > AXIS2_LIMIT_MAX) { generalError=ERR_DEC; decMaxLimit(); }
   #endif
 #endif
-
-    // SLOW POLLING --------------------------------------------------------------------------------------
-    if (!isSlewing()) ambient.poll(); // update weather info
 
   } else {
     // COMMAND PROCESSING --------------------------------------------------------------------------------
