@@ -14,9 +14,13 @@ void StepperModeTrackingInit() {
 #endif
   axis1DriverTrackingMode(true);
   axis2DriverTrackingMode(true);
-#if AXIS1_DRIVER_MODEL == TMC_SPI
-  axis1DriverInitFast();
-  axis2DriverInitFast();
+#if AXIS1_DRIVER_MODEL == TMC_SPI && MODE_SWITCH_BEFORE_SLEW == OFF
+  #if AXIS1_DRIVER_CODE_GOTO
+    axis1DriverInitFast();
+  #endif
+  #if AXIS2_DRIVER_CODE_GOTO
+    axis2DriverInitFast();
+  #endif
 #endif
 
   // then disable again
