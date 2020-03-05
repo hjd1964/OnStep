@@ -47,13 +47,13 @@ class weather {
           if (DS18B20.validFamily(address)) {
             for (int j=0; j<8; j++) _DS1820_address[_DS1820_devices][j]=address[j];
             _DS1820_devices++;
-            Serial.println("Found a DS18B20!");
+//            Serial.println("Found a DS18B20!");
           }
   #ifdef DS2413_DEVICES_PRESENT
           if (DS2413GPIO.validFamily(address)) {
             for (int j=0; j<8; j++) _DS2413_address[_DS2413_devices][j]=address[j];
             _DS2413_devices++;
-            Serial.println("Found a DS2413!");
+//            Serial.println("Found a DS2413!");
           }
   #endif
         }
@@ -105,25 +105,30 @@ class weather {
   #ifdef ONEWIRE_DEVICES_PRESENT
         if (_DS2413_found) {
     #if DEW_HEATER1 == DS2413 || DEW_HEATER2 == DS2413
-          if (phase == 49) { Serial.print("ds2413 channel 1 and 2>"); }
-          if (phase == 50) { if (!DS2413GPIO.setStateByAddress(_DS2413_address[_DS2413_count],_dh_state[1],_dh_state[0],true)) advance=false;  else { Serial.println("<"); _DS2413_count++; } }
+//          if (phase == 49) { Serial.print("ds2413 channel 1 and 2>"); }
+          if (phase == 50) { if (!DS2413GPIO.setStateByAddress(_DS2413_address[_DS2413_count],_dh_state[1],_dh_state[0],true)) advance=false; else _DS2413_count++; }
+//          if (phase == 51) Serial.println("<");
     #endif
     #if DEW_HEATER3 == DS2413 || DEW_HEATER4 == DS2413
-          if (phase == 59) { Serial.print("ds2413 channel 3 and 4>"); }
-          if (phase == 60) { if (!DS2413GPIO.setStateByAddress(_DS2413_address[_DS2413_count],_dh_state[3],_dh_state[2],true)) advance=false;  else { Serial.println("<"); _DS2413_count++; } }
+//          if (phase == 59) { Serial.print("ds2413 channel 3 and 4>"); }
+          if (phase == 60) { if (!DS2413GPIO.setStateByAddress(_DS2413_address[_DS2413_count],_dh_state[3],_dh_state[2],true)) advance=false; else _DS2413_count++; }
+//          if (phase == 61) Serial.println("<");
     #endif
         }
 
         if (_DS1820_found) {
           if (phase == 0) { advance=DS18B20.requestTemperatures(true); _DS1820_count = 0; _DS2413_count = 0; }
     #if TELESCOPE_TEMPERATURE != OFF
-          if (phase == 100) { f = DS18B20.getTempC(_DS1820_address[_DS1820_count],true); if (Tpolling(f)) advance=false; else { _DS1820_count++; if (Tvalid(f)) _tt=f; else _tt=100.0; Serial.print("tt="); Serial.println(_tt); } }
+          if (phase == 100) { f = DS18B20.getTempC(_DS1820_address[_DS1820_count],true); if (Tpolling(f)) advance=false; else { _DS1820_count++; if (Tvalid(f)) _tt=f; else _tt=100.0; } }
+//          if (phase == 101) { Serial.print("tt="); Serial.println(_tt); }
     #endif
     #if DEW_HEATER1_TEMPERATURE != OFF
-          if (phase == 104) { f = DS18B20.getTempC(_DS1820_address[_DS1820_count],true); if (Tpolling(f)) advance=false; else { _DS1820_count++; if (Tvalid(f)) _dh_t[0]=f; else _dh_t[0]=100.0; Serial.print("dh_t0="); Serial.println(_dh_t[0]); } }
+          if (phase == 104) { f = DS18B20.getTempC(_DS1820_address[_DS1820_count],true); if (Tpolling(f)) advance=false; else { _DS1820_count++; if (Tvalid(f)) _dh_t[0]=f; else _dh_t[0]=100.0; } }
+//          if (phase == 105) { Serial.print("dh_t0="); Serial.println(_dh_t[0]); }
     #endif
     #if DEW_HEATER2_TEMPERATURE != OFF
-          if (phase == 108) { f = DS18B20.getTempC(_DS1820_address[_DS1820_count],true); if (Tpolling(f)) advance=false; else { _DS1820_count++; if (Tvalid(f)) _dh_t[1]=f; else _dh_t[1]=100.0; Serial.print("dh_t1="); Serial.println(_dh_t[1]); } }
+          if (phase == 108) { f = DS18B20.getTempC(_DS1820_address[_DS1820_count],true); if (Tpolling(f)) advance=false; else { _DS1820_count++; if (Tvalid(f)) _dh_t[1]=f; else _dh_t[1]=100.0; } }
+//          if (phase == 109) { Serial.print("dh_t0="); Serial.println(_dh_t[0]); }
     #endif
     #if DEW_HEATER3_TEMPERATURE != OFF
           if (phase == 112) { f = DS18B20.getTempC(_DS1820_address[_DS1820_count],true); if (Tpolling(f)) advance=false; else { _DS1820_count++; if (Tvalid(f)) _dh_t[2]=f; else _dh_t[2]=100.0; } }
