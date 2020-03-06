@@ -33,7 +33,7 @@ double HzCf                             = 16000000.0/60.0;   // conversion facto
 volatile long SiderealRate;                                  // based on the siderealInterval, time between steps sidereal tracking
 volatile long TakeupRate;                                    // takeup rate for synchronizing target and actual positions
                                                                           
-long last_loop_micros                   = 0;                 // workload monitoring
+unsigned long last_loop_micros          = 0;                 // workload monitoring
 long this_loop_time                     = 0;
 long loop_time                          = 0;
 long worst_loop_time                    = 0;
