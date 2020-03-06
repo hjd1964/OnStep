@@ -84,63 +84,95 @@ class weather {
     void poll() {
 #if WEATHER != OFF || defined(ONEWIRE_DEVICES_PRESENT)
       if (_BME280_found || _DS1820_found || _DS2413_found) {
-        static int phase = 0;
-        bool advance = true;
         double f;
 
-  #if WEATHER != OFF
-        if (_BME280_found) {
-    #ifdef ESP32
-          if (phase == 4 || phase == 8 || phase == 12) HAL_Wire.begin();
-    #endif
-          if (phase == 4) _t = bme.readTemperature();
-          if (phase == 8) _p = bme.readPressure() / 100.0;
-          if (phase == 12) _h = bme.readHumidity();
-    #if defined(ESP32) & defined(WIRE_END_SUPPORT)
-          if (phase == 4 || phase == 8 || phase == 12) HAL_Wire.end();
-    #endif
-        }
-  #endif
+        static int phase = 0;
+        if (phase >= 600) { phase = 0; _DS1820_count = 0; }
 
   #ifdef ONEWIRE_DEVICES_PRESENT
         if (_DS2413_found) {
-    #if DEW_HEATER1 == DS2413 || DEW_HEATER2 == DS2413
-//          if (phase == 49) { Serial.print("ds2413 channel 1 and 2>"); }
-          if (phase == 50) { if (!DS2413GPIO.setStateByAddress(_DS2413_address[_DS2413_count],_dh_state[1],_dh_state[0],true)) advance=false; else _DS2413_count++; }
-//          if (phase == 51) Serial.println("<");
-    #endif
-    #if DEW_HEATER3 == DS2413 || DEW_HEATER4 == DS2413
-//          if (phase == 59) { Serial.print("ds2413 channel 3 and 4>"); }
-          if (phase == 60) { if (!DS2413GPIO.setStateByAddress(_DS2413_address[_DS2413_count],_dh_state[3],_dh_state[2],true)) advance=false; else _DS2413_count++; }
-//          if (phase == 61) Serial.println("<");
-    #endif
+      #if DEW_HEATER1 == DS2413 || DEW_HEATER2 == DS2413
+          if (phase%2 == 0 && (_last_dh_state[1] != _dh_state[1] || _last_dh_state[0] != _dh_state[0])) {
+            if (DS2413GPIO.setStateByAddress(_DS2413_address[0],_dh_state[1],_dh_state[0],true)) {
+              phase++;
+              _last_dh_state[1] = _dh_state[1];
+              _last_dh_state[0] = _dh_state[0];
+              Serial.print(_dh_state[1]);
+              Serial.println(_dh_state[0]);
+            }
+            return;
+          }
+      #endif
+      #if DEW_HEATER3 == DS2413 || DEW_HEATER4 == DS2413
+          if (phase%2 == 0 && (_last_dh_state[3] != _dh_state[3] || _last_dh_state[2] != _dh_state[2])) {
+            if (DS2413GPIO.setStateByAddress(_DS2413_address[1],_dh_state[3],_dh_state[2],true)) {
+              phase++;
+              _last_dh_state[3] = _dh_state[3];
+              _last_dh_state[2] = _dh_state[2];
+            }
+            return;
+          }
+      #endif
         }
 
         if (_DS1820_found) {
-          if (phase == 0) { advance=DS18B20.requestTemperatures(true); _DS1820_count = 0; _DS2413_count = 0; }
+          if (phase == 0) { if (DS18B20.requestTemperatures(true)) phase++; return; }
     #if TELESCOPE_TEMPERATURE != OFF
-          if (phase == 100) { f = DS18B20.getTempC(_DS1820_address[_DS1820_count],true); if (Tpolling(f)) advance=false; else { _DS1820_count++; if (Tvalid(f)) _tt=f; else _tt=100.0; } }
-//          if (phase == 101) { Serial.print("tt="); Serial.println(_tt); }
+          if (phase == 100) { f = DS18B20.getTempC(_DS1820_address[_DS1820_count],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _tt=f; else _tt=100.0; phase++; return; } }
+//          if (phase == 102) { Serial.print("tt="); Serial.println(_tt); }
     #endif
     #if DEW_HEATER1_TEMPERATURE != OFF
-          if (phase == 104) { f = DS18B20.getTempC(_DS1820_address[_DS1820_count],true); if (Tpolling(f)) advance=false; else { _DS1820_count++; if (Tvalid(f)) _dh_t[0]=f; else _dh_t[0]=100.0; } }
-//          if (phase == 105) { Serial.print("dh_t0="); Serial.println(_dh_t[0]); }
+          if (phase == 200) { f = DS18B20.getTempC(_DS1820_address[_DS1820_count],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _dh_t[0]=f; else _dh_t[0]=100.0; phase++; return; } }
+//          if (phase == 202) { Serial.print("dh_t0="); Serial.println(_dh_t[0]); }
     #endif
     #if DEW_HEATER2_TEMPERATURE != OFF
-          if (phase == 108) { f = DS18B20.getTempC(_DS1820_address[_DS1820_count],true); if (Tpolling(f)) advance=false; else { _DS1820_count++; if (Tvalid(f)) _dh_t[1]=f; else _dh_t[1]=100.0; } }
-//          if (phase == 109) { Serial.print("dh_t0="); Serial.println(_dh_t[0]); }
+          if (phase == 300) { f = DS18B20.getTempC(_DS1820_address[_DS1820_count],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _dh_t[1]=f; else _dh_t[1]=100.0; phase++; return; } }
+//          if (phase == 302) { Serial.print("dh_t0="); Serial.println(_dh_t[0]); }
     #endif
     #if DEW_HEATER3_TEMPERATURE != OFF
-          if (phase == 112) { f = DS18B20.getTempC(_DS1820_address[_DS1820_count],true); if (Tpolling(f)) advance=false; else { _DS1820_count++; if (Tvalid(f)) _dh_t[2]=f; else _dh_t[2]=100.0; } }
+          if (phase == 400) { f = DS18B20.getTempC(_DS1820_address[_DS1820_count],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _dh_t[2]=f; else _dh_t[2]=100.0; phase++; return; } }
     #endif
     #if DEW_HEATER4_TEMPERATURE != OFF
-          if (phase == 116) { f = DS18B20.getTempC(_DS1820_address[_DS1820_count],true); if (Tpolling(f)) advance=false; else { _DS1820_count++; if (Tvalid(f)) _dh_t[2]=f; else _dh_t[2]=100.0; } }
+          if (phase == 500) { f = DS18B20.getTempC(_DS1820_address[_DS1820_count],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _dh_t[2]=f; else _dh_t[2]=100.0; phase++; return; } }
     #endif
         }
   #endif
 
-        if (advance) phase++;
-        if (phase == 120) phase = 0;
+  #if WEATHER != OFF
+        if (_BME280_found) {
+          if (phase == 4) {
+            #ifdef ESP32
+              HAL_Wire.begin();
+            #endif
+            _t = bme.readTemperature();
+            #if defined(ESP32) & defined(WIRE_END_SUPPORT)
+              HAL_Wire.end();
+            #endif
+            phase++; return;
+          }
+          if (phase == 8) {
+            #ifdef ESP32
+              HAL_Wire.begin();
+            #endif
+            _p = bme.readPressure() / 100.0;
+            #if defined(ESP32) & defined(WIRE_END_SUPPORT)
+              HAL_Wire.end();
+            #endif
+            phase++; return;
+          }
+          if (phase == 12) {
+            #ifdef ESP32
+              HAL_Wire.begin();
+            #endif
+            _h = bme.readHumidity();
+            #if defined(ESP32) & defined(WIRE_END_SUPPORT)
+              HAL_Wire.end();
+            #endif
+            phase++; return;
+          }
+        }
+  #endif
+      phase++;
       }
 #endif
     }
@@ -224,7 +256,6 @@ class weather {
 
     bool _DS2413_found = false;
     int  _DS2413_devices = 0;
-    int  _DS2413_count = 0;
     uint8_t _DS2413_address[2][8];
 
     double _t = 10.0;
@@ -234,6 +265,7 @@ class weather {
     double _tt = 10.0;
     double _dh_t[4] = {10.0, 10.0, 10.0, 10.0};
     bool _dh_state[4] = {false, false, false, false};
+    bool _last_dh_state[4] = {false, false, false, false};
 
 #ifdef ONEWIRE_DEVICES_PRESENT
     bool Tpolling(double f) {

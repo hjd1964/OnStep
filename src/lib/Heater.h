@@ -3,6 +3,8 @@
 
 #pragma once
 
+#define DH_PULSE_WIDTH_MS 2000
+
 class dewHeaterControl {
   public:
     void init(int pin) {
@@ -13,7 +15,7 @@ class dewHeaterControl {
     void poll(int deltaAboveDewPointC) {
       int switchTimeMs=0;
       deltaAboveDewPointC=constrain(deltaAboveDewPointC,lowDeltaC,highDeltaC);
-      switchTimeMs=map(deltaAboveDewPointC,lowDeltaC,highDeltaC,1000,0);
+      switchTimeMs=map(deltaAboveDewPointC,lowDeltaC,highDeltaC,DH_PULSE_WIDTH_MS,0);
       currentTime = millis();
       if (!heaterOn && (long)(currentTime - (lastHeaterCycle + switchTimeMs)) <= 0)
       {
@@ -25,7 +27,7 @@ class dewHeaterControl {
         if (_pin>0) digitalWrite(_pin,LOW);
         heaterOn=false;
       }
-      else if ((long)(currentTime - (lastHeaterCycle + 1000)) > 0) {
+      else if ((long)(currentTime - (lastHeaterCycle + DH_PULSE_WIDTH_MS)) > 0) {
         lastHeaterCycle=currentTime;
       }
     }
