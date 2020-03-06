@@ -45,13 +45,13 @@ class weather {
       while (oneWire.search(address)) {
         if (oneWire.crc8(address, 7) == address[7]) {
           if (DS18B20.validFamily(address)) {
-            for (int j=0; j<8; j++) _DS1820_address[_DS1820_devices][j]=address[j];
+            if (_DS1820_devices <= 3) for (int j=0; j<8; j++) _DS1820_address[_DS1820_devices][j]=address[j];
             _DS1820_devices++;
 //            Serial.println("Found a DS18B20!");
           }
   #ifdef DS2413_DEVICES_PRESENT
           if (DS2413GPIO.validFamily(address)) {
-            for (int j=0; j<8; j++) _DS2413_address[_DS2413_devices][j]=address[j];
+            if (_DS2413_devices <= 1) for (int j=0; j<8; j++) _DS2413_address[_DS2413_devices][j]=address[j];
             _DS2413_devices++;
 //            Serial.println("Found a DS2413!");
           }
