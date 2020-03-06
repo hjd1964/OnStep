@@ -93,39 +93,36 @@ class weather {
         if (_DS2413_found) {
       #if DEW_HEATER1 == DS2413 || DEW_HEATER2 == DS2413
           if (phase%2 == 1 && (_last_dh_state[1] != _dh_state[1] || _last_dh_state[0] != _dh_state[0])) {
-            if (DS2413GPIO.setStateByAddress(_DS2413_address[0],_dh_state[1],_dh_state[0],true)) {
-              phase++;
-              _last_dh_state[1] = _dh_state[1];
-              _last_dh_state[0] = _dh_state[0];
-            }
+            if (DS2413GPIO.setStateByAddress(_DS2413_address[0],_dh_state[1],_dh_state[0],true)) { phase++; _last_dh_state[1] = _dh_state[1]; _last_dh_state[0] = _dh_state[0]; }
             return;
           }
       #endif
       #if DEW_HEATER3 == DS2413 || DEW_HEATER4 == DS2413
           if (phase%2 == 1 && (_last_dh_state[3] != _dh_state[3] || _last_dh_state[2] != _dh_state[2])) {
-            if (DS2413GPIO.setStateByAddress(_DS2413_address[1],_dh_state[3],_dh_state[2],true)) {
-              phase++;
-              _last_dh_state[3] = _dh_state[3];
-              _last_dh_state[2] = _dh_state[2];
-            }
+            if (DS2413GPIO.setStateByAddress(_DS2413_address[1],_dh_state[3],_dh_state[2],true)) { phase++; _last_dh_state[3] = _dh_state[3]; _last_dh_state[2] = _dh_state[2]; }
             return;
           }
       #endif
         }
 
         if (_DS1820_found) {
-          if (phase == 0) { if (DS18B20.requestTemperatures(true)) phase++; return; }
+          if (phase == 0) { 
+              if (DS18B20.requestTemperatures(true)) phase++; 
+            return; 
+           }
     #if TELESCOPE_TEMPERATURE != OFF
-          if (phase == 100) { f = DS18B20.getTempC(_DS1820_address[_DS1820_count],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _tt=f; else _tt=100.0; phase++; return; } }
-//          if (phase == 102) { Serial.print("tt="); Serial.println(_tt); }
+          if (phase == 100) { 
+              f = DS18B20.getTempC(_DS1820_address[_DS1820_count],true); 
+              if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _tt=f; else _tt=100.0; phase++; return; } 
+            }
     #endif
     #if DEW_HEATER1_TEMPERATURE != OFF
-          if (phase == 200) { f = DS18B20.getTempC(_DS1820_address[_DS1820_count],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _dh_t[0]=f; else _dh_t[0]=100.0; phase++; return; } }
-//          if (phase == 202) { Serial.print("dh_t0="); Serial.println(_dh_t[0]); }
+          if (phase == 200) { 
+            f = DS18B20.getTempC(_DS1820_address[_DS1820_count],true); 
+            if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _dh_t[0]=f; else _dh_t[0]=100.0; phase++; return; } }
     #endif
     #if DEW_HEATER2_TEMPERATURE != OFF
           if (phase == 300) { f = DS18B20.getTempC(_DS1820_address[_DS1820_count],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _dh_t[1]=f; else _dh_t[1]=100.0; phase++; return; } }
-//          if (phase == 302) { Serial.print("dh_t0="); Serial.println(_dh_t[0]); }
     #endif
     #if DEW_HEATER3_TEMPERATURE != OFF
           if (phase == 400) { f = DS18B20.getTempC(_DS1820_address[_DS1820_count],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _dh_t[2]=f; else _dh_t[2]=100.0; phase++; return; } }
