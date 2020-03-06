@@ -92,19 +92,17 @@ class weather {
   #ifdef ONEWIRE_DEVICES_PRESENT
         if (_DS2413_found) {
       #if DEW_HEATER1 == DS2413 || DEW_HEATER2 == DS2413
-          if (phase%2 == 0 && (_last_dh_state[1] != _dh_state[1] || _last_dh_state[0] != _dh_state[0])) {
+          if (phase%2 == 1 && (_last_dh_state[1] != _dh_state[1] || _last_dh_state[0] != _dh_state[0])) {
             if (DS2413GPIO.setStateByAddress(_DS2413_address[0],_dh_state[1],_dh_state[0],true)) {
               phase++;
               _last_dh_state[1] = _dh_state[1];
               _last_dh_state[0] = _dh_state[0];
-              Serial.print(_dh_state[1]);
-              Serial.println(_dh_state[0]);
             }
             return;
           }
       #endif
       #if DEW_HEATER3 == DS2413 || DEW_HEATER4 == DS2413
-          if (phase%2 == 0 && (_last_dh_state[3] != _dh_state[3] || _last_dh_state[2] != _dh_state[2])) {
+          if (phase%2 == 1 && (_last_dh_state[3] != _dh_state[3] || _last_dh_state[2] != _dh_state[2])) {
             if (DS2413GPIO.setStateByAddress(_DS2413_address[1],_dh_state[3],_dh_state[2],true)) {
               phase++;
               _last_dh_state[3] = _dh_state[3];
@@ -195,6 +193,18 @@ class weather {
     
     // get dew heater temperature in deg. C
     double getDewHeaterTemperature(int index) {
+#if DEW_HEATER1_TEMPERATURE == OFF && WEATHER != OFF
+      _dh_t[0]=getTemperature();
+#endif
+#if DEW_HEATER2_TEMPERATURE == OFF && WEATHER != OFF
+      _dh_t[1]=getTemperature();
+#endif
+#if DEW_HEATER3_TEMPERATURE == OFF && WEATHER != OFF
+      _dh_t[2]=getTemperature();
+#endif
+#if DEW_HEATER4_TEMPERATURE == OFF && WEATHER != OFF
+      _dh_t[3]=getTemperature();
+#endif
       return _dh_t[index];
     }
     
