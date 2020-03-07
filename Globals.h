@@ -75,12 +75,12 @@ boolean faultAxis2                      = false;
 #if AXIS1_DRIVER_MODEL == TMC_SPI
   #define AXIS1_DRIVER_SWITCH_RATE 150*16L
 #else
-  #define AXIS1_DRIVER_SWITCH_RATE 128*16L
+  #define AXIS1_DRIVER_SWITCH_RATE 80*16L
 #endif
 #if AXIS2_DRIVER_MODEL == TMC_SPI
   #define AXIS2_DRIVER_SWITCH_RATE 150*16L
 #else
-  #define AXIS2_DRIVER_SWITCH_RATE 128*16L
+  #define AXIS2_DRIVER_SWITCH_RATE 80*16L
 #endif
 
 #define default_tracking_rate 1
