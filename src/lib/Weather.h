@@ -71,7 +71,7 @@ class weather {
   #elif WEATHER == BME280_0x76
       if (bme.begin(0x76, &HAL_Wire)) _BME280_found = true; else success = false;
   #else
-      if (bme.begin()) _BME280_found = true; else success = false;
+      if (bme.begin()) _BME280_found = true; else { if (bme.begin()) _BME280_found = true; else success = false; }
   #endif
   #if defined(ESP32) & defined(WIRE_END_SUPPORT)
       HAL_Wire.end();
