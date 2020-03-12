@@ -231,22 +231,22 @@ void setup() {
 
   // AUTOMATIC DEW HEATERS
 #if DEW_HEATER1 != OFF
-  // with ambient temperature: lowDeltaC = -5 (dew forming 100% power), highDeltaC = 15 (dew NOT forming 0% power)
-  dewHeater1.init(Heater1Pin);
-  // with individual temperature: lowDeltaC = 1 (dew almost forming 100% power), highDeltaC = 3 (dew NOT forming 0% power)
-  if (DEW_HEATER1_TEMPERATURE != OFF) { dewHeater1.setLowDeltaC(1); dewHeater1.setHighDeltaC(3); }
+  // with ambient temperature: zero = -5 (dew forming 100% power), span = 15 (dew NOT forming 0% power)
+  dewHeater1.init(Heater1Pin,EE_heater1Zero);
+  // with individual temperature: zero = 1 (dew almost forming 100% power), span = 3 (dew NOT forming 0% power)
+  if (DEW_HEATER1_TEMPERATURE != OFF) { dewHeater1.setZero(1); dewHeater1.setSpan(3); }
 #endif
 #if DEW_HEATER2 != OFF
-  dewHeater2.init(Heater2Pin);
-  if (DEW_HEATER2_TEMPERATURE != OFF) { dewHeater2.setLowDeltaC(1); dewHeater2.setHighDeltaC(3); }
+  dewHeater2.init(Heater2Pin,EE_heater2Zero);
+  if (DEW_HEATER2_TEMPERATURE != OFF) { dewHeater2.setZero(1); dewHeater2.setSpan(3); }
 #endif
 #if DEW_HEATER3 != OFF
-  dewHeater3.init(Heater3Pin);
-  if (DEW_HEATER3_TEMPERATURE != OFF) { dewHeater3.setLowDeltaC(1); dewHeater3.setHighDeltaC(3); }
+  dewHeater3.init(Heater3Pin,EE_heater3Zero);
+  if (DEW_HEATER3_TEMPERATURE != OFF) { dewHeater3.setZero(1); dewHeater3.setSpan(3); }
 #endif
 #if DEW_HEATER4 != OFF
-  dewHeater4.init(Heater4Pin);
-  if (DEW_HEATER4_TEMPERATURE != OFF) { dewHeater4.setLowDeltaC(1); dewHeater4.setHighDeltaC(3); }
+  dewHeater4.init(Heater4Pin,EE_heater4Zero);
+  if (DEW_HEATER4_TEMPERATURE != OFF) { dewHeater4.setZero(1); dewHeater4.setSpan(3); }
 #endif
 
   // get the TLS ready (if present)
@@ -526,19 +526,19 @@ void loop2() {
     // AUTOMATIC DEW HEATERS
 #if DEW_HEATER1 != OFF
     dewHeater1.poll(ambient.getDewHeaterTemperature(0)-ambient.getDewPoint());
-    ambient.setDewHeaterState(1,dewHeater1.isHeaterOn());
+    ambient.setDewHeaterState(1,dewHeater1.isOn());
 #endif
 #if DEW_HEATER2 != OFF
     dewHeater2.poll(ambient.getDewHeaterTemperature(1)-ambient.getDewPoint());
-    ambient.setDewHeaterState(2,dewHeater2.isHeaterOn());
+    ambient.setDewHeaterState(2,dewHeater2.isOn());
 #endif
 #if DEW_HEATER3 != OFF
     dewHeater3.poll(ambient.getDewHeaterTemperature(2)-ambient.getDewPoint());
-    ambient.setDewHeaterState(3,dewHeater3.isHeaterOn());
+    ambient.setDewHeaterState(3,dewHeater3.isOn());
 #endif
 #if DEW_HEATER4 != OFF
     dewHeater4.poll(ambient.getDewHeaterTemperature(3)-ambient.getDewPoint());
-    ambient.setDewHeaterState(4,dewHeater4.isHeaterOn());
+    ambient.setDewHeaterState(4,dewHeater4.isOn());
 #endif
 
     // WEATHER

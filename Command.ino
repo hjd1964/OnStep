@@ -880,69 +880,6 @@ void processCommands() {
               default:  commandError=CE_CMD_UNKNOWN;
             }
           } else
-		  if (parameter[0]=='h') {
-			  // Dew heater temperature
-			  switch (parameter[1]) {
-				case '1': dtostrf(ambient.getDewHeaterTemperature(0),3,1,reply); booleanReply=false; break;
-				case '2': dtostrf(ambient.getDewHeaterTemperature(1),3,1,reply); booleanReply=false; break;
-				case '3': dtostrf(ambient.getDewHeaterTemperature(2),3,1,reply); booleanReply=false; break;
-				case '4': dtostrf(ambient.getDewHeaterTemperature(3),3,1,reply); booleanReply=false; break;
-				default:  commandError=CE_CMD_UNKNOWN;
-			  }
-		  } else
-		  if (parameter[0]=='H') {
-		    // Dew heater get High Delta C
-			switch (parameter[1]) {
-				#if DEW_HEATER1 != OFF
-				case '1': dtostrf(dewHeater1.getHighDeltaC(),3,1,reply); booleanReply=false; break;
-				#endif
-				#if DEW_HEATER2 != OFF
-				case '2': dtostrf(dewHeater2.getHighDeltaC(),3,1,reply); booleanReply=false; break;
-				#endif
-				#if DEW_HEATER3 != OFF
-				case '3': dtostrf(dewHeater3.getHighDeltaC(),3,1,reply); booleanReply=false; break;
-				#endif
-				#if DEW_HEATER4 != OFF
-				case '4': dtostrf(dewHeater4.getHighDeltaC(),3,1,reply); booleanReply=false; break;
-				#endif
-				default:  commandError=CE_CMD_UNKNOWN;
-			}
-		  } else
-		  if (parameter[0]=='L') {
-		    // Dew heater get Low Delta C
-			switch (parameter[1]) {
-				#if DEW_HEATER1 != OFF
-				case '1': dtostrf(dewHeater1.getLowDeltaC(),3,1,reply); booleanReply=false; break;
-				#endif
-                                #if DEW_HEATER2 != OFF
-				case '2': dtostrf(dewHeater2.getLowDeltaC(),3,1,reply); booleanReply=false; break;
-				#endif
-				#if DEW_HEATER3 != OFF
-				case '3': dtostrf(dewHeater3.getLowDeltaC(),3,1,reply); booleanReply=false; break;
-				#endif
-				#if DEW_HEATER4 != OFF
-				case '4': dtostrf(dewHeater4.getLowDeltaC(),3,1,reply); booleanReply=false; break;
-				#endif
-				default:  commandError=CE_CMD_UNKNOWN;
-			}
-		  } else
-		  if (parameter[0]=='l') { // Get the current state of heater (on/off)
-			switch (parameter[1]) {
-				#if DEW_HEATER1 != OFF
-				case '1': dtostrf(dewHeater1.isHeaterOn()?1:0,3,1,reply);booleanReply=false; break;
-				#endif
-				#if DEW_HEATER2 != OFF
-				case '1': dtostrf(dewHeater2.isHeaterOn()?1:0,3,1,reply);booleanReply=false; break;
-				#endif
-				#if DEW_HEATER3 != OFF
-				case '1': dtostrf(dewHeater3.isHeaterOn()?1:0,3,1,reply);booleanReply=false; break;
-				#endif
-				#if DEW_HEATER4 != OFF
-				case '1': dtostrf(dewHeater4.isHeaterOn()?1:0,3,1,reply);booleanReply=false; break;
-				#endif
-				default:  commandError=CE_CMD_UNKNOWN;
-			}
-		  } else
 #if (AXIS1_DRIVER_STATUS == TMC_SPI) && (AXIS2_DRIVER_STATUS == TMC_SPI)
           if (parameter[0] == 'U') { // Un: Get stepper driver statUs
 
@@ -1048,7 +985,35 @@ void processCommands() {
 #ifdef Aux8
           if (parameter[0] == 'G' && parameter[1] == '8') { sprintf(reply,"%d",(int)round((float)valueAux8/2.55)); booleanReply=false; } else
 #endif
-            commandError=CE_CMD_UNKNOWN;
+          if (parameter[0] == 'H') { // Hn: dew heaters
+            switch (parameter[1]) {
+#if DEW_HEATER1 != OFF
+              case '0': sprintf(reply,"%d",dewHeater1.getZero()); booleanReply=false; break;
+              case '1': sprintf(reply,"%d",dewHeater1.getSpan()); booleanReply=false; break;
+              case '2': sprintf(reply,"%d",dewHeater1.isEnabled()); booleanReply=false; break;
+              case '3': dtostrf(ambient.getDewHeaterTemperature(0),3,1,reply); booleanReply=false; break;
+#endif
+#if DEW_HEATER2 != OFF
+              case '4': sprintf(reply,"%d",dewHeater2.getZero()); booleanReply=false; break;
+              case '5': sprintf(reply,"%d",dewHeater2.getSpan()); booleanReply=false; break;
+              case '6': sprintf(reply,"%d",dewHeater2.isEnabled()); booleanReply=false; break;
+              case '7': dtostrf(ambient.getDewHeaterTemperature(0),3,1,reply); booleanReply=false; break;
+#endif
+#if DEW_HEATER3 != OFF
+              case '8': sprintf(reply,"%d",dewHeater1.getZero()); booleanReply=false; break;
+              case '9': sprintf(reply,"%d",dewHeater1.getSpan()); booleanReply=false; break;
+              case 'A': sprintf(reply,"%d",dewHeater1.isEnabled()); booleanReply=false; break;
+              case 'B': dtostrf(ambient.getDewHeaterTemperature(0),3,1,reply); booleanReply=false; break;
+#endif
+#if DEW_HEATER4 != OFF
+              case 'C': sprintf(reply,"%d",dewHeater1.getZero()); booleanReply=false; break;
+              case 'D': sprintf(reply,"%d",dewHeater1.getSpan()); booleanReply=false; break;
+              case 'E': sprintf(reply,"%d",dewHeater1.isEnabled()); booleanReply=false; break;
+              case 'F': dtostrf(ambient.getDewHeaterTemperature(0),3,1,reply); booleanReply=false; break;
+#endif
+              default: commandError=CE_CMD_UNKNOWN;
+            }
+          } else commandError=CE_CMD_UNKNOWN;
         } else commandError=CE_CMD_UNKNOWN;
       } else
 // :GZ#       Get telescope azimuth
@@ -1850,24 +1815,26 @@ void processCommands() {
               if (parameter[3] == '1') { if (waitingHome) waitingHomeContinue=true; } commandError=CE_PARAM_RANGE;
             break;
             case 'A': // temperature in deg. C
-              f=strtod(parameter,&conv_end);
-              if (&parameter[0] != conv_end && f >= -100.0 && f < 100.0) {
+              f=strtod(&parameter[3],&conv_end);
+              if (&parameter[3] != conv_end && f >= -100.0 && f < 100.0) {
                 ambient.setTemperature(f);
               } else commandError=CE_PARAM_RANGE;
             break;
             case 'B': // pressure in mb
-              f=strtod(parameter,&conv_end);
-              if (&parameter[0] != conv_end && f >= 500.0 && f < 1500.0) {
+              f=strtod(&parameter[3],&conv_end);
+              if (&parameter[3] != conv_end && f >= 500.0 && f < 1500.0) {
                 ambient.setPressure(f);
               } else commandError=CE_PARAM_RANGE;
             break;
             case 'C': // relative humidity in % 
-              if (&parameter[0] != conv_end && f >= 0.0 && f < 100.0) {
+              f=strtod(&parameter[3],&conv_end);
+              if (&parameter[3] != conv_end && f >= 0.0 && f < 100.0) {
                 ambient.setHumidity(f);
               } else commandError=CE_PARAM_RANGE;
             break;
             case 'D': // altitude 
-              if (&parameter[0] != conv_end && f >= -100.0 && f < 20000.0) {
+              f=strtod(&parameter[3],&conv_end);
+              if (&parameter[3] != conv_end && f >= -100.0 && f < 20000.0) {
                 ambient.setAltitude(f);
               } else commandError=CE_PARAM_RANGE;
             break;
@@ -1895,57 +1862,6 @@ void processCommands() {
           }
         } else
 #endif
-		if (parameter[0] == "L") { // set heater  Low Delta C  
-			switch (parameter[1]) {
-				#if DEW_HEATER1 != OFF
-				case '1': dewHeater1.setLowDeltaC(parameter[2]);
-				#endif
-				#if DEW_HEATER2 != OFF
-				case '2': dewHeater2.setLowDeltaC(parameter[2]);
-				#endif
-				#if DEW_HEATER3 != OFF
-				case '3': dewHeater3.setLowDeltaC(parameter[2]);
-				#endif
-				#if DEW_HEATER4 != OFF
-				case '4': dewHeater4.setLowDeltaC(parameter[2]);
-				#endif
-				default: commandError=CE_CMD_UNKNOWN;
-			}
-		} else
-		if (parameter[0] == "H") { // set heater  High Delta C  
-			switch (parameter[1]) {
-				#if DEW_HEATER1 != OFF
-				case '1': dewHeater1.setHighDeltaC(parameter[2]);
-				#endif
-				#if DEW_HEATER2 != OFF
-				case '2': dewHeater2.setHighDeltaC(parameter[2]);
-				#endif
-				#if DEW_HEATER3 != OFF
-				case '3': dewHeater3.setHighDeltaC(parameter[2]);
-				#endif
-				#if DEW_HEATER4 != OFF
-				case '4': dewHeater4.setHighDeltaC(parameter[2]);
-				#endif
-				default: commandError=CE_CMD_UNKNOWN;
-			}
-		} else
-			if (parameter[0] == "h") { // Turn on/off heater  
-			switch (parameter[1]) {
-				#if DEW_HEATER1 != OFF
-				case '1': dewHeater1.setEnabled(parameter[2]);
-				#endif
-				#if DEW_HEATER2 != OFF
-				case '2': dewHeater2.setEnabled(parameter[2]);
-				#endif
-				#if DEW_HEATER3 != OFF
-				case '3': dewHeater3.setEnabled(parameter[2]);
-				#endif
-				#if DEW_HEATER4 != OFF
-				case '4': dewHeater4.setHighDeltaC(parameter[2]);
-				#endif
-				default: commandError=CE_CMD_UNKNOWN;
-			}
-		} else
         if (parameter[0] == 'G') { // Gn: General purpose output
           long v=(double)strtol(&parameter[3],NULL,10);
           if (v >= 0 && v <= 255) {
@@ -2008,6 +1924,32 @@ void processCommands() {
 #endif
             commandError=CE_PARAM_RANGE;
           } else commandError=CE_CMD_UNKNOWN;
+        } else
+        if (parameter[0] == 'H') { // Hn: dew heater control
+          long v=(double)strtol(&parameter[3],NULL,10);
+          switch (parameter[1]) {
+#if DEW_HEATER1 != OFF
+            case '0': if (v >= -10 && v <= 30) dewHeater1.setZero(v); else commandError=CE_PARAM_RANGE; break;
+            case '1': if (v >= -10 && v <= 30) dewHeater1.setSpan(v); else commandError=CE_PARAM_RANGE; break;
+            case '3': if (v >= 0 && v <= 1) dewHeater1.enable(v); else commandError=CE_PARAM_RANGE; break;
+#endif
+#if DEW_HEATER2 != OFF
+            case '4': if (v >= -10 && v <= 30) dewHeater2.setZero(v); else commandError=CE_PARAM_RANGE; break;
+            case '5': if (v >= -10 && v <= 30) dewHeater2.setSpan(v); else commandError=CE_PARAM_RANGE; break;
+            case '7': if (v >= 0 && v <= 1) dewHeater2.enable(v); else commandError=CE_PARAM_RANGE; break;
+#endif
+#if DEW_HEATER3 != OFF
+            case '8': if (v >= -10 && v <= 30) dewHeater3.setZero(v); else commandError=CE_PARAM_RANGE; break;
+            case '9': if (v >= -10 && v <= 30) dewHeater3.setSpan(v); else commandError=CE_PARAM_RANGE; break;
+            case 'B': if (v >= 0 && v <= 1) dewHeater3.enable(v); else commandError=CE_PARAM_RANGE; break;
+#endif
+#if DEW_HEATER4 != OFF
+            case 'C': if (v >= -10 && v <= 30) dewHeater4.setZero(v); else commandError=CE_PARAM_RANGE; break;
+            case 'D': if (v >= -10 && v <= 30) dewHeater4.setSpan(v); else commandError=CE_PARAM_RANGE; break;
+            case 'F': if (v >= 0 && v <= 1) dewHeater4.enable(v); else commandError=CE_PARAM_RANGE; break;
+#endif
+            default: commandError=CE_CMD_UNKNOWN;
+          }
         } else commandError=CE_CMD_UNKNOWN;
       } else
 // :Sz[DDD*MM]#

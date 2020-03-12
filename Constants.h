@@ -76,12 +76,10 @@
 #define WEATHER_LAST                4
 
 // temperature sensors etc. for focusing and dew heaters
-#define DS1820_TEMPERATURE_FIRST    1
-#define DS1820                      1
-#define DS1820_TEMPERATURE_LAST     1
+#define DS1820                      256
 
 // special pin# indicating this is one of the DS2413 GPIO pins
-#define DS2413                      1024
+#define DS2413                      257
 
 // coordinate mode for getting and setting RA/Dec
 #define OBSERVED_PLACE              1
@@ -181,6 +179,15 @@
 #define EE_tcfCoefAxis5            GSB+10  // 4
 #define EE_tcfEnAxis4              GSB+14  // 1
 #define EE_tcfEnAxis5              GSB+15  // 1
+
+#define EE_heater1Zero             GSB+16  // 1
+#define EE_heater1Span             GSB+17  // 1
+#define EE_heater2Zero             GSB+18  // 1
+#define EE_heater2Span             GSB+19  // 1
+#define EE_heater3Zero             GSB+20  // 1
+#define EE_heater4Span             GSB+21  // 1
+#define EE_heater5Zero             GSB+22  // 1
+#define EE_heater6Span             GSB+23  // 1
 
 // ---------------------------------------------------------------------------------------------------------------------------------
 // Unique identifier for the current initialization format for NV, do not change

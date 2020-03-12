@@ -36,21 +36,37 @@ class weather {
       bool success = true;
 #ifdef ONEWIRE_DEVICES_PRESENT
       uint8_t address[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+      _DS1820_devices=0;
 
-      // clear address arrays
-      for (int i=0; i<4; i++) for (int j=0; j<8; j++) _DS1820_address[i][j] = 0;
-    
+      // clear then pre-load any user defined DS1820 addresses
+      for (int i=0; i<5; i++) for (int j=0; j<8; j++) _DS1820_address[i][j] = 0;
+      if (TELESCOPE_TEMPERATURE > 255) { for (int j=0; j<8; j++) _DS1820_address[0][j] = (((uint64_t)TELESCOPE_TEMPERATURE) >> (j*8)) & 0xff; _DS1820_devices++; }
+      if (DEW_HEATER1_TEMPERATURE > 255) { for (int j=0; j<8; j++) _DS1820_address[1][j] = (((uint64_t)DEW_HEATER1_TEMPERATURE) >> (j*8)) & 0xff; _DS1820_devices++; }
+      if (DEW_HEATER2_TEMPERATURE > 255) { for (int j=0; j<8; j++) _DS1820_address[2][j] = (((uint64_t)DEW_HEATER2_TEMPERATURE) >> (j*8)) & 0xff; _DS1820_devices++; }
+      if (DEW_HEATER3_TEMPERATURE > 255) { for (int j=0; j<8; j++) _DS1820_address[3][j] = (((uint64_t)DEW_HEATER3_TEMPERATURE) >> (j*8)) & 0xff; _DS1820_devices++; }
+      if (DEW_HEATER4_TEMPERATURE > 255) { for (int j=0; j<8; j++) _DS1820_address[4][j] = (((uint64_t)DEW_HEATER4_TEMPERATURE) >> (j*8)) & 0xff; _DS1820_devices++; }
+
+      // clear then pre-load any user defined DS2413 addresses
+  #ifdef DS2413_DEVICES_PRESENT
+      for (int i=0; i<2; i++) for (int j=0; j<8; j++) _DS2413_address[i][j] = 0;
+      if (DEW_HEATER1 > 255 && DEW_HEATER1 == DEW_HEATER2) { for (int j=0; j<8; j++) _DS2413_address[0][j] = (DEW_HEATER1 >> (j*8)) & 0xff; _DS2413_devices++; }
+      if (DEW_HEATER3 > 255 && DEW_HEATER3 == DEW_HEATER4) { for (int j=0; j<8; j++) _DS2413_address[1][j] = (DEW_HEATER3 >> (j*8)) & 0xff; _DS2413_devices++; }
+  #endif
+  
       // scan the OneWire bus and record the devices found
       oneWire.reset_search();
+      // only search out DS1820's or DS2413's IF none are explicitly specified
+      bool searchDS1820 = _DS1820_devices == 0;
+      bool searchDS2413 = _DS2413_devices == 0;
       while (oneWire.search(address)) {
         if (oneWire.crc8(address, 7) == address[7]) {
-          if (DS18B20.validFamily(address)) {
-            if (_DS1820_devices <= 3) for (int j=0; j<8; j++) _DS1820_address[_DS1820_devices][j]=address[j];
+          if (DS18B20.validFamily(address) && searchDS1820) {
+            if (_DS1820_devices <= 4) for (int j=0; j<8; j++) _DS1820_address[_DS1820_devices][j]=address[j];
             _DS1820_devices++;
 //            Serial.println("Found a DS18B20!");
           }
   #ifdef DS2413_DEVICES_PRESENT
-          if (DS2413GPIO.validFamily(address)) {
+          if (DS2413GPIO.validFamily(address) && searchDS2413) {
             if (_DS2413_devices <= 1) for (int j=0; j<8; j++) _DS2413_address[_DS2413_devices][j]=address[j];
             _DS2413_devices++;
 //            Serial.println("Found a DS2413!");
@@ -106,20 +122,12 @@ class weather {
         }
 
         if (_DS1820_found) {
-          if (phase == 0) { 
-              if (DS18B20.requestTemperatures(true)) phase++; 
-            return; 
-           }
+          if (phase == 0) { if (DS18B20.requestTemperatures(true)) phase++; return; }
     #if TELESCOPE_TEMPERATURE != OFF
-          if (phase == 100) { 
-              f = DS18B20.getTempC(_DS1820_address[_DS1820_count],true); 
-              if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _tt=f; else _tt=100.0; phase++; return; } 
-            }
+          if (phase == 100) { f = DS18B20.getTempC(_DS1820_address[_DS1820_count],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _tt=f; else _tt=100.0; phase++; return; } }
     #endif
     #if DEW_HEATER1_TEMPERATURE != OFF
-          if (phase == 200) { 
-            f = DS18B20.getTempC(_DS1820_address[_DS1820_count],true); 
-            if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _dh_t[0]=f; else _dh_t[0]=100.0; phase++; return; } }
+          if (phase == 200) { f = DS18B20.getTempC(_DS1820_address[_DS1820_count],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _dh_t[0]=f; else _dh_t[0]=100.0; phase++; return; } }
     #endif
     #if DEW_HEATER2_TEMPERATURE != OFF
           if (phase == 300) { f = DS18B20.getTempC(_DS1820_address[_DS1820_count],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _dh_t[1]=f; else _dh_t[1]=100.0; phase++; return; } }
@@ -128,7 +136,7 @@ class weather {
           if (phase == 400) { f = DS18B20.getTempC(_DS1820_address[_DS1820_count],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _dh_t[2]=f; else _dh_t[2]=100.0; phase++; return; } }
     #endif
     #if DEW_HEATER4_TEMPERATURE != OFF
-          if (phase == 500) { f = DS18B20.getTempC(_DS1820_address[_DS1820_count],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _dh_t[2]=f; else _dh_t[2]=100.0; phase++; return; } }
+          if (phase == 500) { f = DS18B20.getTempC(_DS1820_address[_DS1820_count],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _dh_t[3]=f; else _dh_t[3]=100.0; phase++; return; } }
     #endif
         }
   #endif
@@ -259,7 +267,7 @@ class weather {
     bool _DS1820_found = false;
     int  _DS1820_devices = 0;
     int  _DS1820_count = 0;
-    uint8_t _DS1820_address[4][8];
+    uint8_t _DS1820_address[5][8];
 
     bool _DS2413_found = false;
     int  _DS2413_devices = 0;
