@@ -19,7 +19,7 @@ class dewHeaterControl {
       currentTime = millis();
       if (!heaterOn && (long)(currentTime - (lastHeaterCycle + switchTimeMs)) <= 0)
       {
-        if (_pin>0 && _pin<1024) digitalWrite(_pin,HIGH);
+        if (heaterEnabled && _pin>0 && _pin<1024) digitalWrite(_pin,HIGH);
         heaterOn=true;
       }
       else if (heaterOn && (long)(currentTime - (lastHeaterCycle + switchTimeMs)) > 0) 
@@ -32,9 +32,25 @@ class dewHeaterControl {
       }
     }
 
+	int getLowDeltaC() {
+		return lowDeltaC;
+	}
+	
+	int getHighDeltaC() {
+		return highDeltaC;
+	}
+
     void setLowDeltaC(int t) { lowDeltaC=t; }
     void setHighDeltaC(int t) { highDeltaC=t; }
-
+	
+	void setEnabled(bool e) { 
+		heaterEnabled=e; 
+		if (!heaterEnabled && _pin>0  && _pin<1024) 
+			{
+				digitalWrite(_pin,LOW);
+				heaterOn=false;
+			}
+	}
     bool isHeaterOn() { return heaterOn; }
   
   private:
@@ -42,6 +58,7 @@ class dewHeaterControl {
     unsigned long currentTime=0;
     
     bool heaterOn=false;
+	bool heaterEnabled=true;
     
     int lowDeltaC=-5;
     int highDeltaC=15;

@@ -880,6 +880,69 @@ void processCommands() {
               default:  commandError=CE_CMD_UNKNOWN;
             }
           } else
+		  if (parameter[0]=='h') {
+			  // Dew heater temperature
+			  switch (parameter[1]) {
+				case '1': dtostrf(ambient.getDewHeaterTemperature(0),3,1,reply); booleanReply=false; break;
+				case '2': dtostrf(ambient.getDewHeaterTemperature(1),3,1,reply); booleanReply=false; break;
+				case '3': dtostrf(ambient.getDewHeaterTemperature(2),3,1,reply); booleanReply=false; break;
+				case '4': dtostrf(ambient.getDewHeaterTemperature(3),3,1,reply); booleanReply=false; break;
+				default:  commandError=CE_CMD_UNKNOWN;
+			  }
+		  } else
+		  if (parameter[0]=='H') {
+		    // Dew heater get High Delta C
+			switch (parameter[1]) {
+				#if DEW_HEATER1 != OFF
+				case '1': dtostrf(dewHeater1.getHighDeltaC(),3,1,reply); booleanReply=false; break;
+				#endif
+				#if DEW_HEATER2 != OFF
+				case '2': dtostrf(dewHeater2.getHighDeltaC(),3,1,reply); booleanReply=false; break;
+				#endif
+				#if DEW_HEATER3 != OFF
+				case '3': dtostrf(dewHeater3.getHighDeltaC(),3,1,reply); booleanReply=false; break;
+				#endif
+				#if DEW_HEATER4 != OFF
+				case '4': dtostrf(dewHeater4.getHighDeltaC(),3,1,reply); booleanReply=false; break;
+				#endif
+				default:  commandError=CE_CMD_UNKNOWN;
+			}
+		  } else
+		  if (parameter[0]=='L') {
+		    // Dew heater get Low Delta C
+			switch (parameter[1]) {
+				#if DEW_HEATER1 != OFF
+				case '1': dtostrf(dewHeater1.getLowDeltaC(),3,1,reply); booleanReply=false; break;
+				#endif
+                                #if DEW_HEATER2 != OFF
+				case '2': dtostrf(dewHeater2.getLowDeltaC(),3,1,reply); booleanReply=false; break;
+				#endif
+				#if DEW_HEATER3 != OFF
+				case '3': dtostrf(dewHeater3.getLowDeltaC(),3,1,reply); booleanReply=false; break;
+				#endif
+				#if DEW_HEATER4 != OFF
+				case '4': dtostrf(dewHeater4.getLowDeltaC(),3,1,reply); booleanReply=false; break;
+				#endif
+				default:  commandError=CE_CMD_UNKNOWN;
+			}
+		  } else
+		  if (parameter[0]=='l') { // Get the current state of heater (on/off)
+			switch (parameter[1]) {
+				#if DEW_HEATER1 != OFF
+				case '1': dtostrf(dewHeater1.isHeaterOn()?1:0,3,1,reply);booleanReply=false; break;
+				#endif
+				#if DEW_HEATER2 != OFF
+				case '1': dtostrf(dewHeater2.isHeaterOn()?1:0,3,1,reply);booleanReply=false; break;
+				#endif
+				#if DEW_HEATER3 != OFF
+				case '1': dtostrf(dewHeater3.isHeaterOn()?1:0,3,1,reply);booleanReply=false; break;
+				#endif
+				#if DEW_HEATER4 != OFF
+				case '1': dtostrf(dewHeater4.isHeaterOn()?1:0,3,1,reply);booleanReply=false; break;
+				#endif
+				default:  commandError=CE_CMD_UNKNOWN;
+			}
+		  } else
 #if (AXIS1_DRIVER_STATUS == TMC_SPI) && (AXIS2_DRIVER_STATUS == TMC_SPI)
           if (parameter[0] == 'U') { // Un: Get stepper driver statUs
 
@@ -1832,6 +1895,57 @@ void processCommands() {
           }
         } else
 #endif
+		if (parameter[0] == "L") { // set heater  Low Delta C  
+			switch (parameter[1]) {
+				#if DEW_HEATER1 != OFF
+				case '1': dewHeater1.setLowDeltaC(parameter[2]);
+				#endif
+				#if DEW_HEATER2 != OFF
+				case '2': dewHeater2.setLowDeltaC(parameter[2]);
+				#endif
+				#if DEW_HEATER3 != OFF
+				case '3': dewHeater3.setLowDeltaC(parameter[2]);
+				#endif
+				#if DEW_HEATER4 != OFF
+				case '4': dewHeater4.setLowDeltaC(parameter[2]);
+				#endif
+				default: commandError=CE_CMD_UNKNOWN;
+			}
+		} else
+		if (parameter[0] == "H") { // set heater  High Delta C  
+			switch (parameter[1]) {
+				#if DEW_HEATER1 != OFF
+				case '1': dewHeater1.setHighDeltaC(parameter[2]);
+				#endif
+				#if DEW_HEATER2 != OFF
+				case '2': dewHeater2.setHighDeltaC(parameter[2]);
+				#endif
+				#if DEW_HEATER3 != OFF
+				case '3': dewHeater3.setHighDeltaC(parameter[2]);
+				#endif
+				#if DEW_HEATER4 != OFF
+				case '4': dewHeater4.setHighDeltaC(parameter[2]);
+				#endif
+				default: commandError=CE_CMD_UNKNOWN;
+			}
+		} else
+			if (parameter[0] == "h") { // Turn on/off heater  
+			switch (parameter[1]) {
+				#if DEW_HEATER1 != OFF
+				case '1': dewHeater1.setEnabled(parameter[2]);
+				#endif
+				#if DEW_HEATER2 != OFF
+				case '2': dewHeater2.setEnabled(parameter[2]);
+				#endif
+				#if DEW_HEATER3 != OFF
+				case '3': dewHeater3.setEnabled(parameter[2]);
+				#endif
+				#if DEW_HEATER4 != OFF
+				case '4': dewHeater4.setHighDeltaC(parameter[2]);
+				#endif
+				default: commandError=CE_CMD_UNKNOWN;
+			}
+		} else
         if (parameter[0] == 'G') { // Gn: General purpose output
           long v=(double)strtol(&parameter[3],NULL,10);
           if (v >= 0 && v <= 255) {
