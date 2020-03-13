@@ -9,7 +9,7 @@ class dewHeaterControl {
   public:
     void init(int pin, int nvAddress) {
       _pin = pin;
-      if (_pin > 0 && _pin < 255) pinMode(_pin, OUTPUT);
+      if (_pin >= 0 && _pin <= 255) pinMode(_pin, OUTPUT);
       _nvAddress = nvAddress;
       zero = nv.read(_nvAddress) - 10;
       span = nv.read(_nvAddress + 1) - 10;
@@ -24,12 +24,12 @@ class dewHeaterControl {
       currentTime = millis();
       if (!heaterOn && (long)(currentTime - (lastHeaterCycle + switchTimeMs)) <= 0)
       {
-        if (_pin > 0 && _pin < 1024) digitalWrite(_pin, HIGH);
+        if (_pin >= 0 && _pin <= 255) digitalWrite(_pin, HIGH);
         heaterOn = true;
       }
       else if (heaterOn && (long)(currentTime - (lastHeaterCycle + switchTimeMs)) > 0)
       {
-        if (_pin > 0  && _pin < 1024) digitalWrite(_pin, LOW);
+        if (_pin >= 0 && _pin <= 255) digitalWrite(_pin, LOW);
         heaterOn = false;
       }
       else if ((long)(currentTime - (lastHeaterCycle + DH_PULSE_WIDTH_MS)) > 0) {
@@ -61,7 +61,7 @@ class dewHeaterControl {
       return enabled;
     }
     void enable(bool state) {
-      if (_pin > 0  && _pin < 255) digitalWrite(_pin, LOW);
+      if (_pin >= 0  && _pin <= 255) digitalWrite(_pin, LOW);
       heaterOn = false;
       enabled = state;
     }

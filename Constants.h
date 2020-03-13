@@ -75,11 +75,11 @@
 #define BME280_SPI                  3 // BME280 on SPI (default CS)
 #define WEATHER_LAST                4
 
-// temperature sensors etc. for focusing and dew heaters
-#define DS1820                      256
-
-// special pin# indicating this is one of the DS2413 GPIO pins
-#define DS2413                      257
+// various Dallas/Maxim devices supported
+#define DALLAS_FIRST                256
+#define DS1820                      256 // DS18B20 temperature sensors etc. for focusing and dew heaters
+#define DS2413                      257 // DS2413 GPIO pins for dew heaters
+#define DALLAS_LAST                 257
 
 // coordinate mode for getting and setting RA/Dec
 #define OBSERVED_PLACE              1
