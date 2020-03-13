@@ -988,26 +988,26 @@ void processCommands() {
           if (parameter[0] == 'H') { // Hn: dew heaters
             switch (parameter[1]) {
 #if DEW_HEATER1 != OFF
-              case '0': sprintf(reply,"%d",dewHeater1.getZero()); booleanReply=false; break;
-              case '1': sprintf(reply,"%d",dewHeater1.getSpan()); booleanReply=false; break;
+              case '0': dtostrf(dewHeater1.getZero(),3,1,reply); booleanReply=false; break;
+              case '1': dtostrf(dewHeater1.getSpan(),3,1,reply); booleanReply=false; break;
               case '2': sprintf(reply,"%d",dewHeater1.isEnabled()); booleanReply=false; break;
               case '3': dtostrf(ambient.getDewHeaterTemperature(0),3,1,reply); booleanReply=false; break;
 #endif
 #if DEW_HEATER2 != OFF
-              case '4': sprintf(reply,"%d",dewHeater2.getZero()); booleanReply=false; break;
-              case '5': sprintf(reply,"%d",dewHeater2.getSpan()); booleanReply=false; break;
+              case '4': dtostrf(dewHeater2.getZero(),3,1,reply); booleanReply=false; break;
+              case '5': dtostrf(dewHeater2.getSpan(),3,1,reply); booleanReply=false; break;
               case '6': sprintf(reply,"%d",dewHeater2.isEnabled()); booleanReply=false; break;
               case '7': dtostrf(ambient.getDewHeaterTemperature(0),3,1,reply); booleanReply=false; break;
 #endif
 #if DEW_HEATER3 != OFF
-              case '8': sprintf(reply,"%d",dewHeater1.getZero()); booleanReply=false; break;
-              case '9': sprintf(reply,"%d",dewHeater1.getSpan()); booleanReply=false; break;
+              case '8': dtostrf(dewHeater3.getZero(),3,1,reply); booleanReply=false; break;
+              case '9': dtostrf(dewHeater3.getSpan(),3,1,reply); booleanReply=false; break;
               case 'A': sprintf(reply,"%d",dewHeater1.isEnabled()); booleanReply=false; break;
               case 'B': dtostrf(ambient.getDewHeaterTemperature(0),3,1,reply); booleanReply=false; break;
 #endif
 #if DEW_HEATER4 != OFF
-              case 'C': sprintf(reply,"%d",dewHeater1.getZero()); booleanReply=false; break;
-              case 'D': sprintf(reply,"%d",dewHeater1.getSpan()); booleanReply=false; break;
+              case 'C': dtostrf(dewHeater4.getZero(),3,1,reply); booleanReply=false; break;
+              case 'D': dtostrf(dewHeater4.getSpan(),3,1,reply); booleanReply=false; break;
               case 'E': sprintf(reply,"%d",dewHeater1.isEnabled()); booleanReply=false; break;
               case 'F': dtostrf(ambient.getDewHeaterTemperature(0),3,1,reply); booleanReply=false; break;
 #endif
@@ -1926,27 +1926,28 @@ void processCommands() {
           } else commandError=CE_CMD_UNKNOWN;
         } else
         if (parameter[0] == 'H') { // Hn: dew heater control
-          long v=(double)strtol(&parameter[3],NULL,10);
+          f=strtod(&parameter[3],&conv_end);
+          if (&parameter[3] == conv_end) commandError=CE_PARAM_FORM; else
           switch (parameter[1]) {
 #if DEW_HEATER1 != OFF
-            case '0': if (v >= -10 && v <= 30) dewHeater1.setZero(v); else commandError=CE_PARAM_RANGE; break;
-            case '1': if (v >= -10 && v <= 30) dewHeater1.setSpan(v); else commandError=CE_PARAM_RANGE; break;
-            case '3': if (v >= 0 && v <= 1) dewHeater1.enable(v); else commandError=CE_PARAM_RANGE; break;
+            case '0': if (f >= -5.0 && f <= 20.0) dewHeater1.setZero(f); else commandError=CE_PARAM_RANGE; break;
+            case '1': if (f >= -5.0 && f <= 20.0) dewHeater1.setSpan(f); else commandError=CE_PARAM_RANGE; break;
+            case '3': if (round(f) >= 0 && round(f) <= 1) dewHeater1.enable(round(f)); else commandError=CE_PARAM_RANGE; break;
 #endif
 #if DEW_HEATER2 != OFF
-            case '4': if (v >= -10 && v <= 30) dewHeater2.setZero(v); else commandError=CE_PARAM_RANGE; break;
-            case '5': if (v >= -10 && v <= 30) dewHeater2.setSpan(v); else commandError=CE_PARAM_RANGE; break;
-            case '7': if (v >= 0 && v <= 1) dewHeater2.enable(v); else commandError=CE_PARAM_RANGE; break;
+            case '4': if (f >= -5.0 && f <= 20.0) dewHeater2.setZero(f); else commandError=CE_PARAM_RANGE; break;
+            case '5': if (f >= -5.0 && f <= 20.0) dewHeater2.setSpan(f); else commandError=CE_PARAM_RANGE; break;
+            case '7': if (round(f) >= 0 && round(f) <= 1) dewHeater2.enable(round(f)); else commandError=CE_PARAM_RANGE; break;
 #endif
 #if DEW_HEATER3 != OFF
-            case '8': if (v >= -10 && v <= 30) dewHeater3.setZero(v); else commandError=CE_PARAM_RANGE; break;
-            case '9': if (v >= -10 && v <= 30) dewHeater3.setSpan(v); else commandError=CE_PARAM_RANGE; break;
-            case 'B': if (v >= 0 && v <= 1) dewHeater3.enable(v); else commandError=CE_PARAM_RANGE; break;
+            case '8': if (f >= -5.0 && f <= 20.0) dewHeater3.setZero(f); else commandError=CE_PARAM_RANGE; break;
+            case '9': if (f >= -5.0 && f <= 20.0) dewHeater3.setSpan(f); else commandError=CE_PARAM_RANGE; break;
+            case 'B': if (round(f) >= 0 && round(f) <= 1) dewHeater3.enable(round(f)); else commandError=CE_PARAM_RANGE; break;
 #endif
 #if DEW_HEATER4 != OFF
-            case 'C': if (v >= -10 && v <= 30) dewHeater4.setZero(v); else commandError=CE_PARAM_RANGE; break;
-            case 'D': if (v >= -10 && v <= 30) dewHeater4.setSpan(v); else commandError=CE_PARAM_RANGE; break;
-            case 'F': if (v >= 0 && v <= 1) dewHeater4.enable(v); else commandError=CE_PARAM_RANGE; break;
+            case 'C': if (f >= -5.0 && f <= 20.0) dewHeater4.setZero(f); else commandError=CE_PARAM_RANGE; break;
+            case 'D': if (f >= -5.0 && f <= 20.0) dewHeater4.setSpan(f); else commandError=CE_PARAM_RANGE; break;
+            case 'F': if (round(f) >= 0 && round(f) <= 1) dewHeater4.enable(round(f)); else commandError=CE_PARAM_RANGE; break;
 #endif
             default: commandError=CE_CMD_UNKNOWN;
           }

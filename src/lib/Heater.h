@@ -11,25 +11,27 @@ class dewHeaterControl {
       _pin = pin;
       if (_pin >= 0 && _pin <= 255) pinMode(_pin, OUTPUT);
       _nvAddress = nvAddress;
-      zero = nv.read(_nvAddress) - 10;
-      span = nv.read(_nvAddress + 1) - 10;
+      zero = nv.read(_nvAddress)/10.0 - 5.0;
+      span = nv.read(_nvAddress + 1)/10.0 - 5.0;
     }
 
-    void poll(int deltaAboveDewPointC) {
+    void poll(float deltaAboveDewPointC) {
       if (!enabled) return;
 
       int switchTimeMs = 0;
       deltaAboveDewPointC = constrain(deltaAboveDewPointC, zero, span);
-      switchTimeMs = map(deltaAboveDewPointC, zero, span, DH_PULSE_WIDTH_MS, 0);
+      switchTimeMs = map(lround(deltaAboveDewPointC*10.0), lround(zero*10.0), lround(span*10.0), DH_PULSE_WIDTH_MS, 0);
       currentTime = millis();
       if (!heaterOn && (long)(currentTime - (lastHeaterCycle + switchTimeMs)) <= 0)
       {
         if (_pin >= 0 && _pin <= 255) digitalWrite(_pin, HIGH);
+        Serial.println("on");
         heaterOn = true;
       }
       else if (heaterOn && (long)(currentTime - (lastHeaterCycle + switchTimeMs)) > 0)
       {
         if (_pin >= 0 && _pin <= 255) digitalWrite(_pin, LOW);
+        Serial.println("off");
         heaterOn = false;
       }
       else if ((long)(currentTime - (lastHeaterCycle + DH_PULSE_WIDTH_MS)) > 0) {
@@ -37,23 +39,23 @@ class dewHeaterControl {
       }
     }
 
-    int getZero() {
+    float getZero() {
       return zero;
     }
-    void setZero(int t) {
-      if (t >= -10 && t <= 30) {
+    void setZero(float t) {
+      if (t >= -5.0 && t <= 20.0) {
         zero = t;
-        nv.write(_nvAddress, zero + 10);
+        nv.write(_nvAddress, round((zero + 5.0)*10.0));
       }
     }
 
-    int getSpan() {
+    float getSpan() {
       return span;
     }
-    void setSpan(int t) {
-      if (t >= -10 && t <= 30) {
+    void setSpan(float t) {
+      if (t >= -5.0 && t <= 20.0) {
         span = t;
-        nv.write(_nvAddress + 1, span + 10);
+        nv.write(_nvAddress + 1, round((span + 5.0)*10.0));
       }
     }
 
