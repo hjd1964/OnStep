@@ -958,61 +958,11 @@ void processCommands() {
               default:  commandError=CE_CMD_UNKNOWN;
             }
           } else
-#ifdef Aux0
-          if (parameter[0] == 'G' && parameter[1] == '0') { sprintf(reply,"%d",(int)round((float)valueAux0/2.55)); booleanReply=false; } else
-#endif
-#ifdef Aux1
-          if (parameter[0] == 'G' && parameter[1] == '1') { sprintf(reply,"%d",(int)round((float)valueAux1/2.55)); booleanReply=false; } else
-#endif
-#ifdef Aux2
-          if (parameter[0] == 'G' && parameter[1] == '2') { sprintf(reply,"%d",(int)round((float)valueAux2/2.55)); booleanReply=false; } else
-#endif
-#ifdef Aux3
-          if (parameter[0] == 'G' && parameter[1] == '3') { sprintf(reply,"%d",(int)round((float)valueAux3/2.55)); booleanReply=false; } else
-#endif
-#ifdef Aux4
-          if (parameter[0] == 'G' && parameter[1] == '4') { sprintf(reply,"%d",(int)round((float)valueAux4/2.55)); booleanReply=false; } else
-#endif
-#ifdef Aux5
-          if (parameter[0] == 'G' && parameter[1] == '5') { sprintf(reply,"%d",(int)round((float)valueAux5/2.55)); booleanReply=false; } else
-#endif
-#ifdef Aux6
-          if (parameter[0] == 'G' && parameter[1] == '6') { sprintf(reply,"%d",(int)round((float)valueAux6/2.55)); booleanReply=false; } else
-#endif
-#ifdef Aux7
-          if (parameter[0] == 'G' && parameter[1] == '7') { sprintf(reply,"%d",(int)round((float)valueAux7/2.55)); booleanReply=false; } else
-#endif
-#ifdef Aux8
-          if (parameter[0] == 'G' && parameter[1] == '8') { sprintf(reply,"%d",(int)round((float)valueAux8/2.55)); booleanReply=false; } else
-#endif
-          if (parameter[0] == 'H') { // Hn: dew heaters
-            switch (parameter[1]) {
-#if DEW_HEATER1 != OFF
-              case '0': dtostrf(dewHeater1.getZero(),3,1,reply); booleanReply=false; break;
-              case '1': dtostrf(dewHeater1.getSpan(),3,1,reply); booleanReply=false; break;
-              case '2': sprintf(reply,"%d",dewHeater1.isEnabled()); booleanReply=false; break;
-              case '3': dtostrf(ambient.getDewHeaterTemperature(0),3,1,reply); booleanReply=false; break;
-#endif
-#if DEW_HEATER2 != OFF
-              case '4': dtostrf(dewHeater2.getZero(),3,1,reply); booleanReply=false; break;
-              case '5': dtostrf(dewHeater2.getSpan(),3,1,reply); booleanReply=false; break;
-              case '6': sprintf(reply,"%d",dewHeater2.isEnabled()); booleanReply=false; break;
-              case '7': dtostrf(ambient.getDewHeaterTemperature(0),3,1,reply); booleanReply=false; break;
-#endif
-#if DEW_HEATER3 != OFF
-              case '8': dtostrf(dewHeater3.getZero(),3,1,reply); booleanReply=false; break;
-              case '9': dtostrf(dewHeater3.getSpan(),3,1,reply); booleanReply=false; break;
-              case 'A': sprintf(reply,"%d",dewHeater1.isEnabled()); booleanReply=false; break;
-              case 'B': dtostrf(ambient.getDewHeaterTemperature(0),3,1,reply); booleanReply=false; break;
-#endif
-#if DEW_HEATER4 != OFF
-              case 'C': dtostrf(dewHeater4.getZero(),3,1,reply); booleanReply=false; break;
-              case 'D': dtostrf(dewHeater4.getSpan(),3,1,reply); booleanReply=false; break;
-              case 'E': sprintf(reply,"%d",dewHeater1.isEnabled()); booleanReply=false; break;
-              case 'F': dtostrf(ambient.getDewHeaterTemperature(0),3,1,reply); booleanReply=false; break;
-#endif
-              default: commandError=CE_CMD_UNKNOWN;
-            }
+          if (parameter[0] == 'X') { // Xn: get auXiliary feature
+            featuresGetCommand(parameter,reply,booleanReply);
+          } else
+          if (parameter[0] == 'Y') { // Yn: get auXiliary feature temperature
+            featuresGetTempCommand(parameter,reply,booleanReply);
           } else commandError=CE_CMD_UNKNOWN;
         } else commandError=CE_CMD_UNKNOWN;
       } else
@@ -1925,32 +1875,8 @@ void processCommands() {
             commandError=CE_PARAM_RANGE;
           } else commandError=CE_CMD_UNKNOWN;
         } else
-        if (parameter[0] == 'H') { // Hn: dew heater control
-          f=strtod(&parameter[3],&conv_end);
-          if (&parameter[3] == conv_end) commandError=CE_PARAM_FORM; else
-          switch (parameter[1]) {
-#if DEW_HEATER1 != OFF
-            case '0': if (f >= -5.0 && f <= 20.0) dewHeater1.setZero(f); else commandError=CE_PARAM_RANGE; break;
-            case '1': if (f >= -5.0 && f <= 20.0) dewHeater1.setSpan(f); else commandError=CE_PARAM_RANGE; break;
-            case '3': if (round(f) >= 0 && round(f) <= 1) dewHeater1.enable(round(f)); else commandError=CE_PARAM_RANGE; break;
-#endif
-#if DEW_HEATER2 != OFF
-            case '4': if (f >= -5.0 && f <= 20.0) dewHeater2.setZero(f); else commandError=CE_PARAM_RANGE; break;
-            case '5': if (f >= -5.0 && f <= 20.0) dewHeater2.setSpan(f); else commandError=CE_PARAM_RANGE; break;
-            case '7': if (round(f) >= 0 && round(f) <= 1) dewHeater2.enable(round(f)); else commandError=CE_PARAM_RANGE; break;
-#endif
-#if DEW_HEATER3 != OFF
-            case '8': if (f >= -5.0 && f <= 20.0) dewHeater3.setZero(f); else commandError=CE_PARAM_RANGE; break;
-            case '9': if (f >= -5.0 && f <= 20.0) dewHeater3.setSpan(f); else commandError=CE_PARAM_RANGE; break;
-            case 'B': if (round(f) >= 0 && round(f) <= 1) dewHeater3.enable(round(f)); else commandError=CE_PARAM_RANGE; break;
-#endif
-#if DEW_HEATER4 != OFF
-            case 'C': if (f >= -5.0 && f <= 20.0) dewHeater4.setZero(f); else commandError=CE_PARAM_RANGE; break;
-            case 'D': if (f >= -5.0 && f <= 20.0) dewHeater4.setSpan(f); else commandError=CE_PARAM_RANGE; break;
-            case 'F': if (round(f) >= 0 && round(f) <= 1) dewHeater4.enable(round(f)); else commandError=CE_PARAM_RANGE; break;
-#endif
-            default: commandError=CE_CMD_UNKNOWN;
-          }
+        if (parameter[0] == 'X') { // Xn: set auXiliary feature
+          featuresSetCommand(parameter);
         } else commandError=CE_CMD_UNKNOWN;
       } else
 // :Sz[DDD*MM]#

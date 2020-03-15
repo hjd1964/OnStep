@@ -41,25 +41,11 @@
 // TIME AND LOCATION -------------------------------------------------- see https://onstep.groups.io/g/main/wiki/6-Configuration#TLS
 #define TIME_LOCATION_SOURCE          OFF //    OFF, DS3231 (I2c,) DS3234 (Spi,) TEENSY (T3.2 internal,) or GPS source.       Option
                                           //         Provides Date/Time, and if available, PPS & Lat/Long also.
-
-// ACCESSORY CONTROL -------------------------------------------- see https://onstep.groups.io/g/main/wiki/6-Configuration#ACCESSORY
-#define DEW_HEATER1                   OFF //    OFF, ON, DS2413, n. Where n is pin# or DS2413 (GPIO0) s/n.                    Option
-#define DEW_HEATER2                   OFF //    OFF, ON, DS2413, n. Where n is pin# or DS2413 (GPIO1) s/n matching above.     Option
-#define DEW_HEATER3                   OFF //    OFF, ON, DS2413, n. Where n is pin# or DS2413 (GPIO0) s/n.                    Option
-#define DEW_HEATER4                   OFF //    OFF, ON, DS2413, n. Where n is pin# or DS2413 (GPIO1) s/n matching above.     Option
-
 // SENSORS -------------------------------------------------------- see https://onstep.groups.io/g/main/wiki/6-Configuration#SENSORS
 // * = also supports ON_PULLUP or ON_PULLDOWN to activate MCU internal resistors if present.
 #define WEATHER                       OFF //    OFF, BME280 (I2C 0x77,) BME280_0x76, BME280_SPI (see pinmap for CS.)          Option
                                           //         Provides temperature, pressure, humidity.
 
-#define TELESCOPE_TEMPERATURE         OFF //    OFF, DS1820, n. Where n is the DS1820 s/n for focuser, OneWire tele temp.     Option
-
-#define DEW_HEATER1_TEMPERATURE       OFF //    OFF, DS1820, n. Where n is the DS1820 s/n for dew heater1, temp on OneWire.   Option
-#define DEW_HEATER2_TEMPERATURE       OFF //    OFF, DS1820, n. Where n is the DS1820 s/n for dew heater2, temp on OneWire.   Option
-#define DEW_HEATER3_TEMPERATURE       OFF //    OFF, DS1820, n. Where n is the DS1820 s/n for dew heater3, temp on OneWire.   Option
-#define DEW_HEATER4_TEMPERATURE       OFF //    OFF, DS1820, n. Where n is the DS1820 s/n for dew heater4, temp on OneWire.   Option
-                                          //    
 
 #define HOME_SENSE                    OFF //    OFF, ON*. Automatically detect and use home switches. For GEM mode only.      Option
 #define HOME_SENSE_STATE_AXIS1       HIGH //   HIGH, State when clockwise of home position, as seen from front. Rev. w/LOW.   Adjust
@@ -211,6 +197,41 @@
 #define AXIS5_LIMIT_MIN_RATE           10 //     10, n. Where n=1..1000 (um/s.) Minimum microns/second. In DC mode, min pwr.  Adjust
 #define AXIS5_LIMIT_MIN                 0 //      0, n. Where n=0..500 (millimeters.) Minimum allowed position.               Adjust
 #define AXIS5_LIMIT_MAX                50 //     50, n. Where n=0..500 (millimeters.) Maximum allowed position.               Adjust
+
+// AUXILIARY FEATURE CONTROL ------------------------------------ see https://onstep.groups.io/g/main/wiki/6-Configuration#AUXILIARY
+#define FEATURE_LIST_DS               ON //    OFF, temporarily set ON to list DS1820 and DS2413 device serial numbers.      Adjust
+#define FEATURE1_NAME          "FEATURE1" // "FE..", Name of feature being controlled.                                        Adjust
+#define FEATURE1_PURPOSE              OFF //    OFF, SWITCH, ANALOG, DEW_HEATER.                                              Adjust
+#define FEATURE1_TEMP                 OFF //    OFF, DS1820, n. Where n is the DS1820 s/n for DEW_HEATER temperature.         Adjust
+#define FEATURE1_PIN                  OFF //    OFF, n. Where n=0 to 255 (pin#), DS2413 (1st), or ds2413 s/n (GPIO0.)         Adjust
+#define FEATURE2_NAME          "FEATURE2" // "FE..", Name of feature being controlled.                                        Adjust
+#define FEATURE2_PURPOSE              OFF //    OFF, SWITCH, ANALOG, DEW_HEATER.                                              Adjust
+#define FEATURE2_TEMP                 OFF //    OFF, DS1820, n. Where n is the DS1820 s/n for DEW_HEATER temperature.         Adjust
+#define FEATURE2_PIN                  OFF //    OFF, n. Where n=0 to 255 (pin#), or CHAIN for ds2413 (GPIO1.)                 Adjust
+#define FEATURE3_NAME          "FEATURE3" // "FE..", Name of feature being controlled.                                        Adjust
+#define FEATURE3_PURPOSE              OFF //    OFF, SWITCH, ANALOG, DEW_HEATER.                                              Adjust
+#define FEATURE3_TEMP                 OFF //    OFF, DS1820, n. Where n is the DS1820 s/n for DEW_HEATER temperature.         Adjust
+#define FEATURE3_PIN                  OFF //    OFF, n. Where n=0 to 255 (pin#), DS2413 (2nd), or ds2413 s/n (GPIO0.)         Adjust
+#define FEATURE4_NAME          "FEATURE4" // "FE..", Name of feature being controlled.                                        Adjust
+#define FEATURE4_PURPOSE              OFF //    OFF, SWITCH, ANALOG, DEW_HEATER.                                              Adjust
+#define FEATURE4_TEMP                 OFF //    OFF, DS1820, n. Where n is the DS1820 s/n for DEW_HEATER temperature.         Adjust
+#define FEATURE4_PIN                  OFF //    OFF, n. Where n=0 to 255 (pin#), or CHAIN for ds2413 (GPIO1.)                 Adjust
+#define FEATURE5_NAME          "FEATURE5" // "FE..", Name of feature being controlled.                                        Adjust
+#define FEATURE5_PURPOSE              OFF //    OFF, SWITCH, ANALOG, DEW_HEATER.                                              Adjust
+#define FEATURE5_TEMP                 OFF //    OFF, DS1820, n. Where n is the DS1820 s/n for DEW_HEATER temperature.         Adjust
+#define FEATURE5_PIN                  OFF //    OFF, n. Where n=0 to 255 (pin#), DS2413 (3rd), or ds2413 s/n (GPIO0.)         Adjust
+#define FEATURE6_NAME          "FEATURE6" // "FE..", Name of feature being controlled.                                        Adjust
+#define FEATURE6_PURPOSE              OFF //    OFF, SWITCH, ANALOG, DEW_HEATER.                                              Adjust
+#define FEATURE6_TEMP                 OFF //    OFF, DS1820, n. Where n is the DS1820 s/n for DEW_HEATER temperature.         Adjust
+#define FEATURE6_PIN                  OFF //    OFF, n. Where n=0 to 255 (pin#), or CHAIN for ds2413 (GPIO1.)                 Adjust
+#define FEATURE7_NAME          "FEATURE7" // "FE..", Name of feature being controlled.                                        Adjust
+#define FEATURE7_PURPOSE              OFF //    OFF, SWITCH, ANALOG, DEW_HEATER.                                              Adjust
+#define FEATURE7_TEMP                 OFF //    OFF, DS1820, n. Where n is the DS1820 s/n for DEW_HEATER temperature.         Adjust
+#define FEATURE7_PIN                  OFF //    OFF, n. Where n=0 to 255 (pin#), DS2413 (4th), or ds2413 s/n (GPIO0.)         Adjust
+#define FEATURE8_NAME          "FEATURE8" // "FE..", Name of feature being controlled.                                        Adjust
+#define FEATURE8_PURPOSE              OFF //    OFF, SWITCH, ANALOG, DEW_HEATER.                                              Adjust
+#define FEATURE8_TEMP                 OFF //    OFF, DS1820, n. Where n is the DS1820 s/n for DEW_HEATER temperature.         Adjust
+#define FEATURE8_PIN                  OFF //    OFF, n. Where n=0 to 255 (pin#), or CHAIN for ds2413 (GPIO1.)                 Adjust
 
 // THAT'S IT FOR USER CONFIGURATION!
 

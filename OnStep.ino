@@ -97,17 +97,29 @@ weather ambient;
 
 // AUTOMATIC DEW HEATERS
 #include "src/lib/Heater.h"
-#if DEW_HEATER1 != OFF
+#if FEATURE1_PURPOSE == DEW_HEATER
   dewHeaterControl dewHeater1;
 #endif
-#if DEW_HEATER2 != OFF
+#if FEATURE2_PURPOSE == DEW_HEATER
   dewHeaterControl dewHeater2;
 #endif
-#if DEW_HEATER3 != OFF
+#if FEATURE3_PURPOSE == DEW_HEATER
   dewHeaterControl dewHeater3;
 #endif
-#if DEW_HEATER4 != OFF
+#if FEATURE4_PURPOSE == DEW_HEATER
   dewHeaterControl dewHeater4;
+#endif
+#if FEATURE5_PURPOSE == DEW_HEATER
+  dewHeaterControl dewHeater5;
+#endif
+#if FEATURE6_PURPOSE == DEW_HEATER
+  dewHeaterControl dewHeater6;
+#endif
+#if FEATURE7_PURPOSE == DEW_HEATER
+  dewHeaterControl dewHeater7;
+#endif
+#if FEATURE8_PURPOSE == DEW_HEATER
+  dewHeaterControl dewHeater8;
 #endif
 
 #if ROTATOR == ON
@@ -229,25 +241,8 @@ void setup() {
   // get weather monitoring ready to go
   if (!ambient.init()) generalError=ERR_WEATHER_INIT;
 
-  // AUTOMATIC DEW HEATERS
-#if DEW_HEATER1 != OFF
-  // with ambient temperature: zero = -5 (dew forming 100% power), span = 15 (dew NOT forming 0% power)
-  dewHeater1.init(Heater1Pin,EE_heater1Zero);
-  // with individual temperature: zero = 1 (dew almost forming 100% power), span = 3 (dew NOT forming 0% power)
-  if (DEW_HEATER1_TEMPERATURE != OFF) { dewHeater1.setZero(1); dewHeater1.setSpan(3); }
-#endif
-#if DEW_HEATER2 != OFF
-  dewHeater2.init(Heater2Pin,EE_heater2Zero);
-  if (DEW_HEATER2_TEMPERATURE != OFF) { dewHeater2.setZero(1); dewHeater2.setSpan(3); }
-#endif
-#if DEW_HEATER3 != OFF
-  dewHeater3.init(Heater3Pin,EE_heater3Zero);
-  if (DEW_HEATER3_TEMPERATURE != OFF) { dewHeater3.setZero(1); dewHeater3.setSpan(3); }
-#endif
-#if DEW_HEATER4 != OFF
-  dewHeater4.init(Heater4Pin,EE_heater4Zero);
-  if (DEW_HEATER4_TEMPERATURE != OFF) { dewHeater4.setZero(1); dewHeater4.setSpan(3); }
-#endif
+  // setup features
+  featuresInit();
 
   // get the TLS ready (if present)
   if (!tls.init()) generalError=ERR_SITE_INIT;
@@ -523,24 +518,9 @@ void loop2() {
     // This just needs to be accurate to the nearest second, it's about 10x better
     UT1=UT1_start+(t2/3600.0);
 
-    // AUTOMATIC DEW HEATERS
-#if DEW_HEATER1 != OFF
-    dewHeater1.poll(ambient.getDewHeaterTemperature(0)-ambient.getDewPoint());
-    ambient.setDewHeaterState(1,dewHeater1.isOn());
-#endif
-#if DEW_HEATER2 != OFF
-    dewHeater2.poll(ambient.getDewHeaterTemperature(1)-ambient.getDewPoint());
-    ambient.setDewHeaterState(2,dewHeater2.isOn());
-#endif
-#if DEW_HEATER3 != OFF
-    dewHeater3.poll(ambient.getDewHeaterTemperature(2)-ambient.getDewPoint());
-    ambient.setDewHeaterState(3,dewHeater3.isOn());
-#endif
-#if DEW_HEATER4 != OFF
-    dewHeater4.poll(ambient.getDewHeaterTemperature(3)-ambient.getDewPoint());
-    ambient.setDewHeaterState(4,dewHeater4.isOn());
-#endif
-
+    // UPDATE AUXILIARY FEATURES
+    featuresPoll();
+    
     // WEATHER
     if (!isSlewing()) ambient.poll();
   }

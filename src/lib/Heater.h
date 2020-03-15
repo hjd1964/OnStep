@@ -25,13 +25,11 @@ class dewHeaterControl {
       if (!heaterOn && (long)(currentTime - (lastHeaterCycle + switchTimeMs)) <= 0)
       {
         if (_pin >= 0 && _pin <= 255) digitalWrite(_pin, HIGH);
-        Serial.println("on");
         heaterOn = true;
       }
       else if (heaterOn && (long)(currentTime - (lastHeaterCycle + switchTimeMs)) > 0)
       {
         if (_pin >= 0 && _pin <= 255) digitalWrite(_pin, LOW);
-        Serial.println("off");
         heaterOn = false;
       }
       else if ((long)(currentTime - (lastHeaterCycle + DH_PULSE_WIDTH_MS)) > 0) {
