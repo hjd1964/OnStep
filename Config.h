@@ -199,39 +199,39 @@
 #define AXIS5_LIMIT_MAX                50 //     50, n. Where n=0..500 (millimeters.) Maximum allowed position.               Adjust
 
 // AUXILIARY FEATURE CONTROL ------------------------------------ see https://onstep.groups.io/g/main/wiki/6-Configuration#AUXILIARY
-#define FEATURE_LIST_DS               ON //    OFF, temporarily set ON to list DS1820 and DS2413 device serial numbers.      Adjust
+#define FEATURE_LIST_DS               OFF //    OFF, temporarily set ON to list DS1820 and DS2413 device serial numbers.      Adjust
 #define FEATURE1_NAME          "FEATURE1" // "FE..", Name of feature being controlled.                                        Adjust
 #define FEATURE1_PURPOSE              OFF //    OFF, SWITCH, ANALOG, DEW_HEATER.                                              Adjust
 #define FEATURE1_TEMP                 OFF //    OFF, DS1820, n. Where n is the DS1820 s/n for DEW_HEATER temperature.         Adjust
-#define FEATURE1_PIN                  OFF //    OFF, n. Where n=0 to 255 (pin#), DS2413 (1st), or ds2413 s/n (GPIO0.)         Adjust
+#define FEATURE1_PIN                  OFF //    OFF, AUX, DS2413, n. Where n is ds2413 s/n (GPIO0) or n=0 to 255 (pin#.)      Adjust
 #define FEATURE2_NAME          "FEATURE2" // "FE..", Name of feature being controlled.                                        Adjust
 #define FEATURE2_PURPOSE              OFF //    OFF, SWITCH, ANALOG, DEW_HEATER.                                              Adjust
 #define FEATURE2_TEMP                 OFF //    OFF, DS1820, n. Where n is the DS1820 s/n for DEW_HEATER temperature.         Adjust
-#define FEATURE2_PIN                  OFF //    OFF, n. Where n=0 to 255 (pin#), or CHAIN for ds2413 (GPIO1.)                 Adjust
+#define FEATURE2_PIN                  OFF //    OFF, AUX, DS2413, CHAIN ds2413 (GPIO1,) n. Where n=0 to 255 (pin#.)           Adjust
 #define FEATURE3_NAME          "FEATURE3" // "FE..", Name of feature being controlled.                                        Adjust
 #define FEATURE3_PURPOSE              OFF //    OFF, SWITCH, ANALOG, DEW_HEATER.                                              Adjust
 #define FEATURE3_TEMP                 OFF //    OFF, DS1820, n. Where n is the DS1820 s/n for DEW_HEATER temperature.         Adjust
-#define FEATURE3_PIN                  OFF //    OFF, n. Where n=0 to 255 (pin#), DS2413 (2nd), or ds2413 s/n (GPIO0.)         Adjust
+#define FEATURE3_PIN                  OFF //    OFF, AUX, DS2413, n. Where n is ds2413 s/n (GPIO0) or n=0 to 255 (pin#.)      Adjust
 #define FEATURE4_NAME          "FEATURE4" // "FE..", Name of feature being controlled.                                        Adjust
 #define FEATURE4_PURPOSE              OFF //    OFF, SWITCH, ANALOG, DEW_HEATER.                                              Adjust
 #define FEATURE4_TEMP                 OFF //    OFF, DS1820, n. Where n is the DS1820 s/n for DEW_HEATER temperature.         Adjust
-#define FEATURE4_PIN                  OFF //    OFF, n. Where n=0 to 255 (pin#), or CHAIN for ds2413 (GPIO1.)                 Adjust
+#define FEATURE4_PIN                  OFF //    OFF, AUX, DS2413, CHAIN ds2413 (GPIO1,) n. Where n=0 to 255 (pin#.)           Adjust
 #define FEATURE5_NAME          "FEATURE5" // "FE..", Name of feature being controlled.                                        Adjust
 #define FEATURE5_PURPOSE              OFF //    OFF, SWITCH, ANALOG, DEW_HEATER.                                              Adjust
 #define FEATURE5_TEMP                 OFF //    OFF, DS1820, n. Where n is the DS1820 s/n for DEW_HEATER temperature.         Adjust
-#define FEATURE5_PIN                  OFF //    OFF, n. Where n=0 to 255 (pin#), DS2413 (3rd), or ds2413 s/n (GPIO0.)         Adjust
+#define FEATURE5_PIN                  OFF //    OFF, AUX, DS2413, n. Where n is ds2413 s/n (GPIO0) or n=0 to 255 (pin#.)      Adjust
 #define FEATURE6_NAME          "FEATURE6" // "FE..", Name of feature being controlled.                                        Adjust
 #define FEATURE6_PURPOSE              OFF //    OFF, SWITCH, ANALOG, DEW_HEATER.                                              Adjust
 #define FEATURE6_TEMP                 OFF //    OFF, DS1820, n. Where n is the DS1820 s/n for DEW_HEATER temperature.         Adjust
-#define FEATURE6_PIN                  OFF //    OFF, n. Where n=0 to 255 (pin#), or CHAIN for ds2413 (GPIO1.)                 Adjust
+#define FEATURE6_PIN                  OFF //    OFF, AUX, DS2413, CHAIN ds2413 (GPIO1,) n. Where n=0 to 255 (pin#.)           Adjust
 #define FEATURE7_NAME          "FEATURE7" // "FE..", Name of feature being controlled.                                        Adjust
 #define FEATURE7_PURPOSE              OFF //    OFF, SWITCH, ANALOG, DEW_HEATER.                                              Adjust
 #define FEATURE7_TEMP                 OFF //    OFF, DS1820, n. Where n is the DS1820 s/n for DEW_HEATER temperature.         Adjust
-#define FEATURE7_PIN                  OFF //    OFF, n. Where n=0 to 255 (pin#), DS2413 (4th), or ds2413 s/n (GPIO0.)         Adjust
+#define FEATURE7_PIN                  OFF //    OFF, AUX, DS2413, n. Where n is ds2413 s/n (GPIO0) or n=0 to 255 (pin#.)      Adjust
 #define FEATURE8_NAME          "FEATURE8" // "FE..", Name of feature being controlled.                                        Adjust
 #define FEATURE8_PURPOSE              OFF //    OFF, SWITCH, ANALOG, DEW_HEATER.                                              Adjust
 #define FEATURE8_TEMP                 OFF //    OFF, DS1820, n. Where n is the DS1820 s/n for DEW_HEATER temperature.         Adjust
-#define FEATURE8_PIN                  OFF //    OFF, n. Where n=0 to 255 (pin#), or CHAIN for ds2413 (GPIO1.)                 Adjust
+#define FEATURE8_PIN                  OFF //    OFF, AUX, DS2413, CHAIN ds2413 (GPIO1,) n. Where n=0 to 255 (pin#.)           Adjust
 
 // THAT'S IT FOR USER CONFIGURATION!
 
