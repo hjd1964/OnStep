@@ -49,7 +49,8 @@
 #define ON_PULLUP                  -3
 #define ON_PULLDOWN                -4
 #define XDIRECT                    -5
-                                   
+#define AUX                        -6
+
 // mount types                     
 #define MOUNT_TYPE_FIRST            1
 #define GEM                         1 // German Equatorial Mount, meridian flips enabled

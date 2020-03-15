@@ -44,12 +44,6 @@
 #ifndef OneWirePin
   #define OneWirePin        Aux4    // Default Pin for one wire bus
 #endif
-#ifndef Heater1Pin
-  #define Heater1Pin        Aux3    // Default Pin for first dew heater
-#endif
-#ifndef Heater2Pin
-  #define Heater2Pin        Aux4    // Default Pin for second dew heater
-#endif
 
 // For ESP8266 control
 #define ESP8266Gpio0Pin     Aux1    // ESP8266 GPIO0 or SPI MISO/Fault

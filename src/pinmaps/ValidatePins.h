@@ -237,3 +237,61 @@
     #error "Configuration (Config.h): AXIS5_DRIVER_POWER_DOWN requires ENable signal support which this PINMAP doesn't have"
   #endif
 #endif
+
+// ACCESSORIES ------------------------------
+#if FEATURE1_PURPOSE != OFF && FEATURE1_PIN == AUX && defined(Aux1)
+  #if ASSIGNED_AUX1 != PIN_NOT_ASSIGNED
+    #error "Configuration (Config.h): FEATURE1_PIN AUX enabled but Aux1 is already in use, choose one feature on Aux1"
+  #endif
+  #undef FEATURE1_PIN
+  #define FEATURE1_PIN Aux1
+#endif
+#if FEATURE2_PURPOSE != OFF && FEATURE2_PIN == AUX && defined(Aux2)
+  #if ASSIGNED_AUX2 != PIN_NOT_ASSIGNED
+    #error "Configuration (Config.h): FEATURE2_PIN AUX enabled but Aux2 is already in use, choose one feature on Aux2"
+  #endif
+  #undef FEATURE2_PIN
+  #define FEATURE2_PIN Aux2
+#endif
+#if FEATURE3_PURPOSE != OFF && FEATURE3_PIN == AUX && defined(Aux3)
+  #if ASSIGNED_AUX3 != PIN_NOT_ASSIGNED
+    #error "Configuration (Config.h): FEATURE3_PIN AUX enabled but Aux3 is already in use, choose one feature on Aux3"
+  #endif
+  #undef FEATURE3_PIN
+  #define FEATURE3_PIN Aux3
+#endif
+#if FEATURE4_PURPOSE != OFF && FEATURE4_PIN == AUX && defined(Aux3)
+  #if ASSIGNED_AUX4 != PIN_NOT_ASSIGNED
+    #error "Configuration (Config.h): FEATURE4_PIN AUX enabled but Aux4 is already in use, choose one feature on Aux4"
+  #endif
+  #undef FEATURE4_PIN
+  #define FEATURE4_PIN Aux4
+#endif
+#if FEATURE5_PURPOSE != OFF && FEATURE5_PIN == AUX && defined(Aux5)
+  #if ASSIGNED_AUX5 != PIN_NOT_ASSIGNED
+    #error "Configuration (Config.h): FEATURE5_PIN AUX enabled but Aux5 is already in use, choose one feature on Aux5"
+  #endif
+  #undef FEATURE5_PIN
+  #define FEATURE5_PIN Aux5
+#endif
+#if FEATURE6_PURPOSE != OFF && FEATURE6_PIN == AUX && defined(Aux6)
+  #if ASSIGNED_AUX6 != PIN_NOT_ASSIGNED
+    #error "Configuration (Config.h): FEATURE6_PIN AUX enabled but Aux6 is already in use, choose one feature on Aux6"
+  #endif
+  #undef FEATURE6_PIN
+  #define FEATURE6_PIN Aux6
+#endif
+#if FEATURE7_PURPOSE != OFF && FEATURE7_PIN == AUX && defined(Aux7)
+  #if ASSIGNED_AUX7 != PIN_NOT_ASSIGNED
+    #error "Configuration (Config.h): FEATURE7_PIN AUX enabled but Aux7 is already in use, choose one feature on Aux7"
+  #endif
+  #undef FEATURE7_PIN
+  #define FEATURE7_PIN Aux7
+#endif
+#if FEATURE8_PURPOSE != OFF && FEATURE8_PIN == AUX && defined(Aux8)
+  #if ASSIGNED_AUX8 != PIN_NOT_ASSIGNED
+    #error "Configuration (Config.h): FEATURE8_PIN AUX enabled but Aux8 is already in use, choose one feature on Aux8"
+  #endif
+  #undef FEATURE8_PIN
+  #define FEATURE8_PIN Aux8
+#endif

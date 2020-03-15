@@ -18,12 +18,6 @@
 #ifndef OneWirePin
   #define OneWirePin         24     // Default Pin for one wire bus
 #endif
-#ifndef Heater1Pin
-  #define Heater1Pin       Aux3     // Default Pin for first dew heater
-#endif
-#ifndef Heater2Pin
-  #define Heater2Pin       Aux4     // Default Pin for second dew heater
-#endif
 #if PINMAP == MiniPCB13
   #define ESP8266Gpio0Pin     2     // ESP8266 GPIO0 (Dir2)
   #define ESP8266RstPin    Aux2     // ESP8266 RST
