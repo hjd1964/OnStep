@@ -36,13 +36,13 @@
 
 // The multi-purpose pins (Aux3..Aux8 can be analog pwm/dac if supported)
 #define Aux0                PC13    // Status LED
-#define Aux1                PB14    // ESP8266 GPIO0 or SPI MISO/Fault
-#define Aux2                 PA1    // ESP8266 RST or SPI MISO/Fault
-#define Aux3                 PB8    // Dew Heater1, Reticle, Home SW, or accessory; this should also be ok as pwm analog output (w/#define Aux3_Analog)
-#define Aux4                PA13    // OneWire, Dew Heater2, Home SW, or OneWire, or accessory
+#define Aux1                PB14    // ESP8266 GPIO0, SPI MISO/Fault
+#define Aux2                 PA1    // ESP8266 RST, SPI MISO/Fault
+#define Aux3                 PB8    // Reticle, Home SW
+#define Aux4                PA13    // OneWire, Home SW
 
 #ifndef OneWirePin
-  #define OneWirePin        Aux4    // Default Pin for one wire bus
+  #define OneWirePin        Aux4    // Default Pin for OneWire bus
 #endif
 
 // For ESP8266 control

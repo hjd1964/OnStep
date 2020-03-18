@@ -11,7 +11,7 @@
   #define BME280_CS_PIN      11     // Default CS Pin for BME280 on SPI
 #endif
 #ifndef OneWirePin
-  #define OneWirePin         24     // Default Pin for one wire bus
+  #define OneWirePin         24     // Default Pin for OneWire bus
 #endif
 
 // The PEC index sense is a 5V logic input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset

@@ -5,14 +5,14 @@
 
 // The multi-purpose pins (Aux3..Aux8 can be analog pwm/dac if supported)
 #define Aux2                  4     // ESP8266 RST control, or MISO for Axis1&2, or Axis4 EN support
-#define Aux3                 21     // Dew Heater 1, Home SW for Axis1, or I2C SDA
-#define Aux4                 22     // Dew Heater 2, Home SW for Axis2, or I2C SCL
+#define Aux3                 21     // Home SW for Axis1, or I2C SDA
+#define Aux4                 22     // Home SW for Axis2, or I2C SCL
 #define Aux7                 39     // Limit SW, PPS, etc.
 #define Aux8                 25     // OneWire, Status LED, Status2 LED, Reticle LED, Tone, etc.
 
 // Misc. pins
 #ifndef OneWirePin
-  #define OneWirePin       Aux8     // Default Pin for one wire bus
+  #define OneWirePin       Aux8     // Default Pin for OneWire bus
 #endif
 #define ESP8266Gpio0Pin      26     // ESP8266 GPIO0 (Dir2)
 #define ESP8266RstPin      Aux2     // ESP8266 RST

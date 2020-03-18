@@ -5,10 +5,10 @@
 
 // The multi-purpose pins (Aux3..Aux8 can be analog pwm/dac if supported)
 #define Aux0                 19     // Status LED
-#define Aux1                 18     // ESP8266 GPIO0 or SPI MISO/Fault
-#define Aux2                  5     // ESP8266 RST or SPI MISO/Fault
-#define Aux3                  4     // Dew Heater1, or Limit SW; should be ok as pwm analog output (w/#define Aux3_Analog)
-#define Aux4                 22     // Dew Heater2, Status2 LED, or Reticle LED; should be ok as pwm analog output (w/#define Aux4_Analog)
+#define Aux1                 18     // ESP8266 GPIO0, SPI MISO/Fault
+#define Aux2                  5     // ESP8266 RST, SPI MISO/Fault
+#define Aux3                  4     // Limit SW
+#define Aux4                 22     // Status2 LED, Reticle LED
 #if !defined(_mk20dx128_h_) && !defined(__MK20DX128__) && !defined(__IMXRT1052__) && !defined(__IMXRT1062__)
   #define Aux5              A14     // true analog output
 #endif
@@ -16,7 +16,7 @@
 
 // Misc. pins
 #ifndef OneWirePin
-  #define OneWirePin         24     // Default Pin for one wire bus
+  #define OneWirePin         24     // Default Pin for OneWire bus
 #endif
 #if PINMAP == MiniPCB13
   #define ESP8266Gpio0Pin     2     // ESP8266 GPIO0 (Dir2)

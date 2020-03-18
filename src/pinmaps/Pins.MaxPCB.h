@@ -5,23 +5,21 @@
 
 // The multi-purpose pins (Aux3..Aux8 can be analog pwm/dac if supported)
 #define Aux0                 19     // Status LED
-#define Aux1                 18     // ESP8266 GPIO0 or SPI MISO/Fault
-#define Aux2                  5     // ESP8266 RST or SPI MISO/Fault
-#define Aux3                 36     // OneWire, Dew Heater1, or Home SW; should be ok as pwm analog output (w/#define Aux3_Analog)
-#define Aux4                 39     // Dew Heater2, or Home SW
+#define Aux1                 18     // ESP8266 GPIO0, SPI MISO/Fault
+#define Aux2                  5     // ESP8266 RST, SPI MISO/Fault
+#define Aux3                 36     // Home SW
+#define Aux4                 39     // OneWire, Home SW
 #define Aux5                A21     // Axis3_EN; true analog output
-#define Aux5_Analog
 #define Aux6                A22     // Axis4_EN; true analog output
-#define Aux6_Analog
-#define Aux7                  4     // Dew Heater3, or Limit SW; should be ok as pwm analog output (w/#define Aux7_Analog)
-#define Aux8                 22     // OneWire, Status2 LED, or Reticle LED; should be ok as pwm analog output (w/#define Aux8_Analog)
+#define Aux7                  4     // Limit SW
+#define Aux8                 22     // Status2 LED, Reticle LED
 
 // Misc. pins
 #ifndef DS3234_CS_PIN
   #define DS3234_CS_PIN      10     // Default CS Pin for DS3234 on SPI
 #endif
 #ifndef OneWirePin
-  #define OneWirePin       Aux4     // Default Pin for one wire bus
+  #define OneWirePin       Aux4     // Default Pin for OneWire bus
 #endif
 #if PINMAP == MaxPCB3
   #define ESP8266Gpio0Pin     2     // ESP8266 GPIO0 (Dir2)

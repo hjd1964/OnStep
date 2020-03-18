@@ -5,14 +5,14 @@
 
 // The multi-purpose pins (Aux3..Aux8 can be analog pwm/dac if supported)
 #define Aux1                 12     // pullup driver RST, SPI MISO, or Fault
-#define Aux3                 21     // Home SW for Axis1, or I2C SDA
-#define Aux4                 22     // Home SW for Axis2, or I2C SCL
+#define Aux3                 21     // Home SW, I2C SDA
+#define Aux4                 22     // Home SW, I2C SCL
 #define Aux7                 39     // PPS, Limit SW, etc.
 #define Aux8                 25     // OneWire, Status LED, Status2 LED, Reticle LED, Tone, etc.
 
 // Misc. pins
 #ifndef OneWirePin
-  #define OneWirePin       Aux8     // Default Pin for one wire bus
+  #define OneWirePin       Aux8     // Default Pin for OneWire bus
 #endif
 
 // The PEC index sense is a logic level input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
