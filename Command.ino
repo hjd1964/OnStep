@@ -958,12 +958,15 @@ void processCommands() {
               default:  commandError=CE_CMD_UNKNOWN;
             }
           } else
+#ifdef FEATURES_PRESENT
           if (parameter[0] == 'X') { // Xn: get auXiliary feature
             featuresGetCommand(parameter,reply,booleanReply);
           } else
           if (parameter[0] == 'Y') { // Yn: get auXiliary feature temperature
-            featuresGetTempCommand(parameter,reply,booleanReply);
-          } else commandError=CE_CMD_UNKNOWN;
+            featuresGetInfoCommand(parameter,reply,booleanReply);
+          } else
+#endif
+            commandError=CE_CMD_UNKNOWN;
         } else commandError=CE_CMD_UNKNOWN;
       } else
 // :GZ#       Get telescope azimuth
@@ -1812,73 +1815,13 @@ void processCommands() {
           }
         } else
 #endif
-        if (parameter[0] == 'G') { // Gn: General purpose output
-          long v=(double)strtol(&parameter[3],NULL,10);
-          if (v >= 0 && v <= 255) {
-#ifdef Aux0
-            if (parameter[1] == '0') { valueAux0=v; static bool init=false; if (!init) { pinMode(Aux0,OUTPUT); init=true; } if (v == 0) digitalWrite(Aux0,LOW); else digitalWrite(Aux0,HIGH); } else
-#endif
-#ifdef Aux1
-            if (parameter[1] == '1') { valueAux1=v; static bool init=false; if (!init) { pinMode(Aux1,OUTPUT); init=true; } if (v == 0) digitalWrite(Aux1,LOW); else digitalWrite(Aux1,HIGH); } else
-#endif
-#ifdef Aux2
-            if (parameter[1] == '2') { valueAux2=v; static bool init=false; if (!init) { pinMode(Aux2,OUTPUT); init=true; } if (v == 0) digitalWrite(Aux2,LOW); else digitalWrite(Aux2,HIGH); } else
-#endif
-#ifdef Aux3
-            if (parameter[1] == '3') { valueAux3=v; static bool init=false; if (!init) { pinMode(Aux3,OUTPUT); init=true; }
-  #ifdef Aux3_Analog
-            analogWrite(Aux3,v); } else
-  #else
-            if (v == 0) digitalWrite(Aux3,LOW); else digitalWrite(Aux3,HIGH); } else
-  #endif
-#endif
-#ifdef Aux4
-            if (parameter[1] == '4') { valueAux4=v; static bool init=false; if (!init) { pinMode(Aux4,OUTPUT); init=true; }
-  #ifdef Aux4_Analog
-            analogWrite(Aux4,v); } else
-  #else
-            if (v == 0) digitalWrite(Aux4,LOW); else digitalWrite(Aux4,HIGH); } else
-  #endif
-#endif
-#ifdef Aux5
-            if (parameter[1] == '5') { valueAux5=v; static bool init=false; if (!init) { pinMode(Aux5,OUTPUT); init=true; }
-  #ifdef Aux5_Analog
-            analogWrite(Aux5,v); } else
-  #else
-            if (v == 0) digitalWrite(Aux5,LOW); else digitalWrite(Aux5,HIGH); } else
-  #endif
-#endif
-#ifdef Aux6
-            if (parameter[1] == '6') { valueAux6=v; static bool init=false; if (!init) { pinMode(Aux6,OUTPUT); init=true; }
-  #ifdef Aux6_Analog
-            analogWrite(Aux6,v); } else
-  #else
-            if (v == 0) digitalWrite(Aux6,LOW); else digitalWrite(Aux6,HIGH); } else
-  #endif
-#endif
-#ifdef Aux7
-            if (parameter[1] == '7') { valueAux7=v; static bool init=false; if (!init) { pinMode(Aux7,OUTPUT); init=true; }
-  #ifdef Aux7_Analog
-            analogWrite(Aux7,v); } else
-  #else
-            if (v == 0) digitalWrite(Aux7,LOW); else digitalWrite(Aux7,HIGH); } else
-  #endif
-#endif
-#ifdef Aux8
-            if (parameter[1] == '8') { valueAux8=v; static bool init=false; if (!init) { pinMode(Aux8,OUTPUT); init=true; }
-  #ifdef Aux8_Analog
-            analogWrite(Aux8,v); } else
-  #else
-            if (v == 0) digitalWrite(Aux8,LOW); else digitalWrite(Aux8,HIGH); } else
-  #endif
-#endif
-            commandError=CE_PARAM_RANGE;
-          } else commandError=CE_CMD_UNKNOWN;
-        } else
+#ifdef FEATURES_PRESENT
         if (parameter[0] == 'X') { // Xn: set auXiliary feature
           featuresSetCommand(parameter);
-        } else commandError=CE_CMD_UNKNOWN;
-      } else
+        } else
+#endif
+          commandError=CE_CMD_UNKNOWN;
+       } else
 // :Sz[DDD*MM]#
 //            Set target object Azimuth to DDD*MM or DDD*MM:SS assumes high precision but falls back to low precision
 //            Return: 0 on failure

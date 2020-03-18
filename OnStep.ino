@@ -83,6 +83,7 @@
 
 #include "src/lib/St4SerialMaster.h"
 #include "src/lib/FPoint.h"
+#include "src/lib/Heater.h"
 #include "Globals.h"
 #include "src/lib/Julian.h"
 #include "src/lib/Misc.h"
@@ -94,33 +95,6 @@
 #include "src/lib/TLS.h"
 #include "src/lib/Weather.h"
 weather ambient;
-
-// AUTOMATIC DEW HEATERS
-#include "src/lib/Heater.h"
-#if FEATURE1_PURPOSE == DEW_HEATER
-  dewHeaterControl dewHeater1;
-#endif
-#if FEATURE2_PURPOSE == DEW_HEATER
-  dewHeaterControl dewHeater2;
-#endif
-#if FEATURE3_PURPOSE == DEW_HEATER
-  dewHeaterControl dewHeater3;
-#endif
-#if FEATURE4_PURPOSE == DEW_HEATER
-  dewHeaterControl dewHeater4;
-#endif
-#if FEATURE5_PURPOSE == DEW_HEATER
-  dewHeaterControl dewHeater5;
-#endif
-#if FEATURE6_PURPOSE == DEW_HEATER
-  dewHeaterControl dewHeater6;
-#endif
-#if FEATURE7_PURPOSE == DEW_HEATER
-  dewHeaterControl dewHeater7;
-#endif
-#if FEATURE8_PURPOSE == DEW_HEATER
-  dewHeaterControl dewHeater8;
-#endif
 
 #if ROTATOR == ON
   #include "src/lib/Rotator.h"
@@ -242,7 +216,9 @@ void setup() {
   if (!ambient.init()) generalError=ERR_WEATHER_INIT;
 
   // setup features
+#ifdef FEATURES_PRESENT
   featuresInit();
+#endif
 
   // get the TLS ready (if present)
   if (!tls.init()) generalError=ERR_SITE_INIT;
@@ -519,7 +495,9 @@ void loop2() {
     UT1=UT1_start+(t2/3600.0);
 
     // UPDATE AUXILIARY FEATURES
+#ifdef FEATURES_PRESENT
     featuresPoll();
+#endif
     
     // WEATHER
     if (!isSlewing()) ambient.poll();

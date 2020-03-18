@@ -347,6 +347,10 @@ class weather {
     }
 
     // four DS2413 OneWire GPIO's are supported, this sets each output on or off
+    int getDS2413State(int feature) {
+      if (feature >= 0 && feature <= 7) return _ds2413_state[feature]; else return 0;
+    }
+
     void setDS2413State(int feature, bool state) {
       if (feature >= 0 && feature <= 7) _ds2413_state[feature]=state;
     }

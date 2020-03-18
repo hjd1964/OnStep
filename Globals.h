@@ -365,30 +365,24 @@ volatile int blAxis1                    = 0;
 volatile int blAxis2                    = 0;
 
 // aux pin control
-#ifdef Aux0
-  byte valueAux0 = 0;
-#endif
-#ifdef Aux1
-  byte valueAux1 = 0;
-#endif
-#ifdef Aux2
-  byte valueAux2 = 0;
-#endif
-#ifdef Aux3
-  byte valueAux3 = 0;
-#endif
-#ifdef Aux4
-  byte valueAux4 = 0;
-#endif
-#ifdef Aux5
-  byte valueAux5 = 0;
-#endif
-#ifdef Aux6
-  byte valueAux6 = 0;
-#endif
-#ifdef Aux7
-  byte valueAux7 = 0;
-#endif
-#ifdef Aux8
-  byte valueAux8 = 0;
+#ifdef FEATURES_PRESENT
+typedef struct Features {
+   const char* name;
+   const int purpose;
+   const int64_t temp;
+   const int64_t pin;
+   int value;
+   dewHeaterControl *dewHeater;
+} features;
+
+features feature[8] = {
+  {FEATURE1_NAME,FEATURE1_PURPOSE,FEATURE1_TEMP,FEATURE1_PIN,0,NULL},
+  {FEATURE2_NAME,FEATURE2_PURPOSE,FEATURE2_TEMP,FEATURE2_PIN,0,NULL},
+  {FEATURE3_NAME,FEATURE3_PURPOSE,FEATURE3_TEMP,FEATURE3_PIN,0,NULL},
+  {FEATURE4_NAME,FEATURE4_PURPOSE,FEATURE4_TEMP,FEATURE4_PIN,0,NULL},
+  {FEATURE5_NAME,FEATURE5_PURPOSE,FEATURE5_TEMP,FEATURE5_PIN,0,NULL},
+  {FEATURE6_NAME,FEATURE6_PURPOSE,FEATURE6_TEMP,FEATURE6_PIN,0,NULL},
+  {FEATURE7_NAME,FEATURE7_PURPOSE,FEATURE7_TEMP,FEATURE7_PIN,0,NULL},
+  {FEATURE8_NAME,FEATURE8_PURPOSE,FEATURE8_TEMP,FEATURE8_PIN,0,NULL}
+};
 #endif

@@ -285,50 +285,157 @@
 #ifndef FEATURE1_NAME
   #error "Configuration (Config.h): Setting FEATURE1_NAME must be present!"
 #endif
-#ifndef FEATURE2_NAME
-  #error "Configuration (Config.h): Setting FEATURE2_NAME must be present!"
-#endif
-#ifndef FEATURE3_NAME
-  #error "Configuration (Config.h): Setting FEATURE3_NAME must be present!"
-#endif
-#ifndef FEATURE4_NAME
-  #error "Configuration (Config.h): Setting FEATURE4_NAME must be present!"
-#endif
-#ifndef FEATURE5_NAME
-  #error "Configuration (Config.h): Setting FEATURE5_NAME must be present!"
-#endif
-#ifndef FEATURE6_NAME
-  #error "Configuration (Config.h): Setting FEATURE6_NAME must be present!"
-#endif
-#ifndef FEATURE7_NAME
-  #error "Configuration (Config.h): Setting FEATURE7_NAME must be present!"
-#endif
-#ifndef FEATURE8_NAME
-  #error "Configuration (Config.h): Setting FEATURE8_NAME must be present!"
-#endif
-
-#ifndef FEATURE2_PURPOSE
-  #error "Configuration (Config.h): Setting FEATURE1_PURPOSE must be present!"
-#elif FEATURE2_PURPOSE != OFF && FEATURE2_PURPOSE != SWITCH && FEATURE2_PURPOSE != ANALOG && FEATURE2_PURPOSE != DEW_HEATER
-  #error "Configuration (Config.h): Setting FEATURE1_PURPOSE invalid, use OFF, SWITCH, ANALOG, or DEW_HEATER."
-#endif
-
 #ifndef FEATURE1_PURPOSE
   #error "Configuration (Config.h): Setting FEATURE1_PURPOSE must be present!"
 #elif FEATURE1_PURPOSE != OFF && FEATURE1_PURPOSE != SWITCH && FEATURE1_PURPOSE != ANALOG && FEATURE1_PURPOSE != DEW_HEATER
   #error "Configuration (Config.h): Setting FEATURE1_PURPOSE invalid, use OFF, SWITCH, ANALOG, or DEW_HEATER."
 #endif
-
 #ifndef FEATURE1_TEMP
   #error "Configuration (Config.h): Setting FEATURE1_TEMP must be present!"
 #elif FEATURE1_TEMP != OFF && (FEATURE1_TEMP & DS_MASK) != DS1820
   #error "Configuration (Config.h): Setting FEATURE1_TEMP invalid, use OFF, DS1820, or DS1820 s/n only."
 #endif
-
 #ifndef FEATURE1_PIN
   #error "Configuration (Config.h): Setting FEATURE1_PIN must be present!"
-#elif FEATURE1_PIN != OFF && (FEATURE1_PIN & DS_MASK) != DS2413 && FEATURE_PIN < 0 && FEATURE_PIN > 255
+#elif FEATURE1_PIN != OFF && (FEATURE1_PIN & DS_MASK) != DS2413 && FEATURE1_PIN < 0 && FEATURE1_PIN > 255
   #error "Configuration (Config.h): Setting FEATURE1_PIN invalid, use OFF, DS2413, DS2413 s/n, or a valid pin# (0 to 255 only.)"
+#endif
+
+#ifndef FEATURE2_NAME
+  #error "Configuration (Config.h): Setting FEATURE2_NAME must be present!"
+#endif
+#ifndef FEATURE2_PURPOSE
+  #error "Configuration (Config.h): Setting FEATURE2_PURPOSE must be present!"
+#elif FEATURE2_PURPOSE != OFF && FEATURE2_PURPOSE != SWITCH && FEATURE2_PURPOSE != ANALOG && FEATURE2_PURPOSE != DEW_HEATER
+  #error "Configuration (Config.h): Setting FEATURE2_PURPOSE invalid, use OFF, SWITCH, ANALOG, or DEW_HEATER."
+#endif
+#ifndef FEATURE2_TEMP
+  #error "Configuration (Config.h): Setting FEATURE2_TEMP must be present!"
+#elif FEATURE2_TEMP != OFF && (FEATURE2_TEMP & DS_MASK) != DS1820
+  #error "Configuration (Config.h): Setting FEATURE2_TEMP invalid, use OFF, DS1820, or DS1820 s/n only."
+#endif
+#ifndef FEATURE2_PIN
+  #error "Configuration (Config.h): Setting FEATURE2_PIN must be present!"
+#elif FEATURE2_PIN != OFF && (FEATURE2_PIN & DS_MASK) != DS2413 && FEATURE2_PIN < 0 && FEATURE2_PIN > 255
+  #error "Configuration (Config.h): Setting FEATURE2_PIN invalid, use OFF, DS2413, DS2413 s/n, or a valid pin# (0 to 255 only.)"
+#endif
+
+#ifndef FEATURE3_NAME
+  #error "Configuration (Config.h): Setting FEATURE3_NAME must be present!"
+#endif
+#ifndef FEATURE3_PURPOSE
+  #error "Configuration (Config.h): Setting FEATURE3_PURPOSE must be present!"
+#elif FEATURE3_PURPOSE != OFF && FEATURE3_PURPOSE != SWITCH && FEATURE3_PURPOSE != ANALOG && FEATURE3_PURPOSE != DEW_HEATER
+  #error "Configuration (Config.h): Setting FEATURE3_PURPOSE invalid, use OFF, SWITCH, ANALOG, or DEW_HEATER."
+#endif
+#ifndef FEATURE3_TEMP
+  #error "Configuration (Config.h): Setting FEATURE3_TEMP must be present!"
+#elif FEATURE3_TEMP != OFF && (FEATURE3_TEMP & DS_MASK) != DS1820
+  #error "Configuration (Config.h): Setting FEATURE3_TEMP invalid, use OFF, DS1820, or DS1820 s/n only."
+#endif
+#ifndef FEATURE3_PIN
+  #error "Configuration (Config.h): Setting FEATURE3_PIN must be present!"
+#elif FEATURE3_PIN != OFF && (FEATURE3_PIN & DS_MASK) != DS2413 && FEATURE3_PIN < 0 && FEATURE3_PIN > 255
+  #error "Configuration (Config.h): Setting FEATURE3_PIN invalid, use OFF, DS2413, DS2413 s/n, or a valid pin# (0 to 255 only.)"
+#endif
+
+#ifndef FEATURE4_NAME
+  #error "Configuration (Config.h): Setting FEATURE4_NAME must be present!"
+#endif
+#ifndef FEATURE4_PURPOSE
+  #error "Configuration (Config.h): Setting FEATURE4_PURPOSE must be present!"
+#elif FEATURE4_PURPOSE != OFF && FEATURE4_PURPOSE != SWITCH && FEATURE4_PURPOSE != ANALOG && FEATURE4_PURPOSE != DEW_HEATER
+  #error "Configuration (Config.h): Setting FEATURE4_PURPOSE invalid, use OFF, SWITCH, ANALOG, or DEW_HEATER."
+#endif
+#ifndef FEATURE4_TEMP
+  #error "Configuration (Config.h): Setting FEATURE4_TEMP must be present!"
+#elif FEATURE4_TEMP != OFF && (FEATURE4_TEMP & DS_MASK) != DS1820
+  #error "Configuration (Config.h): Setting FEATURE4_TEMP invalid, use OFF, DS1820, or DS1820 s/n only."
+#endif
+#ifndef FEATURE4_PIN
+  #error "Configuration (Config.h): Setting FEATURE4_PIN must be present!"
+#elif FEATURE4_PIN != OFF && (FEATURE4_PIN & DS_MASK) != DS2413 && FEATURE4_PIN < 0 && FEATURE4_PIN > 255
+  #error "Configuration (Config.h): Setting FEATURE4_PIN invalid, use OFF, DS2413, DS2413 s/n, or a valid pin# (0 to 255 only.)"
+#endif
+
+#ifndef FEATURE5_NAME
+  #error "Configuration (Config.h): Setting FEATURE5_NAME must be present!"
+#endif
+#ifndef FEATURE5_PURPOSE
+  #error "Configuration (Config.h): Setting FEATURE5_PURPOSE must be present!"
+#elif FEATURE5_PURPOSE != OFF && FEATURE5_PURPOSE != SWITCH && FEATURE5_PURPOSE != ANALOG && FEATURE5_PURPOSE != DEW_HEATER
+  #error "Configuration (Config.h): Setting FEATURE5_PURPOSE invalid, use OFF, SWITCH, ANALOG, or DEW_HEATER."
+#endif
+#ifndef FEATURE5_TEMP
+  #error "Configuration (Config.h): Setting FEATURE5_TEMP must be present!"
+#elif FEATURE5_TEMP != OFF && (FEATURE5_TEMP & DS_MASK) != DS1820
+  #error "Configuration (Config.h): Setting FEATURE5_TEMP invalid, use OFF, DS1820, or DS1820 s/n only."
+#endif
+#ifndef FEATURE5_PIN
+  #error "Configuration (Config.h): Setting FEATURE5_PIN must be present!"
+#elif FEATURE5_PIN != OFF && (FEATURE5_PIN & DS_MASK) != DS2413 && FEATURE5_PIN < 0 && FEATURE5_PIN > 255
+  #error "Configuration (Config.h): Setting FEATURE5_PIN invalid, use OFF, DS2413, DS2413 s/n, or a valid pin# (0 to 255 only.)"
+#endif
+
+#ifndef FEATURE6_NAME
+  #error "Configuration (Config.h): Setting FEATURE6_NAME must be present!"
+#endif
+#ifndef FEATURE6_PURPOSE
+  #error "Configuration (Config.h): Setting FEATURE6_PURPOSE must be present!"
+#elif FEATURE6_PURPOSE != OFF && FEATURE6_PURPOSE != SWITCH && FEATURE6_PURPOSE != ANALOG && FEATURE6_PURPOSE != DEW_HEATER
+  #error "Configuration (Config.h): Setting FEATURE6_PURPOSE invalid, use OFF, SWITCH, ANALOG, or DEW_HEATER."
+#endif
+#ifndef FEATURE6_TEMP
+  #error "Configuration (Config.h): Setting FEATURE6_TEMP must be present!"
+#elif FEATURE6_TEMP != OFF && (FEATURE6_TEMP & DS_MASK) != DS1820
+  #error "Configuration (Config.h): Setting FEATURE6_TEMP invalid, use OFF, DS1820, or DS1820 s/n only."
+#endif
+#ifndef FEATURE6_PIN
+  #error "Configuration (Config.h): Setting FEATURE6_PIN must be present!"
+#elif FEATURE6_PIN != OFF && (FEATURE6_PIN & DS_MASK) != DS2413 && FEATURE6_PIN < 0 && FEATURE6_PIN > 255
+  #error "Configuration (Config.h): Setting FEATURE6_PIN invalid, use OFF, DS2413, DS2413 s/n, or a valid pin# (0 to 255 only.)"
+#endif
+
+#ifndef FEATURE7_NAME
+  #error "Configuration (Config.h): Setting FEATURE7_NAME must be present!"
+#endif
+#ifndef FEATURE7_PURPOSE
+  #error "Configuration (Config.h): Setting FEATURE7_PURPOSE must be present!"
+#elif FEATURE7_PURPOSE != OFF && FEATURE7_PURPOSE != SWITCH && FEATURE7_PURPOSE != ANALOG && FEATURE7_PURPOSE != DEW_HEATER
+  #error "Configuration (Config.h): Setting FEATURE7_PURPOSE invalid, use OFF, SWITCH, ANALOG, or DEW_HEATER."
+#endif
+#ifndef FEATURE7_TEMP
+  #error "Configuration (Config.h): Setting FEATURE7_TEMP must be present!"
+#elif FEATURE7_TEMP != OFF && (FEATURE7_TEMP & DS_MASK) != DS1820
+  #error "Configuration (Config.h): Setting FEATURE7_TEMP invalid, use OFF, DS1820, or DS1820 s/n only."
+#endif
+#ifndef FEATURE7_PIN
+  #error "Configuration (Config.h): Setting FEATURE7_PIN must be present!"
+#elif FEATURE7_PIN != OFF && (FEATURE7_PIN & DS_MASK) != DS2413 && FEATURE7_PIN < 0 && FEATURE7_PIN > 255
+  #error "Configuration (Config.h): Setting FEATURE7_PIN invalid, use OFF, DS2413, DS2413 s/n, or a valid pin# (0 to 255 only.)"
+#endif
+
+#ifndef FEATURE8_NAME
+  #error "Configuration (Config.h): Setting FEATURE8_NAME must be present!"
+#endif
+#ifndef FEATURE8_PURPOSE
+  #error "Configuration (Config.h): Setting FEATURE8_PURPOSE must be present!"
+#elif FEATURE8_PURPOSE != OFF && FEATURE8_PURPOSE != SWITCH && FEATURE8_PURPOSE != ANALOG && FEATURE8_PURPOSE != DEW_HEATER
+  #error "Configuration (Config.h): Setting FEATURE8_PURPOSE invalid, use OFF, SWITCH, ANALOG, or DEW_HEATER."
+#endif
+#ifndef FEATURE8_TEMP
+  #error "Configuration (Config.h): Setting FEATURE8_TEMP must be present!"
+#elif FEATURE8_TEMP != OFF && (FEATURE8_TEMP & DS_MASK) != DS1820
+  #error "Configuration (Config.h): Setting FEATURE8_TEMP invalid, use OFF, DS1820, or DS1820 s/n only."
+#endif
+#ifndef FEATURE8_PIN
+  #error "Configuration (Config.h): Setting FEATURE8_PIN must be present!"
+#elif FEATURE8_PIN != OFF && (FEATURE8_PIN & DS_MASK) != DS2413 && FEATURE8_PIN < 0 && FEATURE8_PIN > 255
+  #error "Configuration (Config.h): Setting FEATURE8_PIN invalid, use OFF, DS2413, DS2413 s/n, or a valid pin# (0 to 255 only.)"
+#endif
+
+#if FEATURE1_PURPOSE != OFF || FEATURE2_PURPOSE != OFF || FEATURE3_PURPOSE != OFF || FEATURE4_PURPOSE != OFF || FEATURE5_PURPOSE != OFF || FEATURE6_PURPOSE != OFF || FEATURE7_PURPOSE != OFF || FEATURE8_PURPOSE != OFF
+  #define FEATURES_PRESENT
 #endif
 
 #if (TELESCOPE_TEMPERATURE & DS_MASK) == DS1820 || (FEATURE1_TEMP & DS_MASK) == DS1820 || (FEATURE2_TEMP & DS_MASK) == DS1820 || (FEATURE3_TEMP & DS_MASK) == DS1820 || (FEATURE4_TEMP & DS_MASK) == DS1820 || (FEATURE5_TEMP & DS_MASK) == DS1820 || (FEATURE6_TEMP & DS_MASK) == DS1820 || (FEATURE7_TEMP & DS_MASK) == DS1820 || (FEATURE8_TEMP & DS_MASK) == DS1820 
