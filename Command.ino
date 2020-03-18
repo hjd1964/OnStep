@@ -355,9 +355,9 @@ void processCommands() {
 //            Return: 0 on failure
 //                    1 on success
         if (command[1] == 'A') {
-          if (parameter[0] == '1' && parameter[1] == 0) { primaryFocuser='F'; secondaryFocuser='f'; }
+          if (parameter[0] == '1' && parameter[1] == 0) { primaryFocuser=toupper(secondaryFocuser); secondaryFocuser=tolower(primaryFocuser); }
 #if FOCUSER2 == ON
-          else if (parameter[0] == '2' && parameter[1] == 0) { primaryFocuser='f'; secondaryFocuser='F'; }
+          else if (parameter[0] == '2' && parameter[1] == 0) { primaryFocuser=tolower(secondaryFocuser); secondaryFocuser=toupper(primaryFocuser); }
 #endif
           else commandError=CE_PARAM_RANGE;
         } else
