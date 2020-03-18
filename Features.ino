@@ -70,11 +70,11 @@ void featuresSetCommand(char *parameter) {
 
   if (v >= 0 && v <= 255) feature[i].value=v;
   if (feature[i].purpose == SWITCH) {
-      if (parameter[3] == 'V') {
-        if (v >= 0 && v <= 1) {
-          if (feature[i].pin >= 0 && feature[i].pin <= 255) digitalWrite(feature[i].pin,v==0?LOW:HIGH); else ambient.setDS2413State(0,v==0?0:1);
-        } else commandError=CE_PARAM_RANGE;
-      } else commandError=CE_PARAM_FORM;
+    if (parameter[3] == 'V') {
+      if (v >= 0 && v <= 1) {
+        if (feature[i].pin >= 0 && feature[i].pin <= 255) digitalWrite(feature[i].pin,v==0?LOW:HIGH); else ambient.setDS2413State(0,v==0?0:1);
+      } else commandError=CE_PARAM_RANGE;
+    } else commandError=CE_PARAM_FORM;
   } else if (feature[i].purpose == ANALOG) {
     if (parameter[3] == 'V') {
       if (v >= 0 && v <= 255) {
@@ -82,13 +82,13 @@ void featuresSetCommand(char *parameter) {
       } else commandError=CE_PARAM_RANGE;
     } else commandError=CE_PARAM_FORM;
   } else if (feature[i].purpose == DEW_HEATER) {
-      if (parameter[3] == 'V') {
-        if (v >= 0 && v <= 1) feature[i].dewHeater->enable(v); else commandError=CE_PARAM_RANGE;
-      } else if (parameter[3] == 'Z') {
-        if (f >= -5.0 && f <= 20.0) feature[i].dewHeater->setZero(f); else commandError=CE_PARAM_RANGE;
-      } else if (parameter[3] == 'S') {
-        if (f >= -5.0 && f <= 20.0) feature[i].dewHeater->setSpan(f); else commandError=CE_PARAM_RANGE;
-      } else commandError=CE_PARAM_FORM;
+    if (parameter[3] == 'V') {
+      if (v >= 0 && v <= 1) feature[i].dewHeater->enable(v); else commandError=CE_PARAM_RANGE;
+    } else if (parameter[3] == 'Z') {
+      if (f >= -5.0 && f <= 20.0) feature[i].dewHeater->setZero(f); else commandError=CE_PARAM_RANGE;
+    } else if (parameter[3] == 'S') {
+      if (f >= -5.0 && f <= 20.0) feature[i].dewHeater->setSpan(f); else commandError=CE_PARAM_RANGE;
+    } else commandError=CE_PARAM_FORM;
   }
 }
 #endif
