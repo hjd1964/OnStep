@@ -150,7 +150,6 @@ class weather {
     void poll() {
 #if WEATHER != OFF || defined(ONEWIRE_DEVICES_PRESENT)
       if (_BME280_found || _DS1820_found || _DS2413_found) {
-        double f;
 
         static int phase = 0;
         if (phase >= 500) { phase = 0; _DS1820_count = 0; }
@@ -187,6 +186,7 @@ class weather {
 
   #ifdef DS1820_DEVICES_PRESENT
         if (_DS1820_found) {
+          double f;
           if (phase == 0) { if (DS18B20.requestTemperatures(true)) phase++; return; }
     #if TELESCOPE_TEMPERATURE != OFF
           if (phase == 50) { f = DS18B20.getTempC(_DS1820_address[0],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _tt=f; else _tt=100.0; phase++; return; } }
