@@ -24,6 +24,9 @@
 #define L_ON "On"
 #define L_OFF "Off"
 #define L_DELTA "Delta"
+#define L_ZERO "Zero"
+#define L_SPAN "Span"
+#define L_POWER "Pwr"
 #define L_GUIDE "Guide"
 #define L_CENTER "Center"
 #define L_BLUE "Blue"
@@ -170,6 +173,7 @@
 #define L_HINT_DEROTATE_OFF "De-Rotate Off"
 
 #define L_ALIGN "Align"
+#define L_AUX_FEATURES "Auxiliary Features"
 
 #define L_FOCUSER "Focuser"
 #define L_ROTATOR "Rotator"

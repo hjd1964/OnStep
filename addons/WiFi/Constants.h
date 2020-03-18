@@ -14,3 +14,8 @@
 #define DEFAULT_AJAX_RATE "5"        // normally 5 seconds between updates
 #define DEFAULT_FAST_AJAX_RATE "1"   // fast update is 1 second/update
 #define DEFAULT_AJAX_SHED_TIME "15"  // time before return to normal update rate
+
+// various auxillary features
+#define SWITCH 1
+#define ANALOG 2
+#define DEW_HEATER 3

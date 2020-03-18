@@ -24,7 +24,7 @@ class MountStatus {
   public:
     bool update(bool all=false) {
 
-      char s[20] = "";
+      char s[40] = "";
       if (!_valid) {
         if (!command(":GVP#",s) || s[0] == 0 || !strstr(s,"On-Step")) { _valid=false; return false; }
         if (!command(":GVN#",s) || s[0] == 0 ) { _valid=false; return false; }
@@ -72,10 +72,15 @@ class MountStatus {
       _lastError=(Errors)(s[strlen(s)-1]-'0');
 
       if (all) {
+        // get meridian status
         if (!command(":GX94#",s) || s[0]==0) { _valid=false; return false; }
         _meridianFlips=!strstr(s, "N");
         _pierSide=strtol(&s[0],NULL,10);
 
+        // update auxiliary features
+        featureUpdate();
+        
+        // get driver status
         static int driverStatusTries = 0;
         _validStepperDriverStatus = false;
         _stst1 = false; _olb1 = false; _ola1 = false; _s2ga1 = false; _s2gb1 = false; _ot1 = false; _otpw1 = false;
@@ -111,6 +116,7 @@ class MountStatus {
       _valid=true;
       return true;
     }
+
     bool getId(char id[]) { if (!_valid) return false; else { strcpy(id,_id); return true; } }
     bool getVer(char ver[]) { if (!_valid) return false; else { strcpy(ver,_ver); return true; } }
     bool valid() { return _valid; }
@@ -157,6 +163,90 @@ class MountStatus {
     bool autoMeridianFlips() { return _autoMeridianFlips; }
     byte pierSide() { return _pierSide; }
     int alignMaxStars() { return _alignMaxStars; }
+
+    bool featureFound() { return _featureFound; }
+    void selectFeature(int f) { _featureSelected=f; }
+    char* featureName() { return _feature[_featureSelected].name; }
+    int featurePurpose() { return _feature[_featureSelected].purpose; }
+    int featureValue1() { return _feature[_featureSelected].value1; }
+    float featureValue2() { return _feature[_featureSelected].value2; }
+    float featureValue3() { return _feature[_featureSelected].value3; }
+    float featureValue4() { return _feature[_featureSelected].value4; }
+    bool featureUpdate(bool all = true) {
+      // scan features at-least once
+      static bool scan_features = true;
+
+      // get feature status
+      for (uint8_t i=0; i<8; i++) {
+        char *purpose_str=NULL;
+        char *value1_str=NULL;
+        char *value2_str=NULL;
+        char *value3_str=NULL;
+        char *value4_str=NULL;
+        char s[40],s1[40];
+
+        if (scan_features) {
+          sprintf(s1,":GXY%d#",i+1);
+          if (!command(s1,s) || s[0]==0) _valid=false;
+          if (!_valid) { for (uint8_t j=0; j<8; j++) _feature[j].purpose=0; return false; }
+
+          if (strlen(s) > 1) {
+            purpose_str = strstr(s,",");
+            if (purpose_str) {
+              purpose_str[0]=0;
+              purpose_str++;
+            } else _valid=false;
+            char *name_str = s; if (!name_str) _valid=false;
+
+            if (!_valid) { for (uint8_t j=0; j<8; j++) _feature[j].purpose=0; return false; }
+
+            if (strlen(name_str)>10) name_str[11]=0;
+            strcpy(_feature[i].name,name_str);
+            if (purpose_str) { _feature[i].purpose=atoi(purpose_str); Serial.println("#"); }
+
+            _featureFound=true;
+          }
+        }
+          
+        if (all || (_feature[i].purpose == ANALOG || _feature[i].purpose == DEW_HEATER)) {
+          sprintf(s1,":GXX%d#",i+1);
+          if (!command(s1,s) || s[0]==0) _valid=false;
+          if (!_valid) { for (uint8_t j=0; j<8; j++) _feature[j].purpose=0; return false; }
+  
+          if (strlen(s) > 1) {
+            value2_str = strstr(s,",");
+            if (value2_str) {
+              value2_str[0]=0;
+              value2_str++;
+              value3_str = strstr(value2_str,",");
+              if (value3_str) {
+                value3_str[0]=0;
+                value3_str++;
+                value4_str = strstr(value3_str,",");
+                if (value4_str) {
+                  value4_str[0]=0;
+                  value4_str++;
+                }
+              }
+            }
+            value1_str = s; if (!value1_str) _valid=false;
+  
+            if (_valid) {
+              if (value1_str) _feature[i].value1=atoi(value1_str);
+              if (value2_str) _feature[i].value2=atof(value2_str);
+              if (value3_str) _feature[i].value3=atof(value3_str);
+              if (value4_str) _feature[i].value4=atof(value4_str);
+            }
+          }
+        }
+      }
+      
+      // features have been scanned
+      scan_features = false;
+
+      return true;
+    }
+    
     Errors lastError() { return _lastError; }
     
     bool getLastErrorMessage(char message[]) {
@@ -180,6 +270,19 @@ class MountStatus {
       return message[0];
     }
   private:
+    // hold state of aux features
+    bool _featureFound = false;
+    int _featureSelected=0;
+    typedef struct Features {
+       char name[11];
+       int purpose;
+       int value1;
+       float value2;
+       float value3;
+       float value4;
+    } features;
+    features _feature[8];
+
     char _id[10]="";
     char _ver[10]="";
     bool _valid=false;

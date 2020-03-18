@@ -24,6 +24,9 @@
 #define L_ON "开"
 #define L_OFF "关"
 #define L_DELTA "对冲值"
+#define L_ZERO "零"
+#define L_SPAN "跨度"
+#define L_POWER "功率"
 #define L_GUIDE "引导"
 #define L_CENTER "居中"
 #define L_BLUE "蓝色"
@@ -170,6 +173,7 @@
 #define L_HINT_DEROTATE_OFF "关闭防旋转功能"
 
 #define L_ALIGN "对齐"
+#define L_AUX_FEATURES "辅助功能"
 
 #define L_FOCUSER "聚焦器"
 #define L_ROTATOR "旋转器"
