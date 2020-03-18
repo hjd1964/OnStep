@@ -9,7 +9,7 @@ void featuresInit() {
     } else if (feature[i].purpose == DEW_HEATER) {
       feature[i].dewHeater = new dewHeaterControl;
       // with ambient temperature: zero = -5 (dew forming 100% power), span = 15 (dew NOT forming 0% power)
-      if (feature[i].pin >= 0 && feature[i].pin <= 255) feature[i].dewHeater->init(feature[i].pin,EE_feature1Value1+i*2); else feature[i].dewHeater->init(-1,EE_feature1Value1+i*2);
+      if (feature[i].pin >= 0 && feature[i].pin <= 255) feature[i].dewHeater->init(feature[i].pin,EE_feature1Value1+i*3); else feature[i].dewHeater->init(-1,EE_feature1Value1+i*3);
     }
   }
 }

@@ -190,20 +190,28 @@
 
 #define EE_feature1Value1          GSB+16  // 1
 #define EE_feature1Value2          GSB+17  // 1
-#define EE_feature2Value1          GSB+18  // 1
-#define EE_feature2Value2          GSB+19  // 1
-#define EE_feature3Value1          GSB+20  // 1
-#define EE_feature3Value2          GSB+21  // 1
-#define EE_feature4Value1          GSB+22  // 1
-#define EE_feature4Value2          GSB+23  // 1
-#define EE_feature5Value1          GSB+24  // 1
-#define EE_feature5Value2          GSB+25  // 1
-#define EE_feature6Value1          GSB+26  // 1
-#define EE_feature6Value2          GSB+27  // 1
-#define EE_feature7Value1          GSB+28  // 1
-#define EE_feature7Value2          GSB+29  // 1
-#define EE_feature8Value1          GSB+30  // 1
-#define EE_feature8Value2          GSB+31  // 1
+#define EE_feature1Value3          GSB+18  // 1
+#define EE_feature2Value1          GSB+19  // 1
+#define EE_feature2Value2          GSB+20  // 1
+#define EE_feature2Value3          GSB+21  // 1
+#define EE_feature3Value1          GSB+22  // 1
+#define EE_feature3Value2          GSB+23  // 1
+#define EE_feature3Value3          GSB+24  // 1
+#define EE_feature4Value1          GSB+25  // 1
+#define EE_feature4Value2          GSB+26  // 1
+#define EE_feature4Value3          GSB+27  // 1
+#define EE_feature5Value1          GSB+28  // 1
+#define EE_feature5Value2          GSB+29  // 1
+#define EE_feature5Value3          GSB+30  // 1
+#define EE_feature6Value1          GSB+31  // 1
+#define EE_feature6Value2          GSB+32  // 1
+#define EE_feature6Value3          GSB+33  // 1
+#define EE_feature7Value1          GSB+34  // 1
+#define EE_feature7Value2          GSB+35  // 1
+#define EE_feature7Value3          GSB+36  // 1
+#define EE_feature8Value1          GSB+37  // 1
+#define EE_feature8Value2          GSB+38  // 1
+#define EE_feature8Value3          GSB+39  // 1
 
 // ---------------------------------------------------------------------------------------------------------------------------------
 // Unique identifier for the current initialization format for NV, do not change
