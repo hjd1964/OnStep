@@ -19,9 +19,10 @@ class dewHeaterControl {
       if (!enabled) return;
 
       int switchTimeMs = 0;
-      deltaAboveDewPointC = constrain(deltaAboveDewPointC, zero, span);
-      switchTimeMs = map(lround(deltaAboveDewPointC*10.0), lround(zero*10.0), lround(span*10.0), DH_PULSE_WIDTH_MS, 0);
+      switchTimeMs = map(lround(deltaAboveDewPointC*10.0), lround(zero*10.0), lround(span*10.0), DEW_HEATER_PULSE_WIDTH_MS, 0);
+      switchTimeMs = constrain(switchTimeMs, 0, DEW_HEATER_PULSE_WIDTH_MS);
       currentTime = millis();
+
       if (!heaterOn && (long)(currentTime - (lastHeaterCycle + switchTimeMs)) <= 0)
       {
         if (_pin >= 0 && _pin <= 255) digitalWrite(_pin, HIGH);
@@ -32,7 +33,7 @@ class dewHeaterControl {
         if (_pin >= 0 && _pin <= 255) digitalWrite(_pin, LOW);
         heaterOn = false;
       }
-      else if ((long)(currentTime - (lastHeaterCycle + DH_PULSE_WIDTH_MS)) > 0) {
+      else if ((long)(currentTime - (lastHeaterCycle + DEW_HEATER_PULSE_WIDTH_MS)) > 0) {
         lastHeaterCycle = currentTime;
       }
     }
