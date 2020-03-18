@@ -3,7 +3,9 @@
 
 #pragma once
 
-#define DH_PULSE_WIDTH_MS 2000
+#ifndef DEW_HEATER_PULSE_WIDTH_MS
+  #define DEW_HEATER_PULSE_WIDTH_MS 2000
+#endif
 
 class dewHeaterControl {
   public:
@@ -21,6 +23,9 @@ class dewHeaterControl {
       int switchTimeMs = 0;
       switchTimeMs = map(lround(deltaAboveDewPointC*10.0), lround(zero*10.0), lround(span*10.0), DEW_HEATER_PULSE_WIDTH_MS, 0);
       switchTimeMs = constrain(switchTimeMs, 0, DEW_HEATER_PULSE_WIDTH_MS);
+#ifdef DEW_HEATER_MAX_POWER
+      switchTimeMs = lround(switchTimeMs*(DEW_HEATER_MAX_POWER/100.0))
+#endif
       currentTime = millis();
 
       if (!heaterOn && (long)(currentTime - (lastHeaterCycle + switchTimeMs)) <= 0)
