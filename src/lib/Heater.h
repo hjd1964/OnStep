@@ -28,6 +28,9 @@ class dewHeaterControl {
 #endif
       currentTime = millis();
 
+      if ((long)(currentTime - (lastHeaterCycle + DEW_HEATER_PULSE_WIDTH_MS)) > 0) {
+        lastHeaterCycle = currentTime;
+      } else
       if (!heaterOn && (long)(currentTime - (lastHeaterCycle + switchTimeMs)) <= 0)
       {
         if (_pin >= 0 && _pin <= 255) digitalWrite(_pin, HIGH);
@@ -37,9 +40,6 @@ class dewHeaterControl {
       {
         if (_pin >= 0 && _pin <= 255) digitalWrite(_pin, LOW);
         heaterOn = false;
-      }
-      else if ((long)(currentTime - (lastHeaterCycle + DEW_HEATER_PULSE_WIDTH_MS)) > 0) {
-        lastHeaterCycle = currentTime;
       }
     }
 
