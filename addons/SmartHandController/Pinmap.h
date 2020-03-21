@@ -20,13 +20,23 @@
 
 // The hand controller buttons, etc.
 #ifdef  __ARM_Teensy3_4__
-  #define B_PIN0 21   // Shift
-  #define B_PIN1 15   // N
-  #define B_PIN2 16   // S
-  #define B_PIN3 17   // E
-  #define B_PIN4 20   // W
-  #define B_PIN5 22   // F
-  #define B_PIN6 23   // f
+  #if KEYPAD_JOYSTICK_ANALOG == JS1
+    #define B_PIN0 21   // Shift
+    #define B_PIN1 15   // N
+    #define B_PIN2 15   // S
+    #define B_PIN3 17   // E
+    #define B_PIN4 17   // W
+    #define B_PIN5 22   // F
+    #define B_PIN6 23   // f
+  #else
+    #define B_PIN0 21   // Shift
+    #define B_PIN1 15   // N
+    #define B_PIN2 16   // S
+    #define B_PIN3 17   // E
+    #define B_PIN4 20   // W
+    #define B_PIN5 22   // F
+    #define B_PIN6 23   // f
+  #endif
 
   #define ST4RAw 2    // ST4 (OnStep) RA- West,  send data to OnStep
   #define ST4DEs 3    // ST4 (OnStep) DE- South, clock input to ISR

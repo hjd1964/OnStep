@@ -8,15 +8,15 @@
 
 //------------------------------------------------------------------------------
 
-void Pad::setup(const int pin[7], const bool active[7])
+void Pad::setup(const int pin[7], const bool active[7], int nullNS, int nullEW)
 {
-  shift.init(pin[0],debounceMs,true,active[0]);
-  n.init(pin[1],debounceMs,true,active[1]);
-  s.init(pin[2],debounceMs,true,active[2]);
-  e.init(pin[3],debounceMs,true,active[3]);
-  w.init(pin[4],debounceMs,true,active[4]);
-  F.init(pin[5],debounceMs,true,active[5]);
-  f.init(pin[6],debounceMs,true,active[6]);
+  shift.init(pin[0],debounceMs,true,0,active[0]);
+  n.init(pin[1],debounceMs,true,nullNS,active[1]);
+  s.init(pin[2],debounceMs,true,-nullNS,active[2]);
+  e.init(pin[3],debounceMs,true,nullEW,active[3]);
+  w.init(pin[4],debounceMs,true,-nullEW,active[4]);
+  F.init(pin[5],debounceMs,true,0,active[5]);
+  f.init(pin[6],debounceMs,true,0,active[6]);
 }
 
 void Pad::tickButtons()

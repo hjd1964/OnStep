@@ -283,7 +283,17 @@ void SmartHandController::setup(const char version[], const int pin[7],const boo
   if (strlen(version)<=19) strcpy(_version,version);
   
   telInfo.lastState = 0;
-  buttonPad.setup( pin, active);
+#if KEYPAD_JOYSTICK_ANALOG == JS1
+  pinMode(B_PIN1,INPUT_PULLUP);
+  pinMode(B_PIN2,INPUT_PULLUP);
+  delay(100);
+  int v1=analogRead(B_PIN1);
+  int v2=analogRead(B_PIN3);
+  buttonPad.setup( pin, active, v1, v2);
+#else
+  buttonPad.setup( pin, active, 0, 0);
+#endif
+
 #if ST4_INTERFACE == ON
   auxST4.setup();
 #endif

@@ -35,6 +35,9 @@
 #define DISPLAY_DIM_TIMEOUT            30 //     30, n. Where n=0..600 seconds, 0 disables timeout.                           Adjust
 #define DISPLAY_BLANK_TIMEOUT         120 //    120, n. Where n=0..600 seconds, 0 disables timeout.                           Adjust
 
+// KEYPAD --------------------------------------------------------------------------------------------------------------------------
+#define KEYPAD_JOYSTICK_ANALOG        OFF //    OFF, JS1 for Jerry's analog joystick                                          Option
+
 // ST4 INTERFACE -------------------------------------------------------------------------------------------------------------------
 // *** It is up to you to verify the interface meets the electrical specifications of any connected device, use at your own risk ***
 #define ST4_INTERFACE                 OFF //    OFF, ON, ON_PULLUP enables auxillary "pass-through" ST4 interface.            Option

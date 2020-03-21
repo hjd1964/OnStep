@@ -5,7 +5,8 @@
 
 class button {
   public:
-    void init(int pin, unsigned long debounceMs, boolean pullup, boolean activeLow=true) {
+    void init(int pin, unsigned long debounceMs, boolean pullup, int analogThreshold, boolean activeLow=true) {
+      _at=analogThreshold;
       _pin=pin;
       _debounceMs=debounceMs;
       if (pullup) pinMode(pin,INPUT_PULLUP); else pinMode(pin,INPUT);
@@ -14,7 +15,22 @@ class button {
     // must be repeatedly called to check status of button
     void poll() {
       int lastState=_state;
-      _state=digitalRead(_pin);
+
+      if (_at == 0) {
+        // an analog threshold of exactly zero means this is a digital input
+        _state=digitalRead(_pin);
+      } else if (_at < 0) {
+        // an analog threshold of < zero means this is an analog input and we are checking the negative value 
+        _state=analogRead(_pin)+_at; // ranges from about 0 to -500
+        if (_pin==17) { Serial.print("<- "); Serial.println(_state);}
+        if (_state < -300) _state = LOW; else _state = HIGH;
+      } else if (_at > 0) {
+        // an analog threshold of > zero means this is an analog input and we are checking the positive value 
+        _state=analogRead(_pin)-_at; // ranges from about 0 to 500
+        if (_pin==17) { Serial.print("-> "); Serial.println(_state);}
+       if (_state > 300) _state = LOW; else _state = HIGH;
+      }
+      
       if (lastState!=_state) { _avgPulseDuration=((_avgPulseDuration*49.0)+(double)(millis()-_stableStartMs))/50.0; _stableStartMs=millis(); }
       _stableMs=(long)(millis()-_stableStartMs);
       if (_stableMs>3000UL) { _avgPulseDuration=((_avgPulseDuration*4.0)+2000.0)/5.0; }
@@ -49,6 +65,7 @@ class button {
     double toneFreq() { return _avgPulseDuration; }
   private:
     int _pin;
+    int _at;
     int _state = HIGH;
     int _lastStableState = HIGH;
     unsigned long _debounceMs = 0;

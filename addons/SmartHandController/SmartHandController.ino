@@ -1,7 +1,7 @@
 /*
 * Title       Smart Hand Controller (based on TeenAstro)
 *
-* Copyright (C) 2018 to 2020 Charles Lemaire, Howard Dutton
+* Copyright (C) 2018 to 2020 Charles Lemaire, Howard Dutton, and Others
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU General Public License as published by
@@ -36,8 +36,8 @@
 #define FirmwareDate          __DATE__
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
-#define FirmwareVersionMinor  "8"
-#define FirmwareVersionPatch  "f"
+#define FirmwareVersionMinor  "9"
+#define FirmwareVersionPatch  "a"
 
 #include "Constants.h"
 #include "Locales.h"

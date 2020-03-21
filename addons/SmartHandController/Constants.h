@@ -3,6 +3,7 @@
 // on/off, etc.
 #define OFF -1
 #define ON  -2
+#define JS1 -3
 
 #define TIMEOUT_CMD         1000  // Default=1000 (1 second)
 #define BACKGROUND_CMD_RATE 300   // Default=300, regulates the background command rate
