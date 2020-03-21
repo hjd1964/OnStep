@@ -308,8 +308,9 @@ void SmartHandController::setup(const char version[], const int pin[7],const boo
     analogWrite(UTILITY_LIGHT_PIN, UTILITY_LIGHT);
   #endif
 #endif
-
+  
   //choose a 128x64 display supported by U8G2lib (if not listed below there are many many others in u8g2 library example Sketches)
+  delay(500);
   if (model == OLED_SH1106) display = new U8G2_EXT_SH1106_128X64_NONAME_1_HW_I2C(U8G2_R0);
   else if (model == OLED_SSD1306) display = new U8G2_EXT_SSD1306_128X64_NONAME_F_HW_I2C(U8G2_R0);
   else if (model == OLED_SSD1309) display = new U8G2_EXT_SSD1309_128X64_NONAME_F_HW_I2C(U8G2_R0);
