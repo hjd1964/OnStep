@@ -34,7 +34,7 @@
   #include "catalogs/herschel.h"        // Herschel's "400 best of the NGC" catalog
   #include "catalogs/collinder.h"       // The Collinder catalog of 471 open clusters
   #include "catalogs/ngc_vc.h"          // The New General Catalog of 8154 DSO's
-  #include "catalogs/ic_select_c.h"     // The Index Catalog (supplement) of 5400 DSO's
+  #include "catalogs/ic_select_c.h"     // The Index Catalog (supplement) of 473 DSO's, limited to Magnitude 16 AND with surface brightness >= 22.5m/arc-sec^2
 #else // Teensy3.2
   #include "catalogs/stars_vc.h"        // Catalog of 408 bright stars
   #include "catalogs/stf_select_c.h"    // Struve STF catalog, limited to 595 double stars brighter than Magnitude 8.5
