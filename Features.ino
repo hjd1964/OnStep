@@ -48,8 +48,11 @@ void featuresGetCommand(char *parameter, char *reply, bool &booleanReply) {
     dtostrf(ambient.getFeatureTemperature(i)-ambient.getDewPoint(),3,1,s); strcat(reply,s);
   } else if (feature[i].purpose == INTERVALOMETER) {
     sprintf(s,"%d",(int)feature[i].intervalometer->isEnabled()); strcat(reply,s); strcat(reply,",");
-    dtostrf(feature[i].intervalometer->getExposure(),3,1,s); strcat(reply,s); strcat(reply,",");
-    dtostrf(feature[i].intervalometer->getDelay(),3,1,s); strcat(reply,s); strcat(reply,",");
+    float v; int d;
+    v=feature[i].intervalometer->getExposure(); if (v < 1.0) d=3; else if (v < 10.0) d=2; else if (v < 30.0) d=1; else d=0;
+    dtostrf(v,0,d,s); strcat(reply,s); strcat(reply,",");
+    v=feature[i].intervalometer->getDelay(); if (v < 30.0) d=1; else d=0;
+    dtostrf(v,0,d,s); strcat(reply,s); strcat(reply,",");
     sprintf(s,"%d",(int)feature[i].intervalometer->getCount()); strcat(reply,s);
   } else { commandError=CE_CMD_UNKNOWN; return; }
   booleanReply=false;
@@ -104,9 +107,9 @@ void featuresSetCommand(char *parameter) {
     if (parameter[3] == 'V') {
       if (v >= 0 && v <= 1) feature[i].intervalometer->enable(v); else commandError=CE_PARAM_RANGE;
     } else if (parameter[3] == 'E') { // exposure length
-      if (f >= 0.0 && f <= 1305.0) feature[i].intervalometer->setExposure(f); else commandError=CE_PARAM_RANGE;
+      if (f >= 0.0 && f <= 3600.0) feature[i].intervalometer->setExposure(f); else commandError=CE_PARAM_RANGE;
     } else if (parameter[3] == 'D') { // delay
-      if (f >= 1.0 && f <= 1305.0) feature[i].intervalometer->setDelay(f); else commandError=CE_PARAM_RANGE;
+      if (f >= 1.0 && f <= 3600.0) feature[i].intervalometer->setDelay(f); else commandError=CE_PARAM_RANGE;
     } else if (parameter[3] == 'C') { // count
       if (f >= 0 && f <= 255.0) feature[i].intervalometer->setCount(f); else commandError=CE_PARAM_RANGE;
     } else commandError=CE_PARAM_FORM;
