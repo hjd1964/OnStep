@@ -1718,7 +1718,7 @@ void processCommands() {
         } else
         if (parameter[0] == '9') { // 9n: Misc.
           switch (parameter[1]) {
-            case '2': // set new acceleration rate (returns 1 success or 0 failure)
+            case '2': // set new slew rate (returns 1 success or 0 failure)
               if (!isSlewing()) {
                 maxRate=strtod(&parameter[3],&conv_end)*16.0;
                 if (maxRate < (double)MaxRateDef*8.0) maxRate=(double)MaxRateDef*8.0;
@@ -1728,7 +1728,7 @@ void processCommands() {
                 setAccelerationRates(maxRate);
               } else commandError=CE_MOUNT_IN_MOTION;
             break;
-            case '3': // acceleration rate preset (returns nothing)
+            case '3': // slew rate preset (returns nothing)
               booleanReply=false;
               if (!isSlewing()) {
                 switch (parameter[3]) {
