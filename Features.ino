@@ -8,8 +8,10 @@ void featuresInit() {
       if (feature[i].pin >= 0 && feature[i].pin <= 255) pinMode(feature[i].pin,OUTPUT);
     } else if (feature[i].purpose == DEW_HEATER) {
       feature[i].dewHeater = new dewHeaterControl;
-      // with ambient temperature: zero = -5 (dew forming 100% power), span = 15 (dew NOT forming 0% power)
-      if (feature[i].pin >= 0 && feature[i].pin <= 255) feature[i].dewHeater->init(feature[i].pin,EE_feature1Value1+i*3); else feature[i].dewHeater->init(-1,EE_feature1Value1+i*3);
+      feature[i].dewHeater->init(feature[i].pin,EE_feature1Value1+i*3);
+    } else if (feature[i].purpose == INTERVALOMETER) {
+      feature[i].intervalometer = new intervalometerControl;
+      feature[i].intervalometer->init(feature[i].pin,EE_feature1Value1+i*3);
     }
   }
 }
@@ -20,6 +22,10 @@ void featuresPoll() {
     if (feature[i].purpose == DEW_HEATER) {
       feature[i].dewHeater->poll(ambient.getFeatureTemperature(0)-ambient.getDewPoint());
       if ((feature[i].pin & DS_MASK) == DS2413) ambient.setDS2413State(i,feature[i].dewHeater->isOn());
+    } else
+    if (feature[i].purpose == INTERVALOMETER) {
+      feature[i].intervalometer->poll();
+      if ((feature[i].pin & DS_MASK) == DS2413) ambient.setDS2413State(i,feature[i].intervalometer->isOn());
     }
   }
 #endif
@@ -40,6 +46,11 @@ void featuresGetCommand(char *parameter, char *reply, bool &booleanReply) {
     dtostrf(feature[i].dewHeater->getZero(),3,1,s); strcat(reply,s); strcat(reply,",");
     dtostrf(feature[i].dewHeater->getSpan(),3,1,s); strcat(reply,s); strcat(reply,",");
     dtostrf(ambient.getFeatureTemperature(i)-ambient.getDewPoint(),3,1,s); strcat(reply,s);
+  } else if (feature[i].purpose == INTERVALOMETER) {
+    sprintf(s,"%d",(int)feature[i].intervalometer->isEnabled()); strcat(reply,s); strcat(reply,",");
+    dtostrf(feature[i].intervalometer->getExposure(),3,1,s); strcat(reply,s); strcat(reply,",");
+    dtostrf(feature[i].intervalometer->getDelay(),3,1,s); strcat(reply,s); strcat(reply,",");
+    sprintf(s,"%d",(int)feature[i].intervalometer->getCount()); strcat(reply,s);
   } else { commandError=CE_CMD_UNKNOWN; return; }
   booleanReply=false;
 }
@@ -68,7 +79,7 @@ void featuresSetCommand(char *parameter) {
   if (&parameter[4] == conv_end) { commandError=CE_PARAM_FORM; return; }
   long v = lround(f);
 
-  if (v >= 0 && v <= 255) feature[i].value=v;
+  if (parameter[3] == 'V' && v >= 0 && v <= 255) feature[i].value=v;
   if (feature[i].purpose == SWITCH) {
     if (parameter[3] == 'V') {
       if (v >= 0 && v <= 1) {
@@ -84,10 +95,20 @@ void featuresSetCommand(char *parameter) {
   } else if (feature[i].purpose == DEW_HEATER) {
     if (parameter[3] == 'V') {
       if (v >= 0 && v <= 1) feature[i].dewHeater->enable(v); else commandError=CE_PARAM_RANGE;
-    } else if (parameter[3] == 'Z') {
+    } else if (parameter[3] == 'Z') { // zero
       if (f >= -5.0 && f <= 20.0) feature[i].dewHeater->setZero(f); else commandError=CE_PARAM_RANGE;
-    } else if (parameter[3] == 'S') {
+    } else if (parameter[3] == 'S') { // span
       if (f >= -5.0 && f <= 20.0) feature[i].dewHeater->setSpan(f); else commandError=CE_PARAM_RANGE;
+    } else commandError=CE_PARAM_FORM;
+  } else if (feature[i].purpose == INTERVALOMETER) {
+    if (parameter[3] == 'V') {
+      if (v >= 0 && v <= 1) feature[i].intervalometer->enable(v); else commandError=CE_PARAM_RANGE;
+    } else if (parameter[3] == 'E') { // exposure length
+      if (f >= 0.0 && f <= 1305.0) feature[i].intervalometer->setExposure(f); else commandError=CE_PARAM_RANGE;
+    } else if (parameter[3] == 'D') { // delay
+      if (f >= 1.0 && f <= 1305.0) feature[i].intervalometer->setDelay(f); else commandError=CE_PARAM_RANGE;
+    } else if (parameter[3] == 'C') { // count
+      if (f >= 0 && f <= 255.0) feature[i].intervalometer->setCount(f); else commandError=CE_PARAM_RANGE;
     } else commandError=CE_PARAM_FORM;
   }
 }

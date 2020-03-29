@@ -84,6 +84,7 @@
 #include "src/lib/St4SerialMaster.h"
 #include "src/lib/FPoint.h"
 #include "src/lib/Heater.h"
+#include "src/lib/Intervalometer.h"
 #include "Globals.h"
 #include "src/lib/Julian.h"
 #include "src/lib/Misc.h"

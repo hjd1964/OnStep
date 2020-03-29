@@ -87,7 +87,8 @@
 #define SWITCH                      1
 #define ANALOG                      2
 #define DEW_HEATER                  3
-#define AUXILLARY_LAST              3
+#define INTERVALOMETER              4
+#define AUXILLARY_LAST              4
 
 // coordinate mode for getting and setting RA/Dec
 #define OBSERVED_PLACE              1
