@@ -68,11 +68,15 @@ class weather {
       oneWire.reset_search();
 
       // only search out DS1820's or DS2413's IF none are explicitly specified
+  #if defined(DS1820_DEVICES_PRESENT) || FEATURE_LIST_DS == ON
       bool searchDS1820 = _DS1820_devices == 0;
+  #endif
+  #if defined(DS2413_DEVICES_PRESENT) || FEATURE_LIST_DS == ON
       bool searchDS2413 = _DS2413_devices == 0;
-#if FEATURE_LIST_DS == ON
+  #endif
+  #if FEATURE_LIST_DS == ON
       Serial.println("Dallas/Maxim OneWire bus device s/n's:");
-#endif
+  #endif
 
       while (oneWire.search(address)) {
         if (oneWire.crc8(address, 7) == address[7]) {
@@ -378,7 +382,7 @@ class weather {
     bool _this_ds2413_state[8] = {false, false, false, false, false, false, false, false};
     bool _last_ds2413_state[8] = {false, false, false, false, false, false, false, false};
 
-#ifdef ONEWIRE_DEVICES_PRESENT
+#ifdef DS1820_DEVICES_PRESENT
     bool Tpolling(double f) {
       return (fabs(f-DEVICE_POLLING_C) < 0.001);
     }
