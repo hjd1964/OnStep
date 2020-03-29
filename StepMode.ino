@@ -46,28 +46,62 @@ void driversInitTmcStealthChop() {
 }
 
 void driversInitTmcMode() {
-  #if AXIS1_DRIVER_PWM_GRAD != OFF
-    tmcAxis1.set_PWMCONF_PWM_GRAD(AXIS1_DRIVER_PWM_GRAD);
+  // spreadCycle
+  #if AXIS1_DRIVER_CHOP_TOFF != OFF
+    tmcAxis1.set_CHOPCONF_toff(AXIS1_DRIVER_CHOP_TOFF);
+  #endif
+  #if AXIS1_DRIVER_CHOP_HSTART != OFF
+    tmcAxis1.set_CHOPCONF_hstart(AXIS1_DRIVER_CHOP_HSTART);
+  #endif
+  #if AXIS1_DRIVER_CHOP_HEND != OFF
+    tmcAxis1.set_CHOPCONF_hend(AXIS1_DRIVER_CHOP_HEND);
+  #endif
+  #if AXIS1_DRIVER_CHOP_RNDTF != OFF
+    tmcAxis1.set_CHOPCONF_rndtf(AXIS1_DRIVER_CHOP_RNDTF);
+  #endif
+  #if AXIS1_DRIVER_CHOP_TBL != OFF
+    tmcAxis1.set_CHOPCONF_tbl(AXIS1_DRIVER_CHOP_TBL);
   #endif
   #if AXIS1_DRIVER_FS_VHIGH != OFF
     tmcAxis1.set_THIGH_value( round(12000000.0/(AXIS1_DRIVER_FS_VHIGH*(256.0/AXIS1_DRIVER_MICROSTEPS))) );
     tmcAxis1.set_CHOPCONF_vhighfs(1);
     tmcAxis1.set_CHOPCONF_vhighchm(1);
   #endif
-  #if AXIS1_DRIVER_SC_VHIGH != OFF
-    tmcAxis1.set_TPWMTHRS_value( round(12000000.0/(AXIS1_DRIVER_SC_VHIGH*(256.0/AXIS1_DRIVER_MICROSTEPS))) );
-  #endif
 
-  #if AXIS2_DRIVER_PWM_GRAD != OFF
-    tmcAxis2.set_PWMCONF_PWM_GRAD(AXIS2_DRIVER_PWM_GRAD);
+  #if AXIS2_DRIVER_CHOP_TOFF != OFF
+    tmcAxis2.set_CHOPCONF_toff(AXIS2_DRIVER_CHOP_TOFF);
+  #endif
+  #if AXIS2_DRIVER_CHOP_HSTART != OFF
+    tmcAxis2.set_CHOPCONF_hstart(AXIS2_DRIVER_CHOP_HSTART);
+  #endif
+  #if AXIS2_DRIVER_CHOP_HEND != OFF
+    tmcAxis2.set_CHOPCONF_hend(AXIS2_DRIVER_CHOP_HEND);
+  #endif
+  #if AXIS2_DRIVER_CHOP_RNDTF != OFF
+    tmcAxis2.set_CHOPCONF_rndtf(AXIS2_DRIVER_CHOP_RNDTF);
+  #endif
+  #if AXIS2_DRIVER_CHOP_TBL != OFF
+    tmcAxis2.set_CHOPCONF_tbl(AXIS2_DRIVER_CHOP_TBL);
   #endif
   #if AXIS2_DRIVER_FS_VHIGH != OFF
     tmcAxis2.set_THIGH_value( round(12000000.0/(AXIS2_DRIVER_FS_VHIGH*(256.0/AXIS2_DRIVER_MICROSTEPS))) );
     tmcAxis2.set_CHOPCONF_vhighfs(1);
     tmcAxis2.set_CHOPCONF_vhighchm(1);
   #endif
-  #if AXIS2_DRIVER_SC_VHIGH != OFF
-    tmcAxis2.set_TPWMTHRS_value( round(12000000.0/(AXIS2_DRIVER_SC_VHIGH*(256.0/AXIS2_DRIVER_MICROSTEPS))) );
+
+  // stealthChop
+  #if AXIS1_DRIVER_PWM_GRAD != OFF
+    tmcAxis1.set_PWMCONF_PWM_GRAD(AXIS1_DRIVER_PWM_GRAD);
+  #endif
+  #if AXIS1_DRIVER_PWM_VHIGH_SC != OFF
+    tmcAxis1.set_TPWMTHRS_value( round(12000000.0/(AXIS1_DRIVER_PWM_VHIGH_SC*(256.0/AXIS1_DRIVER_MICROSTEPS))) );
+  #endif
+
+  #if AXIS2_DRIVER_PWM_GRAD != OFF
+    tmcAxis2.set_PWMCONF_PWM_GRAD(AXIS2_DRIVER_PWM_GRAD);
+  #endif
+  #if AXIS2_DRIVER_PWM_VHIGH_SC != OFF
+    tmcAxis2.set_TPWMTHRS_value( round(12000000.0/(AXIS2_DRIVER_PWM_VHIGH_SC*(256.0/AXIS2_DRIVER_MICROSTEPS))) );
   #endif
 }
 
