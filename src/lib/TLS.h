@@ -192,7 +192,7 @@ class timeLocationSource {
     bool active=false;
 
     // initialize (also enables the RTC PPS if available)
-    void init() {
+    bool init() {
       _Rtc.Begin();
       if (!_Rtc.GetIsRunning()) _Rtc.SetIsRunning(true);
 
