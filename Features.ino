@@ -8,10 +8,10 @@ void featuresInit() {
       if (feature[i].pin >= 0 && feature[i].pin <= 255) pinMode(feature[i].pin,OUTPUT);
     } else if (feature[i].purpose == DEW_HEATER) {
       feature[i].dewHeater = new dewHeaterControl;
-      feature[i].dewHeater->init(feature[i].pin,EE_feature1Value1+i*3);
+      if (feature[i].pin >= 0 && feature[i].pin <= 255) feature[i].dewHeater->init(feature[i].pin,EE_feature1Value1+i*3); else feature[i].dewHeater->init(-1,EE_feature1Value1+i*3);
     } else if (feature[i].purpose == INTERVALOMETER) {
       feature[i].intervalometer = new intervalometerControl;
-      feature[i].intervalometer->init(feature[i].pin,EE_feature1Value1+i*3);
+      if (feature[i].pin >= 0 && feature[i].pin <= 255) feature[i].intervalometer->init(feature[i].pin,EE_feature1Value1+i*3); else feature[i].intervalometer->init(-1,EE_feature1Value1+i*3);
     }
   }
 }
