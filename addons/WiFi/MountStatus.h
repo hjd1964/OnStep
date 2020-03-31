@@ -208,12 +208,12 @@ class MountStatus {
           }
         }
           
-        if (all || (_feature[i].purpose == ANALOG || _feature[i].purpose == DEW_HEATER)) {
+        if (all || (_feature[i].purpose == ANALOG || _feature[i].purpose == DEW_HEATER || _feature[i].purpose == INTERVALOMETER)) {
           sprintf(s1,":GXX%d#",i+1);
           if (!command(s1,s) || s[0]==0) _valid=false;
           if (!_valid) { for (uint8_t j=0; j<8; j++) _feature[j].purpose=0; return false; }
   
-          if (strlen(s) > 1) {
+          if (strlen(s) > 0) {
             value2_str = strstr(s,",");
             if (value2_str) {
               value2_str[0]=0;

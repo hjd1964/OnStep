@@ -23,6 +23,7 @@
 #define L_OK "Ok"
 #define L_ON "On"
 #define L_OFF "Off"
+#define L_START "Start"
 #define L_DELTA "Delta"
 #define L_ZERO "Zero"
 #define L_SPAN "Span"

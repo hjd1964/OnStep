@@ -31,6 +31,7 @@
 #define L_OK "OK"
 #define L_ON "An"
 #define L_OFF "Aus"
+#define L_START "Anfang"
 #define L_DELTA "Delta"
 #define L_ZERO "Null"
 #define L_SPAN "Spanne"

@@ -19,3 +19,4 @@
 #define SWITCH 1
 #define ANALOG 2
 #define DEW_HEATER 3
+#define INTERVALOMETER 4

@@ -23,6 +23,7 @@
 #define L_OK "Ok"
 #define L_ON "开"
 #define L_OFF "关"
+#define L_START "开始"
 #define L_DELTA "对冲值"
 #define L_ZERO "零"
 #define L_SPAN "跨度"
