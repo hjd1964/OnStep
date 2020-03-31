@@ -186,6 +186,9 @@
 
 #define L_FOCUSER "Fokussierer"
 #define L_ROTATOR "Rotator"
+#define L_CAMERA_EXPOSURE "Exposition"
+#define L_CAMERA_DELAY "Verzögern"
+#define L_CAMERA_COUNT "Anzahl"
 
 // ---------------------------- Library --------------------------
 

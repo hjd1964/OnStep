@@ -47,7 +47,7 @@ void featuresGetCommand(char *parameter, char *reply, bool &booleanReply) {
     dtostrf(feature[i].dewHeater->getSpan(),3,1,s); strcat(reply,s); strcat(reply,",");
     dtostrf(ambient.getFeatureTemperature(i)-ambient.getDewPoint(),3,1,s); strcat(reply,s);
   } else if (feature[i].purpose == INTERVALOMETER) {
-    sprintf(s,"%d",(int)feature[i].intervalometer->isEnabled()); strcat(reply,s); strcat(reply,",");
+    sprintf(s,"%d",(int)feature[i].intervalometer->getCurrentCount()); strcat(reply,s); strcat(reply,",");
     float v; int d;
     v=feature[i].intervalometer->getExposure(); if (v < 1.0) d=3; else if (v < 10.0) d=2; else if (v < 30.0) d=1; else d=0;
     dtostrf(v,0,d,s); strcat(reply,s); strcat(reply,",");

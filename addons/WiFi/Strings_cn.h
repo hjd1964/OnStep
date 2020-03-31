@@ -178,6 +178,9 @@
 
 #define L_FOCUSER "聚焦器"
 #define L_ROTATOR "旋转器"
+#define L_CAMERA_EXPOSURE "接触"
+#define L_CAMERA_DELAY "延迟"
+#define L_CAMERA_COUNT "计数"
 
 // ---------------------------- Library --------------------------
 

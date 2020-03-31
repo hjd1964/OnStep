@@ -21,7 +21,8 @@ class intervalometerControl {
 
       if (pressed == P_START) {
         // count and stop when done
-        thisCount--; if (thisCount < 0) { pressed=P_STANDBY; enabled=false; return; }
+        if (thisCount == 0) { pressed=P_STANDBY; enabled=false; return; }
+        thisCount--;
         // start a new exposure
         pressed=P_EXPOSE;
         if (_pin >= 0 && _pin <= 255) digitalWrite(_pin, HIGH);
@@ -59,8 +60,11 @@ class intervalometerControl {
       }
     }
 
+    float getCurrentCount() {
+      return thisCount;
+    }
     float getCount() {
-      if (pressed == P_STANDBY) return expCount; else return thisCount;
+      return expCount;
     }
     void setCount(float c) {
       if (pressed == P_STANDBY && c >= 0 && c <= 255) {

@@ -412,22 +412,24 @@ void handleControl() {
         data += temp1;
         data += FPSTR(html_controlStartStop3);
         data += F("</div><div style='float: left; width: 4em; height: 2em; line-height: 2em'>");
-        dtostrf(mountStatus.featureValue4(),0,0,temp2);
-        sprintf(temp1,"<span id='x%dv4'>%s</span> exp\r\n",i+1,temp2);
+        sprintf(temp1,"<span id='x%dv1'>-</span>\r\n",i+1);
         data += temp1;
         data += "</div>\r\n";
 
         data += F("<div style='float: left; text-align: right; width: 8em; height: 2em; line-height: 2em'>");
-        data += "Count";
+        data += L_CAMERA_COUNT;
         data += F("</div><div style='float: left; width: 14em; height: 2em; line-height: 2em'>");
         data += FPSTR(html_controlCount);
         sprintf(temp1,"%d' onchange=\"sf('x%dv4',this.value)\">",(int)mountStatus.featureValue4(),i+1);
         data += temp1;
         data += F("</div><div style='float: left; width: 4em; height: 2em; line-height: 2em'>");
+        dtostrf(mountStatus.featureValue4(),0,0,temp2);
+        sprintf(temp1,"<span id='x%dv4'>%s</span> x\r\n",i+1,temp2);
+        data += temp1;
         data += "</div>\r\n";
 
         data += F("<div style='float: left; text-align: right; width: 8em; height: 2em; line-height: 2em'>");
-        data += "Exposure time";
+        data += L_CAMERA_EXPOSURE;
         data += F("</div><div style='float: left; width: 14em; height: 2em; line-height: 2em'>");
         data += FPSTR(html_controlExposure);
         sprintf(temp1,"%d' onchange=\"sf('x%dv2',this.value)\">",(int)timeToByte(mountStatus.featureValue2()),i+1);
@@ -441,7 +443,7 @@ void handleControl() {
         data += "</div>\r\n";
 
         data += F("<div style='float: left; text-align: right; width: 8em; height: 2em; line-height: 2em'>");
-        data += "Delay time";
+        data += L_CAMERA_DELAY;
         data += F("</div><div style='float: left; width: 14em; height: 2em; line-height: 2em'>");
         data += FPSTR(html_controlDelay);
         sprintf(temp1,"%d' onchange=\"sf('x%dv3',this.value)\">",(int)timeToByte(mountStatus.featureValue3()),i+1);
@@ -517,11 +519,16 @@ void controlAjax() {
       if (mountStatus.featurePurpose() == INTERVALOMETER) {
         char s[20];
         float v; int d;
+        
+        v=mountStatus.featureValue1();
+        if (abs(v) < 0.001) sprintf(temp,"x%dv1|-\n",i+1); else sprintf(temp,"x%dv1|%d\n",i+1,(int)v); data += temp;
+//        sprintf(temp,"x%dv1|%d\n",i+1,(int)mountStatus.featureValue1()); data += temp;
         v=mountStatus.featureValue2(); if (v < 1.0) d=3; else if (v < 10.0) d=2; else if (v < 30.0) d=1; else d=0;
         dtostrf(v,0,d,s); sprintf(temp,"x%dv2|%s\n",i+1,s); data += temp;
         v=mountStatus.featureValue3(); if (v < 10.0) d=2; else if (v < 30.0) d=1; else d=0;
         dtostrf(v,0,d,s); sprintf(temp,"x%dv3|%s\n",i+1,s); data += temp;
-        dtostrf(mountStatus.featureValue4(),0,0,s); sprintf(temp,"x%dv4|%s\n",i+1,s); data += temp;
+        sprintf(temp,"x%dv4|%d\n",i+1,(int)mountStatus.featureValue4()); data += temp;
+//        dtostrf(mountStatus.featureValue4(),0,0,s); sprintf(temp,"x%dv4|%s\n",i+1,s); data += temp;
       }
     }
   }
