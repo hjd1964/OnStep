@@ -51,7 +51,7 @@ void featuresGetCommand(char *parameter, char *reply, bool &booleanReply) {
     float v; int d;
     v=feature[i].intervalometer->getExposure(); if (v < 1.0) d=3; else if (v < 10.0) d=2; else if (v < 30.0) d=1; else d=0;
     dtostrf(v,0,d,s); strcat(reply,s); strcat(reply,",");
-    v=feature[i].intervalometer->getDelay(); if (v < 30.0) d=1; else d=0;
+    v=feature[i].intervalometer->getDelay(); if (v < 10.0) d=2; else if (v < 30.0) d=1; else d=0;
     dtostrf(v,0,d,s); strcat(reply,s); strcat(reply,",");
     sprintf(s,"%d",(int)feature[i].intervalometer->getCount()); strcat(reply,s);
   } else { commandError=CE_CMD_UNKNOWN; return; }
