@@ -44,22 +44,24 @@ const char html_onstep_header2[] PROGMEM = "</font></b></td><td align='right'><b
 const char html_onstep_header3[] PROGMEM = ")</b></td></tr></table>";
 const char html_onstep_header4[] PROGMEM = "</div><div class='b'>\r\n";
 
-const char html_links1S[] PROGMEM = "<a href='/index.htm' style='background-color: #552222;'>" L_PAGE_STATUS "</a>";
-const char html_links1N[] PROGMEM = "<a href='/index.htm'>" L_PAGE_STATUS "</a>";
-const char html_links2S[] PROGMEM = "<a href='/control.htm' style='background-color: #552222;'>" L_PAGE_CONTROL "</a>";
-const char html_links2N[] PROGMEM = "<a href='/control.htm'>" L_PAGE_CONTROL "</a>";
+const char html_linksStatS[] PROGMEM = "<a href='/index.htm' style='background-color: #552222;'>" L_PAGE_STATUS "</a>";
+const char html_linksStatN[] PROGMEM = "<a href='/index.htm'>" L_PAGE_STATUS "</a>";
+const char html_linksCtrlS[] PROGMEM = "<a href='/control.htm' style='background-color: #552222;'>" L_PAGE_CONTROL "</a>";
+const char html_linksCtrlN[] PROGMEM = "<a href='/control.htm'>" L_PAGE_CONTROL "</a>";
+const char html_linksAuxS[] PROGMEM = "<a href='/auxiliary.htm' style='background-color: #552222;'>" L_PAGE_AUX "</a>";
+const char html_linksAuxN[] PROGMEM = "<a href='/auxiliary.htm'>" L_PAGE_AUX "</a>";
 const char html_linksLibS[] PROGMEM = "<a href='/library.htm' style='background-color: #552222;'>" L_PAGE_LIBRARY "</a>";
 const char html_linksLibN[] PROGMEM = "<a href='/library.htm'>" L_PAGE_LIBRARY "</a>";
 const char html_linksEncS[] PROGMEM = "<a href='/enc.htm' style='background-color: #552222;'>" L_PAGE_ENCODERS "</a>";
 const char html_linksEncN[] PROGMEM = "<a href='/enc.htm'>" L_PAGE_ENCODERS "</a>";
-const char html_links3S[] PROGMEM = "<a href='/pec.htm' style='background-color: #552222;'>" L_PAGE_PEC "</a>";
-const char html_links3N[] PROGMEM = "<a href='/pec.htm'>" L_PAGE_PEC "</a>";
-const char html_links4S[] PROGMEM = "<a href='/settings.htm' style='background-color: #552222;'>" L_PAGE_SETTINGS "</a>";
-const char html_links4N[] PROGMEM = "<a href='/settings.htm'>" L_PAGE_SETTINGS "</a>";
-const char html_links5S[] PROGMEM = "<a href='/configuration.htm' style='background-color: #552222;'>" L_PAGE_CONFIG "</a>";
-const char html_links5N[] PROGMEM = "<a href='/configuration.htm'>" L_PAGE_CONFIG "</a>";
-const char html_links6S[] PROGMEM = "<a href='/wifi.htm' style='background-color: #552222;'>" L_PAGE_WIFI "</a><br />";
-const char html_links6N[] PROGMEM = "<a href='/wifi.htm'>" L_PAGE_WIFI "</a><br />";
+const char html_linksPecS[] PROGMEM = "<a href='/pec.htm' style='background-color: #552222;'>" L_PAGE_PEC "</a>";
+const char html_linksPecN[] PROGMEM = "<a href='/pec.htm'>" L_PAGE_PEC "</a>";
+const char html_linksSetS[] PROGMEM = "<a href='/settings.htm' style='background-color: #552222;'>" L_PAGE_SETTINGS "</a>";
+const char html_linksSetN[] PROGMEM = "<a href='/settings.htm'>" L_PAGE_SETTINGS "</a>";
+const char html_linksCfgS[] PROGMEM = "<a href='/configuration.htm' style='background-color: #552222;'>" L_PAGE_CONFIG "</a>";
+const char html_linksCfgN[] PROGMEM = "<a href='/configuration.htm'>" L_PAGE_CONFIG "</a>";
+const char html_linksWifiS[] PROGMEM = "<a href='/wifi.htm' style='background-color: #552222;'>" L_PAGE_WIFI "</a><br />";
+const char html_linksWifiN[] PROGMEM = "<a href='/wifi.htm'>" L_PAGE_WIFI "</a><br />";
 
 // Javascript for Ajax
 // be sure to define "var ajaxPage='control.txt';" etc.

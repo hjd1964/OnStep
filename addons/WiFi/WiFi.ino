@@ -379,6 +379,9 @@ TryAgain:
   server.on("/control.htm", handleControl);
   server.on("/controlA.txt", controlAjaxGet);
   server.on("/control.txt", controlAjax);
+  server.on("/auxiliary.htm", handleAux);
+  server.on("/auxiliaryA.txt", auxAjaxGet);
+  server.on("/auxiliary.txt", auxAjax);
   server.on("/pec.htm", handlePec);
   server.on("/pec.txt", pecAjax);
   server.on("/wifi.htm", handleWifi);

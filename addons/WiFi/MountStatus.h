@@ -71,6 +71,9 @@ class MountStatus {
 
       _lastError=(Errors)(s[strlen(s)-1]-'0');
 
+      // get a list of auxiliary features (runs once)
+      featureScan();
+
       if (all) {
         // get meridian status
         if (!command(":GX94#",s) || s[0]==0) { _valid=false; return false; }
@@ -172,17 +175,13 @@ class MountStatus {
     float featureValue2() { return _feature[_featureSelected].value2; }
     float featureValue3() { return _feature[_featureSelected].value3; }
     float featureValue4() { return _feature[_featureSelected].value4; }
-    bool featureUpdate(bool all = true) {
-      // scan features at-least once
+    bool featureScan() {
+      // scan features once
       static bool scan_features = true;
 
       // get feature status
       for (uint8_t i=0; i<8; i++) {
         char *purpose_str=NULL;
-        char *value1_str=NULL;
-        char *value2_str=NULL;
-        char *value3_str=NULL;
-        char *value4_str=NULL;
         char s[40],s1[40];
 
         if (scan_features) {
@@ -207,7 +206,19 @@ class MountStatus {
             _featureFound=true;
           }
         }
-          
+      }
+      scan_features = false;
+      return true;
+    }
+    bool featureUpdate(bool all = true) {
+      // get feature status
+      for (uint8_t i=0; i<8; i++) {
+        char *value1_str=NULL;
+        char *value2_str=NULL;
+        char *value3_str=NULL;
+        char *value4_str=NULL;
+        char s[40],s1[40];
+
         if (all || (_feature[i].purpose == ANALOG || _feature[i].purpose == DEW_HEATER || _feature[i].purpose == INTERVALOMETER)) {
           sprintf(s1,":GXX%d#",i+1);
           if (!command(s1,s) || s[0]==0) _valid=false;
@@ -241,9 +252,6 @@ class MountStatus {
         }
       }
       
-      // features have been scanned
-      scan_features = false;
-
       return true;
     }
     

@@ -28,6 +28,8 @@ void handlePec() {
   Ser.setTimeout(webTimeout);
   serialRecvFlush();
       
+  mountStatus.update();
+
   char temp1[120] = "";
 
   processPecGet();
@@ -54,8 +56,6 @@ void handlePec() {
   data += FPSTR(html_bodyB);
   sendHtml(data);
 
-  mountStatus.update();
-
   if (mountStatus.mountType()!=MT_ALTAZM) {
     // active ajax page is: pecAjax();
     data +="<script>var ajaxPage='pec.txt';</script>\n";
@@ -68,18 +68,19 @@ void handlePec() {
   data += FPSTR(html_onstep_header2);
   if (mountStatus.getVer(temp1)) data += temp1; else data += "?";
   data += FPSTR(html_onstep_header3);
-  data += FPSTR(html_links1N);
-  data += FPSTR(html_links2N);
+  data += FPSTR(html_linksStatN);
+  data += FPSTR(html_linksCtrlN);
+  if (mountStatus.featureFound()) data += FPSTR(html_linksAuxN);
   data += FPSTR(html_linksLibN);
 #if ENCODERS == ON
   data += FPSTR(html_linksEncN);
 #endif
   sendHtml(data);
-  data += FPSTR(html_links3S);
-  data += FPSTR(html_links4N);
-  data += FPSTR(html_links5N);
+  data += FPSTR(html_linksPecS);
+  data += FPSTR(html_linksSetN);
+  data += FPSTR(html_linksCfgN);
 #ifndef OETHS
-  data += FPSTR(html_links6N);
+  data += FPSTR(html_linksWifiN);
 #endif
   data += FPSTR(html_onstep_header4);
   sendHtml(data);

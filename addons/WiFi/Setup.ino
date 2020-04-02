@@ -103,6 +103,8 @@ void handleWifi() {
   Ser.setTimeout(webTimeout);
   serialRecvFlush();
   
+  mountStatus.update(true);
+
   char temp[400]="";
   char temp1[120]="";
   
@@ -127,24 +129,23 @@ void handleWifi() {
   data += FPSTR(html_bodyB);
   sendHtml(data);
 
-  mountStatus.update(true);
-
   // finish the standard http response header
   data += FPSTR(html_onstep_header1); data += "OnStep";
   data += FPSTR(html_onstep_header2);
   if (mountStatus.getVer(temp1)) data += temp1; else data += "?";
   data += FPSTR(html_onstep_header3);
-  data += FPSTR(html_links1N);
-  data += FPSTR(html_links2N);
+  data += FPSTR(html_linksStatN);
+  data += FPSTR(html_linksCtrlN);
+  if (mountStatus.featureFound()) data += FPSTR(html_linksAuxN);
   data += FPSTR(html_linksLibN);
 #if ENCODERS == ON
   data += FPSTR(html_linksEncN);
 #endif
   sendHtml(data);
-  data += FPSTR(html_links3N);
-  data += FPSTR(html_links4N);
-  data += FPSTR(html_links5N);
-  data += FPSTR(html_links6S);
+  data += FPSTR(html_linksPecN);
+  data += FPSTR(html_linksSetN);
+  data += FPSTR(html_linksCfgN);
+  data += FPSTR(html_linksWifiS);
   data += FPSTR(html_onstep_header4);
   sendHtml(data);
 

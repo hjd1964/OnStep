@@ -383,6 +383,7 @@
 
 #define L_PAGE_STATUS "Status"
 #define L_PAGE_CONTROL "Steuerung"
+#define L_PAGE_AUX "Hilfs"
 #define L_PAGE_LIBRARY "Bibliothek"
 #define L_PAGE_ENCODERS "Encoder"
 #define L_PAGE_PEC "PEC"

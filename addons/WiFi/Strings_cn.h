@@ -374,6 +374,7 @@
 
 #define L_PAGE_STATUS "状态"
 #define L_PAGE_CONTROL "控制"
+#define L_PAGE_AUX "辅助的"
 #define L_PAGE_LIBRARY "库"
 #define L_PAGE_ENCODERS "编码器"
 #define L_PAGE_PEC "定期校正"

@@ -374,11 +374,12 @@
 
 #define L_PAGE_STATUS "Status"
 #define L_PAGE_CONTROL "Control"
+#define L_PAGE_AUX "Aux"
 #define L_PAGE_LIBRARY "Library"
 #define L_PAGE_ENCODERS "Encoders"
 #define L_PAGE_PEC "PEC"
 #define L_PAGE_SETTINGS "Settings"
-#define L_PAGE_CONFIG "Configuration"
+#define L_PAGE_CONFIG "Config"
 #define L_PAGE_WIFI "WiFi"
 
 // ------------------------- MountStatus -------------------------

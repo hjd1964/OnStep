@@ -73,6 +73,8 @@ void handleSettings() {
   Ser.setTimeout(webTimeout);
   serialRecvFlush();
 
+  mountStatus.update(true);
+
   char temp1[120]="";
 
   processSettingsGet();
@@ -100,25 +102,24 @@ void handleSettings() {
   data +=FPSTR(html_ajax_active);
   data +="<script>auto2Rate=2;</script>";
 
-  mountStatus.update(true);
-
   // finish the standard http response header
   data += FPSTR(html_onstep_header1); data += "OnStep";
   data += FPSTR(html_onstep_header2);
   if (mountStatus.getVer(temp1)) data += temp1; else data += "?";
   data += FPSTR(html_onstep_header3);
-  data += FPSTR(html_links1N);
-  data += FPSTR(html_links2N);
+  data += FPSTR(html_linksStatN);
+  data += FPSTR(html_linksCtrlN);
+  if (mountStatus.featureFound()) data += FPSTR(html_linksAuxN);
   data += FPSTR(html_linksLibN);
 #if ENCODERS == ON
   data += FPSTR(html_linksEncN);
 #endif
   sendHtml(data);
-  data += FPSTR(html_links3N);
-  data += FPSTR(html_links4S);
-  data += FPSTR(html_links5N);
+  data += FPSTR(html_linksPecN);
+  data += FPSTR(html_linksSetS);
+  data += FPSTR(html_linksCfgN);
 #ifndef OETHS
-  data += FPSTR(html_links6N);
+  data += FPSTR(html_linksWifiN);
 #endif
   data += FPSTR(html_onstep_header4);
   sendHtml(data);
