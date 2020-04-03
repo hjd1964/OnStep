@@ -171,6 +171,8 @@ void handleEncoders() {
   Ser.setTimeout(webTimeout);
   serialRecvFlush();
   
+  mountStatus.update();
+
   char temp[400]="";
   
   processEncodersGet();
@@ -209,9 +211,6 @@ void handleEncoders() {
   data += FPSTR(html_bodyB);
   sendHtml(data);
 
-  // get status
-  mountStatus.update();
-
   // finish the standard http response header
   {
     char temp1[40]="";
@@ -220,18 +219,19 @@ void handleEncoders() {
     if (mountStatus.getVer(temp1)) data += temp1; else data += "?";
     data += FPSTR(html_onstep_header3);
   }
-  data += FPSTR(html_links1N);
-  data += FPSTR(html_links2N);
+  data += FPSTR(html_linksStatN);
+  data += FPSTR(html_linksCtrlN);
+  if (mountStatus.featureFound()) data += FPSTR(html_linksAuxN);
   data += FPSTR(html_linksLibN);
 #if ENCODERS == ON
   data += FPSTR(html_linksEncS);
 #endif
   sendHtml(data);
-  data += FPSTR(html_links3N);
-  data += FPSTR(html_links4N);
-  data += FPSTR(html_links5N);
+  data += FPSTR(html_linksPecN);
+  data += FPSTR(html_linksSetN);
+  data += FPSTR(html_linksCfgN);
 #ifndef OETHS
-  data += FPSTR(html_links6N);
+  data += FPSTR(html_linksWifiN);
 #endif
   data += FPSTR(html_onstep_header4);
   sendHtml(data);

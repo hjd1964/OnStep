@@ -23,7 +23,11 @@
 #define L_OK "Ok"
 #define L_ON "On"
 #define L_OFF "Off"
+#define L_START "Start"
 #define L_DELTA "Delta"
+#define L_ZERO "Zero"
+#define L_SPAN "Span"
+#define L_POWER "Pwr"
 #define L_GUIDE "Guide"
 #define L_CENTER "Center"
 #define L_BLUE "Blue"
@@ -170,9 +174,13 @@
 #define L_HINT_DEROTATE_OFF "De-Rotate Off"
 
 #define L_ALIGN "Align"
+#define L_AUX_FEATURES "Auxiliary Features"
 
 #define L_FOCUSER "Focuser"
 #define L_ROTATOR "Rotator"
+#define L_CAMERA_EXPOSURE "Exposure"
+#define L_CAMERA_DELAY "Delay"
+#define L_CAMERA_COUNT "Count"
 
 // ---------------------------- Library --------------------------
 
@@ -366,11 +374,12 @@
 
 #define L_PAGE_STATUS "Status"
 #define L_PAGE_CONTROL "Control"
+#define L_PAGE_AUX "Aux"
 #define L_PAGE_LIBRARY "Library"
 #define L_PAGE_ENCODERS "Encoders"
 #define L_PAGE_PEC "PEC"
 #define L_PAGE_SETTINGS "Settings"
-#define L_PAGE_CONFIG "Configuration"
+#define L_PAGE_CONFIG "Config"
 #define L_PAGE_WIFI "WiFi"
 
 // ------------------------- MountStatus -------------------------

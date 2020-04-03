@@ -64,27 +64,6 @@ IPAddress subnet(255, 255, 255, 0);
                                           //         for skew in the average guide rate over the last worm period.            Option
 #define AXIS1_ENC_BIN_AVG             OFF //    OFF, n, (Number of bins.)  Enables binned rolling average feature.            Option
 
-// AUXILLARY SWITCH/FEATURE CONTROL ------------------------------------------------------------------------------------------------
-// *** Warning: only OnStep Aux pins that are unused for other purposes should be assigned! ***
-#define SW0_OFF                           //   _OFF, "Name" for Aux0 feature on Control webpage, provides On/Off control.     Adjust
-#define SW1_OFF                           //   _OFF, "Name" for Aux1 feature on Control webpage, provides On/Off control.     Adjust
-#define SW2_OFF                           //   _OFF, "Name" for Aux2 feature on Control webpage, provides On/Off control.     Adjust
-#define SW3_OFF                           //   _OFF, "Name" for Aux3 feature on Control webpage, provides On/Off control.     Adjust
-#define SW4_OFF                           //   _OFF, "Name" for Aux4 feature on Control webpage, provides On/Off control.     Adjust
-#define SW5_OFF                           //   _OFF, "Name" for Aux5 feature on Control webpage, provides On/Off control.     Adjust
-#define SW6_OFF                           //   _OFF, "Name" for Aux6 feature on Control webpage, provides On/Off control.     Adjust
-#define SW7_OFF                           //   _OFF, "Name" for Aux7 feature on Control webpage, provides On/Off control.     Adjust
-#define SW8_OFF                           //   _OFF, "Name" for Aux8 feature on Control webpage, provides On/Off control.     Adjust
-
-// AUXILLARY ANALOG/FEATURE CONTROL ------------------------------------------------------------------------------------------------
-// *** Warning: only OnStep Aux pins that are unused for other purposes should be assigned! ***
-#define AN3_OFF                           //   _OFF, "Name" for Aux3 feature on Control webpage, provides 0..100% PWM.        Adjust
-#define AN4_OFF                           //   _OFF, "Name" for Aux4 feature on Control webpage, provides 0..100% PWM.        Adjust
-#define AN5_OFF                           //   _OFF, "Name" for Aux5 feature on Control webpage, provides 0..100% PWM.        Adjust
-#define AN6_OFF                           //   _OFF, "Name" for Aux6 feature on Control webpage, provides 0..100% PWM.        Adjust
-#define AN7_OFF                           //   _OFF, "Name" for Aux7 feature on Control webpage, provides 0..100% PWM.        Adjust
-#define AN8_OFF                           //   _OFF, "Name" for Aux8 feature on Control webpage, provides 0..100% PWM.        Adjust
-
 // THAT'S IT FOR USER CONFIGURATION!
 
 // -------------------------------------------------------------------------------------------------------------------------

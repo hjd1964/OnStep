@@ -135,68 +135,6 @@ const char html_controlDeRotate2[] PROGMEM =
 const char html_controlRotate4[] PROGMEM =
 "</div><br class='clear' />\r\n";
 
-#if defined(SW0) || defined(SW1) || defined(SW2) || defined(SW3) || defined(SW4) || defined(SW5) || defined(SW6) || defined(SW7) || defined(SW8) || defined(AN3) || defined(AN4) || defined(AN5) || defined(AN6) || defined(AN7) || defined(AN8)
-const char html_controlAuxB[] PROGMEM = "<div class='b1' style='width: 27em'><div align='left'>Aux:</div>";
-#ifdef SW0
-const char html_controlSwitch0[] PROGMEM = SW0 "<br /><button type='button' onpointerdown=\"s('sw0','255')\" >" L_ON "</button><button type='button' onpointerdown=\"s('sw0','0')\" >" L_OFF "</button><br />";
-#endif
-#ifdef SW1
-const char html_controlSwitch1[] PROGMEM = SW1 "<br /><button type='button' onpointerdown=\"s('sw1','255')\" >" L_ON "</button><button type='button' onpointerdown=\"s('sw1','0')\" >" L_OFF "</button><br />";
-#endif
-#ifdef SW2
-const char html_controlSwitch2[] PROGMEM = SW2 "<br /><button type='button' onpointerdown=\"s('sw2','255')\" >" L_ON "</button><button type='button' onpointerdown=\"s('sw2','0')\" >" L_OFF "</button><br />";
-#endif
-#ifdef SW3
-const char html_controlSwitch3[] PROGMEM = SW3 "<br /><button type='button' onpointerdown=\"s('sw3','255')\" >" L_ON "</button><button type='button' onpointerdown=\"s('sw3','0')\" >" L_OFF "</button><br />";
-#endif
-#ifdef SW4
-const char html_controlSwitch4[] PROGMEM = SW4 "<br /><button type='button' onpointerdown=\"s('sw4','255')\" >" L_ON "</button><button type='button' onpointerdown=\"s('sw4','0')\" >" L_OFF "</button><br />";
-#endif
-#ifdef SW5
-const char html_controlSwitch5[] PROGMEM = SW5 "<br /><button type='button' onpointerdown=\"s('sw5','255')\" >" L_ON "</button><button type='button' onpointerdown=\"s('sw5','0')\" >" L_OFF "</button><br />";
-#endif
-#ifdef SW6
-const char html_controlSwitch6[] PROGMEM = SW6 "<br /><button type='button' onpointerdown=\"s('sw6','255')\" >" L_ON "</button><button type='button' onpointerdown=\"s('sw6','0')\" >" L_OFF "</button><br />";
-#endif
-#ifdef SW7
-const char html_controlSwitch7[] PROGMEM = SW7 "<br /><button type='button' onpointerdown=\"s('sw7','255')\" >" L_ON "</button><button type='button' onpointerdown=\"s('sw7','0')\" >" L_OFF "</button><br />";
-#endif
-#ifdef SW8
-const char html_controlSwitch8[] PROGMEM = SW8 "<br /><button type='button' onpointerdown=\"s('sw8','255')\" >" L_ON "</button><button type='button' onpointerdown=\"s('sw8','0')\" >" L_OFF "</button><br />";
-#endif
-#ifdef AN3
-const char html_controlAnalog3A[] PROGMEM = AN3 " <span id='an3v'>";
-const char html_controlAnalog3B[] PROGMEM ="</span>%<br /><input style='width: 80%; background: #111' type='range' value='";
-const char html_controlAnalog3C[] PROGMEM = "' onchange=\"sf('an3',this.value)\"><br />";
-#endif
-#ifdef AN4
-const char html_controlAnalog4A[] PROGMEM = AN4 " <span id='an4v'>";
-const char html_controlAnalog4B[] PROGMEM ="</span>%<br /><input style='width: 80%; background: #111' type='range' value='";
-const char html_controlAnalog4C[] PROGMEM = "' onchange=\"sf('an4',this.value)\"><br />";
-#endif
-#ifdef AN5
-const char html_controlAnalog5A[] PROGMEM = AN5 " <span id='an5v'>";
-const char html_controlAnalog5B[] PROGMEM = "</span>%<br /><input style='width: 80%; background: #111' type='range' value='";
-const char html_controlAnalog5C[] PROGMEM = "' onchange=\"sf('an5',this.value)\"><br />";
-#endif
-#ifdef AN6
-const char html_controlAnalog6A[] PROGMEM = AN6 " <span id='an6v'>";
-const char html_controlAnalog6B[] PROGMEM = "</span>%<br /><input style='width: 80%; background: #111' type='range' value='";
-const char html_controlAnalog6C[] PROGMEM = "' onchange=\"sf('an6',this.value)\"><br />";
-#endif
-#ifdef AN7
-const char html_controlAnalog7A[] PROGMEM = AN7 " <span id='an7v'>";
-const char html_controlAnalog7B[] PROGMEM = "</span>%<br /><input style='width: 80%; background: #111' type='range' value='";
-const char html_controlAnalog7C[] PROGMEM = "' onchange=\"sf('an7',this.value)\"><br />";
-#endif
-#ifdef AN8
-const char html_controlAnalog8A[] PROGMEM = AN8 " <span id='an8v'>";
-const char html_controlAnalog8B[] PROGMEM = "</span>%<br /><input style='width: 80%; background: #111' type='range' value='";
-const char html_controlAnalog8C[] PROGMEM = "' onchange=\"sf('an8',this.value)\"><br />";
-#endif
-const char html_controlAuxE[] PROGMEM = "</div><br class='clear' />\r\n";
-#endif
-
 const char html_controlEnd[] PROGMEM = 
 "<br />\r\n";
 
@@ -212,8 +150,10 @@ void handleControl() {
 #endif
   Ser.setTimeout(webTimeout);
   serialRecvFlush();
-    
-  char temp1[24]="";
+
+  mountStatus.update(true);
+
+  char temp1[80]="";
 
   processControlGet();
 
@@ -238,26 +178,24 @@ void handleControl() {
   data += FPSTR(html_bodyB);
   sendHtml(data);
 
-  // get status
-  mountStatus.update();
-
   // finish the standard http response header
   data += FPSTR(html_onstep_header1); data += "OnStep";
   data += FPSTR(html_onstep_header2);
   if (mountStatus.getVer(temp1)) data += temp1; else data += "?";
   data += FPSTR(html_onstep_header3);
-  data += FPSTR(html_links1N);
-  data += FPSTR(html_links2S);
+  data += FPSTR(html_linksStatN);
+  data += FPSTR(html_linksCtrlS);
+  if (mountStatus.featureFound()) data += FPSTR(html_linksAuxN);
   data += FPSTR(html_linksLibN);
 #if ENCODERS == ON
   data += FPSTR(html_linksEncN);
 #endif
   sendHtml(data);
-  data += FPSTR(html_links3N);
-  data += FPSTR(html_links4N);
-  data += FPSTR(html_links5N);
+  data += FPSTR(html_linksPecN);
+  data += FPSTR(html_linksSetN);
+  data += FPSTR(html_linksCfgN);
 #ifndef OETHS
-  data += FPSTR(html_links6N);
+  data += FPSTR(html_linksWifiN);
 #endif
   data += FPSTR(html_onstep_header4);
   sendHtml(data);
@@ -265,7 +203,7 @@ void handleControl() {
   // OnStep wasn't found, show warning and info.
   if (!mountStatus.valid()) { data+= FPSTR(html_bad_comms_message); sendHtml(data); sendHtmlDone(data); return; }
 
-  // guide (etc) script
+  // ajax scripts
   data += FPSTR(html_controlScript1);
   // clock script
   data += FPSTR(html_controlScript2);
@@ -358,65 +296,6 @@ void handleControl() {
     sendHtml(data);
   }
 
-  // Aux -----------------------------------------------------
-  #if defined(SW0) || defined(SW1) || defined(SW2) || defined(SW3) || defined(SW4) || defined(SW5) || defined(SW6) || defined(SW7) || defined(SW8) || defined(AN3) || defined(AN4) || defined(AN5) || defined(AN6) || defined(AN7) || defined(AN8)
-    data += FPSTR(html_controlAuxB);
-    // Digital Control
-    int c=0;
-    #ifdef SW0
-    data += FPSTR(html_controlSwitch0); c++;
-    #endif
-    #ifdef SW1
-    data += FPSTR(html_controlSwitch1); c++;
-    #endif
-    #ifdef SW2
-    data += FPSTR(html_controlSwitch2); c++;
-    #endif
-    #ifdef SW3
-    data += FPSTR(html_controlSwitch3); c++;
-    #endif
-    #ifdef SW4
-    data += FPSTR(html_controlSwitch4); c++;
-    #endif
-    #ifdef SW5
-    data += FPSTR(html_controlSwitch5); c++;
-    #endif
-    #ifdef SW6
-    data += FPSTR(html_controlSwitch6); c++;
-    #endif
-    #ifdef SW7
-    data += FPSTR(html_controlSwitch7); c++;
-    #endif
-    #ifdef SW8
-    data += FPSTR(html_controlSwitch8); c++;
-    #endif
-    if (c>0) { data+="<br />"; sendHtml(data); }
-
-    // Analog Control
-    c=0;
-    #ifdef AN3
-    if (command(":GXG3#",temp1)) { data += FPSTR(html_controlAnalog3A); data += temp1; data += FPSTR(html_controlAnalog3B); data += temp1; data += FPSTR(html_controlAnalog3C); c++; }
-    #endif
-    #ifdef AN4
-    if (command(":GXG4#",temp1)) { data += FPSTR(html_controlAnalog4A); data += temp1; data += FPSTR(html_controlAnalog4B); data += temp1; data += FPSTR(html_controlAnalog4C); c++; }
-    #endif
-    #ifdef AN5
-    if (command(":GXG5#",temp1)) { data += FPSTR(html_controlAnalog5A); data += temp1; data += FPSTR(html_controlAnalog5B); data += temp1; data += FPSTR(html_controlAnalog5C); c++; }
-    #endif
-    #ifdef AN6
-    if (command(":GXG6#",temp1)) { data += FPSTR(html_controlAnalog6A); data += temp1; data += FPSTR(html_controlAnalog6B); data += temp1; data += FPSTR(html_controlAnalog6C); c++; }
-    #endif
-    #ifdef AN7
-    if (command(":GXG7#",temp1)) { data += FPSTR(html_controlAnalog7A); data += temp1; data += FPSTR(html_controlAnalog7B); data += temp1; data += FPSTR(html_controlAnalog7C); c++; }
-    #endif
-    #ifdef AN8
-    if (command(":GXG8#",temp1)) { data += FPSTR(html_controlAnalog8A); data += temp1; data += FPSTR(html_controlAnalog8B); data += temp1; data += FPSTR(html_controlAnalog8C); c++; } 
-    #endif
-    if (c>0) sendHtml(data);
-
-    data += FPSTR(html_controlAuxE);
-  #endif
-
   data += FPSTR(html_controlEnd);
   
   data += "</div></body></html>";
@@ -456,24 +335,6 @@ void controlAjax() {
     if (command(":rG#",temp)) { temp[9]=temp[5]; temp[10]=temp[6]; temp[11]=0; temp[4]='&'; temp[5]='d'; temp[6]='e'; temp[7]='g'; temp[8]=';'; data += temp; data += "&#39;\n"; } else { data += "?\n"; }
   }
 
-  #ifdef AN3
-    data += "an3v|"; if (command(":GXG3#",temp)) { data += temp; data += "\n"; } else { data += "?\n"; }
-  #endif
-  #ifdef AN4
-    data += "an4v|"; if (command(":GXG4#",temp)) { data += temp; data += "\n"; } else { data += "?\n"; }
-  #endif
-  #ifdef AN5
-    data += "an5v|"; if (command(":GXG5#",temp)) { data += temp; data += "\n"; } else { data += "?\n"; }
-  #endif
-  #ifdef AN6
-    data += "an6v|"; if (command(":GXG6#",temp)) { data += temp; data += "\n"; } else { data += "?\n"; }
-  #endif
-  #ifdef AN7
-    data += "an7v|"; if (command(":GXG7#",temp)) { data += temp; data += "\n"; } else { data += "?\n"; }
-  #endif
-  #ifdef AN8
-    data += "an8v|"; if (command(":GXG8#",temp)) { data += temp; data += "\n"; } else { data += "?\n"; }
-  #endif
 #ifdef OETHS
   client->print(data);
 #else
@@ -491,7 +352,6 @@ int get_temp_second;
 void processControlGet() {
   String v;
   int i;
-  char temp[20]="";
 
   // Quick bar
   v=server.arg("qb");
@@ -619,55 +479,4 @@ void processControlGet() {
     if (v=="dr") commandBlind(":rR#");      // reverse rotator
     if (v=="dp") commandBlind(":rP#");      // move rotator to parallactic angle
   }
-
-  // General purpose switches
-  #ifdef SW0
-  v=server.arg("sw0"); if (v != "") commandBool(":SXG0,"+v+"#");
-  #endif
-  #ifdef SW1
-  v=server.arg("sw1"); if (v != "") commandBool(":SXG1,"+v+"#");
-  #endif
-  #ifdef SW2
-  v=server.arg("sw2"); if (v != "") commandBool(":SXG2,"+v+"#");
-  #endif
-  #ifdef SW3
-  v=server.arg("sw3"); if (v != "") commandBool(":SXG3,"+v+"#");
-  #endif
-  #ifdef SW4
-  v=server.arg("sw4"); if (v != "") commandBool(":SXG4,"+v+"#");
-  #endif
-  #ifdef SW5
-  v=server.arg("sw5"); if (v != "") commandBool(":SXG5,"+v+"#");
-  #endif
-  #ifdef SW6
-  v=server.arg("sw6"); if (v != "") commandBool(":SXG6,"+v+"#");
-  #endif
-  #ifdef SW7
-  v=server.arg("sw7"); if (v != "") commandBool(":SXG7,"+v+"#");
-  #endif
-  #ifdef SW8
-  v=server.arg("sw8"); if (v != "") commandBool(":SXG8,"+v+"#");
-  #endif
-
-  // General purpose analog
-  strcpy(temp,"");
-  #ifdef AN3
-  v=server.arg("an3"); if (v != "") sprintf(temp,":SXG3,%ld#",(v.toInt()*255L)/100L);
-  #endif
-  #ifdef AN4
-  v=server.arg("an4"); if (v != "") sprintf(temp,":SXG4,%ld#",(v.toInt()*255L)/100L);
-  #endif
-  #ifdef AN5
-  v=server.arg("an5"); if (v != "") sprintf(temp,":SXG5,%ld#",(v.toInt()*255L)/100L);
-  #endif
-  #ifdef AN6
-  v=server.arg("an6"); if (v != "") sprintf(temp,":SXG6,%ld#",(v.toInt()*255L)/100L);
-  #endif
-  #ifdef AN7
-  v=server.arg("an7"); if (v != "") sprintf(temp,":SXG7,%ld#",(v.toInt()*255L)/100L);
-  #endif
-  #ifdef AN8
-  v=server.arg("an8"); if (v != "") sprintf(temp,":SXG8,%ld#",(v.toInt()*255L)/100L);
-  #endif
-  if (strlen(temp) > 0) commandBool(temp);
 }

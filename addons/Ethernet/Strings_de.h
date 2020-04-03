@@ -31,7 +31,11 @@
 #define L_OK "OK"
 #define L_ON "An"
 #define L_OFF "Aus"
+#define L_START "Anfang"
 #define L_DELTA "Delta"
+#define L_ZERO "Null"
+#define L_SPAN "Spanne"
+#define L_POWER "Macht"
 #define L_GUIDE "Nachf&uuml;hrung"
 #define L_CENTER "Zentrieren"
 #define L_BLUE "Blau"
@@ -178,9 +182,13 @@
 #define L_HINT_DEROTATE_OFF "De-Rotation Aus"
 
 #define L_ALIGN "Align"
+#define L_AUX_FEATURES "Zusatzfunktionen"
 
 #define L_FOCUSER "Fokussierer"
 #define L_ROTATOR "Rotator"
+#define L_CAMERA_EXPOSURE "Exposition"
+#define L_CAMERA_DELAY "Verzögern"
+#define L_CAMERA_COUNT "Anzahl"
 
 // ---------------------------- Library --------------------------
 
@@ -375,6 +383,7 @@
 
 #define L_PAGE_STATUS "Status"
 #define L_PAGE_CONTROL "Steuerung"
+#define L_PAGE_AUX "Hilfs"
 #define L_PAGE_LIBRARY "Bibliothek"
 #define L_PAGE_ENCODERS "Encoder"
 #define L_PAGE_PEC "PEC"
