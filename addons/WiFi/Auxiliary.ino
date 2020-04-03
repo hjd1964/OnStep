@@ -13,7 +13,7 @@ const char html_auxScript1[] PROGMEM =
 "function sf(key,v1){s(key,v1);autoFastRun();}\n"
 "</script>\n";
 
-const char html_auxAuxB[] PROGMEM = "<div class='b1' style='width: 27em'>\r\n<div align='left'>" L_AUX_FEATURES ":</br></div>\r\n";
+const char html_auxAuxB[] PROGMEM = "<div class='b1' style='width: 27em'>\r\n<div align='left'>" L_AUX_FEATURES ":</br></br></div>\r\n";
 const char html_auxSwitch1[] PROGMEM = "<button type='button' onpointerdown=\"s('";
 const char html_auxSwitch2[] PROGMEM = "','1')\" >" L_ON "</button><button type='button' onpointerdown=\"s('";
 const char html_auxSwitch3[] PROGMEM = "','0')\" >" L_OFF "</button>\r\n";
