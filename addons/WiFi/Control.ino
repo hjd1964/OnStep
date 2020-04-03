@@ -154,7 +154,6 @@ void handleControl() {
   mountStatus.update(true);
 
   char temp1[80]="";
-  char temp2[40]="";
 
   processControlGet();
 
@@ -353,8 +352,6 @@ int get_temp_second;
 void processControlGet() {
   String v;
   int i;
-  char temp[40]="";
-  char temp1[40]="";
 
   // Quick bar
   v=server.arg("qb");

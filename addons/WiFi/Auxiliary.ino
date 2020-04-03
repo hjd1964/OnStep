@@ -318,7 +318,6 @@ void auxAjax() {
 
 void processAuxGet() {
   String v;
-  int i;
   char temp[40]="";
   char temp1[40]="";
 
