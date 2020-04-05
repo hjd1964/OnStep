@@ -12,7 +12,7 @@
       #error "Configuration (Config.h): AXIS1_DRIVER_MICROSTEPS_GOTO; TMC SPI driver invalid micro-step mode, use: 256,128,64,32,16,8,4,2,or 1"
     #endif
     #if AXIS1_DRIVER_MICROSTEPS != AXIS1_DRIVER_MICROSTEPS_GOTO
-      #warning "Configuration (Config.h): AXIS2_DRIVER_MICROSTEPS_GOTO; is not OFF.  This can effect pointing accuracy and PEC if index sensing isn't used."
+      #warning "Configuration (Config.h): AXIS1_DRIVER_MICROSTEPS_GOTO; is not OFF.  This can effect pointing accuracy and PEC if index sensing isn't used."
     #endif
   #endif
   #if STEP_WAVE_FORM == PULSE && HAL_PULSE_WIDTH < TMC_SPI_PULSE_WIDTH
