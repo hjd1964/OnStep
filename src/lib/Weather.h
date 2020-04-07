@@ -131,8 +131,8 @@ class weather {
       }
 
   #if FEATURE_LIST_DS == ON
-      if (!_DS1820_found) Serial.println("No DS18B20's found");
-      if (!_DS2413_found) Serial.println("No DS2413's found");
+      if (!_DS1820_found) Serial.println("No DS18B20 devices found");
+      if (!_DS2413_found) Serial.println("No DS2413 devices found");
   #endif
 
   #ifdef DS1820_DEVICES_PRESENT
