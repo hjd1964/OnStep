@@ -76,6 +76,7 @@ class weather {
   #endif
   #if FEATURE_LIST_DS == ON
       Serial.println("Dallas/Maxim OneWire bus device s/n's:");
+      bool _DS1820_found = false, _DS2413_found = false;
   #endif
 
       while (oneWire.search(address)) {
@@ -96,6 +97,7 @@ class weather {
               _DS1820_count++;
             }
     #if FEATURE_LIST_DS == ON
+            _DS1820_found=true;
             Serial.print("DS18B20: 0x"); for (int j=0; j<8; j++) { if (address[j] < 16) Serial.print("0"); Serial.print(address[j],HEX); }
             if (searchDS1820) {
               if (_DS1820_count == 1) Serial.print(" assigned to TELESCOPE_TEMPERATURE"); else
@@ -116,6 +118,7 @@ class weather {
               _DS2413_count++;
             }
     #if FEATURE_LIST_DS == ON
+            _DS2413_found=true;
             Serial.print("DS2413:  0x"); for (int j=0; j<8; j++) { if (address[j] < 16) Serial.print("0"); Serial.print(address[j],HEX); }
             if (searchDS2413) {
               if (_DS2413_count <= 4) { Serial.print(" assigned to FEATURE"); Serial.print((_DS2413_count-1)*2+1); Serial.print("_PIN"); } else Serial.print(" not assigned");
@@ -126,6 +129,11 @@ class weather {
   #endif
         }
       }
+
+  #if FEATURE_LIST_DS == ON
+      if (!_DS1820_found) Serial.println("No DS18B20's found");
+      if (!_DS2413_found) Serial.println("No DS2413's found");
+  #endif
 
   #ifdef DS1820_DEVICES_PRESENT
       // don't sit and wait for conversion to complete
