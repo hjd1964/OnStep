@@ -19,7 +19,7 @@
   #define DS3234_CS_PIN      10     // Default CS Pin for DS3234 on SPI
 #endif
 #ifndef OneWirePin
-  #define OneWirePin       Aux4     // Default Pin for OneWire bus
+  #define OneWirePin       Aux4     // Default Pin for OneWire bus (note: this pin has a 0.1uF capacitor that must be removed for OneWire to function)
 #endif
 #if PINMAP == MaxPCB3
   #define ESP8266Gpio0Pin     2     // ESP8266 GPIO0 (Dir2)
