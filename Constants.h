@@ -36,6 +36,9 @@
 #define MaxESP2                     50 // Similar to MaxPCB2 except 3 axes and uses cheaper/more available ESP32 MCU
 #define MaxESP3                     51 // Adds 4th axis and option to flash the WeMos D1 Mini WiFi through OnStep
 
+// Arduino CNC Sheild on WeMos D2 R32 (ESP32)
+#define CNC3                        52 // Similar features to MaxESP3
+
 // Khalid and Dave's PCB for STM32 Blue pill
 #define STM32Blue                   60
 #define STM32Black                  61

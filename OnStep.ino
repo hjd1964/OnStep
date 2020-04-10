@@ -168,7 +168,11 @@ void setup() {
 
   SerialA.begin(SERIAL_A_BAUD_DEFAULT);
 #ifdef HAL_SERIAL_B_ENABLED
-  SerialB.begin(SERIAL_B_BAUD_DEFAULT);
+  #ifdef SERIAL_B_RX
+    SerialB.begin(SERIAL_B_BAUD_DEFAULT, SERIAL_8N1, SERIAL_B_RX, SERIAL_B_TX);
+  #else
+    SerialB.begin(SERIAL_B_BAUD_DEFAULT);
+  #endif
 #endif
 #ifdef HAL_SERIAL_C_ENABLED
   SerialC.begin(SERIAL_C_BAUD_DEFAULT);

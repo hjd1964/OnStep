@@ -34,6 +34,9 @@
 #if PINMAP == MaxESP3
   #include "Pins.MaxESP3.h"
 #endif
+#if PINMAP == CNC3
+  #include "Pins.CNC3.h"
+#endif
 #if PINMAP == Ramps14
   #include "Pins.Ramps14.h"
 #endif
