@@ -13,7 +13,6 @@ class intervalometerControl {
       expTime = byteToTime(nv.read(_nvAddress));
       expDelay = byteToTime(nv.read(_nvAddress+1));
       expCount = nv.read(_nvAddress+2);
-
     }
 
     void poll() {
