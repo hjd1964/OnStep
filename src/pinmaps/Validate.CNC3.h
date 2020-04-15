@@ -44,12 +44,7 @@
 #endif
 
 #if BUZZER == ON
-  #if ASSIGNED_AUX8 != PIN_NOT_ASSIGNED
-    #error "Configuration (Config.h): BUZZER enabled but Aux8 is already in use, choose one feature on Aux8"
-  #else
-    #undef ASSIGNED_AUX8
-    #define ASSIGNED_AUX8 PIN_DEDICATED
-  #endif
+  // dedicated pin
 #endif
 
 // TIME -------------------------------------
