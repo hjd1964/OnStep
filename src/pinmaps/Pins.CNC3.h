@@ -14,7 +14,7 @@
 #define Aux3                 21     // Home SW for Axis1, or I2C SDA {assuming default SCL/SDA pins are present}
 #define Aux4                 22     // Home SW for Axis2, or I2C SCL
 #define Aux7                 39     // Limit SW, PPS, etc.
-#define Aux8                 19     // {was 25} OneWire, Status LED, Status2 LED, Reticle LED, Tone, etc.
+#define Aux8                 19     // {was 25} OneWire, Status LED, Status2 LED, Reticle LED, etc.
 
 // Misc. pins
 #ifndef OneWirePin
@@ -33,7 +33,7 @@
 #define ReticlePin         Aux8     // Drain
 
 // For a piezo buzzer
-#define TonePin            Aux8     // Tone
+#define TonePin               2     // Tone
 
 // The PPS pin is a 3.3V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
 #define PpsPin             Aux7     // PPS time source, GPS for example
