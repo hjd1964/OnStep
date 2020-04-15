@@ -55,7 +55,7 @@
 #define Axis2_EN             12     // [must be low at boot 12] Enable
 #define Axis2_M0             32     // {was 13} Microstep Mode 0 or SPI MOSI
 #define Axis2_M1             33     // {was 14} Microstep Mode 1 or SPI SCK
-#define Axis2_M2             18     // {was 5} Microstep Mode 2 or SPI CS
+#define Axis2_M2              2     // {was 5} Microstep Mode 2 or SPI CS
 #define Axis2_M3           Aux2     // SPI MISO/Fault
 #define Axis2_STEP           25     // {was 27} Step
 #define Axis2_DIR            27     // {was 26} Dir
@@ -79,7 +79,7 @@
 
 // ST4 interface
 #define ST4RAw               34     // [input only 34] ST4 RA- West
-#define ST4DEs                2     // {was 32} ST4 DE- South
+#define ST4DEs               18     // {was 32} ST4 DE- South
 #define ST4DEn                4     // {was 33} ST4 DE+ North
 #define ST4RAe               35     // [input only 35] ST4 RA+ East
 
