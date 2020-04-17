@@ -83,8 +83,8 @@ class dewHeaterControl {
     bool heaterOn = false;
     bool enabled = false;
 
-    int zero = -5;
-    int span = 15;
+    float zero = -5;
+    float span = 15;
 
     int _pin = 0;
     int _nvAddress = 0;

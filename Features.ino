@@ -61,6 +61,12 @@ void featuresGetCommand(char *parameter, char *reply, bool &booleanReply) {
 // :GXYn#
 void featuresGetInfoCommand(char *parameter, char *reply, bool &booleanReply) {
   int i=parameter[1]-'1';
+  // return active features
+  if (i == -1) {
+    for (int j=0; j < 8; j++) { if (feature[j].purpose == OFF) reply[j] = '0'; else reply[j] = '1'; reply[j+1]=0; }
+    booleanReply=false;
+    return;
+  }
   if (i < 0 || i > 7)  { commandError=CE_PARAM_FORM; return; }
   if (feature[i].purpose == OFF) { commandError=CE_CMD_UNKNOWN; return; }
   
