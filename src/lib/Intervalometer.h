@@ -18,7 +18,7 @@ class intervalometerControl {
     void poll() {
       if (!enabled) return;
 
-      if (pressed == P_START) {
+      if (pressed == P_EXP_START) {
         // count and stop when done
         if (thisCount == 0) { pressed=P_STANDBY; enabled=false; return; }
         thisCount--;
@@ -27,7 +27,7 @@ class intervalometerControl {
         if (_pin >= 0 && _pin <= 255) digitalWrite(_pin, HIGH);
         expDone=millis()+(unsigned long)(expTime*1000.0); // set exposure time in ms
       } else 
-      if (pressed == P_EXPOSE && (long)(millis()-expDone) > 0) {
+      if (pressed == P_EXP_DONE && (long)(millis()-expDone) > 0) {
         // finish an exposure
         pressed=P_WAIT;
         if (_pin >= 0 && _pin <= 255) digitalWrite(_pin, LOW);
@@ -117,7 +117,7 @@ class intervalometerControl {
       return v;
     }
 
-    enum Pressed {P_STANDBY, P_START, P_EXPOSE, P_WAIT};
+    enum Pressed {P_STANDBY, P_EXP_START, P_EXP_START_PHASE2, P_EXP_DONE, P_EXP_DONE_PHASE2, P_WAIT};
     Pressed pressed = P_STANDBY;
     bool enabled = false;
 

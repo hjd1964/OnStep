@@ -200,7 +200,7 @@
 #define AXIS5_LIMIT_MAX                50 //     50, n. Where n=0..500 (millimeters.) Maximum allowed position.               Adjust
 
 // AUXILIARY FEATURE CONTROL ------------------------------ see https://onstep.groups.io/g/main/wiki/6-ConfigurationMaster#AUXILIARY
-#define FEATURE_LIST_DS               OFF //    OFF, temporarily set ON to list DS1820 and DS2413 device serial numbers.      Adjust
+#define FEATURE_LIST_DS               OFF //    OFF, temporarily set ON to list ds18b20 and ds2413 device serial numbers.     Adjust
 #define FEATURE1_NAME          "FEATURE1" // "FE..", Name of feature being controlled.                                        Adjust
 #define FEATURE1_PURPOSE              OFF //    OFF, SWITCH, ANALOG, DEW_HEATER, INTERVALOMETER.                              Adjust
 #define FEATURE1_TEMP                 OFF //    OFF, DS1820, n. Where n is the ds18b20 s/n for DEW_HEATER temperature.        Adjust
