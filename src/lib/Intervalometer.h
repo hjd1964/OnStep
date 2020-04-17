@@ -23,7 +23,7 @@ class intervalometerControl {
         if (thisCount == 0) { pressed=P_STANDBY; enabled=false; return; }
         thisCount--;
         // start a new exposure
-        pressed=P_EXPOSE;
+        pressed=P_EXP_DONE;
         if (_pin >= 0 && _pin <= 255) digitalWrite(_pin, HIGH);
         expDone=millis()+(unsigned long)(expTime*1000.0); // set exposure time in ms
       } else 
@@ -35,7 +35,7 @@ class intervalometerControl {
       } else
       if (pressed == P_WAIT && (long)(millis()-waitDone) > 0) {
         // wait between exposures
-        if (millis()-waitDone > 0) pressed=P_START;
+        if (millis()-waitDone > 0) pressed=P_EXP_START;
       }
     }
 
@@ -78,11 +78,11 @@ class intervalometerControl {
     void enable(bool state) {
       enabled = state;
       if (_pin >= 0  && _pin <= 255) digitalWrite(_pin, LOW);
-      if (enabled) { thisCount=expCount; pressed = P_START; } else { thisCount=0; pressed = P_STANDBY; }
+      if (enabled) { thisCount=expCount; pressed = P_EXP_START; } else { thisCount=0; pressed = P_STANDBY; }
     }
 
     bool isOn() {
-      return pressed == P_EXPOSE;
+      return pressed == P_EXP_DONE;
     }
 
   private:
