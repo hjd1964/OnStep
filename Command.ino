@@ -133,10 +133,11 @@ void processCommands() {
           // telescope should be set in the polar home (CWD) for a starting point
           // this command sets indexAxis1, indexAxis2, azmCor=0; altCor=0;
           setHome();
+
           // start tracking
           trackingState=TrackingSidereal;
           enableStepperDrivers();
-        
+
           // start align...
           alignNumStars=command[1]-'0';
           alignThisStar=1;
@@ -274,7 +275,11 @@ void processCommands() {
             SerialA.println("Waiting for data, you have one minute to start the upload.");
             delay(1000);
 
+  #ifdef SERIAL_B_RX
+            SerialB.begin(115200, SERIAL_8N1, SERIAL_B_RX, SERIAL_B_TX);
+  #else
             SerialB.begin(115200);
+  #endif
             SerialA.begin(115200);
             delay(1000);
 
@@ -309,7 +314,11 @@ void processCommands() {
             SerialA.println("returning to default Baud rates, and resuming OnStep operation...");
             delay(500);
 
+  #ifdef SERIAL_B_RX
+            SerialB.begin(SERIAL_B_BAUD_DEFAULT, SERIAL_8N1, SERIAL_B_RX, SERIAL_B_TX);
+  #else
             SerialB.begin(SERIAL_B_BAUD_DEFAULT);
+  #endif
             SerialA.begin(SERIAL_A_BAUD_DEFAULT);
             delay(1000);
 
@@ -1502,7 +1511,12 @@ void processCommands() {
             #ifdef HAL_SERIAL_TRANSMIT
             while (SerialB.transmit()); 
             #endif
-            delay(50); SerialB.begin(baudRate[i]); 
+            delay(50);
+  #ifdef SERIAL_B_RX
+            SerialB.begin(baudRate[i], SERIAL_8N1, SERIAL_B_RX, SERIAL_B_TX);
+  #else
+            SerialB.begin(baudRate[i]);
+  #endif
             booleanReply=false;
 #endif
 #if defined(HAL_SERIAL_C_ENABLED) && !defined(HAL_SERIAL_C_BLUETOOTH)
