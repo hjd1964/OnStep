@@ -125,6 +125,13 @@ CommandErrors startGuideAxis1(char direction, int guideRate, long guideDuration)
   if (trackingSyncInProgress())         return CE_MOUNT_IN_MOTION;
   if (trackingState == TrackingMoveTo)  return CE_MOUNT_IN_MOTION;
   if (direction == guideDirAxis1)       return CE_NONE;
+  if (guideRate < 3 && (generalError == ERR_ALT_MIN ||
+                        generalError == ERR_LIMIT_SENSE ||
+                        generalError == ERR_DEC ||
+                        generalError == ERR_AZM ||
+                        generalError == ERR_UNDER_POLE ||
+                        generalError == ERR_MERIDIAN ||
+                        generalError == ERR_ALT_MAX)) return CE_SLEW_ERR_OUTSIDE_LIMITS;
   
   if (guideRate < 3) deactivateBacklashComp(); else reactivateBacklashComp();
   enableGuideRate(guideRate);
@@ -157,6 +164,13 @@ CommandErrors startGuideAxis2(char direction, int guideRate, long guideDuration,
   if (direction == 'n' && !guideNorthOk()) return CE_SLEW_ERR_OUTSIDE_LIMITS;
   if (direction == 's' && !guideSouthOk()) return CE_SLEW_ERR_OUTSIDE_LIMITS;
 #endif
+  if (guideRate < 3 && (generalError == ERR_ALT_MIN ||
+                        generalError == ERR_LIMIT_SENSE ||
+                        generalError == ERR_DEC ||
+                        generalError == ERR_AZM ||
+                        generalError == ERR_UNDER_POLE ||
+                        generalError == ERR_MERIDIAN ||
+                        generalError == ERR_ALT_MAX)) return CE_SLEW_ERR_OUTSIDE_LIMITS;
 
   enableGuideRate(guideRate);
   if (guideRate < 3) deactivateBacklashComp(); else reactivateBacklashComp();
