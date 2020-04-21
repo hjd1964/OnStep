@@ -517,7 +517,7 @@ void SmartHandController::update()
       if (buttonPad.f.wasPressed()) { Ser.print(":B+#"); strcpy(briefMessage,L_FKEY_RETI_UP); }
     break;
     case 5: case 6:  // focuser1/2
-      if (featureKeyMode==4) strcpy(cmd,":FA1#"); else strcpy(cmd,":FA2#"); 
+      if (featureKeyMode==5) strcpy(cmd,":FA1#"); else strcpy(cmd,":FA2#"); 
            if (!focOut && buttonPad.F.isDown()) { focOut = true;  strcat(cmd,":FS#:F+#"); SetLX200(cmd); strcpy(briefMessage,L_FKEY_FOC_DN); buttonCommand=true; }
       else if ( focOut && buttonPad.F.isUp())   { focOut = false; Ser.print(":FQ#"); buttonCommand=true; buttonPad.F.clearPress(); }
       else if (!focIn  && buttonPad.f.isDown()) { focIn = true;   strcat(cmd,":FS#:F-#"); SetLX200(cmd); strcpy(briefMessage,L_FKEY_FOC_UP); buttonCommand=true; }
