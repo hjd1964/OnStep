@@ -1,44 +1,53 @@
 // -----------------------------------------------------------------------------------
 // Functions for initializing pins, variables, and timers on startup
 
-void Init_Startup_Values() {
-  
-// Basic stepper driver mode setup
-// if we made through validation and AXIS1_DRIVER_MODEL exists; AXIS2_DRIVER_MODEL, AXIS1_MICROSTEPS, and AXIS2_MICROSTEPS also exist and passed validation in the pre-processor
-#ifdef AXIS1_DRIVER_MODEL
-  // translate microsteps to mode bits
-  Axis1_Microsteps = TranslateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_MICROSTEPS)|TMC_AXIS1_MODE; // if this isn't a TMC2130 stepper driver TMC_AXISn_MODE, etc. = 0
-  Axis2_Microsteps = TranslateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_MICROSTEPS)|TMC_AXIS2_MODE;
-  #ifdef AXIS1_MICROSTEPS_GOTO
-    Axis1_MicrostepsGoto = TranslateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_MICROSTEPS_GOTO)|TMC_AXIS1_MODE_GOTO;
+#define DEBUG_AXIS_MODES_OFF
+
+void initGeneralError() {
+  switch (generalError) {
+    case ERR_ALT_MIN:
+    case ERR_LIMIT_SENSE:
+    case ERR_DEC:
+    case ERR_AZM:
+    case ERR_UNDER_POLE:
+    case ERR_MERIDIAN:
+    case ERR_SYNC:
+    case ERR_ALT_MAX:
+    case ERR_PARK: generalError=ERR_NONE; break;
+    default: break;
+  }
+}
+
+void initPre() {
+  // initialize and disable the main axes stepper drivers
+  pinMode(Axis1_EN,OUTPUT); digitalWrite(Axis1_EN,AXIS1_DRIVER_DISABLE);
+  pinMode(Axis2_EN,OUTPUT); digitalWrite(Axis1_EN,AXIS1_DRIVER_DISABLE);
+}
+
+void initStartupValues() {
+  // Basic stepper driver mode setup
+  // if we made through validation and AXIS1_DRIVER_MODEL exists; AXIS2_DRIVER_MODEL, AXIS1_DRIVER_MICROSTEPS,
+  // and AXIS2_DRIVER_MICROSTEPS also exist and passed validation in the pre-processor
+#if AXIS1_DRIVER_MODEL != OFF
+  // translate microsteps to microstep bit code
+  AXIS1_DRIVER_CODE = translateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_DRIVER_MICROSTEPS);
+  AXIS2_DRIVER_CODE = translateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_DRIVER_MICROSTEPS);
+  #if AXIS1_DRIVER_MICROSTEPS_GOTO != OFF
+    AXIS1_DRIVER_CODE_GOTO = translateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_DRIVER_MICROSTEPS_GOTO);
   #endif
-  #ifdef AXIS2_MICROSTEPS_GOTO
-    Axis2_MicrostepsGoto = TranslateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_MICROSTEPS_GOTO)|TMC_AXIS2_MODE_GOTO;
+  #if AXIS2_DRIVER_MICROSTEPS_GOTO != OFF
+    AXIS2_DRIVER_CODE_GOTO = translateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_DRIVER_MICROSTEPS_GOTO);
   #endif
 #endif
-
-
-/* debugging
-  delay(2000);
-  Serial.begin(9600);
-  delay(1000);
-  
-  Serial.println("A reminder: TMC_LOWPWR=64, TMC_STEALTHCHOP=32");
-
-  Serial.print("AXIS1_MODE=");
-  Serial.print(AXIS1_MODE);
-  Serial.print(", AXIS1_MODE_GOTO=");
-  Serial.print(AXIS1_MODE_GOTO);
-  Serial.print(", AXIS1_STEP_GOTO=");
-  Serial.println(AXIS1_STEP_GOTO);
-
-  Serial.print("AXIS2_MODE=");
-  Serial.print(AXIS2_MODE);
-  Serial.print(", AXIS2_MODE_GOTO=");
-  Serial.print(AXIS2_MODE_GOTO);
-  Serial.print(", AXIS2_STEP_GOTO=");
-  Serial.println(AXIS2_STEP_GOTO);
-*/
+#if AXIS3_DRIVER_MODEL != OFF
+  AXIS3_DRIVER_CODE = translateMicrosteps(3, AXIS3_DRIVER_MODEL, AXIS3_DRIVER_MICROSTEPS);
+#endif
+#if AXIS4_DRIVER_MODEL != OFF
+  AXIS4_DRIVER_CODE = translateMicrosteps(4, AXIS4_DRIVER_MODEL, AXIS4_DRIVER_MICROSTEPS);
+#endif
+#if AXIS5_DRIVER_MODEL != OFF
+  AXIS5_DRIVER_CODE = translateMicrosteps(5, AXIS5_DRIVER_MODEL, AXIS5_DRIVER_MICROSTEPS);
+#endif
 
   // initialize some fixed-point values
   amountGuideAxis1.fixed=0;
@@ -50,39 +59,24 @@ void Init_Startup_Values() {
   fstepAxis2.fixed=0;
   origTargetAxis1.fixed = 0;
   cli();
-  targetAxis1.part.m = 90L*(long)StepsPerDegreeAxis1; targetAxis1.part.f = 0;
-  posAxis1           = 90L*(long)StepsPerDegreeAxis1;
-  trueAxis1          = 90L*(long)StepsPerDegreeAxis1;
-  targetAxis2.part.m = 90L*(long)StepsPerDegreeAxis2; targetAxis2.part.f = 0;
-  posAxis2           = 90L*(long)StepsPerDegreeAxis2;
-  trueAxis2          = 90L*(long)StepsPerDegreeAxis2;
+  targetAxis1.part.m = 0; targetAxis1.part.f = 0;
+  posAxis1           = 0;
+  targetAxis2.part.m = 0; targetAxis2.part.f = 0;
+  posAxis2           = 0;
   sei();
 
-#ifdef ROTATOR_ON
-  targetAxis3.fixed = 0;
-  amountRotateAxis3.fixed=0;
-#endif
-#ifdef FOCUSER1_ON
-  targetAxis4.fixed = 0;
-  amountMoveAxis4.fixed=0;
-#endif
-#ifdef FOCUSER2_ON
-  targetAxis5.fixed = 0;
-  amountMoveAxis5.fixed=0;
-#endif
-
   // default values for state variables
-  pierSide            = PierSideNone;
+  pierSideControl     = PierSideNone;
   dirAxis1            = 1;
   dirAxis2            = 1;
   defaultDirAxis2     = defaultDirAxis2EInit;
-  if (latitude>0) defaultDirAxis1 = defaultDirAxis1NCPInit; else defaultDirAxis1 = defaultDirAxis1SCPInit;
+  if (latitude >= 0) defaultDirAxis1 = defaultDirAxis1NCPInit; else defaultDirAxis1 = defaultDirAxis1SCPInit;
   newTargetRA         = 0;        
   newTargetDec        = 0;
   newTargetAlt        = 0;
   newTargetAzm        = 0;
   origTargetAxis1.fixed = 0;
-  origTargetAxis2       = 0;
+  origTargetAxis2.fixed = 0;
 
   // initialize alignment
   alignNumStars       = 0;
@@ -91,29 +85,31 @@ void Init_Startup_Values() {
   indexAxis1Steps     = 0;
   indexAxis2          = 0;
   indexAxis2Steps     = 0;
-  #ifdef MOUNT_TYPE_ALTAZM
   Align.init();
-  #endif
-  GeoAlign.init();
 
    // reset meridian flip control
-  #ifdef MOUNT_TYPE_GEM
-  meridianFlip = MeridianFlipAlways;
+  #if MOUNT_TYPE == GEM
+    meridianFlip = MeridianFlipAlways;
   #endif
-  #ifdef MOUNT_TYPE_FORK
-  meridianFlip = MeridianFlipAlign;
+  #if MOUNT_TYPE == FORK
+    meridianFlip = MeridianFlipNever;
   #endif
-  #ifdef MOUNT_TYPE_FORK_ALT
-  meridianFlip = MeridianFlipNever;
+  #if MOUNT_TYPE == ALTAZM
+    meridianFlip = MeridianFlipNever;
   #endif
-  #ifdef MOUNT_TYPE_ALTAZM
-  meridianFlip = MeridianFlipNever;
-  #endif
+
+  // clear errors that are no-longer relevant after init
+  initGeneralError();
 
   // where we are
   homeMount           = false;
   atHome              = true;
-  lastError           = ERR_NONE;
+  waitingHome         = false;
+  waitingHomeContinue = false;
+
+  // PEC sanity check
+  if (pecBufferSize < 0 || pecBufferSize > 3384) pecBufferSize=0;
+  if (SecondsPerWormRotationAxis1>pecBufferSize) SecondsPerWormRotationAxis1=pecBufferSize;
 
   // reset tracking and rates
   cli();
@@ -124,353 +120,368 @@ void Init_Startup_Values() {
   sei();
 }
 
-void Init_Pins() {
+void initPins() {
+// ------------------------------------------------------------------
+// Pull the Axis1/2 RST Pin HIGH on the MaxESP2
+
+#if PINMAP == MaxESP2
+  pinMode(Axis1_M3,INPUT_PULLUP);
+#endif
+
 // ------------------------------------------------------------------
 // ESP-01 (ESP8266) firmware flashing control
 
-#ifdef ESP8266_CONTROL_ON
-  pinMode(Axis1_Aux,OUTPUT);                // ESP8266 GPIO0
-  digitalWrite(Axis1_Aux,HIGH); delay(20);  // Run mode
-  pinMode(Axis2_Aux,OUTPUT);                // ESP8266 RST
-  digitalWrite(Axis2_Aux,LOW);  delay(200); // Reset, if LOW
-  digitalWrite(Axis2_Aux,HIGH);             // Reset, inactive HIGH
+#if SERIAL_B_ESP_FLASHING == ON
+  pinMode(ESP8266Gpio0Pin,OUTPUT);                // ESP8266 GPIO0
+  digitalWrite(ESP8266Gpio0Pin,HIGH); delay(20);  // Run mode
+  pinMode(ESP8266RstPin,OUTPUT);                  // ESP8266 RST
+  digitalWrite(ESP8266RstPin,LOW);  delay(200);   // Reset, if LOW
+  digitalWrite(ESP8266RstPin,HIGH);               // Reset, inactive HIGH
 #endif
 
 // ------------------------------------------------------------------
-// LED and audible feedback
+// User feedback
 
-#ifdef STATUS_LED_PINS_ON
+#if LED_STATUS == ON
   pinMode(LEDnegPin,OUTPUT); digitalWrite(LEDnegPin,LOW);  // light status LED (provides GND)
-#ifdef LEDposPin
-  pinMode(LEDposPin,OUTPUT); digitalWrite(LEDposPin,HIGH); // sometimes +5v is provided on a pin
-#endif
-  LED_ON=true;
+  #ifdef LEDposPin
+    pinMode(LEDposPin,OUTPUT); digitalWrite(LEDposPin,HIGH); // sometimes +5v is provided on a pin
+  #endif
+  ledOn=true;
 #endif
 
-#ifdef STATUS_LED_PINS
+#if LED_STATUS >= 0
   pinMode(LEDnegPin,OUTPUT); digitalWrite(LEDnegPin,LOW);  // light status LED (provides pwm'd GND for polar reticule)
-#ifdef LEDposPin
-  pinMode(LEDposPin,OUTPUT); digitalWrite(LEDposPin,HIGH); // sometimes +5v is provided on a pin
-#endif
-  analogWrite(LEDnegPin,STATUS_LED_PINS);
-  LED_ON=true;
-#endif
-
-#ifdef RETICULE_LED_PINS
-  pinMode(ReticulePin,OUTPUT); analogWrite(ReticulePin,reticuleBrightness); // light reticule LED
+  #ifdef LEDposPin
+    pinMode(LEDposPin,OUTPUT); digitalWrite(LEDposPin,HIGH); // sometimes +5v is provided on a pin
+  #endif
+  analogWrite(LEDnegPin,LED_STATUS);
+  ledOn=true;
 #endif
 
-#ifdef STATUS_LED2_PINS_ON
-  pinMode(LEDneg2Pin,OUTPUT); digitalWrite(LEDneg2Pin,LOW); // light second status LED (provides just GND)
-  LED2_ON=false;
-#elif defined(STATUS_LED2_PINS)
+#if LED_RETICLE >= 0
+  pinMode(ReticlePin,OUTPUT); analogWrite(ReticlePin,reticuleBrightness); // light reticule LED
+#endif
+
+#if LED_STATUS2 == ON
+  pinMode(LEDneg2Pin,OUTPUT); digitalWrite(LEDneg2Pin,HIGH); // light second status LED (provides just GND)
+  led2On=false;
+#elif LED_STATUS2 >= 0
   pinMode(LEDneg2Pin,OUTPUT); digitalWrite(LEDneg2Pin,LOW); // light second status LED (provides pwm'd GND for polar reticule)
-  analogWrite(LEDneg2Pin,STATUS_LED2_PINS);
+  analogWrite(LEDneg2Pin,LED_STATUS2);
 #endif
 
 // ready the sound/buzzer pin
-#if defined(BUZZER) || defined(BUZZER_ON)
+#if BUZZER == ON || BUZZER >= 0
   pinMode(TonePin,OUTPUT);
   digitalWrite(TonePin,LOW);
 #endif
 
 // ------------------------------------------------------------------
-// Misc. devices and sensors
+// Sensors
 
-// PEC index sense
-#ifdef PEC_SENSE_ON
-  pinMode(PecPin,INPUT);
-#elif defined(PEC_SENSE_PULLUP)
-  pinMode(PecPin,INPUT_PULLUP);
-#elif defined(PEC_SENSE_PULLDOWN)
-  pinMode(PecPin,INPUT_PULLDOWN);
+// Home position sensing
+#if HOME_SENSE == ON
+  pinMode(Axis1_HOME,INPUT);
+  pinMode(Axis2_HOME,INPUT);
+#elif HOME_SENSE == ON_PULLUP
+  pinMode(Axis1_HOME,INPUT_PULLUP);
+  pinMode(Axis2_HOME,INPUT_PULLUP);
+#elif HOME_SENSE == ON_PULLDOWN
+  pinMode(Axis1_HOME,INPUT_PULLDOWN);
+  pinMode(Axis2_HOME,INPUT_PULLDOWN);
 #endif
 
 // limit switch sense
-#ifdef LIMIT_SENSE_ON  
+#if LIMIT_SENSE == ON
+  pinMode(LimitPin,INPUT);
+#elif LIMIT_SENSE == ON_PULLUP
   pinMode(LimitPin,INPUT_PULLUP);
+#elif LIMIT_SENSE == ON_PULLDOWN
+  pinMode(LimitPin,INPUT_PULLDOWN);
 #endif
 
-// ST4 interface
-#ifdef ST4_ON
-  pinMode(ST4RAw,INPUT);
-  pinMode(ST4RAe,INPUT);
-  pinMode(ST4DEn,INPUT);
-  pinMode(ST4DEs,INPUT);
-#elif defined(ST4_PULLUP)
-  pinMode(ST4RAw,INPUT_PULLUP);
-  pinMode(ST4RAe,INPUT_PULLUP);
-  pinMode(ST4DEn,INPUT_PULLUP);
-  pinMode(ST4DEs,INPUT_PULLUP);
+// PEC index sense
+#if PEC_SENSE == ON
+  pinMode(PecPin,INPUT);
+#elif PEC_SENSE == ON_PULLUP
+  pinMode(PecPin,INPUT_PULLUP);
+#elif PEC_SENSE == ON_PULLDOWN
+  pinMode(PecPin,INPUT_PULLDOWN);
 #endif
 
 // Pulse per second
-#ifdef PPS_SENSE_ON
+#if PPS_SENSE == ON
   pinMode(PpsPin,INPUT);
-  attachInterrupt(digitalPinToInterrupt(PpsPin),ClockSync,RISING);
-#elif defined(PPS_SENSE_PULLUP)
+  attachInterrupt(digitalPinToInterrupt(PpsPin),clockSync,RISING);
+#elif PPS_SENSE == ON_PULLUP
   pinMode(PpsPin,INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(PpsPin),ClockSync,RISING);
+  attachInterrupt(digitalPinToInterrupt(PpsPin),clockSync,RISING);
+#elif PPS_SENSE == ON_PULLDOWN
+  pinMode(PpsPin,INPUT_PULLDOWN);
+  attachInterrupt(digitalPinToInterrupt(PpsPin),clockSync,RISING);
 #endif
 
 // ------------------------------------------------------------------
 // Stepper driver control
 
-  pinMode(Axis1StepPin,OUTPUT);   // Axis1
-  pinMode(Axis1DirPin,OUTPUT); 
-// provide 5V power to stepper drivers if requested (classic Pin-map)
+  pinMode(Axis1_STEP,OUTPUT);   // Axis1
+  pinMode(Axis1_DIR,OUTPUT); 
+  pinMode(Axis2_STEP,OUTPUT);   // Axis2 
+  pinMode(Axis2_DIR,OUTPUT); 
+
+  // provide 5V (or 3.3V) power to stepper drivers if requested (classic Pin-map)
 #ifdef POWER_SUPPLY_PINS_ON
   pinMode(Axis15vPin,OUTPUT);
   digitalWrite(Axis15vPin,HIGH);
-  pinMode(Axis25vPin,OUTPUT);     // Axis2
+  pinMode(Axis25vPin,OUTPUT);
   digitalWrite(Axis25vPin,HIGH);
 #endif
-// provide Gnd on next to the Dec stepper pins if requested (classic Pin-map)
+  // provide Gnd on next to the Dec stepper pins if requested (classic Pin-map)
 #ifdef Axis2GndPin
   pinMode(Axis2GndPin,OUTPUT);
   digitalWrite(Axis2GndPin,LOW);
 #endif
-  pinMode(Axis2StepPin,OUTPUT); 
-  pinMode(Axis2DirPin,OUTPUT); 
-#ifdef ROTATOR_ON
-  pinMode(Axis3StepPin,OUTPUT);   // Axis3
-  pinMode(Axis3DirPin,OUTPUT);
-#endif
-#ifdef FOCUSER1_ON
-  pinMode(Axis4StepPin,OUTPUT);   // Axis4
-  pinMode(Axis4DirPin,OUTPUT); 
-#endif
-#ifdef FOCUSER2_ON
-  pinMode(Axis5StepPin,OUTPUT);   // Axis5
-  pinMode(Axis5DirPin,OUTPUT); 
-#endif
 
 // inputs for stepper drivers fault signal
-#ifdef AXIS1_FAULT_LOW
+#if AXIS1_DRIVER_STATUS == LOW
   pinMode(Axis1_FAULT,INPUT_PULLUP);
-#elif defined(AXIS1_FAULT_HIGH)
+#elif AXIS1_DRIVER_STATUS == HIGH
   #ifdef INPUT_PULLDOWN
-  pinMode(Axis1_FAULT,INPUT_PULLDOWN);
+    pinMode(Axis1_FAULT,INPUT_PULLDOWN);
   #else
-  pinMode(Axis1_FAULT,INPUT);
+    pinMode(Axis1_FAULT,INPUT);
   #endif
 #endif
-#ifdef AXIS2_FAULT_LOW
+
+#if AXIS2_DRIVER_STATUS == LOW
   pinMode(Axis2_FAULT,INPUT_PULLUP);
-#elif defined(AXIS1_FAULT_HIGH)
+#elif AXIS1_DRIVER_STATUS == HIGH
   #ifdef INPUT_PULLDOWN
-  pinMode(Axis2_FAULT,INPUT_PULLDOWN);
+    pinMode(Axis2_FAULT,INPUT_PULLDOWN);
   #else
-  pinMode(Axis2_FAULT,INPUT);
+    pinMode(Axis2_FAULT,INPUT);
   #endif
 #endif
 
-// initialize and disable the stepper drivers
-  pinMode(Axis1_EN,OUTPUT); 
-  pinMode(Axis2_EN,OUTPUT);
   StepperModeTrackingInit();
-
-// turn on the Rotator/Focuser stepper drivers (LOW)
-#ifdef Axis3_EN
-    pinMode(Axis3_EN,OUTPUT); 
-#endif
-#ifdef Axis4_EN
-    pinMode(Axis4_EN,OUTPUT); 
-#endif
-#ifdef Axis5_EN
-    pinMode(Axis5_EN,OUTPUT); 
-#endif
-
 }
 
-void Init_ReadEEPROM_Values() {
+void initReadNvValues() {
   // get the site information, if a GPS were attached we would use that here instead
-  currentSite=EEPROM.read(EE_currentSite); if (currentSite>3) currentSite=0; // site index is valid?
-  latitude=EEPROM_readFloat(EE_sites+(currentSite)*25+0);
+  currentSite=nv.read(EE_currentSite); if (currentSite > 3) currentSite=0; // site index is valid?
+  setLatitude(nv.readFloat(EE_sites+(currentSite)*25+0));
+  longitude=nv.readFloat(EE_sites+(currentSite)*25+4);
+  InitStartPosition();
 
-#ifdef MOUNT_TYPE_ALTAZM
-  celestialPoleAxis2=AltAzmDecStartPos;
-  if (latitude<0) celestialPoleAxis1=180L; else celestialPoleAxis1=0L;
-#else
-  if (latitude<0) celestialPoleAxis2=-90.0; else celestialPoleAxis2=90.0;
-#endif
-  cosLat=cos(latitude/Rad);
-  sinLat=sin(latitude/Rad);
-  if (latitude>0) defaultDirAxis1 = defaultDirAxis1NCPInit; else defaultDirAxis1 = defaultDirAxis1SCPInit;
-  longitude=EEPROM_readFloat(EE_sites+(currentSite)*25+4);
-  timeZone=EEPROM.read(EE_sites+(currentSite)*25+8)-128;
+  timeZone=nv.read(EE_sites+(currentSite)*25+8)-128;
   timeZone=decodeTimeZone(timeZone);
-  EEPROM_readString(EE_sites+(currentSite)*25+9,siteName);
+  nv.readString(EE_sites+(currentSite)*25+9,siteName);
 
-  // update starting coordinates to reflect NCP or SCP polar home position
-  startAxis1 = celestialPoleAxis1*(long)StepsPerDegreeAxis1;
-  startAxis2 = celestialPoleAxis2*(double)StepsPerDegreeAxis2;
-  cli();
-  targetAxis1.part.m = startAxis1;
-  targetAxis1.part.f = 0;
-  posAxis1           = startAxis1;
-  trueAxis1          = startAxis1;
-  targetAxis2.part.m = startAxis2;
-  targetAxis2.part.f = 0;
-  posAxis2           = startAxis2;
-  trueAxis2          = startAxis2;
-  sei();
-  
   // get date and time from EEPROM, start keeping time
-  JD=EEPROM_readFloat(EE_JD);
-  LMT=EEPROM_readFloat(EE_LMT);
-#ifdef RTC_DS3234
-  rtc.begin(DS3234_CS_PIN); rtc.update();
-  if ((rtc.year()>=0) && (rtc.month()<=99) && (rtc.month()>=1) && (rtc.month()<=12) && (rtc.date()>=1) && (rtc.date()<=31) &&
-      (rtc.hour()>=0) && (rtc.hour()<=23) && (rtc.minute()>=0) && (rtc.minute()<=59) && (rtc.second()>=0) && (rtc.second()<=59)) {
-    int y1=rtc.year(); if (y1>11) y1=y1+2000; else y1=y1+2100;
-    JD=julian(y1,rtc.month(),rtc.date());
-    LMT=(rtc.hour()+(rtc.minute()/60.0)+(rtc.second()/3600.0));
-    rtc.writeSQW(SQW_SQUARE_1);
-  }
-#endif
-  UT1=LMT+timeZone;
-  update_lst(jd2last(JD,UT1,false));
+  JD=nv.readFloat(EE_JD);
+  LMT=nv.readFloat(EE_LMT);
 
-  // get the minutes past meridian east/west
-#ifdef MOUNT_TYPE_GEM
-  minutesPastMeridianE=round(((EEPROM.read(EE_dpmE)-128)*60.0)/15.0); if (abs(minutesPastMeridianE)>180) minutesPastMeridianE=60;
-  minutesPastMeridianW=round(((EEPROM.read(EE_dpmW)-128)*60.0)/15.0); if (abs(minutesPastMeridianW)>180) minutesPastMeridianW=60;
-#endif
-  // override if specified in Config.h
-#ifdef MinutesPastMeridianE
-  minutesPastMeridianE=MinutesPastMeridianE;
-#endif
-#ifdef MinutesPastMeridianW
-  minutesPastMeridianW=MinutesPastMeridianW;
+  // read the date/time from TLS (if present)
+  if (tls.active) {
+    tls.get(JD,LMT);
+    dateWasSet=true; timeWasSet=true;
+  }
+
+  UT1=LMT+timeZone;
+  updateLST(jd2last(JD,UT1,false));
+
+  // get the degrees past meridian east/west
+#if MOUNT_TYPE == GEM
+  int i=round(nv.read(EE_dpmE)-128);
+  if (i > 60) i=((i-90)*2)+60; else if (i < -60) i=((i+90)*2)-60;
+  degreesPastMeridianE=i;
+
+  i=round(nv.read(EE_dpmW)-128);
+  if (i > 60) i=((i-60)*2)+60; else if (i < -60) i=((i+60)*2)-60;
+  degreesPastMeridianW=i;
 #endif
   
   // get the min. and max altitude
-  minAlt=EEPROM.read(EE_minAlt)-128;
-  maxAlt=EEPROM.read(EE_maxAlt);
-#ifdef MOUNT_TYPE_ALTAZM
-  if (maxAlt>87) maxAlt=87;
+  minAlt=nv.read(EE_minAlt)-128;
+  maxAlt=nv.read(EE_maxAlt);
+#if MOUNT_TYPE == ALTAZM
+  if (maxAlt > 87) maxAlt=87;
 #endif
 
   // get the backlash amounts
-  backlashAxis2=EEPROM_readInt(EE_backlashAxis2);
-  backlashAxis1=EEPROM_readInt(EE_backlashAxis1);
+  backlashAxis2=nv.readInt(EE_backlashAxis2);
+  backlashAxis1=nv.readInt(EE_backlashAxis1);
   
+#if MOUNT_TYPE != ALTAZM
   // get the PEC status
-  pecStatus  =EEPROM.read(EE_pecStatus);
-  pecRecorded=EEPROM.read(EE_pecRecorded); if (!pecRecorded) pecStatus=IgnorePEC;
-  for (int i=0; i<PECBufferSize; i++) pecBuffer[i]=EEPROM.read(EE_pecTable+i);
-  wormSensePos=EEPROM_readLong(EE_wormSensePos);
-#ifdef PEC_SENSE_OFF
-  wormSensePos=0;
-  pecStatus=IgnorePEC;
+  pecStatus  =nv.read(EE_pecStatus);
+  pecRecorded=nv.read(EE_pecRecorded); if (!pecRecorded) pecStatus=IgnorePEC;
+  for (int i=0; i < pecBufferSize; i++) pecBuffer[i]=nv.read(EE_pecTable+i);
+  wormSensePos=nv.readLong(EE_wormSensePos);
+  #if PEC_SENSE == OFF
+    wormSensePos=0;
+    pecStatus=IgnorePEC;
+  #endif
 #endif
-  
+
   // get the Park status
-  parkSaved=EEPROM.read(EE_parkSaved);
-  parkStatus=EEPROM.read(EE_parkStatus);
+  parkSaved=nv.read(EE_parkSaved);
+  parkStatus=nv.read(EE_parkStatus);
+  // tried to park but crashed?
+  if (parkStatus == Parking) { parkStatus=ParkFailed; nv.write(EE_parkStatus,parkStatus); }
 
   // get the pulse-guide rate
-  currentPulseGuideRate=EEPROM.read(EE_pulseGuideRate); if (currentPulseGuideRate>GuideRate1x) currentPulseGuideRate=GuideRate1x;
+  currentPulseGuideRate=nv.read(EE_pulseGuideRate); if (currentPulseGuideRate > GuideRate1x) currentPulseGuideRate=GuideRate1x;
 
-  // get the Goto rate and constrain values to the limits (1/2 to 2X the MaxRate,) maxRate is in 16MHz clocks but stored in micro-seconds
-  maxRate=EEPROM_readInt(EE_maxRate)*16;
-  if (maxRate<(MaxRate/2L)*16L) maxRate=(MaxRate/2L)*16L;
-  if (maxRate>(MaxRate*2L)*16L) maxRate=(MaxRate*2L)*16L;
-#if !defined(RememberMaxRate_ON) && !defined(REMEMBER_MAX_RATE_ON)
-  if (maxRate!=MaxRate*16L) { maxRate=MaxRate*16L; EEPROM_writeInt(EE_maxRate,(int)(maxRate/16L)); }
+  // set the default MaxRate based on the desired goto speed
+  MaxRateDef=MaxRate;
+  if (MaxRateDef < maxRateLowerLimit()/16.0) MaxRateDef=maxRateLowerLimit()/16.0;
+
+  // get the max goto rate
+  maxRate=(int16_t)nv.readInt(EE_maxRate)*16; // maxRate is in 16MHz clocks but stored in micro-seconds
+  // check for flag that maxRate is stored in EE_maxRateL, if not move it there
+  if (maxRate == -16) maxRate=nv.readLong(EE_maxRateL); else { nv.writeInt(EE_maxRate,-1); nv.writeLong(EE_maxRateL,maxRate); }
+  // constrain values to the limits (1/2 to 2X the MaxRateDef) and platform limits
+  if (maxRate < (double)MaxRateDef*8.0) maxRate=(double)MaxRateDef*8.0;
+  if (maxRate > (double)MaxRateDef*32.0) maxRate=(double)MaxRateDef*32.0;
+  if (maxRate < maxRateLowerLimit()) maxRate=maxRateLowerLimit();
+  
+#if SLEW_RATE_MEMORY == OFF
+  if (maxRate != (long)((double)MaxRateDef*16.0)) {
+    maxRate=(double)MaxRateDef*16.0; 
+    nv.writeLong(EE_maxRateL,maxRate);
+  }
 #endif
-  SetAccelerationRates(maxRate); // set the new acceleration rate
+  setAccelerationRates(maxRate); // set the new acceleration rate
 
   // get autoMeridianFlip
-#if defined(MOUNT_TYPE_GEM) && defined(REMEMBER_AUTO_MERIDIAN_FLIP_ON)
-  autoMeridianFlip=EEPROM.read(EE_autoMeridianFlip);
+#if MOUNT_TYPE == GEM && MFLIP_AUTOMATIC_MEMORY == ON
+  autoMeridianFlip=nv.read(EE_autoMeridianFlip);
 #endif
 
   // get meridian flip pause at home
-#if defined(MOUNT_TYPE_GEM) && defined(REMEMBER_PAUSE_HOME_ON)
-  pauseHome=EEPROM.read(EE_pauseHome);
+#if MOUNT_TYPE == GEM && MFLIP_PAUSE_HOME_MEMORY == ON
+  pauseHome=nv.read(EE_pauseHome);
 #endif
 
-  // set the default guide rate, 24x sidereal
-  setGuideRate(GuideRate24x);
-  enableGuideRate(GuideRate24x);
+  // set the default guide rate
+  setGuideRate(GuideRateDefault);
+  enableGuideRate(GuideRateDefault);
+
 }
 
-void Init_EEPROM_Values() {
+// the polar home position
+void InitStartPosition() {
+  startAxis1 = 0;
+  startAxis2 = 0;
+  cli();
+  targetAxis1.part.m = 0; targetAxis1.part.f = 0;
+  posAxis1           = 0;
+  targetAxis2.part.m = 0; targetAxis2.part.f = 0;
+  posAxis2           = 0;
+  blAxis1            = 0;
+  blAxis2            = 0;
+  sei();
+  setIndexAxis1(homePositionAxis1,PierSideEast);
+  setIndexAxis2(homePositionAxis2,PierSideEast);
+}
+
+void initWriteNvValues() {
   // EEPROM automatic initialization
-  long autoInitKey = initKey;
-  long thisAutoInitKey;
-  if (INIT_KEY) EEPROM_writeLong(EE_autoInitKey,autoInitKey);
-  thisAutoInitKey=EEPROM_readLong(EE_autoInitKey);
-  if (autoInitKey!=thisAutoInitKey) {
+  if (NV_INIT_KEY_RESET) nv.writeLong(EE_autoInitKey,0);
+  if (nv.readLong(EE_autoInitKey) != NV_INIT_KEY) {
+    for (int i=0; i<200; i++) { 
+      #ifdef HAL_SERIAL_TRANSMIT
+        SerialA.transmit();
+      #endif
+      delay(10);
+    }
+    
+    // init the whole nv memory
+    for (int i=0; i<E2END; i++) nv.write(i,0);
+    
     // init the site information, lat/long/tz/name
-    EEPROM.write(EE_currentSite,0);
+    nv.write(EE_currentSite,0);
     latitude=0; longitude=0;
-    for (int l=0; l<4; l++) {
-      EEPROM_writeFloat(EE_sites+(l)*25+0,latitude);
-      EEPROM_writeFloat(EE_sites+(l)*25+4,longitude);
-      EEPROM.write(EE_sites+(l)*25+8,128);
-      EEPROM.write(EE_sites+(l)*25+9,0);
+    for (int l=0; l < 4; l++) {
+      nv.writeFloat(EE_sites+(l)*25+0,latitude);
+      nv.writeFloat(EE_sites+(l)*25+4,longitude);
+      nv.write(EE_sites+(l)*25+8,128);
+      nv.write(EE_sites+(l)*25+9,0);
     }
   
     // init the date and time January 1, 2013. 0 hours LMT
-    JD=2456293.5;
+    JD=CompilerDateToJulian();
     LMT=0.0;
-    EEPROM_writeFloat(EE_JD,JD);
-    EEPROM_writeFloat(EE_LMT,LMT);
+    nv.writeFloat(EE_JD,JD);
+    nv.writeFloat(EE_LMT,LMT);
   
-    // init the minutes past meridian east/west
-    EEPROM.write(EE_dpmE,round((minutesPastMeridianE*15.0)/60.0)+128);
-    EEPROM.write(EE_dpmW,round((minutesPastMeridianW*15.0)/60.0)+128);
+    // init the degrees past meridian east/west
+    nv.write(EE_dpmE,round(AXIS1_LIMIT_MERIDIAN_E+128));
+    nv.write(EE_dpmW,round(AXIS1_LIMIT_MERIDIAN_W+128));
 
     // init the min and max altitude
     minAlt=-10;
     maxAlt=80;
-    EEPROM.write(EE_minAlt,minAlt+128);
-    EEPROM.write(EE_maxAlt,maxAlt);
+    nv.write(EE_minAlt,minAlt+128);
+    nv.write(EE_maxAlt,maxAlt);
   
     // init (clear) the backlash amounts
-    EEPROM_writeInt(EE_backlashAxis2,0);
-    EEPROM_writeInt(EE_backlashAxis1,0);
+    nv.writeInt(EE_backlashAxis2,0);
+    nv.writeInt(EE_backlashAxis1,0);
   
     // init the PEC status, clear the index and buffer
-    EEPROM.write(EE_pecStatus,IgnorePEC);
-    EEPROM.write(EE_pecRecorded,false);
-    for (int l=0; l<PECBufferSize; l++) EEPROM.write(EE_pecTable+l,128);
+    nv.write(EE_pecStatus,IgnorePEC);
+    nv.write(EE_pecRecorded,false);
+    for (int l=0; l < pecBufferSize; l++) nv.write(EE_pecTable+l,128);
     wormSensePos=0;
-    EEPROM_writeLong(EE_wormSensePos,wormSensePos);
+    nv.writeLong(EE_wormSensePos,wormSensePos);
     
     // init the Park status
-    EEPROM.write(EE_parkSaved,false);
-    EEPROM.write(EE_parkStatus,NotParked);
+    nv.write(EE_parkSaved,false);
+    nv.write(EE_parkStatus,NotParked);
   
     // init the pulse-guide rate
-    EEPROM.write(EE_pulseGuideRate,GuideRate1x);
+    nv.write(EE_pulseGuideRate,GuideRate1x);
     
     // init the default maxRate
-    if (maxRate<2L*16L) maxRate=2L*16L; if (maxRate>10000L*16L) maxRate=10000L*16L;
-    EEPROM_writeInt(EE_maxRate,(int)(maxRate/16L));
+    if (maxRate < 2L*16L) maxRate=2L*16L; 
+    if (maxRate > 10000L*16L) maxRate=10000L*16L;
+    if (maxRate<maxRateLowerLimit()) maxRate=maxRateLowerLimit();
+    nv.writeInt(EE_maxRate,-1); nv.writeLong(EE_maxRateL,maxRate);
 
     // init autoMeridianFlip
-    EEPROM.write(EE_autoMeridianFlip,autoMeridianFlip);
+    nv.write(EE_autoMeridianFlip,autoMeridianFlip);
 
     // init the sidereal tracking rate, use this once - then issue the T+ and T- commands to fine tune
     // 1/16uS resolution timer, ticks per sidereal second
-    EEPROM_writeLong(EE_siderealInterval,siderealInterval);
-    
-    // finally, stop the init from happening again
-    EEPROM_writeLong(EE_autoInitKey,autoInitKey);
+    nv.writeLong(EE_siderealInterval,siderealInterval);
+
+    // set default focuser positions at zero
+    nv.writeLong(EE_posAxis4,0L);
+    nv.writeLong(EE_posAxis5,0L);
+    // for DC focusers read in the % power
+    nv.write(EE_dcPwrAxis4,50);
+    nv.write(EE_dcPwrAxis5,50);
+    // clear focuser TCF values
+    nv.writeFloat(EE_tcfCoefAxis4,0.0);
+    nv.writeFloat(EE_tcfCoefAxis5,0.0);
+    nv.write(EE_tcfEnAxis4,0);
+    nv.write(EE_tcfEnAxis5,0);
+
+    // clear the library/catalogs
+    Lib.clearAll();
     
     // clear the pointing model
     saveAlignModel();
 
-    // disable OnTrack/Refraction dual axis mode
-    EEPROM.write(EE_onTrackDec,0);
+    // finally, stop the init from happening again
+    nv.writeLong(EE_autoInitKey,NV_INIT_KEY);
   }
 }
 
-void Init_Start_Timers() {
+void initStartTimers() {
   // Initialize the timers that handle the sidereal clock, RA, and Dec
   HAL_Init_Timer_Sidereal();
 
@@ -480,71 +491,3 @@ void Init_Start_Timers() {
   // Initialize Axis1 and Axis2 motor timers and set their priorities
   HAL_Init_Timers_Motor();
 }
-
-void EnableStepperDrivers() {
-  // enable the stepper drivers
-  if (axis1Enabled==false) {
-    digitalWrite(Axis1_EN,Axis1_Enabled); axis1Enabled=true;
-    digitalWrite(Axis2_EN,Axis2_Enabled); axis2Enabled=true;
-    delay(10);
-  }
-}
-
-void DisableStepperDrivers() {
-  // disable the stepper drivers
-  if (axis1Enabled==true) {
-    digitalWrite(Axis1_EN,Axis1_Disabled); axis1Enabled=false;
-    digitalWrite(Axis2_EN,Axis2_Disabled); axis2Enabled=false;
-    delay(10);
-  }
-}
-
-// Basic stepper driver mode setup
-#ifdef AXIS1_DRIVER_MODEL
-
-// different models of stepper drivers have different bit settings for microsteps
-// translate the human readable microsteps in the configuration to modebit settings 
-unsigned int TranslateMicrosteps(int axis, int DriverModel, unsigned int Microsteps) {
-  unsigned int Mode;
-    
-  // we search for each model, since they are different
-  switch(DriverModel) {
-    case A4988:
-      Mode = searchTable(StepsA4988, LEN_A4988, Microsteps);
-      break;
-    case DRV8825:
-      Mode = searchTable(StepsDRV8825, LEN_DRV8825, Microsteps);
-      break;
-    case LV8729:
-      Mode = searchTable(StepsLV8729, LEN_LV8729, Microsteps);
-      break;
-    case TMC2100:
-      Mode = searchTable(StepsTMC2100, LEN_TMC2100, Microsteps);
-      break;
-    case TMC2208:
-      Mode = searchTable(StepsTMC2208, LEN_TMC2208, Microsteps);
-      break;
-    case TMC2130:
-      Mode = searchTable(StepsTMC2130, LEN_TMC2130, Microsteps);
-      break;
-    default:
-      Mode=1;
-  }
-
-  return Mode;
-}
-
-// search function
-unsigned int searchTable(unsigned int Table[][2], int TableLen, unsigned int Microsteps) {
-  int i;
-  
-  for(i = 0; i < TableLen; i++) {
-    if (Table[i][0] == Microsteps) {
-      return Table[i][1];
-    }
-  }
-  
-  return 0;
-}
-#endif
-

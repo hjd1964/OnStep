@@ -16,8 +16,27 @@
 *.out
 *.app
 
-PecPlus.ino
-Alternate_Config.h
-zConfig*.h
-Timer.ino.old
-Display.ino
+# Visual studio
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.d
+*.elf
+*.hex
+*.buildinfo
+*.bin
+*.sln
+*.user
+*.filters
+*.vcxproj
+*.vsarduino.h
+*.vmps.xml
+*.suo
+*.log
+*.db
+*.db-shm
+*.db-wal
+*.json
+*.sqlite
+*.config
+*.bak

@@ -1,9 +1,11 @@
 OnStep Telescope Controller
 ===========================
 # Important Note
-THIS IS THE BETA BRANCH, IT'S FAIRLY WELL TESTED BUT STILL FREQUENTLY GETS UPDATED WITH NEW FEATURES.
 
-THE BETA BRANCH IS RECOMMENDED FOR MOST USERS.
+THERE ARE SEVERAL GITHUB BRANCHES OF ONSTEP:
+* The **RELEASE BRANCHES** are well tested and what most should use.  Usually the newest (highest revision) RELEASE is recommended.  No new features are added and only bug fixes where necessary and safe.
+* Tne **BETA BRANCH**, if present, is a "snap-shot" of the MASTER where we have reached a point of apparent stability.  This provides access to most new features for adventurous users.
+* The **MASTER BRANCH** is the most up to date OnStep version; where new features are added.  It is the least well tested branch and should only be user by experienced users willing to test for and report bugs.
 
 # What is OnStep?
 OnStep is a computerized telescope goto controller, based on Teensy or
@@ -44,6 +46,12 @@ There are also [INDI](http://www.indilib.org/about.html) drivers so it can be us
 Detailed documentation, including the full set of features, detailed designs for
 PCBs, instructions on how to build a controller, how to configure the firmware
 for your particular mount, can all be found the [OnStep Group Wiki](https://groups.io/g/onstep/wiki/home).
+
+# Change Log
+All the changes are tracking in git, and a detailed list can be accessed using the
+following git command:
+ 
+git log --date=short --pretty=format:"%h %ad %<(20)%an %<(150,trunc)%s"
 
 # Support
 Questions and discussion should be on the mailing list (also accessible via the
