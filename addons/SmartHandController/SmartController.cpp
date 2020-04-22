@@ -398,9 +398,7 @@ void SmartHandController::update()
   if (display_blank_time && top - time_last_action > display_blank_time) { display->sleepOn(); sleepDisplay = true; return; }
   if (display_dim_time && top - time_last_action > display_dim_time && !lowContrast) { display->setContrast(0); lowContrast = true; return; }
 
-  // power cycle reqd message
-  if (powerCylceRequired) { display->setFont(LF_LARGE); DisplayMessage(L_REBOOT "REBOOT", L_DEVICE "DEVICE", 1000); return; }
-  
+  // show align state
   if (telInfo.align == Telescope::ALI_SELECT_STAR_1 || telInfo.align == Telescope::ALI_SELECT_STAR_2 || telInfo.align == Telescope::ALI_SELECT_STAR_3 || 
       telInfo.align == Telescope::ALI_SELECT_STAR_4 || telInfo.align == Telescope::ALI_SELECT_STAR_5 || telInfo.align == Telescope::ALI_SELECT_STAR_6 ||
       telInfo.align == Telescope::ALI_SELECT_STAR_7 || telInfo.align == Telescope::ALI_SELECT_STAR_8 || telInfo.align == Telescope::ALI_SELECT_STAR_9) {
@@ -422,13 +420,17 @@ void SmartHandController::update()
     // mark this as the next alignment star 
     telInfo.align = static_cast<Telescope::AlignState>(telInfo.align + 1);
   } else
+
+  // otherwise update the main display
   if (top - lastpageupdate > BACKGROUND_CMD_RATE/2) updateMainDisplay(page);
-  
+
+  // let the user know if the comms are down
   if (telInfo.connected == false) DisplayMessage(L_DISCONNECT_MSG1, L_DISCONNECT_MSG2, -1);
 
-  // is a goto happening?
-  if (telInfo.connected && (telInfo.getTrackingState() == Telescope::TRK_SLEWING || telInfo.getParkState() == Telescope::PRK_PARKING))
-  {
+  // -------------------------------------------------------------------------------------------------------------------
+  // handle gotos and guiding
+  if (telInfo.connected && (telInfo.getTrackingState() == Telescope::TRK_SLEWING || telInfo.getParkState() == Telescope::PRK_PARKING)) {
+    // gotos
     if (buttonPad.nsewPressed()) {
       Ser.print(":Q#"); Ser.flush();
       if (telInfo.align != Telescope::ALI_OFF) telInfo.align = static_cast<Telescope::AlignState>(telInfo.align - 1); // try another align star?
@@ -438,11 +440,8 @@ void SmartHandController::update()
       DisplayMessage(L_SLEW_MSG1, L_SLEW_MSG2 "!", 1000);
       return;
     }
-  } else
-
-  // -------------------------------------------------------------------------------------------------------------------
-  // handle the guiding buttons
-  {
+  } else {
+    // guiding
     buttonCommand = false;
 #if ST4_INTERFACE == ON
     if (!moveEast  && (buttonPad.e.isDown() || auxST4.e.isDown())) { moveEast = true;   Ser.write(ccMe); buttonCommand=true; } else
@@ -517,10 +516,9 @@ void SmartHandController::update()
       if (buttonPad.f.wasPressed()) { Ser.print(":B+#"); strcpy(briefMessage,L_FKEY_RETI_UP); }
     break;
     case 5: case 6:  // focuser1/2
-      if (featureKeyMode==5) strcpy(cmd,":FA1#"); else strcpy(cmd,":FA2#"); 
-           if (!focOut && buttonPad.F.isDown()) { focOut = true;  strcat(cmd,":FS#:F+#"); SetLX200(cmd); strcpy(briefMessage,L_FKEY_FOC_DN); buttonCommand=true; }
+           if (!focOut && buttonPad.F.isDown()) { focOut = true;  Ser.print(":FS#:F+#"); strcpy(briefMessage,L_FKEY_FOC_DN); buttonCommand=true; }
       else if ( focOut && buttonPad.F.isUp())   { focOut = false; Ser.print(":FQ#"); buttonCommand=true; buttonPad.F.clearPress(); }
-      else if (!focIn  && buttonPad.f.isDown()) { focIn = true;   strcat(cmd,":FS#:F-#"); SetLX200(cmd); strcpy(briefMessage,L_FKEY_FOC_UP); buttonCommand=true; }
+      else if (!focIn  && buttonPad.f.isDown()) { focIn = true;   Ser.print(":FS#:F-#"); strcpy(briefMessage,L_FKEY_FOC_UP); buttonCommand=true; }
       else if ( focIn  && buttonPad.f.isUp())   { focIn = false;  Ser.print(":FQ#"); buttonCommand=true; buttonPad.f.clearPress(); }
 #ifndef FOCUSER_ACCELERATE_DISABLE_ON
       // acceleration control
@@ -619,6 +617,14 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
     else
       if (page == 2)
         telInfo.updateTime();
+
+  // prep. brief message, simply place the message in the briefMessage string and it'll show for one second
+  static char lastMessage[40]="";
+  static unsigned long startTime=0;
+  if (strlen(briefMessage) != 0) { startTime=millis(); strcpy(lastMessage,briefMessage); strcpy(briefMessage,""); }
+  if (strlen(lastMessage) != 0) {
+    if ((long)(millis()-startTime) > 1000) strcpy(lastMessage,"");
+  }
  
   // the graphics loop
   u8g2_FirstPage(u8g2);
@@ -709,21 +715,14 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
       }
     }
 
-    // show brief message, simply place the message in the briefMessage string and it'll show for one second
-    static char lastMessage[20]="";
-    if ((strlen(briefMessage)!=0) || (strlen(lastMessage)!=0)) {
-      static unsigned long startTime=0;
-      if (strlen(briefMessage)!=0) { startTime=millis(); strcpy(lastMessage,briefMessage); strcpy(briefMessage,""); }
-
+    // show brief message
+    if (strlen(lastMessage) != 0) {
       x = u8g2_GetDisplayWidth(u8g2);  u8g2_uint_t y = 36;  u8g2_uint_t x1 = u8g2_GetStrWidth(u8g2,lastMessage);
       u8g2_DrawUTF8(u8g2, (x/2)-(x1/2), y+8, lastMessage);
-
-      if (millis()-startTime>1000) { startTime=0; strcpy(lastMessage,""); }
     } else
 
     // show equatorial coordinates
-    if (page == 0)
-    {
+    if (page == 0) {
       if (telInfo.hasInfoRa && telInfo.hasInfoDec) {
         char rs[20]; strcpy(rs,telInfo.TempRa); int l=strlen(rs); if (l>1) rs[l-1]=0;
         u8g2_uint_t x = u8g2_GetDisplayWidth(u8g2)-u8g2_GetUTF8Width(u8g2,"00000000");
