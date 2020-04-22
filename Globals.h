@@ -137,6 +137,7 @@ volatile double StepsForRateChangeAxis2 = (sqrt((double)SLEW_ACCELERATION_DIST*(
 
 // Location ------------------------------------------------------------------------------------------------------------------------
 double latitude                         = 0.0;
+double latitudeAbs                      = 0.0;
 double latitudeSign                     = 1.0;
 double cosLat                           = 1.0;
 double sinLat                           = 0.0;

@@ -307,6 +307,7 @@ void setLatitude(double Lat) {
   nv.writeFloat(100+(currentSite)*25+0,latitude);
   cosLat=cos(latitude/Rad);
   sinLat=sin(latitude/Rad);
+  latitudeAbs=fabs(latitude);
   if (latitude >= 0) latitudeSign=1; else latitudeSign=-1;
   if (latitude >= 0) defaultDirAxis1=defaultDirAxis1NCPInit; else defaultDirAxis1=defaultDirAxis1SCPInit;
 
