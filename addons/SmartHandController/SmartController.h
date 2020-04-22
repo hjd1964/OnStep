@@ -48,13 +48,12 @@ private:
 
   Telescope telInfo;
   char _version[20]="Version ?";
-  char briefMessage[20]="";
+  char briefMessage[40]="";
 
   void updateMainDisplay( u8g2_uint_t page);
   bool sleepDisplay = false;
   bool lowContrast = false;
   uint8_t maxContrast = 255;
-  bool powerCylceRequired = false;
   bool buttonCommand = false;
   bool moveNorth=false;
   bool moveSouth=false;
