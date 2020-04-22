@@ -608,7 +608,15 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
     else
       if (page == 2)
         telInfo.updateTime();
- 
+
+  // prep. brief message, simply place the message in the briefMessage string and it'll show for one second
+  static char lastMessage[20]="";
+  static unsigned long startTime=0;
+  if (strlen(briefMessage) != 0) { startTime=millis(); strcpy(lastMessage,briefMessage); strcpy(briefMessage,""); }
+  if (strlen(lastMessage) != 0) {
+    if ((long)(millis()-startTime) > 1000) strcpy(lastMessage,"");
+  }
+
   // the graphics loop
   u8g2_FirstPage(u8g2);
   do
@@ -698,16 +706,10 @@ void SmartHandController::updateMainDisplay( u8g2_uint_t page)
       }
     }
 
-    // show brief message, simply place the message in the briefMessage string and it'll show for one second
-    static char lastMessage[20]="";
-    if ((strlen(briefMessage)!=0) || (strlen(lastMessage)!=0)) {
-      static unsigned long startTime=0;
-      if (strlen(briefMessage)!=0) { startTime=millis(); strcpy(lastMessage,briefMessage); strcpy(briefMessage,""); }
-
+    // show brief message
+    if (strlen(lastMessage) != 0) {
       x = u8g2_GetDisplayWidth(u8g2);  u8g2_uint_t y = 36;  u8g2_uint_t x1 = u8g2_GetStrWidth(u8g2,lastMessage);
       u8g2_DrawUTF8(u8g2, (x/2)-(x1/2), y+8, lastMessage);
-
-      if (millis()-startTime>1000) { startTime=0; strcpy(lastMessage,""); }
     } else
 
     // show equatorial coordinates
