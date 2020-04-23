@@ -467,11 +467,10 @@ void SmartHandController::update()
 
   // -------------------------------------------------------------------------------------------------------------------
   // handle the feature buttons
-  char cmd[32];
-  static bool focOut=false;
-  static bool focIn=false;
-  static bool rotCw=false;
-  static bool rotCcw=false;
+  enum FocusState {FS_STOPPED, FS_IN_FAST, FS_IN_SLOW, FS_OUT_SLOW, FS_OUT_FAST};
+  static FocusState focusState = FS_STOPPED;
+  enum RotState {RS_STOPPED, RS_CW_FAST, RS_CW_SLOW, RS_CCW_SLOW, RS_CCW_FAST};
+  static RotState rotState = RS_STOPPED;
   buttonCommand=false;
   if (telInfo.align != Telescope::ALI_OFF) featureKeyMode = 1;
   switch (featureKeyMode) {
@@ -516,24 +515,22 @@ void SmartHandController::update()
       if (buttonPad.f.wasPressed()) { Ser.print(":B+#"); strcpy(briefMessage,L_FKEY_RETI_UP); }
     break;
     case 5: case 6:  // focuser1/2
-           if (!focOut && buttonPad.F.isDown()) { focOut = true;  Ser.print(":FS#:F+#"); strcpy(briefMessage,L_FKEY_FOC_DN); buttonCommand=true; }
-      else if ( focOut && buttonPad.F.isUp())   { focOut = false; Ser.print(":FQ#"); buttonCommand=true; buttonPad.F.clearPress(); }
-      else if (!focIn  && buttonPad.f.isDown()) { focIn = true;   Ser.print(":FS#:F-#"); strcpy(briefMessage,L_FKEY_FOC_UP); buttonCommand=true; }
-      else if ( focIn  && buttonPad.f.isUp())   { focIn = false;  Ser.print(":FQ#"); buttonCommand=true; buttonPad.f.clearPress(); }
+           if (focusState == FS_STOPPED && buttonPad.F.isDown()) { focusState=FS_OUT_SLOW; Ser.print(":FS#:F+#"); strcpy(briefMessage,L_FKEY_FOC_DN); buttonCommand=true; }
+      else if ((focusState == FS_OUT_SLOW || focusState == FS_OUT_FAST) && buttonPad.F.isUp()) { focusState=FS_STOPPED; Ser.print(":FQ#"); buttonCommand=true; buttonPad.F.clearPress(); }
+      else if (focusState == FS_STOPPED && buttonPad.f.isDown()) { focusState=FS_IN_SLOW;  Ser.print(":FS#:F-#"); strcpy(briefMessage,L_FKEY_FOC_UP); buttonCommand=true; }
+      else if ((focusState == FS_IN_SLOW || focusState == FS_IN_FAST) && buttonPad.f.isUp()) { focusState=FS_STOPPED; Ser.print(":FQ#"); buttonCommand=true; buttonPad.f.clearPress(); }
 #ifndef FOCUSER_ACCELERATE_DISABLE_ON
-      // acceleration control
-      else if ((focOut && buttonPad.F.isDown() && (buttonPad.F.timeDown()>5000))) { Ser.print(":FF#:F+#"); strcpy(briefMessage,L_FKEY_FOCF_DN); }
-      else if ((focIn  && buttonPad.f.isDown() && (buttonPad.f.timeDown()>5000))) { Ser.print(":FF#:F-#"); strcpy(briefMessage,L_FKEY_FOCF_UP); }
+      else if ((focusState == FS_OUT_SLOW && buttonPad.F.isDown() && (buttonPad.F.timeDown()>5000))) { focusState=FS_OUT_FAST; Ser.print(":FF#:F+#"); strcpy(briefMessage,L_FKEY_FOCF_DN); }
+      else if ((focusState == FS_IN_SLOW  && buttonPad.f.isDown() && (buttonPad.f.timeDown()>5000))) { focusState=FS_IN_FAST;  Ser.print(":FF#:F-#"); strcpy(briefMessage,L_FKEY_FOCF_UP); }
 #endif
     break;
     case 7:  // rotator
-           if (!rotCcw && buttonPad.F.isDown()) { rotCcw = true;  Ser.print(":r2#:rc#:r<#"); strcpy(briefMessage,L_FKEY_ROT_DN); buttonCommand=true; }
-      else if ( rotCcw && buttonPad.F.isUp())   { rotCcw = false; Ser.print(":rQ#"); buttonCommand=true; buttonPad.F.clearPress(); }
-      else if (!rotCw  && buttonPad.f.isDown()) { rotCw = true;   Ser.print(":r2#:rc#:r>#"); strcpy(briefMessage,L_FKEY_ROT_UP); buttonCommand=true; }
-      else if ( rotCw  && buttonPad.f.isUp())   { rotCw = false;  Ser.print(":rQ#"); buttonCommand=true; buttonPad.f.clearPress(); }
-      // acceleration control
-      else if ((rotCcw && buttonPad.F.isDown() && (buttonPad.F.timeDown()>5000))) { Ser.print(":r4#:rc#:r<#"); strcpy(briefMessage,L_FKEY_ROTF_DN); }
-      else if (( rotCw && buttonPad.f.isDown() && (buttonPad.f.timeDown()>5000))) { Ser.print(":r4#:rc#:r>#"); strcpy(briefMessage,L_FKEY_ROTF_UP); }
+           if (rotState == RS_STOPPED && buttonPad.F.isDown()) { rotState = RS_CCW_SLOW; Ser.print(":r2#:rc#:r<#"); strcpy(briefMessage,L_FKEY_ROT_DN); buttonCommand=true; }
+      else if ((focusState == RS_CCW_SLOW || focusState == RS_CCW_FAST) && buttonPad.F.isUp()) { rotState = RS_STOPPED; Ser.print(":rQ#"); buttonCommand=true; buttonPad.F.clearPress(); }
+      else if (rotState == RS_STOPPED && buttonPad.f.isDown()) { rotState = RS_CW_SLOW;  Ser.print(":r2#:rc#:r>#"); strcpy(briefMessage,L_FKEY_ROT_UP); buttonCommand=true; }
+      else if ((focusState == RS_CW_SLOW || focusState == RS_CW_FAST) && buttonPad.f.isUp()) { rotState = RS_STOPPED; Ser.print(":rQ#"); buttonCommand=true; buttonPad.f.clearPress(); }
+      else if ((rotState == RS_CCW_SLOW && buttonPad.F.isDown() && (buttonPad.F.timeDown()>5000))) { rotState = RS_CCW_FAST; Ser.print(":r4#:rc#:r<#"); strcpy(briefMessage,L_FKEY_ROTF_DN); }
+      else if ((rotState == RS_CW_SLOW  && buttonPad.f.isDown() && (buttonPad.f.timeDown()>5000))) { rotState = RS_CW_FAST;  Ser.print(":r4#:rc#:r>#"); strcpy(briefMessage,L_FKEY_ROTF_UP); }
     break;
   }
   if (buttonCommand) { time_last_action = millis(); return; }
