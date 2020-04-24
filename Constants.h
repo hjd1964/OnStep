@@ -97,7 +97,6 @@
 #define OBSERVED_PLACE              1
 #define TOPOCENTRIC                 2
 #define ASTROMETRIC_J2000           3
-#define TELESCOPE_COORDINATES       TOPOCENTRIC
 
 // EEPROM Info ---------------------------------------------------------------------------------------------------------------------
 // General purpose storage A (100 bytes), 0..99

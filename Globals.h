@@ -150,6 +150,9 @@ double longitude                        = 0.0;
 #endif
 
 // Coordinates ---------------------------------------------------------------------------------------------------------------------
+#ifndef TELESCOPE_COORDINATES
+  #define TELESCOPE_COORDINATES TOPOCENTRIC
+#endif
 #if MOUNT_TYPE == GEM
   double homePositionAxis1              = 90.0;
 #else
