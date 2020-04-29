@@ -69,9 +69,9 @@ float HAL_MCU_Temperature(void) {
 
 #define ISR(f) void f (void)
 
-HardwareTimer *HwTimer_Sidereal = new HardwareTimer(TIM1);
-HardwareTimer *HwTimer_Axis1    = new HardwareTimer(TIM2); // 32bit timer
-HardwareTimer *HwTimer_Axis2    = new HardwareTimer(TIM5); // 32bit timer
+static HardwareTimer *HwTimer_Sidereal = new HardwareTimer(TIM1);
+static HardwareTimer *HwTimer_Axis1    = new HardwareTimer(TIM2); // 32bit timer
+static HardwareTimer *HwTimer_Axis2    = new HardwareTimer(TIM5); // 32bit timer
 
 // Sidereal timer is on STM32 Hardware Timer 1
 void Timer_Sidereal();
