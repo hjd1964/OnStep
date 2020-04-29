@@ -5,9 +5,11 @@
 
 #include <Wire.h>
 #include "Adafruit_FRAM_I2C.h"  // https://github.com/hjd1964/Adafruit_FRAM_I2C
+
 #define I2C_EEPROM_ADDRESS 0x76
 Adafruit_FRAM_I2C fram = Adafruit_FRAM_I2C();
 #define E2END 32767
+#define I2C_CLOCK 400000
 
 class nvs {
   public:
