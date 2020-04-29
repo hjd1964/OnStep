@@ -50,7 +50,7 @@
 // This option forces that initialization again.
 // Change to true, upload OnStep and nv will be reset to default. Then immediately set to false and upload again.
 // *** IMPORTANT: This option must not be left set to true or it will cause excessive wear of EEPROM or FLASH ***
-#define NV_INIT_KEY_RESET true
+#define NV_INIT_KEY_RESET false
 
 #include <errno.h>
 #include <math.h>
