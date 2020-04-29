@@ -1,6 +1,7 @@
 // -----------------------------------------------------------------------------------
 // non-volatile storage for AT24C32 (often on DS3231 RTC modules with I2C address 0x57)
 // read & write caching version of driver, uses 5K of RAM
+// this is specifically for the Teensy3.5 or 3.6 where there's 4095 bytes of EEPROM built-in
 
 #pragma once
 
@@ -9,12 +10,9 @@
 
 // I2C EEPROM Address on DS3231 RTC module
 #define I2C_EEPROM_ADDRESS 0x57
-
-// this is specifically for the Teensy3.5 or 3.6 where there's 4095 bytes of EEPROM built-in
 #undef E2END
 #define E2END2 4095
 #define E2END 8191
-
 #define I2C_CLOCK 400000
 
 #define MSB(i) (i >> 8)
