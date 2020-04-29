@@ -34,19 +34,8 @@
 #define HAL_Wire Wire
 
 // Non-volatile storage ------------------------------------------------------------------------------
-#if defined(NV_AT24C32_C)
-  #include "../drivers/NV_I2C_EEPROM_AT24C32_C.h"
-#elif defined(NV_AT24C32)
-  #include "../drivers/NV_I2C_EEPROM_AT24C32.h"
-#elif defined(NV_MB85RC256V)
-  #include "../drivers/NV_I2C_FRAM_MB85RC256V.h"
-#else
-  #undef E2END
-  #define E2END 2048
-  #define I2C_EEPROM_ADDRESS 0x50 
-
-  #include "../drivers/NV_I2C_EEPROM_AT24C32_C.h"
-#endif
+// The FYSETC S6 has a 2047 byte EEPROM built-in
+#include "../drivers/NV_I2C_EEPROM_24LC16_C.h"
 
 //--------------------------------------------------------------------------------------------------
 // Nanoseconds delay function
