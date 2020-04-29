@@ -69,13 +69,9 @@ float HAL_MCU_Temperature(void) {
 
 #define ISR(f) void f (void)
 
-TIM_TypeDef * Timer1 = TIM1;
-TIM_TypeDef * Timer2 = TIM2;
-TIM_TypeDef * Timer3 = TIM3;
-
-HardwareTimer *HwTimer_Sidereal = new HardwareTimer(Timer1);
-HardwareTimer *HwTimer_Axis1    = new HardwareTimer(Timer3);
-HardwareTimer *HwTimer_Axis2    = new HardwareTimer(Timer2);
+HardwareTimer *HwTimer_Sidereal = new HardwareTimer(TIM1);
+HardwareTimer *HwTimer_Axis1    = new HardwareTimer(TIM2); // 32bit timer
+HardwareTimer *HwTimer_Axis2    = new HardwareTimer(TIM5); // 32bit timer
 
 // Sidereal timer is on STM32 Hardware Timer 1
 void Timer_Sidereal();
@@ -93,6 +89,7 @@ void TIMER4_COMPA_vect(void);
 
 // Init sidereal clock timer
 void HAL_Init_Timer_Sidereal() {
+  HwTimer_Sidereal->pause();
   //HwTimer_Sidereal->setMode(1, TIMER_OUTPUT_COMPARE);
   HwTimer_Sidereal->setCaptureCompare(1, 1); // Interrupt 1 count after each update
   HwTimer_Sidereal->attachInterrupt(TIMER1_COMPA_vect);
