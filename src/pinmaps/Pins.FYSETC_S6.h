@@ -4,15 +4,15 @@
 #if defined(STM32F446xx)
 
 // The multi-purpose pins (Aux3..Aux8 can be analog pwm/dac if supported)
-#define Aux0                 PB15    // Status LED
+#define Aux0                 PB14    // Status LED
 #define Aux1                 -1     // ESP8266 GPIO0, SPI MISO/Fault
 #define Aux2                 -1      // ESP8266 RST, SPI MISO/Fault
-#define Aux3                 -1      // Home SW
+#define Aux3                 PB13      // Home SW
 #define Aux4                 -1      // OneWire, Home SW
 #define Aux5                 -1     // Axis3_EN; true analog output
 #define Aux6                 -1     // Axis4_EN; true analog output
-#define Aux7                 -1      // Limit SW
-#define Aux8                 -1     // Status2 LED, Reticle LED
+#define Aux7                 PA0      // Limit SW
+#define Aux8                 PA1    // Status2 LED, Reticle LED
 
 // Misc. pins
 #ifndef DS3234_CS_PIN
