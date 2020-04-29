@@ -62,6 +62,9 @@
 #if PINMAP == STM32Blue
   #include "Validate.STM32Blue.h"
 #endif
+#if PINMAP == FYSETC_S6
+  #include "Validate.FYSETC_S6.h"
+#endif
 #if PINMAP == STM32Black
 #endif
 
@@ -131,7 +134,7 @@
 #endif
 
 // RTC DS3234 SPI allowed?
-#if (RTC == DS3234S || RTC == DS3234M) && !defined(DS3234_CS_PIN)
+#if (myRTC == DS3234S || myRTC == DS3234M) && !defined(DS3234_CS_PIN)
   #if PINMAP == Classic
       #error "Configuration (Config.h): DS3234 RTC using SPI is not supported, use PINMAP ClassicShield or add '#define ST4_ALTERNATE_PINS_ON' to move the ST4 port pins"
     #else
@@ -158,8 +161,8 @@
 #endif
 
 // if we have a >= 3 driver SPI bus it's a requirement that all drivers be TMC SPI (or OFF)
-// except for MksGenL2 which can set modes on shunts instead
-#if PINMAP != MksGenL2
+// except for MksGenL2 and FYSETC_S6 which can set modes on shunts instead
+#if PINMAP != MksGenL2 || PINMAP != FYSETC_S6
   #ifndef Axis3_M0
     #define Axis3_M0 -1
   #endif

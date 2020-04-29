@@ -59,6 +59,10 @@
 
   #include "HAL_STM32F1/HAL_STM32F1.h"
 
+#elif defined(STM32F446xx)
+  // FYSETC S6 board with STM32F446
+  #include "HAL_STM32F4/HAL_STM32F4.h"
+
 #elif defined(ESP32)
   // ESP32
   #include "HAL_ESP32/HAL_ESP32.h"

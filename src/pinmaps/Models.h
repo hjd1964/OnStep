@@ -46,6 +46,9 @@
 #if PINMAP == STM32Blue
   #include "Pins.STM32B.h"
 #endif
+#if PINMAP == FYSETC_S6
+  #include "Pins.FYSETC_S6.h"
+#endif
 #if PINMAP == STM32Black
   #include "Pins.STM32B.h"
 #endif
