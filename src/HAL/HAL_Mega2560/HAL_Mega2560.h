@@ -51,14 +51,8 @@
 
 // Non-volatile storage ----------------------------------------------------------------------------
 #if defined(NV_AT24C32)
-  #ifdef E2END
-    #undef E2END
-  #endif
-  #include "../drivers/NV_I2C_EEPROM_AT24C32.h"
+  #include "../drivers/NV_I2C_EEPROM_AT24C32_C.h"
 #elif defined(NV_MB85RC256V)
-  #ifdef E2END
-    #undef E2END
-  #endif
   #include "../drivers/NV_I2C_FRAM_MB85RC256V.h"
 #else
   #include "../drivers/NV_EEPROM.h"

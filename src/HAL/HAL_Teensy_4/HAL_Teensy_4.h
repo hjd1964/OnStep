@@ -21,7 +21,7 @@
 #if defined(NV_AT24C32_PLUS)
   #include "../drivers/NV_I2C_EEPROM_AT24C32_PLUS.h"
 #elif defined(NV_AT24C32)
-  #include "../drivers/NV_I2C_EEPROM_AT24C32.h"
+  #include "../drivers/NV_I2C_EEPROM_AT24C32_C.h"
 #elif defined(NV_MB85RC256V)
   #include "../drivers/NV_I2C_FRAM_MB85RC256V.h"
 #else
