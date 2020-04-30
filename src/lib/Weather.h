@@ -7,24 +7,27 @@
 
 #if WEATHER != OFF
 
-  // https://github.com/adafruit/Adafruit_BME280_Library/tree/156a0537d6b21aaab1d1f104a7001a38ca1ffce3
-  // and https://github.com/adafruit/Adafruit_Sensor
+  #if WEATHER == BME280 || WEATHER == BME280_0x76 || WEATHER == BME280_SPI
+    #include <Adafruit_BME280.h>          // https://github.com/adafruit/Adafruit_BME280_Library/tree/156a0537d6b21aaab1d1f104a7001a38ca1ffce3
+                                          // and https://github.com/adafruit/Adafruit_Sensor
+  #endif
+
   #if WEATHER == BME280 || WEATHER == BME280_0x76
-  #include <Adafruit_BME280.h> 
     Adafruit_BME280 bme;
   #elif WEATHER == BME280_SPI
-    #include <Adafruit_BME280.h> 
     Adafruit_BME280 bme(BME280_CS_PIN);                                   // hardware SPI
   //Adafruit_BME280 bme(BME280_CS_PIN, SSPI_MOSI, SSPI_MISO, SSPI_SCK);   // software SPI
   #endif
     
-  //BMP280 is the BME280 without humidity 
-  // Using the Adafruit_BMP280 library
+  // BMP280 is the BME280 without humidity 
+  #if WEATHER == BMP280 || WEATHER == BMP280_0x76 || WEATHER == BMP280_SPI
+    #include <Adafruit_BMP280.h>          // https://github.com/adafruit/Adafruit_BMP280_Library
+                                          // and https://github.com/adafruit/Adafruit_Sensor
+  #endif
+
   #if WEATHER == BMP280 || WEATHER == BMP280_0x76
-    #include <Adafruit_BMP280.h> 
     Adafruit_BMP280 bmp(&HAL_Wire); 
   #elif WEATHER == BMP280_SPI
-    #include <Adafruit_BMP280.h> 
     Adafruit_BMP280 bmp(BMP280_CS_PIN);                                   // hardware SPI
   #endif
     
