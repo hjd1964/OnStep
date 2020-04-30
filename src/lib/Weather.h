@@ -170,7 +170,7 @@ class weather {
   #elif WEATHER == BMP280_0x76
       if (bmx.begin(0x76)) _BMP280_found = true; else success = false;
   #else
-      //if (bmx.begin()) _BME280_found = true; else { if (bmx.begin()) _BME280_found = true; else success = false; }
+      #error "Configuration (Config.h): Setting WEATHER unknown value!"
   #endif
   #if defined(ESP32) & defined(WIRE_END_SUPPORT)
       HAL_Wire.end();
