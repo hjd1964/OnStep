@@ -44,8 +44,10 @@
 
 // SENSORS -------------------------------------------------------- see https://onstep.groups.io/g/main/wiki/6-Configuration#SENSORS
 // * = also supports ON_PULLUP or ON_PULLDOWN to activate MCU internal resistors if present.
-#define WEATHER                       OFF //    OFF, BME280 (I2C 0x77,) BME280_0x76, BME280_SPI (see pinmap for CS.)          Option
-                                          //         Provides temperature, pressure, humidity.
+#define WEATHER                       OFF //    OFF, BME280 (I2C 0x77,) BME280_0x76, BME280_SPI, (see pinmap for CS.)         Option
+                                          //         BMP280 (I2C 0x77,) BMP280_0x76, BMP280_SPI
+                                          //         BME280 Provides temperature, pressure, humidity.
+                                          //         BMP280 Provides temperature, pressure. It does not provide humidity.
 
 #define TELESCOPE_TEMPERATURE         OFF //    OFF, DS1820, n. Where n is the DS1820 s/n for DEW_HEATER temperature.         Adjust
 

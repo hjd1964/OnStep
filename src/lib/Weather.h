@@ -6,14 +6,28 @@
 #include "Heater.h"
 
 #if WEATHER != OFF
-  #include <Adafruit_BME280.h>            // https://github.com/adafruit/Adafruit_BME280_Library/tree/156a0537d6b21aaab1d1f104a7001a38ca1ffce3
-                                          // and https://github.com/adafruit/Adafruit_Sensor
-  #if WEATHER == BME280 || WEATHER == BME280_0x76
+
+  // https://github.com/adafruit/Adafruit_BME280_Library/tree/156a0537d6b21aaab1d1f104a7001a38ca1ffce3
+  // and https://github.com/adafruit/Adafruit_Sensor
+  #if WEATHER == BME280 || WEATHER == BME280_0x76  || WEATHER == BME280_0x77
+  #include <Adafruit_BME280.h> 
     Adafruit_BME280 bme;
   #elif WEATHER == BME280_SPI
+    #include <Adafruit_BME280.h> 
     Adafruit_BME280 bme(BME280_CS_PIN);                                   // hardware SPI
   //Adafruit_BME280 bme(BME280_CS_PIN, SSPI_MOSI, SSPI_MISO, SSPI_SCK);   // software SPI
   #endif
+    
+  //BMP280 is the BME280 without humidity 
+  // Using the Adafruit_BMP280 library
+  #if WEATHER == BMP280 || WEATHER == BMP280_0x76 || WEATHER == BMP280_0x77
+    #include <Adafruit_BMP280.h> 
+     Adafruit_BMP280 bmp;
+  #elif WEATHER == BMP280_SPI
+    #include <Adafruit_BMP280.h> 
+    Adafruit_BMP280 bmp(BMP280_CS_PIN);                                   // hardware SPI
+  #endif
+    
 #endif
 
 #ifdef ONEWIRE_DEVICES_PRESENT
@@ -75,7 +89,6 @@ class weather {
       bool searchDS2413 = _DS2413_devices == 0;
   #endif
   #if FEATURE_LIST_DS == ON
-      bool _DS1820_detected=false, _DS2413_detected=false;
       Serial.println("Dallas/Maxim OneWire bus device s/n's:");
   #endif
 
@@ -97,7 +110,6 @@ class weather {
               _DS1820_count++;
             }
     #if FEATURE_LIST_DS == ON
-            _DS1820_detected=true;
             Serial.print("DS18B20: 0x"); for (int j=0; j<8; j++) { if (address[j] < 16) Serial.print("0"); Serial.print(address[j],HEX); }
             if (searchDS1820) {
               if (_DS1820_count == 1) Serial.print(" assigned to TELESCOPE_TEMPERATURE"); else
@@ -118,7 +130,6 @@ class weather {
               _DS2413_count++;
             }
     #if FEATURE_LIST_DS == ON
-            _DS2413_detected=true;
             Serial.print("DS2413:  0x"); for (int j=0; j<8; j++) { if (address[j] < 16) Serial.print("0"); Serial.print(address[j],HEX); }
             if (searchDS2413) {
               if (_DS2413_count <= 4) { Serial.print(" assigned to FEATURE"); Serial.print((_DS2413_count-1)*2+1); Serial.print("_PIN"); } else Serial.print(" not assigned");
@@ -131,8 +142,8 @@ class weather {
       }
 
   #if FEATURE_LIST_DS == ON
-      if (!_DS1820_detected) Serial.println("No DS18B20 devices found");
-      if (!_DS2413_detected) Serial.println("No DS2413 devices found");
+      if (_DS1820_devices == 0) Serial.println("No DS18B20 devices found");
+      if (_DS2413_devices == 0) Serial.println("No DS2413 devices found");
   #endif
 
   #ifdef DS1820_DEVICES_PRESENT
@@ -144,12 +155,16 @@ class weather {
       if (_DS2413_devices > 0) _DS2413_found = true;
 #endif
 #if WEATHER != OFF
-  #if WEATHER == BME280
+  #if WEATHER == BME280 || WEATHER == BME280_0x77
       if (bme.begin(&HAL_Wire)) _BME280_found = true; else success = false;
   #elif WEATHER == BME280_0x76
       if (bme.begin(0x76, &HAL_Wire)) _BME280_found = true; else success = false;
+  #elif WEATHER == BMP280 || WEATHER == BMP280_0x77
+      if (bmp.begin()) _BMP280_found = true; else success = false;
+  #elif WEATHER == BMP280_0x76
+      if (bmp.begin(0x76)) _BMP280_found = true; else success = false;
   #else
-      if (bme.begin()) _BME280_found = true; else { if (bme.begin()) _BME280_found = true; else success = false; }
+      //if (bme.begin()) _BME280_found = true; else { if (bme.begin()) _BME280_found = true; else success = false; }
   #endif
   #if defined(ESP32) & defined(WIRE_END_SUPPORT)
       HAL_Wire.end();
@@ -161,7 +176,7 @@ class weather {
     // designed for a 0.01s polling interval, 5 seconds to refresh everything
     void poll() {
 #if WEATHER != OFF || defined(ONEWIRE_DEVICES_PRESENT)
-      if (_BME280_found || _DS1820_found || _DS2413_found) {
+      if (_BME280_found || _BMP280_found || _DS1820_found || _DS2413_found) {
 
         static int phase = 0;
         if (phase >= 500) { phase = 0; _DS1820_count = 0; }
@@ -231,6 +246,7 @@ class weather {
   #endif
 
   #if WEATHER != OFF
+     #if WEATHER == BME280 || WEATHER == BME280_0x76 
         if (_BME280_found) {
           if (phase == 4) {
             #ifdef ESP32
@@ -263,6 +279,41 @@ class weather {
             phase++; return;
           }
         }
+     #endif
+     #if WEATHER == BMP280 || WEATHER == BMP280_0x76
+        if (_BMP280_found) {
+		if (phase == 4) {
+			#ifdef ESP32
+			HAL_Wire.begin();
+			#endif
+			_t = bmp.readTemperature();
+			#if defined(ESP32) & defined(WIRE_END_SUPPORT)
+			HAL_Wire.end();
+			#endif
+			phase++; return;
+		}
+		if (phase == 8) {
+			#ifdef ESP32
+			HAL_Wire.Begin();
+			#endif
+			_p = bmp.readPressure() / 100.0;
+			#if defined(ESP32) & defined(WIRE_END_SUPPORT)
+			HAL_Wire.end();
+			#endif
+			phase++; return;
+		}
+// 		if (phase == 12) {
+// 			#ifdef ESP32
+// 			HAL_Wire.begin();
+// 			#endif
+// 			_h = bmp.readHumidity();
+// 			#if defined(ESP32) & defined(WIRE_END_SUPPORT)
+// 			HAL_Wire.end();
+// 			#endif
+// 			phase++; return;
+// 		}
+	}
+     #endif
   #endif
       phase++;
       }
@@ -369,6 +420,7 @@ class weather {
 
   private:
     bool _BME280_found = false;
+    bool _BMP280_found = false;
 
     bool _DS1820_found = false;
     int  _DS1820_devices = 0;
