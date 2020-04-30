@@ -68,9 +68,9 @@ float HAL_MCU_Temperature(void) {
 
 #define ISR(f) void f (void)
 
-static HardwareTimer *iTimer_Sidereal = new HardwareTimer(TIM1);
-static HardwareTimer *iTimer_Axis1    = new HardwareTimer(TIM2); // 32bit timer
-static HardwareTimer *iTimer_Axis2    = new HardwareTimer(TIM5); // 32bit timer
+static HardwareTimer *Timer_Sidereal = new HardwareTimer(TIM1);
+static HardwareTimer *Timer_Axis1    = new HardwareTimer(TIM2); // 32bit timer
+static HardwareTimer *Timer_Axis2    = new HardwareTimer(TIM5); // 32bit timer
 
 // Sidereal timer is on STM32 Hardware Timer 1
 void TIMER1_COMPA_vect(void);
@@ -85,75 +85,75 @@ void TIMER4_COMPA_vect(void);
 
 // Init sidereal clock timer
 void HAL_Init_Timer_Sidereal() {
-  iTimer_Sidereal->pause();
-  iTimer_Sidereal->setMode(1, TIMER_OUTPUT_COMPARE);
-  iTimer_Sidereal->setCaptureCompare(1, 1); // Interrupt 1 count after each update
-  iTimer_Sidereal->attachInterrupt(TIMER1_COMPA_vect);
+  Timer_Sidereal->pause();
+  Timer_Sidereal->setMode(1, TIMER_OUTPUT_COMPARE);
+  Timer_Sidereal->setCaptureCompare(1, 1); // Interrupt 1 count after each update
+  Timer_Sidereal->attachInterrupt(TIMER1_COMPA_vect);
 
   // Set up period
   // 0.166... us per count (72/12 = 6MHz) 10.922 ms max, more than enough for the 1/100 second sidereal clock +/- any PPS adjustment for xo error
   unsigned long psf = F_CPU/6000000; // for example, 72000000/6000000 = 12
-  iTimer_Sidereal->setPrescaleFactor(psf);
-  iTimer_Sidereal->setOverflow(round((60000.0/1.00273790935)/3.0));
+  Timer_Sidereal->setPrescaleFactor(psf);
+  Timer_Sidereal->setOverflow(round((60000.0/1.00273790935)/3.0));
 
   // Start the timer counting
-  iTimer_Sidereal->resume();
+  Timer_Sidereal->resume();
 }
 
 // Init Axis1 and Axis2 motor timers and set their priorities
 void HAL_Init_Timers_Motor() {
   // ===== Axis 1 Timer =====
   // Pause the timer while we're configuring it
-  iTimer_Axis1->pause();
+  Timer_Axis1->pause();
 
   // Set up an interrupt on channel 3
-  iTimer_Axis1->setMode(3, TIMER_OUTPUT_COMPARE);
-  iTimer_Axis1->setCaptureCompare(3, 1);  // Interrupt 1 count after each update
-  iTimer_Axis1->attachInterrupt(TIMER3_COMPA_vect);
+  Timer_Axis1->setMode(3, TIMER_OUTPUT_COMPARE);
+  Timer_Axis1->setCaptureCompare(3, 1);  // Interrupt 1 count after each update
+  Timer_Axis1->attachInterrupt(TIMER3_COMPA_vect);
 
   // Set up period
   // 0.25... us per count (72/18 = 4MHz) 16.384 ms max, good resolution for accurate motor timing and still a reasonable range (for lower steps per degree)
   unsigned long psf = F_CPU/4000000; // for example, 72000000/4000000 = 18
-  iTimer_Axis1->setPrescaleFactor(psf);
-  iTimer_Axis1->setOverflow(65535); // allow enough time that the sidereal clock will tick
+  Timer_Axis1->setPrescaleFactor(psf);
+  Timer_Axis1->setOverflow(65535); // allow enough time that the sidereal clock will tick
 
   // Refresh the timer's count, prescale, and overflow
-  //iTimer_Axis1.refresh();
+  //Timer_Axis1.refresh();
 
   // Start the timer counting
-  iTimer_Axis1->resume();
+  Timer_Axis1->resume();
   
   // ===== Axis 2 Timer =====
   // Pause the timer while we're configuring it
-  iTimer_Axis2->pause();
+  Timer_Axis2->pause();
 
   // Set up an interrupt on channel 2
-  iTimer_Axis2->setMode(2, TIMER_OUTPUT_COMPARE);
-  iTimer_Axis2->setCaptureCompare(2, 1);  // Interrupt 1 count after each update
-  iTimer_Axis2->attachInterrupt(TIMER4_COMPA_vect);
+  Timer_Axis2->setMode(2, TIMER_OUTPUT_COMPARE);
+  Timer_Axis2->setCaptureCompare(2, 1);  // Interrupt 1 count after each update
+  Timer_Axis2->attachInterrupt(TIMER4_COMPA_vect);
 
   // Set up period
-  //iTimer_Axis2->setPrescaleFactor(psf);
-  iTimer_Axis2->setOverflow(65535); // allow enough time that the sidereal clock will tick
+  //Timer_Axis2->setPrescaleFactor(psf);
+  Timer_Axis2->setOverflow(65535); // allow enough time that the sidereal clock will tick
 
   // Refresh the timer's count, prescale, and overflow
-  //iTimer_Axis2.refresh();
+  //Timer_Axis2.refresh();
 
   // Start the timer counting
-  iTimer_Axis2->resume();
+  Timer_Axis2->resume();
 
   // ===== Set timer priorities =====
   // set the 1/100 second sidereal clock timer to run at the second highest priority
-  iTimer_Sidereal->setInterruptPriority(2, 0);
+  Timer_Sidereal->setInterruptPriority(2, 0);
 
   // set the motor timers to run at the highest priority
-  iTimer_Axis1->setInterruptPriority(0, 0);
-  iTimer_Axis2->setInterruptPriority(0, 0);
+  Timer_Axis1->setInterruptPriority(0, 0);
+  Timer_Axis2->setInterruptPriority(0, 0);
 }
 
 // Set timer1 to interval (in 0.0625 microsecond units), for the 1/100 second sidereal timer
 void Timer1SetInterval(long iv, double rateRatio) {
-  iTimer_Sidereal->setOverflow(round((((double)iv/16.0)*6.0)/rateRatio)); // our "clock" ticks at 6MHz due to the pre-scaler setting
+  Timer_Sidereal->setOverflow(round((((double)iv/16.0)*6.0)/rateRatio)); // our "clock" ticks at 6MHz due to the pre-scaler setting
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -168,10 +168,10 @@ void PresetTimerInterval(long iv, float TPSM, volatile uint32_t *nextRate, volat
 
 // Must work from within the motor ISR timers, in microseconds*(F_COMP/1000000.0) units
 void QuickSetIntervalAxis1(uint32_t r) {
-  iTimer_Axis1->setOverflow(r);
+  Timer_Axis1->setOverflow(r);
 }
 void QuickSetIntervalAxis2(uint32_t r) {
-  iTimer_Axis2->setOverflow(r);
+  Timer_Axis2->setOverflow(r);
 }
 
 // --------------------------------------------------------------------------------------------------
