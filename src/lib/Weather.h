@@ -22,7 +22,7 @@
   // Using the Adafruit_BMP280 library
   #if WEATHER == BMP280 || WEATHER == BMP280_0x76 || WEATHER == BMP280_0x77
     #include <Adafruit_BMP280.h> 
-     Adafruit_BMP280 bmp;
+    Adafruit_BMP280 bmp(&HAL_Wire); 
   #elif WEATHER == BMP280_SPI
     #include <Adafruit_BMP280.h> 
     Adafruit_BMP280 bmp(BMP280_CS_PIN);                                   // hardware SPI
@@ -156,7 +156,7 @@ class weather {
 #endif
 #if WEATHER != OFF
   #if WEATHER == BME280 || WEATHER == BME280_0x77
-      if (bme.begin(&HAL_Wire)) _BME280_found = true; else success = false;
+      if (bme.begin(0x77, &HAL_Wire)) _BME280_found = true; else success = false;
   #elif WEATHER == BME280_0x76
       if (bme.begin(0x76, &HAL_Wire)) _BME280_found = true; else success = false;
   #elif WEATHER == BMP280 || WEATHER == BMP280_0x77
@@ -282,26 +282,26 @@ class weather {
      #endif
      #if WEATHER == BMP280 || WEATHER == BMP280_0x76
         if (_BMP280_found) {
-		if (phase == 4) {
-			#ifdef ESP32
-			HAL_Wire.begin();
-			#endif
-			_t = bmp.readTemperature();
-			#if defined(ESP32) & defined(WIRE_END_SUPPORT)
-			HAL_Wire.end();
-			#endif
-			phase++; return;
-		}
-		if (phase == 8) {
-			#ifdef ESP32
-			HAL_Wire.Begin();
-			#endif
-			_p = bmp.readPressure() / 100.0;
-			#if defined(ESP32) & defined(WIRE_END_SUPPORT)
-			HAL_Wire.end();
-			#endif
-			phase++; return;
-		}
+            if (phase == 4) {
+                #ifdef ESP32
+                    HAL_Wire.begin();
+                #endif
+                _t = bmp.readTemperature();
+                #if defined(ESP32) & defined(WIRE_END_SUPPORT)
+                    HAL_Wire.end();
+                #endif
+                phase++; return;
+            }
+            if (phase == 8) {
+                #ifdef ESP32
+                    HAL_Wire.begin();
+                #endif
+                _p = bmp.readPressure() / 100.0;
+                #if defined(ESP32) & defined(WIRE_END_SUPPORT)
+                    HAL_Wire.end();
+                #endif
+                phase++; return;
+            }
 // 		if (phase == 12) {
 // 			#ifdef ESP32
 // 			HAL_Wire.begin();
