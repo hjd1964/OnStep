@@ -254,33 +254,15 @@ class weather {
   #if WEATHER != OFF
         if (_BME280_found || _BMP280_found) {
           if (phase == 4) {
-            #ifdef ESP32
-              HAL_Wire.begin();
-            #endif
             _t = bmx.readTemperature();
-            #if defined(ESP32) & defined(WIRE_END_SUPPORT)
-              HAL_Wire.end();
-            #endif
             phase++; return;
           }
           if (phase == 8) {
-            #ifdef ESP32
-              HAL_Wire.begin();
-            #endif
             _p = bmx.readPressure() / 100.0;
-            #if defined(ESP32) & defined(WIRE_END_SUPPORT)
-              HAL_Wire.end();
-            #endif
             phase++; return;
           }
           if (phase == 12 && _BME280_found) {
-            #ifdef ESP32
-              HAL_Wire.begin();
-            #endif
             _h = bmx.readHumidity();
-            #if defined(ESP32) & defined(WIRE_END_SUPPORT)
-              HAL_Wire.end();
-            #endif
             phase++; return;
           }
         }
