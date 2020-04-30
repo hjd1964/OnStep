@@ -47,10 +47,10 @@
 
 #define GUIDE_TIME_LIMIT               10
 
-#define PEC_SENSE                      ON
+#define PEC_SENSE                     OFF
 #define PEC_SENSE_STATE               LOW
 
-#define BUZZER                         ON
-#define BUZZER_STATE_DEFAULT           ON
+#define BUZZER                        OFF
+#define BUZZER_STATE_DEFAULT          OFF
 
 //#define WEATHER                        BME280_0x76
