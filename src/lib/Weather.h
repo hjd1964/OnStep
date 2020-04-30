@@ -9,7 +9,7 @@
 
   // https://github.com/adafruit/Adafruit_BME280_Library/tree/156a0537d6b21aaab1d1f104a7001a38ca1ffce3
   // and https://github.com/adafruit/Adafruit_Sensor
-  #if WEATHER == BME280 || WEATHER == BME280_0x76  || WEATHER == BME280_0x77
+  #if WEATHER == BME280 || WEATHER == BME280_0x76
   #include <Adafruit_BME280.h> 
     Adafruit_BME280 bme;
   #elif WEATHER == BME280_SPI
@@ -20,7 +20,7 @@
     
   //BMP280 is the BME280 without humidity 
   // Using the Adafruit_BMP280 library
-  #if WEATHER == BMP280 || WEATHER == BMP280_0x76 || WEATHER == BMP280_0x77
+  #if WEATHER == BMP280 || WEATHER == BMP280_0x76
     #include <Adafruit_BMP280.h> 
     Adafruit_BMP280 bmp(&HAL_Wire); 
   #elif WEATHER == BMP280_SPI
@@ -158,11 +158,11 @@ class weather {
       if (_DS2413_devices > 0) _DS2413_found = true;
 #endif
 #if WEATHER != OFF
-  #if WEATHER == BME280 || WEATHER == BME280_0x77
+  #if WEATHER == BME280
       if (bme.begin(0x77, &HAL_Wire)) _BME280_found = true; else success = false;
   #elif WEATHER == BME280_0x76
       if (bme.begin(0x76, &HAL_Wire)) _BME280_found = true; else success = false;
-  #elif WEATHER == BMP280 || WEATHER == BMP280_0x77
+  #elif WEATHER == BMP280
       if (bmp.begin()) _BMP280_found = true; else success = false;
   #elif WEATHER == BMP280_0x76
       if (bmp.begin(0x76)) _BMP280_found = true; else success = false;
