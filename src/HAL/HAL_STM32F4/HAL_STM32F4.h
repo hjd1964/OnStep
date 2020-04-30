@@ -96,7 +96,7 @@ void HAL_Init_Timer_Sidereal() {
 
   // Set up period
   // 0.166... us per count (72/12 = 6MHz) 10.922 ms max, more than enough for the 1/100 second sidereal clock +/- any PPS adjustment for xo error
-  unsigned long psf = F_CPU/6000000; // for example, 72000000/6000000 = 12
+  unsigned long psf = F_CPU/15000000; // for example, 72000000/6000000 = 12
   iTimer_Sidereal->setPrescaleFactor(psf);
   iTimer_Sidereal->setOverflow(round((60000.0/1.00273790935)/3.0));
 
@@ -112,14 +112,14 @@ void HAL_Init_Timers_Motor() {
 
   // Set up an interrupt on channel 3
   iTimer_Axis1->setMode(3, TIMER_OUTPUT_COMPARE);
-  iTimer_Axis1->setCaptureCompare(3, 1);  // Interrupt 1 count after each update
+  iTimer_Axis1->setCaptureCompare(3, 1, MICROSEC_COMPARE_FORMAT);  // Interrupt 1 count after each update
   iTimer_Axis1->attachInterrupt(TIMER3_COMPA_vect);
 
   // Set up period
   // 0.25... us per count (72/18 = 4MHz) 16.384 ms max, good resolution for accurate motor timing and still a reasonable range (for lower steps per degree)
-  unsigned long psf = F_CPU/4000000; // for example, 72000000/4000000 = 18
-  iTimer_Axis1->setPrescaleFactor(psf);
-  iTimer_Axis1->setOverflow(65535); // allow enough time that the sidereal clock will tick
+  //unsigned long psf = F_CPU/10000000; // for example, 72000000/4000000 = 18
+  //iTimer_Axis1->setPrescaleFactor(psf);
+  iTimer_Axis1->setOverflow(65535, MICROSEC_FORMAT); // allow enough time that the sidereal clock will tick
 
   // Refresh the timer's count, prescale, and overflow
   //iTimer_Axis1.refresh();
@@ -133,12 +133,12 @@ void HAL_Init_Timers_Motor() {
 
   // Set up an interrupt on channel 2
   iTimer_Axis2->setMode(2, TIMER_OUTPUT_COMPARE);
-  iTimer_Axis2->setCaptureCompare(2, 1);  // Interrupt 1 count after each update
+  iTimer_Axis2->setCaptureCompare(2, 1, MICROSEC_COMPARE_FORMAT);  // Interrupt 1 count after each update
   iTimer_Axis2->attachInterrupt(TIMER4_COMPA_vect);
 
   // Set up period
-  iTimer_Axis2->setPrescaleFactor(psf);
-  iTimer_Axis2->setOverflow(65535); // allow enough time that the sidereal clock will tick
+  //iTimer_Axis2->setPrescaleFactor(psf);
+  iTimer_Axis2->setOverflow(65535, MICROSEC_FORMAT); // allow enough time that the sidereal clock will tick
 
   // Refresh the timer's count, prescale, and overflow
   //iTimer_Axis2.refresh();
