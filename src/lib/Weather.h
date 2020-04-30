@@ -13,10 +13,10 @@
   #endif
 
   #if WEATHER == BME280 || WEATHER == BME280_0x76
-    Adafruit_BME280 bme;
+    Adafruit_BME280 bmx;
   #elif WEATHER == BME280_SPI
-    Adafruit_BME280 bme(BME280_CS_PIN);                                   // hardware SPI
-  //Adafruit_BME280 bme(BME280_CS_PIN, SSPI_MOSI, SSPI_MISO, SSPI_SCK);   // software SPI
+    Adafruit_BME280 bmx(BME280_CS_PIN);                                   // hardware SPI
+  //Adafruit_BME280 bmx(BME280_CS_PIN, SSPI_MOSI, SSPI_MISO, SSPI_SCK);   // software SPI
   #endif
     
   // BMP280 is the BME280 without humidity 
@@ -26,9 +26,9 @@
   #endif
 
   #if WEATHER == BMP280 || WEATHER == BMP280_0x76
-    Adafruit_BMP280 bmp(&HAL_Wire); 
+    Adafruit_BMP280 bmx(&HAL_Wire); 
   #elif WEATHER == BMP280_SPI
-    Adafruit_BMP280 bmp(BMP280_CS_PIN);                                   // hardware SPI
+    Adafruit_BMP280 bmx(BMP280_CS_PIN);                                   // hardware SPI
   #endif
     
 #endif
@@ -162,15 +162,15 @@ class weather {
 #endif
 #if WEATHER != OFF
   #if WEATHER == BME280
-      if (bme.begin(0x77, &HAL_Wire)) _BME280_found = true; else success = false;
+      if (bmx.begin(0x77, &HAL_Wire)) _BME280_found = true; else success = false;
   #elif WEATHER == BME280_0x76
-      if (bme.begin(0x76, &HAL_Wire)) _BME280_found = true; else success = false;
+      if (bmx.begin(0x76, &HAL_Wire)) _BME280_found = true; else success = false;
   #elif WEATHER == BMP280
-      if (bmp.begin()) _BMP280_found = true; else success = false;
+      if (bmx.begin()) _BMP280_found = true; else success = false;
   #elif WEATHER == BMP280_0x76
-      if (bmp.begin(0x76)) _BMP280_found = true; else success = false;
+      if (bmx.begin(0x76)) _BMP280_found = true; else success = false;
   #else
-      //if (bme.begin()) _BME280_found = true; else { if (bme.begin()) _BME280_found = true; else success = false; }
+      //if (bmx.begin()) _BME280_found = true; else { if (bmx.begin()) _BME280_found = true; else success = false; }
   #endif
   #if defined(ESP32) & defined(WIRE_END_SUPPORT)
       HAL_Wire.end();
@@ -252,13 +252,12 @@ class weather {
   #endif
 
   #if WEATHER != OFF
-     #if WEATHER == BME280 || WEATHER == BME280_0x76 
-        if (_BME280_found) {
+        if (_BME280_found || _BMP280_found) {
           if (phase == 4) {
             #ifdef ESP32
               HAL_Wire.begin();
             #endif
-            _t = bme.readTemperature();
+            _t = bmx.readTemperature();
             #if defined(ESP32) & defined(WIRE_END_SUPPORT)
               HAL_Wire.end();
             #endif
@@ -268,58 +267,23 @@ class weather {
             #ifdef ESP32
               HAL_Wire.begin();
             #endif
-            _p = bme.readPressure() / 100.0;
+            _p = bmx.readPressure() / 100.0;
             #if defined(ESP32) & defined(WIRE_END_SUPPORT)
               HAL_Wire.end();
             #endif
             phase++; return;
           }
-          if (phase == 12) {
+          if (phase == 12 && _BME280_found) {
             #ifdef ESP32
               HAL_Wire.begin();
             #endif
-            _h = bme.readHumidity();
+            _h = bmx.readHumidity();
             #if defined(ESP32) & defined(WIRE_END_SUPPORT)
               HAL_Wire.end();
             #endif
             phase++; return;
           }
         }
-     #endif
-     #if WEATHER == BMP280 || WEATHER == BMP280_0x76
-        if (_BMP280_found) {
-            if (phase == 4) {
-                #ifdef ESP32
-                    HAL_Wire.begin();
-                #endif
-                _t = bmp.readTemperature();
-                #if defined(ESP32) & defined(WIRE_END_SUPPORT)
-                    HAL_Wire.end();
-                #endif
-                phase++; return;
-            }
-            if (phase == 8) {
-                #ifdef ESP32
-                    HAL_Wire.begin();
-                #endif
-                _p = bmp.readPressure() / 100.0;
-                #if defined(ESP32) & defined(WIRE_END_SUPPORT)
-                    HAL_Wire.end();
-                #endif
-                phase++; return;
-            }
-// 		if (phase == 12) {
-// 			#ifdef ESP32
-// 			HAL_Wire.begin();
-// 			#endif
-// 			_h = bmp.readHumidity();
-// 			#if defined(ESP32) & defined(WIRE_END_SUPPORT)
-// 			HAL_Wire.end();
-// 			#endif
-// 			phase++; return;
-// 		}
-	}
-     #endif
   #endif
       phase++;
       }
@@ -329,7 +293,7 @@ class weather {
     // get temperature in deg. C
     double getTemperature() {
 #if TELESCOPE_TEMPERATURE != OFF && WEATHER == OFF
-          _t = _tt;
+      _t = _tt;
 #endif
       return _t;
     }
