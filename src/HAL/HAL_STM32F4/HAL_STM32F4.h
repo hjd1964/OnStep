@@ -92,7 +92,7 @@ void HAL_Init_Timer_Sidereal() {
 
   // Set up period
   // 0.166... us per count (72/12 = 6MHz) 10.922 ms max, more than enough for the 1/100 second sidereal clock +/- any PPS adjustment for xo error
-  unsigned long psf = F_CPU/15000000; // for example, 72000000/6000000 = 12
+  unsigned long psf = F_CPU/6000000; // for example, 72000000/6000000 = 12
   iTimer_Sidereal->setPrescaleFactor(psf);
   iTimer_Sidereal->setOverflow(round((60000.0/1.00273790935)/3.0));
 
@@ -113,7 +113,7 @@ void HAL_Init_Timers_Motor() {
 
   // Set up period
   // 0.25... us per count (72/18 = 4MHz) 16.384 ms max, good resolution for accurate motor timing and still a reasonable range (for lower steps per degree)
-  unsigned long psf = F_CPU/10000000; // for example, 72000000/4000000 = 18
+  unsigned long psf = F_CPU/4000000; // for example, 72000000/4000000 = 18
   iTimer_Axis1->setPrescaleFactor(psf);
   iTimer_Axis1->setOverflow(65535); // allow enough time that the sidereal clock will tick
 
