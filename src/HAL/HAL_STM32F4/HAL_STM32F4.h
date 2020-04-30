@@ -24,7 +24,6 @@
 #define SerialA Serial
 #define SerialB Serial1
 #define SerialC Serial3
-//*/
 
 // SerialA is always enabled, SerialB and SerialC are optional
 #define HAL_SERIAL_B_ENABLED
@@ -74,17 +73,14 @@ static HardwareTimer *iTimer_Axis1    = new HardwareTimer(TIM2); // 32bit timer
 static HardwareTimer *iTimer_Axis2    = new HardwareTimer(TIM5); // 32bit timer
 
 // Sidereal timer is on STM32 Hardware Timer 1
-void Timer_Sidereal();
 void TIMER1_COMPA_vect(void);
 
 // Axis1 motor timer is on STM32 Hardware Timer 3
-void Timer_Axis1();
 void TIMER3_COMPA_vect(void);
 
 // Axis2 motor timer is on STM32 Hardware Timer 2
 // Even though the called function is TIMER4_COMPA_vect(). The reason is that Timer 4
 // on the STM32F1 is used for I2C, which is required for the EEPROM on the RTC module
-void Timer_Axis2();
 void TIMER4_COMPA_vect(void);
 
 // Init sidereal clock timer
@@ -112,14 +108,14 @@ void HAL_Init_Timers_Motor() {
 
   // Set up an interrupt on channel 3
   iTimer_Axis1->setMode(3, TIMER_OUTPUT_COMPARE);
-  iTimer_Axis1->setCaptureCompare(3, 1, MICROSEC_COMPARE_FORMAT);  // Interrupt 1 count after each update
+  iTimer_Axis1->setCaptureCompare(3, 1);  // Interrupt 1 count after each update
   iTimer_Axis1->attachInterrupt(TIMER3_COMPA_vect);
 
   // Set up period
   // 0.25... us per count (72/18 = 4MHz) 16.384 ms max, good resolution for accurate motor timing and still a reasonable range (for lower steps per degree)
-  //unsigned long psf = F_CPU/10000000; // for example, 72000000/4000000 = 18
-  //iTimer_Axis1->setPrescaleFactor(psf);
-  iTimer_Axis1->setOverflow(65535, MICROSEC_FORMAT); // allow enough time that the sidereal clock will tick
+  unsigned long psf = F_CPU/10000000; // for example, 72000000/4000000 = 18
+  iTimer_Axis1->setPrescaleFactor(psf);
+  iTimer_Axis1->setOverflow(65535); // allow enough time that the sidereal clock will tick
 
   // Refresh the timer's count, prescale, and overflow
   //iTimer_Axis1.refresh();
@@ -133,12 +129,12 @@ void HAL_Init_Timers_Motor() {
 
   // Set up an interrupt on channel 2
   iTimer_Axis2->setMode(2, TIMER_OUTPUT_COMPARE);
-  iTimer_Axis2->setCaptureCompare(2, 1, MICROSEC_COMPARE_FORMAT);  // Interrupt 1 count after each update
+  iTimer_Axis2->setCaptureCompare(2, 1);  // Interrupt 1 count after each update
   iTimer_Axis2->attachInterrupt(TIMER4_COMPA_vect);
 
   // Set up period
   //iTimer_Axis2->setPrescaleFactor(psf);
-  iTimer_Axis2->setOverflow(65535, MICROSEC_FORMAT); // allow enough time that the sidereal clock will tick
+  iTimer_Axis2->setOverflow(65535); // allow enough time that the sidereal clock will tick
 
   // Refresh the timer's count, prescale, and overflow
   //iTimer_Axis2.refresh();
