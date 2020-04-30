@@ -132,7 +132,7 @@ class weather {
               _DS2413_count++;
             }
     #if FEATURE_LIST_DS == ON
-            _DS1820_detected=true;
+            _DS2413_detected=true;
             Serial.print("DS2413:  0x"); for (int j=0; j<8; j++) { if (address[j] < 16) Serial.print("0"); Serial.print(address[j],HEX); }
             if (searchDS2413) {
               if (_DS2413_count <= 4) { Serial.print(" assigned to FEATURE"); Serial.print((_DS2413_count-1)*2+1); Serial.print("_PIN"); } else Serial.print(" not assigned");
