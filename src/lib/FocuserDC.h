@@ -62,7 +62,7 @@ class focuserDC : public focuser  {
 
     // set movement rate in microns/second, from minRate to 1000
     void setMoveRate(double rate) {
-      constrain(rate,minRate,1000);
+      rate = constrain(rate,minRate,1000);
       moveRate=rate*spm;                            // in steps per second, for a DC motor a step is 1 micron.
       if (moveRate > spsMax) moveRate=spsMax;       // limit to maxRate
     }

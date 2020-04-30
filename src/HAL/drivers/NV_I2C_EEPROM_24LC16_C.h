@@ -1,18 +1,14 @@
 // -----------------------------------------------------------------------------------
-// non-volatile storage for AT24C32 (often on DS3231 RTC modules with I2C address 0x57)
-// read & write caching version of driver, uses 5K of RAM
-// this is specifically for the Teensy3.5 or 3.6 where there's 4095 bytes of EEPROM built-in
+// non-volatile storage for 24LC16
+// read & write caching version of driver, uses 2.5K of RAM
 
 #pragma once
 
 #include <Wire.h>
-#include "EEPROM.h"
 
-// I2C EEPROM Address on DS3231 RTC module
-#define I2C_EEPROM_ADDRESS 0x57
-#undef E2END
-#define E2END2 4095
-#define E2END 8191
+#define I2C_EEPROM_ADDRESS 0x50
+#define E2END 2047
+#define CACHE_SIZE ((E2END+1)/8)
 #define I2C_CLOCK 400000
 
 #define MSB(i) (i >> 8)
@@ -26,9 +22,9 @@ class nvs {
       _eeprom_addr = I2C_EEPROM_ADDRESS;
 
       // mark entire read cache as dirty
-      for (int i=0; i < 512; i++) cacheReadState[i]=255;
+      for (int i=0; i < CACHE_SIZE; i++) cacheReadState[i]=255;
       // mark entire write cache as clean
-      for (int i=0; i < 512; i++) cacheWriteState[i]=0;
+      for (int i=0; i < CACHE_SIZE; i++) cacheWriteState[i]=0;
 
       HAL_Wire.beginTransmission(I2C_EEPROM_ADDRESS);
       bool error = HAL_Wire.endTransmission();
@@ -37,7 +33,7 @@ class nvs {
 
     // move data to/from the cache
     void poll() {
-      static int i=4095;
+      static int i=E2END;
       uint8_t j;
       int dirtyW, dirtyR;
 
@@ -46,7 +42,7 @@ class nvs {
 
       // check 20 byte chunks of cache for data that needs processing so < about 2s to check the entire cache
       for (int j=0; j < 20; j++) {
-        i++; if (i > 4095) i=0;
+        i++; if (i > E2END) i=0;
         dirtyW=bitRead(cacheWriteState[i/8],i%8);
         dirtyR=bitRead(cacheReadState[i/8],i%8);
         if (dirtyW || dirtyR) break;
@@ -68,40 +64,31 @@ class nvs {
     }
 
     uint8_t read(int i) {
-      if (i > E2END2) {
-        i=i-(E2END2+1);
-        int dirty=bitRead(cacheReadState[i/8],i%8);
-        if (dirty) {
-          uint8_t j;
-          ee_read(i,&j,1);
-          
-          // store and mark as clean
-          cache[i]=j;
-          bitWrite(cacheReadState[i/8],i%8,0);
-  
-          return j;
-        } else return cache[i];
-      } else {
-        return EEPROM.read(i);
-      }
+      int dirty=bitRead(cacheReadState[i/8],i%8);
+      if (dirty) {
+        uint8_t j;
+        ee_read(i,&j,1);
+        
+        // store and mark as clean
+        cache[i]=j;
+        bitWrite(cacheReadState[i/8],i%8,0);
+
+        return j;
+      } else return cache[i];
     }
 
     void update(int i, byte j) {
-      if (i > E2END2) {
-        uint8_t k=read(i);
-        i=i-(E2END2+1);
-        if (j != k) {
-          // store
-          cache[i]=j;
-  
-          // mark write as dirty (needs to be written)
-          bitWrite(cacheWriteState[i/8],i%8,1);
-  
-          // mark read as clean (so we don't overwrite the cache)
-          bitWrite(cacheReadState[i/8],i%8,0);
-        }
-      } else {
-        EEPROM.update(i, j);
+      uint8_t k;
+      k=read(i);
+      if (j != k) {
+        // store
+        cache[i]=j;
+
+        // mark as write as dirty (needs to be written)
+        bitWrite(cacheWriteState[i/8],i%8,1);
+
+        // mark read as clean (so we don't overwrite the cache)
+        bitWrite(cacheReadState[i/8],i%8,0);
       }
     }
 
@@ -188,9 +175,9 @@ private:
   // Address of the I2C EEPROM
   uint8_t _eeprom_addr;
   uint32_t nextOpMs=0;
-  uint8_t cache[4096];
-  uint8_t cacheReadState[512];
-  uint8_t cacheWriteState[512];
+  uint8_t cache[E2END+1];
+  uint8_t cacheReadState[CACHE_SIZE];
+  uint8_t cacheWriteState[CACHE_SIZE];
 
   void ee_write(int offset, byte data) {
     while ((int32_t)(millis()-nextOpMs) < 0) {}

@@ -23,8 +23,8 @@ void SmartHandController::menuFeatureKey()
     if (current_selection_feature_mode==2) featureKeyMode=2; else // pulse guide rate
     if (current_selection_feature_mode==j) featureKeyMode=3; else // util. light
     if (current_selection_feature_mode==k) featureKeyMode=4; else // reticule
-    if (current_selection_feature_mode==l) featureKeyMode=5; else // focuser 1
-    if (current_selection_feature_mode==m) featureKeyMode=6; else // focuser 2
+    if (current_selection_feature_mode==l) { featureKeyMode=5; SetLX200(":FA1#"); } else // focuser 1
+    if (current_selection_feature_mode==m) { featureKeyMode=6; SetLX200(":FA2#"); } else // focuser 2
     if (current_selection_feature_mode==n) featureKeyMode=7; else // rotator
     { featureKeyMode=1; current_selection_feature_mode=1; } // default to guide rate
   } else current_selection_feature_mode = last_selection_feature_mode;

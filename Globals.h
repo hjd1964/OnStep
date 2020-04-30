@@ -137,6 +137,7 @@ volatile double StepsForRateChangeAxis2 = (sqrt((double)SLEW_ACCELERATION_DIST*(
 
 // Location ------------------------------------------------------------------------------------------------------------------------
 double latitude                         = 0.0;
+double latitudeAbs                      = 0.0;
 double latitudeSign                     = 1.0;
 double cosLat                           = 1.0;
 double sinLat                           = 0.0;
@@ -149,6 +150,9 @@ double longitude                        = 0.0;
 #endif
 
 // Coordinates ---------------------------------------------------------------------------------------------------------------------
+#ifndef TELESCOPE_COORDINATES
+  #define TELESCOPE_COORDINATES TOPOCENTRIC
+#endif
 #if MOUNT_TYPE == GEM
   double homePositionAxis1              = 90.0;
 #else

@@ -38,7 +38,7 @@ void moveTo() {
       } else {
         // if we're at a low latitude and in the opposite sky, |HA|=6 is very low on the horizon in this orientation and we need to delay arriving there during a meridian flip
         // in the extreme case, where the user is very near the (Earths!) equator an Horizon limit of -10 or -15 may be necessary for proper operation.
-        if ((currentAlt < 20.0) && (fabs(latitude) < 45.0) && (getInstrAxis2() < 0.0)) {
+        if (currentAlt < 20.0 && latitudeAbs < 45.0 && getInstrAxis2() < 0.0) {
           if (pierSideControl == PierSideFlipWE1) setTargetAxis1(-45.0,PierSideWest); else setTargetAxis1(45.0,PierSideEast);
         }
       }
@@ -48,7 +48,7 @@ void moveTo() {
         if (pierSideControl == PierSideFlipWE1) setTargetAxis1(-homePositionAxis1,PierSideWest); else setTargetAxis1(homePositionAxis1,PierSideEast);
       } else { 
         // if we're at a low latitude and in the opposite sky, |HA|=6 is very low on the horizon in this orientation and we need to delay arriving there during a meridian flip
-        if ((currentAlt < 20.0) && (fabs(latitude) < 45.0) && (getInstrAxis2() > 0.0)) {
+        if (currentAlt < 20.0 && latitudeAbs < 45.0 && getInstrAxis2() > 0.0) {
           if (pierSideControl == PierSideFlipWE1) setTargetAxis1(-45.0,PierSideWest); else setTargetAxis1(45.0,PierSideEast);
         }
       }
@@ -74,21 +74,18 @@ void moveTo() {
   
   // adjust rates near the horizon to help keep from exceeding the minAlt limit
   #if MOUNT_TYPE != ALTAZM
-    long a2=latitudeSign*getInstrAxis2()*AXIS2_STEPS_PER_DEGREE;
-    static long lastPosAxis2=0;
-    if ((latitude > 10 || latitude < -10) && distStartAxis1 > (SLEW_ACCELERATION_DIST*AXIS1_STEPS_PER_DEGREE)/16) {
+    if (latitudeAbs > 10) {
+      long posAxis2=latitudeSign*getInstrAxis2()*AXIS2_STEPS_PER_DEGREE;
+      static long lastPosAxis2=0;
+      double distDestLimit=currentAlt-(minAlt+10.0); if (distDestLimit < SLEW_ACCELERATION_DIST/8.0) distDestLimit=SLEW_ACCELERATION_DIST/8.0;  
       // if Dec is decreasing slow down the Dec axis, if Dec is increasing slow down the RA axis
-      if (a2 < lastPosAxis2) {
-        double minAlt2=minAlt+10.0;
-        long a=(currentAlt-minAlt2)*AXIS2_STEPS_PER_DEGREE; if (a < (SLEW_ACCELERATION_DIST*AXIS2_STEPS_PER_DEGREE)/8) a=(SLEW_ACCELERATION_DIST*AXIS2_STEPS_PER_DEGREE)/8;
-        if (a < distDestAxis2) distDestAxis2=a;
-      } else { 
-        double minAlt2=minAlt+10.0;
-        long a=(currentAlt-minAlt2)*AXIS1_STEPS_PER_DEGREE; if (a < (SLEW_ACCELERATION_DIST*AXIS1_STEPS_PER_DEGREE)/8) a=(SLEW_ACCELERATION_DIST*AXIS1_STEPS_PER_DEGREE)/8;
-        if (a < distDestAxis1) distDestAxis1=a;
+      if (posAxis2 < lastPosAxis2) {
+        if (distDestLimit*AXIS2_STEPS_PER_DEGREE < distDestAxis2) distDestAxis2=distDestLimit*AXIS2_STEPS_PER_DEGREE;
+      } else {
+        if (distDestLimit*AXIS1_STEPS_PER_DEGREE < distDestAxis1) distDestAxis1=distDestLimit*AXIS1_STEPS_PER_DEGREE;
       }
+      lastPosAxis2=posAxis2;
     }
-    lastPosAxis2=a2;
   #endif
 
   if (distDestAxis1 < 1) distDestAxis1=1;
