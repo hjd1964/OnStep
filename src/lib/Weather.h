@@ -255,7 +255,9 @@ class weather {
         if (_BME280_found || _BMP280_found) {
           if (phase == 4) { _t = bmx.readTemperature(); phase++; return; }
           if (phase == 8) { _p = bmx.readPressure() / 100.0; phase++; return; }
-          if (phase == 12 && _BME280_found) { _h = bmx.readHumidity(); phase++; return; }
+    #if WEATHER == BME280 || WEATHER == BME280_0x76 || WEATHER == BME280_SPI
+          if (phase == 12) { _h = bmx.readHumidity(); phase++; return; }
+    #endif
         }
   #endif
       phase++;
