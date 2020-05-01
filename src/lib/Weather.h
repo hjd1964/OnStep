@@ -165,10 +165,10 @@ class weather {
       if (bmx.begin(0x77, &HAL_Wire)) _BME280_found = true; else success = false;
   #elif WEATHER == BME280_0x76
       if (bmx.begin(0x76, &HAL_Wire)) _BME280_found = true; else success = false;
-  #elif WEATHER == BMP280
-      if (bmx.begin()) _BMP280_found = true; else success = false;
   #elif WEATHER == BMP280_0x76
       if (bmx.begin(0x76)) _BMP280_found = true; else success = false;
+  #elif WEATHER == BMP280 || WEATHER == BMP280_SPI || WEATHER == BME280_SPI
+      if (bmx.begin()) _BMP280_found = true; else success = false;
   #else
       #error "Configuration (Config.h): Setting WEATHER unknown value!"
   #endif
