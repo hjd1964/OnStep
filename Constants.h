@@ -78,7 +78,11 @@
 #define BME280_0x77                 1 // BME280 on I2C (at address 0x77)
 #define BME280_0x76                 2 // BME280 on I2C (at address 0x76)
 #define BME280_SPI                  3 // BME280 on SPI (default CS)
-#define WEATHER_LAST                4
+#define BMP280                      4 // BMP280 on I2C (at default address 0x77)
+#define BMP280_0x77                 4 // BMP280 on I2C (at address 0x77)
+#define BMP280_0x76                 5 // BMP280 on I2C (at address 0x76)
+#define BMP280_SPI                  6 // BMP280 on SPI (default CS)
+#define WEATHER_LAST                6
 
 // various Dallas/Maxim devices supported
 #define DS_MASK    0x3F00000000000000
