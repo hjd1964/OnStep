@@ -65,7 +65,7 @@ float HAL_MCU_Temperature(void) {
 // Initialize timers
 
 // frequency compensation (F_COMP/1000000.0) for adjusting microseconds to timer counts
-#define F_COMP 4000000.0
+//#define F_COMP 4000000.0
 
 #define ISR(f) void f (void)
 
@@ -73,15 +73,18 @@ HardwareTimer *Timer_Sidereal = new HardwareTimer(TIM1);
 HardwareTimer *Timer_Axis1    = new HardwareTimer(TIM2); // 32bit timer
 HardwareTimer *Timer_Axis2    = new HardwareTimer(TIM5); // 32bit timer
 
-// Sidereal timer is on STM32 Hardware Timer 1
+// Timer frequency, depends on the STM32 timer type. See the datasheet.
+// Note that Timer_Axis1 and Timer_Axis2 *MUST* be the exact same type since we have
+// only a single function PresetTimerInterval() for both axes.
+long timerFreq = Timer_Axis1->getTimerClkFreq();
+
+// Sidereal timer
 void TIMER1_COMPA_vect(void);
 
-// Axis1 motor timer is on STM32 Hardware Timer 3
+// Axis1 motor timer
 void TIMER3_COMPA_vect(void);
 
-// Axis2 motor timer is on STM32 Hardware Timer 2
-// Even though the called function is TIMER4_COMPA_vect(). The reason is that Timer 4
-// on the STM32F1 is used for I2C, which is required for the EEPROM on the RTC module
+// Axis2 motor timer
 void TIMER4_COMPA_vect(void);
 
 // Init sidereal clock timer
@@ -96,6 +99,9 @@ void HAL_Init_Timer_Sidereal() {
   unsigned long psf = F_CPU/6000000; // for example, 72000000/6000000 = 12
   Timer_Sidereal->setPrescaleFactor(psf);
   Timer_Sidereal->setOverflow(round((60000.0/1.00273790935)/3.0));
+
+  // Refresh the timer's count, prescale, and overflow
+  Timer_Sidereal->refresh();
 
   // Start the timer counting
   Timer_Sidereal->resume();
@@ -119,7 +125,7 @@ void HAL_Init_Timers_Motor() {
   Timer_Axis1->setOverflow(65535); // allow enough time that the sidereal clock will tick
 
   // Refresh the timer's count, prescale, and overflow
-  //Timer_Axis1.refresh();
+  Timer_Axis1->refresh();
 
   // Start the timer counting
   Timer_Axis1->resume();
@@ -138,7 +144,7 @@ void HAL_Init_Timers_Motor() {
   Timer_Axis2->setOverflow(65535); // allow enough time that the sidereal clock will tick
 
   // Refresh the timer's count, prescale, and overflow
-  //Timer_Axis2.refresh();
+  Timer_Axis2->refresh();
 
   // Start the timer counting
   Timer_Axis2->resume();
@@ -164,15 +170,30 @@ void Timer1SetInterval(long iv, double rateRatio) {
 void PresetTimerInterval(long iv, float TPSM, volatile uint32_t *nextRate, volatile uint16_t *nextRep) {
   // 0.0327 * 4096 = 134.21s
   uint32_t i=iv; uint16_t t=1; while (iv>65536L*8L) { t*=2; iv=i/t; if (t==4096) { iv=65535L*8L; break; } }
-  cli(); *nextRate=((F_COMP/1000000.0) * (iv*0.0625) * TPSM); *nextRep=t; sei();
+  cli(); *nextRate=((timerFreq/1000000.0) * (iv*0.0625) * TPSM); *nextRep=t; sei();
 }
 
 // Must work from within the motor ISR timers, in microseconds*(F_COMP/1000000.0) units
 void QuickSetIntervalAxis1(uint32_t r) {
+  //Timer_Axis1->pause();
+
   Timer_Axis1->setOverflow(r);
+
+  // Refresh the timer's count, prescale, and overflow
+  //Timer_Axis1->refresh();
+
+  // Start the timer counting
+  //Timer_Axis1->resume();
 }
 void QuickSetIntervalAxis2(uint32_t r) {
+  //Timer_Axis2->pause();
   Timer_Axis2->setOverflow(r);
+
+  // Refresh the timer's count, prescale, and overflow
+  //Timer_Axis2->refresh();
+
+  // Start the timer counting
+  //Timer_Axis2->resume();
 }
 
 // --------------------------------------------------------------------------------------------------
