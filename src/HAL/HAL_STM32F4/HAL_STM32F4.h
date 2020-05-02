@@ -8,7 +8,7 @@
 #define boolean bool
 
 // Lower limit (fastest) step rate in uS for this platform (in SQW mode)
-#define HAL_MAXRATE_LOWER_LIMIT 12
+#define HAL_MAXRATE_LOWER_LIMIT 20 // FIXME
 
 // Width of step pulse
 #define HAL_PULSE_WIDTH 1200 // FIXME
@@ -76,7 +76,7 @@ HardwareTimer *Timer_Axis2    = new HardwareTimer(TIM5); // 32bit timer
 // Timer frequency, depends on the STM32 timer type. See the datasheet.
 // Note that Timer_Axis1 and Timer_Axis2 *MUST* be the exact same type since we have
 // only a single function PresetTimerInterval() for both axes.
-long timerFreq = Timer_Axis1->getTimerClkFreq();
+uint32_t timerFreq = Timer_Axis1->getTimerClkFreq();
 
 // Sidereal timer
 void TIMER1_COMPA_vect(void);
@@ -170,7 +170,7 @@ void Timer1SetInterval(long iv, double rateRatio) {
 void PresetTimerInterval(long iv, float TPSM, volatile uint32_t *nextRate, volatile uint16_t *nextRep) {
   // 0.0327 * 4096 = 134.21s
   uint32_t i=iv; uint16_t t=1; while (iv>65536L*8L) { t*=2; iv=i/t; if (t==4096) { iv=65535L*8L; break; } }
-  cli(); *nextRate=((timerFreq/1000000.0) * (iv*0.0625) * TPSM); *nextRep=t; sei();
+  cli(); *nextRate=((timerFreq/1000000) * (iv*0.0625) * TPSM); *nextRep=t; sei();
 }
 
 // Must work from within the motor ISR timers, in microseconds*(F_COMP/1000000.0) units
