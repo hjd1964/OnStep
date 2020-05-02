@@ -3,6 +3,7 @@
 // We define a more generic symbol, in case more STM32 boards based on different lines are supported
 #define __ARM_STM32__
 
+// This is to avoid lots of warnings
 #undef boolean
 #define boolean bool
 
@@ -68,9 +69,9 @@ float HAL_MCU_Temperature(void) {
 
 #define ISR(f) void f (void)
 
-static HardwareTimer *Timer_Sidereal = new HardwareTimer(TIM1);
-static HardwareTimer *Timer_Axis1    = new HardwareTimer(TIM2); // 32bit timer
-static HardwareTimer *Timer_Axis2    = new HardwareTimer(TIM5); // 32bit timer
+HardwareTimer *Timer_Sidereal = new HardwareTimer(TIM1);
+HardwareTimer *Timer_Axis1    = new HardwareTimer(TIM2); // 32bit timer
+HardwareTimer *Timer_Axis2    = new HardwareTimer(TIM5); // 32bit timer
 
 // Sidereal timer is on STM32 Hardware Timer 1
 void TIMER1_COMPA_vect(void);
