@@ -4,15 +4,17 @@
 #if defined(STM32F446xx)
 
 // The multi-purpose pins (Aux3..Aux8 can be analog pwm/dac if supported)
-#define Aux0                 PB14    // Status LED
+/*
+#define Aux0                 -1      // Status LED
 #define Aux1                 -1     // ESP8266 GPIO0, SPI MISO/Fault
 #define Aux2                 -1      // ESP8266 RST, SPI MISO/Fault
-#define Aux3                 PB13      // Home SW
+#define Aux3                 -1        // Home SW
 #define Aux4                 -1      // OneWire, Home SW
 #define Aux5                 -1     // Axis3_EN; true analog output
 #define Aux6                 -1     // Axis4_EN; true analog output
-#define Aux7                 PA0      // Limit SW
-#define Aux8                 PA1    // Status2 LED, Reticle LED
+#define Aux7                 -1       // Limit SW
+#define Aux8                 -1     // Status2 LED, Reticle LED
+*/
 
 // Misc. pins
 #ifndef DS3234_CS_PIN
@@ -29,9 +31,26 @@
 #define AnalogPecPin         -1     // PEC Sense, analog or digital
 
 // The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
-#define LEDnegPin          Aux0     // Drain
-#define LEDneg2Pin         Aux8     // Drain
-#define ReticlePin         Aux8     // Drain
+#define LEDnegPin          PB14     // Drain
+//#define LEDneg2Pin         Aux8     // Drain
+#define ReticlePin         PA1      // Drain
+
+// Temperature sensors (From Marlin)
+#define Temp0Pin           PC0
+#define Temp1Pin           PC1
+#define Temp2Pin           PC2
+#define Temp3Pin           PC3
+
+// Heaters (From Marlin)
+#define Heater0Pin         PB3
+#define Heater1Pin         PB4
+#define Heater2Pin         PB15
+#define Heater3Pin         PC8
+
+// Fans (From Marlin)
+#define Fan0Pin            PB0
+#define Fan1Pin            PB1
+#define Fan2Pin            PB2
 
 // For a piezo buzzer
 #define TonePin              PC9     // Tone
@@ -39,7 +58,7 @@
 // The PPS pin is a 3.3V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
 #define PpsPin               PC2   // PPS time source, GPS for example
 
-#define LimitPin           Aux7     // The limit switch sense is a logic level input normally pull high (2k resistor,) shorted to ground it stops gotos/tracking
+#define LimitPin           PA0     // The limit switch sense is a logic level input normally pull high (2k resistor,) shorted to ground it stops gotos/tracking
 
 // Axis1 RA/Azm step/dir driver
 #define Axis1_EN           PE12     // Enable
@@ -51,7 +70,7 @@
 #define Axis1_DIR          PE10     // Dir
 #define Axis1_DECAY    Axis1_M2     // Decay mode
 #define Axis1_FAULT        Aux1     // SPI MISO/Fault (or ESP8266 GPIO0 on MaxPCB)
-#define Axis1_HOME         Aux3     // Sense home position Axis1
+#define Axis1_HOME         PB10     // Sense home position Axis1
 
 // Axis2 Dec/Alt step/dir driver
 #define Axis2_EN           PD8     // Enable
@@ -63,7 +82,7 @@
 #define Axis2_DIR          PB12     // Dir (ESP8266 GPIO0 on MaxPCB3)
 #define Axis2_DECAY    Axis2_M2     // Decay mode
 #define Axis2_FAULT        Aux2
-#define Axis2_HOME         Aux4     // Sense home position
+#define Axis2_HOME         PC7
 
 // For rotator stepper driver
 #define Axis3_EN           PD15     // Enable
