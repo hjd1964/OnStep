@@ -25,7 +25,7 @@
 #define ESP8266RstPin        -1     // ESP8266 RST
 
 // The PEC index sense is a logic level input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
-#define PecPin               -1
+#define PecPin               PC1
 #define AnalogPecPin         -1     // PEC Sense, analog or digital
 
 // The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
@@ -37,7 +37,7 @@
 #define TonePin              PC9     // Tone
 
 // The PPS pin is a 3.3V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
-#define PpsPin               -1     // PPS time source, GPS for example
+#define PpsPin               PC2   // PPS time source, GPS for example
 
 #define LimitPin           Aux7     // The limit switch sense is a logic level input normally pull high (2k resistor,) shorted to ground it stops gotos/tracking
 
