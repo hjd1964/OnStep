@@ -70,8 +70,12 @@ float HAL_MCU_Temperature(void) {
 #define ISR(f) void f (void)
 
 HardwareTimer *Timer_Sidereal = new HardwareTimer(TIM1);
-HardwareTimer *Timer_Axis1    = new HardwareTimer(TIM2); // 32bit timer
-HardwareTimer *Timer_Axis2    = new HardwareTimer(TIM5); // 32bit timer
+HardwareTimer *Timer_Axis1    = new HardwareTimer(TIM2);
+HardwareTimer *Timer_Axis2    = new HardwareTimer(TIM5);
+
+#define SIDEREAL_CH  1
+#define AXIS1_CH     1
+#define AXIS2_CH     1
 
 // Timer frequency, depends on the STM32 timer type. See the datasheet.
 // Note that Timer_Axis1 and Timer_Axis2 *MUST* be the exact same type since we have
@@ -90,13 +94,13 @@ void TIMER4_COMPA_vect(void);
 // Init sidereal clock timer
 void HAL_Init_Timer_Sidereal() {
   Timer_Sidereal->pause();
-  Timer_Sidereal->setMode(1, TIMER_OUTPUT_COMPARE);
-  Timer_Sidereal->setCaptureCompare(1, 1); // Interrupt 1 count after each update
-  Timer_Sidereal->attachInterrupt(1, TIMER1_COMPA_vect);
+  Timer_Sidereal->setMode(SIDEREAL_CH, TIMER_OUTPUT_COMPARE);
+  Timer_Sidereal->setCaptureCompare(SIDEREAL_CH, 1); // Interrupt 1 count after each update
+  Timer_Sidereal->attachInterrupt(SIDEREAL_CH, TIMER1_COMPA_vect);
 
   // Set up period
   // 0.166... us per count (72/12 = 6MHz) 10.922 ms max, more than enough for the 1/100 second sidereal clock +/- any PPS adjustment for xo error
-  unsigned long psf = F_CPU/6000000; // for example, 72000000/6000000 = 12
+  unsigned long psf = Timer_Sidereal->getTimerClkFreq()/6000000; // for example, 72000000/6000000 = 12
   Timer_Sidereal->setPrescaleFactor(psf);
   Timer_Sidereal->setOverflow(round((60000.0/1.00273790935)/3.0));
 
@@ -109,18 +113,19 @@ void HAL_Init_Timer_Sidereal() {
 
 // Init Axis1 and Axis2 motor timers and set their priorities
 void HAL_Init_Timers_Motor() {
+  unsigned long psf;
   // ===== Axis 1 Timer =====
   // Pause the timer while we're configuring it
   Timer_Axis1->pause();
 
   // Set up an interrupt on channel 3
-  Timer_Axis1->setMode(3, TIMER_OUTPUT_COMPARE);
-  Timer_Axis1->setCaptureCompare(3, 1);  // Interrupt 1 count after each update
-  Timer_Axis1->attachInterrupt(3, TIMER3_COMPA_vect);
+  Timer_Axis1->setMode(AXIS1_CH, TIMER_OUTPUT_COMPARE);
+  Timer_Axis1->setCaptureCompare(AXIS1_CH, 1);  // Interrupt 1 count after each update
+  Timer_Axis1->attachInterrupt(AXIS1_CH, TIMER3_COMPA_vect);
 
   // Set up period
   // 0.25... us per count (72/18 = 4MHz) 16.384 ms max, good resolution for accurate motor timing and still a reasonable range (for lower steps per degree)
-  unsigned long psf = F_CPU/4000000; // for example, 72000000/4000000 = 18
+  psf = Timer_Axis1->getTimerClkFreq()/4000000; // for example, 72000000/4000000 = 18
   Timer_Axis1->setPrescaleFactor(psf);
   Timer_Axis1->setOverflow(65535); // allow enough time that the sidereal clock will tick
 
@@ -135,12 +140,13 @@ void HAL_Init_Timers_Motor() {
   Timer_Axis2->pause();
 
   // Set up an interrupt on channel 2
-  Timer_Axis2->setMode(2, TIMER_OUTPUT_COMPARE);
-  Timer_Axis2->setCaptureCompare(2, 1);  // Interrupt 1 count after each update
-  Timer_Axis2->attachInterrupt(2, TIMER4_COMPA_vect);
+  Timer_Axis2->setMode(AXIS2_CH, TIMER_OUTPUT_COMPARE);
+  Timer_Axis2->setCaptureCompare(AXIS2_CH, 1);  // Interrupt 1 count after each update
+  Timer_Axis2->attachInterrupt(AXIS2_CH, TIMER4_COMPA_vect);
 
   // Set up period
-  //Timer_Axis2->setPrescaleFactor(psf);
+  psf = Timer_Axis2->getTimerClkFreq()/4000000; // for example, 72000000/4000000 = 18
+  Timer_Axis2->setPrescaleFactor(psf);
   Timer_Axis2->setOverflow(65535); // allow enough time that the sidereal clock will tick
 
   // Refresh the timer's count, prescale, and overflow
