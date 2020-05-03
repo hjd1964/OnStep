@@ -8,10 +8,12 @@
 #define boolean bool
 
 // Lower limit (fastest) step rate in uS for this platform (in SQW mode)
-#define HAL_MAXRATE_LOWER_LIMIT 20 // FIXME
+//#define HAL_MAXRATE_LOWER_LIMIT 20 // FIXME
+#define HAL_MAXRATE_LOWER_LIMIT 4
 
 // Width of step pulse
-#define HAL_PULSE_WIDTH 1200 // FIXME
+//#define HAL_PULSE_WIDTH 1200 // FIXME
+#define HAL_PULSE_WIDTH         400
 
 #include <HardwareTimer.h>
 
@@ -100,7 +102,7 @@ void HAL_Init_Timer_Sidereal() {
 
   // Set up period
   // 0.166... us per count (72/12 = 6MHz) 10.922 ms max, more than enough for the 1/100 second sidereal clock +/- any PPS adjustment for xo error
-  unsigned long psf = Timer_Sidereal->getTimerClkFreq()/6000000; // for example, 72000000/6000000 = 12
+  uint32_t psf = Timer_Sidereal->getTimerClkFreq()/6000000; // for example, 72000000/6000000 = 12
   Timer_Sidereal->setPrescaleFactor(psf);
   Timer_Sidereal->setOverflow(round((60000.0/1.00273790935)/3.0));
 
@@ -113,7 +115,7 @@ void HAL_Init_Timer_Sidereal() {
 
 // Init Axis1 and Axis2 motor timers and set their priorities
 void HAL_Init_Timers_Motor() {
-  unsigned long psf;
+  uint32_t psf;
   // ===== Axis 1 Timer =====
   // Pause the timer while we're configuring it
   Timer_Axis1->pause();
@@ -177,6 +179,11 @@ void PresetTimerInterval(long iv, float TPSM, volatile uint32_t *nextRate, volat
   // 0.0327 * 4096 = 134.21s
   uint32_t i=iv; uint16_t t=1; while (iv>65536L*8L) { t*=2; iv=i/t; if (t==4096) { iv=65535L*8L; break; } }
   cli(); *nextRate=((timerFreq/1000000) * (iv*0.0625) * TPSM); *nextRep=t; sei();
+
+  // 0.262 * 512 = 134.21s
+  //uint32_t i=iv; uint16_t t=1; while (iv>65536L*64L) { t++; iv=i/t; if (t==512) { iv=65535L*64L; break; } }
+  //cli(); *nextRate=((timerFreq/1000000.0) * (iv*0.0625) * TPSM - 1.0); *nextRep=t; sei();
+
 }
 
 // Must work from within the motor ISR timers, in microseconds*(F_COMP/1000000.0) units
