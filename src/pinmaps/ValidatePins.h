@@ -162,7 +162,7 @@
 
 // if we have a >= 3 driver SPI bus it's a requirement that all drivers be TMC SPI (or OFF)
 // except for MksGenL2 and FYSETC_S6 which can set modes on shunts instead
-#if PINMAP != MksGenL2 || PINMAP != FYSETC_S6
+#if PINMAP != MksGenL2 && PINMAP != FYSETC_S6
   #ifndef Axis3_M0
     #define Axis3_M0 -1
   #endif
