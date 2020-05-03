@@ -79,10 +79,8 @@ HardwareTimer *Timer_Axis2    = new HardwareTimer(TIM5);
 #define AXIS1_CH     1
 #define AXIS2_CH     1
 
-// Timer frequency, depends on the STM32 timer type. See the datasheet.
-// Note that Timer_Axis1 and Timer_Axis2 *MUST* be the exact same type since we have
-// only a single function PresetTimerInterval() for both axes.
-uint32_t timerFreq = Timer_Axis1->getTimerClkFreq();
+// Motor timer frequency
+#define F_COMP 4000000.0
 
 // Sidereal timer
 void TIMER1_COMPA_vect(void);
@@ -178,12 +176,7 @@ void Timer1SetInterval(long iv, double rateRatio) {
 void PresetTimerInterval(long iv, float TPSM, volatile uint32_t *nextRate, volatile uint16_t *nextRep) {
   // 0.0327 * 4096 = 134.21s
   uint32_t i=iv; uint16_t t=1; while (iv>65536L*8L) { t*=2; iv=i/t; if (t==4096) { iv=65535L*8L; break; } }
-  cli(); *nextRate=((timerFreq/1000000) * (iv*0.0625) * TPSM); *nextRep=t; sei();
-
-  // 0.262 * 512 = 134.21s
-  //uint32_t i=iv; uint16_t t=1; while (iv>65536L*64L) { t++; iv=i/t; if (t==512) { iv=65535L*64L; break; } }
-  //cli(); *nextRate=((timerFreq/1000000.0) * (iv*0.0625) * TPSM - 1.0); *nextRep=t; sei();
-
+  cli(); *nextRate=((F_COMP/1000000) * (iv*0.0625) * TPSM); *nextRep=t; sei();
 }
 
 // Must work from within the motor ISR timers, in microseconds*(F_COMP/1000000.0) units
