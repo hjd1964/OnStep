@@ -157,51 +157,6 @@
   #endif
 #endif
 
-// if we have a >= 3 driver SPI bus it's a requirement that all drivers be TMC SPI (or OFF)
-// except for MksGenL2 which can set modes on shunts instead
-#if PINMAP != MksGenL2
-  #ifndef Axis3_M0
-    #define Axis3_M0 -1
-  #endif
-  #ifndef Axis3_M1
-    #define Axis3_M1 -1
-  #endif
-  #if Axis1_M0 == Axis2_M0 && Axis1_M1 == Axis2_M1 && Axis1_M0 == Axis3_M0 && Axis1_M1 == Axis3_M1
-    // special checks for SPI bus pin maps to ensure all enabled stepper drivers are TMC2130 or TMC5160 in SPI mode
-    #if AXIS1_DRIVER_MODEL != TMC_SPI
-      #error "Configuration (Config.h): AXIS1_DRIVER_MODEL must be a TMC2130 or TMC5160 for this PINMAP"
-    #endif
-    #if AXIS2_DRIVER_MODEL != TMC_SPI
-      #error "Configuration (Config.h): AXIS2_DRIVER_MODEL must be a TMC2130 or TMC5160 for this PINMAP"
-    #endif
-    #if Axis1_M0 == Axis3_M0 && Axis1_M1 == Axis3_M1 && ROTATOR == ON
-      #if AXIS3_DRIVER_MODEL != TMC_SPI
-        #error "Configuration (Config.h): AXIS3_DRIVER_MODEL must be a TMC2130 or TMC5160 for this PINMAP, or AXIS3 must be OFF"
-      #endif
-    #endif
-    #if Axis1_M0 == Axis4_M0 && Axis1_M1 == Axis4_M1 && FOCUSER1 == ON
-      #if AXIS4_DRIVER_MODEL != TMC_SPI
-        #error "Configuration (Config.h): AXIS4_DRIVER_MODEL must be a TMC2130 or TMC5160 for this PINMAP, or AXIS4 must be OFF"
-      #endif
-    #endif
-    #if Axis1_M0 == Axis5_M0 && Axis1_M1 == Axis5_M1 && FOCUSER2 == ON
-      #if AXIS5_DRIVER_MODEL != TMC_SPI
-        #error "Configuration (Config.h): AXIS5_DRIVER_MODEL must be a TMC2130 or TMC5160 for this PINMAP, or AXIS5 must be OFF"
-      #endif
-    #endif
-  #else
-    #if ROTATOR == ON && AXIS3_DRIVER_MODEL != OFF
-      #error "Configuration (Config.h): AXIS3_DRIVER_MODEL must be OFF for this PINMAP"
-    #endif
-    #if FOCUSER1 == ON && AXIS4_DRIVER_MODEL != OFF
-      #error "Configuration (Config.h): AXIS4_DRIVER_MODEL must be OFF for this PINMAP"
-    #endif
-    #if FOCUSER2 == ON && AXIS5_DRIVER_MODEL != OFF
-      #error "Configuration (Config.h): AXIS5_DRIVER_MODEL must be OFF for this PINMAP"
-    #endif
-  #endif
-#endif
-
 // focuser/rotators any invalid focuser DC modes?
 #if FOCUSER1 == ON && AXIS4_DRIVER_DC_MODE == XDIRECT && AXIS4_DRIVER_MODEL != TMC_SPI
   #error "Configuration (Config.h): AXIS4_DRIVER_DC_MODE error XDIRECT is for TMC stepper drivers only."
