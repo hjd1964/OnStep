@@ -67,13 +67,13 @@ float HAL_MCU_Temperature(void) {
 // Initialize timers
 
 // frequency compensation (F_COMP/1000000.0) for adjusting microseconds to timer counts
-#define F_COMP 20
+#define F_COMP 19.849
 
 #define ISR(f) void f (void)
 
 HardwareTimer *Timer_Sidereal = new HardwareTimer(TIM1);
-HardwareTimer *Timer_Axis1    = new HardwareTimer(TIM8);
-HardwareTimer *Timer_Axis2    = new HardwareTimer(TIM9);
+HardwareTimer *Timer_Axis1    = new HardwareTimer(TIM3);
+HardwareTimer *Timer_Axis2    = new HardwareTimer(TIM4);
 
 #define SIDEREAL_CH  1
 #define AXIS1_CH     1
