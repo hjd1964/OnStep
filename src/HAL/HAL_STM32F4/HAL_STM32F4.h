@@ -7,12 +7,11 @@
 #undef boolean
 #define boolean bool
 
+#define HAL_FAST_PROCESSOR
 // Lower limit (fastest) step rate in uS for this platform (in SQW mode)
-//#define HAL_MAXRATE_LOWER_LIMIT 20 // FIXME
 #define HAL_MAXRATE_LOWER_LIMIT 4
 
 // Width of step pulse
-//#define HAL_PULSE_WIDTH 1200 // FIXME
 #define HAL_PULSE_WIDTH         400
 
 #include <HardwareTimer.h>
