@@ -347,7 +347,7 @@
 #ifndef FEATURE1_PURPOSE
   #error "Configuration (Config.h): Setting FEATURE1_PURPOSE must be present!"
 #elif FEATURE1_PURPOSE != OFF && (FEATURE1_PURPOSE < AUXILLARY_FIRST || FEATURE1_PURPOSE > AUXILLARY_LAST)
-  #error "Configuration (Config.h): Setting FEATURE1_PURPOSE invalid, use OFF, SWITCH, ANALOG, DEW_HEATER, or INTERVALOMETER."
+  #error "Configuration (Config.h): Setting FEATURE1_PURPOSE invalid, use OFF, SWITCH, ANALOG_OUTPUT, DEW_HEATER, or INTERVALOMETER."
 #endif
 #ifndef FEATURE1_TEMP
   #error "Configuration (Config.h): Setting FEATURE1_TEMP must be present!"
@@ -366,7 +366,7 @@
 #ifndef FEATURE2_PURPOSE
   #error "Configuration (Config.h): Setting FEATURE2_PURPOSE must be present!"
 #elif FEATURE2_PURPOSE != OFF && (FEATURE2_PURPOSE < AUXILLARY_FIRST || FEATURE2_PURPOSE > AUXILLARY_LAST)
-  #error "Configuration (Config.h): Setting FEATURE2_PURPOSE invalid, use OFF, SWITCH, ANALOG, DEW_HEATER, or INTERVALOMETER."
+  #error "Configuration (Config.h): Setting FEATURE2_PURPOSE invalid, use OFF, SWITCH, ANALOG_OUTPUT, DEW_HEATER, or INTERVALOMETER."
 #endif
 #ifndef FEATURE2_TEMP
   #error "Configuration (Config.h): Setting FEATURE2_TEMP must be present!"
@@ -385,7 +385,7 @@
 #ifndef FEATURE3_PURPOSE
   #error "Configuration (Config.h): Setting FEATURE3_PURPOSE must be present!"
 #elif FEATURE3_PURPOSE != OFF && (FEATURE3_PURPOSE < AUXILLARY_FIRST || FEATURE3_PURPOSE > AUXILLARY_LAST)
-  #error "Configuration (Config.h): Setting FEATURE3_PURPOSE invalid, use OFF, SWITCH, ANALOG, DEW_HEATER, or INTERVALOMETER."
+  #error "Configuration (Config.h): Setting FEATURE3_PURPOSE invalid, use OFF, SWITCH, ANALOG_OUTPUT, DEW_HEATER, or INTERVALOMETER."
 #endif
 #ifndef FEATURE3_TEMP
   #error "Configuration (Config.h): Setting FEATURE3_TEMP must be present!"
@@ -404,7 +404,7 @@
 #ifndef FEATURE4_PURPOSE
   #error "Configuration (Config.h): Setting FEATURE4_PURPOSE must be present!"
 #elif FEATURE4_PURPOSE != OFF && (FEATURE4_PURPOSE < AUXILLARY_FIRST || FEATURE4_PURPOSE > AUXILLARY_LAST)
-  #error "Configuration (Config.h): Setting FEATURE4_PURPOSE invalid, use OFF, SWITCH, ANALOG, DEW_HEATER, or INTERVALOMETER."
+  #error "Configuration (Config.h): Setting FEATURE4_PURPOSE invalid, use OFF, SWITCH, ANALOG_OUTPUT, DEW_HEATER, or INTERVALOMETER."
 #endif
 #ifndef FEATURE4_TEMP
   #error "Configuration (Config.h): Setting FEATURE4_TEMP must be present!"
@@ -423,7 +423,7 @@
 #ifndef FEATURE5_PURPOSE
   #error "Configuration (Config.h): Setting FEATURE5_PURPOSE must be present!"
 #elif FEATURE5_PURPOSE != OFF && (FEATURE5_PURPOSE < AUXILLARY_FIRST || FEATURE5_PURPOSE > AUXILLARY_LAST)
-  #error "Configuration (Config.h): Setting FEATURE5_PURPOSE invalid, use OFF, SWITCH, ANALOG, DEW_HEATER, or INTERVALOMETER."
+  #error "Configuration (Config.h): Setting FEATURE5_PURPOSE invalid, use OFF, SWITCH, ANALOG_OUTPUT, DEW_HEATER, or INTERVALOMETER."
 #endif
 #ifndef FEATURE5_TEMP
   #error "Configuration (Config.h): Setting FEATURE5_TEMP must be present!"
@@ -442,7 +442,7 @@
 #ifndef FEATURE6_PURPOSE
   #error "Configuration (Config.h): Setting FEATURE6_PURPOSE must be present!"
 #elif FEATURE6_PURPOSE != OFF && (FEATURE6_PURPOSE < AUXILLARY_FIRST || FEATURE6_PURPOSE > AUXILLARY_LAST)
-  #error "Configuration (Config.h): Setting FEATURE6_PURPOSE invalid, use OFF, SWITCH, ANALOG, DEW_HEATER, or INTERVALOMETER."
+  #error "Configuration (Config.h): Setting FEATURE6_PURPOSE invalid, use OFF, SWITCH, ANALOG_OUTPUT, DEW_HEATER, or INTERVALOMETER."
 #endif
 #ifndef FEATURE6_TEMP
   #error "Configuration (Config.h): Setting FEATURE6_TEMP must be present!"
@@ -461,7 +461,7 @@
 #ifndef FEATURE7_PURPOSE
   #error "Configuration (Config.h): Setting FEATURE7_PURPOSE must be present!"
 #elif FEATURE7_PURPOSE != OFF && (FEATURE7_PURPOSE < AUXILLARY_FIRST || FEATURE7_PURPOSE > AUXILLARY_LAST)
-  #error "Configuration (Config.h): Setting FEATURE7_PURPOSE invalid, use OFF, SWITCH, ANALOG, DEW_HEATER, or INTERVALOMETER."
+  #error "Configuration (Config.h): Setting FEATURE7_PURPOSE invalid, use OFF, SWITCH, ANALOG_OUTPUT, DEW_HEATER, or INTERVALOMETER."
 #endif
 #ifndef FEATURE7_TEMP
   #error "Configuration (Config.h): Setting FEATURE7_TEMP must be present!"
@@ -480,7 +480,7 @@
 #ifndef FEATURE8_PURPOSE
   #error "Configuration (Config.h): Setting FEATURE8_PURPOSE must be present!"
 #elif FEATURE8_PURPOSE != OFF && (FEATURE8_PURPOSE < AUXILLARY_FIRST || FEATURE8_PURPOSE > AUXILLARY_LAST)
-  #error "Configuration (Config.h): Setting FEATURE8_PURPOSE invalid, use OFF, SWITCH, ANALOG, DEW_HEATER, or INTERVALOMETER."
+  #error "Configuration (Config.h): Setting FEATURE8_PURPOSE invalid, use OFF, SWITCH, ANALOG_OUTPUT, DEW_HEATER, or INTERVALOMETER."
 #endif
 #ifndef FEATURE8_TEMP
   #error "Configuration (Config.h): Setting FEATURE8_TEMP must be present!"
