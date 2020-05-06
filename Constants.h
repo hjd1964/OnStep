@@ -92,7 +92,7 @@
 // various auxillary features
 #define AUXILLARY_FIRST             1
 #define SWITCH                      1
-#define ANALOG                      2
+#define ANALOG_OUTPUT               2
 #define DEW_HEATER                  3
 #define INTERVALOMETER              4
 #define AUXILLARY_LAST              4
