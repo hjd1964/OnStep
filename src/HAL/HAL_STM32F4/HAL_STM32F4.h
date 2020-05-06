@@ -153,11 +153,11 @@ void HAL_Init_Timers_Motor() {
 
   // ===== Set timer priorities =====
   // set the 1/100 second sidereal clock timer to run at the second highest priority
-  Timer_Sidereal->setInterruptPriority(2, 0);
+  Timer_Sidereal->setInterruptPriority(2, 2);
 
   // set the motor timers to run at the highest priority
-  Timer_Axis1->setInterruptPriority(0, 0);
-  Timer_Axis2->setInterruptPriority(0, 0);
+  Timer_Axis1->setInterruptPriority(1, 0);
+  Timer_Axis2->setInterruptPriority(1, 1);
 }
 
 // Set timer1 to interval (in 0.0625 microsecond units), for the 1/100 second sidereal timer
