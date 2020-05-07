@@ -99,7 +99,7 @@ class weather {
       while (oneWire.search(address)) {
         if (oneWire.crc8(address, 7) == address[7]) {
   #if defined(DS1820_DEVICES_PRESENT) || FEATURE_LIST_DS == ON
-          if (address[0] == 0x28) {
+          if (address[0] == 0x10 || address[0] == 0x28) {
             if (searchDS1820) {
               if (_DS1820_count == 0 && TELESCOPE_TEMPERATURE != DS1820) _DS1820_count++;
               if (_DS1820_count == 1 && FEATURE1_TEMP != DS1820) _DS1820_count++;
@@ -115,7 +115,8 @@ class weather {
             }
     #if FEATURE_LIST_DS == ON
             _DS1820_detected=true;
-            Serial.print("DS18B20: 0x"); for (int j=0; j<8; j++) { if (address[j] < 16) Serial.print("0"); Serial.print(address[j],HEX); }
+            if (address[0] == 0x10) Serial.print("DS18S20: 0x"); else Serial.print("DS18B20: 0x");
+            for (int j=0; j<8; j++) { if (address[j] < 16) Serial.print("0"); Serial.print(address[j],HEX); }
             if (searchDS1820) {
               if (_DS1820_count == 1) Serial.print(" assigned to TELESCOPE_TEMPERATURE"); else
               if (_DS1820_count <= 9) { Serial.print(" assigned to FEATURE"); Serial.print(_DS1820_count-1); Serial.print("_TEMP"); } else Serial.print(" not assigned");
@@ -148,7 +149,7 @@ class weather {
       }
 
   #if FEATURE_LIST_DS == ON
-      if (!_DS1820_detected) Serial.println("No DS18B20 devices found");
+      if (!_DS1820_detected) Serial.println("No DS18B20 or DS18S20 devices found");
       if (!_DS2413_detected) Serial.println("No DS2413 devices found");
   #endif
 
