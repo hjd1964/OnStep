@@ -533,7 +533,7 @@ void serialBegin(long baudRate, bool swap) {
 #ifdef ESP32
   // wemos d1 mini esp32
   // not swapped: TX and RX on default pins
-  //     swapped: TX on pin 5 and RX on pin 23
+  //     swapped: TX on gpio 5 and RX on gpio 23
   if (swap) Ser.begin(baudRate,SERIAL_8N1,23,5); else Ser.begin(baudRate);
 #else
   Ser.begin(baudRate); if (swap) Ser.swap();
