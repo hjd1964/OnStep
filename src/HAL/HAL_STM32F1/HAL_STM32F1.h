@@ -186,8 +186,8 @@ void Timer1SetInterval(long iv, double rateRatio) {
 
 // prepare to set Axis1/2 hw timers to interval (in microseconds*16), maximum time is about 134 seconds
 void PresetTimerInterval(long iv, float TPSM, volatile uint32_t *nextRate, volatile uint16_t *nextRep) {
-  // 0.0327 * 4096 = 134.21s
-  uint32_t i=iv; uint16_t t=1; while (iv>65536L*(4.0/TPSM)) { t*=2; iv=i/t; if (t==4096) { iv=65535L*(4.0/TPSM); break; } }
+  // 0.0163 * 4096 = 134.21s
+  uint32_t i=iv; uint16_t t=1; while (iv>65536L*(4.0/TPSM)) { t*=2; iv=i/t; if (t==8192) { iv=65535L*(4.0/TPSM); break; } }
   cli(); *nextRate=((F_COMP/1000000.0) * (iv*0.0625) * TPSM); *nextRep=t; sei();
 }
 
