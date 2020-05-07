@@ -65,7 +65,7 @@ float HAL_MCU_Temperature(void) {
 //--------------------------------------------------------------------------------------------------
 // Initialize timers
 // frequency compensation for adjusting microseconds to timer counts
-#define F_COMP 19.77210430
+#define F_COMP 19.77210420
 
 #define ISR(f) void f (void)
 
