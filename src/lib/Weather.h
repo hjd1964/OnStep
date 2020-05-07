@@ -60,25 +60,25 @@ class weather {
       _DS1820_devices=0;
   #ifdef DS1820_DEVICES_PRESENT
       for (int i=0; i<9; i++) for (int j=0; j<8; j++) _DS1820_address[i][j] = 0;
-      if (TELESCOPE_TEMPERATURE > DS1820) { for (int j=0; j<8; j++) _DS1820_address[0][j] = (((uint64_t)TELESCOPE_TEMPERATURE) >> ((7-j)*8)) & 0xff; _DS1820_devices++; }
-      if (FEATURE1_TEMP > DS1820) { for (int j=0; j<8; j++) _DS1820_address[1][j] = (((uint64_t)FEATURE1_TEMP) >> ((7-j)*8)) & 0xff; _DS1820_devices++; }
-      if (FEATURE2_TEMP > DS1820) { for (int j=0; j<8; j++) _DS1820_address[2][j] = (((uint64_t)FEATURE2_TEMP) >> ((7-j)*8)) & 0xff; _DS1820_devices++; }
-      if (FEATURE3_TEMP > DS1820) { for (int j=0; j<8; j++) _DS1820_address[3][j] = (((uint64_t)FEATURE3_TEMP) >> ((7-j)*8)) & 0xff; _DS1820_devices++; }
-      if (FEATURE4_TEMP > DS1820) { for (int j=0; j<8; j++) _DS1820_address[4][j] = (((uint64_t)FEATURE4_TEMP) >> ((7-j)*8)) & 0xff; _DS1820_devices++; }
-      if (FEATURE5_TEMP > DS1820) { for (int j=0; j<8; j++) _DS1820_address[5][j] = (((uint64_t)FEATURE5_TEMP) >> ((7-j)*8)) & 0xff; _DS1820_devices++; }
-      if (FEATURE6_TEMP > DS1820) { for (int j=0; j<8; j++) _DS1820_address[6][j] = (((uint64_t)FEATURE6_TEMP) >> ((7-j)*8)) & 0xff; _DS1820_devices++; }
-      if (FEATURE7_TEMP > DS1820) { for (int j=0; j<8; j++) _DS1820_address[7][j] = (((uint64_t)FEATURE7_TEMP) >> ((7-j)*8)) & 0xff; _DS1820_devices++; }
-      if (FEATURE8_TEMP > DS1820) { for (int j=0; j<8; j++) _DS1820_address[8][j] = (((uint64_t)FEATURE8_TEMP) >> ((7-j)*8)) & 0xff; _DS1820_devices++; }
+      if (TELESCOPE_TEMPERATURE != OFF && TELESCOPE_TEMPERATURE != DS1820) { for (int j=0; j<8; j++) _DS1820_address[0][j] = (((uint64_t)TELESCOPE_TEMPERATURE) >> ((7-j)*8)) & 0xff; _DS1820_devices++; }
+      if (FEATURE1_TEMP != OFF && FEATURE1_TEMP != DS1820) { for (int j=0; j<8; j++) _DS1820_address[1][j] = (((uint64_t)FEATURE1_TEMP) >> ((7-j)*8)) & 0xff; _DS1820_devices++; }
+      if (FEATURE2_TEMP != OFF && FEATURE2_TEMP != DS1820) { for (int j=0; j<8; j++) _DS1820_address[2][j] = (((uint64_t)FEATURE2_TEMP) >> ((7-j)*8)) & 0xff; _DS1820_devices++; }
+      if (FEATURE3_TEMP != OFF && FEATURE3_TEMP != DS1820) { for (int j=0; j<8; j++) _DS1820_address[3][j] = (((uint64_t)FEATURE3_TEMP) >> ((7-j)*8)) & 0xff; _DS1820_devices++; }
+      if (FEATURE4_TEMP != OFF && FEATURE4_TEMP != DS1820) { for (int j=0; j<8; j++) _DS1820_address[4][j] = (((uint64_t)FEATURE4_TEMP) >> ((7-j)*8)) & 0xff; _DS1820_devices++; }
+      if (FEATURE5_TEMP != OFF && FEATURE5_TEMP != DS1820) { for (int j=0; j<8; j++) _DS1820_address[5][j] = (((uint64_t)FEATURE5_TEMP) >> ((7-j)*8)) & 0xff; _DS1820_devices++; }
+      if (FEATURE6_TEMP != OFF && FEATURE6_TEMP != DS1820) { for (int j=0; j<8; j++) _DS1820_address[6][j] = (((uint64_t)FEATURE6_TEMP) >> ((7-j)*8)) & 0xff; _DS1820_devices++; }
+      if (FEATURE7_TEMP != OFF && FEATURE7_TEMP != DS1820) { for (int j=0; j<8; j++) _DS1820_address[7][j] = (((uint64_t)FEATURE7_TEMP) >> ((7-j)*8)) & 0xff; _DS1820_devices++; }
+      if (FEATURE8_TEMP != OFF && FEATURE8_TEMP != DS1820) { for (int j=0; j<8; j++) _DS1820_address[8][j] = (((uint64_t)FEATURE8_TEMP) >> ((7-j)*8)) & 0xff; _DS1820_devices++; }
   #endif
   
       // clear then pre-load any user defined DS2413 addresses
       _DS2413_devices=0;
   #ifdef DS2413_DEVICES_PRESENT
       for (int i=0; i<4; i++) for (int j=0; j<8; j++) _DS2413_address[i][j] = 0;
-      if (FEATURE1_PIN > DS2413) { for (int j=0; j<8; j++) _DS2413_address[0][j] = (FEATURE1_PIN >> ((7-j)*8)) & 0xff; _DS2413_devices++; }
-      if (FEATURE3_PIN > DS2413) { for (int j=0; j<8; j++) _DS2413_address[1][j] = (FEATURE3_PIN >> ((7-j)*8)) & 0xff; _DS2413_devices++; }
-      if (FEATURE5_PIN > DS2413) { for (int j=0; j<8; j++) _DS2413_address[2][j] = (FEATURE5_PIN >> ((7-j)*8)) & 0xff; _DS2413_devices++; }
-      if (FEATURE7_PIN > DS2413) { for (int j=0; j<8; j++) _DS2413_address[3][j] = (FEATURE7_PIN >> ((7-j)*8)) & 0xff; _DS2413_devices++; }
+      if (FEATURE1_PIN != OFF && FEATURE1_PIN != DS2413) { for (int j=0; j<8; j++) _DS2413_address[0][j] = (FEATURE1_PIN >> ((7-j)*8)) & 0xff; _DS2413_devices++; }
+      if (FEATURE3_PIN != OFF && FEATURE3_PIN != DS2413) { for (int j=0; j<8; j++) _DS2413_address[1][j] = (FEATURE3_PIN >> ((7-j)*8)) & 0xff; _DS2413_devices++; }
+      if (FEATURE5_PIN != OFF && FEATURE5_PIN != DS2413) { for (int j=0; j<8; j++) _DS2413_address[2][j] = (FEATURE5_PIN >> ((7-j)*8)) & 0xff; _DS2413_devices++; }
+      if (FEATURE7_PIN != OFF && FEATURE7_PIN != DS2413) { for (int j=0; j<8; j++) _DS2413_address[3][j] = (FEATURE7_PIN >> ((7-j)*8)) & 0xff; _DS2413_devices++; }
   #endif
   
       // scan the OneWire bus and record the devices found
