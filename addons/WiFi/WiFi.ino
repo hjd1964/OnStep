@@ -37,7 +37,7 @@
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
 #define FirmwareVersionMinor  "13"
-#define FirmwareVersionPatch  "e"
+#define FirmwareVersionPatch  "f"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
@@ -246,7 +246,7 @@ void setup(void){
 
 #ifndef DEBUG_ON
   long serial_baud = SERIAL_BAUD;
-  Ser.begin(SERIAL_BAUD_DEFAULT); if (serialSwap) Ser.swap(); delay(2000);
+  Ser.begin(SERIAL_BAUD_DEFAULT); if (serialSwap) swapSerial(); delay(2000);
   byte tb=1;
 
 Again:
@@ -286,7 +286,7 @@ Again:
     if (Ser.read() != '1') goto Again;
     
     // we're all set, just change the baud rate to match OnStep
-    Ser.begin(serial_baud); if (serialSwap) Ser.swap(); delay(2000);
+    Ser.begin(serial_baud); if (serialSwap) swapSerial(); delay(2000);
   } else {
 #if LED_STATUS != OFF
     digitalWrite(LED_STATUS,HIGH);
@@ -295,9 +295,9 @@ Again:
     serialRecvFlush();
     tb++;
     if (tb == 16) { tb=1; serialSwap=!serialSwap; }
-    if (tb == 1) { Ser.begin(SERIAL_BAUD_DEFAULT); if (serialSwap) Ser.swap(); delay(2000); }
-    if (tb == 6) { Ser.begin(serial_baud); if (serialSwap) Ser.swap(); delay(2000); }
-    if (tb == 11) { Ser.begin(19200); if (serialSwap) Ser.swap(); delay(2000); }
+    if (tb == 1) { Ser.begin(SERIAL_BAUD_DEFAULT); if (serialSwap) swapSerial(); delay(2000); }
+    if (tb == 6) { Ser.begin(serial_baud); if (serialSwap) swapSerial(); delay(2000); }
+    if (tb == 11) { Ser.begin(19200); if (serialSwap) swapSerial(); delay(2000); }
     goto Again;
   }
 #else
@@ -526,5 +526,11 @@ void idle() {
   server.handleClient(); 
 #if ENCODERS == ON
   encoders.poll();
+#endif
+}
+
+void swapSerial() {
+#ifndef ESP32
+  Ser.swap();
 #endif
 }
