@@ -64,9 +64,8 @@ float HAL_MCU_Temperature(void) {
 
 //--------------------------------------------------------------------------------------------------
 // Initialize timers
-
-// frequency compensation (F_COMP/1000000.0) for adjusting microseconds to timer counts
-#define F_COMP 19.8494
+// frequency compensation for adjusting microseconds to timer counts
+#define F_COMP 19.86285000
 
 #define ISR(f) void f (void)
 
@@ -168,11 +167,19 @@ void Timer1SetInterval(long iv, double rateRatio) {
 //--------------------------------------------------------------------------------------------------
 // Re-program interval for the motor timers
 
-// prepare to set Axis1/2 hw timers to interval (in microseconds*16), maximum time is about 134 seconds
 void PresetTimerInterval(long iv, float TPSM, volatile uint32_t *nextRate, volatile uint16_t *nextRep) {
-  // 0.0327 * 4096 = 134.21s
-  uint32_t i=iv; uint16_t t=1; while (iv>65536L*8L) { t*=2; iv=i/t; if (t==4096) { iv=65535L*8L; break; } }
-  cli(); *nextRate=(F_COMP * (iv*0.0625) * TPSM); *nextRep=t; sei();
+  // 0.262 * 512 = 134.21s
+  uint32_t i=iv;
+  uint16_t t=1;
+  while (iv>65536L*64L) {
+    t++;
+    iv=i/t;
+    if (t==512) {
+      iv=65535L*64L;
+      break;
+    }
+  }
+  cli(); *nextRate= F_COMP * (iv*0.0625) * TPSM - 1.0; *nextRep=t; sei();
 }
 
 // Must work from within the motor ISR timers, in microseconds*(F_COMP/1000000.0) units
