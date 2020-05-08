@@ -37,7 +37,7 @@
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
 #define FirmwareVersionMinor  "13"
-#define FirmwareVersionPatch  "g"
+#define FirmwareVersionPatch  "i"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
@@ -77,10 +77,18 @@ bool serialSwap=false;
 int webTimeout=TIMEOUT_WEB;
 int cmdTimeout=TIMEOUT_CMD;
 
-#define AXIS1_ENC_A_PIN 14 // pin# for Axis1 encoder, for A or CW
-#define AXIS1_ENC_B_PIN 12 // pin# for Axis1 encoder, for B or CCW
-#define AXIS2_ENC_A_PIN 5  // pin# for Axis1 encoder, for A or CW
-#define AXIS2_ENC_B_PIN 4  // pin# for Axis1 encoder, for B or CCW
+#ifdef ESP32
+  #define AXIS1_ENC_A_PIN 18 // pin# for Axis1 encoder, for A or CW
+  #define AXIS1_ENC_B_PIN 19 // pin# for Axis1 encoder, for B or CCW
+  #define AXIS2_ENC_A_PIN 22 // pin# for Axis1 encoder, for A or CW
+  #define AXIS2_ENC_B_PIN 21 // pin# for Axis1 encoder, for B or CCW
+#else
+  #define AXIS1_ENC_A_PIN 14 // pin# for Axis1 encoder, for A or CW
+  #define AXIS1_ENC_B_PIN 12 // pin# for Axis1 encoder, for B or CCW
+  #define AXIS2_ENC_A_PIN 5  // pin# for Axis1 encoder, for A or CW
+  #define AXIS2_ENC_B_PIN 4  // pin# for Axis1 encoder, for B or CCW
+#endif
+
 #include "Encoders.h"
 #if ENCODERS == ON
 Encoders encoders;
