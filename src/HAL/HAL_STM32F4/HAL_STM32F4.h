@@ -65,7 +65,8 @@ float HAL_MCU_Temperature(void) {
 //--------------------------------------------------------------------------------------------------
 // Initialize timers
 // frequency compensation for adjusting microseconds to timer counts
-#define F_COMP 19.77210420
+//#define F_COMP 19.7721042
+#define F_COMP 4000000
 
 #define ISR(f) void f (void)
 
@@ -88,6 +89,8 @@ void TIMER4_COMPA_vect(void);
 
 // Init sidereal clock timer
 void HAL_Init_Timer_Sidereal() {
+  uint32_t psf;
+
   Timer_Sidereal->pause();
   Timer_Sidereal->setMode(SIDEREAL_CH, TIMER_OUTPUT_COMPARE);
   Timer_Sidereal->setCaptureCompare(SIDEREAL_CH, 1); // Interrupt 1 count after each update
@@ -95,15 +98,18 @@ void HAL_Init_Timer_Sidereal() {
 
   // Set up period
   // 0.166... us per count (72/12 = 6MHz) 10.922 ms max, more than enough for the 1/100 second sidereal clock +/- any PPS adjustment for xo error
-  uint32_t psf = Timer_Sidereal->getTimerClkFreq()/6000000; // for example, 72000000/6000000 = 12
+  psf = Timer_Sidereal->getTimerClkFreq()/6000000; // for example, 72000000/6000000 = 12
   Timer_Sidereal->setPrescaleFactor(psf);
   Timer_Sidereal->setOverflow(round((60000.0/1.00273790935)/3.0));
 
-  // Refresh the timer's count, prescale, and overflow
-  Timer_Sidereal->refresh();
+  // set the 1/100 second sidereal clock timer to run at the second highest priority
+  Timer_Sidereal->setInterruptPriority(2, 2);
 
   // Start the timer counting
   Timer_Sidereal->resume();
+
+  // Refresh the timer's count, prescale, and overflow
+  Timer_Sidereal->refresh();
 }
 
 // Init Axis1 and Axis2 motor timers and set their priorities
@@ -120,16 +126,19 @@ void HAL_Init_Timers_Motor() {
 
   // Set up period
   // 0.25... us per count (72/18 = 4MHz) 16.384 ms max, good resolution for accurate motor timing and still a reasonable range (for lower steps per degree)
-  psf = Timer_Axis1->getTimerClkFreq()/4000000; // for example, 72000000/4000000 = 18
+  psf = Timer_Axis1->getTimerClkFreq()/F_COMP; // for example, 72000000/4000000 = 18
   Timer_Axis1->setPrescaleFactor(psf);
   Timer_Axis1->setOverflow(65535); // allow enough time that the sidereal clock will tick
 
-  // Refresh the timer's count, prescale, and overflow
-  Timer_Axis1->refresh();
+  // set the motor timer to run at the highest priority
+  Timer_Axis1->setInterruptPriority(1, 0);
 
   // Start the timer counting
   Timer_Axis1->resume();
   
+  // Refresh the timer's count, prescale, and overflow
+  Timer_Axis1->refresh();
+
   // ===== Axis 2 Timer =====
   // Pause the timer while we're configuring it
   Timer_Axis2->pause();
@@ -140,23 +149,18 @@ void HAL_Init_Timers_Motor() {
   Timer_Axis2->attachInterrupt(AXIS2_CH, TIMER4_COMPA_vect);
 
   // Set up period
-  psf = Timer_Axis2->getTimerClkFreq()/4000000; // for example, 72000000/4000000 = 18
+  psf = Timer_Axis2->getTimerClkFreq()/F_COMP; // for example, 72000000/4000000 = 18
   Timer_Axis2->setPrescaleFactor(psf);
   Timer_Axis2->setOverflow(65535); // allow enough time that the sidereal clock will tick
 
-  // Refresh the timer's count, prescale, and overflow
-  Timer_Axis2->refresh();
+  // set the motor timer to run at the highest priority
+  Timer_Axis2->setInterruptPriority(1, 1);
 
   // Start the timer counting
   Timer_Axis2->resume();
 
-  // ===== Set timer priorities =====
-  // set the 1/100 second sidereal clock timer to run at the second highest priority
-  Timer_Sidereal->setInterruptPriority(2, 2);
-
-  // set the motor timers to run at the highest priority
-  Timer_Axis1->setInterruptPriority(1, 0);
-  Timer_Axis2->setInterruptPriority(1, 1);
+  // Refresh the timer's count, prescale, and overflow
+  Timer_Axis2->refresh();
 }
 
 // Set timer1 to interval (in 0.0625 microsecond units), for the 1/100 second sidereal timer
@@ -167,19 +171,20 @@ void Timer1SetInterval(long iv, double rateRatio) {
 //--------------------------------------------------------------------------------------------------
 // Re-program interval for the motor timers
 
+// prepare to set Axis1/2 hw timers to interval (in microseconds*16), maximum time is about 134 seconds
 void PresetTimerInterval(long iv, float TPSM, volatile uint32_t *nextRate, volatile uint16_t *nextRep) {
-  // 0.262 * 512 = 134.21s
+  // 0.0163 * 4096 = 134.21s
   uint32_t i=iv;
-  uint16_t t=1;
-  while (iv>65536L*64L) {
-    t++;
+  uint16_t t=1; 
+  while (iv>65536L*(4.0/TPSM)) {
+    t*=2;
     iv=i/t;
-    if (t==512) {
-      iv=65535L*64L;
+    if (t==8192) {
+      iv=65535L*(4.0/TPSM);
       break;
     }
   }
-  cli(); *nextRate= F_COMP * (iv*0.0625) * TPSM - 1.0; *nextRep=t; sei();
+  cli(); *nextRate=((F_COMP/1000000) * (iv*0.0625) * TPSM); *nextRep=t; sei();
 }
 
 // Must work from within the motor ISR timers, in microseconds*(F_COMP/1000000.0) units
