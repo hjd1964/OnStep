@@ -171,20 +171,24 @@ void Timer1SetInterval(long iv, double rateRatio) {
 //--------------------------------------------------------------------------------------------------
 // Re-program interval for the motor timers
 
-// prepare to set Axis1/2 hw timers to interval (in microseconds*16), maximum time is about 134 seconds
-void PresetTimerInterval(long iv, float TPSM, volatile uint32_t *nextRate, volatile uint16_t *nextRep) {
-  // 0.0163 * 4096 = 134.21s
-  uint32_t i=iv;
-  uint16_t t=1; 
-  while (iv>65536L*(4.0/TPSM)) {
-    t*=2;
-    iv=i/t;
-    if (t==8192) {
-      iv=65535L*(4.0/TPSM);
-      break;
-    }
-  }
-  cli(); *nextRate=((F_COMP/1000000) * (iv*0.0625) * TPSM); *nextRep=t; sei();
+#define TIMER_RATE_MHZ         4L   // STM32 motor timers run at 4 MHz
+#define TIMER_RATE_16MHZ_TICKS 4L   // 16L/TIMER_RATE_MHZ, 4x slower than the default 16MHz
+
+// prepare to set Axis1/2 hw timers to interval (in 1/16 microsecond units)
+void PresetTimerInterval(long iv, bool TPS, volatile uint32_t *nextRate, volatile uint16_t *nextRep) {
+  // maximum time is about 134 seconds
+  if (iv>2144000000) iv=2144000000;
+
+  // minimum time is 1 micro-second
+  if (iv<16) iv=16;
+
+  // TPS (timer pulse step) == false for SQW mode and double the timer rate
+  if (!TPS) iv/=2L;
+
+  iv/=TIMER_RATE_16MHZ_TICKS;
+  uint32_t reps = (iv/65536)+1;
+  uint32_t i = iv/reps; // no -1 for STM32 that's handled in the setOverflow() call
+  cli(); *nextRate=i; *nextRep=reps; sei();
 }
 
 // Must work from within the motor ISR timers, in microseconds*(F_COMP/1000000.0) units
