@@ -38,15 +38,15 @@
 #endif
 
 // TIME -------------------------------------
-#if RTC == DS3231
+#if TIME_LOCATION_SOURCE == DS3231
   #if ASSIGNED_AUX0 == PIN_DEDICATED
-    #error "Configuration (Config.h): RTC DS3231 I2C enabled but Aux0 is already in use, choose one feature on Aux0"
+    #error "Configuration (Config.h): TIME_LOCATION_SOURCE DS3231 I2C enabled but Aux0 is already in use, choose one feature on Aux0"
   #else
     #undef ASSIGNED_AUX0
     #define ASSIGNED_AUX0 PIN_SHARED_I2C
   #endif
   #if ASSIGNED_AUX1 == PIN_DEDICATED
-    #error "Configuration (Config.h): RTC DS3231 I2C enabled but Aux1 is already in use, choose one feature on Aux1"
+    #error "Configuration (Config.h): TIME_LOCATION_SOURCE DS3231 I2C enabled but Aux1 is already in use, choose one feature on Aux1"
   #else
     #undef ASSIGNED_AUX1
     #define ASSIGNED_AUX1 PIN_SHARED_I2C
@@ -60,13 +60,13 @@
 // SENSORS ----------------------------------
 #if WEATHER == BME280
   #if ASSIGNED_AUX0 == PIN_DEDICATED
-    #error "Configuration (Config.h): RTC DS3231 I2C enabled but Aux0 is already in use, choose one feature on Aux0"
+    #error "Configuration (Config.h): WEATHER BME280 I2C enabled but Aux0 is already in use, choose one feature on Aux0"
   #else
     #undef ASSIGNED_AUX0
     #define ASSIGNED_AUX0 PIN_SHARED_I2C
   #endif
   #if ASSIGNED_AUX1 == PIN_DEDICATED
-    #error "Configuration (Config.h): RTC DS3231 I2C enabled but Aux1 is already in use, choose one feature on Aux1"
+    #error "Configuration (Config.h): WEATHER BME280 I2C enabled but Aux1 is already in use, choose one feature on Aux1"
   #else
     #undef ASSIGNED_AUX1
     #define ASSIGNED_AUX1 PIN_SHARED_I2C

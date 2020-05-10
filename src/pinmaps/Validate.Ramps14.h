@@ -28,7 +28,7 @@
 #endif
 
 // TIME -------------------------------------
-#if RTC == DS3231
+#if TIME_LOCATION_SOURCE == DS3231
   // dedicated pins
 #endif
 

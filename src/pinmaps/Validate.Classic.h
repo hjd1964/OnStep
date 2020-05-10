@@ -23,7 +23,7 @@
 #endif
 
 // TIME -------------------------------------
-#if RTC == DS3231
+#if TIME_LOCATION_SOURCE == DS3231
   #error "Configuration (Config.h): I2C is not supported on this PINMAP"
 #endif
 

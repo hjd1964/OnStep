@@ -133,12 +133,12 @@
   #error "Configuration (Config.h): PEC_SENSE in ANALOG mode not supported for this PINMAP, use ON, etc. NOT a threshold value"
 #endif
 
-// RTC DS3234 SPI allowed?
-#if (RTC == DS3234S || RTC == DS3234M) && !defined(DS3234_CS_PIN)
+// TIME_LOCATION_SOURCE DS3234 SPI allowed?
+#if (TIME_LOCATION_SOURCE == DS3234S || TIME_LOCATION_SOURCE == DS3234M) && !defined(DS3234_CS_PIN)
   #if PINMAP == Classic
-      #error "Configuration (Config.h): DS3234 RTC using SPI is not supported, use PINMAP ClassicShield or add '#define ST4_ALTERNATE_PINS_ON' to move the ST4 port pins"
+      #error "Configuration (Config.h): DS3234 TIME_LOCATION_SOURCE using SPI is not supported, use PINMAP ClassicShield or add '#define ST4_ALTERNATE_PINS_ON' to move the ST4 port pins"
     #else
-      #error "Configuration (Config.h): DS3234 RTC using SPI is not supported for this PINMAP"
+      #error "Configuration (Config.h): DS3234 TIME_LOCATION_SOURCE using SPI is not supported for this PINMAP"
   #endif
 #endif
 
