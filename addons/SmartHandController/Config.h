@@ -26,13 +26,13 @@
                                           //         Only used for async serial communication with OnStep.
 
 // USER FEEDBACK -------------------------------------------------------------------------------------------------------------------
-#define UTILITY_LIGHT                   0 //    OFF, n. Where n=0..255 (0..100%) activates feature sets default brightness.   Adjust
+#define UTILITY_LIGHT                 OFF //    OFF, n. Where n=0..255 (0..100%) activates feature sets default brightness.   Adjust
 
 // DISPLAY -------------------------------------------------------------------------------------------------------------------------
 #define DISPLAY_AMBIENT_CONDITIONS    OFF //    OFF, ON to show ambient conditions in the display rotation                    Option
-#define DISPLAY_WRAP_MENUS             ON //    OFF, ON allows menus to wrap so moving past bottom returns to top, etc.       Option
+#define DISPLAY_WRAP_MENUS            OFF //    OFF, ON allows menus to wrap so moving past bottom returns to top, etc.       Option
 #define DISPLAY_24HR_TIME              ON //     ON, OFF to use 12 hour format for entering time.                             Option
-#define DISPLAY_DIM_TIMEOUT             3 //     30, n. Where n=0..600 seconds, 0 disables timeout.                           Adjust
+#define DISPLAY_DIM_TIMEOUT            30 //     30, n. Where n=0..600 seconds, 0 disables timeout.                           Adjust
 #define DISPLAY_BLANK_TIMEOUT         120 //    120, n. Where n=0..600 seconds, 0 disables timeout.                           Adjust
 
 // KEYPAD --------------------------------------------------------------------------------------------------------------------------
