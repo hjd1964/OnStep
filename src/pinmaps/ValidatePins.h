@@ -134,7 +134,7 @@
 #endif
 
 // RTC DS3234 SPI allowed?
-#if (myRTC == DS3234S || myRTC == DS3234M) && !defined(DS3234_CS_PIN)
+#if (RTC == DS3234S || RTC == DS3234M) && !defined(DS3234_CS_PIN)
   #if PINMAP == Classic
       #error "Configuration (Config.h): DS3234 RTC using SPI is not supported, use PINMAP ClassicShield or add '#define ST4_ALTERNATE_PINS_ON' to move the ST4 port pins"
     #else

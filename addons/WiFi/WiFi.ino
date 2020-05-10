@@ -37,7 +37,7 @@
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "1"
 #define FirmwareVersionMinor  "13"
-#define FirmwareVersionPatch  "e"
+#define FirmwareVersionPatch  "i"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
@@ -77,10 +77,18 @@ bool serialSwap=false;
 int webTimeout=TIMEOUT_WEB;
 int cmdTimeout=TIMEOUT_CMD;
 
-#define AXIS1_ENC_A_PIN 14 // pin# for Axis1 encoder, for A or CW
-#define AXIS1_ENC_B_PIN 12 // pin# for Axis1 encoder, for B or CCW
-#define AXIS2_ENC_A_PIN 5  // pin# for Axis1 encoder, for A or CW
-#define AXIS2_ENC_B_PIN 4  // pin# for Axis1 encoder, for B or CCW
+#ifdef ESP32
+  #define AXIS1_ENC_A_PIN 18 // pin# for Axis1 encoder, for A or CW
+  #define AXIS1_ENC_B_PIN 19 // pin# for Axis1 encoder, for B or CCW
+  #define AXIS2_ENC_A_PIN 22 // pin# for Axis1 encoder, for A or CW
+  #define AXIS2_ENC_B_PIN 21 // pin# for Axis1 encoder, for B or CCW
+#else
+  #define AXIS1_ENC_A_PIN 14 // pin# for Axis1 encoder, for A or CW
+  #define AXIS1_ENC_B_PIN 12 // pin# for Axis1 encoder, for B or CCW
+  #define AXIS2_ENC_A_PIN 5  // pin# for Axis1 encoder, for A or CW
+  #define AXIS2_ENC_B_PIN 4  // pin# for Axis1 encoder, for B or CCW
+#endif
+
 #include "Encoders.h"
 #if ENCODERS == ON
 Encoders encoders;
@@ -246,7 +254,7 @@ void setup(void){
 
 #ifndef DEBUG_ON
   long serial_baud = SERIAL_BAUD;
-  Ser.begin(SERIAL_BAUD_DEFAULT); if (serialSwap) Ser.swap(); delay(2000);
+  serialBegin(SERIAL_BAUD_DEFAULT,serialSwap);
   byte tb=1;
 
 Again:
@@ -286,7 +294,7 @@ Again:
     if (Ser.read() != '1') goto Again;
     
     // we're all set, just change the baud rate to match OnStep
-    Ser.begin(serial_baud); if (serialSwap) Ser.swap(); delay(2000);
+    serialBegin(serial_baud,serialSwap);
   } else {
 #if LED_STATUS != OFF
     digitalWrite(LED_STATUS,HIGH);
@@ -295,13 +303,13 @@ Again:
     serialRecvFlush();
     tb++;
     if (tb == 16) { tb=1; serialSwap=!serialSwap; }
-    if (tb == 1) { Ser.begin(SERIAL_BAUD_DEFAULT); if (serialSwap) Ser.swap(); delay(2000); }
-    if (tb == 6) { Ser.begin(serial_baud); if (serialSwap) Ser.swap(); delay(2000); }
-    if (tb == 11) { Ser.begin(19200); if (serialSwap) Ser.swap(); delay(2000); }
+    if (tb == 1) serialBegin(SERIAL_BAUD_DEFAULT,serialSwap);
+    if (tb == 6) serialBegin(serial_baud,serialSwap);
+    if (tb == 11) serialBegin(19200,serialSwap);
     goto Again;
   }
 #else
-  Ser.begin(115200);
+  serialBegin(115200,false);
   delay(10000);
   
   Ser.println(accessPointEnabled);
@@ -527,4 +535,16 @@ void idle() {
 #if ENCODERS == ON
   encoders.poll();
 #endif
+}
+
+void serialBegin(long baudRate, bool swap) {
+#ifdef ESP32
+  // wemos d1 mini esp32
+  // not swapped: TX and RX on default pins
+  //     swapped: TX on gpio 5 and RX on gpio 23
+  if (swap) Ser.begin(baudRate,SERIAL_8N1,23,5); else Ser.begin(baudRate);
+#else
+  Ser.begin(baudRate); if (swap) Ser.swap();
+#endif
+  delay(2000);
 }

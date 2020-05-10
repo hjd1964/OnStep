@@ -127,7 +127,7 @@ void handleAux() {
         sendHtml(data);
         j++;
       } else
-      if (mountStatus.featurePurpose() == ANALOG) {
+      if (mountStatus.featurePurpose() == ANALOG_OUTPUT) {
         data += F("<div style='float: left; width: 8em; height: 2em; line-height: 2em'>&bull;");
         data += mountStatus.featureName();
         data += "&bull;";
@@ -285,7 +285,7 @@ void auxAjax() {
     mountStatus.featureUpdate(false);
     for (int i=0; i<8; i++) {
       mountStatus.selectFeature(i);
-      if (mountStatus.featurePurpose() == ANALOG) {
+      if (mountStatus.featurePurpose() == ANALOG_OUTPUT) {
         sprintf(temp,"x%dv1|%d\n",i+1,(int)lround((mountStatus.featureValue1()/255.0)*100.0)); data += temp;
       } else
       if (mountStatus.featurePurpose() == DEW_HEATER) {

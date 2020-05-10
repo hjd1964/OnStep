@@ -108,8 +108,8 @@ volatile int32_t __p1,__p2;
 
 // ----------------------------------------------------------------------------------------------------------------
 // this is for Quadrature A/B type encoders (library based)
-#if AXIS1_ENC_RATE_CONTROL != ON && (AXIS1_ENC == AB || AXIS2_ENC == AB)
-  #include <Encoder.h> // from https://github.com/PaulStoffregen/Encoder 
+#if (AXIS1_ENC_RATE_CONTROL != ON && !defined(ESP32)) && (AXIS1_ENC == AB || AXIS2_ENC == AB)
+  #include <Encoder.h> // from https://github.com/PaulStoffregen/Encoder
 #if AXIS1_ENC == AB
   Encoder axis1Pos(AXIS1_ENC_A_PIN,AXIS1_ENC_B_PIN);
 #endif
@@ -154,7 +154,7 @@ void ICACHE_RAM_ATTR __logRate() {
 // neg <--      ______        ______        __    --> pos
 //         B __|      |______|      |______|   B
 
-#if AXIS1_ENC_RATE_CONTROL == ON && (AXIS1_ENC == AB || AXIS2_ENC == AB)
+#if (AXIS1_ENC_RATE_CONTROL == ON || defined(ESP32)) && (AXIS1_ENC == AB || AXIS2_ENC == AB)
   volatile int16_t __aPin1,__bPin1;
   volatile bool __a_set1=false;
   volatile bool __b_set1=false;

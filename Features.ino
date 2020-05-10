@@ -4,7 +4,7 @@
 #ifdef FEATURES_PRESENT
 void featuresInit() {
   for (int i=0; i < 8; i++) {
-    if (feature[i].purpose == SWITCH || feature[i].purpose == ANALOG) {
+    if (feature[i].purpose == SWITCH || feature[i].purpose == ANALOG_OUTPUT) {
       if (feature[i].pin >= 0 && feature[i].pin <= 255) pinMode(feature[i].pin,OUTPUT);
     } else if (feature[i].purpose == DEW_HEATER) {
       feature[i].dewHeater = new dewHeaterControl;
@@ -39,7 +39,7 @@ void featuresGetCommand(char *parameter, char *reply, bool &booleanReply) {
   char s[255];
   if (feature[i].purpose == SWITCH) {
     if (feature[i].pin >= 0 && feature[i].pin <= 255) sprintf(s,"%d",feature[i].value); else sprintf(s,"%d",ambient.getDS2413State(i)); strcat(reply,s);
-  } else if (feature[i].purpose == ANALOG) {
+  } else if (feature[i].purpose == ANALOG_OUTPUT) {
     if (feature[i].pin >= 0 && feature[i].pin <= 255) sprintf(s,"%d",feature[i].value); else strcpy(s,"0"); strcat(reply,s);
   } else if (feature[i].purpose == DEW_HEATER) {
     sprintf(s,"%d",(int)feature[i].dewHeater->isEnabled()); strcat(reply,s); strcat(reply,",");
@@ -95,7 +95,7 @@ void featuresSetCommand(char *parameter) {
         if (feature[i].pin >= 0 && feature[i].pin <= 255) digitalWrite(feature[i].pin,v==0?LOW:HIGH); else ambient.setDS2413State(feature[i].pin,v==0?0:1);
       } else commandError=CE_PARAM_RANGE;
     } else commandError=CE_PARAM_FORM;
-  } else if (feature[i].purpose == ANALOG) {
+  } else if (feature[i].purpose == ANALOG_OUTPUT) {
     if (parameter[3] == 'V') {
       if (v >= 0 && v <= 255) {
         if (feature[i].pin >= 0 && feature[i].pin <= 255) analogWrite(feature[i].pin,v);

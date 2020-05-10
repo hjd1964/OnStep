@@ -347,11 +347,11 @@
 #ifndef FEATURE1_PURPOSE
   #error "Configuration (Config.h): Setting FEATURE1_PURPOSE must be present!"
 #elif FEATURE1_PURPOSE != OFF && (FEATURE1_PURPOSE < AUXILLARY_FIRST || FEATURE1_PURPOSE > AUXILLARY_LAST)
-  #error "Configuration (Config.h): Setting FEATURE1_PURPOSE invalid, use OFF, SWITCH, ANALOG, DEW_HEATER, or INTERVALOMETER."
+  #error "Configuration (Config.h): Setting FEATURE1_PURPOSE invalid, use OFF, SWITCH, ANALOG_OUTPUT, DEW_HEATER, or INTERVALOMETER."
 #endif
 #ifndef FEATURE1_TEMP
   #error "Configuration (Config.h): Setting FEATURE1_TEMP must be present!"
-#elif FEATURE1_TEMP != OFF && (FEATURE1_TEMP & DS_MASK) != DS1820
+#elif FEATURE1_TEMP != OFF && (FEATURE1_TEMP & DS_MASK) != DS1820 && (FEATURE1_TEMP & DS_MASK) != DS18S20
   #error "Configuration (Config.h): Setting FEATURE1_TEMP invalid, use OFF, DS1820, or DS1820 s/n only."
 #endif
 #ifndef FEATURE1_PIN
@@ -366,11 +366,11 @@
 #ifndef FEATURE2_PURPOSE
   #error "Configuration (Config.h): Setting FEATURE2_PURPOSE must be present!"
 #elif FEATURE2_PURPOSE != OFF && (FEATURE2_PURPOSE < AUXILLARY_FIRST || FEATURE2_PURPOSE > AUXILLARY_LAST)
-  #error "Configuration (Config.h): Setting FEATURE2_PURPOSE invalid, use OFF, SWITCH, ANALOG, DEW_HEATER, or INTERVALOMETER."
+  #error "Configuration (Config.h): Setting FEATURE2_PURPOSE invalid, use OFF, SWITCH, ANALOG_OUTPUT, DEW_HEATER, or INTERVALOMETER."
 #endif
 #ifndef FEATURE2_TEMP
   #error "Configuration (Config.h): Setting FEATURE2_TEMP must be present!"
-#elif FEATURE2_TEMP != OFF && (FEATURE2_TEMP & DS_MASK) != DS1820
+#elif FEATURE2_TEMP != OFF && (FEATURE2_TEMP & DS_MASK) != DS1820 && (FEATURE2_TEMP & DS_MASK) != DS18S20
   #error "Configuration (Config.h): Setting FEATURE2_TEMP invalid, use OFF, DS1820, or DS1820 s/n only."
 #endif
 #ifndef FEATURE2_PIN
@@ -385,11 +385,11 @@
 #ifndef FEATURE3_PURPOSE
   #error "Configuration (Config.h): Setting FEATURE3_PURPOSE must be present!"
 #elif FEATURE3_PURPOSE != OFF && (FEATURE3_PURPOSE < AUXILLARY_FIRST || FEATURE3_PURPOSE > AUXILLARY_LAST)
-  #error "Configuration (Config.h): Setting FEATURE3_PURPOSE invalid, use OFF, SWITCH, ANALOG, DEW_HEATER, or INTERVALOMETER."
+  #error "Configuration (Config.h): Setting FEATURE3_PURPOSE invalid, use OFF, SWITCH, ANALOG_OUTPUT, DEW_HEATER, or INTERVALOMETER."
 #endif
 #ifndef FEATURE3_TEMP
   #error "Configuration (Config.h): Setting FEATURE3_TEMP must be present!"
-#elif FEATURE3_TEMP != OFF && (FEATURE3_TEMP & DS_MASK) != DS1820
+#elif FEATURE3_TEMP != OFF && (FEATURE3_TEMP & DS_MASK) != DS1820 && (FEATURE3_TEMP & DS_MASK) != DS18S20
   #error "Configuration (Config.h): Setting FEATURE3_TEMP invalid, use OFF, DS1820, or DS1820 s/n only."
 #endif
 #ifndef FEATURE3_PIN
@@ -404,11 +404,11 @@
 #ifndef FEATURE4_PURPOSE
   #error "Configuration (Config.h): Setting FEATURE4_PURPOSE must be present!"
 #elif FEATURE4_PURPOSE != OFF && (FEATURE4_PURPOSE < AUXILLARY_FIRST || FEATURE4_PURPOSE > AUXILLARY_LAST)
-  #error "Configuration (Config.h): Setting FEATURE4_PURPOSE invalid, use OFF, SWITCH, ANALOG, DEW_HEATER, or INTERVALOMETER."
+  #error "Configuration (Config.h): Setting FEATURE4_PURPOSE invalid, use OFF, SWITCH, ANALOG_OUTPUT, DEW_HEATER, or INTERVALOMETER."
 #endif
 #ifndef FEATURE4_TEMP
   #error "Configuration (Config.h): Setting FEATURE4_TEMP must be present!"
-#elif FEATURE4_TEMP != OFF && (FEATURE4_TEMP & DS_MASK) != DS1820
+#elif FEATURE4_TEMP != OFF && (FEATURE4_TEMP & DS_MASK) != DS1820 && (FEATURE4_TEMP & DS_MASK) != DS18S20
   #error "Configuration (Config.h): Setting FEATURE4_TEMP invalid, use OFF, DS1820, or DS1820 s/n only."
 #endif
 #ifndef FEATURE4_PIN
@@ -423,11 +423,11 @@
 #ifndef FEATURE5_PURPOSE
   #error "Configuration (Config.h): Setting FEATURE5_PURPOSE must be present!"
 #elif FEATURE5_PURPOSE != OFF && (FEATURE5_PURPOSE < AUXILLARY_FIRST || FEATURE5_PURPOSE > AUXILLARY_LAST)
-  #error "Configuration (Config.h): Setting FEATURE5_PURPOSE invalid, use OFF, SWITCH, ANALOG, DEW_HEATER, or INTERVALOMETER."
+  #error "Configuration (Config.h): Setting FEATURE5_PURPOSE invalid, use OFF, SWITCH, ANALOG_OUTPUT, DEW_HEATER, or INTERVALOMETER."
 #endif
 #ifndef FEATURE5_TEMP
   #error "Configuration (Config.h): Setting FEATURE5_TEMP must be present!"
-#elif FEATURE5_TEMP != OFF && (FEATURE5_TEMP & DS_MASK) != DS1820
+#elif FEATURE5_TEMP != OFF && (FEATURE5_TEMP & DS_MASK) != DS1820 && (FEATURE5_TEMP & DS_MASK) != DS18S20
   #error "Configuration (Config.h): Setting FEATURE5_TEMP invalid, use OFF, DS1820, or DS1820 s/n only."
 #endif
 #ifndef FEATURE5_PIN
@@ -442,11 +442,11 @@
 #ifndef FEATURE6_PURPOSE
   #error "Configuration (Config.h): Setting FEATURE6_PURPOSE must be present!"
 #elif FEATURE6_PURPOSE != OFF && (FEATURE6_PURPOSE < AUXILLARY_FIRST || FEATURE6_PURPOSE > AUXILLARY_LAST)
-  #error "Configuration (Config.h): Setting FEATURE6_PURPOSE invalid, use OFF, SWITCH, ANALOG, DEW_HEATER, or INTERVALOMETER."
+  #error "Configuration (Config.h): Setting FEATURE6_PURPOSE invalid, use OFF, SWITCH, ANALOG_OUTPUT, DEW_HEATER, or INTERVALOMETER."
 #endif
 #ifndef FEATURE6_TEMP
   #error "Configuration (Config.h): Setting FEATURE6_TEMP must be present!"
-#elif FEATURE6_TEMP != OFF && (FEATURE6_TEMP & DS_MASK) != DS1820
+#elif FEATURE6_TEMP != OFF && (FEATURE6_TEMP & DS_MASK) != DS1820 && (FEATURE6_TEMP & DS_MASK) != DS18S20
   #error "Configuration (Config.h): Setting FEATURE6_TEMP invalid, use OFF, DS1820, or DS1820 s/n only."
 #endif
 #ifndef FEATURE6_PIN
@@ -461,11 +461,11 @@
 #ifndef FEATURE7_PURPOSE
   #error "Configuration (Config.h): Setting FEATURE7_PURPOSE must be present!"
 #elif FEATURE7_PURPOSE != OFF && (FEATURE7_PURPOSE < AUXILLARY_FIRST || FEATURE7_PURPOSE > AUXILLARY_LAST)
-  #error "Configuration (Config.h): Setting FEATURE7_PURPOSE invalid, use OFF, SWITCH, ANALOG, DEW_HEATER, or INTERVALOMETER."
+  #error "Configuration (Config.h): Setting FEATURE7_PURPOSE invalid, use OFF, SWITCH, ANALOG_OUTPUT, DEW_HEATER, or INTERVALOMETER."
 #endif
 #ifndef FEATURE7_TEMP
   #error "Configuration (Config.h): Setting FEATURE7_TEMP must be present!"
-#elif FEATURE7_TEMP != OFF && (FEATURE7_TEMP & DS_MASK) != DS1820
+#elif FEATURE7_TEMP != OFF && (FEATURE7_TEMP & DS_MASK) != DS1820 && (FEATURE7_TEMP & DS_MASK) != DS18S20
   #error "Configuration (Config.h): Setting FEATURE7_TEMP invalid, use OFF, DS1820, or DS1820 s/n only."
 #endif
 #ifndef FEATURE7_PIN
@@ -480,11 +480,11 @@
 #ifndef FEATURE8_PURPOSE
   #error "Configuration (Config.h): Setting FEATURE8_PURPOSE must be present!"
 #elif FEATURE8_PURPOSE != OFF && (FEATURE8_PURPOSE < AUXILLARY_FIRST || FEATURE8_PURPOSE > AUXILLARY_LAST)
-  #error "Configuration (Config.h): Setting FEATURE8_PURPOSE invalid, use OFF, SWITCH, ANALOG, DEW_HEATER, or INTERVALOMETER."
+  #error "Configuration (Config.h): Setting FEATURE8_PURPOSE invalid, use OFF, SWITCH, ANALOG_OUTPUT, DEW_HEATER, or INTERVALOMETER."
 #endif
 #ifndef FEATURE8_TEMP
   #error "Configuration (Config.h): Setting FEATURE8_TEMP must be present!"
-#elif FEATURE8_TEMP != OFF && (FEATURE8_TEMP & DS_MASK) != DS1820
+#elif FEATURE8_TEMP != OFF && (FEATURE8_TEMP & DS_MASK) != DS1820 && (FEATURE8_TEMP & DS_MASK) != DS18S20
   #error "Configuration (Config.h): Setting FEATURE8_TEMP invalid, use OFF, DS1820, or DS1820 s/n only."
 #endif
 #ifndef FEATURE8_PIN
@@ -497,12 +497,20 @@
   #define DS1820_DEVICES_PRESENT
 #endif
 
+#if (FEATURE1_TEMP & DS_MASK) == DS18S20 || (FEATURE2_TEMP & DS_MASK) == DS18S20 || (FEATURE3_TEMP & DS_MASK) == DS18S20 || (FEATURE4_TEMP & DS_MASK) == DS18S20 || (FEATURE5_TEMP & DS_MASK) == DS18S20 || (FEATURE6_TEMP & DS_MASK) == DS18S20 || (FEATURE7_TEMP & DS_MASK) == DS18S20 || (FEATURE8_TEMP & DS_MASK) == DS18S20 
+  #define DS1820_DEVICES_PRESENT
+#endif
+
 #if (FEATURE1_PIN & DS_MASK) == DS2413 || (FEATURE2_PIN & DS_MASK) == DS2413 || (FEATURE3_PIN & DS_MASK) == DS2413 || (FEATURE4_PIN & DS_MASK) == DS2413 || (FEATURE5_PIN & DS_MASK) == DS2413 || (FEATURE6_PIN & DS_MASK) == DS2413 || (FEATURE7_PIN & DS_MASK) == DS2413 || (FEATURE8_PIN & DS_MASK) == DS2413
   #define DS2413_DEVICES_PRESENT
 #endif
 #endif
 
 #if !defined(DS1820_DEVICES_PRESENT) && (TELESCOPE_TEMPERATURE & DS_MASK) == DS1820
+  #define DS1820_DEVICES_PRESENT
+#endif
+
+#if !defined(DS1820_DEVICES_PRESENT) && (TELESCOPE_TEMPERATURE & DS_MASK) == DS18S20
   #define DS1820_DEVICES_PRESENT
 #endif
 
