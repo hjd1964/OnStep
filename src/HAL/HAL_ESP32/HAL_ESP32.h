@@ -106,9 +106,6 @@ void timerAlarmsDisable() { timerAlarmDisable(itimer1); timerAlarmDisable(itimer
 //--------------------------------------------------------------------------------------------------
 // Initialize timers
 
-// frequency compensation (F_COMP/1000000.0) for adjusting microseconds to timer counts
-#define F_COMP 16000000.0
-
 extern long int siderealInterval;
 extern void SiderealClockSetInterval (long int);
 
@@ -145,16 +142,29 @@ void Timer1SetInterval(long iv, double rateRatio) {
 }
 
 //--------------------------------------------------------------------------------------------------
-// Re-program the interval (in microseconds*(F_COMP/1000000.0)) for the motor timers
+// Re-program interval for the motor timers
 
-// Prepare to set Axis1/2 hw timers to interval (in microseconds*16), maximum time is about 134 seconds
-void PresetTimerInterval(long iv, float TPSM, volatile uint32_t *nextRate, volatile uint16_t *nextRep) {
-  // 0.262 * 512 = 134.21s
-  uint32_t i=iv; uint16_t t=1; while (iv>65536L*64L) { t++; iv=i/t; if (t==512) { iv=65535L*64L; break; } }
-  cli(); *nextRate=((F_COMP/1000000.0) * (iv*0.0625) * TPSM - 1.0); *nextRep=t; sei();
+#define TIMER_RATE_MHZ 16L          // ESP32 motor timers run at 16MHz so use full resolution
+#define TIMER_RATE_16MHZ_TICKS 1L   // 16L/TIMER_RATE_MHZ, for the default 16MHz
+
+// prepare to set Axis1/2 hw timers to interval (in 1/16 microsecond units)
+void PresetTimerInterval(long iv, bool TPS, volatile uint32_t *nextRate, volatile uint16_t *nextRep) {
+  // maximum time is about 134 seconds
+  if (iv>2144000000) iv=2144000000;
+
+  // minimum time is 1 micro-second
+  if (iv<16) iv=16;
+
+  // TPS (timer pulse step) == false for SQW mode and double the timer rate
+  if (!TPS) iv/=2L;
+
+  iv/=TIMER_RATE_16MHZ_TICKS;
+  uint32_t reps = (iv/4194304L)+1;
+  uint32_t i = iv/reps;
+  cli(); *nextRate=i; *nextRep=reps; sei();
 }
 
-// Must work from within the motor ISR timers
+// Must work from within the motor ISR timers, in tick units
 IRAM_ATTR void QuickSetIntervalAxis1(uint32_t r) {
   timerAlarmWrite(itimer3, r, true);
 }

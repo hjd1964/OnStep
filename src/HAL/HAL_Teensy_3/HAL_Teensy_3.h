@@ -93,19 +93,13 @@ float HAL_MCU_Temperature(void) {
   int Tpin=38;
 #endif
   // delta of -1.715 mV/C where 25C measures 719 mV
-//  analogReadResolution(12);
-//  delayMicroseconds(10);
   float v=(analogRead(Tpin)/1024.0)*3.3;
   float t=(-(v-0.719)/0.001715)+25.0;
-//  analogReadResolution(10);
   return t;
 }
 
 //--------------------------------------------------------------------------------------------------
 // Initialize timers
-
-// frequency compensation (F_COMP/1000000.0) for adjusting microseconds to timer counts
-#define F_COMP F_BUS
 
 IntervalTimer itimer3;
 void TIMER3_COMPA_vect(void);
@@ -153,20 +147,30 @@ void Timer1SetInterval(long iv, double rateRatio) {
 //--------------------------------------------------------------------------------------------------
 // Re-program interval for the motor timers
 
-// prepare to set Axis1/2 hw timers to interval (in microseconds*16), maximum time is about 134 seconds
-void PresetTimerInterval(long iv, float TPSM, volatile uint32_t *nextRate, volatile uint16_t *nextRep) {
-  // 0.262 * 512 = 134.21s
-  uint32_t i=iv; uint16_t t=1; while (iv>65536L*64L) { t++; iv=i/t; if (t==512) { iv=65535L*64L; break; } }
-  cli(); *nextRate=((F_COMP/1000000.0) * (iv*0.0625) * TPSM - 1.0); *nextRep=t; sei();
+#define TIMER_RATE_MHZ (F_BUS/1000000.0)                 // Teensy motor timers run at F_BUS Hz so use full resolution
+#define TIMER_RATE_16MHZ_TICKS (16.0/TIMER_RATE_MHZ)     // 16.0/TIMER_RATE_MHZ
+const double timerRate16MHzTicks TIMER_RATE_16MHZ_TICKS; // make sure this is pre-calculated
+
+// prepare to set Axis1/2 hw timers to interval (in 1/16 microsecond units)
+void PresetTimerInterval(long iv, bool TPS, volatile uint32_t *nextRate, volatile uint16_t *nextRep) {
+  // maximum time is about 134 seconds
+  if (iv>2144000000) iv=2144000000;
+
+  // minimum time is 1 micro-second
+  if (iv<16) iv=16;
+
+  // TPS (timer pulse step) == false for SQW mode and double the timer rate
+  if (!TPS) iv/=2L;
+
+  double fiv = iv/timerRate16MHzTicks;
+  uint32_t reps = (fiv/4194304.0)+1.0;
+  uint32_t i = fiv/reps-1.0; // has -1 since this is dropped right into a timer register
+  cli(); *nextRate=i; *nextRep=reps; sei();
 }
 
-// Must work from within the motor ISR timers, in microseconds*(F_COMP/1000000.0) units
-void QuickSetIntervalAxis1(uint32_t r) {
-  PIT_LDVAL1=r;
-}
-void QuickSetIntervalAxis2(uint32_t r) {
-  PIT_LDVAL2=r;
-}
+// Must work from within the motor ISR timers, in tick units
+#define QuickSetIntervalAxis1(r) (PIT_LDVAL1=r)
+#define QuickSetIntervalAxis2(r) (PIT_LDVAL2=r)
 
 // --------------------------------------------------------------------------------------------------
 // Fast port writing help, etc.

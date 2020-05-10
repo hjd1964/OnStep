@@ -132,18 +132,27 @@ void Timer1SetInterval(long iv, double rateRatio) {
 //--------------------------------------------------------------------------------------------------
 // Re-program interval for the motor timers
 
-// interval (r) is in (in microseconds*2) due to using HAL_FIXED_PRESCALE_16BIT_MOTOR_TIMERS 
-// for a maximum period of 0.032 seconds (16 bit, 65535 maximum interval)
+#define TIMER_RATE_MHZ 2L           // Mega2560 motor timers run at 2 MHz
+#define TIMER_RATE_16MHZ_TICKS 8L   // 16L/TIMER_RATE_MHZ, 8x slower than the default 16MHz
 
-// prepare to set Axis1/2 hw timers to interval (in microseconds*16), maximum time is about 134 seconds
-void PresetTimerInterval(long iv, float TPSM, volatile uint32_t *nextRate, volatile uint16_t *nextRep) {
-  iv=iv/8L;
-  // 0.0327 * 4096 = 134.21s
-  uint32_t i=iv; uint16_t t=1; while (iv>65536L) { t*=2; iv=i/t; if (t==4096) { iv=65535L; break; } }
-  cli(); *nextRate=(iv * TPSM) - 1L; *nextRep=t; sei();
+// prepare to set Axis1/2 hw timers to interval (in microseconds*16)
+void PresetTimerInterval(long iv, bool TPS, volatile uint32_t *nextRate, volatile uint16_t *nextRep) {
+  // maximum time is about 134 seconds
+  if (iv>2144000000) iv=2144000000;
+
+  // minimum time is 1 micro-second
+  if (iv<16) iv=16;
+
+  // TPS (timer pulse step) == false for SQW mode and double the timer rate
+  if (!TPS) iv/=2L;
+
+  iv/=TIMER_RATE_16MHZ_TICKS;
+  uint32_t reps = (iv/65536)+1;
+  uint32_t i = iv/reps-1; // has -1 since this is dropped right into a timer register
+  cli(); *nextRate=i; *nextRep=reps; sei();
 }
-
-// Must work from within the motor ISR timers, in microseconds*(F_COMP/1000000.0) units
+  
+// Must work from within the motor ISR timers, in tick units
 #define QuickSetIntervalAxis1(r) (OCR3A=r)
 #define QuickSetIntervalAxis2(r) (OCR4A=r)
 

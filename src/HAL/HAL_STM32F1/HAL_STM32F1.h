@@ -86,8 +86,6 @@ float HAL_MCU_Temperature(void) {
 // http://docs.leaflabs.com/static.leaflabs.com/pub/leaflabs/maple-docs/0.0.12/timers.html
 // Pause the timer while we're configuring it
 
-// frequency compensation (F_COMP/1000000.0) for adjusting microseconds to timer counts
-#define F_COMP 4000000.0
 #define ISR(f) void f (void)
 
 // Sidereal timer is on STM32 Hardware Timer 1
@@ -138,9 +136,9 @@ void HAL_Init_Timers_Motor() {
 
   // Set up period
   // 0.25... us per count (72/18 = 4MHz) 16.384 ms max, good resolution for accurate motor timing and still a reasonable range (for lower steps per degree)
-  unsigned long psf = F_CPU/4000000; // for example, 72000000/4000000 = 18
+  unsigned long psf = F_CPU/4000000;     // for example, 72000000/4000000 = 18
   Timer_Axis1.setPrescaleFactor(psf);
-  Timer_Axis1.setOverflow(65535); // allow enough time that the sidereal clock will tick
+  Timer_Axis1.setOverflow(65535);        // allow enough time that the sidereal clock will tick
 
   // Refresh the timer's count, prescale, and overflow
   Timer_Axis1.refresh();
@@ -159,7 +157,7 @@ void HAL_Init_Timers_Motor() {
 
   // Set up period
   Timer_Axis2.setPrescaleFactor(psf);
-  Timer_Axis2.setOverflow(65535); // allow enough time that the sidereal clock will tick
+  Timer_Axis2.setOverflow(65535);         // allow enough time that the sidereal clock will tick
 
   // Refresh the timer's count, prescale, and overflow
   Timer_Axis2.refresh();
@@ -176,7 +174,7 @@ void HAL_Init_Timers_Motor() {
   nvic_irq_set_priority(NVIC_TIMER3, 0);
 }
 
-// Set timer1 to interval (in 0.0625 microsecond units), for the 1/100 second sidereal timer
+// Set timer1 to interval in 1/16 microsecond units, for the 1/100 second sidereal timer
 void Timer1SetInterval(long iv, double rateRatio) {
   Timer_Sidereal.setOverflow(round((((double)iv/16.0)*6.0)/rateRatio)); // our "clock" ticks at 6MHz due to the pre-scaler setting
 }
@@ -184,14 +182,27 @@ void Timer1SetInterval(long iv, double rateRatio) {
 //--------------------------------------------------------------------------------------------------
 // Re-program interval for the motor timers
 
-// prepare to set Axis1/2 hw timers to interval (in microseconds*16), maximum time is about 134 seconds
-void PresetTimerInterval(long iv, float TPSM, volatile uint32_t *nextRate, volatile uint16_t *nextRep) {
-  // 0.0163 * 4096 = 134.21s
-  uint32_t i=iv; uint16_t t=1; while (iv>65536L*(4.0/TPSM)) { t*=2; iv=i/t; if (t==8192) { iv=65535L*(4.0/TPSM); break; } }
-  cli(); *nextRate=((F_COMP/1000000.0) * (iv*0.0625) * TPSM); *nextRep=t; sei();
+#define TIMER_RATE_MHZ 4L           // STM32 motor timers run at 4 MHz
+#define TIMER_RATE_16MHZ_TICKS 4L   // 16L/TIMER_RATE_MHZ, 4x slower than the default 16MHz
+
+// prepare to set Axis1/2 hw timers to interval (in 1/16 microsecond units)
+void PresetTimerInterval(long iv, bool TPS, volatile uint32_t *nextRate, volatile uint16_t *nextRep) {
+  // maximum time is about 134 seconds
+  if (iv>2144000000) iv=2144000000;
+
+  // minimum time is 1 micro-second
+  if (iv<16) iv=16;
+
+  // TPS (timer pulse step) == false for SQW mode and double the timer rate
+  if (!TPS) iv/=2L;
+
+  iv/=TIMER_RATE_16MHZ_TICKS;
+  uint32_t reps = (iv/65536)+1;
+  uint32_t i = iv/reps;
+  cli(); *nextRate=i; *nextRep=reps; sei();
 }
 
-// Must work from within the motor ISR timers, in microseconds*(F_COMP/1000000.0) units
+// Must work from within the motor ISR timers, in tick (TIMER_RATE_MHZ) units
 void QuickSetIntervalAxis1(uint32_t r) {
   Timer_Axis1.setOverflow(r);
 }

@@ -3,15 +3,15 @@
 
 #if STEP_WAVE_FORM == PULSE
   // motor timers at 1x rate
-  #define TIMER_PULSE_STEP_MULTIPLIER 1
+  #define TIMER_PULSE_STEP true
 #elif STEP_WAVE_FORM == DEDGE
   // motor timers at 1x rate
-  #define TIMER_PULSE_STEP_MULTIPLIER 1
+  #define TIMER_PULSE_STEP true
   volatile byte toggleStateAxis1 = 0;
   volatile byte toggleStateAxis2 = 0;
 #else
   // motor timers at 2x rate
-  #define TIMER_PULSE_STEP_MULTIPLIER 0.5
+  #define TIMER_PULSE_STEP false
   volatile boolean clearAxis1 = true;
   volatile boolean takeStepAxis1 = false;
   volatile boolean clearAxis2 = true;
@@ -215,11 +215,11 @@ void timerSupervisor(bool isCentiSecond) {
 
   // set the rates
   if (thisTimerRateAxis1 != isrTimerRateAxis1) {
-    PresetTimerInterval(thisTimerRateAxis1/PPSrateRatio, TIMER_PULSE_STEP_MULTIPLIER, &nextAxis1Rate, &slowAxis1Rep);
+    PresetTimerInterval(thisTimerRateAxis1/PPSrateRatio, TIMER_PULSE_STEP, &nextAxis1Rate, &slowAxis1Rep);
     isrTimerRateAxis1=thisTimerRateAxis1;
   }
   if (thisTimerRateAxis2 != isrTimerRateAxis2) {
-    PresetTimerInterval(thisTimerRateAxis2/PPSrateRatio, TIMER_PULSE_STEP_MULTIPLIER, &nextAxis2Rate, &slowAxis2Rep);
+    PresetTimerInterval(thisTimerRateAxis2/PPSrateRatio, TIMER_PULSE_STEP, &nextAxis2Rate, &slowAxis2Rep);
     isrTimerRateAxis2=thisTimerRateAxis2;
   }
 }
