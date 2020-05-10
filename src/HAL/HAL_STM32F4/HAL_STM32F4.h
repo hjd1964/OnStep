@@ -187,31 +187,16 @@ void PresetTimerInterval(long iv, bool TPS, volatile uint32_t *nextRate, volatil
 
   iv/=TIMER_RATE_16MHZ_TICKS;
   uint32_t reps = (iv/65536)+1;
-  uint32_t i = iv/reps; // no -1 for STM32 that's handled in the setOverflow() call
+  uint32_t i = iv/reps;
   cli(); *nextRate=i; *nextRep=reps; sei();
 }
 
 // Must work from within the motor ISR timers, in microseconds*(F_COMP/1000000.0) units
 void QuickSetIntervalAxis1(uint32_t r) {
-  //Timer_Axis1->pause();
-
   Timer_Axis1->setOverflow(r);
-
-  // Refresh the timer's count, prescale, and overflow
-  //Timer_Axis1->refresh();
-
-  // Start the timer counting
-  //Timer_Axis1->resume();
 }
 void QuickSetIntervalAxis2(uint32_t r) {
-  //Timer_Axis2->pause();
   Timer_Axis2->setOverflow(r);
-
-  // Refresh the timer's count, prescale, and overflow
-  //Timer_Axis2->refresh();
-
-  // Start the timer counting
-  //Timer_Axis2->resume();
 }
 
 // --------------------------------------------------------------------------------------------------
