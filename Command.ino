@@ -580,7 +580,20 @@ void processCommands() {
 //            Returns: HH:MM:SS#
 //            On devices with single precision fp several days up-time will cause loss of precision as additional mantissa digits are needed to represent hours
 //            Devices with double precision fp are limitated by sidereal clock overflow which takes 249 days
-      if (command[1] == 'L' && parameter[0] == 0)  { LMT=timeRange(UT1-timeZone); doubleToHms(reply,&LMT,PM_HIGH); booleanReply=false; } else 
+// :GLa#      Get Local Time in 24 hour format (high precision)
+//            Returns: HH:MM:SS.ss#
+//            On devices with single precision fp several days up-time will cause loss of precision as additional mantissa digits are needed to represent hours
+//            Devices with double precision fp are limitated by sidereal clock overflow which takes 249 days
+      if (command[1] == 'L') {
+        LMT=timeRange(UT1-timeZone);
+        if ( parameter[0] == 0)  {
+          doubleToHms(reply,&LMT,PM_HIGH); booleanReply=false;
+        } else 
+        if (parameter[0] == 'a' && parameter[1] == 0) {
+          doubleToHms(reply,&LMT,PM_HIGHEST); booleanReply=false;
+        }
+      }
+      else
 // :GM#       Get site 1 name
 // :GN#       Get site 2 name
 // :GO#       Get site 3 name
@@ -643,7 +656,17 @@ void processCommands() {
       } else 
 // :GS#       Get the Sidereal Time as sexagesimal value in 24 hour format
 //            Returns: HH:MM:SS#
-      if (command[1] == 'S' && parameter[0] == 0)  { f=LST(); doubleToHms(reply,&f,PM_HIGH); booleanReply=false; } else 
+// :GSa#      Get the Sidereal Time as sexagesimal value in 24 hour format, with high precision
+//            Returns HH:MM:SS.ss#
+      if (command[1] == 'S') {
+        f = LST();
+        if (parameter[0] == 0) {
+          doubleToHms(reply,&f,PM_HIGH); booleanReply=false;
+        } else 
+        if (parameter[0] == 'a' && parameter[1] == 0) {
+          doubleToHms(reply,&f,PM_HIGHEST); booleanReply=false;
+        }
+      } else
 // :GT#       Get tracking rate, 0.0 unless TrackingSidereal
 //            Returns: n.n# (OnStep returns more decimal places than LX200 standard)
       if (command[1] == 'T' && parameter[0] == 0)  {
