@@ -223,31 +223,31 @@ class weather {
           double f;
           if (phase == 0) { if (DS18B20.requestTemperatures(true)) phase++; return; }
     #if TELESCOPE_TEMPERATURE != OFF
-          if (phase == 50) { f = DS18B20.getTempC(_DS1820_address[0],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _tt=f; else _tt=100.0; phase++; return; } }
+          if (phase == 50) { f = DS18B20.getTempC(_DS1820_address[0],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _tt=f; phase++; return; } }
     #endif
     #if (FEATURE1_TEMP & DS_MASK) == DS1820
-          if (phase == 100) { f = DS18B20.getTempC(_DS1820_address[1],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _dh_t[0]=f; else _dh_t[0]=100.0; phase++; return; } }
+          if (phase == 100) { f = DS18B20.getTempC(_DS1820_address[1],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _dh_t[0]=f; phase++; return; } }
     #endif
     #if (FEATURE2_TEMP & DS_MASK) == DS1820
-          if (phase == 150) { f = DS18B20.getTempC(_DS1820_address[2],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _dh_t[1]=f; else _dh_t[1]=100.0; phase++; return; } }
+          if (phase == 150) { f = DS18B20.getTempC(_DS1820_address[2],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _dh_t[1]=f; phase++; return; } }
     #endif
     #if (FEATURE3_TEMP & DS_MASK) == DS1820
-          if (phase == 200) { f = DS18B20.getTempC(_DS1820_address[3],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _dh_t[2]=f; else _dh_t[2]=100.0; phase++; return; } }
+          if (phase == 200) { f = DS18B20.getTempC(_DS1820_address[3],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _dh_t[2]=f; phase++; return; } }
     #endif
     #if (FEATURE4_TEMP & DS_MASK) == DS1820
-          if (phase == 250) { f = DS18B20.getTempC(_DS1820_address[4],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _dh_t[3]=f; else _dh_t[3]=100.0; phase++; return; } }
+          if (phase == 250) { f = DS18B20.getTempC(_DS1820_address[4],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _dh_t[3]=f; phase++; return; } }
     #endif
     #if (FEATURE5_TEMP & DS_MASK) == DS1820
-          if (phase == 300) { f = DS18B20.getTempC(_DS1820_address[5],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _dh_t[4]=f; else _dh_t[4]=100.0; phase++; return; } }
+          if (phase == 300) { f = DS18B20.getTempC(_DS1820_address[5],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _dh_t[4]=f; phase++; return; } }
     #endif
     #if (FEATURE6_TEMP & DS_MASK) == DS1820
-          if (phase == 350) { f = DS18B20.getTempC(_DS1820_address[6],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _dh_t[5]=f; else _dh_t[5]=100.0; phase++; return; } }
+          if (phase == 350) { f = DS18B20.getTempC(_DS1820_address[6],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _dh_t[5]=f; phase++; return; } }
     #endif
     #if (FEATURE7_TEMP & DS_MASK) == DS1820
-          if (phase == 400) { f = DS18B20.getTempC(_DS1820_address[7],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _dh_t[6]=f; else _dh_t[6]=100.0; phase++; return; }}
+          if (phase == 400) { f = DS18B20.getTempC(_DS1820_address[7],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _dh_t[6]=f; phase++; return; } }
     #endif
     #if (FEATURE8_TEMP & DS_MASK) == DS1820
-          if (phase == 450) { f = DS18B20.getTempC(_DS1820_address[8],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _dh_t[7]=f; else _dh_t[7]=100.0; phase++; return; } }
+          if (phase == 450) { f = DS18B20.getTempC(_DS1820_address[8],true); if (Tpolling(f)) return; else { _DS1820_count++; if (Tvalid(f)) _dh_t[7]=f; phase++; return; } }
     #endif
         }
   #endif
@@ -393,7 +393,7 @@ class weather {
       return (fabs(f-DEVICE_POLLING_C) < 0.001);
     }
     bool Tvalid(double f) {
-      return (f > DEVICE_DISCONNECTED_C);
+      return !(fabs(f-DEVICE_DISCONNECTED_C) < 0.001);
     }
 #endif
 
