@@ -18,6 +18,12 @@
 #define HAL_PULSE_WIDTH 10000
 
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
+
+// automatically switch to built in serial
+#if FEATURE_LIST_DS == ON || defined(DEBUG_ON)
+  #define MEGA2560_ARDUINO_SERIAL_ON
+#endif
+
 #ifndef MEGA2560_ARDUINO_SERIAL_ON
   // SerialA is always enabled, SerialB and SerialC are optional
   #define HAL_SERIAL_B_ENABLED       // Enable support for RX1/TX1
