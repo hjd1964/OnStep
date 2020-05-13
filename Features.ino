@@ -21,11 +21,11 @@ void featuresPoll() {
   for (int i=0; i < 8; i++) {
     if (feature[i].purpose == DEW_HEATER) {
       feature[i].dewHeater->poll(ambient.getFeatureTemperature(0)-ambient.getDewPoint());
-      if ((feature[i].pin & DS_MASK) == DS2413) ambient.setDS2413State(i,feature[i].dewHeater->isOn());
+      if (isDS2413(feature[i].pin)) ambient.setDS2413State(i,feature[i].dewHeater->isOn());
     } else
     if (feature[i].purpose == INTERVALOMETER) {
       feature[i].intervalometer->poll();
-      if ((feature[i].pin & DS_MASK) == DS2413) ambient.setDS2413State(i,feature[i].intervalometer->isOn());
+      if (isDS2413(feature[i].pin)) ambient.setDS2413State(i,feature[i].intervalometer->isOn());
     }
   }
 #endif
@@ -120,5 +120,14 @@ void featuresSetCommand(char *parameter) {
       if (f >= 0 && f <= 255.0) feature[i].intervalometer->setCount(f); else commandError=CE_PARAM_RANGE;
     } else commandError=CE_PARAM_FORM;
   }
+}
+
+// work-around for Mega2560 64 bit conditional comparison bug ((feature[i].pin & DS_MASK) == DS2413)
+bool isDS2413(int64_t v) {
+  uint32_t l1 = (v & DS_MASK)&0xffff;
+  uint32_t h1 = (v & DS_MASK)>>32;
+  uint32_t l2 = DS2413&0xffff;
+  uint32_t h2 = DS2413>>32;
+  return (l1 == l2 && h1 == h2);
 }
 #endif
