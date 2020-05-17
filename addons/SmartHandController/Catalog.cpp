@@ -280,7 +280,7 @@ bool CatMgr::isFiltered() {
   if (_fm & FM_VAR_MAX_PER)   { if (isVarStarCatalog() && ((period()    >_fm_var_max) || (period()    <0))) return true; }
   if (_fm & FM_ABOVE_HORIZON) { if (alt()<0.0) return true; }
   if (_fm & FM_ALIGN_ALL_SKY) {
-    if (magnitude()>2.5) return true; // maximum magnitude 2.5
+    if (magnitude()>3.0) return true; // maximum magnitude 3.0
     if (alt()<10.0) return true;      // minimum 10 degrees altitude
     if (abs(dec())>80.0) return true; // minimum 10 degrees from the pole (for accuracy)
   }
