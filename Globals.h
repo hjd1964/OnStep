@@ -315,7 +315,6 @@ int     pecAnalogValue                  = 0;
 int     pecAutoRecord                   = 0;                 // for writing to PEC table to EEPROM
 long    wormSensePos                    = 0;                 // in steps
 boolean wormSensedAgain                 = false;             // indicates PEC index was found
-int     LastPecPinState                 = PEC_SENSE_STATE;                         
 boolean pecBufferStart                  = false;                                   
 fixed_t accPecGuideHA;                                       // for PEC, buffers steps to be recorded
 volatile double pecTimerRateAxis1 = 0.0;

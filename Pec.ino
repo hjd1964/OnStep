@@ -31,9 +31,14 @@ void pec() {
     wormSensedFirst=true;
   #elif PEC_SENSE >= 0
     // for analog sense, with 60 second delay before redetect
-    pecAnalogValue = analogRead(AnalogPecPin)
     long dist; if (wormSensePos > pecPos) dist=wormSensePos-pecPos; else dist=pecPos-wormSensePos;
-    if ((dist > StepsPerSecondAxis1*60.0) && (pecAnalogValue > PEC_SENSE)) {
+
+    static int lastValue=pecValue; pecValue = analogRead(AnalogPecPin);
+    #if PEC_SENSE_STATE == HIGH
+      if ((dist > StepsPerSecondAxis1*60.0) && (lastValue <= PEC_SENSE) && (pecValue > PEC_SENSE)) {
+    #else
+      if ((dist > StepsPerSecondAxis1*60.0) && (lastValue >= PEC_SENSE) && (pecValue < PEC_SENSE)) {
+    #endif
       wormSensePos=pecPos;
       wormSensedAgain=true;
       wormSensedFirst=true;
@@ -42,7 +47,9 @@ void pec() {
   #elif PEC_SENSE == ON || PEC_SENSE == ON_PULLUP || PEC_SENSE == ON_PULLDOWN
     // for digital sense, with 60 second delay before redetect
     long dist; if (wormSensePos > pecPos) dist=wormSensePos-pecPos; else dist=pecPos-wormSensePos;
-    if ((dist > StepsPerSecondAxis1*60.0) && (digitalRead(PecPin) == PEC_SENSE_STATE)) {
+
+    static int lastValue=pecValue; pecValue=digitalRead(PecPin);
+    if ((dist > StepsPerSecondAxis1*60.0) && (pecValue != lastValue) && (pecValue == PEC_SENSE_STATE)) {
       wormSensePos=pecPos;
       wormSensedAgain=true;
       wormSensedFirst=true;

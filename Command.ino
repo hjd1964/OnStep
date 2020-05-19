@@ -881,7 +881,7 @@ void processCommands() {
           if (parameter[0] == '9') { // 9n: Misc.
             switch (parameter[1]) {
               case '0': dtostrf(guideRates[currentPulseGuideRate]/15.0,2,2,reply); booleanReply=false; break;// pulse-guide rate
-              case '1': sprintf(reply,"%i",pecAnalogValue); booleanReply=false; break;                       // pec analog value
+              case '1': sprintf(reply,"%i",pecValue); booleanReply=false; break;                             // pec analog value
               case '2': dtostrf(maxRate/16.0,3,3,reply); booleanReply=false; break;                          // MaxRate (current)
               case '3': dtostrf((double)MaxRateDef,3,3,reply); booleanReply=false; break;                    // MaxRateDef (default)
               case '4': if (meridianFlip == MeridianFlipNever) { sprintf(reply,"%d N",getInstrPierSide()); } else { sprintf(reply,"%d",getInstrPierSide()); } booleanReply=false; break; // pierSide (N if never)
