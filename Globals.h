@@ -311,7 +311,13 @@ long    lastPecIndex                    = -1;
 int     pecBufferSize                   = PEC_BUFFER_SIZE;
 long    pecIndex                        = 0;
 long    pecIndex1                       = 0;
-int     pecAnalogValue                  = 0;
+#if PEC_SENSE == ON || PEC_SENSE == ON_PULLUP || PEC_SENSE == ON_PULLDOWN
+  int   pecValue                        = PEC_SENSE_STATE;
+#elif PEC_SENSE_STATE == HIGH
+  int   pecValue                        = 1023;
+#else
+  int   pecValue                        = 0;
+#endif
 int     pecAutoRecord                   = 0;                 // for writing to PEC table to EEPROM
 long    wormSensePos                    = 0;                 // in steps
 boolean wormSensedAgain                 = false;             // indicates PEC index was found
