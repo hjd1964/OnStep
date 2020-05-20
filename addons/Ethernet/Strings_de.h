@@ -366,7 +366,7 @@
 #define L_WIFI_ADVICE4 "deaktivieren Sie den Access Point Modus. Wenn die Steuerung keine Verbindung zu Ihrem Heim-WLAN herstellen kann, wird "
 #define L_WIFI_ADVICE5 "der Access Point Modus automatisch wieder aktiviert. Dies ist n&uuml;tzlich, wenn Sie sich an einem dunklen Ort befinden und/oder "
 #define L_WIFI_ADVICE6 "um sich vor einer Aussperrung zu sch&uuml;tzen.<br/><br/>"
-#define L_WIFI_ADVICE7 "Wenn Sie vom WLAN ausgeschlossen sind, m&uuml;ssen Sie die Arduino IDE verwenden, um den ESP8266 Flash-Speicher zur&uuml;ckzusetzen (und somit zu den Standardeinstellungen zur&uuml;ckzukehren)."
+#define L_WIFI_ADVICE7 "Wenn Sie vom WLAN ausgeschlossen sind, m&uuml;ssen Sie die Arduino IDE verwenden, um den ESP Flash-Speicher zur&uuml;ckzusetzen (und somit zu den Standardeinstellungen zur&uuml;ckzukehren)."
 #define L_WIFI_ADVICE8 "&Auml;ndern Sie im Men&uuml; Arduino Tools die Option Erase Flash 'Only Sketch' auf Erase Flash 'All Flash Contents' "
 #define L_WIFI_ADVICE9 "und laden Sie die WiFi-Bluetooth Firmware erneut hoch."
 
@@ -376,7 +376,7 @@
 #define L_DOWN_MESSAGE1 "Aus- und Wiedereinschalten kann helfen, wenn es eine Unstimmigkeit mit der Baudrate gibt<br /><br />"
 #define L_DOWN_MESSAGE2 "Andere m&ouml;gliche Gr&uuml;nde:<br /><ul>"
 #define L_DOWN_MESSAGE3 "Inkorrekt konfigurierte OnStep Baudrate."
-#define L_DOWN_MESSAGE4A "Inkorrekt konfigurierte ESP8266 Baudrate."
+#define L_DOWN_MESSAGE4A "Inkorrekt konfigurierte ESP Baudrate."
 #define L_DOWN_MESSAGE4B "Inkorrekt konfigurierte MCU Baudrate."
 #define L_DOWN_MESSAGE6 "Inkorrekte Verkabelung der  COM-Ports (oder Hardwareschaden wenn RX/TX vertauscht wurden.)"
 #define L_DOWN_MESSAGE7 "Incorrekte Verkabelung der Stromversorgungs-Pins. Masse (GND) muss zwischen OnStep's MCU und der MCU des Addon's verbunden sein."

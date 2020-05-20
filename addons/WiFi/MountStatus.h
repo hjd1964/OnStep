@@ -201,7 +201,7 @@ class MountStatus {
 
             if (strlen(name_str)>10) name_str[11]=0;
             strcpy(_feature[i].name,name_str);
-            if (purpose_str) { _feature[i].purpose=atoi(purpose_str); Serial.println("#"); }
+            if (purpose_str) _feature[i].purpose=atoi(purpose_str);
 
             _featureFound=true;
           }

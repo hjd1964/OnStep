@@ -9,7 +9,7 @@
 
 #if ENCODERS == ON
 
-#ifdef ESP8266
+#if defined(ESP8266) || defined(ESP32)
   #include <Esp.h>
 #endif
 
@@ -51,7 +51,7 @@ volatile int32_t __p1,__p2;
   volatile uint32_t usPerBinTickMin =(double)usPerTick*(double)AXIS1_ENC_BIN_AVG*MIN_ENC_PERIOD;
   volatile uint32_t usPerBinTickMax =(double)usPerTick*(double)AXIS1_ENC_BIN_AVG*MAX_ENC_PERIOD;
 #endif
-#if defined(ESP8266)
+#if defined(ESP8266) || defined(ESP32)
   volatile uint32_t clocksPerTickMin=(double)usPerTick*(double)ESP.getCpuFreqMHz()*MIN_ENC_PERIOD;
   volatile uint32_t clocksPerTickMax=(double)usPerTick*(double)ESP.getCpuFreqMHz()*MAX_ENC_PERIOD;
 #elif defined(__MK20DX256__)
@@ -61,7 +61,7 @@ volatile int32_t __p1,__p2;
   volatile uint32_t clocksPerTickMin=(double)usPerTick*MIN_ENC_PERIOD;
   volatile uint32_t clocksPerTickMax=(double)usPerTick*MAX_ENC_PERIOD;
 #endif
-#if defined(ESP8266)
+#if defined(ESP8266) || defined(ESP32)
   #define GetClockCount ESP.getCycleCount()
   #define ClockCountToMicros ((uint32_t)ESP.getCpuFreqMHz())
 #elif defined(__MK20DX256__)

@@ -357,7 +357,7 @@
 #define L_WIFI_ADVICE4 "disable Access Point mode. If OnStep cannot connect to your home WiFi network it will "
 #define L_WIFI_ADVICE5 "automatically re-enable Station mode; this is useful when you are away at a dark site and/or "
 #define L_WIFI_ADVICE6 "to guard against becoming locked out.<br/><br/>"
-#define L_WIFI_ADVICE7 "If locked out of WiFi you can use the Arduino IDE to reset the ESP8266 flash memory (and "
+#define L_WIFI_ADVICE7 "If locked out of WiFi you can use the Arduino IDE to reset the ESP flash memory (and "
 #define L_WIFI_ADVICE8 "hence go back to defaults.) From the Arduino Tools menu, change Erase Flash 'Only Sketch' "
 #define L_WIFI_ADVICE9 "to Erase Flash 'All Flash Contents' and upload the WiFi-Bluetooth sketch again."
 
@@ -367,7 +367,7 @@
 #define L_DOWN_MESSAGE1 "Powering off/on again can help if there is a baud rate mis-match (caused by OnStep restarting.)<br /><br />"
 #define L_DOWN_MESSAGE2 "Other possible causes:<br /><ul>"
 #define L_DOWN_MESSAGE3 "Incorrectly configured OnStep baud rate."
-#define L_DOWN_MESSAGE4A "Incorrectly configured ESP8266 baud rate."
+#define L_DOWN_MESSAGE4A "Incorrectly configured ESP baud rate."
 #define L_DOWN_MESSAGE4B "Incorrectly configured MCU baud rate."
 #define L_DOWN_MESSAGE6 "Incorrect wiring of the com ports (or damaged h/w if RX/TX were EVER wired incorrectly.)"
 #define L_DOWN_MESSAGE7 "Incorrect wiring of power supply pins.  Gnd must be shared between OnStep's MCU and the Addon's MCU."

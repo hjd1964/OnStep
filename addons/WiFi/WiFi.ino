@@ -335,21 +335,31 @@ Again:
 #endif
 
 TryAgain:
-  if ((stationEnabled) && (!stationDhcpEnabled)) WiFi.config(wifi_sta_ip, wifi_sta_gw, wifi_sta_sn);
-  if (accessPointEnabled) WiFi.softAPConfig(wifi_ap_ip, wifi_ap_gw, wifi_ap_sn);
-  
   if (accessPointEnabled && !stationEnabled) {
     WiFi.softAP(wifi_ap_ssid, wifi_ap_pwd, wifi_ap_ch);
+    delay(2000);
+    WiFi.softAPConfig(wifi_ap_ip, wifi_ap_gw, wifi_ap_sn);
+    
     WiFi.mode(WIFI_AP);
   } else
   if (!accessPointEnabled && stationEnabled) {
     WiFi.softAPdisconnect(true);
+
     WiFi.begin(wifi_sta_ssid, wifi_sta_pwd);
+    delay(2000);
+    if (!stationDhcpEnabled) WiFi.config(wifi_sta_ip, wifi_sta_gw, wifi_sta_sn);
+
     WiFi.mode(WIFI_STA);
   } else
   if (accessPointEnabled && stationEnabled) {
     WiFi.softAP(wifi_ap_ssid, wifi_ap_pwd, wifi_ap_ch);
+    delay(2000);
+    WiFi.softAPConfig(wifi_ap_ip, wifi_ap_gw, wifi_ap_sn);
+
     WiFi.begin(wifi_sta_ssid, wifi_sta_pwd);
+    delay(2000);
+    if (!stationDhcpEnabled) WiFi.config(wifi_sta_ip, wifi_sta_gw, wifi_sta_sn);
+
     WiFi.mode(WIFI_AP_STA);
   }
 

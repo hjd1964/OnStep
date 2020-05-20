@@ -29,7 +29,7 @@ const char html_bad_comms_message[] PROGMEM =
   "<br /><bigger><font class=\"y\">" L_DOWN_TITLE "</font></bigger><br /><br />"
   L_DOWN_MESSAGE1 L_DOWN_MESSAGE2
   " <li>" L_DOWN_MESSAGE3 "</li><br />"
-#ifdef ESP8266
+#if defined(ESP8266) || defined(ESP32)
   " <li>" L_DOWN_MESSAGE4A "</li><br />"
 #else
   " <li>" L_DOWN_MESSAGE4B "</li><br />"

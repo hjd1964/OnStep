@@ -357,7 +357,7 @@
 #define L_WIFI_ADVICE4 "停用接入点模式。如果控制器无法连接到您的家庭WLAN "
 #define L_WIFI_ADVICE5 "接入点模式会自动重新激活。如果您在黑暗的地方和/或，这很有用 "
 #define L_WIFI_ADVICE6 "保护自己不受锁定。<br/> <br/>"
-#define L_WIFI_ADVICE7 "如果您不属于WLAN，则必须使用Arduino IDE重置ESP8266闪存（并因此返回默认设置）"
+#define L_WIFI_ADVICE7 "如果您不属于WLAN，则必须使用Arduino IDE重置ESP闪存（并因此返回默认设置）"
 #define L_WIFI_ADVICE8 "在Arduino工具菜单中，将“擦除Flash'仅草图'”选项更改为“擦除Flash'所有Flash内容 "
 #define L_WIFI_ADVICE9 "然后再次上传WiFi蓝牙固件."
 
@@ -367,7 +367,7 @@
 #define L_DOWN_MESSAGE1 "如果波特率不符，请重新打开电源会有所帮助。<br /> <br />"
 #define L_DOWN_MESSAGE2 "其他可能的原因：<br /> <ul>"
 #define L_DOWN_MESSAGE3 "配置错误的OnStep波特率."
-#define L_DOWN_MESSAGE4A "ESP8266波特率配置错误."
+#define L_DOWN_MESSAGE4A "ESP波特率配置错误."
 #define L_DOWN_MESSAGE4B "配置错误的MCU波特率."
 #define L_DOWN_MESSAGE6 "COM端口的电缆连接不正确（如果交换了RX / TX，则会损坏硬件。）"
 #define L_DOWN_MESSAGE7 "电源引脚的接线错误。OnStep的MCU与附加模块的MCU之间必须接地（GND）"
