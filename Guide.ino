@@ -27,10 +27,13 @@ button st4w;
 
 #endif
 
+unsigned long guideStartTime             = 0;
 long          guideTimeRemainingAxis1    = -1;
 unsigned long guideTimeThisIntervalAxis1 = -1;
 long          guideTimeRemainingAxis2    = -1;
 unsigned long guideTimeThisIntervalAxis2 = -1;
+double        guideTimerCustomRateAxis1  = 0.0;
+double        guideTimerCustomRateAxis2  = 0.0;
 
 // initialize guiding
 void initGuide() {
@@ -89,6 +92,11 @@ void guide() {
         // don't count time if in backlash
         guideTimeThisIntervalAxis2=micros();
       }
+    }
+
+    // set rates for spiral guide
+    if (spiralGuide) {
+      if ((guideDirAxis1 == 'e' || guideDirAxis1 == 'w') && (guideDirAxis2 == 'n' || guideDirAxis2 == 's')) guideSpiralPoll(); else stopGuideSpiral();
     }
   }
 }
@@ -208,24 +216,108 @@ void stopGuideAxis2() {
   }
 }
 
+// start a guide spiral, guideRate is the rate selection (0 to 9), guideDuration is in ms (0 to ignore) 
+double spiralScaleAxis1=0;
+CommandErrors startGuideSpiral(int guideRate, long guideDuration) {
+  if (faultAxis1 || faultAxis2)            return CE_SLEW_ERR_HARDWARE_FAULT;
+  if (!axis1Enabled)                       return CE_SLEW_ERR_IN_STANDBY;
+  if (parkStatus == Parked)                return CE_SLEW_ERR_IN_PARK;
+  if (trackingSyncInProgress())            return CE_MOUNT_IN_MOTION;
+  if (trackingState == TrackingMoveTo)     return CE_MOUNT_IN_MOTION;
+  if (guideDirAxis1 || guideDirAxis2)      { if (spiralGuide) stopGuideSpiral(); return CE_NONE; }
+  if (abs(getInstrAxis2() > 75.0))         return CE_SLEW_ERR_OUTSIDE_LIMITS;
+#if AXIS2_TANGENT_ARM == ON
+  if (!guideNorthOk() || !guideSouthOk())  return CE_SLEW_ERR_OUTSIDE_LIMITS;
+#endif
+  if ((generalError == ERR_ALT_MIN ||
+       generalError == ERR_LIMIT_SENSE ||
+       generalError == ERR_DEC ||
+       generalError == ERR_AZM ||
+       generalError == ERR_UNDER_POLE ||
+       generalError == ERR_MERIDIAN ||
+       generalError == ERR_ALT_MAX))       return CE_SLEW_ERR_OUTSIDE_LIMITS;
+
+  spiralGuide = guideRate;
+  if (spiralGuide < 3) spiralGuide=3;
+  if (spiralGuide > 8) spiralGuide=8;
+
+  guideStartTime=millis();
+  guideTimeThisIntervalAxis1=micros();
+  guideTimeRemainingAxis1=guideDuration*1000L;
+  guideTimeThisIntervalAxis2=micros();
+  guideTimeRemainingAxis2=guideDuration*1000L;
+
+  spiralScaleAxis1=cos(getInstrAxis2()/Rad);
+
+  guideSpiralPoll();
+
+  return CE_NONE;
+}
+
+// stop guide spiral
+void stopGuideSpiral() {
+  spiralGuide=0;
+  cli();
+  if (guideDirAxis1) guideDirAxis1='b';
+  if (guideDirAxis2) guideDirAxis2='b';
+  sei();
+}
+
+// set guide spiral rates in RA/Azm and Dec/Alt, rate is in x-sidereal, guideElapsed time is in ms 
+void guideSpiralPoll() {
+  // current elapsed time in seconds
+  double T=((long)(millis()-guideStartTime))/1000.0;
+
+  // actual rate we'll be using (in arc-seconds per second)
+  double rate=guideRates[spiralGuide];
+  if (rate > 1800.0) rate=1800.0;
+
+  // apparaent FOV (in arc-seconds)
+  double fov=rate*2.0;
+
+  // current radius assuming movement at 2 seconds per fov
+  double radius=pow(T/6.28318,1.0/1.74);
+
+  // current angle in radians
+  double angle =(radius-trunc(radius))*6.28318;
+
+  // calculate the Axis rates for this moment
+  guideTimerCustomRateAxis1=(rate/15.0)*cos(angle);
+  guideTimerCustomRateAxis2=(rate/15.0)*sin(angle);
+
+  // set direction
+  if (guideTimerCustomRateAxis1 < 0) { guideTimerCustomRateAxis1=fabs(guideTimerCustomRateAxis1); guideDirAxis1='e'; } else guideDirAxis1='w';
+  if (guideTimerCustomRateAxis2 < 0) { guideTimerCustomRateAxis2=fabs(guideTimerCustomRateAxis2); guideDirAxis2='s'; } else guideDirAxis2='n';
+
+  // adjust Axis1 due to spherical coordinates
+  guideTimerCustomRateAxis1/=spiralScaleAxis1;
+
+  // limit Axis1 to speeds we can reach
+  double rateXPerSec = RateToXPerSec/(maxRate/16.0);
+  if (guideTimerCustomRateAxis1 > rateXPerSec) guideTimerCustomRateAxis1=rateXPerSec;
+
+  // activate the new guide rates
+  enableGuideRate(-1);
+  if (guideDirAxis1 == 'e') { cli(); guideTimerRateAxis1=-guideTimerBaseRateAxis1; sei(); }
+  if (guideDirAxis1 == 'w') { cli(); guideTimerRateAxis1= guideTimerBaseRateAxis1; sei(); }
+  if (guideDirAxis2 == 's') { cli(); guideTimerRateAxis2=-guideTimerBaseRateAxis2; sei(); } 
+  if (guideDirAxis2 == 'n') { cli(); guideTimerRateAxis2= guideTimerBaseRateAxis2; sei(); }
+}
+
 // custom guide rate in RA or Azm, rate is in x-sidereal, guideDuration is in ms (0 to ignore) 
-double guideTimerCustomRateAxis1 = 0.0;
 bool customGuideRateAxis1(double rate, long guideDuration) {
   guideTimerCustomRateAxis1=rate;
   enableGuideRate(-1);
   if ((parkStatus == NotParked) && (trackingState != TrackingMoveTo) && (axis1Enabled) && (guideDirAxis1)) {
     guideTimeThisIntervalAxis1=micros();
     guideTimeRemainingAxis1=guideDuration*1000L;
-    cli();
-    if (guideDirAxis1 == 'e') guideTimerRateAxis1=-guideTimerBaseRateAxis1;
-    if (guideDirAxis1 == 'w') guideTimerRateAxis1=guideTimerBaseRateAxis1; 
-    sei();
+    if (guideDirAxis1 == 'e') { cli(); guideTimerRateAxis1=-guideTimerBaseRateAxis1; sei(); }
+    if (guideDirAxis1 == 'w') { cli(); guideTimerRateAxis1= guideTimerBaseRateAxis1; sei(); }
   } else return false;
   return true;
 }
 
 // custom guide rate in Dec or Alt, rate is in x-sidereal, guideDuration is in ms (0 to ignore)
-double guideTimerCustomRateAxis2 = 0.0;
 bool customGuideRateAxis2(double rate, long guideDuration) {
   guideTimerCustomRateAxis2=rate;
   enableGuideRate(-1);

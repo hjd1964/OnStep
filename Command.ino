@@ -1255,16 +1255,22 @@ void processCommands() {
           } else commandError=CE_PARAM_RANGE;
         } else commandError=CE_PARAM_FORM;
       } else
-// :Me# :Mw#  Move Telescope East or West at current slew rate
+// :Me# :Mw#  Move Telescope East or West at current guide rate
 //            Returns: Nothing
       if ((command[1] == 'e' || command[1] == 'w') && parameter[0] == 0) {
         commandError=startGuideAxis1(command[1],currentGuideRate,GUIDE_TIME_LIMIT*1000);
         booleanReply=false;
       } else
-// :Mn# :Ms#  Move Telescope North or South at current slew rate
+// :Mn# :Ms#  Move Telescope North or South at current guide rate
 //            Returns: Nothing
       if ((command[1] == 'n' || command[1] == 's') && parameter[0] == 0) {
         commandError=startGuideAxis2(command[1],currentGuideRate,GUIDE_TIME_LIMIT*1000);
+        booleanReply=false;
+      } else
+// :Mp#  Move Telescope for sPiral search at current guide rate
+//            Returns: Nothing
+      if ((command[1] == 'p') && parameter[0] == 0) {
+        commandError=startGuideSpiral(currentGuideRate,GUIDE_SPIRAL_TIME_LIMIT*1000);
         booleanReply=false;
       } else
 
@@ -2148,9 +2154,14 @@ void decMaxLimit() {
   }
 }
 
-// stops all motion except guiding
+// stops all motion except most guiding
 void stopLimit() {
-  if (trackingState == TrackingMoveTo) { if (!abortSlew) abortSlew=StartAbortSlew; } else trackingState=TrackingNone;
+  if (trackingState == TrackingMoveTo) {
+    if (!abortSlew) abortSlew=StartAbortSlew;
+  } else {
+    trackingState=TrackingNone;
+    if (spiralGuide) stopGuideSpiral();
+  }
 }
 
 // stops all motion including guiding
