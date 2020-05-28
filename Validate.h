@@ -77,6 +77,25 @@
 // automatically set MaxRate from SLEW_RATE_BASE_DESIRED
 #define MaxRate ((1000000.0/SLEW_RATE_BASE_DESIRED)/AXIS1_STEPS_PER_DEGREE)
 
+// automatically set focuser/rotator step rate (or focuser DC pwm freq.) from AXISn_SLEW_RATE_DESIRED
+#ifndef AXIS3_STEP_RATE_MAX
+  #define AXIS3_STEP_RATE_MAX (1000.0/(AXIS3_SLEW_RATE_DESIRED*AXIS3_STEPS_PER_DEGREE))
+#endif
+#ifndef AXIS4_STEP_RATE_MAX
+  #if AXIS5_DRIVER_DC_MODE == ON
+    #define AXIS4_STEP_RATE_MAX (1000.0/(AXIS4_SLEW_RATE_DESIRED*10.0))
+  #else
+    #define AXIS4_STEP_RATE_MAX (1000.0/(AXIS4_SLEW_RATE_DESIRED*AXIS4_STEPS_PER_MICRON))
+  #endif
+#endif
+#ifndef AXIS5_STEP_RATE_MAX
+  #if AXIS5_DRIVER_DC_MODE == ON
+    #define AXIS5_STEP_RATE_MAX (1000.0/(AXIS5_SLEW_RATE_DESIRED*10.0))
+  #else
+    #define AXIS5_STEP_RATE_MAX (1000.0/(AXIS5_SLEW_RATE_DESIRED*AXIS5_STEPS_PER_MICRON))
+  #endif
+#endif
+
 // automatically calculate the pecBufferSize
 #if MOUNT_TYPE == ALTAZM
   #define PEC_BUFFER_SIZE 0
@@ -719,10 +738,20 @@
   #error "Configuration (Config.h): Setting AXIS3_LIMIT_MAX invalid, use a number between 0 and 360 (degrees.)"
 #endif
 
+#if !defined(AXIS4_SLEW_RATE_DESIRED) && !defined(AXIS4_STEP_RATE_MAX)
+  #error "Configuration (Config.h): Setting AXIS4_SLEW_RATE_DESIRED must be present!"
+#elif AXIS4_DRIVER_DC_MODE == OFF && (AXIS4_SLEW_RATE_DESIRED < 200 || AXIS4_SLEW_RATE_DESIRED > 5000)
+  #error "Configuration (Config.h): Setting AXIS4_SLEW_RATE_DESIRED invalid, use a number between 200 and 5000 (micrometers per second.)"
+#elif AXIS4_DRIVER_DC_MODE == ON && (AXIS4_SLEW_RATE_DESIRED < 10 || AXIS4_SLEW_RATE_DESIRED > 100)
+  #error "Configuration (Config.h): Setting AXIS4_SLEW_RATE_DESIRED invalid, use a number between 10 and 100%."
+#endif
+
 #ifndef AXIS4_LIMIT_MIN_RATE
   #error "Configuration (Config.h): Setting AXIS4_LIMIT_MIN_RATE must be present!"
-#elif AXIS4_LIMIT_MIN_RATE < 1 || AXIS4_LIMIT_MIN_RATE > 1000
+#elif AXIS4_DRIVER_DC_MODE == OFF && (AXIS4_LIMIT_MIN_RATE < 1 || AXIS4_LIMIT_MIN_RATE > 1000)
   #error "Configuration (Config.h): Setting AXIS4_LIMIT_MIN_RATE invalid, use a number between 1 and 1000 (micrometers per second.)"
+#elif AXIS4_DRIVER_DC_MODE == ON && (AXIS4_LIMIT_MIN_RATE < 10 || AXIS4_LIMIT_MIN_RATE > 100) 
+  #error "Configuration (Config.h): Setting AXIS4_LIMIT_MIN_RATE invalid, use a number between 10 and 100%."
 #endif
 
 #ifndef AXIS4_LIMIT_MIN
@@ -737,10 +766,20 @@
   #error "Configuration (Config.h): Setting AXIS4_LIMIT_MAX invalid, use a number between 0 and 500 (mm) but > AXIS4_LIMIT_MIN."
 #endif
 
+#if !defined(AXIS5_SLEW_RATE_DESIRED) && !defined(AXIS5_STEP_RATE_MAX)
+  #error "Configuration (Config.h): Setting AXIS5_SLEW_RATE_DESIRED must be present!"
+#elif AXIS5_DRIVER_DC_MODE == OFF && (AXIS5_SLEW_RATE_DESIRED < 200 || AXIS5_SLEW_RATE_DESIRED > 5000) 
+  #error "Configuration (Config.h): Setting AXIS5_SLEW_RATE_DESIRED invalid, use a number between 200 and 5000 (micrometers per second.)"
+#elif AXIS5_DRIVER_DC_MODE == ON && (AXIS5_SLEW_RATE_DESIRED < 10 || AXIS5_SLEW_RATE_DESIRED > 100) 
+  #error "Configuration (Config.h): Setting AXIS5_SLEW_RATE_DESIRED invalid, use a number between 10 and 100%."
+#endif
+
 #ifndef AXIS5_LIMIT_MIN_RATE
   #error "Configuration (Config.h): Setting AXIS5_LIMIT_MIN_RATE must be present!"
-#elif AXIS5_LIMIT_MIN_RATE < 1 || AXIS5_LIMIT_MIN_RATE > 1000
+#elif AXIS5_DRIVER_DC_MODE == OFF && (AXIS5_LIMIT_MIN_RATE < 1 || AXIS5_LIMIT_MIN_RATE > 1000)
   #error "Configuration (Config.h): Setting AXIS5_LIMIT_MIN_RATE invalid, use a number between 1 and 1000 (micrometers per second.)"
+#elif AXIS5_DRIVER_DC_MODE == ON && (AXIS5_LIMIT_MIN_RATE < 10 || AXIS5_LIMIT_MIN_RATE > 100) 
+  #error "Configuration (Config.h): Setting AXIS5_LIMIT_MIN_RATE invalid, use a number between 10 and 100%."
 #endif
 
 #ifndef AXIS5_LIMIT_MIN
