@@ -740,9 +740,9 @@
 
 #if !defined(AXIS4_SLEW_RATE_DESIRED) && !defined(AXIS4_STEP_RATE_MAX)
   #error "Configuration (Config.h): Setting AXIS4_SLEW_RATE_DESIRED must be present!"
-#elif AXIS4_DRIVER_DC_MODE == OFF && (AXIS4_SLEW_RATE_DESIRED < 200 || AXIS4_SLEW_RATE_DESIRED > 5000)
+#elif defined(AXIS4_SLEW_RATE_DESIRED) && AXIS4_DRIVER_DC_MODE == OFF && (AXIS4_SLEW_RATE_DESIRED < 200 || AXIS4_SLEW_RATE_DESIRED > 5000)
   #error "Configuration (Config.h): Setting AXIS4_SLEW_RATE_DESIRED invalid, use a number between 200 and 5000 (micrometers per second.)"
-#elif AXIS4_DRIVER_DC_MODE == ON && (AXIS4_SLEW_RATE_DESIRED < 10 || AXIS4_SLEW_RATE_DESIRED > 100)
+#elif defined(AXIS4_SLEW_RATE_DESIRED) &&AXIS4_DRIVER_DC_MODE == ON && (AXIS4_SLEW_RATE_DESIRED < 10 || AXIS4_SLEW_RATE_DESIRED > 100)
   #error "Configuration (Config.h): Setting AXIS4_SLEW_RATE_DESIRED invalid, use a number between 10 and 100%."
 #endif
 
@@ -768,9 +768,9 @@
 
 #if !defined(AXIS5_SLEW_RATE_DESIRED) && !defined(AXIS5_STEP_RATE_MAX)
   #error "Configuration (Config.h): Setting AXIS5_SLEW_RATE_DESIRED must be present!"
-#elif AXIS5_DRIVER_DC_MODE == OFF && (AXIS5_SLEW_RATE_DESIRED < 200 || AXIS5_SLEW_RATE_DESIRED > 5000) 
+#elif defined(AXIS5_SLEW_RATE_DESIRED) && AXIS5_DRIVER_DC_MODE == OFF && (AXIS5_SLEW_RATE_DESIRED < 200 || AXIS5_SLEW_RATE_DESIRED > 5000) 
   #error "Configuration (Config.h): Setting AXIS5_SLEW_RATE_DESIRED invalid, use a number between 200 and 5000 (micrometers per second.)"
-#elif AXIS5_DRIVER_DC_MODE == ON && (AXIS5_SLEW_RATE_DESIRED < 10 || AXIS5_SLEW_RATE_DESIRED > 100) 
+#elif defined(AXIS5_SLEW_RATE_DESIRED) && AXIS5_DRIVER_DC_MODE == ON && (AXIS5_SLEW_RATE_DESIRED < 10 || AXIS5_SLEW_RATE_DESIRED > 100) 
   #error "Configuration (Config.h): Setting AXIS5_SLEW_RATE_DESIRED invalid, use a number between 10 and 100%."
 #endif
 
