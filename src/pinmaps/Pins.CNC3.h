@@ -14,7 +14,7 @@
 #define Aux3                 21     // Home SW for Axis1, or I2C SDA {assuming default SCL/SDA pins are present}
 #define Aux4                 22     // Home SW for Axis2, or I2C SCL
 #define Aux7                 39     // Limit SW, PPS, etc.
-#define Aux8                 19     // {was 25} OneWire, Status LED, Status2 LED, Reticle LED, etc.
+#define Aux8                 23     // {was 25} OneWire, Status LED, Status2 LED, Reticle LED, etc.
 
 // Misc. pins
 #ifndef OneWirePin
@@ -69,7 +69,7 @@
 
 // For focuser1 stepper driver
 #define Axis4_EN             -1     // Enable {enable pin disabled so focuser/rotator doesn't impact main axes EN state}
-#define Axis4_STEP           23     // {was 19} Step
+#define Axis4_STEP           19     // Step
 #define Axis4_DIR            14     // {was 15} Dir
 
 // For focuser2 stepper driver
