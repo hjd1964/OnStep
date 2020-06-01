@@ -64,17 +64,17 @@
 
 // For rotator stepper driver
 #define Axis3_EN             -1     // Enable {enable pin disabled so focuser/rotator doesn't impact main axes EN state}
-#define Axis3_STEP           17     // {was 2} Step
+#define Axis3_STEP           19     // {was 2} Step
 #define Axis3_DIR            14     // {was 15} Dir
 
 // For focuser1 stepper driver
 #define Axis4_EN             -1     // Enable {enable pin disabled so focuser/rotator doesn't impact main axes EN state}
-#define Axis4_STEP           19     // Step
+#define Axis4_STEP           17     // Step
 #define Axis4_DIR            14     // {was 15} Dir
 
 // For focuser2 stepper driver
 #define Axis5_EN             -1     // Enable {enable pin disabled so focuser/rotator doesn't impact main axes EN state}
-#define Axis5_STEP           17     // {was 2} Step
+#define Axis5_STEP           19     // {was 2} Step
 #define Axis5_DIR            14     // {was 15} Dir
 
 // ST4 interface
