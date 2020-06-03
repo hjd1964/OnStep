@@ -273,7 +273,7 @@ void guideSpiralPoll() {
   if (rate > 1800.0) rate=1800.0;
 
   // apparaent FOV (in arc-seconds)
-  double fov=rate*2.0;
+  // double fov=rate*2.0;
 
   // current radius assuming movement at 2 seconds per fov
   double radius=pow(T/6.28318,1.0/1.74);
