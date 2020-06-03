@@ -41,13 +41,12 @@ volatile long runTimerRateAxis2=0;
 volatile uint32_t nextAxis1Rate = 100000UL;
 volatile uint16_t slowAxis1Cnt = 0;
 volatile uint16_t slowAxis1Rep = 1;
-volatile long timerDirAxis1 = 0;
 volatile long thisTimerRateAxis1 = 10000UL;
 
 volatile uint32_t nextAxis2Rate = 100000UL;
 volatile uint16_t slowAxis2Cnt = 0;
 volatile uint16_t slowAxis2Rep = 1;
-volatile long timerDirAxis2 = 0;
+
 volatile long thisTimerRateAxis2 = 10000UL;
 
 // set Timer1 master sidereal clock to interval (in microseconds*16)

@@ -168,6 +168,7 @@ double origTargetRA                     = 0.0;               // holds the RA for
 double newTargetRA                      = 0.0;               // holds the RA for gotos after conversion to observed place
 fixed_t origTargetAxis1;
 volatile long stepAxis1=1;
+volatile long timerDirAxis1 = 0;
 
 volatile long posAxis2                  = 0;                 // declination position in steps
 volatile long startAxis2                = 0;                 // declination of goto start position in steps
@@ -177,6 +178,7 @@ double origTargetDec                    = 0.0;               // holds the Dec fo
 double newTargetDec                     = 0.0;               // holds the Dec for gotos after conversion to observed place
 fixed_t origTargetAxis2;
 volatile long stepAxis2=1;
+volatile long timerDirAxis2 = 0;
 
 double newTargetAlt=0.0, newTargetAzm   = 0.0;               // holds the altitude and azmiuth for slews
 long   degreesPastMeridianE             = 15;                // east of pier.  How far past the meridian before we do a flip.
@@ -198,6 +200,7 @@ volatile byte defaultDirAxis2           = defaultDirAxis2EInit;
 volatile byte defaultDirAxis1           = defaultDirAxis1NCPInit;
 
 // Status --------------------------------------------------------------------------------------------------------------------------
+// Note: the following error codes are obsolete ERR_SYNC, ERR_PARK
 enum GeneralErrors {
   ERR_NONE, ERR_MOTOR_FAULT, ERR_ALT_MIN, ERR_LIMIT_SENSE, ERR_DEC, ERR_AZM,
   ERR_UNDER_POLE, ERR_MERIDIAN, ERR_SYNC, ERR_PARK, ERR_GOTO_SYNC, ERR_UNSPECIFIED,
