@@ -96,7 +96,7 @@ void Timer1SetInterval(long iv, double rateRatio) {
 //--------------------------------------------------------------------------------------------------
 // Re-program interval for the motor timers
 
-#define F_BUS 24000000L                                  // for whatever reason this isn't defined on the Teensy4.0
+#define F_BUS 16000000L                                  // we force the timer to run at 16MHz
 #define TIMER_RATE_MHZ (F_BUS/1000000.0)                 // Teensy motor timers run at F_BUS Hz so use full resolution
 #define TIMER_RATE_16MHZ_TICKS (16.0/TIMER_RATE_MHZ)     // 16.0/24.0 = 0.6666
 const double timerRate16MHzTicks TIMER_RATE_16MHZ_TICKS; // make sure this is pre-calculated
