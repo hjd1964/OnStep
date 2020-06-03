@@ -177,7 +177,7 @@ void moveTo() {
     slewForceEnd=true;
   }
 
-  if ( ((distDestAxis1 <= ceil(fabs(fixedToDouble(fstepAxis1)))+1) && (distDestAxis2 <= ceil(fabs(fixedToDouble(fstepAxis2)))+1) ) || slewForceEnd ) {
+  if ( ((distDestAxis1 <= ceil(fabs(fixedToDouble(fstepAxis1)))+4) && (distDestAxis2 <= ceil(fabs(fixedToDouble(fstepAxis2)))+4) ) || slewForceEnd ) {
     slewEnding=false;
     slewForceEnd=false;
     abortSlew=0;
