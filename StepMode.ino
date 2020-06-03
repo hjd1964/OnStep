@@ -358,21 +358,12 @@ void disableStepperDrivers() {
   }
 }
 
-long _da1=timerDirAxis1;
-long _da2=timerDirAxis2;
-
 void haltStepperDrivers() {
-  cli();
-  _da1=timerDirAxis1;
-  _da2=timerDirAxis2;
-  timerDirAxis1=0;
-  timerDirAxis2=0;
-  sei();
+  haltAxis1=true;
+  haltAxis2=true;
 }
 
 void resumeStepperDrivers() {
-  cli();
-  timerDirAxis1=_da1;
-  timerDirAxis2=_da2;
-  sei();
+  haltAxis1=false;
+  haltAxis2=false;
 }

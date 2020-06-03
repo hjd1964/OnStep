@@ -66,10 +66,12 @@ double slewSpeed                        = 0;
 volatile long timerRateAxis1            = 0;
 volatile long timerRateBacklashAxis1    = 0;
 volatile boolean inbacklashAxis1        = false;
+boolean haltAxis1                       = false;
 boolean faultAxis1                      = false;
 volatile long timerRateAxis2            = 0;
 volatile long timerRateBacklashAxis2    = 0;
 volatile boolean inbacklashAxis2        = false;
+boolean haltAxis2                       = false;
 boolean faultAxis2                      = false;
 
 #if AXIS1_DRIVER_MODEL == TMC_SPI
@@ -168,7 +170,6 @@ double origTargetRA                     = 0.0;               // holds the RA for
 double newTargetRA                      = 0.0;               // holds the RA for gotos after conversion to observed place
 fixed_t origTargetAxis1;
 volatile long stepAxis1=1;
-volatile long timerDirAxis1 = 0;
 
 volatile long posAxis2                  = 0;                 // declination position in steps
 volatile long startAxis2                = 0;                 // declination of goto start position in steps
@@ -178,7 +179,6 @@ double origTargetDec                    = 0.0;               // holds the Dec fo
 double newTargetDec                     = 0.0;               // holds the Dec for gotos after conversion to observed place
 fixed_t origTargetAxis2;
 volatile long stepAxis2=1;
-volatile long timerDirAxis2 = 0;
 
 double newTargetAlt=0.0, newTargetAzm   = 0.0;               // holds the altitude and azmiuth for slews
 long   degreesPastMeridianE             = 15;                // east of pier.  How far past the meridian before we do a flip.

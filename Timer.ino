@@ -41,12 +41,13 @@ volatile long runTimerRateAxis2=0;
 volatile uint32_t nextAxis1Rate = 100000UL;
 volatile uint16_t slowAxis1Cnt = 0;
 volatile uint16_t slowAxis1Rep = 1;
+volatile long timerDirAxis1 = 0;
 volatile long thisTimerRateAxis1 = 10000UL;
 
 volatile uint32_t nextAxis2Rate = 100000UL;
 volatile uint16_t slowAxis2Cnt = 0;
 volatile uint16_t slowAxis2Rep = 1;
-
+volatile long timerDirAxis2 = 0;
 volatile long thisTimerRateAxis2 = 10000UL;
 
 // set Timer1 master sidereal clock to interval (in microseconds*16)
@@ -231,6 +232,8 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
 
   if (slowAxis1Rep > 1) { slowAxis1Cnt++; if (slowAxis1Cnt%slowAxis1Rep != 0) goto done; }
 
+  if (haltAxis1) goto done;
+
 #if STEP_WAVE_FORM != DEDGE
   a1CLEAR;
 #endif
@@ -314,6 +317,8 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
 #endif
 
   if (slowAxis2Rep > 1) { slowAxis2Cnt++; if (slowAxis2Cnt%slowAxis2Rep != 0) goto done; }
+
+  if (haltAxis2) goto done;
 
 #if STEP_WAVE_FORM != DEDGE
   a2CLEAR;
