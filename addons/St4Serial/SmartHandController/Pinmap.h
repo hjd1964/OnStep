@@ -71,7 +71,7 @@
 
   #define UTILITY_LIGHT_PIN  13    // GPIO13 used as PWM output to drive utility lamp LED
 
-  #define DISPLAY_RESET_PIN  23    // GPIO23 used to reset some displays, i.e. the SSD1309
+  #define DISPLAY_RESET_PIN  16    // GPIO16 used to reset some displays, i.e. the SSD1309
 #endif
 
 #include "St4SerialSlave.h"
