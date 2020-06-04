@@ -73,9 +73,9 @@
 #define Axis1_HOME         PB10     // Sense home position Axis1
 
 // Axis2 Dec/Alt step/dir driver
-#define Axis2_EN           PD8     // Enable
 #define Axis2_M0           -1     // Microstep Mode 0 or SPI MOSI
 #define Axis2_M1           -1     // Microstep Mode 1 or SPI SCK
+#define Axis2_EN            PD9     // Enable
 #define Axis2_M2           PE15     // Microstep Mode 2 or SPI CS or Decay Mode
 #define Axis2_M3         Aux1     // SPI MISO
 #define Axis2_STEP         PD8     // Step
