@@ -59,8 +59,8 @@ volatile boolean PPSsynced              = false;
   RateCompensation rateCompensation = RC_NONE;
 #endif
 
-long maxRate                            = (double)MaxRate*16.0;
-double MaxRateDef                       = (double)MaxRate;
+long maxRate                            = (double)MaxRateBaseDesired*16.0;
+double MaxRateBaseActual                = (double)MaxRateBaseDesired;
 
 double slewSpeed                        = 0;
 volatile long timerRateAxis1            = 0;
@@ -97,8 +97,8 @@ volatile boolean useTimerRateRatio      = (AXIS1_STEPS_PER_DEGREE != AXIS2_STEPS
 #define BreakDistAxis1                    (2L)
 #define BreakDistAxis2                    (2L)
 long SecondsPerWormRotationAxis1        = ((double)AXIS1_STEPS_PER_WORMROT/StepsPerSecondAxis1);
-volatile double StepsForRateChangeAxis1 = (sqrt((double)SLEW_ACCELERATION_DIST*(double)AXIS1_STEPS_PER_DEGREE))*(double)MaxRate*16.0;
-volatile double StepsForRateChangeAxis2 = (sqrt((double)SLEW_ACCELERATION_DIST*(double)AXIS2_STEPS_PER_DEGREE))*(double)MaxRate*16.0;
+volatile double StepsForRateChangeAxis1 = (sqrt((double)SLEW_ACCELERATION_DIST*(double)AXIS1_STEPS_PER_DEGREE))*(double)MaxRateBaseDesired*16.0;
+volatile double StepsForRateChangeAxis2 = (sqrt((double)SLEW_ACCELERATION_DIST*(double)AXIS2_STEPS_PER_DEGREE))*(double)MaxRateBaseDesired*16.0;
 
 // Basic stepper driver mode setup -------------------------------------------------------------------------------------------------
 #if AXIS1_DRIVER_MODEL != OFF
@@ -275,9 +275,9 @@ unsigned long baudRate[10] = {115200,56700,38400,28800,19200,14400,9600,4800,240
 #define RateToDegPerSec                   (1000000.0/(double)AXIS1_STEPS_PER_DEGREE)
 #define RateToASPerSec                    (RateToDegPerSec*3600.0)
 #define RateToXPerSec                     (RateToASPerSec/15.0)
-double  slewRateX                       = (RateToXPerSec/MaxRate)*2.5;
+double  slewRateX                       = (RateToXPerSec/MaxRateBaseDesired)*2.5;
 double  accXPerSec                      = (slewRateX/SLEW_ACCELERATION_DIST);
-double  guideRates[10]={3.75,7.5,15,30,60,120,300,720,(RateToASPerSec/MaxRate)/2.0,RateToASPerSec/MaxRate};
+double  guideRates[10]={3.75,7.5,15,30,60,120,300,720,(RateToASPerSec/MaxRateBaseDesired)/2.0,RateToASPerSec/MaxRateBaseDesired};
 //                      .25X .5x 1x 2x 4x  8x 20x 48x       half-MaxRate                   MaxRate
 //                         0   1  2  3  4   5   6   7                  8                         9
 

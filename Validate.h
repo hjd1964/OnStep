@@ -75,7 +75,7 @@
 #define GUIDE_SPIRAL_TIME_LIMIT 103.4
 
 // automatically set MaxRate from SLEW_RATE_BASE_DESIRED
-#define MaxRate ((1000000.0/SLEW_RATE_BASE_DESIRED)/AXIS1_STEPS_PER_DEGREE)
+#define MaxRateBaseDesired ((1000000.0/SLEW_RATE_BASE_DESIRED)/AXIS1_STEPS_PER_DEGREE)
 
 // automatically set focuser/rotator step rate (or focuser DC pwm freq.) from AXISn_SLEW_RATE_DESIRED
 #ifndef AXIS3_STEP_RATE_MAX

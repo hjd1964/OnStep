@@ -335,21 +335,21 @@ void initReadNvValues() {
   currentPulseGuideRate=nv.read(EE_pulseGuideRate); if (currentPulseGuideRate > GuideRate1x) currentPulseGuideRate=GuideRate1x;
 
   // set the default MaxRate based on the desired goto speed
-  MaxRateDef=MaxRate;
-  if (MaxRateDef < maxRateLowerLimit()/16.0) MaxRateDef=maxRateLowerLimit()/16.0;
+  MaxRateBaseActual=MaxRateBaseDesired;
+  if (MaxRateBaseActual < maxRateLowerLimit()/8.0) MaxRateBaseActual=maxRateLowerLimit()/8.0;
 
   // get the max goto rate
   maxRate=(int16_t)nv.readInt(EE_maxRate)*16; // maxRate is in 16MHz clocks but stored in micro-seconds
   // check for flag that maxRate is stored in EE_maxRateL, if not move it there
   if (maxRate == -16) maxRate=nv.readLong(EE_maxRateL); else { nv.writeInt(EE_maxRate,-1); nv.writeLong(EE_maxRateL,maxRate); }
-  // constrain values to the limits (1/2 to 2X the MaxRateDef) and platform limits
-  if (maxRate < (double)MaxRateDef*8.0) maxRate=(double)MaxRateDef*8.0;
-  if (maxRate > (double)MaxRateDef*32.0) maxRate=(double)MaxRateDef*32.0;
+  // constrain values to the limits (1/2 to 2X the MaxRateBaseActual) and platform limits
+  if (maxRate < (double)MaxRateBaseActual*8.0) maxRate=(double)MaxRateBaseActual*8.0;
+  if (maxRate > (double)MaxRateBaseActual*32.0) maxRate=(double)MaxRateBaseActual*32.0;
   if (maxRate < maxRateLowerLimit()) maxRate=maxRateLowerLimit();
   
 #if SLEW_RATE_MEMORY == OFF
-  if (maxRate != (long)((double)MaxRateDef*16.0)) {
-    maxRate=(double)MaxRateDef*16.0; 
+  if (maxRate != (long)((double)MaxRateBaseActual*16.0)) {
+    maxRate=(double)MaxRateBaseActual*16.0; 
     nv.writeLong(EE_maxRateL,maxRate);
   }
 #endif
@@ -448,7 +448,7 @@ void initWriteNvValues() {
     // init the default maxRate
     if (maxRate < 2L*16L) maxRate=2L*16L; 
     if (maxRate > 10000L*16L) maxRate=10000L*16L;
-    if (maxRate<maxRateLowerLimit()) maxRate=maxRateLowerLimit();
+    if (maxRate < maxRateLowerLimit()) maxRate=maxRateLowerLimit();
     nv.writeInt(EE_maxRate,-1); nv.writeLong(EE_maxRateL,maxRate);
 
     // init autoMeridianFlip

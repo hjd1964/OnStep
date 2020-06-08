@@ -883,7 +883,7 @@ void processCommands() {
               case '0': dtostrf(guideRates[currentPulseGuideRate]/15.0,2,2,reply); booleanReply=false; break;// pulse-guide rate
               case '1': sprintf(reply,"%i",pecValue); booleanReply=false; break;                             // pec analog value
               case '2': dtostrf(maxRate/16.0,3,3,reply); booleanReply=false; break;                          // MaxRate (current)
-              case '3': dtostrf((double)MaxRateDef,3,3,reply); booleanReply=false; break;                    // MaxRateDef (default)
+              case '3': dtostrf((double)MaxRateBaseActual,3,3,reply); booleanReply=false; break;             // MaxRateBaseActual (default)
               case '4': if (meridianFlip == MeridianFlipNever) { sprintf(reply,"%d N",getInstrPierSide()); } else { sprintf(reply,"%d",getInstrPierSide()); } booleanReply=false; break; // pierSide (N if never)
               case '5': sprintf(reply,"%i",(int)autoMeridianFlip); booleanReply=false; break;                // autoMeridianFlip
               case '6':                                                                                      // preferred pier side
@@ -944,7 +944,7 @@ void processCommands() {
 #endif
           if (parameter[0] == 'E') { // En: Get settings
             switch (parameter[1]) {
-              case '1': dtostrf((double)MaxRateDef,3,3,reply); booleanReply=false; break;
+              case '1': dtostrf((double)MaxRateBaseActual,3,3,reply); booleanReply=false; break;
               case '2': dtostrf(SLEW_ACCELERATION_DIST,2,1,reply); booleanReply=false; break;
               case '3': sprintf(reply,"%ld",(long)round(TRACK_BACKLASH_RATE)); booleanReply=false; break;
               case '4': sprintf(reply,"%ld",(long)round(AXIS1_STEPS_PER_DEGREE)); booleanReply=false; break;
@@ -1764,8 +1764,8 @@ void processCommands() {
             case '2': // set new slew rate (returns 1 success or 0 failure)
               if (!isSlewing()) {
                 maxRate=strtod(&parameter[3],&conv_end)*16.0;
-                if (maxRate < (double)MaxRateDef*8.0) maxRate=(double)MaxRateDef*8.0;
-                if (maxRate > (double)MaxRateDef*32.0) maxRate=(double)MaxRateDef*32.0;
+                if (maxRate < (double)MaxRateBaseActual*8.0) maxRate=(double)MaxRateBaseActual*8.0;
+                if (maxRate > (double)MaxRateBaseActual*32.0) maxRate=(double)MaxRateBaseActual*32.0;
                 if (maxRate < maxRateLowerLimit()) maxRate=maxRateLowerLimit();
                 nv.writeLong(EE_maxRateL,maxRate);
                 setAccelerationRates(maxRate);
@@ -1775,12 +1775,12 @@ void processCommands() {
               booleanReply=false;
               if (!isSlewing()) {
                 switch (parameter[3]) {
-                  case '5': maxRate=(double)MaxRateDef*32.0; break; // 50%
-                  case '4': maxRate=(double)MaxRateDef*24.0; break; // 75%
-                  case '3': maxRate=(double)MaxRateDef*16.0; break; // 100%
-                  case '2': maxRate=(double)MaxRateDef*12.0; break; // 150%
-                  case '1': maxRate=(double)MaxRateDef*8.0;  break; // 200%
-                  default:  maxRate=(double)MaxRateDef*16.0;
+                  case '5': maxRate=(double)MaxRateBaseActual*32.0; break; // 50%
+                  case '4': maxRate=(double)MaxRateBaseActual*24.0; break; // 75%
+                  case '3': maxRate=(double)MaxRateBaseActual*16.0; break; // 100%
+                  case '2': maxRate=(double)MaxRateBaseActual*10.6666666; break; // 150%
+                  case '1': maxRate=(double)MaxRateBaseActual*8.0;  break; // 200%
+                  default:  maxRate=(double)MaxRateBaseActual*16.0;
                 }
                 if (maxRate<maxRateLowerLimit()) maxRate=maxRateLowerLimit();
 
