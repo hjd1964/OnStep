@@ -1754,7 +1754,7 @@ void processCommands() {
                   case '5': maxRate=(double)MaxRateDef*32.0; break; // 50%
                   case '4': maxRate=(double)MaxRateDef*24.0; break; // 75%
                   case '3': maxRate=(double)MaxRateDef*16.0; break; // 100%
-                  case '2': maxRate=(double)MaxRateDef*12.0; break; // 150%
+                  case '2': maxRate=(double)MaxRateDef*10.6666666; break; // 150%
                   case '1': maxRate=(double)MaxRateDef*8.0;  break; // 200%
                   default:  maxRate=(double)MaxRateDef*16.0;
                 }
