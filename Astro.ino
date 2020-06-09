@@ -769,8 +769,8 @@ boolean doHorRateCalc() {
 void setAccelerationRates(double maxRate) {
   
   // set the new guide acceleration rate
-  slewRateX  = (RateToXPerSec/(maxRate/16.0))*5.0;         // 5x for exponential factor average rate
-  slewRateX = slewRateX*((MaxRateDef/2.0)/(maxRate/16.0)); // scale with maxRate so SLEW_ACCELERATION_DIST and SLEW_RAPID_STOP_DIST are approximately correct
+  slewRateX  = (RateToXPerSec/(maxRate/16.0))*5.0;                // 5x for exponential factor average rate
+  slewRateX = slewRateX*((MaxRateBaseActual/2.0)/(maxRate/16.0)); // scale with maxRate so SLEW_ACCELERATION_DIST and SLEW_RAPID_STOP_DIST are approximately correct
   accXPerSec = slewRateX/SLEW_ACCELERATION_DIST;
   guideRates[9]=RateToASPerSec/(maxRate/16.0); guideRates[8]=guideRates[9]/2.0;
   activeGuideRate=GuideRateNone;
@@ -782,5 +782,5 @@ void setAccelerationRates(double maxRate) {
   sei();
 
   // slewSpeed is in degrees per second
-  slewSpeed=(1000000.0/(maxRate/16L))/AXIS1_STEPS_PER_DEGREE;
+  slewSpeed=(1000000.0/(maxRate/16.0))/AXIS1_STEPS_PER_DEGREE;
 }
