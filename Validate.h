@@ -3,6 +3,10 @@
 
 #pragma once
 
+#if FileVersionConfig != 3
+  #error "Configuration (Config.h): FileVersionConfig (Config.h version) must be 3 for this OnStep."
+#endif
+
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
 // correct for configuration backwards compatability
