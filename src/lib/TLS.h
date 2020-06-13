@@ -15,6 +15,9 @@ TinyGPSPlus gps;
 #ifndef SerialGPS
   #error "Configuration (Config.h): Setting TLS GPS, requires adding a line to identify the serial port '#define SerialGPS Serial6' for example."
 #endif
+#ifndef SerialGPSBaud
+  #define SerialGPSBaud 9600
+#endif
 
 class timeLocationSource {
   public:
@@ -22,7 +25,7 @@ class timeLocationSource {
 
     // initialize
     bool init() {
-      SerialGPS.begin(9600);
+      SerialGPS.begin(SerialGPSBaud);
       active=false;
       return active;
     }
