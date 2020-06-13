@@ -123,9 +123,15 @@ void initStartupValues() {
 void initPins() {
 
 // ------------------------------------------------------------------
-// Allow any pin to provide power for 1-Wire devices
-#ifdef OneWirePowerPin
-  pinMode(OneWirePowerPin,HIGH);
+// Allow a given pin to supply power to devices
+#ifdef GeneralPurposePowerPin1
+  pinMode(GeneralPurposePowerPin1,OUTPUT);
+  digitalWrite(GeneralPurposePowerPin1,HIGH);
+#endif
+
+#ifdef GeneralPurposePowerPin2
+  pinMode(GeneralPurposePowerPin2,OUTPUT);
+  digitalWrite(GeneralPurposePowerPin2,HIGH);
 #endif
 
 // ------------------------------------------------------------------
