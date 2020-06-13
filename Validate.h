@@ -76,7 +76,9 @@
 #define SEPARATE_PULSE_GUIDE_RATE ON
 
 // default time for spiral guides is 103.4 seconds
-#define GUIDE_SPIRAL_TIME_LIMIT 103.4
+#ifndef GUIDE_SPIRAL_TIME_LIMIT
+  #define GUIDE_SPIRAL_TIME_LIMIT 103.4
+#endif
 
 // automatically set MaxRate from SLEW_RATE_BASE_DESIRED
 #define MaxRateBaseDesired ((1000000.0/SLEW_RATE_BASE_DESIRED)/AXIS1_STEPS_PER_DEGREE)
