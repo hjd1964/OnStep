@@ -121,6 +121,13 @@ void initStartupValues() {
 }
 
 void initPins() {
+
+// ------------------------------------------------------------------
+// Allow any pin to provide power for 1-Wire devices
+#ifdef OneWirePowerPin
+  pinMode(OneWirePowerPin,HIGH);
+#endif
+
 // ------------------------------------------------------------------
 // Pull the Axis1/2 RST Pin HIGH on the MaxESP2
 
