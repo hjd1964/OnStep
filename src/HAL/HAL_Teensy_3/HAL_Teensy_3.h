@@ -39,7 +39,7 @@
 // SerialA is always enabled, SerialB and SerialC are optional
 #define SerialB Serial1
 #define HAL_SERIAL_B_ENABLED
-#if defined(__MK64FX512__) || defined(__MK66FX1M0__)
+#if (defined(__MK64FX512__) || defined(__MK66FX1M0__)) && SERIAL_C_BAUD_DEFAULT != OFF
   #define SerialC Serial4
   #define HAL_SERIAL_C_ENABLED
 #endif
