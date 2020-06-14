@@ -227,6 +227,9 @@ void initPins() {
 #if PPS_SENSE == ON
   pinMode(PpsPin,INPUT);
   attachInterrupt(digitalPinToInterrupt(PpsPin),clockSync,RISING);
+#elif PPS_SENSE == ON_BOTH
+  pinMode(PpsPin,INPUT);
+  attachInterrupt(digitalPinToInterrupt(PpsPin),clockSync,CHANGE);
 #elif PPS_SENSE == ON_PULLUP
   pinMode(PpsPin,INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(PpsPin),clockSync,RISING);

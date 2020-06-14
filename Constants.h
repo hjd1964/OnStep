@@ -50,10 +50,11 @@
 // On/Off, etc.
 #define OFF                        -1
 #define ON                         -2
-#define ON_PULLUP                  -3
-#define ON_PULLDOWN                -4
-#define XDIRECT                    -5
-#define AUX                        -6
+#define ON_BOTH                    -3
+#define ON_PULLUP                  -4
+#define ON_PULLDOWN                -5
+#define XDIRECT                    -6
+#define AUX                        -7
 
 // mount types                     
 #define MOUNT_TYPE_FIRST            1

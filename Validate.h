@@ -596,7 +596,7 @@
 
 #ifndef PPS_SENSE
   #error "Configuration (Config.h): Setting PPS_SENSE must be present!"
-#elif PPS_SENSE != OFF && PPS_SENSE != ON && PPS_SENSE != ON_PULLUP && PPS_SENSE != ON_PULLDOWN
+#elif PPS_SENSE != OFF && PPS_SENSE != ON && PPS_SENSE != ON_BOTH && PPS_SENSE != ON_PULLUP && PPS_SENSE != ON_PULLDOWN
   #error "Configuration (Config.h): Setting PPS_SENSE invalid, use OFF, ON, ON_PULLUP, or ON_PULLDOWN only."
 #endif
 
