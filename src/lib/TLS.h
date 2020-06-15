@@ -31,9 +31,18 @@ class timeLocationSource {
     }
 
     boolean poll() {
-      if (gps.location.isValid() && gps.date.isValid() && gps.time.isValid()) { active=true; return true; }
+      if (gps.location.isValid() && siteIsValid() && gps.date.isValid() && gps.time.isValid() && timeIsValid()) { active=true; return true; }
       while (SerialGPS.available() > 0) gps.encode(SerialGPS.read());
       return false;
+    }
+
+    boolean timeIsValid() {
+      if ((gps.date.year() >= 0) && (gps.date.year() <= 3000) && (gps.date.month() >= 1) && (gps.date.month() <= 12) && (gps.date.day() >= 1) && (gps.date.day() <= 31) &&
+          (gps.time.hour() >= 0) && (gps.time.hour() <= 23) && (gps.time.minute() >= 0) && (gps.time.minute() <= 59) && (gps.time.second() >= 0) && (gps.time.second() <= 59)) return true; else return false;
+    }
+
+    boolean siteIsValid() {
+      if (gps.location.lat() >= -90 && gps.location.lat() <= 90 && gps.location.lng() >= -360 && gps.location.lng() <= 360) return true; else return false;
     }
 
     // set the GPS's time (does nothing)
@@ -43,19 +52,19 @@ class timeLocationSource {
     // get the GPS's time (local standard time)
     void get(double &JD, double &LMT) {
       if (!active) return;
-      if ((gps.date.year() >= 0) && (gps.date.year() <= 3000) && (gps.date.month() >= 1) && (gps.date.month() <= 12) && (gps.date.day() >= 1) && (gps.date.day() <= 31) &&
-          (gps.time.hour() >= 0) && (gps.time.hour() <= 23) && (gps.time.minute() >= 0) && (gps.time.minute() <= 59) && (gps.time.second() >= 0) && (gps.time.second() <= 59)) 
-      {
-          JD=julian(gps.date.year(),gps.date.month(),gps.date.day());
-          LMT=(gps.time.hour()+(gps.time.minute()/60.0)+(gps.time.second()/3600.0))-timeZone;
-          if (LMT < 0)   { LMT+=24.0; JD-=1; }
-          if (LMT >= 24) { LMT-=24.0; JD+=1; }
-      }
+      if (!timeIsValid()) return;
+
+      JD=julian(gps.date.year(),gps.date.month(),gps.date.day());
+      LMT=(gps.time.hour()+(gps.time.minute()/60.0)+(gps.time.second()/3600.0))-timeZone;
+      if (LMT < 0)   { LMT+=24.0; JD-=1; }
+      if (LMT >= 24) { LMT-=24.0; JD+=1; }
     }
 
     // get the GPS's location
     void getSite(double &LAT, double &LONG) {
       if (!active) return;
+      if (!siteIsValid()) return;
+
       LAT=gps.location.lat();
       LONG=gps.location.lng();
     }
