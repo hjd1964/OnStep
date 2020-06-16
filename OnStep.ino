@@ -431,7 +431,7 @@ void loop2() {
 #endif
 
     // SAFETY CHECKS
-#if LIMIT_SENSE == ON
+#if LIMIT_SENSE != OFF
     // support for limit switch(es)
     byte limit_1st = digitalRead(LimitPin);
     if (limit_1st == LIMIT_SENSE_STATE) {
