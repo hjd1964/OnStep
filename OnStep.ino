@@ -41,7 +41,7 @@
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  3
 #define FirmwareVersionMinor  16      // minor version 0 to 99
-#define FirmwareVersionPatch  "j"     // for example major.minor patch: 1.3c
+#define FirmwareVersionPatch  "k"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 3       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
@@ -432,7 +432,7 @@ void loop2() {
 #endif
 
     // SAFETY CHECKS
-#if LIMIT_SENSE == ON
+#if LIMIT_SENSE != OFF
     // support for limit switch(es)
     byte limit_1st = digitalRead(LimitPin);
     if (limit_1st == LIMIT_SENSE_STATE) {
