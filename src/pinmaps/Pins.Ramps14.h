@@ -9,9 +9,10 @@
 #define Aux2                 37     // ESP8266 RST, SPI MISO/Fault
 #define Aux3                 32     // Home SW; note modified pinmap 10/2/19 Aux3 and Aux4 were changed, 9/30/19 Aux5 was removed
 #define Aux4                 39     // OneWire, Home SW
-#define Aux6                  8     // Dew Heater1
-#define Aux7                  9     // Dew Heater2
-#define Aux8                 10     // Dew Heater3
+#define Aux5                  7     // Dew Heater0 (E1 , MKS Gen-L)
+#define Aux6                  8     // Dew Heater1 (BED, MKS Gen-L, RAMPS1.4)
+#define Aux7                  9     // Dew Heater2 (FAN, MKS Gen-L, RAMPS1.4)
+#define Aux8                 10     // Dew Heater3 (E0 , MKS Gen-L, RAMPS1.4)
 
 #ifndef DS3234_CS_PIN
   #define DS3234_CS_PIN      53     // Default CS Pin for DS3234 on SPI
