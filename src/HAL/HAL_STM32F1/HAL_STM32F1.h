@@ -26,7 +26,8 @@
 // The only supported upload method for flashing OnStep to the Blue Pill is the Serial method, via the CP2102.
 // No other upload method is supported!
 // Verified to work with Arduino_STM32 repository snapshot as of Dec 26, 2019 or later.
-// Should work with earlier versions too.#define SerialA Serial1
+// Should work with earlier versions too.
+#define SerialA Serial1
 #define SerialB Serial3
 
 // SerialA is always enabled, SerialB and SerialC are optional
