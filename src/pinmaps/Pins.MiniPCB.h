@@ -7,8 +7,8 @@
 #define Aux0                 19     // Status LED
 #define Aux1                 18     // ESP8266 GPIO0, SPI MISO/Fault
 #define Aux2                  5     // ESP8266 RST, SPI MISO/Fault
-#define Aux3                  4     // Limit SW
-#define Aux4                 22     // Status2 LED, Reticle LED
+#define Aux3                  4     // Limit SW, Home SW
+#define Aux4                 22     // Status2 LED, Reticle LED, Home SW
 #if !defined(_mk20dx128_h_) && !defined(__MK20DX128__) && !defined(__IMXRT1052__) && !defined(__IMXRT1062__)
   #define Aux5              A14     // true analog output
 #endif
