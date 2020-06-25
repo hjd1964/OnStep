@@ -114,51 +114,56 @@ bool doParkClearBacklash(int phase) {
     timeout=(unsigned long)millis()+10000UL; // set timeout in 10s
     return true;
   }
-  // wait until done or timed out
   if (phase == 2) {
+    // wait until done or timed out
     cli(); if ((posAxis1 == (long)targetAxis1.part.m) && (posAxis2 == (long)targetAxis2.part.m) && !inbacklashAxis1 && !inbacklashAxis2) { sei(); return true; }  sei();
-    if ((long)(millis()-timeout) > 0) { failed=true; return true; } else return false;
+    if ((long)(millis()-timeout) > 0) { failed=true; DL("PCB: timeout finding nearest position"); return true; } else return false;
   }
   if (phase == 3) {
     // start by moving fully into the backlash
     cli(); targetAxis1.part.m += 1; targetAxis2.part.m += 1; sei();
-    timeout=(unsigned long)millis()+10000UL; // set timeout in 10s
+    timeout=(unsigned long)millis()+10000UL;
     return true;
   }
-  // wait until done or timed out
   if (phase == 4) {
+    // wait until done or timed out
     cli(); if ((posAxis1 == (long)targetAxis1.part.m) && (posAxis2 == (long)targetAxis2.part.m) && !inbacklashAxis1 && !inbacklashAxis2) { sei(); return true; }  sei();
-    if ((long)(millis()-timeout) > 0) { failed=true; return true; } else return false;
+    if ((long)(millis()-timeout) > 0) { failed=true; DL("PCB: timeout moving into BL"); return true; } else return false;
   }
   if (phase == 5) {
     // then reverse direction and take it all up
     cli(); targetAxis1.part.m -= 1; targetAxis2.part.m -= 1; sei();
-    timeout=(unsigned long)millis()+10000UL; // set timeout in 10s
+    timeout=(unsigned long)millis()+10000UL;
     return true;
   }
-  // wait until done or timed out
   if (phase == 6) {
-    cli(); if ((posAxis1 == (long)targetAxis1.part.m) && (posAxis2 == (long)targetAxis2.part.m) && !inbacklashAxis1 && !inbacklashAxis2) { sei(); return true; } sei();
-    if ((long)(millis()-timeout) > 0) { failed=true; return true; } else return false;
+    // wait until done or timed out
+    cli(); if (posAxis1 == (long)targetAxis1.part.m && posAxis2 == (long)targetAxis2.part.m && !inbacklashAxis1 && !inbacklashAxis2) { sei(); return true; } sei();
+    if ((long)(millis()-timeout) > 0) { failed=true; DL("PCB: timeout moving out of BL"); return true; } else return false;
   }
-  // we arrive back at the exact same position so targetAxis1/targetAxis2 don't need to be touched
   if (phase == 7) {
+    // double check to be sure backlash is zero
+    cli(); if (blAxis1 != 0 || blAxis2 != 0) { sei(); failed=true; DL("PCB: non-zero BL"); } else sei();
+    return true;
+  }
+  if (phase == 8) {
     // return true on success
-    cli(); if ((blAxis1 != 0) || (blAxis2 != 0) || (posAxis1 != (long)targetAxis1.part.m) || (posAxis2 != (long)targetAxis2.part.m) || failed) { sei(); return false; } else { sei(); return true; }
+    return !failed;
   }
   return false;
 }
 
 int parkClearBacklash() {
   static int phase=1;
-  if (phase == 1) { if (doParkClearBacklash(1)) phase++; } else
-  if (phase == 2) { if (doParkClearBacklash(2)) phase++; } else
-  if (phase == 3) { if (doParkClearBacklash(3)) phase++; } else
-  if (phase == 4) { if (doParkClearBacklash(4)) phase++; } else
-  if (phase == 5) { if (doParkClearBacklash(5)) phase++; } else
-  if (phase == 6) { if (doParkClearBacklash(6)) phase++; } else
-  if (phase == 7) { phase=1; if (doParkClearBacklash(7)) return 1; else return 0; }
-  return -1;
+  if (phase == 1) { if (doParkClearBacklash(1)) { phase++; DL("PCB: phase1 done"); } } else
+  if (phase == 2) { if (doParkClearBacklash(2)) { phase++; DL("PCB: phase2 done"); } } else
+  if (phase == 3) { if (doParkClearBacklash(3)) { phase++; DL("PCB: phase3 done"); } } else
+  if (phase == 4) { if (doParkClearBacklash(4)) { phase++; DL("PCB: phase4 done"); } } else
+  if (phase == 5) { if (doParkClearBacklash(5)) { phase++; DL("PCB: phase5 done"); } } else
+  if (phase == 6) { if (doParkClearBacklash(6)) { phase++; DL("PCB: phase6 done"); } } else
+  if (phase == 7) { if (doParkClearBacklash(7)) { phase++; DL("PCB: phase7 done"); } } else
+  if (phase == 8) { phase=1; if (doParkClearBacklash(8)) return PCB_SUCCESS; else return PCB_FAILURE; DL("PCB: phase8 done"); }
+  return PCB_BUSY;
 }
 
 // returns a parked telescope to operation, you must set date and time before calling this.  it also

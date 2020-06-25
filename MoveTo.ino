@@ -233,7 +233,8 @@ void moveTo() {
       // other special gotos: for parking the mount and homing the mount
       if (parkStatus == Parking) {
         // clear the backlash
-        int i=parkClearBacklash(); if (i == -1) return; // working
+        int pcbStatus=parkClearBacklash();
+        if (pcbStatus == PCB_BUSY) return;
 
         // stop the motor timers (except guiding)
         cli(); trackingTimerRateAxis1=0.0; trackingTimerRateAxis2=0.0; sei(); delay(11);
@@ -244,7 +245,7 @@ void moveTo() {
 
         // validate location
         byte parkPierSide=nv.read(EE_pierSide);
-        if ((blAxis1 != 0) || (blAxis2 != 0) || (posAxis1 != (long)targetAxis1.part.m) || (posAxis2 != (long)targetAxis2.part.m) || (pierSideControl != parkPierSide) || (i != 1)) { parkStatus=ParkFailed; nv.write(EE_parkStatus,parkStatus); }
+        if (pierSideControl != parkPierSide || pcbStatus != PCB_SUCCESS) { parkStatus=ParkFailed; nv.write(EE_parkStatus,parkStatus); }
 
         // sound park done
         soundAlert();
