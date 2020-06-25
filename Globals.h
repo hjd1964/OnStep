@@ -160,44 +160,54 @@ double longitude                        = 0.0;
 #else
   double homePositionAxis1              = 0.0;
 #endif
-double homePositionAxis2                = 90.0;
-
 volatile long posAxis1                  = 0;                 // hour angle position in steps
+volatile int blAxis1                    = 0;                 // backlash position in steps
+volatile int backlashAxis1              = 0;                 // total backlash in steps
 volatile long startAxis1                = 0;                 // hour angle of goto start position in steps
 volatile fixed_t targetAxis1;                                // hour angle of goto end   position in steps
-volatile byte dirAxis1                  = 1;                 // stepping direction + or -
 double origTargetRA                     = 0.0;               // holds the RA for gotos before possible conversion to observed place
 double newTargetRA                      = 0.0;               // holds the RA for gotos after conversion to observed place
+double newTargetAzm                     = 0.0;               // holds the altitude and azmiuth for slews
 fixed_t origTargetAxis1;
+double indexAxis1                       = 0;                 // index offset corrections, simple align/sync
+long   indexAxis1Steps                  = 0;
 volatile long stepAxis1=1;
+fixed_t fstepAxis1;                                          // tracking and PEC, fractional steps
 
+double homePositionAxis2                = 90.0;
 volatile long posAxis2                  = 0;                 // declination position in steps
+volatile int blAxis2                    = 0;                 // backlash position in steps
+volatile int backlashAxis2              = 0;                 // total backlash in steps
 volatile long startAxis2                = 0;                 // declination of goto start position in steps
 volatile fixed_t targetAxis2;                                // declination of goto end   position in steps
-volatile byte dirAxis2                  = 1;                 // stepping direction + or -
 double origTargetDec                    = 0.0;               // holds the Dec for gotos before possible conversion to observed place
 double newTargetDec                     = 0.0;               // holds the Dec for gotos after conversion to observed place
+double newTargetAlt                     = 0.0;               // holds the altitude and azmiuth for slews
 fixed_t origTargetAxis2;
+double indexAxis2                       = 0;                 // index offset corrections, simple align/sync
+long   indexAxis2Steps                  = 0;
 volatile long stepAxis2=1;
+fixed_t fstepAxis2;                                          // tracking and PEC, fractional steps
 
-double newTargetAlt=0.0, newTargetAzm   = 0.0;               // holds the altitude and azmiuth for slews
+double currentAlt                       = 45.0;              // the current altitude
+double currentDec                       = 0.0;               // the current declination
+
+// Limits --------------------------------------------------------------------------------------------------------------------------
 long   degreesPastMeridianE             = 15;                // east of pier.  How far past the meridian before we do a flip.
 long   degreesPastMeridianW             = 15;                // west of pier.  Mount stops tracking when it hits the this limit.
 int    minAlt;                                               // the min altitude, in deg, so we don't try to point too low
 int    maxAlt;                                               // the max altitude, in deg, keeps telescope away from mount/tripod
-bool   autoMeridianFlip                 = false;             // auto meridian flip/continue as tracking hits AXIS1_LIMIT_MERIDIAN_W
-                                                                          
-double currentAlt                       = 45.0;              // the current altitude
-double currentDec                       = 0.0;               // the current declination
 
 // Stepper driver enable/disable and direction -------------------------------------------------------------------------------------
+#define defaultDirAxis1NCPInit            0
+#define defaultDirAxis1SCPInit            1
+volatile byte dirAxis1                  = 1;                 // stepping direction + or -
+volatile byte defaultDirAxis1           = defaultDirAxis1NCPInit;
 
 #define defaultDirAxis2EInit              1
 #define defaultDirAxis2WInit              0
+volatile byte dirAxis2                  = 1;                 // stepping direction + or -
 volatile byte defaultDirAxis2           = defaultDirAxis2EInit;
-#define defaultDirAxis1NCPInit            0
-#define defaultDirAxis1SCPInit            1
-volatile byte defaultDirAxis1           = defaultDirAxis1NCPInit;
 
 // Status --------------------------------------------------------------------------------------------------------------------------
 // Note: the following error codes are obsolete ERR_SYNC, ERR_PARK
@@ -219,21 +229,22 @@ CommandErrors commandError = CE_NONE;
 enum PrecisionMode {PM_LOW, PM_HIGH, PM_HIGHEST};
 PrecisionMode precision = PM_HIGH;
 
+// Tracking modes ------------------------------------------------------------------------------------------------------------------
 #define TrackingNone                      0
 #define TrackingSidereal                  1
 #define TrackingMoveTo                    2
+#define StartAbortSlew                    1
 volatile byte trackingState             = TrackingNone;
 byte abortTrackingState                 = TrackingNone;
 volatile byte lastTrackingState         = TrackingNone;
 int trackingSyncSeconds                 = 0;
-#define StartAbortSlew 1                
 byte abortSlew                          = 0;
 volatile boolean safetyLimitsOn         = true;
 boolean axis1Enabled                    = false;
 boolean axis2Enabled                    = false;
-
 boolean syncToEncodersOnly              = false;
                                         
+// Meridian flips ------------------------------------------------------------------------------------------------------------------
 #define MeridianFlipNever                 0
 #define MeridianFlipAlign                 1
 #define MeridianFlipAlways                2
@@ -250,14 +261,27 @@ boolean syncToEncodersOnly              = false;
 byte pierSideControl = PierSideNone;
 enum PreferredPierSide {PPS_BEST,PPS_EAST,PPS_WEST};
 PreferredPierSide preferredPierSide = PPS_BEST;
+boolean autoMeridianFlip                = false;             // auto meridian flip/continue as tracking hits AXIS1_LIMIT_MERIDIAN_W
+boolean pauseHome                       = false;             // allow pause at home?
+boolean waitingHomeContinue             = false;             // set to true to stop pause
+boolean waitingHome                     = false;             // true if waiting at home
 
+// Parking -------------------------------------------------------------------------------------------------------------------------
+#define PCB_BUSY                         -1
+#define PCB_FAILURE                       0
+#define PCB_SUCCESS                       1
+
+#define PARK_STATUS_FIRST                 0
 #define NotParked                         0
 #define Parking                           1
 #define Parked                            2
 #define ParkFailed                        3
 #define ParkUnknown                       4
+#define PARK_STATUS_LAST                  4
 byte    parkStatus                      = NotParked;
 boolean parkSaved                       = false;
+
+// Homing --------------------------------------------------------------------------------------------------------------------------
 boolean atHome                          = true;
 boolean homeMount                       = false;
 
@@ -266,10 +290,10 @@ boolean homeMount                       = false;
 // serial speed
 unsigned long baudRate[10] = {115200,56700,38400,28800,19200,14400,9600,4800,2400,1200};
 
-// Guide command -------------------------------------------------------------------------------------------------------------------
+// Guiding and slewing -------------------------------------------------------------------------------------------------------------
 #define GuideRate1x 2
 #ifndef GuideRateDefault
-  #define GuideRateDefault 6 // 20x
+  #define GuideRateDefault 6                                 // 20x
 #endif
 #define GuideRateNone                     255
 #define RateToDegPerSec                   (1000000.0/(double)AXIS1_STEPS_PER_DEGREE)
@@ -301,13 +325,17 @@ fixed_t amountGuideAxis2;
 fixed_t guideAxis2;
 
 // PEC control ---------------------------------------------------------------------------------------------------------------------
-#define PECStatusString                   "IpPrR"
-#define PECStatusStringAlt                "/,~;^"
+#define PEC_STATUS_FIRST                  0
 #define IgnorePEC                         0
 #define ReadyPlayPEC                      1
 #define PlayPEC                           2
 #define ReadyRecordPEC                    3
 #define RecordPEC                         4
+#define PEC_STATUS_LAST                   4
+
+#define PECStatusString                   "IpPrR"
+#define PECStatusStringAlt                "/,~;^"
+
 byte    pecStatus                       = IgnorePEC;
 boolean pecRecorded                     = false;
 boolean pecFirstRecord                  = false;
@@ -339,16 +367,6 @@ volatile double pecTimerRateAxis1 = 0.0;
 byte currentSite = 0; 
 char siteName[16];
 
-// offset corrections simple align
-double indexAxis1                       = 0;
-long   indexAxis1Steps                  = 0;
-double indexAxis2                       = 0;
-long   indexAxis2Steps                  = 0;
-
-// tracking and PEC, fractional steps
-fixed_t fstepAxis1;
-fixed_t fstepAxis2;
-
 // status state
 boolean ledOn                           = false;
 boolean led2On                          = false;
@@ -361,21 +379,10 @@ boolean led2On                          = false;
 #endif
 volatile int buzzerDuration = 0;
 
-// pause at home on meridian flip
-boolean pauseHome                       = false;             // allow pause at home?
-boolean waitingHomeContinue             = false;             // set to true to stop pause
-boolean waitingHome                     = false;             // true if waiting at home
-
 // reticule control
 #if LED_RETICLE >= 0
   int reticuleBrightness=LED_RETICLE;
 #endif
-
-// backlash control
-volatile int backlashAxis1              = 0;
-volatile int backlashAxis2              = 0;
-volatile int blAxis1                    = 0;
-volatile int blAxis2                    = 0;
 
 // aux pin control
 #ifdef FEATURES_PRESENT
