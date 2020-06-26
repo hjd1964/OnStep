@@ -14,7 +14,8 @@ class focuserDC : public focuser  {
     void init(int stepPin, int dirPin, int enPin, int nvAddress, int nvTcfCoef, int nvTcfEn, float maxRate, double stepsPerMicro, double min, double max, double minRate) {
 
       // init only happens once, on the first call and is ignored otherwise
-      dcMotor.init(stepPin,dirPin,enPin,maxRate);
+      // 10 = 100ms pwm frequency
+      dcMotor.init(stepPin,dirPin,enPin,10);
       
       this->nvAddress=nvAddress;
       this->minRate=minRate;
