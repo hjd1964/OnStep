@@ -60,6 +60,7 @@ CommandErrors park() {
   double parkTargetAxis1=nv.readFloat(EE_posAxis1);
   double parkTargetAxis2=nv.readFloat(EE_posAxis2);
   int parkPierSide=nv.read(EE_pierSide);
+  if (parkPierSide != PierSideNone && parkPierSide != PierSideEast && parkPierSide != PierSideWest) { parkPierSide=PierSideNone; DL("NV: bad parkPierSide"); } // valid parkPierSide?
 
   // now, goto this target coordinate
   e=goTo(parkTargetAxis1,parkTargetAxis2,parkTargetAxis1,parkTargetAxis2,parkPierSide);
@@ -155,14 +156,14 @@ bool doParkClearBacklash(int phase) {
 
 int parkClearBacklash() {
   static int phase=1;
-  if (phase == 1) { if (doParkClearBacklash(1)) { phase++; DL("PCB: phase1 done"); } } else
-  if (phase == 2) { if (doParkClearBacklash(2)) { phase++; DL("PCB: phase2 done"); } } else
-  if (phase == 3) { if (doParkClearBacklash(3)) { phase++; DL("PCB: phase3 done"); } } else
-  if (phase == 4) { if (doParkClearBacklash(4)) { phase++; DL("PCB: phase4 done"); } } else
-  if (phase == 5) { if (doParkClearBacklash(5)) { phase++; DL("PCB: phase5 done"); } } else
-  if (phase == 6) { if (doParkClearBacklash(6)) { phase++; DL("PCB: phase6 done"); } } else
-  if (phase == 7) { if (doParkClearBacklash(7)) { phase++; DL("PCB: phase7 done"); } } else
-  if (phase == 8) { phase=1; if (doParkClearBacklash(8)) return PCB_SUCCESS; else return PCB_FAILURE; DL("PCB: phase8 done"); }
+  if (phase == 1) { if (doParkClearBacklash(1)) phase++; } else
+  if (phase == 2) { if (doParkClearBacklash(2)) phase++; } else
+  if (phase == 3) { if (doParkClearBacklash(3)) phase++; } else
+  if (phase == 4) { if (doParkClearBacklash(4)) phase++; } else
+  if (phase == 5) { if (doParkClearBacklash(5)) phase++; } else
+  if (phase == 6) { if (doParkClearBacklash(6)) phase++; } else
+  if (phase == 7) { if (doParkClearBacklash(7)) phase++; } else
+  if (phase == 8) { phase=1; if (doParkClearBacklash(8)) return PCB_SUCCESS; else { DL("PCB: failure"); return PCB_FAILURE; } }
   return PCB_BUSY;
 }
 
@@ -198,6 +199,8 @@ CommandErrors unPark(bool withTrackingOn) {
 
   // get suggested park position
   int parkPierSide=nv.read(EE_pierSide);
+  if (parkPierSide != PierSideNone && parkPierSide != PierSideEast && parkPierSide != PierSideWest) { parkPierSide=PierSideNone; DL("NV: bad parkPierSide"); } // valid parkPierSide?
+
   setTargetAxis1(nv.readFloat(EE_posAxis1),parkPierSide);
   setTargetAxis2(nv.readFloat(EE_posAxis2),parkPierSide);
 
@@ -228,7 +231,10 @@ CommandErrors unPark(bool withTrackingOn) {
 
     // get PEC status
     pecStatus  =nv.read(EE_pecStatus);
+    if (pecStatus < PEC_STATUS_FIRST || pecStatus > PEC_STATUS_LAST) { pecStatus=IgnorePEC; DL("NV: bad pecStatus"); } // valid PEC status?
+    
     pecRecorded=nv.read(EE_pecRecorded); if (!pecRecorded) pecStatus=IgnorePEC;
+    if (pecRecorded != true && pecRecorded != false) { pecRecorded=false; DL("NV: bad pecRecorded"); } // valid PEC recorded?
   }
   return CE_NONE;
 }
@@ -248,9 +254,13 @@ boolean saveAlignModel() {
 boolean loadAlignModel() {
   // get align/corrections
   indexAxis1=nv.readFloat(EE_indexAxis1);
+  if (indexAxis1 < -720 || indexAxis1 > 720) { indexAxis1=0; DL("NV: bad indexAxis1"); } // valid indexAxis1 recorded?
   indexAxis1Steps=(long)(indexAxis1*(double)AXIS1_STEPS_PER_DEGREE);
+  
   indexAxis2=nv.readFloat(EE_indexAxis2);
+  if (indexAxis2 < -720 || indexAxis2 > 720) { indexAxis2=0; DL("NV: bad indexAxis2"); } // valid indexAxis2 recorded?
   indexAxis2Steps=(long)(indexAxis2*(double)AXIS2_STEPS_PER_DEGREE);
+  
   Align.readCoe();
   return true;
 }

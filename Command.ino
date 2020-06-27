@@ -2053,9 +2053,13 @@ void processCommands() {
       if (command[0] == 'W') {
         if (command[1] >= '0' && command[1] <= '3' && parameter[0] == 0) {
           currentSite=command[1]-'0'; nv.update(EE_currentSite,currentSite); booleanReply=false;
-          setLatitude(nv.readFloat(EE_sites+(currentSite*25+0)));
+          double f=nv.readFloat(EE_sites+(currentSite*25+0));
+          if (f < -90 || f > 90) { f=0.0; DL("NV: bad latitude"); } // valid latitude?
+          setLatitude(f);
           longitude=nv.readFloat(EE_sites+(currentSite*25+4));
+          if (longitude < -360 || longitude > 360) { longitude=0.0; DL("NV: bad longitude"); } // valid longitude?
           timeZone=nv.read(EE_sites+(currentSite)*25+8)-128;
+          if (timeZone < -12 || timeZone > 14) { timeZone=0.0; DL("NV: bad timeZone"); }  // valid time zone?
           timeZone=decodeTimeZone(timeZone);
         } else 
         if (command[1] == '?') {

@@ -62,8 +62,9 @@
 #include "src/HAL/HAL.h"
 #include "Validate.h"
 
-// Enable debugging messages on DebugSer -------------------------------------------------------------
+// Enable debugging and messages on DebugSer ---------------------------------------------------------
 #define DEBUG_OFF             // default=_OFF, use "DEBUG_ON" to activate
+#define MESSAGE_LOG_OFF       // default=_OFF, use "MESSAGE_LOG_ON" to activate
 #define DebugSer SerialA      // default=SerialA, or SerialB for example (always 9600 baud)
 
 // Helper macros for debugging, with less typing
@@ -79,6 +80,14 @@
   #define DHL(x,y)
 #endif
 
+// Helper macros for messages, with less typing
+#if defined(MESSAGE_LOG_ON)
+  #define ML(x)       DebugSer.print(x)
+  #define MLL(x)      DebugSer.println(x)
+#else
+  #define ML(x)
+  #define MLL(x)
+#endif
 // ---------------------------------------------------------------------------------------------------
 
 #include "src/lib/St4SerialMaster.h"
@@ -230,6 +239,7 @@ void setup() {
   
   // this sets up the sidereal timer and tracking rates
   siderealInterval=nv.readLong(EE_siderealInterval); // the number of 16MHz clocks in one sidereal second (this is scaled to actual processor speed)
+  if (siderealInterval < 14360682L || siderealInterval > 17551944L) { siderealInterval=15956313L; DL("NV: bad siderealInterval"); } // valid siderealInterval?
   SiderealRate=siderealInterval/StepsPerSecondAxis1;
   timerRateAxis1=SiderealRate;
   timerRateAxis2=SiderealRate;
@@ -442,7 +452,7 @@ void loop2() {
         // It is still low, there must be a problem
         generalError=ERR_LIMIT_SENSE;
         stopLimit();
-      }
+      } 
     }
 #endif
 

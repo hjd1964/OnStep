@@ -161,11 +161,13 @@ CommandErrors setHome() {
   
   // reset PEC, unless we have an index to recover from this
   pecRecorded=nv.read(EE_pecRecorded);
+  if (pecRecorded != true && pecRecorded != false) { pecRecorded=false; DL("NV: bad pecRecorded"); } // valid PEC recorded?
   #if PEC_SENSE == OFF
     pecStatus=IgnorePEC;
     nv.write(EE_pecStatus,pecStatus);
   #else
     pecStatus=nv.read(EE_pecStatus);
+    if (pecStatus < PEC_STATUS_FIRST || pecStatus > PEC_STATUS_LAST) { pecStatus=IgnorePEC; DL("NV: bad pecStatus"); } // valid PEC status?
   #endif
   if (!pecRecorded) pecStatus=IgnorePEC;
 
