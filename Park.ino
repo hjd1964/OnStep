@@ -156,14 +156,14 @@ bool doParkClearBacklash(int phase) {
 
 int parkClearBacklash() {
   static int phase=1;
-  if (phase == 1) { if (doParkClearBacklash(1)) phase++; } else
+  if (phase == 1) { if (doParkClearBacklash(1)) phase++; MLL("PCB: start clearing BL"); } else
   if (phase == 2) { if (doParkClearBacklash(2)) phase++; } else
   if (phase == 3) { if (doParkClearBacklash(3)) phase++; } else
   if (phase == 4) { if (doParkClearBacklash(4)) phase++; } else
   if (phase == 5) { if (doParkClearBacklash(5)) phase++; } else
   if (phase == 6) { if (doParkClearBacklash(6)) phase++; } else
   if (phase == 7) { if (doParkClearBacklash(7)) phase++; } else
-  if (phase == 8) { phase=1; if (doParkClearBacklash(8)) return PCB_SUCCESS; else { DL("PCB: failure"); return PCB_FAILURE; } }
+  if (phase == 8) { phase=1; if (doParkClearBacklash(8)) { MLL("PCB: done clearing BL"); return PCB_SUCCESS; } else { DL("PCB: failure"); return PCB_FAILURE; } }
   return PCB_BUSY;
 }
 
