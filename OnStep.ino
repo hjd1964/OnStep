@@ -52,6 +52,12 @@
 // *** IMPORTANT: This option must not be left set to true or it will cause excessive wear of EEPROM or FLASH ***
 #define NV_INIT_KEY_RESET false
 
+// Enable additional debugging and/or status messages on the specified DebugSer port
+// Note that the DebugSer port cannot be used for normal communication with OnStep
+#define DEBUG_ON             // default=_OFF, use "DEBUG_ON" to activate
+#define MESSAGE_LOG_OFF       // default=_OFF, use "MESSAGE_LOG_ON" to activate
+#define DebugSer SerialA      // default=SerialA, or SerialB for example (always 9600 baud)
+
 #include <errno.h>
 #include <math.h>
 
@@ -61,11 +67,6 @@
 #include "src/pinmaps/Models.h"
 #include "src/HAL/HAL.h"
 #include "Validate.h"
-
-// Enable debugging and messages on DebugSer ---------------------------------------------------------
-#define DEBUG_OFF             // default=_OFF, use "DEBUG_ON" to activate
-#define MESSAGE_LOG_OFF       // default=_OFF, use "MESSAGE_LOG_ON" to activate
-#define DebugSer SerialA      // default=SerialA, or SerialB for example (always 9600 baud)
 
 // Helper macros for debugging, with less typing
 #if defined(DEBUG_ON)
