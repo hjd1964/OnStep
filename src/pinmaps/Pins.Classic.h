@@ -87,12 +87,12 @@
 #define Axis3_DIR            A8     // Dir
 
 // Pins to focuser1 stepper driver
-#define Axis3_EN             -1     // Enable
+#define Axis4_EN             -1     // Enable
 #define Axis4_STEP          A11     // Step
 #define Axis4_DIR           A10     // Dir
 
 // Pins to focuser2 stepper driver
-#define Axis3_EN             -1     // Enable
+#define Axis5_EN             -1     // Enable
 #define Axis5_STEP          A13     // Step
 #define Axis5_DIR           A12     // Dir
 
