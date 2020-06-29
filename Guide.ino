@@ -129,7 +129,7 @@ CommandErrors startGuideAxis1(char direction, int guideRate, long guideDuration)
   // Check state
   if (faultAxis1)                       return CE_SLEW_ERR_HARDWARE_FAULT;
   if (!axis1Enabled)                    return CE_SLEW_ERR_IN_STANDBY;
-  if (parkStatus == Parked)             return CE_SLEW_ERR_IN_PARK;
+  if (parkStatus != NotParked)          return CE_SLEW_ERR_IN_PARK;
   if (trackingSyncInProgress())         return CE_MOUNT_IN_MOTION;
   if (trackingState == TrackingMoveTo)  return CE_MOUNT_IN_MOTION;
   if (direction == guideDirAxis1)       return CE_NONE;
@@ -164,7 +164,7 @@ void stopGuideAxis1() {
 CommandErrors startGuideAxis2(char direction, int guideRate, long guideDuration, bool absolute) {
   if (faultAxis2)                          return CE_SLEW_ERR_HARDWARE_FAULT;
   if (!axis1Enabled)                       return CE_SLEW_ERR_IN_STANDBY;
-  if (parkStatus == Parked)                return CE_SLEW_ERR_IN_PARK;
+  if (parkStatus != NotParked)             return CE_SLEW_ERR_IN_PARK;
   if (trackingSyncInProgress())            return CE_MOUNT_IN_MOTION;
   if (trackingState == TrackingMoveTo)     return CE_MOUNT_IN_MOTION;
   if (direction == guideDirAxis2)          return CE_NONE;
