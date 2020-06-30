@@ -987,6 +987,22 @@ void processCommands() {
               case 'B': cli(); temp=(long)(trackingTimerRateAxis1*1000.0); sei(); sprintf(reply,"%ld",temp); booleanReply=false; break;       // DebugB, trackingTimerRateAxis1
               case 'C': sprintf(reply,"%ldus",average_loop_time); booleanReply=false; break;                                                  // DebugC, Workload average
               case 'E': double ra, de; cli(); getEqu(&ra,&de,false); sei(); sprintf(reply,"%f,%f",ra,de); booleanReply=false; break;          // DebugE, equatorial coordinates degrees (no division by 15)
+#ifdef DEBUG_ON                                                                                                                               // DebugF, EEPROM dump to DebugSer
+              case 'F':
+                for (int x=0; x <= E2END+16; x++) {
+                  if (x < 8 || x > E2END+8) {
+                    if (x%8 == 0) D("-----------");
+                    D("--");
+                    if (x%8 == 7) DL();
+                  } else {
+                    if (x%8 == 0) { D(":SXFF,"); char s[8]; sprintf(s,"%04d=",x/8); D(s); }
+                    int v=nv.read(x-8);
+                    if (v < 16) D(0); DebugSer.print(v,HEX);
+                    if (x%8 == 7) DL("#");
+                  }
+                }
+              break;
+#endif
               default:  commandError=CE_CMD_UNKNOWN;
             }
           } else
@@ -1855,6 +1871,25 @@ void processCommands() {
               } else commandError=CE_PARAM_RANGE;
               break;
             default: commandError=CE_CMD_UNKNOWN;
+          }
+        } else
+#endif
+#ifdef DEBUG_ON 
+        if (parameter[0] == 'F') { // Fn: Debug
+          switch (parameter[1]) {                                                                            // DebugF, EEPROM upload
+            case 'F':
+              if (strlen(parameter) != 24) { commandError=CE_CMD_UNKNOWN; break; }
+              char s[5]; s[0]=parameter[3]; s[1]=parameter[4]; s[2]=parameter[5]; s[3]=parameter[6]; s[4]=0;
+              int base=atoi(s);
+              int rec[8];
+              for (int i=0; i<8; i++) {
+                int h=parameter[i*2+8]-'0'; if (h > 9) h-=7;
+                int l=parameter[i*2+9]-'0'; if (l > 9) l-=7;
+                rec[i]=h*16+l;
+                if (rec[i] < 0 || rec[i] > 255) { commandError=CE_PARAM_RANGE; break; }
+              }
+              for (int i=0; i<8; i++) nv.write(base+i,rec[i]);
+            break;
           }
         } else
 #endif
