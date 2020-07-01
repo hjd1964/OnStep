@@ -2112,7 +2112,7 @@ void processCommands() {
       }
 
       if (process_command == COMMAND_SERIAL_A) {
-        if (commandError != CE_NULL) cmdA.lastError=commandError;
+        if (commandError != CE_NULL) { cmdA.lastError=commandError; logErrors("MSG: CMD_CH_A",command,parameter,commandError); }
         if (strlen(reply) > 0 || cmdA.checksum) {
           if (cmdA.checksum)  { checksum(reply); strcat(reply,cmdA.getSeq()); supress_frame=false; }
           if (!supress_frame) strcat(reply,"#");
@@ -2122,7 +2122,7 @@ void processCommands() {
 
 #ifdef HAL_SERIAL_B_ENABLED
       if (process_command == COMMAND_SERIAL_B) {
-        if (commandError != CE_NULL) cmdB.lastError=commandError;
+        if (commandError != CE_NULL) { cmdB.lastError=commandError; logErrors("MSG: CMD_CH_B",command,parameter,commandError); }
         if (strlen(reply) > 0 || cmdB.checksum) {
           if (cmdB.checksum)  { checksum(reply); strcat(reply,cmdB.getSeq()); supress_frame=false; }
           if (!supress_frame) strcat(reply,"#");
@@ -2134,7 +2134,7 @@ void processCommands() {
 
 #ifdef HAL_SERIAL_C_ENABLED
       if (process_command == COMMAND_SERIAL_C) {
-        if (commandError != CE_NULL) cmdC.lastError=commandError;
+        if (commandError != CE_NULL) { cmdC.lastError=commandError; logErrors("MSG: CMD_CH_C",command,parameter,commandError); }
         if (strlen(reply) > 0 || cmdC.checksum) {
           if (cmdC.checksum)  { checksum(reply); strcat(reply,cmdC.getSeq()); supress_frame=false; }
           if (!supress_frame) strcat(reply,"#");
@@ -2145,7 +2145,7 @@ void processCommands() {
 
 #if ST4_HAND_CONTROL == ON && ST4_INTERFACE != OFF
       if (process_command == COMMAND_SERIAL_ST4) {
-        if (commandError != CE_NULL) cmdST4.lastError=commandError;
+        if (commandError != CE_NULL) { cmdST4.lastError=commandError; logErrors("MSG: CMD_CH_ST4",command,parameter,commandError); }
         if (strlen(reply) > 0 || cmdST4.checksum) {
           if (cmdST4.checksum)  { checksum(reply); strcat(reply,cmdST4.getSeq()); supress_frame=false; }
           if (!supress_frame) strcat(reply,"#");
@@ -2155,7 +2155,7 @@ void processCommands() {
 #endif
 
       if (process_command == COMMAND_SERIAL_X) {
-        if (commandError != CE_NULL) cmdX.lastError=commandError;
+        if (commandError != CE_NULL) { cmdX.lastError=commandError; logErrors("MSG: CMD_CH_X",command,parameter,commandError); }
         if (strlen(reply) > 0 || cmdX.checksum) {
           if (cmdX.checksum)  { checksum(reply); strcat(reply,cmdX.getSeq()); supress_frame=false; }
           if (!supress_frame) strcat(reply,"#");
@@ -2243,4 +2243,9 @@ bool cmdReply(char *s) {
   if (_replyX[0] == 0) return false;
   strcpy(s,_replyX); _replyX[0]=0;
   return true;
+}
+
+void logErrors(const char ch[], char cmd[], char param[], CommandErrors cmdErr) {
+  if (cmdErr <= CE_0) return;
+  ML(ch); ML(" \""); ML(cmd); ML(param); ML("\", Error "); MLL(commandErrorStr[cmdErr]);
 }
