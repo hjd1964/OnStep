@@ -2293,5 +2293,5 @@ bool cmdReply(char *s) {
 
 void logErrors(const char ch[], char cmd[], char param[], CommandErrors cmdErr) {
   if (cmdErr <= CE_0) return;
-  ML(ch); ML(" \""); ML(cmd); ML(param); ML("\", Error "); MLL(commandErrorStr[cmdErr]);
+  VL(ch); VL(" \""); VL(cmd); VL(param); VL("\", Error "); VLL(commandErrorStr[cmdErr]);
 }

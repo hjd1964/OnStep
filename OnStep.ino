@@ -54,9 +54,8 @@
 
 // Enable additional debugging and/or status messages on the specified DebugSer port
 // Note that the DebugSer port cannot be used for normal communication with OnStep
-#define DEBUG_ON             // default=_OFF, use "DEBUG_ON" to activate
-#define MESSAGE_LOG_OFF       // default=_OFF, use "MESSAGE_LOG_ON" to activate
-#define DebugSer SerialA      // default=SerialA, or SerialB for example (always 9600 baud)
+#define DEBUG_OFF             // default=_OFF, use "DEBUG_ON" for background errors only, use "DEBUG_VERBOSE" for all errors and status messages
+#define DebugSer SerialA      // default=SerialA, or Serial4 for example (always 9600 baud)
 
 #include <errno.h>
 #include <math.h>
@@ -69,7 +68,7 @@
 #include "Validate.h"
 
 // Helper macros for debugging, with less typing
-#if defined(DEBUG_ON)
+#if defined(DEBUG_ON) || defined(DEBUG_VERBOSE)
   #define D(x)       DebugSer.print(x)
   #define DH(x)      DebugSer.print(x,HEX)
   #define DL(x)      DebugSer.println(x)
@@ -80,14 +79,12 @@
   #define DL(x)
   #define DHL(x,y)
 #endif
-
-// Helper macros for messages, with less typing
-#if defined(MESSAGE_LOG_ON)
-  #define ML(x)       DebugSer.print(x)
-  #define MLL(x)      DebugSer.println(x)
+#if defined(DEBUG_VERBOSE)
+  #define VL(x)       DebugSer.print(x)
+  #define VLL(x)      DebugSer.println(x)
 #else
-  #define ML(x)
-  #define MLL(x)
+  #define VL(x)
+  #define VLL(x)
 #endif
 // ---------------------------------------------------------------------------------------------------
 
