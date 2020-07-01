@@ -1876,17 +1876,18 @@ void processCommands() {
 #endif
 #ifdef DEBUG_ON 
         if (parameter[0] == 'F') { // Fn: Debug
-          switch (parameter[1]) {                                                                            // DebugF, EEPROM upload
+          switch (parameter[1]) {  // DebugF, EEPROM upload
             case 'F':
               if (strlen(parameter) != 24) { commandError=CE_CMD_UNKNOWN; break; }
               char s[5]; s[0]=parameter[3]; s[1]=parameter[4]; s[2]=parameter[5]; s[3]=parameter[6]; s[4]=0;
-              int base=atoi(s);
+              long base=(atoi(s)-1)*8;
               int rec[8];
               for (int i=0; i<8; i++) {
+                const char ss[17] = "0123456789ABCDEF";
+                if (!strchr(ss,parameter[i*2+8]) || !strchr(ss,parameter[i*2+9])) { commandError=CE_PARAM_RANGE; break; }
                 int h=parameter[i*2+8]-'0'; if (h > 9) h-=7;
                 int l=parameter[i*2+9]-'0'; if (l > 9) l-=7;
                 rec[i]=h*16+l;
-                if (rec[i] < 0 || rec[i] > 255) { commandError=CE_PARAM_RANGE; break; }
               }
               for (int i=0; i<8; i++) nv.write(base+i,rec[i]);
             break;
