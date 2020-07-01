@@ -20,7 +20,7 @@
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
 
 // automatically switch to built in serial
-#if FEATURE_LIST_DS == ON || defined(DEBUG_ON) || defined(MESSAGE_LOG_ON)
+#if FEATURE_LIST_DS == ON || defined(DEBUG_ON) || defined(DEBUG_VERBOSE)
   #define MEGA2560_ARDUINO_SERIAL_ON
 #endif
 
