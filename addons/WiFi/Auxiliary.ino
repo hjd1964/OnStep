@@ -282,7 +282,7 @@ void auxAjax() {
 
   // update auxiliary feature values
   if (mountStatus.featureFound()) {
-    mountStatus.featureUpdate(false);
+    mountStatus.featureUpdate();
     for (int i=0; i<8; i++) {
       mountStatus.selectFeature(i);
       if (mountStatus.featurePurpose() == ANALOG_OUTPUT) {

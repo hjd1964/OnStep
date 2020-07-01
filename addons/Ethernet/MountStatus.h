@@ -210,7 +210,7 @@ class MountStatus {
       scan_features = false;
       return true;
     }
-    bool featureUpdate(bool all = true) {
+    bool featureUpdate(bool all = false) {
       // get feature status
       for (uint8_t i=0; i<8; i++) {
         char *value1_str=NULL;
