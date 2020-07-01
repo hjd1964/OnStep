@@ -1011,7 +1011,7 @@ void processCommands() {
               case 'B': cli(); temp=(long)(trackingTimerRateAxis1*1000.0); sei(); sprintf(reply,"%ld",temp); booleanReply=false; break;       // DebugB, trackingTimerRateAxis1
               case 'C': sprintf(reply,"%ldus",average_loop_time); booleanReply=false; break;                                                  // DebugC, Workload average
               case 'E': double ra, de; cli(); getEqu(&ra,&de,false); sei(); sprintf(reply,"%f,%f",ra,de); booleanReply=false; break;          // DebugE, equatorial coordinates degrees (no division by 15)
-#ifdef DEBUG_ON                                                                                                                               // DebugF, EEPROM dump to DebugSer
+#if defined(DEBUG_ON) || defined(DEBUG_VERBOSE)                                                                                               // DebugF, EEPROM dump to DebugSer
               case 'F':
                 for (int x=0; x <= E2END+16; x++) {
                   if (x < 8 || x > E2END+8) {
@@ -1898,7 +1898,7 @@ void processCommands() {
           }
         } else
 #endif
-#ifdef DEBUG_ON 
+#if defined(DEBUG_ON) || defined(DEBUG_VERBOSE)
         if (parameter[0] == 'F') { // Fn: Debug
           switch (parameter[1]) {  // DebugF, EEPROM upload
             case 'F':
