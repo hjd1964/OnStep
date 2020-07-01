@@ -298,6 +298,7 @@ void handleRoot() {
   if (mountStatus.axisStatusValid()) {
     // Stepper driver status Axis1
     strcpy(temp1,"");
+    if (mountStatus.axis1Comms()) strcat(temp1,L_COMMS_FAILURE  ", ");
     if (mountStatus.axis1StSt()) strcat(temp1,L_STANDSTILL ", "); else {
       if (mountStatus.axis1OLa() || mountStatus.axis1OLb()) {
         strcat(temp1,L_OPEN_LOAD " ");
@@ -322,6 +323,7 @@ void handleRoot() {
   
     // Stepper driver status Axis2
     strcpy(temp1,"");
+    if (mountStatus.axis2Comms()) strcat(temp1,L_COMMS_FAILURE ", ");
     if (mountStatus.axis2StSt()) strcat(temp1,L_STANDSTILL ", "); else {
       if (mountStatus.axis2OLa() || mountStatus.axis2OLb()) {
         strcat(temp1,L_OPEN_LOAD " ");

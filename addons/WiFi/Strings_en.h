@@ -89,6 +89,7 @@
 // driver status
 #define L_DRIVER_STATUS "Driver"
 #define L_STATE "State"
+#define L_COMMS_FAILURE "Comms failure"
 #define L_STANDSTILL "Standstill"
 #define L_OPEN_LOAD "Open Load"
 #define L_SHORT_GND "Short Gnd"

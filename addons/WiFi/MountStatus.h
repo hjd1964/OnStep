@@ -90,23 +90,27 @@ class MountStatus {
         _stst2 = false; _olb2 = false; _ola2 = false; _s2ga2 = false; _s2gb2 = false; _ot2 = false; _otpw2 = false;
         if (!command(":GXU1#",s) || (s[0] != 0 && s[0] != '0' && driverStatusTries<3)) {
           driverStatusTries=0;
-          if (strstr(s,"ST")) _stst1=true;
-          if (strstr(s,"OA")) _ola1=true;
-          if (strstr(s,"OB")) _olb1=true;
-          if (strstr(s,"GA")) _s2ga1=true;
-          if (strstr(s,"GB")) _s2gb1=true;
-          if (strstr(s,"OT")) _ot1=true;
-          if (strstr(s,"PW")) _otpw1=true;
+          if (strstr(s,"ST,OA,OB,GA,GB,OT,PW")) _comms1=true; else {
+            if (strstr(s,"ST")) _stst1=true;
+            if (strstr(s,"OA")) _ola1=true;
+            if (strstr(s,"OB")) _olb1=true;
+            if (strstr(s,"GA")) _s2ga1=true;
+            if (strstr(s,"GB")) _s2gb1=true;
+            if (strstr(s,"OT")) _ot1=true;
+            if (strstr(s,"PW")) _otpw1=true;
+          }
 
           if (!command(":GXU2#",s) || (s[0] != 0 && s[0] != '0')) {
             _validStepperDriverStatus = true;
-            if (strstr(s,"ST")) _stst2=true;
-            if (strstr(s,"OA")) _ola2=true;
-            if (strstr(s,"OB")) _olb2=true;
-            if (strstr(s,"GA")) _s2ga2=true;
-            if (strstr(s,"GB")) _s2gb2=true;
-            if (strstr(s,"OT")) _ot2=true;
-            if (strstr(s,"PW")) _otpw2=true;
+            if (strstr(s,"ST,OA,OB,GA,GB,OT,PW")) _comms2=true; else {
+              if (strstr(s,"ST")) _stst2=true;
+              if (strstr(s,"OA")) _ola2=true;
+              if (strstr(s,"OB")) _olb2=true;
+              if (strstr(s,"GA")) _s2ga2=true;
+              if (strstr(s,"GB")) _s2gb2=true;
+              if (strstr(s,"OT")) _ot2=true;
+              if (strstr(s,"PW")) _otpw2=true;
+            }
           }
         } else { driverStatusTries++; if (driverStatusTries>3) driverStatusTries=3; }
 
@@ -142,6 +146,7 @@ class MountStatus {
 
     bool axisFault() { return _axisFault; }
     bool axisStatusValid() { return _validStepperDriverStatus; }
+    bool axis1Comms() { return _comms1; }
     bool axis1StSt() { return _stst1; }
     bool axis1OLa() { return _ola1; }
     bool axis1OLb() { return _olb1; }
@@ -149,6 +154,7 @@ class MountStatus {
     bool axis1S2Gb() { return _s2gb1; }
     bool axis1OT() { return _ot1; }
     bool axis1OTPW() { return _otpw1; }
+    bool axis2Comms() { return _comms2; }
     bool axis2StSt() { return _stst2; }
     bool axis2OLa() { return _ola2; }
     bool axis2OLb() { return _olb2; }
@@ -322,6 +328,7 @@ class MountStatus {
 
     Errors _lastError=ERR_NONE;
     bool _validStepperDriverStatus = false;
+    bool _comms1 = false;
     bool _stst1 = false;
     bool _olb1 = false;
     bool _ola1 = false;
@@ -330,6 +337,7 @@ class MountStatus {
     bool _ot1 = false;
     bool _otpw1 = false;
     bool _valid2 = false;
+    bool _comms2 = false;
     bool _stst2 = false;
     bool _olb2 = false;
     bool _ola2 = false;

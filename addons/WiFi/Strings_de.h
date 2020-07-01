@@ -97,6 +97,7 @@
 // driver status
 #define L_DRIVER_STATUS "Teriber"
 #define L_STATE "Status"
+#define L_COMMS_FAILURE "Befehlsfehler"
 #define L_STANDSTILL "Stillstand"
 #define L_OPEN_LOAD "Offene Last"
 #define L_SHORT_GND "Masseschluss"

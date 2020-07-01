@@ -89,6 +89,7 @@
 // driver status
 #define L_DRIVER_STATUS "运转"
 #define L_STATE "状态"
+#define L_COMMS_FAILURE "命令失败"
 #define L_STANDSTILL "停止"
 #define L_OPEN_LOAD "打开负载"
 #define L_SHORT_GND "接近地面"
