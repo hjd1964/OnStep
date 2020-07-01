@@ -187,6 +187,13 @@ void setup() {
 #ifdef HAL_SERIAL_C_ENABLED
   SerialC.begin(SERIAL_C_BAUD_DEFAULT);
 #endif
+#ifdef HAL_SERIAL_D_ENABLED
+  SerialD.begin(SERIAL_D_BAUD_DEFAULT);
+#endif
+#ifdef HAL_SERIAL_E_ENABLED
+  SerialE.begin(SERIAL_E_BAUD_DEFAULT);
+#endif
+
 #if ST4_HAND_CONTROL == ON && ST4_INTERFACE != OFF
   SerialST4.begin();
 #endif
@@ -359,6 +366,12 @@ void setup() {
 #endif
 #ifdef HAL_SERIAL_C_ENABLED
   SerialC.flush();
+#endif
+#ifdef HAL_SERIAL_D_ENABLED
+  SerialD.flush();
+#endif
+#ifdef HAL_SERIAL_E_ENABLED
+  SerialE.flush();
 #endif
   delay(500);
 

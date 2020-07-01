@@ -12,6 +12,16 @@
 // SerialA is always enabled, SerialB and SerialC are optional
 #define SerialB Serial1
 #define HAL_SERIAL_B_ENABLED
+#if defined(USB_DUAL_SERIAL) || defined(USB_TRIPLE_SERIAL)
+  #define SerialD SerialUSB1
+  #define SERIAL_D_BAUD_DEFAULT 9600
+  #define HAL_SERIAL_D_ENABLED
+#endif
+#if defined(USB_TRIPLE_SERIAL)
+  #define SerialE SerialUSB2
+  #define SERIAL_E_BAUD_DEFAULT 9600
+  #define HAL_SERIAL_E_ENABLED
+#endif
 
 // New symbol for the default I2C port -------------------------------------------------------------
 #include <Wire.h>
@@ -36,12 +46,12 @@ void HAL_Init(void) {
   analogReadResolution(10);
 
   // clear/make available all PIT timers
-  CCM_CCGR1 |= CCM_CCGR1_PIT(CCM_CCGR_ON);
-  PIT_MCR = 1;
-  PIT_TCTRL0=0;
-  PIT_TCTRL1=0;
-  PIT_TCTRL2=0;
-  PIT_TCTRL3=0;
+//  CCM_CCGR1 |= CCM_CCGR1_PIT(CCM_CCGR_ON);
+//  PIT_MCR = 1;
+//  PIT_TCTRL0=0;
+//  PIT_TCTRL1=0;
+//  PIT_TCTRL2=0;
+//  PIT_TCTRL3=0;
 }
 
 //--------------------------------------------------------------------------------------------------

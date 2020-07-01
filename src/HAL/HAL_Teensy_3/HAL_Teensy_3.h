@@ -43,7 +43,16 @@
   #define SerialC Serial4
   #define HAL_SERIAL_C_ENABLED
 #endif
-
+#if defined(USB_DUAL_SERIAL) || defined(USB_TRIPLE_SERIAL)
+  #define SerialD SerialUSB1
+  #define SERIAL_D_BAUD_DEFAULT 9600
+  #define HAL_SERIAL_D_ENABLED
+#endif
+#if defined(USB_TRIPLE_SERIAL)
+  #define SerialE SerialUSB2
+  #define SERIAL_E_BAUD_DEFAULT 9600
+  #define HAL_SERIAL_E_ENABLED
+#endif
 // New symbol for the default I2C port -------------------------------------------------------------
 #include <Wire.h>
 #if defined(__MK64FX512__) || defined(__MK66FX1M0__)
