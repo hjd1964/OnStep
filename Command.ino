@@ -630,7 +630,7 @@ void processCommands() {
         booleanReply=false; 
       } else
 // :Gm#       Gets the meridian pier-side
-//            Returns: E#, W#, N# (none/parked), ?# (Meridian flip in progress) 
+//            Returns: E#, W#, N# (none/parked)
       if (command[1] == 'm' && parameter[0] == 0)  {
         reply[0]='?'; reply[1]=0;
         if (getInstrPierSide() == PierSideNone) reply[0]='N';
