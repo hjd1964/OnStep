@@ -695,7 +695,8 @@ void processCommands() {
 //            Returns: n.n# (OnStep returns more decimal places than LX200 standard)
       if (command[1] == 'T' && parameter[0] == 0)  {
         char temp[10];
-        if (trackingState == TrackingSidereal && !trackingSyncInProgress()) f=getTrackingRate60Hz(); else f=0.0;
+        // during slews, if tracking is enabled it's at the default sidereal rate
+        if (trackingState == TrackingMoveTo && lastTrackingState == TrackingSidereal) f=1.00273790935*60.0; else f=getTrackingRate60Hz();
         dtostrf(f,0,5,temp);
         strcpy(reply,temp);
         booleanReply=false;
@@ -707,7 +708,8 @@ void processCommands() {
 //            Returns: s#
       if (command[1] == 'U' && parameter[0] == 0)  {
         i=0;
-        if (trackingState != TrackingSidereal || trackingSyncInProgress()) reply[i++]='n';                   // [n]ot tracking
+        if (trackingState != TrackingSidereal &&
+          !(trackingState == TrackingMoveTo && lastTrackingState == TrackingSidereal)) reply[i++]='n';       // [n]ot tracking
         if (trackingState != TrackingMoveTo && !trackingSyncInProgress())  reply[i++]='N';                   // [N]o goto
         const char *parkStatusCh = "pIPF";       reply[i++]=parkStatusCh[parkStatus];                        // not [p]arked, parking [I]n-progress, [P]arked, Park [F]ailed
         if (pecRecorded)                         reply[i++]='R';                                             // PEC data has been [R]ecorded
@@ -760,7 +762,8 @@ void processCommands() {
 //            Returns: s#
       if (command[1] == 'u' && parameter[0] == 0)  {
         memset(reply,(char)0b10000000,9);
-        if (trackingState != TrackingSidereal || trackingSyncInProgress()) reply[0]|=0b10000001;             // Not tracking
+        if (trackingState != TrackingSidereal &&
+          !(trackingState == TrackingMoveTo && lastTrackingState == TrackingSidereal)) reply[0]|=0b10000001; // Not tracking
         if (trackingState != TrackingMoveTo && !trackingSyncInProgress())  reply[0]|=0b10000010;             // No goto
         if (PPSsynced)                               reply[0]|=0b10000100;                                   // PPS sync
         if (guideDirAxis1 || guideDirAxis2)          reply[0]|=0b10001000;                                   // Guide active
