@@ -59,13 +59,23 @@
   // workaround for ESP32 crashing on EEPROM commit
   #define DISABLE_EEPROM_COMMIT_ON
 
-  #define B_PIN0 33   // Shift
-  #define B_PIN1 25   // N
-  #define B_PIN2 32   // S
-  #define B_PIN3 36   // E
-  #define B_PIN4 34   // W
-  #define B_PIN5 39   // F
-  #define B_PIN6 35   // f
+  #if KEYPAD_JOYSTICK_ANALOG == JS1
+    #define B_PIN0 25   // Shift
+    #define B_PIN1 33   // N
+    #define B_PIN2 33   // S
+    #define B_PIN3 32   // E
+    #define B_PIN4 32   // W
+    #define B_PIN5 34   // F
+    #define B_PIN6 35   // f
+  #else
+    #define B_PIN0 33   // Shift
+    #define B_PIN1 25   // N
+    #define B_PIN2 32   // S
+    #define B_PIN3 36   // E
+    #define B_PIN4 34   // W
+    #define B_PIN5 39   // F
+    #define B_PIN6 35   // f
+  #endif
 
   #define ST4RAw 23   // ST4 (OnStep) RA- West,  send data to OnStep
   #define ST4DEs 14   // ST4 (OnStep) DE- South, clock input to ISR
