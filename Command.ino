@@ -2218,11 +2218,9 @@ void processCommands() {
 
 // stops all fast motion
 void stopSlewing() {
-  if (parkStatus == NotParked || parkStatus == Parking) {
-    stopGuideAxis1();
-    stopGuideAxis2();
-    if (trackingState == TrackingMoveTo) if (!abortSlew) abortSlew=StartAbortSlew;
-  }
+  stopGuideAxis1();
+  stopGuideAxis2();
+  if (trackingState == TrackingMoveTo) if (!abortSlew) abortSlew=StartAbortSlew;
 }
 
 // stops everything if slewing or tracking breaks the limit, just stops Dec axis if guiding breaks the limit
