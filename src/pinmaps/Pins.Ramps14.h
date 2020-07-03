@@ -7,8 +7,13 @@
 #define Aux0                 11     // Status LED
 #define Aux1                 29     // ESP8266 GPIO0, SPI MISO/Fault
 #define Aux2                 37     // ESP8266 RST, SPI MISO/Fault
-#define Aux3                 32     // Home SW; note modified pinmap 10/2/19 Aux3 and Aux4 were changed, 9/30/19 Aux5 was removed
-#define Aux4                 39     // OneWire, Home SW
+#if PINMAP == MksGenL1
+  #define Aux3               14     // Home SW (GenL1 Y- endstop)
+  #define Aux4               15     // OneWire (requires h/w modification,) Home SW (GenL1 Y+ endstop)
+#else
+  #define Aux3               32     // Home SW; note modified pinmap 10/2/19 Aux3 and Aux4 were changed, 9/30/19 Aux5 was removed (Aux3 not present Gen-L1)
+  #define Aux4               39     // OneWire, Home SW (Aux4 not present Gen-L1)
+#endif
 #define Aux5                  7     // Dew Heater0 (E1 , MKS Gen-L)
 #define Aux6                  8     // Dew Heater1 (BED, MKS Gen-L, RAMPS1.4)
 #define Aux7                  9     // Dew Heater2 (FAN, MKS Gen-L, RAMPS1.4)
@@ -32,8 +37,13 @@
 #define SSPI_MOSI 51
 
 // The PEC index sense is a 5V logic input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
-#define PecPin               57     // RAMPS AUX1, A-OUT (1=+5V, 2=GND, 3=PEC)
-#define AnalogPecPin         A3     // Note A3 is (57)
+#if PINMAP == MksGenL1
+  #define PecPin             41     // GenL1 EXP2
+  #define AnalogPecPin       -1     // N/A
+#else
+  #define PecPin             57     // RAMPS AUX1, A-OUT (1=+5V, 2=GND, 3=PEC)
+  #define AnalogPecPin       A3     // Note A3 is (57)
+#endif
 
 // The limit switch sense is a 5V logic input which uses the internal (or external 2k) pull up, shorted to ground it stops gotos/tracking
 #define LimitPin              3     // RAMPS X- (1=LMT, 2=GND, 3=+5)
