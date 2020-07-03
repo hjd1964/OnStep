@@ -21,7 +21,8 @@ CommandErrors validateGotoCoords(double HA, double Dec, double Alt) {
     if (Dec < AXIS2_LIMIT_MIN)                 return CE_SLEW_ERR_OUTSIDE_LIMITS;
     if (Dec > AXIS2_LIMIT_MAX)                 return CE_SLEW_ERR_OUTSIDE_LIMITS;
 #endif
-  if ((fabs(HA) > AXIS1_LIMIT_UNDER_POLE))     return CE_SLEW_ERR_OUTSIDE_LIMITS;
+  if (HA < AXIS1_LIMIT_MIN)                    return CE_SLEW_ERR_OUTSIDE_LIMITS;
+  if (HA > AXIS1_LIMIT_MAX)                    return CE_SLEW_ERR_OUTSIDE_LIMITS;
   return CE_NONE;
 }
 
@@ -239,26 +240,24 @@ CommandErrors goToEqu(double RA, double Dec) {
   Align.horToInstr(a,z,&a,&z,getInstrPierSide());
   z=haRange(z);
 
-  if ((AXIS1_LIMIT_MAXAZM > 180.0) && (AXIS1_LIMIT_MAXAZM <= 360.0)) {
-    // adjust coordinate range to allow going past 180 deg.
-    // position a1 is 0..180
-    double a1=getInstrAxis1();
-    if (a1 >= 0) {
-      // and goto z is in -0..-180
-      if (z < 0) {
-        // the alternate z1 is in 180..360
-        double z1=z+360.0;
-        if ((z1 < AXIS1_LIMIT_MAXAZM) && (dist(a1,z) > dist(a1,z1))) z=z1;
-      }
+  // adjust coordinate range to allow going past 180 deg.
+  // position a1 is 0..180
+  double a1=getInstrAxis1();
+  if (a1 >= 0) {
+    // and goto z is in -0..-180
+    if (z < 0) {
+      // the alternate z1 is in 180..360
+      double z1=z+360.0;
+      if ((z1 < AXIS1_LIMIT_MAX) && (dist(a1,z) > dist(a1,z1))) z=z1;
     }
-    // position a1 -0..-180
-    if (a1 < 0) { 
-      // and goto z is in 0..180
-      if (z > 0) {
-        // the alternate z1 is in -360..-180
-        double z1=z-360.0;
-        if ((z1 > -AXIS1_LIMIT_MAXAZM) && (dist(a1,z) > dist(a1,z1))) z=z1;
-      }
+  }
+  // position a1 -0..-180
+  if (a1 < 0) { 
+    // and goto z is in 0..180
+    if (z > 0) {
+      // the alternate z1 is in -360..-180
+      double z1=z-360.0;
+      if ((z1 > AXIS1_LIMIT_MIN) && (dist(a1,z) > dist(a1,z1))) z=z1;
     }
   }
   
@@ -353,7 +352,7 @@ CommandErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTar
   int p=PierSideEast; switch (thisPierSide) { case PierSideWest: case PierSideFlipEW1: p=PierSideWest; break; }
 #if MOUNT_TYPE == ALTAZM
   // allow +/- 360 in Az
-  if (((thisTargetAxis1 > AXIS1_LIMIT_MAXAZM) || (thisTargetAxis1 < -AXIS1_LIMIT_MAXAZM)) || ((thisTargetAxis2 > 180.0) || (thisTargetAxis2 < -180.0))) return CE_GOTO_ERR_UNSPECIFIED;
+  if (((thisTargetAxis1 > AXIS1_LIMIT_MAX) || (thisTargetAxis1 < AXIS1_LIMIT_MIN)) || ((thisTargetAxis2 > 180.0) || (thisTargetAxis2 < -180.0))) return CE_GOTO_ERR_UNSPECIFIED;
 #else
   if (((thisTargetAxis1 > 180.0) || (thisTargetAxis1 < -180.0)) || ((thisTargetAxis2 > 180.0) || (thisTargetAxis2 < -180.0))) return CE_GOTO_ERR_UNSPECIFIED;
   #if AXIS2_TANGENT_ARM == ON

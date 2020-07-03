@@ -11,6 +11,28 @@
 // -----------------------------------------------------------------------------------
 // correct for configuration backwards compatability
 
+#if AXIS2_LIMIT_MIN == -91
+  #undef AXIS2_LIMIT_MIN
+  #define AXIS2_LIMIT_MIN -90
+#endif
+
+#if AXIS2_LIMIT_MAX == 91
+  #undef AXIS2_LIMIT_MAX
+  #define AXIS2_LIMIT_MAX -90
+#endif
+
+#if MOUNT_TYPE == ALTAZM
+  #if !defined(AXIS1_LIMIT_MIN) && defined(AXIS1_LIMIT_MAXAZM)
+    #define AXIS1_LIMIT_MIN -AXIS1_LIMIT_MAXAZM
+    #define AXIS1_LIMIT_MAX AXIS1_LIMIT_MAXAZM
+  #endif
+#else
+  #if !defined(AXIS1_LIMIT_MIN) && defined(AXIS1_LIMIT_UNDER_POLE)
+    #define AXIS1_LIMIT_MIN -AXIS1_LIMIT_UNDER_POLE
+    #define AXIS1_LIMIT_MAX AXIS1_LIMIT_UNDER_POLE
+  #endif
+#endif
+
 #ifndef AXIS2_TANGENT_ARM
   #define AXIS2_TANGENT_ARM OFF
 #endif
@@ -695,16 +717,28 @@
   #warning "Configuration (Config.h): When compiling for Mega2560, STEP_WAVE_FORM PULSE is recommended for best performance."
 #endif
 
-#ifndef AXIS1_LIMIT_UNDER_POLE
-  #error "Configuration (Config.h): Setting AXIS1_LIMIT_UNDER_POLE must be present!"
-#elif AXIS1_LIMIT_UNDER_POLE < 150 || AXIS1_LIMIT_UNDER_POLE > 180
-  #error "Configuration (Config.h): Setting AXIS1_LIMIT_UNDER_POLE invalid, use a number between 150 and 180 (degrees.)"
-#endif
-
-#ifndef AXIS1_LIMIT_MAXAZM
-  #error "Configuration (Config.h): Setting AXIS1_LIMIT_MAXAZM must be present!"
-#elif AXIS1_LIMIT_MAXAZM < 180 || AXIS1_LIMIT_MAXAZM > 360
-  #error "Configuration (Config.h): Setting AXIS1_LIMIT_MAXAZM invalid, use a number between 180 and 360 (degrees.)"
+#if MOUNT_TYPE == ALTAZM
+  #ifndef AXIS1_LIMIT_MIN
+    #error "Configuration (Config.h): Setting AXIS1_LIMIT_MIN must be present!"
+  #elif AXIS1_LIMIT_MIN > -180 || AXIS1_LIMIT_MIN < -360
+    #error "Configuration (Config.h): Setting AXIS1_LIMIT_MIN invalid, use a number between -180 and -360 (degrees.)"
+  #endif
+  #ifndef AXIS1_LIMIT_MAX
+    #error "Configuration (Config.h): Setting AXIS1_LIMIT_MAX must be present!"
+  #elif AXIS1_LIMIT_MAX < 180 || AXIS1_LIMIT_MAX > 360
+    #error "Configuration (Config.h): Setting AXIS1_LIMIT_MAX invalid, use a number between 180 and 360 (degrees.)"
+  #endif
+#else
+  #ifndef AXIS1_LIMIT_MIN
+    #error "Configuration (Config.h): Setting AXIS1_LIMIT_MIN must be present!"
+  #elif AXIS1_LIMIT_MIN > -105 || AXIS1_LIMIT_MIN < -180
+    #error "Configuration (Config.h): Setting AXIS1_LIMIT_MIN invalid, use a number between -105 and -180 (degrees.)"
+  #endif
+  #ifndef AXIS1_LIMIT_MAX
+    #error "Configuration (Config.h): Setting AXIS1_LIMIT_MAX must be present!"
+  #elif AXIS1_LIMIT_MAX < 105 || AXIS1_LIMIT_MAX > 180
+    #error "Configuration (Config.h): Setting AXIS1_LIMIT_MAX invalid, use a number between 105 and 180 (degrees.)"
+  #endif
 #endif
 
 #ifndef AXIS2_LIMIT_MIN

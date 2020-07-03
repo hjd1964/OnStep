@@ -145,12 +145,6 @@ double cosLat                           = 1.0;
 double sinLat                           = 0.0;
 double longitude                        = 0.0;
 
-// fix AXIS1_LIMIT_UNDER_POLE for fork mounts
-#if MOUNT_TYPE == FORK
-  #undef AXIS1_LIMIT_UNDER_POLE
-  #define AXIS1_LIMIT_UNDER_POLE 180.0
-#endif
-
 // Coordinates ---------------------------------------------------------------------------------------------------------------------
 #ifndef TELESCOPE_COORDINATES
   #define TELESCOPE_COORDINATES TOPOCENTRIC

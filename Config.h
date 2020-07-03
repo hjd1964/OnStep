@@ -127,8 +127,10 @@
 #define AXIS1_DRIVER_REVERSE          OFF //    OFF, ON Reverses movement direction, or reverse wiring instead to correct.   <-Often
 #define AXIS1_DRIVER_STATUS           OFF //    OFF, TMC_SPI, HIGH, or LOW.  Polling for driver status info/fault detection.  Option
 
-#define AXIS1_LIMIT_UNDER_POLE        180 //    180, n. Where n=150..180 (degrees.) Max HA hour angle + or - for Eq modes.    Infreq
-#define AXIS1_LIMIT_MAXAZM            360 //    360, n. Where n=180..360 (degrees.) Max Azimuth + or - for AltAzm mode only.  Infreq
+#define AXIS1_LIMIT_MIN              -180 //   -180, n. Where n=-105..-180 (degrees.) Minimum "Hour Angle" for Eq modes.      Infreq
+                                          //         n. Where n=-180..-360 (degrees.) Minimum Azimuth for AltAzm mode.        Infreq
+#define AXIS1_LIMIT_MAX               180 //    180, n. Where n= 105.. 180 (degrees.) Maximum "Hour Angle" for Eq modes.      Infreq
+                                          //         n. Where n= 180.. 360 (degrees.) Maximum Azimuth for AltAzm mode.        Infreq
 
 // AXIS2 DEC/ALT
 // see https://onstep.groups.io/g/main/wiki/6-Configuration#AXIS2

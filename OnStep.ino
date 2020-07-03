@@ -595,7 +595,7 @@ void loop2() {
   #endif
 #endif
 
-    // SAFETY CHECKS, keeps mount from tracking past the meridian limit, past the AXIS1_LIMIT_UNDER_POLE, or past the Dec limits
+    // SAFETY CHECKS, keeps mount from tracking past the meridian limit, past the AXIS1_LIMIT_MAX, or past the Dec limits
     if (safetyLimitsOn) {
       if (meridianFlip != MeridianFlipNever) {
         if (getInstrPierSide() == PierSideWest) {
@@ -609,23 +609,24 @@ void loop2() {
         } else
         if (getInstrPierSide() == PierSideEast) {
           if (getInstrAxis1() < -degreesPastMeridianE) { generalError=ERR_MERIDIAN; stopLimit(); }
-          if (getInstrAxis1() > AXIS1_LIMIT_UNDER_POLE) { generalError=ERR_UNDER_POLE; stopLimit(); }
+          if (getInstrAxis1() > AXIS1_LIMIT_MAX) { generalError=ERR_UNDER_POLE; stopLimit(); }
         }
       } else {
 #if MOUNT_TYPE != ALTAZM
         // when Fork mounted, ignore pierSide and just stop the mount if it passes the UnderPoleLimit
-        if (getInstrAxis1() > AXIS1_LIMIT_UNDER_POLE) { generalError=ERR_UNDER_POLE; stopLimit(); }
+        if (getInstrAxis1() > AXIS1_LIMIT_MAX) { generalError=ERR_UNDER_POLE; stopLimit(); }
 #else
-        // when Alt/Azm mounted, just stop the mount if it passes AXIS1_LIMIT_MAXAZM
-        if (getInstrAxis1() > AXIS1_LIMIT_MAXAZM) { generalError=ERR_AZM; stopLimit(); }
+        // when Alt/Azm mounted, just stop the mount if it passes AXIS1_LIMIT_MAX
+        if (getInstrAxis1() > AXIS1_LIMIT_MAX) { generalError=ERR_AZM; stopLimit(); }
 #endif
       }
     }
     // check for exceeding AXIS2_LIMIT_MIN or AXIS2_LIMIT_MAX
 #if MOUNT_TYPE != ALTAZM
   #if AXIS2_TANGENT_ARM == ON
-      if (posAxis2/AXIS2_STEPS_PER_DEGREE < AXIS2_LIMIT_MIN) { generalError=ERR_DEC; decMinLimit(); } else
-      if (posAxis2/AXIS2_STEPS_PER_DEGREE > AXIS2_LIMIT_MAX) { generalError=ERR_DEC; decMaxLimit(); } else
+      cli(); double d=posAxis2/AXIS2_STEPS_PER_DEGREE; sei();
+      if (d < AXIS2_LIMIT_MIN) { generalError=ERR_DEC; decMinLimit(); } else
+      if (d > AXIS2_LIMIT_MAX) { generalError=ERR_DEC; decMaxLimit(); } else
       if (trackingState == TrackingSidereal && generalError == ERR_DEC) generalError=ERR_NONE;
   #else
       if (currentDec < AXIS2_LIMIT_MIN) { generalError=ERR_DEC; decMinLimit(); }
