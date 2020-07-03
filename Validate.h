@@ -18,7 +18,7 @@
 
 #if AXIS2_LIMIT_MAX == 91
   #undef AXIS2_LIMIT_MAX
-  #define AXIS2_LIMIT_MAX -90
+  #define AXIS2_LIMIT_MAX 90
 #endif
 
 #if MOUNT_TYPE == ALTAZM
@@ -731,7 +731,7 @@
 #else
   #ifndef AXIS1_LIMIT_MIN
     #error "Configuration (Config.h): Setting AXIS1_LIMIT_MIN must be present!"
-  #elif AXIS1_LIMIT_MIN > -105 || AXIS1_LIMIT_MIN < -180
+  #elif AXIS1_LIMIT_MIN < -180 || AXIS1_LIMIT_MIN > -105
     #error "Configuration (Config.h): Setting AXIS1_LIMIT_MIN invalid, use a number between -105 and -180 (degrees.)"
   #endif
   #ifndef AXIS1_LIMIT_MAX
@@ -743,14 +743,14 @@
 
 #ifndef AXIS2_LIMIT_MIN
   #error "Configuration (Config.h): Setting AXIS2_LIMIT_MIN must be present!"
-#elif (AXIS2_LIMIT_MIN < -91 || AXIS2_LIMIT_MIN > 0)
-  #error "Configuration (Config.h): Setting AXIS2_LIMIT_MIN invalid, use a number between -91 and 0 (degrees.)  -91 = disabled."
+#elif (AXIS2_LIMIT_MIN < -90 || AXIS2_LIMIT_MIN > 0)
+  #error "Configuration (Config.h): Setting AXIS2_LIMIT_MIN invalid, use a number between -90 and 0 (degrees.)  -90 = disabled."
 #endif
 
 #ifndef AXIS2_LIMIT_MAX
   #error "Configuration (Config.h): Setting AXIS2_LIMIT_MAX must be present!"
-#elif (AXIS2_LIMIT_MAX < 0 || AXIS2_LIMIT_MAX > 91)
-  #error "Configuration (Config.h): Setting AXIS2_LIMIT_MAX invalid, use a number between 0 and 91 (degrees.)  91 = disabled."
+#elif (AXIS2_LIMIT_MAX < 0 || AXIS2_LIMIT_MAX > 90)
+  #error "Configuration (Config.h): Setting AXIS2_LIMIT_MAX invalid, use a number between 0 and 90 (degrees.)  90 = disabled."
 #endif
 
 #ifndef AXIS2_TANGENT_ARM
