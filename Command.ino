@@ -983,10 +983,10 @@ void processCommands() {
               case '9': sprintf(reply,"%ld",(long)round(degreesPastMeridianE*4.0)); booleanReply=false; break;    // minutes past meridianE
               case 'A': sprintf(reply,"%ld",(long)round(degreesPastMeridianW*4.0)); booleanReply=false; break;    // minutes past meridianW
 #endif
-              case 'B': sprintf(reply,"%ld",(long)round(AXIS1_LIMIT_UNDER_POLE/15.0)); booleanReply=false; break; // in hours
+              case 'B': sprintf(reply,"%ld",(long)round(AXIS1_LIMIT_MAX/15.0)); booleanReply=false; break; // in hours
               case 'C': sprintf(reply,"%ld",(long)round(AXIS2_LIMIT_MIN)); booleanReply=false; break;
               case 'D': sprintf(reply,"%ld",(long)round(AXIS2_LIMIT_MAX)); booleanReply=false; break;
-              case 'E': 
+              case 'E':
                 // coordinate mode for getting and setting RA/Dec
                 // 0 = OBSERVED_PLACE
                 // 1 = TOPOCENTRIC (does refraction)
@@ -1344,7 +1344,7 @@ void processCommands() {
 //              3=controller in standby
 //              4=mount is parked
 //              5=Goto in progress
-//              6=outside limits (AXIS2_LIMIT_MAX, AXIS2_LIMIT_MIN, AXIS1_LIMIT_UNDER_POLE, MERIDIAN_E/W)
+//              6=outside limits (AXIS2_LIMIT_MAX, AXIS2_LIMIT_MIN, AXIS1_LIMIT_MIN/MAX, MERIDIAN_E/W)
 //              7=hardware fault
 //              8=already in motion
 //              9=unspecified error
