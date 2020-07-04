@@ -55,6 +55,7 @@
 #define ON_PULLDOWN                -5
 #define XDIRECT                    -6
 #define AUX                        -7
+#define VERBOSE                    -8
 
 // mount types                     
 #define MOUNT_TYPE_FIRST            1

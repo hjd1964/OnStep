@@ -46,6 +46,8 @@
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
 
+#include "Constants.h"
+
 // On first upload OnStep automatically initializes a host of settings in nv memory (EEPROM.)
 // This option forces that initialization again.
 // Change to true, upload OnStep and nv will be reset to default. Then immediately set to false and upload again.
@@ -54,13 +56,12 @@
 
 // Enable additional debugging and/or status messages on the specified DebugSer port
 // Note that the DebugSer port cannot be used for normal communication with OnStep
-#define DEBUG_OFF             // default=_OFF, use "DEBUG_ON" for background errors only, use "DEBUG_VERBOSE" for all errors and status messages
+#define DEBUG OFF             // default=OFF, use "DEBUG ON" for background errors only, use "DEBUG VERBOSE" for all errors and status messages
 #define DebugSer SerialA      // default=SerialA, or Serial4 for example (always 9600 baud)
 
 #include <errno.h>
 #include <math.h>
 
-#include "Constants.h"
 #include "src/sd_drivers/Models.h"
 #include "Config.h"
 #include "src/pinmaps/Models.h"
@@ -68,7 +69,7 @@
 #include "Validate.h"
 
 // Helper macros for debugging, with less typing
-#if defined(DEBUG_ON) || defined(DEBUG_VERBOSE)
+#if DEBUG != OFF
   #define D(x)       DebugSer.print(x)
   #define DH(x)      DebugSer.print(x,HEX)
   #define DL(x)      DebugSer.println(x)
@@ -79,7 +80,7 @@
   #define DL(x)
   #define DHL(x,y)
 #endif
-#if defined(DEBUG_VERBOSE)
+#if DEBUG == VERBOSE
   #define VL(x)       DebugSer.print(x)
   #define VLL(x)      DebugSer.println(x)
 #else
@@ -164,7 +165,7 @@ void setup() {
   // take a half-second to let any connected devices come up before we start setting up pins
   delay(500);
 
-#ifdef DEBUG_ON
+#if DEBUG != OFF
   // Initialize USB serial debugging early, so we can use DebugSer.print() for debugging, if needed
   DebugSer.begin(9600);
   delay(5000);
