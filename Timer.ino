@@ -271,11 +271,11 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
 
     // set direction
     if (posAxis1 < (long)targetAxis1.part.m) dirAxis1=1; else dirAxis1=0;
-    #if AXIS1_DRIVER_REVERSE == ON
+    if (axis1Settings.reverse == ON) {
       if (defaultDirAxis1 == dirAxis1) a1DIR_L; else a1DIR_H;
-    #else
+    } else {
       if (defaultDirAxis1 == dirAxis1) a1DIR_H; else a1DIR_L;
-    #endif
+    }
   
     // telescope moves WEST with the sky, blAxis1 is the amount of EAST backlash
     if (dirAxis1 == 1) {
@@ -357,11 +357,11 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
     
     // set direction
     if (posAxis2 < (long)targetAxis2.part.m) dirAxis2=1; else dirAxis2=0;
-    #if AXIS2_DRIVER_REVERSE == ON
+    if (axis2Settings.reverse == ON) {
       if (defaultDirAxis2 == dirAxis2) a2DIR_L; else a2DIR_H;
-    #else
+    } else {
       if (defaultDirAxis2 == dirAxis2) a2DIR_H; else a2DIR_L;
-    #endif
+    }
    
     // telescope moving toward celestial pole in the sky, blAxis2 is the amount of opposite backlash
     if (dirAxis2 == 1) {
