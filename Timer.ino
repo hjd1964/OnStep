@@ -124,7 +124,7 @@ void timerSupervisor(bool isCentiSecond) {
       } else {
         if ((isCentiSecond) && (!inbacklashAxis1)) {
           // high speed guiding
-          axis1SettingsGotoMode();
+          axis1DriverGotoMode();
 
           // at higher step rates where torque is reduced make smaller rate changes
           double r=1.2-sqrt((fabs(guideTimerRateAxis1A)/slewRateX));
@@ -142,7 +142,7 @@ void timerSupervisor(bool isCentiSecond) {
   
           // stop guiding
           if (guideDirAxis1 == 'b') {
-            if (fabs(guideTimerRateAxis1A) < 0.001) { guideDirAxis1=0; lastGuideDirAxis1=0; guideTimerRateAxis1=0.0; guideTimerRateAxis1A=0.0; guideDirChangeTimerAxis1=0; axis1SettingsTrackingMode(false); }
+            if (fabs(guideTimerRateAxis1A) < 0.001) { guideDirAxis1=0; lastGuideDirAxis1=0; guideTimerRateAxis1=0.0; guideTimerRateAxis1A=0.0; guideDirChangeTimerAxis1=0; axis1DriverTrackingMode(false); }
           }
         }
       }
@@ -165,7 +165,7 @@ void timerSupervisor(bool isCentiSecond) {
       } else {
         if ((isCentiSecond) && (!inbacklashAxis2)) {
           // use acceleration
-          axis2SettingsGotoMode();
+          axis2DriverGotoMode();
   
           // at higher step rates where torque is reduced make smaller rate changes
           double r=1.2-sqrt((fabs(guideTimerRateAxis2A)/slewRateX));
@@ -183,7 +183,7 @@ void timerSupervisor(bool isCentiSecond) {
   
           // stop guiding
           if (guideDirAxis2 == 'b') {
-            if (fabs(guideTimerRateAxis2A) < 0.001) { guideDirAxis2=0; lastGuideDirAxis2=0; guideTimerRateAxis2=0.0; guideTimerRateAxis2A=0.0; guideDirChangeTimerAxis2=0; axis2SettingsTrackingMode(false); }
+            if (fabs(guideTimerRateAxis2A) < 0.001) { guideDirAxis2=0; lastGuideDirAxis2=0; guideTimerRateAxis2=0.0; guideTimerRateAxis2A=0.0; guideDirChangeTimerAxis2=0; axis2DriverTrackingMode(false); }
           }
         }
       }
@@ -251,7 +251,7 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
 #if AXIS1_DRIVER_MODEL == TMC_SPI
       if (!_spiInUse)
 #endif
-      { if (gotoModeAxis1) { gotoModeAxis1=false; stepAxis1=1; axis1SettingsTrackingFast(); } else { gotoModeAxis1=true; stepAxis1=AXIS1_DRIVER_STEP_GOTO; axis1SettingsGotoFast(); } }
+      { if (gotoModeAxis1) { gotoModeAxis1=false; stepAxis1=1; axis1DriverTrackingFast(); } else { gotoModeAxis1=true; stepAxis1=AXIS1_DRIVER_STEP_GOTO; axis1DriverGotoFast(); } }
     }
   }
 #endif
@@ -271,11 +271,11 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
 
     // set direction
     if (posAxis1 < (long)targetAxis1.part.m) dirAxis1=1; else dirAxis1=0;
-    if (axis1Settings.reverse == ON) {
+    #if AXIS1_DRIVER_REVERSE == ON
       if (defaultDirAxis1 == dirAxis1) a1DIR_L; else a1DIR_H;
-    } else {
+    #else
       if (defaultDirAxis1 == dirAxis1) a1DIR_H; else a1DIR_L;
-    }
+    #endif
   
     // telescope moves WEST with the sky, blAxis1 is the amount of EAST backlash
     if (dirAxis1 == 1) {
@@ -337,7 +337,7 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
 #if AXIS2_DRIVER_MODEL == TMC_SPI
       if (!_spiInUse)
 #endif
-      { if (gotoModeAxis2) { gotoModeAxis2=false; stepAxis2=1; axis2SettingsTrackingFast(); } else { gotoModeAxis2=true; stepAxis2=AXIS2_DRIVER_STEP_GOTO; axis2SettingsGotoFast(); } }
+      { if (gotoModeAxis2) { gotoModeAxis2=false; stepAxis2=1; axis2DriverTrackingFast(); } else { gotoModeAxis2=true; stepAxis2=AXIS2_DRIVER_STEP_GOTO; axis2DriverGotoFast(); } }
     }
   }
 #endif
@@ -357,11 +357,11 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
     
     // set direction
     if (posAxis2 < (long)targetAxis2.part.m) dirAxis2=1; else dirAxis2=0;
-    if (axis2Settings.reverse == ON) {
+    #if AXIS2_DRIVER_REVERSE == ON
       if (defaultDirAxis2 == dirAxis2) a2DIR_L; else a2DIR_H;
-    } else {
+    #else
       if (defaultDirAxis2 == dirAxis2) a2DIR_H; else a2DIR_L;
-    }
+    #endif
    
     // telescope moving toward celestial pole in the sky, blAxis2 is the amount of opposite backlash
     if (dirAxis2 == 1) {
