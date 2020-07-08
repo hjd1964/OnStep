@@ -25,7 +25,10 @@
 
 #define SerialA Serial
 #define SerialB Serial1
-#define SerialC Serial3
+#if SERIAL_C_BAUD_DEFAULT != OFF
+  #define SerialC Serial3
+  #define HAL_SERIAL_C_ENABLED
+#endif
 
 // SerialA is always enabled, SerialB and SerialC are optional
 #define HAL_SERIAL_B_ENABLED
