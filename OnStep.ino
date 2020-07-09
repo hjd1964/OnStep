@@ -511,6 +511,11 @@ void loop2() {
       updateLST(jd2last(JD,UT1,false));
       dateWasSet=true;
       timeWasSet=true;
+
+      nv.update(EE_currentSite,0);
+      nv.writeString(EE_sites+9,"GPS");
+      nv.writeFloat(EE_sites+0,latitude);
+      nv.writeFloat(EE_sites+4,longitude);
       if (generalError == ERR_SITE_INIT) generalError=ERR_NONE;
     }
 #endif
