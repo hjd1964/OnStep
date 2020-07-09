@@ -505,18 +505,23 @@ void loop2() {
     // 0.01S POLLING -------------------------------------------------------------------------------------
 #if TIME_LOCATION_SOURCE == GPS
     if (!tls.active && tls.poll()) {
+      currentSite=0; nv.update(EE_currentSite,currentSite);
+
       tls.getSite(latitude,longitude);
       tls.get(JD,LMT);
+
+      timeZone=nv.read(EE_sites+currentSite*25+8)-128;
       UT1=LMT+timeZone;
+
+      nv.writeString(EE_sites+currentSite*25+9,(char*)"GPS");
+      setLatitude(latitude);
+      nv.writeFloat(EE_sites+currentSite*25+4,longitude);
       updateLST(jd2last(JD,UT1,false));
+
+      if (generalError == ERR_SITE_INIT) generalError=ERR_NONE;
+
       dateWasSet=true;
       timeWasSet=true;
-
-      nv.update(EE_currentSite,0);
-      nv.writeString(EE_sites+9,"GPS");
-      nv.writeFloat(EE_sites+0,latitude);
-      nv.writeFloat(EE_sites+4,longitude);
-      if (generalError == ERR_SITE_INIT) generalError=ERR_NONE;
     }
 #endif
 

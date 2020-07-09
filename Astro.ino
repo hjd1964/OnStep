@@ -304,7 +304,7 @@ double encodeTimeZone(double tz) {
 // sets latitude and associated values
 void setLatitude(double Lat) {
   latitude=Lat;
-  nv.writeFloat(100+(currentSite)*25+0,latitude);
+  nv.writeFloat(EE_sites+currentSite*25+0,latitude);
   cosLat=cos(latitude/Rad);
   sinLat=sin(latitude/Rad);
   latitudeAbs=fabs(latitude);

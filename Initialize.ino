@@ -288,18 +288,18 @@ void initReadNvValues() {
   currentSite=nv.read(EE_currentSite);
   if (currentSite > 3) { currentSite=0; DL("NV: bad currentSite"); } // valid site index?
 
-  double f=nv.readFloat(EE_sites+(currentSite)*25+0);
+  double f=nv.readFloat(EE_sites+currentSite*25+0);
   if (f < -90 || f > 90) { f=0.0; DL("NV: bad latitude"); } // valid latitude?
   setLatitude(f);
-  longitude=nv.readFloat(EE_sites+(currentSite)*25+4);
+  longitude=nv.readFloat(EE_sites+currentSite*25+4);
   if (longitude < -360 || longitude > 360) { longitude=0.0; DL("NV: bad longitude"); } // valid longitude?
   InitStartPosition();
 
   // get date and time from EEPROM, start keeping time
-  timeZone=nv.read(EE_sites+(currentSite)*25+8)-128;
+  timeZone=nv.read(EE_sites+currentSite*25+8)-128;
   timeZone=decodeTimeZone(timeZone);
   if (timeZone < -12 || timeZone > 14) { timeZone=0.0; DL("NV: bad timeZone"); }  // valid time zone?
-  nv.readString(EE_sites+(currentSite)*25+9,siteName);
+  nv.readString(EE_sites+currentSite*25+9,siteName);
 
   JD=nv.readFloat(EE_JD);
   LMT=nv.readFloat(EE_LMT);

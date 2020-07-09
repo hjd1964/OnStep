@@ -1633,7 +1633,7 @@ void processCommands() {
           if (parameter[0] == '-') longitude=-longitude;
           if (longitude >= -180.0 && longitude <= 360.0) {
             if (longitude >= 180.0) longitude-=360.0;
-            nv.writeFloat(EE_sites+(currentSite)*25+4,longitude);
+            nv.writeFloat(EE_sites+currentSite*25+4,longitude);
           } else commandError=CE_PARAM_RANGE;
         } else commandError=CE_PARAM_FORM;
         updateLST(jd2last(JD,UT1,false));
@@ -1656,7 +1656,7 @@ void processCommands() {
             if (i >= -24 && i <= 24) {
               if (i<0) timeZone=i-f; else timeZone=i+f;
               b=encodeTimeZone(timeZone)+128;
-              nv.update(EE_sites+(currentSite)*25+8,b);
+              nv.update(EE_sites+currentSite*25+8,b);
               updateLST(jd2last(JD,UT1,true));
             } else commandError=CE_PARAM_RANGE;
           } else commandError=CE_PARAM_FORM;
@@ -2116,12 +2116,12 @@ void processCommands() {
       if (command[0] == 'W') {
         if (command[1] >= '0' && command[1] <= '3' && parameter[0] == 0) {
           currentSite=command[1]-'0'; nv.update(EE_currentSite,currentSite); booleanReply=false;
-          double f=nv.readFloat(EE_sites+(currentSite*25+0));
+          double f=nv.readFloat(EE_sites+currentSite*25+0);
           if (f < -90 || f > 90) { f=0.0; DL("NV: bad latitude"); } // valid latitude?
           setLatitude(f);
-          longitude=nv.readFloat(EE_sites+(currentSite*25+4));
+          longitude=nv.readFloat(EE_sites+currentSite*25+4);
           if (longitude < -360 || longitude > 360) { longitude=0.0; DL("NV: bad longitude"); } // valid longitude?
-          timeZone=nv.read(EE_sites+(currentSite)*25+8)-128;
+          timeZone=nv.read(EE_sites+currentSite*25+8)-128;
           if (timeZone < -12 || timeZone > 14) { timeZone=0.0; DL("NV: bad timeZone"); }  // valid time zone?
           timeZone=decodeTimeZone(timeZone);
           updateLST(jd2last(JD,UT1,false));
