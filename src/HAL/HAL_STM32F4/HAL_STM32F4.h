@@ -23,18 +23,17 @@
 #define cli() noInterrupts()
 #define sei() interrupts()
 
+// New symbols for the Serial ports so they can be remapped if necessary -----------------------------
 #define SerialA Serial
+// SerialA is always enabled, SerialB and SerialC are optional
 #define SerialB Serial1
+#define HAL_SERIAL_B_ENABLED
 #if SERIAL_C_BAUD_DEFAULT != OFF
   #define SerialC Serial3
   #define HAL_SERIAL_C_ENABLED
 #endif
 
-// SerialA is always enabled, SerialB and SerialC are optional
-#define HAL_SERIAL_B_ENABLED
-#define HAL_SERIAL_C_ENABLED
-
-// New symbol for the default I2C port -------------------------------------------------------------
+// New symbol for the default I2C port ---------------------------------------------------------------
 #define HAL_Wire Wire
 
 // Non-volatile storage ------------------------------------------------------------------------------
@@ -42,7 +41,7 @@
 #undef E2END
 #include "../drivers/NV_I2C_EEPROM_24LC16_C.h"
 
-//--------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------
 // Nanoseconds delay function
 unsigned int _nanosPerPass=1;
 void delayNanoseconds(unsigned int n) {
