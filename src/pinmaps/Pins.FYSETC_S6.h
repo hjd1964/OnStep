@@ -3,7 +3,7 @@
 
 #if defined(STM32F446xx)
 
-// RX2/TX2 (PA2/PA3) is on the Y+ and Z+ end stops and is reserved for GPS (etc, no command channel is associated with this port)
+// TX2/RX2 (PA2/PA3) is on the Y+ and Z+ end stops and is reserved for GPS (etc, no command channel is associated with this port)
 
 // Temperature sensors (From Marlin) perhaps these would make better Limit sw and 2x home switches, and PEC.
 // They have built-in pullups and a 10uf cap for ESD but they are not labeled as such so leaving it be.
@@ -37,7 +37,7 @@
 
 // Misc. pins
 #ifndef DS3234_CS_PIN
-  #define DS3234_CS_PIN     PA4     // Default CS Pin for DS3234 on SPI (on EXP1 shared with the DS3234 CS pin)
+  #define DS3234_CS_PIN     PA4     // Default CS Pin for DS3234 on SPI (on EXP1 shared with the ESP8266 RST pin)
 #endif
 #ifndef OneWirePin
   #define OneWirePin        PD0     // Default Pin for OneWire bus (on EXP2)
@@ -81,7 +81,7 @@
 #define Axis2_M2           PE15     // Microstep Mode 2 or SPI CS or Decay Mode
 #define Axis2_M3            PA6     // SPI MISO
 #define Axis2_STEP          PD8     // Step
-#define Axis2_DIR          PB12     // Dir (ESP8266 GPIO0 on MaxPCB3)
+#define Axis2_DIR          PB12     // Dir (ESP8266 GPIO0)
 #define Axis2_DECAY    Axis2_M2     // Decay mode
 #define Axis2_FAULT    Axis2_M3     // SPI MISO/Fault
 #define Axis2_HOME         PB13     // Sense home position Axis2 (on Y-)
