@@ -511,6 +511,7 @@ void loop2() {
       tls.get(JD,LMT);
 
       timeZone=nv.read(EE_sites+currentSite*25+8)-128;
+      timeZone=decodeTimeZone(timeZone);
       UT1=LMT+timeZone;
 
       nv.writeString(EE_sites+currentSite*25+9,(char*)"GPS");
