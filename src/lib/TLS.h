@@ -65,8 +65,8 @@ class timeLocationSource {
       if (!active) return;
       if (!siteIsValid()) return;
 
-      LAT=gps.location.lat();
-      LONG=gps.location.lng();
+      LAT =gps.location.lat();
+      LONG=-gps.location.lng();
     }
 };
 
