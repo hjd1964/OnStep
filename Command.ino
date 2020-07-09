@@ -2124,6 +2124,7 @@ void processCommands() {
           timeZone=nv.read(EE_sites+(currentSite)*25+8)-128;
           if (timeZone < -12 || timeZone > 14) { timeZone=0.0; DL("NV: bad timeZone"); }  // valid time zone?
           timeZone=decodeTimeZone(timeZone);
+          updateLST(jd2last(JD,UT1,false));
         } else 
         if (command[1] == '?') {
           booleanReply=false;
