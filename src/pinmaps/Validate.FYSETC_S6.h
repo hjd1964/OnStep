@@ -2,7 +2,7 @@
 
 // SERIAL PORTS ------------------------------------------------------------------------------------------------------------
 #if SERIAL_B_ESP_FLASHING == ON
-  #error "Configuration (Config.h): SERIAL_B_ESP_FLASHING not supported on this PINMAP"
+  // dedicated pin
 #endif
 
 // USER FEEDBACK ----------------------------
