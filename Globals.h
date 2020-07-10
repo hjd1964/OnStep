@@ -220,7 +220,7 @@ enum CommandErrors {
   CE_MOUNT_IN_MOTION, CE_GOTO_ERR_UNSPECIFIED, CE_NULL};
 CommandErrors commandError = CE_NONE;
 
-#if defined(MESSAGE_LOG_ON)
+#if DEBUG != OFF
   // command errors
   #define L_CE_NONE "No Errors"
   #define L_CE_0 "reply 0"
