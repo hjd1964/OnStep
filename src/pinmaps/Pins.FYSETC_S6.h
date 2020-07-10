@@ -40,7 +40,7 @@
   #define DS3234_CS_PIN     PA4     // Default CS Pin for DS3234 on SPI (on EXP1 shared with the ESP8266 RST pin)
 #endif
 #ifndef OneWirePin
-  #define OneWirePin        PD0     // Default Pin for OneWire bus (on EXP2)
+  #define OneWirePin        PE0     // Default Pin for OneWire bus (on E2-MOT PD-EN, right hand pin)
 #endif
 #define ESP8266Gpio0Pin    PB12     // ESP8266 GPIO0 (Dir2)
 #define ESP8266RstPin       PA4     // ESP8266 RST (on EXP1 shared with the DS3234 CS pin)
