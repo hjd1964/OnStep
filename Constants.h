@@ -19,6 +19,9 @@
 #define MksGenL1                    10
 #define MksGenL2                    11 // Adds SPI bus to all stepper drivers (TMC only)
 
+// FYSETC S6 - 3D printer board that works with OnStep, a 6-axis design with 5-axes supported
+#define FYSETC_S6                   15
+
 // Mini - Small 2-axis design suitable for embedded or mounting behind a panel can even be built with connectors up
 #define MiniPCB                     20 // All for Teensy3.2
 #define MiniPCB13                   21 // MiniPCB v1.3 adds better support for ESP-01 flashing and optional I2C
@@ -42,8 +45,8 @@
 // Khalid and Dave's PCB for STM32 Blue pill
 #define STM32Blue                   60
 #define STM32Black                  61
-#define FYSETC_S6                   62
-#define PINMAP_LAST                 62
+
+#define PINMAP_LAST                 61
 // ---------------------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------------------------------------------------
                                    
@@ -56,6 +59,7 @@
 #define XDIRECT                    -6
 #define AUX                        -7
 #define VERBOSE                    -8
+#define SoftwareSerial2            -9
 
 // mount types                     
 #define MOUNT_TYPE_FIRST            1
