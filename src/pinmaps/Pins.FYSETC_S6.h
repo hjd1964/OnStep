@@ -4,6 +4,7 @@
 #if defined(STM32F446xx)
 
 // TX2/RX2 (PA2/PA3) is on the Y+ and Z+ end stops and is reserved for GPS (etc, no command channel is associated with this port)
+// Use "#define SerialGPS SoftwareSerial2" in Config.h for the GPS only serial port
 
 // Temperature sensors (From Marlin) perhaps these would make better Limit sw and 2x home switches, and PEC.
 // They have built-in pullups and a 10uf cap for ESD but they are not labeled as such so leaving it be.

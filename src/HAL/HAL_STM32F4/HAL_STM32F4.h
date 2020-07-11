@@ -33,6 +33,14 @@
   #define HAL_SERIAL_C_ENABLED
 #endif
 
+// handle special case of using software serial for a GPS
+#if SerialGPS == SoftwareSerial2
+  #include <SoftwareSerial.h>
+  SoftwareSerial HWSerialGPS(PA3, PA2); // RX2, TX2
+  #undef SerialGPS
+  #define SerialGPS HWSerialGPS
+#endif
+
 // New symbol for the default I2C port ---------------------------------------------------------------
 #define HAL_Wire Wire
 
