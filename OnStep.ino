@@ -582,16 +582,16 @@ void loop2() {
 
 #if PPS_SENSE != OFF
     // update clock via PPS
-    if (trackingState == TrackingSidereal) {
       cli();
       PPSrateRatio=((double)1000000.0/(double)(PPSavgMicroS));
       if ((long)(micros()-(PPSlastMicroS+2000000UL)) > 0) PPSsynced=false; // if more than two seconds has ellapsed without a pulse we've lost sync
       sei();
   #if LED_STATUS2 == ON
+    if (trackingState == TrackingSidereal) {
       if (PPSsynced) { if (led2On) { digitalWrite(LEDneg2Pin,HIGH); led2On=false; } else { digitalWrite(LEDneg2Pin,LOW); led2On=true; } } else { digitalWrite(LEDneg2Pin,HIGH); led2On=false; } // indicate PPS
+    }
   #endif
       if (LastPPSrateRatio != PPSrateRatio) { SiderealClockSetInterval(siderealInterval); LastPPSrateRatio=PPSrateRatio; }
-    }
 #endif
 
 #if LED_STATUS == ON
