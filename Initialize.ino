@@ -379,8 +379,8 @@ void initReadNvValues() {
   // check for flag that maxRate is stored in EE_maxRateL, if not move it there
   if (maxRate == -16) maxRate=nv.readLong(EE_maxRateL); else { nv.writeInt(EE_maxRate,-1); nv.writeLong(EE_maxRateL,maxRate); }
   // constrain values to the limits (1/2 to 2X the MaxRateBaseActual) and platform limits
-  if (maxRate < (double)MaxRateBaseActual*8.0) { maxRate=(double)MaxRateBaseActual*8.0; DL("NV: maxRate warning (too low)"); }
-  if (maxRate > (double)MaxRateBaseActual*32.0) { maxRate=(double)MaxRateBaseActual*32.0; DL("NV: bad maxRate (too high)"); }
+  if (maxRate < (long)(MaxRateBaseActual*8.0)) { maxRate=(long)(MaxRateBaseActual*8.0); DL("NV: maxRate warning (too low)"); }
+  if (maxRate > (long)(MaxRateBaseActual*32.0)) { maxRate=(long)(MaxRateBaseActual*32.0); DL("NV: maxRate warning (too high)"); }
   if (maxRate < maxRateLowerLimit()) maxRate=maxRateLowerLimit();
   
 #if SLEW_RATE_MEMORY == OFF
