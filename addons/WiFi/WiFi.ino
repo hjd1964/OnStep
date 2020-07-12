@@ -268,12 +268,12 @@ Again:
 #if LED_STATUS != OFF
     digitalWrite(LED_STATUS,HIGH);
 #endif
-    delay(300);
+    delay(100);
     Ser.flush(); serialRecvFlush();
 #if LED_STATUS != OFF
     digitalWrite(LED_STATUS,LOW);
 #endif
-    delay(300);
+    delay(100);
   }
 
   // look for On-Step
@@ -556,5 +556,5 @@ void serialBegin(long baudRate, bool swap) {
 #else
   Ser.begin(baudRate); if (swap) Ser.swap();
 #endif
-  delay(2000);
+  delay(500);
 }
