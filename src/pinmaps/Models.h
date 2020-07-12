@@ -37,10 +37,7 @@
 #if PINMAP == CNC3
   #include "Pins.CNC3.h"
 #endif
-#if PINMAP == Ramps14
-  #include "Pins.Ramps14.h"
-#endif
-#if PINMAP == MksGenL2
+#if PINMAP == Ramps14 || PINMAP == MksGenL1 || PINMAP == MksGenL2 || PINMAP == MksGenL21
   #include "Pins.Ramps14.h"
 #endif
 #if PINMAP == STM32Blue

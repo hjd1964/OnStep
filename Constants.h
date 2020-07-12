@@ -15,9 +15,10 @@
 // RAMPS - 3D printer shields/boards that work with OnStep, all are 5-axis designs
 #define Ramps14                     10 // Ramps v1.4 shield for Mega2560
 #define Ramps15                     10 // Ramps v1.5
-#define MksGenL                     10 // Like Ramps above but better, Mega2560 built-in, crystal oscillator, 24V support
-#define MksGenL1                    10
-#define MksGenL2                    11 // Adds SPI bus to all stepper drivers (TMC only)
+#define MksGenL                     11 // Like Ramps above but better, Mega2560 built-in, crystal oscillator, 24V support
+#define MksGenL1                    11
+#define MksGenL2                    12 // Adds SPI bus to all stepper drivers (TMC only)
+#define MksGenL21                   13 // As above except Focuser2 CS is on pin12
 
 // FYSETC S6 - 3D printer board that works with OnStep, a 6-axis design with 5-axes supported
 #define FYSETC_S6                   15

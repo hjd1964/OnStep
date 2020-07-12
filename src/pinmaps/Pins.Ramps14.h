@@ -153,10 +153,14 @@
 
 // For focuser2 stepper driver on RAMPS E1
 #define Axis5_EN             30     // Enable
-#if PINMAP == MksGenL2
+#if PINMAP == MksGenL2 || PINMAP == MksGenL21
   #define Axis5_M0           51     // SPI MOSI
   #define Axis5_M1           52     // SPI SCK
-  #define Axis5_M2           21     // SPI CS (HOME SW)
+  #if PINMAP == MksGenL21
+    #define Axis5_M2         12     // SPI CS
+  #else
+    #define Axis5_M2         21     // SPI CS
+  #endif
   #define Axis5_M3           50     // SPI MISO
 #endif
 #define Axis5_STEP           36     // Step
