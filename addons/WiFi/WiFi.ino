@@ -335,32 +335,29 @@ Again:
 #endif
 
 TryAgain:
+  WiFi.disconnect();
+  WiFi.softAPdisconnect(true);
+
   if (accessPointEnabled && !stationEnabled) {
-    WiFi.softAP(wifi_ap_ssid, wifi_ap_pwd, wifi_ap_ch);
-    delay(2000);
-    WiFi.softAPConfig(wifi_ap_ip, wifi_ap_gw, wifi_ap_sn);
-    
     WiFi.mode(WIFI_AP);
+
+    WiFi.softAPConfig(wifi_ap_ip, wifi_ap_gw, wifi_ap_sn);
+    WiFi.softAP(wifi_ap_ssid, wifi_ap_pwd, wifi_ap_ch);
   } else
   if (!accessPointEnabled && stationEnabled) {
-    WiFi.softAPdisconnect(true);
-
-    WiFi.begin(wifi_sta_ssid, wifi_sta_pwd);
-    delay(2000);
-    if (!stationDhcpEnabled) WiFi.config(wifi_sta_ip, wifi_sta_gw, wifi_sta_sn);
-
     WiFi.mode(WIFI_STA);
+
+    if (!stationDhcpEnabled) WiFi.config(wifi_sta_ip, wifi_sta_gw, wifi_sta_sn);
+    WiFi.begin(wifi_sta_ssid, wifi_sta_pwd);
   } else
   if (accessPointEnabled && stationEnabled) {
-    WiFi.softAP(wifi_ap_ssid, wifi_ap_pwd, wifi_ap_ch);
-    delay(2000);
-    WiFi.softAPConfig(wifi_ap_ip, wifi_ap_gw, wifi_ap_sn);
-
-    WiFi.begin(wifi_sta_ssid, wifi_sta_pwd);
-    delay(2000);
-    if (!stationDhcpEnabled) WiFi.config(wifi_sta_ip, wifi_sta_gw, wifi_sta_sn);
-
     WiFi.mode(WIFI_AP_STA);
+
+    WiFi.softAPConfig(wifi_ap_ip, wifi_ap_gw, wifi_ap_sn);
+    WiFi.softAP(wifi_ap_ssid, wifi_ap_pwd, wifi_ap_ch);
+
+    if (!stationDhcpEnabled) WiFi.config(wifi_sta_ip, wifi_sta_gw, wifi_sta_sn);
+    WiFi.begin(wifi_sta_ssid, wifi_sta_pwd);
   }
 
   // wait for connection in station mode, if it fails fall back to access-point mode
