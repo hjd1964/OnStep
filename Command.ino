@@ -1818,14 +1818,14 @@ void processCommands() {
               booleanReply=false;
               if (!isSlewing()) {
                 switch (parameter[3]) {
-                  case '5': maxRate=(double)MaxRateBaseActual*(16.0*2.0); break; // 50%
-                  case '4': maxRate=(double)MaxRateBaseActual*(16.0*1.5); break; // 75%
-                  case '3': maxRate=(double)MaxRateBaseActual*(16.0*1.0); break; // 100%
-                  case '2': maxRate=(double)MaxRateBaseActual*(16.0/1.5); break; // 150%
-                  case '1': maxRate=(double)MaxRateBaseActual*(16.0/2.0); break; // 200%
-                  default:  maxRate=(double)MaxRateBaseActual*16.0;
+                  case '5': maxRate=MaxRateBaseActual*(16.0*2.0); break; // 50%
+                  case '4': maxRate=MaxRateBaseActual*(16.0*1.5); break; // 75%
+                  case '3': maxRate=MaxRateBaseActual*(16.0*1.0); break; // 100%
+                  case '2': maxRate=MaxRateBaseActual*(16.0/1.5); break; // 150%
+                  case '1': maxRate=MaxRateBaseActual*(16.0/2.0); break; // 200%
+                  default:  maxRate=MaxRateBaseActual*16.0;
                 }
-                if (maxRate<maxRateLowerLimit()) maxRate=maxRateLowerLimit();
+                if (maxRate < maxRateLowerLimit()) maxRate=maxRateLowerLimit();
 
                 nv.writeLong(EE_maxRateL,maxRate);
                 setAccelerationRates(maxRate);
