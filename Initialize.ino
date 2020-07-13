@@ -108,7 +108,7 @@ void initStartupValues() {
   waitingHomeContinue = false;
 
   // PEC sanity check
-  if pecBufferSize != 0) {
+  if (pecBufferSize != 0) {
     if (pecBufferSize < 61 || pecBufferSize > 3384) { pecBufferSize=0; DL("PEC: warning invalid pecBufferSize, PEC disabled"); }
     if (200+pecBufferSize > E2END-200) { pecBufferSize=0; DL("PEC: warning buffer exceeds available NV, PEC disabled"); }
   }
