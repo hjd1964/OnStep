@@ -191,7 +191,6 @@ void setup() {
 #ifdef HAL_SERIAL_E_ENABLED
   SerialE.begin(SERIAL_E_BAUD_DEFAULT);
 #endif
-
 #if ST4_HAND_CONTROL == ON && ST4_INTERFACE != OFF
   SerialST4.begin();
 #endif
@@ -359,17 +358,22 @@ void setup() {
   // finally clear the comms channels
   delay(500);
   SerialA.flush();
+  while (SerialA.available()) SerialA.read();
 #ifdef HAL_SERIAL_B_ENABLED
   SerialB.flush();
+  while (SerialB.available()) SerialB.read();
 #endif
 #ifdef HAL_SERIAL_C_ENABLED
   SerialC.flush();
+  while (SerialC.available()) SerialC.read();
 #endif
 #ifdef HAL_SERIAL_D_ENABLED
   SerialD.flush();
+  while (SerialD.available()) SerialD.read();
 #endif
 #ifdef HAL_SERIAL_E_ENABLED
   SerialE.flush();
+  while (SerialE.available()) SerialE.read();
 #endif
   delay(500);
 
