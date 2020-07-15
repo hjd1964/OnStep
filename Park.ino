@@ -8,7 +8,7 @@ CommandErrors setPark() {
   if (isSlewing())                      return CE_MOUNT_IN_MOTION;
   if (faultAxis1 || faultAxis2)         return CE_SLEW_ERR_HARDWARE_FAULT;
 
-  VLL("MSG: Setting park position");
+  VL("MSG: Setting park position");
 
   lastTrackingState=trackingState;
   trackingState=TrackingNone;
@@ -26,7 +26,7 @@ CommandErrors setPark() {
 
   trackingState=lastTrackingState;
   
-  VLL("MSG: Setting park done");
+  VL("MSG: Setting park done");
   return CE_NONE;
 }
 
@@ -72,9 +72,9 @@ CommandErrors park() {
     parkStatus=lastParkStatus;        // revert the park status
     nv.write(EE_parkStatus,parkStatus);
     
-    VLL("ERR, park(): Failed to start parking");
+    VL("ERR, park(): Failed to start parking");
     return e;
-  } else { VLL("MSG: Parking started"); }
+  } else { VL("MSG: Parking started"); }
   return CE_NONE;
 }
 
@@ -86,7 +86,7 @@ void parkFinish() {
     // store the pointing model
     saveAlignModel();
     
-    VLL("MSG: Parking finished");
+    VL("MSG: Parking finished");
   } else { DL("ERR, parkFinish(): Parking failed"); }
   
   disableStepperDrivers();
@@ -162,14 +162,14 @@ bool doParkClearBacklash(int phase) {
 
 int parkClearBacklash() {
   static int phase=1;
-  if (phase == 1) { if (doParkClearBacklash(1)) phase++; VLL("MSG: Clearing BL"); } else
+  if (phase == 1) { if (doParkClearBacklash(1)) phase++; VL("MSG: Clearing BL"); } else
   if (phase == 2) { if (doParkClearBacklash(2)) phase++; } else
   if (phase == 3) { if (doParkClearBacklash(3)) phase++; } else
   if (phase == 4) { if (doParkClearBacklash(4)) phase++; } else
   if (phase == 5) { if (doParkClearBacklash(5)) phase++; } else
   if (phase == 6) { if (doParkClearBacklash(6)) phase++; } else
   if (phase == 7) { if (doParkClearBacklash(7)) phase++; } else
-  if (phase == 8) { phase=1; if (doParkClearBacklash(8)) { VLL("MSG: Done clearing BL"); return PCB_SUCCESS; } else { DL("ERR, parkClearBacklash(): Failure"); return PCB_FAILURE; } }
+  if (phase == 8) { phase=1; if (doParkClearBacklash(8)) { VL("MSG: Done clearing BL"); return PCB_SUCCESS; } else { DL("ERR, parkClearBacklash(): Failure"); return PCB_FAILURE; } }
   return PCB_BUSY;
 }
 
@@ -184,7 +184,7 @@ CommandErrors unPark(bool withTrackingOn) {
   if (isSlewing())                      return CE_MOUNT_IN_MOTION;
   if (faultAxis1 || faultAxis2)         return CE_SLEW_ERR_HARDWARE_FAULT;
 
-  VLL("MSG: Un-Parking");
+  VL("MSG: Un-Parking");
 
   initStartupValues();
 
@@ -244,7 +244,7 @@ CommandErrors unPark(bool withTrackingOn) {
     pecRecorded=nv.read(EE_pecRecorded); if (!pecRecorded) pecStatus=IgnorePEC;
     if (pecRecorded != true && pecRecorded != false) { pecRecorded=false; DL("ERR, unPark(): bad NV pecRecorded"); }
   }
-  VLL("MSG: Un-Parking finished");
+  VL("MSG: Un-Parking finished");
   return CE_NONE;
 }
 

@@ -71,21 +71,17 @@
 // Helper macros for debugging, with less typing
 #if DEBUG != OFF
   #define D(x)       DebugSer.print(x)
-  #define DH(x)      DebugSer.print(x,HEX)
   #define DL(x)      DebugSer.println(x)
-  #define DHL(x,y)   DebugSer.println(x,HEX)
 #else
   #define D(x)
-  #define DH(x,y)
   #define DL(x)
-  #define DHL(x,y)
 #endif
 #if DEBUG == VERBOSE
-  #define VL(x)       DebugSer.print(x)
-  #define VLL(x)      DebugSer.println(x)
+  #define V(x)        DebugSer.print(x)
+  #define VL(x)       DebugSer.println(x)
 #else
+  #define V(x)
   #define VL(x)
-  #define VLL(x)
 #endif
 // ---------------------------------------------------------------------------------------------------
 
@@ -171,13 +167,13 @@ void setup() {
   delay(5000);
 #endif
 
-  VL("MSG: OnStep "); VL(FirmwareVersionMajor); VL("."); VL(FirmwareVersionMinor); VLL(FirmwareVersionPatch);
+  V("MSG: OnStep "); V(FirmwareVersionMajor); V("."); V(FirmwareVersionMinor); VL(FirmwareVersionPatch);
   
   // Call hardware specific initialization
-  VLL("MSG: Init HAL");
+  VL("MSG: Init HAL");
   HAL_Init();
 
-  VLL("MSG: Init serial");
+  VL("MSG: Init serial");
   SerialA.begin(SERIAL_A_BAUD_DEFAULT);
 #ifdef HAL_SERIAL_B_ENABLED
   #ifdef SERIAL_B_RX
@@ -203,7 +199,7 @@ void setup() {
   delay(2000);
 
   // initialize the Non-Volatile Memory
-  VLL("MSG: Init NV");
+  VL("MSG: Init NV");
   if (!nv.init()) {
     while (true) {
       SerialA.print("NV (EEPROM) failure!#\r\n");
@@ -217,12 +213,12 @@ void setup() {
   }
 
   // initialize the Object Library
-  VLL("MSG: Init library/catalogs");
+  VL("MSG: Init library/catalogs");
   Lib.init();
 
   // prepare PEC buffer
 #if MOUNT_TYPE != ALTAZM
-  VLL("MSG: Init PEC");
+  VL("MSG: Init PEC");
   createPecBuffer();
 #endif
 
@@ -233,28 +229,28 @@ void setup() {
   initPins();
 
   // get guiding ready
-  VLL("MSG: Init guiding");
+  VL("MSG: Init guiding");
   initGuide();
 
   // if this is the first startup set EEPROM to defaults
   initWriteNvValues();
   
   // get weather monitoring ready to go
-  VLL("MSG: Init weather");
+  VL("MSG: Init weather");
   if (!ambient.init()) generalError=ERR_WEATHER_INIT;
 
   // setup features
 #ifdef FEATURES_PRESENT
-  VLL("MSG: Init auxiliary features");
+  VL("MSG: Init auxiliary features");
   featuresInit();
 #endif
 
   // get the TLS ready (if present)
-  VLL("MSG: Init TLS");
+  VL("MSG: Init TLS");
   if (!tls.init()) generalError=ERR_SITE_INIT;
   
   // this sets up the sidereal timer and tracking rates
-  VLL("MSG: Init sidereal timer");
+  VL("MSG: Init sidereal timer");
   siderealInterval=nv.readLong(EE_siderealInterval); // the number of 16MHz clocks in one sidereal second (this is scaled to actual processor speed)
   if (siderealInterval < 14360682L || siderealInterval > 17551944L) { siderealInterval=15956313L; DL("ERR, setup(): bad NV siderealInterval"); }
   SiderealRate=siderealInterval/StepsPerSecondAxis1;
@@ -267,7 +263,7 @@ void setup() {
   timerRateBacklashAxis2=(SiderealRate/TRACK_BACKLASH_RATE)*timerRateRatio;
 
   // now read any saved values from EEPROM into varaibles to restore our last state
-  VLL("MSG: NV getting run-time settings");
+  VL("MSG: NV getting run-time settings");
   initReadNvValues();
 
   // starts the hardware timers that keep sidereal time, move the motors, etc.
@@ -278,7 +274,7 @@ void setup() {
   // tracking autostart
 #if TRACK_AUTOSTART == ON
   #if MOUNT_TYPE != ALTAZM
-    VLL("MSG: Tracking autostart");
+    VL("MSG: Tracking autostart");
 
     // tailor behaviour depending on TLS presence
     if (!tls.active) {
@@ -305,7 +301,7 @@ void setup() {
   #if AXIS3_DRIVER_REVERSE == ON
     rot.setReverseState(HIGH);
   #endif
-  VLL("MSG: Init rotator");
+  VL("MSG: Init rotator");
   rot.setDisableState(AXIS3_DRIVER_DISABLE);
   
   #if AXIS3_DRIVER_MODEL == TMC_SPI
@@ -331,7 +327,7 @@ void setup() {
   #if AXIS4_DRIVER_REVERSE == ON
     foc1.setReverseState(HIGH);
   #endif
-  VLL("MSG: Init focuser1");
+  VL("MSG: Init focuser1");
   foc1.setDisableState(AXIS4_DRIVER_DISABLE);
 
   #if AXIS4_DRIVER_MODEL == TMC_SPI
@@ -356,7 +352,7 @@ void setup() {
   #if AXIS5_DRIVER_REVERSE == ON
     foc2.setReverseState(HIGH);
   #endif
-  VLL("MSG: Init focuser2");
+  VL("MSG: Init focuser2");
   foc2.setDisableState(AXIS5_DRIVER_DISABLE);
 
   #if AXIS5_DRIVER_MODEL == TMC_SPI
@@ -373,7 +369,7 @@ void setup() {
 #endif
 
   // finally clear the comms channels
-  VLL("MSG: Serial buffer flush");
+  VL("MSG: Serial buffer flush");
   delay(500);
   SerialA.flush();
   while (SerialA.available()) SerialA.read();
@@ -399,7 +395,7 @@ void setup() {
   cli(); siderealTimer=lst; guideSiderealTimer=lst; PecSiderealTimer=lst; sei();
   last_loop_micros=micros();
 
-  VLL("MSG: OnStep is ready"); VLL("");
+  VL("MSG: OnStep is ready"); VL("");
 }
 
 void loop() {

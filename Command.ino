@@ -2295,5 +2295,5 @@ bool cmdReply(char *s) {
 
 void logErrors(const char ch[], char cmd[], char param[], CommandErrors cmdErr) {
   if (cmdErr <= CE_0) return;
-  VL(ch); VL(" \""); VL(cmd); VL(param); VL("\", Error "); VLL(commandErrorStr[cmdErr]);
+  V(ch); V(" \""); V(cmd); V(param); V("\", Error "); VL(commandErrorStr[cmdErr]);
 }
