@@ -317,7 +317,7 @@ long maxRateLowerLimit() {
   
   // on-the-fly mode switching used?
   #if MODE_SWITCH_BEFORE_SLEW == OFF
-    if ((AXIS1_DRIVER_STEP_GOTO != 1) || (AXIS2_DRIVER_STEP_GOTO != 1)) r_us=HAL_MAXRATE_LOWER_LIMIT*1.7;  // if this code is enabled, 27us
+    if (AXIS1_DRIVER_STEP_GOTO != 1 || AXIS2_DRIVER_STEP_GOTO != 1) r_us=r_us*1.7;  // if this code is enabled, 27us
   #endif
 
   // average required goto us rates for each axis with any micro-step mode switching applied, if tracking in 32X mode using 4X for gotos (32/4 = 8,) that's an 8x lower true rate so 27/8 = 3.4 is allowed
