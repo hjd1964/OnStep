@@ -207,7 +207,7 @@ CommandErrors unPark(bool withTrackingOn) {
 
   // get suggested park position
   int parkPierSide=nv.read(EE_pierSide);
-  if (parkPierSide != PierSideNone && parkPierSide != PierSideEast && parkPierSide != PierSideWest) { parkPierSide=PierSideNone; DL("ERR, unPark(): bad NV parkPierSide"); } // valid parkPierSide?
+  if (parkPierSide != PierSideNone && parkPierSide != PierSideEast && parkPierSide != PierSideWest) { parkPierSide=PierSideNone; DL("ERR, unPark(): bad NV parkPierSide"); }
 
   setTargetAxis1(nv.readFloat(EE_posAxis1),parkPierSide);
   setTargetAxis2(nv.readFloat(EE_posAxis2),parkPierSide);
@@ -239,10 +239,10 @@ CommandErrors unPark(bool withTrackingOn) {
 
     // get PEC status
     pecStatus  =nv.read(EE_pecStatus);
-    if (pecStatus < PEC_STATUS_FIRST || pecStatus > PEC_STATUS_LAST) { pecStatus=IgnorePEC; DL("ERR, unPark(): bad NV pecStatus"); } // valid PEC status?
+    if (pecStatus < PEC_STATUS_FIRST || pecStatus > PEC_STATUS_LAST) { pecStatus=IgnorePEC; DL("ERR, unPark(): bad NV pecStatus"); }
     
     pecRecorded=nv.read(EE_pecRecorded); if (!pecRecorded) pecStatus=IgnorePEC;
-    if (pecRecorded != true && pecRecorded != false) { pecRecorded=false; DL("ERR, unPark(): bad NV pecRecorded"); } // valid PEC recorded?
+    if (pecRecorded != true && pecRecorded != false) { pecRecorded=false; DL("ERR, unPark(): bad NV pecRecorded"); }
   }
   VLL("MSG: Un-Parking finished");
   return CE_NONE;
