@@ -256,7 +256,7 @@ void setup() {
   // this sets up the sidereal timer and tracking rates
   VLL("MSG: Init sidereal timer");
   siderealInterval=nv.readLong(EE_siderealInterval); // the number of 16MHz clocks in one sidereal second (this is scaled to actual processor speed)
-  if (siderealInterval < 14360682L || siderealInterval > 17551944L) { siderealInterval=15956313L; DL("NV: bad siderealInterval"); } // valid siderealInterval?
+  if (siderealInterval < 14360682L || siderealInterval > 17551944L) { siderealInterval=15956313L; DL("ERR, setup(): bad NV siderealInterval"); }
   SiderealRate=siderealInterval/StepsPerSecondAxis1;
   timerRateAxis1=SiderealRate;
   timerRateAxis2=SiderealRate;

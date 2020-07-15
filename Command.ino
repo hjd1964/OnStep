@@ -2117,13 +2117,13 @@ void processCommands() {
         if (command[1] >= '0' && command[1] <= '3' && parameter[0] == 0) {
           currentSite=command[1]-'0'; nv.update(EE_currentSite,currentSite); booleanReply=false;
           double f=nv.readFloat(EE_sites+currentSite*25+0);
-          if (f < -90 || f > 90) { f=0.0; DL("NV: bad latitude"); } // valid latitude?
+          if (f < -90 || f > 90) { f=0.0; DL("ERR, processCommands(): bad NV latitude"); }
           setLatitude(f);
           longitude=nv.readFloat(EE_sites+currentSite*25+4);
-          if (longitude < -360 || longitude > 360) { longitude=0.0; DL("NV: bad longitude"); } // valid longitude?
+          if (longitude < -360 || longitude > 360) { longitude=0.0; DL("ERR, processCommands(): bad NV longitude"); }
           timeZone=nv.read(EE_sites+currentSite*25+8)-128;
-          if (timeZone < -12 || timeZone > 14) { timeZone=0.0; DL("NV: bad timeZone"); }  // valid time zone?
           timeZone=decodeTimeZone(timeZone);
+          if (timeZone < -12 || timeZone > 14) { timeZone=0.0; DL("ERR, processCommands(): bad NV timeZone"); }
           updateLST(jd2last(JD,UT1,false));
         } else 
         if (command[1] == '?') {

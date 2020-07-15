@@ -31,21 +31,21 @@ void TGeoAlign::init() {
 // remember the alignment between sessions
 void TGeoAlign::readCoe() {
   ax1Cor=nv.readFloat(EE_ax1Cor);
-  if (ax1Cor < -360 || ax1Cor > 360) { ax1Cor=0.0; DL("NV: bad ax1Cor"); } // valid ax1Cor?
+  if (ax1Cor < -360 || ax1Cor > 360) { ax1Cor=0.0; DL("ERR, readCoe(): bad NV ax1Cor"); }
   ax2Cor=nv.readFloat(EE_ax2Cor);
-  if (ax2Cor < -360 || ax2Cor > 360) { ax2Cor=0.0; DL("NV: bad ax2Cor"); } // valid ax2Cor?
+  if (ax2Cor < -360 || ax2Cor > 360) { ax2Cor=0.0; DL("ERR, readCoe(): bad NV ax2Cor"); }
   dfCor=nv.readFloat(EE_dfCor);  // dfCor is ffCor for fork mounts
-  if (dfCor < -10 || dfCor > 10) { dfCor=0.0; DL("NV: bad dfCor"); } // valid dfCor?
+  if (dfCor < -10 || dfCor > 10) { dfCor=0.0; DL("ERR, readCoe(): bad NV dfCor"); }
   tfCor=nv.readFloat(EE_tfCor);
-  if (tfCor < -10 || tfCor > 10) { tfCor=0.0; DL("NV: bad tfCor"); } // valid tfCor?
+  if (tfCor < -10 || tfCor > 10) { tfCor=0.0; DL("ERR, readCoe(): bad NV tfCor"); }
   doCor=nv.readFloat(EE_doCor);
-  if (doCor < -10 || doCor > 10) { doCor=0.0; DL("NV: bad doCor"); } // valid doCor?
+  if (doCor < -10 || doCor > 10) { doCor=0.0; DL("ERR, readCoe(): bad NV doCor"); }
   pdCor=nv.readFloat(EE_pdCor);
-  if (pdCor < -10 || pdCor > 10) { pdCor=0.0; DL("NV: bad pdCor"); } // valid pdCor?
+  if (pdCor < -10 || pdCor > 10) { pdCor=0.0; DL("ERR, readCoe(): bad NV pdCor"); }
   altCor=nv.readFloat(EE_altCor);
-  if (altCor < -10 || altCor > 10) { altCor=0.0; DL("NV: bad altCor"); } // valid altCor?
+  if (altCor < -10 || altCor > 10) { altCor=0.0; DL("ERR, readCoe(): bad NV altCor"); }
   azmCor=nv.readFloat(EE_azmCor);
-  if (azmCor < -10 || azmCor > 10) { azmCor=0.0; DL("NV: bad azmCor"); } // valid azmCor?
+  if (azmCor < -10 || azmCor > 10) { azmCor=0.0; DL("ERR, readCoe(): bad NV azmCor"); }
 }
 
 void TGeoAlign::writeCoe() {
