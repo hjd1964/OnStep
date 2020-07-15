@@ -170,6 +170,8 @@ void handleNotFound(){
 #include "MountStatus.h"
 
 void setup(void){
+  WiFi.softAPdisconnect(true);
+
 #if LED_STATUS != OFF
   pinMode(LED_STATUS,OUTPUT);
 #endif
@@ -268,12 +270,12 @@ Again:
 #if LED_STATUS != OFF
     digitalWrite(LED_STATUS,HIGH);
 #endif
-    delay(300);
+    delay(200);
     Ser.flush(); serialRecvFlush();
 #if LED_STATUS != OFF
     digitalWrite(LED_STATUS,LOW);
 #endif
-    delay(300);
+    delay(200);
   }
 
   // look for On-Step
@@ -335,29 +337,22 @@ Again:
 #endif
 
 TryAgain:
-  WiFi.disconnect();
-  WiFi.softAPdisconnect(true);
-
+  if ((stationEnabled) && (!stationDhcpEnabled)) WiFi.config(wifi_sta_ip, wifi_sta_gw, wifi_sta_sn);
+  if (accessPointEnabled) WiFi.softAPConfig(wifi_ap_ip, wifi_ap_gw, wifi_ap_sn);
+  
   if (accessPointEnabled && !stationEnabled) {
-    WiFi.mode(WIFI_AP);
-
-    WiFi.softAPConfig(wifi_ap_ip, wifi_ap_gw, wifi_ap_sn);
     WiFi.softAP(wifi_ap_ssid, wifi_ap_pwd, wifi_ap_ch);
+    WiFi.mode(WIFI_AP);
   } else
   if (!accessPointEnabled && stationEnabled) {
-    WiFi.mode(WIFI_STA);
-
-    if (!stationDhcpEnabled) WiFi.config(wifi_sta_ip, wifi_sta_gw, wifi_sta_sn);
+    WiFi.softAPdisconnect(true);
     WiFi.begin(wifi_sta_ssid, wifi_sta_pwd);
+    WiFi.mode(WIFI_STA);
   } else
   if (accessPointEnabled && stationEnabled) {
-    WiFi.mode(WIFI_AP_STA);
-
-    WiFi.softAPConfig(wifi_ap_ip, wifi_ap_gw, wifi_ap_sn);
     WiFi.softAP(wifi_ap_ssid, wifi_ap_pwd, wifi_ap_ch);
-
-    if (!stationDhcpEnabled) WiFi.config(wifi_sta_ip, wifi_sta_gw, wifi_sta_sn);
     WiFi.begin(wifi_sta_ssid, wifi_sta_pwd);
+    WiFi.mode(WIFI_AP_STA);
   }
 
   // wait for connection in station mode, if it fails fall back to access-point mode
@@ -553,5 +548,5 @@ void serialBegin(long baudRate, bool swap) {
 #else
   Ser.begin(baudRate); if (swap) Ser.swap();
 #endif
-  delay(1300);
+  delay(1000);
 }
