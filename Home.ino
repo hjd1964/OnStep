@@ -41,7 +41,6 @@ void checkHome() {
     #else    
       // at the polar home position
       InitStartPosition();
-      disableStepperDrivers();
       atHome=true;
     #endif
   }
