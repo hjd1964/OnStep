@@ -272,9 +272,8 @@ void moveTo() {
 
           // at the polar home position
           homeMount=false;
-#if AXIS2_TANGENT_ARM != ON
           atHome=true;
-#endif
+          if (AXIS2_TANGENT_ARM == OFF) { atHome=true; disableStepperDrivers(); }
           VLF("MSG: Homing done");
         } else {
           // restore trackingState
