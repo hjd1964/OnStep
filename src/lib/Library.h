@@ -98,7 +98,7 @@ void Library::init() {
 
 boolean Library::setCatalog(int num)
 {
-  if ((num < 0) || (num > 14)) return false;
+  if (num < 0 || num > 14) return false;
 
   catalog=num;
   return firstRec();
@@ -131,7 +131,7 @@ void Library::readVars(char* name, int* code, double* RA, double* Dec)
   int cat = work.libRec.code>>4;
 
   // empty? or not found
-  if ((cat == 15) || (cat != catalog)) { name[0]=0; *code=0; *RA=0.0; *Dec=0.0; return; }
+  if (cat == 15 || cat != catalog) { name[0]=0; *code=0; *RA=0.0; *Dec=0.0; return; }
 
   for (int l=0; l < 11; l++) name[l]=work.libRec.name[l]; name[11]=0;
   
