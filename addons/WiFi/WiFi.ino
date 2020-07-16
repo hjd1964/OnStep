@@ -170,6 +170,9 @@ void handleNotFound(){
 #include "MountStatus.h"
 
 void setup(void){
+  WiFi.disconnect();
+  WiFi.softAPdisconnect(true);
+
 #if LED_STATUS != OFF
   pinMode(LED_STATUS,OUTPUT);
 #endif
