@@ -124,7 +124,7 @@ bool doParkClearBacklash(int phase) {
   if (phase == 2) {
     // wait until done or timed out
     cli(); if ((posAxis1 == (long)targetAxis1.part.m) && (posAxis2 == (long)targetAxis2.part.m) && !inbacklashAxis1 && !inbacklashAxis2) { sei(); return true; }  sei();
-    if ((long)(millis()-timeout) > 0) { failed=true; DL("ERR, doParkClearBacklash(): Timeout finding nearest position"); return true; } else return false;
+    if ((long)(millis()-timeout) > 0) { failed=true; DLF("ERR, doParkClearBacklash(): Timeout finding nearest position"); return true; } else return false;
   }
   if (phase == 3) {
     // start by moving fully into the backlash
@@ -135,7 +135,7 @@ bool doParkClearBacklash(int phase) {
   if (phase == 4) {
     // wait until done or timed out
     cli(); if ((posAxis1 == (long)targetAxis1.part.m) && (posAxis2 == (long)targetAxis2.part.m) && !inbacklashAxis1 && !inbacklashAxis2) { sei(); return true; }  sei();
-    if ((long)(millis()-timeout) > 0) { failed=true; DL("ERR, doParkClearBacklash(): Timeout moving into BL"); return true; } else return false;
+    if ((long)(millis()-timeout) > 0) { failed=true; DLF("ERR, doParkClearBacklash(): Timeout moving into BL"); return true; } else return false;
   }
   if (phase == 5) {
     // then reverse direction and take it all up
@@ -146,11 +146,11 @@ bool doParkClearBacklash(int phase) {
   if (phase == 6) {
     // wait until done or timed out
     cli(); if (posAxis1 == (long)targetAxis1.part.m && posAxis2 == (long)targetAxis2.part.m && !inbacklashAxis1 && !inbacklashAxis2) { sei(); return true; } sei();
-    if ((long)(millis()-timeout) > 0) { failed=true; DL("ERR, doParkClearBacklash(): Timeout moving out of BL"); return true; } else return false;
+    if ((long)(millis()-timeout) > 0) { failed=true; DLF("ERR, doParkClearBacklash(): Timeout moving out of BL"); return true; } else return false;
   }
   if (phase == 7) {
     // double check to be sure backlash is zero
-    cli(); if (blAxis1 != 0 || blAxis2 != 0) { sei(); failed=true; DL("ERR, doParkClearBacklash(): Non-zero BL"); } else sei();
+    cli(); if (blAxis1 != 0 || blAxis2 != 0) { sei(); failed=true; DLF("ERR, doParkClearBacklash(): Non-zero BL"); } else sei();
     return true;
   }
   if (phase == 8) {
@@ -162,14 +162,14 @@ bool doParkClearBacklash(int phase) {
 
 int parkClearBacklash() {
   static int phase=1;
-  if (phase == 1) { if (doParkClearBacklash(1)) phase++; VLF("MSG: Parking clear BL"); } else
+  if (phase == 1) { if (doParkClearBacklash(1)) phase++; VLF("MSG: Clearing BL"); } else
   if (phase == 2) { if (doParkClearBacklash(2)) phase++; } else
   if (phase == 3) { if (doParkClearBacklash(3)) phase++; } else
   if (phase == 4) { if (doParkClearBacklash(4)) phase++; } else
   if (phase == 5) { if (doParkClearBacklash(5)) phase++; } else
   if (phase == 6) { if (doParkClearBacklash(6)) phase++; } else
   if (phase == 7) { if (doParkClearBacklash(7)) phase++; } else
-  if (phase == 8) { phase=1; if (doParkClearBacklash(8)) { VLF("MSG: Parking clear BL done"); return PCB_SUCCESS; } else { DLF("ERR, parkClearBacklash(): Failure"); return PCB_FAILURE; } }
+  if (phase == 8) { phase=1; if (doParkClearBacklash(8)) { VLF("MSG: Clearing BL done"); return PCB_SUCCESS; } else { DLF("ERR, parkClearBacklash(): Failure"); return PCB_FAILURE; } }
   return PCB_BUSY;
 }
 
