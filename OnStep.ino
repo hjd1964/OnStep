@@ -78,7 +78,7 @@
   #define D(x)
   #define DF(x)
   #define DL(x)
-  #define DF(x)
+  #define DLF(x)
 #endif
 #if DEBUG == VERBOSE
   #define V(x)        DebugSer.print(x)
