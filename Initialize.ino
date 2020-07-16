@@ -1,8 +1,6 @@
 // -----------------------------------------------------------------------------------
 // Functions for initializing pins, variables, and timers on startup
 
-#define DEBUG_AXIS_MODES_OFF
-
 void initGeneralError() {
   switch (generalError) {
     case ERR_ALT_MIN:
