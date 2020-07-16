@@ -85,7 +85,7 @@ CommandErrors goHome(boolean fast) {
   
   // start guides
   if (fast) {
-    #if AXIS2_TANGENT_ARM != ON
+    #if AXIS2_TANGENT_ARM == OFF
       // make sure tracking is disabled
       trackingState=TrackingNone;
     #endif
@@ -98,20 +98,14 @@ CommandErrors goHome(boolean fast) {
     findHomeTimeout=millis()+(unsigned long)(secPerDeg*180.0*1000.0);
     
     // 8=HalfMaxRate
-    #if AXIS2_TANGENT_ARM != ON
-      e=startGuideAxis1(a1,8,0);
-    #endif
-
+    if (AXIS2_TANGENT_ARM == OFF) e=startGuideAxis1(a1,8,0);
     if (e == CE_NONE) { VLF("MSG: Homing started phase 1"); e=startGuideAxis2(a2,8,0,true); } else { stopGuideAxis1(); VLF("MSG: Homing failed"); }
   } else {
     findHomeMode=FH_SLOW;
     findHomeTimeout=millis()+30000UL;
     
     // 7=48x sidereal
-    #if AXIS2_TANGENT_ARM != ON
-      e=startGuideAxis1(a1,7,0);
-    #endif
-
+    if (AXIS2_TANGENT_ARM == OFF) e=startGuideAxis1(a1,7,0);
     if (e == CE_NONE) { e=startGuideAxis2(a2,7,0,true); VLF("MSG: Homing started phase 2"); } else { stopGuideAxis1(); VLF("MSG: Homing failed"); }
   }
   if (e != CE_NONE) stopSlewing();
