@@ -275,14 +275,19 @@ void moveTo() {
 #if AXIS2_TANGENT_ARM != ON
           atHome=true;
 #endif
+          VLF("MSG: Homing done");
         } else {
           // restore trackingState
           trackingState=lastTrackingState; lastTrackingState=TrackingNone;
           SiderealClockSetInterval(siderealInterval);
           setDeltaTrackingRate();
+          VLF("MSG: Goto done");
           
           // allow 5 seconds for synchronization of coordinates after goto ends
-          if (trackingState == TrackingSidereal) trackingSyncSeconds=5;
+          if (trackingState == TrackingSidereal) {
+            trackingSyncSeconds=5;
+            VLF("MSG: Tracking sync started");
+          }
         }
       }
     }
@@ -328,7 +333,7 @@ long maxRateLowerLimit() {
   r_us=(r_us_axis1+r_us_axis2/timerRateRatio)/2.0;  // if Axis1 is 10000 step/deg & Axis2 is 20000 steps/deg, Axis2 needs to run 2x speed so we must slow down.  3.4 on one axis and 6.8 on the other for an average of 5.1
 
   // the timer granulaity can start to make for some very abrupt rate changes below 0.25us
-  if (r_us < 0.25) { r_us=0.25; DL("WRN, maxRateLowerLimit(): r_us exceeds design limit"); }
+  if (r_us < 0.25) { r_us=0.25; DLF("WRN, maxRateLowerLimit(): r_us exceeds design limit"); }
 
   // return rate in 1/16us units
   return round(r_us*16.0);

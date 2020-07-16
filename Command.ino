@@ -1018,11 +1018,11 @@ void processCommands() {
               case 'F':
                 for (int x=0; x <= E2END+16; x++) {
                   if (x < 8 || x > E2END+8) {
-                    if (x%8 == 0) D("-----------");
-                    D("--");
+                    if (x%8 == 0) DF("-----------");
+                    DF("--");
                     if (x%8 == 7) DL();
                   } else {
-                    if (x%8 == 0) { D(":SXFF,"); char s[8]; sprintf(s,"%04d=",x/8); D(s); }
+                    if (x%8 == 0) { DF(":SXFF,"); char s[8]; sprintf(s,"%04d=",x/8); D(s); }
                     int v=nv.read(x-8);
                     if (v < 16) D(0); DebugSer.print(v,HEX);
                     if (x%8 == 7) DL("#");
@@ -2117,13 +2117,13 @@ void processCommands() {
         if (command[1] >= '0' && command[1] <= '3' && parameter[0] == 0) {
           currentSite=command[1]-'0'; nv.update(EE_currentSite,currentSite); booleanReply=false;
           double f=nv.readFloat(EE_sites+currentSite*25+0);
-          if (f < -90 || f > 90) { f=0.0; DL("ERR, processCommands(): bad NV latitude"); }
+          if (f < -90 || f > 90) { f=0.0; DLF("ERR, processCommands(): bad NV latitude"); }
           setLatitude(f);
           longitude=nv.readFloat(EE_sites+currentSite*25+4);
-          if (longitude < -360 || longitude > 360) { longitude=0.0; DL("ERR, processCommands(): bad NV longitude"); }
+          if (longitude < -360 || longitude > 360) { longitude=0.0; DLF("ERR, processCommands(): bad NV longitude"); }
           timeZone=nv.read(EE_sites+currentSite*25+8)-128;
           timeZone=decodeTimeZone(timeZone);
-          if (timeZone < -12 || timeZone > 14) { timeZone=0.0; DL("ERR, processCommands(): bad NV timeZone"); }
+          if (timeZone < -12 || timeZone > 14) { timeZone=0.0; DLF("ERR, processCommands(): bad NV timeZone"); }
           updateLST(jd2last(JD,UT1,false));
         } else 
         if (command[1] == '?') {
@@ -2229,7 +2229,12 @@ void decMinLimit() {
   if (trackingState == TrackingMoveTo) { if (!abortSlew) abortSlew=StartAbortSlew; trackingState = TrackingNone; } else {
     if (getInstrPierSide() == PierSideWest && guideDirAxis2 == 'n' ) guideDirAxis2='b'; else
     if (getInstrPierSide() == PierSideEast && guideDirAxis2 == 's' ) guideDirAxis2='b'; else
-    if (guideDirAxis2 == 0 && generalError != ERR_DEC) trackingState = TrackingNone;
+    if (guideDirAxis2 == 0 && generalError != ERR_DEC) {
+      if (trackingState != TrackingNone) {
+        trackingState=TrackingNone;
+        DLF("WRN, decMinLimit(): Limit exceeded tracking/slewing stopped");
+      }
+    }
   }
 }
 
@@ -2238,7 +2243,12 @@ void decMaxLimit() {
   if (trackingState == TrackingMoveTo) { if (!abortSlew) abortSlew=StartAbortSlew; trackingState = TrackingNone; } else {
     if (getInstrPierSide() == PierSideWest && guideDirAxis2 == 's' ) guideDirAxis2='b'; else
     if (getInstrPierSide() == PierSideEast && guideDirAxis2 == 'n' ) guideDirAxis2='b'; else
-    if (guideDirAxis2 == 0 && generalError != ERR_DEC) trackingState = TrackingNone;
+    if (guideDirAxis2 == 0 && generalError != ERR_DEC) {
+      if (trackingState != TrackingNone) {
+        trackingState=TrackingNone;
+        DLF("WRN, decMaxLimit(): Limit exceeded tracking/slewing stopped");
+      }
+    }
   }
 }
 
@@ -2247,15 +2257,24 @@ void stopLimit() {
   if (trackingState == TrackingMoveTo) {
     if (!abortSlew) abortSlew=StartAbortSlew;
   } else {
-    trackingState=TrackingNone;
-    if (spiralGuide) stopGuideSpiral();
+    if (spiralGuide) stopGuideSpiral(); else {
+      if (trackingState != TrackingNone) {
+        trackingState=TrackingNone;
+        DLF("WRN, stopLimit(): Limit exceeded tracking/goto stopped");
+      }
+    }
   }
 }
 
 // stops all motion including guiding
 void hardLimit() {
   stopSlewing();
-  if (trackingState != TrackingMoveTo) trackingState=TrackingNone;
+  if (trackingState != TrackingMoveTo) {
+    if (trackingState != TrackingNone) {
+      trackingState=TrackingNone;
+      DLF("WRN, hardLimit(): Limit exceeded tracking/slewing stopped");
+    }
+  }
 }
 
 // calculate the checksum and add to string

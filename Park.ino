@@ -8,7 +8,7 @@ CommandErrors setPark() {
   if (isSlewing())                      return CE_MOUNT_IN_MOTION;
   if (faultAxis1 || faultAxis2)         return CE_SLEW_ERR_HARDWARE_FAULT;
 
-  VL("MSG: Setting park position");
+  VLF("MSG: Setting park position");
 
   lastTrackingState=trackingState;
   trackingState=TrackingNone;
@@ -26,7 +26,7 @@ CommandErrors setPark() {
 
   trackingState=lastTrackingState;
   
-  VL("MSG: Setting park done");
+  VLF("MSG: Setting park done");
   return CE_NONE;
 }
 
@@ -63,7 +63,7 @@ CommandErrors park() {
   double parkTargetAxis1=nv.readFloat(EE_posAxis1);
   double parkTargetAxis2=nv.readFloat(EE_posAxis2);
   int parkPierSide=nv.read(EE_pierSide);
-  if (parkPierSide != PierSideNone && parkPierSide != PierSideEast && parkPierSide != PierSideWest) { parkPierSide=PierSideNone; DL("ERR, park(): bad NV parkPierSide"); }
+  if (parkPierSide != PierSideNone && parkPierSide != PierSideEast && parkPierSide != PierSideWest) { parkPierSide=PierSideNone; DLF("ERR, park(): bad NV parkPierSide"); }
 
   // now, goto this target coordinate
   e=goTo(parkTargetAxis1,parkTargetAxis2,parkTargetAxis1,parkTargetAxis2,parkPierSide);
@@ -72,9 +72,9 @@ CommandErrors park() {
     parkStatus=lastParkStatus;        // revert the park status
     nv.write(EE_parkStatus,parkStatus);
     
-    VL("ERR, park(): Failed to start parking");
+    VLF("ERR, park(): Failed to start parking");
     return e;
-  } else { VL("MSG: Parking started"); }
+  } else { VLF("MSG: Parking started"); }
   return CE_NONE;
 }
 
@@ -86,8 +86,8 @@ void parkFinish() {
     // store the pointing model
     saveAlignModel();
     
-    VL("MSG: Parking finished");
-  } else { DL("ERR, parkFinish(): Parking failed"); }
+    VLF("MSG: Parking done");
+  } else { DLF("ERR, parkFinish(): Parking failed"); }
   
   disableStepperDrivers();
 }
@@ -162,14 +162,14 @@ bool doParkClearBacklash(int phase) {
 
 int parkClearBacklash() {
   static int phase=1;
-  if (phase == 1) { if (doParkClearBacklash(1)) phase++; VL("MSG: Clearing BL"); } else
+  if (phase == 1) { if (doParkClearBacklash(1)) phase++; VLF("MSG: Parking clear BL"); } else
   if (phase == 2) { if (doParkClearBacklash(2)) phase++; } else
   if (phase == 3) { if (doParkClearBacklash(3)) phase++; } else
   if (phase == 4) { if (doParkClearBacklash(4)) phase++; } else
   if (phase == 5) { if (doParkClearBacklash(5)) phase++; } else
   if (phase == 6) { if (doParkClearBacklash(6)) phase++; } else
   if (phase == 7) { if (doParkClearBacklash(7)) phase++; } else
-  if (phase == 8) { phase=1; if (doParkClearBacklash(8)) { VL("MSG: Done clearing BL"); return PCB_SUCCESS; } else { DL("ERR, parkClearBacklash(): Failure"); return PCB_FAILURE; } }
+  if (phase == 8) { phase=1; if (doParkClearBacklash(8)) { VLF("MSG: Parking clear BL done"); return PCB_SUCCESS; } else { DLF("ERR, parkClearBacklash(): Failure"); return PCB_FAILURE; } }
   return PCB_BUSY;
 }
 
@@ -184,7 +184,7 @@ CommandErrors unPark(bool withTrackingOn) {
   if (isSlewing())                      return CE_MOUNT_IN_MOTION;
   if (faultAxis1 || faultAxis2)         return CE_SLEW_ERR_HARDWARE_FAULT;
 
-  VL("MSG: Un-Parking");
+  VLF("MSG: Un-Parking");
 
   initStartupValues();
 
@@ -207,7 +207,7 @@ CommandErrors unPark(bool withTrackingOn) {
 
   // get suggested park position
   int parkPierSide=nv.read(EE_pierSide);
-  if (parkPierSide != PierSideNone && parkPierSide != PierSideEast && parkPierSide != PierSideWest) { parkPierSide=PierSideNone; DL("ERR, unPark(): bad NV parkPierSide"); }
+  if (parkPierSide != PierSideNone && parkPierSide != PierSideEast && parkPierSide != PierSideWest) { parkPierSide=PierSideNone; DLF("ERR, unPark(): bad NV parkPierSide"); }
 
   setTargetAxis1(nv.readFloat(EE_posAxis1),parkPierSide);
   setTargetAxis2(nv.readFloat(EE_posAxis2),parkPierSide);
@@ -239,12 +239,12 @@ CommandErrors unPark(bool withTrackingOn) {
 
     // get PEC status
     pecStatus  =nv.read(EE_pecStatus);
-    if (pecStatus < PEC_STATUS_FIRST || pecStatus > PEC_STATUS_LAST) { pecStatus=IgnorePEC; DL("ERR, unPark(): bad NV pecStatus"); }
+    if (pecStatus < PEC_STATUS_FIRST || pecStatus > PEC_STATUS_LAST) { pecStatus=IgnorePEC; DLF("ERR, unPark(): bad NV pecStatus"); }
     
     pecRecorded=nv.read(EE_pecRecorded); if (!pecRecorded) pecStatus=IgnorePEC;
-    if (pecRecorded != true && pecRecorded != false) { pecRecorded=false; DL("ERR, unPark(): bad NV pecRecorded"); }
+    if (pecRecorded != true && pecRecorded != false) { pecRecorded=false; DLF("ERR, unPark(): bad NV pecRecorded"); }
   }
-  VL("MSG: Un-Parking finished");
+  VLF("MSG: Un-Parking done");
   return CE_NONE;
 }
 

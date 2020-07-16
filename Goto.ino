@@ -389,6 +389,7 @@ CommandErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTar
 
   axis1DriverGotoMode();
   axis2DriverGotoMode();
-  
+
+  VLF("MSG: Goto started");
   return CE_NONE;
 }
