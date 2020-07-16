@@ -31,8 +31,8 @@ class tmcSpiDriver {
       // IHOLDDELAY, default=4,  range 0 to 15 (Delay per current reduction step in x 2^18 clocks)
       
       float Ifs = 0.325/_rsense;
-      unsigned long IHOLD=round(( ((float)ihold/1000.0)/Ifs)*32.0)-1;
-      unsigned long IRUN =round(( ((float)irun/1000.0)/Ifs)*32.0)-1;
+      long IHOLD=round(( (ihold/1000.0)/Ifs)*32.0)-1;
+      long IRUN =round(( (irun/1000.0)/Ifs)*32.0)-1;
       if (IHOLD < 0) IHOLD=0; if (IHOLD > 31) IHOLD=31;
       if (IRUN < 0)  IRUN=0;  if (IRUN > 31)  IRUN=31;
 
