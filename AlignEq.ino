@@ -3,7 +3,7 @@
 //
 // by Howard Dutton
 //
-// Copyright (C) 2012 to 2019 Howard Dutton
+// Copyright (C) 2012 to 2020 Howard Dutton
 //
 
 // -----------------------------------------------------------------------------------
