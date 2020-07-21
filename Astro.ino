@@ -478,16 +478,14 @@ void setTrackingRate(double r) {
 #endif
 }
 
-double getTrackingRate() {
-  return _currentRate;
-}
-
 double getTrackingRate60Hz() {
-  double f;
+  double f=0;
+  // during slews, if tracking is enabled it's at the default sidereal rate
+  if (trackingState == TrackingMoveTo && lastTrackingState == TrackingSidereal) f=1.00273790935*60.0;
 #if MOUNT_TYPE == ALTAZM
-    f=getTrackingRate()*1.00273790935*60.0; 
+    if (trackingState == TrackingSidereal) f=_currentRate*1.00273790935*60.0;
 #else
-    cli(); f=(trackingTimerRateAxis1*1.00273790935)*60.0; sei();
+    if (trackingState == TrackingSidereal) { cli(); f=(trackingTimerRateAxis1*1.00273790935)*60.0; sei(); }
 #endif
   return f;
 }
