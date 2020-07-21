@@ -1073,7 +1073,7 @@ void processCommands() {
         foc2.savePosition();
 #endif
         commandError=setHome(); booleanReply=false;
-        if (commandError == CE_MOUNT_IN_MOTION) stopSlewing(SS_ALL_FAST);
+        if (commandError == CE_MOUNT_IN_MOTION) stopSlewingAndTracking(SS_ALL_FAST);
       } else 
 // :hC#       Moves telescope to the home position
 //            Returns: Nothing
@@ -1085,7 +1085,7 @@ void processCommands() {
         foc2.savePosition();
 #endif
         commandError=goHome(true); booleanReply=false;
-        if (commandError == CE_MOUNT_IN_MOTION) stopSlewing(SS_ALL_FAST);
+        if (commandError == CE_MOUNT_IN_MOTION) stopSlewingAndTracking(SS_ALL_FAST);
       } else 
 // :hP#       Goto the Park Position
 //            Return: 0 on failure
@@ -1439,7 +1439,7 @@ void processCommands() {
 //            Returns: Nothing
       if (command[0] == 'Q') {
         if (command[1] == 0) {
-          stopSlewing(SS_ALL_FAST);
+          stopSlewingAndTracking(SS_ALL_FAST);
           booleanReply=false; 
         } else
 // :Qe# Qw#   Halt east/westward Slews

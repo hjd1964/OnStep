@@ -500,12 +500,12 @@ void loop2() {
     if (lst%2 == 1) faultAxis2=tmcAxis2.error();
 #endif
 
-    if (faultAxis1 || faultAxis2) { generalError=ERR_MOTOR_FAULT; stopSlewing(SS_LIMIT_HARD); }
+    if (faultAxis1 || faultAxis2) { generalError=ERR_MOTOR_FAULT; stopSlewingAndTracking(SS_LIMIT_HARD); }
 
     if (safetyLimitsOn) {
       // check altitude overhead limit and horizon limit
-      if (currentAlt < minAlt) { generalError=ERR_ALT_MIN; if (MOUNT_TYPE == ALTAZM) stopSlewing(SS_LIMIT_AXIS2_MIN); else stopSlewing(SS_LIMIT); }
-      if (currentAlt > maxAlt) { generalError=ERR_ALT_MAX; if (MOUNT_TYPE == ALTAZM) stopSlewing(SS_LIMIT_AXIS2_MAX); else stopSlewing(SS_LIMIT); }
+      if (currentAlt < minAlt) { generalError=ERR_ALT_MIN; if (MOUNT_TYPE == ALTAZM) stopSlewingAndTracking(SS_LIMIT_AXIS2_MIN); else stopSlewingAndTracking(SS_LIMIT); }
+      if (currentAlt > maxAlt) { generalError=ERR_ALT_MAX; if (MOUNT_TYPE == ALTAZM) stopSlewingAndTracking(SS_LIMIT_AXIS2_MAX); else stopSlewingAndTracking(SS_LIMIT); }
     }
 
     // OPTION TO POWER DOWN AXIS2 IF NOT MOVING
@@ -623,20 +623,20 @@ void loop2() {
     // keeps mount from tracking past the meridian limit, past the AXIS1_LIMIT_MAX, or past the Dec limits
     if (safetyLimitsOn) {
       // check for exceeding AXIS1_LIMIT_MIN or AXIS1_LIMIT_MAX
-      if (getInstrAxis1() < axis1Settings.min) { generalError=(MOUNT_TYPE==ALTAZM)?ERR_AZM:ERR_UNDER_POLE; stopSlewing(SS_LIMIT_AXIS1_MIN); } else
-      if (getInstrAxis1() > axis1Settings.max) { generalError=(MOUNT_TYPE==ALTAZM)?ERR_AZM:ERR_UNDER_POLE; stopSlewing(SS_LIMIT_AXIS1_MAX); } else
+      if (getInstrAxis1() < axis1Settings.min) { generalError=(MOUNT_TYPE==ALTAZM)?ERR_AZM:ERR_UNDER_POLE; stopSlewingAndTracking(SS_LIMIT_AXIS1_MIN); } else
+      if (getInstrAxis1() > axis1Settings.max) { generalError=(MOUNT_TYPE==ALTAZM)?ERR_AZM:ERR_UNDER_POLE; stopSlewingAndTracking(SS_LIMIT_AXIS1_MAX); } else
       // check for exceeding Meridian Limits
       if (meridianFlip != MeridianFlipNever) {
         if (getInstrPierSide() == PierSideWest) {
-          if (getInstrAxis1() > degreesPastMeridianW && (!(autoMeridianFlip && goToHere(true) == CE_NONE))) { generalError=ERR_MERIDIAN; stopSlewing(SS_LIMIT_AXIS1_MAX); }
+          if (getInstrAxis1() > degreesPastMeridianW && (!(autoMeridianFlip && goToHere(true) == CE_NONE))) { generalError=ERR_MERIDIAN; stopSlewingAndTracking(SS_LIMIT_AXIS1_MAX); }
         } else
-        if (getInstrAxis1() < -degreesPastMeridianE) { generalError=ERR_MERIDIAN; stopSlewing(SS_LIMIT_AXIS1_MIN); }
+        if (getInstrAxis1() < -degreesPastMeridianE) { generalError=ERR_MERIDIAN; stopSlewingAndTracking(SS_LIMIT_AXIS1_MIN); }
       }
     }
     double a2; if (AXIS2_TANGENT_ARM == ON) { cli(); a2=posAxis2/axis2Settings.stepsPerDegree; sei(); } else a2=getInstrAxis2();
     // check for exceeding AXIS2_LIMIT_MIN or AXIS2_LIMIT_MAX
-    if (a2 < axis2Settings.min) { generalError=ERR_DEC; stopSlewing(SS_LIMIT_AXIS2_MIN); } else
-    if (a2 > axis2Settings.max) { generalError=ERR_DEC; stopSlewing(SS_LIMIT_AXIS2_MAX); } else
+    if (a2 < axis2Settings.min) { generalError=ERR_DEC; stopSlewingAndTracking(SS_LIMIT_AXIS2_MIN); } else
+    if (a2 > axis2Settings.max) { generalError=ERR_DEC; stopSlewingAndTracking(SS_LIMIT_AXIS2_MAX); } else
     // automatically clear error in TA mode
     if (AXIS2_TANGENT_ARM == ON && (trackingState == TrackingSidereal && generalError == ERR_DEC)) generalError=ERR_NONE;
 
@@ -654,7 +654,7 @@ void loop2() {
 // SS_LIMIT_AXIS1_MAX stops gotos + spiral guides + tracking, also stops/blocks RA/Az guides in the wrong direction
 // SS_LIMIT_AXIS2_MIN stops gotos + spiral guides + tracking, also stops/blocks Dec/Alt guides in the wrong direction
 // SS_LIMIT_AXIS2_MAX stops gotos + spiral guides + tracking, also stops/blocks Dec/Alt guides in the wrong direction
-void stopSlewing(StopSlewActions ss) {
+void stopSlewingAndTracking(StopSlewActions ss) {
   if (trackingState == TrackingMoveTo) {
     if (!abortSlew) abortSlew=StartAbortSlew;
   } else {
@@ -675,7 +675,7 @@ void stopSlewing(StopSlewActions ss) {
     if (trackingState != TrackingNone) {
       if (ss != SS_ALL_FAST) {
         if (generalError != ERR_DEC) { stopGuideAxis1(); stopGuideAxis2(); trackingState=TrackingNone; }
-        DLF("WRN, stopSlewing(): Limit exceeded tracking/slewing stopped");
+        DLF("WRN, stopSlewingAndTracking(): Limit exceeded slewing/tracking stopped");
       }
     }
   }
