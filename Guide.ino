@@ -127,12 +127,14 @@ void deactivateBacklashComp() {
 // start a guide in RA or Azm, direction must be 'e', 'w', or 'b', guideRate is the rate selection (0 to 9), guideDuration is in ms (0 to ignore) 
 CommandErrors startGuideAxis1(char direction, int guideRate, long guideDuration) {
   // Check state
-  if (faultAxis1)                       return CE_SLEW_ERR_HARDWARE_FAULT;
-  if (!axis1Enabled)                    return CE_SLEW_ERR_IN_STANDBY;
-  if (parkStatus == Parked)             return CE_SLEW_ERR_IN_PARK;
-  if (trackingSyncInProgress())         return CE_MOUNT_IN_MOTION;
-  if (trackingState == TrackingMoveTo)  return CE_MOUNT_IN_MOTION;
-  if (direction == guideDirAxis1)       return CE_NONE;
+  if (faultAxis1)                         return CE_SLEW_ERR_HARDWARE_FAULT;
+  if (!axis1Enabled)                      return CE_SLEW_ERR_IN_STANDBY;
+  if (parkStatus == Parked)               return CE_SLEW_ERR_IN_PARK;
+  if (trackingSyncInProgress())           return CE_MOUNT_IN_MOTION;
+  if (trackingState == TrackingMoveTo)    return CE_MOUNT_IN_MOTION;
+  if (direction == guideDirAxis1)         return CE_NONE;
+  if (direction == 'e' && !guideEastOk()) return CE_SLEW_ERR_OUTSIDE_LIMITS;
+  if (direction == 'w' && !guideWestOk()) return CE_SLEW_ERR_OUTSIDE_LIMITS;
   if (guideRate < 3 && (generalError == ERR_ALT_MIN ||
                         generalError == ERR_LIMIT_SENSE ||
                         generalError == ERR_DEC ||
@@ -166,10 +168,8 @@ CommandErrors startGuideAxis2(char direction, int guideRate, long guideDuration,
   if (trackingSyncInProgress())            return CE_MOUNT_IN_MOTION;
   if (trackingState == TrackingMoveTo)     return CE_MOUNT_IN_MOTION;
   if (direction == guideDirAxis2)          return CE_NONE;
-#if AXIS2_TANGENT_ARM == ON
   if (direction == 'n' && !guideNorthOk()) return CE_SLEW_ERR_OUTSIDE_LIMITS;
   if (direction == 's' && !guideSouthOk()) return CE_SLEW_ERR_OUTSIDE_LIMITS;
-#endif
   if (guideRate < 3 && (generalError == ERR_ALT_MIN ||
                         generalError == ERR_LIMIT_SENSE ||
                         generalError == ERR_DEC ||
@@ -190,18 +190,30 @@ CommandErrors startGuideAxis2(char direction, int guideRate, long guideDuration,
   return CE_NONE;
 }
 
-#if AXIS2_TANGENT_ARM == ON
 bool guideNorthOk() {
-  if (posAxis2/AXIS2_STEPS_PER_DEGREE < AXIS2_LIMIT_MIN && getInstrPierSide() == PierSideWest) return false;
-  if (posAxis2/AXIS2_STEPS_PER_DEGREE > AXIS2_LIMIT_MAX && getInstrPierSide() == PierSideEast) return false;
+  double a2; if (AXIS2_TANGENT_ARM == ON) { cli(); a2=posAxis2/axis2Settings.stepsPerDegree; sei(); } else a2=getInstrAxis2();
+  if (a2 < axis2Settings.min && getInstrPierSide() == PierSideWest) return false;
+  if (a2 > axis2Settings.max && getInstrPierSide() == PierSideEast) return false;
+  if (MOUNT_TYPE == ALTAZM && currentAlt > maxAlt) return false;
   return true;
 }
 bool guideSouthOk() {
-  if (posAxis2/AXIS2_STEPS_PER_DEGREE < AXIS2_LIMIT_MIN && getInstrPierSide() == PierSideEast) return false;
-  if (posAxis2/AXIS2_STEPS_PER_DEGREE > AXIS2_LIMIT_MAX && getInstrPierSide() == PierSideWest) return false;
+  double a2; if (AXIS2_TANGENT_ARM == ON) { cli(); a2=posAxis2/axis2Settings.stepsPerDegree; sei(); } else a2=getInstrAxis2();
+  if (a2 < axis2Settings.min && getInstrPierSide() == PierSideEast) return false;
+  if (a2 > axis2Settings.max && getInstrPierSide() == PierSideWest) return false;
+  if (MOUNT_TYPE == ALTAZM && currentAlt < minAlt) return false;
   return true;
 }
-#endif
+bool guideEastOk() {
+  if (meridianFlip != MeridianFlipNever && getInstrPierSide() == PierSideEast) { if (getInstrAxis1() < -degreesPastMeridianE) return false; }
+  if (getInstrAxis1() < axis1Settings.min) return false;
+  return true;
+}
+bool guideWestOk() {
+  if (meridianFlip != MeridianFlipNever && getInstrPierSide() == PierSideWest) { if (getInstrAxis1() > degreesPastMeridianW) return false; }
+  if (getInstrAxis1() > axis1Settings.max) return false;
+  return true;
+}
 
 CommandErrors startGuideAxis2(char direction, int guideRate, long guideDuration) {
   return startGuideAxis2(direction, guideRate, guideDuration, false);
@@ -222,9 +234,7 @@ CommandErrors startGuideSpiral(int guideRate, long guideDuration) {
   if (trackingState == TrackingMoveTo)     return CE_MOUNT_IN_MOTION;
   if (guideDirAxis1 || guideDirAxis2)      { if (spiralGuide) stopGuideSpiral(); return CE_NONE; }
   if (abs(getInstrAxis2() > 75.0))         return CE_SLEW_ERR_OUTSIDE_LIMITS;
-#if AXIS2_TANGENT_ARM == ON
   if (!guideNorthOk() || !guideSouthOk())  return CE_SLEW_ERR_OUTSIDE_LIMITS;
-#endif
   if ((generalError == ERR_ALT_MIN ||
        generalError == ERR_LIMIT_SENSE ||
        generalError == ERR_DEC ||
