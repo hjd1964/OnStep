@@ -115,6 +115,11 @@ class nvs {
     void readBytes(uint16_t i, byte *v, uint8_t count) {
       for (int j=0; j < count; j++) { *v = read(i + j); v++; }
     }
+
+    // write count bytes to EEPROM starting at position i
+    void writeBytes(uint16_t i, byte *v, uint8_t count) {
+      for (int j=0; j < count; j++) { write(i + j,*v); v++; }
+    }
   private:
     unsigned long _lastWrite;
     bool _dirtyPool=false;

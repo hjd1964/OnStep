@@ -41,12 +41,12 @@ void driversInitTmcStealthChop() {
   haltStepperDrivers();
   
   #if AXIS1_DRIVER_DECAY_MODE == STEALTHCHOP || AXIS2_DRIVER_DECAY_MODE == STEALTHCHOP
-    tmcAxis1.setup(AXIS1_DRIVER_INTPOL,AXIS1_DRIVER_DECAY_MODE,AXIS1_DRIVER_CODE,AXIS1_DRIVER_IRUN,AXIS1_DRIVER_IRUN);
-    tmcAxis2.setup(AXIS2_DRIVER_INTPOL,AXIS2_DRIVER_DECAY_MODE,AXIS2_DRIVER_CODE,AXIS2_DRIVER_IRUN,AXIS2_DRIVER_IRUN);
+    tmcAxis1.setup(AXIS1_DRIVER_INTPOL,AXIS1_DRIVER_DECAY_MODE,AXIS1_DRIVER_CODE,axis1Settings.IRUN,axis1Settings.IRUN);
+    tmcAxis2.setup(AXIS2_DRIVER_INTPOL,AXIS2_DRIVER_DECAY_MODE,AXIS2_DRIVER_CODE,axis2Settings.IRUN,axis2Settings.IRUN);
     delay(150);
   #endif
-  tmcAxis1.setup(AXIS1_DRIVER_INTPOL,AXIS1_DRIVER_DECAY_MODE,AXIS1_DRIVER_CODE,AXIS1_DRIVER_IRUN,AXIS1_DRIVER_IHOLD);
-  tmcAxis2.setup(AXIS2_DRIVER_INTPOL,AXIS2_DRIVER_DECAY_MODE,AXIS2_DRIVER_CODE,AXIS2_DRIVER_IRUN,AXIS2_DRIVER_IHOLD);
+  tmcAxis1.setup(AXIS1_DRIVER_INTPOL,AXIS1_DRIVER_DECAY_MODE,AXIS1_DRIVER_CODE,axis1Settings.IRUN,AXIS1_DRIVER_IHOLD);
+  tmcAxis2.setup(AXIS2_DRIVER_INTPOL,AXIS2_DRIVER_DECAY_MODE,AXIS2_DRIVER_CODE,axis2Settings.IRUN,AXIS2_DRIVER_IHOLD);
   
   // resume motion
   resumeStepperDrivers();
@@ -70,7 +70,7 @@ void driversInitTmcMode() {
     tmcAxis1.set_CHOPCONF_tbl(AXIS1_DRIVER_CHOP_TBL);
   #endif
   #if AXIS1_DRIVER_FS_VHIGH != OFF
-    tmcAxis1.set_THIGH_value( round(12000000.0/(AXIS1_DRIVER_FS_VHIGH*(256.0/AXIS1_DRIVER_MICROSTEPS))) );
+    tmcAxis1.set_THIGH_value( round(12000000.0/(AXIS1_DRIVER_FS_VHIGH*(256.0/axis1Settings.microsteps))) );
     tmcAxis1.set_CHOPCONF_vhighfs(1);
     tmcAxis1.set_CHOPCONF_vhighchm(1);
   #endif
@@ -91,7 +91,7 @@ void driversInitTmcMode() {
     tmcAxis2.set_CHOPCONF_tbl(AXIS2_DRIVER_CHOP_TBL);
   #endif
   #if AXIS2_DRIVER_FS_VHIGH != OFF
-    tmcAxis2.set_THIGH_value( round(12000000.0/(AXIS2_DRIVER_FS_VHIGH*(256.0/AXIS2_DRIVER_MICROSTEPS))) );
+    tmcAxis2.set_THIGH_value( round(12000000.0/(AXIS2_DRIVER_FS_VHIGH*(256.0/axis2Settings.microsteps))) );
     tmcAxis2.set_CHOPCONF_vhighfs(1);
     tmcAxis2.set_CHOPCONF_vhighchm(1);
   #endif
@@ -101,21 +101,21 @@ void driversInitTmcMode() {
     tmcAxis1.set_PWMCONF_PWM_GRAD(AXIS1_DRIVER_PWM_GRAD);
   #endif
   #if AXIS1_DRIVER_PWM_VHIGH_SC != OFF
-    tmcAxis1.set_TPWMTHRS_value( round(12000000.0/(AXIS1_DRIVER_PWM_VHIGH_SC*(256.0/AXIS1_DRIVER_MICROSTEPS))) );
+    tmcAxis1.set_TPWMTHRS_value( round(12000000.0/(AXIS1_DRIVER_PWM_VHIGH_SC*(256.0/axis1Settings.microsteps))) );
   #endif
 
   #if AXIS2_DRIVER_PWM_GRAD != OFF
     tmcAxis2.set_PWMCONF_PWM_GRAD(AXIS2_DRIVER_PWM_GRAD);
   #endif
   #if AXIS2_DRIVER_PWM_VHIGH_SC != OFF
-    tmcAxis2.set_TPWMTHRS_value( round(12000000.0/(AXIS2_DRIVER_PWM_VHIGH_SC*(256.0/AXIS2_DRIVER_MICROSTEPS))) );
+    tmcAxis2.set_TPWMTHRS_value( round(12000000.0/(AXIS2_DRIVER_PWM_VHIGH_SC*(256.0/axis2Settings.microsteps))) );
   #endif
 }
 
 volatile boolean _a1trk=false;
 void axis1DriverTrackingMode(boolean init) {
   if (_a1trk) return;
-  if (!tmcAxis1.setup(AXIS1_DRIVER_INTPOL,AXIS1_DRIVER_DECAY_MODE,255,AXIS1_DRIVER_IRUN,AXIS1_DRIVER_IHOLD)) return;
+  if (!tmcAxis1.setup(AXIS1_DRIVER_INTPOL,AXIS1_DRIVER_DECAY_MODE,255,axis1Settings.IRUN,AXIS1_DRIVER_IHOLD)) return;
   if (MODE_SWITCH_BEFORE_SLEW == ON || init) {  haltStepperDrivers(); if (!tmcAxis1.refresh_CHOPCONF(AXIS1_DRIVER_CODE)) { resumeStepperDrivers(); return; } stepAxis1=1; resumeStepperDrivers(); }
   _a1trk=true;
 }
@@ -123,7 +123,7 @@ void axis1DriverTrackingMode(boolean init) {
 volatile boolean _a2trk=false;
 void axis2DriverTrackingMode(boolean init) {
   if (_a2trk) return;
-  if (!tmcAxis2.setup(AXIS2_DRIVER_INTPOL,AXIS2_DRIVER_DECAY_MODE,255,AXIS2_DRIVER_IRUN,AXIS2_DRIVER_IHOLD)) return;
+  if (!tmcAxis2.setup(AXIS2_DRIVER_INTPOL,AXIS2_DRIVER_DECAY_MODE,255,axis2Settings.IRUN,AXIS2_DRIVER_IHOLD)) return;
   if (MODE_SWITCH_BEFORE_SLEW == ON || init) { haltStepperDrivers(); if (!tmcAxis2.refresh_CHOPCONF(AXIS2_DRIVER_CODE)) { resumeStepperDrivers(); return; } stepAxis2=1; resumeStepperDrivers(); }
   _a2trk=true;
 }

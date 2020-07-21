@@ -59,9 +59,6 @@ volatile boolean PPSsynced              = false;
   RateCompensation rateCompensation = RC_NONE;
 #endif
 
-long maxRate                            = (double)MaxRateBaseDesired*16.0;
-double MaxRateBaseActual                = (double)MaxRateBaseDesired;
-
 double slewSpeed                        = 0;
 volatile long timerRateAxis1            = 0;
 volatile long timerRateBacklashAxis1    = 0;
@@ -86,19 +83,45 @@ boolean faultAxis2                      = false;
 #endif
 
 #define default_tracking_rate 1
+
+typedef struct AxisSettingsD {
+   double stepsPerDegree;
+   int16_t microsteps;
+   int16_t IRUN;
+   int8_t reverse;
+   int16_t min;
+   int16_t max;
+} axisSettingsD;
+
+typedef struct AxisSettingsM {
+   float stepsPerMicron;
+   int16_t microsteps;
+   int16_t IRUN;
+   int8_t reverse;
+   int16_t min;
+   int16_t max;
+} axisSettingsM;
+
+volatile axisSettingsD axis1Settings = {AXIS1_STEPS_PER_DEGREE, AXIS1_DRIVER_MICROSTEPS, AXIS1_DRIVER_IRUN, AXIS1_DRIVER_REVERSE, AXIS1_LIMIT_MIN, AXIS1_LIMIT_MAX};
+volatile axisSettingsD axis2Settings = {AXIS2_STEPS_PER_DEGREE, AXIS2_DRIVER_MICROSTEPS, AXIS2_DRIVER_IRUN, AXIS2_DRIVER_REVERSE, AXIS2_LIMIT_MIN, AXIS2_LIMIT_MAX};
+volatile axisSettingsD axis3Settings = {AXIS3_STEPS_PER_DEGREE, AXIS3_DRIVER_MICROSTEPS, AXIS3_DRIVER_IRUN, AXIS3_DRIVER_REVERSE, AXIS3_LIMIT_MIN, AXIS3_LIMIT_MAX};
+volatile axisSettingsM axis4Settings = {AXIS4_STEPS_PER_MICRON, AXIS4_DRIVER_MICROSTEPS, AXIS4_DRIVER_IRUN, AXIS4_DRIVER_REVERSE, AXIS4_LIMIT_MIN, AXIS4_LIMIT_MAX};
+volatile axisSettingsM axis5Settings = {AXIS5_STEPS_PER_MICRON, AXIS5_DRIVER_MICROSTEPS, AXIS5_DRIVER_IRUN, AXIS5_DRIVER_REVERSE, AXIS5_LIMIT_MIN, AXIS5_LIMIT_MAX};
+
 volatile double trackingTimerRateAxis1  = default_tracking_rate;
 volatile double trackingTimerRateAxis2  = default_tracking_rate;
-volatile double timerRateRatio          = ((double)AXIS1_STEPS_PER_DEGREE/(double)AXIS2_STEPS_PER_DEGREE);
-volatile boolean useTimerRateRatio      = (AXIS1_STEPS_PER_DEGREE != AXIS2_STEPS_PER_DEGREE);
-#define StepsPerSecondAxis1               ((double)AXIS1_STEPS_PER_DEGREE/240.0)
-#define ArcSecPerStepAxis1                (3600.0/AXIS1_STEPS_PER_DEGREE)
-#define StepsPerSecondAxis2               ((double)AXIS2_STEPS_PER_DEGREE/240.0)
-#define ArcSecPerStepAxis2                (3600.0/AXIS2_STEPS_PER_DEGREE)
-#define BreakDistAxis1                    (2L)
-#define BreakDistAxis2                    (2L)
-long SecondsPerWormRotationAxis1        = ((double)AXIS1_STEPS_PER_WORMROT/StepsPerSecondAxis1);
-volatile double StepsForRateChangeAxis1 = (sqrt((double)SLEW_ACCELERATION_DIST*(double)AXIS1_STEPS_PER_DEGREE))*(double)MaxRateBaseDesired*16.0;
-volatile double StepsForRateChangeAxis2 = (sqrt((double)SLEW_ACCELERATION_DIST*(double)AXIS2_STEPS_PER_DEGREE))*(double)MaxRateBaseDesired*16.0;
+volatile double timerRateRatio          = (axis1Settings.stepsPerDegree/axis2Settings.stepsPerDegree);
+volatile boolean useTimerRateRatio      = (axis1Settings.stepsPerDegree != axis2Settings.stepsPerDegree);
+#define StepsPerSecondAxis1               (axis1Settings.stepsPerDegree/240.0)
+#define ArcSecPerStepAxis1                (3600.0/axis1Settings.stepsPerDegree)
+#define StepsPerSecondAxis2               (axis2Settings.stepsPerDegree/240.0)
+#define ArcSecPerStepAxis2                (3600.0/axis2Settings.stepsPerDegree)
+long SecondsPerWormRotationAxis1        = ((double)(AXIS1_STEPS_PER_WORMROT)/StepsPerSecondAxis1);
+#define MaxRateBaseDesired                ((1000000.0/(SLEW_RATE_BASE_DESIRED))/axis1Settings.stepsPerDegree)
+long maxRate                            = MaxRateBaseDesired*16.0;
+double MaxRateBaseActual                = MaxRateBaseDesired;
+volatile double StepsForRateChangeAxis1 = (sqrt((double)SLEW_ACCELERATION_DIST*axis1Settings.stepsPerDegree))*(double)MaxRateBaseDesired*16.0;
+volatile double StepsForRateChangeAxis2 = (sqrt((double)SLEW_ACCELERATION_DIST*axis2Settings.stepsPerDegree))*(double)MaxRateBaseDesired*16.0;
 
 // Basic stepper driver mode setup -------------------------------------------------------------------------------------------------
 #if AXIS1_DRIVER_MODEL != OFF
@@ -119,22 +142,16 @@ volatile double StepsForRateChangeAxis2 = (sqrt((double)SLEW_ACCELERATION_DIST*(
   #endif
 #endif
 #if AXIS3_DRIVER_MODEL != OFF
-  #if AXIS3_DRIVER_MICROSTEPS != OFF
-    volatile uint8_t _axis3_code;
-    #define AXIS3_DRIVER_CODE _axis3_code
-  #endif
+  volatile uint8_t _axis3_code;
+  #define AXIS3_DRIVER_CODE _axis3_code
 #endif
 #if AXIS4_DRIVER_MODEL != OFF
-  #if AXIS4_DRIVER_MICROSTEPS != OFF
-    volatile uint8_t _axis4_code;
-    #define AXIS4_DRIVER_CODE _axis4_code
-  #endif
+  volatile uint8_t _axis4_code;
+  #define AXIS4_DRIVER_CODE _axis4_code
 #endif
 #if AXIS5_DRIVER_MODEL != OFF
-  #if AXIS5_DRIVER_MICROSTEPS != OFF
-    volatile uint8_t _axis5_code;
-    #define AXIS5_DRIVER_CODE _axis5_code
-  #endif
+  volatile uint8_t _axis5_code;
+  #define AXIS5_DRIVER_CODE _axis5_code
 #endif
 
 // Location ------------------------------------------------------------------------------------------------------------------------
@@ -168,7 +185,7 @@ long   indexAxis1Steps                  = 0;
 volatile long stepAxis1=1;
 fixed_t fstepAxis1;                                          // tracking and PEC, fractional steps
 
-double homePositionAxis2                = 90.0;
+double homePositionAxis2                = 0.0;
 volatile long posAxis2                  = 0;                 // declination position in steps
 volatile int blAxis2                    = 0;                 // backlash position in steps
 volatile int backlashAxis2              = 0;                 // total backlash in steps
@@ -242,7 +259,7 @@ CommandErrors commandError = CE_NONE;
   #define L_CE_SLEW_ERR_IN_STANDBY "slew in standby"
   #define L_CE_SLEW_ERR_IN_PARK "slew in park"
   #define L_CE_GOTO_ERR_GOTO "already in goto"
-  #define L_CE_GOTO_ERR_OUTSIDE_LIMITS "goto outside limits"
+  #define L_CE_SLEW_ERR_OUTSIDE_LIMITS "outside limits"
   #define L_CE_SLEW_ERR_HARDWARE_FAULT "hardware fault"
   #define L_CE_MOUNT_IN_MOTION "mount in motion"
   #define L_CE_GOTO_ERR_UNSPECIFIED "other"
@@ -253,7 +270,7 @@ CommandErrors commandError = CE_NONE;
     L_CE_PARAM_FORM, L_CE_ALIGN_FAIL, L_CE_ALIGN_NOT_ACTIVE, L_CE_NOT_PARKED_OR_AT_HOME,
     L_CE_PARKED, L_CE_PARK_FAILED, L_CE_NOT_PARKED, L_CE_NO_PARK_POSITION_SET, L_CE_GOTO_FAIL,
     L_CE_LIBRARY_FULL, L_CE_GOTO_ERR_BELOW_HORIZON, L_CE_GOTO_ERR_ABOVE_OVERHEAD,
-    L_CE_SLEW_ERR_IN_STANDBY, L_CE_SLEW_ERR_IN_PARK, L_CE_GOTO_ERR_GOTO, L_CE_GOTO_ERR_OUTSIDE_LIMITS,
+    L_CE_SLEW_ERR_IN_STANDBY, L_CE_SLEW_ERR_IN_PARK, L_CE_GOTO_ERR_GOTO, L_CE_SLEW_ERR_OUTSIDE_LIMITS,
     L_CE_SLEW_ERR_HARDWARE_FAULT, L_CE_MOUNT_IN_MOTION, L_CE_GOTO_ERR_UNSPECIFIED, L_CE_UNK};
 #else
   char commandErrorStr[0][0];
@@ -276,6 +293,7 @@ volatile boolean safetyLimitsOn         = true;
 boolean axis1Enabled                    = false;
 boolean axis2Enabled                    = false;
 boolean syncToEncodersOnly              = false;
+enum StopSlewActions {SS_ALL_FAST, SS_LIMIT, SS_LIMIT_HARD, SS_LIMIT_AXIS1_MIN, SS_LIMIT_AXIS1_MAX, SS_LIMIT_AXIS2_MIN, SS_LIMIT_AXIS2_MAX};
                                         
 // Meridian flips ------------------------------------------------------------------------------------------------------------------
 #define MeridianFlipNever                 0
@@ -329,7 +347,7 @@ unsigned long baudRate[10] = {115200,56700,38400,28800,19200,14400,9600,4800,240
   #define GuideRateDefault 6                                 // 20x
 #endif
 #define GuideRateNone                     255
-#define RateToDegPerSec                   (1000000.0/(double)AXIS1_STEPS_PER_DEGREE)
+#define RateToDegPerSec                   (1000000.0/axis1Settings.stepsPerDegree)
 #define RateToASPerSec                    (RateToDegPerSec*3600.0)
 #define RateToXPerSec                     (RateToASPerSec/15.0)
 double  slewRateX                       = (RateToXPerSec/MaxRateBaseDesired)*2.5;

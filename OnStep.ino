@@ -56,7 +56,7 @@
 
 // Enable additional debugging and/or status messages on the specified DebugSer port
 // Note that the DebugSer port cannot be used for normal communication with OnStep
-#define DEBUG OFF             // default=OFF, use "DEBUG ON" for background errors only, use "DEBUG VERBOSE" for all errors and status messages
+#define DEBUG VERBOSE             // default=OFF, use "DEBUG ON" for background errors only, use "DEBUG VERBOSE" for all errors and status messages
 #define DebugSer SerialA      // default=SerialA, or Serial4 for example (always 9600 baud)
 
 #include <errno.h>
@@ -171,10 +171,8 @@ void setup() {
 
 #if DEBUG != OFF
   // Initialize USB serial debugging early, so we can use DebugSer.print() for debugging, if needed
-  DebugSer.begin(9600);
-  delay(5000);
+  DebugSer.begin(9600); delay(5000); DebugSer.flush(); VLF(""); VLF("");
 #endif
-
   VF("MSG: OnStep "); V(FirmwareVersionMajor); V("."); V(FirmwareVersionMinor); VL(FirmwareVersionPatch);
   
   // Call hardware specific initialization
@@ -206,7 +204,11 @@ void setup() {
   // Take another two seconds to be sure Serial ports are online
   delay(2000);
 
-  // initialize the Non-Volatile Memory
+  // set initial values for some variables
+  VLF("MSG: Init startup values");
+  initStartupValues();
+
+  // Check the Non-Volatile Memory
   VLF("MSG: Init NV");
   if (!nv.init()) {
     while (true) {
@@ -220,6 +222,13 @@ void setup() {
     }
   }
 
+  // if this is the first startup set EEPROM to defaults
+  initWriteNvValues();
+
+  // set pins for input/output as specified in Config.h and PinMap.h
+  VLF("MSG: Init pins");
+  initPins();
+
   // initialize the Object Library
   VLF("MSG: Init library/catalogs");
   Lib.init();
@@ -230,19 +239,10 @@ void setup() {
   createPecBuffer();
 #endif
 
-  // set initial values for some variables
-  initStartupValues();
-
-  // set pins for input/output as specified in Config.h and PinMap.h
-  initPins();
-
   // get guiding ready
   VLF("MSG: Init guiding");
   initGuide();
-
-  // if this is the first startup set EEPROM to defaults
-  initWriteNvValues();
-  
+ 
   // get weather monitoring ready to go
   VLF("MSG: Init weather");
   if (!ambient.init()) generalError=ERR_WEATHER_INIT;
@@ -273,6 +273,10 @@ void setup() {
   // now read any saved values from EEPROM into varaibles to restore our last state
   VLF("MSG: NV getting run-time settings");
   initReadNvValues();
+
+  // setup the stepper driver modes
+  VLF("MSG: Init motor timers");
+  StepperModeTrackingInit();
 
   // starts the hardware timers that keep sidereal time, move the motors, etc.
   setTrackingRate(default_tracking_rate);
@@ -305,17 +309,15 @@ void setup() {
 
   // start rotator if present
 #if ROTATOR == ON
-  rot.init(Axis3_STEP,Axis3_DIR,Axis3_EN,AXIS3_STEP_RATE_MAX,AXIS3_STEPS_PER_DEGREE,AXIS3_LIMIT_MIN,AXIS3_LIMIT_MAX);
-  #if AXIS3_DRIVER_REVERSE == ON
-    rot.setReverseState(HIGH);
-  #endif
   VLF("MSG: Init rotator");
+  rot.init(Axis3_STEP,Axis3_DIR,Axis3_EN,AXIS3_STEP_RATE_MAX,axis3Settings.stepsPerDegree,axis3Settings.min,axis3Settings.max);
+  if (axis3Settings.reverse == ON) rot.setReverseState(HIGH);
   rot.setDisableState(AXIS3_DRIVER_DISABLE);
   
   #if AXIS3_DRIVER_MODEL == TMC_SPI
-    tmcAxis3.setup(AXIS3_DRIVER_INTPOL,AXIS3_DRIVER_DECAY_MODE,AXIS3_DRIVER_CODE,AXIS3_DRIVER_IRUN,AXIS3_DRIVER_IRUN);
+    tmcAxis3.setup(AXIS3_DRIVER_INTPOL,AXIS3_DRIVER_DECAY_MODE,AXIS3_DRIVER_CODE,axis3Settings.IRUN,axis3Settings.IRUN);
     delay(150);
-    tmcAxis3.setup(AXIS3_DRIVER_INTPOL,AXIS3_DRIVER_DECAY_MODE,AXIS3_DRIVER_CODE,AXIS3_DRIVER_IRUN,AXIS3_DRIVER_IHOLD);
+    tmcAxis3.setup(AXIS3_DRIVER_INTPOL,AXIS3_DRIVER_DECAY_MODE,AXIS3_DRIVER_CODE,axis3Settings.IRUN,AXIS3_DRIVER_IHOLD);
   #endif
   
   #if AXIS3_DRIVER_POWER_DOWN == ON
@@ -327,21 +329,16 @@ void setup() {
 
   // start focusers if present
 #if FOCUSER1 == ON
-  foc1.init(Axis4_STEP,Axis4_DIR,Axis4_EN,EE_posAxis4,EE_tcfCoefAxis4,EE_tcfEnAxis4,AXIS4_STEP_RATE_MAX,AXIS4_STEPS_PER_MICRON,AXIS4_LIMIT_MIN*1000.0,AXIS4_LIMIT_MAX*1000.0,AXIS4_LIMIT_MIN_RATE);
-  #if AXIS4_DRIVER_DC_MODE != OFF
-    foc1.initDcPower(EE_dcPwrAxis4);
-    foc1.setPhase1();
-  #endif
-  #if AXIS4_DRIVER_REVERSE == ON
-    foc1.setReverseState(HIGH);
-  #endif
   VLF("MSG: Init focuser1");
+  foc1.init(Axis4_STEP,Axis4_DIR,Axis4_EN,EE_posAxis4,EE_tcfCoefAxis4,EE_tcfEnAxis4,AXIS4_STEP_RATE_MAX,axis4Settings.stepsPerMicron,axis4Settings.min*1000.0,axis4Settings.max*1000.0,AXIS4_LIMIT_MIN_RATE);
+  if (AXIS4_DRIVER_DC_MODE != OFF) { foc1.initDcPower(EE_dcPwrAxis4); foc1.setPhase1(); }
+  if (AXIS4_DRIVER_REVERSE == ON) foc1.setReverseState(HIGH);
   foc1.setDisableState(AXIS4_DRIVER_DISABLE);
 
   #if AXIS4_DRIVER_MODEL == TMC_SPI
-    tmcAxis4.setup(AXIS4_DRIVER_INTPOL,AXIS4_DRIVER_DECAY_MODE,AXIS4_DRIVER_CODE,AXIS4_DRIVER_IRUN,AXIS4_DRIVER_IRUN);
+    tmcAxis4.setup(AXIS4_DRIVER_INTPOL,AXIS4_DRIVER_DECAY_MODE,AXIS4_DRIVER_CODE,axis4Settings.IRUN,axis4Settings.IRUN);
     delay(150);
-    tmcAxis4.setup(AXIS4_DRIVER_INTPOL,AXIS4_DRIVER_DECAY_MODE,AXIS4_DRIVER_CODE,AXIS4_DRIVER_IRUN,AXIS4_DRIVER_IHOLD);
+    tmcAxis4.setup(AXIS4_DRIVER_INTPOL,AXIS4_DRIVER_DECAY_MODE,AXIS4_DRIVER_CODE,axis4Settings.IRUN,AXIS4_DRIVER_IHOLD);
   #endif
 
   #if AXIS4_DRIVER_POWER_DOWN == ON
@@ -352,21 +349,16 @@ void setup() {
 #endif
 
 #if FOCUSER2 == ON
-  foc2.init(Axis5_STEP,Axis5_DIR,Axis5_EN,EE_posAxis5,EE_tcfCoefAxis5,EE_tcfEnAxis5,AXIS5_STEP_RATE_MAX,AXIS5_STEPS_PER_MICRON,AXIS5_LIMIT_MIN*1000.0,AXIS5_LIMIT_MAX*1000.0,AXIS5_LIMIT_MIN_RATE);
-  #if AXIS5_DRIVER_DC_MODE == DRV8825
-    foc2.initDcPower(EE_dcPwrAxis5);
-    foc2.setPhase2();
-  #endif
-  #if AXIS5_DRIVER_REVERSE == ON
-    foc2.setReverseState(HIGH);
-  #endif
   VLF("MSG: Init focuser2");
+  foc2.init(Axis5_STEP,Axis5_DIR,Axis5_EN,EE_posAxis5,EE_tcfCoefAxis5,EE_tcfEnAxis5,AXIS5_STEP_RATE_MAX,axis5Settings.stepsPerMicron,axis5Settings.min*1000.0,axis5Settings.max*1000.0,AXIS5_LIMIT_MIN_RATE);
+  if (AXIS5_DRIVER_DC_MODE == DRV8825) { foc2.initDcPower(EE_dcPwrAxis5); foc2.setPhase2(); }
+  if (axis5Settings.reverse == ON) foc2.setReverseState(HIGH);
   foc2.setDisableState(AXIS5_DRIVER_DISABLE);
 
   #if AXIS5_DRIVER_MODEL == TMC_SPI
-    tmcAxis5.setup(AXIS5_DRIVER_INTPOL,AXIS5_DRIVER_DECAY_MODE,AXIS5_DRIVER_CODE,AXIS5_DRIVER_IRUN,AXIS5_DRIVER_IRUN);
+    tmcAxis5.setup(AXIS5_DRIVER_INTPOL,AXIS5_DRIVER_DECAY_MODE,AXIS5_DRIVER_CODE,axis5Settings.IRUN,axis5Settings.IRUN);
     delay(150);
-    tmcAxis5.setup(AXIS5_DRIVER_INTPOL,AXIS5_DRIVER_DECAY_MODE,AXIS5_DRIVER_CODE,AXIS5_DRIVER_IRUN,AXIS5_DRIVER_IHOLD);
+    tmcAxis5.setup(AXIS5_DRIVER_INTPOL,AXIS5_DRIVER_DECAY_MODE,AXIS5_DRIVER_CODE,axis5Settings.IRUN,AXIS5_DRIVER_IHOLD);
   #endif
 
   #if AXIS5_DRIVER_POWER_DOWN == ON
@@ -610,16 +602,16 @@ void loop2() {
 
 #if PPS_SENSE != OFF
     // update clock via PPS
-      cli();
-      PPSrateRatio=((double)1000000.0/(double)(PPSavgMicroS));
-      if ((long)(micros()-(PPSlastMicroS+2000000UL)) > 0) PPSsynced=false; // if more than two seconds has ellapsed without a pulse we've lost sync
-      sei();
+    cli();
+    PPSrateRatio=((double)1000000.0/(double)(PPSavgMicroS));
+    if ((long)(micros()-(PPSlastMicroS+2000000UL)) > 0) PPSsynced=false; // if more than two seconds has ellapsed without a pulse we've lost sync
+    sei();
   #if LED_STATUS2 == ON
     if (trackingState == TrackingSidereal) {
       if (PPSsynced) { if (led2On) { digitalWrite(LEDneg2Pin,HIGH); led2On=false; } else { digitalWrite(LEDneg2Pin,LOW); led2On=true; } } else { digitalWrite(LEDneg2Pin,HIGH); led2On=false; } // indicate PPS
     }
   #endif
-      if (LastPPSrateRatio != PPSrateRatio) { SiderealClockSetInterval(siderealInterval); LastPPSrateRatio=PPSrateRatio; }
+    if (LastPPSrateRatio != PPSrateRatio) { SiderealClockSetInterval(siderealInterval); LastPPSrateRatio=PPSrateRatio; }
 #endif
 
 #if LED_STATUS == ON
@@ -636,7 +628,6 @@ void loop2() {
   #endif
 #endif
 
-    // SAFETY CHECKS, keeps mount from tracking past the meridian limit, past the AXIS1_LIMIT_MAX, or past the Dec limits
     if (safetyLimitsOn) {
       if (meridianFlip != MeridianFlipNever) {
         if (getInstrPierSide() == PierSideWest) {

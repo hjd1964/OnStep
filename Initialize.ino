@@ -23,29 +23,6 @@ void initPre() {
 }
 
 void initStartupValues() {
-  // Basic stepper driver mode setup
-  // if we made through validation and AXIS1_DRIVER_MODEL exists; AXIS2_DRIVER_MODEL, AXIS1_DRIVER_MICROSTEPS,
-  // and AXIS2_DRIVER_MICROSTEPS also exist and passed validation in the pre-processor
-#if AXIS1_DRIVER_MODEL != OFF
-  // translate microsteps to microstep bit code
-  AXIS1_DRIVER_CODE = translateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_DRIVER_MICROSTEPS);
-  AXIS2_DRIVER_CODE = translateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_DRIVER_MICROSTEPS);
-  #if AXIS1_DRIVER_MICROSTEPS_GOTO != OFF
-    AXIS1_DRIVER_CODE_GOTO = translateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_DRIVER_MICROSTEPS_GOTO);
-  #endif
-  #if AXIS2_DRIVER_MICROSTEPS_GOTO != OFF
-    AXIS2_DRIVER_CODE_GOTO = translateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_DRIVER_MICROSTEPS_GOTO);
-  #endif
-#endif
-#if AXIS3_DRIVER_MODEL != OFF
-  AXIS3_DRIVER_CODE = translateMicrosteps(3, AXIS3_DRIVER_MODEL, AXIS3_DRIVER_MICROSTEPS);
-#endif
-#if AXIS4_DRIVER_MODEL != OFF
-  AXIS4_DRIVER_CODE = translateMicrosteps(4, AXIS4_DRIVER_MODEL, AXIS4_DRIVER_MICROSTEPS);
-#endif
-#if AXIS5_DRIVER_MODEL != OFF
-  AXIS5_DRIVER_CODE = translateMicrosteps(5, AXIS5_DRIVER_MODEL, AXIS5_DRIVER_MICROSTEPS);
-#endif
 
   // initialize some fixed-point values
   amountGuideAxis1.fixed=0;
@@ -280,12 +257,41 @@ void initPins() {
     pinMode(Axis2_FAULT,INPUT);
   #endif
 #endif
-
-  StepperModeTrackingInit();
 }
 
 void initReadNvValues() {
   if (E2END < 1023) { DLF("ERR, initReadNvValues(): bad NV size < 1024 bytes"); }
+
+  // get axis settings
+  nv.readBytes(EE_settingsAxis1,(byte*)&axis1Settings,sizeof(axis1Settings));
+  nv.readBytes(EE_settingsAxis2,(byte*)&axis2Settings,sizeof(axis2Settings));
+  nv.readBytes(EE_settingsAxis3,(byte*)&axis3Settings,sizeof(axis3Settings));
+  nv.readBytes(EE_settingsAxis4,(byte*)&axis4Settings,sizeof(axis4Settings));
+  nv.readBytes(EE_settingsAxis5,(byte*)&axis5Settings,sizeof(axis5Settings));
+
+  // Basic stepper driver mode setup
+  // if we made through validation and AXIS1_DRIVER_MODEL exists; AXIS2_DRIVER_MODEL, axis1Settings.microsteps,
+  // and axis2Settings.microsteps also exist and passed validation in the pre-processor
+#if AXIS1_DRIVER_MODEL != OFF
+  // translate microsteps to microstep bit code
+  AXIS1_DRIVER_CODE = translateMicrosteps(1, AXIS1_DRIVER_MODEL, axis1Settings.microsteps);
+  AXIS2_DRIVER_CODE = translateMicrosteps(2, AXIS2_DRIVER_MODEL, axis2Settings.microsteps);
+  #if AXIS1_DRIVER_MICROSTEPS_GOTO != OFF
+    AXIS1_DRIVER_CODE_GOTO = translateMicrosteps(1, AXIS1_DRIVER_MODEL, AXIS1_DRIVER_MICROSTEPS_GOTO);
+  #endif
+  #if AXIS2_DRIVER_MICROSTEPS_GOTO != OFF
+    AXIS2_DRIVER_CODE_GOTO = translateMicrosteps(2, AXIS2_DRIVER_MODEL, AXIS2_DRIVER_MICROSTEPS_GOTO);
+  #endif
+#endif
+#if AXIS3_DRIVER_MODEL != OFF
+  AXIS3_DRIVER_CODE = translateMicrosteps(3, AXIS3_DRIVER_MODEL, axis3Settings.microsteps);
+#endif
+#if AXIS4_DRIVER_MODEL != OFF
+  AXIS4_DRIVER_CODE = translateMicrosteps(4, AXIS4_DRIVER_MODEL, axis4Settings.microsteps);
+#endif
+#if AXIS5_DRIVER_MODEL != OFF
+  AXIS5_DRIVER_CODE = translateMicrosteps(5, AXIS5_DRIVER_MODEL, axis5Settings.microsteps);
+#endif
 
   // get the site information, if a GPS were attached we would use that here instead
   currentSite=nv.read(EE_currentSite);
@@ -436,6 +442,9 @@ void initWriteNvValues() {
       #endif
       delay(10);
     }
+
+    // stepper driver setup is from Config.h
+    nv.write(EE_settingsRuntime,false);
     
     // init the whole nv memory
     for (int i=0; i<E2END; i++) nv.write(i,0);
@@ -517,6 +526,13 @@ void initWriteNvValues() {
 
     // finally, stop the init from happening again
     nv.writeLong(EE_autoInitKey,NV_INIT_KEY);
+  }
+  if (!nv.read(EE_settingsRuntime)) {
+    nv.writeBytes(EE_settingsAxis1,(byte*)&axis1Settings,sizeof(axis1Settings));
+    nv.writeBytes(EE_settingsAxis2,(byte*)&axis2Settings,sizeof(axis2Settings));
+    nv.writeBytes(EE_settingsAxis3,(byte*)&axis3Settings,sizeof(axis3Settings));
+    nv.writeBytes(EE_settingsAxis4,(byte*)&axis4Settings,sizeof(axis4Settings));
+    nv.writeBytes(EE_settingsAxis5,(byte*)&axis5Settings,sizeof(axis5Settings));
   }
 }
 

@@ -465,8 +465,8 @@ void setDeltaTrackingRate() {
   if (trackingState == TrackingSidereal) trackingTimerRateAxis1=(_deltaAxis1/15.0)+f1; else trackingTimerRateAxis1=0.0;
   if (trackingState == TrackingSidereal) trackingTimerRateAxis2=(_deltaAxis2/15.0)+f2; else trackingTimerRateAxis2=0.0;
   sei();
-  fstepAxis1.fixed=doubleToFixed( (((double)AXIS1_STEPS_PER_DEGREE/240.0)*(_deltaAxis1/15.0))/100.0 );
-  fstepAxis2.fixed=doubleToFixed( (((double)AXIS2_STEPS_PER_DEGREE/240.0)*(_deltaAxis2/15.0))/100.0 );
+  fstepAxis1.fixed=doubleToFixed( ((axis1Settings.stepsPerDegree/240.0)*(_deltaAxis1/15.0))/100.0 );
+  fstepAxis2.fixed=doubleToFixed( ((axis2Settings.stepsPerDegree/240.0)*(_deltaAxis2/15.0))/100.0 );
 }
 
 double _currentRate=1.0;
@@ -491,13 +491,13 @@ double getTrackingRate60Hz() {
 }
 
 double getStepsPerSecondAxis1() {
- double s=(((double)AXIS1_STEPS_PER_DEGREE/240.0)*(_deltaAxis1/15.0));
+ double s=((axis1Settings.stepsPerDegree/240.0)*(_deltaAxis1/15.0));
  if (s < 8.0) s=8.0;
  return s;
 }
 
 double getStepsPerSecondAxis2() {
- double s=(((double)AXIS2_STEPS_PER_DEGREE/240.0)*(_deltaAxis2/15.0));
+ double s=((axis2Settings.stepsPerDegree/240.0)*(_deltaAxis2/15.0));
  if (s < 8.0) s=8.0;
  return s;
 }
@@ -705,9 +705,9 @@ boolean doHorRateCalc() {
       sei();
     }
     // get the Azm
-    az_Azm=(double)az_Axis1/(double)AXIS1_STEPS_PER_DEGREE;
+    az_Azm=(double)az_Axis1/axis1Settings.stepsPerDegree;
     // get the Alt
-    az_Alt=(double)az_Axis2/(double)AXIS2_STEPS_PER_DEGREE; 
+    az_Alt=(double)az_Axis2/axis2Settings.stepsPerDegree; 
   } else
 
   // convert to Equatorial coords
@@ -777,10 +777,10 @@ void setAccelerationRates(double maxRate) {
   
   // set the new goto acceleration rate
   cli();
-  StepsForRateChangeAxis1= (sqrt((double)SLEW_ACCELERATION_DIST*(double)AXIS1_STEPS_PER_DEGREE))*maxRate;
-  StepsForRateChangeAxis2= (sqrt((double)SLEW_ACCELERATION_DIST*(double)AXIS2_STEPS_PER_DEGREE))*maxRate;
+  StepsForRateChangeAxis1= (sqrt((double)SLEW_ACCELERATION_DIST*axis1Settings.stepsPerDegree))*maxRate;
+  StepsForRateChangeAxis2= (sqrt((double)SLEW_ACCELERATION_DIST*axis2Settings.stepsPerDegree))*maxRate;
   sei();
 
   // slewSpeed is in degrees per second
-  slewSpeed=(1000000.0/(maxRate/16.0))/AXIS1_STEPS_PER_DEGREE;
+  slewSpeed=(1000000.0/(maxRate/16.0))/axis1Settings.stepsPerDegree;
 }

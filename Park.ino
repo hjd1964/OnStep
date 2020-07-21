@@ -263,12 +263,12 @@ boolean saveAlignModel() {
 boolean loadAlignModel() {
   // get align/corrections
   indexAxis1=nv.readFloat(EE_indexAxis1);
-  indexAxis1Steps=(long)(indexAxis1*(double)AXIS1_STEPS_PER_DEGREE);
-  if (indexAxis1 < -720 || indexAxis1 > 720) { indexAxis1=0; DL("ERR, loadAlignModel(): bad NV indexAxis1"); }
+  if (indexAxis1 < -720 || indexAxis1 > 720) { indexAxis1=0; DLF("ERR, loadAlignModel(): bad NV indexAxis1"); }
+  indexAxis1Steps=(long)(indexAxis1*axis1Settings.stepsPerDegree);
   
   indexAxis2=nv.readFloat(EE_indexAxis2);
-  indexAxis2Steps=(long)(indexAxis2*(double)AXIS2_STEPS_PER_DEGREE);
-  if (indexAxis2 < -720 || indexAxis2 > 720) { indexAxis2=0; DL("ERR, loadAlignModel(): bad NV indexAxis2"); }
+  if (indexAxis2 < -720 || indexAxis2 > 720) { indexAxis2=0; DLF("ERR, loadAlignModel(): bad NV indexAxis2"); }
+  indexAxis2Steps=(long)(indexAxis2*axis2Settings.stepsPerDegree);
   
   Align.readCoe();
   return true;

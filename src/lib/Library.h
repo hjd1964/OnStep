@@ -41,31 +41,29 @@ class Library
     boolean firstFreeRec();
     boolean prevRec();
     boolean nextRec();
-    boolean gotoRec(int num);
+    boolean gotoRec(long num);
 
     void clearCurrentRec(); // clears this record
-    void clearLib(); // clears this library
-    void clearAll(); // clears all libraries
+    void clearLib();        // clears this library
+    void clearAll();        // clears all libraries
 
-    int recCount();    // actual number of records for this catalog
-    int recFree();     // number records available for this catalog
-    int recCountAll(); // actual number of records for this library
-    int recFreeAll();  // number records available for this library
-    int recPos;        // currently selected record#
-    int recMax;        // last record#
+    long recCount();        // actual number of records for this catalog
+    long recFree();         // number records available for this catalog
+    long recCountAll();     // actual number of records for this library
+    long recFreeAll();      // number records available for this library
+    long recPos;            // currently selected record#
+    long recMax;            // last record#
     
   private:
-    libRec_t readRec(int address);
-    void writeRec(int address, libRec_t data);
-    void clearRec(int address);
+    libRec_t readRec(long address);
+    void writeRec(long address, libRec_t data);
+    void clearRec(long address);
     inline double degRange(double d) { while (d >= 360.0) d-=360.0; while (d < 0.0)  d+=360.0; return d; }
 
     int catalog;
 
-    int byteCount;
-    int bytePos;
-    int byteMin;
-    int byteMax;
+    long byteMin;
+    long byteMax;
 };
 
 Library Lib;
@@ -76,13 +74,13 @@ Library::Library()
   catalog=0;
 
   byteMin=200+pecBufferSize;
-  
-  byteMax=E2END-100;
+  byteMax=GSB;
 
-  byteCount=(byteMax-byteMin)+1;
-  bytePos=byteMin;
-  
-  recMax=byteCount/rec_size;           // maximum number of records
+  long byteCount=(byteMax-byteMin)+1;
+  if (byteCount < 0) byteCount=0;
+  if (byteCount > 262143) byteCount=262143; // maximum 256KB
+
+  recMax=byteCount/rec_size; // maximum number of records
 }
 
 Library::~Library()
@@ -146,26 +144,26 @@ void Library::readVars(char* name, int* code, double* RA, double* Dec)
   *Dec=((*Dec/65536.0)*180.0)-90.0;
 }
 
-libRec_t Library::readRec(int address)
+libRec_t Library::readRec(long address)
 {
   libRec_t work;
-  int l=address*rec_size+byteMin;
+  long l=address*rec_size+byteMin;
   nv.readBytes(l,(uint8_t*)&work.libRecBytes,16);
   return work;
 }
 
-void Library::writeRec(int address, libRec_t data)
+void Library::writeRec(long address, libRec_t data)
 {
-    int l=address*rec_size+byteMin;
-    for (int m=0;m < 16;m++) nv.write(l+m,data.libRecBytes[m]);
   if (address >= 0 && address < recMax) {
+    long l=address*rec_size+byteMin;
+    for (int m=0; m < 16; m++) nv.write(l+m,data.libRecBytes[m]);
   }
 }
 
-void Library::clearRec(int address)
+void Library::clearRec(long address)
 {
-    int l=address*rec_size+byteMin;
   if (address >= 0 && address < recMax) {
+    long l=address*rec_size+byteMin;
     int code=15<<4;
     nv.write(l+11,(byte)code); // catalog code 15 = deleted
   }
@@ -195,7 +193,7 @@ boolean Library::nameRec()
   
   do
   {
-    recPos++; if (recPos >= recMax) { break; }
+    recPos++; if (recPos >= recMax) break;
     work=readRec(recPos);
 
     cat=(int)work.libRec.code>>4;
@@ -217,7 +215,7 @@ boolean Library::firstFreeRec()
   
   do
   {
-    recPos++; if (recPos >= recMax) { break; }
+    recPos++; if (recPos >= recMax) break;
     work=readRec(recPos);
 
     cat=(int)work.libRec.code>>4;
@@ -270,15 +268,15 @@ boolean Library::nextRec()
 }
 
 // read the specified record (of this catalog), if it exists
-boolean Library::gotoRec(int num)
+boolean Library::gotoRec(long num)
 {
   libRec_t work;
 
   int cat;
-  int l,r=0;
-  int c=0;
+  long r=0;
+  long c=0;
   
-  for (l=0;l < recMax;l++) {
+  for (long l=0; l < recMax; l++) {
     work=readRec(l); r=l;
 
     cat=(int)work.libRec.code>>4;
@@ -289,14 +287,14 @@ boolean Library::gotoRec(int num)
 }
 
 // count all catalog records
-int Library::recCount()
+long Library::recCount()
 {
   libRec_t work;
 
   int cat;
-  int c=0;
+  long c=0;
   
-  for (int l=0;l < recMax;l++) {
+  for (long l=0; l < recMax; l++) {
     work=readRec(l);
 
     cat=(int)work.libRec.code>>4;
@@ -307,14 +305,14 @@ int Library::recCount()
 }
 
 // count all library records (index or otherwise)
-int Library::recCountAll()
+long Library::recCountAll()
 {
   libRec_t work;
 
   int cat;
-  int c=0;
+  long c=0;
   
-  for (int l=0;l < recMax;l++) {
+  for (long l=0; l < recMax; l++) {
     work=readRec(l);
 
     cat=(int)work.libRec.code>>4;
@@ -325,7 +323,7 @@ int Library::recCountAll()
 }
 
 // library records available
-int Library::recFreeAll()
+long Library::recFreeAll()
 {
   return recMax-recCountAll();
 }
@@ -350,7 +348,7 @@ void Library::clearLib()
 
   int cat;
 
-  for (int l=0;l < recMax;l++) {
+  for (long l=0; l < recMax; l++) {
     work=readRec(l);
 
     cat=(int)work.libRec.code>>4;
@@ -361,5 +359,5 @@ void Library::clearLib()
 // mark all records as empty
 void Library::clearAll()
 {
-  for (int l=0;l < recMax;l++) clearRec(l);
+  for (long l=0;l < recMax;l++) clearRec(l);
 }

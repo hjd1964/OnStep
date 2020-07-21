@@ -75,14 +75,14 @@ void moveTo() {
   // adjust rates near the horizon to help keep from exceeding the minAlt limit
   #if MOUNT_TYPE != ALTAZM
     if (latitudeAbs > 10) {
-      long posAxis2=latitudeSign*getInstrAxis2()*AXIS2_STEPS_PER_DEGREE;
+      long posAxis2=latitudeSign*getInstrAxis2()*axis2Settings.stepsPerDegree;
       static long lastPosAxis2=0;
       double distDestLimit=currentAlt-(minAlt+10.0); if (distDestLimit < SLEW_ACCELERATION_DIST/8.0) distDestLimit=SLEW_ACCELERATION_DIST/8.0;  
       // if Dec is decreasing slow down the Dec axis, if Dec is increasing slow down the RA axis
       if (posAxis2 < lastPosAxis2) {
-        if (distDestLimit*AXIS2_STEPS_PER_DEGREE < distDestAxis2) distDestAxis2=distDestLimit*AXIS2_STEPS_PER_DEGREE;
+        if (distDestLimit*axis2Settings.stepsPerDegree < distDestAxis2) distDestAxis2=distDestLimit*axis2Settings.stepsPerDegree;
       } else {
-        if (distDestLimit*AXIS1_STEPS_PER_DEGREE < distDestAxis1) distDestAxis1=distDestLimit*AXIS1_STEPS_PER_DEGREE;
+        if (distDestLimit*axis1Settings.stepsPerDegree < distDestAxis1) distDestAxis1=distDestLimit*axis1Settings.stepsPerDegree;
       }
       lastPosAxis2=posAxis2;
     }

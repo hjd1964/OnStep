@@ -102,9 +102,6 @@
   #define GUIDE_SPIRAL_TIME_LIMIT 103.4
 #endif
 
-// automatically set MaxRate from SLEW_RATE_BASE_DESIRED
-#define MaxRateBaseDesired ((1000000.0/SLEW_RATE_BASE_DESIRED)/AXIS1_STEPS_PER_DEGREE)
-
 // automatically set focuser/rotator step rate (or focuser DC pwm freq.) from AXISn_SLEW_RATE_DESIRED
 #ifndef AXIS3_STEP_RATE_MAX
   #define AXIS3_STEP_RATE_MAX (1000.0/(AXIS3_SLEW_RATE_DESIRED*AXIS3_STEPS_PER_DEGREE))
@@ -128,7 +125,7 @@
 #if MOUNT_TYPE == ALTAZM
   #define PEC_BUFFER_SIZE 0
 #else
-  #define PEC_BUFFER_SIZE ceil(AXIS1_STEPS_PER_WORMROT/(AXIS1_STEPS_PER_DEGREE/240.0))
+  #define PEC_BUFFER_SIZE ceil(AXIS1_STEPS_PER_WORMROT/(axis1Settings.stepsPerDegree/240.0))
 #endif
 
 // figure out how many align star are allowed for the configuration
@@ -731,12 +728,12 @@
 #else
   #ifndef AXIS1_LIMIT_MIN
     #error "Configuration (Config.h): Setting AXIS1_LIMIT_MIN must be present!"
-  #elif AXIS1_LIMIT_MIN < -180 || AXIS1_LIMIT_MIN > -105
+  #elif AXIS1_LIMIT_MIN < -180 || AXIS1_LIMIT_MIN > -90
     #error "Configuration (Config.h): Setting AXIS1_LIMIT_MIN invalid, use a number between -105 and -180 (degrees.)"
   #endif
   #ifndef AXIS1_LIMIT_MAX
     #error "Configuration (Config.h): Setting AXIS1_LIMIT_MAX must be present!"
-  #elif AXIS1_LIMIT_MAX < 105 || AXIS1_LIMIT_MAX > 180
+  #elif AXIS1_LIMIT_MAX < 90 || AXIS1_LIMIT_MAX > 180
     #error "Configuration (Config.h): Setting AXIS1_LIMIT_MAX invalid, use a number between 105 and 180 (degrees.)"
   #endif
 #endif
@@ -755,8 +752,10 @@
 
 #ifndef AXIS2_TANGENT_ARM
   #error "Configuration (Config.h): Setting AXIS2_TANGENT_ARM must be present!"
-#elif (AXIS2_TANGENT_ARM != ON && AXIS2_TANGENT_ARM != OFF)
+#elif AXIS2_TANGENT_ARM != ON && AXIS2_TANGENT_ARM != OFF
   #error "Configuration (Config.h): Setting AXIS2_TANGENT_ARM invalid, use OFF or ON only."
+#elif AXIS2_TANGENT_ARM == ON && MOUNT_TYPE == ALTAZM
+  #error "Configuration (Config.h): Setting AXIS2_TANGENT_ARM is not compatible with ALTAZM mode."
 #endif
 #ifndef AXIS2_TANGENT_ARM_CORRECTION
   #if AXIS2_TANGENT_ARM == ON

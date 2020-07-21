@@ -17,12 +17,12 @@ CommandErrors validateGotoCoords(double HA, double Dec, double Alt) {
   // Check coordinates
   if (Alt < minAlt)                            return CE_GOTO_ERR_BELOW_HORIZON;
   if (Alt > maxAlt)                            return CE_GOTO_ERR_ABOVE_OVERHEAD;
-#if AXIS2_TANGENT_ARM != ON
-    if (Dec < AXIS2_LIMIT_MIN)                 return CE_SLEW_ERR_OUTSIDE_LIMITS;
-    if (Dec > AXIS2_LIMIT_MAX)                 return CE_SLEW_ERR_OUTSIDE_LIMITS;
+#if AXIS2_TANGENT_ARM == OFF && MOUNT_TYPE != ALTAZM
+    if (Dec < axis2Settings.min)               return CE_SLEW_ERR_OUTSIDE_LIMITS;
+    if (Dec > axis2Settings.max)               return CE_SLEW_ERR_OUTSIDE_LIMITS;
 #endif
-  if (HA < AXIS1_LIMIT_MIN)                    return CE_SLEW_ERR_OUTSIDE_LIMITS;
-  if (HA > AXIS1_LIMIT_MAX)                    return CE_SLEW_ERR_OUTSIDE_LIMITS;
+  if (HA < axis1Settings.min)                  return CE_SLEW_ERR_OUTSIDE_LIMITS;
+  if (HA > axis1Settings.max)                  return CE_SLEW_ERR_OUTSIDE_LIMITS;
   return CE_NONE;
 }
 
@@ -104,8 +104,8 @@ CommandErrors syncEnc(double EncAxis1, double EncAxis2) {
   // force syncing to encoders only
   if (syncToEncodersOnly) return CE_NONE;
 
-  long e1=EncAxis1*(double)AXIS1_STEPS_PER_DEGREE;
-  long e2=EncAxis2*(double)AXIS2_STEPS_PER_DEGREE;
+  long e1=EncAxis1*axis1Settings.stepsPerDegree;
+  long e2=EncAxis2*axis2Settings.stepsPerDegree;
 
   long a1,a2;
   cli();
@@ -119,9 +119,9 @@ CommandErrors syncEnc(double EncAxis1, double EncAxis2) {
   long delta2=a2-e2;
 
   indexAxis1Steps-=delta1;
-  indexAxis1=(double)indexAxis1Steps/(double)AXIS1_STEPS_PER_DEGREE;
+  indexAxis1=(double)indexAxis1Steps/axis1Settings.stepsPerDegree;
   indexAxis2Steps-=delta2;
-  indexAxis2=(double)indexAxis2Steps/(double)AXIS2_STEPS_PER_DEGREE;
+  indexAxis2=(double)indexAxis2Steps/axis2Settings.stepsPerDegree;
 
   return CE_NONE;
 }
@@ -136,8 +136,8 @@ void getEnc(double *EncAxis1, double *EncAxis2) {
   a1+=indexAxis1Steps;
   a2+=indexAxis2Steps;
   
-  *EncAxis1=(double)a1/(double)AXIS1_STEPS_PER_DEGREE;
-  *EncAxis2=(double)a2/(double)AXIS2_STEPS_PER_DEGREE;
+  *EncAxis1=(double)a1/axis1Settings.stepsPerDegree;
+  *EncAxis2=(double)a2/axis2Settings.stepsPerDegree;
 }
 
 // gets the telescopes current RA and Dec, set returnHA to true for Horizon Angle instead of RA
@@ -205,8 +205,8 @@ CommandErrors goToHere(bool toEastOnly) {
   PreferredPierSide p=preferredPierSide;
   if (meridianFlip == MeridianFlipNever) return CE_SLEW_ERR_OUTSIDE_LIMITS;
   cli(); long h=posAxis1+indexAxis1Steps; sei();
-  if ((!toEastOnly) && (getInstrPierSide() == PierSideEast) && (h < (degreesPastMeridianW*(long)AXIS1_STEPS_PER_DEGREE))) { verified=true; preferredPierSide=PPS_WEST; }
-  if ((getInstrPierSide() == PierSideWest) && (h > (-degreesPastMeridianE*(long)AXIS1_STEPS_PER_DEGREE))) { verified=true; preferredPierSide=PPS_EAST; }
+  if ((!toEastOnly) && (getInstrPierSide() == PierSideEast) && (h < (degreesPastMeridianW*(long)axis1Settings.stepsPerDegree))) { verified=true; preferredPierSide=PPS_WEST; }
+  if ((getInstrPierSide() == PierSideWest) && (h > (-degreesPastMeridianE*(long)axis1Settings.stepsPerDegree))) { verified=true; preferredPierSide=PPS_EAST; }
   if (verified) {
     double newRA,newDec;
     getEqu(&newRA,&newDec,false);
@@ -248,7 +248,7 @@ CommandErrors goToEqu(double RA, double Dec) {
     if (z < 0) {
       // the alternate z1 is in 180..360
       double z1=z+360.0;
-      if ((z1 < AXIS1_LIMIT_MAX) && (dist(a1,z) > dist(a1,z1))) z=z1;
+      if ((z1 < axis1Settings.max) && (dist(a1,z) > dist(a1,z1))) z=z1;
     }
   }
   // position a1 -0..-180
@@ -257,7 +257,7 @@ CommandErrors goToEqu(double RA, double Dec) {
     if (z > 0) {
       // the alternate z1 is in -360..-180
       double z1=z-360.0;
-      if ((z1 > AXIS1_LIMIT_MIN) && (dist(a1,z) > dist(a1,z1))) z=z1;
+      if ((z1 > axis1Settings.min) && (dist(a1,z) > dist(a1,z1))) z=z1;
     }
   }
   
@@ -298,7 +298,7 @@ CommandErrors goToHor(double *Alt, double *Azm) {
 CommandErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTargetAxis1, double altTargetAxis2, int gotoPierSide) {
   atHome=false;
   int thisPierSide=getInstrPierSide();
-
+  DL("Goto started");
   if (meridianFlip != MeridianFlipNever) {
     // where the allowable hour angles are
     double eastOfPierMaxHA= 180.0;
@@ -352,12 +352,12 @@ CommandErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTar
   int p=PierSideEast; switch (thisPierSide) { case PierSideWest: case PierSideFlipEW1: p=PierSideWest; break; }
 #if MOUNT_TYPE == ALTAZM
   // allow +/- 360 in Az
-  if (((thisTargetAxis1 > AXIS1_LIMIT_MAX) || (thisTargetAxis1 < AXIS1_LIMIT_MIN)) || ((thisTargetAxis2 > 180.0) || (thisTargetAxis2 < -180.0))) return CE_GOTO_ERR_UNSPECIFIED;
+  if (((thisTargetAxis1 > axis1Settings.max) || (thisTargetAxis1 < axis1Settings.min)) || ((thisTargetAxis2 > 180.0) || (thisTargetAxis2 < -180.0))) return CE_GOTO_ERR_UNSPECIFIED;
 #else
   if (((thisTargetAxis1 > 180.0) || (thisTargetAxis1 < -180.0)) || ((thisTargetAxis2 > 180.0) || (thisTargetAxis2 < -180.0))) return CE_GOTO_ERR_UNSPECIFIED;
   #if AXIS2_TANGENT_ARM == ON
-    if (toInstrAxis2(thisTargetAxis2,p) < AXIS2_LIMIT_MIN) return CE_SLEW_ERR_OUTSIDE_LIMITS;
-    if (toInstrAxis2(thisTargetAxis2,p) > AXIS2_LIMIT_MAX) return CE_SLEW_ERR_OUTSIDE_LIMITS;
+    if (toInstrAxis2(thisTargetAxis2,p) < axis2Settings.min) return CE_SLEW_ERR_OUTSIDE_LIMITS;
+    if (toInstrAxis2(thisTargetAxis2,p) > axis2Settings.max) return CE_SLEW_ERR_OUTSIDE_LIMITS;
   #endif
 #endif
   lastTrackingState=trackingState;

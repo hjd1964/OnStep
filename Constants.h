@@ -195,10 +195,10 @@
 #define EE_pecTable                200
 
 // Library
-// Catalog storage starts at 200+pecBufferSize and ends at E2END-100
+// Catalog storage starts at 200+pecBufferSize and ends at E2END-200
 
-// General purpose storage B (100 bytes), E2END-99..E2END
-#define GSB                       (E2END-100)
+// General purpose storage B (200 bytes), E2END-199..E2END
+#define GSB                       (E2END-200)
 #define EE_dcPwrAxis4              GSB+0   // 1
 #define EE_dcPwrAxis5              GSB+1   // 1
 #define EE_maxRateL                GSB+2   // 4
@@ -231,6 +231,13 @@
 #define EE_feature8Value1          GSB+37  // 1
 #define EE_feature8Value2          GSB+38  // 1
 #define EE_feature8Value3          GSB+39  // 1
+
+#define EE_settingsAxis1           GSB+40  // 17
+#define EE_settingsAxis2           GSB+57  // 17
+#define EE_settingsAxis3           GSB+74  // 17
+#define EE_settingsAxis4           GSB+91  // 13
+#define EE_settingsAxis5           GSB+104 // 13
+#define EE_settingsRuntime         GSB+117 // 1
 
 // ---------------------------------------------------------------------------------------------------------------------------------
 // Unique identifier for the current initialization format for NV, do not change
