@@ -413,14 +413,16 @@ void observedPlaceToTopocentric(double *RA, double *Dec) {
 double _deltaAxis1=15.0,_deltaAxis2=0.0;
 
 boolean trackingSyncInProgress() {
-  static int lastTrackingSyncSeconds=0;
-  
-  if ((trackingSyncSeconds > 0) && (trackingState != TrackingSidereal)) trackingSyncSeconds=0;
+  static int lastTrackingSyncSeconds=-1;
 
   // sound goto done
-  if ((trackingSyncSeconds == 0) and (lastTrackingSyncSeconds != trackingSyncSeconds)) soundAlert();
+  if (trackingSyncSeconds == 0 && lastTrackingSyncSeconds != trackingSyncSeconds) {
+    soundAlert();
+    VLF("MSG: Tracking sync done");
+  }
 
   lastTrackingSyncSeconds=trackingSyncSeconds;
+  if (trackingState != TrackingSidereal) trackingSyncSeconds=0;
 
   return trackingSyncSeconds > 0;
 }
