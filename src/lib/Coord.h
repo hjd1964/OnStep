@@ -55,6 +55,11 @@ void setIndexAxis2(double axis2, int newPierSide) {
 
   indexAxis2=axis2-(double)p2/(double)AXIS2_STEPS_PER_DEGREE;
   indexAxis2Steps=(long)(indexAxis2*(double)AXIS2_STEPS_PER_DEGREE);
+
+double getIndexAxis2() {
+  double q=indexAxis2;
+  if ((q < -90.0) || (q > 90.0)) q=180.0-q; if (q > 180.0) q-=360.0; if (q < -180.0) q+=360.0;
+  return q;
 }
 
 void setTargetAxis1(double axis1, int newPierSide) {

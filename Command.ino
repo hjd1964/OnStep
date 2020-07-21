@@ -995,6 +995,15 @@ void processCommands() {
                 booleanReply=false;
                 supress_frame=true;
               break;
+              case 'F':
+#if AXIS2_TANGENT_ARM == ON
+                reply[0]='1';
+#else
+                reply[0]='0';
+#endif
+                booleanReply=false;
+                supress_frame=true;
+              break;
               default: commandError=CE_CMD_UNKNOWN;
             }
           } else
@@ -1014,7 +1023,7 @@ void processCommands() {
               case 'B': cli(); temp=(long)(trackingTimerRateAxis1*1000.0); sei(); sprintf(reply,"%ld",temp); booleanReply=false; break;       // DebugB, trackingTimerRateAxis1
               case 'C': sprintf(reply,"%ldus",average_loop_time); booleanReply=false; break;                                                  // DebugC, Workload average
               case 'E': double ra, de; cli(); getEqu(&ra,&de,false); sei(); sprintf(reply,"%f,%f",ra,de); booleanReply=false; break;          // DebugE, equatorial coordinates degrees (no division by 15)
-#if DEBUG != OFF                                                                                               // DebugF, EEPROM dump to DebugSer
+#if DEBUG != OFF // DebugF, EEPROM dump to DebugSer
               case 'F':
                 for (int x=0; x <= E2END+16; x++) {
                   if (x < 8 || x > E2END+8) {
@@ -1030,6 +1039,7 @@ void processCommands() {
                 }
               break;
 #endif
+              case 'G': dtostrf(getIndexAxis2(),3,6,reply); booleanReply=false; break;                                                        // DebugG, return index position
               default:  commandError=CE_CMD_UNKNOWN;
             }
           } else
