@@ -156,14 +156,11 @@ class focuserStepper : public focuser {
 
     void enableDriver() {
       if (enPin == -1) return;
-      // for Aux5/Aux6 (DAC) support for stepper driver EN control on MaxPCB Aux5=A21=66 Aux6=A22=67
-      if ((enPin == 66) || (enPin == 67)) { if (enableState == HIGH) analogWrite(enPin,255); else analogWrite(enPin,0); delayMicroseconds(30); } else 
-      { digitalWrite(enPin,enableState); delayMicroseconds(5); }
+      digitalWrite(enPin,enableState); delayMicroseconds(20);
     }
 
     void disableDriver() {
       if (enPin == -1) return;
-      if ((enPin == 66) || (enPin == 67)) { if (disableState == HIGH) analogWrite(enPin,255); else analogWrite(enPin,0); delayMicroseconds(30); } else 
-      { digitalWrite(enPin,disableState); delayMicroseconds(5); }
+      digitalWrite(enPin,disableState); delayMicroseconds(20);
     }
 };
