@@ -2,10 +2,14 @@
 
 // Lower limit (fastest) step rate in uS for this platform, width of step pulse, and set HAL_FAST_PROCESSOR is needed
 #if defined(__MK64FX512__) 
+  // for using the DAC as a digital output on Teensy3.5 A21=66 A22=67
+  #define digitalWrite(x,y) { if (x==66 || x==67) { if ((y)==LOW) analogWrite(x,0); else analogWrite(x,255); } else digitalWrite(x,y); }
   #define HAL_MAXRATE_LOWER_LIMIT 12
   #define HAL_PULSE_WIDTH 750
   #define HAL_FAST_PROCESSOR
 #elif defined(__MK66FX1M0__)
+  // for using the DAC as a digital output on Teensy3.6 A21=66 A22=67
+  #define digitalWrite(x,y) { if (x==66 || x==67) { if ((y)==LOW) analogWrite(x,0); else analogWrite(x,255); } else digitalWrite(x,y); }
   #if (F_CPU>=240000000)
     #define HAL_MAXRATE_LOWER_LIMIT 2
     #define HAL_PULSE_WIDTH 260
