@@ -492,8 +492,8 @@ void loop2() {
 
     if (safetyLimitsOn) {
       // check altitude overhead limit and horizon limit
-      if (currentAlt < minAlt) { generalError=ERR_ALT_MIN; if (MOUNT_TYPE == ALTAZM) stopSlewingAndTracking(SS_LIMIT_AXIS2_MIN); else stopSlewingAndTracking(SS_LIMIT); }
-      if (currentAlt > maxAlt) { generalError=ERR_ALT_MAX; if (MOUNT_TYPE == ALTAZM) stopSlewingAndTracking(SS_LIMIT_AXIS2_MAX); else stopSlewingAndTracking(SS_LIMIT); }
+      if (currentAlt < minAlt) { generalError=ERR_ALT_MIN; stopSlewingAndTracking((MOUNT_TYPE == ALTAZM)?SS_LIMIT_AXIS2_MIN:SS_LIMIT); }
+      if (currentAlt > maxAlt) { generalError=ERR_ALT_MAX; stopSlewingAndTracking((MOUNT_TYPE == ALTAZM)?SS_LIMIT_AXIS2_MAX:SS_LIMIT); }
     }
 
     // OPTION TO POWER DOWN AXIS2 IF NOT MOVING
