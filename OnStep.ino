@@ -471,7 +471,7 @@ void loop2() {
       if (limit_2nd == LIMIT_SENSE_STATE) {
         // It is still low, there must be a problem
         generalError=ERR_LIMIT_SENSE;
-        stopLimit();
+        stopSlewingAndTracking(SS_LIMIT);
       } 
     }
 #endif
