@@ -1,7 +1,7 @@
 // -------------------------------------------------------------------------------------------------
-// Pin map for OnStep using RAMPS 1.4 Pin defs (Arduino Mega2560)
+// Pin map for OnStep using RAMPS 1.4 Pin defs (Arduino Mega2560 & Arduino DUE)
 
-#if defined(__AVR_ATmega2560__) || defined(__AVR_ATmega1280__)
+#if defined(__AVR_ATmega2560__) || defined(__AVR_ATmega1280__) || defined(__SAM3X8E__)
 
 // The multi-purpose pins (Aux3..Aux8 can be analog (pwm/dac) if supported)
 #define Aux0                 11     // Status LED
