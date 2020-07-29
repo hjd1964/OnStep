@@ -121,13 +121,6 @@
   #endif
 #endif
 
-// automatically calculate the pecBufferSize
-#if MOUNT_TYPE == ALTAZM
-  #define PEC_BUFFER_SIZE 0
-#else
-  #define PEC_BUFFER_SIZE ceil(AXIS1_STEPS_PER_WORMROT/(axis1Settings.stepsPerDegree/240.0))
-#endif
-
 // figure out how many align star are allowed for the configuration
 #if defined(MAX_NUM_ALIGN_STARS)
   #if MAX_NUM_ALIGN_STARS > '9' || MAX_NUM_ALIGN_STARS < '6'

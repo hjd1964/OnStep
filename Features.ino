@@ -68,7 +68,7 @@ void featuresGetInfoCommand(char *parameter, char *reply, bool &booleanReply) {
     return;
   }
   if (i < 0 || i > 7)  { commandError=CE_PARAM_FORM; return; }
-  if (feature[i].purpose == OFF) { commandError=CE_CMD_UNKNOWN; return; }
+  if (feature[i].purpose == OFF) { commandError=CE_0; return; }
   
   char s[255];
   strcpy(s,feature[i].name); if (strlen(s)>10) s[10]=0; strcpy(reply,s); strcat(reply,",");

@@ -100,12 +100,12 @@ unsigned int searchTable(unsigned int Table[][2], int TableLen, unsigned int Mic
     }
   }
   
-  return 0;
+  return 255;
 }
 
 // different models of stepper drivers have different bit settings for microsteps
 // translate the human readable microsteps in the configuration to modebit settings 
-unsigned int translateMicrosteps(int axis, int DriverModel, unsigned int Microsteps) {
+unsigned int translateMicrosteps(int DriverModel, unsigned int Microsteps, boolean err = false) {
   unsigned int Mode;
     
   // we search for each model, since they are different
@@ -144,7 +144,8 @@ unsigned int translateMicrosteps(int axis, int DriverModel, unsigned int Microst
       Mode = searchTable(StepsSERVO, LEN_SERVO, Microsteps);
       break;
     default:
-      Mode=1;
+      if (!err) Mode=1; else Mode=255;
   }
+  if (!err && Mode == 255) Mode=0;
   return Mode;
 }

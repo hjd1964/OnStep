@@ -52,7 +52,7 @@ volatile long thisTimerRateAxis2 = 10000UL;
 
 // set Timer1 master sidereal clock to interval (in microseconds*16)
 void SiderealClockSetInterval(long iv) {
-  if (trackingState == TrackingMoveTo) Timer1SetInterval(iv/100,PPSrateRatio); else Timer1SetInterval(iv/300,PPSrateRatio);
+  if (trackingState == TrackingMoveTo) Timer1SetInterval(iv/100,ppsRateRatio); else Timer1SetInterval(iv/300,ppsRateRatio);
 
   isrTimerRateAxis1=0; // also force rate update for Axis1/2 timers so that PPS adjustments take hold immediately
   isrTimerRateAxis2=0;
@@ -151,7 +151,7 @@ void timerSupervisor(bool isCentiSecond) {
     double timerRateAxis1B=guideTimerRateAxis1A+pecTimerRateAxis1+trackingTimerRateAxis1;
     if (timerRateAxis1B < -0.00001) { timerRateAxis1B=fabs(timerRateAxis1B); cli(); timerDirAxis1=-1; sei(); } else 
       if (timerRateAxis1B > 0.00001) { cli(); timerDirAxis1=1; sei(); } else { cli(); timerDirAxis1=0; sei(); timerRateAxis1B=1.0; }
-    long calculatedTimerRateAxis1=round((double)SiderealRate/timerRateAxis1B);
+    long calculatedTimerRateAxis1=round((double)siderealRate/timerRateAxis1B);
     // remember our "running" rate and only update the actual rate when it changes
     if (runTimerRateAxis1 != calculatedTimerRateAxis1) { timerRateAxis1=calculatedTimerRateAxis1; runTimerRateAxis1=calculatedTimerRateAxis1; }
  
@@ -192,7 +192,7 @@ void timerSupervisor(bool isCentiSecond) {
     double timerRateAxis2B=guideTimerRateAxis2A+trackingTimerRateAxis2;
     if (timerRateAxis2B < -0.0001) { timerRateAxis2B=fabs(timerRateAxis2B); cli(); timerDirAxis2=-1; sei(); } else
       if (timerRateAxis2B > 0.0001) { cli(); timerDirAxis2=1; sei(); } else { cli(); timerDirAxis2=0; sei(); timerRateAxis2B=1.0; }
-    long calculatedTimerRateAxis2=round((double)SiderealRate/timerRateAxis2B);
+    long calculatedTimerRateAxis2=round((double)siderealRate/timerRateAxis2B);
     // remember our "running" rate and only update the actual rate when it changes
     if (runTimerRateAxis2 != calculatedTimerRateAxis2) { timerRateAxis2=calculatedTimerRateAxis2; runTimerRateAxis2=calculatedTimerRateAxis2; }
   }
@@ -215,11 +215,11 @@ void timerSupervisor(bool isCentiSecond) {
 
   // set the rates
   if (thisTimerRateAxis1 != isrTimerRateAxis1) {
-    PresetTimerInterval(thisTimerRateAxis1/PPSrateRatio, TIMER_PULSE_STEP, &nextAxis1Rate, &slowAxis1Rep);
+    PresetTimerInterval(thisTimerRateAxis1/ppsRateRatio, TIMER_PULSE_STEP, &nextAxis1Rate, &slowAxis1Rep);
     isrTimerRateAxis1=thisTimerRateAxis1;
   }
   if (thisTimerRateAxis2 != isrTimerRateAxis2) {
-    PresetTimerInterval(thisTimerRateAxis2/PPSrateRatio, TIMER_PULSE_STEP, &nextAxis2Rate, &slowAxis2Rep);
+    PresetTimerInterval(thisTimerRateAxis2/ppsRateRatio, TIMER_PULSE_STEP, &nextAxis2Rate, &slowAxis2Rep);
     isrTimerRateAxis2=thisTimerRateAxis2;
   }
 }
@@ -271,11 +271,7 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
 
     // set direction
     if (posAxis1 < (long)targetAxis1.part.m) dirAxis1=1; else dirAxis1=0;
-    #if AXIS1_DRIVER_REVERSE == ON
-      if (defaultDirAxis1 == dirAxis1) a1DIR_L; else a1DIR_H;
-    #else
-      if (defaultDirAxis1 == dirAxis1) a1DIR_H; else a1DIR_L;
-    #endif
+    if (defaultDirAxis1 == dirAxis1) a1DIR_H; else a1DIR_L;
   
     // telescope moves WEST with the sky, blAxis1 is the amount of EAST backlash
     if (dirAxis1 == 1) {
@@ -357,12 +353,8 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
     
     // set direction
     if (posAxis2 < (long)targetAxis2.part.m) dirAxis2=1; else dirAxis2=0;
-    #if AXIS2_DRIVER_REVERSE == ON
-      if (defaultDirAxis2 == dirAxis2) a2DIR_L; else a2DIR_H;
-    #else
-      if (defaultDirAxis2 == dirAxis2) a2DIR_H; else a2DIR_L;
-    #endif
-   
+    if (defaultDirAxis2 == dirAxis2) a2DIR_H; else a2DIR_L;
+
     // telescope moving toward celestial pole in the sky, blAxis2 is the amount of opposite backlash
     if (dirAxis2 == 1) {
       if (blAxis2 < backlashAxis2) { blAxis2+=stepAxis2; inbacklashAxis2=true; } else { inbacklashAxis2=false; posAxis2+=stepAxis2; }
@@ -399,7 +391,7 @@ done: {}
 double getFrequencyHzAxis1() {
   if (trackingState == TrackingMoveTo) {
     if (posAxis1 == (long)targetAxis1.part.m) {
-      return getStepsPerSecondAxis1()*1.00273790935;
+      return getstepsPerSecondAxis1()*1.00273790935;
     } else
       return 16000000.0/(double)isrTimerRateAxis1;
   } else
@@ -409,7 +401,7 @@ double getFrequencyHzAxis1() {
 double getFrequencyHzAxis2() {
   if (trackingState == TrackingMoveTo) {
     if (posAxis2 == (long)targetAxis2.part.m)
-      return getStepsPerSecondAxis2()*1.00273790935;
+      return getstepsPerSecondAxis2()*1.00273790935;
     else
       return 16000000.0/(double)isrTimerRateAxis2;
   } else
@@ -448,11 +440,11 @@ double getFrequencyHzAxis2() {
 void clockSync() {
   #define NUM_SECS_TO_AVERAGE 40
   unsigned long t=micros();
-  unsigned long oneS=(t-PPSlastMicroS);
+  unsigned long oneS=(t-ppsLastMicroS);
   if ((oneS > 1000000-20000) && (oneS < 1000000+20000)) {
-    PPSavgMicroS=(PPSavgMicroS*(NUM_SECS_TO_AVERAGE-1)+oneS)/NUM_SECS_TO_AVERAGE;
-    PPSsynced=true;
-  } else PPSsynced=false;
-  PPSlastMicroS=t;
+    ppsAvgMicroS=(ppsAvgMicroS*(NUM_SECS_TO_AVERAGE-1)+oneS)/NUM_SECS_TO_AVERAGE;
+    ppsSynced=true;
+  } else ppsSynced=false;
+  ppsLastMicroS=t;
 }
 #endif

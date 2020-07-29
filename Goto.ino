@@ -104,8 +104,8 @@ CommandErrors syncEnc(double EncAxis1, double EncAxis2) {
   // force syncing to encoders only
   if (syncToEncodersOnly) return CE_NONE;
 
-  long e1=EncAxis1*axis1Settings.stepsPerDegree;
-  long e2=EncAxis2*axis2Settings.stepsPerDegree;
+  long e1=EncAxis1*axis1Settings.stepsPerMeasure;
+  long e2=EncAxis2*axis2Settings.stepsPerMeasure;
 
   long a1,a2;
   cli();
@@ -119,9 +119,9 @@ CommandErrors syncEnc(double EncAxis1, double EncAxis2) {
   long delta2=a2-e2;
 
   indexAxis1Steps-=delta1;
-  indexAxis1=(double)indexAxis1Steps/axis1Settings.stepsPerDegree;
+  indexAxis1=(double)indexAxis1Steps/axis1Settings.stepsPerMeasure;
   indexAxis2Steps-=delta2;
-  indexAxis2=(double)indexAxis2Steps/axis2Settings.stepsPerDegree;
+  indexAxis2=(double)indexAxis2Steps/axis2Settings.stepsPerMeasure;
 
   return CE_NONE;
 }
@@ -136,8 +136,8 @@ void getEnc(double *EncAxis1, double *EncAxis2) {
   a1+=indexAxis1Steps;
   a2+=indexAxis2Steps;
   
-  *EncAxis1=(double)a1/axis1Settings.stepsPerDegree;
-  *EncAxis2=(double)a2/axis2Settings.stepsPerDegree;
+  *EncAxis1=(double)a1/axis1Settings.stepsPerMeasure;
+  *EncAxis2=(double)a2/axis2Settings.stepsPerMeasure;
 }
 
 // gets the telescopes current RA and Dec, set returnHA to true for Horizon Angle instead of RA
@@ -205,8 +205,8 @@ CommandErrors goToHere(bool toEastOnly) {
   PreferredPierSide p=preferredPierSide;
   if (meridianFlip == MeridianFlipNever) return CE_SLEW_ERR_OUTSIDE_LIMITS;
   cli(); long h=posAxis1+indexAxis1Steps; sei();
-  if ((!toEastOnly) && (getInstrPierSide() == PierSideEast) && (h < (degreesPastMeridianW*(long)axis1Settings.stepsPerDegree))) { verified=true; preferredPierSide=PPS_WEST; }
-  if ((getInstrPierSide() == PierSideWest) && (h > (-degreesPastMeridianE*(long)axis1Settings.stepsPerDegree))) { verified=true; preferredPierSide=PPS_EAST; }
+  if ((!toEastOnly) && (getInstrPierSide() == PierSideEast) && (h < (degreesPastMeridianW*(long)axis1Settings.stepsPerMeasure))) { verified=true; preferredPierSide=PPS_WEST; }
+  if ((getInstrPierSide() == PierSideWest) && (h > (-degreesPastMeridianE*(long)axis1Settings.stepsPerMeasure))) { verified=true; preferredPierSide=PPS_EAST; }
   if (verified) {
     double newRA,newDec;
     getEqu(&newRA,&newDec,false);
@@ -369,8 +369,8 @@ CommandErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTar
   startAxis1=posAxis1;
   startAxis2=posAxis2;
 
-  timerRateAxis1=SiderealRate;
-  timerRateAxis2=SiderealRate;
+  timerRateAxis1=siderealRate;
+  timerRateAxis2=siderealRate;
   sei();
 
   setTargetAxis1(thisTargetAxis1,p);

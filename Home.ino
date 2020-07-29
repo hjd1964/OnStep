@@ -39,8 +39,8 @@ void checkHome() {
       posAxis2           = 0;
       sei();
     #else    
-      // at the polar home position
-      InitStartPosition();
+      // at the home position
+      initStartPosition();
       atHome=true;
     #endif
   }
@@ -147,8 +147,11 @@ CommandErrors setHome() {
   // back to startup state
   reactivateBacklashComp();
   initStartupValues();
+  initStartPosition();
+
   currentAlt=45.0;
   doFastAltCalc(true);
+
   safetyLimitsOn=true;
 
   // initialize and disable the stepper drivers
@@ -170,8 +173,5 @@ CommandErrors setHome() {
   #endif
   if (!pecRecorded) pecStatus=IgnorePEC;
 
-  // the polar home position
-  InitStartPosition();
-  
   return CE_NONE;
 }

@@ -61,6 +61,7 @@
 #define AUX                        -7
 #define VERBOSE                    -8
 #define SoftwareSerial2            -9
+#define INVALID               -999999
 
 // mount types                     
 #define MOUNT_TYPE_FIRST            1
@@ -235,13 +236,13 @@
 #define EE_settingsAxis1           GSB+40  // 17
 #define EE_settingsAxis2           GSB+57  // 17
 #define EE_settingsAxis3           GSB+74  // 17
-#define EE_settingsAxis4           GSB+91  // 13
-#define EE_settingsAxis5           GSB+104 // 13
-#define EE_settingsRuntime         GSB+117 // 1
+#define EE_settingsAxis4           GSB+91  // 17
+#define EE_settingsAxis5           GSB+108 // 17
+#define EE_settingsRuntime         GSB+125 // 1
 
 // ---------------------------------------------------------------------------------------------------------------------------------
 // Unique identifier for the current initialization format for NV, do not change
-#define NV_INIT_KEY 915307549
+#define NV_INIT_KEY 915307550
 
 #define PierSideNone               0
 #define PierSideEast               1

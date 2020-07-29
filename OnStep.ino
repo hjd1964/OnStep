@@ -56,7 +56,7 @@
 
 // Enable additional debugging and/or status messages on the specified DebugSer port
 // Note that the DebugSer port cannot be used for normal communication with OnStep
-#define DEBUG OFF             // default=OFF, use "DEBUG ON" for background errors only, use "DEBUG VERBOSE" for all errors and status messages
+#define DEBUG VERBOSE         // default=OFF, use "DEBUG ON" for background errors only, use "DEBUG VERBOSE" for all errors and status messages
 #define DebugSer SerialA      // default=SerialA, or Serial4 for example (always 9600 baud)
 
 #include <errno.h>
@@ -204,40 +204,37 @@ void setup() {
   // Take another two seconds to be sure Serial ports are online
   delay(2000);
 
-  // set initial values for some variables
-  VLF("MSG: Init startup values");
-  initStartupValues();
+  // set pins for input/output as specified in Config.h and PinMap.h
+  VLF("MSG: Init pins");
+  initPins();
 
   // Check the Non-Volatile Memory
-  VLF("MSG: Init NV");
+  VLF("MSG: Start NV");
   if (!nv.init()) {
+    SerialA.print("NV (EEPROM) failure!#\r\n");
     while (true) {
-      SerialA.print("NV (EEPROM) failure!#\r\n");
-      for (int i=0; i<200; i++) { 
-        #ifdef HAL_SERIAL_TRANSMIT
-          SerialA.transmit();
-        #endif
-        delay(10);
-      }
+      delay(10);
+      #ifdef HAL_SERIAL_TRANSMIT
+        SerialA.transmit();
+      #endif
     }
   }
 
   // if this is the first startup set EEPROM to defaults
   initWriteNvValues();
 
-  // set pins for input/output as specified in Config.h and PinMap.h
-  VLF("MSG: Init pins");
-  initPins();
+  // now read any saved values from EEPROM into varaibles to restore our last state
+  VLF("MSG: Read NV settings");
+  initReadNvValues();
+
+  // set initial values for some variables
+  VLF("MSG: Init startup settings");
+  initStartupValues();
+  initStartPosition();
 
   // initialize the Object Library
   VLF("MSG: Init library/catalogs");
   Lib.init();
-
-  // prepare PEC buffer
-#if MOUNT_TYPE != ALTAZM
-  VLF("MSG: Init PEC");
-  createPecBuffer();
-#endif
 
   // get guiding ready
   VLF("MSG: Init guiding");
@@ -256,30 +253,26 @@ void setup() {
   // get the TLS ready (if present)
   VLF("MSG: Init TLS");
   if (!tls.init()) generalError=ERR_SITE_INIT;
-  
+
   // this sets up the sidereal timer and tracking rates
   VLF("MSG: Init sidereal timer");
   siderealInterval=nv.readLong(EE_siderealInterval); // the number of 16MHz clocks in one sidereal second (this is scaled to actual processor speed)
   if (siderealInterval < 14360682L || siderealInterval > 17551944L) { siderealInterval=15956313L; DLF("ERR, setup(): bad NV siderealInterval"); }
-  SiderealRate=siderealInterval/StepsPerSecondAxis1;
-  timerRateAxis1=SiderealRate;
-  timerRateAxis2=SiderealRate;
+  siderealRate=siderealInterval/stepsPerSecondAxis1;
+  timerRateAxis1=siderealRate;
+  timerRateAxis2=siderealRate;
 
   // backlash takeup rates
-  TakeupRate=SiderealRate/TRACK_BACKLASH_RATE;
-  timerRateBacklashAxis1=SiderealRate/TRACK_BACKLASH_RATE;
-  timerRateBacklashAxis2=(SiderealRate/TRACK_BACKLASH_RATE)*timerRateRatio;
-
-  // now read any saved values from EEPROM into varaibles to restore our last state
-  VLF("MSG: NV getting run-time settings");
-  initReadNvValues();
+  backlashTakeupRate=siderealRate/TRACK_BACKLASH_RATE;
+  timerRateBacklashAxis1=siderealRate/TRACK_BACKLASH_RATE;
+  timerRateBacklashAxis2=(siderealRate/TRACK_BACKLASH_RATE)*timerRateRatio;
 
   // setup the stepper driver modes
   VLF("MSG: Init motor timers");
   StepperModeTrackingInit();
 
   // starts the hardware timers that keep sidereal time, move the motors, etc.
-  setTrackingRate(default_tracking_rate);
+  setTrackingRate(DefaultTrackingRate);
   setDeltaTrackingRate();
   initStartTimers();
  
@@ -310,14 +303,14 @@ void setup() {
   // start rotator if present
 #if ROTATOR == ON
   VLF("MSG: Init rotator");
-  rot.init(Axis3_STEP,Axis3_DIR,Axis3_EN,AXIS3_STEP_RATE_MAX,axis3Settings.stepsPerDegree,axis3Settings.min,axis3Settings.max);
+  rot.init(Axis3_STEP,Axis3_DIR,Axis3_EN,AXIS3_STEP_RATE_MAX,axis3Settings.stepsPerMeasure,axis3Settings.min,axis3Settings.max);
   if (axis3Settings.reverse == ON) rot.setReverseState(HIGH);
   rot.setDisableState(AXIS3_DRIVER_DISABLE);
   
   #if AXIS3_DRIVER_MODEL == TMC_SPI
     tmcAxis3.setup(AXIS3_DRIVER_INTPOL,AXIS3_DRIVER_DECAY_MODE,AXIS3_DRIVER_CODE,axis3Settings.IRUN,axis3Settings.IRUN);
     delay(150);
-    tmcAxis3.setup(AXIS3_DRIVER_INTPOL,AXIS3_DRIVER_DECAY_MODE,AXIS3_DRIVER_CODE,axis3Settings.IRUN,AXIS3_DRIVER_IHOLD);
+    tmcAxis3.setup(AXIS3_DRIVER_INTPOL,AXIS3_DRIVER_DECAY_MODE,AXIS3_DRIVER_CODE,axis3Settings.IRUN,axis3SettingsEx.IHOLD);
   #endif
   
   rot.powerDownActive(AXIS3_DRIVER_POWER_DOWN == ON);
@@ -326,7 +319,7 @@ void setup() {
   // start focusers if present
 #if FOCUSER1 == ON
   VLF("MSG: Init focuser1");
-  foc1.init(Axis4_STEP,Axis4_DIR,Axis4_EN,EE_posAxis4,EE_tcfCoefAxis4,EE_tcfEnAxis4,AXIS4_STEP_RATE_MAX,axis4Settings.stepsPerMicron,axis4Settings.min*1000.0,axis4Settings.max*1000.0,AXIS4_LIMIT_MIN_RATE);
+  foc1.init(Axis4_STEP,Axis4_DIR,Axis4_EN,EE_posAxis4,EE_tcfCoefAxis4,EE_tcfEnAxis4,AXIS4_STEP_RATE_MAX,axis4Settings.stepsPerMeasure,axis4Settings.min*1000.0,axis4Settings.max*1000.0,AXIS4_LIMIT_MIN_RATE);
   if (AXIS4_DRIVER_DC_MODE != OFF) { foc1.initDcPower(EE_dcPwrAxis4); foc1.setPhase1(); }
   if (AXIS4_DRIVER_REVERSE == ON) foc1.setReverseState(HIGH);
   foc1.setDisableState(AXIS4_DRIVER_DISABLE);
@@ -334,7 +327,7 @@ void setup() {
   #if AXIS4_DRIVER_MODEL == TMC_SPI
     tmcAxis4.setup(AXIS4_DRIVER_INTPOL,AXIS4_DRIVER_DECAY_MODE,AXIS4_DRIVER_CODE,axis4Settings.IRUN,axis4Settings.IRUN);
     delay(150);
-    tmcAxis4.setup(AXIS4_DRIVER_INTPOL,AXIS4_DRIVER_DECAY_MODE,AXIS4_DRIVER_CODE,axis4Settings.IRUN,AXIS4_DRIVER_IHOLD);
+    tmcAxis4.setup(AXIS4_DRIVER_INTPOL,AXIS4_DRIVER_DECAY_MODE,AXIS4_DRIVER_CODE,axis4Settings.IRUN,axis4SettingsEx.IHOLD);
   #endif
 
   foc1.powerDownActive(AXIS4_DRIVER_POWER_DOWN == ON);
@@ -342,7 +335,7 @@ void setup() {
 
 #if FOCUSER2 == ON
   VLF("MSG: Init focuser2");
-  foc2.init(Axis5_STEP,Axis5_DIR,Axis5_EN,EE_posAxis5,EE_tcfCoefAxis5,EE_tcfEnAxis5,AXIS5_STEP_RATE_MAX,axis5Settings.stepsPerMicron,axis5Settings.min*1000.0,axis5Settings.max*1000.0,AXIS5_LIMIT_MIN_RATE);
+  foc2.init(Axis5_STEP,Axis5_DIR,Axis5_EN,EE_posAxis5,EE_tcfCoefAxis5,EE_tcfEnAxis5,AXIS5_STEP_RATE_MAX,axis5Settings.stepsPerMeasure,axis5Settings.min*1000.0,axis5Settings.max*1000.0,AXIS5_LIMIT_MIN_RATE);
   if (AXIS5_DRIVER_DC_MODE == DRV8825) { foc2.initDcPower(EE_dcPwrAxis5); foc2.setPhase2(); }
   if (axis5Settings.reverse == ON) foc2.setReverseState(HIGH);
   foc2.setDisableState(AXIS5_DRIVER_DISABLE);
@@ -350,7 +343,7 @@ void setup() {
   #if AXIS5_DRIVER_MODEL == TMC_SPI
     tmcAxis5.setup(AXIS5_DRIVER_INTPOL,AXIS5_DRIVER_DECAY_MODE,AXIS5_DRIVER_CODE,axis5Settings.IRUN,axis5Settings.IRUN);
     delay(150);
-    tmcAxis5.setup(AXIS5_DRIVER_INTPOL,AXIS5_DRIVER_DECAY_MODE,AXIS5_DRIVER_CODE,axis5Settings.IRUN,AXIS5_DRIVER_IHOLD);
+    tmcAxis5.setup(AXIS5_DRIVER_INTPOL,AXIS5_DRIVER_DECAY_MODE,AXIS5_DRIVER_CODE,axis5Settings.IRUN,axis5SettingsEx.IHOLD);
   #endif
 
   foc2.powerDownActive(AXIS5_DRIVER_POWER_DOWN == ON);
@@ -380,7 +373,7 @@ void setup() {
   delay(500);
 
   // prep counters (for keeping time in main loop)
-  cli(); siderealTimer=lst; guideSiderealTimer=lst; PecSiderealTimer=lst; sei();
+  cli(); siderealTimer=lst; guideSiderealTimer=lst; pecSiderealTimer=lst; sei();
   last_loop_micros=micros();
 
   VLF("MSG: OnStep is ready"); VL("");
@@ -503,7 +496,7 @@ void loop2() {
 
     // 0.01S POLLING -------------------------------------------------------------------------------------
 #if TIME_LOCATION_SOURCE == GPS
-    if ((PPS_SENSE == OFF || PPSsynced) && !tls.active && tls.poll()) {
+    if ((PPS_SENSE == OFF || ppsSynced) && !tls.active && tls.poll()) {
       SerialGPS.end();
       currentSite=0; nv.update(EE_currentSite,currentSite);
 
@@ -582,15 +575,15 @@ void loop2() {
 #if PPS_SENSE != OFF
     // update clock via PPS
     cli();
-    PPSrateRatio=((double)1000000.0/(double)(PPSavgMicroS));
-    if ((long)(micros()-(PPSlastMicroS+2000000UL)) > 0) PPSsynced=false; // if more than two seconds has ellapsed without a pulse we've lost sync
+    ppsRateRatio=((double)1000000.0/(double)(ppsAvgMicroS));
+    if ((long)(micros()-(ppsLastMicroS+2000000UL)) > 0) ppsSynced=false; // if more than two seconds has ellapsed without a pulse we've lost sync
     sei();
   #if LED_STATUS2 == ON
     if (trackingState == TrackingSidereal) {
-      if (PPSsynced) { if (led2On) { digitalWrite(LEDneg2Pin,HIGH); led2On=false; } else { digitalWrite(LEDneg2Pin,LOW); led2On=true; } } else { digitalWrite(LEDneg2Pin,HIGH); led2On=false; } // indicate PPS
+      if (ppsSynced) { if (led2On) { digitalWrite(LEDneg2Pin,HIGH); led2On=false; } else { digitalWrite(LEDneg2Pin,LOW); led2On=true; } } else { digitalWrite(LEDneg2Pin,HIGH); led2On=false; } // indicate PPS
     }
   #endif
-    if (LastPPSrateRatio != PPSrateRatio) { SiderealClockSetInterval(siderealInterval); LastPPSrateRatio=PPSrateRatio; }
+    if (ppsLastRateRatio != ppsRateRatio) { SiderealClockSetInterval(siderealInterval); ppsLastRateRatio=ppsRateRatio; }
 #endif
 
 #if LED_STATUS == ON
@@ -621,7 +614,7 @@ void loop2() {
         if (getInstrAxis1() < -degreesPastMeridianE) { generalError=ERR_MERIDIAN; stopSlewingAndTracking(SS_LIMIT_AXIS1_MIN); }
       }
     }
-    double a2; if (AXIS2_TANGENT_ARM == ON) { cli(); a2=posAxis2/axis2Settings.stepsPerDegree; sei(); } else a2=getInstrAxis2();
+    double a2; if (AXIS2_TANGENT_ARM == ON) { cli(); a2=posAxis2/axis2Settings.stepsPerMeasure; sei(); } else a2=getInstrAxis2();
     // check for exceeding AXIS2_LIMIT_MIN or AXIS2_LIMIT_MAX
     if (a2 < axis2Settings.min) { generalError=ERR_DEC; stopSlewingAndTracking(SS_LIMIT_AXIS2_MIN); } else
     if (a2 > axis2Settings.max) { generalError=ERR_DEC; stopSlewingAndTracking(SS_LIMIT_AXIS2_MAX); } else

@@ -309,7 +309,7 @@ void setLatitude(double Lat) {
   sinLat=sin(latitude/Rad);
   latitudeAbs=fabs(latitude);
   if (latitude >= 0) latitudeSign=1; else latitudeSign=-1;
-  if (latitude >= 0) defaultDirAxis1=defaultDirAxis1NCPInit; else defaultDirAxis1=defaultDirAxis1SCPInit;
+  if (latitude >= 0) defaultDirAxis1=DefaultDirAxis1NCPInit; else defaultDirAxis1=DefaultDirAxis1SCPInit;
 
   // the polar home position
 #if MOUNT_TYPE == ALTAZM
@@ -413,7 +413,7 @@ void observedPlaceToTopocentric(double *RA, double *Dec) {
 double _deltaAxis1=15.0,_deltaAxis2=0.0;
 
 boolean trackingSyncInProgress() {
-  static int lastTrackingSyncSeconds=-1;
+  static int lastTrackingSyncSeconds=0;
 
   // sound goto done
   if (trackingSyncSeconds == 0 && lastTrackingSyncSeconds != trackingSyncSeconds) {
@@ -447,13 +447,13 @@ void setDeltaTrackingRate() {
     d2=d-newTargetDec;
     if (getInstrPierSide() == PierSideEast) d2=-d2;
   #endif
-    if ((fabs(d1) < ArcSecPerStepAxis1/3600.0) && (fabs(d2) < ArcSecPerStepAxis2/3600.0)) {
+    if ((fabs(d1) < arcSecPerStepAxis1/3600.0) && (fabs(d2) < arcSecPerStepAxis2/3600.0)) {
       trackingSyncSeconds=0;
     } else {
       f1=(d1*3600.0)/120.0; if (f1 < -5.0) f1=-5.0; if (f1 > 5.0) f1=5.0;
-      if (fabs(d1) < ArcSecPerStepAxis1/3600.0) f1=0.0;
+      if (fabs(d1) < arcSecPerStepAxis1/3600.0) f1=0.0;
       f2=(d2*3600.0)/120.0; if (f2 < -5.0) f2=-5.0; if (f2 > 5.0) f2=5.0;
-      if (fabs(d2) < ArcSecPerStepAxis2/3600.0) f2=0.0;
+      if (fabs(d2) < arcSecPerStepAxis2/3600.0) f2=0.0;
     }
   }
 
@@ -465,8 +465,8 @@ void setDeltaTrackingRate() {
   if (trackingState == TrackingSidereal) trackingTimerRateAxis1=(_deltaAxis1/15.0)+f1; else trackingTimerRateAxis1=0.0;
   if (trackingState == TrackingSidereal) trackingTimerRateAxis2=(_deltaAxis2/15.0)+f2; else trackingTimerRateAxis2=0.0;
   sei();
-  fstepAxis1.fixed=doubleToFixed( ((axis1Settings.stepsPerDegree/240.0)*(_deltaAxis1/15.0))/100.0 );
-  fstepAxis2.fixed=doubleToFixed( ((axis2Settings.stepsPerDegree/240.0)*(_deltaAxis2/15.0))/100.0 );
+  fstepAxis1.fixed=doubleToFixed( ((axis1Settings.stepsPerMeasure/240.0)*(_deltaAxis1/15.0))/100.0 );
+  fstepAxis2.fixed=doubleToFixed( ((axis2Settings.stepsPerMeasure/240.0)*(_deltaAxis2/15.0))/100.0 );
 }
 
 double _currentRate=1.0;
@@ -490,14 +490,14 @@ double getTrackingRate60Hz() {
   return f;
 }
 
-double getStepsPerSecondAxis1() {
- double s=((axis1Settings.stepsPerDegree/240.0)*(_deltaAxis1/15.0));
+double getstepsPerSecondAxis1() {
+ double s=((axis1Settings.stepsPerMeasure/240.0)*(_deltaAxis1/15.0));
  if (s < 8.0) s=8.0;
  return s;
 }
 
-double getStepsPerSecondAxis2() {
- double s=((axis2Settings.stepsPerDegree/240.0)*(_deltaAxis2/15.0));
+double getstepsPerSecondAxis2() {
+ double s=((axis2Settings.stepsPerMeasure/240.0)*(_deltaAxis2/15.0));
  if (s < 8.0) s=8.0;
  return s;
 }
@@ -705,9 +705,9 @@ boolean doHorRateCalc() {
       sei();
     }
     // get the Azm
-    az_Azm=(double)az_Axis1/axis1Settings.stepsPerDegree;
+    az_Azm=(double)az_Axis1/axis1Settings.stepsPerMeasure;
     // get the Alt
-    az_Alt=(double)az_Axis2/axis2Settings.stepsPerDegree; 
+    az_Alt=(double)az_Axis2/axis2Settings.stepsPerMeasure; 
   } else
 
   // convert to Equatorial coords
@@ -769,18 +769,18 @@ boolean doHorRateCalc() {
 void setAccelerationRates(double maxRate) {
   
   // set the new guide acceleration rate
-  slewRateX  = (RateToXPerSec/(maxRate/16.0))*5.0;                // 5x for exponential factor average rate
-  slewRateX = slewRateX*((MaxRateBaseActual/2.0)/(maxRate/16.0)); // scale with maxRate so SLEW_ACCELERATION_DIST and SLEW_RAPID_STOP_DIST are approximately correct
+  slewRateX  = (RateToXPerSec/(maxRate/16.0))*7.0;                // 7x for exponential factor average rate
+  slewRateX = slewRateX*((maxRateBaseActual/2.0)/(maxRate/16.0)); // scale with maxRate so SLEW_ACCELERATION_DIST and SLEW_RAPID_STOP_DIST are approximately correct
   accXPerSec = slewRateX/SLEW_ACCELERATION_DIST;
   guideRates[9]=RateToASPerSec/(maxRate/16.0); guideRates[8]=guideRates[9]/2.0;
   activeGuideRate=GuideRateNone;
   
   // set the new goto acceleration rate
   cli();
-  StepsForRateChangeAxis1= (sqrt((double)SLEW_ACCELERATION_DIST*axis1Settings.stepsPerDegree))*maxRate;
-  StepsForRateChangeAxis2= (sqrt((double)SLEW_ACCELERATION_DIST*axis2Settings.stepsPerDegree))*maxRate;
+  stepsForRateChangeAxis1= (sqrt((double)SLEW_ACCELERATION_DIST*axis1Settings.stepsPerMeasure))*maxRate;
+  stepsForRateChangeAxis2= (sqrt((double)SLEW_ACCELERATION_DIST*axis2Settings.stepsPerMeasure))*maxRate;
   sei();
 
   // slewSpeed is in degrees per second
-  slewSpeed=(1000000.0/(maxRate/16.0))/axis1Settings.stepsPerDegree;
+  slewSpeed=(1000000.0/(maxRate/16.0))/axis1Settings.stepsPerMeasure;
 }

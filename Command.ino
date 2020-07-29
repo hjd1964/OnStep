@@ -37,7 +37,7 @@ void processCommands() {
     // command processing
     static char reply[50];
     static char command[3];
-    static char parameter[25];
+    static char parameter[45];
     static boolean booleanReply = true;
 
     boolean supress_frame = false;
@@ -185,12 +185,12 @@ void processCommands() {
           if (i >= 0 && i <= 3600) {
             if (parameter[0] == 'D') {
               reactivateBacklashComp();
-              cli(); backlashAxis2=(int)round(((double)i*axis2Settings.stepsPerDegree)/3600.0); sei();
+              cli(); backlashAxis2=(int)round(((double)i*axis2Settings.stepsPerMeasure)/3600.0); sei();
               nv.writeInt(EE_backlashAxis2,backlashAxis2);
             } else
             if (parameter[0] == 'R') {
               reactivateBacklashComp();
-              cli(); backlashAxis1 =(int)round(((double)i*axis1Settings.stepsPerDegree)/3600.0); sei();
+              cli(); backlashAxis1 =(int)round(((double)i*axis1Settings.stepsPerMeasure)/3600.0); sei();
               nv.writeInt(EE_backlashAxis1,backlashAxis1);
             } else commandError=CE_CMD_UNKNOWN;
           } else commandError=CE_PARAM_RANGE;
@@ -205,14 +205,14 @@ void processCommands() {
       if (command[0] == '%' && command[1] == 'B') {
         if (parameter[0] == 'D' && parameter[1] == 0) {
             reactivateBacklashComp();
-            i=(int)round(((double)backlashAxis2*3600.0)/axis2Settings.stepsPerDegree);
+            i=(int)round(((double)backlashAxis2*3600.0)/axis2Settings.stepsPerMeasure);
             if (i < 0) i=0; if (i > 3600) i=3600;
             sprintf(reply,"%d",i);
             booleanReply=false;
         } else
         if (parameter[0] == 'R' && parameter[1] == 0) {
             reactivateBacklashComp();
-            i=(int)round(((double)backlashAxis1*3600.0)/axis1Settings.stepsPerDegree);
+            i=(int)round(((double)backlashAxis1*3600.0)/axis1Settings.stepsPerMeasure);
             if (i < 0) i=0; if (i > 3600) i=3600;
             sprintf(reply,"%d",i);
             booleanReply=false;
@@ -714,7 +714,7 @@ void processCommands() {
         if (pecRecorded)                         reply[i++]='R';                                             // PEC data has been [R]ecorded
         if (syncToEncodersOnly)                  reply[i++]='e';                                             // sync to [e]ncoders only
         if (atHome)                              reply[i++]='H';                                             // at [H]ome
-        if (PPSsynced)                           reply[i++]='S';                                             // PPS [S]ync
+        if (ppsSynced)                           reply[i++]='S';                                             // PPS [S]ync
         if (guideDirAxis1 || guideDirAxis2)      reply[i++]='G';                                             // [G]uide active
 #if MOUNT_TYPE != ALTAZM
         if (rateCompensation == RC_REFR_RA)      { reply[i++]='r'; reply[i++]='s'; }                         // [r]efr enabled [s]ingle axis
@@ -764,7 +764,7 @@ void processCommands() {
         if (trackingState != TrackingSidereal &&
           !(trackingState == TrackingMoveTo && lastTrackingState == TrackingSidereal)) reply[0]|=0b10000001; // Not tracking
         if (trackingState != TrackingMoveTo && !trackingSyncInProgress())  reply[0]|=0b10000010;             // No goto
-        if (PPSsynced)                               reply[0]|=0b10000100;                                   // PPS sync
+        if (ppsSynced)                               reply[0]|=0b10000100;                                   // PPS sync
         if (guideDirAxis1 || guideDirAxis2)          reply[0]|=0b10001000;                                   // Guide active
 #if MOUNT_TYPE != ALTAZM
         if (rateCompensation == RC_REFR_RA)          reply[0]|=0b11010000;                                   // Refr enabled Single axis
@@ -909,7 +909,7 @@ void processCommands() {
               case '0': dtostrf(guideRates[currentPulseGuideRate]/15.0,2,2,reply); booleanReply=false; break;// pulse-guide rate
               case '1': sprintf(reply,"%i",pecValue); booleanReply=false; break;                             // pec analog value
               case '2': dtostrf(maxRate/16.0,3,3,reply); booleanReply=false; break;                          // MaxRate (current)
-              case '3': dtostrf((double)MaxRateBaseActual,3,3,reply); booleanReply=false; break;             // MaxRateBaseActual (default)
+              case '3': dtostrf((double)maxRateBaseActual,3,3,reply); booleanReply=false; break;             // maxRateBaseActual (default)
               case '4': if (meridianFlip == MeridianFlipNever) { sprintf(reply,"%d N",getInstrPierSide()); } else { sprintf(reply,"%d",getInstrPierSide()); } booleanReply=false; break; // pierSide (N if never)
               case '5': sprintf(reply,"%i",(int)autoMeridianFlip); booleanReply=false; break;                // autoMeridianFlip
               case '6':                                                                                      // preferred pier side
@@ -938,11 +938,28 @@ void processCommands() {
               default:  commandError=CE_CMD_UNKNOWN;
             }
           } else
-#if (AXIS1_DRIVER_STATUS == TMC_SPI) && (AXIS2_DRIVER_STATUS == TMC_SPI)
+          if (parameter[0] == 'A') { // :GXAn: Get axis settings
+            int p=parameter[1]-'1';
+            if (p >= 0 && p <= 5) {
+              uint8_t state=nv.read(EE_settingsRuntime);
+              // check for all axes set to revert
+              if (state&1) {
+                // check for this axis set to revert
+                if (!(state&(1<<(p+1)))) {
+                  if (p == 0 || p == 1 || (p == 2 && ROTATOR == ON) || (p == 3 && FOCUSER1 == ON) || (p == 4 && FOCUSER2 == ON)) {
+                    axisSettings axis;
+                    nv.readBytes(EE_settingsAxis1+(p*17),(byte*)&axis,sizeof(axis));
+                    sprintf(reply,"%ld.%03d,%d,%d,%d,%d,%d",(long)axis.stepsPerMeasure,(int)(axis.stepsPerMeasure*1000)%1000,axis.microsteps,axis.IRUN,axis.reverse,axis.min,axis.max);
+                    booleanReply=false;
+                  } else commandError=CE_0;
+                } else commandError=CE_0;
+              } else commandError=CE_0;
+            } else commandError=CE_CMD_UNKNOWN;
+          } else
           if (parameter[0] == 'U') { // Un: Get stepper driver statUs
-
             switch (parameter[1]) {
               case '1':
+#if (AXIS1_DRIVER_STATUS == TMC_SPI)
                 tmcAxis1.refresh_DRVSTATUS();
                 strcat(reply,tmcAxis1.get_DRVSTATUS_STST() ? "ST," : ",");                                   // Standstill
                 strcat(reply,tmcAxis1.get_DRVSTATUS_OLa() ? "OA," : ",");                                    // Open Load A
@@ -952,8 +969,12 @@ void processCommands() {
                 strcat(reply,tmcAxis1.get_DRVSTATUS_OT() ? "OT," : ",");                                     // Overtemp Shutdown 150C
                 strcat(reply,tmcAxis1.get_DRVSTATUS_OTPW() ? "PW" : "");                                     // Overtemp Pre-warning 120C
                 booleanReply=false;
+#else
+                commandError=CE_0;
+#endif
               break;
               case '2':
+#if (AXIS2_DRIVER_STATUS == TMC_SPI)
                 tmcAxis2.refresh_DRVSTATUS();
                 strcat(reply,tmcAxis2.get_DRVSTATUS_STST() ? "ST," : ",");                                   // Standstill
                 strcat(reply,tmcAxis2.get_DRVSTATUS_OLa() ? "OA," : ",");                                    // Open Load A
@@ -963,20 +984,22 @@ void processCommands() {
                 strcat(reply,tmcAxis2.get_DRVSTATUS_OT() ? "OT," : ",");                                     // Overtemp Shutdown 150C
                 strcat(reply,tmcAxis2.get_DRVSTATUS_OTPW() ? "PW" : "");                                     // Overtemp Pre-warning 120C
                 booleanReply=false;
+#else
+                commandError=CE_0;
+#endif
               break;
               default: commandError=CE_CMD_UNKNOWN;
             }
           } else
-#endif
           if (parameter[0] == 'E') { // En: Get settings
             switch (parameter[1]) {
-              case '1': dtostrf((double)MaxRateBaseActual,3,3,reply); booleanReply=false; break;
+              case '1': dtostrf((double)maxRateBaseActual,3,3,reply); booleanReply=false; break;
               case '2': dtostrf(SLEW_ACCELERATION_DIST,2,1,reply); booleanReply=false; break;
               case '3': sprintf(reply,"%ld",(long)round(TRACK_BACKLASH_RATE)); booleanReply=false; break;
-              case '4': sprintf(reply,"%ld",(long)round(axis1Settings.stepsPerDegree)); booleanReply=false; break;
-              case '5': sprintf(reply,"%ld",(long)round(axis2Settings.stepsPerDegree)); booleanReply=false; break;
-              case '6': dtostrf(StepsPerSecondAxis1,3,6,reply); booleanReply=false; break;
-              case '7': sprintf(reply,"%ld",(long)round(AXIS1_STEPS_PER_WORMROT)); booleanReply=false; break;
+              case '4': sprintf(reply,"%ld",(long)round(axis1Settings.stepsPerMeasure)); booleanReply=false; break;
+              case '5': sprintf(reply,"%ld",(long)round(axis2Settings.stepsPerMeasure)); booleanReply=false; break;
+              case '6': dtostrf(stepsPerSecondAxis1,3,6,reply); booleanReply=false; break;
+              case '7': sprintf(reply,"%ld",stepsPerWormRotationAxis1); booleanReply=false; break;
               case '8': sprintf(reply,"%ld",(long)round(pecBufferSize)); booleanReply=false; break;
 #if MOUNT_TYPE == GEM
               case '9': sprintf(reply,"%ld",(long)round(degreesPastMeridianE*4.0)); booleanReply=false; break;    // minutes past meridianE
@@ -1466,7 +1489,7 @@ void processCommands() {
         double maxStepsPerSecond=1000000.0/(maxRate/16.0);
         if (&parameter[0] != conv_end) {
           if (f < 0.001/60.0/60.0) f=0.001/60.0/60.0;
-          if (f > maxStepsPerSecond/axis1Settings.stepsPerDegree) f=maxStepsPerSecond/axis1Settings.stepsPerDegree;
+          if (f > maxStepsPerSecond/axis1Settings.stepsPerMeasure) f=maxStepsPerSecond/axis1Settings.stepsPerMeasure;
           customGuideRateAxis1(f*240.0,GUIDE_TIME_LIMIT*1000);
         }
         booleanReply=false; 
@@ -1478,7 +1501,7 @@ void processCommands() {
         double maxStepsPerSecond=1000000.0/(maxRate/16.0);
         if (&parameter[0] != conv_end) {
           if (f < 0.001/60.0/60.0) f=0.001/60.0/60.0;
-          if (f > maxStepsPerSecond/axis2Settings.stepsPerDegree) f=maxStepsPerSecond/axis2Settings.stepsPerDegree;
+          if (f > maxStepsPerSecond/axis2Settings.stepsPerMeasure) f=maxStepsPerSecond/axis2Settings.stepsPerMeasure;
           customGuideRateAxis2(f*240.0,GUIDE_TIME_LIMIT*1000);
         }
         booleanReply=false; 
@@ -1818,8 +1841,8 @@ void processCommands() {
             case '2': // set new slew rate (returns 1 success or 0 failure)
               if (!isSlewing()) {
                 maxRate=strtod(&parameter[3],&conv_end)*16.0;
-                if (maxRate < (long)(MaxRateBaseActual*8.0)) maxRate=MaxRateBaseActual*8.0;
-                if (maxRate > (long)(MaxRateBaseActual*32.0)) maxRate=MaxRateBaseActual*32.0;
+                if (maxRate < (long)(maxRateBaseActual*8.0)) maxRate=maxRateBaseActual*8.0;
+                if (maxRate > (long)(maxRateBaseActual*32.0)) maxRate=maxRateBaseActual*32.0;
                 if (maxRate < maxRateLowerLimit()) maxRate=maxRateLowerLimit();
                 nv.writeLong(EE_maxRateL,maxRate);
                 setAccelerationRates(maxRate);
@@ -1829,12 +1852,12 @@ void processCommands() {
               booleanReply=false;
               if (!isSlewing()) {
                 switch (parameter[3]) {
-                  case '5': maxRate=MaxRateBaseActual*(16.0*2.0); break; // 50%
-                  case '4': maxRate=MaxRateBaseActual*(16.0*1.5); break; // 75%
-                  case '3': maxRate=MaxRateBaseActual*(16.0*1.0); break; // 100%
-                  case '2': maxRate=MaxRateBaseActual*(16.0/1.5); break; // 150%
-                  case '1': maxRate=MaxRateBaseActual*(16.0/2.0); break; // 200%
-                  default:  maxRate=MaxRateBaseActual*16.0;
+                  case '5': maxRate=maxRateBaseActual*(16.0*2.0); break; // 50%
+                  case '4': maxRate=maxRateBaseActual*(16.0*1.5); break; // 75%
+                  case '3': maxRate=maxRateBaseActual*(16.0*1.0); break; // 100%
+                  case '2': maxRate=maxRateBaseActual*(16.0/1.5); break; // 150%
+                  case '1': maxRate=maxRateBaseActual*(16.0/2.0); break; // 200%
+                  default:  maxRate=maxRateBaseActual*16.0;
                 }
                 if (maxRate < maxRateLowerLimit()) maxRate=maxRateLowerLimit();
 
@@ -1889,6 +1912,45 @@ void processCommands() {
               } else commandError=CE_PARAM_RANGE;
             break;
             default: commandError=CE_CMD_UNKNOWN;
+          }
+        } else
+        if (parameter[0] == 'A') {
+          uint8_t state=nv.read(EE_settingsRuntime);
+          if (parameter[1] == 'C' && (parameter[3] == '0' || parameter[3] == '1') && parameter[4] == 0) {
+            // :SXAC,n# to switch between compile and run-time settings
+            if (parameter[3]-'0' == 0) state=1; else state=0; nv.write(EE_settingsRuntime,state);
+          } else {
+            int p=parameter[1]-'1';
+            // check for all axes set to revert
+            if (state&1) {
+              // check for this axis set to revert
+              if (!(state&(1<<(p+1)))) {
+                if (p == 0 || p == 1 || (p == 2 && ROTATOR == ON) || (p == 3 && FOCUSER1 == ON) || (p == 4 && FOCUSER2 == ON)) {
+                  // bit 0 = settings at compile (0) or run time (1), bits 1 to 5 = (1) to reset axis n on next boot
+                  if (parameter[3] == 'R' && parameter[4] == 0) {
+                    // :SXA1,R# to revert an axis to defaults
+                     state|=1<<(p+1); nv.write(EE_settingsRuntime,state);
+                  } else {
+                    // :SXAn: Set axis settings :SXA1,....#
+                    axisSettings axis;
+                    boolean error=false;
+                    if (!decodeAxisSettings(&parameter[3],axis)) error=true;
+                    if (!validateAxisSettings(p+1,MOUNT_TYPE==ALTAZM,axis)) error=true;
+                    if (p == 0 && axis.microsteps < AXIS1_DRIVER_MICROSTEPS_GOTO) axis.microsteps=AXIS1_DRIVER_MICROSTEPS_GOTO;
+                    if (p == 1 && axis.microsteps < AXIS2_DRIVER_MICROSTEPS_GOTO) axis.microsteps=AXIS2_DRIVER_MICROSTEPS_GOTO;
+                    if (p == 0 && AXIS1_DRIVER_MODEL != OFF && translateMicrosteps(AXIS1_DRIVER_MODEL, axis.microsteps, true) == 255) error=true;
+                    if (p == 1 && AXIS2_DRIVER_MODEL != OFF && translateMicrosteps(AXIS2_DRIVER_MODEL, axis.microsteps, true) == 255) error=true;
+                    if (p == 2 && AXIS3_DRIVER_MODEL != OFF && translateMicrosteps(AXIS3_DRIVER_MODEL, axis.microsteps, true) == 255) error=true;
+                    if (p == 3 && AXIS4_DRIVER_MODEL != OFF && translateMicrosteps(AXIS4_DRIVER_MODEL, axis.microsteps, true) == 255) error=true;
+                    if (p == 4 && AXIS5_DRIVER_MODEL != OFF && translateMicrosteps(AXIS5_DRIVER_MODEL, axis.microsteps, true) == 255) error=true;
+                    if (!error) {
+                      nv.writeBytes(EE_settingsAxis1+(p*17),(byte*)&axis,sizeof(axis));
+                      booleanReply=false;
+                    } else commandError=CE_PARAM_RANGE;
+                  }
+                } else commandError=CE_PARAM_RANGE;
+              } else commandError=CE_0;
+            } else commandError=CE_0;
           }
         } else
 #if MOUNT_TYPE == GEM
@@ -1972,9 +2034,9 @@ void processCommands() {
       if (command[0] == 'T' && parameter[0] == 0) {
 #if MOUNT_TYPE != ALTAZM
         static bool dualAxis=false;
-        if (command[1] == 'o') { rateCompensation=RC_FULL_RA; setTrackingRate(default_tracking_rate); } else // turn full compensation on, defaults to base sidereal tracking rate
-        if (command[1] == 'r') { rateCompensation=RC_REFR_RA; setTrackingRate(default_tracking_rate); } else // turn refraction compensation on, defaults to base sidereal tracking rate
-        if (command[1] == 'n') { rateCompensation=RC_NONE; setTrackingRate(default_tracking_rate); } else    // turn refraction off, sidereal tracking rate resumes
+        if (command[1] == 'o') { rateCompensation=RC_FULL_RA; setTrackingRate(DefaultTrackingRate); } else // turn full compensation on, defaults to base sidereal tracking rate
+        if (command[1] == 'r') { rateCompensation=RC_REFR_RA; setTrackingRate(DefaultTrackingRate); } else // turn refraction compensation on, defaults to base sidereal tracking rate
+        if (command[1] == 'n') { rateCompensation=RC_NONE; setTrackingRate(DefaultTrackingRate); } else    // turn refraction off, sidereal tracking rate resumes
         if (command[1] == '1') { dualAxis=false; } else                                                      // turn off dual axis tracking
         if (command[1] == '2') { dualAxis=true;  } else                                                      // turn on dual axis tracking
 #endif
@@ -1982,7 +2044,7 @@ void processCommands() {
         if (command[1] == '-') { siderealInterval+=HzCf*(0.02); booleanReply=false; } else
         if (command[1] == 'S') { setTrackingRate(0.99726956632); rateCompensation=RC_NONE; booleanReply=false; } else // solar tracking rate 60Hz
         if (command[1] == 'L') { setTrackingRate(0.96236513150); rateCompensation=RC_NONE; booleanReply=false; } else // lunar tracking rate 57.9Hz
-        if (command[1] == 'Q') { setTrackingRate(default_tracking_rate); booleanReply=false; } else                   // sidereal tracking rate
+        if (command[1] == 'Q') { setTrackingRate(DefaultTrackingRate); booleanReply=false; } else                   // sidereal tracking rate
         if (command[1] == 'R') { siderealInterval=15956313L; booleanReply=false; } else                               // reset master sidereal clock interval
         if (command[1] == 'K') { setTrackingRate(0.99953004401); rateCompensation=RC_NONE; booleanReply=false; } else // king tracking rate 60.136Hz
         if (command[1] == 'e' && !isSlewing() && !isHoming() && !isParked() ) { initGeneralError(); trackingState=TrackingSidereal; enableStepperDrivers(); } else
@@ -2000,7 +2062,7 @@ void processCommands() {
         if (commandError == CE_NONE && (command[1] == '+' || command[1] == '-' || command[1] == 'R')) {
           nv.writeLong(EE_siderealInterval,siderealInterval);
           SiderealClockSetInterval(siderealInterval);
-          cli(); SiderealRate=siderealInterval/StepsPerSecondAxis1; sei();
+          cli(); siderealRate=siderealInterval/stepsPerSecondAxis1; sei();
         }
 
         setDeltaTrackingRate();
@@ -2026,7 +2088,7 @@ void processCommands() {
         if (conv_result) {
           if (i >= 0 && i < pecBufferSize) {
             if (parameter[0] == 0) {
-              i-=1; if (i < 0) i+=SecondsPerWormRotationAxis1; if (i >= SecondsPerWormRotationAxis1) i-=SecondsPerWormRotationAxis1;
+              i-=1; if (i < 0) i+=secondsPerWormRotationAxis1; if (i >= secondsPerWormRotationAxis1) i-=secondsPerWormRotationAxis1;
               i1=pecBuffer[i]-128; sprintf(reply,"%+04i,%03i",i1,i);
             } else {
               i1=pecBuffer[i]-128; sprintf(reply,"%+04i",i1);
@@ -2057,7 +2119,7 @@ void processCommands() {
 // :VW#       PEC number of steps per worm rotation
 //            Returns: n#
       if (command[0] == 'V' && command[1] == 'W' && parameter[0] == 0) {
-        sprintf(reply,"%06ld",(long)AXIS1_STEPS_PER_WORMROT);
+        sprintf(reply,"%06ld",stepsPerWormRotationAxis1);
         booleanReply=false;
       } else
 #endif
@@ -2065,7 +2127,7 @@ void processCommands() {
 //            Returns: n.n#
       if (command[0] == 'V' && command[1] == 'S' && parameter[0] == 0) {
         char temp[12];
-        dtostrf(StepsPerSecondAxis1,0,6,temp);
+        dtostrf(stepsPerSecondAxis1,0,6,temp);
         strcpy(reply,temp);
         booleanReply=false;
       } else
@@ -2073,9 +2135,9 @@ void processCommands() {
 //  :VH#      PEC index sense position in seconds
 //            Returns: n#
       if (command[0] == 'V' && command[1] == 'H' && parameter[0] == 0) {
-        long s=(long)((double)wormSensePos/(double)StepsPerSecondAxis1);
-        while (s > SecondsPerWormRotationAxis1) s-=SecondsPerWormRotationAxis1;
-        while (s < 0) s+=SecondsPerWormRotationAxis1;
+        long s=(long)((double)wormSensePos/(double)stepsPerSecondAxis1);
+        while (s > secondsPerWormRotationAxis1) s-=secondsPerWormRotationAxis1;
+        while (s < 0) s+=secondsPerWormRotationAxis1;
         sprintf(reply,"%05ld",s);
         booleanReply=false;
       } else
@@ -2089,14 +2151,14 @@ void processCommands() {
       if (command[0] == 'W' && command[1] == 'R') { 
         if (parameter[1] == 0) {
           if (parameter[0] == '+') {
-            i=pecBuffer[SecondsPerWormRotationAxis1-1];
-            memmove((byte *)&pecBuffer[1],(byte *)&pecBuffer[0],SecondsPerWormRotationAxis1-1);
+            i=pecBuffer[secondsPerWormRotationAxis1-1];
+            memmove((byte *)&pecBuffer[1],(byte *)&pecBuffer[0],secondsPerWormRotationAxis1-1);
             pecBuffer[0]=i;
           } else
           if (parameter[0] == '-') {
             i=pecBuffer[0];
-            memmove((byte *)&pecBuffer[0],(byte *)&pecBuffer[1],SecondsPerWormRotationAxis1-1);
-            pecBuffer[SecondsPerWormRotationAxis1-1]=i;
+            memmove((byte *)&pecBuffer[0],(byte *)&pecBuffer[1],secondsPerWormRotationAxis1-1);
+            pecBuffer[secondsPerWormRotationAxis1-1]=i;
           } commandError=CE_CMD_UNKNOWN;
         } else {
           // it should be an int, see if it converts and is in range

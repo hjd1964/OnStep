@@ -13,8 +13,8 @@ void moveTo() {
     origTargetAxis1.fixed = targetAxis1.fixed;
     origTargetAxis2.fixed = targetAxis2.fixed;
  
-    timerRateAxis1=SiderealRate;
-    timerRateAxis2=SiderealRate;
+    timerRateAxis1=siderealRate;
+    timerRateAxis2=siderealRate;
     sei();
 
     // first phase, decide if we should move to 60 deg. HA (4 hours) to get away from the horizon limits or just go straight to the home position
@@ -75,14 +75,14 @@ void moveTo() {
   // adjust rates near the horizon to help keep from exceeding the minAlt limit
   #if MOUNT_TYPE != ALTAZM
     if (latitudeAbs > 10) {
-      long posAxis2=latitudeSign*getInstrAxis2()*axis2Settings.stepsPerDegree;
+      long posAxis2=latitudeSign*getInstrAxis2()*axis2Settings.stepsPerMeasure;
       static long lastPosAxis2=0;
       double distDestLimit=currentAlt-(minAlt+10.0); if (distDestLimit < SLEW_ACCELERATION_DIST/8.0) distDestLimit=SLEW_ACCELERATION_DIST/8.0;  
       // if Dec is decreasing slow down the Dec axis, if Dec is increasing slow down the RA axis
       if (posAxis2 < lastPosAxis2) {
-        if (distDestLimit*axis2Settings.stepsPerDegree < distDestAxis2) distDestAxis2=distDestLimit*axis2Settings.stepsPerDegree;
+        if (distDestLimit*axis2Settings.stepsPerMeasure < distDestAxis2) distDestAxis2=distDestLimit*axis2Settings.stepsPerMeasure;
       } else {
-        if (distDestLimit*axis1Settings.stepsPerDegree < distDestAxis1) distDestAxis1=distDestLimit*axis1Settings.stepsPerDegree;
+        if (distDestLimit*axis1Settings.stepsPerMeasure < distDestAxis1) distDestAxis1=distDestLimit*axis1Settings.stepsPerMeasure;
       }
       lastPosAxis2=posAxis2;
     }
@@ -123,33 +123,33 @@ void moveTo() {
   // First, for Right Ascension
   long temp;
   if (distStartAxis1 > distDestAxis1) {
-    temp=(StepsForRateChangeAxis1/isqrt32(distDestAxis1));   // slow down (temp gets bigger)
+    temp=(stepsForRateChangeAxis1/isqrt32(distDestAxis1));   // slow down (temp gets bigger)
   } else {
-    temp=(StepsForRateChangeAxis1/isqrt32(distStartAxis1));  // speed up (temp gets smaller)
+    temp=(stepsForRateChangeAxis1/isqrt32(distStartAxis1));  // speed up (temp gets smaller)
   }
   if (temp < maxRate) temp=maxRate;                          // fastest rate 
-  if (temp > TakeupRate) temp=TakeupRate;                    // slowest rate
+  if (temp > backlashTakeupRate) temp=backlashTakeupRate;    // slowest rate
   if (abortSlew != 0) {
-    if (abortSlew == 2) { a1r=(double)SiderealRate/(double)temp; } else
+    if (abortSlew == 2) { a1r=(double)siderealRate/(double)temp; } else
     if (abortSlew == 3) {
       double r=1.2-sqrt((fabs(a1r)/slewRateX));
       if (r < 0.2) r=0.2; if (r > 1.2) r=1.2;
       a1r-=(deaccXPerSec/100.0)*r; if (a1r < 2.0) a1r=2.0;
     }
-    temp=round((double)SiderealRate/a1r);
+    temp=round((double)siderealRate/a1r);
   }
   cli(); timerRateAxis1=temp; sei();
 
   // Now, for Declination
   if (distStartAxis2 > distDestAxis2) {
-    temp=(StepsForRateChangeAxis2/isqrt32(distDestAxis2));   // slow down
+    temp=(stepsForRateChangeAxis2/isqrt32(distDestAxis2));   // slow down
   } else {
-    temp=(StepsForRateChangeAxis2/isqrt32(distStartAxis2));  // speed up
+    temp=(stepsForRateChangeAxis2/isqrt32(distStartAxis2));  // speed up
   }
   if (temp < maxRate) temp=maxRate;                          // fastest rate
-  if (temp > TakeupRate) temp=TakeupRate;                    // slowest rate
+  if (temp > backlashTakeupRate) temp=backlashTakeupRate;    // slowest rate
   if (abortSlew != 0) {
-    if (abortSlew == 2) { a2r=(double)SiderealRate/(double)temp; abortSlew++; } else
+    if (abortSlew == 2) { a2r=(double)siderealRate/(double)temp; abortSlew++; } else
     if (abortSlew == 3) { 
       double r=1.2-sqrt((fabs(a2r)/slewRateX));
       if (r < 0.2) r=0.2; if (r > 1.2) r=1.2;
@@ -158,19 +158,19 @@ void moveTo() {
       if ((a1r < 2.00001) && (a2r < 2.00001)) abortSlew++;
     } else
     if (abortSlew == 4) { abortSlew=0; cli(); targetAxis1.part.m=posAxis1; targetAxis2.part.m=posAxis2; sei(); distDestAxis1=0; distDestAxis2=0; }
-    temp=round((double)SiderealRate/a2r);
+    temp=round((double)siderealRate/a2r);
   }
   cli(); timerRateAxis2=temp; sei();
 
   // make sure we're using the tracking mode microstep setting near the end of slew
-  if (distDestAxis1 <= getStepsPerSecondAxis1()) axis1DriverTrackingMode(false);
-  if (distDestAxis2 <= getStepsPerSecondAxis2()) axis2DriverTrackingMode(false);
+  if (distDestAxis1 <= getstepsPerSecondAxis1()) axis1DriverTrackingMode(false);
+  if (distDestAxis2 <= getstepsPerSecondAxis2()) axis2DriverTrackingMode(false);
 
   // the end of slew doesn't get close enough within 4 seconds force the slew to end
   static unsigned long slewStopTime=0;
   static bool slewEnding=false;
   static bool slewForceEnd=false;
-  if (!slewEnding && (distDestAxis1 <= getStepsPerSecondAxis1()*4.0) && (distDestAxis2 <= getStepsPerSecondAxis2()*4.0) ) { slewStopTime=millis()+4000L; slewEnding=true; }
+  if (!slewEnding && (distDestAxis1 <= getstepsPerSecondAxis1()*4.0) && (distDestAxis2 <= getstepsPerSecondAxis2()*4.0) ) { slewStopTime=millis()+4000L; slewEnding=true; }
   if (slewEnding && ((long)(millis()-slewStopTime) > 0)) {
     if (abortSlew != 0) { cli(); targetAxis1.part.m=posAxis1; targetAxis2.part.m=posAxis2; sei(); }
     generalError=ERR_GOTO_SYNC;
@@ -255,8 +255,8 @@ void moveTo() {
       } else {
         // restore last tracking state
         cli();
-        timerRateAxis1=SiderealRate;
-        timerRateAxis2=SiderealRate;
+        timerRateAxis1=siderealRate;
+        timerRateAxis2=siderealRate;
         sei();
   
         if (homeMount) {

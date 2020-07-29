@@ -191,14 +191,14 @@ CommandErrors startGuideAxis2(char direction, int guideRate, long guideDuration,
 }
 
 bool guideNorthOk() {
-  double a2; if (AXIS2_TANGENT_ARM == ON) { cli(); a2=posAxis2/axis2Settings.stepsPerDegree; sei(); } else a2=getInstrAxis2();
+  double a2; if (AXIS2_TANGENT_ARM == ON) { cli(); a2=posAxis2/axis2Settings.stepsPerMeasure; sei(); } else a2=getInstrAxis2();
   if (a2 < axis2Settings.min && getInstrPierSide() == PierSideWest) return false;
   if (a2 > axis2Settings.max && getInstrPierSide() == PierSideEast) return false;
   if (MOUNT_TYPE == ALTAZM && currentAlt > maxAlt) return false;
   return true;
 }
 bool guideSouthOk() {
-  double a2; if (AXIS2_TANGENT_ARM == ON) { cli(); a2=posAxis2/axis2Settings.stepsPerDegree; sei(); } else a2=getInstrAxis2();
+  double a2; if (AXIS2_TANGENT_ARM == ON) { cli(); a2=posAxis2/axis2Settings.stepsPerMeasure; sei(); } else a2=getInstrAxis2();
   if (a2 < axis2Settings.min && getInstrPierSide() == PierSideEast) return false;
   if (a2 > axis2Settings.max && getInstrPierSide() == PierSideWest) return false;
   if (MOUNT_TYPE == ALTAZM && currentAlt < minAlt) return false;
@@ -379,8 +379,8 @@ void enableGuideRate(int g) {
   } else {
     guideTimerBaseRateAxis2=(double)(guideRates[g]/15.0);
   }
-  amountGuideAxis1.fixed=doubleToFixed((guideTimerBaseRateAxis1*StepsPerSecondAxis1)/100.0);
-  amountGuideAxis2.fixed=doubleToFixed((guideTimerBaseRateAxis2*StepsPerSecondAxis2)/100.0);
+  amountGuideAxis1.fixed=doubleToFixed((guideTimerBaseRateAxis1*stepsPerSecondAxis1)/100.0);
+  amountGuideAxis2.fixed=doubleToFixed((guideTimerBaseRateAxis2*stepsPerSecondAxis2)/100.0);
 }
 
 // handle the ST4 interface and hand controller features

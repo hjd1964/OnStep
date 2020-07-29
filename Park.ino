@@ -197,7 +197,7 @@ CommandErrors unPark(bool withTrackingOn) {
   // the polar home position
   currentAlt=45.0;
   doFastAltCalc(true);
-  InitStartPosition();
+  initStartPosition();
 
   // stop the motor timers (except guiding)
   cli(); trackingTimerRateAxis1=0.0; trackingTimerRateAxis2=0.0; sei(); delay(11);
@@ -264,11 +264,11 @@ boolean loadAlignModel() {
   // get align/corrections
   indexAxis1=nv.readFloat(EE_indexAxis1);
   if (indexAxis1 < -720 || indexAxis1 > 720) { indexAxis1=0; DLF("ERR, loadAlignModel(): bad NV indexAxis1"); }
-  indexAxis1Steps=(long)(indexAxis1*axis1Settings.stepsPerDegree);
+  indexAxis1Steps=(long)(indexAxis1*axis1Settings.stepsPerMeasure);
   
   indexAxis2=nv.readFloat(EE_indexAxis2);
   if (indexAxis2 < -720 || indexAxis2 > 720) { indexAxis2=0; DLF("ERR, loadAlignModel(): bad NV indexAxis2"); }
-  indexAxis2Steps=(long)(indexAxis2*axis2Settings.stepsPerDegree);
+  indexAxis2Steps=(long)(indexAxis2*axis2Settings.stepsPerMeasure);
   
   Align.readCoe();
   return true;

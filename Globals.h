@@ -5,7 +5,7 @@
 
 // Time keeping --------------------------------------------------------------------------------------------------------------------
 long siderealTimer                      = 0;                 // counter to issue steps during tracking
-long PecSiderealTimer                   = 0;                 // time since worm wheel zero index for PEC
+long pecSiderealTimer                   = 0;                 // time since worm wheel zero index for PEC
 long guideSiderealTimer                 = 0;                 // counter to issue steps during guiding
 boolean dateWasSet                      = false;             // keep track of date/time validity
 boolean timeWasSet                      = false;                          
@@ -28,10 +28,10 @@ long masterSiderealInterval             = siderealInterval;
                                                              // with the ":T+#" and ":T-#" commands a higher number here means
                                                              // a longer count which slows down the sidereal clock
                                                                           
-double HzCf                             = 16000000.0/60.0;   // conversion factor to go to/from Hz for sidereal interval
+const double HzCf                       = 16000000.0/60.0;   // conversion factor to go to/from Hz for sidereal interval
                                                                           
-volatile long SiderealRate;                                  // based on the siderealInterval, time between steps sidereal tracking
-volatile long TakeupRate;                                    // takeup rate for synchronizing target and actual positions
+volatile long siderealRate;                                  // based on the siderealInterval, time between steps sidereal tracking
+volatile long backlashTakeupRate;                            // backlash takeup rate
                                                                           
 unsigned long last_loop_micros          = 0;                 // workload monitoring
 long this_loop_time                     = 0;
@@ -40,23 +40,23 @@ long worst_loop_time                    = 0;
 long average_loop_time                  = 0;
 
 // PPS (GPS) -----------------------------------------------------------------------------------------------------------------------
-volatile unsigned long PPSlastMicroS    = 1000000UL;
-volatile unsigned long PPSavgMicroS     = 1000000UL;
-volatile double PPSrateRatio            = 1.0;
-volatile double LastPPSrateRatio        = 1.0;
-volatile boolean PPSsynced              = false;
+volatile unsigned long ppsLastMicroS    = 1000000UL;
+volatile unsigned long ppsAvgMicroS     = 1000000UL;
+volatile double ppsRateRatio            = 1.0;
+volatile double ppsLastRateRatio        = 1.0;
+volatile boolean ppsSynced              = false;
 
 // Tracking and rate control -------------------------------------------------------------------------------------------------------
 #if MOUNT_TYPE != ALTAZM
   enum RateCompensation {RC_NONE, RC_REFR_RA, RC_REFR_BOTH, RC_FULL_RA, RC_FULL_BOTH};
   #if TRACK_REFRACTION_RATE_DEFAULT == ON
-    RateCompensation rateCompensation = RC_REFR_RA;
+    RateCompensation rateCompensation   = RC_REFR_RA;
   #else
-    RateCompensation rateCompensation = RC_NONE;
+    RateCompensation rateCompensation   = RC_NONE;
   #endif
 #else
   enum RateCompensation {RC_NONE};
-  RateCompensation rateCompensation = RC_NONE;
+  RateCompensation rateCompensation     = RC_NONE;
 #endif
 
 double slewSpeed                        = 0;
@@ -82,46 +82,48 @@ boolean faultAxis2                      = false;
   #define AXIS2_DRIVER_SWITCH_RATE 80*16L
 #endif
 
-#define default_tracking_rate 1
-
-typedef struct AxisSettingsD {
-   double stepsPerDegree;
+#pragma pack(1)
+typedef struct AxisSettings {
+   double stepsPerMeasure;                                   // degrees for axis1-3 or microns for axis4-5
    int16_t microsteps;
    int16_t IRUN;
    int8_t reverse;
    int16_t min;
    int16_t max;
-} axisSettingsD;
+} axisSettings;
+#pragma pack()
+volatile axisSettings axis1Settings     = {AXIS1_STEPS_PER_DEGREE, AXIS1_DRIVER_MICROSTEPS, AXIS1_DRIVER_IRUN, AXIS1_DRIVER_REVERSE, AXIS1_LIMIT_MIN, AXIS1_LIMIT_MAX};
+volatile axisSettings axis2Settings     = {AXIS2_STEPS_PER_DEGREE, AXIS2_DRIVER_MICROSTEPS, AXIS2_DRIVER_IRUN, AXIS2_DRIVER_REVERSE, AXIS2_LIMIT_MIN, AXIS2_LIMIT_MAX};
+volatile axisSettings axis3Settings     = {AXIS3_STEPS_PER_DEGREE, AXIS3_DRIVER_MICROSTEPS, AXIS3_DRIVER_IRUN, AXIS3_DRIVER_REVERSE, AXIS3_LIMIT_MIN, AXIS3_LIMIT_MAX};
+volatile axisSettings axis4Settings     = {AXIS4_STEPS_PER_MICRON, AXIS4_DRIVER_MICROSTEPS, AXIS4_DRIVER_IRUN, AXIS4_DRIVER_REVERSE, AXIS4_LIMIT_MIN, AXIS4_LIMIT_MAX};
+volatile axisSettings axis5Settings     = {AXIS5_STEPS_PER_MICRON, AXIS5_DRIVER_MICROSTEPS, AXIS5_DRIVER_IRUN, AXIS5_DRIVER_REVERSE, AXIS5_LIMIT_MIN, AXIS5_LIMIT_MAX};
 
-typedef struct AxisSettingsM {
-   float stepsPerMicron;
-   int16_t microsteps;
-   int16_t IRUN;
-   int8_t reverse;
-   int16_t min;
-   int16_t max;
-} axisSettingsM;
+typedef struct AxisSettingsEx {
+   int16_t IHOLD;
+   int16_t IGOTO;
+} axisSettingsEx;
+axisSettingsEx axis1SettingsEx          = {AXIS1_DRIVER_IHOLD, AXIS1_DRIVER_IGOTO};
+axisSettingsEx axis2SettingsEx          = {AXIS2_DRIVER_IHOLD, AXIS2_DRIVER_IGOTO};
+axisSettingsEx axis3SettingsEx          = {AXIS3_DRIVER_IHOLD, OFF};
+axisSettingsEx axis4SettingsEx          = {AXIS4_DRIVER_IHOLD, OFF};
+axisSettingsEx axis5SettingsEx          = {AXIS5_DRIVER_IHOLD, OFF};
 
-volatile axisSettingsD axis1Settings = {AXIS1_STEPS_PER_DEGREE, AXIS1_DRIVER_MICROSTEPS, AXIS1_DRIVER_IRUN, AXIS1_DRIVER_REVERSE, AXIS1_LIMIT_MIN, AXIS1_LIMIT_MAX};
-volatile axisSettingsD axis2Settings = {AXIS2_STEPS_PER_DEGREE, AXIS2_DRIVER_MICROSTEPS, AXIS2_DRIVER_IRUN, AXIS2_DRIVER_REVERSE, AXIS2_LIMIT_MIN, AXIS2_LIMIT_MAX};
-volatile axisSettingsD axis3Settings = {AXIS3_STEPS_PER_DEGREE, AXIS3_DRIVER_MICROSTEPS, AXIS3_DRIVER_IRUN, AXIS3_DRIVER_REVERSE, AXIS3_LIMIT_MIN, AXIS3_LIMIT_MAX};
-volatile axisSettingsM axis4Settings = {AXIS4_STEPS_PER_MICRON, AXIS4_DRIVER_MICROSTEPS, AXIS4_DRIVER_IRUN, AXIS4_DRIVER_REVERSE, AXIS4_LIMIT_MIN, AXIS4_LIMIT_MAX};
-volatile axisSettingsM axis5Settings = {AXIS5_STEPS_PER_MICRON, AXIS5_DRIVER_MICROSTEPS, AXIS5_DRIVER_IRUN, AXIS5_DRIVER_REVERSE, AXIS5_LIMIT_MIN, AXIS5_LIMIT_MAX};
-
-volatile double trackingTimerRateAxis1  = default_tracking_rate;
-volatile double trackingTimerRateAxis2  = default_tracking_rate;
-volatile double timerRateRatio          = (axis1Settings.stepsPerDegree/axis2Settings.stepsPerDegree);
-volatile boolean useTimerRateRatio      = (axis1Settings.stepsPerDegree != axis2Settings.stepsPerDegree);
-#define StepsPerSecondAxis1               (axis1Settings.stepsPerDegree/240.0)
-#define ArcSecPerStepAxis1                (3600.0/axis1Settings.stepsPerDegree)
-#define StepsPerSecondAxis2               (axis2Settings.stepsPerDegree/240.0)
-#define ArcSecPerStepAxis2                (3600.0/axis2Settings.stepsPerDegree)
-long SecondsPerWormRotationAxis1        = ((double)(AXIS1_STEPS_PER_WORMROT)/StepsPerSecondAxis1);
-#define MaxRateBaseDesired                ((1000000.0/(SLEW_RATE_BASE_DESIRED))/axis1Settings.stepsPerDegree)
-long maxRate                            = MaxRateBaseDesired*16.0;
-double MaxRateBaseActual                = MaxRateBaseDesired;
-volatile double StepsForRateChangeAxis1 = (sqrt((double)SLEW_ACCELERATION_DIST*axis1Settings.stepsPerDegree))*(double)MaxRateBaseDesired*16.0;
-volatile double StepsForRateChangeAxis2 = (sqrt((double)SLEW_ACCELERATION_DIST*axis2Settings.stepsPerDegree))*(double)MaxRateBaseDesired*16.0;
+#define stepsPerSecondAxis1               (axis1Settings.stepsPerMeasure/240.0)
+#define arcSecPerStepAxis1                (3600.0/axis1Settings.stepsPerMeasure)
+#define stepsPerSecondAxis2               (axis2Settings.stepsPerMeasure/240.0)
+#define arcSecPerStepAxis2                (3600.0/axis2Settings.stepsPerMeasure)
+#define DefaultTrackingRate               1
+volatile double trackingTimerRateAxis1  = DefaultTrackingRate;
+volatile double trackingTimerRateAxis2  = DefaultTrackingRate;
+volatile double timerRateRatio;
+volatile boolean useTimerRateRatio;
+long stepsPerWormRotationAxis1;
+long secondsPerWormRotationAxis1;
+long maxRate;
+#define maxRateBaseDesired                ((1000000.0/(SLEW_RATE_BASE_DESIRED))/axis1Settings.stepsPerMeasure)
+double maxRateBaseActual;
+volatile double stepsForRateChangeAxis1;
+volatile double stepsForRateChangeAxis2;
 
 // Basic stepper driver mode setup -------------------------------------------------------------------------------------------------
 #if AXIS1_DRIVER_MODEL != OFF
@@ -210,22 +212,22 @@ int    minAlt;                                               // the min altitude
 int    maxAlt;                                               // the max altitude, in deg, keeps telescope away from mount/tripod
 
 // Stepper driver enable/disable and direction -------------------------------------------------------------------------------------
-#define defaultDirAxis1NCPInit            0
-#define defaultDirAxis1SCPInit            1
+#define DefaultDirAxis1NCPInit            0
+#define DefaultDirAxis1SCPInit            1
 volatile byte dirAxis1                  = 1;                 // stepping direction + or -
-volatile byte defaultDirAxis1           = defaultDirAxis1NCPInit;
+volatile byte defaultDirAxis1           = DefaultDirAxis1NCPInit;
 
-#define defaultDirAxis2EInit              1
-#define defaultDirAxis2WInit              0
+#define DefaultDirAxis2EInit              1
+#define DefaultDirAxis2WInit              0
 volatile byte dirAxis2                  = 1;                 // stepping direction + or -
-volatile byte defaultDirAxis2           = defaultDirAxis2EInit;
+volatile byte defaultDirAxis2           = DefaultDirAxis2EInit;
 
 // Status --------------------------------------------------------------------------------------------------------------------------
 // Note: the following error codes are obsolete ERR_SYNC, ERR_PARK
 enum GeneralErrors {
   ERR_NONE, ERR_MOTOR_FAULT, ERR_ALT_MIN, ERR_LIMIT_SENSE, ERR_DEC, ERR_AZM,
   ERR_UNDER_POLE, ERR_MERIDIAN, ERR_SYNC, ERR_PARK, ERR_GOTO_SYNC, ERR_UNSPECIFIED,
-  ERR_ALT_MAX, ERR_WEATHER_INIT, ERR_SITE_INIT};
+  ERR_ALT_MAX, ERR_WEATHER_INIT, ERR_SITE_INIT, ERR_NV_INIT};
 GeneralErrors generalError = ERR_NONE;
 
 enum CommandErrors {
@@ -342,20 +344,20 @@ boolean homeMount                       = false;
 unsigned long baudRate[10] = {115200,56700,38400,28800,19200,14400,9600,4800,2400,1200};
 
 // Guiding and slewing -------------------------------------------------------------------------------------------------------------
-#define GuideRate1x 2
-#ifndef GuideRateDefault
-  #define GuideRateDefault 6                                 // 20x
-#endif
-#define GuideRateNone                     255
-#define RateToDegPerSec                   (1000000.0/axis1Settings.stepsPerDegree)
+#define RateToDegPerSec                   (1000000.0/axis1Settings.stepsPerMeasure)
 #define RateToASPerSec                    (RateToDegPerSec*3600.0)
 #define RateToXPerSec                     (RateToASPerSec/15.0)
-double  slewRateX                       = (RateToXPerSec/MaxRateBaseDesired)*2.5;
-double  accXPerSec                      = (slewRateX/SLEW_ACCELERATION_DIST);
-double  guideRates[10]={3.75,7.5,15,30,60,120,300,720,(RateToASPerSec/MaxRateBaseDesired)/2.0,RateToASPerSec/MaxRateBaseDesired};
-//                      .25X .5x 1x 2x 4x  8x 20x 48x       half-MaxRate                   MaxRate
-//                         0   1  2  3  4   5   6   7                  8                         9
+double  slewRateX;
+double  accXPerSec;
+double  guideRates[10]={3.75,7.5,15,30,60,120,300,720,         720,    720};
+//                      .25X .5x 1x 2x 4x  8x 20x 48x half-MaxRate MaxRate
+//                         0   1  2  3  4   5   6   7            8       9
 
+#define GuideRate1x                       2
+#ifndef GuideRateDefault
+  #define GuideRateDefault                6
+#endif
+#define GuideRateNone                     255
 byte currentGuideRate                   = GuideRateDefault;
 byte currentPulseGuideRate              = GuideRate1x;
 volatile byte activeGuideRate           = GuideRateNone;
@@ -391,7 +393,7 @@ byte    pecStatus                       = IgnorePEC;
 boolean pecRecorded                     = false;
 boolean pecFirstRecord                  = false;
 long    lastPecIndex                    = -1;
-int     pecBufferSize                   = PEC_BUFFER_SIZE;
+int     pecBufferSize                   = 0;
 long    pecIndex                        = 0;
 long    pecIndex1                       = 0;
 #if PEC_SENSE == ON || PEC_SENSE == ON_PULLUP || PEC_SENSE == ON_PULLDOWN
