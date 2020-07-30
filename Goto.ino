@@ -90,6 +90,8 @@ CommandErrors syncEqu(double RA, double Dec) {
   setIndexAxis2(Axis2,newPierSide);
   syncToEncodersOnly=true;
 
+  VLF("MSG: Sync, indices set");
+
   return CE_NONE;
 }
 
@@ -122,6 +124,8 @@ CommandErrors syncEnc(double EncAxis1, double EncAxis2) {
   indexAxis1=(double)indexAxis1Steps/axis1Settings.stepsPerMeasure;
   indexAxis2Steps-=delta2;
   indexAxis2=(double)indexAxis2Steps/axis2Settings.stepsPerMeasure;
+
+  VLF("MSG: Encoder sync, indices set");
 
   return CE_NONE;
 }
