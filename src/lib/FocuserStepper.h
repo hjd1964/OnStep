@@ -114,7 +114,7 @@ class focuserStepper : public focuser {
     void follow(boolean slewing) {
 
       // if enabled and the timeout has elapsed, disable the stepper driver
-      if (pda && !currentlyDisabled && ((micros()-lastPhysicalMove) > 10000000L)) { disableDriver(); currentlyDisabled=true; }
+      if (pda && !currentlyDisabled && ((long)(micros()-lastPhysicalMove) > 10000000L)) { disableDriver(); currentlyDisabled=true; }
     
       // write position to non-volatile storage if not moving for FOCUSER_WRITE_DELAY milliseconds
       if ((spos != lastPos)) { lastMove=millis(); lastPos=spos; }
