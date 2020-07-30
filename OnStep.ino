@@ -208,6 +208,10 @@ void setup() {
   VLF("MSG: Init pins");
   initPins();
 
+  // get the TLS ready (if present)
+  VLF("MSG: Init TLS");
+  if (!tls.init()) generalError=ERR_SITE_INIT;
+  
   // Check the Non-Volatile Memory
   VLF("MSG: Start NV");
   if (!nv.init()) {
@@ -249,10 +253,6 @@ void setup() {
   VLF("MSG: Init auxiliary features");
   featuresInit();
 #endif
-
-  // get the TLS ready (if present)
-  VLF("MSG: Init TLS");
-  if (!tls.init()) generalError=ERR_SITE_INIT;
 
   // this sets up the sidereal timer and tracking rates
   VLF("MSG: Init sidereal timer");
