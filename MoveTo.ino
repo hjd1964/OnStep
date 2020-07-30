@@ -95,7 +95,7 @@ void moveTo() {
   static double deaccXPerSec=0;
   static double a1r=0;
   static double a2r=0;
-  if (abortSlew == 1) {
+  if (abortGoto == 1) {
     // aborts any meridian flip
     if ((pierSideControl == PierSideFlipWE1) || (pierSideControl == PierSideFlipWE2) || (pierSideControl == PierSideFlipWE3)) pierSideControl=PierSideWest;
     if ((pierSideControl == PierSideFlipEW1) || (pierSideControl == PierSideFlipEW2) || (pierSideControl == PierSideFlipEW3)) pierSideControl=PierSideEast;
@@ -117,7 +117,7 @@ void moveTo() {
     double numSecToStop = (SLEW_RAPID_STOP_DIST/(rateXPerSec/240.0));
     deaccXPerSec = (SLEW_RAPID_STOP_DIST/numSecToStop)*240.0;
 
-    abortSlew++;
+    abortGoto++;
   }
 
   // First, for Right Ascension
@@ -129,9 +129,9 @@ void moveTo() {
   }
   if (temp < maxRate) temp=maxRate;                          // fastest rate 
   if (temp > backlashTakeupRate) temp=backlashTakeupRate;    // slowest rate
-  if (abortSlew != 0) {
-    if (abortSlew == 2) { a1r=(double)siderealRate/(double)temp; } else
-    if (abortSlew == 3) {
+  if (abortGoto != 0) {
+    if (abortGoto == 2) { a1r=(double)siderealRate/(double)temp; } else
+    if (abortGoto == 3) {
       double r=1.2-sqrt((fabs(a1r)/slewRateX));
       if (r < 0.2) r=0.2; if (r > 1.2) r=1.2;
       a1r-=(deaccXPerSec/100.0)*r; if (a1r < 2.0) a1r=2.0;
@@ -148,16 +148,16 @@ void moveTo() {
   }
   if (temp < maxRate) temp=maxRate;                          // fastest rate
   if (temp > backlashTakeupRate) temp=backlashTakeupRate;    // slowest rate
-  if (abortSlew != 0) {
-    if (abortSlew == 2) { a2r=(double)siderealRate/(double)temp; abortSlew++; } else
-    if (abortSlew == 3) { 
+  if (abortGoto != 0) {
+    if (abortGoto == 2) { a2r=(double)siderealRate/(double)temp; abortGoto++; } else
+    if (abortGoto == 3) { 
       double r=1.2-sqrt((fabs(a2r)/slewRateX));
       if (r < 0.2) r=0.2; if (r > 1.2) r=1.2;
       a2r-=(deaccXPerSec/100.0)*r;
       if (a2r < 2.00) a2r=2.0;
-      if ((a1r < 2.00001) && (a2r < 2.00001)) abortSlew++;
+      if ((a1r < 2.00001) && (a2r < 2.00001)) abortGoto++;
     } else
-    if (abortSlew == 4) { abortSlew=0; cli(); targetAxis1.part.m=posAxis1; targetAxis2.part.m=posAxis2; sei(); distDestAxis1=0; distDestAxis2=0; }
+    if (abortGoto == 4) { abortGoto=0; cli(); targetAxis1.part.m=posAxis1; targetAxis2.part.m=posAxis2; sei(); distDestAxis1=0; distDestAxis2=0; }
     temp=round((double)siderealRate/a2r);
   }
   cli(); timerRateAxis2=temp; sei();
@@ -172,7 +172,7 @@ void moveTo() {
   static bool slewForceEnd=false;
   if (!slewEnding && (distDestAxis1 <= getstepsPerSecondAxis1()*4.0) && (distDestAxis2 <= getstepsPerSecondAxis2()*4.0) ) { slewStopTime=millis()+4000L; slewEnding=true; }
   if (slewEnding && ((long)(millis()-slewStopTime) > 0)) {
-    if (abortSlew != 0) { cli(); targetAxis1.part.m=posAxis1; targetAxis2.part.m=posAxis2; sei(); }
+    if (abortGoto != 0) { cli(); targetAxis1.part.m=posAxis1; targetAxis2.part.m=posAxis2; sei(); }
     generalError=ERR_GOTO_SYNC;
     slewForceEnd=true;
   }
@@ -180,7 +180,7 @@ void moveTo() {
   if ( ((distDestAxis1 <= ceil(fabs(fixedToDouble(fstepAxis1)))+4) && (distDestAxis2 <= ceil(fabs(fixedToDouble(fstepAxis2)))+4) ) || slewForceEnd ) {
     slewEnding=false;
     slewForceEnd=false;
-    abortSlew=0;
+    abortGoto=0;
 
     // assurance that we're really in tracking mode
     axis1DriverTrackingMode(false);
@@ -273,6 +273,7 @@ void moveTo() {
           // at the polar home position
           homeMount=false;
           if (AXIS2_TANGENT_ARM == OFF) atHome=true;
+
           VLF("MSG: Homing done");
         } else {
           // restore trackingState

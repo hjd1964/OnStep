@@ -637,7 +637,10 @@ void loop2() {
 // SS_LIMIT_AXIS2_MAX stops gotos + spiral guides + tracking, also stops/blocks Dec/Alt guides in the wrong direction
 void stopSlewingAndTracking(StopSlewActions ss) {
   if (trackingState == TrackingMoveTo) {
-    if (!abortSlew) abortSlew=StartAbortSlew;
+    if (!abortGoto) {
+      abortGoto=StartAbortGoto;
+      DLF("MSG: Goto abort");
+    }
   } else {
     if (spiralGuide) stopGuideSpiral();
     if (ss == SS_ALL_FAST || ss == SS_LIMIT_HARD) { stopGuideAxis1(); stopGuideAxis2(); } else
@@ -655,8 +658,12 @@ void stopSlewingAndTracking(StopSlewActions ss) {
     }
     if (trackingState != TrackingNone) {
       if (ss != SS_ALL_FAST) {
-        if (generalError != ERR_DEC) { stopGuideAxis1(); stopGuideAxis2(); trackingState=TrackingNone; }
-        DLF("WRN, stopSlewingAndTracking(): Limit exceeded slewing/tracking stopped");
+        if (generalError != ERR_DEC) {
+          stopGuideAxis1();
+          stopGuideAxis2();
+          trackingState=TrackingNone;
+          DLF("WRN, stopSlewingAndTracking(): Limit exceeded guiding/tracking stopped");
+        }
       }
     }
   }

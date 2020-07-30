@@ -2044,11 +2044,19 @@ void processCommands() {
         if (command[1] == '-') { siderealInterval+=HzCf*(0.02); booleanReply=false; } else
         if (command[1] == 'S') { setTrackingRate(0.99726956632); rateCompensation=RC_NONE; booleanReply=false; } else // solar tracking rate 60Hz
         if (command[1] == 'L') { setTrackingRate(0.96236513150); rateCompensation=RC_NONE; booleanReply=false; } else // lunar tracking rate 57.9Hz
-        if (command[1] == 'Q') { setTrackingRate(DefaultTrackingRate); booleanReply=false; } else                   // sidereal tracking rate
+        if (command[1] == 'Q') { setTrackingRate(DefaultTrackingRate); booleanReply=false; } else                     // sidereal tracking rate
         if (command[1] == 'R') { siderealInterval=15956313L; booleanReply=false; } else                               // reset master sidereal clock interval
         if (command[1] == 'K') { setTrackingRate(0.99953004401); rateCompensation=RC_NONE; booleanReply=false; } else // king tracking rate 60.136Hz
-        if (command[1] == 'e' && !isSlewing() && !isHoming() && !isParked() ) { initGeneralError(); trackingState=TrackingSidereal; enableStepperDrivers(); } else
-        if (command[1] == 'd' && !isSlewing() && !isHoming() ) trackingState=TrackingNone; else
+        if (command[1] == 'e') {
+          if (!isSlewing() && !isHoming() && !isParked()) {
+            initGeneralError();
+            trackingState=TrackingSidereal;
+            enableStepperDrivers();
+          } else commandError=CE_MOUNT_IN_MOTION;
+        } else
+        if (command[1] == 'd') {
+          if (!isSlewing() && !isHoming()) trackingState=TrackingNone; else commandError=CE_MOUNT_IN_MOTION;
+        } else
           commandError=CE_CMD_UNKNOWN;
 
 #if MOUNT_TYPE != ALTAZM

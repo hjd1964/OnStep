@@ -285,12 +285,12 @@ PrecisionMode precision = PM_HIGH;
 #define TrackingNone                      0
 #define TrackingSidereal                  1
 #define TrackingMoveTo                    2
-#define StartAbortSlew                    1
+#define StartAbortGoto                    1
 volatile byte trackingState             = TrackingNone;
 byte abortTrackingState                 = TrackingNone;
 volatile byte lastTrackingState         = TrackingNone;
 int trackingSyncSeconds                 = 0;
-byte abortSlew                          = 0;
+byte abortGoto                          = 0;
 volatile boolean safetyLimitsOn         = true;
 boolean axis1Enabled                    = false;
 boolean axis2Enabled                    = false;

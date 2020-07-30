@@ -229,7 +229,7 @@ CommandErrors goToEqu(double RA, double Dec) {
   // validate
   CommandErrors e=validateGoto();
 #ifndef CE_GOTO_ERR_GOTO_OFF
-  if (e == CE_GOTO_ERR_GOTO) { if (!abortSlew) abortSlew=StartAbortSlew; } 
+  if (e == CE_GOTO_ERR_GOTO) { if (!abortGoto) abortGoto=StartAbortGoto; } 
 #endif
   if (e != CE_NONE) return e;
   e=validateGotoCoords(HA,Dec,a);
