@@ -152,8 +152,8 @@ class timeLocationSource {
           _Rtc.SetSquareWavePin(DS3231SquareWavePin_ModeClock);
           _Rtc.SetSquareWavePinClockFrequency(DS3231SquareWaveClock_1Hz);
           active=true;
-        }
-      }
+        } else DLF("WRN: tls.init(), DS3231 not found");
+      } else DLF("WRN: tls.init(), DS3231 not found");
 
       return active;
     }
@@ -217,7 +217,7 @@ class timeLocationSource {
         _Rtc.SetSquareWavePin(DS3234SquareWavePin_ModeClock);
         _Rtc.SetSquareWavePinClockFrequency(DS3234SquareWaveClock_1Hz);
         active=true;
-      }
+      } else DLF("WRN: tls.init(), DS3234 not found");
   
       return active;
     }
