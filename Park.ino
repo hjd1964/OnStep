@@ -220,6 +220,7 @@ CommandErrors unPark(bool withTrackingOn) {
   posAxis1=targetAxis1.part.m;
   posAxis2=targetAxis2.part.m;
   sei();
+  atHome=false;
   
   // set Meridian Flip behaviour to match mount type
   #if MOUNT_TYPE == GEM
