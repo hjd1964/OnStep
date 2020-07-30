@@ -298,7 +298,6 @@ CommandErrors goToHor(double *Alt, double *Azm) {
 CommandErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTargetAxis1, double altTargetAxis2, int gotoPierSide) {
   atHome=false;
   int thisPierSide=getInstrPierSide();
-  DL("Goto started");
   if (meridianFlip != MeridianFlipNever) {
     // where the allowable hour angles are
     double eastOfPierMaxHA= 180.0;

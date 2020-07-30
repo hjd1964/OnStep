@@ -639,7 +639,7 @@ void stopSlewingAndTracking(StopSlewActions ss) {
   if (trackingState == TrackingMoveTo) {
     if (!abortGoto) {
       abortGoto=StartAbortGoto;
-      DLF("MSG: Goto abort");
+      VLF("MSG: Goto aborted");
     }
   } else {
     if (spiralGuide) stopGuideSpiral();
@@ -662,7 +662,7 @@ void stopSlewingAndTracking(StopSlewActions ss) {
           stopGuideAxis1();
           stopGuideAxis2();
           trackingState=TrackingNone;
-          DLF("WRN, stopSlewingAndTracking(): Limit exceeded guiding/tracking stopped");
+          VLF("MSG: Limit exceeded guiding/tracking stopped");
         }
       }
     }
