@@ -321,7 +321,7 @@ void setup() {
   VLF("MSG: Init focuser1");
   foc1.init(Axis4_STEP,Axis4_DIR,Axis4_EN,EE_posAxis4,EE_tcfCoefAxis4,EE_tcfEnAxis4,AXIS4_STEP_RATE_MAX,axis4Settings.stepsPerMeasure,axis4Settings.min*1000.0,axis4Settings.max*1000.0,AXIS4_LIMIT_MIN_RATE);
   if (AXIS4_DRIVER_DC_MODE != OFF) { foc1.initDcPower(EE_dcPwrAxis4); foc1.setPhase1(); }
-  if (AXIS4_DRIVER_REVERSE == ON) foc1.setReverseState(HIGH);
+  if (axis4Settings.reverse == ON) foc1.setReverseState(HIGH);
   foc1.setDisableState(AXIS4_DRIVER_DISABLE);
 
   #if AXIS4_DRIVER_MODEL == TMC_SPI
