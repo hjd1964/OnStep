@@ -132,7 +132,7 @@ void axis1DriverGotoMode() {
   if (!_a1trk) return;
   if (!tmcAxis1.setup(AXIS1_DRIVER_INTPOL,AXIS1_DRIVER_DECAY_MODE_GOTO,255,axis1SettingsEx.IGOTO,axis1SettingsEx.IHOLD)) return;
   #if MODE_SWITCH_BEFORE_SLEW == ON && defined(AXIS1_DRIVER_CODE_GOTO)
-    haltStepperDrivers(); if (!tmcAxis1.refresh_CHOPCONF(AXIS1_DRIVER_CODE_GOTO)) { resumeStepperDrivers(); return; } stepAxis1=AXIS1_DRIVER_STEP_GOTO; resumeStepperDrivers();
+    haltStepperDrivers(); if (!tmcAxis1.refresh_CHOPCONF(AXIS1_DRIVER_CODE_GOTO)) { resumeStepperDrivers(); return; } stepAxis1=axis1StepsGoto; resumeStepperDrivers();
   #endif
   _a1trk=false;
 }
@@ -141,7 +141,7 @@ void axis2DriverGotoMode() {
   if (!_a2trk) return;
   if (!tmcAxis2.setup(AXIS2_DRIVER_INTPOL,AXIS2_DRIVER_DECAY_MODE_GOTO,255,axis2SettingsEx.IGOTO,axis2SettingsEx.IHOLD)) return;
   #if MODE_SWITCH_BEFORE_SLEW == ON && defined(AXIS2_DRIVER_CODE_GOTO)
-    haltStepperDrivers(); if (!tmcAxis2.refresh_CHOPCONF(AXIS2_DRIVER_CODE_GOTO)) { resumeStepperDrivers(); return; } stepAxis2=AXIS2_DRIVER_STEP_GOTO; resumeStepperDrivers();
+    haltStepperDrivers(); if (!tmcAxis2.refresh_CHOPCONF(AXIS2_DRIVER_CODE_GOTO)) { resumeStepperDrivers(); return; } stepAxis2=axis2StepsGoto; resumeStepperDrivers();
   #endif
   _a2trk=false;
 }
@@ -265,7 +265,7 @@ void axis1DriverGotoMode() {
 #endif
 #if MODE_SWITCH_BEFORE_SLEW == ON && defined(AXIS1_DRIVER_CODE_GOTO)
   haltStepperDrivers();
-  stepAxis1=AXIS1_DRIVER_STEP_GOTO;
+  stepAxis1=axis1StepsGoto;
   if ((AXIS1_DRIVER_CODE_GOTO & 0b001000) == 0) { pinMode(Axis1_M0,OUTPUT); digitalWrite(Axis1_M0,bitRead(AXIS1_DRIVER_CODE_GOTO,0)); } else { pinMode(Axis1_M0,INPUT); }
   if ((AXIS1_DRIVER_CODE_GOTO & 0b010000) == 0) { pinMode(Axis1_M1,OUTPUT); digitalWrite(Axis1_M1,bitRead(AXIS1_DRIVER_CODE_GOTO,1)); } else { pinMode(Axis1_M1,INPUT); }
   #ifndef AXIS1_DRIVER_DISABLE_M2
@@ -284,7 +284,7 @@ void axis2DriverGotoMode() {
 #endif
 #if MODE_SWITCH_BEFORE_SLEW == ON && defined(AXIS2_DRIVER_CODE_GOTO)
   haltStepperDrivers();
-  stepAxis2=AXIS2_DRIVER_STEP_GOTO;
+  stepAxis2=axis2StepsGoto;
   if ((AXIS2_DRIVER_CODE_GOTO & 0b001000) == 0) { pinMode(Axis2_M0,OUTPUT); digitalWrite(Axis2_M0,bitRead(AXIS2_DRIVER_CODE_GOTO,0)); } else { pinMode(Axis2_M0,INPUT); }
   if ((AXIS2_DRIVER_CODE_GOTO & 0b010000) == 0) { pinMode(Axis2_M1,OUTPUT); digitalWrite(Axis2_M1,bitRead(AXIS2_DRIVER_CODE_GOTO,1)); } else { pinMode(Axis2_M1,INPUT); }
   #ifndef AXIS2_DRIVER_DISABLE_M2

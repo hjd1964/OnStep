@@ -247,11 +247,11 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
   // switch micro-step mode
   if (gotoModeAxis1 != gotoRateAxis1) {
     // only when at an allowed position
-    if (gotoModeAxis1 || (posAxis1+blAxis1)%AXIS1_DRIVER_STEP_GOTO == 0) {
+    if (gotoModeAxis1 || (posAxis1+blAxis1)%axis1StepsGoto == 0) {
 #if AXIS1_DRIVER_MODEL == TMC_SPI
       if (!_spiInUse)
 #endif
-      { if (gotoModeAxis1) { gotoModeAxis1=false; stepAxis1=1; axis1DriverTrackingFast(); } else { gotoModeAxis1=true; stepAxis1=AXIS1_DRIVER_STEP_GOTO; axis1DriverGotoFast(); } }
+      { if (gotoModeAxis1) { gotoModeAxis1=false; stepAxis1=1; axis1DriverTrackingFast(); } else { gotoModeAxis1=true; stepAxis1=axis1StepsGoto; axis1DriverGotoFast(); } }
     }
   }
 #endif
@@ -329,11 +329,11 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
   // switch micro-step mode
   if (gotoModeAxis2 != gotoRateAxis2) {
     // only when at an allowed position
-    if ((gotoModeAxis2) || ((posAxis2+blAxis2)%AXIS2_DRIVER_STEP_GOTO == 0)) {
+    if ((gotoModeAxis2) || ((posAxis2+blAxis2)%axis2StepsGoto == 0)) {
 #if AXIS2_DRIVER_MODEL == TMC_SPI
       if (!_spiInUse)
 #endif
-      { if (gotoModeAxis2) { gotoModeAxis2=false; stepAxis2=1; axis2DriverTrackingFast(); } else { gotoModeAxis2=true; stepAxis2=AXIS2_DRIVER_STEP_GOTO; axis2DriverGotoFast(); } }
+      { if (gotoModeAxis2) { gotoModeAxis2=false; stepAxis2=1; axis2DriverTrackingFast(); } else { gotoModeAxis2=true; stepAxis2=axis2StepsGoto; axis2DriverGotoFast(); } }
     }
   }
 #endif
