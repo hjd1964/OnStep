@@ -14,7 +14,12 @@ class dewHeaterControl {
       if (_pin >= 0 && _pin <= 255) pinMode(_pin, OUTPUT);
       _nvAddress = nvAddress;
       zero = nv.read(_nvAddress)/10.0 - 5.0;
+      if (zero < -5.0) { zero = -5.0; DLF("ERR, dewHeater.init(): NV zero too low (set to -5.0)"); }
+      if (zero > 20) { zero = 20.0; DLF("ERR, dewHeater.init(): NV zero too high (set to 20.0)"); }
       span = nv.read(_nvAddress + 1)/10.0 - 5.0;
+      if (span < -5.0) { span = -5.0; DLF("ERR, dewHeater.init(): NV span too low (set to -5.0)"); }
+      if (span > 20) { span = 20.0; DLF("ERR, dewHeater.init(): NV span too high (set to 20.0)"); }
+      if (zero >= span) { if (span > -5.0) zero = span - 0.1; else span = zero + 0.1; DLF("ERR, dewHeater.init(): NV zero >= span (corrected)"); }
     }
 
     void poll(float deltaAboveDewPointC) {
@@ -49,6 +54,7 @@ class dewHeaterControl {
     void setZero(float t) {
       if (t >= -5.0 && t <= 20.0) {
         zero = t;
+        if (zero >= span) zero=span-0.1;
         nv.write(_nvAddress, round((zero + 5.0)*10.0));
       }
     }
@@ -59,6 +65,7 @@ class dewHeaterControl {
     void setSpan(float t) {
       if (t >= -5.0 && t <= 20.0) {
         span = t;
+        if (span <= zero) span=zero+0.1;
         nv.write(_nvAddress + 1, round((span + 5.0)*10.0));
       }
     }

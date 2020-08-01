@@ -245,7 +245,11 @@ void setup() {
   initGuide();
  
   // get weather monitoring ready to go
+#ifdef ONEWIRE_DEVICES_PRESENT
+  VLF("MSG: Init weather and 1-Wire");
+#else
   VLF("MSG: Init weather");
+#endif
   if (!ambient.init()) generalError=ERR_WEATHER_INIT;
 
   // setup features
