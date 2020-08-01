@@ -321,12 +321,12 @@ long maxRateLowerLimit() {
   
   // on-the-fly mode switching used?
   #if MODE_SWITCH_BEFORE_SLEW == OFF
-    if (AXIS1_DRIVER_STEP_GOTO != 1 || AXIS2_DRIVER_STEP_GOTO != 1) r_us=r_us*1.7;  // if this code is enabled, 27us
+    if (axis1StepsGoto != 1 || axis2StepsGoto != 1) r_us=r_us*1.7;  // if this code is enabled, 27us
   #endif
 
   // average required goto us rates for each axis with any micro-step mode switching applied, if tracking in 32X mode using 4X for gotos (32/4 = 8,) that's an 8x lower true rate so 27/8 = 3.4 is allowed
-  double r_us_axis1=r_us/AXIS1_DRIVER_STEP_GOTO;
-  double r_us_axis2=r_us/AXIS2_DRIVER_STEP_GOTO;
+  double r_us_axis1=r_us/axis1StepsGoto;
+  double r_us_axis2=r_us/axis2StepsGoto;
   
   // average in axis2 step rate scaling for drives where the reduction ratio isn't equal
   r_us=(r_us_axis1+r_us_axis2/timerRateRatio)/2.0;  // if Axis1 is 10000 step/deg & Axis2 is 20000 steps/deg, Axis2 needs to run 2x speed so we must slow down.  3.4 on one axis and 6.8 on the other for an average of 5.1
