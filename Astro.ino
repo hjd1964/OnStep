@@ -309,7 +309,11 @@ void setLatitude(double Lat) {
   sinLat=sin(latitude/Rad);
   latitudeAbs=fabs(latitude);
   if (latitude >= 0) latitudeSign=1; else latitudeSign=-1;
-  if (latitude >= 0) defaultDirAxis1=DefaultDirAxis1NCPInit; else defaultDirAxis1=DefaultDirAxis1SCPInit;
+  if (latitude >= 0) {
+    if (axis1Settings.reverse == ON) defaultDirAxis1 = DefaultDirAxis1SCPInit; else defaultDirAxis1 = DefaultDirAxis1NCPInit;
+  } else {
+    if (axis1Settings.reverse == ON) defaultDirAxis1 = DefaultDirAxis1NCPInit; else defaultDirAxis1 = DefaultDirAxis1SCPInit;
+  }
 
   // the polar home position
 #if MOUNT_TYPE == ALTAZM
