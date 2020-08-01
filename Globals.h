@@ -108,6 +108,9 @@ axisSettingsEx axis3SettingsEx          = {AXIS3_DRIVER_IHOLD, OFF};
 axisSettingsEx axis4SettingsEx          = {AXIS4_DRIVER_IHOLD, OFF};
 axisSettingsEx axis5SettingsEx          = {AXIS5_DRIVER_IHOLD, OFF};
 
+unsigned long axis1StepsGoto            = 1;
+unsigned long axis2StepsGoto            = 1;
+
 #define stepsPerSecondAxis1               (axis1Settings.stepsPerMeasure/240.0)
 #define arcSecPerStepAxis1                (3600.0/axis1Settings.stepsPerMeasure)
 #define stepsPerSecondAxis2               (axis2Settings.stepsPerMeasure/240.0)
