@@ -383,8 +383,8 @@ void initReadNvValues() {
   secondsPerWormRotationAxis1=stepsPerWormRotationAxis1/stepsPerSecondAxis1;
   if (MOUNT_TYPE == ALTAZM) pecBufferSize=0; else pecBufferSize=ceil(stepsPerWormRotationAxis1/(axis1Settings.stepsPerMeasure/240.0));
   if (pecBufferSize != 0) {
-    if (pecBufferSize < 61 || pecBufferSize > 3384) { pecBufferSize=0; generalError=ERR_NV_INIT; DLF("PEC: warning invalid pecBufferSize, PEC disabled"); }
-    if (200+pecBufferSize > E2END-200) { pecBufferSize=0; generalError=ERR_NV_INIT; DLF("PEC: warning buffer exceeds available NV, PEC disabled"); }
+    if (pecBufferSize < 61) { pecBufferSize=0; generalError=ERR_NV_INIT; DLF("PEC: warning invalid pecBufferSize, PEC disabled"); }
+    if (200+pecBufferSize >= E2END-200) { pecBufferSize=0; generalError=ERR_NV_INIT; DLF("PEC: warning buffer exceeds available NV, PEC disabled"); }
   }
   if (secondsPerWormRotationAxis1 > pecBufferSize) secondsPerWormRotationAxis1=pecBufferSize;
 

@@ -202,13 +202,17 @@ void cleanupPec() {
   if ((sum_pec > 2) || (sum_pec < -2)) { pecRecorded=false; pecStatus=IgnorePEC; }
 }
 
-// it often takes a couple of ms to record a value to EEPROM, this can effect tracking performance since interrupts are disabled during the operation.
-// so we store PEC data in RAM while recording.  When done, sidereal tracking is turned off and the data is written to EEPROM.
+// it often takes a couple of ms to record a value to EEPROM, this can effect tracking performance since interrupts may be disabled during the operation.
+// so we store PEC data in RAM while recording.  When done, sidereal tracking can be turned off and the data is written to EEPROM.
 void createPecBuffer() {
-  // automatically calculate the pecBufferSize
   pecBuffer = (byte*)malloc(pecBufferSize * sizeof(*pecBuffer));
-  if (!pecBuffer) pecBufferSize=0;
-  VF("MSG: Allocated PEC buffer, "); V(pecBufferSize * sizeof(*pecBuffer)); VLF(" bytes");
+  if (pecBufferSize == 0) return;
+  if (!pecBuffer) {
+    pecBufferSize=0;
+    DLF("PEC: warning buffer exceeds available RAM, PEC disabled");
+  } else {
+    VF("MSG: Allocated PEC buffer, "); V(pecBufferSize * sizeof(*pecBuffer)); VLF(" bytes");
+  }
 }
 
 #endif
