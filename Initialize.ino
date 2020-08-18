@@ -288,16 +288,16 @@ void initReadNvValues() {
   useTimerRateRatio = axis1Settings.stepsPerMeasure != axis2Settings.stepsPerMeasure;
 
   #if AXIS1_DRIVER_MODEL != SERVO && AXIS1_DRIVER_MODEL != SERVO1 && AXIS1_DRIVER_MODEL != SERVO2
-    axis1StepsGoto = axis1Settings.microsteps/AXIS1_DRIVER_MICROSTEPS_GOTO;
+    if (AXIS1_DRIVER_MICROSTEPS_GOTO != OFF) axis1StepsGoto = axis1Settings.microsteps/AXIS1_DRIVER_MICROSTEPS_GOTO;
   #else
-    axis1StepsGoto = AXIS1_DRIVER_MICROSTEPS_GOTO/axis1Settings.microsteps;
+    if (AXIS1_DRIVER_MICROSTEPS_GOTO != OFF) axis1StepsGoto = AXIS1_DRIVER_MICROSTEPS_GOTO/axis1Settings.microsteps;
   #endif
   #if AXIS2_DRIVER_MODEL != SERVO && AXIS2_DRIVER_MODEL != SERVO1 && AXIS2_DRIVER_MODEL != SERVO2
-    axis2StepsGoto = axis2Settings.microsteps/AXIS2_DRIVER_MICROSTEPS_GOTO;
+    if (AXIS2_DRIVER_MICROSTEPS_GOTO != OFF) axis2StepsGoto = axis2Settings.microsteps/AXIS2_DRIVER_MICROSTEPS_GOTO;
   #else
-    axis2StepsGoto = AXIS2_DRIVER_MICROSTEPS_GOTO/axis2Settings.microsteps;
+    if (AXIS2_DRIVER_MICROSTEPS_GOTO != OFF) axis2StepsGoto = AXIS2_DRIVER_MICROSTEPS_GOTO/axis2Settings.microsteps;
   #endif
-
+  
   // Basic stepper driver mode setup
   // if we made through validation and AXIS1_DRIVER_MODEL exists; AXIS2_DRIVER_MODEL, axis1Settings.microsteps,
   // and axis2Settings.microsteps also exist and passed validation in the pre-processor
