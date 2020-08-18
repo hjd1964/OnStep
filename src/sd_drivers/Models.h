@@ -105,7 +105,7 @@ unsigned int searchTable(unsigned int Table[][2], int TableLen, unsigned int Mic
 
 // different models of stepper drivers have different bit settings for microsteps
 // translate the human readable microsteps in the configuration to modebit settings 
-unsigned int translateMicrosteps(int DriverModel, unsigned int Microsteps, boolean err = false) {
+unsigned int translateMicrosteps(int DriverModel, unsigned int Microsteps, bool err = false) {
   unsigned int Mode;
     
   // we search for each model, since they are different
