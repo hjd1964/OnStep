@@ -44,7 +44,7 @@ class focuserDC : public focuser  {
     }
 
     // DC motor control
-    boolean isDcFocuser() { return true; }
+    bool isDcFocuser() { return true; }
     void initDcPower(int nvDcPower) { this->nvDcPower=nvDcPower; powerFor1mmSec=nv.read(nvDcPower); }
     void setDcPower(byte power) { this->powerFor1mmSec=power; nv.write(nvDcPower,powerFor1mmSec); }
     byte getDcPower() { return powerFor1mmSec; }
@@ -57,7 +57,7 @@ class focuserDC : public focuser  {
     }
 
     // sets logic state for disabling stepper driver
-    void setDisableState(boolean disableState) {
+    void setDisableState(bool disableState) {
       dcMotor.setDisableState(disableState);
     }
 
@@ -102,7 +102,7 @@ class focuserDC : public focuser  {
       if (((long)target.part.m < smin) || ((long)target.part.m > smax)) delta.fixed=0;
     }
 
-    void follow(boolean slewing) {
+    void follow(bool slewing) {
           
       // write position to non-volatile storage if not moving for FOCUSER_WRITE_DELAY milliseconds
       if ((spos != lastPos)) { lastMove=millis(); lastPos=spos; }

@@ -32,7 +32,7 @@ void featuresPoll() {
 }
 
 // :GXXn#
-void featuresGetCommand(char *parameter, char *reply, bool &booleanReply) {
+void featuresGetCommand(char *parameter, char *reply, bool &boolReply) {
   int i=parameter[1]-'1';
   if (i < 0 || i > 7)  { commandError=CE_PARAM_FORM; return; }
 
@@ -55,16 +55,16 @@ void featuresGetCommand(char *parameter, char *reply, bool &booleanReply) {
     dtostrf(v,0,d,s); strcat(reply,s); strcat(reply,",");
     sprintf(s,"%d",(int)feature[i].intervalometer->getCount()); strcat(reply,s);
   } else { commandError=CE_CMD_UNKNOWN; return; }
-  booleanReply=false;
+  boolReply=false;
 }
 
 // :GXYn#
-void featuresGetInfoCommand(char *parameter, char *reply, bool &booleanReply) {
+void featuresGetInfoCommand(char *parameter, char *reply, bool &boolReply) {
   int i=parameter[1]-'1';
   // return active features
   if (i == -1) {
     for (int j=0; j < 8; j++) { if (feature[j].purpose == OFF) reply[j] = '0'; else reply[j] = '1'; reply[j+1]=0; }
-    booleanReply=false;
+    boolReply=false;
     return;
   }
   if (i < 0 || i > 7)  { commandError=CE_PARAM_FORM; return; }
@@ -73,7 +73,7 @@ void featuresGetInfoCommand(char *parameter, char *reply, bool &booleanReply) {
   char s[255];
   strcpy(s,feature[i].name); if (strlen(s)>10) s[10]=0; strcpy(reply,s); strcat(reply,",");
   sprintf(s,"%d",(int)feature[i].purpose); strcat(reply,s);
-  booleanReply=false;
+  boolReply=false;
 }
 
 // :SXX[n],V[Z][S][v]#

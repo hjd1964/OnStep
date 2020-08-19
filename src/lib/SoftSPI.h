@@ -3,7 +3,7 @@
 
 #pragma once
 
-volatile boolean _spiInUse = false;
+volatile bool _spiInUse = false;
 
 class bbspi {
   public:
@@ -11,7 +11,7 @@ class bbspi {
       _cs=cs; _sck=sck; _miso=miso; _mosi=mosi;
     }
 
-    boolean begin()
+    bool begin()
     {
       if (_spiInUse) return false; _spiInUse=true;
 

@@ -47,7 +47,7 @@ class TGeoAlignH
     void model(int n);
 
   private:
-    boolean geo_ready;
+    bool geo_ready;
     double avgAlt;
     double avgAzm;
 
@@ -108,7 +108,7 @@ class TGeoAlign
     void model(int n);
 
   private:
-    boolean geo_ready;
+    bool geo_ready;
     double avgDec;
     double avgHA;
 
@@ -136,7 +136,7 @@ byte alignNumStars = 0;
 byte alignThisStar = 0;
 
 // checks to see if an alignment is active
-boolean alignActive() {
+bool alignActive() {
   return (alignNumStars > 0) && (alignThisStar <= alignNumStars);
 }
 

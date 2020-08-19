@@ -112,16 +112,16 @@ void driversInitTmcMode() {
   #endif
 }
 
-volatile boolean _a1trk=false;
-void axis1DriverTrackingMode(boolean init) {
+volatile bool _a1trk=false;
+void axis1DriverTrackingMode(bool init) {
   if (_a1trk) return;
   if (!tmcAxis1.setup(AXIS1_DRIVER_INTPOL,AXIS1_DRIVER_DECAY_MODE,255,axis1Settings.IRUN,axis1SettingsEx.IHOLD)) return;
   if (MODE_SWITCH_BEFORE_SLEW == ON || init) {  haltStepperDrivers(); if (!tmcAxis1.refresh_CHOPCONF(AXIS1_DRIVER_CODE)) { resumeStepperDrivers(); return; } stepAxis1=1; resumeStepperDrivers(); }
   _a1trk=true;
 }
 
-volatile boolean _a2trk=false;
-void axis2DriverTrackingMode(boolean init) {
+volatile bool _a2trk=false;
+void axis2DriverTrackingMode(bool init) {
   if (_a2trk) return;
   if (!tmcAxis2.setup(AXIS2_DRIVER_INTPOL,AXIS2_DRIVER_DECAY_MODE,255,axis2Settings.IRUN,axis2SettingsEx.IHOLD)) return;
   if (MODE_SWITCH_BEFORE_SLEW == ON || init) { haltStepperDrivers(); if (!tmcAxis2.refresh_CHOPCONF(AXIS2_DRIVER_CODE)) { resumeStepperDrivers(); return; } stepAxis2=1; resumeStepperDrivers(); }
@@ -213,8 +213,8 @@ void axis2DriverGotoMode() {
 // ---------------------------------------------------------------------------------------------------
 // traditional s/d stepper drivers
 
-boolean _a1trk=false;
-void axis1DriverTrackingMode(boolean init) {
+bool _a1trk=false;
+void axis1DriverTrackingMode(bool init) {
   if (_a1trk) return; else _a1trk=true;
 
 #if AXIS1_DRIVER_DECAY_MODE != OFF
@@ -235,8 +235,8 @@ void axis1DriverTrackingMode(boolean init) {
 #endif
 }
 
-boolean _a2trk=false;
-void axis2DriverTrackingMode(boolean init) {
+bool _a2trk=false;
+void axis2DriverTrackingMode(bool init) {
   if (_a2trk) return; else _a2trk=true;
 
 #if AXIS2_DRIVER_DECAY_MODE != OFF

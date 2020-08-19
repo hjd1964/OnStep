@@ -60,7 +60,7 @@ void StopAxis2() {
 #endif
 
 // moves telescope to the home position, then stops tracking
-CommandErrors goHome(boolean fast) {
+CommandErrors goHome(bool fast) {
   CommandErrors e=validateGoto();
   
 #if HOME_SENSE != OFF
@@ -131,7 +131,7 @@ CommandErrors goHome(boolean fast) {
 #endif
 }
 
-boolean isHoming() {
+bool isHoming() {
 #if HOME_SENSE != OFF
   return (homeMount || (findHomeMode != FH_OFF));
 #else

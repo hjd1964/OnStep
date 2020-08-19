@@ -12,20 +12,20 @@
 #else
   // motor timers at 2x rate
   #define TIMER_PULSE_STEP false
-  volatile boolean clearAxis1 = true;
-  volatile boolean takeStepAxis1 = false;
-  volatile boolean clearAxis2 = true;
+  volatile bool clearAxis1 = true;
+  volatile bool takeStepAxis1 = false;
+  volatile bool clearAxis2 = true;
 #endif
-  volatile boolean takeStepAxis2 = false;
+  volatile bool takeStepAxis2 = false;
 
 #if defined(AXIS1_DRIVER_CODE) && defined(AXIS1_DRIVER_CODE_GOTO)
   volatile long AXIS1_DRIVER_CODE_NEXT=AXIS1_DRIVER_CODE;
-  volatile boolean gotoModeAxis1=false;
+  volatile bool gotoModeAxis1=false;
 #endif
 
 #if defined(AXIS2_DRIVER_CODE) && defined(AXIS2_DRIVER_CODE_GOTO)
   volatile long AXIS2_DRIVER_CODE_NEXT=AXIS2_DRIVER_CODE;
-  volatile boolean gotoModeAxis2=false;
+  volatile bool gotoModeAxis2=false;
 #endif
 
 volatile bool axis2Powered = true;
@@ -60,8 +60,8 @@ void SiderealClockSetInterval(long iv) {
 
 //--------------------------------------------------------------------------------------------------
 // Timer1 handles sidereal time and setting up the Axis1/2 intervals for later programming
-volatile boolean gotoRateAxis1=false;
-volatile boolean gotoRateAxis2=false;
+volatile bool gotoRateAxis1=false;
+volatile bool gotoRateAxis2=false;
 volatile byte siderealClockCycleCount=0;
 volatile double guideTimerRateAxis1A=0.0;
 volatile double guideTimerRateAxis2A=0.0;

@@ -31,19 +31,19 @@ class timeLocationSource {
       return active;
     }
 
-    boolean poll() {
+    bool poll() {
       if (!serialActive) { SerialGPS.begin(SerialGPSBaud); serialActive=true; }
       if (gps.location.isValid() && siteIsValid() && gps.date.isValid() && gps.time.isValid() && timeIsValid()) { active=true; return true; }
       while (SerialGPS.available() > 0) gps.encode(SerialGPS.read());
       return false;
     }
 
-    boolean timeIsValid() {
+    bool timeIsValid() {
       if ((gps.date.year() >= 0) && (gps.date.year() <= 3000) && (gps.date.month() >= 1) && (gps.date.month() <= 12) && (gps.date.day() >= 1) && (gps.date.day() <= 31) &&
           (gps.time.hour() >= 0) && (gps.time.hour() <= 23) && (gps.time.minute() >= 0) && (gps.time.minute() <= 59) && (gps.time.second() >= 0) && (gps.time.second() <= 59)) return true; else return false;
     }
 
-    boolean siteIsValid() {
+    bool siteIsValid() {
       if (gps.location.lat() >= -90 && gps.location.lat() <= 90 && gps.location.lng() >= -360 && gps.location.lng() <= 360) return true; else return false;
     }
 

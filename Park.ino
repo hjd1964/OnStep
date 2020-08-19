@@ -249,11 +249,11 @@ CommandErrors unPark(bool withTrackingOn) {
   return CE_NONE;
 }
 
-boolean isParked() {
+bool isParked() {
   return (parkStatus == Parked);
 }
 
-boolean saveAlignModel() {
+bool saveAlignModel() {
   // and store our corrections
   Align.writeCoe();
   nv.writeFloat(EE_indexAxis1,indexAxis1);
@@ -261,7 +261,7 @@ boolean saveAlignModel() {
   return true;
 }
 
-boolean loadAlignModel() {
+bool loadAlignModel() {
   // get align/corrections
   indexAxis1=nv.readFloat(EE_indexAxis1);
   if (indexAxis1 < -720 || indexAxis1 > 720) { indexAxis1=0; DLF("ERR, loadAlignModel(): bad NV indexAxis1"); }

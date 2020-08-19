@@ -51,14 +51,14 @@ class rotator {
     }
 
     // sets logic state for disabling stepper driver
-    void setDisableState(boolean disableState) {
+    void setDisableState(bool disableState) {
       this->disableState=disableState;
       if (disableState == LOW) enableState=HIGH; else enableState=LOW;
       if (enPin != -1) { pinMode(enPin,OUTPUT); enableDriver(); currentlyDisabled=false; }
     }
 
     // allows enabling/disabling stepper driver
-    void powerDownActive(boolean active) {
+    void powerDownActive(bool active) {
       if (enPin == -1) { pda=false; return; }
       pda=active;
       if (pda) { pinMode(enPin,OUTPUT); disableDriver(); currentlyDisabled=true; }
@@ -171,7 +171,7 @@ class rotator {
     }
 
     // do de-rotate movement
-    void move(boolean tracking) {
+    void move(bool tracking) {
       if (DR && tracking) target.fixed+=deltaDR.fixed;
       target.fixed+=delta.fixed;
       if (((long)target.part.m < smin) || ((long)target.part.m > smax)) { DR=false; delta.fixed=0; deltaDR.fixed=0; }
@@ -266,10 +266,10 @@ class rotator {
     long smax=-1;
 
     // state
-    boolean mc=false;
+    bool mc=false;
     int reverseState=LOW;
     int forwardState=HIGH;
-    boolean pda=false;
+    bool pda=false;
     int disableState=LOW;
     int enableState=HIGH;
     bool currentlyDisabled=true;

@@ -8,9 +8,9 @@
 #define PEC_CLEANUP ON
 
 #if PEC_SENSE == OFF
-  boolean wormSensedFirst=true;
+  bool wormSensedFirst=true;
 #else
-  boolean wormSensedFirst=false;
+  bool wormSensedFirst=false;
 #endif
 
 long pecRecordStopTime  = 0;

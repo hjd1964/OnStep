@@ -18,7 +18,7 @@ class tmcSpiDriver {
     // decay mode:           decay_mode (STEALTHCHOP or SPREADCYCLE)
     // microstepping mode:   micro_step_mode (0=256x, 1=128x, 2=64x, 3=32x, 4=16x, 5=8x, 6=4x, 7=2x, 8=1x)
     // irun, ihold, rsense:  current in mA and sense resistor value
-    boolean setup(bool intpol, int decay_mode, byte micro_step_mode, int irun, int ihold) {
+    bool setup(bool intpol, int decay_mode, byte micro_step_mode, int irun, int ihold) {
       if (!BBSpi.begin()) return false;
       uint32_t data_out=0;
 
@@ -114,7 +114,7 @@ class tmcSpiDriver {
       return true;
     }
 
-    boolean error() {
+    bool error() {
       if (!BBSpi.begin()) return false;
 
       // get global status register, look for driver error bit
@@ -129,7 +129,7 @@ class tmcSpiDriver {
 // -------------------------------
 // CHOPCONF settings
 
-    boolean refresh_CHOPCONF(byte micro_step_mode) {
+    bool refresh_CHOPCONF(byte micro_step_mode) {
       // default=0x00008008UL
       if (_driver_model == TMC2130) _last_chop_config=(_cc_toff<<0)+(_cc_hstart<<4)+(_cc_hend<<7)+(_cc_rndtf<<13)+(_cc_tbl<<15)+(_cc_vsense<<17)+(_cc_vhighfs<<18)+(_cc_vhighchm<<19)+(_cc_intpol<<28);
       // default=0x10410150UL

@@ -8,7 +8,7 @@ class focuser {
     virtual void init(int stepPin, int dirPin, int enPin, int nvAddress, int nvTcfCoef, int nvTcfEn, float maxRate, double stepsPerMicro, double min, double max, double minRate) { }
 
     // DC motor control
-    virtual boolean isDcFocuser() { return false; }
+    virtual bool isDcFocuser() { return false; }
     virtual void initDcPower(int nvDcPower) { }
     virtual void setDcPower(byte power) { }
     virtual byte getDcPower() { return 0; }
@@ -18,8 +18,8 @@ class focuser {
     // temperature compensation
     virtual void setTcfCoef(double coef) { }
     virtual double getTcfCoef() { return 0; }
-    virtual void setTcfEnable(boolean enabled) { }
-    virtual boolean getTcfEnable() { return false; }
+    virtual void setTcfEnable(bool enabled) { }
+    virtual bool getTcfEnable() { return false; }
 
     // get step size in microns
     virtual double getStepsPerMicro() { return spm; }
@@ -36,10 +36,10 @@ class focuser {
     virtual void setReverseState(int reverseState) { }
 
     // sets logic state for disabling stepper driver
-    virtual void setDisableState(boolean disableState) { }
+    virtual void setDisableState(bool disableState) { }
 
     // allows enabling/disabling stepper driver
-    virtual void powerDownActive(boolean active) { }
+    virtual void powerDownActive(bool active) { }
 
     // set movement rate in microns/second, from minRate to 1000
     virtual void setMoveRate(double rate) { }
@@ -77,7 +77,7 @@ class focuser {
     virtual void move() { }
 
     // follow( (trackingState == TrackingMoveTo) || guideDirAxis1 || guideDirAxis2) );
-    virtual void follow(boolean slewing) { }
+    virtual void follow(bool slewing) { }
 
     void savePosition() { writePos(spos); }
   

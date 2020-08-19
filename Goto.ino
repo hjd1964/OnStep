@@ -145,7 +145,7 @@ void getEnc(double *EncAxis1, double *EncAxis2) {
 }
 
 // gets the telescopes current RA and Dec, set returnHA to true for Horizon Angle instead of RA
-boolean getEqu(double *RA, double *Dec, boolean returnHA) {
+bool getEqu(double *RA, double *Dec, bool returnHA) {
   double HA;
  
 #if MOUNT_TYPE != ALTAZM
@@ -172,7 +172,7 @@ boolean getEqu(double *RA, double *Dec, boolean returnHA) {
 }
 
 // gets the telescopes current RA and Dec, set returnHA to true for Horizon Angle instead of RA
-boolean getApproxEqu(double *RA, double *Dec, boolean returnHA) {
+bool getApproxEqu(double *RA, double *Dec, bool returnHA) {
   double HA;
   
 #if MOUNT_TYPE != ALTAZM
@@ -196,7 +196,7 @@ boolean getApproxEqu(double *RA, double *Dec, boolean returnHA) {
 }
 
 // gets the telescopes current Alt and Azm
-boolean getHor(double *Alt, double *Azm) {
+bool getHor(double *Alt, double *Azm) {
   double h,d;
   getEqu(&h,&d,true);
   equToHor(h,d,Alt,Azm);

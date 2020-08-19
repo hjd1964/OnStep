@@ -28,7 +28,7 @@ class Library
     
     void init();
 
-    boolean setCatalog(int num);
+    bool setCatalog(int num);
 
     // 16 byte record
     libRec_t list;
@@ -36,12 +36,12 @@ class Library
     void writeVars(char* name, int code, double RA, double Dec);
     void readVars(char* name, int* code, double* RA, double* Dec);
 
-    boolean firstRec();
-    boolean nameRec();
-    boolean firstFreeRec();
-    boolean prevRec();
-    boolean nextRec();
-    boolean gotoRec(long num);
+    bool firstRec();
+    bool nameRec();
+    bool firstFreeRec();
+    bool prevRec();
+    bool nextRec();
+    bool gotoRec(long num);
 
     void clearCurrentRec(); // clears this record
     void clearLib();        // clears this library
@@ -94,7 +94,7 @@ void Library::init() {
   firstRec();
 }
 
-boolean Library::setCatalog(int num)
+bool Library::setCatalog(int num)
 {
   if (num < 0 || num > 14) return false;
 
@@ -169,7 +169,7 @@ void Library::clearRec(long address)
   }
 }
 
-boolean Library::firstRec()
+bool Library::firstRec()
 {
   libRec_t work;
 
@@ -184,7 +184,7 @@ boolean Library::firstRec()
 }
 
 // move to the catalog name rec
-boolean Library::nameRec()
+bool Library::nameRec()
 {
   libRec_t work;
 
@@ -206,7 +206,7 @@ boolean Library::nameRec()
 }
 
 // move to first unused record for this catalog
-boolean Library::firstFreeRec()
+bool Library::firstFreeRec()
 {
   libRec_t work;
 
@@ -228,7 +228,7 @@ boolean Library::firstFreeRec()
 }
 
 // read the previous record, if it exists
-boolean Library::prevRec()
+bool Library::prevRec()
 {
   libRec_t work;
 
@@ -248,7 +248,7 @@ boolean Library::prevRec()
 }
 
 // read the next record, if it exists
-boolean Library::nextRec()
+bool Library::nextRec()
 {
   libRec_t work;
 
@@ -268,7 +268,7 @@ boolean Library::nextRec()
 }
 
 // read the specified record (of this catalog), if it exists
-boolean Library::gotoRec(long num)
+bool Library::gotoRec(long num)
 {
   libRec_t work;
 

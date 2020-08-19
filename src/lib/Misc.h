@@ -29,7 +29,7 @@ bool atof2(char *a, double *d, bool sign=true) {
 }
 
 // convert axis settings string into numeric form
-boolean decodeAxisSettings(char s[], axisSettings &a) {
+bool decodeAxisSettings(char s[], axisSettings &a) {
   if (strcmp(s,"0") != 0) {
     char *ws=s;
     char *conv_end;
@@ -55,7 +55,7 @@ boolean decodeAxisSettings(char s[], axisSettings &a) {
 }
 
 // convert axis settings string into numeric form
-boolean validateAxisSettings(int axisNum, boolean altAz, volatile axisSettings &a) {
+bool validateAxisSettings(int axisNum, bool altAz, volatile axisSettings &a) {
   int   MinLimitL[5]   = {-180,-90,-360,  0,  0};
   int   MinLimitH[5]   = { -90,  0,   0,500,500};
   int   MaxLimitL[5]   = {  90,  0,   0,  0,  0};

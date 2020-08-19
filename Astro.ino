@@ -2,7 +2,7 @@
 // Astronomy related functions
 
 // convert string in format MM/DD/YY to julian date
-boolean dateToDouble(double *JulianDay, char *date) {
+bool dateToDouble(double *JulianDay, char *date) {
   char m[3],d[3],y[3];
   int  m1,d1,y1;
   
@@ -22,7 +22,7 @@ boolean dateToDouble(double *JulianDay, char *date) {
 // (also handles)           HH:MM.M
 // (also handles)           HH:MM:SS
 // (also handles)           HH:MM:SS.SSSS
-boolean hmsToDouble(double *f, char *hms, PrecisionMode p) {
+bool hmsToDouble(double *f, char *hms, PrecisionMode p) {
   char h[3],m[5];
   int  h1,m1,m2=0;
   double s1=0;
@@ -100,11 +100,11 @@ void doubleToHms(char *reply, double *f, PrecisionMode p) {
 //                          DDD:MM
 //                          sDD*MM
 //                          DDD*MM
-boolean dmsToDouble(double *f, char *dms, boolean sign_present, PrecisionMode p) {
+bool dmsToDouble(double *f, char *dms, bool sign_present, PrecisionMode p) {
   char d[4],m[5];
   int d1,m1,lowLimit=0,highLimit=360,len;
   double s1=0,sign=1;
-  boolean secondsOff=false;
+  bool secondsOff=false;
 
   while (*dms == ' ') dms++; // strip prefix white-space
   if (strlen(dms) > 13) dms[13]=0; // maximum length
@@ -146,7 +146,7 @@ boolean dmsToDouble(double *f, char *dms, boolean sign_present, PrecisionMode p)
 }
 
 // convert double to string in a variety of formats (as above) 
-void doubleToDms(char *reply, double *f, boolean fullRange, boolean signPresent, PrecisionMode p) {
+void doubleToDms(char *reply, double *f, bool fullRange, bool signPresent, PrecisionMode p) {
   char sign[]="+";
   int  o=0;
   double d1,m1,s1=0,s2,f1;
@@ -416,7 +416,7 @@ void observedPlaceToTopocentric(double *RA, double *Dec) {
 // _deltaAxis1/2 are in arc-seconds/second
 double _deltaAxis1=15.0,_deltaAxis2=0.0;
 
-boolean trackingSyncInProgress() {
+bool trackingSyncInProgress() {
   static int lastTrackingSyncSeconds=0;
 
   // sound goto done
@@ -509,8 +509,8 @@ double getstepsPerSecondAxis2() {
 // -----------------------------------------------------------------------------------------------------------------------------
 // Low overhead altitude calculation, 16 calls to complete
 
-boolean doFastAltCalc(bool recalc) {
-  boolean done=false;
+bool doFastAltCalc(bool recalc) {
+  bool done=false;
   
   static byte ac_step = 0;
   static double ac_HA=0,ac_Dec=0;
@@ -585,8 +585,8 @@ double ztr(double a) {
 #define RefractionRateRange 1.0
 #endif
 
-boolean doRefractionRateCalc() {
-  boolean done=false;
+bool doRefractionRateCalc() {
+  bool done=false;
 
   static int rr_step = 0;
   static double rr_Axis1=0,rr_Axis2=0;
@@ -679,10 +679,10 @@ boolean doRefractionRateCalc() {
 
 #if MOUNT_TYPE == ALTAZM
 
-#define AltAzTrackingRange 10  // distance in arc-min (10) ahead of and behind the current Equ position, used for rate calculation
+#define AltAzTrackingRange 5  // distance in arc-min (10) ahead of and behind the current Equ position, used for rate calculation
 
-boolean doHorRateCalc() {
-  boolean done=false;
+bool doHorRateCalc() {
+  bool done=false;
 
   static int az_step=0;
   static double az_Axis1=0,az_Axis2=0;

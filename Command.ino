@@ -38,9 +38,9 @@ void processCommands() {
     static char reply[50];
     static char command[3];
     static char parameter[45];
-    static boolean booleanReply = true;
+    static bool boolReply = true;
 
-    boolean supress_frame = false;
+    bool supress_frame = false;
     char *conv_end;
 #if FOCUSER1 == ON
     static char primaryFocuser = 'F';
@@ -111,7 +111,7 @@ void processCommands() {
           reply[0]=command[1]; reply[1]=0;               // Equatorial or Horizon mode, A or P
           supress_frame=true;
         }
-        booleanReply=false;
+        boolReply=false;
       } else
 
 // A - Alignment Commands
@@ -131,7 +131,7 @@ void processCommands() {
           reply[1]='0'+alignThisStar;
           reply[2]='0'+alignNumStars;
           reply[3]=0;
-          booleanReply=false;
+          boolReply=false;
         } else
 // :A[n]#     Start Telescope Manual Alignment Sequence
 //            This is to initiate a n-star alignment for 1..MAX_NUM_ALIGN_STARS:
@@ -208,14 +208,14 @@ void processCommands() {
             i=(int)round(((double)backlashAxis2*3600.0)/axis2Settings.stepsPerMeasure);
             if (i < 0) i=0; if (i > 3600) i=3600;
             sprintf(reply,"%d",i);
-            booleanReply=false;
+            boolReply=false;
         } else
         if (parameter[0] == 'R' && parameter[1] == 0) {
             reactivateBacklashComp();
             i=(int)round(((double)backlashAxis1*3600.0)/axis1Settings.stepsPerMeasure);
             if (i < 0) i=0; if (i > 3600) i=3600;
             sprintf(reply,"%d",i);
-            booleanReply=false;
+            boolReply=false;
         } else commandError=CE_CMD_UNKNOWN;
       } else
       
@@ -235,7 +235,7 @@ void processCommands() {
         if (command[1] == '+') reticuleBrightness-=scale;  if (reticuleBrightness < 0)   reticuleBrightness=0;
         analogWrite(ReticlePin,reticuleBrightness);
 #endif
-        booleanReply=false;
+        boolReply=false;
       } else 
 
 //  C - Sync Control
@@ -264,13 +264,13 @@ void processCommands() {
               if (e == CE_NONE) strcpy(reply,"N/A");
           }
 
-          booleanReply=false;
+          boolReply=false;
         }
       } else 
 
 //  D - Distance Bars
 // :D#        Return: "\0x7f#" if the mount is moving, otherwise "#".
-      if (command[0] == 'D' && command[1] == 0)  { if (trackingState == TrackingMoveTo) { reply[0]=(char)127; reply[1]=0; } else { reply[0]='#'; reply[1]=0; supress_frame=true; } booleanReply=false; } else 
+      if (command[0] == 'D' && command[1] == 0)  { if (trackingState == TrackingMoveTo) { reply[0]=(char)127; reply[1]=0; } else { reply[0]='#'; reply[1]=0; supress_frame=true; } boolReply=false; } else 
 
 //  E - Enter special mode
       if (command[0] == 'E') {
@@ -279,7 +279,7 @@ void processCommands() {
 //            Return: Nothing
         if (command[1] == 'C') {
           SerialA.println(parameter);
-          booleanReply=false;
+          boolReply=false;
         } else
 #endif
 #if SERIAL_B_ESP_FLASHING == ON
@@ -391,7 +391,7 @@ void processCommands() {
 
 // :FT#       Get status
 //            Returns: M# (for moving) or S# (for stopped)
-        if (command[1] == 'T') { if (foc->moving()) strcpy(reply,"M"); else strcpy(reply,"S"); booleanReply=false; } else
+        if (command[1] == 'T') { if (foc->moving()) strcpy(reply,"M"); else strcpy(reply,"S"); boolReply=false; } else
 // :Fp#       Get mode
 //            Return: 0 for absolute
 //                    1 for pseudo absolute
@@ -399,20 +399,20 @@ void processCommands() {
 
 // :FI#       Get full in position (in microns or steps)
 //            Returns: n#
-        if (toupper(command[1]) == 'I') { sprintf(reply,"%ld",(long)round(foc->getMin()/spm)); booleanReply=false; } else
+        if (toupper(command[1]) == 'I') { sprintf(reply,"%ld",(long)round(foc->getMin()/spm)); boolReply=false; } else
 // :FM#       Get max position (in microns or steps)
 //            Returns: n#
-        if (toupper(command[1]) == 'M') { sprintf(reply,"%ld",(long)round(foc->getMax()/spm)); booleanReply=false; } else
+        if (toupper(command[1]) == 'M') { sprintf(reply,"%ld",(long)round(foc->getMax()/spm)); boolReply=false; } else
 
 // :Ft#       Get focuser temperature
 //            Returns: n# temperature in deg. C
-        if (command[1] == 't') { dtostrf(ambient.getTelescopeTemperature(),3,1,reply); booleanReply=false; } else
+        if (command[1] == 't') { dtostrf(ambient.getTelescopeTemperature(),3,1,reply); boolReply=false; } else
 // :Fu#       Get focuser microns per step
 //            Returns: n.n#
-        if (command[1] == 'u') { dtostrf(1.0/foc->getStepsPerMicro(),7,5,reply); booleanReply=false; } else
+        if (command[1] == 'u') { dtostrf(1.0/foc->getStepsPerMicro(),7,5,reply); boolReply=false; } else
 // :FC#       Get focuser temperature compensation coefficient
 //            Return: n.n#
-        if (command[1] == 'C' && parameter[0] == 0) { dtostrf(foc->getTcfCoef(),7,5,reply); booleanReply=false; } else
+        if (command[1] == 'C' && parameter[0] == 0) { dtostrf(foc->getTcfCoef(),7,5,reply); boolReply=false; } else
 // :FC[sn.n]# Set focuser temperature compensation coefficient in um per deg. C (+ moves out as temperature falls)
 //            Return: 0 on failure
 //                    1 on success
@@ -434,7 +434,7 @@ void processCommands() {
         if (command[1] == 'P') {
           if (foc->isDcFocuser()) {
             if (parameter[0] == 0) {
-              sprintf(reply,"%d",(int)foc->getDcPower()); booleanReply=false; 
+              sprintf(reply,"%d",(int)foc->getDcPower()); boolReply=false; 
             } else {
               i=atol(parameter);
               if (i >= 0 && i <= 100) foc->setDcPower(i); else commandError=CE_PARAM_RANGE; 
@@ -444,43 +444,43 @@ void processCommands() {
 
 // :FQ#       Stop the focuser
 //            Returns: Nothing
-        if (command[1] == 'Q') { foc->stopMove(); booleanReply=false; } else
+        if (command[1] == 'Q') { foc->stopMove(); boolReply=false; } else
 
 // :FF#       Set focuser for fast motion (1mm/s)
 //            Returns: Nothing
-        if (command[1] == 'F') { foc->setMoveRate(1000); booleanReply=false; } else
+        if (command[1] == 'F') { foc->setMoveRate(1000); boolReply=false; } else
 // :FS#       Set focuser for slow motion (0.01mm/s)
 //            Returns: Nothing
-        if (command[1] == 'S' && parameter[0] == 0) { foc->setMoveRate(1); booleanReply=false; } else
+        if (command[1] == 'S' && parameter[0] == 0) { foc->setMoveRate(1); boolReply=false; } else
 // :F[n]#     Set focuser move rate, where n = 1 for finest, 2 for 0.01mm/second, 3 for 0.1mm/second, 4 for 1mm/second
 //            Returns: Nothing
-        if (command[1] >= '1' && command[1] <= '4') { int p[] = {1,10,100,1000}; foc->setMoveRate(p[command[1] - '1']); booleanReply=false; } else
+        if (command[1] >= '1' && command[1] <= '4') { int p[] = {1,10,100,1000}; foc->setMoveRate(p[command[1] - '1']); boolReply=false; } else
 // :F+#       Move focuser in (toward objective)
 //            Returns: Nothing
-        if (command[1] == '+') { foc->startMoveIn(); booleanReply=false; } else
+        if (command[1] == '+') { foc->startMoveIn(); boolReply=false; } else
 // :F-#       Move focuser out (away from objective)
 //            Returns: Nothing
-        if (command[1] == '-') { foc->startMoveOut(); booleanReply=false; } else
+        if (command[1] == '-') { foc->startMoveOut(); boolReply=false; } else
 
 // :FG#       Get focuser current position (in microns or steps)
 //            Returns: sn#
-        if (toupper(command[1]) == 'G') { sprintf(reply,"%ld",(long)round(foc->getPosition()/spm)); booleanReply=false; } else
+        if (toupper(command[1]) == 'G') { sprintf(reply,"%ld",(long)round(foc->getPosition()/spm)); boolReply=false; } else
 // :FR[sn]#   Set focuser target position relative (in microns or steps)
 //            Returns: Nothing
-        if (toupper(command[1]) == 'R') { foc->relativeTarget((double)atol(parameter)*spm); booleanReply=false; } else
+        if (toupper(command[1]) == 'R') { foc->relativeTarget((double)atol(parameter)*spm); boolReply=false; } else
 // :FS[n]#    Set focuser target position (in microns or steps)
 //            Return: 0 on failure
 //                    1 on success
         if (toupper(command[1]) == 'S') { foc->setTarget((double)atol(parameter)*spm); } else
 // :FZ#       Set focuser position as zero
 //            Returns: Nothing
-        if (command[1] == 'Z') { foc->setPosition(0); booleanReply=false; } else
+        if (command[1] == 'Z') { foc->setPosition(0); boolReply=false; } else
 // :FH#       Set focuser position as half-travel
 //            Returns: Nothing
-        if (command[1] == 'H') { foc->setPosition((foc->getMax()+foc->getMin())/2.0); booleanReply=false; } else
+        if (command[1] == 'H') { foc->setPosition((foc->getMax()+foc->getMin())/2.0); boolReply=false; } else
 // :Fh#       Set focuser target position at half-travel
 //            Returns: Nothing
-        if (command[1] == 'h') { foc->setTarget((foc->getMax()+foc->getMin())/2.0); booleanReply=false; } else commandError=CE_CMD_UNKNOWN;
+        if (command[1] == 'h') { foc->setTarget((foc->getMax()+foc->getMin())/2.0); boolReply=false; } else commandError=CE_CMD_UNKNOWN;
         
         } else commandError=CE_CMD_UNKNOWN;
       } else
@@ -492,7 +492,7 @@ void processCommands() {
 // :GA#       Get Telescope Altitude
 //            Returns: sDD*MM# or sDD*MM'SS# (based on precision setting)
 //            The current scope altitude
-      if (command[1] == 'A' && parameter[0] == 0)  { getHor(&f,&f1); doubleToDms(reply,&f,false,true,precision); booleanReply=false; } else
+      if (command[1] == 'A' && parameter[0] == 0)  { getHor(&f,&f1); doubleToDms(reply,&f,false,true,precision); boolReply=false; } else
 // :GB#       Get Fastest Recommended Baud rate
 //            Returns: n
 //            The baud rate code
@@ -502,12 +502,12 @@ void processCommands() {
 #else
         strcpy(reply,"0");
 #endif
-        booleanReply=false;
+        boolReply=false;
         supress_frame=true;
       } else
 // :Ga#       Get Local Time in 12 hour format
 //            Returns: HH:MM:SS#
-      if (command[1] == 'a' && parameter[0] == 0)  { LMT=timeRange(UT1-timeZone); if (LMT > 12.0) LMT-=12.0; doubleToHms(reply,&LMT,PM_HIGH); booleanReply=false; } else 
+      if (command[1] == 'a' && parameter[0] == 0)  { LMT=timeRange(UT1-timeZone); if (LMT > 12.0) LMT-=12.0; doubleToHms(reply,&LMT,PM_HIGH); boolReply=false; } else 
 // :GC#       Get the current local calendar date
 //            Returns: MM/DD/YY#
       if (command[1] == 'C' && parameter[0] == 0) { 
@@ -519,13 +519,13 @@ void processCommands() {
         if    (LMT<0.0)   { LMT=LMT+24.0; J=J+1.0; }
         greg(J,&y,&m,&d); y-=2000; if (y >= 100) y-=100;
         sprintf(reply,"%02d/%02d/%02d",m,d,y); 
-        booleanReply=false; 
+        boolReply=false; 
       } else 
 // :Gc#       Get the current local time format
 //            Returns: 24#
       if (command[1] == 'c' && parameter[0] == 0) {
         strcpy(reply,"24");
-        booleanReply=false; 
+        boolReply=false; 
        } else
 // :GD#       Get Telescope Declination
 //            Returns: sDD*MM# or sDD*MM'SS# (based on precision setting)
@@ -545,10 +545,10 @@ void processCommands() {
           _ra=f/15.0; _dec=f1; _coord_t=millis(); 
         }
         if (parameter[0] == 0) {
-          doubleToDms(reply,&_dec,false,true,precision); booleanReply=false; 
+          doubleToDms(reply,&_dec,false,true,precision); boolReply=false; 
         } else
         if (parameter[0] == 'e' && parameter[1] == 0) {
-          doubleToDms(reply,&_dec,false,true,PM_HIGHEST); booleanReply=false; 
+          doubleToDms(reply,&_dec,false,true,PM_HIGHEST); boolReply=false; 
         } else commandError=CE_CMD_UNKNOWN;
       } else 
 // :Gd#       Get Currently Selected Target Declination
@@ -557,10 +557,10 @@ void processCommands() {
 //            Returns: sDD*MM'SS.s#
       if (command[1] == 'd')  { 
         if (parameter[0] == 0) {
-          doubleToDms(reply,&origTargetDec,false,true,precision); booleanReply=false; 
+          doubleToDms(reply,&origTargetDec,false,true,precision); boolReply=false; 
         } else
         if (parameter[0] == 'e' && parameter[1] == 0) {
-          doubleToDms(reply,&origTargetDec,false,true,PM_HIGHEST); booleanReply=false; 
+          doubleToDms(reply,&origTargetDec,false,true,PM_HIGHEST); boolReply=false; 
         } else commandError=CE_CMD_UNKNOWN;
       } else
 // :GE#       Get last command error numeric code
@@ -586,20 +586,20 @@ void processCommands() {
         if (process_command == COMMAND_SERIAL_X) e=cmdX.lastError;
         sprintf(reply,"%02d",e);
         commandError=CE_NULL;
-        booleanReply=false; 
+        boolReply=false; 
       } else
 // :GG#       Get UTC offset time, the number of decimal hours to add to local time to convert to UTC
 //            Returns: sHH#
       if (command[1] == 'G' && parameter[0] == 0)  { 
         timeZoneToHM(reply,timeZone);
-        booleanReply=false; 
+        boolReply=false; 
       } else 
 // :Gg#       Get Current Site Longitude, east is negative
 //            Returns: sDDD*MM#
-      if (command[1] == 'g' && parameter[0] == 0)  { doubleToDms(reply,&longitude,true,true,PM_LOW); booleanReply=false; } else 
+      if (command[1] == 'g' && parameter[0] == 0)  { doubleToDms(reply,&longitude,true,true,PM_LOW); boolReply=false; } else 
 // :Gh#       Get Horizon Limit, the minimum elevation of the mount relative to the horizon
 //            Returns: sDD*#
-      if (command[1] == 'h' && parameter[0] == 0)  { sprintf(reply,"%+02d*",minAlt); booleanReply=false; } else
+      if (command[1] == 'h' && parameter[0] == 0)  { sprintf(reply,"%+02d*",minAlt); boolReply=false; } else
 // :GL#       Get Local Time in 24 hour format
 //            Returns: HH:MM:SS#
 //            On devices with single precision fp several days up-time will cause loss of precision as additional mantissa digits are needed to represent hours
@@ -611,10 +611,10 @@ void processCommands() {
       if (command[1] == 'L') {
         LMT=timeRange(UT1-timeZone);
         if ( parameter[0] == 0)  {
-          doubleToHms(reply,&LMT,PM_HIGH); booleanReply=false;
+          doubleToHms(reply,&LMT,PM_HIGH); boolReply=false;
         } else 
         if (parameter[0] == 'a' && parameter[1] == 0) {
-          doubleToHms(reply,&LMT,PM_HIGHEST); booleanReply=false;
+          doubleToHms(reply,&LMT,PM_HIGHEST); boolReply=false;
         }
       }
       else
@@ -627,7 +627,7 @@ void processCommands() {
         i=command[1]-'M';
         nv.readString(EE_sites+i*25+9,reply); 
         if (reply[0] == 0) { strcat(reply,"None"); }
-        booleanReply=false; 
+        boolReply=false; 
       } else
 // :Gm#       Gets the meridian pier-side
 //            Returns: E#, W#, N# (none/parked)
@@ -636,11 +636,11 @@ void processCommands() {
         if (getInstrPierSide() == PierSideNone) reply[0]='N';
         if (getInstrPierSide() == PierSideEast) reply[0]='E';
         if (getInstrPierSide() == PierSideWest) reply[0]='W';
-        booleanReply=false; } else
+        boolReply=false; } else
 // :Go#       Get Overhead Limit
 //            Returns: DD*#
 //            The highest elevation above the horizon that the telescope will goto
-      if (command[1] == 'o' && parameter[0] == 0)  { sprintf(reply,"%02d*",maxAlt); booleanReply=false; } else
+      if (command[1] == 'o' && parameter[0] == 0)  { sprintf(reply,"%02d*",maxAlt); boolReply=false; } else
 // :GR#       Get Telescope RA
 //            Returns: HH:MM.T# or HH:MM:SS# (based on precision setting)
 // :GRa#      Get Telescope RA
@@ -659,10 +659,10 @@ void processCommands() {
           _ra=f/15.0; _dec=f1; _coord_t=millis(); 
         }
         if (parameter[0] == 0) {
-           doubleToHms(reply,&_ra,precision); booleanReply=false;  
+           doubleToHms(reply,&_ra,precision); boolReply=false;  
         } else
         if (parameter[0] == 'a' && parameter[1] == 0) {
-          doubleToHms(reply,&_ra,PM_HIGHEST); booleanReply=false;
+          doubleToHms(reply,&_ra,PM_HIGHEST); boolReply=false;
         } else commandError=CE_CMD_UNKNOWN;
       } else 
 // :Gr#       Get current/target object RA
@@ -672,10 +672,10 @@ void processCommands() {
       if (command[1] == 'r')  {
         f=origTargetRA; f/=15.0;
         if (parameter[0] == 0) {
-           doubleToHms(reply,&f,precision); booleanReply=false;
+           doubleToHms(reply,&f,precision); boolReply=false;
         } else
         if (parameter[0] == 'a' && parameter[1] == 0) {
-          doubleToHms(reply,&f,PM_HIGHEST); booleanReply=false;
+          doubleToHms(reply,&f,PM_HIGHEST); boolReply=false;
         } else commandError=CE_CMD_UNKNOWN;
       } else 
 // :GS#       Get the Sidereal Time as sexagesimal value in 24 hour format
@@ -685,10 +685,10 @@ void processCommands() {
       if (command[1] == 'S') {
         f = LST();
         if (parameter[0] == 0) {
-          doubleToHms(reply,&f,PM_HIGH); booleanReply=false;
+          doubleToHms(reply,&f,PM_HIGH); boolReply=false;
         } else 
         if (parameter[0] == 'a' && parameter[1] == 0) {
-          doubleToHms(reply,&f,PM_HIGHEST); booleanReply=false;
+          doubleToHms(reply,&f,PM_HIGHEST); boolReply=false;
         }
       } else
 // :GT#       Get tracking rate, 0.0 unless TrackingSidereal
@@ -698,11 +698,11 @@ void processCommands() {
         f=getTrackingRate60Hz();
         dtostrf(f,0,5,temp);
         strcpy(reply,temp);
-        booleanReply=false;
+        boolReply=false;
       } else 
 // :Gt#       Get current site Latitude, positive for North latitudes
 //            Returns: sDD*MM#
-      if (command[1] == 't' && parameter[0] == 0)  { doubleToDms(reply,&latitude,false,true,PM_LOW); booleanReply=false; } else 
+      if (command[1] == 't' && parameter[0] == 0)  { doubleToDms(reply,&latitude,false,true,PM_LOW); boolReply=false; } else 
 // :GU#       Get telescope Status
 //            Returns: s#
       if (command[1] == 'U' && parameter[0] == 0)  {
@@ -754,7 +754,7 @@ void processCommands() {
         // provide general error
         reply[i++]='0'+generalError;
         reply[i++]=0;
-        booleanReply=false;
+        boolReply=false;
 
       } else
 // :Gu#       Get bit packed telescope status
@@ -811,7 +811,7 @@ void processCommands() {
         reply[7]=getGuideRate()|0b10000000;                                                                  // Guide rate
         reply[8]=generalError|0b10000000;                                                                    // General error
         reply[9]=0;
-        booleanReply=false;
+        boolReply=false;
       } else
 // :GVD#      Get Telescope Firmware Date
 //            Returns: MTH DD YYYY#
@@ -831,7 +831,7 @@ void processCommands() {
           if (parameter[0] == 'P') strcpy(reply,FirmwareName); else
           if (parameter[0] == 'T') strcpy(reply,FirmwareTime); else commandError=CE_CMD_UNKNOWN;
         } else commandError=CE_CMD_UNKNOWN;
-        booleanReply=false; 
+        boolReply=false; 
       } else
 // :GW#       Get alignment status
 //            Returns: [mount][tracking][alignment]#
@@ -852,7 +852,7 @@ void processCommands() {
         // align status
         i=alignThisStar-1; if (i<0) i=0; if (i > 3) i=3; reply[2]='0'+i;
         reply[3]=0;
-        booleanReply=false;
+        boolReply=false;
        } else
 // :GX[II]#   Get OnStep value where II is the numeric index
 //            Returns: n (numeric value, possibly floating point)
@@ -861,62 +861,62 @@ void processCommands() {
           if (parameter[0] == '0') { // 0n: Align Model
             static int star=0;
             switch (parameter[1]) {
-              case '0': sprintf(reply,"%ld",(long)(Align.ax1Cor*3600.0)); booleanReply=false; break;         // ax1Cor
-              case '1': sprintf(reply,"%ld",(long)(Align.ax2Cor*3600.0)); booleanReply=false; break;         // ax2Cor
-              case '2': sprintf(reply,"%ld",(long)(Align.altCor*3600.0)); booleanReply=false; break;         // altCor
-              case '3': sprintf(reply,"%ld",(long)(Align.azmCor*3600.0)); booleanReply=false; break;         // azmCor
-              case '4': sprintf(reply,"%ld",(long)(Align.doCor*3600.0)); booleanReply=false; break;          // doCor
-              case '5': sprintf(reply,"%ld",(long)(Align.pdCor*3600.0)); booleanReply=false; break;          // pdCor
+              case '0': sprintf(reply,"%ld",(long)(Align.ax1Cor*3600.0)); boolReply=false; break;         // ax1Cor
+              case '1': sprintf(reply,"%ld",(long)(Align.ax2Cor*3600.0)); boolReply=false; break;         // ax2Cor
+              case '2': sprintf(reply,"%ld",(long)(Align.altCor*3600.0)); boolReply=false; break;         // altCor
+              case '3': sprintf(reply,"%ld",(long)(Align.azmCor*3600.0)); boolReply=false; break;         // azmCor
+              case '4': sprintf(reply,"%ld",(long)(Align.doCor*3600.0)); boolReply=false; break;          // doCor
+              case '5': sprintf(reply,"%ld",(long)(Align.pdCor*3600.0)); boolReply=false; break;          // pdCor
 #if MOUNT_TYPE == FORK || MOUNT_TYPE == ALTAZM
-              case '6': sprintf(reply,"%ld",(long)(Align.dfCor*3600.0)); booleanReply=false; break;          // ffCor
-              case '7': sprintf(reply,"%ld",(long)(0)); booleanReply=false; break;                           // dfCor
+              case '6': sprintf(reply,"%ld",(long)(Align.dfCor*3600.0)); boolReply=false; break;          // ffCor
+              case '7': sprintf(reply,"%ld",(long)(0)); boolReply=false; break;                           // dfCor
 #else
-              case '6': sprintf(reply,"%ld",(long)(0)); booleanReply=false; break;                           // ffCor
-              case '7': sprintf(reply,"%ld",(long)(Align.dfCor*3600.0)); booleanReply=false; break;          // dfCor
+              case '6': sprintf(reply,"%ld",(long)(0)); boolReply=false; break;                           // ffCor
+              case '7': sprintf(reply,"%ld",(long)(Align.dfCor*3600.0)); boolReply=false; break;          // dfCor
 #endif
-              case '8': sprintf(reply,"%ld",(long)(Align.tfCor*3600.0)); booleanReply=false; break;          // tfCor
+              case '8': sprintf(reply,"%ld",(long)(Align.tfCor*3600.0)); boolReply=false; break;          // tfCor
 
               // Number of stars, reset to first star
-              case '9': { int n=0; if (alignThisStar > alignNumStars) n=alignNumStars; sprintf(reply,"%ld",(long)(n)); star=0; booleanReply=false; } break;
-              case 'A': { double f=(Align.actual[star].ha*Rad)/15.0; doubleToHms(reply,&f,PM_HIGH); booleanReply=false; } break;           // Star  #n HA
-              case 'B': { double f=(Align.actual[star].dec*Rad); doubleToDms(reply,&f,false,true,precision);  booleanReply=false; } break; // Star  #n Dec
-              case 'C': { double f=(Align.mount[star].ha*Rad)/15.0;  doubleToHms(reply,&f,PM_HIGH); booleanReply=false; } break;           // Mount #n HA
-              case 'D': { double f=(Align.mount[star].dec*Rad);  doubleToDms(reply,&f,false,true,precision);  booleanReply=false; } break; // Mount #n Dec
-              case 'E': sprintf(reply,"%ld",(long)(Align.mount[star].side)); star++; booleanReply=false; break;                            // Mount PierSide (and increment n)
+              case '9': { int n=0; if (alignThisStar > alignNumStars) n=alignNumStars; sprintf(reply,"%ld",(long)(n)); star=0; boolReply=false; } break;
+              case 'A': { double f=(Align.actual[star].ha*Rad)/15.0; doubleToHms(reply,&f,PM_HIGH); boolReply=false; } break;           // Star  #n HA
+              case 'B': { double f=(Align.actual[star].dec*Rad); doubleToDms(reply,&f,false,true,precision);  boolReply=false; } break; // Star  #n Dec
+              case 'C': { double f=(Align.mount[star].ha*Rad)/15.0;  doubleToHms(reply,&f,PM_HIGH); boolReply=false; } break;           // Mount #n HA
+              case 'D': { double f=(Align.mount[star].dec*Rad);  doubleToDms(reply,&f,false,true,precision);  boolReply=false; } break; // Mount #n Dec
+              case 'E': sprintf(reply,"%ld",(long)(Align.mount[star].side)); star++; boolReply=false; break;                            // Mount PierSide (and increment n)
               default: commandError=CE_CMD_UNKNOWN;
             }
           } else
           if (parameter[0] == '4') { // 4n: Encoder
             switch (parameter[1]) {
-              case '0': getEnc(&f,&f1); doubleToDms(reply,&f,true,true,precision); booleanReply=false; break;  // Get formatted absolute Axis1 angle
-              case '1': getEnc(&f,&f1); doubleToDms(reply,&f1,true,true,precision); booleanReply=false; break; // Get formatted absolute Axis2 angle 
-              case '2': getEnc(&f,&f1); dtostrf(f,0,6,reply); booleanReply=false; break;                       // Get absolute Axis1 angle in degrees
-              case '3': getEnc(&f,&f1); dtostrf(f1,0,6,reply); booleanReply=false; break;                      // Get absolute Axis2 angle in degrees
-              case '9': cli(); dtostrf(trackingTimerRateAxis1,1,8,reply); sei(); booleanReply=false; break;    // Get current tracking rate
+              case '0': getEnc(&f,&f1); doubleToDms(reply,&f,true,true,precision); boolReply=false; break;  // Get formatted absolute Axis1 angle
+              case '1': getEnc(&f,&f1); doubleToDms(reply,&f1,true,true,precision); boolReply=false; break; // Get formatted absolute Axis2 angle 
+              case '2': getEnc(&f,&f1); dtostrf(f,0,6,reply); boolReply=false; break;                       // Get absolute Axis1 angle in degrees
+              case '3': getEnc(&f,&f1); dtostrf(f1,0,6,reply); boolReply=false; break;                      // Get absolute Axis2 angle in degrees
+              case '9': cli(); dtostrf(trackingTimerRateAxis1,1,8,reply); sei(); boolReply=false; break;    // Get current tracking rate
               default:  commandError=CE_CMD_UNKNOWN;
             }
           } else
           if (parameter[0] == '8') { // 8n: Date/Time
             switch (parameter[1]) {
-              case '0': f=timeRange(UT1); doubleToHms(reply,&f,PM_HIGH); booleanReply=false; break;          // UTC time
-              case '1': f1=JD; f=UT1; while (f >= 24.0) { f-=24.0; f1+=1; } while (f < 0.0) { f+=24.0; f1-=1; } greg(f1,&i2,&i,&i1); i2=(i2/99.99999-floor(i2/99.99999))*100; sprintf(reply,"%02d/%02d/%02d",i,i1,i2); booleanReply=false; break; // UTC date
+              case '0': f=timeRange(UT1); doubleToHms(reply,&f,PM_HIGH); boolReply=false; break;          // UTC time
+              case '1': f1=JD; f=UT1; while (f >= 24.0) { f-=24.0; f1+=1; } while (f < 0.0) { f+=24.0; f1-=1; } greg(f1,&i2,&i,&i1); i2=(i2/99.99999-floor(i2/99.99999))*100; sprintf(reply,"%02d/%02d/%02d",i,i1,i2); boolReply=false; break; // UTC date
               case '9': if (dateWasSet && timeWasSet) commandError=CE_0; break;                              // Get Date/Time status, returns 0=known or 1=unknown
               default:  commandError=CE_CMD_UNKNOWN;
             }
           } else
           if (parameter[0] == '9') { // 9n: Misc.
             switch (parameter[1]) {
-              case '0': dtostrf(guideRates[currentPulseGuideRate]/15.0,2,2,reply); booleanReply=false; break;// pulse-guide rate
-              case '1': sprintf(reply,"%i",pecValue); booleanReply=false; break;                             // pec analog value
-              case '2': dtostrf(maxRate/16.0,3,3,reply); booleanReply=false; break;                          // MaxRate (current)
-              case '3': dtostrf((double)maxRateBaseActual,3,3,reply); booleanReply=false; break;             // maxRateBaseActual (default)
-              case '4': if (meridianFlip == MeridianFlipNever) { sprintf(reply,"%d N",getInstrPierSide()); } else { sprintf(reply,"%d",getInstrPierSide()); } booleanReply=false; break; // pierSide (N if never)
-              case '5': sprintf(reply,"%i",(int)autoMeridianFlip); booleanReply=false; break;                // autoMeridianFlip
-              case '6':                                                                                      // preferred pier side
+              case '0': dtostrf(guideRates[currentPulseGuideRate]/15.0,2,2,reply); boolReply=false; break;// pulse-guide rate
+              case '1': sprintf(reply,"%i",pecValue); boolReply=false; break;                             // pec analog value
+              case '2': dtostrf(maxRate/16.0,3,3,reply); boolReply=false; break;                          // MaxRate (current)
+              case '3': dtostrf((double)maxRateBaseActual,3,3,reply); boolReply=false; break;             // maxRateBaseActual (default)
+              case '4': if (meridianFlip == MeridianFlipNever) { sprintf(reply,"%d N",getInstrPierSide()); } else { sprintf(reply,"%d",getInstrPierSide()); } boolReply=false; break; // pierSide (N if never)
+              case '5': sprintf(reply,"%i",(int)autoMeridianFlip); boolReply=false; break;                // autoMeridianFlip
+              case '6':                                                                                   // preferred pier side
                 if (preferredPierSide == PPS_EAST) strcpy(reply,"E"); else
                 if (preferredPierSide == PPS_WEST) strcpy(reply,"W"); else strcpy(reply,"B");
-                booleanReply=false; break;
-              case '7': dtostrf(slewSpeed,3,1,reply); booleanReply=false; break;                             // slew speed
+                boolReply=false; break;
+              case '7': dtostrf(slewSpeed,3,1,reply); boolReply=false; break;                             // slew speed
               case '8':
 #if ROTATOR == ON
   #if MOUNT_TYPE == ALTAZM
@@ -927,14 +927,14 @@ void processCommands() {
 #else
                 strcpy(reply,"N");
 #endif
-                booleanReply=false; break; // rotator availablity 2=rotate/derotate, 1=rotate, 0=off
-              case '9': dtostrf(maxRateLowerLimit()/16.0,3,3,reply); booleanReply=false; break;              // MaxRate (fastest/lowest)
-              case 'A': dtostrf(ambient.getTemperature(),3,1,reply); booleanReply=false; break;              // temperature in deg. C
-              case 'B': dtostrf(ambient.getPressure(),3,1,reply); booleanReply=false; break;                 // pressure in mb
-              case 'C': dtostrf(ambient.getHumidity(),3,1,reply); booleanReply=false; break;                 // relative humidity in %
-              case 'D': dtostrf(ambient.getAltitude(),3,1,reply); booleanReply=false; break;                 // altitude in meters
-              case 'E': dtostrf(ambient.getDewPoint(),3,1,reply); booleanReply=false; break;                 // dew point in deg. C
-              case 'F': { float t=HAL_MCU_Temperature(); if (t > -999) { dtostrf(t,1,0,reply); booleanReply=false; } else commandError=CE_0; } break; // internal MCU temperature in deg. C
+                boolReply=false; break; // rotator availablity 2=rotate/derotate, 1=rotate, 0=off
+              case '9': dtostrf(maxRateLowerLimit()/16.0,3,3,reply); boolReply=false; break;              // MaxRate (fastest/lowest)
+              case 'A': dtostrf(ambient.getTemperature(),3,1,reply); boolReply=false; break;              // temperature in deg. C
+              case 'B': dtostrf(ambient.getPressure(),3,1,reply); boolReply=false; break;                 // pressure in mb
+              case 'C': dtostrf(ambient.getHumidity(),3,1,reply); boolReply=false; break;                 // relative humidity in %
+              case 'D': dtostrf(ambient.getAltitude(),3,1,reply); boolReply=false; break;                 // altitude in meters
+              case 'E': dtostrf(ambient.getDewPoint(),3,1,reply); boolReply=false; break;                 // dew point in deg. C
+              case 'F': { float t=HAL_MCU_Temperature(); if (t > -999) { dtostrf(t,1,0,reply); boolReply=false; } else commandError=CE_0; } break; // internal MCU temperature in deg. C
               default:  commandError=CE_CMD_UNKNOWN;
             }
           } else
@@ -950,7 +950,7 @@ void processCommands() {
                     axisSettings axis;
                     nv.readBytes(EE_settingsAxis1+(p*17),(byte*)&axis,sizeof(axis));
                     sprintf(reply,"%ld.%03d,%d,%d,%d,%d,%d",(long)axis.stepsPerMeasure,(int)(axis.stepsPerMeasure*1000)%1000,axis.microsteps,axis.IRUN,axis.reverse,axis.min,axis.max);
-                    booleanReply=false;
+                    boolReply=false;
                   } else commandError=CE_0;
                 } else commandError=CE_0;
               } else commandError=CE_0;
@@ -968,7 +968,7 @@ void processCommands() {
                 strcat(reply,tmcAxis1.get_DRVSTATUS_S2Gb() ? "GB," : ",");                                   // Short to Ground B
                 strcat(reply,tmcAxis1.get_DRVSTATUS_OT() ? "OT," : ",");                                     // Overtemp Shutdown 150C
                 strcat(reply,tmcAxis1.get_DRVSTATUS_OTPW() ? "PW" : "");                                     // Overtemp Pre-warning 120C
-                booleanReply=false;
+                boolReply=false;
 #else
                 commandError=CE_0;
 #endif
@@ -983,7 +983,7 @@ void processCommands() {
                 strcat(reply,tmcAxis2.get_DRVSTATUS_S2Gb() ? "GB," : ",");                                   // Short to Ground B
                 strcat(reply,tmcAxis2.get_DRVSTATUS_OT() ? "OT," : ",");                                     // Overtemp Shutdown 150C
                 strcat(reply,tmcAxis2.get_DRVSTATUS_OTPW() ? "PW" : "");                                     // Overtemp Pre-warning 120C
-                booleanReply=false;
+                boolReply=false;
 #else
                 commandError=CE_0;
 #endif
@@ -993,30 +993,30 @@ void processCommands() {
           } else
           if (parameter[0] == 'E') { // En: Get settings
             switch (parameter[1]) {
-              case '1': dtostrf((double)maxRateBaseActual,3,3,reply); booleanReply=false; break;
-              case '2': dtostrf(SLEW_ACCELERATION_DIST,2,1,reply); booleanReply=false; break;
-              case '3': sprintf(reply,"%ld",(long)round(TRACK_BACKLASH_RATE)); booleanReply=false; break;
-              case '4': sprintf(reply,"%ld",(long)round(axis1Settings.stepsPerMeasure)); booleanReply=false; break;
-              case '5': sprintf(reply,"%ld",(long)round(axis2Settings.stepsPerMeasure)); booleanReply=false; break;
-              case '6': dtostrf(stepsPerSecondAxis1,3,6,reply); booleanReply=false; break;
-              case '7': sprintf(reply,"%ld",stepsPerWormRotationAxis1); booleanReply=false; break;
-              case '8': sprintf(reply,"%ld",(long)round(pecBufferSize)); booleanReply=false; break;
+              case '1': dtostrf((double)maxRateBaseActual,3,3,reply); boolReply=false; break;
+              case '2': dtostrf(SLEW_ACCELERATION_DIST,2,1,reply); boolReply=false; break;
+              case '3': sprintf(reply,"%ld",(long)round(TRACK_BACKLASH_RATE)); boolReply=false; break;
+              case '4': sprintf(reply,"%ld",(long)round(axis1Settings.stepsPerMeasure)); boolReply=false; break;
+              case '5': sprintf(reply,"%ld",(long)round(axis2Settings.stepsPerMeasure)); boolReply=false; break;
+              case '6': dtostrf(stepsPerSecondAxis1,3,6,reply); boolReply=false; break;
+              case '7': sprintf(reply,"%ld",stepsPerWormRotationAxis1); boolReply=false; break;
+              case '8': sprintf(reply,"%ld",(long)round(pecBufferSize)); boolReply=false; break;
 #if MOUNT_TYPE == GEM
-              case '9': sprintf(reply,"%ld",(long)round(degreesPastMeridianE*4.0)); booleanReply=false; break;    // minutes past meridianE
-              case 'A': sprintf(reply,"%ld",(long)round(degreesPastMeridianW*4.0)); booleanReply=false; break;    // minutes past meridianW
+              case '9': sprintf(reply,"%ld",(long)round(degreesPastMeridianE*4.0)); boolReply=false; break;    // minutes past meridianE
+              case 'A': sprintf(reply,"%ld",(long)round(degreesPastMeridianW*4.0)); boolReply=false; break;    // minutes past meridianW
 #endif
-              case 'e': sprintf(reply,"%ld",(long)round(axis1Settings.min)); booleanReply=false; break;           // RA east or -Az limit, in degrees
-              case 'w': sprintf(reply,"%ld",(long)round(axis1Settings.max)); booleanReply=false; break;           // RA west or +Az limit, in degrees
-              case 'B': sprintf(reply,"%ld",(long)round(axis1Settings.max/15.0)); booleanReply=false; break;      // RA west or +Az limit, in hours
-              case 'C': sprintf(reply,"%ld",(long)round(axis2Settings.min)); booleanReply=false; break;
-              case 'D': sprintf(reply,"%ld",(long)round(axis2Settings.max)); booleanReply=false; break;
+              case 'e': sprintf(reply,"%ld",(long)round(axis1Settings.min)); boolReply=false; break;           // RA east or -Az limit, in degrees
+              case 'w': sprintf(reply,"%ld",(long)round(axis1Settings.max)); boolReply=false; break;           // RA west or +Az limit, in degrees
+              case 'B': sprintf(reply,"%ld",(long)round(axis1Settings.max/15.0)); boolReply=false; break;      // RA west or +Az limit, in hours
+              case 'C': sprintf(reply,"%ld",(long)round(axis2Settings.min)); boolReply=false; break;
+              case 'D': sprintf(reply,"%ld",(long)round(axis2Settings.max)); boolReply=false; break;
               case 'E':
                 // coordinate mode for getting and setting RA/Dec
                 // 0 = OBSERVED_PLACE
                 // 1 = TOPOCENTRIC (does refraction)
                 // 2 = ASTROMETRIC_J2000
                 reply[0]='0'+(TELESCOPE_COORDINATES-1);
-                booleanReply=false;
+                boolReply=false;
                 supress_frame=true;
               break;
               case 'F':
@@ -1025,7 +1025,7 @@ void processCommands() {
 #else
                 reply[0]='0';
 #endif
-                booleanReply=false;
+                boolReply=false;
                 supress_frame=true;
               break;
               default: commandError=CE_CMD_UNKNOWN;
@@ -1034,19 +1034,19 @@ void processCommands() {
           if (parameter[0] == 'F') { // Fn: Debug
             long temp;
             switch (parameter[1]) {
-              case '0': cli(); temp=(long)(posAxis1-((long)targetAxis1.part.m)); sei(); sprintf(reply,"%ld",temp); booleanReply=false; break; // Debug0, true vs. target RA position
-              case '1': cli(); temp=(long)(posAxis2-((long)targetAxis2.part.m)); sei(); sprintf(reply,"%ld",temp); booleanReply=false; break; // Debug1, true vs. target Dec position
-              case '2': cli(); temp=(long)trackingState; sei(); sprintf(reply,"%ld",temp); booleanReply=false; break;                         // Debug2, trackingState
-              case '3': dtostrf(getFrequencyHzAxis1(),3,6,reply); booleanReply=false; break;                                                  // Axis1 final tracking rate Hz
-              case '4': dtostrf(getFrequencyHzAxis2(),3,6,reply); booleanReply=false; break;                                                  // Axis2 final tracking rate Hz
-              case '6': cli(); temp=(long)(targetAxis1.part.m); sei(); sprintf(reply,"%ld",temp); booleanReply=false; break;                  // Debug6, HA target position
-              case '7': cli(); temp=(long)(targetAxis2.part.m); sei(); sprintf(reply,"%ld",temp); booleanReply=false; break;                  // Debug7, Dec target position
-              case '8': cli(); temp=(long)(posAxis1); sei(); sprintf(reply,"%ld",temp); booleanReply=false; break;                            // Debug8, HA motor position
-              case '9': cli(); temp=(long)(posAxis2); sei(); sprintf(reply,"%ld",temp); booleanReply=false; break;                            // Debug9, Dec motor position
-              case 'A': sprintf(reply,"%ld%%",((long)worst_loop_time*100L)/9970L); worst_loop_time=0; booleanReply=false; break;              // DebugA, Workload
-              case 'B': cli(); temp=(long)(trackingTimerRateAxis1*1000.0); sei(); sprintf(reply,"%ld",temp); booleanReply=false; break;       // DebugB, trackingTimerRateAxis1
-              case 'C': sprintf(reply,"%ldus",average_loop_time); booleanReply=false; break;                                                  // DebugC, Workload average
-              case 'E': double ra, de; cli(); getEqu(&ra,&de,false); sei(); sprintf(reply,"%f,%f",ra,de); booleanReply=false; break;          // DebugE, equatorial coordinates degrees (no division by 15)
+              case '0': cli(); temp=(long)(posAxis1-((long)targetAxis1.part.m)); sei(); sprintf(reply,"%ld",temp); boolReply=false; break; // Debug0, true vs. target RA position
+              case '1': cli(); temp=(long)(posAxis2-((long)targetAxis2.part.m)); sei(); sprintf(reply,"%ld",temp); boolReply=false; break; // Debug1, true vs. target Dec position
+              case '2': cli(); temp=(long)trackingState; sei(); sprintf(reply,"%ld",temp); boolReply=false; break;                         // Debug2, trackingState
+              case '3': dtostrf(getFrequencyHzAxis1(),3,6,reply); boolReply=false; break;                                                  // Axis1 final tracking rate Hz
+              case '4': dtostrf(getFrequencyHzAxis2(),3,6,reply); boolReply=false; break;                                                  // Axis2 final tracking rate Hz
+              case '6': cli(); temp=(long)(targetAxis1.part.m); sei(); sprintf(reply,"%ld",temp); boolReply=false; break;                  // Debug6, HA target position
+              case '7': cli(); temp=(long)(targetAxis2.part.m); sei(); sprintf(reply,"%ld",temp); boolReply=false; break;                  // Debug7, Dec target position
+              case '8': cli(); temp=(long)(posAxis1); sei(); sprintf(reply,"%ld",temp); boolReply=false; break;                            // Debug8, HA motor position
+              case '9': cli(); temp=(long)(posAxis2); sei(); sprintf(reply,"%ld",temp); boolReply=false; break;                            // Debug9, Dec motor position
+              case 'A': sprintf(reply,"%ld%%",((long)worst_loop_time*100L)/9970L); worst_loop_time=0; boolReply=false; break;              // DebugA, Workload
+              case 'B': cli(); temp=(long)(trackingTimerRateAxis1*1000.0); sei(); sprintf(reply,"%ld",temp); boolReply=false; break;       // DebugB, trackingTimerRateAxis1
+              case 'C': sprintf(reply,"%ldus",average_loop_time); boolReply=false; break;                                                  // DebugC, Workload average
+              case 'E': double ra, de; cli(); getEqu(&ra,&de,false); sei(); sprintf(reply,"%f,%f",ra,de); boolReply=false; break;          // DebugE, equatorial coordinates degrees (no division by 15)
 #if DEBUG != OFF // DebugF, EEPROM dump to DebugSer
               case 'F':
                 for (int x=0; x <= E2END+16; x++) {
@@ -1063,16 +1063,16 @@ void processCommands() {
                 }
               break;
 #endif
-              case 'G': dtostrf(getIndexAxis2(),3,6,reply); booleanReply=false; break;                                                        // DebugG, return index position
+              case 'G': dtostrf(getIndexAxis2(),3,6,reply); boolReply=false; break;                                                        // DebugG, return index position
               default:  commandError=CE_CMD_UNKNOWN;
             }
           } else
 #ifdef FEATURES_PRESENT
           if (parameter[0] == 'X') { // Xn: get auXiliary feature
-            featuresGetCommand(parameter,reply,booleanReply);
+            featuresGetCommand(parameter,reply,boolReply);
           } else
           if (parameter[0] == 'Y') { // Yn: get auXiliary feature temperature
-            featuresGetInfoCommand(parameter,reply,booleanReply);
+            featuresGetInfoCommand(parameter,reply,boolReply);
           } else
 #endif
             commandError=CE_CMD_UNKNOWN;
@@ -1080,7 +1080,7 @@ void processCommands() {
       } else
 // :GZ#       Get telescope azimuth
 //            Returns: DDD*MM# or DDD*MM'SS# (based on precision setting)
-      if (command[1] == 'Z' && parameter[0] == 0)  { getHor(&f,&f1); f1=degRange(f1); doubleToDms(reply,&f1,true,false,precision); booleanReply=false; } else commandError=CE_CMD_UNKNOWN;
+      if (command[1] == 'Z' && parameter[0] == 0)  { getHor(&f,&f1); f1=degRange(f1); doubleToDms(reply,&f1,true,false,precision); boolReply=false; } else commandError=CE_CMD_UNKNOWN;
       } else
 
 //  h - Home Position Commands
@@ -1095,7 +1095,7 @@ void processCommands() {
 #if FOCUSER2 == ON
         foc2.savePosition();
 #endif
-        commandError=setHome(); booleanReply=false;
+        commandError=setHome(); boolReply=false;
         if (commandError == CE_MOUNT_IN_MOTION) stopSlewingAndTracking(SS_ALL_FAST);
       } else 
 // :hC#       Moves telescope to the home position
@@ -1107,7 +1107,7 @@ void processCommands() {
 #if FOCUSER2 == ON
         foc2.savePosition();
 #endif
-        commandError=goHome(true); booleanReply=false;
+        commandError=goHome(true); boolReply=false;
         if (commandError == CE_MOUNT_IN_MOTION) stopSlewingAndTracking(SS_ALL_FAST);
       } else 
 // :hP#       Goto the Park Position
@@ -1140,7 +1140,7 @@ void processCommands() {
 // :LB#       Find previous object and set it as the current target object
 //            Returns: Nothing
       if (command[1] == 'B' && parameter[0] == 0) { 
-          Lib.prevRec(); booleanReply=false;
+          Lib.prevRec(); boolReply=false;
       } else 
 
 // :LC[n]#    Set current target object to catalog object number
@@ -1148,7 +1148,7 @@ void processCommands() {
       if (command[1] == 'C') {
         if (atoi2(parameter,&i)) {
           if (i >= 0 && i <= 32767) {
-            Lib.gotoRec(i); booleanReply=false;
+            Lib.gotoRec(i); boolReply=false;
           } else commandError=CE_PARAM_RANGE;
         } else commandError=CE_PARAM_FORM;
       } else 
@@ -1161,7 +1161,7 @@ void processCommands() {
         char const * objType=objectStr[i];
         strcat(reply,",");
         strcat(reply,objType);
-        booleanReply=false;
+        boolReply=false;
       } else 
 
 // :LIG#      Get catalog object information and goto
@@ -1175,7 +1175,7 @@ void processCommands() {
 #endif
 
         commandError=goToEqu(newTargetRA,newTargetDec);
-        booleanReply=false;
+        boolReply=false;
       } else 
 
 // :LR#       Get catalog object information including RA and Dec, with advance to next record
@@ -1195,7 +1195,7 @@ void processCommands() {
         
         Lib.nextRec();
 
-        booleanReply=false;
+        boolReply=false;
           
       } else 
 
@@ -1240,42 +1240,42 @@ void processCommands() {
 //            Returns: Nothing
       if (command[1] == 'N' && parameter[0] == 0) { 
           Lib.nextRec();
-          booleanReply=false;
+          boolReply=false;
       } else 
 
 // :L$#       Move to catalog name record
 //            Returns: 1
       if (command[1] == '$' && parameter[0] == 0) { 
           Lib.nameRec();
-          booleanReply=true;
+          boolReply=true;
       } else 
 
 // :LD#       Clear current record
 //            Returns: Nothing
       if (command[1] == 'D' && parameter[0] == 0) { 
           Lib.clearCurrentRec();
-          booleanReply=false;
+          boolReply=false;
       } else 
 
 // :LL#       Clear current catalog
 //            Returns: Nothing
       if (command[1] == 'L' && parameter[0] == 0) { 
           Lib.clearLib();
-          booleanReply=false;
+          boolReply=false;
       } else 
 
 // :L!#       Clear library (all catalogs)
 //            Returns: Nothing
       if (command[1] == '!' && parameter[0] == 0) { 
           Lib.clearAll();
-          booleanReply=false;
+          boolReply=false;
       } else 
 
 // :L?#       Get library free records (all catalogs)
 //            Returns: n#
       if (command[1] == '?' && parameter[0] == 0) { 
           sprintf(reply,"%ld",Lib.recFreeAll());
-          booleanReply=false;
+          boolReply=false;
       } else 
 
 // :Lo[n]#    Select Library catalog by catalog number n
@@ -1301,7 +1301,7 @@ void processCommands() {
         if (e >= CE_GOTO_ERR_BELOW_HORIZON && e <= CE_GOTO_ERR_UNSPECIFIED) reply[0]=(char)(e-CE_GOTO_ERR_BELOW_HORIZON)+'1';
         if (e == CE_NONE) reply[0]='0';
         reply[1]=0;
-        booleanReply=false; 
+        boolReply=false; 
         supress_frame=true;
         commandError=e;
       } else
@@ -1319,7 +1319,7 @@ void processCommands() {
 #else
               commandError=startGuideAxis1(parameter[0],currentGuideRate,i);
 #endif
-              if (command[1] == 'g') booleanReply=false;
+              if (command[1] == 'g') boolReply=false;
             } else
             if ((parameter[0] == 'n' || parameter[0] == 's') && guideDirAxis2 == 0) { 
 #if SEPARATE_PULSE_GUIDE_RATE == ON
@@ -1327,7 +1327,7 @@ void processCommands() {
 #else
               commandError=startGuideAxis2(parameter[0],currentGuideRate,i);
 #endif
-              if (command[1] == 'g') booleanReply=false;
+              if (command[1] == 'g') boolReply=false;
             } else commandError=CE_CMD_UNKNOWN;
           } else commandError=CE_PARAM_RANGE;
         } else commandError=CE_PARAM_FORM;
@@ -1336,19 +1336,19 @@ void processCommands() {
 //            Returns: Nothing
       if ((command[1] == 'e' || command[1] == 'w') && parameter[0] == 0) {
         commandError=startGuideAxis1(command[1],currentGuideRate,GUIDE_TIME_LIMIT*1000);
-        booleanReply=false;
+        boolReply=false;
       } else
 // :Mn# :Ms#  Move Telescope North or South at current guide rate
 //            Returns: Nothing
       if ((command[1] == 'n' || command[1] == 's') && parameter[0] == 0) {
         commandError=startGuideAxis2(command[1],currentGuideRate,GUIDE_TIME_LIMIT*1000);
-        booleanReply=false;
+        boolReply=false;
       } else
 // :Mp#  Move Telescope for sPiral search at current guide rate
 //            Returns: Nothing
       if ((command[1] == 'p') && parameter[0] == 0) {
         commandError=startGuideSpiral(currentGuideRate,GUIDE_SPIRAL_TIME_LIMIT*1000);
-        booleanReply=false;
+        boolReply=false;
       } else
 
 // :MP#       Goto the Current Position for Polar Align
@@ -1365,7 +1365,7 @@ void processCommands() {
         if (e >= CE_GOTO_ERR_BELOW_HORIZON && e <= CE_GOTO_ERR_UNSPECIFIED) reply[0]=(char)(e-CE_GOTO_ERR_BELOW_HORIZON)+'1';
         if (e == CE_NONE) reply[0]='0';
         reply[1]=0;
-        booleanReply=false;
+        boolReply=false;
         supress_frame=true;
         commandError=e;
       } else
@@ -1391,7 +1391,7 @@ void processCommands() {
         if (e >= CE_GOTO_ERR_BELOW_HORIZON && e <= CE_GOTO_ERR_UNSPECIFIED) reply[0]=(char)(e-CE_GOTO_ERR_BELOW_HORIZON)+'1';
         if (e == CE_NONE) reply[0]='0';
         reply[1]=0;
-        booleanReply=false;
+        boolReply=false;
         supress_frame=true;
         commandError=e;
       } else
@@ -1403,7 +1403,7 @@ void processCommands() {
         if (e >= CE_GOTO_ERR_BELOW_HORIZON && e <= CE_GOTO_ERR_UNSPECIFIED) reply[0]=(char)(e-CE_GOTO_ERR_BELOW_HORIZON)+'1';
         if (e == CE_NONE) reply[0]='0';
         reply[1]=0;
-        booleanReply=false;
+        boolReply=false;
         supress_frame=true; 
       } else commandError=CE_CMD_UNKNOWN;
       
@@ -1423,7 +1423,7 @@ void processCommands() {
 //            Returns: s#
       if (command[0] == '$' && command[1] == 'Q') {
         if (parameter[0] == 'Z' && parameter[2] == 0) {
-          booleanReply=false;
+          boolReply=false;
 #if MOUNT_TYPE != ALTAZM
           if (parameter[1] == '+') { if (pecRecorded) pecStatus=ReadyPlayPEC; nv.update(EE_pecStatus,pecStatus); } else
           if (parameter[1] == '-') { pecStatus=IgnorePEC; nv.update(EE_pecStatus,pecStatus); } else
@@ -1451,7 +1451,7 @@ void processCommands() {
             reply[1]=0; reply[2]=0;
             if (wormSensedAgain) { reply[1]='.'; wormSensedAgain=false; }
           } else {
-            booleanReply=true;
+            boolReply=true;
             commandError=CE_CMD_UNKNOWN;
           }
         } else commandError=CE_CMD_UNKNOWN;
@@ -1463,19 +1463,19 @@ void processCommands() {
       if (command[0] == 'Q') {
         if (command[1] == 0) {
           stopSlewingAndTracking(SS_ALL_FAST);
-          booleanReply=false; 
+          boolReply=false; 
         } else
 // :Qe# Qw#   Halt east/westward Slews
 //            Returns: Nothing
         if ((command[1] == 'e' || command[1] == 'w') && parameter[0] == 0) {
           stopGuideAxis1();
-          booleanReply=false;
+          boolReply=false;
         } else
 // :Qn# Qs#   Halt north/southward Slews
 //            Returns: Nothing
         if ((command[1] == 'n' || command[1] == 's') && parameter[0] == 0) {
           stopGuideAxis2();
-          booleanReply=false;
+          boolReply=false;
         } else commandError=CE_CMD_UNKNOWN;
       } else
 
@@ -1492,7 +1492,7 @@ void processCommands() {
           if (f > maxStepsPerSecond/axis1Settings.stepsPerMeasure) f=maxStepsPerSecond/axis1Settings.stepsPerMeasure;
           customGuideRateAxis1(f*240.0,GUIDE_TIME_LIMIT*1000);
         }
-        booleanReply=false; 
+        boolReply=false; 
       } else
 // :RE[n.n]#  Set Axis2 Guide rate to n.n degrees per sidereal second
 //            Returns: Nothing
@@ -1504,7 +1504,7 @@ void processCommands() {
           if (f > maxStepsPerSecond/axis2Settings.stepsPerMeasure) f=maxStepsPerSecond/axis2Settings.stepsPerMeasure;
           customGuideRateAxis2(f*240.0,GUIDE_TIME_LIMIT*1000);
         }
-        booleanReply=false; 
+        boolReply=false; 
       } else
 
 // :RG#       Set slew rate to Guiding Rate   1X
@@ -1521,7 +1521,7 @@ void processCommands() {
         if (command[1] == 'F') i=7; else // 48x
         if (command[1] == 'S') i=8; else i=command[1]-'0'; // typically 240x to 480x can be as low as 60x
         setGuideRate(i);
-        booleanReply=false; 
+        boolReply=false; 
       } else commandError=CE_CMD_UNKNOWN;
      } else
 
@@ -1531,49 +1531,49 @@ void processCommands() {
 #if MOUNT_TYPE == ALTAZM
 // :r+#       Enable derotator
 //            Returns: Nothing
-      if (command[1] == '+' && parameter[0] == 0) { rot.enableDR(true); booleanReply=false; } else
+      if (command[1] == '+' && parameter[0] == 0) { rot.enableDR(true); boolReply=false; } else
 // :r-#       Disable derotator
 //            Returns: Nothing
-      if (command[1] == '-' && parameter[0] == 0) { rot.enableDR(false); booleanReply=false; } else
+      if (command[1] == '-' && parameter[0] == 0) { rot.enableDR(false); boolReply=false; } else
 // :rP#       Move rotator to the parallactic angle
 //            Returns: Nothing
-      if (command[1] == 'P' && parameter[0] == 0) { double h,d; getApproxEqu(&h,&d,true); rot.setPA(h,d); booleanReply=false; } else
+      if (command[1] == 'P' && parameter[0] == 0) { double h,d; getApproxEqu(&h,&d,true); rot.setPA(h,d); boolReply=false; } else
 // :rR#       Reverse derotator direction
 //            Returns: Nothing
-      if (command[1] == 'R' && parameter[0] == 0) { rot.reverseDR(); booleanReply=false; } else
+      if (command[1] == 'R' && parameter[0] == 0) { rot.reverseDR(); boolReply=false; } else
 #endif
 // :rF#       Reset rotator at the home position
 //            Returns: Nothing
-      if (command[1] == 'F' && parameter[0] == 0) { rot.reset(); booleanReply=false; } else
+      if (command[1] == 'F' && parameter[0] == 0) { rot.reset(); boolReply=false; } else
 // :rC#       Moves rotator to the home position
 //            Returns: Nothing
-      if (command[1] == 'C' && parameter[0] == 0) { rot.home(); booleanReply=false; } else
+      if (command[1] == 'C' && parameter[0] == 0) { rot.home(); boolReply=false; } else
 // :rG#       Get rotator current position in degrees
 //            Returns: sDDD*MM#
       if (command[1] == 'G' && parameter[0] == 0) {
         f1=rot.getPosition();
         doubleToDms(reply,&f1,true,true,PM_LOW);
-        booleanReply=false;
+        boolReply=false;
       } else
 // :rc#       Set continuous move mode (for next move command)
 //            Returns: Nothing
-      if (command[1] == 'c' && parameter[0] == 0) { rot.moveContinuous(true); booleanReply=false; } else
+      if (command[1] == 'c' && parameter[0] == 0) { rot.moveContinuous(true); boolReply=false; } else
 // :r>#       Move clockwise as set by :rn# command, default = 1 deg (or 0.1 deg/s in continuous mode)
 //            Returns: Nothing
-      if (command[1] == '>' && parameter[0] == 0) { rot.startMoveCW(); booleanReply=false; } else
+      if (command[1] == '>' && parameter[0] == 0) { rot.startMoveCW(); boolReply=false; } else
 // :r<#       Move counter clockwise as set by :rn# command
 //            Returns: Nothing
-      if (command[1] == '<' && parameter[0] == 0) { rot.startMoveCCW(); booleanReply=false; } else
+      if (command[1] == '<' && parameter[0] == 0) { rot.startMoveCCW(); boolReply=false; } else
 // :rQ#       Stops movement (except derotator)
 //            Returns: Nothing
-      if (command[1] == 'Q' && parameter[0] == 0) { rot.stopMove(); rot.moveContinuous(false); booleanReply=false; } else
+      if (command[1] == 'Q' && parameter[0] == 0) { rot.stopMove(); rot.moveContinuous(false); boolReply=false; } else
 // :r[n]#     Move increment where n = 1 for 1 degrees, 2 for 2 degrees, 3 for 5 degrees, 4 for 10 degrees
 //            Move rate where n = 1 for .01 deg/s, 2 for 0.1 deg/s, 3 for 1.0 deg/s, 4 for 5.0 deg/s
 //            Returns: Nothing
       if ((command[1] >= '1' && command[1] <= '4') && parameter[0] == 0) {
         i=command[1]-'1';
         int t[]={1,2,5,10}; double t1[]={0.01,0.1,1.0,5.0};
-        rot.setIncrement(t[i]); rot.setMoveRate(t1[i]); booleanReply=false;
+        rot.setIncrement(t[i]); rot.setMoveRate(t1[i]); boolReply=false;
       } else
 // :rS[sDDD*MM'SS]#
 //            Set position
@@ -1609,7 +1609,7 @@ void processCommands() {
             while (SerialA.transmit()); 
             #endif
             delay(50); SerialA.begin(baudRate[i]);
-            booleanReply=false; 
+            boolReply=false; 
 #ifdef HAL_SERIAL_B_ENABLED
           } else
           if (process_command == COMMAND_SERIAL_B) {
@@ -1623,7 +1623,7 @@ void processCommands() {
   #else
             SerialB.begin(baudRate[i]);
   #endif
-            booleanReply=false;
+            boolReply=false;
 #endif
 #if defined(HAL_SERIAL_C_ENABLED) && !defined(HAL_SERIAL_C_BLUETOOTH)
           } else
@@ -1633,7 +1633,7 @@ void processCommands() {
             while (SerialC.transmit()); 
             #endif
             delay(50); SerialC.begin(baudRate[i]);
-            booleanReply=false; 
+            boolReply=false; 
 #endif
           } else commandError=CE_CMD_UNKNOWN;
         } else commandError=CE_PARAM_RANGE;
@@ -1849,7 +1849,7 @@ void processCommands() {
               } else commandError=CE_MOUNT_IN_MOTION;
             break;
             case '3': // slew rate preset (returns nothing)
-              booleanReply=false;
+              boolReply=false;
               if (!isSlewing()) {
                 switch (parameter[3]) {
                   case '5': maxRate=maxRateBaseActual*(16.0*2.0); break; // 50%
@@ -1933,7 +1933,7 @@ void processCommands() {
                   } else {
                     // :SXAn: Set axis settings :SXA1,....#
                     axisSettings axis;
-                    boolean error=false;
+                    bool error=false;
                     if (!decodeAxisSettings(&parameter[3],axis)) error=true;
                     if (!validateAxisSettings(p+1,MOUNT_TYPE==ALTAZM,axis)) error=true;
                     if (p == 0 && axis.microsteps < AXIS1_DRIVER_MICROSTEPS_GOTO) axis.microsteps=AXIS1_DRIVER_MICROSTEPS_GOTO;
@@ -1945,7 +1945,7 @@ void processCommands() {
                     if (p == 4 && AXIS5_DRIVER_MODEL != OFF && translateMicrosteps(AXIS5_DRIVER_MODEL, axis.microsteps, true) == 255) error=true;
                     if (!error) {
                       nv.writeBytes(EE_settingsAxis1+(p*17),(byte*)&axis,sizeof(axis));
-                      booleanReply=false;
+                      boolReply=false;
                     } else commandError=CE_PARAM_RANGE;
                   }
                 } else commandError=CE_PARAM_RANGE;
@@ -2040,13 +2040,13 @@ void processCommands() {
         if (command[1] == '1') { dualAxis=false; } else                                                      // turn off dual axis tracking
         if (command[1] == '2') { dualAxis=true;  } else                                                      // turn on dual axis tracking
 #endif
-        if (command[1] == '+') { siderealInterval-=HzCf*(0.02); booleanReply=false; } else
-        if (command[1] == '-') { siderealInterval+=HzCf*(0.02); booleanReply=false; } else
-        if (command[1] == 'S') { setTrackingRate(0.99726956632); rateCompensation=RC_NONE; booleanReply=false; } else // solar tracking rate 60Hz
-        if (command[1] == 'L') { setTrackingRate(0.96236513150); rateCompensation=RC_NONE; booleanReply=false; } else // lunar tracking rate 57.9Hz
-        if (command[1] == 'Q') { setTrackingRate(DefaultTrackingRate); booleanReply=false; } else                     // sidereal tracking rate
-        if (command[1] == 'R') { siderealInterval=15956313L; booleanReply=false; } else                               // reset master sidereal clock interval
-        if (command[1] == 'K') { setTrackingRate(0.99953004401); rateCompensation=RC_NONE; booleanReply=false; } else // king tracking rate 60.136Hz
+        if (command[1] == '+') { siderealInterval-=HzCf*(0.02); boolReply=false; } else
+        if (command[1] == '-') { siderealInterval+=HzCf*(0.02); boolReply=false; } else
+        if (command[1] == 'S') { setTrackingRate(0.99726956632); rateCompensation=RC_NONE; boolReply=false; } else // solar tracking rate 60Hz
+        if (command[1] == 'L') { setTrackingRate(0.96236513150); rateCompensation=RC_NONE; boolReply=false; } else // lunar tracking rate 57.9Hz
+        if (command[1] == 'Q') { setTrackingRate(DefaultTrackingRate); boolReply=false; } else                     // sidereal tracking rate
+        if (command[1] == 'R') { siderealInterval=15956313L; boolReply=false; } else                               // reset master sidereal clock interval
+        if (command[1] == 'K') { setTrackingRate(0.99953004401); rateCompensation=RC_NONE; boolReply=false; } else // king tracking rate 60.136Hz
         if (command[1] == 'e') {
           if (!isSlewing() && !isHoming() && !isParked()) {
             initGeneralError();
@@ -2082,7 +2082,7 @@ void processCommands() {
 //            Low -  RA/Dec/etc. displays and accepts HH:MM.M sDD*MM
 //            High - RA/Dec/etc. displays and accepts HH:MM:SS sDD*MM:SS
 //            Returns: Nothing
-      if (command[0] == 'U' && command[1] == 0) { if (precision == PM_LOW) precision=PM_HIGH; else precision=PM_LOW; booleanReply=false; } else
+      if (command[0] == 'U' && command[1] == 0) { if (precision == PM_LOW) precision=PM_HIGH; else precision=PM_LOW; boolReply=false; } else
 
 #if MOUNT_TYPE != ALTAZM
 // V - PEC Readout
@@ -2091,7 +2091,7 @@ void processCommands() {
 // :VR#       Read PEC table entry rate adjustment (in steps +/-) for currently playing segment and its rate adjustment (in steps +/-)
 //            Returns: sn,n#
       if (command[0] == 'V' && command[1] == 'R') {
-        boolean conv_result=true;
+        bool conv_result=true;
         if (parameter[0] == 0) { i=pecIndex1; } else conv_result=atoi2(parameter,&i);
         if (conv_result) {
           if (i >= 0 && i < pecBufferSize) {
@@ -2103,7 +2103,7 @@ void processCommands() {
             }
           } else commandError=CE_PARAM_RANGE;
         } else commandError=CE_PARAM_FORM;
-        booleanReply=false;
+        boolReply=false;
       } else
 // :Vr[n]#    Read out RA PEC ten byte frame in hex format starting at worm segment n (in seconds)
 //            Returns: x0x1x2x3x4x5x6x7x8x9# (hex one byte integers)
@@ -2122,13 +2122,13 @@ void processCommands() {
             }
           } else commandError=CE_PARAM_RANGE;
         } else commandError=CE_PARAM_FORM;
-        booleanReply=false;
+        boolReply=false;
       } else
 // :VW#       PEC number of steps per worm rotation
 //            Returns: n#
       if (command[0] == 'V' && command[1] == 'W' && parameter[0] == 0) {
         sprintf(reply,"%06ld",stepsPerWormRotationAxis1);
-        booleanReply=false;
+        boolReply=false;
       } else
 #endif
 // :VS#       PEC number of steps per second of worm rotation
@@ -2137,7 +2137,7 @@ void processCommands() {
         char temp[12];
         dtostrf(stepsPerSecondAxis1,0,6,temp);
         strcpy(reply,temp);
-        booleanReply=false;
+        boolReply=false;
       } else
 #if MOUNT_TYPE != ALTAZM
 //  :VH#      PEC index sense position in seconds
@@ -2147,7 +2147,7 @@ void processCommands() {
         while (s > secondsPerWormRotationAxis1) s-=secondsPerWormRotationAxis1;
         while (s < 0) s+=secondsPerWormRotationAxis1;
         sprintf(reply,"%05ld",s);
-        booleanReply=false;
+        boolReply=false;
       } else
       
 // :WR+#      Move PEC Table ahead by one second
@@ -2184,7 +2184,7 @@ void processCommands() {
               } else commandError=CE_PARAM_RANGE;
             } else commandError=CE_PARAM_FORM;
           } else commandError=CE_PARAM_FORM;
-          booleanReply=false;
+          boolReply=false;
         }
       } else
 #endif
@@ -2196,7 +2196,7 @@ void processCommands() {
 //            Returns: n#
       if (command[0] == 'W') {
         if (command[1] >= '0' && command[1] <= '3' && parameter[0] == 0) {
-          currentSite=command[1]-'0'; nv.update(EE_currentSite,currentSite); booleanReply=false;
+          currentSite=command[1]-'0'; nv.update(EE_currentSite,currentSite); boolReply=false;
           double f=nv.readFloat(EE_sites+currentSite*25+0);
           if (f < -90 || f > 90) { f=0.0; DLF("ERR, processCommands(): bad NV latitude"); }
           setLatitude(f);
@@ -2208,13 +2208,13 @@ void processCommands() {
           updateLST(jd2last(JD,UT1,false));
         } else 
         if (command[1] == '?') {
-          booleanReply=false;
+          boolReply=false;
           sprintf(reply,"%i",currentSite);
         } else commandError=CE_CMD_UNKNOWN;
       } else commandError=CE_CMD_UNKNOWN;
 
  // Process reply
-      if (booleanReply) {
+      if (boolReply) {
         if (commandError != CE_NONE) reply[0]='0'; else reply[0]='1';
         reply[1]=0;
         supress_frame=true;
@@ -2294,7 +2294,7 @@ void processCommands() {
         }
       }
 
-      booleanReply=true;
+      boolReply=true;
    }
 }
 

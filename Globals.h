@@ -7,8 +7,8 @@
 long siderealTimer                      = 0;                 // counter to issue steps during tracking
 long pecSiderealTimer                   = 0;                 // time since worm wheel zero index for PEC
 long guideSiderealTimer                 = 0;                 // counter to issue steps during guiding
-boolean dateWasSet                      = false;             // keep track of date/time validity
-boolean timeWasSet                      = false;                          
+bool dateWasSet                         = false;             // keep track of date/time validity
+bool timeWasSet                         = false;                          
                                                                           
 double UT1                              = 0.0;               // the current universal time
 double UT1_start                        = 0.0;               // the start of UT1
@@ -44,7 +44,7 @@ volatile unsigned long ppsLastMicroS    = 1000000UL;
 volatile unsigned long ppsAvgMicroS     = 1000000UL;
 volatile double ppsRateRatio            = 1.0;
 volatile double ppsLastRateRatio        = 1.0;
-volatile boolean ppsSynced              = false;
+volatile bool ppsSynced              = false;
 
 // Tracking and rate control -------------------------------------------------------------------------------------------------------
 #if MOUNT_TYPE != ALTAZM
@@ -62,14 +62,14 @@ volatile boolean ppsSynced              = false;
 double slewSpeed                        = 0;
 volatile long timerRateAxis1            = 0;
 volatile long timerRateBacklashAxis1    = 0;
-volatile boolean inbacklashAxis1        = false;
-boolean haltAxis1                       = false;
-boolean faultAxis1                      = false;
+volatile bool inbacklashAxis1        = false;
+bool haltAxis1                       = false;
+bool faultAxis1                      = false;
 volatile long timerRateAxis2            = 0;
 volatile long timerRateBacklashAxis2    = 0;
-volatile boolean inbacklashAxis2        = false;
-boolean haltAxis2                       = false;
-boolean faultAxis2                      = false;
+volatile bool inbacklashAxis2        = false;
+bool haltAxis2                       = false;
+bool faultAxis2                      = false;
 
 #if AXIS1_DRIVER_MODEL == TMC_SPI
   #define AXIS1_DRIVER_SWITCH_RATE 150*16L
@@ -119,7 +119,7 @@ unsigned long axis2StepsGoto            = 1;
 volatile double trackingTimerRateAxis1  = DefaultTrackingRate;
 volatile double trackingTimerRateAxis2  = DefaultTrackingRate;
 volatile double timerRateRatio;
-volatile boolean useTimerRateRatio;
+volatile bool useTimerRateRatio;
 long stepsPerWormRotationAxis1;
 long secondsPerWormRotationAxis1;
 long maxRate;
@@ -294,10 +294,10 @@ byte abortTrackingState                 = TrackingNone;
 volatile byte lastTrackingState         = TrackingNone;
 int trackingSyncSeconds                 = 0;
 byte abortGoto                          = 0;
-volatile boolean safetyLimitsOn         = true;
-boolean axis1Enabled                    = false;
-boolean axis2Enabled                    = false;
-boolean syncToEncodersOnly              = false;
+volatile bool safetyLimitsOn         = true;
+bool axis1Enabled                    = false;
+bool axis2Enabled                    = false;
+bool syncToEncodersOnly              = false;
 enum StopSlewActions {SS_ALL_FAST, SS_LIMIT, SS_LIMIT_HARD, SS_LIMIT_AXIS1_MIN, SS_LIMIT_AXIS1_MAX, SS_LIMIT_AXIS2_MIN, SS_LIMIT_AXIS2_MAX};
                                         
 // Meridian flips ------------------------------------------------------------------------------------------------------------------
@@ -317,10 +317,10 @@ enum StopSlewActions {SS_ALL_FAST, SS_LIMIT, SS_LIMIT_HARD, SS_LIMIT_AXIS1_MIN, 
 byte pierSideControl = PierSideNone;
 enum PreferredPierSide {PPS_BEST,PPS_EAST,PPS_WEST};
 PreferredPierSide preferredPierSide = PPS_BEST;
-boolean autoMeridianFlip                = false;             // auto meridian flip/continue as tracking hits AXIS1_LIMIT_MERIDIAN_W
-boolean pauseHome                       = false;             // allow pause at home?
-boolean waitingHomeContinue             = false;             // set to true to stop pause
-boolean waitingHome                     = false;             // true if waiting at home
+bool autoMeridianFlip                   = false;             // auto meridian flip/continue as tracking hits AXIS1_LIMIT_MERIDIAN_W
+bool pauseHome                          = false;             // allow pause at home?
+bool waitingHomeContinue                = false;             // set to true to stop pause
+bool waitingHome                        = false;             // true if waiting at home
 
 // Parking -------------------------------------------------------------------------------------------------------------------------
 #define PCB_BUSY                         -1
@@ -335,11 +335,11 @@ boolean waitingHome                     = false;             // true if waiting 
 #define ParkUnknown                       4
 #define PARK_STATUS_LAST                  4
 byte    parkStatus                      = NotParked;
-boolean parkSaved                       = false;
+bool parkSaved                          = false;
 
 // Homing --------------------------------------------------------------------------------------------------------------------------
-boolean atHome                          = true;
-boolean homeMount                       = false;
+bool atHome                             = true;
+bool homeMount                          = false;
 
 // Command processing --------------------------------------------------------------------------------------------------------------
 #define BAUD 9600
@@ -393,8 +393,8 @@ fixed_t guideAxis2;
 #define PECStatusStringAlt                "/,~;^"
 
 byte    pecStatus                       = IgnorePEC;
-boolean pecRecorded                     = false;
-boolean pecFirstRecord                  = false;
+bool pecRecorded                        = false;
+bool pecFirstRecord                     = false;
 long    lastPecIndex                    = -1;
 int     pecBufferSize                   = 0;
 long    pecIndex                        = 0;
@@ -408,8 +408,8 @@ long    pecIndex1                       = 0;
 #endif
 int     pecAutoRecord                   = 0;                 // for writing to PEC table to EEPROM
 long    wormSensePos                    = 0;                 // in steps
-boolean wormSensedAgain                 = false;             // indicates PEC index was found
-boolean pecBufferStart                  = false;                                   
+bool wormSensedAgain                    = false;             // indicates PEC index was found
+bool pecBufferStart                     = false;                                   
 fixed_t accPecGuideHA;                                       // for PEC, buffers steps to be recorded
 volatile double pecTimerRateAxis1 = 0.0;
 #if MOUNT_TYPE != ALTAZM
@@ -424,14 +424,14 @@ byte currentSite = 0;
 char siteName[16];
 
 // status state
-boolean ledOn                           = false;
-boolean led2On                          = false;
+bool ledOn                              = false;
+bool led2On                             = false;
 
 // sound/buzzer
 #if BUZZER_STATE_DEFAULT == ON
-  boolean soundEnabled                  = true;
+  bool soundEnabled                     = true;
 #else                                   
-  boolean soundEnabled                  = false;
+  bool soundEnabled                     = false;
 #endif
 volatile int buzzerDuration = 0;
 

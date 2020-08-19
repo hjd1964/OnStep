@@ -94,7 +94,7 @@ class stepperDC {
     }
 
     // sets logic state for disabling stepper driver
-    void setDisableState(boolean disableState) {
+    void setDisableState(bool disableState) {
       _disableState=disableState;
       if (_disableState == LOW) _enableState=HIGH; else _enableState=LOW;
     }

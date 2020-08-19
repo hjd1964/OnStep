@@ -52,8 +52,8 @@ class focuserStepper : public focuser {
     // temperature compensation
     void setTcfCoef(double coef) { if (fabs(coef) >= 10000.0) coef = 0.0; tcf_coef = coef; nv.writeFloat(nvTcfCoef,tcf_coef); }
     double getTcfCoef() { return tcf_coef; }
-    void setTcfEnable(boolean enabled) { tcf = enabled; nv.write(nvTcfEn,tcf); }
-    boolean getTcfEnable() { return tcf; }
+    void setTcfEnable(bool enabled) { tcf = enabled; nv.write(nvTcfEn,tcf); }
+    bool getTcfEnable() { return tcf; }
 
     // sets logic state for reverse motion
     void setReverseState(int reverseState) {
@@ -62,14 +62,14 @@ class focuserStepper : public focuser {
     }
 
     // sets logic state for disabling stepper driver
-    void setDisableState(boolean disableState) {
+    void setDisableState(bool disableState) {
       this->disableState=disableState;
       if (disableState == LOW) enableState=HIGH; else enableState=LOW;
       if (enPin != -1) { pinMode(enPin,OUTPUT); enableDriver(); currentlyDisabled=false; }
     }
 
     // allows enabling/disabling stepper driver
-    void powerDownActive(boolean active) {
+    void powerDownActive(bool active) {
       if (enPin == -1) { pda=false; return; }
       pda=active;
       if (pda) { pinMode(enPin,OUTPUT); disableDriver(); currentlyDisabled=true; }
@@ -111,7 +111,7 @@ class focuserStepper : public focuser {
       if (((long)target.part.m < smin) || ((long)target.part.m > smax)) delta.fixed=0;
     }
 
-    void follow(boolean slewing) {
+    void follow(bool slewing) {
 
       // if enabled and the timeout has elapsed, disable the stepper driver
       if (pda && !currentlyDisabled && ((long)(micros()-lastPhysicalMove) > 10000000L)) { disableDriver(); currentlyDisabled=true; }

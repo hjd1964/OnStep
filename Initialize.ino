@@ -390,7 +390,7 @@ void initReadNvValues() {
 
 #if MOUNT_TYPE != ALTAZM
   createPecBuffer();
-  boolean pecBufferNeedsInit=true;
+  bool pecBufferNeedsInit=true;
   for (int i=0; i < pecBufferSize; i++) { pecBuffer[i]=nv.read(EE_pecTable+i); if (pecBuffer[i] != 0) pecBufferNeedsInit=false; }
   if (pecBufferNeedsInit) for (int l=0; l < pecBufferSize; l++) nv.write(EE_pecTable+l,128);
   wormSensePos=nv.readLong(EE_wormSensePos); // validation of this value is not useful

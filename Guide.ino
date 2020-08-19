@@ -46,9 +46,9 @@ void initGuide() {
 
 #if ST4_INTERFACE == ON || ST4_INTERFACE == ON_PULLUP
   #if ST4_INTERFACE == ON
-    boolean pullup=false;
+    bool pullup=false;
   #else
-    boolean pullup=true;
+    bool pullup=true;
   #endif
   st4n.init(ST4DEn,debounceMs,pullup); // active low is default (true)
   st4s.init(ST4DEs,debounceMs,pullup);
@@ -102,7 +102,7 @@ void guide() {
 }
 
 // returns true if rapid movement is happening
-boolean isSlewing() {
+bool isSlewing() {
   return ((guideDirAxis1 != 0) && (fabs(guideTimerRateAxis1) >= 2)) || ((guideDirAxis2 != 0) && (fabs(guideTimerRateAxis2) >= 2)) || (trackingState == TrackingMoveTo);
 }
 
@@ -388,7 +388,7 @@ void ST4() {
 #if ST4_INTERFACE == ON || ST4_INTERFACE == ON_PULLUP
   // get ST4 button presses
   st4e.poll();
-  static boolean shcActive=false;
+  static bool shcActive=false;
   if (!shcActive) {
     st4w.poll();
     st4n.poll();
