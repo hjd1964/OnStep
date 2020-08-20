@@ -42,7 +42,7 @@
 // General purpose initialize for HAL
 #include "imxrt.h"
 
-void HAL_Init(void) {
+void HAL_Initialize(void) {
   analogReadResolution(10);
 
   // clear/make available all PIT timers

@@ -177,7 +177,7 @@ void setup() {
   
   // Call hardware specific initialization
   VLF("MSG: Init HAL");
-  HAL_Init();
+  HAL_Initialize();
 
   VLF("MSG: Init serial");
   SerialA.begin(SERIAL_A_BAUD_DEFAULT);

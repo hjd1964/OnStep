@@ -47,7 +47,7 @@
 
 //--------------------------------------------------------------------------------------------------
 // General purpose initialize for HAL
-void HAL_Init(void)
+void HAL_Initialize(void)
 {
 }
 
