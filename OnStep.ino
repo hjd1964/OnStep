@@ -216,7 +216,7 @@ void setup() {
   VLF("MSG: Start NV");
   if (!nv.init()) {
     SerialA.print("NV (EEPROM) failure!#\r\n");
-    while (false) {
+    while (true) {
       delay(10);
       #ifdef HAL_SERIAL_TRANSMIT
         SerialA.transmit();
