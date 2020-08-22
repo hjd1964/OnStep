@@ -5,7 +5,7 @@
 #define __ARM_STM32__
 
 // Lower limit (fastest) step rate in uS for this platform (in SQW mode)
-#define HAL_MAXRATE_LOWER_LIMIT 30
+#define HAL_MAXRATE_LOWER_LIMIT 34
 
 // Width of step pulse
 #define HAL_PULSE_WIDTH 1900
