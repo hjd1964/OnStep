@@ -213,8 +213,9 @@ void setup() {
   if (!tls.init()) generalError=ERR_SITE_INIT;
   
   // Check the Non-Volatile Memory
-  VLF("MSG: Start NV");
+  VF("MSG: Start NV ");
   if (!nv.init()) {
+    VLF("");
     SerialA.print("NV (EEPROM) failure!#\r\n");
     while (true) {
       delay(10);
@@ -223,6 +224,7 @@ void setup() {
       #endif
     }
   }
+  V(E2END+1); VLF(" Bytes");
 
   // if this is the first startup set EEPROM to defaults
   initWriteNvValues();
