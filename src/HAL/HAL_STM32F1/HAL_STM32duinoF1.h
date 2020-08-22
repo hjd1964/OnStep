@@ -29,6 +29,7 @@ HardwareSerial Serial2(PB11, PB10);
 #define HAL_Wire Wire
 
 // Non-volatile storage ------------------------------------------------------------------------------
+#undef E2END
 #if defined(NV_AT24C32)
   #include "../drivers/NV_I2C_EEPROM_AT24C32_C.h"
 #elif defined(NV_MB85RC256V)
