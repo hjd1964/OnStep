@@ -3,10 +3,6 @@
 // We define a more generic symbol, in case more STM32 boards based on different lines are supported
 #define __ARM_STM32__
 
-// This is to avoid lots of warnings
-#undef boolean
-#define boolean bool
-
 #define HAL_FAST_PROCESSOR
 // Lower limit (fastest) step rate in uS for this platform (in SQW mode)
 #define HAL_MAXRATE_LOWER_LIMIT 14
