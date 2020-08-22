@@ -58,6 +58,10 @@
   // STM32103ZE: 72MHz, 512K flash, 64K RAM
 
   #include "HAL_STM32F1/HAL_STM32F1.h"
+  
+#elif defined(STM32F103xB)
+  // as above except using STM32duino
+  #include "HAL_STM32F1/HAL_STM32duinoF1.h"
 
 #elif defined(STM32F446xx)
   // FYSETC S6 board with STM32F446
