@@ -64,9 +64,6 @@
 
 #include "src/sd_drivers/Models.h"
 #include "Config.h"
-#if STM32DUINO == ON
-  #define __STM32F1__
-#endif
 #include "src/pinmaps/Models.h"
 #include "src/HAL/HAL.h"
 #include "Validate.h"
