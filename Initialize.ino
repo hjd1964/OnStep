@@ -165,10 +165,11 @@ void initWriteNvValues() {
   if (NV_INIT_KEY_RESET == ON) nv.writeLong(EE_autoInitKey,0);
 
   if (nv.readLong(EE_autoInitKey) != NV_INIT_KEY) {
-    VLF("MSG: Init all NV defaults");
-
     // wipe the whole nv memory
+    VF("MSG: Wipe NV "); V(E2END+1); VLF(" Bytes (please wait)");
     for (int i=0; i<E2END; i++) nv.write(i,0);
+
+    VLF("MSG: Init NV to defaults");
 
     // default stepper driver setup is from Config.h
     nv.write(EE_settingsRuntime,0);
