@@ -229,7 +229,7 @@ void setup() {
   // if this is the first startup set EEPROM to defaults
   initWriteNvValues();
 
-  // now read any saved values from EEPROM into varaibles to restore our last state
+  // now read any saved values from EEPROM into variables to restore our last state
   VLF("MSG: Read NV settings");
   initReadNvValues();
 
