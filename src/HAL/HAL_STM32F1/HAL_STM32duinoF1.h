@@ -68,9 +68,12 @@ float HAL_MCU_Temperature(void) {
 
 #define ISR(f) void f (void)
 
-HardwareTimer *Timer_Sidereal = new HardwareTimer(TIM1);
-HardwareTimer *Timer_Axis1    = new HardwareTimer(TIM2);
-HardwareTimer *Timer_Axis2    = new HardwareTimer(TIM3);
+HardwareTimer *Timer_Sidereal = new HardwareTimer(TIM4);
+HardwareTimer *Timer_Axis1    = new HardwareTimer(TIM1);
+HardwareTimer *Timer_Axis2    = new HardwareTimer(TIM2);
+// TIMER_TONE uses TIM3
+// TIMER_SERVO uses TIM2
+#undef TIMER_SERVO
 
 #define SIDEREAL_CH  1
 #define AXIS1_CH     1
@@ -98,7 +101,7 @@ void HAL_Init_Timer_Sidereal() {
   // 0.166... us per count (72/12 = 6MHz) 10.922 ms max, more than enough for the 1/100 second sidereal clock +/- any PPS adjustment for xo error
   psf = Timer_Sidereal->getTimerClkFreq()/6000000; // for example, 72000000/6000000 = 12
   Timer_Sidereal->setPrescaleFactor(psf);
-  Timer_Sidereal->setOverflow(round((60000.0/1.00273790935)/3.0));
+  Timer_Sidereal->setOverflow(19945);
 
   // set the 1/100 second sidereal clock timer to run at the second highest priority
   Timer_Sidereal->setInterruptPriority(2, 2);
@@ -191,8 +194,8 @@ void PresetTimerInterval(long iv, bool TPS, volatile uint32_t *nextRate, volatil
 }
 
 // Must work from within the motor ISR timers, in microseconds*(F_COMP/1000000.0) units
-#define QuickSetIntervalAxis1(r) WRITE_REG(TIM2->ARR, r)
-#define QuickSetIntervalAxis2(r) WRITE_REG(TIM3->ARR, r)
+#define QuickSetIntervalAxis1(r) WRITE_REG(TIM1->ARR, r)
+#define QuickSetIntervalAxis2(r) WRITE_REG(TIM2->ARR, r)
 
 // --------------------------------------------------------------------------------------------------
 // Fast port writing help, etc.
