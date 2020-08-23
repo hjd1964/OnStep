@@ -2045,7 +2045,7 @@ void processCommands() {
         if (command[1] == 'S') { setTrackingRate(0.99726956632); rateCompensation=RC_NONE; boolReply=false; } else // solar tracking rate 60Hz
         if (command[1] == 'L') { setTrackingRate(0.96236513150); rateCompensation=RC_NONE; boolReply=false; } else // lunar tracking rate 57.9Hz
         if (command[1] == 'Q') { setTrackingRate(DefaultTrackingRate); boolReply=false; } else                     // sidereal tracking rate
-        if (command[1] == 'R') { siderealInterval=15956313L; boolReply=false; } else                               // reset master sidereal clock interval
+        if (command[1] == 'R') { siderealInterval=masterSiderealInterval; boolReply=false; } else                  // reset master sidereal clock interval
         if (command[1] == 'K') { setTrackingRate(0.99953004401); rateCompensation=RC_NONE; boolReply=false; } else // king tracking rate 60.136Hz
         if (command[1] == 'e') {
           if (!isSlewing() && !isHoming() && !isParked()) {

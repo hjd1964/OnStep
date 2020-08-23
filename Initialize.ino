@@ -228,7 +228,7 @@ void initWriteNvValues() {
 
     // init the sidereal tracking rate
     // 1/16uS resolution timer, ticks per sidereal second
-    nv.writeLong(EE_siderealInterval,siderealInterval);
+    nv.writeLong(EE_siderealInterval,masterSiderealInterval);
 
     // set default focuser positions at zero
     nv.writeLong(EE_posAxis4,0L);

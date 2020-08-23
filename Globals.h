@@ -21,8 +21,8 @@ volatile long lst                       = 0;                 // local (apparent)
                                                              // takes 249 days to roll over.
                                                              // 1.00273 wall clock seconds per sidereal second
                                                                           
-long siderealInterval                   = 15956313L;                      
-long masterSiderealInterval             = siderealInterval;               
+const long masterSiderealInterval      = 15956313L;                      
+long siderealInterval                  = masterSiderealInterval;               
                                                              // default = 15956313 ticks per sidereal second, where a tick
                                                              // is 1/16 uS this is stored in EEPROM which is updated/adjusted
                                                              // with the ":T+#" and ":T-#" commands a higher number here means
