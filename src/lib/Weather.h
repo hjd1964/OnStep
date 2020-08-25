@@ -173,8 +173,9 @@ class weather {
   #else
       #error "Configuration (Config.h): Setting WEATHER unknown value!"
   #endif
-  #if defined(ESP32) & defined(WIRE_END_SUPPORT)
-      HAL_Wire.end();
+  // follow any I2C device in-library init with a reset of the I2C bus speed
+  #if WEATHER == BME280 || WEATHER == BME280_0x76 || WEATHER == BMP280_0x76 || WEATHER == BMP280
+    HAL_Wire.setClock(HAL_WIRE_CLOCK);
   #endif
 #endif
       return success;

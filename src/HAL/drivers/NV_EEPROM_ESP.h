@@ -25,6 +25,10 @@ class nvs {
       }
     }
 
+    bool committed() {
+      return !_dirtyPool;
+    }
+
     byte read(int i) {
       return EEPROM.read(i);
     }

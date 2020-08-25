@@ -5,28 +5,44 @@
 
 #include <Wire.h>
 #include "Adafruit_FRAM_I2C.h"  // https://github.com/hjd1964/Adafruit_FRAM_I2C
-
-#define I2C_EEPROM_ADDRESS 0x76
 Adafruit_FRAM_I2C fram = Adafruit_FRAM_I2C();
-#define E2END 32767
-#define I2C_CLOCK 400000
+
+// I2C EEPROM Address
+#if !defined(I2C_EEPROM_ADDRESS)
+  #define I2C_EEPROM_ADDRESS 0x76
+#endif
+
+// Time to wait after write page is requested, in microseconds
+#if !defined(FRAM_WRITE_WAIT)
+  #define FRAM_WRITE_WAIT 3
+#endif
+
+#if !defined(E2END)
+  #define E2END 32767
+#endif
 
 class nvs {
   public:
     bool init() {
-      return fram.begin(&HAL_Wire);
+      bool result=fram.begin(&HAL_Wire);
+      HAL_Wire.setClock(HAL_WIRE_CLOCK);
+      return result;
     }
 
     void poll() {
     }
 
+    bool committed() {
+      return true;
+    }
+
     byte read(int i) {
-      delayMicroseconds(3);
+      delayMicroseconds(FRAM_WRITE_WAIT);
       return fram.read8(i);
     }
 
     void update(int i, byte j) {
-      delayMicroseconds(3);
+      delayMicroseconds(FRAM_WRITE_WAIT);
       fram.write8(i,j);
     }
 

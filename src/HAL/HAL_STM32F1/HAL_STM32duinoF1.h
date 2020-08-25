@@ -26,16 +26,17 @@ HardwareSerial Serial2(PB11, PB10);
 #endif
 
 // New symbol for the default I2C port ---------------------------------------------------------------
+#include <Wire.h>
 #define HAL_Wire Wire
+#define HAL_WIRE_CLOCK 100000
 
 // Non-volatile storage ------------------------------------------------------------------------------
 #undef E2END
-#if defined(NV_AT24C32)
-  #include "../drivers/NV_I2C_EEPROM_AT24C32_C.h"
-#elif defined(NV_MB85RC256V)
+#if defined(NV_MB85RC256V)
   #include "../drivers/NV_I2C_FRAM_MB85RC256V.h"
 #else
-  #include "../drivers/NV_I2C_EEPROM_AT24C32_C.h"
+  // defaults to 0x57 and 4KB
+  #include "../drivers/NV_I2C_EEPROM_24XX_C.h"
 #endif
 
 //----------------------------------------------------------------------------------------------------

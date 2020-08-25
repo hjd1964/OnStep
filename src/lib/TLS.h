@@ -140,10 +140,12 @@ class timeLocationSource {
     // initialize (also enables the RTC PPS if available)
     bool init() {
       HAL_Wire.begin();
+      HAL_Wire.setClock(HAL_WIRE_CLOCK);
       HAL_Wire.beginTransmission(0x68);
       bool error = HAL_Wire.endTransmission() != 0;
       if (!error) {
         _Rtc.Begin();
+        HAL_Wire.setClock(HAL_WIRE_CLOCK);
         if (!_Rtc.GetIsRunning()) _Rtc.SetIsRunning(true);
   
         // see if the RTC is present
@@ -170,7 +172,7 @@ class timeLocationSource {
       h=floor(f1);
       m=(f1-h)*60.0;
       s=(m-floor(m))*60.0;
-      
+
       RtcDateTime updateTime = RtcDateTime(yy, mo, d, h, floor(m), floor(s));
       _Rtc.SetDateTime(updateTime);
     }

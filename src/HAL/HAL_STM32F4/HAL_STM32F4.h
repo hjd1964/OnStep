@@ -5,7 +5,7 @@
 
 #define HAL_FAST_PROCESSOR
 // Lower limit (fastest) step rate in uS for this platform (in SQW mode)
-#define HAL_MAXRATE_LOWER_LIMIT 14
+#define HAL_MAXRATE_LOWER_LIMIT 20
 
 // Width of step pulse
 #define HAL_PULSE_WIDTH         500
@@ -38,12 +38,16 @@
 #endif
 
 // New symbol for the default I2C port ---------------------------------------------------------------
+#include <Wire.h>
 #define HAL_Wire Wire
+#define HAL_WIRE_CLOCK 100000
 
 // Non-volatile storage ------------------------------------------------------------------------------
 // The FYSETC S6 has a 2047 byte EEPROM built-in
 #undef E2END
-#include "../drivers/NV_I2C_EEPROM_24LC16_C.h"
+#define E2END 2047
+#define I2C_EEPROM_ADDRESS 0x50
+#include "../drivers/NV_I2C_EEPROM_24XX_C.h"
 
 //----------------------------------------------------------------------------------------------------
 // Nanoseconds delay function

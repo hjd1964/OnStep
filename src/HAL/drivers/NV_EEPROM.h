@@ -14,6 +14,10 @@ class nvs {
     void poll() {
     }
 
+    bool committed() {
+      return true;
+    }
+
     byte read(int i) {
       return EEPROM.read(i);
     }

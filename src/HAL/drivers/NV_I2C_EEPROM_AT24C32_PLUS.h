@@ -8,12 +8,20 @@
 #include <Wire.h>
 #include "EEPROM.h"
 
-// I2C EEPROM Address on DS3231 RTC module
-#define I2C_EEPROM_ADDRESS 0x57
+// I2C EEPROM Address
+#if !defined(I2C_EEPROM_ADDRESS)
+  #define I2C_EEPROM_ADDRESS 0x57
+#endif
+
+// Time to wait after write page is requested, in milliseconds
+#if !defined(EEPROM_WRITE_WAIT)
+  #define EEPROM_WRITE_WAIT 10UL
+#endif
+
 #undef E2END
 #define E2END2 4095
+#define CACHE_SIZE ((E2END2+1)/8)
 #define E2END 8191
-#define I2C_CLOCK 400000
 
 #define MSB(i) (i >> 8)
 #define LSB(i) (i & 0xFF)
@@ -22,13 +30,13 @@ class nvs {
   public:    
     bool init() {
       HAL_Wire.begin();
-      HAL_Wire.setClock(I2C_CLOCK);
+      HAL_Wire.setClock(HAL_WIRE_CLOCK);
       _eeprom_addr = I2C_EEPROM_ADDRESS;
 
       // mark entire read cache as dirty
-      for (int i=0; i < 512; i++) cacheReadState[i]=255;
+      for (int i=0; i < CACHE_SIZE; i++) cacheReadState[i]=255;
       // mark entire write cache as clean
-      for (int i=0; i < 512; i++) cacheWriteState[i]=0;
+      for (int i=0; i < CACHE_SIZE; i++) cacheWriteState[i]=0;
 
       HAL_Wire.beginTransmission(I2C_EEPROM_ADDRESS);
       bool error = HAL_Wire.endTransmission();
@@ -37,16 +45,16 @@ class nvs {
 
     // move data to/from the cache
     void poll() {
-      static int i=4095;
+      static int i=E2END2;
       uint8_t j;
       int dirtyW, dirtyR;
 
       // just exit if waiting for an EEPROM write to finish
-      if ((int32_t)(millis()-nextOpMs) < 0) return;
+      if (!ee_ready()) return;
 
       // check 20 byte chunks of cache for data that needs processing so < about 2s to check the entire cache
       for (int j=0; j < 20; j++) {
-        i++; if (i > 4095) i=0;
+        i++; if (i > E2END2) i=0;
         dirtyW=bitRead(cacheWriteState[i/8],i%8);
         dirtyR=bitRead(cacheReadState[i/8],i%8);
         if (dirtyW || dirtyR) break;
@@ -65,6 +73,18 @@ class nvs {
           bitWrite(cacheReadState[i/8],i%8,0); // clean
         }
       }
+    }
+
+    bool committed() {
+      int dirtyPool=0;
+
+      // check 20 byte chunks of cache for data that needs processing so < about 2s to check the entire cache
+      for (int j=0; j < E2END2; j++) {
+        dirtyPool=bitRead(cacheWriteState[j/8],j%8);
+        if (dirtyPool) break;
+      }
+
+      return !dirtyPool;
     }
 
     uint8_t read(int i) {
@@ -193,23 +213,27 @@ private:
   // Address of the I2C EEPROM
   uint8_t _eeprom_addr;
   uint32_t nextOpMs=0;
-  uint8_t cache[4096];
-  uint8_t cacheReadState[512];
-  uint8_t cacheWriteState[512];
+  uint8_t cache[E2END2+1];
+  uint8_t cacheReadState[CACHE_SIZE];
+  uint8_t cacheWriteState[CACHE_SIZE];
+
+  bool ee_ready() {
+    return (int32_t)(millis()-nextOpMs) >= 0;
+  }
 
   void ee_write(int offset, byte data) {
-    while ((int32_t)(millis()-nextOpMs) < 0) {}
+    while (!ee_ready()) {}
 
     HAL_Wire.beginTransmission(_eeprom_addr);
     HAL_Wire.write(MSB(offset));
     HAL_Wire.write(LSB(offset));
     HAL_Wire.write(data);
     HAL_Wire.endTransmission();
-    nextOpMs=millis()+10UL;
+    nextOpMs=millis()+EEPROM_WRITE_WAIT;
   }
 
   void ee_read(int offset, byte *data, byte count) {
-    while ((int32_t)(millis()-nextOpMs) < 0) {}
+    while (!ee_ready()) {}
 
     HAL_Wire.beginTransmission(_eeprom_addr);
     HAL_Wire.write(MSB(offset));
