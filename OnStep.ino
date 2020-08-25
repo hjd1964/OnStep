@@ -249,10 +249,11 @@ void setup() {
   // get weather monitoring ready to go
 #ifdef ONEWIRE_DEVICES_PRESENT
   VLF("MSG: Init weather and 1-Wire");
+  if (!ambient.init()) { generalError=ERR_WEATHER_INIT; DLF("ERR, setup(): Init weather and/or 1-Wire failed"); }
 #else
   VLF("MSG: Init weather");
+  if (!ambient.init()) { generalError=ERR_WEATHER_INIT; DLF("ERR, setup(): Init weather failed"); }
 #endif
-  if (!ambient.init()) generalError=ERR_WEATHER_INIT;
 
   // setup features
 #ifdef FEATURES_PRESENT
