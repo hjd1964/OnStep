@@ -162,7 +162,7 @@ void initPins() {
 
 void initWriteNvValues() {
   // EEPROM automatic initialization
-  if (NV_INIT_KEY_RESET == ON) nv.writeLong(EE_autoInitKey,0);
+  if (NV_FACTORY_RESET == ON) nv.writeLong(EE_autoInitKey,0);
 
   if (nv.readLong(EE_autoInitKey) != NV_INIT_KEY) {
     // wipe the whole nv memory
