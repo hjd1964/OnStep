@@ -102,20 +102,20 @@
 
 // ST4 interface
 #if defined(ST4_ALTERNATE_PINS_ON) || (PINMAP == ClassicShield)
-  #define ST4RAw               47     // ST4 RA- West
-  #define ST4DEs               43     // ST4 DE- South
-  #define ST4DEn               45     // ST4 DE+ North
-  #define ST4RAe               49     // ST4 RA+ East
+  #define ST4RAw             47     // ST4 RA- West
+  #define ST4DEs             43     // ST4 DE- South
+  #define ST4DEn             45     // ST4 DE+ North
+  #define ST4RAe             49     // ST4 RA+ East
 #elif PINMAP == ClassicInstein
-  #define ST4RAw               49     // Socket RJ12 Pin 3 RA- West
-  #define ST4DEs               43     // Socket RJ12 Pin 4 DE- South
-  #define ST4DEn               47     // Socket RJ12 Pin 5 DE+ North
-  #define ST4RAe               45     // Socket RJ12 Pin 6 RA+ East
+  #define ST4RAw             49     // Socket RJ12 Pin 3 RA- West
+  #define ST4DEs             43     // Socket RJ12 Pin 4 DE- South
+  #define ST4DEn             47     // Socket RJ12 Pin 5 DE+ North
+  #define ST4RAe             45     // Socket RJ12 Pin 6 RA+ East
 #else
-  #define ST4RAw               47     // ST4 RA- West
-  #define ST4DEs               49     // ST4 DE- South
-  #define ST4DEn               51     // ST4 DE+ North
-  #define ST4RAe               53     // ST4 RA+ East
+  #define ST4RAw             47     // ST4 RA- West
+  #define ST4DEs             49     // ST4 DE- South
+  #define ST4DEn             51     // ST4 DE+ North
+  #define ST4RAe             53     // ST4 RA+ East
 #endif
 
 #elif defined(__MK20DX256__) || defined(__MK64FX512__) || defined(__MK66FX1M0__)
@@ -141,9 +141,9 @@
 
 // Obsolete pins that would power stepper drivers in the old days
 #define POWER_SUPPLY_PINS_OFF
-#define Axis15vPin    11    // Pin 11 (3.3V)
-#define Axis25vPin     5    // Pin 5 (3.3V)
-#define Axis2GndPin    7    // Pin 7 (GND)
+#define Axis15vPin           11     // Pin 11 (3.3V)
+#define Axis25vPin            5     // Pin 5 (3.3V)
+#define Axis2GndPin           7     // Pin 7 (GND)
 
 // Axis1 RA/Azm step/dir driver
 #define Axis1_EN             16     // Enable
