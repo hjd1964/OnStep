@@ -539,6 +539,15 @@ void loop2() {
     
     // WEATHER
     if (!isSlewing()) ambient.poll();
+
+    // MONITOR NV CACHE
+#if DEBUG == VERBOSE
+    static bool lastCommitted=true;
+    bool committed=nv.committed();
+    if (committed && !lastCommitted) { DLF("MSG: NV commit done"); lastCommitted=committed; }
+    if (!committed && lastCommitted) { DLF("MSG: NV data in cache"); lastCommitted=committed; }
+#endif
+
   }
 
   // FASTEST POLLING -----------------------------------------------------------------------------------
