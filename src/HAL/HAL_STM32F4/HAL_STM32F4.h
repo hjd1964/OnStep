@@ -29,12 +29,14 @@
   #define HAL_SERIAL_C_ENABLED
 #endif
 
-// handle special case of using software serial for a GPS
-#if SerialGPS == SoftwareSerial2
-  #include <SoftwareSerial.h>
-  SoftwareSerial HWSerialGPS(PA3, PA2); // RX2, TX2
-  #undef SerialGPS
-  #define SerialGPS HWSerialGPS
+#if PINMAP == FYSETC_S6
+  // Handle special case of using software serial for a GPS
+  #if SerialGPS == SoftwareSerial2
+    #include <SoftwareSerial.h>
+    SoftwareSerial HWSerialGPS(PA3, PA2); // RX2, TX2
+    #undef SerialGPS
+    #define SerialGPS HWSerialGPS
+  #endif
 #endif
 
 // New symbol for the default I2C port ---------------------------------------------------------------
@@ -43,11 +45,18 @@
 #define HAL_WIRE_CLOCK 100000
 
 // Non-volatile storage ------------------------------------------------------------------------------
-// The FYSETC S6 has a 2047 byte EEPROM built-in
 #undef E2END
-#define E2END 2047
-#define I2C_EEPROM_ADDRESS 0x50
-#include "../drivers/NV_I2C_EEPROM_24XX_C.h"
+#if defined(NV_MB85RC256V)
+  #include "../drivers/NV_I2C_FRAM_MB85RC256V.h"
+#else
+  // The FYSETC S6 has a 2047 byte EEPROM built-in
+  #if PINMAP == FYSETC_S6
+    #define E2END 2047
+    #define I2C_EEPROM_ADDRESS 0x50
+  #endif
+  // Defaults to 0x57 and 4KB 
+  #include "../drivers/NV_I2C_EEPROM_24XX_C.h"
+#endif
 
 //----------------------------------------------------------------------------------------------------
 // Nanoseconds delay function

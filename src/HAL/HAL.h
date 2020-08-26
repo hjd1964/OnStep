@@ -63,6 +63,10 @@
   // as above except using STM32duino
   #include "HAL_STM32F1/HAL_STM32duinoF1.h"
 
+#elif defined(STM32F411xE)
+  // Blackpill board with STM32F411CE
+  #include "HAL_STM32F4/HAL_STM32F4.h"
+
 #elif defined(STM32F446xx)
   // FYSETC S6 board with STM32F446
   #include "HAL_STM32F4/HAL_STM32F4.h"
