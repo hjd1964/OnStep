@@ -163,13 +163,15 @@ class weather {
 #endif
 #if WEATHER != OFF
   #if WEATHER == BME280
-      if (bmx.begin(0x77, &HAL_Wire)) _BME280_found = true; else success = false;
+      if (bmx.begin(0x77, &HAL_Wire)) _BME280_found = true; else { success = false; DLF("WRN, ambient.init(): BME280_0x77 not found"); }
   #elif WEATHER == BME280_0x76
-      if (bmx.begin(0x76, &HAL_Wire)) _BME280_found = true; else success = false;
-  #elif WEATHER == BMP280_0x76
-      if (bmx.begin(0x76)) _BMP280_found = true; else success = false;
+      if (bmx.begin(0x76, &HAL_Wire)) _BME280_found = true; else { success = false; DLF("WRN, ambient.init(): BME280_0x76 not found"); } 
   #elif WEATHER == BMP280 || WEATHER == BMP280_SPI || WEATHER == BME280_SPI
-      if (bmx.begin()) _BMP280_found = true; else success = false;
+      if (bmx.begin()) _BMP280_found = true; else { success = false; DLF("WRN, ambient.init(): BME280_SPI not found"); }
+  #elif WEATHER == BMP280_0x76
+      if (bmx.begin(0x76)) _BMP280_found = true; else { success = false; DLF("WRN, ambient.init(): BMP280_0x76 not found"); }
+  #elif WEATHER == BMP280 || WEATHER == BMP280_SPI
+      if (bmx.begin()) _BMP280_found = true; else { success = false;  DLF("WRN, ambient.init(): BMP280_SPI not found"); }
   #else
       #error "Configuration (Config.h): Setting WEATHER unknown value!"
   #endif

@@ -137,6 +137,11 @@ class Mst4 : public Stream
       delayMicroseconds(XMIT_TIME);
 
       lastMicros=micros();
+
+      if (_frame_error) VLF("MSG: SerialST4, frame error");
+      if (_send_error) VLF("MSG: SerialST4, send error (parity failed)");
+      if (_recv_error) VLF("MSG: SerialST4, recv error (parity failed)");
+
       if (_frame_error) return false; else return true;
     }
 

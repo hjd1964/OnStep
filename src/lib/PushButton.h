@@ -21,8 +21,8 @@ class button {
       if (_stableMs > _debounceMs) {
         if ((_lastStableState == _UP) && (_state == _DOWN)) { 
           static unsigned long lastPressTime=0;
-          if ((_wasPressed) && (millis()-lastPressTime < 500)) _wasDoublePressed=true; 
-          _wasPressed=true; 
+          if ((_wasPressed) && (millis()-lastPressTime < 500)) _wasDoublePressed=true;
+          _wasPressed=true;
           lastPressTime=millis();
         }
         _lastStableState=_state;
