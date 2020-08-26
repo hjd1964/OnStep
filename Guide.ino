@@ -406,7 +406,7 @@ void ST4() {
         digitalWrite(ST4DEs,HIGH); // idle
         shcActive=true;
         SerialST4.begin();
-        VLF("MSG: ST4Serial mode activated");
+        VLF("MSG: SerialST4 mode activated");
       }
       return;
     } else { 
@@ -433,7 +433,7 @@ void ST4() {
       #endif
       shcActive=false;
       SerialST4.end();
-      VLF("MSG: ST4Serial mode deactivated");
+      VLF("MSG: SerialST4 mode deactivated");
       return;
     }
   }

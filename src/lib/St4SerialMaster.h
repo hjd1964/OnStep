@@ -138,9 +138,9 @@ class Mst4 : public Stream
 
       lastMicros=micros();
 
-      if (_frame_error) VLF("MSG: SerialST4, frame error");
-      if (_send_error) VLF("MSG: SerialST4, send error (parity failed)");
-      if (_recv_error) VLF("MSG: SerialST4, recv error (parity failed)");
+      if (_frame_error) DLF("WRN, SerialST4.trans(): frame error");
+      if (_send_error) DLF("WRN, SerialST4.trans(): send parity error");
+      if (_recv_error) DLF("WRN, SerialST4.trans(): recv parity error");
 
       if (_frame_error) return false; else return true;
     }
