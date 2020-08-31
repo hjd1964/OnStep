@@ -721,13 +721,13 @@
 #else
   #ifndef AXIS1_LIMIT_MIN
     #error "Configuration (Config.h): Setting AXIS1_LIMIT_MIN must be present!"
-  #elif AXIS1_LIMIT_MIN < -180 || AXIS1_LIMIT_MIN > -90
-    #error "Configuration (Config.h): Setting AXIS1_LIMIT_MIN invalid, use a number between -105 and -180 (degrees.)"
+  #elif AXIS1_LIMIT_MIN < -270 || AXIS1_LIMIT_MIN > -90
+    #error "Configuration (Config.h): Setting AXIS1_LIMIT_MIN invalid, use a number between -90 and -270 (degrees.)"
   #endif
   #ifndef AXIS1_LIMIT_MAX
     #error "Configuration (Config.h): Setting AXIS1_LIMIT_MAX must be present!"
-  #elif AXIS1_LIMIT_MAX < 90 || AXIS1_LIMIT_MAX > 180
-    #error "Configuration (Config.h): Setting AXIS1_LIMIT_MAX invalid, use a number between 105 and 180 (degrees.)"
+  #elif AXIS1_LIMIT_MAX < 90 || AXIS1_LIMIT_MAX > 270
+    #error "Configuration (Config.h): Setting AXIS1_LIMIT_MAX invalid, use a number between 90 and 270 (degrees.)"
   #endif
 #endif
 

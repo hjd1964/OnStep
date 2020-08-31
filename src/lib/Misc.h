@@ -56,10 +56,10 @@ bool decodeAxisSettings(char s[], axisSettings &a) {
 
 // convert axis settings string into numeric form
 bool validateAxisSettings(int axisNum, bool altAz, volatile axisSettings &a) {
-  int   MinLimitL[5]   = {-180,-90,-360,  0,  0};
+  int   MinLimitL[5]   = {-270,-90,-360,  0,  0};
   int   MinLimitH[5]   = { -90,  0,   0,500,500};
   int   MaxLimitL[5]   = {  90,  0,   0,  0,  0};
-  int   MaxLimitH[5]   = { 180, 90, 360,500,500};
+  int   MaxLimitH[5]   = { 270, 90, 360,500,500};
   float StepsLimitL[5] = {   150.0,   150.0,    5.0, 0.005, 0.005};
   float StepsLimitH[5] = {122400.0,122400.0, 7200.0,  20.0,  20.0};
   int   IrunLimitH[5]  = { 3000, 3000, 1000, 1000, 1000};

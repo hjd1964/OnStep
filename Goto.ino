@@ -304,10 +304,10 @@ CommandErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTar
   int thisPierSide=getInstrPierSide();
   if (meridianFlip != MeridianFlipNever) {
     // where the allowable hour angles are
-    double eastOfPierMaxHA= 180.0;
+    double eastOfPierMaxHA= axis1Settings.max;
     double eastOfPierMinHA=-degreesPastMeridianE;
     double westOfPierMaxHA= degreesPastMeridianW;
-    double westOfPierMinHA=-180.0;
+    double westOfPierMinHA= axis1Settings.min;
 
     // override the defaults and force a flip if near the meridian and possible (for parking and align)
     if ((gotoPierSide != PierSideBest) && (thisPierSide != gotoPierSide)) {
@@ -357,7 +357,7 @@ CommandErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTar
   // allow +/- 360 in Az
   if (((thisTargetAxis1 > axis1Settings.max) || (thisTargetAxis1 < axis1Settings.min)) || ((thisTargetAxis2 > 180.0) || (thisTargetAxis2 < -180.0))) return CE_GOTO_ERR_UNSPECIFIED;
 #else
-  if (((thisTargetAxis1 > 180.0) || (thisTargetAxis1 < -180.0)) || ((thisTargetAxis2 > 180.0) || (thisTargetAxis2 < -180.0))) return CE_GOTO_ERR_UNSPECIFIED;
+  if (((thisTargetAxis1 > 270.0) || (thisTargetAxis1 < -270.0)) || ((thisTargetAxis2 > 270.0) || (thisTargetAxis2 < -270.0))) return CE_GOTO_ERR_UNSPECIFIED;
   #if AXIS2_TANGENT_ARM == ON
     if (toInstrAxis2(thisTargetAxis2,p) < axis2Settings.min) return CE_SLEW_ERR_OUTSIDE_LIMITS;
     if (toInstrAxis2(thisTargetAxis2,p) > axis2Settings.max) return CE_SLEW_ERR_OUTSIDE_LIMITS;
