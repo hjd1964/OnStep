@@ -73,8 +73,8 @@ class focuser {
     // sets target relative position in steps
     virtual void relativeTarget(long pos) { }
 
-    // do automatic movement
-    virtual void move() { }
+    // do automatic movement, call this method at 100Hz
+    virtual void poll() { }
 
     // follow( (trackingState == TrackingMoveTo) || guideDirAxis1 || guideDirAxis2) );
     virtual void follow(bool slewing) { }

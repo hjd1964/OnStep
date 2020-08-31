@@ -440,13 +440,13 @@ void loop2() {
 
     // ROTATOR/FOCUSERS, MOVE THE TARGET
 #if ROTATOR == ON
-    rot.move(trackingState == TrackingSidereal);
+    rot.poll(trackingState == TrackingSidereal);
 #endif
 #if FOCUSER1 == ON
-    foc1.move();
+    foc1.poll();
 #endif
 #if FOCUSER2 == ON
-    foc2.move();
+    foc2.poll();
 #endif
 
     // CALCULATE SOME TRACKING RATES, ETC.

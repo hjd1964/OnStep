@@ -110,7 +110,7 @@ class focuserStepper : public focuser {
     }
     
     // do automatic movement
-    void move() {
+    void poll() {
       target.fixed+=delta.fixed;
       // stop at limits
       if (((long)target.part.m < smin) || ((long)target.part.m > smax)) delta.fixed=0;
