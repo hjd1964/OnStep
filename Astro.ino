@@ -59,7 +59,13 @@ bool hmsToDouble(double *f, char *hms, PrecisionMode p) {
   
   if (h1 < 0 || h1 > 23 || m1 < 0 || m1 > 59 || m2 < 0 || m2 > 9 || s1 < 0 || s1 > 59.9999) return false;
 
-  *f=h1+m1/60.0+m2/600.0+s1/3600.0;
+  *f=(double)h1+(double)m1/60.0+(double)m2/600.0+s1/3600.0;
+  return true;
+}
+bool hmsToDouble(double *f, char *hms) {
+  if (!hmsToDouble(f,hms,PM_HIGHEST))
+    if (!hmsToDouble(f,hms,PM_HIGH))
+      if (!hmsToDouble(f,hms,PM_LOW)) return false;
   return true;
 }
 
@@ -140,8 +146,14 @@ bool dmsToDouble(double *f, char *dms, bool sign_present, PrecisionMode p) {
 
   if (sign_present) { lowLimit=-90; highLimit=90; }
   if ((d1 < lowLimit) || (d1 > highLimit) || (m1 < 0) || (m1 > 59) || (s1 < 0) || (s1 > 59.999)) return false;
-  
-  *f=sign*(d1+m1/60.0+s1/3600.0);
+
+  *f=sign*((double)d1+(double)m1/60.0+s1/3600.0);
+  return true;
+}
+bool dmsToDouble(double *f, char *dms, bool sign_present) {
+  if (!dmsToDouble(f,dms,sign_present,PM_HIGHEST))
+    if (!dmsToDouble(f,dms,sign_present,PM_HIGH))
+      if (!dmsToDouble(f,dms,sign_present,PM_LOW)) return false;
   return true;
 }
 

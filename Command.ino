@@ -528,9 +528,9 @@ void processCommands() {
         boolReply=false; 
        } else
 // :GD#       Get Telescope Declination
-//            Returns: sDD*MM# or sDD*MM'SS# (based on precision setting)
-// :GDe#      Get Telescope Declination
-//            Returns: sDD*MM'SS.s#
+//            Returns: sDD*MM# or sDD*MM:SS# (based on precision setting)
+// :GDH#      Get Telescope Declination
+//            Returns: sDD*MM:SS.SSSS# (high precision)
       if (command[1] == 'D')  {
 #ifdef HAL_SLOW_PROCESSOR
         if ((long)(millis()-_coord_t) > 500)
@@ -547,19 +547,19 @@ void processCommands() {
         if (parameter[0] == 0) {
           doubleToDms(reply,&_dec,false,true,precision); boolReply=false; 
         } else
-        if (parameter[0] == 'e' && parameter[1] == 0) {
+        if ((parameter[0] == 'e' || parameter[0] == 'H') && parameter[1] == 0) {
           doubleToDms(reply,&_dec,false,true,PM_HIGHEST); boolReply=false; 
         } else commandError=CE_CMD_UNKNOWN;
       } else 
 // :Gd#       Get Currently Selected Target Declination
-//            Returns: sDD*MM# or sDD*MM'SS# (based on precision setting)
-// :Gde#      Get Currently Selected Target Declination
-//            Returns: sDD*MM'SS.s#
-      if (command[1] == 'd')  { 
+//            Returns: sDD*MM# or sDD*MM:SS# (based on precision setting)
+// :GdH#      Get Currently Selected Target Declination
+//            Returns: sDD*MM:SS.SSS# (high precision)
+      if (command[1] == 'd')  {
         if (parameter[0] == 0) {
           doubleToDms(reply,&origTargetDec,false,true,precision); boolReply=false; 
         } else
-        if (parameter[0] == 'e' && parameter[1] == 0) {
+        if ((parameter[0] == 'e' || parameter[0] == 'H') && parameter[1] == 0) {
           doubleToDms(reply,&origTargetDec,false,true,PM_HIGHEST); boolReply=false; 
         } else commandError=CE_CMD_UNKNOWN;
       } else
@@ -596,16 +596,23 @@ void processCommands() {
       } else 
 // :Gg#       Get Current Site Longitude, east is negative
 //            Returns: sDDD*MM#
-      if (command[1] == 'g' && parameter[0] == 0)  { doubleToDms(reply,&longitude,true,true,PM_LOW); boolReply=false; } else 
+// :GgH#      Get current site Longitude
+//            Returns: sDD*MM:SS.SSS# (high precision)
+      if (command[1] == 'g')  {
+        if (parameter[0] == 0) {
+          doubleToDms(reply,&longitude,true,true,PM_LOW); boolReply=false;
+        } else
+        if (parameter[0] == 'H' && parameter[1] == 0) {
+          doubleToDms(reply,&longitude,true,true,PM_HIGHEST); boolReply=false;
+        } else commandError=CE_CMD_UNKNOWN;
+      } else 
 // :Gh#       Get Horizon Limit, the minimum elevation of the mount relative to the horizon
 //            Returns: sDD*#
       if (command[1] == 'h' && parameter[0] == 0)  { sprintf(reply,"%+02d*",minAlt); boolReply=false; } else
 // :GL#       Get Local Time in 24 hour format
 //            Returns: HH:MM:SS#
-//            On devices with single precision fp several days up-time will cause loss of precision as additional mantissa digits are needed to represent hours
-//            Devices with double precision fp are limitated by sidereal clock overflow which takes 249 days
-// :GLa#      Get Local Time in 24 hour format (high precision)
-//            Returns: HH:MM:SS.ss#
+// :GLH#      Get Local Time in 24 hour format
+//            Returns: HH:MM:SS.SSSS# (high precision)
 //            On devices with single precision fp several days up-time will cause loss of precision as additional mantissa digits are needed to represent hours
 //            Devices with double precision fp are limitated by sidereal clock overflow which takes 249 days
       if (command[1] == 'L') {
@@ -613,7 +620,7 @@ void processCommands() {
         if ( parameter[0] == 0)  {
           doubleToHms(reply,&LMT,PM_HIGH); boolReply=false;
         } else 
-        if (parameter[0] == 'a' && parameter[1] == 0) {
+        if ((parameter[0] == 'a' || parameter[0] == 'H') && parameter[1] == 0) {
           doubleToHms(reply,&LMT,PM_HIGHEST); boolReply=false;
         }
       }
@@ -643,8 +650,8 @@ void processCommands() {
       if (command[1] == 'o' && parameter[0] == 0)  { sprintf(reply,"%02d*",maxAlt); boolReply=false; } else
 // :GR#       Get Telescope RA
 //            Returns: HH:MM.T# or HH:MM:SS# (based on precision setting)
-// :GRa#      Get Telescope RA
-//            Returns: HH:MM:SS.ss#
+// :GRH#      Get Telescope RA High Precision
+//            Returns: HH:MM:SS.SSSS#
       if (command[1] == 'R')  {
 #ifdef HAL_SLOW_PROCESSOR
         if ((long)(millis()-_coord_t) > 500)
@@ -661,20 +668,20 @@ void processCommands() {
         if (parameter[0] == 0) {
            doubleToHms(reply,&_ra,precision); boolReply=false;  
         } else
-        if (parameter[0] == 'a' && parameter[1] == 0) {
+        if ((parameter[0] == 'a' || parameter[0] == 'H') && parameter[1] == 0) {
           doubleToHms(reply,&_ra,PM_HIGHEST); boolReply=false;
         } else commandError=CE_CMD_UNKNOWN;
       } else 
 // :Gr#       Get current/target object RA
 //            Returns: HH:MM.T# or HH:MM:SS (based on precision setting)
-// :Gra#      Get Telescope RA
-//            Returns: HH:MM:SS.ss#
+// :GrH#      Get Telescope RA
+//            Returns: HH:MM:SS.SSSS# (high precision)
       if (command[1] == 'r')  {
         f=origTargetRA; f/=15.0;
         if (parameter[0] == 0) {
            doubleToHms(reply,&f,precision); boolReply=false;
         } else
-        if (parameter[0] == 'a' && parameter[1] == 0) {
+        if ((parameter[0] == 'a' || parameter[0] == 'H') && parameter[1] == 0) {
           doubleToHms(reply,&f,PM_HIGHEST); boolReply=false;
         } else commandError=CE_CMD_UNKNOWN;
       } else 
@@ -702,7 +709,16 @@ void processCommands() {
       } else 
 // :Gt#       Get current site Latitude, positive for North latitudes
 //            Returns: sDD*MM#
-      if (command[1] == 't' && parameter[0] == 0)  { doubleToDms(reply,&latitude,false,true,PM_LOW); boolReply=false; } else 
+// :GtH#      Get current site Latitude, positive for North latitudes
+//            Returns: sDD*MM:SS.SSS# (high precision)
+      if (command[1] == 't')  {
+        if (parameter[0] == 0) {
+          doubleToDms(reply,&latitude,false,true,PM_LOW); boolReply=false;
+        } else
+        if (parameter[0] == 'H' && parameter[1] == 0) {
+          doubleToDms(reply,&latitude,false,true,PM_HIGHEST); boolReply=false;
+        } else commandError=CE_CMD_UNKNOWN;
+      } else 
 // :GU#       Get telescope Status
 //            Returns: s#
       if (command[1] == 'U' && parameter[0] == 0)  {
@@ -1649,21 +1665,20 @@ void processCommands() {
           dateWasSet=true;
           if (generalError == ERR_SITE_INIT && dateWasSet && timeWasSet) generalError=ERR_NONE;
         } else commandError=CE_PARAM_FORM; } else 
-//  :Sd[sDD*MM]#
-//            Set target object declination to sDD*MM or sDD*MM:SS assumes high precision but falls back to low precision
+//  :Sd[sDD*MM]# or :Sd[sDD*MM:SS]# or :Sd[sDD*MM:SS.SSS]#
+//            Set target object declination
 //            Return: 0 on failure
 //                    1 on success
       if (command[1] == 'd')  {
-        if (!dmsToDouble(&origTargetDec,parameter,true,PM_HIGH))
-          if (!dmsToDouble(&origTargetDec,parameter,true,PM_LOW)) commandError=CE_PARAM_FORM;
+        if (!dmsToDouble(&origTargetDec,parameter,true)) commandError=CE_PARAM_FORM;
       } else
-//  :Sg[sDDD*MM]# or :Sg[DDD*MM]#
-//            Set current sites longitude to sDDD*MM an ASCII position string, East longitudes can be as negative or > 180 degrees
+//  :Sg[(s)DDD*MM]# or :Sg[(s)DDD*MM:SS]# or :Sg[(s)DDD*MM:SS.SSS]#
+//            Set current site longitude, east longitudes can be negative or > 180 degrees
 //            Return: 0 on failure
 //                    1 on success
       if (command[1] == 'g')  {
         if (parameter[0] == '-' || parameter[0] == '+') i1=1; else i1=0;
-        if (dmsToDouble(&longitude,(char *)&parameter[i1],false,PM_LOW)) {
+        if (dmsToDouble(&longitude,(char *)&parameter[i1],false)) {
           if (parameter[0] == '-') longitude=-longitude;
           if (longitude >= -180.0 && longitude <= 360.0) {
             if (longitude >= 180.0) longitude-=360.0;
@@ -1707,12 +1722,12 @@ void processCommands() {
           } else commandError=CE_PARAM_RANGE;
         } else commandError=CE_PARAM_FORM;
       } else
-//  :SL[HH:MM:SS]#
+//  :SL[HH:MM:SS]# or :SL[HH:MM:SS.SSS]#
 //            Set the local Time
 //            Return: 0 on failure
 //                    1 on success
       if (command[1] == 'L')  {  
-        if (!hmsToDouble(&LMT,parameter,PM_HIGH)) commandError=CE_PARAM_FORM; else {
+        if (hmsToDouble(&LMT,parameter,PM_HIGH) || hmsToDouble(&LMT,parameter,PM_HIGHEST)) {
 #ifndef ESP32
           nv.writeFloat(EE_LMT,LMT);
 #endif
@@ -1720,7 +1735,7 @@ void processCommands() {
           updateLST(jd2last(JD,UT1,true));
           timeWasSet=true;
           if (generalError == ERR_SITE_INIT && dateWasSet && timeWasSet) generalError=ERR_NONE;
-        }
+        } else commandError=CE_PARAM_FORM;
       } else 
 //  :SM[s]# or :SN[s]# or :SO[s]# or :SP[s]#
 //            Set site name, string may be up to 15 characters
@@ -1745,28 +1760,24 @@ void processCommands() {
           } else commandError=CE_PARAM_RANGE;
         } else commandError=CE_PARAM_FORM;
       } else
-//  :Sr[HH:MM.T]# or :Sr[HH:MM:SS]#
-//            Set target object RA to HH:MM.T or HH:MM:SS assumes high precision but falls back to low precision
+//  :Sr[HH:MM.T]# or :Sr[HH:MM:SS]# or :Sr[HH:MM:SS.SSSS]#
+//            Set target object RA
 //            Return: 0 on failure
 //                    1 on success
       if (command[1] == 'r')  {
-        if (!hmsToDouble(&origTargetRA,parameter,PM_HIGH))
-          if (!hmsToDouble(&origTargetRA,parameter,PM_LOW)) commandError=CE_PARAM_RANGE;
-        if (commandError == CE_NONE) origTargetRA*=15.0;
+        if (hmsToDouble(&origTargetRA,parameter)) origTargetRA*=15.0; else commandError=CE_PARAM_RANGE;
       } else 
 //  :SS[HH:MM:SS]#
 //            Sets the local (apparent) sideral time to HH:MM:SS
 //            Return: 0 on failure
 //                    1 on success
       if (command[1] == 'S')  { if (!hmsToDouble(&f,parameter,PM_HIGH)) commandError=CE_PARAM_FORM; else updateLST(f); } else 
-//  :St[sDD*MM]#
-//            Sets the current site latitude to sDD*MM#
+//  :St[sDD*MM]# or :St[sDD*MM:SS]# or :St[sDD*MM:SS.SSS]#
+//            Set current site latitude
 //            Return: 0 on failure
 //                    1 on success
-      if (command[1] == 't')  { 
-        if (dmsToDouble(&f,parameter,true,PM_LOW)) {
-          setLatitude(f);
-        } else commandError=CE_PARAM_FORM;
+      if (command[1] == 't')  {
+        if (dmsToDouble(&f,parameter,true)) setLatitude(f); else commandError=CE_PARAM_FORM;
       } else 
 //  :ST[H.H]# Set Tracking Rate in Hz where 60.0 is solar rate
 //            Return: 0 on failure
