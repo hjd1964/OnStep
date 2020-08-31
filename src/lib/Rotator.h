@@ -108,7 +108,7 @@ class rotator {
     // set movement rate in deg/second (continuous mode)
     void setMoveRate(double rate) {
       moveRate=rate*spd;                          // in steps per second
-      if (moveRate > spsMax) moveRate=spsMax;       // limit to maxRate
+      if (moveRate > spsMax) moveRate=spsMax;     // limit to maxRate
     }
     
     // check if moving
@@ -171,7 +171,7 @@ class rotator {
     }
 
     // do de-rotate movement
-    void move(bool tracking) {
+    void poll(bool tracking) {
       if (DR && tracking) target.fixed+=deltaDR.fixed;
       target.fixed+=delta.fixed;
       if (((long)target.part.m < smin) || ((long)target.part.m > smax)) { DR=false; delta.fixed=0; deltaDR.fixed=0; }
