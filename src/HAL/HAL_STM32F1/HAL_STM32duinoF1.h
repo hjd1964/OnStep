@@ -35,7 +35,7 @@ HardwareSerial Serial2(PB11, PB10);
 #if defined(NV_MB85RC256V)
   #include "../drivers/NV_I2C_FRAM_MB85RC256V.h"
 #else
-  // defaults to 0x57 and 4KB
+  // Defaults to 0x57 and 4KB
   #include "../drivers/NV_I2C_EEPROM_24XX_C.h"
 #endif
 
