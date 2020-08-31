@@ -343,8 +343,10 @@ void axis2DriverGotoMode() {
 void enableStepperDrivers() {
   // enable the stepper drivers
   if (axis1Enabled == false) {
-    digitalWrite(Axis1_EN,AXIS1_DRIVER_ENABLE); axis1Enabled=true;
-    digitalWrite(Axis2_EN,AXIS2_DRIVER_ENABLE); axis2Enabled=true;
+    if (Axis1_EN != -1) { digitalWrite(Axis1_EN,AXIS1_DRIVER_ENABLE); } else { if (AXIS1_DRIVER_MODEL == TMC_SPI) tmcAxis1.setup(AXIS1_DRIVER_INTPOL,AXIS1_DRIVER_DECAY_MODE,AXIS1_DRIVER_CODE,axis1Settings.IRUN,axis1SettingsEx.IHOLD); }
+    axis1Enabled=true;
+    if (Axis2_EN != -1) { digitalWrite(Axis2_EN,AXIS2_DRIVER_ENABLE); } else { if (AXIS2_DRIVER_MODEL == TMC_SPI) tmcAxis2.setup(AXIS2_DRIVER_INTPOL,AXIS2_DRIVER_DECAY_MODE,AXIS2_DRIVER_CODE,axis2Settings.IRUN,axis2SettingsEx.IHOLD); }
+    axis2Enabled=true;
     delay(WAIT_DRIVER_ENABLE);
     VLF("MSG: Axis1/2 stepper drivers enabled");
   }
@@ -353,8 +355,10 @@ void enableStepperDrivers() {
 void disableStepperDrivers() {
   // disable the stepper drivers
   if (axis1Enabled == true) {
-    digitalWrite(Axis1_EN,AXIS1_DRIVER_DISABLE); axis1Enabled=false;
-    digitalWrite(Axis2_EN,AXIS2_DRIVER_DISABLE); axis2Enabled=false;
+    if (Axis1_EN != -1) { digitalWrite(Axis1_EN,AXIS1_DRIVER_DISABLE); } else { if (AXIS1_DRIVER_MODEL == TMC_SPI) tmcAxis1.setup(AXIS1_DRIVER_INTPOL,AXIS1_DRIVER_DECAY_MODE,AXIS1_DRIVER_CODE,0,0); }
+    axis1Enabled=false;
+    if (Axis2_EN != -1) { digitalWrite(Axis2_EN,AXIS2_DRIVER_DISABLE); } else { if (AXIS2_DRIVER_MODEL == TMC_SPI) tmcAxis2.setup(AXIS2_DRIVER_INTPOL,AXIS2_DRIVER_DECAY_MODE,AXIS2_DRIVER_CODE,0,0); }
+    axis2Enabled=false;
     delay(WAIT_DRIVER_ENABLE);
     VLF("MSG: Axis1/2 stepper drivers disabled");
   }

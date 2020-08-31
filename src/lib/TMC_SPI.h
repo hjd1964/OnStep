@@ -333,7 +333,7 @@ class tmcSpiDriver {
     unsigned long _pc_PWM_GRAD = 0x04; // default=4,   range 0 to 14  (PWM gradient scale using automatic current control)
     unsigned long _pc_pwm_freq = 0x01; // default=1,   range 0 to 3   (PWM frequency 0: fpwm=2/1024 fclk, 1: fpwm=2/683 fclk, 2: fpwm=2/512 fclk, 3: fpwm=2/410 fclk)
     unsigned long _pc_pwm_auto = 0x01; // default=1,   range 0 to 1   (PWM automatic current control 0: off, 1: on)
-    unsigned long _pc_pwm_freewheel=0x00; //default=0, range 0 to 1   (PWM freewheel 0: normal, 1: freewheel, 2:LS short, 3: HS short)
+    unsigned long _pc_pwm_freewheel=0x01; //default=1, range 0 to 3   (PWM freewheel 0: normal, 1: freewheel, 2:LS short, 3: HS short)
     // TMC2130 specific
     unsigned long _pc_PWM_AMPL = 0x80; // default=128, range 0 to 255 (PWM amplitude or switch back amplitude if pwm_auto=1)
     unsigned long _pc_pwm_sym  = 0x00; // default=0,   range 0 to 1   (PWM symmetric 0: value may change during cycle, 1: enforce; 0: disable autograd on TMC5160/5161)
