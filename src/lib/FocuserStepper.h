@@ -25,13 +25,18 @@ class focuserStepper : public focuser {
       if (dirPin != -1) pinMode(dirPin,OUTPUT);
 
       // get the temperature compensated focusing settings
-      setTcfCoef(nv.readFloat(nvTcfCoef));
-      setTcfEnable(nv.read(nvTcfEn));
+      float coef=nv.readFloat(nvTcfCoef);
+      if (fabs(coef) > 1000.0) { coef=0; generalError=ERR_NV_INIT; DLF("ERR, foc.init(): bad NV TcfCoef > 1000 um/deg. C (set to 0.0)"); }
+      setTcfCoef(coef);
+
+      int tcfEn=nv.read(nvTcfEn);
+      if (tcfEn != true && tcfEn != false) { tcfEn=false; generalError=ERR_NV_INIT; DLF("ERR, foc.init(): bad NV tcfEn (set to false)"); }
+      setTcfEnable(tcfEn);
       
       // get step position
       spos=readPos();
-      long lmin=(long)(min*spm); if (spos < lmin) spos=lmin;
-      long lmax=(long)(max*spm); if (spos > lmax) spos=lmax;
+      long lmin=(long)(min*spm); if (spos < lmin) { spos=lmin; DLF("WRN, foc.init(): bad NV position < _LIMIT_MIN (set to _LIMIT_MIN)"); }
+      long lmax=(long)(max*spm); if (spos > lmax) { spos=lmax; DLF("WRN, foc.init(): bad NV position > _LIMIT_MAX (set to _LIMIT_MAX)"); }
       target.part.m=spos; target.part.f=0;
       lastPos=spos;
       delta.fixed=0;
@@ -50,7 +55,7 @@ class focuserStepper : public focuser {
     }
 
     // temperature compensation
-    void setTcfCoef(double coef) { if (fabs(coef) >= 10000.0) coef = 0.0; tcf_coef = coef; nv.writeFloat(nvTcfCoef,tcf_coef); }
+    void setTcfCoef(double coef) { if (fabs(coef) >= 1000.0) coef = 0.0; tcf_coef = coef; nv.writeFloat(nvTcfCoef,tcf_coef); }
     double getTcfCoef() { return tcf_coef; }
     void setTcfEnable(bool enabled) { tcf = enabled; nv.write(nvTcfEn,tcf); }
     bool getTcfEnable() { return tcf; }

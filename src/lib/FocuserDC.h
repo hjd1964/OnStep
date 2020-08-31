@@ -24,8 +24,8 @@ class focuserDC : public focuser  {
     
       spos=readPos();
       // constrain step position
-      long lmin=(long)(min*spm); if (spos < lmin) spos=lmin;
-      long lmax=(long)(max*spm); if (spos > lmax) spos=lmax;
+      long lmin=(long)(min*spm); if (spos < lmin) { spos=lmin; DLF("WRN, foc.init(): bad NV position < _LIMIT_MIN (set to _LIMIT_MIN)"); }
+      long lmax=(long)(max*spm); if (spos > lmax) { spos=lmax; DLF("WRN, foc.init(): bad NV position > _LIMIT_MAX (set to _LIMIT_MAX)"); }
       target.part.m=spos; target.part.f=0;
       lastPos=spos;
       delta.fixed=0;
