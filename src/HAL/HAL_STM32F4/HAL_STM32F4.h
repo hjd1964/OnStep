@@ -4,8 +4,16 @@
 #define __ARM_STM32__
 
 #define HAL_FAST_PROCESSOR
+
 // Lower limit (fastest) step rate in uS for this platform (in SQW mode)
-#define HAL_MAXRATE_LOWER_LIMIT 20
+
+#if defined(STM32F446xx)
+  #define HAL_MAXRATE_LOWER_LIMIT 20
+#elif defined(STM32F411xE)
+  #define HAL_MAXRATE_LOWER_LIMIT 24
+#else
+  #define HAL_MAXRATE_LOWER_LIMIT 64
+#endif
 
 // Width of step pulse
 #define HAL_PULSE_WIDTH         500
@@ -22,20 +30,28 @@
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
 #define SerialA Serial
 // SerialA is always enabled, SerialB and SerialC are optional
-#define SerialB Serial1
-#define HAL_SERIAL_B_ENABLED
-#if SERIAL_C_BAUD_DEFAULT != OFF
-  #define SerialC Serial3
-  #define HAL_SERIAL_C_ENABLED
-#endif
-
 #if PINMAP == FYSETC_S6
+  #define SerialB Serial1
+  #define HAL_SERIAL_B_ENABLED
+  #if SERIAL_C_BAUD_DEFAULT != OFF
+    #define SerialC Serial3
+    #define HAL_SERIAL_C_ENABLED
+  #endif
+
   // Handle special case of using software serial for a GPS
   #if SerialGPS == SoftwareSerial2
     #include <SoftwareSerial.h>
-    SoftwareSerial HWSerialGPS(PA3, PA2); // RX2, TX2
+    SoftwareSerial SWSerialGPS(PA3, PA2); // RX2, TX2
     #undef SerialGPS
-    #define SerialGPS HWSerialGPS
+    #define SerialGPS SWSerialGPS
+  #endif
+#elif PINMAP == MaxPCB3
+  #define SerialB Serial1
+  #define HAL_SERIAL_B_ENABLED
+  #if SERIAL_C_BAUD_DEFAULT != OFF
+    HardwareSerial HWSerial2(PA3, PA2); // RX2, TX2
+    #define SerialC HWSerial2
+    #define HAL_SERIAL_C_ENABLED
   #endif
 #endif
 
