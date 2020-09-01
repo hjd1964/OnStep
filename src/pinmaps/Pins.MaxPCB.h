@@ -137,8 +137,8 @@
 #define ESP8266RstPin      Aux2     // ESP8266 RST
 
 // The PEC index sense is a logic level input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
-#define PecPin             Aux8
-#define AnalogPecPin       Aux8     // PEC Sense, analog or digital
+#define PecPin              PB1
+#define AnalogPecPin        PB1     // PEC Sense, analog or digital
 
 // The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
 #define LEDnegPin          Aux0     // Drain
@@ -159,7 +159,7 @@
 #define Axis1_M1            PA5     // SPI SCK
 #define Axis1_M2            PA1     // SPI CS
 #define Axis1_M3           Aux1     // SPI MISO
-#define Axis1_STEP          PB1     // Step
+#define Axis1_STEP         PB10     // Step
 #define Axis1_DIR           PB2     // Dir
 #define Axis1_DECAY    Axis1_M2     // Decay mode
 #define Axis1_FAULT        Aux1     // SPI MISO/Fault (or ESP8266 GPIO0 on MaxPCB)
