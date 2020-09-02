@@ -40,6 +40,9 @@
 #ifndef DS3234_CS_PIN
   #define DS3234_CS_PIN     PA4     // Default CS Pin for DS3234 on SPI (on EXP2 shared with the ESP8266 RST pin)
 #endif
+#ifndef BME280_CS_PIN
+  #define BME280_CS_PIN     PC7     // Default CS Pin for BME280 on SPI (on EXP2 shared with LED2/Reticle)
+#endif
 #ifndef OneWirePin
   #define OneWirePin        PE0     // Default Pin for OneWire bus (on E2-MOT PD-EN, right hand pin)
 #endif
@@ -52,8 +55,8 @@
 
 // The status LED is a two wire jumper with a 10k resistor in series to limit the current to the LED
 #define LEDnegPin           PC6     // Drain (on EXP2) One could perhaps move these to the RGB leds, there's a header but no +5V present on it.
-#define LEDneg2Pin          PC7     // Drain (on EXP2 shared with Reticle)
-#define ReticlePin          PC7     // Drain (on EXP2 shared with LED2)
+#define LEDneg2Pin          PC7     // Drain (on EXP2 shared with Reticle/BME280_CS)
+#define ReticlePin          PC7     // Drain (on EXP2 shared with LED2/BME280_CS)
 
 // For a piezo buzzer
 #define TonePin             PC9     // Tone (on BEEP/EXP1)
