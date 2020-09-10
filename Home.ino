@@ -108,7 +108,7 @@ CommandErrors goHome(bool fast) {
     if (AXIS2_TANGENT_ARM == OFF) e=startGuideAxis1(a1,7,0);
     if (e == CE_NONE) { e=startGuideAxis2(a2,7,0,true); VLF("MSG: Homing started phase 2"); } else { stopGuideAxis1(); VLF("MSG: Homing failed"); }
   }
-  if (e != CE_NONE) stopSlewingAndTracking();
+  if (e != CE_NONE) stopSlewingAndTracking(SS_ALL_FAST);
   return e;
 #else
   if (e != CE_NONE) return e; 
