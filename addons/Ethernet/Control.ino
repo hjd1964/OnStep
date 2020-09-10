@@ -56,7 +56,7 @@ const char html_controlQuick5[] PROGMEM =
 
 const char html_controlTrack1[] PROGMEM = 
 "<div class='b1' style='width: 8em'>"
-"<div align='left'>" L_LOCATION_TITLE ":</div>"
+"<div align='left'>" L_TRACKING_RATE ":</div>"
 "<button type='button' class='bbh' style='width: 2em' onpointerdown=\"g('Ts')\" type='submit' title='" L_HINT_RATE_SIDEREAL "'>" SIDEREAL_CH "</button>";
 const char html_controlTrack2[] PROGMEM =
 "<button type='button' class='bbh' style='width: 2em' onpointerdown=\"g('Tl')\" type='submit' title='" L_HINT_RATE_LUNAR "'>" LUNAR_CH "</button>";
