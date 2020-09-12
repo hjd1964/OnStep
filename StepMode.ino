@@ -3,17 +3,25 @@
 
 // initialize stepper drivers
 void StepperModeTrackingInit() {
-  // setup Axis1 and Axis2
-#if AXIS1_DRIVER_MODEL == TMC_SPI
   // enable stepper drivers
   enableStepperDrivers();
 
+  // setup Axis1 and Axis2
+#if AXIS1_DRIVER_MODEL == TMC_SPI
   VLF("MSG: Setting up Axis1/2 TMC stepper drivers");
   driversInitTmcMode();
   driversInitTmcStealthChop();
 #endif
+
   axis1DriverTrackingMode(true);
   axis2DriverTrackingMode(true);
+
+#if AXIS1_DRIVER_MODEL == TMC2209 || AXIS2_DRIVER_MODEL == TMC2209
+  delay(150);
+#else
+  delay(1);
+#endif
+
 #if AXIS1_DRIVER_MODEL == TMC_SPI && MODE_SWITCH_BEFORE_SLEW == OFF
   #ifdef AXIS1_DRIVER_CODE_GOTO
     axis1DriverInitFast();
@@ -21,10 +29,10 @@ void StepperModeTrackingInit() {
   #ifdef AXIS2_DRIVER_CODE_GOTO
     axis2DriverInitFast();
   #endif
+#endif
 
   // then disable again
   disableStepperDrivers();
-#endif
 }
 
 #if AXIS1_DRIVER_MODEL == TMC_SPI
