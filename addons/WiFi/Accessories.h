@@ -212,7 +212,7 @@ float byteToTime(uint8_t b) {
 // remove leading and trailing 0's
 void stripNum(char s[]) {
   int pp=-1;
-  for (int p=0; p < strlen(s); p++) if (s[p] == '.') { pp=p; break; }
+  for (unsigned int p=0; p < strlen(s); p++) if (s[p] == '.') { pp=p; break; }
   if (pp != -1) {
     int p;
     for (p=strlen(s)-1; p >= pp; p--) { if (s[p] != '0') break; s[p]=0; }
