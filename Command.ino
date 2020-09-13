@@ -1968,15 +1968,17 @@ void processCommands() {
         if (parameter[0] == 'E') { // En: Simple value
           switch (parameter[1]) {
             case '9': // minutes past meridianE
-              degreesPastMeridianE=(double)strtol(&parameter[3],NULL,10)/4.0;
-              if (labs(degreesPastMeridianE) <= 180) {
+              f=(double)strtol(&parameter[3],NULL,10)/4.0;
+              if (labs(f) <= 180) {
+                degreesPastMeridianE=f;
                 i=round(degreesPastMeridianE); if (degreesPastMeridianE > 60) i= 60+round((i-60)/2); else if (degreesPastMeridianE < -60) i=-60+round((i+60)/2);
                 nv.write(EE_dpmE,round(i+128));
               } else commandError=CE_PARAM_RANGE;
               break;
             case 'A': // minutes past meridianW
-              degreesPastMeridianW=(double)strtol(&parameter[3],NULL,10)/4.0;
-              if (labs(degreesPastMeridianW) <= 180) {
+              f=(double)strtol(&parameter[3],NULL,10)/4.0;
+              if (labs(f) <= 180) {
+                degreesPastMeridianW=f;
                 i=round(degreesPastMeridianW); if (degreesPastMeridianW > 60) i= 60+round((i-60)/2); else if (degreesPastMeridianW < -60) i=-60+round((i+60)/2);
                 nv.write(EE_dpmW,round(i+128));
               } else commandError=CE_PARAM_RANGE;
