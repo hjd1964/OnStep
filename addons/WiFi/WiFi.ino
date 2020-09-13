@@ -106,13 +106,6 @@ Encoders encoders;
   #define sendHtmlDone(x) server.send(200, "text/html", x)
 #endif
 
-bool errorMonitorOn=false;
-struct errors {
-  char cmd[40];
-  byte err;
-};
-struct errors cmdErrorList[10] = { {"",0},{"",0},{"",0},{"",0},{"",0},{"",0},{"",0},{"",0},{"",0},{"",0} };
-
 #define Default_Password "password"
 char masterPassword[40]=Default_Password;
 
@@ -455,7 +448,6 @@ void loop(void) {
       char result[40]="";
       processCommand(cmdBuffer,result,cmdTimeout);               // send cmd to OnStep, pickup response
       if (strlen(result) > 0) { if (cmdSvrClient && cmdSvrClient.connected()) { cmdSvrClient.print(result); delay(2); } } // client response
-      if (errorMonitorOn) logCommandErrors(cmdBuffer,result);    // log any errors
       cmdBuffer[0]=0; cmdBufferPos=0;
     } else idle();
   }
@@ -495,7 +487,6 @@ void loop(void) {
       char result[40]="";
       processCommand(cmdBuffer,result,cmdTimeout);               // send cmd to OnStep, pickup response
       if (strlen(result) > 0) { if (persistentCmdSvrClient && persistentCmdSvrClient.connected()) { persistentCmdSvrClient.print(result); delay(2); } } // client response
-      if (errorMonitorOn) logCommandErrors(cmdBuffer,result);    // log any errors
       cmdBuffer[0]=0; cmdBufferPos=0;
     } else idle();
   }
@@ -510,26 +501,6 @@ const char* HighSpeedCommsStr(long baud) {
   if (baud==38400) { return ":SB2#"; }
   if (baud==28800) { return ":SB3#"; }
   if (baud==19200) { return ":SB4#"; } else { return ":SB5#"; }
-}
-
-void logCommandErrors(char *cmdBuffer, char *result) {
-#if MONITOR_GUIDE_COMMANDS == ON
-  if (strstr(cmdBuffer,":Me") || strstr(cmdBuffer,":Mw") || strstr(cmdBuffer,":Mn") || strstr(cmdBuffer,":Ms") || strstr(cmdBuffer,":Mg") ||
-      strstr(cmdBuffer,":Qe") || strstr(cmdBuffer,":Qw") || strstr(cmdBuffer,":Qn") || strstr(cmdBuffer,":Qs") || strstr(cmdBuffer,":Q") ||
-      strstr(cmdBuffer,";Me") || strstr(cmdBuffer,";Mw") || strstr(cmdBuffer,";Mn") || strstr(cmdBuffer,";Ms") || strstr(cmdBuffer,";Mg") ||
-      strstr(cmdBuffer,";Qe") || strstr(cmdBuffer,";Qw") || strstr(cmdBuffer,";Qn") || strstr(cmdBuffer,";Qs") || strstr(cmdBuffer,";Q")) {
-    for (int i=8; i>=0; i--) { strcpy(cmdErrorList[i+1].cmd,cmdErrorList[i].cmd); cmdErrorList[i+1].err=cmdErrorList[i].err; }
-    strcpy(cmdErrorList[0].cmd,cmdBuffer); cmdErrorList[0].err=CE_NULL;
-  }
-#endif
-  char cmd[]=":GE#";
-  processCommand(cmd,result,cmdTimeout);
-  int e=CE_REPLY_UNKNOWN;
-  if (strlen(result) == 3) e=atoi(result); else strcat(cmdBuffer,"(:GE#)");
-  if (e>1) {
-    for (int i=8; i>=0; i--) { strcpy(cmdErrorList[i+1].cmd,cmdErrorList[i].cmd); cmdErrorList[i+1].err=cmdErrorList[i].err; }
-    strcpy(cmdErrorList[0].cmd,cmdBuffer); cmdErrorList[0].err=e;
-  }
 }
 
 void idle() {

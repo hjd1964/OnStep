@@ -55,13 +55,6 @@ const char html_settingsMFPause2[] PROGMEM =
 "<button name='mp' value='on' type='submit'>" L_ON "</button>"
 "<button name='mp' value='off' type='submit'>" L_OFF "</button>\r\n";
 
-const char html_settingsCmdErrLog1[] PROGMEM =
-"<br /><br />" L_CMD_ERROR_LOG " (";
-const char html_settingsCmdErrLog2[] PROGMEM =
-"): <br />"
-"<button name='cel' value='on' type='submit'>" L_ON "</button>"
-"<button name='cel' value='off' type='submit'>" L_OFF "</button>\r\n";
-
 const char html_settingsEnd[] PROGMEM =
 "</form>\r\n";
 
@@ -160,10 +153,6 @@ void handleSettings() {
     data += FPSTR(html_settingsMFPause2);
   }
 
-  data += FPSTR(html_settingsCmdErrLog1);
-  if (errorMonitorOn) data+=L_ON; else data+=L_OFF;
-  data += FPSTR(html_settingsCmdErrLog2);
-
   data += FPSTR(html_settingsEnd);
 
   data += "<br />";
@@ -243,11 +232,5 @@ void processSettingsGet() {
   if (v!="") {
     if (v=="on")   commandBool(":SX98,1#");
     if (v=="off")  commandBool(":SX98,0#");
-  }
-  // Command error logging
-  v=server.arg("cel");
-  if (v!="") {
-    if (v=="on")   errorMonitorOn=true;
-    if (v=="off") { errorMonitorOn=false; for (int i=0; i<10; i++) { strcpy(cmdErrorList[i].cmd,""); cmdErrorList[i].err=0; } }
   }
 }

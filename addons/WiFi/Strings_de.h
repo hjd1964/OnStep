@@ -106,7 +106,6 @@
 
 // misc. errors/workload
 #define L_INTERNAL_TEMP "Interne Controller Temperatur"
-#define L_CMD_ERROR_LOG "Kommando-Fehler Log"
 #define L_LAST_GENERAL_ERROR "Letzter allgemeiner (Hintergrund-) Fehler"
 #define L_WORKLOAD "Auslastung"
 #define L_WIRELESS_SIGNAL_STRENGTH "WiFi-Signalst&auml;rke"

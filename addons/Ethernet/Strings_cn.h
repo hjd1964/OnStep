@@ -98,7 +98,6 @@
 
 // misc. errors/workload
 #define L_INTERNAL_TEMP "内部控制器温度"
-#define L_CMD_ERROR_LOG "命令错误日志"
 #define L_LAST_GENERAL_ERROR "最后一个一般(背景)错误"
 #define L_WORKLOAD "工作量"
 #define L_WIRELESS_SIGNAL_STRENGTH "无线 信号强度"

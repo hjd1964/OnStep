@@ -124,6 +124,7 @@ void handleRoot() {
 
   // UTC Date
   if (!command(":GX81#",temp1)) strcpy(temp1,"?");
+  stripNum(temp1);
   sprintf_P(temp,html_indexDate,temp1);
   data += temp;
 
@@ -358,17 +359,6 @@ void handleRoot() {
   if (!mountStatus.valid()) strcpy(temp1,"?");
   sprintf_P(temp,html_indexGeneralError,temp1);
   data += temp;
-
-  // Error monitor
-  if (errorMonitorOn) {
-    data += "&nbsp;&nbsp;" L_CMD_ERROR_LOG ":<br /><font class='c'>";
-    for (int i=0; i<10; i++) {
-      sprintf_P(temp,html_indexCmdErrorLog,cmdErrorList[i].cmd,commandErrorToStr(cmdErrorList[i].err));
-      if (cmdErrorList[i].err != 0 || i == 0) data += temp;
-      if (cmdErrorList[i].err == 0) break;
-    }
-    data += "</font><br />";
-  }
 
   // Loop time
   if (!command(":GXFA#",temp1)) strcpy(temp1,"?%");
