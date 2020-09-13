@@ -400,6 +400,7 @@
 #define L_GE_ALT_MAX "Above overhead limit"
 #define L_GE_WEATHER_INIT "Weather sensor init failed"
 #define L_GE_SITE_INIT "Time or Location not updated"
+#define L_GE_NV_INIT "Init NV/EEPROM bad"
 #define L_GE_OTHER "Unknown Error, code"
 
 // command errors

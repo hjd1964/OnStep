@@ -409,6 +409,7 @@
 #define L_GE_ALT_MAX "&uuml;ber Obergrenze"
 #define L_GE_WEATHER_INIT "Wettersensor Initialisierung fehlgeschlagen"
 #define L_GE_SITE_INIT "Zeit oder Ort nicht aktualisiert"
+#define L_GE_NV_INIT "Init NV/EEPROM schlecht"
 #define L_GE_OTHER "Unbekannter Fehler, Code"
 
 // command errors

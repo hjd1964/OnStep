@@ -400,6 +400,7 @@
 #define L_GE_ALT_MAX "超出上限"
 #define L_GE_WEATHER_INIT "天气传感器初始化失败"
 #define L_GE_SITE_INIT "RTC初始化失败"
+#define L_GE_NV_INIT "初始化 NV/EEPROM 损坏"
 #define L_GE_OTHER "未知错误，代码"
 
 // command errors
