@@ -29,7 +29,7 @@
   #define HAL_SERIAL_B_ENABLED       // Enable support for RX1/TX1
 
   // don't enable serial C on a Classic board since pins are used
-  #if PINMAP != Classic
+  #if PINMAP != Classic && SERIAL_C_BAUD_DEFAULT != OFF
     #define HAL_SERIAL_C_ENABLED
     #define HAL_SERIAL_C_SERIAL2     // Use RX2/TX2 for channel C (defaults to RX3/TX3 otherwise.)
   #endif
