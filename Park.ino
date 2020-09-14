@@ -46,7 +46,7 @@ CommandErrors park() {
   lastTrackingState=TrackingNone;
   trackingState=TrackingNone;
 
-#if MOUNT_TYPE != ALTAZM
+#if AXIS1_PEC == ON
   // turn off the PEC while we park
   disablePec();
   pecStatus=IgnorePEC;

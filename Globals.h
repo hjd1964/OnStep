@@ -412,7 +412,7 @@ bool wormSensedAgain                    = false;             // indicates PEC in
 bool pecBufferStart                     = false;                                   
 fixed_t accPecGuideHA;                                       // for PEC, buffers steps to be recorded
 volatile double pecTimerRateAxis1 = 0.0;
-#if MOUNT_TYPE != ALTAZM
+#if AXIS1_PEC == ON
   static byte *pecBuffer;
 #endif
 

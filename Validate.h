@@ -90,6 +90,12 @@
 // -----------------------------------------------------------------------------------
 // setup defaults
 
+#if !(AXIS1_STEPS_PER_WORMROT == 0 || MOUNT_TYPE == ALTAZM)
+  #define AXIS1_PEC ON
+#else
+  #define AXIS1_PEC OFF
+#endif
+
 // default allowed degrees past the meridian on the East and West sides of the pier
 #define AXIS1_LIMIT_MERIDIAN_E 7.5 
 #define AXIS1_LIMIT_MERIDIAN_W 7.5

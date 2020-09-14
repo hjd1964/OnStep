@@ -1,7 +1,7 @@
 // -------------------------------------------------------------------------------------------------
 // Functions to handle periodic error correction
 
-#if MOUNT_TYPE != ALTAZM
+#if AXIS1_PEC == ON
 
 // enables code to clean-up PEC readings after record (use PECprep or a spreadsheet to fix readings otherwise)
 // this cleans up any tracking rate variations that would be introduced by recording more guiding corrections to either the east or west, default ON

@@ -118,6 +118,12 @@ bool Telescope::atHome()
   if (strlen(TelStatus)<3) return false;
   if (TelStatus[2]&0b00000001) return true; else return false;
 }
+bool Telescope::isPecEnabled()
+{
+  // PEC status: 0 ignore, 1 get ready to play, 2 playing, 3 get ready to record, 4 recording
+  if (strlen(TelStatus)<5) return false;
+  if ((TelStatus[4]&0b00000111)==0) return false; else return true;
+}
 bool Telescope::isPecPlaying()
 {
   // PEC status: 0 ignore, 1 get ready to play, 2 playing, 3 get ready to record, 4 recording

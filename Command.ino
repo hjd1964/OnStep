@@ -744,7 +744,7 @@ void processCommands() {
 #if MOUNT_TYPE == GEM
         if (autoMeridianFlip)                    reply[i++]='a';                                             // [a]uto meridian flip
 #endif
-#if MOUNT_TYPE != ALTAZM     
+#if AXIS1_PEC == ON
         const char *pch = PECStatusStringAlt; reply[i++]=pch[pecStatus];                                     // PEC Status one of "/,~;^" (/)gnore, ready to (,)lay, (~)laying, ready to (;)ecord, (^)ecording
 #endif
         // provide mount type
@@ -819,7 +819,7 @@ void processCommands() {
         if (getInstrPierSide() == PierSideEast)      reply[3]|=0b10100000; else                              // Pier side east
         if (getInstrPierSide() == PierSideWest)      reply[3]|=0b11000000;                                   // Pier side west
 
-#if MOUNT_TYPE != ALTAZM
+#if AXIS1_PEC == ON
         reply[4]=pecStatus|0b10000000;                                                                       // PEC status: 0 ignore, 1 ready play, 2 playing, 3 ready record, 4 recording
 #endif
         reply[5]=parkStatus|0b10000000;                                                                      // Park status: 0 not parked, 1 parking in-progress, 2 parked, 3 park failed
@@ -1440,7 +1440,7 @@ void processCommands() {
       if (command[0] == '$' && command[1] == 'Q') {
         if (parameter[0] == 'Z' && parameter[2] == 0) {
           boolReply=false;
-#if MOUNT_TYPE != ALTAZM
+#if AXIS1_PEC == ON
           if (parameter[1] == '+') { if (pecRecorded) pecStatus=ReadyPlayPEC; nv.update(EE_pecStatus,pecStatus); } else
           if (parameter[1] == '-') { pecStatus=IgnorePEC; nv.update(EE_pecStatus,pecStatus); } else
           if (parameter[1] == '/' && trackingState == TrackingSidereal) { pecStatus=ReadyRecordPEC; nv.update(EE_pecStatus,IgnorePEC); } else
@@ -2097,7 +2097,7 @@ void processCommands() {
 //            Returns: Nothing
       if (command[0] == 'U' && command[1] == 0) { if (precision == PM_LOW) precision=PM_HIGH; else precision=PM_LOW; boolReply=false; } else
 
-#if MOUNT_TYPE != ALTAZM
+#if AXIS1_PEC == ON
 // V - PEC Readout
 // :VR[n]#    Read PEC table entry rate adjustment (in steps +/-) for worm segment n (in seconds)
 //            Returns: sn#
@@ -2152,7 +2152,7 @@ void processCommands() {
         strcpy(reply,temp);
         boolReply=false;
       } else
-#if MOUNT_TYPE != ALTAZM
+#if AXIS1_PEC == ON
 //  :VH#      PEC index sense position in seconds
 //            Returns: n#
       if (command[0] == 'V' && command[1] == 'H' && parameter[0] == 0) {

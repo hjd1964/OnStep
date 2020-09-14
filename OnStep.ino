@@ -409,7 +409,7 @@ void loop2() {
     timerSupervisor(true);
 #endif
     
-#if MOUNT_TYPE != ALTAZM
+#if AXIS1_PEC == ON
     // PERIODIC ERROR CORRECTION
     pec();
 #endif

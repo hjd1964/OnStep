@@ -385,7 +385,7 @@ CommandErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTar
   } else pierSideControl=thisPierSide;
 
   reactivateBacklashComp();
-#if MOUNT_TYPE != ALTAZM
+#if AXIS1_PEC == ON
   disablePec();
 #endif
   soundAlert();

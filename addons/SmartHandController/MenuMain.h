@@ -36,7 +36,7 @@ void SmartHandController::menuMain()
   current_selection_L0 = 1;
   while (current_selection_L0 != 0)
   {
-    if (!telInfo.isMountAltAz()) {
+    if (telInfo.isPecEnabled()) {
       const char *string_list_main_UnParkedL0 = L_MM_GOTO "\n" L_MM_SYNC "\n" L_MM_ALIGN "\n" L_MM_PARKING "\n" L_MM_TRACKING "\n" L_MM_PEC "\n" L_MM_SETTINGS;
       current_selection_L0 = display->UserInterfaceSelectionList(&buttonPad, L_MM_MAIN_MENU, current_selection_L0, string_list_main_UnParkedL0);
       switch (current_selection_L0) {

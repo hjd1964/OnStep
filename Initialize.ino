@@ -383,14 +383,19 @@ void initReadNvValues() {
   // setup PEC and get data
   stepsPerWormRotationAxis1=AXIS1_STEPS_PER_WORMROT*(axis1Settings.stepsPerMeasure/AXIS1_STEPS_PER_DEGREE);
   secondsPerWormRotationAxis1=stepsPerWormRotationAxis1/stepsPerSecondAxis1;
-  if (MOUNT_TYPE == ALTAZM) pecBufferSize=0; else pecBufferSize=ceil(stepsPerWormRotationAxis1/(axis1Settings.stepsPerMeasure/240.0));
+
+#if AXIS1_PEC == ON
+  pecBufferSize=ceil(stepsPerWormRotationAxis1/(axis1Settings.stepsPerMeasure/240.0));
+#else
+  pecBufferSize=0;
+#endif
   if (pecBufferSize != 0) {
     if (pecBufferSize < 61) { pecBufferSize=0; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): invalid pecBufferSize, PEC disabled"); }
     if (200+pecBufferSize >= E2END-200) { pecBufferSize=0; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): pecBufferSize exceeds available NV, PEC disabled"); }
   }
   if (secondsPerWormRotationAxis1 > pecBufferSize) secondsPerWormRotationAxis1=pecBufferSize;
 
-#if MOUNT_TYPE != ALTAZM
+#if AXIS1_PEC == ON
   createPecBuffer();
   bool pecBufferNeedsInit=true;
   for (int i=0; i < pecBufferSize; i++) { pecBuffer[i]=nv.read(EE_pecTable+i); if (pecBuffer[i] != 0) pecBufferNeedsInit=false; }
@@ -401,7 +406,7 @@ void initReadNvValues() {
     pecStatus=IgnorePEC;
   #endif
 
-  pecStatus  =nv.read(EE_pecStatus);
+  pecStatus=nv.read(EE_pecStatus);
   if (pecStatus < PEC_STATUS_FIRST || pecStatus > PEC_STATUS_LAST) { pecStatus=IgnorePEC; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV pecStatus"); }
   pecRecorded=nv.read(EE_pecRecorded);
   if (pecRecorded != true && pecRecorded != false) { pecRecorded=false; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV pecRecorded"); }
