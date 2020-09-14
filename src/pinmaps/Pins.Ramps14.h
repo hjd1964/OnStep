@@ -61,7 +61,7 @@
 
 // Pins to Axis1 RA/Azm on RAMPS X
 #define Axis1_EN             38     // Enable
-#if PINMAP == MksGenL2
+#if PINMAP == MksGenL2 || PINMAP == MksGenL21
   #define Axis1_M0           51     // SPI MOSI
   #define Axis1_M0PORT    PORTB
   #define Axis1_M0BIT         2
@@ -96,7 +96,7 @@
 
 // Axis2 Dec/Alt step/dir driver on RMAPS Y
 #define Axis2_EN             56     // Enable (Pin A2)
-#if PINMAP == MksGenL2
+#if PINMAP == MksGenL2 || PINMAP == MksGenL21
   #define Axis2_M0           51     // SPI MOSI
   #define Axis2_M0PORT    PORTB
   #define Axis2_M0BIT         2
@@ -131,7 +131,7 @@
 
 // For rotator stepper driver on RAMPS Z
 #define Axis3_EN             62     // Enable (Pin A8)
-#if PINMAP == MksGenL2
+#if PINMAP == MksGenL2 || PINMAP == MksGenL21
   #define Axis3_M0           51     // SPI MOSI
   #define Axis3_M1           52     // SPI SCK
   #define Axis3_M2          A11     // SPI CS
@@ -142,7 +142,7 @@
 
 // For focuser1 stepper driver on RAMPS E0
 #define Axis4_EN             24     // Enable
-#if PINMAP == MksGenL2
+#if PINMAP == MksGenL2 || PINMAP == MksGenL21
   #define Axis4_M0           51     // SPI MOSI
   #define Axis4_M1           52     // SPI SCK
   #define Axis4_M2          A12     // SPI CS
@@ -166,7 +166,7 @@
 #define Axis5_STEP           36     // Step
 #define Axis5_DIR            34     // Dir
 
-#if PINMAP == MksGenL2
+#if PINMAP == MksGenL2 || PINMAP == MksGenL21
   // ST4 interface on MksGenL2 EXP-1
   #define ST4RAw             27     // ST4 RA- West
   #define ST4DEs             23     // ST4 DE- South
