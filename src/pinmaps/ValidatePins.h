@@ -53,10 +53,7 @@
 #if PINMAP == CNC3
   #include "Validate.CNC3.h"
 #endif
-#if PINMAP == Ramps14
-  #include "Validate.Ramps14.h"
-#endif
-#if PINMAP == MksGenL2
+#if PINMAP == Ramps14 || PINMAP == MksGenL2 || PINMAP == MksGenL21
   #include "Validate.Ramps14.h"
 #endif
 #if PINMAP == STM32Blue
