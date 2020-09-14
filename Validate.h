@@ -90,6 +90,7 @@
 // -----------------------------------------------------------------------------------
 // setup defaults
 
+// enable PEC code only if we need it
 #if !(AXIS1_STEPS_PER_WORMROT == 0 || MOUNT_TYPE == ALTAZM)
   #define AXIS1_PEC ON
 #else
