@@ -279,7 +279,7 @@ class weather {
     
     // get telescope temperature in deg. C
     float getTelescopeTemperature() {
-#if TELESCOPE_TEMPERATURE == OFF && WEATHER != OFF
+#if TELESCOPE_TEMPERATURE == OFF
       _tt = _t;
 #endif
       return _tt;

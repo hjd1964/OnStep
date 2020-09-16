@@ -416,7 +416,7 @@ void processCommands() {
 // :FC[sn.n]# Set focuser temperature compensation coefficient in um per deg. C (+ moves out as temperature falls)
 //            Return: 0 on failure
 //                    1 on success
-        if (command[1] == 'C') { f = atof(parameter); if (fabs(f) < 10000.0) foc->setTcfCoef(f); else commandError=CE_PARAM_RANGE; } else
+        if (command[1] == 'C') { f = atof(parameter); if (fabs(f) < 1000.0) foc->setTcfCoef(f); else commandError=CE_PARAM_RANGE; } else
 // :Fc#       Get focuser temperature compensation enable status
 //            Return: 0 if disabled
 //                    1 if enabled

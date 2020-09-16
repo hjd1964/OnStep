@@ -20,6 +20,9 @@ class focuser {
     virtual double getTcfCoef() { return 0; }
     virtual void setTcfEnable(bool enabled) { }
     virtual bool getTcfEnable() { return false; }
+    long getTcfSteps() {
+      if (tcf) return -round((tcf_coef * (ambient.getTelescopeTemperature() - 10.0)) * spm); else return 0;
+    }
 
     // get step size in microns
     virtual double getStepsPerMicro() { return spm; }
@@ -51,10 +54,10 @@ class focuser {
     virtual void startMoveOut() { }
 
     // check if moving
-    bool moving() { if ((delta.fixed != 0) || ((long)target.part.m != spos)) return true; else return false; }
+    bool moving() { if ((delta.fixed != 0) || ((long)target.part.m + getTcfSteps() != spos)) return true; else return false; }
 
     // stop move
-    void stopMove() { delta.fixed=0; target.part.m=spos; target.part.f=0; }
+    void stopMove() { delta.fixed=0; target.part.m=spos-getTcfSteps(); target.part.f=0; }
 
     // get position in steps
     long getPosition() { return spos; }

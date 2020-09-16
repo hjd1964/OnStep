@@ -128,26 +128,18 @@ class focuserStepper : public focuser {
         if ((long)(millis()-lastMove) > FOCUSER_WRITE_DELAY) writePos(spos);
       }
 
-      // temperature compensation
-      long tcfSteps;
-      if (tcf) {
-        tcfSteps = -round((tcf_coef * (ambient.getTelescopeTemperature() - 10.0)) * spm);
-      } else {
-        tcfSteps = 0;
-      }
-
       unsigned long microsNow=micros();
       if ((long)(microsNow-nextPhysicalMove) > 0) {
         nextPhysicalMove=microsNow+(unsigned long)(maxRate*1000.0);
     
-        if ((spos < (long)target.part.m + tcfSteps) && (spos < smax)) {
+        if ((spos < (long)target.part.m + getTcfSteps()) && (spos < smax)) {
           if (pda && currentlyDisabled) { enableDriver(); currentlyDisabled=false; delayMicroseconds(5); }
           digitalWrite(stepPin,LOW); delayMicroseconds(5);
           digitalWrite(dirPin,forwardState); delayMicroseconds(5);
           digitalWrite(stepPin,HIGH); spos++;
           lastPhysicalMove=micros();
         } else
-        if ((spos > (long)target.part.m + tcfSteps) && (spos > smin)) {
+        if ((spos > (long)target.part.m + getTcfSteps()) && (spos > smin)) {
           if (pda && currentlyDisabled) { enableDriver(); currentlyDisabled=false; delayMicroseconds(5); }
           digitalWrite(stepPin,LOW); delayMicroseconds(5);
           digitalWrite(dirPin,reverseState); delayMicroseconds(5);
