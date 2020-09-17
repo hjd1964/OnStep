@@ -233,16 +233,29 @@ void initWriteNvValues() {
     nv.writeLong(EE_siderealInterval,masterSiderealInterval);
 
     // set default focuser positions at zero
-    nv.writeLong(EE_posAxis4,0L);
-    nv.writeLong(EE_posAxis5,0L);
-    // for DC focusers read in the % power
-    nv.write(EE_dcPwrAxis4,50);
-    nv.write(EE_dcPwrAxis5,50);
+    // for DC focusers set the % power
     // clear focuser TCF values
-    nv.writeFloat(EE_tcfCoefAxis4,0.0);
-    nv.writeFloat(EE_tcfCoefAxis5,0.0);
-    nv.write(EE_tcfEnAxis4,0);
-    nv.write(EE_tcfEnAxis5,0);
+    long base=EE_focBaseAxis4;
+    nv.writeLong(base+EE_focSpos,0L);
+    nv.writeLong(base+EE_focTarget,0L);
+    nv.writeInt(base+EE_focBacklashPos,0);
+    nv.writeInt(base+EE_focBacklash,0);
+    nv.write(base+EE_focDcPwr,50);
+    nv.writeFloat(base+EE_tcfCoef,0.0);
+    nv.write(base+EE_tcfEn,0);
+    nv.writeInt(base+EE_tcfDeadband,1);
+    nv.writeFloat(base+EE_tcfT0,10.0);
+
+    base=EE_focBaseAxis5;
+    nv.writeLong(base+EE_focSpos,0L);
+    nv.writeLong(base+EE_focTarget,0L);
+    nv.writeInt(base+EE_focBacklashPos,0);
+    nv.writeInt(base+EE_focBacklash,0);
+    nv.write(base+EE_focDcPwr,50);
+    nv.writeFloat(base+EE_tcfCoef,0.0);
+    nv.write(base+EE_tcfEn,0);
+    nv.writeInt(base+EE_tcfDeadband,1);
+    nv.writeFloat(base+EE_tcfT0,10.0);
 
     // clear the library/catalogs
     Lib.clearAll();

@@ -157,14 +157,11 @@
 #define EE_pecStatus                70  // 1
 #define EE_pecRecorded              71  // 1
                                     
-#define EE_posAxis4                 72  // 4
-                                    
 #define EE_wormSensePos             76  // 4
                                     
 #define EE_backlashAxis1            80  // 4
 #define EE_backlashAxis2            84  // 4
 #define EE_siderealInterval         88  // 4
-#define EE_posAxis5                 92  // 4
                                     
 #define EE_autoInitKey              96
 
@@ -201,13 +198,7 @@
 
 // General purpose storage B (200 bytes), E2END-199..E2END
 #define GSB                       (E2END-200)
-#define EE_dcPwrAxis4              GSB+0   // 1
-#define EE_dcPwrAxis5              GSB+1   // 1
 #define EE_maxRateL                GSB+2   // 4
-#define EE_tcfCoefAxis4            GSB+6   // 4
-#define EE_tcfCoefAxis5            GSB+10  // 4
-#define EE_tcfEnAxis4              GSB+14  // 1
-#define EE_tcfEnAxis5              GSB+15  // 1
 
 #define EE_feature1Value1          GSB+16  // 1
 #define EE_feature1Value2          GSB+17  // 1
@@ -241,9 +232,24 @@
 #define EE_settingsAxis5           GSB+108 // 17
 #define EE_settingsRuntime         GSB+125 // 1
 
+// focuser base addresses
+#define EE_focBaseAxis4            GSB+126 // 24
+#define EE_focBaseAxis5            GSB+150 // 24
+
+// offsets for the focusers
+#define EE_focSpos                      0  // 4
+#define EE_focTarget                    4  // 4
+#define EE_focBacklashPos               8  // 2
+#define EE_focBacklash                  10 // 2
+#define EE_focDcPwr                     12 // 1
+#define EE_tcfCoef                      13 // 4
+#define EE_tcfEn                        17 // 1
+#define EE_tcfDeadband                  18 // 2
+#define EE_tcfT0                        20 // 4
+
 // ---------------------------------------------------------------------------------------------------------------------------------
 // Unique identifier for the current initialization format for NV, do not change
-#define NV_INIT_KEY 915307550
+#define NV_INIT_KEY 915307551
 
 #define PierSideNone               0
 #define PierSideEast               1

@@ -376,7 +376,7 @@ void processCommands() {
         if (foc != NULL && !(strchr("TpIMtuQF1234+-GZHh",command[1]) && parameter[0] != 0)) {
 
         // get ready for commands that convert to microns or steps (these commands are upper-case for microns OR lower-case for steps)
-        double spm = foc->getStepsPerMicro(); if (strchr("gimrs",command[1])) spm = 1.0;
+        double spm = foc->getStepsPerMicro(); if (strchr("bdgimrs",command[1])) spm = 1.0;
 
 // :FA[n]#    Select primary focuser where [n] = 1 or 2
 //            Return: 0 on failure
@@ -410,13 +410,20 @@ void processCommands() {
 // :Fu#       Get focuser microns per step
 //            Returns: n.n#
         if (command[1] == 'u') { dtostrf(1.0/foc->getStepsPerMicro(),7,5,reply); boolReply=false; } else
+// :FB#       Get focuser backlash amount (in steps or microns)
+//            Return: n#
+        if (toupper(command[1]) == 'B' && parameter[0] == 0) { sprintf(reply,"%ld",(long)round(foc->getBacklash()/spm)); boolReply=false; } else
+// :FB[n]#    Set focuser backlash amount (in steps or microns)
+//            Return: 0 on failure
+//                    1 on success
+        if (toupper(command[1]) == 'B') { long l = atol(parameter)*spm; if (!foc->setBacklash(l)) commandError=CE_PARAM_RANGE; } else
 // :FC#       Get focuser temperature compensation coefficient
 //            Return: n.n#
         if (command[1] == 'C' && parameter[0] == 0) { dtostrf(foc->getTcfCoef(),7,5,reply); boolReply=false; } else
 // :FC[sn.n]# Set focuser temperature compensation coefficient in um per deg. C (+ moves out as temperature falls)
 //            Return: 0 on failure
 //                    1 on success
-        if (command[1] == 'C') { f = atof(parameter); if (fabs(f) < 1000.0) foc->setTcfCoef(f); else commandError=CE_PARAM_RANGE; } else
+        if (command[1] == 'C') { f = atof(parameter); if (!foc->setTcfCoef(f)) commandError=CE_PARAM_RANGE; } else
 // :Fc#       Get focuser temperature compensation enable status
 //            Return: 0 if disabled
 //                    1 if enabled
@@ -425,6 +432,13 @@ void processCommands() {
 //            Return: 0 on failure
 //                    1 on success
         if (command[1] == 'c' && parameter[1] == 0) { foc->setTcfEnable(parameter[0] != '0'); } else
+// :FD#       Get focuser temperature compensation deadband amount (in steps or microns)
+//            Return: n#
+        if (toupper(command[1]) == 'D' && parameter[0] == 0) { sprintf(reply,"%ld",(long)round(foc->getTcfDeadband()/spm)); boolReply=false; } else
+// :FD[n]#    Set focuser temperature compensation deadband amount (in steps or microns)
+//            Return: 0 on failure
+//                    1 on success
+        if (toupper(command[1]) == 'D') { long l = atol(parameter)*spm; if (!foc->setTcfDeadband(l)) commandError=CE_PARAM_RANGE; } else
 
 // :FP#       Get focuser DC Motor Power Level (in %)
 //            Returns: n#
@@ -437,7 +451,7 @@ void processCommands() {
               sprintf(reply,"%d",(int)foc->getDcPower()); boolReply=false; 
             } else {
               i=atol(parameter);
-              if (i >= 0 && i <= 100) foc->setDcPower(i); else commandError=CE_PARAM_RANGE; 
+              if (!foc->setDcPower(i)) commandError=CE_PARAM_RANGE; 
             }
           } else commandError=CE_CMD_UNKNOWN;
         } else
@@ -1090,6 +1104,8 @@ void processCommands() {
           if (parameter[0] == 'Y') { // Yn: get auXiliary feature temperature
             featuresGetInfoCommand(parameter,reply,boolReply);
           } else
+#else
+          if (parameter[0] == 'X' || parameter[0] == 'Y') commandError=CE_0; else // silent errors for feature detection
 #endif
             commandError=CE_CMD_UNKNOWN;
         } else commandError=CE_CMD_UNKNOWN;

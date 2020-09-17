@@ -325,8 +325,8 @@ void setup() {
   // start focusers if present
 #if FOCUSER1 == ON
   VLF("MSG: Init focuser1");
-  foc1.init(Axis4_STEP,Axis4_DIR,Axis4_EN,EE_posAxis4,EE_tcfCoefAxis4,EE_tcfEnAxis4,AXIS4_STEP_RATE_MAX,axis4Settings.stepsPerMeasure,axis4Settings.min*1000.0,axis4Settings.max*1000.0,AXIS4_LIMIT_MIN_RATE);
-  if (AXIS4_DRIVER_DC_MODE != OFF) { foc1.initDcPower(EE_dcPwrAxis4); foc1.setPhase1(); }
+  foc1.init(Axis4_STEP,Axis4_DIR,Axis4_EN,EE_focBaseAxis4,AXIS4_STEP_RATE_MAX,axis4Settings.stepsPerMeasure,axis4Settings.min*1000.0,axis4Settings.max*1000.0,AXIS4_LIMIT_MIN_RATE);
+  if (AXIS4_DRIVER_DC_MODE != OFF) foc1.setPhase1();
   if (axis4Settings.reverse == ON) foc1.setReverseState(HIGH);
   foc1.setDisableState(AXIS4_DRIVER_DISABLE);
 
@@ -341,8 +341,8 @@ void setup() {
 
 #if FOCUSER2 == ON
   VLF("MSG: Init focuser2");
-  foc2.init(Axis5_STEP,Axis5_DIR,Axis5_EN,EE_posAxis5,EE_tcfCoefAxis5,EE_tcfEnAxis5,AXIS5_STEP_RATE_MAX,axis5Settings.stepsPerMeasure,axis5Settings.min*1000.0,axis5Settings.max*1000.0,AXIS5_LIMIT_MIN_RATE);
-  if (AXIS5_DRIVER_DC_MODE == DRV8825) { foc2.initDcPower(EE_dcPwrAxis5); foc2.setPhase2(); }
+  foc2.init(Axis5_STEP,Axis5_DIR,Axis5_EN,EE_focBaseAxis5,AXIS5_STEP_RATE_MAX,axis5Settings.stepsPerMeasure,axis5Settings.min*1000.0,axis5Settings.max*1000.0,AXIS5_LIMIT_MIN_RATE);
+  if (AXIS5_DRIVER_DC_MODE != OFF) foc2.setPhase2();
   if (axis5Settings.reverse == ON) foc2.setReverseState(HIGH);
   foc2.setDisableState(AXIS5_DRIVER_DISABLE);
 

@@ -6,59 +6,99 @@
 // time to write position to nv after last movement of Focuser 1/2, default = 5 minutes
 #define FOCUSER_WRITE_DELAY 1000L*60L*5L
 
+#define BD_NONE 0
+#define BD_IN -1
+#define BD_OUT 1
+
 #include "Focuser.h"
 
 class focuserStepper : public focuser {
   public:
-    void init(int stepPin, int dirPin, int enPin, int nvAddress, int nvTcfCoef, int nvTcfEn, float maxRate, double stepsPerMicro, double min, double max, double minRate) {
+    void init(int stepPin, int dirPin, int enPin, int nvAddress, float maxRate, double stepsPerMicro, double min, double max, double minRate) {
       this->stepPin=stepPin;
       this->dirPin=dirPin;
       this->enPin=enPin;
       this->nvAddress=nvAddress;
-      this->nvTcfCoef=nvTcfCoef;
-      this->nvTcfEn=nvTcfEn;
       this->minRate=minRate;
       this->maxRate=maxRate;
       this->spm=stepsPerMicro;
 
+      // set smin/smax
+      setMin((long)(min*spm));
+      setMax((long)(max*spm));
+      
       if (stepPin != -1) pinMode(stepPin,OUTPUT);
       if (dirPin != -1) pinMode(dirPin,OUTPUT);
 
       // get the temperature compensated focusing settings
-      float coef=nv.readFloat(nvTcfCoef);
-      if (fabs(coef) > 1000.0) { coef=0; generalError=ERR_NV_INIT; DLF("ERR, foc.init(): bad NV TcfCoef > 1000 um/deg. C (set to 0.0)"); }
+      float coef=nv.readFloat(nvAddress+EE_tcfCoef);
+      if (fabs(coef) >= 1000.0) { coef=0; generalError=ERR_NV_INIT; DLF("ERR, foc.init(): bad NV TcfCoef >= 1000 um/deg. C (set to 0.0)"); }
       setTcfCoef(coef);
 
-      int tcfEn=nv.read(nvTcfEn);
+      int deadband=nv.readInt(nvAddress+EE_tcfDeadband);
+      if (deadband < 1)     { deadband=1; generalError=ERR_NV_INIT; DLF("ERR, foc.init(): bad NV TcfDeadband < 1 steps (set to 1)"); }
+      if (deadband > 32767) { deadband=1; generalError=ERR_NV_INIT; DLF("ERR, foc.init(): bad NV TcfDeadband > 32767 steps (set to 1)"); }
+      setTcfDeadband(deadband);
+
+      tcf_t0=nv.readFloat(nvAddress+EE_tcfT0);
+      if (tcf_t0 < -100.0) { tcf_t0=10.0; generalError=ERR_NV_INIT; DLF("ERR, foc.init(): bad NV TcfT0 < -100 deg. C (set to 10.0)"); }
+      if (tcf_t0 >  150.0) { tcf_t0=10.0; generalError=ERR_NV_INIT; DLF("ERR, foc.init(): bad NV TcfT0 >  150 deg. C (set to 10.0)"); }
+
+      int tcfEn=nv.read(nvAddress+EE_tcfEn);
       if (tcfEn != true && tcfEn != false) { tcfEn=false; generalError=ERR_NV_INIT; DLF("ERR, foc.init(): bad NV tcfEn (set to false)"); }
-      setTcfEnable(tcfEn);
-      
+
+      // get backlash amount
+      int b=nv.readInt(nvAddress+EE_focBacklash);
+      if (b < 0) { b=0; generalError=ERR_NV_INIT; DLF("ERR, foc.init(): bad NV focBacklash < 0 um (set to 0)"); }
+      setBacklash(b);
+
+      // get backlash position
+      backlashPos=nv.readInt(nvAddress+EE_focBacklashPos);
+      if (backlashPos < 0)           { backlashPos=0; generalError=ERR_NV_INIT; DLF("ERR, foc.init(): bad NV focBacklash < 0 um (set to 0)"); }
+      if (backlashPos > backlashMax) { backlashPos=0; generalError=ERR_NV_INIT; DLF("ERR, foc.init(): bad NV focBacklash > 1/10 full range (set to 0)"); }
+
       // get step position
-      spos=readPos();
-      long lmin=(long)(min*spm); if (spos < lmin) { spos=lmin; DLF("WRN, foc.init(): bad NV position < _LIMIT_MIN (set to _LIMIT_MIN)"); }
-      long lmax=(long)(max*spm); if (spos > lmax) { spos=lmax; DLF("WRN, foc.init(): bad NV position > _LIMIT_MAX (set to _LIMIT_MAX)"); }
-      target.part.m=spos; target.part.f=0;
-      lastPos=spos;
+      spos=nv.readLong(nvAddress+EE_focSpos);
+      if (spos < smin) { spos=smin; DLF("WRN, foc.init(): bad NV position < _LIMIT_MIN (set to _LIMIT_MIN)"); }
+      if (spos > smax) { spos=smax; DLF("WRN, foc.init(): bad NV position > _LIMIT_MAX (set to _LIMIT_MAX)"); }
+      lastPos=spos+backlashPos;
+
+      // get target position
+      target.part.m=nv.readLong(nvAddress+EE_focTarget); target.part.f=0;
+      if ((long)target.part.m < smin) { target.part.m=smin; DLF("WRN, foc.init(): bad NV target < _LIMIT_MIN (set to _LIMIT_MIN)"); }
+      if ((long)target.part.m > smax) { target.part.m=smax; DLF("WRN, foc.init(): bad NV target > _LIMIT_MAX (set to _LIMIT_MAX)"); }
+      lastTarget=target.part.m;
+
+      // prepare for movement
       delta.fixed=0;
-
-      // set min/max
-      setMin(lmin);
-      setMax(lmax);
-
-      // steps per second, maximum
-      spsMax=(1.0/maxRate)*1000.0;
-      // microns per second default
-      setMoveRate(100);
-
+      spsMax=(1.0/maxRate)*1000.0; // steps per second, maximum
+      setMoveRate(100);            // microns per second default
       nextPhysicalMove=micros()+(unsigned long)(maxRate*1000.0);
       lastPhysicalMove=nextPhysicalMove;
     }
 
-    // temperature compensation
-    void setTcfCoef(double coef) { if (fabs(coef) >= 1000.0) coef = 0.0; tcf_coef = coef; nv.writeFloat(nvTcfCoef,tcf_coef); }
-    double getTcfCoef() { return tcf_coef; }
-    void setTcfEnable(bool enabled) { tcf = enabled; nv.write(nvTcfEn,tcf); }
-    bool getTcfEnable() { return tcf; }
+    // temperature compensation coefficient in um/deg.C
+    bool setTcfCoef(double coef) { if (fabs(coef) >= 1000.0) return false; tcf_coef = coef; nv.writeFloat(nvAddress+EE_tcfCoef,tcf_coef); return true; }
+
+    // temperature compensation deadband in um
+    bool setTcfDeadband(int deadband) { if (deadband < 1 || deadband > 32767) return false; tcf_deadband = deadband; nv.writeInt(nvAddress+EE_tcfDeadband,tcf_deadband); return true; }
+
+    // temperature compensation deadband enable/disable
+    bool setTcfEnable(bool enabled) {
+      if (tcf != enabled) {
+        if (enabled) {
+          tcf_t0=ambient.getTelescopeTemperature();
+          nv.writeFloat(nvAddress+EE_tcfT0,tcf_t0);
+        } else {
+          target.part.m=(long)target.part.m+getTcfSteps();
+        }
+        tcf = enabled; nv.write(nvAddress+EE_tcfEn,tcf);
+      }
+      return true;
+    }
+
+    // set backlash, in steps
+    bool setBacklash(int b) { if (b < 0 || b > backlashMax) return false; backlash = b; nv.writeInt(nvAddress+EE_focBacklash,backlash); return true; }
 
     // sets logic state for reverse motion
     void setReverseState(int reverseState) {
@@ -97,6 +137,9 @@ class focuserStepper : public focuser {
       delta.fixed=doubleToFixed(-moveRate/100.0);   // in steps per centi-second
     }
 
+    // check if moving
+    bool moving() { if (delta.fixed != 0 || spos != (long)target.part.m) return true; else return false; }
+
     // sets target position in steps
     void setTarget(long pos) {
       target.part.m=pos; target.part.f=0;
@@ -116,34 +159,37 @@ class focuserStepper : public focuser {
       if (((long)target.part.m < smin) || ((long)target.part.m > smax)) delta.fixed=0;
     }
 
-    void follow(bool slewing) {
+    void follow(bool mountSlewing) {
 
       // if enabled and the timeout has elapsed, disable the stepper driver
       if (pda && !currentlyDisabled && ((long)(micros()-lastPhysicalMove) > 10000000L)) { disableDriver(); currentlyDisabled=true; }
-    
-      // write position to non-volatile storage if not moving for FOCUSER_WRITE_DELAY milliseconds
-      if ((spos != lastPos)) { lastMove=millis(); lastPos=spos; }
-      if (!slewing && (spos != readPos())) {
-        // needs updating and enough time has passed?
-        if ((long)(millis()-lastMove) > FOCUSER_WRITE_DELAY) writePos(spos);
-      }
 
       unsigned long microsNow=micros();
       if ((long)(microsNow-nextPhysicalMove) > 0) {
         nextPhysicalMove=microsNow+(unsigned long)(maxRate*1000.0);
-    
-        if ((spos < (long)target.part.m + getTcfSteps()) && (spos < smax)) {
+
+        // keep track of when motion starts and stops
+        if (target.part.m != lastTarget) { inMotion=true; lastTargetMs=millis(); lastTarget=target.part.m; }
+        if (spos+backlashPos != lastPos) { lastMoveMs=millis(); lastPos=spos+backlashPos; }
+        if ((long)(millis()-lastMoveMs) > 1000) inMotion=false;
+  
+        // write position as needed to non-volatile storage if not moving for FOCUSER_WRITE_DELAY milliseconds
+        if (!mountSlewing && !moving() && (long)(millis()-lastTargetMs) > FOCUSER_WRITE_DELAY) writeTarget();
+
+        if (((spos < (long)target.part.m+getTcfSteps()) && spos < smax) || backlashDir == BD_OUT) {
           if (pda && currentlyDisabled) { enableDriver(); currentlyDisabled=false; delayMicroseconds(5); }
           digitalWrite(stepPin,LOW); delayMicroseconds(5);
           digitalWrite(dirPin,forwardState); delayMicroseconds(5);
-          digitalWrite(stepPin,HIGH); spos++;
+          digitalWrite(stepPin,HIGH);
+          if (backlashPos < backlash) { backlashPos++; backlashDir=BD_OUT; } else { spos++; backlashDir=BD_NONE; }
           lastPhysicalMove=micros();
         } else
-        if ((spos > (long)target.part.m + getTcfSteps()) && (spos > smin)) {
+        if (((spos > (long)target.part.m+getTcfSteps()) && spos > smin) || backlashDir == BD_IN) {
           if (pda && currentlyDisabled) { enableDriver(); currentlyDisabled=false; delayMicroseconds(5); }
           digitalWrite(stepPin,LOW); delayMicroseconds(5);
           digitalWrite(dirPin,reverseState); delayMicroseconds(5);
-          digitalWrite(stepPin,HIGH); spos--;
+          digitalWrite(stepPin,HIGH);
+          if (backlashPos > 0) { backlashPos--; backlashDir=BD_IN; } else { spos--; backlashDir=BD_NONE; }
           lastPhysicalMove=micros();
         }
       }
