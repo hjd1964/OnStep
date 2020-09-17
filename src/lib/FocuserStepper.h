@@ -49,7 +49,7 @@ class focuserStepper : public focuser {
 
       // get backlash amount
       int b=nv.readInt(nvAddress+EE_focBacklash);
-      if (b < 0) { b=0; generalError=ERR_NV_INIT; DLF("ERR, foc.init(): bad NV focBacklash < 0 um (set to 0)"); }
+      if (b < 0) { b=0; generalError=ERR_NV_INIT; DLF("ERR, foc.init(): bad NV focBacklash < 0 steps (set to 0)"); }
       setBacklash(b);
 
       // get backlash position
