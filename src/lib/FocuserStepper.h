@@ -54,7 +54,7 @@ class focuserStepper : public focuser {
 
       // get backlash position
       backlashPos=nv.readInt(nvAddress+EE_focBacklashPos);
-      if (backlashPos < 0)           { backlashPos=0; generalError=ERR_NV_INIT; DLF("ERR, foc.init(): bad NV focBacklash < 0 um (set to 0)"); }
+      if (backlashPos < 0)           { backlashPos=0; generalError=ERR_NV_INIT; DLF("ERR, foc.init(): bad NV focBacklash < 0 steps (set to 0)"); }
       if (backlashPos > backlashMax) { backlashPos=0; generalError=ERR_NV_INIT; DLF("ERR, foc.init(): bad NV focBacklash > 1/10 full range (set to 0)"); }
 
       // get step position
