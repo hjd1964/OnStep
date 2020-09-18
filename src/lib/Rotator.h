@@ -53,12 +53,12 @@ class rotator {
     }
 
     // minimum position in degrees
-    void setMin(long min) { smin=min*spd; if (smin < -180*3600 || smin > 180*3600) smin=0; if (smin > smax) smin=smax; backlashMax=(smax-smin)/10; if (backlashMax > 32767) backlashMax=32767; }
-    long getMin() { return smin/spd; }
+    void setMin(double min) { smin=min*spd; if (smin < -180*3600 || smin > 180*3600) smin=0; if (smin > smax) smin=smax; backlashMax=(smax-smin)/10; if (backlashMax > 32767) backlashMax=32767; }
+    double getMin() { return smin/spd; }
 
     // maximum position in degrees
-    void setMax(long max) { smax=max*spd; if (smax < -180*3600 || smax > 180*3600) smax=0; if (smax < smin) smax=smin; backlashMax=(smax-smin)/10; if (backlashMax > 32767) backlashMax=32767; }
-    long getMax() { return smax/spd; }
+    void setMax(double max) { smax=max*spd; if (smax < -180*3600 || smax > 180*3600) smax=0; if (smax < smin) smax=smin; backlashMax=(smax-smin)/10; if (backlashMax > 32767) backlashMax=32767; }
+    double getMax() { return smax/spd; }
 
     // backlash, in degrees
     bool setBacklash(double b) { b=b*spd; if (b < 0 || b > backlashMax) return false; backlash = b; nv.writeInt(nvAddress+EE_rotBacklash,backlash); return true; }
