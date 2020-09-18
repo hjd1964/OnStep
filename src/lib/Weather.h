@@ -267,22 +267,37 @@ class weather {
       phase++;
       }
 #endif
+
+#if TELESCOPE_TEMPERATURE == OFF
+      // use primary temperature for the telescope temperature if TELESCOPE_TEMPERATURE
+      _tt = _t;
+#else
+  #if WEATHER == OFF
+      // use telescope temperature for the primary temperature if WEATHER = OFF
+      _t = _tt;
+  #endif
+#endif
+
+      // apply a 20 sample rolling average to the temperatures, sampling once a second
+      static byte p;
+      if ((p++)%100 == 0) {
+        static bool firstTSample=false; if (firstTSample) { firstTSample=false; _ta=_t; }
+        _ta=(_ta*19.0+_t)/20.0;
+  
+        static bool firstTTSample=false; if (firstTTSample) { firstTTSample=false; _tta=_tt; }
+        _tta=(_tta*19.0+_tt)/20.0;
+      }
+
     }
 
     // get temperature in deg. C
     double getTemperature() {
-#if TELESCOPE_TEMPERATURE != OFF && WEATHER == OFF
-      _t = _tt;
-#endif
-      return _t;
+      return _ta;
     }
     
     // get telescope temperature in deg. C
     float getTelescopeTemperature() {
-#if TELESCOPE_TEMPERATURE == OFF
-      _tt = _t;
-#endif
-      return _tt;
+      return _tta;
     }
     
     // get feature temperature in deg. C
@@ -353,9 +368,9 @@ class weather {
     // get dew point in deg. C
     // accurate to +/- 1 deg. C for RH above 50%
     double getDewPoint() {
-      return _t - ((100.0 - _h) / 5.0);
+      return _ta - ((100.0 - _h) / 5.0);
       // a more accurate formula?
-      // return 243.04*(log(_h/100.0)+((17.625*_t)/(243.04+_t)))/(17.625-log(_h/100.0)-((17.625*_t)/(243.04+_t)));
+      // return 243.04*(log(_h/100.0)+((17.625*_ta)/(243.04+_ta)))/(17.625-log(_h/100.0)-((17.625*_ta)/(243.04+_ta)));
     }
 
     // four DS2413 OneWire GPIO's are supported, this sets each output on or off
@@ -382,10 +397,12 @@ class weather {
     uint8_t _DS2413_address[4][8];
 
     float _t = 10.0;
+    float _ta = 10.0;
     float _p = 1010.0;
     float _h = 70.0;
     float _a = 200.0;
     float _tt = 10.0;
+    float _tta = 10.0;
     float _dh_t[8] = {10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0};
     bool _ds2413_state[8] = {false, false, false, false, false, false, false, false};
     bool _this_ds2413_state[8] = {false, false, false, false, false, false, false, false};
