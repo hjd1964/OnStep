@@ -1120,25 +1120,15 @@ void processCommands() {
 // :hF#       Reset telescope at the home position.  This position is required for a cold Start.
 //            Point to the celestial pole.  GEM w/counterweights pointing downwards (CWD position).  Equatorial fork mounts at HA = 0.
 //            Returns: Nothing
-      if (command[1] == 'F' && parameter[0] == 0)  { 
-#if FOCUSER1 == ON
-        foc1.savePosition();
-#endif
-#if FOCUSER2 == ON
-        foc2.savePosition();
-#endif
+      if (command[1] == 'F' && parameter[0] == 0)  {
+        focuserRotatorSave();
         commandError=setHome(); boolReply=false;
         if (commandError == CE_MOUNT_IN_MOTION) stopSlewingAndTracking(SS_ALL_FAST);
       } else 
 // :hC#       Moves telescope to the home position
 //            Returns: Nothing
       if (command[1] == 'C' && parameter[0] == 0)  {
-#if FOCUSER1 == ON
-        foc1.savePosition();
-#endif
-#if FOCUSER2 == ON
-        foc2.savePosition();
-#endif
+        focuserRotatorSave();
         commandError=goHome(true); boolReply=false;
         if (commandError == CE_MOUNT_IN_MOTION) stopSlewingAndTracking(SS_ALL_FAST);
       } else 
@@ -1146,12 +1136,7 @@ void processCommands() {
 //            Return: 0 on failure
 //                    1 on success
       if (command[1] == 'P' && parameter[0] == 0)  {
-#if FOCUSER1 == ON
-        foc1.savePosition();
-#endif
-#if FOCUSER2 == ON
-        foc2.savePosition();
-#endif
+        focuserRotatorSave();
         commandError=park();
         } else 
 // :hQ#       Set the park position
@@ -2369,4 +2354,22 @@ bool cmdReply(char *s) {
 void logErrors(const char ch[], char cmd[], char param[], CommandErrors cmdErr) {
   if (cmdErr <= CE_0) return;
   V(ch); V(" \""); V(cmd); V(param); V("\", Error "); VL(commandErrorStr[cmdErr]);
+}
+
+void focuserRotatorSave() {
+#if FOCUSER1 == ON
+  foc1.stopMove();
+  foc1.savePosition();
+#endif
+#if FOCUSER2 == ON
+  foc2.stopMove();
+  foc2.savePosition();
+#endif
+#if ROTATOR == ON
+  #if MOUNT_TYPE == ALTAZM
+    rot.enableDR(false);
+  #endif
+  rot.stopMove();
+  rot.savePosition();
+#endif
 }
