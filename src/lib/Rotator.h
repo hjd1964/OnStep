@@ -3,22 +3,42 @@
 
 #pragma once
 
-// ROTATOR/DEROTATOR ----------------------------
+// time to write position to nv after last movement of Rotator, default = 5 minutes
+#define ROTATOR_WRITE_DELAY 1000L*60L*5L
 
 class rotator {
   public:
-    void init(int stepPin, int dirPin, int enPin, float maxRate, double stepsPerDeg, double min, double max) {
+    void init(int stepPin, int dirPin, int enPin, int nvAddress, float maxRate, double stepsPerDeg, double min, double max) {
       this->stepPin=stepPin;
       this->dirPin=dirPin;
       this->enPin=enPin;
       this->maxRate=maxRate;
       this->spd=stepsPerDeg;
 
+      // default min/max (in degrees)
+      setMin(min);
+      setMax(max);
+
       if (stepPin != -1) pinMode(stepPin,OUTPUT);
       if (dirPin != -1) pinMode(dirPin,OUTPUT);
 
+      // get backlash amount
+      int b=nv.readInt(nvAddress+EE_rotBacklash);
+      if (b < 0) { b=0; generalError=ERR_NV_INIT; DLF("ERR, rot.init(): bad NV rotBacklash < 0 steps (set to 0)"); }
+      setBacklash(b);
+
+      // get backlash position
+      backlashPos=nv.readInt(nvAddress+EE_rotBacklashPos);
+      if (backlashPos < 0)           { backlashPos=0; generalError=ERR_NV_INIT; DLF("ERR, rot.init(): bad NV rotBacklash < 0 steps (set to 0)"); }
+      if (backlashPos > backlashMax) { backlashPos=0; generalError=ERR_NV_INIT; DLF("ERR, rot.init(): bad NV rotBacklash > 1/10 full range (set to 0)"); }
+
+      // get step position
+      spos=nv.readLong(nvAddress+EE_rotSpos);
+      if (spos < smin) { spos=smin; DLF("WRN, rot.init(): bad NV position < _LIMIT_MIN (set to _LIMIT_MIN)"); }
+      if (spos > smax) { spos=smax; DLF("WRN, rot.init(): bad NV position > _LIMIT_MAX (set to _LIMIT_MAX)"); }
+
       // positions
-      target.fixed=0;
+      target.part.m=spos; target.part.f=0;
       delta.fixed=0;
       deltaDR.fixed=0;
       amountRotate.fixed=0;
@@ -28,22 +48,22 @@ class rotator {
       // degrees per second default
       setMoveRate(1.0);
 
-      // default min/max
-      setMin(min);
-      setMax(max);
-
       nextPhysicalMove=micros()+(unsigned long)(maxRate*1000.0);
       lastPhysicalMove=nextPhysicalMove;
     }
 
     // minimum position in degrees
-    void setMin(double min) { smin=(min*spd); }
-    double getMin() { return smin/spd; }
+    void setMin(long min) { smin=min*spd; if (smin < -180*3600 || smin > 180*3600) smin=0; if (smin > smax) smin=smax; backlashMax=(smax-smin)/10; if (backlashMax > 32767) backlashMax=32767; }
+    long getMin() { return smin/spd; }
 
     // maximum position in degrees
-    void setMax(double max) { smax=(max*spd); }
-    double getMax() { return smax/spd; }
+    void setMax(long max) { smax=max*spd; if (smax < -180*3600 || smax > 180*3600) smax=0; if (smax < smin) smax=smin; backlashMax=(smax-smin)/10; if (backlashMax > 32767) backlashMax=32767; }
+    long getMax() { return smax/spd; }
 
+    // backlash, in degrees
+    bool setBacklash(double b) { b=b*spd; if (b < 0 || b > backlashMax) return false; backlash = b; nv.writeInt(nvAddress+EE_rotBacklash,backlash); return true; }
+    double getBacklash() { return backlash/spd; }
+    
     // sets logic state for reverse motion
     void setReverseState(int reverseState) {
       this->reverseState=reverseState;
@@ -113,7 +133,7 @@ class rotator {
     
     // check if moving
     bool moving() {
-      if ((delta.fixed != 0) || ((long)target.part.m != spos)) return true; else return false;
+      if (delta.fixed != 0 || (long)target.part.m != spos || backlashDir != BD_NONE) return true; else return false;
     }
 
     // enable/disable new continuous move mode
@@ -161,10 +181,9 @@ class rotator {
       spos=round(deg*spd);
       if (spos < smin) spos=smin; if (spos > smax) spos=smax;
       target.part.m=spos; target.part.f=0;
-      lastMove=millis();
     }
 
-    // set target
+    // set target in degrees
     void setTarget(double deg) {
       target.part.m=(long)(deg*spd); target.part.f=0;
       if ((long)target.part.m < smin) target.part.m=smin; if ((long)target.part.m > smax) target.part.m=smax;
@@ -188,31 +207,43 @@ class rotator {
     }
 #endif
     
-    void follow() {
+    void follow(bool mountSlewing) {
       if (pda && !currentlyDisabled && ((micros()-lastPhysicalMove) > 10000000L)) { currentlyDisabled=true; disableDriver(); }
-      
+
       unsigned long microsNow=micros();
       if ((long)(microsNow-nextPhysicalMove) > 0) {
         nextPhysicalMove=microsNow+(unsigned long)(maxRate*1000.0);
-      
-        if ((spos < (long)target.part.m) && (spos < smax)) {
+
+        // write position as needed to non-volatile storage if not moving for ROTATOR_WRITE_DELAY milliseconds
+        if (moving()) sinceMovingMs=millis();
+        if (!mountSlewing && (long)(millis()-sinceMovingMs) > ROTATOR_WRITE_DELAY) writeTarget();
+
+        if ((spos < (long)target.part.m && spos < smax) || backlashDir == BD_OUT) {
           if (pda && currentlyDisabled) { currentlyDisabled=false; enableDriver(); delayMicroseconds(5); }
           digitalWrite(stepPin,LOW); delayMicroseconds(5);
           digitalWrite(dirPin,forwardState); delayMicroseconds(5);
           digitalWrite(stepPin,HIGH); spos++;
+          if (backlashPos < backlash) { backlashPos++; backlashDir=BD_OUT; } else { spos++; backlashDir=BD_NONE; }
           lastPhysicalMove=micros();
         } else
-        if ((spos > (long)target.part.m) && (spos > smin)) {
+        if ((spos > (long)target.part.m && spos > smin) || backlashDir == BD_IN) {
           if (pda && currentlyDisabled) { currentlyDisabled=false; enableDriver(); delayMicroseconds(5); }
           digitalWrite(stepPin,LOW); delayMicroseconds(5);
           digitalWrite(dirPin,reverseState); delayMicroseconds(5);
           digitalWrite(stepPin,HIGH); spos--;
+          if (backlashPos > 0) { backlashPos--; backlashDir=BD_IN; } else { spos--; backlashDir=BD_NONE; }
           lastPhysicalMove=micros();
         }
       }
     }
 
+    void savePosition() { writeTarget(); }
+  
   private:
+    void writeTarget() {
+      nv.writeLong(nvAddress+EE_rotSpos,spos);
+      nv.writeInt(nvAddress+EE_rotBacklashPos,backlashPos);
+    }
 
     void enableDriver() {
       if (enPin == -1) return;
@@ -284,6 +315,10 @@ class rotator {
     fixed_t target;
     long spos=0;
     long lastPos=0;
+    int backlash=0;
+    int backlashPos=0;
+    int backlashDir=0;
+    long backlashMax=0;
 
     // automatic movement
     double moveRate=0.1;
@@ -292,8 +327,7 @@ class rotator {
     double increment=1.0;
     
     // timing
-    unsigned long lastMs=0;
-    unsigned long lastMove=0;
+    unsigned long sinceMovingMs=0;
     unsigned long lastPhysicalMove=0;
     unsigned long nextPhysicalMove=0;
 };

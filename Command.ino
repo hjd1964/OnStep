@@ -1574,6 +1574,14 @@ void processCommands() {
 //            Returns: Nothing
       if (command[1] == 'R' && parameter[0] == 0) { rot.reverseDR(); boolReply=false; } else
 #endif
+// :rB#       Get rotator backlash amount in degrees
+//            Return: DDD*MM'SS#
+        if (command[1] == 'B' && parameter[0] == 0) { f1=rot.getBacklash(); doubleToDms(reply,&f1,true,false,PM_HIGH); boolReply=false; } else
+// :rB[DDD*MM'SS]#
+//            Set rotator backlash amount in degrees
+//            Returns: 0 on failure
+//                     1 on success
+      if (command[1] == 'B') { if (dmsToDouble(&f1,&parameter[0],true,PM_HIGH)) rot.setBacklash(f*f1); else commandError=CE_PARAM_FORM; } else
 // :rF#       Reset rotator at the home position
 //            Returns: Nothing
       if (command[1] == 'F' && parameter[0] == 0) { rot.reset(); boolReply=false; } else
@@ -1582,11 +1590,7 @@ void processCommands() {
       if (command[1] == 'C' && parameter[0] == 0) { rot.home(); boolReply=false; } else
 // :rG#       Get rotator current position in degrees
 //            Returns: sDDD*MM#
-      if (command[1] == 'G' && parameter[0] == 0) {
-        f1=rot.getPosition();
-        doubleToDms(reply,&f1,true,true,PM_LOW);
-        boolReply=false;
-      } else
+      if (command[1] == 'G' && parameter[0] == 0) { f1=rot.getPosition(); doubleToDms(reply,&f1,true,true,PM_LOW); boolReply=false; } else
 // :rc#       Set continuous move mode (for next move command)
 //            Returns: Nothing
       if (command[1] == 'c' && parameter[0] == 0) { rot.moveContinuous(true); boolReply=false; } else
@@ -1608,7 +1612,7 @@ void processCommands() {
         rot.setIncrement(t[i]); rot.setMoveRate(t1[i]); boolReply=false;
       } else
 // :rS[sDDD*MM'SS]#
-//            Set position
+//            Set position in degrees
 //            Returns: 0 on failure
 //                     1 on success
       if (command[1] == 'S') {

@@ -309,7 +309,7 @@ void setup() {
   // start rotator if present
 #if ROTATOR == ON
   VLF("MSG: Init rotator");
-  rot.init(Axis3_STEP,Axis3_DIR,Axis3_EN,AXIS3_STEP_RATE_MAX,axis3Settings.stepsPerMeasure,axis3Settings.min,axis3Settings.max);
+  rot.init(Axis3_STEP,Axis3_DIR,Axis3_EN,EE_rotBaseAxis3,AXIS3_STEP_RATE_MAX,axis3Settings.stepsPerMeasure,axis3Settings.min,axis3Settings.max);
   if (axis3Settings.reverse == ON) rot.setReverseState(HIGH);
   rot.setDisableState(AXIS3_DRIVER_DISABLE);
   
@@ -551,7 +551,7 @@ void loop2() {
 
   // FASTEST POLLING -----------------------------------------------------------------------------------
 #if ROTATOR == ON
-  rot.follow();
+  rot.follow(isSlewing());
 #endif
 #if FOCUSER1 == ON
   foc1.follow(isSlewing());

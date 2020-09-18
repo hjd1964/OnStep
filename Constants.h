@@ -255,6 +255,14 @@
 #define EE_tcfDeadband                  18 // 2
 #define EE_tcfT0                        20 // 4
 
+// rotator base address
+#define EE_rotBaseAxis3            GSB+174 // 8
+
+// offsets for the rotator
+#define EE_rotSpos                      0  // 4
+#define EE_rotBacklashPos               4  // 2
+#define EE_rotBacklash                  6  // 2
+
 // ---------------------------------------------------------------------------------------------------------------------------------
 // Unique identifier for the current initialization format for NV, do not change
 #define NV_INIT_KEY 915307551
