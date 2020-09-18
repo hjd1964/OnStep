@@ -11,6 +11,18 @@
 // -----------------------------------------------------------------------------------
 // correct for configuration backwards compatability
 
+#ifndef PIER_SIDE_PREFERRED_DEFAULT
+  #define PIER_SIDE_PREFERRED_DEFAULT BEST
+#endif
+
+#ifndef PIER_SIDE_SYNC_CHANGE_SIDES
+  #if SYNC_CURRENT_PIER_SIDE_ONLY == OFF
+    #define PIER_SIDE_SYNC_CHANGE_SIDES ON
+  #elif SYNC_CURRENT_PIER_SIDE_ONLY == ON
+    #define PIER_SIDE_SYNC_CHANGE_SIDES OFF
+  #endif
+#endif
+
 #if AXIS2_LIMIT_MIN == -91
   #undef AXIS2_LIMIT_MIN
   #define AXIS2_LIMIT_MIN -90
@@ -383,6 +395,10 @@
   #error "Configuration (Config.h): Setting WEATHER sensor invalid, use OFF or BME280, BME280_0x76, BME280SPI only."
 #endif
 
+#if FOCUSER1 == OFF && FOCUSER2 != OFF
+  #error "Configuration (Config.h): FOCUSER2 can't be enabled if FOCUSER1 isn't enabled; if using only one focuser it must be FOCUSER1."
+#endif
+
 #if FEATURE1_PURPOSE != OFF || FEATURE2_PURPOSE != OFF || FEATURE3_PURPOSE != OFF || FEATURE4_PURPOSE != OFF || FEATURE5_PURPOSE != OFF || FEATURE6_PURPOSE != OFF || FEATURE7_PURPOSE != OFF || FEATURE8_PURPOSE != OFF
   #define FEATURES_PRESENT
 #endif
@@ -669,10 +685,16 @@
   #warning "Configuration (Config.h): Setting TRACK_BACKLASH_RATE, above 25x can cause problems if AXISn_STEPS_PER_DEGREE > 30600 *and* on-the-fly micro-step mode switching is used"
 #endif
 
-#ifndef SYNC_CURRENT_PIER_SIDE_ONLY
-  #error "Configuration (Config.h): Setting SYNC_CURRENT_PIER_SIDE_ONLY must be present!"
-#elif SYNC_CURRENT_PIER_SIDE_ONLY != OFF && SYNC_CURRENT_PIER_SIDE_ONLY != ON
-  #error "Configuration (Config.h): Setting SYNC_CURRENT_PIER_SIDE_ONLY invalid, use OFF or ON only."
+#ifndef PIER_SIDE_SYNC_CHANGE_SIDES
+  #error "Configuration (Config.h): Setting PIER_SIDE_SYNC_CHANGE_SIDES must be present!"
+#elif PIER_SIDE_SYNC_CHANGE_SIDES != OFF && PIER_SIDE_SYNC_CHANGE_SIDES != ON
+  #error "Configuration (Config.h): Setting PIER_SIDE_SYNC_CHANGE_SIDES invalid, use OFF or ON only."
+#endif
+
+#ifndef PIER_SIDE_PREFERRED_DEFAULT
+  #error "Configuration (Config.h): Setting PIER_SIDE_PREFERRED_DEFAULT must be present!"
+#elif PIER_SIDE_PREFERRED_DEFAULT != BEST && PIER_SIDE_PREFERRED_DEFAULT != EAST && PIER_SIDE_PREFERRED_DEFAULT != WEST
+  #error "Configuration (Config.h): Setting PIER_SIDE_PREFERRED_DEFAULT invalid, use BEST, EAST, or WEST only."
 #endif
 
 #ifndef SLEW_RATE_MEMORY
@@ -959,7 +981,7 @@
     #error "Configuration (Config.h): AXIS2_DRIVER_IGOTO must be OFF unless used with a TMC SPI mode stepper driver."
   #endif
 #endif
-#if AXIS3_DRIVER_MODEL != TMC_SPI
+#if ROTATOR == ON && AXIS3_DRIVER_MODEL != TMC_SPI
   #if AXIS3_DRIVER_IHOLD != OFF
     #error "Configuration (Config.h): AXIS3_DRIVER_IHOLD must be OFF unless used with a TMC SPI mode stepper driver."
   #endif
@@ -967,7 +989,7 @@
     #error "Configuration (Config.h): AXIS3_DRIVER_IRUN must be OFF unless used with a TMC SPI mode stepper driver."
   #endif
 #endif
-#if AXIS4_DRIVER_MODEL != TMC_SPI
+#if FOCUSER1 == ON && AXIS4_DRIVER_MODEL != TMC_SPI
   #if AXIS4_DRIVER_IHOLD != OFF
     #error "Configuration (Config.h): AXIS4_DRIVER_IHOLD must be OFF unless used with a TMC SPI mode stepper driver."
   #endif
@@ -975,7 +997,7 @@
     #error "Configuration (Config.h): AXIS4_DRIVER_IRUN must be OFF unless used with a TMC SPI mode stepper driver."
   #endif
 #endif
-#if AXIS5_DRIVER_MODEL != TMC_SPI
+#if FOCUSER2 == ON && AXIS5_DRIVER_MODEL != TMC_SPI
   #if AXIS5_DRIVER_IHOLD != OFF
     #error "Configuration (Config.h): AXIS5_DRIVER_IHOLD must be OFF unless used with a TMC SPI mode stepper driver."
   #endif

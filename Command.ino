@@ -376,7 +376,7 @@ void processCommands() {
         if (foc != NULL && !(strchr("TpIMtuQF1234+-GZHh",command[1]) && parameter[0] != 0)) {
 
         // get ready for commands that convert to microns or steps (these commands are upper-case for microns OR lower-case for steps)
-        double spm = foc->getStepsPerMicro(); if (strchr("gimrs",command[1])) spm = 1.0;
+        double spm = foc->getStepsPerMicro(); if (strchr("bdgimrs",command[1])) spm = 1.0;
 
 // :FA[n]#    Select primary focuser where [n] = 1 or 2
 //            Return: 0 on failure
@@ -410,13 +410,20 @@ void processCommands() {
 // :Fu#       Get focuser microns per step
 //            Returns: n.n#
         if (command[1] == 'u') { dtostrf(1.0/foc->getStepsPerMicro(),7,5,reply); boolReply=false; } else
+// :FB#       Get focuser backlash amount (in steps or microns)
+//            Return: n#
+        if (toupper(command[1]) == 'B' && parameter[0] == 0) { sprintf(reply,"%ld",(long)round(foc->getBacklash()/spm)); boolReply=false; } else
+// :FB[n]#    Set focuser backlash amount (in steps or microns)
+//            Return: 0 on failure
+//                    1 on success
+        if (toupper(command[1]) == 'B') { long l = atol(parameter)*spm; if (!foc->setBacklash(l)) commandError=CE_PARAM_RANGE; } else
 // :FC#       Get focuser temperature compensation coefficient
 //            Return: n.n#
         if (command[1] == 'C' && parameter[0] == 0) { dtostrf(foc->getTcfCoef(),7,5,reply); boolReply=false; } else
 // :FC[sn.n]# Set focuser temperature compensation coefficient in um per deg. C (+ moves out as temperature falls)
 //            Return: 0 on failure
 //                    1 on success
-        if (command[1] == 'C') { f = atof(parameter); if (fabs(f) < 1000.0) foc->setTcfCoef(f); else commandError=CE_PARAM_RANGE; } else
+        if (command[1] == 'C') { f = atof(parameter); if (!foc->setTcfCoef(f)) commandError=CE_PARAM_RANGE; } else
 // :Fc#       Get focuser temperature compensation enable status
 //            Return: 0 if disabled
 //                    1 if enabled
@@ -425,6 +432,13 @@ void processCommands() {
 //            Return: 0 on failure
 //                    1 on success
         if (command[1] == 'c' && parameter[1] == 0) { foc->setTcfEnable(parameter[0] != '0'); } else
+// :FD#       Get focuser temperature compensation deadband amount (in steps or microns)
+//            Return: n#
+        if (toupper(command[1]) == 'D' && parameter[0] == 0) { sprintf(reply,"%ld",(long)round(foc->getTcfDeadband()/spm)); boolReply=false; } else
+// :FD[n]#    Set focuser temperature compensation deadband amount (in steps or microns)
+//            Return: 0 on failure
+//                    1 on success
+        if (toupper(command[1]) == 'D') { long l = atol(parameter)*spm; if (!foc->setTcfDeadband(l)) commandError=CE_PARAM_RANGE; } else
 
 // :FP#       Get focuser DC Motor Power Level (in %)
 //            Returns: n#
@@ -437,7 +451,7 @@ void processCommands() {
               sprintf(reply,"%d",(int)foc->getDcPower()); boolReply=false; 
             } else {
               i=atol(parameter);
-              if (i >= 0 && i <= 100) foc->setDcPower(i); else commandError=CE_PARAM_RANGE; 
+              if (!foc->setDcPower(i)) commandError=CE_PARAM_RANGE; 
             }
           } else commandError=CE_CMD_UNKNOWN;
         } else
@@ -929,8 +943,8 @@ void processCommands() {
               case '4': if (meridianFlip == MeridianFlipNever) { sprintf(reply,"%d N",getInstrPierSide()); } else { sprintf(reply,"%d",getInstrPierSide()); } boolReply=false; break; // pierSide (N if never)
               case '5': sprintf(reply,"%i",(int)autoMeridianFlip); boolReply=false; break;                // autoMeridianFlip
               case '6':                                                                                   // preferred pier side
-                if (preferredPierSide == PPS_EAST) strcpy(reply,"E"); else
-                if (preferredPierSide == PPS_WEST) strcpy(reply,"W"); else strcpy(reply,"B");
+                if (preferredPierSide == EAST) strcpy(reply,"E"); else
+                if (preferredPierSide == WEST) strcpy(reply,"W"); else strcpy(reply,"B");
                 boolReply=false; break;
               case '7': dtostrf(slewSpeed,3,1,reply); boolReply=false; break;                             // slew speed
               case '8':
@@ -1090,6 +1104,8 @@ void processCommands() {
           if (parameter[0] == 'Y') { // Yn: get auXiliary feature temperature
             featuresGetInfoCommand(parameter,reply,boolReply);
           } else
+#else
+          if (parameter[0] == 'X' || parameter[0] == 'Y') commandError=CE_0; else // silent errors for feature detection
 #endif
             commandError=CE_CMD_UNKNOWN;
         } else commandError=CE_CMD_UNKNOWN;
@@ -1104,25 +1120,15 @@ void processCommands() {
 // :hF#       Reset telescope at the home position.  This position is required for a cold Start.
 //            Point to the celestial pole.  GEM w/counterweights pointing downwards (CWD position).  Equatorial fork mounts at HA = 0.
 //            Returns: Nothing
-      if (command[1] == 'F' && parameter[0] == 0)  { 
-#if FOCUSER1 == ON
-        foc1.savePosition();
-#endif
-#if FOCUSER2 == ON
-        foc2.savePosition();
-#endif
+      if (command[1] == 'F' && parameter[0] == 0)  {
+        focuserRotatorSave();
         commandError=setHome(); boolReply=false;
         if (commandError == CE_MOUNT_IN_MOTION) stopSlewingAndTracking(SS_ALL_FAST);
       } else 
 // :hC#       Moves telescope to the home position
 //            Returns: Nothing
       if (command[1] == 'C' && parameter[0] == 0)  {
-#if FOCUSER1 == ON
-        foc1.savePosition();
-#endif
-#if FOCUSER2 == ON
-        foc2.savePosition();
-#endif
+        focuserRotatorSave();
         commandError=goHome(true); boolReply=false;
         if (commandError == CE_MOUNT_IN_MOTION) stopSlewingAndTracking(SS_ALL_FAST);
       } else 
@@ -1130,12 +1136,7 @@ void processCommands() {
 //            Return: 0 on failure
 //                    1 on success
       if (command[1] == 'P' && parameter[0] == 0)  {
-#if FOCUSER1 == ON
-        foc1.savePosition();
-#endif
-#if FOCUSER2 == ON
-        foc2.savePosition();
-#endif
+        focuserRotatorSave();
         commandError=park();
         } else 
 // :hQ#       Set the park position
@@ -1558,6 +1559,14 @@ void processCommands() {
 //            Returns: Nothing
       if (command[1] == 'R' && parameter[0] == 0) { rot.reverseDR(); boolReply=false; } else
 #endif
+// :rB#       Get rotator backlash amount in degrees
+//            Return: DDD*MM'SS#
+        if (command[1] == 'B' && parameter[0] == 0) { f1=rot.getBacklash(); doubleToDms(reply,&f1,true,false,PM_HIGH); boolReply=false; } else
+// :rB[DDD*MM'SS]#
+//            Set rotator backlash amount in degrees
+//            Returns: 0 on failure
+//                     1 on success
+      if (command[1] == 'B') { if (dmsToDouble(&f1,&parameter[0],true,PM_HIGH)) rot.setBacklash(f*f1); else commandError=CE_PARAM_FORM; } else
 // :rF#       Reset rotator at the home position
 //            Returns: Nothing
       if (command[1] == 'F' && parameter[0] == 0) { rot.reset(); boolReply=false; } else
@@ -1566,11 +1575,7 @@ void processCommands() {
       if (command[1] == 'C' && parameter[0] == 0) { rot.home(); boolReply=false; } else
 // :rG#       Get rotator current position in degrees
 //            Returns: sDDD*MM#
-      if (command[1] == 'G' && parameter[0] == 0) {
-        f1=rot.getPosition();
-        doubleToDms(reply,&f1,true,true,PM_LOW);
-        boolReply=false;
-      } else
+      if (command[1] == 'G' && parameter[0] == 0) { f1=rot.getPosition(); doubleToDms(reply,&f1,true,true,PM_LOW); boolReply=false; } else
 // :rc#       Set continuous move mode (for next move command)
 //            Returns: Nothing
       if (command[1] == 'c' && parameter[0] == 0) { rot.moveContinuous(true); boolReply=false; } else
@@ -1592,7 +1597,7 @@ void processCommands() {
         rot.setIncrement(t[i]); rot.setMoveRate(t1[i]); boolReply=false;
       } else
 // :rS[sDDD*MM'SS]#
-//            Set position
+//            Set position in degrees
 //            Returns: 0 on failure
 //                     1 on success
       if (command[1] == 'S') {
@@ -1883,9 +1888,9 @@ void processCommands() {
 #endif
             case '6': // preferred pier side 
               switch (parameter[3]) {
-                case 'E': preferredPierSide=PPS_EAST; break;
-                case 'W': preferredPierSide=PPS_WEST; break;
-                case 'B': preferredPierSide=PPS_BEST; break;
+                case 'E': preferredPierSide=EAST; break;
+                case 'W': preferredPierSide=WEST; break;
+                case 'B': preferredPierSide=BEST; break;
                 default:  commandError=CE_PARAM_RANGE;
               }
             break;
@@ -2349,4 +2354,22 @@ bool cmdReply(char *s) {
 void logErrors(const char ch[], char cmd[], char param[], CommandErrors cmdErr) {
   if (cmdErr <= CE_0) return;
   V(ch); V(" \""); V(cmd); V(param); V("\", Error "); VL(commandErrorStr[cmdErr]);
+}
+
+void focuserRotatorSave() {
+#if FOCUSER1 == ON
+  foc1.stopMove();
+  foc1.savePosition();
+#endif
+#if FOCUSER2 == ON
+  foc2.stopMove();
+  foc2.savePosition();
+#endif
+#if ROTATOR == ON
+  #if MOUNT_TYPE == ALTAZM
+    rot.enableDR(false);
+  #endif
+  rot.stopMove();
+  rot.savePosition();
+#endif
 }

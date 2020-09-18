@@ -5,6 +5,10 @@
 
 #pragma once
 
+#ifndef NV_ENDURANCE
+  #define NV_ENDURANCE LOW
+#endif
+
 #include <Wire.h>
 #include "EEPROM.h"
 

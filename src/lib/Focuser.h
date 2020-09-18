@@ -3,6 +3,15 @@
 
 #pragma once
 
+// time to write position to nv after last movement of Focuser
+#if NV_ENDURANCE == VHIGH
+  #define FOCUSER_WRITE_DELAY 1000L*5L       // 5 seconds
+#elif NV_ENDURANCE == HIGH
+  #define FOCUSER_WRITE_DELAY 1000L*60L      // 1 minute
+#else
+  #define FOCUSER_WRITE_DELAY 1000L*60L*5L   // 5 minutes
+#endif
+
 class focuser {
   public:
     virtual void init(int stepPin, int dirPin, int enPin, int nvAddress, int nvTcfCoef, int nvTcfEn, float maxRate, double stepsPerMicro, double min, double max, double minRate) { }
@@ -10,30 +19,39 @@ class focuser {
     // DC motor control
     virtual bool isDcFocuser() { return false; }
     virtual void initDcPower(int nvDcPower) { }
-    virtual void setDcPower(byte power) { }
+    virtual bool setDcPower(byte power) { return false; }
     virtual byte getDcPower() { return 0; }
-    virtual void setPhase1() { }
-    virtual void setPhase2() { }
+    virtual bool setPhase1() { return false; }
+    virtual bool setPhase2() { return false; }
 
     // temperature compensation
-    virtual void setTcfCoef(double coef) { }
-    virtual double getTcfCoef() { return 0; }
-    virtual void setTcfEnable(bool enabled) { }
-    virtual bool getTcfEnable() { return false; }
+    virtual bool setTcfCoef(double coef) { return false; }
+    double getTcfCoef() { return tcf_coef; }
+    virtual bool setTcfDeadband(int deadband) { return false; }
+    virtual int getTcfDeadband() { return tcf_deadband; }
+    virtual bool setTcfEnable(bool enabled) { return false; }
+    bool getTcfEnable() { return tcf; }
     long getTcfSteps() {
-      if (tcf) return -round((tcf_coef * (ambient.getTelescopeTemperature() - 10.0)) * spm); else return 0;
+      if (tcf) {
+        float tc = -round((tcf_coef * (ambient.getTelescopeTemperature() - tcf_t0)) * spm);
+        return lround(tc/(float)tcf_deadband)*(long)tcf_deadband;
+      } else return 0;
     }
 
     // get step size in microns
     virtual double getStepsPerMicro() { return spm; }
 
     // minimum position in steps
-    void setMin(long min) { smin=min; }
+    void setMin(long min) { smin=min; if (smin < 0 || smin > 500*1000*10) smin=0; if (smin > smax) smin=smax; backlashMax=(smax-smin)/10; if (backlashMax > 32767) backlashMax=32767; }
     long getMin() { return smin; }
 
     // maximum position in steps
-    void setMax(long max) { smax=max; }
+    void setMax(long max) { smax=max; if (smax < 0 || smax > 500*1000*10) smax=0; if (smax < smin) smax=smin; backlashMax=(smax-smin)/10; if (backlashMax > 32767) backlashMax=32767; }
     long getMax() { return smax; }
+
+    // backlash, in steps
+    virtual bool setBacklash(int b) { return false; }
+    virtual int getBacklash() { return backlash; }
 
     // sets logic state for reverse motion
     virtual void setReverseState(int reverseState) { }
@@ -54,20 +72,20 @@ class focuser {
     virtual void startMoveOut() { }
 
     // check if moving
-    bool moving() { if ((delta.fixed != 0) || ((long)target.part.m + getTcfSteps() != spos)) return true; else return false; }
+    bool moving() { return inMotion; }
 
     // stop move
-    void stopMove() { delta.fixed=0; target.part.m=spos-getTcfSteps(); target.part.f=0; }
+    void stopMove() { delta.fixed=0; }
 
     // get position in steps
-    long getPosition() { return spos; }
+    long getPosition() { return spos - getTcfSteps(); }
 
     // sets current position in steps
     void setPosition(long pos) {
+      setTcfEnable(false);
       spos=pos;
       if (spos < smin) spos=smin; if (spos > smax) spos=smax;
       target.part.m=spos; target.part.f=0;
-      lastMove=millis();
     }
 
     // sets target position in steps
@@ -82,12 +100,15 @@ class focuser {
     // follow( (trackingState == TrackingMoveTo) || guideDirAxis1 || guideDirAxis2) );
     virtual void follow(bool slewing) { }
 
-    void savePosition() { writePos(spos); }
+    void savePosition() { writeTarget(); }
   
   protected:
-    long readPos() { return nv.readLong(nvAddress); }
-    void writePos(long p) { nv.writeLong(nvAddress,(long)p); }
- 
+    void writeTarget() {
+      nv.writeLong(nvAddress+EE_focSpos,spos);
+      nv.writeLong(nvAddress+EE_focTarget,(long)target.part.m);
+      nv.writeInt(nvAddress+EE_focBacklashPos,backlashPos);
+    }
+
     // parameters
     int stepPin=-1;
     int dirPin=-1;
@@ -98,9 +119,7 @@ class focuser {
     long smin=0;
     long smax=1000;
     int nvAddress=-1;
-    int nvTcfCoef=-1;
-    int nvTcfEn=-1;
-
+    
     bool reverse=false;
     bool phase1=true;
     long nvDcPower=-1;
@@ -117,21 +136,28 @@ class focuser {
     // conversion
     double spm=1.0;
     double tcf_coef=0.0;
+    double tcf_t0=10.0;
     double powerFor1mmSec=0.0;
 
     // position
     fixed_t target;
     long spos=0;
     long lastPos=0;
+    int backlash=0;
+    int backlashPos=0;
+    int backlashDir=0;
+    long backlashMax=0;
+    int tcf_deadband=1;
 
     // automatic movement
     double moveRate=0.0;
     fixed_t delta;
-    bool wasMoving=false;
+    bool inMotion=false;
 
     // timing
-    unsigned long lastMs=0;
-    unsigned long lastMove=0;
+    unsigned long lastMoveMs=0;
+    unsigned long sinceMovingMs=0;
+    unsigned long lastTarget=0;
     unsigned long lastPhysicalMove=0;
     unsigned long nextPhysicalMove=0;
     unsigned long lastPollingTime=0;

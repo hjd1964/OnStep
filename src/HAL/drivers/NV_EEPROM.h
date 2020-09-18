@@ -3,6 +3,10 @@
 
 #pragma once
 
+#ifndef NV_ENDURANCE
+  #define NV_ENDURANCE LOW
+#endif
+
 #include "EEPROM.h"
 
 class nvs {

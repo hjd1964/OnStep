@@ -62,8 +62,6 @@
 #if PINMAP == FYSETC_S6
   #include "Validate.FYSETC_S6.h"
 #endif
-#if PINMAP == STM32Black
-#endif
 
 // GENERAL PURPOSE PINMAP VALIDATION ---------------
 

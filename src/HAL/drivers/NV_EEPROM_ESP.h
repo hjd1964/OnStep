@@ -3,6 +3,10 @@
 
 #pragma once
 
+#ifndef NV_ENDURANCE
+  #define NV_ENDURANCE LOW
+#endif
+
 #define EEPROM_SIZE 4096
 #define E2END 4095
 

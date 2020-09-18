@@ -40,8 +40,8 @@
 // firmware info, these are returned by the ":GV?#" commands
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  4
-#define FirmwareVersionMinor  15      // minor version 0 to 99
-#define FirmwareVersionPatch  "l"     // for example major.minor patch: 1.3c
+#define FirmwareVersionMinor  16      // minor version 0 to 99
+#define FirmwareVersionPatch  "e"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 3       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
@@ -173,8 +173,11 @@ void setup() {
   // Initialize USB serial debugging early, so we can use DebugSer.print() for debugging, if needed
   DebugSer.begin(9600); delay(5000); DebugSer.flush(); VLF(""); VLF("");
 #endif
+
+  // Say hello
   VF("MSG: OnStep "); V(FirmwareVersionMajor); V("."); V(FirmwareVersionMinor); VL(FirmwareVersionPatch);
-  
+  VF("MSG: MCU =  "); V(MCU_STR); V(", "); VF("Pinmap = "); VL(PINMAP_STR);
+
   // Call hardware specific initialization
   VLF("MSG: Init HAL");
   HAL_Initialize();
@@ -285,16 +288,22 @@ void setup() {
   // tracking autostart
 #if TRACK_AUTOSTART == ON
   #if MOUNT_TYPE != ALTAZM
-    VLF("MSG: Tracking autostart");
 
     // tailor behaviour depending on TLS presence
     if (!tls.active) {
+      VLF("MSG: Tracking autostart - no TLS, limits disabled");
       setHome();
       safetyLimitsOn=false;
     } else {
-      if (parkStatus == Parked) unPark(true); else setHome();
+      if (parkStatus == Parked) {
+        VLF("MSG: Tracking autostart - assuming TLS is correct, limits enabled and automatic unpark");
+        unPark(true);
+      } else {
+        VLF("MSG: Tracking autostart - assuming TLS is correct, limits enabled");
+        setHome();
+      }
     }
-    
+
     // start tracking
     trackingState=TrackingSidereal;
     enableStepperDrivers();
@@ -302,14 +311,16 @@ void setup() {
     #warning "Tracking autostart ignored for MOUNT_TYPE ALTAZM"
   #endif
 #else
-  // unpark without tracking, if parked
-  if (parkStatus == Parked) unPark(false);
+  if (parkStatus == Parked) {
+    VLF("MSG: Restoring parked telescope pointing state");
+    unPark(false);
+  }
 #endif
 
   // start rotator if present
 #if ROTATOR == ON
   VLF("MSG: Init rotator");
-  rot.init(Axis3_STEP,Axis3_DIR,Axis3_EN,AXIS3_STEP_RATE_MAX,axis3Settings.stepsPerMeasure,axis3Settings.min,axis3Settings.max);
+  rot.init(Axis3_STEP,Axis3_DIR,Axis3_EN,EE_rotBaseAxis3,AXIS3_STEP_RATE_MAX,axis3Settings.stepsPerMeasure,axis3Settings.min,axis3Settings.max);
   if (axis3Settings.reverse == ON) rot.setReverseState(HIGH);
   rot.setDisableState(AXIS3_DRIVER_DISABLE);
   
@@ -325,8 +336,8 @@ void setup() {
   // start focusers if present
 #if FOCUSER1 == ON
   VLF("MSG: Init focuser1");
-  foc1.init(Axis4_STEP,Axis4_DIR,Axis4_EN,EE_posAxis4,EE_tcfCoefAxis4,EE_tcfEnAxis4,AXIS4_STEP_RATE_MAX,axis4Settings.stepsPerMeasure,axis4Settings.min*1000.0,axis4Settings.max*1000.0,AXIS4_LIMIT_MIN_RATE);
-  if (AXIS4_DRIVER_DC_MODE != OFF) { foc1.initDcPower(EE_dcPwrAxis4); foc1.setPhase1(); }
+  foc1.init(Axis4_STEP,Axis4_DIR,Axis4_EN,EE_focBaseAxis4,AXIS4_STEP_RATE_MAX,axis4Settings.stepsPerMeasure,axis4Settings.min*1000.0,axis4Settings.max*1000.0,AXIS4_LIMIT_MIN_RATE);
+  if (AXIS4_DRIVER_DC_MODE != OFF) foc1.setPhase1();
   if (axis4Settings.reverse == ON) foc1.setReverseState(HIGH);
   foc1.setDisableState(AXIS4_DRIVER_DISABLE);
 
@@ -341,8 +352,8 @@ void setup() {
 
 #if FOCUSER2 == ON
   VLF("MSG: Init focuser2");
-  foc2.init(Axis5_STEP,Axis5_DIR,Axis5_EN,EE_posAxis5,EE_tcfCoefAxis5,EE_tcfEnAxis5,AXIS5_STEP_RATE_MAX,axis5Settings.stepsPerMeasure,axis5Settings.min*1000.0,axis5Settings.max*1000.0,AXIS5_LIMIT_MIN_RATE);
-  if (AXIS5_DRIVER_DC_MODE == DRV8825) { foc2.initDcPower(EE_dcPwrAxis5); foc2.setPhase2(); }
+  foc2.init(Axis5_STEP,Axis5_DIR,Axis5_EN,EE_focBaseAxis5,AXIS5_STEP_RATE_MAX,axis5Settings.stepsPerMeasure,axis5Settings.min*1000.0,axis5Settings.max*1000.0,AXIS5_LIMIT_MIN_RATE);
+  if (AXIS5_DRIVER_DC_MODE != OFF) foc2.setPhase2();
   if (axis5Settings.reverse == ON) foc2.setReverseState(HIGH);
   foc2.setDisableState(AXIS5_DRIVER_DISABLE);
 
@@ -551,7 +562,7 @@ void loop2() {
 
   // FASTEST POLLING -----------------------------------------------------------------------------------
 #if ROTATOR == ON
-  rot.follow();
+  rot.follow(isSlewing());
 #endif
 #if FOCUSER1 == ON
   foc1.follow(isSlewing());
