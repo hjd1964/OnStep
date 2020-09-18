@@ -285,16 +285,22 @@ void setup() {
   // tracking autostart
 #if TRACK_AUTOSTART == ON
   #if MOUNT_TYPE != ALTAZM
-    VLF("MSG: Tracking autostart");
 
     // tailor behaviour depending on TLS presence
     if (!tls.active) {
+      VLF("MSG: Tracking autostart - no TLS, limits disabled");
       setHome();
       safetyLimitsOn=false;
     } else {
-      if (parkStatus == Parked) unPark(true); else setHome();
+      if (parkStatus == Parked) {
+        VLF("MSG: Tracking autostart - assuming TLS is correct, limits enabled and automatic unpark");
+        unPark(true);
+      } else {
+        VLF("MSG: Tracking autostart - assuming TLS is correct, limits enabled");
+        setHome();
+      }
     }
-    
+
     // start tracking
     trackingState=TrackingSidereal;
     enableStepperDrivers();
@@ -302,8 +308,10 @@ void setup() {
     #warning "Tracking autostart ignored for MOUNT_TYPE ALTAZM"
   #endif
 #else
-  // unpark without tracking, if parked
-  if (parkStatus == Parked) unPark(false);
+  if (parkStatus == Parked) {
+    VLF("MSG: Restoring parked telescope pointing state");
+    unPark(false);
+  }
 #endif
 
   // start rotator if present
