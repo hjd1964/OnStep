@@ -222,7 +222,7 @@ class rotator {
 
         // write position as needed to non-volatile storage if not moving for ROTATOR_WRITE_DELAY milliseconds
         if (moving()) sinceMovingMs=millis();
-        if (!mountSlewing && (long)(millis()-sinceMovingMs) > ROTATOR_WRITE_DELAY) writeTarget();
+        if (!mountSlewing && !DR && (long)(millis()-sinceMovingMs) > ROTATOR_WRITE_DELAY) writeTarget();
 
         if ((spos < (long)target.part.m && spos < smax) || backlashDir == BD_OUT) {
           if (pda && currentlyDisabled) { currentlyDisabled=false; enableDriver(); delayMicroseconds(5); }
