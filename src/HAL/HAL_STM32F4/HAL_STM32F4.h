@@ -65,7 +65,7 @@
 #if defined(NV_MB85RC256V)
   #include "../drivers/NV_I2C_FRAM_MB85RC256V.h"
 #else
-  // The FYSETC S6 has a 2047 byte EEPROM built-in
+  // The FYSETC S6 has a 2048 byte EEPROM built-in
   #if PINMAP == FYSETC_S6
     #define E2END 2047
     #define I2C_EEPROM_ADDRESS 0x50
