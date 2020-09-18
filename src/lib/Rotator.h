@@ -91,7 +91,7 @@ class rotator {
     }
 
 #if MOUNT_TYPE == ALTAZM
-    // enable/disable the de-rotator
+    // enable/disable the derotator
     void enableDR(bool state) {
       DR=state;
     }
@@ -195,7 +195,7 @@ class rotator {
       if ((long)target.part.m < smin) target.part.m=smin; if ((long)target.part.m > smax) target.part.m=smax;
     }
 
-    // do de-rotate movement
+    // do derotate movement
     void poll(bool tracking) {
       if (DR && tracking) target.fixed+=deltaDR.fixed;
       target.fixed+=delta.fixed;
@@ -203,7 +203,7 @@ class rotator {
     }
 
 #if MOUNT_TYPE == ALTAZM
-    // calculate new de-rotation rate if needed
+    // calculate new derotation rate if needed
     void derotate(double h, double d) {
       if (DR) {
         double pr=ParallacticRate(h,d)*spd;     // in steps per second
