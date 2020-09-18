@@ -943,8 +943,8 @@ void processCommands() {
               case '4': if (meridianFlip == MeridianFlipNever) { sprintf(reply,"%d N",getInstrPierSide()); } else { sprintf(reply,"%d",getInstrPierSide()); } boolReply=false; break; // pierSide (N if never)
               case '5': sprintf(reply,"%i",(int)autoMeridianFlip); boolReply=false; break;                // autoMeridianFlip
               case '6':                                                                                   // preferred pier side
-                if (preferredPierSide == PPS_EAST) strcpy(reply,"E"); else
-                if (preferredPierSide == PPS_WEST) strcpy(reply,"W"); else strcpy(reply,"B");
+                if (preferredPierSide == EAST) strcpy(reply,"E"); else
+                if (preferredPierSide == WEST) strcpy(reply,"W"); else strcpy(reply,"B");
                 boolReply=false; break;
               case '7': dtostrf(slewSpeed,3,1,reply); boolReply=false; break;                             // slew speed
               case '8':
@@ -1899,9 +1899,9 @@ void processCommands() {
 #endif
             case '6': // preferred pier side 
               switch (parameter[3]) {
-                case 'E': preferredPierSide=PPS_EAST; break;
-                case 'W': preferredPierSide=PPS_WEST; break;
-                case 'B': preferredPierSide=PPS_BEST; break;
+                case 'E': preferredPierSide=EAST; break;
+                case 'W': preferredPierSide=WEST; break;
+                case 'B': preferredPierSide=BEST; break;
                 default:  commandError=CE_PARAM_RANGE;
               }
             break;

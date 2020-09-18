@@ -62,6 +62,9 @@
 #define AUX                        -7
 #define VERBOSE                    -8
 #define SoftwareSerial2            -9
+#define BEST                      -10
+#define EAST                      -11
+#define WEST                      -12
 #define INVALID               -999999
 
 // mount types                     

@@ -315,8 +315,7 @@ enum StopSlewActions {SS_ALL_FAST, SS_LIMIT, SS_LIMIT_HARD, SS_LIMIT_AXIS1_MIN, 
 #endif
 
 byte pierSideControl = PierSideNone;
-enum PreferredPierSide {PPS_BEST,PPS_EAST,PPS_WEST};
-PreferredPierSide preferredPierSide = PPS_BEST;
+int preferredPierSide = PIER_SIDE_PREFERRED_DEFAULT;
 bool autoMeridianFlip                   = false;             // auto meridian flip/continue as tracking hits AXIS1_LIMIT_MERIDIAN_W
 bool pauseHome                          = false;             // allow pause at home?
 bool waitingHomeContinue                = false;             // set to true to stop pause

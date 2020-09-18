@@ -11,6 +11,18 @@
 // -----------------------------------------------------------------------------------
 // correct for configuration backwards compatability
 
+#ifndef PIER_SIDE_PREFERRED_DEFAULT
+  #define PIER_SIDE_PREFERRED_DEFAULT BEST
+#endif
+
+#ifndef PIER_SIDE_SYNC_CHANGE_SIDES
+  #if SYNC_CURRENT_PIER_SIDE_ONLY == OFF
+    #define PIER_SIDE_SYNC_CHANGE_SIDES ON
+  #elif SYNC_CURRENT_PIER_SIDE_ONLY == ON
+    #define PIER_SIDE_SYNC_CHANGE_SIDES OFF
+  #endif
+#endif
+
 #if AXIS2_LIMIT_MIN == -91
   #undef AXIS2_LIMIT_MIN
   #define AXIS2_LIMIT_MIN -90
@@ -669,10 +681,16 @@
   #warning "Configuration (Config.h): Setting TRACK_BACKLASH_RATE, above 25x can cause problems if AXISn_STEPS_PER_DEGREE > 30600 *and* on-the-fly micro-step mode switching is used"
 #endif
 
-#ifndef SYNC_CURRENT_PIER_SIDE_ONLY
-  #error "Configuration (Config.h): Setting SYNC_CURRENT_PIER_SIDE_ONLY must be present!"
-#elif SYNC_CURRENT_PIER_SIDE_ONLY != OFF && SYNC_CURRENT_PIER_SIDE_ONLY != ON
-  #error "Configuration (Config.h): Setting SYNC_CURRENT_PIER_SIDE_ONLY invalid, use OFF or ON only."
+#ifndef PIER_SIDE_SYNC_CHANGE_SIDES
+  #error "Configuration (Config.h): Setting PIER_SIDE_SYNC_CHANGE_SIDES must be present!"
+#elif PIER_SIDE_SYNC_CHANGE_SIDES != OFF && PIER_SIDE_SYNC_CHANGE_SIDES != ON
+  #error "Configuration (Config.h): Setting PIER_SIDE_SYNC_CHANGE_SIDES invalid, use OFF or ON only."
+#endif
+
+#ifndef PIER_SIDE_PREFERRED_DEFAULT
+  #error "Configuration (Config.h): Setting PIER_SIDE_PREFERRED_DEFAULT must be present!"
+#elif PIER_SIDE_PREFERRED_DEFAULT != BEST && PIER_SIDE_PREFERRED_DEFAULT != EAST && PIER_SIDE_PREFERRED_DEFAULT != WEST
+  #error "Configuration (Config.h): Setting PIER_SIDE_PREFERRED_DEFAULT invalid, use BEST, EAST, or WEST only."
 #endif
 
 #ifndef SLEW_RATE_MEMORY

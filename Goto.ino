@@ -67,16 +67,16 @@ CommandErrors syncEqu(double RA, double Dec) {
   int newPierSide=getInstrPierSide();
   if (meridianFlip != MeridianFlipNever) {
     if (atHome) { if (Axis1 < 0) newPierSide=PierSideWest; else newPierSide=PierSideEast; } else // best side of pier decided based on meridian
-#if SYNC_CURRENT_PIER_SIDE_ONLY == OFF
-    if (preferredPierSide == PPS_WEST) { newPierSide=PierSideWest; if (haRange(Axis1) > degreesPastMeridianW) newPierSide=PierSideEast; } else
-    if (preferredPierSide == PPS_EAST) { newPierSide=PierSideEast; if (haRange(Axis1) < -degreesPastMeridianE) newPierSide=PierSideWest; } else
+#if PIER_SIDE_SYNC_CHANGE_SIDES == ON
+    if (preferredPierSide == WEST) { newPierSide=PierSideWest; if (haRange(Axis1) > degreesPastMeridianW) newPierSide=PierSideEast; } else
+    if (preferredPierSide == EAST) { newPierSide=PierSideEast; if (haRange(Axis1) < -degreesPastMeridianE) newPierSide=PierSideWest; } else
 #endif
     {
       if ((getInstrPierSide() == PierSideWest) && (haRange(Axis1) > degreesPastMeridianW)) newPierSide=PierSideEast;
       if ((getInstrPierSide() == PierSideEast) && (haRange(Axis1) < -degreesPastMeridianE)) newPierSide=PierSideWest;
     }
 
-#if SYNC_CURRENT_PIER_SIDE_ONLY == ON
+#if PIER_SIDE_SYNC_CHANGE_SIDES == OFF
     if ((!atHome) && (newPierSide != getInstrPierSide())) return CE_SLEW_ERR_OUTSIDE_LIMITS;
 #endif
 
@@ -206,11 +206,11 @@ bool getHor(double *Alt, double *Azm) {
 // causes a goto to the same RA/Dec on the opposite pier side if possible
 CommandErrors goToHere(bool toEastOnly) {
   bool verified=false;
-  PreferredPierSide p=preferredPierSide;
+  int p=preferredPierSide;
   if (meridianFlip == MeridianFlipNever) return CE_SLEW_ERR_OUTSIDE_LIMITS;
   cli(); long h=posAxis1+indexAxis1Steps; sei();
-  if ((!toEastOnly) && (getInstrPierSide() == PierSideEast) && (h < (degreesPastMeridianW*(long)axis1Settings.stepsPerMeasure))) { verified=true; preferredPierSide=PPS_WEST; }
-  if ((getInstrPierSide() == PierSideWest) && (h > (-degreesPastMeridianE*(long)axis1Settings.stepsPerMeasure))) { verified=true; preferredPierSide=PPS_EAST; }
+  if ((!toEastOnly) && (getInstrPierSide() == PierSideEast) && (h < (degreesPastMeridianW*(long)axis1Settings.stepsPerMeasure))) { verified=true; preferredPierSide=WEST; }
+  if ((getInstrPierSide() == PierSideWest) && (h > (-degreesPastMeridianE*(long)axis1Settings.stepsPerMeasure))) { verified=true; preferredPierSide=EAST; }
   if (verified) {
     double newRA,newDec;
     getEqu(&newRA,&newDec,false);
@@ -281,8 +281,8 @@ CommandErrors goToEqu(double RA, double Dec) {
   // goto function takes HA and Dec in steps
   byte thisPierSide = PierSideBest;
   if (meridianFlip != MeridianFlipNever) {
-    if (preferredPierSide == PPS_WEST) thisPierSide=PierSideWest;
-    if (preferredPierSide == PPS_EAST) thisPierSide=PierSideEast;
+    if (preferredPierSide == WEST) thisPierSide=PierSideWest;
+    if (preferredPierSide == EAST) thisPierSide=PierSideEast;
   }
 
   return goTo(Axis1,Axis2,Axis1Alt,Axis2Alt,thisPierSide);
