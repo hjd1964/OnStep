@@ -65,6 +65,7 @@
 #define BEST                      -10
 #define EAST                      -11
 #define WEST                      -12
+#define VHIGH                     -13
 #define INVALID               -999999
 
 // mount types                     

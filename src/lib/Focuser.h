@@ -3,6 +3,15 @@
 
 #pragma once
 
+// time to write position to nv after last movement of Focuser
+#if NV_ENDURANCE == VHIGH
+  #define FOCUSER_WRITE_DELAY 1000L*5L       // 5 seconds
+#elif NV_ENDURANCE == HIGH
+  #define FOCUSER_WRITE_DELAY 1000L*60L      // 1 minute
+#else
+  #define FOCUSER_WRITE_DELAY 1000L*60L*5L   // 5 minutes
+#endif
+
 class focuser {
   public:
     virtual void init(int stepPin, int dirPin, int enPin, int nvAddress, int nvTcfCoef, int nvTcfEn, float maxRate, double stepsPerMicro, double min, double max, double minRate) { }

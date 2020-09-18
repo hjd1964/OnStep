@@ -3,6 +3,10 @@
 
 #pragma once
 
+#ifndef NV_ENDURANCE
+  #define NV_ENDURANCE VHIGH
+#endif
+
 #include <Wire.h>
 #include "Adafruit_FRAM_I2C.h"  // https://github.com/hjd1964/Adafruit_FRAM_I2C
 Adafruit_FRAM_I2C fram = Adafruit_FRAM_I2C();

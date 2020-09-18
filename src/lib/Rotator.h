@@ -3,8 +3,14 @@
 
 #pragma once
 
-// time to write position to nv after last movement of Rotator, default = 5 minutes
-#define ROTATOR_WRITE_DELAY 1000L*60L*5L
+// time to write position to nv after last movement of Rotator
+#if NV_ENDURANCE == VHIGH
+  #define ROTATOR_WRITE_DELAY 1000L*5L       // 5 seconds
+#elif NV_ENDURANCE == HIGH
+  #define ROTATOR_WRITE_DELAY 1000L*60L      // 1 minute
+#else
+  #define ROTATOR_WRITE_DELAY 1000L*60L*5L   // 5 minutes
+#endif
 
 class rotator {
   public:
