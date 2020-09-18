@@ -173,8 +173,11 @@ void setup() {
   // Initialize USB serial debugging early, so we can use DebugSer.print() for debugging, if needed
   DebugSer.begin(9600); delay(5000); DebugSer.flush(); VLF(""); VLF("");
 #endif
+
+  // Say hello
   VF("MSG: OnStep "); V(FirmwareVersionMajor); V("."); V(FirmwareVersionMinor); VL(FirmwareVersionPatch);
-  
+  VF("MSG: MCU =  "); V(MCU_STR); V(", "); VF("Pinmap = "); VL(PINMAP_STR);
+
   // Call hardware specific initialization
   VLF("MSG: Init HAL");
   HAL_Initialize();
