@@ -977,7 +977,7 @@
     #error "Configuration (Config.h): AXIS2_DRIVER_IGOTO must be OFF unless used with a TMC SPI mode stepper driver."
   #endif
 #endif
-#if AXIS3_DRIVER_MODEL != TMC_SPI
+#if ROTATOR == ON && AXIS3_DRIVER_MODEL != TMC_SPI
   #if AXIS3_DRIVER_IHOLD != OFF
     #error "Configuration (Config.h): AXIS3_DRIVER_IHOLD must be OFF unless used with a TMC SPI mode stepper driver."
   #endif
@@ -985,7 +985,7 @@
     #error "Configuration (Config.h): AXIS3_DRIVER_IRUN must be OFF unless used with a TMC SPI mode stepper driver."
   #endif
 #endif
-#if AXIS4_DRIVER_MODEL != TMC_SPI
+#if FOCUSER1 == ON && AXIS4_DRIVER_MODEL != TMC_SPI
   #if AXIS4_DRIVER_IHOLD != OFF
     #error "Configuration (Config.h): AXIS4_DRIVER_IHOLD must be OFF unless used with a TMC SPI mode stepper driver."
   #endif
@@ -993,7 +993,7 @@
     #error "Configuration (Config.h): AXIS4_DRIVER_IRUN must be OFF unless used with a TMC SPI mode stepper driver."
   #endif
 #endif
-#if AXIS5_DRIVER_MODEL != TMC_SPI
+#if FOCUSER2 == ON && AXIS5_DRIVER_MODEL != TMC_SPI
   #if AXIS5_DRIVER_IHOLD != OFF
     #error "Configuration (Config.h): AXIS5_DRIVER_IHOLD must be OFF unless used with a TMC SPI mode stepper driver."
   #endif
