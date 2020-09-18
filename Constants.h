@@ -119,6 +119,11 @@
 #define ASTROMETRIC_J2000           3
 #define TOPOCENTRIC_STRICT          OFF
 
+// backlash direction
+#define BD_NONE 0
+#define BD_IN -1
+#define BD_OUT 1
+
 // EEPROM Info ---------------------------------------------------------------------------------------------------------------------
 // General purpose storage A (100 bytes), 0..99
 

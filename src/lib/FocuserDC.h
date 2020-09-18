@@ -23,8 +23,8 @@ class focuserDC : public focuser  {
       this->spm=stepsPerMicro;
 
       // set smin/smax
-      setMin((long)(min*spm));
-      setMax((long)(max*spm));
+      setMin(min*spm);
+      setMax(max*spm);
 
       // get DC power level
       powerFor1mmSec=nv.read(nvAddress+EE_focDcPwr);
@@ -113,11 +113,12 @@ class focuserDC : public focuser  {
         nextPhysicalMove=microsNow+(unsigned long)(maxRate*1000.0);
 
         // keep track of when motion starts and stops
-        if (target.part.m != lastTarget) { lastTargetMs=millis(); lastTarget=target.part.m; }
+        if (target.part.m != lastTarget) lastTarget=target.part.m;
         if (delta.fixed != 0 || ((long)target.part.m != spos)) inMotion=true; else inMotion=false;
    
         // write position as needed to non-volatile storage if not moving for FOCUSER_WRITE_DELAY milliseconds
-        if (!mountSlewing && !moving() && (long)(millis()-lastTargetMs) > FOCUSER_WRITE_DELAY) writeTarget();
+        if (moving()) sinceMovingMs=millis();
+        if (!mountSlewing && (long)(millis()-sinceMovingMs) > FOCUSER_WRITE_DELAY) writeTarget();
 
         if ((spos < (long)target.part.m) && spos < smax) {
           if (reverse) dcMotor.setDirectionIn(); else dcMotor.setDirectionOut();

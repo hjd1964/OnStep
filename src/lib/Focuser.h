@@ -33,14 +33,14 @@ class focuser {
     virtual double getStepsPerMicro() { return spm; }
 
     // minimum position in steps
-    void setMin(long min) { smin=min; backlashMax=(smax-smin)/10; if (backlashMax > 32767) backlashMax=32767; }
+    void setMin(long min) { smin=min; if (smin < 0 || smin > 500*1000*10) smin=0; if (smin > smax) smin=smax; backlashMax=(smax-smin)/10; if (backlashMax > 32767) backlashMax=32767; }
     long getMin() { return smin; }
 
     // maximum position in steps
-    void setMax(long max) { smax=max; backlashMax=(smax-smin)/10; if (backlashMax > 32767) backlashMax=32767; }
+    void setMax(long max) { smax=max; if (smax < 0 || smax > 500*1000*10) smax=0; if (smax < smin) smax=smin; backlashMax=(smax-smin)/10; if (backlashMax > 32767) backlashMax=32767; }
     long getMax() { return smax; }
 
-    // set backlash, in steps
+    // backlash, in steps
     virtual bool setBacklash(int b) { return false; }
     virtual int getBacklash() { return backlash; }
 
@@ -77,7 +77,6 @@ class focuser {
       spos=pos;
       if (spos < smin) spos=smin; if (spos > smax) spos=smax;
       target.part.m=spos; target.part.f=0;
-      lastMove=millis();
     }
 
     // sets target position in steps
@@ -148,8 +147,7 @@ class focuser {
 
     // timing
     unsigned long lastMoveMs=0;
-    unsigned long lastMove=0;
-    unsigned long lastTargetMs=0;
+    unsigned long sinceMovingMs=0;
     unsigned long lastTarget=0;
     unsigned long lastPhysicalMove=0;
     unsigned long nextPhysicalMove=0;

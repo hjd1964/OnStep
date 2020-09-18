@@ -6,10 +6,6 @@
 // time to write position to nv after last movement of Focuser 1/2, default = 5 minutes
 #define FOCUSER_WRITE_DELAY 1000L*60L*5L
 
-#define BD_NONE 0
-#define BD_IN -1
-#define BD_OUT 1
-
 #include "Focuser.h"
 
 class focuserStepper : public focuser {
@@ -23,9 +19,9 @@ class focuserStepper : public focuser {
       this->maxRate=maxRate;
       this->spm=stepsPerMicro;
 
-      // set smin/smax
-      setMin((long)(min*spm));
-      setMax((long)(max*spm));
+      // default min/max (in microns)
+      setMin(min*spm);
+      setMax(max*spm);
       
       if (stepPin != -1) pinMode(stepPin,OUTPUT);
       if (dirPin != -1) pinMode(dirPin,OUTPUT);
@@ -169,14 +165,15 @@ class focuserStepper : public focuser {
         nextPhysicalMove=microsNow+(unsigned long)(maxRate*1000.0);
 
         // keep track of when motion starts and stops
-        if (target.part.m != lastTarget) { inMotion=true; lastTargetMs=millis(); lastTarget=target.part.m; }
+        if (target.part.m != lastTarget) { inMotion=true; lastTarget=target.part.m; }
         if (spos+backlashPos != lastPos) { lastMoveMs=millis(); lastPos=spos+backlashPos; }
         if ((long)(millis()-lastMoveMs) > 1000) inMotion=false;
   
         // write position as needed to non-volatile storage if not moving for FOCUSER_WRITE_DELAY milliseconds
-        if (!mountSlewing && !moving() && (long)(millis()-lastTargetMs) > FOCUSER_WRITE_DELAY) writeTarget();
+        if (moving()) sinceMovingMs=millis();
+        if (!mountSlewing && (long)(millis()-sinceMovingMs) > FOCUSER_WRITE_DELAY) writeTarget();
 
-        if (((spos < (long)target.part.m+getTcfSteps()) && spos < smax) || backlashDir == BD_OUT) {
+        if ((spos < (long)target.part.m+getTcfSteps() && spos < smax) || backlashDir == BD_OUT) {
           if (pda && currentlyDisabled) { enableDriver(); currentlyDisabled=false; delayMicroseconds(5); }
           digitalWrite(stepPin,LOW); delayMicroseconds(5);
           digitalWrite(dirPin,forwardState); delayMicroseconds(5);
@@ -184,7 +181,7 @@ class focuserStepper : public focuser {
           if (backlashPos < backlash) { backlashPos++; backlashDir=BD_OUT; } else { spos++; backlashDir=BD_NONE; }
           lastPhysicalMove=micros();
         } else
-        if (((spos > (long)target.part.m+getTcfSteps()) && spos > smin) || backlashDir == BD_IN) {
+        if ((spos > (long)target.part.m+getTcfSteps() && spos > smin) || backlashDir == BD_IN) {
           if (pda && currentlyDisabled) { enableDriver(); currentlyDisabled=false; delayMicroseconds(5); }
           digitalWrite(stepPin,LOW); delayMicroseconds(5);
           digitalWrite(dirPin,reverseState); delayMicroseconds(5);
