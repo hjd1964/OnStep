@@ -137,28 +137,26 @@ weather ambient;
 #endif
 
 // support for TMC2130, TMC5160, etc. stepper drivers in SPI mode
-#if AXIS1_DRIVER_MODEL == TMC_SPI
+#if (AXIS1_DRIVER_MODEL == TMC_SPI && AXIS2_DRIVER_MODEL == TMC_SPI) || \
+    (ROTATOR == ON && AXIS3_DRIVER_MODEL == TMC_SPI) || \
+    (FOCUSER1 == ON && AXIS4_DRIVER_MODEL == TMC_SPI) || \
+    (FOCUSER2 == ON && AXIS5_DRIVER_MODEL == TMC_SPI)
   #include "src/lib/SoftSPI.h"
   #include "src/lib/TMC_SPI.h"
-  #if AXIS1_DRIVER_STATUS == TMC_SPI
-//                        SS      ,SCK     ,MISO    ,MOSI
-    tmcSpiDriver tmcAxis1(Axis1_M2,Axis1_M1,Axis1_M3,Axis1_M0,AXIS1_DRIVER_SUBMODEL,AXIS1_DRIVER_RSENSE);
-  #else
-    tmcSpiDriver tmcAxis1(Axis1_M2,Axis1_M1,      -1,Axis1_M0,AXIS1_DRIVER_SUBMODEL,AXIS1_DRIVER_RSENSE);
+  #if AXIS1_DRIVER_MODEL == TMC_SPI
+    tmcSpiDriver tmcAxis1(Axis1_M2,Axis1_M1,(AXIS1_DRIVER_STATUS == TMC_SPI)?Axis1_M3:-1,Axis1_M0,AXIS1_DRIVER_SUBMODEL,AXIS1_DRIVER_RSENSE);
   #endif
-  #if AXIS2_DRIVER_STATUS == TMC_SPI
-    tmcSpiDriver tmcAxis2(Axis2_M2,Axis2_M1,Axis2_M3,Axis2_M0,AXIS2_DRIVER_SUBMODEL,AXIS2_DRIVER_RSENSE);
-  #else
-    tmcSpiDriver tmcAxis2(Axis2_M2,Axis2_M1,      -1,Axis2_M0,AXIS2_DRIVER_SUBMODEL,AXIS2_DRIVER_RSENSE);
+  #if AXIS2_DRIVER_MODEL == TMC_SPI
+    tmcSpiDriver tmcAxis2(Axis2_M2,Axis2_M1,(AXIS2_DRIVER_STATUS == TMC_SPI)?Axis2_M3:-1,Axis2_M0,AXIS2_DRIVER_SUBMODEL,AXIS2_DRIVER_RSENSE);
   #endif
-  #if ROTATOR == ON && AXIS3_DRIVER_MODEL == TMC_SPI
-    tmcSpiDriver tmcAxis3(Axis3_M2,Axis3_M1,      -1,Axis3_M0,AXIS3_DRIVER_SUBMODEL,AXIS3_DRIVER_RSENSE);
+  #if AXIS3_DRIVER_MODEL == TMC_SPI
+    tmcSpiDriver tmcAxis3(Axis3_M2,Axis3_M1,-1,Axis3_M0,AXIS3_DRIVER_SUBMODEL,AXIS3_DRIVER_RSENSE);
   #endif
-  #if FOCUSER1 == ON && AXIS4_DRIVER_MODEL == TMC_SPI
-    tmcSpiDriver tmcAxis4(Axis4_M2,Axis4_M1,      -1,Axis4_M0,AXIS4_DRIVER_SUBMODEL,AXIS4_DRIVER_RSENSE);
+  #if AXIS4_DRIVER_MODEL == TMC_SPI
+    tmcSpiDriver tmcAxis4(Axis4_M2,Axis4_M1,-1,Axis4_M0,AXIS4_DRIVER_SUBMODEL,AXIS4_DRIVER_RSENSE);
   #endif
-  #if FOCUSER2 == ON && AXIS5_DRIVER_MODEL == TMC_SPI
-    tmcSpiDriver tmcAxis5(Axis5_M2,Axis5_M1,      -1,Axis5_M0,AXIS5_DRIVER_SUBMODEL,AXIS5_DRIVER_RSENSE);
+  #if AXIS5_DRIVER_MODEL == TMC_SPI
+    tmcSpiDriver tmcAxis5(Axis5_M2,Axis5_M1,-1,Axis5_M0,AXIS5_DRIVER_SUBMODEL,AXIS5_DRIVER_RSENSE);
   #endif
 #endif
 
