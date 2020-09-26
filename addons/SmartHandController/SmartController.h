@@ -130,6 +130,7 @@ private:
   void menuBlankTimeout();
   void menuFocuser1();
   void menuFocuser2();
+  bool menuSetFocTCCoef(uint8_t &foc);
   void menuRotator();
   void menuLatitude();
   void menuLongitude();
