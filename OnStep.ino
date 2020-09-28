@@ -56,7 +56,7 @@
 
 // Enable additional debugging and/or status messages on the specified DebugSer port
 // Note that the DebugSer port cannot be used for normal communication with OnStep
-#define DEBUG OFF             // default=OFF, use "DEBUG ON" for background errors only, use "DEBUG VERBOSE" for all errors and status messages
+#define DEBUG OFF         // default=OFF, use "DEBUG ON" for background errors only, use "DEBUG VERBOSE" for all errors and status messages
 #define DebugSer SerialA      // default=SerialA, or Serial4 for example (always 9600 baud)
 
 #include <errno.h>
