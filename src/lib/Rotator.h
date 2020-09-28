@@ -59,11 +59,11 @@ class rotator {
     }
 
     // minimum position in degrees
-    void setMin(double min) { smin=min*spd; if (smin < -180*3600 || smin > 180*3600) smin=0; if (smin > smax) smin=smax; backlashMax=(smax-smin)/10; if (backlashMax > 32767) backlashMax=32767; }
+    void setMin(double min) { smin=min*spd; if (smin < -180L*3600L || smin > 180*3600L) smin=0; if (smin > smax) smin=smax; backlashMax=(smax-smin)/10; if (backlashMax > 32767) backlashMax=32767; }
     double getMin() { return smin/spd; }
 
     // maximum position in degrees
-    void setMax(double max) { smax=max*spd; if (smax < -180*3600 || smax > 180*3600) smax=0; if (smax < smin) smax=smin; backlashMax=(smax-smin)/10; if (backlashMax > 32767) backlashMax=32767; }
+    void setMax(double max) { smax=max*spd; if (smax < -180L*3600L || smax > 180L*3600L) smax=0; if (smax < smin) smax=smin; backlashMax=(smax-smin)/10; if (backlashMax > 32767) backlashMax=32767; }
     double getMax() { return smax/spd; }
 
     // backlash, in degrees
