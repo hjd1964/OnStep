@@ -42,11 +42,11 @@ class focuser {
     virtual double getStepsPerMicro() { return spm; }
 
     // minimum position in steps
-    void setMin(long min) { smin=min; if (smin < 0 || smin > 500*1000*10) smin=0; if (smin > smax) smin=smax; backlashMax=(smax-smin)/10; if (backlashMax > 32767) backlashMax=32767; }
+    void setMin(long min) { smin=min; if (smin < 0 || smin > 500L*1000L*10L) smin=0; if (smin > smax) smin=smax; backlashMax=(smax-smin)/10; if (backlashMax > 32767) backlashMax=32767; }
     long getMin() { return smin; }
 
     // maximum position in steps
-    void setMax(long max) { smax=max; if (smax < 0 || smax > 500*1000*10) smax=0; if (smax < smin) smax=smin; backlashMax=(smax-smin)/10; if (backlashMax > 32767) backlashMax=32767; }
+    void setMax(long max) { smax=max; if (smax < 0 || smax > 500*1000L*10L) smax=0; if (smax < smin) smax=smin; backlashMax=(smax-smin)/10; if (backlashMax > 32767) backlashMax=32767; }
     long getMax() { return smax; }
 
     // backlash, in steps
