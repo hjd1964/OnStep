@@ -149,7 +149,7 @@
 #define TonePin            PA14     // Tone
 
 // The PPS pin is a 3.3V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
-#define PpsPin             AUX0     // PPS time source, GPS for example
+#define PpsPin             Aux0     // PPS time source, GPS for example
 
 #define LimitPin           Aux7     // The limit switch sense is a logic level input normally pull high (2k resistor,) shorted to ground it stops gotos/tracking
 
