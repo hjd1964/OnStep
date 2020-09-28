@@ -168,15 +168,15 @@ void setup() {
   delay(500);
 
 #if DEBUG != OFF
-  // Initialize USB serial debugging early, so we can use DebugSer.print() for debugging, if needed
+  // initialize USB serial debugging early, so we can use DebugSer.print() for debugging, if needed
   DebugSer.begin(9600); delay(5000); DebugSer.flush(); VLF(""); VLF("");
 #endif
 
-  // Say hello
+  // say hello
   VF("MSG: OnStep "); V(FirmwareVersionMajor); V("."); V(FirmwareVersionMinor); VL(FirmwareVersionPatch);
   VF("MSG: MCU =  "); V(MCU_STR); V(", "); VF("Pinmap = "); VL(PINMAP_STR);
 
-  // Call hardware specific initialization
+  // call hardware specific initialization
   VLF("MSG: Init HAL");
   HAL_Initialize();
 
@@ -202,7 +202,7 @@ void setup() {
   SerialST4.begin();
 #endif
 
-  // Take another two seconds to be sure Serial ports are online
+  // take another two seconds to be sure Serial ports are online
   delay(2000);
 
   // set pins for input/output as specified in Config.h and PinMap.h
