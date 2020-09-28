@@ -181,6 +181,9 @@ void setup() {
   HAL_Initialize();
 
   VLF("MSG: Init serial");
+
+  // take a half-second to let the serial buffer empty before possibly restarting the debug port
+  delay(500);
   SerialA.begin(SERIAL_A_BAUD_DEFAULT);
 #ifdef HAL_SERIAL_B_ENABLED
   #ifdef SERIAL_B_RX
