@@ -174,7 +174,7 @@ void setup() {
 
   // say hello
   VF("MSG: OnStep "); V(FirmwareVersionMajor); V("."); V(FirmwareVersionMinor); VL(FirmwareVersionPatch);
-  VF("MSG: MCU =  "); V(MCU_STR); V(", "); VF("Pinmap = "); VL(PINMAP_STR);
+  VF("MSG: MCU =  "); VF(MCU_STR); V(", "); VF("Pinmap = "); VLF(PINMAP_STR);
 
   // call hardware specific initialization
   VLF("MSG: Init HAL");
