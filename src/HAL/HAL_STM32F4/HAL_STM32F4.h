@@ -8,7 +8,7 @@
 // Lower limit (fastest) step rate in uS for this platform (in SQW mode)
 
 #if defined(STM32F446xx)
-  #define HAL_MAXRATE_LOWER_LIMIT 20
+  #define HAL_MAXRATE_LOWER_LIMIT 14
 #elif defined(STM32F411xE)
   #define HAL_MAXRATE_LOWER_LIMIT 24
 #else
