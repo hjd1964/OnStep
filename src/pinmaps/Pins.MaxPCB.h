@@ -153,12 +153,17 @@
 
 #define LimitPin           Aux7     // The limit switch sense is a logic level input normally pull high (2k resistor,) shorted to ground it stops gotos/tracking
 
+// Soft SPI bus to stepper drivers
+#define SS_MOSI             PA7
+#define SS_SCK              PA5
+#define SS_MISO            Aux1
+
 // Axis1 RA/Azm step/dir driver
 #define Axis1_EN             -1     // Enable
-#define Axis1_M0            PA7     // SPI MOSI
-#define Axis1_M1            PA5     // SPI SCK
+#define Axis1_M0        SS_MOSI     // SPI MOSI
+#define Axis1_M1         SS_SCK     // SPI SCK
 #define Axis1_M2            PA1     // SPI CS
-#define Axis1_M3           Aux1     // SPI MISO
+#define Axis1_M3        SS_MISO     // SPI MISO
 #define Axis1_STEP         PB10     // Step
 #define Axis1_DIR           PB2     // Dir
 #define Axis1_DECAY    Axis1_M2     // Decay mode
@@ -167,10 +172,10 @@
 
 // Axis2 Dec/Alt step/dir driver
 #define Axis2_EN             -1     // Enable
-#define Axis2_M0            PA7     // SPI MOSI
-#define Axis2_M1            PA5     // SPI SCK
+#define Axis2_M0        SS_MOSI     // SPI MOSI
+#define Axis2_M1         SS_SCK     // SPI SCK
 #define Axis2_M2            PA0     // SPI CS
-#define Axis2_M3           Aux1     // SPI MISO
+#define Axis2_M3        SS_MISO     // SPI MISO
 #define Axis2_STEP          PA4     // Step
 #define Axis2_DIR           PB0     // Dir (ESP8266 GPIO0 on MaxPCB3)
 #define Axis2_DECAY    Axis2_M2     // Decay mode
@@ -179,28 +184,28 @@
 
 // For rotator stepper driver
 #define Axis3_EN             -1     // Enable
-#define Axis3_M0            PA7     // SPI MOSI
-#define Axis3_M1            PA5     // SPI SCK
+#define Axis3_M0        SS_MOSI     // SPI MOSI
+#define Axis3_M1         SS_SCK     // SPI SCK
 #define Axis3_M2           PC15     // SPI CS
-#define Axis3_M3           Aux1     // SPI MISO
+#define Axis3_M3        SS_MISO     // SPI MISO
 #define Axis3_STEP          PB8     // Step
 #define Axis3_DIR          PC13     // Dir
 
 // For focuser1 stepper driver
 #define Axis4_EN             -1     // Enable
-#define Axis4_M0            PA7     // SPI MOSI
-#define Axis4_M1            PA5     // SPI SCK
+#define Axis4_M0        SS_MOSI     // SPI MOSI
+#define Axis4_M1         SS_SCK     // SPI SCK
 #define Axis4_M2           PC14     // SPI CS
-#define Axis4_M3           Aux1     // SPI MISO
+#define Axis4_M3        SS_MISO     // SPI MISO
 #define Axis4_STEP          PB9     // Step
 #define Axis4_DIR          PC13     // Dir
 
 // For focuser2 stepper driver
 #define Axis5_EN             -1     // Enable
-#define Axis5_M0            PA7     // SPI MOSI
-#define Axis5_M1            PA5     // SPI SCK
+#define Axis5_M0        SS_MOSI     // SPI MOSI
+#define Axis5_M1         SS_SCK     // SPI SCK
 #define Axis5_M2           PC15     // SPI CS
-#define Axis5_M3           Aux1     // SPI MISO
+#define Axis5_M3        SS_MISO     // SPI MISO
 #define Axis5_STEP          PB8     // Step
 #define Axis5_DIR          PC13     // Dir
 
