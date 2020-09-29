@@ -39,6 +39,10 @@ LX200RETURN readBacklashLX200(const uint8_t &axis, float &backlash);
 LX200RETURN writeBacklashLX200(const uint8_t &axis, const float &backlash);
 LX200RETURN readFocTCCoefLX200(const uint8_t &foc, float &tccoef);
 LX200RETURN writeFocTCCoefLX200(const uint8_t &foc, const float &tccoef);
+LX200RETURN readFocBacklashLX200(const uint8_t &foc, float &tccoef);
+LX200RETURN writeFocBacklashLX200(const uint8_t &foc, const float &tccoef);
+LX200RETURN readFocTCDeadbandLX200(const uint8_t &foc, float &tccoef);
+LX200RETURN writeFocTCDeadbandLX200(const uint8_t &foc, const float &tccoef);
 
 boolean hmsToDouble(double *f, char *hms);
 boolean dmsToDouble(double *f, char *dms, boolean sign_present, boolean highPrecision);
