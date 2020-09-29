@@ -23,6 +23,8 @@
 
 // FYSETC S6 - 3D printer board that works with OnStep, a 6-axis design with 5-axes supported
 #define FYSETC_S6                   15
+#define FYSETC_S6_1                 15
+#define FYSETC_S6_2                 16
 
 // Mini - Small 2-axis design suitable for embedded or mounting behind a panel can even be built with connectors up
 #define MiniPCB                     20 // All for Teensy3.2

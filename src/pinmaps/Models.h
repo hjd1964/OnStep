@@ -77,3 +77,7 @@
   #define PINMAP_STR "FYSETC S6"
   #include "Pins.FYSETC_S6.h"
 #endif
+#if PINMAP == FYSETC_S6_2
+  #define PINMAP_STR "FYSETC S6 v2"
+  #include "Pins.FYSETC_S6.h"
+#endif

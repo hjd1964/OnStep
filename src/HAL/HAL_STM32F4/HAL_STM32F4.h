@@ -28,7 +28,7 @@
 #define sei() interrupts()
 
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
-#if PINMAP == FYSETC_S6
+#if PINMAP == FYSETC_S6 || PINMAP == FYSETC_S6_2
   #define SerialA Serial
   // SerialA is always enabled, SerialB and SerialC are optional
   #define SerialB Serial1
@@ -74,6 +74,11 @@
 #if defined(NV_MB85RC256V)
   #include "../drivers/NV_I2C_FRAM_MB85RC256V.h"
 #else
+  // The FYSETC S6 v2 has a 4096 byte EEPROM built-in
+  #if PINMAP == FYSETC_S6_2
+    #define E2END 4095
+    #define I2C_EEPROM_ADDRESS 0x50
+  #endif
   // The FYSETC S6 has a 2048 byte EEPROM built-in
   #if PINMAP == FYSETC_S6
     #define E2END 2047
