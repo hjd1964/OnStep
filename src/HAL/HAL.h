@@ -68,7 +68,7 @@
 #elif defined(STM32F411xE)
   // Blackpill board with STM32F411CE
   #define MCU_STR "STM32F411"
-  #include "HAL_STM32F4/HAL_STM32F4.h"
+  #include "HAL_STM32F4/HAL_STM32F411.h"
 
 #elif defined(STM32F446xx)
   // FYSETC S6 board with STM32F446

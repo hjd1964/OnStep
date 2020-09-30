@@ -6,14 +6,8 @@
 #define HAL_FAST_PROCESSOR
 
 // Lower limit (fastest) step rate in uS for this platform (in SQW mode)
-
-#if defined(STM32F446xx)
-  #define HAL_MAXRATE_LOWER_LIMIT 14
-#elif defined(STM32F411xE)
-  #define HAL_MAXRATE_LOWER_LIMIT 24
-#else
-  #define HAL_MAXRATE_LOWER_LIMIT 64
-#endif
+// This assumes optimization set to Fastest (-O3)
+#define HAL_MAXRATE_LOWER_LIMIT 16
 
 // Width of step pulse
 #define HAL_PULSE_WIDTH         500
@@ -28,41 +22,22 @@
 #define sei() interrupts()
 
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
-#if PINMAP == FYSETC_S6 || PINMAP == FYSETC_S6_2
-  #define SerialA Serial
-  // SerialA is always enabled, SerialB and SerialC are optional
-  #define SerialB Serial1
-  #define HAL_SERIAL_B_ENABLED
-  #if SERIAL_C_BAUD_DEFAULT != OFF
-    #define SerialC Serial3
-    #define HAL_SERIAL_C_ENABLED
-  #endif
+#define SerialA Serial
+// SerialA is always enabled, SerialB and SerialC are optional
 
-  // Handle special case of using software serial for a GPS
-  #if SerialGPS == SoftwareSerial2
-    #include <SoftwareSerial.h>
-    SoftwareSerial SWSerialGPS(PA3, PA2); // RX2, TX2
-    #undef SerialGPS
-    #define SerialGPS SWSerialGPS
-  #endif
-#elif PINMAP == MaxPCB3
-  #define SerialA Serial
-  // SerialA is always enabled, SerialB and SerialC are optional
+HardwareSerial HWSerial2(PA3, PA2); // RX2, TX2
+#define SerialB HWSerial2
+#define HAL_SERIAL_B_ENABLED
 
-  HardwareSerial HWSerial2(PA3, PA2); // RX2, TX2
-  #define SerialB HWSerial2
-  #define HAL_SERIAL_B_ENABLED
-
-  #if SERIAL_C_BAUD_DEFAULT != OFF
-    HardwareSerial HWSerial1(PA10, PA9); // RX1, TX1
-    #define SerialC HWSerial1
-    #define HAL_SERIAL_C_ENABLED
-  #endif
+#if SERIAL_C_BAUD_DEFAULT != OFF
+  HardwareSerial HWSerial1(PA10, PA9); // RX1, TX1
+  #define SerialC HWSerial1
+  #define HAL_SERIAL_C_ENABLED
+#endif
   
 // HardwareSerial HWSerial1(PA10, PA9);  // RX1, TX1
 // HardwareSerial HWSerial2(PA3, PA2);   // RX2, TX2
 // HardwareSerial HWSerial6(PA12, PA11); // RX6, TX6
-#endif
 
 // New symbol for the default I2C port ---------------------------------------------------------------
 #include <Wire.h>
@@ -74,22 +49,11 @@
 #if defined(NV_MB85RC256V)
   #include "../drivers/NV_I2C_FRAM_MB85RC256V.h"
 #else
-  // The FYSETC S6 v2 has a 4096 byte EEPROM built-in
-  #if PINMAP == FYSETC_S6_2
-    #define E2END 4095
-    #define I2C_EEPROM_ADDRESS 0x50
-  #endif
-  // The FYSETC S6 has a 2048 byte EEPROM built-in
-  #if PINMAP == FYSETC_S6
-    #define E2END 2047
-    #define I2C_EEPROM_ADDRESS 0x50
-  #endif
   // The STM32F411 MaxPCB3 has an 8192 byte EEPROM built-in (rated for 5M write cycles)
-  #if PINMAP == MaxPCB3
-    #define NV_ENDURANCE HIGH
-    #define E2END 8191
-    #define I2C_EEPROM_ADDRESS 0x50
-  #endif
+  #define NV_ENDURANCE HIGH
+  #define E2END 8191
+  #define I2C_EEPROM_ADDRESS 0x50
+
   // Defaults to 0x57 and 4KB 
   #include "../drivers/NV_I2C_EEPROM_24XX_C.h"
 #endif
@@ -126,11 +90,7 @@ float HAL_MCU_Temperature(void) {
 #define ISR(f) void f (void)
 
 HardwareTimer *Timer_Sidereal = new HardwareTimer(TIM1);
-#if defined(STM32F411xE)
-  HardwareTimer *Timer_Axis1  = new HardwareTimer(TIM9);
-#else
-  HardwareTimer *Timer_Axis1  = new HardwareTimer(TIM10);
-#endif
+HardwareTimer *Timer_Axis1    = new HardwareTimer(TIM9);
 HardwareTimer *Timer_Axis2    = new HardwareTimer(TIM11);
 
 #define SIDEREAL_CH  1
@@ -239,24 +199,20 @@ void PresetTimerInterval(long iv, bool TPS, volatile uint32_t *nextRate, volatil
   if (iv>2144000000) iv=2144000000;
 
   // minimum time is 1 micro-second
-  if (iv<16) iv=16;
+  if (iv < 16) iv=16;
 
   // TPS (timer pulse step) == false for SQW mode and double the timer rate
   if (!TPS) iv/=2L;
 
   iv/=TIMER_RATE_16MHZ_TICKS;
   uint32_t reps = (iv/65536)+1;
-  uint32_t i = iv/reps;
+  uint32_t i = iv/reps-1;
   cli(); *nextRate=i; *nextRep=reps; sei();
 }
 
 // Must work from within the motor ISR timers, in microseconds*(F_COMP/1000000.0) units
-void QuickSetIntervalAxis1(uint32_t r) {
-  Timer_Axis1->setOverflow(r);
-}
-void QuickSetIntervalAxis2(uint32_t r) {
-  Timer_Axis2->setOverflow(r);
-}
+#define QuickSetIntervalAxis1(r) WRITE_REG(TIM9->ARR, r)
+#define QuickSetIntervalAxis2(r) WRITE_REG(TIM11->ARR, r)
 
 // --------------------------------------------------------------------------------------------------
 // Fast port writing help, etc.
@@ -266,35 +222,35 @@ void QuickSetIntervalAxis2(uint32_t r) {
 #define TGL(x,y) (x^=(1<<y))
 
 // We use standard #define's to do **fast** digitalWrite's to the step and dir pins for the Axis1/2 stepper drivers
-#define a1STEP_H digitalWriteFast(Axis1_STEP, HIGH)
-#define a1STEP_L digitalWriteFast(Axis1_STEP, LOW)
-#define a1DIR_H digitalWriteFast(Axis1_DIR, HIGH)
-#define a1DIR_L digitalWriteFast(Axis1_DIR, LOW)
+#define a1STEP_H WRITE_REG(Axis1_StpPORT->BSRR, Axis1_StpBIT)
+#define a1STEP_L WRITE_REG(Axis1_StpPORT->BSRR, Axis1_StpBIT << 16)
+#define a1DIR_H  WRITE_REG(Axis1_DirPORT->BSRR, Axis1_DirBIT)
+#define a1DIR_L  WRITE_REG(Axis1_DirPORT->BSRR, Axis1_DirBIT << 16)
 
-#define a2STEP_H digitalWriteFast(Axis2_STEP, HIGH)
-#define a2STEP_L digitalWriteFast(Axis2_STEP, LOW)
-#define a2DIR_H digitalWriteFast(Axis2_DIR, HIGH)
-#define a2DIR_L digitalWriteFast(Axis2_DIR, LOW)
+#define a2STEP_H WRITE_REG(Axis2_StpPORT->BSRR, Axis2_StpBIT)
+#define a2STEP_L WRITE_REG(Axis2_StpPORT->BSRR, Axis2_StpBIT << 16)
+#define a2DIR_H  WRITE_REG(Axis2_DirPORT->BSRR, Axis2_DirBIT)
+#define a2DIR_L  WRITE_REG(Axis2_DirPORT->BSRR, Axis2_DirBIT << 16)
 
 // fast bit-banged SPI should hit an ~1 MHz bitrate for TMC drivers
 #define delaySPI delayNanoseconds(500)
 
-#define a1CS_H digitalWriteFast(Axis1_M2,HIGH)
-#define a1CS_L digitalWriteFast(Axis1_M2,LOW)
-#define a1CLK_H digitalWriteFast(Axis1_M1,HIGH)
-#define a1CLK_L digitalWriteFast(Axis1_M1,LOW)
-#define a1SDO_H digitalWriteFast(Axis1_M0,HIGH)
-#define a1SDO_L digitalWriteFast(Axis1_M0,LOW)
-#define a1M0(P) digitalWriteFast(Axis1_M0,(P))
-#define a1M1(P) digitalWriteFast(Axis1_M1,(P))
-#define a1M2(P) digitalWriteFast(Axis1_M2,(P))
+#define a1CS_H WRITE_REG(Axis1_M2PORT->BSRR, Axis1_M2BIT)
+#define a1CS_L WRITE_REG(Axis1_M2PORT->BSRR, Axis1_M2BIT << 16)
+#define a1CLK_H WRITE_REG(Axis1_M1PORT->BSRR, Axis1_M1BIT)
+#define a1CLK_L WRITE_REG(Axis1_M1PORT->BSRR, Axis1_M1BIT << 16)
+#define a1SDO_H WRITE_REG(Axis1_M0PORT->BSRR, Axis1_M0BIT)
+#define a1SDO_L WRITE_REG(Axis1_M0PORT->BSRR, Axis1_M0BIT << 16)
+#define a1M0(P) if (P) WRITE_REG(Axis1_M0PORT->BSRR, Axis1_M0BIT); else WRITE_REG(Axis1_M0PORT->BSRR, Axis1_M0BIT << 16)
+#define a1M1(P) if (P) WRITE_REG(Axis1_M1PORT->BSRR, Axis1_M1BIT); else WRITE_REG(Axis1_M1PORT->BSRR, Axis1_M1BIT << 16)
+#define a1M2(P) if (P) WRITE_REG(Axis1_M2PORT->BSRR, Axis1_M2BIT); else WRITE_REG(Axis1_M2PORT->BSRR, Axis1_M2BIT << 16)
 
-#define a2CS_H digitalWriteFast(Axis2_M2,HIGH)
-#define a2CS_L digitalWriteFast(Axis2_M2,LOW)
-#define a2CLK_H digitalWriteFast(Axis2_M1,HIGH)
-#define a2CLK_L digitalWriteFast(Axis2_M1,LOW)
-#define a2SDO_H digitalWriteFast(Axis2_M0,HIGH)
-#define a2SDO_L digitalWriteFast(Axis2_M0,LOW)
-#define a2M0(P) digitalWriteFast(Axis2_M0,(P))
-#define a2M1(P) digitalWriteFast(Axis2_M1,(P))
-#define a2M2(P) digitalWriteFast(Axis2_M2,(P))
+#define a2CS_H WRITE_REG(Axis2_M2PORT->BSRR, Axis2_M2BIT)
+#define a2CS_L WRITE_REG(Axis2_M2PORT->BSRR, Axis2_M2BIT << 16)
+#define a2CLK_H WRITE_REG(Axis2_M1PORT->BSRR, Axis2_M1BIT)
+#define a2CLK_L WRITE_REG(Axis2_M1PORT->BSRR, Axis2_M1BIT << 16)
+#define a2SDO_H WRITE_REG(Axis2_M0PORT->BSRR, Axis2_M0BIT)
+#define a2SDO_L WRITE_REG(Axis2_M0PORT->BSRR, Axis2_M0BIT << 16)
+#define a2M0(P) if (P) WRITE_REG(Axis2_M0PORT->BSRR, Axis2_M0BIT); else WRITE_REG(Axis2_M0PORT->BSRR, Axis2_M0BIT << 16)
+#define a2M1(P) if (P) WRITE_REG(Axis2_M1PORT->BSRR, Axis2_M1BIT); else WRITE_REG(Axis2_M1PORT->BSRR, Axis2_M1BIT << 16)
+#define a2M2(P) if (P) WRITE_REG(Axis2_M2PORT->BSRR, Axis2_M2BIT); else WRITE_REG(Axis2_M2PORT->BSRR, Axis2_M2BIT << 16)
