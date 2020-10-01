@@ -233,7 +233,7 @@ void PresetTimerInterval(long iv, bool TPS, volatile uint32_t *nextRate, volatil
 #define a2DIR_L  WRITE_REG(Axis2_DirPORT->BSRR, Axis2_DirBIT << 16)
 
 // fast bit-banged SPI should hit an ~1 MHz bitrate for TMC drivers
-#define delaySPI delayNanoseconds(500)
+#define delaySPI delayNanoseconds(250)
 
 #define a1CS_H WRITE_REG(Axis1_M2PORT->BSRR, Axis1_M2BIT)
 #define a1CS_L WRITE_REG(Axis1_M2PORT->BSRR, Axis1_M2BIT << 16)
