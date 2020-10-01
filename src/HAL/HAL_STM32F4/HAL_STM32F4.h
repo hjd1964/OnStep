@@ -107,7 +107,7 @@ void delayNanoseconds(unsigned int n) {
 void HAL_Initialize(void) {
   // calibrate delayNanoseconds()
   uint32_t startTime,npp;
-  cli(); startTime=micros(); delayNanoseconds(65535); npp=micros(); sei(); npp=((int32_t)(npp-startTime)*1000)/63335;
+  startTime=micros(); delayNanoseconds(65535); npp=micros(); npp=((int32_t)(npp-startTime)*1000)/63335;
   if (npp<1) npp=1; if (npp>2000) npp=2000; _nanosPerPass=npp;
 }
 
