@@ -71,7 +71,7 @@ void delayNanoseconds(unsigned int n) {
 void HAL_Initialize(void) {
   // calibrate delayNanoseconds()
   uint32_t startTime,npp;
-  cli(); startTime=micros(); delayNanoseconds(65535); npp=micros(); sei(); npp=((int32_t)(npp-startTime)*1000)/63335;
+  startTime=micros(); delayNanoseconds(65535); npp=micros(); npp=((int32_t)(npp-startTime)*1000)/63335;
   if (npp<1) npp=1; if (npp>2000) npp=2000; _nanosPerPass=npp;
 }
 
@@ -233,7 +233,7 @@ void PresetTimerInterval(long iv, bool TPS, volatile uint32_t *nextRate, volatil
 #define a2DIR_L  WRITE_REG(Axis2_DirPORT->BSRR, Axis2_DirBIT << 16)
 
 // fast bit-banged SPI should hit an ~1 MHz bitrate for TMC drivers
-#define delaySPI delayNanoseconds(500)
+#define delaySPI delayNanoseconds(250)
 
 #define a1CS_H WRITE_REG(Axis1_M2PORT->BSRR, Axis1_M2BIT)
 #define a1CS_L WRITE_REG(Axis1_M2PORT->BSRR, Axis1_M2BIT << 16)
