@@ -50,7 +50,7 @@
 
 // On first upload OnStep automatically initializes a host of settings in nv memory (EEPROM.)
 // This option forces that initialization again.
-// Change to ON, upload OnStep and nv will be reset to default. Then immediately set to OFF and upload again.
+// Change to ON, upload OnStep and nv will be reset to default. Wait about 30 seconds then set to OFF and upload again.
 // *** IMPORTANT: This option must not be left set to true or it will cause excessive wear of EEPROM or FLASH ***
 #define NV_FACTORY_RESET OFF
 
