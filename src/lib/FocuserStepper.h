@@ -34,8 +34,8 @@ class focuserStepper : public focuser {
       setTcfDeadband(deadband);
 
       tcf_t0=nv.readFloat(nvAddress+EE_tcfT0);
-      if (tcf_t0 < -100.0) { tcf_t0=10.0; generalError=ERR_NV_INIT; DLF("ERR, foc.init(): bad NV TcfT0 < -100 deg. C (set to 10.0)"); }
-      if (tcf_t0 >  150.0) { tcf_t0=10.0; generalError=ERR_NV_INIT; DLF("ERR, foc.init(): bad NV TcfT0 >  150 deg. C (set to 10.0)"); }
+      if (tcf_t0 < -100.0) { tcf_t0=10.0; generalError=ERR_NV_INIT; DLF("ERR, foc.init(): bad NV TcfT0 < -100.0 deg. C (set to 10.0)"); }
+      if (tcf_t0 >  150.0) { tcf_t0=10.0; generalError=ERR_NV_INIT; DLF("ERR, foc.init(): bad NV TcfT0 >  150.0 deg. C (set to 10.0)"); }
 
       int tcfEn=nv.read(nvAddress+EE_tcfEn);
       if (tcfEn != true && tcfEn != false) { tcfEn=false; generalError=ERR_NV_INIT; DLF("ERR, foc.init(): bad NV tcfEn (set to false)"); }
@@ -88,6 +88,10 @@ class focuserStepper : public focuser {
         tcf = enabled; nv.write(nvAddress+EE_tcfEn,tcf);
       }
       return true;
+    }
+
+    double getTcfT0() {
+      return tcf_t0;
     }
 
     // set backlash, in steps

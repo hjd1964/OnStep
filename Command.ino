@@ -388,6 +388,9 @@ void processCommands() {
 #endif
           else commandError=CE_PARAM_RANGE;
         } else
+// :Fa#       Get primary focuser
+//            Returns: 1 if primary focuser is focuser 1, 0 otherwise
+        if (command[1] == 'a') { if (primaryFocuser != 'F') commandError=CE_0; } else
 
 // :FT#       Get status
 //            Returns: M# (for moving) or S# (for stopped)
@@ -404,6 +407,9 @@ void processCommands() {
 //            Returns: n#
         if (toupper(command[1]) == 'M') { sprintf(reply,"%ld",(long)round(foc->getMax()/spm)); boolReply=false; } else
 
+// :Fd#       Get focuser temperature differential
+//            Returns: n# temperature in deg. C
+        if (command[1] == 't') { if (foc->getTcfEnable()) dtostrf(ambient.getTelescopeTemperature()-foc->getTcfT0(),3,1,reply); else dtostrf(0.0,3,1,reply); boolReply=false; } else
 // :Ft#       Get focuser temperature
 //            Returns: n# temperature in deg. C
         if (command[1] == 't') { dtostrf(ambient.getTelescopeTemperature(),3,1,reply); boolReply=false; } else
