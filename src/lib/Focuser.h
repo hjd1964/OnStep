@@ -37,6 +37,7 @@ class focuser {
         return lround(tc/(float)tcf_deadband)*(long)tcf_deadband;
       } else return 0;
     }
+    virtual double getTcfT0() { return 0; }
 
     // get step size in microns
     virtual double getStepsPerMicro() { return spm; }

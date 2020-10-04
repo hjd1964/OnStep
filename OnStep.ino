@@ -40,8 +40,8 @@
 // firmware info, these are returned by the ":GV?#" commands
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  4
-#define FirmwareVersionMinor  16      // minor version 0 to 99
-#define FirmwareVersionPatch  "k"     // for example major.minor patch: 1.3c
+#define FirmwareVersionMinor  17      // minor version 0 to 99
+#define FirmwareVersionPatch  "a"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 3       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
@@ -50,7 +50,7 @@
 
 // On first upload OnStep automatically initializes a host of settings in nv memory (EEPROM.)
 // This option forces that initialization again.
-// Change to ON, upload OnStep and nv will be reset to default. Then immediately set to OFF and upload again.
+// Change to ON, upload OnStep and nv will be reset to default. Wait about 30 seconds then set to OFF and upload again.
 // *** IMPORTANT: This option must not be left set to true or it will cause excessive wear of EEPROM or FLASH ***
 #define NV_FACTORY_RESET OFF
 
@@ -552,7 +552,7 @@ void loop2() {
     if (!isSlewing()) ambient.poll();
 
     // MONITOR NV CACHE
-#if DEBUG == VERBOSE
+#if DEBUG == VERBOSE && DEBUG_NV == ON
     static bool lastCommitted=true;
     bool committed=nv.committed();
     if (committed && !lastCommitted) { DLF("MSG: NV commit done"); lastCommitted=committed; }
