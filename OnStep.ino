@@ -552,7 +552,7 @@ void loop2() {
     if (!isSlewing()) ambient.poll();
 
     // MONITOR NV CACHE
-#if DEBUG == VERBOSE
+#if DEBUG == VERBOSE && DEBUG_NV == ON
     static bool lastCommitted=true;
     bool committed=nv.committed();
     if (committed && !lastCommitted) { DLF("MSG: NV commit done"); lastCommitted=committed; }
