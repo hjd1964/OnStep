@@ -2084,14 +2084,16 @@ void processCommands() {
         if (command[1] == 'R') { siderealInterval=masterSiderealInterval; boolReply=false; } else                  // reset master sidereal clock interval
         if (command[1] == 'K') { setTrackingRate(0.99953004401); rateCompensation=RC_NONE; boolReply=false; } else // king tracking rate 60.136Hz
         if (command[1] == 'e') {
-          if (!isSlewing() && !isHoming() && !isParked()) {
+          if (isParked()) commandError=CE_PARKED; else
+          if (trackingState == TrackingMoveTo || trackingSyncInProgress() || isHoming()) commandError=CE_MOUNT_IN_MOTION; else
+          {
             initGeneralError();
             trackingState=TrackingSidereal;
             enableStepperDrivers();
-          } else commandError=CE_MOUNT_IN_MOTION;
+          }
         } else
         if (command[1] == 'd') {
-          if (!isSlewing() && !isHoming()) trackingState=TrackingNone; else commandError=CE_MOUNT_IN_MOTION;
+          if (trackingState == TrackingMoveTo || trackingSyncInProgress() || isHoming()) commandError=CE_MOUNT_IN_MOTION; else trackingState=TrackingNone;
         } else
           commandError=CE_CMD_UNKNOWN;
 
