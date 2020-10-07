@@ -73,7 +73,7 @@ class focuser {
     virtual void startMoveOut() { }
 
     // check if moving
-    bool moving() { return inMotion; }
+    virtual bool moving() { return inMotion; }
 
     // stop move
     void stopMove() { delta.fixed=0; }
