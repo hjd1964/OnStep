@@ -101,9 +101,16 @@ void guide() {
   }
 }
 
+// returns true if a pulse guide is happening
+bool lastGuidePulseGuideAxis1 = false;
+bool lastGuidePulseGuideAxis2 = false;
+bool isPulseGuiding() {
+  if (guideDirAxis1 && lastGuidePulseGuideAxis1 || guideDirAxis2 && lastGuidePulseGuideAxis2) return true; else return false;
+}
+
 // returns true if rapid movement is happening
 bool isSlewing() {
-  return ((guideDirAxis1 != 0) && (fabs(guideTimerRateAxis1) >= 2)) || ((guideDirAxis2 != 0) && (fabs(guideTimerRateAxis2) >= 2)) || (trackingState == TrackingMoveTo) || trackingSyncInProgress();
+  return guideDirAxis1 || guideDirAxis2 || trackingState == TrackingMoveTo || trackingSyncInProgress();
 }
 
 // reactivate or deactivate backlash comp. if necessary
@@ -125,7 +132,7 @@ void deactivateBacklashComp() {
 }
 
 // start a guide in RA or Azm, direction must be 'e', 'w', or 'b', guideRate is the rate selection (0 to 9), guideDuration is in ms (0 to ignore) 
-CommandErrors startGuideAxis1(char direction, int guideRate, long guideDuration) {
+CommandErrors startGuideAxis1(char direction, int guideRate, long guideDuration, bool pulseGuide) {
   // Check state
   if (faultAxis1)                         return CE_SLEW_ERR_HARDWARE_FAULT;
   if (!axis1Enabled)                      return CE_SLEW_ERR_IN_STANDBY;
@@ -151,6 +158,7 @@ CommandErrors startGuideAxis1(char direction, int guideRate, long guideDuration)
   cli();
   if (guideDirAxis1 == 'e') guideTimerRateAxis1=-guideTimerBaseRateAxis1; else guideTimerRateAxis1=guideTimerBaseRateAxis1; 
   sei();
+  lastGuidePulseGuideAxis1 = pulseGuide;
   
   return CE_NONE;
 }
@@ -161,7 +169,7 @@ void stopGuideAxis1() {
 }
 
 // start a guide in Dec or Alt, direction must be 'n', 's', or 'b', guideRate is the rate selection (0 to 9), guideDuration is in ms (0 to ignore) 
-CommandErrors startGuideAxis2(char direction, int guideRate, long guideDuration, bool absolute) {
+CommandErrors startGuideAxis2(char direction, int guideRate, long guideDuration, bool pulseGuide, bool absolute) {
   if (faultAxis2)                          return CE_SLEW_ERR_HARDWARE_FAULT;
   if (!axis1Enabled)                       return CE_SLEW_ERR_IN_STANDBY;
   if (parkStatus == Parked)                return CE_SLEW_ERR_IN_PARK;
@@ -186,7 +194,8 @@ CommandErrors startGuideAxis2(char direction, int guideRate, long guideDuration,
   if (guideDirAxis2 == 's') { cli(); guideTimerRateAxis2=-guideTimerBaseRateAxis2; sei(); } 
   if (guideDirAxis2 == 'n') { cli(); guideTimerRateAxis2= guideTimerBaseRateAxis2; sei(); }
   if (!absolute && (getInstrPierSide() == PierSideWest)) { cli(); guideTimerRateAxis2=-guideTimerRateAxis2; sei(); }
-
+  lastGuidePulseGuideAxis2 = pulseGuide;
+  
   return CE_NONE;
 }
 
@@ -215,8 +224,8 @@ bool guideWestOk() {
   return true;
 }
 
-CommandErrors startGuideAxis2(char direction, int guideRate, long guideDuration) {
-  return startGuideAxis2(direction, guideRate, guideDuration, false);
+CommandErrors startGuideAxis2(char direction, int guideRate, long guideDuration, bool pulseGuide) {
+  return startGuideAxis2(direction, guideRate, guideDuration, pulseGuide, false);
 }
 
 // stops guide in Dec or Alt
@@ -413,10 +422,10 @@ void ST4() {
       char c=SerialST4.poll();
 
       // process any single byte guide commands
-      if (c == ccMe) startGuideAxis1('e',currentGuideRate,GUIDE_TIME_LIMIT*1000);
-      if (c == ccMw) startGuideAxis1('w',currentGuideRate,GUIDE_TIME_LIMIT*1000);
-      if (c == ccMn) startGuideAxis2('n',currentGuideRate,GUIDE_TIME_LIMIT*1000);
-      if (c == ccMs) startGuideAxis2('s',currentGuideRate,GUIDE_TIME_LIMIT*1000);
+      if (c == ccMe) startGuideAxis1('e',currentGuideRate,GUIDE_TIME_LIMIT*1000,false);
+      if (c == ccMw) startGuideAxis1('w',currentGuideRate,GUIDE_TIME_LIMIT*1000,false);
+      if (c == ccMn) startGuideAxis2('n',currentGuideRate,GUIDE_TIME_LIMIT*1000,false);
+      if (c == ccMs) startGuideAxis2('s',currentGuideRate,GUIDE_TIME_LIMIT*1000,false);
       if ((c == ccQe) || (c == ccQw)) stopGuideAxis1();
       if ((c == ccQn) || (c == ccQs)) stopGuideAxis2();
       
@@ -527,9 +536,9 @@ void ST4() {
 #endif
             {
 #if SEPARATE_PULSE_GUIDE_RATE == ON && ST4_HAND_CONTROL != ON
-            startGuideAxis1(newDirAxis1,currentPulseGuideRate,GUIDE_TIME_LIMIT*1000);
+            startGuideAxis1(newDirAxis1,currentPulseGuideRate,GUIDE_TIME_LIMIT*1000,false);
 #else
-            startGuideAxis1(newDirAxis1,currentGuideRate,GUIDE_TIME_LIMIT*1000);
+            startGuideAxis1(newDirAxis1,currentGuideRate,GUIDE_TIME_LIMIT*1000,false);
 #endif
           }
         } else stopGuideAxis1();
@@ -550,9 +559,9 @@ void ST4() {
 #endif
           {
 #if SEPARATE_PULSE_GUIDE_RATE == ON && ST4_HAND_CONTROL != ON
-            startGuideAxis2(newDirAxis2,currentPulseGuideRate,GUIDE_TIME_LIMIT*1000);
+            startGuideAxis2(newDirAxis2,currentPulseGuideRate,GUIDE_TIME_LIMIT*1000,false);
 #else
-            startGuideAxis2(newDirAxis2,currentGuideRate,GUIDE_TIME_LIMIT*1000);
+            startGuideAxis2(newDirAxis2,currentGuideRate,GUIDE_TIME_LIMIT*1000,false);
 #endif
           }
         } else stopGuideAxis2();

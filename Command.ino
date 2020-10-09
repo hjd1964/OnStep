@@ -752,13 +752,13 @@ void processCommands() {
         i=0;
         if (trackingState != TrackingSidereal &&
           !(trackingState == TrackingMoveTo && lastTrackingState == TrackingSidereal)) reply[i++]='n';       // [n]ot tracking
-        if (trackingState != TrackingMoveTo && !trackingSyncInProgress())  reply[i++]='N';                   // [N]o goto
+        if (!isSlewing())                        reply[i++]='N';                                             // [N]o slew
         const char *parkStatusCh = "pIPF";       reply[i++]=parkStatusCh[parkStatus];                        // not [p]arked, parking [I]n-progress, [P]arked, Park [F]ailed
         if (pecRecorded)                         reply[i++]='R';                                             // PEC data has been [R]ecorded
         if (syncToEncodersOnly)                  reply[i++]='e';                                             // sync to [e]ncoders only
         if (atHome)                              reply[i++]='H';                                             // at [H]ome
         if (ppsSynced)                           reply[i++]='S';                                             // PPS [S]ync
-        if (guideDirAxis1 || guideDirAxis2)      reply[i++]='G';                                             // [G]uide active
+        if (isPulseGuiding())                    reply[i++]='G';                                             // pulse [G]uide active
 #if MOUNT_TYPE != ALTAZM
         if (rateCompensation == RC_REFR_RA)      { reply[i++]='r'; reply[i++]='s'; }                         // [r]efr enabled [s]ingle axis
         if (rateCompensation == RC_REFR_BOTH)    { reply[i++]='r'; }                                         // [r]efr enabled
@@ -806,9 +806,9 @@ void processCommands() {
         memset(reply,(char)0b10000000,9);
         if (trackingState != TrackingSidereal &&
           !(trackingState == TrackingMoveTo && lastTrackingState == TrackingSidereal)) reply[0]|=0b10000001; // Not tracking
-        if (trackingState != TrackingMoveTo && !trackingSyncInProgress())  reply[0]|=0b10000010;             // No goto
+        if (!isSlewing())                            reply[0]|=0b10000010;                                   // No slew
         if (ppsSynced)                               reply[0]|=0b10000100;                                   // PPS sync
-        if (guideDirAxis1 || guideDirAxis2)          reply[0]|=0b10001000;                                   // Guide active
+        if (isPulseGuiding())                        reply[0]|=0b10001000;                                   // pulse guide active
 #if MOUNT_TYPE != ALTAZM
         if (rateCompensation == RC_REFR_RA)          reply[0]|=0b11010000;                                   // Refr enabled Single axis
         if (rateCompensation == RC_REFR_BOTH)        reply[0]|=0b10010000;                                   // Refr enabled
@@ -1345,17 +1345,17 @@ void processCommands() {
           if (i >= 0 && i <= 16399) {
             if ((parameter[0] == 'e' || parameter[0] == 'w') && guideDirAxis1 == 0) {
 #if SEPARATE_PULSE_GUIDE_RATE == ON
-              commandError=startGuideAxis1(parameter[0],currentPulseGuideRate,i);
+              commandError=startGuideAxis1(parameter[0],currentPulseGuideRate,i,true);
 #else
-              commandError=startGuideAxis1(parameter[0],currentGuideRate,i);
+              commandError=startGuideAxis1(parameter[0],currentGuideRate,i,true);
 #endif
               if (command[1] == 'g') boolReply=false;
             } else
             if ((parameter[0] == 'n' || parameter[0] == 's') && guideDirAxis2 == 0) { 
 #if SEPARATE_PULSE_GUIDE_RATE == ON
-              commandError=startGuideAxis2(parameter[0],currentPulseGuideRate,i);
+              commandError=startGuideAxis2(parameter[0],currentPulseGuideRate,i,true);
 #else
-              commandError=startGuideAxis2(parameter[0],currentGuideRate,i);
+              commandError=startGuideAxis2(parameter[0],currentGuideRate,i,true);
 #endif
               if (command[1] == 'g') boolReply=false;
             } else commandError=CE_CMD_UNKNOWN;
@@ -1365,13 +1365,13 @@ void processCommands() {
 // :Me# :Mw#  Move Telescope East or West at current guide rate
 //            Returns: Nothing
       if ((command[1] == 'e' || command[1] == 'w') && parameter[0] == 0) {
-        commandError=startGuideAxis1(command[1],currentGuideRate,GUIDE_TIME_LIMIT*1000);
+        commandError=startGuideAxis1(command[1],currentGuideRate,GUIDE_TIME_LIMIT*1000,false);
         boolReply=false;
       } else
 // :Mn# :Ms#  Move Telescope North or South at current guide rate
 //            Returns: Nothing
       if ((command[1] == 'n' || command[1] == 's') && parameter[0] == 0) {
-        commandError=startGuideAxis2(command[1],currentGuideRate,GUIDE_TIME_LIMIT*1000);
+        commandError=startGuideAxis2(command[1],currentGuideRate,GUIDE_TIME_LIMIT*1000,false);
         boolReply=false;
       } else
 // :Mp#  Move Telescope for sPiral search at current guide rate
