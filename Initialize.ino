@@ -263,8 +263,14 @@ void initWriteNvValues() {
     // clear the pointing model
     saveAlignModel();
 
+    // sit here and wait until the entire nv contents are written before writing the key
+    VLF("MSG: Init NV waiting for cache");
+    while (!nv.committed()) nv.poll();
+
     // finally, stop the init from happening again
     nv.writeLong(EE_autoInitKey,NV_INIT_KEY);
+
+    VLF("MSG: Init NV key written");
   }
   
   // bit 0 = settings at compile (0) or run time (1), bits 1 to 5 = (1) to reset axis n on next boot

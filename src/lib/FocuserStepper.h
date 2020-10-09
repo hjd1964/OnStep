@@ -25,7 +25,7 @@ class focuserStepper : public focuser {
 
       // get the temperature compensated focusing settings
       float coef=nv.readFloat(nvAddress+EE_tcfCoef);
-      if (fabs(coef) >= 1000.0) { coef=0; generalError=ERR_NV_INIT; DLF("ERR, foc.init(): bad NV TcfCoef >= 1000 um/deg. C (set to 0.0)"); }
+      if (fabs(coef) > 999.0) { coef=0; generalError=ERR_NV_INIT; DLF("ERR, foc.init(): bad NV TcfCoef > 999.0 um/deg. C (set to 0.0)"); }
       setTcfCoef(coef);
 
       int deadband=nv.readInt(nvAddress+EE_tcfDeadband);

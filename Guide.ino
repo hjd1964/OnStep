@@ -103,7 +103,7 @@ void guide() {
 
 // returns true if rapid movement is happening
 bool isSlewing() {
-  return ((guideDirAxis1 != 0) && (fabs(guideTimerRateAxis1) >= 2)) || ((guideDirAxis2 != 0) && (fabs(guideTimerRateAxis2) >= 2)) || (trackingState == TrackingMoveTo);
+  return ((guideDirAxis1 != 0) && (fabs(guideTimerRateAxis1) >= 2)) || ((guideDirAxis2 != 0) && (fabs(guideTimerRateAxis2) >= 2)) || (trackingState == TrackingMoveTo) || trackingSyncInProgress();
 }
 
 // reactivate or deactivate backlash comp. if necessary

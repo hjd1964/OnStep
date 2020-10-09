@@ -58,6 +58,9 @@ class rotator {
       lastPhysicalMove=nextPhysicalMove;
     }
 
+    // get step size in degrees
+    double getStepsPerDegree() { return spd; }
+
     // minimum position in degrees
     void setMin(double min) { smin=min*spd; if (smin < -180L*3600L || smin > 180*3600L) smin=0; if (smin > smax) smin=smax; backlashMax=(smax-smin)/10; if (backlashMax > 32767) backlashMax=32767; }
     double getMin() { return smin/spd; }
@@ -66,10 +69,10 @@ class rotator {
     void setMax(double max) { smax=max*spd; if (smax < -180L*3600L || smax > 180L*3600L) smax=0; if (smax < smin) smax=smin; backlashMax=(smax-smin)/10; if (backlashMax > 32767) backlashMax=32767; }
     double getMax() { return smax/spd; }
 
-    // backlash, in degrees
-    bool setBacklash(double b) { b=b*spd; if (b < 0 || b > backlashMax) return false; backlash = b; nv.writeInt(nvAddress+EE_rotBacklash,backlash); return true; }
-    double getBacklash() { return backlash/spd; }
-    
+    // backlash, in steps
+    bool setBacklash(int b) { if (b < 0 || b > backlashMax) return false; backlash = b; nv.writeInt(nvAddress+EE_rotBacklash,backlash); return true; }
+    int getBacklash() { return backlash; }
+
     // sets logic state for reverse motion
     void setReverseState(int reverseState) {
       this->reverseState=reverseState;

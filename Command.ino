@@ -282,6 +282,13 @@ void processCommands() {
           boolReply=false;
         } else
 #endif
+// :ENVRESET# Wipe flash.  OnStep must be at home and tracking turned off for this command to work.
+        if (command[1] == 'N' && parameter[0] == 'V' && parameter[1] == 'R' && parameter[2] == 'E' && parameter[3] == 'S' && parameter[4] == 'E' && parameter[5] == 'T' && parameter[6] == 0) {
+          if (atHome || parkStatus == Parked) {
+            nv.writeLong(EE_autoInitKey,0);
+            strcpy(reply,"NV will be wiped on next boot");
+            boolReply=false;
+          } else commandError=CE_NOT_PARKED_OR_AT_HOME; } else
 #if SERIAL_B_ESP_FLASHING == ON
 // :ESPFLASH# ESP8266 device flash mode.  OnStep must be at home and tracking turned off for this command to work.
 //            Return: 1 on completion (after up to one minute from start of command.)
@@ -407,9 +414,9 @@ void processCommands() {
 //            Returns: n#
         if (toupper(command[1]) == 'M') { sprintf(reply,"%ld",(long)round(foc->getMax()/spm)); boolReply=false; } else
 
-// :Fd#       Get focuser temperature differential
+// :Fe#       Get focuser temperature differential
 //            Returns: n# temperature in deg. C
-        if (command[1] == 't') { if (foc->getTcfEnable()) dtostrf(ambient.getTelescopeTemperature()-foc->getTcfT0(),3,1,reply); else dtostrf(0.0,3,1,reply); boolReply=false; } else
+        if (command[1] == 'e') { if (foc->getTcfEnable()) dtostrf(ambient.getTelescopeTemperature()-foc->getTcfT0(),3,1,reply); else dtostrf(0.0,3,1,reply); boolReply=false; } else
 // :Ft#       Get focuser temperature
 //            Returns: n# temperature in deg. C
         if (command[1] == 't') { dtostrf(ambient.getTelescopeTemperature(),3,1,reply); boolReply=false; } else
@@ -1565,14 +1572,26 @@ void processCommands() {
 //            Returns: Nothing
       if (command[1] == 'R' && parameter[0] == 0) { rot.reverseDR(); boolReply=false; } else
 #endif
-// :rB#       Get rotator backlash amount in degrees
-//            Return: DDD*MM'SS#
-        if (command[1] == 'B' && parameter[0] == 0) { f1=rot.getBacklash(); doubleToDms(reply,&f1,true,false,PM_HIGH); boolReply=false; } else
-// :rB[DDD*MM'SS]#
-//            Set rotator backlash amount in degrees
+// :rT#       Get status
+//            Returns: M# (for moving) or S# (for stopped)
+        if (command[1] == 'T') { if (rot.moving()) strcpy(reply,"M"); else strcpy(reply,"S"); boolReply=false; } else
+// :rI#       Get mIn position (in degrees)
+//            Returns: n#
+        if (command[1] == 'I') { sprintf(reply,"%ld",(long)round(rot.getMin())); boolReply=false; } else
+// :rM#       Get Max position (in degrees)
+//            Returns: n#
+        if (command[1] == 'M') { sprintf(reply,"%ld",(long)round(rot.getMax())); boolReply=false; } else
+// :rD#       Get rotator degrees per step
+//            Returns: n.n#
+        if (command[1] == 'D') { dtostrf(1.0/rot.getStepsPerDegree(),7,5,reply); boolReply=false; } else
+// :rb#       Get rotator backlash amount in steps
+//            Return: n#
+        if (command[1] == 'b' && parameter[0] == 0) { sprintf(reply,"%ld",(long)rot.getBacklash()); boolReply=false; } else
+// :rb[n]#
+//            Set rotator backlash amount in steps
 //            Returns: 0 on failure
 //                     1 on success
-      if (command[1] == 'B') { if (dmsToDouble(&f1,&parameter[0],true,PM_HIGH)) rot.setBacklash(f*f1); else commandError=CE_PARAM_FORM; } else
+      if (command[1] == 'b') { if (atoi2((char*)&parameter[0],&i)) { if (!rot.setBacklash(i)) commandError=CE_PARAM_RANGE; } else commandError=CE_PARAM_FORM; } else
 // :rF#       Reset rotator at the home position
 //            Returns: Nothing
       if (command[1] == 'F' && parameter[0] == 0) { rot.reset(); boolReply=false; } else
@@ -1609,7 +1628,7 @@ void processCommands() {
       if (command[1] == 'S') {
         if (parameter[0] == '-') f=-1.0; else f=1.0;
         if (parameter[0] == '+' || parameter[0] == '-') i1=1; else i1=0;
-        if (dmsToDouble(&f1,&parameter[i1],true,PM_HIGH)) rot.setTarget(f*f1); else commandError=CE_PARAM_FORM;
+        if (dmsToDouble(&f1,(char *)&parameter[i1],false)) rot.setTarget(f*f1); else commandError=CE_PARAM_FORM;
       } else commandError=CE_CMD_UNKNOWN;
      } else
 #endif
@@ -2072,14 +2091,16 @@ void processCommands() {
         if (command[1] == 'R') { siderealInterval=masterSiderealInterval; boolReply=false; } else                  // reset master sidereal clock interval
         if (command[1] == 'K') { setTrackingRate(0.99953004401); rateCompensation=RC_NONE; boolReply=false; } else // king tracking rate 60.136Hz
         if (command[1] == 'e') {
-          if (!isSlewing() && !isHoming() && !isParked()) {
+          if (isParked()) commandError=CE_PARKED; else
+          if (trackingState == TrackingMoveTo || trackingSyncInProgress() || isHoming()) commandError=CE_MOUNT_IN_MOTION; else
+          {
             initGeneralError();
             trackingState=TrackingSidereal;
             enableStepperDrivers();
-          } else commandError=CE_MOUNT_IN_MOTION;
+          }
         } else
         if (command[1] == 'd') {
-          if (!isSlewing() && !isHoming()) trackingState=TrackingNone; else commandError=CE_MOUNT_IN_MOTION;
+          if (trackingState == TrackingMoveTo || trackingSyncInProgress() || isHoming()) commandError=CE_MOUNT_IN_MOTION; else trackingState=TrackingNone;
         } else
           commandError=CE_CMD_UNKNOWN;
 
