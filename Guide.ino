@@ -105,7 +105,7 @@ void guide() {
 bool lastGuidePulseGuideAxis1 = false;
 bool lastGuidePulseGuideAxis2 = false;
 bool isPulseGuiding() {
-  if (guideDirAxis1 && lastGuidePulseGuideAxis1 || guideDirAxis2 && lastGuidePulseGuideAxis2) return true; else return false;
+  if ((guideDirAxis1 && lastGuidePulseGuideAxis1) || (guideDirAxis2 && lastGuidePulseGuideAxis2)) return true; else return false;
 }
 
 // returns true if rapid movement is happening
