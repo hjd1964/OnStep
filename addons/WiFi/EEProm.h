@@ -1,6 +1,8 @@
 // -----------------------------------------------------------------------------------
 // EEPROM related functions 
 
+#pragma once
+
 // write int numbers into EEPROM at position i (2 bytes)
 void EEPROM_writeInt(int i,int j) {
   uint8_t *k = (uint8_t*)&j;

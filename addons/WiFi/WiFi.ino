@@ -54,6 +54,7 @@
   #include <ESP8266WiFiAP.h>
 #endif
 #include <EEPROM.h>
+#include "EEProm.h"
 
 #define DEBUG_OFF   // Turn _ON to allow web and cmd channel servers to startup without OnStep (Serial port for debug at 115200 baud)
 
@@ -184,14 +185,16 @@ void setup(void){
     EEPROM_writeInt(12,(int)cmdTimeout);
 
 #if ENCODERS == ON
-    EEPROM_writeLong(600,Axis1EncDiffLimit);
-    EEPROM_writeLong(604,Axis2EncDiffLimit);
+    EEPROM_writeLong(600,Axis1EncDiffTo);
+    EEPROM_writeLong(604,Axis2EncDiffTo);
     EEPROM_writeLong(608,20);  // enc short term average samples
     EEPROM_writeLong(612,200); // enc long term average samples
     EEPROM_writeLong(616,0);   // enc rate comp
     EEPROM_writeLong(624,1);   // intpol phase
     EEPROM_writeLong(628,0);   // intpol mag
     EEPROM_writeLong(632,10);  // prop
+    EEPROM_writeLong(650,0);   // absolute Encoder Axis1 zero
+    EEPROM_writeLong(654,0);   // absolute Encoder Axis2 zero
 #endif
 
     EEPROM_writeString(100,wifi_sta_ssid);
@@ -218,8 +221,8 @@ void setup(void){
     if (cmdTimeout > 100) cmdTimeout=30;
 
 #if ENCODERS == ON
-    Axis1EncDiffLimit=EEPROM_readLong(600);
-    Axis2EncDiffLimit=EEPROM_readLong(604);
+    Axis1EncDiffTo=EEPROM_readLong(600);
+    Axis2EncDiffTo=EEPROM_readLong(604);
 #if AXIS1_ENC_RATE_CONTROL == ON
     Axis1EncStaSamples=EEPROM_readLong(608);
     Axis1EncLtaSamples=EEPROM_readLong(612);

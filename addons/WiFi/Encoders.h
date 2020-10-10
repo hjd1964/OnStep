@@ -18,11 +18,20 @@
 #else
   bool encAutoSync=false;
 #endif
-long Axis1EncDiffLimit=AXIS1_ENC_DIFF_LIMIT;
-long Axis2EncDiffLimit=AXIS2_ENC_DIFF_LIMIT;
+long Axis1EncDiffTo=AXIS1_ENC_DIFF_LIMIT_TO;
+long Axis1EncDiffFrom=AXIS1_ENC_DIFF_LIMIT_FROM;
+long Axis1EncDiffAbs=0;
+long Axis2EncDiffTo=AXIS2_ENC_DIFF_LIMIT_TO;
+long Axis2EncDiffFrom=AXIS2_ENC_DIFF_LIMIT_FROM;
+long Axis2EncDiffAbs=0;
 
 // encoder position
 volatile int32_t __p1,__p2;
+
+// bring in support for the various encoder types
+#include "Enc_AB.h"
+#include "Enc_CwCcw.h"
+#include "Enc_BiSS_C_BC.h"
 
 // encoder polling rate in seconds, default=2.0
 #define POLLING_RATE 2.0
@@ -54,20 +63,16 @@ volatile int32_t __p1,__p2;
 #if defined(ESP8266) || defined(ESP32)
   volatile uint32_t clocksPerTickMin=(double)usPerTick*(double)ESP.getCpuFreqMHz()*MIN_ENC_PERIOD;
   volatile uint32_t clocksPerTickMax=(double)usPerTick*(double)ESP.getCpuFreqMHz()*MAX_ENC_PERIOD;
-#elif defined(__MK20DX256__)
-  volatile uint32_t clocksPerTickMin=(double)usPerTick*(double)(F_CPU/1000000L)*MIN_ENC_PERIOD;
-  volatile uint32_t clocksPerTickMax=(double)usPerTick*(double)(F_CPU/1000000L)*MAX_ENC_PERIOD;
-#else
-  volatile uint32_t clocksPerTickMin=(double)usPerTick*MIN_ENC_PERIOD;
-  volatile uint32_t clocksPerTickMax=(double)usPerTick*MAX_ENC_PERIOD;
-#endif
-#if defined(ESP8266) || defined(ESP32)
   #define GetClockCount ESP.getCycleCount()
   #define ClockCountToMicros ((uint32_t)ESP.getCpuFreqMHz())
 #elif defined(__MK20DX256__)
+  volatile uint32_t clocksPerTickMin=(double)usPerTick*(double)(F_CPU/1000000L)*MIN_ENC_PERIOD;
+  volatile uint32_t clocksPerTickMax=(double)usPerTick*(double)(F_CPU/1000000L)*MAX_ENC_PERIOD;
   #define GetClockCount ARM_DWT_CYCCNT
   #define ClockCountToMicros (F_CPU/1000000L)
 #else
+  volatile uint32_t clocksPerTickMin=(double)usPerTick*MIN_ENC_PERIOD;
+  volatile uint32_t clocksPerTickMax=(double)usPerTick*MAX_ENC_PERIOD;
   #define GetClockCount micros()
   #define ClockCountToMicros (1L)
 #endif
@@ -107,203 +112,18 @@ volatile int32_t __p1,__p2;
 #endif
 
 // ----------------------------------------------------------------------------------------------------------------
-// this is for Quadrature A/B type encoders (library based)
-#if AXIS1_ENC_RATE_CONTROL != ON && (AXIS1_ENC == AB || AXIS2_ENC == AB)
-  #include <Encoder.h> // from https://github.com/PaulStoffregen/Encoder 
-#if AXIS1_ENC == AB
-  Encoder axis1Pos(AXIS1_ENC_A_PIN,AXIS1_ENC_B_PIN);
-#endif
-#if AXIS2_ENC == AB
-  Encoder axis2Pos(AXIS2_ENC_A_PIN,AXIS2_ENC_B_PIN);
-#endif
-#endif
-// ----------------------------------------------------------------------------------------------------------------
-
-// ----------------------------------------------------------------------------------------------------------------
-// support for local encoder ISR routines
-#if AXIS1_ENC_RATE_CONTROL == ON
-static unsigned long lastLogRate=0;
-bool fastMotion() { return Telapsed<clocksPerTickMin; }
-bool slowMotion() { return (millis()-lastLogRate)>msPerTickMax; }
-
-// this ISR function times the arrival of pulses from the RA axis encoder
-void ICACHE_RAM_ATTR __logRate() {
-  lastLogRate=millis();
-#if AXIS1_ENC_BIN_AVG > 0
-  int i=abs(__p1)%AXIS1_ENC_BIN_AVG;
-  uint32_t T0us=T0/ClockCountToMicros;
-  uint32_t Te=T0us-T1Bins[i]; T1Bins[i]=T0us;
-  if ((Te>usPerBinTickMin) && (Te<usPerBinTickMax))
-  {
-    StaBins[i]=((StaBins[i]*(Axis1EncStaSamples-1))+Te)/Axis1EncStaSamples;
-    LtaBins[i]=((LtaBins[i]*(Axis1EncLtaSamples-1))+Te)/Axis1EncLtaSamples;
-  }
-#else
-  uint32_t Te=Telapsed/ClockCountToMicros;
-  Tsta=((Tsta*(Axis1EncStaSamples-1))+Te)/Axis1EncStaSamples;
-  Tlta=((Tlta*(Axis1EncLtaSamples-1))+Te)/Axis1EncLtaSamples;
-#endif
-}
-#endif
-// ----------------------------------------------------------------------------------------------------------------
-
-// ----------------------------------------------------------------------------------------------------------------
-// ISR to read Quadrature A/B type encoders
-//                 ______        ______       
-//         A _____|      |______|      |______ A
-// neg <--      ______        ______        __    --> pos
-//         B __|      |______|      |______|   B
-
-#if AXIS1_ENC_RATE_CONTROL == ON && (AXIS1_ENC == AB || AXIS2_ENC == AB)
-  volatile int16_t __aPin1,__bPin1;
-  volatile bool __a_set1=false;
-  volatile bool __b_set1=false;
-  void ICACHE_RAM_ATTR __a1() {
-#ifdef __MK20DX256__
-    __a_set1 = digitalReadFast(__aPin1) == HIGH;
-#else
-    __a_set1 = digitalRead(__aPin1) == HIGH;
-#endif
-    if (__a_set1 != __b_set1) __p1--; else __p1++;
-#if AXIS1_ENC_RATE_CONTROL == ON
-    T0=GetClockCount; Telapsed=(T0-T1); T1=T0;
-    if (Telapsed>clocksPerTickMin) __logRate();
-#endif
-  }
-  void ICACHE_RAM_ATTR __b1() { 
-#ifdef __MK20DX256__
-    __b_set1 = digitalReadFast(__bPin1) == HIGH;
-#else
-    __b_set1 = digitalRead(__bPin1) == HIGH;
-#endif
-    if (__a_set1 == __b_set1) __p1--; else __p1++;
-#if AXIS1_ENC_RATE_CONTROL == ON
-    T0=GetClockCount; Telapsed=(T0-T1); T1=T0;
-    if (Telapsed>clocksPerTickMin) __logRate();
-#endif
-  }
-
-  volatile int16_t __aPin2,__bPin2;
-  volatile bool __a_set2=false;
-  volatile bool __b_set2=false;
-  void ICACHE_RAM_ATTR __a2() {
-    __a_set2 = digitalRead(__aPin2) == HIGH;
-    if (__a_set2 != __b_set2) __p2--; else __p2++;
-  }
-  void ICACHE_RAM_ATTR __b2() {
-    __b_set2 = digitalRead(__bPin2) == HIGH;
-    if (__a_set2 == __b_set2) __p2--; else __p2++;
-  }
-  
-  class ABEncoder {
-    public:
-      ABEncoder(int16_t aPin, int16_t bPin, int16_t axis) {
-        _axis=axis;
-        pinMode(aPin,INPUT_PULLUP);
-        pinMode(bPin,INPUT_PULLUP);
-        if (_axis==1) {
-          __aPin1=aPin; __bPin1=bPin;
-          attachInterrupt(digitalPinToInterrupt(aPin),__a1,CHANGE);
-          attachInterrupt(digitalPinToInterrupt(bPin),__b1,CHANGE);
-        }
-        if (_axis==2) {
-          __aPin2=aPin; __bPin2=bPin;
-          attachInterrupt(digitalPinToInterrupt(aPin),__a2,CHANGE);
-          attachInterrupt(digitalPinToInterrupt(bPin),__b2,CHANGE);
-        }
-      }
-      int32_t read() {
-        int32_t v=0;
-        if (_axis==1) { noInterrupts(); v=__p1; interrupts(); }
-        if (_axis==2) { noInterrupts(); v=__p2; interrupts(); }
-        return v;
-      }
-      void write(int32_t v) {
-        if (_axis==1) { noInterrupts(); __p1=v; interrupts(); }
-        if (_axis==2) { noInterrupts(); __p2=v; interrupts(); }
-      }
-    private:
-      int16_t _axis;
-  };
-#if AXIS1_ENC == AB
-  ABEncoder axis1Pos(AXIS1_ENC_A_PIN,AXIS1_ENC_B_PIN,1);
-#endif
-#if AXIS2_ENC == AB
-  ABEncoder axis2Pos(AXIS2_ENC_A_PIN,AXIS2_ENC_B_PIN,2);
-#endif
-#endif
-// ----------------------------------------------------------------------------------------------------------------
-
-// ----------------------------------------------------------------------------------------------------------------
-// ISR to read CW/CCW type encoders
-#if AXIS1_ENC == CWCCW || AXIS2_ENC == CWCCW
-  void ICACHE_RAM_ATTR __cw1() {
-    __p1++;
-#if AXIS1_ENC_RATE_CONTROL == ON
-    T0=GetClockCount; Telapsed=(T0-T1); T1=T0;
-    if (Telapsed>clocksPerTickMin) __logRate();
-#endif
-  }
-  void ICACHE_RAM_ATTR __ccw1() {
-    __p1--;
-#if AXIS1_ENC_RATE_CONTROL == ON
-    T0=GetClockCount; Telapsed=(T0-T1); T1=T0;
-    if (Telapsed>clocksPerTickMin) __logRate();
-#endif
-  }
-
-  void ICACHE_RAM_ATTR __cw2() { __p2++; }
-  void ICACHE_RAM_ATTR __ccw2() { __p2--; }
-
-  class CwCcwEncoder {
-    public:
-      CwCcwEncoder(int16_t cwPin, int16_t ccwPin, int16_t axis) {
-        _cwPin=cwPin;
-        _ccwPin=ccwPin;
-        _axis=axis;
-        pinMode(_cwPin,INPUT_PULLUP);
-        pinMode(_ccwPin,INPUT_PULLUP);
-        if (_axis==1) {
-          attachInterrupt(digitalPinToInterrupt(_cwPin),__cw1,CHANGE);
-          attachInterrupt(digitalPinToInterrupt(_ccwPin),__ccw1,CHANGE);
-        }
-        if (_axis==2) {
-          attachInterrupt(digitalPinToInterrupt(_cwPin),__cw2,CHANGE);
-          attachInterrupt(digitalPinToInterrupt(_ccwPin),__ccw2,CHANGE);
-        }
-      }
-      int32_t read() {
-        int32_t v=0;
-        if (_axis==1) { noInterrupts(); v=__p1; interrupts(); }
-        if (_axis==2) { noInterrupts(); v=__p2; interrupts(); }
-        return v;
-      }
-      void write(int32_t v) {
-        if (_axis==1) { noInterrupts(); __p1=v; interrupts(); }
-        if (_axis==2) { noInterrupts(); __p2=v; interrupts(); }
-      }
-    private:
-      int16_t _cwPin;
-      int16_t _ccwPin;
-      int16_t _axis;
-  };
-#if AXIS1_ENC == CWCCW
-  CwCcwEncoder axis1Pos(AXIS1_ENC_A_PIN,AXIS1_ENC_B_PIN,1);
-#endif
-#if AXIS2_ENC == CWCCW
-  CwCcwEncoder axis2Pos(AXIS2_ENC_A_PIN,AXIS2_ENC_B_PIN,2);
-#endif
-#endif
-// ----------------------------------------------------------------------------------------------------------------
-
-// ----------------------------------------------------------------------------------------------------------------
 // background process position/rate control for encoders 
 class Encoders {
   public:
     void init() {
     }
+
+    // automatically sync the encoders from OnStep's position when at home or parked
     void syncFromOnStep() {
-      // automatically sync the encoders to OnStep's position when at home or parked
+      // don't sync if the Encoders vs. OnStep disagree by too much
+      if (Axis1EncDiffFrom != OFF && fabs(_osAxis1-_enAxis1) > (double)(Axis1EncDiffFrom/3600.0)) return;
+      if (Axis2EncDiffFrom != OFF && fabs(_osAxis1-_enAxis1) > (double)(Axis1EncDiffFrom/3600.0)) return;
+        
 #if AXIS1_ENC_REVERSE == ON
         axis1Pos.write(-_osAxis1*(double)AXIS1_ENC_TICKS_DEG);
 #else
@@ -315,6 +135,19 @@ class Encoders {
         axis2Pos.write(_osAxis2*(double)AXIS2_ENC_TICKS_DEG);
 #endif
     }
+    
+    // zero absolute encoders from OnStep's position
+#ifdef ENC_HAS_ABSOLUTE
+    void zeroFromOnStep() {
+  #ifdef ENC_HAS_ABSOLUTE_AXIS1
+      axis1Pos.write(_osAxis1*(double)AXIS1_ENC_TICKS_DEG);
+  #endif
+  #ifdef ENC_HAS_ABSOLUTE_AXIS2
+      axis2Pos.write(_osAxis2*(double)AXIS2_ENC_TICKS_DEG);
+  #endif
+    }
+#endif
+    
     void syncToOnStep() {
         char s[22];
         // automatically sync OnStep to the encoders' position
@@ -355,8 +188,8 @@ class Encoders {
             if (mountStatus.syncToEncodersOnly()) { Ser.print(":SX43,1#"); Ser.readBytes(s,1); }
           } else
             if (!mountStatus.slewing() && !mountStatus.guiding()) {
-              if ((fabs(_osAxis1-_enAxis1)>(double)(Axis1EncDiffLimit/3600.0)) ||
-                  (fabs(_osAxis2-_enAxis2)>(double)(Axis2EncDiffLimit/3600.0))) syncToOnStep();
+              if ((fabs(_osAxis1-_enAxis1)>(double)(Axis1EncDiffTo/3600.0)) ||
+                  (fabs(_osAxis2-_enAxis2)>(double)(Axis2EncDiffTo/3600.0))) syncToOnStep();
             }
         }
 

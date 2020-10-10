@@ -39,20 +39,24 @@
 #define STANDARD_COMMAND_CHANNEL       ON //     ON, Enable standard cmd channel port 9999 use w/Android App & ASCOM driver.  Infreq
 #define PERSISTENT_COMMAND_CHANNEL     ON //     ON, Enable persistent cmd channel port 9998 use w/INDI? & Stellarium Mobile. Infreq
                                           //         Experimental, possibly causes problems w/standard cmd channel if enabled.
-#define MONITOR_GUIDE_COMMANDS        OFF //    OFF, Allow error reporting to also monitor guide commands.                    Infreq
 
 // ENCODER SUPPORT -----------------------------------------------------------------------------------------------------------------
-#define AXIS1_ENC                     OFF //    OFF, CWCCW, AB. RA/Azm Axis on Pin 5 (A or CW) and Pin 6 (B or CCW,)          Option
 #define AXIS1_ENC_REVERSE             OFF //    OFF, ON to reverse the count direction.                                       Adjust
 #define AXIS1_ENC_TICKS_DEG      22.22222 // 22.222, n, (ticks/degree.) Encoder ticks per degree.                             Adjust
-#define AXIS1_ENC_DIFF_LIMIT          300 //    300, n, (arcsec.) Maximum difference between encoder and OnStep before sync.  Adjust
+#define AXIS1_ENC                     OFF //    OFF, CWCCW, AB, BC_BISSC. RA/Azm Axis on Pin 5 (A/CW/MA) & Pin 6 (B/CCW/SLO,) Option
+#define AXIS1_ENC_DIFF_LIMIT_TO       300 //    300, n, (arcsec.) Minimum diff. between encoder/OnStep for sync. to OnStep    Adjust
+#define AXIS1_ENC_DIFF_LIMIT_FROM     OFF //    OFF, n, (arcsec.) Maximum diff. between encoder/OnStep for sync. from OnStep  Adjust
+                                          //         for absolute encoders, leave off when setting Zero, then enable
 
-#define AXIS2_ENC                     OFF //    OFF, CWCCW, AB. Dec/Alt Axis on Pin 7 (A or CW) and Pin 8 (B or CCW)          Option
 #define AXIS2_ENC_REVERSE             OFF //    OFF, ON to reverse the count direction.                                       Option
 #define AXIS2_ENC_TICKS_DEG      22.22222 // 22.222, n, (ticks/degree.) Encoder ticks per degree.                             Adjust
 #define AXIS2_ENC_DIFF_LIMIT          300 //    300, n, (arcsec.) Maximum difference between encoder and OnStep before sync.  Adjust
                                                      
 #define ENCODERS_AUTO_SYNC_DEFAULT    OFF //    OFF, ON To start with auto sync of OnStep to encoder values enabled.          Adjust
+#define AXIS2_ENC                     OFF //    OFF, CWCCW, AB, BC_BISSC. Dec/Alt Axis on Pin 7 (A/CW/MA) & Pin 8 (B/CCW/SLO) Option
+#define AXIS2_ENC_DIFF_LIMIT_TO       300 //    300, n, (arcsec.) Minimum diff. between encoder/OnStep for sync. to OnStep    Adjust
+#define AXIS2_ENC_DIFF_LIMIT_FROM     OFF //    OFF, n, (arcsec.) Maximum diff. between encoder/OnStep for sync. from OnStep  Adjust
+                                          //         for absolute encoders, leave off when setting Zero, then enable
 
 // ENCODER RATE CONTROL
 #define AXIS1_ENC_RATE_CONTROL        OFF //    OFF, ON Rate control for RA high resolution encoder. EQ mounts only.          Infreq
