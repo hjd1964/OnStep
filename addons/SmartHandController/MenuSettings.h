@@ -298,7 +298,7 @@ void SmartHandController::menuFocuser1()
   current_selection_L2 = 1;
   while (current_selection_L2 != 0)
   {
-    const char *string_list_SiteL2 = L_FOC_RET_HOME "\n" L_FOC_AT_HOME "\n" L_FOC_TC "\n" L_FOC_TC_COEF;
+    const char *string_list_SiteL2 = L_FOC_RET_HOME "\n" L_FOC_AT_HOME "\n" L_FOC_BACKLASH "\n" L_FOC_TC "\n" L_FOC_TC_COEF "\n" L_FOC_TC_DEADBAND;
     
     if (telInfo.hasFocuser2())
       current_selection_L2 = display->UserInterfaceSelectionList(&buttonPad, L_FOCUSER " 1", current_selection_L2, string_list_SiteL2);
@@ -317,6 +317,9 @@ void SmartHandController::menuFocuser1()
       }
       break;
     case 3:
+      menuSetFocBacklash(foc);
+      break;
+    case 4:
       if (display->UserInterfaceInputValueBoolean(&buttonPad, L_FOC_TC, &isOk)) {
         if (isOk)
         {
@@ -330,8 +333,11 @@ void SmartHandController::menuFocuser1()
         }
       }
       break;
-    case 4:
+    case 5:
       menuSetFocTCCoef(foc);
+      break;
+    case 6:
+      menuSetFocTCDeadband(foc);
       break;
     }
   }
@@ -342,7 +348,7 @@ void SmartHandController::menuFocuser2()
   current_selection_L2 = 1;
   while (current_selection_L2 != 0)
   {
-    const char *string_list_SiteL2 = L_FOC_RET_HOME "\n" L_FOC_AT_HOME "\n" L_FOC_TC "\n" L_FOC_TC_COEF;
+    const char *string_list_SiteL2 = L_FOC_RET_HOME "\n" L_FOC_AT_HOME "\n" L_FOC_BACKLASH "\n" L_FOC_TC "\n" L_FOC_TC_COEF "\n" L_FOC_TC_DEADBAND;
     current_selection_L2 = display->UserInterfaceSelectionList(&buttonPad, L_FOCUSER " 2", current_selection_L2, string_list_SiteL2);
     bool isOk=false;
     uint8_t foc = 2;
@@ -357,6 +363,9 @@ void SmartHandController::menuFocuser2()
       }
     break;
     case 3:
+      menuSetFocBacklash(foc);
+      break;
+    case 4:
       if (display->UserInterfaceInputValueBoolean(&buttonPad, L_FOC_TC, &isOk)) {
         if (isOk)
         {
@@ -370,11 +379,30 @@ void SmartHandController::menuFocuser2()
         }
       }
       break;
-    case 4:
+    case 5:
       menuSetFocTCCoef(foc);
+      break;
+    case 6:
+      menuSetFocTCDeadband(foc);
       break;
     }
   }
+}
+
+bool SmartHandController::menuSetFocBacklash(uint8_t &foc)
+{
+  float backlash;
+  if (!DisplayMessageLX200(readFocBacklashLX200(foc, backlash))) return false;
+  char text[20];
+  if (foc == 1 && !telInfo.hasFocuser2())
+    sprintf(text, "Focuser " L_FOC_BACKLASH);
+  else
+    sprintf(text, "Foc.%u " L_FOC_BACKLASH, foc);
+  if (display->UserInterfaceInputValueFloat(&buttonPad, text, "", &backlash, 0, 999, 3, 0, " " L_FOC_BL_UNITS))
+  {
+    return DisplayMessageLX200(writeFocBacklashLX200(foc, backlash),false);
+  }
+  return true;
 }
 
 bool SmartHandController::menuSetFocTCCoef(uint8_t &foc)
@@ -389,6 +417,22 @@ bool SmartHandController::menuSetFocTCCoef(uint8_t &foc)
   if (display->UserInterfaceInputValueFloat(&buttonPad, text, "", &tccoef, -999, 999, 4, 0, " " L_MICRON_PER_C))
   {
     return DisplayMessageLX200(writeFocTCCoefLX200(foc, tccoef),false);
+  }
+  return true;
+}
+
+bool SmartHandController::menuSetFocTCDeadband(uint8_t &foc)
+{
+  float deadband;
+  if (!DisplayMessageLX200(readFocTCDeadbandLX200(foc, deadband))) return false;
+  char text[20];
+  if (foc == 1 && !telInfo.hasFocuser2())
+    sprintf(text, "Focuser " L_FOC_TC_DEADBAND);
+  else
+    sprintf(text, "Foc.%u " L_FOC_TC_DEADBAND, foc);
+  if (display->UserInterfaceInputValueFloat(&buttonPad, text, "", &deadband, 1, 999, 3, 0, " " L_FOC_TC_DB_UNITS))
+  {
+    return DisplayMessageLX200(writeFocTCDeadbandLX200(foc, deadband),false);
   }
   return true;
 }
