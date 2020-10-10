@@ -34,6 +34,9 @@
       void setZero() {
         if (_axis == 1) EEPROM_writeLong(650,_offset);
         if (_axis == 2) EEPROM_writeLong(654,_offset);
+#ifndef EEPROM_COMMIT_DISABLED
+        EEPROM.commit();
+#endif
       }
     private:
       uint32_t _position=0;
