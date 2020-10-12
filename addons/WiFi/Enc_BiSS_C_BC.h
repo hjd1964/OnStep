@@ -4,7 +4,10 @@
 // tested and known to work with Broadcom AS37-H39B-B
 // designed according protocol description found in as38-H39e-b-an100.pdf
 
+#include <EEPROM.h>
 #include "EEProm.h"
+
+#define INT32_MAX 2147483647
 
 #if AXIS1_ENC == BC_BISSC || AXIS2_ENC == BC_BISSC
   #define ENC_HAS_ABSOLUTE
@@ -24,7 +27,7 @@
       int32_t read() {
         if (readEnc(_position)) {
           return (int32_t)_position + _offset;
-        }
+        } else return INT32_MAX;
       }
       void write(int32_t v) {
         if (readEnc(_position)) {
@@ -50,7 +53,6 @@
         bool foundStart=false;
         bool foundCds=false;
       
-        int count=0;
         uint8_t  encErr = 0;
         uint8_t  encWrn = 0;
         uint8_t  encCrc = 0;
