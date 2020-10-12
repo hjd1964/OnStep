@@ -237,6 +237,7 @@
 // general settings
 #define L_ENC_SYNC_TO_ENC "Syncronisiere OnStep zu Encodern"
 #define L_ENC_SYNC_TO_ONS "Syncronisiere Encoder zu OnStep"
+#define L_ENC_ZERO_TO_ONS "Stellen Sie Absolute Encoder Zero auf OnStep"
 #define L_ENC_AUTO_SYNC "Synchronisiere automatisch OnStep zu Encodern"
 #define L_ENC_MAX_ANGLE "Maximale Winkeldistanz (Encoder verglichen mit OnStep)"
 #define L_ENC_MAX_ANGLE_AXIS1 "(Axis1, Bogensekunden 0 to 9999)"

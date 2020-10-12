@@ -59,6 +59,14 @@
 
 #define DEBUG_OFF   // Turn _ON to allow Ethernet startup without OnStep (Serial port for debug at 9600 baud)
 
+#define EEPROM_COMMIT_DISABLED
+#if defined(_mk20dx128_h_) || defined(__MK20DX128__) || defined(__MK20DX256__)
+  #include <EEPROM.h>
+  #include "EEProm.h"
+#else
+  #define EEPROM_DISABLED
+#endif
+
 #include <Ethernet.h>
 #include "CmdServer.h"
 
@@ -70,7 +78,7 @@
 
 #include "WebServer.h"
 
-// The settings below are for initialization only, afterward they are stored and recalled from EEPROM and must
+// The settings in NV (EEPROM) are for initialization only, afterward they are stored and recalled from EEPROM and must
 // be changed in the web interface OR with a reset (for initialization again) as described in the Config.h comments
 #if SERIAL_BAUD<=28800
   #define TIMEOUT_WEB 60
@@ -100,13 +108,6 @@ Encoders encoders;
 WebServer server;
 CmdServer cmdSvr;
 
-#if defined(_mk20dx128_h_) || defined(__MK20DX128__) || defined(__MK20DX256__)
-  #include <EEPROM.h>
-#else
-  #define EEPROM_DISABLED
-#endif
-#define EEPROM_COMMIT_DISABLED
-
 void handleNotFound(EthernetClient *client) {
   String message = "File Not Found\n\n";
   client->print(message);
@@ -127,19 +128,21 @@ void setup(void){
     EEPROM_writeInt(0,8267);
     EEPROM_writeInt(2,0);
 #if ENCODERS == ON
-    EEPROM_writeLong(600,Axis1EncDiffLimit);
-    EEPROM_writeLong(604,Axis2EncDiffLimit);
+    EEPROM_writeLong(600,Axis1EncDiffTo);
+    EEPROM_writeLong(604,Axis2EncDiffTo);
     EEPROM_writeLong(608,20);  // enc short term average samples
     EEPROM_writeLong(612,200); // enc long term average samples
     EEPROM_writeLong(616,0);   // enc rate comp
     EEPROM_writeLong(624,1);   // intpol phase
     EEPROM_writeLong(628,0);   // intpol mag
     EEPROM_writeLong(632,10);  // prop
+    EEPROM_writeLong(650,0);   // absolute Encoder Axis1 zero
+    EEPROM_writeLong(654,0);   // absolute Encoder Axis2 zero
 #endif
   } else {  
 #if ENCODERS == ON
-    Axis1EncDiffLimit=EEPROM_readLong(600);
-    Axis2EncDiffLimit=EEPROM_readLong(604);
+    Axis1EncDiffTo=EEPROM_readLong(600);
+    Axis2EncDiffTo=EEPROM_readLong(604);
 #if AXIS1_ENC_RATE_CONTROL == ON
     Axis1EncStaSamples=EEPROM_readLong(608);
     Axis1EncLtaSamples=EEPROM_readLong(612);

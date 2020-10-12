@@ -41,16 +41,18 @@ IPAddress subnet(255, 255, 255, 0);
 #define DISPLAY_ADVANCED_CHARS         ON //     ON, For standard "RA/Dec" instead of symbols.                                Infreq
 
 // ENCODER SUPPORT -----------------------------------------------------------------------------------------------------------------
-#define AXIS1_ENC                     OFF //    OFF, CWCCW, AB. RA/Azm Axis on Pin 5 (A or CW) and Pin 6 (B or CCW,)          Option
+#define AXIS1_ENC                BC_BISSC //    OFF, CWCCW, AB, BC_BISSC. Dec/Alt Axis on Pin 7 (A/CW/MA) & Pin 8 (B/CCW/SLO) Option
 #define AXIS1_ENC_REVERSE             OFF //    OFF, ON to reverse the count direction.                                       Adjust
 #define AXIS1_ENC_TICKS_DEG      22.22222 // 22.222, n, (ticks/degree.) Encoder ticks per degree.                             Adjust
-#define AXIS1_ENC_DIFF_LIMIT          300 //    300, n, (arcsec.) Maximum difference between encoder and OnStep before sync.  Adjust
+#define AXIS1_ENC_DIFF_LIMIT_TO       300 //    300, n, (arcsec.) Minimum diff. between encoder/OnStep for sync. to OnStep    Adjust
+#define AXIS1_ENC_DIFF_LIMIT_FROM     OFF //    OFF, n, (arcsec.) Maximum diff. between encoder/OnStep for sync. from OnStep  Adjust
 
-#define AXIS2_ENC                     OFF //    OFF, CWCCW, AB. Dec/Alt Axis on Pin 7 (A or CW) and Pin 8 (B or CCW)          Option
+#define AXIS2_ENC                BC_BISSC //    OFF, CWCCW, AB, BC_BISSC. Dec/Alt Axis on Pin 7 (A/CW/MA) & Pin 8 (B/CCW/SLO) Option
 #define AXIS2_ENC_REVERSE             OFF //    OFF, ON to reverse the count direction.                                       Option
 #define AXIS2_ENC_TICKS_DEG      22.22222 // 22.222, n, (ticks/degree.) Encoder ticks per degree.                             Adjust
-#define AXIS2_ENC_DIFF_LIMIT          300 //    300, n, (arcsec.) Maximum difference between encoder and OnStep before sync.  Adjust
-                                                     
+#define AXIS2_ENC_DIFF_LIMIT_TO       300 //    300, n, (arcsec.) Minimum diff. between encoder/OnStep for sync. to OnStep    Adjust
+#define AXIS2_ENC_DIFF_LIMIT_FROM     OFF //    OFF, n, (arcsec.) Maximum diff. between encoder/OnStep for sync. from OnStep  Adjust
+
 #define ENCODERS_AUTO_SYNC_DEFAULT    OFF //    OFF, ON To start with auto sync of OnStep to encoder values enabled.          Adjust
 
 // ENCODER RATE CONTROL

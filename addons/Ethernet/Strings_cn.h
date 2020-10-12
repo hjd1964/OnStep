@@ -229,6 +229,7 @@
 // general settings
 #define L_ENC_SYNC_TO_ENC "将OnStep同步到编码器"
 #define L_ENC_SYNC_TO_ONS "将编码器同步到OnStep"
+#define L_ENC_ZERO_TO_ONS "将绝对编码器零设置为OnStep"
 #define L_ENC_AUTO_SYNC "将OnStep自动同步到编码器"
 #define L_ENC_MAX_ANGLE "最大角度距离（编码器与OnStep相比）"
 #define L_ENC_MAX_ANGLE_AXIS1 "（轴1，弧秒0到9999）"

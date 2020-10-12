@@ -62,9 +62,16 @@ L_ENC_SYNC_TO_ENC ": <br />"
 const char html_syncEncodersNow[] PROGMEM =
 L_ENC_SYNC_TO_ONS ": <br />"
 "<button name='ms' value='enc' type='submit'>" L_ENC_SYNC_NOW "</button>"
-"</form><br />";
+"</form>";
 
-const char html_encEn1[] PROGMEM =
+#ifdef ENC_HAS_ABSOLUTE
+const char html_zeroEncodersNow[] PROGMEM =
+L_ENC_ZERO_TO_ONS ": <br />"
+"<button name='ms' value='zro' type='submit'>" L_ENC_SYNC_NOW "</button>"
+"</form>";
+#endif
+
+const char html_encEn1[] PROGMEM = "<br /><br />"
 L_ENC_AUTO_SYNC " (<span id='aste'>?</span>):<br />";
 const char html_encEn2[] PROGMEM =
 "<button type='button' onpointerdown=\"s('as','on')\" >" L_ON "</button>"
@@ -243,6 +250,9 @@ void handleEncoders() {
 
   data += FPSTR(html_syncOnStepNow);
   data += FPSTR(html_syncEncodersNow);
+#ifdef ENC_HAS_ABSOLUTE
+  data += FPSTR(html_zeroEncodersNow);
+#endif
 
   // Autosync
   data += FPSTR(html_encEn1);
@@ -252,9 +262,9 @@ void handleEncoders() {
   // Encoder sync thresholds
   sprintf_P(temp,html_encMxAxis0);
   data += temp;
-  sprintf_P(temp,html_encMxAxis1,Axis1EncDiffLimit);
+  sprintf_P(temp,html_encMxAxis1,Axis1EncDiffTo);
   data += temp;
-  sprintf_P(temp,html_encMxAxis2,Axis2EncDiffLimit);
+  sprintf_P(temp,html_encMxAxis2,Axis2EncDiffTo);
   data += temp;
   sendHtml(data);
   
@@ -400,12 +410,14 @@ void encAjaxGet() {
 void processEncodersGet() {
   boolean EEwrite=false;
   String v;
-  char temp[20]="";
   
   v=server.arg("ms");
   if (v!="") {
     if (v=="ons") encoders.syncToOnStep();
     if (v=="enc") encoders.syncFromOnStep();
+#ifdef ENC_HAS_ABSOLUTE
+    if (v=="zro") encoders.zeroFromOnStep();
+#endif
   }
 
   // Autosync
@@ -420,9 +432,9 @@ void processEncodersGet() {
   if (v!="") {
     int i;
     if ( (atoi2((char*)v.c_str(),&i)) && ((i>=0) && (i<=9999))) { 
-      Axis1EncDiffLimit=i;
+      Axis1EncDiffTo=i;
 #ifndef EEPROM_DISABLED
-      EEPROM_writeLong(600,Axis1EncDiffLimit);
+      EEPROM_writeLong(600,Axis1EncDiffTo);
 #endif
       EEwrite=true;
     }
@@ -431,9 +443,9 @@ void processEncodersGet() {
   if (v!="") {
     int i;
     if ( (atoi2((char*)v.c_str(),&i)) && ((i>=0) && (i<=9999))) { 
-      Axis2EncDiffLimit=i;
+      Axis2EncDiffTo=i;
 #ifndef EEPROM_DISABLED
-      EEPROM_writeLong(604,Axis2EncDiffLimit);
+      EEPROM_writeLong(604,Axis2EncDiffTo);
 #endif
       EEwrite=true;
     }

@@ -1,7 +1,7 @@
 // -----------------------------------------------------------------------------------
 // EEPROM related functions 
 
-#ifndef EEPROM_DISABLED
+#pragma once
 
 // write int numbers into EEPROM at position i (2 bytes)
 void EEPROM_writeInt(int i,int j) {
@@ -72,6 +72,3 @@ long EEPROM_readLong(int i) {
   EEPROM_readQuad(i,(byte*)&l);
   return l;
 }
-
-#endif
-
