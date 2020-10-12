@@ -410,7 +410,6 @@ void encAjaxGet() {
 void processEncodersGet() {
   boolean EEwrite=false;
   String v;
-  char temp[20]="";
   
   v=server.arg("ms");
   if (v!="") {
