@@ -265,7 +265,9 @@ void initWriteNvValues() {
 
     // sit here and wait until the entire nv contents are written before writing the key
     VLF("MSG: Init NV waiting for cache");
+#ifndef ESP32
     while (!nv.committed()) nv.poll();
+#endif
 
     // finally, stop the init from happening again
     nv.writeLong(EE_autoInitKey,NV_INIT_KEY);
