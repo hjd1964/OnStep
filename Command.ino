@@ -752,7 +752,7 @@ void processCommands() {
         i=0;
         if (trackingState != TrackingSidereal &&
           !(trackingState == TrackingMoveTo && lastTrackingState == TrackingSidereal)) reply[i++]='n';       // [n]ot tracking
-        if (!isSlewing())                        reply[i++]='N';                                             // [N]o slew
+        if (trackingState != TrackingMoveTo && !trackingSyncInProgress())  reply[i++]='N';                   // [N]o goto
         const char *parkStatusCh = "pIPF";       reply[i++]=parkStatusCh[parkStatus];                        // not [p]arked, parking [I]n-progress, [P]arked, Park [F]ailed
         if (pecRecorded)                         reply[i++]='R';                                             // PEC data has been [R]ecorded
         if (syncToEncodersOnly)                  reply[i++]='e';                                             // sync to [e]ncoders only
@@ -806,7 +806,7 @@ void processCommands() {
         memset(reply,(char)0b10000000,9);
         if (trackingState != TrackingSidereal &&
           !(trackingState == TrackingMoveTo && lastTrackingState == TrackingSidereal)) reply[0]|=0b10000001; // Not tracking
-        if (!isSlewing())                            reply[0]|=0b10000010;                                   // No slew
+        if (trackingState != TrackingMoveTo && !trackingSyncInProgress())  reply[0]|=0b10000010;             // No goto
         if (ppsSynced)                               reply[0]|=0b10000100;                                   // PPS sync
         if (isPulseGuiding())                        reply[0]|=0b10001000;                                   // pulse guide active
 #if MOUNT_TYPE != ALTAZM
