@@ -6,6 +6,33 @@ void initPre() {
   pinMode(14,OUTPUT); digitalWrite(14,AXIS1_DRIVER_ENABLE);
   if (Axis1_EN != -1) { pinMode(Axis1_EN,OUTPUT); digitalWrite(Axis1_EN,AXIS1_DRIVER_DISABLE); }
   if (Axis1_EN != -1) { pinMode(Axis2_EN,OUTPUT); digitalWrite(Axis1_EN,AXIS1_DRIVER_DISABLE); }
+
+  // disable DS3231 CS pin
+#if TIME_LOCATION_SOURCE == DS3234
+  pinMode(DS3234_CS_PIN,OUTPUT); digitalWrite(DS3234_CS_PIN,HIGH);
+#endif
+
+  // disable weather CS pin
+#if WEATHER == BMP280_SPI || WEATHER == BME280_SPI
+  pinMode(BME280_CS_PIN,OUTPUT); digitalWrite(BME280_CS_PIN,HIGH);
+#endif
+
+  // disable all stepper driver CS pins at startup
+#if AXIS1_DRIVER_MODEL == TMC_SPI
+  pinMode(Axis1_M2,OUTPUT); digitalWrite(Axis1_M2,HIGH);
+#endif
+#if AXIS2_DRIVER_MODEL == TMC_SPI
+  pinMode(Axis2_M2,OUTPUT); digitalWrite(Axis2_M2,HIGH);
+#endif
+#if AXIS3_DRIVER_MODEL == TMC_SPI
+  pinMode(Axis3_M2,OUTPUT); digitalWrite(Axis3_M2,HIGH);
+#endif
+#if AXIS4_DRIVER_MODEL == TMC_SPI
+  pinMode(Axis4_M2,OUTPUT); digitalWrite(Axis4_M2,HIGH);
+#endif
+#if AXIS5_DRIVER_MODEL == TMC_SPI
+  pinMode(Axis5_M2,OUTPUT); digitalWrite(Axis5_M2,HIGH);
+#endif
 }
 
 void initPins() {
