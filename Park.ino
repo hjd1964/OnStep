@@ -179,7 +179,10 @@ CommandErrors unPark(bool withTrackingOn) {
   if (!parkSaved)                       return CE_NO_PARK_POSITION_SET;
   if (parkStatus != Parked && !atHome)  return CE_NOT_PARKED;
 #if STRICT_PARKING == ON
-  if (parkStatus != Parked)             return CE_NOT_PARKED;
+  if (parkStatus != Parked) {
+    VLF("MSG: Un-Park ignored, not parked");
+    return CE_NONE;
+  }
 #endif
   if (isSlewing())                      return CE_MOUNT_IN_MOTION;
   if (faultAxis1 || faultAxis2)         return CE_SLEW_ERR_HARDWARE_FAULT;
