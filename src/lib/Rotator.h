@@ -18,6 +18,7 @@ class rotator {
       this->stepPin=stepPin;
       this->dirPin=dirPin;
       this->enPin=enPin;
+      this->nvAddress=nvAddress;
       this->maxRate=maxRate;
       this->spd=stepsPerDeg;
 
