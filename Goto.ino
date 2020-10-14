@@ -46,7 +46,8 @@ CommandErrors syncEqu(double RA, double Dec) {
 
   // validate
   CommandErrors e=validateGoto();
-  if (e != CE_NONE && e != CE_SLEW_ERR_IN_STANDBY) return e;
+  if (e == CE_SLEW_ERR_IN_STANDBY && atHome) { trackingState=TrackingSidereal; enableStepperDrivers(); e=validateGoto(); }
+  if (e != CE_NONE) return e;
   e=validateGotoCoords(HA,Dec,a);
   if (e != CE_NONE) return e;
 
@@ -58,9 +59,6 @@ CommandErrors syncEqu(double RA, double Dec) {
 #else
   Align.equToInstr(HA,Dec,&Axis1,&Axis2,getInstrPierSide());
 #endif
-
-  // just turn on tracking
-  if (atHome) { trackingState=TrackingSidereal; enableStepperDrivers(); }
 
   // west side of pier - we're in the eastern sky and the HA's are negative
   // east side of pier - we're in the western sky and the HA's are positive
@@ -232,6 +230,7 @@ CommandErrors goToEqu(double RA, double Dec) {
 
   // validate
   CommandErrors e=validateGoto();
+  if (e == CE_SLEW_ERR_IN_STANDBY && atHome && timeWasSet && dateWasSet) { trackingState=TrackingSidereal; enableStepperDrivers(); e=validateGoto(); }
 #ifndef CE_GOTO_ERR_GOTO_OFF
   if (e == CE_GOTO_ERR_GOTO) { if (!abortGoto) abortGoto=StartAbortGoto; } 
 #endif
