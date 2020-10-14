@@ -61,13 +61,13 @@
   #elif AXIS3_DRIVER_MODEL == TMC2130_VQUIET
     #undef AXIS3_DRIVER_MODEL
     #define AXIS3_DRIVER_MODEL TMC2130
-    #define AXIS3_DRIVER_SUBMODEL TMC2130
     #undef AXIS3_DRIVER_DECAY_MODE
     #define AXIS3_DRIVER_DECAY_MODE STEALTHCHOP
   #endif
   #if AXIS3_DRIVER_MODEL == TMC2130
     #undef AXIS3_DRIVER_MODEL
     #define AXIS3_DRIVER_MODEL TMC_SPI
+    #define AXIS3_DRIVER_SUBMODEL TMC2130
     #if AXIS3_DRIVER_IRUN != OFF && AXIS3_DRIVER_IHOLD == OFF
       #warning "Configuration (Config.h): AXIS3 TMC2130, use Vref=2.5V and be sure AXIS3_DRIVER_IRUN is set properly for your power supply, voltage regulator, and stepper motor limits."
     #elif AXIS3_DRIVER_IRUN != OFF || AXIS3_DRIVER_IHOLD != OFF
