@@ -186,6 +186,7 @@ CommandErrors unPark(bool withTrackingOn) {
 #endif
   if (isSlewing())                      return CE_MOUNT_IN_MOTION;
   if (faultAxis1 || faultAxis2)         return CE_SLEW_ERR_HARDWARE_FAULT;
+  if (!timeWasSet || !dateWasSet)       return CE_PARKED;
 
   VLF("MSG: Un-Parking");
 
