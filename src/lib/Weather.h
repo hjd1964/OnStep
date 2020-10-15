@@ -281,10 +281,10 @@ class weather {
       // apply a 20 sample rolling average to the temperatures, sampling once a second
       static byte p;
       if ((p++)%100 == 0) {
-        static bool firstTSample=false; if (firstTSample) { firstTSample=false; _ta=_t; }
+        static bool firstTSample=true; if (firstTSample) { firstTSample=false; _ta=_t; }
         _ta=(_ta*19.0+_t)/20.0;
   
-        static bool firstTTSample=false; if (firstTTSample) { firstTTSample=false; _tta=_tt; }
+        static bool firstTTSample=true; if (firstTTSample) { firstTTSample=false; _tta=_tt; }
         _tta=(_tta*19.0+_tt)/20.0;
       }
 
