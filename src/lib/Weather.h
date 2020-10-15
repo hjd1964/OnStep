@@ -279,7 +279,7 @@ class weather {
 #endif
 
       // apply a 20 sample rolling average to the temperatures, sampling once a second
-      static byte p;
+      static byte p = 1;
       if ((p++)%100 == 0) {
         static bool firstTSample=true; if (firstTSample) { firstTSample=false; _ta=_t; }
         _ta=(_ta*19.0+_t)/20.0;
