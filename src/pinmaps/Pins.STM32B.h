@@ -12,7 +12,7 @@
 //
 // Cost on eBay and AliExpress is less than US $2.50
 
-#if defined(__STM32F1__) || defined(STM32F103xB)
+#if defined(__STM32F1__) || defined(STM32F103xB) || defined(STM32F303xC)
 
 // === Pins for USB 
 // In HAL, Serial_A is mapped to USART1, with the following pins:

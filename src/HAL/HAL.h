@@ -56,13 +56,18 @@
   #include "HAL_Teensy_4/HAL_Teensy_4.h"
 
 #elif defined(__STM32F1__)
-  // STM32F103C8/CB: 72MHz, 128K flash, 64K RAM
+  // STM32F103C8/CB: 72MHz, 128K flash, 64K RAM, ARM Cortex M3
   #define MCU_STR "STM32F1"
   #include "HAL_STM32F1/HAL_STM32F1.h"
   
 #elif defined(STM32F103xB)
-  // STM32F103C8/CB: 72MHz, 128K flash, 64K RAM (using STM32duino)
+  // STM32F103C8/CB: 72MHz, 128K flash, 64K RAM, ARM Cortex M3 (using STM32duino board manager)
   #define MCU_STR "STM32F103"
+  #include "HAL_STM32F1/HAL_STM32duinoF1.h"
+
+#elif defined(STM32F303xC)
+  // RobotDyn BlackPill STM32F303, ARM Cortex M4
+  #define MCU_STR "STM32F303"
   #include "HAL_STM32F1/HAL_STM32duinoF1.h"
 
 #elif defined(STM32F411xE)

@@ -4,7 +4,13 @@
 #define __ARM_STM32__
 
 // Lower limit (fastest) step rate in uS for this platform (in SQW mode)
-#define HAL_MAXRATE_LOWER_LIMIT 34
+#if defined(STM32F303xC)
+  #define HAL_MAXRATE_LOWER_LIMIT 18
+#elif defined(STM32F103xB)
+  #define HAL_MAXRATE_LOWER_LIMIT 34
+#else
+  #error "Unknown Board for this HAL file"
+#endif
 
 // Width of step pulse
 #define HAL_PULSE_WIDTH 1900
