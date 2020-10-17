@@ -5,9 +5,19 @@
 
 // Lower limit (fastest) step rate in uS for this platform (in SQW mode)
 #if defined(STM32F303xC)
+
   #define HAL_MAXRATE_LOWER_LIMIT 18
+  #define TIM_SIDEREAL TIM4
+  #define TIM_AXIS1    TIM1
+  #define TIM_AXIS2    TIM8
+
 #elif defined(STM32F103xB)
+
   #define HAL_MAXRATE_LOWER_LIMIT 34
+  #define TIM_SIDEREAL TIM4
+  #define TIM_AXIS1    TIM1
+  #define TIM_AXIS2    TIM2
+
 #else
   #error "Unknown Board for this HAL file"
 #endif
@@ -75,9 +85,9 @@ float HAL_MCU_Temperature(void) {
 
 #define ISR(f) void f (void)
 
-HardwareTimer *Timer_Sidereal = new HardwareTimer(TIM4);
-HardwareTimer *Timer_Axis1    = new HardwareTimer(TIM1);
-HardwareTimer *Timer_Axis2    = new HardwareTimer(TIM2);
+HardwareTimer *Timer_Sidereal = new HardwareTimer(TIM_SIDEREAL);
+HardwareTimer *Timer_Axis1    = new HardwareTimer(TIM_AXIS1);
+HardwareTimer *Timer_Axis2    = new HardwareTimer(TIM_AXIS2);
 // TIMER_TONE uses TIM3
 // TIMER_SERVO uses TIM2
 #undef TIMER_SERVO
@@ -201,8 +211,8 @@ void PresetTimerInterval(long iv, bool TPS, volatile uint32_t *nextRate, volatil
 }
 
 // Must work from within the motor ISR timers, in microseconds*(F_COMP/1000000.0) units
-#define QuickSetIntervalAxis1(r) WRITE_REG(TIM1->ARR, r)
-#define QuickSetIntervalAxis2(r) WRITE_REG(TIM2->ARR, r)
+#define QuickSetIntervalAxis1(r) WRITE_REG(TIM_AXIS1->ARR, r)
+#define QuickSetIntervalAxis2(r) WRITE_REG(TIM_AXIS2->ARR, r)
 
 // --------------------------------------------------------------------------------------------------
 // Fast port writing help, etc.
@@ -211,20 +221,18 @@ void PresetTimerInterval(long iv, bool TPS, volatile uint32_t *nextRate, volatil
 #define SET(x,y) (x|=(1<<y))
 #define TGL(x,y) (x^=(1<<y))
 
+// fast bit-banged SPI should hit an ~1 MHz bitrate for TMC drivers
+#define delaySPI delayNanoseconds(500)
+
 // We use standard #define's to do **fast** digitalWrite's to the step and dir pins for the Axis1/2 stepper drivers
 #define a1STEP_H WRITE_REG(Axis1_StpPORT->BSRR, Axis1_StpBIT)
 #define a1STEP_L WRITE_REG(Axis1_StpPORT->BRR,  Axis1_StpBIT)
 #define a1DIR_H  WRITE_REG(Axis1_DirPORT->BSRR, Axis1_DirBIT)
 #define a1DIR_L  WRITE_REG(Axis1_DirPORT->BRR,  Axis1_DirBIT)
-
 #define a2STEP_H WRITE_REG(Axis2_StpPORT->BSRR, Axis2_StpBIT)
 #define a2STEP_L WRITE_REG(Axis2_StpPORT->BRR,  Axis2_StpBIT)
 #define a2DIR_H  WRITE_REG(Axis2_DirPORT->BSRR, Axis2_DirBIT)
 #define a2DIR_L  WRITE_REG(Axis2_DirPORT->BRR,  Axis2_DirBIT)
-
-// fast bit-banged SPI should hit an ~1 MHz bitrate for TMC drivers
-#define delaySPI delayNanoseconds(500)
-
 #define a1CS_H WRITE_REG(Axis1_M2PORT->BSRR, Axis1_M2BIT)
 #define a1CS_L WRITE_REG(Axis1_M2PORT->BRR, Axis1_M2BIT)
 #define a1CLK_H WRITE_REG(Axis1_M1PORT->BSRR, Axis1_M1BIT)
@@ -244,3 +252,4 @@ void PresetTimerInterval(long iv, bool TPS, volatile uint32_t *nextRate, volatil
 #define a2M0(P) if (P) WRITE_REG(Axis2_M0PORT->BSRR, Axis2_M0BIT); else WRITE_REG(Axis2_M0PORT->BRR, Axis2_M0BIT)
 #define a2M1(P) if (P) WRITE_REG(Axis2_M1PORT->BSRR, Axis2_M1BIT); else WRITE_REG(Axis2_M1PORT->BRR, Axis2_M1BIT)
 #define a2M2(P) if (P) WRITE_REG(Axis2_M2PORT->BSRR, Axis2_M2BIT); else WRITE_REG(Axis2_M2PORT->BRR, Axis2_M2BIT)
+
