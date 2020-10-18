@@ -62,6 +62,9 @@
 #if PINMAP == FYSETC_S6
   #include "Validate.FYSETC_S6.h"
 #endif
+#if PINMAP == InsteinESP1
+  #include "Validate.InsteinESP1.h"
+#endif
 
 // GENERAL PURPOSE PINMAP VALIDATION ---------------
 
