@@ -61,6 +61,16 @@ void initPins() {
   digitalWrite(ESP8266RstPin,HIGH);               // Reset, inactive HIGH
 #endif
 
+// ------------------------------------------------------------------
+// ESP-01 (ESP8266) firmware flashing control
+#if PINMAP == InsteinESP1
+    //pinMode(EnableMultiserial, INPUT);
+    //pinMode(WifiReset, OUTPUT);
+    digitalWrite(WifiReset,LOW); delay(200);
+    digitalWrite(WifiReset,HIGH);
+#endif
+// ------------------------------------------------------------------
+
   // light status LED (provides GND)
 #if LED_STATUS == ON
   pinMode(LEDnegPin,OUTPUT); digitalWrite(LEDnegPin,LOW);

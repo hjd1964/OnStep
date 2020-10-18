@@ -18,8 +18,8 @@
 //#define ESP8266Gpio0Pin      26     // ESP8266 GPIO0 (Dir2)
 //#define ESP8266RstPin      Aux2     // ESP8266 RST
 
-#define EnableMultiserial 36
-#define WifiReset 2
+#define EnableMultiserial    36
+#define WifiReset             2
 
 // The PEC index sense is a logic level input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
 #define PecPin               36

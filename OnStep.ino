@@ -46,7 +46,6 @@
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
 
-#include "Unavailable.h"
 #include "Constants.h"
 
 // On first upload OnStep automatically initializes a host of settings in nv memory (EEPROM.)
