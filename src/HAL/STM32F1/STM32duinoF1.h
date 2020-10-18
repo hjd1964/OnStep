@@ -8,8 +8,8 @@
 
   #define HAL_MAXRATE_LOWER_LIMIT 18
   #define TIM_SIDEREAL TIM4
-  #define TIM_AXIS1    TIM1
-  #define TIM_AXIS2    TIM8
+  #define TIM_AXIS1    TIM6
+  #define TIM_AXIS2    TIM7
 
 #elif defined(STM32F103xB)
 
