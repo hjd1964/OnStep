@@ -64,8 +64,8 @@
 
 // For rotator stepper driver
 #define Axis3_EN             -1     // Enable
-#define Axis3StepPin          2     // Step
-#define Axis3DirPin          15     // Dir
+#define Axis3_STEP          2     // Step
+#define Axis3_DIR          15     // Dir
 
 // For focuser1 stepper driver
 #define Axis4_EN           Aux2     // Enable

@@ -163,6 +163,10 @@ weather ambient;
 
 void setup() {
   // early pin initialization
+  if(PINMAP == InsteinESP1) {
+    pinMode(EnableMultiserial, INPUT);
+    pinMode(WifiReset, OUTPUT);
+  }
   initPre();
   
   // take a half-second to let any connected devices come up before we start setting up pins
@@ -399,6 +403,28 @@ void setup() {
 }
 
 void loop() {
+  if(PINMAP==InsteinESP1){
+    // ESPFLASH
+    if (digitalRead(EnableMultiserial) == LOW) {
+      SerialB.begin(115200);
+      SerialA.begin(115200);
+    
+      digitalWrite(WifiReset, LOW); delay(100);
+      digitalWrite(WifiReset, HIGH); 
+      
+      while (true)   {
+        if (SerialB.available()) {
+          int inByte = SerialB.read(); delayMicroseconds(5);
+          SerialA.write(inByte); delayMicroseconds(5);
+        }
+        // read from port 0, send to port 1:
+        if (SerialA.available()) {
+          int inByte = SerialA.read(); delayMicroseconds(5);
+          SerialB.write(inByte); delayMicroseconds(5);
+        }
+      }
+    }
+  }
   loop2();
   Align.model(0); // GTA compute pointing model, this will call loop2() during extended processing
 }
