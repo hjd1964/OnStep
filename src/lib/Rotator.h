@@ -232,7 +232,7 @@ class rotator {
           if (pda && currentlyDisabled) { currentlyDisabled=false; enableDriver(); delayMicroseconds(5); }
           digitalWrite(stepPin,LOW); delayMicroseconds(5);
           digitalWrite(dirPin,forwardState); delayMicroseconds(5);
-          digitalWrite(stepPin,HIGH); spos++;
+          digitalWrite(stepPin,HIGH);
           if (backlashPos < backlash) { backlashPos++; backlashDir=BD_OUT; } else { spos++; backlashDir=BD_NONE; }
           lastPhysicalMove=micros();
         } else
@@ -240,7 +240,7 @@ class rotator {
           if (pda && currentlyDisabled) { currentlyDisabled=false; enableDriver(); delayMicroseconds(5); }
           digitalWrite(stepPin,LOW); delayMicroseconds(5);
           digitalWrite(dirPin,reverseState); delayMicroseconds(5);
-          digitalWrite(stepPin,HIGH); spos--;
+          digitalWrite(stepPin,HIGH);
           if (backlashPos > 0) { backlashPos--; backlashDir=BD_IN; } else { spos--; backlashDir=BD_NONE; }
           lastPhysicalMove=micros();
         }
