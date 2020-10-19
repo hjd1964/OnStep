@@ -75,7 +75,7 @@ void processCommands() {
     if (SerialC.transmit()) return;
   #endif
   #ifdef HAL_SERIAL_D_ENABLED
-     if (SerialD.transmit()) return;
+    if (SerialD.transmit()) return;
   #endif
 #endif
 
