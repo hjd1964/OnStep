@@ -79,7 +79,7 @@
 #elif defined(STM32F446xx)
   // FYSETC S6 board with STM32F446
   #define MCU_STR "STM32F446"
-  #include "STM32F4/STM32F4.h"
+  #include "STM32F4/STM32F446.h"
 
 #elif defined(ESP32)
   // ESP32
