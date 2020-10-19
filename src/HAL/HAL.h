@@ -56,17 +56,18 @@
   #include "Teensy_4/Teensy_4.h"
 
 #elif defined(__STM32F1__)
+  #error "For OnStep 4.x and later, Arduino_STM32 is deprecated in favour of STM32Duino board manager. See the Blue Pill Wiki for details"
   // STM32F103C8/CB: 72MHz, 128K flash, 64K RAM, ARM Cortex M3
-  #define MCU_STR "STM32F1"
-  #include "STM32F1/STM32F1.h"
+  //#define MCU_STR "STM32F1"
+  //#include "STM32F1/STM32F1.h"
   
 #elif defined(STM32F103xB)
-  // STM32F103C8/CB: 72MHz, 128K flash, 64K RAM, ARM Cortex M3 (using STM32duino board manager)
+  // STM32F103C8/CB: 72MHz, 128K flash, 64K RAM, ARM Cortex M3 (STM32duino board manager)
   #define MCU_STR "STM32F103"
   #include "STM32F1/STM32duinoF1.h"
 
 #elif defined(STM32F303xC)
-  // RobotDyn BlackPill STM32F303, ARM Cortex M4
+  // RobotDyn BlackPill STM32F303, 256K flash, ARM Cortex M4 (STM32duino board manager)
   #define MCU_STR "STM32F303"
   #include "STM32F1/STM32duinoF1.h"
 
