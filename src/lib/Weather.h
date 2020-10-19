@@ -14,9 +14,10 @@
 
   #if WEATHER == BME280 || WEATHER == BME280_0x76
     Adafruit_BME280 bmx;
+  #elif WEATHER == BME280_SPI && SSPI_SHARED
+    Adafruit_BME280 bmx(BME280_CS_PIN, SSPI_MOSI, SSPI_MISO, SSPI_SCK);   // software SPI
   #elif WEATHER == BME280_SPI
     Adafruit_BME280 bmx(BME280_CS_PIN);                                   // hardware SPI
-  //Adafruit_BME280 bmx(BME280_CS_PIN, SSPI_MOSI, SSPI_MISO, SSPI_SCK);   // software SPI
   #endif
     
   // BMP280 is the BME280 without humidity 

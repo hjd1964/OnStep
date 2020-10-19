@@ -249,7 +249,7 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
     // only when at an allowed position
     if (gotoModeAxis1 || (posAxis1+blAxis1)%axis1StepsGoto == 0) {
 #if AXIS1_DRIVER_MODEL == TMC_SPI
-      if (!_spiInUse)
+      if (!spiInUse)
 #endif
       { if (gotoModeAxis1) { gotoModeAxis1=false; stepAxis1=1; axis1DriverTrackingFast(); } else { gotoModeAxis1=true; stepAxis1=axis1StepsGoto; axis1DriverGotoFast(); } }
     }
@@ -331,7 +331,7 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
     // only when at an allowed position
     if ((gotoModeAxis2) || ((posAxis2+blAxis2)%axis2StepsGoto == 0)) {
 #if AXIS2_DRIVER_MODEL == TMC_SPI
-      if (!_spiInUse)
+      if (!spiInUse)
 #endif
       { if (gotoModeAxis2) { gotoModeAxis2=false; stepAxis2=1; axis2DriverTrackingFast(); } else { gotoModeAxis2=true; stepAxis2=axis2StepsGoto; axis2DriverGotoFast(); } }
     }

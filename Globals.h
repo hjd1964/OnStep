@@ -70,6 +70,7 @@ volatile long timerRateBacklashAxis2    = 0;
 volatile bool inbacklashAxis2        = false;
 bool haltAxis2                       = false;
 bool faultAxis2                      = false;
+volatile bool spiInUse               = false;
 
 #if AXIS1_DRIVER_MODEL == TMC_SPI
   #define AXIS1_DRIVER_SWITCH_RATE 150*16L
