@@ -18,6 +18,12 @@
 //#define ESP8266Gpio0Pin      26     // ESP8266 GPIO0 (Dir2)
 //#define ESP8266RstPin      Aux2     // ESP8266 RST
 
+// For Instein we have to remap pins RX1 and TX1 from HardwareSerial.cpp. Need to check if doing it here will work
+// since HardwareSerial.cpp checks for them being defined before setting values
+#define RX1					 21  // for Instein box
+#define TX1					 22  // for Instein box
+
+// these two pinfs are custom pins used by Instein to allow writing ESP8266 flash
 #define EnableMultiserial    36
 #define WifiReset             2
 
