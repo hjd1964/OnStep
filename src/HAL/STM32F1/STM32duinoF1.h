@@ -7,9 +7,9 @@
 #if defined(STM32F303xC)
 
   #define HAL_MAXRATE_LOWER_LIMIT 18
-  #define TIM_SIDEREAL TIM4
-  #define TIM_AXIS1    TIM6
-  #define TIM_AXIS2    TIM7
+  #define TIM_SIDEREAL TIM15
+  #define TIM_AXIS1    TIM16
+  #define TIM_AXIS2    TIM17
 
 #elif defined(STM32F103xB)
 
