@@ -96,9 +96,13 @@ float HAL_MCU_Temperature(void) {
 
 #define ISR(f) void f (void)
 
-HardwareTimer *Timer_Sidereal = new HardwareTimer(TIM1);
-HardwareTimer *Timer_Axis1  = new HardwareTimer(TIM10);
-HardwareTimer *Timer_Axis2    = new HardwareTimer(TIM11);
+#define TIM_SIDEREAL   TIM1
+#define TIM_AXIS1      TIM10
+#define TIM_AXIS2      TIM11
+
+HardwareTimer *Timer_Sidereal = new HardwareTimer(TIM_SIDEREAL);
+HardwareTimer *Timer_Axis1    = new HardwareTimer(TIM_AXIS1);
+HardwareTimer *Timer_Axis2    = new HardwareTimer(TIM_AXIS2);
 
 #define SIDEREAL_CH  1
 #define AXIS1_CH     1
@@ -218,12 +222,8 @@ void PresetTimerInterval(long iv, bool TPS, volatile uint32_t *nextRate, volatil
 }
 
 // Must work from within the motor ISR timers, in microseconds*(F_COMP/1000000.0) units
-void QuickSetIntervalAxis1(uint32_t r) {
-  Timer_Axis1->setOverflow(r);
-}
-void QuickSetIntervalAxis2(uint32_t r) {
-  Timer_Axis2->setOverflow(r);
-}
+#define QuickSetIntervalAxis1(r) WRITE_REG(TIM_AXIS1->ARR, r)
+#define QuickSetIntervalAxis2(r) WRITE_REG(TIM_AXIS2->ARR, r)
 
 // --------------------------------------------------------------------------------------------------
 // Fast port writing help, etc.
