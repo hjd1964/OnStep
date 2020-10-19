@@ -89,9 +89,9 @@ float HAL_MCU_Temperature(void) {
 
 #define ISR(f) void f (void)
 
-#define TIMER_SIDEREAL   TIM1
-#define TIMER_AXIS1      TIM9
-#define TIMER_AXIS2      TIM11
+#define TIM_SIDEREAL   TIM1
+#define TIM_AXIS1      TIM9
+#define TIM_AXIS2      TIM11
 
 HardwareTimer *Timer_Sidereal = new HardwareTimer(TIM_SIDEREAL);
 HardwareTimer *Timer_Axis1    = new HardwareTimer(TIM_AXIS1);
