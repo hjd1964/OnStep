@@ -32,6 +32,9 @@
 #define ESP8266RstPin      Aux2     // ESP8266 RST or SPI MISO/Fault
 
 // For software SPI
+#if PINMAP == MksGenL2 || PINMAP == MksGenL21
+  #define SSPI_SHARED
+#endif
 #define SSPI_SCK 52
 #define SSPI_MISO 50
 #define SSPI_MOSI 51
