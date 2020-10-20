@@ -388,7 +388,7 @@ void initReadNvValues() {
   // get date and time from EEPROM, start keeping time
   timeZone=nv.read(EE_sites+currentSite*25+8)-128;
   timeZone=decodeTimeZone(timeZone);
-  if (timeZone < -12 || timeZone > 14) { timeZone=0.0; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV timeZone"); }
+  if (timeZone < -14 || timeZone > 12) { timeZone=0.0; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV timeZone"); }
   nv.readString(EE_sites+currentSite*25+9,siteName);
 
   JD=nv.readFloat(EE_JD);
