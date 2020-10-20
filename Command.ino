@@ -2379,6 +2379,7 @@ void focuserRotatorSave() {
 #endif
 }
 
+#if SERIAL_B_ESP_FLASHING != OFF || ESP8266FlashPin != OFF
 void esp8266Flash(bool inf) {
 #ifdef SERIAL_B_RX
   SerialB.begin(115200, SERIAL_8N1, SERIAL_B_RX, SERIAL_B_TX);
@@ -2413,3 +2414,4 @@ void esp8266Flash(bool inf) {
   if (ESP8266RstPin != OFF) { digitalWrite(ESP8266RstPin,LOW); delay(20); digitalWrite(ESP8266RstPin,HIGH); } // Reset LOW (active) HIGH (inactive)
   delay(20);
 }
+#endif
