@@ -331,7 +331,7 @@
 #define L_LOCATION_TITLE "Standort"
 #define L_LOCATION_LONG "L&auml;ngengad, in Grad und Min. +/- 180, W is +"
 #define L_LOCATION_LAT "Breitengrad, in Grad und Min. +/- 90, N is +"
-#define L_LOCATION_RANGE_UTC_OFFSET "UTC Offset, in Stunden -12 to +14"
+#define L_LOCATION_RANGE_UTC_OFFSET "UTC Offset, in Stunden -14 to +12"
 #define L_LOCATION_MESSAGE_UTC_OFFSET "Entgegengesetzter Zeitzonenwert f&uuml;r die Standardzeit (Keine Winterzeit!)"
 
 // ----------------------------  WiFi ----------------------------

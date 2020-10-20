@@ -76,7 +76,7 @@ const char html_configLatMin[] PROGMEM =
 "\r\n";
 const char html_configOffsetDeg[] PROGMEM =
 "<form method='get' action='/configuration.htm'>"
-" <input value='%s' type='number' name='u1' min='-12' max='14'>&nbsp;hrs&nbsp;";
+" <input value='%s' type='number' name='u1' min='-14' max='12'>&nbsp;hrs&nbsp;";
 const char html_configOffsetMin[] PROGMEM =
 " <select name='u2'><option value='0' %s>00</option><option value='30' %s>30</option><option value='45' %s>45</option></select>&nbsp;min.&nbsp;"
 "<button type='submit'>" L_UPLOAD "</button>"
@@ -320,7 +320,7 @@ void processConfigurationGet() {
   int ut_hrs=-999;
   v=server.arg("u1");
   if (v!="") {
-    if (atoi2((char*)v.c_str(),&i) && (i >= -13 && i <= 13)) ut_hrs = i;
+    if (atoi2((char*)v.c_str(),&i) && (i >= -14 && i <= 12)) ut_hrs = i;
   }
   v=server.arg("u2");
   if (v!="") {
