@@ -18,7 +18,7 @@
 
 //      Parameter Name              Value   Default  Notes                                                                      Hint
 #define PINMAP                        OFF //    OFF, Choose from: MiniPCB, MiniPCB2, MaxPCB, MaxPCB2, STM32Blue,             <-Req'd
-                                          //         Ramps14, MaxESP2, MaxESP3, InsteinESP1.  Check Constants.h for more info.
+                                          //         Ramps14, MaxESP3, InsteinESP1.  Check Constants.h for more info.
 
 // SERIAL PORT COMMAND CHANNELS ------------------------------------ see https://onstep.groups.io/g/main/wiki/6-Configuration#SERIAL
 #define SERIAL_A_BAUD_DEFAULT        9600 //   9600, n. Where n=9600,19200,57600,115200 (common baud rates.)                  Infreq
@@ -26,10 +26,6 @@
 #define SERIAL_B_ESP_FLASHING         OFF //    OFF, ON Upload ESP8266 WiFi firmware through SERIAL_B with :ESPFLASH# cmd.    Option
 #define SERIAL_C_BAUD_DEFAULT         OFF //    OFF, n, ON for ESP32 Bluetooth.                                               Option
 #define SERIAL_C_BLUETOOTH_NAME  "OnStep" // "On..", Bluetooth device name for ESP32.                                         Option
-#define SERIAL_D_BAUD_DEFAULT        9600 // ###req'd for Instein### Instein Drive AUX COM Port baudrate, lowest baudrates = larguer 
-                                          // cable lenght. 9600 Recomended 
-                                          // AUX COM Port Pinout: #1:5VdcOut #2:GND #3:RX #4:TX Many single Serial TTL devices 
-                                          // can be conected here
 
 // MOUNT TYPE -------------------------------------------------- see https://onstep.groups.io/g/main/wiki/6-Configuration#MOUNT_TYPE
 #define MOUNT_TYPE                    GEM //    GEM, GEM for German Equatorial, FORK for Equatorial Fork, or ALTAZM          <-Req'd
