@@ -197,6 +197,17 @@
   #endif
 #endif
 
+// ESP8266 flashing control -----------------
+#ifndef ESP8266PassthroughPin
+  #define ESP8266FlashPin -1
+#endif
+#ifndef ESP8266Gpio0Pin
+  #define ESP8266Gpio0Pin -1
+#endif
+#ifndef ESP8266RstPin
+  #define ESP8266RstPin -1
+#endif
+
 // ACCESSORIES ------------------------------
 #if FEATURE1_PURPOSE != OFF && FEATURE1_PIN == AUX && defined(Aux1)
   #if ASSIGNED_AUX1 != PIN_NOT_ASSIGNED
