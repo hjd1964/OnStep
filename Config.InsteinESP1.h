@@ -17,9 +17,13 @@
 //   *** to be sure it matches your wiring.            *** USE AT YOUR OWN RISK ***                                           ***
 
 //      Parameter Name              Value   Default  Notes                                                                      Hint
-#define PINMAP                        InsteinESP1 //   ###req'd for Instein### OFF, Choose from: MiniPCB, MiniPCB2, MaxPCB, MaxPCB2, 
-                                                  //STM32Blue,             <-Req'd
-                                          //         Ramps14, MaxESP2, MaxESP3.  Check Constants.h for more info.
+#define PINMAP                        InsteinESP1 //   OFF, Choose from: MiniPCB, MiniPCB2, MaxPCB,STM32Blue, MaxPCB2,       <-Req'd
+                                                  //    Ramps14,MaxESP2, MaxESP3, InsteinESP1. Check Constants.h for more info                   
+// - ADITIONALLY YOU MUST MAKE A CHANGE on your HardwareSerial.ccp file code lines 10 & 14, this file is usually located on: 
+//     C:\Users\xxxx\AppData\Local\Arduino15\packages\esp32\hardware\esp32\1.0.1\cores\esp32\HardwareSerial.ccp
+//     Change the lines "#define RX1 9" & "#define TX1 10" by "#define RX1 21" & "#define TX1 22" respectively.
+//     This change is mandatory for this firmware to work and in this way, OnStep AUX port will work as second serial port an enable
+//     a set of conectivity options: aditional wifi, bluetooth or USB, RF Link, ethernet or future serial devices.     
 
 // SERIAL PORT COMMAND CHANNELS ------------------------------------ see https://onstep.groups.io/g/main/wiki/6-Configuration#SERIAL
 #define SERIAL_A_BAUD_DEFAULT        9600 //   9600, n. Where n=9600,19200,57600,115200 (common baud rates.)                  Infreq

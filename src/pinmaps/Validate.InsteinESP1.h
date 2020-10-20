@@ -11,6 +11,7 @@
     #if PINMAP == InsteinESP1
       #undef Axis4_EN
       #define Axis4_EN -1
+      #error "Make sure you made the changes to HardwareSerial pins RX1 and TX1 as descrived in Config.InsteinESP1.h. Comment this line after you're done"
     #endif
 #endif
 
