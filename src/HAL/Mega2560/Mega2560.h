@@ -38,7 +38,7 @@
   #define HAL_SERIAL_TRANSMIT
 
   // Use low overhead serial
-  #include "Serial.h"
+  #include "HAL_Serial.h"
 #else
   // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
   #define SerialA Serial
