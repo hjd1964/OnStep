@@ -16,17 +16,19 @@
 
 // Misc. pins
 #ifndef DS3234_CS_PIN
-  #define DS3234_CS_PIN      10     // Default CS Pin for DS3234 on SPI
+  #define DS3234_CS_PIN      10      // Default CS Pin for DS3234 on SPI
 #endif
 #ifndef OneWirePin
   #define OneWirePin        Aux4     // Default Pin for OneWire bus (note: this pin has a 0.1uF capacitor that must be removed for OneWire to function)
 #endif
-#if PINMAP == MaxPCB3
-  #define ESP8266Gpio0Pin      2     // ESP8266 GPIO0 (Dir2)
-  #define ESP8266RstPin     Aux2     // ESP8266 RST
-#elif PINMAP == MaxPCB
-  #define ESP8266Gpio0Pin   Aux1     // ESP8266 GPIO0 or SPI MISO/Fault
-  #define ESP8266RstPin     Aux2     // ESP8266 RST or SPI MISO/Fault
+#if SERIAL_B_ESP_FLASHING == ON
+  #if PINMAP == MaxPCB3
+    #define ESP8266Gpio0Pin    2     // ESP8266 GPIO0 (Dir2)
+    #define ESP8266RstPin   Aux2     // ESP8266 RST
+  #elif PINMAP == MaxPCB
+    #define ESP8266Gpio0Pin Aux1     // ESP8266 GPIO0 or SPI MISO/Fault
+    #define ESP8266RstPin   Aux2     // ESP8266 RST or SPI MISO/Fault
+  #endif
 #endif
 
 // The PEC index sense is a logic level input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset

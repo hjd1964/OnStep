@@ -20,8 +20,10 @@
 #ifndef OneWirePin
   #define OneWirePin       Aux8     // Default Pin for OneWire bus
 #endif
-#define ESP8266Gpio0Pin      27     // {was 26} ESP8266 GPIO0 (Dir2)
-#define ESP8266RstPin      Aux2     // ESP8266 RST
+#if SERIAL_B_ESP_FLASHING == ON
+  #define ESP8266Gpio0Pin    27     // {was 26} ESP8266 GPIO0 (Dir2)
+  #define ESP8266RstPin    Aux2     // ESP8266 RST
+#endif
 
 // The PEC index sense is a logic level input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
 #define PecPin               36     // [input only 36]

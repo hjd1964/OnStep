@@ -46,8 +46,10 @@
 #endif
 
 // For ESP8266 control
-#define ESP8266Gpio0Pin     Aux1    // ESP8266 GPIO0 or SPI MISO/Fault
-#define ESP8266RstPin       Aux2    // ESP8266 RST or SPI MISO/Fault
+#if SERIAL_B_ESP_FLASHING == ON
+  #define ESP8266Gpio0Pin   Aux1    // ESP8266 GPIO0 or SPI MISO/Fault
+  #define ESP8266RstPin     Aux2    // ESP8266 RST or SPI MISO/Fault
+#endif
 
 // Axis1 RA/Azm step/dir driver
 #define Axis1_EN            PA12    // Enable
