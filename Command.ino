@@ -303,7 +303,8 @@ void processCommands() {
             SerialA.println("Waiting for data, you have one minute to start the upload.");
             delay(1000);
 
-            esp8266Flash(false);
+            // flash the addon
+            fa.go(false);
 
             SerialA.println("ESP8266 reset, returning to default Baud rates, and resuming OnStep operation...");
 
@@ -2378,40 +2379,3 @@ void focuserRotatorSave() {
   rot.savePosition();
 #endif
 }
-
-#if SERIAL_B_ESP_FLASHING != OFF || ESP8266FlashPin != OFF
-void esp8266Flash(bool inf) {
-#ifdef SERIAL_B_RX
-  SerialB.begin(115200, SERIAL_8N1, SERIAL_B_RX, SERIAL_B_TX);
-#else
-  SerialB.begin(115200);
-#endif
-  SerialA.begin(115200);
-  delay(1000);
-
-  if (ESP8266Gpio0Pin != OFF) { digitalWrite(ESP8266Gpio0Pin,LOW); delay(100); } // Pgm mode LOW
-  if (ESP8266RstPin != OFF) { digitalWrite(ESP8266RstPin,LOW); delay(20); digitalWrite(ESP8266RstPin,HIGH); } // Reset LOW (active) HIGH (inactive)
-  delay(20);
-  
-  unsigned long lastRead=millis()+85000; // so we have a total of 1.5 minutes to start the upload
-  while (true) {
-    // read from port 1, send to port 0:
-    if (SerialB.available()) {
-      int inByte = SerialB.read(); delayMicroseconds(5);
-      SerialA.write(inByte); delayMicroseconds(5);
-    }
-    // read from port 0, send to port 1:
-    if (SerialA.available()) {
-      int inByte = SerialA.read(); delayMicroseconds(5);
-      SerialB.write(inByte); delayMicroseconds(5);
-      if (millis() > lastRead) lastRead=millis();
-    }
-    yield();
-    if (!inf && (long)(millis()-lastRead) > 5000) break; // wait 5 seconds w/no traffic before resuming normal operation
-  }
-
-  if (ESP8266Gpio0Pin != OFF) { digitalWrite(ESP8266Gpio0Pin,HIGH); delay(100); } // Run mode HIGH
-  if (ESP8266RstPin != OFF) { digitalWrite(ESP8266RstPin,LOW); delay(20); digitalWrite(ESP8266RstPin,HIGH); } // Reset LOW (active) HIGH (inactive)
-  delay(20);
-}
-#endif

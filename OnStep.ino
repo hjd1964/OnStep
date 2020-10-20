@@ -109,6 +109,11 @@
 #include "src/lib/Weather.h"
 weather ambient;
 
+#if SERIAL_B_ESP_FLASHING == ON || defined(AddonTriggerPin)
+  #include "src/lib/flashAddon.h"
+  flashAddon fa;
+#endif
+
 #if ROTATOR == ON
   #include "src/lib/Rotator.h"
   rotator rot;
@@ -162,7 +167,14 @@ weather ambient;
 
 void setup() {
   initPre();
-  
+
+  // initialize the ESP8266 Addon flasher
+#if SERIAL_B_ESP_FLASHING == ON
+  fa.init(-1,AddonResetPin,AddonBootModePin);
+#elif defined(AddonTriggerPin)
+  fa.init(AddonTriggerPin,AddonResetPin,AddonBootModePin);
+#endif
+
   // take a half-second to let any connected devices come up before we start setting up pins
   delay(500);
 
@@ -406,11 +418,6 @@ void loop() {
 }
 
 void loop2() {
-#if ESP8266FlashPin != OFF
-  // ESPFLASH -----------------------------------------------------------------------------------------
-  if (digitalRead(ESP8266FlashPin) == LOW) esp8266Flash(true);
-#endif
-
   // GUIDING -------------------------------------------------------------------------------------------
   ST4();
   if ((trackingState != TrackingMoveTo) && (parkStatus == NotParked)) guide();
@@ -567,6 +574,10 @@ void loop2() {
     if (!committed && lastCommitted) { DLF("MSG: NV data in cache"); lastCommitted=committed; }
 #endif
 
+    // TRIGGER ESPFLASH
+#if defined(AddonTriggerPin)
+    fa.poll();
+#endif
   }
 
   // FASTEST POLLING -----------------------------------------------------------------------------------

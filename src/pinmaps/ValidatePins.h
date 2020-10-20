@@ -87,7 +87,7 @@
   #endif
 #endif
 
-#if SERIAL_B_ESP_FLASHING == ON  && (!defined(ESP8266Gpio0Pin) || !defined(ESP8266RstPin))
+#if SERIAL_B_ESP_FLASHING == ON  && (!defined(AddonBootModePin) || !defined(AddonResetPin))
   #error "Configuration (Config.h): SERIAL_B_ESP_FLASHING not supported for this PINMAP"
 #endif
 
@@ -195,17 +195,6 @@
   #if Axis5_EN == -1
     #error "Configuration (Config.h): AXIS5_DRIVER_POWER_DOWN requires ENable signal support which this PINMAP doesn't have"
   #endif
-#endif
-
-// ESP8266 flashing control -----------------
-#ifndef ESP8266PassthroughPin
-  #define ESP8266FlashPin -1
-#endif
-#ifndef ESP8266Gpio0Pin
-  #define ESP8266Gpio0Pin -1
-#endif
-#ifndef ESP8266RstPin
-  #define ESP8266RstPin -1
 #endif
 
 // ACCESSORIES ------------------------------

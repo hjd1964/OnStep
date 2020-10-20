@@ -17,9 +17,9 @@
 #endif
 
 // two pins are custom pins used by Instein to allow writing ESP8266 flash
-#define ESP8266FlashPin      36     // ESP8266 pin to trigger serial passthrough mode
-#define ESP8266Gpio0Pin      -1     // ESP8266 GPIO0 (disabled)
-#define ESP8266RstPin         2     // ESP8266 RST
+#define AddonTriggerPin      36     // ESP8266 pin to trigger serial passthrough mode
+#define AddonBootModePin     -1     // ESP8266 GPIO0 (disabled)
+#define AddonResetPin         2     // ESP8266 RST
 
 // The PEC index sense is a logic level input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
 #define PecPin               36

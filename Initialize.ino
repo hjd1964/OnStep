@@ -33,18 +33,6 @@ void initPre() {
 #if AXIS5_DRIVER_MODEL == TMC_SPI
   pinMode(Axis5_M2,OUTPUT); digitalWrite(Axis5_M2,HIGH);
 #endif
-
-  // ESP-01 (ESP8266) firmware flashing control
-  if (ESP8266FlashPin != -1) pinMode(ESP8266FlashPin, INPUT);
-  if (ESP8266Gpio0Pin != -1) {
-    pinMode(ESP8266Gpio0Pin,OUTPUT);
-    digitalWrite(ESP8266Gpio0Pin,HIGH); delay(20);  // Run mode is HIGH
-  }
-  if (ESP8266RstPin != -1) {
-    pinMode(ESP8266RstPin,OUTPUT);
-    digitalWrite(ESP8266RstPin,LOW);  delay(200);   // Reset, if LOW
-    digitalWrite(ESP8266RstPin,HIGH);               // Reset, inactive HIGH
-  }
 }
 
 void initPins() {
