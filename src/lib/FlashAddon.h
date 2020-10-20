@@ -62,6 +62,13 @@ class flashAddon {
       if (_bootModePin != OFF) { digitalWrite(_bootModePin,HIGH); delay(100); } // Run mode HIGH
       if (_resetPin != OFF) { digitalWrite(_resetPin,LOW); delay(20); digitalWrite(_resetPin,HIGH); } // Reset LOW (active) HIGH (inactive)
       delay(20);
+
+#ifdef SERIAL_B_RX
+      SerialB.begin(SERIAL_B_BAUD_DEFAULT, SERIAL_8N1, SERIAL_B_RX, SERIAL_B_TX);
+#else
+      SerialB.begin(SERIAL_B_BAUD_DEFAULT);
+#endif
+      SerialA.begin(SERIAL_A_BAUD_DEFAULT);
     }
 
   private:

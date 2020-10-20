@@ -289,7 +289,7 @@ void processCommands() {
         if (command[1] == 'N' && parameter[0] == 'V' && parameter[1] == 'R' && parameter[2] == 'E' && parameter[3] == 'S' && parameter[4] == 'E' && parameter[5] == 'T' && parameter[6] == 0) {
           if (atHome || parkStatus == Parked) {
             nv.writeLong(EE_autoInitKey,0);
-            strcpy(reply,"NV will be wiped on next boot");
+            strcpy(reply,"NV will be wiped on next boot.");
             boolReply=false;
           } else commandError=CE_NOT_PARKED_OR_AT_HOME; } else
 #if SERIAL_B_ESP_FLASHING == ON
@@ -297,25 +297,13 @@ void processCommands() {
 //            Return: 1 on completion (after up to one minute from start of command.)
         if (command[1] == 'S' && parameter[0] == 'P' && parameter[1] == 'F' && parameter[2] == 'L' && parameter[3] == 'A' && parameter[4] == 'S' && parameter[5] == 'H' && parameter[6] == 0) {
           if (atHome || parkStatus == Parked) {
-            // initialize both serial ports
             SerialA.println("The ESP8266 will now be placed in flash upload mode (at 115200 Baud.)");
             SerialA.println("Arduino's 'Tools -> Upload Speed' should be set to 115200 Baud.");
             SerialA.println("Waiting for data, you have one minute to start the upload.");
             delay(1000);
-
-            // flash the addon
-            fa.go(false);
-
-            SerialA.println("ESP8266 reset, returning to default Baud rates, and resuming OnStep operation...");
-
-  #ifdef SERIAL_B_RX
-            SerialB.begin(SERIAL_B_BAUD_DEFAULT, SERIAL_8N1, SERIAL_B_RX, SERIAL_B_TX);
-  #else
-            SerialB.begin(SERIAL_B_BAUD_DEFAULT);
-  #endif
-            SerialA.begin(SERIAL_A_BAUD_DEFAULT);
+            fa.go(false); // flash the addon
+            SerialA.println("ESP8266 reset and in run mode, resuming OnStep operation...");
             delay(1000);
-
           } else commandError=CE_NOT_PARKED_OR_AT_HOME;
         } else
 #endif
