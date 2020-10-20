@@ -13,6 +13,10 @@
   #define PINMAP_STR "Classic (Instein)"
   #include "Pins.Classic.h"
 #endif
+#if PINMAP == InsteinESP1
+  #define PINMAP_STR "Instein (ESP32)"
+  #include "Pins.InsteinESP1.h"
+#endif
 #if PINMAP == Mega2560Alt
   #define PINMAP_STR "Alternate"
   #include "Pins.Mega2560Alt.h"

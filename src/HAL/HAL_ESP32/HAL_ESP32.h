@@ -17,6 +17,10 @@
 #define SerialB Serial2
 #define HAL_SERIAL_B_ENABLED
 
+// SerialD
+#define SerialD Serial1
+#define HAL_SERIAL_D_ENABLED
+
 // SerialC
 #if SERIAL_C_BAUD_DEFAULT != OFF
   #if SERIAL_C_BAUD_DEFAULT > 0
