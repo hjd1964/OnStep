@@ -74,6 +74,9 @@ void processCommands() {
   #ifdef HAL_SERIAL_C_ENABLED
     if (SerialC.transmit()) return;
   #endif
+  #ifdef HAL_SERIAL_D_ENABLED
+    if (SerialD.transmit()) return;
+  #endif
 #endif
 
     // if a command is ready, process it
@@ -1680,6 +1683,16 @@ void processCommands() {
             #endif
             delay(50); SerialC.begin(baudRate[i]);
             boolReply=false; 
+#endif
+#if defined(HAL_SERIAL_D_ENABLED)
+          } else
+          if (process_command == COMMAND_SERIAL_D) {
+            SerialD.print("1"); 
+            #ifdef HAL_SERIAL_TRANSMIT
+            while (SerialD.transmit()); 
+            #endif
+            delay(50); SerialD.begin(baudRate[i]); 
+            boolReply=false;
 #endif
           } else commandError=CE_CMD_UNKNOWN;
         } else commandError=CE_PARAM_RANGE;

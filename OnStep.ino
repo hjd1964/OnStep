@@ -40,8 +40,8 @@
 // firmware info, these are returned by the ":GV?#" commands
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  4
-#define FirmwareVersionMinor  17      // minor version 0 to 99
-#define FirmwareVersionPatch  "k"     // for example major.minor patch: 1.3c
+#define FirmwareVersionMinor  18      // minor version 0 to 99
+#define FirmwareVersionPatch  "b"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 3       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
@@ -162,6 +162,10 @@ weather ambient;
 
 void setup() {
   // early pin initialization
+#if PINMAP == InsteinESP1
+    pinMode(EnableMultiserial, INPUT);
+    pinMode(WifiReset, OUTPUT);
+#endif
   initPre();
   
   // take a half-second to let any connected devices come up before we start setting up pins
@@ -196,7 +200,11 @@ void setup() {
   SerialC.begin(SERIAL_C_BAUD_DEFAULT);
 #endif
 #ifdef HAL_SERIAL_D_ENABLED
-  SerialD.begin(SERIAL_D_BAUD_DEFAULT);
+  #ifdef SERIAL_D_RX
+    SerialD.begin(SERIAL_B_BAUD_DEFAULT, SERIAL_8N1, SERIAL_D_RX, SERIAL_D_TX);
+  #else
+    SerialD.begin(SERIAL_D_BAUD_DEFAULT);
+  #endif
 #endif
 #ifdef HAL_SERIAL_E_ENABLED
   SerialE.begin(SERIAL_E_BAUD_DEFAULT);
@@ -398,6 +406,29 @@ void setup() {
 }
 
 void loop() {
+#if PINMAP==InsteinESP1
+    // ESPFLASH
+    if (digitalRead(EnableMultiserial) == LOW) {
+      SerialB.begin(115200);
+      SerialA.begin(115200);
+    
+      digitalWrite(WifiReset, LOW); delay(100);
+      digitalWrite(WifiReset, HIGH); 
+      
+      while (true)   {
+        if (SerialB.available()) {
+          int inByte = SerialB.read(); delayMicroseconds(5);
+          SerialA.write(inByte); delayMicroseconds(5);
+        }
+        // read from port 0, send to port 1:
+        if (SerialA.available()) {
+          int inByte = SerialA.read(); delayMicroseconds(5);
+          SerialB.write(inByte); delayMicroseconds(5);
+        }
+      }
+    }
+#endif
+
   loop2();
   Align.model(0); // GTA compute pointing model, this will call loop2() during extended processing
 }

@@ -73,6 +73,11 @@ class timeLocationSource {
 };
 
 #elif TIME_LOCATION_SOURCE == DS3234S
+
+#ifdef SSPI_SHARED
+  #error "Configuration (Config.h): TIME_LOCATION_SOURCE DS3234S is not compatible with your PINMAP.  Use DS3234M."
+#endif
+
 // -----------------------------------------------------------------------------------
 // DS3234 RTC support 
 // uses the default SPI port and CS (DS3234_CS_PIN from Pins.xxx.h)
@@ -220,7 +225,9 @@ class timeLocationSource {
         _Rtc.SetSquareWavePinClockFrequency(DS3234SquareWaveClock_1Hz);
         active=true;
       } else DLF("WRN, tls.init(): DS3234 GetIsRunning() false");
-  
+#ifdef SSPI_SHARED
+      SPI.end();
+#endif
       return active;
     }
 
@@ -238,20 +245,36 @@ class timeLocationSource {
       m=(f1-h)*60.0;
       s=(m-floor(m))*60.0;
       
+#ifdef SSPI_SHARED
+      spiInUse=true;
+      SPI.begin();
+#endif
       RtcDateTime updateTime = RtcDateTime(yy, mo, d, h, floor(m), floor(s));
       _Rtc.SetDateTime(updateTime);
+#ifdef SSPI_SHARED
+      SPI.end();
+      spiInUse=false;
+#endif
     }
     
     // get the RTC's time (local standard time)
     void get(double &JD, double &LMT) {
       if (!active) return;
 
+#ifdef SSPI_SHARED
+      spiInUse=true;
+      SPI.begin();
+#endif
       RtcDateTime now = _Rtc.GetDateTime();
       if ((now.Year() >= 2018) && (now.Year() <= 3000) && (now.Month() >= 1) && (now.Month() <= 12) && (now.Day() >= 1) && (now.Day() <= 31) &&
           (now.Hour() >= 0) && (now.Hour() <= 23) && (now.Minute() >= 0) && (now.Minute() <= 59) && (now.Second() >= 0) && (now.Second() <= 59)) {
         JD=julian(now.Year(),now.Month(),now.Day());
         LMT=(now.Hour()+(now.Minute()/60.0)+(now.Second()/3600.0));
       }
+#ifdef SSPI_SHARED
+      SPI.end();
+      spiInUse=false;
+#endif
     }
 
     // get the location (does nothing)

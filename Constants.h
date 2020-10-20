@@ -12,6 +12,7 @@
 #define ClassicShield                2 // Original pin-map, for Steve's shield where ST4 port is on the Mega2560's "alternate pins"
 #define AltMega2560                  3 // Obsolete
 #define ClassicInstein               4 // Original pin-map with Instein ST4 port... this is not tested and I have no idea if it's safe to use!
+#define InsteinESP1                  5 // ESP32 Instein PINMAP (latest variant September/2020)
 
 // RAMPS - 3D printer shields/boards that work with OnStep, all are 5-axis designs
 #define Ramps14                     10 // Ramps v1.4 shield for Mega2560
