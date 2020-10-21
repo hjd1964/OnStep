@@ -188,14 +188,14 @@ class rotator {
 
     // sets current position in degrees
     void setPosition(double deg) {
-      spos=round(deg*spd);
+      spos=lround(deg*spd);
       if (spos < smin) spos=smin; if (spos > smax) spos=smax;
       target.part.m=spos; target.part.f=0;
     }
 
     // set target in degrees
     void setTarget(double deg) {
-      target.part.m=(long)(deg*spd); target.part.f=0;
+      target.part.m=lround(deg*spd); target.part.f=0;
       if ((long)target.part.m < smin) target.part.m=smin; if ((long)target.part.m > smax) target.part.m=smax;
     }
 
