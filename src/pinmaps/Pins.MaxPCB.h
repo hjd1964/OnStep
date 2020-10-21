@@ -132,8 +132,8 @@
 #ifndef OneWirePin
   #define OneWirePin        Aux4     // Default Pin for OneWire bus (note: this pin has a 0.1uF capacitor that must be removed for OneWire to function)
 #endif
-#define ESP8266Gpio0Pin      PB0     // ESP8266 GPIO0 (Dir2)
-#define ESP8266RstPin       Aux2     // ESP8266 RST
+#define AddonBootModePin     PB0     // ESP8266 GPIO0 (Dir2)
+#define AddonResetPin       Aux2     // ESP8266 RST
 
 // The PEC index sense is a logic level input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
 #define PecPin               PB1
