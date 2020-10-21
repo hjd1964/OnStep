@@ -46,8 +46,8 @@
 #ifndef OneWirePin
   #define OneWirePin        PE0     // Default Pin for OneWire bus (on E2-MOT PD-EN, right hand pin)
 #endif
-#define ESP8266Gpio0Pin     PD0     // ESP8266 GPIO0 (on EXP1)
-#define ESP8266RstPin       PA4     // ESP8266 RST (on EXP2 shared with the DS3234 CS pin)
+#define AddonBootModePin    PD0     // ESP8266 GPIO0 (on EXP1)
+#define AddonResetPin       PA4     // ESP8266 RST (on EXP2 shared with the DS3234 CS pin)
 
 // The PEC index sense is a logic level input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
 #define PecPin              PA1

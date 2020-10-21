@@ -22,23 +22,21 @@
 #define sei() interrupts()
 
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
-#if PINMAP == FYSETC_S6 || PINMAP == FYSETC_S6_2
-  #define SerialA Serial
-  // SerialA is always enabled, SerialB and SerialC are optional
-  #define SerialB Serial1
-  #define HAL_SERIAL_B_ENABLED
-  #if SERIAL_C_BAUD_DEFAULT != OFF
-    #define SerialC Serial3
-    #define HAL_SERIAL_C_ENABLED
-  #endif
+#define SerialA Serial
+// SerialA is always enabled, SerialB and SerialC are optional
+#define SerialB Serial1
+#define HAL_SERIAL_B_ENABLED
+#if SERIAL_C_BAUD_DEFAULT != OFF
+  #define SerialC Serial3
+  #define HAL_SERIAL_C_ENABLED
+#endif
 
-  // Handle special case of using software serial for a GPS
-  #if SerialGPS == SoftwareSerial2
-    #include <SoftwareSerial.h>
-    SoftwareSerial SWSerialGPS(PA3, PA2); // RX2, TX2
-    #undef SerialGPS
-    #define SerialGPS SWSerialGPS
-  #endif
+// Handle special case of using software serial for a GPS
+#if SerialGPS == SoftwareSerial2
+  #include <SoftwareSerial.h>
+  SoftwareSerial SWSerialGPS(PA3, PA2); // RX2, TX2
+  #undef SerialGPS
+  #define SerialGPS SWSerialGPS
 #endif
 
 // New symbol for the default I2C port ---------------------------------------------------------------

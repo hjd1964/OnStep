@@ -87,7 +87,7 @@
   #endif
 #endif
 
-#if SERIAL_B_ESP_FLASHING == ON  && (!defined(ESP8266Gpio0Pin) || !defined(ESP8266RstPin))
+#if SERIAL_B_ESP_FLASHING == ON  && (!defined(AddonBootModePin) || !defined(AddonResetPin))
   #error "Configuration (Config.h): SERIAL_B_ESP_FLASHING not supported for this PINMAP"
 #endif
 

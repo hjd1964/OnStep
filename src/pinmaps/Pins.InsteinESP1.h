@@ -15,12 +15,11 @@
 #ifndef OneWirePin
   #define OneWirePin       Aux8     // Default Pin for one wire bus
 #endif
-//#define ESP8266Gpio0Pin      26     // ESP8266 GPIO0 (Dir2)
-//#define ESP8266RstPin      Aux2     // ESP8266 RST
 
-// these two pinfs are custom pins used by Instein to allow writing ESP8266 flash
-#define EnableMultiserial    36
-#define WifiReset             2
+// two pins are custom pins used by Instein to allow writing ESP8266 flash
+#define AddonTriggerPin      36     // ESP8266 pin to trigger serial passthrough mode
+#define AddonBootModePin     -1     // ESP8266 GPIO0 (disabled)
+#define AddonResetPin         2     // ESP8266 RST
 
 // The PEC index sense is a logic level input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
 #define PecPin               36
@@ -65,8 +64,8 @@
 
 // For rotator stepper driver
 #define Axis3_EN             -1     // Enable
-#define Axis3_STEP          2     // Step
-#define Axis3_DIR          15     // Dir
+#define Axis3_STEP            2     // Step
+#define Axis3_DIR            15     // Dir
 
 // For focuser1 stepper driver
 #define Axis4_EN           Aux2     // Enable

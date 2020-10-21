@@ -56,10 +56,8 @@
   #include "Teensy_4/Teensy_4.h"
 
 #elif defined(__STM32F1__)
+  // STM32F103C8/CB: 72MHz, 128K flash, 64K RAM, ARM Cortex M3 (Arduino_STM32 board manager)
   #error "For OnStep 4.x and later, Arduino_STM32 is deprecated in favour of STM32Duino board manager. See the Blue Pill Wiki for details"
-  // STM32F103C8/CB: 72MHz, 128K flash, 64K RAM, ARM Cortex M3
-  //#define MCU_STR "STM32F1"
-  //#include "STM32F1/STM32F1.h"
   
 #elif defined(STM32F103xB)
   // STM32F103C8/CB: 72MHz, 128K flash, 64K RAM, ARM Cortex M3 (STM32duino board manager)

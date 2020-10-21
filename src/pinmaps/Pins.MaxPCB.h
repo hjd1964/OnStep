@@ -16,17 +16,17 @@
 
 // Misc. pins
 #ifndef DS3234_CS_PIN
-  #define DS3234_CS_PIN      10     // Default CS Pin for DS3234 on SPI
+  #define DS3234_CS_PIN      10      // Default CS Pin for DS3234 on SPI
 #endif
 #ifndef OneWirePin
   #define OneWirePin        Aux4     // Default Pin for OneWire bus (note: this pin has a 0.1uF capacitor that must be removed for OneWire to function)
 #endif
 #if PINMAP == MaxPCB3
-  #define ESP8266Gpio0Pin      2     // ESP8266 GPIO0 (Dir2)
-  #define ESP8266RstPin     Aux2     // ESP8266 RST
+  #define AddonBootModePin     2     // ESP8266 GPIO0 (Dir2)
+  #define AddonResetPin     Aux2     // ESP8266 RST
 #elif PINMAP == MaxPCB
-  #define ESP8266Gpio0Pin   Aux1     // ESP8266 GPIO0 or SPI MISO/Fault
-  #define ESP8266RstPin     Aux2     // ESP8266 RST or SPI MISO/Fault
+  #define AddonBootModePin  Aux1     // ESP8266 GPIO0 or SPI MISO/Fault
+  #define AddonResetPin     Aux2     // ESP8266 RST or SPI MISO/Fault
 #endif
 
 // The PEC index sense is a logic level input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
@@ -132,8 +132,8 @@
 #ifndef OneWirePin
   #define OneWirePin        Aux4     // Default Pin for OneWire bus (note: this pin has a 0.1uF capacitor that must be removed for OneWire to function)
 #endif
-#define ESP8266Gpio0Pin      PB0     // ESP8266 GPIO0 (Dir2)
-#define ESP8266RstPin       Aux2     // ESP8266 RST
+#define AddonBootModePin     PB0     // ESP8266 GPIO0 (Dir2)
+#define AddonResetPin       Aux2     // ESP8266 RST
 
 // The PEC index sense is a logic level input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
 #define PecPin               PB1
@@ -153,7 +153,12 @@
 #define LimitPin            Aux7     // The limit switch sense is a logic level input normally pull high (2k resistor,) shorted to ground it stops gotos/tracking
 
 // Axis1 RA/Azm step/dir driver
-#define Axis1_EN              -1     // Enable
+#if SERIAL_B_ESP_FLASHING == ON
+  #define Axis1_EN            -1     // Enable
+#else
+  #warning "Configuration (Config.h): SERIAL_B_ESP_FLASHING is OFF so stepper driver ENable control is ON, make sure Aux2 is NOT connected to the Addon's RST pin!"
+  #define Axis1_EN          Aux2
+#endif
 #define Axis1_M0             PA7     // SPI MOSI
 #define Axis1_M0PORT       GPIOA
 #define Axis1_M0BIT   GPIO_PIN_7
@@ -177,7 +182,11 @@
 #define Axis1_HOME          Aux3     // Sense home position Axis1
 
 // Axis2 Dec/Alt step/dir driver
-#define Axis2_EN              -1     // Enable
+#if SERIAL_B_ESP_FLASHING == ON
+  #define Axis2_EN            -1     // Enable
+#else
+  #define Axis2_EN          Aux2
+#endif
 #define Axis2_M0             PA7     // SPI MOSI
 #define Axis2_M0PORT       GPIOA
 #define Axis2_M0BIT   GPIO_PIN_7

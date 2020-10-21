@@ -236,6 +236,7 @@ private:
     HAL_Wire.requestFrom(_eeprom_addr, (uint8_t)count);
     while (HAL_Wire.available()) {
       *data = HAL_Wire.read(); data++;
+      count--; if (count == 0) break;
     }
   }
 };

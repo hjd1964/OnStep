@@ -52,25 +52,6 @@ void initPins() {
   pinMode(Axis1_M3,INPUT_PULLUP);
 #endif
 
-  // ESP-01 (ESP8266) firmware flashing control
-#if SERIAL_B_ESP_FLASHING == ON
-  pinMode(ESP8266Gpio0Pin,OUTPUT);                // ESP8266 GPIO0
-  digitalWrite(ESP8266Gpio0Pin,HIGH); delay(20);  // Run mode
-  pinMode(ESP8266RstPin,OUTPUT);                  // ESP8266 RST
-  digitalWrite(ESP8266RstPin,LOW);  delay(200);   // Reset, if LOW
-  digitalWrite(ESP8266RstPin,HIGH);               // Reset, inactive HIGH
-#endif
-
-// ------------------------------------------------------------------
-// ESP-01 (ESP8266) firmware flashing control
-#if PINMAP == InsteinESP1
-    //pinMode(EnableMultiserial, INPUT);
-    //pinMode(WifiReset, OUTPUT);
-    digitalWrite(WifiReset,LOW); delay(200);
-    digitalWrite(WifiReset,HIGH);
-#endif
-// ------------------------------------------------------------------
-
   // light status LED (provides GND)
 #if LED_STATUS == ON
   pinMode(LEDnegPin,OUTPUT); digitalWrite(LEDnegPin,LOW);
@@ -395,7 +376,7 @@ void initReadNvValues() {
   // get date and time from EEPROM, start keeping time
   timeZone=nv.read(EE_sites+currentSite*25+8)-128;
   timeZone=decodeTimeZone(timeZone);
-  if (timeZone < -12 || timeZone > 14) { timeZone=0.0; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV timeZone"); }
+  if (timeZone < -14 || timeZone > 12) { timeZone=0.0; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV timeZone"); }
   nv.readString(EE_sites+currentSite*25+9,siteName);
 
   JD=nv.readFloat(EE_JD);
