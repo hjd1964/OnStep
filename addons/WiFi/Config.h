@@ -41,16 +41,16 @@
                                           //         Experimental, possibly causes problems w/standard cmd channel if enabled.
 
 // ENCODER SUPPORT -----------------------------------------------------------------------------------------------------------------
-#define AXIS1_ENC                     OFF //    OFF, CWCCW, AB, BC_BISSC. RA/Azm Axis on Pin 5 (A/CW/MA) & Pin 6 (B/CCW/SLO,) Option
 #define AXIS1_ENC_REVERSE              ON //    OFF, ON to reverse the count direction.                                       Adjust
 #define AXIS1_ENC_TICKS_DEG   23301.68888 // 22.222, n, (ticks/degree.) Encoder ticks per degree.                             Adjust
+#define AXIS1_ENC                     OFF //    OFF, CWCCW, AB, BC_BISSC. RA/Azm Axis (A/CW/MA) & (B/CCW/SLO,)                Option
 #define AXIS1_ENC_DIFF_LIMIT_TO       300 //    300, n, (arcsec.) Minimum diff. between encoder/OnStep for sync. to OnStep    Adjust
 #define AXIS1_ENC_DIFF_LIMIT_FROM     OFF //    OFF, n, (arcsec.) Maximum diff. between encoder/OnStep for sync. from OnStep  Adjust
                                           //         for absolute encoders, leave off when setting Zero, then enable
 
-#define AXIS2_ENC                     OFF //    OFF, CWCCW, AB, BC_BISSC. Dec/Alt Axis on Pin 7 (A/CW/MA) & Pin 8 (B/CCW/SLO) Option
 #define AXIS2_ENC_REVERSE              ON //    OFF, ON to reverse the count direction.                                       Option
 #define AXIS2_ENC_TICKS_DEG   23301.68888 // 22.222, n, (ticks/degree.) Encoder ticks per degree.                             Adjust
+#define AXIS2_ENC                     OFF //    OFF, CWCCW, AB, BC_BISSC. Dec/Alt Axis (A/CW/MA) & (B/CCW/SLO)                Option
 #define AXIS2_ENC_DIFF_LIMIT_TO       300 //    300, n, (arcsec.) Minimum diff. between encoder/OnStep for sync. to OnStep    Adjust
 #define AXIS2_ENC_DIFF_LIMIT_FROM     OFF //    OFF, n, (arcsec.) Maximum diff. between encoder/OnStep for sync. from OnStep  Adjust
                                           //         for absolute encoders, leave off when setting Zero, then enable
