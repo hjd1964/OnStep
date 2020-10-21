@@ -6,7 +6,7 @@
 // Lower limit (fastest) step rate in uS for this platform (in SQW mode)
 #if defined(STM32F303xC)
 
-  #define HAL_MAXRATE_LOWER_LIMIT 18
+  #define HAL_MAXRATE_LOWER_LIMIT 16
   #define TIM_SIDEREAL TIM15
   #define TIM_AXIS1    TIM16
   #define TIM_AXIS2    TIM17
