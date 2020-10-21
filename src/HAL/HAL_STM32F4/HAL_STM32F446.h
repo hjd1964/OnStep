@@ -7,13 +7,7 @@
 
 // Lower limit (fastest) step rate in uS for this platform (in SQW mode)
 
-#if defined(STM32F446xx)
-  #define HAL_MAXRATE_LOWER_LIMIT 14
-#elif defined(STM32F411xE)
-  #define HAL_MAXRATE_LOWER_LIMIT 24
-#else
-  #define HAL_MAXRATE_LOWER_LIMIT 64
-#endif
+#define HAL_MAXRATE_LOWER_LIMIT 14
 
 // Width of step pulse
 #define HAL_PULSE_WIDTH         500
@@ -28,40 +22,21 @@
 #define sei() interrupts()
 
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
-#if PINMAP == FYSETC_S6 || PINMAP == FYSETC_S6_2
-  #define SerialA Serial
-  // SerialA is always enabled, SerialB and SerialC are optional
-  #define SerialB Serial1
-  #define HAL_SERIAL_B_ENABLED
-  #if SERIAL_C_BAUD_DEFAULT != OFF
-    #define SerialC Serial3
-    #define HAL_SERIAL_C_ENABLED
-  #endif
+#define SerialA Serial
+// SerialA is always enabled, SerialB and SerialC are optional
+#define SerialB Serial1
+#define HAL_SERIAL_B_ENABLED
+#if SERIAL_C_BAUD_DEFAULT != OFF
+  #define SerialC Serial3
+  #define HAL_SERIAL_C_ENABLED
+#endif
 
-  // Handle special case of using software serial for a GPS
-  #if SerialGPS == SoftwareSerial2
-    #include <SoftwareSerial.h>
-    SoftwareSerial SWSerialGPS(PA3, PA2); // RX2, TX2
-    #undef SerialGPS
-    #define SerialGPS SWSerialGPS
-  #endif
-#elif PINMAP == MaxPCB3
-  #define SerialA Serial
-  // SerialA is always enabled, SerialB and SerialC are optional
-
-  HardwareSerial HWSerial2(PA3, PA2); // RX2, TX2
-  #define SerialB HWSerial2
-  #define HAL_SERIAL_B_ENABLED
-
-  #if SERIAL_C_BAUD_DEFAULT != OFF
-    HardwareSerial HWSerial1(PA10, PA9); // RX1, TX1
-    #define SerialC HWSerial1
-    #define HAL_SERIAL_C_ENABLED
-  #endif
-  
-// HardwareSerial HWSerial1(PA10, PA9);  // RX1, TX1
-// HardwareSerial HWSerial2(PA3, PA2);   // RX2, TX2
-// HardwareSerial HWSerial6(PA12, PA11); // RX6, TX6
+// Handle special case of using software serial for a GPS
+#if SerialGPS == SoftwareSerial2
+  #include <SoftwareSerial.h>
+  SoftwareSerial SWSerialGPS(PA3, PA2); // RX2, TX2
+  #undef SerialGPS
+  #define SerialGPS SWSerialGPS
 #endif
 
 // New symbol for the default I2C port ---------------------------------------------------------------
@@ -82,12 +57,6 @@
   // The FYSETC S6 has a 2048 byte EEPROM built-in
   #if PINMAP == FYSETC_S6
     #define E2END 2047
-    #define I2C_EEPROM_ADDRESS 0x50
-  #endif
-  // The STM32F411 MaxPCB3 has an 8192 byte EEPROM built-in (rated for 5M write cycles)
-  #if PINMAP == MaxPCB3
-    #define NV_ENDURANCE HIGH
-    #define E2END 8191
     #define I2C_EEPROM_ADDRESS 0x50
   #endif
   // Defaults to 0x57 and 4KB 
@@ -120,17 +89,12 @@ float HAL_MCU_Temperature(void) {
 //--------------------------------------------------------------------------------------------------
 // Initialize timers
 // frequency compensation for adjusting microseconds to timer counts
-//#define F_COMP 19.7721042
 #define F_COMP 4000000
 
 #define ISR(f) void f (void)
 
 HardwareTimer *Timer_Sidereal = new HardwareTimer(TIM1);
-#if defined(STM32F411xE)
-  HardwareTimer *Timer_Axis1  = new HardwareTimer(TIM9);
-#else
-  HardwareTimer *Timer_Axis1  = new HardwareTimer(TIM10);
-#endif
+HardwareTimer *Timer_Axis1    = new HardwareTimer(TIM10);
 HardwareTimer *Timer_Axis2    = new HardwareTimer(TIM11);
 
 #define SIDEREAL_CH  1
