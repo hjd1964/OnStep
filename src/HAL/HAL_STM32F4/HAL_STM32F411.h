@@ -59,12 +59,6 @@ HardwareSerial HWSerial2(PA3, PA2); // RX2, TX2
   #include "../drivers/NV_I2C_EEPROM_24XX_C.h"
 #endif
 
-#elif defined(NV_AT24C32)
-  // defaults to 0x57 and 4KB
-  #include "../drivers/NV_I2C_EEPROM_24XX_C.h"
-#elif defined(NV_MB85RC256V)
-  #include "../drivers/NV_I2C_FRAM_MB85RC256V.h"
-#else
 //----------------------------------------------------------------------------------------------------
 // Nanoseconds delay function
 unsigned int _nanosPerPass=1;
