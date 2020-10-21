@@ -156,6 +156,7 @@
 #if SERIAL_B_ESP_FLASHING == ON
   #define Axis1_EN            -1     // Enable
 #else
+  #warning "Configuration (Config.h): SERIAL_B_ESP_FLASHING is OFF so stepper driver ENable control is ON, make sure Aux2 is NOT connected to the Addon's RST pin!"
   #define Axis1_EN          Aux2
 #endif
 #define Axis1_M0             PA7     // SPI MOSI
