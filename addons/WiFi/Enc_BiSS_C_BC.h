@@ -7,8 +7,6 @@
 #include <EEPROM.h>
 #include "EEProm.h"
 
-#define INT32_MAX 2147483647
-
 #if AXIS1_ENC == BC_BISSC || AXIS2_ENC == BC_BISSC
   #define ENC_HAS_ABSOLUTE
   
@@ -30,8 +28,10 @@
         } else return INT32_MAX;
       }
       void write(int32_t v) {
-        if (readEnc(_position)) {
-          _offset = v - (int32_t)_position;
+        if (_position != INT32_MAX) {
+          if (readEnc(_position)) {
+            _offset = v - (int32_t)_position;
+          }
         }
       }
       void setZero() {
@@ -172,4 +172,3 @@
 #endif
 
 #endif
-// ----------------------------------------------------------------------------------------------------------------

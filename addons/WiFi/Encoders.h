@@ -171,17 +171,21 @@ class Encoders {
           double f=strtod(s,&conv_end);
           if (&s[0] != conv_end && f >= -999.9 && f <= 999.9) _osAxis2=f;
         }
-        _enAxis1=(double)axis1Pos.read()/(double)AXIS1_ENC_TICKS_DEG;
+        long pos=axis1Pos.read();
+        if (pos == INT32_MAX) _enAxis1Fault = true; else _enAxis1Fault=false;
+        _enAxis1=(double)pos/(double)AXIS1_ENC_TICKS_DEG;
 #if AXIS1_ENC_REVERSE == ON
         _enAxis1=-_enAxis1;
 #endif
-        _enAxis2=(double)axis2Pos.read()/(double)AXIS2_ENC_TICKS_DEG;
+        pos=axis2Pos.read();
+        if (pos == INT32_MAX) _enAxis2Fault = true; else _enAxis2Fault=false;
+        _enAxis2=(double)pos/(double)AXIS2_ENC_TICKS_DEG;
 #if AXIS2_ENC_REVERSE == ON
         _enAxis2=-_enAxis2;
 #endif
 
         mountStatus.update();
-        if (encAutoSync && mountStatus.valid()) {
+        if (encAutoSync && mountStatus.valid() && !_enAxis1Fault && !_enAxis2Fault) {
           if (mountStatus.atHome() || mountStatus.parked() || mountStatus.aligning() || mountStatus.syncToEncodersOnly()) {
             syncFromOnStep();
             // re-enable normal operation once we're updated here
@@ -287,6 +291,8 @@ class Encoders {
   
     double getAxis1() { return _enAxis1; }
     double getAxis2() { return _enAxis2; }
+    bool validAxis1() { return !_enAxis1Fault; }
+    bool validAxis2() { return !_enAxis2Fault; }
     double getOnStepAxis1() { return _osAxis1; }
     double getOnStepAxis2() { return _osAxis2; }
 
@@ -295,5 +301,7 @@ class Encoders {
     double _osAxis2=0;
     double _enAxis1=0;
     double _enAxis2=0;
+    bool _enAxis1Fault=false;
+    bool _enAxis2Fault=false;
 };
 #endif
