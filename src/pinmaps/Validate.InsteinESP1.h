@@ -9,7 +9,7 @@
   #define ASSIGNED_AUX2 PIN_DEDICATED
   // for the InsteinESP1 also undefine the focuser control EN pin since it is in use for other purposes
   #undef Axis4_EN
-  #define Axis4_EN -1
+  #define Axis4_EN OFF
 #endif
 
 // USER FEEDBACK ----------------------------

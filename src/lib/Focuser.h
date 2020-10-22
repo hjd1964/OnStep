@@ -90,7 +90,7 @@ class focuser {
     }
 
     // sets target position in steps
-    virtual void setTarget(long pos) { }
+    virtual bool setTarget(long pos) { return false; }
 
     // sets target relative position in steps
     virtual void relativeTarget(long pos) { }

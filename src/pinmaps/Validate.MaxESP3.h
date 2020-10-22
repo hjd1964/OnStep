@@ -7,10 +7,10 @@
   #else
     #undef ASSIGNED_AUX2
     #define ASSIGNED_AUX2 PIN_DEDICATED
-    // for the MaxESP3 also undefine the focuser control EN pin since it is in use for other purposes
+    // also undefine the focuser control EN pin since it is in use for other purposes
     #if PINMAP == MaxESP3
       #undef Axis4_EN
-      #define Axis4_EN -1
+      #define Axis4_EN OFF
     #endif
   #endif
 #endif

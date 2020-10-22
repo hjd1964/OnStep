@@ -95,42 +95,42 @@
 #endif
 
 // powering down Dec supported only if EN is available and not shared with Axis1
-#if AXIS2_DRIVER_POWER_DOWN == ON && (Axis2_EN == -1 || Axis1_EN == Axis2_EN)
+#if AXIS2_DRIVER_POWER_DOWN == ON && (Axis2_EN == OFF || Axis2_EN == SHARED)
   #error "Configuration (Config.h): AXIS2_DRIVER_POWER_DOWN not supported on this PINMAP"
 #endif
 
 // focusers/rotator allowed?
 #if ROTATOR == ON
-  #if Axis3_STEP == -1 || Axis3_DIR == -1
+  #if Axis3_STEP == OFF || Axis3_DIR == OFF
     #error "Configuration (Config.h): AXIS3 step/dir interface is not supported on this PINMAP"
   #endif
 #endif
 #if FOCUSER1 == ON
-  #if Axis4_STEP == -1 || Axis4_DIR == -1
+  #if Axis4_STEP == OFF || Axis4_DIR == OFF
     #error "Configuration (Config.h): AXIS4 step/dir interface is not supported on this PINMAP"
   #endif
 #endif
 #if FOCUSER2 == ON
-  #if (Axis5_STEP == -1 || Axis5_DIR == -1) && AXIS5_DRIVER_DC_MODE == OFF
+  #if (Axis5_STEP == OFF || Axis5_DIR == OFF) && AXIS5_DRIVER_DC_MODE == OFF
     #error "Configuration (Config.h): AXIS5 step/dir interface is not supported on this PINMAP"
   #endif
 #endif
 
 // leds allowed?
-#if LED_STATUS != OFF && LEDnegPin == -1
+#if LED_STATUS != OFF && LEDnegPin == OFF
   #error "Configuration (Config.h): LED_STATUS not supported for this PINMAP, must be OFF"
 #endif
 
-#if LED_STATUS2 != OFF && LEDneg2Pin == -1
+#if LED_STATUS2 != OFF && LEDneg2Pin == OFF
   #error "Configuration (Config.h): LED_STATUS2 not supported for this PINMAP, must be OFF"
 #endif
 
-#if LED_RETICLE != OFF && ReticlePin == -1
+#if LED_RETICLE != OFF && ReticlePin == OFF
   #error "Configuration (Config.h): LED_RETICLE not supported for this PINMAP, must be OFF"
 #endif
 
 // analog PEC allowed?
-#if PEC_SENSE > 0 && AnalogPecPin == -1
+#if PEC_SENSE > 0 && AnalogPecPin == OFF
   #error "Configuration (Config.h): PEC_SENSE in ANALOG mode not supported for this PINMAP, use ON, etc. NOT a threshold value"
 #endif
 
@@ -177,7 +177,7 @@
 #endif
 
 #if ROTATOR == ON && AXIS3_DRIVER_POWER_DOWN == ON
-  #if Axis3_EN == -1
+  #if Axis3_EN == OFF || Axis3_EN == SHARED
     #error "Configuration (Config.h): AXIS3_DRIVER_POWER_DOWN enabled but not supported on this PINMAP"
   #endif
 #endif
@@ -186,7 +186,7 @@
   #if AXIS4_DRIVER_POWER_DOWN == ON && AXIS4_DRIVER_DC_MODE != OFF
     #error "Configuration (Config.h): AXIS4_DRIVER_POWER_DOWN and AXIS4_DRIVER_DC_MODE can't be used at the same time"
   #endif
-  #if Axis4_EN == -1
+  #if Axis4_EN == OFF || Axis4_EN == SHARED
     #error "Configuration (Config.h): AXIS4_DRIVER_POWER_DOWN and AXIS4_DRIVER_DC_MODE require ENable signal support which this PINMAP doesn't have or is in use for other purposes"
   #endif
 #endif
@@ -195,7 +195,7 @@
   #if AXIS5_DRIVER_POWER_DOWN == ON && AXIS5_DRIVER_DC_MODE != OFF
     #error "Configuration (Config.h): AXIS5_DRIVER_POWER_DOWN and AXIS5_DRIVER_DC_MODE can't be used at the same time"
   #endif
-  #if Axis5_EN == -1
+  #if Axis5_EN == OFF || Axis5_EN == SHARED
     #error "Configuration (Config.h): AXIS5_DRIVER_POWER_DOWN requires ENable signal support which this PINMAP doesn't have"
   #endif
 #endif

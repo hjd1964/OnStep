@@ -26,8 +26,8 @@ class rotator {
       setMin(min);
       setMax(max);
 
-      if (stepPin != -1) pinMode(stepPin,OUTPUT);
-      if (dirPin != -1) pinMode(dirPin,OUTPUT);
+      if (stepPin != OFF) pinMode(stepPin,OUTPUT);
+      if (dirPin != OFF) pinMode(dirPin,OUTPUT);
 
       // get backlash amount
       int b=nv.readInt(nvAddress+EE_rotBacklash);
@@ -84,12 +84,12 @@ class rotator {
     void setDisableState(bool disableState) {
       this->disableState=disableState;
       if (disableState == LOW) enableState=HIGH; else enableState=LOW;
-      if (enPin != -1) { pinMode(enPin,OUTPUT); enableDriver(); currentlyDisabled=false; }
+      if (enPin != OFF && enPin != SHARED) { pinMode(enPin,OUTPUT); enableDriver(); currentlyDisabled=false; }
     }
 
     // allows enabling/disabling stepper driver
     void powerDownActive(bool active) {
-      if (enPin == -1) { pda=false; return; }
+      if (enPin == OFF || enPin == SHARED) active=false;
       pda=active;
       if (pda) { pinMode(enPin,OUTPUT); disableDriver(); currentlyDisabled=true; }
     }
@@ -153,6 +153,7 @@ class rotator {
 
     // move CW
     void startMoveCW() {
+      if (enPin == SHARED && !axis1Enabled) return;
       if (mc) {
         delta.fixed=doubleToFixed(+moveRate/100.0); // in steps per centi-second
       } else {
@@ -165,6 +166,7 @@ class rotator {
 
     // move CCW
     void startMoveCCW() {
+      if (enPin == SHARED && !axis1Enabled) return;
       if (mc) {
         delta.fixed=doubleToFixed(-moveRate/100.0); // in steps per centi-second
       } else {
@@ -194,9 +196,11 @@ class rotator {
     }
 
     // set target in degrees
-    void setTarget(double deg) {
+    bool setTarget(double deg) {
+      if (enPin == SHARED && !axis1Enabled) return false;
       target.part.m=lround(deg*spd); target.part.f=0;
       if ((long)target.part.m < smin) target.part.m=smin; if ((long)target.part.m > smax) target.part.m=smax;
+      return true;
     }
 
     // do derotate movement
@@ -256,7 +260,7 @@ class rotator {
     }
 
     void enableDriver() {
-      if (enPin == -1) return;
+      if (enPin == OFF || enPin == SHARED) return;
       // for Aux5/Aux6 (DAC) support for stepper driver EN control on MaxPCB
 #if defined(A21) && defined(A22)
       if (enPin == A21) { if (enableState == HIGH) analogWrite(A21,1024); else analogWrite(A21,0); return; }
@@ -266,7 +270,7 @@ class rotator {
     }
 
     void disableDriver() {
-      if (enPin == -1) return;
+      if (enPin == OFF || enPin == SHARED) return;
 #if defined(A21) && defined(A22)
       if (enPin == A21) { if (disableState == HIGH) analogWrite(A21,1024); else analogWrite(A21,0); return; }
       if (enPin == A22) { if (disableState == HIGH) analogWrite(A22,1024); else analogWrite(A22,0); return; }

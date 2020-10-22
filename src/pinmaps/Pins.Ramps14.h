@@ -42,7 +42,7 @@
 // The PEC index sense is a 5V logic input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
 #if PINMAP == MksGenL1
   #define PecPin             41     // GenL1 EXP2
-  #define AnalogPecPin       -1     // N/A
+  #define AnalogPecPin      OFF     // N/A
 #else
   #define PecPin             57     // RAMPS AUX1, A-OUT (1=+5V, 2=GND, 3=PEC)
   #define AnalogPecPin       A3     // Note A3 is (57)

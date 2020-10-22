@@ -455,7 +455,7 @@ void processCommands() {
 // :FS[n]#    Set focuser target position (in microns or steps)
 //            Return: 0 on failure
 //                    1 on success
-        if (toupper(command[1]) == 'S') { foc->setTarget((double)atol(parameter)*spm); } else
+        if (toupper(command[1]) == 'S') { if (!foc->setTarget((double)atol(parameter)*spm)) commandError=CE_SLEW_ERR_IN_STANDBY; } else
 // :FZ#       Set focuser position as zero
 //            Returns: Nothing
         if (command[1] == 'Z') { foc->setPosition(0); boolReply=false; } else
@@ -1585,7 +1585,7 @@ void processCommands() {
       if (command[1] == 'S') {
         if (parameter[0] == '-') f=-1.0; else f=1.0;
         if (parameter[0] == '+' || parameter[0] == '-') i1=1; else i1=0;
-        if (dmsToDouble(&f1,(char *)&parameter[i1],false)) rot.setTarget(f*f1); else commandError=CE_PARAM_FORM;
+        if (dmsToDouble(&f1,(char *)&parameter[i1],false)) { if (!rot.setTarget(f*f1)) commandError=CE_SLEW_ERR_IN_STANDBY; } else commandError=CE_PARAM_FORM;
       } else commandError=CE_CMD_UNKNOWN;
      } else
 #endif
