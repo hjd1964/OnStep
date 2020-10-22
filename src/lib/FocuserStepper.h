@@ -162,6 +162,7 @@ class focuserStepper : public focuser {
     }
 
     void follow(bool mountSlewing) {
+      if (enPin == SHARED && !axis1Enabled) return;
 
       // if enabled and the timeout has elapsed, disable the stepper driver
       if (pda && !currentlyDisabled && ((long)(micros()-lastPhysicalMove) > 10000000L)) { disableDriver(); currentlyDisabled=true; }

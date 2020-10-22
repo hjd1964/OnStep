@@ -222,7 +222,10 @@ class rotator {
 #endif
     
     void follow(bool mountSlewing) {
-      if (pda && !currentlyDisabled && ((micros()-lastPhysicalMove) > 10000000L)) { currentlyDisabled=true; disableDriver(); }
+      if (enPin == SHARED && !axis1Enabled) return;
+
+      // if enabled and the timeout has elapsed, disable the stepper driver
+      if (pda && !currentlyDisabled && ((long)(micros()-lastPhysicalMove) > 10000000L)) { disableDriver(); currentlyDisabled=true; }
 
       unsigned long microsNow=micros();
       if ((long)(microsNow-nextPhysicalMove) > 0) {
