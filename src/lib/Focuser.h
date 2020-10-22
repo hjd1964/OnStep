@@ -32,6 +32,7 @@ class focuser {
     virtual bool setTcfEnable(bool enabled) { return false; }
     bool getTcfEnable() { return tcf; }
     long getTcfSteps() {
+      if (isnan(ambient.getTelescopeTemperature())) tcf=false;
       if (tcf) {
         float tc = -round((tcf_coef * (ambient.getTelescopeTemperature() - tcf_t0)) * spm);
         return lround(tc/(float)tcf_deadband)*(long)tcf_deadband;

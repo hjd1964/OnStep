@@ -23,6 +23,8 @@ class dewHeaterControl {
     }
 
     void poll(float deltaAboveDewPointC) {
+      if (isnan(deltaAboveDewPointC)) enabled=false;
+      
       if (!enabled) return;
 
       int switchTimeMs = 0;
