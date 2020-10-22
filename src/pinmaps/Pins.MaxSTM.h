@@ -5,7 +5,7 @@
 
 // The multi-purpose pins (Aux3..Aux8 can be analog pwm/dac if supported)
 #define Aux0                PB12     // Status LED
-#define Aux2                PA13     // ESP8266 RST
+#define Aux2                PA13     // ESP8266 RST or stepper drivers ENable
 #define Aux3                PB13     // Home SW
 #define Aux4                PB14     // OneWire, Home SW
 #define Aux7                PB15     // Limit SW
