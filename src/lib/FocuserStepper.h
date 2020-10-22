@@ -126,13 +126,13 @@ class focuserStepper : public focuser {
 
     // move in
     void startMoveIn() {
-      if (enPin == SHARED && !axis1Enabled) return;
+      if (!movementAllowed()) return;
       delta.fixed=doubleToFixed(+moveRate/100.0);   // in steps per centi-second
     }
 
     // move out
     void startMoveOut() {
-      if (enPin == SHARED && !axis1Enabled) return;
+      if (!movementAllowed()) return;
       delta.fixed=doubleToFixed(-moveRate/100.0);   // in steps per centi-second
     }
 
@@ -141,7 +141,7 @@ class focuserStepper : public focuser {
 
     // sets target position in steps
     bool setTarget(long pos) {
-      if (enPin == SHARED && !axis1Enabled) return false;
+      if (!movementAllowed()) return false;
       target.part.m=pos; target.part.f=0;
       if ((long)target.part.m < smin) target.part.m=smin; if ((long)target.part.m > smax) target.part.m=smax;
       return true;
@@ -149,20 +149,21 @@ class focuserStepper : public focuser {
 
     // sets target relative position in steps
     void relativeTarget(long pos) {
-      if (enPin == SHARED && !axis1Enabled) return;
+      if (!movementAllowed()) return;
       target.part.m+=pos; target.part.f=0;
       if ((long)target.part.m < smin) target.part.m=smin; if ((long)target.part.m > smax) target.part.m=smax;
     }
     
     // do automatic movement
     void poll() {
+      if (!movementAllowed()) return;
       target.fixed+=delta.fixed;
       // stop at limits
       if (((long)target.part.m < smin) || ((long)target.part.m > smax)) delta.fixed=0;
     }
 
     void follow(bool mountSlewing) {
-      if (enPin == SHARED && !axis1Enabled) return;
+      if (!movementAllowed()) return;
 
       // if enabled and the timeout has elapsed, disable the stepper driver
       if (pda && !currentlyDisabled && ((long)(micros()-lastPhysicalMove) > 10000000L)) { disableDriver(); currentlyDisabled=true; }

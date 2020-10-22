@@ -153,7 +153,7 @@ class rotator {
 
     // move CW
     void startMoveCW() {
-      if (enPin == SHARED && !axis1Enabled) return;
+      if (!movementAllowed()) return;
       if (mc) {
         delta.fixed=doubleToFixed(+moveRate/100.0); // in steps per centi-second
       } else {
@@ -166,7 +166,7 @@ class rotator {
 
     // move CCW
     void startMoveCCW() {
-      if (enPin == SHARED && !axis1Enabled) return;
+      if (!movementAllowed()) return;
       if (mc) {
         delta.fixed=doubleToFixed(-moveRate/100.0); // in steps per centi-second
       } else {
@@ -197,7 +197,7 @@ class rotator {
 
     // set target in degrees
     bool setTarget(double deg) {
-      if (enPin == SHARED && !axis1Enabled) return false;
+      if (!movementAllowed()) return false;
       target.part.m=lround(deg*spd); target.part.f=0;
       if ((long)target.part.m < smin) target.part.m=smin; if ((long)target.part.m > smax) target.part.m=smax;
       return true;
@@ -205,6 +205,7 @@ class rotator {
 
     // do derotate movement
     void poll(bool tracking) {
+      if (!movementAllowed()) return;
       if (DR && tracking) target.fixed+=deltaDR.fixed;
       target.fixed+=delta.fixed;
       if (((long)target.part.m < smin) || ((long)target.part.m > smax)) { DR=false; delta.fixed=0; deltaDR.fixed=0; }
@@ -222,7 +223,7 @@ class rotator {
 #endif
     
     void follow(bool mountSlewing) {
-      if (enPin == SHARED && !axis1Enabled) return;
+      if (!movementAllowed()) return;
 
       // if enabled and the timeout has elapsed, disable the stepper driver
       if (pda && !currentlyDisabled && ((long)(micros()-lastPhysicalMove) > 10000000L)) { disableDriver(); currentlyDisabled=true; }
@@ -257,6 +258,9 @@ class rotator {
     void savePosition() { writeTarget(); }
   
   private:
+    bool movementAllowed() {
+      if (enPin == SHARED && !axis1Enabled) return false; else return true;
+    }
     void writeTarget() {
       nv.writeLong(nvAddress+EE_rotSpos,spos);
       nv.writeInt(nvAddress+EE_rotBacklashPos,backlashPos);

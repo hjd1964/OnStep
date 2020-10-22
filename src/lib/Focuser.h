@@ -104,6 +104,9 @@ class focuser {
     void savePosition() { writeTarget(); }
   
   protected:
+    bool movementAllowed() {
+      if (enPin == SHARED && !axis1Enabled) return false; else return true;
+    }
     void writeTarget() {
       nv.writeLong(nvAddress+EE_focSpos,spos);
       nv.writeLong(nvAddress+EE_focTarget,(long)target.part.m);
