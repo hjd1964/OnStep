@@ -76,19 +76,19 @@
 #define Axis2_DECAY          40     // Decay mode
 
 // For rotator stepper driver
-#define Axis3_EN             -1     // Enable
-#define Axis3_STEP           -1     // Step
-#define Axis3_DIR            -1     // Dir
+#define Axis3_EN            OFF     // Enable
+#define Axis3_STEP          OFF     // Step
+#define Axis3_DIR           OFF     // Dir
 
 // For focuser1 stepper driver
-#define Axis4_EN             -1     // Enable
-#define Axis4_STEP           -1     // Step
-#define Axis4_DIR            -1     // Dir
+#define Axis4_EN            OFF     // Enable
+#define Axis4_STEP          OFF     // Step
+#define Axis4_DIR           OFF     // Dir
 
 // For focuser2 stepper driver
-#define Axis5_EN             -1     // Enable
-#define Axis5_STEP           -1     // Step
-#define Axis5_DIR            -1     // Dir
+#define Axis5_EN            OFF     // Enable
+#define Axis5_STEP          OFF     // Step
+#define Axis5_DIR           OFF     // Dir
 
 // ST4 interface
 #define ST4RAw               47     // ST4 RA- West

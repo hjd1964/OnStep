@@ -10,10 +10,10 @@
 // Misc. pins
 #if defined(ST4_ALTERNATE_PINS_ON) || (PINMAP == ClassicShield)
   #ifndef DS3234_CS_PIN
-    #define DS3234_CS_PIN      53     // Default CS Pin for DS3234 on SPI
+    #define DS3234_CS_PIN    53     // Default CS Pin for DS3234 on SPI
   #endif
   #ifndef BME280_CS_PIN
-    #define BME280_CS_PIN      48     // Default CS Pin for BME280 on SPI
+    #define BME280_CS_PIN    48     // Default CS Pin for BME280 on SPI
   #endif
 #endif
 
@@ -86,17 +86,17 @@
 #define Axis2_FAULT          31     // SPI MISO/Fault
 
 // Pins to rotator stepper driver
-#define Axis3_EN             -1     // Enable
+#define Axis3_EN            OFF     // Enable
 #define Axis3_STEP           A9     // Step
 #define Axis3_DIR            A8     // Dir
 
 // Pins to focuser1 stepper driver
-#define Axis4_EN             -1     // Enable
+#define Axis4_EN            OFF     // Enable
 #define Axis4_STEP          A11     // Step
 #define Axis4_DIR           A10     // Dir
 
 // Pins to focuser2 stepper driver
-#define Axis5_EN             -1     // Enable
+#define Axis5_EN            OFF     // Enable
 #define Axis5_STEP          A13     // Step
 #define Axis5_DIR           A12     // Dir
 
@@ -166,11 +166,12 @@
 #define Axis2_DIR             4     // Dir
 
 // For rotator stepper driver
-#define Axis3_EN             -1     // Enable
+#define Axis3_EN            OFF     // Enable
 #define Axis3_STEP           30     // Step
 #define Axis3_DIR            33     // Dir
 
 // For focuser1 stepper driver  
+#define Axis4_EN            OFF     // Enable
 #if defined(__MK64FX512__) || defined(__MK66FX1M0__)
   // teensy3.5/3.6
   #define Axis4_STEP         34     // Step
@@ -180,12 +181,11 @@
   #define Axis4_STEP         31     // Step
   #define Axis4_DIR          32     // Dir
 #endif
-#define Axis4_EN             -1     // Enable
 
 // For focuser2 stepper driver
+#define Axis5_EN            OFF     // Enable
 #define Axis5_STEP           30     // Step
 #define Axis5_DIR            33     // Dir
-#define Axis5_EN             -1     // Enable
 
 // ST4 interface
 #define ST4RAw               24     // ST4 RA- West

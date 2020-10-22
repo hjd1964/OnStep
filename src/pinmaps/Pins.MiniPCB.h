@@ -72,17 +72,17 @@
 #define Axis2_HOME         Aux4     // Sense home position
 
 // For rotator stepper driver
-#define Axis3_EN             -1     // ENable
+#define Axis3_EN            OFF     // ENable
 #define Axis3_STEP           30     // Step
 #define Axis3_DIR            33     // Dir
 
 // For focuser1 stepper driver
-#define Axis4_EN             -1     // ENable
+#define Axis4_EN            OFF     // ENable
 #define Axis4_STEP           31     // Step
 #define Axis4_DIR            32     // Dir
 
 // For focuser2 stepper driver
-#define Axis5_EN             -1     // ENable
+#define Axis5_EN            OFF     // ENable
 #define Axis5_STEP           30     // Step
 #define Axis5_DIR            33     // Dir
 

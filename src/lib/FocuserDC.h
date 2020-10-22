@@ -83,10 +83,11 @@ class focuserDC : public focuser  {
     }
 
     // sets target position in steps
-    void setTarget(long pos) {
+    bool setTarget(long pos) {
       dcMotor.setPower((moveRate/1000.0)*powerFor1mmSec);
       target.part.m=pos; target.part.f=0;
       if ((long)target.part.m < smin) target.part.m=smin; if ((long)target.part.m > smax) target.part.m=smax;
+      return true;
     }
 
     // sets target relative position in steps

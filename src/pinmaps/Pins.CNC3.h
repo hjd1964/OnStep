@@ -14,13 +14,13 @@
 #define Aux3                 21     // Home SW for Axis1, or I2C SDA {assuming default SCL/SDA pins are present}
 #define Aux4                 22     // Home SW for Axis2, or I2C SCL
 #define Aux7                 39     // Limit SW, PPS, etc.
-#define Aux8                 23     // {was 25} OneWire, Status LED, Status2 LED, Reticle LED, etc.
+#define Aux8                 23     // OneWire, Status LED, Status2 LED, Reticle LED, etc.
 
 // Misc. pins
 #ifndef OneWirePin
   #define OneWirePin       Aux8     // Default Pin for OneWire bus
 #endif
-#define AddonBootModePin     27     // {was 26} ESP8266 GPIO0 (Dir2)
+#define AddonBootModePin     27     // ESP8266 GPIO0 (Dir2)
 #define AddonResetPin      Aux2     // ESP8266 RST
 
 // The PEC index sense is a logic level input, resets the PEC index on rising edge then waits for 60 seconds before allowing another reset
@@ -41,47 +41,47 @@
 #define LimitPin           Aux7     // The limit switch sense is a logic level input normally pull high (2k resistor,) shorted to ground it stops gotos/tracking
 
 // Axis1 RA/Azm step/dir driver
-#define Axis1_EN             12     // [must be low at boot 12] Enable
-#define Axis1_M0             32     // {was 13} Microstep Mode 0 or SPI MOSI
-#define Axis1_M1             33     // {was 14} Microstep Mode 1 or SPI SCK
-#define Axis1_M2             15     // {was 23} Microstep Mode 2 or SPI CS
+#define Axis1_EN             12     // Enable [must be low at boot 12]
+#define Axis1_M0             32     // Microstep Mode 0 or SPI MOSI
+#define Axis1_M1             33     // Microstep Mode 1 or SPI SCK
+#define Axis1_M2             15     // Microstep Mode 2 or SPI CS
 #define Axis1_M3           Aux2     // SPI MISO/Fault
-#define Axis1_STEP           26     // {was 18} Step
-#define Axis1_DIR            16     // {was 0} Dir
+#define Axis1_STEP           26     // Step
+#define Axis1_DIR            16     // Dir
 #define Axis1_DECAY    Axis1_M2     // Decay mode
 #define Axis1_HOME         Aux3     // Sense home position
 
 // Axis2 Dec/Alt step/dir driver
-#define Axis2_EN             12     // [must be low at boot 12] Enable
-#define Axis2_M0             32     // {was 13} Microstep Mode 0 or SPI MOSI
-#define Axis2_M1             33     // {was 14} Microstep Mode 1 or SPI SCK
-#define Axis2_M2              0     // {was 5} Microstep Mode 2 or SPI CS
+#define Axis2_EN         SHARED     // Enable pin control shared with Axis1
+#define Axis2_M0             32     // Microstep Mode 0 or SPI MOSI
+#define Axis2_M1             33     // Microstep Mode 1 or SPI SCK
+#define Axis2_M2              0     // Microstep Mode 2 or SPI CS
 #define Axis2_M3           Aux2     // SPI MISO/Fault
-#define Axis2_STEP           25     // {was 27} Step
-#define Axis2_DIR            27     // {was 26} Dir
+#define Axis2_STEP           25     // Step
+#define Axis2_DIR            27     // Dir
 #define Axis2_DECAY    Axis2_M2     // Decay mode
 #define Axis2_HOME         Aux4     // Sense home position
 
 // For rotator stepper driver
-#define Axis3_EN             -1     // Enable {enable pin disabled so focuser/rotator doesn't impact main axes EN state}
-#define Axis3_STEP           19     // {was 2} Step
-#define Axis3_DIR            14     // {was 15} Dir
+#define Axis3_EN         SHARED     // Enable pin control shared with Axis1
+#define Axis3_STEP           19     // Step
+#define Axis3_DIR            14     // Dir
 
 // For focuser1 stepper driver
-#define Axis4_EN             -1     // Enable {enable pin disabled so focuser/rotator doesn't impact main axes EN state}
+#define Axis4_EN         SHARED     // Enable pin control shared with Axis1
 #define Axis4_STEP           17     // Step
-#define Axis4_DIR            14     // {was 15} Dir
+#define Axis4_DIR            14     // Dir
 
 // For focuser2 stepper driver
-#define Axis5_EN             -1     // Enable {enable pin disabled so focuser/rotator doesn't impact main axes EN state}
-#define Axis5_STEP           19     // {was 2} Step
-#define Axis5_DIR            14     // {was 15} Dir
+#define Axis5_EN         SHARED     // Enable pin control shared with Axis1
+#define Axis5_STEP           19     // Step
+#define Axis5_DIR            14     // Dir
 
 // ST4 interface
-#define ST4RAw               34     // [input only 34] ST4 RA- West
-#define ST4DEs               18     // {was 32} ST4 DE- South
-#define ST4DEn                4     // {was 33} ST4 DE+ North
-#define ST4RAe               35     // [input only 35] ST4 RA+ East
+#define ST4RAw               34     // ST4 RA- West [input only 34]
+#define ST4DEs               18     // ST4 DE- South
+#define ST4DEn                4     // ST4 DE+ North
+#define ST4RAe               35     // ST4 RA+ East [input only 35]
 
 #else
 #error "Wrong processor for this configuration!"

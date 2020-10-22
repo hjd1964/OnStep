@@ -361,7 +361,7 @@ void enableStepperDrivers() {
     #if AXIS2_DRIVER_MODEL == TMC_SPI && Axis2_EN == -1
       tmcAxis2.setup(AXIS2_DRIVER_INTPOL,AXIS2_DRIVER_DECAY_MODE,AXIS2_DRIVER_CODE,axis2Settings.IRUN,axis2SettingsEx.IHOLD);
     #else
-      digitalWrite(Axis2_EN,AXIS2_DRIVER_ENABLE);
+      if (Axis2_EN != OFF && Axis2_EN != SHARED) digitalWrite(Axis2_EN,AXIS2_DRIVER_ENABLE);
     #endif
     axis2Enabled=true;
 
@@ -373,17 +373,17 @@ void enableStepperDrivers() {
 void disableStepperDrivers() {
   // disable the stepper drivers
   if (axis1Enabled == true) {
-    #if AXIS1_DRIVER_MODEL == TMC_SPI && Axis1_EN == -1
+    #if AXIS1_DRIVER_MODEL == TMC_SPI && Axis1_EN == OFF
       tmcAxis1.setup(AXIS1_DRIVER_INTPOL,STEALTHCHOP,AXIS1_DRIVER_CODE,0,0);
     #else
       digitalWrite(Axis1_EN,AXIS1_DRIVER_DISABLE);
     #endif
     axis1Enabled=false;
 
-    #if AXIS2_DRIVER_MODEL == TMC_SPI && Axis2_EN == -1
+    #if AXIS2_DRIVER_MODEL == TMC_SPI && Axis2_EN == OFF
       tmcAxis2.setup(AXIS2_DRIVER_INTPOL,STEALTHCHOP,AXIS2_DRIVER_CODE,0,0);
     #else
-      digitalWrite(Axis2_EN,AXIS2_DRIVER_DISABLE);
+      if (Axis2_EN != OFF && Axis2_EN != SHARED) digitalWrite(Axis2_EN,AXIS2_DRIVER_DISABLE);
     #endif
     axis2Enabled=false;
 

@@ -45,7 +45,7 @@
 #define Axis1_HOME         Aux3     // Sense home position Axis1
 
 // Axis2 Dec/Alt step/dir driver
-#define Axis2_EN              4     // Enable
+#define Axis2_EN         SHARED     // Enable pin control shared with Axis1
 #define Axis2_M0             13     // Microstep Mode 0  or SPI MOSI
 #define Axis2_M1             14     // Microstep Mode 1  or SPI SCK
 #define Axis2_M2              5     // Microstep Mode 2  or SPI CS or Decay Mode
@@ -67,9 +67,9 @@
 #define Axis4_DIR            15     // Dir
 
 // For focuser2 stepper driver
-#define Axis5_EN             -1     // Enable
-#define Axis5_STEP           -1     // Step
-#define Axis5_DIR            -1     // Dir
+#define Axis5_EN            OFF     // Enable
+#define Axis5_STEP          OFF     // Step
+#define Axis5_DIR           OFF     // Dir
 
 // ST4 interface
 #define ST4RAw               34     // ST4 RA- West

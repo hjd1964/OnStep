@@ -90,7 +90,7 @@ class focuser {
     }
 
     // sets target position in steps
-    virtual void setTarget(long pos) { }
+    virtual bool setTarget(long pos) { return false; }
 
     // sets target relative position in steps
     virtual void relativeTarget(long pos) { }
@@ -104,6 +104,9 @@ class focuser {
     void savePosition() { writeTarget(); }
   
   protected:
+    bool movementAllowed() {
+      if (enPin == SHARED && !axis1Enabled) return false; else return true;
+    }
     void writeTarget() {
       nv.writeLong(nvAddress+EE_focSpos,spos);
       nv.writeLong(nvAddress+EE_focTarget,(long)target.part.m);

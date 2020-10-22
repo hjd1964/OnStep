@@ -46,7 +46,7 @@
 #define Axis1_HOME         Aux3     // Sense home position
 
 // Axis2 Dec/Alt step/dir driver
-#define Axis2_EN             12     // Enable
+#define Axis2_EN         SHARED     // Enable pin control shared with Axis1
 #define Axis2_M0             13     // Microstep Mode 0 or SPI MOSI
 #define Axis2_M1             14     // Microstep Mode 1 or SPI SCK
 #define Axis2_M2              5     // Microstep Mode 2 or SPI CS
@@ -57,17 +57,17 @@
 #define Axis2_HOME         Aux4     // Sense home position
 
 // For rotator stepper driver
-#define Axis3_EN             -1     // Enable
+#define Axis3_EN            OFF     // No enable pin control (always enabled)
 #define Axis3_STEP            2     // Step
 #define Axis3_DIR            15     // Dir
 
 // For focuser1 stepper driver
-#define Axis4_EN           Aux2     // Enable
+#define Axis4_EN           Aux2     // Enable pin on Aux2 but can be turned OFF during validation
 #define Axis4_STEP           19     // Step
 #define Axis4_DIR            15     // Dir
 
 // For focuser2 stepper driver
-#define Axis5_EN             -1     // Enable
+#define Axis5_EN            OFF     // No enable pin control (always enabled)
 #define Axis5_STEP            2     // Step
 #define Axis5_DIR            15     // Dir
 

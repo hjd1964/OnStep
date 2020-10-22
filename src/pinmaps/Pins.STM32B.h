@@ -102,7 +102,7 @@
 // This is the built in LED for the Black Pill board. There is a pin
 // available from it too, in case you want to power another LED with a wire
 #define LEDnegPin           Aux0    // Drain
-#define LEDneg2Pin            -1    // Drain
+#define LEDneg2Pin           OFF    // Drain
 
 // For a piezo buzzer
 #define TonePin              PB9    // Tone
@@ -122,9 +122,9 @@
 #define Axis4_DIR           PA15    // Dir
 
 // For focuser2 stepper driver
-#define Axis5_EN              -1    // Enable
-#define Axis5_STEP            -1    // Step
-#define Axis5_DIR             -1    // Dir
+#define Axis5_EN             OFF    // Enable
+#define Axis5_STEP           OFF    // Step
+#define Axis5_DIR            OFF    // Dir
 
 // The limit switch sense is a logic level input which uses the internal pull up,
 // shorted to ground it stops gotos/tracking
@@ -133,7 +133,7 @@
 // The PEC index sense is a logic level input, resets the PEC index on rising
 // edge then waits for 60 seconds before allowing another reset
 #define PecPin              PC14
-#define AnalogPecPin          -1    // PEC Sense, analog or digital
+#define AnalogPecPin         OFF    // PEC Sense, analog or digital
 
 #define ReticlePin          Aux3    // Drain
 
