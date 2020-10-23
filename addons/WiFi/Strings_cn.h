@@ -35,6 +35,7 @@
 #define L_RATE "速率"
 #define L_RANGE "范围"
 #define L_UNKNOWN "未知"
+#define L_FAULT "故障"
 
 // ---------------------------- Index ----------------------------
 // date/time

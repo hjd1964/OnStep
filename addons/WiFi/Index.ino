@@ -189,8 +189,8 @@ void handleRoot() {
   data += temp;
 
   // RA,Dec encoder position
-  if (encoders.validAxis1()) { f=encoders.getAxis1(); doubleToDms(temp1,&f,true,true); } else strcpy(temp1," --- fault --- ");
-  if (encoders.validAxis2()) { f=encoders.getAxis2(); doubleToDms(temp2,&f,true,true); } else strcpy(temp2," --- fault --- ");
+  if (encoders.validAxis1()) { f=encoders.getAxis1(); doubleToDms(temp1,&f,true,true); } else strcpy(temp1," ** " L_FAULT " ** ");
+  if (encoders.validAxis2()) { f=encoders.getAxis2(); doubleToDms(temp2,&f,true,true); } else strcpy(temp2," ** " L_FAULT " ** ");
   sprintf_P(temp,html_indexEncoder2,temp1,temp2);
   data += temp;
 #endif

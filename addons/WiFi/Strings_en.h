@@ -35,6 +35,7 @@
 #define L_RATE "rate"
 #define L_RANGE "range"
 #define L_UNKNOWN "Unknown"
+#define L_FAULT "Fault"
 
 // ---------------------------- Index ----------------------------
 // date/time
