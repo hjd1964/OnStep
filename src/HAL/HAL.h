@@ -24,66 +24,70 @@
 
 #if defined(__AVR_ATmega1280__)
   #define MCU_STR "Mega1280"
-  #include "HAL_Mega2560/HAL_Mega2560.h"
+  #include "Mega2560/Mega2560.h"
 
 #elif defined(__AVR_ATmega2560__)
   #define MCU_STR "Mega2560"
-  #include "HAL_Mega2560/HAL_Mega2560.h"
+  #include "Mega2560/Mega2560.h"
 
 #elif defined(_mk20dx128_h_) || defined(__MK20DX128__)
   // Teensy 3.0
   #define MCU_STR "Teensy3.0"
-  #include "HAL_Teensy_3/HAL_Teensy_3.h"
+  #include "Teensy_3/Teensy_3.h"
 
 #elif defined(__MK20DX256__)
   // Teensy 3.2
   #define MCU_STR "Teensy3.2"
-  #include "HAL_Teensy_3/HAL_Teensy_3.h"
+  #include "Teensy_3/Teensy_3.h"
 
 #elif defined(__MK64FX512__)
   // Teensy 3.5
   #define MCU_STR "Teensy3.5"
-  #include "HAL_Teensy_3/HAL_Teensy_3.h"
+  #include "Teensy_3/Teensy_3.h"
 
 #elif defined(__MK66FX1M0__)
   // Teensy 3.6
   #define MCU_STR "Teensy3.6"
-  #include "HAL_Teensy_3/HAL_Teensy_3.h"
+  #include "Teensy_3/Teensy_3.h"
 
 #elif defined(__IMXRT1052__) || defined(__IMXRT1062__)
   // Teensy 4.0
   #define MCU_STR "Teensy4.0"
-  #include "HAL_Teensy_4/HAL_Teensy_4.h"
+  #include "Teensy_4/Teensy_4.h"
 
 #elif defined(__STM32F1__)
-  // STM32F103C8/CB: 72MHz, 128K flash, 64K RAM
-  #define MCU_STR "STM32F1"
-  #include "HAL_STM32F1/HAL_STM32F1.h"
+  // STM32F103C8/CB: 72MHz, 128K flash, 64K RAM, ARM Cortex M3 (Arduino_STM32 board manager)
+  #error "For OnStep 4.x and later, Arduino_STM32 is deprecated in favour of STM32Duino board manager. See the Blue Pill Wiki for details"
   
 #elif defined(STM32F103xB)
-  // STM32F103C8/CB: 72MHz, 128K flash, 64K RAM (using STM32duino)
+  // STM32F103C8/CB: 72MHz, 128K flash, 64K RAM, ARM Cortex M3 (STM32duino board manager)
   #define MCU_STR "STM32F103"
-  #include "HAL_STM32F1/HAL_STM32duinoF1.h"
+  #include "STM32F1/STM32duinoF1.h"
+
+#elif defined(STM32F303xC)
+  // RobotDyn BlackPill STM32F303, 256K flash, ARM Cortex M4 (STM32duino board manager)
+  #define MCU_STR "STM32F303"
+  #include "STM32F1/STM32duinoF1.h"
 
 #elif defined(STM32F411xE)
   // Blackpill board with STM32F411CE
   #define MCU_STR "STM32F411"
-  #include "HAL_STM32F4/HAL_STM32F411.h"
+  #include "STM32F4/STM32F411.h"
 
 #elif defined(STM32F446xx)
   // FYSETC S6 board with STM32F446
   #define MCU_STR "STM32F446"
-  #include "HAL_STM32F4/HAL_STM32F446.h"
+  #include "STM32F4/STM32F446.h"
 
 #elif defined(ESP32)
   // ESP32
   #define MCU_STR "ESP32"
-  #include "HAL_ESP32/HAL_ESP32.h"
+  #include "ESP32/ESP32.h"
 
 #elif defined(__SAM3X8E__)
   // Arduino Due
   #define MCU_STR "SAM3X8E (Arduino DUE)"
-  #include "HAL_Due/HAL_Due.h"  
+  #include "Due/Due.h"  
   
 #else
   #error "Unsupported Platform! If this is a new platform, it needs the appropriate entries in the HAL directory."
