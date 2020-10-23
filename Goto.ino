@@ -6,7 +6,7 @@ CommandErrors validateGoto() {
   // Check state
   if (parkStatus != NotParked)                 return CE_SLEW_ERR_IN_PARK;
   if (!axis1Enabled)                           return CE_SLEW_ERR_IN_STANDBY;
-  if (trackingSyncInProgress())                return CE_GOTO_ERR_GOTO;
+  if (trackingSyncInProgress())                return CE_MOUNT_IN_MOTION;
   if (trackingState == TrackingMoveTo)         return CE_GOTO_ERR_GOTO;
   if (guideDirAxis1 || guideDirAxis2)          return CE_MOUNT_IN_MOTION;
   if (faultAxis1 || faultAxis2)                return CE_SLEW_ERR_HARDWARE_FAULT;
