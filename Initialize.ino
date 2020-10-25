@@ -394,7 +394,7 @@ void initReadNvValues() {
   // get the degrees past meridian east/west
 #if MOUNT_TYPE == GEM
   int i=round(nv.read(EE_dpmE)-128);
-  if (i > 60) i=((i-90)*2)+60; else if (i < -60) i=((i+90)*2)-60;
+  if (i > 60) i=((i-60)*2)+60; else if (i < -60) i=((i+60)*2)-60;
   degreesPastMeridianE=i;
   if (degreesPastMeridianE < -180 || degreesPastMeridianE > 180) { degreesPastMeridianE=0.0; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV degreesPastMeridianE"); }
 
