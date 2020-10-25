@@ -7,17 +7,6 @@
   #else
     #undef ASSIGNED_AUX2
     #define ASSIGNED_AUX2 PIN_DEDICATED
-    #warning "Configuration (Config.h): SERIAL_B_ESP_FLASHING is ON; Stepper driver ENable control OFF, design should Gnd driver EN pins and Aux2 gets connected to Addons RST pin."
-    #undef Axis1_EN
-    #define Axis1_EN OFF
-    #undef Axis2_EN
-    #define Axis2_EN OFF
-    #undef Axis3_EN
-    #define Axis3_EN OFF
-    #undef Axis4_EN
-    #define Axis4_EN OFF
-    #undef Axis5_EN
-    #define Axis5_EN OFF
   #endif
 #endif
 

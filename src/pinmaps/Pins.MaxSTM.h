@@ -38,7 +38,7 @@
 #define LimitPin            Aux7     // The limit switch sense is a logic level input normally pull high (2k resistor,) shorted to ground it stops gotos/tracking
 
 // Axis1 RA/Azm step/dir driver
-#define Axis1_EN            Aux2     // Enable pin control on Aux2 but can be turned OFF during validation (setting all stepper drivers _EN to OFF)
+#define Axis1_EN             OFF     // No ENable pin control
 #define Axis1_M0             PA7     // SPI MOSI
 #define Axis1_M0PORT       GPIOA
 #define Axis1_M0BIT   GPIO_PIN_7
@@ -62,7 +62,7 @@
 #define Axis1_HOME          Aux3     // Sense home position Axis1
 
 // Axis2 Dec/Alt step/dir driver
-#define Axis2_EN          SHARED     // Enable pin control shared with Axis1
+#define Axis2_EN             OFF     // No ENable pin control
 #define Axis2_M0             PA7     // SPI MOSI
 #define Axis2_M0PORT       GPIOA
 #define Axis2_M0BIT   GPIO_PIN_7
@@ -86,7 +86,7 @@
 #define Axis2_HOME          Aux4     // Sense home position
 
 // For rotator stepper driver
-#define Axis3_EN          SHARED     // Enable pin control shared with Axis1
+#define Axis3_EN             OFF     // No ENable pin control
 #define Axis3_M0             PA7     // SPI MOSI
 #define Axis3_M1             PA5     // SPI SCK
 #define Axis3_M2            PC15     // SPI CS
@@ -95,7 +95,7 @@
 #define Axis3_DIR           PC13     // Dir
 
 // For focuser1 stepper driver
-#define Axis4_EN          SHARED     // Enable pin control shared with Axis1
+#define Axis4_EN             OFF     // No ENable pin control
 #define Axis4_M0             PA7     // SPI MOSI
 #define Axis4_M1             PA5     // SPI SCK
 #define Axis4_M2            PC14     // SPI CS
@@ -104,7 +104,7 @@
 #define Axis4_DIR           PC13     // Dir
 
 // For focuser2 stepper driver
-#define Axis5_EN          SHARED     // Enable pin control shared with Axis1
+#define Axis5_EN             OFF     // No ENable pin control
 #define Axis5_M0             PA7     // SPI MOSI
 #define Axis5_M1             PA5     // SPI SCK
 #define Axis5_M2            PC15     // SPI CS
