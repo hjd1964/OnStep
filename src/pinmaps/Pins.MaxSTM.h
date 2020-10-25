@@ -8,6 +8,8 @@
 #define Aux2                PA13     // ESP8266 RST or stepper drivers ENable
 #define Aux3                PB13     // Home SW
 #define Aux4                PB14     // OneWire, Home SW
+#define Aux5                 PA9     // TX1 
+#define Aux6                PA10     // RX1
 #define Aux7                PB15     // Limit SW
 #define Aux8                 PA8     // Status2 LED, Reticle LED
 
