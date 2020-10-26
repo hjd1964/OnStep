@@ -200,6 +200,7 @@ CommandErrors startGuideAxis2(char direction, int guideRate, long guideDuration,
 }
 
 bool guideNorthOk() {
+  if (!safetyLimitsOn) return true;
   double a2; if (AXIS2_TANGENT_ARM == ON) { cli(); a2=posAxis2/axis2Settings.stepsPerMeasure; sei(); } else a2=getInstrAxis2();
   if (a2 < axis2Settings.min && getInstrPierSide() == PierSideWest) return false;
   if (a2 > axis2Settings.max && getInstrPierSide() == PierSideEast) return false;
@@ -207,6 +208,7 @@ bool guideNorthOk() {
   return true;
 }
 bool guideSouthOk() {
+  if (!safetyLimitsOn) return true;
   double a2; if (AXIS2_TANGENT_ARM == ON) { cli(); a2=posAxis2/axis2Settings.stepsPerMeasure; sei(); } else a2=getInstrAxis2();
   if (a2 < axis2Settings.min && getInstrPierSide() == PierSideEast) return false;
   if (a2 > axis2Settings.max && getInstrPierSide() == PierSideWest) return false;
@@ -214,11 +216,13 @@ bool guideSouthOk() {
   return true;
 }
 bool guideEastOk() {
+  if (!safetyLimitsOn) return true;
   if (meridianFlip != MeridianFlipNever && getInstrPierSide() == PierSideEast) { if (getInstrAxis1() < -degreesPastMeridianE) return false; }
   if (getInstrAxis1() < axis1Settings.min) return false;
   return true;
 }
 bool guideWestOk() {
+  if (!safetyLimitsOn) return true;
   if (meridianFlip != MeridianFlipNever && getInstrPierSide() == PierSideWest) { if (getInstrAxis1() > degreesPastMeridianW) return false; }
   if (getInstrAxis1() > axis1Settings.max) return false;
   return true;
