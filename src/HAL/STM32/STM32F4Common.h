@@ -1,3 +1,5 @@
+// Common macros for STM32F4 family
+
 // fast bit-banged SPI should hit an ~1 MHz bitrate for TMC drivers
 #define delaySPI delayNanoseconds(250)
 

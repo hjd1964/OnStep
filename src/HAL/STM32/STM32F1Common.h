@@ -1,3 +1,5 @@
+// Common macros and functions for STM32 F103 and F303 microcontrollers
+
 // fast bit-banged SPI should hit an ~1 MHz bitrate for TMC drivers
 #define delaySPI delayNanoseconds(500)
 

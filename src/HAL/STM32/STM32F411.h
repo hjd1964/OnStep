@@ -1,7 +1,4 @@
-// Platform setup ------------------------------------------------------------------------------------
-
-// We define a more generic symbol, in case more STM32 boards based on different lines are supported
-#define __ARM_STM32__
+// HAL setup for STM32F411
 
 #define HAL_FAST_PROCESSOR
 

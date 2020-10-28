@@ -1,3 +1,4 @@
+// Common functions and macros for all STM32 microcontroller families
 
 // Sidereal timer
 void TIMER1_COMPA_vect(void);

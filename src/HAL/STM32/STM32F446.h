@@ -1,4 +1,4 @@
-// Platform setup ------------------------------------------------------------------------------------
+// HAL setup for STM32F446 microcontroller
 
 // We define a more generic symbol, in case more STM32 boards based on different lines are supported
 #define __ARM_STM32__
