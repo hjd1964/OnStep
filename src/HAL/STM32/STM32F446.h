@@ -103,6 +103,6 @@ HardwareTimer *Timer_Axis2    = new HardwareTimer(TIM_AXIS2);
 #define AXIS1_CH     1
 #define AXIS2_CH     1
 
-#include "STM32Common.h"
+#include "Common.h"
 
-#include "STM32F4Common.h"
+#include "F4Common.h"
