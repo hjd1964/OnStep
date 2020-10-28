@@ -1,12 +1,12 @@
-// Platform setup ------------------------------------------------------------------------------------
-
-// We define a more generic symbol, in case more STM32 boards based on different lines are supported
-#define __ARM_STM32__
+// HAL setup for STM32 F103 and F303 microcontrollers
 
 // Lower limit (fastest) step rate in uS for this platform (in SQW mode)
 #if defined(STM32F303xC)
 
   #define HAL_MAXRATE_LOWER_LIMIT 16
+
+  #define HAL_FAST_PROCESSOR
+
   #define TIM_SIDEREAL TIM15
   #define TIM_AXIS1    TIM16
   #define TIM_AXIS2    TIM17
@@ -14,6 +14,7 @@
 #elif defined(STM32F103xB)
 
   #define HAL_MAXRATE_LOWER_LIMIT 34
+
   #define TIM_SIDEREAL TIM4
   #define TIM_AXIS1    TIM1
   #define TIM_AXIS2    TIM2
