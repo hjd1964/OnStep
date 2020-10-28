@@ -14,9 +14,6 @@
 
 #include <HardwareTimer.h>
 
-// Get this library from https://github.com/watterott/Arduino-Libs/archive/master.zip
-#include <digitalWriteFast.h>
-
 // Interrupts
 #define cli() noInterrupts()
 #define sei() interrupts()
