@@ -8,10 +8,12 @@
 #define a1STEP_L WRITE_REG(Axis1_StpPORT->BRR,  Axis1_StpBIT)
 #define a1DIR_H  WRITE_REG(Axis1_DirPORT->BSRR, Axis1_DirBIT)
 #define a1DIR_L  WRITE_REG(Axis1_DirPORT->BRR,  Axis1_DirBIT)
+
 #define a2STEP_H WRITE_REG(Axis2_StpPORT->BSRR, Axis2_StpBIT)
 #define a2STEP_L WRITE_REG(Axis2_StpPORT->BRR,  Axis2_StpBIT)
 #define a2DIR_H  WRITE_REG(Axis2_DirPORT->BSRR, Axis2_DirBIT)
 #define a2DIR_L  WRITE_REG(Axis2_DirPORT->BRR,  Axis2_DirBIT)
+
 #define a1CS_H WRITE_REG(Axis1_M2PORT->BSRR, Axis1_M2BIT)
 #define a1CS_L WRITE_REG(Axis1_M2PORT->BRR, Axis1_M2BIT)
 #define a1CLK_H WRITE_REG(Axis1_M1PORT->BSRR, Axis1_M1BIT)
