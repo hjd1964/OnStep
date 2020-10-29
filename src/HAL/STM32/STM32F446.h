@@ -62,7 +62,6 @@
 //--------------------------------------------------------------------------------------------------
 // Initialize timers
 // frequency compensation for adjusting microseconds to timer counts
-//#define F_COMP 19.7721042
 #define F_COMP 4000000
 
 #define ISR(f) void f (void)

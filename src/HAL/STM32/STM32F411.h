@@ -59,7 +59,6 @@ HardwareSerial HWSerial2(PA3, PA2); // RX2, TX2
 //--------------------------------------------------------------------------------------------------
 // Initialize timers
 // frequency compensation for adjusting microseconds to timer counts
-//#define F_COMP 19.7721042
 #define F_COMP 4000000
 
 #define ISR(f) void f (void)
