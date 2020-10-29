@@ -1,8 +1,5 @@
 // HAL setup for STM32F446 microcontroller
 
-// We define a more generic symbol, in case more STM32 boards based on different lines are supported
-#define __ARM_STM32__
-
 #define HAL_FAST_PROCESSOR
 
 // Lower limit (fastest) step rate in uS for this platform (in SQW mode)
@@ -11,6 +8,9 @@
 
 // Width of step pulse
 #define HAL_PULSE_WIDTH         500
+
+// SPI delay in nanoseconds
+#define SPI_DELAY_NS            250
 
 #include <HardwareTimer.h>
 

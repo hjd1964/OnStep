@@ -1,8 +1,5 @@
 // Common macros for STM32F4 family
 
-// fast bit-banged SPI should hit an ~1 MHz bitrate for TMC drivers
-#define delaySPI delayNanoseconds(250)
-
 // We use standard #define's to do **fast** digitalWrite's to the step and dir pins for the Axis1/2 stepper drivers
 #define a1STEP_H WRITE_REG(Axis1_StpPORT->BSRR, Axis1_StpBIT)
 #define a1STEP_L WRITE_REG(Axis1_StpPORT->BSRR, Axis1_StpBIT << 16)

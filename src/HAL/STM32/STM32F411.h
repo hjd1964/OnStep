@@ -9,6 +9,9 @@
 // Width of step pulse
 #define HAL_PULSE_WIDTH         500
 
+// SPI delay in nanoseconds
+#define SPI_DELAY_NS            250
+
 #include <HardwareTimer.h>
 
 // Interrupts

@@ -124,3 +124,6 @@ void PresetTimerInterval(long iv, bool TPS, volatile uint32_t *nextRate, volatil
 #define SET(x,y) (x|=(1<<y))
 #define TGL(x,y) (x^=(1<<y))
 
+// Shorthand for SPI delay
+#define delaySPI delayNanoseconds(SPI_DELAY_NS)
+

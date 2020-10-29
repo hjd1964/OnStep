@@ -26,6 +26,9 @@
 // Width of step pulse
 #define HAL_PULSE_WIDTH 1900
 
+// fast bit-banged SPI should hit an ~1 MHz bitrate for TMC drivers
+#define SPI_DELAY_NS    500
+
 #include <HardwareTimer.h>
 
 // Interrupts
