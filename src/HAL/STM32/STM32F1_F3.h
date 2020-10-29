@@ -1,8 +1,9 @@
 // HAL setup for STM32 F103 and F303 microcontrollers
 
-// Lower limit (fastest) step rate in uS for this platform (in SQW mode)
 #if defined(STM32F303xC)
 
+  // Lower limit (fastest) step rate in uS for this platform (in SQW mode)
+  // This assumes optimization in the Arduino IDE is set to "Fastest (-O3)"
   #define HAL_MAXRATE_LOWER_LIMIT 16
 
   #define HAL_FAST_PROCESSOR
@@ -13,6 +14,7 @@
 
 #elif defined(STM32F103xB)
 
+  // Lower limit (fastest) step rate in uS for this platform (in SQW mode)
   #define HAL_MAXRATE_LOWER_LIMIT 34
 
   #define TIM_SIDEREAL TIM4
@@ -59,29 +61,6 @@ HardwareSerial Serial2(PB11, PB10);
   #include "../drivers/NV_I2C_EEPROM_24XX_C.h"
 #endif
 
-//----------------------------------------------------------------------------------------------------
-// Nanoseconds delay function
-unsigned int _nanosPerPass=1;
-void delayNanoseconds(unsigned int n) {
-  unsigned int np=(n/_nanosPerPass);
-  for (unsigned int i=0; i<np; i++) { __asm__ volatile ("nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t"); }
-}
-
-//--------------------------------------------------------------------------------------------------
-// General purpose initialize for HAL
-void HAL_Initialize(void) {
-  // calibrate delayNanoseconds()
-  uint32_t startTime,npp;
-  cli(); startTime=micros(); delayNanoseconds(65535); npp=micros(); sei(); npp=((int32_t)(npp-startTime)*1000)/63335;
-  if (npp<1) npp=1; if (npp>2000) npp=2000; _nanosPerPass=npp;
-}
-
-//--------------------------------------------------------------------------------------------------
-// Internal MCU temperature (in degrees C)
-float HAL_MCU_Temperature(void) {
-  return -999;
-}
-
 //--------------------------------------------------------------------------------------------------
 // Initialize timers
 // frequency compensation for adjusting microseconds to timer counts
@@ -101,5 +80,6 @@ HardwareTimer *Timer_Axis2    = new HardwareTimer(TIM_AXIS2);
 #define AXIS2_CH     1
 
 #include "Common.h"
+
 #include "F1_FastWrite.h"
 

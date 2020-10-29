@@ -3,7 +3,6 @@
 #define HAL_FAST_PROCESSOR
 
 // Lower limit (fastest) step rate in uS for this platform (in SQW mode)
-
 #define HAL_MAXRATE_LOWER_LIMIT 14
 
 // Width of step pulse
@@ -59,29 +58,6 @@
   // Defaults to 0x57 and 4KB 
   #include "../drivers/NV_I2C_EEPROM_24XX_C.h"
 #endif
-
-//----------------------------------------------------------------------------------------------------
-// Nanoseconds delay function
-unsigned int _nanosPerPass=1;
-void delayNanoseconds(unsigned int n) {
-  unsigned int np=(n/_nanosPerPass);
-  for (unsigned int i=0; i<np; i++) { __asm__ volatile ("nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t"); }
-}
-
-//--------------------------------------------------------------------------------------------------
-// General purpose initialize for HAL
-void HAL_Initialize(void) {
-  // calibrate delayNanoseconds()
-  uint32_t startTime,npp;
-  startTime=micros(); delayNanoseconds(65535); npp=micros(); npp=((int32_t)(npp-startTime)*1000)/63335;
-  if (npp<1) npp=1; if (npp>2000) npp=2000; _nanosPerPass=npp;
-}
-
-//--------------------------------------------------------------------------------------------------
-// Internal MCU temperature (in degrees C)
-float HAL_MCU_Temperature(void) {
-  return -999;
-}
 
 //--------------------------------------------------------------------------------------------------
 // Initialize timers
