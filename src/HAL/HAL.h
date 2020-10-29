@@ -62,22 +62,22 @@
 #elif defined(STM32F103xB)
   // STM32F103C8/CB: 72MHz, 128K flash, 64K RAM, ARM Cortex M3 (STM32duino board manager)
   #define MCU_STR "STM32F103"
-  #include "STM32F1/STM32duinoF1.h"
+  #include "STM32/STM32F1_F3.h"
 
 #elif defined(STM32F303xC)
   // RobotDyn BlackPill STM32F303, 256K flash, ARM Cortex M4 (STM32duino board manager)
   #define MCU_STR "STM32F303"
-  #include "STM32F1/STM32duinoF1.h"
+  #include "STM32/STM32F1_F3.h"
 
 #elif defined(STM32F411xE)
   // Blackpill board with STM32F411CE
   #define MCU_STR "STM32F411"
-  #include "STM32F4/STM32F411.h"
+  #include "STM32/STM32F411.h"
 
 #elif defined(STM32F446xx)
   // FYSETC S6 board with STM32F446
   #define MCU_STR "STM32F446"
-  #include "STM32F4/STM32F446.h"
+  #include "STM32/STM32F446.h"
 
 #elif defined(ESP32)
   // ESP32
