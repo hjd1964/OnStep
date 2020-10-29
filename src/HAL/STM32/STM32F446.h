@@ -105,4 +105,4 @@ HardwareTimer *Timer_Axis2    = new HardwareTimer(TIM_AXIS2);
 
 #include "Common.h"
 
-#include "F4Common.h"
+#include "F4_FastWrite.h"

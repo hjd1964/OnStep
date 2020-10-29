@@ -101,5 +101,5 @@ HardwareTimer *Timer_Axis2    = new HardwareTimer(TIM_AXIS2);
 #define AXIS2_CH     1
 
 #include "Common.h"
-#include "F1Common.h"
+#include "F1_FastWrite.h"
 
