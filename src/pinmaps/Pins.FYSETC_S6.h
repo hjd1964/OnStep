@@ -114,7 +114,11 @@
 // Axis2 Dec/Alt step/dir driver
 #define Axis2_EN            PD9     // Enable
 #define Axis2_M0        SS_MOSI     // Microstep Mode 0 or SPI MOSI
+#define Axis2_M0PORT       Axis1_M0PORT
+#define Axis2_M0BIT        Axis1_M0BIT
 #define Axis2_M1         SS_SCK     // Microstep Mode 1 or SPI SCK
+#define Axis2_M1PORT       Axis1_M1PORT
+#define Axis2_M1BIT        Axis1_M1BIT
 #define Axis2_M2           PE15     // Microstep Mode 2 or SPI CS or Decay Mode
 #define Axis2_M2PORT       GPIOE
 #define Axis2_M2BIT   GPIO_PIN_15
