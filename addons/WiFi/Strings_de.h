@@ -14,6 +14,7 @@
 #define L_DOWNLOAD "Download"
 #define L_ACCEPT "Akzeptieren"
 #define L_CONTINUE "Fortsetzen"
+#define L_ARE_YOU_SURE "Bist du sicher"
 #define L_LOGOUT "Abmelden"
 
 #define L_UT "UT"
@@ -50,7 +51,8 @@
 #define L_TIME_BROWSER_UT "UT (Webbrowser)"
 
 // weather
-#define L_TEMPERATURE "Temperatur"
+#define L_TELE_TEMPERATURE "Teleskoptemperatur"
+#define L_TEMPERATURE "Umgebungstemperatur"
 #define L_PRESSURE "Luftdruck"
 #define L_HUMIDITY "Relative Luftfeuchte"
 #define L_DEW_POINT "Taupunkt-Temperatur"
@@ -284,7 +286,7 @@
 #define L_REFINE_POLAR_ALIGN "Verfeinere Polausrichtung"
 #define L_REFINE_PA "Verfeinere PA"
 #define L_REFINE_MESSAGE1 "Setup und 3+ Stern-Ausrichtung der Montierung. F&auml;hrt zu einem hellen Stern in der N&auml;he von Himmelsnord- oder -s&uuml;dpols mit einer Deklination von 50 bis 80 Grad (N oder S). "
-#define L_REFINE_MESSAGE2 "Dr&uuml;cken Sie dann die [Verfeinere PA] Taste. Verwenden Sie die Richtungstasten, um den Stern im Okular wieder zu zentrieren."
+#define L_REFINE_MESSAGE2 "Dr&uuml;cken Sie dann die [Verfeinere PA] Taste. Verwenden Sie die Richtungstasten, um den Stern im Okular wieder zu zentrieren. "
 #define L_REFINE_MESSAGE3 "Optional richten Sie die  Montierung erneut aus."
 
 #define L_PARK "Parken"
@@ -307,6 +309,8 @@
 
 // ------------------------ Configuration ------------------------
 
+#define L_BASIC_SET_TITLE "Basic:"
+
 #define L_MAX_SLEW_SPEED "Maximale Schwenkgeschwindigkeit"
 
 // goto Rate
@@ -317,19 +321,24 @@
 #define L_VFAST "Sehr schnell (2x)"
 
 // backlash
-#define L_BACKLASH_TITLE "Getriebespiel"
-#define L_BACKLASH_RANGE_AXIS1 "Achse1, in Bogensekunden 0 to 3600"
-#define L_BACKLASH_RANGE_AXIS2 "Achse2, in Bogensekunden 0 to 3600"
+#define L_BACKLASH_RANGE_AXIS1 "Getriebespiel, in Bogensekunden 0 to 3600"
+#define L_BACKLASH_RANGE_AXIS2 "Getriebespiel, in Bogensekunden 0 to 3600"
+#define L_BACKLASH_RANGE_AXIS345 "Spiel in den Schritten 0 bis 32767"
+
+// deadband/TCF
+#define L_DEADBAND_RANGE_AXIS45 "TCF Deadband, in den Schritten 1 bis 32767"
+#define L_TCF_COEF_RANGE_AXIS45 "TCF Coef, in Mikrometern / Grad C -999,0 bis 999,0"
+#define L_TCF_COEF_EN_AXIS45 "TCF aktivieren, 0 falsch oder 1 wahr"
 
 // limits
-#define L_LIMITS_TITLE "Grenzen"
+#define L_LIMITS_TITLE "Horizont- und Overhead-Grenzen"
 #define L_LIMITS_RANGE_HORIZON "Horizont, in Grad +/- 30"
 #define L_LIMITS_RANGE_OVERHEAD "Obergrenze, in Grad 60 to 90"
 #define L_LIMITS_RANGE_MERIDIAN_E "Nach Meridian wenn Teleskop auf Ostseite der Montierung, in Grad +/- 180"
 #define L_LIMITS_RANGE_MERIDIAN_W "Nach Meridian wenn Teleskop auf Westseite der Montierung, in Grad +/- 180"
 
 // location
-#define L_LOCATION_TITLE "Standort"
+#define L_LOCATION_TITLE "Seite Standort Breite, Länge, UTC-Versatz"
 #define L_LOCATION_LONG "L&auml;ngengad, in Grad und Min. +/- 180, W is +"
 #define L_LOCATION_LAT "Breitengrad, in Grad und Min. +/- 90, N is +"
 #define L_LOCATION_RANGE_UTC_OFFSET "UTC Offset, in Stunden -14 to +12"

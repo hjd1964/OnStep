@@ -72,10 +72,10 @@ L_ENC_ZERO_TO_ONS ": <br />"
 #endif
 
 const char html_encEn1[] PROGMEM = "<br /><br />"
-L_ENC_AUTO_SYNC " (<span id='aste'>?</span>):<br />";
+L_ENC_AUTO_SYNC ": <br />";
 const char html_encEn2[] PROGMEM =
-"<button type='button' onpointerdown=\"s('as','on')\" >" L_ON "</button>"
-"<button type='button' onpointerdown=\"s('as','off')\" >" L_OFF "</button>"
+"<button id='eas_on'  class='btns_right' onpointerdown=\"s('as','on')\"  type='button' disabled>" L_ON "</button>"
+"<button id='eas_off' class='btns_left'  onpointerdown=\"s('as','off')\" type='button' disabled>" L_OFF "</button>"
 "<br /><br />";
 
 const char html_encMxAxis0[] PROGMEM =
@@ -213,6 +213,10 @@ void handleEncoders() {
   data += FPSTR(html_main_css6);
   data += FPSTR(html_main_css7);
   data += FPSTR(html_main_css8);
+  data += FPSTR(html_main_css_btns1);
+  sendHtml(data);
+  data += FPSTR(html_main_css_btns2);
+  data += FPSTR(html_main_css_btns3);
   data += FPSTR(html_main_cssE);
   data += FPSTR(html_headE);
   data += FPSTR(html_bodyB);
@@ -385,7 +389,9 @@ if (guideCorrectionMillis<0) {
   data += "orc|"; if (encRateControl) data+=L_ON "\n"; else data+=L_OFF "\n";
   data += "osc|"; if (encSweep) data+=L_ON "\n"; else data+=L_OFF "\n";
 #endif
-  data += "aste|";  if (encAutoSync) data+=L_ON "\n"; else data+=L_OFF "\n";
+
+  data += "eas_on|";  if (encAutoSync) data+="disabled"; else data+="enabled"; data+="\n";
+  data += "eas_off|"; if (encAutoSync) data+="enabled"; else data+="disabled"; data+="\n";
 
 #ifdef OETHS
   client->print(data);

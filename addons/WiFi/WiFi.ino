@@ -35,9 +35,9 @@
 #define Product "WiFi Server"
 #define FirmwareDate          __DATE__
 #define FirmwareTime          __TIME__
-#define FirmwareVersionMajor  "1"
-#define FirmwareVersionMinor  "15"
-#define FirmwareVersionPatch  "d"
+#define FirmwareVersionMajor  "2"
+#define FirmwareVersionMinor  "1"
+#define FirmwareVersionPatch  "a"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
@@ -373,6 +373,7 @@ TryAgain:
   server.on("/index.htm", handleRoot);
   server.on("/configuration.htm", handleConfiguration);
   server.on("/settings.htm", handleSettings);
+  server.on("/settingsA.txt", settingsAjaxGet);
   server.on("/settings.txt", settingsAjax);
 #if ENCODERS == ON
   server.on("/enc.htm", handleEncoders);

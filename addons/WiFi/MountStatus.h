@@ -146,6 +146,8 @@ class MountStatus {
     bool ppsSync() { return _ppsSync; }
     bool guiding() { return _guiding; }
 
+    bool focuserPresent() { return commandBool(":FA#"); }
+
     bool axisFault() { return _axisFault; }
     bool axisStatusValid() { return _validStepperDriverStatus; }
     bool axis1Comms() { return _comms1; }
@@ -227,35 +229,33 @@ class MountStatus {
         char *value4_str=NULL;
         char s[40],s1[40];
 
-        if (all || (_feature[i].purpose == ANALOG_OUTPUT || _feature[i].purpose == DEW_HEATER || _feature[i].purpose == INTERVALOMETER)) {
+        if (all || (_feature[i].purpose == SWITCH || _feature[i].purpose == ANALOG_OUTPUT || _feature[i].purpose == DEW_HEATER || _feature[i].purpose == INTERVALOMETER)) {
           sprintf(s1,":GXX%d#",i+1);
-          if (!command(s1,s) || s[0]==0) _valid=false;
+          if (!command(s1,s) || strlen(s) == 0) _valid=false;
           if (!_valid) { for (uint8_t j=0; j<8; j++) _feature[j].purpose=0; return false; }
   
-          if (strlen(s) > 0) {
-            value2_str = strstr(s,",");
-            if (value2_str) {
-              value2_str[0]=0;
-              value2_str++;
-              value3_str = strstr(value2_str,",");
-              if (value3_str) {
-                value3_str[0]=0;
-                value3_str++;
-                value4_str = strstr(value3_str,",");
-                if (value4_str) {
-                  value4_str[0]=0;
-                  value4_str++;
-                }
+          value2_str = strstr(s,",");
+          if (value2_str) {
+            value2_str[0]=0;
+            value2_str++;
+            value3_str = strstr(value2_str,",");
+            if (value3_str) {
+              value3_str[0]=0;
+              value3_str++;
+              value4_str = strstr(value3_str,",");
+              if (value4_str) {
+                value4_str[0]=0;
+                value4_str++;
               }
             }
-            value1_str = s; if (!value1_str) _valid=false;
-  
-            if (_valid) {
-              if (value1_str) _feature[i].value1=atoi(value1_str);
-              if (value2_str) _feature[i].value2=atof(value2_str);
-              if (value3_str) _feature[i].value3=atof(value3_str);
-              if (value4_str) _feature[i].value4=atof(value4_str);
-            }
+          }
+          value1_str = s; if (!value1_str) _valid=false;
+
+          if (_valid) {
+            if (value1_str) _feature[i].value1=atoi(value1_str);
+            if (value2_str) _feature[i].value2=atof(value2_str);
+            if (value3_str) _feature[i].value3=atof(value3_str);
+            if (value4_str) _feature[i].value4=atof(value4_str);
           }
         }
       }

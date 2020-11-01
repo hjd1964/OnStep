@@ -12,17 +12,22 @@ const char html_headE[] PROGMEM = "</head>\r\n";
 const char html_bodyB[] PROGMEM = "<body bgcolor='#26262A'>\r\n";
 
 const char html_main_cssB[] PROGMEM = "<STYLE>";
-const char html_main_css1[] PROGMEM = ".clear { clear: both; } .a { background-color: #111111; } .t { padding: 10px 10px 20px 10px; width: 600px; border: 5px solid #551111;";
-const char html_main_css2[] PROGMEM = " margin: 25px 25px 0px 25px; color: #999999; background-color: #111111; min-width: 30em; } input { font-weight: bold; width:4em; background-color: #A01010; padding: 2px 2px; }";
+const char html_main_css1[] PROGMEM = ".clear { clear: both; } .a { background-color: #111111; } .t { padding: 10px 10px 20px 10px; width: 600px; border: 5px solid #551111; margin: 25px 25px 0px 25px;";
+const char html_main_css2[] PROGMEM = "color: #999999; background-color: #111111; min-width: 30em; } input { text-align:center; padding: 2px; margin: 3px; font-weight: bold; width:5em; background-color: #A01010}";
 const char html_main_css3[] PROGMEM = ".b { padding: 10px; border-left: 5px solid #551111; border-right: 5px solid #551111; border-bottom: 5px solid #551111; margin: 0px 25px 25px 25px; width: 600px; color: #999999;";
 const char html_main_css4[] PROGMEM = "background-color: #111111; min-width: 30em; } select { width:4em; font-weight: bold; background-color: #A01010; padding: 2px 2px; } .c { color: #A01010; font-weight: bold; }";
 const char html_main_css5[] PROGMEM = "h1 { text-align: right; } a:hover, a:active { background-color: red; } .y { color: #FFFF00; font-weight: bold; }";
-const char html_main_css6[] PROGMEM = "a:link, a:visited { background-color: #332222; color: #a07070; border:1px solid red; padding: 5px 10px;";
+const char html_main_css6[] PROGMEM = "a:link, a:visited { background-color: #332222; color: #A07070; border:1px solid red; padding: 5px 10px;";
 const char html_main_css7[] PROGMEM = " margin: none; text-align: center; text-decoration: none; display: inline-block; }";
-const char html_main_css8[] PROGMEM = "button { background-color: #A01010; font-weight: bold; border-radius: 5px; margin: 2px; padding: 4px 8px; }";
+const char html_main_css8[] PROGMEM = "button:disabled { color: #444; } button { background-color: #A01010; font-weight: bold; border-radius: 5px; margin: 2px; padding: 4px 8px; }";
+const char html_main_css_btns1[] PROGMEM = ".btns_left { margin-left: -1px; border-top-left-radius: 0px; border-bottom-left-radius: 0px; }";
+const char html_main_css_btns2[] PROGMEM = ".btns_mid { margin-left: -1px; margin-right: -1px; border-top-left-radius: 0px; border-bottom-left-radius: 0px; border-top-right-radius: 0px; border-bottom-right-radius: 0px; }";
+const char html_main_css_btns3[] PROGMEM = ".btns_right { margin-right: -1px; border-top-right-radius: 0px; border-bottom-right-radius: 0px; }";
 const char html_main_css_control1[] PROGMEM = ".b1 { float: left; border: 2px solid #551111; background-color: #181818; text-align: center; margin: 5px; padding: 15px; padding-top: 3px; }";
 const char html_main_css_control2[] PROGMEM = ".gb {  font-weight: bold; font-size: 150%; font-family: 'Times New Roman', Times, serif; width: 60px; height: 50px; padding: 0px; }";
 const char html_main_css_control3[] PROGMEM = ".bb {  font-weight: bold; font-size: 105%; } .bbh {  font-weight: bold; font-size: 100%; height: 2.1em; }";
+const char html_main_css_collapse1[] PROGMEM = ".collapsible { background-color: #500808; color: #999; cursor: pointer; padding: 7px; width: 80%; border: none; text-align: left; outline: none; font-size: 14px; }";
+const char html_main_css_collapse2[] PROGMEM = ".active, .collapsible:hover { background-color: #661111; } .content { padding: 0px 18px; display: none; overflow: hidden; background-color: #301212; }";
 const char html_main_cssE[] PROGMEM = "</STYLE>";
 
 const char html_bad_comms_message[] PROGMEM =
@@ -63,11 +68,25 @@ const char html_linksCfgN[] PROGMEM = "<a href='/configuration.htm'>" L_PAGE_CON
 const char html_linksWifiS[] PROGMEM = "<a href='/wifi.htm' style='background-color: #552222;'>" L_PAGE_WIFI "</a><br />";
 const char html_linksWifiN[] PROGMEM = "<a href='/wifi.htm'>" L_PAGE_WIFI "</a><br />";
 
+// Javascript for Collapsibles
+const char html_collapseScript[] PROGMEM =
+"<script>"
+"var cc = document.getElementsByClassName('collapsible');"
+"var i;"
+"for (i = 0; i < cc.length; i++) {"
+  "cc[i].addEventListener('click', function() {"
+    "this.classList.toggle('active');"
+    "var ct = this.nextElementSibling;"
+    "if (ct.style.display === 'block') { ct.style.display = 'none'; } else { ct.style.display = 'block'; }"
+  "});"
+"}"
+"</script>\n";
+
 // Javascript for Ajax
 // be sure to define "var ajaxPage='control.txt';" etc.
 const char html_ajax_active[] PROGMEM =
 "<script>\n"
-"var auto1Tick=0;\n"
+"var auto1Tick=-1;\n"
 "var auto2Tick=0;\n"
 "var auto2Rate=" DEFAULT_AJAX_RATE ";\n"
 "var auto1=setInterval(autoRun1s,1000);\n"

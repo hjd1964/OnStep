@@ -6,6 +6,7 @@
 #define L_DOWNLOAD "Download"
 #define L_ACCEPT "Accept"
 #define L_CONTINUE "Continue"
+#define L_ARE_YOU_SURE "Are you sure"
 #define L_LOGOUT "Logout"
 
 #define L_UT "UT"
@@ -42,7 +43,8 @@
 #define L_TIME_BROWSER_UT "UT (web browser)"
 
 // weather
-#define L_TEMPERATURE "Temperature"
+#define L_TELE_TEMPERATURE "Telescope Temperature"
+#define L_TEMPERATURE "Ambient Temperature"
 #define L_PRESSURE "Barometric Pressure"
 #define L_HUMIDITY "Relative Humidity"
 #define L_DEW_POINT "Dew Point Temperature"
@@ -275,8 +277,8 @@
 
 #define L_REFINE_POLAR_ALIGN "Refine Polar Alignment"
 #define L_REFINE_PA "Refine PA"
-#define L_REFINE_MESSAGE1 "Setup &amp; 3+ Star Align mount.  Goto bright star near NCP or SCP with Dec in 50 to 80&deg; range (N or S.) "
-#define L_REFINE_MESSAGE2 "Press [Refine PA] button.  Use mount's PA adjust controls to center the star again."
+#define L_REFINE_MESSAGE1 "Setup &amp; 3+ Star align mount. Goto bright star near NCP or SCP with Dec in 50 to 80&deg; range (N or S.) "
+#define L_REFINE_MESSAGE2 "Press [Refine PA] button. Use mount's PA adjust controls to center the star again. "
 #define L_REFINE_MESSAGE3 "Optionally align the mount again."
 
 #define L_PARK "Park"
@@ -299,32 +301,39 @@
 
 // ------------------------ Configuration ------------------------
 
+#define L_BASIC_SET_TITLE "Basic:"
+
 #define L_MAX_SLEW_SPEED "Maximum Slew Speed"
 
 // goto Rate
-#define L_VSLOW "Very Slow (0.5x)"
+#define L_VSLOW "VSlow (0.5x)"
 #define L_SLOW "Slow (0.75x)"
 #define L_NORMAL "Normal (1x)"
 #define L_FAST "Fast (1.5x)"
-#define L_VFAST "Very Fast (2x)"
+#define L_VFAST "VFast (2x)"
 
 // backlash
-#define L_BACKLASH_TITLE "Backlash"
-#define L_BACKLASH_RANGE_AXIS1 "Axis1, in arc-seconds 0 to 3600"
-#define L_BACKLASH_RANGE_AXIS2 "Axis2, in arc-seconds 0 to 3600"
+#define L_BACKLASH_RANGE_AXIS1 "Backlash, in arc-seconds 0 to 3600"
+#define L_BACKLASH_RANGE_AXIS2 "Backlash, in arc-seconds 0 to 3600"
+#define L_BACKLASH_RANGE_AXIS345 "Backlash, in steps 0 to 32767"
+
+// deadband/TCF
+#define L_DEADBAND_RANGE_AXIS45 "TCF Deadband, in steps 1 to 32767"
+#define L_TCF_COEF_RANGE_AXIS45 "TCF Coef, in microns/deg. C -999.0 to 999.0"
+#define L_TCF_COEF_EN_AXIS45 "TCF Enable, 0 false or 1 true"
 
 // limits
-#define L_LIMITS_TITLE "Limits"
-#define L_LIMITS_RANGE_HORIZON "Horizon, in degrees +/- 30"
-#define L_LIMITS_RANGE_OVERHEAD "Overhead, in degrees 60 to 90"
+#define L_LIMITS_TITLE "Horizon and Overhead Limits"
+#define L_LIMITS_RANGE_HORIZON "Horizon, minimum altitude in degrees +/- 30"
+#define L_LIMITS_RANGE_OVERHEAD "Overhead, maximum altitude in degrees 60 to 90"
 #define L_LIMITS_RANGE_MERIDIAN_E "Past Meridian when East of the pier, in degrees +/- 180"
 #define L_LIMITS_RANGE_MERIDIAN_W "Past Meridian when West of the pier, in degrees +/- 180"
 
 // location
-#define L_LOCATION_TITLE "Location"
+#define L_LOCATION_TITLE "Site Latitude, Longitude, UTC Offset"
 #define L_LOCATION_LONG "Longitude, in deg. and min. +/- 180, W is +"
 #define L_LOCATION_LAT "Latitude, in deg. and min. +/- 90, N is +"
-#define L_LOCATION_RANGE_UTC_OFFSET "UTC Offset, in hours -14 to +12"
+#define L_LOCATION_RANGE_UTC_OFFSET "UTC Offset, in hours and min. -14 to +12"
 #define L_LOCATION_MESSAGE_UTC_OFFSET "Opposite of a time-zone value, this is for Standard Time (not Daylight Time.)"
 
 // ----------------------------  WiFi ----------------------------

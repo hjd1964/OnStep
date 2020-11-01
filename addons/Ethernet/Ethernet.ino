@@ -216,6 +216,7 @@ Again:
   server.on("/index.htm", handleRoot);
   server.on("/configuration.htm", handleConfiguration);
   server.on("/settings.htm", handleSettings);
+  server.on("/settingsA.txt", settingsAjaxGet);
   server.on("/settings.txt", settingsAjax);
 #if ENCODERS == ON
   server.on("/enc.htm", handleEncoders);

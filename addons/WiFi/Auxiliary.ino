@@ -13,13 +13,16 @@ const char html_auxScript1[] PROGMEM =
 "function sf(key,v1){s(key,v1);autoFastRun();}\n"
 "</script>\n";
 
-const char html_auxAuxB[] PROGMEM = "<div class='b1' style='width: 27em'>\r\n<div align='left'>" L_AUX_FEATURES ":</br></br></div>\r\n";
-const char html_auxSwitch1[] PROGMEM = "<button type='button' onpointerdown=\"s('";
-const char html_auxSwitch2[] PROGMEM = "','1')\" >" L_ON "</button><button type='button' onpointerdown=\"s('";
-const char html_auxSwitch3[] PROGMEM = "','0')\" >" L_OFF "</button>\r\n";
-const char html_auxStartStop1[] PROGMEM = "<button type='button' onpointerdown=\"s('";
-const char html_auxStartStop2[] PROGMEM = "','1')\" >" L_START "</button><button type='button' onpointerdown=\"s('";
-const char html_auxStartStop3[] PROGMEM = "','0')\" >" L_STOP "</button>\r\n";
+const char html_auxAuxB[] PROGMEM = "<div class='b1' style='width: 27em'>\r\n<div align='left'>" L_AUX_FEATURES ":<br /><br /></div>\r\n";
+const char html_auxOnSwitch[] PROGMEM = 
+"<button id='sw%d_on' class='btns_right' style='line-height: 1.2rem' onpointerdown=\"s('x%dv1','1')\" type='button' disabled>" L_ON "</button>";
+const char html_auxOffSwitch[] PROGMEM = 
+"<button id='sw%d_off' class='btns_left' style='line-height: 1.2rem' onpointerdown=\"s('x%dv1','0')\" type='button' disabled>" L_OFF "</button>\r\n";
+
+const char html_auxStartStop1[] PROGMEM = "<button style='line-height: 1.2rem' onpointerdown=\"s('";
+const char html_auxStartStop2[] PROGMEM = "','1')\" type='button'>" L_START "</button><button onpointerdown=\"s('";
+const char html_auxStartStop3[] PROGMEM = "','0')\" type='button'>" L_STOP "</button>\r\n";
+
 const char html_auxAnalog[] PROGMEM ="<input style='width: 12em; background: #111' type='range' min='0' max='255' value='";
 const char html_auxHeater[] PROGMEM ="<input style='width: 12em; background: #111' type='range' min='-50' max='200' value='";
 const char html_auxExposure[] PROGMEM ="<input style='width: 12em; background: #111' type='range' min='0' max='255' value='";
@@ -40,7 +43,7 @@ void handleAux() {
 
   mountStatus.update(true);
     
-  char temp1[80]="";
+  char temp1[120]="";
   char temp2[40]="";
 
   processAuxGet();
@@ -61,6 +64,10 @@ void handleAux() {
   data += FPSTR(html_main_css_control1);
   data += FPSTR(html_main_css_control2);
   data += FPSTR(html_main_css_control3);
+  data += FPSTR(html_main_css_btns1);
+  sendHtml(data);
+  data += FPSTR(html_main_css_btns2);
+  data += FPSTR(html_main_css_btns3);
   data += FPSTR(html_main_cssE);
   data += FPSTR(html_headE);
   data += FPSTR(html_bodyB);
@@ -115,13 +122,8 @@ void handleAux() {
         data += mountStatus.featureName();
         data += "&bull;";
         data += F("</div><div style='float: left; width: 14em; height: 2em; line-height: 2em'>");
-        data += FPSTR(html_auxSwitch1);
-        sprintf(temp1,"x%dv1",i+1);
-        data += temp1;
-        data += FPSTR(html_auxSwitch2);
-        sprintf(temp1,"x%dv1",i+1);
-        data += temp1;
-        data += FPSTR(html_auxSwitch3);
+        sprintf_P(temp1,html_auxOnSwitch,i+1,i+1); data += temp1;
+        sprintf_P(temp1,html_auxOffSwitch,i+1,i+1); data += temp1;
         data += F("</div><div style='float: left; width: 4em; height: 2em; line-height: 2em'>");
         data += "</div>\r\n";
         sendHtml(data);
@@ -147,13 +149,8 @@ void handleAux() {
         data += mountStatus.featureName();
         data += "&bull;";
         data += F("</div><div style='float: left; width: 14em; height: 2em; line-height: 2em'>");
-        data += FPSTR(html_auxSwitch1);
-        sprintf(temp1,"x%dv1",i+1);
-        data += temp1;
-        data += FPSTR(html_auxSwitch2);
-        sprintf(temp1,"x%dv1",i+1);
-        data += temp1;
-        data += FPSTR(html_auxSwitch3);
+        sprintf_P(temp1,html_auxOnSwitch,i+1,i+1); data += temp1;
+        sprintf_P(temp1,html_auxOffSwitch,i+1,i+1); data += temp1;
         data += F("</div><div style='float: left; width: 4em; height: 2em; line-height: 2em'>");
         dtostrf(mountStatus.featureValue4(),3,1,temp2);
         sprintf(temp1,"&Delta;<span id='x%dv4'>%s</span>&deg;C\r\n",i+1,temp2);
@@ -285,11 +282,27 @@ void auxAjax() {
     mountStatus.featureUpdate();
     for (int i=0; i<8; i++) {
       mountStatus.selectFeature(i);
+      if (mountStatus.featurePurpose() == SWITCH) {
+        if (mountStatus.featureValue1() == 0) {
+          sprintf(temp,"sw%d_on|%s\n",i+1,"enabled"); data += temp;
+          sprintf(temp,"sw%d_off|%s\n",i+1,"disabled"); data += temp;
+        } else {
+          sprintf(temp,"sw%d_on|%s\n",i+1,"disabled"); data += temp;
+          sprintf(temp,"sw%d_off|%s\n",i+1,"enabled"); data += temp;
+        }
+      } else
       if (mountStatus.featurePurpose() == ANALOG_OUTPUT) {
         sprintf(temp,"x%dv1|%d\n",i+1,(int)lround((mountStatus.featureValue1()/255.0)*100.0)); data += temp;
       } else
       if (mountStatus.featurePurpose() == DEW_HEATER) {
         char s[20];
+        if (mountStatus.featureValue1() == 0) {
+          sprintf(temp,"sw%d_on|%s\n",i+1,"enabled"); data += temp;
+          sprintf(temp,"sw%d_off|%s\n",i+1,"disabled"); data += temp;
+        } else {
+          sprintf(temp,"sw%d_on|%s\n",i+1,"disabled"); data += temp;
+          sprintf(temp,"sw%d_off|%s\n",i+1,"enabled"); data += temp;
+        }
         dtostrf(mountStatus.featureValue2(),3,1,s); sprintf(temp,"x%dv2|%s\n",i+1,s); data += temp;
         dtostrf(mountStatus.featureValue3(),3,1,s); sprintf(temp,"x%dv3|%s\n",i+1,s); data += temp;
         dtostrf(mountStatus.featureValue4(),3,1,s); sprintf(temp,"x%dv4|%s\n",i+1,s); data += temp;
