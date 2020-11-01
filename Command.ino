@@ -2046,7 +2046,7 @@ void processCommands() {
         static bool dualAxis=false;
         if (command[1] == 'o') { rateCompensation=RC_FULL_RA; setTrackingRate(DefaultTrackingRate); } else // turn full compensation on, defaults to base sidereal tracking rate
         if (command[1] == 'r') { rateCompensation=RC_REFR_RA; setTrackingRate(DefaultTrackingRate); } else // turn refraction compensation on, defaults to base sidereal tracking rate
-        if (command[1] == 'n') { rateCompensation=RC_NONE; setTrackingRate(DefaultTrackingRate); } else    // turn refraction off, sidereal tracking rate resumes
+        if (command[1] == 'n') { rateCompensation=RC_NONE; dualAxis=false; setTrackingRate(DefaultTrackingRate); } else // turn refraction off, sidereal tracking rate resumes
         if (command[1] == '1') { dualAxis=false; } else                                                      // turn off dual axis tracking
         if (command[1] == '2') { dualAxis=true;  } else                                                      // turn on dual axis tracking
 #endif
