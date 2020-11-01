@@ -434,14 +434,13 @@ void handleConfiguration() {
 
 void processConfigurationGet() {
   String v,v1;
-  int i;
   char temp[20]="";
 
   // Overhead limit
   v=server.arg("ol");
   if (v!="") {
     if (v.toInt() >= 60 && v.toInt() <= 90) { 
-      sprintf(temp,":So%d#",v.toInt());
+      sprintf(temp,":So%d#",(int16_t)v.toInt());
       commandBool(temp);
     }
   }
@@ -450,7 +449,7 @@ void processConfigurationGet() {
   v=server.arg("hl");
   if (v!="") {
     if (v.toInt() >= -30 && v.toInt() <= 30) { 
-      sprintf(temp,":Sh%d#",v.toInt());
+      sprintf(temp,":Sh%d#",(int16_t)v.toInt());
       commandBool(temp);
     }
   }
@@ -459,7 +458,7 @@ void processConfigurationGet() {
   v=server.arg("el");
   if (v!="") {
     if (v.toInt() >= -180 && v.toInt() <= 180) { 
-      sprintf(temp,":SXE9,%d#",round((v.toInt()*60.0)/15.0));
+      sprintf(temp,":SXE9,%d#",(int16_t)round((v.toInt()*60.0)/15.0));
       commandBool(temp);
     }
   }
@@ -468,7 +467,7 @@ void processConfigurationGet() {
   v=server.arg("wl");
   if (v!="") {
     if (v.toInt() >= -180 && v.toInt() <= 180) { 
-      sprintf(temp,":SXEA,%d#",round((v.toInt()*60.0)/15.0));
+      sprintf(temp,":SXEA,%d#",(int16_t)round((v.toInt()*60.0)/15.0));
       commandBool(temp);
     }
   }
@@ -477,35 +476,35 @@ void processConfigurationGet() {
   v=server.arg("b1");
   if (v!="") {
     if (v.toInt() >= 0 && v.toInt() <= 3600) { 
-      sprintf(temp,":$BR%d#",v.toInt());
+      sprintf(temp,":$BR%d#",(int16_t)v.toInt());
       commandBool(temp);
     }
   }
   v=server.arg("b2");
   if (v!="") {
     if (v.toInt() >= 0 && v.toInt() <= 3600) { 
-      sprintf(temp,":$BD%d#",v.toInt());
+      sprintf(temp,":$BD%d#",(int16_t)v.toInt());
       commandBool(temp);
     }
   }
   v=server.arg("b3");
   if (v!="") {
     if (v.toInt() >= 0 && v.toInt() <= 32767) { 
-      sprintf(temp,":rb%d#",v.toInt());
+      sprintf(temp,":rb%d#",(int16_t)v.toInt());
       commandBool(temp);
     }
   }
   v=server.arg("b4");
   if (v!="") {
     if (v.toInt() >= 0 && v.toInt() <= 32767) { 
-      sprintf(temp,":Fb%d#",v.toInt());
+      sprintf(temp,":Fb%d#",(int16_t)v.toInt());
       commandBool(":FA1#"); commandBool(temp);
     }
   }
   v=server.arg("b5");
   if (v!="") {
     if (v.toInt() >= 0 && v.toInt() <= 32767) { 
-      sprintf(temp,":fb%d#",v.toInt());
+      sprintf(temp,":fb%d#",(int16_t)v.toInt());
       commandBool(":FA1#"); commandBool(temp);
     }
   }
@@ -514,14 +513,14 @@ void processConfigurationGet() {
   v=server.arg("d4");
   if (v!="") {
     if (v.toInt() >= 1 && v.toInt() <= 32767) { 
-      sprintf(temp,":Fd%d#",v.toInt());
+      sprintf(temp,":Fd%d#",(int16_t)v.toInt());
       commandBool(":FA1#"); commandBool(temp);
     }
   }
   v=server.arg("d5");
   if (v!="") {
     if (v.toInt() >= 1 && v.toInt() <= 32767) { 
-      sprintf(temp,":fd%d#",v.toInt());
+      sprintf(temp,":fd%d#",(int16_t)v.toInt());
       commandBool(":FA1#"); commandBool(temp);
     }
   }
@@ -559,7 +558,7 @@ void processConfigurationGet() {
   v1=server.arg("g2"); // long min
   if (v != "" && v1 != "") {
     if (v.toInt() >= -180 && v.toInt() <= 180 && v1.toInt() >= 0 && v1.toInt() <= 60) {
-      sprintf(temp,":Sg%+04d*%02d#",v.toInt(),v1.toInt());
+      sprintf(temp,":Sg%+04d*%02d#",(int16_t)v.toInt(),(int16_t)v1.toInt());
       commandBool(temp);
     }
   }
@@ -567,7 +566,7 @@ void processConfigurationGet() {
   v1=server.arg("t2"); // lat min
   if (v != "" && v1 != "") {
     if (v.toInt() >= -90 && v.toInt() <= 90 && v1.toInt() >= 0 && v1.toInt() <= 60) {
-      sprintf(temp,":St%+03d*%02d#",v.toInt(),v1.toInt());
+      sprintf(temp,":St%+03d*%02d#",(int16_t)v.toInt(),(int16_t)v1.toInt());
       commandBool(temp);
     }
   }
@@ -575,7 +574,7 @@ void processConfigurationGet() {
   v1=server.arg("u2"); // UT min
   if (v != "" && v1 != "") {
     if (v.toInt() >= -14 && v.toInt() <= 12 && (v1.toInt() == 0 || v1.toInt() == 30 || v1.toInt() == 45)) {
-      sprintf(temp,":SG%+03d:%02d#",v.toInt(),v1.toInt());
+      sprintf(temp,":SG%+03d:%02d#",(int16_t)v.toInt(),(int16_t)v1.toInt());
       commandBool(temp);
     }
   }
