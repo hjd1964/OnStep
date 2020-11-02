@@ -23,7 +23,7 @@
 #define MksGenL21                   13 // As above except Focuser2 CS is on pin12
 
 // RUMBA - 3D printer shields/board that works with OnStep, a 6-axis design with 5-axes supported
-#define Rumba                       14 // https://reprap.org/wiki/RUMBA
+#define Rumba                       14 // This is a new, experimental, pin-map use at your own risk! https://reprap.org/wiki/RUMBA
 
 // FYSETC S6 - 3D printer board that works with OnStep, a 6-axis design with 5-axes supported
 #define FYSETC_S6                   15 // FYSETC S6 Version 1.2

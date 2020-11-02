@@ -1,6 +1,8 @@
 // -------------------------------------------------------------------------------------------------
 // Pin map for OnStep using RUMBA Pin defs (Arduino Mega2560)
 
+#warning "This is a new, experimental, pin-map use at your own risk!"
+
 #if defined(__AVR_ATmega2560__)
 
 // The multi-purpose pins (Aux3..Aux8 can be analog (pwm/dac) if supported)
