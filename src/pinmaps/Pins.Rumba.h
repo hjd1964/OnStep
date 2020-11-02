@@ -8,8 +8,8 @@
 // The multi-purpose pins (Aux3..Aux8 can be analog (pwm/dac) if supported)
 #define Aux0                PB7     // Status LED
 // Note: PWM is not allowed on any of the following (auxiliary feature ANALOG is not supported)
-#define Aux1                PC4     // Z-MIN
-#define Aux2                PC5     // Z-MAX
+#define Aux1                PC7     // EXP3
+#define Aux2                PC6     // EXP3
 #define Aux3                PE4     // DEW_HEATER or SWITCH (HE0)  (D2)
 #define Aux4                PE5     // DEW_HEATER or SWITCH (HE1)  (D3)
 #define Aux5                PH3     // DEW_HEATER or SWITCH (HE2)  (D6)
@@ -24,7 +24,7 @@
   #define BME280_CS_PIN     A10     // Default CS Pin for BME280 on SPI
 #endif
 #ifndef OneWirePin
-  #define OneWirePin        PC7     // Default Pin for 1-Wire bus
+  #define OneWirePin        PC4     // Default Pin for 1-Wire bus Z-MIN
 #endif
 #define AddonBootModePin    PG0     // ESP8266 GPIO0 or SPI MISO/Fault
 #define AddonResetPin       PD7     // ESP8266 RST or SPI MISO/Fault
