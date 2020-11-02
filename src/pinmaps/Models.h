@@ -53,6 +53,10 @@
   #define PINMAP_STR "RAMPS v1.4"
   #include "Pins.Ramps14.h"
 #endif
+#if PINMAP == Rumba
+  #define PINMAP_STR "RUMBA"
+  #include "Pins.Rumba.h"
+#endif
 #if PINMAP == MksGenL1
   #define PINMAP_STR "MKS Gen-L v1"
   #include "Pins.Ramps14.h"
