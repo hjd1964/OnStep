@@ -115,7 +115,7 @@ const char html_controlFocus2[] PROGMEM =
 "<button class='bbh' onpointerdown=\"gf('F2')\" title='" L_HINT_FOC_SEL " 2' type='button'>2</button>&nbsp;&nbsp;&nbsp;&nbsp;";
 const char html_controlFocus3[] PROGMEM =
 "<button class='bbh' onpointerdown=\"gf('Fh')\" title='" L_HINT_FOC_FIND_HOME "' type='button'>" ARROW_DR HOME_CH "</button>"
-"<button class='bbh' onpointerdown=\"gf('FH')\" title='" L_HINT_FOC_RESET_HOME "' type='button'>" CAUTION_CH HOME_CH "</button>&nbsp;&nbsp;&nbsp;&nbsp;";
+"<button class='bbh' onpointerdown=\"if (confirm('" L_ARE_YOU_SURE "?')) gf('FH')\" title='" L_HINT_FOC_RESET_HOME "' type='button'>" CAUTION_CH HOME_CH "</button>&nbsp;&nbsp;&nbsp;&nbsp;";
 const char html_controlFocus4[] PROGMEM =
 "<button class='bbh' onpointerdown=\"gf('FI')\" onpointerup=\"g('Fq');\" type='button'>" ARROW_DD "</button>"
 "<button class='bbh' style='width: 2em' onpointerdown=\"gf('Fi')\" onpointerup=\"g('Fq')\" type='button'>" ARROW_D "</button>";
@@ -129,7 +129,7 @@ const char html_controlRotate0[] PROGMEM =
 "<div class='b1' style='width: 27em'>";
 const char html_controlRotate1[] PROGMEM =
 "<button class='bbh' style='height: 2.1em' onpointerdown=\"gf('rh')\" title='" L_HINT_ROT_FIND_HOME "' type='button'>" ARROW_DR HOME_CH "</button>"
-"<button class='bbh' style='height: 2.1em' onpointerdown=\"gf('rH')\" title='" L_HINT_ROT_RESET_HOME "' type='button'>" CAUTION_CH HOME_CH "</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+"<button class='bbh' style='height: 2.1em' onpointerdown=\"if (confirm('" L_ARE_YOU_SURE "?')) gf('rH')\" title='" L_HINT_ROT_RESET_HOME "' type='button'>" CAUTION_CH HOME_CH "</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 const char html_controlRotate2[] PROGMEM =
 "<button class='bbh' style='height: 2.1em' onpointerdown=\"gf('rR')\" onpointerup=\"g('rq')\" type='button'>" ARROW_LL "</button>"
 "<button class='bbh' style='width: 2em' onpointerdown=\"gf('rr')\" onpointerup=\"g('rq')\" type='button'>" ARROW_L "</button>";
