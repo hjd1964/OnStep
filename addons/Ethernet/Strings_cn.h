@@ -226,6 +226,8 @@
 #define L_CAT_UPLOAD_LINES_WRITTEN "写的行"
 #define L_CAT_UPLOAD_SELECT_FAIL "上传失败,无法选择目录."
 #define L_CAT_UPLOAD_NO_CAT "上传失败,未选择目录."
+#define L_CAT_CLEAR "清除目录"
+#define L_CAT_CLEAR_LIB "清除图书馆"
 
 // --------------------------- Encoders --------------------------
 
@@ -278,7 +280,7 @@
 #define L_REFINE_POLAR_ALIGN "精确对齐极轴"
 #define L_REFINE_PA "改变停车位"
 #define L_REFINE_MESSAGE1 "赤道仪的设置和3+星的方向。在天球北极或南极附近引出一颗明亮的恒星，其偏角为50至80度（N或S）"
-#define L_REFINE_MESSAGE2 "然后按[提炼 PA]键。使用方向键将星星重新定位在目镜中."
+#define L_REFINE_MESSAGE2 "然后按[提炼 PA]键。使用方向键将星星重新定位在目镜中. "
 #define L_REFINE_MESSAGE3 "（可选）再次重新调整赤道仪."
 
 #define L_PARK "停车"

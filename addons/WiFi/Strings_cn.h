@@ -226,6 +226,8 @@
 #define L_CAT_UPLOAD_LINES_WRITTEN "写的行"
 #define L_CAT_UPLOAD_SELECT_FAIL "上传失败,无法选择目录."
 #define L_CAT_UPLOAD_NO_CAT "上传失败,未选择目录."
+#define L_CAT_CLEAR "清除目录"
+#define L_CAT_CLEAR_LIB "清除图书馆"
 
 // --------------------------- Encoders --------------------------
 

@@ -226,6 +226,8 @@
 #define L_CAT_UPLOAD_LINES_WRITTEN "lines written"
 #define L_CAT_UPLOAD_SELECT_FAIL "Upload failed, unable to select catalog."
 #define L_CAT_UPLOAD_NO_CAT "Upload failed, no catalog selected."
+#define L_CAT_CLEAR "Clear Catalog"
+#define L_CAT_CLEAR_LIB "Clear Library"
 
 // --------------------------- Encoders --------------------------
 
@@ -277,8 +279,8 @@
 
 #define L_REFINE_POLAR_ALIGN "Refine Polar Alignment"
 #define L_REFINE_PA "Refine PA"
-#define L_REFINE_MESSAGE1 "Setup &amp; 3+ Star align mount.  Goto bright star near NCP or SCP with Dec in 50 to 80&deg; range (N or S.) "
-#define L_REFINE_MESSAGE2 "Press [Refine PA] button. Use mount's PA adjust controls to center the star again."
+#define L_REFINE_MESSAGE1 "Setup &amp; 3+ Star align mount. Goto bright star near NCP or SCP with Dec in 50 to 80&deg; range (N or S.) "
+#define L_REFINE_MESSAGE2 "Press [Refine PA] button. Use mount's PA adjust controls to center the star again. "
 #define L_REFINE_MESSAGE3 "Optionally align the mount again."
 
 #define L_PARK "Park"

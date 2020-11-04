@@ -234,6 +234,8 @@
 #define L_CAT_UPLOAD_LINES_WRITTEN "Zeilen geschrieben"
 #define L_CAT_UPLOAD_SELECT_FAIL "Der Upload ist fehlgeschlagen, der Katalog konnte nicht ausgew&auml;hlt werden."
 #define L_CAT_UPLOAD_NO_CAT "Upload fehlgeschlagen, kein Katalog ausgewÃ¤hlt."
+#define L_CAT_CLEAR "Katalog löschen"
+#define L_CAT_CLEAR_LIB "Bibliothek löschen"
 
 // --------------------------- Encoders --------------------------
 

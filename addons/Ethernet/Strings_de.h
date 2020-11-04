@@ -234,6 +234,8 @@
 #define L_CAT_UPLOAD_LINES_WRITTEN "Zeilen geschrieben"
 #define L_CAT_UPLOAD_SELECT_FAIL "Der Upload ist fehlgeschlagen, der Katalog konnte nicht ausgew&auml;hlt werden."
 #define L_CAT_UPLOAD_NO_CAT "Upload fehlgeschlagen, kein Katalog ausgewÃ¤hlt."
+#define L_CAT_CLEAR "Katalog löschen"
+#define L_CAT_CLEAR_LIB "Bibliothek löschen"
 
 // --------------------------- Encoders --------------------------
 
@@ -286,7 +288,7 @@
 #define L_REFINE_POLAR_ALIGN "Verfeinere Polausrichtung"
 #define L_REFINE_PA "Verfeinere PA"
 #define L_REFINE_MESSAGE1 "Setup und 3+ Stern-Ausrichtung der Montierung. F&auml;hrt zu einem hellen Stern in der N&auml;he von Himmelsnord- oder -s&uuml;dpols mit einer Deklination von 50 bis 80 Grad (N oder S). "
-#define L_REFINE_MESSAGE2 "Dr&uuml;cken Sie dann die [Verfeinere PA] Taste. Verwenden Sie die Richtungstasten, um den Stern im Okular wieder zu zentrieren."
+#define L_REFINE_MESSAGE2 "Dr&uuml;cken Sie dann die [Verfeinere PA] Taste. Verwenden Sie die Richtungstasten, um den Stern im Okular wieder zu zentrieren. "
 #define L_REFINE_MESSAGE3 "Optional richten Sie die  Montierung erneut aus."
 
 #define L_PARK "Parken"
