@@ -11,7 +11,7 @@ const char html_wifiSSID1[] PROGMEM =
 "<br/><b>" L_WIFI_STA_TITLE ":</b><br/>"
 "<form method='post' action='/wifi.htm'>"
 "SSID: <input style='width:6em' name='stssid' type='text' value='%s' maxlength='32'>&nbsp;&nbsp;&nbsp;"
-L_WIFI_PWD ": <input style='width:8em' name='stpwd' type='password' value='%s' maxlength='39'> (" L_WIFI_PWD_MSG ")<br/>";
+L_WIFI_PWD ": <input style='width:8em' name='stpwd' type='password' value='%s' minlength='8' maxlength='39'> (" L_WIFI_PWD_MSG ")<br/>";
 const char html_wifiSSID2[] PROGMEM =
 L_WIFI_EN_DHCP ": <input type='checkbox' name='stadhcp' value='1' %s> (" L_WIFI_EN_DHCP_MSG ")<br/>"
 L_WIFI_EN_STA ": <input type='checkbox' name='staen' value='1' %s><br/>"
@@ -43,8 +43,8 @@ const char html_wifiSSID3[] PROGMEM =
 "<br/><b>" L_WIFI_AP ":</b><br/>"
 "<form method='post' action='/wifi.htm'>"
 "SSID: <input style='width:6em' name='apssid' type='text' value='%s' maxlength='32'>&nbsp;&nbsp;&nbsp;"
-L_WIFI_PWD ": <input style='width:8em' name='appwd' type='password' value='%s' maxlength='39'> " L_WIFI_PWD_MSG "&nbsp;&nbsp;&nbsp;"
-L_WIFI_CHA ": <input style='width:2em' name='apch' value='%d' type='number' min='1' max='11'><br/>";
+L_WIFI_PWD ": <input style='width:8em' name='appwd' type='password' value='%s' minlength='8' maxlength='39'> " L_WIFI_PWD_MSG "&nbsp;&nbsp;&nbsp;"
+L_WIFI_CHA ": <input style='width:3em' name='apch' value='%d' type='number' min='1' max='11'><br/>";
 
 const char html_wifiApMAC[] PROGMEM =
 "MAC: <input style='width:10em' name='apmac' type='text' value='%s' maxlength='17' disabled><br/>";
@@ -75,7 +75,7 @@ L_WIFI_EN_AP_MODE ": <input type='checkbox' name='apen' value='1' %s> (Note: aut
 const char html_logout[] PROGMEM =
 "<br/><b>" L_WIFI_CONFIG_SECURITY ":</b><br/>"
 "<form method='post' action='/wifi.htm'>"
-L_WIFI_PWD ": <input style='width:8em' name='webpwd' type='password' maxlength='39'> "
+L_WIFI_PWD ": <input style='width:8em' name='webpwd' type='password' minlength='3' maxlength='39'> "
 "<button type='submit'>" L_UPLOAD "</button></form>"
 "<form method='post' action='/wifi.htm'>"
 "<button type='submit' name='logout' value='1'>" L_LOGOUT "</button></form><br />\r\n";
@@ -90,7 +90,7 @@ const char html_reboot[] PROGMEM =
 const char html_login[] PROGMEM =
 "<br/><form method='post' action='/wifi.htm'>"
 "<br/>" L_WIFI_TITLE "<br />"
-"<input style='width:8em' name='login' type='password' maxlength='39'>"
+"<input style='width:8em' name='login' type='password' minlength='3' maxlength='39'>"
 "<button type='submit'>" L_OK "</button>"
 "</form><br/><br/><br/>"
 L_WIFI_ADVICE1 L_WIFI_ADVICE2 L_WIFI_ADVICE3 L_WIFI_ADVICE4 L_WIFI_ADVICE5 L_WIFI_ADVICE6 L_WIFI_ADVICE7 L_WIFI_ADVICE8 L_WIFI_ADVICE9 
