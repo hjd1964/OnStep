@@ -18,12 +18,27 @@ char serialRecvFlush() {
   return c;
 }
 
+void clearSerialChannel() {
+  for (int i=0; i<3; i++) {
+    Ser.print(":#");
+#if LED_STATUS != OFF
+    digitalWrite(LED_STATUS,HIGH);
+#endif
+    delay(200);
+    serialRecvFlush();
+#if LED_STATUS != OFF
+    digitalWrite(LED_STATUS,LOW);
+#endif
+    delay(200);
+  }
+
+}
+
 // smart LX200 aware command and response over serial
 boolean processCommand(const char cmd[], char response[], long timeOutMs) {
   Ser.setTimeout(timeOutMs);
   
   // clear the read/write buffers
-  Ser.flush();
   serialRecvFlush();
 
   // send the command

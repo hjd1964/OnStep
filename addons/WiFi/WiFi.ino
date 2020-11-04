@@ -261,19 +261,7 @@ Again:
   digitalWrite(LED_STATUS,LOW);
 #endif
 
-  // clear the buffers and any noise on the serial lines
-  for (int i=0; i<3; i++) {
-    Ser.print(":#");
-#if LED_STATUS != OFF
-    digitalWrite(LED_STATUS,HIGH);
-#endif
-    delay(200);
-    Ser.flush(); serialRecvFlush();
-#if LED_STATUS != OFF
-    digitalWrite(LED_STATUS,LOW);
-#endif
-    delay(200);
-  }
+  clearSerialChannel();
 
   // look for On-Step
   Ser.print(":GVP#"); delay(100);
@@ -362,13 +350,8 @@ TryAgain:
     }
   }
 
-  // clear the buffers and any noise on the serial lines
-  for (int i=0; i<3; i++) {
-    Ser.print(":#");
-    delay(50);
-    serialRecvFlush();
-  }
-
+  clearSerialChannel();
+  
   server.on("/", handleRoot);
   server.on("/index.htm", handleRoot);
   server.on("/configuration.htm", handleConfiguration);
@@ -406,6 +389,9 @@ TryAgain:
 #endif
 
   server.begin();
+
+  // clear the serial channel one last time
+  clearSerialChannel();
 
 #ifdef DEBUG_ON
   Ser.println("HTTP server started");
