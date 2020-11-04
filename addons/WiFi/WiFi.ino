@@ -390,6 +390,9 @@ TryAgain:
 
   server.begin();
 
+  // allow time for the background servers to come up
+  delay(2000);
+
   // clear the serial channel one last time
   clearSerialChannel();
 

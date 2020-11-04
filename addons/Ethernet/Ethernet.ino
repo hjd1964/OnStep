@@ -232,6 +232,9 @@ Again:
   // Initialize the cmd server, timeout after 500ms
   cmdSvr.init(9999,500);
   
+  // allow time for the background servers to come up
+  delay(2000);
+
   // clear the serial channel one last time
   clearSerialChannel();
   
