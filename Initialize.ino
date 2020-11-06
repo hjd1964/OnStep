@@ -296,7 +296,7 @@ void initWriteNvValues() {
   // bit 0 = settings at compile (0) or run time (1), bits 1 to 5 = (1) to reset axis n on next boot
   int axisReset=nv.read(EE_settingsRuntime);
   if (!(axisReset&0b0000001)) axisReset|=0b0111110; // force reset of all axis settings
-  if   (axisReset&0b0000010) { nv.writeBytes(EE_settingsAxis1,(byte*)&axis1Settings,sizeof(axis1Settings)); VLF("MSG: Init NV Axis1 defaults"); }
+  if   (axisReset&0b0000010) { nv.writeBytes(EE_settingsAxis1,(byte*)&axis1Settings,sizeof(axis1Settings)); nv.writeLong(EE_stepsPerWormRotAxis1,AXIS1_STEPS_PER_WORMROT); VLF("MSG: Init NV Axis1 defaults"); }
   if   (axisReset&0b0000100) { nv.writeBytes(EE_settingsAxis2,(byte*)&axis2Settings,sizeof(axis2Settings)); VLF("MSG: Init NV Axis2 defaults"); }
   if   (axisReset&0b0001000) { nv.writeBytes(EE_settingsAxis3,(byte*)&axis3Settings,sizeof(axis3Settings)); VLF("MSG: Init NV Axis3 defaults"); }
   if   (axisReset&0b0010000) { nv.writeBytes(EE_settingsAxis4,(byte*)&axis4Settings,sizeof(axis4Settings)); VLF("MSG: Init NV Axis4 defaults"); }
@@ -420,14 +420,11 @@ void initReadNvValues() {
   if (backlashAxis2 < 0 ) { backlashAxis2=0; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV backlashAxis2"); }
   
   // setup PEC and get data
-  stepsPerWormRotationAxis1=AXIS1_STEPS_PER_WORMROT*(axis1Settings.stepsPerMeasure/AXIS1_STEPS_PER_DEGREE);
+  if (AXIS1_PEC != ON) nv.writeLong(EE_stepsPerWormRotAxis1,0);
+  stepsPerWormRotationAxis1=nv.readLong(EE_stepsPerWormRotAxis1);
   secondsPerWormRotationAxis1=stepsPerWormRotationAxis1/stepsPerSecondAxis1;
 
-#if AXIS1_PEC == ON
   pecBufferSize=ceil(stepsPerWormRotationAxis1/(axis1Settings.stepsPerMeasure/240.0));
-#else
-  pecBufferSize=0;
-#endif
   if (pecBufferSize != 0) {
     if (pecBufferSize < 61) { pecBufferSize=0; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): invalid pecBufferSize, PEC disabled"); }
     if (200+pecBufferSize >= E2END-200) { pecBufferSize=0; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): pecBufferSize exceeds available NV, PEC disabled"); }

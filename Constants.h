@@ -180,7 +180,9 @@
 #define EE_backlashAxis1            80  // 4
 #define EE_backlashAxis2            84  // 4
 #define EE_siderealInterval         88  // 4
-                                    
+
+#define EE_stepsPerWormRotAxis1     92  // 4
+
 #define EE_autoInitKey              96
 
 // site index: 100-199

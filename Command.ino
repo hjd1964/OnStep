@@ -999,7 +999,7 @@ void processCommands() {
               case '4': sprintf(reply,"%ld",(long)round(axis1Settings.stepsPerMeasure)); boolReply=false; break;
               case '5': sprintf(reply,"%ld",(long)round(axis2Settings.stepsPerMeasure)); boolReply=false; break;
               case '6': dtostrf(stepsPerSecondAxis1,3,6,reply); boolReply=false; break;
-              case '7': sprintf(reply,"%ld",stepsPerWormRotationAxis1); boolReply=false; break;
+              case '7': sprintf(reply,"%ld",nv.readLong(EE_stepsPerWormRotAxis1)); boolReply=false; break;
               case '8': sprintf(reply,"%ld",(long)round(pecBufferSize)); boolReply=false; break;
 #if MOUNT_TYPE == GEM
               case '9': sprintf(reply,"%ld",(long)round(degreesPastMeridianE*4.0)); boolReply=false; break;    // minutes past meridianE
@@ -1961,9 +1961,15 @@ void processCommands() {
             } else commandError=CE_0;
           }
         } else
-#if MOUNT_TYPE == GEM
         if (parameter[0] == 'E') { // En: Simple value
+          long l;
           switch (parameter[1]) {
+            case '7': // stepsPerWormRotation
+              l=strtol(&parameter[3],NULL,10);
+              if (AXIS1_PEC != ON) l=0;
+              if (l >= 0 && l < 129600000) nv.writeLong(EE_stepsPerWormRotAxis1,l); else commandError=CE_PARAM_RANGE;
+              break;
+#if MOUNT_TYPE == GEM
             case '9': // minutes past meridianE
               f=(double)strtol(&parameter[3],NULL,10)/4.0;
               if (labs(f) <= 180) {
@@ -1980,10 +1986,10 @@ void processCommands() {
                 nv.write(EE_dpmW,round(i+128));
               } else commandError=CE_PARAM_RANGE;
               break;
+#endif
             default: commandError=CE_CMD_UNKNOWN;
           }
         } else
-#endif
 #if DEBUG != OFF
         if (parameter[0] == 'F') { // Fn: Debug
           switch (parameter[1]) {  // DebugF, EEPROM upload
