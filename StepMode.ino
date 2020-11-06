@@ -293,7 +293,7 @@ void axis2DriverGotoMode() {
     #ifndef AXIS1_DRIVER_DISABLE_M2
       a1M2(bitRead(AXIS1_DRIVER_CODE_GOTO,2));
     #endif
-      stepAxis1=axis2StepsGoto;
+      stepAxis1=axis1StepsGoto;
     }
   #endif
   #ifdef AXIS2_DRIVER_CODE_GOTO
