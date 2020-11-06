@@ -17,6 +17,7 @@ class dewHeaterControl {
       if (zero < -5.0) { zero = -5.0; DLF("ERR, dewHeater.init(): NV zero too low (set to -5.0)"); }
       if (zero > 20) { zero = 20.0; DLF("ERR, dewHeater.init(): NV zero too high (set to 20.0)"); }
       span = nv.read(_nvAddress + 1)/10.0 - 5.0;
+      if (zero == -5.0 && span == -5.0) span=-4.9; // init. state is ok, no error or warning
       if (span < -5.0) { span = -5.0; DLF("ERR, dewHeater.init(): NV span too low (set to -5.0)"); }
       if (span > 20) { span = 20.0; DLF("ERR, dewHeater.init(): NV span too high (set to 20.0)"); }
       if (zero >= span) { if (span > -5.0) zero = span - 0.1; else span = zero + 0.1; DLF("ERR, dewHeater.init(): NV zero >= span (corrected)"); }
