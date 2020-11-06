@@ -26,8 +26,8 @@ class rotator {
       setMin(min);
       setMax(max);
 
-      if (stepPin != OFF) pinMode(stepPin,OUTPUT);
-      if (dirPin != OFF) pinMode(dirPin,OUTPUT);
+      pinMode(stepPin,OUTPUT);
+      pinMode(dirPin,OUTPUT);
 
       // get backlash amount
       int b=nv.readInt(nvAddress+EE_rotBacklash);

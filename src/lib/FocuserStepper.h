@@ -20,8 +20,8 @@ class focuserStepper : public focuser {
       setMin(min*spm);
       setMax(max*spm);
       
-      if (stepPin != -1) pinMode(stepPin,OUTPUT);
-      if (dirPin != -1) pinMode(dirPin,OUTPUT);
+      pinMode(stepPin,OUTPUT);
+      pinMode(dirPin,OUTPUT);
 
       // get the temperature compensated focusing settings
       float coef=nv.readFloat(nvAddress+EE_tcfCoef);

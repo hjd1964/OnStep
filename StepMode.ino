@@ -39,7 +39,7 @@ void driversInitTmcStealthChop() {
   // stop motion
   haltAxis1=true; haltAxis2=true;
   
-  #if AXIS1_DRIVER_DECAY_MODE == STEALTHCHOP || AXIS2_DRIVER_DECAY_MODE == STEALTHCHOP || Axis1_EN == -1 || Axis2_EN == -1
+  #if AXIS1_DRIVER_DECAY_MODE == STEALTHCHOP || AXIS2_DRIVER_DECAY_MODE == STEALTHCHOP
     tmcAxis1.setup(AXIS1_DRIVER_INTPOL,STEALTHCHOP,AXIS1_DRIVER_CODE,axis1Settings.IRUN,axis1Settings.IRUN);
     tmcAxis2.setup(AXIS2_DRIVER_INTPOL,STEALTHCHOP,AXIS2_DRIVER_CODE,axis2Settings.IRUN,axis2Settings.IRUN);
     delay(150);
@@ -325,14 +325,14 @@ void axis2DriverGotoMode() {
 void enableStepperDrivers() {
   // enable the stepper drivers
   if (axis1Enabled == false) {
-    #if AXIS1_DRIVER_MODEL == TMC_SPI && Axis1_EN == -1
+    #if AXIS1_DRIVER_MODEL == TMC_SPI && Axis1_EN == OFF
       tmcAxis1.setup(AXIS1_DRIVER_INTPOL,AXIS1_DRIVER_DECAY_MODE,AXIS1_DRIVER_CODE,axis1Settings.IRUN,axis1SettingsEx.IHOLD);
     #else
       digitalWrite(Axis1_EN,AXIS1_DRIVER_ENABLE);
     #endif
     axis1Enabled=true;
 
-    #if AXIS2_DRIVER_MODEL == TMC_SPI && Axis2_EN == -1
+    #if AXIS2_DRIVER_MODEL == TMC_SPI && Axis2_EN == OFF
       tmcAxis2.setup(AXIS2_DRIVER_INTPOL,AXIS2_DRIVER_DECAY_MODE,AXIS2_DRIVER_CODE,axis2Settings.IRUN,axis2SettingsEx.IHOLD);
     #else
       if (Axis2_EN != OFF && Axis2_EN != SHARED) digitalWrite(Axis2_EN,AXIS2_DRIVER_ENABLE);
