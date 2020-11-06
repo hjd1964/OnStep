@@ -232,7 +232,11 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
 
   if (slowAxis1Rep > 1) { slowAxis1Cnt++; if (slowAxis1Cnt%slowAxis1Rep != 0) goto done; }
 
+#if MODE_SWITCH_BEFORE_SLEW == OFF && defined(AXIS1_DRIVER_CODE_GOTO) && AXIS1_DRIVER_MODEL == TMC_SPI
+  if (haltAxis1 || axis1ModeSwitchState == MSS_READY) goto done;
+#else
   if (haltAxis1) goto done;
+#endif
 
 #if STEP_WAVE_FORM != DEDGE
   a1CLEAR;
@@ -243,15 +247,12 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
     takeStepAxis1=false;
 #endif
 
-#if defined(AXIS1_DRIVER_CODE) && defined(AXIS1_DRIVER_CODE_GOTO) && MODE_SWITCH_BEFORE_SLEW == OFF
+#if MODE_SWITCH_BEFORE_SLEW == OFF && defined(AXIS1_DRIVER_CODE_GOTO)
   // switch micro-step mode
   if (gotoModeAxis1 != gotoRateAxis1) {
     // only when at an allowed position
     if (gotoModeAxis1 || (posAxis1+blAxis1)%axis1StepsGoto == 0) {
-#if AXIS1_DRIVER_MODEL == TMC_SPI
-      if (!spiInUse)
-#endif
-      { if (gotoModeAxis1) { gotoModeAxis1=false; stepAxis1=1; axis1DriverTrackingFast(); } else { gotoModeAxis1=true; stepAxis1=axis1StepsGoto; axis1DriverGotoFast(); } }
+      if (gotoModeAxis1) { gotoModeAxis1=false; axis1DriverTrackingFast(); } else { gotoModeAxis1=true; axis1DriverGotoFast(); }
     }
   }
 #endif
@@ -263,16 +264,16 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
   if ((trackingState != TrackingMoveTo) && (!inbacklashAxis1)) targetAxis1.part.m+=timerDirAxis1*stepAxis1;
 
   // move the RA/Azm stepper to the target
-#if MODE_SWITCH_BEFORE_SLEW == OFF
-  if ((posAxis1 != (long)targetAxis1.part.m) || inbacklashAxis1) {
-#else
+#if MODE_SWITCH_BEFORE_SLEW == ON || (AXIS1_DRIVER_MODEL == TMC_SPI && defined(AXIS1_DRIVER_CODE_GOTO))
   if ((labs(posAxis1 - (long)targetAxis1.part.m) >= stepAxis1) || inbacklashAxis1) {
+#else
+  if ((posAxis1 != (long)targetAxis1.part.m) || inbacklashAxis1) {
 #endif
 
     // set direction
     if (posAxis1 < (long)targetAxis1.part.m) dirAxis1=1; else dirAxis1=0;
     if (defaultDirAxis1 == dirAxis1) a1DIR_H; else a1DIR_L;
-  
+
     // telescope moves WEST with the sky, blAxis1 is the amount of EAST backlash
     if (dirAxis1 == 1) {
       if (blAxis1 < backlashAxis1) { blAxis1+=stepAxis1; inbacklashAxis1=true; } else { inbacklashAxis1=false; posAxis1+=stepAxis1; }
@@ -314,7 +315,11 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
 
   if (slowAxis2Rep > 1) { slowAxis2Cnt++; if (slowAxis2Cnt%slowAxis2Rep != 0) goto done; }
 
+#if MODE_SWITCH_BEFORE_SLEW == OFF && defined(AXIS2_DRIVER_CODE_GOTO) && AXIS2_DRIVER_MODEL == TMC_SPI
+  if (haltAxis2 || axis2ModeSwitchState == MSS_READY) goto done;
+#else
   if (haltAxis2) goto done;
+#endif
 
 #if STEP_WAVE_FORM != DEDGE
   a2CLEAR;
@@ -325,15 +330,12 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
     takeStepAxis2=false;
 #endif
 
-#if defined(AXIS2_DRIVER_CODE) && defined(AXIS2_DRIVER_CODE_GOTO) && MODE_SWITCH_BEFORE_SLEW == OFF
+#if MODE_SWITCH_BEFORE_SLEW == OFF && defined(AXIS2_DRIVER_CODE_GOTO)
   // switch micro-step mode
   if (gotoModeAxis2 != gotoRateAxis2) {
     // only when at an allowed position
-    if ((gotoModeAxis2) || ((posAxis2+blAxis2)%axis2StepsGoto == 0)) {
-#if AXIS2_DRIVER_MODEL == TMC_SPI
-      if (!spiInUse)
-#endif
-      { if (gotoModeAxis2) { gotoModeAxis2=false; stepAxis2=1; axis2DriverTrackingFast(); } else { gotoModeAxis2=true; stepAxis2=axis2StepsGoto; axis2DriverGotoFast(); } }
+    if (gotoModeAxis2 || (posAxis2+blAxis2)%axis2StepsGoto == 0) {
+      if (gotoModeAxis2) { gotoModeAxis2=false; axis2DriverTrackingFast(); } else { gotoModeAxis2=true; axis2DriverGotoFast(); }
     }
   }
 #endif
@@ -345,12 +347,12 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
   if ((trackingState != TrackingMoveTo) && (!inbacklashAxis2)) targetAxis2.part.m+=timerDirAxis2*stepAxis2;
 
   // move the Dec/Alt stepper to the target
-#if MODE_SWITCH_BEFORE_SLEW == OFF
-  if (axis2Powered && ((posAxis2 != (long)targetAxis2.part.m) || inbacklashAxis2)) {
-#else
+#if MODE_SWITCH_BEFORE_SLEW == ON || (AXIS2_DRIVER_MODEL == TMC_SPI && defined(AXIS2_DRIVER_CODE_GOTO))
   if (axis2Powered && ((labs(posAxis2 - (long)targetAxis2.part.m) >= stepAxis2) || inbacklashAxis2)) {
+#else
+  if (axis2Powered && ((posAxis2 != (long)targetAxis2.part.m) || inbacklashAxis2)) {
 #endif
-    
+
     // set direction
     if (posAxis2 < (long)targetAxis2.part.m) dirAxis2=1; else dirAxis2=0;
     if (defaultDirAxis2 == dirAxis2) a2DIR_H; else a2DIR_L;

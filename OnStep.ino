@@ -581,6 +581,10 @@ void loop2() {
   }
 
   // FASTEST POLLING -----------------------------------------------------------------------------------
+#if AXIS1_DRIVER_MODEL == TMC_SPI
+  autoModeSwitch();
+#endif
+
 #if ROTATOR == ON
   rot.follow(isSlewing());
 #endif

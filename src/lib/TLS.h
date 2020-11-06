@@ -246,14 +246,12 @@ class timeLocationSource {
       s=(m-floor(m))*60.0;
       
 #ifdef SSPI_SHARED
-      spiInUse=true;
       SPI.begin();
 #endif
       RtcDateTime updateTime = RtcDateTime(yy, mo, d, h, floor(m), floor(s));
       _Rtc.SetDateTime(updateTime);
 #ifdef SSPI_SHARED
       SPI.end();
-      spiInUse=false;
 #endif
     }
     
@@ -262,7 +260,6 @@ class timeLocationSource {
       if (!active) return;
 
 #ifdef SSPI_SHARED
-      spiInUse=true;
       SPI.begin();
 #endif
       RtcDateTime now = _Rtc.GetDateTime();
@@ -273,7 +270,6 @@ class timeLocationSource {
       }
 #ifdef SSPI_SHARED
       SPI.end();
-      spiInUse=false;
 #endif
     }
 

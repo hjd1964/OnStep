@@ -11,8 +11,6 @@ class bbspi {
 
     bool begin()
     {
-      spiInUse=true;
-
       pinMode(_cs,OUTPUT); digitalWrite(_cs,HIGH);
       delaySPI;
       pinMode(_sck,OUTPUT); digitalWrite(_sck,HIGH);
@@ -35,7 +33,6 @@ class bbspi {
     void end() {
       digitalWrite(_cs, HIGH);
       delaySPI;
-      spiInUse=false;
     }
     
     uint8_t transfer(uint8_t data_out)
