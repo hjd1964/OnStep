@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "focuser.h"
+#include "Focuser.h"
 #include "StepperDC.h"
 
 class focuserDC : public focuser  {
