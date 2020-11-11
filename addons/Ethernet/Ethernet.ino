@@ -122,6 +122,10 @@ void setup(void){
   Ser.begin(SERIAL_BAUD_DEFAULT);
   byte tb=1;
 
+#if LED_STATUS != OFF
+  pinMode(LED_STATUS,OUTPUT);
+#endif
+
 // EEPROM Init
 #ifndef EEPROM_DISABLED
   if ((EEPROM_readInt(0)!=8267) || (EEPROM_readInt(2)!=0)) {

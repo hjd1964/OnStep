@@ -32,6 +32,9 @@ IPAddress subnet(255, 255, 255, 0);
                                           //         At startup this firmware will attempt to switch OnStep's baud rate to this
                                           //         faster speed (vs. SERIAL_BAUD_DEFAULT) and AFTER success, start WiFi, etc.
 
+// USER FEEDBACK -------------------------------------------------------------------------------------------------------------------
+#define LED_STATUS                    OFF //    OFF, GPIO LED pin. Flashes connecting then steady on connected.               Infreq
+
 // DISPLAY -------------------------------------------------------------------------------------------------------------------------
 #define DISPLAY_LANGUAGE             L_en //   L_en, English. Specify language with two letter country code, if supported.    Adjust
 #define DISPLAY_WEATHER               OFF //    OFF, ON Shows weather/ambient conditions (from OnStep) on status page.        Option
