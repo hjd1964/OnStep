@@ -65,7 +65,7 @@
 #if PINMAP == FYSETC_S6
   #include "Validate.FYSETC_S6.h"
 #endif
-#if PINMAP == MaxSTM3
+#if PINMAP == MaxSTM3 || PINMAP == MaxSTM3I
   #include "Validate.MaxSTM3.h"
 #endif
 #if PINMAP == InsteinESP1
