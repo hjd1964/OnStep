@@ -86,6 +86,7 @@ CommandErrors syncEqu(double RA, double Dec) {
 
   setIndexAxis1(Axis1,newPierSide);
   setIndexAxis2(Axis2,newPierSide);
+  safetyLimitsOn=true;
   syncToEncodersOnly=true;
 
   VLF("MSG: Sync, indices set");

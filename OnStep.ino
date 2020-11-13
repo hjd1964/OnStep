@@ -309,7 +309,6 @@ void setup() {
     if (!tls.active) {
       VLF("MSG: Tracking autostart - no TLS, limits disabled");
       setHome();
-      safetyLimitsOn=false;
     } else {
       if (parkStatus == Parked) {
         VLF("MSG: Tracking autostart - assuming TLS is correct, limits enabled and automatic unpark");
