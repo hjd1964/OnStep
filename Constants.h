@@ -44,6 +44,7 @@
 #define MaxPCB2                     41 // Improved "full feature" board, Teensy3.5/Teensy3.6
 #define MaxPCB3                     42 // Adds SPI bus to all stepper drivers (TMC only,) flashes WeMos D1 Mini through OnStep
 #define MaxSTM3                     43 // Update to the MaxPCB3 using an onboard STM32F411CE MCU instead of the Teensy3.5/3.6
+#define MaxSTM3I                    44 // As above with but with M24C64 EEPROM as default
 
 #define MaxESP2                     50 // Similar to MaxPCB2 except 3 axes and uses cheaper/more available ESP32 MCU
 #define MaxESP3                     51 // Adds 4th axis and option to flash the WeMos D1 Mini WiFi through OnStep
