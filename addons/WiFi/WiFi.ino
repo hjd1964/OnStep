@@ -64,6 +64,9 @@
 #include "Locale.h"
 #include "Globals.h"
 
+// Station mode timeout in seconds after it falls back to access-point mode
+#define STATION_MODE_TIMEOUT 10
+
 // The settings below are for initialization only, afterward they are stored and recalled from EEPROM and must
 // be changed in the web interface OR with a reset (for initialization again) as described in the Config.h comments
 #if SERIAL_BAUD<=28800
@@ -341,7 +344,7 @@ TryAgain:
 
   // wait for connection in station mode, if it fails fall back to access-point mode
   if (!accessPointEnabled && stationEnabled) {
-    for (int i=0; i<5; i++) if (WiFi.status() != WL_CONNECTED) delay(1000); else break;
+    for (int i=0; i<STATION_MODE_TIMEOUT; i++) if (WiFi.status() != WL_CONNECTED) delay(1000); else break;
     if (WiFi.status() != WL_CONNECTED) {
       WiFi.disconnect(); delay(3000);
       stationEnabled=false;
