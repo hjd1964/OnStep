@@ -4,10 +4,9 @@
 // tested and known to work with Broadcom AS37-H39B-B
 // designed according protocol description found in as38-H39e-b-an100.pdf
 
-#include <EEPROM.h>
-#include "EEProm.h"
-
 #if AXIS1_ENC == BC_BISSC || AXIS2_ENC == BC_BISSC
+  #include <EEPROM.h>
+  #include "EEProm.h"
   #define ENC_HAS_ABSOLUTE
   
   class BiSSC_Encoder {

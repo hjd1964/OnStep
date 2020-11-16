@@ -49,6 +49,9 @@
 #endif
 
 #include <limits.h>
+#ifdef ARDUINO_ARCH_SAMD
+  #include <avr/dtostrf.h>
+#endif
 
 // pretty sure this wasn't being compiled in even if W5500 was ON (ahead of #include Config.h) so commented out for now.
 //#ifdef W5500_ON

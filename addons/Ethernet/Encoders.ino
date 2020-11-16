@@ -264,8 +264,7 @@ void handleEncoders() {
   sendHtml(data);
   
   // Encoder sync thresholds
-  sprintf_P(temp,html_encMxAxis0);
-  data += temp;
+  data += FPSTR(html_encMxAxis0);
   sprintf_P(temp,html_encMxAxis1,Axis1EncDiffTo);
   data += temp;
   sprintf_P(temp,html_encMxAxis2,Axis2EncDiffTo);
