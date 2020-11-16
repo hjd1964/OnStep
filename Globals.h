@@ -72,12 +72,12 @@ bool haltAxis2                       = false;
 bool faultAxis2                      = false;
 
 #if AXIS1_DRIVER_MODEL == TMC_SPI
-  #define AXIS1_DRIVER_SWITCH_RATE siderealRate*3L
+  #define AXIS1_DRIVER_SWITCH_RATE siderealRate/3L
 #else
   #define AXIS1_DRIVER_SWITCH_RATE 80*16L
 #endif
 #if AXIS2_DRIVER_MODEL == TMC_SPI
-  #define AXIS2_DRIVER_SWITCH_RATE siderealRate*3L
+  #define AXIS2_DRIVER_SWITCH_RATE siderealRate/3L
 #else
   #define AXIS2_DRIVER_SWITCH_RATE 80*16L
 #endif

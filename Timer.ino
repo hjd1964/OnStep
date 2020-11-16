@@ -232,7 +232,7 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
 
   if (slowAxis1Rep > 1) { slowAxis1Cnt++; if (slowAxis1Cnt%slowAxis1Rep != 0) goto done; }
 
-#if MODE_SWITCH_BEFORE_SLEW == OFF && defined(AXIS1_DRIVER_CODE_GOTO) && AXIS1_DRIVER_MODEL == TMC_SPI
+#if MODE_SWITCH_BEFORE_SLEW == OFF && AXIS1_DRIVER_MODEL == TMC_SPI && defined(AXIS1_DRIVER_CODE_GOTO)
   if (haltAxis1 || axis1ModeSwitchState == MSS_READY) goto done;
 #else
   if (haltAxis1) goto done;
@@ -315,7 +315,7 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
 
   if (slowAxis2Rep > 1) { slowAxis2Cnt++; if (slowAxis2Cnt%slowAxis2Rep != 0) goto done; }
 
-#if MODE_SWITCH_BEFORE_SLEW == OFF && defined(AXIS2_DRIVER_CODE_GOTO) && AXIS2_DRIVER_MODEL == TMC_SPI
+#if MODE_SWITCH_BEFORE_SLEW == OFF && AXIS2_DRIVER_MODEL == TMC_SPI && defined(AXIS2_DRIVER_CODE_GOTO)
   if (haltAxis2 || axis2ModeSwitchState == MSS_READY) goto done;
 #else
   if (haltAxis2) goto done;

@@ -145,50 +145,58 @@ void axis2DriverGotoMode() {
   _a2trk=false;
 }
 
-enum ModeSwitchState {MSS_IDLE, MSS_READY, MSS_GOTO, MSS_DONE};
-volatile ModeSwitchState axis1ModeSwitchState = MSS_IDLE;
-volatile ModeSwitchState axis2ModeSwitchState = MSS_IDLE;
-
 #if MODE_SWITCH_BEFORE_SLEW == OFF
+  enum ModeSwitchState {MSS_IDLE, MSS_READY, MSS_GOTO, MSS_DONE};
+
+  #ifdef AXIS1_DRIVER_CODE_GOTO
+    volatile ModeSwitchState axis1ModeSwitchState = MSS_IDLE;
+    IRAM_ATTR void axis1DriverTrackingFast() { axis1ModeSwitchState = MSS_DONE; }
+    IRAM_ATTR void axis1DriverGotoFast()     { axis1ModeSwitchState = MSS_READY; }
+  #endif
+  #ifdef AXIS2_DRIVER_CODE_GOTO
+    volatile ModeSwitchState axis2ModeSwitchState = MSS_IDLE;
+    IRAM_ATTR void axis2DriverTrackingFast() { axis2ModeSwitchState = MSS_DONE; }
+    IRAM_ATTR void axis2DriverGotoFast()     { axis2ModeSwitchState = MSS_READY; }
+  #endif
+
   void autoModeSwitch() {
   #ifdef AXIS1_DRIVER_CODE_GOTO
     if (axis1ModeSwitchState == MSS_READY) {
-      if (tmcAxis1.refresh_CHOPCONF(AXIS1_DRIVER_CODE_GOTO)) stepAxis1=axis1StepsGoto;
+      haltAxis1=true;
+      tmcAxis1.refresh_CHOPCONF(AXIS1_DRIVER_CODE_GOTO);
+      stepAxis1=axis1StepsGoto;
       axis1ModeSwitchState = MSS_GOTO;
+      haltAxis1=false;
     }
     if (axis1ModeSwitchState == MSS_DONE) {
       haltAxis1=true;
-      if (tmcAxis1.refresh_CHOPCONF(AXIS1_DRIVER_CODE)) stepAxis1=1;
+      tmcAxis1.refresh_CHOPCONF(AXIS1_DRIVER_CODE);
+      stepAxis1=1;
       while (blAxis1 > backlashAxis1) { blAxis1--; posAxis1++; }
       while (blAxis1 < 0) { blAxis1++; posAxis1--; }
-      haltAxis1=false;
-      axis1DriverTrackingMode(true);
       axis1ModeSwitchState = MSS_IDLE;
+      haltAxis1=false;
     }
   #endif
   #ifdef AXIS2_DRIVER_CODE_GOTO
     if (axis2ModeSwitchState == MSS_READY) {
-      if (tmcAxis2.refresh_CHOPCONF(AXIS2_DRIVER_CODE_GOTO)) stepAxis2=axis2StepsGoto;
+      haltAxis2=true;
+      tmcAxis2.refresh_CHOPCONF(AXIS2_DRIVER_CODE_GOTO);
+      stepAxis2=axis2StepsGoto;
       axis2ModeSwitchState = MSS_GOTO;
+      haltAxis2=false;
     }
     if (axis2ModeSwitchState == MSS_DONE) {
       haltAxis2=true;
-      if (tmcAxis2.refresh_CHOPCONF(AXIS2_DRIVER_CODE)) stepAxis2=1;
+      tmcAxis2.refresh_CHOPCONF(AXIS2_DRIVER_CODE);
+      stepAxis2=1;
       while (blAxis2 > backlashAxis2) { blAxis2--; posAxis2++; }
       while (blAxis2 < 0) { blAxis2++; posAxis2--; }
-      haltAxis2=false;
       axis2ModeSwitchState = MSS_IDLE;
+      haltAxis2=false;
     }
   #endif
   }
-
-  #ifdef AXIS1_DRIVER_CODE_GOTO
-    IRAM_ATTR void axis1DriverTrackingFast() { axis1ModeSwitchState = MSS_DONE; }
-    IRAM_ATTR void axis1DriverGotoFast()     { axis1ModeSwitchState = MSS_READY; }
-    IRAM_ATTR void axis2DriverTrackingFast() { axis1ModeSwitchState = MSS_DONE; }
-    IRAM_ATTR void axis2DriverGotoFast()     { axis2ModeSwitchState = MSS_READY; }
-  #endif
-
 #endif
 
 #else
