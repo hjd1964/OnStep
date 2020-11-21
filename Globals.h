@@ -144,8 +144,8 @@ volatile byte dirAxis1                  = 1;                 // stepping directi
 double origTargetRA                     = 0.0;               // holds the RA for gotos before possible conversion to observed place
 double newTargetRA                      = 0.0;               // holds the RA for gotos after conversion to observed place
 fixed_t origTargetAxis1;
-#if defined(AXIS1_DRIVER_CODE) && defined(AXIS1_DRIVER_CODE_GOTO)
-  volatile long stepAxis1=1;
+#if defined(AXIS1_DRIVER_CODE_GOTO)
+  volatile int stepAxis1=1;
 #else
   #define stepAxis1 1
 #endif
@@ -157,8 +157,8 @@ volatile byte dirAxis2                  = 1;                 // stepping directi
 double origTargetDec                    = 0.0;               // holds the Dec for gotos before possible conversion to observed place
 double newTargetDec                     = 0.0;               // holds the Dec for gotos after conversion to observed place
 long origTargetAxis2                    = 0;
-#if defined(AXIS2_DRIVER_CODE) && defined(AXIS2_DRIVER_CODE_GOTO)
-  volatile long stepAxis2=1;
+#if defined(AXIS2_DRIVER_CODE_GOTO)
+  volatile int stepAxis2=1;
 #else
   #define stepAxis2 1
 #endif
