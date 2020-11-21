@@ -187,7 +187,7 @@ double newTargetAzm                     = 0.0;               // holds the altitu
 fixed_t origTargetAxis1;
 double indexAxis1                       = 0;                 // index offset corrections, simple align/sync
 long   indexAxis1Steps                  = 0;
-volatile long stepAxis1=1;
+volatile int stepAxis1=1;
 fixed_t fstepAxis1;                                          // tracking and PEC, fractional steps
 
 double homePositionAxis2                = 0.0;
@@ -202,7 +202,7 @@ double newTargetAlt                     = 0.0;               // holds the altitu
 fixed_t origTargetAxis2;
 double indexAxis2                       = 0;                 // index offset corrections, simple align/sync
 long   indexAxis2Steps                  = 0;
-volatile long stepAxis2=1;
+volatile int stepAxis2=1;
 fixed_t fstepAxis2;                                          // tracking and PEC, fractional steps
 
 double currentAlt                       = 45.0;              // the current altitude
