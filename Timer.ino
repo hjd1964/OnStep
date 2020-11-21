@@ -39,14 +39,20 @@ volatile long runTimerRateAxis1=0;
 volatile long runTimerRateAxis2=0;
 
 volatile uint32_t nextAxis1Rate = 100000UL;
-volatile uint16_t slowAxis1Cnt = 0;
-volatile uint16_t slowAxis1Rep = 1;
+volatile uint16_t nextAxis1Rep = 1;
+#if MODE_SWITCH_BEFORE_SLEW != OFF && defined(AXIS1_DRIVER_CODE_GOTO)
+volatile uint32_t nextAxis1GotoRate = 100000UL;
+volatile uint16_t nextAxis1GotoRep = 1;
+#endif
 volatile long timerDirAxis1 = 0;
 volatile long thisTimerRateAxis1 = 10000UL;
 
 volatile uint32_t nextAxis2Rate = 100000UL;
-volatile uint16_t slowAxis2Cnt = 0;
-volatile uint16_t slowAxis2Rep = 1;
+volatile uint16_t nextAxis2Rep = 1;
+#if MODE_SWITCH_BEFORE_SLEW != OFF && defined(AXIS2_DRIVER_CODE_GOTO)
+volatile uint32_t nextAxis2GotoRate = 100000UL;
+volatile uint16_t nextAxis2GotoRep = 1;
+#endif
 volatile long timerDirAxis2 = 0;
 volatile long thisTimerRateAxis2 = 10000UL;
 
@@ -224,11 +230,17 @@ void timerSupervisor(bool isCentiSecond) {
 
   // set the rates
   if (thisTimerRateAxis1 != isrTimerRateAxis1) {
-    PresetTimerInterval(thisTimerRateAxis1/PPSrateRatio, TIMER_PULSE_STEP_MULTIPLIER, &nextAxis1Rate, &slowAxis1Rep);
+#if MODE_SWITCH_BEFORE_SLEW != OFF && defined(AXIS1_DRIVER_CODE_GOTO)
+    PresetTimerInterval((thisTimerRateAxis1/PPSrateRatio)*AXIS1_DRIVER_STEP_GOTO, TIMER_PULSE_STEP_MULTIPLIER, &nextAxis1GotoRate, &nextAxis1GotoRep);
+#endif
+    PresetTimerInterval(thisTimerRateAxis1/PPSrateRatio, TIMER_PULSE_STEP_MULTIPLIER, &nextAxis1Rate, &nextAxis1Rep);
     isrTimerRateAxis1=thisTimerRateAxis1;
   }
   if (thisTimerRateAxis2 != isrTimerRateAxis2) {
-    PresetTimerInterval(thisTimerRateAxis2/PPSrateRatio, TIMER_PULSE_STEP_MULTIPLIER, &nextAxis2Rate, &slowAxis2Rep);
+#if MODE_SWITCH_BEFORE_SLEW != OFF && defined(AXIS2_DRIVER_CODE_GOTO)
+    PresetTimerInterval((thisTimerRateAxis2/PPSrateRatio)*AXIS2_DRIVER_STEP_GOTO, TIMER_PULSE_STEP_MULTIPLIER, &nextAxis2GotoRate, &nextAxis2GotoRep);
+#endif
+    PresetTimerInterval(thisTimerRateAxis2/PPSrateRatio, TIMER_PULSE_STEP_MULTIPLIER, &nextAxis2Rate, &nextAxis2Rep);
     isrTimerRateAxis2=thisTimerRateAxis2;
   }
 }
@@ -239,7 +251,11 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
   HAL_TIMER3_PREFIX;
 #endif
 
-  if (slowAxis1Rep > 1) { slowAxis1Cnt++; if (slowAxis1Cnt%slowAxis1Rep != 0) goto done; }
+  static uint16_t count = 0;
+#if MODE_SWITCH_BEFORE_SLEW != OFF && defined(AXIS1_DRIVER_CODE_GOTO)
+  if (stepAxis1 != 1) { if (nextAxis1GotoRep > 1) { count++; if (count%nextAxis1GotoRep != 0) goto done; } } else
+#endif
+  if (nextAxis1Rep > 1) { count++; if (count%nextAxis1Rep != 0) goto done; }
 
 #if STEP_WAVE_FORM != DEDGE
   Axis1StepPinReset;
@@ -250,7 +266,7 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
     takeStepAxis1=false;
 #endif
 
-#if defined(AXIS1_DRIVER_CODE) && defined(AXIS1_DRIVER_CODE_GOTO) && MODE_SWITCH_BEFORE_SLEW == OFF
+#if MODE_SWITCH_BEFORE_SLEW == OFF && defined(AXIS1_DRIVER_CODE_GOTO)
   // switch micro-step mode
   if (gotoModeAxis1 != gotoRateAxis1) {
     // only when at an allowed position
@@ -267,7 +283,10 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
 #endif
 
 #if STEP_WAVE_FORM != SQUARE
-  QuickSetIntervalAxis1(nextAxis1Rate*stepAxis1);
+#if MODE_SWITCH_BEFORE_SLEW != OFF && defined(AXIS1_DRIVER_CODE_GOTO)
+  if (stepAxis1 != 1) QuickSetIntervalAxis1(nextAxis1GotoRate); else
+#endif
+  QuickSetIntervalAxis1(nextAxis1Rate);
 #endif
 
   if ((trackingState != TrackingMoveTo) && (!inbacklashAxis1)) targetAxis1.part.m+=timerDirAxis1*stepAxis1;
@@ -302,7 +321,10 @@ IRAM_ATTR ISR(TIMER3_COMPA_vect)
     if (takeStepAxis1) Axis1StepPinStep;
     clearAxis1=true;
 
-    QuickSetIntervalAxis1(nextAxis1Rate*stepAxis1);
+#if MODE_SWITCH_BEFORE_SLEW != OFF && defined(AXIS1_DRIVER_CODE_GOTO)
+    if (stepAxis1 != 1) QuickSetIntervalAxis1(nextAxis1GotoRate); else
+#endif
+    QuickSetIntervalAxis1(nextAxis1Rate);
   }
 #else
 #if STEP_WAVE_FORM == DEDGE
@@ -326,7 +348,11 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
   HAL_TIMER4_PREFIX;
 #endif
 
-  if (slowAxis2Rep > 1) { slowAxis2Cnt++; if (slowAxis2Cnt%slowAxis2Rep != 0) goto done; }
+  static uint16_t count = 0;
+#if MODE_SWITCH_BEFORE_SLEW != OFF && defined(AXIS2_DRIVER_CODE_GOTO)
+  if (stepAxis2 != 1) { if (nextAxis2GotoRep > 1) { count++; if (count%nextAxis2GotoRep != 0) goto done; } } else
+#endif
+  if (nextAxis2Rep > 1) { count++; if (count%nextAxis2Rep != 0) goto done; }
 
 #if STEP_WAVE_FORM != DEDGE
   Axis2StepPinReset;
@@ -337,7 +363,7 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
     takeStepAxis2=false;
 #endif
 
-#if defined(AXIS2_DRIVER_CODE) && defined(AXIS2_DRIVER_CODE_GOTO) && MODE_SWITCH_BEFORE_SLEW == OFF
+#if MODE_SWITCH_BEFORE_SLEW == OFF && defined(AXIS2_DRIVER_CODE_GOTO) 
   // switch micro-step mode
   if (gotoModeAxis2 != gotoRateAxis2) {
     // only when at an allowed position
@@ -354,7 +380,10 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
 #endif
 
 #if STEP_WAVE_FORM != SQUARE
-  QuickSetIntervalAxis2(nextAxis2Rate*stepAxis2);
+#if MODE_SWITCH_BEFORE_SLEW != OFF && defined(AXIS2_DRIVER_CODE_GOTO)
+  if (stepAxis2 != 1) QuickSetIntervalAxis2(nextAxis2GotoRate); else
+#endif
+  QuickSetIntervalAxis2(nextAxis2Rate);
 #endif
 
   if ((trackingState != TrackingMoveTo) && (!inbacklashAxis2)) targetAxis2.part.m+=timerDirAxis2*stepAxis2;
@@ -389,7 +418,10 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
     if (takeStepAxis2) Axis2StepPinStep;
     clearAxis2=true;
 
-    QuickSetIntervalAxis2(nextAxis2Rate*stepAxis2);
+#if MODE_SWITCH_BEFORE_SLEW != OFF && defined(AXIS2_DRIVER_CODE_GOTO)
+    if (stepAxis2 != 1) QuickSetIntervalAxis2(nextAxis2GotoRate); else
+#endif
+    QuickSetIntervalAxis2(nextAxis2Rate);
   }
 #else
 #if STEP_WAVE_FORM == DEDGE
