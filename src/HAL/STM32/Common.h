@@ -139,6 +139,7 @@ void HAL_Initialize(void) {
   uint32_t startTime,npp;
   startTime=micros(); delayNanoseconds(65535); npp=micros(); npp=((int32_t)(npp-startTime)*1000)/63335;
   if (npp<1) npp=1; if (npp>2000) npp=2000; _nanosPerPass=npp;
+  analogWriteResolution(8);
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -149,4 +150,3 @@ float HAL_MCU_Temperature(void) {
 
 // Shorthand for SPI delay
 #define delaySPI delayNanoseconds(SPI_DELAY_NS)
-
