@@ -271,7 +271,7 @@ void setup() {
 #else
   VLF("MSG: Init weather");
 #endif
-  if (!ambient.init()) generalError=ERR_WEATHER_INIT;
+  if (!ambient.init() && WEATHER_SUPRESS_ERRORS == OFF) generalError=ERR_WEATHER_INIT;
 
   // setup features
 #ifdef FEATURES_PRESENT

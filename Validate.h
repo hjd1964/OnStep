@@ -395,6 +395,10 @@
   #error "Configuration (Config.h): Setting WEATHER sensor invalid, use OFF or BME280, BME280_0x76, BME280SPI only."
 #endif
 
+#ifndef WEATHER_SUPRESS_ERRORS
+  #define WEATHER_SUPRESS_ERRORS OFF
+#endif
+
 #if FOCUSER1 == OFF && FOCUSER2 != OFF
   #error "Configuration (Config.h): FOCUSER2 can't be enabled if FOCUSER1 isn't enabled; if using only one focuser it must be FOCUSER1."
 #endif
