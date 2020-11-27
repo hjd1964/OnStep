@@ -43,7 +43,7 @@
   #endif
 #endif
 
-#if BUZZER == ON
+#if BUZZER == ON && TonePin == Aux8
   #if ASSIGNED_AUX8 != PIN_NOT_ASSIGNED
     #error "Configuration (Config.h): BUZZER enabled but Aux8 is already in use, choose one feature on Aux8"
   #else
