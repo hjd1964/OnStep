@@ -1,12 +1,12 @@
 // -------------------------------------------------------------------------------------------------
-// Pin map for OnStep MaxSTM STM32F411CE PCB (or the Blackpill https://github.com/WeActTC/MiniF4-STM32F4x1)
+// Pin map for OnStep MaxSTM STM32F411CE/STM32F401CE PCB (or the Blackpill https://github.com/WeActTC/MiniF4-STM32F4x1)
 
 // For an 8KB EEPROM on the MaxSTM3.6I
 #if PINMAP == MaxSTM3I
   #define NV_M24C32
 #endif
 
-#if defined(STM32F411xE)
+#if defined(STM32F411xE) || defined(STM32F401xC)
 
 // The multi-purpose pins (Aux3..Aux8 can be analog pwm/dac if supported)
 #define Aux0                PB12     // Status LED
