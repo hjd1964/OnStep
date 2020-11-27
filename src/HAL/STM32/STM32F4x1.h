@@ -5,12 +5,13 @@
 
 #define HAL_FAST_PROCESSOR
 
-// Lower limit (fastest) step rate in uS for this platform (in SQW mode)
-// This assumes optimization set to Fastest (-O3)
-#define HAL_MAXRATE_LOWER_LIMIT 16
-
-// Width of step pulse
-#define HAL_PULSE_WIDTH         500
+#if defined(STM32F411xE)
+#define HAL_MAXRATE_LOWER_LIMIT 16   // Lower limit (fastest) step rate in uS (in SQW mode) assumes optimization set to Fastest (-O3)
+#define HAL_PULSE_WIDTH         500  // Width of step pulse
+#elif defined(STM32F401xC)
+#define HAL_MAXRATE_LOWER_LIMIT 20   // Lower limit (fastest) step rate in uS (in SQW mode) assumes optimization set to Fastest (-O3)
+#define HAL_PULSE_WIDTH         600  // Width of step pulse
+#endif
 
 #include <HardwareTimer.h>
 
@@ -71,6 +72,7 @@ void HAL_Initialize(void) {
   uint32_t startTime,npp;
   startTime=micros(); delayNanoseconds(65535); npp=micros(); npp=((int32_t)(npp-startTime)*1000)/63335;
   if (npp<1) npp=1; if (npp>2000) npp=2000; _nanosPerPass=npp;
+  analogWriteResolution(8);
 }
 
 //--------------------------------------------------------------------------------------------------
