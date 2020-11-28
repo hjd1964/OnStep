@@ -5,7 +5,9 @@
 void featuresInit() {
   for (int i=0; i < 8; i++) {
     if (feature[i].purpose == SWITCH || feature[i].purpose == ANALOG_OUTPUT) {
-      if (feature[i].pin >= 0 && feature[i].pin <= 255) pinMode(feature[i].pin,OUTPUT);
+      if (feature[i].pin >= 0 && feature[i].pin <= 255) {
+        analogWrite(feature[i].pin,feature[i].value);
+      }
     } else if (feature[i].purpose == DEW_HEATER) {
       feature[i].dewHeater = new dewHeaterControl;
       if (feature[i].pin >= 0 && feature[i].pin <= 255) feature[i].dewHeater->init(feature[i].pin,EE_feature1Value1+i*3); else feature[i].dewHeater->init(-1,EE_feature1Value1+i*3);
