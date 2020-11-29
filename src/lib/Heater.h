@@ -24,7 +24,7 @@ class dewHeaterControl {
     }
 
     void poll(float deltaAboveDewPointC) {
-      if (isnan(deltaAboveDewPointC)) enabled=false;
+      if (isnan(deltaAboveDewPointC)) { enabled=false; heaterOn=false; if (_pin >= 0 && _pin <= 255) digitalWrite(_pin, LOW); }
       
       if (!enabled) return;
 

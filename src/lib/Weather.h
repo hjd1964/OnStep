@@ -186,11 +186,12 @@ class weather {
 
     // designed for a 0.01s polling interval, 5 seconds to refresh everything
     void poll() {
+      static bool firstScanDone = false;
 #if WEATHER != OFF || defined(ONEWIRE_DEVICES_PRESENT)
       if (_BME280_found || _BMP280_found || _DS1820_found || _DS2413_found) {
 
         static int phase = 0;
-        if (phase >= 500) { phase = 0; _DS1820_count = 0; }
+        if (phase >= 500) { phase = 0; _DS1820_count = 0; firstScanDone = true; }
 
   #ifdef DS2413_DEVICES_PRESENT
         if (_DS2413_found) {
@@ -198,24 +199,28 @@ class weather {
     #if (FEATURE1_PIN & DS_MASK) == DS2413 || (FEATURE2_PIN & DS_MASK) == DS2413
           if (phase%2 == 1 && (_last_ds2413_state[1] != _this_ds2413_state[1] || _last_ds2413_state[0] != _this_ds2413_state[0])) {
             if (DS2413GPIO.setStateByAddress(_DS2413_address[0],_this_ds2413_state[1],_this_ds2413_state[0],true)) { phase++; _last_ds2413_state[1] = _this_ds2413_state[1]; _last_ds2413_state[0] = _this_ds2413_state[0]; }
+            if (!DS2413GPIO.success()) { _ds2413_failures[0]++; VLF("WRN, DS2413 comms: features 1/2"); }
             return;
           }
     #endif
     #if (FEATURE3_PIN & DS_MASK) == DS2413 || (FEATURE4_PIN & DS_MASK) == DS2413
           if (phase%2 == 1 && (_last_ds2413_state[3] != _this_ds2413_state[3] || _last_ds2413_state[2] != _this_ds2413_state[2])) {
             if (DS2413GPIO.setStateByAddress(_DS2413_address[1],_this_ds2413_state[3],_this_ds2413_state[2],true)) { phase++; _last_ds2413_state[3] = _this_ds2413_state[3]; _last_ds2413_state[2] = _this_ds2413_state[2]; }
+            if (!DS2413GPIO.success()) { _ds2413_failures[1]++; VLF("WRN, DS2413 comms: features 3/4"); }
             return;
           }
     #endif
     #if (FEATURE5_PIN & DS_MASK) == DS2413 || (FEATURE6_PIN & DS_MASK) == DS2413
           if (phase%2 == 1 && (_last_ds2413_state[5] != _this_ds2413_state[5] || _last_ds2413_state[4] != _this_ds2413_state[4])) {
             if (DS2413GPIO.setStateByAddress(_DS2413_address[2],_this_ds2413_state[5],_this_ds2413_state[4],true)) { phase++; _last_ds2413_state[5] = _this_ds2413_state[5]; _last_ds2413_state[4] = _this_ds2413_state[4]; }
+            if (!DS2413GPIO.success()) { _ds2413_failures[2]++; VLF("WRN, DS2413 comms: features 5/6"); }
             return;
           }
     #endif
     #if (FEATURE7_PIN & DS_MASK) == DS2413 || (FEATURE8_PIN & DS_MASK) == DS2413
           if (phase%2 == 1 && (_last_ds2413_state[7] != _this_ds2413_state[7] || _last_ds2413_state[6] != _this_ds2413_state[6])) {
             if (DS2413GPIO.setStateByAddress(_DS2413_address[3],_this_ds2413_state[7],_this_ds2413_state[6],true)) { phase++; _last_ds2413_state[7] = _this_ds2413_state[7]; _last_ds2413_state[6] = _this_ds2413_state[6]; }
+            if (!DS2413GPIO.success()) { _ds2413_failures[3]++; VLF("WRN, DS2413 comms: features 7/8"); }
             return;
           }
     #endif
@@ -224,7 +229,7 @@ class weather {
 
   #ifdef DS1820_DEVICES_PRESENT
         if (_DS1820_found) {
-          double f;
+          float f;
           if (phase == 0) { if (DS18B20.requestTemperatures(true)) phase++; return; }
     #if TELESCOPE_TEMPERATURE != OFF
           if (phase == 50) { f = DS18B20.getTempC(_DS1820_address[0],true); if (Tpolling(f)) return; else { _DS1820_count++; _tt=Tvalidated(f); phase++; return; } }
@@ -268,7 +273,8 @@ class weather {
       phase++;
       }
 #endif
-
+      if (!firstScanDone) return;
+      
 #if TELESCOPE_TEMPERATURE == OFF
       // use primary temperature for the telescope temperature if TELESCOPE_TEMPERATURE
       _tt = _t;
@@ -279,20 +285,104 @@ class weather {
   #endif
 #endif
 
-      // apply a 20 sample rolling average to the temperatures, sampling once a second
-      static byte p = 1;
-      if ((p++)%100 == 0) {
-        static bool firstTSample=true; if (firstTSample) { firstTSample=false; _ta=_t; }
-        _ta=(_ta*19.0+_t)/20.0;
-  
-        static bool firstTTSample=true; if (firstTTSample) { firstTTSample=false; _tta=_tt; }
-        _tta=(_tta*19.0+_tt)/20.0;
+      // once every two second timed
+      static uint16_t p = 1;
+      if ((p++)%200 == 0) {
+        // apply a 10 sample rolling average to the ambient temperature
+        static byte taNanCount=0;
+        static bool firstTSample=true; if (firstTSample) { firstTSample=false; _ta=_t; if (!isnan(_t)) taNanCount=0; }
+        if (isnan(_t)) {
+          if (taNanCount < 15) {
+            taNanCount++;
+            VLF("WRN, misc. comms: ambient temp");
+          } else {
+            _ta=NAN;
+            firstTSample=true;
+            VLF("WRN, misc. isnan: ambient temp disabled");
+          }
+        } else { taNanCount=0; _ta=(_ta*9.0+_t)/10.0; }
+
+        // apply a 10 sample rolling average to the telescope temperature
+        static byte ttNanCount=0;
+        static bool firstTTSample=true; if (firstTTSample) { firstTTSample=false; _tta=_tt; if (!isnan(_tt)) ttNanCount=0; }
+        if (isnan(_tt)) {
+          if (ttNanCount < 15) {
+            ttNanCount++;
+            VLF("WRN, DS1820 comms: telescope");
+          } else {
+            _tta=NAN;
+            firstTTSample=true;
+            VLF("WRN, DS1820 isnan: telescope disabled");
+          }
+        } else { ttNanCount=0; _tta=(_tta*9.0+_tt)/10.0; }
+ 
+ #ifdef DS1820_DEVICES_PRESENT
+        // apply a 2 sample rolling average to the feature temperatures
+        static byte ftNanCount[8]={0,0,0,0,0,0,0,0};
+        static bool firstFTSample[8]={true,true,true,true,true,true,true,true};
+        for (int i=0; i<8; i++) {
+  #if FEATURE1_TEMP == OFF
+          if (i==0) continue;
+  #endif
+  #if FEATURE2_TEMP == OFF
+          if (i==1) continue;
+  #endif
+  #if FEATURE3_TEMP == OFF
+          if (i==2) continue;
+  #endif
+  #if FEATURE4_TEMP == OFF
+          if (i==3) continue;
+  #endif
+  #if FEATURE5_TEMP == OFF
+          if (i==4) continue;
+  #endif
+  #if FEATURE6_TEMP == OFF
+          if (i==5) continue;
+  #endif
+  #if FEATURE7_TEMP == OFF
+          if (i==6) continue;
+  #endif
+  #if FEATURE8_TEMP == OFF
+          if (i==7) continue;
+  #endif
+          if (firstFTSample[i]) { firstFTSample[i]=false; _dh_ta[i]=_dh_t[i]; if (!isnan(_dh_t[i])) ftNanCount[i]=0; }
+          if (isnan(_dh_t[i])) {
+            if (ftNanCount[i] < 15) {
+              ftNanCount[i]++;
+              VF("WRN, DS1820 comms: feature "); VL(i+1);
+            } else {
+              _dh_ta[i]=NAN;
+              firstFTSample[i]=true;
+              VF("WRN, DS1820 isnan: feature "); V(i+1); VLF(" disabled");
+            }
+          } else { ftNanCount[i]=0; _dh_ta[i]=(_dh_ta[i]+_dh_t[i])/2.0; }
+
+        }
+#endif
       }
 
+#ifdef DS2413_DEVICES_PRESENT
+      // turn off features that have an error rate of above 2 per minute
+      if (p%6000 == 0) {
+        for (int i=0; i<4; i++) { 
+          if (_ds2413_failures[i] > 0) {
+            _ds2413_failures[i]--;
+            _ds2413_state[i*2]=0; _last_ds2413_state[i*2]=INVALID;
+            _ds2413_state[i*2+1]=0; _last_ds2413_state[i*2+1]=INVALID;
+          }
+          if (_ds2413_failures[i] > 2) {
+            _ds2413_failures[i]=0;
+            VF("WRN, DS2413 epm>2: features ");
+            if (i == 0) VF("1/2"); if (i == 1) VF("3/4"); if (i == 2) VF("5/6"); if (i == 3) VF("7/8");
+            VLF(" disabled");
+          }
+        }
+      }
+#endif
     }
 
     // get temperature in deg. C
-    double getTemperature() {
+    float getTemperature() {
       return _ta;
     }
     
@@ -305,30 +395,30 @@ class weather {
     float getFeatureTemperature(int index) {
       if (index < 0 || index > 7) return 100.0;
 #if FEATURE1_TEMP == OFF
-      _dh_t[0]=getTemperature();
+      _dh_ta[0]=getTemperature();
 #endif
 #if FEATURE2_TEMP == OFF
-      _dh_t[1]=getTemperature();
+      _dh_ta[1]=getTemperature();
 #endif
 #if FEATURE3_TEMP == OFF
-      _dh_t[2]=getTemperature();
+      _dh_ta[2]=getTemperature();
 #endif
 #if FEATURE4_TEMP == OFF
-      _dh_t[3]=getTemperature();
+      _dh_ta[3]=getTemperature();
 #endif
 #if FEATURE5_TEMP == OFF
-      _dh_t[4]=getTemperature();
+      _dh_ta[4]=getTemperature();
 #endif
 #if FEATURE6_TEMP == OFF
-      _dh_t[5]=getTemperature();
+      _dh_ta[5]=getTemperature();
 #endif
 #if FEATURE7_TEMP == OFF
-      _dh_t[6]=getTemperature();
+      _dh_ta[6]=getTemperature();
 #endif
 #if FEATURE8_TEMP == OFF
-      _dh_t[7]=getTemperature();
+      _dh_ta[7]=getTemperature();
 #endif
-      return _dh_t[index];
+      return _dh_ta[index];
     }
     
     // set temperature in deg. C
@@ -352,7 +442,7 @@ class weather {
     }
     
     // set relative humidity in %
-    void setHumidity(double h) {
+    void setHumidity(float h) {
       _h = h;
     }
     
@@ -368,7 +458,7 @@ class weather {
     
     // get dew point in deg. C
     // accurate to +/- 1 deg. C for RH above 50%
-    double getDewPoint() {
+    float getDewPoint() {
       return _ta - ((100.0 - _h) / 5.0);
       // a more accurate formula?
       // return 243.04*(log(_h/100.0)+((17.625*_ta)/(243.04+_ta)))/(17.625-log(_h/100.0)-((17.625*_ta)/(243.04+_ta)));
@@ -378,11 +468,18 @@ class weather {
     int getDS2413State(int feature) {
       if (feature >= 0 && feature <= 7) return _ds2413_state[feature]; else return 0;
     }
-
     void setDS2413State(int feature, bool state) {
       if (feature >= 0 && feature <= 7) _ds2413_state[feature]=state;
     }
-
+    bool getDS2413Failure(int feature) {
+      if (feature >= 0 && feature <= 7) {
+        if (feature == 0 || feature == 1) return _ds2413_failures[0] > 2;
+        if (feature == 2 || feature == 3) return _ds2413_failures[1] > 2;
+        if (feature == 4 || feature == 5) return _ds2413_failures[2] > 2;
+        if (feature == 6 || feature == 7) return _ds2413_failures[3] > 2;
+      } else return true;
+    }
+    
   private:
     bool _BME280_found = false;
     bool _BMP280_found = false;
@@ -404,16 +501,18 @@ class weather {
     float _a = 200.0;
     float _tt = 10.0;
     float _tta = 10.0;
-    float _dh_t[8] = {10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0, 10.0};
+    float _dh_t[8] = {NAN, NAN, NAN, NAN, NAN, NAN, NAN, NAN};
+    float _dh_ta[8] = {NAN, NAN, NAN, NAN, NAN, NAN, NAN, NAN};
     bool _ds2413_state[8] = {false, false, false, false, false, false, false, false};
-    bool _this_ds2413_state[8] = {false, false, false, false, false, false, false, false};
-    bool _last_ds2413_state[8] = {false, false, false, false, false, false, false, false};
+    int16_t _ds2413_failures[4] = {0, 0, 0, 0};
+    int16_t _this_ds2413_state[8] = {false, false, false, false, false, false, false, false};
+    int16_t _last_ds2413_state[8] = {INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID, INVALID};
 
 #ifdef DS1820_DEVICES_PRESENT
-    bool Tpolling(double f) {
+    bool Tpolling(float f) {
       return (fabs(f-DEVICE_POLLING_C) < 0.001);
     }
-    double Tvalidated(double f) {
+    float Tvalidated(float f) {
       if (fabs(f-DEVICE_DISCONNECTED_C) < 0.001) return NAN;
       if (f < -100 || f > 70) return NAN;
       return f;
