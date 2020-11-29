@@ -251,4 +251,4 @@
 // THAT'S IT FOR USER CONFIGURATION!
 
 // -------------------------------------------------------------------------------------------------------------------------
-#define FileVersionConfig 3
+#define FileVersionConfig 4

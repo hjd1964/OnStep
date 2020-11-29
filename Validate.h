@@ -3,8 +3,8 @@
 
 #pragma once
 
-#if FileVersionConfig != 3
-  #error "Configuration (Config.h): FileVersionConfig (Config.h version) must be 3 for this OnStep."
+#if FileVersionConfig != 3 && FileVersionConfig != 4
+  #error "Configuration (Config.h): FileVersionConfig (Config.h version) must be 3 or 4 for this OnStep."
 #endif
 
 // -----------------------------------------------------------------------------------
