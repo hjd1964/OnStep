@@ -220,7 +220,7 @@ class weather {
     #if (FEATURE7_PIN & DS_MASK) == DS2413 || (FEATURE8_PIN & DS_MASK) == DS2413
           if (phase%2 == 1 && (_last_ds2413_state[7] != _this_ds2413_state[7] || _last_ds2413_state[6] != _this_ds2413_state[6])) {
             if (DS2413GPIO.setStateByAddress(_DS2413_address[3],_this_ds2413_state[7],_this_ds2413_state[6],true)) { phase++; _last_ds2413_state[7] = _this_ds2413_state[7]; _last_ds2413_state[6] = _this_ds2413_state[6]; }
-            if (!DS2413GPIO.success()) { _ds2413_failures[3]++; VLF("WRN, DS2413 comms: features 7/8"); }
+            if (!DS2413GPIO.success()) { _ds2413_failures[3]++; VLF("WRN, DS2413 comms: features 7/8"); } // If your compile fails you need to update the DS2413 library: https://github.com/hjd1964/Arduino-DS2413GPIO-Control-Library
             return;
           }
     #endif
