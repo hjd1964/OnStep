@@ -162,8 +162,8 @@ void handleWifi() {
     restartRequired=false;
     data+=FPSTR(html_login);
   } else {
-    EEPROM_readString(100,wifi_sta_ssid);
-    EEPROM_readString(150,wifi_sta_pwd);
+    nv.readString(EE_STA_SSID,wifi_sta_ssid);
+    nv.readString(EE_STA_PWD,wifi_sta_pwd);
       
     sprintf_P(temp,html_wifiSerial,cmdTimeout,webTimeout); data += temp;
     sprintf_P(temp,html_wifiSSID1,wifi_sta_ssid,""); data += temp;
@@ -215,7 +215,7 @@ void processWifiGet() {
   v=server.arg("webpwd");
   if (v!="") {
     strcpy(masterPassword,(char*)v.c_str());
-    EEPROM_writeString(200,masterPassword);
+    nv.writeString(EE_PASSWORD,masterPassword);
     EEwrite=true;
   }
 
@@ -224,7 +224,7 @@ void processWifiGet() {
   v=server.arg("ccto");
   if (v!="") {
     cmdTimeout=v.toInt();
-    EEPROM_writeInt(12,(int)cmdTimeout);
+    nv.writeInt(EE_TIMEOUT_CMD,(int)cmdTimeout);
     EEwrite=true;
   }
 
@@ -232,7 +232,7 @@ void processWifiGet() {
   v=server.arg("wcto");
   if (v!="") {
     webTimeout=v.toInt();
-    EEPROM_writeInt(10,(int)webTimeout);
+    nv.writeInt(EE_TIMEOUT_WEB,(int)webTimeout);
     EEwrite=true;
   }
 
@@ -312,13 +312,13 @@ void processWifiGet() {
   v=server.arg("stagw4"); if (v!="") wifi_sta_gw[3]=v.toInt();
     
   if (v1!="") {
-    EEPROM_writeString(100,wifi_sta_ssid);
-    EEPROM_writeString(150,wifi_sta_pwd);
-    EEPROM_writeInt(8,(int)stationDhcpEnabled);
-    EEPROM_writeInt(6,(int)stationEnabled);
-    EEPROM.write(20,wifi_sta_ip[0]); EEPROM.write(21,wifi_sta_ip[1]); EEPROM.write(22,wifi_sta_ip[2]); EEPROM.write(23,wifi_sta_ip[3]);
-    EEPROM.write(24,wifi_sta_gw[0]); EEPROM.write(25,wifi_sta_gw[1]); EEPROM.write(26,wifi_sta_gw[2]); EEPROM.write(27,wifi_sta_gw[3]);
-    EEPROM.write(28,wifi_sta_sn[0]); EEPROM.write(29,wifi_sta_sn[1]); EEPROM.write(30,wifi_sta_sn[2]); EEPROM.write(31,wifi_sta_sn[3]);
+    nv.writeString(EE_STA_SSID,wifi_sta_ssid);
+    nv.writeString(EE_STA_PWD,wifi_sta_pwd);
+    nv.writeInt(EE_DHCP_EN,(int)stationDhcpEnabled);
+    nv.writeInt(EE_STA_EN,(int)stationEnabled);
+    for (int i=0;i<4;i++) nv.write(EE_STA_IP+i,wifi_sta_ip[i]);
+    for (int i=0;i<4;i++) nv.write(EE_STA_GW+i,wifi_sta_gw[i]);
+    for (int i=0;i<4;i++) nv.write(EE_STA_SN+i,wifi_sta_sn[i]);
     EEwrite=true;
     restartRequired=true;
   }
@@ -400,18 +400,18 @@ void processWifiGet() {
   v=server.arg("apgw4"); if (v!="") wifi_ap_gw[3]=v.toInt();
 
   if (v!="") {
-    EEPROM_writeString(500,wifi_ap_ssid);
-    EEPROM_writeString(550,wifi_ap_pwd);
-    EEPROM_writeInt(50,(int)wifi_ap_ch);
-    EEPROM_writeInt(4,(int)accessPointEnabled);
-    EEPROM.write(60,wifi_ap_ip[0]); EEPROM.write(61,wifi_ap_ip[1]); EEPROM.write(62,wifi_ap_ip[2]); EEPROM.write(63,wifi_ap_ip[3]);
-    EEPROM.write(70,wifi_ap_gw[0]); EEPROM.write(71,wifi_ap_gw[1]); EEPROM.write(72,wifi_ap_gw[2]); EEPROM.write(73,wifi_ap_gw[3]);
-    EEPROM.write(80,wifi_ap_sn[0]); EEPROM.write(81,wifi_ap_sn[1]); EEPROM.write(82,wifi_ap_sn[2]); EEPROM.write(83,wifi_ap_sn[3]);
+    nv.writeString(EE_AP_SSID,wifi_ap_ssid);
+    nv.writeString(EE_AP_PWD,wifi_ap_pwd);
+    nv.writeInt(EE_AP_CH,(int)wifi_ap_ch);
+    nv.writeInt(EE_AP_EN,(int)accessPointEnabled);
+    for (int i=0;i<4;i++) nv.write(EE_AP_IP+i,wifi_ap_ip[i]);
+    for (int i=0;i<4;i++) nv.write(EE_AP_GW+i,wifi_ap_gw[i]);
+    for (int i=0;i<4;i++) nv.write(EE_AP_SN+i,wifi_ap_sn[i]);
     EEwrite=true;
     restartRequired=true;
   }
 
-  if (EEwrite) EEPROM.commit();
+  if (EEwrite) nv.commit();
 }
 
 // convert hex to int with error checking

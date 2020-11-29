@@ -1,5 +1,22 @@
 // -----------------------------------------------------------------------------------
-// Global variables
+// Global variables / pin maps
+
+#ifdef ESP32
+  #define AXIS1_ENC_A_PIN 18 // pin# for Axis1 encoder, for A or CW
+  #define AXIS1_ENC_B_PIN 19 // pin# for Axis1 encoder, for B or CCW
+  #define AXIS2_ENC_A_PIN 22 // pin# for Axis1 encoder, for A or CW
+  #define AXIS2_ENC_B_PIN 21 // pin# for Axis1 encoder, for B or CCW
+#elif ESP8266
+  #define AXIS1_ENC_A_PIN 14 // pin# for Axis1 encoder, for A or CW
+  #define AXIS1_ENC_B_PIN 12 // pin# for Axis1 encoder, for B or CCW
+  #define AXIS2_ENC_A_PIN 5  // pin# for Axis1 encoder, for A or CW
+  #define AXIS2_ENC_B_PIN 4  // pin# for Axis1 encoder, for B or CCW
+#else // Teensy's etc.
+  #define AXIS1_ENC_A_PIN 5  // pin# for Axis1 encoder, for A or CW
+  #define AXIS1_ENC_B_PIN 6  // pin# for Axis1 encoder, for B or CCW
+  #define AXIS2_ENC_A_PIN 7  // pin# for Axis2 encoder, for A or CW
+  #define AXIS2_ENC_B_PIN 8  // pin# for Axis2 encoder, for B or CCW
+#endif
 
 const char html_headB[] PROGMEM = "<!DOCTYPE HTML>\r\n"
                                   "<html>\r\n"
@@ -116,7 +133,7 @@ const char html_ajax_active[] PROGMEM =
         "if (j==-1) {j=lines[i].indexOf('&');m=1;}\n"
         "v=lines[i].slice(j+1);\n"
         "k=lines[i].slice(0,j);\n"
-        "if (k!='') {"
+        "if (k!=''&&document.getElementById(k)!=null) {"
         " if (m==1) document.getElementById(k).value=v; else "
         " if (v=='disabled') document.getElementById(k).disabled=true; else"
         " if (v=='enabled') document.getElementById(k).disabled=false; else"

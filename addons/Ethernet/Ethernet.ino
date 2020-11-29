@@ -62,13 +62,12 @@
 
 #define DEBUG_OFF   // Turn _ON to allow Ethernet startup without OnStep (Serial port for debug at 9600 baud)
 
-#define EEPROM_COMMIT_DISABLED
 #if defined(_mk20dx128_h_) || defined(__MK20DX128__) || defined(__MK20DX256__)
   #include <EEPROM.h>
-  #include "EEProm.h"
 #else
   #define EEPROM_DISABLED
 #endif
+#include "EEProm.h"
 
 #include <Ethernet.h>
 #include "CmdServer.h"
@@ -76,9 +75,11 @@
 #include "Constants.h"
 #include "Locales.h"
 #include "Config.h"
+#if AXIS1_ENC > 0 && AXIS2_ENC > 0
+  #define ENCODERS ON
+#endif
 #include "Locale.h"
 #include "Globals.h"
-
 #include "WebServer.h"
 
 // The settings in NV (EEPROM) are for initialization only, afterward they are stored and recalled from EEPROM and must
@@ -94,10 +95,6 @@
 int webTimeout=TIMEOUT_WEB;
 int cmdTimeout=TIMEOUT_CMD;
 
-#define AXIS1_ENC_A_PIN 5  // pin# for Axis1 encoder, for A or CW
-#define AXIS1_ENC_B_PIN 6  // pin# for Axis1 encoder, for B or CCW
-#define AXIS2_ENC_A_PIN 7  // pin# for Axis2 encoder, for A or CW
-#define AXIS2_ENC_B_PIN 8  // pin# for Axis2 encoder, for B or CCW
 #include "Encoders.h"
 #if ENCODERS == ON
 Encoders encoders;
@@ -131,37 +128,43 @@ void setup(void){
 
 // EEPROM Init
 #ifndef EEPROM_DISABLED
-  if ((EEPROM_readInt(0)!=8267) || (EEPROM_readInt(2)!=0)) {
-    EEPROM_writeInt(0,8267);
-    EEPROM_writeInt(2,0);
+  nv.init();
+
+  if (nv.readInt(EE_KEY_HIGH) != 8266 || nv.readInt(EE_KEY_LOW) != 0) {
+    nv.writeInt(EE_KEY_HIGH,8266);
+    nv.writeInt(EE_KEY_LOW,0);
 #if ENCODERS == ON
-    EEPROM_writeLong(600,Axis1EncDiffTo);
-    EEPROM_writeLong(604,Axis2EncDiffTo);
-    EEPROM_writeLong(608,20);  // enc short term average samples
-    EEPROM_writeLong(612,200); // enc long term average samples
-    EEPROM_writeLong(616,0);   // enc rate comp
-    EEPROM_writeLong(624,1);   // intpol phase
-    EEPROM_writeLong(628,0);   // intpol mag
-    EEPROM_writeLong(632,10);  // prop
-    EEPROM_writeLong(650,0);   // absolute Encoder Axis1 zero
-    EEPROM_writeLong(654,0);   // absolute Encoder Axis2 zero
+    nv.writeLong(EE_ENC_A1_DIFF_TO,AXIS1_ENC_DIFF_LIMIT_TO);
+    nv.writeLong(EE_ENC_A2_DIFF_TO,AXIS2_ENC_DIFF_LIMIT_TO);
+    nv.writeLong(EE_ENC_RC_STA,20);     // enc short term average samples
+    nv.writeLong(EE_ENC_RC_LTA,200);    // enc long term average samples
+    nv.writeLong(EE_ENC_RC_RCOMP,0);    // enc rate comp
+    nv.writeLong(EE_ENC_RC_INTP_P,1);   // intpol phase
+    nv.writeLong(EE_ENC_RC_INTP_M,0);   // intpol mag
+    nv.writeLong(EE_ENC_RC_PROP,10);    // prop
+    nv.writeLong(EE_ENC_MIN_GUIDE,100); // minimum guide duration
+    nv.writeLong(EE_ENC_A1_ZERO,0);     // absolute Encoder Axis1 zero
+    nv.writeLong(EE_ENC_A2_ZERO,0);     // absolute Encoder Axis2 zero
 #endif
-  } else {  
-#if ENCODERS == ON
-    Axis1EncDiffTo=EEPROM_readLong(600);
-    Axis2EncDiffTo=EEPROM_readLong(604);
-#if AXIS1_ENC_RATE_CONTROL == ON
-    Axis1EncStaSamples=EEPROM_readLong(608);
-    Axis1EncLtaSamples=EEPROM_readLong(612);
-    long l=EEPROM_readLong(616); Axis1EncRateComp=(float)l/1000000.0;
-    Axis1EncIntPolPeriod=EEPROM_readLong(620);
-    Axis1EncIntPolPhase =EEPROM_readLong(624);
-    Axis1EncIntPolMag   =EEPROM_readLong(628);
-    Axis1EncProp        =EEPROM_readLong(632);
-    Axis1EncMinGuide    =EEPROM_readLong(636);
-#endif
-#endif
+    nv.commit();
   }
+
+#if ENCODERS == ON
+  Axis1EncDiffTo=nv.readLong(EE_ENC_A1_DIFF_TO);
+  Axis2EncDiffTo=nv.readLong(EE_ENC_A2_DIFF_TO);
+  #if AXIS1_ENC_RATE_CONTROL == ON
+    Axis1EncStaSamples=nv.readLong(EE_ENC_RC_STA);
+    Axis1EncLtaSamples=nv.readLong(EE_ENC_RC_LTA);
+    long l=nv.readLong(EE_ENC_RC_RCOMP); axis1EncRateComp=(float)l/1000000.0;
+    #if AXIS1_ENC_INTPOL_COS == ON
+      Axis1EncIntPolPhase=nv.readLong(EE_ENC_RC_INTP_P);
+      Axis1EncIntPolMag=nv.readLong(EE_ENC_RC_INTP_M);
+    #endif
+    Axis1EncProp=nv.readLong(EE_ENC_RC_PROP);
+    Axis1EncMinGuide=nv.readLong(EE_ENC_MIN_GUIDE);
+  #endif
+#endif
+
 #endif
 
 Again:

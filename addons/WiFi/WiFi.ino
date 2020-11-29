@@ -61,6 +61,9 @@
 #include "Constants.h"
 #include "Locales.h"
 #include "Config.h"
+#if AXIS1_ENC > 0 && AXIS2_ENC > 0
+  #define ENCODERS ON
+#endif
 #include "Locale.h"
 #include "Globals.h"
 
@@ -77,18 +80,6 @@ bool serialSwap=false;
 
 int webTimeout=TIMEOUT_WEB;
 int cmdTimeout=TIMEOUT_CMD;
-
-#ifdef ESP32
-  #define AXIS1_ENC_A_PIN 18 // pin# for Axis1 encoder, for A or CW
-  #define AXIS1_ENC_B_PIN 19 // pin# for Axis1 encoder, for B or CCW
-  #define AXIS2_ENC_A_PIN 22 // pin# for Axis1 encoder, for A or CW
-  #define AXIS2_ENC_B_PIN 21 // pin# for Axis1 encoder, for B or CCW
-#else
-  #define AXIS1_ENC_A_PIN 14 // pin# for Axis1 encoder, for A or CW
-  #define AXIS1_ENC_B_PIN 12 // pin# for Axis1 encoder, for B or CCW
-  #define AXIS2_ENC_A_PIN 5  // pin# for Axis1 encoder, for A or CW
-  #define AXIS2_ENC_B_PIN 4  // pin# for Axis1 encoder, for B or CCW
-#endif
 
 #include "Encoders.h"
 #if ENCODERS == ON
@@ -170,86 +161,89 @@ void setup(void){
 #if LED_STATUS != OFF
   pinMode(LED_STATUS,OUTPUT);
 #endif
-  EEPROM.begin(1024);
+  nv.init();
 
   // EEPROM Init
-  if ((EEPROM_readInt(0)!=8266) || (EEPROM_readInt(2)!=0)) {
-    EEPROM_writeInt(0,8266);
-    EEPROM_writeInt(2,0);
+  if (nv.readInt(EE_KEY_HIGH) != 8266 || nv.readInt(EE_KEY_LOW) != 0) {
+    nv.writeInt(EE_KEY_HIGH,8266);
+    nv.writeInt(EE_KEY_LOW,0);
 
-    EEPROM_writeInt(4,(int)accessPointEnabled);
-    EEPROM_writeInt(6,(int)stationEnabled);
-    EEPROM_writeInt(8,(int)stationDhcpEnabled);
+    nv.writeInt(EE_AP_EN,(int)accessPointEnabled);
+    nv.writeInt(EE_STA_EN,(int)stationEnabled);
+    nv.writeInt(EE_DHCP_EN,(int)stationDhcpEnabled);
 
-    EEPROM_writeInt(10,(int)webTimeout);
-    EEPROM_writeInt(12,(int)cmdTimeout);
+    nv.writeInt(EE_TIMEOUT_WEB,(int)webTimeout);
+    nv.writeInt(EE_TIMEOUT_CMD,(int)cmdTimeout);
 
-#if ENCODERS == ON
-    EEPROM_writeLong(600,Axis1EncDiffTo);
-    EEPROM_writeLong(604,Axis2EncDiffTo);
-    EEPROM_writeLong(608,20);  // enc short term average samples
-    EEPROM_writeLong(612,200); // enc long term average samples
-    EEPROM_writeLong(616,0);   // enc rate comp
-    EEPROM_writeLong(624,1);   // intpol phase
-    EEPROM_writeLong(628,0);   // intpol mag
-    EEPROM_writeLong(632,10);  // prop
-    EEPROM_writeLong(650,0);   // absolute Encoder Axis1 zero
-    EEPROM_writeLong(654,0);   // absolute Encoder Axis2 zero
-#endif
+    nv.writeString(EE_STA_SSID,wifi_sta_ssid);
+    nv.writeString(EE_STA_PWD,wifi_sta_pwd);
+    nv.writeString(EE_PASSWORD,masterPassword);
+    for (int i=0;i<4;i++) nv.write(EE_STA_IP+i,wifi_sta_ip[i]);
+    for (int i=0;i<4;i++) nv.write(EE_STA_GW+i,wifi_sta_gw[i]);
+    for (int i=0;i<4;i++) nv.write(EE_STA_SN+i,wifi_sta_sn[i]);
 
-    EEPROM_writeString(100,wifi_sta_ssid);
-    EEPROM_writeString(150,wifi_sta_pwd);
-    EEPROM_writeString(200,masterPassword);
-    EEPROM.write(20,wifi_sta_ip[0]); EEPROM.write(21,wifi_sta_ip[1]); EEPROM.write(22,wifi_sta_ip[2]); EEPROM.write(23,wifi_sta_ip[3]);
-    EEPROM.write(24,wifi_sta_gw[0]); EEPROM.write(25,wifi_sta_gw[1]); EEPROM.write(26,wifi_sta_gw[2]); EEPROM.write(27,wifi_sta_gw[3]);
-    EEPROM.write(28,wifi_sta_sn[0]); EEPROM.write(29,wifi_sta_sn[1]); EEPROM.write(30,wifi_sta_sn[2]); EEPROM.write(31,wifi_sta_sn[3]);
-
-    EEPROM_writeString(500,wifi_ap_ssid);
-    EEPROM_writeString(550,wifi_ap_pwd);
-    EEPROM_writeInt(50,(int)wifi_ap_ch);
-    EEPROM.write(60,wifi_ap_ip[0]); EEPROM.write(61,wifi_ap_ip[1]); EEPROM.write(62,wifi_ap_ip[2]); EEPROM.write(63,wifi_ap_ip[3]);
-    EEPROM.write(70,wifi_ap_gw[0]); EEPROM.write(71,wifi_ap_gw[1]); EEPROM.write(72,wifi_ap_gw[2]); EEPROM.write(73,wifi_ap_gw[3]);
-    EEPROM.write(80,wifi_ap_sn[0]); EEPROM.write(81,wifi_ap_sn[1]); EEPROM.write(82,wifi_ap_sn[2]); EEPROM.write(83,wifi_ap_sn[3]);
-    EEPROM.commit();
-  } else {  
-    accessPointEnabled=EEPROM_readInt(4);
-    stationEnabled=EEPROM_readInt(6);
-    stationDhcpEnabled=EEPROM_readInt(8);
-
-    webTimeout=EEPROM_readInt(10);
-    cmdTimeout=EEPROM_readInt(12);
-    if (cmdTimeout > 100) cmdTimeout=30;
+    nv.writeString(EE_AP_SSID,wifi_ap_ssid);
+    nv.writeString(EE_AP_PWD,wifi_ap_pwd);
+    nv.writeInt(EE_AP_CH,(int)wifi_ap_ch);
+    for (int i=0;i<4;i++) nv.write(EE_AP_IP+i,wifi_ap_ip[i]);
+    for (int i=0;i<4;i++) nv.write(EE_AP_GW+i,wifi_ap_gw[i]);
+    for (int i=0;i<4;i++) nv.write(EE_AP_SN+i,wifi_ap_sn[i]);
 
 #if ENCODERS == ON
-    Axis1EncDiffTo=EEPROM_readLong(600);
-    Axis2EncDiffTo=EEPROM_readLong(604);
-#if AXIS1_ENC_RATE_CONTROL == ON
-    Axis1EncStaSamples=EEPROM_readLong(608);
-    Axis1EncLtaSamples=EEPROM_readLong(612);
-    long l=EEPROM_readLong(616); axis1EncRateComp=(float)l/1000000.0;
-#if AXIS1_ENC_INTPOL_COS == ON
-    Axis1EncIntPolPhase =EEPROM_readLong(624);
-    Axis1EncIntPolMag   =EEPROM_readLong(628);
-#endif
-    Axis1EncProp        =EEPROM_readLong(632);
-    Axis1EncMinGuide    =EEPROM_readLong(636);
-#endif
+    nv.writeLong(EE_ENC_A1_DIFF_TO,AXIS1_ENC_DIFF_LIMIT_TO);
+    nv.writeLong(EE_ENC_A2_DIFF_TO,AXIS2_ENC_DIFF_LIMIT_TO);
+    nv.writeLong(EE_ENC_RC_STA,20);     // enc short term average samples
+    nv.writeLong(EE_ENC_RC_LTA,200);    // enc long term average samples
+    nv.writeLong(EE_ENC_RC_RCOMP,0);    // enc rate comp
+    nv.writeLong(EE_ENC_RC_INTP_P,1);   // intpol phase
+    nv.writeLong(EE_ENC_RC_INTP_M,0);   // intpol mag
+    nv.writeLong(EE_ENC_RC_PROP,10);    // prop
+    nv.writeLong(EE_ENC_MIN_GUIDE,100); // minimum guide duration
+    nv.writeLong(EE_ENC_A1_ZERO,0);     // absolute Encoder Axis1 zero
+    nv.writeLong(EE_ENC_A2_ZERO,0);     // absolute Encoder Axis2 zero
 #endif
 
-    EEPROM_readString(100,wifi_sta_ssid);
-    EEPROM_readString(150,wifi_sta_pwd);
-    EEPROM_readString(200,masterPassword);
-    wifi_sta_ip[0]=EEPROM.read(20); wifi_sta_ip[1]=EEPROM.read(21); wifi_sta_ip[2]=EEPROM.read(22); wifi_sta_ip[3]=EEPROM.read(23);
-    wifi_sta_gw[0]=EEPROM.read(24); wifi_sta_gw[1]=EEPROM.read(25); wifi_sta_gw[2]=EEPROM.read(26); wifi_sta_gw[3]=EEPROM.read(27);
-    wifi_sta_sn[0]=EEPROM.read(28); wifi_sta_sn[1]=EEPROM.read(29); wifi_sta_sn[2]=EEPROM.read(30); wifi_sta_sn[3]=EEPROM.read(31);
-
-    EEPROM_readString(500,wifi_ap_ssid);
-    EEPROM_readString(550,wifi_ap_pwd);
-    wifi_ap_ch=EEPROM_readInt(50);
-    wifi_ap_ip[0]=EEPROM.read(60); wifi_ap_ip[1]=EEPROM.read(61); wifi_ap_ip[2]=EEPROM.read(62); wifi_ap_ip[3]=EEPROM.read(63);
-    wifi_ap_gw[0]=EEPROM.read(70); wifi_ap_gw[1]=EEPROM.read(71); wifi_ap_gw[2]=EEPROM.read(72); wifi_ap_gw[3]=EEPROM.read(73);
-    wifi_ap_sn[0]=EEPROM.read(80); wifi_ap_sn[1]=EEPROM.read(81); wifi_ap_sn[2]=EEPROM.read(82); wifi_ap_sn[3]=EEPROM.read(83);    
+    nv.commit();
   }
+  
+  accessPointEnabled=nv.readInt(EE_AP_EN);
+  stationEnabled=nv.readInt(EE_STA_EN);
+  if (!accessPointEnabled && !stationEnabled) accessPointEnabled=true;
+  stationDhcpEnabled=nv.readInt(EE_DHCP_EN);
+
+  webTimeout=nv.readInt(EE_TIMEOUT_WEB);
+  cmdTimeout=nv.readInt(EE_TIMEOUT_CMD);
+  if (cmdTimeout > 100) cmdTimeout=30;
+
+#if ENCODERS == ON
+  Axis1EncDiffTo=nv.readLong(EE_ENC_A1_DIFF_TO);
+  Axis2EncDiffTo=nv.readLong(EE_ENC_A2_DIFF_TO);
+  #if AXIS1_ENC_RATE_CONTROL == ON
+    Axis1EncStaSamples=nv.readLong(EE_ENC_RC_STA);
+    Axis1EncLtaSamples=nv.readLong(EE_ENC_RC_LTA);
+    long l=nv.readLong(EE_ENC_RC_RCOMP); axis1EncRateComp=(float)l/1000000.0;
+    #if AXIS1_ENC_INTPOL_COS == ON
+      Axis1EncIntPolPhase=nv.readLong(EE_ENC_RC_INTP_P);
+      Axis1EncIntPolMag=nv.readLong(EE_ENC_RC_INTP_M);
+    #endif
+    Axis1EncProp=nv.readLong(EE_ENC_RC_PROP);
+    Axis1EncMinGuide=nv.readLong(EE_ENC_MIN_GUIDE);
+  #endif
+#endif
+
+  nv.readString(EE_STA_SSID,wifi_sta_ssid);
+  nv.readString(EE_STA_PWD,wifi_sta_pwd);
+  nv.readString(EE_PASSWORD,masterPassword);
+  for (int i=0;i<4;i++) wifi_sta_ip[i]=nv.read(EE_STA_IP+i);
+  for (int i=0;i<4;i++) wifi_sta_gw[i]=nv.read(EE_STA_GW+i);
+  for (int i=0;i<4;i++) wifi_sta_sn[i]=nv.read(EE_STA_SN+i);
+
+  nv.readString(EE_AP_SSID,wifi_ap_ssid);
+  nv.readString(EE_AP_PWD,wifi_ap_pwd);
+  wifi_ap_ch=nv.readInt(EE_AP_CH);
+  for (int i=0;i<4;i++) wifi_ap_ip[i]=nv.read(EE_AP_IP+i);
+  for (int i=0;i<4;i++) wifi_ap_gw[i]=nv.read(EE_AP_GW+i);
+  for (int i=0;i<4;i++) wifi_ap_sn[i]=nv.read(EE_AP_SN+i);  
 
 #ifndef DEBUG_ON
   long serial_baud = SERIAL_BAUD;
@@ -257,10 +251,6 @@ void setup(void){
   byte tb=1;
 
 Again:
-#if LED_STATUS != OFF
-  digitalWrite(LED_STATUS,LOW);
-#endif
-
   clearSerialChannel();
 
   // look for On-Step

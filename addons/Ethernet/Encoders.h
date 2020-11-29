@@ -3,27 +3,27 @@
 
 #include "MountStatus.h"
 
-#if AXIS1_ENC > 0 && AXIS2_ENC > 0
-  #define ENCODERS ON
-#endif
-
 #if ENCODERS == ON
 
 #if defined(ESP8266) || defined(ESP32)
   #include <Esp.h>
 #endif
 
-#if ENCODERS_AUTO_SYNC_DEFAULT == ON
+#if ENC_AUTO_SYNC_DEFAULT == ON
   bool encAutoSync=true;
 #else
   bool encAutoSync=false;
 #endif
-long Axis1EncDiffTo=AXIS1_ENC_DIFF_LIMIT_TO;
+double Axis1EncTicksPerDeg=AXIS1_ENC_TICKS_DEG;
+int  Axis1EncRev     =AXIS1_ENC_REVERSE;
+long Axis1EncDiffTo  =AXIS1_ENC_DIFF_LIMIT_TO;
 long Axis1EncDiffFrom=AXIS1_ENC_DIFF_LIMIT_FROM;
-long Axis1EncDiffAbs=0;
-long Axis2EncDiffTo=AXIS2_ENC_DIFF_LIMIT_TO;
+long Axis1EncDiffAbs =0;
+double Axis2EncTicksPerDeg=AXIS2_ENC_TICKS_DEG;
+int  Axis2EncRev     =AXIS2_ENC_REVERSE;
+long Axis2EncDiffTo  =AXIS2_ENC_DIFF_LIMIT_TO;
 long Axis2EncDiffFrom=AXIS2_ENC_DIFF_LIMIT_FROM;
-long Axis2EncDiffAbs=0;
+long Axis2EncDiffAbs =0;
 
 // encoder position
 volatile int32_t __p1,__p2;
@@ -52,7 +52,7 @@ volatile int32_t __p1,__p2;
 
   #define MIN_ENC_PERIOD 0.2
   #define MAX_ENC_PERIOD 5.0
-  float arcSecondsPerTick=(1.0/AXIS1_ENC_TICKS_DEG)*3600.0; // (0.0018)*3600 = 6.48
+  float arcSecondsPerTick=(1.0/Axis1EncTicksPerDeg)*3600.0; // (0.0018)*3600 = 6.48
   float usPerTick=(arcSecondsPerTick/15.041)*1000000.0;     // 6.48/15.041 = 0.4308 seconds per tick
 
   unsigned long msPerTickMax =(arcSecondsPerTick/15.041)*1000.0*MAX_ENC_PERIOD;
@@ -124,26 +124,26 @@ class Encoders {
       if (Axis1EncDiffFrom != OFF && fabs(_osAxis1-_enAxis1) > (double)(Axis1EncDiffFrom/3600.0)) return;
       if (Axis2EncDiffFrom != OFF && fabs(_osAxis1-_enAxis1) > (double)(Axis1EncDiffFrom/3600.0)) return;
         
-#if AXIS1_ENC_REVERSE == ON
-        axis1Pos.write(-_osAxis1*(double)AXIS1_ENC_TICKS_DEG);
-#else
-        axis1Pos.write(_osAxis1*(double)AXIS1_ENC_TICKS_DEG);
-#endif
-#if AXIS2_ENC_REVERSE == ON
-        axis2Pos.write(-_osAxis2*(double)AXIS2_ENC_TICKS_DEG);
-#else
-        axis2Pos.write(_osAxis2*(double)AXIS2_ENC_TICKS_DEG);
-#endif
+      if (Axis1EncRev == ON)
+        axis1Pos.write(-_osAxis1*(double)Axis1EncTicksPerDeg);
+      else
+        axis1Pos.write(_osAxis1*(double)Axis1EncTicksPerDeg);
+
+      if (Axis2EncRev == ON)
+        axis2Pos.write(-_osAxis2*(double)Axis2EncTicksPerDeg);
+      else
+        axis2Pos.write(_osAxis2*(double)Axis2EncTicksPerDeg);
+
     }
     
     // zero absolute encoders from OnStep's position
 #ifdef ENC_HAS_ABSOLUTE
     void zeroFromOnStep() {
   #ifdef ENC_HAS_ABSOLUTE_AXIS1
-      axis1Pos.write(_osAxis1*(double)AXIS1_ENC_TICKS_DEG);
+      axis1Pos.write(_osAxis1*(double)Axis1EncTicksPerDeg);
   #endif
   #ifdef ENC_HAS_ABSOLUTE_AXIS2
-      axis2Pos.write(_osAxis2*(double)AXIS2_ENC_TICKS_DEG);
+      axis2Pos.write(_osAxis2*(double)Axis2EncTicksPerDeg);
   #endif
     }
 #endif
@@ -171,18 +171,16 @@ class Encoders {
           double f=strtod(s,&conv_end);
           if (&s[0] != conv_end && f >= -999.9 && f <= 999.9) _osAxis2=f;
         }
+        
         long pos=axis1Pos.read();
         if (pos == INT32_MAX) _enAxis1Fault = true; else _enAxis1Fault=false;
-        _enAxis1=(double)pos/(double)AXIS1_ENC_TICKS_DEG;
-#if AXIS1_ENC_REVERSE == ON
-        _enAxis1=-_enAxis1;
-#endif
+        _enAxis1=(double)pos/(double)Axis1EncTicksPerDeg;
+        if (Axis1EncRev == ON) _enAxis1=-_enAxis1;
+
         pos=axis2Pos.read();
         if (pos == INT32_MAX) _enAxis2Fault = true; else _enAxis2Fault=false;
-        _enAxis2=(double)pos/(double)AXIS2_ENC_TICKS_DEG;
-#if AXIS2_ENC_REVERSE == ON
-        _enAxis2=-_enAxis2;
-#endif
+        _enAxis2=(double)pos/(double)Axis2EncTicksPerDeg;
+        if (Axis2EncRev == ON) _enAxis2=-_enAxis2;
 
         mountStatus.update();
         if (encAutoSync && mountStatus.valid() && !_enAxis1Fault && !_enAxis2Fault) {

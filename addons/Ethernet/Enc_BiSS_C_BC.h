@@ -5,6 +5,10 @@
 // designed according protocol description found in as38-H39e-b-an100.pdf
 
 #if AXIS1_ENC == BC_BISSC || AXIS2_ENC == BC_BISSC
+  #ifdef EEPROM_DISABLED
+    #error "Absolute encoders require NV/EEPROM which isn't supported on this platform"
+  #endif
+
   #include <EEPROM.h>
   #include "EEProm.h"
   #define ENC_HAS_ABSOLUTE
@@ -18,8 +22,8 @@
         pinMode(_clkPin,OUTPUT);
         digitalWrite(_clkPin,LOW);
         pinMode(_sloPin,INPUT_PULLUP);
-        if (_axis == 1) _offset=EEPROM_readLong(650);
-        if (_axis == 2) _offset=EEPROM_readLong(654);
+        if (_axis == 1) _offset=nv.readLong(EE_ENC_A1_ZERO);
+        if (_axis == 2) _offset=nv.readLong(EE_ENC_A2_ZERO);
       }
       int32_t read() {
         if (readEnc(_position)) {
@@ -34,11 +38,9 @@
         }
       }
       void setZero() {
-        if (_axis == 1) EEPROM_writeLong(650,_offset);
-        if (_axis == 2) EEPROM_writeLong(654,_offset);
-#ifndef EEPROM_COMMIT_DISABLED
-        EEPROM.commit();
-#endif
+        if (_axis == 1) nv.writeLong(EE_ENC_A1_ZERO,_offset);
+        if (_axis == 2) nv.writeLong(EE_ENC_A2_ZERO,_offset);
+        nv.commit();
       }
     private:
       uint32_t _position=0;

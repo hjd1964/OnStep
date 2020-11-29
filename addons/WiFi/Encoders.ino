@@ -438,9 +438,7 @@ void processEncodersGet() {
     int i;
     if ( (atoi2((char*)v.c_str(),&i)) && ((i>=0) && (i<=9999))) { 
       Axis1EncDiffTo=i;
-#ifndef EEPROM_DISABLED
-      EEPROM_writeLong(600,Axis1EncDiffTo);
-#endif
+      nv.writeLong(EE_ENC_A1_DIFF_TO,Axis1EncDiffTo);
       EEwrite=true;
     }
   }
@@ -449,9 +447,7 @@ void processEncodersGet() {
     int i;
     if ( (atoi2((char*)v.c_str(),&i)) && ((i>=0) && (i<=9999))) { 
       Axis2EncDiffTo=i;
-#ifndef EEPROM_DISABLED
-      EEPROM_writeLong(604,Axis2EncDiffTo);
-#endif
+      nv.writeLong(EE_ENC_A2_DIFF_TO,Axis2EncDiffTo);
       EEwrite=true;
     }
   }
@@ -470,9 +466,7 @@ void processEncodersGet() {
     int i;
     if ( (atoi2((char*)v.c_str(),&i)) && ((i>=1) && (i<=999))) { 
       Axis1EncStaSamples=i;
-#ifndef EEPROM_DISABLED
-      EEPROM_writeLong(608,Axis1EncStaSamples);
-#endif
+      nv.writeLong(EE_ENC_RC_STA,Axis1EncStaSamples);
       EEwrite=true;
     }
   }
@@ -481,9 +475,7 @@ void processEncodersGet() {
     int i;
     if ( (atoi2((char*)v.c_str(),&i)) && ((i>=1) && (i<=999))) { 
       Axis1EncLtaSamples=i;
-#ifndef EEPROM_DISABLED
-      EEPROM_writeLong(612,Axis1EncLtaSamples);
-#endif
+      nv.writeLong(EE_ENC_RC_LTA,Axis1EncLtaSamples);
       EEwrite=true;
     }
   }
@@ -494,9 +486,7 @@ void processEncodersGet() {
     int i;
     if ( (atoi2((char*)v.c_str(),&i)) && ((i>=50) && (i<=5000))) { 
       Axis1EncProp=i;
-#ifndef EEPROM_DISABLED
-      EEPROM_writeLong(632,Axis1EncProp);
-#endif
+      nv.writeLong(EE_ENC_RC_PROP,Axis1EncProp);
       EEwrite=true;
     }
   }
@@ -507,9 +497,7 @@ void processEncodersGet() {
     int i;
     if ( (atoi2((char*)v.c_str(),&i)) && ((i>=25) && (i<=1000))) { 
       Axis1EncMinGuide=i;
-#ifndef EEPROM_DISABLED
-      EEPROM_writeLong(636,Axis1EncMinGuide);
-#endif
+      nv.writeLong(EE_ENC_MIN_GUIDE,Axis1EncMinGuide);
       EEwrite=true;
     }
   }
@@ -521,9 +509,7 @@ void processEncodersGet() {
     l=strtol(v.c_str(),NULL,10);
     if ((l>=-99999) && (l<=99999)) {
       axis1EncRateComp=(float)l/1000000.0;
-#ifndef EEPROM_DISABLED
-      EEPROM_writeLong(616,l);
-#endif
+      nv.writeLong(EE_ENC_RC_RCOMP,l);
       EEwrite=true;
     }
   }
@@ -535,9 +521,7 @@ void processEncodersGet() {
     int i;
     if ( (atoi2((char*)v.c_str(),&i)) && ((i>=0) && (i<=255))) { 
       Axis1EncIntPolPhase=i;
-#ifndef EEPROM_DISABLED
-      EEPROM_writeLong(624,i);
-#endif
+      nv.writeLong(EE_ENC_RC_INTP_P,i);
       EEwrite=true;
     }
   }
@@ -546,9 +530,7 @@ void processEncodersGet() {
     int i;
     if ( (atoi2((char*)v.c_str(),&i)) && ((i>=0) && (i<=29000))) { 
       Axis1EncIntPolMag=i;
-#ifndef EEPROM_DISABLED
-      EEPROM_writeLong(628,i);
-#endif
+      nv.writeLong(EE_ENC_RC_INTP_M,i);
       EEwrite=true;
     }
   }
@@ -563,9 +545,7 @@ void processEncodersGet() {
 
 #endif // AXIS1_ENC_RATE_CONTROL == ON
 
-#ifndef EEPROM_COMMIT_DISABLED
-  if (EEwrite) EEPROM.commit();
-#endif
+  nv.commit();
 }
 
 #endif
