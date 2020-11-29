@@ -4,11 +4,17 @@
 #ifdef FEATURES_PRESENT
 void featuresInit() {
   for (int i=0; i < 8; i++) {
-    if (feature[i].purpose == SWITCH || feature[i].purpose == ANALOG_OUTPUT) {
-      if (feature[i].pin >= 0 && feature[i].pin <= 255) pinMode(feature[i].pin,OUTPUT);
+    if (feature[i].value == ON) feature[i].value=1; else if (feature[i].value < 0 || feature[i].value > 255) feature[i].value=0;
+    if (feature[i].purpose == SWITCH) {
+      if (feature[i].pin >= 0 && feature[i].pin <= 255) {
+        pinMode(feature[i].pin,OUTPUT); digitalWrite(feature[i].pin,feature[i].value==0?LOW:HIGH);
+      } else ambient.setDS2413State(i,feature[i].value==0?0:1);
+    } else if (feature[i].purpose == ANALOG_OUTPUT) {
+      if (feature[i].pin >= 0 && feature[i].pin <= 255) { pinMode(feature[i].pin,OUTPUT); analogWrite(feature[i].pin,feature[i].value); }
     } else if (feature[i].purpose == DEW_HEATER) {
       feature[i].dewHeater = new dewHeaterControl;
       if (feature[i].pin >= 0 && feature[i].pin <= 255) feature[i].dewHeater->init(feature[i].pin,EE_feature1Value1+i*3); else feature[i].dewHeater->init(-1,EE_feature1Value1+i*3);
+      feature[i].dewHeater->enable(feature[i].value);
     } else if (feature[i].purpose == INTERVALOMETER) {
       feature[i].intervalometer = new intervalometerControl;
       if (feature[i].pin >= 0 && feature[i].pin <= 255) feature[i].intervalometer->init(feature[i].pin,EE_feature1Value1+i*3); else feature[i].intervalometer->init(-1,EE_feature1Value1+i*3);

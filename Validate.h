@@ -426,6 +426,13 @@
 #elif FEATURE1_PIN != OFF && (FEATURE1_PIN & DS_MASK) != DS2413 && FEATURE1_PIN < 0 && FEATURE1_PIN > 255
   #error "Configuration (Config.h): Setting FEATURE1_PIN invalid, use OFF, DS2413, DS2413 s/n, or a valid pin# (0 to 255 only.)"
 #endif
+#ifndef FEATURE1_DEFAULT_VALUE
+  #error "Configuration (Config.h): Setting FEATURE1_DEFAULT_VALUE must be present!"
+#elif (FEATURE1_PURPOSE == SWITCH || FEATURE1_PURPOSE == DEW_HEATER) && FEATURE1_DEFAULT_VALUE != OFF && FEATURE1_DEFAULT_VALUE != ON
+  #error "Configuration (Config.h): Setting FEATURE1_DEFAULT_VALUE (SWITCH or DEW_HEATER) invalid, use OFF or ON only."
+#elif FEATURE1_PURPOSE == ANALOG_OUT && FEATURE1_DEFAULT_VALUE < 0 && FEATURE1_DEFAULT_VALUE > 255
+  #error "Configuration (Config.h): Setting FEATURE1_DEFAULT_VALUE (ANALOG OUT) invalid, use 0 to 255 only."
+#endif
 
 #ifndef FEATURE2_NAME
   #error "Configuration (Config.h): Setting FEATURE2_NAME must be present!"
@@ -444,6 +451,13 @@
   #error "Configuration (Config.h): Setting FEATURE2_PIN must be present!"
 #elif FEATURE2_PIN != OFF && (FEATURE2_PIN & DS_MASK) != DS2413 && FEATURE2_PIN < 0 && FEATURE2_PIN > 255
   #error "Configuration (Config.h): Setting FEATURE2_PIN invalid, use OFF, DS2413, DS2413 s/n, or a valid pin# (0 to 255 only.)"
+#endif
+#ifndef FEATURE2_DEFAULT_VALUE
+  #error "Configuration (Config.h): Setting FEATURE2_DEFAULT_VALUE must be present!"
+#elif (FEATURE2_PURPOSE == SWITCH || FEATURE2_PURPOSE == DEW_HEATER) && FEATURE2_DEFAULT_VALUE != OFF && FEATURE2_DEFAULT_VALUE != ON
+  #error "Configuration (Config.h): Setting FEATURE2_DEFAULT_VALUE (SWITCH or DEW_HEATER) invalid, use OFF or ON only."
+#elif FEATURE2_PURPOSE == ANALOG_OUT && FEATURE2_DEFAULT_VALUE < 0 && FEATURE2_DEFAULT_VALUE > 255
+  #error "Configuration (Config.h): Setting FEATURE2_DEFAULT_VALUE (ANALOG OUT) invalid, use 0 to 255 only."
 #endif
 
 #ifndef FEATURE3_NAME
@@ -464,6 +478,13 @@
 #elif FEATURE3_PIN != OFF && (FEATURE3_PIN & DS_MASK) != DS2413 && FEATURE3_PIN < 0 && FEATURE3_PIN > 255
   #error "Configuration (Config.h): Setting FEATURE3_PIN invalid, use OFF, DS2413, DS2413 s/n, or a valid pin# (0 to 255 only.)"
 #endif
+#ifndef FEATURE3_DEFAULT_VALUE
+  #error "Configuration (Config.h): Setting FEATURE3_DEFAULT_VALUE must be present!"
+#elif (FEATURE3_PURPOSE == SWITCH || FEATURE3_PURPOSE == DEW_HEATER) && FEATURE3_DEFAULT_VALUE != OFF && FEATURE3_DEFAULT_VALUE != ON
+  #error "Configuration (Config.h): Setting FEATURE3_DEFAULT_VALUE (SWITCH or DEW_HEATER) invalid, use OFF or ON only."
+#elif FEATURE3_PURPOSE == ANALOG_OUT && FEATURE3_DEFAULT_VALUE < 0 && FEATURE3_DEFAULT_VALUE > 255
+  #error "Configuration (Config.h): Setting FEATURE3_DEFAULT_VALUE (ANALOG OUT) invalid, use 0 to 255 only."
+#endif
 
 #ifndef FEATURE4_NAME
   #error "Configuration (Config.h): Setting FEATURE4_NAME must be present!"
@@ -482,6 +503,13 @@
   #error "Configuration (Config.h): Setting FEATURE4_PIN must be present!"
 #elif FEATURE4_PIN != OFF && (FEATURE4_PIN & DS_MASK) != DS2413 && FEATURE4_PIN < 0 && FEATURE4_PIN > 255
   #error "Configuration (Config.h): Setting FEATURE4_PIN invalid, use OFF, DS2413, DS2413 s/n, or a valid pin# (0 to 255 only.)"
+#endif
+#ifndef FEATURE4_DEFAULT_VALUE
+  #error "Configuration (Config.h): Setting FEATURE4_DEFAULT_VALUE must be present!"
+#elif (FEATURE4_PURPOSE == SWITCH || FEATURE4_PURPOSE == DEW_HEATER) && FEATURE4_DEFAULT_VALUE != OFF && FEATURE4_DEFAULT_VALUE != ON
+  #error "Configuration (Config.h): Setting FEATURE4_DEFAULT_VALUE (SWITCH or DEW_HEATER) invalid, use OFF or ON only."
+#elif FEATURE4_PURPOSE == ANALOG_OUT && FEATURE4_DEFAULT_VALUE < 0 && FEATURE4_DEFAULT_VALUE > 255
+  #error "Configuration (Config.h): Setting FEATURE4_DEFAULT_VALUE (ANALOG OUT) invalid, use 0 to 255 only."
 #endif
 
 #ifndef FEATURE5_NAME
@@ -502,6 +530,13 @@
 #elif FEATURE5_PIN != OFF && (FEATURE5_PIN & DS_MASK) != DS2413 && FEATURE5_PIN < 0 && FEATURE5_PIN > 255
   #error "Configuration (Config.h): Setting FEATURE5_PIN invalid, use OFF, DS2413, DS2413 s/n, or a valid pin# (0 to 255 only.)"
 #endif
+#ifndef FEATURE5_DEFAULT_VALUE
+  #error "Configuration (Config.h): Setting FEATURE5_DEFAULT_VALUE must be present!"
+#elif (FEATURE5_PURPOSE == SWITCH || FEATURE5_PURPOSE == DEW_HEATER) && FEATURE5_DEFAULT_VALUE != OFF && FEATURE5_DEFAULT_VALUE != ON
+  #error "Configuration (Config.h): Setting FEATURE5_DEFAULT_VALUE (SWITCH or DEW_HEATER) invalid, use OFF or ON only."
+#elif FEATURE5_PURPOSE == ANALOG_OUT && FEATURE5_DEFAULT_VALUE < 0 && FEATURE5_DEFAULT_VALUE > 255
+  #error "Configuration (Config.h): Setting FEATURE5_DEFAULT_VALUE (ANALOG OUT) invalid, use 0 to 255 only."
+#endif
 
 #ifndef FEATURE6_NAME
   #error "Configuration (Config.h): Setting FEATURE6_NAME must be present!"
@@ -520,6 +555,13 @@
   #error "Configuration (Config.h): Setting FEATURE6_PIN must be present!"
 #elif FEATURE6_PIN != OFF && (FEATURE6_PIN & DS_MASK) != DS2413 && FEATURE6_PIN < 0 && FEATURE6_PIN > 255
   #error "Configuration (Config.h): Setting FEATURE6_PIN invalid, use OFF, DS2413, DS2413 s/n, or a valid pin# (0 to 255 only.)"
+#endif
+#ifndef FEATURE6_DEFAULT_VALUE
+  #error "Configuration (Config.h): Setting FEATURE6_DEFAULT_VALUE must be present!"
+#elif (FEATURE6_PURPOSE == SWITCH || FEATURE6_PURPOSE == DEW_HEATER) && FEATURE6_DEFAULT_VALUE != OFF && FEATURE6_DEFAULT_VALUE != ON
+  #error "Configuration (Config.h): Setting FEATURE6_DEFAULT_VALUE (SWITCH or DEW_HEATER) invalid, use OFF or ON only."
+#elif FEATURE6_PURPOSE == ANALOG_OUT && FEATURE6_DEFAULT_VALUE < 0 && FEATURE6_DEFAULT_VALUE > 255
+  #error "Configuration (Config.h): Setting FEATURE6_DEFAULT_VALUE (ANALOG OUT) invalid, use 0 to 255 only."
 #endif
 
 #ifndef FEATURE7_NAME
@@ -540,6 +582,13 @@
 #elif FEATURE7_PIN != OFF && (FEATURE7_PIN & DS_MASK) != DS2413 && FEATURE7_PIN < 0 && FEATURE7_PIN > 255
   #error "Configuration (Config.h): Setting FEATURE7_PIN invalid, use OFF, DS2413, DS2413 s/n, or a valid pin# (0 to 255 only.)"
 #endif
+#ifndef FEATURE7_DEFAULT_VALUE
+  #error "Configuration (Config.h): Setting FEATURE7_DEFAULT_VALUE must be present!"
+#elif (FEATURE7_PURPOSE == SWITCH || FEATURE7_PURPOSE == DEW_HEATER) && FEATURE7_DEFAULT_VALUE != OFF && FEATURE7_DEFAULT_VALUE != ON
+  #error "Configuration (Config.h): Setting FEATURE7_DEFAULT_VALUE (SWITCH or DEW_HEATER) invalid, use OFF or ON only."
+#elif FEATURE7_PURPOSE == ANALOG_OUT && FEATURE7_DEFAULT_VALUE < 0 && FEATURE7_DEFAULT_VALUE > 255
+  #error "Configuration (Config.h): Setting FEATURE7_DEFAULT_VALUE (ANALOG OUT) invalid, use 0 to 255 only."
+#endif
 
 #ifndef FEATURE8_NAME
   #error "Configuration (Config.h): Setting FEATURE8_NAME must be present!"
@@ -558,6 +607,13 @@
   #error "Configuration (Config.h): Setting FEATURE8_PIN must be present!"
 #elif FEATURE8_PIN != OFF && (FEATURE8_PIN & DS_MASK) != DS2413 && FEATURE8_PIN < 0 && FEATURE8_PIN > 255
   #error "Configuration (Config.h): Setting FEATURE8_PIN invalid, use OFF, DS2413, DS2413 s/n, or a valid pin# (0 to 255 only.)"
+#endif
+#ifndef FEATURE8_DEFAULT_VALUE
+  #error "Configuration (Config.h): Setting FEATURE8_DEFAULT_VALUE must be present!"
+#elif (FEATURE8_PURPOSE == SWITCH || FEATURE8_PURPOSE == DEW_HEATER) && FEATURE8_DEFAULT_VALUE != OFF && FEATURE8_DEFAULT_VALUE != ON
+  #error "Configuration (Config.h): Setting FEATURE8_DEFAULT_VALUE (SWITCH or DEW_HEATER) invalid, use OFF or ON only."
+#elif FEATURE8_PURPOSE == ANALOG_OUT && FEATURE8_DEFAULT_VALUE < 0 && FEATURE8_DEFAULT_VALUE > 255
+  #error "Configuration (Config.h): Setting FEATURE8_DEFAULT_VALUE (ANALOG OUT) invalid, use 0 to 255 only."
 #endif
 
 #if (FEATURE1_TEMP & DS_MASK) == DS1820 || (FEATURE2_TEMP & DS_MASK) == DS1820 || (FEATURE3_TEMP & DS_MASK) == DS1820 || (FEATURE4_TEMP & DS_MASK) == DS1820 || (FEATURE5_TEMP & DS_MASK) == DS1820 || (FEATURE6_TEMP & DS_MASK) == DS1820 || (FEATURE7_TEMP & DS_MASK) == DS1820 || (FEATURE8_TEMP & DS_MASK) == DS1820 
