@@ -331,7 +331,7 @@ TryAgain:
 
   // wait for connection in station mode, if it fails fall back to access-point mode
   if (!accessPointEnabled && stationEnabled) {
-    for (int i=0; i<5; i++) if (WiFi.status() != WL_CONNECTED) delay(1000); else break;
+    for (int i=0; i<8; i++) if (WiFi.status() != WL_CONNECTED) delay(1000); else break;
     if (WiFi.status() != WL_CONNECTED) {
       WiFi.disconnect(); delay(3000);
       stationEnabled=false;
