@@ -268,7 +268,10 @@ class weather {
     #if WEATHER == BME280 || WEATHER == BME280_0x76 || WEATHER == BME280_SPI
           if (phase == 12) { _h = bmx.readHumidity(); phase++; return; }
     #endif
-        } else { _t=NAN; _p=NAN; _h=NAN; }
+        }
+    #if WEATHER_SUPRESS_ERRORS == OFF
+        else { _t=NAN; _p=NAN; _h=NAN; }
+    #endif
   #endif
       phase++;
       }
