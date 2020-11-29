@@ -329,10 +329,9 @@ void setLatitude(double Lat) {
 
   // the polar home position
 #if MOUNT_TYPE == ALTAZM
-  homePositionAxis1=0.0;
-  homePositionAxis2=0.0;
+  homePositionAxis2=AXIS2_HOME_DEFAULT;
 #else
-  if (latitude < 0) homePositionAxis2=-90.0; else homePositionAxis2=90.0;
+  if (latitude < 0) homePositionAxis2=-AXIS2_HOME_DEFAULT; else homePositionAxis2=AXIS2_HOME_DEFAULT;
 #endif
 }
 

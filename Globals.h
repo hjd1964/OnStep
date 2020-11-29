@@ -171,11 +171,16 @@ double longitude                        = 0.0;
 #ifndef TELESCOPE_COORDINATES
   #define TELESCOPE_COORDINATES TOPOCENTRIC
 #endif
-#if MOUNT_TYPE == GEM
-  double homePositionAxis1              = 90.0;
-#else
-  double homePositionAxis1              = 0.0;
+
+#ifndef AXIS1_HOME_DEFAULT
+  #if MOUNT_TYPE == GEM
+    #define AXIS1_HOME_DEFAULT 90.0 
+  #else
+    #define AXIS1_HOME_DEFAULT 0.0 
+  #endif
 #endif
+double homePositionAxis1                = AXIS1_HOME_DEFAULT;
+
 volatile long posAxis1                  = 0;                 // hour angle position in steps
 volatile int blAxis1                    = 0;                 // backlash position in steps
 volatile int backlashAxis1              = 0;                 // total backlash in steps
@@ -190,7 +195,15 @@ long   indexAxis1Steps                  = 0;
 volatile int stepAxis1=1;
 fixed_t fstepAxis1;                                          // tracking and PEC, fractional steps
 
-double homePositionAxis2                = 0.0;
+#ifndef AXIS2_HOME_DEFAULT
+  #if MOUNT_TYPE == ALTAZM
+    #define AXIS2_HOME_DEFAULT 0.0
+  #else
+    #define AXIS2_HOME_DEFAULT 90.0                          // always positive, sign is automatically adjusted for hemisphere
+  #endif
+#endif
+double homePositionAxis2                = AXIS2_HOME_DEFAULT;
+
 volatile long posAxis2                  = 0;                 // declination position in steps
 volatile int blAxis2                    = 0;                 // backlash position in steps
 volatile int backlashAxis2              = 0;                 // total backlash in steps
