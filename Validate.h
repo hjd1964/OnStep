@@ -11,6 +11,31 @@
 // -----------------------------------------------------------------------------------
 // correct for configuration backwards compatability
 
+#ifndef FEATURE1_DEFAULT_VALUE
+  #define FEATURE1_DEFAULT_VALUE OFF
+#endif
+#ifndef FEATURE2_DEFAULT_VALUE
+  #define FEATURE2_DEFAULT_VALUE OFF
+#endif
+#ifndef FEATURE3_DEFAULT_VALUE
+  #define FEATURE3_DEFAULT_VALUE OFF
+#endif
+#ifndef FEATURE4_DEFAULT_VALUE
+  #define FEATURE4_DEFAULT_VALUE OFF
+#endif
+#ifndef FEATURE5_DEFAULT_VALUE
+  #define FEATURE5_DEFAULT_VALUE OFF
+#endif
+#ifndef FEATURE6_DEFAULT_VALUE
+  #define FEATURE6_DEFAULT_VALUE OFF
+#endif
+#ifndef FEATURE7_DEFAULT_VALUE
+  #define FEATURE7_DEFAULT_VALUE OFF
+#endif
+#ifndef FEATURE8_DEFAULT_VALUE
+  #define FEATURE8_DEFAULT_VALUE OFF
+#endif
+
 #ifndef PIER_SIDE_PREFERRED_DEFAULT
   #define PIER_SIDE_PREFERRED_DEFAULT BEST
 #endif
