@@ -20,8 +20,8 @@ void featuresPoll() {
 #ifdef FEATURES_PRESENT
   for (int i=0; i < 8; i++) {
     if (feature[i].purpose == DEW_HEATER) {
-      feature[i].dewHeater->poll(ambient.getFeatureTemperature(0)-ambient.getDewPoint());
       if (isDS2413(feature[i].pin)) ambient.setDS2413State(i,feature[i].dewHeater->isOn());
+      feature[i].dewHeater->poll(ambient.getFeatureTemperature(i)-ambient.getDewPoint());
     } else
     if (feature[i].purpose == INTERVALOMETER) {
       feature[i].intervalometer->poll();
