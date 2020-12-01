@@ -62,13 +62,13 @@ L_ENC_SYNC_TO_ENC ": <br />"
 const char html_syncEncodersNow[] PROGMEM =
 L_ENC_SYNC_TO_ONS ": <br />"
 "<button name='ms' value='enc' type='submit'>" L_ENC_SYNC_NOW "</button>"
-"</form>";
+"<br />";
 
 #ifdef ENC_HAS_ABSOLUTE
 const char html_zeroEncodersNow[] PROGMEM =
 L_ENC_ZERO_TO_ONS ": <br />"
 "<button name='ms' value='zro' type='submit'>" L_ENC_SYNC_NOW "</button>"
-"</form>";
+"<br />";
 #endif
 
 const char html_encEn1[] PROGMEM = "<br /><br />"
@@ -257,6 +257,7 @@ void handleEncoders() {
 #ifdef ENC_HAS_ABSOLUTE
   data += FPSTR(html_zeroEncodersNow);
 #endif
+  data += "</form>";
 
   // Autosync
   data += FPSTR(html_encEn1);
