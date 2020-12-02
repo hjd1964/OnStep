@@ -367,7 +367,7 @@ IRAM_ATTR ISR(TIMER4_COMPA_vect)
 #endif
 
 #if STEP_WAVE_FORM != SQUARE
-#if MODE_SWITCH_BEFORE_SLEW == ON || (AXIS2_DRIVER_MODEL == TMC_SPI && defined(AXIS2_DRIVER_CODE_GOTO))
+#if defined(AXIS2_DRIVER_CODE_GOTO)
   if (stepAxis2 != 1) QuickSetIntervalAxis2(nextAxis2GotoRate); else
 #endif
   QuickSetIntervalAxis2(nextAxis2Rate);
