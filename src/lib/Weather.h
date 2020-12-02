@@ -476,10 +476,10 @@ class weather {
     }
     bool getDS2413Failure(int feature) {
       if (feature >= 0 && feature <= 7) {
-        if (feature == 0 || feature == 1) return _ds2413_failures[0] > 2;
-        if (feature == 2 || feature == 3) return _ds2413_failures[1] > 2;
-        if (feature == 4 || feature == 5) return _ds2413_failures[2] > 2;
-        if (feature == 6 || feature == 7) return _ds2413_failures[3] > 2;
+        if (feature == 0 || feature == 1) return _ds2413_failures[0] > 2; else
+        if (feature == 2 || feature == 3) return _ds2413_failures[1] > 2; else
+        if (feature == 4 || feature == 5) return _ds2413_failures[2] > 2; else
+        if (feature == 6 || feature == 7) return _ds2413_failures[3] > 2; else return true;
       } else return true;
     }
     
