@@ -392,8 +392,8 @@
 
 #ifndef LED_RETICLE
   #error "Configuration (Config.h): Setting LED_RETICLE must be present!"
-#elif LED_RETICLE != OFF && LED_RETICLE != ON && (LED_RETICLE < 0 || LED_RETICLE > 255)
-  #error "Configuration (Config.h): Setting LED_RETICLE invalid, use OFF, ON, or a number between 0 and 255 (0 to 100% power.)"
+#elif LED_RETICLE != OFF && (LED_RETICLE < 0 || LED_RETICLE > 255)
+  #error "Configuration (Config.h): Setting LED_RETICLE invalid, use OFF or a number between 0 and 255 (0 to 100% power.)"
 #endif
 
 #ifndef BUZZER
