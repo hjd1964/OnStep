@@ -101,9 +101,19 @@ CommandErrors syncEnc(double EncAxis1, double EncAxis2) {
 
   // no sync from encoders during an alignment!
   if (alignActive()) return CE_NONE;
-  
+
   // force syncing to encoders only
   if (syncToEncodersOnly) return CE_NONE;
+
+  // don't allow syncing outside of our normal operating range
+  if (EncAxis1 < -360.0 || EncAxis2 < -360.0 || EncAxis1 > 360.0 || EncAxis2 > 360.0) {
+    DLF("MSG: Sync from Encoders ignored, Axis");
+    if (EncAxis1 < -360.0) DLF("1 < -360.0"); else
+    if (EncAxis2 < -360.0) DLF("2 < -360.0"); else
+    if (EncAxis1 > 360.0) DLF("1 > 360.0"); else
+    if (EncAxis2 > 360.0) DLF("2 > 360.0");
+    return CE_PARAM_RANGE;
+  }
 
   long e1=EncAxis1*axis1Settings.stepsPerMeasure;
   long e2=EncAxis2*axis2Settings.stepsPerMeasure;
@@ -124,7 +134,7 @@ CommandErrors syncEnc(double EncAxis1, double EncAxis2) {
   indexAxis2Steps-=delta2;
   indexAxis2=(double)indexAxis2Steps/axis2Settings.stepsPerMeasure;
 
-  VLF("MSG: Encoder sync, indices set");
+  VLF("MSG: Sync from Encoders, indices set");
 
   return CE_NONE;
 }
