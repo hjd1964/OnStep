@@ -5,13 +5,8 @@
 
 #define HAL_FAST_PROCESSOR
 
-#if defined(STM32F411xE)
 #define HAL_MAXRATE_LOWER_LIMIT 16   // Lower limit (fastest) step rate in uS (in SQW mode) assumes optimization set to Fastest (-O3)
 #define HAL_PULSE_WIDTH         500  // Width of step pulse
-#elif defined(STM32F401xC)
-#define HAL_MAXRATE_LOWER_LIMIT 20   // Lower limit (fastest) step rate in uS (in SQW mode) assumes optimization set to Fastest (-O3)
-#define HAL_PULSE_WIDTH         600  // Width of step pulse
-#endif
 
 #include <HardwareTimer.h>
 
@@ -45,7 +40,7 @@ HardwareSerial HWSerial2(PA3, PA2); // RX2, TX2
 // Non-volatile storage ------------------------------------------------------------------------------
 #undef E2END
 #if defined(NV_M24C32)
-  // The STM32F411 MaxPCB3 has an 8192 byte EEPROM built-in (rated for 5M write cycles)
+  // The MaxPCB3I has an 8192 byte EEPROM built-in (rated for 5M write cycles)
   #define NV_ENDURANCE HIGH
   #define E2END 8191
   #define I2C_EEPROM_ADDRESS 0x50
@@ -53,7 +48,7 @@ HardwareSerial HWSerial2(PA3, PA2); // RX2, TX2
 #elif defined(NV_MB85RC256V)
   #include "../drivers/NV_I2C_FRAM_MB85RC256V.h"
 #else
-  // defaults to 0x57 and 4KB
+  // defaults to 0x57 and 4KB as used on DS3231 RTC modules
   #include "../drivers/NV_I2C_EEPROM_24XX_C.h"
 #endif
 
