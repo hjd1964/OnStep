@@ -305,7 +305,7 @@ void setup() {
 #if TRACK_AUTOSTART == ON
   #if MOUNT_TYPE != ALTAZM
 
-    // tailor behaviour depending on TLS presence
+    // tailor behavior depending on TLS presence
     if (!tls.active) {
       VLF("MSG: Tracking autostart - no TLS, limits disabled");
       setHome();
