@@ -3,7 +3,6 @@
 
 void initPre() {
   // initialize and disable the main axes stepper drivers
-  pinMode(14,OUTPUT); digitalWrite(14,AXIS1_DRIVER_ENABLE);
   if (Axis1_EN != OFF) { pinMode(Axis1_EN,OUTPUT); digitalWrite(Axis1_EN,AXIS1_DRIVER_DISABLE); }
   if (Axis2_EN != OFF) { pinMode(Axis2_EN,OUTPUT); digitalWrite(Axis2_EN,AXIS2_DRIVER_DISABLE); }
 
