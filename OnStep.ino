@@ -307,15 +307,18 @@ void setup() {
 
     // tailor behavior depending on TLS presence
     if (!tls.active) {
-      VLF("MSG: Tracking autostart - no TLS, limits disabled");
+      VLF("MSG: Tracking autostart - TLS/orientation unknown, limits disabled");
       setHome();
+      safetyLimitsOn=false;
     } else {
-      if (parkStatus == Parked) {
-        VLF("MSG: Tracking autostart - assuming TLS is correct, limits enabled and automatic unpark");
-        unPark(true);
-      } else {
-        VLF("MSG: Tracking autostart - assuming TLS is correct, limits enabled");
+      if (parkStatus != Parked) {
+        VLF("MSG: Tracking autostart - TLS/orientation unknown, limits disabled");
         setHome();
+        safetyLimitsOn=false;
+      } else {
+        // parking implies the orientation of the mount and the location are known
+        VLF("MSG: Tracking autostart - assuming TLS/orientation are correct, limits enabled and automatic unpark");
+        unPark(true);
       }
     }
 
