@@ -2,11 +2,11 @@
 // Functions for initializing pins, variables, and timers on startup
 
 void initPre() {
-  // initialize and disable the main axes stepper drivers
+  // disable the main axes stepper drivers
   if (Axis1_EN != OFF) { pinMode(Axis1_EN,OUTPUT); digitalWrite(Axis1_EN,AXIS1_DRIVER_DISABLE); }
   if (Axis2_EN != OFF  && Axis2_EN != SHARED) { pinMode(Axis2_EN,OUTPUT); digitalWrite(Axis2_EN,AXIS2_DRIVER_DISABLE); }
 
-  // disable DS3231 CS pin
+  // disable DS3234 CS pin
 #if TIME_LOCATION_SOURCE == DS3234
   pinMode(DS3234_CS_PIN,OUTPUT); digitalWrite(DS3234_CS_PIN,HIGH);
 #endif
