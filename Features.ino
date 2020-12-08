@@ -5,7 +5,7 @@
 void featuresInit() {
   for (int i=0; i < 8; i++) {
     if (feature[i].value == ON) feature[i].value=1; else if (feature[i].value < 0 || feature[i].value > 255) feature[i].value=0;
-    if (feature[i].purpose == SWITCH || feature[i].purpose == SIGNAL_UNPARKED) {
+    if (feature[i].purpose == SWITCH || feature[i].purpose == SWITCH_UNPARKED) {
       if (feature[i].pin >= 0 && feature[i].pin <= 255) {
         pinMode(feature[i].pin,OUTPUT); digitalWrite(feature[i].pin,feature[i].value==0?LOW:HIGH);
       } else ambient.setDS2413State(i,feature[i].value==0?0:1);
@@ -25,9 +25,10 @@ void featuresInit() {
 void featuresPoll() {
 #ifdef FEATURES_PRESENT
   for (int i=0; i < 8; i++) {
-    if (feature[i].purpose == SIGNAL_UNPARKED) {
-      if (parkStatus == NotParked) feature[i].value = 1; else feature[i].value = 0;
-      if (feature[i].pin >= 0 && feature[i].pin <= 255) { digitalWrite(feature[i].pin,feature[i].value==0?LOW:HIGH); } else ambient.setDS2413State(i,feature[i].value==0?0:1);
+    if (feature[i].purpose == SWITCH_UNPARKED) {
+      int v=feature[i].value;
+      if (parkStatus == NotParked) feature[i].value=1; else feature[i].value=0;
+      if (feature[i].value != v) { if (feature[i].pin >= 0 && feature[i].pin <= 255) { digitalWrite(feature[i].pin,feature[i].value==0?LOW:HIGH); } else ambient.setDS2413State(i,feature[i].value==0?0:1); }
     } else
     if (feature[i].purpose == DEW_HEATER) {
       feature[i].dewHeater->poll(ambient.getFeatureTemperature(i)-ambient.getDewPoint());
@@ -53,7 +54,7 @@ void featuresGetCommand(char *parameter, char *reply, bool &boolReply) {
   if (i < 0 || i > 7)  { commandError=CE_PARAM_FORM; return; }
 
   char s[255];
-  if (feature[i].purpose == SWITCH || feature[i].purpose == SIGNAL_UNPARKED) {
+  if (feature[i].purpose == SWITCH || feature[i].purpose == SWITCH_UNPARKED) {
     if (feature[i].pin >= 0 && feature[i].pin <= 255) sprintf(s,"%d",feature[i].value); else sprintf(s,"%d",ambient.getDS2413State(i)); strcat(reply,s);
   } else if (feature[i].purpose == ANALOG_OUTPUT) {
     if (feature[i].pin >= 0 && feature[i].pin <= 255) sprintf(s,"%d",feature[i].value); else strcpy(s,"0"); strcat(reply,s);
@@ -88,7 +89,9 @@ void featuresGetInfoCommand(char *parameter, char *reply, bool &boolReply) {
   
   char s[255];
   strcpy(s,feature[i].name); if (strlen(s)>10) s[10]=0; strcpy(reply,s); strcat(reply,",");
-  sprintf(s,"%d",(int)feature[i].purpose); strcat(reply,s);
+  int p=feature[i].purpose;
+  if (p == SWITCH_UNPARKED) p = SWITCH;
+  sprintf(s,"%d",p); strcat(reply,s);
   boolReply=false;
 }
 
@@ -105,10 +108,12 @@ void featuresSetCommand(char *parameter) {
   long v = lround(f);
 
   if (parameter[3] == 'V' && v >= 0 && v <= 255) feature[i].value=v;
-  if (feature[i].purpose == SWITCH) {
+  if (feature[i].purpose == SWITCH || feature[i].purpose == SWITCH_UNPARKED) {
     if (parameter[3] == 'V') {
       if (v >= 0 && v <= 1) {
-        if (feature[i].pin >= 0 && feature[i].pin <= 255) { digitalWrite(feature[i].pin,v==0?LOW:HIGH); } else ambient.setDS2413State(i,v==0?0:1);
+        if (feature[i].purpose == SWITCH) {
+          if (feature[i].pin >= 0 && feature[i].pin <= 255) { digitalWrite(feature[i].pin,v==0?LOW:HIGH); } else ambient.setDS2413State(i,v==0?0:1);
+        }
       } else commandError=CE_PARAM_RANGE;
     } else commandError=CE_PARAM_FORM;
   } else if (feature[i].purpose == ANALOG_OUTPUT) {
