@@ -27,7 +27,7 @@ void featuresPoll() {
   for (int i=0; i < 8; i++) {
     if (feature[i].purpose == SWITCH_UNPARKED) {
       int v=feature[i].value;
-      if (parkStatus == NotParked) feature[i].value=1; else feature[i].value=0;
+      if (parkStatus != Parked) feature[i].value=1; else feature[i].value=0;
       if (feature[i].value != v) { if (feature[i].pin >= 0 && feature[i].pin <= 255) { digitalWrite(feature[i].pin,feature[i].value==0?LOW:HIGH); } else ambient.setDS2413State(i,feature[i].value==0?0:1); }
     } else
     if (feature[i].purpose == DEW_HEATER) {
