@@ -4,9 +4,12 @@
 // Configuration options
 
 // On/Off, etc.
-#define OFF          -1
-#define ON           -2
-#define INVALID -999999
+#define OFF                 -1
+#define ON                  -2
+#define METRIC              ON
+#define IMPERIAL            -3
+#define LOCALE_DEFAULT      -4
+#define INVALID        -999999
 
 // encoder types
 #define AB 1

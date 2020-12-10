@@ -147,15 +147,15 @@ void handleRoot() {
 
   // Ambient conditions
 #if DISPLAY_WEATHER == ON
-  if (!command(":GX9A#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,L_TEMPERATURE ":",temp1,"&deg;C"); data+=temp;
-  if (!command(":GX9B#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,L_PRESSURE ":",temp1,"mb"); data+=temp;
+  if (!command(":GX9A#",temp1)) strcpy(temp1,"?"); else localeTemperature(temp1,temp2); sprintf_P(temp,html_indexTPHD,L_TEMPERATURE ":",temp1,temp2); data+=temp;
+  if (!command(":GX9B#",temp1)) strcpy(temp1,"?"); else localePressure(temp1,temp2); sprintf_P(temp,html_indexTPHD,L_PRESSURE ":",temp1,temp2); data+=temp;
   if (!command(":GX9C#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,L_HUMIDITY ":",temp1,"%"); data+=temp;
-  if (!command(":GX9E#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,L_DEW_POINT ":",temp1,"&deg;C"); data+=temp;
+  if (!command(":GX9E#",temp1)) strcpy(temp1,"?"); else localeTemperature(temp1,temp2); sprintf_P(temp,html_indexTPHD,L_DEW_POINT ":",temp1,temp2); data+=temp;
 #endif
 
   // Focuser/telescope temperature
   if (mountStatus.focuserPresent()) {
-    if (!command(":Ft#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,L_TELE_TEMPERATURE ":",temp1,"&deg;C"); data+=temp;
+    if (!command(":Ft#",temp1)) strcpy(temp1,"?"); else localeTemperature(temp1,temp2); sprintf_P(temp,html_indexTPHD,L_TELE_TEMPERATURE ":",temp1,temp2); data+=temp;
   }
   
   data+="<br /><b>" L_COORDINATES ":</b><br />";
@@ -355,7 +355,7 @@ void handleRoot() {
   }
 
 #if DISPLAY_INTERNAL_TEMPERATURE == ON
-  if (!command(":GX9F#",temp1)) strcpy(temp1,"?"); sprintf_P(temp,html_indexTPHD,L_INTERNAL_TEMP ":",temp1,"&deg;C"); data+=temp;
+  if (!command(":GX9F#",temp1)) strcpy(temp1,"?"); else localeTemperature(temp1,temp2); sprintf_P(temp,html_indexTPHD,L_INTERNAL_TEMP ":",temp1,temp2); data+=temp;
 #endif
 
   // General Error
