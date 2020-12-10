@@ -327,12 +327,10 @@ void setLatitude(double Lat) {
     if (axis1Settings.reverse == ON) defaultDirAxis1 = DefaultDirAxis1NCPInit; else defaultDirAxis1 = DefaultDirAxis1SCPInit;
   }
 
-  // the polar home position
-#if MOUNT_TYPE == ALTAZM
-  homePositionAxis2=AXIS2_HOME_DEFAULT;
-#else
-  if (latitude < 0) homePositionAxis2=-AXIS2_HOME_DEFAULT; else homePositionAxis2=AXIS2_HOME_DEFAULT;
-#endif
+  // Declination home position changes sign with n/s hemisphere for Eq mounts
+  if (mountType != ALTAZM) {
+    if (latitude < 0) homePositionAxis2=-fabs(homePositionAxis2); else homePositionAxis2=fabs(homePositionAxis2);
+  }
 }
 
 // convert equatorial coordinates to horizon
@@ -451,21 +449,23 @@ void setDeltaTrackingRate() {
 
   if (trackingSyncInProgress()) {
     trackingSyncSeconds--;
-    
-  #if MOUNT_TYPE == ALTAZM
-    double a,z,d1,d2,newTargetAlt,newTargetAzm;
-    getHor(&a,&z);
-    double newTargetHA=haRange(LST()*15.0-newTargetRA);
-    equToHor(newTargetHA,newTargetDec,&newTargetAlt,&newTargetAzm);
-    d1=-(z-newTargetAzm);
-    d2=-(a-newTargetAlt);
-  #else
-    double r,d,d1,d2;
-    getEqu(&r,&d,false);
-    d1=r-newTargetRA;
-    d2=d-newTargetDec;
-    if (getInstrPierSide() == PierSideEast) d2=-d2;
-  #endif
+
+    double d1,d2,newTargetAlt,newTargetAzm;
+    if (mountType == ALTAZM) {
+      double a,z;
+      getHor(&a,&z);
+      double newTargetHA=haRange(LST()*15.0-newTargetRA);
+      equToHor(newTargetHA,newTargetDec,&newTargetAlt,&newTargetAzm);
+      d1=-(z-newTargetAzm);
+      d2=-(a-newTargetAlt);
+    } else {
+      double r,d;
+      getEqu(&r,&d,false);
+      d1=r-newTargetRA;
+      d2=d-newTargetDec;
+      if (getInstrPierSide() == PierSideEast) d2=-d2;
+    }
+
     if ((fabs(d1) < arcSecPerStepAxis1/3600.0) && (fabs(d2) < arcSecPerStepAxis2/3600.0)) {
       trackingSyncSeconds=0;
     } else {
@@ -476,14 +476,16 @@ void setDeltaTrackingRate() {
     }
   }
 
-#if MOUNT_TYPE != ALTAZM
-  if ((rateCompensation != RC_REFR_BOTH) && (rateCompensation != RC_FULL_BOTH)) _deltaAxis2=0.0;
-#endif
-  cli();
+  if (mountType != ALTAZM) {
+    if ((rateCompensation != RC_REFR_BOTH) && (rateCompensation != RC_FULL_BOTH)) _deltaAxis2=0.0;
+  }
+
   // trackingTimerRateAxis1/2 are x the sidereal rate
+  cli();
   if (trackingState == TrackingSidereal) trackingTimerRateAxis1=(_deltaAxis1/15.0)+f1; else trackingTimerRateAxis1=0.0;
   if (trackingState == TrackingSidereal) trackingTimerRateAxis2=(_deltaAxis2/15.0)+f2; else trackingTimerRateAxis2=0.0;
   sei();
+
   fstepAxis1.fixed=doubleToFixed( ((axis1Settings.stepsPerMeasure/240.0)*(_deltaAxis1/15.0))/100.0 );
   fstepAxis2.fixed=doubleToFixed( ((axis2Settings.stepsPerMeasure/240.0)*(_deltaAxis2/15.0))/100.0 );
 }
@@ -491,21 +493,21 @@ void setDeltaTrackingRate() {
 double _currentRate=1.0;
 void setTrackingRate(double r) {
   _currentRate=r;
-#if MOUNT_TYPE != ALTAZM
-  _deltaAxis1=r*15.0;
-  _deltaAxis2=0.0;
-#endif
+  if (mountType != ALTAZM) {
+    _deltaAxis1=r*15.0;
+    _deltaAxis2=0.0;
+  }
 }
 
 double getTrackingRate60Hz() {
   double f=0;
   // during slews, if tracking is enabled it's at the default sidereal rate
   if (trackingState == TrackingMoveTo && lastTrackingState == TrackingSidereal) f=1.00273790935*60.0;
-#if MOUNT_TYPE == ALTAZM
+  if (mountType == ALTAZM) {
     if (trackingState == TrackingSidereal) f=_currentRate*1.00273790935*60.0;
-#else
+  } else {
     if (trackingState == TrackingSidereal) { cli(); f=(trackingTimerRateAxis1*1.00273790935)*60.0; sei(); }
-#endif
+  }
   return f;
 }
 
@@ -591,13 +593,11 @@ double ztr(double a) {
   return x;
 }
 
-#if MOUNT_TYPE != ALTAZM
-
 // Distance in arc-min ahead of and behind the current Equ position, used for rate calculation
 #ifdef HAL_NO_DOUBLE_PRECISION
-#define RefractionRateRange 30.0
+  #define RefractionRateRange 30.0
 #else
-#define RefractionRateRange 1.0
+  #define RefractionRateRange 1.0
 #endif
 
 bool doRefractionRateCalc() {
@@ -629,7 +629,7 @@ bool doRefractionRateCalc() {
   // get the instrument coordinates
   if ((rr_step == 10) || (rr_step == 110)) {
     if ((rateCompensation == RC_FULL_RA) || (rateCompensation == RC_FULL_BOTH)) {
-      Align.equToInstr(rr_HA,rr_Dec,&rr_HA,&rr_Dec,getInstrPierSide());
+      AlignE.equToInstr(rr_HA,rr_Dec,&rr_HA,&rr_Dec,getInstrPierSide());
     }
   }
 
@@ -687,12 +687,8 @@ bool doRefractionRateCalc() {
   return done;
 }
 
-#endif
-
 // -----------------------------------------------------------------------------------------------------------------------------
 // AltAz tracking
-
-#if MOUNT_TYPE == ALTAZM
 
 #define AltAzTrackingRange 5  // distance in arc-min (10) ahead of and behind the current Equ position, used for rate calculation
 
@@ -781,7 +777,6 @@ bool doHorRateCalc() {
   }
   return done;
 }
-#endif
 
 // -----------------------------------------------------------------------------------------------------------------------------
 // Acceleration rate calculation

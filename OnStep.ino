@@ -303,8 +303,7 @@ void setup() {
  
   // tracking autostart
 #if TRACK_AUTOSTART == ON
-  #if MOUNT_TYPE != ALTAZM
-
+  if (mountType != ALTAZM) {
     // tailor behavior depending on TLS presence
     if (!tls.active) {
       VLF("MSG: Tracking autostart - TLS/orientation unknown, limits disabled");
@@ -325,9 +324,9 @@ void setup() {
     // start tracking
     trackingState=TrackingSidereal;
     enableStepperDrivers();
-  #else
-    #warning "Tracking autostart ignored for MOUNT_TYPE ALTAZM"
-  #endif
+  } else {
+    VLF("MSG: Tracking autostart - ignored for MOUNT_TYPE ALTAZM");
+  }
 #else
   if (parkStatus == Parked) {
     VLF("MSG: Restoring parked telescope pointing state");
@@ -416,7 +415,8 @@ void setup() {
 
 void loop() {
   loop2();
-  Align.model(0); // GTA compute pointing model, this will call loop2() during extended processing
+  // GTA compute pointing model, this will call loop2() during extended processing
+  if (mountType == ALTAZM) AlignH.model(0); else AlignE.model(0);
 }
 
 void loop2() {
@@ -480,13 +480,13 @@ void loop2() {
 
     // CALCULATE SOME TRACKING RATES, ETC.
     if (lstNow%3 == 0) doFastAltCalc(false);
-#if MOUNT_TYPE == ALTAZM
-    // figure out the current Alt/Azm tracking rates
-    if (lstNow%3 != 0) doHorRateCalc();
-#else
-    // figure out the current refraction compensated tracking rate
-    if (rateCompensation != RC_NONE && lstNow%3 != 0) doRefractionRateCalc();
-#endif
+    if (mountType == ALTAZM) {
+      // figure out the current Alt/Azm tracking rates
+      if (lstNow%3 != 0) doHorRateCalc();
+    } else {
+      // figure out the current refraction compensated tracking rate
+      if (rateCompensation != RC_NONE && lstNow%3 != 0) doRefractionRateCalc();
+    }
 
     // SAFETY CHECKS
 #if LIMIT_SENSE != OFF
@@ -520,13 +520,13 @@ void loop2() {
 
     if (safetyLimitsOn) {
       // check altitude overhead limit and horizon limit
-      if (currentAlt < minAlt) { generalError=ERR_ALT_MIN; stopSlewingAndTracking((MOUNT_TYPE == ALTAZM)?SS_LIMIT_AXIS2_MIN:SS_LIMIT); }
-      if (currentAlt > maxAlt) { generalError=ERR_ALT_MAX; stopSlewingAndTracking((MOUNT_TYPE == ALTAZM)?SS_LIMIT_AXIS2_MAX:SS_LIMIT); }
+      if (currentAlt < minAlt) { generalError=ERR_ALT_MIN; stopSlewingAndTracking((mountType == ALTAZM)?SS_LIMIT_AXIS2_MIN:SS_LIMIT); }
+      if (currentAlt > maxAlt) { generalError=ERR_ALT_MAX; stopSlewingAndTracking((mountType == ALTAZM)?SS_LIMIT_AXIS2_MAX:SS_LIMIT); }
     }
 
     // OPTION TO POWER DOWN AXIS2 IF NOT MOVING
-#if AXIS2_DRIVER_POWER_DOWN == ON && MOUNT_TYPE != ALTAZM
-    autoPowerDownAxis2();
+#if AXIS2_DRIVER_POWER_DOWN == ON
+    if (mountType != ALTAZM) autoPowerDownAxis2();
 #endif
 
     // 0.01S POLLING -------------------------------------------------------------------------------------
@@ -611,10 +611,12 @@ void loop2() {
   if ((long)(tempMs-housekeepingTimer) > 1000L) {
     housekeepingTimer=tempMs;
 
-#if ROTATOR == ON && MOUNT_TYPE == ALTAZM
-    // calculate and set the derotation rate as required
-    double h,d; getApproxEqu(&h,&d,true);
-    if (trackingState == TrackingSidereal) rot.derotate(h,d);
+#if ROTATOR == ON
+    if (mountType == ALTAZM) {
+      // calculate and set the derotation rate as required
+      double h,d; getApproxEqu(&h,&d,true);
+      if (trackingState == TrackingSidereal) rot.derotate(h,d);
+    }
 #endif
 
     // adjust tracking rate for Alt/Azm mounts
@@ -656,8 +658,8 @@ void loop2() {
     // keeps mount from tracking past the meridian limit, past the AXIS1_LIMIT_MAX, or past the Dec limits
     if (safetyLimitsOn) {
       // check for exceeding AXIS1_LIMIT_MIN or AXIS1_LIMIT_MAX
-      if (getInstrAxis1() < axis1Settings.min) { generalError=(MOUNT_TYPE==ALTAZM)?ERR_AZM:ERR_UNDER_POLE; stopSlewingAndTracking(SS_LIMIT_AXIS1_MIN); } else
-      if (getInstrAxis1() > axis1Settings.max) { generalError=(MOUNT_TYPE==ALTAZM)?ERR_AZM:ERR_UNDER_POLE; stopSlewingAndTracking(SS_LIMIT_AXIS1_MAX); } else
+      if (getInstrAxis1() < axis1Settings.min) { generalError=(mountType==ALTAZM)?ERR_AZM:ERR_UNDER_POLE; stopSlewingAndTracking(SS_LIMIT_AXIS1_MIN); } else
+      if (getInstrAxis1() > axis1Settings.max) { generalError=(mountType==ALTAZM)?ERR_AZM:ERR_UNDER_POLE; stopSlewingAndTracking(SS_LIMIT_AXIS1_MAX); } else
       // check for exceeding Meridian Limits
       if (meridianFlip != MeridianFlipNever) {
         if (getInstrPierSide() == PierSideWest) {

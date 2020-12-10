@@ -17,10 +17,10 @@ CommandErrors validateGotoCoords(double HA, double Dec, double Alt) {
   // Check coordinates
   if (Alt < minAlt)                            return CE_GOTO_ERR_BELOW_HORIZON;
   if (Alt > maxAlt)                            return CE_GOTO_ERR_ABOVE_OVERHEAD;
-#if AXIS2_TANGENT_ARM == OFF && MOUNT_TYPE != ALTAZM
+  if (AXIS2_TANGENT_ARM == OFF && mountType != ALTAZM) {
     if (Dec < axis2Settings.min)               return CE_SLEW_ERR_OUTSIDE_LIMITS;
     if (Dec > axis2Settings.max)               return CE_SLEW_ERR_OUTSIDE_LIMITS;
-#endif
+  }
   if (HA < axis1Settings.min)                  return CE_SLEW_ERR_OUTSIDE_LIMITS;
   if (HA > axis1Settings.max)                  return CE_SLEW_ERR_OUTSIDE_LIMITS;
   return CE_NONE;
@@ -52,13 +52,13 @@ CommandErrors syncEqu(double RA, double Dec) {
   if (e != CE_NONE) return e;
 
   double Axis1,Axis2;
-#if MOUNT_TYPE == ALTAZM
-  equToHor(HA,Dec,&Axis2,&Axis1);
-  Align.horToInstr(Axis2,Axis1,&Axis2,&Axis1,getInstrPierSide());
-  Axis1=haRange(Axis1);
-#else
-  Align.equToInstr(HA,Dec,&Axis1,&Axis2,getInstrPierSide());
-#endif
+  if (mountType == ALTAZM) {
+    equToHor(HA,Dec,&Axis2,&Axis1);
+    AlignH.horToInstr(Axis2,Axis1,&Axis2,&Axis1,getInstrPierSide());
+    Axis1=haRange(Axis1);
+  } else {
+    AlignE.equToInstr(HA,Dec,&Axis1,&Axis2,getInstrPierSide());
+  }
 
   // west side of pier - we're in the eastern sky and the HA's are negative
   // east side of pier - we're in the western sky and the HA's are positive
@@ -157,18 +157,18 @@ void getEnc(double *EncAxis1, double *EncAxis2) {
 bool getEqu(double *RA, double *Dec, bool returnHA) {
   double HA;
  
-#if MOUNT_TYPE != ALTAZM
-  HA=getInstrAxis1();
-  *Dec=getInstrAxis2();
-  // apply pointing model
-  Align.instrToEqu(HA,*Dec,&HA,Dec,getInstrPierSide());
-#else
-  double Z=getInstrAxis1();
-  double A=getInstrAxis2();
-  // apply pointing model
-  Align.instrToHor(A,Z,&A,&Z,getInstrPierSide());
-  horToEqu(A,Z,&HA,Dec);
-#endif
+  if (mountType != ALTAZM) {
+    HA=getInstrAxis1();
+    *Dec=getInstrAxis2();
+    // apply pointing model
+    AlignE.instrToEqu(HA,*Dec,&HA,Dec,getInstrPierSide());
+  } else {
+    double Z=getInstrAxis1();
+    double A=getInstrAxis2();
+    // apply pointing model
+    AlignH.instrToHor(A,Z,&A,&Z,getInstrPierSide());
+    horToEqu(A,Z,&HA,Dec);
+  }
 
   // return either the RA or the HA depending on returnHA
   if (!returnHA) {
@@ -184,14 +184,14 @@ bool getEqu(double *RA, double *Dec, bool returnHA) {
 bool getApproxEqu(double *RA, double *Dec, bool returnHA) {
   double HA;
   
-#if MOUNT_TYPE != ALTAZM
-  HA=getInstrAxis1();
-  *Dec=getInstrAxis2();
-#else
-  double Z=getInstrAxis1();
-  double A=getInstrAxis2();
-  horToEqu(A,Z,&HA,Dec);
-#endif
+  if (mountType != ALTAZM) {
+    HA=getInstrAxis1();
+    *Dec=getInstrAxis2();
+  } else {
+    double Z=getInstrAxis1();
+    double A=getInstrAxis2();
+    horToEqu(A,Z,&HA,Dec);
+  }
 
   HA=haRange(HA);
   if (*Dec > 90.0) *Dec=+90.0;
@@ -249,44 +249,44 @@ CommandErrors goToEqu(double RA, double Dec) {
   e=validateGotoCoords(HA,Dec,a);
   if (e != CE_NONE) return e;
 
-#if MOUNT_TYPE == ALTAZM
-  equToHor(HA,Dec,&a,&z);
-  Align.horToInstr(a,z,&a,&z,getInstrPierSide());
-  z=haRange(z);
-
-  // adjust coordinate range to allow going past 180 deg.
-  // position a1 is 0..180
-  double a1=getInstrAxis1();
-  if (a1 >= 0) {
-    // and goto z is in -0..-180
-    if (z < 0) {
-      // the alternate z1 is in 180..360
-      double z1=z+360.0;
-      if ((z1 < axis1Settings.max) && (dist(a1,z) > dist(a1,z1))) z=z1;
-    }
-  }
-  // position a1 -0..-180
-  if (a1 < 0) { 
-    // and goto z is in 0..180
-    if (z > 0) {
-      // the alternate z1 is in -360..-180
-      double z1=z-360.0;
-      if ((z1 > axis1Settings.min) && (dist(a1,z) > dist(a1,z1))) z=z1;
-    }
-  }
+  if (mountType == ALTAZM) {
+    equToHor(HA,Dec,&a,&z);
+    AlignH.horToInstr(a,z,&a,&z,getInstrPierSide());
+    z=haRange(z);
   
-  Axis1=z;
-  Axis2=a;
-  Axis1Alt=z;
-  Axis2Alt=a;
-#else
-  // correct for polar offset, refraction, coordinate systems, operation past pole, etc. as required
-  Align.equToInstr(HA,Dec,&Axis1,&Axis2,getInstrPierSide());
-
-  // as above... for the opposite pier side just incase we need to do a meridian flip
-  int p=PierSideNone; if (getInstrPierSide() == PierSideEast) p=PierSideWest; else if (getInstrPierSide() == PierSideWest) p=PierSideEast;
-  Align.equToInstr(HA,Dec,&Axis1Alt,&Axis2Alt,p);
-#endif
+    // adjust coordinate range to allow going past 180 deg.
+    // position a1 is 0..180
+    double a1=getInstrAxis1();
+    if (a1 >= 0) {
+      // and goto z is in -0..-180
+      if (z < 0) {
+        // the alternate z1 is in 180..360
+        double z1=z+360.0;
+        if ((z1 < axis1Settings.max) && (dist(a1,z) > dist(a1,z1))) z=z1;
+      }
+    }
+    // position a1 -0..-180
+    if (a1 < 0) { 
+      // and goto z is in 0..180
+      if (z > 0) {
+        // the alternate z1 is in -360..-180
+        double z1=z-360.0;
+        if ((z1 > axis1Settings.min) && (dist(a1,z) > dist(a1,z1))) z=z1;
+      }
+    }
+    
+    Axis1=z;
+    Axis2=a;
+    Axis1Alt=z;
+    Axis2Alt=a;
+  } else {
+    // correct for polar offset, refraction, coordinate systems, operation past pole, etc. as required
+    AlignE.equToInstr(HA,Dec,&Axis1,&Axis2,getInstrPierSide());
+  
+    // as above... for the opposite pier side just incase we need to do a meridian flip
+    int p=PierSideNone; if (getInstrPierSide() == PierSideEast) p=PierSideWest; else if (getInstrPierSide() == PierSideWest) p=PierSideEast;
+    AlignE.equToInstr(HA,Dec,&Axis1Alt,&Axis2Alt,p);
+  }
 
   // goto function takes HA and Dec in steps
   byte thisPierSide = PierSideBest;
@@ -363,16 +363,16 @@ CommandErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTar
   
   // final validation
   int p=PierSideEast; switch (thisPierSide) { case PierSideWest: case PierSideFlipEW1: p=PierSideWest; break; }
-#if MOUNT_TYPE == ALTAZM
-  // allow +/- 360 in Az
-  if (((thisTargetAxis1 > axis1Settings.max) || (thisTargetAxis1 < axis1Settings.min)) || ((thisTargetAxis2 > 180.0) || (thisTargetAxis2 < -180.0))) return CE_GOTO_ERR_UNSPECIFIED;
-#else
-  if (((thisTargetAxis1 > 270.0) || (thisTargetAxis1 < -270.0)) || ((thisTargetAxis2 > 270.0) || (thisTargetAxis2 < -270.0))) return CE_GOTO_ERR_UNSPECIFIED;
-  #if AXIS2_TANGENT_ARM == ON
-    if (toInstrAxis2(thisTargetAxis2,p) < axis2Settings.min) return CE_SLEW_ERR_OUTSIDE_LIMITS;
-    if (toInstrAxis2(thisTargetAxis2,p) > axis2Settings.max) return CE_SLEW_ERR_OUTSIDE_LIMITS;
-  #endif
-#endif
+  if (mountType == ALTAZM) {
+    // allow +/- 360 in Az
+    if (((thisTargetAxis1 > axis1Settings.max) || (thisTargetAxis1 < axis1Settings.min)) || ((thisTargetAxis2 > 180.0) || (thisTargetAxis2 < -180.0))) return CE_GOTO_ERR_UNSPECIFIED;
+  } else {
+    if (((thisTargetAxis1 > 270.0) || (thisTargetAxis1 < -270.0)) || ((thisTargetAxis2 > 270.0) || (thisTargetAxis2 < -270.0))) return CE_GOTO_ERR_UNSPECIFIED;
+    if (AXIS2_TANGENT_ARM == ON) {
+      if (toInstrAxis2(thisTargetAxis2,p) < axis2Settings.min) return CE_SLEW_ERR_OUTSIDE_LIMITS;
+      if (toInstrAxis2(thisTargetAxis2,p) > axis2Settings.max) return CE_SLEW_ERR_OUTSIDE_LIMITS;
+    }
+  }
   lastTrackingState=trackingState;
 
   cli();

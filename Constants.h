@@ -147,7 +147,9 @@
                                     
 #define EE_currentSite              11  // 1
                                     
-#define EE_pauseHome                12  // 1 + 1
+#define EE_pauseHome                12  // 1
+
+#define EE_mountType                13  // 1
                                     
 #define EE_LMT                      14  // 4
 #define EE_JD                       18  // 4

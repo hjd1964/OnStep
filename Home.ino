@@ -32,17 +32,17 @@ void checkHome() {
     findHomeMode=FH_OFF;
 
     VLF("MSG: Homing done");
-    #if AXIS2_TANGENT_ARM == ON
+    if (AXIS2_TANGENT_ARM == ON) {
       trackingState=abortTrackingState;
       cli();
       targetAxis2.part.m = 0; targetAxis2.part.f = 0;
       posAxis2           = 0;
       sei();
-    #else    
+    } else {
       // at the home position
       initStartPosition();
       atHome=true;
-    #endif
+    }
   }
 }
 
@@ -85,10 +85,8 @@ CommandErrors goHome(bool fast) {
   
   // start guides
   if (fast) {
-    #if AXIS2_TANGENT_ARM == OFF
-      // make sure tracking is disabled
-      trackingState=TrackingNone;
-    #endif
+    // make sure tracking is disabled
+    if (AXIS2_TANGENT_ARM == OFF) trackingState=TrackingNone;
 
     // make sure motors are powered on
     enableStepperDrivers();
@@ -115,16 +113,16 @@ CommandErrors goHome(bool fast) {
 
   abortTrackingState=trackingState;
 
-  #if AXIS2_TANGENT_ARM == ON
+  if (AXIS2_TANGENT_ARM == ON) {
     double h=getInstrAxis1();
     double i2=indexAxis2;
     int p=getInstrPierSide();
     if (latitude >= 0) { if (p == PierSideWest) i2=180.0-i2; } else { if (p == PierSideWest) i2=-180.0-i2; }
     e=goTo(h,i2,h,i2,p);
-  #else
+  } else {
     trackingState=TrackingNone;
     e=goTo(homePositionAxis1,homePositionAxis2,homePositionAxis1,homePositionAxis2,PierSideEast);
-  #endif
+  }
 
   if (e == CE_NONE) { VLF("MSG: Homing started"); homeMount=true; } else { VLF("MSG: Homing failed"); trackingState=abortTrackingState; }
   return e;

@@ -73,7 +73,7 @@ void moveTo() {
   sei();
   
   // adjust rates near the horizon to help keep from exceeding the minAlt limit
-  #if MOUNT_TYPE != ALTAZM
+  if (mountType != ALTAZM) {
     if (latitudeAbs > 10) {
       long posAxis2=latitudeSign*getInstrAxis2()*axis2Settings.stepsPerMeasure;
       static long lastPosAxis2=0;
@@ -86,7 +86,7 @@ void moveTo() {
       }
       lastPosAxis2=posAxis2;
     }
-  #endif
+  }
 
   if (distDestAxis1 < 1) distDestAxis1=1;
   if (distDestAxis2 < 1) distDestAxis2=1;

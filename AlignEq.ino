@@ -9,8 +9,6 @@
 // -----------------------------------------------------------------------------------
 // ADVANCED GEOMETRIC ALIGN FOR EQUATORIAL MOUNTS (GOTO ASSIST)
 
-#if MOUNT_TYPE != ALTAZM
-
 // Initialize
 void TGeoAlign::init() {
   avgDec=0.0;
@@ -286,11 +284,7 @@ void TGeoAlign::autoModel(int n) {
   }
   ohe=ohe/num; best_ohe=round(ohe*Rad*3600.0); best_ohw=best_ohe;
 
-#if MOUNT_TYPE == FORK
-  Ff=1; Df=0;
-#else
-  Ff=0; Df=1;
-#endif
+  if (mountType == FORK) { Ff=1; Df=0; } else { Ff=0; Df=1; }
 
   // only search for cone error if > 2 stars
   int Do=0; if (num > 2) Do=1;
@@ -335,11 +329,7 @@ void TGeoAlign::autoModel(int n) {
   altCor=best_pe/3600.0;
 
   tfCor=best_tf/3600.0;
-#if MOUNT_TYPE == FORK || MOUNT_TYPE == ALTAZM
-  dfCor=best_ff/3600.0;
-#else
-  dfCor=best_df/3600.0;
-#endif
+  if (mountType == FORK || mountType == ALTAZM) dfCor=best_ff/3600.0; else dfCor=best_df/3600.0;
 
   ax1Cor=best_ohw/3600.0;
   ax2Cor=best_odw/3600.0;
@@ -379,13 +369,9 @@ void TGeoAlign::equToInstr(double HA, double Dec, double *HA1, double *Dec1, int
       // misalignment due to Dec axis being perp. to RA axis
       double PDh=-pdCor*(sinDec/cosDec)*p;
   
-  #if MOUNT_TYPE == FORK
-      // Fork flex
-      double DFd=dfCor*cosHA;
-  #else
-      // Axis flex
-      double DFd=-dfCor*(cosLat*cosHA+sinLat*(sinDec/cosDec));
-  #endif
+      // Fork flex or Axis flex
+      double DFd;
+      if (mountType == FORK) DFd=dfCor*cosHA; else DFd=-dfCor*(cosLat*cosHA+sinLat*(sinDec/cosDec));
   
       // Tube flex
       double TFh=tfCor*(cosLat*sinHA*(1.0/cosDec));
@@ -442,13 +428,9 @@ void TGeoAlign::instrToEqu(double HA, double Dec, double *HA1, double *Dec1, int
     // works on HA instead.  meridian flips affect this in HA
     double PDh=-pdCor*(sinDec/cosDec)*p;
 
-#if MOUNT_TYPE == FORK
-    // Fork flex
-    double DFd=dfCor*cosHA;
-#else
-    // Axis flex
-    double DFd=-dfCor*(cosLat*cosHA+sinLat*(sinDec/cosDec));
-#endif
+    // Fork flex or Axis flex
+    double DFd;
+    if (mountType == FORK) DFd=dfCor*cosHA; else DFd=-dfCor*(cosLat*cosHA+sinLat*(sinDec/cosDec));
 
     // Tube flex
     double TFh=tfCor*(cosLat*sinHA*(1.0/cosDec));
@@ -472,5 +454,3 @@ void TGeoAlign::instrToEqu(double HA, double Dec, double *HA1, double *Dec1, int
   if (*Dec1 > 90.0) *Dec1=90.0;
   if (*Dec1 < -90.0) *Dec1=-90.0;
 }
-
-#endif

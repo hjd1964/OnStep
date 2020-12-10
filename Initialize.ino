@@ -292,9 +292,10 @@ void initWriteNvValues() {
     VLF("MSG: Init NV key written");
   }
   
-  // bit 0 = settings at compile (0) or run time (1), bits 1 to 5 = (1) to reset axis n on next boot
+  // bit 0 = settings at compile (0) or run time (1), bits 1 to 5 = (1) to reset axis n on next boot, bit 6 reset misc. config on boot
   int axisReset=nv.read(EE_settingsRuntime);
-  if (!(axisReset&0b0000001)) axisReset|=0b0111110; // force reset of all axis settings
+  if (!(axisReset&0b0000001)) axisReset|=0b0111110; // force reset of all settings
+  if (!(axisReset&0b0000001) || nv.read(EE_mountType) == 0) { nv.write(EE_mountType,MOUNT_TYPE); VLF("MSG: Init NV mount type default"); }
   if   (axisReset&0b0000010) { nv.writeBytes(EE_settingsAxis1,(byte*)&axis1Settings,sizeof(axis1Settings)); nv.writeLong(EE_stepsPerWormRotAxis1,AXIS1_STEPS_PER_WORMROT); VLF("MSG: Init NV Axis1 defaults"); }
   if   (axisReset&0b0000100) { nv.writeBytes(EE_settingsAxis2,(byte*)&axis2Settings,sizeof(axis2Settings)); VLF("MSG: Init NV Axis2 defaults"); }
   if   (axisReset&0b0001000) { nv.writeBytes(EE_settingsAxis3,(byte*)&axis3Settings,sizeof(axis3Settings)); VLF("MSG: Init NV Axis3 defaults"); }
@@ -307,6 +308,20 @@ void initWriteNvValues() {
 void initReadNvValues() {
   if (E2END < 1023) { generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV size < 1024 bytes"); }
 
+  // get mount type
+  mountType=nv.read(EE_mountType);
+  if (mountType < 1 || mountType > 3) { mountType=MOUNT_TYPE; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV mountType"); }
+#ifndef AXIS1_HOME_DEFAULT
+  if (mountType == GEM) homePositionAxis1 = 90.0; else homePositionAxis1 = 0.0;
+#else
+  homePositionAxis1 = AXIS1_HOME_DEFAULT;
+#endif
+#ifndef AXIS2_HOME_DEFAULT
+  if (mountType == ALTAZM) homePositionAxis2 = 0.0; else homePositionAxis2 = 90.0;
+#else
+  homePositionAxis2 = AXIS2_HOME_DEFAULT;
+#endif
+  
   // get axis settings
   nv.readBytes(EE_settingsAxis1,(byte*)&axis1Settings,sizeof(axis1Settings));
   nv.readBytes(EE_settingsAxis2,(byte*)&axis2Settings,sizeof(axis2Settings));
@@ -314,15 +329,15 @@ void initReadNvValues() {
   nv.readBytes(EE_settingsAxis4,(byte*)&axis4Settings,sizeof(axis4Settings));
   nv.readBytes(EE_settingsAxis5,(byte*)&axis5Settings,sizeof(axis5Settings));
   if (axis1Settings.IRUN != AXIS1_DRIVER_IRUN) { axis1SettingsEx.IGOTO=axis1Settings.IRUN; axis1SettingsEx.IHOLD=axis1Settings.IRUN/2; }
-  if (!validateAxisSettings(1,MOUNT_TYPE==ALTAZM,axis1Settings)) generalError=ERR_NV_INIT;
+  if (!validateAxisSettings(1,mountType==ALTAZM,axis1Settings)) generalError=ERR_NV_INIT;
   if (axis2Settings.IRUN != AXIS2_DRIVER_IRUN) { axis2SettingsEx.IGOTO=axis2Settings.IRUN; axis2SettingsEx.IHOLD=axis2Settings.IRUN/2; }
-  if (!validateAxisSettings(2,MOUNT_TYPE==ALTAZM,axis2Settings)) generalError=ERR_NV_INIT;
+  if (!validateAxisSettings(2,mountType==ALTAZM,axis2Settings)) generalError=ERR_NV_INIT;
   if (axis3Settings.IRUN != AXIS3_DRIVER_IRUN) axis3SettingsEx.IHOLD=axis3Settings.IRUN/2;
-  if (!validateAxisSettings(3,MOUNT_TYPE==ALTAZM,axis3Settings)) generalError=ERR_NV_INIT;
+  if (!validateAxisSettings(3,mountType==ALTAZM,axis3Settings)) generalError=ERR_NV_INIT;
   if (axis4Settings.IRUN != AXIS4_DRIVER_IRUN) axis4SettingsEx.IHOLD=axis4Settings.IRUN/2;
-  if (!validateAxisSettings(4,MOUNT_TYPE==ALTAZM,axis4Settings)) generalError=ERR_NV_INIT;
+  if (!validateAxisSettings(4,mountType==ALTAZM,axis4Settings)) generalError=ERR_NV_INIT;
   if (axis5Settings.IRUN != AXIS5_DRIVER_IRUN) axis5SettingsEx.IHOLD=axis5Settings.IRUN/2;
-  if (!validateAxisSettings(5,MOUNT_TYPE==ALTAZM,axis5Settings)) generalError=ERR_NV_INIT;
+  if (!validateAxisSettings(5,mountType==ALTAZM,axis5Settings)) generalError=ERR_NV_INIT;
 
   timerRateRatio    = axis1Settings.stepsPerMeasure/axis2Settings.stepsPerMeasure;
   useTimerRateRatio = axis1Settings.stepsPerMeasure != axis2Settings.stepsPerMeasure;
@@ -391,25 +406,23 @@ void initReadNvValues() {
   updateLST(jd2last(JD,UT1,false));
 
   // get the degrees past meridian east/west
-#if MOUNT_TYPE == GEM
-  int i=round(nv.read(EE_dpmE)-128);
-  if (i > 60) i=((i-60)*2)+60; else if (i < -60) i=((i+60)*2)-60;
-  degreesPastMeridianE=i;
-  if (degreesPastMeridianE < -180 || degreesPastMeridianE > 180) { degreesPastMeridianE=0.0; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV degreesPastMeridianE"); }
-
-  i=round(nv.read(EE_dpmW)-128);
-  if (i > 60) i=((i-60)*2)+60; else if (i < -60) i=((i+60)*2)-60;
-  degreesPastMeridianW=i;
-  if (degreesPastMeridianW < -180 || degreesPastMeridianW > 180) { degreesPastMeridianW=0.0; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV degreesPastMeridianW"); }
-#endif
+  if (mountType == GEM) {
+    int i=round(nv.read(EE_dpmE)-128);
+    if (i > 60) i=((i-60)*2)+60; else if (i < -60) i=((i+60)*2)-60;
+    degreesPastMeridianE=i;
+    if (degreesPastMeridianE < -180 || degreesPastMeridianE > 180) { degreesPastMeridianE=0.0; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV degreesPastMeridianE"); }
+  
+    i=round(nv.read(EE_dpmW)-128);
+    if (i > 60) i=((i-60)*2)+60; else if (i < -60) i=((i+60)*2)-60;
+    degreesPastMeridianW=i;
+    if (degreesPastMeridianW < -180 || degreesPastMeridianW > 180) { degreesPastMeridianW=0.0; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV degreesPastMeridianW"); }
+  }
   
   // get the min. and max altitude
   minAlt=nv.read(EE_minAlt)-128;
   if (minAlt < -30 || minAlt > 30) { minAlt=-10.0; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV minAlt"); }
   maxAlt=nv.read(EE_maxAlt);
-#if MOUNT_TYPE == ALTAZM
-  if (maxAlt > 87) maxAlt=87;
-#endif
+  if (mountType == ALTAZM && maxAlt > 87) maxAlt=87;
   if (maxAlt < 60 || maxAlt > 90) { maxAlt=80.0; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV maxAlt"); }
 
   // get the backlash amounts
@@ -483,15 +496,19 @@ void initReadNvValues() {
   setAccelerationRates(maxRate);
 
   // get autoMeridianFlip
-#if MOUNT_TYPE == GEM && MFLIP_AUTOMATIC_MEMORY == ON
-  autoMeridianFlip=nv.read(EE_autoMeridianFlip);
-  if (autoMeridianFlip != 1 && autoMeridianFlip != 0) { autoMeridianFlip=0; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV autoMeridianFlip"); }
+#if MFLIP_AUTOMATIC_MEMORY == ON
+  if (mountType == GEM) {
+    autoMeridianFlip=nv.read(EE_autoMeridianFlip);
+    if (autoMeridianFlip != 1 && autoMeridianFlip != 0) { autoMeridianFlip=0; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV autoMeridianFlip"); }
+  }
 #endif
 
   // get meridian flip pause at home
-#if MOUNT_TYPE == GEM && MFLIP_PAUSE_HOME_MEMORY == ON
-  pauseHome=nv.read(EE_pauseHome);
-  if (pauseHome != 1 && pauseHome != 0) { pauseHome=0; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV pauseHome"); }
+#if MFLIP_PAUSE_HOME_MEMORY == ON
+  if (mountType == GEM) {
+    pauseHome=nv.read(EE_pauseHome);
+    if (pauseHome != 1 && pauseHome != 0) { pauseHome=0; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV pauseHome"); }
+  }
 #endif
 
   // set the default guide rate
@@ -549,18 +566,12 @@ void initStartupValues() {
   indexAxis1Steps       = 0;
   indexAxis2            = 0;
   indexAxis2Steps       = 0;
-  Align.init();
+  if (mountType == ALTAZM) AlignH.init(); else AlignE.init();
 
    // reset meridian flip control
-  #if MOUNT_TYPE == GEM
-    meridianFlip = MeridianFlipAlways;
-  #endif
-  #if MOUNT_TYPE == FORK
-    meridianFlip = MeridianFlipNever;
-  #endif
-  #if MOUNT_TYPE == ALTAZM
-    meridianFlip = MeridianFlipNever;
-  #endif
+  if (mountType == GEM) meridianFlip = MeridianFlipAlways; else
+  if (mountType == FORK) meridianFlip = MeridianFlipNever; else
+  if (mountType == ALTAZM) meridianFlip = MeridianFlipNever;
 
   // clear errors that are no-longer relevant after init
   initGeneralError();

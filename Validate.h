@@ -58,7 +58,7 @@
   #define AXIS2_LIMIT_MAX 90
 #endif
 
-#if MOUNT_TYPE == ALTAZM
+#if mountType == ALTAZM
   #if !defined(AXIS1_LIMIT_MIN) && defined(AXIS1_LIMIT_MAXAZM)
     #define AXIS1_LIMIT_MIN -AXIS1_LIMIT_MAXAZM
     #define AXIS1_LIMIT_MAX AXIS1_LIMIT_MAXAZM
@@ -128,7 +128,7 @@
 // setup defaults
 
 // enable PEC code only if we need it
-#if !(AXIS1_STEPS_PER_WORMROT == 0 || MOUNT_TYPE == ALTAZM)
+#if AXIS1_STEPS_PER_WORMROT != 0
   #define AXIS1_PEC ON
 #else
   #define AXIS1_PEC OFF
@@ -374,8 +374,8 @@
 
 #ifndef MOUNT_TYPE
   #error "Configuration (Config.h): Setting MOUNT_TYPE must be present!"
-#elif MOUNT_TYPE != OFF && (MOUNT_TYPE < MOUNT_TYPE_FIRST || MOUNT_TYPE > MOUNT_TYPE_LAST)
-  #error "Configuration (Config.h): Setting MOUNT_TYPE use OFF, GEM, FORK, or ALTAZM."
+#elif MOUNT_TYPE < MOUNT_TYPE_FIRST || MOUNT_TYPE > MOUNT_TYPE_LAST
+  #error "Configuration (Config.h): Setting MOUNT_TYPE use GEM, FORK, or ALTAZM."
 #endif
 
 #ifndef LED_STATUS

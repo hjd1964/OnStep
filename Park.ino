@@ -227,11 +227,7 @@ CommandErrors unPark(bool withTrackingOn) {
   atHome=false;
   
   // set Meridian Flip behaviour to match mount type
-  #if MOUNT_TYPE == GEM
-    meridianFlip=MeridianFlipAlways;
-  #else
-    meridianFlip=MeridianFlipNever;
-  #endif
+  if (mountType == GEM) meridianFlip=MeridianFlipAlways; else meridianFlip=MeridianFlipNever;
 
   if (withTrackingOn) {
     // update our status, we're not parked anymore
@@ -259,7 +255,7 @@ bool isParked() {
 
 bool saveAlignModel() {
   // and store our corrections
-  Align.writeCoe();
+  if (mountType == ALTAZM) AlignH.writeCoe(); else AlignE.writeCoe();
   nv.writeFloat(EE_indexAxis1,indexAxis1);
   nv.writeFloat(EE_indexAxis2,indexAxis2);
   return true;
@@ -275,6 +271,6 @@ bool loadAlignModel() {
   if (indexAxis2 < -720 || indexAxis2 > 720) { indexAxis2=0; DLF("ERR, loadAlignModel(): bad NV indexAxis2"); }
   indexAxis2Steps=(long)(indexAxis2*axis2Settings.stepsPerMeasure);
   
-  Align.readCoe();
+  if (mountType == ALTAZM) AlignH.readCoe(); else AlignE.readCoe();
   return true;
 }

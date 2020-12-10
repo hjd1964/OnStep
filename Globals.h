@@ -47,18 +47,14 @@ volatile double ppsLastRateRatio        = 1.0;
 volatile bool ppsSynced              = false;
 
 // Tracking and rate control -------------------------------------------------------------------------------------------------------
-#if MOUNT_TYPE != ALTAZM
-  enum RateCompensation {RC_NONE, RC_REFR_RA, RC_REFR_BOTH, RC_FULL_RA, RC_FULL_BOTH};
-  #if TRACK_REFRACTION_RATE_DEFAULT == ON
-    RateCompensation rateCompensation   = RC_REFR_RA;
-  #else
-    RateCompensation rateCompensation   = RC_NONE;
-  #endif
+enum RateCompensation {RC_NONE, RC_REFR_RA, RC_REFR_BOTH, RC_FULL_RA, RC_FULL_BOTH};
+#if TRACK_REFRACTION_RATE_DEFAULT == ON
+  RateCompensation rateCompensation   = RC_REFR_RA;
 #else
-  enum RateCompensation {RC_NONE};
-  RateCompensation rateCompensation     = RC_NONE;
+  RateCompensation rateCompensation   = RC_NONE;
 #endif
 
+byte mountType                          = MOUNT_TYPE;
 double slewSpeed                        = 0;
 volatile long timerRateAxis1            = 0;
 volatile long timerRateBacklashAxis1    = 0;
@@ -172,15 +168,7 @@ double longitude                        = 0.0;
   #define TELESCOPE_COORDINATES TOPOCENTRIC
 #endif 
 
-#ifndef AXIS1_HOME_DEFAULT
-  #if MOUNT_TYPE == GEM
-    #define AXIS1_HOME_DEFAULT 90.0 
-  #else
-    #define AXIS1_HOME_DEFAULT 0.0 
-  #endif
-#endif
-double homePositionAxis1                = AXIS1_HOME_DEFAULT;
-
+double homePositionAxis1                = 0.0;
 volatile long posAxis1                  = 0;                 // hour angle position in steps
 volatile int blAxis1                    = 0;                 // backlash position in steps
 volatile int backlashAxis1              = 0;                 // total backlash in steps
@@ -195,15 +183,7 @@ long   indexAxis1Steps                  = 0;
 volatile int stepAxis1=1;
 fixed_t fstepAxis1;                                          // tracking and PEC, fractional steps
 
-#ifndef AXIS2_HOME_DEFAULT
-  #if MOUNT_TYPE == ALTAZM
-    #define AXIS2_HOME_DEFAULT 0.0
-  #else
-    #define AXIS2_HOME_DEFAULT 90.0                          // always positive, sign is automatically adjusted for hemisphere
-  #endif
-#endif
-double homePositionAxis2                = AXIS2_HOME_DEFAULT;
-
+double homePositionAxis2                = 0.0;
 volatile long posAxis2                  = 0;                 // declination position in steps
 volatile int blAxis2                    = 0;                 // backlash position in steps
 volatile int backlashAxis2              = 0;                 // total backlash in steps
@@ -317,15 +297,7 @@ enum StopSlewActions {SS_ALL_FAST, SS_LIMIT, SS_LIMIT_HARD, SS_LIMIT_AXIS1_MIN, 
 #define MeridianFlipNever                 0
 #define MeridianFlipAlign                 1
 #define MeridianFlipAlways                2
-#if MOUNT_TYPE == GEM
-  byte meridianFlip = MeridianFlipAlways;
-#endif
-#if MOUNT_TYPE == FORK
-  byte meridianFlip = MeridianFlipNever;
-#endif
-#if MOUNT_TYPE == ALTAZM
-  byte meridianFlip = MeridianFlipNever;
-#endif
+byte meridianFlip = MeridianFlipNever;
 
 byte pierSideControl = PierSideNone;
 int preferredPierSide = PIER_SIDE_PREFERRED_DEFAULT;

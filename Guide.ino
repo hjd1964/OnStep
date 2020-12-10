@@ -204,7 +204,7 @@ bool guideNorthOk() {
   double a2; if (AXIS2_TANGENT_ARM == ON) { cli(); a2=posAxis2/axis2Settings.stepsPerMeasure; sei(); } else a2=getInstrAxis2();
   if (a2 < axis2Settings.min && getInstrPierSide() == PierSideWest) return false;
   if (a2 > axis2Settings.max && getInstrPierSide() == PierSideEast) return false;
-  if (MOUNT_TYPE == ALTAZM && currentAlt > maxAlt) return false;
+  if (mountType == ALTAZM && currentAlt > maxAlt) return false;
   return true;
 }
 bool guideSouthOk() {
@@ -212,7 +212,7 @@ bool guideSouthOk() {
   double a2; if (AXIS2_TANGENT_ARM == ON) { cli(); a2=posAxis2/axis2Settings.stepsPerMeasure; sei(); } else a2=getInstrAxis2();
   if (a2 < axis2Settings.min && getInstrPierSide() == PierSideEast) return false;
   if (a2 > axis2Settings.max && getInstrPierSide() == PierSideWest) return false;
-  if (MOUNT_TYPE == ALTAZM && currentAlt < minAlt) return false;
+  if (mountType == ALTAZM && currentAlt < minAlt) return false;
   return true;
 }
 bool guideEastOk() {

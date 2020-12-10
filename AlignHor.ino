@@ -9,8 +9,6 @@
 // -----------------------------------------------------------------------------------
 // ADVANCED GEOMETRIC ALIGN FOR ALT/AZ MOUNTS (GOTO ASSIST)
 
-#if MOUNT_TYPE == ALTAZM
-
 // Initialize
 void TGeoAlignH::init() {
   avgAlt=0.0;
@@ -345,11 +343,7 @@ void TGeoAlignH::autoModel(int n) {
   altCor=best_pe/3600.0;
 
   tfCor=best_tf/3600.0;
-#if MOUNT_TYPE == FORK || MOUNT_TYPE == ALTAZM
-  dfCor=best_ff/3600.0;
-#else
-  dfCor=best_df/3600.0;
-#endif
+  if (mountType == FORK || mountType == ALTAZM) dfCor=best_ff/3600.0; else dfCor=best_df/3600.0;
 
   ax1Cor=best_ohw/3600.0;
   ax2Cor=best_odw/3600.0;
@@ -390,13 +384,9 @@ void TGeoAlignH::horToInstr(double Alt, double Azm, double *Alt1, double *Azm1, 
       // misalignment due to Alt axis being perp. to Azm axis
       double PDh=-pdCor*(sinAlt/cosAlt)*p;
   
-  #if MOUNT_TYPE == FORK || MOUNT_TYPE == ALTAZM
-      // Fork flex
-      double DFd=dfCor*cosAzm;
-  #else
-      // Axis flex
-      double DFd=-dfCor*(cosLat*cosAzm+sinLat*(sinAlt/cosAlt));
-  #endif
+      // Fork or Axis flex
+      double DFd;
+      if (mountType == FORK || mountType == ALTAZM) DFd=dfCor*cosAzm; else DFd=-dfCor*(cosLat*cosAzm+sinLat*(sinAlt/cosAlt));
   
       // Tube flex
       double TFh=tfCor*(cosLat*sinAzm*(1.0/cosAlt));
@@ -456,13 +446,9 @@ void TGeoAlignH::instrToHor(double Alt, double Azm, double *Alt1, double *Azm1, 
     // works on Azm instead.  meridian flips affect this in Azm
     double PDh=-pdCor*(sinAlt/cosAlt)*p;
 
-#if MOUNT_TYPE == FORK
-    // Fork flex
-    double DFd=dfCor*cosAzm;
-#else
-    // Axis flex
-    double DFd=-dfCor*(cosLat*cosAzm+sinLat*(sinAlt/cosAlt));
-#endif
+    // Fork or Axis flex
+    double DFd;
+    if (mountType == FORK) DFd=dfCor*cosAzm; else DFd=-dfCor*(cosLat*cosAzm+sinLat*(sinAlt/cosAlt));
 
     // Tube flex
     double TFh=tfCor*(cosLat*sinAzm*(1.0/cosAlt));
@@ -486,4 +472,3 @@ void TGeoAlignH::instrToHor(double Alt, double Azm, double *Alt1, double *Azm1, 
   if (*Alt1 > 90.0) *Alt1=90.0;
   if (*Alt1 < -90.0) *Alt1=-90.0;
 }
-#endif
