@@ -1829,14 +1829,14 @@ void processCommands() {
             static double encoderAxis2=0;
             case '0': // set encoder Axis1 value
               f=strtod(&parameter[3],&conv_end);
-              if ( (&parameter[3] != conv_end) && (f >= -999.9) && (f <= 999.9)) encoderAxis1=f; else commandError=CE_PARAM_RANGE;
+              if (&parameter[3] != conv_end && fabs(f) <= 360.0) encoderAxis1=f; else commandError=CE_PARAM_RANGE;
               break;
             case '1': // set encoder Axis2 value
               f=strtod(&parameter[3],&conv_end);
-              if ( (&parameter[3] != conv_end) && (f >= -999.9) && (f <= 999.9)) encoderAxis2=f; else commandError=CE_PARAM_RANGE;
+              if (&parameter[3] != conv_end && fabs(f) <= 360.0) encoderAxis2=f; else commandError=CE_PARAM_RANGE;
               break;
             case '2': // sync encoder to last values
-              if ( (parameter[3] == '1') && (parameter[4] == 0)) if (syncEnc(encoderAxis1,encoderAxis2)) commandError=CE_PARAM_RANGE;
+              if (parameter[3] == '1' && parameter[4] == 0) if (syncEnc(encoderAxis1,encoderAxis2)) commandError=CE_PARAM_RANGE;
               break;
             case '3': // re-enable setting OnStep to Encoders after a Sync 
               syncToEncodersOnly=false;
