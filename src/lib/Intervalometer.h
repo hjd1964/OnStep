@@ -5,9 +5,7 @@
 
 class intervalometerControl {
   public:
-    void init(int pin, int nvAddress) {
-      _pin = pin;
-      if (_pin >= 0 && _pin <= 255) pinMode(_pin, OUTPUT);
+    void init(int nvAddress) {
       _nvAddress = nvAddress;
 
       expTime = byteToTime(nv.read(_nvAddress));
@@ -24,13 +22,11 @@ class intervalometerControl {
         thisCount--;
         // start a new exposure
         pressed=P_EXP_DONE;
-        if (_pin >= 0 && _pin <= 255) digitalWrite(_pin, HIGH);
         expDone=millis()+(unsigned long)(expTime*1000.0); // set exposure time in ms
       } else 
       if (pressed == P_EXP_DONE && (long)(millis()-expDone) > 0) {
         // finish an exposure
         pressed=P_WAIT;
-        if (_pin >= 0 && _pin <= 255) digitalWrite(_pin, LOW);
         waitDone=millis()+(unsigned long)(expDelay*1000.0); // set wait time in ms
       } else
       if (pressed == P_WAIT && (long)(millis()-waitDone) > 0) {
@@ -77,7 +73,6 @@ class intervalometerControl {
     }
     void enable(bool state) {
       enabled = state;
-      if (_pin >= 0  && _pin <= 255) digitalWrite(_pin, LOW);
       if (enabled) { thisCount=expCount; pressed = P_EXP_START; } else { thisCount=0; pressed = P_STANDBY; }
     }
 
@@ -129,6 +124,5 @@ class intervalometerControl {
     unsigned long expDone = 0;
     unsigned long waitDone = 0;
 
-    int _pin = 0;
     int _nvAddress = 0;
 };

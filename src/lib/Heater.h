@@ -9,9 +9,7 @@
 
 class dewHeaterControl {
   public:
-    void init(int pin, int nvAddress) {
-      _pin = pin;
-      if (_pin >= 0 && _pin <= 255) pinMode(_pin, OUTPUT);
+    void init(int nvAddress) {
       _nvAddress = nvAddress;
       zero = nv.read(_nvAddress)/10.0 - 5.0;
       if (zero < -5.0) { zero = -5.0; DLF("ERR, dewHeater.init(): NV zero too low (set to -5.0)"); }
@@ -24,7 +22,7 @@ class dewHeaterControl {
     }
 
     void poll(float deltaAboveDewPointC) {
-      if (isnan(deltaAboveDewPointC)) { enabled=false; heaterOn=false; if (_pin >= 0 && _pin <= 255) digitalWrite(_pin, LOW); }
+      if (isnan(deltaAboveDewPointC)) { enabled=false; heaterOn=false; }
       
       if (!enabled) return;
 
@@ -39,14 +37,10 @@ class dewHeaterControl {
       if ((long)(currentTime - (lastHeaterCycle + DEW_HEATER_PULSE_WIDTH_MS)) > 0) {
         lastHeaterCycle = currentTime;
       } else
-      if (!heaterOn && (long)(currentTime - (lastHeaterCycle + switchTimeMs)) <= 0)
-      {
-        if (_pin >= 0 && _pin <= 255) digitalWrite(_pin, HIGH);
+      if (!heaterOn && (long)(currentTime - (lastHeaterCycle + switchTimeMs)) <= 0) {
         heaterOn = true;
-      }
-      else if (heaterOn && (long)(currentTime - (lastHeaterCycle + switchTimeMs)) > 0)
-      {
-        if (_pin >= 0 && _pin <= 255) digitalWrite(_pin, LOW);
+      } else
+      if (heaterOn && (long)(currentTime - (lastHeaterCycle + switchTimeMs)) > 0) {
         heaterOn = false;
       }
     }
@@ -77,7 +71,6 @@ class dewHeaterControl {
       return enabled;
     }
     void enable(bool state) {
-      if (_pin >= 0  && _pin <= 255) digitalWrite(_pin, LOW);
       heaterOn = false;
       enabled = state;
     }
@@ -96,6 +89,5 @@ class dewHeaterControl {
     float zero = -5;
     float span = 15;
 
-    int _pin = 0;
     int _nvAddress = 0;
 };
