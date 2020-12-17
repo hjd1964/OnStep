@@ -19,7 +19,9 @@ void featuresInit() {
     } else if (feature[i].purpose == INTERVALOMETER) {
       feature[i].intervalometer = new intervalometerControl;
       feature[i].intervalometer->init(EE_feature1Value1+i*3);
-      if (feature[i].pin >= 0 && feature[i].pin <= 255) pinMode(feature[i].pin,OUTPUT);
+      if (feature[i].pin >= 0 && feature[i].pin <= 255) {
+        pinMode(feature[i].pin,OUTPUT); digitalWrite(feature[i].pin,feature[i].value==feature[i].active?HIGH:LOW);
+      }
     }
   }
 }
