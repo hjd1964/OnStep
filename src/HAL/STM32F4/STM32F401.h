@@ -79,12 +79,12 @@ float HAL_MCU_Temperature(void) {
 //--------------------------------------------------------------------------------------------------
 // Initialize timers
 // frequency compensation for adjusting microseconds to timer counts
-//#define F_COMP 19.7721042
 #define F_COMP 4000000
 
 #define ISR(f) void f (void)
 
-#define TIM_SIDEREAL   TIM1
+// was TIM1 which collided with PWM on the Reticle pin
+#define TIM_SIDEREAL   TIM4
 #define TIM_AXIS1      TIM9
 #define TIM_AXIS2      TIM11
 
