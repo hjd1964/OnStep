@@ -10,7 +10,7 @@
 
 // The multi-purpose pins (Aux3..Aux8 can be analog pwm/dac if supported)
 #define Aux0                PB12     // Status LED
-#define Aux2                PA13     // ESP8266 RST or stepper drivers ENable
+#define Aux2                PA13     // PPS
 #define Aux3                PB13     // Home SW
 #define Aux4                PB14     // OneWire, Home SW
 #define Aux5                 PA9     // TX1 
@@ -38,7 +38,11 @@
 #define TonePin             PA14     // Tone
 
 // The PPS pin is a 3.3V logic input, OnStep measures time between rising edges and adjusts the internal sidereal clock frequency
-#define PpsPin              Aux0     // PPS time source, GPS for example
+#ifdef MAXSTM_AUX0_PPS
+  #define PpsPin            Aux0     // PPS time source, GPS for example (MaxSTM version 3.6)
+#else
+  #define PpsPin            Aux2     // PPS time source, GPS for example (MaxSTM version 3.61 and later)
+#endif
 
 #define LimitPin            Aux7     // The limit switch sense is a logic level input normally pull high (2k resistor,) shorted to ground it stops gotos/tracking
 
