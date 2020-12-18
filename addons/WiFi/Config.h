@@ -2,8 +2,8 @@
 // Configuration for OnStep WiFi Add-on
 
 /*
- *          For more information on setting OnStep up see http://www.stellarjourney.com/index.php?r=site/equipment_onstep 
- *                      and join the OnStep Groups.io at https://groups.io/g/onstep
+ *               For more information on setting this addon up see https://onstep.groups.io/g/main/wiki/7119 
+ *                           and join the OnStep Groups.io at https://groups.io/g/onstep
  * 
  *           *** Read the compiler warnings and errors, they are there to help guard against invalid configurations ***
 */

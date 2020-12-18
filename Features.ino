@@ -32,7 +32,11 @@ void featuresPoll() {
     if (feature[i].purpose == SWITCH_UNPARKED) {
       int v=feature[i].value;
       if (parkStatus != Parked) feature[i].value=1; else feature[i].value=0;
-      if (feature[i].value != v) { if (feature[i].pin >= 0 && feature[i].pin <= 255) { digitalWrite(feature[i].pin,feature[i].value==feature[i].active?HIGH:LOW); } else ambient.setDS2413State(i,feature[i].value==feature[i].active?1:0); }
+      if (feature[i].value != v) {
+        if (feature[i].pin >= 0 && feature[i].pin <= 255) { digitalWrite(feature[i].pin,feature[i].value==feature[i].active?HIGH:LOW); } else {
+          ambient.setDS2413State(i,feature[i].value==feature[i].active?1:0); if (ambient.getDS2413Failure(i)) feature[i].value=0;
+        }
+      }
     } else
     if (feature[i].purpose == DEW_HEATER) {
       feature[i].dewHeater->poll(ambient.getFeatureTemperature(i)-ambient.getDewPoint());
