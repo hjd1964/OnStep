@@ -2,7 +2,7 @@
 // Configuration for OnStep Ethernet Add-on
 
 /*
- *          For more information on setting OnStep up see http://www.stellarjourney.com/index.php?r=site/equipment_onstep 
+ *          For more information on setting OnStep up see https://onstep.groups.io/g/main/wiki/7149
  *                      and join the OnStep Groups.io at https://groups.io/g/onstep
  * 
  *           *** Read the compiler warnings and errors, they are there to help guard against invalid configurations ***
