@@ -171,7 +171,7 @@ class focuserStepper : public focuser {
       if (!movementAllowed()) return;
 
       // if enabled and the timeout has elapsed, disable the stepper driver
-      if (pda && !currentlyDisabled && ((long)(micros()-lastPhysicalMove) > 10000000L)) { disableDriver(); currentlyDisabled=true; }
+      if (pda && !currentlyDisabled && ((long)(micros()-lastPhysicalMove) > FOCUSER_POWER_DOWN_DELAY*1000L)) { disableDriver(); currentlyDisabled=true; }
 
       unsigned long microsNow=micros();
       if ((long)(microsNow-nextPhysicalMove) > 0) {
