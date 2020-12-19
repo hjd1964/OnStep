@@ -364,7 +364,7 @@ void setup() {
     tmcAxis4.setup(AXIS4_DRIVER_INTPOL,AXIS4_DRIVER_DECAY_MODE,AXIS4_DRIVER_CODE,axis4Settings.IRUN,axis4SettingsEx.IHOLD);
   #endif
 
-  foc1.powerDownActive(AXIS4_DRIVER_POWER_DOWN == ON);
+  foc1.powerDownActive(AXIS4_DRIVER_POWER_DOWN == ON, AXIS4_DRIVER_POWER_DOWN == STARTUP);
 #endif
 
 #if FOCUSER2 == ON
@@ -380,7 +380,7 @@ void setup() {
     tmcAxis5.setup(AXIS5_DRIVER_INTPOL,AXIS5_DRIVER_DECAY_MODE,AXIS5_DRIVER_CODE,axis5Settings.IRUN,axis5SettingsEx.IHOLD);
   #endif
 
-  foc2.powerDownActive(AXIS5_DRIVER_POWER_DOWN == ON);
+  foc2.powerDownActive(AXIS5_DRIVER_POWER_DOWN == ON, AXIS5_DRIVER_POWER_DOWN == STARTUP);
 #endif
 
   // finally clear the comms channels

@@ -75,6 +75,7 @@
 #define WEST                      -12
 #define VHIGH                     -13
 #define SHARED                    -14
+#define STARTUP                   -15
 #define INVALID                -32767
 
 // mount types                     
