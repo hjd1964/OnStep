@@ -11,6 +11,9 @@
 #else
   #define FOCUSER_WRITE_DELAY 1000L*60L*5L   // 5 minutes
 #endif
+#ifndef FOCUSER_POWER_DOWN_DELAY
+  #define FOCUSER_POWER_DOWN_DELAY 10L*1000L // 10 seconds to power off, when the power down setting is active
+#endif
 
 class focuser {
   public:
