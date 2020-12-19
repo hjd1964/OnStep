@@ -111,10 +111,11 @@ class focuserStepper : public focuser {
     }
 
     // allows enabling/disabling stepper driver
-    void powerDownActive(bool active) {
-      if (enPin == OFF || enPin == SHARED) active=false;
+    void powerDownActive(bool active, bool startupOnly) {
+      if (enPin == OFF || enPin == SHARED || startupOnly) active=false;
       pda=active;
-      if (pda) { pinMode(enPin,OUTPUT); disableDriver(); currentlyDisabled=true; }
+      this->startupOnly=startupOnly;
+      if (pda || startupOnly) { pinMode(enPin,OUTPUT); disableDriver(); currentlyDisabled=true; }
     }
 
     // set movement rate in microns/second, from minRate to 1000
@@ -127,12 +128,14 @@ class focuserStepper : public focuser {
     // move in
     void startMoveIn() {
       if (!movementAllowed()) return;
+      if (startupOnly && currentlyDisabled) { enableDriver(); currentlyDisabled=false; }
       delta.fixed=doubleToFixed(+moveRate/100.0);   // in steps per centi-second
     }
 
     // move out
     void startMoveOut() {
       if (!movementAllowed()) return;
+      if (startupOnly && currentlyDisabled) { enableDriver(); currentlyDisabled=false; }
       delta.fixed=doubleToFixed(-moveRate/100.0);   // in steps per centi-second
     }
 
@@ -142,6 +145,7 @@ class focuserStepper : public focuser {
     // sets target position in steps
     bool setTarget(long pos) {
       if (!movementAllowed()) return false;
+      if (startupOnly && currentlyDisabled) { enableDriver(); currentlyDisabled=false; }
       target.part.m=pos; target.part.f=0;
       if ((long)target.part.m < smin) target.part.m=smin; if ((long)target.part.m > smax) target.part.m=smax;
       return true;
@@ -150,6 +154,7 @@ class focuserStepper : public focuser {
     // sets target relative position in steps
     void relativeTarget(long pos) {
       if (!movementAllowed()) return;
+      if (startupOnly && currentlyDisabled) { enableDriver(); currentlyDisabled=false; }
       target.part.m+=pos; target.part.f=0;
       if ((long)target.part.m < smin) target.part.m=smin; if ((long)target.part.m > smax) target.part.m=smax;
     }
@@ -211,4 +216,6 @@ class focuserStepper : public focuser {
       if (enPin == OFF || enPin == SHARED) return;
       digitalWrite(enPin,disableState); delayMicroseconds(20);
     }
+
+    bool startupOnly = false;
 };
