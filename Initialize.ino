@@ -328,16 +328,26 @@ void initReadNvValues() {
   nv.readBytes(EE_settingsAxis3,(byte*)&axis3Settings,sizeof(axis3Settings));
   nv.readBytes(EE_settingsAxis4,(byte*)&axis4Settings,sizeof(axis4Settings));
   nv.readBytes(EE_settingsAxis5,(byte*)&axis5Settings,sizeof(axis5Settings));
-  if (axis1Settings.IRUN != AXIS1_DRIVER_IRUN) { axis1SettingsEx.IGOTO=axis1Settings.IRUN; axis1SettingsEx.IHOLD=axis1Settings.IRUN/2; }
   if (!validateAxisSettings(1,mountType==ALTAZM,axis1Settings)) generalError=ERR_NV_INIT;
-  if (axis2Settings.IRUN != AXIS2_DRIVER_IRUN) { axis2SettingsEx.IGOTO=axis2Settings.IRUN; axis2SettingsEx.IHOLD=axis2Settings.IRUN/2; }
+  #if AXIS1_DRIVER_MODEL == TMC_SPI
+    constrainAxisSettingsEx(1,AXIS1_DRIVER_SUBMODEL,AXIS1_DRIVER_IRUN,axis1Settings,axis1SettingsEx);
+  #endif
   if (!validateAxisSettings(2,mountType==ALTAZM,axis2Settings)) generalError=ERR_NV_INIT;
-  if (axis3Settings.IRUN != AXIS3_DRIVER_IRUN) axis3SettingsEx.IHOLD=axis3Settings.IRUN/2;
+  #if AXIS2_DRIVER_MODEL == TMC_SPI
+    constrainAxisSettingsEx(2,AXIS2_DRIVER_SUBMODEL,AXIS2_DRIVER_IRUN,axis2Settings,axis2SettingsEx);
+  #endif
   if (!validateAxisSettings(3,mountType==ALTAZM,axis3Settings)) generalError=ERR_NV_INIT;
-  if (axis4Settings.IRUN != AXIS4_DRIVER_IRUN) axis4SettingsEx.IHOLD=axis4Settings.IRUN/2;
+  #if AXIS3_DRIVER_MODEL == TMC_SPI
+    constrainAxisSettingsEx(3,AXIS3_DRIVER_SUBMODEL,AXIS3_DRIVER_IRUN,axis3Settings,axis3SettingsEx);
+  #endif
   if (!validateAxisSettings(4,mountType==ALTAZM,axis4Settings)) generalError=ERR_NV_INIT;
-  if (axis5Settings.IRUN != AXIS5_DRIVER_IRUN) axis5SettingsEx.IHOLD=axis5Settings.IRUN/2;
+  #if AXIS4_DRIVER_MODEL == TMC_SPI
+    constrainAxisSettingsEx(4,AXIS4_DRIVER_SUBMODEL,AXIS4_DRIVER_IRUN,axis4Settings,axis4SettingsEx);
+  #endif
   if (!validateAxisSettings(5,mountType==ALTAZM,axis5Settings)) generalError=ERR_NV_INIT;
+  #if AXIS5_DRIVER_MODEL == TMC_SPI
+    constrainAxisSettingsEx(5,AXIS5_DRIVER_SUBMODEL,AXIS5_DRIVER_IRUN,axis5Settings,axis5SettingsEx);
+  #endif
 
   timerRateRatio    = axis1Settings.stepsPerMeasure/axis2Settings.stepsPerMeasure;
   useTimerRateRatio = axis1Settings.stepsPerMeasure != axis2Settings.stepsPerMeasure;

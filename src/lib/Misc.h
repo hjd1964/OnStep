@@ -74,6 +74,23 @@ bool validateAxisSettings(int axisNum, bool altAz, volatile axisSettings &a) {
   return true;
 }
 
+// keep extended axis settings within reasonable limits
+void constrainAxisSettingsEx(int axisNum, int subModel, int IRUN_DEFAULT, volatile axisSettings &a, AxisSettingsEx &aEx) {
+  if (a.IRUN < 0) a.IRUN=0;
+  if (aEx.IHOLD < 0) aEx.IHOLD=0;
+  if (aEx.IGOTO < 0) aEx.IGOTO=0;
+
+  int maxCurrent=1500;
+  if (subModel == TMC5160) maxCurrent=3000;
+  if (axisNum > 2) maxCurrent=1000; 
+  if (a.IRUN > maxCurrent)    { a.IRUN=maxCurrent;    VF("MSG, constrainAxisSettingsEx(): Axis"); D(axisNum+1); VF(" IRUN  current limited to <= "); V(maxCurrent); VLF("mA"); }
+  if (aEx.IHOLD > maxCurrent) { aEx.IHOLD=maxCurrent; VF("MSG, constrainAxisSettingsEx(): Axis"); D(axisNum+1); VF(" IHOLD current limited to <= "); V(maxCurrent); VLF("mA"); }
+  if (aEx.IGOTO > maxCurrent) { aEx.IGOTO=maxCurrent; VF("MSG, constrainAxisSettingsEx(): Axis"); D(axisNum+1); VF(" IGOTO current limited to <= "); V(maxCurrent); VLF("mA"); }
+  
+  int minHold=200; if (axisNum > 2) minHold=150;
+  if (a.IRUN != IRUN_DEFAULT) { aEx.IHOLD=a.IRUN/2; if (aEx.IHOLD < minHold) aEx.IHOLD=minHold; if (axisNum <= 2) aEx.IGOTO=a.IRUN; }
+}
+
 // numeric help
 double timeRange(double t) {
   while (t >= 24.0) t-=24.0;
