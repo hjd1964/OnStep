@@ -580,6 +580,7 @@ void processConfigurationGet() {
     if (v.toInt() >= -90 && v.toInt() <= 90 && v1.toInt() >= 0 && v1.toInt() <= 60 && v2.toInt() >= 0 && v2.toInt() <= 60) {
       sprintf(temp,":St%+03d*%02d:%02d#",(int16_t)v.toInt(),(int16_t)v1.toInt(),(int16_t)v2.toInt());
       commandBool(temp);
+    }
   }
   v=server.arg("u1"); // UT hrs
   v1=server.arg("u2"); // UT min
