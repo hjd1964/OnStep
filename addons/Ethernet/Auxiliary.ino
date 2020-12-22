@@ -19,7 +19,7 @@ const char html_auxOnSwitch[] PROGMEM =
 const char html_auxOffSwitch[] PROGMEM = 
 "<button id='sw%d_off' class='btns_left' style='line-height: 1.2rem' onpointerdown=\"s('x%dv1','0')\" type='button' disabled>" L_OFF "</button>\r\n";
 
-const char html_auxStartStop1[] PROGMEM = "<button style='line-height: 1.2rem' onpointerdown=\"s('";
+const char html_auxStartStop1[] PROGMEM = "<button onpointerdown=\"s('";
 const char html_auxStartStop2[] PROGMEM = "','1')\" type='button'>" L_START "</button><button onpointerdown=\"s('";
 const char html_auxStartStop3[] PROGMEM = "','0')\" type='button'>" L_STOP "</button>\r\n";
 
