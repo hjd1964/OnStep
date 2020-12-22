@@ -3,14 +3,14 @@
 
 const char html_controlScript1[] PROGMEM =
 "<script>\n"
-"function s(key,v1) {\n"
-  "var xhttp = new XMLHttpRequest();\n"
-  "xhttp.open('GET', 'controlA.txt?'+key+'='+v1+'&x='+new Date().getTime(), true);\n"
-  "xhttp.send();\n"
-"}\n"
-"function g(v1){s('dr',v1);}\n"
-"function gf(v1){s('dr',v1);autoFastRun();}\n"
-"function sf(key,v1){s(key,v1);autoFastRun();}\n"
+"function s(key,v1) {"
+  "var xhttp = new XMLHttpRequest();"
+  "xhttp.open('GET', 'controlA.txt?'+key+'='+v1+'&x='+new Date().getTime(), true);"
+  "xhttp.send();"
+"}"
+"function g(v1){s('dr',v1);}"
+"function gf(v1){s('dr',v1);autoFastRun();}"
+"function sf(key,v1){s(key,v1);autoFastRun();}"
 "</script>\n";
 
 const char html_controlScript2[] PROGMEM =
@@ -33,7 +33,7 @@ const char html_controlScript4[] =
 const char html_controlQuick1[] PROGMEM =
 "<div style='text-align: center; width: 30em'>"
 "<form style='display: inline;' method='get' action='/control.htm'>"
-"<button name='qb' class='bb' value='st' onpointerdown='SetDateTime();' title='" L_HINT_CLOCK "' type='button'>" CLOCK_CH "</button>"
+"<button name='qb' class='bb' value='st' onpointerdown='SetDateTime();' title='" L_HINT_CLOCK "' type='submit'>" CLOCK_CH "</button>"
 "&nbsp;&nbsp;";
 const char html_controlQuick1a[] PROGMEM =
 "<input id='dm' type='hidden' name='dm'><input id='dd' type='hidden' name='dd'><input id='dy' type='hidden' name='dy'>"
