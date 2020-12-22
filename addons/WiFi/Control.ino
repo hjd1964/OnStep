@@ -33,7 +33,7 @@ const char html_controlScript4[] =
 const char html_controlQuick1[] PROGMEM =
 "<div style='text-align: center; width: 30em'>"
 "<form style='display: inline;' method='get' action='/control.htm'>"
-"<button name='qb' class='bb' value='st' onpointerdown='SetDateTime();' title='" L_HINT_CLOCK "' type='button'>" CLOCK_CH "</button>"
+"<button name='qb' class='bb' value='st' onpointerdown='SetDateTime();' title='" L_HINT_CLOCK "' type='submit'>" CLOCK_CH "</button>"
 "&nbsp;&nbsp;";
 const char html_controlQuick1a[] PROGMEM =
 "<input id='dm' type='hidden' name='dm'><input id='dd' type='hidden' name='dd'><input id='dy' type='hidden' name='dy'>"
