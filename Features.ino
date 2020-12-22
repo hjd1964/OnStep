@@ -122,7 +122,7 @@ void featuresSetCommand(char *parameter) {
     if (parameter[3] == 'V') {
       if (v >= 0 && v <= 1) {
         if (feature[i].purpose == SWITCH) {
-          if (feature[i].pin >= 0 && feature[i].pin <= 255) { digitalWrite(feature[i].pin,v==feature[i].active?HIGH:LOW); } else ambient.setDS2413State(i,v==feature[i].active?HIGH:LOW);
+          if (feature[i].pin >= 0 && feature[i].pin <= 255) { digitalWrite(feature[i].pin,v==feature[i].active?1:0); } else ambient.setDS2413State(i,v==feature[i].active?1:0);
         }
       } else commandError=CE_PARAM_RANGE;
     } else commandError=CE_PARAM_FORM;
