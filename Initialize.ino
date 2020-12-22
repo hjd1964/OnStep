@@ -259,7 +259,6 @@ void initWriteNvValues() {
     nv.writeInt(base+EE_focBacklash,0);
     nv.write(base+EE_focDcPwr,50);
     nv.writeFloat(base+EE_tcfCoef,0.0);
-    nv.write(base+EE_tcfEn,0);
     nv.writeInt(base+EE_tcfDeadband,1);
     nv.writeFloat(base+EE_tcfT0,10.0);
 
@@ -270,7 +269,6 @@ void initWriteNvValues() {
     nv.writeInt(base+EE_focBacklash,0);
     nv.write(base+EE_focDcPwr,50);
     nv.writeFloat(base+EE_tcfCoef,0.0);
-    nv.write(base+EE_tcfEn,0);
     nv.writeInt(base+EE_tcfDeadband,1);
     nv.writeFloat(base+EE_tcfT0,10.0);
 

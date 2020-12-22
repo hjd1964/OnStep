@@ -37,8 +37,7 @@ class focuserStepper : public focuser {
       if (tcf_t0 < -100.0) { tcf_t0=10.0; generalError=ERR_NV_INIT; DLF("ERR, foc.init(): bad NV TcfT0 < -100.0 deg. C (set to 10.0)"); }
       if (tcf_t0 >  150.0) { tcf_t0=10.0; generalError=ERR_NV_INIT; DLF("ERR, foc.init(): bad NV TcfT0 >  150.0 deg. C (set to 10.0)"); }
 
-      int tcfEn=nv.read(nvAddress+EE_tcfEn);
-      if (tcfEn != true && tcfEn != false) { tcfEn=false; generalError=ERR_NV_INIT; DLF("ERR, foc.init(): bad NV tcfEn (set to false)"); }
+      setTcfEnable(false);
 
       // get backlash amount
       int b=nv.readInt(nvAddress+EE_focBacklash);
@@ -85,7 +84,7 @@ class focuserStepper : public focuser {
         } else {
           target.part.m=(long)target.part.m+getTcfSteps();
         }
-        tcf = enabled; nv.write(nvAddress+EE_tcfEn,tcf);
+        tcf = enabled;
       }
       return true;
     }

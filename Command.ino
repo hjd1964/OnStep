@@ -2336,10 +2336,12 @@ void logErrors(const char ch[], char cmd[], char param[], CommandErrors cmdErr) 
 
 void focuserRotatorSave() {
 #if FOCUSER1 == ON
+  foc1.setTcfEnable(false);
   foc1.stopMove();
   foc1.savePosition();
 #endif
 #if FOCUSER2 == ON
+  foc2.setTcfEnable(false);
   foc2.stopMove();
   foc2.savePosition();
 #endif

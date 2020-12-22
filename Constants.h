@@ -267,8 +267,7 @@
 #define EE_focBacklashPos               8  // 2
 #define EE_focBacklash                  10 // 2
 #define EE_focDcPwr                     12 // 1
-#define EE_tcfCoef                      13 // 4
-#define EE_tcfEn                        17 // 1
+#define EE_tcfCoef                      13 // 4 (1)
 #define EE_tcfDeadband                  18 // 2
 #define EE_tcfT0                        20 // 4
 
