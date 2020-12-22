@@ -7,18 +7,22 @@ const char html_configFormEnd[] PROGMEM = "\r\n</form><br />\r\n</div><br />\r\n
 
 // Site
 const char html_configLongDeg[] PROGMEM =
-"<input value='%s' type='number' name='g1' min='-180' max='180'>&nbsp;&deg;&nbsp;";
+"<input style='width: 4em;' value='%s' type='number' name='g1' min='-180' max='180'>&nbsp;&deg;&nbsp;";
 const char html_configLongMin[] PROGMEM =
-"<input value='%s' type='number' name='g2' min='0' max='60'>&nbsp;'&nbsp;&nbsp; &nbsp;" L_LOCATION_LONG "<br />\r\n";
+"<input style='width: 3.5em;' value='%s' type='number' name='g2' min='0' max='60'>&nbsp;'&nbsp;";
+const char html_configLongSec[] PROGMEM =
+"<input style='width: 3.5em;' value='%s' type='number' name='g3' min='0' max='60'>&nbsp;\"&nbsp;&nbsp; &nbsp;" L_LOCATION_LONG "<br />\r\n";
 const char html_configLatDeg[] PROGMEM =
-"<input value='%s' type='number' name='t1' min='-90' max='90'>&nbsp;&deg;&nbsp;";
+"<input style='width: 4em;' value='%s' type='number' name='t1' min='-90' max='90'>&nbsp;&deg;&nbsp;";
 const char html_configLatMin[] PROGMEM =
-"<input value='%s' type='number' name='t2' min='0' max='60'>&nbsp;'&nbsp;&nbsp; &nbsp;" L_LOCATION_LAT "<br />\r\n";
+"<input style='width: 3.5em;' value='%s' type='number' name='t2' min='0' max='60'>&nbsp;'&nbsp;";
+const char html_configLatSec[] PROGMEM =
+"<input style='width: 3.5em;' value='%s' type='number' name='t3' min='0' max='60'>&nbsp;\"&nbsp;&nbsp; &nbsp;" L_LOCATION_LAT "<br />\r\n";
 const char html_configOffsetHrs[] PROGMEM =
-"<input value='%s' type='number' name='u1' min='-14' max='12'>&nbsp;h&nbsp;";
+"<input style='width: 4em;' value='%s' type='number' name='u1' min='-14' max='12'>&nbsp;h&nbsp;";
 const char html_configOffsetMin[] PROGMEM =
 "<select name='u2'><option value='0' %s>00</option><option value='30' %s>30</option><option value='45' %s>45</option></select>&nbsp;m&nbsp;"
-"&nbsp;" L_LOCATION_RANGE_UTC_OFFSET "<br />" L_LOCATION_MESSAGE_UTC_OFFSET "<br /><br />";
+"&nbsp;&nbsp;" L_LOCATION_RANGE_UTC_OFFSET "<br />" L_LOCATION_MESSAGE_UTC_OFFSET "<br /><br />";
 
 // Overhead and Horizon limits
 const char html_configMinAlt[] PROGMEM =
@@ -131,8 +135,9 @@ void handleConfiguration() {
   data += "<button type='button' class='collapsible'>" L_LOCATION_TITLE "</button>";
   data += FPSTR(html_configFormBegin);
   // Longitude
-  if (!command(":Gg#",temp1)) strcpy(temp1,"+000*00");
-  temp1[4]=0;                      // deg. part only
+  if (!command(":GgH#",temp1)) strcpy(temp1,"+000*00:00"); temp1[10]=0;
+  temp1[4]=0;                      // deg part only
+  temp1[7]=0;                      // min part only
   if (temp1[0]=='+') temp1[0]='0'; // remove +
   stripNum(temp1);
   while (temp1[0] == '0' && strlen(temp1) > 1) memmove(&temp1[0],&temp1[1],strlen(temp1)); // remove leading 0's
@@ -140,16 +145,21 @@ void handleConfiguration() {
   data += temp;
   sprintf_P(temp,html_configLongMin,(char*)&temp1[5]);
   data += temp;
+  sprintf_P(temp,html_configLongSec,(char*)&temp1[8]);
+  data += temp;
   sendHtml(data);
 
   // Latitude
-  if (!command(":Gt#",temp1)) strcpy(temp1,"+00*00");
-  temp1[3]=0;                      // deg. part only
+  if (!command(":GtH#",temp1)) strcpy(temp1,"+00*00:00"); temp1[9]=0;
+  temp1[3]=0;                      // deg part only
+  temp1[6]=0;                      // min part only
   if (temp1[0]=='+') temp1[0]='0'; // remove +
   stripNum(temp1);
   sprintf_P(temp,html_configLatDeg,temp1);
   data += temp;
   sprintf_P(temp,html_configLatMin,(char*)&temp1[4]);
+  data += temp;
+  sprintf_P(temp,html_configLatSec,(char*)&temp1[7]);
   data += temp;
   sendHtml(data);
 
@@ -433,7 +443,7 @@ void handleConfiguration() {
 }
 
 void processConfigurationGet() {
-  String v,v1;
+  String v,v1,v2;
   char temp[20]="";
 
   // Overhead limit
@@ -556,19 +566,20 @@ void processConfigurationGet() {
   // Location
   v=server.arg("g1"); // long deg
   v1=server.arg("g2"); // long min
-  if (v != "" && v1 != "") {
-    if (v.toInt() >= -180 && v.toInt() <= 180 && v1.toInt() >= 0 && v1.toInt() <= 60) {
-      sprintf(temp,":Sg%+04d*%02d#",(int16_t)v.toInt(),(int16_t)v1.toInt());
+  v2=server.arg("g3"); // long sec
+  if (v != "" && v1 != "" && v2 != "") {
+    if (v.toInt() >= -180 && v.toInt() <= 180 && v1.toInt() >= 0 && v1.toInt() <= 60 && v2.toInt() >= 0 && v2.toInt() <= 60) {
+      sprintf(temp,":Sg%+04d*%02d:%02d#",(int16_t)v.toInt(),(int16_t)v1.toInt(),(int16_t)v2.toInt());
       commandBool(temp);
     }
   }
   v=server.arg("t1"); // lat deg
   v1=server.arg("t2"); // lat min
-  if (v != "" && v1 != "") {
-    if (v.toInt() >= -90 && v.toInt() <= 90 && v1.toInt() >= 0 && v1.toInt() <= 60) {
-      sprintf(temp,":St%+03d*%02d#",(int16_t)v.toInt(),(int16_t)v1.toInt());
+  v2=server.arg("t3"); // lat sec
+  if (v != "" && v1 != "" && v2 != "") {
+    if (v.toInt() >= -90 && v.toInt() <= 90 && v1.toInt() >= 0 && v1.toInt() <= 60 && v2.toInt() >= 0 && v2.toInt() <= 60) {
+      sprintf(temp,":St%+03d*%02d:%02d#",(int16_t)v.toInt(),(int16_t)v1.toInt(),(int16_t)v2.toInt());
       commandBool(temp);
-    }
   }
   v=server.arg("u1"); // UT hrs
   v1=server.arg("u2"); // UT min

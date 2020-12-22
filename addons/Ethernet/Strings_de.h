@@ -341,8 +341,8 @@
 
 // location
 #define L_LOCATION_TITLE "Seite Standort Breite, Länge, UTC-Versatz"
-#define L_LOCATION_LONG "L&auml;ngengad, in Grad und Min. +/- 180, W is +"
-#define L_LOCATION_LAT "Breitengrad, in Grad und Min. +/- 90, N is +"
+#define L_LOCATION_LONG "L&auml;ngengad, in Grad +/- 180, W is +"
+#define L_LOCATION_LAT "Breitengrad, in Grad +/- 90, N is +"
 #define L_LOCATION_RANGE_UTC_OFFSET "UTC Offset, in Stunden -14 to +12"
 #define L_LOCATION_MESSAGE_UTC_OFFSET "Entgegengesetzter Zeitzonenwert f&uuml;r die Standardzeit (Keine Winterzeit!)"
 

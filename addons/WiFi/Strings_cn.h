@@ -333,8 +333,8 @@
 
 // location
 #define L_LOCATION_TITLE "站点纬度，经度，UTC偏移"
-#define L_LOCATION_LONG "经度，以度和分钟为单位。+ /-180，W为+"
-#define L_LOCATION_LAT "纬度，以度和分钟为单位。+ /-90，N为+"
+#define L_LOCATION_LONG "经度，以度和分钟为单位。+/-180，W为+"
+#define L_LOCATION_LAT "纬度，以度和分钟为单位。+/-90，N为+"
 #define L_LOCATION_RANGE_UTC_OFFSET "UTC偏移，以-14到+12小时为单位"
 #define L_LOCATION_MESSAGE_UTC_OFFSET "标准时间的相对时区值（无冬季时间！）"
 
