@@ -10,7 +10,7 @@ const char html_controlScript1[] PROGMEM =
 "}"
 "function g(v1){s('dr',v1);}"
 "function gf(v1){s('dr',v1);autoFastRun();}"
-"function sf(key,v1){s(key,v1);autoFastRun();}"
+"function sf(key,v1){s(key,v1);autoFastRun();}\n"
 "</script>\n";
 
 const char html_controlScript2[] PROGMEM =
