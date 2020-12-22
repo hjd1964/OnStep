@@ -197,7 +197,7 @@ class MountStatus {
         if (scan_features) {
           sprintf(s1,":GXY%d#",i+1);
           if (!command(s1,s) || s[0]==0) _valid=false;
-          if (!_valid) { for (uint8_t j=0; j<8; j++) _feature[j].purpose=0; return false; }
+          if (!_valid) { for (uint8_t j=0; j<8; j++) _feature[j].purpose=0; _featureFound=false; return false; }
 
           if (strlen(s) > 1) {
             purpose_str = strstr(s,",");
@@ -207,7 +207,7 @@ class MountStatus {
             } else _valid=false;
             char *name_str = s; if (!name_str) _valid=false;
 
-            if (!_valid) { for (uint8_t j=0; j<8; j++) _feature[j].purpose=0; return false; }
+            if (!_valid) { for (uint8_t j=0; j<8; j++) _feature[j].purpose=0; _featureFound=false; return false; }
 
             if (strlen(name_str)>10) name_str[11]=0;
             strcpy(_feature[i].name,name_str);
