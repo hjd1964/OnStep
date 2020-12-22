@@ -248,9 +248,13 @@ double jd2last(double JulianDay, double ut1, bool updateRTC) {
     // UT to local time
     double lmt=ut1-timeZone;
 
+#ifdef RTC_SKEW_IN_SECONDS
+    lmt+=RTC_SKEW_IN_SECONDS/3600.0;
+#endif
+
     // correct for day moving forward/backward... this works for multipule days of up-time
     double J=JulianDay;
-    while (lmt >= 24.0) { lmt=lmt-24.0; J=J-1.0; } 
+    while (lmt >= 24.0) { lmt=lmt-24.0; J=J-1.0; }
     if    (lmt < 0.0)   { lmt=lmt+24.0; J=J+1.0; }
 
     // set the RTC
