@@ -353,8 +353,7 @@ again:
   if (GetLX200(":GXEE#", s) == LX200VALUEGET) {
     if (s[0]=='0') {
       telescopeCoordinates=OBSERVED_PLACE; 
-      DisplayMessage(L_CONNECTION, L_WARNING "!", 1000);
-      DisplayMessage(L_COORDINATES, L_OBSERVED_PLACE ".", 2000);
+      DisplayMessage(L_CONNECTION, L_OK "!", 1000);
   } else 
     if (s[0]=='1') {
       telescopeCoordinates=TOPOCENTRIC; 
@@ -362,13 +361,13 @@ again:
     } else 
     if (s[0]=='2') {
       telescopeCoordinates=ASTROMETRIC_J2000;
-      DisplayMessage(L_CONNECTION, L_WARNING "!", 1000);
-      DisplayMessage(L_COORDINATES, "J2000 ?", 2000);
+      DisplayMessage(L_CONNECTION, L_OK "!", 1000);
     }
   } else {
     if (++thisTry <= 4) goto again;
     telescopeCoordinates=OBSERVED_PLACE;
-    DisplayMessage(L_CONNECTION, L_FAILED "!", 1000);
+    DisplayMessage(L_CONNECTION, L_WARNING "!", 1000);
+    DisplayMessage(L_COORDINATES, L_OBSERVED_PLACE ".", 2000);
   }
 }
 
