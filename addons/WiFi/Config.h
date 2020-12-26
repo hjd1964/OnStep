@@ -22,6 +22,7 @@
 #define SERIAL_BAUD                 57600 //  57600, Automatically uses 19200 if talking to a Mega2560 OnStep.                Infreq
                                           //         If establishing a link to OnStep was ***unsuccessful*** the ESP8266 may
                                           //         retain prior settings perhaps an SSID from factory defaults, for example.
+#define SERIAL_SWAP                  AUTO //   AUTO, Automatic check both, ON for swapped port or OFF for default port only.  Infreq
 
 // USER FEEDBACK -------------------------------------------------------------------------------------------------------------------
 #define LED_STATUS                      2 //      2, GPIO LED pin WeMos D1 Mini. Flashes connecting then steady on connected. Infreq

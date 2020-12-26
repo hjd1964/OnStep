@@ -9,6 +9,9 @@
 #define METRIC              ON
 #define IMPERIAL            -3
 #define LOCALE_DEFAULT      -4
+#define AUTO                -5
+#define AUTO_ON             -6
+#define AUTO_OFF            -7
 #define INVALID        -999999
 
 // encoder types

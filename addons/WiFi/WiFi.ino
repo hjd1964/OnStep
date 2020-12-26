@@ -76,7 +76,6 @@
   #define TIMEOUT_WEB 15
   #define TIMEOUT_CMD 30
 #endif
-bool serialSwap=false;
 
 int webTimeout=TIMEOUT_WEB;
 int cmdTimeout=TIMEOUT_CMD;
@@ -245,6 +244,9 @@ void setup(void){
   for (int i=0;i<4;i++) wifi_ap_gw[i]=nv.read(EE_AP_GW+i);
   for (int i=0;i<4;i++) wifi_ap_sn[i]=nv.read(EE_AP_SN+i);  
 
+  int serialSwap=SERIAL_SWAP;
+  if (serialSwap == AUTO) serialSwap = AUTO_OFF;
+
 #ifndef DEBUG_ON
   long serial_baud = SERIAL_BAUD;
   serialBegin(SERIAL_BAUD_DEFAULT,serialSwap);
@@ -279,14 +281,14 @@ Again:
     // got nothing back, toggle baud rate and/or swap ports
     serialRecvFlush();
     tb++;
-    if (tb == 16) { tb=1; serialSwap=!serialSwap; }
+    if (tb == 16) { tb=1; if (serialSwap == AUTO_OFF) serialSwap=AUTO_ON; else if (serialSwap == AUTO_ON) serialSwap=AUTO_OFF; }
     if (tb == 1) serialBegin(SERIAL_BAUD_DEFAULT,serialSwap);
     if (tb == 6) serialBegin(serial_baud,serialSwap);
-    if (tb == 11) serialBegin(19200,serialSwap);
+    if (tb == 11) if (SERIAL_BAUD_DEFAULT == 9600) serialBegin(19200,serialSwap); else tb=15;
     goto Again;
   }
 #else
-  serialBegin(115200,false);
+  serialBegin(115200,OFF);
   delay(10000);
   
   Ser.println(accessPointEnabled);
@@ -493,7 +495,11 @@ void idle() {
 #endif
 }
 
-void serialBegin(long baudRate, bool swap) {
+void serialBegin(long baudRate, int swap) {
+  static bool firstRun = true;
+  if (SERIAL_BAUD_DEFAULT == SERIAL_BAUD && (swap == ON || swap == OFF) && !firstRun) return;
+  firstRun=false;
+  if (swap == ON || swap == AUTO_ON) swap=1; else swap=0;
 #ifdef ESP32
   // wemos d1 mini esp32
   // not swapped: TX and RX on default pins
