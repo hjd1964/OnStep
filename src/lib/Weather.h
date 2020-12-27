@@ -356,7 +356,7 @@ class weather {
             } else {
               _dh_ta[i]=NAN;
               firstFTSample[i]=true;
-              VF("WRN, DS1820 isnan: feature "); V(i+1); VLF(" reset");
+//            VF("WRN, DS1820 isnan: feature "); V(i+1); VLF(" reset");
             }
           } else { ftNanCount[i]=0; _dh_ta[i]=(_dh_ta[i]+_dh_t[i])/2.0; }
 
@@ -375,9 +375,9 @@ class weather {
           }
           if (_ds2413_failures[i] > 2) {
             _ds2413_failures[i]=0;
-            VF("WRN, DS2413 epm>2: features ");
-            if (i == 0) VF("1/2"); if (i == 1) VF("3/4"); if (i == 2) VF("5/6"); if (i == 3) VF("7/8");
-            VLF(" disabled");
+//          VF("WRN, DS2413 epm>2: features ");
+//          if (i == 0) VF("1/2"); if (i == 1) VF("3/4"); if (i == 2) VF("5/6"); if (i == 3) VF("7/8");
+//          VLF(" disabled");
           }
         }
       }
