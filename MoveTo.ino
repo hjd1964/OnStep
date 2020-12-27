@@ -6,7 +6,7 @@ void moveTo() {
   // HA goes from +90...0..-90
   //                W   .   E
   // meridian flip, first phase.  only happens for GEM mounts
-  if ((pierSideControl == PierSideFlipEW1) || (pierSideControl == PierSideFlipWE1)) {
+  if ((pierSideControl == PIER_SIDE_EW1) || (pierSideControl == PIER_SIDE_WE1)) {
 
     // save destination
     cli(); 
@@ -18,38 +18,38 @@ void moveTo() {
     sei();
 
     // first phase, decide if we should move to 60 deg. HA (4 hours) to get away from the horizon limits or just go straight to the home position
-    if (pierSideControl == PierSideFlipWE1) {
-      if (homePositionAxis1 == 0.0) setTargetAxis1(0.0,PierSideWest); else {
-        if ((currentAlt < 10.0) && (getStartAxis1() > -90.0)) setTargetAxis1(-60.0,PierSideWest); else setTargetAxis1(-homePositionAxis1,PierSideWest);
+    if (pierSideControl == PIER_SIDE_WE1) {
+      if (homePositionAxis1 == 0.0) setTargetAxis1(0.0,PIER_SIDE_WEST); else {
+        if ((currentAlt < 10.0) && (getStartAxis1() > -90.0)) setTargetAxis1(-60.0,PIER_SIDE_WEST); else setTargetAxis1(-homePositionAxis1,PIER_SIDE_WEST);
       }
-      setTargetAxis2(homePositionAxis2,PierSideWest);
+      setTargetAxis2(homePositionAxis2,PIER_SIDE_WEST);
     } else {
-      if (homePositionAxis1 == 0.0) setTargetAxis1(0.0,PierSideEast); else {
-        if ((currentAlt < 10.0) && (getStartAxis1() < 90.0)) setTargetAxis1(60.0,PierSideEast); else setTargetAxis1(homePositionAxis1,PierSideEast);
+      if (homePositionAxis1 == 0.0) setTargetAxis1(0.0,PIER_SIDE_EAST); else {
+        if ((currentAlt < 10.0) && (getStartAxis1() < 90.0)) setTargetAxis1(60.0,PIER_SIDE_EAST); else setTargetAxis1(homePositionAxis1,PIER_SIDE_EAST);
       }
-      setTargetAxis2(homePositionAxis2,PierSideEast);
+      setTargetAxis2(homePositionAxis2,PIER_SIDE_EAST);
     }
 
     // first phase, override above for additional waypoints
     if (homePositionAxis2 > 0.0) {
       if (getInstrAxis2() > 90.0-latitude) {
         // if Dec is in the general area of the pole, slew both axis back at once
-        if (pierSideControl == PierSideFlipWE1) setTargetAxis1(-homePositionAxis1,PierSideWest); else setTargetAxis1(homePositionAxis1,PierSideEast);
+        if (pierSideControl == PIER_SIDE_WE1) setTargetAxis1(-homePositionAxis1,PIER_SIDE_WEST); else setTargetAxis1(homePositionAxis1,PIER_SIDE_EAST);
       } else {
         // if we're at a low latitude and in the opposite sky, |HA|=6 is very low on the horizon in this orientation and we need to delay arriving there during a meridian flip
         // in the extreme case, where the user is very near the (Earths!) equator an Horizon limit of -10 or -15 may be necessary for proper operation.
         if (currentAlt < 20.0 && latitudeAbs < 45.0 && getInstrAxis2() < 0.0) {
-          if (pierSideControl == PierSideFlipWE1) setTargetAxis1(-45.0,PierSideWest); else setTargetAxis1(45.0,PierSideEast);
+          if (pierSideControl == PIER_SIDE_WE1) setTargetAxis1(-45.0,PIER_SIDE_WEST); else setTargetAxis1(45.0,PIER_SIDE_EAST);
         }
       }
     } else {
       if (getInstrAxis2() < -90.0-latitude) {
         // if Dec is in the general area of the pole, slew both axis back at once
-        if (pierSideControl == PierSideFlipWE1) setTargetAxis1(-homePositionAxis1,PierSideWest); else setTargetAxis1(homePositionAxis1,PierSideEast);
+        if (pierSideControl == PIER_SIDE_WE1) setTargetAxis1(-homePositionAxis1,PIER_SIDE_WEST); else setTargetAxis1(homePositionAxis1,PIER_SIDE_EAST);
       } else { 
         // if we're at a low latitude and in the opposite sky, |HA|=6 is very low on the horizon in this orientation and we need to delay arriving there during a meridian flip
         if (currentAlt < 20.0 && latitudeAbs < 45.0 && getInstrAxis2() > 0.0) {
-          if (pierSideControl == PierSideFlipWE1) setTargetAxis1(-45.0,PierSideWest); else setTargetAxis1(45.0,PierSideEast);
+          if (pierSideControl == PIER_SIDE_WE1) setTargetAxis1(-45.0,PIER_SIDE_WEST); else setTargetAxis1(45.0,PIER_SIDE_EAST);
         }
       }
     }
@@ -97,8 +97,8 @@ void moveTo() {
   static double a2r=0;
   if (abortGoto == 1) {
     // aborts any meridian flip
-    if ((pierSideControl == PierSideFlipWE1) || (pierSideControl == PierSideFlipWE2) || (pierSideControl == PierSideFlipWE3)) pierSideControl=PierSideWest;
-    if ((pierSideControl == PierSideFlipEW1) || (pierSideControl == PierSideFlipEW2) || (pierSideControl == PierSideFlipEW3)) pierSideControl=PierSideEast;
+    if ((pierSideControl == PIER_SIDE_WE1) || (pierSideControl == PIER_SIDE_WE2) || (pierSideControl == PIER_SIDE_WE3)) pierSideControl=PIER_SIDE_WEST;
+    if ((pierSideControl == PIER_SIDE_EW1) || (pierSideControl == PIER_SIDE_EW2) || (pierSideControl == PIER_SIDE_EW3)) pierSideControl=PIER_SIDE_EAST;
     if (pauseHome) { waitingHome=false; waitingHomeContinue=false; }
 
     // stop parking/homing
@@ -186,7 +186,7 @@ void moveTo() {
     axis1DriverTrackingMode(false);
     axis2DriverTrackingMode(false);
 
-    if ((pierSideControl == PierSideFlipEW2) || (pierSideControl == PierSideFlipWE2)) {
+    if ((pierSideControl == PIER_SIDE_EW2) || (pierSideControl == PIER_SIDE_WE2)) {
       // just wait stop here until we get notification to continue
       if (pauseHome) {
         if (!waitingHomeContinue) { waitingHome=true; return; }
@@ -200,10 +200,10 @@ void moveTo() {
       sei();
       if (homePositionAxis1 == 0.0) {
         // for fork mounts
-        if (pierSideControl == PierSideFlipEW2) setTargetAxis1(180.0,PierSideEast); else setTargetAxis1(-180.0,PierSideWest);
+        if (pierSideControl == PIER_SIDE_EW2) setTargetAxis1(180.0,PIER_SIDE_EAST); else setTargetAxis1(-180.0,PIER_SIDE_WEST);
       } else {
         // for eq mounts
-        if (pierSideControl == PierSideFlipEW2) setTargetAxis1(homePositionAxis1,PierSideEast); else setTargetAxis1(-homePositionAxis1,PierSideWest);
+        if (pierSideControl == PIER_SIDE_EW2) setTargetAxis1(homePositionAxis1,PIER_SIDE_EAST); else setTargetAxis1(-homePositionAxis1,PIER_SIDE_WEST);
       }
       pierSideControl++;
 
@@ -212,9 +212,9 @@ void moveTo() {
       
       forceRefreshGetEqu();
     } else
-    if ((pierSideControl == PierSideFlipEW3) || (pierSideControl == PierSideFlipWE3)) {
+    if ((pierSideControl == PIER_SIDE_EW3) || (pierSideControl == PIER_SIDE_WE3)) {
 
-      if (pierSideControl == PierSideFlipEW3) pierSideControl=PierSideWest; else pierSideControl=PierSideEast;
+      if (pierSideControl == PIER_SIDE_EW3) pierSideControl=PIER_SIDE_WEST; else pierSideControl=PIER_SIDE_EAST;
     
       // now complete the slew
       cli();

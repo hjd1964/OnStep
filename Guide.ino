@@ -108,6 +108,11 @@ bool isPulseGuiding() {
   if ((guideDirAxis1 && lastGuidePulseGuideAxis1) || (guideDirAxis2 && lastGuidePulseGuideAxis2)) return true; else return false;
 }
 
+// returns true if a guide is happening
+bool isGuiding() {
+  if (guideDirAxis1 || guideDirAxis2) return true; else return false;
+}
+
 // returns true if rapid movement is happening
 bool isSlewing() {
   return guideDirAxis1 || guideDirAxis2 || trackingState == TrackingMoveTo || trackingSyncInProgress();
@@ -193,7 +198,7 @@ CommandErrors startGuideAxis2(char direction, int guideRate, long guideDuration,
   guideTimeRemainingAxis2=guideDuration*1000L;
   if (guideDirAxis2 == 's') { cli(); guideTimerRateAxis2=-guideTimerBaseRateAxis2; sei(); } 
   if (guideDirAxis2 == 'n') { cli(); guideTimerRateAxis2= guideTimerBaseRateAxis2; sei(); }
-  if (!absolute && (getInstrPierSide() == PierSideWest)) { cli(); guideTimerRateAxis2=-guideTimerRateAxis2; sei(); }
+  if (!absolute && (getInstrPierSide() == PIER_SIDE_WEST)) { cli(); guideTimerRateAxis2=-guideTimerRateAxis2; sei(); }
   lastGuidePulseGuideAxis2 = pulseGuide;
   
   return CE_NONE;
@@ -202,28 +207,28 @@ CommandErrors startGuideAxis2(char direction, int guideRate, long guideDuration,
 bool guideNorthOk() {
   if (!safetyLimitsOn) return true;
   double a2; if (AXIS2_TANGENT_ARM == ON) { cli(); a2=posAxis2/axis2Settings.stepsPerMeasure; sei(); } else a2=getInstrAxis2();
-  if (a2 < axis2Settings.min && getInstrPierSide() == PierSideWest) return false;
-  if (a2 > axis2Settings.max && getInstrPierSide() == PierSideEast) return false;
+  if (a2 < axis2Settings.min && getInstrPierSide() == PIER_SIDE_WEST) return false;
+  if (a2 > axis2Settings.max && getInstrPierSide() == PIER_SIDE_EAST) return false;
   if (mountType == ALTAZM && currentAlt > maxAlt) return false;
   return true;
 }
 bool guideSouthOk() {
   if (!safetyLimitsOn) return true;
   double a2; if (AXIS2_TANGENT_ARM == ON) { cli(); a2=posAxis2/axis2Settings.stepsPerMeasure; sei(); } else a2=getInstrAxis2();
-  if (a2 < axis2Settings.min && getInstrPierSide() == PierSideEast) return false;
-  if (a2 > axis2Settings.max && getInstrPierSide() == PierSideWest) return false;
+  if (a2 < axis2Settings.min && getInstrPierSide() == PIER_SIDE_EAST) return false;
+  if (a2 > axis2Settings.max && getInstrPierSide() == PIER_SIDE_WEST) return false;
   if (mountType == ALTAZM && currentAlt < minAlt) return false;
   return true;
 }
 bool guideEastOk() {
   if (!safetyLimitsOn) return true;
-  if (meridianFlip != MeridianFlipNever && getInstrPierSide() == PierSideEast) { if (getInstrAxis1() < -degreesPastMeridianE) return false; }
+  if (meridianFlip != MeridianFlipNever && getInstrPierSide() == PIER_SIDE_EAST) { if (getInstrAxis1() < -degreesPastMeridianE) return false; }
   if (getInstrAxis1() < axis1Settings.min) return false;
   return true;
 }
 bool guideWestOk() {
   if (!safetyLimitsOn) return true;
-  if (meridianFlip != MeridianFlipNever && getInstrPierSide() == PierSideWest) { if (getInstrAxis1() > degreesPastMeridianW) return false; }
+  if (meridianFlip != MeridianFlipNever && getInstrPierSide() == PIER_SIDE_WEST) { if (getInstrAxis1() > degreesPastMeridianW) return false; }
   if (getInstrAxis1() > axis1Settings.max) return false;
   return true;
 }
@@ -345,7 +350,7 @@ bool customGuideRateAxis2(double rate, long guideDuration) {
     guideTimeRemainingAxis2=guideDuration*1000L;
     if (guideDirAxis2 == 's') { cli(); guideTimerRateAxis2=-guideTimerBaseRateAxis2; sei(); } 
     if (guideDirAxis2 == 'n') { cli(); guideTimerRateAxis2= guideTimerBaseRateAxis2; sei(); }
-    if (getInstrPierSide() == PierSideWest) { cli(); guideTimerRateAxis2=-guideTimerRateAxis2; sei(); }
+    if (getInstrPierSide() == PIER_SIDE_WEST) { cli(); guideTimerRateAxis2=-guideTimerRateAxis2; sei(); }
   } else return false;
   return true;
 }

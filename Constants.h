@@ -283,13 +283,13 @@
 // Unique identifier for the current initialization format for NV, do not change
 #define NV_INIT_KEY 915307551
 
-#define PierSideNone               0
-#define PierSideEast               1
-#define PierSideWest               2
-#define PierSideBest               3
-#define PierSideFlipWE1            10
-#define PierSideFlipWE2            11
-#define PierSideFlipWE3            12
-#define PierSideFlipEW1            20
-#define PierSideFlipEW2            21
-#define PierSideFlipEW3            22
+#define PIER_SIDE_NONE                 0
+#define PIER_SIDE_EAST                 1
+#define PIER_SIDE_WEST                 2
+#define PIER_SIDE_BEST                 3
+#define PIER_SIDE_WE1                 10
+#define PIER_SIDE_WE2                 11
+#define PIER_SIDE_WE3                 12
+#define PIER_SIDE_EW1                 20
+#define PIER_SIDE_EW2                 21
+#define PIER_SIDE_EW3                 22

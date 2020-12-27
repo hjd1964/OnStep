@@ -117,11 +117,11 @@ CommandErrors goHome(bool fast) {
     double h=getInstrAxis1();
     double i2=indexAxis2;
     int p=getInstrPierSide();
-    if (latitude >= 0) { if (p == PierSideWest) i2=180.0-i2; } else { if (p == PierSideWest) i2=-180.0-i2; }
-    e=goTo(h,i2,h,i2,p);
+    if (latitude >= 0) { if (p == PIER_SIDE_WEST) i2=180.0-i2; } else { if (p == PIER_SIDE_WEST) i2=-180.0-i2; }
+    e=goTo(h,i2,h,i2,p,false);
   } else {
     trackingState=TrackingNone;
-    e=goTo(homePositionAxis1,homePositionAxis2,homePositionAxis1,homePositionAxis2,PierSideEast);
+    e=goTo(homePositionAxis1,homePositionAxis2,homePositionAxis1,homePositionAxis2,PIER_SIDE_EAST,false);
   }
 
   if (e == CE_NONE) { VLF("MSG: Homing started"); homeMount=true; } else { VLF("MSG: Homing failed"); trackingState=abortTrackingState; }

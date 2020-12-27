@@ -175,6 +175,7 @@ volatile int backlashAxis1              = 0;                 // total backlash i
 volatile long startAxis1                = 0;                 // hour angle of goto start position in steps
 volatile fixed_t targetAxis1;                                // hour angle of goto end   position in steps
 double origTargetRA                     = 0.0;               // holds the RA for gotos before possible conversion to observed place
+double secTargetRA;                                          // secondary, as above
 double newTargetRA                      = 0.0;               // holds the RA for gotos after conversion to observed place
 double newTargetAzm                     = 0.0;               // holds the altitude and azmiuth for slews
 fixed_t origTargetAxis1;
@@ -190,6 +191,7 @@ volatile int backlashAxis2              = 0;                 // total backlash i
 volatile long startAxis2                = 0;                 // declination of goto start position in steps
 volatile fixed_t targetAxis2;                                // declination of goto end   position in steps
 double origTargetDec                    = 0.0;               // holds the Dec for gotos before possible conversion to observed place
+double secTargetDec;                                         // secondary, as above
 double newTargetDec                     = 0.0;               // holds the Dec for gotos after conversion to observed place
 double newTargetAlt                     = 0.0;               // holds the altitude and azmiuth for slews
 fixed_t origTargetAxis2;
@@ -299,8 +301,8 @@ enum StopSlewActions {SS_ALL_FAST, SS_LIMIT, SS_LIMIT_HARD, SS_LIMIT_AXIS1_MIN, 
 #define MeridianFlipAlways                2
 byte meridianFlip = MeridianFlipNever;
 
-byte pierSideControl = PierSideNone;
-int preferredPierSide = PIER_SIDE_PREFERRED_DEFAULT;
+byte pierSideControl = PIER_SIDE_NONE;
+int preferredPierSideDefault = PIER_SIDE_PREFERRED_DEFAULT;
 bool autoMeridianFlip                   = false;             // auto meridian flip/continue as tracking hits AXIS1_LIMIT_MERIDIAN_W
 bool pauseHome                          = false;             // allow pause at home?
 bool waitingHomeContinue                = false;             // set to true to stop pause

@@ -467,7 +467,7 @@ void setDeltaTrackingRate() {
       getEqu(&r,&d,false);
       d1=r-newTargetRA;
       d2=d-newTargetDec;
-      if (getInstrPierSide() == PierSideEast) d2=-d2;
+      if (getInstrPierSide() == PIER_SIDE_EAST) d2=-d2;
     }
 
     if ((fabs(d1) < arcSecPerStepAxis1/3600.0) && (fabs(d2) < arcSecPerStepAxis2/3600.0)) {
@@ -668,7 +668,7 @@ bool doRefractionRateCalc() {
       double dax1=(rr_HA1-rr_HA2)*(15.0/(RefractionRateRange/60.0))/2.0;
       if (fabs(_deltaAxis1-dax1) > 0.005) _deltaAxis1=dax1; else _deltaAxis1=(_deltaAxis1*9.0+dax1)/10.0;
       double dax2;
-      if (getInstrPierSide() == PierSideWest) {
+      if (getInstrPierSide() == PIER_SIDE_WEST) {
         dax2=(rr_Dec2-rr_Dec1)*(15.0/(RefractionRateRange/60.0))/2.0;
       } else {
         dax2=(rr_Dec1-rr_Dec2)*(15.0/(RefractionRateRange/60.0))/2.0;

@@ -91,8 +91,8 @@ CommandErrors TGeoAlignH::addStar(int I, int N, double RA, double Dec) {
   actual[I-1].ha =degRange(actual[I-1].ha)/Rad;
   actual[I-1].dec=actual[I-1].dec/Rad;
 
-  if (getInstrPierSide() == PierSideWest) { actual[I-1].side=-1; mount[I-1].side=-1; } else
-  if (getInstrPierSide() == PierSideEast) { actual[I-1].side=1; mount[I-1].side=1; } else { actual[I-1].side=0; mount[I-1].side=0; }
+  if (getInstrPierSide() == PIER_SIDE_WEST) { actual[I-1].side=-1; mount[I-1].side=-1; } else
+  if (getInstrPierSide() == PIER_SIDE_EAST) { actual[I-1].side=1; mount[I-1].side=1; } else { actual[I-1].side=0; mount[I-1].side=0; }
 
   // two or more stars and finished
   if ((I >= 2) && (I == N)) model(N);
@@ -352,7 +352,7 @@ void TGeoAlignH::autoModel(int n) {
 }
 
 void TGeoAlignH::horToInstr(double Alt, double Azm, double *Alt1, double *Azm1, int PierSide) {
-  double p=1.0; if (PierSide == PierSideWest) p=-1.0;
+  double p=1.0; if (PierSide == PIER_SIDE_WEST) p=-1.0;
   
   double cosLat=cos(90.0/Rad); double sinLat=sin(90.0/Rad);
   
@@ -415,7 +415,7 @@ void TGeoAlignH::horToInstr(double Alt, double Azm, double *Alt1, double *Azm1, 
 
 // takes the instrument equatorial coordinates and applies corrections to arrive at topocentric refracted coordinates
 void TGeoAlignH::instrToHor(double Alt, double Azm, double *Alt1, double *Azm1, int PierSide) { 
-  double p=1.0; if (PierSide == PierSideWest) p=-1.0;
+  double p=1.0; if (PierSide == PIER_SIDE_WEST) p=-1.0;
   
   double cosLat=cos(90.0/Rad); double sinLat=sin(90.0/Rad);
   

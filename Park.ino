@@ -16,7 +16,7 @@ CommandErrors setPark() {
   // store our position
   nv.writeFloat(EE_posAxis1,getInstrAxis1());
   nv.writeFloat(EE_posAxis2,getInstrAxis2());
-  int p=getInstrPierSide(); if (p == PierSideNone) nv.write(EE_pierSide,PierSideEast); else nv.write(EE_pierSide,p);
+  int p=getInstrPierSide(); if (p == PIER_SIDE_NONE) nv.write(EE_pierSide,PIER_SIDE_EAST); else nv.write(EE_pierSide,p);
 
   // record our park status
   parkSaved=true; nv.write(EE_parkSaved,parkSaved);
@@ -63,10 +63,10 @@ CommandErrors park() {
   double parkTargetAxis1=nv.readFloat(EE_posAxis1);
   double parkTargetAxis2=nv.readFloat(EE_posAxis2);
   int parkPierSide=nv.read(EE_pierSide);
-  if (parkPierSide != PierSideNone && parkPierSide != PierSideEast && parkPierSide != PierSideWest) { parkPierSide=PierSideNone; DLF("ERR, park(): bad NV parkPierSide"); }
+  if (parkPierSide != PIER_SIDE_NONE && parkPierSide != PIER_SIDE_EAST && parkPierSide != PIER_SIDE_WEST) { parkPierSide=PIER_SIDE_NONE; DLF("ERR, park(): bad NV parkPierSide"); }
 
   // now, goto this target coordinate
-  e=goTo(parkTargetAxis1,parkTargetAxis2,parkTargetAxis1,parkTargetAxis2,parkPierSide);
+  e=goTo(parkTargetAxis1,parkTargetAxis2,parkTargetAxis1,parkTargetAxis2,parkPierSide,false);
   if (e != CE_NONE) {
     trackingState=abortTrackingState; // resume tracking state
     parkStatus=lastParkStatus;        // revert the park status
@@ -211,7 +211,7 @@ CommandErrors unPark(bool withTrackingOn) {
 
   // get suggested park position
   int parkPierSide=nv.read(EE_pierSide);
-  if (parkPierSide != PierSideNone && parkPierSide != PierSideEast && parkPierSide != PierSideWest) { parkPierSide=PierSideNone; DLF("ERR, unPark(): bad NV parkPierSide"); }
+  if (parkPierSide != PIER_SIDE_NONE && parkPierSide != PIER_SIDE_EAST && parkPierSide != PIER_SIDE_WEST) { parkPierSide=PIER_SIDE_NONE; DLF("ERR, unPark(): bad NV parkPierSide"); }
 
   setTargetAxis1(nv.readFloat(EE_posAxis1),parkPierSide);
   setTargetAxis2(nv.readFloat(EE_posAxis2),parkPierSide);

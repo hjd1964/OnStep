@@ -551,7 +551,7 @@ void initStartupValues() {
   origTargetAxis1.fixed = 0;
 
   // default values for state variables
-  pierSideControl       = PierSideNone;
+  pierSideControl       = PIER_SIDE_NONE;
   dirAxis1              = 1;
   if (latitude >= 0) {
     if (axis1Settings.reverse == ON) defaultDirAxis1 = DefaultDirAxis1SCPInit; else defaultDirAxis1 = DefaultDirAxis1NCPInit;
@@ -611,8 +611,8 @@ void initStartPosition() {
   posAxis2           = 0;
   blAxis2            = 0;
   sei();
-  setIndexAxis1(homePositionAxis1,PierSideEast);
-  setIndexAxis2(homePositionAxis2,PierSideEast);
+  setIndexAxis1(homePositionAxis1,PIER_SIDE_EAST);
+  setIndexAxis2(homePositionAxis2,PIER_SIDE_EAST);
 }
 
 void initStartTimers() {

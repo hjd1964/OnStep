@@ -25,7 +25,7 @@ double getInstrAxis2() {
 }
 
 int getInstrPierSide() {
-  if (atHome) return PierSideNone;
+  if (atHome) return PIER_SIDE_NONE;
   cli(); long p2=posAxis2; sei();
 
 #if AXIS2_TANGENT_ARM_CORRECTION == ON
@@ -33,19 +33,19 @@ int getInstrPierSide() {
 #endif
   
   double q=(double)((long)p2+indexAxis2Steps)/axis2Settings.stepsPerMeasure;
-  if ((q < -90.0) || (q > 90.0)) return PierSideWest; else return PierSideEast;
+  if ((q < -90.0) || (q > 90.0)) return PIER_SIDE_WEST; else return PIER_SIDE_EAST;
 }
 
 void setIndexAxis1(double axis1, int newPierSide) {
   // sky=pos+index, index=sky-pos
-  if (newPierSide == PierSideWest) axis1=axis1+180.0;
+  if (newPierSide == PIER_SIDE_WEST) axis1=axis1+180.0;
   cli(); long p1=posAxis1; sei();
   indexAxis1=axis1-(double)p1/axis1Settings.stepsPerMeasure;
   indexAxis1Steps=(long)(indexAxis1*axis1Settings.stepsPerMeasure);
 }
 
 void setIndexAxis2(double axis2, int newPierSide) {
-  if (latitude >= 0) { if (newPierSide == PierSideWest) axis2=180.0-axis2; } else { if (newPierSide == PierSideWest) axis2=-180.0-axis2; }
+  if (latitude >= 0) { if (newPierSide == PIER_SIDE_WEST) axis2=180.0-axis2; } else { if (newPierSide == PIER_SIDE_WEST) axis2=-180.0-axis2; }
   if (axis2 > 360.0) axis2-=360.0; if (axis2 < -360.0) axis2+=360.0;
   cli(); long p2=posAxis2; sei();
 
@@ -64,13 +64,13 @@ double getIndexAxis2() {
 }
 
 void setTargetAxis1(double axis1, int newPierSide) {
-  if (newPierSide == PierSideWest) axis1=axis1+180.0;
+  if (newPierSide == PIER_SIDE_WEST) axis1=axis1+180.0;
   long p1=(double)(axis1-indexAxis1)*axis1Settings.stepsPerMeasure;
   cli(); targetAxis1.part.m=p1; targetAxis2.part.f=0; sei();
 }
 
 void setTargetAxis2(double axis2, int newPierSide) {
-  if (latitude >= 0) { if (newPierSide == PierSideWest) axis2=180.0-axis2; } else { if (newPierSide == PierSideWest) axis2=-180.0-axis2; }
+  if (latitude >= 0) { if (newPierSide == PIER_SIDE_WEST) axis2=180.0-axis2; } else { if (newPierSide == PIER_SIDE_WEST) axis2=-180.0-axis2; }
   if (axis2 > 360.0) axis2-=360.0; if (axis2 < -360.0) axis2+=360.0;
   axis2=(double)(axis2-indexAxis2);
 
@@ -83,7 +83,7 @@ void setTargetAxis2(double axis2, int newPierSide) {
 }
 
 double toInstrAxis2(double axis2, int newPierSide) {
-  if (latitude >= 0) { if (newPierSide == PierSideWest) axis2=180.0-axis2; } else { if (newPierSide == PierSideWest) axis2=-180.0-axis2; }
+  if (latitude >= 0) { if (newPierSide == PIER_SIDE_WEST) axis2=180.0-axis2; } else { if (newPierSide == PIER_SIDE_WEST) axis2=-180.0-axis2; }
   if (axis2 > 360.0) axis2-=360.0; if (axis2 < -360.0) axis2+=360.0;
 
   axis2=(double)(axis2-indexAxis2);

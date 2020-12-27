@@ -77,8 +77,8 @@ CommandErrors TGeoAlign::addStar(int I, int N, double RA, double Dec) {
   mount[I-1].dec=getInstrAxis2()/Rad;
   actual[I-1].ha=haRange(LST()*15.0-RA)/Rad;
   actual[I-1].dec=Dec/Rad;
-  if (getInstrPierSide() == PierSideWest) { actual[I-1].side=-1; mount[I-1].side=-1; } else
-  if (getInstrPierSide() == PierSideEast) { actual[I-1].side=1; mount[I-1].side=1; } else { actual[I-1].side=0; mount[I-1].side=0; }
+  if (getInstrPierSide() == PIER_SIDE_WEST) { actual[I-1].side=-1; mount[I-1].side=-1; } else
+  if (getInstrPierSide() == PIER_SIDE_EAST) { actual[I-1].side=1; mount[I-1].side=1; } else { actual[I-1].side=0; mount[I-1].side=0; }
 
   // two or more stars and finished
   if ((I >= 2) && (I == N)) model(N);
@@ -339,7 +339,7 @@ void TGeoAlign::autoModel(int n) {
 
 // takes the topocentric refracted coordinates and applies corrections to arrive at instrument equatorial coordinates 
 void TGeoAlign::equToInstr(double HA, double Dec, double *HA1, double *Dec1, int PierSide) {
-  double p=1.0; if (PierSide == PierSideWest) p=-1.0;
+  double p=1.0; if (PierSide == PIER_SIDE_WEST) p=-1.0;
 
   if (Dec > 90.0) Dec=90.0;
   if (Dec < -90.0) Dec=-90.0;
@@ -400,7 +400,7 @@ void TGeoAlign::equToInstr(double HA, double Dec, double *HA1, double *Dec1, int
 
 // takes the instrument equatorial coordinates and applies corrections to arrive at topocentric refracted coordinates
 void TGeoAlign::instrToEqu(double HA, double Dec, double *HA1, double *Dec1, int PierSide) { 
-  double p=1.0; if (PierSide == PierSideWest) p=-1.0;
+  double p=1.0; if (PierSide == PIER_SIDE_WEST) p=-1.0;
   
   HA =HA +ax1Cor;
   Dec=Dec+ax2Cor*-p;
