@@ -127,6 +127,14 @@
 // -----------------------------------------------------------------------------------
 // setup defaults
 
+#ifndef HOME_SENSE_HYSTERSIS
+  #define HOME_SENSE_HYSTERSIS 26
+#endif
+
+#ifndef LED_RETICLE_ACTIVE_STATE
+  #define LED_RETICLE_ACTIVE_STATE LOW
+#endif
+
 // enable PEC code only if we need it
 #if AXIS1_STEPS_PER_WORMROT != 0
   #define AXIS1_PEC ON
@@ -770,8 +778,8 @@
 
 #ifndef HOME_SENSE
   #error "Configuration (Config.h): Setting HOME_SENSE must be present!"
-#elif HOME_SENSE != OFF && HOME_SENSE != ON && HOME_SENSE != ON_PULLUP && HOME_SENSE != ON_PULLDOWN
-  #error "Configuration (Config.h): Setting HOME_SENSE invalid, use OFF, ON, ON_PULLUP, or ON_PULLDOWN only."
+#elif HOME_SENSE != OFF && HOME_SENSE != ON && HOME_SENSE != ON_PULLUP && HOME_SENSE != ON_PULLDOWN && (HOME_SENSE < 0 || HOME_SENSE > 1023)
+  #error "Configuration (Config.h): Setting HOME_SENSE invalid, use OFF, ON, ON_PULLUP, ON_PULLDOWN, or a number between 0 and 1023 (0 to 3.3V or 0 to 5V) only."
 #endif
 
 #ifndef HOME_SENSE_STATE_AXIS1
@@ -800,7 +808,7 @@
 
 #ifndef PEC_SENSE
   #error "Configuration (Config.h): Setting PEC_SENSE must be present!"
-#elif (PEC_SENSE != OFF && PEC_SENSE != ON && PEC_SENSE != ON_PULLUP && PEC_SENSE != ON_PULLDOWN) && PEC_SENSE < 0 && PEC_SENSE > 1023
+#elif (PEC_SENSE != OFF && PEC_SENSE != ON && PEC_SENSE != ON_PULLUP && PEC_SENSE != ON_PULLDOWN) && (PEC_SENSE < 0 || PEC_SENSE > 1023)
   #error "Configuration (Config.h): Setting PEC_SENSE invalid, use OFF, ON, ON_PULLUP, ON_PULLDOWN or a number between 0 and 1023 (0 to 3.3V or 0 to 5V) only."
 #endif
 

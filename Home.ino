@@ -18,8 +18,8 @@ void checkHome() {
       safetyLimitsOn=true;
       findHomeMode=FH_OFF;
     } else {
-      if (digitalRead(Axis1_HOME) != PierSideStateAxis1 && (guideDirAxis1 == 'e' || guideDirAxis1 == 'w')) StopAxis1();
-      if (digitalRead(Axis2_HOME) != PierSideStateAxis2 && (guideDirAxis2 == 'n' || guideDirAxis2 == 's')) StopAxis2();
+      if (axis1HomeSense.read() != PierSideStateAxis1 && (guideDirAxis1 == 'e' || guideDirAxis1 == 'w')) StopAxis1();
+      if (axis2HomeSense.read() != PierSideStateAxis2 && (guideDirAxis2 == 'n' || guideDirAxis2 == 's')) StopAxis2();
     }
   }
   // we are idle and waiting for a fast guide to stop before the final slow guide to refine the home position
@@ -72,17 +72,17 @@ CommandErrors goHome(bool fast) {
   abortTrackingState=trackingState;
   trackingState=TrackingNone;
 
-  // decide direction to guide
-  char a1; if (digitalRead(Axis1_HOME) == HOME_SENSE_STATE_AXIS1) a1='w'; else a1='e';
-  char a2; if (digitalRead(Axis2_HOME) == HOME_SENSE_STATE_AXIS2) a2='n'; else a2='s';
+  // reset/read initial state
+  axis1HomeSense.reset(); PierSideStateAxis1=axis1HomeSense.read();
+  axis2HomeSense.reset(); PierSideStateAxis2=axis2HomeSense.read();
 
-  // attach interrupts to stop guide
-  PierSideStateAxis1=digitalRead(Axis1_HOME);
-  PierSideStateAxis2=digitalRead(Axis2_HOME);
-  
+  // decide direction to guide
+  char a1; if (PierSideStateAxis1 == HOME_SENSE_STATE_AXIS1) a1='w'; else a1='e';
+  char a2; if (PierSideStateAxis2 == HOME_SENSE_STATE_AXIS2) a2='n'; else a2='s';
+
   // disable limits
   safetyLimitsOn=false;
-  
+
   // start guides
   if (fast) {
     // make sure tracking is disabled
