@@ -49,10 +49,10 @@ class DigitalAnalog {
     void write(int value) {
       if (_mode == INPUT) return;
 
-      int res = _lastValue;
       if (value > _threshold+_hysteresis ) _lastValue=HIGH;
       if (value <= _threshold-_hysteresis ) _lastValue=LOW;
-      if (_invert) { if (_lastValue == LOW) res=HIGH; else res=LOW; }
+      int res = _lastValue;
+      if (_invert) { if (res == LOW) res=HIGH; else res=LOW; }
       if (_isAnalog) { if (res == HIGH) analogWrite(_pin,1023); else analogWrite(_pin,0); } else digitalWrite(_pin,res);
     }
 
