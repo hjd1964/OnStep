@@ -120,6 +120,11 @@ weather ambient;
   DigitalAnalogInput limitSense;
 #endif
 
+#if PEC_SENSE != OFF
+  #include "src/lib/DigitalAnalogInput.h"
+  DigitalAnalogInput pecSense;
+#endif
+
 #if SERIAL_B_ESP_FLASHING == ON || defined(AddonTriggerPin)
   #include "src/lib/flashAddon.h"
   flashAddon fa;

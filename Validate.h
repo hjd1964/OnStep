@@ -131,6 +131,10 @@
   #define HOME_SENSE_HYSTERSIS 26
 #endif
 
+#ifndef PEC_SENSE_HYSTERSIS
+  #define PEC_SENSE_HYSTERSIS 26
+#endif
+
 #ifndef LED_RETICLE_ACTIVE_STATE
   #define LED_RETICLE_ACTIVE_STATE LOW
 #endif

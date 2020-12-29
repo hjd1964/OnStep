@@ -118,12 +118,14 @@ void initPins() {
 #endif
 
   // PEC index sense
-#if PEC_SENSE == ON
-  pinMode(PecPin,INPUT);
+#if PEC_SENSE > OFF
+  pecSense.init(PecPin,INPUT,true,PEC_SENSE,PEC_SENSE_HYSTERSIS,false);
+#elif PEC_SENSE == ON
+  pecSense.init(PecPin,INPUT,false,0,0,false);
 #elif PEC_SENSE == ON_PULLUP
-  pinMode(PecPin,INPUT_PULLUP);
+  pecSense.init(PecPin,INPUT_PULLUP,false,0,0,false);
 #elif PEC_SENSE == ON_PULLDOWN
-  pinMode(PecPin,INPUT_PULLDOWN);
+  pecSense.init(PecPin,INPUT_PULLDOWN,false,0,0,false);
 #endif
 
   // Pulse per second
