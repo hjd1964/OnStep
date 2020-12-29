@@ -115,6 +115,11 @@ weather ambient;
   DigitalAnalogInput axis2HomeSense;
 #endif
 
+#if LIMIT_SENSE != OFF
+  #include "src/lib/DigitalAnalogInput.h"
+  DigitalAnalogInput limitSense;
+#endif
+
 #if SERIAL_B_ESP_FLASHING == ON || defined(AddonTriggerPin)
   #include "src/lib/flashAddon.h"
   flashAddon fa;
@@ -496,18 +501,10 @@ void loop2() {
 
     // SAFETY CHECKS
 #if LIMIT_SENSE != OFF
-    // support for limit switch(es)
-    byte limit_1st = digitalRead(LimitPin);
-    if (limit_1st == LIMIT_SENSE_STATE) {
-      // Wait for a short while, then read again
-      delayMicroseconds(50);
-      byte limit_2nd = digitalRead(LimitPin);
-      if (limit_2nd == LIMIT_SENSE_STATE) {
-        // It is still low, there must be a problem
-        generalError=ERR_LIMIT_SENSE;
-        stopSlewingAndTracking(SS_LIMIT);
-      } 
-    }
+    if (limitSense.read() == LIMIT_SENSE_STATE) {
+      generalError=ERR_LIMIT_SENSE;
+      stopSlewingAndTracking(SS_LIMIT);
+    } 
 #endif
 
     // check for fault signal, stop any slew or guide and turn tracking off

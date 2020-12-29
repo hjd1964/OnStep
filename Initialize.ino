@@ -110,11 +110,11 @@ void initPins() {
 
   // limit switch sense
 #if LIMIT_SENSE == ON
-  pinMode(LimitPin,INPUT);
+  limitSense.init(LimitPin,INPUT,false,0,0,false);
 #elif LIMIT_SENSE == ON_PULLUP
-  pinMode(LimitPin,INPUT_PULLUP);
+  limitSense.init(LimitPin,INPUT_PULLUP,false,0,0,false);
 #elif LIMIT_SENSE == ON_PULLDOWN
-  pinMode(LimitPin,INPUT_PULLDOWN);
+  limitSense.init(LimitPin,INPUT_PULLDOWN,false,0,0,false);
 #endif
 
   // PEC index sense
