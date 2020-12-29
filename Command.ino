@@ -230,13 +230,13 @@ void processCommands() {
       if (command[0] == 'B' && (command[1] == '+' || command[1] == '-') && parameter[0] == 0)  {
 #if LED_RETICLE >= 0
         int scale;
-        if (reticuleBrightness > 255-8) scale=1; else
-        if (reticuleBrightness > 255-32) scale=4; else
-        if (reticuleBrightness > 255-64) scale=12; else
-        if (reticuleBrightness > 255-128) scale=32; else scale=64;
-        if (command[1] == '-') reticuleBrightness+=scale;  if (reticuleBrightness > 255) reticuleBrightness=255;
-        if (command[1] == '+') reticuleBrightness-=scale;  if (reticuleBrightness < 0)   reticuleBrightness=0;
-        analogWrite(ReticlePin,reticuleBrightness);
+        if (reticuleBrightness < 8) scale=1; else
+        if (reticuleBrightness < 32) scale=4; else
+        if (reticuleBrightness < 64) scale=12; else
+        if (reticuleBrightness < 128) scale=32; else scale=64;
+        if (command[1] == '+') reticuleBrightness+=scale;  if (reticuleBrightness > 255) reticuleBrightness=255;
+        if (command[1] == '-') reticuleBrightness-=scale;  if (reticuleBrightness < 0)   reticuleBrightness=0;
+        analogWrite(ReticlePin,(LED_RETICLE_ACTIVE_STATE == HIGH)?reticuleBrightness:255-reticuleBrightness);
 #endif
         boolReply=false;
       } else 
