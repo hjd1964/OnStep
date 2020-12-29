@@ -110,9 +110,9 @@
 weather ambient;
 
 #if HOME_SENSE != OFF
-  #include "src/lib/DigitalAnalog.h"
-  DigitalAnalog axis1HomeSense;
-  DigitalAnalog axis2HomeSense;
+  #include "src/lib/DigitalAnalogInput.h"
+  DigitalAnalogInput axis1HomeSense;
+  DigitalAnalogInput axis2HomeSense;
 #endif
 
 #if SERIAL_B_ESP_FLASHING == ON || defined(AddonTriggerPin)
