@@ -96,16 +96,16 @@ void initPins() {
 #if HOME_SENSE > OFF
   //                  pin,       mode,analog,threshold,     hystersis,      invert
   axis1HomeSense.init(Axis1_HOME,INPUT,true,HOME_SENSE,HOME_SENSE_HYSTERSIS,false);
-  axis2HomeSense.init(Axis1_HOME,INPUT,true,HOME_SENSE,HOME_SENSE_HYSTERSIS,false);
+  axis2HomeSense.init(Axis2_HOME,INPUT,true,HOME_SENSE,HOME_SENSE_HYSTERSIS,false);
 #elif HOME_SENSE == ON
   axis1HomeSense.init(Axis1_HOME,INPUT,false,0,0,false);
-  axis2HomeSense.init(Axis1_HOME,INPUT,false,0,0,false);
+  axis2HomeSense.init(Axis2_HOME,INPUT,false,0,0,false);
 #elif HOME_SENSE == ON_PULLUP
   axis1HomeSense.init(Axis1_HOME,INPUT_PULLUP,false,0,0,false);
-  axis2HomeSense.init(Axis1_HOME,INPUT_PULLUP,false,0,0,false);
+  axis2HomeSense.init(Axis2_HOME,INPUT_PULLUP,false,0,0,false);
 #elif HOME_SENSE == ON_PULLDOWN
   axis1HomeSense.init(Axis1_HOME,INPUT_PULLDOWN,false,0,0,false);
-  axis2HomeSense.init(Axis1_HOME,INPUT_PULLDOWN,false,0,0,false);
+  axis2HomeSense.init(Axis2_HOME,INPUT_PULLDOWN,false,0,0,false);
 #endif
 
   // limit switch sense
