@@ -8,7 +8,7 @@
 class DigitalAnalogInput {
   public:
     // pin        = MCU pin#
-    // mode       = pin mode (INPUT or OUTPUT)
+    // mode       = pin mode (INPUT, INPUT_PULLUP, or INPUT_PULLDOWN)
     // isAnalog   = specifices if pin is analog (true or false) where false is digital
     // threshold  = value (0 to 1023) where result switches from LOW to HIGH
     // hysteresis = range +/- (0 to 1023) where result is igonored (uses last valid reading)
