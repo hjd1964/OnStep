@@ -1336,14 +1336,17 @@ void processCommands() {
 //         Returns: 0..9, see :MS#
       if (command[1] == 'N')  {
         CommandErrors e;
-        if (parameter[0] == 0) e=goToHere(PIER_SIDE_EAST);
-        if (parameter[0] == 'e' && parameter[1] == 0) e=goToHere(PIER_SIDE_EAST);
-        if (parameter[0] == 'w' && parameter[1] == 0) e=goToHere(PIER_SIDE_WEST);
-        if (e >= CE_GOTO_ERR_BELOW_HORIZON && e <= CE_GOTO_ERR_UNSPECIFIED) reply[0]=(char)(e-CE_GOTO_ERR_BELOW_HORIZON)+'1';
-        if (e == CE_NONE) reply[0]='0';
-        reply[1]=0;
-        boolReply=false;
-        supress_frame=true; 
+        if (parameter[0] == 0) e=goToHere(PIER_SIDE_EAST); else
+        if (parameter[0] == 'e' && parameter[1] == 0) e=goToHere(PIER_SIDE_EAST); else
+        if (parameter[0] == 'w' && parameter[1] == 0) e=goToHere(PIER_SIDE_WEST); else e=CE_CMD_UNKNOWN;
+        if (e != CE_CMD_UNKNOWN) {
+          if (e >= CE_GOTO_ERR_BELOW_HORIZON && e <= CE_GOTO_ERR_UNSPECIFIED) reply[0]=(char)(e-CE_GOTO_ERR_BELOW_HORIZON)+'1';
+          if (e == CE_NONE) reply[0]='0';
+          reply[1]=0;
+          boolReply=false;
+          supress_frame=true; 
+        }
+        commandError=e;
       } else
 
 // :MP#       Goto the Current Position for Polar Align
