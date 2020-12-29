@@ -40,7 +40,7 @@ class DigitalAnalogInput {
         int sample1=digitalRead(_pin); delayMicroseconds(30);
         int sample2=digitalRead(_pin); delayMicroseconds(30);
         int sample3=digitalRead(_pin);
-        if (sample1 == sample2 && sample2 == sample3) res=sample1;
+        if (sample1 == sample2 && sample2 == sample3) value=sample1;
       }
       _lastValue=value;
       if (_invert) { if (value == LOW) return HIGH; else return LOW; } else return value;
