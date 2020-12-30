@@ -215,19 +215,18 @@ bool getHor(double *Alt, double *Azm) {
 // causes a goto to the same RA/Dec on the opposite pier side if possible
 CommandErrors goToHere(int destinationPierSide) {
   bool validated=false;
-  if (meridianFlip == MeridianFlipNever) return CE_SLEW_ERR_OUTSIDE_LIMITS;
-  cli(); long h=posAxis1+indexAxis1Steps; sei();
-  if (getInstrPierSide() == PIER_SIDE_EAST && destinationPierSide == PIER_SIDE_WEST && h < degreesPastMeridianW*(long)axis1Settings.stepsPerMeasure) validated=true;
-  if (getInstrPierSide() == PIER_SIDE_WEST && destinationPierSide == PIER_SIDE_EAST && h > -degreesPastMeridianE*(long)axis1Settings.stepsPerMeasure) validated=true;
+  if (meridianFlip == MeridianFlipNever) return CE_GOTO_ERR_UNSPECIFIED;
+  byte currentPierSide=getInstrPierSide();
+  double Axis1=getInstrAxis1();
+  if (currentPierSide == PIER_SIDE_EAST && destinationPierSide == WEST && (Axis1 < degreesPastMeridianW || Axis1 > axis1Settings.min+360.0)) validated=true;
+  if (currentPierSide == PIER_SIDE_WEST && destinationPierSide == EAST && (Axis1 > -degreesPastMeridianE || Axis1 < axis1Settings.max-360.0)) validated=true;
   if (validated) {
     double newRA,newDec;
     getEqu(&newRA,&newDec,false);
     CommandErrors e=goToEqu(newRA,newDec,destinationPierSide,false);
     return e;
   }
-  if (getInstrPierSide() == PIER_SIDE_EAST && destinationPierSide == PIER_SIDE_EAST) return CE_NONE;
-  if (getInstrPierSide() == PIER_SIDE_WEST && destinationPierSide == PIER_SIDE_WEST) return CE_NONE;
-  return CE_SLEW_ERR_OUTSIDE_LIMITS;
+  return CE_GOTO_ERR_UNSPECIFIED;
 }
 
 // moves the mount to a new Right Ascension and Declination (RA,Dec) in degrees
@@ -282,11 +281,19 @@ CommandErrors goToEqu(double RA, double Dec, int preferredPierSide, bool validat
     Axis2Alt=a;
   } else {
     // correct for polar offset, refraction, coordinate systems, operation past pole, etc. as required
-    AlignE.equToInstr(HA,Dec,&Axis1,&Axis2,getInstrPierSide());
-  
+    byte currentPierSide=getInstrPierSide();
+    AlignE.equToInstr(HA,Dec,&Axis1,&Axis2,currentPierSide);
+    // adjust coordinate overlap as appropriate for each pier side
+    if (currentPierSide == PIER_SIDE_EAST && Axis1+360.0 < axis1Settings.max) Axis1+=360.0;
+    if (currentPierSide == PIER_SIDE_WEST && Axis1-360.0 > axis1Settings.min) Axis1-=360.0;
+    
     // as above... for the opposite pier side just incase we need to do a meridian flip
-    int p=PIER_SIDE_NONE; if (getInstrPierSide() == PIER_SIDE_EAST) p=PIER_SIDE_WEST; else if (getInstrPierSide() == PIER_SIDE_WEST) p=PIER_SIDE_EAST;
-    AlignE.equToInstr(HA,Dec,&Axis1Alt,&Axis2Alt,p);
+    int alternatePierSide=PIER_SIDE_NONE;
+    if (currentPierSide == PIER_SIDE_EAST) alternatePierSide=PIER_SIDE_WEST; else if (currentPierSide == PIER_SIDE_WEST) alternatePierSide=PIER_SIDE_EAST;
+    AlignE.equToInstr(HA,Dec,&Axis1Alt,&Axis2Alt,alternatePierSide);
+    // adjust coordinate overlap as appropriate for each pier side
+    if (alternatePierSide == PIER_SIDE_EAST && Axis1Alt+360.0 < axis1Settings.max) Axis1Alt+=360.0;
+    if (alternatePierSide == PIER_SIDE_WEST && Axis1Alt-360.0 > axis1Settings.min) Axis1Alt-=360.0;
   }
 
   // goto function takes HA and Dec in steps
@@ -320,12 +327,12 @@ CommandErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTar
     double westOfPierMaxHA= degreesPastMeridianW;
     double westOfPierMinHA= axis1Settings.min;
 
-    // override the defaults and force a flip if near the meridian and possible (for parking and align)
+    // override the defaults and force a flip if in the limit overlap near the meridian or min/max regions
     if ((thisPierSide != PIER_SIDE_BEST) && (thisPierSide != currentPierSide)) {
-      if (currentPierSide == PIER_SIDE_EAST) eastOfPierMinHA= degreesPastMeridianW;
-      if (currentPierSide == PIER_SIDE_WEST) westOfPierMaxHA=-degreesPastMeridianE;
+      if (currentPierSide == PIER_SIDE_EAST) { eastOfPierMinHA= degreesPastMeridianW; eastOfPierMaxHA=axis1Settings.min+360.0; }
+      if (currentPierSide == PIER_SIDE_WEST) { westOfPierMaxHA=-degreesPastMeridianE; westOfPierMinHA=axis1Settings.max-360.0; }
     }
-    
+
     // if doing a meridian flip, use the opposite pier side coordinates
     if (currentPierSide == PIER_SIDE_EAST) {
       if ((thisTargetAxis1 > eastOfPierMaxHA) || (thisTargetAxis1 < eastOfPierMinHA)) {
@@ -381,7 +388,7 @@ CommandErrors goTo(double thisTargetAxis1, double thisTargetAxis2, double altTar
     if (thisPierSideControl == PIER_SIDE_WE1) thisPierSideControl=PIER_SIDE_EAST; else
     if (thisPierSideControl == PIER_SIDE_EW1) thisPierSideControl=PIER_SIDE_WEST;
   }
-
+  
   if (validateOnly) {
     if (thisPierSideControl == PIER_SIDE_EW1 || thisPierSideControl == PIER_SIDE_WEST) return CE_0; else return CE_NONE;
   }
