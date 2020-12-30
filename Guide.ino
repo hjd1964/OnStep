@@ -108,9 +108,9 @@ bool isPulseGuiding() {
   if ((guideDirAxis1 && lastGuidePulseGuideAxis1) || (guideDirAxis2 && lastGuidePulseGuideAxis2)) return true; else return false;
 }
 
-// returns true if a guide is happening
+// returns true if a guide is happening and active (breaking is considered false)
 bool isGuiding() {
-  if (guideDirAxis1 || guideDirAxis2) return true; else return false;
+  if (guideDirAxis1 == 'e' || guideDirAxis1 == 'w' || guideDirAxis2 == 'n' || guideDirAxis2 == 's') return true; else return false;
 }
 
 // returns true if rapid movement is happening
