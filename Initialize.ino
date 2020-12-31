@@ -425,13 +425,17 @@ void initReadNvValues() {
     if (i > 120)  i=((i-120)*15)+180; else if (i > 60)  i=((i-60)*2)+60; else 
     if (i < -120) i=((i+120)*15)-180; else if (i < -60) i=((i+60)*2)-60;
     degreesPastMeridianE=i;
-    if (degreesPastMeridianE < axis1Settings.min || degreesPastMeridianE > axis1Settings.max) { degreesPastMeridianE=0.0; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV degreesPastMeridianE"); }
+    if (labs(degreesPastMeridianE) > 270) { degreesPastMeridianE=0.0; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV degreesPastMeridianE"); }
+    if (degreesPastMeridianE < -axis1Settings.max) degreesPastMeridianE=-axis1Settings.max;
+    if (degreesPastMeridianE > -axis1Settings.min) degreesPastMeridianE=-axis1Settings.min;
 
     i=round(nv.read(EE_dpmW)-128);
     if (i > 120)  i=((i-120)*15)+180; else if (i > 60)  i=((i-60)*2)+60; else 
     if (i < -120) i=((i+120)*15)-180; else if (i < -60) i=((i+60)*2)-60;
     degreesPastMeridianW=i;
-    if (-degreesPastMeridianW < axis1Settings.min || -degreesPastMeridianW > axis1Settings.max) { degreesPastMeridianW=0.0; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV degreesPastMeridianW"); }
+    if (labs(degreesPastMeridianW) > 270) { degreesPastMeridianW=0.0; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV degreesPastMeridianW"); }
+    if (degreesPastMeridianW < axis1Settings.min) degreesPastMeridianW=axis1Settings.min;
+    if (degreesPastMeridianW > axis1Settings.max) degreesPastMeridianW=axis1Settings.max;
   }
   
   // get the min. and max altitude

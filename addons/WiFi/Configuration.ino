@@ -34,9 +34,9 @@ const char html_configMaxAlt[] PROGMEM =
 const char html_configBlAxis1[] PROGMEM =
 "<input value='%d' type='number' name='b1' min='0' max='3600'>&nbsp;" L_BACKLASH_RANGE_AXIS1 "<br />\r\n";
 const char html_configPastMerE[] PROGMEM =
-"<input value='%d' type='number' name='el' min='-180' max='270'>&nbsp;" L_LIMITS_RANGE_MERIDIAN_E "<br />\r\n";
+"<input value='%d' type='number' name='el' min='-270' max='270'>&nbsp;" L_LIMITS_RANGE_MERIDIAN_E "<br />\r\n";
 const char html_configPastMerW[] PROGMEM =
-"<input value='%d' type='number' name='wl' min='-180' max='270'>&nbsp;" L_LIMITS_RANGE_MERIDIAN_W "<br /><br />";
+"<input value='%d' type='number' name='wl' min='-270' max='270'>&nbsp;" L_LIMITS_RANGE_MERIDIAN_W "<br /><br />";
 
 // Axis2
 const char html_configBlAxis2[] PROGMEM =
