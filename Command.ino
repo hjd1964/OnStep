@@ -1981,17 +1981,21 @@ void processCommands() {
               if (AXIS1_PEC != ON) l=0;
               if (l >= 0 && l < 129600000) nv.writeLong(EE_stepsPerWormRotAxis1,l); else commandError=CE_PARAM_RANGE;
             break;
-            case '9': // minutes past meridianE
-              if (labs(f) <= 180) {
+            case '9': // minutes past meridianE (up to +/- 270 degrees range, within min/max)
+              if (f >= axis1Settings.min && f <= axis1Settings.max) {
                 degreesPastMeridianE=f;
-                i=round(degreesPastMeridianE); if (degreesPastMeridianE > 60) i= 60+round((i-60)/2); else if (degreesPastMeridianE < -60) i=-60+round((i+60)/2);
+                i=round(degreesPastMeridianE);
+                if (i >  180) i=120+round((i-180)/15); else if (i >  60) i= 60+round((i-60)/2); else
+                if (i < -180) i=120+round((i+180)/15); else if (i < -60) i=-60+round((i+60)/2);
                 nv.write(EE_dpmE,round(i+128));
               } else commandError=CE_PARAM_RANGE;
             break;
-            case 'A': // minutes past meridianW
-              if (labs(f) <= 180) {
+            case 'A': // minutes past meridianW (up to +/- 270 degrees range, within min/max)
+              if (-f >= axis1Settings.min && -f <= axis1Settings.max) {
                 degreesPastMeridianW=f;
-                i=round(degreesPastMeridianW); if (degreesPastMeridianW > 60) i= 60+round((i-60)/2); else if (degreesPastMeridianW < -60) i=-60+round((i+60)/2);
+                i=round(degreesPastMeridianW);
+                if (i >  180) i=120+round((i-180)/15); else if (i >  60) i= 60+round((i-60)/2); else
+                if (i < -180) i=120+round((i+180)/15); else if (i < -60) i=-60+round((i+60)/2);
                 nv.write(EE_dpmW,round(i+128));
               } else commandError=CE_PARAM_RANGE;
             break;

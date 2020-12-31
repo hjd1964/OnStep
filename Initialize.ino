@@ -422,14 +422,16 @@ void initReadNvValues() {
   // get the degrees past meridian east/west
   if (mountType == GEM) {
     int i=round(nv.read(EE_dpmE)-128);
-    if (i > 60) i=((i-60)*2)+60; else if (i < -60) i=((i+60)*2)-60;
+    if (i > 120)  i=((i-120)*15)+180; else if (i > 60)  i=((i-60)*2)+60; else 
+    if (i < -120) i=((i+120)*15)-180; else if (i < -60) i=((i+60)*2)-60;
     degreesPastMeridianE=i;
-    if (degreesPastMeridianE < -180 || degreesPastMeridianE > 180) { degreesPastMeridianE=0.0; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV degreesPastMeridianE"); }
-  
+    if (degreesPastMeridianE < axis1Settings.min || degreesPastMeridianE > axis1Settings.max) { degreesPastMeridianE=0.0; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV degreesPastMeridianE"); }
+
     i=round(nv.read(EE_dpmW)-128);
-    if (i > 60) i=((i-60)*2)+60; else if (i < -60) i=((i+60)*2)-60;
+    if (i > 120)  i=((i-120)*15)+180; else if (i > 60)  i=((i-60)*2)+60; else 
+    if (i < -120) i=((i+120)*15)-180; else if (i < -60) i=((i+60)*2)-60;
     degreesPastMeridianW=i;
-    if (degreesPastMeridianW < -180 || degreesPastMeridianW > 180) { degreesPastMeridianW=0.0; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV degreesPastMeridianW"); }
+    if (-degreesPastMeridianW < axis1Settings.min || -degreesPastMeridianW > axis1Settings.max) { degreesPastMeridianW=0.0; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV degreesPastMeridianW"); }
   }
   
   // get the min. and max altitude
