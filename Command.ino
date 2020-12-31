@@ -289,7 +289,7 @@ void processCommands() {
         if (command[1] == 'N' && parameter[0] == 'V' && parameter[1] == 'R' && parameter[2] == 'E' && parameter[3] == 'S' && parameter[4] == 'E' && parameter[5] == 'T' && parameter[6] == 0) {
           if (atHome || parkStatus == Parked) {
             nv.writeLong(EE_autoInitKey,0);
-            strcpy(reply,"NV will be wiped on next boot.");
+            strcpy(reply,"NV memory will be cleared on next boot.");
             boolReply=false;
           } else commandError=CE_NOT_PARKED_OR_AT_HOME; } else
 #if SERIAL_B_ESP_FLASHING == ON
