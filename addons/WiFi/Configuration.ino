@@ -34,9 +34,9 @@ const char html_configMaxAlt[] PROGMEM =
 const char html_configBlAxis1[] PROGMEM =
 "<input value='%d' type='number' name='b1' min='0' max='3600'>&nbsp;" L_BACKLASH_RANGE_AXIS1 "<br />\r\n";
 const char html_configPastMerE[] PROGMEM =
-"<input value='%d' type='number' name='el' min='-180' max='180'>&nbsp;" L_LIMITS_RANGE_MERIDIAN_E "<br />\r\n";
+"<input value='%d' type='number' name='el' min='-180' max='270'>&nbsp;" L_LIMITS_RANGE_MERIDIAN_E "<br />\r\n";
 const char html_configPastMerW[] PROGMEM =
-"<input value='%d' type='number' name='wl' min='-180' max='180'>&nbsp;" L_LIMITS_RANGE_MERIDIAN_W "<br /><br />";
+"<input value='%d' type='number' name='wl' min='-180' max='270'>&nbsp;" L_LIMITS_RANGE_MERIDIAN_W "<br /><br />";
 
 // Axis2
 const char html_configBlAxis2[] PROGMEM =
@@ -309,127 +309,6 @@ void handleConfiguration() {
   
   data += "<br />\r\n";
 
-#if DRIVE_CONFIGURATION == ON
-  int numShown = 0;
-  axisSettings a;
-
-  data += FPSTR(html_configAxes);
- 
-  // Axis1 RA/Azm
-  if (!command(":GXA1#",temp1)) strcpy(temp1,"0");
-  if (decodeAxisSettings(temp1,a)) {
-    data += "<button type='button' class='collapsible'>Axis1 RA/Azm</button>";
-    data += FPSTR(html_configFormBegin);
-    if (validateAxisSettings(1,mountStatus.mountType()==MT_ALTAZM,a)) {
-      dtostrf(a.stepsPerMeasure,1,3,temp1); stripNum(temp1);
-      sprintf_P(temp,html_configAxisSpd,temp1,1,3000,61200); data += temp;
-#if DRIVE_MAIN_AXES_MICROSTEPS == ON
-      if (a.microsteps != OFF) { sprintf_P(temp,html_configAxisMicroSteps,a.microsteps,1); data += temp; }
-#endif
-#if DRIVE_MAIN_AXES_CURRENT == ON
-      if (a.IRUN != OFF) { sprintf_P(temp,html_configAxisCurrent,a.IRUN,1,3000); data += temp; }
-#endif
-#if DRIVE_MAIN_AXES_REVERSE == ON
-      sprintf_P(temp,html_configAxisReverse,a.reverse==ON?1:0,1); data += temp;
-#endif
-      sprintf_P(temp,html_configAxisMin,a.min,1,-360,-90,"&deg;,"); data += temp;
-      sprintf_P(temp,html_configAxisMax,a.max,1,90,360,"&deg;,"); data += temp;
-      data += "<button type='submit'>" L_UPLOAD "</button> ";
-    }
-    data += "<button name='revert' value='1' type='submit'>" L_REVERT "</button>\r\n";
-    data += FPSTR(html_configFormEnd);
-    numShown++;
-  }
-
-  // Axis2 Dec/Alt
-  if (!command(":GXA2#",temp1)) strcpy(temp1,"0");
-  if (decodeAxisSettings(temp1,a)) {
-    data += "<button type='button' class='collapsible'>Axis2 Dec/Alt</button>";
-    data += FPSTR(html_configFormBegin);
-    if (validateAxisSettings(2,mountStatus.mountType()==MT_ALTAZM,a)) {
-      dtostrf(a.stepsPerMeasure,1,3,temp1); stripNum(temp1);
-      sprintf_P(temp,html_configAxisSpd,temp1,2,3000,61200); data += temp;
-#if DRIVE_MAIN_AXES_MICROSTEPS == ON
-      if (a.microsteps != OFF) { sprintf_P(temp,html_configAxisMicroSteps,a.microsteps,2); data += temp; }
-#endif
-#if DRIVE_MAIN_AXES_CURRENT == ON
-      if (a.IRUN != OFF) { sprintf_P(temp,html_configAxisCurrent,a.IRUN,2,3000); data += temp; }
-#endif
-#if DRIVE_MAIN_AXES_REVERSE == ON
-      sprintf_P(temp,html_configAxisReverse,a.reverse==ON?1:0,2); data += temp;
-#endif
-      sprintf_P(temp,html_configAxisMin,a.min,2,-90,0,"&deg;,"); data += temp;
-      sprintf_P(temp,html_configAxisMax,a.max,2,0,90,"&deg;,"); data += temp;
-      data += "<button type='submit'>" L_UPLOAD "</button> ";
-    }
-    data += "<button name='revert' value='2' type='submit'>" L_REVERT "</button>";
-    data += FPSTR(html_configFormEnd);
-    numShown++;
-  }
-  
-  // Axis3 Rotator
-  if (!command(":GXA3#",temp1)) strcpy(temp1,"0");
-  if (decodeAxisSettings(temp1,a)) {
-    data += "<button type='button' class='collapsible'>Axis3 " L_ROTATOR "</button>";
-    data += FPSTR(html_configFormBegin);
-    if (validateAxisSettings(3,mountStatus.mountType()==MT_ALTAZM,a)) {
-      dtostrf(a.stepsPerMeasure,1,3,temp1); stripNum(temp1);
-      sprintf_P(temp,html_configAxisSpd,temp1,3,10,3600); data += temp;
-      if (a.microsteps != OFF) { sprintf_P(temp,html_configAxisMicroSteps,a.microsteps,3); data += temp; }
-      if (a.IRUN != OFF) { sprintf_P(temp,html_configAxisCurrent,a.IRUN,3,1000); data += temp; }
-      sprintf_P(temp,html_configAxisReverse,a.reverse==ON?1:0,3); data += temp;
-      sprintf_P(temp,html_configAxisMin,a.min,3,-360,0,"&deg;,"); data += temp;
-      sprintf_P(temp,html_configAxisMax,a.max,3,0,360,"&deg;,"); data += temp;
-      data += "<button type='submit'>" L_UPLOAD "</button> ";
-    }
-    data += "<button name='revert' value='3' type='submit'>" L_REVERT "</button>";
-    data += FPSTR(html_configFormEnd);
-    numShown++;
-  }
-  
-  // Axis4 Focuser1
-  if (!command(":GXA4#",temp1)) strcpy(temp1,"0");
-  if (decodeAxisSettings(temp1,a)) {
-    data += "<button type='button' class='collapsible'>Axis4 " L_FOCUSER " 1</button>";
-    data += FPSTR(html_configFormBegin);
-    if (validateAxisSettings(4,mountStatus.mountType()==MT_ALTAZM,a)) {
-      dtostrf(a.stepsPerMeasure,1,3,temp1); stripNum(temp1);
-      sprintf_P(temp,html_configAxisSpu,temp1,4); data += temp;
-      if (a.microsteps != OFF) { sprintf_P(temp,html_configAxisMicroSteps,a.microsteps,4); data += temp; }
-      if (a.IRUN != OFF) { sprintf_P(temp,html_configAxisCurrent,a.IRUN,4,1000); data += temp; }
-      sprintf_P(temp,html_configAxisReverse,a.reverse==ON?1:0,4); data += temp;
-      sprintf_P(temp,html_configAxisMin,a.min,4,0,500,"mm,"); data += temp;
-      sprintf_P(temp,html_configAxisMax,a.max,4,0,500,"mm,"); data += temp;
-      data += "<button type='submit'>" L_UPLOAD "</button> ";
-    }
-    data += "<button name='revert' value='4' type='submit'>" L_REVERT "</button>";
-    data += FPSTR(html_configFormEnd);
-    numShown++;
-  }
-  
-  // Axis5 Focuser2
-  if (!command(":GXA5#",temp1)) strcpy(temp1,"0");
-  if (decodeAxisSettings(temp1,a)) {
-    data += "<button type='button' class='collapsible'>Axis5 " L_FOCUSER " 2</button>";
-    data += FPSTR(html_configFormBegin);
-    if (validateAxisSettings(5,mountStatus.mountType()==MT_ALTAZM,a)) {
-      dtostrf(a.stepsPerMeasure,1,3,temp1); stripNum(temp1);
-      sprintf_P(temp,html_configAxisSpu,temp1,5); data += temp;
-      if (a.microsteps != OFF) { sprintf_P(temp,html_configAxisMicroSteps,a.microsteps,5); data += temp; }
-      if (a.IRUN != OFF) { sprintf_P(temp,html_configAxisCurrent,a.IRUN,5,1000); data += temp; }
-      sprintf_P(temp,html_configAxisReverse,a.reverse==ON?1:0,5); data += temp;
-      sprintf_P(temp,html_configAxisMin,a.min,5,0,500,"mm,"); data += temp;
-      sprintf_P(temp,html_configAxisMax,a.max,5,0,500,"mm,"); data += temp;
-      data += "<button type='submit'>" L_UPLOAD "</button> ";
-    }
-    data += "<button name='revert' value='5' type='submit'>" L_REVERT "</button>";
-    data += FPSTR(html_configFormEnd);
-    numShown++;
-  }
-  if (numShown == 0) data += L_ADV_SET_NO_EDIT "<br />";
-  data += FPSTR(html_configAxesNotes);
-#endif
-
   // collapsible script
   data += FPSTR(html_collapseScript);
 
@@ -467,7 +346,7 @@ void processConfigurationGet() {
   // Meridian limit E
   v=server.arg("el");
   if (v!="") {
-    if (v.toInt() >= -180 && v.toInt() <= 180) { 
+    if (v.toInt() >= -270 && v.toInt() <= 270) { 
       sprintf(temp,":SXE9,%d#",(int16_t)round((v.toInt()*60.0)/15.0));
       commandBool(temp);
     }
@@ -476,7 +355,7 @@ void processConfigurationGet() {
   // Meridian limit W
   v=server.arg("wl");
   if (v!="") {
-    if (v.toInt() >= -180 && v.toInt() <= 180) { 
+    if (v.toInt() >= -270 && v.toInt() <= 270) { 
       sprintf(temp,":SXEA,%d#",(int16_t)round((v.toInt()*60.0)/15.0));
       commandBool(temp);
     }

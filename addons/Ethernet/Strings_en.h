@@ -328,8 +328,8 @@
 #define L_LIMITS_TITLE "Horizon and Overhead Limits"
 #define L_LIMITS_RANGE_HORIZON "Horizon, minimum altitude in degrees +/- 30"
 #define L_LIMITS_RANGE_OVERHEAD "Overhead, maximum altitude in degrees 60 to 90"
-#define L_LIMITS_RANGE_MERIDIAN_E "Past Meridian when East of the pier, in degrees +/- 180"
-#define L_LIMITS_RANGE_MERIDIAN_W "Past Meridian when West of the pier, in degrees +/- 180"
+#define L_LIMITS_RANGE_MERIDIAN_E "Past Meridian when East of the pier, in degrees +/- 270"
+#define L_LIMITS_RANGE_MERIDIAN_W "Past Meridian when West of the pier, in degrees +/- 270"
 
 // location
 #define L_LOCATION_TITLE "Site Latitude, Longitude, UTC Offset"

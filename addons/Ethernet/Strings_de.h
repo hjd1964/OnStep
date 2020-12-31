@@ -336,8 +336,8 @@
 #define L_LIMITS_TITLE "Horizont- und Overhead-Grenzen"
 #define L_LIMITS_RANGE_HORIZON "Horizont, in Grad +/- 30"
 #define L_LIMITS_RANGE_OVERHEAD "Obergrenze, in Grad 60 to 90"
-#define L_LIMITS_RANGE_MERIDIAN_E "Nach Meridian wenn Teleskop auf Ostseite der Montierung, in Grad +/- 180"
-#define L_LIMITS_RANGE_MERIDIAN_W "Nach Meridian wenn Teleskop auf Westseite der Montierung, in Grad +/- 180"
+#define L_LIMITS_RANGE_MERIDIAN_E "Nach Meridian wenn Teleskop auf Ostseite der Montierung, in Grad +/- 270"
+#define L_LIMITS_RANGE_MERIDIAN_W "Nach Meridian wenn Teleskop auf Westseite der Montierung, in Grad +/- 270"
 
 // location
 #define L_LOCATION_TITLE "Seite Standort Breite, Länge, UTC-Versatz"

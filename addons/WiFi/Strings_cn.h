@@ -328,8 +328,8 @@
 #define L_LIMITS_TITLE "范围和开销限制"
 #define L_LIMITS_RANGE_HORIZON "地平线，以+/- 30度为单位"
 #define L_LIMITS_RANGE_OVERHEAD "上限，以60到90度为单位"
-#define L_LIMITS_RANGE_MERIDIAN_E "如果将望远镜放在坐骑的东侧，则指向子午线，以+/- 180度为单位"
-#define L_LIMITS_RANGE_MERIDIAN_W "如果将望远镜放在坐骑西侧，则指向子午线，以+/- 180度为单位"
+#define L_LIMITS_RANGE_MERIDIAN_E "如果将望远镜放在坐骑的东侧，则指向子午线，以+/- 270度为单位"
+#define L_LIMITS_RANGE_MERIDIAN_W "如果将望远镜放在坐骑西侧，则指向子午线，以+/- 270度为单位"
 
 // location
 #define L_LOCATION_TITLE "站点纬度，经度，UTC偏移"
