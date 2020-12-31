@@ -285,6 +285,15 @@ void processCommands() {
           boolReply=false;
         } else
 #endif
+// :ERESET#   Reset the MCU.  OnStep must be at home and tracking turned off for this command to work.
+//            Returns: Nothing
+        if (command[1] == 'R' && parameter[0] == 'E' && parameter[1] == 'S' && parameter[2] == 'E' && parameter[3] == 'T' && parameter[4] == 0) {
+          if (atHome || parkStatus == Parked) {
+#ifdef HAL_RESET
+            HAL_RESET;
+#endif
+            boolReply=false;
+          } else commandError=CE_NOT_PARKED_OR_AT_HOME; } else
 // :ENVRESET# Wipe flash.  OnStep must be at home and tracking turned off for this command to work.
         if (command[1] == 'N' && parameter[0] == 'V' && parameter[1] == 'R' && parameter[2] == 'E' && parameter[3] == 'S' && parameter[4] == 'E' && parameter[5] == 'T' && parameter[6] == 0) {
           if (atHome || parkStatus == Parked) {
