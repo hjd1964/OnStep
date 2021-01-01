@@ -101,6 +101,17 @@ void guide() {
   }
 }
 
+// returns true if a spiral guide is happening
+bool lastGuideSpiralGuide = false;
+bool isSpiralGuiding() {
+  if ((guideDirAxis1 || guideDirAxis2) && lastGuideSpiralGuide) return true; else { 
+    lastGuideSpiralGuide=false;
+    guideTimerCustomRateAxis1=0.0;
+    guideTimerCustomRateAxis2=0.0;
+    return false;
+  }
+}
+
 // returns true if a pulse guide is happening
 bool lastGuidePulseGuideAxis1 = false;
 bool lastGuidePulseGuideAxis2 = false;
@@ -139,6 +150,7 @@ CommandErrors startGuideAxis1(char direction, int guideRate, long guideDuration,
   if (parkStatus == Parked)               return CE_SLEW_ERR_IN_PARK;
   if (trackingSyncInProgress())           return CE_MOUNT_IN_MOTION;
   if (trackingState == TrackingMoveTo)    return CE_MOUNT_IN_MOTION;
+  if (isSpiralGuiding())                  return CE_MOUNT_IN_MOTION;
   if (direction == guideDirAxis1)         return CE_NONE;
   if (direction == 'e' && !guideEastOk()) return CE_SLEW_ERR_OUTSIDE_LIMITS;
   if (direction == 'w' && !guideWestOk()) return CE_SLEW_ERR_OUTSIDE_LIMITS;
@@ -175,6 +187,7 @@ CommandErrors startGuideAxis2(char direction, int guideRate, long guideDuration,
   if (parkStatus == Parked)                return CE_SLEW_ERR_IN_PARK;
   if (trackingSyncInProgress())            return CE_MOUNT_IN_MOTION;
   if (trackingState == TrackingMoveTo)     return CE_MOUNT_IN_MOTION;
+  if (isSpiralGuiding())                   return CE_MOUNT_IN_MOTION;
   if (direction == guideDirAxis2)          return CE_NONE;
   if (direction == 'n' && !guideNorthOk()) return CE_SLEW_ERR_OUTSIDE_LIMITS;
   if (direction == 's' && !guideSouthOk()) return CE_SLEW_ERR_OUTSIDE_LIMITS;
@@ -246,6 +259,7 @@ CommandErrors startGuideSpiral(int guideRate, long guideDuration) {
   if (trackingSyncInProgress())            return CE_MOUNT_IN_MOTION;
   if (trackingState == TrackingMoveTo)     return CE_MOUNT_IN_MOTION;
   if (guideDirAxis1 || guideDirAxis2)      { if (spiralGuide) stopGuideSpiral(); return CE_NONE; }
+  if (isSpiralGuiding())                   return CE_MOUNT_IN_MOTION;
   if (abs(getInstrAxis2() > 75.0))         return CE_SLEW_ERR_OUTSIDE_LIMITS;
   if (!guideNorthOk() || !guideSouthOk())  return CE_SLEW_ERR_OUTSIDE_LIMITS;
   if ((generalError == ERR_ALT_MIN ||
@@ -268,6 +282,7 @@ CommandErrors startGuideSpiral(int guideRate, long guideDuration) {
 
   spiralScaleAxis1=cos(getInstrAxis2()/Rad);
 
+  lastGuideSpiralGuide=true;
   guideSpiralPoll();
 
   return CE_NONE;
@@ -376,9 +391,7 @@ int getPulseGuideRate() {
 // -1 to use guideTimerCustomRateAxis1/2, otherwise rates are:
 // 0=.25X 1=.5x 2=1x 3=2x 4=4x 5=8x 6=24x 7=48x 8=half-MaxRate 9=MaxRate
 void enableGuideRate(int g) {
-  // don't do these calculations unless we have to
-  static int lastGuideRate=GuideRateNone;
-  if (g != GuideRateNone && g != -1 && g == lastGuideRate) return; else lastGuideRate=g;
+  if (g == activeGuideRate) return;
   
   if (g >= 0) activeGuideRate=g;
 
