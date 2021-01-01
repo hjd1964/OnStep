@@ -105,9 +105,7 @@ void guide() {
 bool lastGuideSpiralGuide = false;
 bool isSpiralGuiding() {
   if ((guideDirAxis1 || guideDirAxis2) && lastGuideSpiralGuide) return true; else { 
-    lastGuideSpiralGuide=false;
-    guideTimerCustomRateAxis1=0.0;
-    guideTimerCustomRateAxis2=0.0;
+    if (lastGuideSpiralGuide) { lastGuideSpiralGuide=false; guideTimerCustomRateAxis1=0.0; guideTimerCustomRateAxis2=0.0; }
     return false;
   }
 }
