@@ -791,7 +791,7 @@ void setAccelerationRates(double maxRate) {
   slewRateX = slewRateX*((maxRateBaseActual/2.0)/(maxRate/16.0)); // scale with maxRate so SLEW_ACCELERATION_DIST and SLEW_RAPID_STOP_DIST are approximately correct
   accXPerSec = slewRateX/SLEW_ACCELERATION_DIST;
   guideRates[9]=RateToASPerSec/(maxRate/16.0); guideRates[8]=guideRates[9]/2.0;
-  activeGuideRate=GuideRateNone;
+  activeGuideRateSelection=GR_NONE;
   
   // set the new goto acceleration rate
   cli();

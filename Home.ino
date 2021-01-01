@@ -13,8 +13,8 @@ void checkHome() {
   if (findHomeMode == FH_FAST || findHomeMode == FH_SLOW) {
     if ((long)(millis()-findHomeTimeout) > 0L || (guideDirAxis1 == 0 && guideDirAxis2 == 0)) {
       if ((long)(millis()-findHomeTimeout) > 0L) generalError=ERR_LIMIT_SENSE;
-      if (guideDirAxis1 == 'e' || guideDirAxis1 == 'w') guideDirAxis1='b';
-      if (guideDirAxis2 == 'n' || guideDirAxis2 == 's') guideDirAxis2='b';
+      stopGuideAxis1();
+      stopGuideAxis2();
       safetyLimitsOn=true;
       findHomeMode=FH_OFF;
     } else {
@@ -47,13 +47,13 @@ void checkHome() {
 }
 
 void StopAxis1() {
-  guideDirAxis1='b';
+  stopGuideAxis1();
   VLF("MSG: Homing limit detected, stopping guide on Axis1");
   if (guideDirAxis2 != 'n' && guideDirAxis2 != 's') { if (findHomeMode == FH_SLOW) findHomeMode=FH_DONE; if (findHomeMode == FH_FAST) findHomeMode=FH_IDLE; }
 }
 
 void StopAxis2() {
-  guideDirAxis2='b';
+  stopGuideAxis2();
   VLF("MSG: Homing limit detected, stopping guide on Axis2");
   if (guideDirAxis1 != 'e' && guideDirAxis1 != 'w') { if (findHomeMode == FH_SLOW) findHomeMode=FH_DONE; if (findHomeMode == FH_FAST) findHomeMode=FH_IDLE; }
 }

@@ -707,16 +707,16 @@ void stopSlewingAndTracking(StopSlewActions ss) {
     if (spiralGuide) stopGuideSpiral();
     if (ss == SS_ALL_FAST || ss == SS_LIMIT_HARD) { stopGuideAxis1(); stopGuideAxis2(); } else
     if (ss == SS_LIMIT_AXIS1_MIN) {
-      if (guideDirAxis1 == 'e' ) guideDirAxis1='b';
+      if (guideDirAxis1 == 'e' ) stopGuideAxis1();
     } else
     if (ss == SS_LIMIT_AXIS1_MAX) {
-      if (guideDirAxis1 == 'w' ) guideDirAxis1='b';
+      if (guideDirAxis1 == 'w' ) stopGuideAxis1();
     } else
     if (ss == SS_LIMIT_AXIS2_MIN) {
-      if (getInstrPierSide() == PIER_SIDE_WEST) { if (guideDirAxis2 == 'n' ) guideDirAxis2='b'; } else if (guideDirAxis2 == 's' ) guideDirAxis2='b';
+      if (getInstrPierSide() == PIER_SIDE_WEST) { if (guideDirAxis2 == 'n' ) stopGuideAxis2(); } else if (guideDirAxis2 == 's' ) stopGuideAxis2();
     } else
     if (ss == SS_LIMIT_AXIS2_MAX) {
-      if (getInstrPierSide() == PIER_SIDE_WEST) { if (guideDirAxis2 == 's' ) guideDirAxis2='b'; } else if (guideDirAxis2 == 'n' ) guideDirAxis2='b';
+      if (getInstrPierSide() == PIER_SIDE_WEST) { if (guideDirAxis2 == 's' ) stopGuideAxis2(); } else if (guideDirAxis2 == 'n' ) stopGuideAxis2();
     }
     if (trackingState != TrackingNone) {
       if (ss != SS_ALL_FAST) {

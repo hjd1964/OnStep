@@ -239,7 +239,7 @@ void initWriteNvValues() {
     nv.write(EE_parkStatus,NotParked);
 
     // init the pulse-guide rate
-    nv.write(EE_pulseGuideRate,GuideRate1x);
+    nv.write(EE_pulseGuideRate,GR_1X);
 
     // init the default maxRate
     maxRate=((1000000.0/(SLEW_RATE_BASE_DESIRED))/AXIS1_STEPS_PER_DEGREE)*16L;
@@ -490,9 +490,10 @@ void initReadNvValues() {
   if (parkStatus == Parking) { parkStatus=ParkFailed; nv.write(EE_parkStatus,parkStatus); }
 
   // get the pulse-guide rate
-  currentPulseGuideRate=nv.read(EE_pulseGuideRate);
-  if (currentPulseGuideRate < 0) { currentPulseGuideRate=0; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV currentPulseGuideRate"); }
-  if (currentPulseGuideRate > GuideRate1x) { currentPulseGuideRate=GuideRate1x; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV currentPulseGuideRate"); }
+  int r=nv.read(EE_pulseGuideRate);
+  if (r < 0) { r=0; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV pulseGuideRateSelection"); }
+  if (r > GR_1X) { r=GR_1X; generalError=ERR_NV_INIT; DLF("ERR, initReadNvValues(): bad NV pulseGuideRateSelection"); }
+  setPulseGuideRateSelection(r);
 
   // set the default MaxRate based on the desired goto speed
   maxRateBaseActual=maxRateBaseDesired;
@@ -532,8 +533,8 @@ void initReadNvValues() {
 #endif
 
   // set the default guide rate
-  setGuideRate(GuideRateDefault);
-  enableGuideRate(GuideRateDefault);
+  setGuideRateSelection(GR_DEFAULT);
+  activateGuideRateSelection(GR_DEFAULT);
 }
 
 void initGeneralError() {

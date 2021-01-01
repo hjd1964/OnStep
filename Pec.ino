@@ -22,7 +22,7 @@ void pec() {
   if (pecAutoRecord > 0) { pecAutoRecord--; nv.update(EE_pecTable+pecAutoRecord,pecBuffer[pecAutoRecord]); }
  
   // PEC is only active when we're tracking at the sidereal rate with a guide rate that makes sense
-  if (trackingState != TrackingSidereal || parkStatus != NotParked || ((guideDirAxis1 || guideDirAxis2) && activeGuideRate > GuideRate1x)) { disablePec(); return; }
+  if (trackingState != TrackingSidereal || parkStatus != NotParked || ((guideDirAxis1 || guideDirAxis2) && activeGuideRateSelection > GR_1X)) { disablePec(); return; }
 
   // keep track of our current step position, and when the step position on the worm wraps during playback
   cli(); long pecPos=(long)targetAxis1.part.m; sei();
