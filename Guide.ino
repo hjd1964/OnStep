@@ -377,8 +377,9 @@ int getPulseGuideRate() {
 // 0=.25X 1=.5x 2=1x 3=2x 4=4x 5=8x 6=24x 7=48x 8=half-MaxRate 9=MaxRate
 void enableGuideRate(int g) {
   // don't do these calculations unless we have to
-  if (activeGuideRate == g) return;
-
+  static int lastGuideRate=GuideRateNone;
+  if (g != GuideRateNone && g != -1 && g == lastGuideRate) return; else lastGuideRate=g;
+  
   if (g >= 0) activeGuideRate=g;
 
   // this enables the guide rates
