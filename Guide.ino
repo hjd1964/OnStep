@@ -105,9 +105,7 @@ void guide() {
 bool lastGuideSpiralGuide = false;
 bool isSpiralGuiding() {
   if ((guideDirAxis1 || guideDirAxis2) && lastGuideSpiralGuide) return true; else { 
-    lastGuideSpiralGuide=false;
-    guideTimerCustomRateAxis1=0.0;
-    guideTimerCustomRateAxis2=0.0;
+    if (lastGuideSpiralGuide) { lastGuideSpiralGuide=false; guideTimerCustomRateAxis1=0.0; guideTimerCustomRateAxis2=0.0; }
     return false;
   }
 }
@@ -149,7 +147,9 @@ void deactivateBacklashComp() {
 
 // start a guide in RA or Azm, direction must be 'e', 'w', or 'b', guideRate is the rate selection (0 to 9), guideDuration is in ms (0 to ignore) 
 CommandErrors startGuideAxis1(char direction, int guideRate, long guideDuration, bool pulseGuide) {
-  // Check state
+  // Translate rate setting
+  if (guideRate == GR_GUIDE) guideRate=guideRateSelection; else if (guideRate == GR_PULSEGUIDE) guideRate=pulseGuideRateSelection;
+
   if (faultAxis1)                         return CE_SLEW_ERR_HARDWARE_FAULT;
   if (!axis1Enabled)                      return CE_SLEW_ERR_IN_STANDBY;
   if (parkStatus == Parked)               return CE_SLEW_ERR_IN_PARK;
@@ -159,7 +159,6 @@ CommandErrors startGuideAxis1(char direction, int guideRate, long guideDuration,
   if (direction == guideDirAxis1)         return CE_NONE;
   if (direction == 'e' && !guideEastOk()) return CE_SLEW_ERR_OUTSIDE_LIMITS;
   if (direction == 'w' && !guideWestOk()) return CE_SLEW_ERR_OUTSIDE_LIMITS;
-  if (guideRate == GR_GUIDE) guideRate=guideRateSelection; else if (guideRate == GR_PULSEGUIDE) guideRate=pulseGuideRateSelection;
   if (guideRate < 3 && (generalError == ERR_ALT_MIN ||
                         generalError == ERR_LIMIT_SENSE ||
                         generalError == ERR_DEC ||
@@ -188,6 +187,9 @@ void stopGuideAxis1() {
 
 // start a guide in Dec or Alt, direction must be 'n', 's', or 'b', guideRate is the rate selection (0 to 9), guideDuration is in ms (0 to ignore) 
 CommandErrors startGuideAxis2(char direction, int guideRate, long guideDuration, bool pulseGuide, bool absolute) {
+  // Translate rate setting
+  if (guideRate == GR_GUIDE) guideRate=guideRateSelection; else if (guideRate == GR_PULSEGUIDE) guideRate=pulseGuideRateSelection;
+
   if (faultAxis2)                          return CE_SLEW_ERR_HARDWARE_FAULT;
   if (!axis1Enabled)                       return CE_SLEW_ERR_IN_STANDBY;
   if (parkStatus == Parked)                return CE_SLEW_ERR_IN_PARK;
@@ -198,7 +200,6 @@ CommandErrors startGuideAxis2(char direction, int guideRate, long guideDuration,
   if (direction == guideDirAxis2)          return CE_NONE;
   if (direction == 'n' && !guideNorthOk()) return CE_SLEW_ERR_OUTSIDE_LIMITS;
   if (direction == 's' && !guideSouthOk()) return CE_SLEW_ERR_OUTSIDE_LIMITS;
-  if (guideRate == GR_GUIDE) guideRate=guideRateSelection; else if (guideRate == GR_PULSEGUIDE) guideRate=pulseGuideRateSelection;
   if (guideRate < 3 && (generalError == ERR_ALT_MIN ||
                         generalError == ERR_LIMIT_SENSE ||
                         generalError == ERR_DEC ||
@@ -290,8 +291,8 @@ CommandErrors startGuideSpiral(long guideDuration) {
 
   spiralScaleAxis1=cos(getInstrAxis2()/Rad);
 
-  lastGuideSpiralGuide=true;
   guideSpiralPoll();
+  lastGuideSpiralGuide=true;
 
   return CE_NONE;
 }
@@ -375,9 +376,8 @@ bool customGuideRateAxis2(double rate, long guideDuration) {
 // custom rates have a special "guideRateSelection" value
 void setGuideRateSelection(int g) {
   guideRateSelection=g;
-  if ((g <= GR_1X) && (pulseGuideRateSelection != g)) { pulseGuideRateSelection=g; nv.update(EE_pulseGuideRate,g); }
-  guideTimerCustomRateAxis1=0.0;
-  guideTimerCustomRateAxis2=0.0;
+  if (g <= GR_1X) setPulseGuideRateSelection(g);
+  if (!isSpiralGuiding()) { guideTimerCustomRateAxis1=0.0; guideTimerCustomRateAxis2=0.0; }
 }
 
 // gets the rate for guide commands
@@ -387,7 +387,7 @@ int getGuideRateSelection() {
 
 // sets the rates for pulse-guide commands
 void setPulseGuideRateSelection(int g) {
-  pulseGuideRateSelection=g; nv.update(EE_pulseGuideRate,g);
+  if (pulseGuideRateSelection != g) { pulseGuideRateSelection=g; nv.update(EE_pulseGuideRate,g); }
 }
 
 // gets the rate for pulse-guide commands
