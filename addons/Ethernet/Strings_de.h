@@ -346,6 +346,11 @@
 #define L_LOCATION_RANGE_UTC_OFFSET "UTC Offset, in Stunden -14 to +12"
 #define L_LOCATION_MESSAGE_UTC_OFFSET "Entgegengesetzter Zeitzonenwert f&uuml;r die Standardzeit (Keine Winterzeit!)"
 
+// reset control
+#define L_RESET_TITLE "OnStep Steuerung zurücksetzen:"
+#define L_RESET "Zurücksetzen OnStep"
+#define L_RESET_FWU "Zurücksetzen OnStep zum Hochladen der Firmware"
+
 // ----------------------------  WiFi ----------------------------
 
 #define L_WIFI_PERFORMANCE "Leistung und Kompatibilität"
@@ -389,8 +394,8 @@
 #define L_DOWN_MESSAGE1 "Aus- und Wiedereinschalten kann helfen, wenn es eine Unstimmigkeit mit der Baudrate gibt<br /><br />"
 #define L_DOWN_MESSAGE2 "Andere m&ouml;gliche Gr&uuml;nde:<br /><ul>"
 #define L_DOWN_MESSAGE3 "Inkorrekt konfigurierte OnStep Baudrate."
-#define L_DOWN_MESSAGE4A "Inkorrekt konfigurierte ESP Baudrate."
-#define L_DOWN_MESSAGE4B "Inkorrekt konfigurierte MCU Baudrate."
+#define L_DOWN_MESSAGE4 "Inkorrekt konfigurierte ESP Baudrate."
+#define L_DOWN_MESSAGE5 "Inkorrekt konfigurierte MCU Baudrate."
 #define L_DOWN_MESSAGE6 "Inkorrekte Verkabelung der  COM-Ports (oder Hardwareschaden wenn RX/TX vertauscht wurden.)"
 #define L_DOWN_MESSAGE7 "Incorrekte Verkabelung der Stromversorgungs-Pins. Masse (GND) muss zwischen OnStep's MCU und der MCU des Addon's verbunden sein."
 

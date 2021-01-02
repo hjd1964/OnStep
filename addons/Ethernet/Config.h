@@ -40,6 +40,8 @@ IPAddress subnet(255, 255, 255, 0);
 #define DISPLAY_HIGH_PRECISION_COORDS OFF //    OFF, ON for pull high precision coordinates from OnStep.                      Option
 #define DISPLAY_WEATHER               OFF //    OFF, ON ambient conditions in locale default units.                           Option
 #define DISPLAY_INTERNAL_TEMPERATURE  OFF //    OFF, ON internal MCU temp. in locale default units.                           Option
+#define DISPLAY_RESET_CONTROLS        OFF //    OFF, ON to allow reset of OnStep, FWU for STM32 firmware upload pin HIGH.     Option
+
 #define DISPLAY_SPECIAL_CHARS          ON //     ON, For standard ASCII special symbols (compatibility.)                      Infreq
 #define DISPLAY_ADVANCED_CHARS         ON //     ON, For standard "RA/Dec" instead of symbols.                                Infreq
 

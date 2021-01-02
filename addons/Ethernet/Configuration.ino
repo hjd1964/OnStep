@@ -80,7 +80,7 @@ void handleConfiguration() {
   char temp1[120]="";
   char temp2[120]="";
   
-  processConfigurationGet();
+  bool success=processConfigurationGet();
 
   sendHtmlStart();
 
@@ -126,7 +126,7 @@ void handleConfiguration() {
   sendHtml(data);
   
   // OnStep wasn't found, show warning and info.
-  if (!mountStatus.valid()) { data+= FPSTR(html_bad_comms_message); sendHtml(data); sendHtmlDone(data); return; }
+  if (!mountStatus.valid() || !success) { data+= FPSTR(html_bad_comms_message); sendHtml(data); sendHtmlDone(data); return; }
 
   data+="<div style='width: 35em;'>";
   data += L_BASIC_SET_TITLE "<br /><br />";
@@ -202,7 +202,7 @@ void handleConfiguration() {
   data += temp;
   sendHtml(data);
   // Meridian Limits
-  if ((command(":GXE9#",temp1)) && (command(":GXEA#",temp2))) {
+  if (mountStatus.mountType() == MT_GEM && (command(":GXE9#",temp1)) && (command(":GXEA#",temp2))) {
     int degPastMerE=(int)strtol(&temp1[0],NULL,10);
     degPastMerE=round((degPastMerE*15.0)/60.0);
     sprintf_P(temp,html_configPastMerE,degPastMerE);
@@ -309,6 +309,16 @@ void handleConfiguration() {
   
   data += "<br />\r\n";
 
+#if DISPLAY_RESET_CONTROLS != OFF
+  sendHtml(data);
+  data += "<hr>" L_RESET_TITLE "<br/><br/><form method='get' action='/configuration.htm'>";
+  data += "<button name='advanced' type='submit' value='reset' onclick=\"return confirm('" L_ARE_YOU_SURE "?');\" >" L_RESET "!</button>";
+  #ifdef BOOT0_PIN
+    data += " &nbsp;&nbsp;<button name='advanced' type='submit' value='fwu' onclick=\"return confirm('" L_ARE_YOU_SURE "?');\" >" L_RESET_FWU "!</button>";
+  #endif
+  data += "</form>\r\n";
+#endif
+
   // collapsible script
   data += FPSTR(html_collapseScript);
 
@@ -321,7 +331,7 @@ void handleConfiguration() {
   sendHtmlDone(data);
 }
 
-void processConfigurationGet() {
+bool processConfigurationGet() {
   String v,v1,v2;
   char temp[20]="";
 
@@ -469,4 +479,14 @@ void processConfigurationGet() {
       commandBool(temp);
     }
   }
+
+  String ssa=server.arg("advanced");
+#if DISPLAY_RESET_CONTROLS != OFF
+  if (ssa.equals("reset")) { commandBlind(":ERESET#"); return false; }
+  #ifdef BOOT0_PIN
+    if (ssa.equals("fwu")) { pinMode(BOOT0_PIN,OUTPUT); digitalWrite(BOOT0_PIN,HIGH); commandBlind(":ERESET#"); delay(500); pinMode(BOOT0_PIN,INPUT); return false; }
+  #endif
+#endif
+
+  return true;
 }

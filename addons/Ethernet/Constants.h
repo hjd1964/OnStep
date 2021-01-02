@@ -12,6 +12,7 @@
 #define AUTO                -5
 #define AUTO_ON             -6
 #define AUTO_OFF            -7
+#define FWU                 -8
 #define INVALID        -999999
 
 // encoder types
