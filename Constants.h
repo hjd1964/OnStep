@@ -52,11 +52,10 @@
 // Arduino CNC Sheild on WeMos D2 R32 (ESP32)
 #define CNC3                        52 // Similar features to MaxESP3
 
-// Khalid and Dave's PCB for STM32 Blue pill
+// Khalid and Dave's PCB for STM32 Blue pill (STM32F303CC)
 #define STM32Blue                   60
-#define STM32Black                  61
 
-#define PINMAP_LAST                 61
+#define PINMAP_LAST                 60
 // ---------------------------------------------------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------------------------------------------------
                                    

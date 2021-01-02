@@ -1,18 +1,15 @@
 // -------------------------------------------------------------------------------------------------
 // Pin map for OnStep on STM32
 // 
-// This pin map is for an STM32F103C8T6 "Blue Pill" and "Black Pill" boards..
-// They run at 72MHz, with 20K of RAM, and 128K of flash.
-// The Black variant is 3.3V only, while the Blue has some pins that are 5V tolerant.
-// The Black Pill has two less pins than the Blue Pill.
+// This pin map is for an STM32F303xC "Blue Pill" boards..
+// They run at 72MHz, with 48K of RAM, and 256K of flash.
 //
 // More info, schematic at:
-//   http://wiki.stm32duino.com/index.php?title=Black_Pill
 //   http://wiki.stm32duino.com/index.php?title=Blue_Pill
 //
 // Cost on eBay and AliExpress is less than US $2.50
 
-#if defined(__STM32F1__) || defined(STM32F103xB) || defined(STM32F303xC)
+#if defined(STM32F303xC)
 
 // === Pins for USB 
 // In HAL, Serial_A is mapped to USART1, with the following pins:

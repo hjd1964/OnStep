@@ -86,8 +86,7 @@ float HAL_MCU_Temperature(void) {
 
 #define ISR(f) void f (void)
 
-// was TIM1 which collided with PWM on the Reticle pin
-#define TIM_SIDEREAL   TIM4
+#define TIM_SIDEREAL   TIM4  // was TIM1 which collided with PWM on the Reticle pin
 #define TIM_AXIS1      TIM9
 #define TIM_AXIS2      TIM11
 

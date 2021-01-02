@@ -5,7 +5,7 @@
 
 #define HAL_FAST_PROCESSOR
 
-#define HAL_MAXRATE_LOWER_LIMIT 14   // Lower limit (fastest) step rate in uS (in SQW mode) assumes optimization set to Fastest (-O3)
+#define HAL_MAXRATE_LOWER_LIMIT 16   // Lower limit (fastest) step rate in uS (in SQW mode) assumes optimization set to Fastest (-O3)
 #define HAL_PULSE_WIDTH         500  // Width of step pulse
 
 #include <HardwareTimer.h>
@@ -18,20 +18,19 @@
 #define SerialA Serial
 // SerialA is always enabled, SerialB and SerialC are optional
 
-#define SerialB Serial1
+HardwareSerial HWSerial2(PA3, PA2); // RX2, TX2
+#define SerialB HWSerial2
 #define HAL_SERIAL_B_ENABLED
+
 #if SERIAL_C_BAUD_DEFAULT != OFF
-  #define SerialC Serial3
+  HardwareSerial HWSerial1(PA10, PA9); // RX1, TX1
+  #define SerialC HWSerial1
   #define HAL_SERIAL_C_ENABLED
 #endif
-
-// Handle special case of using software serial for a GPS
-#if SerialGPS == SoftwareSerial2
-  #include <SoftwareSerial.h>
-  SoftwareSerial SWSerialGPS(PA3, PA2); // RX2, TX2
-  #undef SerialGPS
-  #define SerialGPS SWSerialGPS
-#endif
+  
+// HardwareSerial HWSerial1(PA10, PA9);  // RX1, TX1
+// HardwareSerial HWSerial2(PA3, PA2);   // RX2, TX2
+// HardwareSerial HWSerial6(PA12, PA11); // RX6, TX6
 
 // New symbol for the default I2C port ---------------------------------------------------------------
 #include <Wire.h>
@@ -40,20 +39,16 @@
 
 // Non-volatile storage ------------------------------------------------------------------------------
 #undef E2END
-#if defined(NV_MB85RC256V)
+#if defined(NV_M24C32)
+  // The MaxPCB3I has an 8192 byte EEPROM built-in (rated for 5M write cycles)
+  #define NV_ENDURANCE HIGH
+  #define E2END 8191
+  #define I2C_EEPROM_ADDRESS 0x50
+  #include "../drivers/NV_I2C_EEPROM_24XX_C.h"
+#elif defined(NV_MB85RC256V)
   #include "../drivers/NV_I2C_FRAM_MB85RC256V.h"
 #else
-  // The FYSETC S6 v2 has a 4096 byte EEPROM built-in
-  #if PINMAP == FYSETC_S6_2
-    #define E2END 4095
-    #define I2C_EEPROM_ADDRESS 0x50
-  #endif
-  // The FYSETC S6 has a 2048 byte EEPROM built-in
-  #if PINMAP == FYSETC_S6
-    #define E2END 2047
-    #define I2C_EEPROM_ADDRESS 0x50
-  #endif
-  // Defaults to 0x57 and 4KB 
+  // defaults to 0x57 and 4KB as used on DS3231 RTC modules
   #include "../drivers/NV_I2C_EEPROM_24XX_C.h"
 #endif
 
@@ -68,7 +63,7 @@ void delayNanoseconds(unsigned int n) {
 // Allow MCU reset -----------------------------------------------------------------------------------
 #define HAL_RESET NVIC_SystemReset()
 
-//--------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------
 // General purpose initialize for HAL
 void HAL_Initialize(void) {
   // calibrate delayNanoseconds()
@@ -78,21 +73,21 @@ void HAL_Initialize(void) {
   analogWriteResolution(8);
 }
 
-//--------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------
 // Internal MCU temperature (in degrees C)
 float HAL_MCU_Temperature(void) {
   return -999;
 }
 
-//--------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------
 // Initialize timers
 // frequency compensation for adjusting microseconds to timer counts
 #define F_COMP 4000000
 
 #define ISR(f) void f (void)
 
-#define TIM_SIDEREAL   TIM1
-#define TIM_AXIS1      TIM10
+#define TIM_SIDEREAL   TIM4  // was TIM1 which collided with PWM on the Reticle pin
+#define TIM_AXIS1      TIM9
 #define TIM_AXIS2      TIM11
 
 HardwareTimer *Timer_Sidereal = new HardwareTimer(TIM_SIDEREAL);
@@ -193,7 +188,7 @@ void Timer1SetInterval(long iv, double rateRatio) {
   Timer_Sidereal->setOverflow(round((((double)iv/16.0)*6.0)/rateRatio)); // our "clock" ticks at 6MHz due to the pre-scaler setting
 }
 
-//--------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------
 // Re-program interval for the motor timers
 
 #define TIMER_RATE_MHZ         4L   // STM32 motor timers run at 4 MHz
@@ -220,7 +215,7 @@ void PresetTimerInterval(long iv, bool TPS, volatile uint32_t *nextRate, volatil
 #define QuickSetIntervalAxis1(r) WRITE_REG(TIM_AXIS1->ARR, r)
 #define QuickSetIntervalAxis2(r) WRITE_REG(TIM_AXIS2->ARR, r)
 
-// --------------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------------
 // Fast port writing help, etc.
 
 #define CLR(x,y) (x&=(~(1<<y)))

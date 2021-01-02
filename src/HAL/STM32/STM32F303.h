@@ -6,7 +6,7 @@
 #define HAL_FAST_PROCESSOR
 
 #define HAL_MAXRATE_LOWER_LIMIT 16   // Lower limit (fastest) step rate in uS (in SQW mode) assumes optimization set to Fastest (-O3)
-#define HAL_PULSE_WIDTH         500  // Width of step pulse
+#define HAL_PULSE_WIDTH         1900 // Width of step pulse
 
 #include <HardwareTimer.h>
 
@@ -15,22 +15,16 @@
 #define sei() interrupts()
 
 // New symbols for the Serial ports so they can be remapped if necessary -----------------------------
-#define SerialA Serial
+#define SerialA Serial1
 // SerialA is always enabled, SerialB and SerialC are optional
 
-HardwareSerial HWSerial2(PA3, PA2); // RX2, TX2
-#define SerialB HWSerial2
+HardwareSerial Serial2(PB11, PB10);
+#define SerialB Serial2
 #define HAL_SERIAL_B_ENABLED
 
 #if SERIAL_C_BAUD_DEFAULT != OFF
-  HardwareSerial HWSerial1(PA10, PA9); // RX1, TX1
-  #define SerialC HWSerial1
-  #define HAL_SERIAL_C_ENABLED
+  #error "Configuration (Config.h): SerialC isn't supported, disable this option."
 #endif
-  
-// HardwareSerial HWSerial1(PA10, PA9);  // RX1, TX1
-// HardwareSerial HWSerial2(PA3, PA2);   // RX2, TX2
-// HardwareSerial HWSerial6(PA12, PA11); // RX6, TX6
 
 // New symbol for the default I2C port ---------------------------------------------------------------
 #include <Wire.h>
@@ -39,16 +33,10 @@ HardwareSerial HWSerial2(PA3, PA2); // RX2, TX2
 
 // Non-volatile storage ------------------------------------------------------------------------------
 #undef E2END
-#if defined(NV_M24C32)
-  // The MaxPCB3I has an 8192 byte EEPROM built-in (rated for 5M write cycles)
-  #define NV_ENDURANCE HIGH
-  #define E2END 8191
-  #define I2C_EEPROM_ADDRESS 0x50
-  #include "../drivers/NV_I2C_EEPROM_24XX_C.h"
-#elif defined(NV_MB85RC256V)
+#if defined(NV_MB85RC256V)
   #include "../drivers/NV_I2C_FRAM_MB85RC256V.h"
 #else
-  // defaults to 0x57 and 4KB as used on DS3231 RTC modules
+  // Defaults to 0x57 and 4KB
   #include "../drivers/NV_I2C_EEPROM_24XX_C.h"
 #endif
 
@@ -63,7 +51,7 @@ void delayNanoseconds(unsigned int n) {
 // Allow MCU reset -----------------------------------------------------------------------------------
 #define HAL_RESET NVIC_SystemReset()
 
-//----------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 // General purpose initialize for HAL
 void HAL_Initialize(void) {
   // calibrate delayNanoseconds()
@@ -73,23 +61,23 @@ void HAL_Initialize(void) {
   analogWriteResolution(8);
 }
 
-//----------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 // Internal MCU temperature (in degrees C)
 float HAL_MCU_Temperature(void) {
   return -999;
 }
 
-//----------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 // Initialize timers
 // frequency compensation for adjusting microseconds to timer counts
 #define F_COMP 4000000
 
 #define ISR(f) void f (void)
 
-// was TIM1 which collided with PWM on the Reticle pin
-#define TIM_SIDEREAL   TIM4
-#define TIM_AXIS1      TIM9
-#define TIM_AXIS2      TIM11
+#undef TIMER_SERVO  // TIMER_SERVO uses TIM2, TIMER_TONE uses TIM3
+#define TIM_SIDEREAL TIM15
+#define TIM_AXIS1    TIM16
+#define TIM_AXIS2    TIM17
 
 HardwareTimer *Timer_Sidereal = new HardwareTimer(TIM_SIDEREAL);
 HardwareTimer *Timer_Axis1    = new HardwareTimer(TIM_AXIS1);
@@ -189,7 +177,7 @@ void Timer1SetInterval(long iv, double rateRatio) {
   Timer_Sidereal->setOverflow(round((((double)iv/16.0)*6.0)/rateRatio)); // our "clock" ticks at 6MHz due to the pre-scaler setting
 }
 
-//----------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------
 // Re-program interval for the motor timers
 
 #define TIMER_RATE_MHZ         4L   // STM32 motor timers run at 4 MHz
@@ -216,7 +204,7 @@ void PresetTimerInterval(long iv, bool TPS, volatile uint32_t *nextRate, volatil
 #define QuickSetIntervalAxis1(r) WRITE_REG(TIM_AXIS1->ARR, r)
 #define QuickSetIntervalAxis2(r) WRITE_REG(TIM_AXIS2->ARR, r)
 
-// ----------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------
 // Fast port writing help, etc.
 
 #define CLR(x,y) (x&=(~(1<<y)))
@@ -225,34 +213,34 @@ void PresetTimerInterval(long iv, bool TPS, volatile uint32_t *nextRate, volatil
 
 // We use standard #define's to do **fast** digitalWrite's to the step and dir pins for the Axis1/2 stepper drivers
 #define a1STEP_H WRITE_REG(Axis1_StpPORT->BSRR, Axis1_StpBIT)
-#define a1STEP_L WRITE_REG(Axis1_StpPORT->BSRR, Axis1_StpBIT << 16)
+#define a1STEP_L WRITE_REG(Axis1_StpPORT->BRR,  Axis1_StpBIT)
 #define a1DIR_H  WRITE_REG(Axis1_DirPORT->BSRR, Axis1_DirBIT)
-#define a1DIR_L  WRITE_REG(Axis1_DirPORT->BSRR, Axis1_DirBIT << 16)
+#define a1DIR_L  WRITE_REG(Axis1_DirPORT->BRR,  Axis1_DirBIT)
 
 #define a2STEP_H WRITE_REG(Axis2_StpPORT->BSRR, Axis2_StpBIT)
-#define a2STEP_L WRITE_REG(Axis2_StpPORT->BSRR, Axis2_StpBIT << 16)
+#define a2STEP_L WRITE_REG(Axis2_StpPORT->BRR,  Axis2_StpBIT)
 #define a2DIR_H  WRITE_REG(Axis2_DirPORT->BSRR, Axis2_DirBIT)
-#define a2DIR_L  WRITE_REG(Axis2_DirPORT->BSRR, Axis2_DirBIT << 16)
+#define a2DIR_L  WRITE_REG(Axis2_DirPORT->BRR,  Axis2_DirBIT)
 
 // fast bit-banged SPI should hit an ~1 MHz bitrate for TMC drivers
-#define delaySPI delayNanoseconds(250)
+#define delaySPI delayNanoseconds(500)
 
 #define a1CS_H WRITE_REG(Axis1_M2PORT->BSRR, Axis1_M2BIT)
-#define a1CS_L WRITE_REG(Axis1_M2PORT->BSRR, Axis1_M2BIT << 16)
+#define a1CS_L WRITE_REG(Axis1_M2PORT->BRR, Axis1_M2BIT)
 #define a1CLK_H WRITE_REG(Axis1_M1PORT->BSRR, Axis1_M1BIT)
-#define a1CLK_L WRITE_REG(Axis1_M1PORT->BSRR, Axis1_M1BIT << 16)
+#define a1CLK_L WRITE_REG(Axis1_M1PORT->BRR, Axis1_M1BIT)
 #define a1SDO_H WRITE_REG(Axis1_M0PORT->BSRR, Axis1_M0BIT)
-#define a1SDO_L WRITE_REG(Axis1_M0PORT->BSRR, Axis1_M0BIT << 16)
-#define a1M0(P) if (P) WRITE_REG(Axis1_M0PORT->BSRR, Axis1_M0BIT); else WRITE_REG(Axis1_M0PORT->BSRR, Axis1_M0BIT << 16)
-#define a1M1(P) if (P) WRITE_REG(Axis1_M1PORT->BSRR, Axis1_M1BIT); else WRITE_REG(Axis1_M1PORT->BSRR, Axis1_M1BIT << 16)
-#define a1M2(P) if (P) WRITE_REG(Axis1_M2PORT->BSRR, Axis1_M2BIT); else WRITE_REG(Axis1_M2PORT->BSRR, Axis1_M2BIT << 16)
+#define a1SDO_L WRITE_REG(Axis1_M0PORT->BRR, Axis1_M0BIT)
+#define a1M0(P) if (P) WRITE_REG(Axis1_M0PORT->BSRR, Axis1_M0BIT); else WRITE_REG(Axis1_M0PORT->BRR, Axis1_M0BIT)
+#define a1M1(P) if (P) WRITE_REG(Axis1_M1PORT->BSRR, Axis1_M1BIT); else WRITE_REG(Axis1_M1PORT->BRR, Axis1_M1BIT)
+#define a1M2(P) if (P) WRITE_REG(Axis1_M2PORT->BSRR, Axis1_M2BIT); else WRITE_REG(Axis1_M2PORT->BRR, Axis1_M2BIT)
 
 #define a2CS_H WRITE_REG(Axis2_M2PORT->BSRR, Axis2_M2BIT)
-#define a2CS_L WRITE_REG(Axis2_M2PORT->BSRR, Axis2_M2BIT << 16)
+#define a2CS_L WRITE_REG(Axis2_M2PORT->BRR, Axis2_M2BIT)
 #define a2CLK_H WRITE_REG(Axis2_M1PORT->BSRR, Axis2_M1BIT)
-#define a2CLK_L WRITE_REG(Axis2_M1PORT->BSRR, Axis2_M1BIT << 16)
+#define a2CLK_L WRITE_REG(Axis2_M1PORT->BRR, Axis2_M1BIT)
 #define a2SDO_H WRITE_REG(Axis2_M0PORT->BSRR, Axis2_M0BIT)
-#define a2SDO_L WRITE_REG(Axis2_M0PORT->BSRR, Axis2_M0BIT << 16)
-#define a2M0(P) if (P) WRITE_REG(Axis2_M0PORT->BSRR, Axis2_M0BIT); else WRITE_REG(Axis2_M0PORT->BSRR, Axis2_M0BIT << 16)
-#define a2M1(P) if (P) WRITE_REG(Axis2_M1PORT->BSRR, Axis2_M1BIT); else WRITE_REG(Axis2_M1PORT->BSRR, Axis2_M1BIT << 16)
-#define a2M2(P) if (P) WRITE_REG(Axis2_M2PORT->BSRR, Axis2_M2BIT); else WRITE_REG(Axis2_M2PORT->BSRR, Axis2_M2BIT << 16)
+#define a2SDO_L WRITE_REG(Axis2_M0PORT->BRR, Axis2_M0BIT)
+#define a2M0(P) if (P) WRITE_REG(Axis2_M0PORT->BSRR, Axis2_M0BIT); else WRITE_REG(Axis2_M0PORT->BRR, Axis2_M0BIT)
+#define a2M1(P) if (P) WRITE_REG(Axis2_M1PORT->BSRR, Axis2_M1BIT); else WRITE_REG(Axis2_M1PORT->BRR, Axis2_M1BIT)
+#define a2M2(P) if (P) WRITE_REG(Axis2_M2PORT->BSRR, Axis2_M2BIT); else WRITE_REG(Axis2_M2PORT->BRR, Axis2_M2BIT)

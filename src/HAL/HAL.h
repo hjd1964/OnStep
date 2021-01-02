@@ -55,29 +55,24 @@
   #define MCU_STR "Teensy4.0"
   #include "Teensy_4/Teensy_4.h"
 
-#elif defined(__STM32F1__)
-  // STM32F103C8/CB: 72MHz, 128K flash, 64K RAM, ARM Cortex M3 (Arduino_STM32 board manager)
-  #error "For OnStep 4.x and later, Arduino_STM32 is deprecated in favour of STM32Duino board manager. See the Blue Pill Wiki for details"
-  
-#elif defined(STM32F103xB)
-  // STM32F103C8/CB: 72MHz, 128K flash, 64K RAM, ARM Cortex M3 (STM32duino board manager)
-  #define MCU_STR "STM32F103"
-  #include "STM32/STM32F1_F3.h"
+#elif defined(__STM32F1__) || defined(STM32F103xB)
+  // STM32F103C8/CB: 72MHz, 128K flash, 64K RAM, ARM Cortex M3
+  #error "Please use OnStep release-4.23 (w/STM32Duino) or release-3.16 (w/Arduino_STM32), release-5 has dropped support this platform."
 
 #elif defined(STM32F303xC)
   // RobotDyn BlackPill STM32F303, 256K flash, ARM Cortex M4 (STM32duino board manager)
   #define MCU_STR "STM32F303"
-  #include "STM32/STM32F1_F3.h"
-
-#elif defined(STM32F411xE)
-  // Blackpill board with STM32F411CE
-  #define MCU_STR "STM32F411"
-  #include "STM32F4/STM32F411.h"
+  #include "STM32/STM32F303.h"
 
 #elif defined(STM32F401xC)
   // Blackpill board with STM32F401CC
   #define MCU_STR "STM32F401"
-  #include "STM32F4/STM32F401.h"
+  #include "STM32/STM32F401.h"
+
+#elif defined(STM32F411xE)
+  // Blackpill board with STM32F411CE
+  #define MCU_STR "STM32F411"
+  #include "STM32/STM32F411.h"
 
 #elif defined(STM32F446xx)
   // FYSETC S6 board with STM32F446
