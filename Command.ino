@@ -737,7 +737,9 @@ void processCommands() {
         if (soundEnabled)                        reply[i++]='z';                                             // bu[z]zer enabled?
         if (mountType==GEM && autoMeridianFlip)  reply[i++]='a';                                             // [a]uto meridian flip
 #if AXIS1_PEC == ON
-        const char *pch = PECStatusStringAlt; reply[i++]=pch[pecStatus];                                     // PEC Status one of "/,~;^" (/)gnore, ready to (,)lay, (~)laying, ready to (;)ecord, (^)ecording
+        if (mountType != ALTAZM) {
+          const char *pch = PECStatusStringAlt;  reply[i++]=pch[pecStatus];                                  // PEC Status one of "/,~;^" (/)gnore, ready to (,)lay, (~)laying, ready to (;)ecord, (^)ecording
+        }
 #endif
         // provide mount type
         if (mountType == GEM)                    reply[i++]='E'; else
@@ -803,7 +805,9 @@ void processCommands() {
         if (getInstrPierSide() == PIER_SIDE_WEST)    reply[3]|=0b11000000;                                   // Pier side west
 
 #if AXIS1_PEC == ON
-        reply[4]=pecStatus|0b10000000;                                                                       // PEC status: 0 ignore, 1 ready play, 2 playing, 3 ready record, 4 recording
+        if (mountType != ALTAZM) {
+          reply[4]=pecStatus|0b10000000;                                                                     // PEC status: 0 ignore, 1 ready play, 2 playing, 3 ready record, 4 recording
+        }
 #endif
         reply[5]=parkStatus|0b10000000;                                                                      // Park status: 0 not parked, 1 parking in-progress, 2 parked, 3 park failed
         reply[6]=getPulseGuideRateSelection()|0b10000000;                                                             // Pulse-guide rate
