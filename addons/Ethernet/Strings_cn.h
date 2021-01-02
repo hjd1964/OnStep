@@ -342,6 +342,7 @@
 #define L_RESET_TITLE "OnStep 重置控制:"
 #define L_RESET "重启 OnStep"
 #define L_RESET_FWU "重启 OnStep 用于固件上传"
+#define L_ADV_RESET_MSG1 "OnStep 必须处于“在家”或“停放”状态，否则重置请求将被忽略."
 
 // ----------------------------  WiFi ----------------------------
 

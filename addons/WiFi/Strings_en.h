@@ -342,6 +342,7 @@
 #define L_RESET_TITLE "OnStep Reset Control:"
 #define L_RESET "Reset OnStep"
 #define L_RESET_FWU "Reset OnStep for firmware upload"
+#define L_ADV_RESET_MSG1 "OnStep must be At Home or Parked, otherwise the reset request is ignored."
 
 // ----------------------------  WiFi ----------------------------
 

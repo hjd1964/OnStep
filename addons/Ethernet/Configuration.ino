@@ -66,6 +66,12 @@ const char html_configDbAxis5[] PROGMEM =
 const char html_configTcfCoefAxis5[] PROGMEM =
 "<input value='%s' type='number' name='tc5' min='-999.0' max='999.0' step='any'>&nbsp;" L_TCF_COEF_RANGE_AXIS45 "<br /><br />";
 
+// Reset
+const char html_resetNotes[] PROGMEM =
+"<br />Notes:<ul>"
+"<li>" L_ADV_RESET_MSG1 "</li>"
+"</ul>";
+
 #ifdef OETHS
 void handleConfiguration(EthernetClient *client) {
 #else
@@ -317,6 +323,7 @@ void handleConfiguration() {
     data += " &nbsp;&nbsp;<button name='advanced' type='submit' value='fwu' onclick=\"return confirm('" L_ARE_YOU_SURE "?');\" >" L_RESET_FWU "!</button>";
   #endif
   data += "</form>\r\n";
+  data += FPSTR(html_resetNotes);
 #endif
 
   // collapsible script
