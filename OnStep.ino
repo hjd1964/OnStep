@@ -436,12 +436,12 @@ void loop() {
 }
 
 void loop2() {
-  // GUIDING -------------------------------------------------------------------------------------------
+  // GUIDING
   ST4();
   if ((trackingState != TrackingMoveTo) && (parkStatus == NotParked)) guide();
 
 #if HOME_SENSE != OFF
-  // AUTOMATIC HOMING ----------------------------------------------------------------------------------
+  // AUTOMATIC HOMING
   checkHome();
 #endif
 
@@ -467,7 +467,6 @@ void loop2() {
 #endif
 
     // SIDEREAL TRACKING DURING GOTOS
-    // keeps the target where it's supposed to be while doing gotos
     if (trackingState == TrackingMoveTo) {
       moveTo();
       if (lastTrackingState == TrackingSidereal) {
@@ -497,11 +496,9 @@ void loop2() {
     // CALCULATE SOME TRACKING RATES, ETC.
     if (lstNow%3 == 0) doFastAltCalc(false);
     if (mountType == ALTAZM) {
-      // figure out the current Alt/Azm tracking rates
-      if (lstNow%3 != 0) doHorRateCalc();
+      if (lstNow%3 != 0) doHorRateCalc(); // Alt/Azm rates
     } else {
-      // figure out the current refraction compensated tracking rate
-      if (rateCompensation != RC_NONE && lstNow%3 != 0) doRefractionRateCalc();
+      if (rateCompensation != RC_NONE && lstNow%3 != 0) doRefractionRateCalc(); // refraction comp rates
     }
 
     // SAFETY CHECKS
@@ -512,7 +509,7 @@ void loop2() {
     } 
 #endif
 
-    // check for fault signal, stop any slew or guide and turn tracking off
+    // check for fault, stop any slew or guide, and turn tracking off
 #if AXIS1_DRIVER_STATUS == LOW || AXIS1_DRIVER_STATUS == HIGH
     faultAxis1=(digitalRead(Axis1_FAULT) == AXIS1_DRIVER_STATUS);
 #elif AXIS1_DRIVER_STATUS == TMC_SPI
@@ -537,7 +534,7 @@ void loop2() {
     if (mountType != ALTAZM) autoPowerDownAxis2();
 #endif
 
-    // 0.01S POLLING -------------------------------------------------------------------------------------
+    // 1/100S POLLING ----------------------------------------------------------------------------------
 #if TIME_LOCATION_SOURCE == GPS
     if ((PPS_SENSE == OFF || ppsSynced) && !tls.active && tls.poll()) {
       SerialGPS.end();
@@ -635,7 +632,6 @@ void loop2() {
     if (trackingState != TrackingNone) atHome=false;
 
 #if PPS_SENSE != OFF
-    // update clock via PPS
     cli();
     ppsRateRatio=((double)1000000.0/(double)(ppsAvgMicroS));
     if ((long)(micros()-(ppsLastMicroS+2000000UL)) > 0) ppsSynced=false; // if more than two seconds has ellapsed without a pulse we've lost sync
@@ -662,7 +658,7 @@ void loop2() {
   #endif
 #endif
 
-    // SAFETY CHECKS -------------------------------------------------------------------------------------
+    // SAFETY CHECKS
     // keeps mount from tracking past the meridian limit, past the AXIS1_LIMIT_MAX, or past the Dec limits
     if (safetyLimitsOn) {
       // check for exceeding AXIS1_LIMIT_MIN or AXIS1_LIMIT_MAX
