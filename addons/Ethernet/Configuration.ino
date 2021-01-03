@@ -1,6 +1,14 @@
 // -----------------------------------------------------------------------------------
 // Configuration
 
+const char html_configScript1[] PROGMEM =
+"<script>\n"
+"function s(key,v1) {"
+  "var xhttp = new XMLHttpRequest();"
+  "xhttp.open('GET', 'configuration.htm?'+key+'='+v1+'&x='+new Date().getTime(), true);"
+  "xhttp.send();"
+"}</script>\n";
+
 // Misc
 const char html_configFormBegin[] PROGMEM = "<div class='content'><br />\r\n<form method='get' action='/configuration.htm'>";
 const char html_configFormEnd[] PROGMEM = "\r\n</form><br />\r\n</div><br />\r\n";
@@ -75,6 +83,7 @@ const char html_configMountType[] PROGMEM =
 const char html_resetNotes[] PROGMEM =
 "<br />Notes:<ul>"
 "<li>" L_RESET_MSG1 "</li>"
+"<li>" L_DOWN_MESSAGE1 "</li>"
 "</ul>";
 
 #ifdef OETHS
@@ -138,7 +147,10 @@ void handleConfiguration() {
   
   // OnStep wasn't found, show warning and info.
   if (!mountStatus.valid() || !success) { data+= FPSTR(html_bad_comms_message); sendHtml(data); sendHtmlDone(data); return; }
-
+  
+  // ajax scripts
+  data += FPSTR(html_configScript1);
+  
   data+="<div style='width: 35em;'>";
   data += L_BASIC_SET_TITLE "<br /><br />";
   sendHtml(data);
@@ -339,12 +351,12 @@ void handleConfiguration() {
 
 #if DISPLAY_RESET_CONTROLS != OFF
   sendHtml(data);
-  data += "<hr>" L_RESET_TITLE "<br/><br/><form method='get' action='/configuration.htm'>";
-  data += "<button name='advanced' type='submit' value='reset' onclick=\"return confirm('" L_ARE_YOU_SURE "?');\" >" L_RESET "!</button>";
+  data += "<hr>" L_RESET_TITLE "<br/><br/>";
+  data += "<button onpointerdown=\"if (confirm('" L_ARE_YOU_SURE "?')) s('advanced','reset')\" type='button'>" L_RESET "!</button>";
   #ifdef BOOT0_PIN
-    data += " &nbsp;&nbsp;<button name='advanced' type='submit' value='fwu' onclick=\"return confirm('" L_ARE_YOU_SURE "?');\" >" L_RESET_FWU "!</button>";
+    data += " &nbsp;&nbsp;<button onpointerdown=\"if (confirm('" L_ARE_YOU_SURE "?')) s('advanced','fwu')\" type='button'>" L_RESET_FWU "!</button>";
   #endif
-  data += "</form>\r\n";
+  data += "<br/>\r\n";
   data += FPSTR(html_resetNotes);
 #endif
 
