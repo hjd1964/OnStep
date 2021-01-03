@@ -5,7 +5,7 @@ const char html_configScript1[] PROGMEM =
 "<script>\n"
 "function s(key,v1) {"
   "var xhttp = new XMLHttpRequest();"
-  "xhttp.open('GET', 'configuration.htm?'+key+'='+v1+'&x='+new Date().getTime(), true);"
+  "xhttp.open('GET', 'configurationA.txt?'+key+'='+v1+'&x='+new Date().getTime(), true);"
   "xhttp.send();"
 "}</script>\n";
 
@@ -370,6 +370,19 @@ void handleConfiguration() {
 
   sendHtml(data);
   sendHtmlDone(data);
+}
+
+#ifdef OETHS
+void configurationAjaxGet(EthernetClient *client) {
+#else
+void configurationAjaxGet() {
+#endif
+  processConfigurationGet();
+#ifdef OETHS
+  client->print("");
+#else
+  server.send(200, "text/html","");
+#endif
 }
 
 bool processConfigurationGet() {
