@@ -216,6 +216,7 @@ Again:
   server.init();
   server.on("/index.htm", handleRoot);
   server.on("/configuration.htm", handleConfiguration);
+  server.on("/configurationA.txt", configurationAjaxGet);
   server.on("/settings.htm", handleSettings);
   server.on("/settingsA.txt", settingsAjaxGet);
   server.on("/settings.txt", settingsAjax);
