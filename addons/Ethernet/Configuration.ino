@@ -66,6 +66,11 @@ const char html_configDbAxis5[] PROGMEM =
 const char html_configTcfCoefAxis5[] PROGMEM =
 "<input value='%s' type='number' name='tc5' min='-999.0' max='999.0' step='any'>&nbsp;" L_TCF_COEF_RANGE_AXIS45 "<br /><br />";
 
+const char html_configAdvanced[] PROGMEM =
+"<hr>" L_ADV_SET_TITLE " (<i>" L_ADV_SET_HEADER_MSG "</i>)<br /><br />";
+const char html_configMountType[] PROGMEM =
+" <input style='width: 7em;' value='%d' type='number' name='mountt' min='1' max='3' step='1'>&nbsp; " L_ADV_MOUNT_TYPE "<br /><br />\r\n";
+
 // Reset
 const char html_resetNotes[] PROGMEM =
 "<br />Notes:<ul>"
@@ -315,6 +320,23 @@ void handleConfiguration() {
   
   data += "<br />\r\n";
 
+  int numShown = 0;
+  data += FPSTR(html_configAdvanced);
+  
+  // Mount type
+  if (!command(":GXEM#",temp1)) strcpy(temp1,"0");
+  int mt=atoi(temp1);
+  if (mt >= 1 && mt <= 3) {
+    data += "<button type='button' class='collapsible'>Mount Type</button>";
+    data += FPSTR(html_configFormBegin);
+    sprintf_P(temp,html_configMountType,mt); data += temp;
+    data += "<button type='submit'>" L_UPLOAD "</button> ";
+    data += "<button name='revert' value='0' type='submit'>" L_REVERT "</button>\r\n";
+    data += FPSTR(html_configFormEnd);
+    data += "<br />";
+    numShown++;
+  }
+
 #if DISPLAY_RESET_CONTROLS != OFF
   sendHtml(data);
   data += "<hr>" L_RESET_TITLE "<br/><br/><form method='get' action='/configuration.htm'>";
@@ -494,6 +516,7 @@ bool processConfigurationGet() {
     if (ssa.equals("fwu")) { pinMode(BOOT0_PIN,OUTPUT); digitalWrite(BOOT0_PIN,HIGH); commandBlind(":ERESET#"); delay(500); pinMode(BOOT0_PIN,INPUT); return false; }
   #endif
 #endif
+  String ssm=server.arg("mountt"); if (!ssm.equals("")) { sprintf(temp,":SXEM,%s#",ssm.c_str()); commandBool(temp); }
 
   return true;
 }

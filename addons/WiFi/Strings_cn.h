@@ -338,6 +338,12 @@
 #define L_LOCATION_RANGE_UTC_OFFSET "UTC 偏移，以-14到+12小时为单位"
 #define L_LOCATION_MESSAGE_UTC_OFFSET "标准时间的相对时区值（无冬季时间！）"
 
+// advanced configuration
+#define L_REVERT "还原为默认值"
+#define L_ADV_SET_TITLE "高级"
+#define L_ADV_SET_HEADER_MSG "重新启动 OnStep 后，以下更改将生效:"
+#define L_ADV_MOUNT_TYPE "选择 1 GEM, 2 EQ Fork, 3 Alt/Azm"
+
 // reset control
 #define L_RESET_TITLE "OnStep 重置控制:"
 #define L_RESET "重启 OnStep"

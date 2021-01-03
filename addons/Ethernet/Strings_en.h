@@ -338,6 +338,12 @@
 #define L_LOCATION_RANGE_UTC_OFFSET "UTC Offset, in hours and min. -14 to +12"
 #define L_LOCATION_MESSAGE_UTC_OFFSET "Opposite of a time-zone value, this is for Standard Time (not Daylight Time.)"
 
+// advanced configuration
+#define L_REVERT "Revert to Defaults"
+#define L_ADV_SET_TITLE "Advanced"
+#define L_ADV_SET_HEADER_MSG "changes below take effect after rebooting OnStep:"
+#define L_ADV_MOUNT_TYPE "Select 1 GEM, 2 EQ Fork, or 3 Alt/Azm"
+
 // reset control
 #define L_RESET_TITLE "OnStep Reset Control:"
 #define L_RESET "Reset OnStep"
