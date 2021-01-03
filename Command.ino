@@ -1012,7 +1012,9 @@ void processCommands() {
                 supress_frame=true;
               break;
               case 'F': if (AXIS2_TANGENT_ARM == ON) reply[0]='1'; else reply[0]='0'; boolReply=false; supress_frame=true; break;
-              case 'M': if (!(nv.read(EE_settingsRuntime)&0b0000001)) strcpy(reply,"0"); else sprintf(reply,"%d",(int)nv.read(EE_mountType)); boolReply=false; break; // return the mount type
+              case 'M': 
+            //if (!(nv.read(EE_settingsRuntime)&0b0000001)) strcpy(reply,"0"); else 
+              sprintf(reply,"%d",(int)nv.read(EE_mountType)); boolReply=false; break; // return the mount type
               default: commandError=CE_CMD_UNKNOWN;
             }
           } else
