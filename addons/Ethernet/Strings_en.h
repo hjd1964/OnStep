@@ -345,10 +345,10 @@
 #define L_ADV_MOUNT_TYPE "Select 1 GEM, 2 EQ Fork, or 3 Alt/Azm"
 
 // reset control
-#define L_RESET_TITLE "OnStep Reset Control:"
-#define L_RESET "Reset OnStep"
-#define L_RESET_FWU "Reset OnStep for firmware upload"
-#define L_ADV_RESET_MSG1 "OnStep must be At Home or Parked, otherwise the reset request is ignored."
+#define L_RESET_TITLE "OnStep Reboot Control:"
+#define L_RESET "Reboot OnStep"
+#define L_RESET_FWU "Reboot OnStep for firmware upload"
+#define L_RESET_MSG1 "OnStep must be At Home or Parked, otherwise the reset request is ignored."
 
 // ----------------------------  WiFi ----------------------------
 

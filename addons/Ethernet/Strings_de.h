@@ -356,7 +356,7 @@
 #define L_RESET_TITLE "OnStep Steuerung zurücksetzen:"
 #define L_RESET "Zurücksetzen OnStep"
 #define L_RESET_FWU "Zurücksetzen OnStep zum Hochladen der Firmware"
-#define L_ADV_RESET_MSG1 "OnStep muss zu Hause oder geparkt sein, andernfalls wird die Rücksetzanforderung ignoriert."
+#define L_RESET_MSG1 "OnStep muss zu Hause oder geparkt sein, andernfalls wird die Rücksetzanforderung ignoriert."
 
 // ----------------------------  WiFi ----------------------------
 

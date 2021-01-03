@@ -74,7 +74,7 @@ const char html_configMountType[] PROGMEM =
 // Reset
 const char html_resetNotes[] PROGMEM =
 "<br />Notes:<ul>"
-"<li>" L_ADV_RESET_MSG1 "</li>"
+"<li>" L_RESET_MSG1 "</li>"
 "</ul>";
 
 #ifdef OETHS
