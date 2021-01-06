@@ -41,7 +41,7 @@
 #define FirmwareDate          __DATE__
 #define FirmwareVersionMajor  5
 #define FirmwareVersionMinor  1       // minor version 0 to 99
-#define FirmwareVersionPatch  "h"     // for example major.minor patch: 1.3c
+#define FirmwareVersionPatch  "i"     // for example major.minor patch: 1.3c
 #define FirmwareVersionConfig 4       // internal, for tracking configuration file changes
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
@@ -498,7 +498,7 @@ void loop2() {
     if (mountType == ALTAZM) {
       if (lstNow%3 != 0) doHorRateCalc(); // Alt/Azm rates
     } else {
-      if (rateCompensation != RC_NONE && lstNow%3 != 0) doRefractionRateCalc(); // refraction comp rates
+      if (rateCompensation != RC_NONE && lstNow%3 != 0) doRefractionRateCalc(); 
     }
 
     // SAFETY CHECKS
