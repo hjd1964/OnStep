@@ -458,6 +458,24 @@
   #error "Configuration (Config.h): Setting TIME_LOCATION_SOURCE invalid, use OFF or DS3231, DS3234, TEENSY, GPS only."
 #endif
 
+#if TIME_LOCATION_SOURCE == GPS
+  #ifdef SERIAL_GPS
+    #define SerialGPS SERIAL_GPS
+  #endif
+  #ifdef SerialGPSBaud
+    #ifndef SERIAL_GPS_BAUD
+      #define SERIAL_GPS_BAUD SerialGPSBaud
+    #endif
+  #endif
+  #ifndef SerialGPS
+    #error "Configuration (Config.h): Setting SERIAL_GPS, GPS requires adding a line to identify the serial port '#define SERIAL_GPS Serial6' for example."
+  #endif
+  #ifndef SERIAL_GPS_BAUD
+    #warning "Configuration (Config.h): Setting SERIAL_GPS_BAUD, GPS serial port baud rate is not defined, using 4800."
+    #define SERIAL_GPS_BAUD 4800
+  #endif
+#endif
+
 #ifndef WEATHER
   #error "Configuration (Config.h): Setting WEATHER must be present!"
 #elif WEATHER != OFF && (WEATHER < WEATHER_FIRST || WEATHER > WEATHER_LAST)
