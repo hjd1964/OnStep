@@ -216,6 +216,13 @@ void setup() {
 #ifdef HAL_SERIAL_E_ENABLED
   SerialE.begin(SERIAL_E_BAUD_DEFAULT);
 #endif
+#if TIME_LOCATION_SOURCE == GPS
+  #ifdef SERIAL_GPS_RX
+    SerialGPS.begin(SERIAL_GPS_BAUD, SERIAL_8N1, SERIAL_GPS_RX, SERIAL_GPS_TX);
+  #else
+    SerialGPS.begin(SERIAL_GPS_BAUD);
+  #endif
+#endif
 #if ST4_HAND_CONTROL == ON && ST4_INTERFACE != OFF
   SerialST4.begin();
 #endif
