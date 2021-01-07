@@ -542,6 +542,7 @@ bool processConfigurationGet() {
   #endif
 #endif
   String ssm=server.arg("mountt"); if (!ssm.equals("")) { sprintf(temp,":SXEM,%s#",ssm.c_str()); commandBool(temp); }
+  String ssr=server.arg("revert"); if (!ssr.equals("")) commandBool(":SXEM,0#");
 
   return true;
 }
