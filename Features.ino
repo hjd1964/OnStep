@@ -7,17 +7,21 @@ void featuresInit() {
     if (feature[i].value == ON) feature[i].value=1; else if (feature[i].value < 0 || feature[i].value > 255) feature[i].value=0;
     if (feature[i].purpose == SWITCH || feature[i].purpose == SWITCH_UNPARKED) {
       if (feature[i].pin >= 0 && feature[i].pin <= 255) {
-        pinMode(feature[i].pin,OUTPUT); digitalWrite(feature[i].pin,feature[i].value==0?LOW:HIGH);
-      } else ambient.setDS2413State(i,feature[i].value==0?0:1);
+        pinMode(feature[i].pin,OUTPUT); digitalWrite(feature[i].pin,feature[i].value==feature[i].active?HIGH:LOW);
+      } else ambient.setDS2413State(i,feature[i].value==feature[i].active?HIGH:LOW);
     } else if (feature[i].purpose == ANALOG_OUTPUT) {
       if (feature[i].pin >= 0 && feature[i].pin <= 255) { pinMode(feature[i].pin,OUTPUT); analogWrite(feature[i].pin,feature[i].value); }
     } else if (feature[i].purpose == DEW_HEATER) {
       feature[i].dewHeater = new dewHeaterControl;
-      if (feature[i].pin >= 0 && feature[i].pin <= 255) feature[i].dewHeater->init(feature[i].pin,EE_feature1Value1+i*3); else feature[i].dewHeater->init(-1,EE_feature1Value1+i*3);
+      feature[i].dewHeater->init(EE_feature1Value1+i*3);
+      if (feature[i].pin >= 0 && feature[i].pin <= 255) pinMode(feature[i].pin,OUTPUT);
       feature[i].dewHeater->enable(feature[i].value);
     } else if (feature[i].purpose == INTERVALOMETER) {
       feature[i].intervalometer = new intervalometerControl;
-      if (feature[i].pin >= 0 && feature[i].pin <= 255) feature[i].intervalometer->init(feature[i].pin,EE_feature1Value1+i*3); else feature[i].intervalometer->init(-1,EE_feature1Value1+i*3);
+      feature[i].intervalometer->init(EE_feature1Value1+i*3);
+      if (feature[i].pin >= 0 && feature[i].pin <= 255) {
+        pinMode(feature[i].pin,OUTPUT); digitalWrite(feature[i].pin,feature[i].value==feature[i].active?HIGH:LOW);
+      }
     }
   }
 }
@@ -28,20 +32,26 @@ void featuresPoll() {
     if (feature[i].purpose == SWITCH_UNPARKED) {
       int v=feature[i].value;
       if (parkStatus != Parked) feature[i].value=1; else feature[i].value=0;
-      if (feature[i].value != v) { if (feature[i].pin >= 0 && feature[i].pin <= 255) { digitalWrite(feature[i].pin,feature[i].value==0?LOW:HIGH); } else ambient.setDS2413State(i,feature[i].value==0?0:1); }
+      if (feature[i].value != v) {
+        if (feature[i].pin >= 0 && feature[i].pin <= 255) { digitalWrite(feature[i].pin,feature[i].value==feature[i].active?HIGH:LOW); } else {
+          ambient.setDS2413State(i,feature[i].value==feature[i].active?1:0); if (ambient.getDS2413Failure(i)) feature[i].value=0;
+        }
+      }
     } else
     if (feature[i].purpose == DEW_HEATER) {
       feature[i].dewHeater->poll(ambient.getFeatureTemperature(i)-ambient.getDewPoint());
       if (isDS2413(feature[i].pin)) {
-        ambient.setDS2413State(i,feature[i].dewHeater->isOn());
-        if (ambient.getDS2413Failure(i)) feature[i].dewHeater->enable(false);
+        ambient.setDS2413State(i,feature[i].dewHeater->isOn()==feature[i].active?HIGH:LOW); if (ambient.getDS2413Failure(i)) feature[i].dewHeater->enable(false);
+      } else {
+        if (feature[i].pin >= 0 && feature[i].pin <= 255) { digitalWrite(feature[i].pin,feature[i].dewHeater->isOn()==feature[i].active?HIGH:LOW); }
       }
     } else
     if (feature[i].purpose == INTERVALOMETER) {
       feature[i].intervalometer->poll();
       if (isDS2413(feature[i].pin)) {
-        ambient.setDS2413State(i,feature[i].intervalometer->isOn());
-        if (ambient.getDS2413Failure(i)) feature[i].intervalometer->enable(false);
+        ambient.setDS2413State(i,feature[i].intervalometer->isOn()==feature[i].active?HIGH:LOW); if (ambient.getDS2413Failure(i)) feature[i].intervalometer->enable(false);
+      } else {
+        if (feature[i].pin >= 0 && feature[i].pin <= 255) { digitalWrite(feature[i].pin,feature[i].intervalometer->isOn()==feature[i].active?HIGH:LOW); }
       }
     }
   }
@@ -55,7 +65,7 @@ void featuresGetCommand(char *parameter, char *reply, bool &boolReply) {
 
   char s[255];
   if (feature[i].purpose == SWITCH || feature[i].purpose == SWITCH_UNPARKED) {
-    if (feature[i].pin >= 0 && feature[i].pin <= 255) sprintf(s,"%d",feature[i].value); else sprintf(s,"%d",ambient.getDS2413State(i)); strcat(reply,s);
+    if (feature[i].pin >= 0 && feature[i].pin <= 255) sprintf(s,"%d",feature[i].value); else sprintf(s,"%d",ambient.getDS2413State(i)==feature[i].active?1:0); strcat(reply,s);
   } else if (feature[i].purpose == ANALOG_OUTPUT) {
     if (feature[i].pin >= 0 && feature[i].pin <= 255) sprintf(s,"%d",feature[i].value); else strcpy(s,"0"); strcat(reply,s);
   } else if (feature[i].purpose == DEW_HEATER) {
@@ -112,7 +122,7 @@ void featuresSetCommand(char *parameter) {
     if (parameter[3] == 'V') {
       if (v >= 0 && v <= 1) {
         if (feature[i].purpose == SWITCH) {
-          if (feature[i].pin >= 0 && feature[i].pin <= 255) { digitalWrite(feature[i].pin,v==0?LOW:HIGH); } else ambient.setDS2413State(i,v==0?0:1);
+          if (feature[i].pin >= 0 && feature[i].pin <= 255) { digitalWrite(feature[i].pin,v==feature[i].active?1:0); } else ambient.setDS2413State(i,v==feature[i].active?1:0);
         }
       } else commandError=CE_PARAM_RANGE;
     } else commandError=CE_PARAM_FORM;

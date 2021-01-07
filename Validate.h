@@ -338,6 +338,38 @@
   #define AXIS5_DRIVER_IRUN OFF
 #endif
 
+#ifndef FEATURE1_ACTIVE_STATE
+  #define FEATURE1_ACTIVE_STATE 1
+#endif
+#ifndef FEATURE2_ACTIVE_STATE
+  #define FEATURE2_ACTIVE_STATE 1
+#endif
+#ifndef FEATURE3_ACTIVE_STATE
+  #define FEATURE3_ACTIVE_STATE 1
+#endif
+#ifndef FEATURE4_ACTIVE_STATE
+  #define FEATURE4_ACTIVE_STATE 1
+#endif
+#ifndef FEATURE5_ACTIVE_STATE
+  #define FEATURE5_ACTIVE_STATE 1
+#endif
+#ifndef FEATURE6_ACTIVE_STATE
+  #define FEATURE6_ACTIVE_STATE 1
+#endif
+#ifndef FEATURE7_ACTIVE_STATE
+  #define FEATURE7_ACTIVE_STATE 1
+#endif
+#ifndef FEATURE8_ACTIVE_STATE
+  #define FEATURE8_ACTIVE_STATE 1
+#endif
+
+#if LOW != 0
+  #error "Library check: OnStep assumes LOW == 0!"
+#endif
+#if HIGH != 1
+  #error "Library check: OnStep assumes HIGH == 1!"
+#endif
+
 // -----------------------------------------------------------------------------------
 // -----------------------------------------------------------------------------------
 // Config.h FILE VALIDATION
@@ -374,8 +406,8 @@
 
 #ifndef MOUNT_TYPE
   #error "Configuration (Config.h): Setting MOUNT_TYPE must be present!"
-#elif MOUNT_TYPE != OFF && (MOUNT_TYPE < MOUNT_TYPE_FIRST || MOUNT_TYPE > MOUNT_TYPE_LAST)
-  #error "Configuration (Config.h): Setting MOUNT_TYPE use OFF, GEM, FORK, or ALTAZM."
+#elif MOUNT_TYPE < MOUNT_TYPE_FIRST || MOUNT_TYPE > MOUNT_TYPE_LAST
+  #error "Configuration (Config.h): Setting MOUNT_TYPE use GEM, FORK, or ALTAZM."
 #endif
 
 #ifndef LED_STATUS
