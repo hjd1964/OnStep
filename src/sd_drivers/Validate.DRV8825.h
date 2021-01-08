@@ -12,6 +12,10 @@
   #if STEP_WAVE_FORM == PULSE && HAL_PULSE_WIDTH < DRV8825_PULSE_WIDTH
     #error "Configuration (Config.h): STEP_WAVE_FORM PULSE; Pulse width is below the DRV8825 stepper driver specifications."
   #endif
+  #if AXIS1_DRIVER_STATUS == ON
+    #undef AXIS1_DRIVER_STATUS
+    #define AXIS1_DRIVER_STATUS LOW
+  #endif
 #endif
 
 #if AXIS2_DRIVER_MODEL == DRV8825
@@ -25,5 +29,9 @@
   #endif
   #if STEP_WAVE_FORM == PULSE && HAL_PULSE_WIDTH < DRV8825_PULSE_WIDTH
     #error "Configuration (Config.h): STEP_WAVE_FORM PULSE; Pulse width is below the DRV8825 stepper driver specifications."
+  #endif
+  #if AXIS2_DRIVER_STATUS == ON
+    #undef AXIS2_DRIVER_STATUS
+    #define AXIS2_DRIVER_STATUS LOW
   #endif
 #endif

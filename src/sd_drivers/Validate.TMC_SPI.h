@@ -21,6 +21,10 @@
   #ifndef AXIS1_DRIVER_PWM_VHIGH
     #define AXIS1_DRIVER_PWM_VHIGH OFF
   #endif
+  #if AXIS1_DRIVER_STATUS == ON
+    #undef AXIS1_DRIVER_STATUS
+    #define AXIS1_DRIVER_STATUS TMC_SPI
+  #endif
 #endif
 
 #if AXIS2_DRIVER_MODEL == TMC_SPI
@@ -43,6 +47,10 @@
   #endif
   #ifndef AXIS2_DRIVER_PWM_VHIGH
     #define AXIS2_DRIVER_PWM_VHIGH OFF
+  #endif
+  #if AXIS2_DRIVER_STATUS == ON
+    #undef AXIS2_DRIVER_STATUS
+    #define AXIS2_DRIVER_STATUS TMC_SPI
   #endif
 #endif
 

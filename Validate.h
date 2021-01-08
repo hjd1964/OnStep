@@ -1139,6 +1139,20 @@
   #include "src/sd_drivers/Validate.GENERIC.h"
   #include "src/sd_drivers/Validate.SERVO.h"
 
+  #if AXIS1_DRIVER_STATUS == ON
+    #error "Configuration (Config.h): AXIS1_DRIVER_STATUS; Stepper driver doesn't support the ON setting."
+  #endif
+  #if AXIS1_DRIVER_STATUS != OFF && AXIS1_DRIVER_STATUS != LOW && AXIS1_DRIVER_STATUS != HIGH && AXIS1_DRIVER_STATUS != TMC_SPI
+    #error "Configuration (Config.h): AXIS1_DRIVER_STATUS; Stepper driver unsupported setting, use OFF, ON, LOW, HIGH, TMC_SPI."
+  #endif
+
+  #if AXIS2_DRIVER_STATUS == ON
+    #error "Configuration (Config.h): AXIS2_DRIVER_STATUS; Stepper driver doesn't support the ON setting."
+  #endif
+  #if AXIS2_DRIVER_STATUS != OFF && AXIS2_DRIVER_STATUS != LOW && AXIS2_DRIVER_STATUS != HIGH && AXIS2_DRIVER_STATUS != TMC_SPI
+    #error "Configuration (Config.h): AXIS2_DRIVER_STATUS; Stepper driver unsupported setting, use OFF, ON, LOW, HIGH, TMC_SPI."
+  #endif
+
   #if AXIS1_DRIVER_DECAY_MODE_GOTO == STEALTHCHOP || AXIS2_DRIVER_DECAY_MODE_GOTO == STEALTHCHOP
     #warning "Configuration (Config.h): TMC stepper driver _VQUIET mode is generally not recommended except for situations where motor RPM is low."
   #endif
