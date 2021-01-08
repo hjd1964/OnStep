@@ -28,8 +28,12 @@
 #ifndef OneWirePin
   #define OneWirePin       Aux4     // Default Pin for OneWire bus
 #endif
-#define AddonBootModePin   Aux1     // ESP8266 GPIO0 or SPI MISO/Fault
-#define AddonResetPin      Aux2     // ESP8266 RST or SPI MISO/Fault
+#ifndef AddonBootModePin
+  #define AddonBootModePin Aux1     // ESP8266 GPIO0 or SPI MISO/Fault
+#endif
+#ifndef AddonResetPin
+  #define AddonResetPin    Aux2     // ESP8266 RST or SPI MISO/Fault
+#endif
 
 // For software SPI
 #if PINMAP == MksGenL2 || PINMAP == MksGenL21
