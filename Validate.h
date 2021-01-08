@@ -462,13 +462,14 @@
   #ifdef SERIAL_GPS
     #define SerialGPS SERIAL_GPS
   #endif
-  #ifdef SerialGPSBaud
-    #ifndef SERIAL_GPS_BAUD
-      #define SERIAL_GPS_BAUD SerialGPSBaud
-    #endif
-  #endif
   #ifndef SerialGPS
     #error "Configuration (Config.h): Setting SERIAL_GPS, GPS requires adding a line to identify the serial port '#define SERIAL_GPS Serial6' for example."
+  #endif
+  #ifndef SERIAL_GPS
+    #define SERIAL_GPS SerialGPS
+  #endif
+  #ifdef SerialGPSBaud
+    #define SERIAL_GPS_BAUD SerialGPSBaud
   #endif
   #ifndef SERIAL_GPS_BAUD
     #warning "Configuration (Config.h): Setting SERIAL_GPS_BAUD, GPS serial port baud rate is not defined, using 4800."
