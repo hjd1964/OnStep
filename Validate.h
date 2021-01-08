@@ -378,8 +378,8 @@
 #if LOW != 0
   #error "Library check: OnStep assumes LOW == 0!"
 #endif
-#if HIGH != 1
-  #error "Library check: OnStep assumes HIGH == 1!"
+#if HIGH != 1 || true != 1
+  #error "Library check: OnStep assumes both true and HIGH == 1!"
 #endif
 
 // -----------------------------------------------------------------------------------
