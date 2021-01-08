@@ -500,7 +500,7 @@
 #endif
 #ifndef FEATURE1_PURPOSE
   #error "Configuration (Config.h): Setting FEATURE1_PURPOSE must be present!"
-#elif FEATURE1_PURPOSE != OFF && (FEATURE1_PURPOSE < AUXILLARY_FIRST || FEATURE1_PURPOSE > AUXILLARY_LAST)
+#elif FEATURE1_PURPOSE != OFF && (FEATURE1_PURPOSE < AUXILARY_FIRST || FEATURE1_PURPOSE > AUXILARY_LAST)
   #error "Configuration (Config.h): Setting FEATURE1_PURPOSE invalid, use OFF, SWITCH, ANALOG_OUTPUT, DEW_HEATER, etc."
 #endif
 #ifndef FEATURE1_TEMP
@@ -534,7 +534,7 @@
 #endif
 #ifndef FEATURE2_PURPOSE
   #error "Configuration (Config.h): Setting FEATURE2_PURPOSE must be present!"
-#elif FEATURE2_PURPOSE != OFF && (FEATURE2_PURPOSE < AUXILLARY_FIRST || FEATURE2_PURPOSE > AUXILLARY_LAST)
+#elif FEATURE2_PURPOSE != OFF && (FEATURE2_PURPOSE < AUXILARY_FIRST || FEATURE2_PURPOSE > AUXILARY_LAST)
   #error "Configuration (Config.h): Setting FEATURE2_PURPOSE invalid, use OFF, SWITCH, ANALOG_OUTPUT, DEW_HEATER, etc."
 #endif
 #ifndef FEATURE2_TEMP
@@ -568,7 +568,7 @@
 #endif
 #ifndef FEATURE3_PURPOSE
   #error "Configuration (Config.h): Setting FEATURE3_PURPOSE must be present!"
-#elif FEATURE3_PURPOSE != OFF && (FEATURE3_PURPOSE < AUXILLARY_FIRST || FEATURE3_PURPOSE > AUXILLARY_LAST)
+#elif FEATURE3_PURPOSE != OFF && (FEATURE3_PURPOSE < AUXILARY_FIRST || FEATURE3_PURPOSE > AUXILARY_LAST)
   #error "Configuration (Config.h): Setting FEATURE3_PURPOSE invalid, use OFF, SWITCH, ANALOG_OUTPUT, DEW_HEATER, etc."
 #endif
 #ifndef FEATURE3_TEMP
@@ -602,7 +602,7 @@
 #endif
 #ifndef FEATURE4_PURPOSE
   #error "Configuration (Config.h): Setting FEATURE4_PURPOSE must be present!"
-#elif FEATURE4_PURPOSE != OFF && (FEATURE4_PURPOSE < AUXILLARY_FIRST || FEATURE4_PURPOSE > AUXILLARY_LAST)
+#elif FEATURE4_PURPOSE != OFF && (FEATURE4_PURPOSE < AUXILARY_FIRST || FEATURE4_PURPOSE > AUXILARY_LAST)
   #error "Configuration (Config.h): Setting FEATURE4_PURPOSE invalid, use OFF, SWITCH, ANALOG_OUTPUT, DEW_HEATER, etc."
 #endif
 #ifndef FEATURE4_TEMP
@@ -636,7 +636,7 @@
 #endif
 #ifndef FEATURE5_PURPOSE
   #error "Configuration (Config.h): Setting FEATURE5_PURPOSE must be present!"
-#elif FEATURE5_PURPOSE != OFF && (FEATURE5_PURPOSE < AUXILLARY_FIRST || FEATURE5_PURPOSE > AUXILLARY_LAST)
+#elif FEATURE5_PURPOSE != OFF && (FEATURE5_PURPOSE < AUXILARY_FIRST || FEATURE5_PURPOSE > AUXILARY_LAST)
   #error "Configuration (Config.h): Setting FEATURE5_PURPOSE invalid, use OFF, SWITCH, ANALOG_OUTPUT, DEW_HEATER, etc."
 #endif
 #ifndef FEATURE5_TEMP
@@ -670,7 +670,7 @@
 #endif
 #ifndef FEATURE6_PURPOSE
   #error "Configuration (Config.h): Setting FEATURE6_PURPOSE must be present!"
-#elif FEATURE6_PURPOSE != OFF && (FEATURE6_PURPOSE < AUXILLARY_FIRST || FEATURE6_PURPOSE > AUXILLARY_LAST)
+#elif FEATURE6_PURPOSE != OFF && (FEATURE6_PURPOSE < AUXILARY_FIRST || FEATURE6_PURPOSE > AUXILARY_LAST)
   #error "Configuration (Config.h): Setting FEATURE6_PURPOSE invalid, use OFF, SWITCH, ANALOG_OUTPUT, DEW_HEATER, etc."
 #endif
 #ifndef FEATURE6_TEMP
@@ -704,7 +704,7 @@
 #endif
 #ifndef FEATURE7_PURPOSE
   #error "Configuration (Config.h): Setting FEATURE7_PURPOSE must be present!"
-#elif FEATURE7_PURPOSE != OFF && (FEATURE7_PURPOSE < AUXILLARY_FIRST || FEATURE7_PURPOSE > AUXILLARY_LAST)
+#elif FEATURE7_PURPOSE != OFF && (FEATURE7_PURPOSE < AUXILARY_FIRST || FEATURE7_PURPOSE > AUXILARY_LAST)
   #error "Configuration (Config.h): Setting FEATURE7_PURPOSE invalid, use OFF, SWITCH, ANALOG_OUTPUT, DEW_HEATER, etc."
 #endif
 #ifndef FEATURE7_TEMP
@@ -738,7 +738,7 @@
 #endif
 #ifndef FEATURE8_PURPOSE
   #error "Configuration (Config.h): Setting FEATURE8_PURPOSE must be present!"
-#elif FEATURE8_PURPOSE != OFF && (FEATURE8_PURPOSE < AUXILLARY_FIRST || FEATURE8_PURPOSE > AUXILLARY_LAST)
+#elif FEATURE8_PURPOSE != OFF && (FEATURE8_PURPOSE < AUXILARY_FIRST || FEATURE8_PURPOSE > AUXILARY_LAST)
   #error "Configuration (Config.h): Setting FEATURE8_PURPOSE invalid, use OFF, SWITCH, ANALOG_OUTPUT, DEW_HEATER, etc."
 #endif
 #ifndef FEATURE8_TEMP

@@ -115,15 +115,15 @@
 #define DS_MASK    0x3F00000000000000
 #define DS18S20    0x1000000000000000
 
-// various auxillary features
-#define AUXILLARY_FIRST             1
+// various auxilary features
+#define AUXILARY_FIRST              1
 #define SWITCH                      1
 #define ANALOG_OUTPUT               2
 #define ANALOG_OUT                  2
 #define DEW_HEATER                  3
 #define INTERVALOMETER              4
 #define SWITCH_UNPARKED             5
-#define AUXILLARY_LAST              5
+#define AUXILARY_LAST               4
 
 // coordinate mode for getting and setting RA/Dec
 #define OBSERVED_PLACE              1
