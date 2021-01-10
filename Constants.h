@@ -122,7 +122,6 @@
 #define ANALOG_OUT                  2
 #define DEW_HEATER                  3
 #define INTERVALOMETER              4
-#define SWITCH_UNPARKED             5
 #define AUXILARY_LAST               4
 
 // coordinate mode for getting and setting RA/Dec
