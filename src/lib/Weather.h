@@ -76,10 +76,10 @@ class weather {
       _DS2413_devices=0;
   #ifdef DS2413_DEVICES_PRESENT
       for (int i=0; i<4; i++) for (int j=0; j<8; j++) _DS2413_address[i][j] = 0;
-      if (FEATURE1_PIN != OFF && FEATURE1_PIN != DS2413) { for (int j=0; j<8; j++) _DS2413_address[0][j] = (FEATURE1_PIN >> ((7-j)*8)) & 0xff; _DS2413_devices++; }
-      if (FEATURE3_PIN != OFF && FEATURE3_PIN != DS2413) { for (int j=0; j<8; j++) _DS2413_address[1][j] = (FEATURE3_PIN >> ((7-j)*8)) & 0xff; _DS2413_devices++; }
-      if (FEATURE5_PIN != OFF && FEATURE5_PIN != DS2413) { for (int j=0; j<8; j++) _DS2413_address[2][j] = (FEATURE5_PIN >> ((7-j)*8)) & 0xff; _DS2413_devices++; }
-      if (FEATURE7_PIN != OFF && FEATURE7_PIN != DS2413) { for (int j=0; j<8; j++) _DS2413_address[3][j] = (FEATURE7_PIN >> ((7-j)*8)) & 0xff; _DS2413_devices++; }
+      if (FEATURE1_PIN > 255 && FEATURE1_PIN != DS2413) { for (int j=0; j<8; j++) _DS2413_address[0][j] = (FEATURE1_PIN >> ((7-j)*8)) & 0xff; _DS2413_devices++; }
+      if (FEATURE3_PIN > 255 && FEATURE3_PIN != DS2413) { for (int j=0; j<8; j++) _DS2413_address[1][j] = (FEATURE3_PIN >> ((7-j)*8)) & 0xff; _DS2413_devices++; }
+      if (FEATURE5_PIN > 255 && FEATURE5_PIN != DS2413) { for (int j=0; j<8; j++) _DS2413_address[2][j] = (FEATURE5_PIN >> ((7-j)*8)) & 0xff; _DS2413_devices++; }
+      if (FEATURE7_PIN > 255 && FEATURE7_PIN != DS2413) { for (int j=0; j<8; j++) _DS2413_address[3][j] = (FEATURE7_PIN >> ((7-j)*8)) & 0xff; _DS2413_devices++; }
   #endif
   
       // scan the OneWire bus and record the devices found
