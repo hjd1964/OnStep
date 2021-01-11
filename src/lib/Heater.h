@@ -22,7 +22,7 @@ class dewHeaterControl {
     }
 
     void poll(float deltaAboveDewPointC) {
-      if (isnan(deltaAboveDewPointC)) { enabled=false; heaterOn=false; }
+      if (isnan(deltaAboveDewPointC)) { heaterOn=false; return; }
       
       if (!enabled) return;
 
