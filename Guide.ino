@@ -196,7 +196,6 @@ CommandErrors startGuideAxis2(char direction, int guideRate, long guideDuration,
   if (trackingSyncInProgress())            return CE_MOUNT_IN_MOTION;
   if (trackingState == TrackingMoveTo)     return CE_MOUNT_IN_MOTION;
   if (isSpiralGuiding())                   return CE_MOUNT_IN_MOTION;
-  if (guideDirAxis1 || guideDirAxis2)      { if (spiralGuide) stopGuideSpiral(); return CE_NONE; }
   if (direction == guideDirAxis2)          return CE_NONE;
   if (direction == 'n' && !guideNorthOk()) return CE_SLEW_ERR_OUTSIDE_LIMITS;
   if (direction == 's' && !guideSouthOk()) return CE_SLEW_ERR_OUTSIDE_LIMITS;
