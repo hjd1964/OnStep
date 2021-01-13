@@ -18,8 +18,8 @@ void checkHome() {
       safetyLimitsOn=true;
       findHomeMode=FH_OFF;
     } else {
-      if (axis1HomeSense.read() != PierSideStateAxis1 && (guideDirAxis1 == 'e' || guideDirAxis1 == 'w')) StopAxis1();
-      if (axis2HomeSense.read() != PierSideStateAxis2 && (guideDirAxis2 == 'n' || guideDirAxis2 == 's')) StopAxis2();
+      if (axis1HomeSense.read() != PierSideStateAxis1 && (guideDirAxis1 == 'e' || guideDirAxis1 == 'w')) stopHomeAxis1();
+      if (axis2HomeSense.read() != PierSideStateAxis2 && (guideDirAxis2 == 'n' || guideDirAxis2 == 's')) stopHomeAxis2();
     }
   }
   // we are idle and waiting for a fast guide to stop before the final slow guide to refine the home position
@@ -46,13 +46,13 @@ void checkHome() {
   }
 }
 
-void StopAxis1() {
+void stopHomeAxis1() {
   stopGuideAxis1();
   VLF("MSG: Homing switch detected, stopping guide on Axis1");
   if (guideDirAxis2 != 'n' && guideDirAxis2 != 's') { if (findHomeMode == FH_SLOW) findHomeMode=FH_DONE; if (findHomeMode == FH_FAST) findHomeMode=FH_IDLE; }
 }
 
-void StopAxis2() {
+void stopHomeAxis2() {
   stopGuideAxis2();
   VLF("MSG: Homing switch detected, stopping guide on Axis2");
   if (guideDirAxis1 != 'e' && guideDirAxis1 != 'w') { if (findHomeMode == FH_SLOW) findHomeMode=FH_DONE; if (findHomeMode == FH_FAST) findHomeMode=FH_IDLE; }
