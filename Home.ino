@@ -11,8 +11,8 @@ unsigned long findHomeTimeout=0L;
 void checkHome() {
   // check if find home timed out or stopped
   if (findHomeMode == FH_FAST || findHomeMode == FH_SLOW) {
-    if ((long)(millis()-findHomeTimeout) > 0L || (guideDirAxis1 == 0 && guideDirAxis2 == 0)) {
-      if ((long)(millis()-findHomeTimeout) > 0L) generalError=ERR_LIMIT_SENSE;
+    if ((long)(millis()-findHomeTimeout) > 0L || (!guideDirAxis1 && !guideDirAxis2)) {
+      if ((long)(millis()-findHomeTimeout) > 0L) { generalError=ERR_LIMIT_SENSE; VLF("MSG: Homing timed out, stopping guides"); }
       stopGuideAxis1();
       stopGuideAxis2();
       safetyLimitsOn=true;
@@ -48,13 +48,13 @@ void checkHome() {
 
 void StopAxis1() {
   stopGuideAxis1();
-  VLF("MSG: Homing limit detected, stopping guide on Axis1");
+  VLF("MSG: Homing switch detected, stopping guide on Axis1");
   if (guideDirAxis2 != 'n' && guideDirAxis2 != 's') { if (findHomeMode == FH_SLOW) findHomeMode=FH_DONE; if (findHomeMode == FH_FAST) findHomeMode=FH_IDLE; }
 }
 
 void StopAxis2() {
   stopGuideAxis2();
-  VLF("MSG: Homing limit detected, stopping guide on Axis2");
+  VLF("MSG: Homing switch detected, stopping guide on Axis2");
   if (guideDirAxis1 != 'e' && guideDirAxis1 != 'w') { if (findHomeMode == FH_SLOW) findHomeMode=FH_DONE; if (findHomeMode == FH_FAST) findHomeMode=FH_IDLE; }
 }
 #endif
