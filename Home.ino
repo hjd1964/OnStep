@@ -68,8 +68,6 @@ CommandErrors goHome(bool fast) {
 
   if (findHomeMode != FH_OFF) return CE_MOUNT_IN_MOTION;
 
-  abortTrackingState=trackingState;
-  trackingState=TrackingNone;
   // reset/read initial state
   axis1HomeSense.reset(); PierSideStateAxis1=axis1HomeSense.read();
   axis2HomeSense.reset(); PierSideStateAxis2=axis2HomeSense.read();
@@ -83,6 +81,7 @@ CommandErrors goHome(bool fast) {
 
   // start guides
   if (fast) {
+    abortTrackingState=trackingState;
     if (AXIS2_TANGENT_ARM == OFF) trackingState=TrackingNone;
 
     // make sure motors are powered on
