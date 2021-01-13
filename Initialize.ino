@@ -566,7 +566,7 @@ void initStartupValues() {
   // default values for state variables
   pierSideControl       = PIER_SIDE_NONE;
   dirAxis1              = 1;
-  if (latitude >= 0) {
+  if (latitude >= 0 || mountType == ALTAZM) {
     if (axis1Settings.reverse == ON) defaultDirAxis1 = DefaultDirAxis1SCPInit; else defaultDirAxis1 = DefaultDirAxis1NCPInit;
   } else {
     if (axis1Settings.reverse == ON) defaultDirAxis1 = DefaultDirAxis1NCPInit; else defaultDirAxis1 = DefaultDirAxis1SCPInit;
