@@ -48,13 +48,13 @@ void checkHome() {
 
 void StopAxis1() {
   guideDirAxis1='b';
-  VLF("MSG: Homing limit detected, stopping guide on Axis1");
+  VLF("MSG: Homing switch detected, stopping guide on Axis1");
   if (guideDirAxis2 != 'n' && guideDirAxis2 != 's') { if (findHomeMode == FH_SLOW) findHomeMode=FH_DONE; if (findHomeMode == FH_FAST) findHomeMode=FH_IDLE; }
 }
 
 void StopAxis2() {
   guideDirAxis2='b';
-  VLF("MSG: Homing limit detected, stopping guide on Axis2");
+  VLF("MSG: Homing switch detected, stopping guide on Axis2");
   if (guideDirAxis1 != 'e' && guideDirAxis1 != 'w') { if (findHomeMode == FH_SLOW) findHomeMode=FH_DONE; if (findHomeMode == FH_FAST) findHomeMode=FH_IDLE; }
 }
 #endif
