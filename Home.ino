@@ -99,14 +99,16 @@ CommandErrors goHome(bool fast) {
     
     // 8=HalfMaxRate
     if (AXIS2_TANGENT_ARM == OFF) e=startGuideAxis1(a1,8,0,false);
-    if (e == CE_NONE) { VLF("MSG: Homing started phase 1"); e=startGuideAxis2(a2,8,0,false,true); } else { stopGuideAxis1(); VLF("MSG: Homing failed"); }
+    if (e == CE_NONE) e=startGuideAxis2(a2,8,0,false,true);
+    if (e == CE_NONE) VLF("MSG: Homing started phase 1"); else VLF("MSG: Homing start phase 1 failed");
   } else {
     findHomeMode=FH_SLOW;
     findHomeTimeout=millis()+30000UL;
     
     // 7=48x sidereal
     if (AXIS2_TANGENT_ARM == OFF) e=startGuideAxis1(a1,7,0,false);
-    if (e == CE_NONE) { e=startGuideAxis2(a2,7,0,false,true); VLF("MSG: Homing started phase 2"); } else { stopGuideAxis1(); VLF("MSG: Homing failed"); }
+    if (e == CE_NONE) e=startGuideAxis2(a2,7,0,false,true);
+    if (e == CE_NONE) VLF("MSG: Homing started phase 2"); else VLF("MSG: Homing start phase 2 failed");
   }
   if (e != CE_NONE) stopSlewingAndTracking(SS_ALL_FAST);
   return e;
