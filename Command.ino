@@ -1836,7 +1836,7 @@ void processCommands() {
               if (&parameter[3] != conv_end && fabs(f) <= 360.0) encoderAxis2=f; else commandError=CE_PARAM_RANGE;
               break;
             case '2': // sync encoder to last values
-              if (parameter[3] == '1' && parameter[4] == 0) if (syncEnc(encoderAxis1,encoderAxis2)) commandError=CE_PARAM_RANGE;
+              if (parameter[3] == '1' && parameter[4] == 0) syncEnc(encoderAxis1,encoderAxis2);
               break;
             case '3': // re-enable setting OnStep to Encoders after a Sync 
               syncToEncodersOnly=false;
