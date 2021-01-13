@@ -23,26 +23,26 @@ void checkHome() {
     }
   }
   // we are idle and waiting for a fast guide to stop before the final slow guide to refine the home position
-  if (findHomeMode == FH_IDLE && guideDirAxis1 == 0 && guideDirAxis2 == 0) {
+  if (findHomeMode == FH_IDLE && !guideDirAxis1 && !guideDirAxis2) {
     findHomeMode=FH_OFF;
     goHome(false);
   }
   // we are finishing off the find home
-  if (findHomeMode == FH_DONE && guideDirAxis1 == 0 && guideDirAxis2 == 0) {
+  if (findHomeMode == FH_DONE && !guideDirAxis1 && !guideDirAxis2) {
     findHomeMode=FH_OFF;
 
-    VLF("MSG: Homing done");
     if (AXIS2_TANGENT_ARM == ON) {
-      trackingState=abortTrackingState;
       cli();
       targetAxis2.part.m = 0; targetAxis2.part.f = 0;
       posAxis2           = 0;
       sei();
+      VLF("MSG: Homing done, tangent arm centered");
     } else {
       // at the home position
       initStartPosition();
       atHome=true;
     }
+    VLF("MSG: Homing done");
   }
 }
 
@@ -68,10 +68,8 @@ CommandErrors goHome(bool fast) {
 
   if (findHomeMode != FH_OFF) return CE_MOUNT_IN_MOTION;
 
-  // stop tracking
   abortTrackingState=trackingState;
   trackingState=TrackingNone;
-
   // reset/read initial state
   axis1HomeSense.reset(); PierSideStateAxis1=axis1HomeSense.read();
   axis2HomeSense.reset(); PierSideStateAxis2=axis2HomeSense.read();
@@ -85,7 +83,6 @@ CommandErrors goHome(bool fast) {
 
   // start guides
   if (fast) {
-    // make sure tracking is disabled
     if (AXIS2_TANGENT_ARM == OFF) trackingState=TrackingNone;
 
     // make sure motors are powered on
@@ -94,7 +91,7 @@ CommandErrors goHome(bool fast) {
     findHomeMode=FH_FAST;
     double secPerDeg=3600.0/(double)guideRates[8];
     findHomeTimeout=millis()+(unsigned long)(secPerDeg*180.0*1000.0);
-    
+
     // 8=HalfMaxRate
     if (AXIS2_TANGENT_ARM == OFF) e=startGuideAxis1(a1,8,0,false);
     if (e == CE_NONE) e=startGuideAxis2(a2,8,0,false,true);
@@ -102,7 +99,7 @@ CommandErrors goHome(bool fast) {
   } else {
     findHomeMode=FH_SLOW;
     findHomeTimeout=millis()+30000UL;
-    
+
     // 7=48x sidereal
     if (AXIS2_TANGENT_ARM == OFF) e=startGuideAxis1(a1,7,0,false);
     if (e == CE_NONE) e=startGuideAxis2(a2,7,0,false,true);
