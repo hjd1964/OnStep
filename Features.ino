@@ -42,8 +42,8 @@ void featuresPoll() {
       }
     } else
     if (feature[i].purpose == ANALOG_OUT) {
-      if (feature[i].value) feature[i].value=255;
       if (feature[i].value != v) {
+        if (feature[i].value) feature[i].value=255;
         if (feature[i].pin >= 0 && feature[i].pin <= 255) analogWrite(feature[i].pin,feature[i].value);
       }
     } else
