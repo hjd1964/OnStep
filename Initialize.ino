@@ -98,34 +98,34 @@ void initPins() {
   axis1HomeSense.init(Axis1_HOME,INPUT,true,HOME_SENSE,HOME_SENSE_HYSTERSIS,false);
   axis2HomeSense.init(Axis2_HOME,INPUT,true,HOME_SENSE,HOME_SENSE_HYSTERSIS,false);
 #elif HOME_SENSE == ON
-  axis1HomeSense.init(Axis1_HOME,INPUT,false,0,0,false);
-  axis2HomeSense.init(Axis2_HOME,INPUT,false,0,0,false);
+  axis1HomeSense.init(Axis1_HOME,INPUT,false,0,SST_SWITCH,false);
+  axis2HomeSense.init(Axis2_HOME,INPUT,false,0,SST_SWITCH,false);
 #elif HOME_SENSE == ON_PULLUP
-  axis1HomeSense.init(Axis1_HOME,INPUT_PULLUP,false,0,0,false);
-  axis2HomeSense.init(Axis2_HOME,INPUT_PULLUP,false,0,0,false);
+  axis1HomeSense.init(Axis1_HOME,INPUT_PULLUP,false,0,SST_SWITCH,false);
+  axis2HomeSense.init(Axis2_HOME,INPUT_PULLUP,false,0,SST_SWITCH,false);
 #elif HOME_SENSE == ON_PULLDOWN
-  axis1HomeSense.init(Axis1_HOME,INPUT_PULLDOWN,false,0,0,false);
-  axis2HomeSense.init(Axis2_HOME,INPUT_PULLDOWN,false,0,0,false);
+  axis1HomeSense.init(Axis1_HOME,INPUT_PULLDOWN,false,0,SST_SWITCH,false);
+  axis2HomeSense.init(Axis2_HOME,INPUT_PULLDOWN,false,0,SST_SWITCH,false);
 #endif
 
   // limit switch sense
 #if LIMIT_SENSE == ON
-  limitSense.init(LimitPin,INPUT,false,0,0,false);
+  limitSense.init(LimitPin,INPUT,false,0,SST_EMI_RFI,false);
 #elif LIMIT_SENSE == ON_PULLUP
-  limitSense.init(LimitPin,INPUT_PULLUP,false,0,0,false);
+  limitSense.init(LimitPin,INPUT_PULLUP,false,0,SST_EMI_RFI,false);
 #elif LIMIT_SENSE == ON_PULLDOWN
-  limitSense.init(LimitPin,INPUT_PULLDOWN,false,0,0,false);
+  limitSense.init(LimitPin,INPUT_PULLDOWN,false,0,SST_EMI_RFI,false);
 #endif
 
   // PEC index sense
 #if PEC_SENSE > OFF
   pecSense.init(PecPin,INPUT,true,PEC_SENSE,PEC_SENSE_HYSTERSIS,false);
 #elif PEC_SENSE == ON
-  pecSense.init(PecPin,INPUT,false,0,0,false);
+  pecSense.init(PecPin,INPUT,false,0,SST_EMI_RFI,false);
 #elif PEC_SENSE == ON_PULLUP
-  pecSense.init(PecPin,INPUT_PULLUP,false,0,0,false);
+  pecSense.init(PecPin,INPUT_PULLUP,false,0,SST_EMI_RFI,false);
 #elif PEC_SENSE == ON_PULLDOWN
-  pecSense.init(PecPin,INPUT_PULLDOWN,false,0,0,false);
+  pecSense.init(PecPin,INPUT_PULLDOWN,false,0,SST_EMI_RFI,false);
 #endif
 
   // Pulse per second

@@ -135,6 +135,10 @@
 #define BD_IN -1
 #define BD_OUT 1
 
+// signal stability time, in ms
+#define SST_SWITCH                  10
+#define SST_EMI_RFI                 1
+
 // EEPROM Info ---------------------------------------------------------------------------------------------------------------------
 // General purpose storage A (100 bytes), 0..99
 
