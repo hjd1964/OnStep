@@ -326,6 +326,8 @@ bool parkSaved                          = false;
 // Homing --------------------------------------------------------------------------------------------------------------------------
 bool atHome                             = true;
 bool homeMount                          = false;
+enum findHomeModes {FH_OFF,FH_START,FH_FAST,FH_READY_SLOW,FH_SLOW,FH_READY_TRIM,FH_TRIM,FH_DONE};
+findHomeModes findHomeMode=FH_OFF;
 
 // Command processing --------------------------------------------------------------------------------------------------------------
 #define BAUD 9600

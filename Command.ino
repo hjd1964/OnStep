@@ -1086,7 +1086,7 @@ void processCommands() {
 //            Returns: Nothing
       if (command[1] == 'C' && parameter[0] == 0)  {
         focuserRotatorSave();
-        commandError=goHome(true); boolReply=false;
+        commandError=goHome(FH_START); boolReply=false;
         if (commandError == CE_MOUNT_IN_MOTION) stopSlewingAndTracking(SS_ALL_FAST);
       } else 
 // :hP#       Goto the Park Position
