@@ -424,7 +424,7 @@ void processCommands() {
         if (command[1] == 'F') { foc->setMoveRate(1000); booleanReply=false; } else
 // :FS#       Set focuser for slow motion (0.01mm/s)
 //            Returns: Nothing
-        if (command[1] == 'S' && parameter[0] == 0) { foc->setMoveRate(1); booleanReply=false; } else
+        if (command[1] == 'S' && parameter[0] == 0) { foc->setMoveRate(10); booleanReply=false; } else
 // :F[n]#     Set focuser move rate, where n = 1 for finest, 2 for 0.01mm/second, 3 for 0.1mm/second, 4 for 1mm/second
 //            Returns: Nothing
         if (command[1] >= '1' && command[1] <= '4') { int p[] = {1,10,100,1000}; foc->setMoveRate(p[command[1] - '1']); booleanReply=false; } else
