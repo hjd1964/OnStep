@@ -1511,12 +1511,12 @@ void processCommands() {
         boolReply=false; 
       } else
 
-// :RG#       Set slew rate to Guiding Rate   1X
-// :RC#       Set slew rate to Centering rate 8X
-// :RM#       Set slew rate to Find Rate     20X
-// :RF#       Set slew rate to Fast Rate     48X
-// :RS#       Set slew rate to Half Max (VF)  ?X (1/2 of maxRate)
-// :Rn#       Set slew rate to n, where n = 0..9
+// :RG#       Set guide rate: Guiding        1X
+// :RC#       Set guide rate: Centering      8X
+// :RM#       Set guide rate: Find          20X
+// :RF#       Set guide rate: Fast          48X
+// :RS#       Set guide rate: Slew           ?X (1/2 of current goto rate)
+// :Rn#       Set guide rate to n, where n = 0..9
 //            Returns: Nothing
       if ((command[1] == 'G' || command[1] == 'C' || command[1] == 'M' || command[1] == 'S' || (command[1] >= '0' && command[1] <= '9')) && parameter[0] == 0) {
         if (command[1] == 'G') i=2; else // 1x
