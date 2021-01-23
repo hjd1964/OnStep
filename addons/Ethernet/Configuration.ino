@@ -333,11 +333,11 @@ void handleConfiguration() {
   data += "<br />\r\n";
 
   int numShown = 0;
-  data += FPSTR(html_configAdvanced);
   
   // Mount type
   if (!command(":GXEM#",temp1)) strcpy(temp1,"0");
   int mt=atoi(temp1);
+  if (mt != 0) data += FPSTR(html_configAdvanced);
   if (mt >= 1 && mt <= 3) {
     data += "<button type='button' class='collapsible'>Mount Type</button>";
     data += FPSTR(html_configFormBegin);
@@ -542,6 +542,7 @@ bool processConfigurationGet() {
   #endif
 #endif
   String ssm=server.arg("mountt"); if (!ssm.equals("")) { sprintf(temp,":SXEM,%s#",ssm.c_str()); commandBool(temp); }
+  String ssr=server.arg("revert"); if (!ssr.equals("")) commandBool(":SXEM,0#");
 
   return true;
 }
