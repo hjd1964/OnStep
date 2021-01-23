@@ -3,7 +3,9 @@
 
 #pragma once
 
-#include "EEPROM.h"
+#ifndef EEPROM_DISABLED
+  #include "EEPROM.h"
+#endif
 
 class nvs {
   public:
