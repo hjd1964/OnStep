@@ -68,10 +68,4 @@
 #define AXIS1_ENC_BIN_AVG             OFF //    OFF, n, (Number of bins.)  Enables binned rolling average feature.            Option
 
 // THAT'S IT FOR USER CONFIGURATION!
-
-// -------------------------------------------------------------------------------------------------------------------------
-
-// Misc. options that are usually not changed
-#define Ser Serial // Default=Serial, This is the hardware serial port where OnStep is attached
-
 // -------------------------------------------------------------------------------

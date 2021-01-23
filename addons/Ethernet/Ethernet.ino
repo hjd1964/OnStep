@@ -2,7 +2,7 @@
  * Title       OnStep Ethernet Server
  * by          Howard Dutton
  *
- * Copyright (C) 2016 to 2020 Howard Dutton
+ * Copyright (C) 2016 to 2021 Howard Dutton
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,6 +42,10 @@
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
+// Enable debug and/or status messages to be passed to OnStep for display using its debug facilities
+// default "DEBUG OFF", use "DEBUG ON" for background errors only, use "DEBUG VERBOSE" for all errors and status messages
+#define DEBUG OFF
+
 // work around PROGMEM use on Teensy3.2 etc: FPSTR() gets ignored
 #if !defined(ESP8266) && !defined(ESP32)
   #define ICACHE_RAM_ATTR
@@ -60,9 +64,7 @@
 //  #include <Ethernet.h>
 //#endif
 
-#define DEBUG_OFF   // Turn _ON to allow Ethernet startup without OnStep (Serial port for debug at 9600 baud)
-
-#if defined(_mk20dx128_h_) || defined(__MK20DX128__) || defined(__MK20DX256__)
+#if defined(_mk20dx128_h_) || defined(__MK20DX128__) || defined(__MK20DX256__) || defined(__IMXRT1052__) || defined(__IMXRT1062__)
   #include <EEPROM.h>
 #else
   #define EEPROM_DISABLED
@@ -84,8 +86,13 @@
 
 // The settings in NV (EEPROM) are for initialization only, afterward they are stored and recalled from EEPROM and must
 // be changed in the web interface OR with a reset (for initialization again) as described in the Config.h comments
-#define TIMEOUT_WEB 60
-#define TIMEOUT_CMD 60
+#if SERIAL_BAUD<=28800
+  #define TIMEOUT_WEB 60
+  #define TIMEOUT_CMD 60
+#else
+  #define TIMEOUT_WEB 15
+  #define TIMEOUT_CMD 30
+#endif
 
 int webTimeout=TIMEOUT_WEB;
 int cmdTimeout=TIMEOUT_CMD;
@@ -197,8 +204,19 @@ Again:
   
   clearSerialChannel();
   
+  // say hello
+  VF("WEM: Ethernet Addon "); V(FirmwareVersionMajor); V("."); V(FirmwareVersionMinor); VL(FirmwareVersionPatch);
+  VF("WEM: MCU = "); VLF(MCU_STR);
+
+  VF("WEM: Web Channel Timeout ms= "); VL(webTimeout);
+  VF("WEM: Cmd Channel Timeout ms= "); VL(cmdTimeout);
+
+  VF("WEM: Ethernet IP     = "); VL(ip.toString());
+  VF("WEM: Ethernet GATEWAY= "); VL(gateway.toString());
+  VF("WEM: Ethernet SUBNET = "); VL(subnet.toString());
+
 #if W5500 == ON
-  // reset a W5500
+  VLF("WEM: Resetting W5500 using pin 9");
   pinMode(9, OUTPUT); 
   digitalWrite(9, LOW);
   delayMicroseconds(500);
@@ -207,8 +225,10 @@ Again:
   delay(1000);
 #endif
 
-  // Initialize the www server
+  VLF("WEM: Starting port 80 web svr");
   server.init();
+  
+  VLF("WEM: Connecting web-page handlers");
   server.on("/index.htm", handleRoot);
   server.on("/configuration.htm", handleConfiguration);
   server.on("/configurationA.txt", configurationAjaxGet);
@@ -236,6 +256,7 @@ Again:
   server.onNotFound(handleNotFound);
 
   // Initialize the cmd server, timeout after 500ms
+  VLF("WEM: Starting port 9999 cmd svr");
   cmdSvr.init(9999,500);
   
   // allow time for the background servers to come up
@@ -243,14 +264,13 @@ Again:
 
   // clear the serial channel one last time
   clearSerialChannel();
-  
-#ifdef DEBUG_ON
-  Ser.println("HTTP server started");
-#endif
 
 #if ENCODERS == ON
+  VLF("WEM: Starting Encoders");
   encoders.init();
 #endif
+
+  VLF("WEM: Ethernet Addon is ready");
 }
 
 void loop(void){

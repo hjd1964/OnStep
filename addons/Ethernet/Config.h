@@ -70,9 +70,4 @@ IPAddress subnet(255, 255, 255, 0);
 #define AXIS1_ENC_BIN_AVG             OFF //    OFF, n, (Number of bins.)  Enables binned rolling average feature.            Option
 
 // THAT'S IT FOR USER CONFIGURATION!
-
-// -------------------------------------------------------------------------------------------------------------------------
-
-#define Ser Serial1 // Default=Serial1, This is the hardware serial port where OnStep is attached
-
 // ---------------------------------------------------------------------------------------------------------------------------------

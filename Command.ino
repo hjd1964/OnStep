@@ -277,14 +277,16 @@ void processCommands() {
 
 //  E - Enter special mode
       if (command[0] == 'E') {
-#if DEBUG != OFF
-// :EC[s]# Echo string [c] on SerialA.
+// :EC[s]# Echo string [c] on DebugSer.
 //            Return: Nothing
         if (command[1] == 'C') {
-          SerialA.println(parameter);
+          // spaces are encoded as '_'
+          for (unsigned int i=0; i < strlen(parameter); i++) if (parameter[i]=='_') parameter[i]=' ';
+          // a newline is encoded as '&' in the last char of message
+          int l=strlen(parameter);
+          if (l > 0 && parameter[l-1] == '&') { parameter[l-1]=0; DL(parameter); } else D(parameter);
           boolReply=false;
         } else
-#endif
 // :ERESET#   Reset the MCU.  OnStep must be at home and tracking turned off for this command to work.
 //            Returns: Nothing
         if (command[1] == 'R' && parameter[0] == 'E' && parameter[1] == 'S' && parameter[2] == 'E' && parameter[3] == 'T' && parameter[4] == 0) {

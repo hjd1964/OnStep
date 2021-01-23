@@ -2,7 +2,7 @@
  * Title       OnStep WiFi Server
  * by          Howard Dutton
  *
- * Copyright (C) 2016 to 2020 Howard Dutton
+ * Copyright (C) 2016 to 2021 Howard Dutton
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +41,10 @@
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
+// Enable debug and/or status messages to be passed to OnStep for display using its debug facilities
+// default "DEBUG OFF", use "DEBUG ON" for background errors only, use "DEBUG VERBOSE" for all errors and status messages
+#define DEBUG OFF
+
 #include <limits.h>
 #ifdef ESP32
   #include <WiFi.h>
@@ -55,8 +59,6 @@
 #endif
 #include <EEPROM.h>
 #include "EEProm.h"
-
-#define DEBUG_OFF   // Turn _ON to allow web and cmd channel servers to startup without OnStep (Serial port for debug at 115200 baud)
 
 #include "Constants.h"
 #include "Locales.h"
@@ -242,7 +244,6 @@ void setup(void){
   int serialSwap=SERIAL_SWAP;
   if (serialSwap == AUTO) serialSwap = AUTO_OFF;
 
-#ifndef DEBUG_ON
   long serial_baud = SERIAL_BAUD;
   serialBegin(SERIAL_BAUD_DEFAULT,serialSwap);
   byte tb=1;
@@ -282,44 +283,47 @@ Again:
     if (tb == 11) if (SERIAL_BAUD_DEFAULT == 9600) serialBegin(19200,serialSwap); else tb=15;
     goto Again;
   }
-#else
-  serialBegin(115200,OFF);
-  delay(10000);
   
-  Ser.println(accessPointEnabled);
-  Ser.println(stationEnabled);
-  Ser.println(stationDhcpEnabled);
+  // say hello
+  VF("WEM: WiFi Addon "); V(FirmwareVersionMajor); V("."); V(FirmwareVersionMinor); VL(FirmwareVersionPatch);
+  VF("WEM: MCU = "); VLF(MCU_STR);
 
-  Ser.println(webTimeout);
-  Ser.println(cmdTimeout);
+  VF("WEM: Access Point Enabled  = "); VL(accessPointEnabled);
+  VF("WEM: Station Enabled       = "); VL(stationEnabled);
+  VF("WEM: Station DHCP Enabled  = "); VL(stationDhcpEnabled);
 
-  Ser.println(wifi_sta_ssid);
-  Ser.println(wifi_sta_pwd);
-  Ser.println(wifi_sta_ip.toString());
-  Ser.println(wifi_sta_gw.toString());
-  Ser.println(wifi_sta_sn.toString());
+  VF("WEM: Web Channel Timeout ms= "); VL(webTimeout);
+  VF("WEM: Cmd Channel Timeout ms= "); VL(cmdTimeout);
 
-  Ser.println(wifi_ap_ssid);
-  Ser.println(wifi_ap_pwd);
-  Ser.println(wifi_ap_ch);
-  Ser.println(wifi_ap_ip.toString());
-  Ser.println(wifi_ap_gw.toString());
-  Ser.println(wifi_ap_sn.toString());
+  VF("WEM: WiFi STA SSID   = "); VL(wifi_sta_ssid);
+  VF("WEM: WiFi STA PWD    = "); VL(wifi_sta_pwd);
+  VF("WEM: WiFi STA IP     = "); VL(wifi_sta_ip.toString());
+  VF("WEM: WiFi STA GATEWAY= "); VL(wifi_sta_gw.toString());
+  VF("WEM: WiFi STA SN     = "); VL(wifi_sta_sn.toString());
 
-#endif
+  VF("WEM: WiFi AP SSID    = "); VL(wifi_ap_ssid);
+  VF("WEM: WiFi AP PWD     = "); VL(wifi_ap_pwd);
+  VF("WEM: WiFi AP CH      = "); VL(wifi_ap_ch);
+  VF("WEM: WiFi AP IP      = "); VL(wifi_ap_ip.toString());
+  VF("WEM: WiFi AP GATEWAY = "); VL(wifi_ap_gw.toString());
+  VF("WEM: WiFi AP SN      = "); VL(wifi_ap_sn.toString());
 
 TryAgain:
   
   if (accessPointEnabled && !stationEnabled) {
+    VLF("WEM: Starting WiFi Soft AP");
     WiFi.softAP(wifi_ap_ssid, wifi_ap_pwd, wifi_ap_ch);
     WiFi.mode(WIFI_AP);
   } else
   if (!accessPointEnabled && stationEnabled) {
+    VLF("WEM: Starting WiFi Station");
     WiFi.begin(wifi_sta_ssid, wifi_sta_pwd);
     WiFi.mode(WIFI_STA);
   } else
   if (accessPointEnabled && stationEnabled) {
+    VLF("WEM: Starting WiFi Soft AP");
     WiFi.softAP(wifi_ap_ssid, wifi_ap_pwd, wifi_ap_ch);
+    VLF("WEM: Starting WiFi Station");
     WiFi.begin(wifi_sta_ssid, wifi_sta_pwd);
     WiFi.mode(WIFI_AP_STA);
   }
@@ -332,7 +336,9 @@ TryAgain:
   if (!accessPointEnabled && stationEnabled) {
     for (int i=0; i<8; i++) if (WiFi.status() != WL_CONNECTED) delay(1000); else break;
     if (WiFi.status() != WL_CONNECTED) {
+      VLF("WEM: Starting WiFi Station, failed");
       WiFi.disconnect(); delay(3000);
+      VLF("WEM: Switching to WiFi Soft AP mode");
       stationEnabled=false;
       accessPointEnabled=true;
       goto TryAgain;
@@ -341,6 +347,7 @@ TryAgain:
 
   clearSerialChannel();
   
+  VLF("WEM: Connecting web-page handlers");
   server.on("/", handleRoot);
   server.on("/index.htm", handleRoot);
   server.on("/configuration.htm", handleConfiguration);
@@ -369,15 +376,18 @@ TryAgain:
   server.onNotFound(handleNotFound);
 
 #if STANDARD_COMMAND_CHANNEL == ON
+  VLF("WEM: Starting port 9999 cmd svr");
   cmdSvr.begin();
   cmdSvr.setNoDelay(true);
 #endif
 
 #if PERSISTENT_COMMAND_CHANNEL == ON
+  VLF("WEM: Starting port 9998 persistant cmd svr");
   persistentCmdSvr.begin();
   persistentCmdSvr.setNoDelay(true);
 #endif
 
+  VLF("WEM: Starting port 80 web svr");
   server.begin();
 
   // allow time for the background servers to come up
@@ -386,13 +396,12 @@ TryAgain:
   // clear the serial channel one last time
   clearSerialChannel();
 
-#ifdef DEBUG_ON
-  Ser.println("HTTP server started");
-#endif
-
 #if ENCODERS == ON
+  VLF("WEM: Starting Encoders");
   encoders.init();
 #endif
+
+  VLF("WEM: WiFi Addon is ready");
 }
 
 void loop(void) {
