@@ -64,7 +64,7 @@
 //  #include <Ethernet.h>
 //#endif
 
-#if defined(_mk20dx128_h_) || defined(__MK20DX128__) || defined(__MK20DX256__) || defined(__IMXRT1052__) || defined(__IMXRT1062__)
+#if defined(_mk20dx128_h_) || defined(__MK20DX128__) || defined(__MK20DX256__) || defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__IMXRT1052__) || defined(__IMXRT1062__)
   #include <EEPROM.h>
 #else
   #define EEPROM_DISABLED
