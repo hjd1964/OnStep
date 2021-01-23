@@ -45,7 +45,7 @@ class button {
     // number of ms up
     long timeUp() { if ((_stableMs > _debounceMs) && (_state == _UP)) return _stableMs; else return 0; }
     // check to see if this button has the SHC tone (12.5 Hz nominal)
-    bool hasTone() { if (fabs(_avgPulseDuration-40.0) < 5.0) return true; else return false; }
+    bool hasTone() { if (fabs(_avgPulseDuration-40.0) < 7.0) return true; else return false; }
     // in Hz (0.05 to 5000Hz range) returns NAN otherwise
     double toneFreq() { if (_avgPulseDuration >= 0.1 && _avgPulseDuration <= 10000.0) return 0.5/(_avgPulseDuration/1000.0); else return NAN; }
   private:
