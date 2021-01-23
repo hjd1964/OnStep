@@ -309,8 +309,6 @@ Again:
 #endif
 
 TryAgain:
-  if ((stationEnabled) && (!stationDhcpEnabled)) WiFi.config(wifi_sta_ip, wifi_sta_gw, wifi_sta_sn);
-  if (accessPointEnabled) WiFi.softAPConfig(wifi_ap_ip, wifi_ap_gw, wifi_ap_sn);
   
   if (accessPointEnabled && !stationEnabled) {
     WiFi.softAP(wifi_ap_ssid, wifi_ap_pwd, wifi_ap_ch);
@@ -325,6 +323,10 @@ TryAgain:
     WiFi.begin(wifi_sta_ssid, wifi_sta_pwd);
     WiFi.mode(WIFI_AP_STA);
   }
+
+  delay(100);
+  if ((stationEnabled) && (!stationDhcpEnabled)) WiFi.config(wifi_sta_ip, wifi_sta_gw, wifi_sta_sn);
+  if (accessPointEnabled) WiFi.softAPConfig(wifi_ap_ip, wifi_ap_gw, wifi_ap_sn);
 
   // wait for connection in station mode, if it fails fall back to access-point mode
   if (!accessPointEnabled && stationEnabled) {
