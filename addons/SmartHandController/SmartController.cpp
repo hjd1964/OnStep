@@ -351,17 +351,17 @@ again:
     if (s[0]=='0') {
       telescopeCoordinates=OBSERVED_PLACE; 
       DisplayMessage(L_CONNECTION, L_OK "!", 1000);
-      VLF("HCM: SHC Connected");
+      VLF("HCM: SHC Connection established");
     } else 
     if (s[0]=='1') {
       telescopeCoordinates=TOPOCENTRIC; 
       DisplayMessage(L_CONNECTION, L_OK "!", 1000);
-      VLF("HCM: SHC Connected");
+      VLF("HCM: SHC Connection established");
     } else 
     if (s[0]=='2') {
       telescopeCoordinates=ASTROMETRIC_J2000;
       DisplayMessage(L_CONNECTION, L_OK "!", 1000);
-      VLF("HCM: SHC Connected");
+      VLF("HCM: SHC Connection established");
     }
   } else {
     if (++thisTry <= 4) goto again;

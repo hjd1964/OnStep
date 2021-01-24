@@ -270,6 +270,7 @@ Again:
     
     // we're all set, just change the baud rate to match OnStep
     serialBegin(serial_baud,serialSwap);
+    VLF("WEM: WiFi Connection established");
   } else {
 #if LED_STATUS != OFF
     digitalWrite(LED_STATUS,HIGH);

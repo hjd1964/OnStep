@@ -189,6 +189,7 @@ Again:
     
     // we're all set, just change the baud rate to match OnStep
     Ser.begin(serial_baud); delay(2000);
+    VLF("WEM: Ethernet, Connection established");
   } else {
     // got nothing back, toggle baud rate and/or swap ports
     serialRecvFlush();
