@@ -19,7 +19,7 @@ class nvs {
     }
     
     void commit() {
-#if defined(ESP8266) || defined(ESP32)
+#if defined(ESP8266) || defined(ESP32) || defined(ARDUINO_ARCH_SAMD)
       EEPROM.commit();
 #endif
     }

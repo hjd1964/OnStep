@@ -46,25 +46,19 @@
 // default "DEBUG OFF", use "DEBUG ON" for background errors only, use "DEBUG VERBOSE" for all errors and status messages
 #define DEBUG OFF
 
-// work around PROGMEM use on Teensy3.2 etc: FPSTR() gets ignored
+#include <limits.h>
+
+// work around for some ESP specific code
 #if !defined(ESP8266) && !defined(ESP32)
   #define ICACHE_RAM_ATTR
   #define FPSTR
 #endif
 
-#include <limits.h>
+// get NV ready
 #ifdef ARDUINO_ARCH_SAMD
   #include <avr/dtostrf.h>
-#endif
-
-// pretty sure this wasn't being compiled in even if W5500 was ON (ahead of #include Config.h) so commented out for now.
-//#ifdef W5500_ON
-//  #include <Ethernet3.h>  // https://github.com/PaulStoffregen/Ethernet
-//#else
-//  #include <Ethernet.h>
-//#endif
-
-#if defined(_mk20dx128_h_) || defined(__MK20DX128__) || defined(__MK20DX256__) || defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__IMXRT1052__) || defined(__IMXRT1062__)
+  #include <FlashAsEEPROM.h> // https://github.com/cmaglie/FlashStorage (Called "FlashStorage" in the Arduio IDE Library Manager)
+#elif defined(_mk20dx128_h_) || defined(__MK20DX128__) || defined(__MK20DX256__) || defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__IMXRT1052__) || defined(__IMXRT1062__)
   #include <EEPROM.h>
 #else
   #define EEPROM_DISABLED
@@ -72,7 +66,6 @@
 #include "EEProm.h"
 
 #include <Ethernet.h>
-#include "CmdServer.h"
 
 #include "Constants.h"
 #include "Locales.h"
@@ -82,11 +75,13 @@
 #endif
 #include "Locale.h"
 #include "Globals.h"
+
+#include "CmdServer.h"
 #include "WebServer.h"
 
 // The settings in NV (EEPROM) are for initialization only, afterward they are stored and recalled from EEPROM and must
 // be changed in the web interface OR with a reset (for initialization again) as described in the Config.h comments
-#if SERIAL_BAUD<=28800
+#if SERIAL_BAUD <= 28800
   #define TIMEOUT_WEB 60
   #define TIMEOUT_CMD 60
 #else
@@ -99,7 +94,7 @@ int cmdTimeout=TIMEOUT_CMD;
 
 #include "Encoders.h"
 #if ENCODERS == ON
-Encoders encoders;
+  Encoders encoders;
 #endif
 
 // macros to help with sending webpage data
