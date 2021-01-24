@@ -48,22 +48,14 @@
 
 #include <limits.h>
 
-// work around for some ESP specific code
+// work around for some platform specific code
 #if !defined(ESP8266) && !defined(ESP32)
   #define ICACHE_RAM_ATTR
   #define FPSTR
 #endif
-
-// get NV ready
 #ifdef ARDUINO_ARCH_SAMD
   #include <avr/dtostrf.h>
-  #include <FlashAsEEPROM.h> // https://github.com/cmaglie/FlashStorage (Called "FlashStorage" in the Arduio IDE Library Manager)
-#elif defined(_mk20dx128_h_) || defined(__MK20DX128__) || defined(__MK20DX256__) || defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__IMXRT1052__) || defined(__IMXRT1062__)
-  #include <EEPROM.h>
-#else
-  #define EEPROM_DISABLED
 #endif
-#include "EEProm.h"
 
 #include <Ethernet.h>
 
@@ -73,6 +65,17 @@
 #if AXIS1_ENC > 0 && AXIS2_ENC > 0
   #define ENCODERS ON
 #endif
+
+// get NV ready
+#if defined(ARDUINO_ARCH_SAMD) && ENCODERS == ON
+  #include <FlashAsEEPROM.h> // https://github.com/cmaglie/FlashStorage (Called "FlashStorage" in the Arduio IDE Library Manager)
+#elif defined(_mk20dx128_h_) || defined(__MK20DX128__) || defined(__MK20DX256__) || defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__IMXRT1052__) || defined(__IMXRT1062__)
+  #include <EEPROM.h>
+#else
+  #define EEPROM_DISABLED
+#endif
+#include "EEProm.h"
+
 #include "Locale.h"
 #include "Globals.h"
 
