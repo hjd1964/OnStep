@@ -46,6 +46,7 @@
 #define DEBUG OFF
 
 #include <limits.h>
+
 #ifdef ESP32
   #include <WiFi.h>
   #include <WiFiClient.h>
@@ -57,6 +58,8 @@
   #include <ESP8266WebServer.h>
   #include <ESP8266WiFiAP.h>
 #endif
+#define Ser Serial  // Default=Serial, This is the hardware serial port where OnStep is attached
+
 #include <EEPROM.h>
 #include "EEProm.h"
 

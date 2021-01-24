@@ -56,6 +56,7 @@
 #ifdef ARDUINO_ARCH_SAMD
   #include <avr/dtostrf.h>
 #endif
+#define Ser Serial1  // Default=Serial1, This is the hardware serial port where OnStep is attached
 
 #include <Ethernet.h>
 

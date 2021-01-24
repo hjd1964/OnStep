@@ -30,9 +30,6 @@
 #define DEW_HEATER 3
 #define INTERVALOMETER 4
 
-// Default=Serial1, This is the hardware serial port where OnStep is attached
-#define Ser Serial1
-
 // Helper macros for debugging, with less typing
 // Use VF or VLF for strings (supports embedded spaces)
 void debugPrint(const char s[]) { char s1[255]; strcpy(s1,s); for (unsigned int i=0; i < strlen(s1); i++) if (s1[i]==' ') s1[i]='_'; Ser.print(s1); }
