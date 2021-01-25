@@ -44,6 +44,44 @@ void setIndexAxis1(double axis1, int newPierSide) {
   indexAxis1Steps=(long)(indexAxis1*axis1Settings.stepsPerMeasure);
 }
 
+void nullIndexAxis1() {
+  // remember where we are in the driver step sequence
+  cli(); long m=posAxis1%1024; sei();
+
+  // incorporate index into motor coordinate
+  cli();
+  posAxis1+=indexAxis1Steps;
+  targetAxis1.part.m+=indexAxis1Steps;
+  sei();
+
+  // bring motor coordinate back into +/- 180 degree range
+  long u=360*axis1Settings.stepsPerMeasure;
+  long t=180*axis1Settings.stepsPerMeasure;
+  cli(); long p1=posAxis1; sei();
+  if (p1 > t) {
+    cli();
+    posAxis1-=u;
+    targetAxis1.part.m-=u;
+    p1=posAxis1;
+    sei();
+  } else
+  if (p1 < -t) {
+    cli();
+    posAxis1+=u;
+    targetAxis1.part.m+=u;
+    p1=posAxis1;
+    sei();
+  }
+
+  // restore where we are in the driver step sequence
+  cli();
+  posAxis1-=(posAxis1%1024)-m;
+  targetAxis1.part.m-=(posAxis1%1024)-m;
+  sei();
+  indexAxis1Steps=(posAxis1%1024)-m;
+  indexAxis1=indexAxis1Steps/axis1Settings.stepsPerMeasure;
+}
+
 void setIndexAxis2(double axis2, int newPierSide) {
   if (latitude >= 0) { if (newPierSide == PIER_SIDE_WEST) axis2=180.0-axis2; } else { if (newPierSide == PIER_SIDE_WEST) axis2=-180.0-axis2; }
   if (axis2 > 360.0) axis2-=360.0; if (axis2 < -360.0) axis2+=360.0;

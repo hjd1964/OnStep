@@ -250,6 +250,9 @@ CommandErrors goToEqu(double RA, double Dec, int preferredPierSide, bool validat
   if (e != CE_NONE) return e;
 
   if (mountType == ALTAZM) {
+    // allow infinite coordinate wrap for Axis1 Azm by forcing instrument coordinates back within the +/- 180 degree range
+    if (axis1Settings.min == -360 && axis1Settings.max == 360) nullIndexAxis1();
+
     equToHor(HA,Dec,&a,&z);
     AlignH.horToInstr(a,z,&a,&z,getInstrPierSide());
     z=haRange(z);
