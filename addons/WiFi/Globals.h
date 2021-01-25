@@ -12,6 +12,9 @@
   #define AXIS1_ENC_B_PIN 19 // pin# for Axis1 encoder, for B or CCW
   #define AXIS2_ENC_A_PIN 22 // pin# for Axis1 encoder, for A or CW
   #define AXIS2_ENC_B_PIN 21 // pin# for Axis1 encoder, for B or CCW
+  #ifndef LED_STATUS_ON_STATE
+    #define LED_STATUS_ON_STATE HIGH
+  #endif
 #elif ESP8266
   #if DISPLAY_RESET_CONTROLS == FWU
     #define BOOT0_PIN     13 // pin D7, GPIO13 to Boot0 of STM32 (no swapped serial if active)
@@ -25,6 +28,12 @@
   #define AXIS1_ENC_B_PIN 6  // pin# for Axis1 encoder, for B or CCW
   #define AXIS2_ENC_A_PIN 7  // pin# for Axis2 encoder, for A or CW
   #define AXIS2_ENC_B_PIN 8  // pin# for Axis2 encoder, for B or CCW
+#endif
+
+#if !defined(LED_STATUS_ON_STATE) || LED_STATUS_ON_STATE == LOW
+  #define LED_STATUS_OFF_STATE HIGH
+#elif LED_STATUS_ON_STATE HIGH
+  #define LED_STATUS_OFF_STATE LOW
 #endif
 
 const char html_headB[] PROGMEM = "<!DOCTYPE HTML>\r\n"

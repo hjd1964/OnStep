@@ -276,7 +276,7 @@ Again:
     VLF("WEM: WiFi Connection established");
   } else {
 #if LED_STATUS != OFF
-    digitalWrite(LED_STATUS,HIGH);
+    digitalWrite(LED_STATUS,LED_STATUS_OFF_STATE);
 #endif
     // got nothing back, toggle baud rate and/or swap ports
     serialRecvFlush();

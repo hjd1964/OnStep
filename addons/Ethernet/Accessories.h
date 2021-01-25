@@ -22,16 +22,15 @@ void clearSerialChannel() {
   for (int i=0; i<3; i++) {
     Ser.print(":#");
 #if LED_STATUS != OFF
-    digitalWrite(LED_STATUS,HIGH);
+    digitalWrite(LED_STATUS,LED_STATUS_OFF_STATE);
 #endif
     delay(200);
     serialRecvFlush();
 #if LED_STATUS != OFF
-    digitalWrite(LED_STATUS,LOW);
+    digitalWrite(LED_STATUS,LED_STATUS_ON_STATE);
 #endif
     delay(200);
   }
-
 }
 
 // smart LX200 aware command and response over serial
