@@ -1,12 +1,24 @@
 // -----------------------------------------------------------------------------------
 // Global variables / pin maps
 
+#if DISPLAY_RESET_CONTROLS == FWU
+  #if SERIAL_SWAP != OFF
+    #error "Configuration (Config.h): Setting DISPLAY_RESET_CONTROLS FWU must be used with SERIAL_SWAP OFF only"
+  #endif
+#endif
+
 #ifdef ESP32
   #define AXIS1_ENC_A_PIN 18 // pin# for Axis1 encoder, for A or CW
   #define AXIS1_ENC_B_PIN 19 // pin# for Axis1 encoder, for B or CCW
   #define AXIS2_ENC_A_PIN 22 // pin# for Axis1 encoder, for A or CW
   #define AXIS2_ENC_B_PIN 21 // pin# for Axis1 encoder, for B or CCW
+  #ifndef LED_STATUS_ON_STATE
+    #define LED_STATUS_ON_STATE HIGH
+  #endif
 #elif ESP8266
+  #if DISPLAY_RESET_CONTROLS == FWU
+    #define BOOT0_PIN     13 // pin D7, GPIO13 to Boot0 of STM32 (no swapped serial if active)
+  #endif
   #define AXIS1_ENC_A_PIN 14 // pin# for Axis1 encoder, for A or CW
   #define AXIS1_ENC_B_PIN 12 // pin# for Axis1 encoder, for B or CCW
   #define AXIS2_ENC_A_PIN 5  // pin# for Axis1 encoder, for A or CW
@@ -16,6 +28,15 @@
   #define AXIS1_ENC_B_PIN 6  // pin# for Axis1 encoder, for B or CCW
   #define AXIS2_ENC_A_PIN 7  // pin# for Axis2 encoder, for A or CW
   #define AXIS2_ENC_B_PIN 8  // pin# for Axis2 encoder, for B or CCW
+#endif
+
+#if !defined(LED_STATUS_ON_STATE)
+  #define LED_STATUS_ON_STATE LOW
+  #define LED_STATUS_OFF_STATE HIGH
+#elif LED_STATUS_ON_STATE == LOW
+  #define LED_STATUS_OFF_STATE HIGH
+#elif LED_STATUS_ON_STATE == HIGH
+  #define LED_STATUS_OFF_STATE LOW
 #endif
 
 const char html_headB[] PROGMEM = "<!DOCTYPE HTML>\r\n"
@@ -51,13 +72,14 @@ const char html_bad_comms_message[] PROGMEM =
   "<br /><bigger><font class=\"y\">" L_DOWN_TITLE "</font></bigger><br /><br />"
   L_DOWN_MESSAGE1 L_DOWN_MESSAGE2
   " <li>" L_DOWN_MESSAGE3 "</li><br />"
-#if defined(ESP8266) || defined(ESP32)
-  " <li>" L_DOWN_MESSAGE4A "</li><br />"
-#else
-  " <li>" L_DOWN_MESSAGE4B "</li><br />"
-#endif
+  " <li>" L_DOWN_MESSAGE4 "</li><br />"
+  " <li>" L_DOWN_MESSAGE5 "</li><br />"
   " <li>" L_DOWN_MESSAGE6 "</li><br />"
   " <li>" L_DOWN_MESSAGE7 "</li><br />"
+#if DISPLAY_RESET_CONTROLS != OFF
+  "<br /><form method='get' action='/configuration.htm'>"
+  "<button name='advanced' type='submit' value='reset' onclick=\"return confirm('" L_ARE_YOU_SURE "?');\" >" L_RESET "</button></form>\r\n"
+#endif
   "</ul></div><br class=\"clear\" />\r\n"
   "</div></body></html>";
 

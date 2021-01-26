@@ -43,8 +43,8 @@ void handleAux() {
 
   mountStatus.update(true);
     
-  char temp1[120]="";
-  char temp2[40]="";
+  char temp1[240]="";
+  char temp2[80]="";
 
   processAuxGet();
 

@@ -19,4 +19,3 @@ class CmdServer {
     bool haveClient=false;
     unsigned long lastAccess=0;
 };
-

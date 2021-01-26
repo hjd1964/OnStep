@@ -328,15 +328,27 @@
 #define L_LIMITS_TITLE "Horizon and Overhead Limits"
 #define L_LIMITS_RANGE_HORIZON "Horizon, minimum altitude in degrees +/- 30"
 #define L_LIMITS_RANGE_OVERHEAD "Overhead, maximum altitude in degrees 60 to 90"
-#define L_LIMITS_RANGE_MERIDIAN_E "Past Meridian when East of the pier, in degrees +/- 180"
-#define L_LIMITS_RANGE_MERIDIAN_W "Past Meridian when West of the pier, in degrees +/- 180"
+#define L_LIMITS_RANGE_MERIDIAN_E "Past Meridian when East of the pier, in degrees +/- 270"
+#define L_LIMITS_RANGE_MERIDIAN_W "Past Meridian when West of the pier, in degrees +/- 270"
 
 // location
 #define L_LOCATION_TITLE "Site Latitude, Longitude, UTC Offset"
-#define L_LOCATION_LONG "Longitude, in deg. and min. +/- 180, W is +"
-#define L_LOCATION_LAT "Latitude, in deg. and min. +/- 90, N is +"
+#define L_LOCATION_LONG "Longitude deg. min. sec. +/- 180, W is +"
+#define L_LOCATION_LAT  "Latitude deg. min. sec. +/- 90, N is +"
 #define L_LOCATION_RANGE_UTC_OFFSET "UTC Offset, in hours and min. -14 to +12"
 #define L_LOCATION_MESSAGE_UTC_OFFSET "Opposite of a time-zone value, this is for Standard Time (not Daylight Time.)"
+
+// advanced configuration
+#define L_REVERT "Revert to Defaults"
+#define L_ADV_SET_TITLE "Advanced"
+#define L_ADV_SET_HEADER_MSG "changes below take effect after rebooting OnStep:"
+#define L_ADV_MOUNT_TYPE "Select 1 GEM, 2 EQ Fork, or 3 Alt/Azm"
+
+// reset control
+#define L_RESET_TITLE "OnStep Reboot Control:"
+#define L_RESET "Reboot OnStep"
+#define L_RESET_FWU "Reboot OnStep for firmware upload"
+#define L_RESET_MSG1 "OnStep must be At Home or Parked, otherwise the reset request is ignored."
 
 // ----------------------------  WiFi ----------------------------
 
@@ -377,12 +389,12 @@
 // --------------------------- Constants -------------------------
 
 #define L_DOWN_TITLE "Serial Interface to OnStep is Down!"
-#define L_DOWN_MESSAGE1 "Powering off/on again can help if there is a baud rate mis-match (caused by OnStep restarting.)<br /><br />"
-#define L_DOWN_MESSAGE2 "Other possible causes:<br /><ul>"
-#define L_DOWN_MESSAGE3 "Incorrectly configured OnStep baud rate."
-#define L_DOWN_MESSAGE4A "Incorrectly configured ESP baud rate."
-#define L_DOWN_MESSAGE4B "Incorrectly configured MCU baud rate."
-#define L_DOWN_MESSAGE6 "Incorrect wiring of the com ports (or damaged h/w if RX/TX were EVER wired incorrectly.)"
+#define L_DOWN_MESSAGE1 "If you just rebooted OnStep please wait for several seconds for everything to startup again, then check to be sure you're still connected to WiFi.<br /><br />"
+#define L_DOWN_MESSAGE2 "If this is a persistant problem here are other possible causes:<br /><ul>"
+#define L_DOWN_MESSAGE3 "Baud rate mismatch due to reboot of only OnStep, power everything off/on again."
+#define L_DOWN_MESSAGE4 "Incorrectly configured Addon baud rate."
+#define L_DOWN_MESSAGE5 "Incorrectly configured OnStep baud rate."
+#define L_DOWN_MESSAGE6 "Incorrect wiring of the com ports."
 #define L_DOWN_MESSAGE7 "Incorrect wiring of power supply pins.  Gnd must be shared between OnStep's MCU and the Addon's MCU."
 
 #define L_PAGE_STATUS "Status"

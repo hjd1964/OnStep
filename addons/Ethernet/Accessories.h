@@ -22,16 +22,15 @@ void clearSerialChannel() {
   for (int i=0; i<3; i++) {
     Ser.print(":#");
 #if LED_STATUS != OFF
-    digitalWrite(LED_STATUS,HIGH);
+    digitalWrite(LED_STATUS,LED_STATUS_OFF_STATE);
 #endif
     delay(200);
     serialRecvFlush();
 #if LED_STATUS != OFF
-    digitalWrite(LED_STATUS,LOW);
+    digitalWrite(LED_STATUS,LED_STATUS_ON_STATE);
 #endif
     delay(200);
   }
-
 }
 
 // smart LX200 aware command and response over serial
@@ -53,7 +52,7 @@ boolean processCommand(const char cmd[], char response[], long timeOutMs) {
     } else
     if (cmd[1]=='M') {
       if (strchr("ewnsg",cmd[2])) noResponse=true;
-      if (strchr("SAP",cmd[2])) shortResponse=true;
+      if (strchr("ADNPS",cmd[2])) shortResponse=true;
     } else
     if (cmd[1]=='Q') {
       if (strchr("#ewns",cmd[2])) noResponse=true;
@@ -96,8 +95,12 @@ boolean processCommand(const char cmd[], char response[], long timeOutMs) {
     if (cmd[1]=='U') {
       noResponse=true; 
     } else
-    if ((cmd[1]=='W') && (cmd[2]!='?')) { 
-      noResponse=true; 
+    if (cmd[1]=='W') {
+      if (strchr("R",cmd[2])) {
+        if (strchr("+-",cmd[3])) shortResponse=true; else noResponse=true; // WR+ WR- else WR
+      }
+      if (strchr("S",cmd[2])) shortResponse=true;  // WS
+      if (strchr("0123",cmd[2])) noResponse=true;  // W0 W1 W2 W3
     } else
     if ((cmd[1]=='$') && (cmd[2]=='Q') && (cmd[3]=='Z')) {
       if (strchr("+-Z/!",cmd[4])) noResponse=true;

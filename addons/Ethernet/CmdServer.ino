@@ -64,4 +64,3 @@ void CmdServer::print(char s[]) {
   lastAccess=millis();
   client.write(s);
 }
-

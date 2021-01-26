@@ -3,13 +3,13 @@
 
 const char html_controlScript1[] PROGMEM =
 "<script>\n"
-"function s(key,v1) {\n"
-  "var xhttp = new XMLHttpRequest();\n"
-  "xhttp.open('GET', 'controlA.txt?'+key+'='+v1+'&x='+new Date().getTime(), true);\n"
-  "xhttp.send();\n"
-"}\n"
-"function g(v1){s('dr',v1);}\n"
-"function gf(v1){s('dr',v1);autoFastRun();}\n"
+"function s(key,v1) {"
+  "var xhttp = new XMLHttpRequest();"
+  "xhttp.open('GET', 'controlA.txt?'+key+'='+v1+'&x='+new Date().getTime(), true);"
+  "xhttp.send();"
+"}"
+"function g(v1){s('dr',v1);}"
+"function gf(v1){s('dr',v1);autoFastRun();}"
 "function sf(key,v1){s(key,v1);autoFastRun();}\n"
 "</script>\n";
 

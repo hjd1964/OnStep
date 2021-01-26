@@ -328,15 +328,27 @@
 #define L_LIMITS_TITLE "范围和开销限制"
 #define L_LIMITS_RANGE_HORIZON "地平线，以+/- 30度为单位"
 #define L_LIMITS_RANGE_OVERHEAD "上限，以60到90度为单位"
-#define L_LIMITS_RANGE_MERIDIAN_E "如果将望远镜放在坐骑的东侧，则指向子午线，以+/- 180度为单位"
-#define L_LIMITS_RANGE_MERIDIAN_W "如果将望远镜放在坐骑西侧，则指向子午线，以+/- 180度为单位"
+#define L_LIMITS_RANGE_MERIDIAN_E "如果将望远镜放在坐骑的东侧，则指向子午线，以+/- 270度为单位"
+#define L_LIMITS_RANGE_MERIDIAN_W "如果将望远镜放在坐骑西侧，则指向子午线，以+/- 270度为单位"
 
 // location
 #define L_LOCATION_TITLE "站点纬度，经度，UTC偏移"
-#define L_LOCATION_LONG "经度，以度和分钟为单位。+ /-180，W为+"
-#define L_LOCATION_LAT "纬度，以度和分钟为单位。+ /-90，N为+"
-#define L_LOCATION_RANGE_UTC_OFFSET "UTC偏移，以-14到+12小时为单位"
+#define L_LOCATION_LONG "经度，以度和分钟为单位。+/-180，W为+"
+#define L_LOCATION_LAT "纬度，以度和分钟为单位。+/-90，N为+"
+#define L_LOCATION_RANGE_UTC_OFFSET "UTC 偏移，以-14到+12小时为单位"
 #define L_LOCATION_MESSAGE_UTC_OFFSET "标准时间的相对时区值（无冬季时间！）"
+
+// advanced configuration
+#define L_REVERT "还原为默认值"
+#define L_ADV_SET_TITLE "高级"
+#define L_ADV_SET_HEADER_MSG "重新启动 OnStep 后，以下更改将生效:"
+#define L_ADV_MOUNT_TYPE "选择 1 GEM, 2 EQ Fork, 3 Alt/Azm"
+
+// reset control
+#define L_RESET_TITLE "OnStep 重置控制:"
+#define L_RESET "重启 OnStep"
+#define L_RESET_FWU "重启 OnStep 用于固件上传"
+#define L_RESET_MSG1 "OnStep 必须处于“在家”或“停放”状态，否则重置请求将被忽略."
 
 // ----------------------------  WiFi ----------------------------
 
@@ -380,8 +392,8 @@
 #define L_DOWN_MESSAGE1 "如果波特率不符，请重新打开电源会有所帮助。<br /> <br />"
 #define L_DOWN_MESSAGE2 "其他可能的原因：<br /> <ul>"
 #define L_DOWN_MESSAGE3 "配置错误的OnStep波特率."
-#define L_DOWN_MESSAGE4A "ESP波特率配置错误."
-#define L_DOWN_MESSAGE4B "配置错误的MCU波特率."
+#define L_DOWN_MESSAGE4 "ESP波特率配置错误."
+#define L_DOWN_MESSAGE5 "配置错误的MCU波特率."
 #define L_DOWN_MESSAGE6 "COM端口的电缆连接不正确（如果交换了RX / TX，则会损坏硬件。）"
 #define L_DOWN_MESSAGE7 "电源引脚的接线错误。OnStep的MCU与附加模块的MCU之间必须接地（GND）"
 

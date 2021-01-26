@@ -139,8 +139,8 @@ void handleRoot() {
   data += temp;
 
   // Longitude and Latitude
-  if (!command(":Gg#",temp1)) strcpy(temp1,"?");
-  if (!command(":Gt#",temp2)) strcpy(temp2,"?");
+  if (!command(":GgH#",temp1)) strcpy(temp1,"?"); temp1[10]=0;
+  if (!command(":GtH#",temp2)) strcpy(temp2,"?"); temp2[9]=0;
   sprintf_P(temp,html_indexSite,temp1,temp2);
   data += temp;
   sendHtml(data);

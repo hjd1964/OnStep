@@ -2,7 +2,7 @@
  * Title       OnStep WiFi Server
  * by          Howard Dutton
  *
- * Copyright (C) 2016 to 2020 Howard Dutton
+ * Copyright (C) 2016 to 2021 Howard Dutton
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,11 +37,16 @@
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "2"
 #define FirmwareVersionMinor  "1"
-#define FirmwareVersionPatch  "j"
+#define FirmwareVersionPatch  "u"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
+// Enable debug and/or status messages to be passed to OnStep for display using its debug facilities
+// default "DEBUG OFF", use "DEBUG ON" for background errors only, use "DEBUG VERBOSE" for all errors and status messages
+#define DEBUG OFF
+
 #include <limits.h>
+
 #ifdef ESP32
   #include <WiFi.h>
   #include <WiFiClient.h>
@@ -53,10 +58,10 @@
   #include <ESP8266WebServer.h>
   #include <ESP8266WiFiAP.h>
 #endif
+#define Ser Serial  // Default=Serial, This is the hardware serial port where OnStep is attached
+
 #include <EEPROM.h>
 #include "EEProm.h"
-
-#define DEBUG_OFF   // Turn _ON to allow web and cmd channel servers to startup without OnStep (Serial port for debug at 115200 baud)
 
 #include "Constants.h"
 #include "Locales.h"
@@ -69,14 +74,8 @@
 
 // The settings below are for initialization only, afterward they are stored and recalled from EEPROM and must
 // be changed in the web interface OR with a reset (for initialization again) as described in the Config.h comments
-#if SERIAL_BAUD<=28800
-  #define TIMEOUT_WEB 60
-  #define TIMEOUT_CMD 60
-#else
-  #define TIMEOUT_WEB 15
-  #define TIMEOUT_CMD 30
-#endif
-bool serialSwap=false;
+#define TIMEOUT_WEB 60
+#define TIMEOUT_CMD 60
 
 int webTimeout=TIMEOUT_WEB;
 int cmdTimeout=TIMEOUT_CMD;
@@ -245,7 +244,9 @@ void setup(void){
   for (int i=0;i<4;i++) wifi_ap_gw[i]=nv.read(EE_AP_GW+i);
   for (int i=0;i<4;i++) wifi_ap_sn[i]=nv.read(EE_AP_SN+i);  
 
-#ifndef DEBUG_ON
+  int serialSwap=SERIAL_SWAP;
+  if (serialSwap == AUTO) serialSwap = AUTO_OFF;
+
   long serial_baud = SERIAL_BAUD;
   serialBegin(SERIAL_BAUD_DEFAULT,serialSwap);
   byte tb=1;
@@ -272,68 +273,76 @@ Again:
     
     // we're all set, just change the baud rate to match OnStep
     serialBegin(serial_baud,serialSwap);
+    VLF("WEM: WiFi Connection established");
   } else {
 #if LED_STATUS != OFF
-    digitalWrite(LED_STATUS,HIGH);
+    digitalWrite(LED_STATUS,LED_STATUS_OFF_STATE);
 #endif
     // got nothing back, toggle baud rate and/or swap ports
     serialRecvFlush();
     tb++;
-    if (tb == 16) { tb=1; serialSwap=!serialSwap; }
+    if (tb == 16) { tb=1; if (serialSwap == AUTO_OFF) serialSwap=AUTO_ON; else if (serialSwap == AUTO_ON) serialSwap=AUTO_OFF; }
     if (tb == 1) serialBegin(SERIAL_BAUD_DEFAULT,serialSwap);
     if (tb == 6) serialBegin(serial_baud,serialSwap);
-    if (tb == 11) serialBegin(19200,serialSwap);
+    if (tb == 11) if (SERIAL_BAUD_DEFAULT == 9600) serialBegin(19200,serialSwap); else tb=15;
     goto Again;
   }
-#else
-  serialBegin(115200,false);
-  delay(10000);
   
-  Ser.println(accessPointEnabled);
-  Ser.println(stationEnabled);
-  Ser.println(stationDhcpEnabled);
+  // say hello
+  VF("WEM: WiFi Addon "); V(FirmwareVersionMajor); V("."); V(FirmwareVersionMinor); VL(FirmwareVersionPatch);
+  VF("WEM: MCU = "); VLF(MCU_STR);
 
-  Ser.println(webTimeout);
-  Ser.println(cmdTimeout);
+  VF("WEM: Access Point Enabled  = "); VL(accessPointEnabled);
+  VF("WEM: Station Enabled       = "); VL(stationEnabled);
+  VF("WEM: Station DHCP Enabled  = "); VL(stationDhcpEnabled);
 
-  Ser.println(wifi_sta_ssid);
-  Ser.println(wifi_sta_pwd);
-  Ser.println(wifi_sta_ip.toString());
-  Ser.println(wifi_sta_gw.toString());
-  Ser.println(wifi_sta_sn.toString());
+  VF("WEM: Web Channel Timeout ms= "); VL(webTimeout);
+  VF("WEM: Cmd Channel Timeout ms= "); VL(cmdTimeout);
 
-  Ser.println(wifi_ap_ssid);
-  Ser.println(wifi_ap_pwd);
-  Ser.println(wifi_ap_ch);
-  Ser.println(wifi_ap_ip.toString());
-  Ser.println(wifi_ap_gw.toString());
-  Ser.println(wifi_ap_sn.toString());
+  VF("WEM: WiFi STA SSID   = "); VL(wifi_sta_ssid);
+  VF("WEM: WiFi STA PWD    = "); VL(wifi_sta_pwd);
+  VF("WEM: WiFi STA IP     = "); VL(wifi_sta_ip.toString());
+  VF("WEM: WiFi STA GATEWAY= "); VL(wifi_sta_gw.toString());
+  VF("WEM: WiFi STA SN     = "); VL(wifi_sta_sn.toString());
 
-#endif
+  VF("WEM: WiFi AP SSID    = "); VL(wifi_ap_ssid);
+  VF("WEM: WiFi AP PWD     = "); VL(wifi_ap_pwd);
+  VF("WEM: WiFi AP CH      = "); VL(wifi_ap_ch);
+  VF("WEM: WiFi AP IP      = "); VL(wifi_ap_ip.toString());
+  VF("WEM: WiFi AP GATEWAY = "); VL(wifi_ap_gw.toString());
+  VF("WEM: WiFi AP SN      = "); VL(wifi_ap_sn.toString());
 
 TryAgain:
-  if ((stationEnabled) && (!stationDhcpEnabled)) WiFi.config(wifi_sta_ip, wifi_sta_gw, wifi_sta_sn);
-  if (accessPointEnabled) WiFi.softAPConfig(wifi_ap_ip, wifi_ap_gw, wifi_ap_sn);
   
   if (accessPointEnabled && !stationEnabled) {
+    VLF("WEM: Starting WiFi Soft AP");
     WiFi.softAP(wifi_ap_ssid, wifi_ap_pwd, wifi_ap_ch);
     WiFi.mode(WIFI_AP);
   } else
   if (!accessPointEnabled && stationEnabled) {
+    VLF("WEM: Starting WiFi Station");
     WiFi.begin(wifi_sta_ssid, wifi_sta_pwd);
     WiFi.mode(WIFI_STA);
   } else
   if (accessPointEnabled && stationEnabled) {
+    VLF("WEM: Starting WiFi Soft AP");
     WiFi.softAP(wifi_ap_ssid, wifi_ap_pwd, wifi_ap_ch);
+    VLF("WEM: Starting WiFi Station");
     WiFi.begin(wifi_sta_ssid, wifi_sta_pwd);
     WiFi.mode(WIFI_AP_STA);
   }
+
+  delay(100);
+  if ((stationEnabled) && (!stationDhcpEnabled)) WiFi.config(wifi_sta_ip, wifi_sta_gw, wifi_sta_sn);
+  if (accessPointEnabled) WiFi.softAPConfig(wifi_ap_ip, wifi_ap_gw, wifi_ap_sn);
 
   // wait for connection in station mode, if it fails fall back to access-point mode
   if (!accessPointEnabled && stationEnabled) {
     for (int i=0; i<8; i++) if (WiFi.status() != WL_CONNECTED) delay(1000); else break;
     if (WiFi.status() != WL_CONNECTED) {
+      VLF("WEM: Starting WiFi Station, failed");
       WiFi.disconnect(); delay(3000);
+      VLF("WEM: Switching to WiFi Soft AP mode");
       stationEnabled=false;
       accessPointEnabled=true;
       goto TryAgain;
@@ -342,9 +351,11 @@ TryAgain:
 
   clearSerialChannel();
   
+  VLF("WEM: Connecting web-page handlers");
   server.on("/", handleRoot);
   server.on("/index.htm", handleRoot);
   server.on("/configuration.htm", handleConfiguration);
+  server.on("/configurationA.txt", configurationAjaxGet);
   server.on("/settings.htm", handleSettings);
   server.on("/settingsA.txt", settingsAjaxGet);
   server.on("/settings.txt", settingsAjax);
@@ -369,15 +380,18 @@ TryAgain:
   server.onNotFound(handleNotFound);
 
 #if STANDARD_COMMAND_CHANNEL == ON
+  VLF("WEM: Starting port 9999 cmd svr");
   cmdSvr.begin();
   cmdSvr.setNoDelay(true);
 #endif
 
 #if PERSISTENT_COMMAND_CHANNEL == ON
+  VLF("WEM: Starting port 9998 persistant cmd svr");
   persistentCmdSvr.begin();
   persistentCmdSvr.setNoDelay(true);
 #endif
 
+  VLF("WEM: Starting port 80 web svr");
   server.begin();
 
   // allow time for the background servers to come up
@@ -386,13 +400,12 @@ TryAgain:
   // clear the serial channel one last time
   clearSerialChannel();
 
-#ifdef DEBUG_ON
-  Ser.println("HTTP server started");
-#endif
-
 #if ENCODERS == ON
+  VLF("WEM: Starting Encoders");
   encoders.init();
 #endif
+
+  VLF("WEM: WiFi Addon is ready");
 }
 
 void loop(void) {
@@ -493,7 +506,11 @@ void idle() {
 #endif
 }
 
-void serialBegin(long baudRate, bool swap) {
+void serialBegin(long baudRate, int swap) {
+  static bool firstRun = true;
+  if (SERIAL_BAUD_DEFAULT == SERIAL_BAUD && (swap == ON || swap == OFF) && !firstRun) return;
+  firstRun=false;
+  if (swap == ON || swap == AUTO_ON) swap=1; else swap=0;
 #ifdef ESP32
   // wemos d1 mini esp32
   // not swapped: TX and RX on default pins

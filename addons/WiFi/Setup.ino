@@ -39,10 +39,12 @@ const char html_wifiSTASN[] PROGMEM =
 "<input name='stasn3' value='%d' type='number' min='0' max='255'>&nbsp;.&nbsp;"
 "<input name='stasn4' value='%d' type='number' min='0' max='255'></td></tr></table>";
 
-const char html_wifiSSID3[] PROGMEM =
+const char html_wifiSSID3A[] PROGMEM =
 "<br/><b>" L_WIFI_AP ":</b><br/>"
 "<form method='post' action='/wifi.htm'>"
-"SSID: <input style='width:6em' name='apssid' type='text' value='%s' maxlength='32'>&nbsp;&nbsp;&nbsp;"
+"SSID: <input style='width:6em' name='apssid' type='text' ";
+const char html_wifiSSID3B[] PROGMEM =
+"value='%s' maxlength='32'>&nbsp;&nbsp;&nbsp;"
 L_WIFI_PWD ": <input style='width:8em' name='appwd' type='password' value='%s' minlength='8' maxlength='39'> " L_WIFI_PWD_MSG "&nbsp;&nbsp;&nbsp;"
 L_WIFI_CHA ": <input style='width:3em' name='apch' value='%d' type='number' min='1' max='11'><br/>";
 
@@ -105,8 +107,8 @@ void handleWifi() {
   
   mountStatus.update(true);
 
-  char temp[400]="";
-  char temp1[120]="";
+  char temp[420]="";
+  char temp1[140]="";
   
   processWifiGet();
 
@@ -177,7 +179,8 @@ void handleWifi() {
     sprintf_P(temp,html_wifiSTAGW,wifi_sta_gw[0],wifi_sta_gw[1],wifi_sta_gw[2],wifi_sta_gw[3]); data += temp;
     sprintf_P(temp,html_wifiSTASN,wifi_sta_sn[0],wifi_sta_sn[1],wifi_sta_sn[2],wifi_sta_sn[3]); data += temp;
     sprintf_P(temp,html_wifiSSID2,stationDhcpEnabled?"checked":"",stationEnabled?"checked":""); data += temp;
-    sprintf_P(temp,html_wifiSSID3,wifi_ap_ssid,"",wifi_ap_ch); data += temp;
+    data += FPSTR(html_wifiSSID3A);
+    sprintf_P(temp,html_wifiSSID3B,wifi_ap_ssid,"",wifi_ap_ch); data += temp;
     sendHtml(data);
   
     uint8_t macap[6] = {0,0,0,0,0,0}; WiFi.softAPmacAddress(macap);

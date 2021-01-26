@@ -1,24 +1,36 @@
 // -----------------------------------------------------------------------------------
 // Configuration
 
+const char html_configScript1[] PROGMEM =
+"<script>\n"
+"function s(key,v1) {"
+  "var xhttp = new XMLHttpRequest();"
+  "xhttp.open('GET', 'configurationA.txt?'+key+'='+v1+'&x='+new Date().getTime(), true);"
+  "xhttp.send();"
+"}</script>\n";
+
 // Misc
 const char html_configFormBegin[] PROGMEM = "<div class='content'><br />\r\n<form method='get' action='/configuration.htm'>";
 const char html_configFormEnd[] PROGMEM = "\r\n</form><br />\r\n</div><br />\r\n";
 
 // Site
 const char html_configLongDeg[] PROGMEM =
-"<input value='%s' type='number' name='g1' min='-180' max='180'>&nbsp;&deg;&nbsp;";
+"<input style='width: 4em;' value='%s' type='number' name='g1' min='-180' max='180'>&nbsp;&deg;&nbsp;";
 const char html_configLongMin[] PROGMEM =
-"<input value='%s' type='number' name='g2' min='0' max='60'>&nbsp;'&nbsp;&nbsp; &nbsp;" L_LOCATION_LONG "<br />\r\n";
+"<input style='width: 3.5em;' value='%s' type='number' name='g2' min='0' max='60'>&nbsp;'&nbsp;";
+const char html_configLongSec[] PROGMEM =
+"<input style='width: 3.5em;' value='%s' type='number' name='g3' min='0' max='60'>&nbsp;\"&nbsp;&nbsp; &nbsp;" L_LOCATION_LONG "<br />\r\n";
 const char html_configLatDeg[] PROGMEM =
-"<input value='%s' type='number' name='t1' min='-90' max='90'>&nbsp;&deg;&nbsp;";
+"<input style='width: 4em;' value='%s' type='number' name='t1' min='-90' max='90'>&nbsp;&deg;&nbsp;";
 const char html_configLatMin[] PROGMEM =
-"<input value='%s' type='number' name='t2' min='0' max='60'>&nbsp;'&nbsp;&nbsp; &nbsp;" L_LOCATION_LAT "<br />\r\n";
+"<input style='width: 3.5em;' value='%s' type='number' name='t2' min='0' max='60'>&nbsp;'&nbsp;";
+const char html_configLatSec[] PROGMEM =
+"<input style='width: 3.5em;' value='%s' type='number' name='t3' min='0' max='60'>&nbsp;\"&nbsp;&nbsp; &nbsp;" L_LOCATION_LAT "<br />\r\n";
 const char html_configOffsetHrs[] PROGMEM =
-"<input value='%s' type='number' name='u1' min='-14' max='12'>&nbsp;h&nbsp;";
+"<input style='width: 4em;' value='%s' type='number' name='u1' min='-14' max='12'>&nbsp;h&nbsp;";
 const char html_configOffsetMin[] PROGMEM =
 "<select name='u2'><option value='0' %s>00</option><option value='30' %s>30</option><option value='45' %s>45</option></select>&nbsp;m&nbsp;"
-"&nbsp;" L_LOCATION_RANGE_UTC_OFFSET "<br />" L_LOCATION_MESSAGE_UTC_OFFSET "<br /><br />";
+"&nbsp;&nbsp;" L_LOCATION_RANGE_UTC_OFFSET "<br />" L_LOCATION_MESSAGE_UTC_OFFSET "<br /><br />";
 
 // Overhead and Horizon limits
 const char html_configMinAlt[] PROGMEM =
@@ -30,9 +42,9 @@ const char html_configMaxAlt[] PROGMEM =
 const char html_configBlAxis1[] PROGMEM =
 "<input value='%d' type='number' name='b1' min='0' max='3600'>&nbsp;" L_BACKLASH_RANGE_AXIS1 "<br />\r\n";
 const char html_configPastMerE[] PROGMEM =
-"<input value='%d' type='number' name='el' min='-180' max='180'>&nbsp;" L_LIMITS_RANGE_MERIDIAN_E "<br />\r\n";
+"<input value='%d' type='number' name='el' min='-270' max='270'>&nbsp;" L_LIMITS_RANGE_MERIDIAN_E "<br />\r\n";
 const char html_configPastMerW[] PROGMEM =
-"<input value='%d' type='number' name='wl' min='-180' max='180'>&nbsp;" L_LIMITS_RANGE_MERIDIAN_W "<br /><br />";
+"<input value='%d' type='number' name='wl' min='-270' max='270'>&nbsp;" L_LIMITS_RANGE_MERIDIAN_W "<br /><br />";
 
 // Axis2
 const char html_configBlAxis2[] PROGMEM =
@@ -62,6 +74,18 @@ const char html_configDbAxis5[] PROGMEM =
 const char html_configTcfCoefAxis5[] PROGMEM =
 "<input value='%s' type='number' name='tc5' min='-999.0' max='999.0' step='any'>&nbsp;" L_TCF_COEF_RANGE_AXIS45 "<br /><br />";
 
+const char html_configAdvanced[] PROGMEM =
+"<hr>" L_ADV_SET_TITLE " (<i>" L_ADV_SET_HEADER_MSG "</i>)<br /><br />";
+const char html_configMountType[] PROGMEM =
+" <input style='width: 7em;' value='%d' type='number' name='mountt' min='1' max='3' step='1'>&nbsp; " L_ADV_MOUNT_TYPE "<br /><br />\r\n";
+
+// Reset
+const char html_resetNotes[] PROGMEM =
+"<br />Notes:<ul>"
+"<li>" L_RESET_MSG1 "</li>"
+"<li>" L_DOWN_MESSAGE1 "</li>"
+"</ul>";
+
 #ifdef OETHS
 void handleConfiguration(EthernetClient *client) {
 #else
@@ -76,7 +100,7 @@ void handleConfiguration() {
   char temp1[120]="";
   char temp2[120]="";
   
-  processConfigurationGet();
+  bool success=processConfigurationGet();
 
   sendHtmlStart();
 
@@ -122,8 +146,11 @@ void handleConfiguration() {
   sendHtml(data);
   
   // OnStep wasn't found, show warning and info.
-  if (!mountStatus.valid()) { data+= FPSTR(html_bad_comms_message); sendHtml(data); sendHtmlDone(data); return; }
-
+  if (!mountStatus.valid() || !success) { data+= FPSTR(html_bad_comms_message); sendHtml(data); sendHtmlDone(data); return; }
+  
+  // ajax scripts
+  data += FPSTR(html_configScript1);
+  
   data+="<div style='width: 35em;'>";
   data += L_BASIC_SET_TITLE "<br /><br />";
   sendHtml(data);
@@ -131,8 +158,9 @@ void handleConfiguration() {
   data += "<button type='button' class='collapsible'>" L_LOCATION_TITLE "</button>";
   data += FPSTR(html_configFormBegin);
   // Longitude
-  if (!command(":Gg#",temp1)) strcpy(temp1,"+000*00");
-  temp1[4]=0;                      // deg. part only
+  if (!command(":GgH#",temp1)) strcpy(temp1,"+000*00:00"); temp1[10]=0;
+  temp1[4]=0;                      // deg part only
+  temp1[7]=0;                      // min part only
   if (temp1[0]=='+') temp1[0]='0'; // remove +
   stripNum(temp1);
   while (temp1[0] == '0' && strlen(temp1) > 1) memmove(&temp1[0],&temp1[1],strlen(temp1)); // remove leading 0's
@@ -140,16 +168,21 @@ void handleConfiguration() {
   data += temp;
   sprintf_P(temp,html_configLongMin,(char*)&temp1[5]);
   data += temp;
+  sprintf_P(temp,html_configLongSec,(char*)&temp1[8]);
+  data += temp;
   sendHtml(data);
 
   // Latitude
-  if (!command(":Gt#",temp1)) strcpy(temp1,"+00*00");
-  temp1[3]=0;                      // deg. part only
+  if (!command(":GtH#",temp1)) strcpy(temp1,"+00*00:00"); temp1[9]=0;
+  temp1[3]=0;                      // deg part only
+  temp1[6]=0;                      // min part only
   if (temp1[0]=='+') temp1[0]='0'; // remove +
   stripNum(temp1);
   sprintf_P(temp,html_configLatDeg,temp1);
   data += temp;
   sprintf_P(temp,html_configLatMin,(char*)&temp1[4]);
+  data += temp;
+  sprintf_P(temp,html_configLatSec,(char*)&temp1[7]);
   data += temp;
   sendHtml(data);
 
@@ -192,7 +225,7 @@ void handleConfiguration() {
   data += temp;
   sendHtml(data);
   // Meridian Limits
-  if ((command(":GXE9#",temp1)) && (command(":GXEA#",temp2))) {
+  if (mountStatus.mountType() == MT_GEM && (command(":GXE9#",temp1)) && (command(":GXEA#",temp2))) {
     int degPastMerE=(int)strtol(&temp1[0],NULL,10);
     degPastMerE=round((degPastMerE*15.0)/60.0);
     sprintf_P(temp,html_configPastMerE,degPastMerE);
@@ -299,125 +332,32 @@ void handleConfiguration() {
   
   data += "<br />\r\n";
 
-#if DRIVE_CONFIGURATION == ON
   int numShown = 0;
-  axisSettings a;
-
-  data += FPSTR(html_configAxes);
- 
-  // Axis1 RA/Azm
-  if (!command(":GXA1#",temp1)) strcpy(temp1,"0");
-  if (decodeAxisSettings(temp1,a)) {
-    data += "<button type='button' class='collapsible'>Axis1 RA/Azm</button>";
+  
+  // Mount type
+  if (!command(":GXEM#",temp1)) strcpy(temp1,"0");
+  int mt=atoi(temp1);
+  if (mt != 0) data += FPSTR(html_configAdvanced);
+  if (mt >= 1 && mt <= 3) {
+    data += "<button type='button' class='collapsible'>Mount Type</button>";
     data += FPSTR(html_configFormBegin);
-    if (validateAxisSettings(1,mountStatus.mountType()==MT_ALTAZM,a)) {
-      dtostrf(a.stepsPerMeasure,1,3,temp1); stripNum(temp1);
-      sprintf_P(temp,html_configAxisSpd,temp1,1,3000,61200); data += temp;
-#if DRIVE_MAIN_AXES_MICROSTEPS == ON
-      if (a.microsteps != OFF) { sprintf_P(temp,html_configAxisMicroSteps,a.microsteps,1); data += temp; }
-#endif
-#if DRIVE_MAIN_AXES_CURRENT == ON
-      if (a.IRUN != OFF) { sprintf_P(temp,html_configAxisCurrent,a.IRUN,1,3000); data += temp; }
-#endif
-#if DRIVE_MAIN_AXES_REVERSE == ON
-      sprintf_P(temp,html_configAxisReverse,a.reverse==ON?1:0,1); data += temp;
-#endif
-      sprintf_P(temp,html_configAxisMin,a.min,1,-360,-90,"&deg;,"); data += temp;
-      sprintf_P(temp,html_configAxisMax,a.max,1,90,360,"&deg;,"); data += temp;
-      data += "<button type='submit'>" L_UPLOAD "</button> ";
-    }
-    data += "<button name='revert' value='1' type='submit'>" L_REVERT "</button>\r\n";
+    sprintf_P(temp,html_configMountType,mt); data += temp;
+    data += "<button type='submit'>" L_UPLOAD "</button> ";
+    data += "<button name='revert' value='0' type='submit'>" L_REVERT "</button>\r\n";
     data += FPSTR(html_configFormEnd);
+    data += "<br />";
     numShown++;
   }
 
-  // Axis2 Dec/Alt
-  if (!command(":GXA2#",temp1)) strcpy(temp1,"0");
-  if (decodeAxisSettings(temp1,a)) {
-    data += "<button type='button' class='collapsible'>Axis2 Dec/Alt</button>";
-    data += FPSTR(html_configFormBegin);
-    if (validateAxisSettings(2,mountStatus.mountType()==MT_ALTAZM,a)) {
-      dtostrf(a.stepsPerMeasure,1,3,temp1); stripNum(temp1);
-      sprintf_P(temp,html_configAxisSpd,temp1,2,3000,61200); data += temp;
-#if DRIVE_MAIN_AXES_MICROSTEPS == ON
-      if (a.microsteps != OFF) { sprintf_P(temp,html_configAxisMicroSteps,a.microsteps,2); data += temp; }
-#endif
-#if DRIVE_MAIN_AXES_CURRENT == ON
-      if (a.IRUN != OFF) { sprintf_P(temp,html_configAxisCurrent,a.IRUN,2,3000); data += temp; }
-#endif
-#if DRIVE_MAIN_AXES_REVERSE == ON
-      sprintf_P(temp,html_configAxisReverse,a.reverse==ON?1:0,2); data += temp;
-#endif
-      sprintf_P(temp,html_configAxisMin,a.min,2,-90,0,"&deg;,"); data += temp;
-      sprintf_P(temp,html_configAxisMax,a.max,2,0,90,"&deg;,"); data += temp;
-      data += "<button type='submit'>" L_UPLOAD "</button> ";
-    }
-    data += "<button name='revert' value='2' type='submit'>" L_REVERT "</button>";
-    data += FPSTR(html_configFormEnd);
-    numShown++;
-  }
-  
-  // Axis3 Rotator
-  if (!command(":GXA3#",temp1)) strcpy(temp1,"0");
-  if (decodeAxisSettings(temp1,a)) {
-    data += "<button type='button' class='collapsible'>Axis3 " L_ROTATOR "</button>";
-    data += FPSTR(html_configFormBegin);
-    if (validateAxisSettings(3,mountStatus.mountType()==MT_ALTAZM,a)) {
-      dtostrf(a.stepsPerMeasure,1,3,temp1); stripNum(temp1);
-      sprintf_P(temp,html_configAxisSpd,temp1,3,10,3600); data += temp;
-      if (a.microsteps != OFF) { sprintf_P(temp,html_configAxisMicroSteps,a.microsteps,3); data += temp; }
-      if (a.IRUN != OFF) { sprintf_P(temp,html_configAxisCurrent,a.IRUN,3,1000); data += temp; }
-      sprintf_P(temp,html_configAxisReverse,a.reverse==ON?1:0,3); data += temp;
-      sprintf_P(temp,html_configAxisMin,a.min,3,-360,0,"&deg;,"); data += temp;
-      sprintf_P(temp,html_configAxisMax,a.max,3,0,360,"&deg;,"); data += temp;
-      data += "<button type='submit'>" L_UPLOAD "</button> ";
-    }
-    data += "<button name='revert' value='3' type='submit'>" L_REVERT "</button>";
-    data += FPSTR(html_configFormEnd);
-    numShown++;
-  }
-  
-  // Axis4 Focuser1
-  if (!command(":GXA4#",temp1)) strcpy(temp1,"0");
-  if (decodeAxisSettings(temp1,a)) {
-    data += "<button type='button' class='collapsible'>Axis4 " L_FOCUSER " 1</button>";
-    data += FPSTR(html_configFormBegin);
-    if (validateAxisSettings(4,mountStatus.mountType()==MT_ALTAZM,a)) {
-      dtostrf(a.stepsPerMeasure,1,3,temp1); stripNum(temp1);
-      sprintf_P(temp,html_configAxisSpu,temp1,4); data += temp;
-      if (a.microsteps != OFF) { sprintf_P(temp,html_configAxisMicroSteps,a.microsteps,4); data += temp; }
-      if (a.IRUN != OFF) { sprintf_P(temp,html_configAxisCurrent,a.IRUN,4,1000); data += temp; }
-      sprintf_P(temp,html_configAxisReverse,a.reverse==ON?1:0,4); data += temp;
-      sprintf_P(temp,html_configAxisMin,a.min,4,0,500,"mm,"); data += temp;
-      sprintf_P(temp,html_configAxisMax,a.max,4,0,500,"mm,"); data += temp;
-      data += "<button type='submit'>" L_UPLOAD "</button> ";
-    }
-    data += "<button name='revert' value='4' type='submit'>" L_REVERT "</button>";
-    data += FPSTR(html_configFormEnd);
-    numShown++;
-  }
-  
-  // Axis5 Focuser2
-  if (!command(":GXA5#",temp1)) strcpy(temp1,"0");
-  if (decodeAxisSettings(temp1,a)) {
-    data += "<button type='button' class='collapsible'>Axis5 " L_FOCUSER " 2</button>";
-    data += FPSTR(html_configFormBegin);
-    if (validateAxisSettings(5,mountStatus.mountType()==MT_ALTAZM,a)) {
-      dtostrf(a.stepsPerMeasure,1,3,temp1); stripNum(temp1);
-      sprintf_P(temp,html_configAxisSpu,temp1,5); data += temp;
-      if (a.microsteps != OFF) { sprintf_P(temp,html_configAxisMicroSteps,a.microsteps,5); data += temp; }
-      if (a.IRUN != OFF) { sprintf_P(temp,html_configAxisCurrent,a.IRUN,5,1000); data += temp; }
-      sprintf_P(temp,html_configAxisReverse,a.reverse==ON?1:0,5); data += temp;
-      sprintf_P(temp,html_configAxisMin,a.min,5,0,500,"mm,"); data += temp;
-      sprintf_P(temp,html_configAxisMax,a.max,5,0,500,"mm,"); data += temp;
-      data += "<button type='submit'>" L_UPLOAD "</button> ";
-    }
-    data += "<button name='revert' value='5' type='submit'>" L_REVERT "</button>";
-    data += FPSTR(html_configFormEnd);
-    numShown++;
-  }
-  if (numShown == 0) data += L_ADV_SET_NO_EDIT "<br />";
-  data += FPSTR(html_configAxesNotes);
+#if DISPLAY_RESET_CONTROLS != OFF
+  sendHtml(data);
+  data += "<hr>" L_RESET_TITLE "<br/><br/>";
+  data += "<button onpointerdown=\"if (confirm('" L_ARE_YOU_SURE "?')) s('advanced','reset')\" type='button'>" L_RESET "!</button>";
+  #ifdef BOOT0_PIN
+    data += " &nbsp;&nbsp;<button onpointerdown=\"if (confirm('" L_ARE_YOU_SURE "?')) s('advanced','fwu')\" type='button'>" L_RESET_FWU "!</button>";
+  #endif
+  data += "<br/>\r\n";
+  data += FPSTR(html_resetNotes);
 #endif
 
   // collapsible script
@@ -432,8 +372,21 @@ void handleConfiguration() {
   sendHtmlDone(data);
 }
 
-void processConfigurationGet() {
-  String v,v1;
+#ifdef OETHS
+void configurationAjaxGet(EthernetClient *client) {
+#else
+void configurationAjaxGet() {
+#endif
+  processConfigurationGet();
+#ifdef OETHS
+  client->print("");
+#else
+  server.send(200, "text/html","");
+#endif
+}
+
+bool processConfigurationGet() {
+  String v,v1,v2;
   char temp[20]="";
 
   // Overhead limit
@@ -457,7 +410,7 @@ void processConfigurationGet() {
   // Meridian limit E
   v=server.arg("el");
   if (v!="") {
-    if (v.toInt() >= -180 && v.toInt() <= 180) { 
+    if (v.toInt() >= -270 && v.toInt() <= 270) { 
       sprintf(temp,":SXE9,%d#",(int16_t)round((v.toInt()*60.0)/15.0));
       commandBool(temp);
     }
@@ -466,7 +419,7 @@ void processConfigurationGet() {
   // Meridian limit W
   v=server.arg("wl");
   if (v!="") {
-    if (v.toInt() >= -180 && v.toInt() <= 180) { 
+    if (v.toInt() >= -270 && v.toInt() <= 270) { 
       sprintf(temp,":SXEA,%d#",(int16_t)round((v.toInt()*60.0)/15.0));
       commandBool(temp);
     }
@@ -556,17 +509,19 @@ void processConfigurationGet() {
   // Location
   v=server.arg("g1"); // long deg
   v1=server.arg("g2"); // long min
-  if (v != "" && v1 != "") {
-    if (v.toInt() >= -180 && v.toInt() <= 180 && v1.toInt() >= 0 && v1.toInt() <= 60) {
-      sprintf(temp,":Sg%+04d*%02d#",(int16_t)v.toInt(),(int16_t)v1.toInt());
+  v2=server.arg("g3"); // long sec
+  if (v != "" && v1 != "" && v2 != "") {
+    if (v.toInt() >= -180 && v.toInt() <= 180 && v1.toInt() >= 0 && v1.toInt() <= 60 && v2.toInt() >= 0 && v2.toInt() <= 60) {
+      sprintf(temp,":Sg%+04d*%02d:%02d#",(int16_t)v.toInt(),(int16_t)v1.toInt(),(int16_t)v2.toInt());
       commandBool(temp);
     }
   }
   v=server.arg("t1"); // lat deg
   v1=server.arg("t2"); // lat min
-  if (v != "" && v1 != "") {
-    if (v.toInt() >= -90 && v.toInt() <= 90 && v1.toInt() >= 0 && v1.toInt() <= 60) {
-      sprintf(temp,":St%+03d*%02d#",(int16_t)v.toInt(),(int16_t)v1.toInt());
+  v2=server.arg("t3"); // lat sec
+  if (v != "" && v1 != "" && v2 != "") {
+    if (v.toInt() >= -90 && v.toInt() <= 90 && v1.toInt() >= 0 && v1.toInt() <= 60 && v2.toInt() >= 0 && v2.toInt() <= 60) {
+      sprintf(temp,":St%+03d*%02d:%02d#",(int16_t)v.toInt(),(int16_t)v1.toInt(),(int16_t)v2.toInt());
       commandBool(temp);
     }
   }
@@ -578,4 +533,16 @@ void processConfigurationGet() {
       commandBool(temp);
     }
   }
+
+  String ssa=server.arg("advanced");
+#if DISPLAY_RESET_CONTROLS != OFF
+  if (ssa.equals("reset")) { commandBlind(":ERESET#"); return false; }
+  #ifdef BOOT0_PIN
+    if (ssa.equals("fwu")) { pinMode(BOOT0_PIN,OUTPUT); digitalWrite(BOOT0_PIN,HIGH); commandBlind(":ERESET#"); delay(500); pinMode(BOOT0_PIN,INPUT); return false; }
+  #endif
+#endif
+  String ssm=server.arg("mountt"); if (!ssm.equals("")) { sprintf(temp,":SXEM,%s#",ssm.c_str()); commandBool(temp); }
+  String ssr=server.arg("revert"); if (!ssr.equals("")) commandBool(":SXEM,0#");
+
+  return true;
 }

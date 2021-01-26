@@ -336,15 +336,27 @@
 #define L_LIMITS_TITLE "Horizont- und Overhead-Grenzen"
 #define L_LIMITS_RANGE_HORIZON "Horizont, in Grad +/- 30"
 #define L_LIMITS_RANGE_OVERHEAD "Obergrenze, in Grad 60 to 90"
-#define L_LIMITS_RANGE_MERIDIAN_E "Nach Meridian wenn Teleskop auf Ostseite der Montierung, in Grad +/- 180"
-#define L_LIMITS_RANGE_MERIDIAN_W "Nach Meridian wenn Teleskop auf Westseite der Montierung, in Grad +/- 180"
+#define L_LIMITS_RANGE_MERIDIAN_E "Nach Meridian wenn Teleskop auf Ostseite der Montierung, in Grad +/- 270"
+#define L_LIMITS_RANGE_MERIDIAN_W "Nach Meridian wenn Teleskop auf Westseite der Montierung, in Grad +/- 270"
 
 // location
 #define L_LOCATION_TITLE "Seite Standort Breite, Länge, UTC-Versatz"
-#define L_LOCATION_LONG "L&auml;ngengad, in Grad und Min. +/- 180, W is +"
-#define L_LOCATION_LAT "Breitengrad, in Grad und Min. +/- 90, N is +"
+#define L_LOCATION_LONG "L&auml;ngengad, in Grad +/- 180, W is +"
+#define L_LOCATION_LAT "Breitengrad, in Grad +/- 90, N is +"
 #define L_LOCATION_RANGE_UTC_OFFSET "UTC Offset, in Stunden -14 to +12"
 #define L_LOCATION_MESSAGE_UTC_OFFSET "Entgegengesetzter Zeitzonenwert f&uuml;r die Standardzeit (Keine Winterzeit!)"
+
+// advanced configuration
+#define L_REVERT "Auf Standard zurücksetzen"
+#define L_ADV_SET_TITLE "Fortgeschrittene"
+#define L_ADV_SET_HEADER_MSG "Die folgenden Änderungen werden nach dem Neustart von OnStep wirksam:"
+#define L_ADV_MOUNT_TYPE "Wählen 1 GEM, 2 EQ Fork, 3 Alt/Azm"
+
+// reset control
+#define L_RESET_TITLE "OnStep Steuerung zurücksetzen:"
+#define L_RESET "Zurücksetzen OnStep"
+#define L_RESET_FWU "Zurücksetzen OnStep zum Hochladen der Firmware"
+#define L_RESET_MSG1 "OnStep muss zu Hause oder geparkt sein, andernfalls wird die Rücksetzanforderung ignoriert."
 
 // ----------------------------  WiFi ----------------------------
 
@@ -389,8 +401,8 @@
 #define L_DOWN_MESSAGE1 "Aus- und Wiedereinschalten kann helfen, wenn es eine Unstimmigkeit mit der Baudrate gibt<br /><br />"
 #define L_DOWN_MESSAGE2 "Andere m&ouml;gliche Gr&uuml;nde:<br /><ul>"
 #define L_DOWN_MESSAGE3 "Inkorrekt konfigurierte OnStep Baudrate."
-#define L_DOWN_MESSAGE4A "Inkorrekt konfigurierte ESP Baudrate."
-#define L_DOWN_MESSAGE4B "Inkorrekt konfigurierte MCU Baudrate."
+#define L_DOWN_MESSAGE4 "Inkorrekt konfigurierte ESP Baudrate."
+#define L_DOWN_MESSAGE5 "Inkorrekt konfigurierte MCU Baudrate."
 #define L_DOWN_MESSAGE6 "Inkorrekte Verkabelung der  COM-Ports (oder Hardwareschaden wenn RX/TX vertauscht wurden.)"
 #define L_DOWN_MESSAGE7 "Incorrekte Verkabelung der Stromversorgungs-Pins. Masse (GND) muss zwischen OnStep's MCU und der MCU des Addon's verbunden sein."
 
