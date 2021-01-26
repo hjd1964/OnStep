@@ -1,5 +1,5 @@
-
 // Feature Key Menu (double click)
+
 void SmartHandController::menuFeatureKey()
 {
   static unsigned short current_selection_feature_mode = 1;

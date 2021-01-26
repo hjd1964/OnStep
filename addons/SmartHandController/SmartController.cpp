@@ -319,13 +319,10 @@ void SmartHandController::setup(const char version[], const int pin[7],const boo
   display->setContrast(maxContrast);
   display->setFont(LF_STANDARD);
 
-#ifdef DEBUG_ON
-  DebugSer.begin(9600);
-  delay(1000);
-#endif
-
   // establish comms and clear the channel
   Ser.begin(SerialBaud);
+
+  delay(500);
   
   // display the splash screen
   drawIntro();
@@ -340,7 +337,7 @@ void SmartHandController::setup(const char version[], const int pin[7],const boo
   }
 
   DisplayMessage(L_ESTABLISHING, L_CONNECTION, 1000);
-  
+
   // OnStep coordinate mode for getting and setting RA/Dec
   // 0 = OBSERVED_PLACE (same as not supported)
   // 1 = TOPOCENTRIC (does refraction)
@@ -353,22 +350,24 @@ again:
   if (GetLX200(":GXEE#", s) == LX200VALUEGET) {
     if (s[0]=='0') {
       telescopeCoordinates=OBSERVED_PLACE; 
-      DisplayMessage(L_CONNECTION, L_WARNING "!", 1000);
-      DisplayMessage(L_COORDINATES, L_OBSERVED_PLACE ".", 2000);
-  } else 
+      DisplayMessage(L_CONNECTION, L_OK "!", 1000);
+      VLF("HCM: SHC Connection established");
+    } else 
     if (s[0]=='1') {
       telescopeCoordinates=TOPOCENTRIC; 
       DisplayMessage(L_CONNECTION, L_OK "!", 1000);
+      VLF("HCM: SHC Connection established");
     } else 
     if (s[0]=='2') {
       telescopeCoordinates=ASTROMETRIC_J2000;
-      DisplayMessage(L_CONNECTION, L_WARNING "!", 1000);
-      DisplayMessage(L_COORDINATES, "J2000 ?", 2000);
+      DisplayMessage(L_CONNECTION, L_OK "!", 1000);
+      VLF("HCM: SHC Connection established");
     }
   } else {
     if (++thisTry <= 4) goto again;
     telescopeCoordinates=OBSERVED_PLACE;
-    DisplayMessage(L_CONNECTION, L_FAILED "!", 1000);
+    DisplayMessage(L_CONNECTION, L_WARNING "!", 1000);
+    DisplayMessage(L_COORDINATES, L_OBSERVED_PLACE ".", 2000);
   }
 }
 
