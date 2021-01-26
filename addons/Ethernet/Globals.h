@@ -30,9 +30,12 @@
   #define AXIS2_ENC_B_PIN 8  // pin# for Axis2 encoder, for B or CCW
 #endif
 
-#if !defined(LED_STATUS_ON_STATE) || LED_STATUS_ON_STATE == LOW
+#if !defined(LED_STATUS_ON_STATE)
+  #define LED_STATUS_ON_STATE LOW
   #define LED_STATUS_OFF_STATE HIGH
-#elif LED_STATUS_ON_STATE HIGH
+#elif LED_STATUS_ON_STATE == LOW
+  #define LED_STATUS_OFF_STATE HIGH
+#elif LED_STATUS_ON_STATE == HIGH
   #define LED_STATUS_OFF_STATE LOW
 #endif
 
