@@ -63,6 +63,7 @@
 #include "Constants.h"
 #include "Locales.h"
 #include "Config.h"
+#define DISPLAY_RESET_CONTROLS OFF
 #if AXIS1_ENC > 0 && AXIS2_ENC > 0
   #define ENCODERS ON
 #endif
