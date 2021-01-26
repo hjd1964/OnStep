@@ -18,11 +18,11 @@
 
 //      Parameter Name              Value   Default  Notes                                                                      Hint
 // SERIAL PORTS --------------------------------------------------------------------------------------------------------------------
-#define SERIAL_BAUD_DEFAULT           9600 //   9600, Common baud rates for these parameters are 9600,19200,57600,115200.      Infreq
-#define SERIAL_BAUD                  57600 //  57600, Automatically uses 19200 if talking to a Mega2560 OnStep.                Infreq
+#define SERIAL_BAUD_DEFAULT          9600 //   9600, Common baud rates for these parameters are 9600,19200,57600,115200.      Infreq
+#define SERIAL_BAUD                 57600 //  57600, Automatically uses 19200 if talking to a Mega2560 OnStep.                Infreq
                                           //         If establishing a link to OnStep was ***unsuccessful*** the ESP8266 may
                                           //         retain prior settings perhaps an SSID from factory defaults, for example.
-#define SERIAL_SWAP                   OFF //   AUTO, Automatic check both, ON for swapped port or OFF for default port only.  Infreq
+#define SERIAL_SWAP                  AUTO //   AUTO, Automatic check both, ON for swapped port or OFF for default port only.  Infreq
 
 // USER FEEDBACK -------------------------------------------------------------------------------------------------------------------
 #define LED_STATUS                      2 //      2, GPIO LED pin WeMos D1 Mini. Flashes connecting then steady on connected. Infreq
@@ -30,9 +30,8 @@
 // DISPLAY -------------------------------------------------------------------------------------------------------------------------
 #define DISPLAY_LANGUAGE             L_en //   L_en, English. Specify language with two letter country code, if supported.    Adjust
 #define DISPLAY_WEATHER               OFF //    OFF, ON ambient conditions in locale default units.                           Option
-#define DISPLAY_INTERNAL_TEMPERATURE   ON //    OFF, ON internal MCU temp. in locale default units.                           Option
+#define DISPLAY_INTERNAL_TEMPERATURE  OFF //    OFF, ON internal MCU temp. in locale default units.                           Option
 #define DISPLAY_WIFI_SIGNAL_STRENGTH   ON //     ON, Wireless signal strength reported via web interface. OFF otherwise.      Option
-#define DISPLAY_RESET_CONTROLS        FWU //    OFF, ON to allow reset of OnStep, FWU for STM32 firmware upload pin HIGH.     Option
 
 #define DISPLAY_SPECIAL_CHARS          ON //     ON, For standard ASCII special symbols (compatibility.)                      Infreq
 #define DISPLAY_ADVANCED_CHARS         ON //     ON, For standard "RA/Dec" instead of symbols.                                Infreq
