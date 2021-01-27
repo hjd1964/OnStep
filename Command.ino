@@ -271,9 +271,9 @@ void processCommands() {
             boolReply=false;
           }
         } else
-// :CA#       Synchonize the telescope with the current Alt/Azm coordinates
+// :CH#       Synchonize the telescope with the current Horizon (Alt/Azm) coordinates
 //            Returns: 0..9, see :MS#
-        if (command[1] == 'A' && parameter[0] == 0)  {
+        if (command[1] == 'H' && parameter[0] == 0)  {
           CommandErrors e=syncHor(&newTargetAlt, &newTargetAzm);
           if (e >= CE_GOTO_ERR_BELOW_HORIZON && e <= CE_GOTO_ERR_UNSPECIFIED) reply[0]=(char)(e-CE_GOTO_ERR_BELOW_HORIZON)+'1';
           if (e == CE_NONE) reply[0]='0';
