@@ -338,7 +338,6 @@ void setLatitude(double Lat) {
 }
 
 // convert equatorial coordinates to horizon
-// this takes approx. 1.4mS on a 16MHz Mega2560
 void equToHor(double HA, double Dec, double *Alt, double *Azm) {
   HA =HA/Rad;
   Dec=Dec/Rad;
@@ -353,7 +352,6 @@ void equToHor(double HA, double Dec, double *Alt, double *Azm) {
 }
       
 // convert horizon coordinates to equatorial
-// this takes approx. 1.4mS
 void horToEqu(double Alt, double Azm, double *HA, double *Dec) { 
   Alt  = Alt/Rad;
   Azm  = Azm/Rad;
