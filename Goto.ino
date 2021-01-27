@@ -94,6 +94,15 @@ CommandErrors syncEqu(double RA, double Dec) {
   return CE_NONE;
 }
 
+// syncs the mount to a new Altitude and Azmiuth (Alt,Azm) in degrees
+CommandErrors syncHor(double *Alt, double *Azm) {
+  double HA,Dec;
+  
+  horToEqu(*Alt,*Azm,&HA,&Dec);
+  double RA=degRange(LST()*15.0-HA);
+  return syncEqu(RA,Dec);
+}
+
 // syncs internal counts to shaft encoder position (in degrees)
 CommandErrors syncEnc(double EncAxis1, double EncAxis2) {
   // validate

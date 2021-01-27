@@ -242,33 +242,46 @@ void processCommands() {
       } else 
 
 //  C - Sync Control
+      if (command[0] == 'C') {
 // :CS#       Synchonize the telescope with the current right ascension and declination coordinates
 //            Returns: Nothing (Sync's fail silently)
 // :CM#       Synchonize the telescope with the current database object (as above)
 //            Returns: "N/A#" on success, "En#" on failure where n is the error code per the :MS# command
-      if (command[0] == 'C' && (command[1] == 'S' || command[1] == 'M') && parameter[0] == 0)  {
-        if (parkStatus == NotParked && trackingState != TrackingMoveTo) {
-
-          newTargetRA=origTargetRA; newTargetDec=origTargetDec;
+        if ((command[1] == 'S' || command[1] == 'M') && parameter[0] == 0)  {
+          if (parkStatus == NotParked && trackingState != TrackingMoveTo) {
+  
+            newTargetRA=origTargetRA; newTargetDec=origTargetDec;
 #if TELESCOPE_COORDINATES == TOPOCENTRIC
-          topocentricToObservedPlace(&newTargetRA,&newTargetDec);
+            topocentricToObservedPlace(&newTargetRA,&newTargetDec);
 #endif
-
-          CommandErrors e;
-          if (alignActive()) {
-            e=alignStar();
-            if (e != CE_NONE) { alignNumStars=0; alignThisStar=0; commandError=e; }
-          } else { 
-            e=syncEqu(newTargetRA,newTargetDec);
+  
+            CommandErrors e;
+            if (alignActive()) {
+              e=alignStar();
+              if (e != CE_NONE) { alignNumStars=0; alignThisStar=0; commandError=e; }
+            } else { 
+              e=syncEqu(newTargetRA,newTargetDec);
+            }
+  
+            if (command[1] == 'M') {
+                if (e >= CE_GOTO_ERR_BELOW_HORIZON && e <= CE_GOTO_ERR_UNSPECIFIED) { reply[0]='E'; reply[1]=(char)(e-CE_GOTO_ERR_BELOW_HORIZON)+'1'; reply[2]=0; }
+                if (e == CE_NONE) strcpy(reply,"N/A");
+            }
+  
+            boolReply=false;
           }
-
-          if (command[1] == 'M') {
-              if (e >= CE_GOTO_ERR_BELOW_HORIZON && e <= CE_GOTO_ERR_UNSPECIFIED) { reply[0]='E'; reply[1]=(char)(e-CE_GOTO_ERR_BELOW_HORIZON)+'1'; reply[2]=0; }
-              if (e == CE_NONE) strcpy(reply,"N/A");
-          }
-
-          boolReply=false;
-        }
+        } else
+// :CA#       Synchonize the telescope with the current Alt/Azm coordinates
+//            Returns: 0..9, see :MS#
+        if (command[1] == 'A' && parameter[0] == 0)  {
+          CommandErrors e=syncHor(&newTargetAlt, &newTargetAzm);
+          if (e >= CE_GOTO_ERR_BELOW_HORIZON && e <= CE_GOTO_ERR_UNSPECIFIED) reply[0]=(char)(e-CE_GOTO_ERR_BELOW_HORIZON)+'1';
+          if (e == CE_NONE) reply[0]='0';
+          reply[1]=0;
+          boolReply=false; 
+          supress_frame=true;
+          commandError=e;
+        } else commandError=CE_CMD_UNKNOWN;
       } else 
 
 //  D - Distance Bars
