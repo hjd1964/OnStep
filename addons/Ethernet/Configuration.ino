@@ -79,6 +79,38 @@ const char html_configAdvanced[] PROGMEM =
 const char html_configMountType[] PROGMEM =
 " <input style='width: 7em;' value='%d' type='number' name='mountt' min='1' max='3' step='1'>&nbsp; " L_ADV_MOUNT_TYPE "<br /><br />\r\n";
 
+// -------------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------------
+#if DRIVE_CONFIGURATION == ON
+const char html_configAxisSpwr[] PROGMEM =
+" <input style='width: 7em;' value='%ld' type='number' name='a%dspwr' min='%d' max='%ld' step='1'>&nbsp; " L_ADV_SET_SPWR "<br />\r\n";
+const char html_configAxisSpd[] PROGMEM =
+" <input style='width: 7em;' value='%s' type='number' name='a%dspd' min='%d' max='%ld' step='any'>&nbsp; " L_ADV_SET_SPD "<br />\r\n";
+const char html_configAxisSpu[] PROGMEM =
+" <input style='width: 7em;' value='%s' type='number' name='a%dspu' min='0.01' max='10' step='any'>&nbsp; " L_ADV_SET_SPM "<br />\r\n";
+const char html_configAxisMicroSteps[] PROGMEM =
+" <input style='width: 7em;' value='%d' type='number' name='a%dustp' min='1' max='256' step='1'>&nbsp; " L_ADV_SET_us "<br />\r\n";
+const char html_configAxisCurrent[] PROGMEM =
+" <input style='width: 7em;' value='%d' type='number' name='a%dI' min='0' max='%d' step='1'>&nbsp; " L_ADV_SET_ma "<br />\r\n";
+const char html_configAxisReverse[] PROGMEM =
+" <input style='width: 7em;' value='%d' type='number' name='a%drev' min='0' max='1' step='1'>&nbsp; " L_ADV_SET_REV "<br />\r\n";
+const char html_configAxisMin[] PROGMEM =
+" <input style='width: 7em;' value='%d' type='number' name='a%dmin' min='%d' max='%d' step='1'>&nbsp;%s&nbsp; " L_ADV_SET_MIN "<br />\r\n";
+const char html_configAxisMax[] PROGMEM =
+" <input style='width: 7em;' value='%d' type='number' name='a%dmax' min='%d' max='%d' step='1'>&nbsp;%s&nbsp; " L_ADV_SET_MAX "<br /><br />\r\n";
+const char html_configAxesNotes[] PROGMEM =
+"<br />Notes:<ul>"
+"<li>" L_ADV_SET_FOOTER_MSG1 "</li>"
+"<li>" L_ADV_SET_FOOTER_MSG2 "</li>"
+#if DRIVE_MAIN_AXES_CURRENT == ON
+"<li>" L_ADV_SET_FOOTER_MSG3 "</li>"
+#endif
+"<li>" L_ADV_SET_FOOTER_MSG4 "</li>"
+"</ul>";
+#endif
+// -------------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------------
+
 // Reset
 const char html_resetNotes[] PROGMEM =
 "<br />Notes:<ul>"
@@ -337,7 +369,7 @@ void handleConfiguration() {
   // Mount type
   if (!command(":GXEM#",temp1)) strcpy(temp1,"0");
   int mt=atoi(temp1);
-  if (mt != 0) data += FPSTR(html_configAdvanced);
+  if (mt != 0 || DRIVE_CONFIGURATION == ON)  data += FPSTR(html_configAdvanced);
   if (mt >= 1 && mt <= 3) {
     data += "<button type='button' class='collapsible'>Mount Type</button>";
     data += FPSTR(html_configFormBegin);
@@ -348,6 +380,134 @@ void handleConfiguration() {
     data += "<br />";
     numShown++;
   }
+
+// -------------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------------
+#if DRIVE_CONFIGURATION == ON
+  axisSettings a;
+ 
+  // Axis1 RA/Azm
+  if (!command(":GXA1#",temp1)) strcpy(temp1,"0");
+  if (decodeAxisSettings(temp1,a)) {
+    data += "<button type='button' class='collapsible'>Axis1 RA/Azm</button>";
+    data += FPSTR(html_configFormBegin);
+    if (validateAxisSettings(1,mountStatus.mountType()==MT_ALTAZM,a)) {
+      if (!command(":GXE7#",temp1)) strcpy(temp1,"0"); long spwr=strtol(temp1,NULL,10);
+      sprintf_P(temp,html_configAxisSpwr,spwr,1,0,129600000L); data += temp;
+      dtostrf(a.stepsPerMeasure,1,3,temp1); stripNum(temp1);
+      sprintf_P(temp,html_configAxisSpd,temp1,1,3000,61200L); data += temp;
+#if DRIVE_MAIN_AXES_MICROSTEPS == ON
+      if (a.microsteps != OFF) { sprintf_P(temp,html_configAxisMicroSteps,a.microsteps,1); data += temp; }
+#endif
+#if DRIVE_MAIN_AXES_CURRENT == ON
+      if (a.IRUN != OFF) { sprintf_P(temp,html_configAxisCurrent,a.IRUN,1,3000); data += temp; }
+#endif
+#if DRIVE_MAIN_AXES_REVERSE == ON
+      sprintf_P(temp,html_configAxisReverse,a.reverse==ON?1:0,1); data += temp;
+#endif
+      sprintf_P(temp,html_configAxisMin,a.min,1,-360,-90,"&deg;,"); data += temp;
+      sprintf_P(temp,html_configAxisMax,a.max,1,90,360,"&deg;,"); data += temp;
+      data += "<button type='submit'>" L_UPLOAD "</button> ";
+    }
+    data += "<button name='revert' value='1' type='submit'>" L_REVERT "</button>\r\n";
+    data += FPSTR(html_configFormEnd);
+    numShown++;
+  }
+
+  // Axis2 Dec/Alt
+  if (!command(":GXA2#",temp1)) strcpy(temp1,"0");
+  if (decodeAxisSettings(temp1,a)) {
+    data += "<button type='button' class='collapsible'>Axis2 Dec/Alt</button>";
+    data += FPSTR(html_configFormBegin);
+    if (validateAxisSettings(2,mountStatus.mountType()==MT_ALTAZM,a)) {
+      dtostrf(a.stepsPerMeasure,1,3,temp1); stripNum(temp1);
+      sprintf_P(temp,html_configAxisSpd,temp1,2,3000,61200); data += temp;
+#if DRIVE_MAIN_AXES_MICROSTEPS == ON
+      if (a.microsteps != OFF) { sprintf_P(temp,html_configAxisMicroSteps,a.microsteps,2); data += temp; }
+#endif
+#if DRIVE_MAIN_AXES_CURRENT == ON
+      if (a.IRUN != OFF) { sprintf_P(temp,html_configAxisCurrent,a.IRUN,2,3000); data += temp; }
+#endif
+#if DRIVE_MAIN_AXES_REVERSE == ON
+      sprintf_P(temp,html_configAxisReverse,a.reverse==ON?1:0,2); data += temp;
+#endif
+      sprintf_P(temp,html_configAxisMin,a.min,2,-90,0,"&deg;,"); data += temp;
+      sprintf_P(temp,html_configAxisMax,a.max,2,0,90,"&deg;,"); data += temp;
+      data += "<button type='submit'>" L_UPLOAD "</button> ";
+    }
+    data += "<button name='revert' value='2' type='submit'>" L_REVERT "</button>";
+    data += FPSTR(html_configFormEnd);
+    numShown++;
+  }
+  
+  // Axis3 Rotator
+  if (!command(":GXA3#",temp1)) strcpy(temp1,"0");
+  if (decodeAxisSettings(temp1,a)) {
+    data += "<button type='button' class='collapsible'>Axis3 " L_ROTATOR "</button>";
+    data += FPSTR(html_configFormBegin);
+    if (validateAxisSettings(3,mountStatus.mountType()==MT_ALTAZM,a)) {
+      dtostrf(a.stepsPerMeasure,1,3,temp1); stripNum(temp1);
+      sprintf_P(temp,html_configAxisSpd,temp1,3,10,3600); data += temp;
+      if (a.microsteps != OFF) { sprintf_P(temp,html_configAxisMicroSteps,a.microsteps,3); data += temp; }
+      if (a.IRUN != OFF) { sprintf_P(temp,html_configAxisCurrent,a.IRUN,3,1000); data += temp; }
+      sprintf_P(temp,html_configAxisReverse,a.reverse==ON?1:0,3); data += temp;
+      sprintf_P(temp,html_configAxisMin,a.min,3,-360,0,"&deg;,"); data += temp;
+      sprintf_P(temp,html_configAxisMax,a.max,3,0,360,"&deg;,"); data += temp;
+      data += "<button type='submit'>" L_UPLOAD "</button> ";
+    }
+    data += "<button name='revert' value='3' type='submit'>" L_REVERT "</button>";
+    data += FPSTR(html_configFormEnd);
+    numShown++;
+  }
+  
+  // Axis4 Focuser1
+  if (!command(":GXA4#",temp1)) strcpy(temp1,"0");
+  if (decodeAxisSettings(temp1,a)) {
+    data += "<button type='button' class='collapsible'>Axis4 " L_FOCUSER " 1</button>";
+    data += FPSTR(html_configFormBegin);
+    if (validateAxisSettings(4,mountStatus.mountType()==MT_ALTAZM,a)) {
+      dtostrf(a.stepsPerMeasure,1,3,temp1); stripNum(temp1);
+      sprintf_P(temp,html_configAxisSpu,temp1,4); data += temp;
+      if (a.microsteps != OFF) { sprintf_P(temp,html_configAxisMicroSteps,a.microsteps,4); data += temp; }
+      if (a.IRUN != OFF) { sprintf_P(temp,html_configAxisCurrent,a.IRUN,4,1000); data += temp; }
+      sprintf_P(temp,html_configAxisReverse,a.reverse==ON?1:0,4); data += temp;
+      sprintf_P(temp,html_configAxisMin,a.min,4,0,500,"mm,"); data += temp;
+      sprintf_P(temp,html_configAxisMax,a.max,4,0,500,"mm,"); data += temp;
+      data += "<button type='submit'>" L_UPLOAD "</button> ";
+    }
+    data += "<button name='revert' value='4' type='submit'>" L_REVERT "</button>";
+    data += FPSTR(html_configFormEnd);
+    numShown++;
+  }
+  
+  // Axis5 Focuser2
+  if (!command(":GXA5#",temp1)) strcpy(temp1,"0");
+  if (decodeAxisSettings(temp1,a)) {
+    data += "<button type='button' class='collapsible'>Axis5 " L_FOCUSER " 2</button>";
+    data += FPSTR(html_configFormBegin);
+    if (validateAxisSettings(5,mountStatus.mountType()==MT_ALTAZM,a)) {
+      dtostrf(a.stepsPerMeasure,1,3,temp1); stripNum(temp1);
+      sprintf_P(temp,html_configAxisSpu,temp1,5); data += temp;
+      if (a.microsteps != OFF) { sprintf_P(temp,html_configAxisMicroSteps,a.microsteps,5); data += temp; }
+      if (a.IRUN != OFF) { sprintf_P(temp,html_configAxisCurrent,a.IRUN,5,1000); data += temp; }
+      sprintf_P(temp,html_configAxisReverse,a.reverse==ON?1:0,5); data += temp;
+      sprintf_P(temp,html_configAxisMin,a.min,5,0,500,"mm,"); data += temp;
+      sprintf_P(temp,html_configAxisMax,a.max,5,0,500,"mm,"); data += temp;
+      data += "<button type='submit'>" L_UPLOAD "</button> ";
+    }
+    data += "<button name='revert' value='5' type='submit'>" L_REVERT "</button>";
+    data += FPSTR(html_configFormEnd);
+    numShown++;
+  }
+  if (numShown == 0) data += L_ADV_SET_NO_EDIT "<br />";
+  data += "<br /><form method='get' action='/configuration.htm'>";
+  data += "<button name='advanced' type='submit' ";
+  if (numShown == 0) data += "value='enable'>" L_ADV_ENABLE "</button>"; else data += "value='disable'>" L_ADV_DISABLE "</button>";
+  data += "</form>\r\n";
+  data += FPSTR(html_configAxesNotes);
+#endif
+// -------------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------------
 
 #if DISPLAY_RESET_CONTROLS != OFF
   sendHtml(data);
@@ -542,7 +702,45 @@ bool processConfigurationGet() {
   #endif
 #endif
   String ssm=server.arg("mountt"); if (!ssm.equals("")) { sprintf(temp,":SXEM,%s#",ssm.c_str()); commandBool(temp); }
-  String ssr=server.arg("revert"); if (!ssr.equals("")) commandBool(":SXEM,0#");
 
+// -------------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------------
+#if DRIVE_CONFIGURATION == ON
+  // Axis settings
+  if (ssa.equals("enable")) { commandBool(":SXAC,0#"); return true; }
+  if (ssa.equals("disable")) { commandBool(":SXAC,1#"); return true; }
+
+  String ssr=server.arg("revert");
+  if (!ssr.equals("")) {
+    int axis=ssr.toInt();
+    if (axis > 0 && axis < 5) { sprintf(temp,":SXA%d,R#",axis); commandBool(temp); }
+    if (axis == 0) { strcpy(temp,":SXEM,0#"); commandBool(temp); }
+    return true;
+  }
+
+  int axis = 0;
+  String ss1,ss2,ss3,ss4,ss5,s1,s2,s3,s4,s5,s6;
+  ss1=server.arg("a1spd");
+  ss2=server.arg("a2spd");
+  ss3=server.arg("a3spd");
+  ss4=server.arg("a4spu");
+  ss5=server.arg("a5spu");
+  if (!ss1.equals("")) { axis=1; s1=server.arg("a1spd"); s2=server.arg("a1ustp"); s3=server.arg("a1I"); s4=server.arg("a1rev"); s5=server.arg("a1min"); s6=server.arg("a1max"); } else
+  if (!ss2.equals("")) { axis=2; s1=server.arg("a2spd"); s2=server.arg("a2ustp"); s3=server.arg("a2I"); s4=server.arg("a2rev"); s5=server.arg("a2min"); s6=server.arg("a2max"); } else
+  if (!ss3.equals("")) { axis=3; s1=server.arg("a3spd"); s2=server.arg("a3ustp"); s3=server.arg("a3I"); s4=server.arg("a3rev"); s5=server.arg("a3min"); s6=server.arg("a3max"); } else
+  if (!ss4.equals("")) { axis=4; s1=server.arg("a4spu"); s2=server.arg("a4ustp"); s3=server.arg("a4I"); s4=server.arg("a4rev"); s5=server.arg("a4min"); s6=server.arg("a4max"); } else
+  if (!ss5.equals("")) { axis=5; s1=server.arg("a5spu"); s2=server.arg("a5ustp"); s3=server.arg("a5I"); s4=server.arg("a5rev"); s5=server.arg("a5min"); s6=server.arg("a5max"); }
+
+  if (axis > 0 && axis < 6) {
+    if (s2.equals("")) s2="-1"; if (s3.equals("")) s3="-1"; if (s4.equals("")) s4="-1"; if (s5.equals("")) s5="-1"; if (s6.equals("")) s6="-1";
+    if (s4.equals("0")) s4="-1"; else if (s4.equals("1")) s4="-2";
+    v=s1+","+s2+","+s3+","+s4+","+s5+","+s6;
+    sprintf(temp,":SXA%d,%s#",axis,v.c_str());
+    commandBool(temp);
+  }
+  ss1=server.arg("a1spwr"); if (!ss1.equals("")) { sprintf(temp,":SXE7,%s#",ss1.c_str()); commandBool(temp); }
+#endif
+// -------------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------------
   return true;
 }

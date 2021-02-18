@@ -71,28 +71,14 @@ L_ENC_ZERO_TO_ONS ": <br />"
 "<br />";
 #endif
 
-const char html_encEn1[] PROGMEM = "<br /><br />"
+const char html_encEn1[] PROGMEM = "<br />"
 L_ENC_AUTO_SYNC ": <br />";
 const char html_encEn2[] PROGMEM =
 "<button id='eas_on'  class='btns_right' onpointerdown=\"s('as','on')\"  type='button' disabled>" L_ON "</button>"
 "<button id='eas_off' class='btns_left'  onpointerdown=\"s('as','off')\" type='button' disabled>" L_OFF "</button>"
 "<br /><br />";
 
-const char html_encMxAxis0[] PROGMEM =
-L_ENC_MAX_ANGLE ": <br />"
-"<form method='get' action='/enc.htm'>";
-const char html_encMxAxis1[] PROGMEM =
-" <input value='%ld' type='number' name='d1' min='0' max='9999'>"
-"<button type='submit'>" L_UPLOAD "</button>"
-" " L_ENC_MAX_ANGLE_AXIS1
-"</form>";
-const char html_encMxAxis2[] PROGMEM = 
-"<form method='get' action='/enc.htm'>"
-" <input value='%ld' type='number' name='d2' min='0' max='9999'>"
-"<button type='submit'>" L_UPLOAD "</button>"
-" " L_ENC_MAX_ANGLE_AXIS2
-"</form><br />";
-
+// rate control
 const char html_encRateEn1[] PROGMEM =
 L_ENC_AUTO_RATE " (<span id='orc'>?</span>):<br />";
 const char html_encRateEn2[] PROGMEM =
@@ -167,8 +153,23 @@ const char html_encSweepEn2[] PROGMEM =
 "<button type='button' onpointerdown=\"s('sw','off')\" >" L_OFF "</button>"
 "<br /><br />";
 
-const char html_encEnd[] PROGMEM = 
-"</form>";
+// encoder configuration
+const char html_encFormBegin[] PROGMEM = "<div class='content'><br />\r\n<form method='get' action='/enc.htm'>";
+const char html_encFormEnd[] PROGMEM = "\r\n</form><br />\r\n</div><br />\r\n";
+
+const char html_encAxisTpd[] PROGMEM =
+" <input style='width: 7em;' value='%s' type='number' name='a%dcpd' min='%d' max='%ld' step='any'>&nbsp; " L_ENC_SET_TPD "<br />\r\n";
+
+const char html_encAxisReverse[] PROGMEM =
+" <input style='width: 7em;' value='%d' type='number' name='a%drev' min='0' max='1' step='1'>&nbsp; " L_ADV_SET_REV "<br />\r\n";
+
+const char html_encMxAxis1[] PROGMEM =
+" <input style='width: 7em;' value='%ld' type='number' name='d1' min='0' max='9999'>"
+"&nbsp; " L_ENC_MAX_ANGLE ", " L_ENC_MAX_ANGLE_AXIS1 "<br/>";
+
+const char html_encMxAxis2[] PROGMEM =
+" <input style='width: 7em;' value='%ld' type='number' name='d2' min='0' max='9999'>"
+"&nbsp; " L_ENC_MAX_ANGLE ", " L_ENC_MAX_ANGLE_AXIS2 "<br/>";
 
 #ifdef OETHS
 void handleEncoders(EthernetClient *client) {
@@ -181,6 +182,7 @@ void handleEncoders() {
   mountStatus.update();
 
   char temp[400]="";
+  char temp1[80]="";
   
   processEncodersGet();
 
@@ -214,9 +216,11 @@ void handleEncoders() {
   data += FPSTR(html_main_css7);
   data += FPSTR(html_main_css8);
   data += FPSTR(html_main_css_btns1);
-  sendHtml(data);
   data += FPSTR(html_main_css_btns2);
   data += FPSTR(html_main_css_btns3);
+  sendHtml(data);
+  data += FPSTR(html_main_css_collapse1);
+  data += FPSTR(html_main_css_collapse2);
   data += FPSTR(html_main_cssE);
   data += FPSTR(html_headE);
   data += FPSTR(html_bodyB);
@@ -263,15 +267,7 @@ void handleEncoders() {
   data += FPSTR(html_encEn1);
   data += FPSTR(html_encEn2);
   sendHtml(data);
-  
-  // Encoder sync thresholds
-  data += FPSTR(html_encMxAxis0);
-  sprintf_P(temp,html_encMxAxis1,Axis1EncDiffTo);
-  data += temp;
-  sprintf_P(temp,html_encMxAxis2,Axis2EncDiffTo);
-  data += temp;
-  sendHtml(data);
-  
+
 #if AXIS1_ENC_RATE_CONTROL == ON
   // OnStep rate control
   data+="<br />";
@@ -345,9 +341,41 @@ void handleEncoders() {
   encoders.clearAverages();
 #endif
 
+  // Encoder configuration section
+  data += L_ENC_CONF ":<br />";
+
+  // Axis1 RA/Azm
+  data += "<button type='button' class='collapsible'>Axis1 RA/Azm</button>";
+  data += FPSTR(html_encFormBegin);
+  dtostrf(Axis1EncTicksPerDeg,1,3,temp1); stripNum(temp1);
+  sprintf_P(temp,html_encAxisTpd,temp1,1,1,100000L); data += temp;        // Encoder counts per degree
+  sprintf_P(temp,html_encAxisReverse,Axis1EncRev==ON?1:0,1); data += temp;// Encode reverse count
+  sprintf_P(temp,html_encMxAxis1,Axis1EncDiffTo); data += temp;           // Encoder sync thresholds
+  sendHtml(data);
+  data += "<button type='submit'>" L_UPLOAD "</button>\r\n";
+  data += "<button name='revert' value='1' type='submit'>" L_REVERT "</button>";
+  data += FPSTR(html_encFormEnd);
+  sendHtml(data);
+
+  // Axis2 Dec/Alt
+  data += "<button type='button' class='collapsible'>Axis2 Dec/Alt</button>";
+  data += FPSTR(html_encFormBegin);
+  dtostrf(Axis2EncTicksPerDeg,1,3,temp1); stripNum(temp1);
+  sprintf_P(temp,html_encAxisTpd,temp1,2,1,100000L); data += temp;        // Encoder counts per degree
+  sprintf_P(temp,html_encAxisReverse,Axis2EncRev==ON?1:0,2); data += temp;// Encode reverse count
+  sprintf_P(temp,html_encMxAxis2,Axis2EncDiffTo); data += temp;           // Encoder sync thresholds
+  sendHtml(data);
+  data += "<button type='submit'>" L_UPLOAD "</button>\r\n";
+  data += "<button name='revert' value='2' type='submit'>" L_REVERT "</button>";
+  data += FPSTR(html_encFormEnd);
+  sendHtml(data);
+  
   // end of page
   data+="<br />";
-
+  
+  // collapsible script
+  data += FPSTR(html_collapseScript);
+  
   strcpy(temp,"</div></div></body></html>");
   data += temp;
   sendHtml(data);
@@ -429,8 +457,16 @@ void processEncodersGet() {
   // Autosync
   v=server.arg("as");
   if (v!="") {
-    if (v=="on") encAutoSync=true;
-    if (v=="off") encAutoSync=false;
+    if (v=="on") { 
+      encAutoSync=true;
+      if (ENC_AUTO_SYNC_MEMORY == ON) nv.writeInt(EE_ENC_AUTO_SYNC,encAutoSync);
+      EEwrite=true;
+    }
+    if (v=="off") { 
+      encAutoSync=false;
+      if (ENC_AUTO_SYNC_MEMORY == ON) nv.writeInt(EE_ENC_AUTO_SYNC,encAutoSync);
+      EEwrite=true;
+    }
   }
 
   // Max. limits
@@ -446,8 +482,78 @@ void processEncodersGet() {
   v=server.arg("d2");
   if (v!="") {
     int i;
-    if ( (atoi2((char*)v.c_str(),&i)) && ((i>=0) && (i<=9999))) { 
+    if ( atoi2((char*)v.c_str(),&i) && (i >= 0 && i <= 9999)) { 
       Axis2EncDiffTo=i;
+      nv.writeLong(EE_ENC_A2_DIFF_TO,Axis2EncDiffTo);
+      EEwrite=true;
+    }
+  }
+
+  // Counts per degree
+  v=server.arg("a1cpd");
+  if (v!="") {
+    double d = v.toFloat();
+    if (d >= 1.0 && d <= 10000.0) { 
+      Axis1EncTicksPerDeg=d;
+      nv.writeDouble(EE_ENC_A1_TICKS,Axis1EncTicksPerDeg);
+      EEwrite=true;
+    }
+  }
+  v=server.arg("a2cpd");
+  if (v!="") {
+    double d = v.toFloat();
+    if (d >= 1.0 && d <= 10000.0) { 
+      Axis2EncTicksPerDeg=d;
+      nv.writeDouble(EE_ENC_A2_TICKS,Axis2EncTicksPerDeg);
+      EEwrite=true;
+    }
+  }
+
+  v=server.arg("a1rev");
+  if (v!="") {
+    if (v == "0") {
+      Axis1EncRev=OFF;
+      nv.write(EE_ENC_A1_REV,Axis1EncRev);
+      EEwrite=true;
+    }
+    if (v == "1") {
+      Axis1EncRev=ON;
+      nv.write(EE_ENC_A1_REV,Axis1EncRev);
+      EEwrite=true;
+    }
+  }
+
+  v=server.arg("a2rev");
+  if (v!="") {
+    if (v == "0") {
+      Axis2EncRev=OFF;
+      nv.writeInt(EE_ENC_A2_REV,Axis2EncRev);
+      EEwrite=true;
+    }
+    if (v == "1") {
+      Axis2EncRev=ON;
+      nv.writeInt(EE_ENC_A2_REV,Axis2EncRev);
+      EEwrite=true;
+    }
+  }
+
+  v=server.arg("revert");
+  if (v!="") { 
+    if (v == "1") {
+      Axis1EncTicksPerDeg=AXIS1_ENC_TICKS_DEG;
+      nv.writeDouble(EE_ENC_A1_TICKS,Axis1EncTicksPerDeg);
+      Axis1EncRev=AXIS1_ENC_REVERSE;
+      nv.writeInt(EE_ENC_A1_REV,Axis1EncRev);
+      Axis1EncDiffTo=AXIS1_ENC_DIFF_LIMIT_TO;
+      nv.writeLong(EE_ENC_A1_DIFF_TO,Axis1EncDiffTo);
+      EEwrite=true;
+    }
+    if (v == "2") {
+      Axis2EncTicksPerDeg=AXIS2_ENC_TICKS_DEG;
+      nv.writeDouble(EE_ENC_A2_TICKS,Axis2EncTicksPerDeg);
+      Axis2EncRev=AXIS1_ENC_REVERSE;
+      nv.writeInt(EE_ENC_A2_REV,Axis2EncRev);
+      Axis2EncDiffTo=AXIS2_ENC_DIFF_LIMIT_TO;
       nv.writeLong(EE_ENC_A2_DIFF_TO,Axis2EncDiffTo);
       EEwrite=true;
     }

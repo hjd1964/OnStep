@@ -227,6 +227,61 @@ float byteToTime(uint8_t b) {
   return v;
 }
 
+typedef struct AxisSettings {
+   double stepsPerMeasure; // degrees for axis1-3 or microns for axis4-5
+   int16_t microsteps;
+   int16_t IRUN;
+   int8_t reverse;
+   int16_t min;
+   int16_t max;
+} axisSettings;
+
+// convert axis settings string into numeric form
+boolean decodeAxisSettings(char s[], axisSettings &a) {
+  if (strcmp(s,"0") != 0) {
+    char *ws=s;
+    char *conv_end;
+    double f=strtod(ws,&conv_end); if (&s[0] != conv_end) a.stepsPerMeasure=f; else return false;
+    ws=strchr(ws,','); if (ws != NULL) {
+      ws++; a.microsteps=strtol(ws,NULL,10);
+      ws=strchr(ws,','); if (ws != NULL) {
+        ws++; a.IRUN=strtol(ws,NULL,10);
+        ws=strchr(ws,','); if (ws != NULL) {
+          ws++; a.reverse=strtol(ws,NULL,10);
+          ws=strchr(ws,','); if (ws != NULL) {
+            ws++; a.min=strtol(ws,NULL,10);
+            ws=strchr(ws,','); if (ws != NULL) {
+              ws++; a.max=strtol(ws,NULL,10);
+              return true;
+            }
+          }
+        }
+      }
+    }
+  }
+  return false;
+}
+
+// convert axis settings string into numeric form
+boolean validateAxisSettings(int axisNum, boolean altAz, axisSettings &a) {
+  int   MinLimitL[5]   = {-270,-90,-360,  0,  0};
+  int   MinLimitH[5]   = { -90,  0,   0,500,500};
+  int   MaxLimitL[5]   = {  90,  0,   0,  0,  0};
+  int   MaxLimitH[5]   = { 270, 90, 360,500,500};
+  float StepsLimitL[5] = {   150.0,   150.0,    5.0, 0.005, 0.005};
+  float StepsLimitH[5] = {122400.0,122400.0, 7200.0,  20.0,  20.0};
+  int   IrunLimitH[5]  = { 3000, 3000, 1000, 1000, 1000};
+  if (altAz) { MinLimitL[0]=-360; MinLimitH[0]=-180; MaxLimitL[0]=180; MaxLimitH[0]=360; }
+  axisNum--;
+  if (a.stepsPerMeasure < StepsLimitL[axisNum] || a.stepsPerMeasure > StepsLimitH[axisNum]) return false;
+  if (a.microsteps != OFF && (a.microsteps < 1 || a.microsteps > 256)) return false;
+  if (a.IRUN != OFF && (a.IRUN < 0 || a.IRUN > IrunLimitH[axisNum])) return false;
+  if (a.reverse != OFF && a.reverse != ON) return false;
+  if (a.min < MinLimitL[axisNum] || a.min > MinLimitH[axisNum]) return false;
+  if (a.max < MaxLimitL[axisNum] || a.max > MaxLimitH[axisNum]) return false;
+  return true;
+}
+
 // remove leading and trailing 0's
 void stripNum(char s[]) {
   int pp=-1;

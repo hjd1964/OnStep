@@ -36,8 +36,8 @@
 #define FirmwareDate          __DATE__
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "2"
-#define FirmwareVersionMinor  "1"
-#define FirmwareVersionPatch  "u"
+#define FirmwareVersionMinor  "2"
+#define FirmwareVersionPatch  "a"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
@@ -74,8 +74,13 @@
 
 // The settings below are for initialization only, afterward they are stored and recalled from EEPROM and must
 // be changed in the web interface OR with a reset (for initialization again) as described in the Config.h comments
-#define TIMEOUT_WEB 60
-#define TIMEOUT_CMD 60
+#if SERIAL_BAUD<=28800
+  #define TIMEOUT_WEB 60
+  #define TIMEOUT_CMD 60
+#else
+  #define TIMEOUT_WEB 15
+  #define TIMEOUT_CMD 30
+#endif
 
 int webTimeout=TIMEOUT_WEB;
 int cmdTimeout=TIMEOUT_CMD;
@@ -163,9 +168,9 @@ void setup(void){
   nv.init();
 
   // EEPROM Init
-  if (nv.readInt(EE_KEY_HIGH) != 8266 || nv.readInt(EE_KEY_LOW) != 0) {
+  if ((nv.readInt(EE_KEY_HIGH)!=8266) || (nv.readInt(EE_KEY_LOW)!=1)) {
     nv.writeInt(EE_KEY_HIGH,8266);
-    nv.writeInt(EE_KEY_LOW,0);
+    nv.writeInt(EE_KEY_LOW,1);
 
     nv.writeInt(EE_AP_EN,(int)accessPointEnabled);
     nv.writeInt(EE_STA_EN,(int)stationEnabled);
@@ -189,6 +194,7 @@ void setup(void){
     for (int i=0;i<4;i++) nv.write(EE_AP_SN+i,wifi_ap_sn[i]);
 
 #if ENCODERS == ON
+    nv.writeInt(EE_ENC_AUTO_SYNC,ENC_AUTO_SYNC_DEFAULT);
     nv.writeLong(EE_ENC_A1_DIFF_TO,AXIS1_ENC_DIFF_LIMIT_TO);
     nv.writeLong(EE_ENC_A2_DIFF_TO,AXIS2_ENC_DIFF_LIMIT_TO);
     nv.writeLong(EE_ENC_RC_STA,20);     // enc short term average samples
@@ -200,11 +206,15 @@ void setup(void){
     nv.writeLong(EE_ENC_MIN_GUIDE,100); // minimum guide duration
     nv.writeLong(EE_ENC_A1_ZERO,0);     // absolute Encoder Axis1 zero
     nv.writeLong(EE_ENC_A2_ZERO,0);     // absolute Encoder Axis2 zero
+    nv.writeDouble(EE_ENC_A1_TICKS,AXIS1_ENC_TICKS_DEG);
+    nv.writeDouble(EE_ENC_A2_TICKS,AXIS2_ENC_TICKS_DEG);
+    nv.writeInt(EE_ENC_A1_REV,AXIS1_ENC_REVERSE);
+    nv.writeInt(EE_ENC_A2_REV,AXIS2_ENC_REVERSE);
 #endif
 
     nv.commit();
   }
-  
+
   accessPointEnabled=nv.readInt(EE_AP_EN);
   stationEnabled=nv.readInt(EE_STA_EN);
   if (!accessPointEnabled && !stationEnabled) accessPointEnabled=true;
@@ -213,22 +223,6 @@ void setup(void){
   webTimeout=nv.readInt(EE_TIMEOUT_WEB);
   cmdTimeout=nv.readInt(EE_TIMEOUT_CMD);
   if (cmdTimeout > 100) cmdTimeout=30;
-
-#if ENCODERS == ON
-  Axis1EncDiffTo=nv.readLong(EE_ENC_A1_DIFF_TO);
-  Axis2EncDiffTo=nv.readLong(EE_ENC_A2_DIFF_TO);
-  #if AXIS1_ENC_RATE_CONTROL == ON
-    Axis1EncStaSamples=nv.readLong(EE_ENC_RC_STA);
-    Axis1EncLtaSamples=nv.readLong(EE_ENC_RC_LTA);
-    long l=nv.readLong(EE_ENC_RC_RCOMP); axis1EncRateComp=(float)l/1000000.0;
-    #if AXIS1_ENC_INTPOL_COS == ON
-      Axis1EncIntPolPhase=nv.readLong(EE_ENC_RC_INTP_P);
-      Axis1EncIntPolMag=nv.readLong(EE_ENC_RC_INTP_M);
-    #endif
-    Axis1EncProp=nv.readLong(EE_ENC_RC_PROP);
-    Axis1EncMinGuide=nv.readLong(EE_ENC_MIN_GUIDE);
-  #endif
-#endif
 
   nv.readString(EE_STA_SSID,wifi_sta_ssid);
   nv.readString(EE_STA_PWD,wifi_sta_pwd);
@@ -243,6 +237,27 @@ void setup(void){
   for (int i=0;i<4;i++) wifi_ap_ip[i]=nv.read(EE_AP_IP+i);
   for (int i=0;i<4;i++) wifi_ap_gw[i]=nv.read(EE_AP_GW+i);
   for (int i=0;i<4;i++) wifi_ap_sn[i]=nv.read(EE_AP_SN+i);  
+
+#if ENCODERS == ON
+  if (ENC_AUTO_SYNC_MEMORY == ON) encAutoSync=nv.readInt(EE_ENC_AUTO_SYNC);
+  Axis1EncDiffTo=nv.readLong(EE_ENC_A1_DIFF_TO);
+  Axis2EncDiffTo=nv.readLong(EE_ENC_A2_DIFF_TO);
+  #if AXIS1_ENC_RATE_CONTROL == ON
+    Axis1EncStaSamples=nv.readLong(EE_ENC_RC_STA);
+    Axis1EncLtaSamples=nv.readLong(EE_ENC_RC_LTA);
+    long l=nv.readLong(EE_ENC_RC_RCOMP); axis1EncRateComp=(float)l/1000000.0;
+    #if AXIS1_ENC_INTPOL_COS == ON
+      Axis1EncIntPolPhase=nv.readLong(EE_ENC_RC_INTP_P);
+      Axis1EncIntPolMag=nv.readLong(EE_ENC_RC_INTP_M);
+    #endif
+    Axis1EncProp=nv.readLong(EE_ENC_RC_PROP);
+    Axis1EncMinGuide=nv.readLong(EE_ENC_MIN_GUIDE);
+  #endif
+  Axis1EncTicksPerDeg=nv.readDouble(EE_ENC_A1_TICKS);
+  Axis2EncTicksPerDeg=nv.readDouble(EE_ENC_A2_TICKS);
+  Axis1EncRev=nv.readInt(EE_ENC_A1_REV);
+  Axis2EncRev=nv.readInt(EE_ENC_A2_REV);
+#endif
 
   int serialSwap=SERIAL_SWAP;
   if (serialSwap == AUTO) serialSwap = AUTO_OFF;
@@ -284,10 +299,10 @@ Again:
     if (tb == 16) { tb=1; if (serialSwap == AUTO_OFF) serialSwap=AUTO_ON; else if (serialSwap == AUTO_ON) serialSwap=AUTO_OFF; }
     if (tb == 1) serialBegin(SERIAL_BAUD_DEFAULT,serialSwap);
     if (tb == 6) serialBegin(serial_baud,serialSwap);
-    if (tb == 11) if (SERIAL_BAUD_DEFAULT == 9600) serialBegin(19200,serialSwap); else tb=15;
+    if (tb == 11) serialBegin(19200,serialSwap);
     goto Again;
   }
-  
+
   // say hello
   VF("WEM: WiFi Addon "); V(FirmwareVersionMajor); V("."); V(FirmwareVersionMinor); VL(FirmwareVersionPatch);
   VF("WEM: MCU = "); VLF(MCU_STR);
@@ -313,7 +328,6 @@ Again:
   VF("WEM: WiFi AP SN      = "); VL(wifi_ap_sn.toString());
 
 TryAgain:
-  
   if (accessPointEnabled && !stationEnabled) {
     VLF("WEM: Starting WiFi Soft AP");
     WiFi.softAP(wifi_ap_ssid, wifi_ap_pwd, wifi_ap_ch);
@@ -404,7 +418,7 @@ TryAgain:
   VLF("WEM: Starting Encoders");
   encoders.init();
 #endif
-
+  
   VLF("WEM: WiFi Addon is ready");
 }
 

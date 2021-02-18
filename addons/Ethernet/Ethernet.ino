@@ -37,8 +37,8 @@
 #define FirmwareDate          __DATE__
 #define FirmwareTime          __TIME__
 #define FirmwareVersionMajor  "2"
-#define FirmwareVersionMinor  "1"
-#define FirmwareVersionPatch  "t"
+#define FirmwareVersionMinor  "2"
+#define FirmwareVersionPatch  "a"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
@@ -131,10 +131,12 @@ void setup(void){
 #ifndef EEPROM_DISABLED
   nv.init();
 
-  if (nv.readInt(EE_KEY_HIGH) != 8266 || nv.readInt(EE_KEY_LOW) != 0) {
+  if ((nv.readInt(EE_KEY_HIGH)!=8266) || (nv.readInt(EE_KEY_LOW)!=1)) {
     nv.writeInt(EE_KEY_HIGH,8266);
-    nv.writeInt(EE_KEY_LOW,0);
+    nv.writeInt(EE_KEY_LOW,1);
+
 #if ENCODERS == ON
+    nv.writeInt(EE_ENC_AUTO_SYNC,ENC_AUTO_SYNC_DEFAULT);
     nv.writeLong(EE_ENC_A1_DIFF_TO,AXIS1_ENC_DIFF_LIMIT_TO);
     nv.writeLong(EE_ENC_A2_DIFF_TO,AXIS2_ENC_DIFF_LIMIT_TO);
     nv.writeLong(EE_ENC_RC_STA,20);     // enc short term average samples
@@ -146,11 +148,17 @@ void setup(void){
     nv.writeLong(EE_ENC_MIN_GUIDE,100); // minimum guide duration
     nv.writeLong(EE_ENC_A1_ZERO,0);     // absolute Encoder Axis1 zero
     nv.writeLong(EE_ENC_A2_ZERO,0);     // absolute Encoder Axis2 zero
+    nv.writeDouble(EE_ENC_A1_TICKS,AXIS1_ENC_TICKS_DEG);
+    nv.writeDouble(EE_ENC_A2_TICKS,AXIS2_ENC_TICKS_DEG);
+    nv.writeInt(EE_ENC_A1_REV,AXIS1_ENC_REVERSE);
+    nv.writeInt(EE_ENC_A2_REV,AXIS2_ENC_REVERSE);
 #endif
+
     nv.commit();
   }
 
 #if ENCODERS == ON
+  if (ENC_AUTO_SYNC_MEMORY == ON) encAutoSync=nv.readInt(EE_ENC_AUTO_SYNC);
   Axis1EncDiffTo=nv.readLong(EE_ENC_A1_DIFF_TO);
   Axis2EncDiffTo=nv.readLong(EE_ENC_A2_DIFF_TO);
   #if AXIS1_ENC_RATE_CONTROL == ON
@@ -164,8 +172,11 @@ void setup(void){
     Axis1EncProp=nv.readLong(EE_ENC_RC_PROP);
     Axis1EncMinGuide=nv.readLong(EE_ENC_MIN_GUIDE);
   #endif
+  Axis1EncTicksPerDeg=nv.readDouble(EE_ENC_A1_TICKS);
+  Axis2EncTicksPerDeg=nv.readDouble(EE_ENC_A2_TICKS);
+  Axis1EncRev=nv.readInt(EE_ENC_A1_REV);
+  Axis2EncRev=nv.readInt(EE_ENC_A2_REV);
 #endif
-
 #endif
 
 Again:
@@ -203,7 +214,7 @@ Again:
   }
   
   clearSerialChannel();
-  
+
   // say hello
   VF("WEM: Ethernet Addon "); V(FirmwareVersionMajor); V("."); V(FirmwareVersionMinor); VL(FirmwareVersionPatch);
   VF("WEM: MCU = "); VLF(MCU_STR);
