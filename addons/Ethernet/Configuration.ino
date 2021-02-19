@@ -395,7 +395,7 @@ void handleConfiguration() {
       if (!command(":GXE7#",temp1)) strcpy(temp1,"0"); long spwr=strtol(temp1,NULL,10);
       sprintf_P(temp,html_configAxisSpwr,spwr,1,0,129600000L); data += temp;
       dtostrf(a.stepsPerMeasure,1,3,temp1); stripNum(temp1);
-      sprintf_P(temp,html_configAxisSpd,temp1,1,3000,61200L); data += temp;
+      sprintf_P(temp,html_configAxisSpd,temp1,1,3000,122400L); data += temp;
 #if DRIVE_MAIN_AXES_MICROSTEPS == ON
       if (a.microsteps != OFF) { sprintf_P(temp,html_configAxisMicroSteps,a.microsteps,1); data += temp; }
 #endif
@@ -421,7 +421,7 @@ void handleConfiguration() {
     data += FPSTR(html_configFormBegin);
     if (validateAxisSettings(2,mountStatus.mountType()==MT_ALTAZM,a)) {
       dtostrf(a.stepsPerMeasure,1,3,temp1); stripNum(temp1);
-      sprintf_P(temp,html_configAxisSpd,temp1,2,3000,61200); data += temp;
+      sprintf_P(temp,html_configAxisSpd,temp1,2,3000,122400L); data += temp;
 #if DRIVE_MAIN_AXES_MICROSTEPS == ON
       if (a.microsteps != OFF) { sprintf_P(temp,html_configAxisMicroSteps,a.microsteps,2); data += temp; }
 #endif
