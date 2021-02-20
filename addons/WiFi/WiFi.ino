@@ -74,13 +74,8 @@
 
 // The settings below are for initialization only, afterward they are stored and recalled from EEPROM and must
 // be changed in the web interface OR with a reset (for initialization again) as described in the Config.h comments
-#if SERIAL_BAUD<=28800
-  #define TIMEOUT_WEB 60
-  #define TIMEOUT_CMD 60
-#else
-  #define TIMEOUT_WEB 15
-  #define TIMEOUT_CMD 30
-#endif
+#define TIMEOUT_WEB 60
+#define TIMEOUT_CMD 60
 
 int webTimeout=TIMEOUT_WEB;
 int cmdTimeout=TIMEOUT_CMD;
@@ -299,7 +294,7 @@ Again:
     if (tb == 16) { tb=1; if (serialSwap == AUTO_OFF) serialSwap=AUTO_ON; else if (serialSwap == AUTO_ON) serialSwap=AUTO_OFF; }
     if (tb == 1) serialBegin(SERIAL_BAUD_DEFAULT,serialSwap);
     if (tb == 6) serialBegin(serial_baud,serialSwap);
-    if (tb == 11) if (SERIAL_BAUD_DEFAULT == 9600) serialBegin(19200,serialSwap); else tb=15
+    if (tb == 11) if (SERIAL_BAUD_DEFAULT == 9600) serialBegin(19200,serialSwap); else tb=15;
     goto Again;
   }
 
@@ -529,7 +524,7 @@ void serialBegin(long baudRate, int swap) {
   // wemos d1 mini esp32
   // not swapped: TX and RX on default pins
   //     swapped: TX on gpio 5 and RX on gpio 23
-  if (swap) Ser.begin(baudRate,SERIAL_8N1,23,5); else Ser.begin(baudRate);
+  if (swap) Ser.begin(baudRate,SERIAL_8N1,23,5); else Ser.begin(baudRate,SERIAL_8N1,1,3);
 #else
   Ser.begin(baudRate); if (swap) Ser.swap();
 #endif
