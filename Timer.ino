@@ -157,7 +157,9 @@ void timerSupervisor(bool isCentiSecond) {
     double timerRateAxis1B=guideTimerRateAxis1A+pecTimerRateAxis1+trackingTimerRateAxis1;
     if (timerRateAxis1B < -0.00001) { timerRateAxis1B=fabs(timerRateAxis1B); cli(); timerDirAxis1=-1; sei(); } else 
       if (timerRateAxis1B > 0.00001) { cli(); timerDirAxis1=1; sei(); } else { cli(); timerDirAxis1=0; sei(); timerRateAxis1B=1.0; }
-    long calculatedTimerRateAxis1=round((double)siderealRate/timerRateAxis1B);
+    double f = round(siderealRate/timerRateAxis1B);
+    if (fabs(f) > 2144000000) { cli(); timerDirAxis1=0; sei(); f = round(siderealRate); }
+    long calculatedTimerRateAxis1=f;
     // remember our "running" rate and only update the actual rate when it changes
     if (runTimerRateAxis1 != calculatedTimerRateAxis1) { timerRateAxis1=calculatedTimerRateAxis1; runTimerRateAxis1=calculatedTimerRateAxis1; }
  
@@ -198,7 +200,9 @@ void timerSupervisor(bool isCentiSecond) {
     double timerRateAxis2B=guideTimerRateAxis2A+trackingTimerRateAxis2;
     if (timerRateAxis2B < -0.0001) { timerRateAxis2B=fabs(timerRateAxis2B); cli(); timerDirAxis2=-1; sei(); } else
       if (timerRateAxis2B > 0.0001) { cli(); timerDirAxis2=1; sei(); } else { cli(); timerDirAxis2=0; sei(); timerRateAxis2B=1.0; }
-    long calculatedTimerRateAxis2=round((double)siderealRate/timerRateAxis2B);
+    f = round(siderealRate/timerRateAxis2B);
+    if (fabs(f) > 2144000000/timerRateRatio) { cli(); timerDirAxis2=0; sei(); f = round(siderealRate); }
+    long calculatedTimerRateAxis2=f;
     // remember our "running" rate and only update the actual rate when it changes
     if (runTimerRateAxis2 != calculatedTimerRateAxis2) { timerRateAxis2=calculatedTimerRateAxis2; runTimerRateAxis2=calculatedTimerRateAxis2; }
   }
