@@ -299,7 +299,7 @@ Again:
     if (tb == 16) { tb=1; if (serialSwap == AUTO_OFF) serialSwap=AUTO_ON; else if (serialSwap == AUTO_ON) serialSwap=AUTO_OFF; }
     if (tb == 1) serialBegin(SERIAL_BAUD_DEFAULT,serialSwap);
     if (tb == 6) serialBegin(serial_baud,serialSwap);
-    if (tb == 11) serialBegin(19200,serialSwap);
+    if (tb == 11) if (SERIAL_BAUD_DEFAULT == 9600) serialBegin(19200,serialSwap); else tb=15
     goto Again;
   }
 
