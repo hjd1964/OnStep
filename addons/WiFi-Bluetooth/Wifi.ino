@@ -103,8 +103,8 @@ void handleWifi() {
   Ser.setTimeout(webTimeout);
   serialRecvFlush();
   
-  char temp[400]="";
-  char temp1[120]="";
+  char temp[600]="";
+  char temp1[200]="";
   
   processWifiGet();
 
