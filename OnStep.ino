@@ -46,6 +46,8 @@
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
 
+#warning "The master branch is for developers/testing and most would do well to use the latest release instead... or in lieu of that, any beta branch that might exist."
+
 #include "Constants.h"
 
 // On first upload OnStep automatically initializes a host of settings in nv memory (EEPROM.)
