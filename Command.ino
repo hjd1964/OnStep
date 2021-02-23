@@ -958,7 +958,7 @@ void processCommands() {
                   if (p == 0 || p == 1 || (p == 2 && ROTATOR == ON) || (p == 3 && FOCUSER1 == ON) || (p == 4 && FOCUSER2 == ON)) {
                     axisSettings axis;
                     nv.readBytes(EE_settingsAxis1+(p*17),(byte*)&axis,sizeof(axis));
-                    sprintf(reply,"%ld.%03d,%d,%d,%d,%d,%d",(long)axis.stepsPerMeasure,(int)(axis.stepsPerMeasure*1000)%1000,axis.microsteps,axis.IRUN,axis.reverse,axis.min,axis.max);
+                    sprintf(reply,"%ld.%03ld,%d,%d,%d,%d,%d",(long)axis.stepsPerMeasure,(long)(axis.stepsPerMeasure*1000)%1000,axis.microsteps,axis.IRUN,axis.reverse,axis.min,axis.max);
                     boolReply=false;
                   } else commandError=CE_0;
                 } else commandError=CE_0;
