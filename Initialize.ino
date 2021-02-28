@@ -299,7 +299,7 @@ void initWriteNvValues() {
   // bit 0 = settings at compile (0) or run time (1), bits 1 to 5 = (1) to reset axis n on next boot, bit 6 reset misc. config on boot
   int axisReset=nv.read(EE_settingsRuntime);
   if (!(axisReset&0b0000001)) axisReset|=0b0111110; // force reset of all settings
-  if (/*!(axisReset&0b0000001) ||*/ nv.read(EE_mountType) == 0) { nv.write(EE_mountType,MOUNT_TYPE); VLF("MSG: Init NV mount type default"); }
+  if (!(axisReset&0b0000001) || nv.read(EE_mountType) == 0) { nv.write(EE_mountType,MOUNT_TYPE); VLF("MSG: Init NV mount type default"); }
   if   (axisReset&0b0000010) { nv.writeBytes(EE_settingsAxis1,(byte*)&axis1Settings,sizeof(axis1Settings)); nv.writeLong(EE_stepsPerWormRotAxis1,AXIS1_STEPS_PER_WORMROT); VLF("MSG: Init NV Axis1 defaults"); }
   if   (axisReset&0b0000100) { nv.writeBytes(EE_settingsAxis2,(byte*)&axis2Settings,sizeof(axis2Settings)); VLF("MSG: Init NV Axis2 defaults"); }
   if   (axisReset&0b0001000) { nv.writeBytes(EE_settingsAxis3,(byte*)&axis3Settings,sizeof(axis3Settings)); VLF("MSG: Init NV Axis3 defaults"); }
