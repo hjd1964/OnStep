@@ -131,7 +131,7 @@ const char html_controlRotate1[] PROGMEM =
 "<button class='bbh' style='height: 2.1em' onpointerdown=\"gf('rh')\" title='" L_HINT_ROT_FIND_HOME "' type='button'>" ARROW_DR HOME_CH "</button>"
 "<button class='bbh' style='height: 2.1em' onpointerdown=\"if (confirm('" L_ARE_YOU_SURE "?')) gf('rH')\" title='" L_HINT_ROT_RESET_HOME "' type='button'>" CAUTION_CH HOME_CH "</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 const char html_controlRotate2[] PROGMEM =
-"<button class='bbh' style='height: 2.1em' onpointerdown=\"gf('rR')\" onpointerup=\"g('rq')\" type='button'>" ARROW_LL "</button>"
+"<button class='bbh' style='height: 2.1em' onpointerdown=\"gf('rB')\" onpointerup=\"g('rq')\" type='button'>" ARROW_LL "</button>"
 "<button class='bbh' style='width: 2em' onpointerdown=\"gf('rr')\" onpointerup=\"g('rq')\" type='button'>" ARROW_L "</button>";
 const char html_controlRotate3[] PROGMEM =
 "<button class='bbh' style='width: 2em' onpointerdown=\"gf('rf')\" onpointerup=\"g('rq')\" type='button'>" ARROW_R "</button>"
@@ -554,7 +554,7 @@ void processControlGet() {
     if (v=="Fq") commandBlind(":FQ#");
    
     // Rotate/De-Rotate
-    if (v=="rR") commandBlind(":r3#:rc#:r<#"); // rate 3, move ccw
+    if (v=="rB") commandBlind(":r3#:rc#:r<#"); // rate 3, move ccw
     if (v=="rr") commandBlind(":r1#:rc#:r<#"); // rate 1, move ccw
     if (v=="rf") commandBlind(":r1#:rc#:r>#"); // rate 1, move cw
     if (v=="rF") commandBlind(":r3#:rc#:r>#"); // rate 3, move cw
