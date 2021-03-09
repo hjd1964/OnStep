@@ -159,7 +159,7 @@ void WebServer::setResponseHeader(const char *str) {
 }
 
 void WebServer::on(String fn, webFunction handler) {
-  handler_count++; if (handler_count>20) { handler_count=20; return; }
+  handler_count++; if (handler_count>WEBHANDLERCOUNT) { handler_count=WEBHANDLERCOUNT; return; }
   handlers[handler_count-1]=handler;
   handlers_fn[handler_count-1]=fn;
 }
