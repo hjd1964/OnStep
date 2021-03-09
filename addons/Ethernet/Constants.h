@@ -14,6 +14,7 @@
 #define AUTO_OFF            -7
 #define FWU                 -8
 #define INVALID        -999999
+#define WEBHANDLERCOUNT     21
 
 // encoder types
 #define AB 1

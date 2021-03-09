@@ -30,12 +30,12 @@ class WebServer {
 #endif
 
     webFunction notFoundHandler=NULL;
-    webFunction handlers[20];
-    String handlers_fn[20];
+    webFunction handlers[WEBHANDLERCOUNT];
+    String handlers_fn[WEBHANDLERCOUNT];
     int handler_count;
     
-    String parameters[20];
-    String values[20];
+    String parameters[WEBHANDLERCOUNT];
+    String values[WEBHANDLERCOUNT];
     int parameter_count;
 };
 
