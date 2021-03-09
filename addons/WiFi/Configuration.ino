@@ -447,7 +447,7 @@ void handleConfiguration() {
     data += FPSTR(html_configFormBegin);
     if (validateAxisSettings(3,mountStatus.mountType()==MT_ALTAZM,a)) {
       dtostrf(a.stepsPerMeasure,1,3,temp1); stripNum(temp1);
-      sprintf_P(temp,html_configAxisSpd,temp1,3,10,3600); data += temp;
+      sprintf_P(temp,html_configAxisSpd,temp1,3,10,3600L); data += temp;
       if (a.microsteps != OFF) { sprintf_P(temp,html_configAxisMicroSteps,a.microsteps,3); data += temp; }
       if (a.IRUN != OFF) { sprintf_P(temp,html_configAxisCurrent,a.IRUN,3,1000); data += temp; }
       sprintf_P(temp,html_configAxisReverse,a.reverse==ON?1:0,3); data += temp;
