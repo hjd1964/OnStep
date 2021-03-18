@@ -70,6 +70,7 @@ void debugPrint(const char s[]) { char s1[255]; strcpy(s1,s); for (unsigned int 
   #define MCU_STR "Teensy3.2"
 #elif defined(__IMXRT1052__) || defined(__IMXRT1062__)
   #define MCU_STR "Teensy4.0"
+  #define Teensy40
 #else
   #define MCU_STR "Unknown"
 #endif

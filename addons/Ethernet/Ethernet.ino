@@ -44,7 +44,10 @@
 
 // Enable debug and/or status messages to be passed to OnStep for display using its debug facilities
 // default "DEBUG OFF", use "DEBUG ON" for background errors only, use "DEBUG VERBOSE" for all errors and status messages
-#define DEBUG OFF
+//#define DEBUG VERBOSE
+#define DEBUG_OFF   // Turn _ON to allow Ethernet startup without OnStep (Serial port for debug at 9600 baud <moved debug port to USB>)
+#define DebugSer Serial      // default=SerialA, or Serial4 for example (always 9600 baud) This is used for local debug statements to USB
+
 
 #include <limits.h>
 
@@ -112,6 +115,7 @@ CmdServer cmdSvr;
 void handleNotFound(EthernetClient *client) {
   String message = "File Not Found\n\n";
   client->print(message);
+  VLF("File not found");
 //  server.send(404, "text/plain", message);
 }
 
@@ -222,9 +226,9 @@ Again:
   VF("WEM: Web Channel Timeout ms= "); VL(webTimeout);
   VF("WEM: Cmd Channel Timeout ms= "); VL(cmdTimeout);
 
-  VF("WEM: Ethernet IP     = "); VL(ip.toString());
-  VF("WEM: Ethernet GATEWAY= "); VL(gateway.toString());
-  VF("WEM: Ethernet SUBNET = "); VL(subnet.toString());
+//  VF("WEM: Ethernet IP     = "); VL(ip.toString());
+//  VF("WEM: Ethernet GATEWAY= "); VL(gateway.toString());
+//  VF("WEM: Ethernet SUBNET = "); VL(subnet.toString());
 
 #if W5500 == ON
   VLF("WEM: Resetting W5500 using pin 9");

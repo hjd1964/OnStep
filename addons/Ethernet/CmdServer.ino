@@ -12,9 +12,10 @@ void CmdServer::init(int port, long t) {
     if (thisPort==9998) cmdserver2.begin();
     timeout=t;
 #ifdef CMDSERVER_DEBUG_ON
-    Ser.print("cmd server is at ");
-    Ser.print(Ethernet.localIP()); Ser.print(":"); Ser.println(thisPort);
+    DebugSer.print("cmd server is at ");
+    DebugSer.print(Ethernet.localIP()); DebugSer.print(":"); DebugSer.println(thisPort);
 #endif
+   VF("WEM: Ethernet IP     = "); V(Ethernet.localIP()); VF(":"); VL(thisPort);
   }
 }
 
@@ -28,7 +29,7 @@ void CmdServer::handleClient() {
       lastAccess=millis();
       haveClient = true;
 #ifdef CMDSERVER_DEBUG_ON
-      Ser.println("client connected");
+      DebugSer.println("client connected");
 #endif
     }
   } else {
@@ -38,8 +39,8 @@ void CmdServer::handleClient() {
       client = EthernetClient();
       haveClient = false;
 #ifdef CMDSERVER_DEBUG_ON
-      Ser.print("client disconnected");
-      if ((long)(millis()-lastAccess) > timeout) Ser.println(" (timed out)"); else Ser.println("");
+      DebugSer.print("client disconnected");
+      if ((long)(millis()-lastAccess) > timeout) DebugSer.println(" (timed out)"); else DebugSer.println("");
 #endif
     }
   }
