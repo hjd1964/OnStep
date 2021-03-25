@@ -446,6 +446,9 @@ void processEncodersGet() {
   String v;
   
   v=server.arg("ms");
+#ifdef Teensy40
+  if (v=="**") v="";
+#endif  
   if (v!="") {
     if (v=="ons") encoders.syncToOnStep();
     if (v=="enc") encoders.syncFromOnStep();
@@ -456,6 +459,9 @@ void processEncodersGet() {
 
   // Autosync
   v=server.arg("as");
+#ifdef Teensy40
+  if (v=="**") v="";
+#endif  
   if (v!="") {
     if (v=="on") { 
       encAutoSync=true;
@@ -471,6 +477,9 @@ void processEncodersGet() {
 
   // Max. limits
   v=server.arg("d1");
+#ifdef Teensy40
+  if (v=="**") v="";
+#endif  
   if (v!="") {
     int i;
     if ( (atoi2((char*)v.c_str(),&i)) && ((i>=0) && (i<=9999))) { 
@@ -480,6 +489,9 @@ void processEncodersGet() {
     }
   }
   v=server.arg("d2");
+#ifdef Teensy40
+  if (v=="**") v="";
+#endif  
   if (v!="") {
     int i;
     if ( atoi2((char*)v.c_str(),&i) && (i >= 0 && i <= 9999)) { 
@@ -491,6 +503,9 @@ void processEncodersGet() {
 
   // Counts per degree
   v=server.arg("a1cpd");
+#ifdef Teensy40
+  if (v=="**") v="";
+#endif  
   if (v!="") {
     double d = v.toFloat();
     if (d >= 1.0 && d <= 10000.0) { 
@@ -500,6 +515,9 @@ void processEncodersGet() {
     }
   }
   v=server.arg("a2cpd");
+#ifdef Teensy40
+  if (v=="**") v="";
+#endif  
   if (v!="") {
     double d = v.toFloat();
     if (d >= 1.0 && d <= 10000.0) { 
@@ -510,6 +528,9 @@ void processEncodersGet() {
   }
 
   v=server.arg("a1rev");
+#ifdef Teensy40
+  if (v=="**") v="";
+#endif  
   if (v!="") {
     if (v == "0") {
       Axis1EncRev=OFF;
@@ -524,6 +545,9 @@ void processEncodersGet() {
   }
 
   v=server.arg("a2rev");
+#ifdef Teensy40
+  if (v=="**") v="";
+#endif  
   if (v!="") {
     if (v == "0") {
       Axis2EncRev=OFF;
@@ -538,6 +562,9 @@ void processEncodersGet() {
   }
 
   v=server.arg("revert");
+#ifdef Teensy40
+  if (v=="**") v="";
+#endif  
   if (v!="") { 
     if (v == "1") {
       Axis1EncTicksPerDeg=AXIS1_ENC_TICKS_DEG;
@@ -562,6 +589,9 @@ void processEncodersGet() {
 #if AXIS1_ENC_RATE_CONTROL == ON
   // OnStep rate control
   v=server.arg("rc");
+#ifdef Teensy40
+  if (v=="**") v="";
+#endif  
   if (v!="") {
     if (v=="on") encRateControl=true;
     if (v=="off") encRateControl=false;
@@ -569,6 +599,9 @@ void processEncodersGet() {
 
   // Encoder averaging samples
   v=server.arg("sa");
+#ifdef Teensy40
+  if (v=="**") v="";
+#endif  
   if (v!="") {
     int i;
     if ( (atoi2((char*)v.c_str(),&i)) && ((i>=1) && (i<=999))) { 
@@ -578,6 +611,9 @@ void processEncodersGet() {
     }
   }
   v=server.arg("la");
+#ifdef Teensy40
+  if (v=="**") v="";
+#endif  
   if (v!="") {
     int i;
     if ( (atoi2((char*)v.c_str(),&i)) && ((i>=1) && (i<=999))) { 
@@ -589,6 +625,9 @@ void processEncodersGet() {
 
   // Encoder proportional response
   v=server.arg("pr");
+#ifdef Teensy40
+  if (v=="**") v="";
+#endif  
   if (v!="") {
     int i;
     if ( (atoi2((char*)v.c_str(),&i)) && ((i>=50) && (i<=5000))) { 
@@ -600,6 +639,9 @@ void processEncodersGet() {
   
   // Encoder minimum guide
   v=server.arg("mg");
+#ifdef Teensy40
+  if (v=="**") v="";
+#endif  
   if (v!="") {
     int i;
     if ( (atoi2((char*)v.c_str(),&i)) && ((i>=25) && (i<=1000))) { 
@@ -611,6 +653,9 @@ void processEncodersGet() {
 
   // Encoder rate compensation
   v=server.arg("er");
+#ifdef Teensy40
+  if (v=="**") v="";
+#endif  
   if (v!="") {
     int l=0;
     l=strtol(v.c_str(),NULL,10);
@@ -624,6 +669,9 @@ void processEncodersGet() {
 #if AXIS1_ENC_INTPOL_COS == ON
   // Encoder interpolation compensation
   v=server.arg("ip"); // phase
+#ifdef Teensy40
+  if (v=="**") v="";
+#endif  
   if (v!="") {
     int i;
     if ( (atoi2((char*)v.c_str(),&i)) && ((i>=0) && (i<=255))) { 
@@ -633,6 +681,9 @@ void processEncodersGet() {
     }
   }
   v=server.arg("im"); // magnitude
+#ifdef Teensy40
+  if (v=="**") v="";
+#endif  
   if (v!="") {
     int i;
     if ( (atoi2((char*)v.c_str(),&i)) && ((i>=0) && (i<=29000))) { 
@@ -645,6 +696,9 @@ void processEncodersGet() {
 
   // Sweep control
   v=server.arg("sw");
+#ifdef Teensy40
+  if (v=="**") v="";
+#endif  
   if (v!="") {
     if (v=="on") encSweep=true;
     if (v=="off") encSweep=false;

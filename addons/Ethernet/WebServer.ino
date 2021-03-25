@@ -3,6 +3,7 @@
 
 // Turn _ON to allow webserver debug messages
 #define WEBSERVER_DEBUG_OFF
+//#define WEBSERVER_DEBUG_VERBOSE
 #define SD_CARD OFF
 
 // SD CARD support, simply enable and provide a webserver.on("filename.htm") to serve each file
@@ -19,9 +20,12 @@ void WebServer::init() {
   Ethernet.begin(mac, ip, myDns, gateway, subnet);
   _server.begin();
 #ifdef WEBSERVER_DEBUG_ON
-  Ser.print("www server is at ");
-  Ser.println(Ethernet.localIP());
+  DebugSer.print("www server is at ");
+  DebugSer.println(Ethernet.localIP());
 #endif
+   VF("WEM: WWW Server started at = "); VL(Ethernet.localIP());
+
+
 
 #if SD_CARD == ON
   SDfound=SD.begin(4);
@@ -40,7 +44,7 @@ void WebServer::handleClient() {
   _client = _server.available();
   if (_client) {
 #ifdef WEBSERVER_DEBUG_ON
-    Ser.println("new client");
+    DebugSer.println("new client");
 #endif
     // an http request ends with a blank line
     boolean currentLineIsBlank = true;
@@ -49,7 +53,7 @@ void WebServer::handleClient() {
       if (_client.available()) {
         char c = _client.read();
 #ifdef WEBSERVER_DEBUG_ON
-        Ser.write(c);
+//        DebugSer.write(c);
 #endif
         if (inputBuffer.length()<128) inputBuffer+=c;
 
@@ -61,6 +65,9 @@ void WebServer::handleClient() {
           int url_end=inputBuffer.indexOf("HTTP/");
           if ((url_start!=-1) && (url_end!=-1)) {
             String command=inputBuffer.substring(url_start,url_end);
+#ifdef WEBSERVER_DEBUG_VERBOSE
+        DebugSer.println(command);
+#endif
 
 #if SD_CARD == ON
             // watch for cache requests
@@ -73,8 +80,25 @@ void WebServer::handleClient() {
               if (command.indexOf(handlers_fn[i])>=0) {
                 // but first, isolate any get parameters and their values
                 command=command.substring(command.indexOf(handlers_fn[i])+handlers_fn[i].length()); 
+#ifdef WEBSERVER_DEBUG_VERBOSE
+        DebugSer.print(command.length());
+        DebugSer.print("  *");
+        DebugSer.print(command);
+        DebugSer.println("*");
+//        delay(100);
+#endif
+#ifdef Teensy40 
+                while (command[0]==' ') { if (command.length() > 1) { command=command.substring(1);} else {command = ""; }  }
+#else 
                 while (command[0]==' ') command=command.substring(1);
+#endif
                 while (command[command.length()-1]==' ') command=command.substring(0,command.length()-1);
+#ifdef WEBSERVER_DEBUG_VERBOSE
+        DebugSer.print(command.length());
+        DebugSer.print("  *");
+        DebugSer.print(command);
+        DebugSer.println("*");
+#endif
 
                 if (handlers[i]!=NULL) {
                   // check to see if there's a ?a=1& or &a=1
@@ -90,9 +114,10 @@ void WebServer::handleClient() {
                       parameters[parameter_count-1]=thisArg;
                       values[parameter_count-1]=thisVal;
                     }
-                    command=command.substring(j1);
+                    if (int(command.length()) > j1) command=command.substring(j1); else command = "";
   #ifdef WEBSERVER_DEBUG_ON
-                    Ser.print(thisArg); Ser.print("="); Ser.println(thisVal);
+                     DebugSer.print(thisArg); DebugSer.print("="); DebugSer.println(thisVal);
+                     DebugSer.print("Handler = ");  DebugSer.println(i);
   #endif
                   }
                   _client.print(responseHeader);
@@ -123,7 +148,7 @@ void WebServer::handleClient() {
 
           } else {
 #ifdef WEBSERVER_DEBUG_ON
-            Ser.println("Invalid response");
+            DebugSer.println("Invalid response");
 #endif
           }
           inputBuffer="";
@@ -148,7 +173,7 @@ void WebServer::handleClient() {
     modifiedSinceFound=false;
 #endif
 #ifdef WEBSERVER_DEBUG_ON
-    Ser.println("client disconnected");
+    DebugSer.println("client disconnected");
 #endif
   }
 }
@@ -172,7 +197,11 @@ String WebServer::arg(String id) {
   for (int i=0; i<parameter_count; i++) {
     if (id==parameters[i]) return values[i];
   }
-  return "";
+#ifdef Teensy40 
+    return "**";
+#else 
+    return "";
+#endif
 }
 
 #if SD_CARD == ON

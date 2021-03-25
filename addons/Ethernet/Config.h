@@ -14,7 +14,7 @@
 
 //      Parameter Name              Value   Default  Notes                                                                      Hint
 // ETHERNET HARDWARE ---------------------------------------------------------------------------------------------------------------
-#define W5500                         OFF //    OFF, ON If using W5500 Ethernet Adapter: RST ctrl Pin9, SPI default pins,     Option
+#define W5500                         ON //    OFF, ON If using W5500 Ethernet Adapter: RST ctrl Pin9, SPI default pins,     Option
                                           //         CS on Pin10. OFF for W5100 adapter. Uses standard Arduino libraries.
 
 // ETHERNET SETTINGS ---------------------------------------------------------------------------------------------------------------
@@ -46,14 +46,14 @@ IPAddress subnet(255, 255, 255, 0);
 #define DISPLAY_ADVANCED_CHARS         ON //     ON, For standard "RA/Dec" instead of symbols.                                Infreq
 
 // DRIVE CONFIGURATION -------------------------------------------------------------------------------------------------------------
-#define DRIVE_CONFIGURATION           OFF //    OFF, ON to display/modify mount, rotator, focuser settings                    Option
-#define DRIVE_MAIN_AXES_MICROSTEPS    OFF //    OFF, ON to display Axis1/2 Microsteps if available.                           Option
-#define DRIVE_MAIN_AXES_CURRENT       OFF //    OFF, ON to display Axis1/2 IRUN if available.                                 Option
-#define DRIVE_MAIN_AXES_REVERSE       OFF //    OFF, ON to display Axis1/2 Reverse if available.                              Option
+#define DRIVE_CONFIGURATION           ON //    OFF, ON to display/modify mount, rotator, focuser settings                    Option
+#define DRIVE_MAIN_AXES_MICROSTEPS    ON //    OFF, ON to display Axis1/2 Microsteps if available.                           Option
+#define DRIVE_MAIN_AXES_CURRENT       ON //    OFF, ON to display Axis1/2 IRUN if available.                                 Option
+#define DRIVE_MAIN_AXES_REVERSE       ON //    OFF, ON to display Axis1/2 Reverse if available.                              Option
 
 // ENCODER SUPPORT -----------------------------------------------------------------------------------------------------------------
 #define ENC_AUTO_SYNC_DEFAULT          ON //     ON, Automatically sync Encoders to OnStep.                                   Option
-#define ENC_AUTO_SYNC_MEMORY          OFF //    OFF, ON Remember automatic sync setting across power cycles.                  Option
+#define ENC_AUTO_SYNC_MEMORY          ON //    OFF, ON Remember automatic sync setting across power cycles.                  Option
 
 #define AXIS1_ENC                     OFF //    OFF, CWCCW, AB, BC_BISSC. Dec/Alt Axis (A/CW/MA) & (B/CCW/SLO.)               Option
 #define AXIS1_ENC_REVERSE             OFF //    OFF, ON to reverse the count direction.                                       Adjust

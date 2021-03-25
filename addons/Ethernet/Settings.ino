@@ -328,6 +328,9 @@ void processSettingsGet() {
 
   // Slew Speed
   v=server.arg("ss");
+#ifdef Teensy40
+  if (v=="**") v="";
+#endif  
   if (v!="") {
     if (v=="vs") commandBool(":SX93,5#"); // very slow, 0.5 x
     if (v=="s")  commandBool(":SX93,4#"); // slow,      0.75x
@@ -338,11 +341,17 @@ void processSettingsGet() {
 
   // set-park
   v=server.arg("pk");
+#ifdef Teensy40
+  if (v=="**") v="";
+#endif  
   if (v!="") {
     if (v=="s") commandBool(":hQ#");
   }
   // Tracking control
   v=server.arg("tk");
+#ifdef Teensy40
+  if (v=="**") v="";
+#endif  
   if (v!="") {
     if (v=="f")    commandBlind(":T+#"); // 0.02hz faster
     if (v=="-")    commandBlind(":T-#"); // 0.02hz slower
@@ -350,6 +359,9 @@ void processSettingsGet() {
   }
   // Refraction Rate Tracking control
   v=server.arg("rr");
+#ifdef Teensy40
+  if (v=="**") v="";
+#endif  
   if (v!="") {
     if (v=="otk")  commandBool(":To#"); // pointing model compensated
     if (v=="on")   commandBool(":Tr#"); // compensated on
@@ -359,12 +371,18 @@ void processSettingsGet() {
   }
   // Alert buzzer
   v=server.arg("ab");
+#ifdef Teensy40
+  if (v=="**") v="";
+#endif  
   if (v!="") {
     if (v=="on")   commandBool(":SX97,1#");
     if (v=="off")  commandBool(":SX97,0#");
   }
   // Auto-continue
   v=server.arg("ma");
+#ifdef Teensy40
+  if (v=="**") v="";
+#endif  
   if (v!="") {
     if (v=="now")  commandBool(":MN#");
     if (v=="on")   commandBool(":SX95,1#");
@@ -372,6 +390,9 @@ void processSettingsGet() {
   }
   // Pause at meridian flip
   v=server.arg("mp");
+#ifdef Teensy40
+  if (v=="**") v="";
+#endif  
   if (v!="") {
     if (v=="on")   commandBool(":SX98,1#");
     if (v=="off")  commandBool(":SX98,0#");

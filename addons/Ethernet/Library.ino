@@ -294,6 +294,9 @@ void processLibraryGet() {
 
   // Catalog clear
   v=server.arg("cc");
+#ifdef Teensy40
+  if (v=="**") v="";
+#endif  
   if (v!="") {
     if (currentCatalog >= 0 && currentCatalog < 16) {
       if (currentCatalog == 0) {
@@ -313,6 +316,9 @@ void processLibraryGet() {
 
   // Catalog download
   v=server.arg("cd");
+#ifdef Teensy40
+  if (v=="**") v="";
+#endif  
   if (v!="") {
     if (currentCatalog > 0 && currentCatalog < 16) {
       sprintf(temp,":Lo%ld#",(long)currentCatalog-1);
@@ -326,6 +332,9 @@ void processLibraryGet() {
   // ccccccccccc,ccc,HH:MM:SS,sDD*MM:SS
   // NGC6813    ,DN ,19:41:08,+27*20:22
   v=server.arg("cu");
+#ifdef Teensy40
+  if (v=="**") v="";
+#endif  
   if (v!="") {
     showMessage="";
     
@@ -391,6 +400,9 @@ void processLibraryGet() {
 
   // Catalog index (1-15)
   v=server.arg("ci");
+#ifdef Teensy40
+  if (v=="**") v="";
+#endif  
   if (v != "") {
     currentCatalog=v.toInt();
     if (currentCatalog > 0 && currentCatalog < 16) {
