@@ -66,7 +66,7 @@ class focuser {
     virtual void setDisableState(bool disableState) { }
 
     // allows enabling/disabling stepper driver
-    virtual void powerDownActive(bool active) { }
+    virtual void powerDownActive(bool active, bool startupOnly) { }
 
     // set movement rate in microns/second, from minRate to 1000
     virtual void setMoveRate(double rate) { }
