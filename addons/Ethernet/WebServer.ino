@@ -68,13 +68,10 @@ void WebServer::handleClient() {
                 command = command.substring(command.indexOf(handlers_fn[i]) + handlers_fn[i].length());
                 W(command.length()); W("  *"); W(command); WL("*");
 
-                #ifdef Teensy40 
-                  while (command[0] == ' ') { if (command.length() > 1) command = command.substring(1); else command = ""; }
-                #else 
-                  while (command[0] == ' ') command = command.substring(1);
-                #endif
+                // trim white space
+                while (command.length() > 0 && command[0] == ' ') { if (command.length() > 1) command = command.substring(1); else command = ""; }
+                while (command.length() > 0 && command[command.length() - 1] == ' ') command = command.substring(0, command.length() - 1);
 
-                while (command[command.length() - 1] == ' ') command = command.substring(0, command.length() - 1);
                 W(command.length()); W("  *"); W(command); WL("*");
 
                 if (handlers[i] != NULL) {
