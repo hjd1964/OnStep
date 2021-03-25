@@ -6,7 +6,7 @@
 // time to write position to nv after last movement of Focuser 1/2, default = 5 minutes
 #define FOCUSER_WRITE_DELAY 1000L*60L*5L
 
-#include "focuser.h"
+#include "Focuser.h"
 #include "StepperDC.h"
 
 class focuserDC : public focuser  {
