@@ -159,7 +159,7 @@ void WebServer::setResponseHeader(const char *str) {
 }
 
 void WebServer::on(String fn, webFunction handler) {
-  handler_count++; if (handler_count > WEB_HANDLER_COUNT) { handler_count = WEB_HANDLER_COUNT; return; }
+  handler_count++; if (handler_count > HANDLER_COUNT_MAX) { handler_count = HANDLER_COUNT_MAX; return; }
   handlers[handler_count - 1] = handler;
   handlers_fn[handler_count - 1] = fn;
 }
@@ -181,7 +181,7 @@ String WebServer::arg(String id) {
 
 #if SD_CARD == ON
   void WebServer::on(String fn) {
-    handler_count++; if (handler_count > WEB_HANDLER_COUNT) { handler_count = WEB_HANDLER_COUNT; return; }
+    handler_count++; if (handler_count > HANDLER_COUNT_MAX) { handler_count = HANDLER_COUNT_MAX; return; }
     handlers[handler_count - 1] = NULL;
     handlers_fn[handler_count - 1] = fn;
   }

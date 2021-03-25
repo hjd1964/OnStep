@@ -18,7 +18,7 @@
 
 // misc.
 #define WebSocketTimeOut 10000
-#define WEB_HANDLER_COUNT     21
+#define HANDLER_COUNT_MAX     21
 
 typedef void (* webFunction) (EthernetClient *client);
 
@@ -47,12 +47,12 @@ class WebServer {
     #endif
 
     webFunction notFoundHandler=NULL;
-    webFunction handlers[WEB_HANDLER_COUNT];
-    String handlers_fn[WEB_HANDLER_COUNT];
+    webFunction handlers[HANDLER_COUNT_MAX];
+    String handlers_fn[HANDLER_COUNT_MAX];
     int handler_count;
     
-    String parameters[WEB_HANDLER_COUNT];
-    String values[WEB_HANDLER_COUNT];
+    String parameters[HANDLER_COUNT_MAX];
+    String values[HANDLER_COUNT_MAX];
     int parameter_count;
 };
 
