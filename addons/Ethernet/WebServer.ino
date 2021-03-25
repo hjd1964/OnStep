@@ -22,11 +22,10 @@ void WebServer::init() {
   #if SD_CARD == ON
     SDfound = SD.begin(4);
   #else
-
-  // disable the SDCARD if not using
-  pinMode(4, OUTPUT);
-  digitalWrite(4, HIGH);
-#endif
+    // disable the SDCARD CS pin
+    pinMode(4, OUTPUT);
+    digitalWrite(4, HIGH);
+  #endif
 
   handler_count = 0;
 }
@@ -88,7 +87,7 @@ void WebServer::handleClient() {
                       parameters[parameter_count - 1] = thisArg;
                       values[parameter_count-1] = thisVal;
                     }
-                    if (int(command.length()) > j1) command=command.substring(j1); else command = "";
+                    if (int(command.length()) > j1) command = command.substring(j1); else command = "";
                     W(thisArg); W(" = "); WL(thisVal);
                     W("Handler = "); WL(i);
                   }
