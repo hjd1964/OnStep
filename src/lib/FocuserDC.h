@@ -51,6 +51,7 @@ class focuserDC : public focuser  {
     byte getDcPower() { return powerFor1mmSec; }
     bool setPhase1() { phase1=true; return true; }
     bool setPhase2() { phase1=false; return true; }
+    void powerDownActive(bool active, bool startupOnly) { }
     
     // sets logic state for reverse motion
     void setReverseState(int reverseState) {
