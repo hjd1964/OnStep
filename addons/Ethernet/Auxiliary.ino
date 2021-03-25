@@ -331,45 +331,27 @@ void auxAjax() {
 
 void processAuxGet() {
   String v;
-  char temp[40]="";
-  char temp1[40]="";
+  char temp[40] = "";
+  char temp1[40] = "";
 
   // Auxiliary Feature set Value1 to Value4
-  for (char c='1'; c<='8'; c++) {
-    mountStatus.selectFeature(c-'1');
-    sprintf(temp,"x%cv1",c); v=server.arg(temp);
-#ifdef Teensy40
-    if (v=="**") v="";
-#endif
-    if (v != "") { sprintf(temp,":SXX%c,V%s#",c,v.c_str()); commandBool(temp); }
+  for (char c = '1'; c <= '8'; c++) {
+    mountStatus.selectFeature(c - '1');
+    sprintf(temp, "x%cv1", c); v = server.arg(temp);
+    if (v != EmptyStr) { sprintf(temp,":SXX%c,V%s#", c, v.c_str()); commandBool(temp); }
     if (mountStatus.featurePurpose() == DEW_HEATER) {
-      sprintf(temp,"x%cv2",c); v=server.arg(temp);
-#ifdef Teensy40
-    if (v=="**") v="";
-#endif
-      if (v != "") { dtostrf(v.toFloat()/10.0,0,1,temp1); sprintf(temp,":SXX%c,Z%s#",c,temp1); commandBool(temp); }
-      sprintf(temp,"x%cv3",c); v=server.arg(temp);
-#ifdef Teensy40
-    if (v=="**") v="";
-#endif
-      if (v != "") { dtostrf(v.toFloat()/10.0,0,1,temp1); sprintf(temp,":SXX%c,S%s#",c,temp1); commandBool(temp); }
+      sprintf(temp,"x%cv2", c); v = server.arg(temp);
+      if (v != EmptyStr) { dtostrf(v.toFloat()/10.0, 0, 1, temp1); sprintf(temp,":SXX%c,Z%s#", c, temp1); commandBool(temp); }
+      sprintf(temp,"x%cv3", c); v = server.arg(temp);
+      if (v != EmptyStr) { dtostrf(v.toFloat()/10.0, 0, 1, temp1); sprintf(temp,":SXX%c,S%s#", c, temp1); commandBool(temp); }
     } else
     if (mountStatus.featurePurpose() == INTERVALOMETER) {
-      sprintf(temp,"x%cv2",c); v=server.arg(temp);
-#ifdef Teensy40
-    if (v=="**") v="";
-#endif
-      if (v != "") { dtostrf(byteToTime(v.toInt()),0,3,temp1); sprintf(temp,":SXX%c,E%s#",c,temp1); commandBool(temp); }
-      sprintf(temp,"x%cv3",c); v=server.arg(temp);
-#ifdef Teensy40
-    if (v=="**") v="";
-#endif
-      if (v != "") { dtostrf(byteToTime(v.toInt()),0,2,temp1); sprintf(temp,":SXX%c,D%s#",c,temp1); commandBool(temp); }
-      sprintf(temp,"x%cv4",c); v=server.arg(temp);
-#ifdef Teensy40
-    if (v=="**") v="";
-#endif
-      if (v != "") { dtostrf(v.toFloat(),0,0,temp1); sprintf(temp,":SXX%c,C%s#",c,temp1); commandBool(temp); }
+      sprintf(temp,"x%cv2", c); v = server.arg(temp);
+      if (v != EmptyStr) { dtostrf(byteToTime(v.toInt()), 0, 3, temp1); sprintf(temp,":SXX%c,E%s#",c,temp1); commandBool(temp); }
+      sprintf(temp,"x%cv3", c); v = server.arg(temp);
+      if (v != EmptyStr) { dtostrf(byteToTime(v.toInt()), 0, 2, temp1); sprintf(temp,":SXX%c,D%s#",c,temp1); commandBool(temp); }
+      sprintf(temp,"x%cv4", c); v = server.arg(temp);
+      if (v != EmptyStr) { dtostrf(v.toFloat(), 0, 0, temp1); sprintf(temp,":SXX%c,C%s#",c,temp1); commandBool(temp); }
     }
   }
 }

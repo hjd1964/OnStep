@@ -293,11 +293,8 @@ void processLibraryGet() {
   char temp[40]="";
 
   // Catalog clear
-  v=server.arg("cc");
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v!="") {
+  v = server.arg("cc");
+  if (v != EmptyStr) {
     if (currentCatalog >= 0 && currentCatalog < 16) {
       if (currentCatalog == 0) {
         // clear library
@@ -315,11 +312,8 @@ void processLibraryGet() {
   }
 
   // Catalog download
-  v=server.arg("cd");
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v!="") {
+  v = server.arg("cd");
+  if (v != EmptyStr) {
     if (currentCatalog > 0 && currentCatalog < 16) {
       sprintf(temp,":Lo%ld#",(long)currentCatalog-1);
       if (!commandBool(temp)) currentCatalog=0;
@@ -331,11 +325,8 @@ void processLibraryGet() {
   // Object Name|Cat|---RA---|---Dec---
   // ccccccccccc,ccc,HH:MM:SS,sDD*MM:SS
   // NGC6813    ,DN ,19:41:08,+27*20:22
-  v=server.arg("cu");
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v!="") {
+  v = server.arg("cu");
+  if (v != EmptyStr) {
     showMessage="";
     
     uploadCatalogData = true;
@@ -399,11 +390,8 @@ void processLibraryGet() {
   }
 
   // Catalog index (1-15)
-  v=server.arg("ci");
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v != "") {
+  v = server.arg("ci");
+  if (v != EmptyStr) {
     currentCatalog=v.toInt();
     if (currentCatalog > 0 && currentCatalog < 16) {
       sprintf(temp,":Lo%ld#",(long)currentCatalog-1);

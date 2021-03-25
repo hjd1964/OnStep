@@ -172,11 +172,7 @@ String WebServer::arg(String id) {
   for (int i = 0; i < parameter_count; i++) {
     if (id == parameters[i]) return values[i];
   }
-  #ifdef Teensy40 
-    return "**";
-  #else 
-    return "";
-  #endif
+  return EmptyStr;
 }
 
 #if SD_CARD == ON

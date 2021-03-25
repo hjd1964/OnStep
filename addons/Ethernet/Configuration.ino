@@ -631,11 +631,8 @@ bool processConfigurationGet() {
     reservationsDone = true;
   }
   // Overhead limit
-  v=server.arg("ol");
-#ifdef Teensy40 
-  if (v=="**") v="";
-#endif
-  if (v!="") {
+  v = server.arg("ol");
+  if (v != EmptyStr) {
     if (v.toInt() >= 60 && v.toInt() <= 90) { 
       sprintf(temp,":So%d#",(int16_t)v.toInt());
       commandBool(temp);
@@ -643,11 +640,8 @@ bool processConfigurationGet() {
   }
 
   // Horizon limit
-  v=server.arg("hl");
-#ifdef Teensy40 
-  if (v=="**") v="";
-#endif
-  if (v!="") {
+  v = server.arg("hl");
+  if (v != EmptyStr) {
     if (v.toInt() >= -30 && v.toInt() <= 30) { 
       sprintf(temp,":Sh%d#",(int16_t)v.toInt());
       commandBool(temp);
@@ -655,11 +649,8 @@ bool processConfigurationGet() {
   }
 
   // Meridian limit E
-  v=server.arg("el");
-#ifdef Teensy40 
-  if (v=="**") v="";
-#endif
-  if (v!="") {
+  v = server.arg("el");
+  if (v != EmptyStr) {
     if (v.toInt() >= -270 && v.toInt() <= 270) { 
       sprintf(temp,":SXE9,%d#",(int16_t)round((v.toInt()*60.0)/15.0));
       commandBool(temp);
@@ -667,11 +658,8 @@ bool processConfigurationGet() {
   }
 
   // Meridian limit W
-  v=server.arg("wl");
-#ifdef Teensy40 
-  if (v=="**") v="";
-#endif
-  if (v!="") {
+  v = server.arg("wl");
+  if (v != EmptyStr) {
     if (v.toInt() >= -270 && v.toInt() <= 270) { 
       sprintf(temp,":SXEA,%d#",(int16_t)round((v.toInt()*60.0)/15.0));
       commandBool(temp);
@@ -679,51 +667,36 @@ bool processConfigurationGet() {
   }
 
   // Backlash
-  v=server.arg("b1");
-#ifdef Teensy40 
-  if (v=="**") v="";
-#endif
-  if (v!="") {
+  v = server.arg("b1");
+  if (v != EmptyStr) {
     if (v.toInt() >= 0 && v.toInt() <= 3600) { 
       sprintf(temp,":$BR%d#",(int16_t)v.toInt());
       commandBool(temp);
     }
   }
-  v=server.arg("b2");
-#ifdef Teensy40 
-  if (v=="**") v="";
-#endif
-  if (v!="") {
+  v = server.arg("b2");
+  if (v != EmptyStr) {
     if (v.toInt() >= 0 && v.toInt() <= 3600) { 
       sprintf(temp,":$BD%d#",(int16_t)v.toInt());
       commandBool(temp);
     }
   }
-  v=server.arg("b3");
-#ifdef Teensy40 
-  if (v=="**") v="";
-#endif
-  if (v!="") {
+  v = server.arg("b3");
+  if (v != EmptyStr) {
     if (v.toInt() >= 0 && v.toInt() <= 32767) { 
       sprintf(temp,":rb%d#",(int16_t)v.toInt());
       commandBool(temp);
     }
   }
-  v=server.arg("b4");
-#ifdef Teensy40 
-  if (v=="**") v="";
-#endif
-  if (v!="") {
+  v = server.arg("b4");
+  if (v != EmptyStr) {
     if (v.toInt() >= 0 && v.toInt() <= 32767) { 
       sprintf(temp,":Fb%d#",(int16_t)v.toInt());
       commandBool(":FA1#"); commandBool(temp);
     }
   }
-  v=server.arg("b5");
-#ifdef Teensy40 
-  if (v=="**") v="";
-#endif
-  if (v!="") {
+  v = server.arg("b5");
+  if (v != EmptyStr) {
     if (v.toInt() >= 0 && v.toInt() <= 32767) { 
       sprintf(temp,":fb%d#",(int16_t)v.toInt());
       commandBool(":FA1#"); commandBool(temp);
@@ -731,21 +704,15 @@ bool processConfigurationGet() {
   }
 
   // TCF deadband
-  v=server.arg("d4");
-#ifdef Teensy40 
-  if (v=="**") v="";
-#endif
-  if (v!="") {
+  v = server.arg("d4");
+  if (v != EmptyStr) {
     if (v.toInt() >= 1 && v.toInt() <= 32767) { 
       sprintf(temp,":Fd%d#",(int16_t)v.toInt());
       commandBool(":FA1#"); commandBool(temp);
     }
   }
-  v=server.arg("d5");
-#ifdef Teensy40 
-  if (v=="**") v="";
-#endif
-  if (v!="") {
+  v = server.arg("d5");
+  if (v != EmptyStr) {
     if (v.toInt() >= 1 && v.toInt() <= 32767) { 
       sprintf(temp,":fd%d#",(int16_t)v.toInt());
       commandBool(":FA1#"); commandBool(temp);
@@ -753,21 +720,15 @@ bool processConfigurationGet() {
   }
 
   // TCF Coef
-  v=server.arg("tc4");
-#ifdef Teensy40 
-  if (v=="**") v="";
-#endif
-  if (v!="") {
+  v = server.arg("tc4");
+  if (v != EmptyStr) {
     if (v.toFloat() >= -999.0 && v.toFloat() <= 999.0) { 
       sprintf(temp,":FC%s#",v.c_str());
       commandBool(":FA1#"); commandBool(temp);
     }
   }
-  v=server.arg("tc5");
-#ifdef Teensy40 
-  if (v=="**") v="";
-#endif
-  if (v!="") {
+  v = server.arg("tc5");
+  if (v != EmptyStr) {
     if (v.toFloat() >= -999.0 && v.toFloat() <= 999.0) { 
       sprintf(temp,":fC%s#",v.c_str());
       commandBool(":FA1#"); commandBool(temp);
@@ -775,69 +736,46 @@ bool processConfigurationGet() {
   }
 
   // TCF Enable
-  v=server.arg("en4");
-#ifdef Teensy40 
-  if (v=="**") v="";
-#endif
+  v = server.arg("en4");
   if (v == "0" || v == "1") {
     sprintf(temp,":Fc%s#",v.c_str());
     commandBool(":FA1#"); commandBool(temp);
   }
-  v=server.arg("en5");
-#ifdef Teensy40 
-  if (v=="**") v="";
-#endif
+  v = server.arg("en5");
   if (v == "0" || v == "1") {
     sprintf(temp,":fc%s#",v.c_str());
     commandBool(":FA1#"); commandBool(temp);
   }
 
   // Location
-  v=server.arg("g1"); // long deg
-  v1=server.arg("g2"); // long min
-  v2=server.arg("g3"); // long sec
- #ifdef Teensy40 
-  if (v=="**") v="";
-  if (v1=="**") v1="";
-  if (v2=="**") v2="";
-#endif
- if (v != "" && v1 != "" && v2 != "") {
+  v = server.arg("g1");  // long deg
+  v1 = server.arg("g2"); // long min
+  v2 = server.arg("g3"); // long sec
+  if (v != EmptyStr && v1 != EmptyStr && v2 != EmptyStr) {
     if (v.toInt() >= -180 && v.toInt() <= 180 && v1.toInt() >= 0 && v1.toInt() <= 60 && v2.toInt() >= 0 && v2.toInt() <= 60) {
       sprintf(temp,":Sg%+04d*%02d:%02d#",(int16_t)v.toInt(),(int16_t)v1.toInt(),(int16_t)v2.toInt());
       commandBool(temp);
     }
   }
-  v=server.arg("t1"); // lat deg
-  v1=server.arg("t2"); // lat min
-  v2=server.arg("t3"); // lat sec
- #ifdef Teensy40 
-  if (v=="**") v="";
-  if (v1=="**") v1="";
-  if (v2=="**") v2="";
-#endif
-  if (v != "" && v1 != "" && v2 != "") {
+  v = server.arg("t1");  // lat deg
+  v1 = server.arg("t2"); // lat min
+  v2 = server.arg("t3"); // lat sec
+  if (v != EmptyStr && v1 != EmptyStr && v2 != EmptyStr) {
     if (v.toInt() >= -90 && v.toInt() <= 90 && v1.toInt() >= 0 && v1.toInt() <= 60 && v2.toInt() >= 0 && v2.toInt() <= 60) {
       sprintf(temp,":St%+03d*%02d:%02d#",(int16_t)v.toInt(),(int16_t)v1.toInt(),(int16_t)v2.toInt());
       commandBool(temp);
     }
   }
-  v=server.arg("u1"); // UT hrs
-  v1=server.arg("u2"); // UT min
-#ifdef Teensy40 
-  if (v=="**") v="";
-  if (v1=="**") v1="";
-#endif
-  if (v != "" && v1 != "") {
+  v = server.arg("u1");  // UT hrs
+  v1 = server.arg("u2"); // UT min
+  if (v != EmptyStr && v1 != EmptyStr) {
     if (v.toInt() >= -14 && v.toInt() <= 12 && (v1.toInt() == 0 || v1.toInt() == 30 || v1.toInt() == 45)) {
       sprintf(temp,":SG%+03d:%02d#",(int16_t)v.toInt(),(int16_t)v1.toInt());
       commandBool(temp);
     }
   }
 
-  ssa=server.arg("advanced");
-#ifdef Teensy40
-  if (ssa=="**") ssa="";
-#endif  
+  ssa = server.arg("advanced");
 #if DISPLAY_RESET_CONTROLS != OFF
   if (ssa.equals("reset")) { commandBlind(":ERESET#"); return false; }
   #ifdef BOOT0_PIN
@@ -845,11 +783,8 @@ bool processConfigurationGet() {
   #endif
 #endif
 
-  ssm=server.arg("mountt"); 
-#ifdef Teensy40 
-  if (ssm=="**") ssm="";
-#endif
-  if (!ssm.equals("")) { sprintf(temp,":SXEM,%s#",ssm.c_str()); commandBool(temp); 
+  ssm = server.arg("mountt"); 
+  if (ssm != EmptyStr) { sprintf(temp,":SXEM,%s#",ssm.c_str()); commandBool(temp); 
   }
 
 // -------------------------------------------------------------------------------------------------------------------------
@@ -859,16 +794,13 @@ bool processConfigurationGet() {
   if (ssa.equals("enable")) { commandBool(":SXAC,0#"); return true; }
   if (ssa.equals("disable")) { commandBool(":SXAC,1#"); return true; }
 
-  ssr=server.arg("revert");
-#ifdef Teensy40 
-  if (ssr=="**") ssr="";
-#endif
+  ssr = server.arg("revert");
 #ifdef CMDSERVER_DEBUG_ON
     DebugSer.print("ssr value is  ");
     DebugSer.println( ssr );
 #endif
 
-  if (!ssr.equals("")) {
+  if (ssr != EmptyStr) {
     int axis=ssr.toInt();
     if (axis > 0 && axis < 5) { sprintf(temp,":SXA%d,R#",axis); commandBool(temp); }
     if (axis == 0) { strcpy(temp,":SXEM,0#"); commandBool(temp); }
@@ -877,40 +809,25 @@ bool processConfigurationGet() {
 
   int axis = 0;
 
-  ss1=server.arg("a1spd");
-  ss2=server.arg("a2spd");
-  ss3=server.arg("a3spd");
-  ss4=server.arg("a4spu");
-  ss5=server.arg("a5spu");
-#ifdef Teensy40
-  if (ss1=="**") ss1="";
-  if (ss2=="**") ss2="";
-  if (ss3=="**") ss3="";
-  if (ss4=="**") ss4="";
-  if (ss5=="**") ss5="";
-#endif  
+  ss1 = server.arg("a1spd");
+  ss2 = server.arg("a2spd");
+  ss3 = server.arg("a3spd");
+  ss4 = server.arg("a4spu");
+  ss5 = server.arg("a5spu");
 
-  if (!ss1.equals("")) { axis=1; s1=server.arg("a1spd"); s2=server.arg("a1ustp"); s3=server.arg("a1I"); s4=server.arg("a1rev"); s5=server.arg("a1min"); s6=server.arg("a1max"); } else
-  if (!ss2.equals("")) { axis=2; s1=server.arg("a2spd"); s2=server.arg("a2ustp"); s3=server.arg("a2I"); s4=server.arg("a2rev"); s5=server.arg("a2min"); s6=server.arg("a2max"); } else
-  if (!ss3.equals("")) { axis=3; s1=server.arg("a3spd"); s2=server.arg("a3ustp"); s3=server.arg("a3I"); s4=server.arg("a3rev"); s5=server.arg("a3min"); s6=server.arg("a3max"); } else
-  if (!ss4.equals("")) { axis=4; s1=server.arg("a4spu"); s2=server.arg("a4ustp"); s3=server.arg("a4I"); s4=server.arg("a4rev"); s5=server.arg("a4min"); s6=server.arg("a4max"); } else
-  if (!ss5.equals("")) { axis=5; s1=server.arg("a5spu"); s2=server.arg("a5ustp"); s3=server.arg("a5I"); s4=server.arg("a5rev"); s5=server.arg("a5min"); s6=server.arg("a5max"); }
+  if (ss1 != EmptyStr) { axis=1; s1=server.arg("a1spd"); s2=server.arg("a1ustp"); s3=server.arg("a1I"); s4=server.arg("a1rev"); s5=server.arg("a1min"); s6=server.arg("a1max"); } else
+  if (ss2 != EmptyStr) { axis=2; s1=server.arg("a2spd"); s2=server.arg("a2ustp"); s3=server.arg("a2I"); s4=server.arg("a2rev"); s5=server.arg("a2min"); s6=server.arg("a2max"); } else
+  if (ss3 != EmptyStr) { axis=3; s1=server.arg("a3spd"); s2=server.arg("a3ustp"); s3=server.arg("a3I"); s4=server.arg("a3rev"); s5=server.arg("a3min"); s6=server.arg("a3max"); } else
+  if (ss4 != EmptyStr) { axis=4; s1=server.arg("a4spu"); s2=server.arg("a4ustp"); s3=server.arg("a4I"); s4=server.arg("a4rev"); s5=server.arg("a4min"); s6=server.arg("a4max"); } else
+  if (ss5 != EmptyStr) { axis=5; s1=server.arg("a5spu"); s2=server.arg("a5ustp"); s3=server.arg("a5I"); s4=server.arg("a5rev"); s5=server.arg("a5min"); s6=server.arg("a5max"); }
 
-#ifdef Teensy40
-  if (s1=="**") s1="";
-  if (s2=="**") s2="";
-  if (s3=="**") s3="";
-  if (s4=="**") s4="";
-  if (s5=="**") s5="";
-  if (s6=="**") s6="";
-#endif  
 #ifdef CMDSERVER_DEBUG_ON
     DebugSer.print("ss1 3= ");
     DebugSer.println( ss1 );
 #endif
 
   if (axis > 0 && axis < 6) {
-    if (s2.equals("")) s2="-1"; if (s3.equals("")) s3="-1"; if (s4.equals("")) s4="-1"; if (s5.equals("")) s5="-1"; if (s6.equals("")) s6="-1";
+    if (s2 == EmptyStr) s2="-1"; if (s3 == EmptyStr) s3="-1"; if (s4 == EmptyStr) s4="-1"; if (s5 == EmptyStr) s5="-1"; if (s6 == EmptyStr) s6="-1";
     if (s4.equals("0")) s4="-1"; else if (s4.equals("1")) s4="-2";
     v=s1+","+s2+","+s3+","+s4+","+s5+","+s6;
     sprintf(temp,":SXA%d,%s#",axis,v.c_str());
@@ -918,10 +835,7 @@ bool processConfigurationGet() {
   }
 
   ss1=server.arg("a1spwr"); 
-#ifdef Teensy40
-  if (ss1=="**") ss1="";
-#endif  
-  if (!ss1.equals("")) { sprintf(temp,":SXE7,%s#",ss1.c_str()); commandBool(temp); }  // #endif
+  if (ss1 != EmptyStr) { sprintf(temp,":SXE7,%s#",ss1.c_str()); commandBool(temp); }  // #endif
 #ifdef CMDSERVER_DEBUG_ON
     DebugSer.println("Done here exiting." );
 #endif

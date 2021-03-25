@@ -445,24 +445,18 @@ void processEncodersGet() {
   boolean EEwrite=false;
   String v;
   
-  v=server.arg("ms");
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v!="") {
+  v = server.arg("ms");
+  if (v != EmptyStr) {
     if (v=="ons") encoders.syncToOnStep();
     if (v=="enc") encoders.syncFromOnStep();
-#ifdef ENC_HAS_ABSOLUTE
-    if (v=="zro") encoders.zeroFromOnStep();
-#endif
+    #ifdef ENC_HAS_ABSOLUTE
+      if (v=="zro") encoders.zeroFromOnStep();
+    #endif
   }
 
   // Autosync
-  v=server.arg("as");
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v!="") {
+  v = server.arg("as");
+  if (v != EmptyStr) {
     if (v=="on") { 
       encAutoSync=true;
       if (ENC_AUTO_SYNC_MEMORY == ON) nv.writeInt(EE_ENC_AUTO_SYNC,encAutoSync);
@@ -476,11 +470,8 @@ void processEncodersGet() {
   }
 
   // Max. limits
-  v=server.arg("d1");
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v!="") {
+  v = server.arg("d1");
+  if (v != EmptyStr) {
     int i;
     if ( (atoi2((char*)v.c_str(),&i)) && ((i>=0) && (i<=9999))) { 
       Axis1EncDiffTo=i;
@@ -488,11 +479,8 @@ void processEncodersGet() {
       EEwrite=true;
     }
   }
-  v=server.arg("d2");
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v!="") {
+  v = server.arg("d2");
+  if (v != EmptyStr) {
     int i;
     if ( atoi2((char*)v.c_str(),&i) && (i >= 0 && i <= 9999)) { 
       Axis2EncDiffTo=i;
@@ -502,11 +490,8 @@ void processEncodersGet() {
   }
 
   // Counts per degree
-  v=server.arg("a1cpd");
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v!="") {
+  v = server.arg("a1cpd");
+  if (v != EmptyStr) {
     double d = v.toFloat();
     if (d >= 1.0 && d <= 10000.0) { 
       Axis1EncTicksPerDeg=d;
@@ -514,11 +499,8 @@ void processEncodersGet() {
       EEwrite=true;
     }
   }
-  v=server.arg("a2cpd");
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v!="") {
+  v = server.arg("a2cpd");
+  if (v != EmptyStr) {
     double d = v.toFloat();
     if (d >= 1.0 && d <= 10000.0) { 
       Axis2EncTicksPerDeg=d;
@@ -527,11 +509,8 @@ void processEncodersGet() {
     }
   }
 
-  v=server.arg("a1rev");
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v!="") {
+  v = server.arg("a1rev");
+  if (v != EmptyStr) {
     if (v == "0") {
       Axis1EncRev=OFF;
       nv.write(EE_ENC_A1_REV,Axis1EncRev);
@@ -544,11 +523,8 @@ void processEncodersGet() {
     }
   }
 
-  v=server.arg("a2rev");
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v!="") {
+  v = server.arg("a2rev");
+  if (v != EmptyStr) {
     if (v == "0") {
       Axis2EncRev=OFF;
       nv.writeInt(EE_ENC_A2_REV,Axis2EncRev);
@@ -561,11 +537,8 @@ void processEncodersGet() {
     }
   }
 
-  v=server.arg("revert");
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v!="") { 
+  v = server.arg("revert");
+  if (v != EmptyStr) { 
     if (v == "1") {
       Axis1EncTicksPerDeg=AXIS1_ENC_TICKS_DEG;
       nv.writeDouble(EE_ENC_A1_TICKS,Axis1EncTicksPerDeg);
@@ -588,21 +561,15 @@ void processEncodersGet() {
 
 #if AXIS1_ENC_RATE_CONTROL == ON
   // OnStep rate control
-  v=server.arg("rc");
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v!="") {
+  v = server.arg("rc");
+  if (v != EmptyStr) {
     if (v=="on") encRateControl=true;
     if (v=="off") encRateControl=false;
   }
 
   // Encoder averaging samples
-  v=server.arg("sa");
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v!="") {
+  v = server.arg("sa");
+  if (v != EmptyStr) {
     int i;
     if ( (atoi2((char*)v.c_str(),&i)) && ((i>=1) && (i<=999))) { 
       Axis1EncStaSamples=i;
@@ -610,11 +577,8 @@ void processEncodersGet() {
       EEwrite=true;
     }
   }
-  v=server.arg("la");
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v!="") {
+  v = server.arg("la");
+  if (v != EmptyStr) {
     int i;
     if ( (atoi2((char*)v.c_str(),&i)) && ((i>=1) && (i<=999))) { 
       Axis1EncLtaSamples=i;
@@ -624,11 +588,8 @@ void processEncodersGet() {
   }
 
   // Encoder proportional response
-  v=server.arg("pr");
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v!="") {
+  v = server.arg("pr");
+  if (v != EmptyStr) {
     int i;
     if ( (atoi2((char*)v.c_str(),&i)) && ((i>=50) && (i<=5000))) { 
       Axis1EncProp=i;
@@ -638,11 +599,8 @@ void processEncodersGet() {
   }
   
   // Encoder minimum guide
-  v=server.arg("mg");
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v!="") {
+  v = server.arg("mg");
+  if (v != EmptyStr) {
     int i;
     if ( (atoi2((char*)v.c_str(),&i)) && ((i>=25) && (i<=1000))) { 
       Axis1EncMinGuide=i;
@@ -652,11 +610,8 @@ void processEncodersGet() {
   }
 
   // Encoder rate compensation
-  v=server.arg("er");
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v!="") {
+  v = server.arg("er");
+  if (v != EmptyStr) {
     int l=0;
     l=strtol(v.c_str(),NULL,10);
     if ((l>=-99999) && (l<=99999)) {
@@ -668,11 +623,8 @@ void processEncodersGet() {
 
 #if AXIS1_ENC_INTPOL_COS == ON
   // Encoder interpolation compensation
-  v=server.arg("ip"); // phase
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v!="") {
+  v = server.arg("ip"); // phase
+  if (v != EmptyStr) {
     int i;
     if ( (atoi2((char*)v.c_str(),&i)) && ((i>=0) && (i<=255))) { 
       Axis1EncIntPolPhase=i;
@@ -680,11 +632,8 @@ void processEncodersGet() {
       EEwrite=true;
     }
   }
-  v=server.arg("im"); // magnitude
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v!="") {
+  v = server.arg("im"); // magnitude
+  if (v != EmptyStr) {
     int i;
     if ( (atoi2((char*)v.c_str(),&i)) && ((i>=0) && (i<=29000))) { 
       Axis1EncIntPolMag=i;
@@ -695,11 +644,8 @@ void processEncodersGet() {
 #endif // AXIS1_ENC_INTPOL_COS == ON
 
   // Sweep control
-  v=server.arg("sw");
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v!="") {
+  v = server.arg("sw");
+  if (v != EmptyStr) {
     if (v=="on") encSweep=true;
     if (v=="off") encSweep=false;
   }
