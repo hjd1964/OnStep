@@ -15,6 +15,7 @@
 #define FWU                 -8
 #define INVALID        -999999
 
+
 // encoder types
 #define AB 1
 #define CWCCW 2
@@ -30,15 +31,18 @@
 #define DEW_HEATER 3
 #define INTERVALOMETER 4
 
+char msgSource[10] = MSGSOURCE;
+char msgSrc[10] = MSGSOURCE;
+
 // Helper macros for debugging, with less typing
 // Use VF or VLF for strings (supports embedded spaces)
 void debugPrint(const char s[]) { char s1[255]; strcpy(s1,s); for (unsigned int i=0; i < strlen(s1); i++) if (s1[i]==' ') s1[i]='_'; Ser.print(s1); }
 
 #if DEBUG != OFF
-  #define D(x)       { Ser.print(":EC"); Ser.print(x); Ser.print("#"); }
-  #define DF(x)      { Ser.print(":EC"); debugPrint(x); Ser.print("#"); }
-  #define DL(x)      { Ser.print(":EC"); Ser.print(x); Ser.print("&#"); }
-  #define DLF(x)     { Ser.print(":EC"); debugPrint(x); Ser.print("&#"); }
+  #define D(x)       { Ser.print(msgSource); Ser.print(x); Ser.print("#"); } msgSource[3] = 0;
+  #define DF(x)      { Ser.print(msgSource); debugPrint(x); Ser.print("#"); } msgSource[3] = 0;
+  #define DL(x)      { Ser.print(msgSource); Ser.print(x); Ser.print("&#"); } msgSource[3] = msgSrc[3];
+  #define DLF(x)     { Ser.print(msgSource); debugPrint(x); Ser.print("&#"); } msgSource[3] = msgSrc[3]; 
 #else
   #define D(x)
   #define DF(x)
@@ -73,6 +77,13 @@ void debugPrint(const char s[]) { char s1[255]; strcpy(s1,s); for (unsigned int 
   #define Teensy40
 #else
   #define MCU_STR "Unknown"
+#endif
+
+// special empty string
+#ifdef Teensy40
+#define EmptyStr "\1"
+#else
+#define EmptyStr  ""
 #endif
 
 // EEPROM contents

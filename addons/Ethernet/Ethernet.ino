@@ -1,7 +1,7 @@
 /*
  * Title       OnStep Ethernet Server
  * by          Howard Dutton
- *
+ *                                                This is the dev version with all the debug stuff and char[] array
  * Copyright (C) 2016 to 2021 Howard Dutton
  *
  * This program is free software: you can redistribute it and/or modify
@@ -31,7 +31,11 @@
  * W5100 and W5500 Ethernet for OnStep
  *
  */
- 
+ #include <malloc.h>
+
+#define ShowRam printHeapStats();
+#define DebugSer Serial      // default=SerialA, or Serial4 for example (always 9600 baud) This is used for local debug statements to USB
+
 #define OETHS
 #define Product "Ethernet Server"
 #define FirmwareDate          __DATE__
@@ -44,10 +48,12 @@
 
 // Enable debug and/or status messages to be passed to OnStep for display using its debug facilities
 // default "DEBUG OFF", use "DEBUG ON" for background errors only, use "DEBUG VERBOSE" for all errors and status messages
-//#define DEBUG VERBOSE
+#define DEBUG OFF
 #define DEBUG_OFF   // Turn _ON to allow Ethernet startup without OnStep (Serial port for debug at 9600 baud <moved debug port to USB>)
 #define DebugSer Serial      // default=SerialA, or Serial4 for example (always 9600 baud) This is used for local debug statements to USB
 
+#define MSGSOURCE ":ECETH: " // this is the start of the debug messages sent to OnStep. :EC = OnStep command print this msg,
+                             // and ETH: = Ethernet addon source for the message.  (add a similar line into WiFi.ino)
 
 #include <limits.h>
 
@@ -59,6 +65,7 @@
 #ifdef ARDUINO_ARCH_SAMD
   #include <avr/dtostrf.h>
 #endif
+
 #define Ser Serial1  // Default=Serial1, This is the hardware serial port where OnStep is attached
 
 #include <Ethernet.h>
@@ -108,6 +115,7 @@ int cmdTimeout=TIMEOUT_CMD;
 #define sendHtmlStart()
 #define sendHtml(x) client->print(x); x=""
 #define sendHtmlDone(x) client->print(x); x=""
+#define sendHtmlStr(x) client->print(x); strcpy(x,"")
 
 WebServer server;
 CmdServer cmdSvr;
@@ -119,10 +127,25 @@ void handleNotFound(EthernetClient *client) {
 //  server.send(404, "text/plain", message);
 }
 
+void printHeapStats() {
+  struct mallinfo memMap;
+
+  memMap = mallinfo();
+  
+  DebugSer.print("    Total space in heap: ");DebugSer.println(memMap.arena);
+  DebugSer.print("       total free space: ");DebugSer.println(memMap.fordblks);
+  DebugSer.print("      total free chunks: ");DebugSer.println(memMap.ordblks);
+  DebugSer.print("             used bytes: ");DebugSer.println(memMap.uordblks);
+  DebugSer.print("   top releasable space: ");DebugSer.println(memMap.keepcost);
+  DebugSer.println("");
+
+}
+
 #include "Accessories.h"
 #include "MountStatus.h"
 
 void setup(void){
+  ShowRam;
   long serial_baud = SERIAL_BAUD;
   Ser.begin(SERIAL_BAUD_DEFAULT);
   byte tb=1;
@@ -205,7 +228,7 @@ Again:
     
     // we're all set, just change the baud rate to match OnStep
     Ser.begin(serial_baud); delay(2000);
-    VLF("WEM: Ethernet, Connection established");
+    VLF(" Ethernet, Connection established");
   } else {
     // got nothing back, toggle baud rate and/or swap ports
     serialRecvFlush();
@@ -220,18 +243,20 @@ Again:
   clearSerialChannel();
 
   // say hello
-  VF("WEM: Ethernet Addon "); V(FirmwareVersionMajor); V("."); V(FirmwareVersionMinor); VL(FirmwareVersionPatch);
-  VF("WEM: MCU = "); VLF(MCU_STR);
+  VF(" Ethernet Addon "); V(FirmwareVersionMajor); V("."); V(FirmwareVersionMinor); VL(FirmwareVersionPatch);
+  VF(" MCU = "); VLF(MCU_STR);
 
-  VF("WEM: Web Channel Timeout ms= "); VL(webTimeout);
-  VF("WEM: Cmd Channel Timeout ms= "); VL(cmdTimeout);
+  VF(" Web Channel Timeout ms= "); VL(webTimeout);
+  VF(" Cmd Channel Timeout ms= "); VL(cmdTimeout);
+  VF("  EmptyStr = "); VL(int(EmptyStr));
+  VF(" *EmptyStr = "); VL(int(*EmptyStr));
 
-//  VF("WEM: Ethernet IP     = "); VL(ip.toString());
-//  VF("WEM: Ethernet GATEWAY= "); VL(gateway.toString());
-//  VF("WEM: Ethernet SUBNET = "); VL(subnet.toString());
+//  VF(" Ethernet IP     = "); VL(ip.toString());
+//  VF(" Ethernet GATEWAY= "); VL(gateway.toString());
+//  VF(" Ethernet SUBNET = "); VL(subnet.toString());
 
 #if W5500 == ON
-  VLF("WEM: Resetting W5500 using pin 9");
+  VLF(" Resetting W5500 using pin 9");
   pinMode(9, OUTPUT); 
   digitalWrite(9, LOW);
   delayMicroseconds(500);
@@ -240,10 +265,10 @@ Again:
   delay(1000);
 #endif
 
-  VLF("WEM: Starting port 80 web svr");
+  VLF(" Starting port 80 web svr");
   server.init();
   
-  VLF("WEM: Connecting web-page handlers");
+  VLF(" Connecting web-page handlers");
   server.on("/index.htm", handleRoot);
   server.on("/configuration.htm", handleConfiguration);
   server.on("/configurationA.txt", configurationAjaxGet);
@@ -271,7 +296,7 @@ Again:
   server.onNotFound(handleNotFound);
 
   // Initialize the cmd server, timeout after 500ms
-  VLF("WEM: Starting port 9999 cmd svr");
+  VLF(" Starting port 9999 cmd svr");
   cmdSvr.init(9999,500);
   
   // allow time for the background servers to come up
@@ -281,11 +306,11 @@ Again:
   clearSerialChannel();
 
 #if ENCODERS == ON
-  VLF("WEM: Starting Encoders");
+  VLF(" Starting Encoders");
   encoders.init();
 #endif
 
-  VLF("WEM: Ethernet Addon is ready");
+  VLF(" Ethernet Addon is ready");
 }
 
 void loop(void){

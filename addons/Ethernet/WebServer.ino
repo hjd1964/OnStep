@@ -23,8 +23,7 @@ void WebServer::init() {
   DebugSer.print("www server is at ");
   DebugSer.println(Ethernet.localIP());
 #endif
-   VF("WEM: WWW Server started at = "); VL(Ethernet.localIP());
-
+   DF(" WWW Server started at = "); DL(Ethernet.localIP());
 
 
 #if SD_CARD == ON
@@ -48,13 +47,10 @@ void WebServer::handleClient() {
 #endif
     // an http request ends with a blank line
     boolean currentLineIsBlank = true;
-    unsigned long to=millis()+WebSocketTimeOut;
-    while ((_client.connected()) && ((long)(millis()-to) < 0)) {
+    unsigned long to = millis() + WebSocketTimeOut;
+    while (_client.connected() && (long)(millis() - to) < 0) {
       if (_client.available()) {
         char c = _client.read();
-#ifdef WEBSERVER_DEBUG_ON
-//        DebugSer.write(c);
-#endif
         if (inputBuffer.length()<128) inputBuffer+=c;
 
         // if you've gotten to the end of the line (received a newline character) and the line is blank, the http request has ended, send a reply
@@ -65,10 +61,6 @@ void WebServer::handleClient() {
           int url_end=inputBuffer.indexOf("HTTP/");
           if ((url_start!=-1) && (url_end!=-1)) {
             String command=inputBuffer.substring(url_start,url_end);
-#ifdef WEBSERVER_DEBUG_VERBOSE
-        DebugSer.println(command);
-#endif
-
 #if SD_CARD == ON
             // watch for cache requests
             if ((!modifiedSinceFound) && (command.indexOf("If-Modified-Since:")>=0)) modifiedSinceFound=true;
@@ -80,25 +72,12 @@ void WebServer::handleClient() {
               if (command.indexOf(handlers_fn[i])>=0) {
                 // but first, isolate any get parameters and their values
                 command=command.substring(command.indexOf(handlers_fn[i])+handlers_fn[i].length()); 
-#ifdef WEBSERVER_DEBUG_VERBOSE
-        DebugSer.print(command.length());
-        DebugSer.print("  *");
-        DebugSer.print(command);
-        DebugSer.println("*");
-//        delay(100);
-#endif
 #ifdef Teensy40 
                 while (command[0]==' ') { if (command.length() > 1) { command=command.substring(1);} else {command = ""; }  }
 #else 
                 while (command[0]==' ') command=command.substring(1);
 #endif
                 while (command[command.length()-1]==' ') command=command.substring(0,command.length()-1);
-#ifdef WEBSERVER_DEBUG_VERBOSE
-        DebugSer.print(command.length());
-        DebugSer.print("  *");
-        DebugSer.print(command);
-        DebugSer.println("*");
-#endif
 
                 if (handlers[i]!=NULL) {
                   // check to see if there's a ?a=1& or &a=1
@@ -111,14 +90,10 @@ void WebServer::handleClient() {
                     String thisVal=command.substring(j+1,j1);
                     if (thisArg!="") {
                       parameter_count++;
-                      parameters[parameter_count-1]=thisArg;
-                      values[parameter_count-1]=thisVal;
+                      parameters[parameter_count - 1] = thisArg;
+                      values[parameter_count-1] = thisVal;
                     }
-                    if (int(command.length()) > j1) command=command.substring(j1); else command = "";
-  #ifdef WEBSERVER_DEBUG_ON
-                     DebugSer.print(thisArg); DebugSer.print("="); DebugSer.println(thisVal);
-                     DebugSer.print("Handler = ");  DebugSer.println(i);
-  #endif
+                    if (int(command.length()) > j1) command = command.substring(j1); else command = "";
                   }
                   _client.print(responseHeader);
                   (*handlers[i])(&_client); // send page content
@@ -144,21 +119,21 @@ void WebServer::handleClient() {
               }
             }
             // handle not found
-            if (!handlerFound && (notFoundHandler!=NULL)) (*notFoundHandler)(&_client);
+            if (!handlerFound && notFoundHandler != NULL) (*notFoundHandler)(&_client);
 
           } else {
 #ifdef WEBSERVER_DEBUG_ON
             DebugSer.println("Invalid response");
 #endif
           }
-          inputBuffer="";
+          inputBuffer = "";
           break;
         }
         if (c == '\n') {
-          // you're starting a new line
+          // starting a new line
           currentLineIsBlank = true;
         } else if (c != '\r') {
-          // you've gotten a character on the current line
+          // have a character on the current line
           currentLineIsBlank = false;
         }
       }
@@ -179,14 +154,14 @@ void WebServer::handleClient() {
 }
 
 void WebServer::setResponseHeader(const char *str) {
-  if(!str) return;
+  if (!str) return;
   strcpy_P(responseHeader,str);
 }
 
 void WebServer::on(String fn, webFunction handler) {
-  handler_count++; if (handler_count>WEBHANDLERCOUNT) { handler_count=WEBHANDLERCOUNT; return; }
-  handlers[handler_count-1]=handler;
-  handlers_fn[handler_count-1]=fn;
+  handler_count++; if (handler_count > HANDLER_COUNT_MAX) { handler_count = HANDLER_COUNT_MAX; return; }
+  handlers[handler_count - 1] = handler;
+  handlers_fn[handler_count - 1] = fn;
 }
 
 void WebServer::onNotFound(webFunction handler) {
@@ -194,36 +169,33 @@ void WebServer::onNotFound(webFunction handler) {
 }
 
 String WebServer::arg(String id) {
-  for (int i=0; i<parameter_count; i++) {
-    if (id==parameters[i]) return values[i];
+  for (int i = 0; i < parameter_count; i++) {
+    if (id == parameters[i]) return values[i];
   }
-#ifdef Teensy40 
-    return "**";
-#else 
-    return "";
-#endif
-}
+    return EmptyStr;
+  }
 
 #if SD_CARD == ON
-void WebServer::on(String fn) {
-  handler_count++; if (handler_count>20) { handler_count=20; return; }
-  handlers[handler_count-1]=NULL;
-  handlers_fn[handler_count-1]=fn;
-}
-
-void WebServer::sdPage(String fn, EthernetClient *client) {
-  char temp[256] = "";
-  int n;
-
-  // open the sdcard file
-  if (SDfound) {
-    File dataFile=SD.open(fn, FILE_READ);
-    if (dataFile) {
-      do {
-        n=dataFile.available(); if (n>256) n=256;
-        if (n>0) { dataFile.read(temp,n); client->write(temp,n); }
-      } while (n>0);
-      dataFile.close();
+  void WebServer::on(String fn) {
+    handler_count++; if (handler_count > HANDLER_COUNT_MAX) { handler_count = HANDLER_COUNT_MAX; return; }
+    handlers[handler_count - 1] = NULL;
+    handlers_fn[handler_count - 1] = fn;
+  }
+  
+  void WebServer::sdPage(String fn, EthernetClient *client) {
+    char temp[256] = "";
+    int n;
+  
+    // open the sdcard file
+    if (SDfound) {
+      File dataFile = SD.open(fn, FILE_READ);
+      if (dataFile) {
+        do {
+          n=dataFile.available(); if (n > 256) n = 256;
+          if (n > 0) { dataFile.read(temp, n); client->write(temp, n); }
+        } while (n > 0);
+        dataFile.close();
+      }
     }
   }
 }

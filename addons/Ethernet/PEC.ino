@@ -139,10 +139,7 @@ void processPecGet() {
 
   // PEC control
   v=server.arg("pe");
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v != "") {
+  if (v != EmptyStr) {
     if (v == "pl") commandBlind(":$QZ+#"); // play
     if (v == "st") commandBlind(":$QZ-#"); // stop
     if (v == "re") commandBlind(":$QZ/#"); // record

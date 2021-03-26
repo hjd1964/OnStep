@@ -1,5 +1,6 @@
 // -----------------------------------------------------------------------------------
 // Cmd channel server
+//#define CMDSERVER_DEBUG_ON
 
 EthernetServer cmdserver1(9999);
 EthernetServer cmdserver2(9998);
@@ -15,7 +16,7 @@ void CmdServer::init(int port, long t) {
     DebugSer.print("cmd server is at ");
     DebugSer.print(Ethernet.localIP()); DebugSer.print(":"); DebugSer.println(thisPort);
 #endif
-   VF("WEM: Ethernet IP     = "); V(Ethernet.localIP()); VF(":"); VL(thisPort);
+   VF(" Ethernet IP     = "); V(Ethernet.localIP()); VF(":"); VL(thisPort);
   }
 }
 
@@ -65,4 +66,3 @@ void CmdServer::print(char s[]) {
   lastAccess=millis();
   client.write(s);
 }
-

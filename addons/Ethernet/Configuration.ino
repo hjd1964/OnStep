@@ -1,8 +1,8 @@
 // -----------------------------------------------------------------------------------
 // Configuration
-
 #include <string.h>
-#define sendHtmlstr(x) client->print(x); strcpy(x,"")
+#define CMDSERVER_DEBUG_OFF
+//#define CMDSERVER_DEBUG_VERBOSE
 
 const char html_configScript1[] PROGMEM =
 "<script>\n"
@@ -121,6 +121,9 @@ const char html_resetNotes[] PROGMEM =
 "<li>" L_DOWN_MESSAGE1 "</li>"
 "</ul>";
 
+
+
+
 #ifdef OETHS
 void handleConfiguration(EthernetClient *client) {
 #else
@@ -144,15 +147,24 @@ void handleConfiguration() {
   bool success=processConfigurationGet();
 
   sendHtmlStart();
-
+#ifdef CMDSERVER_DEBUG_ON
+    DebugSer.println( "Sent start" );
+    DebugSer.print("temp[400] = "); DebugSer.println( strlen(temp));
+    DebugSer.print("temp1[120] = "); DebugSer.println( strlen(temp1));
+    DebugSer.print("temp2[120] = "); DebugSer.println( strlen(temp2));
+    DebugSer.print("data1[5000] = "); DebugSer.println( strlen(data1));
+    
+#endif  
   // send a standard http response header
   strcpy( data1, FPSTR(html_headB));
+  ShowRam
   strcat( data1 , FPSTR(html_main_cssB));
   strcat( data1 , FPSTR(html_main_css1));
   strcat( data1 , FPSTR(html_main_css2));
   strcat( data1 , FPSTR(html_main_css3));
   strcat( data1 , FPSTR(html_main_css4));
-  sendHtmlstr(data1);
+
+  sendHtmlStr(data1);
   
   strcat( data1, FPSTR(html_main_css5));
   strcat( data1, FPSTR(html_main_css6));
@@ -164,11 +176,7 @@ void handleConfiguration() {
   strcat( data1, FPSTR(html_headE));
   strcat( data1, FPSTR(html_bodyB));
   
-  sendHtmlstr(data1);
-#ifdef CMDSERVER_DEBUG_ON
-    DebugSer.println( "Sent 2 packet" );
-//    delay(100);
-#endif  
+  sendHtmlStr(data1);
 
   // finish the standard http response header
   strcat( data1, FPSTR(html_onstep_header1)); strcat(data1, "OnStep");
@@ -179,34 +187,16 @@ void handleConfiguration() {
   else {
     strcat( data1, "?");
   }
-#ifdef CMDSERVER_DEBUG_ON
-    DebugSer.println( "building 3 packet 1A" );
-//    delay(100);
-#endif  
+  ShowRam
   strcat( data1, FPSTR(html_onstep_header3));
-#ifdef CMDSERVER_DEBUG_ON
-    DebugSer.println( "building 3 packet 1B" );
-#endif  
   strcat( data1, FPSTR(html_linksStatN));
-#ifdef CMDSERVER_DEBUG_ON
-    DebugSer.println( "building 3 packet 1C" );
-#endif  
   strcat( data1, FPSTR(html_linksCtrlN));
-#ifdef CMDSERVER_DEBUG_ON
-    DebugSer.println( "building 3 packet 1D" );
-#endif  
   if (mountStatus.featureFound()) strcat( data1, FPSTR(html_linksAuxN));
-#ifdef CMDSERVER_DEBUG_ON
-    DebugSer.println( "building 3 packet 1E" );
-#endif  
   strcat( data1, FPSTR(html_linksLibN));
-#ifdef CMDSERVER_DEBUG_ON
-    DebugSer.println( "building 3 packet 1" );
-#endif  
 #if ENCODERS == ON
   strcat( data1, FPSTR(html_linksEncN));
 #endif
-  sendHtmlstr(data1);
+  sendHtmlStr(data1);
   strcat( data1, FPSTR(html_linksPecN));
   strcat( data1, FPSTR(html_linksSetN));
   strcat( data1, FPSTR(html_linksCfgS));
@@ -214,20 +204,18 @@ void handleConfiguration() {
   strcat( data1, FPSTR(html_linksWifiN));
 #endif
   strcat( data1, FPSTR(html_onstep_header4));
-  sendHtmlstr(data1);
-#ifdef CMDSERVER_DEBUG_ON
-    DebugSer.println( "Sent 3.5 packet" );
-#endif  
+  sendHtmlStr(data1);
 
   // OnStep wasn't found, show warning and info.
-  if (!mountStatus.valid() || !success) { strcat( data1, FPSTR(html_bad_comms_message)); sendHtmlstr(data1); sendHtmlDone(data); return; }
+  if (!mountStatus.valid() || !success) { strcat( data1, FPSTR(html_bad_comms_message)); sendHtmlStr(data1); sendHtmlDone(data); return; }
   
   // ajax scripts
   strcat( data1, FPSTR(html_configScript1));
   
   strcat( data1,"<div style='width: 35em;'>");
   strcat( data1, L_BASIC_SET_TITLE "<br /><br />");
-  sendHtmlstr(data1);
+  sendHtmlStr(data1);
+
   strcat( data1, "<button type='button' class='collapsible'>");
   strcat( data1, L_LOCATION_TITLE);
   strcat( data1, "</button>");
@@ -245,7 +233,8 @@ void handleConfiguration() {
   strcat( data1, temp);
   sprintf_P(temp,html_configLongSec,(char*)&temp1[8]);
   strcat( data1, temp);
-  sendHtmlstr(data1);
+  sendHtmlStr(data1);
+
   // Latitude
   if (!command(":GtH#",temp1)) strcpy(temp1,"+00*00:00"); temp1[9]=0;
   temp1[3]=0;                      // deg part only
@@ -258,7 +247,8 @@ void handleConfiguration() {
   strcat( data1, temp);
   sprintf_P(temp,html_configLatSec,(char*)&temp1[7]);
   strcat( data1, temp);
-  sendHtmlstr(data1);
+  sendHtmlStr(data1);
+
   // UTC Offset
   if (!command(":GG#",temp1)) strcpy(temp1,"+00");
   strcpy(temp2,temp1);
@@ -276,7 +266,8 @@ void handleConfiguration() {
   strcat( data1, L_UPLOAD);
   strcat( data1, "</button>\r\n");
   strcat( data1, FPSTR(html_configFormEnd));
-  sendHtmlstr(data1);
+  sendHtmlStr(data1);
+
   // Overhead and Horizon Limits
   strcat( data1, "<button type='button' class='collapsible'>");
   strcat( data1, L_LIMITS_TITLE);
@@ -292,7 +283,8 @@ void handleConfiguration() {
   strcat( data1, L_UPLOAD );
   strcat( data1, "</button>\r\n");
   strcat( data1, FPSTR(html_configFormEnd));
-  sendHtmlstr( data1);
+  sendHtmlStr( data1);
+
   // Axis1 RA/Azm
   strcat( data1, "<br /><button type='button' class='collapsible'>Axis1 RA/Azm</button>");
   strcat( data1, FPSTR(html_configFormBegin));
@@ -300,7 +292,7 @@ void handleConfiguration() {
   if (!command(":%BR#",temp1)) strcpy(temp1,"0"); int backlashAxis1=(int)strtol(&temp1[0],NULL,10);
   sprintf_P(temp,html_configBlAxis1,backlashAxis1);
   strcat( data1, temp);
-  sendHtmlstr(data1);
+  sendHtmlStr(data1);
 
   // Meridian Limits
   if (mountStatus.mountType() == MT_GEM && (command(":GXE9#",temp1)) && (command(":GXEA#",temp2))) {
@@ -311,12 +303,15 @@ void handleConfiguration() {
     int degPastMerW=(int)strtol(&temp2[0],NULL,10);
     degPastMerW=round((degPastMerW*15.0)/60.0);
     sprintf_P(temp,html_configPastMerW,degPastMerW);
-    data += temp;
-  } else data += "<br />\r\n";
-  sendHtml(data);
-  data += "<button type='submit'>" L_UPLOAD "</button>\r\n";
-  data += FPSTR(html_configFormEnd);
-  sendHtml(data);
+    strcat( data1, temp);
+  } else strcat( data1, "<br />\r\n");
+  sendHtmlStr(data1);
+
+  strcat( data1, "<button type='submit'>" );
+  strcat( data1, L_UPLOAD);
+  strcat( data1, "</button>\r\n");
+  strcat( data1, FPSTR(html_configFormEnd));
+  sendHtmlStr(data1);
 
   // Axis2 Dec/Alt
   strcat( data1, "<button type='button' class='collapsible'>Axis2 Dec/Alt</button>");
@@ -327,7 +322,7 @@ void handleConfiguration() {
   strcat( data1, temp);
   strcat( data1, "<button type='submit'>" L_UPLOAD "</button>\r\n");
   strcat( data1, FPSTR(html_configFormEnd));
-  sendHtmlstr(data1);
+  sendHtmlStr(data1);
 
   // Axis3 Rotator
   int i = 0;
@@ -343,7 +338,7 @@ void handleConfiguration() {
     strcat( data1, temp);
     strcat( data1, "<button type='submit'>" L_UPLOAD "</button>\r\n");
     strcat( data1, FPSTR(html_configFormEnd));
-    sendHtmlstr(data1);
+    sendHtmlStr(data1);
 
   }
 
@@ -366,7 +361,7 @@ void handleConfiguration() {
     if (!command(":Fd#",temp1)) strcpy(temp1,"0"); i=(int)strtol(&temp1[0],NULL,10);
     sprintf_P(temp,html_configDbAxis4,i);
     strcat( data1, temp);
-    sendHtmlstr(data1);
+    sendHtmlStr(data1);
     // TCF Coef
     if (!command(":FC#",temp1)) strcpy(temp1,"0");
     char *conv_end;
@@ -376,7 +371,7 @@ void handleConfiguration() {
     strcat( data1, temp);
     strcat( data1, "<button type='submit'>" L_UPLOAD "</button>\r\n");
     strcat( data1, FPSTR(html_configFormEnd));
-    sendHtmlstr(data1);
+    sendHtmlStr(data1);
 
   }
 
@@ -397,7 +392,7 @@ void handleConfiguration() {
     if (!command(":fd#",temp1)) strcpy(temp1,"0"); i=(int)strtol(&temp1[0],NULL,10);
     sprintf_P(temp,html_configDbAxis5,i);
     strcat( data1, temp);
-    sendHtmlstr(data1);
+    sendHtmlStr(data1);
     // TCF Coef
     if (!command(":fC#",temp1)) strcpy(temp1,"0");
     char *conv_end;
@@ -407,13 +402,13 @@ void handleConfiguration() {
     strcat( data1, temp);
     strcat( data1, "<button type='submit'>" L_UPLOAD "</button>\r\n");
     strcat( data1, FPSTR(html_configFormEnd));
-    sendHtmlstr(data1);
+    sendHtmlStr(data1);
 
   }
   strcat( data1, "<br />\r\n");
 
   int numShown = 0;
-  
+    
   // Mount type
   if (!command(":GXEM#",temp1)) strcpy(temp1,"0");
   mt=atoi(temp1);
@@ -427,7 +422,7 @@ void handleConfiguration() {
     strcat( data1, FPSTR(html_configFormEnd));
     strcat( data1, "<br />");
     numShown++;
-    sendHtmlstr(data1);
+    sendHtmlStr(data1);
   }
 
 // -------------------------------------------------------------------------------------------------------------------------
@@ -461,7 +456,7 @@ void handleConfiguration() {
     strcat( data1, "<button name='revert' value='1' type='submit'>" L_REVERT "</button>\r\n");
     strcat( data1, FPSTR(html_configFormEnd));
     numShown++;
-     sendHtmlstr(data1);
+     sendHtmlStr(data1);
  }
 
   // Axis2 Dec/Alt
@@ -485,13 +480,10 @@ void handleConfiguration() {
       sprintf_P(temp,html_configAxisMax,a.max,2,0,90,"&deg;,"); strcat( data1, temp);
       strcat( data1, "<button type='submit'>" L_UPLOAD "</button> ");
     }
-#ifdef CMDSERVER_DEBUG_ON
-    DebugSer.println( "a2 pt7" );
-#endif  
     strcat( data1, "<button name='revert' value='2' type='submit'>" L_REVERT "</button>)");
     strcat( data1, FPSTR(html_configFormEnd));
     numShown++;
-     sendHtmlstr(data1);
+     sendHtmlStr(data1);
  }
 
   // Axis3 Rotator
@@ -512,7 +504,7 @@ void handleConfiguration() {
     strcat( data1, "<button name='revert' value='3' type='submit'>" L_REVERT "</button>");
     strcat( data1, FPSTR(html_configFormEnd));
     numShown++;
-      sendHtmlstr(data1);
+      sendHtmlStr(data1);
 }
   
   // Axis4 Focuser1
@@ -533,9 +525,10 @@ void handleConfiguration() {
     strcat( data1, "<button name='revert' value='4' type='submit'>" L_REVERT "</button>");
     strcat( data1, FPSTR(html_configFormEnd));
     numShown++;
-      sendHtmlstr(data1);
+      sendHtmlStr(data1);
 }
-  
+  ShowRam;
+   
   // Axis5 Focuser2
   if (!command(":GXA5#",temp1)) strcpy(temp1,"0");
   if (decodeAxisSettings(temp1,a)) {
@@ -554,15 +547,9 @@ void handleConfiguration() {
     strcat( data1, "<button name='revert' value='5' type='submit'>" L_REVERT "</button>");
     strcat( data1, FPSTR(html_configFormEnd));
     numShown++;
-     sendHtmlstr(data1);
+     sendHtmlStr(data1);
  }
-#ifdef CMDSERVER_DEBUG_ON
-    DebugSer.println( "a5 done" );
-#endif  
   if (numShown == 0) strcat( data1, L_ADV_SET_NO_EDIT "<br />");
-#ifdef CMDSERVER_DEBUG_ON
-    DebugSer.println( "adding config" );
-#endif  
   strcat( data1, "<br /><form method='get' action='/configuration.htm'>");
   strcat( data1, "<button name='advanced' type='submit' ");
   if (numShown == 0) strcat( data1, "value='enable'>" L_ADV_ENABLE "</button>"); else strcat( data1, "value='disable'>" L_ADV_DISABLE "</button>");
@@ -573,11 +560,7 @@ void handleConfiguration() {
 // -------------------------------------------------------------------------------------------------------------------------
 
 #if DISPLAY_RESET_CONTROLS != OFF
-  sendHtmlstr(data1);
-#ifdef CMDSERVER_DEBUG_ON
-    DebugSer.println( "inside reset controls, sent page" );
-#endif  
-
+  sendHtmlStr(data1);
   strcat( data1, "<hr>" L_RESET_TITLE "<br/><br/>");
   strcat( data1, "<button onpointerdown=\"if (confirm('" L_ARE_YOU_SURE "?')) s('advanced','reset')\" type='button'>" L_RESET "!</button>");
   #ifdef BOOT0_PIN
@@ -594,9 +577,12 @@ void handleConfiguration() {
   
   strcpy(temp,"</div></div></body></html>");
   strcat( data1, temp);
-
-  sendHtmlstr(data1);
+  ShowRam;
+ 
+  sendHtmlStr(data1);
   sendHtmlDone(data);
+  ShowRam;
+   
 }
 
 #ifdef OETHS
@@ -611,7 +597,6 @@ void configurationAjaxGet() {
   server.send(200, "text/html","");
 #endif
 }
-
 
   String v,v1,v2;
   char temp[20]="";
@@ -632,10 +617,7 @@ bool processConfigurationGet() {
   }
   // Overhead limit
   v=server.arg("ol");
-#ifdef Teensy40 
-  if (v=="**") v="";
-#endif
-  if (v!="") {
+  if (v!=EmptyStr) {
     if (v.toInt() >= 60 && v.toInt() <= 90) { 
       sprintf(temp,":So%d#",(int16_t)v.toInt());
       commandBool(temp);
@@ -644,22 +626,17 @@ bool processConfigurationGet() {
 
   // Horizon limit
   v=server.arg("hl");
-#ifdef Teensy40 
-  if (v=="**") v="";
-#endif
-  if (v!="") {
+  if (v!=EmptyStr) {
     if (v.toInt() >= -30 && v.toInt() <= 30) { 
       sprintf(temp,":Sh%d#",(int16_t)v.toInt());
       commandBool(temp);
     }
   }
-
+  ShowRam;
+ 
   // Meridian limit E
   v=server.arg("el");
-#ifdef Teensy40 
-  if (v=="**") v="";
-#endif
-  if (v!="") {
+  if (v!=EmptyStr) {
     if (v.toInt() >= -270 && v.toInt() <= 270) { 
       sprintf(temp,":SXE9,%d#",(int16_t)round((v.toInt()*60.0)/15.0));
       commandBool(temp);
@@ -668,10 +645,7 @@ bool processConfigurationGet() {
 
   // Meridian limit W
   v=server.arg("wl");
-#ifdef Teensy40 
-  if (v=="**") v="";
-#endif
-  if (v!="") {
+  if (v!=EmptyStr) {
     if (v.toInt() >= -270 && v.toInt() <= 270) { 
       sprintf(temp,":SXEA,%d#",(int16_t)round((v.toInt()*60.0)/15.0));
       commandBool(temp);
@@ -680,50 +654,35 @@ bool processConfigurationGet() {
 
   // Backlash
   v=server.arg("b1");
-#ifdef Teensy40 
-  if (v=="**") v="";
-#endif
-  if (v!="") {
+  if (v!=EmptyStr) {
     if (v.toInt() >= 0 && v.toInt() <= 3600) { 
       sprintf(temp,":$BR%d#",(int16_t)v.toInt());
       commandBool(temp);
     }
   }
   v=server.arg("b2");
-#ifdef Teensy40 
-  if (v=="**") v="";
-#endif
-  if (v!="") {
+  if (v!=EmptyStr) {
     if (v.toInt() >= 0 && v.toInt() <= 3600) { 
       sprintf(temp,":$BD%d#",(int16_t)v.toInt());
       commandBool(temp);
     }
   }
   v=server.arg("b3");
-#ifdef Teensy40 
-  if (v=="**") v="";
-#endif
-  if (v!="") {
+  if (v!=EmptyStr) {
     if (v.toInt() >= 0 && v.toInt() <= 32767) { 
       sprintf(temp,":rb%d#",(int16_t)v.toInt());
       commandBool(temp);
     }
   }
   v=server.arg("b4");
-#ifdef Teensy40 
-  if (v=="**") v="";
-#endif
-  if (v!="") {
+  if (v!=EmptyStr) {
     if (v.toInt() >= 0 && v.toInt() <= 32767) { 
       sprintf(temp,":Fb%d#",(int16_t)v.toInt());
       commandBool(":FA1#"); commandBool(temp);
     }
   }
   v=server.arg("b5");
-#ifdef Teensy40 
-  if (v=="**") v="";
-#endif
-  if (v!="") {
+  if (v!=EmptyStr) {
     if (v.toInt() >= 0 && v.toInt() <= 32767) { 
       sprintf(temp,":fb%d#",(int16_t)v.toInt());
       commandBool(":FA1#"); commandBool(temp);
@@ -732,20 +691,14 @@ bool processConfigurationGet() {
 
   // TCF deadband
   v=server.arg("d4");
-#ifdef Teensy40 
-  if (v=="**") v="";
-#endif
-  if (v!="") {
+  if (v!=EmptyStr) {
     if (v.toInt() >= 1 && v.toInt() <= 32767) { 
       sprintf(temp,":Fd%d#",(int16_t)v.toInt());
       commandBool(":FA1#"); commandBool(temp);
     }
   }
   v=server.arg("d5");
-#ifdef Teensy40 
-  if (v=="**") v="";
-#endif
-  if (v!="") {
+  if (v!=EmptyStr) {
     if (v.toInt() >= 1 && v.toInt() <= 32767) { 
       sprintf(temp,":fd%d#",(int16_t)v.toInt());
       commandBool(":FA1#"); commandBool(temp);
@@ -754,20 +707,14 @@ bool processConfigurationGet() {
 
   // TCF Coef
   v=server.arg("tc4");
-#ifdef Teensy40 
-  if (v=="**") v="";
-#endif
-  if (v!="") {
+  if (v!=EmptyStr) {
     if (v.toFloat() >= -999.0 && v.toFloat() <= 999.0) { 
       sprintf(temp,":FC%s#",v.c_str());
       commandBool(":FA1#"); commandBool(temp);
     }
   }
   v=server.arg("tc5");
-#ifdef Teensy40 
-  if (v=="**") v="";
-#endif
-  if (v!="") {
+  if (v!=EmptyStr) {
     if (v.toFloat() >= -999.0 && v.toFloat() <= 999.0) { 
       sprintf(temp,":fC%s#",v.c_str());
       commandBool(":FA1#"); commandBool(temp);
@@ -776,17 +723,11 @@ bool processConfigurationGet() {
 
   // TCF Enable
   v=server.arg("en4");
-#ifdef Teensy40 
-  if (v=="**") v="";
-#endif
   if (v == "0" || v == "1") {
     sprintf(temp,":Fc%s#",v.c_str());
     commandBool(":FA1#"); commandBool(temp);
   }
   v=server.arg("en5");
-#ifdef Teensy40 
-  if (v=="**") v="";
-#endif
   if (v == "0" || v == "1") {
     sprintf(temp,":fc%s#",v.c_str());
     commandBool(":FA1#"); commandBool(temp);
@@ -796,12 +737,7 @@ bool processConfigurationGet() {
   v=server.arg("g1"); // long deg
   v1=server.arg("g2"); // long min
   v2=server.arg("g3"); // long sec
- #ifdef Teensy40 
-  if (v=="**") v="";
-  if (v1=="**") v1="";
-  if (v2=="**") v2="";
-#endif
- if (v != "" && v1 != "" && v2 != "") {
+  if (v != EmptyStr && v1 != EmptyStr && v2 != EmptyStr) {
     if (v.toInt() >= -180 && v.toInt() <= 180 && v1.toInt() >= 0 && v1.toInt() <= 60 && v2.toInt() >= 0 && v2.toInt() <= 60) {
       sprintf(temp,":Sg%+04d*%02d:%02d#",(int16_t)v.toInt(),(int16_t)v1.toInt(),(int16_t)v2.toInt());
       commandBool(temp);
@@ -810,12 +746,7 @@ bool processConfigurationGet() {
   v=server.arg("t1"); // lat deg
   v1=server.arg("t2"); // lat min
   v2=server.arg("t3"); // lat sec
- #ifdef Teensy40 
-  if (v=="**") v="";
-  if (v1=="**") v1="";
-  if (v2=="**") v2="";
-#endif
-  if (v != "" && v1 != "" && v2 != "") {
+   if (v != EmptyStr && v1 != EmptyStr && v2 != EmptyStr) {
     if (v.toInt() >= -90 && v.toInt() <= 90 && v1.toInt() >= 0 && v1.toInt() <= 60 && v2.toInt() >= 0 && v2.toInt() <= 60) {
       sprintf(temp,":St%+03d*%02d:%02d#",(int16_t)v.toInt(),(int16_t)v1.toInt(),(int16_t)v2.toInt());
       commandBool(temp);
@@ -823,11 +754,7 @@ bool processConfigurationGet() {
   }
   v=server.arg("u1"); // UT hrs
   v1=server.arg("u2"); // UT min
-#ifdef Teensy40 
-  if (v=="**") v="";
-  if (v1=="**") v1="";
-#endif
-  if (v != "" && v1 != "") {
+  if (v != EmptyStr && v1 != EmptyStr) {
     if (v.toInt() >= -14 && v.toInt() <= 12 && (v1.toInt() == 0 || v1.toInt() == 30 || v1.toInt() == 45)) {
       sprintf(temp,":SG%+03d:%02d#",(int16_t)v.toInt(),(int16_t)v1.toInt());
       commandBool(temp);
@@ -835,9 +762,6 @@ bool processConfigurationGet() {
   }
 
   ssa=server.arg("advanced");
-#ifdef Teensy40
-  if (ssa=="**") ssa="";
-#endif  
 #if DISPLAY_RESET_CONTROLS != OFF
   if (ssa.equals("reset")) { commandBlind(":ERESET#"); return false; }
   #ifdef BOOT0_PIN
@@ -846,10 +770,7 @@ bool processConfigurationGet() {
 #endif
 
   ssm=server.arg("mountt"); 
-#ifdef Teensy40 
-  if (ssm=="**") ssm="";
-#endif
-  if (!ssm.equals("")) { sprintf(temp,":SXEM,%s#",ssm.c_str()); commandBool(temp); 
+  if (!ssm.equals(EmptyStr)) { sprintf(temp,":SXEM,%s#",ssm.c_str()); commandBool(temp); 
   }
 
 // -------------------------------------------------------------------------------------------------------------------------
@@ -860,71 +781,40 @@ bool processConfigurationGet() {
   if (ssa.equals("disable")) { commandBool(":SXAC,1#"); return true; }
 
   ssr=server.arg("revert");
-#ifdef Teensy40 
-  if (ssr=="**") ssr="";
-#endif
-#ifdef CMDSERVER_DEBUG_ON
-    DebugSer.print("ssr value is  ");
-    DebugSer.println( ssr );
-#endif
-
-  if (!ssr.equals("")) {
+  if (!ssr.equals(EmptyStr)) {
     int axis=ssr.toInt();
     if (axis > 0 && axis < 5) { sprintf(temp,":SXA%d,R#",axis); commandBool(temp); }
     if (axis == 0) { strcpy(temp,":SXEM,0#"); commandBool(temp); }
     return true;
   }
-
+  ShowRam;
+ 
   int axis = 0;
-
   ss1=server.arg("a1spd");
   ss2=server.arg("a2spd");
   ss3=server.arg("a3spd");
   ss4=server.arg("a4spu");
   ss5=server.arg("a5spu");
-#ifdef Teensy40
-  if (ss1=="**") ss1="";
-  if (ss2=="**") ss2="";
-  if (ss3=="**") ss3="";
-  if (ss4=="**") ss4="";
-  if (ss5=="**") ss5="";
-#endif  
 
-  if (!ss1.equals("")) { axis=1; s1=server.arg("a1spd"); s2=server.arg("a1ustp"); s3=server.arg("a1I"); s4=server.arg("a1rev"); s5=server.arg("a1min"); s6=server.arg("a1max"); } else
-  if (!ss2.equals("")) { axis=2; s1=server.arg("a2spd"); s2=server.arg("a2ustp"); s3=server.arg("a2I"); s4=server.arg("a2rev"); s5=server.arg("a2min"); s6=server.arg("a2max"); } else
-  if (!ss3.equals("")) { axis=3; s1=server.arg("a3spd"); s2=server.arg("a3ustp"); s3=server.arg("a3I"); s4=server.arg("a3rev"); s5=server.arg("a3min"); s6=server.arg("a3max"); } else
-  if (!ss4.equals("")) { axis=4; s1=server.arg("a4spu"); s2=server.arg("a4ustp"); s3=server.arg("a4I"); s4=server.arg("a4rev"); s5=server.arg("a4min"); s6=server.arg("a4max"); } else
-  if (!ss5.equals("")) { axis=5; s1=server.arg("a5spu"); s2=server.arg("a5ustp"); s3=server.arg("a5I"); s4=server.arg("a5rev"); s5=server.arg("a5min"); s6=server.arg("a5max"); }
-
-#ifdef Teensy40
-  if (s1=="**") s1="";
-  if (s2=="**") s2="";
-  if (s3=="**") s3="";
-  if (s4=="**") s4="";
-  if (s5=="**") s5="";
-  if (s6=="**") s6="";
-#endif  
-#ifdef CMDSERVER_DEBUG_ON
-    DebugSer.print("ss1 3= ");
-    DebugSer.println( ss1 );
-#endif
+  if (!ss1.equals(EmptyStr)) { axis=1; s1=server.arg("a1spd"); s2=server.arg("a1ustp"); s3=server.arg("a1I"); s4=server.arg("a1rev"); s5=server.arg("a1min"); s6=server.arg("a1max"); } else
+  if (!ss2.equals(EmptyStr)) { axis=2; s1=server.arg("a2spd"); s2=server.arg("a2ustp"); s3=server.arg("a2I"); s4=server.arg("a2rev"); s5=server.arg("a2min"); s6=server.arg("a2max"); } else
+  if (!ss3.equals(EmptyStr)) { axis=3; s1=server.arg("a3spd"); s2=server.arg("a3ustp"); s3=server.arg("a3I"); s4=server.arg("a3rev"); s5=server.arg("a3min"); s6=server.arg("a3max"); } else
+  if (!ss4.equals(EmptyStr)) { axis=4; s1=server.arg("a4spu"); s2=server.arg("a4ustp"); s3=server.arg("a4I"); s4=server.arg("a4rev"); s5=server.arg("a4min"); s6=server.arg("a4max"); } else
+  if (!ss5.equals(EmptyStr)) { axis=5; s1=server.arg("a5spu"); s2=server.arg("a5ustp"); s3=server.arg("a5I"); s4=server.arg("a5rev"); s5=server.arg("a5min"); s6=server.arg("a5max"); }
 
   if (axis > 0 && axis < 6) {
-    if (s2.equals("")) s2="-1"; if (s3.equals("")) s3="-1"; if (s4.equals("")) s4="-1"; if (s5.equals("")) s5="-1"; if (s6.equals("")) s6="-1";
+    if (s2.equals(EmptyStr)) s2="-1"; if (s3.equals(EmptyStr)) s3="-1"; if (s4.equals(EmptyStr)) s4="-1"; if (s5.equals(EmptyStr)) s5="-1"; if (s6.equals(EmptyStr)) s6="-1";
     if (s4.equals("0")) s4="-1"; else if (s4.equals("1")) s4="-2";
     v=s1+","+s2+","+s3+","+s4+","+s5+","+s6;
     sprintf(temp,":SXA%d,%s#",axis,v.c_str());
+
+    
     commandBool(temp);
+//    DebugSer.print("ss1 7= ");  DebugSer.println( ss1 );
   }
 
   ss1=server.arg("a1spwr"); 
-#ifdef Teensy40
-  if (ss1=="**") ss1="";
-#endif  
-  if (!ss1.equals("")) { sprintf(temp,":SXE7,%s#",ss1.c_str()); commandBool(temp); }  // #endif
-#ifdef CMDSERVER_DEBUG_ON
-    DebugSer.println("Done here exiting." );
-#endif
+  if (!ss1.equals(EmptyStr)) { sprintf(temp,":SXE7,%s#",ss1.c_str()); commandBool(temp); }  // #endif
 #endif
 // -------------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------------

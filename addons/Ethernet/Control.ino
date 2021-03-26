@@ -439,10 +439,7 @@ void processControlGet() {
 
   // Quick bar
   v=server.arg("qb");
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v!="") {
+  if (v!=EmptyStr) {
     if (v=="q") commandBlind(":Q#");       // stop goto/guide
     if (v=="co") commandBool(":SX99,1#");  // meridian flip, pause->continue
     if (v=="hf") commandBlind(":hF#");     // home, reset
@@ -453,10 +450,7 @@ void processControlGet() {
 
   // Align
   v=server.arg("al");
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v!="") {
+  if (v!=EmptyStr) {
     if (v=="1") commandBool(":A1#");
     if (v=="2") commandBool(":A2#");
     if (v=="3") commandBool(":A3#");
@@ -472,24 +466,15 @@ void processControlGet() {
 
   // Set DATE/TIME
   v=server.arg("dm");
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v!="") {
+  if (v!=EmptyStr) {
     if ( (atoi2((char *)v.c_str(),&i)) && ((i>=0) && (i<=11))) { get_temp_month=i+1; }
   }
   v=server.arg("dd");
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v!="") {
+  if (v!=EmptyStr) {
     if ( (atoi2((char *)v.c_str(),&i)) && ((i>=1) && (i<=31))) { get_temp_day=i; }
   }
   v=server.arg("dy");
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v!="") {
+  if (v!=EmptyStr) {
     if ( (atoi2((char *)v.c_str(),&i)) && ((i>=2016) && (i<=9999))) {
       get_temp_year=i-2000;
       char temp[16];
@@ -498,24 +483,15 @@ void processControlGet() {
     }
   }
   v=server.arg("th");
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v!="") {
+  if (v!=EmptyStr) {
     if ( (atoi2((char *)v.c_str(),&i)) && ((i>=0) && (i<=23))) { get_temp_hour=i; }
   }
   v=server.arg("tm");
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v!="") {
+  if (v!=EmptyStr) {
     if ( (atoi2((char *)v.c_str(),&i)) && ((i>=0) && (i<=59))) { get_temp_minute=i; }
   }
   v=server.arg("ts");
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v!="") {
+  if (v!=EmptyStr) {
     if ( (atoi2((char *)v.c_str(),&i)) && ((i>=0) && (i<=59))) {
       get_temp_second=i;
       char temp[16];
@@ -525,10 +501,7 @@ void processControlGet() {
   }
 
   v=server.arg("dr");
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v!="") {
+  if (v!=EmptyStr) {
     // Tracking control
     if (v=="T1") commandBool(":Te#");     // enable tracking
     if (v=="T0") commandBool(":Td#");     // disable tracking
@@ -595,10 +568,7 @@ void processControlGet() {
   }
   // refine polar align
   v=server.arg("rp");
-#ifdef Teensy40
-  if (v=="**") v="";
-#endif  
-  if (v!="") {
+  if (v!=EmptyStr) {
     if (v=="a") commandBool(":MP#");
   }
 
