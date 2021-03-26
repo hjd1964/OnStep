@@ -42,28 +42,22 @@
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
+#include "Constants.h"
+
 // Enable debug and/or status messages to be passed to OnStep for display using its debug facilities
 // Default "DEBUG OFF", use "DEBUG ON" for background errors only, use "DEBUG VERBOSE" for all errors and status messages
 // "DEBUG REMOTE" to forward debug output to OnStep in verbose mode
-#define DEBUG OFF
-#define DebugSer Serial      // default SerialA, or Serial4 for example (always 9600 baud.) This is used for local debug statements to USB
-
+#define DEBUG     REMOTE
+#define DebugSer  Serial     // Default Serial, always 9600 baud, this is used for local debug output
+#include "Debug.h"
 
 #include <limits.h>
-
-// work around for some platform specific code
-#if !defined(ESP8266) && !defined(ESP32)
-  #define ICACHE_RAM_ATTR
-  #define FPSTR
-#endif
 #ifdef ARDUINO_ARCH_SAMD
   #include <avr/dtostrf.h>
 #endif
-#define Ser Serial1  // Default=Serial1, This is the hardware serial port where OnStep is attached
 
 #include <Ethernet.h>
 
-#include "Constants.h"
 #include "Locales.h"
 #include "Config.h"
 #if AXIS1_ENC > 0 && AXIS2_ENC > 0
