@@ -311,13 +311,15 @@ void handleConfiguration() {
     int degPastMerW=(int)strtol(&temp2[0],NULL,10);
     degPastMerW=round((degPastMerW*15.0)/60.0);
     sprintf_P(temp,html_configPastMerW,degPastMerW);
-    data += temp;
-  } else data += "<br />\r\n";
-  sendHtml(data);
-  data += "<button type='submit'>" L_UPLOAD "</button>\r\n";
-  data += FPSTR(html_configFormEnd);
-  sendHtml(data);
-
+    strcat( data1, temp);
+  } else strcat( data1, "<br />\r\n");
+  sendHtmlstr(data1);
+  strcat( data1, "<button type='submit'>" );
+  strcat( data1, L_UPLOAD);
+  strcat( data1, "</button>\r\n");
+  strcat( data1, FPSTR(html_configFormEnd));
+  sendHtmlstr(data1);
+ 
   // Axis2 Dec/Alt
   strcat( data1, "<button type='button' class='collapsible'>Axis2 Dec/Alt</button>");
   strcat( data1, FPSTR(html_configFormBegin));
