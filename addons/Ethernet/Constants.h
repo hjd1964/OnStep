@@ -30,13 +30,6 @@
 #define DEW_HEATER 3
 #define INTERVALOMETER 4
 
-// special empty string
-#ifdef Teensy40
-  const char* EmptyStr = "\1";
-#else
-  const char* EmptyStr = "";
-#endif
-
 // Helper macros for debugging, with less typing
 // Use VF or VLF for strings (supports embedded spaces)
 void debugPrint(const char s[]) { char s1[255]; strcpy(s1,s); for (unsigned int i=0; i < strlen(s1); i++) if (s1[i]==' ') s1[i]='_'; Ser.print(s1); }
@@ -80,6 +73,13 @@ void debugPrint(const char s[]) { char s1[255]; strcpy(s1,s); for (unsigned int 
   #define Teensy40
 #else
   #define MCU_STR "Unknown"
+#endif
+
+// special empty string
+#ifdef Teensy40
+  const char* EmptyStr = "\1";
+#else
+  const char* EmptyStr = "";
 #endif
 
 // EEPROM contents
