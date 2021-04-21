@@ -3,16 +3,14 @@
 
 #if defined(__AVR_ATmega2560__) || defined(__AVR_ATmega1280__) || defined(__SAM3X8E__)
 
-/*
 // The available PWM pins:
 // 13 OCR0A
 // 10 OCR2A, Dew Heater 3
 //  9 OCR2B, Dew Heater 2
 //  4 OCR4C, Tone
-// 44 OCR5C
 // 46 OCR5A, Axis 3 Step
 // 45 OCR5B
-*/
+// 44 OCR5C
 
 // The multi-purpose pins (Aux3..Aux8 can be analog (pwm/dac) if supported)
 #define Aux0                 11     // Status LED
