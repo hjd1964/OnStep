@@ -383,14 +383,14 @@
 #ifndef SERIAL_A_BAUD_DEFAULT
   #error "Configuration (Config.h): Setting SERIAL_A_BAUD_DEFAULT must be present!"
 #elif SERIAL_A_BAUD_DEFAULT != 9600 && SERIAL_A_BAUD_DEFAULT != 19200 && SERIAL_A_BAUD_DEFAULT != 38400 && SERIAL_A_BAUD_DEFAULT != 57600 && SERIAL_A_BAUD_DEFAULT != 115200 && SERIAL_B_BAUD_DEFAULT != 256000
-  #error "Configuration (Config.h): Setting SERIAL_A_BAUD_DEFAULT invalid, use 9600, 19200, 38400, 57600 or 115200 (baud.)"
+  #warning "Configuration (Config.h): Setting SERIAL_A_BAUD_DEFAULT unknown, use 9600, 19200, 38400, 57600 or 115200 (baud.)"
 #elif defined(HAL_SLOW_PROCESSOR) && SERIAL_A_BAUD_DEFAULT != OFF && SERIAL_A_BAUD_DEFAULT != 9600 && SERIAL_A_BAUD_DEFAULT != 19200
   #error "Configuration (Config.h): Setting SERIAL_A_BAUD_DEFAULT invalid for HAL_SLOW_PROCESSOR, use OFF or 9600, 19200 (baud.)"
 #endif
 #ifndef SERIAL_B_BAUD_DEFAULT
   #error "Configuration (Config.h): Setting SERIAL_B_BAUD_DEFAULT must be present!"
 #elif SERIAL_B_BAUD_DEFAULT != OFF && SERIAL_B_BAUD_DEFAULT != 9600 && SERIAL_B_BAUD_DEFAULT != 19200 && SERIAL_B_BAUD_DEFAULT != 38400 && SERIAL_B_BAUD_DEFAULT != 57600 && SERIAL_B_BAUD_DEFAULT != 115200 && SERIAL_B_BAUD_DEFAULT != 256000
-  #error "Configuration (Config.h): Setting SERIAL_B_BAUD_DEFAULT invalid, use OFF or 9600, 19200, 38400, 57600 or 115200 (baud.)"
+  #warning "Configuration (Config.h): Setting SERIAL_B_BAUD_DEFAULT unknown, use OFF or 9600, 19200, 38400, 57600 or 115200 (baud.)"
 #elif defined(HAL_SLOW_PROCESSOR) && SERIAL_B_BAUD_DEFAULT != OFF && SERIAL_B_BAUD_DEFAULT != 9600 && SERIAL_B_BAUD_DEFAULT != 19200
   #error "Configuration (Config.h): Setting SERIAL_B_BAUD_DEFAULT invalid for HAL_SLOW_PROCESSOR, use OFF or 9600, 19200 (baud.)"
 #endif
@@ -398,7 +398,7 @@
   #error "Configuration (Config.h): Setting SERIAL_C_BAUD_DEFAULT must be present!"
 #elif !defined(HAL_SERIAL_C_BLUETOOTH)
   #if SERIAL_C_BAUD_DEFAULT != OFF && SERIAL_C_BAUD_DEFAULT != 9600 && SERIAL_C_BAUD_DEFAULT != 19200 && SERIAL_C_BAUD_DEFAULT != 38400 && SERIAL_C_BAUD_DEFAULT != 57600 && SERIAL_C_BAUD_DEFAULT != 115200 && SERIAL_B_BAUD_DEFAULT != 256000
-    #error "Configuration (Config.h): Setting SERIAL_C_BAUD_DEFAULT invalid, use OFF or 9600, 19200, 38400, 57600 or 115200 (baud.)"
+    #warning "Configuration (Config.h): Setting SERIAL_C_BAUD_DEFAULT unknown, use OFF or 9600, 19200, 38400, 57600 or 115200 (baud.)"
   #elif defined(HAL_SLOW_PROCESSOR) && SERIAL_C_BAUD_DEFAULT != OFF && SERIAL_C_BAUD_DEFAULT != 9600 && SERIAL_C_BAUD_DEFAULT != 19200
     #error "Configuration (Config.h): Setting SERIAL_C_BAUD_DEFAULT invalid for HAL_SLOW_PROCESSOR, use OFF or 9600, 19200 (baud.)"
   #endif
