@@ -46,7 +46,8 @@
 #define FirmwareName          "On-Step"
 #define FirmwareTime          __TIME__
 
-#warning "The master branch is for developers/testing and most would do well to use the latest release instead... or in lieu of that, any beta branch that might exist."
+#error "This master branch OnStep is for developers only, if you want the latest stable OnStep use the beta branch!"
+#error "If you must use this master... remove these #error lines but be aware this version will likely be discarded at some point and is not supported."
 
 #include "Constants.h"
 
