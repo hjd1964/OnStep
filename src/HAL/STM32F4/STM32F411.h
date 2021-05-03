@@ -44,6 +44,7 @@ HardwareSerial HWSerial2(PA3, PA2); // RX2, TX2
   #define NV_ENDURANCE HIGH
   #define E2END 8191
   #define I2C_EEPROM_ADDRESS 0x50
+  #define NV_VALIDATE
   #include "../drivers/NV_I2C_EEPROM_24XX_C.h"
 #elif defined(NV_MB85RC256V)
   #include "../drivers/NV_I2C_FRAM_MB85RC256V.h"

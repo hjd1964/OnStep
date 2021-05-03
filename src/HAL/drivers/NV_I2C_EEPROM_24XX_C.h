@@ -66,6 +66,20 @@ class nvs {
       if (dirtyW) {
         j=cache[i];        // get data from cache
         ee_write(i,j);     // store in EEPROM
+        #ifdef NV_VALIDATE
+          uint8_t k;
+          ee_read(i,&k);
+          if (j!=k) {
+            //Serial.print("Write addr "); Serial.print(i); Serial.print(" value "); Serial.print(j); Serial.println(" FAILED");
+            //Serial.println("Restarting Wire");
+            HAL_Wire.end();
+            HAL_Wire.begin();
+            HAL_Wire.setClock(HAL_WIRE_CLOCK);
+            ee_write(i,j);
+            //ee_read(i,&k);
+            //if (j!=k) Serial.println("Second attempt FAILED"); else Serial.println("Second attempt SUCCESS");
+          }
+        #endif
         bitWrite(cacheWriteState[i/8],i%8,0); // clean
       } else {
         // read data as required
