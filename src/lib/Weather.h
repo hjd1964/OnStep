@@ -178,6 +178,10 @@ class weather {
   #endif
   // follow any I2C device in-library init with a reset of the I2C bus speed
   #if WEATHER == BME280 || WEATHER == BME280_0x76 || WEATHER == BMP280_0x76 || WEATHER == BMP280
+    #ifdef HAL_WIRE_RESET_AFTER_CONNECT
+      HAL_Wire.end();
+      HAL_Wire.begin();
+    #endif
     HAL_Wire.setClock(HAL_WIRE_CLOCK);
   #endif
 #endif

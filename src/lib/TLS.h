@@ -151,7 +151,11 @@ class timeLocationSource {
           active=true;
         } else DLF("WRN, tls.init(): DS3231 GetIsRunning() false");
       } else DLF("WRN, tls.init(): DS3231 not found at I2C address 0x68");
-
+      #ifdef HAL_WIRE_RESET_AFTER_CONNECT
+        HAL_Wire.end();
+        HAL_Wire.begin();
+        HAL_Wire.setClock(HAL_WIRE_CLOCK);
+      #endif
       return active;
     }
 
