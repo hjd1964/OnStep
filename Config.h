@@ -112,6 +112,10 @@
 // ** = SSS TMC2130 if you choose to set stepper driver current (in mA) set Vref pot. 2.5V instead of by motor current as usual.
 // *** = SSS TMC5160 you must set stepper driver current (in mA) w/ #define AXISn_TMC_IRUN (IHOLD, etc.)
 
+// Settings for driver Microsteps, IRUN, Reverse, Limit Min, and Limit Max are stored in NV (EEPROM.) These runtime settings
+// can be changed (or reverted to the defaults below) from the SmartWebServer's Config webpage.  If runtime axis settings are 
+// enabled changes to these settings below may be ignored as runtime settings from NV (EEPROM) are used instead.
+
 // AXIS1 RA/AZM
 // see https://onstep.groups.io/g/main/wiki/Configuration-Mount#AXIS1
 #define AXIS1_STEPS_PER_DEGREE    12800.0 //  12800, n. Number of steps per degree:                                          <-Req'd
