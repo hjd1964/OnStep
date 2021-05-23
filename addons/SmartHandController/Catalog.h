@@ -1,4 +1,3 @@
-﻿#pragma once
 #include <Arduino.h>
 
 const double Rad=57.29577951;

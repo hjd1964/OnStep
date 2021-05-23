@@ -1,4 +1,4 @@
-﻿/*
+/*
 
 u8g2_selection_list.c
 
