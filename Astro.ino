@@ -338,18 +338,22 @@ void setLatitude(double Lat) {
 // convert equatorial coordinates to horizon
 // this takes approx. 1.4mS on a 16MHz Mega2560
 void equToHor(double HA, double Dec, double *Alt, double *Azm) {
-  HA =HA/Rad;
-  Dec=Dec/Rad;
-  double cosHA=cos(HA);
+  HA = HA/Rad;
+  Dec = Dec/Rad;
+  double cosHA = cos(HA);
   double SinAlt = (sin(Dec) * sinLat) + (cos(Dec) * cosLat * cosHA);  
-  *Alt   = asin(SinAlt);
+  *Alt = asin(SinAlt);
   double t1=sin(HA);
-  double t2=cosHA*sinLat-tan(Dec)*cosLat;
-  *Azm=atan2(t1,t2)*Rad;
-  *Azm=*Azm+180.0;
-  *Alt=*Alt*Rad;
+  // handle degenerate coordinates within 0.1 arc-sec of the poles
+  if (abs(Dec - 90.0/Rad) < 4.848e-7) *Azm = 0.0; else
+  if (abs(Dec + 90.0/Rad) < 4.848e-7) *Azm = 180.0; else {
+    double t2 = cosHA*sinLat - tan(Dec)*cosLat;
+    *Azm = atan2(t1, t2)*Rad;
+    *Azm = *Azm + 180.0;
+  }
+  *Alt = *Alt*Rad;
 }
-      
+
 // convert horizon coordinates to equatorial
 // this takes approx. 1.4mS
 void horToEqu(double Alt, double Azm, double *HA, double *Dec) { 
