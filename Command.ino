@@ -718,6 +718,7 @@ void processCommands() {
         if (atHome)                              reply[i++]='H';                                             // at [H]ome
         if (ppsSynced)                           reply[i++]='S';                                             // PPS [S]ync
         if (isPulseGuiding())                    reply[i++]='G';                                             // pulse [G]uide active
+        if (guideDirAxis1 || guideDirAxis2)      reply[i++]='g';                                             // [g]uide active
 #if MOUNT_TYPE != ALTAZM
         if (rateCompensation == RC_REFR_RA)      { reply[i++]='r'; reply[i++]='s'; }                         // [r]efr enabled [s]ingle axis
         if (rateCompensation == RC_REFR_BOTH)    { reply[i++]='r'; }                                         // [r]efr enabled
@@ -782,6 +783,7 @@ void processCommands() {
         }
         
         if (syncToEncodersOnly)                      reply[1]|=0b10000100;                                   // sync to encoders only
+        if (guideDirAxis1 || guideDirAxis2)          reply[1]|=0b10001000;                                   // guide active
         if (atHome)                                  reply[2]|=0b10000001;                                   // At home
         if (waitingHome)                             reply[2]|=0b10000010;                                   // Waiting at home
         if (pauseHome)                               reply[2]|=0b10000100;                                   // Pause at home enabled?
