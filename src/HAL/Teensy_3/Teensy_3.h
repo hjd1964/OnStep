@@ -81,20 +81,23 @@
 
 //--------------------------------------------------------------------------------------------------
 // Nanoseconds delay function
+/*
 unsigned int _nanosPerPass=1;
 void delayNanoseconds(unsigned int n) {
   unsigned int np=(n/_nanosPerPass);
   for (unsigned int i=0; i<np; i++) { __asm__ volatile ("nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t" "nop\n\t"); }
 }
+*/
 
 //--------------------------------------------------------------------------------------------------
 // General purpose initialize for HAL
 void HAL_Initialize(void) {
+/*
   // calibrate delayNanoseconds()
   uint32_t startTime,npp;
   cli(); startTime=micros(); delayNanoseconds(65535); npp=micros(); sei(); npp=((int32_t)(npp-startTime)*1000)/63335;
   if (npp<1) npp=1; if (npp>2000) npp=2000; _nanosPerPass=npp;
-
+*/
   analogReadResolution(10);
 }
 
