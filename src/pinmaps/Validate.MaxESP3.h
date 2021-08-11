@@ -131,17 +131,18 @@
 #endif
 
 // MOTION CONTROL AXIS1/2 -----------------
-#if AXIS1_DRIVER_STATUS != OFF
-  #if ASSIGNED_AUX1 != PIN_NOT_ASSIGNED
-    #error "Configuration (Config.h): AXIS1_DRIVER_STATUS enabled but Aux1 is already in use, choose one feature on Aux1"
+#if AXIS1_DRIVER_STATUS != OFF || AXIS2_DRIVER_STATUS != OFF
+  #if ASSIGNED_AUX2 != PIN_NOT_ASSIGNED
+    #error "Configuration (Config.h): AXIS1_ and/or AXIS2_DRIVER_STATUS enabled but Aux2 is already in use, choose one feature on Aux2"
   #else
-    #undef ASSIGNED_AUX1
-    #define ASSIGNED_AUX1 PIN_DEDICATED
+    #undef ASSIGNED_AUX2
+    #define ASSIGNED_AUX2 PIN_DEDICATED
+    // also undefine the focuser control EN pin since it is in use for other purposes
+    #if PINMAP == MaxESP3
+      #undef Axis4_EN
+      #define Axis4_EN OFF
+    #endif
   #endif
-#endif
-
-#if AXIS2_DRIVER_STATUS != OFF
-  // dedicated pin, shared with AXIS1
 #endif
 
 // MOTION CONTROL FOCUSERS/ROTATOR --------
