@@ -558,7 +558,12 @@ void loop2() {
 
       dateWasSet=true;
       timeWasSet=true;
-    }
+
+      if (parkStatus == Parked) {
+        VLF("MSG: Restoring parked telescope pointing state");
+        unPark(false);
+      }
+}
 #endif
 
     // UPDATE THE UT1 CLOCK
