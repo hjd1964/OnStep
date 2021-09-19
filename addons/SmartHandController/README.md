@@ -23,8 +23,7 @@ An inexpensive [EasyEDA Teensy SHC 3.2 PCB](https://easyeda.com/hdutton/HC-20e24
 
 b) ESP32 microcontroller.
 This offers a lower cost, and easier to source alternative to the Teensy, with the same features.
-The microcontroller is faster than the Teensy 3.2, and has more flash memory. You can watch
-a [video of the ESP32 SHC](https://baheyeldin.com/astronomy/onstep-esp32-smart-hand-controller-shc.html). In there, there is also a link to a ready to build kit.
+The microcontroller is faster than the Teensy 3.2, and has more flash memory.
 
 # Documentation
 See this [Wiki page](https://groups.io/g/onstep/wiki/Smart-Hand-Controller) for more info.
