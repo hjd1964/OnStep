@@ -595,7 +595,7 @@ void loop2() {
   }
 
   // FASTEST POLLING -----------------------------------------------------------------------------------
-#if AXIS1_DRIVER_MODEL == TMC_SPI
+#if MODE_SWITCH_BEFORE_SLEW == OFF && AXIS1_DRIVER_MODEL == TMC_SPI
   autoModeSwitch();
 #endif
 
