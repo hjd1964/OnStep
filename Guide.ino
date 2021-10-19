@@ -391,7 +391,11 @@ int getPulseGuideRate() {
 void enableGuideRate(int g) {
   if (g == activeGuideRate) return;
   
-  if (g >= 0) activeGuideRate=g;
+  if (g >= 0) {
+    activeGuideRate=g;
+    guideTimerCustomRateAxis1 = 0.0;
+    guideTimerCustomRateAxis2 = 0.0;
+  }
 
   // this enables the guide rates
   if (guideTimerCustomRateAxis1 != 0.0) {
