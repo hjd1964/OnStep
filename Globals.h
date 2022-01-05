@@ -118,7 +118,7 @@ unsigned long axis2StepsGoto            = 1;
 #define DefaultTrackingRate               1
 volatile double trackingTimerRateAxis1  = DefaultTrackingRate;
 volatile double trackingTimerRateAxis2  = DefaultTrackingRate;
-volatile double timerRateRatio;
+volatile double timerRateRatio = AXIS1_STEPS_PER_DEGREE/AXIS2_STEPS_PER_DEGREE;
 volatile bool useTimerRateRatio;
 long stepsPerWormRotationAxis1;
 long secondsPerWormRotationAxis1;
