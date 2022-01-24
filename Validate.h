@@ -878,8 +878,8 @@
 
 #ifndef TRACK_BACKLASH_RATE
   #error "Configuration (Config.h): Setting TRACK_BACKLASH_RATE must be present!"
-#elif TRACK_BACKLASH_RATE < 5 || TRACK_BACKLASH_RATE > 50
-  #error "Configuration (Config.h): Setting TRACK_BACKLASH_RATE invalid, use a number between 5 and 50 (x sidereal rate.)"
+#elif TRACK_BACKLASH_RATE < 2 || TRACK_BACKLASH_RATE > 50
+  #error "Configuration (Config.h): Setting TRACK_BACKLASH_RATE invalid, use a number between 2 and 50 (x sidereal rate.)"
 #elif TRACK_BACKLASH_RATE > 25 && (AXIS1_DRIVER_MICROSTEPS_GOTO != OFF || AXIS2_DRIVER_MICROSTEPS_GOTO != OFF)
   #warning "Configuration (Config.h): Setting TRACK_BACKLASH_RATE, above 25x can cause problems if AXISn_STEPS_PER_DEGREE > 30600 *and* on-the-fly micro-step mode switching is used"
 #endif
