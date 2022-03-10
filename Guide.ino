@@ -337,29 +337,16 @@ void guideSpiralPoll() {
 }
 
 // custom guide rate in RA or Azm, rate is in x-sidereal, guideDuration is in ms (0 to ignore) 
-bool customGuideRateAxis1(double rate, long guideDuration) {
+bool customGuideRateAxis1(double rate) {
   guideTimerCustomRateAxis1=rate;
-  enableGuideRate(-1);
-  if ((parkStatus == NotParked) && (trackingState != TrackingMoveTo) && (axis1Enabled) && (guideDirAxis1)) {
-    guideTimeThisIntervalAxis1=micros();
-    guideTimeRemainingAxis1=guideDuration*1000L;
-    if (guideDirAxis1 == 'e') { cli(); guideTimerRateAxis1=-guideTimerBaseRateAxis1; sei(); }
-    if (guideDirAxis1 == 'w') { cli(); guideTimerRateAxis1= guideTimerBaseRateAxis1; sei(); }
-  } else return false;
+  currentGuideRate=-1;
   return true;
 }
 
 // custom guide rate in Dec or Alt, rate is in x-sidereal, guideDuration is in ms (0 to ignore)
-bool customGuideRateAxis2(double rate, long guideDuration) {
+bool customGuideRateAxis2(double rate) {
   guideTimerCustomRateAxis2=rate;
-  enableGuideRate(-1);
-  if ((parkStatus == NotParked) && (trackingState != TrackingMoveTo) && (axis2Enabled) && (guideDirAxis2)) {
-    guideTimeThisIntervalAxis2=micros();
-    guideTimeRemainingAxis2=guideDuration*1000L;
-    if (guideDirAxis2 == 's') { cli(); guideTimerRateAxis2=-guideTimerBaseRateAxis2; sei(); } 
-    if (guideDirAxis2 == 'n') { cli(); guideTimerRateAxis2= guideTimerBaseRateAxis2; sei(); }
-    if (getInstrPierSide() == PierSideWest) { cli(); guideTimerRateAxis2=-guideTimerRateAxis2; sei(); }
-  } else return false;
+  currentGuideRate=-1;
   return true;
 }
 
@@ -369,11 +356,6 @@ void setGuideRate(int g) {
   if ((g <= GuideRate1x) && (currentPulseGuideRate != g)) { currentPulseGuideRate=g; nv.update(EE_pulseGuideRate,g); }
   guideTimerCustomRateAxis1=0.0;
   guideTimerCustomRateAxis2=0.0;
-}
-
-// gets the rate for guide commands
-int getGuideRate() {
-  return currentGuideRate;
 }
 
 // gets the rate for pulse-guide commands

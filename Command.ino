@@ -752,7 +752,7 @@ void processCommands() {
         reply[i++]='0'+getPulseGuideRate();
 
         // provide guide rate
-        reply[i++]='0'+getGuideRate();
+        if (currentGuideRate == -1) reply[i++]='9'; else reply[i++]='0'+currentGuideRate;
 
         // provide general error
         reply[i++]='0'+generalError;
@@ -812,7 +812,7 @@ void processCommands() {
 #endif
         reply[5]=parkStatus|0b10000000;                                                                      // Park status: 0 not parked, 1 parking in-progress, 2 parked, 3 park failed
         reply[6]=getPulseGuideRate()|0b10000000;                                                             // Pulse-guide rate
-        reply[7]=getGuideRate()|0b10000000;                                                                  // Guide rate
+        if (currentGuideRate == -1) reply[7]=9|0b10000000; else reply[7]=currentGuideRate|0b10000000;        // Guide rate
         reply[8]=generalError|0b10000000;                                                                    // General error
         reply[9]=0;
         boolReply=false;
@@ -1481,7 +1481,7 @@ void processCommands() {
         if (&parameter[0] != conv_end) {
           if (f < 0.001/60.0/60.0) f=0.001/60.0/60.0;
           if (f > maxStepsPerSecond/axis1Settings.stepsPerMeasure) f=maxStepsPerSecond/axis1Settings.stepsPerMeasure;
-          customGuideRateAxis1(f*240.0,GUIDE_TIME_LIMIT*1000);
+          customGuideRateAxis1(f*240.0);
         }
         boolReply=false; 
       } else
@@ -1493,7 +1493,7 @@ void processCommands() {
         if (&parameter[0] != conv_end) {
           if (f < 0.001/60.0/60.0) f=0.001/60.0/60.0;
           if (f > maxStepsPerSecond/axis2Settings.stepsPerMeasure) f=maxStepsPerSecond/axis2Settings.stepsPerMeasure;
-          customGuideRateAxis2(f*240.0,GUIDE_TIME_LIMIT*1000);
+          customGuideRateAxis2(f*240.0);
         }
         boolReply=false; 
       } else

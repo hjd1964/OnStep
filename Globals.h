@@ -373,7 +373,7 @@ double  guideRates[10]={3.75,7.5,15,30,60,120,300,720,         720,    720};
   #define GuideRateDefault                6
 #endif
 #define GuideRateNone                     255
-byte currentGuideRate                   = GuideRateDefault;
+int currentGuideRate                    = GuideRateDefault;
 byte currentPulseGuideRate              = GuideRate1x;
 volatile byte activeGuideRate           = GuideRateNone;
                                         
