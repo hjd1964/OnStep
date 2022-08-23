@@ -5,6 +5,7 @@
 #define rightTri "&#x25ba;"
 #define upTri    "&#x25b2;"
 #define downTri  "&#x25bc;"
+#include "NewUI.h"
 
 #if DISPLAY_ADVANCED_CHARS == ON
   #define Axis1 "&alpha;"
@@ -54,6 +55,13 @@ const char html_indexWorkload[] PROGMEM = "&nbsp;&nbsp;" L_WORKLOAD ": <font cla
 #if DISPLAY_WIFI_SIGNAL_STRENGTH == ON
 const char html_indexSignalStrength[] PROGMEM = "&nbsp;&nbsp;" L_WIRELESS_SIGNAL_STRENGTH ": <font class=\"c\">%s</font><br />";
 #endif
+
+void handleNewUi()
+{
+  server.sendHeader("Content-Encoding", "gzip");
+  server.sendHeader("Cache-Control", "no-cache");
+  server.send_P(200, "text/html", new_ui, html_len);
+}
 
 #ifdef OETHS
 void handleRoot(EthernetClient *client) {

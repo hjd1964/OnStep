@@ -35,9 +35,9 @@
 #define Product "WiFi Server"
 #define FirmwareDate          __DATE__
 #define FirmwareTime          __TIME__
-#define FirmwareVersionMajor  "2"
-#define FirmwareVersionMinor  "1"
-#define FirmwareVersionPatch  "v"
+#define FirmwareVersionMajor  "3"
+#define FirmwareVersionMinor  "0"
+#define FirmwareVersionPatch  "a"
 
 #define Version FirmwareVersionMajor "." FirmwareVersionMinor FirmwareVersionPatch
 
@@ -353,7 +353,13 @@ TryAgain:
   clearSerialChannel();
   
   VLF("WEM: Connecting web-page handlers");
-  server.on("/", handleRoot);
+  server.on("/", handleNewUi);
+  server.on("/ajax/status", statusAjax);
+  server.on("/ajax/wifi", ajaxWifiNetworks);
+  server.on("/ajax/wifi/scan", ajaxScanNetworks);
+  server.on("/ajax/cmd", ajaxRunCommand);
+  server.on("/ajax/library", ajaxLibrary);
+  server.on("/old", handleRoot);
   server.on("/index.htm", handleRoot);
   server.on("/configuration.htm", handleConfiguration);
   server.on("/configurationA.txt", configurationAjaxGet);
