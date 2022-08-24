@@ -99,6 +99,11 @@ L_WIFI_ADVICE1 L_WIFI_ADVICE2 L_WIFI_ADVICE3 L_WIFI_ADVICE4 L_WIFI_ADVICE5 L_WIF
 "<br/><br/>\r\n";
 
 bool restartRequired=false;
+// flag that doesn't get cleared - used in the ajax wifi handler
+// the ajax handler always returns the status of the restart, however
+// the existing restartRequired flag gets cleared after the HTML
+// in this route is rendered. Add another flag.
+bool restartRequiredTriggered = false;
 bool loginRequired=true;
 
 void handleWifi() {
@@ -157,6 +162,7 @@ void handleWifi() {
   data+="<div>";
 
   if (restartRequired) {
+    restartRequiredTriggered = true;
     restartRequired=false;
     data+=FPSTR(html_reboot);
   } else
