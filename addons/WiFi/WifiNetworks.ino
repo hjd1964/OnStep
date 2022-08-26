@@ -79,7 +79,7 @@ void ajaxWifiNetworks()
         data += "sta_dhcp|0\n";
     }
 
-    if (restartRequired) {
+    if (restartRequiredTriggered) {
         data += "restart_required|1\n";
     } else {
         data += "restart_required|0\n";
