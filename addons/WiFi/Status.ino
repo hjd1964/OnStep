@@ -30,6 +30,14 @@ void statusAjax()
 
     data += "type|valid\n";
 
+    if (mountStatus.lastError()!=ERR_NONE) {
+        mountStatus.getLastErrorMessage(temp2);
+        sprintf(temp, "last_error|%s\n", temp2);
+        data += temp;
+    } else {
+        data += "last_error|0\n";
+    }
+
     /**
      * Fork type
      */
