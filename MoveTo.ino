@@ -173,7 +173,6 @@ void moveTo() {
   if (!slewEnding && (distDestAxis1 <= getstepsPerSecondAxis1()*4.0) && (distDestAxis2 <= getstepsPerSecondAxis2()*4.0) ) { slewStopTime=millis()+4000L; slewEnding=true; }
   if (slewEnding && ((long)(millis()-slewStopTime) > 0)) {
     if (abortGoto != 0) { cli(); targetAxis1.part.m=posAxis1; targetAxis2.part.m=posAxis2; sei(); }
-    generalError=ERR_GOTO_SYNC;
     slewForceEnd=true;
   }
 
