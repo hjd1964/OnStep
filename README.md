@@ -3,7 +3,7 @@ OnStep Telescope Controller
 # Important Note
 
 THERE ARE SEVERAL GITHUB BRANCHES OF ONSTEP:
-* The **RELEASE BRANCHES** are well tested and recommended for usage.  Usually the newest (highest revision) RELEASE is recommended.  No new features are added and only bug fixes where necessary and safe.
+* The **RELEASE BRANCHES** are well tested and what most should use.  Usually the newest (highest revision) RELEASE is recommended.  No new features are added and only bug fixes where necessary and safe.
 * Tne **BETA BRANCH**, if present, is a "snap-shot" of the MASTER where we have reached a point of apparent stability.  This provides access to most new features for adventurous users.
 * The **MASTER BRANCH** is the most up to date OnStep version; where new features are added.  It is the least well tested branch and should only be user by experienced users willing to test for and report bugs.
 
