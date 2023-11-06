@@ -190,8 +190,8 @@ class weather {
 
     // designed for a 0.01s polling interval, 5 seconds to refresh everything
     void poll() {
-      static bool firstScanDone = false;
 #if WEATHER != OFF || defined(ONEWIRE_DEVICES_PRESENT)
+      static bool firstScanDone = false;
       if (_BME280_found || _BMP280_found || _DS1820_found || _DS2413_found) {
 
         static int phase = 0;
@@ -279,8 +279,8 @@ class weather {
   #endif
       phase++;
       }
-#endif
       if (!firstScanDone) return;
+#endif
       
 #if TELESCOPE_TEMPERATURE == OFF
       // use primary temperature for the telescope temperature if TELESCOPE_TEMPERATURE
